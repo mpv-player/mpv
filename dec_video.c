@@ -43,6 +43,8 @@ extern int frameratecode2framerate[16];
 #include "libmpeg2/mpeg2.h"
 #include "libmpeg2/mpeg2_internal.h"
 
+#include "postproc/postprocess.h"
+
 extern picture_t *picture;	// exported from libmpeg2/decode.c
 
 
@@ -98,7 +100,7 @@ int get_video_quality_max(sh_video_t *sh_video){
 #ifdef USE_WIN32DLL
   case VFM_VFW:
   case VFM_VFWEX:
-      return 6;
+      return 9; // for Divx.dll (divx4)
 #endif
 #ifdef USE_DIRECTSHOW
   case VFM_DSHOW:
@@ -106,10 +108,15 @@ int get_video_quality_max(sh_video_t *sh_video){
 #endif
 #ifdef MPEG12_POSTPROC
   case VFM_MPEG:
+      return GET_PP_QUALITY_MAX;
 #endif
   case VFM_DIVX4:
   case VFM_ODIVX:
-      return 6;
+#ifdef NEW_DECORE
+      return 9; // for divx4linux
+#else
+      return GET_PP_QUALITY_MAX;  // for opendivx
+#endif
  }
  return 0;
 }
@@ -131,16 +138,21 @@ void set_video_quality(sh_video_t *sh_video,int quality){
 #endif
 #ifdef MPEG12_POSTPROC
   case VFM_MPEG: {
-   if(quality<0 || quality>6) quality=6;
-   picture->pp_options=(1<<quality)-1;
+   if(quality<0 || quality>GET_PP_QUALITY_MAX) quality=GET_PP_QUALITY_MAX;
+   picture->pp_options=getPpModeForQuality(quality);
   }
   break;
 #endif
   case VFM_DIVX4:
   case VFM_ODIVX: {
    DEC_SET dec_set;
-   if(quality<0 || quality>6) quality=6;
-   dec_set.postproc_level=(1<<quality)-1;
+#ifdef NEW_DECORE
+   if(quality<0 || quality>9) quality=9;
+   dec_set.postproc_level=quality*10;
+#else
+   if(quality<0 || quality>GET_PP_QUALITY_MAX) quality=GET_PP_QUALITY_MAX;
+   dec_set.postproc_level=getPpModeForQuality(quality);
+#endif
    decore(0x123,DEC_OPT_SETPP,&dec_set,NULL);
   }
   break;
