@@ -939,8 +939,14 @@ int vixGetCapability(vidix_capability_t *to)
   return 0; 
 }
 
+/*
+  Full list of fourcc which are supported by Win2K redeon driver:
+  YUY2, UYVY, DDES, OGLT, OGl2, OGLS, OGLB, OGNT, OGNZ, OGNS,
+  IF09, YVU9, IMC4, M2IA, IYUV, VBID, DXT1, DXT2, DXT3, DXT4, DXT5
+*/
 uint32_t supported_fourcc[] = 
 {
+  IMGFMT_Y800, IMGFMT_Y8, IMGFMT_YVU9, IMGFMT_IF09,
   IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV, 
   IMGFMT_UYVY, IMGFMT_YUY2, IMGFMT_YVYU,
   IMGFMT_RGB15, IMGFMT_BGR15,
@@ -948,9 +954,9 @@ uint32_t supported_fourcc[] =
   IMGFMT_RGB32, IMGFMT_BGR32
 };
 
-__inline__ static int is_supported_fourcc(uint32_t fourcc)
+inline static int is_supported_fourcc(uint32_t fourcc)
 {
-  unsigned i;
+  unsigned int i;
   for(i=0;i<sizeof(supported_fourcc)/sizeof(uint32_t);i++)
   {
     if(fourcc==supported_fourcc[i]) return 1;
@@ -1080,14 +1086,16 @@ static void radeon_vid_display_video( void )
 */
         case IMGFMT_RGB32:
 	case IMGFMT_BGR32: bes_flags |= SCALER_SOURCE_32BPP; break;
-        /* 4:1:0*/
+        /* 4:1:0 */
 	case IMGFMT_IF09:
         case IMGFMT_YVU9:  bes_flags |= SCALER_SOURCE_YUV9; break;
+	/* 4:0:0 */
+	case IMGFMT_Y800:
+	case IMGFMT_Y8:
         /* 4:2:0 */
 	case IMGFMT_IYUV:
 	case IMGFMT_I420:
-	case IMGFMT_YV12:  bes_flags |= SCALER_SOURCE_YUV12;
-			   break;
+	case IMGFMT_YV12:  bes_flags |= SCALER_SOURCE_YUV12; break;
         /* 4:2:2 */
         case IMGFMT_YVYU:
 	case IMGFMT_UYVY:  bes_flags |= SCALER_SOURCE_YVYU422; break;
@@ -1140,6 +1148,8 @@ static unsigned radeon_query_pitch(unsigned fourcc,const vidix_yuv_t *spitch)
 		if(spy > 16 && spu == spy/2 && spv == spy/2)	pitch = spy;
 		else						pitch = 32;
 		break;
+	/* 4:1:0 */
+	case IMGFMT_IF09:
 	case IMGFMT_YVU9:
 		if(spy > 32 && spu == spy/4 && spv == spy/4)	pitch = spy;
 		else						pitch = 64;
@@ -1155,16 +1165,20 @@ static unsigned radeon_query_pitch(unsigned fourcc,const vidix_yuv_t *spitch)
 static int radeon_vid_init_video( vidix_playback_t *config )
 {
     uint32_t i,tmp,src_w,src_h,dest_w,dest_h,pitch,h_inc,step_by,left,leftUV,top;
-    int is_420,is_rgb32,is_rgb,best_pitch,mpitch;
+    int is_400,is_410,is_420,is_rgb32,is_rgb,best_pitch,mpitch;
     radeon_vid_stop_video();
     left = config->src.x << 16;
     top =  config->src.y << 16;
     src_h = config->src.h;
     src_w = config->src.w;
-    is_420 = is_rgb32 = is_rgb = 0;
+    is_400 = is_410 = is_420 = is_rgb32 = is_rgb = 0;
     if(config->fourcc == IMGFMT_YV12 ||
        config->fourcc == IMGFMT_I420 ||
        config->fourcc == IMGFMT_IYUV) is_420 = 1;
+    if(config->fourcc == IMGFMT_YVU9 ||
+       config->fourcc == IMGFMT_IF09) is_410 = 1;
+    if(config->fourcc == IMGFMT_Y800 ||
+       config->fourcc == IMGFMT_Y8) is_400 = 1;
     if(config->fourcc == IMGFMT_RGB32 ||
        config->fourcc == IMGFMT_BGR32) is_rgb32 = 1;
     if(config->fourcc == IMGFMT_RGB32 ||
@@ -1179,7 +1193,12 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     mpitch = best_pitch-1;
     switch(config->fourcc)
     {
+	/* 4:0:0 */
+	case IMGFMT_Y800:
+	case IMGFMT_Y8:
+	/* 4:1:0 */
 	case IMGFMT_YVU9:
+	case IMGFMT_IF09:
 	/* 4:2:0 */
 	case IMGFMT_IYUV:
 	case IMGFMT_YV12:
@@ -1222,27 +1241,74 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     config->offsets[0] = 0;
     for(i=1;i<besr.vid_nbufs;i++)
 	    config->offsets[i] = config->offsets[i-1]+config->frame_size;
-    if(is_420)
+    if(is_420 || is_410 || is_400)
     {
         uint32_t d1line,d2line,d3line;
 	d1line = top*pitch;
-	d2line = src_h*pitch+(d1line>>2);
-	d3line = d2line+((src_h*pitch)>>2);
+	if(is_420)
+	{
+	    d2line = src_h*pitch+(d1line>>2);
+	    d3line = d2line+((src_h*pitch)>>2);
+	}
+	else
+	if(is_410)
+	{
+	    d2line = src_h*pitch+(d1line>>4);
+	    d3line = d2line+((src_h*pitch)>>4);
+	}
+	else
+	{
+	    d2line = 0;
+	    d3line = 0;
+	}
 	d1line += (left >> 16) & ~15;
-	d2line += (left >> 17) & ~15;
-	d3line += (left >> 17) & ~15;
+	if(is_420)
+	{
+	    d2line += (left >> 17) & ~15;
+	    d3line += (left >> 17) & ~15;
+	}
+	else
+	if(is_410)
+	{
+	    d2line += (left >> 18) & ~15;
+	    d3line += (left >> 18) & ~15;
+	}
 	config->offset.y = d1line & VIF_BUF0_BASE_ADRS_MASK;
-	config->offset.v = d2line & VIF_BUF1_BASE_ADRS_MASK;
-	config->offset.u = d3line & VIF_BUF2_BASE_ADRS_MASK;
+	if(is_400)
+	{
+	    config->offset.v = 0;
+	    config->offset.u = 0;
+	}
+	else
+	{
+	    config->offset.v = d2line & VIF_BUF1_BASE_ADRS_MASK;
+	    config->offset.u = d3line & VIF_BUF2_BASE_ADRS_MASK;
+	}
 	for(i=0;i<besr.vid_nbufs;i++)
 	{
 	    besr.vid_buf_base_adrs_y[i]=((radeon_overlay_off+config->offsets[i]+config->offset.y)&VIF_BUF0_BASE_ADRS_MASK);
-	    besr.vid_buf_base_adrs_v[i]=((radeon_overlay_off+config->offsets[i]+config->offset.v)&VIF_BUF1_BASE_ADRS_MASK)|VIF_BUF1_PITCH_SEL;
-	    besr.vid_buf_base_adrs_u[i]=((radeon_overlay_off+config->offsets[i]+config->offset.u)&VIF_BUF2_BASE_ADRS_MASK)|VIF_BUF2_PITCH_SEL;
+	    if(is_400)
+	    {
+		besr.vid_buf_base_adrs_v[i]=0;
+		besr.vid_buf_base_adrs_u[i]=0;
+	    }
+	    else
+	    {
+		besr.vid_buf_base_adrs_v[i]=((radeon_overlay_off+config->offsets[i]+config->offset.v)&VIF_BUF1_BASE_ADRS_MASK)|VIF_BUF1_PITCH_SEL;
+		besr.vid_buf_base_adrs_u[i]=((radeon_overlay_off+config->offsets[i]+config->offset.u)&VIF_BUF2_BASE_ADRS_MASK)|VIF_BUF2_PITCH_SEL;
+	    }
 	}
 	config->offset.y = ((besr.vid_buf_base_adrs_y[0])&VIF_BUF0_BASE_ADRS_MASK) - radeon_overlay_off;
-	config->offset.v = ((besr.vid_buf_base_adrs_v[0])&VIF_BUF1_BASE_ADRS_MASK) - radeon_overlay_off;
-	config->offset.u = ((besr.vid_buf_base_adrs_u[0])&VIF_BUF2_BASE_ADRS_MASK) - radeon_overlay_off;
+	if(is_400)
+	{
+	    config->offset.v = 0;
+	    config->offset.u = 0;
+	}
+	else
+	{
+	    config->offset.v = ((besr.vid_buf_base_adrs_v[0])&VIF_BUF1_BASE_ADRS_MASK) - radeon_overlay_off;
+	    config->offset.u = ((besr.vid_buf_base_adrs_u[0])&VIF_BUF2_BASE_ADRS_MASK) - radeon_overlay_off;
+	}
 	if(besr.fourcc == IMGFMT_I420 || besr.fourcc == IMGFMT_IYUV)
 	{
 	  uint32_t tmp;
@@ -1274,33 +1340,44 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 			    |(OV0_P1_MAX_LN_IN_PER_LN_OUT & 1);
 
     tmp = ((top >> 1) & 0x0000ffff) + 0x00018000;
-    besr.p23_v_accum_init = is_420 ? ((tmp << 4) & OV0_P23_V_ACCUM_INIT_MASK)
+    besr.p23_v_accum_init = (is_420||is_410) ?
+			    ((tmp << 4) & OV0_P23_V_ACCUM_INIT_MASK)
 			    |(OV0_P23_MAX_LN_IN_PER_LN_OUT & 1) : 0;
 
-    leftUV = (left >> 17) & 15;
+    leftUV = (left >> (is_410?18:17)) & 15;
     left = (left >> 16) & 15;
     if(is_rgb && !is_rgb32) h_inc<<=1;
     if(is_rgb32)
 	besr.h_inc = (h_inc >> 1) | ((h_inc >> 1) << 16);
+    else
+    if(is_410)
+	besr.h_inc = h_inc | ((h_inc >> 2) << 16);
     else
 	besr.h_inc = h_inc | ((h_inc >> 1) << 16);
     besr.step_by = step_by | (step_by << 8);
     besr.y_x_start = (config->dest.x+X_ADJUST) | (config->dest.y << 16);
     besr.y_x_end = (config->dest.x + dest_w+X_ADJUST) | ((config->dest.y + dest_h) << 16);
     besr.p1_blank_lines_at_top = P1_BLNK_LN_AT_TOP_M1_MASK|((src_h-1)<<16);
-    if(is_420)
+    if(is_420 || is_410)
     {
-	src_h = (src_h + 1) >> 1;
+	src_h = (src_h + 1) >> (is_410?2:1);
 	besr.p23_blank_lines_at_top = P23_BLNK_LN_AT_TOP_M1_MASK|((src_h-1)<<16);
     }
     else besr.p23_blank_lines_at_top = 0;
     besr.vid_buf_pitch0_value = pitch;
-    besr.vid_buf_pitch1_value = is_420 ? pitch>>1 : pitch;
+    besr.vid_buf_pitch1_value = is_410 ? pitch>>2 : is_420 ? pitch>>1 : pitch;
     besr.p1_x_start_end = (src_w+left-1)|(left<<16);
-    src_w>>=1;
-    besr.p2_x_start_end = (src_w+left-1)|(leftUV<<16);
-    besr.p3_x_start_end = besr.p2_x_start_end;
-    
+    if (is_410||is_420) src_w>>=is_410?2:1;
+    if(is_400)
+    {
+	besr.p2_x_start_end = 0;
+	besr.p3_x_start_end = 0;
+    }
+    else
+    {
+	besr.p2_x_start_end = (src_w+left-1)|(leftUV<<16);
+	besr.p3_x_start_end = besr.p2_x_start_end;
+    }
 
     return 0;
 }
@@ -1317,6 +1394,16 @@ static void radeon_compute_framesize(vidix_playback_t *info)
     case IMGFMT_IYUV:
 		awidth = (info->src.w + (pitch-1)) & ~(pitch-1);
 		info->frame_size = awidth*(info->src.h+info->src.h/2);
+		break;
+    case IMGFMT_Y800:
+    case IMGFMT_Y8:
+		awidth = (info->src.w + (pitch-1)) & ~(pitch-1);
+		info->frame_size = awidth*info->src.h;
+		break;
+    case IMGFMT_IF09:
+    case IMGFMT_YVU9:
+		awidth = (info->src.w + (pitch-1)) & ~(pitch-1);
+		info->frame_size = awidth*(info->src.h+info->src.h/8);
 		break;
     case IMGFMT_RGB32:
     case IMGFMT_BGR32:
