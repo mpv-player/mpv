@@ -49,7 +49,8 @@ depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 install:
-	cp $(LIBNAME) $(prefix)/lib/$(LIBNAME)
+	mkdir -p $(prefix)/lib
+	install -m 755 -s -p $(LIBNAME) $(prefix)/lib/$(LIBNAME)
 	rm -f $(prefix)/lib/libdha.so
 	ln -sf $(LIBNAME) $(prefix)/lib/libdha.so
 	ldconfig

@@ -97,7 +97,7 @@ depend:
 
 install:
 	mkdir -p $(BINDIR)
-	cp *.so $(BINDIR)
+	install -m 755 -s -p *.so $(BINDIR)
 #
 # include dependency files if they exist
 #
