@@ -586,7 +586,7 @@ subtitle* sub_read_file (char *filename) {
 	    sub_read_line_aqt
 
     };
-
+    if(filename==NULL) return NULL; //qnx segfault
     fd=fopen (filename, "r"); if (!fd) return NULL;
 
     sub_format=sub_autodetect (fd);
