@@ -54,7 +54,6 @@ static char help_text[]=
 // mplayer.c: 
 
 #define MSGTR_Exiting "\nIes... (%s)\n"
-#define MSGTR_Exit_frames "Numãrul de cadre cerut a fost redat"
 #define MSGTR_Exit_quit "Ieºire"
 #define MSGTR_Exit_eof "Sfârºitul fiºierului"
 #define MSGTR_Exit_error "Eroare fatalã"
@@ -74,19 +73,15 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Nu pot deschide fiºierul (dump)!!!\n"
 #define MSGTR_CoreDumped "core aruncat :)\n"
 #define MSGTR_FPSnotspecified "FPS nespecificat (sau invalid) în antet! Folosiþi opþiunea -fps!\n"
-#define MSGTR_NoVideoStream "Îmi pare rãu, nici o pistã video... este de neafiºat încã\n"
 #define MSGTR_TryForceAudioFmt "Încerc sã forþez utilizarea unui codec audio din familia %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Nu pot sã gãsesc un codec audio pentru familia forþatã, revin la alte drivere.\n"
 #define MSGTR_CantFindAudioCodec "Nu gãsesc un codec audio pentru formatul 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Încercaþi sã înnoiþi %s din etc/codecs.conf\n*** Dacã nu ajutã citiþi DOCS/CODECS!\n"
 #define MSGTR_CouldntInitAudioCodec "Nu pot sã iniþializez codec-ul audio! -> fãrã sunet\n"
 #define MSGTR_TryForceVideoFmt "Încerc sã forþez utilizarea unui codec video din familia %d ...\n"
-#define MSGTR_CantFindVfmtFallback "Nu pot sã gãsesc un codec video pentru familia forþatã, revin la alte drivere.\n"
 #define MSGTR_CantFindVideoCodec "Nu gãsesc un codec video pentru formatul 0x%X !\n"
 #define MSGTR_VOincompCodec "Îmi pare rãu, ieºirea video selectatã este incompatibilã cu acest codec.\n"
 #define MSGTR_CouldntInitVideoCodec "FATALÃ: Nu pot iniþializa codec-ul video :(\n"
-#define MSGTR_EncodeFileExists "Fiºierul existã deja: %s (nu vã suprascrieþi fiºierul AVI preferat!)\n"
-#define MSGTR_CantCreateEncodeFile "Nu pot creea fiºierul pentru codare\n"
 #define MSGTR_CannotInitVO "FATALÃ: Nu pot iniþializa diver-ul video!\n"
 #define MSGTR_CannotInitAO "nu pot deschide/iniþializa dispozitivul audio -> fãrã sunet\n"
 #define MSGTR_StartPlaying "Încep afiºarea...\n"
@@ -136,7 +131,6 @@ static char help_text[]=
 #define MSGTR_DetectedMPEGPSfile "Format fiºier detectat: MPEG-PS\n"
 #define MSGTR_DetectedMPEGESfile "Format fiºier detectat: MPEG-ES\n"
 #define MSGTR_DetectedQTMOVfile "Format fiºier detectat: QuickTime/MOV\n"
-#define MSGTR_MissingMpegVideo "Lipseºte pista video MPEG!? contactaþi autorul, poate fi un bug :(\n"
 #define MSGTR_InvalidMPEGES "Pistã MPEG-ES invalidã??? contactaþi autorul, poate fi un bug :(\n"
 #define MSGTR_FormatNotRecognized "============= Îmi pare rãu, acest format de fiºier nu este recunoscut/suportat ===============\n"\
 				  "======== Dacã acest fiºier este o pistã AVI, ASF sau MPEG , contactaþi vã rog autorul! ========\n"
@@ -161,7 +155,6 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: Antetele compresate nu sunt (încã) suportate!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Atenþie! variabilã FOURCC detectatã!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Atenþie! prea multe piste!"
-#define MSGTR_MOVnotyetsupp "\n****** Formatul Quicktime MOV nu este înca suportat!!!!!!! *******\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "nu pot deschide codec-ul audio\n"
@@ -171,17 +164,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Nu pot încãrca/iniþializa codec-ul audio Win32/ACM (lipseºte fiºierul DLL?)\n"
 #define MSGTR_MissingLAVCcodec "Nu gãsesc codec-ul '%s' în libavcodec...\n"
 
-#define MSGTR_NoDShowSupport "MPlayer a fost compilat FÃRÃ suport directshow!\n"
-#define MSGTR_NoWfvSupport "Suport pentru codec-urile win32 dezactivat, sau nedisponibil pe platformele ne-x86!\n"
-#define MSGTR_NoDivx4Support "MPlayer a fost compilat FÃRÃ suport DivX4Linux (libdivxdecore.so)!\n"
-#define MSGTR_NoLAVCsupport "MPlayer a fost compilat FÃRÃ suport ffmpeg/libavcodec!\n"
-#define MSGTR_NoACMSupport "Codec-ul audio Win32/ACM dezactivat, sau nedisponibil pe procesoare ne-x86 -> fortare fara sunet :(\n"
-#define MSGTR_NoDShowAudio "Compilat fãrã suport DirectShow -> forþare fãrã sunet :(\n"
-#define MSGTR_NoOggVorbis "Codec-ul audio OggVorbis dezactivat -> forþare fãrã sunet :(\n"
-
-#define MSGTR_MpegPPhint "ATENÞIE! Aþi solicitat postprocesare pentru un clip MPEG 1/2,\n" \
-			 "         dar MPlayer a fost compilat fãrã suport pentru postprocesare MPEG 1/2!\n" \
-			 "         #define MPEG12_POSTPROC în config.h, ºi recompilaþi libmpeg2!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: FATALÃ: EOF în timpul cãutãrii antetului secvenþei\n"
 #define MSGTR_CannotReadMpegSequHdr "FATALÃ: Nu pot citi antetul secvenþei!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "FATALÃ: Nu pot citi extensia antetului secvenþei!\n"
@@ -190,17 +172,13 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "Nu pot aloca memoria partajatã\n"
 #define MSGTR_CantAllocAudioBuf "Nu pot aloca tamponul pentru ieºirea audio\n"
-#define MSGTR_NoMemForDecodedImage "memorie insuficientã pentru tamponul imaginii decodate (%ld bytes)\n"
 
-#define MSGTR_AC3notvalid "pistã AC3 invalidã.\n"
-#define MSGTR_AC3only48k "Doar piste de 48000 Hz sunt suportate.\n"
 #define MSGTR_UnknownAudio "Format audio necunoscut/lipsã, folosesc fãrã sunet\n"
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Setez suportul pentru LIRC...\n"
 #define MSGTR_LIRCdisabled "Nu veþi putea utiliza telecomanda\n"
 #define MSGTR_LIRCopenfailed "Nu pot deschide suportul pentru LIRC!\n"
-#define MSGTR_LIRCsocketerr "Ceva nu este în regula cu portul LIRC: %s\n"
 #define MSGTR_LIRCcfgerr "Nu pot citi fiºierul de configurare LIRC %s !\n"
 
 
@@ -211,7 +189,6 @@ static char help_text[]=
 // --- labels ---
 #define MSGTR_About "Despre..."
 #define MSGTR_FileSelect "Selectare fiºier..."
-#define MSGTR_MessageBox "Fereastra mesaj..."
 #define MSGTR_PlayList "Listã de redare..."
 #define MSGTR_SkinBrowser "Navigator tematici..."
 
@@ -224,7 +201,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "Îmi pare rãu, memorie insuficientã pentru tamponul de desenare."
 #define MSGTR_NEMFMR "Îmi pare rãu, memorie insuficientã pentru desenarea meniului."
-#define MSGTR_NEMFMM "Îmi pare rãu, memorie insuficientã pentru masca ferestrei principale."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[tematicã] eroare în fiºierul de tematicã la linia %d: %s" 

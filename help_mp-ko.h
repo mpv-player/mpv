@@ -61,7 +61,6 @@ static char help_text[]=
 // mplayer.c: 
 
 #define MSGTR_Exiting "\n종료합니다... (%s)\n"
-#define MSGTR_Exit_frames "요청한 프레임수를 재생하였습니다."
 #define MSGTR_Exit_quit "종료"
 #define MSGTR_Exit_eof "파일의 끝"
 #define MSGTR_Exit_error "치명적 오류"
@@ -82,19 +81,14 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "dump파일을 열 수 없습니다!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "헤더에 FPS가 지정되지않았거나 잘못되었습니다! -fps 옵션을 사용하세요!\n"
-#define MSGTR_NoVideoStream "죄송합니다, 비디오 스트림이 없습니다... 아직 재생불가능합니다.\n"
 #define MSGTR_TryForceAudioFmt "오디오 코덱 드라이버 %d류를 시도하고 있습니다...\n"
 #define MSGTR_CantFindAfmtFallback "시도한 드라이버류에서 오디오 코덱을 찾을 수 없습니다. 다른 드라이버로 대체하세요.\n"
 #define MSGTR_CantFindAudioCodec "오디오 형식 0x%X를 위한 코덱을 찾을 수 없습니다!\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** etc/codecs.conf로 부터 %s를 업그레이드해보세요.\n*** 여전히 작동하지않으면, DOCS/codecs.html을 읽어보세요!\n"
 #define MSGTR_CouldntInitAudioCodec "오디오 코덱을 초기화할 수 없습니다! -> 소리없음\n"
 #define MSGTR_TryForceVideoFmt "비디오 코덱 드라이버 %d류를 시도하고 있습니다...\n"
-#define MSGTR_CantFindVfmtFallback "시도한 드라이버류에서 비디오 코덱을 찾을 수 없습니다. 다른 드라이버로 대체하세요.\n"
 #define MSGTR_CantFindVideoCodec "비디오 형식 0x%X를 위한 코덱을 찾을 수 없습니다!\n"
 #define MSGTR_VOincompCodec "죄송합니다, 선택한 비디오 출력 장치는 이 코덱과 호환되지 않습니다.\n"
-#define MSGTR_CouldntInitVideoCodec "치명적: 비디오 코덱을 초기화할 수 없습니다. :(\n"
-#define MSGTR_EncodeFileExists "파일이 이미 존재합니다.: %s (당신이 아끼는 AVI를 덮어쓰지마세요!)\n"
-#define MSGTR_CantCreateEncodeFile "인코딩을 위한 파일을 만들 수 없습니다.\n"
 #define MSGTR_CannotInitVO "치명적: 비디오 드라이버를 초기화할 수 없습니다!\n"
 #define MSGTR_CannotInitAO "오디오 장치를 열거나 초기화할 수 없습니다. -> 소리없음\n"
 #define MSGTR_StartPlaying "재생을 시작합니다...\n"
@@ -154,7 +148,6 @@ static char help_text[]=
 #define MSGTR_DetectedMPEGPSfile "MPEG-PS 파일 형식을 발견했습니다!\n"
 #define MSGTR_DetectedMPEGESfile "MPEG-ES 파일 형식을 발견했습니다!\n"
 #define MSGTR_DetectedQTMOVfile "QuickTime/MOV 파일 형식을 발견했습니다!\n"
-#define MSGTR_MissingMpegVideo "찾을 수 없는 MPEG 비디오 스트림!? 저작자에게 문의하세요, 버그일지도 모릅니다. :(\n"
 #define MSGTR_InvalidMPEGES "잘못된 MPEG-ES 스트림??? 저작자에게 문의하세요, 버그일지도 모릅니다. :(\n"
 #define MSGTR_FormatNotRecognized "============= 죄송합니다, 이 파일형식은 인식되지못했거나 지원되지않습니다 ===============\n"\
 				  "=== 만약 이 파일이 AVI, ASF 또는 MPEG 스트림이라면, 저작자에게 문의하세요! ===\n"
@@ -179,7 +172,6 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: 압축된 헤더는 (아직) 지원되지않습니다!\n"
 #define MSGTR_MOVvariableFourCC "MOV: 경고! FOURCC 변수 발견!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: 경고! 트랙이 너무 많습니다!"
-#define MSGTR_MOVnotyetsupp "\n****** Quicktime MOV 형식은 아직 지원되지않습니다!!!!!!! *******\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "코덱을 열 수 없습니다.\n"
@@ -189,18 +181,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Win32/ACM 오디오 코덱을 열거나 초기화할 수 없습니다. (DLL 파일이 없나요?)\n"
 #define MSGTR_MissingLAVCcodec "libavcodec에서 '%s' 코덱을 찾을 수 없습니다...\n"
 
-#define MSGTR_NoDShowSupport "MPlayer가 directshow 지원없이 컴파일되었습니다!\n"
-#define MSGTR_NoWfvSupport "win32 코덱 지원이 불가능하거나, 비 x86플랫폼에서는 사용할 수 없습니다!\n"
-#define MSGTR_NoDivx4Support "MPlayer가 DivX4Linux (libdivxdecore.so) 지원없이 컴파일되었습니다!\n"
-#define MSGTR_NoLAVCsupport "MPlayer가 ffmpeg/libavcodec 지원없이 컴파일되었습니다!\n"
-#define MSGTR_NoACMSupport "Win32/ACM 오디오 코덱이 불가능하거나, 비 x86 CPU에서는 사용할 수 없습니다. -> 소리없음 :(\n"
-#define MSGTR_NoDShowAudio "DirectShow 지원없이 컴파일되었습니다. -> 소리없음 :(\n"
-#define MSGTR_NoOggVorbis "OggVorbis 오디오 코덱이 불가능합니다. -> f소리없음 :(\n"
-#define MSGTR_NoXAnimSupport "MPlayer가 XAnim 지원없이 컴파일되었습니다!\n"
-
-#define MSGTR_MpegPPhint "경고! MPEG 1/2 비디오를 위한 이미지 후처리기능을 요청하였습니다만,\n" \
-			 "         MPlayer가 MPEG 1/2 후처리기능 지원없이 컴파일되었습니다!\n" \
-			 "         config.h에 #define MPEG12_POSTPROC 를 추가하고, libmpeg2를 다시 컴파일하세요!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: 치명적: 시퀀스 헤더를 찾는 도중 EOF.\n"
 #define MSGTR_CannotReadMpegSequHdr "치명적: 시퀀스 헤더를 찾을 수 없습니다!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "치명적: 시퀀스 헤더 확장을 읽을 수 없습니다!\n"
@@ -209,17 +189,13 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "공유 메모리를 할당할 수 없습니다.\n"
 #define MSGTR_CantAllocAudioBuf "오디오 출력 버퍼를 할당할 수 없습니다.\n"
-#define MSGTR_NoMemForDecodedImage "발견된 picture 버퍼에 충분한 메모리가 없습니다(%ld bytes).\n"
 
-#define MSGTR_AC3notvalid "AC3 스트림은 유효하지 않습니다.\n"
-#define MSGTR_AC3only48k "48000 Hz 스트림만 지원됩니다.\n"
 #define MSGTR_UnknownAudio "알 수 없는 오디오 형식입니다. -> 소리없음\n"
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "lirc 지원을 시작합니다...\n"
 #define MSGTR_LIRCdisabled "리모콘을 사용할 수 없습니다.\n"
 #define MSGTR_LIRCopenfailed "lirc 지원 시작 실패!\n"
-#define MSGTR_LIRCsocketerr "lirc 소켓에 문제가 있습니다.: %s\n"
 #define MSGTR_LIRCcfgerr "LIRC 설정파일 %s를 읽는데 실패했습니다!\n"
 
 
@@ -232,7 +208,6 @@ static char help_text[]=
 #define MSGTR_FileSelect "파일 선택 ..."
 #define MSGTR_SubtitleSelect "자막 선택 ..."
 #define MSGTR_OtherSelect "선택 ..."
-#define MSGTR_MessageBox "메세지박스"
 #define MSGTR_PlayList "재생목록"
 #define MSGTR_SkinBrowser "스킨 찾기"
 
@@ -245,7 +220,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "죄송합니다, draw 버퍼에 충분한 메모리가 없습니다."
 #define MSGTR_NEMFMR "죄송합니다, 메뉴 렌더링을 위한 충분한 메모리가 없습니다."
-#define MSGTR_NEMFMM "죄송합니다, 메인 윈도우 형태 표시를 위한 충분한 메모리가 없습니다."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[스킨] 스킨 설정파일 %s의 %d번째 줄에 에러가 있습니다." 
