@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.8 -->
 <appendix id="skin">
 <title>Format skórki <application>MPlayera</application></title>
 <para>
@@ -81,7 +81,7 @@ a więc zależy to wyłącznie od Ciebie, czy stworzysz coś wspaniałego.
 </para>
 
 <para>
-W chwili obecnej mamy trzy okna, które można ozdobić:
+W chwili obecnej mamy cztery okna, które można ozdobić:
 <link linkend="skin-file-main">okno główne (main window)</link>,
 <link linkend="skin-file-subwindow">okno ekranu (subwindow)</link>,
 <link linkend="skin-file-main">panel odtwarzania (playbar)</link>,
