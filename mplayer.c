@@ -945,14 +945,19 @@ if(!sh_video->codec){
 printf("Found video codec: [%s] drv:%d (%s)\n",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
 
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
+    int ret;
     out_fmt=sh_video->codec->outfmt[i];
-    if(video_out->query_format(out_fmt)) break;
+    ret=video_out->query_format(out_fmt);
+    if(verbose) printf("vo_debug: query(0x%X) returned 0x%X\n",out_fmt,ret);
+    if(ret) break;
 }
 if(i>=CODECS_MAX_OUTFMT){
     printf("Sorry, selected video_out device is incompatible with this codec.\n");
     exit(1);
 }
 sh_video->outfmtidx=i;
+
+if(verbose) printf("vo_debug1: out_fmt=0x%08X\n",out_fmt);
 
 switch(sh_video->codec->driver){
  case 2: {
@@ -1024,6 +1029,8 @@ switch(sh_video->codec->driver){
    break;
  }
 }
+
+if(verbose) printf("vo_debug2: out_fmt=0x%08X\n",out_fmt);
 
 // ================== Init output files for encoding ===============
    if(encode_name){
@@ -1108,6 +1115,8 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2),
                       title,out_fmt);
+
+if(verbose) printf("vo_debug3: out_fmt=0x%08X\n",out_fmt);
 
    if(video_out->init(sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
