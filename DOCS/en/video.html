@@ -1015,7 +1015,7 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
 
 <H4><A NAME="mpegdec">2.3.1.3 MPEG decoders</A></H4>
 
-<H4><A NAME="dvb">2.3.1.3.1 DVB</A></H4>
+<H4><A NAME="dvb">2.3.1.3.1 DVB output and input</A></H4>
 
 <P>MPlayer supports cards with the Siemens DVB chipset from vendors like
   Siemens, Technotrend, Galaxis or Hauppauge. The latest DVB drivers are
@@ -1101,9 +1101,69 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   right aspect ratio), use the new dvbscale filter:</P>
 
 <PRE>
-for  4:3 TV: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
-for 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
+for a  4:3 TV: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
+for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </PRE>
+
+<H4>Using your DVB card for watching Digital TV (DVB input module)</H4>
+
+<P>First you need to pass the <CODE>dvb_shutdown_timeout=0</CODE> parameter
+  to the kernel module <CODE>dvb-core</CODE>, or MPlayer will die after 10
+  seconds.</P>
+
+<P>You should also have the programs <CODE>scan</CODE> and
+  <CODE>szap/tzap/czap</CODE> installed; they are all included in the drivers
+  package.</P>
+
+<P>Verify that your drivers are working properly with a program such as
+  <A HREF="http://www.sf.net/projects/dvbtools/"><CODE>dvbstream</CODE></A>
+  (that is the base of the DVB input module).</P>
+
+<P>Now you should compile a <CODE>~/.mplayer/channels.conf</CODE> file,
+  with the syntax accepted by <CODE>szap/tzap/czap</CODE>, or have
+  <CODE>scan</CODE> compile it for you.</P>
+
+<P>Make sure that you have have <B>only</B> Free to Air channels in your
+  <CODE>channels.conf</CODE> file, or MPlayer will hang on the others.</P>
+
+<P>To show the first of the channels present in your list, run</P>
+
+<PRE>
+  mplayer dvb://
+</PRE>
+
+<P>If you want to watch a specific channel, such as <CODE>R1</CODE>, run</P>
+
+<PRE>
+  mplayer dvb://R1
+</PRE>
+
+<P>To change channels press the <CODE>'h'</CODE> (next) and <CODE>'k'</CODE>
+  (previous) keys, or use the <CODE>OSD</CODE> menu (requires a working
+  <A HREF="documentation.html#subtitles_osd">OSD subsystem</a>).</P>
+
+<P>If your <CODE>~/.mplayer/menu.conf</CODE> contains a <B>&lt;dvbsel&gt;</b>
+  entry, such as the one in the example file <CODE>etc/dvb-menu.conf</CODE>
+  (that you can use to overwrite <CODE>~/.mplayer/menu.conf</CODE>), the
+  main menu will show a sub-menu entry that will permit you to choose
+  one of the channels present in your <CODE>channels.conf</CODE>.</P>
+
+<P>If you want to save a program to disk you can use</P>
+
+<PRE>
+  mplayer -dumpfile r1.ts -dumpstream dvb://R1
+</PRE>
+
+<P>If you want to record it in a different format (re-encoding it) instead you
+  can run a command such as</P>
+
+<PRE>
+  mencoder -o r1.avi -ovc xvid -xvidenctopts bitrate=800 -oac mp3lame -lameopts cbr:br=128 -vf ci dvb://R1
+</PRE>
+
+<P>Read the man page for a list of options that you can pass to the DVB
+  input module.</P>
+
 
 <H4>FUTURE</H4>
 

@@ -129,6 +129,12 @@ mencoder \- Movie Encoder for Linux
 [options]
 .br
 .in
+.B mplayer
+'in +\n[.k]u
+.I dvb://channel
+[options]
+.br
+.in
 .B mencoder
 [options]
 .RI [ \ file\  | \ URL\  | \ -\  ]
@@ -703,6 +709,23 @@ Useful when ripping from DVD or network.
 .TP
 .B \-dumpvideo (MPLAYER only)
 Dump raw compressed video stream to ./\:stream.dump (not very usable).
+.TP
+.B \-dvbin <options>
+Pass the following parameters to the DVB input module, in order to override
+the default ones:
+
+.PD 0
+.RSs
+.IPs card=<1\-4>
+Specifies using card number 1\-4 (default: 1).
+.IPs file=<file>
+Instructs MPlayer to read the channels list from <file>.
+.IPs type=<SAT|TER|CBL>
+Specifies that the card type is SATellite, TERrestrial or CaBLe. If not specifiied
+the type will be autodetected.
+.RE
+.PD 1
+.
 .TP
 .B \-dvd\-device <path\ to\ device>
 Override default DVD device name /dev/\:dvd.
