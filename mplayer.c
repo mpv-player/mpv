@@ -1005,8 +1005,8 @@ current_module="init_libvo";
    }
 #endif
   // Set default VGA 1:1 aspect as fallback ::atmos
-  if(movie_aspect) sh_video->aspect = movie_aspect;
-  if(!sh_video->aspect) sh_video->aspect=1.0;
+  if(movie_aspect) sh_video->aspect = movie_aspect; // cmdline overrides autodetect
+//  if(!sh_video->aspect) sh_video->aspect=1.0;
 
   if(screen_size_xy||screen_size_x||screen_size_y){
    if(screen_size_xy>0){
@@ -1027,7 +1027,7 @@ current_module="init_libvo";
     // check source format aspect, calculate prescale ::atmos
     screen_size_x=sh_video->disp_w;
     screen_size_y=sh_video->disp_h;
-    if(sh_video->aspect!=1.0){
+    if(sh_video->aspect>0.01){
       mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n",
              sh_video->aspect);
       screen_size_x=(int)((float)sh_video->disp_h*sh_video->aspect);
@@ -1038,7 +1038,7 @@ current_module="init_libvo";
         screen_size_y+=screen_size_y%2; // round
       }
     } else {
-      mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is 1:1 - no prescaling applied.\n");
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is undefined - no prescaling applied.\n");
     }
   }
 
