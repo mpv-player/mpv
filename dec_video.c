@@ -418,8 +418,10 @@ if(verbose){
      case PIX_FMT_YUV422: x="YUV422";break;
      case PIX_FMT_RGB24: x="RGB24";break;
      case PIX_FMT_BGR24: x="BGR24";break;
+#ifdef PIX_FMT_YUV422P
      case PIX_FMT_YUV422P: x="YUV422P";break;
      case PIX_FMT_YUV444P: x="YUV444P";break;
+#endif
      }
      printf("DONE -> got_picture=%d  format=0x%X (%s) \n",got_picture,
 	lavc_context.pix_fmt,x);
