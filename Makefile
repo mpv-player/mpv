@@ -290,6 +290,15 @@ depend:
 	$(CC) -MM $(CFLAGS) mplayer.c mencoder.c $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
 	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
 
+# ./configure must be run if it changed in CVS
+config.h: configure
+	@echo "############################################################"
+	@echo "####### Please run ./configure again - it's changed! #######"
+	@echo "############################################################"
+ifeq ($(wildcard .developer),)
+	@exit 1
+endif
+
 # do not rebuild after cvs commits if .developer file is present!
 
 # rebuild at every config.h/config.mak change:
