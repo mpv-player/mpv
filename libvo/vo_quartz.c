@@ -560,6 +560,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		{
 			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: Device ID %d do not exist, falling back to main device.\n", device_id);
 			deviceHdl = GetMainDevice();
+			device_id = 0;
 			break;
 		}
 	}
