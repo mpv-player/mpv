@@ -288,11 +288,11 @@ while(!stream_eof(demuxer->stream)){
         uint16_t stream_id, i;
         uint32_t max_bitrate;
         char *object=NULL, *ptr=NULL;
-        printf("============ ASF Stream group == START ===\n");
-        printf(" object size = %d\n", (int)objh.size);
+        mp_msg(MSGT_HEADER,MSGL_V,"============ ASF Stream group == START ===\n");
+        mp_msg(MSGT_HEADER,MSGL_V," object size = %d\n", (int)objh.size);
         object = (char*)malloc(objh.size);
 	if( object==NULL ) {
-          printf("Memory allocation failed\n");
+          mp_msg(MSGT_HEADER,MSGL_V,"Memory allocation failed\n");
 	  return 0;
 	}
         stream_read( demuxer->stream, object, objh.size );
@@ -302,19 +302,19 @@ while(!stream_eof(demuxer->stream)){
         ptr += sizeof(uint16_t);
         if(stream_count > 0)
               streams = (uint32_t*)malloc(2*stream_count*sizeof(uint32_t));
-        printf(" stream count=[0x%x][%u]\n", stream_count, stream_count );
+        mp_msg(MSGT_HEADER,MSGL_V," stream count=[0x%x][%u]\n", stream_count, stream_count );
         for( i=0 ; i<stream_count && ptr<((char*)object+objh.size) ; i++ ) {
           stream_id = le2me_16(*(uint16_t*)ptr);
           ptr += sizeof(uint16_t);
           memcpy(&max_bitrate, ptr, sizeof(uint32_t));// workaround unaligment bug on sparc
           max_bitrate = le2me_32(max_bitrate);
           ptr += sizeof(uint32_t);
-          printf("   stream id=[0x%x][%u]\n", stream_id, stream_id );
-          printf("   max bitrate=[0x%x][%u]\n", max_bitrate, max_bitrate );
+          mp_msg(MSGT_HEADER,MSGL_V,"   stream id=[0x%x][%u]\n", stream_id, stream_id );
+          mp_msg(MSGT_HEADER,MSGL_V,"   max bitrate=[0x%x][%u]\n", max_bitrate, max_bitrate );
           streams[2*i] = stream_id;
           streams[2*i+1] = max_bitrate;
         }
-        printf("============ ASF Stream group == END ===\n");
+        mp_msg(MSGT_HEADER,MSGL_V,"============ ASF Stream group == END ===\n");
         free( object );
       break;
     }
