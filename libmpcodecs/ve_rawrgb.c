@@ -66,6 +66,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     mux_v->bih->biHeight=0;
     mux_v->bih->biCompression=0;
     mux_v->bih->biPlanes=1;
+    mux_v->bih->biBitCount=24;
 
     return 1;
 }

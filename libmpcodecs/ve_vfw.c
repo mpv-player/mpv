@@ -37,9 +37,12 @@ static int config(struct vf_instance_s* vf,
     vfw_bih->biWidth=width;
     vfw_bih->biHeight=height;
     vfw_bih->biSizeImage=width*height*((vfw_bih->biBitCount+7)/8);
-    mux_v->bih->biWidth=width;
-    mux_v->bih->biHeight=height;
-    mux_v->bih->biSizeImage=width*height*((mux_v->bih->biBitCount+7)/8);
+
+    if(!vfw_start_encoder(vfw_bih, mux_v->bih)) return 0;
+
+//    mux_v->bih->biWidth=width;
+//    mux_v->bih->biHeight=height;
+//    mux_v->bih->biSizeImage=width*height*((mux_v->bih->biBitCount+7)/8);
 
     return 1;
 }

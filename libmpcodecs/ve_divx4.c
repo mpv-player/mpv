@@ -72,6 +72,13 @@ static int config(struct vf_instance_s* vf,
     else if(divx4_param.bitrate<=16000) divx4_param.bitrate*=1000;
     if(!divx4_param.quality) divx4_param.quality=5; // the quality of compression ( 1 - fastest, 5 - best )
 
+    // set some usefull defaults:
+    if(!divx4_param.min_quantizer) divx4_param.min_quantizer=2;
+    if(!divx4_param.max_quantizer) divx4_param.max_quantizer=31;
+    if(!divx4_param.rc_period) divx4_param.rc_period=2000;
+    if(!divx4_param.rc_reaction_period) divx4_param.rc_reaction_period=10;
+    if(!divx4_param.rc_reaction_ratio) divx4_param.rc_reaction_ratio=20;
+
     divx4_param.handle=NULL;
     encore(NULL,ENC_OPT_INIT,&divx4_param,NULL);
     vf->priv->enc_handle=divx4_param.handle;
@@ -157,7 +164,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 					       enc_result.quantizer);
 	}
     }
-    mencoder_write_frame(mux_v,vf->priv->enc_frame.length,enc_result.is_key_frame?0x10:0);
+    mencoder_write_chunk(mux_v,vf->priv->enc_frame.length,enc_result.is_key_frame?0x10:0);
 }
 
 //===========================================================================//

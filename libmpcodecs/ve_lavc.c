@@ -225,9 +225,14 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mencoder_write_chunk(mux_v,out_size,lavc_venc_context.key_frame?0x10:0);
 }
 
+static void uninit(struct vf_instance_s* vf){
+    avcodec_close(&lavc_venc_context);
+}
+
 //===========================================================================//
 
 static int vf_open(vf_instance_t *vf, char* args){
+    vf->uninit=uninit;
     vf->config=config;
     vf->control=control;
     vf->query_format=query_format;
