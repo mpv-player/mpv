@@ -152,6 +152,13 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	/* get next token */
 	token = strtok(NULL, (char *)&("\x0d\x0a"));
     }
+    
+    if (buf)
+	free(buf);
+    if (opt)
+	free(opt);
+    if (param)
+	free(param);
 }
 
 int vivo_check_file(demuxer_t* demuxer){
@@ -490,6 +497,10 @@ void demux_open_vivo(demuxer_t* demuxer){
 		sh->bih->biSizeImage=sh->bih->biWidth*sh->bih->biHeight*3;
 		demuxer->video->sh=sh; sh->ds=demuxer->video;
 		demuxer->video->id=0;
+
+		printf("VIVO Video stream %d size: display: %dx%d, codec: %dx%d\n",
+		    demuxer->video->id, sh->disp_w, sh->disp_h, sh->bih->biWidth,
+		    sh->bih->biHeight);
 }
 
 if(demuxer->audio->id>=-1){
@@ -497,16 +508,19 @@ if(demuxer->audio->id>=-1){
     mp_msg(MSGT_DEMUX,MSGL_ERR,"VIVO: " MSGTR_MissingAudioStream);
   } else
 {		sh_audio_t* sh=new_sh_audio(demuxer,1);
+
 		sh->format=0x111; // 0x112
 		// Emulate WAVEFORMATEX struct:
 		sh->wf=malloc(sizeof(WAVEFORMATEX));
 		memset(sh->wf,0,sizeof(WAVEFORMATEX));
 		sh->wf->nChannels=1;
 		sh->wf->wBitsPerSample=16;
+//		sh->wf->wBitsPerSample=8;
 		if (priv->samplerate)
 		    sh->wf->nSamplesPerSec=priv->samplerate;
 		else
 		    sh->wf->nSamplesPerSec=22050;
+//		    sh->wf->nSamplesPerSec=8000;
 		sh->wf->nAvgBytesPerSec=sh->wf->nChannels*sh->wf->wBitsPerSample*sh->wf->nSamplesPerSec/8;
 		demuxer->audio->sh=sh; sh->ds=demuxer->audio;
 		demuxer->audio->id=1;
@@ -515,3 +529,20 @@ if(demuxer->audio->id>=-1){
 
 }
 
+void demux_close_vivo(demuxer_t *demuxer)
+{
+    vivo_priv_t* priv=demuxer->priv;
+    
+    if (priv->title)
+	free(priv->title);
+    if (priv->author)
+	free(priv->author);
+    if (priv->copyright)
+	free(priv->copyright);
+    if (priv->producer)
+	free(priv->producer);
+    if (priv)
+	free(priv);
+
+    return;
+}
