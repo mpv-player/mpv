@@ -73,6 +73,10 @@ extern void* mDisplay; // Display* mDisplay;
 #include "Gui/mplayer/play.h"
 #endif
 
+#ifdef HAVE_NEW_INPUT
+#include "input/input.h"
+#endif
+
 int slave_mode=0;
 int verbose=0;
 int quiet=0;
@@ -670,6 +674,20 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 // ========== Init keyboard FIFO (connection to libvo) ============
 make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
+// Init input system
+#ifdef HAVE_NEW_INPUT
+current_module = "init_input";
+mp_input_init();
+if(keyb_fifo_get > 0)
+  mp_input_add_key_fd(keyb_fifo_get,1,NULL,NULL);
+if(slave_mode)
+   mp_input_add_cmd_fd(0,1,NULL,NULL);
+else
+  mp_input_add_key_fd(0,1,NULL,NULL);
+current_module = NULL;
+#endif
+
+
   //========= Catch terminate signals: ================
   // terminate requests:
   signal(SIGTERM,exit_sighandler); // kill
@@ -912,7 +930,18 @@ current_module=NULL;
     // initial prefill: 20%  later: 5%  (should be set by -cacheopts)
   if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024,stream_cache_size*1024/5,stream_cache_size*1024/20);
 
+#ifdef HAVE_NEW_INPUT
+    if(!slave_mode && filename && !use_stdin && !strcmp(filename,"-")) {      
+    mp_input_rm_key_fd(0);
+    use_stdin = 1;
+  }
+  else if(!slave_mode && use_stdin && (!filename || strcmp(filename,"-"))) {
+    mp_input_add_key_fd(0,1,NULL,NULL);
+    use_stdin = 0;
+  }
+#else
   use_stdin=filename && (!strcmp(filename,"-"));
+#endif
 
 #ifdef HAVE_LIBCSS
   current_module="libcss";
@@ -1854,6 +1883,9 @@ if(auto_quality>0){
 #endif
 
   if(osd_function==OSD_PAUSE){
+#ifdef HAVE_NEW_INPUT    
+    mp_cmd_t* cmd;
+#endif
 #ifdef HAVE_NEW_GUI
       int gui_pause_flag=0; // gany!
 #endif
@@ -1864,6 +1896,9 @@ if(auto_quality>0){
       if (audio_out && sh_audio)
          audio_out->pause();	// pause audio, keep data if possible
 
+#ifdef HAVE_NEW_INPUT
+      while( (cmd = mp_input_get_cmd(20,1)) == NULL) {
+#else /* HAVE_NEW_INPUT */
       if(slave_mode) {
         fd_set set;
         struct timeval timeout;
@@ -1884,9 +1919,10 @@ if(auto_quality>0){
              lirc_mp_getinput()<=0 &&
 #endif
              (use_stdin || getch2(20)<=0) && mplayer_get_key()<=0){
+#endif 
 #ifndef USE_LIBVO2
 	     video_out->check_events();
-#endif
+#endif /* HAVE_NEW_INPUT */
 #ifdef HAVE_NEW_GUI
              if(use_gui){
 		EventHandling();
@@ -1894,9 +1930,14 @@ if(auto_quality>0){
 		  { gui_pause_flag=1; break; } // end of pause or seek
              }
 #endif
+#ifdef HAVE_NEW_INPUT
+         }
+      mp_cmd_free(cmd);
+#else
              if(use_stdin) usec_sleep(1000); // do not eat the CPU
          }
       }
+#endif /* HAVE_NEW_INPUT */ 
          osd_function=OSD_PLAY;
       if (audio_out && sh_audio)
         audio_out->resume();	// resume audio
@@ -1919,6 +1960,7 @@ if(step_sec>0) {
 
 //================= Keyboard events, SEEKing ====================
 
+#ifndef HAVE_NEW_INPUT
 /* slave mode */ 
  if(slave_mode) {
    char buffer[1024];
@@ -2229,6 +2271,215 @@ if(step_sec>0) {
   }
 } // keyboard event handler
 
+#else /* HAVE_NEW_INPUT */
+{
+  mp_cmd_t* cmd;
+  while( (cmd = mp_input_get_cmd(0,0)) != NULL) {
+    switch(cmd->id) {
+    case MP_CMD_SEEK : {
+      int v,abs;
+      v = cmd->args[0].v.i;
+      abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
+      if(abs) {
+	abs_seek_pos = 3;
+	osd_function= (v > sh_video->timer) ? OSD_FFW : OSD_REW;
+	rel_seek_secs = v;
+      }
+      else {
+	rel_seek_secs+= v;
+	osd_function= (v > 0) ? OSD_FFW : OSD_REW;
+      }
+    } break;
+    case MP_CMD_AUDIO_DELAY : {
+      float v = cmd->args[0].v.f;
+      audio_delay += v;
+      osd_show_av_delay = 9;
+      if(sh_audio) sh_audio->timer+= v;
+    } break;
+    case MP_CMD_PAUSE : {
+      osd_function=OSD_PAUSE;
+    } break;
+    case MP_CMD_QUIT : {
+      exit_player(MSGTR_Exit_quit);
+    }
+    case MP_CMD_GRAB_FRAMES : {
+      grab_frames=2;
+    } break;
+    case MP_CMD_PLAY_TREE_STEP : {
+      int n = cmd->args[0].v.i > 0 ? 1 : -1;
+      play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
+      
+      if(play_tree_iter_step(i,n,0) == PLAY_TREE_ITER_ENTRY)
+	eof = (n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
+      play_tree_iter_free(i);
+    } break;
+    case MP_CMD_PLAY_TREE_UP_STEP : {
+      int n = cmd->args[0].v.i > 0 ? 1 : -1;
+      play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
+      if(play_tree_iter_up_step(i,n,0) == PLAY_TREE_ITER_ENTRY)
+	eof = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
+      play_tree_iter_free(i);
+    } break;
+    case MP_CMD_PLAY_ALT_SRC_STEP : {
+      if(playtree_iter->num_files > 1) {
+	int v = cmd->args[0].v.i;
+	if(v > 0 && playtree_iter->file < playtree_iter->num_files)
+	  eof = PT_NEXT_SRC;
+	else if(v < 0 && playtree_iter->file > 1)
+	  eof = PT_PREV_SRC;
+      }
+    } break;
+    case MP_CMD_SUB_DELAY : {
+      int abs= cmd->args[1].v.i;
+      float v = cmd->args[0].v.f;
+      if(abs)
+	sub_delay = v;
+      else
+	sub_delay += v;
+      osd_show_sub_delay = 9; // show the subdelay in OSD
+    } break;
+    case MP_CMD_OSD :  {
+      int v = cmd->args[0].v.i;
+      if(v < 0)
+	osd_level=(osd_level+1)%3;
+      else
+	osd_level= v > 2 ? 2 : v;
+    } break;
+    case MP_CMD_VOLUME :  {
+      int v = cmd->args[0].v.i;
+      if(v > 0)
+	mixer_incvolume();
+      else
+	mixer_decvolume();
+#ifdef USE_OSD
+      if(osd_level){
+	osd_visible=sh_video->fps; // 1 sec
+	vo_osd_progbar_type=OSD_VOLUME;
+	vo_osd_progbar_value=(mixer_getbothvolume()*256.0)/100.0;
+      }
+#endif
+    } break;
+    case MP_CMD_MIXER_USEMASTER :  {
+      mixer_usemaster=!mixer_usemaster;
+    } break;
+    case MP_CMD_CONTRAST :  {
+      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
+      if(abs)
+	v_cont = v > 100 ? 100 : v;
+      else {
+	if ( (v_cont += v) > 100 ) v_cont = 100;
+      }
+      if(v_cont < 0) v_cont = 0;
+
+      if(set_video_colors(sh_video,"Contrast",v_cont)){
+#ifdef USE_OSD
+	if(osd_level){
+	  osd_visible=sh_video->fps; // 1 sec
+	  vo_osd_progbar_type=OSD_CONTRAST;
+	  vo_osd_progbar_value=((v_cont)<<8)/100;
+	}
+#endif
+      }
+    } break;
+    case MP_CMD_BRIGHTNESS :  {
+      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
+      if(abs)
+	v_bright = v > 100 ? 100 : v;
+      else {
+	if ( (v_bright += v) > 100 ) v_cont = 100;
+      }
+      if(v_hw_equ_cap & VEQ_CAP_BRIGHTNESS) {
+	if(v_bright < -100) v_bright = -100;
+      } else {
+	if ( v_bright < 0 ) v_bright = 0;	    
+      }
+      if(set_video_colors(sh_video,"Brightness",v_bright)){
+#ifdef USE_OSD
+	if(osd_level){
+	  osd_visible=sh_video->fps; // 1 sec
+	  vo_osd_progbar_type=OSD_BRIGHTNESS;
+	  vo_osd_progbar_value=((v_bright)<<8)/100;
+	}
+#endif
+      }      
+    } break;
+    case MP_CMD_HUE :  {
+      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
+      if(abs)
+	v_hue = v > 100 ? 100 : v;
+      else {
+	if ( (v_hue += v) > 100 ) v_hue = 100;
+      }
+      if(v_hw_equ_cap & VEQ_CAP_HUE) {
+	if(v_hue < -100) v_hue = -100;
+      } else {
+	if ( v_hue < 0 ) v_hue = 0;	    
+      }
+      if(set_video_colors(sh_video,"Hue",v_hue)){
+#ifdef USE_OSD
+	if(osd_level){
+	  osd_visible=sh_video->fps; // 1 sec
+	  vo_osd_progbar_type=OSD_HUE;
+	  vo_osd_progbar_value=((v_hue)<<8)/100;
+	}
+#endif
+      }	
+    } break;
+    case MP_CMD_SATURATION :  {
+      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
+      if(abs)
+	v_saturation = v > 100 ? 100 : v;
+      else {
+	if ( (v_saturation += v) > 100 ) v_saturation = 100;
+      }
+      if(v_hw_equ_cap & VEQ_CAP_SATURATION) {
+	if(v_saturation < -100) v_saturation = -100;
+      } else {
+	if ( v_saturation < 0 ) v_saturation = 0;	    
+      }
+      if(set_video_colors(sh_video,"Saturation",v_saturation)){
+#ifdef USE_OSD
+	if(osd_level){
+	  osd_visible=sh_video->fps; // 1 sec
+	  vo_osd_progbar_type=OSD_SATURATION;
+	  vo_osd_progbar_value=((v_saturation)<<8)/100;
+	}
+#endif
+      }
+    } break;
+    case MP_CMD_FRAMEDROPPING :  {
+      int v = cmd->args[0].v.i;
+      if(v < 0)
+	frame_dropping = (frame_dropping+1)%3;
+      else
+	frame_dropping = v > 2 ? 2 : v;
+    } break;
+#ifdef USE_TV
+    case MP_CMD_TV_STEP_CHANNEL :  {
+      if (tv_param_on == 1) {
+	int v = cmd->args[0].v.i;
+	if(v > 0)
+	  tv_step_channel(tv_handler, TV_CHANNEL_HIGHER);
+	else
+	  tv_step_channel(tv_handler, TV_CHANNEL_LOWER);
+      }
+    } break;
+    case MP_CMD_TV_STEP_NORM :  {
+      if (tv_param_on == 1)
+	tv_step_norm(tv_handler);
+    } break;
+    case MP_CMD_TV_STEP_CHANNEL_LIST :  {
+      if (tv_param_on == 1)
+	tv_step_chanlist(tv_handler);
+    } break;
+#endif
+    default :
+      printf("Received unknow cmd %s\n",cmd->name);
+    }
+    mp_cmd_free(cmd);
+  }
+}
+#endif
   if (seek_to_sec) {
     int a,b; float d;
     

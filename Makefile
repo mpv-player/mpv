@@ -53,7 +53,7 @@ MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) # -Wall
 
-PARTS = g72x libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 opendivx libavcodec libao2 drivers drivers/syncfb linux postproc xa
+PARTS = g72x libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 opendivx libavcodec libao2 drivers drivers/syncfb linux postproc xa input
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
@@ -172,7 +172,10 @@ xa/libxa.a:
 g72x/libg72x.a:
 	$(MAKE) -C g72x
 
-MPLAYER_DEP = $(OBJS_MPLAYER) $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) $(COMMON_DEPS) 
+input/libinput.a:
+	$(MAKE) -C input
+
+MPLAYER_DEP = $(OBJS_MPLAYER) $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) $(COMMON_DEPS) input/libinput.a
 MENCODER_DEP = $(OBJS_MENCODER) $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) $(COMMON_DEPS)
 
 ifeq ($(GUI),yes)
@@ -187,7 +190,7 @@ VIDIX_LIBS += -Lvidix -lvidix
 endif
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(GUI_LIBS) $(VO_LIBS) $(AO_LIBS) $(LIB_LOADER) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(V_LIBS) $(LIRC_LIB) $(CSS_LIB) $(ARCH_LIB) $(DECORE_LIB) $(TERMCAP_LIB) $(STATIC_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(STREAMING_LIB) $(VIDIX_LIBS) -lm
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(GUI_LIBS) $(VO_LIBS) $(AO_LIBS) $(LIB_LOADER) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(V_LIBS) $(LIRC_LIB) $(CSS_LIB) $(ARCH_LIB) $(DECORE_LIB) $(TERMCAP_LIB) $(STATIC_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(STREAMING_LIB) $(VIDIX_LIBS) -Linput -linput -lm
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
