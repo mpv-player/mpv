@@ -49,19 +49,19 @@ static vo_info_t vo_info =
 static unsigned char *ImageData=NULL;
 
 /* X11 related variables */
-static Display *mydisplay;
+//static Display *mydisplay;
 static Window mywindow;
 //static GC mygc;
 //static XImage *myximage;
 //static int depth,mode;
-static XWindowAttributes attribs;
+//static XWindowAttributes attribs;
 static int X_already_started = 0;
 
 //static int texture_id=1;
 
 static GLXContext wsGLXContext;
 //XVisualInfo        * wsVisualInfo;
-int                  wsGLXAttrib[] = { GLX_RGBA,
+static int                  wsGLXAttrib[] = { GLX_RGBA,
                                        GLX_RED_SIZE,1,
                                        GLX_GREEN_SIZE,1,
                                        GLX_BLUE_SIZE,1,
@@ -97,11 +97,11 @@ static void resize(int x,int y){
 static uint32_t 
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
-	int screen;
+//	int screen;
         int dwidth,dheight;
 	unsigned int fg, bg;
 	char *hello = (title == NULL) ? "OpenGL rulez" : title;
-	char *name = ":0.0";
+//	char *name = ":0.0";
 	XSizeHints hint;
 	XVisualInfo *vinfo;
 	XEvent xev;
@@ -115,20 +115,9 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	image_format = format;
   
 	if (X_already_started) return -1;
+	if(!vo_init()) return -1;
 
-	if(getenv("DISPLAY"))	name = getenv("DISPLAY");
-
-	mydisplay = XOpenDisplay(name);
-
-	if (mydisplay == NULL)
-	{
-		printf("[gl] Can not open display\n");
-		return -1;
-	}
-
-	screen = DefaultScreen(mydisplay);
-        vo_screenwidth = DisplayWidth(mydisplay, myscreen);
-	vo_screenheight = DisplayHeight(mydisplay, myscreen);
+	X_already_started++;
 
         dwidth=d_width; dheight=d_height;
 #ifdef X11_FULLSCREEN
@@ -152,44 +141,15 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
 	/* Get some colors */
 
-	bg = WhitePixel(mydisplay, screen);
-	fg = BlackPixel(mydisplay, screen);
+	bg = WhitePixel(mDisplay, mScreen);
+	fg = BlackPixel(mDisplay, mScreen);
 
 	/* Make the window */
 
-	XGetWindowAttributes(mydisplay, DefaultRootWindow(mydisplay), &attribs);
+//	XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
 
-#if 0
-	/*
-	 *
-	 * depth in X11 terminology land is the number of bits used to
-	 * actually represent the colour.
-   	 *
-	 * bpp in X11 land means how many bits in the frame buffer per
-	 * pixel. 
-	 *
-	 * ex. 15 bit color is 15 bit depth and 16 bpp. Also 24 bit
-	 *     color is 24 bit depth, but can be 24 bpp or 32 bpp.
-	 */
-
-	depth = attribs.depth;
-
-	if (depth != 15 && depth != 16 && depth != 24 && depth != 32) 
-	{
-		/* The root window may be 8bit but there might still be
-		* visuals with other bit depths. For example this is the 
-		* case on Sun/Solaris machines.
-		*/
-		depth = 24;
-	}
-	//BEGIN HACK
-	//mywindow = XCreateSimpleWindow(mydisplay, DefaultRootWindow(mydisplay),
-	//hint.x, hint.y, hint.width, hint.height, 4, fg, bg);
-	//
-#endif
-
-//	XMatchVisualInfo(mydisplay, screen, depth, TrueColor, &vinfo);
-  vinfo=glXChooseVisual( mydisplay,screen,wsGLXAttrib );
+//	XMatchVisualInfo(mDisplay, screen, depth, TrueColor, &vinfo);
+  vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
   if (vinfo == NULL)
   {
     printf("[gl] no GLX support present\n");
@@ -198,57 +158,57 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
 	xswa.background_pixel = 0;
 	xswa.border_pixel     = 1;
-//	xswa.colormap         = XCreateColormap(mydisplay, RootWindow(mydisplay,screen), vinfo.visual, AllocNone);
-	xswa.colormap         = XCreateColormap(mydisplay, RootWindow(mydisplay,screen), vinfo->visual, AllocNone);
+//	xswa.colormap         = XCreateColormap(mDisplay, mRootWin, vinfo.visual, AllocNone);
+	xswa.colormap         = XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone);
 	xswamask = CWBackPixel | CWBorderPixel | CWColormap;
 //  xswamask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask | CWCursor | CWOverrideRedirect | CWSaveUnder | CWX | CWY | CWWidth | CWHeight;
 
-  mywindow = XCreateWindow(mydisplay, RootWindow(mydisplay,screen),
+  mywindow = XCreateWindow(mDisplay, RootWindow(mDisplay,mScreen),
     hint.x, hint.y, hint.width, hint.height, 4, vinfo->depth,CopyFromParent,vinfo->visual,xswamask,&xswa);
 
-  vo_x11_classhint( mydisplay,mywindow,"gl" );
-  vo_hidecursor(mydisplay,mywindow);
+  vo_x11_classhint( mDisplay,mywindow,"gl" );
+  vo_hidecursor(mDisplay,mywindow);
 
-  wsGLXContext=glXCreateContext( mydisplay,vinfo,NULL,True );
+  wsGLXContext=glXCreateContext( mDisplay,vinfo,NULL,True );
 //  XStoreName( wsDisplay,wsMyWin,wsSysName );
 
 //  printf("GLXcontext ok\n");
 
-  if ( fullscreen ) vo_x11_decoration( mydisplay,mywindow,0 );
+  if ( fullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
 
-	XSelectInput(mydisplay, mywindow, StructureNotifyMask);
+	XSelectInput(mDisplay, mywindow, StructureNotifyMask);
 
 	/* Tell other applications about this window */
 
-	XSetStandardProperties(mydisplay, mywindow, hello, hello, None, NULL, 0, &hint);
+	XSetStandardProperties(mDisplay, mywindow, hello, hello, None, NULL, 0, &hint);
 
 	/* Map window. */
 
-	XMapWindow(mydisplay, mywindow);
+	XMapWindow(mDisplay, mywindow);
 
 	/* Wait for map. */
 	do 
 	{
-		XNextEvent(mydisplay, &xev);
+		XNextEvent(mDisplay, &xev);
 	}
 	while (xev.type != MapNotify || xev.xmap.event != mywindow);
 
-	XSelectInput(mydisplay, mywindow, NoEventMask);
+	XSelectInput(mDisplay, mywindow, NoEventMask);
 
-  glXMakeCurrent( mydisplay,mywindow,wsGLXContext );
+  glXMakeCurrent( mDisplay,mywindow,wsGLXContext );
 
-	XFlush(mydisplay);
-	XSync(mydisplay, False);
+	XFlush(mDisplay);
+	XSync(mDisplay, False);
 
-//	mygc = XCreateGC(mydisplay, mywindow, 0L, &xgcv);
+//	mygc = XCreateGC(mDisplay, mywindow, 0L, &xgcv);
 
-//		myximage = XGetImage(mydisplay, mywindow, 0, 0,
+//		myximage = XGetImage(mDisplay, mywindow, 0, 0,
 //		width, image_height, AllPlanes, ZPixmap);
 //		ImageData = myximage->data;
 //	bpp = myximage->bits_per_pixel;
 
-	//XSelectInput(mydisplay, mywindow, StructureNotifyMask); // !!!!
-        XSelectInput(mydisplay, mywindow, StructureNotifyMask | KeyPressMask );
+	//XSelectInput(mDisplay, mywindow, StructureNotifyMask); // !!!!
+        XSelectInput(mDisplay, mywindow, StructureNotifyMask | KeyPressMask );
 
 //  printf("Window setup ok\n");
 
@@ -323,7 +283,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
 //  printf("OpenGL setup OK!\n");
 
-	X_already_started++;
+      saver_off(mDisplay);  // turning off screen saver
+
 	return 0;
 }
 
@@ -337,15 +298,15 @@ static void
 Terminate_Display_Process(void) 
 {
 	getchar();	/* wait for enter to remove window */
-	XDestroyWindow(mydisplay, mywindow);
-	XCloseDisplay(mydisplay);
+	XDestroyWindow(mDisplay, mywindow);
+	XCloseDisplay(mDisplay);
 	X_already_started = 0;
 }
 
 
 static void check_events(void)
 {
-    int e=vo_x11_check_events(mydisplay);
+    int e=vo_x11_check_events(mDisplay);
     if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
 }
 
@@ -370,7 +331,7 @@ flip_page(void)
 
 //  glFlush();
   glFinish();
-  glXSwapBuffers( mydisplay,mywindow );
+  glXSwapBuffers( mDisplay,mywindow );
   
 }
 
@@ -514,4 +475,6 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
+  saver_on(mDisplay); // screen saver back on
+  XDestroyWindow( mDisplay,mywindow );
 }
