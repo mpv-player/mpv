@@ -29,14 +29,14 @@ static char help_text[]=
 " -ss <temps>      Démarre la lecture à 'temps' (temps en secondes ou hh:mm:ss)\n"
 " -nosound         Ne joue aucun son\n"
 " -fs -vm -zoom    Options plein-écran (fs: plein-écran, vm: changement de mode\n"
-"                  vidéo, zoom: changement de taille software)\n"
+"                  vidéo, zoom: changement de taille logiciel)\n"
 " -x <x> -y <y>    Résolution de l'affichage (chgts. de mode vidéo ou zoom soft)\n"
 " -sub <fich>      Spécifie les sous-titres à utiliser (cf. -subfps, -subdelay)\n"
 " -playlist <fich> Spécifie la liste des fichiers à jouer\n"
-" -vid x -aid y    Spécifie les flux vidéos (x) et audio (y) à jouer\n"
+" -vid x -aid y    Spécifie les flux vidéo (x) et audio (y) à jouer\n"
 " -fps x -srate y  Options pour changer les fréq. vidéo (x fps) et audio (y Hz)\n"
-" -pp <qualité>    Filtres de sorties (voir page man et les docs)\n"
-" -framedrop       \"Drop\" d'images (pour les machines lentes)\n"
+" -pp <qualité>    Filtres de sorties (voir la page de man et les docs)\n"
+" -framedrop       saut d'images (pour les machines lentes)\n"
 "\n"
 "Fonctions au clavier: (voir la page man et regarder dans input.conf)\n"
 " <- ou ->         + / - 10 secondes\n"
@@ -82,7 +82,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Tente de forcer famille de pilotes codec audio de famille %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Ne peut trouver de codec audio pour famille de pilotes imposée, utilisation d'autres.\n"
 #define MSGTR_CantFindAudioCodec "Ne peut trouver codec pour format audio 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Tentez de mettre à jour %s à partir de etc/codecs.conf\n*** Si ce n'est toujours pas bon, alors lisez DOCS/codecs.html!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Tentez de mettre à jour %s à partir de etc/codecs.conf\n*** Si ce n'est toujours pas bon, alors lisez DOCS/codecs.html ou DOCS/fr/codecs.html !\n"
 #define MSGTR_CouldntInitAudioCodec "Ne peut trouver de codec audio! -> Aucun son\n"
 #define MSGTR_TryForceVideoFmtStr "Tente de forcer famille de pilotes codec vidéo %s ...\n"
 #define MSGTR_CantFindVideoCodec "Ne peut trouver codec pour format vidéo 0x%X !\n"
@@ -131,14 +131,14 @@ static char help_text[]=
 #define MSGTR_Video_NoVideo "Vidéo: pas de vidéo!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: n'a pas pu initialiser les filtres vidéo (-vop) ou la sortie vidéo (-vo) !\n"
 #define MSGTR_Paused "\n------ EN PAUSE -------\r"
-#define MSGTR_PlaylistLoadUnable "\nNe peut pas charger la playlist %s\n"
+#define MSGTR_PlaylistLoadUnable "\nNe peut pas charger la liste de lecture %s\n"
 
 // mencoder.c
 
-#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (see DOCS!)\n"
-#define MSGTR_UsingPass3ControllFile "Utilisation du fichier de controle de la passe 3\n"
+#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (voir les DOCS!)\n"
+#define MSGTR_UsingPass3ControllFile "Utilisation du fichier de contrôle de la passe 3\n"
 #define MSGTR_MissingFilename "\nNom de fichier manquant!\n\n"
-#define MSGTR_CannotOpenFile_Device "Ne peut pas ouvrir le fichier/le device\n"
+#define MSGTR_CannotOpenFile_Device "Ne peut pas ouvrir le fichier/le périph.\n"
 #define MSGTR_ErrorDVDAuth "Erreur à l'authentification du DVD...\n"
 #define MSGTR_CannotOpenDemuxer "Ne peut pas ouvrir le démultiplexeur\n"
 #define MSGTR_NoAudioEncoderSelected "\nPas d'encodeur audio (-oac) choisi! Choisissez en un ou utilisez -nosound. Essayez -oac help !\n"
@@ -261,7 +261,7 @@ static char help_text[]=
 #define MSGTR_ADecoderInitFailed "Echec de l'initialisation de l'ADecoder :(\n"
 #define MSGTR_ADecoderPreinitFailed "Echec de la pré-initialisation de l'ADecoder :(\n"
 #define MSGTR_AllocatingBytesForInputBuffer "dec_audio: allocation de %d bytes comme tampon d'entrée\n"
-#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: allocation %d + %d = %d bytes comme tampon de sortie\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: allocation %d + %d = %d octets comme tampon de sortie\n"
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Mise en place du support LIRC...\n"
@@ -276,7 +276,7 @@ static char help_text[]=
 #define MSGTR_CannotFindColorspace "Ne peut pas trouver d'espace de couleurs commun, même en utilisant 'scale' :(\n"
 
 // vd.c
-#define MSGTR_CodecDidNotSet "VDec: le codec n'a pas défini sh->disp_w and sh->disp_h, essai de workaround!\n"
+#define MSGTR_CodecDidNotSet "VDec: le codec n'a pas défini sh->disp_w and sh->disp_h, essai de contournement!\n"
 #define MSGTR_VoConfigRequest "VDec: requête de configuration du vo - %d x %d (csp préferé: %s)\n"
 #define MSGTR_CouldNotFindColorspace "N'a pas pu trouver d'espace de couleur correspondant - nouvel essai avec -vop scale...\n"
 #define MSGTR_MovieAspectIsSet "L'aspect du film est %.2f:1 - pré-redimensionnement à l'aspect correct.\n"
@@ -293,9 +293,9 @@ static char help_text[]=
 #define MSGTR_OtherSelect "Choisir ..."
 #define MSGTR_AudioFileSelect "Choisir une source audio extérieure ..."
 #define MSGTR_FontSelect "Choisir une police ..."
-#define MSGTR_PlayList "PlayList"
+#define MSGTR_PlayList "Liste de lecture"
 #define MSGTR_Equalizer "Equaliseur"
-#define MSGTR_SkinBrowser "Browser de skins"
+#define MSGTR_SkinBrowser "Navigateur de skins"
 #define MSGTR_Network "Streaming sur le réseau ..."
 #define MSGTR_Preferences "Préférences"
 #define MSGTR_OSSPreferences "Configuration du pilote OSS"
@@ -318,8 +318,8 @@ static char help_text[]=
 // --- messages d'erreur ---
 #define MSGTR_NEMDB "Désolé, pas assez de mémoire pour le tampon de dessin."
 #define MSGTR_NEMFMR "Désolé, pas assez de mémoire pour le rendu des menus."
-#define MSGTR_IDFGCVD "Désolé, pas de pilote de sortie vidéo compatible avec le GUI."
-#define MSGTR_NEEDLAVCFAME "Désolé, vous ne pouvez pas jouer de fichier non-MPEG avec votre DXR3/H+ device sans réencodage\nVeuillez activer lavc ou fame dans la boîte de configuration DXR3/H+."
+#define MSGTR_IDFGCVD "Désolé, pas de pilote de sortie vidéo compatible avec la GUI."
+#define MSGTR_NEEDLAVCFAME "Désolé, vous ne pouvez pas jouer de fichier non-MPEG avec votre périphérique DXR3/H+ sans réencodage\nVeuillez activer lavc ou fame dans la boîte de configuration DXR3/H+."
 
 // --- messages d'erreurs du chargement de skin ---
 #define MSGTR_SKIN_ERRORMESSAGE "[Skin] Erreur à la ligne %d du fichier de config de skin: %s" 
@@ -383,7 +383,10 @@ static char help_text[]=
 #define MSGTR_MENU_Mute "Silence"
 #define MSGTR_MENU_Original "Original"
 #define MSGTR_MENU_AspectRatio "Aspect (ratio)"
-
+#define MSGTR_MENU_AudioTrack "Piste audio"
+#define MSGTR_MENU_Track "Piste %d"
+#define MSGTR_MENU_VideoTrack "Piste Vidéo"
+				  
 // --- equalizer
 #define MSGTR_EQU_Audio "Audio"
 #define MSGTR_EQU_Video "Vidéo"
@@ -393,8 +396,8 @@ static char help_text[]=
 #define MSGTR_EQU_Saturation "Saturation: "
 #define MSGTR_EQU_Front_Left "Avant Gauche"
 #define MSGTR_EQU_Front_Right "Avant Droit"
-#define MSGTR_EQU_Back_Left "Côté Gauche"
-#define MSGTR_EQU_Back_Right "Côté Droit"
+#define MSGTR_EQU_Back_Left "Arrière Gauche"
+#define MSGTR_EQU_Back_Right "Arrière Droit"
 #define MSGTR_EQU_Center "Centre"
 #define MSGTR_EQU_Bass "Basses"
 #define MSGTR_EQU_All "Tout"
@@ -421,8 +424,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AudioDelay "Retard audio"
 #define MSGTR_PREFERENCES_DoubleBuffer "Activer le double-buffering"
 #define MSGTR_PREFERENCES_DirectRender "Activer le rendu direct"
-#define MSGTR_PREFERENCES_FrameDrop "Activer le frame-dropping"
-#define MSGTR_PREFERENCES_HFrameDrop "Activer le frame-dropping VIOLENT (dangereux)"
+#define MSGTR_PREFERENCES_FrameDrop "Activer le saut de trame"
+#define MSGTR_PREFERENCES_HFrameDrop "Activer le saut de trame VIOLENT (dangereux)"
 #define MSGTR_PREFERENCES_Flip "Mirroir vertical"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
 #define MSGTR_PREFERENCES_OSDTimer "Minuteur et indicateurs"
@@ -452,7 +455,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Misc "Divers"
 #define MSGTR_PREFERENCES_OSS_Device "Device:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
-#define MSGTR_PREFERENCES_Message "ATTENTION: certaines options requièrent de un redémarrage de la lecture!"
+#define MSGTR_PREFERENCES_Message "ATTENTION: certaines options requièrent un redémarrage de la lecture!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Encodeur vidéo:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Utiliser LAVC (ffmpeg)"
 #define MSGTR_PREFERENCES_DXR3_FAME "Utiliser FAME"
@@ -489,10 +492,13 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Cache activé/désactivé"
 #define MSGTR_PREFERENCES_LoadFullscreen "Démarrer en plein écran"
 #define MSGTR_PREFERENCES_CacheSize "Taille du cache: "
-
+#define MSGTR_PREFERENCES_XSCREENSAVER "Stopper XScreenSaver"
+#define MSGTR_PREFERENCES_AutoSync "AutoSynchro on/off"
+#define MSGTR_PREFERENCES_AutoSyncValue "Autosynchro: "
+				  
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Erreur fatale ..."
 #define MSGTR_MSGBOX_LABEL_Error "Erreur!"
-#define MSGTR_MSGBOX_LABEL_Warning "Attention!" 
-
+#define MSGTR_MSGBOX_LABEL_Warning "Attention!"
+				  
 #endif
