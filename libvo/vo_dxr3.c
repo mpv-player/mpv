@@ -170,7 +170,7 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 		avc_context->width = v_width;
 		avc_context->height = v_height;
 		avc_context->frame_rate = 30 * FRAME_RATE_BASE;
-		avc_context->gop_size = 0;
+		avc_context->gop_size = 12;
 		avc_context->bit_rate = 8e6;
 		avc_context->flags = CODEC_FLAG_HQ;
 		avc_context->pix_fmt = PIX_FMT_YUV420P;
@@ -243,12 +243,9 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char* src, unsigne
 	switch (img_format) {
 	case IMGFMT_BGR24:
 	case IMGFMT_YV12:
+	case IMGFMT_YUY2:
 		vo_draw_alpha_yv12(w, h, src, srca, srcstride,
 			avc_picture.data[0] + (x0 + d_pos_x) + (y0 + d_pos_y) * avc_picture.linesize[0], avc_picture.linesize[0]);
-		break;
-	case IMGFMT_YUY2:
-		vo_draw_alpha_yuy2(w, h, src, srca, srcstride,
-			avc_picture.data[0] + (x0 + d_pos_x) * 2 + (y0 + d_pos_y) * avc_picture.linesize[0], avc_picture.linesize[0]);
 		break;
 	}
 #endif
@@ -286,6 +283,7 @@ static uint32_t draw_frame(uint8_t * src[])
 			rgb24toyv12(src[0], avc_picture.data[0], avc_picture.data[1], avc_picture.data[2],
 				v_width, v_height, avc_picture.linesize[0], avc_picture.linesize[1], v_width*3);
 		}
+		draw_osd();
 		size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
 		write(fd_video, avc_outbuf, size);
 		return 0;
