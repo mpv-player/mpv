@@ -58,6 +58,11 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
   return NULL;
 }
 
+static float pts_correction=0.0;
+static int pts_corrected=0;
+static int pts_has_video=0;
+static unsigned int pts_corr_bytes=0;
+
 static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int len,int idxpos,int flags){
   int skip;
   float pts=0;
@@ -66,7 +71,21 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
   if(verbose>=3) printf("demux_avi.read_packet: %X\n",id);
 
   if(ds==demux->audio){
-            pts=avi_audio_pts;
+
+      if(pts_corrected==0){
+//          printf("\rYYY-A  A: %5.3f  V: %5.3f  \n",avi_audio_pts,avi_video_pts);
+          if(pts_has_video){
+	      // we have video pts now
+	      float delay=(float)pts_corr_bytes/((sh_audio_t*)(ds->sh))->wf->nAvgBytesPerSec;
+	      printf("XXX initial  v_pts=%5.3f  a_pos=%d (%5.3f) \n",avi_audio_pts,pts_corr_bytes,delay);
+	      //pts_correction=-avi_audio_pts+delay;
+	      pts_correction=delay-avi_audio_pts;
+	      pts_corrected=1;
+	  } else
+          pts_corr_bytes+=len;
+      }
+
+            pts=avi_audio_pts+pts_correction;
             avi_audio_pts=0;
   } else 
   if(ds==demux->video){
@@ -94,7 +113,10 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
      avi_video_pts+=(float)((sh_video_t*)(demux->video->sh))->video.dwScale/(float)((sh_video_t*)(demux->video->sh))->video.dwRate;
 //     avi_video_pts+=avi_video_ftime;
 #endif
+//          printf("\rYYY-V  A: %5.3f  V: %5.3f  \n",avi_audio_pts,avi_video_pts);
      avi_audio_pts=avi_video_pts;
+     pts_has_video=1;
+
   }
   
 //  len=stream_read_dword_le(demux->stream);
