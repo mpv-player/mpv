@@ -174,7 +174,6 @@ extern int vo_directrendering;
 int decode_video(sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
 vf_instance_t* vf=sh_video->vfilter;
 mp_image_t *mpi=NULL;
-int blit_frame=0;
 unsigned int t=GetTimer();
 unsigned int t2;
 double tt;
@@ -208,7 +207,6 @@ vf->control(vf,VFCTRL_DRAW_OSD,NULL);
     t2=GetTimer()-t2;
     tt=t2*0.000001f;
     vout_time_usage+=tt;
-    blit_frame=1;
 
-  return blit_frame;
+  return 1;
 }
