@@ -405,7 +405,14 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 
 	if (!wm)
 	    printf("Win32 LoadLibrary failed to load: %s\n", checked);
-
+	else
+	{
+	    extern char *win32_codec_name;
+	    printf("Loaded %s to address %p\n", libname, wm->module);
+	    /* XXX: FIXME, _VERY_ UGLY HACK */
+	    if (!strcmp(libname, "m3jpegdec.ax"))
+		win32_codec_name = strdup("m3jpeg32.dll");
+	}
 
 	return wm ? wm->module : 0;
 }
