@@ -177,19 +177,12 @@ static void set_window(){
 
 static void check_events(void)
 {
-    int e=vo_x11_check_events(mDisplay);
-
-    if(e&VO_EVENT_RESIZE){
-         set_window();
-         if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
-          {
-           printf( "Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
-//           exit( 0 );
-          }
-
-    } else
-    if(e&VO_EVENT_EXPOSE) mDrawColorKey();
-
+ int e=vo_x11_check_events(mDisplay);
+ if ( !(e&VO_EVENT_RESIZE) && !(e&VO_EVENT_EXPOSE) ) return;
+ if(e&VO_EVENT_EXPOSE) mDrawColorKey();
+ set_window();
+ if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
+   printf( "Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 }
 
 static void draw_osd(void)
