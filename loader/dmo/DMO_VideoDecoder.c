@@ -463,8 +463,9 @@ int DMO_VideoDecoder_SetDestFmt(DMO_VideoDecoder *this, int bits, unsigned int c
 	  this->iv.m_obh.biSize = sizeof(BITMAPINFOHEADER);
 	  this->iv.m_obh.biCompression=csp;
 	  this->iv.m_obh.biBitCount=bits;
-	  this->iv.m_obh.biSizeImage=labs(this->iv.m_obh.biBitCount*
-             this->iv.m_obh.biWidth*this->iv.m_obh.biHeight)>>3;
+
+	  this->iv.m_obh.biSizeImage = labs(this->iv.m_obh.biWidth * this->iv.m_obh.biHeight)
+                                       * ((this->iv.m_obh.biBitCount + 7) / 8);
         }
     }
     this->m_sDestType.lSampleSize = this->iv.m_obh.biSizeImage;
