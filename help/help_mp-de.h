@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.155
+// In synch with rev 1.156
 
 // ========================= MPlayer help ===========================
 
@@ -398,15 +398,15 @@ static char help_text[]=
 "               ein, liefert leicht schlechtere Qualität und höhere Bitraten.\n"\
 "\n"\
 " preset=<wert> Bietet die bestmöglichen Qualitätseinstellungen.\n"\
-"                 medium: VBR-Enkodierung, gute Qualität\n"\
+"                 medium: VBR-Encodierung, gute Qualität\n"\
 "                 (150-180 kbps Bitratenbereich)\n"\
-"                 standard:  VBR-Enkodierung, hohe Qualität\n"\
+"                 standard:  VBR-Encodierung, hohe Qualität\n"\
 "                 (170-210 kbps Bitratenbereich)\n"\
-"                 extreme: VBR-Enkodierung, sehr hohe Qualität\n"\
+"                 extreme: VBR-Encodierung, sehr hohe Qualität\n"\
 "                 (200-240 kbps Bitratenbereich)\n"\
-"                 insane:  CBR-Enkodierung, höchste Preset-Qualität\n"\
+"                 insane:  CBR-Encodierung, höchste Preset-Qualität\n"\
 "                 (320 kbps Bitrate)\n"\
-"                 <8-320>: ABR-Enkodierung mit der angegebenen durchschnittlichen\n"\
+"                 <8-320>: ABR-Encodierung mit der angegebenen durchschnittlichen\n"\
 "                          Bitrate\n\n"
 
 //codec-cfg.c:
@@ -631,7 +631,7 @@ static char help_text[]=
 #define MSGTR_NEMDB "Sorry, nicht genug Speicher für den Zeichnungs-Puffer."
 #define MSGTR_NEMFMR "Sorry, nicht genug Speicher für Menü-Rendering."
 #define MSGTR_IDFGCVD "Sorry, kann keinen GUI-kompatiblen Ausgabetreiber finden."
-#define MSGTR_NEEDLAVCFAME "Sorry, du versuchst, Nicht-MPEG Dateien ohne erneute Enkodierung abzuspielen.\nBitte aktiviere lavc oder fame in der DXR3/H+-Configbox."
+#define MSGTR_NEEDLAVCFAME "Sorry, du versuchst, Nicht-MPEG Dateien ohne erneute Encodierung abzuspielen.\nBitte aktiviere lavc oder fame in der DXR3/H+-Configbox."
 #define MSGTR_UNKNOWNWINDOWTYPE "Unbekannten Fenstertyp gefunden ..."
 
 // --- skin loader error messages
@@ -811,7 +811,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontPropWidth "Proportional zur Breite des Films"
 #define MSGTR_PREFERENCES_FontPropHeight "Proportional zur Höhe des Films"
 #define MSGTR_PREFERENCES_FontPropDiagonal "Proportional zur Diagonale des Films"
-#define MSGTR_PREFERENCES_FontEncoding "Kodierung:"
+#define MSGTR_PREFERENCES_FontEncoding "Codierung:"
 #define MSGTR_PREFERENCES_FontBlur "Unschärfe:"
 #define MSGTR_PREFERENCES_FontOutLine "Zeichenumriss (Outline):"
 #define MSGTR_PREFERENCES_FontTextScale "Textskalierung:"
