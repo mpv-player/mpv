@@ -4207,7 +4207,8 @@ if test "$_freetype" = auto ; then
     if ( $_freetypeconfig --version ) >/dev/null 2>&1 ; then
 	cat > $TMPC << EOF
 #include <stdio.h>
-#include <freetype/freetype.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #if ((FREETYPE_MAJOR < 2) || ((FREETYPE_MINOR == 0) && (FREETYPE_PATCH < 9)))
 #error "Need FreeType 2.0.9 or newer"
 #endif
