@@ -410,12 +410,22 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 //   printf( "No support for non-native XImage byte order!\n" );
 //   return -1;
   }
-  
-  if((mode==MODE_BGR) == (myximage->byte_order == LSBFirst) )
-  {
-    printf("hmm, arpi said that isnt used, contact the developers, thats weird\n" );
+
+#ifdef WORDS_BIGENDIAN
+  if(mode==MODE_BGR && bpp!=32){
+    printf("BGR%d not supported, please contact the developers\n", bpp);
     return -1;
   }
+  if(mode==MODE_RGB && bpp==32){
+    printf("RGB32 not supported on big-endian systems, please contact the developers\n");
+    return -1;
+  }
+#else
+  if(mode==MODE_BGR){
+    printf("BGR not supported, please contact the developers\n");
+    return -1;
+  }
+#endif  
 
  saver_off(mDisplay);
  return 0;
