@@ -153,7 +153,7 @@ Optional features:
   --disable-freetype     Disable freetype2 font rendering support [autodetect]
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
   --disable-new-conf     Disable new experimental config parser code [enabled]
-  --enable-menu          Enable osd menu support (need new config) [disabled]
+  --enable-menu          Enable osd menu support (needs new config) [disabled]
   --disable-sortsub      Disable subtitles sorting [enabled]
 
 Codecs:
