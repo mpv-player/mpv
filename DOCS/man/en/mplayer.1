@@ -7512,6 +7512,10 @@ mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .B Encode from a pipe:
 rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
 .
+.TP
+.B Play a 6-channel aac file with only two speakers:
+mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
+.
 .
 .\" --------------------------------------------------------------------------
 .\" Bugs, authors, standard disclaimer
