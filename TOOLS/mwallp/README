@@ -1,0 +1,23 @@
+mwallp - mplayer's wallpaper setting utility
+======
+
+Usage: mwallp file1.jpg [file2.jpg file3.jpg ...]
+~~~~~~
+
+About:
+~~~~~~
+MWallp is a simple tool to set .jpg images as background/wallpaper on the
+desktop. It scales (bicubic) and convert the given jpg image to desktop
+size/bpp and set as background of Root window.
+
+If more than 1 filenames given, it randomly selects one, so running something
+like 'mwallp ~/.wallpapers/*.jpg' from cron will randomly changes wallpaper.
+
+Why?
+~~~~
+I've tried several programs, and as most of them used Imlib, their quality
+sucks (Imlib uses neares-neighbour scaling...).
+So I've decided to put together something very simple but efficient built
+using the MPlayer codebase.
+
+A'rpi
