@@ -455,6 +455,14 @@ static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
 	int max_l=0, max_r=0, l;
 	if (f->flags & F_HAVE_AFFINITY) return;
 	f->flags |= F_HAVE_AFFINITY;
+	if (f->buffer == f->next->next->buffer) {
+		f->affinity = 1;
+		f->next->affinity = 0;
+		f->next->next->affinity = -1;
+		f->next->flags |= F_HAVE_AFFINITY;
+		f->next->next->flags |= F_HAVE_AFFINITY;
+		return;
+	}
 	for (i = 0; i < c->metric_len; i++) {
 		l = f->comb[i] - f->next->comb[i];
 		if (l > max_l) max_l = l;
