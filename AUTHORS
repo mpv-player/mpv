@@ -481,7 +481,12 @@ Attila Kinali <kinali@gmx.net>
     * various small fixes in the x11 code
     * xinerama support
     * documentation
-    
+
+Andoni Zubimendi <andoni@lpsat.net>.
+    * Spanish documentation translation
+
+Juan Martin <nauj27@teleline.es>
+    * Spanish man page translation
 
 NOTE: If you think you are missing here, feel free to send a patch.
 =====
