@@ -532,6 +532,7 @@ return demuxer;
 int demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags);
+void demux_seek_mov(demuxer_t *demuxer,float pts,int flags);
 
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
@@ -567,6 +568,9 @@ switch(demuxer->file_format){
   case DEMUXER_TYPE_MPEG_ES:
   case DEMUXER_TYPE_MPEG_PS:
       demux_seek_mpg(demuxer,rel_seek_secs,flags);  break;
+
+  case DEMUXER_TYPE_MOV:
+      demux_seek_mov(demuxer,rel_seek_secs,flags);  break;
 
 } // switch(demuxer->file_format)
 

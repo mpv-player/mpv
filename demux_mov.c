@@ -107,6 +107,7 @@ void mov_build_index(mov_track_t* trak){
     if(!trak->samples_size){
 	// constant sampesize
 	if(trak->durmap_size==1 || (trak->durmap_size==2 && trak->durmap[1].num==1)){
+	    trak->duration=trak->durmap[0].dur;
 	} else printf("*** constant samplesize & variable duration not yet supported! ***\nContact the author if you have such sample file!\n");
 	return;
     }
@@ -558,3 +559,55 @@ if(trak->samplesize){
     return 1;
     
 }
+
+static float mov_seek_track(mov_track_t* trak,float pts,int flags){
+
+//    printf("MOV track seek called  %5.3f  \n",pts);
+    if(flags&2) pts*=trak->length; else pts*=(float)trak->timescale;
+
+if(trak->samplesize){
+    int sample=pts/trak->duration;
+//    printf("MOV track seek - chunk: %d  (pts: %5.3f  dur=%d)  \n",sample,pts,trak->duration);
+    if(!(flags&1)) sample+=trak->chunks[trak->pos].sample; // relative
+    trak->pos=0;
+    while(trak->pos<trak->chunks_size && trak->chunks[trak->pos].sample<sample) ++trak->pos;
+    pts=(float)(trak->chunks[trak->pos].sample*trak->duration)/(float)trak->timescale;
+} else {
+    unsigned int ipts=pts;
+//    printf("MOV track seek - sample: %d  \n",ipts);
+    if(!(flags&1)) ipts+=trak->samples[trak->pos].pts;
+    trak->pos=0;
+    while(trak->pos<trak->samples_size && trak->samples[trak->pos].pts<ipts) ++trak->pos;
+    pts=(float)trak->samples[trak->pos].pts/(float)trak->timescale;
+}
+
+//    printf("MOV track seek done:  %5.3f  \n",pts);
+
+return pts;
+}
+
+void demux_seek_mov(demuxer_t *demuxer,float pts,int flags){
+    mov_priv_t* priv=demuxer->priv;
+    demux_stream_t* ds;
+
+//    printf("MOV seek called  %5.3f  flag=%d  \n",pts,flags);
+    
+    ds=demuxer->video;
+    if(ds && ds->id>=0 && ds->id<priv->track_db){
+	mov_track_t* trak=priv->tracks[ds->id];
+	//if(flags&2) pts*=(float)trak->length/(float)trak->timescale;
+	//if(!(flags&1)) pts+=ds->pts;
+	pts=ds->pts=mov_seek_track(trak,pts,flags);
+	flags=1; // absolute seconds
+    }
+
+    ds=demuxer->audio;
+    if(ds && ds->id>=0 && ds->id<priv->track_db){
+	mov_track_t* trak=priv->tracks[ds->id];
+	//if(flags&2) pts*=(float)trak->length/(float)trak->timescale;
+	//if(!(flags&1)) pts+=ds->pts;
+	ds->pts=mov_seek_track(trak,pts,flags);
+    }
+
+}
+
