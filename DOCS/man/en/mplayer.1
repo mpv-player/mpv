@@ -33,7 +33,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-10-20" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2004-11-02" "The MPlayer Project" "The Movie Player"
 .
 .SH NAME
 mplayer  \- movie player
@@ -6481,7 +6481,7 @@ Precision is gained at the expense of CPU time so decrease this setting if
 you need realtime encoding.
 .
 .TP
-.B interlacing
+.B (no)interlacing
 Encode the fields of interlaced video material.
 Turn this option on for interlaced content.
 .br
@@ -6579,7 +6579,7 @@ The last I-frame will get treated normally.
 (default: 30, 2pass mode only)
 .
 .TP
-.B greyscale
+.B (no)greyscale
 Make XviD discard chroma planes so the encoded video is greyscale only.
 Note that this does not speed up encoding, it just prevents chroma data
 from being written in the last stage of encoding.
@@ -6596,7 +6596,7 @@ The following options are only available with the latest stable
 releases of XviD 1.0.x (api4).
 .
 .TP
-.B packed\ 
+.B (no)packed
 Create a bitstream which can be decoded delay-free.
 .br
 .I WARNING:
@@ -6648,7 +6648,7 @@ Playing with this setting may result in a jerky video, so use it at your
 own risks!
 .
 .TP
-.B qpel\ \ \ 
+.B (no)qpel\ 
 MPEG4 uses a half pixel precision for its motion search by default.
 The standard proposes a mode where encoders are allowed to use quarter
 pixel precision.
@@ -6660,14 +6660,14 @@ It's better to test with and without this option and see whether it
 is worth activating.
 .
 .TP
-.B gmc\ \ \ \ 
+.B (no)gmc\ 
 Enable Global Motion Compensation, which makes XviD generate special
 frames (GMC-frames) which are well suited for Pan/\:Zoom/\:Rotating images.
 Whether or not the use of this option will save bits is highly
 dependent on the source material.
 .
 .TP
-.B trellis
+.B (no)trellis
 Trellis Quantization is a kind of adaptive quantization method that
 saves bits by modifying quantized coefficients to make them more
 compressible by the entropy encoder.
@@ -6676,7 +6676,7 @@ this setting can be a good alternative to save a few bits (and gain
 quality at fixed bitrate) at a lesser cost than with VHQ.
 .
 .TP
-.B cartoon
+.B (no)cartoon
 Activate this if your encoded sequence is an anime/\:cartoon.
 It modifies some XviD internal thresholds so XviD takes better decisions on
 frame types and motion vectors for flat looking cartoons.
@@ -6689,7 +6689,7 @@ For low bitrates, the smoothing of H.263 will give you less block noise.
 When using custom matrices, MPEG quantization must be used.
 .
 .TP
-.B chroma_me
+.B (no)chroma_me
 The usual motion estimation algorithm uses only the luminance information to
 find the best motion vector.
 However for some video material, using the chroma planes can help find
@@ -6697,7 +6697,7 @@ better vectors.
 This setting toggles the use of chroma planes for motion estimation.
 .
 .TP
-.B chroma_opt
+.B (no)chroma_opt
 Enable a chroma optimizer prefilter.
 It will do some extra magic on color information to minimize the
 stepped-stairs effect on edges.
@@ -6708,7 +6708,7 @@ Since it works with color information, you might want to turn it off when
 encoding in greyscale.
 .
 .TP
-.B hq_ac\ \ 
+.B (no)hq_ac
 Activates High Quality AC coefficient prediction from neighbor blocks.
 .
 .TP
@@ -6882,7 +6882,7 @@ will display them with the wrong aspect.
 The aspect parameter can be given as a ratio or a floating point number.
 .
 .TP
-.B autoaspect
+.B (no)autoaspect
 Same as the aspect option, but automatically computes aspect, taking
 into account all the adjustments (crop/\:expand/\:scale/\:etc.) made in the
 filter chain.
@@ -6955,7 +6955,7 @@ Some decoders are unable to deal with large frameref values.
 number of consecutive B-frames between I- and P-frames (default: 0)
 .
 .TP
-.B deblock | nodeblock
+.B (no)deblock
 Use deblocking filter (default: on).
 As it takes very little time compared to its quality gain, it's not
 recommend to disable it.
@@ -6982,7 +6982,7 @@ Beta parameter of deblocking filter (default: 0).
 Affects the maximum allowed gradient within two adjacent blocks.
 .
 .TP
-.B cabac | nocabac
+.B (no)cabac
 Use CABAC (Context-Adaptive Binary Arithmetic Coding) (default: on).
 Slightly slows down encoding and decoding, but should save 10-15% bitrate.
 Unless you are looking for speed, you should not disable it.
@@ -7105,7 +7105,7 @@ Lower values allow the quantizer value to jump around more,
 higher values force it to vary more smoothly.
 .
 .TP
-.B fullinter | nofullinter
+.B (no)fullinter
 Use all available interframe macroblock types (i16x16, i4x4, p16x16,
 p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, pskip)
 The idea is to find the type and size that best describe a certain area
@@ -7151,7 +7151,7 @@ Adjust the amount of logging info printed to the screen.
 .REss
 .
 .TP
-.B psnr | nopsnr
+.B (no)psnr
 Print signal-to-noise ratio statistics.
 .br
 .I NOTE:
