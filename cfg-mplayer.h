@@ -57,12 +57,6 @@ extern char *mDisplayName;
 extern int vo_aa_parseoption(struct config * conf, char *opt, char * param);
 #endif
 
-#ifdef USE_DVDREAD
-extern int dvd_title;
-extern int dvd_chapter;
-extern int dvd_angle;
-#endif
-
 #ifdef HAVE_NEW_GUI
 extern char * skinName;
 #endif
@@ -149,8 +143,8 @@ struct config conf[]={
 	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"ffactor", &font_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 10.0},
 #endif
-	{"bg", &play_in_bg, CONF_TYPE_FLAG, 0, 0, 1},
-	{"nobg", &play_in_bg, CONF_TYPE_FLAG, 0, 1, 0},
+//	{"bg", &play_in_bg, CONF_TYPE_FLAG, 0, 0, 1},
+//	{"nobg", &play_in_bg, CONF_TYPE_FLAG, 0, 1, 0},
 	{"sb", &seek_to_byte, CONF_TYPE_INT, CONF_MIN, 0, 0},
 	{"ss", &seek_to_sec, CONF_TYPE_STRING, CONF_MIN, 0, 0},
 	{"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0},

@@ -13,9 +13,7 @@
 #include <sys/stat.h>
 
 #include <signal.h>
-
 #include <time.h>
-
 #include <fcntl.h>
 
 #include "version.h"
@@ -31,6 +29,7 @@
 
 #ifdef USE_SUB
 #include "subreader.h"
+void find_sub(subtitle* subtitles,int key);
 #endif
 
 #ifdef USE_LIBVO2
@@ -69,50 +68,22 @@ extern void* mDisplay; // Display* mDisplay;
 #include "Gui/mplayer/play.h"
 #endif
 
-#define DEBUG if(0)
 int verbose=0;
 int quiet=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
 
-#ifdef USE_SUB
-void find_sub(subtitle* subtitles,int key);
-#endif
-
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
 
-static int cfg_inc_verbose(struct config *conf){
-    ++verbose;
-    return 0;
-}
+static int cfg_inc_verbose(struct config *conf){ ++verbose; return 0;}
 
 static int cfg_include(struct config *conf, char *filename){
 	return parse_config_file(conf, filename);
 }
 
-char *get_path(char *filename){
-	char *homedir;
-	char *buff;
-	static char *config_dir = "/.mplayer";
-	int len;
-
-	if ((homedir = getenv("HOME")) == NULL)
-		return NULL;
-	len = strlen(homedir) + strlen(config_dir) + 1;
-	if (filename == NULL) {
-		if ((buff = (char *) malloc(len)) == NULL)
-			return NULL;
-		sprintf(buff, "%s%s", homedir, config_dir);
-	} else {
-		len += strlen(filename) + 1;
-		if ((buff = (char *) malloc(len)) == NULL)
-			return NULL;
-		sprintf(buff, "%s%s/%s", homedir, config_dir, filename);
-	}
-	return buff;
-}
+#include "get_path.c"
 
 //**************************************************************************//
 //**************************************************************************//
@@ -123,18 +94,7 @@ static int max_framesize=0;
 
 #include "stream.h"
 #include "demuxer.h"
-
 #include "stheader.h"
-
-//char* encode_name=NULL;
-//char* encode_index_name=NULL;
-//int encode_bitrate=0;
-
-int get_video_quality_max(sh_video_t *sh_video);
-void set_video_quality(sh_video_t *sh_video,int quality);
-int set_video_colors(sh_video_t *sh_video,char *item,int value);
-
-// MPEG video stream parser:
 #include "parse_es.h"
 
 extern picture_t *picture;	// exported from libmpeg2/decode.c
@@ -162,17 +122,14 @@ static vo_functions_t *video_out=NULL;
 #endif
 static ao_functions_t *audio_out=NULL;
 
-static float c_total=0;
-
+// benchmark:
 double video_time_usage=0;
 double vout_time_usage=0;
 static double audio_time_usage=0;
 static int total_time_usage_start=0;
 static int benchmark=0;
 
-static int play_in_bg=0;
-
-extern void avi_fixate();
+// static int play_in_bg=0;
 
 // options:
 
@@ -183,12 +140,17 @@ static int output_quality=0;
 int use_gui=0;
 
 int osd_level=2;
+
+// seek:
 char *seek_to_sec=NULL;
 off_t seek_to_byte=0;
 off_t step_sec=0;
-int has_audio=1;
 int loop_times=-1;
+float rel_seek_secs=0;
+int abs_seek_pos=0;
 
+// codecs:
+int has_audio=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
 int audio_family=-1;     // override audio codec family 
@@ -203,44 +165,34 @@ int allow_dshow=1;
 int allow_dshow=0;
 #endif
 
-//#ifdef ALSA_TIMER
-//int alsa=1;
-//#else
-//int alsa=0;
-//#endif
-
 // streaming:
 static int audio_id=-1;
 static int video_id=-1;
 static int dvdsub_id=-1;
 static int vcd_track=0;
-static char *stream_dump_name=NULL;
-static int stream_dump_type=0;
-
-static int stream_cache_size=0;
-
-extern int dvd_title;
-
-// AVI demuxer params:
-extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) index
-extern int force_ni;
-extern int pts_from_bps;
 
 // cache2:
+static int stream_cache_size=0;
 #ifdef USE_STREAM_CACHE
 extern int cache_fill_status;
 #else
 #define cache_fill_status 0
 #endif
 
+// dump:
+static char *stream_dump_name=NULL;
+static int stream_dump_type=0;
+
+// A-V sync:
 static float default_max_pts_correction=-1;//0.01f;
 static float max_pts_correction=0;//default_max_pts_correction;
+static float c_total=0;
+static float audio_delay=0;
 
-float force_fps=0;
-int force_srate=0;
-float audio_delay=0;
-int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
-int play_n_frames=-1;
+static float force_fps=0;
+static int force_srate=0;
+static int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
+static int play_n_frames=-1;
 
 // screen info:
 char* video_driver=NULL; //"mga"; // default
@@ -263,11 +215,6 @@ float sub_fps=0;
 int   sub_auto = 1;
 /*DSP!!char *dsp=NULL;*/
 
-//float initial_pts_delay=0;
-
-float rel_seek_secs=0;
-int abs_seek_pos=0;
-
 extern char *vo_subdevice;
 extern char *ao_subdevice;
 
@@ -281,7 +228,6 @@ static unsigned int inited_flags=0;
 #define INITED_GUI 4
 #define INITED_GETCH2 8
 #define INITED_LIRC 16
-#define INITED_ENCODE 32
 #define INITED_STREAM 64
 #define INITED_ALL 0xFFFF
 
@@ -317,12 +263,6 @@ void uninit_player(unsigned int mask){
     mplDone();
   }
 #endif
-
-//  if(mask&INITED_ENCODE){
-//    inited_flags&=~INITED_ENCODE;
-//    current_module="uninit_encode";
-//    avi_fixate();
-//  }
 
   if(mask&INITED_STREAM){
     inited_flags&=~INITED_STREAM;
@@ -384,27 +324,7 @@ void exit_sighandler(int x){
   exit_player(NULL);
 }
 
-extern stream_t* open_stream(char* filename,int vcd_track,int* file_format);
-
-extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
-
-// dec_audio.c:
-extern int init_audio(sh_audio_t *sh_audio);
-extern int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
-extern void resync_audio_stream(sh_audio_t *sh_audio);
-extern void skip_audio_frame(sh_audio_t *sh_audio);
-
-// dec_video.c:
-extern int video_read_properties(sh_video_t *sh_video);
-extern int init_video(sh_video_t *sh_video);
-#ifdef USE_LIBVO2
-extern int decode_video(vo2_handle_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame);
-#else
-extern int decode_video(vo_functions_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame);
-#endif
-
-extern int get_video_quality_max(sh_video_t *sh_video);
-extern void set_video_quality(sh_video_t *sh_video,int quality);
+//extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
 
 #include "mixer.h"
 #include "cfg-mplayer.h"
@@ -493,8 +413,6 @@ int gui_no_filename=0;
       gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
 #endif
 
-//  this one segfaults if running 'mplayer' (without path containing '/')
-//  if ( !strcmp( strrchr( argv[0],'/' ),"/gmplayer" ) ) appInit( argc,argv,envp );
   if ( argv[0] )
     if(!strcmp(argv[0],"gmplayer") ||
       (strrchr(argv[0],'/') && !strcmp(strrchr(argv[0],'/'),"/gmplayer") ) )
@@ -983,34 +901,6 @@ if(auto_quality>0){
     mp_msg(MSGT_CPLAYER,MSGL_V,"AutoQ: setting quality to %d\n",output_quality);
     set_video_quality(sh_video,output_quality);
 }
-
-// ================== Init output files for encoding ===============
-#if 0
-   if(encode_name){
-     // encode file!!!
-     FILE *encode_file=fopen(encode_name,"rb");
-     if(encode_file){
-       fclose(encode_file);
-       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_EncodeFileExists,encode_name);
-       exit_player(MSGTR_Exit_error);
-     }
-     encode_file=fopen(encode_name,"wb");
-     if(!encode_file){
-       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantCreateEncodeFile);
-       exit_player(MSGTR_Exit_error);
-     }
-     write_avi_header_1(encode_file,mmioFOURCC('d', 'i', 'v', 'x'),sh_video->fps,sh_video->disp_w,sh_video->disp_h);
-     fclose(encode_file);
-     encode_index_name=malloc(strlen(encode_name)+8);
-     strcpy(encode_index_name,encode_name);
-     strcat(encode_index_name,".index");
-     if((encode_file=fopen(encode_index_name,"wb")))
-       fclose(encode_file);
-     else encode_index_name=NULL;
-     sh_audio=d_audio->sh=NULL; // force nosound
-     inited_flags|=INITED_ENCODE;
-   }
-#endif
 
 // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
 
