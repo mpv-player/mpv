@@ -6,6 +6,8 @@
 mplayer \- Movie Player for Linux
 .SH SYNOPSIS
 .B mplayer
+.RB [ \-v\ ]
+.RB [ \-quiet\ ]
 .RB [ \-vo\ <driver>[:<device>]\ ]
 .RB [ \-ao\ <driver>[:<device>]\ ]
 .RB [ \-vcd\ track\ number ]
@@ -175,6 +177,12 @@ specifies which mode the OSD should start in (0 : none, 1 : seek, 2: seek+timer)
 .TP
 .B \-lircconf\ configfile
 specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc 
+.TP
+.B \-v\
+enable verbose output (more -v means more verbose)
+.TP
+.B \-quiet\
+display less output, status messages.
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
