@@ -513,6 +513,15 @@ See the <A HREF="documentation.html#1.3">Installation section</A>. The part
 about new sync code.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+I have A/V sync problems. Some of my AVIs play fine, but some play with
+double speed !
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+You have buggy soundcard/driver. Most likely it's fixed at 44100Hz, and
+you try to play a file which has 22050Hz audio. Try the <CODE>-ao sdl</CODE>
+driver.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 
 <TD COLSPAN=3>
 <B><A NAME=5.4><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.4. Video/audio driver problems (vo/ao)</A></B>
