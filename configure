@@ -530,12 +530,14 @@ if x86 || ppc; then
   _sse=no
   _sse2=no
   _mtrr=no
+  _altivec=no
 
   for i in $pparam ; do
     case "$i" in
     3dnow)        _3dnow=yes               ;;
     3dnowext)     _3dnow=yes  _3dnowex=yes ;;
     mmx)          _mmx=yes                 ;;
+    altivec)      _altivec=yes             ;;
     mmxext)       _mmx2=yes                ;;
     mtrr|k6_mtrr|cyrix_arr)   _mtrr=yes    ;;
     xmm|sse|kni)  _sse=yes    _mmx2=yes    ;;
@@ -795,8 +797,8 @@ EOF
     ;;
 
   ppc)
-    _def_arch='#define ARCH_PPC 1'
-    _target_arch='TARGET_ARCH_PPC = yes'
+    _def_arch='#define ARCH_POWERPC 1'
+    _target_arch='TARGET_ARCH_POWERPC = yes'
     iproc='ppc'
     proc=''
     _march=''
@@ -1246,6 +1248,8 @@ for ac_option do
   --disable-3dnow) _3dnow=no _3dnowex=no ;;
   --enable-3dnowex) _3dnow=yes _3dnowex=yes ;;
   --disable-3dnowex) _3dnowex=no ;;
+  --enable-altivec) _altivec=yes ;;
+  --disable-altivec) _altivec=no ;;
   --enable-mmx)	_mmx=yes ;;
   --disable-mmx) # without mmx 3Dnow! and stuff is also not possible
         _3dnow=no _3dnowex=no _mmx=no _mmx2=no ;;
@@ -1381,6 +1385,8 @@ _def_sse='#undef HAVE_SSE'
 test "$_sse" = yes && _def_sse='#define HAVE_SSE 1'
 _def_sse2='#undef HAVE_SSE2'
 test "$_sse2" = yes && _def_sse2='#define HAVE_SSE2 1'
+_def_altivec='#undef HAVE_ALTIVEC'
+test "$_altivec" = yes && _def_altivec='#define HAVE_ALTIVEC 1'
 
 
 # Checking kernel version...
@@ -4564,6 +4570,7 @@ TARGET_MMX2 = $_mmx2
 TARGET_3DNOW = $_3dnow
 TARGET_3DNOWEX = $_3dnowex
 TARGET_SSE = $_sse
+TARGET_ALTIVEC = $_altivec
 
 # --- GUI stuff ---
 GTKLIB = $_ld_static $_ld_gtk
@@ -4944,6 +4951,7 @@ $_def_mmx	// only define if you have MMX (newer x86 chips, not P54C/PPro)
 $_def_mmx2	// only define if you have MMX2 (Athlon/PIII/4/CelII)
 $_def_sse	// only define if you have SSE (Intel Pentium III/4 or Celeron II)
 $_def_sse2	// only define if you have SSE2 (Intel Pentium 4)
+$_def_altivec	// only define if you have Altivec (G4)
 
 #ifdef HAVE_MMX
 #define USE_MMX_IDCT 1
