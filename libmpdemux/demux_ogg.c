@@ -287,8 +287,18 @@ static  int demux_ogg_get_page_stream(ogg_demuxer_t* ogg_d,ogg_stream_state** os
       break;
   }
 
-  if(id == ogg_d->num_sub)
-    return -1;
+  if(id == ogg_d->num_sub) {
+    // If we have only one vorbis stream allow the stream id to change
+    // it's normal on radio stream (each song have an different id).
+    // But we (or the codec?) should check that the samplerate, etc
+    // doesn't change (for radio stream it's ok)
+    if(ogg_d->num_sub == 1 && ogg_d->subs[0].vorbis) {
+      ogg_stream_reset(&ogg_d->subs[0].stream);
+      ogg_stream_init(&ogg_d->subs[0].stream,s_no);
+      id = 0;
+    } else
+      return -1;
+  }
   
   if(os)
     *os = &ogg_d->subs[id].stream;
