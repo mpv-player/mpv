@@ -86,7 +86,10 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value)
 	    return(1);
     }
     /* try software control */
-    if(mpvdec) return mpvdec->control(sh_video,VDCTRL_SET_EQUALIZER, item, (int *)value);
+    if(mpvdec)
+	if( mpvdec->control(sh_video,VDCTRL_SET_EQUALIZER, item, (int *)value)
+	    == CONTROL_OK) return 1;
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Video attribute '%s' isn't supported by selected vo & vd! \n",item);
     return 0;
 }
 
