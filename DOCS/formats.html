@@ -89,13 +89,13 @@
 <UL>
   <LI><B>Interleaved:</B> Audio and video content is interleaved. This is the
     standard usage. Recommended and mostly used. Some tools create 
-    non-interleaved AVIs with bad sync. MPlayer detects these as
+    interleaved AVIs with bad sync. <B>MPlayer</B> detects these as
     interleaved, and this climaxes in loss of A/V sync, probably at seeking.
     These files should be played as non-interleaved (with the <CODE>-ni</CODE>
     option).</LI>
   <LI><B>Non-interleaved:</B> First comes the whole video stream, then the whole
     audio stream. It thus needs a lot of seeking, making playing from network or
-    CD-Rom difficult. (should be played with the <CODE>-ni</CODE> option)</LI>
+    CD-Rom difficult.</LI>
 </UL>
 
 <P>MPlayer supports two kinds of timings for AVI files:</P>
@@ -244,7 +244,7 @@
 <H4><A NAME="wav">2.1.2.2 WAV files</A></H4>
 
 
-<H4><A NAME="ogg_vorbis">2.1.2.3 OGG files (Vorbis)</A></H4>
+<H4><A NAME="ogg_vorbis">2.1.2.3 OGG/OGM files (Vorbis)</A></H4>
 
 <P>Requires properly installed <CODE>libogg</CODE> and
   <CODE>libvorbis</CODE>.</P>
