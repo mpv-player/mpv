@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.44 -->
+<!-- synced with 1.45 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -791,10 +791,10 @@ Będziesz potrzebował paczki zwierającej czcionkę dla <application>MPlayera</appl
   <!-- FIXME: this para should be before the list -->
   Czcionki powinny mieć odpowiedni plik <filename>font.desc</filename>, który
   mapuje pozycję czcionek unicode do aktualnie używanej przez napisy strony kodowej
-  Innym wyjściem jest posiadanie napisów zakodowanych w UTF8 i użycie opcji
+  Innym wyjściem jest posiadanie napisów zakodowanych w UTF-8 i użycie opcji
   <option>-utf8</option> albo po prostu zmienienie ich nazwy na
   <filename>&lt;nazwa_filmu&gt;.utf</filename> i wgranie ich do tego samego
-  katalogu co plik z filmem. Konwersja z różnych stron kodowych do UTF8 
+  katalogu co plik z filmem. Konwersja z różnych stron kodowych do UTF-8
   może być realizowana poprzez programy <command>konwert</command> lub
   <command>iconv</command>.
   </para><para>
