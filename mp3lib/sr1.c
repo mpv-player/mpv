@@ -364,6 +364,9 @@ void MP3_Init(){
 #ifdef HAVE_3DNOW
     printf( "mp3lib: AMD 3dnow! extension %sdetected.\n",(_3dnow?"":"not ") );
 #endif
+#ifdef HAVE_3DNOWEX
+    printf( "mp3lib: AMD 3dnow-dsp! extension %sdetected.\n",(_3dnow>1?"":"not ") );
+#endif
 
     make_decode_tables(outscale);
 #ifdef USE_FAKE_MONO
