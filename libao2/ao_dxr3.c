@@ -185,8 +185,7 @@ static int init(int rate,int channels,int format,int flags)
 static void uninit()
 {
     printf( "AO: [dxr3] Uninitializing\n" );
-    if( ioctl(fd_audio, SNDCTL_DSP_RESET, NULL) < 0 )
-	printf( "AO: [dxr3] Unable to reset device\n" );
+    reset( );
     if(need_conversion & 0x1) audio_plugin_format.uninit();
     if(need_conversion & 0x2) audio_plugin_resample.uninit();
     close( fd_audio );
@@ -260,10 +259,7 @@ static int play(void* data,int len,int flags)
     ao_plugin_data.len = size;
     if(need_conversion & 0x1) audio_plugin_format.play();
     if(need_conversion & 0x2) audio_plugin_resample.play();
-    if( ioctl(fd_audio, EM8300_IOCTL_AUDIO_SETPTS, &ao_data.pts) < 0 )
-	printf( "AO: [dxr3] Unable to set pts\n" );
-    write(fd_audio,ao_plugin_data.data,ao_plugin_data.len);
-    return size;
+    return write(fd_audio,ao_plugin_data.data,ao_plugin_data.len);
 }
 
 // return: delay in seconds between first and last sample in buffer
