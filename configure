@@ -473,7 +473,7 @@ fi
 if [ "$proc" = "error" ]; then
 	echo
 	echo "Your gcc does not support even \"i386\" for '-march' and '-mcpu'." >&2
-	rm -f $TMPC $TMPO
+	rm -f $TMPC $TMPO $TMPS
 	exit
 fi
 #echo "DONE (${proc})."
@@ -482,7 +482,7 @@ fi
 $_cc $TMPC -o $TMPO -lvgagl -lvga &> /dev/null && _svga=yes
 
 $_cc $TMPC -o $TMPO -lpthread &> /dev/null || \
- { echo "Lib pthread not found."; rm -f $TMPC $TMPO ; exit 1; }
+ { echo "Lib pthread not found."; rm -f $TMPC $TMPO $TMPS ; exit 1; }
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
 _sdl=no
@@ -861,6 +861,7 @@ if test "$as_verc_fail" != "yes"; then
 else
   echo "failed"
   echo "Please upgrade binutils..." # to which version? - Atmos
+  rm -f $TMPS $TMPO $TMPC
   exit
 fi
 
@@ -1445,3 +1446,6 @@ else
  echo "Ok, Win32 codecs directory at $_win32libdir already exists."
 fi
 
+# Last move:
+
+rm -f $TMPO $TMPC $TMPS
