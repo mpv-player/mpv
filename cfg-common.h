@@ -121,6 +121,9 @@
 	{"sound", &audio_id, CONF_TYPE_FLAG, 0, -2, -1, NULL},
 	{"nosound", &audio_id, CONF_TYPE_FLAG, 0, -1, -2, NULL},
 
+	{"af-adv", audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"af", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+
 	// select audio/video codec (by name) or codec family (by number):
 //	{"afm", &audio_family, CONF_TYPE_INT, CONF_MIN, 0, 22, NULL}, // keep ranges in sync
 //	{"vfm", &video_family, CONF_TYPE_INT, CONF_MIN, 0, 29, NULL}, // with codec-cfg.c
@@ -340,6 +343,14 @@ struct config mfopts_conf[]={
 };
 						
 extern char** vo_plugin_args;
+
+#include "libaf/af.h"
+extern af_cfg_t af_cfg; // Audio filter configuration, defined in libmpcodecs/dec_audio.c
+struct config audio_filter_conf[]={       
+	{"list", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+        {"force", &af_cfg.force, CONF_TYPE_INT, CONF_RANGE, 0, 7, NULL},
+	{NULL, NULL, 0, 0, 0, 0, NULL}
+};
 
 #ifdef USE_LIBAVCODEC
 extern struct config lavc_decode_opts_conf[];

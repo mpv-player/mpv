@@ -126,14 +126,6 @@ extern int nortc;
 /* from libvo/aspect.c */
 extern float monitor_aspect;
 
-#include "libaf/af.h"
-extern af_cfg_t af_cfg; // Audio filter configuration, defined in libmpcodecs/dec_audio.c
-struct config audio_filter_conf[]={       
-	{"list", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-        {"force", &af_cfg.force, CONF_TYPE_INT, CONF_RANGE, 0, 7, NULL},
-	{NULL, NULL, 0, 0, 0, 0, NULL}
-};
-
 /* Options related to audio out plugins */
 struct config ao_plugin_conf[]={
 	{"list", &ao_plugin_cfg.plugin_list, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -190,8 +182,6 @@ static config_t mplayer_opts[]={
 	{"fixed-vo", &fixed_vo, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
 	{"aop", ao_plugin_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-	{"af-adv", audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-	{"af", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"master", "Option -master has been removed, use -aop list=volume instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
