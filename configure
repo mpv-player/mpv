@@ -850,6 +850,17 @@ $_cc $_x11incdir $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lX
 
 fi
 
+cat > $TMPC << EOF
+#include <decore.h>
+int main( void ) { return 0; }
+EOF
+$_cc $_x11incdir $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -pthread $_socklib > /dev/null 2>&1 || \
+ { _gl=no; echo "GL includes not found!";}
+
+$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -ldivxdecore > /dev/null 2>&1 || \
+ { _divx4linux=no; echo "DivX4Linux includes (decore.h) not found!";}
+
+
 rm -f $TMPC $TMPO
 
 
@@ -1163,6 +1174,12 @@ for ac_option do
 	;;
   --disable-sunaudio)
   	_sun_audio=no
+	;;
+  --disable-divx4)
+  	_divx4linux=no
+	;;
+  --enable-divx4)
+  	_divx4linux=yes
 	;;
   --with-win32libdir=*)
         _win32libdir=`echo $ac_option | cut -d '=' -f 2`
@@ -1772,10 +1789,8 @@ if [ $_divx4linux = yes ]; then
 else
  _divx4def='#undef NEW_DECORE'
  _decorelibs='-Lopendivx -ldecore'
-# _postproc='#undef MPEG12_POSTPROC'
 fi
 
- _postproc='#define MPEG12_POSTPROC'
 
 echo
 echo "Creating $MCONF"
@@ -1904,7 +1919,7 @@ $_lircdefs
 $_css
 
 /* Define this to enable MPEG 1/2 image postprocessing (requires FAST cpu!) */
-$_postproc
+#define MPEG12_POSTPROC
 
 /* DirectShow support */
 $_dshow
