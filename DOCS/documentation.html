@@ -306,17 +306,8 @@ Table of Contents
   cp decore.h /usr/local/include/
 
 
-  At the moment <B>MPlayer</B> doesn't contain autodetection for the codec, so you'll
-  have to edit config.h and config.mak manually. But first run ./configure .
-  Change #undef NEW_DECORE to #define NEW_DECORE in config.h
-  Change #define MPEG12_POSTPROC to #undef MPEG12_POSTPROC in config.h
-  Change DECORE_LIBS in config.mak to be:
-
-
-	DECORE_LIBS=-L/usr/local/lib -ldivxdecore
-
-
-  Continue compiling <B>MPlayer</B> as usual.
+  <B>MPlayer</B> autodetects if OpenDivX is (properly) installed, just compile
+  as usual.
 
   Using it is a bit tricky. As it conflicts with the old OpenDivX (it's API is
   very similar to OpenDivX's), OpenDivX code is disabled, and the OpenDivX
