@@ -1,0 +1,111 @@
+__________________________________________
+MPlayer code and documentation maintainers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Homepage:
+    * Design: Chass and Tornado
+    * Contents: Gabucino
+
+English documentation:
+    * user docs: Gabucino
+    * review, grammar & html fixes: Diego Biurrun, Nilmoni Deb, András Mohari
+    * input layer, lirc, slave mode docs: Albeu
+    * man page: Jonas Jermann <jjermann@gmx.net>
+    * tech/* docs: A'rpi
+
+Documentation translations:
+    * Hungarian: Gabucino
+    * German: Jonas Jermann <jjermann@gmx.net>
+    * French: Stephane Marteau <smarteau@eso.org> (outdated)
+    * Spanish: TeLeNiEkO (outdated)
+    * Russian: Nick Kurshev (outdated)
+    * Polish: Justyna Biala <nell@skrzynka.pl>
+    * Italian: Matteo Balduzzi
+
+Platforms/ports:
+    * DEBIAN packaging: Dariusz Pietrzak
+    * RedHat/RPM packaging: Dominik Mierzejewski
+    * FreeBSD support: Vladimir Kushnir, Nexus
+    * BSD/OS support: Steven Schultz
+    * NetBSD support: Bernd Ernesti
+    * OpenBSD support: Bjorn Sandell
+    * Solaris 8 support: Jürgen Keil, pl
+    * MIPS support: Oliver Schoenbrunner
+    * Win32/Cygwin support: Atmosfear
+
+MPlayer code:
+    * A-V sync code: A'rpi
+    * libmpdemux, libmpcodecs: A'rpi
+    * TV input: Alex, Jindrich Makovicka
+    * DVD support (experimental - dvdnav): -
+    * DVD support (new - dvdread/dvdcss): A'rpi
+    * DVD support (old - libcss): LGB
+    * network streaming: Bertrand Baudet
+    * DVD/VOB subtitles: Kim Minh Kaplan
+    * config files & commandline parser: Albeu, Szabi
+    * playtree, input layer: Albeu
+    * postproc, colorspace converters: Michael Niedermayer
+    * libavcodec: Michael Niedermayer, Fabrice Bellard @ ffmpeg
+    * VIDIX core, libdha, drivers: Alex, Nick Kurshev @ mplayerxp
+
+libvo drivers:
+    * vo_3dfx.c - OBSOLETED, use xv or tdfxfb
+    * vo_aa.c - Folke Ashberg
+    * vo_dga.c - Acki (outdated)
+    * vo_directfb[2].c - Jiri Svoboda <Jiri.Svoboda@seznam.cz>
+    * vo_dxr2.c - Albeu
+    * vo_dxr3.c - David Holm
+    * vo_fbdev.c - Szabi
+    * vo_ggi.c - Alex
+    * vo_gif89a.c - Joey Parrish
+    * vo_gl.c - A'rpi (outdated)
+    * vo_gl2.c - Sven Goethel <sgoethel@jausoft.com>
+    * vo_jpeg.c - Pontscho
+    * vo_md5.c - A'rpi
+    * vo_mga.c - A'rpi
+    * vo_mpegpes.c - A'rpi
+    * vo_null.c - A'rpi
+    * vo_pgm.c - A'rpi
+    * vo_png.c - Atmos
+    * vo_sdl.c - Atmos
+    * vo_svga.c - Matan Ziv-Av
+    * vo_tdfxfb.c - Mark Zealey <mark@zealos.org>
+    * vo_vesa.c - ? (Nick Kurshev)
+    * vo_x11.c - Pontscho
+    * vo_xmga.c - Pontscho, A'rpi
+    * vo_xv.c - Pontscho
+    * vo_xvidix.c - Pontscho, Alex
+    * vo_yuv4mpeg.c - ?
+    * vo_zr.c - Rik Snel <rsnel@cube.dyndns.org>
+
+VIDIX drivers:
+    * genfb_vid - al3x
+    * mach64_vid - Michael Niedermayer, A'rpi
+    * mga_vid - al3x ?
+    * nvidia_vid - al3x (development stopped - don't expect it)
+    * radeon_vid - al3x, Nick Kurshev @ mplayerxp
+    * rage128_vid - ? , Nick Kurshev @ mplayerxp
+
+libao2 drivers:
+    * ao_alsa5.c - al3x
+    * ao_alsa9.c - joy_ping <joy@pingfm.org>
+    * ao_arts.c - ?
+    * ao_dxr2.c - Albeu
+    * ao_mpegpes.c - A'rpi
+    * ao_nas.c - ?
+    * ao_null.c - A'rpi
+    * ao_oss.c - A'rpi
+    * ao_pcm.c - Atmos
+    * ao_plugin.c - Anders Johansson
+    * ao_sdl.c - Atmos
+    * ao_sgi.c - Oliver Schoenbrunner <oliver.schoenbrunner@jku.at>
+    * ao_sun.c - Jürgen Keil
+
+TOOLS:
+    * subfont-c - Artur Zaprzala <zybi@fanthom.irc.pl>
+    * subfont-GIMP - lanzz@lanzz.org
+    * x2mpsub, benchmark-gab - Gabucino
+    * mencvcd - Juergen Hammelmann <juergen.hammelmann@gmx.de>
+    * subrip - Kim Minh Kaplan
+    * perl files - Atmos
+    * others - A'rpi
