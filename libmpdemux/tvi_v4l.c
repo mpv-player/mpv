@@ -515,7 +515,15 @@ static int init(priv_t *priv)
 	else
 	    priv->audio_id = 0;
 	audio_in_set_samplerate(&priv->audio_in, 44100);
-	audio_in_set_channels(&priv->audio_in, priv->audio_channels[priv->audio_id]);
+	if (priv->capability.audios) {
+	    audio_in_set_channels(&priv->audio_in, priv->audio_channels[priv->audio_id]);
+	} else {
+	    if (tv_param_forcechan >= 0) {
+		audio_in_set_channels(&priv->audio_in, tv_param_forcechan);
+	    } else {
+		audio_in_set_channels(&priv->audio_in, 2);
+	    }
+	}
 	if (audio_in_setup(&priv->audio_in) < 0) return 0;
 	setup_audio_buffer_sizes(priv);
     }
