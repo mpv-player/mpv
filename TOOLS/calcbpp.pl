@@ -5,9 +5,7 @@ use POSIX;
 sub round {
   my $v = shift;
   
-  return floor($v + 0.5) != floor($v) ?
-    floor($v + 0.5) :
-    floor($v);
+  return floor($v + 0.5);
 }
 
 $raw_aspect = 720/576;
