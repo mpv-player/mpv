@@ -18,6 +18,12 @@ static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
 
+    if ((width <= 0) || (height <= 0) || (d_width <= 0) || (d_height <= 0))
+    {
+	mp_msg(MSGT_CPLAYER, MSGL_ERR, "VO: invalid dimensions!\n");
+	return 0;
+    }
+
   if(video_out->get_info)
   { const vo_info_t *info = video_out->get_info();
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
