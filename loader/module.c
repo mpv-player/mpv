@@ -422,6 +422,39 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 	if (!wm)
 	    printf("Win32 LoadLibrary failed to load: %s\n", checked);
 
+        // remove a few divs in the VP codecs that make trouble
+        if (strstr(libname,"vp5vfw.dll") && wm)
+        {
+          int i;
+          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==(void*)0x10003930) {
+            for (i=0;i<3;i++) ((char*)0x10004e86)[i]=0x90;
+            for (i=0;i<3;i++) ((char*)0x10005a23)[i]=0x90;
+            for (i=0;i<3;i++) ((char*)0x10005bff)[i]=0x90;
+          } else {
+            fprintf(stderr, "Unsupported VP5 version\n");
+            return 0;
+          }
+        }
+
+        if (strstr(libname,"vp6vfw.dll") && wm)
+        {
+          int i;
+          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==(void*)0x10003ef0) {
+            // looks like VP 6.1.0.2
+            for (i=0;i<6;i++) ((char*)0x10007268)[i]=0x90;
+            for (i=0;i<6;i++) ((char*)0x10007e83)[i]=0x90;
+            for (i=0;i<6;i++) ((char*)0x1000806a)[i]=0x90;
+          } else if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==(void*)0x10004120) {
+            // looks like VP 6.2.0.10
+            for (i=0;i<6;i++) ((char*)0x10007688)[i]=0x90;
+            for (i=0;i<6;i++) ((char*)0x100082c3)[i]=0x90;
+            for (i=0;i<6;i++) ((char*)0x100084aa)[i]=0x90;
+          } else {
+            fprintf(stderr, "Unsupported VP6 version\n");
+            return 0;
+          }
+        }
+
 	if (strstr(libname,"QuickTime.qts") && wm)
 	{
 	    void** ptr;
