@@ -285,7 +285,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Cannot seek in raw AVI streams. (Index required, try with the -idx switch.)\n"
 #define MSGTR_CantSeekFile "Cannot seek in this file.\n"
 
-#define MSGTR_EncryptedVOB "Encrypted VOB file (not compiled with libcss support)! Read DOCS/en/cd-dvd.html.\n"
+#define MSGTR_EncryptedVOB "Encrypted VOB file! Read DOCS/en/cd-dvd.html.\n"
 #define MSGTR_EncryptedVOBauth "Encrypted stream but you did not request authentication!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Compressed headers support requires ZLIB!\n"
