@@ -693,6 +693,23 @@ Vuelca el flujo raw a ./\:stream.dump.
 .B \-dumpvideo (MPLAYER solamente)
 Vuelca flujo de vídeo comprimido raw a ./\:stream.dump (no es muy útil).
 .TP
+.B \-dvbin <opciones>
+Pasa los siguientes parámetros al módulo de entrada de DVB, para
+no usar los valores por defecto:
+
+.PD 0
+.RSs
+.IPs card=<1\-4>
+Especifica el número de tarjeta usada 1\-4 (por defecto: 1).
+.IPs file=<archivo>
+Ordena a MPlayer que lea los canales desde la lista <archivo>.
+.IPs type=<SAT|TER|CBL>
+Especifica si el tipo de tarjeta es SATélite, TERrestre o CaBLe. Si no
+se especifica el tipo se usará autodetección.
+.RE
+.PD 1
+.
+.TP
 .B \-dvd\-device <ruta\ al\ dispositivo>
 Sobreescribe el nombre por defecto del dispositivo de DVD /dev/\:dvd.
 .TP
