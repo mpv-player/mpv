@@ -21,6 +21,11 @@
 #include "../../libvo/sub.h"
 #include "../../mplayer.h"
 
+#include "../../libmpdemux/demuxer.h"
+#include "../../libmpdemux/stheader.h"
+#include "../../codec-cfg.h"
+
+
 #include "play.h"
 #include "widgets.h"
 
@@ -118,6 +123,10 @@ calclengthmmmmss:
        case 'b': sprintf( tmp,"%3.2f%%",guiIntfStruct.Balance ); strcat( trbuf,tmp ); break;
        case 'B': sprintf( tmp,"%3.1f",guiIntfStruct.Balance ); strcat( trbuf,tmp ); break;
        case 'd': sprintf( tmp,"%d",guiIntfStruct.FrameDrop ); strcat( trbuf,tmp ); break;
+       case 'x': sprintf( tmp,"%d",guiIntfStruct.MovieWidth ); strcat( trbuf,tmp ); break;
+       case 'y': sprintf( tmp,"%d",guiIntfStruct.MovieHeight ); strcat( trbuf,tmp ); break;
+       case 'C': sprintf( tmp,"%s", guiIntfStruct.sh_video? ((sh_video_t *)guiIntfStruct.sh_video)->codec->name : "");
+                 strcat( trbuf,tmp ); break;
        case 's': if ( guiIntfStruct.Playing == 0 ) strcat( trbuf,"s" ); break;
        case 'l': if ( guiIntfStruct.Playing == 1 ) strcat( trbuf,"p" ); break;
        case 'e': if ( guiIntfStruct.Playing == 2 ) strcat( trbuf,"e" ); break;

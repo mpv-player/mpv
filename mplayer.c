@@ -2674,6 +2674,7 @@ if(rel_seek_secs || abs_seek_pos){
 	}
 	if ( sh_video ) guiIntfStruct.TimeSec=d_video->pts;
 	  else if ( sh_audio ) guiIntfStruct.TimeSec=sh_audio->delay;
+	guiIntfStruct.LengthInSec=demuxer_get_time_length(demuxer);
 	guiGetEvent( guiReDraw,NULL );
 	guiGetEvent( guiSetVolume,NULL );
 	if(guiIntfStruct.Playing==0) break; // STOP

@@ -10,6 +10,7 @@
 #include "../../config.h"
 #include "../../mp_msg.h"
 #include "../../help_mp.h"
+#include "../mplayer/widgets.h"
 
 listItems     * skinAppMPlayer = &appMPlayer;
 
@@ -25,11 +26,14 @@ unsigned char   winList[32] = "";
 void ERRORMESSAGE( const char * format, ... )
 {
  char      p[512];
+ char      tmp[512];
  va_list   ap;
  va_start( ap,format );
  vsnprintf( p,512,format,ap );
  va_end( ap );
  mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_SKIN_ERRORMESSAGE,linenumber,p );
+ snprintf( tmp,512,MSGTR_SKIN_ERRORMESSAGE,linenumber,p );
+ gtkMessageBox( GTK_MB_FATAL,tmp );
 }
 
 #define CHECKDEFLIST( str ) \
