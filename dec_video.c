@@ -473,6 +473,9 @@ int* stride=stride_;
 unsigned int t=GetTimer();
 unsigned int t2;
 
+//printf("decode_frame(start: %p, size: %d, w: %d, h: %d)\n",
+//    start, in_size, sh_video->disp_w, sh_video->disp_h);
+
   //--------------------  Decode a frame: -----------------------
 switch(sh_video->codec->driver){
 #ifdef USE_XANIM
@@ -665,8 +668,10 @@ if(verbose>1){
     }
     break;
   case VFM_RAW:
-    planes[0]=start;
-    blit_frame=2;
+//    planes[0]=start;
+//    blit_frame=2;
+    sh_video->our_out_buffer = start;
+    blit_frame=3;
     break;
   case VFM_RLE:
 //void AVI_Decode_RLE8(char *image,char *delta,int tdsize,
