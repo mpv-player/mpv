@@ -7,29 +7,20 @@
  * libav - MPEG-PS multiplexer, part of ffmpeg
  * Copyright Gerard Lantau  (see http://ffmpeg.sf.net)
  *
- *
- *
- *
- *
- *	*** NOTICE ***
- * Further development of this device will be carried out using
- * the new libvo2 system, meanwhile I hope someone can find where
- * the lockup problem is located (caused by using subpics or audio
- * (video gets blocked))
- *
  */
 
 #include "fastmemcpy.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <linux/kernel.h>
-
+#include <unistd.h>
+#include <linux/em8300.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <time.h>
-#include <unistd.h>
-
-#include <libdxr3/api.h>
 
 #include "config.h"
 #include "video_out.h"
@@ -66,6 +57,10 @@ static int d_pos_x,d_pos_y;
 static int osd_w,osd_h;
 static int img_format = 0;
 static int palette[] = { 0x000000, 0x494949, 0xb5b5b5, 0xffffff };
+static int fd_control = -1;
+static int fd_video = -1;
+static int fd_spu = -1;
+static int ioval = 0;
 
 static vo_info_t vo_info = 
 {
@@ -78,25 +73,65 @@ static vo_info_t vo_info =
 static uint32_t
 init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
 {
-    if( dxr3_get_status() == DXR3_STATUS_CLOSED )
+    int i;
+    char tmp;
+    
+    fd_control = open( "/dev/em8300", O_WRONLY );
+    if( fd_control < 1 )
     {
-	if( dxr3_open( "/dev/em8300" ) != 0 ) { printf( "Error opening /dev/em8300\n" ); return -1; }
-	printf( "DXR3 status: %s\n",  dxr3_get_status() ? "opened":"closed" );
+	printf( "VO: [dxr3] Error opening /dev/em8300 for writing!\n" );
+	return -1;
+    }
+    fd_video = open( "/dev/em8300_mv", O_WRONLY );
+    if( fd_video < 0 )
+    {
+	printf( "VO: [dxr3] Error opening /dev/em8300_mv for writing!\n" );
+	return -1;
+    }
+    else printf( "VO: [dxr3] Opened /dev/em8300_mv\n" );
+    fd_spu = open( "/dev/em8300_sp", O_WRONLY );
+    if( fd_spu < 0 )
+    {
+	printf( "VO: [dxr3] Error opening /dev/em8300_sp for writing!\n" );
+	return -1;
     }
 
     /* Subpic code isn't working yet, don't set to ON 
        unless you are really sure what you are doing */
-    dxr3_subpic_set_mode( DXR3_SPU_MODE_ON );
-    dxr3_subpic_set_palette( (char*)palette );
-    spubuf = malloc(53220); //53220bytes is the standardized max size of a subpic
+    ioval = EM8300_SPUMODE_OFF;
+    if( ioctl( fd_control, EM8300_IOCTL_SET_SPUMODE, &ioval ) < 0 )
+    {
+	printf( "VO: [dxr3] Unable to set subpicture mode!\n" );
+	return -1;
+    }
     
-    if( dxr3_set_playmode( DXR3_PLAYMODE_PLAY ) !=0 ) printf( "Error setting playmode of DXR3\n" );
+    /*for( i = 0; i < 64; i+= 4 )
+    {
+	tmp = palette[i];
+	palette[i] = palette[i+3];
+	palette[i+3] = tmp;
+	tmp = palette[i+1];
+	palette[i+1] = palette[i+2];
+	palette[i+2] = tmp;
+    }*/
+    if( ioctl( fd_spu, EM8300_IOCTL_SPU_SETPALETTE, palette ) < 0 )
+    {
+	printf( "VO: [dxr3] Unable to set subpicture palette!\n" );
+	return -1;
+    }
+
+    ioval = EM8300_PLAYMODE_PLAY;
+    if( ioctl( fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval ) < 0)
+	printf( "VO: [dxr3] Unable to set playmode!\n" );
+    
+    close( fd_control );
 
     img_format = format;
     v_width = width;
     v_height = height;
+    spubuf = malloc(53220); /* 53220 bytes is the standardized max size of a subpic */
     picture_buf=NULL;
-    
+
     if( format == IMGFMT_YV12 )
     {
 #ifdef USE_LIBAVCODEC
@@ -114,7 +149,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
         /* find the mpeg1 video encoder */
         codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
         if (!codec) {
-            fprintf(stderr, "mpeg1 codec not found\n");
+            fprintf(stderr, "mpeg1 codec not found\nRead DOCS/DXR3!\n");
             return -1;
         }
             
@@ -204,7 +239,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
         codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
         if (!codec) 
 	{
-            fprintf(stderr, "mpeg1 codec not found\n");
+            fprintf(stderr, "mpeg1 codec not found\nRead DOCS/DXR3!\n");
             return -1;
         }
             
@@ -293,8 +328,8 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
         codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
         if (!codec) 
 	{
-            fprintf(stderr, "mpeg1 codec not found\n");
-            return -1;
+            fprintf(stderr, "mpeg1 codec not found\nRead DOCS/DXR3!\n");
+	    return -1;
         }
             
         outbuf_size=10000+width*height;
@@ -347,7 +382,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
           osd_h=codec_context.height;
         } else s_pos_y=0;
     
-        printf("[vo] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
+        printf("VO: [dxr3] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
     
         /* open it */
         if (avcodec_open(&codec_context, codec) < 0) {
@@ -370,7 +405,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
     }
     else if(format==IMGFMT_MPEGPES)
     {
-	printf( "Format: MPEG-PES\n" );
+	printf( "VO: [dxr3] Format: MPEG-PES (no conversion needed)\n" );
 	return 0;
     }
 
@@ -411,8 +446,9 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char* src, unsigne
 	    }
 	}
     }
-
-    dxr3_subpic_write(spubuf,(dst-spubuf));
+    
+    ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts );
+    write( fd_spu, spubuf, (dst-spubuf) );
 }
 
 static void draw_osd(void)
@@ -428,9 +464,10 @@ static uint32_t draw_frame(uint8_t * src[])
 	vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
     
 	data_left = p->size;
+	ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts );	
 	while( data_left )
-	    data_left -= dxr3_video_write( &((unsigned char*)p->data)[p->size-data_left], data_left );
-	
+	    data_left -= write( fd_video, &((unsigned char*)p->data)[p->size-data_left], data_left );
+
 	return 0;
     }
 #ifdef USE_LIBAVCODEC
@@ -445,7 +482,6 @@ static uint32_t draw_frame(uint8_t * src[])
 	int r, g, b, R, G, B, h = v_height, w = v_width;
 	unsigned char *s, *Y, *U, *V;
 
-	printf( "dS: %dx%d dD: %dx%d S: %dx%d V: %dx%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y,s_width,s_height,v_width,v_height);
         if(d_pos_x+w>picture.linesize[0]) w=picture.linesize[0]-d_pos_x;
         if(d_pos_y+h>codec_context.height) h=codec_context.height-d_pos_y;
 	
@@ -512,15 +548,24 @@ static uint32_t draw_frame(uint8_t * src[])
 	//End of ffmpeg code, see ffmpeg.sourceforge.net for terms of license
         tmp_size = out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
 	while( out_size )
-		out_size -= dxr3_video_write( &outbuf[tmp_size-out_size], out_size );
+		out_size -= write( fd_video, &outbuf[tmp_size-out_size], out_size );
 	return 0;
     }
     else if( img_format == IMGFMT_YUY2 )
     {
 	int tmp_size, out_size;	
+	int x, y, w = v_width, h = v_height;
+	
+	for( y = 0; y < h; y++ )
+	{
+	    for( x = 0; x < w; x++ )
+	    {
+	    }
+	}
+	
         tmp_size = out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
         while( out_size )
-		out_size -= dxr3_video_write( &outbuf[tmp_size-out_size], out_size );
+		out_size -= write( fd_video, &outbuf[tmp_size-out_size], out_size );
 
 	return 0;
     }
@@ -585,7 +630,7 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 	
         tmp_size = out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
         while( out_size )
-		out_size -= dxr3_video_write( &outbuf[tmp_size-out_size], out_size );
+		out_size -= write( fd_video, &outbuf[tmp_size-out_size], out_size );
 
 	return 0;
 #endif
@@ -599,7 +644,7 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
     {
         data_left = p->size;
         while( data_left )
-		data_left -= dxr3_video_write( &((unsigned char*)p->data)[p->size-data_left], data_left );
+		data_left -= write( fd_video, &((unsigned char*)p->data)[p->size-data_left], data_left );
 	return 0;
     }
 
@@ -613,7 +658,7 @@ query_format(uint32_t format)
     if(format==IMGFMT_MPEGPES) return 0x2|0x4;
 #ifdef USE_LIBAVCODEC
     if(format==IMGFMT_YV12) return 0x1|0x4;
-    if(format==IMGFMT_YUY2) return 0x1|0x4;
+//    if(format==IMGFMT_YUY2) return 0x1|0x4;
     if(format==IMGFMT_BGR24) return 0x1|0x4;
 #else
     if(format==IMGFMT_YV12) {printf("You need to compile with libavcodec or ffmpeg.so to play this file!\n" ); return 0;}
@@ -629,7 +674,8 @@ uninit(void)
     free(outbuf);
     free(picture_buf);
     free(spubuf);
-    dxr3_close( );
+    close(fd_video);
+    close(fd_spu);
 }
 
 
