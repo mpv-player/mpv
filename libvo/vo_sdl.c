@@ -194,6 +194,9 @@ static struct sdl_priv_s {
 	/* fullscreen behaviour; see init */
 	int fulltype;
 
+	/* is X running (0/1) */
+	int X;
+
 #ifdef HAVE_X11
 	/* X11 Resolution */
 	int XWidth, XHeight;
@@ -638,6 +641,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		XScreen = DefaultScreen(XDisplay);
 		priv->XWidth = DisplayWidth(XDisplay, XScreen);
 		priv->XHeight = DisplayHeight(XDisplay, XScreen);
+		priv->X = 1;
 		if(verbose) printf("SDL: X11 Resolution %ix%i\n", priv->XWidth, priv->XHeight);
 		saver_off(XDisplay);
 		XCloseDisplay(XDisplay);
@@ -707,7 +711,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		set_fullmode(priv->fullmode);
 	} 
         else {
-		if((strcmp(priv->driver, "x11") == 0) || (strcmp(priv->driver, "aalib") == 0)) {
+		if((strcmp(priv->driver, "x11") == 0) || ((strcmp(priv->driver, "aalib") == 0) && priv->X)) {
 			if(verbose) printf("SDL: setting windowed mode\n");
 #ifdef HAVE_X11		
           	priv->surface = SDL_SetVideoMode (res.w, res.h, priv->bpp, priv->sdlflags);
@@ -716,11 +720,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 #endif
 		}
 		else {
-			if(verbose) printf("SDL: setting nonzoomed fullscreen with modeswitching\n");
-			printf("SDL: Info - please use -zoom switch to scale video\n");
+			if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
+			printf("SDL: Info - please use -vm switch instead if you don't want scaled video\n");
 			
 			priv->surface = NULL;
-			priv->fulltype = VM;
+			priv->fulltype = ZOOM;
 			set_fullmode(priv->fullmode);
 		}	
 	}
