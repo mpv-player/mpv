@@ -477,6 +477,8 @@ asx_parse_param(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
     return;
   }
   play_tree_set_param(pt,name,val);
+  free(name);
+  if(val) free(val);
 }
 
 static void
@@ -516,11 +518,13 @@ asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs) {
   stream=open_stream(href,0,&f);
   if(!stream) {
     mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Can't open playlist %s\n",href);
+    free(href);
     return NULL;
   }
   if(stream->type != STREAMTYPE_PLAYLIST) {
     mp_msg(MSGT_PLAYTREE,MSGL_WARN,"URL %s dont point to a playlist\n",href);
     free_stream(stream);
+    free(href);
     return NULL;
   }
 
@@ -532,7 +536,7 @@ asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs) {
 
   play_tree_parser_free(ptp);
   free_stream(stream);
-
+  free(href);
   //mp_msg(MSGT_PLAYTREE,MSGL_INFO,"Need to implement entryref\n");
     
   return pt;
