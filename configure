@@ -2331,8 +2331,8 @@ echocheck "FFmpeg libavcodec (static)"
 if test "$_libavcodec" = auto ; then
   # Note: static linking is preferred to dynamic linking
   _libavcodec=no
-  if test -d libavcodec && test -f libavcodec/avcodec.h ; then
-    if grep MBC libavcodec/avcodec.h > /dev/null 2>&1 ; then
+  if test -d libavcodec && test -f libavcodec/utils.c ; then
+    if grep avcodec_find_encoder_by_name libavcodec/utils.c > /dev/null 2>&1 ; then
       _libavcodec=yes
       echores "yes"
     else
