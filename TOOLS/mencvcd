@@ -1,0 +1,173 @@
+#!/bin/sh
+#
+# Version:          0.1.1
+#
+# Licence:          GPL
+#
+# 2002/05/11        Jürgen Hammelmann <juergen.hammelmann@gmx.de>
+#
+# Script:           MPlayer Sources (DVD) to (S)VCD ripping and burning
+#
+# requires:         newest mplayer cvs version
+#                   mjpegtools v1.6 beta
+#                   toolame
+#                   vcdimager
+#                   cdrdao
+#
+################################################################################
+#
+# global options section, change them to your needs!
+
+TMPDIR="." # path to directory for creating temporary files, recommended 2-3GB space
+
+CDDRV="generic-mmc" # cdrdao: cdwriter driver
+CDDEV="--device 0,1,0" # or comment out and create link /dev/cdrecorder to your cdwriter dev
+
+################################################################################
+
+function usage() {
+   echo "usage: $HOWCALLED <filename> [options] [mplayer options]"
+   echo
+   echo "$HOWCALLED options:"
+   echo
+   echo "-w       outputs in wide screen format 16:9"
+   echo "-abr <n> audio bitrate in kbs [224]"
+   echo "-asr <n> audio sample rate in Hz [44100]"
+   echo "-blank   cleans cd-rw before burning"
+   echo "-burn    enables burning [default]"
+   echo "-denoise denoises mpeg stream"
+   echo "-noburn  disables burning"
+   echo "-mpg     don't encode from source, multiplex/burn only the mpeg stream"
+   echo "-vcdout  encode to VCD format [default]"
+   echo "-svcdout encode to SVCD format"
+   echo
+   echo "example:"
+   echo "'$HOWCALLED crazy -dvd 3 -w' encodes and burns dvd title 3 to VCD in wide"
+   echo "                             screen format."
+}
+
+HOWCALLED=`basename $0`
+NAME=$1
+if [ $# -le 1 ]; then
+   usage 
+   exit 1
+fi
+shift 1
+
+cd $TMPDIR
+rm -f stream.yuv
+rm -f audiodump.pcm
+rm -f audiodump.wav
+mkfifo -m 660 stream.yuv
+mkfifo -m 660 audiodump.pcm
+mkfifo -m 660 audiodump.wav
+
+params=""
+wide=""
+blank=0
+burn=1
+mkstream=1
+abr=224
+masr=44100
+denoise="cat -"
+norm="VCD"
+mplexnorm="-f 2 -V"
+mpegnorm="-f 2 -b 1152"
+imaget="-t vcd2"
+while [ "$1"x != "x" ]; do
+   case $1 in
+      -w)
+      	wide="-M WIDE2STD"
+	;;
+      -abr)
+      	abr=$2
+	shift 1
+	;;
+      -asr)
+        masr=$2
+        shift 1
+        ;;
+      -blank)
+      	blank=1
+	;;
+      -burn)
+      	burn=1
+	;;
+      -noburn)
+        burn=0
+	;;
+      -mpg)
+      	mkstream=0
+	;;
+      -denoise)
+        denoise="yuvdenoise"
+        ;;
+      -vcdout)
+      	norm="VCD"
+	mplexnorm="-f 2 -V"
+	mpegnorm="-f 2 -b 1152"
+	imaget="-t vcd2"
+	;;
+      -svcdout)
+        norm="SVCD"
+	mplexnorm="-f 4 -V"
+	mpegnorm="-f 4"
+	imaget="-t svcd"
+	;;
+      *)
+	params="$params $1"
+	;;
+   esac
+   shift 1
+done
+
+if [ -n "$wide" ]; then
+   if [ "$norm" == "SVCD" ]; then
+      wide=""
+      mpegnorm="$mpegnorm -a 3"
+   fi
+fi
+
+# encode streams
+if [ $mkstream -eq 1 ]; then
+   # start mplayer
+   mplayer -noframedrop -aop list=resample:fout=$masr -vo yuv4mpeg -ao pcm \
+      -waveheader $params &
+
+   # mjpegtools / sox
+   ($denoise < stream.yuv | \
+      yuvscaler -v 0 $wide -O $norm | \
+      mpeg2enc -v 0 -s $mpegnorm -g 6 -G 15 -r 16 -o $NAME.mpv) &
+
+   # we have to use toolame, mp2enc don't understand audiodump.wav directly, no RIFF header?!
+   (toolame -m s -b $abr audiodump.wav $NAME.mpa) &
+   
+   # wait for finishing the subprocesses
+   wait
+fi
+
+# remove pipes
+rm -f stream.yuv
+rm -f audiodump.pcm
+rm -f audiodump.wav
+
+# multiplex streams
+[ -f $NAME.mpv -a -f $NAME.mpa ] || exit 1
+rm -f $NAME.mpg
+mplex $mplexnorm $NAME.mpv $NAME.mpa -o $NAME.mpg
+
+# create cd image
+[ -f $NAME.mpg ] || exit 1
+rm -f $NAME.cue $NAME.bin
+vcdimager $imaget -c $NAME.cue -b $NAME.bin $NAME.mpg
+
+# burn the vcd
+[ $burn -eq 0 ] && exit 0
+[ -f $NAME.bin -a -f $NAME.cue ] || exit 1
+
+if [ $blank -eq 1 ]; then
+   cdrdao blank --reload $CDDEV --driver $CDDRV --blank-mode minimal
+fi
+cdrdao write --reload $CDDEV --driver $CDDRV $NAME.cue
+
+exit 0
