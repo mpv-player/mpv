@@ -25,7 +25,6 @@ Player features:
 - support for more codecs  (sample .avi files and .dll needed!) - HELP!
 - support for MPEG TS (transport streams) and PES format - I need sample files!
 - verify valid range of numeric options (like '-xy 0') - new configfile code?
-- DirectShow support
 - audio copy/encoding capability
 
 Requested codecs:
