@@ -260,6 +260,7 @@ if(!sh_audio->channels || !sh_audio->samplerate){
 
   if(!driver){
       if(sh_audio->a_buffer) free(sh_audio->a_buffer);
+      sh_audio->a_buffer=NULL;
       sh_audio->o_bps=0;
       return 0;
   }
