@@ -3182,6 +3182,7 @@ TARGET_OS = $system_name
 prefix = $_prefix
 DATADIR = $_datadir
 CONFDIR = $_confdir
+LIBDIR = $_libdir
 AR = ar
 CC = $_cc
 AWK = $_awk
@@ -3287,7 +3288,7 @@ $_def_i18n
 /* Runtime Cpudetection */
 $_def_runtime_cpudetection
 
-#define USR_PREFIX "$_prefix"
+#define PREFIX "$_prefix"
 
 /* define this to use simple idct with patched libavcodec */
 #define SIMPLE_IDCT 1
@@ -3436,7 +3437,6 @@ $_def_fastmemcpy
 
 /* gui support, please do not edit this option */
 $_def_gui
-#define PREFIX "$_prefix"
 
 /* Audio output drivers */
 $_def_ossaudio
