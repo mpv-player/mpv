@@ -496,20 +496,12 @@ int demux_open_tv(demuxer_t *demuxer)
     /* set height */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &sh_video->disp_h);
 
-    /* set color eq */
-    tv_set_color_options(tvh, TV_COLOR_BRIGHTNESS, tv_param_brightness);
-    tv_set_color_options(tvh, TV_COLOR_HUE, tv_param_hue);
-    tv_set_color_options(tvh, TV_COLOR_SATURATION, tv_param_saturation);
-    tv_set_color_options(tvh, TV_COLOR_CONTRAST, tv_param_contrast);
-
     demuxer->video->sh = sh_video;
     sh_video->ds = demuxer->video;
     demuxer->video->id = 0;
-
     demuxer->seekable = 0;
 
     /* here comes audio init */
-
     if (tv_param_noaudio == 0 && funcs->control(tvh->priv, TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
     {
 	int audio_format;
@@ -586,6 +578,13 @@ no_audio:
 	tv_uninit(tvh);
 	return 0;
     }
+
+    /* set color eq */
+    tv_set_color_options(tvh, TV_COLOR_BRIGHTNESS, tv_param_brightness);
+    tv_set_color_options(tvh, TV_COLOR_HUE, tv_param_hue);
+    tv_set_color_options(tvh, TV_COLOR_SATURATION, tv_param_saturation);
+    tv_set_color_options(tvh, TV_COLOR_CONTRAST, tv_param_contrast);
+
     return 1;
 }
 
