@@ -146,7 +146,7 @@ vo_functions_t* video_out_drivers[] =
 #ifdef HAVE_DIRECTFB
 	&video_out_directfb,
 #endif	
-#ifdef CONFIG_VIDIX
+#if defined(CONFIG_VIDIX) && defined(HAVE_X11) 
 	&video_out_xvidix,
 #endif
         NULL
