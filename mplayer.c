@@ -2380,7 +2380,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	eof = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
     } break;
     case MP_CMD_PLAY_ALT_SRC_STEP : {
-      if(playtree_iter->num_files > 1) {
+      if(playtree_iter && playtree_iter->num_files > 1) {
 	int v = cmd->args[0].v.i;
 	if(v > 0 && playtree_iter->file < playtree_iter->num_files)
 	  eof = PT_NEXT_SRC;
