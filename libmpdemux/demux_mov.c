@@ -1607,6 +1607,8 @@ int mov_read_header(demuxer_t* demuxer){
 	return 0;
     }
     lschunks(demuxer, 0, priv->moov_end, NULL);
+    // just in case we have hit eof while parsing...
+    demuxer->stream->eof = 0;
 //    mp_msg(MSGT_DEMUX, MSGL_INFO, "--------------\n");
 
     // find the best (longest) streams:
@@ -1710,6 +1712,7 @@ int mov_read_header(demuxer_t* demuxer){
 	    }
 	}
     }
+    demuxer->stream->eof = 0;
 #endif
 
     return 1;
