@@ -62,7 +62,7 @@ typedef struct entry_s
 
 static int m_iCount;
 static int m_iQuant;
-static int m_iCrispness;
+/*static int m_iCrispness;*/
 static short m_bDrop;
 static float m_fQuant;
 
@@ -178,7 +178,7 @@ int VbrControl_init_2pass_vbr_encoding(const char *filename, int bitrate, double
 
 	
 		while(!feof(m_pFile)) 
-      {  fscanf(m_pFile, "Frame %d: intra %d, quant %d, texture %d, motion %d, total %d\n",
+      {  fscanf(m_pFile, "Frame %d: intra %hd, quant %d, texture %d, motion %d, total %d\n",
          &iNumFrames, &(vFrame.is_key_frame), &(vFrame.quant), &(vFrame.text_bits), &(vFrame.motion_bits), &(vFrame.total_bits));
 
                 vFrame.total_bits+=vFrame.text_bits*(qual_multiplier-1);
@@ -208,7 +208,7 @@ int VbrControl_init_2pass_vbr_encoding(const char *filename, int bitrate, double
 	   fseek(m_pFile, lFrameStart, SEEK_SET);		// start again
 		
 		for (i=0;i<iNumFrames;i++)
-		{  fscanf(m_pFile, "Frame %d: intra %d, quant %d, texture %d, motion %d, total %d\n",
+		{  fscanf(m_pFile, "Frame %d: intra %hd, quant %d, texture %d, motion %d, total %d\n",
          &dummy, &(m_vFrames[i].is_key_frame), &(m_vFrames[i].quant), 
 			&(m_vFrames[i].text_bits), &(m_vFrames[i].motion_bits), 
 			&(m_vFrames[i].total_bits));
@@ -227,7 +227,7 @@ int VbrControl_init_2pass_vbr_encoding(const char *filename, int bitrate, double
 
 	if(desired_bits<=non_text_bits)
 	{
-		char s[200];
+/*		char s[200];*/
 		printf("Specified bitrate is too low for this clip.\n"
 			"Minimum possible bitrate for the clip is %.0f kbps. Overriding\n"
 			"user-specified value.\n",

@@ -109,7 +109,9 @@ int audio_in_set_channels(audio_in_t *ai, int channels)
 
 int audio_in_set_device(audio_in_t *ai, char *device)
 {
+#ifdef HAVE_ALSA9	  
     int i;
+#endif
     if (ai->setup) return -1;
     switch (ai->type) {
 #ifdef HAVE_ALSA9	  

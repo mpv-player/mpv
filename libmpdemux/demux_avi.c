@@ -788,9 +788,9 @@ void demux_close_avi(demuxer_t *demuxer) {
 
 int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
     avi_priv_t *priv=demuxer->priv;
-    demux_stream_t *d_audio=demuxer->audio;
+/*    demux_stream_t *d_audio=demuxer->audio;*/
     demux_stream_t *d_video=demuxer->video;
-    sh_audio_t *sh_audio=d_audio->sh;
+/*    sh_audio_t *sh_audio=d_audio->sh;*/
     sh_video_t *sh_video=d_video->sh;
 
 

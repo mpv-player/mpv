@@ -49,7 +49,7 @@ static vidix_playback_t   vidix_play;
 static vidix_fourcc_t	  vidix_fourcc;
 static vo_functions_t *   vo_server;
 static vidix_yuv_t	  dstrides;
-static uint32_t (*server_control)(uint32_t request, void *data, ...);
+/*static uint32_t (*server_control)(uint32_t request, void *data, ...);*/
 
 static int  vidix_get_video_eq(vidix_video_eq_t *info);
 static int  vidix_set_video_eq(const vidix_video_eq_t *info);

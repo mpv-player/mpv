@@ -29,6 +29,7 @@ int tv_param_on = 0;
 #include "stheader.h"
 
 #include "../libao2/afmt.h"
+#include "../libao2/audio_out.h"
 #include "../libvo/img_format.h"
 #include "../libvo/fastmemcpy.h"
 

@@ -472,7 +472,7 @@ static void gl_set_antialias (int val)
 static void drawTextureDisplay ()
 {
   struct TexSquare *square;
-  int x, y, xoff=0, yoff=0, wd, ht;
+  int x, y/*, xoff=0, yoff=0, wd, ht*/;
   GLenum err;
 
   glColor3f(1.0,1.0,1.0);

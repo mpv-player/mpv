@@ -708,7 +708,7 @@ if (demuxer->audio->id >= -1){
 		if (vivo_param_bytesperblock != -1)
 		    sh->wf->nBlockAlign = vivo_param_bytesperblock;
 		
-sound_ok:
+/*sound_ok:*/
 		/* insert as stream */
 		demuxer->audio->sh=sh;
 		sh->ds=demuxer->audio;

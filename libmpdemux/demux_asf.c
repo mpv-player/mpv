@@ -397,11 +397,11 @@ void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags){
 }
 
 int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
-    demux_stream_t *d_audio=demuxer->audio;
+/*  demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
     sh_video_t *sh_video=d_video->sh;
-
+*/
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
 	    *((unsigned long *)arg)=(unsigned long)(asf_movielength);

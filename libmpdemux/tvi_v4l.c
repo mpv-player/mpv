@@ -1324,7 +1324,7 @@ static void *audio_grabber(void *data)
     priv_t *priv = (priv_t*)data;
     struct timeval tv;
     int i, audio_skew_ptr = 0;
-    long long tmp, current_time, prev_skew = 0;
+    long long /*tmp,*/ current_time, prev_skew = 0;
 
     pthread_mutex_lock(&priv->audio_starter);
 

@@ -354,7 +354,9 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
     int len;
     int timestamp;
     int stream_id;
+#ifdef CRACK_MATRIX
     int i;
+#endif
     int flags;
     int version;
     int reserved;

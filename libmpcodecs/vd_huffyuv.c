@@ -595,7 +595,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 {
 	mp_image_t* mpi;
 	int pixel_ptr;
-	unsigned char y1, y2, u, v, r, g, b, a;
+	unsigned char y1, y2, u, v, r, g, b/*, a*/;
 	unsigned char left_y, left_u, left_v, left_r, left_g, left_b;
 	unsigned char tmp, mi, mx, med;
 	unsigned char *swap;

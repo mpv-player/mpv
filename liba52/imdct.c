@@ -193,16 +193,19 @@ static inline complex_t cmplx_mult(complex_t a, complex_t b)
 void
 imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 {
-    int i,k;
+    int i;
+#ifndef USE_AC3_C
+	int k;
     int p,q;
     int m;
     int two_m;
     int two_m_plus_one;
 
-    sample_t tmp_a_i;
-    sample_t tmp_a_r;
     sample_t tmp_b_i;
     sample_t tmp_b_r;
+#endif
+    sample_t tmp_a_i;
+    sample_t tmp_a_r;
 
     sample_t *data_ptr;
     sample_t *delay_ptr;
@@ -401,16 +404,16 @@ const complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0
 void
 imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 {
-    int i,k;
-    int p,q;
+/*	int i,k;
+    int p,q;*/
     int m;
     int two_m;
     int two_m_plus_one;
 
-    sample_t tmp_a_i;
+/*  sample_t tmp_a_i;
     sample_t tmp_a_r;
     sample_t tmp_b_i;
-    sample_t tmp_b_r;
+    sample_t tmp_b_r;*/
 
     sample_t *data_ptr;
     sample_t *delay_ptr;

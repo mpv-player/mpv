@@ -689,7 +689,7 @@ mp_input_default_cmd_func(int fd,char* buf, int l) {
 
 void
 mp_input_add_cmd_filter(mp_input_cmd_filter func, void* ctx) {
-  mp_cmd_filter_t* filter = malloc(sizeof(mp_cmd_filter_t)), *prev;
+  mp_cmd_filter_t* filter = malloc(sizeof(mp_cmd_filter_t))/*, *prev*/;
 
   filter->filter = func;
   filter->ctx = ctx;

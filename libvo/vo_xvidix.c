@@ -32,6 +32,7 @@
 
 #include "vosub_vidix.h"
 #include "../vidix/vidixlib.h"
+#include "../mplayer.h" /* exit_player() */
 
 #ifdef HAVE_NEW_GUI
 #include "../Gui/interface.h"

@@ -322,7 +322,8 @@ imdct_do_512_3dnow
 #endif
 (sample_t data[],sample_t delay[], sample_t bias)
 {
-    int i,k;
+    int i;
+/*	int k;
     int p,q;
     int m;
     int two_m;
@@ -331,7 +332,7 @@ imdct_do_512_3dnow
     sample_t tmp_a_i;
     sample_t tmp_a_r;
     sample_t tmp_b_i;
-    sample_t tmp_b_r;
+    sample_t tmp_b_r;*/
 
     sample_t *data_ptr;
     sample_t *delay_ptr;

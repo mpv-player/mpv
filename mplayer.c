@@ -1368,7 +1368,7 @@ int too_fast_frame_cnt=0;
 float AV_delay=0; // average of A-V timestamp differences
 double vdecode_time;
 unsigned int lastframeout_ts=0;
-float time_frame_corr_avg=0;
+/*float time_frame_corr_avg=0;*/ /* unused */
 
 float next_frame_time=0;
 int frame_time_remaining=0; // flag

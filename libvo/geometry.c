@@ -2,7 +2,7 @@
 
 #include "geometry.h"
 #include "../mp_msg.h"
-// #include "../mplayer.h" /* exit_player() */
+#include "../mplayer.h" /* exit_player() */
 #include <string.h>
 #include <stdlib.h> /* strtol */
 
