@@ -418,7 +418,6 @@ extension=NULL;
 			if( !strcasecmp(http_hdr->protocol, "ICY") ) {
 				// Ok, we have detected an mp3 streaming
 				*file_format = DEMUXER_TYPE_AUDIO;
-				return 0;
 			}
 			
 			switch( http_hdr->status_code ) {
