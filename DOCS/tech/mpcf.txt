@@ -88,7 +88,7 @@ main header:
 	packet header
 	version					v
 	stream_count				v
-	max_type0_size				v
+	max_distance				v
 	for(i=0; i<256; ){
 		tmp_flag			v
 		tmp_stream			v
@@ -121,6 +121,7 @@ stream_header:
 	time_base_denom				v
 	msb_timestamp_shift			v
 	initial_timestamp_predictor		v(3)
+	decode_delay				v
 	fixed_fps				u(1)
 	index_flag				u(1)
 	reserved				u(6)
@@ -142,15 +143,17 @@ video_stream_header:
 
 audio_stream_header:
 	stream_header
-	samplerate_mul				v
+	samplerate_nom				v
+	samplerate_denom			v
 	channel_count				v
 	reserved_bytes
 	checksum				u(32)
 
  
 frame
-	if(frame_type == 2){
-		frame_type2_startcode		f(64)
+	if(next_byte == 'N'){
+		FIXME short startcode
+		frame_startcode			f(64)
 	}
 	frame_code				f(8)
 	if(stream_id_plus1[frame_code]==0){
@@ -229,7 +232,7 @@ main_startcode
 	0x7A561F5F04ADULL + (((uint64_t)('N'<<8) + 'M')<<48)
 stream_starcode
 	0x11405BF2F9DBULL + (((uint64_t)('N'<<8) + 'S')<<48)
-frame_type2_startcode
+frame_startcode
 	0xE4ADEECA4569ULL + (((uint64_t)('N'<<8) + 'K')<<48)
 index_startcode
 	0xDD672F23E64EULL + (((uint64_t)('N'<<8) + 'X')<<48)
@@ -239,10 +242,11 @@ info_startcode
 version
 	2 for now
 
-max_type0_size
-	max cummulative sum of type0 frames between type not 0 frames, this can
-	be used by the deocoder to detect damaged type 0 headers if the damage
-	results in a too long chain
+max_distance
+	max distance of frame_startcodes, the distance may only be larger if
+	there is only a single frame between the 2 frame_startcodes
+	this can be used by the demuxer to detect damaged frame headers if the
+	damage results in a too long chain
 	SHOULD be set to <=16384 to ensure reasonable error recovery
 
 stream_id
@@ -293,6 +297,12 @@ msb_timestamp_shift
 	amount of bits in lsb_timestamp
 	MUST be <16
 
+decode_delay
+	maximum time between input and output for a codec, used to generate dts
+	from pts
+	is 0 for streams without b frames, and 1 for streams with b frames, may
+	be larger for future codecs
+        
 fixed_fps
 	1 indicates that the fps is fixed
 
@@ -330,29 +340,21 @@ flags[frame_code]
 		timestamp difference, so if the timestamp differences, where
 		+3,+1,+2,+2,+1 then last difference is +1, second is +2 and
 		third is +3
-		predicted delta timestamps MUST NOT be used in type > 0 frames
-		or in type 0 frames if there was no full timestamp in the 
-		current stream after the last type > 0 frame
+		predicted delta timestamps MUST NOT be used in frames if there
+		was no full timestamp in the current stream after the last
+		frame_startcode
 
 		the least recent used delta timestamps are reset to the 
 		initial_timestamp_predictor values from the stream header if a
-		packet of type not 0 in encountered
+		frame_startcode is encountered
 	if D is 1 then data_size_msb is coded, otherwise data_size_msb is 0
 	K is the keyframe_type 
 		0-> no keyframe, 
 		1-> keyframe, 
 	flags=16 can be used to mark illegal frame_code bytes
 	frame_code=78 must have flags=16
-
-frame_type
-	if the first byte of a frame is 'N' then the frame_type is 2 otherwise 
-	its 0
-	there SHOULD not be more then 0.5 seconds or 16kbyte of type 0 frames
-	wihout a intervening frame of different frame_type
-	* type 2 frames MUST not depend(1) upon any other frames, this means,
-	they MUST use a full timestamp
-	* type 0 frames MUST not depend(1) upon frames prior to the last type 
-	2 frame
+	* frames MUST not depend(1) upon frames prior to the last
+	  frame_startcode
 	depend(1) means dependancy on the container level (NUT) not dependancy
 	on the codec level
 
@@ -376,9 +378,8 @@ coded_timestamp
 	mask = (1<<msb_timestamp_shift)-1;
 	delta= last_timestamp - mask/2
 	timestamp= ((timestamp_lsb-delta)&mask) + delta
-	a full timestamp must be used if the packet_type is not 0 or there is no
-	reference timestamp available after the last not 0 frame with the 
-	current stream_id
+	a full timestamp must be used if there is no reference timestamp
+	available after the last frame_startcode with the current stream_id
         
 lsb_timestamp
 	least significant bits of the timestamp in time_base precission
@@ -396,6 +397,16 @@ lsb_timestamp
 		frame                    lsb_timestamp=3 -> timestamp=259
 	all timestamps of keyframes of a single stream MUST be monotone
 
+dts
+	dts are calculated by using a decode_delay+1 sized buffer for each 
+	stream, into which the current pts is inserted and the element with
+	the smallest value is removed, this is then the current dts
+	this buffer is initalized with decode_delay -1 elements
+	all frames with dts == timestamp must be monotone, that means a frame
+	which occures later in the stream must have a larger or equal dts
+	then an earlier frame
+	FIXME rename timestamp* to pts* ?
+
 width/height
 	MUST be set to the coded width/height
 
@@ -411,9 +422,8 @@ colorspace_type
 	17	ITU Rec 624 / ITU Rec 601 Y range:  0..255 Cb/Cr range:  0..255
 	18	ITU Rec 709               Y range:  0..255 Cb/Cr range:  0..255
 
-samplerate_mul
-	the number of samples per second in one time_base unit
-	samplerate = time_base*samplerate_mul
+samplerate_nom / samplerate_denom = samplerate
+	the number of samples per second
 
 checksum
 	adler32 checksum
@@ -583,6 +593,20 @@ static inline int put_v(BufferContext *bc, uint64_t val){
 	*(bc->buf_ptr++)= val&0x7F;
         
 	return 0;
+}
+
+static int64_t get_dts(int64_t pts, int64_t *pts_cache, int delay, int reset){
+	if(reset) memset(pts_cache, -1, delay*sizeof(int64_t));
+
+	while(delay--){
+		int64_t t= pts_cache[delay];
+		if(t < pts){
+			pts_cache[delay]= pts;
+			pts= t;
+		}
+	}
+
+	return pts;
 }
 
 		        Authors
