@@ -1,6 +1,8 @@
 
 // main window
 
+#include "../../libmpdemux/stream.h"
+
 unsigned char * mplDrawBuffer = NULL;
 int             mplMainRender = 1;
 int             mplMainAutoPlay = 0;
@@ -100,6 +102,16 @@ calclengthmmmmss:
 	      case 2: strcat( trbuf,"t" ); break;
 	     }
 	    break;
+       case 'T': 
+    	   switch ( mplShMem->StreamType )
+	    {
+	     case STREAMTYPE_FILE:   strcat( trbuf,"f" ); break;
+	     case STREAMTYPE_VCD:    strcat( trbuf,"v" ); break;
+	     case STREAMTYPE_STREAM: strcat( trbuf,"u" ); break;
+	     case STREAMTYPE_DVD:    strcat( trbuf,"d" ); break;
+	     default:                strcat( trbuf," " ); break;
+	    }
+	   break;
        case '$': strcat( trbuf,"$" ); break;
        default: continue;
       }

@@ -1084,6 +1084,7 @@ current_module="init_libvo";
      mplResizeToMovieSize( sh_video->disp_w,sh_video->disp_h );
      moviewidth=screen_size_x=sh_video->disp_w;
      movieheight=screen_size_y=sh_video->disp_h;
+     mplShMem->StreamType=stream->type;
     }
 #endif
 

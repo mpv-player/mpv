@@ -16,6 +16,7 @@
 
 #include "../../config.h"
 #include "../../libvo/x11_common.h"
+#include "../../libmpdemux/stream.h"
 
 #include "./mplayer.h"
 
@@ -174,6 +175,7 @@ void mplMainSigHandler( int s )
 	strcat( mplShMem->Filename,gtkShMem->fs.filename );
 	printf( "%%%%%%%% Playing file: %s\n",mplShMem->Filename );
 	mplShMem->FilenameChanged=1;
+	mplShMem->StreamType=STREAMTYPE_FILE;
         if ( mplMainAutoPlay ) mplGeneralTimer=1;
         break;
    case evMessageBox:

@@ -121,6 +121,7 @@ void mplMPlayerInit( int argc,char* argv[], char *envp[] )
 
  mplShMem=calloc( 1,sizeof( mplCommStruct ) );
  mplShMem->Balance=50.0f;
+ mplShMem->StreamType=-1;
  memset(&sa, 0, sizeof(sa));
  sa.sa_handler = mplMainSigHandler;
  sigaction( SIGTYPE,&sa,NULL );
@@ -178,21 +179,6 @@ void ChangeSkin( void )
    wsResizeImage( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
   }
 
-/*
- if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
- if ( !mplShMem->Playing )
-  {
-   if ( !appMPlayer.subWindow.isFullScreen ) 
-    {
-     wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
-     wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
-    } 
-   wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
-   wsClearWindow( appMPlayer.subWindow );
-   if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
-   mplSubRender=1; wsPostRedisplay( &appMPlayer.subWindow );
-  }
-*/
  if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
  if ( ( !appMPlayer.subWindow.isFullScreen )&&( !mplShMem->Playing ) )
   {
