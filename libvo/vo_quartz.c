@@ -102,6 +102,7 @@ static Rect winRect; // size of the window containg the displayed image (include
 static Rect oldWinRect; // size of the window containg the displayed image (include padding) when NOT in FS mode
 static Rect deviceRect; // size of the display device
 
+static int border = 20;
 enum
 {
 	kQuitCmd			= 1,
@@ -326,25 +327,34 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 				break;
 				
 			case kHalfScreenCmd:
-					ShowMenuBar();
-					ShowCursor();
-					SizeWindow(theWindow, (d_width/2), (d_height/2), 1);
+					if(vo_quartz_fs)
+					{
+						vo_fs = (!(vo_fs)); window_fullscreen();
+					}
+						
+					SizeWindow(theWindow, (d_width/2), (d_height/2)+border, 1);
 					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
 
 			case kNormalScreenCmd:
-					ShowMenuBar();
-					ShowCursor();
-					SizeWindow(theWindow, d_width, d_height, 1);
+					if(vo_quartz_fs)
+					{
+						vo_fs = (!(vo_fs)); window_fullscreen();
+					}
+						
+					SizeWindow(theWindow, d_width, d_height+border, 1);
 					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
 
 			case kDoubleScreenCmd:
-					ShowMenuBar();
-					ShowCursor();
-					SizeWindow(theWindow, (d_width*2), (d_height*2), 1);
+					if(vo_quartz_fs)
+					{
+						vo_fs = (!(vo_fs)); window_fullscreen();
+					}
+						
+					SizeWindow(theWindow, (d_width*2), (d_height*2)+border, 1);
 					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
@@ -523,13 +533,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	//Create player window//////////////////////////////////////////////////
 	windowAttrs =   kWindowStandardDocumentAttributes
 					| kWindowStandardHandlerAttribute
+					| kWindowMetalAttribute
 					| kWindowLiveResizeAttribute;
 					
-	windowAttrs &= (~kWindowResizableAttribute);
-
  	if (theWindow == NULL)
 	{
-		quartz_CreateWindow(d_width, d_height, windowAttrs);
+		quartz_CreateWindow(d_width, d_height+border, windowAttrs);
 		
 		if (theWindow == NULL)
 		{
@@ -1061,29 +1070,32 @@ void window_resized()
 	uint32_t d_width;
 	uint32_t d_height;
 	
+	Rect tmpRect;
+
 	GetPortBounds( GetWindowPort(theWindow), &winRect );
 
 	aspect( &d_width, &d_height, A_NOZOOM);
 	
 	aspectX = (float)((float)winRect.right/(float)d_width);
-	aspectY = (float)((float)winRect.bottom/(float)d_height);
+	aspectY = (float)((float)(winRect.bottom-border)/(float)d_height);
 	
-	if((d_height*aspectX)>winRect.bottom)
+	if((d_height*aspectX)>(winRect.bottom-border))
 	{
 		padding = (winRect.right - d_width*aspectY)/2;
 		SetRect(&dstRect, padding, 0, d_width*aspectY+padding, d_height*aspectY);
 	}
 	else
 	{
-		padding = (winRect.bottom - d_height*aspectX)/2;
+		padding = ((winRect.bottom-border) - d_height*aspectX)/2;
 		SetRect(&dstRect, 0, padding, (d_width*aspectX), d_height*aspectX+padding);
 	}
 
 	//Clear Background
-	SetGWorld( GetWindowPort(theWindow), NULL );
-	RGBColor blackC = { 0x0000, 0x0000, 0x0000 };
-    RGBForeColor( &blackC );
-    PaintRect( &winRect );
+	CreateCGContextForPort(GetWindowPort(theWindow),&context);
+	CGRect winBounds = CGRectMake( 0, border, winRect.right, winRect.bottom);
+	CGContextSetRGBFillColor(context, 0.0, 0.0, 0.0, 1.0);
+	CGContextFillRect(context, winBounds);
+	CGContextFlush(context);
 	
 	switch (image_format)
 	{
@@ -1162,8 +1174,8 @@ void window_fullscreen()
 			GetWindowPortBounds(theWindow, &oldWinRect);
 		
 		//go fullscreen
-		//ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute);
-			
+		border = 0;
+		ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute);
 		MoveWindow (theWindow, deviceRect.left, deviceRect.top, 1);		
 		SizeWindow(theWindow, device_width, device_height,1);
 
@@ -1177,8 +1189,8 @@ void window_fullscreen()
 		ShowCursor();
 		
 		//revert window to previous setting
-		//ChangeWindowAttributes(theWindow, kWindowResizableAttribute, 0);
-			
+		border = 20;
+		ChangeWindowAttributes(theWindow, kWindowResizableAttribute, 0);
 		SizeWindow(theWindow, oldWinRect.right, oldWinRect.bottom,1);
 		RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 
