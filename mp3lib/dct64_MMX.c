@@ -843,10 +843,6 @@ void __attribute__ (( __stdcall__ )) dct64_MMX(real *a,real *b,real *c)
 "	fsts  960(%%edi)\n\t"
 "	fadds  92(%%edx)\n\t"
 "	fstps 832(%%edi)\n\t"
-"	addl $256,%%esp\n\t"
-"	popl %%edi\n\t"
-"	popl %%esi\n\t"
-"	popl %%ebx\n\t"
 "	jmp	.L_bye\n\t"
 ".L01:\n\t"
 /* Phase 8*/
@@ -985,5 +981,5 @@ void __attribute__ (( __stdcall__ )) dct64_MMX(real *a,real *b,real *c)
 ".L_bye:"
 	:
 	:"m"(a),"m"(b),"m"(c),"m"(tmp[0])
-	:"memory","%ebx","%esi","%edi");
+	:"memory","%eax","%ebx","%ecx","%edx","%esi","%edi");
 }
