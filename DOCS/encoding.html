@@ -35,7 +35,8 @@ other interesting stuff.</P>
 
 <P><B><I>MEncoder features</I></B> :
   <UL>
-    <LI>encoding from the wide range of fileformats and decoders of <B>MPlayer</B>
+    <LI>encoding from the wide range of fileformats and decoders of <B>MPlayer</B></LI>
+    <LI>encoding from <B>V4L compatible TV tuners</B></LI>
     <LI>encoding/multiplexing to interleaved AVI files with proper index</LI>
     <LI>1 or 2 pass <B>DivX4</B> video</LI>
     <LI><B>VBR</B> MP3 audio</LI>
@@ -67,9 +68,84 @@ should consult some guides available on the Net.</P>
 
 <P>This example shows how to encode a DVD to a 2-pass DivX4 AVI. Just two
 commands are needed :<BR>
-<CODE>&nbsp;&nbsp;mplayer -dvd 2 -ovc divx4 -oac mp3lame -divx4opts br=1100
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -dvd 2 -ovc divx4 -oac mp3lame -divx4opts br=1100
 -o movie.avi -pass 1<BR>
-&nbsp;&nbsp;mplayer -dvd 2 -ovc divx4 -oac mp3lame -divx4opts br=1100 -o movie.avi -pass 2</CODE></P>
+&nbsp;&nbsp;&nbsp;&nbsp;mplayer -dvd 2 -ovc divx4 -oac mp3lame -divx4opts br=1100 -o movie.avi -pass 2</CODE></P>
+
+<P><B><I>Syntax</I></B></P>
+
+<P>&nbsp;&nbsp;<CODE>mencoder [options] &lt;input file&gt; [options] ...</P>
+
+<P><B><I>Available options</I></B></P>
+
+<P>NOTE : for all available options, <B>read the manpage !</B></P>
+
+<TABLE BORDER=0>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-o</I> filename</TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    specify output filename
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-ovc</I> codecname</TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
+    &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
+    &nbsp;&nbsp;<B>copy</B> - no encoding, just copy the stream (only from AVI/ASF now)<BR>
+    &nbsp;&nbsp;<B>divx4</B> - encode to DivX4<BR>
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-oac</I> codecname</TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
+    &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
+    &nbsp;&nbsp;<B>copy</B> - no encoding, just copy the stream (only from AVI/ASF now)<BR>
+    &nbsp;&nbsp;<B>pcm</B> - encode to uncompressed PCM<BR>
+    &nbsp;&nbsp;<B>mp3lame</B> - encode to MP3 (using Lame)<BR>
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-divx4opts</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    If encoding to DivX4, you can specify its parameters here, like:<BR>
+    &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
+    Common options: <B>(for full list, check the manpage!)</B><BR>
+    &nbsp;&nbsp;<B>help</B> - get help<BR>
+    &nbsp;&nbsp;<B>br</B>=XXX - specify bitrate in kbit &lt;4-16000&gt; or bit &lt;16001-24000000&gt;<BR>
+    &nbsp;&nbsp;<B>q</B>=XXXX - quality (1-fastest, 5-best - default 5)<BR>
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-lameopts</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    If encoding to MP3 with libmp3lame, you can specify its parameters here, like:<BR>
+    &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
+    &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>
+    Common options: <B>(for full list, check the manpage!)</B><BR>
+    &nbsp;&nbsp;<B>help</B> - get help<BR>
+    &nbsp;&nbsp;<B>cbr</B> - select <B>CBR</B> MP3 (default is <B>VBR</B>)<BR>
+    &nbsp;&nbsp;<B>br</B>=XXX - specify bitrate in kbit &lt;0-1024&gt; (this is for <B>CBR</B> only!)<BR>
+    &nbsp;&nbsp;<B>q</B>=XXXX - quality (0-highest, 9-fastest - default 0) (this is for <B>VBR</B> only!)<BR>
+  </TD>
+</TR>
+</TABLE>
 
 <P><B><I>Examples</I></B></P>
 

@@ -36,12 +36,20 @@ mencoder \- Movie Encoder for Linux
 .PP
 .SH DESCRIPTION
 .I mencoder
-Encoder.
+MEncoder (MPlayer's Movie Encoder) is a simple movie encoder, designed to
+encode MPlayer-playable movies (AVI/DVD/VCD/VOB/MPG/MOV/VIV/NET) to other
+MPlayer-playable formats (see below). Currently it's in beta stage, and encodes
+only to DivX4 (1 or 2 passes) video, PCM/MP3/VBRMP3 audio. Also has stream
+copying abilities. In the future, there will be cropping, resizing filters, and
+other interesting stuff.
 .LP
 .SH "GENERAL OPTIONS"
 .TP
 .I NOTE
 Every "flag" option has "noflag" pair, e.g. -flag opposite is -noflag
+.TP
+.I NOTE
+CHECK THE HTML DOCUMENTATION TOO !
 .TP
 .B \-vcd <track number>
 Encode the specified VCD track.
@@ -72,7 +80,7 @@ the specified one.
 If source media contains multiple video streams, encode the specified one.
 .TP
 .B \-pp <value>
-Apply a postprocess filter to enhance image quality. (values?)
+Apply a postprocess filter to enhance image quality. (values TODO)
 .TP
 .B \-vc <codec name>
 Use specified codec (according to codecs.conf) for decoding input video
@@ -152,8 +160,10 @@ Available options:
     help         get help
     br=XXX       specify bitrate in
                  kbit <0-1024>
+                 (only for CBR)
     q=XXX        Quality
                  (0-highest, 9-fastest)
+                 (for VBR)
     vbr=XXX      variable bitrate method
                    0=cbr
                    1=mt
