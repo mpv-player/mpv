@@ -1193,10 +1193,6 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->wf->cbSize = 0;
 		    sh->format = MKTAG(buf[0], buf[1], buf[2], buf[3]);
 
-		    if ((version != 3) && (hdr_size != 0x4e)) {
-		    	mp_msg(MSGT_DEMUX,MSGL_V,"skipping %d extra header bytes\n", hdr_size-0x4e);
-		    	stream_skip(demuxer->stream, hdr_size-0x4e);
-		    }
 #if 0
 		    switch (sh->format){
 			case MKTAG('d', 'n', 'e', 't'):
