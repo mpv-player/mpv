@@ -82,6 +82,7 @@ void mpeg2_init (void)
 //    printf("libmpeg2 config flags = 0x%X\n",config.flags);
 
     picture=malloc(sizeof(picture_t)); // !!! NEW HACK :) !!!
+    memset(picture,0,sizeof(picture_t));
 
     header_state_init (picture);
 //    picture->repeat_count=0;
