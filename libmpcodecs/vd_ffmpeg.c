@@ -60,14 +60,18 @@ static int lavc_param_workaround_bugs=0;
 static int lavc_param_error_resilience=-1;
 static int lavc_param_gray=0;
 static int lavc_param_vstats=0;
+static int lavc_param_idct_algo=0;
 
 struct config lavc_decode_opts_conf[]={
 #if LIBAVCODEC_BUILD >= 4611
-	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
+	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 99, NULL},
 	{"ver", &lavc_param_error_resilience, CONF_TYPE_INT, CONF_RANGE, -1, 99, NULL},
 #endif
 #if LIBAVCODEC_BUILD >= 4614
 	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4629
+	{"idct", &lavc_param_idct_algo, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
 #endif
 	{"vstats", &lavc_param_vstats, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
@@ -162,6 +166,9 @@ static int init(sh_video_t *sh){
 #endif
 #if LIBAVCODEC_BUILD >= 4628
     avctx->fourcc= sh->format;
+#endif
+#if LIBAVCODEC_BUILD >= 4629
+    avctx->idct_algo= lavc_param_idct_algo;
 #endif
     
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);

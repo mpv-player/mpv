@@ -86,6 +86,7 @@ static int lavc_param_rc_min_rate=0;
 static float lavc_param_rc_initial_cplx=0;
 static int lavc_param_mpeg_quant=0;
 static int lavc_param_fdct=0;
+static int lavc_param_idct=0;
 #if LIBAVCODEC_BUILD >= 4623
 static float lavc_param_aspect=0.0;
 #endif
@@ -167,6 +168,9 @@ struct config lavcopts_conf[]={
 #endif
 #if LIBAVCODEC_BUILD >= 4627
 	{"ildct", &lavc_param_interlaced_dct, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4629
+        {"idct", &lavc_param_idct, CONF_TYPE_INT, CONF_RANGE, 0, 20, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -269,6 +273,9 @@ static int config(struct vf_instance_s* vf,
 
 #if LIBAVCODEC_BUILD >= 4621
     lavc_venc_context->dct_algo= lavc_param_fdct;
+#endif
+#if LIBAVCODEC_BUILD >= 4629
+    lavc_venc_context->idct_algo= lavc_param_idct;
 #endif
 
 #if LIBAVCODEC_BUILD >= 4625
