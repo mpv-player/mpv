@@ -42,7 +42,7 @@
 #include "xvid_vbr.h"
 #endif
 
-extern int pass;
+static int pass;
 extern char* passtmpfile;
 extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags);
 
@@ -62,6 +62,7 @@ static int vbrdebug = 0;
 #include "cfgparser.h"
 
 struct config divx4opts_conf[]={
+	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2, NULL},
 	{"br", &divx4_param.bitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
 	{"rc_period", &divx4_param.rc_period, CONF_TYPE_INT, 0,0,0, NULL},
 	{"rc_reaction_period", &divx4_param.rc_reaction_period, CONF_TYPE_INT, 0,0,0, NULL},

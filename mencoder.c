@@ -140,9 +140,7 @@ char* out_filename="test.avi";
 
 char *force_fourcc=NULL;
 
-int pass=0;
 char* passtmpfile="divx2pass.log";
-int pass_working=0;
 
 static int play_n_frames=-1;
 static int play_n_frames_mf=-1;

@@ -150,7 +150,6 @@ static config_t mencoder_opts[]={
 	// override FOURCC in output file
 	{"ffourcc", &force_fourcc, CONF_TYPE_STRING, 0, 4, 4, NULL},
 
-	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2, NULL},
 	{"passlogfile", &passtmpfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	
 	{"vobsubout", &vobsub_out, CONF_TYPE_STRING, 0, 0, 0, NULL},

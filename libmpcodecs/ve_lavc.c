@@ -25,7 +25,6 @@
 #endif
 
 extern char* passtmpfile;
-extern int pass;
 extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags);
 
 //===========================================================================//
@@ -348,11 +347,7 @@ static int config(struct vf_instance_s* vf,
 #endif
 
     /* lavc internal 2pass bitrate control */
-#ifdef HAVE_DIVX4ENCORE
     switch(lavc_param_vpass){
-#else
-    switch(lavc_param_vpass?lavc_param_vpass:pass){
-#endif
     case 1: 
 	lavc_venc_context->flags|= CODEC_FLAG_PASS1; 
 #if LIBAVCODEC_BUILD >= 4620
@@ -401,28 +396,6 @@ static int config(struct vf_instance_s* vf,
 	lavc_venc_context->quality = lavc_param_vqscale;
     }
 
-#ifdef HAVE_DIVX4ENCORE
-    switch(pass){
-    case 1:
-	if (VbrControl_init_2pass_vbr_analysis(passtmpfile, 5) == -1){
-	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
-	    pass=0;
-	}
-	break;
-    case 2:
-        if (VbrControl_init_2pass_vbr_encoding(passtmpfile,
-		    lavc_venc_context->bit_rate,
-		    (float)mux_v->h.dwRate/mux_v->h.dwScale,
-		    100, /* crispness */
-		    5) == -1){
-	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
-	    pass=0;
-	} else
-	    lavc_venc_context->flags|=CODEC_FLAG_QSCALE|CODEC_FLAG_TYPE; // VBR
-	break;
-    }
-#endif
-
     if (avcodec_open(lavc_venc_context, vf->priv->codec) != 0) {
 	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantOpenCodec);
 	return 0;
@@ -468,31 +441,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     lavc_venc_picture.linesize[1]=mpi->stride[1];
     lavc_venc_picture.linesize[2]=mpi->stride[2];
 
-#ifdef HAVE_DIVX4ENCORE
-    if(pass==2){ // handle 2-pass:
-	lavc_venc_context->flags|=CODEC_FLAG_QSCALE; // enable VBR
-	lavc_venc_context->quality=VbrControl_get_quant();
-	lavc_venc_context->key_frame=VbrControl_get_intra();
-	lavc_venc_context->gop_size=0x3fffffff;
 	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    &lavc_venc_picture);
-	VbrControl_update_2pass_vbr_encoding(lavc_venc_context->mv_bits,
-	      lavc_venc_context->i_tex_bits+lavc_venc_context->p_tex_bits,
-	      8*out_size);
-    } else
-#endif
-    {
-	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
-	    &lavc_venc_picture);
-#ifdef HAVE_DIVX4ENCORE
-	if(pass==1){
-	  VbrControl_update_2pass_vbr_analysis(lavc_venc_context->key_frame,
-	      lavc_venc_context->mv_bits,
-	      lavc_venc_context->i_tex_bits+lavc_venc_context->p_tex_bits,
-	      8*out_size, lavc_venc_context->quality);
-	}
-#endif
-    }
 
     mencoder_write_chunk(mux_v,out_size,lavc_venc_context->key_frame?0x10:0);
     
