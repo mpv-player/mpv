@@ -2045,11 +2045,12 @@ $_confwin32
 
 #ifdef sun
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #else
 #define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
+#define DEFAULT_DVD_DEVICE	"/dev/dvd"
 #endif
 
-#define DEFAULT_DVD_DEVICE "/dev/dvd"
 
 /*----------------------------------------------------------------------------
 **

@@ -60,6 +60,8 @@ Notes for Solaris users
 4. For DVD support you must have the patched libcss installed. Patch:
    http://www.tools.de/solaris/mplayer/
 
+   On that web page you'll also find solaris patches for libdvdread-0.8.0.
+
 
 5. Due to two bugs in solaris 8 x86,  you cannot reliably play DVDs using a
    capacity >4GB: 
