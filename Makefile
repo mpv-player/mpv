@@ -91,7 +91,7 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMON_DEPS = $(FAME_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a input/libinput.a
+COMMON_DEPS = libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a input/libinput.a
 
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
@@ -100,6 +100,9 @@ ifeq ($(VO2),yes)
 COMMON_DEPS += libvo2/libvo2.a
 else
 COMMON_DEPS += libvo/libvo.a
+endif
+ifeq ($(FAME),yes)
+COMMON_DEPS += libfame/libfame.a
 endif
 ifeq ($(DVDKIT),yes)
 ifeq ($(DVDKIT_SHARED),yes)
@@ -210,6 +213,9 @@ $(MENCODER_DEP): version.h
 
 $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML
+
+jaf: 
+	echo $(COMMON_DEPS)
 
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
