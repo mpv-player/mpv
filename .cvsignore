@@ -5,3 +5,4 @@ mplayer
 version.h
 help_mp.h
 .developer
+configure.log
