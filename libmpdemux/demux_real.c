@@ -8,6 +8,10 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.25  2002/08/27 23:01:54  arpi
+    - added matrix cracking/debugging code - disabled
+    - use real codec headers for sipr
+
     Revision 1.24  2002/08/25 00:07:15  arpi
     some files has some shit before teh audio/video headers...
 
@@ -525,9 +529,30 @@ loop:
 	
 	/* if DNET, swap bytes! */
 	if (sh_audio != NULL) {
+#ifdef CRACK_MATRIX
+	    int spos=stream_tell(demuxer->stream);
+	    static int cnt=0;
+	    static int cnt2=CRACK_MATRIX;
+#endif
             dp = new_demux_packet(len);
 	    stream_read(demuxer->stream, dp->buffer, len);
-	    mp_dbg(MSGT_DEMUX,MSGL_DBG2,"audio block len=%d\n",len);
+#ifdef CRACK_MATRIX
+	    printf("*** audio block len=%d\n",len);
+	    { // HACK - used for reverse engineering the descrambling matrix
+		FILE* f=fopen("test.rm","r+");
+		fseek(f,spos,SEEK_SET);
+		++cnt;
+//		    for(i=0;i<len;i++) dp->buffer[i]=i/0x12;
+//		    for(i=0;i<len;i++) dp->buffer[i]=i;
+//		    for(i=0;i<len;i++) dp->buffer[i]=cnt;
+//		    for(i=0;i<len;i++) dp->buffer[i]=cnt<<4;
+		    for(i=0;i<len;i++) dp->buffer[i]=(i==cnt2) ? (cnt+16*(8+cnt)) : 0;
+		if(cnt==6){ cnt=0; ++cnt2; }
+		fwrite(dp->buffer, len, 1, f);
+		fclose(f);
+		if(cnt2>0x150) *((int*)NULL)=1; // sig11 :)
+	    }
+#endif
 	    if (sh_audio->format == 0x2000)
 	    {
 		char *ptr = dp->buffer;
@@ -982,6 +1007,7 @@ void demux_open_real(demuxer_t* demuxer)
 			    sh->format = 0x2000;
 			    break;
 			case MKTAG('s', 'i', 'p', 'r'):
+#if 0
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: SiproLab's ACELP.net\n");
 			    sh->format = 0x130;
 			    /* for buggy directshow loader */
@@ -1001,6 +1027,7 @@ void demux_open_real(demuxer_t* demuxer)
 //			    sh->wf[sizeof(WAVEFORMATEX)+3] = 1;
 //			    sh->wf[sizeof(WAVEFORMATEX)+4] = 0;
 			    break;
+#endif
 			case MKTAG('c', 'o', 'o', 'k'):
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Real's GeneralCooker (?) (RealAudio G2?) (unsupported)\n");
 			    sh->wf->cbSize = 4+2+24;
