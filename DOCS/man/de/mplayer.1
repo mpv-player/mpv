@@ -951,7 +951,7 @@ die Standardeinstellungen:
 Benutze Karte 1\-4 (Standard: 1).
 .IPs file=<Dateiname>
 Weist MPlayer an, die Liste der Kanäle aus <Datei> zu lesen (Standard:
-~/\:.mplayer/\:channels.conf.{sat,ter,cbl} (je nach Kartentyp)
+~/\:.mplayer/\:channels.conf.{sat,ter,cbl,atsc} (je nach Kartentyp)
 oder ~/\:.mplayer/\:channels.conf als letzte Möglichkeit).
 .RE
 .PD 1
@@ -6142,7 +6142,7 @@ benutzenden Quantisierungsparameter fest.
 .
 .TP
 .B me_quality=<0\-6>
-Diese Option kontrolliert das Subsystem der Bewegungsabschätzung.
+Diese Option kontrolliert das Bewegungsabschätzungssubsystem.
 Je höher der Wert, desto genauer sollte die Abschätzung sein (Standard: 6).
 Je genauer die Abschätzung ist, desto mehr Bits können eingespart werden.
 Die Präzision wird auf Kosten der CPU-Zeit erreicht; benutze also niedrigere
@@ -6220,7 +6220,7 @@ liefern.
 Bei der Benutzung eigener Matrizen muss die MPEG-Quantisierung benutzt werden.
 .br
 .I WARNUNG:
-Seit XviD 1.0.x ist diese Option ersetzt durch die Option quant_type.
+Seit XviD 1.0.x ist diese Option durch die Option quant_type ersetzt.
 .
 .TP
 .B mod_quant
@@ -6237,7 +6237,7 @@ Seit Version 1.0.x von XviD ist diese Version nicht länger verfügbar.
 .TP
 .B keyframe_boost=<0\-1000>
 Diese Option verlagert einige Bits aus dem Vorrat anderer Frametypen zu
-Intra-Frames, so dass die Qualität von Keyframes verbessert wird. (Standard: 0,
+Intraframes, so dass die Qualität von Keyframes verbessert wird. (Standard: 0,
 nur im two-pass-Modus)
 .
 .TP
@@ -6250,7 +6250,7 @@ Die oberen beiden Einstellungen können genutzt werden, um die Größe von
 Keyframes anzupassen, die du für zu nah (hintereinander) zum ersten hältst.
 Kfthreshold setzt den Bereich, in dem Keyframes reduziert werden, und
 kfreduction bestimmt die Reduktion der Bitrate, die angewendet wird.
-Der letzte Intra-Frame wird normal behandelt.
+Der letzte Intraframe wird normal behandelt.
 (Standard: 30, nur im two-pass-Modus)
 .
 .TP
@@ -6259,8 +6259,7 @@ Generiere DivX5-kompatible B-Frames (Standard: ein).
 Dies scheint für alte Versionen des DivX-Decoders notwendig zu sein.
 .br
 .I WARNUNG:
-Seit Version 1.0.x von XviD ist diese Option ersetzt durch die Option
-closed_gop.
+Seit XviD 1.0.x ist diese Option durch die Option closed_gop ersetzt.
 .
 .TP
 .B (no)greyscale
@@ -6306,7 +6305,7 @@ Maximale Anzahl der B-Frames, die zwischen I- und P-Frames gesetzt wird
 .
 .TP
 .B bquant_ratio=<0\-1000>
-Verhältnis von B-Frames zu nicht-b-Frames bei der Quantisierung, 150=1.50
+Verhältnis von B-Frames zu nicht-B-Frames bei der Quantisierung, 150=1.50
 (Standard: 150).
 .
 .TP
@@ -6476,12 +6475,12 @@ minimaler Wert für den Quantisierungsparameter für B-Frames (Standard: 31)
 .TP
 .B quant_intra_matrix=<Dateiname>
 Lädt eine Datei mit einer eigenen Intra-Matrix.
-Du kannst eine solche erstellen mit dem Matrixeditor xvid4conf.
+Du kannst eine solche mit dem Matrixeditor xvid4conf erstellen.
 .
 .TP
 .B quant_inter_matrix=<Dateiname>
 Lädt eine Datei mit einer eigenen Inter-Matrix.
-Du kannst eine solche erstellen mit dem Matrixeditor xvid4conf.
+Du kannst eine solche mit dem Matrixeditor xvid4conf erstellen.
 .
 .TP
 .B curve_compression_high=<0\-100>
@@ -6553,8 +6552,8 @@ wählen (Standard: 24 \- durchschnittlicher Overhead für AVIs).
 Gibt den Modus für die Pixel Aspect Ratio (PAR) an, also dem Größenverhältnis
 der Pixel (nicht zu verwechseln mit dem Aspekt auf dem Bildschirm).
 PAR ist das Verhältnis von Breite zu Höhe eines einzelnen Pixels.
-Beide Verhältnisse stehen also in folgendem in Zusammenhang: DAR = PAR *
-(width/height).
+Beide Verhältnisse stehen also in folgendem Zusammenhang: DAR = PAR *
+(Breite/Höhe).
 .br
 MPEG-4 definiert 5 verschiedene Pixel-Aspekte sowie einen erweiterten, der es
 erlaubt, einen eigenen spezifischen Pixel-Aspekt anzugeben.
@@ -6778,6 +6777,11 @@ mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .B Encodiere aus einer Pipe:
 rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts
 vcodec=mpeg4:vbitrate=800 \-ofps 24 -
+.
+.TP
+.B Spiele eine 6-kanalige AAC-Datei mit nur zwei Lautsprechern ab:
+mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1
+adts_he-aac160_51.aac
 .
 .
 .\" --------------------------------------------------------------------------
