@@ -2357,7 +2357,7 @@ if(benchmark){
   double total_time_usage;
   total_time_usage_start=GetTimer()-total_time_usage_start;
   total_time_usage = (float)total_time_usage_start*0.000001;
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nBENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
 	 video_time_usage,vout_time_usage,audio_time_usage,
 	 total_time_usage-tot,total_time_usage);
   if(total_time_usage>0.0)
