@@ -49,10 +49,6 @@ int qt_init_decode_smc(void)
     COLORS_PER_TABLE * BYTES_PER_COLOR * 8)) == 0)
     return 1;
 
-  color_pair_index = 0;
-  color_quad_index = 0;
-  color_octet_index = 0;
-
   // if execution got this far, initialization succeeded
   smc_initialized = 1;
   return 0;
@@ -65,6 +61,7 @@ int qt_init_decode_smc(void)
   pixel_ptr += block_x_inc; \
   if (pixel_ptr >= (width * bytes_per_pixel)) \
   { \
+counter++; \
     pixel_ptr = 0; \
     row_ptr += block_y_inc * 4; \
   } \
@@ -118,6 +115,11 @@ counter = 0;
   if (!smc_initialized)
     return;
 
+  // reset color tables
+  color_pair_index = 0;
+  color_quad_index = 0;
+  color_octet_index = 0;
+
   chunk_size = BE_32(&encoded[stream_ptr]) & 0x00FFFFFF;
   stream_ptr += 4;
   if (chunk_size != encoded_size)
@@ -148,8 +150,8 @@ counter = 0;
     }
 
     opcode = encoded[stream_ptr++];
-//printf ("opcode %02X\n", opcode & 0xF0);
-counter++;
+//if (counter < 3)
+//printf ("%d: opcode %02X\n", counter, opcode);
     switch (opcode & 0xF0)
     {
     // skip n blocks
@@ -263,6 +265,7 @@ counter++;
     case 0x60:
     case 0x70:
       n_blocks = GET_BLOCK_COUNT;
+//printf ("1-color encoding for %d blocks\n", n_blocks);
       color_index = encoded[stream_ptr++] * 4;
 
       while (n_blocks--)
@@ -428,14 +431,27 @@ counter++;
 
       while (n_blocks--)
       {
+        /*
+          For this input:
+            01 23 45 67 89 AB
+          This is the output:
+            flags_a = xx012456, flags_b = xx89A37B
+        */
         // build the color flags
         color_flags_a = color_flags_b = 0;
-        color_flags_a |= (encoded[stream_ptr++] << 16);
-        color_flags_b |= (encoded[stream_ptr++] << 16);
-        color_flags_a |= (encoded[stream_ptr++] << 8);
-        color_flags_b |= (encoded[stream_ptr++] << 8);
-        color_flags_a |= (encoded[stream_ptr++] << 0);
-        color_flags_b |= (encoded[stream_ptr++] << 0);
+        color_flags_a =
+          (encoded[stream_ptr + 0] << 16) |
+          ((encoded[stream_ptr + 1] & 0xF0) << 8) |
+          ((encoded[stream_ptr + 2] & 0xF0) << 4) |
+          ((encoded[stream_ptr + 2] & 0x0F) << 4) |
+          ((encoded[stream_ptr + 3] & 0xF0) >> 4);
+        color_flags_b =
+          (encoded[stream_ptr + 4] << 16) |
+          ((encoded[stream_ptr + 5] & 0xF0) << 8) |
+          ((encoded[stream_ptr + 1] & 0x0F) << 8) |
+          ((encoded[stream_ptr + 3] & 0x0F) << 4) |
+          (encoded[stream_ptr + 5] & 0x0F);
+        stream_ptr += 6;
 
         color_flags = color_flags_a;
         // flag mask actually acts as a bit shift count here
