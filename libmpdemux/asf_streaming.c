@@ -411,7 +411,7 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 				}				
 				if(as < 0) {
 					if(audio_id > 0) 
-		       				printf("Audio stream %d don't exist\n");
+		       				printf("Audio stream %d don't exist\n", as);
 					as = asf_http_ctrl->audio_streams[0];
 				}
 				ptr += sprintf(ptr, " ffff:%d:0",as);
@@ -428,7 +428,7 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 				}
 				if(vs < 0) {
 					if(video_id > 0) 
-						printf("Video stream %d don't exist\n");
+						printf("Video stream %d don't exist\n",vs);
 					vs = asf_http_ctrl->video_streams[0];
 		       		}
 				ptr += sprintf( ptr, " ffff:%d:0",vs);
