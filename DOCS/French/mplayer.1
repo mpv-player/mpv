@@ -2600,11 +2600,16 @@ Les options disponibles sont:
 .RSs
 .IPs pass=<1|2>
 spécifie la passe en mode 2passes
-.IPs quality=<0\-6>
-spécifie la qualité d'encodage (défaut=6)
-.IPs br=<valeur>
+.IPs bitrate=<valeur>
 fixe le bitrate à utiliser en kbits/\:seconde si <16000 ou en bits/\:seconde
 si >16000 (CBR ou mode 2passes, défault=687 kbits/s)
+.IPs fixed_quant=<1\-31>
+passe en mode quantizer fixe et spécifie le quantizer à utiliser
+.IPs me_quality=<0\-6>
+spécifie la qualité de détection de mouvement (par défaut=4)
+.IPs 4mv
+utilise 4 vecteurs de mouvement par macro-bloc, peut apporter une meilleure 
+compression au coût d'un encodage plus lent (par défaut=off)
 .IPs rc_reaction_delay_factor=<valeur>
 spécifie avec quelle rapidité le contrôleur de volume réagit, les valeurs
 les plus basses sont les plus rapides
@@ -2644,8 +2649,6 @@ ce n'est *pas* le fichier de contrôle 2passes
 (défaut=10, mode 2passes uniquement)
 .IPs kfreduction=<0-100>
 (défaut=30, mode 2passes uniquement)
-.IPs fixed_quant=<1\-31>
-spécifie le quantizer (mode quantizer fixe uniquement)
 .RE
 
 
