@@ -100,9 +100,19 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATAL: Cannot initialize video driver!\n"
 #define MSGTR_CannotInitAO "couldn't open/init audio device -> NOSOUND\n"
 #define MSGTR_StartPlaying "Start playing...\n"
-#define MSGTR_SystemTooSlow "\n************************************************************************"\
-			    "\n** Your system is too SLOW to play this! try with -framedrop or RTFM! **"\
-			    "\n************************************************************************\n"
+
+#define MSGTR_SystemTooSlow "\n\n"\
+"         ************************************************\n"\
+"         **** Your system is too SLOW to play this!  ****\n"\
+"         ************************************************\n"\
+"!!! Possible reasons, problems, workaround: \n"\
+"- Most common: broken/buggy _audio_ driver. workaround: try -ao sdl or use\n"\
+"  ALSA 0.5 or oss emulation of ALSA 0.9. read DOCS/sound.html for more tipps!\n"\
+"- Slow video output. try different -vo driver (for list: -vo help) or try\n"\
+"  with -framedrop !  Read DOCS/video.html for video tuning/speedup tipps.\n"\
+"- Slow cpu. don't try to playback big dvd/divx on slow cpu! try -hardframedrop\n"\
+"- Broken file. try various combinations of these: -nobps  -ni  -mc 0  -forceidx\n"\
+"If none of these apply, then read DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer was compiled WITHOUT GUI support!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI requires X11!\n"
