@@ -440,6 +440,42 @@ cddb_request_titles(cddb_data_t *cddb_data) {
 }
 
 int
+cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
+	char album_title[100];
+	char *ptr = NULL;
+	int ret;
+	
+	ptr = strstr(http_hdr->body, "\n");
+	if( ptr==NULL ) {
+		printf("Unable to find end of line\n");
+		return -1;
+	}
+	ptr++;
+	// We have a list of exact/inexact matches, so which one do we use?
+	// So let's take the first one.
+	ret = sscanf(ptr, "%s %08lx %s", cddb_data->category, &(cddb_data->disc_id), album_title);
+	if( ret!=3 ) {
+		printf("Parse error\n");
+		return -1;
+	}
+	ptr = strstr(http_hdr->body, album_title);
+	if( ptr!=NULL ) {
+		char *ptr2;
+		int len;
+		ptr2 = strstr(ptr, "\n");
+		if( ptr2==NULL ) {
+			len = (http_hdr->body_size)-(ptr-(http_hdr->body));
+		} else {
+			len = ptr2-ptr+1;
+		}
+		strncpy(album_title, ptr, len);
+		album_title[len-2]='\0';
+	}
+	printf("Parse OK, found: %s\n", album_title);
+	return 0;
+}
+
+int
 cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	char album_title[100];
 	char *ptr = NULL;
@@ -480,33 +516,7 @@ cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			break;
 		case 210:
 			// Found exact matches, list follows
-			ptr = strstr(http_hdr->body, "\n");
-			if( ptr==NULL ) {
-				printf("Unable to find end of line\n");
-				return -1;
-			}
-			ptr++;
-			// We have a list of exact matches, so which one do
-			// we use? So let's take the first one.
-			ret = sscanf(ptr, "%s %08lx %s", cddb_data->category, &(cddb_data->disc_id), album_title);
-			if( ret!=3 ) {
-				printf("Parse error\n");
-				return -1;
-			}
-			ptr = strstr(http_hdr->body, album_title);
-			if( ptr!=NULL ) {
-				char *ptr2;
-				int len;
-				ptr2 = strstr(ptr, "\n");
-				if( ptr2==NULL ) {
-					len = (http_hdr->body_size)-(ptr-(http_hdr->body));
-				} else {
-					len = ptr2-ptr+1;
-				}
-				strncpy(album_title, ptr, len);
-				album_title[len-2]='\0';
-			}
-			printf("Parse OK, found: %s\n", album_title);
+			cddb_parse_matches_list(http_hdr, cddb_data);
 			return cddb_request_titles(cddb_data);
 /*
 body=[210 Found exact matches, list follows (until terminating `.')
@@ -517,8 +527,8 @@ blues c711930d Santana / Supernatural
 */	
 		case 211:
 			// Found inexact matches, list follows
-			printf("No exact matches found, list follows\n");
-			break;
+			cddb_parse_matches_list(http_hdr, cddb_data);
+			return cddb_request_titles(cddb_data);
 		default:
 			printf("Unhandled code\n");
 	}
@@ -815,9 +825,9 @@ cddb_open(char *dev, char *track) {
 	int ret;
 	
 	ret = cddb_resolve(&xmcd_file);
-	if( ret<0 ) {
-		return NULL;
-	}
+//	if( ret<0 ) {
+//		return NULL;
+//	}
 	if( ret==0 ) {
 		cd_info = cddb_parse_xmcd(xmcd_file);
 		free(xmcd_file);
