@@ -269,7 +269,7 @@ static void (*requantize)(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *per
 static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stride, int src_stride, int width, int height, uint8_t *qp_store, int qp_stride, int is_luma){
 	int x, y, i;
 	const int count= 1<<p->log2_count;
-	const int stride= is_luma ? p->temp_stride : (p->temp_stride/2 + 8);
+	const int stride= is_luma ? p->temp_stride : ((width+16+15)&(~15));
 	uint64_t block_align[32];
 	DCTELEM *block = (DCTELEM *)block_align;
 	DCTELEM *block2= (DCTELEM *)(block_align+16);
@@ -363,18 +363,18 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
 		// no DR, so get a new image! hope we'll get DR buffer:
 		vf->dmpi=vf_get_image(vf->next,vf->priv->outfmt,
-		MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+		MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 		mpi->w,mpi->h);
 	}
 
 	dmpi= vf->dmpi;
         
         vf->priv->mpeg2= mpi->qscale_type;
-
-	filter(vf->priv, dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, mpi->qscale, mpi->qstride, 1);
-	filter(vf->priv, dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w>>1, mpi->h>>1, mpi->qscale, mpi->qstride, 0);
-	filter(vf->priv, dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w>>1, mpi->h>>1, mpi->qscale, mpi->qstride, 0);
-
+	if(vf->priv->log2_count || !(mpi->flags&MP_IMGFLAG_DIRECT)){
+		filter(vf->priv, dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, mpi->qscale, mpi->qstride, 1);
+		filter(vf->priv, dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, mpi->qscale, mpi->qstride, 0);
+		filter(vf->priv, dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, mpi->qscale, mpi->qstride, 0);
+	}
         vf_clone_mpi_attributes(dmpi, mpi);
 
 #ifdef HAVE_MMX
@@ -402,24 +402,51 @@ static void uninit(struct vf_instance_s* vf){
 }
 
 //===========================================================================//
-
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
-	switch(fmt)
-	{
+    switch(fmt){
+	case IMGFMT_YVU9:
+	case IMGFMT_IF09:
 	case IMGFMT_YV12:
 	case IMGFMT_I420:
 	case IMGFMT_IYUV:
-		return vf_next_query_format(vf,vf->priv->outfmt);
-	}
-	return 0;
+	case IMGFMT_CLPL:
+	case IMGFMT_Y800:
+	case IMGFMT_Y8:
+	case IMGFMT_NV12:
+	case IMGFMT_444P:
+	case IMGFMT_422P:
+	case IMGFMT_411P:
+	    return vf_next_query_format(vf,fmt);
+    }
+    return 0;
 }
 
 static unsigned int fmt_list[]={
-    IMGFMT_YV12,
-    IMGFMT_I420,
-    IMGFMT_IYUV,
-    0
+	IMGFMT_YVU9,
+	IMGFMT_IF09,
+	IMGFMT_YV12,
+	IMGFMT_I420,
+	IMGFMT_IYUV,
+	IMGFMT_CLPL,
+	IMGFMT_Y800,
+	IMGFMT_Y8,
+	IMGFMT_NV12,
+	IMGFMT_444P,
+	IMGFMT_422P,
+	IMGFMT_411P,
+	0
 };
+
+static int control(struct vf_instance_s* vf, int request, void* data){
+    switch(request){
+    case VFCTRL_QUERY_MAX_PP_LEVEL:
+	return 6;
+    case VFCTRL_SET_PP_LEVEL:
+	vf->priv->log2_count= *((unsigned int*)data);
+	return CONTROL_TRUE;
+    }
+    return vf_next_control(vf,request,data);
+}
 
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
@@ -427,6 +454,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->get_image=get_image;
     vf->query_format=query_format;
     vf->uninit=uninit;
+    vf->control= control;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
     
@@ -441,7 +469,7 @@ static int open(vf_instance_t *vf, char* args){
     }
 #endif
     
-    vf->priv->log2_count= 6;
+    vf->priv->log2_count= 3;
     
     if (args) sscanf(args, "%d:%d", &vf->priv->log2_count, &vf->priv->qp);
 	
