@@ -80,9 +80,10 @@ one is '~/.mplayer/config'. User specific options override system-wide options
 and options given on the command line override either. The syntax of the config
 files is 'option=<value>', everything after a '#' is considered a comment.
 Options that work without values can be enabled by setting them to 'yes' or '1'
-and disabled by setting them to 'no' or '0'.
+and disabled by setting them to 'no' or '0'. Even suboptions can be specified
+this way.
 
-.I EXAMPLE
+.I EXAMPLE:
 .br
 # Use Matrox driver by default.
 .br
@@ -91,6 +92,9 @@ vo=xmga
 # I love practicing handstands while watching videos.
 .br
 flip=yes
+# Always encode/decode multiple files from png with 25fps, start it with -mf on
+.br
+mf= type=png:fps=25
 
 
 .SH "DEMUXER/STREAM OPTIONS"
@@ -369,7 +373,8 @@ Force audio parameters for the .vivo demuxer (for debugging purposes).
 .SH "DECODING/FILTERING OPTIONS"
 .TP
 .B \-ac <codec name>
-Force usage of a specific audio codec, according to its name in codecs.conf.
+Force usage of a specific audio codec, according to its codec name in
+codecs.conf.
 
 .I EXAMPLE:
     \-ac mp3     use libmp3 MP3 codec
@@ -382,17 +387,16 @@ Force usage of a specific audio codec, according to its name in codecs.conf.
 
 See \-ac help for a full list of available codecs.
 .TP
-.B \-afm <1\-12> (OBSOLETE)
-Force usage of a specific audio format family.
+.B \-afm <driver name>
+Force usage of a specific audio codec family, according to its driver name
+in codecs.conf and fall back to default if it failed.
 
 .I EXAMPLE:
-    \-afm 1   use libmp3 (mp2/mp3, but not mp1)
-    \-afm 2   suppose raw PCM audio
-    \-afm 3   use libac3
-    \-afm 4   use a matching Win32 codec
-    \-afm 5   use aLaw/uLaw driver
-    \-afm 10  use libvorbis
-    \-afm 11  use ffmpeg's MP3 decoder (even mp1)
+    \-afm mp3lib     use libmp3 (mp2/3, but not mp1)
+    \-afm libmad     use libmad (mp1/2/3, slow)
+    \-afm ffmpeg     use ffmpeg's decoder (mp1/2/3)
+    \-afm liba52     use liba52 (ac3)
+    \-afm libvorbis  use libvorbis
 .TP
 .B \-aspect <ratio>
 Override aspect ratio of movies. It's autodetected on MPEG files, but can't be
@@ -526,7 +530,7 @@ of \-vop scale (0 (soft) \- 100 (sharp)), for \-sws 9, it specifies the filter
 length (1 \- 10).
 .TP
 .B \-vc <codec name>
-Force usage of a specific video codec, according to its name in codecs.conf,
+Force usage of a specific video codec, according to its codec name in codecs.conf,
 
 .I EXAMPLE:
     \-vc divx      use VFW DivX codec
@@ -537,18 +541,19 @@ Force usage of a specific video codec, according to its name in codecs.conf,
 
 See '\-vc help' for FULL list!
 .TP
-.B \-vfm <1\-12> (OBSOLETE)
-Force usage of a specific codec FAMILY, and FALLBACK to default if failed.
+.B \-vfm <driver name>
+Force usage of a specific video codec family, according to its driver name
+in codecs.conf and fall back to default if it failed.
 
 .I EXAMPLE:
-    \-vfm 2   use VFW (Win32) codecs
-    \-vfm 3   use OpenDivX/DivX4 codec (YV12)
-             (same as \-vc odivx but fallback)
-    \-vfm 4   use DirectShow (Win32) codecs
-    \-vfm 5   use libavcodec codecs
-    \-vfm 7   use DivX4 codec (YUY2)
-             (same as \-vc divx4 but fallback)
-    \-vfm 10  use XAnim codecs
+    \-vfm ffmpeg  use libavcodec codecs
+    \-vfm vfw     use VFW (Win32) codecs
+    \-vfm odivx   use OpenDivX/DivX4 codec (YV12)
+                  (same as \-vc odivx but fallback)
+    \-vfm dshow   use DirectShow (Win32) codecs
+    \-vfm divx4   use DivX4 codec (YUY2)
+                  (same as \-vc divx4 but fallback)
+    \-vfm xanim   use XAnim codecs
 
 .I NOTE:
 If libdivxdecore support was compiled in, then type 3 and 7 now contains
@@ -1518,7 +1523,7 @@ up and down     seek backward/forward   1 minute
 .br
 pgup and pgdown seek backward/forward  10 minutes
 .br
-< and >		 backward/forward in playlist
+< and >         backward/forward in playlist
 .br
 HOME and END    go to next/previous playtree entry
                 in the parent list
