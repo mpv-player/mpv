@@ -3,14 +3,16 @@
 <sect1 id="history">
 <title>History</title>
  
-<para>
-This began a year ago...  I (A'rpi) have tried lots of players under linux
+<blockquote><para>
+This began a year ago...  I have tried lots of players under linux
 (mtv, xmps, dvdview, livid/oms, videolan, xine, xanim, avifile, xmmp) but
 they all have some problem. Mostly with special files or with audio/video
 sync.  Most of them is unable to play both MPEG1, MPEG2 and AVI (DivX)
 files. Many players have image quality or speed problems too. So I've
 decided to write/modify one...
+</para></blockquote><para>A'rpi, 2001</para>
 
+<para>
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.1-v0.3</emphasis>: Sep 22-25, 2000
@@ -22,7 +24,7 @@ decided to write/modify one...
 <listitem><para>
   <emphasis role="bold">mpg12play v0.5-v0.87</emphasis>: Sep 28-Oct 20, 2000
   </para><para>Mpeg codec replaced with DVDview by Dirk Farin, it was a
-  great stuff, but it was slow and was written in C++ (I hate C++!!!)
+  great stuff, but it was slow and was written in C++ (A'rpi hate C++!!!)
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.9-v0.95pre5</emphasis>: Oct 21-Nov 2, 2000

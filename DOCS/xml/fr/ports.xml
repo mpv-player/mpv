@@ -255,8 +255,8 @@ qui est TRÈS lente. Utilisez SDL.
 <sect1 id="cygwin">
 <title>Cygwin</title>
 <para>
-Le port Cygwin est toujours à ces débuts. Actuellement il n'y a aucun support pour les DLLs Win32
-ou OpenGL. SDL est connu pour distordre le son et l'image ou planter sur certains systèmes. Les
+Le port Cygwin est toujours à ces débuts. Actuellement il n'y a aucun support pour
+OpenGL. SDL est connu pour distordre le son et l'image ou planter sur certains systèmes. Les
 <ulink url="../../tech/patches.txt">patches</ulink> sont toujours bienvenus. Les meilleurs
 résultats peuvent être obtenus avec le pilote SDL natif de sortie vidéo (<option>-vo directx</option>)
 et le pilote Windows waveout natif de sortie audio (<option>-ao win32</option>). Vous devriez aussi
@@ -302,7 +302,7 @@ Les DVDs fonctionnent également, définissez juste votre périphérique DVD pour qu
 
 <para>
 Les DLLs QuickTime doivent normalement fonctionner. Compilez avec
-<option>--enable-qtx-codecs</option> et placez les codecs dans l'emplacement par défaut des DLLs
+<option>--enable-qtx</option> et placez les codecs dans l'emplacement par défaut des DLLs
 Windows, <filename class="directory">C:\WINNT\system32</filename>
 ou <filename class="directory">C:\Windows\system</filename> selon votre version de Windows.
 </para>

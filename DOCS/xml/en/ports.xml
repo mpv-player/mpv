@@ -260,7 +260,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <title>Cygwin</title>
 <para>
 The Cygwin port is still in its infancy. Currently there is no support for
-Win32 DLLs or OpenGL. SDL is known to distort sound and image or crash on
+OpenGL. SDL is known to distort sound and image or crash on
 some systems. <ulink url="../../tech/patches.txt">Patches</ulink>
 are always welcome. Best results are achieved with the native DirectX video
 output driver (<option>-vo directx</option>) and the native Windows waveout
@@ -306,7 +306,7 @@ device is:
 
 <para>
 QuickTime DLLs have also been reported to work. Compile with
-<option>--enable-qtx-codecs</option> and put the codecs into
+<option>--enable-qtx</option> and put the codecs into
 the default Windows DLL location, <filename class="directory">C:\WINNT\system32</filename>
 or <filename class="directory">C:\Windows\system</filename> depending on your
 Windows version.

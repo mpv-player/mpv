@@ -3,7 +3,7 @@
 .\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
 .\"
 .\" Lancez cette commande pour obtenir une version HTML de la page de man:
-.\"   cat mplayer.1 | sed s/SS\ 20/SS\ 4/ | groff -man -Thtml - > manpage.html
+.\"   groff -man -Thtml mplayer.1 > manpage.html
 .\" Lancez cette commande pour obtenir une version texte de la page de man:
 .\"   groff -m man -Tascii8 mplayer.1 | col -bx > manpage.txt
 .\"
@@ -15,7 +15,7 @@
 .\" l'indentation par défaut est 7, ne pas changer!
 .nr IN 7
 .\" défini l'indentation pour les sous-options
-.nr SS 20
+.nr SS 4
 .\"
 .de IPs
 .IP "\\$1" \n(SS
@@ -238,13 +238,134 @@ Si vous souhaitez avoir un fichier de config pour un fichier nommé 'film.avi',
 créez un fichier nommé 'film.avi.conf' contenant les options spécifiques à ce 
 fichier et placez-le dans ~/.mplayer ou dans le même répertoire que le fichier.
 
-.SH "OPTIONS DU LECTEUR (MPLAYER UNIQUEMENT)"
+
+.\" --------------------------------------------------------------------------
+.\" Contrôle clavier
+.\" --------------------------------------------------------------------------
+.
+.SH "CONTROLE CLAVIER"
+.I NOTE:
+.br
+MPlayer dispose d'une couche de contrôle pleinement configurable, qui
+vous permet de contrôler MPlayer avec le clavier, la souris, le joystick
+ou une télécommande (en utilisant LIRC).
+.br
+Le fichier de configuration par défaut pour le système d'entrée est
+~/.mplayer/\:input.conf mais cela peut être outrepassé en utilisant
+l'option \-input conf.
+.br
+Ces touches peuvent/\:ne peuvent pas fonctionner, suivant votre pilote de
+sortie vidéo.
 .TP
-.B \-, \-use-stdin
-L'entrée standard (alias stdin) sera utilisée pour lire les données au lieu des
-évenements-clé. Si vous ouvrez /dev/stdin (ou l'équivalent sur votre système),
-utilisez stdin dans une liste de lecture ou essaiez de lire depuis stdin ensuite
-via les commandes openfile ou openlist vous aurez besoin de cette option.
+.B contrôle général
+.PD 0
+.RSs
+.IPs "<\- et \->"
+recule/\:avance de 10 secondes
+.IPs "haut et bas"
+recule/\:avance d'1 minute
+.IPs "pgup et pgdown"
+recule/\:avance de 10 minutes
+.IPs "< et >"
+recule/\:avance dans la liste de lecture
+.IPs "HOME et END"
+va à la prochaine/précédente entrée dans la liste parente
+.IPs "INS et DEL"
+va à la prochaine/précédente source (liste de lecture asx uniquement)
+.IPs "p / ESPACE"
+met le film en pause (n'importe quelle touche pour redémarrer)
+.IPs "q / ESC"
+stoppe la lecture est quitte
+.IPs "+ et \-"
+ajuste le décalage audio de +/\:\- 0.1 seconde
+.IPs "/ et *"
+réduit/\:augmente le volume
+.IPs "9 et 0"
+réduit/\:augmente le volume
+.IPs m
+coupe le son (mute)
+.IPs f
+bascule en plein-écran
+.IPs "w et e"
+réduit/\:augmente l'intervalle panscan
+.IPs o
+bascule entre les états OSD: aucun / déplacement / déplacement+chrono
+.IPs d
+bascule les sauts de trame
+.IPs v
+bascule l'affichage des sous-titres
+.IPs j
+change de langue de sous-titres
+.IPs a\ \ \ \
+bascule l'alignement des sous-titres: haut/milieu/bas
+.IPs "z et x"
+ajuste le décalage des sous-titres de +/\:\- 0.1 seconde
+.IPs "r et t"
+ajuste la position des sous-titres
+.IPs "i"
+créé une marque EDL
+
+.PP
+(Les touches suivantes ne sont valides qu'en utilisant une sortie vidéo
+accélérée matériellement (xv, (x)vidix, (x)mga, etc) ou le filtre égualiseur
+logiciel (-vf eq ou -vf eq2).
+
+.IPs "1 et 2"
+ajuste le contraste
+.IPs "3 et 4"
+ajuste la luminosité
+.IPs "5 et 6"
+ajuste la couleur
+.IPs "7 et 8"
+ajuste la saturation
+.RE
+.PD 1
+.
+.TP
+.B Contrôle clavier de la GUI
+.PD 0
+.RSs
+.IPs "ENTREE"
+démarre la lecture
+.IPs s
+stoppe la lecture
+.IPs l
+charge un fichier
+.IPs c
+navigateur de skins
+.IPs p
+bascule la liste de lecture
+.RE
+.PD 1
+.
+.TP
+.B Contrôle entrée TV
+.PD 0
+.RSs
+.IPs "h et k"
+sélectionne le précédent/\:prochain canal
+.IPs n
+change de norme
+.IPs u
+change la liste des canaux
+.RE
+.PD 1
+.
+.TP
+.B Contrôle entrée DVDNAV
+.PD 0
+.RSs
+.IPs "K,J,H,L"
+se déplace en haut /\:en base/\:à gauche/\:à droite
+.IPs M
+saute au menu principal
+.IPs S
+sélectionne
+.RE
+.PD 1
+
+
+.SH "OPTIONS DU LECTEUR (MPLAYER UNIQUEMENT)"
 .TP
 .B \-autoq <qualité> (utiliser avec \-vf pp)
 Change dynamiquement le niveau de postprocessing en fonction de la charge
@@ -254,7 +375,7 @@ Normalement vous pouvez utiliser un nombre important.
 Vous devez utiliser \-vf pp sans paramètres pour l'utiliser.
 .TP
 .B \-autosync <facteur>
-Ajuste graduellement la synchro A/\:V en fonction de la mesure du décalage 
+Ajuste graduellement la synchro A/\:V en fonction de la mesure du décalage
 audio.
 En spécifiant \-autosync\ 0, valeur par défaut, la synchronisation des trames
 sera entièrement basée sur la mesure du décalage audio.
@@ -264,11 +385,11 @@ On peut souvent améliorer la lecture d'une vidéo possédant un taux de transfert
 irrégulier, mais qui peut-être lue avec \-nosound, en initialisant cette option
 à une valeur entière supérieure à 1.
 Plus cette valeur sera élevée, plus le débit sera proche de -nosound.
-Essayez \-autosync\ 30 pour faire disparaître les problèmes avec les drivers 
+Essayez \-autosync\ 30 pour faire disparaître les problèmes avec les drivers
 audio qui ne possèdent pas une mesure de décalage audio parfaite.
-Avec cette valeur, si de large écarts de synchro A/\:V se produisent, il ne 
+Avec cette valeur, si de large écarts de synchro A/\:V se produisent, il ne
 mettront que une seconde ou deux pour disparaître.
-Ce temps de réaction devrait être le seul effet de bord si cette option est 
+Ce temps de réaction devrait être le seul effet de bord si cette option est
 activé, pour tous les drivers audio.
 .TP
 .B \-benchmark
@@ -281,17 +402,17 @@ Avec cette option MPlayer ignorera également la durée des trames pendant la
 lecture de vidéo uniquement (vous pouvez le prendre comme des fps infinis).
 .TP
 .B \-edl <nomfichier>
-Active les actions d'édition de liste de décision (EDL) durant la lecture. 
-La vidéo sera sautée et le son coupé et remis suivant les entrées du fichier 
-indiqué. 
+Active les actions d'édition de liste de décision (EDL) durant la lecture.
+La vidéo sera sautée et le son coupé et remis suivant les entrées du fichier
+indiqué.
 Voir DOCS/documentation.html#edl pour les détails sur comment l'utiliser.
 .TP
 .B \-edlout <nomfichier>
-Créé un nouveau fichier et écrit les enregistrements d'édition de la liste de 
+Créé un nouveau fichier et écrit les enregistrements d'édition de la liste de
 décision (EDL) dans ce fichier. Durant la lecture, quand l'utilisateur tape 'i',
-une entrée à sauter après les deux dernières secondes de la lecture est écrite 
-dans ce fichier. Cela fournit un point de départ depuis lequel l'utilisateur 
-peut régler plus finement les entrées EDL plus tard. 
+une entrée à sauter après les deux dernières secondes de la lecture est écrite
+dans ce fichier. Cela fournit un point de départ depuis lequel l'utilisateur
+peut régler plus finement les entrées EDL plus tard.
 Voir DOCS/documentation.html#edl pour les détails.
 .TP
 .B \-enqueue (GUI uniquement)
@@ -299,10 +420,10 @@ Ajoute les fichiers donnés en ligne de commande à la liste de lecture au lieu
 de les jouer immédiatement.
 .TP
 .B \-fixed-vo (CODE BETA!)
-force un système de vidéo fixe pour des fichiers multiples (une 
+force un système de vidéo fixe pour des fichiers multiples (une
 (dès)initialisation pour pour tous les fichiers).
 Ainsi une seule fenêtre sera ouverte pour tous les fichiers.
-Actuellement les pilotes suivants fonctionnent avec fixed-vo: x11, xv, xvidix, 
+Actuellement les pilotes suivants fonctionnent avec fixed-vo: x11, xv, xvidix,
 xmga, gl2 et svga.
 .TP
 .B \-framedrop (voir aussi \-hardframedrop)
@@ -319,12 +440,12 @@ Saute les trames de façon plus brutale (casse le décodage).
 Mène à des distorsions d'image!
 .TP
 .B \-identify
-Affiche les paramètres du fichier dans un format facilement analysable. 
-Le script TOOLS/midentify supprime le reste de l'affichage et (espérons-le) 
+Affiche les paramètres du fichier dans un format facilement analysable.
+Le script TOOLS/midentify supprime le reste de l'affichage et (espérons-le)
 formate les noms de fichiers pour le shell.
 .TP
 .B \-input <commandes>
-Cette option peut être utilisée pour configurer certaines parties du 
+Cette option peut être utilisée pour configurer certaines parties du
 système de contrôle.
 Les chemins sont relatifs à ~/\:.mplayer/.
 
@@ -340,7 +461,7 @@ Les commandes disponibles sont:
 Lit le fichier input.conf précisé.
 Si aucun chemin n'est précisé, ~/\:.mplayer est utilisé.
 .IPs ar\-delay
-Temps en msec avant de démarrer la répétition automatique d'une touche 
+Temps en msec avant de démarrer la répétition automatique d'une touche
 (0 pour désactiver).
 .IPs ar\-rate
 Combien de frappes par seconde pendant la répétition automatique.
@@ -351,7 +472,7 @@ Afficher toutes les commandes pouvant être attachées.
 .IPs js\-dev
 Spécifier le périphérique joystick à utiliser (/dev/\:input/\:js0 par défaut).
 .IPs file
-Lit les commandes depuis un fichier donné. 
+Lit les commandes depuis un fichier donné.
 Utile surtout avec une communication fifo.
 .br
 .I NOTE:
@@ -362,7 +483,7 @@ pouvez avoir plusieurs \'echo "seek 10" > mp_pipe\' et le pipe restera valide.
 .
 .TP
 .B \-lircconf <fichier>
-Indique un fichier de configuration pour LIRC (Linux Infrared Remote 
+Indique un fichier de configuration pour LIRC (Linux Infrared Remote
 Control, voir http://www.lirc.org) si vous n'aimez pas le ~/\:.lircrc par
 défaut.
 .TP
@@ -387,11 +508,11 @@ Activé par défaut, si il a été compilé pour.
 Désactive le support de LIRC.
 .TP
 .B \-nortc
-Désactive l'utilisation du RTC Linux (real-time clock \- /dev/\:rtc) 
+Désactive l'utilisation du RTC Linux (real-time clock \- /dev/\:rtc)
 comme mécanisme de synchro.
 .TP
 .B \-playlist <fichier>
-Lit les fichiers en fonction d'une playlist (1 fichier par ligne, ou aux 
+Lit les fichiers en fonction d'une playlist (1 fichier par ligne, ou aux
 formats Winamp ou ASX).
 .br
 .I NOTE:
@@ -407,7 +528,7 @@ particulièrement utile quand votre terminal ne comprends pas les retours chariot
 .B \-really\-quiet
 Affiche encore moins de messages.
 .TP
-.B \-shuffle \ \ 
+.B \-shuffle \ \
 Joue les fichiers en ordre aléatoire.
 .TP
 .B \-skin <répertoire\ des\ skin> (BETA CODE)
@@ -425,7 +546,7 @@ essaie /usr/\:local/\:share/\:mplayer/\: en premier, puis
 .TP
 .B \-slave \ \
 Cette option enclenche le mode esclave.
-Ceci est prévu pour l'utilisation de MPlayer en tant que base 
+Ceci est prévu pour l'utilisation de MPlayer en tant que base
 (backend) pour d'autres programmes.
 Au lieu d'intercepter les évènements clavier, MPlayer va lire des
 commandes simples via son entrée stdin.
@@ -444,7 +565,14 @@ Règle la vitesse de lecture.
 .B \-sstep <sec>
 Spécifie le nombre de secondes entre chaque trame.
 Utile pour les diaporamas.
-
+.TP
+.B \-, \-use-stdin
+L'entrée standard (alias stdin) sera utilisée pour lire les données au lieu des
+évenements-clé. Si vous ouvrez /dev/stdin (ou l'équivalent sur votre système),
+utilisez stdin dans une liste de lecture ou essaiez de lire depuis stdin ensuite
+via les commandes openfile ou openlist vous aurez
+.B besoin
+de cette option.
 
 .SH "OPTIONS DEMUXER/FLUX"
 .TP
@@ -457,7 +585,7 @@ MPlayer affiche les IDs disponibles quand il tourne en mode verbeux (-v).
 Fonctionne uniquement pour la lecture de DVD.
 Cela sélectionne la piste audio et tente toujours de lire les flux audio
 dont la langue correspond au code donné.
-Pour afficher la liste des langues disponibles, utilisez l'option \-v et 
+Pour afficher la liste des langues disponibles, utilisez l'option \-v et
 regardez le résultat.
 
 .I EXEMPLE:
@@ -826,7 +954,7 @@ disponible: europe-east, europe-west, us-bcast, us-cable, etc
 Défini des noms pour les canaux. 
 Utilisez _ pour les espaces dans les noms (ou jouez avec les quotes ;-).
 Les noms de canaux seront ensuite écrits en utilisant l'OSD, et les commandes 
-tv_step_channel, tv_set_channel et tv_last_channel seront utilisables 
+tv_step_channel, tv_set_channel et tv_last_channel seront utilisables
 avec une télécommande (voir. lirc).
 Non compatible avec le paramètre frequency.
 Attention : Le numéro de canal sera sa position dans la liste des 'channels',
@@ -3561,7 +3689,7 @@ divx2pass.log.
 Nombre maximal de trames sautables après une non-sautée
 (-noskiplimit pour un nombre illimité).
 .TP
-.B \-v, \-\-verbose
+.B \-v, \-verbose
 Active le mode verbeux (plus de \-v signifie plus de verbosité).
 
 .PD 0
@@ -3706,220 +3834,6 @@ affiche le psnr (peak signal to noise ratio, rapport du signal crête sur bruit)
 pour l'ensemble de la vidéo après encodage et stocke le psnr par trame dans un
 fichier portant un nom tel que  'psnr_hhmmss.log'.
 Les valeurs renvoyées sont en dB (décibel), le plus haut est le mieux.
-.RE
-
-
-.\" --------------------------------------------------------------------------
-.\" Contrôle clavier
-.\" --------------------------------------------------------------------------
-.
-.SH "CONTROLE CLAVIER"
-.I NOTE:
-.br
-MPlayer dispose d'une couche de contrôle pleinement configurable, qui
-vous permet de contrôler MPlayer avec le clavier, la souris, le joystick
-ou une télécommande (en utilisant LIRC).
-.br
-Le fichier de configuration par défaut pour le système d'entrée est
-~/.mplayer/\:input.conf mais cela peut être outrepassé en utilisant
-l'option \-input conf.
-.br
-Ces touches peuvent/\:ne peuvent pas fonctionner, suivant votre pilote de
-sortie vidéo.
-.TP
-.B contrôle général
-.PD 0
-.RSs
-.IPs "<\- et \->"
-recule/\:avance de 10 secondes
-.IPs "haut et bas"
-recule/\:avance d'1 minute
-.IPs "pgup et pgdown"
-recule/\:avance de 10 minutes
-.IPs "< et >"
-recule/\:avance dans la liste de lecture
-.IPs "HOME et END"
-va à la prochaine/précédente entrée dans la liste parente
-.IPs "INS et DEL"
-va à la prochaine/précédente source (liste de lecture asx uniquement)
-.IPs "p / ESPACE"
-met le film en pause (n'importe quelle touche pour redémarrer)
-.IPs "q / ESC"
-stoppe la lecture est quitte
-.IPs "+ et \-"
-ajuste le décalage audio de +/\:\- 0.1 seconde
-.IPs "/ et *"
-réduit/\:augmente le volume
-.IPs "9 et 0"
-réduit/\:augmente le volume
-.IPs m
-coupe le son (mute)
-.IPs f
-bascule en plein-écran
-.IPs "w et e"
-réduit/\:augmente l'intervalle panscan
-.IPs o
-bascule entre les états OSD: aucun / déplacement / déplacement+chrono
-.IPs d
-bascule les sauts de trame
-.IPs v
-bascule l'affichage des sous-titres
-.IPs j
-change de langue de sous-titres
-.IPs a\ \ \ \ 
-bascule l'alignement des sous-titres: haut/milieu/bas
-.IPs "z et x"
-ajuste le décalage des sous-titres de +/\:\- 0.1 seconde
-.IPs "r et t"
-ajuste la position des sous-titres
-.IPs "i"
-créé une marque EDL
-
-.PP
-(Les touches suivantes ne sont valides qu'en utilisant une sortie vidéo
-accélérée matériellement (xv, (x)vidix, (x)mga, etc) ou le filtre égualiseur
-logiciel (-vf eq ou -vf eq2).
-
-.IPs "1 et 2"
-ajuste le contraste
-.IPs "3 et 4"
-ajuste la luminosité
-.IPs "5 et 6"
-ajuste la couleur
-.IPs "7 et 8"
-ajuste la saturation
-.RE
-.PD 1
-.
-.TP
-.B Contrôle clavier de la GUI
-.PD 0
-.RSs
-.IPs "ENTREE"
-démarre la lecture
-.IPs s
-stoppe la lecture
-.IPs l
-charge un fichier
-.IPs c
-navigateur de skins
-.IPs p
-bascule la liste de lecture
-.RE
-.PD 1
-.
-.TP
-.B Contrôle entrée TV
-.PD 0
-.RSs
-.IPs "h et k"
-sélectionne le précédent/\:prochain canal
-.IPs n
-change de norme
-.IPs u
-change la liste des canaux
-.RE
-.PD 1
-.
-.TP
-.B Contrôle entrée DVDNAV
-.PD 0
-.RSs
-.IPs "K,J,H,L"
-se déplace en haut /\:en base/\:à gauche/\:à droite
-.IPs M
-saute au menu principal
-.IPs S
-sélectionne
-.RE
-.PD 1
-
-
-.\" --------------------------------------------------------------------------
-.\" Protocole mode esclave
-.\" --------------------------------------------------------------------------
-.
-.SH "PROTOCOLE MODE ESCLAVE"
-Si l'option \-slave est donnée, la lecture est contrôlée par un protocole ligne.
-Chaque ligne doit contenir une des commandes suivantes:
-.TP
-.B Commandes
-.RSs
-.IPs "seek <valeur> [type=<0/\:1/\:2>]"
-Se déplace à un endroit donné du film.
-Le type 0 est un déplacement relatif de +/\:- <valeur> secondes.
-Le type 1 se déplace à <valeur> % du film.
-Le type 2 est un déplacement en position absolue de <valeur> secondes.
-.IPs "edl_mark"
-????
-.IPs "audio_delay <valeur>"
-Ajuste le décalage audio de valeur secondes
-.IPs quit
-Quitte MPlayer
-.IPs pause
-Pause/\:dépause la lecture
-.IPs grap_frames
-Quelqu'un sait ?
-.IPs "pt_step <valeur> [force=<valeur>]"
-Va à la prochaine/\:précédente entrée de la liste.
-.IPs "pt_up_step <valeur> [force=<valeur>]"
-Comme pt_step mais saute à la prochaine/\:précédente de la liste parente.
-.IPs "alt_src_step <valeur>"
-Quand plus d'une source est disponible sélectionne la prochaine/\:précédente
-(uniquement supporté par les listes de lecture asx).
-.IPs "sub_delay <valeur> [abs=<valeur>]"
-Ajuste le décalage des sous-titres de +/\:- <valeur> secondes et l'initialise à
-<valeur> secondes quand abs n'est pas égal à zéro.
-.IPs "osd [level=<valeur>]"
-Bascule le mode OSD ou le met à un niveau quand level >= 0.
-.IPs "volume <dir>"
-Augmente/\:diminue le volume.
-.IPs "use_master"
-Bascule le contrôle du volume entre master et pcm.
-.IPs "mute"
-Coupe/\:rétablit la sortie du son.
-.IPs "[contrast|brightness|hue|saturation] <\-100\-100> [abs=<valeur>]"
-Initialise/\:Ajuste les paramètres video.
-.IPs "frame_drop [type=<valeur>]"
-Bascule/\:Initialise le mode saut de trames.
-.IPs "sub_alignment <valeur>"
-Initialise l'alignement des sous-titres.
-.IPs "sub_visibility"
-Bascule l'affichage des sous-titres.
-.IPs "sub_pos <valeur>"
-Ajuste la position des sous-titres.
-.IPs "vobsub_lang"
-Commute la langue des sous-titres pendant l'utilisation de sous-titres VOBSub.
-.IPs "get_percent_pos"
-???
-.IPs "get_time_length"
-???
-.IPs "vo_fullscreen"
-Passe en mode plein-écran.
-.IPs "panscan valeur [valeur2]"
-???
-.IPs "loadfile url"
-Charge le fichier/\:url indiqué.
-.IPs "loadlist file"
-Charge le fichier de liste de lecture indiqué.
-.IPs "change_rectangle val1 val2"
-??? utilisé par le filtre vidéo rectangle.
-.IPs "dvdnav button"
-Presse le bouton dvdnav indiqué.
-.br
-1 est haut, 2 est bas, 3 est gauche, 4 est droit, 5 est menu et 6 est select.
-.IPs "tv_step_channel <dir>"
-Sélectionne le prochain/\: précédent canal tv.
-.IPs "tv_step_norm"
-Change de norme TV.
-.IPs "tv_step_chanlist"
-Change de liste de canaux.
-.IPs "tv_set_channel channel"
-Fixe le canal TV courant.
-.IPs "tv_last_channel"
-Fixe le canal TV courant au dernier.
-.IPs "gui_[loadsubtitle|about|play|stop]"
-Actions GUI
 .RE
 
 

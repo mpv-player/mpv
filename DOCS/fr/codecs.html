@@ -191,7 +191,8 @@
     </LI>
   <LI>Utilisez l'option <CODE>--with-xanimlibdir</CODE> pour dire à configure où
     trouver les codecs XAnim. Par défaut, il les cherche dans
-    <CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods et /usr/lib/xanim</CODE>.
+    <CODE>/usr/local/lib/codecs</CODE>, <CODE>/usr/local/lib/xanim/mods</CODE>,
+    <CODE>/usr/lib/xanim/mods</CODE> et <CODE>/usr/lib/xanim</CODE>.
     Vous pouvez également fixer la variable d'environnement <I>XANIM_MOD_DIR</I> avec
     le répertoire des codecs XAnim.</LI>
   <LI>Renommez/faites des liens symboliques de ces fichiers, en séparant le reste
@@ -254,8 +255,12 @@ MPlayer décode toutes les versions de RealVideo:
   MPlayer peut utiliser leurs librairies pour décoder les fichiers contenant de la
   vidéo RealVideo 2.0 - 4.0. Le script configure de MPlayer devrait détecter les
   librairies RealPlayer aux emplacements standards d'une installation complète.
-  Si non, dites à configure où chercher avec l'option
-  <CODE>--with-reallibdir</CODE>.</P>
+  Si non, dites à configure où chercher avec l'option <CODE>--with-reallibdir</CODE>.</P>
+
+<P>Vous aurez une deuxième chance en téléchargeant les codecs de
+<a href="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</a>.
+Après avoir téléchargé le paquet de codecs Real, extrayez-le dans le répertoire
+/usr/local/lib/codecs, ou spécifiez un chemin unique avec l'option <CODE>--with-reallibdir</CODE>.</P>
 
 <P><B>Note:</B> Les librairies RealPlayer <B>ne fonctionnent actuellement qu'avec Linux, FreeBSD,
   NetBSD et Cygwin sur les plateformes x86 et Alpha.</B></P>
@@ -338,7 +343,7 @@ MPlayer décode toutes les versions de RealVideo:
 <OL>
   <LI>téléchargez le CVS de MPlayer</LI>
   <LI>compilez MPlayer avec:<BR>
-   <CODE>$ ./configure --enable-qtx-codecs</CODE></LI>
+   <CODE>$ ./configure --enable-qtx</CODE></LI>
   <LI>téléchargez le pack de DLL QuickTime sur <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</A></LI>
   <LI>décompressez le pack de DLL QuickTime dans votre répertoire de codecs Win32(par défaut:
     <CODE>/usr/local/lib/codecs/</CODE>)</LI>

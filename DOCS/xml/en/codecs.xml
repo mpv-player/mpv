@@ -295,6 +295,7 @@ for decoding. Follow the instructions to enable them:
   Use the <option>--with-xanimlibdir</option> option to tell
   <filename>configure</filename> where
   to find the XAnim codecs. By default, it looks for them at
+  <filename class="directory">/usr/local/lib/codecs</filename>,
   <filename class="directory">/usr/local/lib/xanim/mods</filename>,
   <filename class="directory">/usr/lib/xanim/mods</filename> and
   <filename class="directory">/usr/lib/xanim</filename>.
@@ -397,6 +398,14 @@ can use their libraries to decode files with RealVideo 2.0 - 4.0 video. The
 detect the <application>RealPlayer</application> libraries in the standard
 locations of a full installation. If it does not, tell <filename>configure</filename>
 where to look with the <option>--with-reallibdir</option> option.
+</para>
+
+<para>
+As a second chance you can download the codecs from
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>.
+After downloading the Real codecs package, extract it to the
+<filename class="directory">/usr/local/lib/codecs</filename> directory, or you can
+specify a unique path with the <option>--with-reallibdir</option> option.
 </para>
 
 <note><para>
@@ -519,7 +528,7 @@ decoders:
 <note><para>currently only 32bit Intel platforms are supported.</para></note>
 <step><para>download MPlayer CVS</para></step>
 <step><para>compile MPlayer with:
-<screen>$ ./configure --enable-qtx-codecs</screen>
+<screen>$ ./configure --enable-qtx</screen>
 </para></step>
 <step><para>download QuickTime DLL pack from
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>

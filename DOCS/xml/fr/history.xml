@@ -3,14 +3,16 @@
 <sect1 id="history">
 <title>Histoire</title>
  
-<para>
+<blockquote><para>
 Cela a commenc&eacute; un an auparavant...
-J'ai (A'rpi) essay&eacute; de nombreux lecteurs de vid&eacute;os sous GNU/Linux (mtv,xmps,dvdview,livid/oms,VideoLAN,
-xine,xanim,avifile,xmmp) mais il pr&eacute;sentaient tous des d&eacute;fauts, particuli&egrave;rement sur
+J'ai essay&eacute; de nombreux lecteurs de vid&eacute;os sous GNU/Linux (mtv,xmps,dvdview,livid/oms,VideoLAN,
+xine,xanim,avifile,xmmp) mais ils pr&eacute;sentaient tous des d&eacute;fauts, particuli&egrave;rement sur
 certains fichiers ou avec la synchronisation audio/video. La plupart &eacute;taient incapables de lire &agrave;
 la fois les fichiers MPEG1, MPEG2 et AVI (DivX). De plus ils avaient des probl&egrave;mes de vitesse/qualit&eacute;
 d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
+</para></blockquote><para>A'rpi, 2001</para>
 
+<para>
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.1-v0.3</emphasis>: 22-25 Sep 2000
@@ -23,7 +25,7 @@ d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
 <listitem><para>
   <emphasis role="bold">mpg12play v0.5-v0.87</emphasis>: 28 Sep-20 Oct 2000
   </para><para>codec Mpeg a &eacute;t&eacute; remplac&eacute; par DVDview de Dirk Farin, du bon boulot,
-    mais c'&eacute;tait lent et &eacute;crit en C++ (je d&eacute;teste le C++!!!)
+    mais c'&eacute;tait lent et &eacute;crit en C++ (A'rpi d&eacute;teste le C++!!!)
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.9-v0.95pre5</emphasis>: 21 Oct-2 Nov 2000

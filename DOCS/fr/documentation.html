@@ -447,12 +447,12 @@
 
 <H2><A NAME="history">1.1 Histoire</A></H2>
 
-<P>Cela a commenc&eacute; un an auparavant...
-  J'ai (A'rpi) essay&eacute; de nombreux lecteurs de vid&eacute;os sous GNU/Linux (mtv,xmps,dvdview,livid/oms,VideoLAN,
+<P><I>Cela a commenc&eacute; un an auparavant...
+  J'ai essay&eacute; de nombreux lecteurs de vid&eacute;os sous GNU/Linux (mtv,xmps,dvdview,livid/oms,VideoLAN,
   xine,xanim,avifile,xmmp) mais il pr&eacute;sentaient tous des d&eacute;fauts, particuli&egrave;rement sur
   certains fichiers ou avec la synchronisation audio/video. La plupart &eacute;taient incapables de lire &agrave;
   la fois les fichiers MPEG1, MPEG2 et AVI (DivX). De plus ils avaient des probl&egrave;mes de vitesse/qualit&eacute;
-  d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...</P>
+  d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...</I> Arpi, 2001</P>
 
 <UL>
   <LI><B>mpg12play v0.1-v0.3:</B> 22-25 Sep 2000<BR>
@@ -461,7 +461,7 @@
     mais il pr&eacute;sentait des probl&egrave;mes de vitesse/qualit&eacute; d'images.</LI>
   <LI><B>mpg12play v0.5-v0.87:</B> 28 Sep-20 Oct 2000<BR>
     Le codec Mpeg a &eacute;t&eacute; remplac&eacute; par DVDview de Dirk Farin, du bon boulot,
-    mais c'&eacute;tait lent et &eacute;crit en C++ (je d&eacute;teste le C++!!!)</LI>
+    mais c'&eacute;tait lent et &eacute;crit en C++ (A'rpi d&eacute;teste le C++!!!)</LI>
   <LI><B>mpg12play v0.9-v0.95pre5:</B> 21 Oct-2 Nov 2000<BR>
     Le codec mpeg &eacute;tait libmpeg2 (mpeg2dec) par Aaron Holtzman & Michel Lespinasse.
     Il est excellent, un code C rapide et bien optimis&eacute; avec une qualit&eacute; d'image parfaite
@@ -502,7 +502,12 @@
     Là encore, pas une version officielle, mais après l'ajout du support Sorenson 3 (QuickTime)
     et Windows Media 9, MPlayer est le premier lecteur de film au monde qui supporte
     tous les formats vidéos connus!</LI>
-  <LI><B>MPlayer 0.90 "?"</B> Date encore inconnue</LI>
+  <LI><B>MPlayer 0.90 "The CounterCounter"</B> 6 Avr 2003<BR>
+    Après plus d'un an, nous avons finalement conclus que le code était
+    de nouveau suffisemment stable, et prèt à sortir en temps que version officielle.
+    Malheureusement nous avons oublié d'incrémenter le numéro de version, et d'autres
+    bogues ennuyeux sont apparus, donc préparez-vous pour...
+  <LI><B>MPlayer 0.91 "?"</B> Date encore inconnue</LI>
 </UL>
 
 
@@ -1788,8 +1793,8 @@ end
 <H2><A NAME="cygwin">6.6. Cygwin</A></H2>
 
 <P>Le port Cygwin est toujours à ces débuts. Actuellement il n'y a aucun support pour
-  les DLLs Win32 ou OpenGL. SDL est connu pour distordre le son et l'image ou 
-  planter sur certains systèmes. Les <A HREF="../tech/patches.txt">patches</A> sont toujours 
+  OpenGL. SDL est connu pour distordre le son et l'image ou planter sur certains
+  systèmes. Les <A HREF="../tech/patches.txt">patches</A> sont toujours
   bienvenus. Les meilleurs résultats peuvent être obtenus avec le pilote SDL natif de 
   sortie vidéo (<CODE>-vo directx</CODE>) et le pilote Windows waveout natif de sortie
   audio (<CODE>-ao win32</CODE>). Vous devriez aussi jeter un oeil à la liste de diffusion
@@ -1814,7 +1819,7 @@ end
 <P>Vous pouvez jouer des VCDs en lisant les fichiers <CODE>.DAT</CODE> ou <CODE>.MPG</CODE>
   que Windows fait apparaître sur les VCDs. Cela fonctionne comme ça (changez la lettre
   de votre lecteur CD-ROM):
-  
+
 <P><CODE>mplayer d:/mpegav/avseq01.dat</CODE></P>
 
 <P><CODE>mplayer /cygdrive/d/MPEG2/AVSEQ01.MPG</CODE></P>
@@ -1825,11 +1830,11 @@ end
 <P><CODE>mplayer dvd://&lt;titre&gt; -dvd-device '\\.\d:'</CODE></P>
 
 <P>Les DLLs QuickTime doivent normalement fonctionner. Compilez avec 
-  <CODE>--enable-qtx-codecs</CODE> et placez les codecs dans l'emplacement par
+  <CODE>--enable-qtx</CODE> et placez les codecs dans l'emplacement par
   défaut des DLL Windows, <CODE>C:\WINNT\system32</CODE> ou <CODE>C:\Windows\system</CODE> 
   selon votre version de Windows.</P>
 
-<P>La console CygWin est particulièrement lente. Il semble que rediriger la sortie
+<P>La console Cygwin est particulièrement lente. Il semble que rediriger la sortie
   ou utiliser l'option <CODE>-quiet</CODE> amèliore les performances.</P>
   
 <H1><A NAME="encoding">7.</A> <A HREF="encoding.html">Encodage avec MEncoder</A></H1>
