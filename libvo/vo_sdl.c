@@ -1041,19 +1041,17 @@ static void check_events (void)
 #ifdef BUGGY_SDL
 			case SDL_KEYDOWN:
 				switch(event.key.keysym.sym) {
-                                case SDLK_UP: mplayer_put_key(KEY_UP);break;
-                                case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
-                                case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
-                                case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT);break;
+                                case SDLK_UP: mplayer_put_key(KEY_UP); break;
+                                case SDLK_DOWN: mplayer_put_key(KEY_DOWN); break;
+                                case SDLK_LEFT: mplayer_put_key(KEY_LEFT); break;
+                                case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT); break;
                                 case SDLK_ASTERISK:
 				case SDLK_KP_MULTIPLY:
-				case SDLK_w: mplayer_put_key('*');break;
+				case SDLK_w: mplayer_put_key('*'); break;
 				case SDLK_SLASH:
 				case SDLK_KP_DIVIDE:
-                                case SDLK_s: mplayer_put_key('/');break;
-				default:
-					mplayer_put_key(keypressed);
-					break;
+                                case SDLK_s: mplayer_put_key('/'); break;
+				default: break;
 				}
 			break;
 			case SDL_KEYUP:
@@ -1238,6 +1236,5 @@ uninit(void)
 		XCloseDisplay(XDisplay);
 	}
 #endif
-sdl_close();
+	sdl_close();
 }
-
