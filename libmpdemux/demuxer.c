@@ -866,7 +866,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       }
       file_format=DEMUXER_TYPE_MPEG_ES; //  <-- hack is here :)
     } else 
-#if 0
+#if 1
     // fuzzy mpeg4-es detection. do NOT enable without heavy testing of mpeg formats detection!
     if(num_elementary_packets1B6>3 && num_elementary_packets12x>=1 &&
        num_elementary_packetsPES==0 && num_elementary_packets100<=num_elementary_packets12x &&
