@@ -511,10 +511,12 @@ static void flip_page(void) {
   if (y_pos) {
     gl_fillbox(0, 0, WIDTH, y_pos, 0);
     gl_fillbox(0, HEIGHT - y_pos, WIDTH, y_pos, 0);
-  } else {
-      gl_fillbox(0, 0, x_pos, HEIGHT, 0);
-      gl_fillbox(WIDTH - x_pos, 0, x_pos, HEIGHT, 0);
-    }
+  }
+  if (x_pos) {
+    gl_fillbox(0, 0, x_pos, HEIGHT, 0);
+    gl_fillbox(WIDTH - x_pos, 0, x_pos, HEIGHT, 0);
+  }
+
   vo_draw_text(WIDTH, HEIGHT, draw_alpha);
   gl_copyscreen(screen);
 }
