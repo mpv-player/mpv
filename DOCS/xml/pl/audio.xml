@@ -7,8 +7,8 @@
 
 
 <para>
-Interfejs audio <application>MPlayera</application> nazywany jest
-<emphasis>libao2</emphasis>. Obecnie zawiera nastêpuj±ce sterowniki:
+Interfejs audio <application>MPlayera</application> nazywa siê
+<emphasis>libao2</emphasis>. Obecnie zawiera on nastêpuj±ce sterowniki:
 </para>
 
 <informaltable>
@@ -35,7 +35,7 @@ Interfejs audio <application>MPlayera</application> nazywany jest
   </entry></row>
 <row><entry>sun</entry><entry>
   rdzenny sterownik d¼wiêku SUN (<filename>/dev/audio</filename>) dla u¿ytkowników 
-  BSD Solarisa 8
+  BSD i Solarisa 8
   </entry></row>
 <row><entry>macosx</entry><entry>
   rdzenny sterownik MacOSX
@@ -54,7 +54,7 @@ Interfejs audio <application>MPlayera</application> nazywany jest
 </informaltable>
 
 <para>
-Sterowniki kart d¼wiêkowych przeznaczone dla Linuksa, maj± problemy 
+Sterowniki kart d¼wiêkowych przeznaczone dla Linuksa maj± problemy 
 zwi±zane z kompatybilno¶ci±. Dzieje siê tak, poniewa¿ <application>MPlayer</application> 
 korzysta z wbudowanych w³a¶ciwo¶ci <emphasis>poprawnie</emphasis> napisanych 
 sterowników d¼wiêku, które prawid³owo obs³uguj± synchronizacjê audio/video.
@@ -70,17 +70,17 @@ korzystaj±cych z wewnêtrznego zegara. Testy pokaza³y, ¿e ich metody nie s± tak
 wydajne jak <application>MPlayera</application>.
 </para>
 
-
 <para>
 U¿ywanie <application>MPlayera</application> z poprawnie napisanym sterownikiem 
-d¼wiêku, nigdy nie zaowocuje desynchronizacj± A/V z powodu d¼wiêku, poza bardzo ¼le
-stworzonymi plikami (sprawd¼ stronê man dla rozwi±zañ tego problemu).
+d¼wiêku, nigdy nie zaowocuje desynchronizacj± A/V z powodu d¼wiêku, chyba ¿e
+odtwarzany plik zosta³ utworzony w niew³a¶ciwy sposób lub jest popsuty
+(na stronie man znajdziesz mo¿liwe rozwi±zania tego problemu).
 </para>
 
 <para>
-Je¶li zdarzy siê tak, ¿e posiadasz z³y sterownik d¼wiêku, spróbuj opcji 
-<option>-autosync</option>, powinno to rozwi±zaæ Twój problem. Sprawd¼
-strony man dla dok³adniejszych informacji.
+Je¶li masz kiepski sterownik d¼wiêku, spróbuj u¿yæ opcji <option>-autosync</option>.
+Powinna ona rozwi±zaæ Twój problem. Dok³adniejsze informacje znajdziesz na stronie
+man.
 </para>
 
 <itemizedlist>
@@ -88,27 +88,28 @@ strony man dla dok³adniejszych informacji.
 <listitem><para>
   Je¶li posiadasz sterownik OSS, spróbuj najpierw opcji <option>-ao oss</option>
   (domy¶lna). Je¿eli zauwa¿ysz niestabilne dzia³anie systemu, jego ci±g³e 
-  zawieszenia siê lub inne dziwne zachowanie, wypróbuj <option>-ao sdl</option>
+  zawieszanie siê lub inne dziwne zachowanie, wypróbuj <option>-ao sdl</option>
   (UWAGA: potrzebujesz zainstalowanych bibliotek i plików nag³ówkowych SDL). 
-  Sterownik SDL pomaga w wielu wypadkach, a tak¿e obs³uguje ESD (GNOME) i ARTS (KDE).
+  Sterownik SDL pomaga w wielu wypadkach, a dodatkowo obs³uguje ESD (GNOME) i ARTS (KDE).
   </para></listitem>
 <listitem><para>
-  Je¿eli posiadasz sterowniki ALSA w wersji 0.5, wtedy prawie zawsze bêdziesz musia³ 
-  u¿yæ <option>-ao alsa5</option>, poniewa¿ posiadaj± one wadliwy kod emulacji OSS i
+  Je¿eli posiadasz sterowniki ALSA w wersji 0.5, prawie zawsze konieczne bêdzie 
+  u¿ycie <option>-ao alsa5</option>, poniewa¿ ich kod emulacji OSS jest wadliwy i
   spowoduje <emphasis role="bold">b³±d <application>MPlayera</application></emphasis>
-  wy¶wietlaj±c komunikat o podobnej tre¶ci, jak ta:
+  wy¶wietlaj±c komunikat o tre¶ci podobnej do tej:
   <screen>
     DEMUXER: Za du¿o (945 w 8390980 bajtach) pakietów video w buforze!
     (DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!)<!--
 --></screen>
   </para></listitem>
 <listitem><para>
-  Na Solarisie u¿ywaj sterownika SUN poprzez opcjê <option>-ao sun</option>,
-  w przeciwnym wypadku ani video, ani audio nie bêd± dzia³a³y.
+  Na Solarisie konieczne jest u¿ycie sterownika SUN przy pomocy opcji
+  <option>-ao sun</option>, w przeciwnym wypadku nie bêdzie dzia³aæ ani audio,
+  ani wideo.
   </para></listitem>
 <listitem><para>
-  Je¶li d¼wiêk przerywany jest krótkimi trzaskami podczas odtwarzania  z CD-ROMu, 
-  w³±cz odmaskowanie IRQ, wpisuj±c np. <command>hdparm -u1 /dev/cdrom</command> 
+  Je¶li d¼wiêk przerywany jest krótkimi trzaskami podczas odtwarzania z CD-ROMu,
+  w³±cz odmaskowywanie przerwañ, wpisuj±c np. <command>hdparm -u1 /dev/cdrom</command> 
   (<command>man hdparm</command>). Jest to bardzo przydatne i opisane bardziej 
   szczegó³owo w <link linkend="drives">sekcji dotycz±cej CD-ROMu</link>.
  </para></listitem>
@@ -116,21 +117,22 @@ strony man dla dok³adniejszych informacji.
 </sect3>
 
 <sect3 id="experiences">
-<title>Do¶wiadczenia zwi±zane z u¿ytkowaniem kart d¼wiêkowych, zalecenia</title>
+<title>Do¶wiadczenia zwi±zane z u¿ytkowaniem kart d¼wiêkowych i zalecenia</title>
 <para>
-Przy stosowaniu Linuksa, zalecamy j±dro z serii 2.4.x . J±dro w wersji 2.2 nie by³o
+Przy stosowaniu Linuksa, zalecamy j±dro z serii 2.4.x. J±dro w wersji 2.2 nie by³o
 testowane.
 </para>
 
 <para>
-Sterowniki kart d¼wiêkowych u¿ywane w Linuksie s± g³ównie dostarczane przez 
-woln± wersjê OSS. Wypierane s± one przez system
-<ulink url="http://www.alsa-project.org">ALSA</ulink>
-(Advanced Linux Sound Architecture) w wersji rozwojowej j±dra 2.5. Je¿eli Twoja
-dystrybucja nie u¿ywa ALSA, mo¿esz j± wypróbowaæ, je¿eli bêdziesz mia³ jakie¶ 
-k³opoty z d¼wiêkiem. ALSA generalnie prze¶ciga OSS w kompatybilno¶ci, wydajno¶ci
-i mo¿liwo¶ciach. Jednak niektóre karty s± obs³ugiwane wy³±cznie przez komercyjn±
-wersjê OSS z witryny <ulink url="http://www.opensound.com/">4Front Technologies</ulink>.
+Sterowniki kart d¼wiêkowych w Linuksie s± dostarczane g³ównie przez
+woln± wersjê OSS. Sterowniki te zosta³y zast±pione w wersji rozwojowej j±dra 2.5
+przez system <ulink url="http://www.alsa-project.org">ALSA</ulink>
+(Advanced Linux Sound Architecture). Je¿eli Twoja dystrybucja nie u¿ywa jeszcze
+ALSA, mo¿esz chcieæ j± wypróbowaæ, je¿eli bêdziesz mia³ jakie¶ k³opoty
+z d¼wiêkiem. Sterowniki ALSA generalnie przewy¿szaj± OSS pod wzglêdem zgodno¶ci,
+wydajno¶ci i mo¿liwo¶ci. Jednak niektóre karty s± obs³ugiwane wy³±cznie przez
+komercyjn± wersjê OSS z witryny
+<ulink url="http://www.opensound.com/">4Front Technologies</ulink>.
 Obs³uguje ona równie¿ kilka innych systemów poza Linuksem.
 </para>
 
@@ -153,12 +155,12 @@ Obs³uguje ona równie¿ kilka innych systemów poza Linuksem.
   <row>
     <entry morerows="2" valign="middle">KARTA D¬WIÊKOWA</entry>
     <entry spanname="driver">STEROWNIK</entry>
-    <entry morerows="2" valign="middle">Max czêstotliwo¶æ(kHz)</entry>
-    <entry morerows="2" valign="middle">Max ilo¶æ kana³ów</entry>
-    <entry morerows="2" valign="middle">Max ilo¶æ programów
+    <entry morerows="2" valign="middle">Maks. czêstotliwo¶æ (kHz)</entry>
+    <entry morerows="2" valign="middle">Maks. liczba kana³ów</entry>
+    <entry morerows="2" valign="middle">Maks. liczba procesów
       <footnote id="maxopens">
-        <para>ilo¶æ aplikacji, które s± w stanie u¿ywaæ urz±dzenia
-         <emphasis>w tym samym czasie</emphasis>.</para>
+        <para>liczba procesów, które s± w stanie u¿ywaæ urz±dzenia
+         <emphasis>jednocze¶nie</emphasis>.</para>
       </footnote>
     </entry>
   </row>
@@ -180,7 +182,7 @@ Obs³uguje ona równie¿ kilka innych systemów poza Linuksem.
     <entry>snd-via82xx</entry>
     <entry></entry>
     <entry></entry>
-    <entry>4-48 kHz lub wy³±cznie 48 kHz, w zale¿no¶ci od chipsetu</entry>
+    <entry>4-48 kHz lub wy³±cznie 48 kHz, w zale¿no¶ci od uk³adu</entry>
     <entry></entry>
     <entry></entry>
   </row>
@@ -205,7 +207,7 @@ Obs³uguje ona równie¿ kilka innych systemów poza Linuksem.
     <entry>Oba dzia³aj±</entry>
     <entry>Oba dzia³aj±</entry>
     <entry>
-      <ulink url="http://opensource.creative.com">Sterowniki OSS Creativu (obs³uga SP/DIF)</ulink>
+      <ulink url="http://opensource.creative.com">Sterowniki OSS Creative'a (obs³uga SP/DIF)</ulink>
     </entry>
     <entry>192</entry>
     <entry>4.0/5.1</entry>
@@ -302,7 +304,7 @@ Obs³uguje ona równie¿ kilka innych systemów poza Linuksem.
   </row>
 
   <row>
-    <entry>Karty z chipami envy24 (jak Terratec EWS88MT)</entry>
+    <entry>Karty z uk³adem envy24 (np. Terratec EWS88MT)</entry>
     <entry>?</entry>
     <entry>?</entry>
     <entry>OK</entry>
@@ -320,7 +322,7 @@ Obs³uguje ona równie¿ kilka innych systemów poza Linuksem.
     <entry>
       <ulink url="http://www.geocities.com/stssppnn/pcsp.html">Sterowniki do PC speakera dla Linuksa (OSS)</ulink>
     </entry>
-    <entry>Sterownik emuluje 44.1, mo¿e wiêcej.</entry>
+    <entry>Sterownik emuluje 44,1, mo¿e wiêcej.</entry>
     <entry>mono</entry>
     <entry>1</entry>
   </row>
@@ -341,13 +343,13 @@ Pomoc przy tworzeniu tego dokumentu jest mile widziana. Powiedz jak
 <title>Filtry audio</title>
 <para>
   Stare wtyczki audio zosta³y wyparte przez now± warstwê filtrów d¼wiêkowych.
-  Mog± byæ one u¿yte do zmiany w³a¶ciwo¶ci danych audio zanim d¼wiêk dotrze do 
+  Mo¿na ich u¿ywaæ do zmiany w³a¶ciwo¶ci danych audio zanim d¼wiêk dotrze do 
   karty. Ich uruchamianie i wy³±czanie odbywa siê przewa¿nie automatycznie, 
-  mo¿e to byæ jednak zmienione. Filtry s± w³±czane wtedy, kiedy cechy d¼wiêku
-  ró¿ni± siê od tych wymaganych przez urz±dzenie audio w przeciwnym wypadku 
-  procedura ta jest omijana. Opcja <option>-af filter1,filter2,...</option>
+  mo¿na to jednak zmieniæ. Filtry w³±czane s± wtedy, gdy cechy d¼wiêku
+  ró¿ni± siê od tych wymaganych przez urz±dzenie audio, w przeciwnym wypadku 
+  procedura ta jest pomijana. Opcja <option>-af filter1,filter2,...</option>
   u¿ywana jest do nadpisania automatycznych ustawieñ lub do zastosowania
-  dodatkowych. Kolejno¶æ aplikowania filtrów uzale¿niona jest od kolejno¶ci 
+  dodatkowych. Kolejno¶æ stosowania filtrów uzale¿niona jest od kolejno¶ci 
   w ci±gu oddzielonych od siebie przecinkami warto¶ci.
 </para>
 
@@ -360,13 +362,13 @@ inaczej zostanie b³êdnie zinterpretowana przez program.
 </para>
 
 <para>
-Filtry czêsto posiadaj± opcje, które zmieniaj± ich zachowanie. S± one dok³adniej 
+Filtry czêsto posiadaj± opcje zmieniaj±ce ich zachowanie. S± one dok³adniej 
 opisane w sekcji poni¿ej. Je¿eli pominie siê parametry, to filtr uruchomi siê
-z domy¶lnymi ustawieniami. Poni¿ej przedstawiony jest przyk³ad jak u¿ywaæ
+z ustawieniami domy¶lnymi. Poni¿ej przedstawiony jest przyk³ad, jak u¿ywaæ
 filtrów wraz z ich opcjami:
 <screen>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1 -srate 11025 media.avi</screen>
 ustawi czêstotliwo¶æ wyj¶ciow± filtru zmieniaj±cego próbkowanie (resample filter) 
-na 11025Hz i zmiksuje inne kana³y do 1, u¿ywaj±c filtru pan.
+na 11025Hz i zmiksuje d¼wiêk do jednego kana³u u¿ywaj±c filtru pan.
 </para>
 
 <para>
@@ -390,7 +392,7 @@ U¿yj automatycznego stosowania filtrów i optymalizuj wzglêdem szybko¶ci procesor
 <varlistentry>
 <term><option>1</option></term>
 <listitem><para>
-U¿yj automatycznego stosowania filtrów i optymalizuj tak, ¿eby osi±gn±æ najwiêksz±
+U¿yj automatycznego stosowania filtrów i optymalizuj tak, aby osi±gn±æ najwiêksz±
 prêdko¶æ.
 <emphasis>Uwaga:</emphasis> Niektóre mo¿liwo¶ci filtrów audio mog± nie zadzia³aæ i 
 jako¶æ d¼wiêku spadnie.
@@ -417,32 +419,32 @@ wyst±pienie b³êdów podczas dzia³ania MPlayera i jego zakoñczenie.
 <varlistentry>
 <term><option>4</option></term>
 <listitem><para>
-U¿yj automatycznego stosowania filtrów (tak jak dla 0), jednak u¿yj przetwarzania
-zmiennoprzecinkowego kiedy to mo¿liwe.
+U¿yj automatycznego stosowania filtrów (tak jak dla 0), jednak u¿yj obliczeñ
+zmiennoprzecinkowych, je¶li to mo¿liwe.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>5</option></term>
 <listitem><para>
-U¿yj automatycznego stosowania filtrów (tak jak dla 1), jednak u¿yj przetwarzania
-zmiennoprzecinkowego kiedy to mo¿liwe.
+U¿yj automatycznego stosowania filtrów (tak jak dla 1), jednak u¿yj obliczeñ
+zmiennoprzecinkowych, je¶li to mo¿liwe.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>6</option></term>
 <listitem><para>
-U¿yj automatycznego stosowania filtrów (tak jak dla 2), jednak u¿yj przetwarzania
-zmiennoprzecinkowego kiedy to mo¿liwe.
+U¿yj automatycznego stosowania filtrów (tak jak dla 2), jednak u¿yj obliczeñ
+zmiennoprzecinkowych, je¶li to mo¿liwe.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>7</option></term>
 <listitem><para>
-U¿yj automatycznego stosowania filtrów (tak jak dla 3), jednak u¿yj przetwarzania
-zmiennoprzecinkowego kiedy to mo¿liwe.
+U¿yj automatycznego stosowania filtrów (tak jak dla 3), jednak u¿yj obliczeñ
+zmiennoprzecinkowych, je¶li to mo¿liwe.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -452,7 +454,7 @@ zmiennoprzecinkowego kiedy to mo¿liwe.
 </para>
 
 <para>
-Warstwa filtrów jest równie¿ sterowana ni¿ej podanymi, standardowymi opcjami:
+Na zachowanie warstwy filtrów wp³ywaj± równie¿ ni¿ej podane, standardowe opcje:
 </para>
 
 <variablelist>
@@ -467,18 +469,18 @@ komunikaty.
 <varlistentry>
 <term><option>-channels</option></term>
 <listitem><para>
-Ta opcja ustawia ilo¶æ kana³ów wyj¶ciowych, których ma u¿ywaæ Twoja karta.
-Ma ona równie¿ wp³yw na ilo¶æ kana³ów, które s± dekodowane z
+Ustawia liczbê kana³ów wyj¶ciowych, których ma u¿ywaæ Twoja karta.
+Ma ona równie¿ wp³yw na liczbê kana³ów, które s± dekodowane z
 no¶nika danych. Je¶li zawiera on mniej kana³ów, filtr kana³ów (channels filter)
-zostanie automatycznie u¿yty (zobacz poni¿ej). Przekierowywanie bêdzie ustawione na
-domy¶lne.
+zostanie automatycznie u¿yty (zobacz poni¿ej). Przekierowywanie kana³ów bêdzie
+ustawione domy¶lnie.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-srate</option></term>
 <listitem><para>
-Opcja ta ustawia czêstotliwo¶æ próbkowania, któr± ma u¿ywaæ Twoja karta
+Ustawia czêstotliwo¶æ próbkowania, której ma u¿ywaæ Twoja karta
 (oczywi¶cie karty maj± swoje ograniczenia). Je¿eli poziom próbkowania Twojej
 karty ró¿ni siê od tego stosowanego w no¶niku, zostanie w³±czony filtr zmieniaj±cy
 próbkowanie (resample filter, zobacz poni¿ej), aby zniwelowaæ ró¿nice.
@@ -488,7 +490,7 @@ próbkowanie (resample filter, zobacz poni¿ej), aby zniwelowaæ ró¿nice.
 <varlistentry>
 <term><option>-format</option></term>
 <listitem><para>
-Opcja ta ustawia format próbki pomiêdzy filtrem audio a kart± d¼wiêkow±.
+Ustawia format próbki pomiêdzy filtrem audio a kart± d¼wiêkow±.
 Je¿eli ¿±dany format próbki dla karty jest inny ni¿ format zawieraj±cy siê w no¶niku,
 zostanie zastosowany filtr formatu (format filter, zobacz poni¿ej), aby zniwelowaæ 
 ró¿nice.
@@ -502,10 +504,10 @@ ró¿nice.
 <para>
 MPlayer w pe³ni obs³uguje zmniejszanie/zwiêkszanie czêstotliwo¶ci (up/downsampling)
 poprzez filtr zmieniaj±cy czêstotliwo¶æ próbkowania - <option>resample</option> filter.
-Mo¿e byæ on u¿yty, je¿eli masz sta³± czêstotliwo¶æ na karcie, albo je¿eli nie jest
-ona w stanie przerobiæ wiêcej ni¿ 44.1kHz. Filtr jest automatycznie uruchamiany,
-je¿eli jest to konieczne, ale mo¿e równie¿ zostaæ w³±czony z poziomu linii komend.
-Ma trzy opcje:
+Mo¿e on byæ u¿yty, je¿eli masz sta³± czêstotliwo¶æ na karcie, albo je¿eli nie jest
+ona w stanie obs³u¿yæ wiêcej ni¿ 44,1kHz. Filtr jest automatycznie uruchamiany,
+je¿eli jest to konieczne, ale mo¿e równie¿ zostaæ w³±czony z poziomu linii poleceñ.
+Ma on trzy opcje:
 </para>
 
 <variablelist>
@@ -537,14 +539,14 @@ Ma trzy opcje:
     jest dodatkow± liczb± ca³kowit± z przedzia³u od <literal>0</literal> 
     do <literal>2</literal>, która wybiera metodê zmiany czêstotliwo¶ci 
     próbkowania. Tutaj <literal>0</literal> przedstawia interpolacjê liniow±
-    (linear interpolation), <literal>1</literal> reprezentuje  metodê wielofazowego 
-    przetwarzania banku filtrów (poly-phase filter-bank processing) oraz przetwarzanie 
-    ca³kowitoliczbowe, <literal>2</literal> do zmiany czêstotliwo¶ci przy u¿yciu
-    wielofazowego przetwarzania banku filtrów (poly-phase filter-bank processing) 
-    oraz przetwarzania zmiennoprzecinkowego. Interpolacja liniowa (linear interpolation)
+    (linear interpolation), <literal>1</literal> reprezentuje metodê wielofazowego 
+    przetwarzania banku filtrów (poly-phase filter-bank processing) przy u¿yciu
+    obliczeñ ca³kowitoliczbowych, <literal>2</literal> do zmiany czêstotliwo¶ci za
+    pomoc± wielofazowego przetwarzania banku filtrów (poly-phase filter-bank processing) 
+    i obliczeñ zmiennoprzecinkowych. Interpolacja liniowa (linear interpolation)
     jest wyj±tkowo szybka, jednak pogarsza jako¶æ d¼wiêku szczególnie przy zwiêkszaniu
     czêstotliwo¶ci (upsampling). Najlepsz± jako¶æ daje <literal>2</literal>,
-    ale metoda ta potrzebuje najwiêkszej mocy obliczeniowej.
+    ale metoda ta wymaga najwiêkszej mocy obliczeniowej.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -560,10 +562,10 @@ wyj¶ciowej oraz interpolacji liniowej (linear interpolation).
 <sect4 id="af_channels">
 <title>Zmiana liczby kana³ów</title>
 <para>
-Filtr kana³ów (<option>channels</option> filter) mo¿e byæ u¿yty w celu dodania
-lub usuniêcia kana³ów, mo¿na go u¿yæ tak¿e do kopiowania lub przekierowywania kana³ów.
+Filtr kana³ów (<option>channels</option> filter) mo¿na u¿yæ w celu dodania
+lub usuniêcia kana³ów, mo¿na go tak¿e u¿yæ do kopiowania lub przekierowywania kana³ów.
 Jest on automatycznie w³±czony, je¿eli wyj¶cie warstwy audio filtrów ró¿ni siê 
-od wej¶ciowego lub je¿eli za¿±dano jego uruchomienia. Filtr wy³±cza siê sam,
+od wej¶ciowego lub je¶li za¿±dano jego uruchomienia. Filtr wy³±cza siê sam,
 je¿eli nie jest u¿ywany. Liczba parametrów jest dynamiczna:
 </para>
 
@@ -572,9 +574,8 @@ je¿eli nie jest u¿ywany. Liczba parametrów jest dynamiczna:
 <term><option>nch &lt;1-6&gt;</option></term>
 <listitem><para>
   jest to liczba ca³kowita z zakresu od <literal>1</literal> do <literal>6</literal>, 
-  która ustawia liczbê kana³ów wyj¶ciowych. Ta opcja jest wymagana,
-  w przypadku je¿eli nie zostanie podana, program wywo³a b³±d uruchamiania
-  (runtime error).
+  która ustawia liczbê kana³ów wyj¶ciowych. Ta opcja jest wymagana.
+  Nie podanie jej spowoduje b³±d uruchamiania (runtime error) programu.
 </para></listitem>
 </varlistentry>
 
@@ -582,8 +583,8 @@ je¿eli nie jest u¿ywany. Liczba parametrów jest dynamiczna:
 <term><option>nr &lt;1-6&gt;</option></term>
 <listitem><para>
   jest to liczba ca³kowita z zakresu od <literal>1</literal> do <literal>6</literal>, 
-  która u¿ywana jest do podania liczby dróg rutowania. Ten parametr jest opcjonalny. 
-  Je¿eli jest pominiêty, stosowane jest domy¶lne rutowanie.
+  która u¿ywana jest do okre¶lenia liczby dróg przekierowania. Parametr ten jest
+  opcjonalny. Je¿eli jest pominiêty, stosowane jest domy¶lne przekierowanie.
 </para></listitem>
 </varlistentry>
 
@@ -591,33 +592,32 @@ je¿eli nie jest u¿ywany. Liczba parametrów jest dynamiczna:
 <term><option>od1:do1:od2:do2:od3:do3...</option></term>
 <listitem><para>
   to pary liczb pomiêdzy <literal>0</literal> a <literal>5</literal>, które
-  okre¶laj± gdzie poszczególny kana³ ma byæ przekierowywany.
+  okre¶laj± gdzie poszczególne kana³y maj± byæ przekierowywane.
 </para></listitem>
 </varlistentry>
 </variablelist>
 
 <para>
-  Je¿eli tylko opcja <option>nch</option> jest podana, u¿yte jest domy¶lne przekierowywanie,
-  dzia³a ono nastêpuj±co: Je¿eli ilo¶æ kana³ów wyj¶ciowych jest wiêksza ni¿ 
-  wej¶ciowych, tworzone s± puste kana³y (poza miksowaniem z mono do stereo, 
-  wtedy kana³ mono jest powtarzany w obu kana³ach wyj¶ciowych). Je¿eli ilo¶æ 
-  kana³ów wyj¶ciowych jest mniejsza ni¿ wej¶ciowych, nadmiarowe kana³y bêd± usuwane.
+  Je¿eli podana jest tylko opcja <option>nch</option>, filtr u¿ywa domy¶lnego
+  przekierowywanie, które dzia³a nastêpuj±co: Je¶li liczba kana³ów wyj¶ciowych jest
+  wiêksza ni¿ wej¶ciowych, tworzone s± puste kana³y (w przypadku miksowania z mono
+  do stereo, kana³ mono jest powtarzany w obu kana³ach wyj¶ciowych). Je¿eli liczba
+  kana³ów wyj¶ciowych jest mniejsza ni¿ wej¶ciowych, nadmiarowe kana³y s± usuwane.
 </para>
 
 <para>
 Przyk³ad 1:
 <screen>mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi</screen>
-zmieni ilo¶æ kana³ów na 4 i ustawia 4 drogi przekierowywania, które zamieniaj±
-kana³ 1 z 0, a 2 i 3 pozostawiaj± bez zmian. Zauwa¿, ¿e je¿eli odtwarzany
-by³ no¶nik zawieraj±ce 2 kana³y, kana³y 2 i 3 bêd± puste ale
-0 i 1 ci±gle zamienione.
+zmieni liczbê kana³ów na 4 i ustawi 4 drogi przekierowywania, które zamieniaj±
+kana³ 1 z 0, a 2 i 3 pozostawiaj± bez zmian. Zauwa¿, ¿e je¿eli odtwarzany by³
+no¶nik zawieraj±ce 2 kana³y, to kana³y 2 i 3 bêd± puste, ale 0 i 1 nadal bêd±
+zamienione.
 </para>
-
 
 <para>
 Przyk³ad 2:
 <screen>mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi</screen>
-zmieni ilo¶æ kana³ów na 6 i ustawi 4 drogi przekierowywania, które skopiuj±
+zmieni liczbê kana³ów na 6 i ustawi 4 drogi przekierowywania, które skopiuj±
 kana³ 0 do 0 i 3. Kana³y 4 i 5 bêd± puste.
 </para>
 </sect4>
@@ -625,8 +625,8 @@ kana³ 0 do 0 i 3. Kana³y 4 i 5 bêd± puste.
 <sect4 id="af_format">
 <title>Konwerter formatu próbek (sample format converter)</title>
 <para>
-Filtr formatu (<option>format</option> filter)  przekszta³ca ró¿ne formaty
-próbek w inne. Jest automatycznie uruchamiany, kiedy jest potrzebny przez 
+Filtr formatu (<option>format</option> filter) przekszta³ca jedne formaty
+próbek w inne. Jest uruchamiany automatycznie, je¶li tylko jest wymagany przez 
 kartê lub inny filtr d¼wiêkowy.
 </para>
 
@@ -635,21 +635,20 @@ kartê lub inny filtr d¼wiêkowy.
 <term><option>bps &lt;numer&gt;</option></term>
 <listitem><para>
     mo¿e mieæ warto¶æ <literal>1</literal>, <literal>2</literal> lub 
-    <literal>4</literal>, okre¶la ilo¶æ bajtów przypadaj±c± na próbkê. Parametr 
-    ten jest wymagany, je¿eli nie zostanie podany, program wywo³a b³±d uruchamiania
-    (runtime error).
+    <literal>4</literal>, okre¶la liczbê bajtów przypadaj±c± na próbkê. Parametr 
+    ten jest wymagany. Nie podanie go spowoduje b³±d uruchamiania (runtime error).
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>f &lt;format&gt;</option></term>
 <listitem><para>
-    jest ci±giem znaków, okre¶laj±cych próbkê. Ci±g jest kombinacj±:
+    jest ci±giem znaków okre¶laj±cym format próbki. Ci±g jest kombinacj±:
     <option>alaw</option>, <option>mulaw</option> lub
     <option>imaadpcm</option>, <option>float</option> lub <option>int</option>,
     <option>unsigned</option> lub <option>signed</option>, <option>le</option> lub
-    <option>be</option> (little lub big endian). Opcja ta jest wymagana, je¿eli
-    nie zostanie podana, program wywo³a b³±d podczas uruchamiania (runtime error).
+    <option>be</option> (little lub big endian). Opcja ta jest wymagana. Jej nie
+    podanie, spowoduje b³±d podczas uruchamiania (runtime error).
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -662,7 +661,7 @@ ustawi format wyj¶ciowy na 4 bajty danych zmiennoprzecinkowych przypadaj±cych na
 </sect4>
 
 <sect4 id="af_delay">
-<title>Opó¼nianie (delay)</title>
+<title>Opó¼nienie (delay)</title>
 <para>
 Filtr opó¼niaj±cy (<option>delay</option> filter) opó¼nia d¼wiêk zmierzaj±cy do
 g³o¶ników, tak ¿eby strumienie d¼wiêkowe z ró¿nych kana³ów dotar³y do nich 
@@ -674,7 +673,7 @@ ma kilka opcji:
 <varlistentry>
 <term><option>d1:d2:d3...</option></term>
 <listitem><para>
-    s± liczbami rzeczywitymi, które przedstawiaj± opó¼nienie w ms,
+    s± liczbami rzeczywistymi okre¶laj±cymi opó¼nienie w milisekundach,
     które powinno byæ zastosowane do ka¿dego kana³u. Minimalna warto¶æ to 0ms a 
     maksymalna to 1000ms.
 </para></listitem>
@@ -682,7 +681,7 @@ ma kilka opcji:
 </variablelist>
 
 <para>
-Aby obliczyæ opó¼nienie dla poszczególnych kana³ów, wykonaj co nastêpuje:
+Aby obliczyæ opó¼nienie dla poszczególnych kana³ów, wykonaj nastêpuje czynno¶ci:
 </para>
 
 <orderedlist>
@@ -704,7 +703,7 @@ Oblicz opó¼nienia w nastêpuj±cy sposób
 <para>
 Przyk³ad:
 <screen>mplayer -af delay=10.5:10.5:0:0:7:0 media.avi</screen>
-opó¼ni lewy i prawy przedni g³o¶nik o 10.5ms, dwa tylnie i subwoofer o 0ms a
+opó¼ni lewy i prawy przedni g³o¶nik o 10,5ms, dwa tylne i subwoofer o 0ms a
 centralny o 7ms.
 </para>
 
@@ -716,11 +715,11 @@ centralny o 7ms.
 <para>Programowa regulacja g³o¶no¶ci (software volume control) jest obs³ugiwana
 poprzez filtr g³o¶no¶ci (<option>volume</option> filter). U¿ywaj go ostro¿nie,
 gdy¿ mo¿e obni¿yæ stosunek sygna³u do szumu. W wiêkszo¶ci wypadków
-najlepszym rozwi±zaniem jest ustawienie miksera PCM na maksymaln± warto¶æ, wy³±czy to 
-filtr, a Ty bêdziesz móg³ regulowaæ g³o¶no¶æ poprzez g³o¶niki. Je¿eli Twoja karta
+najlepszym rozwi±zaniem jest ustawienie miksera PCM na maksymaln± warto¶æ, wy³±czenie 
+filtru i regulacja g³o¶no¶ci poziomem g³o¶no¶ci ogólnej miksera. Je¿eli Twoja karta
 ma cyfrowy mikser PCM zamiast analogowego i zauwa¿ysz przek³amania, u¿yj miksera 
 MASTER. Je¿eli do komputera pod³±czony jest zewnêtrzny wzmacniacz 
-(tak to zazwyczaj wygl±da), poziom ha³asu mo¿e zostaæ zredukowany poprzez 
+(co zazwyczaj ma miejsce), poziom ha³asu mo¿e zostaæ zredukowany poprzez 
 dostrojenie g³ównego poziomu g³o¶no¶ci (master level) i pokrêt³a g³o¶no¶ci, 
 dopóki syczenie w tle nie ustanie. Filtr ma dwie opcje:
 </para>
@@ -739,10 +738,10 @@ dopóki syczenie w tle nie ustanie. Filtr ma dwie opcje:
 <term><option>c</option></term>
 <listitem><para>
     jest binarn± warto¶ci± która w³±cza lub wy³±cza miêkkie obcinanie (soft-clipping). 
-    Miêkkie obcinanie (soft-clipping)  mo¿e sprawiæ, ¿e d¼wiêk bêdzie ³agodniejszy,
+    Miêkkie obcinanie (soft-clipping) mo¿e sprawiæ, ¿e d¼wiêk bêdzie ³agodniejszy,
     je¿eli wysokie poziomy d¼wiêku s± u¿yte. Uaktywnij tê opcjê, je¿eli moc
-    g³o¶ników jest zbyt niska. Zwróæ uwagê, ¿e ta metoda tworzy przek³amania i
-    powinna zostaæ u¿yta w ostateczno¶ci.
+    g³o¶ników jest zbyt niska. Zwróæ uwagê, ¿e ta metoda powoduje przek³amania
+    i powinna byæ u¿ywana tylko w ostateczno¶ci.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -750,7 +749,7 @@ dopóki syczenie w tle nie ustanie. Filtr ma dwie opcje:
 <para>
 Przyk³ad:
 <screen>mplayer -af volume=10.1:0 media.avi</screen>
-wzmocni d¼wiêk o 10.1dB i zastosuje metodê twardego obcinania (hard-clip), je¿eli 
+wzmocni d¼wiêk o 10,1dB i zastosuje metodê twardego obcinania (hard-clip), je¿eli 
 poziom d¼wiêku jest za wysoki.
 </para>
 
@@ -765,11 +764,10 @@ osi±gniêcia.
 <sect4 id="af_equalizer">
 <title>Korektor (equalizer)</title>
 <para>
-Filtr korektora (<option>equalizer</option> filter) to 10 oktawowy,
-graficzny korektor pasm, zaimplementowany
-przy pomocy filtrów przej¶æ 10 pasm IIR (10 IIR band pass filters). Oznacza to,
-¿e dzia³a bez wzglêdu na format odtwarzanego d¼wiêku. ¦rodkowe
-czêstotliwo¶ci dla 10 pasm to:
+Filtr korektora (<option>equalizer</option> filter) to 10 oktawowy korektor graficzny
+zaimplementowany przy pomocy dziesiêciopasmowego filtra IIR (10 IIR band pass filters).
+Oznacza to, ¿e dzia³a bez wzglêdu na format odtwarzanego d¼wiêku. ¦rodkowe
+czêstotliwo¶ci dla tych 10 pasm to:
 </para>
 
 <informaltable>
@@ -780,16 +778,16 @@ czêstotliwo¶ci dla 10 pasm to:
   </row>
 </thead>
 <tbody>
-  <row><entry>0</entry><entry>31.25 Hz</entry></row>
-  <row><entry>1</entry><entry>62.50 Hz</entry></row>
-  <row><entry>2</entry><entry>125.0 Hz</entry></row>
-  <row><entry>3</entry><entry>250.0 Hz</entry></row>
-  <row><entry>4</entry><entry>500.0 Hz</entry></row>
-  <row><entry>5</entry><entry>1.000 kHz</entry></row>
-  <row><entry>6</entry><entry>2.000 kHz</entry></row>
-  <row><entry>7</entry><entry>4.000 kHz</entry></row>
-  <row><entry>8</entry><entry>8.000 kHz</entry></row>
-  <row><entry>9</entry><entry>16.00 kHz</entry></row>
+  <row><entry>0</entry><entry>31,25 Hz</entry></row>
+  <row><entry>1</entry><entry>62,50 Hz</entry></row>
+  <row><entry>2</entry><entry>125,0 Hz</entry></row>
+  <row><entry>3</entry><entry>250,0 Hz</entry></row>
+  <row><entry>4</entry><entry>500,0 Hz</entry></row>
+  <row><entry>5</entry><entry>1,000 kHz</entry></row>
+  <row><entry>6</entry><entry>2,000 kHz</entry></row>
+  <row><entry>7</entry><entry>4,000 kHz</entry></row>
+  <row><entry>8</entry><entry>8,000 kHz</entry></row>
+  <row><entry>9</entry><entry>16,00 kHz</entry></row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -829,13 +827,13 @@ prawie ca³kowicie oko³o 1kHz.
 <title>Filtr pan (panning filter)</title>
 <para>
 U¿yj filtru pan (<option>pan</option> filter), ¿eby dowolnie miksowaæ kana³y. Najpro¶ciej 
-t³umacz±c jest to po³±czenie programowej regulacji g³o¶no¶ci± (software volume control) i 
-filtru kana³ów (channels filter). Istniej± jego 2 podstawowe zastosowania:
+t³umacz±c jest to po³±czenie programowej regulacji g³o¶no¶ci (software volume control) i 
+filtru kana³ów (channels filter). Istniej± dla niego 2 podstawowe zastosowania:
 </para>
 
 <orderedlist>
 <listitem><para>
-Miksowanie wielu kana³ów w mniejsz± ilo¶æ, stereo do mono na przyk³ad.
+Miksowanie wielu kana³ów w mniejsz± liczbê, na przyk³ad stereo do mono.
 </para></listitem>
 <listitem><para>
 Zmienianie &quot;szeroko¶ci&quot; centralnego g³o¶nika w systemie przestrzennym.
@@ -845,7 +843,7 @@ Zmienianie &quot;szeroko¶ci&quot; centralnego g³o¶nika w systemie przestrzennym.
 <para>
 Filtr jest trudny w u¿yciu i bêdzie wymaga³ zastosowania ¿mudnej metody prób i b³êdów,
 zanim zostanie osi±gniêty oczekiwany rezultat. Liczba parametrów filtru zale¿y od
-ilo¶ci kana³ów:
+liczby kana³ów:
 </para>
 
 <variablelist>
@@ -853,8 +851,8 @@ ilo¶ci kana³ów:
 <term><option>nch &lt;1-6&gt;</option></term>
 <listitem><para>
 jest liczb± ca³kowit± z przedzia³u od <literal>1</literal> do <literal>6</literal> i 
-jest u¿ywana w celu okre¶lenia liczby kana³ów wyj¶ciowych. Opcja ta jest wymagana, 
-je¿eli nie zostanie podana, program wywo³a b³±d uruchamiania (runtime error).
+jest u¿ywana w celu okre¶lenia liczby kana³ów wyj¶ciowych. Opcja ta jest wymagana.
+Nie podanie jej spowoduje b³±d uruchamiania (runtime error).
 </para></listitem>
 </varlistentry>
 
@@ -862,7 +860,7 @@ je¿eli nie zostanie podana, program wywo³a b³±d uruchamiania (runtime error).
 <term><option>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</option></term>
 <listitem><para>
 s± liczbami rzeczywistymi z przedzia³u od <literal>0</literal> do
-<literal>1</literal>. <option>l[i][j]</option> ustala ile procent kana³u wej¶ciowego j 
+<literal>1</literal>. <option>l[i][j]</option> ustala ile procent kana³u wej¶ciowego j
 ma byæ zmiksowanych do kana³u wyj¶ciowego i.
 </para></listitem>
 </varlistentry>
@@ -877,7 +875,7 @@ zmiksuje kana³y ze stereo do mono.
 <para>
 Przyk³ad 2:
 <screen>mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi</screen>
-da 3 kana³ wyj¶ciowy, zostawiaj±c 0 i 1 nietkniêtymi i miksuj±c kana³y 0 i 1
+da 3 kana³ wyj¶ciowy, zostawiaj±c 0 i 1 nietkniête i miksuj±c kana³y 0 i 1
 do 2 kana³u wyj¶ciowego (który mo¿e byæ na przyk³ad wys³any do subwoofera).
 </para>
 </sect4>
@@ -930,7 +928,7 @@ doda kana³ subwoofera z czêstotliwo¶ci± graniczn± równ± 100Hz do 4 kana³u wyj¶ci
 Macierzowo zakodowany d¼wiêk przestrzenny, mo¿e byæ zdekodowany filtrem przestrzennym
 (<option>surround</option> filter). Dolby Surround jest przyk³adem
 formatu zakodowanego macierzowo. Wiele plików zawieraj±cych 2 kana³y audio,
-faktycznie zawiera d¼wiêk przestrzenny zakodowany w tym systemie. Aby u¿yæ 
+w rzeczywisto¶ci zawiera d¼wiêk przestrzenny zakodowany w tym systemie. Aby u¿yæ 
 tego filtru potrzebujesz karty z obs³ug± przynajmniej 4 kana³ów. Filtr 
 posiada jedn± opcjê:
 </para>
@@ -952,7 +950,7 @@ je¿eli d1 &gt; d2. Domy¶lna warto¶æ dla d to 20ms.
 <para>
 Przyk³ad:
 <screen>mplayer -af surround=15 -channels 4 media.avi</screen>
-doda d¼wiêk przestrzenny dekoduj±c z 15ms opó¼nieniem d¼wiêk dla tylnych g³o¶ników.
+doda d¼wiêk przestrzenny dekoduj±c d¼wiêk dla tylnych g³o¶ników z opó¼nieniem 15ms.
 </para>
 </sect4>
 
@@ -967,8 +965,8 @@ Zmapowane obszary zawieraj± nag³ówek:
 int nch                      /*ilo¶æ kana³ów*/
 int size		     /*rozmiar bufora*/
 unsigned long long counter   /*U¿ywany do zachowania synchronizacji, 
-                               aktualizowany za ka¿dym razem kiedy nowe dane
-			       s± eksportowane.*/
+                               aktualizowany za ka¿dym razem kiedy
+                               eksportowane s± nowe dane.*/
 </programlisting>
 Reszta to 16-bitowe dane (bez przeplotu).
 </para>
@@ -1000,8 +998,8 @@ wyeksportuje 1024 próbek na kana³ do <filename>/tmp/mplayer-af_export</filename>
 
 <sect3 id="audio-plugins">
 <title>Wtyczki Audio (odradzane)</title>
-<note><para><emphasis role="bold">Wtyczki audio zosta³y wyparte przez filtry audio i 
-wkrótce zostan± usuniête.</emphasis></para></note>
+<note><para><emphasis role="bold">Wtyczki audio zosta³y zast±pione przez filtry
+audio i wkrótce zostan± usuniête.</emphasis></para></note>
 
 <para>
 <application>MPlayer</application> ma obs³ugê wtyczek audio. Mog± one byæ
@@ -1020,8 +1018,8 @@ przepu¶ci d¼wiêk przez wtyczkê zmieniaj±c± czêstotliwo¶æ próbkowania
 <para>
 Wtyczki równie¿ posiadaj± parametry, które zmieniaj± ich zachowanie. Opisane s± 
 one dok³adniej w sekcji poni¿ej. Wtyczka uruchomi siê z domy¶lnymi warto¶ciami, 
-je¿eli pominiemy jej opcje.  Poni¿ej podany jest przyk³ad u¿ycia wtyczek i 
-ich specyficznych ustawieñ:
+je¿eli pominiemy jej opcje. Poni¿ej podany jest przyk³ad u¿ycia wtyczek i ich
+specyficznych ustawieñ:
 
 <screen>mplayer media.avi -aop list=resample,format:fout=44100:format=0x8</screen>
 
@@ -1034,7 +1032,6 @@ na AFMT_U8.
 Obecnie wtyczki audio nie mog± zostaæ u¿yte w <application>MEncoderze</application>.
 </para>
 
-
 <sect4 id="updn-sampling">
 <title>Zwiêkszanie/Zmniejszanie czêstotliwo¶ci próbkowania (up/downsampling)</title>
 
@@ -1042,13 +1039,12 @@ Obecnie wtyczki audio nie mog± zostaæ u¿yte w <application>MEncoderze</applicati
 <application>MPlayer</application> w pe³ni obs³uguje zmniejszanie/zwiêkszanie
 czêstotliwo¶ci próbkowania (up/downsampling) d¼wiêku. Wtyczka ta mo¿e byæ
 u¿yta, je¿eli masz kartê ze sta³± czêstotliwo¶ci± lub posiadasz kartê, która 
-nie jest w stanie przerobiæ wiêcej ni¿ 44.1 kHz. Ograniczenia Twojego sprzêtu
+nie jest w stanie obs³u¿yæ wiêcej ni¿ 44,1 kHz. Ograniczenia Twojego sprzêtu
 nie s± automatycznie wykrywane, wiêc musisz wyra¼nie podaæ czêstotliwo¶æ.
 Wtyczka ma jeden prze³±cznik: <option>fout</option>, który u¿ywany jest do
 ustawiania ¿±danej czêstotliwo¶ci wyj¶ciowej. Domy¶ln± warto¶ci± jest
 48 kHz i podawana jest w Hz.
 </para>
-
 
 <para>
 Sposób u¿ycia:
@@ -1076,9 +1072,9 @@ zak³ócenia d¼wiêku.
 <para>
 <application>MPlayer</application> posiada wtyczkê, która umo¿liwia dekodowanie
 macierzowo zakodowanego d¼wiêku przestrzennego. Dolby Surround jest przyk³adem
-takiego formatu.  Wiele plików zawieraj±cych 2 kana³y audio faktycznie zawiera
-d¼wiêk przestrzenny zakodowany macierzowo. Aby skorzystaæ z tej w³a¶ciwo¶ci potrzebujesz karty
-z obs³ug± przynajmniej 4 kana³ów.
+takiego formatu. Wiele plików zawieraj±cych 2 kana³y audio w rzeczywisto¶ci zawiera
+d¼wiêk przestrzenny zakodowany macierzowo. Aby skorzystaæ z tej w³a¶ciwo¶ci
+potrzebujesz karty z obs³ug± przynajmniej 4 kana³ów.
 </para>
 
 <para>
@@ -1092,8 +1088,8 @@ Sposób u¿ycia:
 <title>Konwerter formatu próbek (sample format converter)</title>
 
 <para>
-Je¿eli Twój sterownik do karty d¼wiêkowej nie obs³uguje 16-bitowego typu danych ze znakiem,
-ta wtyczka mo¿e byæ u¿yta do jego zmiany na format zrozumia³y dla 
+Je¿eli Twój sterownik do karty d¼wiêkowej nie obs³uguje 16-bitowego typu danych
+ze znakiem, wtyczka ta mo¿e byæ u¿yta do jego zmiany na format zrozumia³y dla 
 karty. Posiada jeden parametr - <option>format</option>, który mo¿e byæ ustawiony
 na jedn± z warto¶ci umieszczonych w <filename>libao2/afmt.h</filename>. Wtyczka 
 ta jest raczej rzadko potrzebna i jest przeznaczona dla zaawansowanych u¿ytkowników.
@@ -1118,7 +1114,7 @@ próbki.
 Wtyczka opó¼nia d¼wiêk i jest przyk³adem tego, jak tworzyæ nowe wtyczki. Nie ma
 dla niej ¿adnego sensownego zastosowania z punktu widzenia u¿ytkownika i wspomnia³em 
 tylko o niej ze wzglêdu na kompletno¶æ tej dokumentacji. Nie u¿ywaj tej wtyczki,
-chyba ¿e jeste¶ developerem.
+chyba ¿e jeste¶ deweloperem.
 </para>
 </sect4>
 
@@ -1126,19 +1122,18 @@ chyba ¿e jeste¶ developerem.
 <title>Programowa regulacja g³o¶no¶ci± (software volume control)</title>
 
 <para>
-Wtyczka jest programowym odpowiednikiem regulacji g³o¶no¶ci± i mo¿e
-byæ u¿ywana na maszynach z uszkodzonym urz±dzeniem miksuj±cym. Mo¿e byæ równie¿
-przydatna, je¿eli kto¶ chce zmieniæ poziom wyj¶ciowy g³o¶no¶ci w 
-<application>MPlayerze</application> bez zmiany ustawieñ PCM w mikserze. 
-Ma jeden parametr - <option>volume</option>, który s³u¿y do ustawienia pocz±tkowej
-g³o¶no¶ci. Mo¿e przyjmowaæ warto¶ci pomiêdzy 0 a 255. Warto¶ci± domy¶lna jest 101,
-co odpowiada wzmocnieniu równemu 0dB. U¿ywaj tej wtyczki z ostro¿no¶ci±, gdy¿ 
-mo¿esz obni¿yæ poziom sygna³u do szumu. W wiêkszo¶ci wypadków najlepszym 
-rozwi±zaniem jest ustawienie miksera PCM na maksymaln± warto¶æ i, zamiast wtyczk±, 
-regulowaæ g³o¶no¶æ przy pomocy g³o¶ników. Je¿eli do komputera pod³±czony jest zewnêtrzny wzmacniacz 
-(a zazwyczaj jest), poziom ha³asu mo¿e zostaæ zredukowany poprzez
-dostrojenie g³ównego poziomu g³o¶no¶ci (master level) i pokrêt³a g³o¶no¶ci, 
-dopóki syczenie w tle nie ustanie.
+Wtyczka jest programowym odpowiednikiem regulacji g³o¶no¶ci± i mo¿e byæ u¿ywana
+na maszynach z uszkodzonym urz±dzeniem miksuj±cym. Mo¿e byæ równie¿ przydatna,
+je¿eli kto¶ chce zmieniæ poziom wyj¶ciowy g³o¶no¶ci w <application>MPlayerze</application>
+bez zmiany ustawieñ PCM w mikserze. Ma jeden parametr - <option>volume</option>,
+który s³u¿y do ustawienia pocz±tkowej g³o¶no¶ci. Mo¿e przyjmowaæ warto¶ci pomiêdzy
+0 a 255. Warto¶ci± domy¶lna jest 101, co odpowiada wzmocnieniu równemu 0dB. U¿ywaj
+tej wtyczki ostro¿nie, gdy¿ mo¿esz obni¿yæ stosunek sygna³u do szumu. W wiêkszo¶ci
+wypadków najlepszym rozwi±zaniem jest ustawienie miksera PCM na maksymaln± warto¶æ
+i, zamiast wtyczk±, regulowaæ g³o¶no¶æ przy pomocy g³o¶ników. Je¿eli do komputera
+pod³±czony jest zewnêtrzny wzmacniacz (a zazwyczaj jest), poziom ha³asu mo¿e zostaæ
+zredukowany poprzez dostrojenie g³ównego poziomu g³o¶no¶ci (master level)
+i pokrêt³a g³o¶no¶ci, dopóki syczenie w tle nie ustanie.
 </para>
 
 <para>
@@ -1149,9 +1144,9 @@ mplayer <replaceable>media.avi</replaceable> -aop list=volume:volume=<replaceabl
 
 <para>
 Wtyczka ma równie¿ kompresor lub zdolno¶æ do miêkkiego obcinania (soft-clipping).
-Kompresja mo¿e byæ u¿yta, je¿eli dynamika d¼wiêku jest bardzo wysoki lub
+Kompresja mo¿e byæ u¿yta, je¿eli dynamika d¼wiêku jest bardzo wysoka lub
 je¿eli moc g³o¶ników jest zbyt niska. B±d¼ ostro¿ny, poniewa¿ ta
-funkcja tworzy zak³ócenia d¼wiêku i powinna byæ u¿yta w ostateczno¶ci.
+funkcja powoduje zak³ócenia d¼wiêku i powinna byæ u¿yta w ostateczno¶ci.
 </para>
 
 <para>
@@ -1189,7 +1184,7 @@ zmieni, a je¶li na <literal>-1.0</literal>, lewy i prawy kana³ zostan± zamienion
 <title>Normalizator g³o¶no¶ci (volume normalizer)</title>
 
 <para>
-Wtyczka ustawia maksymalny poziom d¼wiêku, bez wywo³ywania zak³óceñ.
+Wtyczka ustawia maksymalny poziom d¼wiêku, bez powodowania zak³óceñ.
 </para>
 
 <para>
