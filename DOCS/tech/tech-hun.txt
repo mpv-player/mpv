@@ -243,5 +243,47 @@ na nezzuk tovabb:
   flip_page(): ez meghivodik minden frame utan, ez kell tenylegesen
    megjelenitse a buffert. double buffering eseten ez lesz a 'swapbuffers'.
   
+6. libao2: ez vezerli a hang lejatszast
 
+  A libvo-hoz (lasd 5.) hasonloan itt is kulonbozo driverek vannak, amik
+  egy kozos API-t (interface) valositanak meg:
+  
+static int control(int cmd,int arg);
+  Ez egy altalanos celu fuggveny, a driverfuggo es egyeb specialis parameterek
+  olvasasara/beallitasara. Egyelore nem nagyon hasznalt.
+
+static int init(int rate,int channels,int format,int flags);
+  Driver initje, ilyenkor kell megnyitni a devicet, beallitani samplerate,
+  channels, sample format parametereket.
+  Sample format: altalaban AFMT_S16_LE vagy AFMT_U8, tovabbi definiciokert
+  lasd. dec_audio.c ill. linux/soundcard.h fileok!
+  
+static void uninit();
+  talald ki.
+  na jo, segitek: lezarja a devicet, kilepeskor (meg nem) hivodik meg.
+  
+static void reset();
+  reseteli a devicet. egesz pontosan a bufferek torlesere szolgal,
+  tehat hogy a reset() utan mar ne szoljon tovabb az amit elotte kapott.
+  (pause ill. seek eseten hivodik meg)
+
+static int get_space();
+  vissza kell adja hogy hany byte irhato az audio bufferbe anelkul hogy
+  blockolna (varakoztatna a hivo processt). amennyiben a buffer (majdnem)
+  tele van, 0-t kell visszaadni!
+  ha sosem ad vissza 0-at akkor nem fog mukodni az MPlayer!
+
+static int play(void* data,int len,int flags);
+  lejatszik egy adag hangot, amit a data cimu memoriateruleten kap, es len
+  a merete. a flags meg nem hasznalt. az adatokat at kell masolnia, mert a
+  hivas utan felulirodhatnak! nem kell feltetlen minden byetot felhasznalni,
+  hanem azt kell visszaadnia mennyit hasznalt fel (masolt a bufferbe).
+
+static int get_delay();
+  vissza kell adja hogy hany byte varakozik az audio bufferben. lehetoleg
+  minel pontosabban, mert ettol fugg az egesz idozites!
+  legrosszabb esetben adja vissza a buffer meretet.
+
+!!!  Mivel a kep a hanghoz (hangkartyahoz) van szinkronizalva, igy nagyon
+!!!  fontos hogy a get-space ill. get_delay fuggvenyek korrektul legyenek megirva!
 
