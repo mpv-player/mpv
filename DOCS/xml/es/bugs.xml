@@ -13,13 +13,16 @@
 </listitem>
 <listitem>
 <para>SIGILL general (señal 4):</para>
-<para>Problema: compiló y corrió MPlayer en máquinas diferentes
-(por ejemplo compilado para P3 y corriendo en un Celeron)</para>
-<para>Solución: ¡Compile MPlayer en la misma máquina que lo va a usar!</para>
+<para>Problema: compiló y corrió <application>MPlayer</application> en
+máquinas diferentes (por ejemplo compilado para P3 y corriendo en un
+Celeron)</para>
+<para>Solución: ¡Compile <application>MPlayer</application> en la misma
+máquina que lo va a usar!</para>
 <para>Solución temporal: Compile usando: <command>./configure --disable-sse</command>, etc. </para>
 </listitem>
 <listitem>
-<para>&quot;Inconsistencia interna del buffer&quot; mientras corre MEncoder:</para>
+<para>&quot;Inconsistencia interna del buffer&quot; mientras ejecuta
+<application>MEncoder</application>:</para>
 <para>Problema: problema conocido cuando lame &lt; 3.90 fue compilado con el gcc 2.96 o 3.x.</para>
 <para>Solución: use lame &gt;=3.90.</para>
 <para>Solución temporal: compile lame con gcc 2.95.x y quite cualquier paquete de lame que ya
@@ -143,7 +146,8 @@ codec usando las opciones <option>-vc</option> o <option>-vfm</option>.
 <listitem>
 <para>
 intentó reproducir un archivo DivX 3.x con el decodificador OpenDivX o XviD
-(<option>-vc odivx</option>) - instale DivX4Linux y recompile <application>MPlayer</application>
+(<option>-vc odivx</option>) - instale DivX4Linux y recompile
+<application>MPlayer</application>
 </para>
 </listitem>
 </itemizedlist>

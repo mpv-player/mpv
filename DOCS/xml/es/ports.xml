@@ -7,17 +7,18 @@
 <title>Linux</title>
 <para>
 La principal plataforma de desarrollo es Linux en x86, sin embargo
-<application>MPlayer</application> funciona en muchas otras adaptaciones de Linux.
-Los paquetes binarios de MPlayer están disponibles desde muchos sitios.
-Sin embargo <emphasis role="bold">ninguno de estos paquetes tiene soporte</emphasis>.
-Reporte los problemas a sus autores, no a nosotros.
+<application>MPlayer</application> funciona en muchas otras adaptaciones de
+Linux. Los paquetes binarios de <application>MPlayer</application> están
+disponibles desde muchos sitios. Sin embargo <emphasis role="bold">ninguno
+de estos paquetes tiene soporte</emphasis>. Reporte los problemas a sus
+autores, no a nosotros.
 </para>
 
 <sect2 id="debian">
 <title>Empaquetado para Debian</title>
 <para>
 Para construir un paquete de Debian, ejecute la siguiente órden en el directorio
-de fuentes de MPlayer:
+de fuentes de <application>MPlayer</application>:
 <screen>fakeroot debian/rules binary</screen>
 Y después puede instalar el paquete <filename>.deb</filename> como root de la
 manera habitual:
@@ -25,9 +26,11 @@ manera habitual:
 </para>
 
 <para>
-Christian Marillat ha hecho los paquetes no oficiales de MPlayer para Debian,
-de MEncoder y de tipografías para que en un momento, pueda (apt-)obtenerlos desde
-su <ulink url="http://marillat.free.fr/">página personal</ulink>.
+Christian Marillat ha hecho los paquetes no oficiales de
+<application>MPlayer</application> para Debian, de
+<application>MEncoder</application> y de tipografías para que en un momento,
+pueda (apt-)obtenerlos desde su <ulink url="http://marillat.free.fr/">página
+personal</ulink>.
 </para>
 </sect2>
 
@@ -42,7 +45,8 @@ Dominik Mierzejewski ha creado y mantiene los paquetes oficiales RPM para Red Ha
 <para>
 Los paquetes RPM para Mandrake están disponibles en el
 <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
-SuSE los usa para incluir una versión mutilada de MPlayer en su distribución.
+SuSE los usa para incluir una versión mutilada de
+<application>MPlayer</application> en su distribución.
 Esta versión será eliminada en sus próximas liberaciones. Puede obtener RPMs
 que funcionan desde
 <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
@@ -52,15 +56,17 @@ que funcionan desde
 <sect2 id="arm">
 <title>ARM</title>
 <para>
-MPlayer funciona en PDAs con Linux en CPU ARM p.e. Sharp Zaurus, Compaq Ipaq. La
-manera más facil de obtener MPlayer es bajarlo desde uno de los sitios de paquetes de
-<ulink url="http://www.openzaurus.org">OpenZaurus</ulink>. Si desea compilarlo usted
-mismo, debe mirar en
+<application>MPlayer</application> funciona en PDAs con Linux en CPU ARM p.e.
+Sharp Zaurus, Compaq Ipaq. La manera más facil de obtener
+<application>MPlayer</application> es bajarlo desde uno de los sitios de
+paquetes de <ulink url="http://www.openzaurus.org">OpenZaurus</ulink>. Si
+desea compilarlo usted mismo, debe mirar en
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</ulink>
 y el directorio 
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
-en el raiz de la distribución de OpenZaurus. Ahí siempre tienen los Makefile y parches
-más recientes usados para construir un MPlayer desde CVS con
+en el raiz de la distribución de OpenZaurus. Ahí siempre tienen los Makefile
+y parches más recientes usados para construir un
+<application>MPlayer</application> desde CVS con
 <systemitem class="library">libavcodec</systemitem>.
 Si necesita un entorno GUI, puede usar xmms-embebido.
 </para>
@@ -71,25 +77,27 @@ Si necesita un entorno GUI, puede usar xmms-embebido.
 <title>*BSD</title>
 <para>
 <application>MPlayer</application> funciona en FreeBSD, OpenBSD, NetBSD,
-BSD/OS y Darwin. Hay versiones ports/pkgsrc/fink/etc de MPlayer disponibles
-que son probablemente más faciles de usar que nuestras fuentes crudas.
+BSD/OS y Darwin. Hay versiones ports/pkgsrc/fink/etc de
+<application>MPlayer</application> disponibles que son probablemente más
+faciles de usar que nuestras fuentes en crudo.
 </para>
 
 <para>
-Para construir MPlayer necesita GNU make (gmake - el make nativo de BSD
-no funciona) y una versión reciente de binutils.
+Para construir <application>MPlayer</application> necesita GNU make (gmake -
+el make nativo de BSD no funciona) y una versión reciente de binutils.
 </para>
 
 <para>
-Si MPlayer se queja de que no encuentra <filename>/dev/cdrom</filename> o
-<filename>/dev/dvd</filename>, cree un enlace simbólico apropiado:
+Si <application>MPlayer</application> se queja de que no encuentra
+<filename>/dev/cdrom</filename> o <filename>/dev/dvd</filename>,
+cree un enlace simbólico apropiado:
 <screen>ln -s /dev/<replaceable>(su_dispositivo_de_cdrom)</replaceable> /dev/cdrom</screen>
 </para>
 
 <para>
-Para usar DLLs Win32 con MPlayer necesita re-compilar el kernel con la
-&quot;<envar>opción USER_LDT</envar>&quot; (a no ser que ejecute FreeBSD-CURRENT,
-donde es así por defecto).
+Para usar DLLs Win32 con <application>MPlayer</application> necesita
+re-compilar el kernel con la &quot;<envar>opción USER_LDT</envar>&quot;
+(a no ser que ejecute FreeBSD-CURRENT, donde es así por defecto).
 </para>
 
 
@@ -127,14 +135,15 @@ Vea la sección <link linkend="macos">Mac OS</link>.
 </para>
 
 <para>
-En <emphasis role="bold">UltraSPARCs</emphasis>, MPlayer tiene la ventaja de
-las extensiones <emphasis role="bold">VIS</emphasis> (equivalentes a MMX), actualmente
+En <emphasis role="bold">UltraSPARCs</emphasis>,
+<application>MPlayer</application> tiene la ventaja de las extensiones
+<emphasis role="bold">VIS</emphasis> (equivalentes a MMX), actualmente
 solo en
 <systemitem class="library">libmpeg2</systemitem>,
 <systemitem class="library">libvo</systemitem> y
 <systemitem class="library">libavcodec</systemitem>, pero no en
-<systemitem class="library">mp3lib</systemitem>. Puede ver un archivo VOB en una
-CPU a 400MHz. Necesita tener
+<systemitem class="library">mp3lib</systemitem>. Puede ver un archivo
+VOB en una CPU a 400MHz. Necesita tener
 <ulink url="http://www.sun.com/sparc/vis/mediaLib.html"><systemitem class="library">mLib</systemitem></ulink>
 instalado.
 </para>
@@ -157,7 +166,8 @@ GNU C/C++ está configurado con o sin el ensamblador GNU.
 
 <para>
 En Solaris x86, necesita el ensamblador GNU y el compilador GNU C/C++,
-¡configurado para usar el ensamblador GNU! El código de MPlayer en la plataforma
+¡configurado para usar el ensamblador GNU! El código de
+<application>MPlayer</application> en la plataforma
 x86 hace dificil el uso de las instrucciones de MMX, SSE y 3DNOW! que no puede
 ser compilado usando el ensamblador de Sun <filename>/usr/ccs/bin/as</filename>.
 </para>
@@ -225,7 +235,8 @@ El problema hsfs puede ser corregido instalando el parche 109764-04 (sparc) /
 <para>
 En Solaris con una CPU UltraSPARC, puede obtener alguna velocidad extra usando
 las instrucciones VIS de la CPU para algunas operaciones que consumen un tiempo.
-La acelación VIS puede ser usada en MPlayer llamando a funciones en la
+La acelación VIS puede ser usada en <application>MPlayer</application>
+llamando a funciones en la
 <ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mediaLib</ulink> de Sun.
 </para>
 
@@ -259,7 +270,8 @@ por:
 
   $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </programlisting>
-Y entonces haga (desde el directorio de fuentes de MPlayer):
+Y entonces haga (desde el directorio de fuentes de
+<application>MPlayer</application>):
 <screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
 y después continúe con la construcción e instalación.
 </para>
@@ -282,7 +294,7 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 <sect1 id="windows">
 <title>Windows</title>
 
-<para>Sí, MPlayer funciona en Windows bajo
+<para>Sí, <application>MPlayer</application> funciona en Windows bajo
   <ulink url="http://www.cygwin.com/">Cygwin</ulink> y
   <ulink url="http://www.mingw.org/">MinGW</ulink>.
   No tiene aún una interfaz gráfica (GUI), pero la versión en línea de órdenes
@@ -307,10 +319,12 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
   pase la opción <option>--with-codecsdir=<replaceable>c:/ruta/a/sus/codecs</replaceable></option>
   (alternativamente
   <option>--with-codecsdir=<replaceable>/ruta/a/sus/codecs</replaceable></option> solo en Cygwin) a
-  <filename>configure</filename>. Tenemos informes de que las DLLs de Real deben tener
-  permisos de escritura para el usuario que usa MPlayer, pero solo en algunos sistemas.
-  Pruebe ha dar permisos de escritura si tiene problemas. Las DLLs de QuickTime también
-  funcionan, pero debe colocarlas en su directorio de sistema de Windows
+  <filename>configure</filename>. Tenemos informes de que las DLLs de Real
+  deben tener permisos de escritura para el usuario que usa
+  <application>MPlayer</application>, pero solo en algunos sistemas.
+  Pruebe ha dar permisos de escritura si tiene problemas. Las DLLs de
+  QuickTime también funcionan, pero debe colocarlas en su directorio de
+  sistema de Windows
   (<filename class="directory"><replaceable>C:\Windows\system\</replaceable></filename>
   o similar).</para>
 
@@ -364,9 +378,10 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 <sect2 id="mingw">
 <title>MinGW</title>
 
-<para>Instalar una versión de MinGW que pueda usarse para compilar MPlayer es
-  bastante artificioso, pero ya funciona fuera de la caja. Solo instale MinGW 3.1.0
-  o posterior y MSYS 1.0.9 o posterior y diga a MSYS en la postinstalación que MinGW
+<para>Instalar una versión de MinGW que pueda usarse para compilar
+  <application>MPlayer</application> es bastante artificioso, pero ya
+  funciona fuera de la caja. Solo instale MinGW 3.1.0 o posterior y MSYS
+  1.0.9 o posterior y diga a MSYS en la postinstalación que MinGW
   está instalado.</para>
 
 <para>Si usa una versión de MinGW anterior a la 3.1.0, necesita reemplazar

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- synced with 1.19 -->
 <chapter id="mencoder">
-<title>Codificando con MEncoder</title>
+<title>Codificando con <application>MEncoder</application></title>
 
 <para>
 Para una lista completa de las opciones de <application>MEncoder</application>
@@ -75,8 +75,8 @@ codificado una sola vez, y no como en el modo 2-pasadas. De manera esquemática:
 mencoder <replaceable>file/DVD</replaceable> -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1:vbitrate=<replaceable>bitrate</replaceable><!--
 --></screen>
 Esta es la primera pasada de la codificación de video. Opcionalmente puede
-especificar la tasa de bits de video que predijo MEncoder cuando terminó la
-primera pasada.
+especificar la tasa de bits de video que predijo
+<application>MEncoder</application> cuando terminó la primera pasada.
   </para></step>
 <step><para>
   <emphasis>Tercera pasada:</emphasis>
@@ -117,13 +117,14 @@ video MPEG1, y audio en MPEG1 layer 2 (MP2) en los archivos MPEG.
 
 <para>
 Esta característica no es muy útil ahora, por un lado probablemente tenga muchos
-fallos, pero lo más importante es porque MEncoder actualmente no codifica audio
-MPEG1 layer 2 (MP2), que es lo que otros reproductores esperan en los archivos MPEG.
+fallos, pero lo más importante es porque <application>MEncoder</application>
+actualmente no codifica audio MPEG1 layer 2 (MP2), que es lo que otros
+reproductores esperan en los archivos MPEG.
 </para>
 
 <para>
-Para cambiar el formato del archivo de salida de MEncoder, use la opción
-<option>-of mpeg</option>.
+Para cambiar el formato del archivo de salida de
+<application>MEncoder</application>, use la opción <option>-of mpeg</option>.
 </para>
 
 <para>
@@ -214,7 +215,7 @@ mencoder -idx <replaceable>entrada.avi</replaceable> -ovc copy -oac copy -o <rep
 
 <para>
 Como un efecto co-lateral, la función de corregir AVI's sin índice habilita a
-MEncoder para unir 2 (o más) archivos AVI:
+<application>MEncoder</application> para unir 2 (o más) archivos AVI:
 </para>
 
 <para>
@@ -1069,11 +1070,11 @@ Notas:
   desventajas. Consulte <option>mplayer -pphelp</option> para ver
   qué hay disponible (grep &quot;deint&quot;), y busque en las
   <ulink url="http://www.mplayerhq.hu/homepage/design6/info.html#mailing_lists">
-  listas de correo MPlayer</ulink> para encontrar discusiones acerca
-  de varios filtros. De nuevo, la tasa de bits por segundo no cambia, nada de
-  <option>-ofps</option>. Además, el desentrelazado debe hacerse después
-  del recortado <link linkend="menc-feat-telecine-footnotes">[1]</link> y
-  antes del escalado.
+  listas de correo <application>MPlayer</application></ulink> para encontrar
+  discusiones acerca de varios filtros. De nuevo, la tasa de bits por segundo
+  no cambia, nada de <option>-ofps</option>. Además, el desentrelazado debe
+  hacerse después del recortado <link linkend="menc-feat-telecine-footnotes">
+  [1]</link> y antes del escalado.
 
   <screen>mencoder dvd://1 -nosound -vf pp=lb -ovc lavc</screen>
   </para></listitem>

@@ -133,7 +133,8 @@ su tarjeta de sonido por medio de un cable de conexión externo entre la placa
 sintonizadora y la linea de entrada, o usando el chip ADC incorporado en el chip
 bt878. En este ultimo caso, deberá cargar el controlador <emphasis role="bold">btaudio
 </emphasis>. Lea el archivo <filename>linux/Documentation/sound/btaudio</filename>
-(en el árbol de directorio del núcleo, no el de MPlayer) para instrucciones de como
+(en el árbol de directorio del núcleo, no el de
+<application>MPlayer</application>) para instrucciones de como
 usar este controlador.
 </para>
 </listitem>
@@ -175,10 +176,11 @@ mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://
 
 <informalexample>
 <para>
-Un ejemplo más sofisticado. Esto hace que MEncoder capture la imagen completa
-PAL, corte los margenes y desentrelazando la imagen usando un algoritmo linear
-blend. El audio es comprimido con una tasa de bits constante de 64kbps, usando
-el codec LAME. Esta configuración es satisfactoria para capturar películas.
+Un ejemplo más sofisticado. Esto hace que <application>MEncoder</application>
+capture la imagen completa PAL, corte los margenes y desentrelazando la
+imagen usando un algoritmo linear blend. El audio es comprimido con una
+tasa de bits constante de 64kbps, usando el codec LAME. Esta configuración
+es satisfactoria para capturar películas.
 <screen>
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \

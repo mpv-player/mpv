@@ -225,10 +225,10 @@ XFree86 :( Las quejas a nVidia.
 </para>
 
 <para>
-Sin embargo, MPlayer contiene un controlador <link linkend="vidix">VIDIX</link>
-para la mayoría de las tarjetas nVidia. Actualmente está en estado beta,
-y tiene algunos problemas. Para más información, vea la sección
-<link linkend="vidix-nvidia">nVidia VIDIX</link>.
+Sin embargo, <application>MPlayer</application> contiene un controlador
+<link linkend="vidix">VIDIX</link> para la mayoría de las tarjetas nVidia.
+Actualmente está en estado beta, y tiene algunos problemas. Para más
+información, vea la sección <link linkend="vidix-nvidia">nVidia VIDIX</link>.
 </para>
 </sect5>
 
@@ -295,8 +295,8 @@ con la tarjeta Cyberblade XP.
 </para>
 
 <para>
-Alternativamente, MPlayer contiene un controlador <link linkend="vidix">VIDIX</link>
-para la tarjeta Cyberblade/i1.
+Alternativamente, <application>MPlayer</application> contiene un controlador
+<link linkend="vidix">VIDIX</link> para la tarjeta Cyberblade/i1.
 </para>
 
 </sect5>
@@ -366,7 +366,7 @@ sistemas...
 </para>
 
 <formalpara>
-<title>INSTALANDO SOPORTE DGA PARA MPLAYER</title>
+<title>INSTALANDO SOPORTE DGA PARA <application>MPlayer</application></title>
 
 <para>Primero asegura que X carga la extensión DGA, mira en
 <filename>/var/log/XFree86.0.log</filename>:
@@ -459,7 +459,7 @@ EndSection
 
 
 <formalpara>
-<title>DGA &amp; MPLAYER</title>
+<title>DGA &amp; <application>MPlayer</application></title>
 <para>
 DGA es usado en dos lugares con <application>MPlayer</application>: El
 controlador SDL puede prepararse para que lo use (<option>-vo sdl:dga</option>)
@@ -1652,7 +1652,8 @@ Por defecto: desactivado</para></listitem>
 
 <varlistentry>
 <term><option>(no)spic</option></term>
-<listitem><para>hace uso de la capa de sub imagen para mostrar el OSD de MPlayer.
+<listitem><para>hace uso de la capa de sub imagen para mostrar el OSD de
+<application>MPlayer</application>.
 Por defecto: activado</para></listitem>
 </varlistentry>
 
@@ -1665,8 +1666,9 @@ correcta en cada campo par/impar. Por defecto: activada</para></listitem>
 
 <varlistentry>
 <term><option>(no)input</option></term>
-<listitem><para>usa el código de teclado de DirectFB en lugar del código de teclado
-normal de MPlayer. Por defecto: desactivado</para></listitem>
+<listitem><para>usa el código de teclado de DirectFB en lugar del código de
+teclado normal de <application>MPlayer</application>. Por defecto:
+desactivado</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -1926,7 +1928,8 @@ tiempo real entre MPEG2 y MPEG4 (descompresión parcial).
 
 <sect4 id="dxr2">
 <title>DXR2</title>
-<para>MPlayer soporta reproducción acelerada por hardware con la tarjeta Creative DXR2.</para>
+<para><application>MPlayer</application> soporta reproducción acelerada por
+hardware con la tarjeta Creative DXR2.</para>
 <para>
 Lo primero que necesita tener es los controladores DRX2 correctamente instalados. Puede
 encontrar estos controladores e instrucciones para su instalación en el sitio
@@ -1981,7 +1984,7 @@ para su instalación en el sitio
 debe funcionar sin problemas.
 </para>
 
-<!-- FIXME: find a more clear presentation -->
+<!-- FIXME: encontrar una presentación más clara -->
 <variablelist>
 <title>USO</title>
 <varlistentry>
@@ -1989,29 +1992,34 @@ debe funcionar sin problemas.
 <listitem><para>
 <option>overlay</option> activa overlay en lugar de TVOut. Requiere que tenga
 una configuración de overlay que funcione correctamente. La manera facil de
-configurar el overlay es iniciar primero autocal. Después ejecute MPlayer con
-salida dxr3 y sin overlay, ejecute dxr3view. En dxr3view puede tocar la
-configuración de overlay y ver los efectos en tiempo real, quizá esta característica
-esté soportada en el GUI de MPlayer en el futuro. Cuando overlay está correctamente
-configurado ya no necesitará usar más dxr3view.
-<option>prebuf</option> activa el prebuffering. Prebuffering es una característica del
-chip em8300 que se activa para mantener más de un marco por video al mismo tiempo. Esto
-significa que cuando está ejecutando con prebufferint MPlayer intentará mantener lleno
-el buffer de video con datos todo el tiempo. Si está en una máquina lenta MPlayer
-probablemente usa un valor cercano a, o totalmente de 100% de CPU. Esto ocurre
-normalemente si reproduce flujos MPEG (como DVDs, SVCDs a.s.o.) ya que MPlayer no
+configurar el overlay es iniciar primero autocal. Después ejecute
+<application>MPlayer</application> con salida dxr3 y sin overlay, ejecute
+dxr3view. En dxr3view puede tocar la configuración de overlay y ver los
+efectos en tiempo real, quizá esta característica esté soportada en el GUI de
+<application>MPlayer</application> en el futuro. Cuando overlay está
+correctamente configurado ya no necesitará usar más dxr3view.
+<option>prebuf</option> activa el prebuffering. Prebuffering es una
+característica del chip em8300 que se activa para mantener más de un marco
+por video al mismo tiempo. Esto significa que cuando está ejecutando con
+prebufferint <application>MPlayer</application> intentará mantener lleno
+el buffer de video con datos todo el tiempo. Si está en una máquina lenta
+<application>MPlayer</application> probablemente usa un valor cercano a,
+o totalmente de 100% de CPU. Esto ocurre normalemente si reproduce flujos
+MPEG (como DVDs, SVCDs a.s.o.) ya que <application>MPlayer</application> no
 tiene recodificador a MPEG y llena el buffer muy rápido.
-Con reproducción de video con prebufferint es <emphasis role="bold">mucho</emphasis>
-menos sensible a otros programas que quieran uso de CPU, no elimina marcos a menos
-que alguna aplicación aproveche la CPU un largo periodo de tiempo.
-Cuando ejecuta sin prebuffering el em8300 es mucho más sensible a cargar la CPU,
-por lo que le sugerimos que active en MPlayer la opción <option>-framedrop</option>
+Con reproducción de video con prebufferint es <emphasis role="bold">
+mucho</emphasis> menos sensible a otros programas que quieran uso de CPU,
+no elimina marcos a menos que alguna aplicación aproveche la CPU un largo
+periodo de tiempo. Cuando ejecuta sin prebuffering el em8300 es mucho más
+sensible a cargar la CPU, por lo que le sugerimos que active en
+<application>MPlayer</application> la opción <option>-framedrop</option>
 para evitar posibles pérdidas de sincronización.
-<option>sync</option> activa el nuevo motor de sincronización. Esta es actualmente
-una característica experimental. Con la característica de sincronización activada en
-el reloj interno de em8300 se monitoriza todas las veces, si comienza a desviarse del
-reloj de MPlayer es puesto a cero causando que em8300 se salte algunos marcos que
-están comenzando a tener retardo.
+<option>sync</option> activa el nuevo motor de sincronización. Esta es
+actualmente una característica experimental. Con la característica de
+sincronización activada en el reloj interno de em8300 se monitoriza todas
+las veces, si comienza a desviarse del reloj de
+<application>MPlayer</application> es puesto a cero causando que em8300
+se salte algunos marcos que están comenzando a tener retardo.
 <option>norm=x</option> establece la norma de TV de la tarjeta DXR3 sin la
 necesidad de herramientas externas como em8300setup. Normas válidas son
 5 = NTSC, 4 = PAL-60, 3 = PAL. Normas especiales son 2 (auto-ajuste usando

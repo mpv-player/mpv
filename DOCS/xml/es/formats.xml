@@ -28,7 +28,8 @@ los <emphasis role="bold">MPG</emphasis> no tienen los campos necesarios para
 describir sus flujos de video y audio).
 O puede también poner video MPEG1 dentro de un archivo AVI.
 <ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> y
-<link linkend="mencoder">MEncoder</link> pueden crear estos archivos.
+<link linkend="mencoder"><application>MEncoder</application></link> pueden
+crear estos archivos.
 </para>
 
 
@@ -171,7 +172,8 @@ reproductores esperan audio en CBR, y por eso fallan con VBR. VBR no es
 muy común y los AVI de Microsoft solo describen audio CBR. También he
 notado que la mayoría de los codificadores/multiplexores de AVI crean
 archivos mal cuando usan audio VBR. Solo hay dos excepciones:
-<application>NanDub</application> y <link linkend="mencoder">MEncoder</link>.
+<application>NanDub</application> y
+<link linkend="mencoder"><application>MEncoder</application></link>.
 </para>
 </sect3>
 
@@ -363,9 +365,10 @@ Las especificaciones de PVA pueden descargarse desde la siguiente dirección:
 <para>
 El formato <emphasis role="bold">GIF</emphasis> es un formato común para
 gráficos para la web. Hay dos versiones de la especificación GIF, GIF87a y
-GIF89a. La principal diferencia es que GIF89a permite animación. MPlayer
-soporta ambos formatos usando <systemitem class="library">libungif</systemitem>
-u otra biblioteca compatible con libgif. Los GIFs no animagos son mostrados
+GIF89a. La principal diferencia es que GIF89a permite animación.
+<application>MPlayer</application> soporta ambos formatos usando
+<systemitem class="library">libungif</systemitem> u otra biblioteca
+compatible con libgif. Los GIFs no animagos son mostrados
 como marcos de video simples. (Use las opciones <option>-loop</option> y
 <option>-fixed-vo</option> para mostrarlas durante más tiempo.)
 </para>

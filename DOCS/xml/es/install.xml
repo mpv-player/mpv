@@ -593,7 +593,8 @@ correspondientes:
 </para>
 
 <para>
-MEncoder puede volcar subtítulos de DVD en formato <link linkend="menc-feat-extractsub">VobSub</link>.
+<application>MEncoder</application> puede volcar subtítulos de DVD en
+formato <link linkend="menc-feat-extractsub">VobSub</link>.
 </para>
 
 <para>
@@ -772,10 +773,11 @@ Hay muchas maneras de conseguirlo:
       Ejemplo: <option>-font <replaceable>'Bitstream Vera Sans'</replaceable></option>
   </para></listitem>
 <listitem><para>
-  Descargue paquetes de fuentes listos para usar del sitio de MPlayer. Nota:
-  actualmente las fuentes disponibles están limitadas al soporte ISO 8859-1/2,
-  pero existen algunas otras fuentes (incluyendo Koreano, Ruso, ISO 8859-8, etc)
-  en la sección contrib/font del FTP, hechas por los usuarios.
+  Descargue paquetes de fuentes listos para usar del sitio de
+  <application>MPlayer</application>.
+  Nota: actualmente las fuentes disponibles están limitadas al soporte ISO
+  8859-1/2, pero existen algunas otras fuentes (incluyendo Koreano, Ruso,
+  ISO 8859-8, etc)en la sección contrib/font del FTP, hechas por los usuarios.
   </para><para>
   <!-- FIXME: this para should be before the list -->
   Las fuentes deberían tener el archivo apropiado <filename>font.desc</filename>
@@ -911,7 +913,7 @@ completamente configurable por el usuario.
 <sect1 id="rtc">
 <title>RTC</title>
 <para>
-Existen tres métodos de temporización en MPlayer.
+Existen tres métodos de temporización en <application>MPlayer</application>.
 
 <itemizedlist>
 <listitem><simpara>

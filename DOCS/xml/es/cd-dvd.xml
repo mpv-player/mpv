@@ -99,13 +99,13 @@ dispositivo correcto en la línea de órdenes con la opción
 <systemitem>libdvdcss</systemitem> para desencriptación y reproducción. Estas
 dos bibliotecas están contenidas en el subdirectorio
 <filename class="directory">libmpdvdkit2/</filename>
-del árbol de código fuente de MPlayer, no tiene que instalarlo por separado.
-Hemos optado por esta solución porque hemos corregido un error de
-<systemitem>libdvdread</systemitem> y aplicado un parche que añade
-<emphasis role="bold">soporte para cacheo de claves CSS crackeadas</emphasis> para
-<systemitem>libdvdcss</systemitem>. Esto resulta en un gran incremento de
-velocidad porque las claves no tienen que ser crackeadas cada vez que se
-reproduce.
+del árbol de código fuente de <application>MPlayer</application>, no tiene
+que instalarlo por separado. Hemos optado por esta solución porque hemos
+corregido un error de <systemitem>libdvdread</systemitem> y aplicado un
+parche que añade <emphasis role="bold">soporte para cacheo de claves CSS
+crackeadas</emphasis> para <systemitem>libdvdcss</systemitem>. Esto resulta
+en un gran incremento de velocidad porque las claves no tienen que ser
+crackeadas cada vez que se reproduce.
 </para>
 </formalpara>
 

@@ -419,7 +419,7 @@ Usa inserción automática de filtros y optimiza para calidad.
 <listitem><para>
 No usa inserción automática de filtros ni optimización.
 <emphasis>Advertencia:</emphasis> Posiblemente esto hará fallar
-a MPlayer.
+a <application>MPlayer</application>.
 </para></listitem>
 </varlistentry>
 
@@ -511,12 +511,13 @@ formato (vea más abajo) será insertado para rectificar la diferencia.
 <title>Super/Submuestreo</title>
 
 <para>
-MPlayer soporta completamente super/sub-muestreo de sonido a través
-del filtro <option>resample</option>. Puede ser usado si
-tiene una frecuencia fija para la tarjeta de sonido o si tiene una tarjeta
-de sonido antigua que solo tiene como capacidad máxima 44.1kHz. Este filtro
-es activado automáticamente si es necesario, pero también puede ser habilitado
-explícitamente en la línea de órdenes. Tiene tres opciones:
+<application>MPlayer</application> soporta completamente
+super/sub-muestreo de sonido a través del filtro <option>resample</option>.
+Puede ser usado si tiene una frecuencia fija para la tarjeta de sonido
+o si tiene una tarjeta de sonido antigua que solo tiene como capacidad
+máxima 44.1kHz. Este filtro es activado automáticamente si es necesario,
+pero también puede ser habilitado explícitamente en la línea de órdenes.
+Tiene tres opciones:
 </para>
 
 <variablelist>
@@ -763,8 +764,9 @@ amplificará el sonido por 10.1dB y hard-clip si el nivl de sonido es demasiado a
 <para>
 Este filtro tiene una segunda característica: Mides el nivel de sonido máximo
 y lo muestra, después MPlayer termina. Esta estimaciónd el volumen puede
-usarse para establecer el nivel de sonido en MEncoder de manera que el rango
-dinámico máximo sea utilizado.
+usarse para establecer el nivel de sonido en
+<application>MEncoder</application> de manera que el rango dinámico máximo
+sea utilizado.
 </para>
 </sect4>
 

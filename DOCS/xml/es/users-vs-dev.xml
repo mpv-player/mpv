@@ -75,9 +75,9 @@ Si tiene problemas con GCC 2.96, puede obtener los paquetes 2.96-85 del
 <ulink url="ftp://updates.redhat.com">servidor ftp</ulink> de Red Hat, o
 vaya directamente a por los <ulink url="ftp://people.redhat.com/jakub/gcc/3.2.3-11/">
 paquetes gcc-3.2.3-11</ulink> (no oficiales, pero funcionan bien) y puede instalarlos junto
-con gcc-2.96 si ya lo tiene. MPlayer detectará y usará 3.2 en lugar de 2.96. Si no desea
-o no puede usar los paquetes binarios, aquí tiene cómo compilar GCC 3 desde el código
-fuente:
+con gcc-2.96 si ya lo tiene. <application>MPlayer</application> detectará
+y usará 3.2 en lugar de 2.96. Si no desea o no puede usar los paquetes
+binarios, aquí tiene cómo compilar GCC 3 desde el código fuente:
 </para>
 
 <procedure>
@@ -172,7 +172,7 @@ porque tenemos muy poca información a respecto.
 <para>
 Joe Barr se hizo infame en diciembre de 2001 por escribir un más que desfavorable
 artículo sobre <application>MPlayer</application> llamado
-<ulink url="http://www.linuxworld.com/story/32880.htm">MPlayer: El proyecto del infierno</ulink>.
+<ulink url="http://www.linuxworld.com/story/32880.htm"><application>MPlayer</application>: El proyecto del infierno</ulink>.
 Él encuentra <application>MPlayer</application> dificil de instalar, y concluye que
 los desarrolladores son poco amistosos y la documentación está incompleta y es insultante.
 Juzgue usted mismo sobre ese asunto. También menciona a Arpi de manera negativa en su
@@ -192,7 +192,7 @@ usarlo".
 </para></blockquote>
 
 Casi dos años después en octubre de 2003 escribe otro artículo llamado
-<ulink url="http://www.newsforge.com/article.pl?sid=03/10/02/0343200">MPlayer revisitado</ulink>.
+<ulink url="http://www.newsforge.com/article.pl?sid=03/10/02/0343200"><application>MPlayer</application> revisitado</ulink>.
 En este llega a las siguientes conclusiónes:
 
 <blockquote><para>

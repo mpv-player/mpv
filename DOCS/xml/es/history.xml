@@ -35,81 +35,98 @@ uno...
   calidad de imagen perfecta y que cumple al 100% el estándar MPEG.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer v0.3-v0.9</emphasis>: Nov 18-Dec 4, 2000
+  <emphasis role="bold"><application>MPlayer</application> v0.3-v0.9
+  </emphasis>: Nov 18-Dec 4, 2000
   </para><para>Era la union de dos programas: mpg12play v0.95pre6 y mi 
   nuevo reproductor simple de AVIs 'avip' basado en el cargador de DLL de
   Win32 de avifile.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer v0.10</emphasis>: Ene 1, 2001
+  <emphasis role="bold"><application>MPlayer</application> v0.10</emphasis>:
+  Ene 1, 2001
   </para><para>¡El reproductor de MPEG y AVI en un solo binario!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">La serie de MPlayer v0.11pre</emphasis>:
+  <emphasis role="bold">La serie de <application>MPlayer</application>
+  v0.11pre</emphasis>:
   </para><para>¡Algunos desarrolladores se unieron y desde la versión 0.11 el
-  proyecto MPlayer es un trabajo de equipo! Se agregó soporte de archivos ASF
-  y de/codificación de OpenDivX (ver <ulink url="http://www.projectmayo.com"/>).
+  proyecto <application>MPlayer</application> es un trabajo de equipo!
+  Se agregó soporte de archivos ASF   y de/codificación de OpenDivX (ver
+  <ulink url="http://www.projectmayo.com"/>).
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer v0.17a "The IdegCounter"</emphasis> Abr 27, 2001
+  <emphasis role="bold"><application>MPlayer</application> v0.17a "The
+  IdegCounter"</emphasis> Abr 27, 2001
   </para><para>¡El lanzamiento de la versión posterior a las 0.11pre después de 
   4 meses de gran desarrollo! ¡Probalo y asombrese! Cientos de nuevas funciones
   agregadas y por supuesto el código viejo ha sido mejorado también, y sacamos
   muchos errores, etc.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 0.18 "The BugCounter"</emphasis> Jul 9, 2001
+  <emphasis role="bold"><application>MPlayer</application> 0.18 "The
+  BugCounter"</emphasis> Jul 9, 2001
   </para><para>2 meses desde 0.17 y he aquí una nueva versión. Soporte de ASF
   completo, más formatos de subtítulos, aparece libao (similar a libvo pero 
   para audio), aún más estable que antes, y más. ¡Es imprescindible!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 0.50 "The Faszom(C)ounter"</emphasis> Oct 8, 2001
+  <emphasis role="bold"><application>MPlayer</application> 0.50 "The
+  Faszom(C)ounter"</emphasis> Oct 8, 2001
   </para><para>Hmm. Otra versión. Toneladas de funciones nuevas , una versión beta
   de la GUI (interfaz gráfica de usuario), problemas solucionados, controladores nuevos
   de vo y ao, portado a muchos sistemas, incluyendo codecs de código abierto de DivX y
   mucho más. ¡Probalo!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 0.60 "The RTFMCounter"</emphasis> Ene 3, 2002
+  <emphasis role="bold"><application>MPlayer</application> 0.60 "The
+  RTFMCounter"</emphasis> Ene 3, 2002
   </para><para>Soporte a los formatos de archivos MOV/VIVO/RM/FLI/NUV, codecs 
   nativos para CRAM, Cinepak, ADPCM, y soporte para los codecs binarios de XAnim;
-  suporte de subtítulos de DVD, lanzamiento de la primera versión de MEncoder,
-  grabación de TV, cache, liba52, incontables arreglos.
+  suporte de subtítulos de DVD, lanzamiento de la primera versión de
+  <application>MEncoder</application>, grabación de TV, cache, liba52,
+  incontables arreglos.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 0.90pre10 "The BirthdayCounter"</emphasis> Nov 11, 2002
-  </para><para> A pesar de no ser una versión liberada, la voy a mencionar ya que
-  se hacen dos años desde MPlayer v0.01. ¡Feliz cumpleaños, MPlayer!
+  <emphasis role="bold"><application>MPlayer</application> 0.90pre10 "The
+  BirthdayCounter"</emphasis> Nov 11, 2002
+  </para><para> A pesar de no ser una versión liberada, la voy a mencionar ya
+  que   se hacen dos años desde <application>MPlayer</application> v0.01.
+  ¡Feliz cumpleaños, <application>MPlayer</application>!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 0.90rc1 "The CodecCounter"</emphasis> Dic 7, 2002
+  <emphasis role="bold"><application>MPlayer</application> 0.90rc1 "The
+  CodecCounter"</emphasis> Dic 7, 2002
   </para><para>Otra vez sin una nueva versión, pero después de agregar soporte a
-  Sorenson 3 (QuickTime) y a Windows Media 9, ¡MPlayer es el primer reproductor de
+  Sorenson 3 (QuickTime) y a Windows Media 9,
+  ¡<application>MPlayer</application> es el primer reproductor de
   películas del mundo con soporte para todos los formatos de vídeo conocidos!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 0.90 "The CounterCounter"</emphasis> Abr 6, 2003
-  </para><para>Después de más de un año, hemos finalmente concluido que el código estaba
-    nuevamente estable y listo para ser publicado como una nueva versión. Desafortunadamente
-    hemos olvidado de incrementar el número de versión, y se ha metido algún molesto
-    desperfecto, por lo que debería prepararse para...
+  <emphasis role="bold"><application>MPlayer</application> 0.90 "The
+  CounterCounter"</emphasis> Abr 6, 2003
+  </para><para>Después de más de un año, hemos finalmente concluido que el
+  código estaba nuevamente estable y listo para ser publicado como una nueva
+  versión. Desafortunadamente hemos olvidado de incrementar el número de
+  versión, y se ha metido algún molesto desperfecto, por lo que debería
+  prepararse para...
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 0.91</emphasis> Ago 13, 2003
-  </para><para>Lo que se menciona más arriba y un montón de otros fallos han sido
-    corregidos. Esta es la última versión estable.
+  <emphasis role="bold"><application>MPlayer</application> 0.91</emphasis>
+  Ago 13, 2003
+  </para><para>Lo que se menciona más arriba y un montón de otros fallos han
+  sido corregidos. Esta es la última versión estable.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 1.0pre1 "Development on the beach"</emphasis> Sep 1, 2003
+  <emphasis role="bold"><application>MPlayer</application> 1.0pre1 "Development on the beach"</emphasis> Sep 1, 2003
   </para><para>Aunque no es una liberación estable, la mencionamos aquí porque
-    es la primera pre versión de la serie 1.0 de MPlayer y se pretende que sea
+    es la primera pre versión de la serie 1.0 de
+    <application>MPlayer</application> y se pretende que sea
     de ayuda en la <emphasis>gran fiesta de caza de fallos</emphasis>.
     ¡Este es un enorme paso adelante!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 1.0</emphasis> fecha aún desconocida
-  </para></listitem>
+  <emphasis role="bold"><application>MPlayer</application> 1.0</emphasis>
+  fecha aún desconocida </para></listitem>
 </itemizedlist>
 </para>
 </sect1>

@@ -533,16 +533,16 @@ video Sorenson con los siguientes decodificadores:
 </itemizedlist>
 
 <procedure>
-<title>COMPILANDO MPLAYER CON SOPORTE PARA BIBLIOTECAS DE QUICKTIME</title>
+<title>COMPILANDO <application>MPlayer</application> CON SOPORTE PARA BIBLIOTECAS DE QUICKTIME</title>
 <note><para>actualmente solo está soportado por plataformas Intel de 32bit.</para></note>
-<step><para>descargue MPlayer CVS</para></step>
+<step><para>descargue <application>MPlayer</application> CVS</para></step>
 <step><para>descargue el paquete QuickTime DLL desde
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
 <step><para>extraiga el paquete QuickTime DLL a su directorio de codecs Win32
 (por defecto: <filename class="directory">/usr/local/lib/codecs/</filename>)
 </para></step>
-<step><para>compile MPlayer</para></step>
+<step><para>compile <application>MPlayer</application></para></step>
 </procedure>
 
 </sect3>
@@ -735,7 +735,8 @@ AAC (Codificación Avanzada de Audio) es un codec de audio que algunas veces
 se encuentra en archivos MOV y MP4. Un decodificador llamado FAAD de código
 abierto está disponible en
 <ulink url="http://www.audiocoding.com"/>.
-MPlayer incluye libfaad 2.0RC1, por lo que no necesita obtenerlo por separado.
+<application>MPlayer</application> incluye libfaad 2.0RC1, por lo que no
+necesita obtenerlo por separado.
 </para>
 
 <para>

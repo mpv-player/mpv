@@ -2,7 +2,8 @@
 <!-- synced with 1.11 -->
 
 <bookinfo id="toc">
-<title>MPlayer - El reproductor de Películas para LINUX</title>
+<title><application>MPlayer</application> - El reproductor de Películas
+para LINUX</title>
 <subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
 <date>24 de Marzo del 2003</date>
 <copyright>
@@ -62,18 +63,20 @@ NuppelVideo, yuv4mpeg, FILM, RoQ, PVA y Matroska, soportado por muchos codecs
 nativos, de XAnim, de RealPlayer y de DLL de Win32. Puede ver películas en formato
 <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>,
 y <emphasis>DivX</emphasis> también (¡y no es necesaria la librería avifile!). 
-Otra gran característica de MPlayer es el amplio rango de controladores de salida
-soportados. Funciona con X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, ¡pero también
-puede usar GGI y SDL (y de esta manera todos sus controladores) y algunos controladores
-de bajo nivel específicos de algunas placas (para Matrox, 3Dfx y Radeon, Mach64, Permidia3)!
-Casi todos ellos soportan escalado por software o hardware, por lo que puede disfrutar
-de las películas en pantalla completa.
-<application>MPlayer</application> soporta mostrado sobre algunas placas decodificadoras
-por hardware de MPEG, como la <link linkend="dvb">DVB</link> y <link linkend="dxr3">
-DXR3/Hollywood+</link>. ¿Y que tal los grandes y bonitos subtítulos sombreados y con
-efecto antialias (<emphasis role="bold">se soportan 10 tipos de subtítulos</emphasis>)
-con fuentes Europeas/ISO 8859-1,2 (Húngara, Inglesa, Checa, etc), Cirílica, Coreana,
-y el mostrado en pantalla (OSD)?
+Otra gran característica de <application>MPlayer</application> es el amplio
+rango de controladores de salida soportados. Funciona con X11, Xv, DGA, OpenGL,
+SVGAlib, fbdev, AAlib, DirectFB, ¡pero también puede usar GGI y SDL (y de esta
+manera todos sus controladores) y algunos controladores de bajo nivel
+específicos de algunas placas (para Matrox, 3Dfx y Radeon, Mach64, Permidia3)!
+Casi todos ellos soportan escalado por software o hardware, por lo que puede
+disfrutar de las películas en pantalla completa.
+<application>MPlayer</application> soporta mostrado sobre algunas placas
+decodificadoras por hardware de MPEG, como la <link linkend="dvb">DVB</link>
+y <link linkend="dxr3"> DXR3/Hollywood+</link>. ¿Y que tal los grandes y
+bonitos subtítulos sombreados y con efecto antialias (<emphasis role="bold">
+se soportan 10 tipos de subtítulos</emphasis>) con fuentes Europeas/ISO
+8859-1,2 (Húngara, Inglesa, Checa, etc), Cirílica, Coreana, y el mostrado
+en pantalla (OSD)?
 </para>
 
 <para>
@@ -87,11 +90,13 @@ importantes, pero la velocidad también es asombrosa.
 </para>
 
 <para>
-<application>MEncoder</application> (el codificador de películas de MPlayer) es un
-codificador de películas simple, diseñado para codificar películas que MPlayer pueda
-reproducir (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG//MOV/VIV/FLI/RM/NUV/NET/PVA
-</emphasis>) a otros formatos también reproducibles por MPlayer (ver más abajo). Puede
-codificar con varios codecs, como <emphasis role="bold">DivX4</emphasis> (1 o 2 pasadas),
+<application>MEncoder</application> (el codificador de películas de
+<application>MPlayer</application>) es un codificador de películas simple,
+diseñado para codificar películas que <application>MPlayer</application>
+pueda reproducir (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
+a otros formatos también reproducibles por <application>MPlayer</application>
+(ver más abajo). Puede codificar con varios codecs, como
+<emphasis role="bold">DivX4</emphasis> (1 o 2 pasadas),
 <systemitem class="library">libavcodec</systemitem>, audio
 <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>. Además posee un poderoso
 sistema de plugin para la manipulación de vídeo.
@@ -99,10 +104,10 @@ sistema de plugin para la manipulación de vídeo.
 
 
 <itemizedlist>
-<title>Características de MEncoder</title>
+<title>Características de <application>MEncoder</application></title>
 <listitem><simpara>
-  Codificación desde una amplia variedad de formato de archivos y decodificadores de
-  <application>MPlayer</application>
+  Codificación desde una amplia variedad de formato de archivos y
+  decodificadores de <application>MPlayer</application>
   </simpara></listitem>
 <listitem><simpara>
   Codificación a todos los codecs soportados por ffmpeg
@@ -161,7 +166,7 @@ sistema de plugin para la manipulación de vídeo.
   </simpara></listitem>
 </itemizedlist>
 
-<!-- FIXME: the license should be in bookinfo -->
+<!-- FIXME: la licencia debe estar en bookinfo -->
 <para>
 <application>MPlayer</application> y <application>MEncoder</application>
 pueden ser distribuidos bajo los términos de la Licencia GNU General Public

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- synced with 1.7 -->
 <appendix id="skin">
-<title>Formato del skin de MPlayer</title>
+<title>Formato del skin de <application>MPlayer</application></title>
 <para>
 El propósito de este documento es describir el formato de los skin
-de MPlayer. La información contenida aquí puede ser errónea, porque
+de <application>MPlayer</application>. La información contenida aquí
+puede ser errónea, porque
 <orderedlist>
 <listitem><para>No soy yo quien ha escrito el GUI.</para></listitem>
 <listitem><para>El GUI no está terminado.</para></listitem>
@@ -45,8 +46,9 @@ Los directorios donde se buscan los skins son (en orden):
 
 <para>
 Tenga en cuenta que la primera ruta puede variar de acuerdo a cómo fue
-configurado MPlayer (vea los argumentos <option>--prefix</option> y
-<option>--datadir</option> del script <command>configure</command>).
+configurado <application>MPlayer</application> (vea los argumentos
+<option>--prefix</option> y <option>--datadir</option> del script
+<command>configure</command>).
 </para>
 
 <para>
@@ -62,9 +64,9 @@ listados más arriba, por ejemplo:
 <para>
 En la ventana principal y en la barra de reproducción (ver más abajo) puede
 usar imágenes con `transparencia': Regiones rellenas con color #FF00FF
-(magenta) son completamente transparentes cuando se ven con MPlayer. Esto
-significa que puede incluso tener ventanas con formas si su servidor X
-tiene la extensión XShape.
+(magenta) son completamente transparentes cuando se ven con
+<application>MPlayer</application>. Esto significa que puede incluso tener
+ventanas con formas si su servidor X tiene la extensión XShape.
 </para>
 </sect2>
 
@@ -87,11 +89,12 @@ con clic derecho).
 <itemizedlist>
 <listitem><para>
   La <emphasis role="bold">ventana principal</emphasis> y/o la
-  <emphasis role="bold">barra de reproducción</emphasis> es donde puede controlar
-  MPlayer. El fondo de la ventana es una imagen. Varios objetos pueden (y deben)
-  ser colocados en la ventana: <emphasis>botones</emphasis>, <emphasis>medidores</emphasis>
-  (desplazables) y <emphasis>etiquetas</emphasis>. Para cada objeto, debe especificar
-  su posición y tamaño.
+  <emphasis role="bold">barra de reproducción</emphasis> es donde puede
+  controlar <application>MPlayer</application>. El fondo de la ventana es
+  una imagen. Varios objetos pueden (y deben) ser colocados en la ventana:
+  <emphasis>botones</emphasis>, <emphasis>medidores</emphasis>
+  (desplazables) y <emphasis>etiquetas</emphasis>. Para cada objeto, debe
+  especificar su posición y tamaño.
 </para><para>
   Un <emphasis role="bold">botón</emphasis> tiene tres estados (pulsado, soltado,
   desactivado), por eso la imagen debe estar dividida en tres partes verticalmente.
@@ -129,12 +132,12 @@ con clic derecho).
 
 <listitem><para>
   El <emphasis role="bold">skin del menú</emphasis> es una forma de controlar
-  MPlayer con entradas de menú. Dos imágenes son requeridas para el menú: una
-  es la imagen base que muestra el menú en su estado normal, la otra es usada
-  para mostrar las entradas seleccionadas. Cuando hace salir el menú, la entrada
-  seleccionada actualmente es copiada desde la segunda imagen sobre la entrada
-  de menú que hay bajo el puntero del ratón (la segunda imagen nunca se muestra
-  entera).
+  <application>MPlayer</application> con entradas de menú. Dos imágenes son
+  requeridas para el menú: una es la imagen base que muestra el menú en su
+  estado normal, la otra es usada para mostrar las entradas seleccionadas.
+  Cuando hace salir el menú, la entrada seleccionada actualmente es copiada
+  desde la segunda imagen sobre la entrada de menú que hay bajo el puntero
+  del ratón (la segunda imagen nunca se muestra entera).
 </para><para>
   Una entrada de menú se define por su posición y tamaño en la imagen (vea la
   sección que habla del <link linkend="skin-file-menu">skin del menú</link>
@@ -145,8 +148,8 @@ con clic derecho).
 
 <para>
   Hay algo importante que aún no he mencionado: Para que los botones, medidores
-  deposición y entradas de menú funcionen, MPlayer tiene que saber qué hacer
-  cuando se hace clic en ellos. Esto se hace con
+  deposición y entradas de menú funcionen, <application>MPlayer</application>
+  tiene que saber qué hacer cuando se hace clic en ellos. Esto se hace con
   <link linkend="skin-gui">mensajes</link> (eventos). Para estos objetos
   debe definir los mensajes que se generan cuando se hace clic en ellos.
 </para>
@@ -159,8 +162,9 @@ Necesita los siguientes archivos para construir un skin:
 <itemizedlist>
 <listitem><para>
   El archivo de configuración llamado <link linkend="skin-file">skin</link>
-  le dice a MPlayer cómo poner las diferentes partes del skin juntas y qué
-  debe hacer cuando se hace clic en alguna parte de la ventana.
+  le dice a <application>MPlayer</application> cómo poner las diferentes
+  partes del skin juntas y qué debe hacer cuando se hace clic en alguna
+  parte de la ventana.
 </para></listitem>
 <listitem><para>
   La imagen de fondo para la ventana principal
@@ -273,7 +277,8 @@ end
 El nombre de un archivo de imagen se debe dar sin los directorios - las imágenes
 se buscan en el directorio <filename class="directory">Skin</filename>.
 También puede (pero necesita ser root) especificar la extensión del archivo. Si
-el archivo no existe, MPlayer intentará cargar el archivo
+el archivo no existe, <application>MPlayer</application> intentará cargar el
+archivo
 <filename>&lt;filename&gt;.&lt;ext&gt;</filename>, donde <literal>png</literal>
 y <literal>PNG</literal> son probados para <filename>&lt;ext&gt;</filename>
 (en ese orden). El primer nombre de archivo que coincida será el que se use.
@@ -302,7 +307,8 @@ es a la derecha o abajo, como se muestra en la ilustracion:
 Aquí tiene un ejemplo para clarificar esto. Suponga que tiene una imagen llamada
 <filename>main.png</filename> que usa para la ventana principal:
 <programlisting>base = main, -1, -1</programlisting>
-MPlayer intentará cargar los archivos <filename>main</filename>, <filename>main.png</filename>,
+<application>MPlayer</application> intentará cargar los archivos
+<filename>main</filename>, <filename>main.png</filename>,
 <filename>main.PNG</filename>.
 </para>
 

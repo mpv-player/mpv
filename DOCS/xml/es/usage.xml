@@ -127,7 +127,7 @@ usando la opción <option>-input <replaceable>conf</replaceable></option>
 <title>Un archivo de control simple</title>
 <programlisting>
 ##
-## Archivo de control de entrada de MPlayer
+## Archivo de control de entrada de <application>MPlayer</application>
 ##
 
 RIGHT seek +10
@@ -354,7 +354,8 @@ Eso es todo :-)
 <para>
 El nombre de la aplicación para <application>MPlayer</application> es - oh
 que maravilla - <filename>mplayer</filename>. Puede usar las órdenes de
-mplayer e incluso pasar más de una órden separándolas con <literal>\n</literal>.
+<application>MPlayer</application> e incluso pasar más de una órden
+separándolas con <literal>\n</literal>.
 No olvide activar el marcador repeat en <filename>.lircrc</filename> cuando
 tenga sentido (posición, volumen, etc). Aquí hay un extracto de mi
 <filename>.lircrc</filename>:

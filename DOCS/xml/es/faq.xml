@@ -729,7 +729,8 @@ hay un problema con su kernel/libc. Quizas esté usando algún parche de seguridad
 librerías a direcciones bajas. Al ser un DLL non-relocable,<filename>l3codeca.acm</filename>
 debe ser cargado a <literal>0x00400000</literal>, no podemos
 cambiar esto. Debería usar un kernel sin parchear, o use la opción
-<option>-afm 1</option> de Mplayer para dejar de usar <filename>l3codeca.acm</filename>.
+<option>-afm 1</option> de <application>Mplayer</application> para dejar de
+usar <filename>l3codeca.acm</filename>.
 </para></answer>
 </qandaentry>
 
@@ -750,10 +751,11 @@ documentación de la misma para ver si hay forma de mejorar el rendimiento.
 signal 4 in module: decode_video</screen>.
 </para></question>
 <answer><para>
-Intente ejecutar Mplayer en la máquina en la que fue compilado. O recompile con detección
-de CPU en tiempo de ejecución (<command>./configure --enable-runtime-cpudetection</command>).
-No use MPlayer en un CPU diferente a en el que fue compilado, sin usar
-esta opción que se acaba de mencionar.
+Intente ejecutar <application>Mplayer</application> en la máquina en la que
+fue compilado. O recompile con detección de CPU en tiempo de ejecución
+(<command>./configure --enable-runtime-cpudetection</command>).
+No use <application>MPlayer</application> en un CPU diferente a en el que
+fue compilado, sin usar esta opción que se acaba de mencionar.
 </para></answer>
 </qandaentry>
 
@@ -822,8 +824,9 @@ Esto puede ser por varias razones.
 <itemizedlist>
 <listitem><para>
 Su CPU <emphasis role="bold">y/o</emphasis> tarjeta de video <emphasis role="bold">y/o</emphasis>
-sonido es damasiado lenta. MPlayer mostrará un mensaje si el motivo es ese (y el contador
-de imágenes saltadas subirá rápidamente).
+sonido es damasiado lenta. <application>MPlayer</application> mostrará un
+mensaje si el motivo es ese (y el contador de imágenes saltadas subirá
+rápidamente).
 </para></listitem>
 <listitem><para>
 Si es un AVI, igual tiene interleaving malo. Intente la opción <option>-ni</option>.
@@ -901,8 +904,9 @@ si <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
 
 <qandaentry>
 <question><para>
-El audio/video pierde la sincronización totalmente cuando ejecuto <application>MPlayer</application>
-como root en mi portatil. Cuando lo ejecuto como usuario normal funciona correctamente.
+El audio/video pierde la sincronización totalmente cuando ejecuto
+<application>MPlayer</application> como root en mi portatil. Cuando lo
+ejecuto como usuario normal funciona correctamente.
 </para></question>
 <answer><para>
 Se trata de otro efecto del administrador de energía (mire más arriba). Enchufe el conector de energía
@@ -948,7 +952,7 @@ No tengo sonido cuando reproduzco un video y me sale un error parecido a este:
 <answer><para>
 ¿Está usando KDE o GNOME con el demonio ARTS o ESD? Pruebe a no utilizar
 el demonio de sonido o use la opcion <option>-ao arts</option> o <option>-ao esd</option>
-para hacer que MPlayer use ARTS o ESD.
+para hacer que <application>MPlayer</application> use ARTS o ESD.
 </para></answer>
 </qandaentry>
 
@@ -972,8 +976,8 @@ Vale, <option>-vo help</option> encuentra un controlador DGA, pero se queja sobr
 </para></question>
 <answer><para>
 ¡Solo funciona ejecutandolo siendo root! Es una limitacion de DGA. Necesita volverse root
-(<command>su -</command>), e intentalo otra vez. Otra solución es hacer MPlayer SUID
-root, ¡pero no es recomendable!
+(<command>su -</command>), e intentalo otra vez. Otra solución es hacer
+<application>MPlayer</application> SUID root, ¡pero no es recomendable!
 <screen>
      chown root /usr/local/bin/mplayer
      chmod 755 /usr/local/bin/mplayer
@@ -982,7 +986,8 @@ root, ¡pero no es recomendable!
 <warning><para>
 ¡Esto un <emphasis role="bold">gran</emphasis> riesgo de seguridad! <emphasis role="bold">Nunca</emphasis>
 lo haga en un servidor o en un ordenador del que no tiene control completo porque
-otros usuarios pueden conseguir privilegios root por SUID root MPlayer.
+otros usuarios pueden conseguir privilegios root por SUID root
+<application>MPlayer</application>.
 <emphasis role="bold">Ha sido advertido</emphasis>.
 </para></warning>
 </para></answer>
@@ -1103,7 +1108,8 @@ en la fuente de <application>MPlayer</application>, y es usado por defecto.
 
 <qandaentry>
 <question><para>
-¿Qué pasa con subtítulos? ¿Puede MPlayer reproducirlos?
+¿Qué pasa con subtítulos? ¿Puede <application>MPlayer</application>
+reproducirlos?
 </para></question>
 <answer><para>
 Sí. Mire la <link linkend="dvd">sección DVD</link>.
@@ -1134,9 +1140,11 @@ en el archivo del DVD en (en <filename class="directory">/dev/</filename>).
 ¿De donde puedo obtener los paquetes libdvdread y libdvdcss?
 </para></question>
 <answer><para>
-No necesita obtenerlos. Use <emphasis role="bold">libmpdvdkit2</emphasis>, que está
-presente en la fuente de MPlayer, y es usado por defecto. Puede obtener los paquetes mencionados
-de la <ulink url="http://www.dtek.chalmers.se/groups/dvd/">página de Ogle</ulink>.
+No necesita obtenerlos. Use <emphasis role="bold">libmpdvdkit2</emphasis>,
+que está presente en la fuente de <application>MPlayer</application>,
+y es usado por defecto. Puede obtener los paquetes mencionados
+de la <ulink url="http://www.dtek.chalmers.se/groups/dvd/">página de
+Ogle</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -1165,12 +1173,14 @@ DMA para el aparato DVD con la heramienta <command>hdparm</command> (definido en
 <title>Solicitando prestaciones</title>
 <qandaentry>
 <question><para>
-Si MPlayer esta pausado e intento buscar o apretar cualquier tecla, MPlayer
-abandona el estado de pausa. Me gustaría poder buscar mientras está la película pausada.
+Si <application>MPlayer</application> esta pausado e intento buscar o
+apretar cualquier tecla, <application>MPlayer</application> abandona el
+estado de pausa. Me gustaría poder buscar mientras está la película pausada.
 </para></question>
 <answer><para>
 Esto es muy dificil de implementar sin perder sincronizacion A/V.
-Todos los intentos han fallado, pero parches son bienvenidos.
+Todos los intentos han fallado, pero se agradece cualquier colaboración
+en forma de parche.
 </para></answer>
 </qandaentry>
 
@@ -1186,7 +1196,8 @@ Siéntase libre de implemetarlo, y mande un parche. No pregunte por ello.
 
 <qandaentry>
 <question><para>
-¿Como puedo hacer que MPlayer recuerde la opción que usé para un archivo en particular?
+¿Como puedo hacer que <application>MPlayer</application> recuerde la opción
+que usé para un archivo en particular?
 </para></question>
 <answer><para>
 Cree un archivo llamado <filename>movie.avi.conf</filename> con las opciones
@@ -1203,7 +1214,7 @@ en el mismo lugar que el archivo.
 ¿Como puedo codificar?
 </para></question>
 <answer><para>
-Lea la sección <link linkend="mencoder">MEncoder</link>.
+Lea la sección <link linkend="mencoder"><application>MEncoder</application></link>.
 </para></answer>
 </qandaentry>
 
@@ -1242,8 +1253,9 @@ si tiene dos archivos compartiendo las mismas dimensiones y codec. Pruebe
 
 <qandaentry>
 <question><para>
-Mi sintonizador funciona, puedo oir el sonido y ver la película con <application>MPlayer</application>,
-¡pero <application>MEncoder</application> no codifica el audio!
+Mi sintonizador funciona, puedo oir el sonido y ver la película con
+<application>MPlayer</application>, ¡pero <application>MEncoder</application>
+no codifica el audio!
 </para></question>
 <answer><para>
 La codificación de audio de TV para Linux no está implementada de momento, estamos trabajando en
@@ -1314,7 +1326,7 @@ fijarlo a mano usando <option>-ofps</option>.
 </para></question>
 <answer><para>
 Simplemente pase la opción <option>-sub &lt;filename&gt;</option> (o <option>-sid</option>,
-<option>-vobsub</option>, respectivamente) a MEncoder.
+<option>-vobsub</option>, respectivamente) a <application>MEncoder</application>.
 </para></answer>
 </qandaentry>
 
