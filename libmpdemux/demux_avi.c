@@ -445,6 +445,16 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
 
   //---- AVI header:
   read_avi_header(demuxer,(demuxer->stream->type!=STREAMTYPE_STREAM)?index_mode:-2);
+  
+  if(demuxer->audio->id>=0 && !demuxer->a_streams[demuxer->audio->id]){
+      mp_msg(MSGT_DEMUX,MSGL_WARN,"AVI: invalid audio stream ID: %d - ignoring (nosound)\n",demuxer->audio->id);
+      demuxer->audio->id=-2; // disabled
+  }
+  if(demuxer->video->id>=0 && !demuxer->v_streams[demuxer->video->id]){
+      mp_msg(MSGT_DEMUX,MSGL_WARN,"AVI: invalid video stream ID: %d - ignoring (using default)\n",demuxer->video->id);
+      demuxer->video->id=-1; // autodetect
+  }
+  
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,demuxer->movi_start);
   priv->idx_pos=0;
@@ -518,7 +528,6 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   if(!ds_fill_buffer(d_video)){
     mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI: " MSGTR_MissingVideoStreamBug);
     return NULL;
-//    GUI_MSG( mplAVIErrorMissingVideoStream )
   }
   sh_video=d_video->sh;sh_video->ds=d_video;
   if(d_audio->id!=-2){
