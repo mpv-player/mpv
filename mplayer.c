@@ -1229,7 +1229,7 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
 #ifdef USE_LIBVO2
     vo_flags=vo2_query_format(video_out);
 #else
-    vo_flags=video_out->query_format(out_fmt);
+    vo_flags=video_out->control(VOCTRL_QUERY_FORMAT, &out_fmt);
 #endif
     mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X\n",vo_format_name(out_fmt),vo_flags);
     if(vo_flags) break;
@@ -1367,7 +1367,8 @@ current_module="init_libvo";
    }
    inited_flags|=INITED_VO;
    mp_msg(MSGT_CPLAYER,MSGL_V,"INFO: Video OUT driver init OK!\n");
-   video_out->query_vaa(&vo_vaa);
+   if(video_out->control(VOCTRL_QUERY_VAA, &vo_vaa)==VO_NOTIMPL)
+     memset(&vo_vaa,0,sizeof(vo_vaa_t));
    /*
 	get_hw_eq
    */
@@ -2580,11 +2581,15 @@ if(rel_seek_secs || abs_seek_pos){
       }
       fflush(stdout);
 
+      if(sh_video){
+	 current_module="seek_video_reset";
+         video_out->control(VOCTRL_RESET,NULL);
+      }
+      
       if(sh_audio){
         current_module="seek_audio_reset";
         audio_out->reset(); // stop audio, throwing away buffered data
       }
-
 #ifdef USE_OSD
         // Set OSD:
       if(osd_level){
