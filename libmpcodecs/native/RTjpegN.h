@@ -22,7 +22,7 @@
     
 */
 
-#ifndef _I386_TYPES_H
+#if !defined(_I386_TYPES_H) && !defined(_X86_64_TYPES_H)
 typedef unsigned char __u8;
 typedef unsigned short __u16;
 typedef unsigned long __u32;

@@ -7,7 +7,7 @@
 #ifdef __i386__
 // is this needed? #include <sys/perm.h>
 #else
-#if !defined(__sparc__) && !defined(__powerpc__)
+#if !defined(__sparc__) && !defined(__powerpc__) && !defined(__x86_64__)
 #include <sys/io.h>
 #endif
 #endif
@@ -117,8 +117,8 @@ static __inline__ int disable_os_io(void)
     return(0);
 }
 
-#if (defined(__powerpc__) || defined(__sparc__) || defined(__sparc64__)) \
-    && defined(__linux__) && !defined(CONFIG_SVGAHELPER)
+#if (defined(__powerpc__) || defined(__sparc__) || defined(__sparc64__) \
+    || defined(__x86_64__)) && defined(__linux__) && !defined(CONFIG_SVGAHELPER)
 #define CONFIG_PCI_LINUX_PROC
 #endif
 
