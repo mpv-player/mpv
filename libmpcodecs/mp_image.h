@@ -183,6 +183,17 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->bpp=16;
 	mpi->num_planes=1;
 	return;
+    case IMGFMT_NV12:
+	mpi->flags|=MP_IMGFLAG_SWAPPED;
+    case IMGFMT_NV21:
+	mpi->flags|=MP_IMGFLAG_PLANAR;
+	mpi->bpp=12;
+	mpi->num_planes=2;
+	mpi->chroma_width=(mpi->width>>0);
+	mpi->chroma_height=(mpi->height>>1);
+	mpi->chroma_x_shift=0;
+	mpi->chroma_y_shift=1;
+	return;
     }
     printf("mp_image: Unknown out_fmt: 0x%X\n",out_fmt);
     mpi->bpp=0;

@@ -68,13 +68,18 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	mpi->planes[0]=data;
 	mpi->stride[0]=mpi->width;
 	frame_size=mpi->stride[0]*mpi->h;
-        if(mpi->flags&MP_IMGFLAG_YUV) {
+	if((mpi->imgfmt == IMGFMT_NV12) || (mpi->imgfmt == IMGFMT_NV21))
+	{
+	    mpi->planes[1]=mpi->planes[0]+mpi->width*mpi->height;
+	    mpi->stride[1]=mpi->chroma_width;
+	    frame_size+=mpi->chroma_width*mpi->chroma_height;
+	} else if(mpi->flags&MP_IMGFLAG_YUV) {
+    	    int cb=2, cr=1;
+    	    if(mpi->flags&MP_IMGFLAG_SWAPPED) {
+        	cb=1; cr=2;
+    	    }
             // Support for some common Planar YUV formats
 	    /* YV12,I420,IYUV */
-            int cb=2, cr=1;
-            if(mpi->flags&MP_IMGFLAG_SWAPPED) {
-                cb=1; cr=2;
-            }
             mpi->planes[cb]=mpi->planes[0]+mpi->width*mpi->height;
             mpi->stride[cb]=mpi->chroma_width;
             mpi->planes[cr]=mpi->planes[cb]+mpi->chroma_width*mpi->chroma_height;
