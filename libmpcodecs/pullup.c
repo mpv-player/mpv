@@ -53,7 +53,7 @@ static int diff_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"emms \n\t"
 		: "=a" (ret)
 		: "S" (a), "D" (b), "a" (s)
-		: "%edx"
+		: "%ecx", "%edx"
 		);
 	return ret;
 }
@@ -143,7 +143,7 @@ static int licomb_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"emms \n\t"
 		: "=a" (ret)
 		: "S" (a), "D" (b), "a" (s)
-		: "%edx"
+		: "%ecx", "%edx"
 		);
 	return ret;
 }
