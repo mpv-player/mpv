@@ -333,8 +333,53 @@ static unsigned int nas_aformat_to_auformat(unsigned int *format)
 }
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
-	return -1;
+static int control(int cmd, int arg)
+{
+	AuDeviceAttributes *dattr;
+	AuFixedPoint fpgain;
+	AuStatus as;
+	int gain;
+	ao_control_vol_t *vol = (ao_control_vol_t *)arg;
+
+	dattr = AuGetDeviceAttributes(nas_data->aud, nas_data->dev, &as);
+	if (as != AuSuccess) {
+		nas_print_error(nas_data->aud,
+		                "control(): AuGetDeviceAttributes", as);
+		return CONTROL_ERROR;
+	}
+	gain = AuFixedPointRoundDown(AuDeviceGain(dattr));
+	// kn: 0 <= gain <= 100
+
+	switch (cmd) {
+	case AOCONTROL_GET_VOLUME:
+
+		vol->right = (float) gain;
+		vol->left = vol->right;
+
+		return CONTROL_OK;
+
+	case AOCONTROL_SET_VOLUME:
+		/*
+		 * kn: we should have vol->left == vol->right but i don't
+		 * know if something can change it outside of ao_nas
+		 * so i take the mean of both values.
+		 */
+		gain = (int) ((vol->left+vol->right)/2);
+
+		fpgain = AuFixedPointFromSum(gain, 0);
+		AuDeviceGain(dattr) = fpgain;
+		AuSetDeviceAttributes(nas_data->aud, nas_data->dev,
+		                      AuCompDeviceGainMask, dattr, &as);
+		if (as != AuSuccess) {
+			nas_print_error(nas_data->aud,
+			                "control(): AuSetDeviceAttributes", as);
+			return CONTROL_ERROR;
+		}
+		return CONTROL_OK;
+
+	default:
+		return CONTROL_UNKNOWN;
+	};
 }
 
 // open & setup audio device
