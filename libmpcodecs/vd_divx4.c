@@ -69,6 +69,10 @@ static int init(sh_video_t *sh){
 	  mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Unsupported out_fmt: 0x%X\n",sh->codec->outfmt[sh->outfmtidx]);
 	  return 0;
     }
+#ifdef DECORE_DIVX5
+    dec_param.codec_version = (sh->format==mmioFOURCC('D','I','V','3'))?311:500;
+    dec_param.build_number = 0;
+#endif
     dec_param.x_dim = sh->disp_w;
     dec_param.y_dim = sh->disp_h;
     decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
