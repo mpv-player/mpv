@@ -747,8 +747,7 @@ static int mga_vid_find_card(void)
 		    // SDRAM:
 		    case 0x00:
 		    case 0x04:  mga_ram_size = 16; break;
-		    case 0x03:
-		    case 0x05:  mga_ram_size = 64; break;
+		    case 0x03:  mga_ram_size = 32; break;
 		    // SGRAM:
 		    case 0x10:
 		    case 0x14:  mga_ram_size = 32; break;
