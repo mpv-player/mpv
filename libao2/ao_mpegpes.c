@@ -1,10 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/ioctl.h>
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
 
 #include "afmt.h"
+
+audioMixer_t dvb_mixer={255,255};
+extern int vo_mpegpes_fd;
+extern int vo_mpegpes_fd2;
 
 static ao_info_t info = 
 {
@@ -19,7 +24,34 @@ LIBAO_EXTERN(mpegpes)
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
-    return -1;
+    switch(cmd){
+	case AOCONTROL_GET_VOLUME:
+	{
+	  if(vo_mpegpes_fd2>=0){
+	    ((ao_control_vol_t*)(arg))->left=dvb_mixer.volume_left/2.56;
+	    ((ao_control_vol_t*)(arg))->right=dvb_mixer.volume_right/2.56;
+	    return CONTROL_OK;
+	  }
+	  return CONTROL_ERROR;
+	}
+	case AOCONTROL_SET_VOLUME:
+	{
+	  if(vo_mpegpes_fd2>=0){
+	    dvb_mixer.volume_left=((ao_control_vol_t)(arg)).left*2.56;
+	    dvb_mixer.volume_right=((ao_control_vol_t)(arg)).right*2.56;
+	    if(dvb_mixer.volume_left>255) dvb_mixer.volume_left=255;
+	    if(dvb_mixer.volume_right>255) dvb_mixer.volume_right=255;
+	    //	 printf("Setting DVB volume: %d ; %d  \n",dvb_mixer.volume_left,dvb_mixer.volume_right);
+	    if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_MIXER, &dvb_mixer) < 0)){
+	      perror("DVB AUDIO SET MIXER: ");
+	      return CONTROL_ERROR;
+	    }
+	    return CONTROL_OK;
+	  }
+	  return CONTROL_ERROR;
+	}
+    }
+    return CONTROL_UNKNOWN;
 }
 
 static int freq=0;

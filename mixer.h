@@ -2,9 +2,6 @@
 #ifndef __MPLAYER_MIXER
 #define __MPLAYER_MIXER
 
-#define DEV_MIXER "/dev/mixer"
-
-extern int    mixer_usemaster;
 extern char * mixer_device;
 
 extern void mixer_getvolume( float *l,float *r );

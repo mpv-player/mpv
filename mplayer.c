@@ -171,7 +171,7 @@ static vo2_handle_t *video_out=NULL;
 #else
 static vo_functions_t *video_out=NULL;
 #endif
-static ao_functions_t *audio_out=NULL;
+ao_functions_t *audio_out=NULL;
 
 // benchmark:
 double video_time_usage=0;
@@ -2193,9 +2193,6 @@ if(step_sec>0) {
 #endif
       }
       break; 
-    case 'm':
-      mixer_usemaster=!mixer_usemaster;
-      break;
 
 #if 0  // change to 1 for absolute seeking tests
     case '1':
@@ -2451,7 +2448,6 @@ if(step_sec>0) {
 #endif
     } break;
     case MP_CMD_MIXER_USEMASTER :  {
-      mixer_usemaster=!mixer_usemaster;
     } break;
     case MP_CMD_CONTRAST :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;

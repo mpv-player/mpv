@@ -10,6 +10,7 @@
 //#include <sys/soundcard.h>
 
 #include "../config.h"
+#include "../mixer.h"
 
 #include "afmt.h"
 
@@ -35,7 +36,6 @@ static audio_buf_info zz;
 static int audio_fd=-1;
 
 char *oss_mixer_device = "/dev/mixer";
-int oss_mixer_usemaster = 0;
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
@@ -54,35 +54,27 @@ static int control(int cmd,int arg){
 	    if(ao_data.format == AFMT_AC3)
 		return CONTROL_TRUE;
     
-	    if ((fd = open("/dev/mixer", O_RDONLY)) > 0)
+	    if ((fd = open(oss_mixer_device, O_RDONLY)) > 0)
 	    {
 		ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devs);
-		if ((devs & SOUND_MASK_PCM) && (oss_mixer_usemaster == 0))
+		if (devs & SOUND_MASK_PCM)
+		{
 		    if (cmd == AOCONTROL_GET_VOLUME)
-			mcmd = SOUND_MIXER_READ_PCM;
+		    {
+		        ioctl(fd, SOUND_MIXER_READ_PCM, &v);
+			vol->right = (v & 0xFF00) >> 8;
+			vol->left = v & 0x00FF;
+		    }
 		    else
-			mcmd = SOUND_MIXER_WRITE_PCM;
-		else if ((devs & SOUND_MASK_VOLUME) && (oss_mixer_usemaster == 1))
-		    if (cmd == AOCONTROL_GET_VOLUME)
-			mcmd = SOUND_MIXER_READ_VOLUME;
-		    else
-			mcmd = SOUND_MIXER_WRITE_VOLUME;
+		    {
+		        v = ((int)vol->right << 8) | (int)vol->left;
+			ioctl(fd, SOUND_MIXER_WRITE_PCM, &v);
+		    }
+		}
 		else
 		{
 		    close(fd);
 		    return CONTROL_ERROR;
-		}
-
-		if (cmd == AOCONTROL_GET_VOLUME)
-		{
-		    ioctl(fd, cmd, &v);
-		    vol->right = (v & 0xFF00) >> 8;
-		    vol->left = v & 0x00FF;
-		}
-		else
-		{
-		    v = ((int)vol->right << 8) | (int)vol->left;
-		    ioctl(fd, cmd, &v);
 		}
 		close(fd);
 		return CONTROL_OK;
@@ -102,6 +94,9 @@ static int init(int rate,int channels,int format,int flags){
 
   if (ao_subdevice)
     dsp = ao_subdevice;
+
+  if(mixer_device)
+    oss_mixer_device=mixer_device;
 
   if (verbose)
     printf("audio_setup: using '%s' dsp device\n", dsp);

@@ -34,8 +34,10 @@ extern ao_functions_t audio_out_sun;
 #ifdef USE_SGI_AUDIO
 extern ao_functions_t audio_out_sgi;
 #endif
-extern ao_functions_t audio_out_pcm;
+#ifdef HAVE_DVB
 extern ao_functions_t audio_out_mpegpes;
+#endif
+extern ao_functions_t audio_out_pcm;
 extern ao_functions_t audio_out_pss;
 extern ao_functions_t audio_out_plugin;
 
@@ -66,8 +68,10 @@ ao_functions_t* audio_out_drivers[] =
 #ifdef HAVE_SDL
         &audio_out_sdl,
 #endif
-	&audio_out_pcm,
+#ifdef HAVE_DVB
 	&audio_out_mpegpes,
+#endif
+	&audio_out_pcm,
 	&audio_out_plugin,
 //	&audio_out_pss,
 	NULL

@@ -15,6 +15,7 @@
 #endif
 
 #include "../config.h"
+#include "../mixer.h"
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
@@ -42,6 +43,7 @@ LIBAO_EXTERN(sun)
 #endif
 
 
+static char *sun_mixer_device="/dev/audioctl";
 static char *audio_dev = NULL;
 static int queued_bursts = 0;
 static int queued_samples = 0;
@@ -214,6 +216,37 @@ static int control(int cmd,int arg){
 	return CONTROL_OK;
     case AOCONTROL_QUERY_FORMAT:
 	return CONTROL_TRUE;
+    case AOCONTROL_GET_VOLUME:
+    {
+        int fd,v,cmd,devs;
+
+	fd=open( sun_mixer_device,O_RDONLY );
+	if ( fd != -1 )
+	{
+	    struct audio_info info;
+	    ioctl( fd,AUDIO_GETINFO,&info);
+	    ((ao_control_vol_t*)(arg))->left=info.play.gain * 100. / AUDIO_MAX_GAIN;
+	    ((ao_control_vol_t*)(arg))->=info.play.gain * 100. / AUDIO_MAX_GAIN;
+	    close( fd );
+	    return CONTROL_OK;
+	}	
+	return CONTROL_ERROR;
+    }
+    case AOCONTROL_SET_VOLUME:
+    {
+        int fd,v,cmd,devs;
+
+	fd=open( sun_mixer_device,O_RDONLY );
+	if ( fd != -1 )
+	{
+	    struct audio_info info;
+	    AUDIO_INITINFO(&info);
+	    info.play.gain = (r+l) * AUDIO_MAX_GAIN / 100 / 2;
+	    ioctl( fd,AUDIO_SETINFO,&info );
+	    close( fd );
+	    return CONTROL_OK;
+	}	
+	return CONTROL_ERROR;
     }
     return CONTROL_UNKNOWN;
 }
@@ -224,6 +257,9 @@ static int init(int rate,int channels,int format,int flags){
 
     audio_info_t info;
     int ok;
+
+    if(mixer_device)
+      sun_mixer_device=mixer_device;
 
     if (audio_dev == NULL) {
 	if ((audio_dev = getenv("AUDIODEV")) == NULL)

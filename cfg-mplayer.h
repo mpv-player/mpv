@@ -141,7 +141,7 @@ static config_t mplayer_opts[]={
 //	{"dsp", &dsp, CONF_TYPE_STRING, CONF_NOCFG, 0, 0, NULL},
 	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
-        {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"master", "Option -master was obsolete and has been removed\n" , CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 2, 6, NULL},
 #ifdef HAVE_X11
 	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0, NULL},
