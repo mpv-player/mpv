@@ -12,7 +12,7 @@
 #include <inttypes.h>
 #include <stdarg.h>
 
-#include "font_load.h"
+//#include "font_load.h"
 #include "img_format.h"
 #include "../vidix/vidix.h"
 

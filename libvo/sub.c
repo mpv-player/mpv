@@ -1,6 +1,7 @@
 
 #include "config.h"
 #include "video_out.h"
+#include "font_load.h"
 #include "sub.h"
 
 #include <stdlib.h>

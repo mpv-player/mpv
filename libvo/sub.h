@@ -12,8 +12,6 @@ static inline void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,in
 
 #include "../subreader.h"
 
-extern font_desc_t* vo_font;
-
 extern unsigned char* vo_osd_text;
 
 extern int vo_osd_progbar_type;
