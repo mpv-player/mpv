@@ -281,6 +281,12 @@ void convert_linux(unsigned char *puc_y, int stride_y,
 static vo_functions_t *video_out=NULL;
 static ao_functions_t *audio_out=NULL;
 
+double video_time_usage=0;
+double vout_time_usage=0;
+double audio_time_usage=0;
+int total_time_usage_start=0;
+int benchmark=0;
+
 static int play_in_bg=0;
 
 extern void avi_fixate();
@@ -293,6 +299,8 @@ extern void avi_fixate();
 #endif
 
 void exit_player(char* how){
+
+ total_time_usage_start=GetTimer()-total_time_usage_start;
 
 #ifdef HAVE_GUI
  if ( !nogui )
@@ -309,6 +317,20 @@ void exit_player(char* how){
 
   if(how) printf("\nExiting... (%s)\n",how);
   if(verbose) printf("max framesize was %d bytes\n",max_framesize);
+  if(benchmark){
+      double tot=video_time_usage+vout_time_usage+audio_time_usage;
+      double total_time_usage=(float)total_time_usage_start*0.000001;
+      printf("BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
+          video_time_usage,vout_time_usage,audio_time_usage,
+	  total_time_usage-tot,total_time_usage);
+      if(total_time_usage>0.0)
+      printf("BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
+          100.0*video_time_usage/total_time_usage,
+	  100.0*vout_time_usage/total_time_usage,
+	  100.0*audio_time_usage/total_time_usage,
+	  100.0*(total_time_usage-tot)/total_time_usage,
+	  100.0);
+  }
   // restore terminal:
   #ifdef HAVE_GUI
    if ( nogui )
@@ -401,6 +423,7 @@ float force_fps=0;
 int force_srate=0;
 float audio_delay=0;
 int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
+int play_n_frames=-1;
 
 // screen info:
 char* video_driver=NULL; //"mga"; // default
@@ -1355,9 +1378,6 @@ float max_pts_correction=0;//default_max_pts_correction;
 int eof=0;
 int force_redraw=0;
 float num_frames=0;      // number of frames played
-double video_time_usage=0;
-double vout_time_usage=0;
-double audio_time_usage=0;
 int grab_frames=0;
 char osd_text_buffer[64];
 int drop_frame=0;
@@ -1473,6 +1493,8 @@ if(force_fps){
 printf("Start playing...\n");fflush(stdout);
 
 InitTimer();
+
+total_time_usage_start=GetTimer();
 
 while(!eof){
 
@@ -1791,7 +1813,9 @@ switch(sh_video->codec->driver){
 	      if (verbose>0) printf("\nframe drop %d, %.2f\n", drop_frame, time_frame);
 	  }
       } else {
-          if(time_frame<-3*frame_time || time_frame>3*frame_time) time_frame=0;
+          if( (time_frame<-3*frame_time || time_frame>3*frame_time) || benchmark)
+	      time_frame=0;
+	  
       }
 
       if(verbose>1)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",time_frame,a_frame,v_frame);
@@ -1811,6 +1835,11 @@ switch(sh_video->codec->driver){
     }
 
     current_module=NULL;
+    
+    if(play_n_frames>=0){
+      --play_n_frames;
+      if(play_n_frames<0) exit_player("Requested number of frames played");
+    }
     
     if(eof) break;
     if(force_redraw){
