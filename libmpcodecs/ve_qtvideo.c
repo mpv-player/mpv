@@ -177,7 +177,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     long framesizemax;
     UInt8 similarity=0;
     long compressedsize;
-    int in_format=kYUVSPixelFormat;
+    OSType in_format=kYUVSPixelFormat;
     int width = mpi->width;
     int height = mpi->height;
     int stride = width*2;

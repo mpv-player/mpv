@@ -235,7 +235,7 @@ static int init(sh_video_t *sh){
 //    result = FindCodec ('SVQ1',anyCodec,&compressor,&decompressor );                 
 //    printf("FindCodec SVQ1 returned:%i compressor: 0x%X decompressor: 0x%X\n",result,compressor,decompressor);
 
-    sh->context = kYUVSPixelFormat;
+    sh->context = (void *)kYUVSPixelFormat;
 #if 1
     {
 	int imgfmt = sh->codec->outfmt[sh->outfmtidx];
@@ -275,7 +275,7 @@ static int init(sh_video_t *sh){
 	    return(0);    
     }
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"imgfmt: %s qt_imgfmt: %.4s\n", vo_format_name(imgfmt), &qt_imgfmt);
-    sh->context = qt_imgfmt;
+    sh->context = (void *)qt_imgfmt;
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,imgfmt)) return 0;
     }
 #else
@@ -313,7 +313,7 @@ if(!codec_inited){
     result = QTNewGWorldFromPtr(
         &OutBufferGWorld,  
 //        kYUVSPixelFormat, //pixel format of new GWorld == YUY2
-	sh->context,
+	(OSType)sh->context,
         &OutBufferRect,   //we should benchmark if yvu9 is faster for svq3, too
         0, 
         0, 

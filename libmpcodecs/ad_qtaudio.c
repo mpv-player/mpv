@@ -92,7 +92,7 @@ static int loader_init()
     Setup_LDT_Keeper();
 #endif
     qtml_dll = LoadLibraryA("qtmlClient.dll");
-    if( qtml_dll == NULL )
+    if( qtml_dll == (HMODULE)NULL )
     {
         mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed loading dll\n" );
 	return 1;

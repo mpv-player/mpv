@@ -266,7 +266,7 @@ static int open(vf_instance_t *vf, char* args)
 	    return 0; /* bad args */
 	 }
 
-      if(args=strchr(args, ':')) args++;
+      if( (args=strchr(args, ':')) ) args++;
       }
 
    return 1;

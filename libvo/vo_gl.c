@@ -362,7 +362,7 @@ static uint32_t preinit(const char *arg)
     slice_height = 4;
     if(arg) 
     {
-        char *parse_pos = &arg[0];
+        char *parse_pos = (char *)&arg[0];
         while (parse_pos[0] && !parse_err) {
             if (strncmp (parse_pos, "manyfmts", 8) == 0) {
                 parse_pos = &parse_pos[8];
