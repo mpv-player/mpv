@@ -591,7 +591,7 @@ mplayer (0.90)
     Features:
     * -ao esd: new EsounD audio driver
     * -vo dxr3: new NORM option
-    * Xanim & RealPlayer binary Codecs working on PPC
+    * XAnim & RealPlayer binary Codecs working on PPC
     * Radeon 9000 support in VIDIX, colorkey restoring for all Radeons
     * Initial PPC (Big-Endian) support in VIDIX Rage128 driver
     * PNM:// streaming support (ported from xine)
@@ -838,7 +838,7 @@ mplayer (0.90)
     * removed obsolete/unused entries from help_mp-en.h
 
     Cleanup:
-    * xanim interface merged & fixed, now uses mpi and supports direct rendering
+    * XAnim interface merged & fixed, now uses mpi and supports direct rendering
     * cleanup of libmpdemux stream layer, especially of TV and MF parts
     * some more unused files removed: vo_fsdga, vo_odivx, vd_rle, timer.c, ttf_load
 
@@ -1027,8 +1027,8 @@ mplayer (0.60) "The RTFMCounter"
 
   pre1:
     * new file formats (MOV, FLI/FLC, VIVO, RealMedia, NuppelVideo, yuv4mpeg, yuv4mpeg2)
-    * more native codecs (CRAM, CVID, FLI, generic ADPCM (and IMA) decoder, g723, xanim)
-    * mencoder (a tool for encoding video to divx4+mp3)
+    * more native codecs (CRAM, CVID, FLI, generic ADPCM (and IMA) decoder, g723, XAnim)
+    * MEncoder (a tool for encoding video to divx4+mp3)
     * rewritten configure script (better autodetect, cleaner messages)
     * MMX/SSE optimizations
     * faster postprocessing filter, syntax change (deinterlacing support)
@@ -1495,7 +1495,7 @@ mplayer v0.10-pre5: Dec 22  2000
     - new flag: avi_header.flipped, TRUE if upside-down
     - image flipping code removed/disabled from libvo modules
     - duplicate flip_page() calls removed (overload with x11 and mga)
-  - aLaw audio codec (AVI id 0x06) added (uses code from xanim source)
+  - aLaw audio codec (AVI id 0x06) added (uses code from XAnim source)
 
 mplayer v0.10-pre4: ???
   test release, small fixes

@@ -488,7 +488,7 @@ Marcus Blomenkamp <Marcus.Blomenkamp@epost.de>
     * OSS AC3 passthru. fix
 
 Alan Young <ayoung@teleport.com>
-    * fixed support of RealMedia & Xanim binary plugins on Alpha
+    * fixed support of RealMedia & XAnim binary plugins on Alpha
 
 Attila Kinali <attila@kinali.ch>
     * various small fixes in the x11 code
