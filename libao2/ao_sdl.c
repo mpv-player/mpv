@@ -258,7 +258,7 @@ static void audio_pause()
 {
 
 	//printf("SDL: audio_pause called!\n");	
-	SDL_LockAudio();
+	SDL_PauseAudio(1);
 	
 }
 
@@ -266,7 +266,7 @@ static void audio_pause()
 static void audio_resume()
 {
 	//printf("SDL: audio_resume called!\n");	
-	SDL_UnlockAudio();
+	SDL_PauseAudio(0);
 }
 
 
