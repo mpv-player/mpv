@@ -902,7 +902,7 @@ cat > $TMPC << EOF
 #include <mlib.h>
 int main( void ) { mlib_VideoColorYUV2ABGR420(0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-$_cc $_extraincdir $_extralibdir -I$_mlibdir/include $TMPC -o $TMPO -L$_mlibdir/lib -lmlib 9>/dev/null 2>&1 && _mlib=yes;
+$_cc $_extraincdir $_extralibdir -I$_mlibdir/include $TMPC -o $TMPO -L$_mlibdir/lib -lmlib >/dev/null 2>&1 && _mlib=yes;
 
 
 rm -f $TMPC $TMPO
