@@ -1273,6 +1273,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     
     
     if(vidmode)vo_fs=0;    
+	if (g_cc != NULL)g_cc->lpVtbl->Release(g_cc);
+	g_cc=NULL;
 	/*release all surfaces*/
 	if (g_lpddsBack != NULL) g_lpddsBack->lpVtbl->Release(g_lpddsBack);
 	g_lpddsBack = NULL;
