@@ -4870,13 +4870,13 @@ paramètres pré-sélectionnés.
 .SS lavc (\-lavcopts)
 De nombreuses options de lavc sont très spécialisées et pauvrement documentées.
 Pour avoir tous les détails lisez le source.
+.PP
 .I EXEMPLE:
 .PD 0
 .RSs
 .IPs vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
 .RE
 .PD 1
-.
 .
 .TP
 .B acodec=<value>
@@ -4905,9 +4905,17 @@ Utilise le tag Windows audio spécifié (par ex. atag=0x55).
 .TP
 .B bit_exact
 Utilise uniquement les algorithmes à bit exact (excepté (i)dct).
+De plus, bit_exact désactive certaines optimisations, ce qui
+fait que cette option ne devrait être utilisée que pour des
+tests de régression, qui nécessitent des fichiers identiques
+bit-à-bit, même quand la version de l'encodeur change.
 Cela supprime également l'entête user-data des flux MPEG-4
-(cette section peut être utilisée par certains lecteur comme Quicktime player
-d'Apple pour déclarer le flux corompu).
+N'utilisez donc cette options que si vous êtes sûr d'en avoir
+besoin.
+.
+.TP
+.B threads=<1\-8>
+Nombre maximum de threads à utiliser (par défaut\ : 1).
 .
 .TP
 .B vcodec=<valeur>
@@ -4917,11 +4925,11 @@ utilise le codec indiqué (par défaut\ : mpeg4):
 .IPs mjpeg
 Motion JPEG
 .IPs ljpeg
-Lossless JPEG
-.IPs h263
-H263
+Lossless (sans perte) JPEG
+.IPs h263\ 
+H.263
 .IPs h263p
-H263 Plus
+H.263+
 .IPs mpeg4
 DivX 4/\:5
 .IPs msmpeg4
@@ -4929,9 +4937,9 @@ DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
 .IPs wmv1
-Windows Media Video 7 (alias WMV7)
+Windows Media Video, version 1 (alias WMV7)
 .IPs wmv2
-Windows Media Video 8 (alias WMV8)
+Windows Media Video, version 2 (alias WMV8)
 .IPs rv10
 un ancien codec RealVideo
 .IPs mpeg1video
@@ -4954,59 +4962,59 @@ codec vidéo sans perte de FFmpeg
 quantificateur minimum (passe\ 1/\:2)
 .RSs
 .IPs 1
-Non recommandé (fichier bien plus gros, petite différence de qualité et
-mauvais effets secondaires: msmpeg4, h263 seront de mauvaise qualité, le
-contrôle du débit sera perdu entrainant une mauvaise qualité et certains
+Non recommandé (fichier bien plus gros, faible différence de qualité et
+secondaires étranges\ : msmpeg4, h263 seront de mauvaise qualité, le
+contrôleur du débit sera perdu entrainant une mauvaise qualité et certains
 décodeurs seront incapables de le décoder).
 .IPs 2
 Recommandé pour l'encodage normal mpeg4/\:mpeg1video (par défaut).
 .IPs 3
 Recommandé pour h263(p)/\:msmpeg4. La raison de préférer 3 à 2 est que
 2 peut conduire à des dépassements (ceci sera corrigé pour h263(p) en changeant
-les quantificateur par BM dans le futur, msmpeg4 ne peut être corrigé car il ne
-gère pas cela).
+les quantificateurs par MB dans le futur, msmpeg4 ne peut être corrigé car il
+ne gère pas cela).
 .RE
 .
 .TP
 .B lmin=<0.01\-255.0>
-Multiplicateur de lagrange minimum pour le contrôle de débit, vous le voudrez
-probablement égal ou inférieur à vqmin. (par défaut\ : 2.0)
+Multiplicateur de lagrange minimum pour le contrôleur de débit, qu'il est
+conseillé d'avoir égal ou inférieur à vqmin. (par défaut\ : 2.0)
 .RE
 .
 .TP
 .B lmax=<0.01\-255.0>
-Multiplicateur de lagrange maximum pour le contrôle de débit.
+Multiplicateur de lagrange maximum pour le contrôleur de débit.
 (par défault: 31.0)
 .RE
 .
 .TP
 .B vqscale=<1\-31>
-Quantificateur constant / qualité d'encodage constante.
+Quantificateur constant /\: qualité d'encodage constante.
 Une valeur basse signifie une meilleur qualité mais de gros fichiers
 (par défaut\ : 0 (désactivé)).
-1 n'est pas recommandé (voir \-vqmin pour plus de détails).
+1 est déconseillé (voir vqmin pour plus de détails).
 .
 .TP
 .B vqmax=<1\-31>
-Quantificateur maximum (passe\ 1/\:2) 10\-31 devrait être un intervalle
+quantificateur maximum (passe\ 1/\:2) 10\-31 devrait être un intervalle
 raisonable (par défaut\ : 31)
 .
 .TP
 .B mbqmin=<1\-31>
-Quantificateur minimum du macrobloc (passe\ 1/\:2) (par défaut\ : 2)
+quantificateur minimum de macro-bloc (passe\ 1/\:2) (par défaut\ : 2)
 .
 .TP
 .B mbqmax=<1\-31>
-Quantificateur maximum du macrobloc (passe\ 1/\:2) (par défaut\ : 31)
+quantificateur maximum de macro-bloc (passe\ 1/\:2) (par défaut\ : 31)
 .
 .TP
 .B vqdiff=<1\-31>
-maximum quantificateur entre les trames I ou P (passe\ 1/\:2)
+différence maximale de quantificateur entre les trames I ou P (passe\ 1/\:2)
 (par défaut\ : 3)
 .
 .TP
 .B vmax_b_frames=<0\-4>
-nombre maximum de trames B entre les trames non B:
+nombre maximum de trames B entre les trames non B\ :
 .PD 0
 .RSs
 .IPs 0
@@ -5020,13 +5028,13 @@ intervalle sensé pour MPEG4
 .B vme=<0\-5>
 méthode d'estimation du mouvement.
 .I NOTE:
-0\-3 pour l'instant ignorent le montant de Bits utilisés, donc la qualité
+0\-3 pour l'instant ignorent la quantité de Bits utilisés, donc la qualité
 peut être mauvaise.
 Les méthodes disponibles sont:
 .PD 0
 .RSs
 .IPs 0
-aucune (qualité très basse)
+aucune (qualité très mauvaise)
 .IPs 1
 pleine (lent)
 .IPs 2
@@ -5042,14 +5050,15 @@ X1 (expérimental)
 .
 .TP
 .B me_range=<0\-9999>
-intervalle de recherche de l'estimation de mouvement, la valeur
-par défaut 0 signifie illimité.
+intervalle de recherche de l'estimation de mouvement, 0 (par défaut) signifie
+illimité.
 .
 .TP
 .B mbd=<0\-2>
-Macroblock decision algorithm (mode haute qualité), encode chaque bloc macro
-dans tous les modes et choisi le meilleur.
-C'est lent mais donne de meilleurs qualité et taille de fichier.
+Algorithme de décision de macro-block (mode haute qualité), encode chaque
+macro-block dans tous les modes et choisi le meilleur.
+C'est lent mais permet d'améliorer la qualité visuelle et réduire la taille 
+du fichier.
 .PD 0
 .RSs
 .IPs 0
@@ -5057,27 +5066,27 @@ utilise mbcmp (par défaut)
 .IPs 1
 sélectionne le mode MB qui requiert le moins de bits (=vhq)
 .IPs 2
-sélectionne le mode MB qui à la meilleure distortion de débit
+sélectionne le mode MB qui est le plus fidèle à l'original
 .RE
 .PD 1
 .
 .TP
-.B vhq
+.B vhq\ \ \ \ 
 Identique à mbd=1, gardé pour raisons de compatibilité.
 .
 .TP
 .B v4mv
-Permet 4 vecteurs de mouvement par macrobloc (qualité légèrement meilleure).
+Permet 4 vecteurs de mouvement par macro-bloc (qualité légèrement meilleure).
 (par défaut\ : désactivé)
 .
 .TP
 .B obmc\ \ \ 
-Compensation de mouvement de blocs (H263+)
+Compensation de mouvement de par groupes de blocs (H.263+)
 .
 .TP
 .B loop\ \ \ 
-Filtre loop (H263+)
-note: c'est actuellement cassé
+Filtre loop (H.263+)
+note: est actuellement cassé
 .
 .TP
 .B inter_threshold <-1000\-1000>
@@ -5085,11 +5094,12 @@ Ne fait absolument rien pour l'instant.
 .
 .TP
 .B keyint=<0\-300>
-intervalle entre les trames-clé en trames.
+intervalle (en trames) entre les trames-clé (keyframe).
 Les trames-clé sont nécessaires pour les déplacement puisque celui-ci n'est
-possible que vers une trame-clé, mais les trames-clé ont besoin de plus d'espace
-que les autres trames donc de plus grands nombres ici signifient fichiers
-légèrement plus petits, mais déplacement plus précis, 0 signifie pas de
+possible que d'une trames-clé vers une autre, mais celles-ci prennent plus
+de place que les autres trames.
+De plus grands nombres ici signifient donc des fichiers légèrement plus
+petits, mais un déplacement moins précis, 0 signifie pas de
 trame-clé.
 Les valeurs >300 ne sont pas recommandées car la qualité peut être
 mauvaise suivant le décodeur, l'encodeur et la chance.
@@ -5101,7 +5111,7 @@ film à 25fps)
 .B sc_threshold=<-1000000\-1000000>
 Seuil pour la détection des changements de scène.
 Libavcodec ajoute une trame-clé quand elle détecte un changement de scène.
-Vous pouvez spécifier la sensibilité de la détection avec cette option.
+Vous pouvez définir la sensibilité de la détection avec cette option.
 -1000000 signifie qu'il y aura un changement détecté à chaque trame, 1000000
 signifie qu'aucun changement de scène ne sera détecté (par défaut\ : 0).
 .
@@ -5113,13 +5123,13 @@ stratégie à choisir entre les trames I/\:P/\:B (passe\ 2):
 toujours utiliser le nombre maximum de trames B (par défaut)
 .IPs 1
 éviter les trames B dans les scènes avec beaucoup de mouvement
-(prédictions incorrectes du bitrate)
+(le débit binaire sera mal prédit/\:non respecté)
 .RE
 .
 .TP
 .B vpass=<1\-2>
 Active le mode 2passes interne, ne le spécifiez que si vous désirez utiliser
-l'encodage deux passes (par défaut\ : désactivé):
+l'encodage deux passes\ :
 .PD 0
 .RSs
 .IPs 1
@@ -5128,16 +5138,16 @@ première passe
 seconde passe
 .RE
 .PD 1
-
+.sp 1
 .RS
-huffyuv:
+huffyuv\ :
 .RE
 .PD 0
 .RSs
-.IPs la passe 1
-sauve les statistiques
-.IPs la passe 2
-encode avec une table Huffman optimisée d'après les statistiques de la passe 1.
+.IPs "la passe 1"
+Sauve les statistiques.
+.IPs "la passe 2"
+Encode avec une table Huffman optimisée d'après les statistiques de la passe 1.
 .RE
 .PD 1
 .
@@ -5145,13 +5155,13 @@ encode avec une table Huffman optimisée d'après les statistiques de la passe 1.
 .B aspect=<x/\:y>
 Stocke le rapport hauteur/\:largeur du film en interne, tout comme les fichiers
 MPEG.
-Bien meilleur solution que le redimensionnement, car la qualité
+Solution bien meilleure que le redimensionnement, car la qualité
 n'en est pas diminuée.
 Probablement seul MPlayer sera capable de relire ces fichiers correctement,
 les autres lecteurs l'afficheront avec un mauvais rapport hauteur/\:largeur.
-Le paramètre le rapport hauteur/\:largeur peut être donné en tant que ratio ou
-nombre flottant.
-
+Le paramètre peut être donné en tant que ratio hauteur/\:largeur ou nombre
+flottant.
+.sp 1
 .RS
 .I EXEMPLE:
 .RE
@@ -5169,22 +5179,27 @@ hauteur/\:largeur, en prenant en compte tous les ajustements
 .
 .TP
 .B vbitrate=<valeur>
-spécifie le bitrate (passe 1/\:2).  Attention: 1kBit = 1000 Bits.
+Définit le débit binaire (bitrate) (passe 1/\:2).
+attention: 1kBit = 1000 Bits
 .RSs
 .IPs 4\-16000
 (en kbits)
 .IPs 16001\-24000000
 (en bits)
 .IPs 800
-valeur par défaut
+par défaut
 .RE
 .
 .TP
 .B vratetol=<valeur>
-tolérance approximative de taille du fichier en kbit. 1000\-100000 est un
-intervalle raisonable.
-(Attention: 1kBit = 1000 Bits)
+tolérance approximative de taille du fichier en kbit.
+1000\-100000 est un intervalle raisonable.
+attention: 1kBit = 1000 Bits
 (par défaut\ : 8000)
+.br
+.I NOTE\ :
+vratetol ne devrait pas être trop grand lors de la seconde passe ou il peut
+se produire des problèmes si vrc_(min|max)rate est utilisé.
 .
 .TP
 .B vrc_maxrate=<valeur>
@@ -5193,6 +5208,7 @@ bitrate maximum en kbit/\:sec (passe\ 1/\:2)
 .TP
 .B vrc_minrate=<valeur>
 bitrate minimum en kbit/\:sec (passe\ 1/\:2)
+.\" -------------- fin de options libavcodec à jour --------
 .
 .TP
 .B vrc_buf_size=<valeur>
