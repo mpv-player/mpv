@@ -57,7 +57,7 @@ int add_plugin(int i,char* cfg){
   if(cnt >= 100)
     return 0;
 
-  // Is this the last itteration or just another plugin
+  // Is this the last iteration or just another plugin
   if(cfg[cnt]=='\0'){
     ao_plugin_local_data.plugins=malloc((i+1)*sizeof(ao_plugin_functions_t*));
     if(ao_plugin_local_data.plugins){
