@@ -4075,7 +4075,7 @@ capturés, soit pour réduire légèrement le contraste pour masquer des
 artefacts et s'accomoder de débits plus bas.
 .
 .TP
-.IPs eq2[=gamma:contraste:luminosité:saturation:rg:vg:bg:poids]
+.Bs eq2[=gamma:contraste:luminosité:saturation:rg:vg:bg:poids]
 Égaliseur logiciel alternatif qui utilise des tables de lookup (très lent),
 autorisant une correction du gamma en plus d'un simple ajustement de
 luminosité et de contraste.
@@ -5653,6 +5653,7 @@ gourmandes.
 .sp 1
 .RS
 huffyuv\ :
+.RE
 .PD 0
 .RSs
 .IPs "la passe 1"
@@ -5920,7 +5921,7 @@ désactivé (par défaut)
 .PD 1
 .
 .TP
-.IPs vcelim=<-1000\-1000>
+.B vcelim=<-1000\-1000>
 Définit le coefficient de seuil d'élimination pour la chrominance.
 Des valeurs négatives prendront aussi en compte le coefficient dc (qui devrait
 être au moins \-4 ou plus bas pour l'encodage à quant=1):
@@ -6428,7 +6429,7 @@ dans un fichier comme 'psnr_012345.log'.
 Les valeurs retournées sont en dB (décibel), le plus haut est le mieux.
 .
 .TP
-.IPs mpeg_quant
+.B mpeg_quant
 Utilise les quantificateurs MPEG au lieu de H.263.
 .
 .TP
@@ -7165,7 +7166,7 @@ facteur de quantification entre les trames I et P (par défaut\ : 2.0)
 facteur de quantification entre les trames P et B (par défaut\ : 2.0)
 .
 .TP
-.B pass=<1|2>
+.B pass=<1\-2>
 Active le mode 2 ou 3-passes.
 Il est recommandé de toujours encoder en mode 2 ou 3 passes puisque cela
 permet une distribution plus adéquate des bits et améliore la qualité
