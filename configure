@@ -210,6 +210,9 @@ Codecs:
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (MPEG audio) support [autodetect]
   --enable-xmms          build with XMMS inputplugin support [disabled]
+  --disable-mp3lib       disable builtin mp3lib [enabled]
+  --disable-liba52       disable builtin liba52 [enabled]
+  --disable-libmpeg2     disable builtin libmpeg2 [enabled]
   
 Video output:
   --disable-vidix        disable VIDIX [enable on x86 *nix]
@@ -1150,6 +1153,9 @@ _liblzo=auto
 _mad=auto
 _vorbis=auto
 _theora=auto
+_mp3lib=yes
+_liba52=yes
+_libmpeg2=yes
 _matroska_internal=yes
 _matroska_external=auto
 _tremor=no
@@ -1315,6 +1321,12 @@ for ac_option do
   --disable-tremor)	_tremor=no	;;
   --enable-theora)	_theora=yes	;;
   --disable-theora)	_theora=no	;;
+  --enable-mp3lib)	_mp3lib=yes	;;
+  --disable-mp3lib)	_mp3lib=no	;;
+  --enable-liba52)	_liba52=yes	;;
+  --disable-liba52)	_liba52=no	;;
+  --enable-libmpeg2)	_libmpeg2=yes	;;
+  --disable-libmpeg2)	_libmpeg2=no	;;
   --enable-internal-matroska)  _matroska_internal=yes _matroska_external=no ;;
   --disable-internal-matroska) _matroska_internal=no ;;
   --enable-external-matroska)  _matroska_internal=no  _matroska_external=yes ;;
@@ -4521,7 +4533,35 @@ else
 fi
 echores "$_theora"
 
+echocheck "mp3lib support"
+if test "$_mp3lib" = yes ; then
+  _def_mp3lib='#define USE_MP3LIB 1'
+  _codecmodules="mp3lib $_codecmodules"
+else
+  _def_mp3lib='#undef USE_MP3LIB'
+  _nocodecmodules="mp3lib $_nocodecmodules"
+fi
+echores "$_mp3lib"
 
+echocheck "liba52 support"
+if test "$_liba52" = yes ; then
+  _def_liba52='#define USE_LIBA52 1'
+  _codecmodules="liba52 $_codecmodules"
+else
+  _def_liba52'#undef USE_LIBA52'
+  _nocodecmodules="liba52 $_nocodecmodules"
+fi
+echores "$_liba52"
+
+echocheck "libmpeg2 support"
+if test "$_libmpeg2" = yes ; then
+  _def_libmpeg2='#define USE_LIBMPEG2 1'
+  _codecmodules="libmpeg2 $_codecmodules"
+else
+  _def_libmpeg2'#undef USE_LIBMPEG2'
+  _nocodecmodules="libmpeg2 $_nocodecmodules"
+fi
+echores "$_libmpeg2"
 echocheck "Matroska support (external 0.6.0 or later OR internal)"
 _matroska_result="no"
 if test "$_matroska_internal" = yes ; then
@@ -6205,9 +6245,9 @@ $_def_libavcodecso
 #define CONFIG_MPEGAUDIO_HP 1
 
 /* Use codec libs included in mplayer CVS / source dist: */
-#define USE_MP3LIB
-#define USE_LIBA52
-#define USE_LIBMPEG2
+$_def_mp3lib
+$_def_liba52
+$_def_libmpeg2
 
 /* Use libfame encoder filter */
 $_def_fame
