@@ -575,7 +575,7 @@ static inline int put_v(BufferContext *bc, uint64_t val){
 		if(val>>i == 0) break;
 	}
 
-	for(i-=7; i>0; i-=8){
+	for(i-=7; i>0; i-=7){
 		*(bc->buf_ptr++)= 0x80 | (val>>i);
 	}
 	*(bc->buf_ptr++)= val&0x7F;
