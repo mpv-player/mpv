@@ -865,9 +865,9 @@ $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib > /dev/null 2>&
 
 # this is not yet checked with OpenBSD - atmos
 if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -pthread $_socklib > /dev/null 2>&1 && _gl=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm -pthread $_socklib > /dev/null 2>&1 && _gl=yes
 else
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL $_socklib > /dev/null 2>&1 && _gl=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm $_socklib > /dev/null 2>&1 && _gl=yes
 fi
 
 cat > $TMPC << EOF
@@ -876,10 +876,10 @@ int main( void ) { return 0; }
 EOF
 # this is not yet checked with OpenBSD - atmos
 if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
-$_cc $_x11incdir $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -pthread $_socklib > /dev/null 2>&1 || \
+$_cc $_x11incdir $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm -pthread $_socklib > /dev/null 2>&1 || \
  { _gl=no; echo "GL includes not found!";}
 else
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL $_socklib > /dev/null 2>&1 || \
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm $_socklib > /dev/null 2>&1 || \
  { _gl=no; echo "GL includes not found!";}
 fi
 
