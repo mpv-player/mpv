@@ -440,7 +440,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
       if(id==formtypeAVI){ 
         mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedAVIfile);
         file_format=DEMUXER_TYPE_AVI;
-      }
+      } else
+        free_demuxer(demuxer);
     }
   }
 }
@@ -450,7 +451,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_Y4M){
   if(y4m_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected YUV4MPEG2 file format!\n");
       file_format=DEMUXER_TYPE_Y4M;
-  }
+  } else
+      free_demuxer(demuxer);
 }
 //=============== Try to open as ASF file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
@@ -458,7 +460,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
   if(asf_check_header(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedASFfile);
       file_format=DEMUXER_TYPE_ASF;
-  }
+  } else
+      free_demuxer(demuxer);
 }
 //=============== Try to open as NUV file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_NUV){
@@ -466,7 +469,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_NUV){
   if(nuv_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected NuppelVideo file format!\n");
       file_format=DEMUXER_TYPE_NUV;
-  }
+  } else
+      free_demuxer(demuxer);
 }
 //=============== Try to open as MOV file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
@@ -474,7 +478,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   if(mov_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedQTMOVfile);
       file_format=DEMUXER_TYPE_MOV;
-  }
+  } else
+      free_demuxer(demuxer);
 }
 //=============== Try to open as VIVO file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
@@ -490,7 +495,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_REAL){
   if(real_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedREALfile);
       file_format=DEMUXER_TYPE_REAL;
-  }
+  } else
+      free_demuxer(demuxer);
 }
 //=============== Try to open as FLI file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FLI){
@@ -503,7 +509,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FLI){
     if((id==0xAF11) || (id==0xAF12)){ 
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedFLIfile);
       file_format=DEMUXER_TYPE_FLI;
-    }
+    } else
+      free_demuxer(demuxer);
   }
 }
 //=============== Try to open as FILM file: =================
@@ -515,7 +522,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FILM){
     if(signature==mmioFOURCC('F', 'I', 'L', 'M')){ 
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedFILMfile);
       file_format=DEMUXER_TYPE_FILM;
-    }
+    } else
+      free_demuxer(demuxer);
   }
 }
 //=============== Try to open as RoQ file: =================
@@ -524,7 +532,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ROQ){
   if(roq_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedROQfile);
       file_format=DEMUXER_TYPE_ROQ;
-  }
+  } else
+      free_demuxer(demuxer);
 }
 //=============== Try to open as MPEG-PS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
@@ -571,6 +580,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
         mp_msg(MSGT_DEMUXER,MSGL_ERR,"MPEG: " MSGTR_MissingVideoStreamBug);
       else
         mp_msg(MSGT_DEMUXER,MSGL_V,"Not MPEG System Stream format... (maybe Transport Stream?)\n");
+      free_demuxer(demuxer);
     }
   }
   break;
@@ -582,6 +592,7 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
   if(!ds_fill_buffer(demuxer->video)){
     mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_InvalidMPEGES);
     file_format=DEMUXER_TYPE_UNKNOWN;
+    free_demuxer(demuxer);
   } else {
     mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGESfile);
   }
