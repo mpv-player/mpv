@@ -95,7 +95,7 @@ cat > html-single.xsl << EOF
 EOF
 
 echo "Searching for DTD..."
-for _try_dtd in /usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd /usr/share/docbook-xml42/docbookx.dtd /usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd /usr/share/sgml/docbook/xml-dtd-4.2/docbookx.dtd
+for _try_dtd in /usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd /usr/share/docbook-xml42/docbookx.dtd /usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd /usr/share/sgml/docbook/xml-dtd-4.2/docbookx.dtd /usr/share/xml/docbook/schema/dtd/4.2/docbookx.dtd
 do
   if test -f "$_try_dtd"
   then
