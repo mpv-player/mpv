@@ -61,7 +61,11 @@ extern int init_acm_audio_codec(sh_audio_t *sh_audio);
 extern int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen);
 
 sh_audio->samplesize=2;
+#if WORDS_BIGENDIAN
+sh_audio->sample_format=AFMT_S16_BE;
+#else
 sh_audio->sample_format=AFMT_S16_LE;
+#endif
 sh_audio->samplerate=0;
 //sh_audio->pcm_bswap=0;
 

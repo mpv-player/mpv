@@ -72,6 +72,7 @@ static int oss2sunfmt(int oss_format)
 	return AUDIO_ENCODING_ULAW;
     case AFMT_A_LAW:
 	return AUDIO_ENCODING_ALAW;
+    case AFMT_S16_BE:
     case AFMT_S16_LE:
 	return AUDIO_ENCODING_LINEAR;
     case AFMT_U8:
@@ -248,7 +249,10 @@ static int init(int rate,int channels,int format,int flags){
 
     AUDIO_INITINFO(&info);
     info.play.encoding = oss2sunfmt(ao_format = format);
-    info.play.precision = (format==AFMT_S16_LE? AUDIO_PRECISION_16:AUDIO_PRECISION_8);
+    info.play.precision =
+	(format==AFMT_S16_LE || format==AFMT_S16_BE
+	 ? AUDIO_PRECISION_16
+	 : AUDIO_PRECISION_8);
     info.play.channels = ao_channels = channels;
     info.play.sample_rate = ao_samplerate = rate;
     if(ioctl (audio_fd, AUDIO_SETINFO, &info)<0)
@@ -331,7 +335,10 @@ static void reset(){
 
     AUDIO_INITINFO(&info);
     info.play.encoding = oss2sunfmt(ao_format);
-    info.play.precision = (ao_format==AFMT_S16_LE? AUDIO_PRECISION_16:AUDIO_PRECISION_8);
+    info.play.precision =
+	(ao_format==AFMT_S16_LE || ao_format==AFMT_S16_BE 
+	 ? AUDIO_PRECISION_16
+	 : AUDIO_PRECISION_8);
     info.play.channels = ao_channels;
     info.play.sample_rate = ao_samplerate;
     info.play.samples = 0;
@@ -390,16 +397,22 @@ static int get_space(){
 // it should round it down to outburst*n
 // return: number of bytes played
 static int play(void* data,int len,int flags){
+#if	WORDS_BIGENDIAN
+    int native_endian = AFMT_S16_BE;
+#else
+    int native_endian = AFMT_S16_LE;
+#endif
 
     if (len < ao_outburst) return 0;
     len /= ao_outburst;
     len *= ao_outburst;
 
-#if	WORDS_BIGENDIAN
-    {
+    /* 16-bit format using the 'wrong' byteorder?  swap words */
+    if ((ao_format == AFMT_S16_LE || ao_format == AFMT_S16_BE)
+	&& ao_format != native_endian) {
 	static void *swab_buf;
 	static int swab_len;
-	if (ao_format == AFMT_S16_LE && len > swab_len) {
+	if (len > swab_len) {
 	    if (swab_buf)
 		swab_buf = realloc(swab_buf, len);
 	    else
@@ -410,7 +423,6 @@ static int play(void* data,int len,int flags){
 	swab(data, swab_buf, len);
 	data = swab_buf;
     }
-#endif
 
     len = write(audio_fd, data, len);
     if(len > 0) {
