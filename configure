@@ -189,7 +189,7 @@ Advanced options:
   --enable-profile       compile profiling information into mplayer [disable]
 
 Hazardous options a.k.a. "DO NOT BUGREPORT ANYTHING !"
-  --disable-gcc-checking   disable gcc version checking
+  --disable-gcc-checking   disable gcc version checking [enable]
 
 Use these options if autodetection fails:
   --with-extraincdir=DIR   extra headers (png, dvb, mad, sdl, css, ...) in DIR
@@ -225,6 +225,9 @@ for ac_option do
     ;;
   --as=*)
     _as=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --enable-gcc-checking)
+    _skip_cc_check=no
     ;;
   --disable-gcc-checking)
     _skip_cc_check=yes
@@ -593,6 +596,14 @@ EOF
       _march="-march=$host_arch"
       _mcpu="-mcpu=$host_arch"
       proc="$_target"
+      # Note: this has to be extended
+      case "$proc" in
+        i386*) iproc=386 ;;
+        i486*) iproc=486 ;;
+        i586*) iproc=586 ;;
+        i686*) iproc=686 ;;
+        *) iproc=586 ;;
+      esac
     fi
 
     echores "$proc"
@@ -773,6 +784,7 @@ for ac_option do
   --target=*) ;;
   --cc=*) ;;
   --as=*) ;;
+  --enable-gcc-checking) ;;
   --disable-gcc-checking) ;;
   --enable-static*) ;;
   --disable-static*) ;;
@@ -914,6 +926,9 @@ for ac_option do
     _mlib=yes
     ;;
 
+  --disable-profile)
+    _profile=
+    ;;
   --enable-profile)
     _profile='-p'
     ;;
