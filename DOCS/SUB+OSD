@@ -19,7 +19,7 @@ There are many ways to get it:
    (read TOOLS/subfont-c/README for details)
 
 2. use the font generator GIMP plugin at TOOLS/subfont-GIMP
-   (note: you must have HSI RAW plugin too, see URL bellow)
+   (note: you must have HSI RAW plugin too, see URL below)
 
 3. download ready-to-use font packages from mplayer site.
    Note: currently available fonts are only for limited iso 8859-1/2 support,
