@@ -154,6 +154,21 @@ int mpeg2_parse (mpeg2dec_t * mpeg2dec)
 {
     int size_buffer, size_chunk, copied;
 
+    if(mpeg2dec->code==0xff){
+	// FIXME: we need to resync stream (esp. mpeg2dec-->code) as we
+	// left parser at 0x1FF last time at the end of prev. chunk.
+	// Why? mpeg2dec->action is set to mpeg2_header_picture_start, but
+	// it will call mpeg2_parse_header() too...
+	//
+	// following code copied from mpeg2_seek_header():
+	while (mpeg2dec->code != 0xb3 &&
+	   ((mpeg2dec->code != 0xb7 && mpeg2dec->code != 0xb8 &&
+	     mpeg2dec->code) || mpeg2dec->sequence.width == -1))
+	    if (seek_chunk (mpeg2dec))
+		return -1;
+	mpeg2dec->chunk_start = mpeg2dec->chunk_ptr = mpeg2dec->chunk_buffer;
+    }
+
     if (mpeg2dec->action) {
 	int state;
 
@@ -161,8 +176,9 @@ int mpeg2_parse (mpeg2dec_t * mpeg2dec)
 	if (state)
 	    return state;
     }
-
+    
     while (1) {
+	//printf("code=0x%X       \n",mpeg2dec->code);
 	while ((unsigned) (mpeg2dec->code - mpeg2dec->first_decode_slice) <
 	       mpeg2dec->nb_decode_slices) {
 	    size_buffer = mpeg2dec->buf_end - mpeg2dec->buf_start;
@@ -195,6 +211,13 @@ int mpeg2_parse (mpeg2dec_t * mpeg2dec)
 	    break;
 	if (seek_chunk (mpeg2dec))
 	    return -1;
+    }
+    
+    //printf("next_code=0x%X  state=%d     \n",mpeg2dec->code,mpeg2dec->state);
+    
+    if(mpeg2dec->code==0xff){
+	mpeg2dec->action = mpeg2_header_picture_start; //mpeg2_seek_header;
+	return mpeg2dec->state;
     }
 
     switch (RECEIVED (mpeg2dec->code, mpeg2dec->state)) {
@@ -248,6 +271,11 @@ int mpeg2_parse_header (mpeg2dec_t * mpeg2dec)
 	}
 	mpeg2dec->bytes_since_pts += copied;
 
+    //printf("header_code=0x%X    state=%d   \n",mpeg2dec->code,mpeg2dec->state);
+    
+//    if(!mpeg2dec->code && mpeg2dec->state==7)
+	
+
 	if (process_header[mpeg2dec->code & 0x0b] (mpeg2dec)) {
 	    mpeg2dec->code = mpeg2dec->buf_start[-1];
 	    mpeg2dec->action = mpeg2_seek_header;
@@ -255,6 +283,9 @@ int mpeg2_parse_header (mpeg2dec_t * mpeg2dec)
 	}
 
 	mpeg2dec->code = mpeg2dec->buf_start[-1];
+
+    //printf("next_header_code=0x%X    state=%d   \n",mpeg2dec->code,mpeg2dec->state);
+
 	switch (RECEIVED (mpeg2dec->code, mpeg2dec->state)) {
 
 	/* state transition after a sequence header */
@@ -348,6 +379,15 @@ void mpeg2_set_buf (mpeg2dec_t * mpeg2dec, uint8_t * buf[3], void * id)
     fbuf->buf[1] = buf[1];
     fbuf->buf[2] = buf[2];
     fbuf->id = id;
+    // HACK! FIXME! At first I frame, copy pointers to prediction frame too!
+    if (mpeg2dec->custom_fbuf && !mpeg2dec->fbuf[1]->buf[0]){
+	mpeg2dec->fbuf[1]->buf[0]=buf[0];
+	mpeg2dec->fbuf[1]->buf[1]=buf[1];
+	mpeg2dec->fbuf[1]->buf[2]=buf[2];
+	mpeg2dec->fbuf[1]->id=NULL;
+    }
+//        printf("libmpeg2: FBUF 0:%p 1:%p 2:%p\n",
+//	    mpeg2dec->fbuf[0]->buf[0],mpeg2dec->fbuf[1]->buf[0],mpeg2dec->fbuf[2]->buf[0]);
 }
 
 void mpeg2_custom_fbuf (mpeg2dec_t * mpeg2dec, int custom_fbuf)

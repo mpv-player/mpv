@@ -655,7 +655,7 @@ int mpeg2_header_slice_start (mpeg2dec_t * mpeg2dec)
     } else {
 	int b_type;
 
-	mpeg2dec->decoder.convert = NULL;
+	//mpeg2dec->decoder.convert = NULL;
 	b_type = (mpeg2dec->decoder.coding_type == B_TYPE);
 	mpeg2_init_fbuf (&(mpeg2dec->decoder), mpeg2dec->fbuf[0]->buf,
 			 mpeg2dec->fbuf[b_type + 1]->buf,
