@@ -2,9 +2,11 @@
 # For latest version of pci ids see: http://pciids.sf.net
 # Copyright 2002 Nick Kurshev
 #
-# Usage gawk -f pci_db2c.awk pci.db
+# Usage: awk -f pci_db2c.awk pci.db
 #
 # Tested with Gawk v 3.0.3
+# But there are reports that it works with Awk and Mawk
+# (Nobody tested it with Nawk).
 #
 
 BEGIN {
@@ -15,11 +17,6 @@ BEGIN {
 	exit(1);
     }
     in_file = ARGV[1];
-# Try get input file attributes.
-    system("ls -o -q --time=ctime "in_file" >.tmp_file")
-    getline <".tmp_file"
-    in_file_attr = $0
-    system("rm -f .tmp_file")
     vendor_file = "pci_vendors.h";
     ids_file = "pci_ids.h"
     name_file = "pci_names.c"
@@ -115,7 +112,7 @@ function print_head( out_file)
 {
     print "/*" >out_file;
     printf(" * File: %s\n", out_file) >out_file;
-    printf(" * This file was generated automatically from:\n * %s\n", in_file_attr) >out_file;
+    printf(" * This file was generated automatically. Don't modify it.\n") >out_file;
     print "*/" >out_file;
     return;
 }
@@ -196,9 +193,11 @@ function init_name_db()
 
 function init_device_db()
 {
-  delete device_names
+#  delete device_names
+  for( i in device_names ) delete device_names[i];
   device_names[1]=""
-  delete subdevice_names
+#  delete subdevice_names
+  for( i in subdevice_names ) delete subdevice_names[i];
   subdevice_names[1] = ""
 }
 
