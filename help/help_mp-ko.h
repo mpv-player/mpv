@@ -1,47 +1,47 @@
-// Fully sync'ed with help_mp-en.h 1.105
+// Fully sync'ed with help_mp-en.h 1.120
 // Translated by: DongCheon Park <dcpark@kaist.ac.kr>
 
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
-"»ç¿ë¹ı:   mplayer [¼±ÅÃ»çÇ×] [url|°æ·Î/]ÆÄÀÏ¸í\n"
+"ì‚¬ìš©ë²•:   mplayer [ì„ íƒì‚¬í•­] [url|ê²½ë¡œ/]íŒŒì¼ëª…\n"
 "\n"
-"±âº» ¼±ÅÃ»çÇ×: (ÀüÃ¼ ¸ñ·ÏÀº man ÆäÀÌÁö ÂüÁ¶)\n"
-" -vo <drv[:dev]>  ºñµğ¿À Ãâ·Â µå¶óÀÌ¹ö ¹× ÀåÄ¡ ¼±ÅÃ (¸ñ·Ïº¸±â´Â '-vo help')\n"
-" -ao <drv[:dev]>  ¿Àµğ¿À Ãâ·Â µå¶óÀÌ¹ö ¹× ÀåÄ¡ ¼±ÅÃ (¸ñ·Ïº¸±â´Â '-ao help')\n"
+"ê¸°ë³¸ ì„ íƒì‚¬í•­: (ì „ì²´ ëª©ë¡ì€ man í˜ì´ì§€ ì°¸ì¡°)\n"
+" -vo <drv[:dev]>  ë¹„ë””ì˜¤ ì¶œë ¥ ë“œë¼ì´ë²„ ë° ì¥ì¹˜ ì„ íƒ (ëª©ë¡ë³´ê¸°ëŠ” '-vo help')\n"
+" -ao <drv[:dev]>  ì˜¤ë””ì˜¤ ì¶œë ¥ ë“œë¼ì´ë²„ ë° ì¥ì¹˜ ì„ íƒ (ëª©ë¡ë³´ê¸°ëŠ” '-ao help')\n"
 #ifdef HAVE_VCD
-" vcd://<trackno>  ÆÄÀÏÀÌ ¾Æ´Ñ ÀåÄ¡·ÎºÎÅÍ VCD (ºñµğ¿À CD) Æ®·¢ Àç»ı\n"
+" vcd://<trackno>  (S)VCD (Super Video CD) íŠ¸ë™ ì¬ìƒ (ì¥ì¹˜ë¡œë¶€í„°, ë§ˆìš´íŠ¸ ì—†ì´)\n"
 #endif
 #ifdef USE_DVDREAD
-" dvd://<titleno>  ÆÄÀÏÀÌ ¾Æ´Ñ ÀåÄ¡·ÎºÎÅÍ DVD Å¸ÀÌÆ²/Æ®·¢ Àç»ı\n"
-" -alang/-slang    DVD ¿Àµğ¿À/ÀÚ¸· ¾ğ¾î ¼±ÅÃ (µÎ ±ÛÀÚÀÇ ±¹°¡ ÄÚµå)\n"
+" dvd://<titleno>  ì¼ë°˜ íŒŒì¼ì´ ì•„ë‹Œ ì¥ì¹˜ë¡œë¶€í„° DVD íƒ€ì´í‹€ ì¬ìƒ\n"
+" -alang/-slang    DVD ì˜¤ë””ì˜¤/ìë§‰ ì–¸ì–´ ì„ íƒ (ë‘ ê¸€ìì˜ êµ­ê°€ ì½”ë“œ)\n"
 #endif
-" -ss <timepos>    Æ¯Á¤ À§Ä¡·Î Ã£¾Æ°¡±â (ÃÊ ¶Ç´Â ½Ã:ºĞ:ÃÊ)\n"
-" -nosound         ¼Ò¸® Àç»ı ¾ÈÇÔ\n"
-" -fs              ÀüÃ¼È­¸é Àç»ı (¶Ç´Â -vm, -zoom, ÀÚ¼¼ÇÑ »çÇ×Àº man ÆäÀÌÁö)\n"
-" -x <x> -y <y>    È­¸éÀ» <x>*<y>ÇØ»óµµ·Î ¼³Á¤ (-vmÀÌ³ª -zoom°ú ÇÔ²² »ç¿ëÇÔ)\n"
-" -sub <file>      »ç¿ëÇÒ ÀÚ¸· ÆÄÀÏ ÁöÁ¤ (-subfps, -subdelayµµ Âü°íÇÒ °Í)\n"
-" -playlist <file> Àç»ı¸ñ·Ï ÆÄÀÏ ÁöÁ¤\n"
-" -vid x -aid y    Àç»ıÇÒ ºñµğ¿À(x) ¿Í ¿Àµğ¿À(y) ½ºÆ®¸² ¼±ÅÃ\n"
-" -fps x -srate y  ºñµğ¿À(x fps)¿Í ¿Àµğ¿À(y Hz) ºñÀ² º¯°æ\n"
-" -pp <quality>    ÈÄÇàÃ³¸® ÇÊÅÍ »ç¿ë (ÀÚ¼¼ÇÑ »çÇ×Àº man ÆäÀÌÁö ÂüÁ¶)\n"
-" -framedrop       ÇÁ·¹ÀÓ °Ç³Ê¶Ù±â »ç¿ë (´À¸° ÄÄÇ»ÅÍ¿ë ¼±ÅÃ»çÇ×)\n"
+" -ss <timepos>    íŠ¹ì • ìœ„ì¹˜ë¡œ ì°¾ì•„ê°€ê¸° (ì´ˆ ë˜ëŠ” ì‹œ:ë¶„:ì´ˆ)\n"
+" -nosound         ì†Œë¦¬ ì¬ìƒ ì•ˆí•¨\n"
+" -fs              ì „ì²´í™”ë©´ ì¬ìƒ (ë˜ëŠ” -vm, -zoom, ìì„¸í•œ ì‚¬í•­ì€ man í˜ì´ì§€)\n"
+" -x <x> -y <y>    í™”ë©´ì„ <x>*<y>í•´ìƒë„ë¡œ ì„¤ì • (-vmì´ë‚˜ -zoomê³¼ í•¨ê»˜ ì‚¬ìš©í•¨)\n"
+" -sub <file>      ì‚¬ìš©í•  ìë§‰ íŒŒì¼ ì§€ì • (-subfps, -subdelayë„ ì°¸ê³ í•  ê²ƒ)\n"
+" -playlist <file> ì¬ìƒëª©ë¡ íŒŒì¼ ì§€ì •\n"
+" -vid x -aid y    ì¬ìƒí•  ë¹„ë””ì˜¤(x) ì™€ ì˜¤ë””ì˜¤(y) ìŠ¤íŠ¸ë¦¼ ì„ íƒ\n"
+" -fps x -srate y  ë¹„ë””ì˜¤(x fps)ì™€ ì˜¤ë””ì˜¤(y Hz) ë¹„ìœ¨ ë³€ê²½\n"
+" -pp <quality>    í›„í–‰ì²˜ë¦¬ í•„í„° ì‚¬ìš© (ìì„¸í•œ ì‚¬í•­ì€ man í˜ì´ì§€ ì°¸ì¡°)\n"
+" -framedrop       í”„ë ˆì„ ê±´ë„ˆë›°ê¸° ì‚¬ìš© (ëŠë¦° ì»´í“¨í„°ìš© ì„ íƒì‚¬í•­)\n"
 "\n"
-"±âº» Á¶Á¤Å°: (ÀüÃ¼ Á¶Á¤Å° ¸ñ·ÏÀº man ÆäÀÌÁö ÂüÁ¶, input.confµµ È®ÀÎÇÒ °Í)\n"
-" <-  ¶Ç´Â  ->     10ÃÊ µÚ·Î/¾ÕÀ¸·Î ÀÌµ¿\n"
-" up ¶Ç´Â down     1ºĞ µÚ·Î/¾ÕÀ¸·Î ÀÌµ¿\n"
-" pgup ¶Ç´Â pgdown 10ºĞ µÚ·Î/¾ÕÀ¸·Î ÀÌµ¿\n"
-" < ¶Ç´Â >         Àç»ı¸ñ·Ï¿¡¼­ µÚ·Î/¾ÕÀ¸·Î ÀÌµ¿\n"
-" p ¶Ç´Â SPACE     Àá½Ã ¸ØÃã (¾Æ¹«Å°³ª ´©¸£¸é °è¼Ó)\n"
-" q ¶Ç´Â ESC       Àç»ıÀ» ¸ØÃß°í ÇÁ·Î±×·¥À» ³¡³¿\n"
-" + ¶Ç´Â -         +/- 0.1ÃÊ¾¿ ¿Àµğ¿À Áö¿¬ Á¶Á¤\n"
-" o                OSD¸ğµå º¯°æ:  ¾øÀ½/Å½»öÁÙ/Å½»öÁÙ+Å¸ÀÌ¸Ó\n"
-" * ¶Ç´Â /         PCM º¼·ıÀ» ³ôÀÓ/³·Ãã\n"
-" z ¶Ç´Â x         +/- 0.1ÃÊ¾¿ ÀÚ¸· Áö¿¬ Á¶Á¤\n"
-" r ¶Ç´Â t         ÀÚ¸· À§Ä¡¸¦ À§·Î/¾Æ·¡·Î Á¶Á¤, -vf expandµµ Âü°íÇÒ °Í\n"
+"ê¸°ë³¸ ì¡°ì •í‚¤: (ì „ì²´ ì¡°ì •í‚¤ ëª©ë¡ì€ man í˜ì´ì§€ ì°¸ì¡°, input.confë„ í™•ì¸í•  ê²ƒ)\n"
+" <-  ë˜ëŠ”  ->     10ì´ˆ ë’¤ë¡œ/ì•ìœ¼ë¡œ ì´ë™\n"
+" up ë˜ëŠ” down     1ë¶„ ë’¤ë¡œ/ì•ìœ¼ë¡œ ì´ë™\n"
+" pgup ë˜ëŠ” pgdown 10ë¶„ ë’¤ë¡œ/ì•ìœ¼ë¡œ ì´ë™\n"
+" < ë˜ëŠ” >         ì¬ìƒëª©ë¡ì—ì„œ ë’¤ë¡œ/ì•ìœ¼ë¡œ ì´ë™\n"
+" p ë˜ëŠ” SPACE     ì ì‹œ ë©ˆì¶¤ (ì•„ë¬´í‚¤ë‚˜ ëˆ„ë¥´ë©´ ê³„ì†)\n"
+" q ë˜ëŠ” ESC       ì¬ìƒì„ ë©ˆì¶”ê³  í”„ë¡œê·¸ë¨ì„ ëëƒ„\n"
+" + ë˜ëŠ” -         +/- 0.1ì´ˆì”© ì˜¤ë””ì˜¤ ì§€ì—° ì¡°ì •\n"
+" o                OSDëª¨ë“œ ë³€ê²½:  ì—†ìŒ/íƒìƒ‰ì¤„/íƒìƒ‰ì¤„+íƒ€ì´ë¨¸\n"
+" * ë˜ëŠ” /         PCM ìŒëŸ‰ì„ ë†’ì„/ë‚®ì¶¤\n"
+" z ë˜ëŠ” x         +/- 0.1ì´ˆì”© ìë§‰ ì§€ì—° ì¡°ì •\n"
+" r ë˜ëŠ” t         ìë§‰ ìœ„ì¹˜ë¥¼ ìœ„ë¡œ/ì•„ë˜ë¡œ ì¡°ì •, -vf expandë„ ì°¸ê³ í•  ê²ƒ\n"
 "\n"
-" * * * ´õ ÀÚ¼¼ÇÑ (°í±Ş) ¼±ÅÃ»çÇ× ¹× Á¶Á¤Å°´Â MAN ÆäÀÌÁö¸¦ ÂüÁ¶ÇÏ¼¼¿ä. * * *\n"
+" * * * ë” ìì„¸í•œ (ê³ ê¸‰) ì„ íƒì‚¬í•­ ë° ì¡°ì •í‚¤ëŠ” MAN í˜ì´ì§€ë¥¼ ì°¸ì¡°í•˜ì„¸ìš”. * * *\n"
 "\n";
 #endif
 
@@ -49,544 +49,555 @@ static char help_text[]=
 
 // mplayer.c: 
 
-#define MSGTR_Exiting "\nÁ¾·áÇÕ´Ï´Ù... (%s)\n"
-#define MSGTR_Exit_quit "Á¾·á"
-#define MSGTR_Exit_eof "ÆÄÀÏÀÇ ³¡"
-#define MSGTR_Exit_error "Ä¡¸íÀû ¿À·ù"
-#define MSGTR_IntBySignal "\nMPlayer°¡ %d½Ã±×³Î¿¡ ÀÇÇØ ÀÎÅÍ·´Æ®µÇ¾ú½À´Ï´Ù. - ¸ğµâ: %s\n"
-#define MSGTR_NoHomeDir "È¨µğ·ºÅä¸®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_GetpathProblem "get_path(\"config\") ¹®Á¦ ¹ß»ı\n"
-#define MSGTR_CreatingCfgFile "¼³Á¤ÆÄÀÏÀ» ¸¸µì´Ï´Ù.: %s\n"
-#define MSGTR_InvalidVOdriver "Àß¸øµÈ ºñµğ¿À Ãâ·Â µå¶óÀÌ¹öÀÔ´Ï´Ù.: %s\n°¡´ÉÇÑ ºñµğ¿À Ãâ·Â µå¶óÀÌ¹ö ¸ñ·ÏÀ» º¸·Á¸é '-vo help' ÇÏ¼¼¿ä.\n"
-#define MSGTR_InvalidAOdriver "Àß¸øµÈ ¿Àµğ¿À Ãâ·Â µå¶óÀÌ¹öÀÔ´Ï´Ù.: %s\n°¡´ÉÇÑ ¿Àµğ¿À Ãâ·Â µå¶óÀÌ¹ö ¸ñ·ÏÀ» º¸·Á¸é '-ao help' ÇÏ¼¼¿ä.\n"
-#define MSGTR_CopyCodecsConf "((MPlayer ¼Ò½º Æ®¸®ÀÇ) etc/codecs.conf¸¦ ~/.mplayer/codecs.conf·Î º¹»ç ¶Ç´Â ¸µÅ©ÇÏ¼¼¿ä.)\n"
-#define MSGTR_BuiltinCodecsConf "³»ÀåµÈ ±âº» codecs.conf¸¦ »ç¿ëÇÕ´Ï´Ù.\n"
-#define MSGTR_CantLoadFont "ÆùÆ®¸¦ ÀĞ¾î µéÀÏ ¼ö ¾ø½À´Ï´Ù.: %s\n"
-#define MSGTR_CantLoadSub "ÀÚ¸·À» ÀĞ¾î µéÀÏ ¼ö ¾ø½À´Ï´Ù.: %s\n"
-#define MSGTR_ErrorDVDkey "DVD Å°¸¦ Ã³¸®ÇÏ´Â µµÁß ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù.\n"
-#define MSGTR_CmdlineDVDkey "¾ÏÈ£ÇØµ¶À» À§ÇØ ¿äÃ»ÇÑ DVD Å°¸¦ »ç¿ëÇÕ´Ï´Ù.\n"
-#define MSGTR_DVDauthOk "DVD ÀÎÁõ °á°ú°¡ Á¤»óÀûÀÎµí ÇÕ´Ï´Ù.\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: Ä¡¸íÀû : ¼±ÅÃµÈ ½ºÆ®¸²ÀÌ ¾ø½À´Ï´Ù!\n"
-#define MSGTR_CantOpenDumpfile "dumpÆÄÀÏÀ» ¿­ ¼ö ¾ø½À´Ï´Ù.\n"
+#define MSGTR_Exiting "\nì¢…ë£Œí•©ë‹ˆë‹¤... (%s)\n"
+#define MSGTR_Exit_quit "ì¢…ë£Œ"
+#define MSGTR_Exit_eof "íŒŒì¼ì˜ ë"
+#define MSGTR_Exit_error "ì¹˜ëª…ì  ì˜¤ë¥˜"
+#define MSGTR_IntBySignal "\nMPlayerê°€ %dì‹œê·¸ë„ì— ì˜í•´ ì¸í„°ëŸ½íŠ¸ë˜ì—ˆìŠµë‹ˆë‹¤. - ëª¨ë“ˆ: %s\n"
+#define MSGTR_NoHomeDir "í™ˆë””ë ‰í† ë¦¬ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_GetpathProblem "get_path(\"config\") ë¬¸ì œ ë°œìƒ\n"
+#define MSGTR_CreatingCfgFile "ì„¤ì •íŒŒì¼ì„ ë§Œë“­ë‹ˆë‹¤.: %s\n"
+#define MSGTR_InvalidVOdriver "ì˜ëª»ëœ ë¹„ë””ì˜¤ ì¶œë ¥ ë“œë¼ì´ë²„ì…ë‹ˆë‹¤.: %s\nê°€ëŠ¥í•œ ë¹„ë””ì˜¤ ì¶œë ¥ ë“œë¼ì´ë²„ ëª©ë¡ì„ ë³´ë ¤ë©´ '-vo help' í•˜ì„¸ìš”.\n"
+#define MSGTR_InvalidAOdriver "ì˜ëª»ëœ ì˜¤ë””ì˜¤ ì¶œë ¥ ë“œë¼ì´ë²„ì…ë‹ˆë‹¤.: %s\nê°€ëŠ¥í•œ ì˜¤ë””ì˜¤ ì¶œë ¥ ë“œë¼ì´ë²„ ëª©ë¡ì„ ë³´ë ¤ë©´ '-ao help' í•˜ì„¸ìš”.\n"
+#define MSGTR_CopyCodecsConf "((MPlayer ì†ŒìŠ¤ íŠ¸ë¦¬ì˜) etc/codecs.confë¥¼ ~/.mplayer/codecs.confë¡œ ë³µì‚¬ ë˜ëŠ” ë§í¬í•˜ì„¸ìš”.)\n"
+#define MSGTR_BuiltinCodecsConf "ë‚´ì¥ëœ ê¸°ë³¸ codecs.confë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.\n"
+#define MSGTR_CantLoadFont "í°íŠ¸ë¥¼ ì½ì–´ ë“¤ì¼ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.: %s\n"
+#define MSGTR_CantLoadSub "ìë§‰ì„ ì½ì–´ ë“¤ì¼ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.: %s\n"
+#define MSGTR_ErrorDVDkey "DVD í‚¤ë¥¼ ì²˜ë¦¬í•˜ëŠ” ë„ì¤‘ ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_CmdlineDVDkey "ì•”í˜¸í•´ë…ì„ ìœ„í•´ ìš”ì²­í•œ DVD í‚¤ë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.\n"
+#define MSGTR_DVDauthOk "DVD ì¸ì¦ ê²°ê³¼ê°€ ì •ìƒì ì¸ë“¯ í•©ë‹ˆë‹¤.\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: ì¹˜ëª…ì  : ì„ íƒëœ ìŠ¤íŠ¸ë¦¼ì´ ì—†ìŠµë‹ˆë‹¤!\n"
+#define MSGTR_CantOpenDumpfile "dumpíŒŒì¼ì„ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
 #define MSGTR_CoreDumped "Core dumped :)\n"
-#define MSGTR_FPSnotspecified "Çì´õ¿¡ FPS°¡ ÁöÁ¤µÇÁö ¾Ê¾Ò°Å³ª À¯È¿ÇÏÁö ¾Ê½À´Ï´Ù. -fps ¿É¼ÇÀ» »ç¿ëÇÏ¼¼¿ä.\n"
-#define MSGTR_TryForceAudioFmtStr "¿Àµğ¿À ÄÚµ¦ µå¶óÀÌ¹ö ÁıÇÕ %s¸¦ ½ÃµµÇÏ°í ÀÖ½À´Ï´Ù...\n"
-#define MSGTR_CantFindAfmtFallback "½ÃµµÇÑ µå¶óÀÌ¹ö ÁıÇÕ¿¡¼­ ¿Àµğ¿À ÄÚµ¦À» Ã£À» ¼ö ¾ø¾î, ´Ù¸¥ µå¶óÀÌ¹ö·Î ´ëÃ¼ÇÕ´Ï´Ù.\n"
-#define MSGTR_CantFindAudioCodec "¿Àµğ¿À Çü½Ä 0x%X¸¦ À§ÇÑ ÄÚµ¦À» Ã£À» ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_CouldntInitAudioCodec "¿Àµğ¿À ÄÚµ¦À» ÃÊ±âÈ­ÇÒ ¼ö ¾ø½À´Ï´Ù. -> ¼Ò¸®¾øÀ½\n"
-#define MSGTR_TryForceVideoFmtStr "ºñµğ¿À ÄÚµ¦ µå¶óÀÌ¹ö ÁıÇÕ %s¸¦ ½ÃµµÇÏ°í ÀÖ½À´Ï´Ù...\n"
-#define MSGTR_CantFindVideoCodec "¼±ÅÃÇÑ -vo ¹× ºñµğ¿À Çü½Ä 0x%X°ú ÀÏÄ¡ÇÏ´Â ÄÚµ¦À» Ã£À» ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_VOincompCodec "¼±ÅÃÇÑ ºñµğ¿À Ãâ·Â ÀåÄ¡´Â ÀÌ ÄÚµ¦°ú È£È¯µÇÁö ¾Ê½À´Ï´Ù.\n"
-#define MSGTR_CannotInitVO "Ä¡¸íÀû ¿À·ù: ºñµğ¿À µå¶óÀÌ¹ö¸¦ ÃÊ±âÈ­ÇÒ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_CannotInitAO "¿Àµğ¿À ÀåÄ¡¸¦ ¿­°Å³ª ÃÊ±âÈ­ÇÒ ¼ö ¾ø½À´Ï´Ù. -> ¼Ò¸®¾øÀ½\n"
-#define MSGTR_StartPlaying "Àç»ıÀ» ½ÃÀÛÇÕ´Ï´Ù...\n"
+#define MSGTR_FPSnotspecified "í—¤ë”ì— FPSê°€ ì§€ì •ë˜ì§€ ì•Šì•˜ê±°ë‚˜ ìœ íš¨í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤. -fps ì˜µì…˜ì„ ì‚¬ìš©í•˜ì„¸ìš”.\n"
+#define MSGTR_TryForceAudioFmtStr "ì˜¤ë””ì˜¤ ì½”ë± ë“œë¼ì´ë²„ ì§‘í•© %së¥¼ ì‹œë„í•˜ê³  ìˆìŠµë‹ˆë‹¤...\n"
+#define MSGTR_CantFindAfmtFallback "ì‹œë„í•œ ë“œë¼ì´ë²„ ì§‘í•©ì—ì„œ ì˜¤ë””ì˜¤ ì½”ë±ì„ ì°¾ì„ ìˆ˜ ì—†ì–´, ë‹¤ë¥¸ ë“œë¼ì´ë²„ë¡œ ëŒ€ì²´í•©ë‹ˆë‹¤.\n"
+#define MSGTR_CantFindAudioCodec "ì˜¤ë””ì˜¤ í˜•ì‹ 0x%Xë¥¼ ìœ„í•œ ì½”ë±ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_RTFMCodecs "DOCS/HTML/en/codecs.htmlì„ ì°¸ì¡°í•˜ì„¸ìš”!\n"
+#define MSGTR_CouldntInitAudioCodec "ì˜¤ë””ì˜¤ ì½”ë±ì„ ì´ˆê¸°í™”í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤. -> ì†Œë¦¬ì—†ìŒ\n"
+#define MSGTR_TryForceVideoFmtStr "ë¹„ë””ì˜¤ ì½”ë± ë“œë¼ì´ë²„ ì§‘í•© %së¥¼ ì‹œë„í•˜ê³  ìˆìŠµë‹ˆë‹¤...\n"
+#define MSGTR_CantFindVideoCodec "ì„ íƒí•œ -vo ë° ë¹„ë””ì˜¤ í˜•ì‹ 0x%Xê³¼ ì¼ì¹˜í•˜ëŠ” ì½”ë±ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_VOincompCodec "ì„ íƒí•œ ë¹„ë””ì˜¤ ì¶œë ¥ ì¥ì¹˜ëŠ” ì´ ì½”ë±ê³¼ í˜¸í™˜ë˜ì§€ ì•ŠìŠµë‹ˆë‹¤.\n"
+#define MSGTR_CannotInitVO "ì¹˜ëª…ì  ì˜¤ë¥˜: ë¹„ë””ì˜¤ ë“œë¼ì´ë²„ë¥¼ ì´ˆê¸°í™”í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_CannotInitAO "ì˜¤ë””ì˜¤ ì¥ì¹˜ë¥¼ ì—´ê±°ë‚˜ ì´ˆê¸°í™”í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤. -> ì†Œë¦¬ì—†ìŒ\n"
+#define MSGTR_StartPlaying "ì¬ìƒì„ ì‹œì‘í•©ë‹ˆë‹¤...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
 "         ************************************************\n"\
-"         **** Àç»ıÇÏ±â¿¡´Â ½Ã½ºÅÛÀÌ ³Ê¹« ´À¸³´Ï´Ù.!  ****\n"\
+"         **** ì¬ìƒí•˜ê¸°ì—ëŠ” ì‹œìŠ¤í…œì´ ë„ˆë¬´ ëŠë¦½ë‹ˆë‹¤.!  ****\n"\
 "         ************************************************\n"\
-"°¡´É¼ºÀÖ´Â ¿øÀÎ°ú ¹®Á¦ ¹× ´ëÃ³¹æ¾È: \n"\
-"- ´ëºÎºĞÀÇ °æ¿ì: ±úÁø/¹ö±×°¡ ¸¹Àº ¿Àµğ¿À µå¶óÀÌ¹ö\n"\
-"  - -ao sdlÀ» ½ÃµµÇÏ°Å³ª ALSA 0.5, È¤Àº ALSA 0.9ÀÇ OSS ¿¡¹Ä·¹ÀÌ¼ÇÀ» »ç¿ëÇØº¸¼¼¿ä.\n"\
-"  - -autosync¸¦À¸·Î ¿©·¯°¡Áö °ªÀ¸·Î ½ÇÇèÇØº¸¼¼¿ä. ½ÃÀÛ °ªÀ¸·Î´Â 30ÀÌ Àû´çÇÕ´Ï´Ù.\n"\
-"- ºñµğ¿À Ãâ·ÂÀÌ ´À¸²\n"\
-"  - ´Ù¸¥ -vo driver¸¦ ½ÃµµÇÏ°Å³ª (¸ñ·Ïº¸±â´Â -vo help), -framedropÀ» ½ÃµµÇØº¸¼¼¿ä!\n"\
-"- ´À¸° CPU\n"\
-"  - µ¢Ä¡ Å« DVD³ª DivX¸¦ ´À¸° CPU¿¡¼­ Àç»ıÇÏÁö ¸¶¼¼¿ä! -hardframedropÀ» ½ÃµµÇØº¸¼¼¿ä.\n"\
-"- ±úÁø ÆÄÀÏ\n"\
-"  - -nobps -ni -forceidx -mc 0 µîÀÇ ¿©·¯°¡Áö Á¶ÇÕÀ» ½ÃµµÇØº¸¼¼¿ä.\n"\
-"- ´À¸° ¹Ìµğ¾î (NFS/SMB ¸¶¿îÆ®, DVD, VCD µî)\n"\
-"  - -cache 8192¸¦ ½ÃµµÇØº¸¼¼¿ä.\n"\
-"- non-interleaved AVI ÆÄÀÏÀ» -cache ¿É¼ÇÀ¸·Î Àç»ıÇÏ°í ÀÖ³ª¿ä?\n"\
-"  - -nocache¸¦ ½ÃµµÇØº¸¼¼¿ä.\n"\
-"¹Ì¼¼Á¶Á¤/¼ÓµµÇâ»ó ÆÁÀº DOCS/HTML/en/devices.html#video-dev°ú DOCS/HTML/en/devices.html#audio-devÀ» ÂüÁ¶ÇÏ¼¼¿ä.\n"\
-"À§ÀÇ ¾î¶² »çÇ×µµ µµ¿òÀÌ µÇÁö ¾Ê´Â´Ù¸é, DOCS/HTML/en/bugreports.htmlÀ» ÂüÁ¶ÇÏ¼¼¿ä.\n\n"
+"ê°€ëŠ¥ì„±ìˆëŠ” ì›ì¸ê³¼ ë¬¸ì œ ë° ëŒ€ì²˜ë°©ì•ˆ: \n"\
+"- ëŒ€ë¶€ë¶„ì˜ ê²½ìš°: ê¹¨ì§„/ë²„ê·¸ê°€ ë§ì€ ì˜¤ë””ì˜¤ ë“œë¼ì´ë²„\n"\
+"  - -ao sdlì„ ì‹œë„í•˜ê±°ë‚˜ ALSA 0.5, í˜¹ì€ ALSA 0.9ì˜ OSS ì—ë®¬ë ˆì´ì…˜ì„ ì‚¬ìš©í•´ë³´ì„¸ìš”.\n"\
+"  - -autosyncë¥¼ìœ¼ë¡œ ì—¬ëŸ¬ê°€ì§€ ê°’ìœ¼ë¡œ ì‹¤í—˜í•´ë³´ì„¸ìš”. ì‹œì‘ ê°’ìœ¼ë¡œëŠ” 30ì´ ì ë‹¹í•©ë‹ˆë‹¤.\n"\
+"- ë¹„ë””ì˜¤ ì¶œë ¥ì´ ëŠë¦¼\n"\
+"  - ë‹¤ë¥¸ -vo driverë¥¼ ì‹œë„í•˜ê±°ë‚˜ (ëª©ë¡ë³´ê¸°ëŠ” -vo help), -framedropì„ ì‹œë„í•´ë³´ì„¸ìš”!\n"\
+"- ëŠë¦° CPU\n"\
+"  - ë©ì¹˜ í° DVDë‚˜ DivXë¥¼ ëŠë¦° CPUì—ì„œ ì¬ìƒí•˜ì§€ ë§ˆì„¸ìš”! -hardframedropì„ ì‹œë„í•´ë³´ì„¸ìš”.\n"\
+"- ê¹¨ì§„ íŒŒì¼\n"\
+"  - -nobps -ni -forceidx -mc 0 ë“±ì˜ ì—¬ëŸ¬ê°€ì§€ ì¡°í•©ì„ ì‹œë„í•´ë³´ì„¸ìš”.\n"\
+"- ëŠë¦° ë¯¸ë””ì–´ (NFS/SMB ë§ˆìš´íŠ¸, DVD, VCD ë“±)\n"\
+"  - -cache 8192ë¥¼ ì‹œë„í•´ë³´ì„¸ìš”.\n"\
+"- non-interleaved AVI íŒŒì¼ì„ -cache ì˜µì…˜ìœ¼ë¡œ ì¬ìƒí•˜ê³  ìˆë‚˜ìš”?\n"\
+"  - -nocacheë¥¼ ì‹œë„í•´ë³´ì„¸ìš”.\n"\
+"ë¯¸ì„¸ì¡°ì •/ì†ë„í–¥ìƒ íŒì€ DOCS/HTML/en/devices.html#video-devê³¼ DOCS/HTML/en/devices.html#audio-devì„ ì°¸ì¡°í•˜ì„¸ìš”.\n"\
+"ìœ„ì˜ ì–´ë–¤ ì‚¬í•­ë„ ë„ì›€ì´ ë˜ì§€ ì•ŠëŠ”ë‹¤ë©´, DOCS/HTML/en/bugreports.htmlì„ ì°¸ì¡°í•˜ì„¸ìš”.\n\n"
 
-#define MSGTR_NoGui "MPlayer°¡ GUI¸¦ »ç¿ëÇÒ ¼ö ÀÖµµ·Ï ÄÄÆÄÀÏµÇÁö ¾Ê¾Ò½À´Ï´Ù.\n"
-#define MSGTR_GuiNeedsX "MPlayer GUI´Â X11À» ÇÊ¿ä·ÎÇÕ´Ï´Ù!\n"
-#define MSGTR_Playing "%s Àç»ı Áß...\n"
-#define MSGTR_NoSound "¿Àµğ¿À: ¼Ò¸®¾øÀ½\n"
-#define MSGTR_FPSforced "FPS°¡ %5.3f (ftime: %5.3f)À¸·Î º¯°æµÇ¾ú½À´Ï´Ù.\n"
-#define MSGTR_CompiledWithRuntimeDetection "·±Å¸ÀÓ CPU °¨Áö°¡ °¡´ÉÇÏµµ·Ï ÄÄÆÄÀÏµÇ¾ú½À´Ï´Ù. - °æ°í - ÀÌ°ÍÀº ÃÖÀû Á¶°ÇÀÌ ¾Æ´Õ´Ï´Ù!\nÃÖ»óÀÇ ¼º´ÉÀ» ¾ò±âÀ§ÇØ¼±, MPlayer¸¦ --disable-runtime-cpudetection ¿É¼ÇÀ¸·Î ´Ù½Ã ÄÄÆÄÀÏÇÏ¼¼¿ä.\n"
-#define MSGTR_CompiledWithCPUExtensions "È®Àå x86 CPU¿ëÀ¸·Î ÄÄÆÄÀÏ µÇ¾ú½À´Ï´Ù.:"
-#define MSGTR_AvailableVideoOutputPlugins "°¡´ÉÇÑ ºñµğ¿À Ãâ·Â ÇÃ·¯±×ÀÎ:\n"
-#define MSGTR_AvailableVideoOutputDrivers "°¡´ÉÇÑ ºñµğ¿À Ãâ·Â µå¶óÀÌ¹ö:\n"
-#define MSGTR_AvailableAudioOutputDrivers "°¡´ÉÇÑ ¿Àµğ¿À Ãâ·Â µå¸®¾Æ¹ö:\n"
-#define MSGTR_AvailableAudioCodecs "°¡´ÉÇÑ ¿Àµğ¿À ÄÚµ¦:\n"
-#define MSGTR_AvailableVideoCodecs "°¡´ÉÇÑ ºñµğ¿À ÄÚµ¦:\n"
-#define MSGTR_AvailableAudioFm "\n°¡´ÉÇÑ (ÄÄÆÄÀÏµÈ) ¿Àµğ¿À ÄÚµ¦ ÁıÇÕ/µå¶óÀÌ¹ö:\n"
-#define MSGTR_AvailableVideoFm "\n°¡´ÉÇÑ (ÄÄÆÄÀÏµÈ) ºñµğ¿À ÄÚµ¦ ÁıÇÕ/µå¶óÀÌ¹ö:\n"
-#define MSGTR_AvailableFsType "°¡´ÉÇÑ ÀüÃ¼È­¸é ·¹ÀÌ¾î º¯°æ ¸ğµå:\n"
-#define MSGTR_UsingRTCTiming "¸®´ª½º ÇÏµå¿ş¾î RTC Å¸ÀÌ¹Ö(%ldHz)À» »ç¿ëÇÕ´Ï´Ù.\n"
-#define MSGTR_CannotReadVideoProperties "ºñµğ¿À: ¼Ó¼ºÀ» ÀĞÀ» ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_NoStreamFound "½ºÆ¼¸²À» Ã£À» ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_InitializingAudioCodec "¿Àµğ¿À ÄÚµ¦À» ÃÊ±âÈ­ÇÕ´Ï´Ù...\n"
-#define MSGTR_ErrorInitializingVODevice "¼±ÅÃÇÑ ºñµğ¿À Ãâ·Â (-vo) ÀåÄ¡¸¦ ¿­°Å³ª ÃÊ±âÈ­ÇÒ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_ForcedVideoCodec "°­Á¦·Î »ç¿ëµÈ ºñµğ¿À ÄÚµ¦: %s\n"
-#define MSGTR_ForcedAudioCodec "°­Á¦·Î »ç¿ëµÈ ¿Àµğ¿À ÄÚµ¦: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: ¼³¸í: %s\nAO: ¸¸µçÀÌ: %s\n"
-#define MSGTR_AOComment "AO: µ¡¸»: %s\n"
-#define MSGTR_Video_NoVideo "ºñµğ¿À: ºñµğ¿À ¾øÀ½\n"
-#define MSGTR_NotInitializeVOPorVO "\nÄ¡¸íÀû ¿À·ù: ºñµğ¿À ÇÊÅÍ(-vf) ¶Ç´Â ºñµğ¿À Ãâ·Â(-vo)À» ÃÊ±âÈ­ÇÒ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_Paused "\n  =====  Àá½Ã¸ØÃã  =====\r"
-#define MSGTR_PlaylistLoadUnable "\nÀç»ı¸ñ·Ï %sÀ»(¸¦) ¿­ ¼ö ¾ø½À´Ï´Ù.\n"
+#define MSGTR_NoGui "MPlayerê°€ GUIë¥¼ ì‚¬ìš©í•  ìˆ˜ ìˆë„ë¡ ì»´íŒŒì¼ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_GuiNeedsX "MPlayer GUIëŠ” X11ì„ í•„ìš”ë¡œí•©ë‹ˆë‹¤!\n"
+#define MSGTR_Playing "%s ì¬ìƒ ì¤‘...\n"
+#define MSGTR_NoSound "ì˜¤ë””ì˜¤: ì†Œë¦¬ì—†ìŒ\n"
+#define MSGTR_FPSforced "FPSê°€ %5.3f (ftime: %5.3f)ìœ¼ë¡œ ë³€ê²½ë˜ì—ˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_CompiledWithRuntimeDetection "ëŸ°íƒ€ì„ CPU ê°ì§€ê°€ ê°€ëŠ¥í•˜ë„ë¡ ì»´íŒŒì¼ë˜ì—ˆìŠµë‹ˆë‹¤. - ê²½ê³  - ì´ê²ƒì€ ìµœì  ì¡°ê±´ì´ ì•„ë‹™ë‹ˆë‹¤!\nìµœìƒì˜ ì„±ëŠ¥ì„ ì–»ê¸°ìœ„í•´ì„ , MPlayerë¥¼ --disable-runtime-cpudetection ì˜µì…˜ìœ¼ë¡œ ë‹¤ì‹œ ì»´íŒŒì¼í•˜ì„¸ìš”.\n"
+#define MSGTR_CompiledWithCPUExtensions "í™•ì¥ x86 CPUìš©ìœ¼ë¡œ ì»´íŒŒì¼ ë˜ì—ˆìŠµë‹ˆë‹¤.:"
+#define MSGTR_AvailableVideoOutputPlugins "ê°€ëŠ¥í•œ ë¹„ë””ì˜¤ ì¶œë ¥ í”ŒëŸ¬ê·¸ì¸:\n"
+#define MSGTR_AvailableVideoOutputDrivers "ê°€ëŠ¥í•œ ë¹„ë””ì˜¤ ì¶œë ¥ ë“œë¼ì´ë²„:\n"
+#define MSGTR_AvailableAudioOutputDrivers "ê°€ëŠ¥í•œ ì˜¤ë””ì˜¤ ì¶œë ¥ ë“œë¦¬ì•„ë²„:\n"
+#define MSGTR_AvailableAudioCodecs "ê°€ëŠ¥í•œ ì˜¤ë””ì˜¤ ì½”ë±:\n"
+#define MSGTR_AvailableVideoCodecs "ê°€ëŠ¥í•œ ë¹„ë””ì˜¤ ì½”ë±:\n"
+#define MSGTR_AvailableAudioFm "\nê°€ëŠ¥í•œ (ì»´íŒŒì¼ëœ) ì˜¤ë””ì˜¤ ì½”ë± ì§‘í•©/ë“œë¼ì´ë²„:\n"
+#define MSGTR_AvailableVideoFm "\nê°€ëŠ¥í•œ (ì»´íŒŒì¼ëœ) ë¹„ë””ì˜¤ ì½”ë± ì§‘í•©/ë“œë¼ì´ë²„:\n"
+#define MSGTR_AvailableFsType "ê°€ëŠ¥í•œ ì „ì²´í™”ë©´ ë ˆì´ì–´ ë³€ê²½ ëª¨ë“œ:\n"
+#define MSGTR_UsingRTCTiming "ë¦¬ëˆ…ìŠ¤ í•˜ë“œì›¨ì–´ RTC íƒ€ì´ë°(%ldHz)ì„ ì‚¬ìš©í•©ë‹ˆë‹¤.\n"
+#define MSGTR_CannotReadVideoProperties "ë¹„ë””ì˜¤: ì†ì„±ì„ ì½ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_NoStreamFound "ìŠ¤í‹°ë¦¼ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_InitializingAudioCodec "ì˜¤ë””ì˜¤ ì½”ë±ì„ ì´ˆê¸°í™”í•©ë‹ˆë‹¤...\n"
+#define MSGTR_ErrorInitializingVODevice "ì„ íƒí•œ ë¹„ë””ì˜¤ ì¶œë ¥ (-vo) ì¥ì¹˜ë¥¼ ì—´ê±°ë‚˜ ì´ˆê¸°í™”í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_ForcedVideoCodec "ê°•ì œë¡œ ì‚¬ìš©ëœ ë¹„ë””ì˜¤ ì½”ë±: %s\n"
+#define MSGTR_ForcedAudioCodec "ê°•ì œë¡œ ì‚¬ìš©ëœ ì˜¤ë””ì˜¤ ì½”ë±: %s\n"
+#define MSGTR_AODescription_AOAuthor "AO: ì„¤ëª…: %s\nAO: ë§Œë“ ì´: %s\n"
+#define MSGTR_AOComment "AO: ë§ë§: %s\n"
+#define MSGTR_Video_NoVideo "ë¹„ë””ì˜¤: ë¹„ë””ì˜¤ ì—†ìŒ\n"
+#define MSGTR_NotInitializeVOPorVO "\nì¹˜ëª…ì  ì˜¤ë¥˜: ë¹„ë””ì˜¤ í•„í„°(-vf) ë˜ëŠ” ë¹„ë””ì˜¤ ì¶œë ¥(-vo)ì„ ì´ˆê¸°í™”í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_Paused "\n  =====  ì ì‹œë©ˆì¶¤  =====\r"
+#define MSGTR_PlaylistLoadUnable "\nì¬ìƒëª©ë¡ %sì„(ë¥¼) ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
-"- MPlayer°¡ 'Àß¸øµÈ ¿¬»ê'À¸·Î Á¾·áµÇ¾ú½À´Ï´Ù.\n"\
-"  ·±Å¸ÀÓ CPU °¨Áö ÄÚµå¿¡ ¹ö±×°¡ ÀÖÀ» Áöµµ ¸ğ¸¨´Ï´Ù...\n"\
-"  DOCS/HTML/en/bugreports.htmlÀ» ÂüÁ¶ÇÏ¼¼¿ä.\n"
+"- MPlayerê°€ 'ì˜ëª»ëœ ì—°ì‚°'ìœ¼ë¡œ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.\n"\
+"  ëŸ°íƒ€ì„ CPU ê°ì§€ ì½”ë“œì— ë²„ê·¸ê°€ ìˆì„ ì§€ë„ ëª¨ë¦…ë‹ˆë‹¤...\n"\
+"  DOCS/HTML/en/bugreports.htmlì„ ì°¸ì¡°í•˜ì„¸ìš”.\n"
 #define MSGTR_Exit_SIGILL \
-"- MPlayer°¡ 'Àß¸øµÈ ¿¬»ê'À¸·Î Á¾·áµÇ¾ú½À´Ï´Ù.\n"\
-"  ÄÄÆÄÀÏ/ÃÖÀûÈ­µÈ CPU¿Í ´Ù¸¥ ¸ğµ¨ÀÇ CPU¿¡¼­ ½ÇÇàµÉ ¶§\n"\
-"  Á¾Á¾ ÀÏ¾î³ª´Â Çö»óÀÔ´Ï´Ù.\n  È®ÀÎÇØ º¸¼¼¿ä!\n"
+"- MPlayerê°€ 'ì˜ëª»ëœ ì—°ì‚°'ìœ¼ë¡œ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.\n"\
+"  ì»´íŒŒì¼/ìµœì í™”ëœ CPUì™€ ë‹¤ë¥¸ ëª¨ë¸ì˜ CPUì—ì„œ ì‹¤í–‰ë  ë•Œ\n"\
+"  ì¢…ì¢… ì¼ì–´ë‚˜ëŠ” í˜„ìƒì…ë‹ˆë‹¤.\n"\
+"  í™•ì¸í•´ ë³´ì„¸ìš”!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
-"- MPlayer°¡ Àß¸øµÈ CPU/FPU/RAMÀÇ »ç¿ëÀ¸·Î Á¾·áµÇ¾ú½À´Ï´Ù.\n"\
-"  MPlayer¸¦ --enable-debug ¿É¼ÇÀ¸·Î ´Ù½Ã ÄÄÆÄÀÏÇÏ°í, 'gdb' ¹éÆ®·¹ÀÌ½º ¹×\n"\
-"  µğ½º¾î¼ÀºíÇØº¸¼¼¿ä. ÀÚ¼¼ÇÑ »çÇ×Àº DOCS/HTML/en/bugreports_what.html#bugreports_crash¸¦ ÂüÁ¶ÇÏ¼¼¿ä.\n"
+"- MPlayerê°€ ì˜ëª»ëœ CPU/FPU/RAMì˜ ì‚¬ìš©ìœ¼ë¡œ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.\n"\
+"  MPlayerë¥¼ --enable-debug ì˜µì…˜ìœ¼ë¡œ ë‹¤ì‹œ ì»´íŒŒì¼í•˜ê³ , 'gdb' ë°±íŠ¸ë ˆì´ìŠ¤ ë°\n"\
+"  ë””ìŠ¤ì–´ì…ˆë¸”í•´ë³´ì„¸ìš”. ìì„¸í•œ ì‚¬í•­ì€ DOCS/HTML/en/bugreports_what.html#bugreports_crashë¥¼ ì°¸ì¡°í•˜ì„¸ìš”.\n"
 #define MSGTR_Exit_SIGCRASH \
-"- MPlayer°¡ ¾Ë ¼ö ¾ø´Â ÀÌÀ¯·Î Á¾·áµÇ¾ú½À´Ï´Ù.\n"\
-"  MPlayer ÄÚµå³ª µå¶óÀÌ¹öÀÇ ¹ö±×, È¤Àº gcc¹öÀüÀÇ ¹®Á¦ÀÏ ¼öµµ ÀÖ½À´Ï´Ù.\n"\
-"  MPlayerÀÇ ¹®Á¦¶ó°í »ı°¢ÇÑ´Ù¸é, DOCS/HTML/en/bugreports.htmlÀ» ÀĞ°í °Å±âÀÖ´Â\n"\
-"  ¼³¸í´ë·Î ÇÏ½Ã±â ¹Ù¶ø´Ï´Ù. °¡´ÉÇÑ ¹ö±×¸¦ º¸°íÇÒ ¶©, ÀÌ Á¤º¸¸¦ Æ÷ÇÔÇÏ¼¼¿ä.\n"\
-"  ±×·¸Áö ¾ÊÀ¸¸é, µµ¿ÍÁÙ ¹æ¹ıÀÌ ¾ø½À´Ï´Ù.\n"
+"- MPlayerê°€ ì•Œ ìˆ˜ ì—†ëŠ” ì´ìœ ë¡œ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.\n"\
+"  MPlayer ì½”ë“œë‚˜ ë“œë¼ì´ë²„ì˜ ë²„ê·¸, í˜¹ì€ gccë²„ì „ì˜ ë¬¸ì œì¼ ìˆ˜ë„ ìˆìŠµë‹ˆë‹¤.\n"\
+"  MPlayerì˜ ë¬¸ì œë¼ê³  ìƒê°í•œë‹¤ë©´, DOCS/HTML/en/bugreports.htmlì„ ì½ê³  ê±°ê¸°ìˆëŠ”\n"\
+"  ì„¤ëª…ëŒ€ë¡œ í•˜ì‹œê¸° ë°”ëë‹ˆë‹¤. ê°€ëŠ¥í•œ ë²„ê·¸ë¥¼ ë³´ê³ í•  ë•, ì´ ì •ë³´ë¥¼ í¬í•¨í•˜ì„¸ìš”.\n"\
+"  ê·¸ë ‡ì§€ ì•Šìœ¼ë©´, ë„ì™€ì¤„ ë°©ë²•ì´ ì—†ìŠµë‹ˆë‹¤.\n"
 
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "pass3 ÄÁÆ®·Ñ ÆÄÀÏÀ» »ç¿ëÇÕ´Ï´Ù.: %s\n"
-#define MSGTR_MissingFilename "\nÆÄÀÏÀÌ¸§ÀÌ ¾ø½À´Ï´Ù.\n\n"
-#define MSGTR_CannotOpenFile_Device "ÆÄÀÏ/ÀåÄ¡¸¦ ¿­ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_ErrorDVDAuth "DVD ÀÎÁõ¿¡ ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù.\n"
-#define MSGTR_CannotOpenDemuxer "ÇØ¼®±â¸¦ ¿­ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_NoAudioEncoderSelected "\n¼±ÅÃµÈ ¿Àµğ¿À ÀÎÄÚ´õ(-oac)°¡ ¾ø½À´Ï´Ù. ÇÏ³ª¸¦ ¼±ÅÃÇÏ°Å³ª, -nosound ¿É¼ÇÀ» »ç¿ëÇÏ¼¼¿ä. -oac help¸¦ ÂüÁ¶ÇÏ¼¼¿ä!\n"
-#define MSGTR_NoVideoEncoderSelected "\n¼±ÅÃµÈ ºñµğ¿À ÀÎÄÚ´õ(-ovc)°¡ ¾ø½À´Ï´Ù. ÇÏ³ª¸¦ ¼±ÅÃ°Å³ª, -ovc help¸¦ ÂüÁ¶ÇÏ¼¼¿ä!\n"
-#define MSGTR_InitializingAudioCodec "¿Àµğ¿À ÄÚµ¦À» ÃÊ±âÈ­ÇÕ´Ï´Ù...\n"
-#define MSGTR_CannotOpenOutputFile "Ãâ·Â ÆÄÀÏ '%s'À»(¸¦) ¿­ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_EncoderOpenFailed "ÀÎÄÚ´õ ¿­±â¿¡ ½ÇÆĞÇß½À´Ï´Ù.\n"
-#define MSGTR_ForcingOutputFourcc "fourcc¸¦ %x [%.4s](À¸)·Î °­Á¦Ãâ·ÂÇÕ´Ï´Ù.\n"
-#define MSGTR_WritingAVIHeader "AVI ÇØ´õ¸¦ ¾²°í ÀÖ½À´Ï´Ù...\n"
-#define MSGTR_DuplicateFrames "\n%d ÇÁ·¹ÀÓ(µé)ÀÌ Áßº¹µÇ¾ú½À´Ï´Ù!\n"
-#define MSGTR_SkipFrame "\nÇÁ·¹ÀÓÀ» °Ç³Ê ¶İ´Ï´Ù!\n"
-#define MSGTR_ErrorWritingFile "%s: ÆÄÀÏ ¾²±â ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù.\n"
-#define MSGTR_WritingAVIIndex "\nAVI ÀÎµ¦½º¸¦ ¾²°í ÀÖ½À´Ï´Ù...\n"
-#define MSGTR_FixupAVIHeader "AVI ÇØ´õ¸¦ °íÄ¡°í ÀÖ½À´Ï´Ù...\n"
-#define MSGTR_RecommendedVideoBitrate "%s CD¿ëÀ¸·Î ÃßÃµÇÒ ¸¸ÇÑ ºñµğ¿À ÁÖ»çÀ²: %d\n"
-#define MSGTR_VideoStreamResult "\nºñµğ¿À ½ºÆ®¸²: %8.3f kbit/s  (%d bps)  Å©±â: %d ¹ÙÀÌÆ®  %5.3f ÃÊ  %d ÇÁ·¹ÀÓ\n"
-#define MSGTR_AudioStreamResult "\n¿Àµğ¿À ½ºÆ®¸²: %8.3f kbit/s  (%d bps)  Å©±â: %d ¹ÙÀÌÆ®  %5.3f ÃÊ\n"
+#define MSGTR_UsingPass3ControllFile "pass3 ì»¨íŠ¸ë¡¤ íŒŒì¼ì„ ì‚¬ìš©í•©ë‹ˆë‹¤.: %s\n"
+#define MSGTR_MissingFilename "\níŒŒì¼ì´ë¦„ì´ ì—†ìŠµë‹ˆë‹¤.\n\n"
+#define MSGTR_CannotOpenFile_Device "íŒŒì¼/ì¥ì¹˜ë¥¼ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_ErrorDVDAuth "DVD ì¸ì¦ì— ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_CannotOpenDemuxer "í•´ì„ê¸°ë¥¼ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_NoAudioEncoderSelected "\nì„ íƒëœ ì˜¤ë””ì˜¤ ì¸ì½”ë”(-oac)ê°€ ì—†ìŠµë‹ˆë‹¤. í•˜ë‚˜ë¥¼ ì„ íƒí•˜ê±°ë‚˜, -nosound ì˜µì…˜ì„ ì‚¬ìš©í•˜ì„¸ìš”. -oac helpë¥¼ ì°¸ì¡°í•˜ì„¸ìš”!\n"
+#define MSGTR_NoVideoEncoderSelected "\nì„ íƒëœ ë¹„ë””ì˜¤ ì¸ì½”ë”(-ovc)ê°€ ì—†ìŠµë‹ˆë‹¤. í•˜ë‚˜ë¥¼ ì„ íƒê±°ë‚˜, -ovc helpë¥¼ ì°¸ì¡°í•˜ì„¸ìš”!\n"
+#define MSGTR_InitializingAudioCodec "ì˜¤ë””ì˜¤ ì½”ë±ì„ ì´ˆê¸°í™”í•©ë‹ˆë‹¤...\n"
+#define MSGTR_CannotOpenOutputFile "ì¶œë ¥ íŒŒì¼ '%s'ì„(ë¥¼) ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_EncoderOpenFailed "ì¸ì½”ë” ì—´ê¸°ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_ForcingOutputFourcc "fourccë¥¼ %x [%.4s](ìœ¼)ë¡œ ê°•ì œì¶œë ¥í•©ë‹ˆë‹¤.\n"
+#define MSGTR_WritingAVIHeader "AVI í•´ë”ë¥¼ ì“°ê³  ìˆìŠµë‹ˆë‹¤...\n"
+#define MSGTR_DuplicateFrames "\n%d í”„ë ˆì„(ë“¤)ì´ ì¤‘ë³µë˜ì—ˆìŠµë‹ˆë‹¤!\n"
+#define MSGTR_SkipFrame "\ní”„ë ˆì„ì„ ê±´ë„ˆ ëœë‹ˆë‹¤!\n"
+#define MSGTR_ErrorWritingFile "%s: íŒŒì¼ ì“°ê¸° ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_WritingAVIIndex "\nAVI ì¸ë±ìŠ¤ë¥¼ ì“°ê³  ìˆìŠµë‹ˆë‹¤...\n"
+#define MSGTR_FixupAVIHeader "AVI í•´ë”ë¥¼ ê³ ì¹˜ê³  ìˆìŠµë‹ˆë‹¤...\n"
+#define MSGTR_RecommendedVideoBitrate "%s CDìš©ìœ¼ë¡œ ì¶”ì²œí•  ë§Œí•œ ë¹„ë””ì˜¤ ì£¼ì‚¬ìœ¨: %d\n"
+#define MSGTR_VideoStreamResult "\në¹„ë””ì˜¤ ìŠ¤íŠ¸ë¦¼: %8.3f kbit/s  (%d bps)  í¬ê¸°: %d ë°”ì´íŠ¸  %5.3f ì´ˆ  %d í”„ë ˆì„\n"
+#define MSGTR_AudioStreamResult "\nì˜¤ë””ì˜¤ ìŠ¤íŠ¸ë¦¼: %8.3f kbit/s  (%d bps)  í¬ê¸°: %d ë°”ì´íŠ¸  %5.3f ì´ˆ\n"
 
 // cfg-mencoder.h:
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
-" vbr=<0-4>     °¡º¯ ºñÆ®·¹ÀÌÆ® ¹æ½Ä\n"\
+" vbr=<0-4>     ê°€ë³€ ë¹„íŠ¸ë ˆì´íŠ¸ ë°©ì‹\n"\
 "                0: cbr\n"\
 "                1: mt\n"\
-"                2: rh(±âº»°ª)\n"\
+"                2: rh(ê¸°ë³¸ê°’)\n"\
 "                3: abr\n"\
 "                4: mtrh\n"\
 "\n"\
-" abr           Æò±Õ ºñÆ®·¹ÀÌÆ®\n"\
+" abr           í‰ê·  ë¹„íŠ¸ë ˆì´íŠ¸\n"\
 "\n"\
-" cbr           °íÁ¤ ºñÆ®·¹ÀÌÆ®\n"\
-"               ÀÏ·ÃÀÇ ABR ÇÁ¸®¼Â ¸ğµåµé¿¡¼­ CBR¸ğµå °­Á¦ »ç¿ëÇÔ.\n"\
+" cbr           ê³ ì • ë¹„íŠ¸ë ˆì´íŠ¸\n"\
+"               ì¼ë ¨ì˜ ABR í”„ë¦¬ì…‹ ëª¨ë“œë“¤ì—ì„œ CBRëª¨ë“œ ê°•ì œ ì‚¬ìš©í•¨.\n"\
 "\n"\
-" br=<0-1024>   ºñÆ®·¹ÀÌÆ®¸¦ kBit´ÜÀ§·Î ÁöÁ¤ (CBR ¹× ABR¿¡¼­¸¸)\n"\
+" br=<0-1024>   ë¹„íŠ¸ë ˆì´íŠ¸ë¥¼ kBitë‹¨ìœ„ë¡œ ì§€ì • (CBR ë° ABRì—ì„œë§Œ)\n"\
 "\n"\
-" q=<0-9>       À½Áú (0-ÃÖ°í, 9-ÃÖÀú) (VBR¿¡¼­¸¸)\n"\
+" q=<0-9>       ìŒì§ˆ (0-ìµœê³ , 9-ìµœì €) (VBRì—ì„œë§Œ)\n"\
 "\n"\
-" aq=<0-9>      ¿¬»ê À½Áú (0-ÃÖ°í/´À¸², 9-ÃÖÀú/ºü¸§)\n"\
+" aq=<0-9>      ì—°ì‚° ìŒì§ˆ (0-ìµœê³ /ëŠë¦¼, 9-ìµœì €/ë¹ ë¦„)\n"\
 "\n"\
-" ratio=<1-100> ¾ĞÃà·ü\n"\
+" ratio=<1-100> ì••ì¶•ë¥ \n"\
 "\n"\
-" vol=<0-10>    ¿Àµğ¿À ÀÔ·Â À½·® Á¶Àı\n"\
+" vol=<0-10>    ì˜¤ë””ì˜¤ ì…ë ¥ ìŒëŸ‰ ì¡°ì ˆ\n"\
 "\n"\
-" mode=<0-3>    (±âº»°ª: ÀÚµ¿)\n"\
-"                0: ½ºÅ×·¹¿À\n"\
-"                1: Á¶ÀÎÆ®-½ºÅ×·¹¿À\n"\
-"                2: µà¾óÃ¤³Î\n"\
-"                3: ¸ğ³ë\n"\
+" mode=<0-3>    (ê¸°ë³¸ê°’: ìë™)\n"\
+"                0: ìŠ¤í…Œë ˆì˜¤\n"\
+"                1: ì¡°ì¸íŠ¸-ìŠ¤í…Œë ˆì˜¤\n"\
+"                2: ë“€ì–¼ì±„ë„\n"\
+"                3: ëª¨ë…¸\n"\
 "\n"\
 " padding=<0-2>\n"\
-"                0: ¾ÈÇÔ\n"\
-"                1: ¸ğµÎ\n"\
-"                2: Á¶Á¤\n"\
+"                0: ì•ˆí•¨\n"\
+"                1: ëª¨ë‘\n"\
+"                2: ì¡°ì •\n"\
 "\n"\
-" fast          ÀÏ·ÃÀÇ VBR ÇÁ¸®¼Â ¸ğµåµé¿¡¼­ ´õ ºü¸¥ ÀÎÄÚµù »ç¿ë,\n"\
-"               À½ÁúÀÌ Á¶±İ ÀúÇÏµÇ°í ºñÆ®·¹ÀÌÆ®°¡ Á¶±İ ´õ ³ô¾ÆÁü.\n"\
+" fast          ì¼ë ¨ì˜ VBR í”„ë¦¬ì…‹ ëª¨ë“œë“¤ì—ì„œ ë” ë¹ ë¥¸ ì¸ì½”ë”© ì‚¬ìš©,\n"\
+"               ìŒì§ˆì´ ì¡°ê¸ˆ ì €í•˜ë˜ê³  ë¹„íŠ¸ë ˆì´íŠ¸ê°€ ì¡°ê¸ˆ ë” ë†’ì•„ì§.\n"\
 "\n"\
-" preset=<value> ÃÖÀûÀÇ °¡´ÉÇÑ À½Áú ¼¼ÆÃµé.\n"\
-"                 medium: VBR  ÀÎÄÚµù, ÁÁÀº À½Áú\n"\
-"                 (150-180 kbps ºñÆ®·¹ÀÌÆ® ¹üÀ§)\n"\
-"                 standard:  VBR ÀÎÄÚµù, ³ôÀº À½Áú\n"\
-"                 (170-210 kbps ºñÆ®·¹ÀÌÆ® ¹üÀ§)\n"\
-"                 extreme: VBR ÀÎÄÚµù, ¸Å¿ì ³ôÀº À½Áú\n"\
-"                 (200-240 kbps ºñÆ®·¹ÀÌÆ® ¹üÀ§)\n"\
-"                 insane:  CBR  ÀÎÄÚµù, °¡Àå ³ôÀº À½Áú\n"\
-"                 (320 kbps ºñÆ®·¹ÀÌÆ® °íÁ¤)\n"\
-"                 <8-320>: ÁÖ¾îÁø kbps ºñÆ®·¹ÀÌÆ®ÀÇ Æò±ÕÄ¡·Î ABR ÀÎÄÚµù.\n\n"
+" preset=<value> ìµœì ì˜ ê°€ëŠ¥í•œ ìŒì§ˆ ì„¸íŒ…ë“¤.\n"\
+"                 medium: VBR  ì¸ì½”ë”©, ì¢‹ì€ ìŒì§ˆ\n"\
+"                 (150-180 kbps ë¹„íŠ¸ë ˆì´íŠ¸ ë²”ìœ„)\n"\
+"                 standard:  VBR ì¸ì½”ë”©, ë†’ì€ ìŒì§ˆ\n"\
+"                 (170-210 kbps ë¹„íŠ¸ë ˆì´íŠ¸ ë²”ìœ„)\n"\
+"                 extreme: VBR ì¸ì½”ë”©, ë§¤ìš° ë†’ì€ ìŒì§ˆ\n"\
+"                 (200-240 kbps ë¹„íŠ¸ë ˆì´íŠ¸ ë²”ìœ„)\n"\
+"                 insane:  CBR  ì¸ì½”ë”©, ê°€ì¥ ë†’ì€ ìŒì§ˆ\n"\
+"                 (320 kbps ë¹„íŠ¸ë ˆì´íŠ¸ ê³ ì •)\n"\
+"                 <8-320>: ì£¼ì–´ì§„ kbps ë¹„íŠ¸ë ˆì´íŠ¸ì˜ í‰ê· ì¹˜ë¡œ ABR ì¸ì½”ë”©.\n\n"
 
 // open.c, stream.c:
-#define MSGTR_CdDevNotfound "CD-ROM ÀåÄ¡ '%s'¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù!\n"
-#define MSGTR_ErrTrackSelect "VCD Æ®·¢À» ¼±ÅÃÇÏ´Â µµÁß ¿¡·¯°¡ ¹ß»ıÇß½À´Ï´Ù."
-#define MSGTR_ReadSTDIN "Ç¥ÁØÀÔ·Â(stdin)À¸·Î ºÎÅÍ ÀĞ°í ÀÖ½À´Ï´Ù...\n"
-#define MSGTR_UnableOpenURL "URLÀ» ¿­ ¼ö ¾ø½À´Ï´Ù.: %s\n"
-#define MSGTR_ConnToServer "¼­¹ö¿¡ ¿¬°áµÇ¾ú½À´Ï´Ù.: %s\n"
-#define MSGTR_FileNotFound "ÆÄÀÏÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù.: '%s'\n"
+#define MSGTR_CdDevNotfound "CD-ROM ì¥ì¹˜ '%s'ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!\n"
+#define MSGTR_ErrTrackSelect "VCD íŠ¸ë™ì„ ì„ íƒí•˜ëŠ” ë„ì¤‘ ì—ëŸ¬ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤."
+#define MSGTR_ReadSTDIN "í‘œì¤€ì…ë ¥(stdin)ìœ¼ë¡œ ë¶€í„° ì½ê³  ìˆìŠµë‹ˆë‹¤...\n"
+#define MSGTR_UnableOpenURL "URLì„ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.: %s\n"
+#define MSGTR_ConnToServer "ì„œë²„ì— ì—°ê²°ë˜ì—ˆìŠµë‹ˆë‹¤.: %s\n"
+#define MSGTR_FileNotFound "íŒŒì¼ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.: '%s'\n"
 
-#define MSGTR_SMBInitError "libsmbclient ¶óÀÌºê·¯¸®¸¦ ÃÊ±âÈ­ÇÒ ¼ö ¾ø½À´Ï´Ù.: %d\n"
-#define MSGTR_SMBFileNotFound "lanÀ¸·Î ºÎÅÍ ¿­ ¼ö ¾ø½À´Ï´Ù.: '%s'\n"
-#define MSGTR_SMBNotCompiled "MPlayer°¡ SMBÀĞ±â¸¦ ÇÒ ¼ö ÀÖµµ·Ï ÄÄÆÄÀÏµÇÁö ¾Ê¾Ò½À´Ï´Ù.\n"
+#define MSGTR_SMBInitError "libsmbclient ë¼ì´ë¸ŒëŸ¬ë¦¬ë¥¼ ì´ˆê¸°í™”í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.: %d\n"
+#define MSGTR_SMBFileNotFound "lanìœ¼ë¡œ ë¶€í„° ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayerê°€ SMBì½ê¸°ë¥¼ í•  ìˆ˜ ìˆë„ë¡ ì»´íŒŒì¼ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.\n"
 
-#define MSGTR_CantOpenDVD "DVD ÀåÄ¡¸¦ ¿­ ¼ö ¾ø½À´Ï´Ù.: %s\n"
-#define MSGTR_DVDwait "µğ½ºÅ© ±¸Á¶¸¦ ÀĞ°íÀÖ½À´Ï´Ù. Àá½Ã¸¸ ±â´Ù·Á ÁÖ¼¼¿ä...\n"
-#define MSGTR_DVDnumTitles "ÀÌ DVD¿¡´Â %d°³ÀÇ Å¸ÀÌÆ²ÀÌ ÀÖ½À´Ï´Ù.\n"
-#define MSGTR_DVDinvalidTitle "À¯È¿ÇÏÁö ¾ÊÀº DVD Å¸ÀÌÆ² ¹øÈ£ÀÔ´Ï´Ù.: %d\n"
-#define MSGTR_DVDnumChapters "ÀÌ DVD Å¸ÀÌÆ²¿¡´Â %d°³ÀÇ Ã©ÅÍ°¡ ÀÖ½À´Ï´Ù.\n"
-#define MSGTR_DVDinvalidChapter "À¯È¿ÇÏÁö ¾ÊÀº DVD Ã©ÅÍ ¹øÈ£ÀÔ´Ï´Ù.: %d\n"
-#define MSGTR_DVDnumAngles "ÀÌ DVD Å¸ÀÌÆ²¿¡´Â %d°³ÀÇ ¾Ş±ÛÀÌ ÀÖ½À´Ï´Ù.\n"
-#define MSGTR_DVDinvalidAngle "À¯È¿ÇÏÁö ¾ÊÀº DVD ¾Ş±Û ¹øÈ£ÀÔ´Ï´Ù.: %d\n"
-#define MSGTR_DVDnoIFO "DVD Å¸ÀÌÆ² %d¸¦ À§ÇÑ IFOÆÄÀÏÀ» ¿­ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_DVDnoVOBs "Å¸ÀÌÆ² VOBS (VTS_%02d_1.VOB)¸¦ ¿­ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_DVDopenOk "¼º°øÀûÀ¸·Î DVD¸¦ ¿­¾ú½À´Ï´Ù.\n"
+#define MSGTR_CantOpenDVD "DVD ì¥ì¹˜ë¥¼ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.: %s\n"
+#define MSGTR_DVDwait "ë””ìŠ¤í¬ êµ¬ì¡°ë¥¼ ì½ê³ ìˆìŠµë‹ˆë‹¤. ì ì‹œë§Œ ê¸°ë‹¤ë ¤ ì£¼ì„¸ìš”...\n"
+#define MSGTR_DVDnumTitles "ì´ DVDì—ëŠ” %dê°œì˜ íƒ€ì´í‹€ì´ ìˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_DVDinvalidTitle "ìœ íš¨í•˜ì§€ ì•Šì€ DVD íƒ€ì´í‹€ ë²ˆí˜¸ì…ë‹ˆë‹¤.: %d\n"
+#define MSGTR_DVDnumChapters "ì´ DVD íƒ€ì´í‹€ì—ëŠ” %dê°œì˜ ì±•í„°ê°€ ìˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_DVDinvalidChapter "ìœ íš¨í•˜ì§€ ì•Šì€ DVD ì±•í„° ë²ˆí˜¸ì…ë‹ˆë‹¤.: %d\n"
+#define MSGTR_DVDnumAngles "ì´ DVD íƒ€ì´í‹€ì—ëŠ” %dê°œì˜ ì•µê¸€ì´ ìˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_DVDinvalidAngle "ìœ íš¨í•˜ì§€ ì•Šì€ DVD ì•µê¸€ ë²ˆí˜¸ì…ë‹ˆë‹¤.: %d\n"
+#define MSGTR_DVDnoIFO "DVD íƒ€ì´í‹€ %dë¥¼ ìœ„í•œ IFOíŒŒì¼ì„ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_DVDnoVOBs "íƒ€ì´í‹€ VOBS (VTS_%02d_1.VOB)ë¥¼ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_DVDopenOk "ì„±ê³µì ìœ¼ë¡œ DVDë¥¼ ì—´ì—ˆìŠµë‹ˆë‹¤.\n"
 
 // demuxer.c, demux_*.c:
-#define MSGTR_AudioStreamRedefined "°æ°í: ¿Àµğ¿À ½ºÆ®¸² Çì´õ %d°¡ ÀçÁ¤ÀÇµÇ¾ú½À´Ï´Ù.\n"
-#define MSGTR_VideoStreamRedefined "°æ°í: ºñµğ¿À ½ºÆ®¸² Çì´õ %d°¡ ÀçÁ¤ÀÇµÇ¾ú½À´Ï´Ù.\n"
-#define MSGTR_TooManyAudioInBuffer "\n¹öÆÛ¿¡ ³Ê¹« ¸¹Àº ¿Àµğ¿À ÆĞÅ¶ÀÌ ÀÖ½À´Ï´Ù.: (%d in %d bytes)\n"
-#define MSGTR_TooManyVideoInBuffer "\n¹öÆÛ¿¡ ³Ê¹« ¸¹Àº ºñµğ¿À ÆĞÅ¶ÀÌ ÀÖ½À´Ï´Ù.: (%d in %d bytes)\n"
-#define MSGTR_MaybeNI "non-interleaved ½ºÆ®¸²/ÆÄÀÏÀ» Àç»ıÇÏ°íÀÖ°Å³ª ÄÚµ¦¿¡ ¹®Á¦°¡ ÀÖ³ª¿ä?\n" \
-		      "AVI ÆÄÀÏÀÇ °æ¿ì, -ni ¿É¼ÇÀ¸·Î non-interleaved ¸ğµå·Î °­Á¦ ½ÃµµÇØº¸¼¼¿ä.\n"
-#define MSGTR_SwitchToNi "\nÀß¸øµÈ interleaved AVI ÆÄÀÏÀ» ¹ß°ßÇß½À´Ï´Ù. -ni ¸ğµå·Î º¯°æÇÕ´Ï´Ù...\n"
-#define MSGTR_Detected_XXX_FileFormat "%s ÆÄÀÏ Çü½ÄÀ» ¹ß°ßÇß½À´Ï´Ù.\n"
-#define MSGTR_DetectedAudiofile "¿Àµğ¿À ÆÄÀÏÀ» °¨ÁöÇÏ¿´½À´Ï´Ù.\n"
-#define MSGTR_NotSystemStream "MPEG ½Ã½ºÅÛ ½ºÆ®¸² Æ÷¸ËÀÌ ¾Æ´Õ´Ï´Ù... (È¤½Ã Àü¼Û ½ºÆ®¸²ÀÏÁöµµ?)\n"
-#define MSGTR_InvalidMPEGES "À¯È¿ÇÏÁö ¾ÊÀº MPEG-ES ½ºÆ®¸²??? ÀúÀÛÀÚ¿¡°Ô ¹®ÀÇÇÏ¼¼¿ä, ¹ö±×ÀÏÁöµµ ¸ğ¸¨´Ï´Ù. :(\n"
-#define MSGTR_FormatNotRecognized "============= ÁË¼ÛÇÕ´Ï´Ù. ÀÌ ÆÄÀÏÇü½ÄÀ» ÀÎ½ÄÇÏÁö¸øÇß°Å³ª Áö¿øÇÏÁö¾Ê½À´Ï´Ù ===============\n"\
-				  "=== ¸¸¾à ÀÌ ÆÄÀÏÀÌ AVI, ASF ¶Ç´Â MPEG ½ºÆ®¸²ÀÌ¶ó¸é, ÀúÀÛÀÚ¿¡°Ô ¹®ÀÇÇÏ¼¼¿ä! ===\n"
-#define MSGTR_MissingVideoStream "ºñµğ¿À ½ºÆ®¸²À» Ã£Áö ¸øÇß½À´Ï´Ù.\n"
-#define MSGTR_MissingAudioStream "¿Àµğ¿À ½ºÆ®¸²À» Ã£Áö ¸øÇß½À´Ï´Ù. -> ¼Ò¸®¾øÀ½\n"
-#define MSGTR_MissingVideoStreamBug "Ã£À» ¼ö ¾ø´Â ºñµğ¿À ½ºÆ®¸²!? ÀúÀÛÀÚ¿¡°Ô ¹®ÀÇÇÏ¼¼¿ä, ¹ö±×ÀÏÁöµµ ¸ğ¸¨´Ï´Ù. :(\n"
+#define MSGTR_AudioStreamRedefined "ê²½ê³ : ì˜¤ë””ì˜¤ ìŠ¤íŠ¸ë¦¼ í—¤ë” %dê°€ ì¬ì •ì˜ë˜ì—ˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_VideoStreamRedefined "ê²½ê³ : ë¹„ë””ì˜¤ ìŠ¤íŠ¸ë¦¼ í—¤ë” %dê°€ ì¬ì •ì˜ë˜ì—ˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_TooManyAudioInBuffer "\në²„í¼ì— ë„ˆë¬´ ë§ì€ ì˜¤ë””ì˜¤ íŒ¨í‚·ì´ ìˆìŠµë‹ˆë‹¤.: (%d in %d bytes)\n"
+#define MSGTR_TooManyVideoInBuffer "\në²„í¼ì— ë„ˆë¬´ ë§ì€ ë¹„ë””ì˜¤ íŒ¨í‚·ì´ ìˆìŠµë‹ˆë‹¤.: (%d in %d bytes)\n"
+#define MSGTR_MaybeNI "non-interleaved ìŠ¤íŠ¸ë¦¼/íŒŒì¼ì„ ì¬ìƒí•˜ê³ ìˆê±°ë‚˜ ì½”ë±ì— ë¬¸ì œê°€ ìˆë‚˜ìš”?\n" \
+		      "AVI íŒŒì¼ì˜ ê²½ìš°, -ni ì˜µì…˜ìœ¼ë¡œ non-interleaved ëª¨ë“œë¡œ ê°•ì œ ì‹œë„í•´ë³´ì„¸ìš”.\n"
+#define MSGTR_SwitchToNi "\nì˜ëª»ëœ interleaved AVI íŒŒì¼ì„ ë°œê²¬í–ˆìŠµë‹ˆë‹¤. -ni ëª¨ë“œë¡œ ë³€ê²½í•©ë‹ˆë‹¤...\n"
+#define MSGTR_Detected_XXX_FileFormat "%s íŒŒì¼ í˜•ì‹ì„ ë°œê²¬í–ˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_DetectedAudiofile "ì˜¤ë””ì˜¤ íŒŒì¼ì„ ê°ì§€í•˜ì˜€ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_NotSystemStream "MPEG ì‹œìŠ¤í…œ ìŠ¤íŠ¸ë¦¼ í¬ë§·ì´ ì•„ë‹™ë‹ˆë‹¤... (í˜¹ì‹œ ì „ì†¡ ìŠ¤íŠ¸ë¦¼ì¼ì§€ë„?)\n"
+#define MSGTR_InvalidMPEGES "ìœ íš¨í•˜ì§€ ì•Šì€ MPEG-ES ìŠ¤íŠ¸ë¦¼??? ì €ì‘ìì—ê²Œ ë¬¸ì˜í•˜ì„¸ìš”, ë²„ê·¸ì¼ì§€ë„ ëª¨ë¦…ë‹ˆë‹¤. :(\n"
+#define MSGTR_FormatNotRecognized "============= ì£„ì†¡í•©ë‹ˆë‹¤. ì´ íŒŒì¼í˜•ì‹ì„ ì¸ì‹í•˜ì§€ëª»í–ˆê±°ë‚˜ ì§€ì›í•˜ì§€ì•ŠìŠµë‹ˆë‹¤ ===============\n"\
+				  "=== ë§Œì•½ ì´ íŒŒì¼ì´ AVI, ASF ë˜ëŠ” MPEG ìŠ¤íŠ¸ë¦¼ì´ë¼ë©´, ì €ì‘ìì—ê²Œ ë¬¸ì˜í•˜ì„¸ìš”! ===\n"
+#define MSGTR_MissingVideoStream "ë¹„ë””ì˜¤ ìŠ¤íŠ¸ë¦¼ì„ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_MissingAudioStream "ì˜¤ë””ì˜¤ ìŠ¤íŠ¸ë¦¼ì„ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤. -> ì†Œë¦¬ì—†ìŒ\n"
+#define MSGTR_MissingVideoStreamBug "ì°¾ì„ ìˆ˜ ì—†ëŠ” ë¹„ë””ì˜¤ ìŠ¤íŠ¸ë¦¼!? ì €ì‘ìì—ê²Œ ë¬¸ì˜í•˜ì„¸ìš”, ë²„ê·¸ì¼ì§€ë„ ëª¨ë¦…ë‹ˆë‹¤. :(\n"
 
-#define MSGTR_DoesntContainSelectedStream "demux: ÆÄÀÏ¿¡ ¼±ÅÃµÈ ¿Àµğ¿À ¹× ºñµğ¿À ½ºÆ®¸²ÀÌ ¾ø½À´Ï´Ù.\n"
+#define MSGTR_DoesntContainSelectedStream "demux: íŒŒì¼ì— ì„ íƒëœ ì˜¤ë””ì˜¤ ë° ë¹„ë””ì˜¤ ìŠ¤íŠ¸ë¦¼ì´ ì—†ìŠµë‹ˆë‹¤.\n"
 
-#define MSGTR_NI_Forced "°­Á¦·Î"
-#define MSGTR_NI_Detected "¹ß°ßµÊ"
-#define MSGTR_NI_Message "%s NON-INTERLEAVED AVI ÆÄÀÏ Çü½ÄÀÔ´Ï´Ù.\n"
+#define MSGTR_NI_Forced "ê°•ì œë¡œ"
+#define MSGTR_NI_Detected "ë°œê²¬ë¨"
+#define MSGTR_NI_Message "%s NON-INTERLEAVED AVI íŒŒì¼ í˜•ì‹ì…ë‹ˆë‹¤.\n"
 
-#define MSGTR_UsingNINI "NON-INTERLEAVED ±úÁø AVI ÆÄÀÏ Çü½ÄÀ» »ç¿ëÁßÀÔ´Ï´Ù.\n"
-#define MSGTR_CouldntDetFNo "(Àı´ë Å½»öÀ» À§ÇÑ) ÇÁ·¹ÀÓ ¼ö¸¦ °áÁ¤ÇÒ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_CantSeekRawAVI "raw AVI ½ºÆ®¸²¿¡¼­´Â Å½»öÇÒ ¼ö ¾ø½À´Ï´Ù. (ÀÎµ¦½º°¡ ÇÊ¿äÇÕ´Ï´Ù. -idx ½ºÀ§Ä¡·Î ½ÃµµÇØº¸¼¼¿ä.)  \n"
-#define MSGTR_CantSeekFile "ÀÌ ÆÄÀÏ¿¡¼­´Â Å½»öÇÒ ¼ö ¾ø½À´Ï´Ù.\n"
+#define MSGTR_UsingNINI "NON-INTERLEAVED ê¹¨ì§„ AVI íŒŒì¼ í˜•ì‹ì„ ì‚¬ìš©ì¤‘ì…ë‹ˆë‹¤.\n"
+#define MSGTR_CouldntDetFNo "(ì ˆëŒ€ íƒìƒ‰ì„ ìœ„í•œ) í”„ë ˆì„ ìˆ˜ë¥¼ ê²°ì •í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_CantSeekRawAVI "raw AVI ìŠ¤íŠ¸ë¦¼ì—ì„œëŠ” íƒìƒ‰í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤. (ì¸ë±ìŠ¤ê°€ í•„ìš”í•©ë‹ˆë‹¤. -idx ìŠ¤ìœ„ì¹˜ë¡œ ì‹œë„í•´ë³´ì„¸ìš”.)  \n"
+#define MSGTR_CantSeekFile "ì´ íŒŒì¼ì—ì„œëŠ” íƒìƒ‰í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
 
-#define MSGTR_MOVcomprhdr "MOV: ¾ĞÃàµÈ Çì´õ´Â (¾ÆÁ÷) Áö¿øµÇÁö¾Ê½À´Ï´Ù.\n"
-#define MSGTR_MOVvariableFourCC "MOV: °æ°í: °¡º¯ÀûÀÎ FOURCC ¹ß°ß!?\n"
-#define MSGTR_MOVtooManyTrk "MOV: °æ°í: Æ®·¢ÀÌ ³Ê¹« ¸¹½À´Ï´Ù."
-#define MSGTR_FoundAudioStream "==> ¿Àµğ¿À ½ºÆ®¸²À» Ã£¾Ò½À´Ï´Ù.: %d\n"
-#define MSGTR_FoundVideoStream "==> ºñµğ¿À ½ºÆ®¸²À» Ã£¾Ò½À´Ï´Ù.: %d\n"
-#define MSGTR_DetectedTV "TV¸¦ ¹ß°ßÇÏ¿´½À´Ï´Ù! ;-)\n"
-#define MSGTR_ErrorOpeningOGGDemuxer "ogg ÇØ¼®±â¸¦ ¿­ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_ASFSearchingForAudioStream "ASF: ¿Àµğ¿À ½ºÆ®¸²(id:%d)À» Ã£°í ÀÖ½À´Ï´Ù.\n"
-#define MSGTR_CannotOpenAudioStream "¿Àµğ¿À ½ºÆ®¸²À» ¿­ ¼ö ¾ø½À´Ï´Ù.: %s\n"
-#define MSGTR_CannotOpenSubtitlesStream "ÀÚ¸· ½ºÆ®¸²À» ¿­ ¼ö ¾ø½À´Ï´Ù.: %s\n"
-#define MSGTR_OpeningAudioDemuxerFailed "¿Àµğ¿À ÇØ¼®±â¸¦ ¿©´Âµ¥ ½ÇÆĞÇß½À´Ï´Ù.: %s\n"
-#define MSGTR_OpeningSubtitlesDemuxerFailed "ÀÚ¸· ÇØ¼®±â¸¦ ¿©´Âµ¥ ½ÇÆĞÇß½À´Ï´Ù.: %s\n"
-#define MSGTR_TVInputNotSeekable "TV ÀÔ·ÂÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù! (Ã¤³ÎÀ» ¹Ù²Ù°í ÇÏ¸é µÉ¼öµµ ÀÖ½À´Ï´Ù. ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "ÇØ¼®±â Á¤º¸ %s(ÀÌ)°¡ ÀÌ¹Ì Á¸ÀçÇÕ´Ï´Ù!\n"
-#define MSGTR_ClipInfo "Å¬¸³ Á¤º¸: \n"
+#define MSGTR_EncryptedVOB "ì•”í˜¸í™”ëœ VOB íŒŒì¼ì…ë‹ˆë‹¤! DOCS/HTML/en/dvd.htmlì„ ì°¸ì¡°í•˜ì„¸ìš”.\n"
 
+#define MSGTR_MOVcomprhdr "MOV: ì••ì¶•ëœ í—¤ë”ëŠ” (ì•„ì§) ì§€ì›ë˜ì§€ì•ŠìŠµë‹ˆë‹¤.\n"
+#define MSGTR_MOVvariableFourCC "MOV: ê²½ê³ : ê°€ë³€ì ì¸ FOURCC ë°œê²¬!?\n"
+#define MSGTR_MOVtooManyTrk "MOV: ê²½ê³ : íŠ¸ë™ì´ ë„ˆë¬´ ë§ìŠµë‹ˆë‹¤."
+#define MSGTR_FoundAudioStream "==> ì˜¤ë””ì˜¤ ìŠ¤íŠ¸ë¦¼ì„ ì°¾ì•˜ìŠµë‹ˆë‹¤.: %d\n"
+#define MSGTR_FoundVideoStream "==> ë¹„ë””ì˜¤ ìŠ¤íŠ¸ë¦¼ì„ ì°¾ì•˜ìŠµë‹ˆë‹¤.: %d\n"
+#define MSGTR_DetectedTV "TVë¥¼ ë°œê²¬í•˜ì˜€ìŠµë‹ˆë‹¤! ;-)\n"
+#define MSGTR_ErrorOpeningOGGDemuxer "ogg í•´ì„ê¸°ë¥¼ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_ASFSearchingForAudioStream "ASF: ì˜¤ë””ì˜¤ ìŠ¤íŠ¸ë¦¼(id:%d)ì„ ì°¾ê³  ìˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_CannotOpenAudioStream "ì˜¤ë””ì˜¤ ìŠ¤íŠ¸ë¦¼ì„ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.: %s\n"
+#define MSGTR_CannotOpenSubtitlesStream "ìë§‰ ìŠ¤íŠ¸ë¦¼ì„ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.: %s\n"
+#define MSGTR_OpeningAudioDemuxerFailed "ì˜¤ë””ì˜¤ í•´ì„ê¸°ë¥¼ ì—¬ëŠ”ë° ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.: %s\n"
+#define MSGTR_OpeningSubtitlesDemuxerFailed "ìë§‰ í•´ì„ê¸°ë¥¼ ì—¬ëŠ”ë° ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.: %s\n"
+#define MSGTR_TVInputNotSeekable "TV ì…ë ¥ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤! (ì±„ë„ì„ ë°”ê¾¸ê³  í•˜ë©´ ë ìˆ˜ë„ ìˆìŠµë‹ˆë‹¤. ;)\n"
+#define MSGTR_DemuxerInfoAlreadyPresent "í•´ì„ê¸° ì •ë³´ %s(ì´)ê°€ ì´ë¯¸ ì¡´ì¬í•©ë‹ˆë‹¤!\n"
+#define MSGTR_ClipInfo "í´ë¦½ ì •ë³´: \n"
+
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30fps NTSC í•­ëª©ì„ ê°ì§€í•˜ì—¬, í”„ë ˆì„ì†ë„ë¥¼ ë°”ê¿‰ë‹ˆë‹¤.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24fps progressive NTSC í•­ëª©ì„ ê°ì§€í•˜ì—¬, í”„ë ˆì„ì†ë„ë¥¼ ë°”ê¿‰ë‹ˆë‹¤.\n"
 
 // dec_video.c & dec_audio.c:
-#define MSGTR_CantOpenCodec "ÄÚµ¦À» ¿­ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_CantCloseCodec "ÄÚµ¦À» ´İÀ» ¼ö ¾ø½À´Ï´Ù.\n"
+#define MSGTR_CantOpenCodec "ì½”ë±ì„ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_CantCloseCodec "ì½”ë±ì„ ë‹«ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
 
-#define MSGTR_MissingDLLcodec "¿À·ù: ¿äÃ»ÇÑ DirectShow ÄÚµ¦ %s¸¦ ¿­ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_ACMiniterror "Win32/ACM ¿Àµğ¿À ÄÚµ¦À» ¿­°Å³ª ÃÊ±âÈ­ÇÒ ¼ö ¾ø½À´Ï´Ù. (DLL ÆÄÀÏÀÌ ¾ø³ª¿ä?)\n"
-#define MSGTR_MissingLAVCcodec "libavcodec¿¡¼­ '%s' ÄÚµ¦À» Ã£À» ¼ö ¾ø½À´Ï´Ù...\n"
+#define MSGTR_MissingDLLcodec "ì˜¤ë¥˜: ìš”ì²­í•œ DirectShow ì½”ë± %së¥¼ ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_ACMiniterror "Win32/ACM ì˜¤ë””ì˜¤ ì½”ë±ì„ ì—´ê±°ë‚˜ ì´ˆê¸°í™”í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤. (DLL íŒŒì¼ì´ ì—†ë‚˜ìš”?)\n"
+#define MSGTR_MissingLAVCcodec "libavcodecì—ì„œ '%s' ì½”ë±ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤...\n"
 
-#define MSGTR_MpegNoSequHdr "MPEG: Ä¡¸íÀû ¿À·ù: ½ÃÄö½º Çì´õ¸¦ Ã£´Â µµÁß EOF.\n"
-#define MSGTR_CannotReadMpegSequHdr "Ä¡¸íÀû ¿À·ù: ½ÃÄö½º Çì´õ¸¦ ÀĞÀ» ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_CannotReadMpegSequHdrEx "Ä¡¸íÀû ¿À·ù: ½ÃÄö½º Çì´õ È®ÀåÀ» ÀĞÀ» ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_BadMpegSequHdr "MPEG: Àß¸øµÈ ½ÃÄö½º Çì´õÀÔ´Ï´Ù.\n"
-#define MSGTR_BadMpegSequHdrEx "MPEG: Àß¸øµÈ ½ÃÄö½º Çì´õ È®ÀåÀÔ´Ï´Ù.\n"
+#define MSGTR_MpegNoSequHdr "MPEG: ì¹˜ëª…ì  ì˜¤ë¥˜: ì‹œí€€ìŠ¤ í—¤ë”ë¥¼ ì°¾ëŠ” ë„ì¤‘ EOF.\n"
+#define MSGTR_CannotReadMpegSequHdr "ì¹˜ëª…ì  ì˜¤ë¥˜: ì‹œí€€ìŠ¤ í—¤ë”ë¥¼ ì½ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_CannotReadMpegSequHdrEx "ì¹˜ëª…ì  ì˜¤ë¥˜: ì‹œí€€ìŠ¤ í—¤ë” í™•ì¥ì„ ì½ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_BadMpegSequHdr "MPEG: ì˜ëª»ëœ ì‹œí€€ìŠ¤ í—¤ë”ì…ë‹ˆë‹¤.\n"
+#define MSGTR_BadMpegSequHdrEx "MPEG: ì˜ëª»ëœ ì‹œí€€ìŠ¤ í—¤ë” í™•ì¥ì…ë‹ˆë‹¤.\n"
 
-#define MSGTR_ShMemAllocFail "°øÀ¯ ¸Ş¸ğ¸®¸¦ ÇÒ´çÇÒ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_CantAllocAudioBuf "¿Àµğ¿À Ãâ·Â ¹öÆÛ¸¦ ÇÒ´çÇÒ ¼ö ¾ø½À´Ï´Ù.\n"
+#define MSGTR_ShMemAllocFail "ê³µìœ  ë©”ëª¨ë¦¬ë¥¼ í• ë‹¹í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_CantAllocAudioBuf "ì˜¤ë””ì˜¤ ì¶œë ¥ ë²„í¼ë¥¼ í• ë‹¹í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
 
-#define MSGTR_UnknownAudio "¾Ë ¼ö ¾ø´Â ¿Àµğ¿À Çü½ÄÀÔ´Ï´Ù. -> ¼Ò¸®¾øÀ½\n"
+#define MSGTR_UnknownAudio "ì•Œ ìˆ˜ ì—†ëŠ” ì˜¤ë””ì˜¤ í˜•ì‹ì…ë‹ˆë‹¤. -> ì†Œë¦¬ì—†ìŒ\n"
 
-#define MSGTR_UsingExternalPP "[PP] ¿ÜºÎ ÈÄÇàÃ³¸® ÇÊÅÍ¸¦ »ç¿ëÇÕ´Ï´Ù. max q = %d\n"
-#define MSGTR_UsingCodecPP "[PP] ÄÚµ¦ÀÇ ÈÄÇàÃ³¸®¸¦ »ç¿ëÇÕ´Ï´Ù. max q = %d\n"
-#define MSGTR_VideoAttributeNotSupportedByVO_VD "¼±ÅÃµÈ vo & vd°¡ ºñµğ¿À ¼Ó¼º '%s'À»(¸¦) Áö¿øÇÏÁö ¾Ê½À´Ï´Ù. \n"
-#define MSGTR_VideoCodecFamilyNotAvailableStr "¿äÃ»ÇÑ ºñµğ¿À ÄÚµ¦ ÁıÇÕ [%s] (vfm=%s)À»(¸¦) »ç¿ëÇÒ ¼ö ¾ø½À´Ï´Ù. (ÄÄÆÄÀÏ½Ã¿¡ °¡´ÉÇÏµµ·Ï ¼³Á¤ÇÏ¼¼¿ä.)\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "¿äÃ»ÇÑ ¿Àµğ¿À ÄÚÅØ ÁıÇÕ [%s] (afm=%s)À»(¸¦) »ç¿ëÇÒ ¼ö ¾ø½À´Ï´Ù. (ÄÄÆÄÀÏ½Ã¿¡ °¡´ÉÇÏµµ·Ï ¼³Á¤ÇÏ¼¼¿ä.)\n"
-#define MSGTR_OpeningVideoDecoder "ºñµğ¿À µğÄÚ´õ¸¦ ¿­°í ÀÖ½À´Ï´Ù.: [%s] %s\n"
-#define MSGTR_OpeningAudioDecoder "¿Àµğ¿À µğÄÚ´õ¸¦ ¿­°í ÀÖ½À´Ï´Ù.: [%s] %s\n"
-#define MSGTR_UninitVideoStr "ºñµğ¿À ÃÊ±âÈ­¸¦ Ãë¼ÒÇÕ´Ï´Ù.: %s\n"
-#define MSGTR_UninitAudioStr "¿Àµğ¿À ÃÊ±âÈ­¸¦ Ãë¼ÒÇÕ´Ï´Ù.: %s\n"
-#define MSGTR_VDecoderInitFailed "ºñµğ¿À µğÄÚ´õ ÃÊ±âÈ­¸¦ ½ÇÆĞÇß½À´Ï´Ù. :(\n"
-#define MSGTR_ADecoderInitFailed "¿Àµğ¿À µğÄÚ´õ ÃÊ±âÈ­¸¦ ½ÇÆĞÇß½À´Ï´Ù. :(\n"
-#define MSGTR_ADecoderPreinitFailed "¿Àµğ¿À µğÄÚ´õ »çÀü ÃÊ±âÈ­¸¦ ½ÇÆĞÇß½À´Ï´Ù. :(\n"
-#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: ÀÔ·Â ¹öÆÛ·Î %d ¹ÙÀÌÆ®¸¦ ÇÒ´çÇÕ´Ï´Ù.\n"
-#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Ãâ·Â ¹öÆÛ·Î %d + %d = %d ¹ÙÀÌÆ®¸¦ ÇÒ´çÇÕ´Ï´Ù.\n"
+#define MSGTR_UsingExternalPP "[PP] ì™¸ë¶€ í›„í–‰ì²˜ë¦¬ í•„í„°ë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤. max q = %d\n"
+#define MSGTR_UsingCodecPP "[PP] ì½”ë±ì˜ í›„í–‰ì²˜ë¦¬ë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤. max q = %d\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "ì„ íƒëœ vo & vdê°€ ë¹„ë””ì˜¤ ì†ì„± '%s'ì„(ë¥¼) ì§€ì›í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤. \n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "ìš”ì²­í•œ ë¹„ë””ì˜¤ ì½”ë± ì§‘í•© [%s] (vfm=%s)ì„(ë¥¼) ì‚¬ìš©í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤. (ì»´íŒŒì¼ì‹œì— ê°€ëŠ¥í•˜ë„ë¡ ì„¤ì •í•˜ì„¸ìš”.)\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "ìš”ì²­í•œ ì˜¤ë””ì˜¤ ì½”í… ì§‘í•© [%s] (afm=%s)ì„(ë¥¼) ì‚¬ìš©í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤. (ì»´íŒŒì¼ì‹œì— ê°€ëŠ¥í•˜ë„ë¡ ì„¤ì •í•˜ì„¸ìš”.)\n"
+#define MSGTR_OpeningVideoDecoder "ë¹„ë””ì˜¤ ë””ì½”ë”ë¥¼ ì—´ê³  ìˆìŠµë‹ˆë‹¤.: [%s] %s\n"
+#define MSGTR_OpeningAudioDecoder "ì˜¤ë””ì˜¤ ë””ì½”ë”ë¥¼ ì—´ê³  ìˆìŠµë‹ˆë‹¤.: [%s] %s\n"
+#define MSGTR_UninitVideoStr "ë¹„ë””ì˜¤ ì´ˆê¸°í™”ë¥¼ ì·¨ì†Œí•©ë‹ˆë‹¤.: %s\n"
+#define MSGTR_UninitAudioStr "ì˜¤ë””ì˜¤ ì´ˆê¸°í™”ë¥¼ ì·¨ì†Œí•©ë‹ˆë‹¤.: %s\n"
+#define MSGTR_VDecoderInitFailed "ë¹„ë””ì˜¤ ë””ì½”ë” ì´ˆê¸°í™”ë¥¼ ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤. :(\n"
+#define MSGTR_ADecoderInitFailed "ì˜¤ë””ì˜¤ ë””ì½”ë” ì´ˆê¸°í™”ë¥¼ ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤. :(\n"
+#define MSGTR_ADecoderPreinitFailed "ì˜¤ë””ì˜¤ ë””ì½”ë” ì‚¬ì „ ì´ˆê¸°í™”ë¥¼ ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤. :(\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: ì…ë ¥ ë²„í¼ë¡œ %d ë°”ì´íŠ¸ë¥¼ í• ë‹¹í•©ë‹ˆë‹¤.\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: ì¶œë ¥ ë²„í¼ë¡œ %d + %d = %d ë°”ì´íŠ¸ë¥¼ í• ë‹¹í•©ë‹ˆë‹¤.\n"
 
 // LIRC:
-#define MSGTR_SettingUpLIRC "LIRC Áö¿øÀ» ½ÃÀÛÇÕ´Ï´Ù...\n"
-#define MSGTR_LIRCdisabled "¸®¸ğÄÜÀ» »ç¿ëÇÒ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_LIRCopenfailed "LIRC Áö¿ø ½ÃÀÛÀ» ½ÇÆĞÇß½À´Ï´Ù.\n"
-#define MSGTR_LIRCcfgerr "LIRC ¼³Á¤ÆÄÀÏ %s¸¦ ÀĞ´Âµ¥ ½ÇÆĞÇß½À´Ï´Ù.\n"
+#define MSGTR_SettingUpLIRC "LIRC ì§€ì›ì„ ì‹œì‘í•©ë‹ˆë‹¤...\n"
+#define MSGTR_LIRCdisabled "ë¦¬ëª¨ì½˜ì„ ì‚¬ìš©í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_LIRCopenfailed "LIRC ì§€ì› ì‹œì‘ì„ ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_LIRCcfgerr "LIRC ì„¤ì •íŒŒì¼ %së¥¼ ì½ëŠ”ë° ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.\n"
 
 // vf.c:
-#define MSGTR_CouldNotFindVideoFilter "ºñµğ¿À ÇÊÅÍ '%s'À»(¸¦) Ã£À» ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_CouldNotOpenVideoFilter "ºñµğ¿À ÇÊÅÍ '%s'À»(¸¦) ¿­ ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_OpeningVideoFilter "ºñµğ¿À ÇÊÅÍ¸¦ ¿­°í ÀÖ½À´Ï´Ù.: "
-#define MSGTR_CannotFindColorspace "°øÅë ÄÃ·¯°ø°£À» Ã£À» ¼ö ¾ø½À´Ï´Ù. :(\n"
+#define MSGTR_CouldNotFindVideoFilter "ë¹„ë””ì˜¤ í•„í„° '%s'ì„(ë¥¼) ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_CouldNotOpenVideoFilter "ë¹„ë””ì˜¤ í•„í„° '%s'ì„(ë¥¼) ì—´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_OpeningVideoFilter "ë¹„ë””ì˜¤ í•„í„°ë¥¼ ì—´ê³  ìˆìŠµë‹ˆë‹¤.: "
+#define MSGTR_CannotFindColorspace "'scale'ì„ ì‹œë„í–ˆì§€ë§Œ, ë§ëŠ” ì»¬ëŸ¬ê³µê°„ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. :(\n"
 
 // vd.c
-#define MSGTR_CodecDidNotSet "VDec: ÄÚµ¦ÀÌ sh->disp_w¿Í sh->disp_h·Î ¼³Á¤µÇÁö ¾Ê¾Æ¼­, ´Ù½Ã ½ÃµµÇÕ´Ï´Ù.\n"
-#define MSGTR_VoConfigRequest "VDec: vo ¼³Á¤ ¿äÃ» - %d x %d (¼±È£ÇÏ´Â csp: %s)\n"
-#define MSGTR_CouldNotFindColorspace "¾î¿ï¸®´Â ÄÃ·¯°ø°£À» Ã£À» ¼ö ¾ø½À´Ï´Ù. -vf Å©±âÁ¶Àı·Î ´Ù½Ã ½ÃµµÇÕ´Ï´Ù...\n"
-#define MSGTR_MovieAspectIsSet "È­¸éºñÀ²ÀÌ %.2f:1 ÀÔ´Ï´Ù. - È­¸éºñÀ²À» Á¶Á¤ÇÏ±âÀ§ÇØ »çÀü Å©±âÁ¶ÀıÀ» ÇÕ´Ï´Ù.\n"
-#define MSGTR_MovieAspectUndefined "È­¸éºñÀ²ÀÌ Á¤ÀÇµÇÁö ¾Ê¾Ò½À´Ï´Ù. - »çÀü Å©±âÁ¶ÀıÀÌ Àû¿ëµÇÁö ¾Ê¾Ò½À´Ï´Ù.\n"
+#define MSGTR_CodecDidNotSet "VDec: ì½”ë±ì´ sh->disp_wì™€ sh->disp_hë¡œ ì„¤ì •ë˜ì§€ ì•Šì•„ì„œ, ë‹¤ì‹œ ì‹œë„í•©ë‹ˆë‹¤.\n"
+#define MSGTR_VoConfigRequest "VDec: vo ì„¤ì • ìš”ì²­ - %d x %d (ì„ í˜¸í•˜ëŠ” csp: %s)\n"
+#define MSGTR_CouldNotFindColorspace "ì–´ìš¸ë¦¬ëŠ” ì»¬ëŸ¬ê³µê°„ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. -vf í¬ê¸°ì¡°ì ˆë¡œ ë‹¤ì‹œ ì‹œë„í•©ë‹ˆë‹¤...\n"
+#define MSGTR_MovieAspectIsSet "í™”ë©´ë¹„ìœ¨ì´ %.2f:1 ì…ë‹ˆë‹¤. - í™”ë©´ë¹„ìœ¨ì„ ì¡°ì •í•˜ê¸°ìœ„í•´ ì‚¬ì „ í¬ê¸°ì¡°ì ˆì„ í•©ë‹ˆë‹¤.\n"
+#define MSGTR_MovieAspectUndefined "í™”ë©´ë¹„ìœ¨ì´ ì •ì˜ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤. - ì‚¬ì „ í¬ê¸°ì¡°ì ˆì´ ì ìš©ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: EWMH ì „ì²´í™”ë©´ ì´ë²¤íŠ¸ë¥¼ ë³´ë‚¼ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!\n"
+
+#define MSGTR_NeedAfVolume "Mixer: ì´ ì˜¤ë””ì˜¤ ì¶œë ¥ ë“œë¼ì´ë²„ëŠ” ìŒëŸ‰ì¡°ì ˆì„ ìœ„í•´ \"-af volume\"ì„ í•´ì•¼í•©ë‹ˆë‹¤.\n"
 
 // ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI
 
 // --- labels ---
-#define MSGTR_About "Á¤º¸"
-#define MSGTR_FileSelect "ÆÄÀÏ ¼±ÅÃ..."
-#define MSGTR_SubtitleSelect "ÀÚ¸· ¼±ÅÃ..."
-#define MSGTR_OtherSelect "¼±ÅÃ..."
-#define MSGTR_AudioFileSelect "À½¾Ç ÆÄÀÏ ¼±ÅÃ..."
-#define MSGTR_FontSelect "±Û²Ã ¼±ÅÃ..."
-#define MSGTR_PlayList "Àç»ı¸ñ·Ï"
-#define MSGTR_Equalizer "ÀÌÄ÷¶óÀÌÀú"
-#define MSGTR_SkinBrowser "½ºÅ² Ã£±â"
-#define MSGTR_Network "³×Æ®¿öÅ© ½ºÆ®¸®¹Ö..."
-#define MSGTR_Preferences "¼±ÅÃ»çÇ×"
-#define MSGTR_OSSPreferences "OSS µå¶óÀÌ¹ö ¼³Á¤"
-#define MSGTR_SDLPreferences "SDL µå¶óÀÌ¹ö ¼³Á¤"
-#define MSGTR_NoMediaOpened "¹Ìµğ¾î ¾øÀ½"
-#define MSGTR_VCDTrack "VCD Æ®·¢ %d"
-#define MSGTR_NoChapter "Ã©ÅÍ ¾øÀ½"
-#define MSGTR_Chapter "Ã©ÅÍ %d"
-#define MSGTR_NoFileLoaded "ÆÄÀÏ ¾øÀ½"
+#define MSGTR_About "ì •ë³´"
+#define MSGTR_FileSelect "íŒŒì¼ ì„ íƒ..."
+#define MSGTR_SubtitleSelect "ìë§‰ ì„ íƒ..."
+#define MSGTR_OtherSelect "ì„ íƒ..."
+#define MSGTR_AudioFileSelect "ìŒì•… íŒŒì¼ ì„ íƒ..."
+#define MSGTR_FontSelect "ê¸€ê¼´ ì„ íƒ..."
+#define MSGTR_PlayList "ì¬ìƒëª©ë¡"
+#define MSGTR_Equalizer "ì´í€„ë¼ì´ì €"
+#define MSGTR_SkinBrowser "ìŠ¤í‚¨ ì°¾ê¸°"
+#define MSGTR_Network "ë„¤íŠ¸ì›Œí¬ ìŠ¤íŠ¸ë¦¬ë°..."
+#define MSGTR_Preferences "ì„ íƒì‚¬í•­"
+#define MSGTR_OSSPreferences "OSS ë“œë¼ì´ë²„ ì„¤ì •"
+#define MSGTR_SDLPreferences "SDL ë“œë¼ì´ë²„ ì„¤ì •"
+#define MSGTR_NoMediaOpened "ë¯¸ë””ì–´ ì—†ìŒ"
+#define MSGTR_VCDTrack "VCD íŠ¸ë™ %d"
+#define MSGTR_NoChapter "ì±•í„° ì—†ìŒ"
+#define MSGTR_Chapter "ì±•í„° %d"
+#define MSGTR_NoFileLoaded "íŒŒì¼ ì—†ìŒ"
 
 // --- buttons ---
-#define MSGTR_Ok "È®ÀÎ"
-#define MSGTR_Cancel "Ãë¼Ò"
-#define MSGTR_Add "Ãß°¡"
-#define MSGTR_Remove "»èÁ¦"
-#define MSGTR_Clear "Áö¿ò"
-#define MSGTR_Config "¼³Á¤"
-#define MSGTR_ConfigDriver "µå¶óÀÌ¹ö ¼³Á¤"
-#define MSGTR_Browse "¿­±â"
+#define MSGTR_Ok "í™•ì¸"
+#define MSGTR_Cancel "ì·¨ì†Œ"
+#define MSGTR_Add "ì¶”ê°€"
+#define MSGTR_Remove "ì‚­ì œ"
+#define MSGTR_Clear "ì§€ì›€"
+#define MSGTR_Config "ì„¤ì •"
+#define MSGTR_ConfigDriver "ë“œë¼ì´ë²„ ì„¤ì •"
+#define MSGTR_Browse "ì—´ê¸°"
 
 // --- error messages ---
-#define MSGTR_NEMDB "ÁË¼ÛÇÕ´Ï´Ù. ±×¸®±â ¹öÆÛ¸¦ À§ÇÑ ÃæºĞÇÑ ¸Ş¸ğ¸®°¡ ¾ø½À´Ï´Ù."
-#define MSGTR_NEMFMR "ÁË¼ÛÇÕ´Ï´Ù. ¸Ş´º ·»´õ¸µÀ» À§ÇÑ ÃæºĞÇÑ ¸Ş¸ğ¸®°¡ ¾ø½À´Ï´Ù."
-#define MSGTR_IDFGCVD "ÁË¼ÛÇÕ´Ï´Ù. GUI È£È¯ ºñµğ¿À Ãâ·Â µå¶óÀÌ¹ö¸¦ Ã£Áö ¸øÇß½À´Ï´Ù."
-#define MSGTR_NEEDLAVCFAME "ÁË¼ÛÇÕ´Ï´Ù. MPEG°¡ ¾Æ´Ñ ÆÄÀÏÀ» DXR3/H+ ÀåÄ¡·Î Àç»ıÇÏ·Á¸é ´Ù½Ã ÀÎÄÚµùÇØ¾ß¸¸ ÇÕ´Ï´Ù.\nDXR3/H+ ¼³Á¤ ´ëÈ­»óÀÚ¿¡¼­ lavc³ª frameÀÌ °¡´ÉÇÏµµ·Ï ÇÏ¼¼¿ä."
+#define MSGTR_NEMDB "ì£„ì†¡í•©ë‹ˆë‹¤. ê·¸ë¦¬ê¸° ë²„í¼ë¥¼ ìœ„í•œ ì¶©ë¶„í•œ ë©”ëª¨ë¦¬ê°€ ì—†ìŠµë‹ˆë‹¤."
+#define MSGTR_NEMFMR "ì£„ì†¡í•©ë‹ˆë‹¤. ë©”ë‰´ ë Œë”ë§ì„ ìœ„í•œ ì¶©ë¶„í•œ ë©”ëª¨ë¦¬ê°€ ì—†ìŠµë‹ˆë‹¤."
+#define MSGTR_IDFGCVD "ì£„ì†¡í•©ë‹ˆë‹¤. GUI í˜¸í™˜ ë¹„ë””ì˜¤ ì¶œë ¥ ë“œë¼ì´ë²„ë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤."
+#define MSGTR_NEEDLAVCFAME "ì£„ì†¡í•©ë‹ˆë‹¤. MPEGê°€ ì•„ë‹Œ íŒŒì¼ì„ DXR3/H+ ì¥ì¹˜ë¡œ ì¬ìƒí•˜ë ¤ë©´ ë‹¤ì‹œ ì¸ì½”ë”©í•´ì•¼ë§Œ í•©ë‹ˆë‹¤.\nDXR3/H+ ì„¤ì • ëŒ€í™”ìƒìì—ì„œ lavcë‚˜ frameì´ ê°€ëŠ¥í•˜ë„ë¡ í•˜ì„¸ìš”."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[½ºÅ²] ½ºÅ² ¼³Á¤ÆÄÀÏÀÇ %d¹øÂ° ÁÙ¿¡ ¿À·ù°¡ ÀÖ½À´Ï´Ù.: %s" 
-#define MSGTR_SKIN_WARNING1 "[½ºÅ²] ½ºÅ² ¼³Á¤ÆÄÀÏÀÇ %d¹øÂ° ÁÙ °æ°í: À§Á¬À» Ã£¾ÒÁö¸¸ \"section\"¾Õ¿¡ (%s)¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù."
-#define MSGTR_SKIN_WARNING2 "[½ºÅ²] ½ºÅ² ¼³Á¤ÆÄÀÏÀÇ %d¹øÂ° ÁÙ °æ°í: À§Á¬À» Ã£¾ÒÁö¸¸ \"subsection\"¾Õ¿¡ (%s)¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù."
-#define MSGTR_SKIN_WARNING3 "[½ºÅ²] ½ºÅ² ¼³Á¤ÆÄÀÏÀÇ %d¹øÂ° ÁÙ °æ°í: ÀÌ subsectionÀº ÇöÀç À§Á¬¿¡¼­ Áö¿øµÇÁö ¾Ê½À´Ï´Ù. (%s)"
-#define MSGTR_SKIN_BITMAP_16bit  "16 ºñÆ® È¤Àº ´õ ³·Àº Ç°ÁúÀÇ ºñÆ®¸ÊÀº Áö¿øµÇÁö ¾Ê½À´Ï´Ù. (%s)\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "ÆÄÀÏÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù. (%s)\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "BMP ÀĞ±â ¿À·ùÀÔ´Ï´Ù. (%s)\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "TGA ÀĞ±â ¿À·ùÀÔ´Ï´Ù. (%s)\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "PNG ÀĞ±â ¿À·ùÀÔ´Ï´Ù. (%s)\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE·Î ¾ĞÃàµÈ TGA´Â Áö¿øµÇÁö ¾Ê½À´Ï´Ù. (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "¾Ë ¼ö ¾ø´Â ÆÄÀÏ Çü½ÄÀÔ´Ï´Ù. (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24 ºñÆ®¿¡¼­ 32 ºñÆ®·Î ÀüÈ¯ ¿À·ù (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownMessage "¾Ë ¼ö ¾ø´Â ¸Ş¼¼ÁöÀÔ´Ï´Ù.: %s\n"
-#define MSGTR_SKIN_FONT_NotEnoughtMemory "¸Ş¸ğ¸®°¡ ºÎÁ·ÇÕ´Ï´Ù.\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "ÆùÆ®°¡ ³Ê¹« ¸¹ÀÌ ¼±¾ğµÇ¾î ÀÖ½À´Ï´Ù.\n"
-#define MSGTR_SKIN_FONT_FontFileNotFound "ÆùÆ®ÆÄÀÏÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_SKIN_FONT_FontImageNotFound "ÆùÆ® ÀÌ¹ÌÁöÆÄÀÏÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù.\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "ÆùÆ® ÁöÁ¤ÀÚ°¡ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù. (%s)\n"
-#define MSGTR_SKIN_UnknownParameter "¾Ë ¼ö ¾ø´Â ¸Å°³º¯¼öÀÔ´Ï´Ù. (%s)\n"
-#define MSGTR_SKINBROWSER_NotEnoughMemory "[½ºÅ²¼±ÅÃ] ¸Ş¸ğ¸®°¡ ºÎÁ·ÇÕ´Ï´Ù.\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "½ºÅ²À» Ã£À» ¼ö ¾ø½À´Ï´Ù. (%s)\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "½ºÅ² ¼³Á¤ÆÄÀÏ ÀĞ±â ¿À·ùÀÔ´Ï´Ù. (%s)\n"
-#define MSGTR_SKIN_LABEL "½ºÅ²:"
+#define MSGTR_SKIN_ERRORMESSAGE "[ìŠ¤í‚¨] ìŠ¤í‚¨ ì„¤ì •íŒŒì¼ì˜ %dë²ˆì§¸ ì¤„ì— ì˜¤ë¥˜ê°€ ìˆìŠµë‹ˆë‹¤.: %s" 
+#define MSGTR_SKIN_WARNING1 "[ìŠ¤í‚¨] ì„¤ì •íŒŒì¼ì˜ %dë²ˆì§¸ ì¤„ ê²½ê³ :\nìœ„ì ¯(%s)ì„ ì°¾ì•˜ì§€ë§Œ ê·¸ ì•ì— \"section\"ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤."
+#define MSGTR_SKIN_WARNING2 "[ìŠ¤í‚¨] ì„¤ì •íŒŒì¼ì˜ %dë²ˆì§¸ ì¤„ ê²½ê³ :\nìœ„ì ¯(%s)ì„ ì°¾ì•˜ì§€ë§Œ ê·¸ ì•ì— \"subsection\"ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤."
+#define MSGTR_SKIN_WARNING3 "[ìŠ¤í‚¨] ì„¤ì •íŒŒì¼ì˜ %dë²ˆì§¸ ì¤„ ê²½ê³ :\nì´ subsectionì€ í˜„ì¬ ìœ„ì ¯ì—ì„œ ì§€ì›ë˜ì§€ ì•ŠìŠµë‹ˆë‹¤. (%s)"
+#define MSGTR_SKIN_BITMAP_16bit  "16 ë¹„íŠ¸ í˜¹ì€ ë” ë‚®ì€ í’ˆì§ˆì˜ ë¹„íŠ¸ë§µì€ ì§€ì›ë˜ì§€ ì•ŠìŠµë‹ˆë‹¤. (%s)\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "íŒŒì¼ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. (%s)\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "BMP ì½ê¸° ì˜¤ë¥˜ì…ë‹ˆë‹¤. (%s)\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "TGA ì½ê¸° ì˜¤ë¥˜ì…ë‹ˆë‹¤. (%s)\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "PNG ì½ê¸° ì˜¤ë¥˜ì…ë‹ˆë‹¤. (%s)\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "RLEë¡œ ì••ì¶•ëœ TGAëŠ” ì§€ì›ë˜ì§€ ì•ŠìŠµë‹ˆë‹¤. (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "ì•Œ ìˆ˜ ì—†ëŠ” íŒŒì¼ í˜•ì‹ì…ë‹ˆë‹¤. (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConvertError "24 ë¹„íŠ¸ì—ì„œ 32 ë¹„íŠ¸ë¡œ ì „í™˜ ì˜¤ë¥˜ (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownMessage "ì•Œ ìˆ˜ ì—†ëŠ” ë©”ì„¸ì§€ì…ë‹ˆë‹¤.: %s\n"
+#define MSGTR_SKIN_FONT_NotEnoughtMemory "ë©”ëª¨ë¦¬ê°€ ë¶€ì¡±í•©ë‹ˆë‹¤.\n"
+#define MSGTR_SKIN_FONT_TooManyFontsDeclared "í°íŠ¸ê°€ ë„ˆë¬´ ë§ì´ ì„ ì–¸ë˜ì–´ ìˆìŠµë‹ˆë‹¤.\n"
+#define MSGTR_SKIN_FONT_FontFileNotFound "í°íŠ¸íŒŒì¼ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_SKIN_FONT_FontImageNotFound "í°íŠ¸ ì´ë¯¸ì§€íŒŒì¼ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "í°íŠ¸ ì§€ì •ìê°€ ì¡´ì¬í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤. (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "ì•Œ ìˆ˜ ì—†ëŠ” ë§¤ê°œë³€ìˆ˜ì…ë‹ˆë‹¤. (%s)\n"
+#define MSGTR_SKINBROWSER_NotEnoughMemory "[ìŠ¤í‚¨ì„ íƒ] ë©”ëª¨ë¦¬ê°€ ë¶€ì¡±í•©ë‹ˆë‹¤.\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "ìŠ¤í‚¨ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤. (%s)\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "ìŠ¤í‚¨ ì„¤ì •íŒŒì¼ ì½ê¸° ì˜¤ë¥˜ì…ë‹ˆë‹¤. (%s)\n"
+#define MSGTR_SKIN_LABEL "ìŠ¤í‚¨:"
 
 // --- gtk menus
-#define MSGTR_MENU_AboutMPlayer "MPlayer Á¤º¸"
-#define MSGTR_MENU_Open "¿­±â..."
-#define MSGTR_MENU_PlayFile "ÆÄÀÏ Àç»ı..."
-#define MSGTR_MENU_PlayVCD "VCD Àç»ı..."
-#define MSGTR_MENU_PlayDVD "DVD Àç»ı..."
-#define MSGTR_MENU_PlayURL "URL Àç»ı..."
-#define MSGTR_MENU_LoadSubtitle "ÀÚ¸· ¼±ÅÃ..."
-#define MSGTR_MENU_DropSubtitle "ÀÚ¸· ¾ø¾Ú..."
-#define MSGTR_MENU_LoadExternAudioFile "À½¾Ç ÆÄÀÏ..."
-#define MSGTR_MENU_Playing "ÀÛµ¿"
-#define MSGTR_MENU_Play "Àç»ı"
-#define MSGTR_MENU_Pause "¸ØÃã"
-#define MSGTR_MENU_Stop "Á¤Áö"
-#define MSGTR_MENU_NextStream "´ÙÀ½"
-#define MSGTR_MENU_PrevStream "ÀÌÀü"
-#define MSGTR_MENU_Size "Å©±â"
-#define MSGTR_MENU_NormalSize "º¸Åë Å©±â"
-#define MSGTR_MENU_DoubleSize "µÎ¹è Å©±â"
-#define MSGTR_MENU_FullScreen "ÀüÃ¼ È­¸é"
+#define MSGTR_MENU_AboutMPlayer "MPlayer ì •ë³´"
+#define MSGTR_MENU_Open "ì—´ê¸°..."
+#define MSGTR_MENU_PlayFile "íŒŒì¼ ì¬ìƒ..."
+#define MSGTR_MENU_PlayVCD "VCD ì¬ìƒ..."
+#define MSGTR_MENU_PlayDVD "DVD ì¬ìƒ..."
+#define MSGTR_MENU_PlayURL "URL ì¬ìƒ..."
+#define MSGTR_MENU_LoadSubtitle "ìë§‰ ì„ íƒ..."
+#define MSGTR_MENU_DropSubtitle "ìë§‰ ì—†ì•°..."
+#define MSGTR_MENU_LoadExternAudioFile "ìŒì•… íŒŒì¼..."
+#define MSGTR_MENU_Playing "ì‘ë™"
+#define MSGTR_MENU_Play "ì¬ìƒ"
+#define MSGTR_MENU_Pause "ë©ˆì¶¤"
+#define MSGTR_MENU_Stop "ì •ì§€"
+#define MSGTR_MENU_NextStream "ë‹¤ìŒ"
+#define MSGTR_MENU_PrevStream "ì´ì „"
+#define MSGTR_MENU_Size "í¬ê¸°"
+#define MSGTR_MENU_NormalSize "ë³´í†µ í¬ê¸°"
+#define MSGTR_MENU_DoubleSize "ë‘ë°° í¬ê¸°"
+#define MSGTR_MENU_FullScreen "ì „ì²´ í™”ë©´"
 #define MSGTR_MENU_DVD "DVD"
 #define MSGTR_MENU_VCD "VCD"
-#define MSGTR_MENU_PlayDisc "µğ½ºÅ© ¿­±â..."
-#define MSGTR_MENU_ShowDVDMenu "DVD ¸Ş´ºº¸±â"
-#define MSGTR_MENU_Titles "Å¸ÀÌÆ²"
-#define MSGTR_MENU_Title "Å¸ÀÌÆ² %2d"
-#define MSGTR_MENU_None "(¾øÀ½)"
-#define MSGTR_MENU_Chapters "Ã©ÅÍ"
-#define MSGTR_MENU_Chapter "Ã©ÅÍ %2d"
-#define MSGTR_MENU_AudioLanguages "¿Àµğ¿À ¾ğ¾î"
-#define MSGTR_MENU_SubtitleLanguages "ÀÚ¸· ¾ğ¾î"
-#define MSGTR_MENU_PlayList "Àç»ı¸ñ·Ï"
-#define MSGTR_MENU_SkinBrowser "½ºÅ²¼±ÅÃ"
-#define MSGTR_MENU_Preferences "¼±ÅÃ»çÇ×"
-#define MSGTR_MENU_Exit "Á¾·á..."
-#define MSGTR_MENU_Mute "À½¼Ò°Å"
-#define MSGTR_MENU_Original "¿ø·¡´ë·Î"
-#define MSGTR_MENU_AspectRatio "È­¸éºñÀ²"
-#define MSGTR_MENU_AudioTrack "¿Àµğ¿À Æ®·¢"
-#define MSGTR_MENU_Track "Æ®·¢ %d"
-#define MSGTR_MENU_VideoTrack "ºñµğ¿À Æ®·¢"
+#define MSGTR_MENU_PlayDisc "ë””ìŠ¤í¬ ì—´ê¸°..."
+#define MSGTR_MENU_ShowDVDMenu "DVD ë©”ë‰´ë³´ê¸°"
+#define MSGTR_MENU_Titles "íƒ€ì´í‹€"
+#define MSGTR_MENU_Title "íƒ€ì´í‹€ %2d"
+#define MSGTR_MENU_None "(ì—†ìŒ)"
+#define MSGTR_MENU_Chapters "ì±•í„°"
+#define MSGTR_MENU_Chapter "ì±•í„° %2d"
+#define MSGTR_MENU_AudioLanguages "ì˜¤ë””ì˜¤ ì–¸ì–´"
+#define MSGTR_MENU_SubtitleLanguages "ìë§‰ ì–¸ì–´"
+#define MSGTR_MENU_PlayList "ì¬ìƒëª©ë¡"
+#define MSGTR_MENU_SkinBrowser "ìŠ¤í‚¨ì„ íƒ"
+#define MSGTR_MENU_Preferences "ì„ íƒì‚¬í•­"
+#define MSGTR_MENU_Exit "ì¢…ë£Œ..."
+#define MSGTR_MENU_Mute "ìŒì†Œê±°"
+#define MSGTR_MENU_Original "ì›ë˜ëŒ€ë¡œ"
+#define MSGTR_MENU_AspectRatio "í™”ë©´ë¹„ìœ¨"
+#define MSGTR_MENU_AudioTrack "ì˜¤ë””ì˜¤ íŠ¸ë™"
+#define MSGTR_MENU_Track "íŠ¸ë™ %d"
+#define MSGTR_MENU_VideoTrack "ë¹„ë””ì˜¤ íŠ¸ë™"
 
 // --- equalizer
-#define MSGTR_EQU_Audio "¿Àµğ¿À"
-#define MSGTR_EQU_Video "ºñµğ¿À"
-#define MSGTR_EQU_Contrast "´ëºñ: "
-#define MSGTR_EQU_Brightness "¹à±â: "
-#define MSGTR_EQU_Hue "»ö»ó: "
-#define MSGTR_EQU_Saturation "Ã¤µµ: "
-#define MSGTR_EQU_Front_Left "¿ŞÂÊ ¾Õ"
-#define MSGTR_EQU_Front_Right "¿À¸¥ÂÊ ¾Õ"
-#define MSGTR_EQU_Back_Left "¿ŞÂÊ µÚ"
-#define MSGTR_EQU_Back_Right "¿À¸¥ÂÊ µÚ"
-#define MSGTR_EQU_Center "°¡¿îµ¥"
-#define MSGTR_EQU_Bass "º£ÀÌ½º"
-#define MSGTR_EQU_All "¸ğµÎ"
-#define MSGTR_EQU_Channel1 "Ã¤³Î 1:"
-#define MSGTR_EQU_Channel2 "Ã¤³Î 2:"
-#define MSGTR_EQU_Channel3 "Ã¤³Î 3:"
-#define MSGTR_EQU_Channel4 "Ã¤³Î 4:"
-#define MSGTR_EQU_Channel5 "Ã¤³Î 5:"
-#define MSGTR_EQU_Channel6 "Ã¤³Î 6:"
+#define MSGTR_EQU_Audio "ì˜¤ë””ì˜¤"
+#define MSGTR_EQU_Video "ë¹„ë””ì˜¤"
+#define MSGTR_EQU_Contrast "ëŒ€ë¹„: "
+#define MSGTR_EQU_Brightness "ë°ê¸°: "
+#define MSGTR_EQU_Hue "ìƒ‰ìƒ: "
+#define MSGTR_EQU_Saturation "ì±„ë„: "
+#define MSGTR_EQU_Front_Left "ì™¼ìª½ ì•"
+#define MSGTR_EQU_Front_Right "ì˜¤ë¥¸ìª½ ì•"
+#define MSGTR_EQU_Back_Left "ì™¼ìª½ ë’¤"
+#define MSGTR_EQU_Back_Right "ì˜¤ë¥¸ìª½ ë’¤"
+#define MSGTR_EQU_Center "ê°€ìš´ë°"
+#define MSGTR_EQU_Bass "ë² ì´ìŠ¤"
+#define MSGTR_EQU_All "ëª¨ë‘"
+#define MSGTR_EQU_Channel1 "ì±„ë„ 1:"
+#define MSGTR_EQU_Channel2 "ì±„ë„ 2:"
+#define MSGTR_EQU_Channel3 "ì±„ë„ 3:"
+#define MSGTR_EQU_Channel4 "ì±„ë„ 4:"
+#define MSGTR_EQU_Channel5 "ì±„ë„ 5:"
+#define MSGTR_EQU_Channel6 "ì±„ë„ 6:"
 
 // --- playlist
-#define MSGTR_PLAYLIST_Path "°æ·Î"
-#define MSGTR_PLAYLIST_Selected "¼±ÅÃµÈ ÆÄÀÏ"
-#define MSGTR_PLAYLIST_Files "ÆÄÀÏ"
-#define MSGTR_PLAYLIST_DirectoryTree "µğ·ºÅä¸®"
+#define MSGTR_PLAYLIST_Path "ê²½ë¡œ"
+#define MSGTR_PLAYLIST_Selected "ì„ íƒëœ íŒŒì¼"
+#define MSGTR_PLAYLIST_Files "íŒŒì¼"
+#define MSGTR_PLAYLIST_DirectoryTree "ë””ë ‰í† ë¦¬"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "¿Àµğ¿À"
-#define MSGTR_PREFERENCES_Video "ºñµğ¿À"
-#define MSGTR_PREFERENCES_SubtitleOSD "ÀÚ¸· & OSD"
-#define MSGTR_PREFERENCES_Codecs "ÄÚµ¦ & ÇØ¼®±â"
-#define MSGTR_PREFERENCES_Misc "±âÅ¸"
+#define MSGTR_PREFERENCES_Audio "ì˜¤ë””ì˜¤"
+#define MSGTR_PREFERENCES_Video "ë¹„ë””ì˜¤"
+#define MSGTR_PREFERENCES_SubtitleOSD "ìë§‰ & OSD"
+#define MSGTR_PREFERENCES_Codecs "ì½”ë± & í•´ì„ê¸°"
+#define MSGTR_PREFERENCES_Misc "ê¸°íƒ€"
 
-#define MSGTR_PREFERENCES_None "¾øÀ½"
-#define MSGTR_PREFERENCES_AvailableDrivers "°¡´ÉÇÑ µå¶óÀÌ¹ö:"
-#define MSGTR_PREFERENCES_DoNotPlaySound "»ç¿îµå Àç»ı ¾ÈÇÔ"
-#define MSGTR_PREFERENCES_NormalizeSound "»ç¿îµå Ç¥ÁØÈ­"
-#define MSGTR_PREFERENCES_EnEqualizer "ÀÌÄ÷¶óÀÌÀú »ç¿ë"
-#define MSGTR_PREFERENCES_ExtraStereo "¿ÜºÎ ½ºÅ×·¹¿À »ç¿ë"
-#define MSGTR_PREFERENCES_Coefficient "°è¼ö:"
-#define MSGTR_PREFERENCES_AudioDelay "¿Àµğ¿À Áö¿¬:"
-#define MSGTR_PREFERENCES_DoubleBuffer "ÀÌÁß ¹öÆÛ¸µ »ç¿ë"
-#define MSGTR_PREFERENCES_DirectRender "´ÙÀÌ·ºÆ® ·»´õ¸µ »ç¿ë"
-#define MSGTR_PREFERENCES_FrameDrop "ÇÁ·¹ÀÓ °Ç³Ê¶Ù±â »ç¿ë"
-#define MSGTR_PREFERENCES_HFrameDrop "°­Á¦ ÇÁ·¹ÀÓ °Ç³Ê¶Ù±â »ç¿ë(À§ÇèÇÔ)"
-#define MSGTR_PREFERENCES_Flip "ÀÌ¹ÌÁö »óÇÏ ¹İÀü"
-#define MSGTR_PREFERENCES_Panscan "ÆÒ½ºÄµ: "
-#define MSGTR_PREFERENCES_OSDTimer "Å¸ÀÌ¸Ó ¹× Ç¥½Ã±â"
-#define MSGTR_PREFERENCES_OSDProgress "ÁøÇà ¸·´ë¸¸ Ç¥½Ã"
-#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Å¸ÀÌ¸Ó, ÆÛ¼¾Æ® ¹× ÀüÃ¼½Ã°£"
-#define MSGTR_PREFERENCES_Subtitle "ÀÚ¸·:"
-#define MSGTR_PREFERENCES_SUB_Delay "Áö¿¬: "
+#define MSGTR_PREFERENCES_None "ì—†ìŒ"
+#define MSGTR_PREFERENCES_AvailableDrivers "ê°€ëŠ¥í•œ ë“œë¼ì´ë²„:"
+#define MSGTR_PREFERENCES_DoNotPlaySound "ì‚¬ìš´ë“œ ì¬ìƒ ì•ˆí•¨"
+#define MSGTR_PREFERENCES_NormalizeSound "ì‚¬ìš´ë“œ í‘œì¤€í™”"
+#define MSGTR_PREFERENCES_EnEqualizer "ì´í€„ë¼ì´ì € ì‚¬ìš©"
+#define MSGTR_PREFERENCES_ExtraStereo "ì™¸ë¶€ ìŠ¤í…Œë ˆì˜¤ ì‚¬ìš©"
+#define MSGTR_PREFERENCES_Coefficient "ê³„ìˆ˜:"
+#define MSGTR_PREFERENCES_AudioDelay "ì˜¤ë””ì˜¤ ì§€ì—°:"
+#define MSGTR_PREFERENCES_DoubleBuffer "ì´ì¤‘ ë²„í¼ë§ ì‚¬ìš©"
+#define MSGTR_PREFERENCES_DirectRender "ë‹¤ì´ë ‰íŠ¸ ë Œë”ë§ ì‚¬ìš©"
+#define MSGTR_PREFERENCES_FrameDrop "í”„ë ˆì„ ê±´ë„ˆë›°ê¸° ì‚¬ìš©"
+#define MSGTR_PREFERENCES_HFrameDrop "ê°•ì œ í”„ë ˆì„ ê±´ë„ˆë›°ê¸° ì‚¬ìš©(ìœ„í—˜í•¨)"
+#define MSGTR_PREFERENCES_Flip "ì´ë¯¸ì§€ ìƒí•˜ ë°˜ì „"
+#define MSGTR_PREFERENCES_Panscan "íŒ¬ìŠ¤ìº”: "
+#define MSGTR_PREFERENCES_OSDTimer "íƒ€ì´ë¨¸ ë° í‘œì‹œê¸°"
+#define MSGTR_PREFERENCES_OSDProgress "ì§„í–‰ ë§‰ëŒ€ë§Œ í‘œì‹œ"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "íƒ€ì´ë¨¸, í¼ì„¼íŠ¸ ë° ì „ì²´ì‹œê°„"
+#define MSGTR_PREFERENCES_Subtitle "ìë§‰:"
+#define MSGTR_PREFERENCES_SUB_Delay "ì§€ì—°: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
-#define MSGTR_PREFERENCES_SUB_POS "À§Ä¡: "
-#define MSGTR_PREFERENCES_SUB_AutoLoad "ÀÚµ¿À¸·Î ÀÚ¸· ¿­Áö ¾Ê±â"
-#define MSGTR_PREFERENCES_SUB_Unicode "À¯´ÏÄÚµå ÀÚ¸·"
-#define MSGTR_PREFERENCES_SUB_MPSUB "ÁÖ¾îÁø ÀÚ¸·À» MPlayer¿ë ÀÚ¸· Çü½ÄÀ¸·Î ¹Ù²Ş"
-#define MSGTR_PREFERENCES_SUB_SRT "ÁÖ¾îÁø ÀÚ¸·À» SRT Çü½ÄÀ¸·Î ¹Ù²Ş"
-#define MSGTR_PREFERENCES_SUB_Overlap "ÀÚ¸· °ãÄ§ ÄÑ±â"
-#define MSGTR_PREFERENCES_Font "±Û²Ã:"
-#define MSGTR_PREFERENCES_FontFactor "±Û²Ã ÆÑÅÍ:"
-#define MSGTR_PREFERENCES_PostProcess "ÈÄÇàÃ³¸® »ç¿ë"
-#define MSGTR_PREFERENCES_AutoQuality "ÀÚµ¿ Ç°ÁúÁ¶Á¤: "
-#define MSGTR_PREFERENCES_NI "non-interleaved AVI ÆÄ¼­ »ç¿ë"
-#define MSGTR_PREFERENCES_IDX "ÇÊ¿äÇÑ °æ¿ì, ÀÎµ¦½º Å×ÀÌºí ´Ù½Ã ¸¸µé±â"
-#define MSGTR_PREFERENCES_VideoCodecFamily "ºñµğ¿À ÄÚµ¦ ÁıÇÕ:"
-#define MSGTR_PREFERENCES_AudioCodecFamily "¿Àµğ¿À ÄÚµ¦ ÁıÇÕ:"
-#define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD ·¹º§"
-#define MSGTR_PREFERENCES_FRAME_Subtitle "ÀÚ¸·"
-#define MSGTR_PREFERENCES_FRAME_Font "±Û²Ã"
-#define MSGTR_PREFERENCES_FRAME_PostProcess "ÈÄÇàÃ³¸®"
-#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "ÄÚµ¦ & ÇØ¼®±â"
-#define MSGTR_PREFERENCES_FRAME_Cache "Ä³½Ã"
-#define MSGTR_PREFERENCES_FRAME_Misc "±âÅ¸"
-#define MSGTR_PREFERENCES_OSS_Device "ÀåÄ¡:"
-#define MSGTR_PREFERENCES_OSS_Mixer "¹Í¼­:"
-#define MSGTR_PREFERENCES_SDL_Driver "µå¶óÀÌ¹ö:"
-#define MSGTR_PREFERENCES_Message "¼±ÅÃ»çÇ×µéÀ» Àû¿ëÇÏ·Á¸é Àç»ı±â¸¦ ´Ù½Ã ½ÃÀÛÇØ¾ß ÇÕ´Ï´Ù!"
-#define MSGTR_PREFERENCES_DXR3_VENC "ºñµğ¿À ÀÎÄÚ´õ:"
-#define MSGTR_PREFERENCES_DXR3_LAVC "LAVC »ç¿ë (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "FAME »ç¿ë"
-#define MSGTR_PREFERENCES_FontEncoding1 "À¯´ÏÄÚµå"
-#define MSGTR_PREFERENCES_FontEncoding2 "¼­À¯·´¾î (ISO-8859-1)"
-#define MSGTR_PREFERENCES_FontEncoding3 "Euro Æ÷ÇÔ ¼­À¯·´¾î (ISO-8859-15)"
-#define MSGTR_PREFERENCES_FontEncoding4 "½½¶óºê/Áß¾Ó À¯·´¾î (ISO-8859-2)"
-#define MSGTR_PREFERENCES_FontEncoding5 "¿¡½ºÆä¶õÅä, °¥¸®½Ã¾Æ, ¸ôÅ¸, ÅÍÅ°¾î (ISO-8859-3)"
-#define MSGTR_PREFERENCES_FontEncoding6 "°í´ë ¹ßÆ® ¹®ÀÚ¼Â (ISO-8859-4)"
-#define MSGTR_PREFERENCES_FontEncoding7 "Å°¸± ÀÚ¸ğ (ISO-8859-5)"
-#define MSGTR_PREFERENCES_FontEncoding8 "¾Æ¶ø¾î (ISO-8859-6)"
-#define MSGTR_PREFERENCES_FontEncoding9 "Çö´ë ±×¸®½º¾î (ISO-8859-7)"
-#define MSGTR_PREFERENCES_FontEncoding10 "ÅÍÅ°¾î (ISO-8859-9)"
-#define MSGTR_PREFERENCES_FontEncoding11 "¹ßÆ®¾î (ISO-8859-13)"
-#define MSGTR_PREFERENCES_FontEncoding12 "ÄÌÆ®¾î (ISO-8859-14)"
-#define MSGTR_PREFERENCES_FontEncoding13 "È÷ºê¸®¾î (ISO-8859-8)"
-#define MSGTR_PREFERENCES_FontEncoding14 "·¯½Ã¾Æ¾î (KOI8-R)"
-#define MSGTR_PREFERENCES_FontEncoding15 "¿ìÅ©¶óÀÌ³ª, º§·Î·ç½Ã¾î (KOI8-U/RU)"
-#define MSGTR_PREFERENCES_FontEncoding16 "Áß±¹¾î °£Ã¼ (CP936)"
-#define MSGTR_PREFERENCES_FontEncoding17 "Áß±¹¾î ¹øÃ¼ (BIG5)"
-#define MSGTR_PREFERENCES_FontEncoding18 "ÀÏº»¾î (SHIFT-JIS)"
-#define MSGTR_PREFERENCES_FontEncoding19 "ÇÑ±¹¾î (CP949)"
-#define MSGTR_PREFERENCES_FontEncoding20 "ÅÂ±¹¾î (CP874)"
-#define MSGTR_PREFERENCES_FontEncoding21 "¹ßÆ®¾î Windows (CP1251)"
-#define MSGTR_PREFERENCES_FontEncoding22 "½½¶óºê/Áß¾Ó À¯·´¾î Windows (CP1250)"
-#define MSGTR_PREFERENCES_FontNoAutoScale "ÀÚµ¿ Å©±âÁ¶Àı ²û"
-#define MSGTR_PREFERENCES_FontPropWidth "½ºÅ©¸°ÀÇ ³Êºñ¿¡ ºñ·Ê"
-#define MSGTR_PREFERENCES_FontPropHeight "½ºÅ©¸°ÀÇ ³ôÀÌ¿¡ ºñ·Ê"
-#define MSGTR_PREFERENCES_FontPropDiagonal "½ºÅ©¸°ÀÇ ´ë°¢¼±¿¡ ºñ·Ê"
-#define MSGTR_PREFERENCES_FontEncoding "ÀÎÄÚµù:"
-#define MSGTR_PREFERENCES_FontBlur "Èå¸²:"
-#define MSGTR_PREFERENCES_FontOutLine "¿Ü°û¼±:"
-#define MSGTR_PREFERENCES_FontTextScale "ÅØ½ºÆ® Å©±âÁ¶Àı:"
-#define MSGTR_PREFERENCES_FontOSDScale "OSD Å©±âÁ¶Àı:"
-#define MSGTR_PREFERENCES_Cache "Ä³½¬ ÄÑ±â/²ô±â"
-#define MSGTR_PREFERENCES_CacheSize "Ä³½Ã Å©±â: "
-#define MSGTR_PREFERENCES_LoadFullscreen "ÀüÃ¼È­¸éÀ¸·Î ½ÃÀÛ"
-#define MSGTR_PREFERENCES_SaveWinPos "Ã¢ÀÇ À§Ä¡ ÀúÀå"
-#define MSGTR_PREFERENCES_XSCREENSAVER "X½ºÅ©¸°¼¼ÀÌ¹ö Á¤Áö"
-#define MSGTR_PREFERENCES_PlayBar "Àç»ıÇ¥½ÃÁÙ »ç¿ë"
-#define MSGTR_PREFERENCES_AutoSync "ÀÚµ¿ µ¿±âÈ­ ÄÑ±â/²ô±â"
-#define MSGTR_PREFERENCES_AutoSyncValue "ÀÚµ¿ µ¿±âÈ­: "
-#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM ÀåÄ¡:"
-#define MSGTR_PREFERENCES_DVDDevice "DVD ÀåÄ¡:"
-#define MSGTR_PREFERENCES_FPS "µ¿¿µ»ó FPS:"
-#define MSGTR_PREFERENCES_ShowVideoWindow "Á¤Áö ÁßÀÏ ¶§ ºñµğ¿À Ã¢ º¸ÀÌ±â"
+#define MSGTR_PREFERENCES_SUB_POS "ìœ„ì¹˜: "
+#define MSGTR_PREFERENCES_SUB_AutoLoad "ìë™ìœ¼ë¡œ ìë§‰ ì—´ì§€ ì•Šê¸°"
+#define MSGTR_PREFERENCES_SUB_Unicode "ìœ ë‹ˆì½”ë“œ ìë§‰"
+#define MSGTR_PREFERENCES_SUB_MPSUB "ì£¼ì–´ì§„ ìë§‰ì„ MPlayerìš© ìë§‰ í˜•ì‹ìœ¼ë¡œ ë°”ê¿ˆ"
+#define MSGTR_PREFERENCES_SUB_SRT "ì£¼ì–´ì§„ ìë§‰ì„ SRT í˜•ì‹ìœ¼ë¡œ ë°”ê¿ˆ"
+#define MSGTR_PREFERENCES_SUB_Overlap "ìë§‰ ê²¹ì¹¨ ì¼œê¸°"
+#define MSGTR_PREFERENCES_Font "ê¸€ê¼´:"
+#define MSGTR_PREFERENCES_FontFactor "ê¸€ê¼´ íŒ©í„°:"
+#define MSGTR_PREFERENCES_PostProcess "í›„í–‰ì²˜ë¦¬ ì‚¬ìš©"
+#define MSGTR_PREFERENCES_AutoQuality "ìë™ í’ˆì§ˆì¡°ì •: "
+#define MSGTR_PREFERENCES_NI "non-interleaved AVI íŒŒì„œ ì‚¬ìš©"
+#define MSGTR_PREFERENCES_IDX "í•„ìš”í•œ ê²½ìš°, ì¸ë±ìŠ¤ í…Œì´ë¸” ë‹¤ì‹œ ë§Œë“¤ê¸°"
+#define MSGTR_PREFERENCES_VideoCodecFamily "ë¹„ë””ì˜¤ ì½”ë± ì§‘í•©:"
+#define MSGTR_PREFERENCES_AudioCodecFamily "ì˜¤ë””ì˜¤ ì½”ë± ì§‘í•©:"
+#define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD ë ˆë²¨"
+#define MSGTR_PREFERENCES_FRAME_Subtitle "ìë§‰"
+#define MSGTR_PREFERENCES_FRAME_Font "ê¸€ê¼´"
+#define MSGTR_PREFERENCES_FRAME_PostProcess "í›„í–‰ì²˜ë¦¬"
+#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "ì½”ë± & í•´ì„ê¸°"
+#define MSGTR_PREFERENCES_FRAME_Cache "ìºì‹œ"
+#define MSGTR_PREFERENCES_FRAME_Misc "ê¸°íƒ€"
+#define MSGTR_PREFERENCES_OSS_Device "ì¥ì¹˜:"
+#define MSGTR_PREFERENCES_OSS_Mixer "ë¯¹ì„œ:"
+#define MSGTR_PREFERENCES_SDL_Driver "ë“œë¼ì´ë²„:"
+#define MSGTR_PREFERENCES_Message "ì„ íƒì‚¬í•­ë“¤ì„ ì ìš©í•˜ë ¤ë©´ ì¬ìƒê¸°ë¥¼ ë‹¤ì‹œ ì‹œì‘í•´ì•¼ í•©ë‹ˆë‹¤!"
+#define MSGTR_PREFERENCES_DXR3_VENC "ë¹„ë””ì˜¤ ì¸ì½”ë”:"
+#define MSGTR_PREFERENCES_DXR3_LAVC "LAVC ì‚¬ìš© (FFmpeg)"
+#define MSGTR_PREFERENCES_DXR3_FAME "FAME ì‚¬ìš©"
+#define MSGTR_PREFERENCES_FontEncoding1 "ìœ ë‹ˆì½”ë“œ"
+#define MSGTR_PREFERENCES_FontEncoding2 "ì„œìœ ëŸ½ì–´ (ISO-8859-1)"
+#define MSGTR_PREFERENCES_FontEncoding3 "Euro í¬í•¨ ì„œìœ ëŸ½ì–´ (ISO-8859-15)"
+#define MSGTR_PREFERENCES_FontEncoding4 "ìŠ¬ë¼ë¸Œ/ì¤‘ì•™ ìœ ëŸ½ì–´ (ISO-8859-2)"
+#define MSGTR_PREFERENCES_FontEncoding5 "ì—ìŠ¤í˜ë€í† , ê°ˆë¦¬ì‹œì•„, ëª°íƒ€, í„°í‚¤ì–´ (ISO-8859-3)"
+#define MSGTR_PREFERENCES_FontEncoding6 "ê³ ëŒ€ ë°œíŠ¸ ë¬¸ìì…‹ (ISO-8859-4)"
+#define MSGTR_PREFERENCES_FontEncoding7 "í‚¤ë¦´ ìëª¨ (ISO-8859-5)"
+#define MSGTR_PREFERENCES_FontEncoding8 "ì•„ëì–´ (ISO-8859-6)"
+#define MSGTR_PREFERENCES_FontEncoding9 "í˜„ëŒ€ ê·¸ë¦¬ìŠ¤ì–´ (ISO-8859-7)"
+#define MSGTR_PREFERENCES_FontEncoding10 "í„°í‚¤ì–´ (ISO-8859-9)"
+#define MSGTR_PREFERENCES_FontEncoding11 "ë°œíŠ¸ì–´ (ISO-8859-13)"
+#define MSGTR_PREFERENCES_FontEncoding12 "ì¼ˆíŠ¸ì–´ (ISO-8859-14)"
+#define MSGTR_PREFERENCES_FontEncoding13 "íˆë¸Œë¦¬ì–´ (ISO-8859-8)"
+#define MSGTR_PREFERENCES_FontEncoding14 "ëŸ¬ì‹œì•„ì–´ (KOI8-R)"
+#define MSGTR_PREFERENCES_FontEncoding15 "ìš°í¬ë¼ì´ë‚˜, ë²¨ë¡œë£¨ì‹œì–´ (KOI8-U/RU)"
+#define MSGTR_PREFERENCES_FontEncoding16 "ì¤‘êµ­ì–´ ê°„ì²´ (CP936)"
+#define MSGTR_PREFERENCES_FontEncoding17 "ì¤‘êµ­ì–´ ë²ˆì²´ (BIG5)"
+#define MSGTR_PREFERENCES_FontEncoding18 "ì¼ë³¸ì–´ (SHIFT-JIS)"
+#define MSGTR_PREFERENCES_FontEncoding19 "í•œêµ­ì–´ (CP949)"
+#define MSGTR_PREFERENCES_FontEncoding20 "íƒœêµ­ì–´ (CP874)"
+#define MSGTR_PREFERENCES_FontEncoding21 "ë°œíŠ¸ì–´ Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "ìŠ¬ë¼ë¸Œ/ì¤‘ì•™ ìœ ëŸ½ì–´ Windows (CP1250)"
+#define MSGTR_PREFERENCES_FontNoAutoScale "ìë™ í¬ê¸°ì¡°ì ˆ ë”"
+#define MSGTR_PREFERENCES_FontPropWidth "ìŠ¤í¬ë¦°ì˜ ë„ˆë¹„ì— ë¹„ë¡€"
+#define MSGTR_PREFERENCES_FontPropHeight "ìŠ¤í¬ë¦°ì˜ ë†’ì´ì— ë¹„ë¡€"
+#define MSGTR_PREFERENCES_FontPropDiagonal "ìŠ¤í¬ë¦°ì˜ ëŒ€ê°ì„ ì— ë¹„ë¡€"
+#define MSGTR_PREFERENCES_FontEncoding "ì¸ì½”ë”©:"
+#define MSGTR_PREFERENCES_FontBlur "íë¦¼:"
+#define MSGTR_PREFERENCES_FontOutLine "ì™¸ê³½ì„ :"
+#define MSGTR_PREFERENCES_FontTextScale "í…ìŠ¤íŠ¸ í¬ê¸°ì¡°ì ˆ:"
+#define MSGTR_PREFERENCES_FontOSDScale "OSD í¬ê¸°ì¡°ì ˆ:"
+#define MSGTR_PREFERENCES_Cache "ìºì‰¬ ì¼œê¸°/ë„ê¸°"
+#define MSGTR_PREFERENCES_CacheSize "ìºì‹œ í¬ê¸°: "
+#define MSGTR_PREFERENCES_LoadFullscreen "ì „ì²´í™”ë©´ìœ¼ë¡œ ì‹œì‘"
+#define MSGTR_PREFERENCES_SaveWinPos "ì°½ì˜ ìœ„ì¹˜ ì €ì¥"
+#define MSGTR_PREFERENCES_XSCREENSAVER "XìŠ¤í¬ë¦°ì„¸ì´ë²„ ì •ì§€"
+#define MSGTR_PREFERENCES_PlayBar "ì¬ìƒí‘œì‹œì¤„ ì‚¬ìš©"
+#define MSGTR_PREFERENCES_AutoSync "ìë™ ë™ê¸°í™” ì¼œê¸°/ë„ê¸°"
+#define MSGTR_PREFERENCES_AutoSyncValue "ìë™ ë™ê¸°í™”: "
+#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM ì¥ì¹˜:"
+#define MSGTR_PREFERENCES_DVDDevice "DVD ì¥ì¹˜:"
+#define MSGTR_PREFERENCES_FPS "ë™ì˜ìƒ FPS:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "ì •ì§€ ì¤‘ì¼ ë•Œ ë¹„ë””ì˜¤ ì°½ ë³´ì´ê¸°"
 
-#define MSGTR_ABOUT_UHU "GUI °³¹ß Áö¿ø: UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "ÇÑ±Û¹ø¿ª: DongCheon Park (µ¿ÂÊÇÏ´Ã)\n          <dcpark@kaist.ac.kr>\n\n   MPlayer ÄÚ¾î ÆÀ:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   ±× ¿ÜÀÇ ÄÚ´õ:\n"
-#define MSGTR_ABOUT_MainTesters "   ¸ŞÀÎ Å×½ºÅÍ:\n"
+#define MSGTR_ABOUT_UHU "GUI ê°œë°œ ì§€ì›: UHU Linux\n"
+#define MSGTR_ABOUT_CoreTeam "í•œê¸€ë²ˆì—­: DongCheon Park (ë™ìª½í•˜ëŠ˜)\n          <dcpark@kaist.ac.kr>\n\n   MPlayer ì½”ì–´ íŒ€:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   ê·¸ ì™¸ì˜ ì½”ë”:\n"
+#define MSGTR_ABOUT_MainTesters "   ë©”ì¸ í…ŒìŠ¤í„°:\n"
 
 // --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "Ä¡¸íÀû ¿À·ù!"
-#define MSGTR_MSGBOX_LABEL_Error "¿À·ù!"
-#define MSGTR_MSGBOX_LABEL_Warning "°æ°í!" 
+#define MSGTR_MSGBOX_LABEL_FatalError "ì¹˜ëª…ì  ì˜¤ë¥˜!"
+#define MSGTR_MSGBOX_LABEL_Error "ì˜¤ë¥˜!"
+#define MSGTR_MSGBOX_LABEL_Warning "ê²½ê³ !" 
 
 #endif
