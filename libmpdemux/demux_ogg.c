@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../mp_msg.h"
 #include "../help_mp.h"
@@ -118,6 +119,56 @@ extern int index_mode;
 static subtitle ogg_sub;
 extern subtitle* vo_sub;
 //FILE* subout;
+
+static
+uint16_t get_uint16 (const void *buf)
+{
+  uint16_t      ret;
+  unsigned char *tmp;
+
+  tmp = (unsigned char *) buf;
+
+  ret = tmp[1] & 0xff;
+  ret = (ret << 8) + (tmp[0] & 0xff);
+
+  return (ret);
+}
+
+static
+uint32_t get_uint32 (const void *buf)
+{
+  uint32_t      ret;
+  unsigned char *tmp;
+
+  tmp = (unsigned char *) buf;
+
+  ret = tmp[3] & 0xff;
+  ret = (ret << 8) + (tmp[2] & 0xff);
+  ret = (ret << 8) + (tmp[1] & 0xff);
+  ret = (ret << 8) + (tmp[0] & 0xff);
+
+  return (ret);
+}
+
+static
+uint64_t get_uint64 (const void *buf)
+{
+  uint64_t      ret;
+  unsigned char *tmp;
+
+  tmp = (unsigned char *) buf;
+
+  ret = tmp[7] & 0xff;
+  ret = (ret << 8) + (tmp[6] & 0xff);
+  ret = (ret << 8) + (tmp[5] & 0xff);
+  ret = (ret << 8) + (tmp[4] & 0xff);
+  ret = (ret << 8) + (tmp[3] & 0xff);
+  ret = (ret << 8) + (tmp[2] & 0xff);
+  ret = (ret << 8) + (tmp[1] & 0xff);
+  ret = (ret << 8) + (tmp[0] & 0xff);
+
+  return (ret);
+}
 
 void demux_ogg_init_sub () {
   int lcv;
@@ -472,18 +523,18 @@ int demux_ogg_open(demuxer_t* demuxer) {
     } else if(pack.bytes >= 142 && ! strncmp(&pack.packet[1],"Direct Show Samples embedded in Ogg",35) ) {
 
        // Old video header
-      if(*(int32_t*)(pack.packet+96) == 0x05589f80 && pack.bytes >= 184) {
+      if(get_uint32 (pack.packet+96) == 0x05589f80 && pack.bytes >= 184) {
 	sh_v = new_sh_video(demuxer,ogg_d->num_sub);
 	sh_v->bih = (BITMAPINFOHEADER*)calloc(1,sizeof(BITMAPINFOHEADER));
 	sh_v->bih->biSize=sizeof(BITMAPINFOHEADER);
 	sh_v->bih->biCompression=
 	sh_v->format = mmioFOURCC(pack.packet[68],pack.packet[69],
 				pack.packet[70],pack.packet[71]);
-	sh_v->frametime =  (*(int64_t*)(pack.packet+164))*0.0000001;
+	sh_v->frametime = get_uint64(pack.packet+164)*0.0000001;
 	sh_v->fps = 1/sh_v->frametime;
-	sh_v->disp_w = sh_v->bih->biWidth = *(int32_t*)(pack.packet+176);
-	sh_v->disp_h = sh_v->bih->biHeight = *(int32_t*)(pack.packet+180);
-	sh_v->bih->biBitCount = *(int16_t*)(pack.packet+182);
+	sh_v->disp_w = sh_v->bih->biWidth = get_uint32(pack.packet+176);
+	sh_v->disp_h = sh_v->bih->biHeight = get_uint32(pack.packet+180);
+	sh_v->bih->biBitCount = get_uint16(pack.packet+182);
 	if(!sh_v->bih->biBitCount) sh_v->bih->biBitCount=24; // hack, FIXME
 	sh_v->bih->biPlanes=1;
 	sh_v->bih->biSizeImage=(sh_v->bih->biBitCount>>3)*sh_v->bih->biWidth*sh_v->bih->biHeight;
@@ -493,17 +544,17 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is video (old hdr)\n",ogg_d->num_sub);
 	if(verbose) print_video_header(sh_v->bih);
 	// Old audio header
-      } else if(*(int32_t*)pack.packet+96 == 0x05589F81) {
+      } else if(get_uint32(pack.packet+96) == 0x05589F81) {
 	unsigned int extra_size;
 	sh_a = new_sh_audio(demuxer,ogg_d->num_sub);
-	extra_size = *(int16_t*)(pack.packet+140);
+	extra_size = get_uint16(pack.packet+140);
 	sh_a->wf = (WAVEFORMATEX*)calloc(1,sizeof(WAVEFORMATEX)+extra_size);
-	sh_a->format = sh_a->wf->wFormatTag = *(int16_t*)(pack.packet+124);
-	sh_a->channels = sh_a->wf->nChannels = *(int16_t*)(pack.packet+126);
-	sh_a->samplerate = sh_a->wf->nSamplesPerSec = *(int32_t*)(pack.packet+128);
-	sh_a->wf->nAvgBytesPerSec = *(int32_t*)(pack.packet+132);
-	sh_a->wf->nBlockAlign = *(int16_t*)(pack.packet+136);
-	sh_a->wf->wBitsPerSample = *(int16_t*)(pack.packet+138);
+	sh_a->format = sh_a->wf->wFormatTag = get_uint16(pack.packet+124);
+	sh_a->channels = sh_a->wf->nChannels = get_uint16(pack.packet+126);
+	sh_a->samplerate = sh_a->wf->nSamplesPerSec = get_uint32(pack.packet+128);
+	sh_a->wf->nAvgBytesPerSec = get_uint32(pack.packet+132);
+	sh_a->wf->nBlockAlign = get_uint16(pack.packet+136);
+	sh_a->wf->wBitsPerSample = get_uint16(pack.packet+138);
 	sh_a->samplesize = (sh_a->wf->wBitsPerSample+7)/8;
 	sh_a->wf->cbSize = extra_size;
 	if(extra_size > 0)
@@ -528,11 +579,11 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	sh_v->bih->biCompression=
 	sh_v->format = mmioFOURCC(st->subtype[0],st->subtype[1],
 				  st->subtype[2],st->subtype[3]);
-	sh_v->frametime = st->time_unit*0.0000001;
-	sh_v->fps = 1/sh_v->frametime;
-	sh_v->bih->biBitCount = st->bits_per_sample;
-	sh_v->disp_w = sh_v->bih->biWidth = st->sh.video.width;
-	sh_v->disp_h = sh_v->bih->biHeight = st->sh.video.height;
+	sh_v->frametime = get_uint64(&st->time_unit)*0.0000001;
+	sh_v->fps = 1.0/sh_v->frametime;
+	sh_v->bih->biBitCount = get_uint16(&st->bits_per_sample);
+	sh_v->disp_w = sh_v->bih->biWidth = get_uint32(&st->sh.video.width);
+	sh_v->disp_h = sh_v->bih->biHeight = get_uint32(&st->sh.video.height);
 	if(!sh_v->bih->biBitCount) sh_v->bih->biBitCount=24; // hack, FIXME
 	sh_v->bih->biPlanes=1;
 	sh_v->bih->biSizeImage=(sh_v->bih->biBitCount>>3)*sh_v->bih->biWidth*sh_v->bih->biHeight;
@@ -544,17 +595,17 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	/// New audio header
       } else if(strncmp(st->streamtype,"audio",5) == 0) {
 	char buffer[5];
-	unsigned int extra_size = st->size - sizeof(stream_header);
+	unsigned int extra_size = get_uint32 (&st->size) - sizeof(stream_header);
 	memcpy(buffer,st->subtype,4);
 	buffer[4] = '\0';
 	sh_a = new_sh_audio(demuxer,ogg_d->num_sub);
 	sh_a->wf = (WAVEFORMATEX*)calloc(1,sizeof(WAVEFORMATEX)+extra_size);
 	sh_a->format =  sh_a->wf->wFormatTag = strtol(buffer, NULL, 16);
-	sh_a->channels = sh_a->wf->nChannels = st->sh.audio.channels;
-	sh_a->samplerate = sh_a->wf->nSamplesPerSec = st->samples_per_unit;
-	sh_a->wf->nAvgBytesPerSec = st->sh.audio.avgbytespersec;
-	sh_a->wf->nBlockAlign = st->sh.audio.blockalign;
-	sh_a->wf->wBitsPerSample = st->bits_per_sample;
+	sh_a->channels = sh_a->wf->nChannels = get_uint16(&st->sh.audio.channels);
+	sh_a->samplerate = sh_a->wf->nSamplesPerSec = get_uint64(&st->samples_per_unit);
+	sh_a->wf->nAvgBytesPerSec = get_uint32(&st->sh.audio.avgbytespersec);
+	sh_a->wf->nBlockAlign = get_uint16(&st->sh.audio.blockalign);
+	sh_a->wf->wBitsPerSample = get_uint16(&st->bits_per_sample);
 	sh_a->samplesize = (sh_a->wf->wBitsPerSample+7)/8;
 	sh_a->wf->cbSize = extra_size;
 	if(extra_size)
