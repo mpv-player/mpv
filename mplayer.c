@@ -36,6 +36,7 @@
 #include "libvo/video_out.h"
 extern void* mDisplay; // Display* mDisplay;
 
+#include "libvo/font_load.h"
 #include "libvo/sub.h"
 
 #include "libao2/audio_out.h"
