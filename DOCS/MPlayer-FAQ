@@ -245,3 +245,13 @@ A: gcc 2.96 is RedHat's UNOFFICIAL (it can be found only on RedHat sites, or
    compile it. Important: this is NOT an MPlayer-specific problem, numerous
    other projects (DRI, avifile, etc..) have problems with this shit too.
    ** DO NOT USE gcc 2.96 !!! **
+
+Q: Is there a hint on how to watch QuickTime and RealMedia movies in mplayer?
+A: There's no way to do it. Therefore these formats deserve to die in flames.
+   Theoretically you can reverse engineer Real codecs built for Linux (they
+   are available as .so files), but in practice that's really difficult, even
+   if you know how the compiler used by Real is making assembler code.
+   As for QuickTime, it's possible to play some old movies and this
+   capability will be added to mplayer soon, but newer clips are all Sorenson
+   encoded, and that codec is built-in deep in the QT executable, there's
+   no way to use it.
