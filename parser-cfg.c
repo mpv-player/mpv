@@ -121,7 +121,7 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 		/* check '=' */
 		if (line[line_pos++] != '=') {
 			PRINT_LINENUM;
-			mp_msg(MSGT_CFGPARSER,MSGL_ERR,"Option %s need a parameter at line %d\n",line_num);
+			mp_msg(MSGT_CFGPARSER,MSGL_ERR,"Option %s needs a parameter at line %d\n",opt,line_num);
 			ret = -1;
 			errors++;
 			continue;
@@ -139,7 +139,7 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 				param[param_pos++] = line[line_pos++];
 				if (param_pos >= MAX_PARAM_LEN) {
 					PRINT_LINENUM;
-					mp_msg(MSGT_CFGPARSER,MSGL_ERR,"Option %s have a too long parameter at line %d\n",opt,line_num);
+					mp_msg(MSGT_CFGPARSER,MSGL_ERR,"Option %s has a too long parameter at line %d\n",opt,line_num);
 					ret = -1;
 					errors++;
 					goto nextline;
@@ -164,7 +164,7 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 		/* did we read a parameter? */
 		if (param_pos == 0) {
 			PRINT_LINENUM;
-			mp_msg(MSGT_CFGPARSER,MSGL_ERR,"Option %s need a parameter at line %d\n",opt,line_num);
+			mp_msg(MSGT_CFGPARSER,MSGL_ERR,"Option %s needs a parameter at line %d\n",opt,line_num);
 			ret = -1;
 			errors++;
 			continue;
