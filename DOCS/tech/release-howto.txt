@@ -44,5 +44,7 @@ Somehow get Diego to write a news entry for the release, and update the
 source file of dload.html and commit it. Test it, it's sometimes buggy
 (broken links etc).
 
+Send a message to mplayer-announce mailing list.
+
 Done.
 
