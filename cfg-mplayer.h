@@ -196,6 +196,7 @@ struct config conf[]={
 	{"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1},
 	{"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2},
         
+	{"quiet", &quiet, CONF_TYPE_FLAG, 0, 0, 1},
 	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100},
 	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, 0, 0, 0},
 	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},

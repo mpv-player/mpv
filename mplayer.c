@@ -86,6 +86,7 @@ static URL_t* url;
  int nogui=1;
 #endif
 int verbose=0;
+int quiet=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
 
@@ -1146,7 +1147,7 @@ if(file_format==DEMUXER_TYPE_AVI && sh_audio){
 //             audio_delay,audio_buffer_delay,a_pts,sh_audio->timer);
     printf("START:  a_pts=%5.3f  v_pts=%5.3f  \n",d_audio->pts,d_video->pts);
   }
-  delay_corrected=0; // has to correct PTS diffs
+//  delay_corrected=0; // has to correct PTS diffs
   d_video->pts=0;d_audio->pts=0; // PTS is outdated now!
 } else {
   pts_from_bps=0; // it must be 0 for mpeg/asf !
@@ -1454,7 +1455,8 @@ if(1)
       if(delay_corrected){
         float x=frame_correction=(a_pts-delay-audio_delay)-v_pts;
 //        printf("A:%6.1f  V:%6.1f  A-V:%7.3f",a_pts-audio_delay-delay,v_pts,x);
-        printf("A:%6.1f (%6.1f)  V:%6.1f  A-V:%7.3f",a_pts,a_pts-audio_delay-delay,v_pts,x);
+        if(!quiet)
+	  printf("A:%6.1f (%6.1f)  V:%6.1f  A-V:%7.3f",a_pts,a_pts-audio_delay-delay,v_pts,x);
         x*=0.1f;
         if(x<-max_pts_correction) x=-max_pts_correction; else
         if(x> max_pts_correction) x= max_pts_correction;
@@ -1463,7 +1465,7 @@ if(1)
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
         sh_audio->timer+=x; c_total+=x;
-        printf(" ct:%7.3f  %3d  %2d%% %2d%% %4.1f%% %d %d\r",c_total,
+        if(!quiet) printf(" ct:%7.3f  %3d  %2d%% %2d%% %4.1f%% %d %d\r",c_total,
         (int)sh_video->num_frames,
         (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
@@ -1477,6 +1479,7 @@ if(1)
   } else {
     // No audio:
     
+    if(!quiet)
       printf("V:%6.1f  %3d  %2d%%  %2d%%  %3.1f%% \r",d_video->pts,
         (int)sh_video->num_frames,
         (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
