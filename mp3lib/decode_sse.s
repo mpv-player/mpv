@@ -110,12 +110,19 @@ synth_1to1_sse:
 	movups 48(%ecx), %xmm1
 	mulps  48(%ebx), %xmm1
 	addps  %xmm1, %xmm0
+/* pfnacc ->  PFNACC mmreg1, mmreg2  performs the following operations: */
+/* temp = mmreg2 */
+/* mmreg1[31:0] = mmreg1[31:0] - mmreg1[63:32] */
+/* mmreg1[63:32]= temp [31:0] - temp[63:32] */
+/* save difference of mmreg1's low-word and high-word into mmreg1's low-word */
+/* save difference of mmreg2's low-word and high-word into mmreg1's high-word */
 	movhlps %xmm0, %xmm1
 	addps   %xmm1, %xmm0
 	movaps  %xmm0, %xmm1
 	shufps  $0x55, %xmm1, %xmm1 /* fake of pfnacc. 1|1|1|1 */
+
 	subss	%xmm1, %xmm0
-	cvttss2si %xmm0, %eax
+	cvtss2si %xmm0, %eax
 
 /        sar   $16,%eax
         movw  %ax,(%esi)
@@ -141,7 +148,7 @@ synth_1to1_sse:
 	addps  %xmm1, %xmm0
 	movhlps %xmm0, %xmm1	
 	addss	%xmm1, %xmm0
-	cvttss2si %xmm0, %eax
+	cvtss2si %xmm0, %eax
 
 /        sar   $16,%eax
 
@@ -171,7 +178,7 @@ synth_1to1_sse:
 	movaps	%xmm0, %xmm1
 	shufps $0x55, %xmm1, %xmm1 /* fake of pfacc 1|1|1|1 */
 	addss  %xmm1, %xmm0
-	cvttss2si %xmm0, %eax
+	cvtss2si %xmm0, %eax
 
 /        sar   $16,%eax
 
