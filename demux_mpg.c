@@ -249,6 +249,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 
 int num_elementary_packets100=0;
 int num_elementary_packets101=0;
+int num_elementary_packets1B6=0;
 
 int demux_mpg_es_fill_buffer(demuxer_t *demux){
 //if(demux->type==DEMUXER_TYPE_MPEG_ES)
@@ -310,12 +311,11 @@ do{
         }
   } else {
     if(head>=0x100 && head<0x1B0){
-      if(head==0x100)
-        ++num_elementary_packets100;
-      else
-        if(head==0x101) ++num_elementary_packets101;
+      if(head==0x100) ++num_elementary_packets100; else
+      if(head==0x101) ++num_elementary_packets101;
       if(verbose>=3) printf("Opps... elementary video packet found: %03X\n",head);
-    }
+    } else
+      if(head==0x1B6) ++num_elementary_packets1B6;
 #if 1
     if(num_elementary_packets100>50 && num_elementary_packets101>50
        && skipped>4000000){
