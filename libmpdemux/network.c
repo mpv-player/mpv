@@ -18,6 +18,7 @@
 
 #include "stream.h"
 #include "demuxer.h"
+#include "../cfgparser.h"
 
 #include "network.h"
 #include "http.h"
@@ -26,6 +27,7 @@
 #include "rtp.h"
 
 extern int verbose;
+extern m_config_t *mconfig;
 
 static struct {
 	char *mime_type;
@@ -546,10 +548,8 @@ nop_streaming_start( stream_t *stream ) {
 
 	stream->streaming_ctrl->streaming_read = nop_streaming_read;
 	stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
-	stream->streaming_ctrl->prebuffer_size = 180000;
-//	stream->streaming_ctrl->prebuffer_size = 0;
+	stream->streaming_ctrl->prebuffer_size = 4096;	// KBytes
 	stream->streaming_ctrl->buffering = 1;
-//	stream->streaming_ctrl->buffering = 0;
 	stream->streaming_ctrl->status = streaming_playing_e;
 	return 0;
 }
@@ -649,8 +649,8 @@ rtp_streaming_start( stream_t *stream ) {
 
 	streaming_ctrl->streaming_read = rtp_streaming_read;
 	streaming_ctrl->streaming_seek = nop_streaming_seek;
-	streaming_ctrl->prebuffer_size = 180000;
-	streaming_ctrl->buffering = 0; //1;
+	streaming_ctrl->prebuffer_size = 4096;	// KBytes	
+	streaming_ctrl->buffering = 0;
 	streaming_ctrl->status = streaming_playing_e;
 	return 0;
 }
@@ -700,7 +700,7 @@ streaming_start(stream_t *stream, int demuxer_type, URL_t *url) {
 			// the network stream, it's a raw stream
 			ret = nop_streaming_start( stream );
 			if( ret<0 ) {
-				printf("asf_streaming_start failed\n");
+				printf("nop_streaming_start failed\n");
 			}
 			break;
 		default:
@@ -711,7 +711,19 @@ streaming_start(stream_t *stream, int demuxer_type, URL_t *url) {
 	if( ret<0 ) {
 		streaming_ctrl_free( stream->streaming_ctrl );
 		stream->streaming_ctrl = NULL;
-	} 
+	} else if( stream->streaming_ctrl->buffering ) { 
+		char cache_size[10];
+		int ret=-1;
+		// buffer in KBytes, *5 because the prefill is 20% of the buffer.
+		sprintf( cache_size, "%d", (stream->streaming_ctrl->prebuffer_size/1024)*5 );
+printf("Cache size = %s KBytes\n", cache_size );
+		ret = m_config_set_option(mconfig, "cache", cache_size );
+		if( ret<0 ) {
+			printf("Unable to set the cache size option (return=%d)\n", ret );
+		} else {
+			printf("Cache size set to %s KBytes\n", cache_size );
+		}
+	}
 	return ret;
 }
 
