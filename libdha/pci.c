@@ -494,44 +494,42 @@ static int pcibus=-1, pcicard=-1, pcifunc=-1 ;
 #endif
 #endif
  
-static int pcicards=0 ;
 static pciinfo_t *pci_lst;
  
-static void identify_card(struct pci_config_reg *pcr)
+static void identify_card(struct pci_config_reg *pcr, int idx)
 {
+  /* local overflow test */ 
+  if (idx>=MAX_PCI_DEVICES) return ;
  
-  if (pcicards>=MAX_PCI_DEVICES) return ;
- 
-  pci_lst[pcicards].bus     = pcibus ;
-  pci_lst[pcicards].card    = pcicard ;
-  pci_lst[pcicards].func    = pcifunc ;
-  pci_lst[pcicards].vendor  = pcr->_vendor ;
-  pci_lst[pcicards].device  = pcr->_device ;
-  pci_lst[pcicards].base0   = 0xFFFFFFFF ;
-  pci_lst[pcicards].base1   = 0xFFFFFFFF ;
-  pci_lst[pcicards].base2   = 0xFFFFFFFF ;
-  pci_lst[pcicards].baserom = 0x000C0000 ;
-  if (pcr->_base0) pci_lst[pcicards].base0 = pcr->_base0 &
+  pci_lst[idx].bus     = pcibus ;
+  pci_lst[idx].card    = pcicard ;
+  pci_lst[idx].func    = pcifunc ;
+  pci_lst[idx].vendor  = pcr->_vendor ;
+  pci_lst[idx].device  = pcr->_device ;
+  pci_lst[idx].base0   = 0xFFFFFFFF ;
+  pci_lst[idx].base1   = 0xFFFFFFFF ;
+  pci_lst[idx].base2   = 0xFFFFFFFF ;
+  pci_lst[idx].baserom = 0x000C0000 ;
+  if (pcr->_base0) pci_lst[idx].base0 = pcr->_base0 &
                      ((pcr->_base0&0x1) ? 0xFFFFFFFC : 0xFFFFFFF0) ;
-  if (pcr->_base1) pci_lst[pcicards].base1 = pcr->_base1 &
+  if (pcr->_base1) pci_lst[idx].base1 = pcr->_base1 &
                      ((pcr->_base1&0x1) ? 0xFFFFFFFC : 0xFFFFFFF0) ;
-  if (pcr->_base2) pci_lst[pcicards].base2 = pcr->_base2 &
+  if (pcr->_base2) pci_lst[idx].base2 = pcr->_base2 &
                      ((pcr->_base2&0x1) ? 0xFFFFFFFC : 0xFFFFFFF0) ;
-  if (pcr->_baserom) pci_lst[pcicards].baserom = pcr->_baserom ;
- 
-  pcicards++;
+  if (pcr->_baserom) pci_lst[idx].baserom = pcr->_baserom ;
 }
 
 /*main(int argc, char *argv[])*/
 int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
 {
-    unsigned int idx;
+    unsigned int idx = 0;
     struct pci_config_reg pcr;
     int do_mode1_scan = 0, do_mode2_scan = 0;
     int func, hostbridges=0;
     int ret = -1;
     
     pci_lst = pci_list;
+    *num_pci = 0;
  
     ret = enable_os_io();
     if (ret != 0)
@@ -549,7 +547,6 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
     pcr._pcibuses[0] = 0;
     pcr._pcinumbus = 1;
     pcr._pcibusidx = 0;
-    idx = 0;
  
     do {
         /*printf("Probing for devices on PCI bus %d:\n\n", pcr._pcibusidx);*/
@@ -624,12 +621,12 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
 	    if (idx++ >= MAX_PCI_DEVICES)
 	        continue;
  
-	    identify_card(&pcr);
+	    identify_card(&pcr, (*num_pci)++);
 	  } while( func < 8 );
         }
     } while (++pcr._pcibusidx < pcr._pcinumbus);
     }
- 
+
 #if !defined(__alpha__) && !defined(__powerpc__)
     /* Now try pci config 2 probe (deprecated) */
  
@@ -684,17 +681,16 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
 	    if (idx++ >= MAX_PCI_DEVICES)
 	        continue;
  
-	    identify_card(&pcr);
+	    identify_card(&pcr, (*num_pci)++);
 	}
     } while (++pcr._pcibusidx < pcr._pcinumbus);
  
     outb(PCI_MODE2_ENABLE_REG, 0x00);
     }
  
-#endif /* __alpha__ */
+#endif /* !__alpha__ && !__powerpc__ */
  
     disable_os_io();
-    *num_pci = pcicards;
  
     return 0 ;
  
