@@ -126,13 +126,48 @@ problems (losing sync, disappearing audio, etc).</LI>
 
 <P><B><A NAME=2.3.2.2>2.3.2.2. Audio plugins</B></P>
 
+<P><B>MPlayer</B> has support for audio plugins. Audio plugins can be used for
+  changing the properties of the audio data before the sound reaches the sound
+  card. They are enabled using the <CODE>-aop</CODE> switch followed by the
+  <CODE>list=plugin1,plugin2,...</CODE> switch. The <CODE>list</CODE> switch is
+  required and determines which plugins that should be used and in which order
+  they should be executed, example:
+</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample,format</CODE></P>
+
+<P>would run the sound through the resampling plugin followed by the format
+  plugin.
+</P>
+
+<P>The plugins can also have switches that changes their behaviour. These
+  switches are explained in detail in the sections below. A plugin will execute
+  using default settings if it's switches are omitted.  Example of how to use
+  plugins in combination with plugin specific switches:
+</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=resample,format:fout=48000:format=0x8</CODE>
+</P>
+
+<P>would set the output frequency of the resample plugin to 44100Hz and the
+  output format of the format plugin to AFMT_U8.
+</P>                         
+
+<P>Currently audio plugins can not be used in <B>MEncoder</B>.</P>
+
+
 <P><B><A NAME=2.3.2.2.1>2.3.2.2.1. Up/Downsampling</B></P>
 
-<P><B>MPlayer</B> fully supports up/downsampling of audio stream.
-It is not autodetected, so you have to specify it explicitly even when
-for example you have a max 44.1Khz capable soundcard, and the audio
-is 48Khz. Also, this functionality is currently unimplemented in
-<B>MEncoder</B>.</P>
+<P><B>MPlayer</B> fully supports up/down sampling of the sound. This plugin can
+  for example be used if you have a fixed frequency sound card or if you are
+  stuck with an olqd sound card that is only capable of max 44.1kHz.
+  Limitations in your hardware are not auto detected, so you have to specify
+  the sample frequency explicitly. This plugin has one switch:
+  <CODE>fout</CODE> which is used for setting the desired output sample
+  frequency, it defaults to 48kHz, and is given in
+  &lt;Hz&gt;.
+</P>
 
 <P>Usage :<BR>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;required
@@ -151,6 +186,30 @@ sound.</p>
 
 <P>Usage :<BR>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
+
+
+<P><B><A NAME=2.3.2.2.3>2.3.2.2.3. Sample format converter</A></B></P>
+                                                                               
+<P>If your sound card driver doesn't support signed 16bit int, this plugin can
+  be used to change the format to one which your sound card can understand. It
+  has one switch <CODE>format</CODE> which can be set to one of the numbers
+  found in libao2/afmt.h. This plugin is hardly ever needed and is intended for
+  advanced users. Observe that this plugin only changes the sample format and
+  not the sample frequency or the number of channels.
+</P>
+
+<P>Usage :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=format:format=&lt;required output format&gt;</CODE>
+</P>
+
+
+<P><B><A NAME=2.3.2.2.4>2.3.2.2.4. Delay</A></B></P>
+
+<P>This plugin delays the sound and is intended as an example of how to develop
+  new plugins. It can not be used for anything useful from users perspective
+  and is mentioned here for the sake of completeness only. Do not use this
+  plugin unless you are a developer.</P>
 
 </BODY>
 </HTML>

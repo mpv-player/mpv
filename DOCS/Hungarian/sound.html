@@ -130,6 +130,37 @@ is bugzik...</I></TD><TR>
 
 <P><B><A NAME=2.3.2.2>2.3.2.2.  Audio pluginek</A></B></P>
 
+<P>Az <B>MPlayer</B> tartalmaz néhány audio plugint. Ezek a hang
+  tulajdonságainak megváltoztatására használhatóak. A használatuk az
+  <CODE>-aop</CODE> opcióval történik, amit a
+  <CODE>list=plugin1,plugin2,...</CODE> opció követ. A <CODE>list</CODE>
+  kapcsoló elhagyhatatlan, itt adható meg a használandó pluginek listája,
+  valamint a sorrendjük. Például a következõ parancs:
+</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample,format</CODE></P>
+
+<P>elõször a resample pluginen, aztán a format pluginen keresztül vezeti
+  a hangot.
+</P>
+
+<P>A plugineknek is vannak opcióik, amelyek befolyásolják õket. Ezek
+  részletesebben a következõ fejezetekben vannak leírva. Ha egy pluginnak
+  nem adsz meg beállításokat, az alapértelmezett beállításban fognak futni.
+  Íme egy példa hogy hogyan használj több plugint, megadott opciókkal:
+</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=resample,format:fout=48000:format=0x8</CODE>
+</P>
+
+<P>Ez 44100Hz-es kimeneti frekvenciára mixel, és a kimeneti formátumot
+  átállítja AFMT_U8-ra.
+</P>                         
+
+<P>Currently audio plugins can not be used in <B>MEncoder</B>.</P>
+
+
 <P><B><A NAME=2.3.2.2.1>2.3.2.2.1.  Up/Downsampling</A></B></P>
 
 <P>Az <B>MPlayer</B> képes az audio stream frekvenciáját növelni illetve
@@ -156,6 +187,24 @@ hangkártyára+meghajtóra van szükség.</P>
 <P>Használat :<BR>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
 
+
+<P><B><A NAME=2.3.2.2.3>2.3.2.2.3. Sample formátum konvertáló</A></B></P>
+
+<P>Ha a hangkártyád nem támogatja a signed 16bit int formátumot, ezzel
+  a pluginnel átalakíthatod a kimeneti hangot olyanba amit visz.
+  Egy opciója van neki, a <CODE>format</CODE>, ami után megadandó a kívánt
+  formátum száma (lásd libao2/afmt.h). Ez a plugin ritkán használandó..
+</P>
+
+<P>Használat :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=format:format=&lt;kimeneti formátum&gt;</CODE>
+</P>
+
+
+<P><B><A NAME=2.3.2.2.4>2.3.2.2.4. Delay</A></B></P>
+
+<P>Példa plugin, csak developereknek. Lásd angol dox.</P>
 
 </BODY>
 
