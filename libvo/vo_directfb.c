@@ -128,8 +128,6 @@ extern char *fb_dev_name;
 char *fb_dev_name;
 #endif
 
-static int preinitdone=0;
-
 static void (*draw_alpha_p)(int w, int h, unsigned char *src,
 		unsigned char *srca, int stride, unsigned char *dst,
 		int dstride);
@@ -151,6 +149,7 @@ struct modes_t {
 static unsigned int best_bpp=5;
 // videolayer stuff
 static int videolayeractive=0;
+static int videolayerpresent=0;
 //some info about videolayer - filled on preinit
 struct vlayer_t { 
         int iv12;
@@ -170,7 +169,9 @@ static int memcpyBitBlt=0;
 static int dr_enabled=0;
 static int framelocked=0;
 #endif
-
+// primary & frame stuff
+static int frameallocated=0;
+static int primaryallocated=0;
 
 DFBEnumerationResult enum_modes_callback( unsigned int width,unsigned int height,unsigned int bpp, void *data)
 {
@@ -273,8 +274,6 @@ static uint32_t preinit(const char *arg)
    */
 	
 if (verbose) printf("DirectFB: Preinit entered\n");
-
-	if (preinitdone) return 0;
 
         DFBCHECK (DirectFBInit (NULL,NULL));
 
@@ -406,11 +405,11 @@ if (verbose) printf("DirectFB: Preinit entered\n");
 	// is there a working yuv ? if no we will not use videolayer
 		if ((videolayercaps.iv12==0)&&(videolayercaps.i420==0)&&(videolayercaps.yuy2==0)&&(videolayercaps.uyvy==0)) {
 		    // videolayer doesn't work with yuv so release it
-		    videolayeractive=0;
+		    videolayerpresent=0;
 		    videolayer->SetOpacity(videolayer,0);
 		    videolayer->Release(videolayer);
 		} else {
-		    videolayeractive=1;
+		    videolayerpresent=1;
 		};
         }
 
@@ -420,7 +419,22 @@ if (verbose) printf("DirectFB: Preinit entered\n");
         modes[2].valid=0;
         modes[3].valid=0;
         DFBCHECK (dfb->EnumVideoModes(dfb,enum_modes_callback,NULL));
-	preinitdone=1;
+
+  /*
+   * (Get keyboard)
+   */
+  DFBCHECK (dfb->GetInputDevice (dfb, DIDID_KEYBOARD, &keyboard));
+
+  /*
+   * Create an input buffer for the keyboard.
+   */
+#ifdef HAVE_DIRECTFB099
+  DFBCHECK (keyboard->CreateEventBuffer (keyboard, &buffer));
+#else
+  DFBCHECK (keyboard->CreateInputBuffer (keyboard, &buffer));
+#endif
+  // just to start with clean ...
+  buffer->Reset(buffer);
   return 0;
 
 }
@@ -441,6 +455,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	int zoom = fullscreen & 0x04;
 
 	if (verbose) printf("DirectFB: Config entered [%ix%i]\n",width,height);
+	if (verbose) printf("DirectFB: With requested format: %s\n",vo_format_name(format));
 
 	fs = fullscreen & 0x01;
 	flip = fullscreen & 0x08;
@@ -471,9 +486,16 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
         if (modes[source_pixel_size-1].valid) dfb->SetVideoMode(dfb,modes[source_pixel_size-1].width,modes[source_pixel_size-1].height,source_pixel_size);
         }
 
+  // release primary if it is already allocated
+  if (primaryallocated) {
+    if (verbose ) printf("DirectFB: Release primary\n");
+    primary->Release (primary);
+    primaryallocated=0;
+  };
 
-     if (videolayeractive) {
-        videolayeractive=0; // will be enabled on succes later
+     videolayeractive=0; // will be enabled on succes later
+
+     if (videolayerpresent) {
      
         // try to set proper w a h values matching image size
         dlc.flags       = DLCONF_WIDTH | DLCONF_HEIGHT;
@@ -520,17 +542,16 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 #endif
 			      }; 
 			      // shouldn't happen - if it reaches here -> bug
-			      dsc.pixelformat =  DSPF_RGB24; break;
 
-            case IMGFMT_RGB32: dsc.pixelformat =  DSPF_ARGB; break;
-	    case IMGFMT_BGR32: dsc.pixelformat =  DSPF_ARGB; break;
-    	    case IMGFMT_RGB24: dsc.pixelformat =  DSPF_RGB24; break;
-	    case IMGFMT_BGR24: dsc.pixelformat =  DSPF_RGB24; break;
-            case IMGFMT_RGB16: dsc.pixelformat =  DSPF_RGB16; break;
-            case IMGFMT_BGR16: dsc.pixelformat =  DSPF_RGB16; break;
-            case IMGFMT_RGB15: dsc.pixelformat =  DSPF_RGB15; break;
-            case IMGFMT_BGR15: dsc.pixelformat =  DSPF_RGB15; break;
-            default: dsc.pixelformat =  DSPF_RGB24; break;
+            case IMGFMT_RGB32: dlc.pixelformat =  DSPF_ARGB; break;
+	    case IMGFMT_BGR32: dlc.pixelformat =  DSPF_ARGB; break;
+    	    case IMGFMT_RGB24: dlc.pixelformat =  DSPF_RGB24; break;
+	    case IMGFMT_BGR24: dlc.pixelformat =  DSPF_RGB24; break;
+            case IMGFMT_RGB16: dlc.pixelformat =  DSPF_RGB16; break;
+            case IMGFMT_BGR16: dlc.pixelformat =  DSPF_RGB16; break;
+            case IMGFMT_RGB15: dlc.pixelformat =  DSPF_RGB15; break;
+            case IMGFMT_BGR15: dlc.pixelformat =  DSPF_RGB15; break;
+            default: dlc.pixelformat =  DSPF_RGB24; break;
 	}
 
 	if (verbose) switch (dlc.pixelformat) {
@@ -564,8 +585,15 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	     if (!ret){
                 videolayeractive=1;
                 if (verbose) printf("DirectFB: Get surface for layer OK\n");
-              };
-        };
+		primaryallocated=1;
+              } else {
+	      videolayeractive=0;
+	      if (videolayer) videolayer->SetOpacity(videolayer,0);
+	      };
+        } else {
+	videolayeractive=0;
+	if (videolayer) videolayer->SetOpacity(videolayer,0);
+	};
 
       }
 
@@ -587,14 +615,15 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
   if (!videolayeractive) {
       DFBCHECK (dfb->CreateSurface( dfb, &dsc, &primary ));
-
+      if (verbose) printf("DirectFB: Get primary surface OK\n");
+      primaryallocated=1;
   } 
 
   DFBCHECK (primary->GetSize (primary, &screen_width, &screen_height));
 
   DFBCHECK (primary->GetPixelFormat (primary, &frame_format));
 
-// temporary buffer buffer
+// temporary frame buffer
   dsc.flags = DSDESC_CAPS | DSDESC_HEIGHT | DSDESC_PIXELFORMAT | DSDESC_WIDTH;
 
   dsc.width = in_width;
@@ -628,6 +657,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
    memcpyBitBlt = 0;
 #endif   
 
+  // release frame if it is already allocated
+  if (frameallocated) {
+    if (verbose ) printf("DirectFB: Release frame\n");
+    frame->Release (frame);
+    frameallocated=0;
+  };
+
+
   // prevent from memcpy from videomemory to videomemory 
 /*  if (memcpyBitBlt) {  
     dsc.caps  = DSCAPS_SYSTEMONLY;
@@ -639,6 +676,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     if (verbose) printf ("DirectFB: Trying do create buffer in system memory (2)\n");*/
     dsc.caps  = DSCAPS_SYSTEMONLY;
     DFBCHECK (dfb->CreateSurface( dfb, &dsc, &frame));
+    frameallocated=1;
 //  }
   
   DFBCHECK (frame->GetPixelFormat (frame, &frame_format));
@@ -682,20 +720,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	}
 
 
-
-  /*
-   * (Get keyboard)
-   */
-  DFBCHECK (dfb->GetInputDevice (dfb, DIDID_KEYBOARD, &keyboard));
-
-  /*
-   * Create an input buffer for the keyboard.
-   */
-#ifdef HAVE_DIRECTFB099
-  DFBCHECK (keyboard->CreateEventBuffer (keyboard, &buffer));
-#else
-  DFBCHECK (keyboard->CreateInputBuffer (keyboard, &buffer));
-#endif
 
 // yuv2rgb transform init
 
@@ -785,17 +809,17 @@ static uint32_t query_format(uint32_t format)
                 case IMGFMT_RGB15:
                 case IMGFMT_BGR15: if (modes[1].valid) return ret|0x2;
                                    break;
-                case IMGFMT_YUY2: if (videolayeractive) {
+                case IMGFMT_YUY2: if (videolayerpresent) {
 				    if (videolayercaps.yuy2) {
-					return ret|0x2;
+					return ret|0x2|0x1;
 				    } else {
 				    	return ret|0x1;
 				    };
 				   };				    
                                    break;
-        	case IMGFMT_YV12:  if ((videolayeractive) &&
+        	case IMGFMT_YV12:  if ((videolayerpresent) &&
 				       (videolayercaps.i420 || videolayercaps.iv12))
-				    return ret|0x2; else return ret|0x1;
+				    return ret|0x2|0x1; else return ret|0x1;
                                    break;
   // YV12 should work in all cases
  	}
@@ -1035,19 +1059,29 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x, in
 #ifdef HAVE_DIRECTFB099
                 case DSPF_YV12:
                         switch (pixel_format) {
-                        	case IMGFMT_YV12: {
+                        	case IMGFMT_YV12: { 
+						    void *d,*s;
 						    int i;
-						    dst += x;
-                                            	    for (i=y;i<(y+h);i++) {
-                                                        memcpy(dst+i*pitch,src[0]+i*stride[0],w);
+						    d = dst + pitch*y + x;
+						    s = src[0];
+                                            	    for (i=0;i<h;i++) {
+                                                        memcpy(d,s,w);
+							d+=pitch;
+							s+=stride[0];
                                                     }
-						    dst += pitch*in_height - (x)/2;
-                                            	    for (i=y/2;i<(y+h)/2;i++) {
-                                                        memcpy(dst+i*pitch/2,src[2]+i*stride[2],w/2);
+						    d = dst + pitch*in_height + pitch*y/4 + x/2;
+						    s = src[2];
+                                            	    for (i=0;i<h/2;i++) {
+                                                        memcpy(d,s,w/2);
+							d+=pitch/2;
+							s+=stride[2];
                                                     }
-						    dst += pitch*in_height/4;
-                                            	    for (i=y/2;i<(y+h)/2;i++) {
-                                                        memcpy(dst+i*pitch/2,src[1]+i*stride[1],w/2);
+						    d = dst + pitch*in_height + pitch*in_height/4 + pitch*y/4 + x/2;
+						    s = src[1];
+                                            	    for (i=0;i<h/2;i++) {
+                                                        memcpy(d,s,w/2);
+							d+=pitch/2;
+							s+=stride[1];
                                                     }
 						  };
 		                        	  break;
@@ -1066,20 +1100,30 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x, in
                 case DSPF_I420:
                         switch (pixel_format) {
                         	case IMGFMT_YV12: {
+						    void *d,*s;
 						    int i;
-						    dst += x;
-                                            	    for (i=y;i<(y+h);i++) {
-                                                        memcpy(dst+i*pitch,src[0]+i*stride[0],w);
+						    d = dst + pitch*y + x;
+						    s = src[0];
+                                            	    for (i=0;i<h;i++) {
+                                                        memcpy(d,s,w);
+							d+=pitch;
+							s+=stride[0];
                                                     }
-						    dst += pitch*in_height - (x)/2;
-                                            	    for (i=y/2;i<(y+h)/2;i++) {
-                                                        memcpy(dst+i*pitch/2,src[1]+i*stride[1],w/2);
+						    d = dst + pitch*in_height + pitch*y/4 + x/2;
+						    s = src[1];
+                                            	    for (i=0;i<h/2;i++) {
+                                                        memcpy(d,s,w/2);
+							d+=pitch/2;
+							s+=stride[1];
                                                     }
-						    dst += pitch*in_height/4;
-                                            	    for (i=y/2;i<(y+h)/2;i++) {
-                                                        memcpy(dst+i*pitch/2,src[2]+i*stride[2],w/2);
+						    d = dst + pitch*in_height + pitch*in_height/4 + pitch*y/4 + x/2;
+						    s = src[2];
+                                            	    for (i=0;i<h/2;i++) {
+                                                        memcpy(d,s,w/2);
+							d+=pitch/2;
+							s+=stride[2];
                                                     }
-						  };
+		  				  };
 		                        	  break;
 /*	                        case IMGFMT_YUY2: {
 						    int i;
@@ -1233,9 +1277,12 @@ static void uninit(void)
   buffer->Release (buffer);
   if (verbose ) printf("DirectFB: Release keyboard\n");
   keyboard->Release (keyboard);
-  if (verbose ) printf("DirectFB: Release frame\n");
-  frame->Release (frame);
-
+  if (frameallocated) {
+    if (verbose ) printf("DirectFB: Release frame\n");
+    frame->Release (frame);
+    frameallocated=0;
+  };
+  
 // we will not release dfb and layer because there could be a new film
 
   if (verbose ) printf("DirectFB: Release primary\n");
@@ -1249,7 +1296,6 @@ static void uninit(void)
 
   if (verbose ) printf("DirectFB: Release DirectFB library\n");
   dfb->Release (dfb);
-  preinitdone=0;
 #endif
 
   if (verbose ) printf("DirectFB: Uninit done.\n");
@@ -1338,9 +1384,7 @@ static void query_vaa(vo_vaa_t *vaa)
 static uint32_t get_image(mp_image_t *mpi){
         int err;
         void *dst;
-	uint8_t *s;
         int pitch;
-	int i;
 
 //    printf("DirectFB: get_image() called\n");
 
