@@ -247,6 +247,8 @@ void vo_x11_putkey(int key){
    case wsMul:       mplayer_put_key('*'); break;
    case wsGrayDiv:
    case wsDiv:       mplayer_put_key('/'); break;
+   case wsLess:      mplayer_put_key('<'); break;
+   case wsMore:      mplayer_put_key('>'); break;
    case wsm:
    case wsM:	     mplayer_put_key('m'); break;
    case wso:

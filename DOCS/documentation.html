@@ -530,6 +530,8 @@ directive to use the skin in <CODE>*/Skin/newskin</CODE> directory.</P>
 8 kinds of subtitle can be used by the subreader code. To see what are
 these subtitle formats, see subreader.c, line ~30.</P>
 
+<P>About DVD subtitles, read the <A HREF="cd-dvd.html#4.2">DVD section</A>.</P>
+
 <P><B>MPlayer</B> introduces a new subtitle format called <B><I>MPsub</I></B>.
 It was designed by me (Gabucino). Basically its main feature is being
 <I>dynamically</I> time-based (although it has frame-based mode too). Example (from
@@ -636,6 +638,15 @@ TV tuner</B>.</P>
     xawtv.</LI>
 </UL>
 </P>
+
+<P><B>Hint</B>: if <B>MPlayer</B> prints <CODE>ioctl: can't sync</CODE> or something
+  like this, your tuner can't capture the requested image size. Try using
+  <CODE>width=640:height=480</CODE> options.</P>
+
+<P><B>Hint #2</B> : are the colors fucked up? Then your tuner can't display
+  in YV12 colorspace. Try YUY2, UYVY or if none of these works: RGB32 (this one
+  with <CODE>-vo sdl</CODE>).
+  You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
 
 <P><B><I>Available options</I></B><BR>
 <TABLE BORDER=0>
@@ -767,6 +778,7 @@ Input from standard V4L<BR>
 <TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt;-  or  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward  10 seconds</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>up or down</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward   1 minute</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pgup/pgdown</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward  10 minutes</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt; or &gt;</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward  in playlist</TD><TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p or SPACE</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pause movie (press any key)</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>q or ESC</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>stop playing and quit program</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>+ or -</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust audio delay by +/- 0.1 second</TD></TR>

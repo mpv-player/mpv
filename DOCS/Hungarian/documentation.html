@@ -549,6 +549,9 @@ könyvtárban lévõ skin kerül betöltésre.</P>
 jelenleg 8 fajtát ismer fel. Hogy lásd melyek ezek, nézd meg a subreader.c
 file-t, a 30. sor körül.</P>
 
+<P>A DVD feliratok használatához olvasd el a <A HREF="cd-dvd.html#4.2">DVD
+fejezetet.</A></P>
+
 <P>Az <B>MPlayer</B> tartalmaz egy új, <B><I>MPsub</I></B> nevû feliratformátumot.
 A tervezés az én (Gabucino) kezem munkáját dicséri. A legfõbb újítása hogy
 <I>dinamikusan</I> idõ alapú (bár van képkocka alapú módja is). Példa (a
@@ -657,6 +660,15 @@ TV tuner-rõl</B>.</P>
     alatt, mint például az xawtv.</LI>
 </UL>
 </P>
+
+<P><B>Tipp</B> : ha az <B>MPlayer</B> <CODE>ioctl: can't sync</CODE>-szerû
+  üzenetekkel dobálózik, a tunered nem tudja a kért felbontást. Próbáld a
+  <CODE>width=640:height=480</CODE> opciókkal.</P>
+
+<P><B>Tipp #2</B> : rosszak a színek? Ezekszerint a tunered nem tudja a képet
+  YV12 colorspace-ben grabbelni. Próbáld a YUY2, UYVY vagy végsõ esetben az
+  RGB32 colorspace-eket (ezutóbbit <CODE>-vo sdl</CODE>-el). Ezeket a
+  <CODE>outfmt=YV12</CODE> opcióval lehet megadni, lásd lent.</P>
 
 <P><B><I>Rendelkezésre álló opciók</I></B><BR>
 <TABLE BORDER=0>
@@ -793,6 +805,7 @@ Szabványos V4L-rõl bemenet<BR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>fel vagy le</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hátra/elõre seek, 1 percnyi</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pgup/pgdown</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hátra/elõre seek, 10 percnyi</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p vagy SPACE</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pillanatállj, bármely billentyûre tovább</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt; or &gt;</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>elõzõ / következõ file a lejátszási listában</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>q vagy ESC</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>lejátszás leállítasa, kilépés</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>+ vagy -</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>audio késleltetése +/- 0.1 másodperccel</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>/ vagy *</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hangerõ csökkentése/növelése</TD><TR>

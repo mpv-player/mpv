@@ -96,9 +96,18 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATAL: Kan video driver niet initialiseren!\n"
 #define MSGTR_CannotInitAO "Kon audio device niet open/init -> NOSOUND\n"
 #define MSGTR_StartPlaying "Start afspelen...\n"
-#define MSGTR_SystemTooSlow "\n*********************************************************************************"\
-			    "\n** Je systeem is te TRAAG om dit af te spelen! Probeer met -framedrop of RTFM! **"\
-			    "\n*********************************************************************************\n"
+#define MSGTR_SystemTooSlow "\n\n"\
+"         ************************************************\n"\
+"         ** Je system is te TRAAG om dit af te spelen! **\n"\
+"         ************************************************\n"\
+"!!! Mogelijke oorzaken, problemen, oplossingen: \n"\
+"- Meestal: kapotte/buggy _audio_ driver. Oplossing: Probeer -ao sdl of gebruik\n"\
+"  ALSA 0.5 of oss emulatie of ALSA 0.9. Lees DOCS/sound.html voor more tips!\n"\
+"- Trage video output. Probeer andere -vo driver (voor lijst: -vo help) of probeer\n"\
+"  net -framedrop !  Lees DOCS/video.html voor video tuning/speedup tips.\n"\
+"- Trage CPU. Probeer geen grote DVD/DivX af te spelen op een trage CPU! Probeer -hardframedrop\n"\
+"- Kapot bestand. Probeer verschillende combinaties van: -nobps  -ni  -mc 0  -forceidx\n"\
+"Als geen van deze oorzaken van toepassingen zijn, lees dan DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer werd gecompileerd ZONDER GUI ondersteuning!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI heeft X11 nodig!\n"
