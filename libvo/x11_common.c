@@ -17,7 +17,9 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
+#ifdef HAVE_XDPMS
 #include <X11/extensions/dpms.h>
+#endif
 
 static int dpms_disabled=0;
 static int timeout_save=0;
@@ -278,6 +280,7 @@ int vo_x11_check_events(Display *mydisplay){
 
 void saver_on(Display *mDisplay) {
 
+#ifdef HAVE_XDPMS
     int nothing;
     if (dpms_disabled)
     {
@@ -298,7 +301,8 @@ void saver_on(Display *mDisplay) {
             }
 	}
     }
-    
+#endif
+
     if (timeout_save)
     {
 	int dummy, interval, prefer_blank, allow_exp;
@@ -311,7 +315,9 @@ void saver_on(Display *mDisplay) {
 
 void saver_off(Display *mDisplay) {
 
-    int interval, prefer_blank, allow_exp, nothing;
+    int interval, prefer_blank, allow_exp;
+#ifdef HAVE_XDPMS
+    int nothing;
 
     if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
     {
@@ -327,6 +333,7 @@ void saver_off(Display *mDisplay) {
             printf ("stat: %d\n", stat);
 	}
     }
+#endif
     XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
     if (timeout_save)
 	XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
