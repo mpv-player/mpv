@@ -1,9 +1,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "config.h"
 #include "mp_msg.h"
+#include "x11_common.h"
 
 #ifdef X11_FULLSCREEN
 
@@ -511,9 +513,11 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
 
 void vo_x11_classhint( Display * display,Window window,char *name ){
 	    XClassHint wmClass;
+	    pid_t pid=getpid();
 	    wmClass.res_name = name;
 	    wmClass.res_class = "MPlayer";
 	    XSetClassHint(display,window,&wmClass);
+	    XChangeProperty(display,window, XInternAtom(display,"_NET_WM_PID", False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&pid, 1);
 }
 
 Window     vo_window = None;
