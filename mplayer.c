@@ -736,6 +736,7 @@ int osd_show_sub_changed = 0;
 int osd_show_percentage = 0;
 int osd_show_tv_channel = 25;
 int osd_show_ontop = 0;
+int osd_show_framedropping = 0;
 
 int rtc_fd=-1;
 
@@ -2854,8 +2855,13 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_FRAMEDROPPING :  {
       int v = cmd->args[0].v.i;
-      if(v < 0)
+      if(v < 0){
 	frame_dropping = (frame_dropping+1)%3;
+#ifdef USE_OSD
+       osd_show_framedropping=10;
+       vo_osd_changed(OSDTYPE_SUBTITLE);
+#endif
+      }
       else
 	frame_dropping = v > 2 ? 2 : v;
     } break;
@@ -3559,6 +3565,11 @@ if(rel_seek_secs || abs_seek_pos){
       } else if (osd_show_ontop) {
 	  snprintf(osd_text_tmp, 63, "Stay on top: %sabled", vo_ontop?"en":"dis");
 	  osd_show_ontop--;
+      } else if (osd_show_framedropping) {
+	  snprintf(osd_text_tmp, 63, "Framedropping: %s",
+	     (frame_dropping == 1 ? "on" :
+	     (frame_dropping == 2 ? "hard"  : "off")));
+	  osd_show_framedropping--;
       } else if(osd_level>=2) {
           int len = demuxer_get_time_length(demuxer);
           int percentage = -1;
