@@ -567,9 +567,6 @@ Ponekker, Zoltán (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
     * libvo: adding xmga driver
     * audio mixer (volume) support
 
-Poorten, Ivo van <ivop@euronet.nl>
-    * multiple directory support for vo_jpeg
-
 Ran, Lu <hephooey@fastmail.fm>
     * Chinese documentation translation
     * various VOBsub related patches
@@ -661,6 +658,9 @@ Tropea, Salvador Eduardo <salvador@inti.gov.ar>
 
 Vajna, Miklós (VMiklos) <mamajom@axelero.hu>
     * TOOLS/divx2svcd author
+
+van Poorten, Ivo (ivop) <ivop@euronet.nl>
+    * multiple directory support for vo_jpeg
 
 Verdejo Pinochet, Reynaldo H. (reynaldo) <reynaldo@opendot.cl>
     * improved EDL support
