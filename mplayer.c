@@ -944,8 +944,8 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 //================== MAIN: ==========================
 {
 
-float frame_correction=0; // average of A-V timestamp differences
-int frame_corr_num=0;   //
+//float frame_correction=0; // average of A-V timestamp differences
+//int frame_corr_num=0;   //
 //float v_frame=0;    // Video
 float time_frame=0; // Timer
 int eof=0;
@@ -1346,9 +1346,8 @@ if(1)
 
     if(verbose>1)printf("### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
 
-    if(frame_corr_num==1){
-      float x=frame_correction;
       if(delay_corrected){
+        float x=(a_pts-delay-audio_delay)-v_pts;
 //        printf("A:%6.1f  V:%6.1f  A-V:%7.3f",a_pts-audio_delay-delay,v_pts,x);
         printf("A:%6.1f (%6.1f)  V:%6.1f  A-V:%7.3f",a_pts,a_pts-audio_delay-delay,v_pts,x);
         x*=0.1f;
@@ -1368,18 +1367,11 @@ if(1)
         );
         fflush(stdout);
       }
-      frame_corr_num=0; frame_correction=0;
-    }
-    
-    if(frame_corr_num>=0) frame_correction+=(a_pts-delay-audio_delay)-v_pts;
     
   } else {
     // No audio:
-    //if(d_video->pts)
-    float v_pts=d_video->pts;
-    if(frame_corr_num==5){
-//      printf("A: ---   V:%6.1f   \r",v_pts);
-      printf("V:%6.1f  %3d  %2d%%  %2d%%  %3.1f%% \r",v_pts,
+    
+      printf("V:%6.1f  %3d  %2d%%  %2d%%  %3.1f%% \r",d_video->pts,
         (int)sh_video->num_frames,
         (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
@@ -1387,10 +1379,8 @@ if(1)
         );
 
       fflush(stdout);
-      frame_corr_num=0;
-    }
+
   }
-  ++frame_corr_num;
 #endif
 
   if(osd_visible){
@@ -1546,10 +1536,8 @@ if(1)
         }
       }
       
-      c_total=0; // kell ez?
+      c_total=0;
       max_pts_correction=0.1;
-      frame_corr_num=0; // -5   FIXME!!!
-      frame_correction=0;
       force_redraw=5;
       audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
   
