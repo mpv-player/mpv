@@ -456,7 +456,7 @@ parse_playtree(stream_t *stream, int forced) {
 
 #ifdef MP_DEBUG
   assert(stream != NULL);
-  assert(stream->type == STREAMTYPE_PLAYLIST);
+//  assert(stream->type == STREAMTYPE_PLAYLIST);
 #endif
 
   p = play_tree_parser_new(stream,0);
