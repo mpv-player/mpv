@@ -62,8 +62,8 @@ int fakemono=0;
 #endif
 
 #ifdef USE_DIRECTSHOW
-#include "loader/DirectShow/DS_AudioDec.h"
-static void* ds_adec=NULL;
+#include "loader/dshow/DS_AudioDecoder.h"
+static DS_AudioDecoder* ds_adec=NULL;
 #endif
 
 #ifdef HAVE_OGGVORBIS

@@ -55,8 +55,8 @@ extern picture_t *picture;	// exported from libmpeg2/decode.c
 int divx_quality=0;
 
 #ifdef USE_DIRECTSHOW
-#include "loader/DirectShow/DS_VideoDec.h"
-static void* ds_vdec=NULL;
+#include "loader/dshow/DS_VideoDecoder.h"
+static DS_VideoDecoder* ds_vdec=NULL;
 #endif
 
 #ifdef USE_LIBAVCODEC
