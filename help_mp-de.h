@@ -1,4 +1,4 @@
-// Transated by: Johannes Feigl, johannes.feigl@mcse.at
+// Transated by: Johannes Feigl, johannes.feigl@aon.at
 // Reworked by Klaus Umbach, klaus.umbach@gmx.net
 
 // ========================= MPlayer help ===========================
