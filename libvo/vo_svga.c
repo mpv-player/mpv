@@ -93,7 +93,12 @@ static uint32_t preinit(const char *arg)
       maxframes=1;
   }
 
-printf("vo_svga: preinit - maxframes=%i\n",maxframes);
+  if (!checked) {
+    if (checksupportedmodes()) // Looking for available video modes 
+      return(1);
+  }
+
+// printf("vo_svga: preinit - maxframes=%i\n",maxframes);
   
   return 0;
 }
@@ -118,11 +123,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   uint8_t res_widescr, vid_widescr = (((req_w*1.0)/req_h) > (4.0/3)) ? 1 : 0;
   uint16_t buf_w = USHRT_MAX, buf_h = USHRT_MAX;
   vga_modelist_t *list = modelist;
-
-  if (!checked) {
-    if (checksupportedmodes()) // Looking for available video modes 
-      return(1);
-  }
 
   bpp_avail = 0;
   while (list != NULL) {
