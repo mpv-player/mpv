@@ -18,8 +18,10 @@ int ao_buffersize=-1;
 extern ao_functions_t audio_out_oss;
 //extern ao_functions_t audio_out_ossold;
 extern ao_functions_t audio_out_null;
-extern ao_functions_t audio_out_alsa5;
-extern ao_functions_t audio_out_alsa9;
+#ifdef HAVE_ALSA5
+ extern ao_functions_t audio_out_alsa5;
+#endif
+//extern ao_functions_t audio_out_alsa9;
 extern ao_functions_t audio_out_esd;
 #ifdef HAVE_SDL
 extern ao_functions_t audio_out_sdl;
@@ -29,7 +31,9 @@ ao_functions_t* audio_out_drivers[] =
 {
         &audio_out_oss,
         &audio_out_null,
+#ifdef HAVE_ALSA5
 	&audio_out_alsa5,
+#endif
 //	&audio_out_alsa9,
 //	&audio_out_esd,
 #ifdef HAVE_SDL
