@@ -32,6 +32,9 @@
 #include "fastmemcpy.h"
 #endif
 #include "../mp_msg.h"
+/* We need this #define because we need ../libavcodec/common.h to #define 
+ * be2me_32, otherwise the linker will complain that it doesn't exist */
+#define HAVE_AV_CONFIG_H
 #include "../libavcodec/avcodec.h"
 #include "../libavcodec/dsputil.h"
 #include "../libavcodec/mpegvideo.h"
@@ -440,7 +443,7 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 	if (j->s->mjpeg_write_tables == 1)
 		j->s->mjpeg_write_tables = 0;
 	
-	return j->s->pb.buf_ptr - j->s->pb.buf;
+	return pbBufPtr(&(j->s->pb)) - j->s->pb.buf;
 }
 
 void jpeg_enc_uninit(jpeg_enc_t *j) {
