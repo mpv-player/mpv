@@ -241,6 +241,8 @@ static int format2palette(int format)
 	    return(VIDEO_PALETTE_YUV420P);
 	case IMGFMT_YUY2:
 	    return(VIDEO_PALETTE_YUV422);
+    case IMGFMT_UYVY:
+       return(VIDEO_PALETTE_UYVY);
     }
     return(-1);
 }
