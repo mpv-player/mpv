@@ -12,15 +12,51 @@
 
 #include "stream.h"
 
-static ASF_StreamType_e streaming_type = ASF_Unknown_e;
+typedef struct {
+	ASF_StreamType_e streaming_type;
+	int request;
+} asf_http_streaming_ctrl_t;
 
 // ASF streaming support several network protocol.
 // One use UDP, not known, yet!
 // Another is HTTP, this one is known.
 // So for now, we use the HTTP protocol.
+// 
+// We can try several protocol for asf streaming
+// * first the UDP protcol, if there is a firewall, UDP
+//   packets will not come back, so the mmsu will failed.
+// * Then we can try TCP, but if there is a proxy for
+//   internet connection, the TCP connection will not get
+//   through
+// * Then we can try HTTP.
 int
 asf_streaming_start( stream_t *stream ) {
-	return asf_http_streaming_start( stream );	
+	char proto_s[10];
+	int fd = -1;
+	
+	strncpy( proto_s, stream->streaming_ctrl->url->protocol, 10 );
+	
+	if( !strncasecmp( proto_s, "mms", 3) && strncasecmp( proto_s, "mmst", 4) ) {
+		printf("Trying ASF/UDP...\n");
+		//fd = asf_mmsu_streaming_start( stream );
+		if( fd!=-1 ) return fd;
+		printf("  ===> ASF/UDP failed\n");
+	}
+	if( !strncasecmp( proto_s, "mms", 3) ) {
+		printf("Trying ASF/TCP...\n");
+		//fd = asf_mmst_streaming_start( stream );
+		if( fd!=-1 ) return fd;
+		printf("  ===> ASF/TCP failed\n");
+	}
+	if( !strncasecmp( proto_s, "http", 4) || !strncasecmp( proto_s, "mms", 3) ) {
+		printf("Trying ASF/HTTP...\n");
+		fd = asf_http_streaming_start( stream );
+		if( fd!=-1 ) return fd;
+		printf("  ===> ASF/HTTP failed\n");
+	}
+
+	printf("Unknown protocol: %s\n", proto_s );
+	return -1;
 }
 
 
@@ -132,14 +168,17 @@ asf_http_streaming_type(char *content_type, char *features) {
 }
 
 HTTP_header_t *
-asf_http_request(URL_t *url) {
+//asf_http_request(URL_t *url) {
+asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	HTTP_header_t *http_hdr;
+	URL_t *url = streaming_ctrl->url;
+	asf_http_streaming_ctrl_t *asf_http_ctrl = (asf_http_streaming_ctrl_t*)streaming_ctrl->data;
 	char str[250];
 	char *ptr;
 	char *request;
 	int i;
 
-	int offset_hi=0, offset_lo=0, req_nb=1, length=0;
+	int offset_hi=0, offset_lo=0, length=0;
 	int asf_nb_stream;
 
 	// Common header for all requests.
@@ -152,10 +191,10 @@ asf_http_request(URL_t *url) {
 	http_set_field( http_hdr, "Pragma: xClientGUID={c77e7400-738a-11d2-9add-0020af0a3278}" );
 	sprintf(str, 
 		"Pragma: no-cache,rate=1.000000,stream-time=0,stream-offset=%u:%u,request-context=%d,max-duration=%u",
-		offset_hi, offset_lo, req_nb, length );
+		offset_hi, offset_lo, asf_http_ctrl->request, length );
 	http_set_field( http_hdr, str );
 
-	switch( streaming_type ) {
+	switch( asf_http_ctrl->streaming_type ) {
 		case ASF_Live_e:
 		case ASF_Prerecorded_e:
 			http_set_field( http_hdr, "Pragma: xPlayStrm=1" );
@@ -245,9 +284,7 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 		pragma = http_get_next_field( http_hdr );
 	}
 
-	streaming_type = asf_http_streaming_type( content_type, features );
-
-	return 0;
+	return asf_http_streaming_type( content_type, features );
 }
 
 URL_t *
@@ -265,19 +302,34 @@ asf_http_streaming_start( stream_t *stream ) {
 	HTTP_header_t *http_hdr=NULL;
 	URL_t *url_next=NULL;
 	URL_t *url = stream->streaming_ctrl->url;
+	asf_http_streaming_ctrl_t *asf_http_ctrl;
+	ASF_StreamType_e streaming_type;
 	char buffer[BUFFER_SIZE];
-	int i;
+	unsigned int port;
+	int i, ret;
 	int fd = stream->fd;
-	int done=1;
+	int done;
 
-streaming_type = ASF_Live_e;
+	asf_http_ctrl = (asf_http_streaming_ctrl_t*)malloc(sizeof(asf_http_streaming_ctrl_t));
+	if( asf_http_ctrl==NULL ) {
+		printf("Memory allocation failed\n");
+		return -1;
+	}
+	asf_http_ctrl->streaming_type = ASF_Unknown_e;
+	asf_http_ctrl->request = 1;
+	stream->streaming_ctrl->data = (void*)asf_http_ctrl;
+
+//streaming_type = ASF_Live_e;
 	do {
+		done = 1;
 		if( fd>0 ) close( fd );
 
+		if( url->port==0 ) url->port = 80;
 		fd = connect2Server( url->hostname, url->port );
 		if( fd<0 ) return -1;
 
-		http_hdr = asf_http_request( url );
+		//http_hdr = asf_http_request( url );
+		http_hdr = asf_http_request( stream->streaming_ctrl );
 printf("Request [%s]\n", http_hdr->buffer );
 		write( fd, http_hdr->buffer, http_hdr->buffer_size );
 		http_free( http_hdr );
@@ -295,11 +347,13 @@ printf("read: %d\n", i );
 		} while( !http_is_header_entire( http_hdr ) );
 http_hdr->buffer[http_hdr->buffer_size]='\0';
 printf("Response [%s]\n", http_hdr->buffer );
-		if( asf_http_parse_response(http_hdr)<0 ) {
+		streaming_type = asf_http_parse_response(http_hdr);
+		if( streaming_type<0 ) {
 			printf("Failed to parse header\n");
 			http_free( http_hdr );
 			return -1;
 		}
+		asf_http_ctrl->streaming_type = streaming_type;
 		switch( streaming_type ) {
 			case ASF_Live_e:
 			case ASF_Prerecorded_e:
@@ -310,6 +364,13 @@ printf("Response [%s]\n", http_hdr->buffer );
 						return -1;
 					}
 				}
+				if( asf_http_ctrl->request==1 ) {
+					// First request, we only got the ASF header.
+					// We can redo the request and ask for all the stream.
+					// TODO: Here goes the code to read the ASF header and get the proper values.
+					asf_http_ctrl->request++;
+					done = 0;
+				}
 				break;
 			case ASF_Redirector_e:
 				url_next = asf_http_ASX_redirect( http_hdr );
@@ -319,7 +380,6 @@ printf("Response [%s]\n", http_hdr->buffer );
 					http_free( http_hdr );
 					return -1;
 				}
-				if( url_next->port==0 ) url_next->port=80;
 				url_free( stream->streaming_ctrl->url );
 				stream->streaming_ctrl->url = url_next;
 				url = url_next;
@@ -332,8 +392,7 @@ printf("Response [%s]\n", http_hdr->buffer );
 				http_free( http_hdr );
 				return -1;
 		}
-
-		// Check if we got a redirect.	
+	// Check if we got a redirect.	
 	} while(!done);
 
 	stream->fd= fd;
