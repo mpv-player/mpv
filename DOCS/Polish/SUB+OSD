@@ -1,22 +1,23 @@
-Podtytu³y 
--- -- -- -- - 
+NAPISY 
+------ 
 Tak, mplayer wspiera du¿± gamê typów napisów. Aktualnie ( 2001/06/01 ) 
-7 rodzaji podtytu³ów/napisów mog± byæ u¿ywany przez kod subreadera.
-Aby zobaczyæ co to za formaty zobacz plik subreader.c linia 20.
+7 ró¿nych rodzajów mo¿e byæ u¿ywanych przez kod subreadera.
+Informacje o tych formatach znajdziesz w pliku: subreader.c linia 20.
  
-Napisy s± wy¶wietlane technik± zwan± OSD, On Screen Display.
-OSD jest u¿ywany by wy¶wietlaæ aktualny czas, wska¼nik g³o¶no¶ci oraz 
-wska¼nik wyszukiwania.
+Napisy s± wy¶wietlane technik± zwan± 'OSD', On Screen Display.
+OSD jest u¿ywany, by wy¶wietlaæ aktualny czas, wska¼nik g³o¶no¶ci oraz 
+wska¼nik wyszukiwania itp.
  
  
-INSTALOWANIE OSD oraz napisów.
--- -- -- - 
+INSTALOWANIE OSD oraz NAPISÓW.
+------------------------------
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 
-@ Uwaga: OSD i napisy nie s± standardowo skonfigurowane.
-@  Musisz ¶ci±gn±c fonty ze strony mplayera 
-@ mplayer.sf.net/homepage/dload.html
+@ UWAGA: OSD i NAPISY NIE s± standardowo skonfigurowane.                 @
+@ Musisz ¶ci±gn±æ fonty ze strony mplayera                               @
+@  mplayer.sf.net/homepage/dload.html                                    @ 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 
-Standartowy ( Centralne europejskie , Latin1 ) pakunek fontów : 
+
+Standartowy ( Central-European, Latin1 ) pakiet czcionek: 
 	http://mplayer.dev.hu/mp-ftp/release/mp_font3.zip
 	http://thot.banki.hu/mp-ftp/releases/mp_font3.zip
 	( mp_font1 i mp_font2 s± ju¿ nieaktualne )
@@ -24,16 +25,17 @@ Standartowy ( Centralne europejskie , Latin1 ) pakunek fontów :
 Cyrylica : 
 	http://thot.banki.hu/mp-ftp/releases/bgfont.zip
  
-A pod tym adresem znajdziesz koreañskie fonty
+A pod tym adresem znajdziesz czcionki koreañskie: 
 	http://realtime.ssu.ac.kr/~lethean/mplayer
 	
-Jak ¶ci±gniesz, UNZIPuj pliki do ~/.mplayer/font/
-Powiniene¶ teraz zobaczyæ zegar w lewym górnym rogu filmu
-(wyl±cz to za pomoc± klawisza 'o')
+Po ¶ci±gniêciu rozpakuj pliki do ~/.mplayer/font/ .
+Powiniene¶ teraz widzieæ zegar w lewym górnym rogu filmu (wy³±cz to za pomoc±
+klawisza 'o').
  
-OSD ma 3 stany : ( prze³±czaj za pomoc± 'o' )
-- zegar + wska¼nik wolumenu + wska¼nik wyszukiwania + sub ( standart ) 
-- wolumenu kreska + szuka kreski + ³odzi podwodna 
+OSD ma 3 stany : ( prze³±czane za pomoc± 'o' )
+- zegar + pasek g³o¶no¶ci + pasek przeszukiwania + napisy ( standard ) 
+- pasek g³o¶no¶ci + pasek przeszukiwania + napisy 
 - tylko napisy
-     
+
+(poprawione przez nell)
 
