@@ -307,7 +307,7 @@ Toggle fullscreen (also see \-fs).
 .IPs "option + [ and option + ]"
 Set movie window alpha.
 .IPs T\ \ \ \ 
-Toggle video layer: ontop/below/normal (also see \-ontop).
+Toggle video layer: ontop/\:below/\:normal (also see \-ontop).
 .RE
 .PD 1
 .
@@ -3658,7 +3658,7 @@ library, which eliminates the use of 'listplugins' from the LADSPA SDK.
 .IPs controls
 Controls are zero or more floating point values that determine the
 behaviour of the loaded plugin (for example delay, threshold or gain).
-In verbose mode (add -v to the MPlayer command line), all available controls
+In verbose mode (add \-v to the MPlayer command line), all available controls
 and their valid ranges are printed.
 This eliminates the use of 'analyseplugin' from the LADSPA SDK.
 .RE
@@ -3904,7 +3904,9 @@ Aspect can be given as a fraction (4/\:3) or floating point number
 (1.33).
 Alternatively, you may specify the exact display width and height
 desired.
-Note that this filter does NOT do any scaling itself; it just affects
+Note that this filter does
+.B not
+do any scaling itself; it just affects
 what later scalers (software or hardware) will do when auto-scaling to
 correct aspect.
 .
@@ -3928,7 +3930,7 @@ RGB 24/\:32 <\-> BGR 24/\:32 colorspace conversion.
 .PD 0
 .RSs
 .IPs swap\ 
-Also perform  R <\-> B swapping.
+Also perform  R <-> B swapping.
 .RE
 .PD 1
 .
@@ -4337,7 +4339,7 @@ The optional argument n specifies whether to extract the even or the odd
 field (depending on whether n is even or odd).
 .
 .TP
-.B detc[=var1=value2:var2=value2:...]
+.B detc[=var1=value1:var2=value2:...]
 Attempts to reverse the 'telecine' process to recover a clean,
 non-interlaced stream at film framerate.
 This was the first and most primitive inverse telecine filter to be
