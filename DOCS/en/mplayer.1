@@ -1599,7 +1599,7 @@ tune the overlay (default 1000)
 .RE
 .
 .TP
-.B \-fb <device> (fbdev or DirectFB only)
+.B \-fb <device> (fbdev or DirectFB only) (OBSOLETE)
 Specifies the framebuffer device to use.
 By default it uses /dev/\:fb0.
 .TP
@@ -2154,9 +2154,9 @@ Do not play/\:encode video.
 .B \-pp <quality> (see \-vf pp option too!)
 Set postprocess level of the DLL.
 This option is NO LONGER USABLE with MPlayer's postprocess filter, but only
-with Win32 DirectShow DLLs which have internal postprocessing routine.
+with Win32 DirectShow DLLs which have internal postprocessing routines.
 
-The valid range of \-pp value vary on codecs, mostly
+The valid range of \-pp values varies by codec, mostly
 0\-6, where 0=disable 6=slowest/\:best.
 .TP
 .B \-pphelp (see \-vf pp option too)
@@ -4222,13 +4222,13 @@ chrominance threshold
 .B l=<0\-20>
 luminance threshold
 .TP
-.B nolzo
+.B nolzo \ 
 disable the lzo compression
 .TP
 .B q=<3\-255>
 set the quality level
 .TP
-.B raw
+.B raw \ \ \ 
 disable rtjpeg encoding
 
 .SS xvidenc (\-xvidencopts)
