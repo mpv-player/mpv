@@ -76,13 +76,13 @@ static void send_command (int s, int command, uint32_t switches,
   command_t  cmd;
   int        len8;
 
-  len8 = (length + (length%8)) / 8;
+  len8 = (length + 7) / 8;
 
   cmd.num_bytes = 0;
 
   put_32 (&cmd, 0x00000001); /* start sequence */
   put_32 (&cmd, 0xB00BFACE); /* #-)) */
-  put_32 (&cmd, length + 32);
+  put_32 (&cmd, len8*8 + 32);
   put_32 (&cmd, 0x20534d4d); /* protocol type "MMS " */
   put_32 (&cmd, len8 + 4);
   put_32 (&cmd, seq_num);
@@ -95,8 +95,10 @@ static void send_command (int s, int command, uint32_t switches,
   put_32 (&cmd, extra);
 
   memcpy (&cmd.buf[48], data, length);
+  if (length & 7)
+    memset(&cmd.buf[48 + length], 0, 8 - (length & 7));
 
-  if (send (s, cmd.buf, length+48, 0) != (length+48)) {
+  if (send (s, cmd.buf, len8*8+48, 0) != (len8*8+48)) {
     printf ("write error\n");
   }
 }
@@ -462,24 +464,23 @@ int asf_mmst_streaming_start(stream_t *stream)
   * */
 
   snprintf (str, 1023, "\034\003NSPlayer/7.0.0.1956; {33715801-BAB3-9D85-24E9-03B90328270A}; Host: %s", url1->hostname);
-  string_utf16 (data, str, strlen(str)+2);
+  string_utf16 (data, str, strlen(str));
 // send_command(s, commandno ....)
-  send_command (s, 1, 0, 0x0004000b, strlen(str) * 2+8, data);
+  send_command (s, 1, 0, 0x0004000b, strlen(str)*2+2, data);
 
   len = recv (s, data, BUF_SIZE, 0) ;
 
   /*This sends details of the local machine IP address to a Funnel system at the server. 
   * Also, the TCP or UDP transport selection is sent.
   *
-  * here 192.168.0.129 is local ip address TCP/UDP states the tronsport we r using
+  * here 192.168.0.1 is local ip address TCP/UDP states the tronsport we r using
   * and 1037 is the  local TCP or UDP socket number
   * cmd 2 0x02
   *  */
 
-  string_utf16 (&data[8], "\002\000\\\\192.168.0.1\\TCP\\1037\0000", 
-		28);
+  string_utf16 (&data[8], "\002\000\\\\192.168.0.1\\TCP\\1037", 24);
   memset (data, 0, 8);
-  send_command (s, 2, 0, 0, 28*2+8, data);
+  send_command (s, 2, 0, 0, 24*2+10, data);
 
   len = recv (s, data, BUF_SIZE, 0) ;
 
@@ -488,7 +489,7 @@ int asf_mmst_streaming_start(stream_t *stream)
 
   string_utf16 (&data[8], path, strlen(path));
   memset (data, 0, 8);
-  send_command (s, 5, 0, 0, strlen(path)*2+12, data);
+  send_command (s, 5, 0, 0, strlen(path)*2+10, data);
 
   get_answer (s);
 
