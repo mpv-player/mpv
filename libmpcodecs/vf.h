@@ -24,7 +24,7 @@ typedef struct vf_instance_s {
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt);
     int (*control)(struct vf_instance_s* vf,
-        int request, void* data, ...);
+        int request, void* data);
     int (*query_format)(struct vf_instance_s* vf,
         unsigned int fmt);
     void (*get_image)(struct vf_instance_s* vf,
@@ -45,6 +45,12 @@ typedef struct vf_instance_s {
 
 // control codes:
 #include "mpc_info.h"
+
+typedef struct vf_seteq_s 
+{
+    char *item;
+    int value;
+} vf_equalizer_t;
 
 #define VFCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */
 #define VFCTRL_SET_PP_LEVEL 5 /* set postprocessing level */

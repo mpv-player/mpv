@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 
 #include "../config.h"
 #include "../mp_msg.h"
@@ -47,7 +46,7 @@ static int config(struct vf_instance_s* vf,
     return 1;
 }
 
-static int control(struct vf_instance_s* vf, int request, void* data, ...)
+static int control(struct vf_instance_s* vf, int request, void* data)
 {
     switch(request){
 #ifdef USE_OSD
@@ -58,25 +57,15 @@ static int control(struct vf_instance_s* vf, int request, void* data, ...)
 #endif
     case VFCTRL_SET_EQUALIZER:
     {
-	va_list ap;
-	int value;
-
+	vf_equalizer_t *eq=data;
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
-	va_start(ap, data);
-	value = va_arg(ap, int);
-	va_end(ap);
-	return((video_out->control(VOCTRL_SET_EQUALIZER, data, (int *)value) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE);
+	return((video_out->control(VOCTRL_SET_EQUALIZER, eq->item, eq->value) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE);
     }
     case VFCTRL_GET_EQUALIZER:
     {
-	va_list ap;
-	int *value;
-
+	vf_equalizer_t *eq=data;
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
-	va_start(ap, data);
-	value = va_arg(ap, int);
-	va_end(ap);
-	return((video_out->control(VOCTRL_GET_EQUALIZER, data, value) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE);
+	return((video_out->control(VOCTRL_GET_EQUALIZER, eq->item, &eq->value) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE);
     }
     }
     // return video_out->control(request,data);
