@@ -99,8 +99,6 @@ Enhancements:
 
  * implement Plextor compatible SCSI VCD reading
 
- * udp:// support (like xine and vlc)
-
  * -stop option for MPlayer similar to -endpos for MEncoder
 
  * color subtitles
