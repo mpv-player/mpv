@@ -3,7 +3,12 @@
 
   (C) Alex Beregszaszi <alex@naxine.org>
 
-  Don't use this buggy driver, ALSA-0.9.x emulates OSS very well...
+  modified for better alsa-0.9.0beta8a-support by Joy Winter <joy@pingfm.org>
+
+  This driver is still at alpha stage. 
+  If you want stable sound-support use the OSS emulation instead.
+  
+  Any bugreports regarding to this driver are welcome either to the mplayer-user-mailinglist or directly to the authors.
 */
 
 #include <errno.h>
@@ -21,7 +26,7 @@ static ao_info_t info =
 {
     "ALSA-0.9.x audio output",
     "alsa9",
-    "Alex Beregszaszi <alex@naxine.org>",
+    "Alex Beregszaszi <alex@naxine.org>, Joy Winter <joy@pingfm.org>",
     "under developement"
 };
 
@@ -41,10 +46,13 @@ static snd_pcm_format_t alsa_format;
 static snd_pcm_hw_params_t *alsa_hwparams;
 static snd_pcm_sw_params_t *alsa_swparams;
 static char *alsa_device;
-#define ALSA_DEVICE_SIZE 48 /* war 48 */
+#define ALSA_DEVICE_SIZE 48
 
-static int alsa_fragsize = 8192; /* 4096 war 8192*/
-static int alsa_fragcount = 8; /* war 8 */
+static int alsa_fragsize = 8192; /* possible 4096, original 8192 */
+static int alsa_fragcount = 8;
+
+static int chunk_size = -1;
+static int start_delay = 1;
 
 /* to set/get/query special features/parameters */
 static int control(int cmd, int arg)
@@ -69,12 +77,12 @@ static int control(int cmd, int arg)
     return(CONTROL_UNKNOWN);
 }
 
-#undef start /* war undef */
+#undef start /* orig. undef */
 #define buffersize 
-#undef buffertime /* war undef? */
+#define buffertime /* orig. undef? */
 #define set_period
-#define sw_params /* war undef */
-#undef set_start_mode /* war undef */
+#define sw_params /* orig. undef */
+#undef set_start_mode /* orig. undef */
 
 /*
     open & setup audio device
@@ -86,8 +94,10 @@ static int init(int rate_hz, int channels, int format, int flags)
     int cards = -1;
     snd_pcm_info_t *alsa_info;
     
-    printf("alsa-init: Don't use this buggy driver, ALSA-0.9.x emulates OSS very well... modified by me\n");
+    size_t xfer_align; //new
+    snd_pcm_uframes_t start_threshold, stop_threshold; //new
 
+    printf("alsa-init: this driver is still at alpha-stage. if you want stable sound support use the OSS emulation instead.\n");    
     printf("alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
 	channels, audio_out_format_name(format));
 
@@ -102,9 +112,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
-    ao_samplerate = rate_hz; /*war rate_hz */
+    ao_samplerate = rate_hz;
     ao_bps = channels; /* really this is bytes per frame so bad varname */
-    /* ao_bps = channels */
     ao_format = format;
     ao_channels = channels;
     ao_outburst = OUTBURST;
@@ -184,8 +193,8 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
 
     snd_pcm_hw_params_malloc(&alsa_hwparams);
-    snd_pcm_sw_params_malloc(&alsa_swparams);
-    
+    //snd_pcm_sw_params_malloc(&alsa_swparams);
+    snd_pcm_sw_params_alloca(&alsa_swparams);
     if ((err = snd_pcm_hw_params_any(alsa_handler, alsa_hwparams)) < 0)
     {
 	printf("alsa-init: unable to get initial parameters: %s\n",
@@ -218,11 +227,11 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
 
         if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams, ao_samplerate, 0)) < 0) 
-/* war nur snd_pcm_hw_params_set_rate */ 
+/* was originally only snd_pcm_hw_params_set_rate jp*/ 
         {
     	printf("alsa-init: unable to set samplerate-2: %s\n",
     	    snd_strerror(err));
-	//snd_pcm_hw_params_dump(alsa_hwparams, errlog);
+	//snd_pcm_hw_params_dump(alsa_hwparams, errlog); jp
     	return(0);
         }
 
@@ -234,12 +243,12 @@ static int init(int rate_hz, int channels, int format, int flags)
 		snd_strerror(err));
 	    return(0);
 	}
-	if ((err = snd_pcm_hw_params_set_periods(alsa_handler, alsa_hwparams, alsa_fragcount, 0)) < 0)
-	{
-	    printf("alsa-init: unable to set periods: %s\n",
-		snd_strerror(err));
-	    return(0);
-	}
+		if ((err = snd_pcm_hw_params_set_periods(alsa_handler, alsa_hwparams, alsa_fragcount, 0)) < 0)
+		{
+		    printf("alsa-init: unable to set periods: %s\n",
+			snd_strerror(err));
+		    return(0);
+		}
     }
 #endif
 #ifdef buffersize
@@ -258,7 +267,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
 #ifdef buffertime
     {
-      int alsa_buffer_time = 60; /* war 60 */
+      int alsa_buffer_time = 500000; /* original 60 */
 
 	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams, alsa_buffer_time, 0)) < 0)
 	{
@@ -268,8 +277,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	} else
 	    alsa_buffer_time = err;
 
-	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams, alsa_buffer_time/ao_bps, 0)) < 0)
-	  /* war alsa_buffer_time/ao_bps */
+	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams, alsa_buffer_time/4, 0)) < 0)
+	  /* original: alsa_buffer_time/ao_bps */
 	{
 	    printf("alsa-init: unable to set period time: %s\n",
 		snd_strerror(err));
@@ -288,12 +297,38 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
 
 #ifdef sw_params
+    {
+    chunk_size = snd_pcm_hw_params_get_period_size(alsa_hwparams, 0);
+    start_threshold = (double) ao_samplerate * start_delay / 1000000;
+    xfer_align = snd_pcm_sw_params_get_xfer_align(alsa_swparams);
+
     if ((err = snd_pcm_sw_params_current(alsa_handler, alsa_swparams)) < 0)
     {
 	printf("alsa-init: unable to get parameters: %s\n",
 	    snd_strerror(err));
 	return(0);
-    }    
+    }
+	
+	if ((err = snd_pcm_sw_params_set_avail_min(alsa_handler, alsa_swparams, chunk_size)) < 0)
+	  {
+	    printf("alsa-init: unable to set avail_min %s\n",snd_strerror(err));
+	    return(0);
+	  }
+
+
+	
+	if ((err = snd_pcm_sw_params_set_start_threshold(alsa_handler, alsa_swparams, start_threshold)) < 0)
+	  {
+	    printf("alsa-init: unable to set start_threshold %s\n",snd_strerror(err));
+	    return(0);
+	  }
+    } 
+    //      if ((err = snd_pcm_sw_params_set_xfer_align(alsa_handler, alsa_swparams, xfer_align)) < 0)
+    //{
+    //	printf("alsa-init: unable to set xfer_align: %s\n",
+    //	    snd_strerror(err));
+    //	return(0);
+    //}
 
 #ifdef set_start_mode
     if ((err = snd_pcm_sw_params_set_start_mode(alsa_handler, alsa_swparams,
@@ -453,8 +488,8 @@ static int play(void* data, int len, int flags)
 
     got_len = snd_pcm_writei(alsa_handler, data, len / 4);
     
-      // war: if ((got_len = snd_pcm_writei(alsa_handler, data, (len/ao_bps))) != (len/ao_bps)) {     
-      
+    //if ((got_len = snd_pcm_writei(alsa_handler, data, (len/ao_bps))) != (len/ao_bps)) {     
+    //SHOULD BE FIXED      
 	if (got_len == -EPIPE) /* underrun? */
 	{
 	    printf("alsa-play: alsa underrun, resetting stream\n");
@@ -472,6 +507,7 @@ static int play(void* data, int len, int flags)
 	    return(len); /* 2nd write was ok */
     }
     return(len);
+    //}
 }
 
 /* how many byes are free in the buffer */
