@@ -1,3 +1,4 @@
+
 .\" MPlayer (C) 2000-2003 Arpad Gereoffy
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
@@ -2115,7 +2116,20 @@ h: haute qualité
 .br
 p: mixe du bruit aléatoire avec un motif (semi)régulier
 .REss
-.IPs eq[=bright:cont]
+.IPs "denoise3d[=luma:chroma:temps]"
+Ce filtre est destiné à réduire le bruit de l'image pour produire des images 
+lissées et garder des images réellement fidèles (cela devrait amèliorer la 
+compatibilité.).
+On peut lui donner de 0 à 3 paramètres. Si vous ommétez un paramètre, une valeur
+résonnable sera insérée.
+.RSss
+luma:   force spatiale du luma (par défaut = 4)
+.br
+chroma: force spatiale du chroma (par défaut = 3)
+.br
+time:	force temporelle (par défaut = 6)
+.REss
+.IPs eq[=lumi:cont]
 Active l'égaliseur logiciel avec contrôles interactifs comme les ég. matériels.
 Les valeurs peuvent aller de -100 à 100.
 .IPs eq2[=gamma:cont:lumi]
@@ -2296,6 +2310,7 @@ clear: efface le framebuffer avant blitting.
 donc vous n'aurez pas à envoyer 1,8 Mo de données RGBA32 chaque fois qu'une 
 petite partie de l'écran est mise à jour.
 .REss
+.RE
 .
 .TP
 .B \-x <x> (MPLAYER uniquement)
