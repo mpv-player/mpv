@@ -81,7 +81,7 @@ void mpeg2_init (void)
 
 //    printf("libmpeg2 config flags = 0x%X\n",config.flags);
 
-    picture=shmem_alloc(sizeof(picture_t)); // !!! NEW HACK :) !!!
+    picture=malloc(sizeof(picture_t)); // !!! NEW HACK :) !!!
 
     header_state_init (picture);
 //    picture->repeat_count=0;
@@ -114,7 +114,7 @@ void mpeg2_allocate_image_buffers (picture_t * picture)
 #else
 	for(i=0;i<3;i++){
 #endif
-            base = shmem_alloc(buff_size);
+            base = memalign(64,buff_size);
 	    frames[i].base[0] = base;
 	    frames[i].base[1] = base + frame_size * 5 / 4;
 	    frames[i].base[2] = base + frame_size;
@@ -125,6 +125,19 @@ void mpeg2_allocate_image_buffers (picture_t * picture)
 	picture->forward_reference_frame=&frames[0];
 	picture->backward_reference_frame=&frames[1];
 	picture->current_frame=&frames[2];
+
+}
+
+void mpeg2_free_image_buffers (picture_t * picture){
+	int i;
+
+#ifdef MPEG12_POSTPROC
+	for(i=0;i<4;i++){
+#else
+	for(i=0;i<3;i++){
+#endif
+            free(frames[i].base[0]);
+	}
 
 }
 
