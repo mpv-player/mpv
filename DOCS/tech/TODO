@@ -10,7 +10,9 @@ demuxer:
 - test and cleanup FLI/FLC support (and implement seek)
 
 decoders:
-- finish native g72x audio decoder
+- getting vivo audio DLL codec working...
+- getting mss1 (Windows Screen Video) DLL codec working...
+- getting PIM1 codec working...
 - finish and switch to C directshow code
 
 mencoder:
