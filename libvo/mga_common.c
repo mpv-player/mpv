@@ -355,7 +355,7 @@ static int mga_uninit(){
   return 0;
 }
 
-static uint32_t preinit(const char *arg)
+static uint32_t preinit(const char *vo_subdevice)
 {
   char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 
@@ -363,7 +363,7 @@ static uint32_t preinit(const char *arg)
 	if(f == -1)
 	{
 		perror("open");
-		printf("Couldn't open %s\n",devname); 
+		printf("vo_mga: Couldn't open %s\n",devname);
 		return(-1);
 	}
   return 0;

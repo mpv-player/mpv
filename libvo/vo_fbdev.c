@@ -1274,7 +1274,7 @@ static void uninit(void)
 #endif
 }
 
-static uint32_t preinit(const char *arg)
+static uint32_t preinit(const char *vo_subdevice)
 {
     pre_init_err = 0;
 #ifdef CONFIG_VIDIX
