@@ -807,6 +807,7 @@ case VCODEC_LIBAVCODEC:
 	avcodec_inited=1;
     }
     
+#if 1
     {
 	extern AVCodec *first_avcodec;
 	AVCodec *p = first_avcodec;
@@ -820,11 +821,11 @@ case VCODEC_LIBAVCODEC:
 	}
 	lavc_venc_codec = p;
     }
-
+#else
     /* XXX: implement this in avcodec (i will send a patch to ffmpeglist) -- alex */
-//    lavc_venc_codec = (AVCodec *)avcodec_find_encoder_by_name(lavc_param_vcodec);
+    lavc_venc_codec = (AVCodec *)avcodec_find_encoder_by_name(lavc_param_vcodec);
+#endif
 
-//    lavc_venc_codec = (AVCodec *)avcodec_find_encoder(0);
     if (!lavc_venc_codec)
     {
 	printf(MSGTR_MissingLAVCcodec, lavc_param_vcodec);
@@ -833,8 +834,10 @@ case VCODEC_LIBAVCODEC:
 
     memset(&lavc_venc_context, 0, sizeof(lavc_venc_context));
     
-    lavc_venc_context.width = mux_v->bih->biWidth;
-    lavc_venc_context.height = mux_v->bih->biHeight;
+//    lavc_venc_context.width = mux_v->bih->biWidth;
+//    lavc_venc_context.height = mux_v->bih->biHeight;
+    lavc_venc_context.width = vo_w;
+    lavc_venc_context.height = vo_h;
     if (lavc_param_vbitrate >= 0) /* != -1 */
 	lavc_venc_context.bit_rate = lavc_param_vbitrate;
     else
@@ -844,8 +847,9 @@ case VCODEC_LIBAVCODEC:
     if (lavc_param_keyint >= 0) /* != -1 */
 	lavc_venc_context.gop_size = lavc_param_keyint;
     else
-	lavc_venc_context.gop_size = 10; /* default */
+	lavc_venc_context.gop_size = 250; /* default */
     
+    /* ignored by libavcodec? */
     if (lavc_param_vhq)
     {
 	printf("High quality encoding selected (non real time)!\n");
@@ -853,7 +857,12 @@ case VCODEC_LIBAVCODEC:
     }
     else
 	lavc_venc_context.flags = 0;
-//    lavc_venc_context.flags |= CODEC_FLAG_QSCALE;
+
+#if 0
+    /* fixed qscale :p */
+    lavc_venc_context.flags |= CODEC_FLAG_QSCALE;
+    lavc_venc_context.quality = 1;
+#endif
 
     if (avcodec_open(&lavc_venc_context, lavc_venc_codec) != 0)
     {
@@ -867,15 +876,36 @@ case VCODEC_LIBAVCODEC:
 	return 0;
     }
 
+#if 1
+    if (out_fmt != IMGFMT_YV12)
+    {
+        printf("Not supported image format! (%s)\n",
+    	    vo_format_name(out_fmt));
+	return 0; /* FIXME */
+    }
+
+    memset(&lavc_venc_picture, 0, sizeof(lavc_venc_picture));
+    
+    {
+	int size = lavc_venc_context.width * lavc_venc_context.height;
+
+/* Y */	lavc_venc_picture.data[0] = vo_image_ptr;
+/* U */	lavc_venc_picture.data[2] = lavc_venc_picture.data[0] + size;
+/* V */	lavc_venc_picture.data[1] = lavc_venc_picture.data[2] + size/4;
+	lavc_venc_picture.linesize[0] = lavc_venc_context.width;
+	lavc_venc_picture.linesize[1] = lavc_venc_context.width / 2;
+	lavc_venc_picture.linesize[2] = lavc_venc_context.width / 2;
+    }
+#else
     switch(out_fmt)
     {
 	case IMGFMT_YV12:
 	    lavc_venc_context.pix_fmt = PIX_FMT_YUV420P;
 	    break;
-	case IMGFMT_UYVY:
+#if 0 /* it's faulting :( -- libavcodec's bug! -- alex */
+	case IMGFMT_YUY2: /* or UYVY */
 	    lavc_venc_context.pix_fmt = PIX_FMT_YUV422;
 	    break;
-#if 0 /* it's faulting :( -- libavcodec's bug! -- alex */
 	case IMGFMT_BGR24:
 	    lavc_venc_context.pix_fmt = PIX_FMT_BGR24;
 	    break;
@@ -892,6 +922,11 @@ case VCODEC_LIBAVCODEC:
     printf("Using picture format: %s\n", vo_format_name(out_fmt));
 
     memset(&lavc_venc_picture, 0, sizeof(lavc_venc_picture));
+    
+    printf("ahh: avpict_getsize=%d, vo_image_ptr=%d\n", avpicture_get_size(lavc_venc_context.pix_fmt,
+	lavc_venc_context.width, lavc_venc_context.height),
+	vo_h*vo_w*3/2);
+    
     avpicture_fill(&lavc_venc_picture, vo_image_ptr,
 	lavc_venc_context.pix_fmt, lavc_venc_context.width,
 	lavc_venc_context.height);
@@ -902,6 +937,8 @@ case VCODEC_LIBAVCODEC:
 	avcodec_string((char *)&buf[0], 1023, &lavc_venc_context, 1);
 	printf("%s\n", buf);
     }
+#endif
+
 #endif
 }
 
