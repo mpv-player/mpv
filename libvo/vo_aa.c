@@ -200,7 +200,7 @@ printosdtext()
     /* 
      * places the mplayer status osd
      */
-  if (vo_osd_text) {
+  if (vo_osd_text && vo_osd_text[0] != 0) {
     int len;
     if(vo_osd_text[0] < 32) {
       len = strlen(__sub_osd_names_short[vo_osd_text[0]]) + strlen(vo_osd_text+1) + 2;
