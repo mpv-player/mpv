@@ -63,7 +63,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     } else {
 	mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_DRAW_CALLBACK,
 	    sh->disp_w, sh->disp_h);
-	mpeg2_decode_data(sh->video_out, data, data+len,flags&3); // decode
+	if(
+	mpeg2_decode_data(sh->video_out, data, data+len,flags&3)==0 // decode
+	)return NULL;//hack for interlaced mpeg2
     }
     return mpi;
 }
