@@ -3,7 +3,7 @@
    1: aproximate
    2: full (slowest, best looking)
  */
-#define ANTIALIASING_ALGORITHM 1
+#define ANTIALIASING_ALGORITHM 2
 
 /* SPUdec.c
    Skeleton of function spudec_process_controll() is from xine sources.
@@ -69,6 +69,7 @@ typedef struct {
   vo_functions_t *hw_spu;
 } spudec_handle_t;
 
+static int spu_changed = 0;
 
 static inline unsigned int get_be16(const unsigned char *p)
 {
@@ -347,8 +348,14 @@ static void spudec_decode(spudec_handle_t *this, unsigned int pts100)
     spudec_process_control(this, pts100);
     spudec_process_data(this);
   }
+  spu_changed = 1;
 }
 
+int spudec_changed(void * this)
+{
+    spudec_handle_t * spu = (spudec_handle_t*)this;
+    return (spu_changed|(spu->now_pts > spu->end_pts));
+}
 
 void spudec_assemble(void *this, unsigned char *packet, unsigned int len, unsigned int pts100)
 {
@@ -443,6 +450,27 @@ void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsi
     if (spu->start_pts <= spu->now_pts && spu->now_pts < spu->end_pts && spu->image)
 	draw_alpha(spu->start_col, spu->start_row, spu->width, spu->height,
 		   spu->image, spu->aimage, spu->stride);
+}
+
+void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int* bbox)
+{
+  spudec_handle_t *spu;
+  spu = (spudec_handle_t *)me;
+  if (spu->orig_frame_width == 0 || spu->orig_frame_height == 0
+  || (spu->orig_frame_width == dxs && spu->orig_frame_height == dys)) {
+    bbox[0] = spu->start_col;
+    bbox[1] = spu->start_col + spu->width;
+    bbox[2] = spu->start_row;
+    bbox[3] = spu->start_row + spu->height;
+  }
+  else if (spu->scaled_frame_width != dxs || spu->scaled_frame_height != dys) {
+    unsigned int scalex = 0x100 * dxs / spu->orig_frame_width;
+    unsigned int scaley = 0x100 * dys / spu->orig_frame_height;
+    bbox[0] = spu->start_col * scalex / 0x100;
+    bbox[1] = spu->start_col * scalex / 0x100 + spu->width * scalex / 0x100;
+    bbox[2] = spu->start_row * scaley / 0x100;
+    bbox[3] = spu->start_row * scaley / 0x100 + spu->height * scaley / 0x100;
+  }
 }
 
 /* transform mplayer's alpha value into an opacity value that is linear */
@@ -718,9 +746,11 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	  spu->scaled_frame_height = dys;
 	}
       }
-      if (spu->scaled_image)
+      if (spu->scaled_image){
 	draw_alpha(spu->scaled_start_col, spu->scaled_start_row, spu->scaled_width, spu->scaled_height,
 		   spu->scaled_image, spu->scaled_aimage, spu->scaled_stride);
+	spu_changed = 0;
+      }
     }
   }
   else

@@ -320,6 +320,22 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
     
 }
 
+inline static void vo_update_spudec_sub(mp_osd_obj_t* obj, int dxs, int dys)
+{
+  unsigned int bbox[4];
+  int i;
+  spudec_calc_bbox(vo_spudec, dxs, dys, bbox);
+  obj->bbox.x1 = bbox[0];
+  obj->bbox.x2 = bbox[1];
+  obj->bbox.y1 = bbox[2];
+  obj->bbox.y2 = bbox[3];
+  obj->flags |= OSDFLAG_BBOX;
+}
+
+inline static void vo_draw_spudec_sub(mp_osd_obj_t* obj, void (*draw_alpha)(int x0, int y0, int w, int h, unsigned char* src, unsigned char* srca, int stride))
+{
+  spudec_draw_scaled(vo_spudec, obj->dxs, obj->dys, draw_alpha);
+}
 inline static void vo_draw_text_sub(mp_osd_obj_t* obj,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
    int i,j,c,x,l,font;
    int y=obj->y;
@@ -385,8 +401,10 @@ int vo_update_osd(int dxs,int dys){
 	    vo_update_text_progbar(obj,dxs,dys);
 	    break;
 	case OSDTYPE_SPU:
-	    if(vo_spudec && spudec_visible(vo_spudec))
+	    if(vo_spudec && spudec_visible(vo_spudec)){
+	        vo_update_spudec_sub(obj, dxs, dys);
 		obj->flags|=OSDFLAG_VISIBLE|OSDFLAG_CHANGED;
+	    }
 	    else
 		obj->flags&=~OSDFLAG_VISIBLE;
 	    break;
@@ -473,7 +491,7 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 	vo_osd_changed_flag=obj->flags&OSDFLAG_CHANGED;	// temp hack
 	switch(obj->type){
 	case OSDTYPE_SPU:
-	    spudec_draw_scaled(vo_spudec, dxs, dys, draw_alpha); // FIXME
+	    vo_draw_spudec_sub(obj, draw_alpha); // FIXME
 	    break;
 	case OSDTYPE_OSD:
 	    vo_draw_text_osd(obj,draw_alpha);

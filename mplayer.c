@@ -2960,8 +2960,9 @@ if(vo_config_count && vo_spudec) {
       spudec_assemble(vo_spudec,packet,len,timestamp);
   }
   
-  /* Don't know how to detect wether the sub has changed or not */
-  vo_osd_changed(OSDTYPE_SPU);
+  /* detect wether the sub has changed or not */
+  if(spudec_changed(vo_spudec))
+    vo_osd_changed(OSDTYPE_SPU);
   current_module=NULL;
 }
   
