@@ -8,7 +8,7 @@ static char help_text[]=
 "\n"
 "  Options:\n"
 "    -vo <driver>    select video output driver (see '-vo help' for driver list)\n"
-"    -ao <driver>    select audio output driver (see '-vo help' for driver list)\n"
+"    -ao <driver>    select audio output driver (see '-ao help' for driver list)\n"
 "    -vcd <track>    play video cd track from device instead of plain file\n"
 //"    -bg             play in background (X11 only!)\n"
 "    -sb <bytepos>   seek to byte position\n"
