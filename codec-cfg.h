@@ -27,6 +27,7 @@
 #define AFM_DSHOW 7
 #define AFM_DVDPCM 8
 #define AFM_HWAC3 9
+#define AFM_VORBIS 10
 
 #define VFM_MPEG 1
 #define VFM_VFW 2

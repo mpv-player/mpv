@@ -7,6 +7,24 @@ typedef struct {
 } codecinfo_t;
 */
 
+#ifdef HAVE_OGGVORBIS
+#include <math.h>
+#include <vorbis/codec.h>
+typedef struct {
+  ogg_sync_state   oy; /* sync and verify incoming physical bitstream */
+  ogg_stream_state os; /* take physical pages, weld into a logical
+			  stream of packets */
+  ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
+  ogg_packet       op; /* one raw packet of data for decode */
+  
+  vorbis_info      vi; /* struct that stores all the static vorbis bitstream
+			  settings */
+  vorbis_comment   vc; /* struct that stores all the bitstream user comments */
+  vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
+  vorbis_block     vb; /* local working space for packet->PCM decode */
+} ov_struct_t;
+#endif
+
 typedef struct {
   demux_stream_t *ds;
   unsigned int format;
@@ -40,6 +58,9 @@ typedef struct {
 //  ac3_frame_t *ac3_frame;
   void* ac3_frame;
   int pcm_bswap;
+#ifdef HAVE_OGGVORBIS
+  ov_struct_t *ov; // should be assigned on init
+#endif
 } sh_audio_t;
 
 typedef struct {
