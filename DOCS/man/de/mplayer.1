@@ -4096,7 +4096,7 @@ Generiere verschiedene Testmuster.
 .TP
 .B rgbtest
 Generiere ein RGB-Testmuster, nützlich, um RGB/\:BGR-Probleme zu erkennen.
-Du solltest einen roten, grünen und blauben Streifen von oben nach unten sehen.
+Du solltest einen roten, grünen und blauen Streifen von oben nach unten sehen.
 .
 .TP
 .B lavc[=Qualität:fps]
@@ -4170,9 +4170,9 @@ Dieser Filter versucht, Bildrauschen zu unterdrücken und so bewegungslose
 Bilder wirklich statisch zu machen (was das Bild besser komprimierbar macht).
 .PD 0
 .RSs
-.IPs Helligkeit\ 
+.IPs Helligkeit
 räumliche Helligkeitsstärke (Standard = 4)
-.IPs Farbwert\ 
+.IPs Farbwert
 räumliche Farbstärke (Standard = 3)
 .IPs Zeit\ 
 zeitliche Stärke (Standard = 6)
@@ -4236,8 +4236,66 @@ Downsampling.
 Der optionale Parameter f steuert, welche Zeilen erhalten bleiben: bei 0
 nur die geraden, bei 1 nur die ungeraden.
 Andere Werte für f aktivieren das Standardverhalten (Durchschnittsbildung).
-.\" manpage is synced until this option.
-.IPs dint[=sense:level]
+.
+.TP
+.B ilpack[=Modus]
+Wenn interlaced-Videos in YUV 4:2:0-Formaten gespeichert wird, wird das
+Interlacing der Chrominanz wegen vertikalen Resamplings der Chrominanzkanäle
+nicht an den richtigen Stellen dargestellt.
+Dieser Filter packt die planaren 4:2:0-Daten in das YUY2 (4:2:2)-Format
+mit den Chrominanzlinien an den richten Stellen.
+So kommen die Daten für Helligkeit und Chrominanz für jede Linie vom selben
+Feld.
+Das optionale Argument wählt den Sampling-Modus.
+Als Standard wird die lineare Interpolation (Modus 1) verwendet.
+Modus 0 verwendet die Sampling-Methode des nächstgelegenen Nachbars
+(nearest-neighbor), welche schnell aber unkorrekt arbeitet.
+.
+.TP
+.B harddup
+Nur in Verbindung mit MEncoder nützlich.
+Wenn harddup bei der Encodierung verwendet wird, sorgt es dafür, daß doppelte
+Frames auch im encodierten Output doppelt vorkommen.
+Dies verbraucht sehr wenig mehr an Platz, ist jedoch für die Ausgabe in
+MPEG-Dateien nötig oder dann, wenn der Videostream nach der Encodierung
+getrennt und neu zusammengesetzt werden soll (demux bzw.\& remux).
+Die Option sollte am oder nahe am Ende der Filterkette stehen, es sei denn, du
+hast einen guten Grund, es anders zu machen.
+.
+.TP
+.B softskip
+Nur in Verbindung mit MEncoder nützlich.
+Softskip verschiebt den Schritt des Encodierungsvorgangs, Frames zu
+Überspringen (Wegzulassen) von der Position vor der Filterkette in die
+Filterkette hinein.
+Dies erlaubt denjenigen Filtern, die alle Frames untersuchen müssen
+(umgekehrtes Telecine, temporäre Rauschunterdrückung), korrekt zu arbeiten.
+Sollte nach den Filtern, die alle Frames untersuchen müssen, platziert werden
+und vor all denjenigen, die CPU-intensiv sind.
+.
+.TP
+.B decimate[=max:hi:lo:frac]
+Lässt Frames weg, die sich nicht sehr on den vorigen unterscheiden, um die
+Framerate zu reduzieren.
+Das Argument max (falls positiv) setzt eine obere Grenze für die Anzahl
+aufeinanderfolgender Frames, die weggelassen werden können, sonst (falls
+negativ) das kleinste Intervall zwischen weggelassenen Frames.
+Ein Frame ist Kanditat dafür, weggelassen zu werden, falls keine 8x8-Region
+sich mehr unterscheidet als der Schwellwert hi angibt und falls sich nicht
+mehr als der Anteil frac angibt (wobei 1 das ganze Bild bedeutet) vom
+Schwellwert lo unterscheidet.
+Werte für hi und lo beziehen sich auf 8x8-Pixelblöcke und repräsentieren
+aktuelle Unterschiede der Pixelwerte.
+Ein Schwellwert von 64 entspricht einer Einheit im Unterschied für jeden
+Pixel oder derselben unterschiedlichen Ausbreitung über einen Block.
+Die Hauptanwendung für diesen Filter ist die Encodierung bei sehr niedrigen
+Bitraten (z.B.\& Streaming über eine Modemverbindung), er kann aber
+theoretisch auch dazu benutzt werden, um Filme zu reparieren, mit
+inversed-telecine fehlerhaft encodiert worden sind.
+.
+.TP
+.\" manpage is synced down to this option.
+.B dint[=sense:level]
 Erkennt interlaced Bilder im Videostream und verwirft jeweils das erste.
 Die Werte können zwischen 0.0 und 1.0 liegen. Der erste Wert (Standard: 0.1)
 ist die relative Differenz zwischen benachbarten Pixeln. Der zweite Wert
