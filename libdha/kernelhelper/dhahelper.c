@@ -4,14 +4,18 @@
     (C) 2002 Alex Beregszaszi <alex@naxine.org>
     
     Accessing hardware from userspace as USER (no root needed!)
+
+    Tested on 2.2.x (2.2.19) and 2.4.x (2.4.3,2.4.17).
     
-    WARNING!
-    Don't use this on a production system! Use only at home, on a
-    "single-user" Unix system.
+    License: GPL
+    
+    WARNING! THIS MODULE VIOLATES SEVERAL SECURITY LINES! DON'T USE IT
+    ON PRODUCTION SYSTEMS, ONLY AT HOME, ON A "SINGLE-USER" SYSTEM.
+    NO WARRANTY!
 
     Tech:
-	Communication between userspace and kernelspace is going trought
-	character device using ioctl.
+	Communication between userspace and kernelspace goes over character
+	device using ioctl.
 
     Usage:
 	mknod -m 666 /dev/dhahelper c 180 0
@@ -22,12 +26,13 @@
 	Note: do not use other than minor==0, the module forbids it.
 
     TODO:
-	* do memory mappin without fops:mmap
+	* do memory mapping without fops:mmap
 	* implement unmap memory
-	* select (request?) a "valid" major number
+	* select (request?) a "valid" major number (from Linux project? ;)
 	* make security
 	* is pci handling needed? (libdha does this with lowlevel port funcs)
-	* test on older kernels (2.0.x (?) and 2.2.x)
+	* is mttr handling needed?
+	* test on older kernels (2.0.x (?))
 */
 
 #ifndef MODULE
@@ -39,6 +44,12 @@
 #endif
 
 #include <linux/config.h>
+
+#ifdef CONFIG_MODVERSION
+#define MODVERSION
+#include <linux/modversions.h>
+#endif
+
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/types.h>
@@ -70,18 +81,21 @@
 #include "dhahelper.h"
 
 MODULE_AUTHOR("Alex Beregszaszi <alex@naxine.org>");
+MODULE_DESCRIPTION("Provides userspace access to hardware (security violation!)");
 #ifdef MODULE_LICENSE
-MODULE_LICENSE("GPL"); /* modulelicensesh*t */
+MODULE_LICENSE("GPL");
 #endif
 
 static int dhahelper_major = DEFAULT_MAJOR;
 MODULE_PARM(dhahelper_major, "i");
+MODULE_PARM_DESC(dhahelper_major, "Major number of dhahelper characterdevice");
 
 /* 0 = silent */
 /* 1 = report errors (default) */
 /* 2 = debug */
 static int dhahelper_verbosity = 1;
 MODULE_PARM(dhahelper_verbosity, "i");
+MODULE_PARM_DESC(dhahelper_verbosity, "Level of verbosity (0 = silent, 1 = only errors, 2 = debug)");
 
 static dhahelper_memory_t last_mem_request;
 
@@ -225,7 +239,12 @@ static int dhahelper_ioctl(struct inode *inode, struct file *file,
 	    {
 		case MEMORY_OP_MAP:
 		{
+#if 1
 		    memcpy(&last_mem_request, &mem, sizeof(dhahelper_memory_t));
+#else
+		    mem.ret = do_mmap(file, mem.start, mem.size, PROT_READ|PROT_WRITE,
+			MAP_SHARED, mem.offset);
+#endif
 
 		    break;
 		}
@@ -306,7 +325,11 @@ static struct file_operations dhahelper_fops =
 };
 #endif
 
+#if KERNEL_VERSION < KERNEL_VERSION(2,4,0)
+int init_module(void)
+#else 
 static int __init init_dhahelper(void)
+#endif
 {
     printk(KERN_INFO "Direct Hardware Access kernel helper (C) Alex Beregszaszi\n");
 
@@ -321,12 +344,18 @@ static int __init init_dhahelper(void)
     return(0);
 }
 
+#if KERNEL_VERSION < KERNEL_VERSION(2,4,0)
+void cleanup_module(void)
+#else
 static void __exit exit_dhahelper(void)
+#endif
 {
     unregister_chrdev(dhahelper_major, "dhahelper");
 }
 
 EXPORT_NO_SYMBOLS;
 
+#if KERNEL_VERSION >= KERNEL_VERSION(2,4,0)
 module_init(init_dhahelper);
 module_exit(exit_dhahelper);
+#endif
