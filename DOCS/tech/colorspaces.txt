@@ -1,0 +1,51 @@
+Huh. The planar YUV modes.
+==========================
+
+The most missunderstood thingie...
+
+Let's see: (some cut'n'paste from www and maillist)
+
+RGB to YUV Conversion:
+    Y  =      (0.257 * R) + (0.504 * G) + (0.098 * B) + 16
+    Cr = V =  (0.439 * R) - (0.368 * G) - (0.071 * B) + 128
+    Cb = U = -(0.148 * R) - (0.291 * G) + (0.439 * B) + 128
+YUV to RGB Conversion:
+    B = 1.164(Y - 16)                  + 2.018(U - 128)
+    G = 1.164(Y - 16) - 0.813(V - 128) - 0.391(U - 128)
+    R = 1.164(Y - 16) + 1.596(V - 128)
+
+In both these cases, you have to clamp the output values to keep them in
+the [0-255] range. Rumour has it that the valid range is actually a subset
+of [0-255] (I've seen an RGB range of [16-235] mentioned) but clamping the
+values into [0-255] seems to produce acceptable results to me.
+
+Julien (surname unknown) suggests that there are problems with the above
+formulae and suggests the following instead: 
+         Y = 0.299R + 0.587G + 0.114B
+    Cb = U'= (B-Y)*0.565
+    Cr = V'= (R-Y)*0.713
+with reciprocal versions:
+    R = Y + 1.403V'
+    G = Y - 0.344U' - 0.714V'
+    B = Y + 1.770U'
+note: this formule doesn't contain the +128 offsets of U,V values!
+
+Conclusion:
+Y = luminance, the weighted average of R G B components. (0=black 255=white)
+U = Cb = blue component (0=green 128=grey 255=blue)
+V = Cv = red component  (0=green 128=grey 255=red)
+
+MPlayer side:
+=============
+In MPlayer, we usually have 3 pointers to the Y, U and V planes, so it
+doesn't matter what is they order in memory.
+But there are some codecs (vfw, dshow) and vo drivers (xv) ignoring the 2nd
+and 3rd pointer, and use only a single pointer to the planar yuv image. In
+this case we must know the right order and alignment of planes in the memory!
+
+from the webartz fourcc list:
+YV12:  12 bpp, full sized Y plane followed by 2x2 subsampled V and U planes
+I420:  12 bpp, full sized Y plane followed by 2x2 subsampled U and V planes
+IYUV:  the same as I420
+YVU9:   9 bpp, full sized Y plane followed by 4x4 subsampled V and U planes
+
