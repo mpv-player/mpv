@@ -1908,9 +1908,7 @@ switch(file_format){
 //       picture->bitrate=2324*75*8; // standard VCD bitrate (75 sectors / sec)
 
         if(newpos<seek_to_byte) newpos=seek_to_byte;
-#ifdef HAVE_LIBCSS
-        if (dvd_device) newpos&=~(STREAM_BUFFER_SIZE-1);  /* sector boundary */
-#endif
+        newpos&=~(STREAM_BUFFER_SIZE-1);  /* sector boundary */
         stream_seek(demuxer->stream,newpos);
         // re-sync video:
         videobuf_code_len=0; // reset ES stream buffer
