@@ -886,7 +886,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  sh->aspect/=trak->tkdata[81]|(trak->tkdata[80]<<8);
 		}
 		
-		if(depth&(~15)) printf("*** depht = 0x%X\n",depth);
+		if(depth&(~15)) printf("*** depth = 0x%X\n",depth);
 
 		// palettized?
 		depth&=31; // flag 32 means grayscale
