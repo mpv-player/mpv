@@ -610,10 +610,10 @@ if(strncmp("dvbin://",filename,8) == 0)
 	mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ReadSTDIN);
 	f=0; // 0=stdin
     } else {
-#ifndef __CYGWIN__
-       f=open(filename,O_RDONLY);
-#else
+#if defined(__CYGWIN__) || defined(__MINGW32__)
        f=open(filename,O_RDONLY|O_BINARY);
+#else
+       f=open(filename,O_RDONLY);
 #endif
        if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);return NULL; }
     }
