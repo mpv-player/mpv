@@ -7378,6 +7378,90 @@ P-Frames mit der Option vhq getan wird.
 Dies liefert besser aussehende B-Frames, während fast keine
 Performance-Einbußen auftreten.
 .
+.
+.SS x264enc (\-x264encopts)
+.
+.TP
+.B bitrate=<Wert>
+Setzt die zu benutzende Bitrate in kbits/\:Sekunde (Standard: aus).
+Wird benötigt, wenn du CBR (Encodierung mit konstanter Bitrate) möchtest.
+.
+.TP
+.B qp_constant=<1\-51>
+Dies wählt die zu benutzende Quantisierung für P-Frames.
+Intra- und B-Frames haben von diesem Wert einen Offset von ip_factor und
+pb_factor respektive.
+20\-40 ist ein brauchbarer Bereich (Standard: 26).
+Niedrigerere Werte resultieren in besserer Wiedergabetreue aber höheren
+Bitraten.
+Beachte, dass Quantisierung in H.264 unterschiedlich zu MPEG-1/2/4
+funktioniert:
+Quantisierungsparameter (QP) von H.264 werden logarithmisch skaliert.
+Das Mapping beträgt ungefähr H264QP = 12 + 6*log2(MPEGQP).
+Zum Beispiel ist MPEG bei QP=2 äquivalent zu H.264 bei QP=18.
+.
+.TP
+.B pass=<1\-3>
+Aktiviert 2- oder 3-pass-Modus.
+Es wird empfohlen, immer im 2- oder 3-pass-Modus zu encodieren, da es zu einer
+besseren Zuteilung der Bits führt und die Qualität im Ganzen verbessert.
+.PD 0
+.RSs
+.IPs 1
+erster Durchlauf
+.IPs 2
+zweiter Durchlauf (bei Encodierung im two-pass-Modus)
+.IPs 3
+Nter Durchlauf (zweiter und dritter Durchlauf der three-pass-Encodierung)
+.RE
+.RS
+Hier also wie es funktioniert und anzuwenden ist:
+.br
+Der erste Durchlauf (pass=1) sammelt Statistiken über das Video und schreibt
+sie in eine Datei.
+Du möchtest vielleicht manche CPU-intensive Optionen deaktivieren, abgesehen
+von denen, die als Standardeinstellung aktiviert sind.
+.br
+Im Modus mit zwei Durchläufen liest der zweite Durchlauf (pass=2) die
+Statistiken und steuert dementsprechend Entscheidungen der Bitratenkontrolle.
+.br
+Im Modus mit drei Durchläufen tut der zweite Durchlauf (pass=3, kein
+Rechtschreibfehler) beides: Er liest zuerst die Statistiken und überschreibt
+sie dann.
+Wenn die Möglichkeit besteht, dass du diesen Vorgang abbrechen musst, solltest
+du die Datei divx2pass.log vorher sichern.
+Du kannst alle Optionen für die Encodierung verwenden, außer den sehr
+CPU-intensiven.
+.br
+Der dritte Durchlauf (pass=3) ist dasselbe wie der zweite, außer, dass er die
+Statistiken des zweiten Durchlaufs zu Grundlage hat.
+Du kannst alle Optionen für die Encodierung verwenden, auch die sehr
+CPU-intensiven.
+.br
+Der erste Durchlauf darf entweder konstante Bitrate oder konstanten
+Quantisierungsparameter verwenden.
+Ein konstanter Quantisierungsparameter ist oft ein bisschen besser, aber du
+mußt einen qp_constant raten, der in der Nähe deiner erwünschten Bitrate liegt.
+(Es ist besser, eher einen niedrigeren Wert für qp_constant zu raten, also hin
+zu einer höheren Bitrate.)
+Nachfolgende Durchläufe sind ABR (average bitrate), und du musst eine Bitrate
+angeben.
+.br
+.I ANMERKUNG:
+Die Unterstützung für die Encodierung in drei Durchläufen für x264 ist neu in
+MEncoder, wir freuen uns daher über jegliches Feedback, das du geben kannst
+hinsichtlich guten Kombinationen von x264-Optionen, die sowohl schnell sind als
+auch gute Qualität liefern.
+.REss
+.
+.TP
+.B keyint=<Wert>
+Setzt das maximale Intervall zwischen IDR-Frames (Standard: 250).
+Größere Werte sparen Bits und erhöhen so die Qualität, dies geht aber auf
+Kosten der Genauigkeit beim Spulen.
+Im Gegensatz zu MPEG-1/2/4, leidet H.264 bei großen Werten für keyint nicht
+am DCT-Drift.
+.
 .\" man page is synced from top down to this option.
 .
 .\" --------------------------------------------------------------------------
