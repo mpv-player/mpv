@@ -6,6 +6,10 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-02-16:
+ *  Fixed bug which would case invalid output when using :noprebuf
+ *  Removed equalization code, it caused problems on slow systems
+ *
  * 2002-02-13:
  *  Using the swscaler instead of the old hand coded shit. (Checkout man mplayer and search for sws ;).
  *  Using aspect function to setup a proper mpeg1, no more hassling with odd resolutions or GOP-sizes,
@@ -364,8 +368,10 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
-	fd_set rfds;
-	struct timeval tv;
+	if (!vo_fps) {
+		ioval = 90000.0 / vo_fps;
+		ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
+	}
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
 		int out_size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
@@ -375,11 +381,6 @@ static void flip_page(void)
 		write(fd_video, avc_outbuf, out_size);
 	}
 #endif
-	tv.tv_sec = 0;
-	tv.tv_usec = 1e6 / floor(vo_fps);
-	FD_ZERO(&rfds);
-	FD_SET(fd_video, &rfds);
-	select(fd_video + 1, NULL, &rfds, NULL, &tv);
 }
 
 static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0)
@@ -428,15 +429,17 @@ static uint32_t preinit(const char *arg)
 	int fdflags = O_WRONLY;
 	
 	/* Open the control interface */
+	if (!strcmp("noprebuf", vo_subdevice)) {
+		printf("VO: [dxr3] Disabling prebuffering.\n");
+		noprebuf = 1;
+		fdflags |= O_NONBLOCK;
+		free(vo_subdevice);
+		vo_subdevice = NULL;
+	}
+	
 	if (vo_subdevice) {
-		if (!strcmp("noprebuf", vo_subdevice)) {
-			printf("VO: [dxr3] Disabling prebuffering.\n");
-			noprebuf = 1;
-			fdflags |= O_NONBLOCK;
-		} else {
-			printf("VO: [dxr3] Forcing use of device %s\n", vo_subdevice);
-			sprintf(devname, "/dev/em8300-%s", vo_subdevice);
-		}
+		printf("VO: [dxr3] Forcing use of device %s\n", vo_subdevice);
+		sprintf(devname, "/dev/em8300-%s", vo_subdevice);
 	} else {
 		/* Try new naming scheme by default */
 		sprintf(devname, "/dev/em8300-0");
