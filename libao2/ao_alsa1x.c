@@ -853,10 +853,10 @@ static int play_normal(void* data, int len)
 
   //bytes_per_sample is always 4 for 2 chn S16_LE
   int num_frames = len / bytes_per_sample;
-  signed short *output_samples=data;
+  char *output_samples = (char *)data;
   snd_pcm_sframes_t res = 0;
 
-  //printf("alsa-play: frames=%i, len=%i",num_frames,len);
+  //fprintf(stderr,"alsa-play: frames=%i, len=%i\n",num_frames,len);
 
   if (!alsa_handler) {
     printf("alsa-play: device configuration error");
@@ -891,7 +891,10 @@ static int play_normal(void* data, int len)
       }
 
       if (res > 0) {
-	output_samples += ao_data.channels * res;
+
+	/* output_samples += ao_data.channels * res; */
+	output_samples += res * bytes_per_sample;
+
 	num_frames -= res;
       }
 
