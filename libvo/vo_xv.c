@@ -101,15 +101,21 @@ static uint32_t               dwidth,dheight;
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 
 static void draw_alpha_yv12(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   vo_draw_alpha_yv12(w,h,src,srca,stride,xvimage[current_buf]->data+image_width*y0+x0,image_width);
+   vo_draw_alpha_yv12(w,h,src,srca,stride,
+       xvimage[current_buf]->data+xvimage[current_buf]->offsets[0]+
+       xvimage[current_buf]->pitches[0]*y0+x0,xvimage[current_buf]->pitches[0]);
 }
 
 static void draw_alpha_yuy2(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[current_buf]->data+2*(image_width*y0+x0),2*image_width);
+   vo_draw_alpha_yuy2(w,h,src,srca,stride,
+       xvimage[current_buf]->data+xvimage[current_buf]->offsets[0]+
+       xvimage[current_buf]->pitches[0]*y0+2*x0,xvimage[current_buf]->pitches[0]);
 }
 
 static void draw_alpha_uyvy(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[current_buf]->data+2*(image_width*y0+x0)+1,2*image_width);
+   vo_draw_alpha_yuy2(w,h,src,srca,stride,
+       xvimage[current_buf]->data+xvimage[current_buf]->offsets[0]+
+       xvimage[current_buf]->pitches[0]*y0+2*x0+1,xvimage[current_buf]->pitches[0]);
 }
 
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
