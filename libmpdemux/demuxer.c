@@ -373,6 +373,7 @@ extern int num_elementary_packets100; // for MPEG-ES fileformat detection
 extern int num_elementary_packets101;
 extern int num_elementary_packetsPES;
 extern int num_elementary_packets1B6;
+extern int num_mp3audio_packets;
 
 // commandline options, flags:
 //extern int seek_to_byte;
@@ -566,6 +567,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
   num_elementary_packets101=0;
   num_elementary_packets1B6=0;
   num_elementary_packetsPES=0;
+  num_mp3audio_packets=0;
 
   if(ds_fill_buffer(demuxer->video)){
     if(!pes)
@@ -574,8 +576,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGPSfile);
     file_format=DEMUXER_TYPE_MPEG_PS;
   } else {
-    printf("MPEG packet stats: p100: %d  p101: %d  PES: %d \n",
-	num_elementary_packets100,num_elementary_packets101,num_elementary_packetsPES);
+    printf("MPEG packet stats: p100: %d  p101: %d  PES: %d  MP3: %d \n",
+	num_elementary_packets100,num_elementary_packets101,num_elementary_packetsPES,num_mp3audio_packets);
     // some hack to get meaningfull error messages to our unhappy users:
     if(num_elementary_packets100>=2 && num_elementary_packets101>=2 &&
        abs(num_elementary_packets101+8-num_elementary_packets100)<16){
