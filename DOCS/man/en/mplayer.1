@@ -151,10 +151,10 @@ too (without using the avifile library).
 .PP
 Another great feature of MPlayer is the wide range of supported output
 drivers.
-It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, Quartz, 
-but you can also use GGI, SDL (and all their drivers), VESA (on every VESA
-compatible card, even without X11), some low level card-specific drivers (for
-Matrox, 3Dfx and ATI) and some hardware MPEG decoder boards, such as the
+It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
+Quartz, but you can also use GGI, SDL (and all their drivers), VESA (on every
+VESA compatible card, even without X11), some low level card-specific drivers
+(for Matrox, 3Dfx and ATI) and some hardware MPEG decoder boards, such as the
 Siemens DVB, DXR2 and DXR3/\:Hollywood+.
 Most of them support software or hardware scaling, so you can enjoy movies in
 fullscreen.
@@ -1865,6 +1865,21 @@ Adjust saturation of video output (default: 0).
 You can get grayscale output with this option.
 .TP
 .B \-screenh <pixels> \-screenw <pixels>
+If you use an output driver which can't know the resolution of the screen
+(fbdev/\:x11 and/\:or TVout) this is where you can specify the horizontal and
+vertical resolution.
+.PP
+.B \-screenh <pixels>
+.br
+.B \-screenw <pixels>
+.TP
+If you use an output driver which can't know the resolution of the screen
+(fbdev/\:x11 and/\:or TVout) this is where you can specify the horizontal and
+vertical resolution.
+.TP
+.B \-screenh <pixels>
+.B \-screenw <pixels>
+.br
 If you use an output driver which can't know the resolution of the screen
 (fbdev/\:x11 and/\:or TVout) this is where you can specify the horizontal and
 vertical resolution.
@@ -3607,6 +3622,9 @@ Useful for benchmarking.
 .TP
 .B aa\ \ \ \ \ 
 ASCII art output driver that works on a text console.
+.TP
+.B caca\ \ \ 
+Colour AsCii Art output driver that works on a text console.
 .TP
 .B bl\ \ \ \ \ 
 Video playback using the Blinkenlights UDP protocol.

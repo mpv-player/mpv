@@ -1115,6 +1115,99 @@ tuning issues.
 </sect4>
 
 
+<sect4 id="caca">
+<title><systemitem class="library">libcaca</systemitem> - Colour AsCii Art library</title>
+
+<para>
+The <ulink url="http://sam.zoy.org/projects/libcaca/"><systemitem class="library">libcaca</systemitem></ulink>
+library is a graphics library that outputs text instead of pixels, so that it
+can work on older video cards or text terminals. It is not unlike the famous
+<systemitem class="library">AAlib</systemitem> library.
+<systemitem class="library">libcaca</systemitem> needs a terminal to work, thus
+it should work on all Unix systems (including Mac OS X) using either the
+<systemitem class="library">slang</systemitem> library or the
+<systemitem class="library">ncurses</systemitem> library, on DOS using the
+<systemitem class="library">conio.h</systemitem> library, and on Windows systems
+using either <systemitem class="library">slang</systemitem> or
+<systemitem class="library">ncurses</systemitem> (through Cygwin emulation) or
+<systemitem class="library">conio.h</systemitem>. If
+<filename>./configure</filename>
+detects <systemitem class="library">libcaca</systemitem>, the caca libvo driver
+will be built.
+</para>
+
+<itemizedlist>
+<title>The differences with <systemitem class="library">AAlib</systemitem> are
+  the following:</title>
+<listitem><simpara>
+   16 available colours for character output (256 colour pairs)
+  </simpara></listitem>
+<listitem><simpara>
+   color image dithering
+  </simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>But <systemitem class="library">libcaca</systemitem> also has the
+  following limitations:</title>
+<listitem><simpara>
+   no support for brightness, contrast, gamma
+  </simpara></listitem>
+</itemizedlist>
+
+<para>
+You can use some keys in the caca window to change rendering options:
+</para>
+
+<informaltable>
+<tgroup cols="2">
+<thead>
+  <row><entry>Key</entry><entry>Action</entry></row>
+</thead>
+<tbody>
+<row><entry><keycap>d</keycap></entry><entry>
+  Toggle <systemitem class="library">libcaca</systemitem> dithering methods.
+  </entry></row>
+<row><entry><keycap>a</keycap></entry><entry>
+  Toggle <systemitem class="library">libcaca</systemitem> antialiasing.
+  </entry></row>
+<row><entry><keycap>b</keycap></entry><entry>
+  Toggle <systemitem class="library">libcaca</systemitem> background.
+  </entry></row>
+</tbody>
+</tgroup>
+</informaltable>
+
+<variablelist>
+<title><systemitem class="library">libcaca</systemitem> will also look for certain environment variables:</title>
+<varlistentry>
+  <term><option>CACA_DRIVER</option></term>
+  <listitem><simpara>
+    Set recommended caca driver. e.g. ncurses, slang, x11.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>CACA_GEOMETRY (X11 only)</option></term>
+  <listitem><simpara>
+    Specifies the number of rows and columns. e.g. 128x50.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>CACA_FONT (X11 only)</option></term>
+  <listitem><simpara>
+    Specifies the font to use. e.g. fixed, nexus.
+    </simpara></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Use the <option>-framedrop</option> option if your computer is not fast
+enough to render all frames.
+</para>
+
+</sect4>
+
+
 <sect4 id="vesa">
 <title>VESA - output to VESA BIOS</title>
 

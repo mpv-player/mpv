@@ -182,7 +182,7 @@ we need fullscreen switch control function too.
 
 > Maybe we should allow video driver to change the libin driver ? 
 forget libin. most input stuff is handled by libvo drivers.
-think of all X stuff (x11,xv,dga,xmga,gl), SDL, aalib, svgalib.
+think of all X stuff (x11,xv,dga,xmga,gl), SDL, aalib, libcaca, svgalib.
 only a few transparent drivers (fbdev, mga, tdfxfb, vesa) has not, but all
 of them are running on console (and maybe on second head) at fullscreen, so
 they may not need mouse events. console keyboard events are already catched
