@@ -46,12 +46,10 @@ int demux_nsv_fill_buffer ( demuxer_t *demuxer )
     // videolen = audio chunk length, audiolen = video chunk length
     int videolen,audiolen; 
 
-    sh_video_t *sh_video = NULL;
-//  sh_audio_t *sh_audio = NULL;
+    sh_video_t *sh_video = demuxer->video->sh;
+    sh_audio_t *sh_audio = demuxer->audio->sh;
 
     nsv_priv_t * priv = demuxer->priv;
-
-    sh_video = demuxer->video->sh ;
 
     // if the audio/video chunk has no new header the first 2 bytes will be discarded 0xBEEF 
     // or rather 0xEF 0xBE
@@ -76,11 +74,15 @@ int demux_nsv_fill_buffer ( demuxer_t *demuxer )
             break;
 
         default:
+            mp_dbg(MSGT_DEMUX,MSGL_WARN,"demux_nsv: sync lost\n");
             break;
     }
 
+    if (sh_video)
     sh_video->pts = priv->v_pts =demuxer->video->pts=  priv->video_pack_no *
          (float)sh_video->frametime;
+    else
+        priv->v_pts = priv->video_pack_no;
 
     demuxer->filepos=stream_tell(demuxer->stream);
 
@@ -104,7 +106,7 @@ int demux_nsv_fill_buffer ( demuxer_t *demuxer )
 
     // we need to return an empty packet when the 
     // video frame is empty otherwise the stream will fasten up 
-    if(demuxer->video){
+    if(sh_video) {
         if( (hdr[2]&0x0f) != 0x0 )
             ds_read_packet(demuxer->video,demuxer->stream,videolen,priv->v_pts,demuxer->filepos-i_aux,0);
         else 
@@ -117,7 +119,7 @@ int demux_nsv_fill_buffer ( demuxer_t *demuxer )
     audiolen=(hdr[5])|(hdr[6]<<8);
     // we need to return an empty packet when the 
     // audio frame is empty otherwise the stream will fasten up 
-    if(demuxer->audio){
+    if(sh_audio) {
         ds_read_packet(demuxer->audio,demuxer->stream,audiolen,priv->v_pts,demuxer->filepos+videolen,0);
     }
     else
@@ -135,7 +137,7 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
     // last 2 bytes 17 and 18 are unknown but right after that comes the length
     unsigned char hdr[17];
     int videolen,audiolen;
-    unsigned char buf[9];
+    unsigned char buf[10];
     sh_video_t *sh_video = NULL;
     sh_audio_t *sh_audio = NULL;
     
@@ -256,37 +258,34 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
             memcpy(&sh_video->bih->biCompression,hdr+4,4);
             sh_video->bih->biSizeImage=sh_video->bih->biWidth*sh_video->bih->biHeight*3;
 
-            // !!!!!!!!!!!!!!!!!!!!
-            // RemoveMe!!! This is just to avoid lot of bugreports!
-            // !!!!!!!!!!!!!!!!!!!!
-            if(priv->v_format==mmioFOURCC('V','P','5','0'))
-                mp_msg(MSGT_DEMUX,MSGL_WARN,"demux_nsv: VP50 video does not work yet. Expect problems.\n");
-            
             // here we search for the correct keyframe 
             // vp6 keyframe is when the 2nd byte of the vp6 header is 0x36
-            if(priv->v_format==mmioFOURCC('V','P','6','1')){
-                stream_read(demuxer->stream,buf,9);
-                if (hdr[8]!=0x36) {
-                    mp_msg(MSGT_DEMUX,MSGL_V,"demux_nsv: searching vp6 keyframe...\n");
-                    while(buf[8]!=0x36){
-                        mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_nsv: vp6 block skip.\n");
+            if((priv->v_format==mmioFOURCC('V','P','6','1')) ||
+               (priv->v_format==mmioFOURCC('V','P','6','2')) ||
+               (priv->v_format==mmioFOURCC('V','P','3','1'))) {
+                stream_read(demuxer->stream,buf,10);
+                if (((((priv->v_format>>16) & 0xff) == '6') && (buf[8]!=0x36)) ||
+                    ((((priv->v_format>>16) & 0xff) == '3') && (buf[8]!=0x00 || buf[9]!=0x08))) {
+                    mp_msg(MSGT_DEMUX,MSGL_V,"demux_nsv: searching %.4s keyframe...\n", (char*)&priv->v_format);
+                    while(((((priv->v_format>>16) & 0xff) == '6') && (buf[8]!=0x36)) ||
+                          ((((priv->v_format>>16) & 0xff) == '3') && (buf[8]!=0x00 || buf[9]!=0x08))){
+                        mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_nsv: %.4s block skip.\n", (char*)&priv->v_format);
                         videolen=(buf[2]>>4)|(buf[3]<<4)|(buf[4]<<0xC);
                         audiolen=(buf[5])|(buf[6]<<8);
-                        stream_skip(demuxer->stream, videolen+audiolen-2);
-                        stream_read(demuxer->stream,buf,9);
+                        stream_skip(demuxer->stream, videolen+audiolen-3);
+                        stream_read(demuxer->stream,buf,10);
                         if(buf[0]==0x4E){
                             mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_nsv: Got NSVs block.\n");
                             if(stream_eof(demuxer->stream)) return 0;
-                            stream_skip(demuxer->stream,8);
-                            stream_read(demuxer->stream,buf,9);
+                            stream_skip(demuxer->stream,7);
+                            stream_read(demuxer->stream,buf,10);
                         }
                     }
                 }
 
 
-                stream_seek(demuxer->stream,stream_tell(demuxer->stream)-9);
+                stream_seek(demuxer->stream,stream_tell(demuxer->stream)-10);
             } 
-
             
         switch(priv->fps){
         case 0x80:
