@@ -101,12 +101,12 @@ examples:<UL>
 <P><B><I>4. If the problem is specific to one or a few files,
   then please upload that file to:</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
-  Also upload a small .txt file with the same name as your file,
-  describing the problem!<BR>
+  Also upload a small .txt file with the same name as your file (+ .txt extension),
+  containing problem description, mplayer -v file output, and your email address!<BR>
   Usually first 1-5 MB of the file is enough to reproduce
   the problem, but first you should try it:
-<P><CODE>&nbsp;&nbsp;&nbsp;dd if=yourfile of=smallfile bs=1k count=1024</CODE></P>
-  (it will cut first 1MB of 'yourfile' and save to 'smallfile')
+<P><CODE>&nbsp;&nbsp;&nbsp;dd if=yourfile of=smallfile bs=1024k count=5</CODE></P>
+  (it will cut first 5 MB of 'yourfile' and save to 'smallfile')
   Then try again on this small file, and if bug still exists
   then it's enough to upload this small file.<BR>
   NEVER send such files via mail! Upload it, and send only
