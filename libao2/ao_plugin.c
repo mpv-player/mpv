@@ -36,7 +36,7 @@ typedef struct ao_plugin_local_data_s
 static ao_plugin_local_data_t ao_plugin_local_data={NULL,0,0.0,NULL,NULL,AO_PLUGINS};
 
 // global data 
-ao_plugin_data_t ao_plugin_data;             // Data used by the plugins
+volatile ao_plugin_data_t ao_plugin_data;             // Data used by the plugins
 ao_plugin_cfg_t  ao_plugin_cfg=CFG_DEFAULTS; // Set in cfg-mplayer.h
 
 // to set/get/query special features/parameters
