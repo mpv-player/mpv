@@ -1,12 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
+#include "loader/wine/mmreg.h"
+#include "loader/wine/avifmt.h"
+#include "loader/wine/vfw.h"
 
-#include "muxer.h"
+#include "libmpdemux/muxer.h"
+
+char *info_name;
+char *info_artist;
+char *info_genre;
+char *info_subject;
+char *info_copyright;
+char *info_sourceform;
+char *info_comment;
 
 static const short h263_format[8][2] = {
     { 0, 0 },
