@@ -1,6 +1,6 @@
 //  MPG/VOB file parser for DEMUXER v2.5  by A'rpi/ESP-team
 
-//#define MAX_PS_PACKETSIZE 4096
+//#define MAX_PS_PACKETSIZE 2048
 #define MAX_PS_PACKETSIZE (224*1024)
 
 static unsigned int read_mpeg_timestamp(stream_t *s,int c){
@@ -42,6 +42,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 
   len=stream_read_word(demux->stream);
   if(verbose>=3)  printf("PACKET len=%d",len);
+  if(len==62480){ demux->synced=0;return -1;} /* :) */
 //  if(len==0 || len>MAX_PS_PACKETSIZE) return -2;  // invalid packet !!!!!!
   if(len==0 || len>MAX_PS_PACKETSIZE){
     if(verbose>=2) printf("Invalid PS packet len: %d\n",len);
@@ -213,6 +214,7 @@ do{
   }
   if(stream_eof(demux->stream)) break;
   // sure: head=0x000001XX
+  if(verbose>=4) printf("*** head=0x%X\n",head);
   if(demux->synced==0){
     if(head==0x1BA) demux->synced=1;
   } else
