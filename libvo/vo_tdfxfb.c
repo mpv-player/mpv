@@ -158,9 +158,9 @@ static void clear_screen()
      A printf before the memset call also seems to work, but this made more sense
      since it actually checks the status of the card. 
   */
-  do {
-    memset(vidpage, 0, screenwidth * screenheight * screendepth);
-  } while((reg_IO->status & 0x1f) < 1);
+  /* first wait for the card to be ready, do not try to write every time - alex */
+  do {} while((reg_IO->status & 0x1f) < 1);
+  memset(vidpage, 0, screenwidth * screenheight * screendepth);
   
   	if(vo_doublebuffering) {
 		memset(hidpage, 0, screenwidth * screenheight * screendepth);
