@@ -33,11 +33,11 @@
 #ifndef SRFFTP_3DNOW_H__
 #define SRFFTP_3DNOW_H__
 
-static float HSQRT2_3DNOW = 0.707106781188;
+static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0.707106781188 };
 
 #ifdef HAVE_3DNOWEX
 #define TRANS_FILL_MM6_MM7_3DNOW()\
-    asm(\
+    __asm__ __volatile__(\
 	"movl	$-1, %%eax\n\t"\
 	"movd	%%eax, %%mm7\n\t"\
 	"negl	%%eax\n\t"\
@@ -48,7 +48,7 @@ static float HSQRT2_3DNOW = 0.707106781188;
 	:::"eax","memory");
 #else
 #define TRANS_FILL_MM6_MM7_3DNOW()\
-    asm(\
+    __asm__ __volatile__(\
 	"movl	$-1, %%eax\n\t"\
 	"movd	%%eax, %%mm7\n\t"\
 	"negl	%%eax\n\t"\
@@ -71,9 +71,9 @@ static float HSQRT2_3DNOW = 0.707106781188;
 
 #define TRANSZERO_3DNOW(A0,A4,A8,A12) \
 { \
-    asm volatile("femms":::"memory");\
+    __asm__ __volatile__("femms":::"memory");\
     TRANS_FILL_MM6_MM7_3DNOW()\
-    asm(\
+    __asm__ __volatile__(\
 	"movq	%4, %%mm0\n\t" /* mm0 = wTB[0]*/\
 	"movq	%5, %%mm1\n\t" /* mm1 = wTB[k*2]*/ \
 	"movq	%%mm0, %%mm5\n\t"/*u.re = wTB[0].re + wTB[k*2].re;*/\
@@ -98,14 +98,14 @@ static float HSQRT2_3DNOW = 0.707106781188;
 	:"=m"(A0), "=m"(A8), "=m"(A4), "=m"(A12)\
 	:"m"(wTB[0]), "m"(wTB[k*2]), "0"(A0), "2"(A4)\
 	:"memory");\
-    asm volatile("femms":::"memory");\
+    __asm__ __volatile__("femms":::"memory");\
 }
 
 #define TRANSHALF_16_3DNOW(A2,A6,A10,A14)\
 {\
-    asm volatile("femms":::"memory");\
+    __asm__ __volatile__("femms":::"memory");\
     TRANS_FILL_MM6_MM7_3DNOW()\
-    asm(\
+    __asm__ __volatile__(\
 	"movq	%4, %%mm0\n\t"/*u.re = wTB[2].im + wTB[2].re;*/\
 	"movq	%%mm0, %%mm1\n\t"\
 	"pfmul	%%mm7, %%mm1\n\t"\
@@ -121,8 +121,7 @@ static float HSQRT2_3DNOW = 0.707106781188;
 	PSWAP_MM("%%mm3","%%mm2")/*mm3 = v*/\
 	"pfmul	%%mm6, %%mm1\n\t"/*u.re = u.re + a.re;*/\
 	"pfadd	%%mm1, %%mm0\n\t"/*u.im = u.im - a.im; mm0 = u*/\
-	"movd	%8, %%mm2\n\t"\
-	"punpckldq %8, %%mm2\n\t"\
+	"movq	%8, %%mm2\n\t"\
 	"pfmul	%%mm2, %%mm3\n\t" /* v *= HSQRT2_3DNOW; */\
 	"pfmul	%%mm2, %%mm0\n\t" /* u *= HSQRT2_3DNOW; */\
 	"movq	%6, %%mm1\n\t" /* a1 = A2;*/\
@@ -143,7 +142,7 @@ static float HSQRT2_3DNOW = 0.707106781188;
 	:"=m"(A2), "=m"(A10), "=m"(A6), "=m"(A14)\
 	:"m"(wTB[2]), "m"(wTB[6]), "0"(A2), "2"(A6), "m"(HSQRT2_3DNOW)\
 	:"memory");\
-    asm volatile("femms":::"memory");\
+    __asm__ __volatile__("femms":::"memory");\
 }
 
 #endif
