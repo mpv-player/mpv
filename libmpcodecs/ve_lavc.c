@@ -149,6 +149,7 @@ static int lavc_param_ss= 0;
 static int lavc_param_top= -1;
 static int lavc_param_alt= 0;
 static int lavc_param_ilme= 0;
+static int lavc_param_nssew= 8;
 
 
 char *lavc_param_acodec = "mp2";
@@ -290,6 +291,7 @@ m_option_t lavcopts_conf[]={
 	{"sc_threshold", &lavc_param_sc_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
 	{"top", &lavc_param_top, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
         {"qns", &lavc_param_qns, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
+        {"nssew", &lavc_param_nssew, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -411,6 +413,9 @@ static int config(struct vf_instance_s* vf,
 #endif
 #if LIBAVCODEC_BUILD >= 4693
     lavc_venc_context->inter_threshold= lavc_param_inter_threshold;
+#endif
+#if LIBAVCODEC_BUILD >= 4716
+    lavc_venc_context->nsse_weight= lavc_param_nssew;
 #endif
 #if LIBAVCODEC_BUILD >= 4675
     if (lavc_param_intra_matrix)
