@@ -194,6 +194,8 @@ static config_t mencoder_opts[]={
 #endif
 #ifdef USE_LIBAVCODEC
 	{"lavcopts", lavcopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#else
+	{"lavcopts", "MPlayer was compiled without libavcodec! See README or DOCS!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 #ifdef USE_WIN32DLL
 	{"vfwopts", vfwopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
