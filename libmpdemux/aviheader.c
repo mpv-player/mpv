@@ -150,7 +150,10 @@ while(1){
       }
       break;
     }
-    case ckidAVINEWINDEX: if(index_mode){
+    case ckidAVINEWINDEX:
+    if(demuxer->movi_end>stream_tell(demuxer->stream))
+	demuxer->movi_end=stream_tell(demuxer->stream); // fixup movi-end
+    if(index_mode){
       int i;
       priv->idx_size=size2>>4;
       mp_msg(MSGT_HEADER,MSGL_V,"Reading INDEX block, %d chunks for %ld frames\n",
