@@ -1,0 +1,118 @@
+The libMPcodecs API details, hints - by A'rpi
+==================================
+
+See also: colorspaces.txt, codec-devel.txt, dr-methods.txt
+
+The VIDEO path:
+===============
+
+    [MPlayer core]
+          | (1)
+     _____V______   (2)  /~~~~~~~~~~\    (3,4)  |~~~~~~|
+     |          | -----> | vd_XXX.c |  -------> | vd.c |
+     | decvideo |        \__________/  <-(3a)-- |______|
+     |          | -----,  ,.............(3a,4a).....:
+     ~~~~~~~~~~~~  (6) V  V
+                    /~~~~~~~~\     /~~~~~~~~\  (8)
+		    | vf_X.c | --> | vf_Y.c | ---->  vf_vo.c / ve_XXX.c
+		    \________/     \________/
+			|              ^
+                    (7) |   |~~~~~~|   : (7a)
+			`-> | vf.c |...:
+			    |______|
+
+Short description of video path:
+1. mplayer/mencoder core requests the decoding of a compressed video frame:
+   calls decvideo.c::decode_video()
+
+2. decode_video() calls the previously ( init_video() ) selected video codec
+   (vd_XXXX.c file, where XXXX == vfm name, see the 'driver' line of codecs.conf)
+
+3. the codec should initialize output device before decoding the first frame,
+   it may happen in init() or at the middle of the first decode(). see 3.a.
+   it means calling vd.c::mpcodecs_config_vo() with the image dimensions,
+   and the _preferred_ (mean: internal, native, best) colorspace.
+   NOTE: this colorspace may not be equal to the actually used colorspace, it's
+   just a _hint_ for the csp matching algorithm, and mainly used _only_ when
+   csp conversion is required, as input format of the converter.
+
+3.a. selecting the best output colorspace:
+   the vd.c::mpcodecs_config_vo() function will go through the outfmt list
+   defined by codecs.conf's 'out' lines, and query both vd (codec) and vo
+   (output device/filter/encoder) if it's supported or not.
+
+   For the vo, it calls the query_format() func of vf_XXX.c or ve_XXX.c.
+   It should return a set of feature flags, the most important ons for this
+   stage are: VFCAP_CSP_SUPPORTED (csp supported directly or by conversion)
+   and VFCAP_CSP_SUPPORTED_BY_HW (csp supported WITHOUT any conversion).
+
+   For the vd (codec), control() with VDCTRL_QUERY_FORMAT will be called.
+   If it doesn't implement VDCTRL_QUERY_FORMAT, (ie answers CONTROL_UNKNOWN
+   or CONTROL_NA) it will be assumed to be CONTROL_TRUE (csp supported)!
+
+   So, by default, if the list of supported colorspaces is constant, doesn't
+   depend on the actual file's/stream's header, it's enough to list them
+   in codecs.conf ('out' field), and don't implement VDCTRL_QUERY_FORMAT.
+   It's the case for the most codecs.
+   
+   If the supported csp list depends on the file being decoded, list the
+   possible out formats (colorspaces) in codecs.conf, and implement the
+   VDCTRL_QUERY_FORMAT to test the availability of the given csp for the
+   given video file/stream.
+   
+   The vd.c core will find the best matching colorspace, depending on the
+   VFCAP_CSP_SUPPORTED_BY_HW flag (see vfcap.h). If no match at all, it
+   will try again with the 'scale' filter inserted between vd and vo.
+   If still no match, it will fail :(
+
+4. requesting buffer for the decoded frame:
+   The codec have to call mpcodecs_get_image() with proper imgtype & imgflag.
+   It will find the optimal buffering setup (preferred stride, alignment etc)
+   and return a pointer to the allocated and filled up mpi (mp_image_t*) struct.
+   The 'imgtype' controls the buffering setup, ie STATIC (just one buffer,
+   it 'remembers' its contents between frames), TEMP (write-only, full update),
+   EXPORT (memory allocation is done by the codec, not recommended) and so on.
+   The 'imgflags' set up the limits for the buffer, ie stride limitations,
+   readability, remembering content etc. See mp_image.h for the short descr.
+   See dr-methods.txt for the explanation of buffer importing and mpi imgtypes.
+   
+   Always try to implement stride support! (stride == bytes per line)
+   If no stride support, then stride==bytes_per_pixel*image_width.
+   If you have stride supoprt in your decoder, use the mpi->stride[] value
+   for the byte_per_line for each plane.
+   Also take care of other imgflags, like MP_IMGFLAG_PRESERVE and
+   MP_IMGFLAG_READABLE, MP_IMGFLAG_COMMON_STRIDE and MP_IMGFLAG_COMMON_PLANE!
+   The file mp_image.h contains description of flags in comments, read it!
+   Ask for help on -dev-eng, describing the behaviour your codec, if unsure.
+
+4.a. buffer allocation, vd.c::mpcodecs_get_image():
+   If the requested buffer imgtype!=EXPORT, then vd.c will try to do
+   direct rendering, ie. asks the next filter/vo for the buffer allocation.
+   It's done by calling get_image() of the vf_XXX.c file.
+   If it was successful, the imgflag MP_IMGFLAG_DIRECT will be set, and one
+   memcpy() will be saved when passing the data from vd to the next filter/vo.
+   See dr-methods.txt for details and examples.
+
+5. decode the frame, to the mpi structure requested at 4, then return the mpi
+   to decvideo.c. Return NULL if the decoding failed or skipped frame.
+
+6. decvideo.c::decode_video() will now pass the 'mpi' to the next filter (vf_X).
+
+7. the filter's (vf_X) put_image() then requests a new mpi buffer by calling
+   vf.c::vf_get_image().
+
+7.a. vf.c::vf_get_image() will try to get direct rendering, by asking the
+     next fliter to do the buffer allocation (calls vf_Y's get_image()).
+     if it fails, it will fallback to normal system memory allocation.
+
+8. when we're over the whole filter chain (multiple filters can be connected,
+   even the same filter multiple times) then the last, 'leaf' filter will be
+   called. The only difference between leaf and non-leaf filter is that leaf
+   filter have to implement the whole filter api.
+   Leaf filters are now: vf_vo.c (wrapper over libvo) and ve_XXX.c (video
+   encoders used by mencoder).
+   
+
+The AUDIO path:
+===============
+TODO!!!
