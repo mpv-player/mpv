@@ -2548,7 +2548,7 @@ if test "$_directfb" = yes ; then
   _vomodules="directfb $_vomodules"
   _ld_directfb='-ldirectfb'
 
-  if test "$_directfb_version" -ge 914; then
+  if test "$_directfb_version" -ge 915; then
     _vosrc="$_vosrc vo_dfbmga.c"
     _vomodules="dfbmga $_vomodules"
   fi
