@@ -74,12 +74,6 @@ extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
 
 #include "help_mp.h"
 
-#ifdef STREAMING
-#include "url.h"
-#include "network.h"
-static URL_t* url;
-#endif
-
 
 #define DEBUG if(0)
 #ifdef HAVE_GUI
@@ -385,7 +379,8 @@ void exit_sighandler(int x){
   exit_player(NULL);
 }
 
-extern int vcd_get_track_end(int fd,int track);
+extern stream_t* open_stream(char* filename,int vcd_track,int* file_format);
+
 extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
 
 // dec_audio.c:
@@ -458,12 +453,6 @@ stream_t* stream=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 //
 int delay_corrected=1;
-#ifdef VCD_CACHE
-int vcd_cache_size=128;
-#endif
-#ifdef __FreeBSD__
-int bsize = VCD_SECTOR_SIZE;
-#endif
 char* title="MPlayer";
 
 // movie info:
@@ -483,7 +472,7 @@ int v_saturation=50;
 float rel_seek_secs=0;
 
 int i;
-int f; // filedes
+int use_stdin=0; //int f; // filedes
 
   printf("%s",banner_text);
 
@@ -625,83 +614,15 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
        subtitles=sub_read_file(sub_name);
        if(!subtitles) fprintf(stderr,"Can't load subtitles: %s\n",sub_name);
   } else {
-    if ( sub_auto )
-      {
-       // auto load sub file ...
-       subtitles=sub_read_file( sub_filename( get_path("sub/"), filename ) );
-      }
-      if ( subtitles == NULL ) subtitles=sub_read_file(get_path("default.sub")); // try default:
+      if(sub_auto)  // auto load sub file ...
+         subtitles=sub_read_file( sub_filename( get_path("sub/"), filename ) );
+      if(!subtitles) subtitles=sub_read_file(get_path("default.sub")); // try default
   }
 #endif
 
-if(vcd_track){
-//============ Open VideoCD track ==============
-  int ret,ret2;
-  f=open(filename,O_RDONLY);
-  if(f<0){ fprintf(stderr,"CD-ROM Device '%s' not found!\n",filename);return 1; }
-  vcd_read_toc(f);
-  ret2=vcd_get_track_end(f,vcd_track);
-  if(ret2<0){ fprintf(stderr,"Error selecting VCD track! (get)\n");return 1;}
-  ret=vcd_seek_to_track(f,vcd_track);
-  if(ret<0){ fprintf(stderr,"Error selecting VCD track! (seek)\n");return 1;}
-  seek_to_byte+=ret;
-  if(verbose) printf("VCD start byte position: 0x%X  end: 0x%X\n",seek_to_byte,ret2);
-#ifdef VCD_CACHE
-  vcd_cache_init(vcd_cache_size);
-#endif
-#ifdef __FreeBSD__
-  if (ioctl (f, CDRIOCSETBLOCKSIZE, &bsize) == -1) {
-        perror ( "Error in CDRIOCSETBLOCKSIZE");
-  }
-#endif
-  stream=new_stream(f,STREAMTYPE_VCD);
-  stream->start_pos=ret;
-  stream->end_pos=ret2;
-} else {
-//============ Open plain FILE ============
-  off_t len;
-  if(!strcmp(filename,"-")){
-      // read from stdin
-      printf("Reading from stdin...\n");
-      f=0; // 0=stdin
-      stream=new_stream(f,STREAMTYPE_STREAM);
-  } else {
-#ifdef STREAMING
-      url = url_new(filename);
-      if(url==NULL) {
-       // failed to create a new URL, so it's not an URL (or a malformed URL)
-#endif
-       f=open(filename,O_RDONLY);
-       if(f<0){ fprintf(stderr,"File not found: '%s'\n",filename);return 1; }
-       len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
-       if (len == -1)
-	 perror("Error: lseek failed to obtain video file size");
-       else
-        if(verbose)
-#ifdef _LARGEFILE_SOURCE
-	 printf("File size is %lld bytes\n", (long long)len);
-#else
-	 printf("File size is %u bytes\n", (unsigned int)len);
-#endif
-       stream=new_stream(f,STREAMTYPE_FILE);
-       stream->end_pos=len;
-#ifdef STREAMING
-      } else {
-        file_format=autodetectProtocol( url, &f );
-        if( file_format==DEMUXER_TYPE_UNKNOWN ) { 
-          fprintf(stderr,"Unable to open URL: %s\n", filename);
-          url_free(url);
-          return 1; 
-        } else {
-          f=streaming_start( &url, f, file_format );
-          if(f<0){ fprintf(stderr,"Unable to open URL: %s\n", url->url); return 1; }
-          printf("Connected to server: %s\n", url->hostname );
-        }
-        stream=new_stream(f,STREAMTYPE_STREAM);
-      }
-#endif
-  }
-}
+  stream=open_stream(filename,vcd_track,&file_format);
+  if(!stream) return 1; // error...
+  use_stdin=(!strcmp(filename,"-"));
 
 #ifdef HAVE_LIBCSS
   if (dvdimportkey) {
@@ -1062,7 +983,7 @@ double vdecode_time;
 #ifdef USE_TERMCAP
   load_termcap(NULL); // load key-codes
 #endif
-  if(f) getch2_enable();
+  if(!use_stdin) getch2_enable();
   #ifdef HAVE_GUI
    }
   #endif 
@@ -1447,9 +1368,11 @@ if(1)
 //        float x=d_audio->pts-d_video->pts-(delay);
         float x=d_audio->pts-d_video->pts-(delay+audio_delay);
         float y=-(delay+audio_delay);
-        printf("Initial PTS delay: %5.3f sec  (calculated: %5.3f)  audio_delay=%5.3f\n",x,y,audio_delay);
-	initial_pts_delay+=x;
-        audio_delay+=x;
+      float bps_a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->wf->nAvgBytesPerSec;
+      float bps_v_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+        printf("Initial PTS delay: %5.3f sec ->%5.3f (bps: %5.3f)  audio_delay=%5.3f\n",x,2*sh_video->frametime,bps_a_pts-bps_v_pts-(delay+audio_delay),audio_delay);
+	x=2*sh_video->frametime;
+//	initial_pts_delay+=x; audio_delay+=x;
         delay_corrected=1;
         if(verbose)
         printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a.pts=%5.3f  v.pts=%5.3f\n",
@@ -1562,11 +1485,11 @@ if(auto_quality>0){
 #ifdef HAVE_LIRC
              lirc_mp_getinput()<=0 &&
 #endif
-             (!f || getch2(20)<=0) && mplayer_get_key()<=0){
+             (use_stdin || getch2(20)<=0) && mplayer_get_key()<=0){
 #ifndef USE_LIBVO2
 	     video_out->check_events();
 #endif
-             if(!f) usec_sleep(1000); // do not eat the CPU
+             if(use_stdin) usec_sleep(1000); // do not eat the CPU
          }
          osd_function=OSD_PLAY;
 #ifdef HAVE_GUI
@@ -1588,7 +1511,7 @@ if(auto_quality>0){
 #ifdef HAVE_LIRC
       (c=lirc_mp_getinput())>0 ||
 #endif
-      (f && (c=getch2(0))>0) || (c=mplayer_get_key())>0) switch(c){
+      (!use_stdin && (c=getch2(0))>0) || (c=mplayer_get_key())>0) switch(c){
     // seek 10 sec
     case KEY_RIGHT:
       osd_function=OSD_FFW;
