@@ -59,13 +59,17 @@ static int xvidenc_rc_reaction_delay_factor = -1;
 static int xvidenc_rc_averaging_period = -1;
 static int xvidenc_rc_buffer = -1;
 static int xvidenc_min_quantizer = 2;
-static int xvidenc_max_quantizer = -1;
-static int xvidenc_min_key_interval = 0;
+static int xvidenc_max_quantizer = 31;
+static int xvidenc_min_iquantizer = -1;
+static int xvidenc_max_iquantizer = -1;
+static int xvidenc_min_pquantizer = -1;
+static int xvidenc_max_pquantizer = -1;
+static int xvidenc_min_key_interval = -1;
 static int xvidenc_max_key_interval = -1;
 static int xvidenc_mpeg_quant = 0;
 static int xvidenc_mod_quant = 0;
 static int xvidenc_lumi_mask = 0;
-static int xvidenc_keyframe_boost = 0;
+static int xvidenc_keyframe_boost = -1;
 static int xvidenc_kfthreshold = -1;
 static int xvidenc_kfreduction = -1;
 static int xvidenc_fixed_quant = 0;
@@ -83,6 +87,10 @@ struct config xvidencopts_conf[] = {
     { "rc_buffer", &xvidenc_rc_buffer, CONF_TYPE_INT, 0, 0, 0, NULL},
     { "min_quantizer", &xvidenc_min_quantizer, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
     { "max_quantizer", &xvidenc_max_quantizer, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
+    { "min_iquantizer", &xvidenc_min_iquantizer, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
+    { "max_iquantizer", &xvidenc_max_iquantizer, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
+    { "min_pquantizer", &xvidenc_min_pquantizer, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
+    { "max_pquantizer", &xvidenc_max_pquantizer, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
     { "min_key_interval", &xvidenc_min_key_interval, CONF_TYPE_INT, 0, 0, 0, NULL}, /* for XVID_MODE_2PASS_2 */
     { "max_key_interval", &xvidenc_max_key_interval, CONF_TYPE_INT, 0, 0, 0, NULL},
     { "mpeg_quant", &xvidenc_mpeg_quant, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -137,12 +145,17 @@ config(struct vf_instance_s* vf,
     enc_param.rc_reaction_delay_factor = xvidenc_rc_reaction_delay_factor;
     enc_param.rc_averaging_period = xvidenc_rc_averaging_period;
     enc_param.rc_buffer = xvidenc_rc_buffer;
+    if (xvidenc_min_quantizer >= xvidenc_max_quantizer) {
+	mp_msg (MSGT_MENCODER, MSGL_INFO, 
+		"min_quantizer (%d) must be less than max_quantizer (%d)\n",
+		xvidenc_min_quantizer, xvidenc_max_quantizer);
+	return 0;
+    }
     enc_param.min_quantizer = xvidenc_min_quantizer;
     enc_param.max_quantizer = xvidenc_max_quantizer;
-    if( xvidenc_max_key_interval > 0 )
-	enc_param.max_key_interval = xvidenc_max_key_interval;
-    else
-	enc_param.max_key_interval = 10 * enc_param.fbase / enc_param.fincr;
+    if( xvidenc_max_key_interval <= 0 )
+	xvidenc_max_key_interval = 10 * enc_param.fbase / enc_param.fincr;
+    enc_param.max_key_interval = xvidenc_max_key_interval;
     switch (xvid_encore(NULL, XVID_ENC_CREATE, &enc_param, NULL)) {
     case XVID_ERR_FAIL:
 	mp_msg(MSGT_MENCODER,MSGL_ERR, "xvid: encoder creation failed\n");
@@ -212,6 +225,44 @@ config(struct vf_instance_s* vf,
     // initialize VBR engine
     // =====================
     vbrSetDefaults(&fp->vbr_state);
+    if (xvidenc_min_key_interval < 0)
+	xvidenc_min_key_interval = fp->vbr_state.min_key_interval;
+    if (xvidenc_min_iquantizer < 0)
+	xvidenc_min_iquantizer = fp->vbr_state.min_iquant;
+    if (xvidenc_max_iquantizer < 0)
+	xvidenc_max_iquantizer = fp->vbr_state.max_iquant;
+    if (xvidenc_min_pquantizer < 0)
+	xvidenc_min_pquantizer = fp->vbr_state.min_pquant;
+    if (xvidenc_max_pquantizer < 0)
+	xvidenc_max_pquantizer = fp->vbr_state.max_pquant;
+
+    // min/max validation
+    if (xvidenc_min_key_interval > xvidenc_max_key_interval) {
+	mp_msg (MSGT_MENCODER, MSGL_ERR, 
+		"min_key_interval (%d) must be less than max_key_interval (%d)\n",
+		xvidenc_min_key_interval, xvidenc_max_key_interval);
+	return 0;
+    }
+    if (xvidenc_min_quantizer >= xvidenc_max_quantizer) {
+	mp_msg (MSGT_MENCODER, MSGL_ERR, 
+		"min_quantizer (%d) must be less than max_quantizer (%d)\n",
+		xvidenc_min_quantizer, xvidenc_max_quantizer);
+	return 0;
+    }
+    if (xvidenc_min_iquantizer >= xvidenc_max_iquantizer) {
+	mp_msg (MSGT_MENCODER, MSGL_ERR, 
+		"min_iquantizer (%d) must be less than max_iquantizer (%d)\n",
+		xvidenc_min_iquantizer, xvidenc_max_iquantizer);
+	return 0;
+    }
+    if (xvidenc_min_pquantizer >= xvidenc_max_pquantizer) {
+	mp_msg (MSGT_MENCODER, MSGL_ERR, 
+		"min_pquantizer (%d) must be less than max_pquantizer (%d)\n",
+		xvidenc_min_pquantizer, xvidenc_max_pquantizer);
+	return 0;
+    }
+
+    // pass
     if (xvidenc_pass == 0) {
 	if (xvidenc_fixed_quant >= 1) {
 	    fp->vbr_state.mode = VBR_MODE_FIXED_QUANT;
@@ -225,21 +276,26 @@ config(struct vf_instance_s* vf,
 	fp->vbr_state.mode = VBR_MODE_2PASS_2;
     else
 	return -1;
+
+    // misc
     fp->vbr_state.fps = (double)enc_param.fbase / enc_param.fincr;
     fp->vbr_state.filename = passtmpfile;
     fp->vbr_state.desired_bitrate = enc_param.rc_bitrate;
-    fp->vbr_state.min_iquant = fp->vbr_state.min_pquant = enc_param.min_quantizer;
-    fp->vbr_state.max_iquant = fp->vbr_state.max_pquant = enc_param.max_quantizer;
-    if (xvidenc_keyframe_boost)
+    fp->vbr_state.min_iquant = xvidenc_min_iquantizer >= 1 ? xvidenc_min_iquantizer : xvidenc_min_quantizer;
+    fp->vbr_state.max_iquant = xvidenc_max_iquantizer >= 1 ? xvidenc_max_iquantizer : xvidenc_max_quantizer;
+    fp->vbr_state.min_pquant = xvidenc_min_pquantizer >= 1 ? xvidenc_min_pquantizer : xvidenc_min_quantizer;
+    fp->vbr_state.max_pquant = xvidenc_max_pquantizer >= 1 ? xvidenc_max_pquantizer : xvidenc_max_quantizer;
+    if (xvidenc_keyframe_boost >= 0)
 	fp->vbr_state.keyframe_boost = xvidenc_keyframe_boost;
     if (xvidenc_kfthreshold >= 0)
 	fp->vbr_state.kftreshold = xvidenc_kfthreshold;
     if (xvidenc_kfreduction >= 0)
 	fp->vbr_state.kfreduction = xvidenc_kfreduction;
-    if (xvidenc_min_key_interval)
+    if (xvidenc_min_key_interval >= 0)
 	fp->vbr_state.min_key_interval = xvidenc_min_key_interval;
     fp->vbr_state.max_key_interval = enc_param.max_key_interval;
     fp->vbr_state.debug = xvidenc_debug;
+
     vbrInit(&fp->vbr_state);
 
     return 1;

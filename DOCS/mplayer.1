@@ -2534,10 +2534,16 @@ specify how fast the rate control reacts, lower values are faster
 period to reach the required average
 .IPs rc_buffer=<value>
 size of the rate control buffer
-.IPs min_quantizer=<value>
+.IPs min_quantizer=<1-31>
 minimum quantizer (default=2)
-.IPs max_quantizer=<value>
+.IPs max_quantizer=<1-31>
 maximum quantizer (default=31)
+.IPs min_iquantizer=<1-31>
+.IPs min_pquantizer=<1-31>
+minimum quantizer for I & P frames (2pass only, default=2)
+.IPs max_iquantizer=<1-31>
+.IPs max_pquantizer=<1-31>
+maximum quantizer for I & P frames (2pass only, default=31)
 .IPs min_key_interval=<value>
 minimum interval between key frames (2pass only, default=0)
 .IPs max_key_interval=<value>
