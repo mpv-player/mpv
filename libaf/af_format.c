@@ -164,6 +164,9 @@ char* af_fmt2str(int format, char* str, int size)
       i+=snprintf(&str[i],size-i,"int ");
     }
   }
+  // remove trailing space
+  if (i > 0 && str[i - 1] == ' ')
+    i--;
   str[i] = 0; // make sure it is 0 terminated.
   return str;
 }
@@ -268,7 +271,7 @@ static int check_format(int format)
   case(AF_FORMAT_MPEG2): 
   case(AF_FORMAT_AC3):
     af_msg(AF_MSG_ERROR,"[format] Sample format %s not yet supported \n",
-	 af_fmt2str(format,buf,255)); 
+	 af_fmt2str(format,buf,256)); 
     return AF_ERROR;
   }
   return AF_OK;
@@ -295,9 +298,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
        (AF_OK != check_format(af->data->format)))
       return AF_ERROR;
 
-    af_msg(AF_MSG_VERBOSE,"[format] Changing sample format from %sto %s \n",
-	   af_fmt2str(((af_data_t*)arg)->format,buf1,255),
-	   af_fmt2str(af->data->format,buf2,255));
+    af_msg(AF_MSG_VERBOSE,"[format] Changing sample format from %s to %s\n",
+	   af_fmt2str(((af_data_t*)arg)->format,buf1,256),
+	   af_fmt2str(af->data->format,buf2,256));
 
     af->data->rate = ((af_data_t*)arg)->rate;
     af->data->nch  = ((af_data_t*)arg)->nch;
@@ -316,17 +319,17 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if ((data->format == AF_FORMAT_FLOAT_NE) &&
 	(af->data->format == AF_FORMAT_S16_NE))
     {
-	af_msg(AF_MSG_VERBOSE,"[format] Accelerated %sto %sconversion\n",
-	   af_fmt2str(((af_data_t*)arg)->format,buf1,255),
-	   af_fmt2str(af->data->format,buf2,255));
+	af_msg(AF_MSG_VERBOSE,"[format] Accelerated %s to %s conversion\n",
+	   af_fmt2str(((af_data_t*)arg)->format,buf1,256),
+	   af_fmt2str(af->data->format,buf2,256));
 	af->play = play_float_s16;
     }
     if ((data->format == AF_FORMAT_S16_NE) &&
 	(af->data->format == AF_FORMAT_FLOAT_NE))
     {
-	af_msg(AF_MSG_VERBOSE,"[format] Accelerated %sto %sconversion\n",
-	   af_fmt2str(((af_data_t*)arg)->format,buf1,255),
-	   af_fmt2str(af->data->format,buf2,255));
+	af_msg(AF_MSG_VERBOSE,"[format] Accelerated %s to %s conversion\n",
+	   af_fmt2str(((af_data_t*)arg)->format,buf1,256),
+	   af_fmt2str(af->data->format,buf2,256));
 	af->play = play_s16_float;
     }
     return AF_OK;
