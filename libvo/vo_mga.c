@@ -109,8 +109,8 @@ get_info(void)
 static void
 uninit(void)
 {
- ioctl( f,MGA_VID_OFF,0 );
-printf("vo: uninit!\n");
+ mga_uninit();
+ printf("vo: uninit!\n");
 }
 
 static void draw_osd(void)

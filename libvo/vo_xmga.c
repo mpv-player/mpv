@@ -196,6 +196,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
 	f = open(devname,O_RDWR);
 	if(f == -1)
 	{
+		perror("open");
 		printf("Couldn't open %s\n",devname); 
 		return(-1);
 	}
@@ -339,6 +340,6 @@ static void
 uninit(void)
 {
  saver_on(mDisplay);
- ioctl( f,MGA_VID_OFF,0 );
-printf("vo: uninit!\n");
+ mga_uninit();
+ printf("vo: uninit!\n");
 }

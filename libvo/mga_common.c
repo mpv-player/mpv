@@ -211,3 +211,8 @@ static int mga_init(){
 
 }
 
+static int mga_uninit(){
+	ioctl( f,MGA_VID_OFF,0 );
+	munmap(frames[0],mga_vid_config.frame_size*mga_vid_config.num_frames);
+	close(f);
+}
