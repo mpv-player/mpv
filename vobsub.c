@@ -5,6 +5,7 @@
 /* #define HAVE_GETLINE */
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -470,7 +471,7 @@ vobsub_add_id(vobsub_t *vob, const char *id, size_t idlen, const unsigned int in
 }
 
 static int
-vobsub_add_timestamp(vobsub_t *vob, off_t filepos, unsigned int ms)
+vobsub_add_timestamp(vobsub_t *vob, off_t filepos, int ms)
 {
     packet_queue_t *queue;
     packet_t *pkt;
@@ -482,7 +483,7 @@ vobsub_add_timestamp(vobsub_t *vob, off_t filepos, unsigned int ms)
     if (packet_queue_grow(queue) >= 0) {
 	pkt = queue->packets + (queue->packets_size - 1);
 	pkt->filepos = filepos;
-	pkt->pts100 = ms * 90;
+	pkt->pts100 = ms < 0 ? UINT_MAX : (unsigned int)ms * 90;
 	return 0;
     }
     return -1;
@@ -711,7 +712,7 @@ vobsub_parse_delay(vobsub_t *vob, const char *line)
     mp_msg(MSGT_VOBSUB,MSGL_V, "s=%d,", s);
     ms = atoi(line + 16);
     mp_msg(MSGT_VOBSUB,MSGL_V, "ms=%d", ms);
-    vob->delay = ms + 1000 * (s + 60 * (m + 60 * h)) * forward;
+    vob->delay = (ms + 1000 * (s + 60 * (m + 60 * h))) * forward;
     return 0;
 }
 
@@ -930,6 +931,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 					    mpg->pts + last_pts_diff;
 				    }
 				    pkt = queue->packets + queue->current_index;
+				    if (pkt->pts100 != UINT_MAX) {
 				    if (queue->packets_size > 1)
 					last_pts_diff = pkt->pts100 - mpg->pts;
 				    else
@@ -940,6 +942,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 				    mpg->packet = NULL;
 				    mpg->packet_reserve = 0;
 				    mpg->packet_size = 0;
+				    }
 				}
 			    }
 			    else
@@ -978,12 +981,15 @@ vobsub_get_packet(void *vobhandle, float pts,void** data, int* timestamp) {
     packet_queue_t *queue = vob->spu_streams + vobsub_id;
     while (queue->current_index < queue->packets_size) {
       packet_t *pkt = queue->packets + queue->current_index;
+      if (pkt->pts100 != UINT_MAX)
       if (pkt->pts100 <= pts100) {
 	++queue->current_index;
 	*data = pkt->data;
 	*timestamp = pkt->pts100;
 	return pkt->size;
       } else break;
+      else
+	  ++queue->current_index;
     }
   }
   return -1;
