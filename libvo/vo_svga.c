@@ -457,9 +457,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     return(1); // error
   }
   
-  if(vid_mode<10 || vid_mode==145) {
-  	oldmethod=1;
-  }
   /* set 332 palette for 8 bpp */
   if(bpp==8){
     int i;
@@ -478,9 +475,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   BYTESPERPIXEL=(bpp+4)>>3;
     LINEWIDTH=vga_getmodeinfo(vid_mode)->linewidth;
 
-  if(oldmethod && (bpp==8 || bpp==4)) LINEWIDTH*=8;
+  if( (vid_mode<10 || vid_mode==145) && (bpp==8 || bpp==4)) LINEWIDTH*=8;
+  else
+    if(vga_getmodeinfo(vid_mode)->flags & CAPABLE_LINEAR)
+//  	  if (vga_version>0x1430)//remove this to get more speed (or black screen)
+		vga_setlinearaddressing();
   
-  if(!oldmethod || (bpp>8))vga_setlinearaddressing();
   if(oldmethod) {
      buffer=malloc(HEIGHT*LINEWIDTH);
      maxframes=0;
@@ -850,7 +850,8 @@ static uint32_t get_image(mp_image_t *mpi)
 	(mpi->height != image_height) */
     )
 	return(VO_FALSE);
-
+	if(!directrender)
+	  return (VO_FALSE);
 /*
     if (Flip_Flag)
     {
