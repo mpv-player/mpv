@@ -1,3 +1,9 @@
+mplayer (0.90pre5-1) unstable; urgency=low
+
+  * rc1 to become 0.90
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Fri,  7 Jun 2002 15:31:20 +0200
+
 mplayer (0.90pre4-1) unstable; urgency=low
 
   * new pre-release
