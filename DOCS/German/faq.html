@@ -343,7 +343,7 @@ verwende die -double Option.
 <TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was genau ist diese libavcodec?
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Siehe (<A HREF="codecs.html#2.1.2.2">Sektion 2.1.2.2</A>.
+Siehe <A HREF="codecs.html#2.1.2.2">Sektion 2.1.2.2</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -668,6 +668,238 @@ Wo ist die Windows Version ?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Sie ist nicht erschienen und wird auch nicht erscheinen. Schau dich in der Windows Szene um (Opensource
 ASF Parser, Opensource ASF Encoders, usw) und du weisst warum. Wir wollen nicht eingesperrt werden.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Welche Karte ratet ihr mir zum Kauf?</font></font></b></td>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A0:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Das ist deine Entscheidung, aber die Faken sind:</font></font>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A1:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Geschwindigkeit:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>
+Dieser Parameter kann leicht berechnet werden:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>a)</b>
+welche Filme willst du dir ansehen:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
+MPEG1:</b> 320x200@32=256000</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>also
+liegt die benötigte Bandbreite bei nur 256*25fps=6.4Mb/sek (Dieses Format kann
+in Realtime auf jedem PC seit P-100 + S3Virge abgespielt werden)</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
+MPEG4:</b> 640x480@32=1228800</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>
+benötigte Videobandbreite: 1.2*25fps=30Mb/sek. Um ein solches Video in Realtime
+anzusehen brauchst du genug Rechenleistung: (Celeron-450 + DIMM basierene Grafikkarte)</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
+MPEG2 (wie DVD oder SDTV):</b> 1024x768@32=3145728</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>
+benötigte Videobandbreite: 3*30fps=90Mb/sek. In manchen Fällen (wenn deine Grafikkarte
+IDCT-Dekodierung unterstützt) genügt der selbe Rechner wie für MPEG4</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
+HDTV (HighData TeleVision):</b> 2000x2000@32=16000000</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>
+Videobandbreite (Beispiel): 16*30fps=480Mb/sek (das bedeutet du brauchst mindestens
+32Mb Grafikspeicher um diese Video zu sehen 16Mb für RGB und 16Mb für YUV)</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>b)</b>
+Bandbreite eines PCI Slots: 33Mhz*32bit=132Mb/sek und bei PCI2.1 66MHz*32bit=265Mb/sek,
+das sollte weitaus genug sein für jedliche Videowiedergabe (außer HDTV, was wirklich eine
+APG-Bus benötigt).</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>c)</b>
+Welche Art von Speicher soll vorhanden sein:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>SIMM</b>
+- vermeide es</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>DIMM</b>
+- gut, wenn deine Grafikkarte einen 128-bit Speicherzugriff hat.</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>DDR</b>
+- ist genug für alle Arten.</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Hinweis:
+Bei DGA-Vergleichen - es gibt keinen sichtbaren Unterschied zwischen Grafikkarten, welche
+die selbe Art von Speicher besitzen.</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>Resume:</b>
+Wenn du genug CPU-Power hast (Celeron-450 oder K6-2-500) sollte es genug sein, wenn
+du irgendeine Grafikkarte mit mindistens 8Mb DIMM oder DDR Speicher verwendest.</font></font>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A2:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Qualität:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>
+Diese Frage wurde hier tiefergehend behandelt:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><a href="http://www.anandtech.com">http://www.anadtech.com</a>
+AnandTech - Video Card Roundup - DVD Quality, Features &amp; Performance
+(October 2000)</font></font>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A3:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+FUNKTIONIERENDE Features unter Linux:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>
+Wenn du ein Win32-User bist hast du möglicherweise Unterstützung (von Treiber und DirectX8)
+für Features, die in deinem Chip eingebaut wurden.</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>
+Aber für <b>Linux</b> User:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>
+Zur Zeit sind mir nur einige Anbieter bekannt, die eine mehr oder weniger erweiterten Support
+für Linux haben:</font></font>
+<br>&nbsp;
+<table BORDER COLS=5 WIDTH="100%" NOSAVE >
+<tr>
+<td>&nbsp;</td>
+
+<td>
+<center>Matrox</center>
+</td>
+
+<td>
+<center>ATI</center>
+</td>
+
+<td>
+<center>NVidia</center>
+</td>
+
+<td>
+<center>S4 Savage</center>
+</td>
+</tr>
+
+<tr>
+<td>Anbieter von Treibern</td>
+
+<td>von Begeisterten</td>
+
+<td>von Begeisterten</td>
+
+<td>OEM + von Begeisterten</td>
+
+<td>von Begeisterten</td>
+</tr>
+
+<tr>
+<td>Qualität der Treiber</td>
+
+<td>Beste (X11, Kernel)</td>
+
+<td>Beste (X11, GATOS, Kernel)</td>
+
+<td>Fehlerhaft (nur X11)</td>
+
+<td>Beste (nur X11)</td>
+</tr>
+
+<tr>
+<td>VIDEO OVERLAY</td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+</tr>
+
+<tr>
+<td>BES und YV2RGB</td>
+
+<td>JA</td>
+
+<td>JA</td>
+
+<td>JA</td>
+
+<td>JA</td>
+</tr>
+
+<tr>
+<td>Scaling-Filter</td>
+
+<td>UNBEKANNT</td>
+
+<td>JA</td>
+
+<td>UNBAKANNT</td>
+
+<td>UNBEKANNT</td>
+</tr>
+
+<tr>
+<td>anpassungsfähiges Deinterlace</td>
+
+<td>NEIN</td>
+
+<td>JA</td>
+
+<td>UNBEKANNT</td>
+
+<td>UNBAKANNT</td>
+</tr>
+
+<tr>
+<td>Videoanpassung (Farbe, Kontrast, Sättigung, Farbkorrektur)</td>
+
+<td>UNBEKANNT</td>
+
+<td>TEILWEISE&nbsp;(in Entwicklung)</td>
+
+<td>UNBEKANNT</td>
+
+<td>UNBEKANNT</td>
+</tr>
+
+<tr>
+<td>Alpha-Blending, Farb- und Videotasten</td>
+
+<td>TEILWEISE</td>
+
+<td>TEILWEISE&nbsp;(in Entwicklung)</td>
+
+<td>UNBEKANNT</td>
+
+<td>UNBEKANNT</td>
+</tr>
+
+<tr>
+<td>Videoaufzeichnung</td>
+
+<td>UNBEKANNT</td>
+
+<td>JA (GATOS)</td>
+
+<td>UNBEKANNT</td>
+
+<td>UNBEKANNT</td>
+</tr>
+
+<tr>
+<td>TV-out</td>
+
+<td>JA</td>
+
+<td>JA</td>
+
+<td>UNBEKANNT</td>
+
+<td>UNBEKANNT</td>
+</tr>
+</table>
+
+<p><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Well
+- it's very rude observing of video card. Indeed we should pay our attention
+for models of video card:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>For
+example if MatroxG400(G450) drivers support TV-out then G550 has no such
+support.</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Other
+sample: Adaptive deinterlacing exists only since Rage128 chip and isn't
+present on Mach64+ ones. Same as 3D features are far different from Mach64
+to Radeon2 8500 with trueform possibilities.</font></font>
+<p><b><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>ANYWAY
+- MPLAYER'S TEAM DOESN'T ACCEPT ANY CLAIMS IF YOU AFTER</font></font></b>
+<br><b><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>READING
+OF THIS MATERIAL WILL BUY CARD WHICH IS UNSUCCESSFUL FOR YOU!!!</font></font></b>
+<br><b><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>THIS
+MATERIAL IS ONLY OUR VISION.</font></font></b>
+<p><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>Q:</b>
+If PCI slot is far enough for most types of movies then why S3 Virge</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>is
+too slow for them?</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>A:</b>
+Due to its SIMM memory.</font></font>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
