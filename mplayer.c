@@ -1891,6 +1891,7 @@ if(auto_quality>0){
 #endif
 
   if(osd_function==OSD_PAUSE){
+    int pkey=-1;
 #ifdef HAVE_NEW_INPUT    
     mp_cmd_t* cmd;
 #endif
@@ -1929,9 +1930,10 @@ if(auto_quality>0){
 #ifdef HAVE_LIRC
              lirc_mp_getinput()<=0 &&
 #endif
-             (use_stdin || getch2(20)<=0) && mplayer_get_key()<=0){
+             (use_stdin || getch2(20)<=0) /* && mplayer_get_key()<=0*/){
 #endif /* HAVE_NEW_INPUT */
 	     if(sh_video && video_out && vo_config_count) video_out->check_events();
+             if((pkey=mplayer_get_key()) > 0) break;
 #ifdef HAVE_NEW_GUI
              if(use_gui){
 		guiEventHandling();
@@ -1961,6 +1963,8 @@ if(auto_quality>0){
         guiGetEvent( guiCEvent,(char *)guiSetPlay );
        }
 #endif
+      if(pkey!=32 && pkey!=112)
+        mplayer_put_key(pkey); // pass on the key
   }
 
 // handle -sstep
