@@ -412,7 +412,6 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
         mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI_NI: missing video stream!? contact the author, it may be a bug :(\n");
 	return NULL;
 //        GUI_MSG( mplErrorAVINI )
-//        exit(1);
       }
       if(a_pos==-1){
         mp_msg(MSGT_DEMUX,MSGL_INFO,"AVI_NI: No audio stream found -> nosound\n");
@@ -439,7 +438,6 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI: missing video stream!? contact the author, it may be a bug :(\n");
     return NULL;
 //    GUI_MSG( mplAVIErrorMissingVideoStream )
-//    exit(1);
   }
   sh_video=d_video->sh;sh_video->ds=d_video;
   if(d_audio->id!=-2){

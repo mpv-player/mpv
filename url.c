@@ -23,7 +23,7 @@ url_new(char* url) {
 	Curl = (URL_t*)malloc(sizeof(URL_t));
 	if( Curl==NULL ) {
 		printf("Memory allocation failed!\n");
-		exit(1);
+		return NULL;
 	}
 	// Initialisation of the URL container members
 	memset( Curl, 0, sizeof(URL_t) );
@@ -32,7 +32,7 @@ url_new(char* url) {
 	Curl->url = (char*)malloc(strlen(url)+1);
 	if( Curl->url==NULL ) {
 		printf("Memory allocation failed!\n");
-		exit(1);
+		return NULL;
 	}
 	strcpy(Curl->url, url);
 
@@ -71,7 +71,7 @@ url_new(char* url) {
 	Curl->hostname = (char*)malloc(pos2-pos1-3+1);
 	if( Curl->hostname==NULL ) {
 		printf("Memory allocation failed!\n");
-		exit(1);
+		return NULL;
 	}
 	strncpy(Curl->hostname, ptr1+3, pos2-pos1-3);
 	Curl->hostname[pos2-pos1-3] = '\0';
@@ -86,7 +86,7 @@ url_new(char* url) {
 			Curl->file = (char*)malloc(strlen(ptr2)+1);
 			if( Curl->file==NULL ) {
 				printf("Memory allocation failed!\n");
-				exit(1);
+				return NULL;
 			}
 			strcpy(Curl->file, ptr2);
 		}
@@ -96,7 +96,7 @@ url_new(char* url) {
 		Curl->file = (char*)malloc(2);
 		if( Curl->file==NULL ) {
 			printf("Memory allocation failed!\n");
-			exit(1);
+			return NULL;
 		}
 		strcpy(Curl->file, "/");
 	}

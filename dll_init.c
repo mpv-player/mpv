@@ -34,9 +34,6 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
 
     sh_audio->srcstream=NULL;
 
-//    if(in_fmt->nSamplesPerSec==0){  printf("Bad WAVE header!\n");exit(1);  }
-//    MSACM_RegisterAllDrivers();
-
     sh_audio->o_wf.nChannels=in_fmt->nChannels;
     sh_audio->o_wf.nSamplesPerSec=in_fmt->nSamplesPerSec;
     sh_audio->o_wf.nAvgBytesPerSec=2*sh_audio->o_wf.nSamplesPerSec*sh_audio->o_wf.nChannels;

@@ -474,7 +474,7 @@ network_streaming(void *arg) {
 		ret = select( streaming_ctrl->fd_net+1, &fd_net_in, NULL, NULL, NULL );
 		if( ret<0 ) {
 			perror("select");
-			exit(1);
+			return; //exit(1); // FIXME!
 		}
 		if( FD_ISSET( streaming_ctrl->fd_net, &fd_net_in ) ) {
 			ret = readFromServer( streaming_ctrl->fd_net, buffer, BUFFER_SIZE );

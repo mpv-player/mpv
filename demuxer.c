@@ -399,7 +399,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
   mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
   return NULL;
 //  GUI_MSG( mplUnknowFileType )
-//  exit(1);
 }
 //====== File format recognized, set up these for compatibility: =========
 d_audio=demuxer->audio;
@@ -429,7 +428,6 @@ switch(file_format){
     sh_video=NULL;
     //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
     //GUI_MSG( mplASFErrorMissingVideoStream )
-    //exit(1);
   } else {
     sh_video=d_video->sh;sh_video->ds=d_video;
     sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms

@@ -160,7 +160,7 @@ while(!stream_eof(demuxer->stream)){
       if(streamh.type_size>1024 || streamh.stream_size>1024){
           mp_msg(MSGT_HEADER,MSGL_FATAL,"FATAL: header size bigger than 1024 bytes!\n"
               "Please contact mplayer authors, and upload/send this file.\n");
-          exit(1);
+          return 0;
       }
       // type-specific data:
       stream_read(demuxer->stream,(char*) buffer,streamh.type_size);

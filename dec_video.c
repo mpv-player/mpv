@@ -150,7 +150,6 @@ switch(sh_video->codec->driver){
  case VFM_VFW: {
    if(!init_video_codec(sh_video,0)) {
 //     GUI_MSG( mplUnknowError )
-//     exit(1);
       return 0;
    }  
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32 video codec init OK!\n");
@@ -159,7 +158,6 @@ switch(sh_video->codec->driver){
  case VFM_VFWEX: {
    if(!init_video_codec(sh_video,1)) {
 //     GUI_MSG( mplUnknowError )
-//     exit(1);
       return 0;
    }  
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32Ex video codec init OK!\n");
@@ -170,7 +168,6 @@ switch(sh_video->codec->driver){
    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"MPlayer was compiled WITHOUT directshow support!\n");
    return 0;
 //   GUI_MSG( mplCompileWithoutDSSupport )
-//   exit(1);
 #else
    int bpp;
    if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, &sh_video->our_out_buffer)){
@@ -188,7 +185,6 @@ switch(sh_video->codec->driver){
 //           usec_sleep( 10000 );
 //          }
 //        #endif
-//        exit(1);
    }
    
    switch(out_fmt){
@@ -247,7 +243,7 @@ switch(sh_video->codec->driver){
  case VFM_DIVX4: {  // DivX4Linux
 #ifndef NEW_DECORE
    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"MPlayer was compiled WITHOUT DivX4Linux (libdivxdecore.so) support!\n");
-   return 0; //exit(1);
+   return 0;
 #else
    mp_msg(MSGT_DECVIDEO,MSGL_V,"DivX4Linux video codec\n");
    { DEC_PARAM dec_param;
@@ -282,7 +278,7 @@ switch(sh_video->codec->driver){
  case VFM_FFMPEG: {  // FFmpeg's libavcodec
 #ifndef USE_LIBAVCODEC
    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"MPlayer was compiled WITHOUT libavcodec support!\n");
-   return 0; //exit(1);
+   return 0;
 #else
    mp_msg(MSGT_DECVIDEO,MSGL_V,"FFmpeg's libavcodec video codec\n");
     avcodec_init();
@@ -290,7 +286,7 @@ switch(sh_video->codec->driver){
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh_video->codec->dll);
     if(!lavc_codec){
 	mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Can't find codec '%s' in libavcodec...\n",sh_video->codec->dll);
-	return 0; //exit(1);
+	return 0;
     }
     memset(&lavc_context, 0, sizeof(lavc_context));
 //    sh_video->disp_h/=2; // !!
@@ -300,7 +296,7 @@ switch(sh_video->codec->driver){
     /* open it */
     if (avcodec_open(&lavc_context, lavc_codec) < 0) {
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, "could not open codec\n");
-        return 0; //exit(1);
+        return 0;
     }
    
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: libavcodec init OK!\n");
@@ -580,7 +576,6 @@ switch(d_video->demuxer->file_format){
         mp_msg(MSGT_DECVIDEO,MSGL_ERR,"MPEG: FATAL: EOF while searching for sequence header\n");
 	return 0;
 //        GUI_MSG( mplMPEGErrorSeqHeaderSearch )
-//        exit(1);
       }
    }
    mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
@@ -592,20 +587,17 @@ switch(d_video->demuxer->file_format){
      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Cannot allocate shared memory\n");
      return 0;
 //     GUI_MSG( mplErrorShMemAlloc )
-//     exit(0);
    }
    videobuf_len=0;
    if(!read_video_packet(d_video)){ 
      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"FATAL: Cannot read sequence header!\n");
      return 0;
 //     GUI_MSG( mplMPEGErrorCannotReadSeqHeader )
-//     exit(1);
    }
    if(header_process_sequence_header (picture, &videobuffer[4])) {
      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"bad sequence header!\n"); 
      return 0;
 //     GUI_MSG( mplMPEGErrorBadSeqHeader )
-//     exit(1);
    }
    if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
 //    videobuf_len=0;
@@ -614,13 +606,11 @@ switch(d_video->demuxer->file_format){
       mp_msg(MSGT_DECVIDEO,MSGL_ERR,"FATAL: Cannot read sequence header extension!\n");
       return 0;
 //      GUI_MSG( mplMPEGErrorCannotReadSeqHeaderExt )
-//      exit(1);
     }
     if(header_process_extension (picture, &videobuffer[pos+4])) {
       mp_msg(MSGT_DECVIDEO,MSGL_ERR,"bad sequence header extension!\n");  
       return 0;
 //      GUI_MSG( mplMPEGErrorBadSeqHeaderExt )
-//      exit(1);
     }
    }
    // display info:
@@ -629,7 +619,7 @@ switch(d_video->demuxer->file_format){
    if(!sh_video->fps){
 //     if(!force_fps){
 //       fprintf(stderr,"FPS not specified (or invalid) in the header! Use the -fps option!\n");
-//       return 0; //exit(1);
+//       return 0;
 //     }
      sh_video->frametime=0;
    } else {
