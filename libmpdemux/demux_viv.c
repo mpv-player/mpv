@@ -290,6 +290,9 @@ int vivo_check_file(demuxer_t* demuxer){
 return 1;
 }
 
+static audio_pos=0;
+static audio_rate=0;
+
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
@@ -348,6 +351,7 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
       else
         len=40;	/* 40kbps */
       ds=demux->audio;
+      audio_pos+=len;
       break;
   case 0x40:  // audio packet
       if (prefix == 1)
@@ -355,6 +359,7 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
       else
         len=24;	/* 24kbps */
       ds=demux->audio;
+      audio_pos+=len;
       break;
   default:
       mp_msg(MSGT_DEMUX,MSGL_WARN,"VIVO - unknown ID found: %02X at pos %lu contact author!\n",
@@ -395,7 +400,7 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
       dp=new_demux_packet(len);
       //memcpy(dp->buffer,data,len);
       stream_read(demux->stream,dp->buffer,len);
-//      dp->pts=time*0.001f;
+      dp->pts=audio_rate?((float)audio_pos/(float)audio_rate):0;
 //      dp->flags=keyframe;
 //      if(ds==demux->video) printf("ASF time: %8d  dur: %5d  \n",time,dur);
       dp->pos=demux->filepos;
@@ -545,6 +550,8 @@ void demux_open_vivo(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX,MSGL_ERR,"VIVO: " MSGTR_MissingVideoStreamBug);
     return;
   }
+
+    audio_pos=0;
   
   h263_decode_picture_header(demuxer->video->buffer);
   
@@ -693,6 +700,7 @@ if (demuxer->audio->id >= -1){
 		}
 		if (vivo_param_abitrate != -1)
 		    sh->wf->nAvgBytesPerSec = vivo_param_abitrate;
+		audio_rate=sh->wf->nAvgBytesPerSec;
 
 		if (!priv->audio_bytesperblock)
 		{

@@ -237,6 +237,12 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     if(demuxer->file_format==DEMUXER_TYPE_MOV && !force_fps){
         // .MOV files has no fixed FPS - just frame durations!
 	frame_time=d_video->pts-pts1;
+    } else
+    if(demuxer->file_format==DEMUXER_TYPE_VIVO && !force_fps){
+        // .VIVO files has no fixed FPS - just frame durations!
+	if(d_video->pts-pts1>0)
+	    frame_time=d_video->pts-pts1;
+	mp_msg(MSGT_CPLAYER,MSGL_V,"vivo frame_time=%5.3f   \n",frame_time);
     }
 
     if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS) d_video->pts+=frame_time;
