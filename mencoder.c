@@ -842,13 +842,13 @@ case VCODEC_LIBAVCODEC:
 	lavc_venc_context.bit_rate = lavc_param_vbitrate;
     else
 	lavc_venc_context.bit_rate = 800000; /* default */
-    lavc_venc_context.frame_rate = mux_v->h.dwRate * FRAME_RATE_BASE;    
+    lavc_venc_context.frame_rate = sh_video->fps * FRAME_RATE_BASE;    
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */
 	lavc_venc_context.gop_size = lavc_param_keyint;
     else
 	lavc_venc_context.gop_size = 250; /* default */
-    
+
     /* ignored by libavcodec? */
     if (lavc_param_vhq)
     {
