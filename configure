@@ -1459,7 +1459,7 @@ EOF
 fi
 if test "$_i18n" = yes ; then
   _def_i18n='#define USE_I18N 1'
-  LINGUAS='en' # force help_mp-en.h
+#  LINGUAS='en' # force help_mp-en.h
 else
   _def_i18n='#undef USE_I18N'
 fi
