@@ -234,9 +234,11 @@ int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
 //---------------------------------------------------------------------------
 
 static int eof=0;
+static int interrupted=0;
 
 static void exit_sighandler(int x){
     eof=1;
+    interrupted=1;
 }
 
 int main(int argc,char* argv[], char *envp[]){
@@ -850,4 +852,5 @@ fclose(muxer_f);
 
 if(stream) free_stream(stream); // kill cache thread
 
+return interrupted;
 }
