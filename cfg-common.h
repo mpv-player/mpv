@@ -346,6 +346,12 @@ m_option_t tvopts_conf[]={
 extern m_config_t dvbin_opts_conf[];
 #endif
 
+#ifdef  USE_FRIBIDI
+extern char *fribidi_charset;
+extern int flip_hebrew;
+#endif
+
+
 extern int audio_stream_cache;
 
 extern int sws_chr_vshift;
