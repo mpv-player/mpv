@@ -12,6 +12,7 @@
  *
  * 15 & 16 bpp support added by Franck Sicard <Franck.Sicard@solsoft.fr>
  * use swScaler instead of lots of tricky converters by Michael Niedermayer <michaelni@gmx.at>
+ * runtime fullscreen switching by alex
  *
  */
 
@@ -41,6 +42,8 @@ LIBVO_EXTERN( x11 )
 
 #include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"
+
+#include "../mp_msg.h"
 
 static vo_info_t vo_info =
 {
@@ -484,7 +487,7 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
   static int old_vo_dwidth=-1;
   static int old_vo_dheight=-1;
   
-  if((old_vo_dwidth != vo_dwidth || old_vo_dheight != vo_dheight) && y==0 && zoomFlag)
+  if((old_vo_dwidth != vo_dwidth || old_vo_dheight != vo_dheight) /*&& y==0*/ && zoomFlag)
   {
     int newW= vo_dwidth;
     int newH= vo_dheight;
@@ -586,11 +589,58 @@ static uint32_t preinit(const char *arg)
   return 0;
 }
 
+/* for runtime fullscreen switching */
+static int vo_fs_oldx = -1;
+static int vo_fs_oldy = -1;
+static int vo_fs_oldwidth = -1;
+static int vo_fs_oldheight = -1;
+
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_GUISUPPORT:
+    return VO_TRUE;
+  case VOCTRL_FULLSCREEN:
+    if (!zoomFlag)
+    {
+	mp_msg(MSGT_VO, MSGL_WARN, "X11 Fullscreen: not available without zooming enabled\n");
+	return VO_NOTAVAIL;
+    }
+    if ((vo_fs_oldwidth == -1) && (vo_fs_oldheight == -1))
+    {
+	int foo;
+	Window root;
+
+	XGetGeometry(mDisplay, mywindow, &root, &foo, &foo,
+	    &vo_fs_oldwidth, &vo_fs_oldheight, &foo, &foo);
+	XTranslateCoordinates(mDisplay, mywindow, root, 0, 0,
+	    &vo_fs_oldx, &vo_fs_oldy, &foo);
+
+	mp_msg(MSGT_VO,MSGL_V,"X11 Fullscreen: saved old place: %dx%d-%dx%d\n",
+	    vo_fs_oldx, vo_fs_oldy, vo_fs_oldwidth, vo_fs_oldheight);
+	
+	/* resize */
+	vo_dwidth = vo_screenwidth;
+	vo_dheight = vo_screenheight;
+	XMoveResizeWindow(mDisplay, mywindow, 0, 0,
+	    vo_screenwidth, vo_screenheight);
+	vo_x11_decoration( mDisplay,mywindow,0 );
+    }
+    else
+    {
+	XMoveResizeWindow(mDisplay, mywindow, vo_fs_oldx, vo_fs_oldy, 
+	    vo_fs_oldwidth, vo_fs_oldheight);
+
+	/* restore */
+	vo_dwidth = vo_fs_oldwidth;
+	vo_dheight = vo_fs_oldheight;
+	
+	/* clean */
+	vo_fs_oldwidth = -1;
+	vo_fs_oldheight = -1;
+    }
   }
   return VO_NOTIMPL;
 }
