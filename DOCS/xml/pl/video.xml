@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.60 -->
+<!-- synced with 1.61 -->
 <sect2 id="video-dev">
 <title>Urządzenia wyjścia video</title>
 
@@ -508,7 +508,7 @@ jest konwersja (możliwe, że powolna).
 <para>
 Jeżeli jesteś takim szczęśliwcem, że masz wystarczająco dużo pamięci poza-ekranowej 
 (offscreen memory) aby zmieścił się tam cały obraz, 
-sterownik DGA użyje podwójnego buforowania (doublebuffering). 
+sterownik DGA użyje podwójnego buforowania.
 Efektem będzie płynniejsze odtwarzanie filmu. 
 Sterownik poinformuje Cię czy podwójne buforowanie jest włączone czy nie.
 </para>
