@@ -92,11 +92,7 @@ static int init(int rate,int channels,int format,int flags){
 	case AFMT_U8:
 	    break;
 	default:
-#ifdef WORDS_BIGENDIAN
-	    format=AFMT_S16_BE;
-#else
 	    format=AFMT_S16_LE;
-#endif
 	    bits=16;
 	    break;
 	}
