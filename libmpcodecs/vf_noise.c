@@ -49,6 +49,7 @@ typedef struct FilterParam{
 	int strength;
 	int uniform;
 	int temporal;
+	int quality;
 	int8_t *noise;
 }FilterParam;
 
@@ -105,7 +106,6 @@ static int8_t *initNoise(FilterParam *fp){
 #ifdef HAVE_MMX
 static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
 	int mmx_len= len&(~7);
-	shift&= ~7;
 	noise+=shift;
 
 	asm volatile(
@@ -135,7 +135,6 @@ static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int 
 #ifdef HAVE_MMX2
 static inline void lineNoise_MMX2(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
 	int mmx_len= len&(~7);
-	shift&= ~7;
 	noise+=shift;
 
 	asm volatile(
@@ -189,7 +188,7 @@ static void noise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int 
 			{
 				memcpy(dst, src, width);
 				dst+= dstStride;
-				src+= srcStride;	
+				src+= srcStride;
 			}
 		}
 		return;
@@ -200,6 +199,7 @@ static void noise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int 
 		if(fp->temporal)	shift=  rand()&(MAX_SHIFT  -1);
 		else			shift= nonTempRandShift[y];
 
+		if(fp->quality==0) shift&= ~7;
 		lineNoise(dst, src, noise, width, shift);
 		dst+= dstStride;
 		src+= srcStride;
@@ -209,7 +209,7 @@ static void noise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int 
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
-    
+
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
@@ -299,6 +299,8 @@ static void parse(FilterParam *fp, char* args){
 	if(pos && pos<max) fp->uniform=1;
 	pos= strchr(args, 't');
 	if(pos && pos<max) fp->temporal=1;
+	pos= strchr(args, 'h');
+	if(pos && pos<max) fp->quality=1;
 
 	if(fp->strength) initNoise(fp);
 }
