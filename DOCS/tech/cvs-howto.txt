@@ -122,6 +122,16 @@ I. TECH SIDE:
   revision will remain unmodified, only revision history will be lost and
   holes left in the revision numbering.
 
+10. RSA authentication
+
+  Since mplayerhq.hu uses ssh.com and not OpenSSH you will have to convert your
+  OpenSSH RSA keys to IETF SECSH format with
+
+    ssh-keygen -e
+
+  if you want to use RSA authentication. See ssh(1) and ssh-keygen(1) for
+  details.
+
 
 Contact A'rpi <arpi@thot.banki.hu> if you have technical problems with the CVS
 server.
