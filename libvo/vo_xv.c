@@ -174,7 +174,7 @@ static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
    then trigger it if it's ok so that the other values are at default upon query */
                 if (xv_atomka != None)
                 {
-		    int port_value,port_min,port_max,port_mid;
+		    int hue = 0,port_value,port_min,port_max,port_mid;
 		    if(strcmp(attributes[i].name,"XV_BRIGHTNESS") == 0
 			      && (info->cap & VEQ_CAP_BRIGHTNESS))
 				port_value = info->brightness;
@@ -189,7 +189,7 @@ static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
 		    else
 		    if(strcmp(attributes[i].name,"XV_HUE") == 0
 			      && (info->cap & VEQ_CAP_HUE))
-				port_value = info->hue;
+				{ port_value = info->hue; hue=1; }
 		    else
                     /* Note: since 22.01.2002 GATOS supports these attrs for radeons (NK) */
 		    if(strcmp(attributes[i].name,"XV_RED_INTENSITY") == 0
@@ -210,8 +210,13 @@ static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
 		    port_min = xv_min;
 		    port_max = xv_max;
 		    port_mid = (port_min + port_max) / 2;
-		    port_value = port_mid + (port_value * (port_max - port_min)) / 2000;
-		    mp_msg(MSGT_VO,MSGL_V,"vo_xv: set gamma %s to %i (min %i max %i mid %i)\n",attributes[i].name,port_value,port_min,port_max,port_mid);
+
+		    if ( hue && port_min == 0 && port_max == 360 )
+		     {
+		      port_value=( port_value * port_mid ) / 1000;
+		      if ( port_value < 0 ) port_value+=port_max - 1;
+		     } else port_value = port_mid + (port_value * (port_max - port_min)) / 2000;
+		    
                     XvSetPortAttribute(mDisplay, xv_port, xv_atomka, port_value);
                 }
         }
@@ -243,39 +248,46 @@ static int xv_get_video_eq( vidix_video_eq_t *info)
    then trigger it if it's ok so that the other values are at default upon query */
                 if (xv_atomka != None)
                 {
-		    int port_value,port_min,port_max,port_mid;
+		    int value,port_value,port_min,port_max,port_mid;
                     XvGetPortAttribute(mDisplay, xv_port, xv_atomka, &port_value);
 		    mp_msg(MSGT_VO,MSGL_V,"vo_xv: get: %s = %i\n",attributes[i].name,port_value);
 
 		    port_min = xv_min;
 		    port_max = xv_max;
-		    port_mid = (port_min + port_max) / 2;		    
-		    port_value = ((port_value - port_mid)*2000)/(port_max-port_min);
+		    port_mid = (port_min + port_max) / 2;
+		    
+                    value = ((port_value - port_mid)*2000)/(port_max-port_min);
 		    
 		    mp_msg(MSGT_VO,MSGL_V,"vo_xv: assume: %s = %i\n",attributes[i].name,port_value);
 		    
 		    if(strcmp(attributes[i].name,"XV_BRIGHTNESS") == 0)
 		    {
 			info->cap |= VEQ_CAP_BRIGHTNESS;
-			info->brightness = port_value;
+			info->brightness = value;
 		    }
 		    else
 		    if(strcmp(attributes[i].name,"XV_SATURATION") == 0)
 		    {
 			info->cap |= VEQ_CAP_SATURATION;
-			info->saturation = port_value;
+			info->saturation = value;
 		    }
 		    else
 		    if(strcmp(attributes[i].name,"XV_CONTRAST") == 0)
 		    {
 			info->cap |= VEQ_CAP_CONTRAST;
-			info->contrast = port_value;
+			info->contrast = value;
 		    }
 		    else
 		    if(strcmp(attributes[i].name,"XV_HUE") == 0)
 		    {
+		        if ( port_min == 0 && port_max == 360 )
+		         {
+		          if ( port_value > port_mid - 1 ) value=( port_value - port_max + 1 ) * 1000 / port_mid;
+			   else value=port_value * 1000 / port_mid;
+		         }
+//		        mp_msg(MSGT_VO,MSGL_STATUS,"vo_xv: assume: %s = %d (%d)\n",attributes[i].name,value,port_value);
 			info->cap |= VEQ_CAP_HUE;
-			info->hue = port_value;
+			info->hue = value;
 		    }
 		    else
                     /* Note: since 22.01.2002 GATOS supports these attrs for radeons (NK) */
@@ -303,6 +315,7 @@ static int xv_get_video_eq( vidix_video_eq_t *info)
     return 0;
 }
 
+#if 0
 static void set_gamma_correction( void )
 {
   vidix_video_eq_t info;
@@ -320,6 +333,7 @@ static void set_gamma_correction( void )
   /* reset with XV_SET_DEFAULTS only once */
   __xv_set_video_eq(&info,1);
 }
+#endif
 
 /*
  * connect to server, create and map window,
@@ -495,7 +509,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
      current_buf=0;
      current_ip_buf=0;
 
+#if 0
      set_gamma_correction();
+#endif
 
      aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
      if ( ( flags&1 )&&( !WinID ) )
