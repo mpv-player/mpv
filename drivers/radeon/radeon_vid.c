@@ -190,7 +190,10 @@ static uint8_t *radeon_mmio_base = 0;
 static uint32_t radeon_mem_base = 0; 
 static int32_t radeon_overlay_off = 0;
 static uint32_t radeon_ram_size = 0;
-
+#define PARAM_BUFF_SIZE 4096
+static uint8_t *radeon_param_buff = NULL;
+static uint32_t radeon_param_buff_size=0;
+static uint32_t radeon_param_buff_len=0; /* real length of buffer */
 static mga_vid_config_t radeon_config; 
 
 #undef DEBUG
@@ -776,29 +779,40 @@ static int radeon_vid_config_card(void)
 #define PARAM_DEINTERLACE "deinterlace="
 #define PARAM_DEINTERLACE_PATTERN "deinterlace_pattern="
 
-static ssize_t radeon_vid_read(struct file *file, char *buf, size_t count, loff_t *ppos)
+static void radeon_param_buff_fill( void )
 {
     unsigned len,saturation;
     long brightness;
     brightness = besr.brightness;
     saturation = besr.saturation;
     len = 0;
-    len += sprintf(&buf[len],"Interface version: %04X\nDriver version: %s\n",MGA_VID_VERSION,RADEON_VID_VERSION);
-    len += sprintf(&buf[len],"Chip: %s\n",ati_card_ids[detected_chip].name);
-    len += sprintf(&buf[len],"Memory: %p:%x\n",radeon_mem_base,radeon_ram_size*0x100000);
-    len += sprintf(&buf[len],"MMIO: %p\n",radeon_mmio_base);
-    len += sprintf(&buf[len],"Overlay offset: %p\n",radeon_overlay_off);
-    len += sprintf(&buf[len],"Last fourcc: %s\n\n",fourcc_format_name(besr.fourcc));
-    len += sprintf(&buf[len],"Configurable stuff:\n");
-    len += sprintf(&buf[len],"~~~~~~~~~~~~~~~~~~~\n");
-    len += sprintf(&buf[len],PARAM_DOUBLE_BUFF"%s\n",besr.double_buff?"on":"off");
-    len += sprintf(&buf[len],PARAM_BRIGHTNESS"%i\n",brightness);
-    len += sprintf(&buf[len],PARAM_SATURATION"%u\n",saturation);
-    len += sprintf(&buf[len],PARAM_COLOUR_KEY"%X\n",besr.graphics_key_clr);
-    len += sprintf(&buf[len],PARAM_DEINTERLACE"%s\n",besr.deinterlace_on?"on":"off");
-    len += sprintf(&buf[len],PARAM_DEINTERLACE_PATTERN"%X\n",besr.deinterlace_pattern);
-    ppos += len;
-    return len;
+    len += sprintf(&radeon_param_buff[len],"Interface version: %04X\nDriver version: %s\n",MGA_VID_VERSION,RADEON_VID_VERSION);
+    len += sprintf(&radeon_param_buff[len],"Chip: %s\n",ati_card_ids[detected_chip].name);
+    len += sprintf(&radeon_param_buff[len],"Memory: %p:%x\n",radeon_mem_base,radeon_ram_size*0x100000);
+    len += sprintf(&radeon_param_buff[len],"MMIO: %p\n",radeon_mmio_base);
+    len += sprintf(&radeon_param_buff[len],"Overlay offset: %p\n",radeon_overlay_off);
+    len += sprintf(&radeon_param_buff[len],"Last fourcc: %s\n\n",fourcc_format_name(besr.fourcc));
+    len += sprintf(&radeon_param_buff[len],"Configurable stuff:\n");
+    len += sprintf(&radeon_param_buff[len],"~~~~~~~~~~~~~~~~~~~\n");
+    len += sprintf(&radeon_param_buff[len],PARAM_DOUBLE_BUFF"%s\n",besr.double_buff?"on":"off");
+    len += sprintf(&radeon_param_buff[len],PARAM_BRIGHTNESS"%i\n",brightness);
+    len += sprintf(&radeon_param_buff[len],PARAM_SATURATION"%u\n",saturation);
+    len += sprintf(&radeon_param_buff[len],PARAM_COLOUR_KEY"%X\n",besr.graphics_key_clr);
+    len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE"%s\n",besr.deinterlace_on?"on":"off");
+    len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE_PATTERN"%X\n",besr.deinterlace_pattern);
+    radeon_param_buff_len = len;
+}
+
+static ssize_t radeon_vid_read(struct file *file, char *buf, size_t count, loff_t *ppos)
+{
+    uint32_t size;
+    if(!radeon_param_buff) return -ESPIPE;
+    if(!(*ppos)) radeon_param_buff_fill();
+    if(*ppos >= radeon_param_buff_len) return 0;
+    size = min(count,radeon_param_buff_len-(uint32_t)(*ppos));
+    memcpy(buf,radeon_param_buff,size);
+    *ppos += size;
+    return size;
 }
 
 static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count, loff_t *ppos)
@@ -848,6 +862,7 @@ static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count
       dpat=simple_strtol(&buf[strlen(PARAM_DEINTERLACE_PATTERN)],NULL,16);
 	OUTREG(OV0_DEINTERLACE_PATTERN, dpat);
     }
+    else count = -EIO;
     radeon_vid_preset();
     return count;
 }
@@ -947,6 +962,8 @@ static int radeon_vid_initialize(void)
 		unregister_chrdev(RADEON_VID_MAJOR, "radeon_vid");
 		return -EINVAL;
 	}
+	radeon_param_buff = kmalloc(PARAM_BUFF_SIZE,GFP_KERNEL);
+	if(radeon_param_buff) radeon_param_buff_size = PARAM_BUFF_SIZE;
 	radeon_vid_save_state();
 	radeon_vid_make_default();
 	radeon_vid_preset();
@@ -963,7 +980,7 @@ void cleanup_module(void)
 	radeon_vid_restore_state();
 	if(radeon_mmio_base)
 		iounmap(radeon_mmio_base);
-
+	kfree(radeon_param_buff);
 	RTRACE(RVID_MSG"Cleaning up module\n");
 	unregister_chrdev(RADEON_VID_MAJOR, "radeon_vid");
 }
