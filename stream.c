@@ -39,9 +39,9 @@ int stream_fill_buffer(stream_t *s){
   return len;
 }
 
-inline unsigned int stream_read_char(stream_t *s){
+inline int stream_read_char(stream_t *s){
   return (s->buf_pos<s->buf_len)?s->buffer[s->buf_pos++]:
-    (stream_fill_buffer(s)?s->buffer[s->buf_pos++]:0);
+    (stream_fill_buffer(s)?s->buffer[s->buf_pos++]:-256);
 //  if(s->buf_pos<s->buf_len) return s->buffer[s->buf_pos++];
 //  stream_fill_buffer(s);
 //  if(s->buf_pos<s->buf_len) return s->buffer[s->buf_pos++];
