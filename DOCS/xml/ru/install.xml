@@ -357,7 +357,7 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 	    Нет XVideo.
   </simpara></listitem>
 <listitem><simpara>
-  FBdev: фреймбуффер может быть включён <option>clgenfb</option>
+  FBdev: фреймбуфер[framebuffer - кадровый буфер] может быть включён <option>clgenfb</option>
 	    драйвером в ядре, хотя для меня это работало только при 8bpp, и
 	    поэтому, непригодно. Исходный код должен быть расширен 7584 ID
 	    до компиляции.
@@ -457,7 +457,7 @@ make install</screen>
 <filename>config.mak</filename>.
 Если у Вас стоят какие-то библиотеки, которые не определяются 
 <filename>./configure</filename>, проверьте, что у Вас установлены соответствующие
-хедеры[header files] (обычно -dev пакеты) и их версии совпадают. Файл
+заголовки[header files] (обычно -dev пакеты) и их версии совпадают. Файл
 <filename>configure.log</filename> Обычно говорит Вам, чего не хватает.
 </para>
 
