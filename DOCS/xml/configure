@@ -37,8 +37,9 @@ done
 
 if test -z "$_chunk_xsl"
 then
-  echo "Not found."
   _chunk_xsl=/usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl
+  echo "Not found. Using default ($_chunk_xsl)"
+  _fake_chunk_xsl=yes
 else
   echo "Found chunk.xsl at $_chunk_xsl"
 fi
@@ -66,7 +67,7 @@ echo "Looking for a valid XSLT processor..."
 
 if xsltproc --version &> /dev/null
 then
-  if test -n "$_chunk_xsl"
+  if test -z "$_fake_chunk_xsl"
   then
     echo "Found xsltproc. If it works, it's probably the best choice."
     if test -n "$_catalog"
@@ -86,6 +87,7 @@ fi
 # FIXME: We need more checks for Java virtual machines.
 if test -z "$_xsltcommand"
 then
+  #FIXME: Add more suitable machines!!!
   for _try_java in java gij-3.3 gij-3.2 gij-3.1 gij-3.0 gij
   do
     if $_try_java --version > /dev/null 2>&1 || $_try_java -version > /dev/null 2>&1
@@ -100,7 +102,7 @@ then
   else
     # Try to find the right jar files for classpath.
     # This must not trigger on something like saxon-fop-6.4.4.jar.
-    for _try_saxon_jar in /usr/share/java/saxon.jar /usr/local/share/java/saxon.jar /usr/share/java/saxon-[0-9]*.jar /usr/local/share/java/saxon-[0-9]*.jar
+    for _try_saxon_jar in /usr/share/java/saxon-[0-9]*.jar /usr/local/share/java/saxon-[0-9]*.jar /usr/share/java/saxon.jar /usr/local/share/java/saxon.jar
     do
       if test -f "$_try_saxon_jar"
       then
@@ -110,7 +112,7 @@ then
     done
     if test -n "$_saxon_jar"
     then
-      if test -n "$_chunk_xsl"
+      if test -z "$_fake_chunk_xsl"
       then
         _xsltcommand="cd \$1 && if test \"\`dirname \$2 | head -c 1\`\" = \".\" ; then $_java  -classpath $_saxon_jar com.icl.saxon.StyleSheet \$_IN_DIR/\$3 \$_IN_DIR/\$2 ; else $_java  -classpath $_saxon_jar com.icl.saxon.StyleSheet \$_IN_DIR/\$3 \$2 ;fi"
         echo "Found the Saxon XSLT Processor ($_saxon_jar), using Java VM '$_java'."
