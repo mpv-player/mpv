@@ -21,9 +21,10 @@ int main(int argc,char* argv[]){
   hSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
   if(!strcmp(argv[1],"install")){
     printf("Installing dhahelper...\n");
-    if(!CopyFile("dhahelper.sys",path,FALSE))
+    if(!CopyFile("dhahelper.sys",path,FALSE)){
       printf("Copying dhahelper.sys failed.\nEither dhahelper.sys is not in the current directory or you lack sufficient\nprivileges to write to %s.", path);
       return 1;
+    }
     // Install the driver
     hService = CreateService(hSCManager,
                              "DHAHELPER",
