@@ -875,6 +875,9 @@ if(!sh_video){
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
 
+/* display clip info */
+demux_info_print(demuxer);
+
 //================== Init AUDIO (codec) ==========================
 
 current_module="init_audio_codec";

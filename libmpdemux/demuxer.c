@@ -624,4 +624,77 @@ switch(demuxer->file_format){
 return 1;
 }
 
+int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
+{
+    demuxer_info_t *info = &demuxer->info;
 
+    if (!strncmp(opt, "name"))
+    {
+	if (info->name)
+	{
+	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->name already present\n!");
+	    return(0);
+	}
+	info->name = malloc(strlen(param));
+	strcpy(info->name, param);
+	return(1);
+    }
+
+    if (!strncmp(opt, "author"))
+    {
+	if (info->author)
+	{
+	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->author already present\n!");
+	    return(0);
+	}
+	info->author = malloc(strlen(param));
+	strcpy(info->author, param);
+	return(1);
+    }
+
+    if (!strncmp(opt, "encoder"))
+    {
+	if (info->encoder)
+	{
+	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->encoder already present\n!");
+	    return(0);
+	}
+	info->encoder = malloc(strlen(param));
+	strcpy(info->encoder, param);
+	return(1);
+    }
+
+    if (!strncmp(opt, "comments"))
+    {
+	if (info->comments)
+	{
+	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->comments already present\n!");
+	    return(0);
+	}
+	info->comments = malloc(strlen(param));
+	strcpy(info->comments, param);
+	return(1);
+    }
+
+    mp_msg(MSGT_DEMUX, MSGL_WARN, "Unknown demuxer info->%s (=%s)!\n",
+	opt, param);
+    return(1);
+}
+
+int demux_info_print(demuxer_t *demuxer)
+{
+    demuxer_info_t *info = &demuxer->info;
+
+    if (info->name || info->author || info->encoder || info->comments)
+    {
+	mp_msg(MSGT_DEMUX, MSGL_INFO, "Clip info: \n");
+	if (info->name)
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Name: %s\n", info->name);
+	if (info->author)
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Author: %s\n", info->author);
+	if (info->encoder)
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Encoder: %s\n", info->encoder);
+	if (info->comments)
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Comments: %s\n", info->comments);
+    }
+}

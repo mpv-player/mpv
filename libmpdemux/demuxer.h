@@ -56,6 +56,13 @@ typedef struct {
   void* sh;
 } demux_stream_t;
 
+typedef struct demuxer_info_st {
+  char *name;
+  char *author;
+  char *encoder;
+  char *comments;
+} demuxer_info_t;
+
 typedef struct demuxer_st {
   stream_t *stream;
   int synced;  // stream synced (used by mpeg)
@@ -76,6 +83,7 @@ typedef struct demuxer_st {
   char s_streams[32];   // dvd subtitles (flag)
   
   void* priv;  // fileformat-dependent data
+  demuxer_info_t info;
 } demuxer_t;
 
 inline static demux_packet_t* new_demux_packet(int len){
