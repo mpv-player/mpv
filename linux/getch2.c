@@ -219,7 +219,7 @@ void getch2_enable(){
 struct termios tio_new;
 #if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__) || defined(__OS2__)
     tcgetattr(0,&tio_orig);
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__APPLE__)
     ioctl(0,TIOCGETA,&tio_orig);
 #else
     ioctl(0,TCGETS,&tio_orig);
@@ -230,7 +230,7 @@ struct termios tio_new;
     tio_new.c_cc[VTIME] = 0;
 #if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__) || defined(__OS2__)
     tcsetattr(0,TCSANOW,&tio_new);
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__APPLE__)
     ioctl(0,TIOCSETA,&tio_new);
 #else
     ioctl(0,TCSETS,&tio_new);
@@ -244,7 +244,7 @@ void getch2_disable(){
 #ifdef HAVE_TERMIOS
 #if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__) || defined(__OS2__)
     tcsetattr(0,TCSANOW,&tio_orig);
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__APPLE__)
     ioctl(0,TIOCSETA,&tio_orig);
 #else
     ioctl(0,TCSETS,&tio_orig);
