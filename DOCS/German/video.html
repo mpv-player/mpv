@@ -24,6 +24,7 @@
 &nbsp;&nbsp;<CODE>1.2.0:</CODE> unterstützt AAlib (-vo aa ist sehr empfohlen, siehe unten!)</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ggi</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>vergleichbar mit SDL</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>aa</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Textmodus-Rendering mit AAlib</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>vesa</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Ausgabe durch das VESA BIOS</TD><TR>
 
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kartenspezifisch:</B></P></TD><TR>
 
@@ -199,7 +200,8 @@ Wenn die Wiedergabe langsam zu sein scheint, versuche irgendwie VSYNC auszuschal
 oder setze die Refreshrate auf n*(fps des Films) Hz.</LI>
 
 <LI>Radeon VE - zur Zeit hat nur die CVS-Versionen von XFree86 einen Treiber für
-diese Karte, Version 4.1.0 hat keinen. Keine TV-Out Unterstützung.</LI>
+diese Karte, Version 4.1.0 hat keinen. Keine TV-Out Unterstützung
+(aber schaue auf die <A HREF="video.html#2.2.1.12">VESA Sektion</A>).</LI>
 </P>
 
 
@@ -209,7 +211,7 @@ diese Karte, Version 4.1.0 hat keinen. Keine TV-Out Unterstützung.</LI>
 Diese Karte kann man in vielen Laptops finden. Unter Linux ist deren
 Höchstleistung leider nur DGA. Unglücklichweise funktioniert der DGA-Treiber in
 X 4.1.0 nicht, also musst du auf 4.2.0 warten oder den modifizierten Treiber für
-4.0.3 oder 4.1.0 von hier downloaden: <A HREF="http://www.mplayerhq.hu/MPlayer/incoming/NeoMagic-driver">http://www.mplayerhq.hu/MPlayer/incoming/NeoMagic-driver</A>
+4.0.3 oder 4.1.0 von hier downloaden: <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver">http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver</A>
 (hier findet man auch einen Patch für die Treiber-Sourcen).<BR>
 Treiber wurden bereitgestellet von <A HREF="mailto:tomee@cpi.pl">Tomek Jarzynka</A>.
 <P>
@@ -268,7 +270,7 @@ schreiben. Wenn du es auch also Anwender starten willst, installiere bei
 <B>MPlayer</B> die SUID root:</P>
 
 <P><CODE>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>chown root /usr/local/bin/mplayer<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;chown root /usr/local/bin/mplayer<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;chmod 750 /usr/local/bin/mplayer<BR> 
 &nbsp;&nbsp;&nbsp;&nbsp;chmod +s /usr/local/bin/mplayer</CODE></P>
 
@@ -497,10 +499,14 @@ spezifiziert den zu verwendenden Framebuffer (/dev/fd0)</TD><TR>
 Die -flip Option wird nur unterstützt, wenn das Pixel-Format des Videos mit dem
 Video-Modus übereinstimmt. 
 Unter Beobachtung des bpp-Wertes, versucht der fbdev-Treiber den aktuellen oder
-den mit der -bpp Option eingestellten Wert zu verwenden.
+den mit der -bpp Option eingestellten Wert zu verwenden.</LI>
 <LI><B>-zoom</B> Option wird nicht unterstützt (Software-Scaling ist langsam).
 -fs Option wird nicht unterstützt. Du kannst keine Moduse mit 8bpp (oder weniger) 
-verwenden.</UL></P>
+verwenden.</LI>
+<LI>Wenn du deinen Curser ausschalten willst:: <CODE>echo -e '\033[?25l'</CODE><BR>
+und den Bildschirmschoner: <CODE>setterm -blank 0</CODE><BR>
+Um den Curser wieder anzuzeigen: <CODE>echo -e '\033[?25h'</CODE>
+</UL></P>
 
 <P>HINWEIS: FBdev Video-Modus-Änderungen _funktionieren nicht_ mit dem VESA
 Framebuffer, also frage nicht danach, denn es ist keine <B>MPlayer</B> Beschränkung.</P>
@@ -622,8 +628,95 @@ um alle Frames zu Verarbeiten!</P>
 Qualität bekommen, wenn du den Linux-Treiber (-aadriver linux) und nicht den
 Curses-Teiber verwendest. Aber dazu brauchst du Scheibzugriff auf/dev/vcsa&lt;terminal&gt;!
 Dies wird nicht automatisch erkannt von aalib, aber vo_aa versucht die beste
-Möglichkeit zu finden. Siehe <A HREF="http://aa-project.sourceforge.net/tune">http://aa-project.sourceforge.net/tune/</A> für
-zusätzliche Tuning-Möglichkeiten.</P>
+Möglichkeit zu finden. Siehe
+<A HREF="http://aa-project.sourceforge.net/tune">http://aa-project.sourceforge.net/tune/</A>
+für zusätzliche Tuning-Möglichkeiten.</P>
+
+<P><B><A NAME=2.2.1.12>2.2.1.12.  VESA - output to VESA BIOS</B></P>
+<P>
+Dieser Treiber wurde <B>als allgemeiner Treiber</B>entworfen und eingeführt, für jede
+Grafikkarte, die ein VESA VBE 2.0 kompatibles BIOS besitzt. Aber es gibt nur einen Grund
+für die Entwicklung dieses Treibers - die vielseiten Probleme bei der Wiedergabe am TV.<BR>
+<B>VESA BIOS EXTENSION (VBE) Version 3.0 Date: September 16, 1998</B> (Seite 70) sagt:
+</P>
+<P>
+<CODE><I>
+<B>Dual-Controller Aufbau</B><BR>
+VBE 3.0 unterstützt Grafikkarten mit Dual-Controller Aufbau. Unter der Annahme, dass beide
+Kontroller die gleiche OEM, unter der Kontrolle eines einzigen BIOS-ROMs auf der Grafikkarte
+besitzen, ist es möglich, der Anwendung zu verbergen, dass die in wirklichkeit zwei
+Kontroller verhanden sind. Es hat jedoch die Beschränkung, dass die gleichzeitige Verwendung
+der unterschiedlichen Kontroller verhindert wird, aber erlaubt Anwendungen, die vor VBE 3.0
+herausgekommen sind, normal zu arbeiten. Die VBE Funktion 00h (Return Controller Information)
+gibt die gemeinsamen Informationen beider Kontroller zurück, inklusive einer Liste der
+verfügbaren Modusse. Wenn eine Anwendungen einen Modus auswählt wird der entsprechende
+Kontroller aktiviert. Alle verbleibenden VBE-Funktionen werden dann auf dem aktuellen Kontroller
+ausgeführt.
+</i></code>
+</P>
+
+<P>
+Also hast du damit gute Chancen deinen TV-OUT mit diesem Treiber zu aktivieren.<BR>
+(Ich danke das die TV-Funktion sie nur auf Single-Head oder Standalone-Ausgabe beschänkt.)
+</P>
+
+<P>
+<B>Was sind die Vorteile:</B><BR>
+ - Du hast Chance Videos zu sehen, <B>auch wenn Linux nicht mal weiss</B>, welche Grafikkarte du hast.<BR>
+ - Du brauchst dazu auf deinem Linux keine anderen grafikabhängenden Sachen (wie X11 (XFree86),
+fbdev usw.). Dieser Treiber kann vom <b>Textmodus</b> aus betrieben werden.<BR>
+ - Du hast Chancen den <b>TV-Out einzuschalten</b>. (Bis jetzt nur von ATI-Karten bekannt).<BR>
+ - Dieser Treiber verwendet <b>int 10h</b> Handler, das heisst es ist kein Emulator - es ruft
+<B>echte</B> Befehle des <b>echteb</b> BIOS im <b>Real</b>-Mode aus. (im vm86 Modus).<BR>
+ - Am wichtigesten :) Du kannst <b>DVD mit 320x200</b> ansehen ohne einer leistungsfähigen CPU.<BR>
+</P>
+
+<P>
+<B>Was sind die Nachteile:</B><BR>
+ - Es funktioniert nut auf <B>x86 Systemen</B>.<BR>
+ - <B>Es ist der langsamste Treiber</B> von allen verfügbaren für MPlayer.<BR>
+ - Es kann nur als <B>ROOT</B> verwendet werden.<BR>
+ - Zur Zeit ist es nur für <B>Linux</B> verfügbar.<BR>
+ - Es <B>verwendet keine Hardwarebeschleunigung</B> (wie YUV-Overlay oder HW-Scaling).<BR>
+</P>
+ 
+<P>
+<TABLE BORDER=0>
+<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Diese Commandline-Parameter sind zur Zeit verfügbar für VESA:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo vesa:opts</TD><TD>&nbsp;&nbsp;</TD><TD>
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wird bald implementiert werden. (Du kannst damit Parameter wie Wiederholrate, Interlacing, Doublescan und so weiter einstellen. Beispiele: i43,  85,  d100)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-screenw, -screenh, -bpp</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verwendet von Anwender definierte Modie</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-x, -y</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>setzt Prescaling-Auflösung</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-zoom</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>aktiviert Prescaling</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Vollbild-Scaling</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs -zoom</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Vollbild-Scaling des prescalten Bildes</TD><TR>
+</TABLE>
+</P>
+  
+<P>
+<b>Bekannte Probleme und Workarounds:</b><br>
+ - Wenn die <b>NLS</b> Schrift auf deinem Linux Rechner installiert hast und den VESA-Treiber
+auf einer Textmode-Konsole verwendst wird nach dem Beenden von MPlayer die <b>ROM-Schrift</b>
+erscheinen anstatt der nationalen. Du kannst die nationale Schrift wieder durch das z.B.
+<b><i>setsysfont</i></b>-Tool bei einer Mandrake Distribution laden.<br>
+(<b>Hinweis</b>: Das selbe Tool wird zum Loklisieren von fbdev verwendet).<br>
+ - Einige <b>Grafikkartentreiber für Linux</b> aktivieren den <b>BIOS Modus</b> im DOS-Speicher
+nicht. Wenn du solche Probleme hast - verwende den VESA-Treiber im <b>Textmodus</b>. Andernfalls
+wird der Textmodus (#03) einfach aktiviert und du musst deinen Computer neu starten.<br>
+ - Oftmals bekommt man nach dem Beenden des VESA-Treiber einen <b>schwarzen Bildschirm</b>. Um
+zurück zum normalen Modues zu kommen - wechlse einfach auf auf eine andere Konsole (durch das
+Drücken von <b>Alt-Fx</b>) und das Anschließende zurückschalten auf die vorherige Konsole auf die
+gleiche Art.<br>
+ - Um einen <B>funktionierenden TV-out</b> zu bekommen musst du deine TV vor dem Starten des
+PCs anschließden, denn das Video-BIOS inizialisiert es während des POST-Vorganges.
+</P>
+    
+
 
 <P><B><A NAME=2.2.1.A>2.2.1.A. TV-Out Unterstützung</A></B></P>
 
