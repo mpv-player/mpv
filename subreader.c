@@ -199,6 +199,54 @@ subtitle* sub_read_file (char *filename) {
     return first;
 }
 
+char * strreplace( char * in,char * what,char * whereof )
+{
+ int i;
+ char * tmp;
+ 
+ if ( ( in == NULL )||( what == NULL )||( whereof == NULL )||( ( tmp=strstr( in,what ) ) == NULL ) ) return NULL;
+ for( i=0;i<strlen( whereof );i++ ) tmp[i]=whereof[i];
+ if ( strlen( what ) > strlen( whereof ) ) tmp[i]=0;
+ return in;
+}
+
+char * sub_filename( char * fname )
+{
+ char * sub_name = NULL;
+ char * sub_tmp  = NULL;
+ int    i;
+#define SUB_EXTS 4
+ char * sub_exts[SUB_EXTS] = 
+  { ".sub",
+    ".SUB",
+    ".srt",
+    ".SRT" };
+ 
+ if ( fname == NULL ) return NULL;
+ for( i=strlen( fname );i>0;i-- ) 
+   if( fname[i] == '.' ) 
+     {
+      sub_tmp=(char *)&fname[i];
+      break;
+     } 
+ if ( i == 0 ) return NULL;
+ sub_name=strdup( fname );
+ for ( i=0;i<SUB_EXTS;i++ )
+  {
+   FILE * f;
+   
+   strcpy( sub_name,fname );
+   f=fopen( strreplace( sub_name,sub_tmp,sub_exts[i] ),"rt" );
+   if ( f != NULL ) 
+    {
+     fclose( f );
+     printf( "SUB: Detected sub file: %s\n",sub_name );
+     return sub_name;
+    }
+  }
+ return NULL;
+}
+
 #if 0
 int main(int argc, char **argv) {  // for testing
 
