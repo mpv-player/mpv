@@ -35,10 +35,6 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // Sanity check
     if(!arg) return AF_ERROR;
     
-    if(((af_data_t*)arg)->format != (AF_FORMAT_SI | AF_FORMAT_NE) ||
-       (((af_data_t*)arg)->nch != 2))
-       return AF_ERROR;
-
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = 2;
     af->data->format = AF_FORMAT_SI | AF_FORMAT_NE;

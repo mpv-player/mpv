@@ -24,9 +24,6 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
   switch(cmd){
   case AF_CONTROL_REINIT:
-    if(data->format != (AF_FORMAT_SI | AF_FORMAT_NE))
-       return AF_ERROR;
-
     af->data->nch    = data->nch;
     af->data->format = AF_FORMAT_SI | AF_FORMAT_NE;
     af->data->bps    = 2;

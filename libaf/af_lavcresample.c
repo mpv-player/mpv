@@ -43,16 +43,15 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   int g;
   af_resample_t* s   = (af_resample_t*)af->setup; 
   af_data_t *data= (af_data_t*)arg;
+  int out_rate, test_output_res; // helpers for checking input format
 
   switch(cmd){
   case AF_CONTROL_REINIT:
     if((af->data->rate == data->rate) || (af->data->rate == 0))
         return AF_DETACH;
 
-    if(data->format != (AF_FORMAT_SI | AF_FORMAT_NE) || data->nch > CHANS)
-       return AF_ERROR;
-
     af->data->nch    = data->nch;
+    if (af->data->nch > CHANS) af->data->nch = CHANS;
     af->data->format = AF_FORMAT_SI | AF_FORMAT_NE;
     af->data->bps    = 2;
     g= ff_gcd(af->data->rate, data->rate);
@@ -63,7 +62,12 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if(s->avrctx) av_resample_close(s->avrctx);
     s->avrctx= av_resample_init(af->mul.n, /*in_rate*/af->mul.d, s->filter_length, s->phase_shift, s->linear, s->cutoff);
 
-    return AF_OK;
+    // hack to make af_test_output ignore the samplerate change
+    out_rate = af->data->rate;
+    af->data->rate = data->rate;
+    test_output_res = af_test_output(af, (af_data_t*)arg);
+    af->data->rate = out_rate;
+    return test_output_res;
   case AF_CONTROL_COMMAND_LINE:{
     sscanf((char*)arg,"%d:%d:%d:%d:%lf", &af->data->rate, &s->filter_length, &s->linear, &s->phase_shift, &s->cutoff);
     if(s->cutoff <= 0.0) s->cutoff= max(1.0 - 1.0/s->filter_length, 0.80);

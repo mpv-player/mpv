@@ -108,6 +108,8 @@ static int control(struct af_instance_s *af, int cmd, void* arg)
     case AF_CONTROL_REINIT:
 	af->data->rate   = ((af_data_t*)arg)->rate;
 	if(af->data->rate != 48000) {
+	    // automatic samplerate adjustment in the filter chain
+	    // is not yet supported.
 	    af_msg(AF_MSG_ERROR,
 		   "[hrtf] ERROR: Sampling rate is not 48000 Hz (%d)!\n",
 		   af->data->rate);
@@ -115,14 +117,11 @@ static int control(struct af_instance_s *af, int cmd, void* arg)
 	}
 	af->data->nch    = ((af_data_t*)arg)->nch;
 	if(af->data->nch < 5) {
-	    af_msg(AF_MSG_ERROR,
-		   "[hrtf] ERROR: Insufficient channels (%d < 5).\n",
-		   af->data->nch);
-	    return AF_ERROR;
+	    af->data->nch = 5;
 	}
 	af->data->format = AF_FORMAT_SI | AF_FORMAT_NE;
 	af->data->bps    = 2;
-	return AF_OK;
+	return af_test_output(af, (af_data_t*)arg);
     case AF_CONTROL_COMMAND_LINE:
 	sscanf((char*)arg, "%c", &mode);
 	switch(mode) {
