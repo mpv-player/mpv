@@ -490,7 +490,7 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
    vo_MotifWmHints.flags=MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS;
    if ( d )
     {
-     vo_MotifWmHints.functions=MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE;
+     vo_MotifWmHints.functions=MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE;
      d=MWM_DECOR_ALL;
     }
 #if 0
@@ -529,6 +529,9 @@ int vo_x11_uninit(Display *display, Window window)
     if ( !use_gui )
 #endif
     {
+	XSetBackground( mDisplay,vo_gc,0 );
+	XClearWindow( mDisplay,vo_window );
+  
 	/* and -wid is set */
 	if (WinID < 0)
 	 {

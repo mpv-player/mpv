@@ -1,4 +1,3 @@
-#define DISP
 
 /*
  * video_out_x11.c,X11 interface
@@ -103,7 +102,7 @@ static void check_events(){
   int ret = vo_x11_check_events(mDisplay);
   
    /* clear the old window */
-  if (ret & VO_EVENT_RESIZE)
+  if ( (ret & VO_EVENT_RESIZE)||(ret & VO_EVENT_EXPOSE) )
   {
     XSetBackground(mDisplay, vo_gc, 0);
     XClearWindow(mDisplay, vo_window);
@@ -437,7 +436,6 @@ static const vo_info_t* get_info( void )
 
 static void Display_Image( XImage *myximage,uint8_t *ImageData )
 {
-#ifdef DISP
 #ifdef HAVE_SHM
  if ( Shmem_Flag )
   {
@@ -454,7 +452,6 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
                ( vo_dwidth - swsContext->dstW ) / 2,( vo_dheight - myximage->height ) / 2,
                swsContext->dstW,myximage->height);
   }
-#endif
 }
 
 static void draw_osd(void)
@@ -469,6 +466,8 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 {
   uint8_t *dst[3];
   int dstStride[3];
+
+  check_events();
   
   if((old_vo_dwidth != vo_dwidth || old_vo_dheight != vo_dheight) /*&& y==0*/ && zoomFlag)
   {

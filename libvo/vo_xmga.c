@@ -335,8 +335,6 @@ uninit(void)
 {
  if(!inited) return;
  inited=0;
- XSetBackground( mDisplay,vo_gc,0 );
- XClearWindow( mDisplay,vo_window );
  mga_uninit();
  saver_on(mDisplay);
  vo_x11_uninit(mDisplay, vo_window);
