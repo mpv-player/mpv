@@ -1,0 +1,66 @@
+Tools required for building the documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* DocBook 4.1.2 or later
+* The DocBook XML DTD (also known as DocBk XML)
+* DocBook XSL stylesheets -- version 1.50.0 or later is recommended.
+
+I am not quite sure which tools work, but I used the following
+ones successfully, so they are required:
+
+* xmllint (part of libxml2) is used for validation.
+* xsltproc (part of libxslt1) is used for transforming XML files into HTML
+  files.  Version 1.0.18 or later is recommended.
+
+
+Building the documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1) Before trying to build the documentation, run
+
+	make test
+
+   to see if everything is set up properly.  If something goes wrong,
+   check the Configuration section of the toplevel Makefile and adjust
+   the variables.
+
+
+2) Now simply run
+
+	make all
+
+   to build the documentation.
+
+
+A few words about SGML catalog files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As far as I know, the document type declaration in XML files requires
+both a public and a system identifier.  For example:
+
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+	"/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd">
+
+where
+
+	"-//OASIS//DTD DocBook XML V4.1.2//EN"
+
+is the public, and
+
+	"/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd"
+
+is the system identifier.
+
+The problem is that the system identifier is most probably system-dependent.
+To avoid the need to manually fix the system identifiers before building the
+documentation, I've decided to use SGML catalogs.  If you have your catalogs
+set up correctly, xmllint and xsltproc will use the them to find the DTDs
+based on the public identifiers.
+
+Note that this works only if public identifiers override system identifiers
+(i.e. the catalog file must contain 'OVERRIDE YES').  (I had no problem with
+these on my system, since the Debian people took care of everything. ;-))
+
+
+--
+Andras Mohari

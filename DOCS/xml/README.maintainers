@@ -1,0 +1,38 @@
+The documentation and its translations reside in subdirectories.
+When building the documentation, the toplevel Makefile goes into
+the subdirectories listed in the SUBDIRS variable and executes make
+in each of those directories to create the HTML documentation
+in subdirectories of the 'HTML' directory.
+
+IMPORTANT: Do NOT place sensitive files under 'HTML'!
+	   It is for generated documentation only.
+	   The whole directory tree is wiped out by the Makefile
+	   when running 'make distclean' or 'make clean-html'.
+	   Also, subdirectories are wiped out one by one before
+	   creating the HTML files.
+
+Each subdirectory must have a Makefile.  Its purpose is to include
+the toplevel Makefile.inc file (with the rules to build the docs)
+and add dependency information to the main target, $(HTMLDIR)/index.html.
+The main target usually depends on all the XML and XSL files in the
+subdirectory.  (Note that the toplevel *.xsl files are added automatically
+by Makefile.inc, so you do not have to list them.)
+
+
+Adding new translations
+~~~~~~~~~~~~~~~~~~~~~~~
+
+1) Create a new subdirectory and copy the XML files there.
+2) Make sure to create a 'Makefile' for the translation -- you can
+   use 'en/Makefile' as an example.
+3) Set <book lang="XX"> to your language code if the DocBook XSL
+   stylesheets support it.
+4) If you want to use a customized XSL stylesheet, create one and name it
+   'html.xsl'.  And do not forget to import the toplevel XSL file:
+
+	<xsl:import href="../html.xsl"/>
+
+5) If you are using you own HTML stylesheet, edit your Makefile and set
+   the HTML_STYLESHEET variable to its name.
+   
+That's all, in theory.

@@ -1,0 +1,9 @@
+* Can't change output encoding...it's always ISO-8859-1. :-(
+  Should figure out a way to change it...
+  
+  <xsl:output encoding="..."/> does not seem to work with xsltproc.
+  
+  <xsl:param name="chunker.output.encoding" select="'...'"/> seems not to
+  work either.
+  
+  Is it a limitation of xsltproc?
