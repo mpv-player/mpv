@@ -122,7 +122,8 @@ typedef enum {
 	ASF_Live_e,
 	ASF_Prerecorded_e,
 	ASF_Redirector_e,
-	ASF_PlainText_e
+	ASF_PlainText_e,
+	ASF_Authenticate_e
 } ASF_StreamType_e;
 
 typedef struct {
