@@ -1007,7 +1007,7 @@ lame_set_out_samplerate(lame,mux_a->wf->nSamplesPerSec);
 lame_set_quality(lame,lame_param_algqual); // 0 = best q
 if(lame_param_vbr){  // VBR:
     lame_set_VBR(lame,lame_param_vbr); // vbr mode
-    lame_set_VBR_q(lame,lame_param_quality+1); // 1 = best vbr q  6=~128k
+    lame_set_VBR_q(lame,lame_param_quality); // 0 = best vbr q  5=~128k
     if(lame_param_br>0) lame_set_VBR_mean_bitrate_kbps(lame,lame_param_br);
 } else {    // CBR:
     if(lame_param_br>0) lame_set_brate(lame,lame_param_br);
