@@ -382,6 +382,9 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
     fp->enc_frame.bitstream = fp->mux->buffer;
     fp->enc_frame.length = -1 /* fp->mux->buffer_size */;
     fp->enc_frame.image = mpi->planes[0];
+#ifdef XVID_API_UNSTABLE
+    fp->enc_frame.stride = mpi->stride[0];
+#endif
 
     // get quantizers & I/P decision from the VBR engine
 #ifdef XVID_API_UNSTABLE
