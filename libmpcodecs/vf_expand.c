@@ -18,6 +18,8 @@
 #include "../libvo/osd.h"
 #endif
 
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+
 struct vf_priv_s {
     int exp_w,exp_h;
     int exp_x,exp_y;
@@ -194,7 +196,9 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
        (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) ){
 	// try full DR !
 	vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-	    mpi->type, mpi->flags, vf->priv->exp_w, vf->priv->exp_h);
+	    mpi->type, mpi->flags, 
+            MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x), 
+            MAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
 	// set up mpi as a cropped-down image of dmpi:
 	if(mpi->flags&MP_IMGFLAG_PLANAR){
 	    mpi->planes[0]=vf->priv->dmpi->planes[0]+
