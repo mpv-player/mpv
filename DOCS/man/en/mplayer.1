@@ -284,7 +284,8 @@ decrease/\:increase panscan range
 .IPs o\ \ \ \ 
 toggle between OSD states: none / seek / seek+timer
 .IPs d\ \ \ \ 
-toggle frame dropping
+toggle between frame dropping states:  none / skip display / skip decoding
+(see \-framedrop and \-hardframedrop)
 .IPs v\ \ \ \ 
 toggle subtitle visibility
 .IPs j\ \ \ \ 
@@ -2692,10 +2693,10 @@ simple postprocessing filter
 force quantization parameter
 .RE
 .TP
-.B qp=eq
+.B qp=equation
 qp change filter
 .RSs
-.IPs eq
+.IPs equation
 some equation like "2+2*sin(PI*qp)"
 .RE
 .TP
