@@ -1731,14 +1731,12 @@ if test "$_alsa" = auto || test "$_alsa" = yes; then
   _alsa=no
   cat > $TMPC << EOF
 #include <sys/asoundlib.h>
-#include <sys/soundcard.h>
 int main(void) { return (!(SND_LIB_MAJOR==0 && SND_LIB_MINOR==5)); }
 EOF
   cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.5.x'
 
   cat > $TMPC << EOF
 #include <sys/asoundlib.h>
-#include <sys/soundcard.h>
 int main(void) { return (!(SND_LIB_MAJOR==0 && SND_LIB_MINOR==9)); }
 EOF
   cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.9.x'
