@@ -751,7 +751,7 @@ for ac_option do
   --enable-mtrr)	_mtrr=yes	;;
   --disable-mtrr)	_mtrr=no	;;
   --enable-largefiles)	_largefiles=yes	;;
-  --enable-largefiles)	_largefiles=no	;;
+  --disable-largefiles)	_largefiles=no	;;
   --enable-vo2)		_vo2=yes	;;
   --disable-vo2)	_vo2=no		;;
 
