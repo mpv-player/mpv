@@ -1,0 +1,52 @@
+
+CDROM-Tuning
+~~~~~~~~~~~~
+
+Einleitung
+~~~~~~~~~~
+>Aus der Linux-Dokumentation:
+
+Einige CDROM-Laufwerke verfügen über die Möglichkeit, die Abtastgeschwindigkeit
+zu verändern. Es gibt mehrere Gründe für das Ändern der Geschwindigkeit
+eines CDROM-Laufwerks. Schlecht erzeute CDROMs provitieren
+möglicherweise von einer weniger-als-maximum Abtastrate. Moderne CDROM-Laufwerke 
+können sehr hohe Abtastraten erreichen (bis zu 24-fach ist normal). Es wurde
+berichtet, dass diese Laufwerken bei diesen hohen Geschwindkeiten Lesefehler
+erzeugen; Herabsetzen der Geschwindigkeit kann Datenverluste verringern.
+Zu guter Letzt erzeugen einige dieser Laufwerke störend laute Geräusche, die
+eine niedrigere Geschwindigkeit reduzieren kann.
+
+Wie man's macht
+~~~~~~~~~~~~~~~
+Der empfohlene Weg es zu tun ist das Programm 'setcd'. Es ist recht alt, aber
+es sollte nicht zu schwer im Internet zu finden sein.
+Verwendung:
+        setcd -x <Geschwingkeit> <CDROM-Gerät>
+
+Du kannst auch Folgendes probieren:
+        echo current_speed:4 >/proc/ide/<CDROM-Gerät>/settings
+Aber man braucht dazu Root-Privilegien. (Funktionierte bei Gabucino nicht)
+
+Ich verwende auch diesen Befehl:
+        echo file_readahead:2000000 >/proc/ide/<CDROM-Device>/settings
+für 2MB Lese-Buffer für die Dateien (nützlich bei zerkratzten CDs).
+
+Es ist auch zu empfehlenswert, das CD-Rom via 'hdparm' einzustellellen:
+        hdparm -d1 -a8 -u1 <CDROM-Device>
+um den DMA-Zugriff, Vorauslesen und IRQ-Unmasking zu aktivieren.
+(Wenn du das nicht verstehst *lies die hdparm manpage*)
+
+Abschließende Worte
+~~~~~~~~~~~~~~~~~~~
+Bitte schau dir "/proc/ide/<CDROM-Gerät>/settings" an, um das CD-ROM feinein-
+zustellen.
+
+        Nick Kurshev & Gabucino
+          <nickols_k@mail.ru>
+
+Dies ist ein Übersetzung. Wenn du den Autoren etwas schreiben willst, bitte tue das
+in Englisch. Danke.
+
+--
+Übersetzung: JAF <jaf.corporation at gmx.at> und
+             Felix Bünemann <atmosfear at users.sourceforge.net>						  

@@ -1,0 +1,76 @@
+
+Status der Codecs-Unterstützung:
+================================
+
+Siehe http://mplayer.sourceforge.net/DOCS/codecs.html
+
+Wenn dein Codec nicht aufgelistet ist, hilf uns ihn zu unterstützen:
+
+Exportieren des Codecs von Win32
+================================
+
+1. VfW
+~~~~~~
+  VfW (Video für Windows) ist die alte Video-Schnittstelle von Windows.
+Die Codecs haben die .DLL oder (selten) die .DRV Erweiterung.
+Wenn MPlayer mit deinem AVI fehlschlägt:
+
+        UNKNOWN video codec: HFYU (0x55594648)
+
+  Bedeutet dies, dass dein AVI mit dem Codec kodiert wurde, der den fourcc
+HFYU hat (HFYU = HuffYUV Codec, DIV3 = DivX Low Motion, usw...). Jetzt, wo wir
+das wissen, müssen wir herausfinden, welche DLL Windows läd, um diese Datei
+abzuspielen. In unserem Fall enthält die System.ini (unter anderem):
+        VIDC.HFYU=huffyuv.dll
+Also brauchen wir die Datei huffyuv.dll. Bemerke, dass Audio-Codecs mit dem
+MSACM-Prefix angegeben werden:
+        msacm.l3acm=L3codeca.acm
+Dies ist ein MP3 Codec.
+
+So, nun haben wir alles, was wir benötigen (fourcc, Codec Datei, Beispiel AVI).
+Sende deine Anfrage für Unterstützung als Mail und lade die Dateien auf diesen
+FTP herauf:
+    ftp://thot.banki.hu/MPlayer/incoming/<Codecname>/
+
+
+2. DirectShow
+~~~~~~~~~~~~~
+  DirectShow ist die neuere Video-Programmierschnittstelle, welche noch
+schlimmer als ihr Vorgänger ist.
+Es ist schwieriger mit DirectShow, denn
+ - die system.ini enthält nicht die Informationen die man braucht, stattdessen
+   sind diese in der Registrierungsdatenbank gespeichert :(
+ - man braucht die GUID des Codecs.
+
+  Also durchsuchen wir die gottverdammte Registrierung...
+ - Starte 'regedit'
+ - Drücke STRG-F, deaktiviere die ersten beiden Anhackfelder und aktiviere das 
+   dritte. Nun gib den fourcc des Codecs ein (z.B.: TM20).
+ - Du solltest ein Feld sehen, welches den Pfad und Dateinamen enthält
+   (z.B.: C:\WINDOWS\SYSTEM\TM20DEC.AX)
+ - Jetzt da wir die Datei haben, brauchen wir die GUID. Versuche erneut zu
+suchen, aber nun nach dem Codec-Namen, nicht nach dem fourcc. Der Codec-Name
+kann bei der Wiedergabe mit dem Windows Media Player herausgefunden werden,
+indem man unter Datei/Eigenschaften/Erweitert nachschaut.
+Falls nicht, kein Glück ;) Versuche zu raten.
+   (suche zum Beispiel nach: TrueMotion)
+ - wenn du es (in der Registrierung) gefunden hast, sollte ein FriendlyName
+Feld und ein CLSID Feld auftauchen. Schreibe 16 Byte der CLSID auf, dies ist
+die von uns benötigte GUID.
+
+HINWEIS : Wenn die Suche fehlschlägt, versuche alle Anhackboxen zu aktivieren...
+	  du hast möglicherweise falsche Ergebnisse, aber vielleicht auch die
+          richtigen...
+HINWEIS : Vergiss diesen M$ Scheiß.
+
+So, nun haben wir alle Informationen, die wir benötigen (fourcc, GUID, Codec
+Datei, Beispiel AVI). Sende deine Anfrage um Unterstützung als Mail und lade
+die Dateien auf den FTP:
+    ftp://thot.banki.hu/MPlayer/incoming/<Codecname>/
+
+
+	Gabucino & A'rpi
+
+--
+Übersetzung: JAF <jaf.corporation at gmx.at> und
+             Felix Bünemann <atmosfear at users.sourceforge.net>
