@@ -64,7 +64,7 @@ static struct stream_priv_s
 }
 stream_defaults =
 {
-	"", 1, "", 0, 0, "channels.conf"
+	"", 1, "", 0, 0, NULL
 };
 
 #define ST_OFF(f) M_ST_OFF(struct stream_priv_s, f)
@@ -95,7 +95,7 @@ static struct m_struct_st stream_opts = {
 m_option_t dvbin_opts_conf[] = {
 	{"prog", &stream_defaults.prog, CONF_TYPE_STRING, 0, 0 ,0, NULL},
 	{"card", &stream_defaults.card, CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
-	{"type", &stream_defaults.type, CONF_TYPE_STRING, 0, 0 ,0, NULL},
+	{"type", "DVB card type is autodetected and can't be overridden\n", CONF_TYPE_PRINT, CONF_NOCFG, 0 ,0, NULL},
 	{"vid",  &stream_defaults.vid,  CONF_TYPE_INT, 0, 0 ,0, NULL},
 	{"aid",  &stream_defaults.aid,  CONF_TYPE_INT, 0, 0 ,0, NULL},
 	{"file", &stream_defaults.file, CONF_TYPE_STRING, 0, 0 ,0, NULL},
@@ -664,27 +664,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
  		return STREAM_ERROR;
  	}
 	
-	if(!strncmp(p->type, "CBL", 3))
-	{
-		tuner_type = TUNER_CBL;
-	}
-	else if(!strncmp(p->type, "TER", 3))
-	{
-		tuner_type = TUNER_TER;
-	}
-	else if(!strncmp(p->type, "SAT", 3))
-	{
-		tuner_type = TUNER_SAT;
-	}
-	else
-	{
-		int t = dvb_get_tuner_type(priv);
-
-		if((t==TUNER_SAT) || (t==TUNER_TER) || (t==TUNER_CBL))
-		{
-			tuner_type = t;
-		}
-	}
+	tuner_type = dvb_get_tuner_type(priv);
 
 	if(tuner_type == 0)
 	{
@@ -695,12 +675,38 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 
 	priv->tuner_type = tuner_type;
 
-	mp_msg(MSGT_DEMUX, MSGL_V, "OPEN_DVB: prog=%s, card=%d, type=%d, vid=%d, aid=%d, file=%s\n",
-		p->prog, priv->card+1, priv->tuner_type, p->vid, p->aid, p->file);
+	mp_msg(MSGT_DEMUX, MSGL_V, "OPEN_DVB: prog=%s, card=%d, type=%d, vid=%d, aid=%d\n",
+		p->prog, priv->card+1, priv->tuner_type, p->vid, p->aid);
 
 	if(dvb_list_ptr == NULL)
 	{
-		filename = get_path(p->file);
+		if(p->file != NULL)
+		{
+			if(p->file[0] == '/')
+				filename = p->file;
+			else
+				filename = get_path(p->file);
+		}
+		else
+		{
+			switch(priv->tuner_type)
+			{
+				case TUNER_TER:
+					filename = get_path("channels.conf.ter");
+					break;
+				case TUNER_CBL:
+					filename = get_path("channels.conf.cbl");
+					break;
+				case TUNER_SAT:
+					filename = get_path("channels.conf.sat");
+					break;
+			}
+		}
+		
+		if((filename == NULL) || (access(filename, F_OK | R_OK) != 0))
+			filename = get_path("channels.conf");
+
+		
 		if(filename)
 		{
 			if((dvb_list_ptr = dvb_get_channels(filename, tuner_type)) == NULL)
