@@ -264,8 +264,8 @@ vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char
 vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args){
     if(strcmp(name,"vo"))
     mp_msg(MSGT_VFILTER,MSGL_INFO,
-	args ? MSGTR_OpeningVideoFilter
-	     : MSGTR_OpeningVideoFilter2 ,name,args);
+	args ? MSGTR_OpeningVideoFilter "[%s=%s]\n"
+	     : MSGTR_OpeningVideoFilter "[%s]\n",name,args);
     return vf_open_plugin(filter_list,next,name,args);
 }
 

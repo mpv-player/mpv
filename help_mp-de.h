@@ -307,8 +307,7 @@ static char help_text[]=
 // vf.c
 #define MSGTR_CouldNotFindVideoFilter "Konnte Videofilter '%s' nicht finden\n"
 #define MSGTR_CouldNotOpenVideoFilter "Konnte Videofilter '%s' nicht öffnen\n"
-#define MSGTR_OpeningVideoFilter "Öffne Videofilter: [%s=%s]\n"
-#define MSGTR_OpeningVideoFilter2 "Öffne Videofilter: [%s]\n"
+#define MSGTR_OpeningVideoFilter "Öffne Videofilter: "
 #define MSGTR_CannotFindColorspace "Konnte kein allgemeines Colorspace-Format finden, auch nicht mithilfe von 'scale' :(\n"
 
 // vd.c

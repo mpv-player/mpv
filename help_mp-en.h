@@ -308,8 +308,7 @@ static char help_text[]=
 // vf.c
 #define MSGTR_CouldNotFindVideoFilter "Couldn't find video filter '%s'\n"
 #define MSGTR_CouldNotOpenVideoFilter "Couldn't open video filter '%s'\n"
-#define MSGTR_OpeningVideoFilter "Opening video filter: [%s=%s]\n"
-#define MSGTR_OpeningVideoFilter2 "Opening video filter: [%s]\n"
+#define MSGTR_OpeningVideoFilter "Opening video filter: "
 #define MSGTR_CannotFindColorspace "Cannot find common colorspace, even by inserting 'scale' :(\n"
 
 // vd.c
