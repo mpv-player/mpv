@@ -103,7 +103,7 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	"movq	%%mm1, %1\n\t"\
 	"movq	%%mm3, %2"\
 	:"=m"(A0), "=m"(A8), "=m"(A4), "=m"(A12)\
-	:"m"(wTB[0]), "m"(wTB[k*2]), "0"(A0), "2"(A4)\
+	:"m"(wTB[0]), "m"(wTB[k*2]), "m"(A0), "m"(A4)\
 	:"memory");\
 }
 
@@ -144,7 +144,7 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	"movq	%%mm5, %2\n\t"\
 	"movq	%%mm2, %3"\
 	:"=m"(A2), "=m"(A10), "=m"(A6), "=m"(A14)\
-	:"m"(wTB[2]), "m"(wTB[6]), "0"(A2), "2"(A6), "m"(HSQRT2_3DNOW)\
+	:"m"(wTB[2]), "m"(wTB[6]), "m"(A2), "m"(A6), "m"(HSQRT2_3DNOW)\
 	:"memory");\
 }
 
@@ -194,7 +194,7 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	"movq	%%mm1, %1\n\t"\
 	"movq	%%mm3, %3"\
 	:"=m"(A1), "=m"(A9), "=m"(A5), "=m"(A13)\
-	:"0"(A1), "2"(A5)\
+	:"m"(A1), "m"(A5)\
 	:"memory");\
 }
 
