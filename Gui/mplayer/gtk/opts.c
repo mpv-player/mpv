@@ -691,11 +691,11 @@ GtkWidget * create_Preferences( void )
   Preferences=gtk_window_new( GTK_WINDOW_DIALOG );
   gtk_widget_set_name( Preferences,"Preferences" );
   gtk_object_set_data( GTK_OBJECT( Preferences ),"Preferences",Preferences );
-#ifndef HAVE_FREETYPE
-  gtk_widget_set_usize( Preferences,512,400 );
-#else
-  gtk_widget_set_usize( Preferences,612,565 );
-#endif
+//#ifndef HAVE_FREETYPE
+//  gtk_widget_set_usize( Preferences,512,400 );
+//#else
+//  gtk_widget_set_usize( Preferences,612,565 );
+//#endif
   gtk_window_set_title( GTK_WINDOW( Preferences ),MSGTR_Preferences );
   gtk_window_set_position( GTK_WINDOW( Preferences ),GTK_WIN_POS_CENTER );
 //  gtk_window_set_policy( GTK_WINDOW( Preferences ),FALSE,FALSE,FALSE );
