@@ -502,6 +502,27 @@ char * sub_filename(char* path,  char * fname )
  return NULL;
 }
 
+void list_sub_file(subtitle* subs){
+    int i,j;
+
+    for(j=0;j<sub_num;j++){
+	subtitle* egysub=&subs[j];
+        printf ("%i line%c (%li-%li) ",
+		    egysub->lines,
+		    (1==egysub->lines)?' ':'s',
+		    egysub->start,
+		    egysub->end);
+	for (i=0; i<egysub->lines; i++) {
+	    printf ("%s%s",egysub->text[i], i==egysub->lines-1?"":" <BREAK> ");
+	}
+	printf ("\n");
+    }
+
+    printf ("Subtitle format %s time.\n", sub_uses_time?"uses":"doesn't use");
+    printf ("Read %i subtitles, %i errors.\n", sub_num, sub_errs);
+
+}
+
 #if 0
 int main(int argc, char **argv) {  // for testing
 
@@ -519,22 +540,9 @@ int main(int argc, char **argv) {  // for testing
         printf("Couldn't load file... let's write a bugreport :)\n");
         exit(1);
     }
+    
+    list_sub_file(subs);
 
-    for(j=0;j<sub_num;j++){
-	egysub=&subs[j];
-        printf ("%i line%c (%li-%li) ",
-		    egysub->lines,
-		    (1==egysub->lines)?' ':'s',
-		    egysub->start,
-		    egysub->end);
-	for (i=0; i<egysub->lines; i++) {
-	    printf ("%s%s",egysub->text[i], i==egysub->lines-1?"":" <BREAK> ");
-	}
-	printf ("\n");
-    }
-
-    printf ("Subtitle format %s time.\n", sub_uses_time?"uses":"doesn't use");
-    printf ("Read %i subtitles, %i errors.\n", sub_num, sub_errs);
     return 0;
 }
 #endif
