@@ -1,9 +1,10 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
+<!-- Synced with english version 1.122 -->
 
 <HEAD>
 <TITLE>FAQ - MPlayer - Movie Player per Linux</TITLE>
-<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+<LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 <STYLE TYPE="text/css">
       dt	{
@@ -283,8 +284,7 @@ Non è un nostro errore, NON segnalatecelo!
 Mi piacerebbe compilare MPlayer su Minix !
 </DT><DD>R:
 <TD>
-Anche a me. :)
-</DD><DD>&nbsp;</DD>
+Anche a me. :)</DD>
 
 
 <H2><A NAME="general">5.2. Domande generali</A></H2>
@@ -398,10 +398,9 @@ E' un nuovo progetto, vedi http://frozenproductions.com per dettagli.
 Ci sono messaggi d'errore circa un file non trovato /usr/lib/win32/....
 </DT><DD>R:
 <TD>
-Scarica i <A
- HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/w32codec-0.90.tar.bz2">codec Win32</A>
-dal *nostro* FTP (il pacchetto di codec di avifile ha un differente set di DLL).
-Installalo.
+Scarica i codec Win32 dalla nostra
+<A  HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">pagina dei codec</A>
+(il pacchetto di codec di avifile ha un differente set di DLL) ed installali.
 </DD><DD>&nbsp;</DD>
 
 <DT>D:
@@ -506,7 +505,7 @@ La taskbar di Icewm continua a coprire il filmato nella modalità a pieno schermo
 </DT><DD>
 R:
 <TD>
-Questo non dovrebbe più succedere, se invece succede ancora usa l'opzione <CODE>-icelayer</CODE>
+Questo non dovrebbe più succedere, se invece succede ancora usa l'opzione <CODE>-fstype layer</CODE>
 e segnalalo alla mailinglist <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>.
 </DD><DD>&nbsp;</DD>
 
@@ -525,7 +524,7 @@ Setta "Use Applications position hints" a Yes.
 <DT>D:
 Come posso eseguire MPlayer in background ?
 </DT><DD>R: 
-Usa : <CODE>mplayer &lt;opzioni&gt; &lt;nomefile&gt; &lt; /dev/null &
+Usa : <CODE>mplayer &lt;opzioni&gt; &lt;nomefile&gt; &lt; /dev/null &</CODE>
 </DD><DD>&nbsp;</DD>
 
 <H2><A NAME="playback">5.3. Problemi di lettura file</A></H2>
@@ -762,11 +761,16 @@ L' audio/video va totalmente fuori sincronia quando eseguo MPlayer come root. Fu
 normalmente se lo eseguo come utente.
 </DT><DD>R: 
 Questo è ancora un effetto della gestione energetica (vedi sopra). Collega l'alimentazione esterna
-<B>prima</B> di accendere il notebook. Puoi anche provare se
-    <A HREF="http://www.brodo.de/cpufreq/">cpufreq</A> (un' interfaccia SpeedStep
-    per Linux) può aiutare.
+<B>prima</B> di accendere il notebook, o usa l'opzione <CODE>-nortc</CODE>.
 </DD><DD>&nbsp;</DD>
 
+<DT>D:
+Mentre guardo un filmato, improvvisamente va a scatti e vedo questo messaggio:<BR>
+<CODE>Badly interleaved AVI file detected - switching to -ni mode </CODE>
+<DD>R:
+Un file con interleave malfatto e l'opzione <CODE>-cache</CODE> non convivono
+bene. Prova <CODE>-nocache</CODE>.</DD>
+<DD>&nbsp;</DD>
 
 <H2><A NAME="driver">5.4. Problemi driver video/audio (vo/ao)</A></H2>
 
@@ -981,6 +985,14 @@ implementarlo, e manda una patch. Non chiederlo.
   andare in galera. Comunque puoi compilartelo sotto <A HREF="documentation.html#cygwin">Cygwin</A>.
 </DD><DD>&nbsp;</DD>
 
+<DT>D:
+Come posso fare in modo che MPlayer ricordi le opzioni che voglio usare per
+un particolare file?</DT>
+<DD>R:
+Crea un file chiamato <CODE>filmato.avi.conf</CODE> contenente le opzioni specifiche
+per il file filmato.avi, e mettilo in <CODE>~/.mplayer</CODE> o nella stessa
+directory del file.</DD>
+<DD>&nbsp;</DD>
 
 <H2><A NAME="encoding">5.7. Encoding</A></H2>
 

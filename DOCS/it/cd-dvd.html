@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
-
+<!-- Synced with english version 1.56 -->
 <HEAD>
 <TITLE>CD, DVD, VCD - MPlayer - Movie Player per Linux</TITLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
@@ -61,7 +61,16 @@ CDROM.</P>
 
 <H2><A NAME="dvd">4.2. Vedere i DVD</A></H2>
 
-<P>Per la lista completa delle opzioni disponibili, leggete la pagina di man.</P>
+<P>Per la lista completa delle opzioni disponibili, leggete la pagina di man.
+La sintassi per la riproduzione di un DVD standard è la seguente:</P>
+
+<P><CODE>mplayer -dvd &lt;track&gt; [-dvd-device &lt;device&gt;]</CODE></P>
+
+<P>Esempio:<CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+
+<P>Il dispositivo DVD predefinito è <CODE>/dev/dvd</CODE>. Se il tuo sistema è 
+diverso, crea un symlink o specifica il dispositivo corretto sulla linea di comando 
+con l'opzione <CODE>-dvd-device</CODE>.</P>
 
 <H4>Supporto DVD nuovo stile (mpdvdkit2)</H4>
 
@@ -206,6 +215,10 @@ non è del tutto implementato per questi lettori. Se hai conoscenze nella program
 per favore <A HREF="../tech/patches.txt">aiutaci</A> ad implementare il supporto
 SCSI generico per i VCD.</P>
 
+<P>Nel frattempo puoi estrarre i dati dal VCD con 
+<A HREF="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">readvdc</A>
+e vedere il file risultante con MPlayer.</P>
+
 <H4>Struttura dei VCD</H4>
 
 <P>I dischi VCD contengono una o più tracce:</P>
@@ -233,7 +246,7 @@ SCSI generico per i VCD.</P>
   Sotto Windows è possibile perchè il suo driver iso9660 emula la lettura delle tracce pure
   in questo file. Per riprodurre un file .DAT devi usare un driver del kernel che si può
   trovare nella versione Linux di PowerDVD. Ha un driver per il filesystem iso9660 modificato
-  (vcdfs/isofs-2.4.X.o). Se monti il disco col loreo driver puoi copyare e riprodurre
+  (vcdfs/isofs-2.4.X.o). Se monti il disco col loro driver puoi copiare e riprodurre
   il file .DAT con mplayer. Ma <B>non funzionerà</B> 
   col driver iso9660 standard contenuto nel kernel! Si consiglia invece di usare l'opzione
   <CODE>-vcd</CODE>. Altre opzioni per la copia dei VCD sono

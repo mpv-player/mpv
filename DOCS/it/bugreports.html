@@ -1,5 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
+<!-- Synced with english version 1.53 -->
 <HEAD>
 <TITLE>Segnalare bug - MPlayer - Movie Player per Linux</TITLE>
 <LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
@@ -9,7 +10,7 @@
 <BODY>
 
 
-<H1><A NAME="B">Appendice B - Come segnalare i bug</A></H1>
+<H1><A NAME="appendix_b">Appendice B - Come segnalare i bug</A></H1>
 
 <P>Buoni bug-report sono sempre un valido contributo nello sviluppo di qualsiasi
   progetto software. Ma proprio come lo scrivere del buon software, anche il fare
@@ -21,7 +22,7 @@
   le istruzioni in questo documento.</P>
 
 
-<H2>Come risolvere i bug</H2>
+<H2><A NAME="fix">B.1 Come risolvere i bug</A></H2>
 
 <P>Se pensate di avere le capacita' necessarie siete invitati a provare a risolvere
    voi stessi il bug. O forse lo avete gia' fatto?  Leggete
@@ -31,15 +32,19 @@
   vi potranno aiutare se avete dei problemi.</P>
 
 
-<H2>Come segnalare i bug</H2>
+<H2><A NAME="report">B.2 Come segnalare i bug</A></H2>
 
-<P>Prima, prova l'ultima versione CVS di mplayer, forse il tuo bug è già stato corretto. Le istruzioni per scaricare tramite CVS
-si trovano in fondo a <A HREF="http://www.mplayerhq.hu/homepage/dload.html">questa pagina</A>.</P>
+<P>Prima, prova l'ultima versione CVS di mplayer, forse il tuo bug è già stato corretto.
+Lo sviluppo avanza molto velocemente, la maggior parte dei problemi presenti nelle versioni
+ufficiali sono segnalati entro ore o minuti, quindi utilizza <B>solo la versione CVS</B>
+per segnalare i bug. Questo include anche le distribuzioni binarie di MPlayer.
+Non segnalare bug utilizzando le versioni RPM o Debian.
+Le istruzioni per scaricare tramite CVS si trovano in fondo a <A HREF="http://www.mplayerhq.hu/homepage/dload.html">questa pagina</A>
+o nel file README.
+Se questo non è d'aiuto fai riferimento alla <A HREF="documentation.html#known_bugs">lista dei bug noti</A>, ed al resto della documentazione.
+Se il tuo problema non è conosciuto o non si risolve con le nostre istruzioni, allora per favore segnala il bug.</P>
 
-<P>Se questo non è d'aiuto fai riferimento all' <A HREF="documentation.html#known_bugs">Appendice C</A>, e al resto della documentazione. Se il tuo problema
-non è conosciuto o non si risolve con le nostre istruzioni, allora per favore segnala il bug:</P>
-
-<H3>Dove si segnalano i bug?</H3>
+<H2><A NAME="where">B.3 Dove si segnalano i bug?</A></H2>
 
 <P>Iscriviti alla mailing list mplayer-users:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
@@ -57,12 +62,19 @@ La lingua di questa lista è l' <strong>Inglese</strong></P>
 <P>Per favore descrivi il tuo problema in dettaglio, con esempi ecc, e non dimenticare di includere
 queste importanti informazioni:</P>
 
-<H3>Cosa segnalare?</H3>
+<H2><A NAME="what">B.4 Cosa segnalare?</A></H2>
 
-<H4>1. Informazioni sul sistema</H4>
+<P>Potrebbe essere necessario allegare file di log, di configurazione o esempi alla
+tua segnalazione. Se questi sono grossi, è preferibile caricarli sul nostro
+<A HREF="ftp://mplayerhq.hu/MPlayer/incoming">server FTP</A> in formato compresso
+(preferibilmente gzip o bzip) ed includere solo il percorso ed il nome del file
+nella segnalazione del bug. Le nostre mailing list hanno un limite di 80k sulla
+dimensione dei messaggi, se hai qualcosa di più grosso devi comprimerlo o caricarlo.</P>
+
+<H3><A NAME="system">B.4.1 Informazioni sul sistema</H3>
 
 <UL>
-<LI>La tua distribuzione Linux o il tuo sistema operativo es.:<BR>
+<LI>La tua distribuzione Linux o il tuo sistema operativo indicando la versione es.:<BR>
 <UL>
     <LI>RedHat 7.1</LI>
     <LI>Slackware 7.0 + pacchetti di sviluppo dalla 7.1 ...</LI>
@@ -84,6 +96,12 @@ queste importanti informazioni:</P>
     <LI>Tipo e versione del window manager</LI>
   </UL>
 </LI>
+<LI>Se hai problemi con XVIDIX:
+  <UL>
+    <LI>Profondità di colore di X:<BR>
+      <CODE>xdpyinfo | grep "depth of root"</CODE></LI>
+  </UL>
+</LI>
 <LI>se solo la GUI è difettosa :
   <UL>
     <LI>versione GTK</LI>
@@ -94,7 +112,7 @@ queste importanti informazioni:</P>
 </LI>
 </UL>
 
-<H4>2. Hardware &amp; driver:</H4>
+<H3><A NAME="hardware">B.4.2 Hardware e driver</A></H3>
 
 <UL>
 <LI>informazioni sulla CPU (questo funziona solo su Linux):<BR>
@@ -123,17 +141,31 @@ queste importanti informazioni:</P>
 <LI>se non sei sicuro manda l'output di lspci -v</LI>
 </UL>
 
-<H4>Per problemi/errori di compilazione</H4>
+<H3><A NAME="configure">B.4.3 Problemi con configure</A></H3>
+
+<P>Se hai errori durante l'esecuzione di <CODE>./configure</CODE>, o il rilevamento
+di qualche elemento non ha successo, leggi <CODE>configure.log</CODE>: potresti
+tovarci la soluzione, ad esempio più versioni della stessa libreria presenti nel
+sistema, oppure hai dimenticato di installare il pacchetto di sviluppo (quello con
+il suffisso -dev). Se pensi sia un bug, includi <CODE>configure.log</CODE> nella
+tua segnalazione.
+
+<H3><A NAME="compilation">B.4.4 Problemi di compilazione</A></H3>
 
 <P>Per favore includi questi file:</P>
 <UL>
-<LI>configure.log</LI>
-<LI>config.h</LI>
-<LI>config.mak</LI>
-<LI>libvo/config.mak</LI>
+ <LI><CODE>config.h</CODE></LI>
+ <LI><CODE>config.mak</CODE></LI>
 </UL>
 
-<H4>Per problemi di riproduzione:</H4>
+Includi questi file solo se la compilazione fallisce in una di queste directory: 
+<UL>
+<LI><CODE>Gui/config.mak</CODE></LI>
+<LI><CODE>libvo/config.mak</CODE></LI>
+<LI><CODE>libao2/config.mak</CODE></LI>
+</UL>
+
+<H3><A NAME="playback">B.4.5 Problemi in riproduzione</A></H3>
 
 <P>Per favore includi l'output di mplayer al livello di verbosità 1 ma ricordati di
 <B>non tagliare l'output</B> quando lo incolli nella tua mail. Gli sviluppatori hanno
@@ -157,21 +189,14 @@ in un file in questo modo:</P>
   Se il file è presente sulla rete allora è sufficiente mandare l' URL
   <strong>esatta</strong>.
 
-<H4>Per i crash</H4>
+<H3><A NAME="crash">B.4.6 Crash</A></H3>
 
-<P>Se hai il coredump del crash continua a leggere il prossimo paragrafo, altrimenti saltalo:</P>
+<P>Devi eseguire MPlayer in <CODE>gdb</CODE> ed inviarci l'output completo o, se
+hai un core dump del crash, puoi estrarre delle informazioni utili dal file 
+<CODE>Core</CODE>. Procedi cosi:</P>
 
-<H4>Come estrarre informazioni significative da un core dump.</H4>
+<H3><A NAME="debug">B.4.6.1 Come conservare informazioni su un crash riproducibile</A></H3>
 
-<P>Per favore crea il seguente file di comandi:</P>
-
-<P><CODE>disass $pc-32 $pc+32<BR>
-  info all-registers</CODE></P>
-
-<P>Quindi semplicemente esegui la seguente linea di comando:</P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=file_comandi &gt; mplayer.bug</CODE></P>
-
-<H4>Come conservare informazioni su un crash riproducibile</H4>
 <P>Ri-compila mplayer col codice di debug abilitato:</P>
 <P><CODE>./configure --enable-debug=3<BR>
 make
@@ -182,19 +207,22 @@ make
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; run -v [opzioni-per-mplayer] nomefile</CODE></P>
 <P>e riproduci il tuo crash. Appena fatto, gdb ti rimanderà al prompt, dove devi scrivere</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; bt<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;disass $pc-32 $pc+32</CODE></P>
+&nbsp;&nbsp;&nbsp;&nbsp;disass $pc-32 $pc+32<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;info all-registers</CODE></P>
 <P>e mandaci l'output completo.
 </P>
 
-<H3>Nota generale:</H3>
+<H4><A NAME="core">B.4.6.2 Come estrarre informazioni significative da un core dump</A></H4>
 
-<P>Se qualcosa è proprio grande (i log per esempio) allora è meglio caricarlo sull' ftp
-in formato compresso (gzip e bzip2 sono preferiti), e includere solo il percorso/nomefile 
-nella segnalazione di bug. Le nostre mailing list hanno un limite massimo per la lunghezza 
-del messaggio di 80k, se hai qualcosa di più grande dovrai comprimerlo oppure fare l'upload
-via ftp.</P>
+<P>Per favore crea il seguente file di comandi:</P>
 
-<H2>So quello che sto facendo...</H2>
+<P><CODE>disass $pc-32 $pc+32<BR>
+  info all-registers</CODE></P>
+
+<P>Quindi semplicemente esegui la seguente linea di comando:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=file_comandi &gt; mplayer.bug</CODE></P>
+
+<H2><A NAME="advusers">B.5 So quello che sto facendo...</A></H2>
 
 <P>Se hai fatto un appropriata segnalazione seguendo i passi sopra, e sei sicuro
 che sia un bug di mplayer, non un problema del compilatore o un file danneggiato, hai già

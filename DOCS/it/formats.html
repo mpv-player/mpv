@@ -1,9 +1,10 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
+<!-- Synced with english version 1.54 -->
 
 <HEAD>
 <TITLE>Formati - MPlayer - Movie Player per Linux</TITLE>
-<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+<LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
@@ -65,8 +66,8 @@ ridimensionarlo durante la codifica o usa l'opzione -aspect alla lettura.</P>
 formato diffuso e multipurpose, attualmente usato soprattutto per i video DivX e DivX4.
 Ha molti svantaggi conosciuti, e incapacità (per esempio nello streaming).
 Supporta un flusso video, e da 0 a 99 flussi audio. Può essere grande fino a
-2Gb. C'è un'estensione per renderlo più grande, chiamata <B>OpenDMS</B>.
-M$ attualmente scoraggia il suo uso e propaganda ASF/WMV. Non che
+2Gb. C'è un'estensione per renderlo più grande, chiamata <B>OpenDML</B>.
+Microsoft attualmente scoraggia il suo uso e propaganda ASF/WMV. Non che
 a qualcuno importi.<BR>
 
 <P>Esiste un trucco per i file AVI che permette di usare un flusso audio Ogg Vorbis,
@@ -76,7 +77,7 @@ a qualcuno importi.<BR>
   l'unico encoder attualmente capace di creare questi file, nandub, soffre di
   questo problema.</P>
 
-<B>NOTA:</B> le videocamere DV creano puri flussi DV che i programmi di cattura DV
+<P><B>NOTA:</B> le videocamere DV creano puri flussi DV che i programmi di cattura DV
 convertono in due diversi tipi di file AVI. L' AVI quindi conterrà o
 flussi audio e video separati che MPlayer può riprodurre o il puro flusso DV
 il supporto del quale è in sviluppo.</P>
@@ -220,6 +221,32 @@ Questi file sono in realtà una sequenza di immagini YUV 4:2:0 non compresse.
 <P>Le specifiche PVA possono essere scaricate dal seguente indirizzo:
   <A HREF="http://www.technotrend.de/download/av_format_v1.pdf">http://www.technotrend.de/download/av_format_v1.pdf</A></P>
 
+<H4><A NAME="gif">2.1.1.15 File GIF</A></H4>
+
+<P>Il formato <B>GIF</B> è comunemente usato per la grafica su web. Ci sono due
+ versioni delle specifiche GIF, GIF87a e GIF89a.La differenza principale è che
+ GIF89a consente le animazioni. MPlayer supporta entrambi i formati tramite la
+ libreria libungif o altre librerie compatibili. I GIF non animati sono
+ visualizzati come un sigolo frame video (usa <CODE>-loop</CODE> e
+ <CODE>-fixed-vo</CODE> per mostrarli più a lungo).</P>
+
+<P>Al momento MPlayer non supporta la ricerca nei file GIF. I file GIF non hanno
+ necessariamente una dimensione del frame fissa, né un framerate costante.
+ Piuttosto, ogni frame ha una sua dimensione e deve essere posto in una
+ posizione definita in un'area di dimensione fissa. Il framerate è controllato
+ da un blocco opzionale prima di ogni frame, che specifica il ritardo di
+ visualizzazione in centesimi di secondo.</P>
+
+<P>I file GIF standard contengono frame di tipo RGB 24-bit, codificati con una
+ palette indicizzata a 8 bit. I frame sono compressi con un algoritmo LZW,
+ anche se alcuni programmi generano file non compressi per problemi di
+ brevetto sulla compressione LZW.</P>
+
+<P>Se la tua distribuzione non contiene libungif, scaricala dalla
+ <A HREF="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">homepage di libungif</A>.
+ Pre informazioni tecniche dettagliate, leggi le
+ <A HREF="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">specifiche GIF89a</A>.</P>
+
 
 <H3><A NAME="audio_formats">2.1.2. Formati audio</A></H3>
 
@@ -253,6 +280,20 @@ può esserti d'aiuto in questi casi.</P>
 
 <P>Guarda nella pagina di man l'opzione <CODE>-cdda</CODE> che può essere usata per
   passare opzioni a cdparanoia.</P>
+
+<H4><A NAME="xmms">2.1.2.7 XMMS</A></H4>
+
+<P>MPlayer può utilizzare i plugin di input di XMMS per leggere vari formati.
+ Ci sono plugin per i suoni dei giochi di tipo SNSE, per quelli di tipo SID
+ (del Commodore 64), molti formati usati su Amiga, .xm, .it, VQF, musepack,
+ Bonk, shorten e molti altri. Li puoi trovare sulla
+ <A HREF="http://www.xmms.org/plugins_input.html">homepage di XMMS</A>.</P>
+
+<P>Per usare questa funzione devi avere XMMS e compilare MPlayer con
+ <CODE>./configure --enable-xmms</CODE>. Se non funziona, potresti aver bisogno
+ di settare esplicitamente il percorso deli plugin e delle librerie XMMS con le
+ opzioni <CODE>--with-xmmsplugindir</CODE> e <CODE>--withxmmslibdir</CODE>.</P>
+
 
 </BODY>
 </HTML>
