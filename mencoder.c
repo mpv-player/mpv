@@ -1017,6 +1017,8 @@ if(sh_audio){
     if(in_size<0){ at_eof=1; break; }
     sh_video->timer+=frame_time; ++decoded_frameno;
 
+    v_timer_corr-=frame_time-(float)mux_v->h.dwScale/mux_v->h.dwRate;
+
 if(demuxer2){	// 3-pass encoding, read control file (frameno.avi)
     // find our frame:
 	while(next_frameno<decoded_frameno){
@@ -1069,8 +1071,6 @@ if( (v_pts_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag<0)
   }
 
 } // demuxer2
-
-v_timer_corr-=frame_time-(float)mux_v->h.dwScale/mux_v->h.dwRate;
 
 ptimer_start = GetTimerMS();
 
