@@ -283,9 +283,12 @@ echo "Detected operating system: $system_name"
 echo "Detected host architecture: $host_arch"
 
 # Determine OS dependent libs
-
+_confcygwin="TARGET_CYGWIN=no"
 if [ "$system_name" = "FreeBSD" ]; then
     _archlibs="-rdynamic -pthread"
+elif [ `echo $system_name | sed 's/CYGWIN.*/CYGWIN/i'` = "CYGWIN" ]; then
+    _confcygwin="TARGET_CYGWIN=yes"
+    _archlibs="-lpthread"
 else
     _archlibs="-ldl -lpthread"
 fi
@@ -1809,6 +1812,7 @@ DIVX4LINUX=$_divx4linux
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
+$_confcygwin
 TARGET_CPU=$iproc
 TARGET_MMX=$_cfg_mmx
 TARGET_MMX2=$_cfg_mmx2
