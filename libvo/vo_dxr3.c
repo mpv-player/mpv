@@ -515,9 +515,11 @@ static uint32_t preinit(const char *arg)
 {
 	char devname[80];
 	int fdflags = O_WRONLY;
+	CpuCaps cpucaps;
 
+	GetCpuCaps(&cpucaps);
 	/* Open the control interface */
-	if ((arg && !strcmp("noprebuf", arg)) || gCpuCaps.has3DNowExt) {
+	if ((arg && !strcmp("noprebuf", arg)) || cpucaps.has3DNowExt) {
 		printf("VO: [dxr3] Disabling prebuffering.\n");
 		noprebuf = 1;
 		fdflags |= O_NONBLOCK;
