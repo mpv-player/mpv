@@ -110,10 +110,10 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     int screen_size_y=0;//SCREEN_SIZE_Y;
     vo_functions_t* video_out=sh->video_out;
 
-    memset(&vtune,0,sizeof(vo_tune_info_t));
-
     mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDec: vo config request - %d x %d, %s  \n",
 	w,h,vo_format_name(preferred_outfmt));
+
+    if(!video_out) return 1; // temp hack
 
     // check if libvo and codec has common outfmt:
     for(i=0;i<CODECS_MAX_OUTFMT;i++){
@@ -186,6 +186,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       "MPlayer",out_fmt);
 
+    memset(&vtune,0,sizeof(vo_tune_info_t));
     if(video_out->config(sh->disp_w,sh->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
