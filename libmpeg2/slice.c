@@ -1753,7 +1753,7 @@ int slice_process (picture_t * picture, uint8_t code, uint8_t * buffer)
 	}
 
 #ifdef MPEG12_POSTPROC
-	picture->current_frame->quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
+	picture->current_frame->quant_store[code][(offset>>4)+1] = picture->quantizer_scale>>1;
 #endif
 	offset += 16;
 	CHECK_DISPLAY;
@@ -1785,7 +1785,7 @@ int slice_process (picture_t * picture, uint8_t code, uint8_t * buffer)
 			MOTION (motion_fi_zero, MACROBLOCK_MOTION_FORWARD);
 
 #ifdef MPEG12_POSTPROC
-	picture->current_frame->quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
+	picture->current_frame->quant_store[code][(offset>>4)+1] = picture->quantizer_scale>>1;
 #endif
 
 		    offset += 16;
@@ -1801,7 +1801,7 @@ int slice_process (picture_t * picture, uint8_t code, uint8_t * buffer)
 			MOTION (motion_fi_reuse, macroblock_modes);
 
 #ifdef MPEG12_POSTPROC
-	picture->current_frame->quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
+	picture->current_frame->quant_store[code][(offset>>4)+1] = picture->quantizer_scale>>1;
 #endif
 
 		    offset += 16;
