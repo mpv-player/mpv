@@ -189,6 +189,7 @@ float sub_last_pts = -303;
 #endif
 
 int auto_expand=1;
+int encode_duplicates=1;
 
 // infos are empty by default
 char *info_name=NULL;
@@ -1312,7 +1313,8 @@ if(skip_flag<0){
 	if(file_format != DEMUXER_TYPE_TV && !verbose) printf(MSGTR_DuplicateFrames,-skip_flag);
     while(skip_flag<0){
 	duplicatedframes++;
-	muxer_write_chunk(mux_v,0,0);
+	if (!encode_duplicates || vf_next_control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
+	    muxer_write_chunk(mux_v,0,0);
 	++skip_flag;
     }
 } else
