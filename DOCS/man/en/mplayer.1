@@ -3998,7 +3998,7 @@ For DVDs it generally means one in every 15/12  frames (IBBPBBPBBPBBPBB),
 for AVI it means every scene change or every keyint value (see \-lavcopts
 keyint= value if you use MEncoder to encode the video).
 .sp 1
-When a key frame is found, an 'I!' string followed by a newline character is
+When a keyframe is found, an 'I!' string followed by a newline character is
 printed, leaving the current line of mplayer/mencoder output on the screen,
 because it contains the time (in seconds) and frame number of the keyframe
 (You can use this information to split the AVI.).
@@ -4662,11 +4662,11 @@ Does absolutely nothing at the moment.
 maximum interval between keyframes in frames.
 Keyframes are needed for seeking as seeking is only possible to a keyframe but
 keyframes need more space than other frames so larger numbers here mean
-slightly smaller files, but less precise seeking, 0 means no key frames.
+slightly smaller files, but less precise seeking, 0 means no keyframes.
 Values >300 are not recommended as the quality might be bad depending upon
 decoder, encoder and luck.
 For a strict MPEG1/\:2/\:4 compliance this would have to be <=132.
-(default: 250 or one key frame every ten seconds in a 25fps movie)
+(default: 250 or one keyframe every ten seconds in a 25fps movie)
 .TP
 .B sc_threshold=<-1000000\-1000000>
 Threshold for scene change detection.
@@ -5474,13 +5474,12 @@ you need realtime encoding.
 (default: 6)
 .TP
 .B interlacing
-For interlaced video material, turn this option on.
-.I Note:
-This option does not deinterlace video, it encodes it field-based.
+Encode the fields of interlaced video material.
+Turn this option on for interlaced content.
 .TP
 .B 4mv\ \ \ \ 
-Use 4 motion vectors per macro-block, might give better compression at the
-cost of a slower encoding.
+Use 4 motion vectors per macroblock.
+This might give better compression but slows down encoding.
 .br
 .I WARNING:
 This option doesn't exist in XviD-1.0.x.
@@ -5507,10 +5506,10 @@ min & max quantizer for all frames (default: 2\-31, CBR mode)
 min & max quantizer for I/P frames (default: 2\-31/2\-31, 2pass mode)
 .TP
 .B min_key_interval=<value>
-minimum interval between key frames (default: 0, 2pass only)
+minimum interval between keyframes (default: 0, 2pass only)
 .TP
 .B max_key_interval=<value>
-maximum interval between key frames (default: 10*fps)
+maximum interval between keyframes (default: 10*fps)
 .TP
 .B mpeg_quant
 Use MPEG quantizers instead of H.263.
@@ -5522,7 +5521,7 @@ When using custom matrices, MPEG must be used.
 Decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis.
 .br
 .I WARNING:
-This will generate an illegal bitstream, and most likely not be decodeable
+This will generate an illegal bitstream, and most likely not be decodable
 by any MPEG4 decoder besides libavcodec or XviD.
 (2pass mode only)
 .TP
@@ -5557,11 +5556,11 @@ The following options are only available with the latest stable
 releases of XviD 1.0.x (api4).
 .TP
 .B packed\ 
-Create a bitstream that can be decoded delay-free.
+Create a bitstream which can be decoded delay-free.
 .br
 .I WARNING:
 This will generate an illegal bitstream, and WILL NOT be
-decodeable by ISO-MPEG4 decoders except DivX/libavcodec/XviD.
+decodable by ISO-MPEG4 decoders except DivX/libavcodec/XviD.
 .br
 .I WARNING:
 this will also store a fake DivX version in the file so the bug
@@ -5583,7 +5582,7 @@ is worth activating.
 .TP
 .B gmc\ \ \ \ 
 Enable Global Motion Compensation, which makes XviD generate special
-frames (GMC-frames) which best describe Pan/Zoom/Rotating images.
+frames (GMC-frames) which are well suited for Pan/Zoom/Rotating images.
 The decision whether to activate this option or not to save bits
 depends highly on the video material.
 .TP
@@ -5611,11 +5610,11 @@ This setting toggles the use of chroma planes for motion estimation.
 Enable a chroma optimizer prefilter.
 .TP
 .B reduced
-Enable encoding reduced resolution frames.
+Enable encoding reduced-resolution frames.
 .br
 .I WARNING:
 The bitstream created is outside any MPEG-4 profile!
-This means it most likely won't be decoded by anything else than XviD.
+This means it most likely won't be decodable by anything except XviD.
 .TP
 .B max_bframes=<0\-4>
 maximum number of B frames to put between I/P frames (default: 0)
