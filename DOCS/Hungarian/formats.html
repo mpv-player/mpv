@@ -50,7 +50,7 @@ CD-ken</B> használatos. Linux alatt nem tudsz .DAT fileokat megnézni vagy
 lemásolni a VCD-rõl, csak a <CODE>-vcd</CODE> opcióval lejátszani.</LI>
 <LI>VOB : ez a <B>DVD</B>-ken található MPEG formátum. Egyezik az MPG-gel,
 de tud feliratot vagy nem-MPEG (AC3) hangot tárolni. MPEG videot és általában
-AC3 hangot tartalmaz (ritkábban MP2-t).<BR>
+AC3 hangot tartalmaz (ritkábban MP2-t, DTS-t, tömörítetlen LPCM-et).<BR>
 <B>Olvasd el a <A HREF="cd-dvd.html#4.2">DVD fejezetet</A> !</B></LI>
 </P>
 
@@ -64,7 +64,8 @@ képarányának (aspect ratio) leírására. Például az SVCD-ken 480x480-as
 felbontású video van, és a lejátszóprogramok az elõbb említett
 fejlécbõl (ami itt 4:3-at tartalmaz) tudják hogy hogyan kell
 megjeleníteni (itt 640x480-as felbontásban). Az AVI fileoknak nincs ilyen
-mezõjük, így MPEG-bõl AVI-ba kódolásnál át kell méretezni a képet.</P>
+mezõjük, így MPEG-bõl AVI-ba kódolásnál át kell méretezni a képet, vagy
+az <CODE>-aspect</CODE> opciót használni lejátszásnál.</P>
 
 
 <P><B><A NAME=2.1.1.2>2.1.1.2. AVI file-ok</A></B></P>
@@ -72,7 +73,7 @@ mezõjük, így MPEG-bõl AVI-ba kódolásnál át kell méretezni a képet.</P>
 <P>A Micro$oft <B>AVI (Audio Video Interleaved)</B> formátuma egy széles
 körben elterjedt és használt formátum, jelenleg többnyire DivX és DivX4
 codec-kel ellátott videokhoz használják. Több ismert hátránya, inkompatibilitása
-van (például streaming-nél). Egy darab video, és 99 audio streamet támogat
+van (például streaming-nél). Egy darab video, és 0-99 audio streamet támogat
 egy fileban. 2Gb-ig terjedhet, bár az <B>OpenDMS</B> kiterjesztés
 többek között ezt a korlátot is kitágítja. Az M$ jelenleg erõsen ellenzi
 a használatát, az ASF/WMV javára. Persze nem mintha bárkit is érdekelne.<BR>
@@ -188,8 +189,8 @@ Természetesen lehetséges ezen file-ok <B>MEncoder</B>-rel történõ DivX-be
 <P><B><A NAME=2.1.1.9>2.1.1.9. yuv4mpeg file-ok</A></B></P>
 
 <P>A <A HREF="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</A> is egy
-TV grabbeléshez kitalált formátum, vagy ilyesmi :) Egy dolgot tudok róla:
-támogatjuk.</P>
+formátum amit például az <A HREF="http://mjpeg.sf.net">mjpegtools programok</A>
+használnak. Ezek a fileok gyakorlatilag YUV 4:2:0 képek sorozataiból állnak.</P>
 
 
 <P><B><A NAME=2.1.1.10>2.1.1.10. FILM file-ok</A></B></P>

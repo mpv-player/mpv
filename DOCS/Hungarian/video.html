@@ -137,9 +137,7 @@ megkeresni. Erre van 3 módszer :</P>
 
 <P>Régebbi 3dfx meghajtóknak problémái vannak az XVideo gyorsítással,
   nem támogatták a YUY2-t vagy YV12-t, ésígytovább. Ellenõrizd hogy az
-  XFree86-od verziója 4.1.0 vagy újabb-e, az már jó YUY2-vel, viszont
-  <B>szétfagy az YV12-tõl</B>! Szóval vagy vársz a 4.2.0-re, vagy
-  frissíted a DRI-det <A HREF="http://dri.sourceforge.net">CVS-bõl</A>.
+  XFree86-od verziója 4.2.0 vagy újabb-e! Az elõzõek fagynak YV12-tõl.
   Ha furcsa effekteket észlelsz -vo xv-vel, próbáld ki az SDL meghajtót
   (annak is van XVideo támogatása), az segíthet. Nézd meg a <A HREF="#2.3.1.4">2.3.1.4-es</A>
   fejezetet a részletekhez.</P>
@@ -914,9 +912,12 @@ van !</P>
 
 <P><B><A NAME=2.3.1.A>2.3.1.A.  TV kimenet</A></B></P>
 
-<P><B><A NAME=2.3.1.A.1>2.3.1.A.1.  Matrox kártyák</A></B></P>
+<P><B><A NAME=2.3.1.A.1>2.3.1.A.1.  Matrox G400 kártyák</A></B></P>
 
-<P>Linux alatt két lehetõséged van :</P>
+<P>Linux alatt két lehetõséged van a G400 TV kimenetre :</P>
+
+<P><B>FONTOS:</B> CSAK a Matrox G400DH/G400MAX kártyák tudnak Linux alatt
+  TV kimenetet, más Matroxok (G450, G550) <B>NEM!</B></P>
 
 <P>
 <UL>

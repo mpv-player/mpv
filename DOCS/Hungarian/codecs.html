@@ -23,14 +23,14 @@ generált listához!!!</P>
 <P>A legfontosabb video codecek:<BR>
 <UL>
 <LI>MPEG1 (VCD) és MPEG2 (DVD) video
-<LI>DivX ;-), OpenDivX (DivX4), 3ivx és más MPEG4 variánsok
+<LI>DivX ;-), OpenDivX (DivX4), 3ivx, DivX 5.00 és más MPEG4 variánsok
 <LI>Windows Media Video 7 (WMV1) és 8 (WMV2) ami .wmv file-okban van
-<LI>Intel Indeo codecek (3.1, 3.2, 4.1, 5.0)
-<LI>MJPEG, ASV2 és más hardware formátumok
-<LI>XAnim codec-ek
-<LI>VIVO</LI>
-<LI>FLI</LI>
+<LI>Cinepak és Intel Indeo codecek (3.1, 3.2, 4.1, 5.0)
+<LI>MJPEG, AVID, VCR2, ASV2 és más hardware formátumok
+<LI>VIVO 1.0, 2.0, I263 és más h263+ variánsok</LI>
+<LI>FLI/FLC</LI>
 <LI>RealVideo</LI>
+<LI>egyéb régi RLE-szerû formátumok</LI>
 </UL></P>
 
 <P>Ha van olyan codeced, ami nincs felsorolva vagy támogatva, olvasd el a
@@ -96,6 +96,9 @@ igényel a buszon. Packed YUV módokhoz (YUY2, UYVY) használd a 'divx4'
 módszert. RGB módoknál szabadonválasztott, a sebességük megegyezik,
 talán a használt bpp-tol függõen változhat.</P>
 
+<P>Megj: ha a -vo meghajtód támogat direct renderinget, a <CODE>-vc divx4</CODE>
+  gyorsabb lehet !</P>
+
 <P>Megj: támogat postprocessinget is (ez a módszer az <CODE>-oldpp</CODE>
 opcióval kapcsolható be), de az értékei furcsák :</P>
 
@@ -128,7 +131,7 @@ MJPEG, h263, h263+, stb.</P>
   <LI>release : ebben az esetben semmit nem kell tenned, a libavcodec-et
     ilyenkor mindig mellékeljük.</LI>
   <LI>CVS : ebben az esetben le kell töltened az <B>FFmpeg</B>
-    CVS fát:
+    CVS fát (a 0.4.5 NEM fog menni az <B>MPlayerrel</B>!):
 
 <P><CODE>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
@@ -179,9 +182,9 @@ Nagyon könnyû bekapcsolni õket:</P>
   <A HREF="http://www.3ivx.com">3ivx honlapjáról</A>.</LI>
 
   <LI>a <CODE>--with-xanimlibdir</CODE> opcióval mondd meg a configure-nak hogy
-  hol vannak az xanim codec-ek, ha nem az alapértelmezett
-  <CODE>/usr/lib/xanim</CODE> könyvtárba installáltad õket.
-  Egy másik megoldás ha a <I>XANIM_MOD_DIR</I>
+  hol vannak az xanim codec-ek. Magától az
+  <CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods, /usr/lib/xanim</CODE>
+  könyvtárban keresi õket.  Egy másik megoldás ha a <I>XANIM_MOD_DIR</I>
   környezeti változót beállítod arra a könyvtárra ahol az XAnime codec-ek
   találhatók.</LI>
 
@@ -217,8 +220,8 @@ hamarosan az ffh263 is tud VIVO 2.0-ás file-okat dekódolni.</P>
 
 <P>Az MPEG1 és MPEG2 a natív <B>libmpeg2</B>-vel dekódoljuk. A forrása benne
 van az <B>MPlayer</B>-ben, és természetesen több platformon is használható.
-A hibás MPEG1/2 fileokat úgy játszuk le hogy figyeljük a libmpeg2 mit
-ad vissza, és hiba esetén gyorsan ujraindítjuk a codecet pontosan onnan ahol
+A hibás MPEG1/2 fileokat úgy játszuk le hogy sig11 után gyorsan
+újrainicializáljuk a libmpeg2-õt és folytatjuk a lejátszást pontosan onnan ahol
 a hiba volt. Nincs sebességvesztés.</P>
 
 
@@ -265,7 +268,8 @@ támogatottságuk valószínûtlen. :(</P>
 
 <P><B>Hátrányai</B> :
   <UL>
-    <LI>jelenleg nem minden DivX/DivX4 file-t dekódol helyesen</LI>
+    <LI>jelenleg nem minden DivX/DivX4 file-t <B>dekódol</B> helyesen
+      (de kit érdekel. A libavcodec kenterbe ver mindent.)</LI>
     <LI>nem lehet egyszerre DivX4 <B>ÉS</B> XViD támogatással fordítani
       az <B>MPlayer</B>-t. Ezt fordításkor kell eldönteni.</LI>
     <LI>fejlesztés alatt</LI>
@@ -282,6 +286,9 @@ támogatottságuk valószínûtlen. :(</P>
   &nbsp;&nbsp;<CODE>Szerkeszd át a Makefile.linux-ot a gépednek
     megfelelõen</CODE><BR>
   &nbsp;&nbsp;<CODE>make -f Makefile.linux</CODE><BR>
+  &nbsp;&nbsp;<CODE>fogod a DivX4linux csomagot és az encore2.h illetve
+    decore.h file-okat átmásolod belõlük a <CODE>/usr/local/include/</CODE>
+    könyvtárba<BR>
   &nbsp;&nbsp;<CODE>fordítsd újra az <B>MPlayer</B>-t a következõ opcióval :
     --with-xvidcore=/útvonal/libcore.a</CODE><BR>
 </P>
@@ -292,7 +299,7 @@ támogatottságuk valószínûtlen. :(</P>
 <P>A legfontosabb audio codecek:<BR>
 <UL>
 <LI>MPEG layer 2, és layer 3 (MP3) audio (nativ kód, MMX/SSE/3DNow! optimalizációval)
-<LI>AC3 dolby audio (natív kód, SSE/3DNow! optimalizációval)
+<LI>AC3 dolby audio (natív kód, MMX/SSE/3DNow! optimalizációval)
 <LI>AC3 dekódolás a hangkártya dekóderével
 <LI>Ogg Vorbis audio codec (natív)
 <LI>VoxWare audio (DirectShow-os DLL használatával)
@@ -330,16 +337,19 @@ a legújabb ALSA CVS-ben is van hozzá támogatás).</P>
 <P><B><A NAME=2.2.2.2>2.2.2.2.  Hardveres AC3 dekódolás</B></P>
 
 <P>Kell egy AC3 képes hangkártya, digitális kimenettel (SP/DIF). A kártya
-meghajtójának támogatnia kell az AFMT_AC3 formátumot (ilyen például az
-SB Live! és a C-Media kártyák). Kapcsold rá a hardveres AC3 dekódered az SP/DIF kimenetre,
-és használd az -ac hwac3 opciót. Jelenleg a C-Media kártyákkal és az
-SB Live! kártyákkal mûködik, utóbbinál csak az ALSA meghajtóval.</P>
+meghajtójának megfelelõen támogatnia kell az AFMT_AC3 formátumot (ilyenek
+például az SB Live! és a C-Media kártyák). Kapcsold rá a hardveres AC3
+dekódered az SP/DIF kimenetre, és használd az -ac hwac3 opciót. Jelenleg a
+C-Media kártyákkal és az SB Live! kártyákkal mûködik, utóbbinál csak az ALSA
+meghajtóval!</P>
 
 
 <P><B><A NAME=2.2.2.3>2.2.2.3.  libmad támogatás</A></B></P>
 
 <P>A <A HREF="http://mad.sourceforge.net">libmad</A> egy többplatformos MPEG
 audio dekóder. Ha nem tudod miért lenne szükséged rá, nincs szükséged rá.</P>
+
+<P>Nem kezeli jól a hibás file-okat, és a tekeréssel is problémái vannak.</P>
 
 <P>A támogatást az <CODE>--enable-mad</CODE> configure opcióval lehet bekapcsolni.</P>
 

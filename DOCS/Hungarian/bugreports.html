@@ -102,11 +102,12 @@ például:<UL>
 <P><B><I>4. Ha a probléma csak egy vagy néhány file-nál jelentkezik,
   töltsd fel a file-t ide:</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
-  Tölts fel egy (azonos nevû) kis .txt fájlt, amiben leírod hogy mi a baj!<BR>
+  Tölts fel egy (a fileoddal azonos nevû) kis .txt fájlt, amiben leírod hogy
+  mi a baj, plusz egy mplayer -v kimenet, és az emailcímed!<BR>
   Általában az elsõ 1-5 Mb elég, hogy reprodulkáljuk a
   problémát, de elõször probáld ki:
-<P><CODE>&nbsp;&nbsp;&nbsp;dd if=a_file of=kis_file bs=1k count=1024</CODE></P>
-  (ez az 'a_file' elsõ 1 Mb-ját elmenti 'kis_file' néven')
+<P><CODE>&nbsp;&nbsp;&nbsp;dd if=a_file of=kis_file bs=1024k count=5</CODE></P>
+  (ez az 'a_file' elsõ 5 Mb-ját elmenti 'kis_file' néven')
   Ekkor probáld lejátszani a keletkezõ file-t, és ha a bug elõjön,
   akkor elég lesz csak ennyit feltölteni.<BR>
   SOHA ne küldj file-t levélben! Töltsd fel, és csak a file nevét

@@ -270,16 +270,13 @@
   ütközik. Részletes információ <A HREF="users_against_developers.html">ezen file</A>,
   második részében található (angol) (ajánlott olvasmány).</P>
 
-<P>Nem codeceket írtam, csak néhány lejátszót. Sok idõt töltöttem azzal is, hogy
-  megtaláljam a megfelelõ módszert a hibás file-ok beolvasására (mind MPEG,
-  AVI), valamint a tökéletes A-V szinkronra, akár seekkel is.  A lejátszó
-  sziklaszilárdan játszik le hibás MPEG file-okat (hasznos néhány VCD-nél), és
-  lejátszik minden olyan hibás AVI-t, amit a csodás windows media player nem.
-  Még az index chunk nélküli AVI-k is lejátszhatók, sõt az indexet ideiglenesen
-  fel is lehet építeni az -idx opcióval (vagy véglegesen a
+<P>A lejátszó sziklaszilárdan játszik le hibás MPEG file-okat (hasznos néhány
+  VCD-nél), és lejátszik minden olyan hibás AVI-t, amit a csodás windows media
+  player nem.  Még az index chunk nélküli AVI-k is lejátszhatók, sõt az indexet
+  ideiglenesen fel is lehet építeni az -idx opcióval (vagy véglegesen a
   <B>MEncoder</B>-rel), így tekerni is lehet bennük! Amint az látszik, a
-  stabilitás és a minõség a legfontosabbak a számomra, és a sebesség is
-  fontos.</P>
+  stabilitás és a minõség a legfontosabbak, és a sebesség is
+  számít.</P>
 
 
 <B><P><A NAME=1.2>1.2.  Történelem</A></B></P>
@@ -292,40 +289,40 @@
   a képminõséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...</P>
 
 <P><UL>
-<LI><B>mpg12play v0.1-v0.3:</B><BR>
+<LI><B>mpg12play v0.1-v0.3:</B> Szept 22-25, 2000<BR>
     Az elsõ próbálkozás, fél óra alatt összegányolva!
     A libmpeg3-at hasznaltam a www.heroinewarrior.com-ról egészen a 0.3-as
     verzióig, de minõségi és sebességi problémák voltak vele.</LI>
-<LI><B>mpg12play v0.5-v0.87:</B><BR>
+<LI><B>mpg12play v0.5-v0.87:</B> Szept 28-Okt 20, 2000<BR>
     Az MPEG codec helyére a DVDview-et (Dirk Farin) tettem, nagyszerû dolog
     volt, de lassú, és C++-ban készült (utálom a C++-t!!!)</LI>
-<LI><B>mpg12play v0.9-v0.95pre5:</B><BR>
+<LI><B>mpg12play v0.9-v0.95pre5:</B> Okt 21-Nov 2, 2000<BR>
     Az MPEG codec itt az Aaron Holtzman és Michel Lespinasse készítette libmpeg2
     (mpeg2dec). Nagyon jó, optimalizált, gyors C kód, tökéletes képminõség és   
     100%-os megfelelés a szabványnak.</LI>
-<LI><B>MPlayer v0.3-v0.9:</B><BR>
+<LI><B>MPlayer v0.3-v0.9:</B> Nov 18-Dec 4, 2000<BR>
     Egyvelege két programnak: mpg12play v0.95pre6 és az új, egyszerû AVI
     lejátszómnak ('avip'), ami az avifile Win32 DLL loaderén alapul.</LI>
-<LI><B>MPlayer v0.10:</B><BR>
+<LI><B>MPlayer v0.10:</B> Jan 1, 2001<BR>
     Az MPEG és AVI lejátszó egyetlen programban!</LI>
-<LI><B>MPlayer v0.11:</B><BR>
+<LI><B>MPlayer v0.11pre sorozat:</B><BR>
     Néhány új fejlesztõvel gyarapodtunk, és innentõl az mplayer project
     csapatmunkán alapul!
     ASF támogatás hozzáadása, és OpenDivX (lásd www.projectmayo.com)
     en/dekódolás.</LI>
-<LI><B>MPlayer v0.17 "The IdegCounter"</B><BR>
+<LI><B>MPlayer v0.17a "The IdegCounter"</B> Ápr 27, 2001<BR>
     A 0.11pre sorozat végsõ verziója, 4 hónapnyi kõkemény fejlesztés után!
     Próbáld ki és ess ámulatba! Ezernyi új dolog... és persze a régi kód
     feljavítva, bugok eltávolítva stb.</LI>
-<LI><B>MPlayer 0.18 "The BugCounter"</B><BR>
+<LI><B>MPlayer 0.18 "The BugCounter"</B> Jul 9, 2001<BR>
     2 hónap telt el a 0.17 óta, és itt az újabb release... Teljes ASF támogatás,
     még több subtitle formátum, libao (mint libvo, csak ez audio-ra), és még
     stabilabb, mint eddig! KÖTELEZÕ !</LI>
-<LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
+<LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B> Okt 8, 2001<BR>
     Hmm. Újra release. Néhány tonna új feature, béta verziójú GUI,
     hibajavítások, új vo és ao meghajtók, Linuxon kívül sok más támogatott
     rendszer, nyílt forráskódú DivX kodek, és még rengeteg más. Próbáld ki!</LI>
-<LI><B>MPlayer 0.60 "The RTFMCounter"</B><BR>                    
+<LI><B>MPlayer 0.60 "The RTFMCounter"</B> Jan 3, 2002<BR>                    
     MOV/VIVO/RM/FLI/NUV formátumok támogatása, natív CRAM, Cinepak, ADPCM
     codec-ek, XAnim bináris codec-einek támogatása; DVD feliratok támogatása, a
     MEncoder elsõ verziója, grabbelés TV-rõl, cache, liba52, rengeteg
@@ -350,16 +347,18 @@ problémákba ütközni:<BR>
 <UL>
   <LI><B>binutils</B> - <B>2.11.x</B> ajánlott. Ez a program felelõs az
     MMX/3DNow!/stb utasításokért, ezért igen fontos.</LI>
-  <LI><B>gcc</B> - <B>2.95.2</B>-tõl <B>2.95.4</B> verziók ajánlottak.
+  <LI><B>gcc</B> - <B>2.95.3</B>-tól <B>2.95.4</B> verziók ajánlottak.
     <B>SOHA</B> ne használj 2.96-ot vagy 3.x.x-et !!! Hibás kódot generálnak.
     Ha úgy döntesz hogy 2.96 helyett mást használsz, NE a 3.0 mellett
     dönts, csak azért mert újabb! Sok tekintetben bugosabb is mint a 2.96.
     Ígyhát ha váltani akarsz, marad a 2.95.x (2.95-ös libstdc++ is szükséges!),
     vagy maradj a 2.96-nál (ebben az esetben viszont készülj fel a hibákra
     a futás közben). A 2.96 "érdekességeirõl"
+    Ha mégis 3.x-et akarsz használni akkor használd a legújabbat (3.0.3 vagy
+    3.1), tekintve hogy az elõzõ verzióknak mindnek volt valami bugja.
     <A HREF="../users_against_developers.html">itt</A> vagy a <A HREF="faq.html">FAQ-ban</A>
     találsz infot.</LI>
-  <LI><B>XFree86</B> - <B>mindig a legújabb (4.1.0)</B> ajánlott. Normális
+  <LI><B>XFree86</B> - <B>mindig a legújabb (4.2.0)</B> ajánlott. Normális
     esetben ez mindenképpen szükséges, tekintve hogy az újabb videokártyákban
     jelenlevõ hardveres YUV gyorsítás csak a 4.0.2-es verzió óta elérhetõ,
     a benne levõ <A HREF="video.html#2.3.1.2">XVideo</A> kiterjesztés révén 
@@ -376,9 +375,10 @@ problémákba ütközni:<BR>
     történõ lejátszás során furcsa a lejátszás képe). Képes továbbá a
     <B>feliratokat a film alatti fekete sávon megjeleníteni</B>. Ajánlott
     mindig a legújabbat használni.</LI>
-  <LI><B>libjpeg</B> - ajánlott és alapértelmezett (M)JPEG dekóder. Hasznos
-    mind az <B>MPlayer</B>hez, mind a <B>MEncoder</B>hez.</LI>
-  <LI><B>libpng</B> - ajánlott és alapértelmezett (M)PNG dekóder. Hasznos
+  <LI><B>libjpeg</B> - opciónális (M)JPEG dekóder. Az -mf opció és néhány
+    QT file használja.  Hasznos mind az <B>MPlayer</B>hez, mind a
+    <B>MEncoder</B>hez, ha JPEG file-okkal is akarsz dolgozni.</LI>
+  <LI><B>libpng</B> - opcionális (M)PNG dekóder. Kell a GUI-hoz is. Hasznos
     mind az <B>MPlayer</B>hez, mind a <B>MEncoder</B>hez.</LI>
 </UL>
 </P>
@@ -406,8 +406,10 @@ problémákba ütközni:<BR>
   hasonló csomagot használ, de különbözik a miénktõl, ígyhát ezt használd! A mi
   csomagunk egyébként használható az avifile-vel.<BR>
   <UL>
-    <LI>Ha digitális kamerával (pl. DV) felvett filmeket is le akarsz játszani, akkor muszáj ezeket feltenned.</LI>
-    <LI><B>WMV</B> vagy régi ASF filmek lejátszásához is szükséges</LI>
+    <LI>Ha valamilyen hardveres tömörítõ eszközzel, digitális kamerával (pl.
+    DV, ATI VCR, MJPEG) felvett filmeket is le akarsz játszani, akkor muszáj
+    ezeket feltenned.</LI>
+    <LI><B>WMV</B> vagy régi ASF (MP42) filmek lejátszásához is szükséges</LI>
   </UL>
 </LI>
 
@@ -426,12 +428,18 @@ problémákba ütközni:<BR>
   </UL>
 </LI>
 
-<LI>Ha <B>3ivx</B> filmeket is le akarsz játszani, olvasd el az
-  <A HREF=codecs.html#2.1.2.4>XAnim codecek</A> fejezetet.</LI>
+<LI><B>XViD</B> : A DivX4Linux nyílt forráskódú alternatívája.
+  <UL>
+    <LI>1 vagy 2 menetes enkódolás a <A HREF="encoding.html">MEncoderrel</A></LI>
+    <LI>nyílt forráskód, így nem csak x86 gépeken lehet használni</LI>
+    <LI>körülbelül kétszer gyorsabban enkódol mint a DivX4 - és nagyjából azon
+      a minõségen</LI>
+  </UL>
+</LI>
 
 <LI>Az <A HREF=codecs.html#2.1.2.4>XAnim codecek</A> használhatóak a régebbi
-  codec-û filmek (mint pl Indeo 3/4/5) lejátszására (teljes
-  képernyõ, hardveres YUV támogatás). Fõleg hogy mivel több platformon
+  codec-û (mint pl Indeo 3/4/5), valamint <B>3ivx</B> filmek lejátszására
+  (teljes képernyõ, hardveres YUV támogatás). Fõleg hogy mivel több platformon
   hozzáférhetõk, ez az egyetlen lehetõség Indeo (stb) filmek lejátszására
   nem-x86-os gépeken (mármint az Xanim használatán kívûl persze;). Viszont
   például a Cinepak filmekhez ajánlott az <B>MPlayer</B> saját codec-ét
@@ -442,7 +450,8 @@ problémákba ütközni:<BR>
 <P><B><I>VIDEOKÁRTYÁK</I></B></P>
 
 <P>Itt kétféle videokártyát különböztetünk meg. Az egyik fajta (az újabbak)
-rendelkezik <B>hardveres YUV gyorsítással</B>, a másik pedig nem.</P>
+rendelkezik <B>hardveres YUV gyorsítással és nagyítással</B>, a másik pedig
+nem.</P>
 
 <P>
 <B><I>YUV kártyák</I></B></P>
@@ -463,6 +472,13 @@ végzi. Így a teljes képernyõs lejátszás szép és gyors lesz.
   TV kimenet</A> fejezetet. <U><B>Ha nem Linux-ot használsz</B></U>, olvasd el
   a <A HREF="video.html#2.3.1.15">Vidix</A> fejezetet !</LI>
 
+<LI><B>3Dfx Voodoo3/Banshee kártyák</B> : nézd meg a <A
+  HREF="video.html#2.3.1.9">2.3.1.9</A>-es fejezetet.  Ezeket a lépéseket
+  fordítás <I>elõtt</I> kell megcsinálni, különben nem épül be 3Dfx támogatás
+  az <B>MPlayer</B>-be. Nézd meg a <A HREF="video.html#2.3.1.A.3">3dfx TV
+  kimenet</A> fejezetet is. Ha X-et fogsz használni, legalább 4.2.0-ás
+  legyen mert a korábbiak 3dfx támogatása bugos.</LI>
+
 <LI><B>ATI kártyák</B> : amennyiben valamilyen ATI kártyád van, a <A HREF="video.html#2.3.1.A.2">
   2.3.1.A.2 fejezetben</A> megtalálod a kártyád támogatottságára vonatkozó
   információkat. Ha <B>Radeon</B>, <B>Rage128</B> vagy <B>Mach64</B> kártyád
@@ -471,18 +487,12 @@ végzi. Így a teljes képernyõs lejátszás szép és gyors lesz.
   használsz</B></U>, olvasd el a <A HREF="video.html#2.3.1.15">Vidix</A>
   fejezetet !</LI>
 
-<LI><B>3Dfx Voodoo3/Banshee kártyák</B> : nézd meg a <A
-  HREF="video.html#2.3.1.9">2.3.1.9</A>-es fejezetet.  Ezeket a lépéseket
-  fordítás <I>elõtt</I> kell megcsinálni, különben nem épül be 3Dfx támogatás
-  az <B>MPlayer</B>-be. Nézd meg a <A HREF="video.html#2.3.1.A.3">3dfx TV
-  kimenet</A> fejezetet is.</LI>
-
-<LI><B>S3 kártyák</B> : a Savage chip-ek és az XFree86 meghajtó hozzájuk
-  támogatja a hardveres gyorsítást. A lehetõ legújabb XFree86 ajánlott, a
-  régebbi meghajtók hibásak. A Savage kártyáknak problémáik vannak az YV12
-  megjelenítéssel. Lásd az <A HREF="video.html#2.3.1.2.2">S3 Xv fejezetet</A>.
-  Régi, nem-Savage chip-es kártyáknak nincs, vagy lassú a hardveres
-  támogatásuk.</LI>
+<LI><B>S3 kártyák</B> : a Savage és a Virge/DX chip-ek és az XFree86 meghajtó
+  hozzájuk támogatja a hardveres gyorsítást. A lehetõ legújabb XFree86
+  ajánlott, a régebbi meghajtók hibásak. A Savage kártyáknak problémáik vannak
+  az YV12 megjelenítéssel. Lásd az <A HREF="video.html#2.3.1.2.2">S3 Xv
+  fejezetet</A>.  Régi, Trio chip-es kártyáknak nincs, vagy lassú a
+  hardveres támogatásuk.</LI>
 
 <LI><B>Nvidia kártyák</B> : nagyon rossz választás videolejátszásra. Ezek
   a kártyák olcsó távolkeleti alkatrészekbõl készülnek, amik rossz képminõséget
@@ -496,7 +506,12 @@ végzi. Így a teljes képernyõs lejátszás szép és gyors lesz.
     <LI>Próbáld ki hátha a kártyád, és az XFree86 drivere támogatja a
       hardveres gyorsítást. Lásd az <A HREF="video#2.3.1.2">Xv fejezetet</A>
       a részletekért.</LI>
-    <LI>Ha nem, a kártyád a következõ csoportba tartozik :</LI>
+    <LI>Ha nem, a kártyád az illetõ oprendszer alatt nem képes hardveres
+      gyorsításra :(<BR>
+      Ha Windows alatt igen, az nem jelenti azt hogy Linux vagy más OS alatt,
+      is, ez meghajtófüggõ. A legtöbb gyártó nem készit Linuxos meghajtót,
+      illetve nem adja ki a kártyái leírását - rosszul jársz velük. Lásd
+      a következõ fejezetet.</LI>
   </UL>
 </LI>
 
@@ -517,7 +532,7 @@ meghajtókat érdemes kipróbálni :
   <LI>XFree86 <B>használatával</B> : lásd a
    <A HREF="video.html#2.3.1.3">DGA</A> és az
    <A HREF="video.html#2.3.1.13">X11</A> meghajtók fejezeteit. A DGA
-   használata ajánlott!</LI>
+   használata ajánlott! Kipróbálhatod SDL-en keresztül is, hátha jobb lesz.</LI>
   <LI>XFree86 <B>nélkül</B> : próbáld ki ezeket a meghajtókat, ebben a
     sorrendben :
     <A HREF="video.html#2.3.1.12">vesa</A>,
@@ -534,7 +549,8 @@ meghajtókat érdemes kipróbálni :
 <LI><B>Soundblaster Live!</B> : ezzel a kártyával lehetõséged van az
   alapértelmezett 2 helyett 4 vagy 6 (<B>5.1</B>) csatornás AC3 kimenetre.
   Olvasd el a <A HREF="codecs.html#2.2.2.1">Szoftveres AC3 dekódolás</A>
-  fejezetet.</LI>
+  fejezetet. Hardveres AC3 dekódoláshoz MUSZÁJ 0.9-es ALSA-t használnod,
+  OSS emulációval!</LI>
 
 <LI><B>SP/DIF kimenettel rendelkezõ C-Media kártyák</B> : ha van hardveres
   AC3 dekódered, ezekkel a kártyákkal át lehet adni annak a bigyónak a
@@ -571,8 +587,8 @@ idõzítést lehet elérni. Ez root jogokat követel, vagy egy <I>setuid root</I>
 <B>MPlayer</B> binárist (nos, vagy egy kis kernel átirást, ezt azért inkább
 ne..). Az új idõzítõ kód hatékonysága szépen látszik a státuszsorban.
 A harmadik módszer haszálatához a <CODE>-softsleep</CODE> opciót kell megadni.
-Ez van olyan hatékony mint az RTC, de nincs szükség root jogokra a
-használatához. Viszont sajnos több CPU-t igényel.
+Ez van olyan hatékony mint az RTC, de nem használja az RTC-t.
+Viszont sajnos több CPU-t igényel.
 Megj.: <B>SOHA ne installálj setuid MPlayer binárist többfelhasználós
 gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</LI>
 
@@ -588,7 +604,8 @@ gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</LI>
 <CODE>/usr/local/share/mplayer</CODE> könyvtár tartalmazza a
 <CODE>codecs.conf</CODE> file-t, ami megmondja a programnak a használható
 codec-eket és azok tulajdonságait. Ezt a file-t mindig az <B>MPlayer</B>-rel
-együtt kell frissíteni !</P>
+együtt kell frissíteni ! Ha a home könyvtáradban van egy régi codecs.conf
+file, azt töröld !</P>
 
 <P><B>Debian felhasználók</B> egyszerûen készíthetnek .deb csomagot maguknak,
 csak a <CODE>fakeroot debian/rules binary</CODE> parancsot kell beírniuk az
@@ -598,7 +615,9 @@ HREF="documentation.html#6.1">itt</A>.</P>
 <P>Ajánlott átnézni a ./configure kimenetét valamint a
   <CODE>configure.log</CODE> file-t, fontos információkat tartalmaznak arra
   vonatkozóan hogy mi lesz belefordítva és mi nem. Megnézheted továbbá a
-  config.h és config.mak file-okat.</P>
+  config.h és config.mak file-okat. Ha valamilyen könyvtáradat nem találja
+  meg az <B>MPlayer</B> ellenõrizd hogy az illetõ csomag -dev csomagja is
+  fent van-e, és a verziójuk egyezik-e.</P>
 
 <P>Bár nem kötelezõ, jobb ha felteszed a fontokat is, mert így kapsz OSD-t, és
   feliratok megjelenítésének képességét. Töltsd le az mp-arial-iso-8859-2.zip-et
@@ -650,8 +669,8 @@ jelenleg 8 fajtát ismer fel. Hogy lásd melyek ezek, nézd meg a subreader.c
 file-t, a 30. sor körül.</P>
 
 <P>Az <B>MPlayer</B> támogatja a VobSub tipusú feliratokat. Ezek a feliratok
-több fileból állnak: mindig van egy nagy méretû .SUB file, továbbá egy
-.IDX és/vagy .IFO file. Használatuk : például <CODE>sample.sub</CODE>,
+több fileból állnak: mindig van egy nagy méretû .SUB file, továbbá opcionálisan
+egy .IDX és/vagy .IFO file. Használatuk : például <CODE>sample.sub</CODE>,
 <CODE>sample.ifo</CODE>, <CODE>sample.idx</CODE> file-ok esetén a
 <CODE>-vobsub sample -vobsubid 0</CODE> opciókat kell megadni (opcionálisan
 természetesen az útvonalat is). A <CODE>-vobsubid</CODE> opció a DVD-knél
@@ -905,23 +924,31 @@ Szabványos V4L-rõl bemenet<BR>
 <P><B><A NAME=3.1>3.1.  Parancssor</A></B></P>
 
 <P>Az <B>MPlayer</B> képes "playtree" stílusban is kezelni az opcióit.
-  Ez abból áll hogy meg lehet adni opciókat amik "alapértelmezettnek" fognak
+  Ez abból áll hogy meg lehet adni opciókat amik globálisnak fognak
   számítani (például <CODE>mplayer -vfm 5</CODE>), valamint egyes filenevekre
   vonatkoztatva olyan opciókat amelyek ezeket felülbírálják (az elõbbi
   példát folytatva : <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).
+  Lehet csoportokat is kialakítani a { és } karakterekkel. Ez a -loop opcióval
+  hasznos: <CODE>>mplayer { 1.avi -loop 2 2.avi } -loop 3</CODE> ebben a
+  sorrendben fog lejátszani: 1 1 2 1 1 2 1 1 2
+</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT CLASS="text">mplayer [opciók] [útvonal//]filenév</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">file</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [alapértelmezett opciók] [útvonal/]filenév1 [opciók a filenév1 számára] filenév2 filenév3 [opciók a filenév3 számára]</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">VCD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [opciók] -vcd trackszám /dev/cdrom</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">DVD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [opciók] -dvd titleno [/dev/dvd]</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">net</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [opciók] http://site.com/file.[mpg|avi]</CODE></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT CLASS="text">mplayer [opciók] [útvonal/]filenév1 [filenév1 opciói] filenév2 [filenév2 opciói] ...</CODE></TD><TR>
+<TD></TD><TD><FONT CLASS="text">VCD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [opciók] -vcd trackszám [-cdrom-device /dev/cdrom]</CODE></TD><TR>
+<TD></TD><TD><FONT CLASS="text">DVD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [opciók] -dvd titleno [-dvd device /dev/dvd]</CODE></TD><TR>
+<TD></TD><TD><FONT CLASS="text">net</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [opciók] http://site.com/file.[mpg|avi|asf]</CODE></TD><TR>
 </TABLE></P>
 
+<P>Az <B>MPlayer</B> új verzióinak URL stílusban is meg lehet adni a VCD
+  illetve DVD lemezeket, mint a Xine-nak : <CODE>mplayer dvd://1</CODE> vagy
+  <CODE>mplayer vcd://1</CODE>
+</P>
+
 <P><PRE>  mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-  mplayer -vcd 2 /dev/cdrom
+  mplayer -vcd 2
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-  mplayer -dvd 1 /dev/dvd
+  mplayer -dvd 1 -dvd-device /dev/dvd
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
 
@@ -1029,21 +1056,27 @@ Szabványos V4L-rõl bemenet<BR>
 
 <P><B><A NAME=3.4>3.4.  Lejátszás hálózatról, vagy pipe-n keresztül</A></B></P>
 
-<P>Az <B>MPlayer</B> a HTTP protokollal tud lejátszani hálózaton keresztül.
-  A konfigurálása egyszerû, csak fordítsd újra az <B>MPlayer</B>-t így :</P>
-
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
+<P>Az <B>MPlayer</B> a HTTP vagy MMS protokollal tud lejátszani hálózaton
+  keresztül.</P>
 
 <P>A lejátszás maga egyszerûen az URL megadásával történik. Az <B>MPlayer</B>
   automatikusan kezelni tudja továbbá a HTTP_PROXY környezeti változót.
   A proxy használatának kényszerítése :</P>
 
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
+<P><CODE>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
 <P><B>MPlayer</B> tud a standard bemenetrõl (NEM named pipe-okról) beolvasni.
   Itt egy példa az FTP-n keresztüli lejátszásra ennek segítségével :</P>
 
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
+<P><CODE>wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
+
+<P>Ajánlott a <CODE>-cache</CODE> opció használata hálozatról történõ
+  lejátszásnál :</P>
+
+<P><CODE>wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192
+  -</CODE></P>
+
+
 
 <P><B><A NAME=4>4.  <A HREF="faq.html">FAQ fejezet</A></A></B></P>
 
@@ -1213,7 +1246,7 @@ Közelebbi információ valakinél?</P>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A>
 <P>Ez az MPlayer fejlesztõi lista! Témák: interface/API változások, új
 library-k, optimalizáció, ./configure, és IDE kell küldeni patch-eket.
-NE küldj ide bugreportot, kérdést!
+NE küldj ide bugreportot, kérdést, flamet!
 Ne növeljük a lista forgalmát.</P>
 
 </LI><LI>MPlayer felhasználók listája:<BR>
@@ -1241,12 +1274,14 @@ Ne növeljük a lista forgalmát.</P>
 
 </LI><LI>MPlayer és DVB felhasználók:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
-<P>A DVB nevû hardveres dekóderkártyával kapcsolatos kérdések helye.</P>
+<P>A DVB nevû hardveres dekóderkártyával kapcsolatos kérdések helye (nem
+  DXR3!).</P>
 
 </LI><LI>MPlayer CVS-log:     
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A>
 <P>CVS-beli változásokról kérdéseket ide küldj.
-(ha nem érted, mire kell egy változtatás, vagy jobb fixet tudsz)
+(ha nem érted, mire kell egy változtatás, vagy jobb fixet tudsz, esetleg
+bugot találsz az illetõ commitban)
 Bizonyosodj meg róla, hogy a kívánt fejlesztõ is olvassa a listát!</P>
 
 </LI></UL></P>
