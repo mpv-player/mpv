@@ -144,6 +144,11 @@ struct mpeg2_decoder_s {
     int second_field;
 
     int mpeg1;
+
+    /* for MPlayer: */
+    int quantizer_scale;
+    char* quant_store;
+    int quant_stride;
 };
 
 typedef struct {

@@ -154,6 +154,17 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    else mpi->fields &= ~MP_IMGFIELD_REPEAT_FIRST;
 	    mpi->fields |= MP_IMGFIELD_ORDERED;
 
+#ifdef MPEG12_POSTPROC
+	    if(!mpi->qscale){
+		mpi->qstride=(info->sequence->picture_width+15)>>4;
+		mpi->qscale=malloc(mpi->qstride*((info->sequence->picture_height+15)>>4));
+	    }
+	    mpeg2dec->decoder.quant_store=mpi->qscale;
+	    mpeg2dec->decoder.quant_stride=mpi->qstride;
+	    mpi->pict_type=type; // 1->I, 2->P, 3->B
+	    mpi->qscale_type= 1;
+#endif
+
 	    if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
 		!(mpi->flags&MP_IMGFLAG_DIRECT)){
 		   // nice, filter/vo likes draw_callback :)
