@@ -68,6 +68,9 @@ static int freq_id=0;
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
+	if(dxr2_fd <= 0)
+	  return 0;
+
 	ao_data.outburst=2048;
 	ao_data.samplerate=rate;
 	ao_data.channels=channels;
@@ -139,7 +142,6 @@ static void audio_resume()
 extern void dxr2_send_packet(unsigned char* data,int len,int id,int timestamp);
 extern void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,int timestamp,int freq_id);
 extern int vo_pts;
-static int preload = 1;
 // return: how many bytes can be played without blocking
 static int get_space(){
     float x=(float)(vo_pts-ao_data.pts)/90000.0;

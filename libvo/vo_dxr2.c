@@ -315,6 +315,57 @@ void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,unsigned int times
   }
 }
 
+void dxr2_send_sub_packet(unsigned char* data,int len,int id,unsigned int timestamp) {
+  int ptslen=5;
+
+  if(dxr2_fd < 0) {
+    mp_msg(MSGT_VO,MSGL_ERR,"DXR2 fd is not valid\n");
+    return;
+  }
+
+  if (((int) timestamp)<0)
+    timestamp=0;
+
+  mp_msg(MSGT_VO,MSGL_DBG2,"dxr2_send_sub_packet(timestamp=%d)\n", timestamp);
+  // startcode:
+  pack[0]=pack[1]=0;pack[2]=0x01;
+
+  // stream id
+  pack[3]=0xBD;
+
+  while(len>=4){
+    int payload_size= PACK_MAX_SIZE-(7+ptslen+3);
+    if(payload_size>len) payload_size= len;
+    
+    pack[4]=(3+ptslen+1+payload_size)>>8;
+    pack[5]=(3+ptslen+1+payload_size)&255;
+
+    pack[6]=0x81;
+    if(ptslen){
+      int x;
+      pack[7]=0x80;
+      pack[8]=ptslen;
+      // presentation time stamp:
+      x=(0x02 << 4) | (((timestamp >> 30) & 0x07) << 1) | 1;
+      pack[9]=x;
+      x=((((timestamp >> 15) & 0x7fff) << 1) | 1);
+      pack[10]=x>>8; pack[11]=x&255;
+      x=((((timestamp) & 0x7fff) << 1) | 1);
+      pack[12]=x>>8; pack[13]=x&255;
+    } else {
+      pack[7]=0x00;
+      pack[8]=0x00;
+    }
+    pack[ptslen+9] = id;
+    
+    write_dxr2(pack,7+ptslen+3);
+    write_dxr2(data,payload_size);
+    len -= payload_size;
+    data += payload_size;   
+    ptslen = 0;
+  }
+}
+
 static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t flags, char *title, uint32_t format, const vo_tune_info_t *info)
 {
   int arg;
@@ -422,6 +473,9 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
   ioctl(dxr2_fd, DXR2_IOC_SET_TV_OUTPUT_FORMAT, &arg);
 
   // Subtitles
+
+  arg = DXR2_SUBPICTURE_ON;
+  ioctl(dxr2_fd,DXR2_IOC_ENABLE_SUBPICTURE,&arg);
   arg3.arg1 = DXR2_STREAM_SUBPICTURE;
   arg3.arg2 = 0;
   ioctl(dxr2_fd, DXR2_IOC_SELECT_STREAM, &arg3);
@@ -475,8 +529,10 @@ static void draw_osd(void)
 static uint32_t draw_frame(uint8_t * src[])
 {
   vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
-  dxr2_send_packet(p->data, p->size, p->id, p->timestamp);
-
+  if(p->id == 0x1E0) {// Video
+    dxr2_send_packet(p->data, p->size, p->id, p->timestamp);
+  } else if(p->id == 0x20) // Subtitles
+    dxr2_send_sub_packet(p->data, p->size, p->id, p->timestamp);
   return 0;
 }
 
@@ -506,9 +562,12 @@ static void uninit(void)
 {
   mp_msg(MSGT_VO,MSGL_DBG2, "VO: [dxr2] Uninitializing\n" );
 
-  dxr2_send_eof();
-  flush_dxr2();
   if (dxr2_fd > 0) {
+    if(playing) {
+      dxr2_send_eof();
+      flush_dxr2();
+      playing = 0;
+    }
     close(dxr2_fd);
     dxr2_fd = -1;
   }
@@ -675,8 +734,8 @@ static uint32_t preinit(const char *arg) {
     ioctl(dxr2_fd, DXR2_IOC_SET_VGA_PARAMETERS, &vga);
 
     // Remove the white screen
-    sub_vo->check_events(); // at least x11 need this to remove his window
     sub_vo->uninit();
+    vo_uninit(); // x11 need this to fully disapear
     sub_vo = NULL;
 	  
     om.arg = DXR2_OVERLAY_WINDOW_KEY;
@@ -716,6 +775,13 @@ static uint32_t control(uint32_t request, void *data, ...)
       ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_POSITION,&win);
       return VO_TRUE;
     }
+  case VOCTRL_SET_SPU_PALETTE: { 
+    if(ioctl(dxr2_fd,DXR2_IOC_SET_SUBPICTURE_PALETTE,data) < 0) {
+      mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] SPU palette loading failed\n");
+      return VO_ERROR;
+    }
+    return VO_TRUE; 
+  } 
   case VOCTRL_QUERY_VAA:
     query_vaa((vo_vaa_t*)data);
     return VO_TRUE;

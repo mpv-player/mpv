@@ -60,7 +60,7 @@ static int dpms_disabled=0;
 static int timeout_save=0;
 
 char* mDisplayName=NULL;
-Display* mDisplay;
+Display* mDisplay=NULL;
 Window   mRootWin;
 int mScreen;
 int mLocalDisplay;
@@ -381,6 +381,7 @@ void vo_uninit( void )
  XSetErrorHandler(NULL);
  XCloseDisplay( mDisplay );
  vo_depthonscreen = 0;
+ mDisplay=NULL;
 }
 
 #include "../linux/keycodes.h"
