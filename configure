@@ -594,7 +594,7 @@ if [ $_gl = yes ]; then
 fi
 
 if [ $_x11 = yes ]; then
-  _x11lib='-lX11 -lXext'
+  _x11lib='-lX11 -lXext -lXdpms'
 fi
 
 if [ $_xv = yes ]; then
