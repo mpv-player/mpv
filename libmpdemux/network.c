@@ -64,6 +64,8 @@ static struct {
 	{ "wmv", DEMUXER_TYPE_ASF },
 	{ "wma", DEMUXER_TYPE_ASF },
 	{ "viv", DEMUXER_TYPE_VIVO },
+	{ "rm", DEMUXER_TYPE_REAL },
+	{ "y4m", DEMUXER_TYPE_Y4M },
 };
 
 streaming_ctrl_t *
