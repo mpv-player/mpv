@@ -66,9 +66,7 @@
 
 #ifndef DVB_T_LOCATION
     #ifndef UK
-	#warning No DVB-T country defined in dvb_defaults.h
-	#warning defaulting to UK
-	#warning Ignore this if using Satellite or Cable
+	#warning No DVB-T country defined in dvb_defaults.h, defaulting to UK. Ignore this if using Satellite or Cable.
     #endif
 
     /* UNITED KINGDOM settings */

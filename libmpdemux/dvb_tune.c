@@ -52,7 +52,7 @@
 
 
 
-int dvb_get_tuner_type(dvb_priv_t *priv)
+int dvb_get_tuner_type(int fe_fd)
 {
 #ifdef HAVE_DVB_HEAD
   struct dvb_frontend_info fe_info;
@@ -60,9 +60,7 @@ int dvb_get_tuner_type(dvb_priv_t *priv)
   FrontendInfo fe_info;
 #endif
 
-  int res, fe_fd;
-
-  fe_fd = priv->fe_fd;
+  int res;
 
   res = ioctl(fe_fd, FE_GET_INFO, &fe_info);
   if(res < 0)
@@ -74,15 +72,15 @@ int dvb_get_tuner_type(dvb_priv_t *priv)
   switch(fe_info.type)
   {
 	case FE_OFDM:
-      mp_msg(MSGT_DEMUX, MSGL_INFO, "TUNER TYPE SEEMS TO BE DVB-T\n");
+      mp_msg(MSGT_DEMUX, MSGL_V, "TUNER TYPE SEEMS TO BE DVB-T\n");
 	  return TUNER_TER;
 
 	case FE_QPSK:
-      mp_msg(MSGT_DEMUX, MSGL_INFO, "TUNER TYPE SEEMS TO BE DVB-S\n");
+      mp_msg(MSGT_DEMUX, MSGL_V, "TUNER TYPE SEEMS TO BE DVB-S\n");
 	  return TUNER_SAT;
 
 	case FE_QAM:
-      mp_msg(MSGT_DEMUX, MSGL_INFO, "TUNER TYPE SEEMS TO BE DVB-C\n");
+      mp_msg(MSGT_DEMUX, MSGL_V, "TUNER TYPE SEEMS TO BE DVB-C\n");
 	  return TUNER_CBL;
 
 	default:
@@ -92,26 +90,46 @@ int dvb_get_tuner_type(dvb_priv_t *priv)
 
 }
 
-
-int dvb_open_fe(dvb_priv_t *priv)
+int dvb_open_devices(dvb_priv_t *priv, int n)
 {
-	priv->fe_fd = open(dvb_frontenddev[priv->card], O_RDWR | O_NONBLOCK);
+	priv->fe_fd = open(dvb_frontenddev[n], O_RDWR | O_NONBLOCK);
 	if(priv->fe_fd < 0)
 	{
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR IN OPENING FRONTEND DEVICE %s: ERRNO %d\n", dvb_frontenddev[priv->card], errno);
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n", dvb_frontenddev[n], errno);
 		return 0;
 	}
 #ifdef HAVE_DVB_HEAD
     priv->sec_fd=0;
 #else
-	priv->sec_fd = open(dvb_secdev[priv->card], O_RDWR);
+	priv->sec_fd = open(dvb_secdev[n], O_RDWR);
     if(priv->sec_fd < 0)
     {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR IN OPENING SEC DEVICE %s: ERRNO %d\n", dvb_secdev[priv->card], errno);
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING SEC DEVICE %s: ERRNO %d\n", dvb_secdev[n], errno);
 		close(priv->fe_fd);
       	return 0;
     }
 #endif
+	priv->demux_fd[0] = open(dvb_demuxdev[n], O_RDWR);
+	if(priv->demux_fd[0] < 0)
+	{
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DEMUX 0: %d\n", errno);
+		return 0;
+	}
+
+	priv->demux_fd[1] = open(dvb_demuxdev[n], O_RDWR);
+	if(priv->demux_fd[1] < 0)
+	{
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DEMUX 1: %d\n", errno);
+		return 0;
+	}
+
+
+	priv->dvr_fd = open(dvb_dvrdev[n], O_RDONLY| O_NONBLOCK);
+	if(priv->dvr_fd < 0)
+	{
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DVR DEVICE %s: %d\n", dvb_dvrdev[n], errno);
+		return 0;
+	}
 
     return 1;
 }
@@ -172,7 +190,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth);
 
 
-dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
+int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
 		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
 		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate)
 {
@@ -270,7 +288,6 @@ static void print_status(fe_status_t festatus)
 #ifdef HAVE_DVB_HEAD
 static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams, int tuner_type, uint32_t base)
 {
-	int res;
 	int32_t strength;
 	fe_status_t festatus;
 	struct dvb_frontend_event event;

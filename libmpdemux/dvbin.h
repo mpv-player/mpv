@@ -32,10 +32,6 @@
 
 #include "inttypes.h"
 
-typedef struct
-{
-    int next, prev;
-} dvb_history_t;
 
 typedef struct {
 	char 				*name;
@@ -54,9 +50,21 @@ typedef struct {
 typedef struct {
 	uint16_t NUM_CHANNELS;
 	uint16_t current;
-	dvb_channel_t channels[512];
+	dvb_channel_t *channels;
 } dvb_channels_list;
 
+typedef struct {
+	int type;
+	dvb_channels_list *list;
+	char *name;
+	int devno;
+} dvb_card_config_t;
+
+typedef struct {
+	int count;
+	dvb_card_config_t *cards;
+	void *priv;
+} dvb_config_t;
 
 
 typedef struct {
@@ -66,6 +74,7 @@ typedef struct {
     int demux_fd[3];
     int dvr_fd;
 
+    dvb_config_t *config;
     dvb_channels_list *list;
 	int tuner_type;
 	int is_on;
@@ -80,10 +89,7 @@ typedef struct {
 #define TUNER_CBL	3
 
 extern int dvb_step_channel(dvb_priv_t *, int);
-extern int dvb_set_channel(dvb_priv_t *, int);
-extern int dvb_open_fe(dvb_priv_t *priv);
-
-extern dvb_history_t dvb_prev_next;
-
+extern int dvb_set_channel(dvb_priv_t *, int, int);
+extern dvb_config_t *dvb_get_config();
 
 #endif
