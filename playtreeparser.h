@@ -7,9 +7,9 @@
 
 typedef struct play_tree_parser {
   stream_t* stream;
-  char* buffer;
+  char *buffer,*iter,*line;
   int buffer_size , buffer_end;
-  int deep;
+  int deep,keep;
 } play_tree_parser_t;
 
 
