@@ -125,6 +125,8 @@ static int lavc_param_me_range= 0;
 static int lavc_param_ibias= FF_DEFAULT_QUANT_BIAS;
 static int lavc_param_pbias= FF_DEFAULT_QUANT_BIAS;
 #endif
+static int lavc_param_coder= 0;
+static int lavc_param_context= 0;
 
 #include "cfgparser.h"
 
@@ -210,6 +212,10 @@ struct config lavcopts_conf[]={
 #if LIBAVCODEC_BUILD >= 4663
 	{"ibias", &lavc_param_ibias, CONF_TYPE_INT, CONF_RANGE, -512, 512, NULL},
 	{"pbias", &lavc_param_pbias, CONF_TYPE_INT, CONF_RANGE, -512, 512, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4669
+	{"coder", &lavc_param_coder, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
+	{"context", &lavc_param_context, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -308,6 +314,10 @@ static int config(struct vf_instance_s* vf,
 #if LIBAVCODEC_BUILD >= 4663
     lavc_venc_context->intra_quant_bias= lavc_param_ibias;
     lavc_venc_context->inter_quant_bias= lavc_param_pbias;
+#endif
+#if LIBAVCODEC_BUILD >= 4669
+    lavc_venc_context->coder_type= lavc_param_coder;
+    lavc_venc_context->context_model= lavc_param_context;
 #endif
 
     p= lavc_param_rc_override_string;
