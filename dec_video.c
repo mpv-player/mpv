@@ -332,7 +332,7 @@ switch(sh_video->codec->driver){
 #ifdef USE_DIRECTSHOW
   case 4: {        // W32/DirectShow
     if(drop_frame<2) DS_VideoDecoder_DecodeFrame(start, in_size, 0, !drop_frame);
-    if(!drop_frame) blit_frame=3;
+    if(!drop_frame && sh_video->our_out_buffer) blit_frame=3;
     break;
   }
 #endif
