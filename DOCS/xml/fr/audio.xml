@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.6 -->
+<!-- synced with 1.8 -->
 <sect2 id="audio-dev">
 <title>Périphériques de sortie audio</title>
 <sect3 id="sync">
@@ -485,7 +485,7 @@ filtre format (voir plus bas) sera inséré pour rectifier la différence.
 
 <para>
 MPlayer supporte pleinement l'up/down-sampling du son par l'intermédiaire du filtre
-<systemitem>resample</systemitem>. Ce filtre peut être utilisé si vous avez une carte
+<option>resample</option>. Ce filtre peut être utilisé si vous avez une carte
 son à fréquence fixe ou si vous avez une vieille carte son qui n'est capable que de
 44.1kHz. Ce filtre est automatiquement activé si cela est nécessaire, mais il peut être
 explicitement activé en ligne de commande. Il a trois options:
@@ -673,7 +673,6 @@ Soustrayez les distances s1 à s5 à la distance maximum c-a-d.
 <listitem><para>
 Les décalages requis (en ms) sont calculés avec
     d[i] = 1000*s[i]/342; i = 1...5
-    s[i] = max(s) - s[i]; i = 1...5
 </para></listitem>
 </orderedlist>
 

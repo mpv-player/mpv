@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.22 -->
+<!-- synced with 1.25 -->
 <sect1 id="codecs">
 <title>Codecs Supportés</title>
 
@@ -191,37 +191,41 @@ installation ou votre configuration n'est pas correcte.
 
 
 <sect3 id="ffmpeg" xreflabel="FFmpeg DivX/libavcodec">
-<title>DivX/libavcodec de FFmpeg</title>
+<title>FFmpeg/libavcodec</title>
 
 <para>
 <ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> contient un codec
-<emphasis role="bold">open source</emphasis> , qui est capable de décoder des
-flux encodés avec des codecs vidéo H263/MJPEG/LJPEG/RV10/DivX3/DivX4/DivX5/MP41/
-MP42/WMV1/WMV2/HuffYUV/SVQ1/SVQ3/MPEG1/MPEG2/VCR1/VCR2/ASV1/ASV2/CLJR,
-ou avec des codecs audio WMA (Windows Media Audio). Non seulement quelques-uns peuvent
-être encodés avec, mais il est également plus rapide que les codecs Win32 ou
-que la librairie DivX4/5 de DivX.com !
+<emphasis role="bold">open source</emphasis>, qui est capable de décoder des
+flux encodés avec des codecs audio et vidéo variés. Il offre également un confort
+d'encodage impressionnant et une plus grande vitesse que les codecs Win32 ou les
+librairies DivX4/5 de DivX.com !
 </para>
 
 <para>
-Il contient plein de bons codecs, les plus importantes étant les variantes
+Il contient plein de bons codecs, les plus importants étant les variantes
 MPEG4: DivX 3, DivX 4, DivX 5, Windows Media Video 7/8 (WMV1/WMV2). Le décodeur WMA
 est également très intéressant.
 </para>
 
 <para>
-Le codec le plus rescent est le codec <emphasis role="bold">Sorenson 3</emphasis>
+Le codec le plus récent est le codec <emphasis role="bold">Sorenson 3</emphasis>
 (SVQ3). C'est la première implémentation complètement opensource de ce
 codec. Il est même plus rapide que l'original. Assurez-vous d'utiliser celui-ci à
 la place du codec binaire !
 </para>
 
 <para>
+Pour avoir la liste complète des codecs supportés veuillez vous reporter à la
+page web de FFmpeg. Codecs <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
+et <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink> supportés.
+</para>
+
+<para>
 Si vous utilisez une version officielle vous avez libavcodec directement dans
 le paquetage, construisez comme d'habitude. Si vous utilisez la version CVS de
 <application>MPlayer</application> vous devrez extraire libavcodec de l'arborescence
-CVS de FFmpeg car les versions officielles de FFmpeg <emphasis role="bold">ne</emphasis>
-fonctionnent <emphasis role="bold">pas</emphasis>. Pour y arriver faites:
+CVS de FFmpeg car les versions officielles de FFmpeg sont très rares. Le CVS est
+pratiquement stable et offre plus de fonctions. Pour y arriver faites:
 </para>
 
 <procedure>
@@ -234,10 +238,16 @@ fonctionnent <emphasis role="bold">pas</emphasis>. Pour y arriver faites:
 <step><para>
   Déplacez le répertoire <filename>libavcodec</filename> des sources FFmpeg à la racine de
   l'arborescence CVS de <application>MPlayer</application>. Cela devrait ressembler à cela:
-  <filename>main/libavcodec</filename>
+  <filename class="directory">main/libavcodec</filename>
   </para><para>
   Faire un lien symbolique n'est <emphasis role="bold">pas</emphasis> suffisant, vous devez
   le copier ou le déplacer!
+  </para></step>
+<step><para>
+  Si vous préférez que libavcodec soit mis à jour en même temps que vous mettez
+  à jour le CVS de <application>MPlayer</application>, indiquez la ligne suivante
+  dans le fichier <filename>main/CVS/Entries</filename>:
+  <screen>D/libavcodec////</screen>
   </para></step>
 <step><para>
   Compilez. <filename>configure</filename> devrait détecter les problèmes avant la compilation.

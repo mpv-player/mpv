@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!--synced with 1.14 -->
+<!--synced with 1.18 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Foire Aux Questions</title>
 
@@ -581,7 +581,7 @@ Utilisez-vous FVWM? Essayez cela:
 
 <qandaentry>
 <question><para>
-Comment puis-je lancer MPlayer en tâche de fond?
+Comment puis-je lancer MPlayer en tâche de fond ?
 </para></question>
 <answer><para>
 Utilisez:
@@ -696,7 +696,8 @@ J'obtiens ceci quand je lis des fichiers MPEG: Can't find codec for video format
 Vous avez une ancienne version de <filename>codecs.conf</filename> dans
 <filename class="directory">~/.mplayer/</filename>,
 <filename class="directory">/etc/</filename>,
-<filename class="directory">/usr/local/etc/</filename> ou similaire. Retirez-le.
+<filename class="directory">/usr/local/etc/</filename> ou similaire. Retirez-la,
+il n'y en a plus besoin.
 <emphasis role="bold">OU</emphasis> vous avez l'option <option>vc=</option>
 ou quelque chose de similaire dans votre (vos) fichier(s) de config.
 </para></answer>
@@ -842,7 +843,17 @@ Les films mal entrelacés et <option>-cache</option> ne vont pas bien ensemble.
 Essayez <option>-nocache</option>.
 </para></answer>
 </qandaentry>
+
+<qandaentry>
+<question><para>
+Comment puis-je lire les fichiers audio MPEG Layer 2 (mp2) ?
+</para></question>
+<answer><para>
+Vous devez utiliser <option>-rawaudio on:format=0x50</option>.
+</para></answer>
+</qandaentry>
 </qandadiv>
+
 
 <qandadiv id="faq-driver">
 <title>Problèmes de pilotes Vidéo/audio (vo/ao)</title>

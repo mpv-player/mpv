@@ -1,3 +1,4 @@
+.\" synced with 1.456
 .\" MPlayer (C) 2000-2003 Arpad Gereoffy
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
@@ -1631,7 +1632,7 @@ règle l'overlay (1000 par défaut)
 .RE
 .
 .TP
-.B \-fb <périphérique> (fbdev ou DirectFB uniquement)
+.B \-fb <périphérique> (fbdev ou DirectFB uniquement) (OBSOLÈTE)
 Spécifie un périphérique framebuffer à utiliser.
 Par défaut /dev/\:fb0 est utilisé.
 .TP
@@ -1685,9 +1686,9 @@ Utilise l'astuce _NETWM_STATE_STAYS_ON_TOP si disponible.
 .RE
 .PD 1
 
-Il est possible d'inverser les modes en les préfixant de "\-"
+Vous pouvez inverser les modes en les préfixant de '-'.
 .br
-L'ordre par défaut est "layer,stays_on_top,above,fullscreen".
+L'ordre par défaut est layer,stays_on_top,above,fullscreen.
 Ce sera utilisé pour se rabattre au cas où un mode incorrect ou insupporté soit
 indiqué.
 .br
@@ -2197,7 +2198,7 @@ Ne pas jouer/\:encoder la vidéo.
 .B \-pp <qualité> (voir l'option \-vf pp également!)
 Initialise le niveau de postprocess de la DLL. 
 Cette option N'EST PLUS UTILISABLE avec le filtre de postprocess de MPlayer, 
-mais uniquement avec les DLLs DirectShow Win32 qui ont une routine de 
+mais uniquement avec les DLLs DirectShow Win32 qui ont des routines de 
 postprocessing interne.
 
 L'intervalle valide de la valeur \-pp pour les filtres de pp varient suivant les

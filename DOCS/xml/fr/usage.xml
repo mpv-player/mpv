@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.10 -->
+<!-- synced with 1.11 -->
 <chapter id="usage">
 <title>Utilisation</title>
 
@@ -422,7 +422,7 @@ exemple pour lire depuis le FTP:
 </para>
 
 <note><para>
-Il est également recommandé d'activer le CACHE pour une lecture depuis le réseau:
+Il est également recommandé d'activer <option>-cache</option> pour une lecture depuis le réseau:
 <screen>wget ftp://micorsops.com/quelquechose.avi -O - | mplayer -cache 8192 -</screen>
 </para></note>
 </sect1>
@@ -468,8 +468,8 @@ Vous pouvez aussi accéder aux fichiers de ce serveur:
 mplayer -cache 5000 mpst://serveur//usr/local/films/lol.avi
 </screen>
 Veuillez noter que les chemins qui ne commencent pas par un / seront relatifs
-au répertoire dans lequel le serveur fonctionne. L'option cache n'est pas requise
-mais vivement recommandée.
+au répertoire dans lequel le serveur fonctionne. L'option <option>-cache</option>
+n'est pas requise mais vivement recommandée.
 </para>
 
 <para>

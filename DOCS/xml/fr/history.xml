@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.6 -->
+<!-- synced with 1.7 -->
 <!-- FIXME: history really should be in the appendix -->
 <sect1 id="history">
 <title>Histoire</title>
@@ -46,7 +46,7 @@ d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
 <listitem><para>
   <emphasis role="bold">série MPlayer v0.11pre</emphasis>:
   </para><para>De nouveaux d&eacute;veloppeurs ont joint le projet et depuis la version 0.11 le projet
-    mplayer est un travail d'&eacute;quipe ! Ajout&eacute; le support des fichiers .ASF, et
+    MPlayer est un travail d'&eacute;quipe ! Ajout&eacute; le support des fichiers .ASF, et
     de l'encodage/d&eacute;codage OpenDivX (c.f. <ulink url="http://www.projectmayo.com"/>).
   </para></listitem>
 <listitem><para>

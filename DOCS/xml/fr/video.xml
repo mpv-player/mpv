@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.23 -->
+<!-- synced with 1.24 -->
 <sect2 id="video-dev">
 <title>Sorties vidéo</title>
 
@@ -214,7 +214,7 @@ Plaignez-vous en à nVidia.
 </para>
 
 <para>
-Par contre, MPlayer contient un pilote <link linkend="vidix">Vidix</link>
+MPlayer contient également un pilote <link linkend="vidix">VIDIX</link>
 (<link linkend="vidix-nvidia">nvidia_vid</link>) pour la plupart des cartes
 nVidia. Actuellement il est en phase béta, et a quelques inconvénients. Pour
 plus d'informations, <link linkend="vidix-nvidia">cliquez ici</link>.
@@ -285,7 +285,7 @@ carte Cyberblade XP.
 </para>
 
 <para>
-MPlayer contient également un pilote <link linkend="vidix">Vidix</link> pour la
+MPlayer contient également un pilote <link linkend="vidix">VIDIX</link> pour la
 carte Cyberblade/i1.
 </para>
 </sect5>
@@ -1303,7 +1303,7 @@ vidéo.
   pouvez utiliser l'option "XaaNoPixmapCache" dans la section "screen" à la place.
   </simpara></listitem>
 <listitem><simpara>
-  Il y a un pilote console vidix: <option>-vo cvidix</option>.
+  Il y a un pilote console VIDIX: <option>-vo cvidix</option>.
   Celui-ci requiert un framebuffer fonctionnel et initialisé pour la plupart
   des cartes (ou sinon vous brouillerez simplement l'écran), et vous aurez un
   effet similaire à <option>-vo mga</option> ou <option>-vo fbdev</option>.
@@ -1344,7 +1344,7 @@ Quand VIDIX est utilisé en temps que <emphasis role="bold">sous-périphérique</em
 le périphérique de sortie vidéo (<emphasis role="bold">vo_server</emphasis> en bref).
 Par conséquent vous pouvez passer en ligne de commande les mêmes touches que pour
 vo_server. De plus il comprends l'option <option>-double</option> comme un paramètre
-global (Je recommande l'utilisation de cette option au moins pour les cartes ATI).
+global (je recommande l'utilisation de cette option au moins pour les cartes ATI).
 Comme pour <option>-vo xvidix</option>, il reconnaît actuellement les options suivantes:
 <option>-fs -zoom -x -y -double</option>.
 </para>
@@ -1363,7 +1363,7 @@ Mais c'est dangereux, et vous ne devriez pas faire ça. Dans ce cas le pilote ind
 sera forcé et le résultat sera imprévisible (cela peut <emphasis role="bold">bloquer</emphasis>
 votre ordinateur). Vous ne devriez le faire UNIQUEMENT si vous êtes absolument sûr que
 cela va fonctionner, et <application>MPlayer</application> ne le fait pas
-automatiquement. Dites-le aux développeurs SVP. La bonne façon est d'utiliser VIDIX
+automatiquement. Dites-le aux développeurs, SVP. La bonne façon est d'utiliser VIDIX
 sans argument pour activer l'autodétection du pilote.
 </para>
 
