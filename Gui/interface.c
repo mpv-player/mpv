@@ -254,7 +254,7 @@ void guiLoadSubtitle( char * name )
    mp_msg( MSGT_GPLAYER,MSGL_INFO,"[gui] Delete subtitles.\n" );
    sub_free( subtitles );
    subtitles=NULL;
-   sub_name=NULL;
+   gfree( (void **)&sub_name );
    vo_sub=NULL;
    if ( vo_osd_list )
     {
@@ -562,7 +562,7 @@ int guiGetEvent( int type,char * arg )
 
 // -- subtitle
 #ifdef USE_SUB
-	sub_name=guiIntfStruct.Subtitlename;
+	sub_name=gstrdup( guiIntfStruct.Subtitlename );
 	stream_dump_type=0;
 	if ( gtkSubDumpMPSub ) stream_dump_type=4;
 	if ( gtkSubDumpSrt ) stream_dump_type=6;
