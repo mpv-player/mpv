@@ -7,6 +7,10 @@
  * DESCRIPTION: Genres character array 
  * AUTHOR: Jason Carter
  ***********************************
+ *
+ * Initially modified for use with MPlayer by Diego Biurrun on 2004-08-22
+ * $Id$
+ * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
  */
 
 
@@ -157,12 +161,12 @@ char *genres[] = {
 "Crossover",				/* 139 */
 "Contemporary Christian",	/* 140 */
 "Christian Rock",			/* 141 */
-"Unknown",					/* 142 */
-"Unknown",					/* 143 */
-"Unknown",					/* 144 */
-"Unknown",					/* 145 */
-"Unknown",					/* 146 */
-"Unknown",					/* 147 */
+"Merengue",					/* 142 */
+"Salsa",					/* 143 */
+"Thrash Metal",					/* 144 */
+"Anime",					/* 145 */
+"Jpop",					/* 146 */
+"Synthpop",					/* 147 */
 "Unknown",					/* 148 */
 "Unknown",					/* 149 */
 "Unknown",					/* 150 */
