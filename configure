@@ -3655,6 +3655,7 @@ else
   echores "no"
 fi # DivX5 check
 fi
+echores "no"
 fi # XviD divx4 compatiblity check
 
 # mencoder requires (optional) those libs: libmp3lame and divx4linux encore
