@@ -1096,13 +1096,14 @@ küldj patchet.</P>
     Oks. A következõ feladat a kurzor eltüntetése, és a képernyõkímélõ
     kikapcsolása. Futtasd a következõ parancsokat :</P>
     <P>
-      <CODE>echo -e '\033[?25l'<BR>
+      <CODE>echo -e '\033[?25l'</CODE> vagy <CODE>setterm -cursor off<BR>
       setterm -blank 0</CODE>
     </P>
 
     <P>
     Jobb ha valami script-be teszed õket, és kiüríted a képernyõt is..
     A kurzor visszakapcsolása :<BR><CODE>echo -e '\033[?25h'</CODE>
+    or <CODE>setterm -cursor on</CODE>
     </P>
 
     <P>Yeah kewl. A lejátszást a következõ paraméterekkel indítsd :
