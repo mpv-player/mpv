@@ -38,7 +38,7 @@ m_option_t demux_rawvideo_opts[] = {
   // format:
   { "format", &format, CONF_TYPE_IMGFMT, 0, 0 , 0, NULL },
   // below options are obsolete
-  { "y420", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_I420, NULL },
+  { "i420", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_I420, NULL },
   { "yv12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_YV12, NULL },
   { "nv12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_NV12, NULL },
   { "hm12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_HM12, NULL },
