@@ -156,9 +156,11 @@ static int init(sh_video_t *sh){
 
     mp_msg(MSGT_WIN32,MSGL_V,"======= Win32 (VFW) VIDEO Codec init =======\n");
 
-    win32_codec_name = sh->codec->dll;
+
+//    win32_codec_name = sh->codec->dll;
 //    sh->hic = ICOpen( 0x63646976, sh->bih->biCompression, ICMODE_FASTDECOMPRESS);
-    priv->handle = ICOpen( 0x63646976, sh->bih->biCompression, ICMODE_DECOMPRESS);
+//    priv->handle = ICOpen( 0x63646976, sh->bih->biCompression, ICMODE_DECOMPRESS);
+    priv->handle = ICOpen( sh->codec->dll, sh->bih->biCompression, ICMODE_DECOMPRESS);
     if(!priv->handle){
 	mp_msg(MSGT_WIN32,MSGL_ERR,"ICOpen failed! unknown codec / wrong parameters?\n");
 	return 0;
@@ -301,7 +303,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     priv->o_bih->biWidth=mpi->width; //mpi->stride[0]/(mpi->bpp/8);
 
     sh->bih->biSizeImage = len;
-    
+
 #ifdef BUILD_VFWEX
     ret = ICDecompressEx(priv->handle, 
 #else

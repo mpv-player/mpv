@@ -82,7 +82,7 @@ static int preinit(sh_audio_t *sh_audio)
 	print_wave_header(priv->o_wf);
     }
 
-    win32_codec_name = sh_audio->codec->dll;
+    MSACM_RegisterDriver((const char *)sh_audio->codec->dll, in_fmt->wFormatTag, 0);
     ret = acmStreamOpen(&priv->handle, (HACMDRIVER)NULL, in_fmt,
 			priv->o_wf, NULL, 0, 0, 0);
     if (ret)
@@ -150,7 +150,7 @@ static void uninit(sh_audio_t *sh)
 	    return(0);
     }
     
-//    MSACM_UnregisterAllDrivers();
+    MSACM_UnregisterAllDrivers();
 
     free(priv->o_wf);
     free(priv);
