@@ -509,7 +509,7 @@ int tv_step_channel(tvi_handle_t *tvh, int direction)
     {
 	if (tvh->channel-1 >= 0)
 	{
-	    cl = tvh->chanlist_s[tvh->channel--];
+	    cl = tvh->chanlist_s[--tvh->channel];
 	    mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s (freq: %.3f)\n",
 		cl.name, (float)cl.freq/1000);
 	    tv_set_freq(tvh, (unsigned long)(((float)cl.freq/1000)*16));
@@ -520,7 +520,7 @@ int tv_step_channel(tvi_handle_t *tvh, int direction)
     {
 	if (tvh->channel+1 < chanlists[tvh->chanlist].count)
 	{
-	    cl = tvh->chanlist_s[tvh->channel++];
+	    cl = tvh->chanlist_s[++tvh->channel];
 	    mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s (freq: %.3f)\n",
 		cl.name, (float)cl.freq/1000);
 	    tv_set_freq(tvh, (unsigned long)(((float)cl.freq/1000)*16));
