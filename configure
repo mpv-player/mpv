@@ -1453,14 +1453,16 @@ fi
 
 if [ $_dga = yes ]; then
  _dga='#define HAVE_DGA'
- _vosrc=$_vosrc' vo_dga.c vo_fsdga.c'
+# _vosrc=$_vosrc' vo_dga.c vo_fsdga.c'
+ _vosrc=$_vosrc' vo_dga.c'
 else
  _dga='#undef HAVE_DGA'
 fi
 
 if [ $_dga2 = yes ]; then
  _dga2='#define HAVE_DGA2'
- _vosrc=$_vosrc' vo_dga.c vo_fsdga.c'
+# _vosrc=$_vosrc' vo_dga.c vo_fsdga.c'
+ _vosrc=$_vosrc' vo_dga.c'
 else
  _dga2='#undef HAVE_DGA2'
 fi

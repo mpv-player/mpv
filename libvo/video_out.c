@@ -72,7 +72,6 @@ vo_functions_t* video_out_drivers[] =
         &video_out_xmga,
 #endif
 #ifdef HAVE_MGA
-
         &video_out_mga,
 #endif
 #ifdef HAVE_SYNCFB
@@ -92,10 +91,13 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_DGA
         &video_out_dga,
-        &video_out_fsdga,
+//        &video_out_fsdga,
 #endif
 #ifdef HAVE_SDL
         &video_out_sdl,
+#endif
+#ifdef HAVE_GGI
+	&video_out_ggi,
 #endif
 #ifdef HAVE_FBDEV
 	&video_out_fbdev,
@@ -110,9 +112,6 @@ vo_functions_t* video_out_drivers[] =
         &video_out_odivx,
         &video_out_pgm,
         &video_out_md5,
-#ifdef HAVE_GGI
-	&video_out_ggi,
-#endif
         NULL
 };
 
