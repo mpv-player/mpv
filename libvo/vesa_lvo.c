@@ -162,57 +162,13 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
         src+=stride[2];
         dest += bespitch2;
     }
-#elsif 0
-/* vo_xv stuff: slightly better for YV12 on radeon_vid */
- uint8_t *src;
- uint8_t *dst;
- int i;
-
- dst = lvo_mem + image_width * y + x;
- src = image[0];
- if(w==stride[0] && w==image_width) memcpy(dst,src,w*h);
-   else
-    for(i=0;i<h;i++)
-     {
-      memcpy(dst,src,w);
-      src+=stride[0];
-      dst+=image_width;
-     }
-
- x/=2;y/=2;w/=2;h/=2;
-
- dst = lvo_mem + image_width * image_height + image_width/2 * y + x;
- src = image[2];
- if(w==stride[2] && w==image_width/2) memcpy(dst,src,w*h);
-  else
-   for(i=0;i<h;i++)
-    {
-     memcpy(dst,src,w);
-     src+=stride[2];
-     dst+=image_width/2;
-   }
- dst = lvo_mem + image_width * image_height * 5 / 4 + image_width/2 * y + x;
- src = image[1];
- if(w==stride[1] && w==image_width/2) memcpy(dst,src,w*h);
-  else
-   for(i=0;i<h;i++)
-    {
-     memcpy(dst,src,w);
-     src+=stride[1];
-     dst+=image_width/2;
-    }
 #else
  uint8_t *src;
  uint8_t *dst;
     dst = lvo_mem + image_width * y + x;
     src = image[0];
-    w <<= 1;
-    while(h--) {
-	memcpy(dst, src, w);
-	src += stride[0];
-	dst += stride[0];
-    }
-
+    w *= (image_bpp+7)/8;
+    memcpy(dst,src,w*h);
 #endif
  return 0;
 }
