@@ -1863,6 +1863,7 @@ else
 fi
 echores "$_dvb"
 
+
 echocheck "PNG support"
 if test "$_png" = auto ; then
   _png=no
@@ -1873,10 +1874,23 @@ if test "$_png" = auto ; then
   else
 cat > $TMPC << EOF
 #include <png.h>
-int main(void) { return 0; }
+#include <string.h>
+int main(void) {
+  printf("png.h : %s\n", PNG_LIBPNG_VER_STRING);
+  printf("libpng: %s\n", png_get_libpng_ver(NULL));
+  return (strcmp(PNG_LIBPNG_VER_STRING, png_get_libpng_ver(NULL)));
+}
 EOF
-    cc_check  -lpng -lz -lm && _png=yes
-    echores yes
+    if cc_check -lpng -lz -lm ; then
+      if "$TMPO" >> "$TMPLOG" ; then
+        _png=yes
+        echores yes
+      else
+        echores "no (mismatch of library and header versions)"
+      fi
+    else
+      echores no
+    fi
   fi
 else
   echores "$_png"
