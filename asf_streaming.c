@@ -8,9 +8,9 @@
 #include "network.h"
 
 #include "stream.h"
-#include "demuxer.h"
+//#include "demuxer.h"
 
-extern demuxer_t *demuxer;
+//extern demuxer_t *demuxer;
 
 static ASF_StreamType_e streaming_type = ASF_Unknown_e;
 
@@ -152,6 +152,11 @@ asf_http_request(URL_t *url) {
 			http_set_field( http_hdr, "Pragma: xPlayStrm=1" );
 			ptr = str;
 			ptr += sprintf( ptr, "Pragma: stream-switch-entry=");
+
+// FIXME: why do you need demuxer here? if you really need it, pass it as
+// parameter. -- A'rpi
+
+#if 0
 			for( i=0, asf_nb_stream=0 ; i<256 ; i++ ) {
 				// FIXME START
 				if( demuxer==NULL ) {
@@ -169,6 +174,7 @@ asf_http_request(URL_t *url) {
 					asf_nb_stream++;
 				}
 			}
+#endif
 			http_set_field( http_hdr, str );
 			sprintf( str, "Pragma: stream-switch-count=%d", asf_nb_stream );
 			http_set_field( http_hdr, str );
