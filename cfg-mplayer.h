@@ -2,6 +2,7 @@
  * config for cfgparser
  */
 
+extern char *playlist_file;
 
 #ifdef HAVE_FBDEV
 extern char *fb_dev_name;
@@ -221,5 +222,6 @@ struct config conf[]={
 	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+	{"playlist", &playlist_file, CONF_TYPE_STRING, 0, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };

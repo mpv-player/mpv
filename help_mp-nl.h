@@ -31,7 +31,8 @@ static char help_text[]=
 " -fs -vm -zoom    volledig scherm afspeel opties (fullscr,vidmode chg,softw.scale)\n"
 " -x <x> -y <y>    herschaal beeld naar <x> * <y> resolutie [als -vo driver het ondersteunt!]\n"
 " -sub <bestand>   specificeer het te gebruiken ondertitel bestand (zie ook -subfps, -subdelay)\n"
-" -vid x -aid y    opties om te spelen video (x) en audio stream te selecteren\n"
+" -playlist <file> specificeer het te gebruiken playlist bestand\n"
+" -vid x -aid y    opties om te spelen video (x) en audio (y) stream te selecteren\n"
 " -fps x -srate y  opties om video (x fps) en audio (y Hz) tempo te veranderen\n"
 " -pp <kwaliteit>  activeer postprocessing filter (0-4 voor DivX, 0-63 voor mpegs)\n"
 " -nobps           gebruik alternatieve A-V sync methode voor AVI bestand (kan helpen!)\n"
@@ -41,6 +42,7 @@ static char help_text[]=
 " <-  of  ->       ga 10 seconden achterwaards/voorwaards\n"
 " omhoog of omlaag ga 1 minuut achterwaards/voorwaards\n"
 " PGUP of PGDOWN   ga 10 minuten achterwaards/voorwaards\n"
+" < or >           ga naar vorige/volgende item in playlist\n"
 " p of SPACE       pauzeer film (druk eender welke toets om verder te gaan)\n"
 " q of ESC         stop afspelen en sluit programma af\n"
 " + of -           pas audio vertraging aan met +/- 0.1 second\n"
@@ -56,7 +58,7 @@ static char help_text[]=
 
 // mplayer.c: 
 
-#define MSGTR_Exiting "\nExiting... (%s)\n"
+#define MSGTR_Exiting "\nBezig met afsluiten... (%s)\n"
 #define MSGTR_Exit_frames "Gevraagde aantal frames afgespeeld"
 #define MSGTR_Exit_quit "Stop"
 #define MSGTR_Exit_eof "Einde van bestand"
@@ -124,8 +126,8 @@ static char help_text[]=
 #define MSGTR_DVDopenOk "DVD openen geslaagd!\n"
 
 // demuxer.c, demux_*.c:
-#define MSGTR_AudioStreamRedefined "Waarschuwing! Audio stream header %d hergedefinieerd!\n"
-#define MSGTR_VideoStreamRedefined "Waarschuwing! Video stream header %d hergedefinieerd!\n"
+#define MSGTR_AudioStreamRedefined "Waarschuwing! Audio stream header %d geherdefinieerd!\n"
+#define MSGTR_VideoStreamRedefined "Waarschuwing! Video stream header %d geherdefinieerd!\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Te veel (%d in %d bytes) audio packets in de buffer!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Te veel (%d in %d bytes) video packets in de buffer!\n"
 #define MSGTR_MaybeNI "(misschien speel je een non-interleaved stream/bestand of werkte de codec niet)\n"
@@ -139,10 +141,6 @@ static char help_text[]=
 #define MSGTR_InvalidMPEGES "Invalid MPEG-ES stream??? Contacteer de auteur, het zou een bug kunnen zijn :(\n"
 #define MSGTR_FormatNotRecognized "============= Sorry, dit bestandsformaat niet herkend/ondersteund ===============\n"\
 				  "=== Als dit een AVI bestand, ASF bestand of MPEG stream is, contacteer dan aub de auteur! ===\n"
-/*#define MSGTR_MissingASFvideo "ASF: Geen Video stream gevonden!\n"
-#define MSGTR_MissingASFaudio "ASF: Geen Audio stream gevonden...  ->nosound\n"
-#define MSGTR_MissingMPEGaudio "MPEG: Geen Audio stream gevonden...  ->nosound\n"
-*/
 #define MSGTR_MissingVideoStream "Geen video stream gevonden!\n"
 #define MSGTR_MissingAudioStream "Geen audio stream gevonden...  ->nosound\n"
 #define MSGTR_MissingVideoStreamBug "Ontbrekende video stream!? Contacteer de auteur, het zou een bug kunnen zijn :(\n"
@@ -171,7 +169,7 @@ static char help_text[]=
 #define MSGTR_CantCloseCodec "kon codec niet sluiten\n"
 
 #define MSGTR_MissingDLLcodec "FOUT: Kon de nodige DirectShow codec niet openen: %s\n"
-#define MSGTR_ACMiniterror "Kon jWin32/ACM AUDIO codec niet laden/initialiseren (ontbrekend DLL bestand?)\n"
+#define MSGTR_ACMiniterror "Kon Win32/ACM AUDIO codec niet laden/initialiseren (ontbrekend DLL bestand?)\n"
 #define MSGTR_MissingLAVCcodec "Kan codec codec '%s' niet vinden in libavcodec...\n"
 
 #define MSGTR_NoDShowSupport "MPlayer werd gecompileerd ZONDER directshow ondersteuning!\n"

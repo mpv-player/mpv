@@ -209,6 +209,8 @@ static int screen_size_y=0;//SCREEN_SIZE_Y;
 static int screen_size_xy=0;
 static float movie_aspect=0.0;
 
+char* playlist_file;
+
 // sub:
 char *font_name=NULL;
 float font_factor=0.75;
@@ -423,6 +425,39 @@ int gui_no_filename=0;
 
     parse_cfgfiles();
     num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
+
+   if(playlist_file!=NULL)
+   {
+    FILE *playlist_f;
+    char *playlist_linebuffer = (char*)malloc(256);
+    char *playlist_line;    
+    if(!strcmp(playlist_file,"-"))
+    {
+      playlist_f = fopen("/dev/stdin","r");
+    }
+    else
+      playlist_f = fopen(playlist_file,"r");
+    if(playlist_f != NULL)
+    {
+      while(!feof(playlist_f))
+      {
+        memset(playlist_linebuffer,0,255);
+        fgets(playlist_linebuffer,255,playlist_f);
+        if(strlen(playlist_linebuffer)==0)
+          break;
+        playlist_linebuffer[strlen(playlist_linebuffer)-1] = 0;
+        playlist_line = (char*)malloc(strlen(playlist_linebuffer)+1);
+        memset(playlist_line,0,strlen(playlist_linebuffer)+1);
+        strcpy(playlist_line,playlist_linebuffer);
+        if (!(filenames = (char **) realloc(filenames, sizeof(*filenames) * (num_filenames + 2))))
+          exit(3);
+        filenames[num_filenames++] = playlist_line;
+      }
+      fclose(playlist_f);
+    }
+}
+
+
     if(num_filenames<0) exit(1); // error parsing cmdline
 
 #ifndef HAVE_NEW_GUI
@@ -1513,8 +1548,17 @@ if(step_sec>0) {
     // quit
     case KEY_ESC: // ESC
     case 'q': exit_player(MSGTR_Exit_quit);
+    case '>':
+	if(curr_filename>=num_filenames-1)
+		break;
     case KEY_ENTER: // ESC
       eof=1;  // jump to next file
+      break;
+    case '<':
+	if(curr_filename < 1)
+		break;
+        curr_filename-=2;
+	eof=1;
       break;
     case 'g': grab_frames=2;break;
     // pause
