@@ -47,6 +47,7 @@ extern int verbose; // defined in mplayer.c
 #define MSGT_LIRC 19	// lirc_mp.c
 
 #define MSGT_STREAM 20  // stream.c
+#define MSGT_CACHE 21  // cache2.c
 
 #define MSGT_MAX 64
 
