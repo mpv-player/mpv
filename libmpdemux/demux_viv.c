@@ -174,7 +174,7 @@ int vivo_check_file(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX,MSGL_V,"Checking for VIVO\n");
     
     c=stream_read_char(demuxer->stream);
-    if(c) return 0;
+    if(c==-256) return 0;
     len=0;
     while((c=stream_read_char(demuxer->stream))>=0x80){
 	len+=0x80*(c-0x80);
@@ -238,6 +238,8 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
   demux->filepos=stream_tell(demux->stream);
   
   c=stream_read_char(demux->stream);
+  if (c == -256) /* EOF */
+    return 0;
 //  printf("c=%02X\n",c);
   switch(c&0xF0){
   case 0x00: // header - skip it!
