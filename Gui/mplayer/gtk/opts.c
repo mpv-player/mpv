@@ -311,10 +311,10 @@ void ShowPreferences( void )
  }
 
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),0 );
- if ( stream_cache_size )
+ if ( stream_cache_size > 0 )
   {
    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),1 );
-   gtk_adjustment_set_value( SBCacheadj,stream_cache_size );
+   gtk_adjustment_set_value( SBCacheadj,(float)stream_cache_size );
   } else gtk_widget_set_sensitive( SBCache,FALSE );
 
 // -- disables
@@ -479,8 +479,8 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkLoadFullscreen=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ) );
 	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
 
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) stream_cache_size=SBCacheadj->value;
-	 else stream_cache_size=0;
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) stream_cache_size=(int)SBCacheadj->value;
+	 else stream_cache_size=-1;
 
 	{
 	 int i;

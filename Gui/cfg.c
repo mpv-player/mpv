@@ -107,7 +107,7 @@ static config_t gui_opts[] =
  { "font_autoscale",&subtitle_autoscale,CONF_TYPE_INT,CONF_RANGE,0,3,NULL },
 #endif
 
- { "cache",&stream_cache_size,CONF_TYPE_INT,CONF_RANGE,0,65535,NULL },
+ { "cache",&stream_cache_size,CONF_TYPE_INT,CONF_RANGE,-1,65535,NULL },
  { "load_fullscreen",&gtkLoadFullscreen,CONF_TYPE_FLAG,0,0,1,NULL },
  
  { "gui_skin",&skinName,CONF_TYPE_STRING,0,0,0,NULL },
