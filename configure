@@ -4878,11 +4878,16 @@ EOF
 
 echo "Creating help_mp.h"
 cat > help_mp.h << EOF
+//
+// WARNING! This is a generated file. Do NOT edit.
+// See the help/ subdir for the editable files.
+//
 #include "$_mp_help"
 EOF
 
 if test $_mp_help != "help/help_mp-en.h"; then
   echo "Adding untranslated messages to help_mp.h"
+  echo '// untranslated messages from the english master-file:' >> help_mp.h
   help/help_diff.sh $_mp_help <help/help_mp-en.h >> help_mp.h
 fi
 
