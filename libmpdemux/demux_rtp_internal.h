@@ -28,6 +28,7 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
 
 // Flags that may be set by the above routines:
 #define RTPSTATE_IS_MPEG12_VIDEO 0x1 // is a MPEG-1 or 2 video stream
+#define RTPSTATE_IS_MULTIPLEXED 0x2 // is a combined audio+video stream
 
 // A routine to wait for the first packet of a RTP stream to arrive.
 // (For some RTP payload formats, codecs cannot be fully initialized until
