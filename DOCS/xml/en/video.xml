@@ -1252,7 +1252,7 @@ at least.)
   </simpara></listitem>
 <listitem><simpara>
   You don't need to have installed any graphics' related things on your
-  Linux (like X11 (aka XFree86), fbdev and so on). This driver can be run
+  Linux (like X11 (AKA XFree86), fbdev and so on). This driver can be run
   from <emphasis role="bold">text-mode</emphasis>.
   </simpara></listitem>
 <listitem><simpara>

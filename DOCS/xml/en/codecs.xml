@@ -555,7 +555,7 @@ decoders:
   code, with MMX/SSE/3DNow! optimization)
   </simpara></listitem>
 <listitem><simpara>
-  Windows Media Audio 7 and 8 (aka WMAv1 and WMAv2) (<emphasis role="bold">native</emphasis> code, with
+  Windows Media Audio 7 and 8 (AKA WMAv1 and WMAv2) (<emphasis role="bold">native</emphasis> code, with
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>

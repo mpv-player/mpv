@@ -213,16 +213,16 @@ You can encode to the following codecs (more or less up to date):
   ISO standard MPEG4 (DivX 5, XVID compatible)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
-  pre-standard MPEG4 variant by MS, v3 (aka DivX3)
+  pre-standard MPEG4 variant by MS, v3 (AKA DivX3)
   </entry></row>
 <row><entry>msmpeg4v2</entry><entry>
   pre-standard MPEG4 by MS, v2 (used in old asf files)
   </entry></row>
 <row><entry>wmv1</entry><entry>
-  Windows Media Video, version 1 (aka WMV7)
+  Windows Media Video, version 1 (AKA WMV7)
   </entry></row>
 <row><entry>wmv2</entry><entry>
-  Windows Media Video, version 2 (aka WMV8)
+  Windows Media Video, version 2 (AKA WMV8)
   </entry></row>
 <row><entry>rv10</entry><entry>
   an old RealVideo codec

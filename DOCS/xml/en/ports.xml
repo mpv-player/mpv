@@ -210,7 +210,7 @@ This problem does not exist in the SPARC version of Solaris 8.
 </para></listitem>
 
 <listitem><para>
-A similar bug is present in the hsfs(7FS) filesystem code (aka ISO9660),
+A similar bug is present in the hsfs(7FS) filesystem code (AKA ISO9660),
 hsfs may not not support partitions/disks larger than 4GB, all data is
 accessed modulo 4GB
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
