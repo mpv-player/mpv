@@ -162,14 +162,14 @@ besseren endgültigen Genauigkeitrate führt als bei der Benutzung des externen, D
 <UL>
 <B>2-pass Encodierung</B>:<BR>
 <CODE>rm -f lavc_stats.txt<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=1 (Audio-Optionen) -o film.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=2 (Audio-Optionen) -o film.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 (Audio-Optionen) -o film.avi<BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 (Audio-Optionen) -o film.avi</CODE><BR>
 <BR>
 <B>3-pass Encodierung</B>:<BR>
 <CODE>rm -f frameno.avi lavc_stats.txt<BR>
 mencoder -dvd 2 -ovc frameno (Audio-Optionen) -o frameno.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=1 -oac copy -o film.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=2 -oac copy -o film.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o film.avi<BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o film.avi</CODE><BR>
 </UL>
 </P>
 

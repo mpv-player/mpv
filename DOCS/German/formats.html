@@ -79,13 +79,16 @@ existiert eine Erweiterung für größere Dateien, genannt <B>OpenDMS</B>.
 M$ versucht zur Zeit von der Verwendung stark abzuraten und propergiert
 ASF/WMV. Aber keiner achtet darauf.<BR>
 
-<P>Es gibt einen Hack für AVI-Dateien, der diese erweitert, so dass sie Ogg Vorbis
-  Audio Streams enthalten können, sie aber auch inkompatibel mit Standard AVI macht.
- <B>MPlayer</B> unterstützt die Wiedergabe solcher Dateien, eine Suchfunktion ist jedoch
- momentan noch nicht implementiert.</P>
-
-<B>HINWEIS:</B> DV-Kameras können 2 Arten von AVI-Formaten erzeugen, eines ist
-normal und abspielbar das andere weder normal noch abspielbar.</P>
+<P>Es gibt einen Hack, der es AVI-Dateien erlaubt Ogg Vorbis Audio Streams zu enthalten,
+  sie aber auch inkompatibel mit Standard AVI macht. <B>MPlayer</B> unterstützt die Wiedergabe
+  solcher Dateien. Eine Suchfunktion ist auch implementiert, wird jedoch stark gestört bei
+  schlecht konvertierten Dateien mit verwirrenden Headers. Leider hat auch der einzige
+  Encodierer, der fähig ist solche Dateien zu erzeugen (nansub), dieses Problem.</P>
+    
+<P><B>HINWEIS:</B> DV-Kameras können raw DV-Streams erzeugen, welche von DV-Tools in zwei
+unterschiedliche Typen von AVI-Dateien konvertiert werden. Die AVI-Datei enthält dabei
+entweder separate Audio- und Video-Streams, die <B>Mplayer</B> wiedergeben kann, oder
+den raw DV-Stream. An dessen Unterstützung wird gerade gearbeitet.</P>
 
 <P>Es gibt 2 Arten von AVI-Dateien:</P>
 <UL>
@@ -144,7 +147,7 @@ Quicktime-Dateien <B>Sorenson</B> Video und QDesign Music Audio verwenden. Diese
 nicht enthüllt und werden wahrscheinlich auch in Zukunft so bleiben, was Apple's QuickTime Player
 zum einzigen Player macht, der fähig ist, diese Dateien abzuspielen (aber nur auf Win/Mac).</P>
 
-<P><B><A NAME=2.1.1.5>2.1.1.5. VIV Dateien</A></B></P>
+<P><B><A NAME=2.1.1.5>2.1.1.5. VIVO Dateien</A></B></P>
 
 <P><B>MPlayer</B> demuxt nun auch fröhlich VIVO-Dateiformate. 
 Der grösste Nachteil des Formates ist das es keinen Index-Block besitzt, auch keine fixe Paketgröße oder Sync-Bytes.

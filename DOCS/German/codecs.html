@@ -125,7 +125,7 @@ bereits im Paket, welches normal kompiliert werden kann. Wenn <B>MPlayer</B>
 das FFmpeg 0.4.5 <b>nicht</B> mit <B>Mplayer</B> zusammen läuft. 
 Um dies zu erreichen, sollten folgende Schritte vollzogen werden:</P>
 
-<UL>
+<OL>
   <LI><CODE>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login</CODE></LI>
   <LI><CODE>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg</CODE></LI>
   <LI>Dass <CODE>libavcodec</CODE> Verzeichnis von den FFmpeg-Sourcen muss ins
@@ -135,7 +135,12 @@ Um dies zu erreichen, sollten folgende Schritte vollzogen werden:</P>
     Symlinken ist <B>nicht</B> genug, es muss kopiert/bewegt werden!!!</LI>
   <LI>Es folgt die Kompilierung. Configure sollte allfällige Probleme vor der
     Kompilierung erkennen.</LI>
-</UL>
+</OL>
+
+<P><B>HINWEIS:</B> <B>MPlayer</B> über CVS enthält ein libavcodec
+Unterverzeichnis, dieses enthält jedoch NICHT den Quellcode von libavcodec!
+Es muss der obrigen Anleitung gefolgt werden, um den Quellcode für diese
+Bibliothek (library) zu erhalten.</P>
 
 <P>Der Codec <B>unterstützt auch Postprocessing</B>!</P>
 
