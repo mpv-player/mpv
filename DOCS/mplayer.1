@@ -47,7 +47,6 @@ mplayer \- Movie Player for Linux
 .RB [ \-dumpsub ]
 .RB [ \-noframedrop ]
 .RB [ \-framedrop ]
-.RB [ \-hardframedrop ]
 .RB [ \-dvdkey\ key ]
 .RB [ \-stereo\ mode ]
 .RB [ \-srate\ Hz ]
@@ -242,10 +241,6 @@ no frame dropping : every frame is played, audio may skip (default)
 .TP
 .B \-framedrop
 frame dropping : decode all frames, video may skip
-.TP
-.B \-hardframe
-hard frame dropping : skip even decoding (when using with DivX also
-specify -nodshow !!!)
 .TP
 .B \-dvdkey key
 key to decrypt stream encrypted with CSS. For example : -dvdkey F169072699

@@ -37,7 +37,7 @@ General audio delay or jerky sound (exists with all or many files):
 - slow machine (cpu or vga)
   try with -vo null, if it plays well, then you have slow VGA card/driver:
   Workaround: buy a faster card or read DOCS/VIDEOCARDS about how to speed up
-  SOLVED: try -framedrop  (maybe -hardframedrop)
+  SOLVED: try -framedrop
 
 Audio delay/de-sync specific to one or a few files:
 - bad file (please upload the file, so we can check & fix)
