@@ -38,7 +38,13 @@ int    gtkAOExtraStereo = 0;
 float  gtkAOExtraStereoMul = 1.0;
 #ifdef USE_OSS_AUDIO
 char * gtkAOOSSMixer;
+char * gtkAOOSSMixerChannel;
 char * gtkAOOSSDevice;
+#endif
+#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+char * gtkAOALSAMixer;
+char * gtkAOALSAMixerChannel;
+char * gtkAOALSADevice;
 #endif
 #ifdef HAVE_SDL
 char * gtkAOSDLDriver;
@@ -110,7 +116,13 @@ static m_option_t gui_opts[] =
  { "ao_extra_stereo_coefficient",&gtkAOExtraStereoMul,CONF_TYPE_FLOAT,CONF_RANGE,-10,10,NULL },
 #ifdef USE_OSS_AUDIO
  { "ao_oss_mixer",&gtkAOOSSMixer,CONF_TYPE_STRING,0,0,0,NULL },
+ { "ao_oss_mixer_channel",&gtkAOOSSMixerChannel,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_oss_device",&gtkAOOSSDevice,CONF_TYPE_STRING,0,0,0,NULL },
+#endif
+#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+ { "ao_alsa_mixer",&gtkAOALSAMixer,CONF_TYPE_STRING,0,0,0,NULL },
+ { "ao_alsa_mixer_channel",&gtkAOALSAMixerChannel,CONF_TYPE_STRING,0,0,0,NULL },
+ { "ao_alsa_device",&gtkAOALSADevice,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
 #ifdef HAVE_SDL
  { "ao_sdl_subdriver",&gtkAOSDLDriver,CONF_TYPE_STRING,0,0,0,NULL },

@@ -152,18 +152,9 @@ static char * ao_driver[3];
 static char * vo_driver[3];
 static int    old_video_driver = 0;
 
-#ifdef USE_OSS_AUDIO
- void ShowOSSConfig( void );
- void HideOSSConfig( void );
-#endif
-#ifdef HAVE_DXR3
- void ShowDXR3Config( void );
- void HideDXR3Config( void );
-#endif
-#ifdef HAVE_SDL
- void ShowSDLConfig( void );
- void HideSDLConfig( void );
-#endif
+ void ShowAudioConfig();
+ void HideAudioConfig();
+
 static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data );
 static void prToggled( GtkToggleButton * togglebutton,gpointer user_data );
 static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data );
@@ -210,12 +201,10 @@ void ShowPreferences( void )
     gtk_clist_select_row( GTK_CLIST( CLADrivers ),old_audio_driver,0 );
     gtk_clist_get_text( GTK_CLIST( CLADrivers ),old_audio_driver,0,(char **)&ao_driver );
     gtk_widget_set_sensitive( AConfig,FALSE );
-#ifdef USE_OSS_AUDIO
-    if ( !strncmp( ao_driver[0],"oss",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
-#endif
-#ifdef HAVE_SDL
-    if ( !strncmp( ao_driver[0],"sdl",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
-#endif
+    if ( !strncmp( ao_driver[0],"oss",3 ) ||
+         !strncmp( ao_driver[0],"alsa",4 ) ||
+         !strncmp( ao_driver[0],"sdl",3 ) )
+      gtk_widget_set_sensitive( AConfig,TRUE );
    }
  }
 
@@ -465,12 +454,7 @@ void HidePreferences( void )
  gtk_widget_hide( Preferences );
  gtk_widget_destroy( Preferences );
  Preferences=NULL;
-#ifdef USE_OSS_AUDIO
- HideOSSConfig();
-#endif
-#ifdef HAVE_SDL
- HideSDLConfig();
-#endif
+ HideAudioConfig();
 #ifdef HAVE_DXR3
  HideDXR3Config();
 #endif
@@ -615,12 +599,12 @@ void prButton( GtkButton * button,gpointer user_data )
    case bAConfig:
 	if ( !ao_driver[0] ) break;
         gtk_widget_set_sensitive( AConfig,FALSE );
-#ifdef USE_OSS_AUDIO
-        if ( !strncmp( ao_driver[0],"oss",3 ) ) { ShowOSSConfig(); gtk_widget_set_sensitive( AConfig,TRUE ); }
-#endif
-#ifdef HAVE_SDL
-        if ( !strncmp( ao_driver[0],"sdl",3 ) ) { ShowSDLConfig(); gtk_widget_set_sensitive( AConfig,TRUE ); }
-#endif
+        if ( !strncmp( ao_driver[0],"oss",3 ) ||
+             !strncmp( ao_driver[0],"alsa",4 ) ||
+             !strncmp( ao_driver[0],"sdl",3 ) ) {
+          ShowAudioConfig();
+          gtk_widget_set_sensitive( AConfig,TRUE );
+        }
 	break;
    case bVconfig:
 	if ( !vo_driver[0] ) break;
@@ -737,12 +721,10 @@ static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,g
    case 0: // audio driver 
 	gtk_clist_get_text( GTK_CLIST( CLADrivers ),row,0,(char **)&ao_driver ); 
 	gtk_widget_set_sensitive( AConfig,FALSE );
-#ifdef USE_OSS_AUDIO
-	if ( !strncmp( ao_driver[0],"oss",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
-#endif
-#ifdef HAVE_SDL
-	if ( !strncmp( ao_driver[0],"sdl",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
-#endif
+	if ( !strncmp( ao_driver[0],"oss",3 ) ||
+	     !strncmp( ao_driver[0],"alsa",4 ) ||
+	     !strncmp( ao_driver[0],"sdl",3 ) )
+	  gtk_widget_set_sensitive( AConfig,TRUE );
 	break;
    case 1: // video driver 
 	gtk_clist_get_text( GTK_CLIST( CLVDrivers ),row,0,(char **)&vo_driver ); 
@@ -1308,272 +1290,307 @@ GtkWidget * create_Preferences( void )
 }
 
 #ifdef USE_OSS_AUDIO
-       GtkWidget * OSSConfig;
-static GtkWidget * CEOssDevice;
-static GtkWidget * CEOssMixer;
-static GtkWidget * CBOssMixer;
-static GtkWidget * CBOssDevice;
-static GtkWidget * BOssOk;
-static GtkWidget * BOssCancel;
-
-void ShowOSSConfig( void )
-{
- if ( OSSConfig ) gtkActive( OSSConfig );
-   else OSSConfig=create_OSSConfig();
-
- gtk_entry_set_text( GTK_ENTRY( CEOssMixer ),gtkAOOSSMixer );
- gtk_entry_set_text( GTK_ENTRY( CEOssDevice ),gtkAOOSSDevice );
-
- gtk_widget_show( OSSConfig );
- gtkSetLayer( OSSConfig );
-}
-
-void HideOSSConfig( void )
-{
- if ( !OSSConfig ) return;
- gtk_widget_hide( OSSConfig );
- gtk_widget_destroy( OSSConfig ); 
- OSSConfig=NULL;
-}
-
-static void ossButton( GtkButton * button,gpointer user_data )
-{
- switch( (int)user_data )
-  {
-   case 1:
-        gfree( (void **)&gtkAOOSSMixer );  gtkAOOSSMixer=strdup( gtk_entry_get_text( GTK_ENTRY( CEOssMixer ) ) );
-        gfree( (void **)&gtkAOOSSDevice ); gtkAOOSSDevice=strdup( gtk_entry_get_text( GTK_ENTRY( CEOssDevice ) ) );
-   case 0:
-	HideOSSConfig();
-	break;
+GList *appendOSSDevices(GList *l) {
+  // careful! the current implementation allows only string constants!
+  l = g_list_append(l, (gpointer)"/dev/dsp");
+  if (gtkAOOSSDevice && strncmp(gtkAOOSSDevice, "/dev/sound", 10) == 0) {
+    l = g_list_append(l, (gpointer)"/dev/sound/dsp0");
+    l = g_list_append(l, (gpointer)"/dev/sound/dsp1");
+    l = g_list_append(l, (gpointer)"/dev/sound/dsp2");
+    l = g_list_append(l, (gpointer)"/dev/sound/dsp3");
+  } else {
+    l = g_list_append(l, (gpointer)"/dev/dsp0");
+    l = g_list_append(l, (gpointer)"/dev/dsp1");
+    l = g_list_append(l, (gpointer)"/dev/dsp2");
+    l = g_list_append(l, (gpointer)"/dev/dsp3");
   }
-}
-
-GtkWidget * create_OSSConfig( void )
-{
-  GList     * CBOssDevice_items=NULL;
-  GList     * CBOssMixer_items=NULL;
-  GtkWidget * vbox604;
-  GtkWidget * table2;
-  GtkWidget * label;
-  GtkWidget * hbuttonbox6;
-  GtkAccelGroup * accel_group;
-
-  accel_group=gtk_accel_group_new();
-
-  OSSConfig=gtk_window_new( GTK_WINDOW_TOPLEVEL );
-  gtk_widget_set_name( OSSConfig,"OSSConfig" );
-  gtk_object_set_data( GTK_OBJECT( OSSConfig ),"OSSConfig",OSSConfig );
-  gtk_widget_set_usize( OSSConfig,270,92 );
-  gtk_window_set_title( GTK_WINDOW( OSSConfig ),MSGTR_OSSPreferences );
-  gtk_window_set_position( GTK_WINDOW( OSSConfig ),GTK_WIN_POS_CENTER );
-  gtk_window_set_policy( GTK_WINDOW( OSSConfig ),FALSE,FALSE,FALSE );
-  gtk_window_set_wmclass( GTK_WINDOW( OSSConfig ),"OSS Config","MPlayer" );
-
-  gtk_widget_realize( OSSConfig );
-  gtkAddIcon( OSSConfig );
-
-  vbox604=AddVBox( AddDialogFrame( OSSConfig ),0 );
-
-  table2=gtk_table_new( 2,2,FALSE );
-  gtk_widget_set_name( table2,"table2" );
-  gtk_widget_show( table2 );
-  gtk_box_pack_start( GTK_BOX( vbox604 ),table2,TRUE,TRUE,0 );
-
-  label=AddLabel( MSGTR_PREFERENCES_OSS_Device,NULL );
-    gtk_table_attach( GTK_TABLE( table2 ),label,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-
-  label=AddLabel( MSGTR_PREFERENCES_OSS_Mixer,NULL );
-    gtk_table_attach( GTK_TABLE( table2 ),label,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-
-  CBOssDevice=AddComboBox( NULL );
-    gtk_table_attach( GTK_TABLE( table2 ),CBOssDevice,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-
-  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp" );
-  if ( gtkAOOSSDevice && !strncmp( gtkAOOSSDevice,"/dev/sound",10 ) )
-   {
-    CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/sound/dsp0" );
-    CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/sound/dsp1" );
-    CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/sound/dsp2" );
-    CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/sound/dsp3" );
-   }
-   else
-    {
-     CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp0" );
-     CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp1" );
-     CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp2" );
-     CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp3" );
-    }
 #ifdef HAVE_DXR3
-  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma" );
-  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma-0" );
-  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma-1" );
-  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma-2" );
-  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma-3" );
+  l = g_list_append(l, (gpointer)"/dev/em8300_ma");
+  l = g_list_append(l, (gpointer)"/dev/em8300_ma-0");
+  l = g_list_append(l, (gpointer)"/dev/em8300_ma-1");
+  l = g_list_append(l, (gpointer)"/dev/em8300_ma-2");
+  l = g_list_append(l, (gpointer)"/dev/em8300_ma-3");
 #endif
-  gtk_combo_set_popdown_strings( GTK_COMBO( CBOssDevice ),CBOssDevice_items );
-  g_list_free( CBOssDevice_items );
-
-  CEOssDevice=GTK_COMBO( CBOssDevice )->entry;
-  gtk_widget_set_name( CEOssDevice,"CEOssDevice" );
-  gtk_widget_show( CEOssDevice );
-
-  CBOssMixer=AddComboBox( NULL );
-    gtk_table_attach( GTK_TABLE( table2 ),CBOssMixer,1,2,1,2,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer" );
-  if ( gtkAOOSSMixer && !strncmp( gtkAOOSSMixer,"/dev/sound",10 ) )
-   {
-    CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/sound/mixer0" );
-    CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/sound/mixer1" );
-    CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/sound/mixer2" );
-    CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/sound/mixer3" );
-   }
-   else
-    {
-     CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer0" );
-     CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer1" );
-     CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer2" );
-     CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer3" );
-    }
-  gtk_combo_set_popdown_strings( GTK_COMBO( CBOssMixer ),CBOssMixer_items );
-  g_list_free( CBOssMixer_items );
-
-  CEOssMixer=GTK_COMBO( CBOssMixer )->entry;
-  gtk_widget_set_name( CEOssMixer,"CEOssMixer" );
-  gtk_widget_show( CEOssMixer );
-
-  AddHSeparator( vbox604 );
-
-  hbuttonbox6=AddHButtonBox( vbox604 );
-    gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox6 ),GTK_BUTTONBOX_END );
-    gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox6 ),10 );
-  BOssOk=AddButton( MSGTR_Ok,hbuttonbox6 );
-  BOssCancel=AddButton( MSGTR_Cancel,hbuttonbox6 );
-
-  gtk_signal_connect( GTK_OBJECT( OSSConfig ),"destroy",GTK_SIGNAL_FUNC( WidgetDestroy ),&OSSConfig );
-  
-  gtk_signal_connect( GTK_OBJECT( BOssOk ),"clicked",GTK_SIGNAL_FUNC( ossButton ),(void*)1 );
-  gtk_signal_connect( GTK_OBJECT( BOssCancel ),"clicked",GTK_SIGNAL_FUNC( ossButton ),(void*)0 );
-
-  gtk_widget_add_accelerator( BOssOk,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
-  gtk_widget_add_accelerator( BOssCancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
-
-  gtk_window_add_accel_group( GTK_WINDOW( OSSConfig ),accel_group );
-
-  return OSSConfig;
+  return l;
 }
 
+GList *appendOSSMixers(GList *l) {
+  // careful! the current implementation allows only string constants!
+  l = g_list_append(l, (gpointer)"/dev/mixer");
+  if (gtkAOOSSMixer && strncmp(gtkAOOSSMixer, "/dev/sound", 10) == 0) {
+    l = g_list_append(l, (gpointer)"/dev/sound/mixer0");
+    l = g_list_append(l, (gpointer)"/dev/sound/mixer1");
+    l = g_list_append(l, (gpointer)"/dev/sound/mixer2");
+    l = g_list_append(l, (gpointer)"/dev/sound/mixer3");
+  } else {
+    l = g_list_append(l, (gpointer)"/dev/mixer0");
+    l = g_list_append(l, (gpointer)"/dev/mixer1");
+    l = g_list_append(l, (gpointer)"/dev/mixer2");
+    l = g_list_append(l, (gpointer)"/dev/mixer3");
+  }
+  return l;
+}
+
+GList *appendOSSMixerChannels(GList *l) {
+  l = g_list_append(l, (gpointer)"vol");
+  l = g_list_append(l, (gpointer)"pcm");
+  l = g_list_append(l, (gpointer)"line");
+  return l;
+}
+#endif
+
+#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+GList *appendALSADevices(GList *l) {
+  l = g_list_append(l, (gpointer)"default");
+  l = g_list_append(l, (gpointer)"hw#0.0");
+  l = g_list_append(l, (gpointer)"hw#0.1");
+  l = g_list_append(l, (gpointer)"hw#0.2");
+  l = g_list_append(l, (gpointer)"surround40");
+  l = g_list_append(l, (gpointer)"surround51");
+  l = g_list_append(l, (gpointer)"plug:surround40");
+  l = g_list_append(l, (gpointer)"plug:surround51");
+  return l;
+}
+
+GList *appendALSAMixers(GList *l) {
+  l = g_list_append(l, (gpointer)"default");
+  return l;
+}
+
+GList *appendALSAMixerChannels(GList *l) {
+  l = g_list_append(l, (gpointer)"Master");
+  l = g_list_append(l, (gpointer)"Line");
+  l = g_list_append(l, (gpointer)"PCM");
+  return l;
+}
 #endif
 
 #ifdef HAVE_SDL
-       GtkWidget * SDLConfig;
-static GtkWidget * CESDLDriver;
-static GtkWidget * CBSDLDriver;
-static GtkWidget * BSDLOk;
-static GtkWidget * BSDLCancel;
+GList *appendSDLDevices(GList *l) {
+  l = g_list_append(l, (gpointer)"alsa");
+  l = g_list_append(l, (gpointer)"arts");
+  l = g_list_append(l, (gpointer)"esd");
+  l = g_list_append(l, (gpointer)"jack");
+  l = g_list_append(l, (gpointer)"oss");
+  l = g_list_append(l, (gpointer)"nas");
+  return l;
+}
+#endif
 
-void ShowSDLConfig( void )
-{
- if ( SDLConfig ) gtkActive( SDLConfig );
-   else SDLConfig=create_SDLConfig();
-
- if ( gtkAOSDLDriver )
-   gtk_entry_set_text( GTK_ENTRY( CESDLDriver ), gtkAOSDLDriver );
-
- gtk_widget_show( SDLConfig );
- gtkSetLayer( SDLConfig );
+// Gets text string from a gtk entry, interpreting 
+// MSGTR_PREFERENCES_DriverDefault as null string.
+char *getGtkEntryText(GtkWidget *from) {
+  char *tmp = gtk_entry_get_text(GTK_ENTRY(from));
+  if (strcmp(tmp, MSGTR_PREFERENCES_DriverDefault) == 0) {
+    tmp = NULL;
+  }
+  return tmp;
 }
 
-void HideSDLConfig( void )
-{
- if ( !SDLConfig ) return;
- gtk_widget_hide( SDLConfig );
- gtk_widget_destroy( SDLConfig ); 
- SDLConfig=NULL;
+// Sets text string of a gtk entry, interpreting 
+// null string as MSGTR_PREFERENCES_DriverDefault.
+void setGtkEntryText(GtkWidget *dest, char *to) {
+  if (!to) {
+    to = MSGTR_PREFERENCES_DriverDefault;
+  }
+  gtk_entry_set_text(GTK_ENTRY(dest),to);
 }
 
-static void sdlButton( GtkButton * button,gpointer user_data )
-{
- switch( (int)user_data )
-  {
-   case 1:
-        gfree( (void **)&gtkAOSDLDriver );  gtkAOSDLDriver=strdup( gtk_entry_get_text( GTK_ENTRY( CESDLDriver ) ) );
+       GtkWidget *AudioConfig;
+static GtkWidget *CEAudioDevice;
+static GtkWidget *CBAudioDevice;
+static GtkWidget *CEAudioMixer;
+static GtkWidget *CBAudioMixer;
+static GtkWidget *CEAudioMixerChannel;
+static GtkWidget *CBAudioMixerChannel;
+static GtkWidget *BAudioOk;
+static GtkWidget *BAudioCancel;
+
+void ShowAudioConfig() {
+  if (AudioConfig) gtkActive(AudioConfig);
+  else AudioConfig = create_AudioConfig();
+
+#ifdef USE_OSS_AUDIO
+  if (strncmp(ao_driver[0], "oss", 3) == 0) {
+    setGtkEntryText(CEAudioDevice, gtkAOOSSDevice);
+    setGtkEntryText(CEAudioMixer, gtkAOOSSMixer);
+    setGtkEntryText(CEAudioMixerChannel, gtkAOOSSMixerChannel);
+  }
+#endif
+#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+  if (strncmp(ao_driver[0], "alsa", 4) == 0) {
+    setGtkEntryText(CEAudioDevice, gtkAOALSADevice);
+    setGtkEntryText(CEAudioMixer, gtkAOALSAMixer);
+    setGtkEntryText(CEAudioMixerChannel, gtkAOALSAMixerChannel);
+  }
+#endif
+#ifdef HAVE_SDL
+  if (strncmp(ao_driver[0], "sdl", 3) == 0) {
+    setGtkEntryText(CEAudioDevice, gtkAOSDLDriver);
+  }
+#endif
+
+  gtk_widget_show(AudioConfig);
+  gtkSetLayer(AudioConfig);
+}
+
+void HideAudioConfig() {
+  if (!AudioConfig) return;
+  gtk_widget_hide(AudioConfig);
+  gtk_widget_destroy(AudioConfig); 
+  AudioConfig=NULL;
+}
+
+static void audioButton(GtkButton *button, gpointer user_data) {
+  switch( (int)user_data ) {
+    case 1:
+#ifdef USE_OSS_AUDIO
+      if (strncmp(ao_driver[0], "oss", 3) == 0) {
+        gfree(&gtkAOOSSDevice);
+        gtkAOOSSDevice = gstrdup(getGtkEntryText(CEAudioDevice));
+        gfree(&gtkAOOSSMixer);
+        gtkAOOSSMixer = gstrdup(getGtkEntryText(CEAudioMixer));
+        gfree(&gtkAOOSSMixerChannel);
+        gtkAOOSSMixer = gstrdup(getGtkEntryText(CEAudioMixerChannel));
+      }
+#endif
+#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+      if (strncmp(ao_driver[0], "alsa", 4) == 0) {
+        gfree(&gtkAOALSADevice);
+        gtkAOALSADevice = gstrdup(getGtkEntryText(CEAudioDevice));
+        gfree(&gtkAOALSAMixer);
+        gtkAOALSAMixer = gstrdup(getGtkEntryText(CEAudioMixer));
+        gfree(&gtkAOALSAMixerChannel);
+        gtkAOALSAMixer = gstrdup(getGtkEntryText(CEAudioMixerChannel));
+      }
+#endif
+#ifdef HAVE_SDL
+      if (strncmp(ao_driver[0], "sdl", 3) == 0) {
+        gfree(&gtkAOSDLDriver);
+        gtkAOSDLDriver = gstrdup(getGtkEntryText(CEAudioDevice));
+      }
+#endif
    case 0:
-	HideSDLConfig();
-	break;
+      HideAudioConfig();
+      break;
   }
 }
 
-GtkWidget * create_SDLConfig( void )
-{
-  GList     * CBSDLDriver_items=NULL;
-  GtkWidget * vbox604;
-  GtkWidget * table2;
-  GtkWidget * label;
-  GtkWidget * hbuttonbox6;
-  GtkAccelGroup * accel_group;
+GtkWidget *create_AudioConfig() {
+  GList *items = NULL;
+  GtkWidget *vbox;
+  GtkWidget *table;
+  GtkWidget *label;
+  GtkWidget *hbuttonbox;
+  GtkAccelGroup *accel_group;
 
-  accel_group=gtk_accel_group_new();
+  AudioConfig = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_widget_set_name(AudioConfig, "AudioConfig");
+  gtk_object_set_data(GTK_OBJECT(AudioConfig), "AudioConfig", AudioConfig);
+  gtk_window_set_title(GTK_WINDOW(AudioConfig), MSGTR_AudioPreferences);
+  gtk_window_set_position(GTK_WINDOW(AudioConfig), GTK_WIN_POS_CENTER);
+  gtk_window_set_policy(GTK_WINDOW(AudioConfig), FALSE, FALSE, FALSE);
+  gtk_window_set_wmclass(GTK_WINDOW(AudioConfig), "Audio Config", "MPlayer");
 
-  SDLConfig=gtk_window_new( GTK_WINDOW_TOPLEVEL );
-  gtk_widget_set_name( SDLConfig,"SDLConfig" );
-  gtk_object_set_data( GTK_OBJECT( SDLConfig ),"SDLConfig",SDLConfig );
-  gtk_widget_set_usize( SDLConfig,270,70 );
-  gtk_window_set_title( GTK_WINDOW( SDLConfig ),MSGTR_SDLPreferences );
-  gtk_window_set_position( GTK_WINDOW( SDLConfig ),GTK_WIN_POS_CENTER );
-  gtk_window_set_policy( GTK_WINDOW( SDLConfig ),FALSE,FALSE,FALSE );
-  gtk_window_set_wmclass( GTK_WINDOW( SDLConfig ),"SDL Config","MPlayer" );
+  gtk_widget_realize(AudioConfig);
+  gtkAddIcon(AudioConfig);
 
-  gtk_widget_realize( SDLConfig );
-  gtkAddIcon( SDLConfig );
+  vbox = AddVBox(AddDialogFrame(AudioConfig), 0);
 
-  vbox604=AddVBox( AddDialogFrame( SDLConfig ),0 );
+  table = gtk_table_new(2, 3, FALSE);
+  gtk_widget_set_name(table, "table");
+  gtk_widget_show(table);
+  gtk_box_pack_start(GTK_BOX(vbox), table, TRUE, TRUE, 0);
 
-  table2=gtk_table_new( 2,2,FALSE );
-  gtk_widget_set_name( table2,"table2" );
-  gtk_widget_show( table2 );
-  gtk_box_pack_start( GTK_BOX( vbox604 ),table2,TRUE,TRUE,0 );
+  label = AddLabel(MSGTR_PREFERENCES_Audio_Device, NULL);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(0), 0, 0);
 
-  label=AddLabel( MSGTR_PREFERENCES_SDL_Driver,NULL );
-    gtk_table_attach( GTK_TABLE( table2 ),label,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-
-  CBSDLDriver=AddComboBox( NULL );
-  gtk_table_attach( GTK_TABLE( table2 ),CBSDLDriver,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer) NULL );
-  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"alsa" );
-  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"arts" );
-  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"esd" );
-  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"jack" );
-  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"oss" );
-  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"nas" );
-  gtk_combo_set_popdown_strings( GTK_COMBO( CBSDLDriver ),CBSDLDriver_items );
-  g_list_free( CBSDLDriver_items );
-
-  CESDLDriver=GTK_COMBO( CBSDLDriver )->entry;
-  gtk_widget_set_name( CESDLDriver,"CESDLDriver" );
-  gtk_widget_show( CESDLDriver );
-
-  AddHSeparator( vbox604 );
-
-  hbuttonbox6=AddHButtonBox( vbox604 );
-    gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox6 ),GTK_BUTTONBOX_END );
-    gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox6 ),10 );
-  BSDLOk=AddButton( MSGTR_Ok,hbuttonbox6 );
-  BSDLCancel=AddButton( MSGTR_Cancel,hbuttonbox6 );
-
-  gtk_signal_connect( GTK_OBJECT( SDLConfig ),"destroy",GTK_SIGNAL_FUNC( WidgetDestroy ),&SDLConfig );
-  
-  gtk_signal_connect( GTK_OBJECT( BSDLOk ),"clicked",GTK_SIGNAL_FUNC( sdlButton ),(void*)1 );
-  gtk_signal_connect( GTK_OBJECT( BSDLCancel ),"clicked",GTK_SIGNAL_FUNC( sdlButton ),(void*)0 );
-
-  gtk_widget_add_accelerator( BSDLOk,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
-  gtk_widget_add_accelerator( BSDLCancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
-
-  gtk_window_add_accel_group( GTK_WINDOW( SDLConfig ),accel_group );
-
-  return SDLConfig;
-}
+  CBAudioDevice = AddComboBox(NULL);
+  gtk_table_attach(GTK_TABLE(table), CBAudioDevice, 1, 2, 0, 1, (GtkAttachOptions)(GTK_EXPAND | GTK_FILL), (GtkAttachOptions)(0), 0, 0);
+  items = g_list_append(items,(gpointer)MSGTR_PREFERENCES_DriverDefault);
+#ifdef USE_OSS_AUDIO
+  if (strncmp(ao_driver[0], "oss", 3) == 0)
+    items = appendOSSDevices(items);
 #endif
+#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+  if (strncmp(ao_driver[0], "alsa", 4) == 0)
+    items = appendALSADevices(items);
+#endif
+#ifdef HAVE_SDL
+  if (strncmp(ao_driver[0], "sdl", 3) == 0)
+    items = appendSDLDevices(items);
+#endif
+  gtk_combo_set_popdown_strings(GTK_COMBO(CBAudioDevice), items);
+  g_list_free(items);
+  items = NULL;
+
+  CEAudioDevice = GTK_COMBO(CBAudioDevice)->entry;
+  gtk_widget_set_name(CEAudioDevice, "CEAudioDevice");
+  gtk_widget_show(CEAudioDevice);
+
+  label = AddLabel(MSGTR_PREFERENCES_Audio_Mixer, NULL);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(0), 0, 0);
+
+  CBAudioMixer = AddComboBox(NULL);
+  gtk_table_attach(GTK_TABLE(table), CBAudioMixer, 1, 2, 1, 2, (GtkAttachOptions)(GTK_EXPAND | GTK_FILL), (GtkAttachOptions)(0), 0, 0);
+  items = g_list_append(items, (gpointer)MSGTR_PREFERENCES_DriverDefault);
+#ifdef USE_OSS_AUDIO
+  if (strncmp(ao_driver[0], "oss", 3) == 0)
+    items = appendOSSMixers(items);
+#endif
+#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+  if (strncmp(ao_driver[0], "alsa", 4) == 0)
+    items = appendALSAMixers(items);
+#endif
+  gtk_combo_set_popdown_strings(GTK_COMBO(CBAudioMixer), items);
+  g_list_free(items);
+  items = NULL;
+
+  CEAudioMixer = GTK_COMBO(CBAudioMixer)->entry;
+  gtk_widget_set_name(CEAudioMixer, "CEAudioMixer");
+  gtk_widget_show(CEAudioMixer);
+
+  label = AddLabel(MSGTR_PREFERENCES_Audio_MixerChannel, NULL);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 2, 3, (GtkAttachOptions)(GTK_FILL), (GtkAttachOptions)(0), 0, 0);
+
+  CBAudioMixerChannel = AddComboBox(NULL);
+  gtk_table_attach(GTK_TABLE(table), CBAudioMixerChannel, 1, 2, 2, 3, (GtkAttachOptions)(GTK_EXPAND | GTK_FILL), (GtkAttachOptions)(0), 0, 0);
+  items = g_list_append(items, (gpointer)MSGTR_PREFERENCES_DriverDefault);
+#ifdef USE_OSS_AUDIO
+  if (strncmp(ao_driver[0], "oss", 3) == 0)
+    items = appendOSSMixerChannels(items);
+#endif
+#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+  if (strncmp(ao_driver[0], "alsa", 4) == 0)
+    items = appendALSAMixerChannels(items);
+#endif
+  gtk_combo_set_popdown_strings(GTK_COMBO(CBAudioMixerChannel), items);
+  g_list_free(items);
+  items = NULL;
+
+  CEAudioMixerChannel = GTK_COMBO(CBAudioMixerChannel)->entry;
+  gtk_widget_set_name(CEAudioMixerChannel, "CEAudioMixerChannel");
+  gtk_widget_show(CEAudioMixerChannel);
+
+  AddHSeparator(vbox);
+
+  hbuttonbox = AddHButtonBox(vbox);
+  gtk_button_box_set_layout(GTK_BUTTON_BOX(hbuttonbox), GTK_BUTTONBOX_END);
+  gtk_button_box_set_spacing(GTK_BUTTON_BOX(hbuttonbox), 10);
+  BAudioOk = AddButton(MSGTR_Ok, hbuttonbox);
+  BAudioCancel = AddButton(MSGTR_Cancel, hbuttonbox);
+
+  gtk_signal_connect(GTK_OBJECT(AudioConfig), "destroy", GTK_SIGNAL_FUNC(WidgetDestroy), &AudioConfig);
+  gtk_signal_connect(GTK_OBJECT(BAudioOk), "clicked", GTK_SIGNAL_FUNC(audioButton), (void*)1);
+  gtk_signal_connect(GTK_OBJECT(BAudioCancel), "clicked", GTK_SIGNAL_FUNC(audioButton), (void*)0);
+
+  accel_group = gtk_accel_group_new();
+  gtk_widget_add_accelerator(BAudioOk, "clicked", accel_group, GDK_Return, 0, GTK_ACCEL_VISIBLE);
+  gtk_widget_add_accelerator(BAudioCancel, "clicked", accel_group, GDK_Escape, 0, GTK_ACCEL_VISIBLE);
+  gtk_window_add_accel_group(GTK_WINDOW(AudioConfig), accel_group);
+
+  return AudioConfig;
+}
 
 #ifdef HAVE_DXR3
 // --- dxr3 config box

@@ -173,10 +173,6 @@ void guiInit( void )
  guiIntfStruct.StreamType=-1;
 
  memset( &gtkEquChannels,0,sizeof( gtkEquChannels ) );
-#ifdef USE_OSS_AUDIO
- if ( !gtkAOOSSMixer ) gtkAOOSSMixer=strdup( PATH_DEV_MIXER );
- if ( !gtkAOOSSDevice ) gtkAOOSSDevice=strdup( PATH_DEV_DSP );
-#endif
 #ifdef HAVE_DXR3
  if ( !gtkDXR3Device ) gtkDXR3Device=strdup( "/dev/em8300-0" );
 #endif
@@ -797,19 +793,42 @@ int guiGetEvent( int type,char * arg )
 	  ao_plugin_cfg.pl_extrastereo_mul=gtkAOExtraStereoMul;
 	 }
 #ifdef USE_OSS_AUDIO
-	mixer_device=gstrdup( gtkAOOSSMixer );
-	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"oss",3 ) && gtkAOOSSDevice )
+	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"oss",3 ) )
 	 {
-	  char * tmp = calloc( 1,strlen( gtkAOOSSDevice ) + 7 );
+	  char *tmp;
+	  mixer_device = gtkAOOSSMixer;
+	  mixer_channel = gtkAOOSSMixerChannel;
+	  if (gtkAOOSSDevice) {
+	  tmp = calloc( 1,strlen( gtkAOOSSDevice ) + 7 );
 	  sprintf( tmp,"oss:%s",gtkAOOSSDevice );
+	  } else
+	    tmp = "oss";
+	  gaddlist( &audio_driver_list,tmp );
+	 }
+#endif
+#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"alsa",4 ) )
+	 {
+	  char *tmp;
+	  mixer_device = gtkAOALSAMixer;
+	  mixer_channel = gtkAOALSAMixerChannel;
+	  if (gtkAOALSADevice) {
+	    tmp = calloc( 1,strlen( gtkAOALSADevice ) + 14 );
+	    sprintf( tmp,"alsa:device=%s",gtkAOALSADevice );
+	  } else
+	    tmp = "alsa";
 	  gaddlist( &audio_driver_list,tmp );
 	 }
 #endif
 #ifdef HAVE_SDL
-	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"sdl",3 ) && gtkAOSDLDriver )
+	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"sdl",3 ) )
 	 {
-	  char * tmp = calloc( 1,strlen( gtkAOSDLDriver ) + 10 );
+	  char *tmp;
+	  if (gtkAOSDLDriver) {
+	  tmp = calloc( 1,strlen( gtkAOSDLDriver ) + 10 );
 	  sprintf( tmp,"sdl:%s",gtkAOSDLDriver );
+	  } else
+	    tmp = "sdl";
 	  gaddlist( &audio_driver_list,tmp );
 	 }
 #endif
