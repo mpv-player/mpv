@@ -397,6 +397,7 @@ int demux_audio_fill_buffer(demux_stream_t *ds) {
 	dp = new_demux_packet(l);
 	memcpy(dp->buffer,hdr,4);
 	stream_read(s,dp->buffer + 4,l-4);
+	priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + 1152/(float)sh_audio->samplerate; // FIXME: 1152->576 if MPEG-2
 	break;
       }
     } break;
@@ -404,12 +405,14 @@ int demux_audio_fill_buffer(demux_stream_t *ds) {
     l = sh_audio->wf->nAvgBytesPerSec;
     dp = new_demux_packet(l);
     l = stream_read(s,dp->buffer,l);
+    priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + l/(float)sh_audio->i_bps;
     break;
   }
   case fLaC: {
     l = 65535;
     dp = new_demux_packet(l);
     l = stream_read(s,dp->buffer,l);
+    priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + l/(float)sh_audio->i_bps;
     break;
   }
   default:
@@ -418,10 +421,6 @@ int demux_audio_fill_buffer(demux_stream_t *ds) {
   }
 
   resize_demux_packet(dp, l);
-  if (priv->last_pts < 0)
-    priv->last_pts = 0;
-  else
-    priv->last_pts += l/(float)sh_audio->i_bps;
   ds->pts = priv->last_pts - (ds_tell_pts(demux->audio) -
               sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
   ds_add_packet(ds, dp);
