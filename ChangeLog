@@ -344,7 +344,7 @@ MPlayer (1.0)
     Ports:
     * initial Amiga/MorphOS (through GeekGadgets) support
     * FreeBSD 5.x (libkse/libthr) support in Win32 DLL loader
-    * finally fixed the compilation on non-mvi capable Alpha CPUs
+    * finally fixed the compilation on non-MVI capable Alpha CPUs
     * better AltiVec detection in configure
     * OSD menu now works on MinGW
     * slave mode, vobsub and MEncoder support on Windows
@@ -543,7 +543,7 @@ MPlayer (1.0)
 
     Others:
     * gcc can now detect badly called mp_msg()s
-    * manyconfig/cmdline parsing fixes (some of them were at least 100000l bugs)
+    * many config/cmdline parsing fixes (some of them were at least 100000l bugs)
     * configure: enable VIDIX for PPC
     * configure: full featured PPC optimizations, rewritten architecture handling
     * spudec.c: Fix "invalid fragment" handling, Improved subtitle queueing
@@ -1221,7 +1221,7 @@ MPlayer v0.11-pre25-CVS:  yeah, we moved to SourceForge CVS!
   - LIRC fix, mplayer_lirc changed back to mplayer [Andreas Ackermann]
   - stream.c: unsigned int fixes, required for some strange ASF files
   - asfheader.c: using w=h=b=1 for audio_concealment_none
-  - VCD related stuff moved from stream.c to vcd_read.c
+  - VCD-related stuff moved from stream.c to vcd_read.c
   - added DGA driver by Andreas Ackermann
   - added debian/ subdir for the Debian package makers... see DOCS/DEBIAN
   - new Makefile/dependency system
@@ -1269,10 +1269,10 @@ MPlayer v0.11-pre21: Feb 12, 2001
   MPEG1 pp, stereo fix
   - "Skip chunk xxxx" messages moved from -v to -v -v -v debug level...
     [thanks to Christoph H. Lampert]
-      - DivX postprocess filter works for MPEG1 files, too! (-divxq 1/3/7/31)
+  - DivX postprocess filter works for MPEG1 files, too! (-divxq 1/3/7/31)
   - MPEG layer-2 audio fixed - it's stereo again!!!
   - audio select() detection: if detected audio buffer size == 0, then
-    exit with message "recompile MPlayer with #undef HAVE_AUDIO_SELECT"...
+    exit with message "Recompile mplayer with #undef HAVE_AUDIO_SELECT !"...
   - syncfb driver added to the source tree, under drivers/
     (it's very similar to mga_vid, but has syncronization to screen and
      de-interlace features)
