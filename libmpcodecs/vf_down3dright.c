@@ -53,10 +53,14 @@ static void toright(unsigned char *dst[3], unsigned char *src[3],
 			unsigned char* sR = fromR;
 
 			if (p->scalew == 1) {
-				for (j = dd; j > 0; j--)
-					*t++ = (*sL++ + *sL++) / 2;
-				for (j = dd ; j > 0; j--)
-					*t++ = (*sR++ + *sR++) / 2;
+				for (j = dd; j > 0; j--) {
+					*t++ = (sL[0] + sL[1]) / 2;
+					sL+=2;
+				}
+				for (j = dd ; j > 0; j--) {
+					*t++ = (sR[0] + sR[1]) / 2;
+					sR+=2;
+				}
 			} else {
 				for (j = dd * 2 ; j > 0; j--)
 					*t++ = *sL++;
@@ -129,7 +133,7 @@ static int open(vf_instance_t *vf, char* args)
 	vf->priv->skipline = 0;
 	vf->priv->scalew = 1;
 	vf->priv->scaleh = 2;
-	if (args) sscanf(args, "%d", &vf->priv->skipline);
+	if (args) sscanf(args, "%d:%d:%d", &vf->priv->skipline, &vf->priv->scalew, &vf->priv->scaleh);
 
 	return 1;
 }
