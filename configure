@@ -5285,7 +5285,7 @@ else
   echores "$_libavcodec"
 fi
 
-echocheck "FFmpeg libavformatc (static)"
+echocheck "FFmpeg libavformat (static)"
 if test "$_libavformat" = auto ; then
   # Note: static linking is preferred to dynamic linking
   _libavformat=no
