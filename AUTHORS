@@ -182,6 +182,8 @@ Döffinger, Reimar (reimar) <reimar.doeffinger@stud.uni-karlsruhe.de>
 
 Dolbeau, Romain <romain@dolbeau.org>
     * random AltiVec (PowerPC multimedia extensions) stuff
+    * vo_quartz YUV support & fixes
+    * endianess fixes
 
 Ernesti, Bernd <mplayer@lists.veego.de>
     * NetBSD support patches
