@@ -137,7 +137,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     sscanf((char*)arg,"%f",&d);
     if ((d < 0) || (d > 1000)){
       af_msg(AF_MSG_ERROR,"[surround] Invalid delay time, valid time values"
-	     " are 0ms to 1000ms current value is %0.3ms\n",d);
+	     " are 0ms to 1000ms current value is %0.3f ms\n",d);
       return AF_ERROR;
     }
     s->d = d;
