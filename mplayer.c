@@ -2670,7 +2670,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
   
   /* Looping. */
   if(eof==1 && loop_times>=0) {
-
+    int l = loop_times;
+    play_tree_iter_step(playtree_iter,0,0);
+    loop_times = l;
     mp_msg(MSGT_CPLAYER,MSGL_V,"loop_times = %d, eof = %d\n", loop_times,eof);
 
     if(loop_times>1) loop_times--; else

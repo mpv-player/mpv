@@ -28,7 +28,11 @@
 #define CONFIG_RUNNING (1<<1)
 
 #define SET_GLOBAL(c)  (c->flags |= CONFIG_GLOBAL)
+#ifdef GLOBAL_OPTIONS_ONLY
+#define UNSET_GLOBAL(c)
+#else
 #define UNSET_GLOBAL(c) (c->flags &= (!CONFIG_GLOBAL))
+#endif
 #define IS_GLOBAL(c) (c->flags & CONFIG_GLOBAL)
 #define SET_RUNNING(c) (c->flags |= CONFIG_RUNNING)
 #define IS_RUNNING(c) (c->flags & CONFIG_RUNNING)
@@ -1052,11 +1056,26 @@ int m_config_parse_command_line(m_config_t *config, int argc, char **argv, char 
 		    opt++;
 
 		    mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "this_opt = option: %s\n", opt);
+		    // We handle here some specific option
 		    if(strcasecmp(opt,"list-options") == 0) {
 		      m_config_list_options(config);
 		      exit(1);
-		    }
-		    tmp = m_config_set_option(config, opt, argv[i + 1]);
+		      // Loop option when it apply to a group
+		    } else if(strcasecmp(opt,"loop") == 0 &&
+			      (! config->last_entry || config->last_entry->child) ) {
+		      int l;
+		      char* end;
+		      l = strtol(argv[i+1],&end,0);
+		      if(!end)
+			tmp = ERR_OUT_OF_RANGE;
+		      else {
+			play_tree_t* pt = config->last_entry ? config->last_entry : config->last_parent;
+			l = l <= 0 ? -1 : l;
+			pt->loop = l;
+			tmp = 1;
+		      }
+		    } else // All normal options
+		      tmp = m_config_set_option(config, opt, argv[i + 1]);
 
 		    switch (tmp) {
 		    case ERR_NOT_AN_OPTION:
@@ -1091,7 +1110,7 @@ int m_config_parse_command_line(m_config_t *config, int argc, char **argv, char 
 	--config->recursion_depth;
 	if(config->last_parent != config->pt)
 	  mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Missing }- ?\n");
-	UNSET_GLOBAL(config);
+	config->flags &= (!CONFIG_GLOBAL);
 	SET_RUNNING(config);
 	return 1; 
 #if 0
