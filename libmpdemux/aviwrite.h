@@ -13,6 +13,7 @@ typedef struct {
   // buffering:
   unsigned char *buffer;
   unsigned int buffer_size;
+  unsigned int buffer_len;
   // source stream:
   void* source; // sh_audio or sh_video
   int codec; // codec used for encoding. 0 means copy
