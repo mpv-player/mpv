@@ -5090,6 +5090,18 @@ wide search
 .RE
 .PD 1
 .TP
+.B aspect=<x/y | f (float value)>
+Store movie aspect internally, just like MPEG files.
+Much nicer solution than rescaling, because quality isn't decreased.
+MPlayer and few others players will play these files correctly, others will display
+them with the wrong aspect.
+The aspect parameter can be given as a ratio or a floating point number.
+.TP
+.B autoaspect
+Same as the aspect option, but automatically computes aspect, taking
+into account all the adjustments (crop/expand/scale/etc.) made in the
+filter chain.
+.TP
 .B psnr\ \ \ 
 Print the psnr (peak signal to noise ratio) for the whole video after encoding
 and store the per frame psnr in a file with a name like 'psnr_hhmmss.log'.
