@@ -111,6 +111,8 @@ params:
 	--enable-xmmp	        use XMMP audio drivers
 	--enable-lirc	        enable LIRC (remote control) support
 
+	--disable-gcc-checking  disable gcc version checking
+
 	--disable-select        disable audio select() support ( for example required this
 	                        option ALSA or Vortex2 driver )
 
@@ -179,6 +181,9 @@ do
   --cc=*)
         _cc=`echo $ac_option | cut -d '=' -f 2`
         ;;
+  --disable-gcc-checking=*)
+        _skip_cc_check=yes
+	;;
   --with-x11libdir=*)
         _x11libdir=-L`echo $ac_option | cut -d '=' -f 2`
         ;;
@@ -192,6 +197,7 @@ do
 done
 
 # Checking CC version...
+if ! test -z "$_skip_cc_check"; then
 echo "checking version of $CC""... $_cc"
 cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
 case $cc_version in
@@ -204,6 +210,10 @@ echo "$cc_version"
 if ! test -z "$cc_verc_fail"; then
 echo "Please downgrade(upgrade) gcc compiler to gcc-2.95.2+ or gcc-3.0+ version"
 exit
+fi
+fi
+if test -z "$_skip_cc_check"; then
+echo "YOU'VE SELECTED '--disable-gcc-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"
 fi
 # ---
 
@@ -748,6 +758,10 @@ do
 done
 
 # Checking as compatibility...
+cat > astest.S <<EOF
+filds -2(%ebp)
+EOF
+as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
 if [ $_mmx = 'yes' ]; then
 cat > astest.S <<EOF
 emms
@@ -757,6 +771,12 @@ fi
 if [ $_3dnow = 'yes' ]; then
 cat >> astest.S <<EOF
 femms
+EOF
+as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+fi
+if [ $_3dnowex = 'yes' ]; then
+cat >> astest.S <<EOF
+pswapd %mm0, %mm0
 EOF
 as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
 fi
