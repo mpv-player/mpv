@@ -147,6 +147,7 @@ static int init(int rate,int channels,int format,int flags)
 	MMRESULT result;
 	unsigned char* buffer;
 	int i;
+	char buf[128];
    
 	switch(format){
 		case AF_FORMAT_AC3:
@@ -155,7 +156,7 @@ static int init(int rate,int channels,int format,int flags)
 		case AF_FORMAT_S8:
 			break;
 		default:
-			mp_msg(MSGT_AO, MSGL_V,"ao_win32: format %s not supported defaulting to Signed 16-bit Little-Endian\n",audio_out_format_name(format));
+			mp_msg(MSGT_AO, MSGL_V,"ao_win32: format %s not supported defaulting to Signed 16-bit Little-Endian\n",af_fmt2str(format, &buf, 128));
 			format=AF_FORMAT_S16_LE;
 	}   
 	//fill global ao_data 

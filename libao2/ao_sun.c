@@ -457,6 +457,7 @@ static int init(int rate,int channels,int format,int flags){
     audio_info_t info;
     int pass;
     int ok;
+    char buf[128];
 
     setup_device_paths();
 
@@ -479,7 +480,7 @@ static int init(int rate,int channels,int format,int flags){
     for (ok = pass = 0; pass <= 5; pass++) { /* pass 6&7 not useful */
 
 	AUDIO_INITINFO(&info);
-	info.play.encoding = oss2sunfmt(ao_data.format = format);
+	info.play.encoding = af2sunfmt(ao_data.format = format);
 	info.play.precision =
 	    (format==AF_FORMAT_S16_LE || format==AF_FORMAT_S16_BE
 	     ? AUDIO_PRECISION_16
@@ -545,7 +546,7 @@ static int init(int rate,int channels,int format,int flags){
 
     if (!ok) {
 	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SUN_UnsupSampleRate,
-	       channels, audio_out_format_name(format), rate);
+	       channels, af_fmt2str(format, &buf, 128), rate);
 	return 0;
     }
 
@@ -625,7 +626,7 @@ static void reset(){
     ioctl(audio_fd, AUDIO_DRAIN, 0);
 
     AUDIO_INITINFO(&info);
-    info.play.encoding = oss2sunfmt(ao_data.format);
+    info.play.encoding = af2sunfmt(ao_data.format);
     info.play.precision =
 	(ao_data.format==AF_FORMAT_S16_LE || ao_data.format==AF_FORMAT_S16_BE 
 	 ? AUDIO_PRECISION_16

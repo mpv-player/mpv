@@ -274,7 +274,7 @@ static int write_buffer(unsigned char *data, int len)
   	    int i, j;
   	    int numsamp,sampsize;
 
-  	    sampsize = audio_out_format_bits(ao_data.format)>>3; // bytes per sample
+  	    sampsize = af_fmt2bits(ao_data.format)>>3; // bytes per sample
   	    numsamp = dwBytes1 / (ao_data.channels * sampsize);  // number of samples for each channel in this buffer
 
   	    for( i = 0; i < numsamp; i++ ) for( j = 0; j < ao_data.channels; j++ ) {
@@ -372,16 +372,16 @@ static int init(int rate, int channels, int format, int flags)
 		case AF_FORMAT_S8:
 			break;
 		default:
-			mp_msg(MSGT_AO, MSGL_V,"ao_dsound: format %s not supported defaulting to Signed 16-bit Little-Endian\n",audio_out_format_name(format));
+			mp_msg(MSGT_AO, MSGL_V,"ao_dsound: format %x not supported defaulting to Signed 16-bit Little-Endian\n",format);
 			format=AF_FORMAT_S16_LE;
 	}   	
 	//fill global ao_data
 	ao_data.channels = channels;
 	ao_data.samplerate = rate;
 	ao_data.format = format;
-	ao_data.bps = channels * rate * (audio_out_format_bits(format)>>3);
+	ao_data.bps = channels * rate * (af_fmt2bits(format)>>3);
 	if(ao_data.buffersize==-1) ao_data.buffersize = ao_data.bps; // space for 1 sec
-	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Samplerate:%iHz Channels:%i Format:%s\n", rate, channels, audio_out_format_name(format));
+	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Samplerate:%iHz Channels:%i Format:%x\n", rate, channels, format);
 	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Buffersize:%d bytes (%d msec)\n", ao_data.buffersize, ao_data.buffersize / ao_data.bps * 1000);
 
 	//fill waveformatex
@@ -395,7 +395,7 @@ static int init(int rate, int channels, int format, int flags)
 		wformat.Format.nBlockAlign     = 4;
 	} else {
 		wformat.Format.wFormatTag      = (channels > 2) ? WAVE_FORMAT_EXTENSIBLE : WAVE_FORMAT_PCM;
-		wformat.Format.wBitsPerSample  = audio_out_format_bits(format);
+		wformat.Format.wBitsPerSample  = af_fmt2bits(format);
 		wformat.Format.nBlockAlign     = wformat.Format.nChannels * (wformat.Format.wBitsPerSample >> 3);
 	}
 

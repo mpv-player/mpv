@@ -50,9 +50,10 @@ static int init(int rate_hz, int channels, int format, int flags)
     snd_pcm_channel_setup_t setup;
     snd_pcm_info_t info;
     snd_pcm_channel_info_t chninfo;
+    char buf[128];
 
     mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_ALSA5_InitInfo, rate_hz,
-	channels, audio_out_format_name(format));
+	channels, af_fmt2str(format));
 
     alsa_handler = NULL;
 
@@ -111,8 +112,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    ao_data.bps *= 2;
 	    break;
 	case -1:
-	    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_InvalidFormatReq,
-		audio_out_format_name(format));
+	    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_InvalidFormatReq,af_fmt2str(format,&buf,128));
 	    return(0);
 	default:
 	    break;

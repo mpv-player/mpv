@@ -256,8 +256,8 @@ static int init(int rate_hz, int channels, int format, int flags)
     // make sure alsa_device is null-terminated even when using strncpy etc.
     memset(alsa_device, 0, ALSA_DEVICE_SIZE + 1);
 
-    mp_msg(MSGT_AO,MSGL_V,"alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
-	channels, audio_out_format_name(format));
+    mp_msg(MSGT_AO,MSGL_V,"alsa-init: requested format: %d Hz, %d channels, %x\n", rate_hz,
+	channels, format);
     alsa_handler = NULL;
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: compiled for ALSA-%s\n", SND_LIB_VERSION_STR);
     
@@ -334,8 +334,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	ao_data.bps *= 4;
 	break;
       case -1:
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: invalid format (%s) requested - output disabled\n",
-	       audio_out_format_name(format));
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: invalid format (%x) requested - output disabled\n",format);
 	return(0);
 	break;
       default:
@@ -587,8 +586,7 @@ static int init(int rate_hz, int channels, int format, int flags)
                                              alsa_format)) < 0)
       {
          mp_msg(MSGT_AO,MSGL_INFO,
-		"alsa-init: format %s are not supported by hardware, trying default\n", 
-		audio_out_format_name(format));
+		"alsa-init: format %x are not supported by hardware, trying default\n", format);
          alsa_format = SND_PCM_FORMAT_S16_LE;
          ao_data.format = AF_FORMAT_S16_LE;
          ao_data.bps = channels * rate_hz * 2;
