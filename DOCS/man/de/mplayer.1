@@ -5608,9 +5608,497 @@ Füge Fehlerkorrektur hinzu.
 Debugging-Level
 .RE
 .PD 1
+.TP
+.B \-lavcopts <option1:option2:...>
+Wenn du mit libavcodec encodierst, kannst du hiermit die Optionen angeben.
+
+.I BEISPIEL:
+.PD 0
+.RSs
+\-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
+.RE
+.PD 1
+
+.RS
+(FIXME) Verfügbare Optionen sind:
+.RE
+.
+.TP
+.B threads=<1\-8>
+Maximale Anzahl benutzter Threads (Standardwert: 1).
+.RE
+.TP
+.IPs vcodec=<Wert>
+benutzt den angegeben Codec (kein Standardwert, du musst einen angeben):
+.RSss
+mjpeg: Motion JPEG
+.br
+h263: H263
+.br
+h263p: H263 Plus
+.br
+mpeg4: DivX 4/\:5
+.br
+msmpeg4: DivX 3
+.br
+rv10: ein alter RealVideo\-Codec
+.br
+mpeg1video: MPEG-1-Video :)
+.REss
+.IPs vqmin=<2\-31>
+minimaler Quantizer (bei Durchgang 1/\:2) (Standardwert: 2)
+.IPs vqscale=<2\-31>
+konstate Quantizer (wählt einen Modus mit fest vorgegebenen Quantizern)
+(Standardwert: 0 (ausgeschaltet))
+.IPs vqmax=<1\-31>
+maximaler Quantizer (bei Durchgang 1/\:2) (Standardwert: 31)
+.IPs mbqmin=<1\-31>
+minimale Makroblock-Quantizer (bei Durchgang\ 1/\:2) (Standardwert: 2)
+.IPs mbqmax=<1\-31>
+maximale Makroblock-Quantizer (bei Durchgang\ 1/\:2) (Standardwert: 31)
+.IPs vqdiff=<1\-31>
+maximale Differenz der Quantizer zwischen I\- oder P\-Bildern (bei
+Durchgang 1/\:2) (Standardwert: 3)
+.IPs vmax_b_frames=<0\-4>
+maximale Anzahl von B\-Frames zwischen Nicht\-B\-Frames:
+.RSss
+0: keine B\-Frames (Standard)
+.br
+0\-2: sinnvolle Werte
+.REss
+.IPs vme=<0\-5>
+Modus der Bewegungsvoraussage:
+.RSss
+0: keine (sehr niedrige Qualität)
+.br
+1: voll (langsam)
+.br
+2: log (lq)
+.br
+3: phods (lq)
+.br
+4: EPZS (Standard)
+.br
+5: X1 (experimentell)
+.REss
+.IPs vhq\ \ 
+Modus für hohe Qualität. Encodiert jeden Makroblock in allen Modi und
+wählt dann das kleinste Ergebnis (langsam) (Standard: hohe Qualität
+deaktiviert)
+.IPs v4mv
+vier Motion-Vectors pro Makroblock (etwas bessere Qualität)
+(standardmäßig deaktivert).
+.IPs keyint=<0\-300>
+Maximale Anzahl von Bildern zwischen zwie Schlüsselbildern (key frames).
+Größere Intervalle resultieren in kleineren Dateien aber ungenauerem Spulen.
+Ein Wert von 0 bedeutet keine Schlüsselbilder, und Werte > 300 sind nicht
+empfehlenswert. Bei strikter Einhaltung des MPEG-1/\:2/\:4\-Standards muss
+der Wert <= 132 sein (Standardwert: 250, was einem Schlüsselbild alle
+zehn Sekunden bei einem 25fps\-Film bedeutet).
+.IPs vb_strategy=<0\-1>
+Strategie, mit der zwischen I/\:P/\:B\-Frames gewählt wird (beim zweiten
+Durchgang).
+.RSss
+0: Benutzt immer die maximale Anzahl von B\-Frames (Standard).
+.br
+1: Vermeidet B\-Frames in Szenen mit viel Bewegung (was zu falschen
+Vorhersagen bei der Bitrate führt).
+.REss
+.IPs vpass=<1\-2>
+Aktiviert den internen Modus für zwei Durchgänge (standardmäßig deaktiviert):
+.RSss
+1: erster Durchgang
+.br
+2: zweiter Durchgang
+.REss
+.IPs aspect=<x.x/y.y>
+Speichert das Höhen\-/:Breitenverhältnis intern im Videostream, genauso wie
+bei MPEG-1/\:2. Deutlich bessere Lösung als Skalierung, da hierbei die
+Qualität nicht gemindert wird. Momentan kann nur MPlayer solche Dateien
+mit dem richtigen Verhältnis wiedergeben, andere Player zeigen ein falsches
+Verhältnis.
+Beispiel:
+.RSss
+aspect=16.0/9.0
+.REss
+.IPs vbitrate=<Wert>
+gibt die Bitrate (bei Durchgang 1/\:2) in
+specify bitrate (pass\ 1/\:2) in
+.RSss
+kBit <4\-16000> oder
+.br
+Bit  <16001\-24000000> an
+.br
+(Warnung: 1kBit = 1000 Bits)
+.br
+(Standardwert: 800)
+.REss
+.IPs vratetol=<Wert>
+ungefähre Dateigrößentoleranz in kbit
+(Warnung: 1kBit = 1000 Bits)
+(Standardwert: 8000)
+.IPs vrc_maxrate=<Wert>
+maximale Bitrate in kbit/\:sec (Durchgang 1/\:2)
+.IPs vrc_minrate=<Wert>
+minimale Bitrate in kbit/\:sec (Durchgang 1/\:2)
+.IPs vrc_buf_size=<Wert>
+Puffergröße in kbit (Durchgang 1/\:2)
+Anmerkung: vratetol sollte während des zweiten Durchgangs nicht zu hoch
+gesetzt werden, da ansonsten Probleme auftreten können, wenn vrc_(min|max)rate
+benutzt wird.
+.IPs vb_qfactor=<-31.0\-31.0>
+Quantizer\-Faktor zwischen B\- und Nicht\-B\-Frames (Durchgang 1/\:2)
+(Standardwert: 1.25)
+.IPs vi_qfactor=<-31.0\-31.0>
+Quantizer\-Faktor zwischen I\- und Nicht\-I\-Frames (Durchgang 1/\:2)
+(Standardwert: 0.8)
+.IPs vb_qoffset=<-31.0\-31.0>
+Quantizer\-Offset zwischen B\- und Nicht\-B\-Frames (Durchgang 1/\:2)
+(Standardwert: 1.25)
+.IPs vi_qoffset=<-31.0\-31.0>
+Quantizer\-Offset zwischen I\- und Nicht\-I\-Frames (Durchgang 1/\:2)
+(Standardwert: 0.0)
+.br
+if v{b|i}_qfactor > 0 then
+.br
+I/\:B-Frame\-Quantizer = P-Frame\-Quantizer * v{b|i}_qfactor + v{b|i}_qoffset
+.br
+else
+.br
+benutze die normale Bitratenkontrolle (lege den nächsten P\-Frame\-Quantizer
+nicht fest) und setze
+q= -q * v{b|i}_qfactor + v{b|i}_qoffset
+.IPs vqblur=<0.0\-1.0>
+Quantizer\-Glättung (Durchgang 1):
+.RSss
+0.0: qblur deaktiviert
+.br
+0.5 (Standard)
+.br
+1.0: wähle einen Durchschnittsquantizer aller vorhergehender Frames. Größere
+Werte bilden den Durchschnitt über mehr Frames (langsamerer Wechsel).
+.REss
+.IPs vqblur=<0.0\-99.0>
+Gaußsche Unschärfe für die Quantizer. Größere
+Werte bilden den Durchschnitt über mehr Frames (langsamerer Wechsel)
+(Durchgang 2) (Standardwert: 0.5).
+.IPs vqcomp=<Wert>
+Quantizer\-Kompression, hängt von vrc_eq ab (Durchgang 1/\:2) (Standardwert:
+0.5)
+.IPs vrc_eq=<equation>
+hauptsächlich verwendete Gleichung für die Bitratenkontrolle (Durchgang 1/\:2):
+
+1: konstant Bitrate
+.br
+tex: konstante Qualität
+.br
+1+(tex/\:avgTex-1)*qComp: ungefähr die Gleichung der alten Bitratenkontrolle
+code
+.br
+tex^qComp: mit qcomp = 0.5 oder einem ähnlichen Wert (Standard)
+
+Infixoperatoren: +,-,*,/,^
+
+Variables:
+.br
+tex:             Texturkomplexität
+.br
+iTex,pTex:       Intra\- und Nicht\-Intra\-Texturkomplexität
+.br
+avgTex:          durchschnittliche Texturkomplexität
+.br
+avgIITexaverage: Intra\-Texturkomplexität bei I\-Frames
+.br
+avgPITexaverage: Intra\-Texturkomplexität bei P\-Frames
+.br
+avgPPTexaverage: Nicht\-Intra\-Texturkomplexität bei P\-Frames
+.br
+avgBPTexaverage: Nicht\-Intra\-Texturkomplexität bei B\-Frames
+.br
+mv:              für Motion-Vectors verwendete Bits
+.br
+fCode:           maximale Länge der Motion-Vectors (log2)
+.br
+iCount:          Anzahl der Intra\-Makroblöcke / Anzahl der Makroblöcke
+.br
+var:             räumliche Komplexität
+.br
+mcVar:           zeitliche Komplexität
+.br
+qComp:           auf der Kommandozeile angegebener Wert von qcomp
+.br
+isI, isP, isB:   is 1 if picture type is I/\:P/\:B else 0
+.br
+Pi,E:            schau in dein Lieblingsmathebuch
+
+Functions:
+.br
+max(a,b),min(a,b): Maximum / Minimum
+.br
+gt(a,b): (greater than) ist 1, falls a>b, ansonsten 0
+.br
+lt(a,b): (less than) ist 1, falls a<b, ansonsten 0
+.br
+eq(a,b): (equak) ist 1, falls a==b, ansonten 0
+.br
+sin, cos, tan, sinh, cosh, tanh, exp, log, abs
+.
+.IPs vrc_override=<Optionen>
+Benutzerdefinierte Qualität für bestimmte Abschnitte (Durchgang 1/\:2).
+Die Optionen haben folgenden Aufbau: <Startframe, Endframe,
+Qualität[/\:Startframe, Endframe, Qualität[/...]]>:
+.RSss
+Qualität 2\-31: Quantizer
+.br
+Qualität \-500\-0: Qualitätskorrektur in %
+.REss
+.IPs vrc_init_cplx=<0\-1000>
+anfägnliche Komplexität (Durchgang 1)
+.IPs vqsquish=<0\-1>
+Gibt an, wie die Quantizer zwischen qmin und qmax gehalten werden
+(Durchgang 1/\:2):
+.RSss
+0: mit Clipping
+.br
+1: benutzt eine schöne ableitbare Funktion (Standard)
+.REss
+.IPs vlelim=<-1000\-1000>
+Schwelle für die Eliminierung von einzelnen Koeffizienten beim
+Helligkeitsanteil. Bei negativen Werten werden auch die dc-Koeffizienten
+betrachtet (sollte mindestens -4 or niedriger sein, wenn mit quant=1
+encodiert wird):
+.RSss
+0: deaktiviert (Standard)
+.br
+-4 (JVT\-Empfehlung)
+.REss
+.IPs vcelim=<-1000\-1000>
+Schwelle für die Eliminierung von einzelnen Koeffizienten beim
+Farbanteil. Bei negativen Werten werden auch die dc-Koeffizienten
+betrachtet (sollte mindestens -4 or niedriger sein, wenn mit quant=1
+encodiert wird):
+.RSss
+0 deaktiviert (Standard)
+.br
+7 (JVT\-Empfehlung)
+.REss
+.IPs vstrict=<-1\-1>
+Strikte Einhaltung der Standards.
+.RSss
+0: deaktiviert (Standardeinstellung)
+.br
+1: Nur empfehlenswert, wenn die Ausgabe mit einem MPEG-4 Referenzdekoder
+dekodiert werden soll.
+.br
+-1: Erlaubt nichstandardkonforme YV12-Huffyuv-Encodierung (20% kleinere
+Dateien, die aber nicht mit dem offiziellen Huffyuv-Codec abgespielt
+werden können).
+.REss
+.IPs vdpart
+Datenpartitionierung. Fügt zwei Bytes pro Videopaket hinzu und erhöht die
+Fehlerresistenz beim Transfer über unzuverlässige Kanäle (z.B.\& Streaming
+über's Internet).
+.IPs vpsize=<0\-10000>
+Videopaketgröße, erhöht die Fehlerresistenz (siehe auch \-vdpart):
+.RSss
+0: deaktiviert (Standard)
+.br
+100-1000: gute Wahl
+.REss
+.IPs gray
+Encodierung zu Graustufenbildern (schneller) (Standard: deaktiviert)
+.IPs vfdct=<0\-10>
+DCT-Algorithmus (diskrete Cosinustransformation):
+.RSss
+0: automatische Wahl (Standard)
+.br
+1: schneller Integeralgorithmus
+.br
+2: genauer Integeralgorithmus
+.br
+3: mmx
+.br
+4: mlib
+.REss
+.IPs idct=<0\-99>
+IDCT-Algorithmus (inverse diskrete Cosinustransformation).
+Anmerkung: All diese IDCT-Algorithmen bestehen die IEEE1180\-Tests:
+.RSss
+0: automatische Wahl (Standard)
+.br
+1: JPEG\-Referenzalgorithmus (Integer)
+.br
+2: simple
+.br
+3: simplemmx
+.br
+4: libmpeg2mmx (ungenau, benutze ihn NICHT mit einem keyint > 100)
+.br
+5: ps2
+.br
+6: mlib
+.br
+7: arm
+.REss
+.IPs lumi_mask=<0.0\-1.0>
+Helligkeitsmaskierung.
+Warnung: Sei vorsichtig! Zu große Werte können desaströse Ergebnisse liefern.
+Warnung2: Große Werte mögen auf einigen Monitoren gut aussehen, können aber
+auch schrecklich auf anderen aussehen.
+.RSss
+0.0: deaktiviert (Standard)
+.br
+0.0\-0.3: sinnvoller Bereich
+.REss
+.IPs dark_mask=<0.0\-1.0>
+Dunkelheitsmaskierung.
+Warnung: Sei vorsichtig! Zu große Werte können desaströse Ergebnisse liefern.
+Warnung2: Große Werte mögen auf einigen Monitoren gut aussehen, können aber
+auch schrecklich auf anderen Monitoren / Fernsehern / TFTs aussehen.
+.RSss
+0.0: deaktiviert (Standard)
+.br
+0.0\-0.3: sinnvoller Bereich
+.REss
+.IPs tcplx_mask=<0.0\-1.0>
+Maskierung der zeitlichen Komplexität (Standardwert: 0.0 (deaktiviert))
+.IPs scplx_mask=<0.0\-1.0>
+Maskierung der räumlichen Komplexität.
+Größere Werte helfen bei Blockartefakten, falls bei der Decodierung kein
+Filter gegen Blockartefakte eingesetzt wird.
+Schneide alle schwarzen Balken weg, um eine bessere Qualität zu erzielen:
+.RSss
+0.0: deaktiviert (Standard)
+.br
+0.0\-0.5: sinnvoller Bereich
+.REss
+.IPs naq\ \ 
+Normalisierte adaptive Quantisierung (experimentell).
+Wenn adaptive Quantisierung benutzt wird (*_mast), dann wird der
+durchschnittliche Quantizer pro Makroblock eventuell nicht mehr dem
+geforderten Bild\-Quantizer entsprechen. NAQ versucht dann, den pro Makroblock
+verwendeten Quantizer anzupassen, um den geforderten Durschnitt zu erreichen.
+
+.IPs ildct
+benutze die interlaced DCT
+.IPs format=<value>
+.RSss
+YV12: Standard
+.br
+422P: für huffyuv
+.REss
+.IPs pred
+(für huffyuv)
+.RSss
+0: left prediction
+.br
+1: plane/gradient prediction
+.br
+2: median prediction
+.REss
+.IPs qpel
+benutze quarter pel motion compensation
+.IPs precmp=<0\-2000>
+Vergleichsfunktion für motion estimation pre pass
+.IPs cmp=<0\-2000>
+Vergleichsfunktion für full pel motion estimation
+.IPs subcmp=<0\-2000>
+Vergleichsfunktion für sub pel motion estimation
+.RSss
+0 (SAD): Summe der absoluten Differenzen, schnell (standard)
+.br
+1 (SSE): Summe der quadratischen Fehler
+.br
+2 (SATD): Summe der absoluten Hadamard\-transformierten Differenzen
+.br
+3 (DCT): Summe der absoluten DCT\-transformierten Differenzen
+.br
+4 (PSNR): Summe der quadratischen Quantisierungsfehler
+.br
+5 (BIT): Anzahl der für den Block benötigten Bits
+.br
+6 (RD): rate distoration optimal, langsam
+.br
+7 (ZERO): 0
+.br
++256: benutze auch die Farbinformation. Funktioniert momentan nicht mit
+B\-Frames.
+.REss
+.IPs predia=<\-99\-6>
+Diamantentyp und \-größe für motion estimation pre pass
+.IPs dia=<\-99\-6>
+Diamantentyp und \-größe für motion estimation.
+Anmerkung: Die Größe von normalen Diamanten und von shape adaptiven Diamanten
+sind nicht das gleiche.
+.RSss
+\-3: shape adaptiver (schnell) Diamant mit einer Größe von 3
+.br
+\-2: shape adaptiver (schnell) Diamant mit einer Größe von 2
+.br
+\-1: experimentell
+.br
+ 1: normaler Diamant mit Größe 1 (Standard) = EPZS\-Typ\-Diamant
+.nf
+.ne
+      0 
+     000
+      0 
+.fi
+.br
+ 2: normaler Diamant mit Größe 2
+.nf
+.ne
+      0  
+     000 
+    00000
+     000 
+      0  
+.fi
+.REss
+.IPs trell
+Trellis\-Quantisierung.
+Hiermit wird die optimale Encodierung für jeden 8x8\-Block gefunden.
+Die Trellis\-Quantisierung ist im Sinne von 'PSNR vs Bitrate' einfahc die
+optimale Quantisierung (unter der Annahme, dass durch die IDCT keine
+Rundungsfehler ins Spiel kommen \- was natürlich nicht der Fall ist).
+Sie findet einfach einen Block für das Minimum von Fehler und lambda * bits.
+.RSss
+lambda: qp\-abhängige Konstante
+.br
+bits: für die Encodierung des Blockes benötigte Anzahl Bits
+.br
+error: Summe der quadratischen Quantisierungsfehler
+.REss
+.IPs last_pred=<0\-99>
+Menge der motion predictors vom letzten Bild
+.RSss
+0: (Standard)
+.br
+a: benutzt 2a+1 x 2a+1 MB\-Quadrat von MV predictors vom vorherigen Bild
+.REss
+.IPs preme=<0\-2> 
+motion estimation pre-pass
+.RSss
+0: deaktiviert
+.br
+1: nur nach I\-Frames (Standard)
+.br
+2: immer
+.REss
+.IPs subq=<1\-8>
+subpel refinement quality (für qpel) (Standardwert: 8).
+Anmerkung: Diese Einstellung hat eine signifikante Auswirkung auf die
+Geschwindigkeit.
+.IPs psnr
+Gibt den maximalen Signal-zu-Rauschabstand (peak signal to noise ratio) für
+das komlpette Video nach dem Encodieren aus und speichert die psnr-Werte für
+jedes Bild in der Datei 'psnr_012345.log'.
+.IPs mpeg_quant
+benutze MPEG\-Quantizer anstelle der H.263\-Quantizer
+(Standard: deaktiviert = benutze H.263\-Quantizer)
+.RE
 .
 .
-.\" manpage is synced from top down to this option.
 .SS xvidenc (\-xvidencopts)
 .
 Es sind drei Modi verfügbar: konstante Bitrate (CBR), feste
