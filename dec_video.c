@@ -331,6 +331,10 @@ void uninit_video(sh_video_t *sh_video){
 	xacodec_exit();
 	break;
 #endif
+    case VFM_DIVX4:
+    case VFM_ODIVX:
+      decore(0x123,DEC_OPT_RELEASE,NULL,NULL);
+      break;
     }
     if(sh_video->our_out_buffer){
 	free(sh_video->our_out_buffer);

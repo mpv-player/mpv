@@ -1,5 +1,9 @@
 
+#ifndef __PLAYTREE_H
+#define __PLAYTREE_H
+
 #include "libmpdemux/stream.h"
+
 
 #define PLAY_TREE_ITER_ERROR 0
 #define PLAY_TREE_ITER_ENTRY 1
@@ -8,11 +12,12 @@
 
 typedef struct play_tree play_tree_t;
 typedef struct play_tree_iter play_tree_iter_t;
+typedef struct play_tree_param play_tree_param_t;
+
+#include "cfgparser.h"
 
 #if 0
 typedef struct play_tree_info play_tree_info_t;
-typedef struct play_tree_param play_tree_param_t;
-
 // TODO : a attrib,val pair system and not something hardcoded
 struct play_tree_info {
   char* title;
@@ -21,12 +26,13 @@ struct play_tree_info {
   char* abstract;
   // Some more ??
 }
+#endif
 
 struct play_tree_param {
   char* name;
   char* value;
-}
-#endif
+};
+
 
 struct play_tree {
   play_tree_t* parent;
@@ -35,8 +41,7 @@ struct play_tree {
   play_tree_t* prev;
 
   //play_tree_info_t info;
-  //int n_param;
-  //play_tree_param_t* params;
+  play_tree_param_t* params;
   int loop;
   char** files;
 };
@@ -44,10 +49,11 @@ struct play_tree {
 struct play_tree_iter {
   play_tree_t* root; // Iter root tree
   play_tree_t* tree; // Current tree
-  // struct m_config* config; 
+  m_config_t* config; 
   int loop;  // Looping status
   int file;
   int num_files;
+  int entry_pushed;
  
   int* status_stack; //  loop/valid stack to save/revert status when we go up/down
   int stack_size;  // status stack size
@@ -97,7 +103,6 @@ int
 play_tree_remove_file(play_tree_t* pt,char* file);
 
 
-#if 0
 // Val can be NULL
 void
 play_tree_set_param(play_tree_t* pt, char* name, char* val);
@@ -105,13 +110,11 @@ play_tree_set_param(play_tree_t* pt, char* name, char* val);
 int
 play_tree_unset_param(play_tree_t* pt, char* name);
 
-#endif
-
 
 /// Iterator
 
 play_tree_iter_t*
-play_tree_iter_new(play_tree_t* pt);
+play_tree_iter_new(play_tree_t* pt, m_config_t* config);
 
 play_tree_iter_t*
 play_tree_iter_new_copy(play_tree_iter_t* old);
@@ -142,3 +145,5 @@ play_tree_cleanup(play_tree_t* pt);
 
 play_tree_t*
 parse_playlist_file(char* file);
+
+#endif

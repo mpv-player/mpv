@@ -97,6 +97,19 @@ extern tvi_handle_t *tv_handler;
 
 play_tree_t* playtree;
 
+#define PT_NEXT_ENTRY 1
+#define PT_PREV_ENTRY -1
+#define PT_NEXT_SRC 2
+#define PT_PREV_SRC -2
+#define PT_UP_NEXT 3
+#define PT_UP_PREV -3
+
+//**************************************************************************//
+//             Config
+//**************************************************************************//
+
+m_config_t* mconfig;
+
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
@@ -104,7 +117,7 @@ play_tree_t* playtree;
 static int cfg_inc_verbose(struct config *conf){ ++verbose; return 0;}
 
 static int cfg_include(struct config *conf, char *filename){
-	return parse_config_file(conf, filename);
+	return m_config_parse_config_file(mconfig, filename);
 }
 
 #include "get_path.c"
@@ -234,6 +247,10 @@ static int fullscreen=0;
 static int vidmode=0;
 static int softzoom=0;
 static int flip=-1;
+// We need this opt_* because the values are then calculated so the options use the opt_*
+// and before each file we reset the calculated value using this opt_* values
+static int opt_screen_size_x=0;//SCREEN_SIZE_X;
+static int opt_screen_size_y=0;//SCREEN_SIZE_Y;
 static int screen_size_x=0;//SCREEN_SIZE_X;
 static int screen_size_y=0;//SCREEN_SIZE_Y;
 static int screen_size_xy=0;
@@ -373,11 +390,11 @@ void exit_sighandler(int x){
 #include "mixer.h"
 #include "cfg-mplayer.h"
 
-void parse_cfgfiles( void )
+void parse_cfgfiles( m_config_t* conf )
 {
 char *conffile;
 int conffile_fd;
-if (parse_config_file(conf, "/etc/mplayer.conf") < 0)
+if (m_config_parse_config_file(conf, "/etc/mplayer.conf") < 0)
   exit(1);
 if ((conffile = get_path("")) == NULL) {
   mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoHomeDir);
@@ -392,7 +409,7 @@ if ((conffile = get_path("")) == NULL) {
       write(conffile_fd, default_config, strlen(default_config));
       close(conffile_fd);
     }
-    if (parse_config_file(conf, conffile) < 0)
+    if (m_config_parse_config_file(conf, conffile) < 0)
       exit(1);
     free(conffile);
   }
@@ -417,13 +434,10 @@ static sh_video_t *sh_video=NULL;
 
 // for multifile support:
 play_tree_iter_t* playtree_iter = NULL;
-char **filenames=NULL;
-int num_filenames=0;
-int curr_filename=0;
 
 char* filename=NULL; //"MI2-Trailer.avi";
 int file_format=DEMUXER_TYPE_UNKNOWN;
-//
+
 int delay_corrected=1;
 char* title="MPlayer";
 
@@ -493,36 +507,20 @@ int gui_no_filename=0;
       (strrchr(argv[0],'/') && !strcmp(strrchr(argv[0],'/'),"/gmplayer") ) )
           use_gui=1;
 
-    parse_cfgfiles();
-    num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
-    if(num_filenames<0) exit(1); // error parsing cmdline
-
     playtree = play_tree_new();
-    {
-      play_tree_t* list = NULL;
-      int i;
-      play_tree_t *entry = NULL, *tree = play_tree_new();
-      for(i= 0; i < num_filenames ; i++) {
-	entry = entry != NULL ? play_tree_new() : tree;
-	play_tree_add_file(entry,filenames[i]);
-	play_tree_append_entry(tree,entry);
-      }
-     
-      entry = play_tree_new();
-      play_tree_set_child(entry,tree);
-      list = entry;
-      if(playlist_file!=NULL) {
-	entry = parse_playlist_file(playlist_file);
-	if(entry != NULL){
-	  if(list) play_tree_append_entry(list,entry);
-	  else list = entry;
-	}
-      }
-      if(list) play_tree_set_child(playtree,list);
-    }
+
+    mconfig = m_config_new(playtree);
+    m_config_register_options(mconfig,mplayer_opts);
+    // TODO : add something to let modules register their options
+    parse_cfgfiles(mconfig);
+
+
+
+    if(m_config_parse_command_line(mconfig, argc, argv, envp) < 0) exit(1); // error parsing cmdline
+
     playtree = play_tree_cleanup(playtree);
     if(playtree) {
-      playtree_iter = play_tree_iter_new(playtree);
+      playtree_iter = play_tree_iter_new(playtree,mconfig);
       if(playtree_iter) {  
 	if(play_tree_iter_step(playtree_iter,0,0) != PLAY_TREE_ITER_ENTRY) {
 	  play_tree_iter_free(playtree_iter);
@@ -606,7 +604,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       printf("CommandLine:");
       for(i=1;i<argc;i++)printf(" '%s'",argv[i]);
       printf("\n");
-      printf("num_filenames: %d\n",num_filenames);
     }
 
     mp_msg_init(verbose+MSGL_STATUS);
@@ -1172,7 +1169,7 @@ mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",video
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
 //    int ret;
     out_fmt=sh_video->codec->outfmt[i];
-    if(out_fmt==0xFFFFFFFF) continue;
+    if(out_fmt==(signed int)0xFFFFFFFF) continue;
 #ifdef USE_LIBVO2
     vo_flags=vo2_query_format(video_out);
 #else
@@ -1223,10 +1220,12 @@ current_module="init_libvo";
      if(!screen_size_xy) screen_size_xy=vo_screenwidth; // scale with asp.ratio
    }
 #endif
+   
   // Set default VGA 1:1 aspect as fallback ::atmos
   if(movie_aspect>-1.0) sh_video->aspect = movie_aspect; // cmdline overrides autodetect
 //  if(!sh_video->aspect) sh_video->aspect=1.0;
-
+  screen_size_x = opt_screen_size_x;
+  screen_size_y = opt_screen_size_y;
   if(screen_size_xy||screen_size_x||screen_size_y){
    if(screen_size_xy>0){
      if(screen_size_xy<=8){
@@ -1829,7 +1828,9 @@ if(auto_quality>0){
 #endif
 
   if(osd_function==OSD_PAUSE){
+#ifdef HAVE_NEW_GUI
       int gui_pause_flag=0; // gany!
+#endif
       mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\n------ PAUSED -------\r");fflush(stdout);
 #ifdef HAVE_NEW_GUI
       if(use_gui) mplShMem->Playing=2;
@@ -1963,18 +1964,10 @@ if(step_sec>0) {
       break;
     // quit
     case KEY_ESC: // ESC
-    case 'q': exit_player(MSGTR_Exit_quit);
-    case '>':
-	if(curr_filename>=num_filenames-1)
-		break;
+    case 'q': 
+      exit_player(MSGTR_Exit_quit);
     case KEY_ENTER: // ESC
-      eof=2;  // jump to next file
-      break;
-    case '<':
-	if(curr_filename < 1)
-		break;
-        curr_filename-=2;
-	eof=2;
+      eof=1;  // force jump to next file : quit if no next file
       break;
     case 'g': grab_frames=2;break;
     // pause
@@ -1985,26 +1978,42 @@ if(step_sec>0) {
     case KEY_HOME:
       {
 	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
-	if(play_tree_iter_step(i,1,0) == PLAY_TREE_ITER_ENTRY)
-	  eof = 1;
+	if(play_tree_iter_up_step(i,1,0) == PLAY_TREE_ITER_ENTRY)
+	  eof = PT_UP_NEXT;
 	play_tree_iter_free(i);
       }
       break;
     case KEY_END:
       {
 	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
+	if(play_tree_iter_up_step(i,-1,0) == PLAY_TREE_ITER_ENTRY)
+	  eof = PT_UP_PREV;
+	play_tree_iter_free(i);
+      }
+      break;
+    case '>':
+      {
+	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
+	if(play_tree_iter_step(i,1,0) == PLAY_TREE_ITER_ENTRY)
+	  eof = PT_NEXT_ENTRY;
+	play_tree_iter_free(i);
+      }
+      break;
+    case '<':
+      {
+	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
 	if(play_tree_iter_step(i,-1,0) == PLAY_TREE_ITER_ENTRY)
-	  eof = -1;
+	  eof = PT_PREV_ENTRY;
 	play_tree_iter_free(i);
       }	
       break;
     case KEY_INS:
       if(playtree_iter->num_files > 1 && playtree_iter->file < playtree_iter->num_files)
-	eof = 2;
+	eof = PT_NEXT_SRC;
       break;
     case KEY_DEL:      
       if(playtree_iter->num_files > 1 && playtree_iter->file > 1)
-	eof = -2;
+	eof = PT_PREV_SRC;
       break;
     case 'o':  // toggle OSD
       osd_level=(osd_level+1)%3;
@@ -2345,7 +2354,7 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 
 goto_next_file:  // don't jump here after ao/vo/getch initialization!
 
-if(eof == 1 || eof == -1) {
+if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
   if(play_tree_iter_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
     uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC));
     eof = 1;
@@ -2353,9 +2362,18 @@ if(eof == 1 || eof == -1) {
     play_tree_iter_free(playtree_iter);
     playtree_iter = NULL;
   }
-} else {
+} else if (eof == PT_UP_NEXT || eof == PT_UP_PREV) {
+  eof = eof == PT_UP_NEXT ? 1 : -1;
+  if(play_tree_iter_up_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
+    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC));
+    eof = 1;
+  } else {
+    play_tree_iter_free(playtree_iter);
+    playtree_iter = NULL;
+  }
+}else { // NEXT PREV SRC
      uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC));
-     eof = eof == -2 ? -1 : 1;
+     eof = eof == PT_PREV_SRC ? -1 : 1;
 }
 
 goto_next_file_src: // When we have multiple src for file

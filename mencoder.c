@@ -31,6 +31,7 @@ static char* banner_text=
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "playtree.h"
 
 #include "aviwrite.h"
 
@@ -171,10 +172,12 @@ static int vo_w=0, vo_h=0;
 
 #include "cfgparser.h"
 
+m_config_t* mconfig;
+
 static int cfg_inc_verbose(struct config *conf){ ++verbose; return 0;}
 
 static int cfg_include(struct config *conf, char *filename){
-	return parse_config_file(conf, filename);
+	return m_config_parse_config_file(mconfig, filename);
 }
 
 #include "get_path.c"
@@ -340,9 +343,9 @@ float audio_preload=0.5;
 double v_pts_corr=0;
 double v_timer_corr=0;
 
-char** filenames=NULL;
+play_tree_t* playtree;
+play_tree_iter_t* playtree_iter;
 char* filename=NULL;
-int num_filenames;
 
 int decoded_frameno=0;
 
@@ -378,16 +381,30 @@ divx4_param.rc_reaction_period = 10;
 divx4_param.rc_reaction_ratio  = 20;
 #endif
 
-  num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
-  if(num_filenames<0) exit(1); // error parsing cmdline
-  if(!num_filenames && !vcd_track && !dvd_title && !tv_param_on){
+  playtree = play_tree_new();
+  mconfig = m_config_new(playtree);
+  m_config_register_options(mconfig,mencoder_opts);
+
+  if(m_config_parse_command_line(mconfig, argc, argv, envp) < 0) exit(1); // error parsing cmdline
+  playtree = play_tree_cleanup(playtree);
+  if(playtree) {
+    playtree_iter = play_tree_iter_new(playtree,mconfig);
+    if(playtree_iter) {  
+      if(play_tree_iter_step(playtree_iter,0,0) != PLAY_TREE_ITER_ENTRY) {
+	play_tree_iter_free(playtree_iter);
+	playtree_iter = NULL;
+      }
+      filename = play_tree_iter_get_file(playtree_iter,1);
+    }
+  }
+
+  if(!filename && !vcd_track && !dvd_title && !tv_param_on){
 	printf("\nMissing filename!\n\n");
 	exit(1);
   }
 
   mp_msg_init(verbose+MSGL_STATUS);
 
-  filename=(num_filenames>0)?filenames[0]:NULL;
   stream=open_stream(filename,vcd_track,&file_format);
 
   if(!stream){

@@ -1,8 +1,11 @@
 
+#include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef MP_DEBUG
 #include <assert.h>
+#endif
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -240,7 +243,7 @@ play_tree_t*
 parse_playtree(stream_t *stream) {
   play_tree_t* tree = NULL;
   
-#ifdef DEBUG
+#ifdef MP_DEBUG
   assert(stream != NULL);
   assert(stream->type == STREAMTYPE_PLAYLIST);
 #endif
