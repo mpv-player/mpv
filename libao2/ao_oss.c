@@ -7,13 +7,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <sys/soundcard.h>
+//#include <sys/soundcard.h>
 
 #include "../config.h"
 
+#include "afmt.h"
+
 #include "audio_out.h"
 #include "audio_out_internal.h"
-//#include "afmt.h"
 
 extern int verbose;
 
