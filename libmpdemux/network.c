@@ -592,7 +592,7 @@ extension=NULL;
 						extension=(url->file)+i+1;
 						break;
 			}
-			if (!strcasecmp(extension, "rm")) {
+			if (extension != NULL && !strcasecmp(extension, "rm")) {
 				*file_format = DEMUXER_TYPE_REAL;
 				return 0;
 			}
