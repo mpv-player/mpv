@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 	paint(bitmap, (75*75*4), 0, 255, 0, 128);
 	blit(fifo, bitmap, 75, 75, width-50-75, 50, 0, 0);
 
-	// Paint bitmap green, 50% transparent and blit at position -50,50
+	// Paint bitmap blue, 50% transparent and blit at position -50,50
 	paint(bitmap, (75*75*4), 0, 0, 255, 128);
 	blit(fifo, bitmap, 75, 75, 50, height-50-75, 0, 0);
 
