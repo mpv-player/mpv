@@ -53,6 +53,7 @@ extern vf_info_t vf_info_sab;
 extern vf_info_t vf_info_smartblur;
 extern vf_info_t vf_info_perspective;
 extern vf_info_t vf_info_field;
+extern vf_info_t vf_info_denoise3d;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -99,6 +100,7 @@ static vf_info_t* filter_list[]={
     &vf_info_smartblur,
     &vf_info_perspective,
     &vf_info_field,
+    &vf_info_denoise3d,
     NULL
 };
 

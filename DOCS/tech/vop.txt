@@ -220,3 +220,13 @@ Current plugins:
 -vop perspective=x0:y0:x1:y1:x2:y2:x3:y3:t
     x0,y0,...	coordinates of the topleft, topright, bottomleft, bottomright corners
     t		0-> linear, 1->cubic resampling
+
+-vop denoise3d=[luma:chroma:time]
+    luma	spatial luma strength (default = 4)
+    chroma	spatial chroma strength (default = 3)
+    time	temporal strength (default = 6)
+    This filter aims to reduce image noise producing smooth images and
+    making stills realy still. (it should enhance compressibility)
+    Can be given from 0 to 3 parameters. Parameters not given will be
+    infered from the given ones. (ie: providing only one of them acts as an
+    "scale factor")
