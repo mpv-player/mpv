@@ -84,8 +84,7 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
 	  } else
           pts_corr_bytes+=len;
       }
-
-            pts=avi_audio_pts+pts_correction;
+            pts=avi_audio_pts; //+pts_correction;
             avi_audio_pts=0;
   } else 
   if(ds==demux->video){
@@ -114,7 +113,7 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
 //     avi_video_pts+=avi_video_ftime;
 #endif
 //          printf("\rYYY-V  A: %5.3f  V: %5.3f  \n",avi_audio_pts,avi_video_pts);
-     avi_audio_pts=avi_video_pts;
+     avi_audio_pts=avi_video_pts+pts_correction;
      pts_has_video=1;
 
   }
