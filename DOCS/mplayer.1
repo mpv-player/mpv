@@ -107,9 +107,14 @@ Available options are:
 
     speed=n           set CD spin speed
     paranoia=n        set paranoia level (0-2)
+                        0: disable checking
+                        1: overlap checking only
+                           (default)
+                        2: full data verification
+                           and correction
     generic-dev=/dev/ use specified generic scsi
                       device
-    sector-size=n       
+    sector-size=n     atomic read size
     overlap=n         force minimum overlap search
                       during verification to <n>
                       sectors.
@@ -215,6 +220,16 @@ of some bad AVI files).
 .B \-nobps (.AVI only)
 Do not use average byte/sec value for A\-V sync (AVI).
 Helps with some AVI files with broken header.
+.TP
+.B \-rawaudio <option1:option2:...>
+This option lets you play raw audio files. It may also be used to
+play audio CDs wich are not 44KHz 16 bit stereo.
+
+    on                 use raw audio demuxer
+    channels=<value>   number of channels
+    rate=<value>       rate in samples per second
+    samplesize=<value> sample size in byte
+    format=<value>     fourcc in hex
 .TP
 .B \-skipopening
 Skip DVD opening (dvdnav only).
@@ -650,6 +665,25 @@ than a single buffer, so it won't work on cards with very few video memory.
 .B \-dr
 Turns on direct rendering (not supported by all codecs and video outputs)
 (default is off).
+.TP
+.B \-dxr2 <option1:option2:...>
+This option is used to control the dxr2 driver.
+
+    overlay                enable the overlay
+    overlay-ratio          tune the overlay
+    ucode=<value>          path to the microcode
+    norm=<value>           TV norm
+    ar-mode=<value>        aspect ratio mode
+    macrovision=<value>    macrovision mode
+    75ire                  enable 7.5 IRE
+    bw                     b/w TV output
+    color                  color TV output
+    interlaced             interlaced TV output
+    square/ccir601-pixel   TV pixel mode
+    iec958-encoded/decoded iec958 output mode
+    mute                   mute sound output
+    ignore-cache           do not use VGA cache
+    update-cache           recreate VGA cache
 .TP
 .B \-fb <device> (fbdev or DirectFB only)
 Specifies the framebuffer device to use. By default it uses /dev/fb0.
