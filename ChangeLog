@@ -4,7 +4,7 @@ mplayer (1.0)
 
     DOCS:
     * all MPlayer and MEncoder options documented
-    * almost all lavc options documented
+    * all lavc options documented
     * Support for building incomplete XML documentation
     * Support for building all-in-one HTML docs
     * HTML documentation obsoleted
@@ -14,7 +14,7 @@ mplayer (1.0)
     * small improvements and bug fixes all over the place
 
     Ports:
-    * fixed compilation of matroska on MinGW32/Cygwin
+    * fixed compilation of Matroska on MinGW32/Cygwin
     * support for detecting non-Intel CPUs under Cygwin
     * sub autoloading under Windows
 
