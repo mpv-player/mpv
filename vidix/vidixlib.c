@@ -43,6 +43,8 @@ typedef struct vdl_stream_s
 	int 	(*get_eq)( vidix_video_eq_t * );
 	int 	(*set_eq)( const vidix_video_eq_t * );
 	int 	(*copy_frame)( const vidix_dma_t * );
+	int 	(*get_gkey)( vidix_grkey_t * );
+	int 	(*set_gkey)( const vidix_grkey_t * );
 }vdl_stream_t;
 
 #define t_vdl(p) (((vdl_stream_t *)p))
@@ -64,6 +66,8 @@ static int vdl_fill_driver(VDL_HANDLE stream)
   t_vdl(stream)->frame_sel	= dlsym(t_vdl(stream)->handle,"vixPlaybackFrameSelect");
   t_vdl(stream)->get_eq	= dlsym(t_vdl(stream)->handle,"vixPlaybackGetEq");
   t_vdl(stream)->set_eq	= dlsym(t_vdl(stream)->handle,"vixPlaybackSetEq");
+  t_vdl(stream)->get_gkey	= dlsym(t_vdl(stream)->handle,"vixGetGrKeys");
+  t_vdl(stream)->set_gkey	= dlsym(t_vdl(stream)->handle,"vixSetGrKeys");
   t_vdl(stream)->copy_frame	= dlsym(t_vdl(stream)->handle,"vixPlaybackCopyFrame");
   /* check driver viability */
   if(!( t_vdl(stream)->get_caps && t_vdl(stream)->query_fourcc &&
@@ -249,4 +253,14 @@ int  vdlPlaybackSetEq(VDL_HANDLE handle, const vidix_video_eq_t * e)
 int  vdlPlaybackCopyFrame(VDL_HANDLE handle, const vidix_dma_t * f)
 {
   return t_vdl(handle)->copy_frame ? t_vdl(handle)->copy_frame(f) : ENOSYS;
+}
+
+int 	  vdlGetGrKeys(VDL_HANDLE handle, vidix_grkey_t * k)
+{
+  return t_vdl(handle)->get_gkey ? t_vdl(handle)->get_gkey(k) : ENOSYS;
+}
+
+int 	  vdlSetGrKeys(VDL_HANDLE handle, const vidix_grkey_t * k)
+{
+  return t_vdl(handle)->set_gkey ? t_vdl(handle)->set_gkey(k) : ENOSYS;
 }

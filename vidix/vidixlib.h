@@ -61,6 +61,12 @@ extern int 	  vdlPlaybackOff(VDL_HANDLE);
 extern int 	  vdlPlaybackFrameSelect(VDL_HANDLE, unsigned frame_idx );
 
 			/* Returns 0 if ok else errno */
+extern int 	  vdlGetGrKeys(VDL_HANDLE, vidix_grkey_t * );
+
+			/* Returns 0 if ok else errno */
+extern int 	  vdlSetGrKeys(VDL_HANDLE, const vidix_grkey_t * );
+
+			/* Returns 0 if ok else errno */
 extern int 	  vdlPlaybackGetEq(VDL_HANDLE, vidix_video_eq_t * );
 
 			/* Returns 0 if ok else errno */

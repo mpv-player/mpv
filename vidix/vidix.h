@@ -137,13 +137,6 @@ typedef struct vidix_playback_s
 	unsigned	blend_factor;	/* app -> driver: blenfing factor */
 	vidix_rect_t	src;            /* app -> driver: original movie size */
 	vidix_rect_t	dest;           /* app -> driver: destinition movie size. driver->app dest_pitch */
-	vidix_ckey_t	ckey;		/* app -> driver: color key */
-	vidix_vkey_t	vkey;		/* app -> driver: video key */
-#define KEYS_PUT	0
-#define KEYS_AND	1
-#define KEYS_OR		2
-#define KEYS_XOR	3
-	unsigned	key_op;		/* app -> driver: keys operations */
 	/* memory model */
 	unsigned	frame_size;		/* driver -> app; destinition frame size */
 	unsigned	num_frames;		/* app -> driver; after call: driver -> app */
@@ -164,6 +157,24 @@ extern int 	vixPlaybackOff( void );
 
 			/* Returns 0 if ok else errno */
 extern int 	vixPlaybackFrameSelect( unsigned frame_idx );
+
+typedef struct vidix_grkey_s
+{
+	vidix_ckey_t	ckey;		/* app -> driver: color key */
+	vidix_vkey_t	vkey;		/* app -> driver: video key */
+#define KEYS_PUT	0
+#define KEYS_AND	1
+#define KEYS_OR		2
+#define KEYS_XOR	3
+	unsigned	key_op;		/* app -> driver: keys operations */
+}vidix_grkey_t;
+
+			/* Returns 0 if ok else errno */
+extern int 	vixGetGrKeys( vidix_grkey_t * );
+
+			/* Returns 0 if ok else errno */
+extern int 	vixSetGrKeys( const vidix_grkey_t * );
+
 
 typedef struct vidix_video_eq_s
 {

@@ -672,6 +672,7 @@ int vixInit( void )
   /* mem size is bits [28:0], mask off the rest. Range: from 1Mb up to 512 Mb */
   radeon_ram_size &=  CONFIG_MEMSIZE_MASK;
   if((radeon_mem_base = map_phys_mem(pci_info.base0,radeon_ram_size))==(void *)-1) return ENOMEM;
+  memset(&besr,0,sizeof(bes_registers_t));
   radeon_vid_make_default();
   printf(RADEON_MSG" Video memory = %uMb\n",radeon_ram_size/0x100000);
   return 0;  
