@@ -64,8 +64,8 @@ static int nv12_to_yv12(void *data, int len, mp_image_t* mpi, int swapped) {
     unsigned int UV_size = mpi->chroma_width * mpi->chroma_height;
     unsigned int idx;
     unsigned char *dst_Y = mpi->planes[0];
-    unsigned char *dst_U = swapped?mpi->planes[2]:mpi->planes[1];
-    unsigned char *dst_V = swapped?mpi->planes[1]:mpi->planes[2];
+    unsigned char *dst_U = mpi->planes[1];
+    unsigned char *dst_V = mpi->planes[2];
     unsigned char *src   = data + Y_size;
 
     // sanity check raw stream
@@ -90,8 +90,8 @@ static int nv12_to_yv12(void *data, int len, mp_image_t* mpi, int swapped) {
 
     // chroma data is interlaced UVUV... so deinterlace it
     for(idx=0; idx<UV_size; idx++ ) {
-        *(dst_U + idx) = *(src + (idx<<1) + 0); 
-        *(dst_V + idx) = *(src + (idx<<1) + 1);
+        *(dst_U + idx) = *(src + (idx<<1) + (swapped ? 1 : 0)); 
+        *(dst_V + idx) = *(src + (idx<<1) + (swapped ? 0 : 1));
     }
     return 1;
 }
@@ -130,7 +130,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	de_macro_y(mpi->planes[0],data,mpi->stride[0],mpi->w,mpi->h);
 	de_macro_uv(mpi->planes[1],mpi->planes[2],data+mpi->w*mpi->h,mpi->stride[1],mpi->w/2,mpi->h/2);
     } else {
-	if(!nv12_to_yv12(data, len, mpi,(sh->format == IMGFMT_NV12))) return NULL;
+	if(!nv12_to_yv12(data, len, mpi,(sh->format == IMGFMT_NV21))) return NULL;
     }
 
     return mpi;
