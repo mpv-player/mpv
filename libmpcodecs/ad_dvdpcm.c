@@ -43,7 +43,7 @@ static int init(sh_audio_t *sh)
 	    sh->i_bps = sh->channels * sh->samplerate * 5 / 2;
 	  case 2: 
 	    sh->sample_format = AFMT_AF_FLAGS | AF_FORMAT_I |
-	                         AF_FORMAT_BE | AF_FORMAT_US;
+	                         AF_FORMAT_BE | AF_FORMAT_SI;
 	    sh->samplesize = 3;
 	    break;
 	  default:
