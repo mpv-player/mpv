@@ -8,12 +8,14 @@ demuxer:
 - test and cleanup FLI/FLC support (and implement seek)
 - check dvdread/dvdcss version problems
 - add -dumpstream
+- implement seek for VIVO
 
 decoders:
 - check and import videodecoding.de stuff
 - finish and switch to C directshow code
 - finish native g72x audio decoder
 - qtx support?
+- fix the MSVideo1-bugs
 
 mencoder:
 - add ffmpeg encoders support
