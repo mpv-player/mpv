@@ -1,5 +1,5 @@
 /* Translated by:  Nick Kurshev <nickols_k@mail.ru>
-   Was synced with help_mp-en.h: rev 1.16
+   Was synced with help_mp-en.h: rev 1.19
  ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -263,5 +263,46 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "несуществующий идентификатор шрифта ( %s )\n"
 #define MSGTR_SKIN_UnknownParameter "неизвестный параметр ( %s )\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] не хватает памяти.\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin не найден ( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Ошибка чтения фала конфигурации skin ( %s ).\n"
+#define MSGTR_SKIN_LABEL "Skins:"
+
+// --- gtk menus
+#define MSGTR_MENU_AboutMPlayer "О MPlayer"
+#define MSGTR_MENU_Open "Открыть ..."
+#define MSGTR_MENU_PlayFile "Играть файл ..."
+#define MSGTR_MENU_PlayVCD "Играть VCD ..."
+#define MSGTR_MENU_PlayDVD "Играть DVD ..."
+#define MSGTR_MENU_PlayURL "Играть URL ..."
+#define MSGTR_MENU_LoadSubtitle "Загрузить субтитры ..."
+#define MSGTR_MENU_Playing "Воспроизведение"
+#define MSGTR_MENU_Play "Играть"
+#define MSGTR_MENU_Pause "Пауза"
+#define MSGTR_MENU_Stop "Останов"
+#define MSGTR_MENU_NextStream "След. поток"
+#define MSGTR_MENU_PrevStream "Пред. поток"
+#define MSGTR_MENU_Size "Размер"
+#define MSGTR_MENU_NormalSize "Нормальный размер"
+#define MSGTR_MENU_DoubleSize "Двойной размер"
+#define MSGTR_MENU_FullScreen "Полный экран"
+#define MSGTR_MENU_DVD "DVD"
+#define MSGTR_MENU_PlayDisc "Играть диск ..."
+#define MSGTR_MENU_ShowDVDMenu "Показать DVD меню"
+#define MSGTR_MENU_Titles "Титры"
+#define MSGTR_MENU_Title "Титр %2d"
+#define MSGTR_MENU_None "(нет)"
+#define MSGTR_MENU_Chapters "Главы"
+#define MSGTR_MENU_Chapter "Глава %2d"
+#define MSGTR_MENU_AudioLanguages "Авто язык"
+#define MSGTR_MENU_SubtitleLanguages "Язык субтитров"
+#define MSGTR_MENU_PlayList "Playlist"
+#define MSGTR_MENU_SkinBrowser "Просмоторщик skin'ов"
+#define MSGTR_MENU_Preferences "Настройки"
+#define MSGTR_MENU_Exit "Выход ..."
+
+// --- messagebox
+#define MSGTR_MSGBOX_LABEL_FatalError "фатальная ошибка ..."
+#define MSGTR_MSGBOX_LABEL_Error "ошибка ..."
+#define MSGTR_MSGBOX_LABEL_Warning "предупреждение ..." 
 
 #endif
