@@ -205,4 +205,11 @@ void ChangeSkin( void )
      mplSubRender=1; wsPostRedisplay( &appMPlayer.subWindow );
     }
   }
+ mplShMem->SkinChange=0; 
+}
+
+void EventHandling( void )
+{
+ wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+ if ( mplShMem->SkinChange ) ChangeSkin();
 }

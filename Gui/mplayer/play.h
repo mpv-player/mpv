@@ -47,6 +47,8 @@ typedef struct
    int    TimeSec;
    int    LengthInSec;
    char   Filename[4096];
+   
+   int    SkinChange;
 } mplCommStruct;
 
 extern mplCommStruct * mplShMem;
@@ -82,5 +84,6 @@ extern void mplSendMessage( int msg );
 extern void mplPlayerThread( void );
 
 extern void ChangeSkin( void );
+extern void EventHandling( void );
 
 #endif

@@ -168,7 +168,7 @@ void mplMainSigHandler( int s )
  if ( s != SIGTYPE ) return;
 
 // #ifdef DEBUG
-  if ( gtkShMem->message ) dbprintf( 5,"[psignal] main sig handler gtk msg: %d\n",gtkShMem->message );
+//  if ( gtkShMem->message ) dbprintf( 5,"[psignal] main sig handler gtk msg: %d\n",gtkShMem->message );
 //  if ( mplShMem->message ) dbprintf( 5,"[psignal] main sig handler mpl msg: %d\n",mplShMem->message );
 // #endif
 
@@ -199,9 +199,7 @@ void mplMainSigHandler( int s )
           case evLoad: gtkVisibleFileSelect=0; break;
          }
         break;
-   case evSkinBrowser:
-        ChangeSkin();
-        break;
+   case evSkinBrowser: mplShMem->SkinChange=1; break;
    case evFileLoaded:
         strcpy( mplShMem->Filename,gtkShMem->fs.dir ); strcat( mplShMem->Filename,"/" ); strcat( mplShMem->Filename,gtkShMem->fs.filename );
         if ( mplMainAutoPlay ) mplGeneralTimer=1;

@@ -583,7 +583,7 @@ play_next_file:
       mplShMem->Playing= (gui_no_filename) ? 0 : 1;
       while(mplShMem->Playing!=1){
 	usleep(20000);
-	wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+	EventHandling();
       }
       if(gui_no_filename){
         filename=mplShMem->Filename;
@@ -1291,7 +1291,7 @@ if(1)
       }
 #ifdef HAVE_NEW_GUI
       if(use_gui){
-        wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+	EventHandling();
       }
 #endif
       video_out->check_events(); // check events AST
@@ -1329,7 +1329,7 @@ if(1)
 
 #ifdef HAVE_NEW_GUI
       if(use_gui){
-        wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+	EventHandling();
       }
 #endif
       
@@ -1341,7 +1341,7 @@ if(1)
              usec_sleep(1000000*(time_frame-0.002));
 #ifdef HAVE_NEW_GUI
           if(use_gui){
-	    wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+            EventHandling();
           }
 #endif
           time_frame-=GetRelativeTime();
@@ -1512,7 +1512,7 @@ if(auto_quality>0){
 #endif
 #ifdef HAVE_NEW_GUI
              if(use_gui){
-		wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+		EventHandling();
 		if(mplShMem->Playing!=2 || (rel_seek_secs || abs_seek_pos)) break; // end of pause or seek
              }
 #endif
