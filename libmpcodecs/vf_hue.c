@@ -130,8 +130,6 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 	case IMGFMT_I420:
 	case IMGFMT_IYUV:
 	case IMGFMT_CLPL:
-	case IMGFMT_Y800:
-	case IMGFMT_Y8:
 	case IMGFMT_NV12:
 	case IMGFMT_444P:
 	case IMGFMT_422P:
