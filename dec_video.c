@@ -471,6 +471,8 @@ switch(sh_video->codec->driver){
       return 0;
    }  
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32 video codec init OK!\n");
+   /* Warning: these pitches tested only with YUY2 fourcc */
+   pitches[0] = 16; pitches[1] = pitches[2] = 8;
    break;
  }
  case VFM_VFWEX: {
@@ -478,6 +480,8 @@ switch(sh_video->codec->driver){
       return 0;
    }  
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32Ex video codec init OK!\n");
+   /* Warning: these pitches tested only with YUY2 fourcc */
+   pitches[0] = 16; pitches[1] = pitches[2] = 8;
    break;
  }
  case VFM_DSHOW: { // Win32/DirectShow
@@ -1017,10 +1021,24 @@ if(verbose>1){
   {
     int ret;
     if(!in_size) break;
+	/* FIXME: WILL WORK ONLY FOR PACKED FOURCC. BUT WHAT ABOUT PLANAR? */
+        vmem = 0;
+	if(use_dr && bda.dest.pitch.y == 16)
+	{
+	    vmem = bda.dga_addr + bda.offsets[0] + bda.offset.y;
+	    if(vo_doublebuffering && bda.num_frames>1)
+	    {
+		if(double_buff_num) vmem = bda.dga_addr + bda.offsets[1] + bda.offset.y;
+		else		    vmem = bda.dga_addr + bda.offsets[0] + bda.offset.y;
+		double_buff_num = double_buff_num ? 0 : 1;
+	    }
+	    sh_video->our_out_buffer = vmem;
+	}
     if((ret=vfw_decode_video(sh_video,start,in_size,drop_frame,(sh_video->codec->driver==VFM_VFWEX) ))){
       mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error decompressing frame, err=%d\n",ret);
       break;
     }
+    if(vmem) painted=1;
     if(!drop_frame) blit_frame=3;
     break;
   }
