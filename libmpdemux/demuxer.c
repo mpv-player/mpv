@@ -46,7 +46,7 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
   ds->asf_seq=-1;
   ds->asf_packet=NULL;
 //----------------
-  ds->ss_mul=ds->ss_div=1;
+  ds->ss_mul=ds->ss_div=0;
   ds->block_size=1;
 //----------------
   ds->sh=NULL;

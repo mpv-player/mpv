@@ -1399,7 +1399,7 @@ if(trak->samplesize){
 //	x*=char2int(trak->stdata,32); // bytes/packet
 	x*=char2int(trak->stdata,36); // bytes/frame
       } else {
-	if(ds->ss_div!=1 || ds->ss_mul!=1){
+	if(ds->ss_div && ds->ss_mul){
 	    // workaround for buggy files like 7up-high-traffic-areas.mov,
 	    // with missing stsd v1 header containing compression rate
 	    x/=ds->ss_div; x*=ds->ss_mul; // compression ratio fix  ! HACK !
