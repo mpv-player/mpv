@@ -59,11 +59,15 @@ void close_cdda(stream_t* s);
 #include "libsmbclient.h"
 #endif
 
+#ifdef HAVE_CDDA
 extern stream_info_t stream_info_cdda;
+#endif
 extern stream_info_t stream_info_file;
 
 stream_info_t* auto_open_streams[] = {
+#ifdef HAVE_CDDA
   &stream_info_cdda,
+#endif
   &stream_info_file,
   NULL
 };
