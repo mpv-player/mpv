@@ -49,10 +49,6 @@
 
 #include <x264.h>
 
-#if X264_BUILD < 0x0010
-#error We do not support old versions of x264. Get the latest from SVN.
-#endif
-
 typedef struct _h264_module_t {
     muxer_stream_t *mux;
     x264_param_t    param;
