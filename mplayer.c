@@ -803,7 +803,7 @@ if(sh_audio){
       }
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
       mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-      free_sh_audio(sh_audio); sh_audio=NULL; d_audio->sh=NULL;
+      sh_audio=d_audio->sh=NULL;
       break;
     }
     if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
@@ -817,7 +817,7 @@ if(sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_V,"Initializing audio codec...\n");
   if(!init_audio(sh_audio)){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
-    free_sh_audio(sh_audio); sh_audio=NULL; d_audio->sh=NULL;
+    sh_audio=d_audio->sh=NULL;
   } else {
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
         sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
@@ -918,7 +918,7 @@ if(auto_quality>0){
      if((encode_file=fopen(encode_index_name,"wb")))
        fclose(encode_file);
      else encode_index_name=NULL;
-     free_sh_audio(sh_audio); sh_audio=NULL; d_audio->sh=NULL; // disable audio !!!!!
+     sh_audio=d_audio->sh=NULL;
    }
 
 // ========== Init keyboard FIFO (connection to libvo) ============
@@ -1045,7 +1045,7 @@ if(sh_audio){
   if(!audio_out->init(force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels,sh_audio->sample_format,0)){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
-    free_sh_audio(sh_audio); sh_audio=NULL; d_audio->sh=NULL;
+    sh_audio=d_audio->sh=NULL;
   }
 
 //  printf("Audio buffer size: %d bytes, delay: %5.3fs\n",audio_buffer_size,audio_buffer_delay);
