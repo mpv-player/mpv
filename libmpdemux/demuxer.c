@@ -602,6 +602,9 @@ extern int demux_open_ts(demuxer_t *demuxer);
 extern int demux_open_mkv(demuxer_t *demuxer);
 extern int ra_check_file(demuxer_t *demuxer);
 extern int demux_open_ra(demuxer_t* demuxer);
+#ifdef HAVE_MATROSKA
+extern int demux_mkv_open(demuxer_t *demuxer);
+#endif
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
@@ -1183,7 +1186,7 @@ switch(file_format){
     } else {
       sh_video=d_video->sh;sh_video->ds=d_video;
       sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp\n",
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"VIDEO:  [%.4s]  %dx%d  %dbpp\n",
         (char *)&sh_video->bih->biCompression,
         sh_video->bih->biWidth,
         sh_video->bih->biHeight,

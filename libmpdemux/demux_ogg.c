@@ -531,7 +531,7 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
   if(index_mode == 2) mp_msg(MSGT_DEMUX,MSGL_INFO,"\n");
 
   if(index_mode == 2) mp_msg(MSGT_DEMUX,MSGL_V,"Ogg syncpoints table builed: %d syncpoints\n",ogg_d->num_syncpoint);
-  mp_msg(MSGT_DEMUX,MSGL_V,"Ogg stream length: %d\n",ogg_d->final_granulepos);
+  mp_msg(MSGT_DEMUX,MSGL_V,"Ogg stream length (granulepos): %lld\n",ogg_d->final_granulepos);
 
   stream_reset(s);
   stream_seek(s,demuxer->movi_start);
