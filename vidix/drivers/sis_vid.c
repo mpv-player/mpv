@@ -262,7 +262,7 @@ int vixProbe(int verbose, int force)
     force = force;
     err = pci_scan(lst, &num_pci);
     if (err) {
-	printf("[SiS] Error occured during pci scan: %s\n", strerror(err));
+	printf("[SiS] Error occurred during pci scan: %s\n", strerror(err));
 	return err;
     } else {
 	err = ENXIO;

@@ -185,7 +185,7 @@ static inline void __vbeSwitchBank(unsigned long offset)
     show_err:
     vesa_term();
     PRINT_VBE_ERR("vbeSetWindow",err);
-    printf("vo_vesa: Fatal error occured! Can't continue\n");
+    printf("vo_vesa: Fatal error occurred! Can't continue\n");
     abort();
   }
   win.low = new_offset * gran;
@@ -387,7 +387,7 @@ static void flip_page(void)
     {
       vesa_term();
       PRINT_VBE_ERR("vbeSetDisplayStart",err);
-      printf("vo_vesa: Fatal error occured! Can't continue\n");
+      printf("vo_vesa: Fatal error occurred! Can't continue\n");
       abort();
     }
     multi_idx = multi_idx ? 0 : 1;

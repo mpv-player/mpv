@@ -96,9 +96,9 @@
 
 // Error codes for the drivers
 
-// An error occured but we can continue
+// An error occurred but we can continue
 #define MP_INPUT_ERROR -1
-// A fatal error occured, this driver should be removed
+// A fatal error occurred, this driver should be removed
 #define MP_INPUT_DEAD -2
 // No input was available
 #define MP_INPUT_NOTHING -3

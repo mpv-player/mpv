@@ -1387,7 +1387,7 @@ mplayer v0.10-pre6: Dec 24  2000 "Xmas edition"
   - better output at exit (handled now by exit_player())
   - mpeg EOF problem (codec restart) fixed: added EOF detection to parse_es.c
   - internal flag 'current_module' added to get more info at segfaults
-    (contains module number where the segfault occured)
+    (contains module number where the segfault occurred)
   - audio detection changed: using afm=4 (Win32/ACM) for MP3 audio (AVI files)
     (you MUST have l3codeca.acm at /usr/lib/win32, or you have to use '-afm 1')
 

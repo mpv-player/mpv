@@ -1195,7 +1195,7 @@ int vixProbe(int verbose,int force)
 	err = pci_scan(lst, &num_pci);
 	if (err)
 	{
-	    printf("[mga] Error occured during pci scan: %s\n", strerror(err));
+	    printf("[mga] Error occurred during pci scan: %s\n", strerror(err));
 	    return(err);
 	}
 

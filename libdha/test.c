@@ -11,7 +11,7 @@ int main( void )
   err = pci_scan(lst,&num_pci);
   if(err)
   {
-    printf("Error occured during pci scan: %s\n",strerror(err));
+    printf("Error occurred during pci scan: %s\n",strerror(err));
     return EXIT_FAILURE;
   }
   else

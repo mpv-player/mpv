@@ -355,7 +355,7 @@ static int get_space()
     ch_stat.channel = SND_PCM_CHANNEL_PLAYBACK;
 
     if (snd_pcm_channel_status(alsa_handler, &ch_stat) < 0)
-	return(0); /* error occured */
+	return(0); /* error occurred */
     else
 	return(ch_stat.free);
 }
@@ -368,7 +368,7 @@ static float get_delay()
     ch_stat.channel = SND_PCM_CHANNEL_PLAYBACK;
     
     if (snd_pcm_channel_status(alsa_handler, &ch_stat) < 0)
-	return((float)ao_data.buffersize/(float)ao_data.bps); /* error occured */
+	return((float)ao_data.buffersize/(float)ao_data.bps); /* error occurred */
     else
 	return((float)ch_stat.count/(float)ao_data.bps);
 }

@@ -145,7 +145,7 @@ static void uninit(sh_audio_t *sh)
 	case ACMERR_NOTPOSSIBLE:
 	    return;
 	default:
-	    mp_msg(MSGT_WIN32, MSGL_WARN, "ACM_Decoder: unknown error occured: %d\n", ret);
+	    mp_msg(MSGT_WIN32, MSGL_WARN, "ACM_Decoder: unknown error occurred: %d\n", ret);
 	    return;
     }
     

@@ -16,7 +16,7 @@ error codes (the software uses redmond originated error codes)
 4,5  80070005 E_ACCESSDENIED
 6    80004003 E_POINTER
 7,10 80070057 E_INVALIDREG
-8    80040FC1 (or 1FC?: CO_E_OBJISREG) - never occured here
+8    80040FC1 (or 1FC?: CO_E_OBJISREG) - never occurred here
 
 
 

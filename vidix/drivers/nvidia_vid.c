@@ -134,7 +134,7 @@ int vixProbe(int verbose, int force){
 	    printf("[nvidia_vid]: warning: forcing not supported yet!\n");
     err = pci_scan(lst,&num_pci);
     if(err){
-	printf("[nvidia_vid] Error occured during pci scan: %s\n",strerror(err));
+	printf("[nvidia_vid] Error occurred during pci scan: %s\n",strerror(err));
 	return err;
     }
     else {
