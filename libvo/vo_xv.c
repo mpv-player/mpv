@@ -621,7 +621,8 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 
  x/=2;y/=2;w/=2;h/=2;
 
- dst = xvimage[current_buf]->data + image_width * image_height + image_width/2 * y + x;
+ dst = xvimage[current_buf]->data + image_width * image_height + (image_width>>1) * y + x;
+ if(image_format!=IMGFMT_YV12) dst+=(image_width>>1)*(image_height>>1);
  src = image[2];
  if(w==stride[2] && w==image_width/2) memcpy(dst,src,w*h);
   else
@@ -631,7 +632,9 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
      src+=stride[2];
      dst+=image_width/2;
    }
- dst = xvimage[current_buf]->data + image_width * image_height * 5 / 4 + image_width/2 * y + x;
+
+ dst = xvimage[current_buf]->data + image_width * image_height + (image_width>>1) * y + x;
+ if(image_format==IMGFMT_YV12) dst+=(image_width>>1)*(image_height>>1);
  src = image[1];
  if(w==stride[1] && w==image_width/2) memcpy(dst,src,w*h);
   else
@@ -716,9 +719,15 @@ static uint32_t get_image(mp_image_t *mpi){
     if(mpi->width==image_width){
        if(mpi->flags&MP_IMGFLAG_PLANAR){
 	   mpi->planes[0]=xvimage[current_buf]->data;
-	   mpi->planes[2]=xvimage[current_buf]->data+image_width*image_height;
-//	   mpi->planes[1]=xvimage[current_buf]->data+image_width*image_height*5/4;
-	   mpi->planes[1]=mpi->planes[2]+(image_width>>1)*(image_height>>1);
+	   if(mpi->flags&MP_IMGFLAG_SWAPPED){
+	       // I420
+	       mpi->planes[1]=xvimage[current_buf]->data+image_width*image_height;
+	       mpi->planes[2]=mpi->planes[1]+(image_width>>1)*(image_height>>1);
+	   } else {
+	       // YV12
+	       mpi->planes[2]=xvimage[current_buf]->data+image_width*image_height;
+	       mpi->planes[1]=mpi->planes[2]+(image_width>>1)*(image_height>>1);
+	   }
 	   mpi->stride[0]=image_width;
 	   mpi->stride[1]=mpi->stride[2]=image_width/2;
        } else {
