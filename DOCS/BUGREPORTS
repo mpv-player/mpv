@@ -29,7 +29,8 @@ What?
   uname -a
 - libc version:
   ls -l /lib/libc[.-]*
-- X version (you should know that)
+- X version:
+  X -version
 - gcc and ld version:
   gcc -v
   ld -v
