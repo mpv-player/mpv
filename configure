@@ -130,6 +130,8 @@ Optional features:
   --disable-xvid         disable XviD codec [autodetect]
   --disable-divx4linux   disable DivX4linux codec [autodetect]
   --enable-opendivx      enable _old_ OpenDivx codec [disable]
+  --disable-libavcodec   disable libavcodec [autodetect]
+  --disable-libfame      disable libfame realtime-encoder [autodetect]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --enable-faad          build with FAAD (AAC) support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
@@ -765,6 +767,7 @@ _prefix="/usr/local"
 # If autodetection is available then the third state is: auto
 _libavcodec=auto
 _libavcodecso=no # changed default to no as it causes problems - atmos
+_fame=auto
 _mp1e=no
 _mencoder=yes
 _x11=auto
@@ -946,6 +949,10 @@ for ac_option do
   --disable-divx4linux)	_divx4linux=no	;;
   --enable-opendivx)	_opendivx=yes	;;
   --disable-opendivx)	_opendivx=no	;;
+  --enable-libavcodec)	_libavcodec=yes	;;
+  --disable-libavcodec)	_libavcodec=no	;;
+  --enable-libfame)	_fame=yes	;;
+  --disable-libfame)	_fame=no	;;
   --enable-lirc)	_lirc=yes	;;
   --disable-lirc)	_lirc=no	;;
   --enable-gui)		_gui=yes	;;
@@ -3021,6 +3028,27 @@ else
   _nocodecmodules="libavcodec $_nocodecmodules"
 fi
 
+echocheck "libfame"
+if test "$_fame" = auto ; then
+  _fame=no
+  if test -d libfame && test -f libfame/fame.h ; then
+    # disable fame on cygwin as no sense to port - atmos	  
+    cygwin || _fame=yes
+    echores $_fame
+  else
+    echores "no (no fame dir)"
+  fi
+else
+  echores "$_fame"
+fi
+
+_def_fame='#undef USE_LIBFAME'
+if test "$_fame" = yes ; then
+  _def_fame='#define USE_LIBFAME 1'	
+  _ld_fame='-Llibfame -lfame'	
+  _dep_fame='libfame/libfame.a'
+fi  
+
 echocheck "libdv-0.9.5 (for mencoder)"
 if test "$_libdv" = auto ; then
   _libdv=no
@@ -3581,6 +3609,9 @@ DS_DEP = $_dep_dshow
 DS_LIB = $_ld_dshow
 AV_DEP = $_dep_libavcodec
 AV_LIB = $_ld_libavcodec
+FAME = $_fame
+FAME_LIB = $_ld_fame
+FAME_DEB = $_dep_fame
 MP1E_DEP = $_dep_mp1e
 MP1E_LIB = $_ld_mp1e
 ARCH_LIB =  $_ld_arch $_ld_iconv
@@ -3794,6 +3825,9 @@ $_def_libavcodecso
 #define CONFIG_DECODERS 1
 /* Use libavcodec's encoders */
 #define CONFIG_ENCODERS 1
+
+/* Use libfame encoder filter */
+$_def_fame
 
 /* XAnim DLL support */
 $_def_xanim
