@@ -23,7 +23,6 @@ build-stamp:
 	# Add here commands to compile the package.
 	#$(MAKE)
 	#/usr/bin/docbook-to-man debian/etherconf.sgml > etherconf.1
-	${MAKE} dep
 	${MAKE} mplayer
 
 	touch build-stamp
