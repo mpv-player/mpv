@@ -1017,7 +1017,8 @@ create_idx(vobsub_out_t *me, const unsigned int *palette, unsigned int orig_widt
 	for (i = 0; i < 16; ++i) {
 	    if (i)
 		putc(',', me->fidx);
-	    fprintf(me->fidx, " %06x", palette[i] & 0x00ffffff);
+	    fprintf(me->fidx, " %02x%02x%02x", palette[i]>>16 & 0x000000ff,
+		palette[i]>>16 & 0x000000ff, palette[i]>>16 & 0x000000ff);
 	}
 	putc('\n', me->fidx);
     }
