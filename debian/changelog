@@ -1,3 +1,10 @@
+mplayer (0.90pre3-1) unstable; urgency=low
+
+  * new pre-release
+  * gtk bug fixed.
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Tue, 30 Apr 2002 11:32:43 +0200
+
 mplayer (0.90pre2-1) unstable; urgency=low
 
   * new release.
