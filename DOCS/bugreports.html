@@ -13,8 +13,8 @@
 
 <P><B>How to report bugs?</B></P>
 
-<P>First of all please try the latest CVS version of mplayer as your bug might
-already be fixed there. CVS instructions can be found at the bottom of
+<P>First of all please try the latest CVS version of <B>MPlayer</B> as your bug
+might already be fixed there. CVS instructions can be found at the bottom of
 <A HREF="http://www.mplayerhq.hu/homepage/dload.html">this page</A>.</P>
 
 <P>If this did not help please refer to <A HREF="documentation.html#D">Appendix D</A>
@@ -24,7 +24,7 @@ our instructions, then please report the bug.</P>
 <P>If you feel have the necessary skills you are invited to have a go at fixing
 the bug yourself.  Or maybe you already did that?  Please read
 <A HREF="tech/patches.txt">this short document</A> to find out how to get your
-code included in mplayer. The people on the
+code included in <B>MPlayer</B>. The people on the
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
 mailing list can assist you if you have questions.</P>
 
@@ -33,16 +33,19 @@ mailing list can assist you if you have questions.</P>
 <P>Subscribe to the mplayer-users mailing list:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
 and send your bug report to:<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="mailto:mplayer-users@mplayerhq.hu">mplayer-users@mplayerhq.hu</A><BR>
-Please note that we will not individually CC (carbon-copy) people so it is a good
-idea to subscribe to actually receive your answer.</P>
+&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="mailto:mplayer-users@mplayerhq.hu">mplayer-users@mplayerhq.hu</A></P>
+
+<P>The language of this list is <B>English</B>. Please follow the standard
+<A HREF="http://www.ietf.org/rfc/rfc1855.txt">Netiquette Guidelines</A> and
+<B>do not send HTML mail</B> to to any of our mailing lists.  You will only get
+ignored or banned. Also note that we will not individually CC (carbon-copy)
+people so it is a good idea to subscribe to actually receive your answer.</P>
 
 <P>Please do not send bug reports privately to individual developers.  This is
 community work and thus there might be several people interested in it.
 Also sometimes other users already experienced your troubles and have a
-solution in hand how to circumvent a problem even if it is a bug in mplayer
-code.<BR>
-The language of this list is <strong>English</strong>.</P>
+solution in hand how to circumvent a problem even if it is a bug in <B>MPlayer</B>
+code.</P>
 
 <P>Please describe your problem as detailed as possible with examples etc.
 and do not forget to include this valuable information:</P>
@@ -125,10 +128,10 @@ and do not forget to include this valuable information:</P>
 
 <P><B>For playback problems</B></P>
 
-<P>Please include the output of mplayer at verbosity level 1, but remember to
-<B>not truncate the output</B> when you paste it into your mail. The developers need
-all of the messages to properly diagnose a problem. You can direct the output
-into a file like this:</P>
+<P>Please include the output of <B>MPlayer</B> at verbosity level 1, but
+remember to <B>not truncate the output</B> when you paste it into your mail. The
+developers need all of the messages to properly diagnose a problem. You can
+direct the output into a file like this:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [options] [filename] &amp;&gt; mplayer.log</CODE></P>
 
@@ -140,7 +143,7 @@ offender(s) to:</P>
 <P>Also upload a small text file having the same base name as your file
 with a .txt extension. Describe the problem you are having with the
 particular file there and include your email address as well as the output
-of mplayer at verbosity level 1.<BR> 
+of <B>MPlayer</B> at verbosity level 1.<BR> 
 Usually the first 1-5 MB of a file are enough to reproduce the problem,
 but to be sure we ask you to:
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;dd if=yourfile of=smallfile bs=1024k count=5</CODE></P>
@@ -156,7 +159,8 @@ If the file is accessible on the net, then sending the
 
 <P><B>For crashes</B></P>
 
-<P>If you have a core dump of the crash continue reading the next paragraph, otherwise skip it.</P>
+<P>If you have a core dump of the crash continue reading the next paragraph,
+otherwise skip it.</P>
 
 <P><B>How to extract meaningful information from a core dump</B></P>
 
@@ -177,10 +181,10 @@ printf "esi=%08lX\n",$esi<BR>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file &gt; mplayer.bug</CODE></P>
 
 <P><B>How to conserve information about a reproducible crash</B></P>
-<P>Re-compile mplayer with debugging code enabled:</P>
+<P>Recompile <B>MPlayer</B> with debugging code enabled:</P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
-and then run mplayer within gdb using:
+and then run <B>MPlayer</B> within gdb using:
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb mplayer</CODE></P>
 
 <P>You are now within gdb. Type:</P>
@@ -200,7 +204,7 @@ include only the path and filename in your bug report.</P>
 <P><B>I know what I am doing...</B></P>
 
 <P>If you created a proper bug report following the steps above and you are
-confident it is a bug in mplayer, not a compiler problem or broken file,
+confident it is a bug in <B>MPlayer</B>, not a compiler problem or broken file,
 you have already read the documentation and you could not find a solution,
 your sound drivers are OK, then you might want to subscribe to the
 mplayer-advusers list and send your bug report there to get a better and
@@ -209,7 +213,7 @@ Please be advised that if you post newbie questions or questions answered
 in the manual there, you will be ignored or flamed instead of getting an
 appropriate answer.<BR>
 So do not flame us and  subscribe to -advusers only if you really know
-what you are doing and feel like being an advanced mplayer user or
+what you are doing and feel like being an advanced <B>MPlayer</B> user or
 developer.  If you meet these criteria it should not be difficult to find
 out how to subscribe...
 </P>
