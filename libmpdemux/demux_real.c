@@ -593,7 +593,7 @@ got_video:
 			    if(dp_hdr->len!=vpkg_length-vpkg_offset)
 				mp_msg(MSGT_DEMUX,MSGL_V,"warning! assembled.len=%d  frag.len=%d  total.len=%d  \n",dp->len,vpkg_offset,vpkg_length-vpkg_offset);
             		    stream_read(demuxer->stream, dp_data+dp_hdr->len, vpkg_offset);
-			    if(dp_data[dp_hdr->len]&0x20) --dp_hdr->chunks; else
+			    if((dp_data[dp_hdr->len]&0x20) && (sh_video->format==0x30335652)) --dp_hdr->chunks; else
 			    dp_hdr->len+=vpkg_offset;
 			    len-=vpkg_offset;
  			    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "fragment (%d bytes) appended, %d bytes left\n",vpkg_offset,len);
@@ -609,7 +609,7 @@ got_video:
 			if(dp_hdr->len!=vpkg_offset)
 			    mp_msg(MSGT_DEMUX,MSGL_V,"warning! assembled.len=%d  offset=%d  frag.len=%d  total.len=%d  \n",dp->len,vpkg_offset,len,vpkg_length);
             		stream_read(demuxer->stream, dp_data+dp_hdr->len, len);
-			if(dp_data[dp_hdr->len]&0x20) --dp_hdr->chunks; else
+			if((dp_data[dp_hdr->len]&0x20) && (sh_video->format==0x30335652)) --dp_hdr->chunks; else
 			dp_hdr->len+=len;
 			len=0;
 			break; // no more fragments in this chunk!
