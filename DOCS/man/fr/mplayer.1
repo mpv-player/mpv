@@ -4840,7 +4840,7 @@ pas d'encodage, juste une copie du flux
 .IPs "\-ovc divx4"
 Encode en DivX4/\:DivX5.
 .IPs "\-ovc raw"
-encode dans un format non-compressé arbitraire (que vous sélectionnez
+Encode dans un format non-compressé arbitraire (que vous sélectionnez
 avec \-vf format).
 .IPs "\-ovc lavc"
 Encode avec un codec de libavcodec.
@@ -4861,17 +4861,12 @@ une trame (\-noskiplimit pour un nombre illimité).
 .B \-vobsubout <nomdebase>
 Définit le nomdebase pour les fichiers .idx et .sub de destination.
 Cela désactive le rendu des sous-titres dans le film encodé et le redirige
-vers un groupe de fichiers de sous-titre VObsub.
+vers un groupe de fichiers de sous-titre VOBsub.
 .
 .TP
 .B \-vobsuboutid <langid>
 Définit le code-langue à deux lettres pour les sous-titres.
 Ceci outrepasse ce qui est lu depuis le DVD ou le fichier .ifo.
-.
-.TP
-.B \-vobsuboutindex <index>
-Définit l'index des sous-titres dans les fichiers de sortie
-(par défaut\ : 0).
 .
 .TP
 .B \-vobsuboutindex <index>
@@ -4892,7 +4887,7 @@ Où <codec> peut être: lavc, xvidenc, divx4, lame, x264enc
 .
 .
 .SS divx4 (\-divx4opts)
-DivX4 est obsolète et n'géré que par soucis d'exhaustivité.
+DivX4 est obsolète et n'est géré que par soucis d'exhaustivité.
 Pour avoir des détails sur les options DivX4, lisez les sources, la plupart
 des options ne sont pas documentées ici.
 .
@@ -4902,7 +4897,7 @@ obtenir l'aide
 .
 .TP
 .B br=<valeur>
-définit le débit binaire (bitrate)
+Définit le débit binaire (bitrate)
 .IPs 4\-16000
 (en kbits)
 .IPs 16001\-24000000
@@ -4999,11 +4994,11 @@ bitrate moyen (ou plutôt, moyenné)
 .TP
 .B cbr\ \ \ \ 
 bitrate constant.
-Force également l'encodage en mode CBR sur les modes ABR sélectionnés suivant
+Force également l'encodage en mode CBR sur les modes ABR sélectionnés suivant.
 .
 .TP
 .B br=<0\-1024>
-Définit le bitrate en kBit (CBR et ABR uniquement)
+Définit le bitrate en kBit (CBR et ABR uniquement).
 .
 .TP
 .B q=<0\-9>
@@ -5019,7 +5014,7 @@ rapport de compression
 .
 .TP
 .B vol=<0\-10>
-fixe le gain d'entrée audio
+Fixe le gain d'entrée audio.
 .
 .TP
 .B mode=<0\-3>
@@ -5119,7 +5114,7 @@ Pour avoir tous les détails lisez le source.
 .
 .TP
 .B acodec=<value>
-Codec audio (par défaut\ : mp2)\ :
+codec audio (par défaut\ : mp2)\ :
 .PD 0
 .RSs
 .IPs mp2
@@ -6317,7 +6312,7 @@ options [min|max]_[i|p|b]quant.
 .
 .TP
 .B min_key_interval=<valeur>
-Intervalle minimum entre les trames-clés. (par défaut\ : 0, 2passes uniquement)
+Intervalle minimum entre les trames-clés (par défaut\ : 0, 2passes uniquement)
 .
 .TP
 .B max_key_interval=<valeur>
@@ -6376,7 +6371,7 @@ d'avoir l'information de chroma présente dans le fichier vidéo.
 .TP
 .B debug\ \ 
 Sauve les statistiques par trames dans ./xvid.dbg. (Ce n'est pas le
-fichier de contrôle 2passes).
+fichier de contrôle 2passes.)
 .RE
 .
 .PP
@@ -6398,7 +6393,7 @@ l'autodétection de bogues risque de ne pas fonctionner.
 .
 .TP
 .B divx5bvop
-Génère des trames B compatibles DivX5. (par défaut\ : on)
+Génère des trames B compatibles DivX5 (par défaut\ : on).
 .
 .TP
 .B max_bframes=<0\-4>
@@ -6411,7 +6406,7 @@ rapport de quantificateur entre les trames B et non B, 150=1.50
 .
 .TP
 .B bquant_offset=<-1000\-1000>
-fffset de quantificateur entre les trames B et non B, 100=1.00
+offset de quantificateur entre les trames B et non B, 100=1.00
 (par défaut\ : 100)
 .
 .TP
@@ -6572,7 +6567,8 @@ moins rapides en souffrent (par défaut\ : 0).
 Cette option permet à XviD de donner un certain pourcentage de bits en
 plus aux scènes lentes, en prenant quelques bits tout au long du film.
 Vous pouvez agir sur cette option si vous avez quelques scènes lentes qui
-sont encore "blocky" (par défaut\ : 0).
+sont encore "blocky" (de gros blocs apparaissent sur l'image)
+(par défaut\ : 0).
 .
 .TP
 .B overflow_control_strength=<0\-100> (mode 2-passes uniquement)
@@ -6656,11 +6652,11 @@ autoaspect.
 .
 .TP
 .B par_width=<1..255> (par=ext uniquement)
-Définit la largeur du PAR particulier
+Définit la largeur du PAR particulier.
 .
 .TP
 .B par_height=<1...255> (par=ext uniquement)
-Définit la hauteur du PAR particulier
+Définit la hauteur du PAR particulier.
 .
 .TP
 .B aspect=<x/\:y | f (nombre flottant)>
