@@ -244,6 +244,25 @@ static int open_tv(tvi_handle_t *tvh)
 	    }
 	}
     }
+    
+    /* grep frequency in chanlist */
+    {
+	unsigned long i2;
+	int freq;
+	
+	tv_get_freq(tvh, &i2);
+	
+	freq = (int) (((float)(i2/16))*1000)+250;
+	
+	for (i = 0; i < chanlists[tvh->chanlist].count; i++)
+	{
+	    if (tvh->chanlist_s[i].freq == freq)
+	    {
+		tvh->channel = i+1;
+		break;
+	    }
+	}
+    }
 
 done:    
     /* also start device! */
@@ -388,13 +407,11 @@ no_audio:
     return 1;
 }
 
-#if defined(USE_TV) && defined(HAVE_TV_V4L)
 int demux_close_tv(demuxer_t *demuxer)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->priv);
     return(tvh->functions->uninit(tvh->priv));
 }
-#endif
 
 /* ================== STREAM_TV ===================== */
 tvi_handle_t *tvi_init_dummy(char *device);
@@ -513,6 +530,17 @@ int tv_set_color_options(tvi_handle_t *tvh, int opt, int value)
 	    mp_msg(MSGT_TV, MSGL_WARN, "Unknown color option (%d) specified!\n", opt);
     }
     
+    return(1);
+}
+
+int tv_get_freq(tvi_handle_t *tvh, unsigned long *freq)
+{
+    if (tvh->functions->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) == TVI_CONTROL_TRUE)
+    {
+	tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, freq);
+	mp_msg(MSGT_TV, MSGL_V, "Current frequency: %lu (%.3f)\n",
+	    *freq, (float)*freq/16);
+    }
     return(1);
 }
 
