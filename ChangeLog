@@ -31,6 +31,11 @@ mplayer (0.90)
     * -ao win32 sync problems solved, -autosync 100 is still recommended
     * -vo gif89a uninit sig11 fixed
     * GUI: correct widget destroy event handler
+    * GUI: new font render engine
+    * GUI: sync with x11_common
+    * GUI: added persistant history patch from Pavel Rousar
+    * GUI: SDL Audio configure window from Filip Kalinski
+    * GUI: add overlapping to preferences
     * the usual compiler warning fixes :)
     * use -pphelp instead of -vop pp=help
     * various bigendian fixes
