@@ -39,7 +39,7 @@ void decode_cyuv(
   unsigned char *frame,
   int width,
   int height,
-  int bit_per_pixel);
+  int format);
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
@@ -50,7 +50,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	sh->disp_w, sh->disp_h);
     if(!mpi) return NULL;
 
-    decode_cyuv(data, len, mpi->planes[0], sh->disp_w, sh->disp_h, 0);
+    decode_cyuv(data, len, mpi->planes[0], sh->disp_w, sh->disp_h,
+      sh->codec->outfmt[sh->outfmtidx]);
 
     return mpi;
 }

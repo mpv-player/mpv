@@ -21,6 +21,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "loader/wine/avifmt.h" // for mmioFOURCC macro
+
 /* ------------------------------------------------------------------------
  * This function decodes a buffer containing a CYUV encoded frame.
  *
@@ -29,9 +31,9 @@
  * frame - the output frame buffer (UYVY format)
  * width - the width of the output frame
  * height - the height of the output frame
- * bit_per_pixel - ignored for now: may be used later for conversions.
+ * format - the requested output format
  */
-void decode_cyuv(unsigned char *buf, int size, unsigned char *frame, int width, int height, int bit_per_pixel)
+void decode_cyuv(unsigned char *buf, int size, unsigned char *frame, int width, int height, int format)
 {
 int i, xpos, ypos, cur_Y = 0, cur_U = 0, cur_V = 0;
 char *delta_y_tbl, *delta_c_tbl, *ptr;
@@ -48,38 +50,86 @@ char *delta_y_tbl, *delta_c_tbl, *ptr;
 				cur_U = *(ptr++);
 				cur_Y = (cur_U & 0x0f) << 4;
 				cur_U = cur_U & 0xf0;
-				*frame++ = cur_U;
-				*frame++ = cur_Y;
+				if (format == mmioFOURCC('Y','U','Y','2'))
+					{
+					*frame++ = cur_Y;
+					*frame++ = cur_U;
+					}
+				else
+					{
+					*frame++ = cur_U;
+					*frame++ = cur_Y;
+					}
 
 				cur_V = *(ptr++);
 				cur_Y = (cur_Y + delta_y_tbl[cur_V & 0x0f]) & 0xff;
 				cur_V = cur_V & 0xf0;
-				*frame++ = cur_V;
-				*frame++ = cur_Y;
+				if (format == mmioFOURCC('Y','U','Y','2'))
+					{
+					*frame++ = cur_Y;
+					*frame++ = cur_V;
+					}
+				else
+					{
+					*frame++ = cur_V;
+					*frame++ = cur_Y;
+					}
 				}
 			else			/* subsequent pixels in scanline */
 				{
 				i = *(ptr++);
 				cur_U = (cur_U + delta_c_tbl[i >> 4]) & 0xff;
 				cur_Y = (cur_Y + delta_y_tbl[i & 0x0f]) & 0xff;
-				*frame++ = cur_U;
-				*frame++ = cur_Y;
+				if (format == mmioFOURCC('Y','U','Y','2'))
+					{
+					*frame++ = cur_Y;
+					*frame++ = cur_U;
+					}
+				else
+					{
+					*frame++ = cur_U;
+					*frame++ = cur_Y;
+					}
 
 				i = *(ptr++);
 				cur_V = (cur_V + delta_c_tbl[i >> 4]) & 0xff;
 				cur_Y = (cur_Y + delta_y_tbl[i & 0x0f]) & 0xff;
-				*frame++ = cur_V;
-				*frame++ = cur_Y;
+				if (format == mmioFOURCC('Y','U','Y','2'))
+					{
+					*frame++ = cur_Y;
+					*frame++ = cur_V;
+					}
+				else
+					{
+					*frame++ = cur_V;
+					*frame++ = cur_Y;
+					}
 				}
 
 			i = *(ptr++);
 			cur_Y = (cur_Y + delta_y_tbl[i & 0x0f]) & 0xff;
-			*frame++ = cur_U;
-			*frame++ = cur_Y;
+			if (format == mmioFOURCC('Y','U','Y','2'))
+				{
+				*frame++ = cur_Y;
+				*frame++ = cur_U;
+				}
+			else
+				{
+				*frame++ = cur_U;
+				*frame++ = cur_Y;
+				}
 
 			cur_Y = (cur_Y + delta_y_tbl[i >> 4]) & 0xff;
-			*frame++ = cur_V;
-			*frame++ = cur_Y;
+			if (format == mmioFOURCC('Y','U','Y','2'))
+				{
+				*frame++ = cur_Y;
+				*frame++ = cur_V;
+				}
+			else
+				{
+				*frame++ = cur_V;
+				*frame++ = cur_Y;
+				}
 			}
 }
 
