@@ -188,28 +188,28 @@ Explanation of the process:
   global <A HREF="#options">Options</A> section and in the man page.</P>
 
 <P><I>Creating a DivX4 file from all the JPEG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4
-  -o output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc divx4
+  -o output.avi \*.jpg</CODE></P>
 
 <P><I>Creating a DivX4 file from some JPEG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25
-  -ovc divx4 -o output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25
+  -ovc divx4 -o output.avi frame001.jpg,frame002.jpg</CODE></P>
 
 <P><I>Creating a Motion JPEG (MJPEG) file from all the JPEG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
-  -o output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc copy
+  -o output.avi \*.jpg</CODE></P>
 
 <P><I>Creating an uncompressed file from all the PNG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw
-  -o output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc raw
+  -o output.avi \*.png</CODE></P>
 
 <P><I>Creating a Motion PNG (MPNG) file from all the PNG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
-  -o output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  -o output.avi \*.png</CODE></P>
 
 <P><I>Creating a Motion TGA (MTGA) file from all the TGA files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy
-  -o output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy
+  -o output.avi \*.tga</CODE></P>
 
 
 <H2><A NAME="vobsub">7.7 Extracting DVD subtitles to a Vobsub file</A></H2>

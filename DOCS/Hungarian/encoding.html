@@ -184,24 +184,24 @@
   <A HREF=#2.4.3>Opciók</A> fejezetben, illetve a manpage-ben található.</P>
 
 <P><I>DivX4 film létrehozása az aktuális könyvtárban található összes JPEG fileból:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
-  kimenet.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  kimenet.avi \*.jpg</CODE></P>
 
 <P><I>DivX4 film létrehozása néhány JPEG fileból:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
-  kimenet.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  kimenet.avi frame001.jpg,frame002.jpg</CODE></P>
 
 <P><I>MJPEG (Motion JPEG) film létrehozása az aktuális könyvtárban található összes JPEG fileból:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
-  -o kimenet.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc copy
+  -o kimenet.avi \*.jpg</CODE></P>
 
 <P><I>Tömörítetlen film létrehozása az aktuális könyvtárban található összes PNG fileból:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw -o
-  kimenet.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc raw -o
+  kimenet.avi \*.png</CODE></P>
 
 <P><I>MPNG (Motion PNG) film létrehozása az aktuális könyvtárban található összes PNG fileból:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
-  -o kimenet.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  -o kimenet.avi \*.png</CODE></P>
 
 
 <H3><A NAME=vobsub>2.4.7  DVD feliratok VOBsub formátumúvá alakítása</A></H3>
