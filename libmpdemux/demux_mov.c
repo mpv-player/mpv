@@ -139,8 +139,8 @@ void mov_build_index(mov_track_t* trak){
     }
 #endif
 
-    mp_msg(MSGT_DEMUX, MSGL_HINT, "MOV track: %d chunks, %d samples\n",trak->chunks_size,trak->samples_size);
-    mp_msg(MSGT_DEMUX, MSGL_HINT, "pts=%d  scale=%d  time=%5.3f\n",trak->length,trak->timescale,(float)trak->length/(float)trak->timescale);
+    mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV track #%d: %d chunks, %d samples\n",trak->id,trak->chunks_size,trak->samples_size);
+    mp_msg(MSGT_DEMUX, MSGL_V, "pts=%d  scale=%d  time=%5.3f\n",trak->length,trak->timescale,(float)trak->length/(float)trak->timescale);
 
     // process chunkmap:
     i=trak->chunkmap_size;
@@ -610,6 +610,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVtooManyTrk);
 		return;
 	    }
+	    if(!priv->track_db) mp_msg(MSGT_DEMUX, MSGL_INFO, "--------------\n");
 	    trak=malloc(sizeof(mov_track_t));
 	    memset(trak,0,sizeof(mov_track_t));
 	    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Track #%d:\n",priv->track_db);
@@ -698,10 +699,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  }  
 		}  
 
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio bits: %d  chans: %d\n",
-		    trak->stdata[19],trak->stdata[17]);
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio sample rate: %d\n",
-		    sh->samplerate/*char2short(trak->stdata,24)*/);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio bits: %d  chans: %d  rate: %d\n",
+		    trak->stdata[19],trak->stdata[17],sh->samplerate);
 		if((trak->stdata[9]==0) && trak->stdata_len >= 36) { // version 0 with extra atoms
 		    int atom_len = char2int(trak->stdata,28);
 		    switch(char2int(trak->stdata,32)) { // atom type
@@ -886,7 +885,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  sh->aspect/=trak->tkdata[81]|(trak->tkdata[80]<<8);
 		}
 		
-		if(depth&(~15)) printf("*** depth = 0x%X\n",depth);
+		if(depth>32+8) printf("*** depth = 0x%X\n",depth);
 
 		// palettized?
 		depth&=31; // flag 32 means grayscale
@@ -1123,7 +1122,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    off_t udta_size = len;
 	
 	    mp_msg(MSGT_DEMUX, MSGL_DBG2, "mov: user data record found\n");
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Quicktime Clip Info:\n");
+	    mp_msg(MSGT_DEMUX, MSGL_V, "Quicktime Clip Info:\n");
 
 	    while((len > 8) && (udta_size > 8))
 	    {
@@ -1158,51 +1157,51 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			{
 			    case MOV_FOURCC(0xa9,'a','u','t'):
 				demux_info_add(demuxer, "author", &text[2]);
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Author: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Author: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'c','p','y'):
 				demux_info_add(demuxer, "copyright", &text[2]);
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Copyright: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'i','n','f'):
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Info: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Info: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC('n','a','m','e'):
 			    case MOV_FOURCC(0xa9,'n','a','m'):
 				demux_info_add(demuxer, "name", &text[2]);
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Name: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Name: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'A','R','T'):
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Artist: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Artist: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'d','i','r'):
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Director: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Director: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'c','m','t'):
 				demux_info_add(demuxer, "comments", &text[2]);
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Comment: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Comment: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'r','e','q'):
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Requirements: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Requirements: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'s','w','r'):
 				demux_info_add(demuxer, "encoder", &text[2]);
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Software: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Software: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'d','a','y'):
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Creation timestamp: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Creation timestamp: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'f','m','t'):
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Format: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Format: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'p','r','d'):
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Producer: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Producer: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'p','r','f'):
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Performer(s): %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Performer(s): %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'s','r','c'):
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Source providers: %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_V, " Source providers: %s\n", &text[2]);
 				break;
 			}
 			udta_size -= 4+text_len;
@@ -1253,6 +1252,7 @@ int mov_read_header(demuxer_t* demuxer){
 	return 0;
     }
     lschunks(demuxer, 0, priv->moov_end, NULL);
+//    mp_msg(MSGT_DEMUX, MSGL_INFO, "--------------\n");
 
     return 1;
 }

@@ -241,7 +241,7 @@ int vivo_check_file(demuxer_t* demuxer){
 	if(len>1024) return 0;
     }
     len+=c;
-    printf("header block 1 size: %d\n",len);
+    mp_msg(MSGT_DEMUX,MSGL_V,"header block 1 size: %d\n",len);
     //stream_skip(demuxer->stream,len);
 
     priv=malloc(sizeof(vivo_priv_t));
@@ -273,7 +273,7 @@ int vivo_check_file(demuxer_t* demuxer){
 	if(len+len2>2048) return 0;
     }
     len2+=c;
-    printf("header block 2 size: %d\n",len2);
+    mp_msg(MSGT_DEMUX,MSGL_V,"header block 2 size: %d\n",len2);
     stream_skip(demuxer->stream,len2);
 //    stream_read(demuxer->stream,buf+len,len2);
 #endif
