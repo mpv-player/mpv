@@ -753,7 +753,7 @@ static void fillbox(int x, int y, int w, int h, uint32_t c) {
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
                        unsigned char *srca, int stride) {
-  int base;
+  char* base;
   
   if(oldmethod) {
      base=buffer;
