@@ -537,9 +537,11 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     } else
 	avctx->draw_horiz_band= NULL;
 
+#if LIBAVCODEC_BUILD >= 4689
 	// Palette support: libavcodec copies palette to *data[1]
 	if (mpi->bpp == 8)
 		mpi->planes[1] = malloc(AVPALETTE_SIZE);
+#endif
 
     pic->data[0]= mpi->planes[0];
     pic->data[1]= mpi->planes[1];
