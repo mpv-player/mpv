@@ -25,13 +25,13 @@ struct vf_priv_s {
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int voflags, unsigned int outfmt){
-    vf->priv->context= getPPContext(width, height);
+    vf->priv->context= pp_get_context(width, height);
 
     return vf_next_config(vf,width,height,d_width,d_height,voflags,vf->priv->outfmt);
 }
 
 static void uninit(struct vf_instance_s* vf){
-    if(vf->priv->context) freePPContext(vf->priv->context);
+    if(vf->priv->context) pp_free_context(vf->priv->context);
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
@@ -89,7 +89,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     
     if(vf->priv->pp || !(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// do the postprocessing! (or copy if no DR)
-	postprocess(mpi->planes           ,mpi->stride,
+	pp_postprocess(mpi->planes           ,mpi->stride,
 		    vf->priv->dmpi->planes,vf->priv->dmpi->stride,
 		    (mpi->w+7)&(~7),mpi->h,
 		    mpi->qscale, mpi->qstride,
@@ -132,7 +132,7 @@ static int open(vf_instance_t *vf, char* args){
     
     if(args){
 	if(!strcmp("help", args)){
-		printf("%s", postproc_help);
+		printf("%s", pp_help);
 		exit(1);
 	}
 	
@@ -147,7 +147,7 @@ static int open(vf_instance_t *vf, char* args){
     
     if(name){
         for(i=0; i<=GET_PP_QUALITY_MAX; i++){
-            vf->priv->ppMode[i]= getPPModeByNameAndQuality(name, i);
+            vf->priv->ppMode[i]= pp_get_mode_by_name_and_quality(name, i);
             if(vf->priv->ppMode[i].error) return -1;
         }
     }else{
