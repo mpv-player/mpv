@@ -124,6 +124,9 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 		return -1;
 	}
 	strncpy( http_hdr->reason_phrase, hdr_ptr, len );
+	if( http_hdr->reason_phrase[len-1]=='\r' ) {
+		len--;
+	}
 	http_hdr->reason_phrase[len]='\0';
 
 	// Set the position of the header separator: \r\n\r\n
@@ -329,12 +332,14 @@ http_debug_hdr( HTTP_header_t *http_hdr ) {
 	int i = 0;
 	if( http_hdr==NULL ) return;
 
-	printf("protocol: %s\n", http_hdr->protocol );
-	printf("http minor version: %d\n", http_hdr->http_minor_version );
-	printf("uri: %s\n", http_hdr->uri );
-	printf("method: %s\n", http_hdr->method );
-	printf("status code: %d\n", http_hdr->status_code );
-	printf("reason phrase: %s\n", http_hdr->reason_phrase );
+	printf("--- HTTP DEBUG HEADER --- START ---\n");
+	printf("protocol:           [%s]\n", http_hdr->protocol );
+	printf("http minor version: [%d]\n", http_hdr->http_minor_version );
+	printf("uri:                [%s]\n", http_hdr->uri );
+	printf("method:             [%s]\n", http_hdr->method );
+	printf("status code:        [%d]\n", http_hdr->status_code );
+	printf("reason phrase:      [%s]\n", http_hdr->reason_phrase );
+	printf("body size:          [%d]\n", http_hdr->body_size );
 
 	printf("Fields:\n");
 	field = http_hdr->first_field;
@@ -342,4 +347,5 @@ http_debug_hdr( HTTP_header_t *http_hdr ) {
 		printf(" %d - %s\n", i++, field->field_name );
 		field = field->next;
 	}
+	printf("--- HTTP DEBUG HEADER --- END ---\n");
 }
