@@ -2988,14 +2988,16 @@ fi
 echocheck "DVD support (libmpdvdkit)"
 if test "$_dvdkit" = auto ; then
  _dvdkit=no
- if linux || freebsd || netbsd || darwin; then
+ if linux || freebsd || netbsd || darwin || cygwin; then
   test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
  fi
 fi
 if test "$_dvdkit" = yes ; then
-  if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bdsi_dvd" = yes ; then
+  if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bdsi_dvd" = yes || cygwin; then
     _inputmodules="mpdvdkit $_inputmodules"
     _dvdread=included
+  else
+    _noinputmodules="mpdvdkit $_noinputmodules"
   fi
   _def_dvd_linux='#undef HAVE_LINUX_DVD_STRUCT'
   _def_dvd_bsd='#undef HAVE_BSD_DVD_STRUCT'
@@ -4391,6 +4393,9 @@ $_def_vcd
 #ifdef sun
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#elif defined(WIN32)
+#define DEFAULT_CDROM_DEVICE    "D:"
+#define DEFAULT_DVD_DEVICE	"D:"
 #else
 #define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
 #define DEFAULT_DVD_DEVICE	"/dev/dvd"
