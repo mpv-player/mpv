@@ -304,7 +304,7 @@ int init_audio_filters(sh_audio_t *sh_audio,
       afs->output.rate,afs->output.nch,afs->output.bps*8);
   
   // let's autoprobe it!
-  if(0 != af_init(afs)){
+  if(0 != af_init(afs,1)){
     free(afs);
     return 0; // failed :(
   }

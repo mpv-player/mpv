@@ -310,9 +310,12 @@ void af_uninit(af_stream_t* s)
    and output should contain the format of the current movie and the
    formate of the preferred output respectively. The function is
    reentrant i.e. if called with an already initialized stream the
-   stream will be reinitialized. The return value is 0 if success and
-   -1 if failure */
-int af_init(af_stream_t* s)
+   stream will be reinitialized. If the binary parameter
+   "force_output" is set, the output format will be converted to the
+   format given in "s", otherwise the output fromat in the last filter
+   will be copied "s". The return value is 0 if success and -1 if
+   failure */
+int af_init(af_stream_t* s, int force_output)
 {
   int i=0;
 
@@ -345,6 +348,12 @@ int af_init(af_stream_t* s)
   // Init filters 
   if(AF_OK != af_reinit(s,s->first))
     return -1;
+
+  // If force_output isn't set do not compensate for output format
+  if(!force_output){
+    memcpy(&s->output, s->last->data, sizeof(af_data_t));
+    return 0;
+  }
 
   // Check output format
   if((AF_INIT_TYPE_MASK & s->cfg.force) != AF_INIT_FORCE){
