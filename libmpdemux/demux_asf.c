@@ -317,6 +317,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
                   demux_asf_read_packet(demux,p,len2,streamno,seq,x,duration,-1,keyframe);
                   p+=len2;
 		  len-=len2+1;
+		  ++seq;
 		}
                 if(len!=0){
                   mp_msg(MSGT_DEMUX,MSGL_V,"ASF_parser: warning! groups total != len\n");
