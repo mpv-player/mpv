@@ -68,7 +68,7 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
             pts=avi_audio_pts;
             avi_audio_pts=0;
   } else 
-  if(ds && ds==demux->video){
+  if(ds==demux->video){
      // video
      if(skip_video_frames>0){
        // drop frame (seeking)
@@ -85,7 +85,8 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
 #if 1
 //       printf("ds=0x%X\n",ds);
 //       printf("packno=%d\n",ds->pack_no);
-       avi_video_pts = demux->video->pack_no *
+//    printf("### pack_no=%d\n",demux->video->pack_no+demux->video->packs);
+       avi_video_pts = (demux->video->pack_no+demux->video->packs) *
          (float)((sh_video_t*)demux->video->sh)->video.dwScale /
 	 (float)((sh_video_t*)demux->video->sh)->video.dwRate;
 #else
