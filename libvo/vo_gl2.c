@@ -42,6 +42,14 @@ static vo_info_t vo_info =
 
 /* private prototypes */
 
+static const char * tweaks_used =
+#ifdef HAVE_MMX
+	"mmx_bpp"
+#else
+	"none"
+#endif
+	;
+
 /* local data */
 static unsigned char *ImageDataLocal=NULL;
 static unsigned char *ImageData=NULL;
@@ -661,7 +669,6 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
 	xswa.background_pixel = 0;
 	xswa.border_pixel     = 1;
-//	xswa.colormap         = XCreateColormap(mDisplay, mRootWin, vinfo.visual, AllocNone);
 	xswa.colormap         = XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone);
 	xswamask = CWBackPixel | CWBorderPixel | CWColormap;
 
@@ -910,19 +917,10 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
   
   drawTextureDisplay ();
 
-#ifdef HAVE_MMX
   printf("[gl2] Using image_bpp=%d, image_bytes=%d, isBGR=%d, \n\tgl_bitmap_format=%s, gl_bitmap_type=%s, \n\tgl_alignment=%d, rgb_size=%d (%d,%d,%d), a_sz=%d, \n\tgl_internal_format=%s, tweaks=%s\n",
   	image_bpp, image_bytes, image_mode==MODE_BGR, 
         gl_bitmap_format_s, gl_bitmap_type_s, gl_alignment,
-	rgb_sz, r_sz, g_sz, b_sz, a_sz, gl_internal_format_s,
-	"mmx_bpp");
-#else
-  printf("[gl2] Using image_bpp=%d, image_bytes=%d, isBGR=%d, \n\tgl_bitmap_format=%s, gl_bitmap_type=%s, \n\tgl_alignment=%d, rgb_size=%d (%d,%d,%d), a_sz=%d, \n\tgl_internal_format=%s, tweaks=%s\n",
-  	image_bpp, image_bytes, image_mode==MODE_BGR, 
-        gl_bitmap_format_s, gl_bitmap_type_s, gl_alignment,
-	rgb_sz, r_sz, g_sz, b_sz, a_sz, gl_internal_format_s,
-	"none");
-#endif
+	rgb_sz, r_sz, g_sz, b_sz, a_sz, gl_internal_format_s, tweaks_used);
 
   resize(d_width,d_height);
 

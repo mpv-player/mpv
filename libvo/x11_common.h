@@ -9,7 +9,7 @@ extern int vo_dheight;
 
 extern char *mDisplayName;
 extern Display *mDisplay;
-extern Window *mRootWin;
+extern Window mRootWin;
 extern int mScreen;
 extern int mLocalDisplay;
 
