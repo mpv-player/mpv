@@ -138,7 +138,7 @@ typedef struct {
     void* desc; // image/sound/etc description (pointer to ImageDescription etc)
 } mov_track_t;
 
-void mov_build_index(mov_track_t* trak){
+void mov_build_index(mov_track_t* trak,int timescale){
     int i,j,s;
     int last=trak->chunks_size;
     unsigned int pts=0;
@@ -248,8 +248,8 @@ void mov_build_index(mov_track_t* trak){
 		if(pts<=trak->samples[sample].pts) break;
 	    }
 	    el->start_sample=sample;
-	    el->pts_offset=e_pts-trak->samples[sample].pts;
-	    pts+=el->dur;
+	    el->pts_offset=((long long)e_pts*(long long)trak->timescale)/(long long)timescale-trak->samples[sample].pts;
+	    pts+=((long long)el->dur*(long long)trak->timescale)/(long long)timescale;
 	    e_pts+=el->dur;
 	    // find end sample
 	    for(;sample<trak->samples_size;sample++){
@@ -271,6 +271,8 @@ typedef struct {
     off_t mdat_end;
     int track_db;
     mov_track_t* tracks[MOV_MAX_TRACKS];
+    int timescale; // movie timescale
+    int duration;  // movie duration (in movie timescale units)
 } mov_priv_t;
 
 #define MOV_FOURCC(a,b,c,d) ((a<<24)|(b<<16)|(c<<8)|(d))
@@ -423,6 +425,29 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		trak->tkdata_len=len;
 		trak->tkdata=malloc(trak->tkdata_len);
 		stream_read(demuxer->stream,trak->tkdata,trak->tkdata_len);
+/*
+0  1 Version
+1  3 Flags
+4  4 Creation time
+8  4 Modification time
+12 4 Track ID
+16 4 Reserved
+20 4 Duration
+24 8 Reserved
+32 2 Layer
+34 2 Alternate group
+36 2 Volume
+38 2 Reserved
+40 36 Matrix structure
+76 4 Track width
+80 4 Track height
+*/
+		mp_msg(MSGT_DEMUX,MSGL_V,"tkhd len=%d ver=%d flags=0x%X id=%d dur=%d lay=%d vol=%d\n",
+		    trak->tkdata_len, trak->tkdata[0], trak->tkdata[1],
+		    char2int(trak->tkdata,12), // id
+		    char2int(trak->tkdata,20), // duration
+		    char2short(trak->tkdata,32), // layer
+		    char2short(trak->tkdata,36)); // volume
 		break;
 	    }
 	    case MOV_FOURCC('m','d','h','d'): {
@@ -661,6 +686,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	  }//switch(id)
 	} else { /* not in track */
 	  switch(id) {
+	    case MOV_FOURCC('m','v','h','d'): {
+		stream_skip(demuxer->stream,12);
+		priv->timescale=stream_read_dword(demuxer->stream);
+		priv->duration=stream_read_dword(demuxer->stream);
+		mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*sMovie header (%d bytes): tscale=%d  dur=%d\n",level,"",(int)len,
+		    (int)priv->timescale,(int)priv->duration);
+		break;
+	    }
 	    case MOV_FOURCC('t','r','a','k'): {
 //	    if(trak) printf("MOV: Warning! trak in trak?\n");
 	    if(priv->track_db>=MOV_MAX_TRACKS){
@@ -674,7 +707,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    trak->id=priv->track_db;
 	    priv->tracks[priv->track_db]=trak;
 	    lschunks(demuxer,level+1,pos+len,trak);
-	    mov_build_index(trak);
+	    mov_build_index(trak,priv->timescale);
 	    switch(trak->type){
 	    case MOV_TRAK_AUDIO: {
 #if 0				   
