@@ -1357,8 +1357,10 @@ if(1)
     if(pts_from_bps){
       // PTS = (audio position)/(bytes per sec)
 //      a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-      a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->wf->nAvgBytesPerSec;
-//      delay_corrected=1; // hack
+      if(sh_audio->audio.dwSampleSize)
+        a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->wf->nAvgBytesPerSec;
+      else  // VBR:
+        a_pts=d_audio->pack_no*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
       v_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
       if(verbose)printf("%5.3f|",v_pts-d_video->pts);
     } else {

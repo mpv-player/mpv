@@ -249,8 +249,8 @@ do{
   int idx_pos=0;
   demux->filepos=stream_tell(demux->stream);
   
-  if(ds==demux->video) idx_pos=demux->idx_pos_a++; else
-  if(ds==demux->audio) idx_pos=demux->idx_pos_v++; else
+  if(ds==demux->video) idx_pos=demux->idx_pos_v++; else
+  if(ds==demux->audio) idx_pos=demux->idx_pos_a++; else
                        idx_pos=demux->idx_pos++;
   
   if(demux->idx_size>0 && idx_pos<demux->idx_size){
@@ -319,8 +319,8 @@ unsigned int len;
 int ret=0;
 int *fpos=NULL;
 
-  if(ds==demux->video) fpos=&demux->idx_pos_a; else
-  if(ds==demux->audio) fpos=&demux->idx_pos_v; else
+  if(ds==demux->video) fpos=&demux->idx_pos_v; else
+  if(ds==demux->audio) fpos=&demux->idx_pos_a; else
   return 0;
 
   stream_seek(demux->stream,fpos[0]);
@@ -367,14 +367,13 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
   //FIXME: OFF_T - Didn't check AVI case yet (avi files can't be >2G anyway?)
   //================= seek in AVI ==========================
     int rel_seek_frames=rel_seek_secs*sh_video->fps;
-    int curr_audio_pos=0;
-    int audio_chunk_pos=-1;
     int video_chunk_pos=d_video->pos;
     int i;
     
       skip_video_frames=0;
       avi_audio_pts=0;
 
+// ------------ STEP 1: find nearest video keyframe chunk ------------
       // find nearest video keyframe chunk pos:
       if(rel_seek_frames>0){
         // seek forward
@@ -382,7 +381,6 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
           int id=((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].ckid;
           if(avi_stream_id(id)==d_video->id){  // video frame
             if((--rel_seek_frames)<0 && ((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
-//            ++skip_audio_bytes;
           }
           ++video_chunk_pos;
         }
@@ -392,13 +390,11 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
           int id=((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].ckid;
           if(avi_stream_id(id)==d_video->id){  // video frame
             if((++rel_seek_frames)>0 && ((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
-//            --skip_audio_bytes;
           }
           --video_chunk_pos;
         }
       }
       demuxer->idx_pos_a=demuxer->idx_pos_v=demuxer->idx_pos=video_chunk_pos;
-//      printf("%d frames skipped\n",skip_audio_bytes);
 
       // re-calc video pts:
       d_video->pack_no=0;
@@ -408,76 +404,110 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
       }
       sh_video->num_frames=d_video->pack_no;
       avi_video_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+      d_video->pos=video_chunk_pos;
+
+// ------------ STEP 2: seek audio, find the right chunk & pos ------------
+
+      d_audio->pack_no=0;
+      d_audio->dpos=0;
 
       if(sh_audio){
         int i;
-        int apos=0;
+//        int apos=0;
         int last=0;
         int len=0;
 	int skip_audio_bytes=0;
-
-        // calc new audio position in audio stream: (using avg.bps value)
-        curr_audio_pos=(avi_video_pts) * sh_audio->wf->nAvgBytesPerSec;
-        if(curr_audio_pos<0)curr_audio_pos=0;
-#if 1
-        curr_audio_pos&=~15; // requires for PCM formats!!!
+	int curr_audio_pos=-1;
+	int audio_chunk_pos=-1;
+	int chunk_max=(demuxer->type==DEMUXER_TYPE_AVI)?video_chunk_pos:demuxer->idx_size;
+	
+	if(sh_audio->audio.dwSampleSize){
+	    // constant rate audio stream
+#if 0
+	    int align;
+	    curr_audio_pos=(avi_video_pts) * sh_audio->wf->nAvgBytesPerSec;
+	    if(curr_audio_pos<0)curr_audio_pos=0;
+	    align=sh_audio->audio.dwSampleSize;
+	    if(sh_audio->wf->nBlockAlign>align) align=sh_audio->wf->nBlockAlign;
+	    curr_audio_pos/=align;
+	    curr_audio_pos*=align;
 #else
-        curr_audio_pos/=sh_audio->wf->nBlockAlign;
-        curr_audio_pos*=sh_audio->wf->nBlockAlign;
-        demuxer->audio_seekable=1;
+	    curr_audio_pos=(avi_video_pts)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;
+	    curr_audio_pos*=sh_audio->audio.dwSampleSize;
 #endif
 
         // find audio chunk pos:
-          for(i=0;i<video_chunk_pos;i++){
+          for(i=0;i<chunk_max;i++){
             int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
             if(avi_stream_id(id)==d_audio->id){
                 len=((AVIINDEXENTRY *)demuxer->idx)[i].dwChunkLength;
-                last=i;
-                if(apos<=curr_audio_pos && curr_audio_pos<(apos+len)){
-                  if(verbose)printf("break;\n");
+                audio_chunk_pos=i; ++d_audio->pack_no;
+                if(d_audio->dpos<=curr_audio_pos && curr_audio_pos<(d_audio->dpos+len)){
+                  //if(verbose)printf("break;\n");
                   break;
                 }
-                apos+=len;
+                d_audio->dpos+=len;
             }
           }
-          if(verbose)printf("XXX i=%d  last=%d  apos=%d  curr_audio_pos=%d  \n",
-           i,last,apos,curr_audio_pos);
-//          audio_chunk_pos=last; // maybe wrong (if not break; )
-          audio_chunk_pos=i; // maybe wrong (if not break; )
-          skip_audio_bytes=curr_audio_pos-apos;
+	  skip_audio_bytes=curr_audio_pos-d_audio->dpos;
 
+	} else {
+	    // VBR audio
+	    int chunks=(avi_video_pts)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;
+	    audio_chunk_pos=0;
+	    
+        // find audio chunk pos:
+          for(i=0;i<demuxer->idx_size && chunks>0;i++){
+            int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
+            if(avi_stream_id(id)==d_audio->id){
+                len=((AVIINDEXENTRY *)demuxer->idx)[i].dwChunkLength;
+		if(i>chunk_max){
+		  skip_audio_bytes+=len;
+		} else {
+		  ++d_audio->pack_no;
+                  d_audio->dpos+=len;
+		  audio_chunk_pos=i;
+		}
+		--chunks;
+            }
+          }
+	  //if(audio_chunk_pos>chunk_max) audio_chunk_pos=chunk_max;
+	  
+//	  printf("VBR seek: %5.3f -> chunk_no %d -> chunk_idx %d + skip %d  \n",
+//	      avi_video_pts, audio_chunk_pos, );
+	
+	}
+	
+	// Now we have:
+	//      audio_chunk_pos = chunk no in index table (it's <=chunk_max)
+	//      skip_audio_bytes = bytes to be skipped after chunk seek
+	//      d-audio->pack_no = chunk_no in stream at audio_chunk_pos
+	//      d_audio->dpos = bytepos in stream at audio_chunk_pos
+	// let's seek!
+	
           // update stream position:
           d_audio->pos=audio_chunk_pos;
-          d_audio->dpos=apos;
-	  d_audio->pts=initial_pts_delay+(float)apos/(float)sh_audio->wf->nAvgBytesPerSec;
-          demuxer->idx_pos_a=demuxer->idx_pos_v=demuxer->idx_pos=audio_chunk_pos;
-
-          if(!(sh_audio->codec->flags&CODECS_FLAG_SEEKABLE)){
-#if 0
-//             curr_audio_pos=apos; // selected audio codec can't seek in chunk
-             skip_audio_secs=(float)skip_audio_bytes/(float)sh_audio->wf->nAvgBytesPerSec;
-             //printf("Seek_AUDIO: %d bytes --> %5.3f secs\n",skip_audio_bytes,skip_audio_secs);
-             skip_audio_bytes=0;
-#else
-             int d=skip_audio_bytes % sh_audio->wf->nBlockAlign;
-             skip_audio_bytes-=d;
-//             curr_audio_pos-=d;
-             skip_audio_secs=(float)d/(float)sh_audio->wf->nAvgBytesPerSec;
-             //printf("Seek_AUDIO: %d bytes --> %5.3f secs\n",d,skip_audio_secs);
-#endif
-          }
-          // now: audio_chunk_pos=pos in index
-          //      skip_audio_bytes=bytes to skip from that chunk
-          //      skip_audio_secs=time to play audio before video (if can't skip)
-          
-          // calc skip_video_frames & adjust video pts counter:
-//          i=last;
-	  for(i=demuxer->idx_pos;i<video_chunk_pos;i++){
-            int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
-            if(avi_stream_id(id)==d_video->id) ++skip_video_frames;
-          }
-          // requires for correct audio pts calculation (demuxer):
-          avi_video_pts-=skip_video_frames*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+//          d_audio->dpos=apos;
+//	  d_audio->pts=initial_pts_delay+(float)apos/(float)sh_audio->wf->nAvgBytesPerSec;
+	
+	if(demuxer->type==DEMUXER_TYPE_AVI){
+	  // interleaved stream:
+	  if(audio_chunk_pos<video_chunk_pos){
+            // calc skip_video_frames & adjust video pts counter:
+	    for(i=audio_chunk_pos;i<video_chunk_pos;i++){
+              int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
+              if(avi_stream_id(id)==d_video->id) ++skip_video_frames;
+            }
+            // requires for correct audio pts calculation (demuxer):
+            avi_video_pts-=skip_video_frames*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+	    demuxer->idx_pos_a=demuxer->idx_pos_v=demuxer->idx_pos=audio_chunk_pos;
+	  }
+	} else {
+	    // non-interleaved stream:
+	    demuxer->idx_pos_a=audio_chunk_pos;
+	    demuxer->idx_pos_v=video_chunk_pos;
+	    demuxer->idx_pos=(audio_chunk_pos<video_chunk_pos)?audio_chunk_pos:video_chunk_pos;
+	}
 
           if(verbose) printf("SEEK: idx=%d  (a:%d v:%d)  v.skip=%d  a.skip=%d/%4.3f  \n",
             demuxer->idx_pos,audio_chunk_pos,video_chunk_pos,
@@ -489,7 +519,7 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
           }
 	  resync_audio_stream(sh_audio);
 
-          sh_audio->timer=-skip_audio_secs;
+//          sh_audio->timer=-skip_audio_secs;
 
       }
 
