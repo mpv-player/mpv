@@ -623,9 +623,9 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     if ( sub_auto )
       {
        // auto load sub file ...
-       subtitles=sub_read_file( sub_filename( filename ) );
-       if ( subtitles == NULL ) subtitles=sub_read_file(get_path("default.sub")); // try default:
-      } else subtitles=sub_read_file(get_path("default.sub")); // try default:
+       subtitles=sub_read_file( sub_filename( get_path("sub/"), filename ) );
+      }
+      if ( subtitles == NULL ) subtitles=sub_read_file(get_path("default.sub")); // try default:
   }
 
 

@@ -24,6 +24,6 @@ typedef struct {
 } subtitle;
 
 subtitle* sub_read_file (char *filename);
-char * sub_filename( char * fname );
+char * sub_filename(char *path, char * fname );
 
 #endif

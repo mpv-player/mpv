@@ -373,6 +373,7 @@ subtitle* sub_read_file (char *filename) {
     return first;
 }
 
+#if 0
 char * strreplace( char * in,char * what,char * whereof )
 {
  int i;
@@ -383,14 +384,16 @@ char * strreplace( char * in,char * what,char * whereof )
  if ( strlen( what ) > strlen( whereof ) ) tmp[i]=0;
  return in;
 }
+#endif
 
-char * sub_filename( char * fname )
+char * sub_filename(char* path,  char * fname )
 {
- char * sub_name = NULL;
- char * sub_tmp  = NULL;
- int    i;
-#define SUB_EXTS 10
- char * sub_exts[SUB_EXTS] = 
+ char * sub_name1;
+ char * sub_name2;
+ int    i,j;
+ FILE * f;
+ int pos=0;
+ char * sub_exts[] = 
   { ".sub",
     ".SUB",
     ".srt",
@@ -401,29 +404,31 @@ char * sub_filename( char * fname )
     ".RT",
     ".txt",
     ".TXT"};
- 
+
  if ( fname == NULL ) return NULL;
- for( i=strlen( fname );i>0;i-- ) 
-   if( fname[i] == '.' ) 
-     {
-      sub_tmp=(char *)&fname[i];
-      break;
-     } 
- if ( i == 0 ) return NULL;
- sub_name=strdup( fname );
- for ( i=0;i<SUB_EXTS;i++ )
-  {
-   FILE * f;
-   
-   strcpy( sub_name,fname );
-   f=fopen( strreplace( sub_name,sub_tmp,sub_exts[i] ),"rt" );
-   if ( f != NULL ) 
-    {
+ 
+ sub_name1=strrchr(fname,'.');
+ if (!sub_name1) return NULL;
+ pos=sub_name1-fname;
+ 
+ sub_name1=malloc(strlen(path)+strlen(fname)+8);
+ strcpy(sub_name1,path);
+ sub_name2=sub_name1+strlen(path);
+ strncpy(sub_name2,fname,pos);
+ 
+ for(j=0;j<=1;j++){
+  char* sub_name=j?sub_name1:sub_name2;
+  for ( i=0;i<(sizeof(sub_exts)/sizeof(char*));i++ ) {
+   strcpy(sub_name2+pos,sub_exts[i]);
+//   printf("trying: '%s'\n",sub_name);
+   if((f=fopen( sub_name,"rt" ))) {
      fclose( f );
      printf( "SUB: Detected sub file: %s\n",sub_name );
      return sub_name;
-    }
+   }
   }
+ }
+ 
  return NULL;
 }
 
