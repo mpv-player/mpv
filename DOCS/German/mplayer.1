@@ -19,7 +19,7 @@ mencoder \- Movie Encoder für Linux
 .RB [globale\ Optionen]\ {\fIDateigruppe\ mit\ Optionen\fP}\ [gruppenspezifische\ Optionen]
 .br
 .B mplayer
-.RB [dvd|vcd|tv]://[Titel]\ [Optionen]
+.RB [dvd|vcd|tv|cdda]://[Titel]\ [Optionen]
 .br
 .B mplayer
 .RB [mms|mmst|http|http_proxy|rtp]://URL[:Port]\ [Optionen]
@@ -102,6 +102,26 @@ Besonders nützlich für langsamen Medien (normal ist \-nocache).
 .B \-chapter\ <Kapitel\ id>[-<Endkapitel\ id>]
 Gibt an bei welchem Kapitel die Wiedergabe starten soll. Gibt optional an, bei welchem Kapitel
 die Wiedergabe beendet werden soll. Beispiele können unten gefunden werden.
+.TP
+.B \-cdda <Option1:Option2:...>
+Diese Option kann verwendet werden, um das CD-Audio Lesefeature von MPlayer zu konfigurieren.
+Verfügbare Optionen sind:
+
+    speed=<n>          Stellt die Drehgeschwindigkeit der CD ein
+    paranoia=<0-2>     Stellt die Paranoia Stufe ein
+    generic-dev=<dev>  Verwendet das angegebene Scsi-Device
+    sector-size=<n>
+    overlap=<n>
+    toc-bias           Nimmt an, dass der Anfangsoffset von
+                       Track 1 als LBA 0 addressiert wird.
+                       Wird von einigen Toshiba\-Laufwerken
+                       benötigt, um die Trackgrenzen
+                       korrekt zu erhalten.
+    toc-offset=<n>     Fügt den gemeldeten Werten beim
+                       Adressieren der Tracks <n> Sektoren
+                       hinzu. Kann auch negativ sein.
+    (no)skip           Akzeptiert (keine) Daten, welche nicht
+                       perfekt rekonstruiert wurden.
 .TP
 .B \-csslib <Dateiname>
 (alte DVD-Option) Diese Option wird benutzt, um den normalen Standort der libcss.so zu überschreiben.
@@ -452,11 +472,16 @@ Erlaubt Software-Skalierung, falls diese vorhanden ist. Könnte verwendet werden,
 Siehe auch -vop expand.
 .TP
 .B \-dumpmpsub (nur MPLAYER)
-Konvertiert den angegebenen Untertitel (mit dem -sub Schalter) zu MPlayer's
+Konvertiert den angegebenen Untertitel (mit der -sub Option) zu MPlayer's
 Untertitel-Format, MPsub. Erzeugt eine dump.mpsub Datei im aktuellen Verzeichnis.
 .TP
 .B \-dumpsub (nur MPLAYER)
 Schreibt den Untertitelstream eines VOB-Streams nieder.
+.TP
+.B \-dumpsrtsub (nur MPLAYER)
+Konvertiert den angegebenen Untertitel (mit der \-sub Option) in das Zeit
+basierte SubViewer (SRT) Untertitel-Format. Erzeugt eine dumpsub.srt Datei
+im aktuellen Verzeichnis.
 .TP
 .B \-ifo\ <vobsub\ ifo\ Datei>
 Gibt die Datei an, die verwendet werden soll, um die Palette und Framegrösse 
@@ -693,7 +718,7 @@ je nach Karte/Cache. Dies beeinflusst bloss die libmpeg2 und libavcodec Codecs.
 Aktiviert Pan & Scan Funktionsweise. Wird verwendet um einen 16:9 Film auf einem
 4:3 Bildschirm darzustellen: Die Seiten des Films werden abgeschnitten um ein 4:3
 Bild zu erhalten, dass auf den Bildschirm passt. Diese Funktion läuft nur mit xv,
-(x)mga und vidix Treibern.
+xmga und xvidix Treibern.
 
 Der Bereich (0.0-1.0) gibt an, wie viel des Bildes abgeschnitten werden soll.
 .TP
