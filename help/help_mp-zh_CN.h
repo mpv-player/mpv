@@ -376,6 +376,9 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Skin浏览器"
 #define MSGTR_MENU_Preferences "属性设置"
 #define MSGTR_MENU_Exit "退出 ..."
+#define MSGTR_MENU_Mute "静音"
+#define MSGTR_MENU_Original "原始的"
+#define MSGTR_MENU_AspectRatio "长宽比"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "音频"

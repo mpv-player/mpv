@@ -378,6 +378,10 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Skinbrowser"
 #define MSGTR_MENU_Preferences "Einstellungen"
 #define MSGTR_MENU_Exit "Beenden ..."
+#define MSGTR_MENU_Mute "Mute"
+#define MSGTR_MENU_Original "Original"
+#define MSGTR_MENU_AspectRatio "Aspect Ratio"
+
 
 // --- equalizer
 #define MSGTR_EQU_Audio "Audio"
