@@ -50,6 +50,9 @@ stream copying and video resizing abilities.</P>
       panic if it's <B>400</B> or so, you shouldn't heard any audible
       quality decrease. Oh, and if your compiler doesn't even run <CODE>make test</CODE> ...
       Well, delete that <B>GCC 2.96</B>.</LI>
+    <LI><B>OPTIONAL</B> - <CODE>libjpeg</CODE> and <CODE>libpng</CODE> -
+      as described in the <A HREF="documentation.html#1.3">Installation</A>
+      section</LI>
   </UL>
 </P>
 
@@ -251,17 +254,8 @@ unsupported). You can encode to the following codecs :</P>
 
 <P><B><I>Explanation of the process</I></B></P>
 
-<P><B>MEncoder</B> <I>decodes</I> the input image(s) with an available MJPEG
-  video codec (when decoding PNGs, it will use <B>libpng</B>). By
-  default it uses <CODE>ffmjpeg</CODE>, so you have to compile with libavcodec
-  support (which is recommended anyways). Its disadvantage is that it can't
-  handle some JPEG types (green image will be encoded for these). Use some
-  external utility to convert those images into edible format.<BR> You can
-  freely choose any other MJPEG decoder, like <CODE>mcmjpg32.dll</CODE>
-  (MainConcept Motion JPEG) if installed, and after checking
-  <CODE>codecs.conf</CODE> and checking the <CODE>videocodec</CODE> line which
-  refers to this file, you'll learn you have to use the <CODE>-vc mjpeg</CODE>
-  option for it.
+<P><B>MEncoder</B> <I>decodes</I> the input image(s) with <CODE>libjpeg</CODE>
+  (when decoding PNGs, it will use <B>libpng</B>).
 </P>
 
 <P><B>MEncoder</B> then feeds the decoded image to the chosen video compressor

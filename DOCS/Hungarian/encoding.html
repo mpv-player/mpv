@@ -53,6 +53,9 @@ másoló, és video átméretezõ képességgel.</P>
       Azért ne ess pánikba ha pl <B>400</B> fölötti értéket kapsz, nem
       valószínû hogy hallod a különbséget. Jaigen, ha a fordítód nem tudja
       a tesztet lefuttatni.. Nos, töröld már le azt a nyavajás <B>GCC 2.96</B>-ot.</LI>
+    <LI><B>OPCIONÁLIS</B> - <CODE>libjpeg</CODE> és <CODE>libpng</CODE> -
+      lásd az <A HREF="documentation.html#1.3">Installálás</A> 
+      fejezetet</LI>
   </UL>
 </P>
 
@@ -261,19 +264,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
 
 <P><B><I>A folyamat magyarázata</I></B></P>
 
-<P>Elõször a <B>MEncoder</B> <I>dekódolja</I> a bemeneti fileokat egy
-  rendelkezésre álló és szabadonválasztott MJPEG dekóderrel (PNG-k dekódolását
-  a <B>MEncoder</B> a libpngvel végzi). Alapértelmezésben az
-  <CODE>ffmjpeg</CODE> codec-et próbálja használni, így ajánlott libavcodec-kel
-  fordítani. Ennek a codecnek a legnagyobb hátránya hogy bizonyos JPEG
-  fileokat nem tud kezelni (ilyenkor zöld kimenet látható). Ilyenkor különbözõ
-  képkonvertáló programokkal elõtte konvertáld át ezeket a <B>MEncoder</B>
-  által is emészthetõ formába.<BR>
-  Választhatsz más dekódert is, például az <CODE>mcmjpg32.dll</CODE>-t
-  (MainConcept Motion JPEG). Ilyenkor meg kell nézni a <CODE>codecs.conf</CODE>
-  fileban hogy az adott codecre milyen névvel lehet hivatkozni (<CODE>videocodec</CODE>
-  sor), és utána ezt a nevet a <CODE>-vc</CODE> opció után írni. A fenti
-  példát véve: <CODE>-vc mjpeg</CODE>
+<P>Elõször a <B>MEncoder</B> <I>dekódolja</I> a bemeneti fileokat a
+  <CODE>libjpeg</CODE> segítségével (PNG-k dekódolását a libpngvel végzi).
 </P>
 
 <P>A <B>MEncoder</B> ezután a kiválasztott kimeneti codecnek adja a
