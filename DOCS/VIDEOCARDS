@@ -97,6 +97,8 @@ There are 3 native drivers for Linux:
   To make it load/unload automatically when needed, insert the following line
   at the end of /etc/modules.conf :
 	alias char-major-178 mga_vid
+  Then run
+	depmod -a
 
   Using it from MPlayer:  (you should re-compile it with mga_vid support...)
   

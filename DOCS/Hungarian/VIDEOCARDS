@@ -105,6 +105,8 @@ III. Nativ kartyaspecifikus driverek
   Ha azt akarod hogy automatikusan toltodjon be, ird be a kovetkezo sort az
   /etc/modules.conf vegere :
 	alias char-major-178 mga_vid
+  Aztan futtasd :
+	depmod -a
 
   Hasznalata MPlayer-bol:  (eloszor forditsd ujra mga_vid supporttal...)
 

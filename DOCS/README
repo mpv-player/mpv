@@ -129,14 +129,14 @@ NOTE: check DOCS/VIDEOCARDS !
 Supported audio output devices:                                              
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - OSS driver
-- ALSA driver with OSS emulation (NOT recommended, causes annoying delays)
-- ESD with the esddsp utility (not tested, not recommended, see ALSA)
+- ALSA driver with OSS emulation (ALSA >= 0.9 only!)
+- ESD with the esddsp utility (not tested)
 
 NOTE: check DOCS/SOUNDCARDS for details!
 
 Speed:
 ~~~~~~
-Most of time-critical parts are optimized for MMX/MMXext/SSE/3DNow!/3Dnow!Ex.
+Most of time-critical parts are optimized for MMX/MMXext/SSE/3DNow!/3DNow!Ex.
 You can improve rendering speed by setting up MTRR registers, see doc in MTRR.
 Some *old* benchmark results can be found in the doc file SPEED.
 
@@ -166,10 +166,7 @@ Usage:
     mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
 
   Note:  in order to use Matrox YUV driver (-vo mga or xmga), first you'll have
-         to load the driver: insmod drivers/mga_vid.o , or to make it automatic
-         insert the following line at the end of /etc/modules.conf:
-         alias char-major-178 mga_vid
-         and run 'depmod -a' .
+         to load the driver: see DOCS/VIDEOCARDS .
 
 Playing from stdin:
 ~~~~~~~~~~~~~~~~~~~
@@ -252,7 +249,7 @@ the following addresses:
 NOTE: language of above lists are ENGLISH, unless explicitly stated otherwise.
       Please do not send messages using other language!
 
-License:                                                                     
+License:
 ~~~~~~~~
 Since MPlayer incorporates a lot of code from other projects, this isn't
 decided yet. We're going for GPL (will be pretty hard, though).

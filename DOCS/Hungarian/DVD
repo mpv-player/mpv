@@ -1,5 +1,5 @@
 DVD tamogatas az MPlayer-ben!
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Olvasd el a 'DVD-FAQ' file-t is (es keruld el az ottlevo atiranyitast:).
 
@@ -41,7 +41,7 @@ ahol,
 
 	A filenev egyszeruen a VOB file neve a lemezen.
 
-Ugy vettem eszre, hogy az autentikalas rendszergazdai jogosultsagot kivan meg,
+Ugy vettem eszre, hogy az autentikalas root jogosultsagot kivan meg,
 ugyhogy muszaj lesz root-kent futtatni az MPlayer-t! (lasd 'Problemak' resz).
 
 MEGJEGYZES a hangrol:
@@ -58,9 +58,9 @@ dvdauth.c
 dvdauth.h
 	header file
 
-Ezek a file-ok '#ifdef ... #endif' blokkon belul avnnak, igy ha a libcss
-tamogatas ki van kapcsolva, semmi hatasuk sincs, es MPlayer se lesz libcss-hez
-linkelve.
+Ezek a file-ok '#ifdef ... #endif' blokkon belul vannak, igy ha a libcss
+tamogatas ki van kapcsolva, semmi hatasuk nincs, es az MPlayer se lesz
+libcss-hez linkelve.
 
 
 Modositasok a forrasban
@@ -96,11 +96,11 @@ Problemak (TODO)
 * az autentikacionak root jogok kellenek. Ez azert furcsa mert az OMS
   kepes erre user-kent is.
 * hang. Egyetlen DVD lemezem van (Matrix), ennyivel tesztelem az MPlayer-t.
-  Nehany VOB file-nek angol hangja van, nehanynak spanyol, es van aminek
+  Nehany VOB file-nak angol hangja van, nehanynak spanyol, es van aminek
   egyaltalan nincs is.
   Ugy _tunik_ hogy ha megadom az '-aid 128' opciot, mindnek angol nyelve
   lesz ...
-* furcsa effektek, de csak NEHANY VOB file-vel (ugy nez ki mint valami
+* furcsa effektek, de csak NEHANY VOB file-lal (ugy nez ki mint valami
   interlace effekt, azaz minden 2. vonal az elozo kepkockabol van).
 
 

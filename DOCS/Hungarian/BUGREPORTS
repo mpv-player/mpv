@@ -11,7 +11,10 @@ Iratkozz fel az mplayer-users levelezesi listara:
 es kuldd a bugreportot a
    mplayer-users@lists.sourceforge.net
 cimre.
-Nem fogunk CC-zni, szoval legyszives felirtakozni!!!
+
+		( ! A LISTA NYELVE AZ *ANGOL* ! )
+
+Nem fogunk CC-zni, szoval legyszives feliratkozni!!!
 
 Ne kuldj bugreportot egyenesen valamelyik keszitonek!!!
 Egyutt dolgozunk a kodon, ezert mindenki erdekelt.
@@ -19,7 +22,7 @@ Elofordulhat hogy mas felhasznalok mar tudjak a megoldast
 (konfiguracios problema, rossz driver, stb), megha mi azt hinnenk
 hogy a kod bugos.
 
-Legyszives reszletesen leirni a probelmat, peldakkal, stb, es ne
+Legyszives reszletesen leirni a problemat, peldakkal, stb, es ne
 felejtsd el ezeket se mellekelni:
 
 Mit?
@@ -30,7 +33,7 @@ Mit?
   peldaul: RedHat 7.1 / Slackware 7.0 + csomagok 7.1-bol ...
 - kernel verzio
   uname -a
-- libc version:
+- libc verzio:
   ls -l /lib/libc[.-]*
 - X verzio:
   X -version
@@ -61,7 +64,7 @@ gdb mplayer --core=core -batch --command=parancs_file >mplayer.bug
 2. Hardware & driverek:
 - CPU info:
   cat /proc/cpuinfo
-- video card gyarto es tipus:
+- video kartya: gyarto es tipus
   peldaul:
     ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
     Matrox G400 DH 32MB SGRAM
@@ -101,7 +104,7 @@ Lejatszasi problemakhoz:
   problemat, de eloszor probald ki:
     dd if=a_file of=kis_file bs=1k count=1024
   (ez az 'a_file' elso 1 Mb-jat elment 'kis_file' neven')
-  Ekkor probald lejtaszani a keletkezo file-t, es ha a bug elojon,
+  Ekkor probald lejatszani a keletkezo file-t, es ha a bug elojon,
   akkor eleg lesz csak ennyit feltolteni.
   SOHA ne kuldj file-t levelben! Toltsd fel, es csak a file nevet
   kuldd el!

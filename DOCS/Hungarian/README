@@ -1,264 +1,266 @@
 MPlayer (CVS version)           (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)
-=============================== * See the file AUTHORS for the complete list *
+=============================== * Keszitok teljes listajat lasd AUTHORS file*
 http://mplayer.sourceforge.net
 
-About:
-~~~~~~
-MPlayer is a movie player for LINUX. It plays most mpeg, avi and asf files,
-supported by many native and win32 DLL codecs. You can watch VCD, DVD and
-even DivX movies too. The another big feature of mplayer is the wide range
-of supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
-fbdev, AAlib, but you can use SDL (and this way all drivers of SDL) and some 
-lowlevel card-specific drivers (for Matrox/3dfx/SiS) too! Most of them
-supports software or hardware scaling, so you can enjoy movies in fullscreen.
-And what about the nice big antialiased shaded subtitles (.sub files) with
-hungarian, english, cyrillic, czech, korean fonts, and OSD?
+Roviden:
+~~~~~~~~
+Az MPlayer egy LINUXON mukodo videolejatszo. Le tudja jatszani a legtobb
+mpeg, avi es asf file-okat, valamint felsorakoztat jonehany nativ es Win32
+codecet. Nezhetsz vele VCD-t, DVD-t, es meg DivX-et is. A masik oriasi
+tulajdonsaga az MPlayernek a megjelenitesi modok szeles valaszteka.
+Mukodik X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib driverekkel, sot
+SDL-lel is (beleertve ezaltal az SDL kepessegeit is), es nehany alacsonyszintu
+kartyaspecifikus driver (Matrox/3dfx/SiS) is hasznalhato! Legtobbjuk
+tamogat software vagy hardware scaling-et, igy a teljeskepernyos mod is
+elerheto. Es meg nem is szoltam a szep, e'lsimitott, arnyekolt feliratozasrol,
+ami tamogat magyar, angol, cirill, cseh es koreai fontokat, valamint OSD-t!
 
 History:
 ~~~~~~~~
-Yes. Yet another movie player for linux.
-What is the special with this? It works, at least for me :)
-I've tried lots of players under linux (mtv,xmps,dvdview,livid/oms,VideoLAN,
-xine,xanim,avifile,xmmp) but they all have some problem. Mostly with
-special files or with audio/video sync. Most of them is unable to play
-both mpeg1, mpeg2 and avi (DivX) files. Many players have image quality
-or speed problems too. So I've decided to write/modify one...
+Igen. Egy ujabb videolejatszo Linuxra.
+Hogy mi ebben a kulonleges? Nos, mukodik, legalabbis nekem :)
+Nagyon sok lejatszot probaltam Linux alatt (mtv,xmps,dvdview,livid/oms,
+VideoLAN,xine,xanim,avifile,xmmp) de mindnek ugyanazok a problemai.
+Tobbnyire a kulonleges fileokkal, vagy a hang/kep szinkronnal. Legtobbjuk
+keptelen mind mpeg1, mpeg2 ES avi (DivX) lejatszasra. Sokuknak gondjuk van
+a kepminoseggel, vagy a sebesseggel is. Elhataroztam hogy (at)irok egyet...
 
 - mpg12play v0.1-v0.3:
-  The first try, hacked together in a half hour!
-  I've used libmpeg3 from www.heroinewarrior.com up to the version 0.3,
-  but there were image quality and speed problems with it.
+  Az elso probalkozas, felora alatt osszeganyolva!
+  A libmpeg3-at hasznaltam a www.heroinewarrior.com-rol egeszen a 0.3-as
+  verzioig, de minosegi es sebessegi problemak voltak vele.
 - mpg12play v0.5-v0.87:
-  Mpeg codec replaced with DVDview by Dirk Farin, it was a great stuff,
-  but it was slow and was written in C++ (I hate C++!!!)
+  Az MPEG codec helyere a DVDview-et (Dirk Farin) tettem, nagyszeru dolog
+  volt, de lassu, es C++-ben keszult (utalom a C++-t!!!)
 - mpg12play v0.9-v0.95pre5:
-  Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman & Michel Lespinasse.
-  It's great, optimized very fast C code with perfect image quality and
-  100% mpeg standard conformance.
+  Az MPEG codec itt az Aaron Holtzman es Michel Lespinasse keszitette libmpeg2
+  (mpeg2dec). Nagyon jo, optimalizalt gyors C kod, tokeletes kepminoseg es
+  100%-os megfeleles a szabvanynak.
 - MPlayer v0.3-v0.9:
-  It was a pack of two programs: mpg12playv0.95pre6 and my new simple AVI
-  player 'avip' based on avifile's Win32 DLL loader.
+  Egyvelege ket programnak: mpg123playv0.95pre6 es az uj egyszeru AVI
+  lejatszomnak ('avip'), ami az avifile Win32 DLL loader-en alapul.
 - MPlayer v0.10:
-  The mpeg and avi player in a single binary!
+  Az MPEG es AVI lejatszo egyetlen programban!
 - MPlayer v0.11:
-  Added .asf file support, and OpenDivX (see www.projectmayo.com) en/decoding.
+  ASF tamogatas hozzaadasa, es OpenDivX (lasd www.projectmayo.com)
+  en/dekodolas.
 - MPlayer v0.17 "The IdegCounter"
-  The release version of the 0.11pre after 4 months of heavy development!
-  Try it, and be amazed! Thousands of new features added... and of course
-  old code was improved too, bugs removed etc.
+  A 0.11pre sorozat vegso verzioja, 4 honapnyi kokemeny fejlesztes utan!
+  Probald ki es ess amulatba! Ezernyi uj dolog... es persze a regi kod
+  feljavitva, bugok eltavolitva, stb.
 
-As you see, I didn't write any codecs, just some players. Instead I spent
-a lot of time finding the best way to parse bad damaged input files
-(both mpg and avi) and to do perfect A-V sync with seeking ability.
-My player is rock solid playing damaged mpeg files (useful for some VCDs),
-and it plays bad AVI files which are unplayable with the famous
-windows media player. Even AVI files without index chunk are playable, and
-you can rebuild their indexes with the -idx option, thus enabling seeking!
-As you see, stability and quality are the most important things for me,
-speed has lower priority, but is still very important.
+Lathato, hogy nem codeceket irtam, csak nehany lejatszot. Sok idot toltottem
+azzal is, hogy megtalaljam a megfelelo modszer a hibas file-ok beolvasasara
+(mind MPEG, AVI), valamint a tokeletes A-V szinkronra, akar keresessel is.
+A lejatszo sziklaszilardan jatszik le hibas MPEG file-okat (hasznos nehany
+VCD-nel), es lejatszik minden olyan hibas AVI-t, amit a csodas windows
+media player nem. Meg az index chunk nelkuli AVI-k is lejatszhatok, sot
+az indexet fel is lehet epiteni az '-idx' opcioval, igy keresni is lehet
+bennuk! Amint az latszik, a stabilitas es a minoseg a legfontosabbak
+a szamomra, de a sebesseg se eppen alacsony.
 
-What about the GUI?
-~~~~~~~~~~~~~~~~~~~
-I'm not a GUI programmer. I hate GUIs, I like the pure black 80x25 console.
-So the player has only keyboard control from the controlling console/xterm now.
-But there is a GUI development for the player, coordinated by Pontscho/Fresh!
-It's still under development, but it will be merged and released real soon.
-BTW he needs some nice skins, if you are a good graphician, contact him!!!
+Es a grafikus felulet?
+~~~~~~~~~~~~~~~~~~~~~~
+Nem foglalkozok feluletekkel. Utalom oket, a kedvencem az egyszeru 80x25-os
+konzol. Ezert a lejatszo csak billentyuzetrol iranyithato, a
+konzolrol/xtermrol. Tervezes alatt all egy felulet, Pontscho/Fresh! altal.
+Erosen fejlesztes alatt all, de hamarosan kiadjuk es beepitjuk.
+Ha mar itt tartunk, kellene neki nehany skin, ha jo grafikus vagy irj neki!!!
 
-Supported input formats:
-~~~~~~~~~~~~~~~~~~~~~~~~
-- VCD (Video CD) directly from CD-ROM or from CDRwin's .bin image file
-- DVD, directly from your DVD disk, using optional libcss for decryption
-- MPEG 1/2 System Stream (PS/PES/VOB) and Elementary Stream (ES) file formats
-- RIFF AVI file format
-- ASF 1.0 file format
-- supports reading from file or stdin
+Tamogatott formatumok:
+~~~~~~~~~~~~~~~~~~~~~~
+- VCD (Video CD) kozvetlen a CD-ROM-rol, vagy image file-bol
+- DVD, kozvetlen a lemezrol, opcionalisan libcss-t hasznalva dekodolashoz
+- MPEG 1/2 System Stream (PS/PES/VOB) es Elementary Stream (ES) formatumok
+- RIFF AVI formatum
+- ASF 1.0 formatum
+- file olvasasa stdin-rol
 
-Supported audio & video codecs:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*** See http://mplayer.sourceforge.net/DOCS/codecs.html ***
-***               for the complete list                 ***
+Tamogatott audio es video kodekek:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*** Lasd http://mplayer.sourceforge.net/DOCS/codecs.html ***
+***                a teljes listahoz                     ***
 
-The most important video codecs:
-- mpeg1 (VCD) and mpeg2 (DVD) video
-- DivX, OpenDivX and other MPEG4 variants
-- Windows Media Video 7 (WMV1) used in .wmv files
-- Intel Indeo codecs (3.1,3.2,4.1,5.0)
-- MJPEG, ASV2 and other hardware formats
+A legfontosabb video codecek:
+- mpeg1 (VCD) es mpeg2 (DVD) video
+- DivX, OpenDivX es mas MPEG4 variansok
+- Windows Media Video 7 (WMV1) ami .wmv fileokban van
+- Intel Indeo codecek (3.1, 3.2, 4.1, 5.0)
+- MJPEG, ASV2 es mas hardware formatumok
 
-The most important audio codecs:
-- mpeg layer 2, and layer 3 (MP3) audio
+A legfontosabb audio codecek:
+- mpeg layer 2, es layer 3 (MP3) audio
 - AC3 dolby audio
-- Voxware audio
-- alaw, msgsm, pcm and other simple old audio formats
+- VoxWare audio
+- alaw, msgsm, pcm es mas regi formatumok
 
-If you have a codec not listed here, and not supported yet, just
-read http://mplayer.sourceforge.net/DOCS/codecs.html and DOCS/CODECS
-to get info about its status and about how to help us adding support for it!
+Ha van olyan codeced ami nincs felsorolva vagy tamogatva, olvasd el a
+http://mplayer.sourceforge.net/DOCS/codecs.html es DOCS/CODECS
+file-okat, amikben le van irva mit kell tenned hogy tamogassuk a codeced.
 
-Supported video output devices:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-General:
-- x11:	X11 with SHM extension
-- xv:	X11 using overlays with the Xvideo extension (hardware YUV & scaling)
-- gl:	OpenGL renderer, works only with Utah-GLX! (no DRI or nVidia drivers)
-- dga:	X11 DGA extension
-- fsdga:X11 DGA extension with fullscreen scaling (only 24/32bpp and MPEG!)
-- fbdev:Output to general framebuffers
-- svga: Output to SVGAlib
-- sdl:	SDL >= v1.1.7 driver (supports software scaling, and versions >=1.1.8
-        even support Xvideo (thus hardware rendering) and with >=1.2.0 aalib)
-- aalib:Textmode rendering (through SDL, native driver is coming soon!)
+Tamogatott video kimeneti formak:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Altalanos:
+- x11:  X11 az SHM kiterjesztessel
+- xv:   X11 az XVideo kiterjesztes overlay-eivel (hardware tamogatas)
+- gl:   OpenGL renderelo, csak Utah-GLX-szel mukodik!
+- dga:  X11 a DGA kiterjesztessel
+- fsdga:X11 a DGA kiterjesztessel + teljeskepernyos render (csak 24/32bpp
+        es MPEG!)
+- fbdev:Megjelenites altalanos framebuffereken
+- svga: Megjelenites SVGAlib-bel
+- sdl:  SDL >= v1.1.7 driver (software scaling, >=1.1.8 tamogatja a hardware
+        gyorsitast XVideo-n keresztul, >=1.2.0 aalib)
+- aalib:Szoveges modu render (SDL-en keresztul, nativ driver hamarosan!)
 
-Card specific:
-- mga:	Matrox G200/G400 hardware YUV overlay via the mga_vid device
-- xmga:	Matrox G200/G400 overlay (mga_vid) in X11 window
-	(Xv emulation on X 3.3.x !)
-- syncfb: Matrox G400 YUV support on framebuffer (obsoloted, use mga/xmga)
-- 3dfx:	Voodoo2/3 hardware YUV (/dev/3dfx) support (not yet tested, maybe broken)
+Kartyaspecifikus:
+- mga:  Matrox G200/G400 hardware-es YUV overlay az mga_vid-en keresztul
+- xmga: Matrox G200/G400 overlay (mga_vid) X11 ablakban
+        (Xv emulacio 3.3.x-es X-szel!)
+- syncfb: Matrox G400 YUV tamogatas framebufferen (regi, hasznalj mga/xmga-t)
+- 3dfx: Voodoo2/3 hardware YUV (/dev/3dfx) tamogatas (nincs tesztelve!)
 
-Special:
-- png:  PNG files output (use -z switch to set compression)
-- pgm:	PGM files output (for testing purposes or ffmpeg encoding)
-- md5:	MD5sum output (for mpeg conformance tests)
-- odivx:OpenDivX AVI File writer (use -br to set encoding bitrate)
-- null:	Null output (for speed tests/benchmarking)
+Egyeb:
+- png:  kimenet PNG file-okba (-z kapcsolo a tomorites merteket allitja)
+- pgm:  kimenet PGM file-okba (tesztelesre, vagy ffmpeg enkodolashoz)
+- md5:  MD5sum tamogatas (mpeg konformancia tesztekhez)
+- odivx:OpenDivX AVI file kimenet (-br a bitrate-t allitja)
+- null: kimenet a nagy semmibe (sebessegtesztekhez)
 
-NOTE: check DOCS/VIDEOCARDS !
+Megj.: olvasd el a DOCS/VIDEOCARDS file-t !
 
-Supported audio output devices:                                              
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tamogatott audio kimeneti formak:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - OSS driver
-- ALSA driver with OSS emulation (NOT recommended, causes annoying delays)
-- ESD with the esddsp utility (not tested, not recommended, see ALSA)
+- ALSA driver OSS emulacioval (kizarolag ALSA >= 0.9 !)
+- ESD az 'esddsp' programmal (nincs tesztelve)
 
-NOTE: check DOCS/SOUNDCARDS for details!
+Megj.: olvasd el a DOCS/SOUNDCARDS file-t !
 
-Speed:
-~~~~~~
-Most of time-critical parts are optimized for MMX/MMXext/SSE/3DNow!/3Dnow!Ex.
-You can improve rendering speed by setting up MTRR registers, see doc in MTRR.
-Some *old* benchmark results can be found in the doc file SPEED.
+Sebesseg:
+~~~~~~~~~
+A legtobb kritikus resz MMX/MMXext/SSE/3DNow!/3DNow!Ex-re optimalizalt.
+A kepkirakasi sebesseget megnovelheted az MTRR regiszterek beallitasaval,
+lasd DOCS/MTRR . Nehany *regi* sebessegteszt eredmenyet last DOCS/SPEED .
 
-Usage:
-~~~~~~
-  mplayer [options] [-vo driver] [path/]filename
+Hasznalat:
+~~~~~~~~~~
+  mplayer [opciok] [-vo driver] [utvonal/]filenev
 
-  Options:
-    see  `mplayer -h'  for options
-    see  `mplayer -vo help'  for list of available output drivers
+  Opciok:
+    lasd `mplayer -h'
+    lasd `mplayer -vo help'  a rendelkezesre allo driverek listajahoz
 
-  Keys:
-    <-  or  ->      seek backward/forward 10 seconds
-    up or down      seek backward/forward 1 minute
-    p or SPACE      pause movie (press any key to continue)
-    q  or  ^C       stop playing and quit program
-    o               toggle OSD : none / seek / seek+timer
-    /  and *        decrease/increase volume
-    m               toggle using master/pcm channel for volume setting
-    f               toggle fullscreen (only with -vo sdl)
+  Billentyuk:
+    <-  or  ->      hatra/eloretekeres, 10 masodpercnyi
+    up or down      hatra/eloretekeres, 1 percnyi
+    p or SPACE      pillanatallj, barmely billentyure tovabb
+    q  or  ^C       lejatszas leallitasa, kilepes
+    o               OSD funkciok : nincs / seek / seek+ido
+    /  and *        hangero csokkentese/novelese
+    m               master/pcm csatorna hasznalata hangerohoz
+    f               teljes kepernyos mod ki/be (csak SDL!)
 
-  Examples:
+  Peldak:
     mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
     mplayer -vcd 2 /dev/cdrom
     mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
     mplayer -dvd /dev/dvd /mnt/dvd/matrix.vob
     mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
 
-  Note:  in order to use Matrox YUV driver (-vo mga or xmga), first you'll have
-         to load the driver: insmod drivers/mga_vid.o , or to make it automatic
-         insert the following line at the end of /etc/modules.conf:
-         alias char-major-178 mga_vid
-         and run 'depmod -a' .
+  Megj.: a Matrox YUV driver (-vo mga vagy xmga) hasznalatahoz eloszor be kell
+         tolteni a drivert, lasd DOCS/VIDEOCARDS .
 
-Playing from stdin:
-~~~~~~~~~~~~~~~~~~~
-Now it's possible.
+Lejatszas stdin-rol:
+~~~~~~~~~~~~~~~~~~~~
+Vegre lehetseges.
 
-To play something by reading from stdin, just use '-' as filename:
+Egyszeruen csak add meg a '-' karaktert filenevnek:
 
 cat test.mpg | mplayer -vo xv -
 
-Restrictions:
-	mpg: no backward seeking
-	asf: no backward seeking
-	avi: no index reading -> no seeking at all, and playing of some files are
-		+impossible
+Korlatozasok:
+	mpg: nem lehet visszafele tekerni
+	asf: nem lehet visszafele tekerni
+	avi: index nincs beolvasva -> egyaltalan nincs tekeres, nehany
+	     file nem lejatszhato
 
-No control from controlling terminal/xterm, but hotkeys and osd works
-from the window. or course LIRC still works everywhere.
+Terminalrol/xterm-bol nem lehet iranyitani, de a hotkey-ek, es az OSD
+mukodik az ablakban. Termeszetesen a LIRC mindenhol megy.
 
-This feature combined with external wrappers extends possibilities.
-For example, to play a movie just downloaded from your favourite divx
-server:
+Ez a tulajdonsag nehany kulso programmal egyutt kiboviti a lehetosegeinket.
+Peldaul egy epp most letoltott divx film megnezese:
 	rar p ast-nssvcd.rar | mplayer -vo xmga -fs -
 
-With an asf grabber or http dump program you can play from the net.
+Egy asf grabberrel vagy HTTP dump programmal a netrol is lejatszhatsz.
 	wget ftp://micorsops.com/something.avi -O - | mplayer -
 
-(however we planned to add direct asf/http/ftp inputs with seeking and other
-stuff, but for now it's a good workaround)
+(kesobb majd lesz kozvetlen asf/http/ftp olvasas, keresessel stb, de egyelore
+ez van)
 
-TV output:
-~~~~~~~~~~
-If you have a Matrox G400 Dual-Head card, you can watch movies on TV, using
-the TV-out feature of the second head. Read DOCS/TVout-G400 for details!
+TV kimenet:
+~~~~~~~~~~~
+Ha van egy Matrox G400 Dual-Head kartyad, tudsz a TV-n filmet nezni
+kihasznalva a masodik head TV-kimenet kepesseget. Olvasd el a
+DOCS/TVout-G400 file-t a reszletekhez!
 
-Sending bugreports, comments, feature requests etc:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-First please read all the docs in this package, most of the problems are
-described somewhere. At least read DOCS/BUGS !  We don't like answering
-questions which are already answered in this readme or other docs.
+Bugreportok, hozzafuzesek, kerelmek, stb:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Eloszor olvasd el az osszes leirast, a problemak legtobbje le van irva
+valahol. Legalabb olvasd el a DOCS/BUGS filet ! Nem szeretunk olyan
+kerdesre valaszolni, amire mar ismert a valasz ebben, vagy mas
+dokumentacioban.
 
-Read the DOCS/MPlayer-FAQ. Most common problems are answered there!
+Olvasd el a DOCS/MPlayer-FAQ file-t. A legtobb altalanos kerdesre
+ott talalod a valaszokat!
 
-You should try the latest development version (from CVS) too, maybe your
-bug is already fixed, but the new version hasn't been released.
-If you couldn't solve the problem, then send a quality bugreport:
-read DOCS/BUGREPORTS for instructions (where, what and how...)
+Probald ki a legujabb fejlesztoi valtozatot (CVS-rol) is, hatha mar
+meg van oldva a gond, csak az uj verzio meg nincs kiadva. Ha nem
+sikerult megoldani a problemat, kuldj egy szep bugreport-ot:
+lasd DOCS/BUGREPORTS .
 
-Subscribe to the mplayer-users mailing list. There are many MPlayer
-users, maybe they can help or know the solution to your problem.
-You also should send ideas, feature requests, comments to there!
-Please do not ask for features already listed in the DOCS/TODO!
+Iratkozz fel az mplayer-users levelezesi listara (ANGOL nyelvu!).
+Sok MPlayer felhasznalo van, talan tudnak neked segiteni. Kuldd oda
+otleteidet, kerelmeidet, hozzafuznivaloidat. Ne kerj olyat, ami
+mar le van irva a DOCS/TODO fileban!
 
-Contact information:
-~~~~~~~~~~~~~~~~~~~~
+Contact info:
+~~~~~~~~~~~~~
 Homepage:  http://mplayer.sourceforge.net
 
-Mailing lists:
-~~~~~~~~~~~~~~
-There are some public mailing lists on MPlayer. Subscribing can be achieved on
-the following addresses:
+Levelezesi listak:
+~~~~~~~~~~~~~~~~~~
+Jonehany MPlayer lista van. A kovetkezo cimeken lehet feliratkozni:
 
-- MPlayer core/hungarian developers list:  (HUNGARIAN language ONLY!)
+- MPlayer belso/magyar fejlesztok listaja:  (kizarolag MAGYAR nyelvu!)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-devel
 
-- MPlayer developers list:  (send your patches here)
+- MPlayer fejlesztok listaja:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng
 
-- MPlayer users list:  (send your ideas, bugreports, feature requests here)
+- MPlayer felhasznalok listaja:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-users
 
-- MPlayer & Matrox G200/G400/G450 users: (about TV-out, mga_vid, syncfb, Xv)
+- MPlayer & Matrox G200/G400/G450 felhasznalok:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-matrox
 
-- MPlayer announce:    (information about new releases or big changes in CVS)
+- MPlayer bejelentesek: (uj kiadott verziok, nagyobb valtozasok)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-announce
 
-- MPlayer CVS-log:     (announce about _every_ CVS commit)
+- MPlayer CVS-log:     (_minden_ kodvaltozasrol)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-cvslog
 
-NOTE: language of above lists are ENGLISH, unless explicitly stated otherwise.
-      Please do not send messages using other language!
+Megj.: a fenti listak nyelve ANGOL, kiveve ahol mas van feltuntetve.
+       Mas nyelven ne kuldj uzenetet!
 
-License:                                                                     
+Licensz:
 ~~~~~~~~
-Since MPlayer incorporates a lot of code from other projects, this isn't
-decided yet. We're going for GPL (will be pretty hard, though).
+Mivel MPlayer rengeteg kodot tartalmaz mas projectekbol, ez meg nincs
+eldontve. A GPL-re hajtunk (bar igen nehez lesz).
 
 Standard Disclaimer:
 ~~~~~~~~~~~~~~~~~~~~
-Use only at your own risk! There may be errors and inaccuracies that could
-damage your system or your eye. Proceed with caution, and although this is
-highly unlikely, we don't take any responsibility for that!
+Csak a sajat felelossegedre hasznald! Hibak es pontatlansagok elofordulhatnak,
+amik kart tesznek a rendszeredben es/vagy a szemedben. Ovatosan jarj el, mert
+semmifele felelosseget nem vallalunk!
+

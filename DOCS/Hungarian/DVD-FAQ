@@ -5,7 +5,7 @@ Q: Hogy tudok DVD-ket nezni az MPlayer-rel?
 A: Ehh. Olvasd vegig ezt a file-t, es a 'DVD'-t is. (installalj libcss-t)
 
 Q: Szoval az MPlayer tud DVD lejatszast? Akkor biztos DeCSS-t hasznal!
-   Bunosok vagytok a kovetkezo vadpontokban : XYZ#$--
+   Bunosek vagytok a kovetkezo vadpontokban : XYZ#$--
 A: Anyad. Nincs DeCSS kod az MPlayer-ben. libcss-hez linkeli magat.
 
 Q: Mukodni latszik, de nincs hang.

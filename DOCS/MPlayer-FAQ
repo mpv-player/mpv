@@ -83,9 +83,6 @@ Q: There are error messages about file not found /usr/lib/win32/....
 A: Download & install w32codec.zip from *our* FTP
    (avifile's codec package has different DLL set)
 
-Q: It wants to load l3codeca.acm, but I don't have such file.
-A: You should use w32codec.zip from MPlayer FTP instead of avifile's pack!
-
 Q: ...... works with avifile/aviplay while doesn't with MPlayer
 A: MPlayer != avifile
    The only common thing between these players is the Win32 DLL loader.
@@ -107,7 +104,7 @@ A: This is highly unlikely, since the mp3lib rewrite. Contact us, it may be
 
 Q: Are there rpm/deb/... packages of MPlayer?
 A: You can make a .deb package for yourself, check DOCS/DEBIAN .
-   It's _STRONGLY_ discouraged to use binary packages
+   It's _STRONGLY_ discouraged to use precompiled packages
    of MPlayer, since it (currently) _highly_ depends on compile-time
    options and optimizations!
 
@@ -116,10 +113,7 @@ A: Yes! See README on how to subscribe them!
 
 Q: I've found a nasty bug when I tried to play my favourite video!!
    Who should I inform?
-A: Inform the MPlayer-users mailing list about your problem. *ALWAYS*
-   read the BUGREPORTS file about what information we NEED to identify your problem.
-   Use the developers addresses (specified in AUTHORS) only if you want to
-   flame, or want to ask for a date. ;)
+A: See DOCS/BUGREPORTS
 
 Q: During 'make', MPlayer complains about X11 libraries. I don't understand,
    I DO have X installed!?
