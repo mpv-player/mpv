@@ -56,7 +56,7 @@ I. TECH SIDE:
 
   cvs -z3 log filename(s)
   
-8. Renaming/moving files or content of files:
+8. Renaming/moving files or content of files, removing empty directories:
 
   You CANNOT do that. Ask the CVS server admin (A'rpi) to do it!
   Do NOT remove & re-add a file - it will kill the changelog!!!!
