@@ -1207,6 +1207,7 @@ vixConfigPlayback (vidix_playback_t * vinfo)
   int uv_size, swap_uv;
   unsigned int i;
   int extfifo_on;
+  int srcPitch,srcPitch2;
 
   /* Overlay register settings */
   uint32_t win_start, win_end;
@@ -1251,8 +1252,6 @@ vixConfigPlayback (vidix_playback_t * vinfo)
 	//	  vinfo->dest.pitch.v = 0;
 			
 
-	int srcPitch,srcPitch2;
-			
    info->pitch = ((info->src_w << 1) + 15) & ~15;
 
   swap_uv = 0;
