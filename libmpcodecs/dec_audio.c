@@ -34,7 +34,7 @@ int init_audio(sh_audio_t *sh_audio)
 	mpadec=mpcodecs_ad_drivers[i]; break;
     }
   if(!mpadec){
-      mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Requested audio codec family [%s] (vfm=%d) not available (enable it at compile time!)\n",
+      mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Requested audio codec family [%s] (afm=%d) not available (enable it at compile time!)\n",
           sh_audio->codec->name, sh_audio->codec->driver);
       return 0; // no such driver
   }
