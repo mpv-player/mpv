@@ -78,7 +78,9 @@ static uint32_t setup_vidix(){
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_height, uint32_t flags, char *title, uint32_t format){
   vo_fs = flags & 0x01;
   if(!vo_config_count){
-    if(vo_screenwidth && vo_screenheight)center=1;
+    if(vo_screenwidth && vo_screenheight){
+      if(!vo_geometry)center=1;
+    }
     else mp_msg(MSGT_VO, MSGL_WARN, "vo_cvidix: warn: screenwidth and height not set assuming 640x480\n");
   }
   if(!vo_screenwidth)vo_screenwidth=640;
