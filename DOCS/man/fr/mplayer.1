@@ -3056,76 +3056,7 @@ Définit les paramètres de décodage de libavcodec.
 .RS
 Les options disponibles sont:
 .RE
-.
 .RSs
-.IPs ec\ \ \ 
-cacher les erreurs\ :
-.RSss
-1: Utilise un filtre de déblocage fort pour les macro-blocs endommagés.
-.br
-2: recherche du vecteur de mouvement itérative (lente)
-.br
-3: toutes (par défaut)
-.REss
-.IPs er=<valeur>
-résilience aux erreurs\ :
-.RSss
-.br
-0: désactivé
-.br
-1: prudente (Devrait fonctionner avec les encodeurs cassés.)
-.br
-2: normale (par défaut) (Fonctionne avec les encodeurs conformes.)
-.br
-3: agressive (Plus de vérifications, mais peut causer des problèmes même avec
-les flux valides)
-.br
-4: très agressive
-.REss
-.IPs debug=<valeur>
-débogage:
-.RSss
-.br
-0: désactivé
-.br
-1: info image
-.br
-2: contrôle du débit (rate control)
-.br
-4: flux (bitstream)
-.br
-8: type de macro-bloc
-.br
-16: quantificateur (QP)
-.br
-32: Vecteur de mouvement (MV)
-.br
-0x0040: visualisation du vecteur de mouvement (utilisez -noslices)
-.br
-0x0080: saut macro-bloc
-.br
-0x0100: startcode
-.br
-0x0200: PTS
-.br
-0x0400: résilience aux erreurs
-.br
-0x0800: opérations de contrôle de gestion de la mémoire (H264)
-.br
-0x1000: bogues
-.REss
-.IPs vismv=<valeur>
-vismv:
-.RSss
-.br
-0: désactivé
-.br
-1: visualise les MVs prédits en avant des trames P
-.br
-2: visualise les MVs prédits en avant des trames B
-.br
-4: visualise les MVs prédits en arrière des trames B
-.REss
 .IPs bug=<valeur>
 Contourne manuellement les bogues des encodeurs\ :
 .RSss
@@ -3154,15 +3085,90 @@ d'autodétection)
 .br
 1024 (mpeg4): bogue de remplissage des bords (autodétecté par fourcc/\:version)
 .REss
+.IPs debug=<valeur>
+débogage:
+.RSss
+.br
+0: désactivé
+.br
+1: info image
+.br
+2: contrôle du débit (rate control)
+.br
+4: flux (bitstream)
+.br
+8: type de macro-bloc (MB)
+.br
+16: paramètre de quantificateur (QP)
+.br
+32: vecteur de mouvement (MV)
+.br
+0x0040: visualisation du vecteur de mouvement (utilisez -noslices)
+.br
+0x0080: saut macro-bloc (MB)
+.br
+0x0100: startcode
+.br
+0x0200: PTS
+.br
+0x0400: résilience aux erreurs
+.br
+0x0800: opérations de contrôle de gestion de la mémoire (H264)
+.br
+0x1000: bogues
+.REss
+.IPs ec=<valeur>
+cacher les erreurs\ :
+.RSss
+1: Utilise un filtre de déblocage fort pour les macro-blocs endommagés.
+.br
+2: recherche du vecteur de mouvement itérative (lente)
+.br
+3: toutes (par défaut)
+.REss
+.IPs er=<valeur>
+résilience aux erreurs\ :
+.RSss
+.br
+0: désactivé
+.br
+1: prudente (Devrait fonctionner avec les encodeurs cassés.)
+.br
+2: normale (par défaut) (Fonctionne avec les encodeurs conformes.)
+.br
+3: agressive (Plus de vérifications, mais peut causer des problèmes même avec
+les flux valides)
+.br
+4: très agressive
+.REss
+.IPs fast\ 
+Active des optimisations non conformes aux spécifications, et
+qui peuvent éventuellement poser problème, comme une déquantification
+plus simple, l'hypothèse que les matrices de quantification ont été
+utilisées, que l'espace de couleur est YUV 4:2:0, et le saut de quelques
+vérifications pour détecter les flux endommagés.
+.IPs gray\ 
+décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
 .IPs "idct=<0\-99> (voir \-lavcopts)"
 Pour obtenir la meilleur qualité d'encodage utilisez le même algorithme idct
 pour le décodage et l'encodage.
-.IPs gray\ 
-décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
+Cela dit, vous pouriez y perdre en terme de précision.
 .IPs "sb=<valeur> (MPEG2 uniquement)"
 Saute <valeur> lignes de macro-blocs au bas de l'image.
 .IPs "st=<valeur> (MPEG2 uniquement)"
 Saute <valeur> lignes de macro-blocs en haut de l'image.
+.IPs vismv=<valeur>
+vismv:
+.RSss
+.br
+0: désactivé
+.br
+1: visualise les MVs prédits en avant des trames P
+.br
+2: visualise les MVs prédits en avant des trames B
+.br
+4: visualise les MVs prédits en arrière des trames B
+.REss
 .IPs vstats
 Affiche quelques statistiques et les écrit dans ./vstats_*.log.
 .RE
@@ -3733,7 +3739,7 @@ mais image plus floue)
 .
 .TP
 .B qp=equation
-filtre de changement de QP
+filtre de changement des paramètres de quantization (QP)
 .RSs
 .IPs equation
 une équation comme "2+2*sin(PI*qp)"
@@ -5988,7 +5994,7 @@ lambda*bits.
 .PD 0
 .RSs
 .IPs lambda
-constante dépendante de QP
+constante dépendante des paramètres de quantization (QP)
 .IPs bits\ 
 quantité de bits requis pour encoder le bloc
 .IPs error
@@ -6008,7 +6014,8 @@ Ceci n'a pas d'effet si mbd=0.
 .
 .TP
 .B qprd (mbd=2 uniquement)
-QP à taux de distortion optimal pour le lambda donné de chaque macrobloc
+paramètres de quantization (QP) à taux de distortion optimal pour le
+lambda donné de chaque macrobloc
 .
 .TP
 .B last_pred=<0\-99>
@@ -6552,7 +6559,7 @@ Une valeur comprise dans l'intervalle 20-40 semble convenir
 (par défaut\ : 26).
 Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
 Notez que la quantification dans H.264 fonctionne différemment de MPEG[124].
-L'échelle des quantificateurs QP de H.264 est logarithmique.
+L'échelle des paramètres de quantification (QP) de H.264 est logarithmique.
 Ainsi, la différence de débit binaire entre QP=20 et QP=40 est d'environ un
 facteur 10.
 Les quantificateurs utiles en H.264 ont tendance à être bien plus importants
