@@ -585,13 +585,15 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	
 		mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*sEdit list table (%d entries) (ver:%d,flags:%ld)\n",
 		    level, "",entries, ver, flags);
-#if 0
+#if 1
 		for (i=0;i<entries;i++)
 		{
-		    printf("entry#%d: dur: %ld mtime: %ld mrate: %ld\n",
-			i, stream_read_dword(demuxer->stream),
-			stream_read_dword(demuxer->stream),
-			stream_read_dword(demuxer->stream));
+		    int dur=stream_read_dword(demuxer->stream);
+		    int mt=stream_read_dword(demuxer->stream);
+		    int mr=stream_read_dword(demuxer->stream); // 16.16fp
+		    mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*s  entry#%d: duration: %d  start time: %d  speed: %3.1fx\n",level,"",
+			i,
+			dur,mt,(float)mr/65536.0f);
 		}
 #endif
 		break;
