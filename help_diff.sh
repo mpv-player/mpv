@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 
 # This script walks through the master (stdin) help/message file, and
 # prints (stdout) only those messages which are missing from the help
@@ -26,3 +26,4 @@ if test $curr != "x" ; then
 fi
 
 done
+
