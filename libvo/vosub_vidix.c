@@ -628,6 +628,15 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
     return (*server_control)(request,data);
   case VOCTRL_GET_IMAGE:
     return vidix_get_image(data);
+  case VOCTRL_GET_FRAME_NUM:
+	*(uint32_t *)data = next_frame;
+	return VO_TRUE;
+  case VOCTRL_SET_FRAME_NUM:
+	next_frame = *(uint32_t *)data;
+	return VO_TRUE;
+  case VOCTRL_GET_NUM_FRAMES:
+	*(uint32_t *)data = vidix_play.num_frames;
+	return VO_TRUE;
   }
   return VO_NOTIMPL;
 }

@@ -38,6 +38,10 @@
 #define VOCTRL_RESUME 8
 /* libmpcodecs direct rendering: */
 #define VOCTRL_GET_IMAGE 9
+/* decoding ahead: */
+#define VOCTRL_GET_NUM_FRAMES 10
+#define VOCTRL_GET_FRAME_NUM  11
+#define VOCTRL_SET_FRAME_NUM  12
 
 #define VO_TRUE		1
 #define VO_FALSE	0
