@@ -1694,11 +1694,11 @@ char** sub_filenames(char* path, char *fname)
 		// we have a (likely) subtitle file
 		if (found) {
 		    int prio = 0;
-		    if (tmp_sub_id)
+		    if (tmp_sub_id && (sub_match_fuzziness >= 1))
 		    {
 			sprintf(tmpresult, "%s %s", f_fname_trim, tmp_sub_id);
 			printf("dvdsublang...%s\n", tmpresult);
-			if (strcmp(tmp_fname_trim, tmpresult) == 0 && sub_match_fuzziness >= 1) {
+			if (strcmp(tmp_fname_trim, tmpresult) == 0) {
 			    // matches the movie name + lang extension
 			    prio = 5;
 			    break;
@@ -1729,8 +1729,10 @@ char** sub_filenames(char* path, char *fname)
 
 		    if (prio) {
 			prio += prio;
+#ifdef USE_ICONV
 			if (i<3) // prefer UTF-8 coded
 			    prio++;
+#endif
 			sprintf(tmpresult, "%s%s", j == 0 ? f_dir : path, de->d_name);
 //			fprintf(stderr, "%s priority %d\n", tmpresult, prio);
 			if ((f = fopen(tmpresult, "rt"))) {
