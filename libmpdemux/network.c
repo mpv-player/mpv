@@ -1259,8 +1259,20 @@ try_livedotcom:
 			// so we need to pass demuxer_type too
 			ret = asf_streaming_start( stream, demuxer_type );
 			if( ret<0 ) {
+                                //sometimes a file is just on a webserver and it is not streamed.
+				//try loading them default method as last resort for http protocol
+                                if ( !strcasecmp(stream->streaming_ctrl->url->protocol, "http") ) {
+                                mp_msg(MSGT_NETWORK,MSGL_STATUS,"Trying default streaming for http protocol\n ");
+                                //reset stream
+                                close(stream->fd);
+		                stream->fd=-1;
+                                ret=nop_streaming_start(stream);
+                                }
+
+                         if (ret<0) {
 				mp_msg(MSGT_NETWORK,MSGL_ERR,"asf_streaming_start failed\n");
                                 mp_msg(MSGT_NETWORK,MSGL_STATUS,"Check if this is a playlist which requires -playlist option\nExample: mplayer -playlist <url>\n");
+                               }
 			}
 			break;
 #ifdef STREAMING_LIVE_DOT_COM
