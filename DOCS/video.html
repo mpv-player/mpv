@@ -220,7 +220,7 @@
 <H4><A NAME="dga">2.3.1.2.2 DGA</A></H4>
 
 
-<H5>PREAMBLE</H4>
+<H5>PREAMBLE</H5>
 
 <P>This section tries to explain in some words what DGA is in general and what
   the DGA video output driver for MPlayer can do (and what it can't).</P>
@@ -305,7 +305,21 @@
   be found at:
   <CODE>/var/log/XFree86.0.log</CODE>.</P>
 
-<P>See some working modeline definitions <A HREF="#dga_modelines">here</A>.</P>
+<P>These entries are known to work fine with a Riva128 chip, using the
+  <CODE>nv.o</CODE> X server driver module.</P>
+
+<PRE>
+  Section "Modes"
+    Identifier    "Modes[0]"
+    Modeline	"800x600"  40     800 840 968 1056  600 601 605 628
+    Modeline	"712x600"  35.0   712 740 850 900   400 410 412 425
+    Modeline	"640x480"  25.175 640 664 760 800   480 491 493 525
+    Modeline 	"400x300"  20     400 416 480 528   300 301 303 314 Doublescan
+    Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
+    Modeline	"352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
+    Modeline	"320x240"  12.588 320 336 384 400   240 245 246 262 Doublescan
+  EndSection
+</PRE>
 
 
 <H5>DGA &amp; MPLAYER</H5>
@@ -398,28 +412,9 @@
     address space, thus vo_dga won't use doublebuffering (SIS?).</LI>
   <LI>Some drivers seem to fail to report even a single valid mode. In this
     case the DGA driver will crash telling you about a nonsense mode of
-    100000x100000 or someathing like that.</LI>
+    100000x100000 or something like that.</LI>
    <LI>OSD only works with doublebuffering enabled (else it flickers).</LI>
 </UL>
-
-
-<H5><A NAME="dga_modelines">SOME MODELINES</A></H5>
-
-<PRE>
-  Section "Modes"
-    Identifier    "Modes[0]"
-    Modeline	"800x600"  40     800 840 968 1056  600 601 605 628
-    Modeline	"712x600"  35.0   712 740 850 900   400 410 412 425
-    Modeline	"640x480"  25.175 640 664 760 800   480 491 493 525
-    Modeline 	"400x300"  20     400 416 480 528   300 301 303 314 Doublescan
-    Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
-    Modeline	"352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
-    Modeline	"320x240"  12.588 320 336 384 400   240 245 246 262 Doublescan
-  EndSection
-</PRE>
-
-<P>These entries work fine with authors (Acki) Riva128 chip, using nv.o X server driver
-  module.</P>
 
 
 <H4><A NAME="sdl">2.3.1.2.3 SDL</A></H4>
@@ -574,7 +569,7 @@
 <H4><A NAME="mga_vid">2.3.1.2.6 Matrox framebuffer (mga_vid)</A></H4>
 
 <P>This section is about the Matrox G200/G400/G450/G550 BES (Back-End Scaler)
-  support, the mga_vid kernel driver. It's active developed by A'rpi, and
+  support, the mga_vid kernel driver. It's actively developed by A'rpi, and
   it has hardware VSYNC support with triple buffering. It works on both
   framebuffer console and under X.</P>
 
@@ -900,9 +895,8 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   autodetection.</P>
 
 <P>VIDIX is a new technology and it's extremely possible that on your system
-  it won't work. In this case the only solution for you is porting (mainly
-  libdha) it. But there is a hope, that it will work on those systems where X11
-  does.</P>
+  it won't work. In this case the only solution for you is porting it (mainly
+  libdha). But there is hope that it will work on systems where X11 does.</P>
 
 <P>Since VIDIX requires direct hardware access you can either run it as root or
   set the SUID bit on the MPlayer binary (<B>Warning: This is a security
@@ -921,7 +915,7 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
     downloaded the source from the svgalib site) and insmod it.</LI>
   <LI>Move the <CODE>svgalib_helper</CODE> directory to
     <CODE>mplayer/main/libdha/svgalib_helper</CODE>.</LI>
-  <LI>Required if you download the source from the svgalib site: remove the
+  <LI>Required if you download the source from the svgalib site: Remove the
     comment before the CFLAGS line containing "svgalib_helper" string from the
     <CODE>libdha/Makefile</CODE>.</LI>
   <LI>Recompile and install libdha.</LI>
