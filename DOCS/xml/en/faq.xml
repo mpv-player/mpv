@@ -1314,20 +1314,18 @@ and even burn them directly to CD.
 How can I join two video files?
 </para></question>
 <answer><para>
-This has been discussed to no end on mplayer-users. Go search the
-<ulink url="http://mplayerhq.hu/cgi-bin/s-arch.cgi?sbm=mplayer-users">archives</ulink>
-for a complete answer. This is a complicated topic and your mileage may vary a
-lot depending on the kind of files you want to merge. MPEGs can be concatenated
-into a single file with luck. For AVIs there are two tools,
+MPEG files can be concatenated into a single file with luck.
+For AVI files, you can use <application>MEncoder</application>'s
+multiple file support like this:
+<screen>
+mencoder -ovc copy -oac copy -o out.avi file1.avi file2.avi
+</screen>
+This will only work if the files are of the same resolution and codec.
+You can also try
 <ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> and
 <application>avimerge</application> (part of the
-<ulink url="http://www.theorie.physik.uni-goettingen.de/~ostreich/transcode/">transcode</ulink>
-tool set), available that might do the job. You can also try <application>MEncoder</application>
-if you have two files sharing the same dimensions and codec. Try
-<screen>
-     cat file1 file2 > file3
-     mencoder -ovc copy -oac copy -o out.avi -forceidx file3.avi
-</screen>
+<ulink url="http://www.transcoding.org/">transcode</ulink>
+tool set).
 </para></answer>
 </qandaentry>
 
