@@ -194,10 +194,11 @@ Lese die CD/DVD Sektion.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Die -xy Option funktioniert nicht mit dem X11-Treiber (-vo x11)
+Die -xy oder -fs Option funktioniert nicht mit dem X11-Treiber (-vo x11)
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Der X11-Treiber unterstützt kein Scaling, aber XF86VidMode Unterstützung wird
-nun verwendet: du musst dazuen die -vm Option und die -fs Option verwenden.
+Es unterstützt Scaling, aber du musst die musst Softwarescaling mit <CODE>-zoom</CODE>
+deutlich angeben (es ist SEHR LANGSAM!). Es ist besser, wenn du die XF86VidMode
+Unterstützung verwendest. Du musst dazu die -vm Option und die -fs Option verwenden.
 Stelle sicher, dass du die richtigen Modelines in deiner XF86Config-Datei hast
 und versuche, ob der DGA-Treiber (und der SDL-DGA-Treiber, siehe RTFM) bei dir
 funktioniert. Es ist um einiges schneller. Wenn SDL-DGA auch funktioniert, ver-
@@ -290,8 +291,8 @@ Bist du sicher, dass du "mplayer_lirc" anstatt von "mplayer" verwendest?
 Die Untertitel sind sehr nett, die wunderschönsten die ich jemals gesehen habe,
 aber sie bremsen das abspielen! Ich weiss, es ist unmöglich...
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Nach dem Ablaufen von ./configure , editiere config.h und ändere #undef FAST_OSD
-auf <CODE>#define FAST_OSD</CODE>. Dann kompiliere neu.
+Nach dem Ablaufen von ./configure , editiere config.h und ändere <CODE>#undef FAST_OSD</CODE>
+in <CODE>#define FAST_OSD</CODE>. Dann kompiliere neu.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -304,14 +305,7 @@ verwende die -double Option.
 <TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was genau ist diese libavcodec?
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Es ist von Gerard Lantau's ffmpeg Paket (<A HREF="http://ffmpeg.sourceforge.net">http://ffmpeg.sourceforge.net</A>).
-Es beinhaltet einen in C entwickelten DivX ;-) und OpenDivX alpha 47 Codec.
-Einige Benchmarks zeigten, dass dieser Codes in jedem Fall schneller ist als
-der DirectShow-Codec ohne Preprocessing und nur einige Prozent langsamer als
-der von ProjectMayo entwickelte DivX4 Decoder. Es verwendet das YV12 Pixel-
-Format, also können es alte Voodoo-Anwender für YUV verwenden.
-Es eröffnet auch die Möglichkeit DivX auf jedem Computer der einen C Compiler
-hat abzuspielen. Ein großartiges Ding, nicht wahr?
+Siehe (<A HREF="codecs.html#2.1.2.2">Sektion 2.1.2.2</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -422,7 +416,9 @@ Dann verwende avifile, es hat einen nette GUI und netten C++ Code :)
 Ich bekomme diese Meldung beim Abspielen von MPEG-Dateien:
 Can't find codec for video format 0x10000001!
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Du verwenst eine alte Version von codecs.conf. Upgrade es von etc/
+Du verwendest eine alte Version von codecs.conf. Upgrade es von etc/<BR>
+<B>ODER</B> du musst die <CODE>vc=</CODE> Option oder eine ähnliche in deiner
+Config-Datei verwenden.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -478,16 +474,16 @@ EMPFHOHLEN!<BR>
 Dies ist ein *GRÖSSERES* Sicherheitsrisiko! Mach das *NIE* auf einem Server oder
 einem Computer auf dem mehr Anwender als nur du zugreifen, denn die User könnten
 dann durch <B>MPlayer</B> Root-Privilegien bekommen!!!<BR>
-!!!! DU WURDEST ALSO GEWARNT ... !!!!
+<B>!!!! DU BIST ALSO GEWARNT WORDEN ... !!!!<BR>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Wenn ich Xvideo verwende, meldet meine Voodoo 3/Banshee:<BR>
-X Error of failed request:  BadAccess (attempt to access private resource denied)<BR>
+<CODE>X Error of failed request:  BadAccess (attempt to access private resource denied)<BR>
 &nbsp;&nbsp;Major opcode of failed request:  147 (MIT-SHM)<BR>
 &nbsp;&nbsp;Minor opcode of failed request:  1 (X_ShmAttach)<BR>
 &nbsp;&nbsp;Serial number of failed request:  26<BR>
-&nbsp;&nbsp;Current serial number in output stream:27<BR>
+&nbsp;&nbsp;Current serial number in output stream:27</CODE><BR>
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Dein Treiber ist alt, update ihm. Oder downloade DRI Version 0.6 (oder neuer)
 von <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A>,
@@ -498,8 +494,8 @@ oder verwendet DRI CVS.
 Wenn ich Xvideo verwende kann ich keine DivX-AVIs mit meiner Voodoo 3/Banshee abspielen!
 MPlayer meldet:<BR>
 ...<BR>
-Xvideo image format: 0x32315659 (YV12) planar<BR>
-Xvideo image format: 0x30323449 (I420) planar<BR>
+<CODE>Xvideo image format: 0x32315659 (YV12) planar<BR>
+Xvideo image format: 0x30323449 (I420) planar</CODE><BR>
 ...
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A1:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Siehe vorherige Antwort.
