@@ -32,7 +32,6 @@ LIBVD_EXTERN(ffmpeg)
 int avcodec_inited=0;
 
 typedef struct {
-    AVCodec *lavc_codec;
     AVCodecContext *avctx;
     int last_aspect;    
 } vd_ffmpeg_ctx;
@@ -50,6 +49,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 static int init(sh_video_t *sh){
     AVCodecContext *avctx;
     vd_ffmpeg_ctx *ctx;
+    AVCodec *lavc_codec;
 
     if(!avcodec_inited){
       avcodec_init();
@@ -62,8 +62,8 @@ static int init(sh_video_t *sh){
 	return(0);
     memset(ctx, 0, sizeof(vd_ffmpeg_ctx));
     
-    ctx->lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh->codec->dll);
-    if(!ctx->lavc_codec){
+    lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh->codec->dll);
+    if(!lavc_codec){
 	mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingLAVCcodec,sh->codec->dll);
 	return 0;
     }
@@ -78,7 +78,7 @@ static int init(sh_video_t *sh){
     if (sh->format == mmioFOURCC('R', 'V', '1', '3'))
 	avctx->sub_id = 3;
     /* open it */
-    if (avcodec_open(avctx, ctx->lavc_codec) < 0) {
+    if (avcodec_open(avctx, lavc_codec) < 0) {
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantOpenCodec);
         return 0;
     }
@@ -136,8 +136,12 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		sh->aspect = 0.0;
 		break;
 	}
-        if (mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12))
-    	    return NULL;
+	/* config only if width && height isn't changed */
+	/* else it will config twice */
+	if ((sh->aspect > 0.01) && (avctx->width == sh->disp_w) &&
+	    (avctx->height == sh->disp_h))
+    	    if (mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12))
+    		return NULL;
     }
     
     if ((avctx->width != sh->disp_w) ||
