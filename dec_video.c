@@ -143,6 +143,8 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value){
 int init_video(sh_video_t *sh_video){
 unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 
+sh_video->our_out_buffer=NULL;
+
 switch(sh_video->codec->driver){
 #ifdef ARCH_X86
  case VFM_VFW: {
@@ -170,7 +172,6 @@ switch(sh_video->codec->driver){
 //   GUI_MSG( mplCompileWithoutDSSupport )
 //   exit(1);
 #else
-   sh_video->our_out_buffer=NULL;
    if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, &sh_video->our_out_buffer)){
 //   if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, NULL)){
         printf("ERROR: Couldn't open required DirectShow codec: %s\n",sh_video->codec->dll);
@@ -405,14 +406,39 @@ switch(sh_video->codec->driver){
 #ifdef USE_LIBAVCODEC
   case VFM_FFMPEG: {        // libavcodec
     int got_picture=0;
+    printf("Calling ffmpeg...\n");
     if(drop_frame<2 && in_size>0){
         int ret = avcodec_decode_video(&lavc_context, &lavc_picture,
 	     &got_picture, start, in_size);
+    printf("DONE -> got_picture=%d\n",got_picture);
 	if(ret<0) fprintf(stderr, "Error while decoding frame!\n");
 	if(!drop_frame && got_picture){
+//	if(!drop_frame){
+	  if(planar){
 	    planes=lavc_picture.data;
 	    stride=lavc_picture.linesize;
             blit_frame=2;
+	  } else {
+	    int y;
+	    // temporary hack - FIXME
+	    if(!sh_video->our_out_buffer)
+		sh_video->our_out_buffer = shmem_alloc(sh_video->disp_w*sh_video->disp_h*2);
+	    for(y=0;y<sh_video->disp_h;y++){
+	      unsigned char *s0=lavc_picture.data[0]+lavc_picture.linesize[0]*y;
+	      unsigned char *s1=lavc_picture.data[1]+lavc_picture.linesize[1]*y;
+	      unsigned char *s2=lavc_picture.data[2]+lavc_picture.linesize[2]*y;
+	      unsigned char *d=sh_video->our_out_buffer+y*2*sh_video->disp_w;
+	      int x;
+	      for(x=0;x<sh_video->disp_w/2;x++){
+	          d[4*x+0]=s0[2*x+0];
+	          d[4*x+1]=s1[x];
+	          d[4*x+2]=s0[2*x+1];
+	          d[4*x+3]=s2[x];
+	      }
+	    }
+            blit_frame=3;
+	  }
+
 	}
     }
     break;
