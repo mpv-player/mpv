@@ -577,7 +577,7 @@ if((tv_param_on == 1) &&
 #endif
 
 //=============== Try to open as multi file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MF)
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MF){
   if ( mf_support ){
      demuxer=new_demuxer(stream,DEMUXER_TYPE_MF,audio_id,video_id,dvdsub_id);
      file_format=DEMUXER_TYPE_MF;
