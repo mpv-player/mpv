@@ -123,6 +123,8 @@ vpsize	(0-10000) video packet size
 	500-1000 good choice
 	improves error-resistance (see vdpart for more info)
 
+gray	grayscale only encoding (a bit faster than with color ...)
+
 lavdopts: (decoder options)
 ---------------------------
 
