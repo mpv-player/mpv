@@ -168,8 +168,8 @@ connect2Server(char *host, int port) {
 			return -1;
 		}
 	}
-	tv.tv_sec = 0;
-	tv.tv_usec = 500000;
+	tv.tv_sec = 5;
+	tv.tv_usec = 0;
 	FD_ZERO( &set );
 	FD_SET( socket_server_fd, &set );
 	// When the connection will be made, we will have a writable fd
