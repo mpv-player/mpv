@@ -641,6 +641,18 @@ int vixProbe( int verbose,int force )
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_8500_DV || 
 		ati_card_ids[idx] == DEVICE_ATI_RADEON_QW) IsR200 = 1;
 #endif
+	if(force > PROBE_NORMAL)
+	{
+	    printf(RADEON_MSG" Driver was forced. Was found %sknown chip\n",idx == -1 ? "un" : "");
+	    if(idx == -1)
+		printf(RADEON_MSG" Assuming it as %s\n",
+#ifdef RAGE128
+		"Rage128"
+#else
+		"Radeon1"
+#endif
+		);
+	}
 	def_cap.device_id = lst[i].device;
 	err = 0;
 	memcpy(&pci_info,&lst[i],sizeof(pciinfo_t));
