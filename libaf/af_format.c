@@ -12,6 +12,7 @@
 
 #include "af.h"
 #include "../bswap.h"
+#include "../libvo/fastmemcpy.h"
 
 // Integer to float conversion through lrintf()
 #ifdef HAVE_LRINTF
@@ -41,6 +42,11 @@ static void change_bps(void* in, void* out, int len, int inbps, int outbps);
 static void float2int(void* in, void* out, int len, int bps);
 // From signed int to float
 static void int2float(void* in, void* out, int len, int bps);
+
+static af_data_t* play(struct af_instance_s* af, af_data_t* data);
+static af_data_t* play_swapendian(struct af_instance_s* af, af_data_t* data);
+static af_data_t* play_float_s16(struct af_instance_s* af, af_data_t* data);
+static af_data_t* play_s16_float(struct af_instance_s* af, af_data_t* data);
 
 // Convert from string to format
 int af_str2fmt(char* str)
@@ -116,22 +122,22 @@ char* af_fmt2str(int format, char* str, int size)
 
   // Endianess
   if(AF_FORMAT_LE == (format & AF_FORMAT_END_MASK))
-    i+=snprintf(str,size-i,"little endian ");
+    i+=snprintf(str,size-i,"little-endian ");
   else
-    i+=snprintf(str,size-i,"big endian ");
+    i+=snprintf(str,size-i,"big-endian ");
   
   if(format & AF_FORMAT_SPECIAL_MASK){
     switch(format & AF_FORMAT_SPECIAL_MASK){
     case(AF_FORMAT_MU_LAW): 
-      i+=snprintf(&str[i],size-i,"mu law "); break;
+      i+=snprintf(&str[i],size-i,"mu-law "); break;
     case(AF_FORMAT_A_LAW): 
-      i+=snprintf(&str[i],size-i,"A law "); break;
+      i+=snprintf(&str[i],size-i,"A-law "); break;
     case(AF_FORMAT_MPEG2): 
-      i+=snprintf(&str[i],size-i,"MPEG 2 "); break;
+      i+=snprintf(&str[i],size-i,"MPEG-2 "); break;
     case(AF_FORMAT_AC3): 
       i+=snprintf(&str[i],size-i,"AC3 "); break;
     case(AF_FORMAT_IMA_ADPCM): 
-      i+=snprintf(&str[i],size-i,"IMA ADPCM "); break;
+      i+=snprintf(&str[i],size-i,"IMA-ADPCM "); break;
     default:
       printf("Unknown special\n");
     }
@@ -222,6 +228,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_REINIT:{
     char buf1[256];
     char buf2[256];
+    af_data_t *data = arg;
+    
     // Make sure this filter isn't redundant 
     if(af->data->format == ((af_data_t*)arg)->format && 
        af->data->bps == ((af_data_t*)arg)->bps)
@@ -242,6 +250,32 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->nch  = ((af_data_t*)arg)->nch;
     af->mul.n      = af->data->bps;
     af->mul.d      = ((af_data_t*)arg)->bps;
+    
+    af->play = play; // set default
+    
+    // look whether only endianess differences are there
+    if ((af->data->format & ~AF_FORMAT_END_MASK) ==
+	(data->format & ~AF_FORMAT_END_MASK))
+    {
+	af_msg(AF_MSG_VERBOSE,"[format] Accelerated endianess conversion only\n");
+	af->play = play_swapendian;
+    }
+    if ((data->format == AF_FORMAT_FLOAT_NE) &&
+	(af->data->format == AF_FORMAT_S16_NE))
+    {
+	af_msg(AF_MSG_VERBOSE,"[format] Accelerated %sto %sconversion\n",
+	   af_fmt2str(((af_data_t*)arg)->format,buf1,255),
+	   af_fmt2str(af->data->format,buf2,255));
+	af->play = play_float_s16;
+    }
+    if ((data->format == AF_FORMAT_S16_NE) &&
+	(af->data->format == AF_FORMAT_FLOAT_NE))
+    {
+	af_msg(AF_MSG_VERBOSE,"[format] Accelerated %sto %sconversion\n",
+	   af_fmt2str(((af_data_t*)arg)->format,buf1,255),
+	   af_fmt2str(af->data->format,buf2,255));
+	af->play = play_s16_float;
+    }
     return AF_OK;
   }
   case AF_CONTROL_COMMAND_LINE:{
@@ -263,6 +297,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     }
     if(AF_FORMAT_F == (format & AF_FORMAT_POINT_MASK))
       bps=4;
+
+    // set appropriate AF_FORMAT_BITS
+    format |= (bps-1)<<3; // hack
     
     if((AF_OK != af->control(af,AF_CONTROL_FORMAT_BPS | AF_CONTROL_SET,&bps)) ||
        (AF_OK != af->control(af,AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET,&format)))
@@ -297,6 +334,61 @@ static void uninit(struct af_instance_s* af)
   if(af->data)
     free(af->data);
   af->setup = 0;  
+}
+
+static af_data_t* play_swapendian(struct af_instance_s* af, af_data_t* data)
+{
+  af_data_t*   l   = af->data;	// Local data
+  af_data_t*   c   = data;	// Current working data
+  int 	       len = c->len/c->bps; // Lenght in samples of current audio block
+
+  if(AF_OK != RESIZE_LOCAL_BUFFER(af,data))
+    return NULL;
+
+  endian(c->audio,l->audio,len,c->bps);
+
+  c->audio = l->audio;
+  c->format = l->format;
+
+  return c;
+}
+
+static af_data_t* play_float_s16(struct af_instance_s* af, af_data_t* data)
+{
+  af_data_t*   l   = af->data;	// Local data
+  af_data_t*   c   = data;	// Current working data
+  int 	       len = c->len/4; // Lenght in samples of current audio block
+
+  if(AF_OK != RESIZE_LOCAL_BUFFER(af,data))
+    return NULL;
+
+  float2int(c->audio, l->audio, len, 2);
+
+  c->audio = l->audio;
+  c->len = len*2;
+  c->bps = 2;
+  c->format = l->format;
+
+  return c;
+}
+
+static af_data_t* play_s16_float(struct af_instance_s* af, af_data_t* data)
+{
+  af_data_t*   l   = af->data;	// Local data
+  af_data_t*   c   = data;	// Current working data
+  int 	       len = c->len/2; // Lenght in samples of current audio block
+
+  if(AF_OK != RESIZE_LOCAL_BUFFER(af,data))
+    return NULL;
+
+  int2float(c->audio, l->audio, len, 2);
+
+  c->audio = l->audio;
+  c->len = len*4;
+  c->bps = 4;
+  c->format = l->format;
+
+  return c;
 }
 
 // Filter data through filter
