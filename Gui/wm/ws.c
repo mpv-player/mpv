@@ -856,8 +856,8 @@ void wsIconify( wsTWindow win )
 //    Move top the window.
 // ----------------------------------------------------------------------------------------------
 void wsMoveTopWindow( wsTWindow * win )
-//{ XRaiseWindow( wsDisplay,win->WindowID ); }
-{ XUnmapWindow( wsDisplay,win->WindowID ); XMapWindow( wsDisplay,win->WindowID ); }
+{ XRaiseWindow( wsDisplay,win->WindowID ); }
+//{ XUnmapWindow( wsDisplay,win->WindowID ); XMapWindow( wsDisplay,win->WindowID ); }
 
 // ----------------------------------------------------------------------------------------------
 //    Set window background to 'color'.
