@@ -32,55 +32,6 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
     }
 }
 
-static int mga_set_video_eq( const vidix_video_eq_t *info)
-{
-
-	uint32_t luma;
-	float factor = 256.0 / 2000;
-	static int prev_br = 0;
-	static int prev_c = 0;
-
-        if ( info->cap & VEQ_CAP_BRIGHTNESS ) 
-	 {
-	  prev_br=info->brightness;
-	  if ( prev_br == 1000 ) prev_br=999; // i dunno why needed this line -- Pontscho
-	 }
-	if ( info->cap & VEQ_CAP_CONTRAST ) 
-	 { 
-	  prev_c=info->contrast; 
-	  if ( prev_c == 1000 ) prev_c=999; // i dunno why needed this line -- Pontscho
-	 }
-
-	luma = ((int)(prev_br * factor) << 16) + ((int)(prev_c * factor) & 0xFFFF);
-	if (ioctl(f,MGA_VID_SET_LUMA,luma)) {
-		perror("Error in mga_vid_config ioctl()");
-                printf("Could not set luma values in the kernel module!\n");
-		return -1;
-	}
-    return 0;
-
-}
-
-static int mga_get_video_eq( vidix_video_eq_t *info)
-{
-
-	uint32_t luma;
-	float factor = 2000.0 / 256;
-
-	if (ioctl(f,MGA_VID_GET_LUMA,&luma)) {
-		perror("Error in mga_vid_config ioctl()");
-                printf("Could not get luma values from the kernel module!\n");
-		return -1;
-	}
-	info->brightness = (luma >> 16) * factor;
-	info->cap |= VEQ_CAP_BRIGHTNESS;
-
-	info->contrast = (luma & 0xFFFF) * factor;
-	info->cap |= VEQ_CAP_CONTRAST;
-
-    return 0;
-}
-
 //static void
 //write_slice_g200(uint8_t *y,uint8_t *cr, uint8_t *cb,uint32_t slice_num)
 
@@ -242,13 +193,6 @@ query_format(uint32_t format)
     return 0;
 }
 
-static void query_vaa(vo_vaa_t *vaa)
-{
-  memset(vaa,0,sizeof(vo_vaa_t));
-  vaa->get_video_eq = mga_get_video_eq;
-  vaa->set_video_eq = mga_set_video_eq;
-}
-
 static void mga_fullscreen()
 {
 	uint32_t w,h;
@@ -277,14 +221,77 @@ static void mga_fullscreen()
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
-  case VOCTRL_QUERY_VAA:
-    query_vaa((vo_vaa_t*)data);
-    return VO_TRUE;
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
     return get_image(data);
+  case VOCTRL_SET_EQUALIZER:
+    {
+     va_list ap;
+     short value;
+     uint32_t luma,prev;
 
+     if ( strcmp( data,"brightness" ) && strcmp( data,"contrast" ) ) return VO_FALSE;
+
+     if (ioctl(f,MGA_VID_GET_LUMA,&prev)) {
+	perror("Error in mga_vid_config ioctl()");
+        printf("Could not get luma values from the kernel module!\n");
+	return VO_FALSE;
+     }
+
+//     printf("GET: 0x%4X 0x%4X  \n",(prev>>16),(prev&0xffff));
+
+     va_start(ap, data);
+     value = va_arg(ap, int);
+     va_end(ap);
+     
+//     printf("value: %d -> ",value);
+     value=((value+100)*255)/200-128; // maps -100=>-128 and +100=>127
+//     printf("%d  \n",value);
+
+     if(!strcmp(data,"contrast"))
+         luma = (prev&0xFFFF0000)|(value&0xFFFF);
+     else
+         luma = (prev&0xFFFF)|(value<<16);
+     
+     if (ioctl(f,MGA_VID_SET_LUMA,luma)) {
+	perror("Error in mga_vid_config ioctl()");
+        printf("Could not set luma values in the kernel module!\n");
+	return VO_FALSE;
+     }
+
+     return VO_TRUE;
+    }
+
+  case VOCTRL_GET_EQUALIZER:
+    {
+     va_list ap;
+     int * value;
+     short val;
+     uint32_t luma;
+     
+     if ( strcmp( data,"brightness" ) && strcmp( data,"contrast" ) ) return VO_FALSE;
+
+     if (ioctl(f,MGA_VID_GET_LUMA,&luma)) {
+	perror("Error in mga_vid_config ioctl()");
+        printf("Could not get luma values from the kernel module!\n");
+	return VO_FALSE;
+     }
+     
+     if ( !strcmp( data,"contrast" ) )
+	 val=(luma & 0xFFFF);
+     else
+	 val=(luma >> 16);
+	 
+     va_start(ap, data);
+     value = va_arg(ap, int*);
+     va_end(ap);
+
+     *value = (val*200)/255;
+
+     return VO_TRUE;
+    }
+														       
 #ifndef VO_XMGA
   case VOCTRL_FULLSCREEN:
     mga_fullscreen();
