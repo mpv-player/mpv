@@ -277,6 +277,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
     int brightness, contrast, saturation, srcRange, dstRange;
     vf_equalizer_t *eq;
 
+  if(vf->priv->ctx)
     switch(request){
     case VFCTRL_GET_EQUALIZER:
 	r= sws_getColorspaceDetails(vf->priv->ctx, &inv_table, &srcRange, &table, &dstRange, &brightness, &contrast, &saturation);
