@@ -1,4 +1,4 @@
-.\" synced with 1.667
+.\" synced with 1.669
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -757,7 +757,7 @@ Mo¿e te¿ okre¶liæ numer rozdzia³u na którym nale¿y skoñczyæ odtwarzanie
 Wysy³a cookies przy ¿±daniach HTTP.
 .TP
 .B \-cookies-file <nazwa_zbioru> (tylko z sieci±)
-Czyta HTTP cookies z podanego zbioru (domy¶lnie ~/.mozilla/ i ~/.netscape/)
+Czyta HTTP cookies ze <zbioru> (domy¶lnie ~/.mozilla/ i ~/.netscape/)
 i nie czytaj z miejsc standardowych.
 Zak³ada ¿e zbiór jest w formacie Netscape.
 .TP
@@ -1493,7 +1493,7 @@ Okre¶la ID napisów VOBsub.
 .
 .SH "OPCJE WYJ¦CIA AUDIO (TYLKO MPLAYER)"
 .TP
-.B \-abs <warto¶æ> (tylko -ao oss) (PRZESTARZA£E)
+.B \-abs <warto¶æ> (tylko \-ao oss) (PRZESTARZA£E)
 Zmienia wykryt± wielko¶æ bufora sterownika audio/\:karty.
 .TP
 .B \-aofile <nazwa\ zbioru>
@@ -1593,7 +1593,7 @@ niezawartych w wierszu poleceñ.
 Podopcje s± opcjonalne i przewa¿nie mog± byæ pominiête.
 .br
 .I INFORMACJA:
-Aby uzyskaæ listê wkompilowanych sterowników podaj opcjê \-ao help.
+Opcja \-vo help poka¿e listê wkompilowanych sterowników wyj¶cia audio.
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -1946,12 +1946,12 @@ Dostêpne s± opcje:
 Wybiera miêdzy standardowym lub progresywnym JPEG.
 .IPs [no]baseline
 Wybiera, czy ma u¿ywaæ baseline czy nie.
-.IPs optimize=<warto¶æ>
-wspó³czynnik optymalizacji [0\-100]
-.IPs smooth=<warto¶æ>
-wspó³czynnik wyg³adzania [0\-100]
-.IPs quality=<warto¶æ>
-wspó³czynnik jako¶ci [0\-100]
+.IPs optimize=<0\-100>
+wspó³czynnik optymalizacji
+.IPs smooth=<0\-100>
+wspó³czynnik wyg³adzania
+.IPs quality=<0\-100>
+wspó³czynnik jako¶ci
 .IPs outdir=<warto¶æ>
 katalog, gdzie zapisywane bêd± zbiory JPEG
 .RE
@@ -2113,7 +2113,7 @@ niewymienionych w wierszu poleceñ.
 Podopcje s± dodatkowe i przewa¿nie mog± byæ pominiête.
 .br
 .I INFORMACJA:
-Opcja \-vo help poka¿e Ci listê wkompilowanych sterowników.
+Opcja \-vo help poka¿e listê wkompilowanych sterowników wyj¶cia video.
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -2579,13 +2579,13 @@ Dowolnie miksuje kana³y, szczegó³y w DOCS/HTML/pl/devices.html#audio-dev
 .RSss
 n: liczba kana³ów wyj¶ciowych (1\-6).
 .br
-lij: jak du¿o z kana³u wej¶ciowego j jest miksowane w kana³ wyj¶ciowy i.
+lij: Jak du¿o z kana³u wej¶ciowego j jest miksowane w kana³ wyj¶ciowy i.
 .REss
 .IPs sub[=fc:ch]
 Dodaje kana³ subwoofera.
 .RSss
-fc: Czêstotliwo¶æ graniczna filtra dolnoprzepustowego (20Hz do 300Hz,
-domy¶lnie 60Hz).
+fc: Czêstotliwo¶æ graniczna filtra dolnoprzepustowego (20Hz do 300Hz)
+(domy¶lnie: 60Hz).
 .br
 ch: numer kana³u subwoofera.
 .REss
@@ -2593,7 +2593,7 @@ ch: numer kana³u subwoofera.
 Dekoder macierzowo zakodowanego d¼wiêku przestrzennego, dzia³a na wiêkszo¶ci
 zbiorów 2 kana³owych.
 .RSss
-d: opó¼nienie w ms dla tylnych g³o¶ników (0ms do 1000ms, domy¶lnie 15ms).
+d: opó¼nienie w ms dla tylnych g³o¶ników (0ms do 1000ms) (domy¶lnie: 15ms).
 .REss
 .IPs delay[=ch1:ch2:...]
 Opó¼nia wyj¶cie audio.
@@ -2620,11 +2620,11 @@ Wymusza jeden z trybów wstawiania filtrów audio:
 .RSss
 0: Ca³kowicie automatyczne wstawianie filtrów (domy¶lnie)
 .br
-1: Optymalizuje pod wzglêdem dok³adno¶ci
+1: Optymalizuje pod wzglêdem dok³adno¶ci.
 .br
-2: Optymalizuje pod wzglêdem szybko¶ci
+2: Optymalizuje pod wzglêdem szybko¶ci.
 .br
-3: Wy³±cza automaty
+3: Wy³±cza automaty.
 .REss
 .IPs list=<filtry>
 Tak samo jak \-af (zobacz opcja \-af).
