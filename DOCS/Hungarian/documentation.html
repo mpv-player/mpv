@@ -652,8 +652,10 @@ TV tuner-rõl</B>.</P>
 
 <P>
 <UL>
-  <LI>elõszöris, add hozzá a <CODE>--enable-tv</CODE> opciót a <CODE>./configure</CODE>-hez,
-    és fordíts újra.</LI>
+  <LI>elõszöris, újra kell fordítanod az <B>MPlayer</B>-t. A <CODE>configure</CODE>
+    autodetektálja hogy megvannak-e a szükséges bttv kernel headerek, valamint
+    a /dev/video* bejegyzések. Ha igen, kijelöli a TV bemenetet lefordításra
+    (lásd a kimenetét!).
   <LI>bizonyosodj meg róla hogy a tunered mûködik más TV szoftverekkel Linux
     alatt, mint például az xawtv.</LI>
 </UL>

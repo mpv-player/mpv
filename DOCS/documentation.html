@@ -630,8 +630,9 @@ TV tuner</B>.</P>
 
 <P>
 <UL>
-  <LI>first, you have to add the <CODE>--enable-tv</CODE> flag to <CODE>./configure</CODE>,
-    and recompile.</LI>
+  <LI>first, you have to recompile. <CODE>./configure</CODE> will autodetect kernel headers
+    from bttv stuff, and the existence of /dev/video* entries. If they exist,
+    TV support will be built (see configure's output!).</LI>
   <LI>make sure your tuner works with another TV softwares in Linux, for example
     xawtv.</LI>
 </UL>
@@ -1324,6 +1325,11 @@ No closer info yet.</P>
 <LI><B><A HREF="mailto:foth@informatik.uni-hamburg.de">Kilian A. Foth</A></B>
 <UL>
   <LI>-slave mode</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:timf@mail.csse.monash.edu.au">Tim Ferguson</A></B>
+<UL>
+  <LI>Opensource Cinepak decoder</LI>
 </UL></LI>
 
 </UL></P>
