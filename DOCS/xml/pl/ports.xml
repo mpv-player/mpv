@@ -286,8 +286,8 @@ wolna. U¿ywaj SDL.
 <para>Najlepsze wyniki s± osi±gane ze sterownikami wyj¶ciowymi video DirectX 
   (<option>-vo directx</option>) i rdzennym wyj¶ciem d¼wiêkowym wave Windows
   (<option>-ao win32</option>). Mo¿esz skorzystaæ równie¿ z OpenGL lub SDL, jednak
-  wydajno¶æ OpenGL w znacznym  zale¿y od systemu, a SDL mo¿e powodowaæ powstanie
-  zak³óceñ w d¼wiêku i obrazzie albo wywo³aæ b³±d, i zakoñczyæ dzia³anie programu. 
+  wydajno¶æ OpenGL w znacznym stopniu zale¿y od systemu, a SDL mo¿e powodowaæ powstanie
+  zak³óceñ w d¼wiêku i obrazie albo wywo³aæ b³±d, i zakoñczyæ dzia³anie programu. 
   Je¿eli wystêpuj± zak³ócenia obrazu, spróbuj
   wy³±czyæ sprzêtow± akceleracjê przez opcjê <option>-vo directx:noaccel</option>. ¦ci±gnij
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">pliki nag³ówkowe DirectX 7</ulink>,
