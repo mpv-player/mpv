@@ -80,52 +80,44 @@
 
 <P><B>Using MPlayer to play DVDs:</B></P>
 
-
 <TABLE BORDER=0 WIDTH="100%">
-<TR><TD VALIGN=top><CODE>-dvd &lt;title_id&gt;&nbsp;</CODE></TD>
-<TD>Enables DVD support and selects title.</TD><TR>
-<TD VALIGN=top><CODE>-chapter &lt;chapter_id&gt;&nbsp;</CODE></TD>
-<TD>Selects DVD chapter(s) to play (default: 1).
-  Example: <CODE>-chapter 5-10</CODE> or <CODE>-chapter -9</CODE></TD></TR>
-<TR><TD VALIGN=top><CODE>-dvdangle &lt;angle_id&gt;&nbsp;</CODE></TD>
-<TD>Selects camera angle (default: 1)</TD><TR>
-<TD VALIGN=top><CODE>-alang &lt;country code&gt;&nbsp;</CODE></TD>
-<TD>
-  The <CODE>country code</CODE> tells <B>MPlayer</B> which audio language(s) to prefer.
-  For a list of available languages, add the <CODE>-v</CODE> option after
-  your DVD options and browse the output.<BR>
-  For example:<BR>
-  &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - Tries to find Hungarian audio,
-  falling back to English audio.</TD></TR>
-<TR><TD VALIGN=top><CODE>-slang &lt;country code&gt;&nbsp;</CODE></TD>
-<TD>
-  Turns on DVD subtitles. The <CODE>country code</CODE> tells <B>MPlayer</B>
-  which language(s) to prefer.
-  For the list of available languages, add the <CODE>-v</CODE> option after
-  your DVD options and browse the output.<BR>
-  For example:<BR>
-  &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - Tries to display Hungarian subtitles,
-  falling back to English subtitles.</TD></TR>
-<TR><TD VALIGN=top><CODE>-sid &lt;subtitle_id&gt;&nbsp;</CODE></TD>
-<TD>
-  Displays a subtitle channel with the given <CODE>id</CODE> (values can be
-  0-31). Useful with badly mastered DVDs where the country code
-  selects the wrong channel.</TD></TR>
-<TR><TD VALIGN=top><CODE>-csslib &lt;path/filename&gt;</CODE></TD>
-<TD>
-  (old-style DVD option) This option is used to override the default location
-  of <CODE>libcss.so</CODE>.
-  </TD></TR>
-<TR><TD VALIGN=top><CODE>-dvdauth &lt;DVD device&gt;&nbsp;</CODE></TD>
-<TD>
-  (old-style DVD option) Turns on DVD authentication using the given device.
-  </TD></TR>
-<TR><TD VALIGN=top><CODE>-dvdkey &lt;CSS key&gt;</CODE></TD>
-<TD>
-  (old-style DVD option) When decoding a VOB file copied undecrypted from DVD,
-  this option gives the CSS key needed to decrypt the VOB (the key is printed
-  when authenticating with the DVD drive using -dvdauth).
-  </TD></TR>
+  <TR><TD VALIGN=top><CODE>-dvd &lt;title_id&gt;&nbsp;</CODE></TD>
+    <TD>Enables DVD support and selects title.</TD></TR>
+  <TR><TD VALIGN=top><CODE>-chapter &lt;chapter_id&gt;&nbsp;</CODE></TD>
+    <TD>Selects DVD chapter(s) to play (default: 1).
+    Example: <CODE>-chapter 5-10</CODE> or <CODE>-chapter -9</CODE></TD></TR>
+  <TR><TD VALIGN=top><CODE>-dvdangle &lt;angle_id&gt;&nbsp;</CODE></TD>
+    <TD>Selects camera angle (default: 1)</TD></TR>
+  <TR><TD VALIGN=top><CODE>-alang &lt;country code&gt;&nbsp;</CODE></TD>
+    <TD>The <CODE>country code</CODE> tells <B>MPlayer</B> which audio
+    language(s) to prefer. For a list of available languages, add the
+    <CODE>-v</CODE> option after your DVD options and browse the output.<BR>
+    For example:<BR>
+    &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - Tries to find Hungarian audio,
+    falling back to English audio.</TD></TR>
+  <TR><TD VALIGN=top><CODE>-slang &lt;country code&gt;&nbsp;</CODE></TD>
+    <TD>Turns on DVD subtitles. The <CODE>country code</CODE> tells
+    <B>MPlayer</B> which language(s) to prefer.
+    For the list of available languages, add the <CODE>-v</CODE> option after
+    your DVD options and browse the output.<BR>
+    For example:<BR>
+    &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - Tries to display Hungarian
+    subtitles, falling back to English subtitles.</TD></TR>
+  <TR><TD VALIGN=top><CODE>-sid &lt;subtitle_id&gt;&nbsp;</CODE></TD>
+    <TD>Displays a subtitle channel with the given <CODE>id</CODE> (values can
+    be 0-31). Useful with badly mastered DVDs where the country code
+    selects the wrong channel.</TD></TR>
+  <TR><TD VALIGN=top><CODE>-csslib &lt;path/filename&gt;</CODE></TD>
+    <TD>(old-style DVD option) This option is used to override the default
+    location of <CODE>libcss.so</CODE>.
+    </TD></TR>
+  <TR><TD VALIGN=top><CODE>-dvdauth &lt;DVD device&gt;&nbsp;</CODE></TD>
+    <TD>(old-style DVD option) Turns on DVD authentication using the given
+    device.</TD></TR>
+  <TR><TD VALIGN=top><CODE>-dvdkey &lt;CSS key&gt;</CODE></TD>
+    <TD>(old-style DVD option) When decoding a VOB file copied undecrypted from
+    DVD, this option gives the CSS key needed to decrypt the VOB (the key is
+    printed when authenticating with the DVD drive using -dvdauth).</TD></TR>
 </TABLE>
 
 <P>The default device is <CODE>/dev/dvd</CODE>, you can change it in
