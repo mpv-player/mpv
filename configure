@@ -440,7 +440,7 @@ else
 fi
 
 if [ -d libavcodec ]; then
- if [ -e libavcodec/Makefile ]; then
+ if [ -f libavcodec/Makefile ]; then
   _libavcodec=yes
  fi
 fi
