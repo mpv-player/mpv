@@ -1235,6 +1235,9 @@ if (demuxer && demuxer->type==DEMUXER_TYPE_PLAYLIST)
     if ((strlen(bname)>10) && !strncmp(bname,"qt",2) && !strncmp(bname+3,"gateQT",6))
         continue;
 
+    if (!strncmp(bname,mp_basename(filename),strlen(bname))) // ignoring self-reference
+        continue;
+
     entry = play_tree_new();
     
     if (filename && !strcmp(mp_basename(playlist_entry),playlist_entry)) // add reference path of current file
