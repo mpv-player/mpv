@@ -30,7 +30,7 @@ VO_LIBS = -Llibvo -lvo $(X_LIBS)
 
 # .PHONY: all clean
 
-all:	version.h config.h $(PRG) $(PRG_CFG)
+all:	version.h config.h $(PRG)
 # $(PRG_AVIP)
 
 .c.o:
