@@ -37,6 +37,8 @@
 #  include <linux/cdrom.h>
 #elif defined(__sun)
 #  include <sun/dvdio.h>
+#elif defined(__bsdi__)
+#  include <dvd.h>
 #else
 #  error "Need the DVD ioctls"
 #endif
