@@ -91,7 +91,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     vf->put_image=put_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv,0,sizeof(struct vf_priv_s));
-    vf->priv->mux=args;
+    vf->priv->mux=(aviwrite_stream_t*)args;
     
     vf->priv->enc=dv_encoder_new(1,1,1); // FIXME, parse some options!
     if(!vf->priv->enc) return 0;

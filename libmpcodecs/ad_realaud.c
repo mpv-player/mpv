@@ -33,10 +33,10 @@ void *__ctype_b=NULL;
 #endif
 
 static unsigned long (*raCloseCodec)(void*);
-static unsigned long (*raDecode)(void*, char*,unsigned long,char*,unsigned long*,long);
+static unsigned long (*raDecode)(void*, char*,unsigned long,char*,unsigned int*,long);
 static unsigned long (*raFlush)(unsigned long,unsigned long,unsigned long);
 static unsigned long (*raFreeDecoder)(void*);
-static unsigned long (*raGetFlavorProperty)(void*,unsigned long,unsigned long,int*);
+static void*         (*raGetFlavorProperty)(void*,unsigned long,unsigned long,int*);
 //static unsigned long (*raGetNumberOfFlavors2)(void);
 static unsigned long (*raInitDecoder)(void*, void*);
 static unsigned long (*raOpenCodec2)(void*);

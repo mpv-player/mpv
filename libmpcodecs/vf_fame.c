@@ -73,7 +73,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     vf->priv->pes.id=0x1E0;
     vf->priv->pes.timestamp=-1; // dunno
     
-    dmpi->planes[0]=&vf->priv->pes;
+    dmpi->planes[0]=(void*) &vf->priv->pes;
     
     return vf_next_put_image(vf,dmpi);
 }

@@ -42,7 +42,7 @@ struct vf_priv_s {
     BITMAPINFOHEADER* bih;
 };
 
-static int encoder_hic=0;
+static HIC encoder_hic;
 static void* encoder_buf=NULL;
 static int encoder_buf_size=0;
 static int encoder_frameno=0;
@@ -62,7 +62,7 @@ static BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, BITMAPINFOHEADER *inpu
 //  output_bih->biSize = sizeof(BITMAPINFOHEADER);
 
 //  encoder_hic = ICOpen( 0x63646976, out_fourcc, ICMODE_COMPRESS);
-    encoder_hic = ICOpen( dll_name, out_fourcc, ICMODE_COMPRESS);
+    encoder_hic = ICOpen( (long) dll_name, out_fourcc, ICMODE_COMPRESS);
   if(!encoder_hic){
     mp_msg(MSGT_WIN32,MSGL_ERR,"ICOpen failed! unknown codec / wrong parameters?\n");
     return NULL;

@@ -168,7 +168,7 @@ static int init(sh_video_t *sh){
 	// setup rv30 codec (codec sub-type and image dimensions):
 	if(extrahdr[1]>=0x20200002){
 	    unsigned long cmsg24[4]={sh->disp_w,sh->disp_h,sh->disp_w,sh->disp_h};
-	    unsigned long cmsg_data[3]={0x24,1+((extrahdr[0]>>16)&7),&cmsg24};
+	    unsigned long cmsg_data[3]={0x24,1+((extrahdr[0]>>16)&7),(unsigned long) &cmsg24};
 	    (*rvyuv_custom_message)(cmsg_data,sh->context);
 	}
 	mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: RealVideo codec init OK!\n");
@@ -202,7 +202,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		dp_hdr->len,	// length of the packet (sub-packets appended)
 		0,		// unknown, seems to be unused
 		dp_hdr->chunks,	// number of sub-packets - 1
-		extra,		// table of sub-packet offsets
+		(unsigned long) extra,	// table of sub-packet offsets
 		0,		// unknown, seems to be unused
 		dp_hdr->timestamp,// timestamp (the integer value from the stream)
 	};
