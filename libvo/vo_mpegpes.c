@@ -58,6 +58,8 @@ static int outbuf_size = 100000;
 static int s_pos_x,s_pos_y;
 static int d_pos_x,d_pos_y;
 
+static int osd_w,osd_h;
+
 static AVPicture picture;
 static AVCodec *codec=NULL;
 static AVCodecContext codec_context;
@@ -183,16 +185,20 @@ if(format==IMGFMT_YV12){
     }
 #endif
 
+    osd_w=s_width;
     d_pos_x=(codec_context.width-(int)s_width)/2;
     if(d_pos_x<0){
       s_pos_x=-d_pos_x;d_pos_x=0;
+      osd_w=codec_context.width;
     } else s_pos_x=0;
 
+    osd_h=s_height;
     d_pos_y=(codec_context.height-(int)s_height)/2;
     if(d_pos_y<0){
       s_pos_y=-d_pos_y;d_pos_y=0;
+      osd_h=codec_context.height;
     } else s_pos_y=0;
-    
+
     printf("[vo] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
 
     /* open it */
@@ -228,8 +234,21 @@ get_info(void)
     return &vo_info;
 }
 
+#ifdef USE_LIBAVCODEC
+static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+    int x,y;
+    vo_draw_alpha_yv12(w,h,src,srca,stride,
+      picture.data[0]+(x0+d_pos_x)+(y0+d_pos_y)*picture.linesize[0],picture.linesize[0]);
+}
+#endif
+
 static void draw_osd(void)
 {
+#ifdef USE_LIBAVCODEC
+  if(picture_buf){ // YV12 only:
+    vo_draw_text(osd_w,osd_h,draw_alpha);
+  }
+#endif
 }
 
 #define NFD   2
