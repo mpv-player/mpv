@@ -38,6 +38,7 @@ extern ad_functions_t mpcodecs_ad_realaud;
 extern ad_functions_t mpcodecs_ad_libdv;
 extern ad_functions_t mpcodecs_ad_qtaudio;
 extern ad_functions_t mpcodecs_ad_ra1428;
+extern ad_functions_t mpcodecs_ad_twin;
 
 ad_functions_t* mpcodecs_ad_drivers[] =
 {
@@ -65,6 +66,7 @@ ad_functions_t* mpcodecs_ad_drivers[] =
   &mpcodecs_ad_dmo,
 #endif
   &mpcodecs_ad_acm,
+  &mpcodecs_ad_twin,
 #endif
 #if defined(USE_QTX_CODECS) || defined(MACOSX)
   &mpcodecs_ad_qtaudio,

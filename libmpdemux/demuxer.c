@@ -156,6 +156,7 @@ extern void demux_close_mkv(demuxer_t* demuxer);
 extern void demux_close_ra(demuxer_t* demuxer);
 extern void demux_close_ty(demuxer_t* demuxer);
 extern void demux_close_lavf(demuxer_t* demuxer);
+extern void demux_close_vqf(demuxer_t* demuxer);
 
 
 #ifdef USE_TV
@@ -241,6 +242,8 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_mpg(demuxer); break;
     case DEMUXER_TYPE_REALAUDIO:
       demux_close_ra(demuxer); break;
+    case DEMUXER_TYPE_VQF:
+      demux_close_vqf(demuxer); break;
 #ifdef USE_LIBAVFORMAT
     case DEMUXER_TYPE_LAVF:
       demux_close_lavf(demuxer); break;
@@ -326,6 +329,7 @@ int demux_xmms_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 int demux_gif_fill_buffer(demuxer_t *demux);
 int demux_ts_fill_buffer(demuxer_t *demux);
 int demux_ra_fill_buffer(demuxer_t *demux);
+int demux_vqf_fill_buffer(demuxer_t *demux);
 
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 extern int demux_ogg_fill_buffer(demuxer_t *d);
@@ -390,6 +394,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_MPEG_TS: 
 	return demux_ts_fill_buffer(demux);
     case DEMUXER_TYPE_REALAUDIO: return demux_ra_fill_buffer(demux);
+    case DEMUXER_TYPE_VQF: return demux_vqf_fill_buffer(demux);
 #ifdef USE_LIBAVFORMAT
      case DEMUXER_TYPE_LAVF: return demux_lavf_fill_buffer(demux);
 #endif
@@ -634,6 +639,8 @@ extern int demux_open_ts(demuxer_t *demuxer);
 extern int demux_open_mkv(demuxer_t *demuxer);
 extern int ra_check_file(demuxer_t *demuxer);
 extern int demux_open_ra(demuxer_t* demuxer);
+extern int demux_probe_vqf(demuxer_t *demuxer);
+extern int demux_open_vqf(demuxer_t* demuxer);
 #ifdef HAVE_MATROSKA
 extern int demux_mkv_open(demuxer_t *demuxer);
 #endif
@@ -803,6 +810,18 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_REALAUDIO){
   if(ra_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"REALAUDIO");
       file_format=DEMUXER_TYPE_REALAUDIO;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
+
+//=============== Try to open as VQF file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VQF){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_VQF,audio_id,video_id,dvdsub_id);
+  if(demux_probe_vqf(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"VQF");
+      file_format=DEMUXER_TYPE_VQF;
   } else {
       free_demuxer(demuxer);
       demuxer = NULL;
@@ -1355,6 +1374,10 @@ switch(file_format){
   if (!demux_open_ra(demuxer)) return NULL;
   break;
  }
+ case DEMUXER_TYPE_VQF: {
+  if (!demux_open_vqf(demuxer)) return NULL;
+  break;
+ }
 #ifdef USE_LIBAVFORMAT
   case DEMUXER_TYPE_LAVF: {
   if (!demux_open_lavf(demuxer)) return NULL;
@@ -1474,6 +1497,7 @@ extern void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags
 extern void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_mkv_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
+extern void demux_seek_vqf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
@@ -1576,6 +1600,8 @@ switch(demuxer->file_format){
  case DEMUXER_TYPE_LAVF:
       demux_seek_lavf(demuxer,rel_seek_secs,flags); break;
  #endif
+ case DEMUXER_TYPE_VQF:
+      demux_seek_vqf(demuxer,rel_seek_secs,flags); break;
 
 } // switch(demuxer->file_format)
 
