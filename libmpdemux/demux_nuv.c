@@ -69,9 +69,8 @@ int demux_nuv_fill_buffer ( demuxer_t *demuxer )
 	    (rtjpeg_frameheader.comptype == '0'))
 	{
 	    /* put Audio to audio buffer */
-	    stream_seek ( demuxer->stream, orig_pos );
-	    ds_read_packet ( demuxer->audio, demuxer->stream, rtjpeg_frameheader.packetlength + 12, 
-		rtjpeg_frameheader.timecode / 1000, orig_pos, 0 );
+	    ds_read_packet ( demuxer->audio, demuxer->stream, rtjpeg_frameheader.packetlength, 
+		rtjpeg_frameheader.timecode / 1000, orig_pos + 12, 0 );
 	}
 
 	return 1;
