@@ -220,6 +220,8 @@ for example :
     -vc ffdivx     use libavcodec's DivX codec
     -vc ffmpeg12   use libavcodec's MPEG1/2 codec
     -vc divx4      use ProjectMayo's DivX codec
+
+See -vc help for FULL list !
 .TP
 .B \-ac <name>
 force usage of a specific audio codec, according to its name in codecs.conf,
@@ -232,6 +234,8 @@ for example :
                    (see documentation)
     -ac vorbis     use libvorbis
     -ac ffmp3      use ffmpeg's MP3 decoder (SLOW)
+
+See -ac help for FULL list !
 .TP
 .B \-vfm <1-5>
 force usage of a specific codec FAMILY, and FALLBACK to default if failed.
@@ -244,6 +248,8 @@ For example:
     -vfm 5         use libavcodec codecs
     -vfm 7         use DivX4 codec (YUY2)
                    (same as -vc divx4 but fallback)
+
+See -vc help for FULL list !
 
 NOTE : if libdivxdecore support was compiled in, then type 3 and 7 now contains
 just the same DivX4 codec, but different APIs to reach it. For difference
@@ -261,6 +267,8 @@ force usage of a specific audio format. For example:
     -afm 5         use aLaw/uLaw driver
     -afm 10        use libvorbis
     -afm 11        use ffmpeg's MP3 decoder
+
+See -ac help for FULL list !
 .TP
 .B \-sb\ position
 seek to byte position
