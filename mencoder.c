@@ -1173,7 +1173,7 @@ if(sh_audio && !demuxer2){
 	    mux_v->timer, decoded_frameno, (int)(p*100),
 	    (t>1) ? (int)(decoded_frameno/t+0.5) : 0,
 	    (p>0.001) ? (int)((t/p-t)/60) : 0, 
-	    (p>0.001) ? (int)(ftell(muxer_f)/p/1024/1024) : 0,
+	    (p>0.001) ? (int)(ftello(muxer_f)/p/1024/1024) : 0,
 	    v_pts_corr,
 	    (mux_v->timer>1) ? (int)(mux_v->size/mux_v->timer/125) : 0,
 	    (mux_a && mux_a->timer>1) ? (int)(mux_a->size/mux_a->timer/125) : 0
