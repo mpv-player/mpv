@@ -810,8 +810,6 @@ void wsFullScreen( wsTWindow * win )
 {
  int decoration = 0;
  
- if ( wsWMType == wsWMUnknown ) XUnmapWindow( wsDisplay,win->WindowID );
-
  switch ( wsWMType )
    {
     case wsWMUnknown:
@@ -990,13 +988,13 @@ void wsIconify( wsTWindow win )
 // ----------------------------------------------------------------------------------------------
 //    Move top the window.
 // ----------------------------------------------------------------------------------------------
-void wsMoveTopWindow( wsTWindow * win )
+void wsMoveTopWindow( Display * wsDisplay,Window win )
 {
  switch ( wsWMType )
   {
    case wsWMIceWM:
-	  XUnmapWindow( wsDisplay,win->WindowID );
-	  XMapWindow( wsDisplay,win->WindowID );
+	  XUnmapWindow( wsDisplay,win );
+	  XMapWindow( wsDisplay,win );
 	  break;
    case wsWMNetWM:
    case wsWMKDE:
@@ -1005,15 +1003,15 @@ void wsMoveTopWindow( wsTWindow * win )
 	  e.xclient.type=ClientMessage;
 	  e.xclient.message_type=XInternAtom( wsDisplay,"_NET_ACTIVE_WINDOW",False );
 	  e.xclient.display=wsDisplay;
-	  e.xclient.window=win->WindowID;
+	  e.xclient.window=win;
 	  e.xclient.format=32;
 	  e.xclient.data.l[0]=0;
-	  XSendEvent( wsDisplay,wsRootWin,False,SubstructureRedirectMask,&e );
+	  XSendEvent( wsDisplay,RootWindow( wsDisplay,DefaultScreen( wsDisplay ) ),False,SubstructureRedirectMask,&e );
 	  break;
 	 }
    default:
-         XMapRaised( wsDisplay,win->WindowID );
-	 XRaiseWindow( wsDisplay,win->WindowID );
+         XMapRaised( wsDisplay,win );
+	 XRaiseWindow( wsDisplay,win );
          break;
   }
 }

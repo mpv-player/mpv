@@ -7,8 +7,9 @@ extern GtkWidget * SkinList;
 extern char      * sbSelectedSkin;
 extern char      * sbMPlayerDirInHome;
 extern char      * sbMPlayerPrefixDir;
+extern GtkWidget * SkinBrowser;
 
-extern void HideSkinBrowser( void );
+extern void ShowSkinBrowser( void );
 extern int gtkFillSkinList( gchar * mdir );
 extern GtkWidget * create_SkinBrowser( void );
 

@@ -64,8 +64,8 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
    case wsRLMouseButton:
           if ( ( !mplSubMoved )&&( appMPlayer.subWindow.isFullScreen ) )
            {
-            if( SubVisible++%2 ) wsMoveTopWindow( &appMPlayer.mainWindow );
-             else wsMoveTopWindow( &appMPlayer.subWindow );
+            if( SubVisible++%2 ) wsMoveTopWindow( wsDisplay,appMPlayer.mainWindow.WindowID );
+             else wsMoveTopWindow( wsDisplay,appMPlayer.subWindow.WindowID );
 	   }
           msButton=0;
           mplSubMoved=0;

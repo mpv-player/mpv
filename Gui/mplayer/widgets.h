@@ -19,14 +19,9 @@
 #define GTK_MB_ERROR 4
 #define GTK_MB_WARNING 8
 
-extern GtkWidget     * SkinBrowser;
 extern GtkWidget     * PlayList;
-extern GtkWidget     * FileSelect;
-extern GtkWidget     * AboutBox;
 extern GtkWidget     * Options;
 extern GtkWidget     * PopUpMenu;
-
-extern GtkWidget     * MessageBox;
 
 extern GtkWidget     * WarningPixmap;
 extern GtkWidget     * ErrorPixmap;
@@ -54,5 +49,7 @@ extern void gtkEventHandling( void );
 
 extern void gtkShow( int type,char * param );
 extern void gtkMessageBox( int type,gchar * str );
+extern void gtkSetLayer( GtkWidget * wdg );
+extern void gtkActive( GtkWidget * wdg );
 
 #endif

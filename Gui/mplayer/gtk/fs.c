@@ -38,6 +38,8 @@ int             fsPressed = 0;
 int             fsMessage = -1;
 int             fsType    = 0;
 
+int gtkVFileSelect = 0;
+
 #define fsNumberOfVideoFilterNames 9
 char * fsVideoFilterNames[fsNumberOfVideoFilterNames+1][2] =
          { { "MPEG files (*.mpg,*.mpeg)",                               "*.mpg,*.mpeg" },
@@ -186,7 +188,9 @@ static int FirstInit = 1;
 void ShowFileSelect( int type )
 {
  int i;
- FileSelect=create_FileSelect();
+
+ if ( gtkVFileSelect ) gtkActive( fsFileSelect );
+  else fsFileSelect=create_FileSelect();
  
  if ( FirstInit )
   {
@@ -231,11 +235,15 @@ void ShowFileSelect( int type )
         gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsOtherFilterNames[fsNumberOfOtherFilterNames][0] );
         break;
   }
- gtk_widget_show( FileSelect );
+ gtk_widget_show( fsFileSelect );
 }
 
 void HideFileSelect( void )
-{ gtk_widget_destroy( fsFileSelect ); }
+{
+ gtk_widget_hide( fsFileSelect );
+ gtk_widget_destroy( fsFileSelect );
+ gtkVFileSelect=0;
+}
 
 void fs_fsFileSelect_destroy( GtkObject * object,gpointer user_data )
 { HideFileSelect(); }
@@ -336,8 +344,6 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
    return;
   }
 
- HideFileSelect();
-
  switch( fsPressed )
   {
    case 1:
@@ -346,7 +352,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
    case 2:
         str=gtk_entry_get_text( GTK_ENTRY( fsPathCombo ) );
         fsSelectedFile=str;
-        if ( !fsFileExist( fsSelectedFile ) ) return;
+        if ( !fsFileExist( fsSelectedFile ) ) { HideFileSelect(); return; }
         fsSelectedDirectory=fsSelectedFile;
         size=strlen( fsSelectedDirectory );
         for ( j=0;j<size;j++ )
@@ -375,6 +381,9 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
           guiSetDF( guiIntfStruct.Othername,fsSelectedDirectory,fsSelectedFile );
           break;
   }
+
+ HideFileSelect();
+
  item=fsTopList_items;
  while( item )
   {
@@ -412,6 +421,9 @@ gboolean on_FileSelect_key_release_event( GtkWidget * widget,GdkEventKey * event
   }
  return FALSE;
 }
+
+void fs_FileSelect_show( GtkWidget * widget,gpointer user_data )
+{ gtkVFileSelect=(int)user_data; }
 
 GtkWidget * create_FileSelect( void )
 {
@@ -639,6 +651,10 @@ GtkWidget * create_FileSelect( void )
 
  gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"destroy",GTK_SIGNAL_FUNC( fs_fsFileSelect_destroy ),NULL );
  gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"key_release_event",GTK_SIGNAL_FUNC( on_FileSelect_key_release_event ),NULL );
+
+ gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"show",GTK_SIGNAL_FUNC( fs_FileSelect_show ),1 );
+ gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"hide",GTK_SIGNAL_FUNC( fs_FileSelect_show ),0 );
+
  gtk_signal_connect( GTK_OBJECT( fsFilterCombo ),"changed",GTK_SIGNAL_FUNC( fs_fsFilterCombo_changed ),fsFilterCombo );
  gtk_signal_connect( GTK_OBJECT( fsFilterCombo ),"activate",GTK_SIGNAL_FUNC( fs_fsFilterCombo_activate ),fsFilterCombo );
  gtk_signal_connect( GTK_OBJECT( fsPathCombo ),"changed",GTK_SIGNAL_FUNC( fs_fsPathCombo_changed ),fsPathCombo );

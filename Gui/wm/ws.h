@@ -220,7 +220,7 @@ extern void wsDestroyWindow( wsTWindow * win );
 extern void wsMoveWindow( wsTWindow * win,int b,int x, int y );
 extern void wsResizeWindow( wsTWindow * win,int sx, int sy );
 extern void wsIconify( wsTWindow win );
-extern void wsMoveTopWindow( wsTWindow * win );
+extern void wsMoveTopWindow( Display * wsDisplay,Window win );
 extern void wsSetBackground( wsTWindow * win,int color );
 extern void wsSetForegroundRGB( wsTWindow * win,int r,int g,int b );
 extern void wsSetBackgroundRGB( wsTWindow * win,int r,int g,int b );

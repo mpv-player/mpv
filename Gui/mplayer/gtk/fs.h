@@ -7,6 +7,8 @@
 #define fsSubtitleSelector 1
 #define fsOtherSelector    2
 
+extern GtkWidget   * fsFileSelect;
+
 extern void HideFileSelect( void );
 extern void ShowFileSelect( int type );
 

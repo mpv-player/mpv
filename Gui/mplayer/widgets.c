@@ -27,14 +27,9 @@
 #include "../../config.h"
 #include "../../help_mp.h"
 
-GtkWidget     * SkinBrowser;
 GtkWidget     * PlayList;
-GtkWidget     * FileSelect;
-GtkWidget     * AboutBox;
 GtkWidget     * Options;
 GtkWidget     * PopUpMenu = NULL;
-
-GtkWidget     * MessageBox;
 
 GtkWidget     * WarningPixmap;
 GtkWidget     * ErrorPixmap;
@@ -58,14 +53,7 @@ void gtkInit( int argc,char* argv[], char *envp[] )
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] init gtk ...\n" );
  gtk_set_locale();
  gtk_init( &argc,&argv );
- gdk_set_use_xshm( FALSE );
- 
-// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create about box.\n" );              AboutBox=create_About();
-// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create skin browser.\n" );           SkinBrowser=create_SkinBrowser();
-// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create playlist.\n" );               PlayList=create_PlayList();
-// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create file selector.\n" );          FileSelect=create_FileSelect();
-// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create message box.\n" );            MessageBox=create_MessageBox(0);
-// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create preferences dialog box.\n" ); Options=create_Options();
+// gdk_set_use_xshm( TRUE );
  
  gtkInited=1;
 }
@@ -106,7 +94,7 @@ void gtkEventHandling( void )
 void gtkMessageBox( int type,gchar * str )
 {
  if ( !gtkInited ) return;
- MessageBox=create_MessageBox(0);
+ ShowMessageBox( str );
  gtk_label_set_text( GTK_LABEL( gtkMessageBoxText ),str );
  switch( type)
   {
@@ -135,45 +123,53 @@ void gtkSetLayer( GtkWidget * wdg )
  wsSetLayer( gdk_display,win->xwindow,appMPlayer.subWindow.isFullScreen );
 }
 
+void gtkActive( GtkWidget * wdg )
+{
+ GdkWindowPrivate * win = wdg->window;
+ wsMoveTopWindow( gdk_display,win->xwindow );
+}
+
 void gtkShow( int type,char * param )
 {
  switch( type )
   {
    case evSkinBrowser:
-	SkinBrowser=create_SkinBrowser();
+//	SkinBrowser=create_SkinBrowser();
+	ShowSkinBrowser();
 //        gtkClearList( SkinList );
         if ( gtkFillSkinList( sbMPlayerPrefixDir ) && gtkFillSkinList( sbMPlayerDirInHome ) )
          {
           gtkSetDefaultToCList( SkinList,param );
           gtk_widget_show( SkinBrowser );
 	  gtkSetLayer( SkinBrowser );
-         }
+         } else gtk_widget_destroy( SkinBrowser );
         break;
    case evPreferences:
-	Options=create_Options();
-        gtk_widget_show( Options );
-	gtkSetLayer( Options );
+        gtkMessageBox( GTK_MB_WARNING,"Sorry, this feature is under development ..." );
+//	Options=create_Options();
+//        gtk_widget_show( Options );
+//	gtkSetLayer( Options );
         break;
    case evPlayList:
-	PlayList=create_PlayList();
-        gtk_widget_show( PlayList );
-	gtkSetLayer( PlayList );
+        gtkMessageBox( GTK_MB_WARNING,"Sorry, this feature is under development ..." );
+//	PlayList=create_PlayList();
+//        gtk_widget_show( PlayList );
+//	gtkSetLayer( PlayList );
         break;
    case evLoad:
         ShowFileSelect( fsVideoSelector );
-	gtkSetLayer( FileSelect );
+	gtkSetLayer( fsFileSelect );
         break;
    case evFirstLoad:
         ShowFileSelect( fsVideoSelector );
-	gtkSetLayer( FileSelect );
+	gtkSetLayer( fsFileSelect );
         break;
    case evLoadSubtitle:
         ShowFileSelect( fsSubtitleSelector );
-	gtkSetLayer( FileSelect );
+	gtkSetLayer( fsFileSelect );
         break;
    case evAbout:
-	AboutBox=create_About();
-        gtk_widget_show( AboutBox );
+	ShowAboutBox();
 	gtkSetLayer( AboutBox );
         break;
    case evShowPopUpMenu:
