@@ -76,7 +76,7 @@ struct config ovc_conf[]={
 #endif
 #ifdef USE_WIN32DLL
 	"   vfw      - using VfW DLLs, currently only AVID is supported\n"
-	"   qtvideo  - using Quickime DLLs, currently only SVQ1/3 are supported\n"
+	"   qtvideo  - using QuickTime DLLs, currently only SVQ1/3 are supported\n"
 #endif
 #ifdef HAVE_LIBDV095
 	"   libdv    - DV encoding using libdv v0.9.5\n"
@@ -97,7 +97,7 @@ struct config oac_conf[]={
 	{"mp3lame", "MPlayer was compiled without libmp3lame support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 	{"help", "\nAvailable codecs:\n"
-	"   copy     - frame copy, without re-encoding (usefull for AC3)\n"
+	"   copy     - frame copy, without re-encoding (useful for AC3)\n"
 	"   pcm      - uncompressed PCM audio\n"
 #ifdef HAVE_MP3LAME
 	"   mp3lame  - cbr/abr/vbr MP3 using libmp3lame\n"
@@ -149,7 +149,7 @@ static config_t mencoder_opts[]={
 	{"x", "This option is obsolete, use -vop scale=w:h for scaling\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"xsize", "This option is obsolete, use -vop crop=w:h:x0:y0 for cropping\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 
-	// outut audio/video codec selection
+	// output audio/video codec selection
 	{"oac", oac_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{"ovc", ovc_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
