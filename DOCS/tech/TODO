@@ -2,15 +2,28 @@
 TODO:
 =====
 
-FOR THE PRE-RELEASE:
-~~~~~~~~~~~~~~~~~~~~
-- finish mencoder -ovc vfw (bitrate setting, codec selection etc)
-- codec priority option
+FOR THE v0.90 RELEASE:
+~~~~~~~~~~~~~~~~~~~~~~
+- use codec family names instead of IDs (-afm/-vfm changes)
+- codec (vc/ac) priority option
+- ao/vo priority option
 
+demuxer:
+- fix .asf demuxer bugs - DONE?
+- fix buggy .rm files (broken rv20/30 frames) - Florian?
+- add+test non-cook realaudio codecs - samples?
+- fix .mp4 demuxer bugs - Atmos? (sig11, bad AAC audio)
 
-FOR THE RELEASE:
-~~~~~~~~~~~~~~~~
-- mencoder: migrate to muxer layer
+FOR THE v1.00 RELEASE:
+~~~~~~~~~~~~~~~~~~~~~~
+
+- audio filter layer
+- new demuxer layer - at least modularized...
+- display OSD and subtitles using DVB card's OSD
+
+mpg demuxer:
+- implement mpeg-TS demuxer
+- implement common mpeg 1/2/4 es/ps/pes/mp3 demuxer
 
 avi demuxer: (needs rewrite)
 - fix AVI index offset base position handling ('no video stream found' bug)
@@ -19,37 +32,31 @@ avi demuxer: (needs rewrite)
 - fix for growing avi files (movi_end pos > stream->end_pos)
 - implement forward seeking in avi streams with no index
 
-demuxer:
-- fix .asf demuxer bugs
-- forward seeking from stdin ?
-- fix the whole syncing mechanism of Real demuxer
-- implement mpeg-TS demuxer
+mencoder:
+- finish mencoder -ovc vfw (bitrate setting, codec selection etc)
+- implement muxer layer (for mpg, ogm, mov support)
+- add ogg/vorbis audio encoder
+- stop/resume
+
+docs:
+- migrate to XML/DocBook
+- restructuring?
 
 FUTURE:
 ~~~~~~~
-
-decoders:
-- fix DLLs: pegasusm, pegasusl, pegasusmwv, 3ivX, morgands, alaris, vcr1, pim1,
-  qpeg, rricm
 
 demuxer:
 - demux_mpg: support for VDR's index files for more accurate seeking
 - implement seeking for YUV4MPEG_2_
 
 decoders:
+- fix DLLs: pegasusm, pegasusl, pegasusmwv, 3ivX, morgands, alaris, vcr1, pim1,
+  qpeg, rricm
+
+decoders:
 - qtx support?
-
-mencoder:
-- add ogg/vorbis audio encoder
-- stop/resume
-
-gui:
-- playlist ?
-- preferences ?
 
 other:
 - dvd server
 - mga_vid crtc2 fix
 - make nvidia_vid ;)
-- display OSD and subtitles using DVB card's OSD
-- sync with mplayerxp-vidix (pm3 and rage128)
