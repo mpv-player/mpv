@@ -57,6 +57,7 @@ typedef struct {
     int				width;
     int				height;
     int				bytesperline;
+    int				fps;
 
     struct video_mbuf		mbuf;
     unsigned char		*mmap;
@@ -174,7 +175,7 @@ tvi_handle_t *tvi_init_v4l(char *device)
     }
 
     /* set audio device name */
-    priv->audio_device = "/dev/dsp";
+    priv->audio_device = strdup("/dev/dsp");
 
     return(h);
 }
@@ -192,8 +193,8 @@ static int init(priv_t *priv)
 	    priv->video_device, strerror(errno));
 	goto err;
     }
-
-    mp_msg(MSGT_TV, MSGL_V, "Video fd: %d\n", priv->video_fd);
+    
+    priv->fps = 25; /* pal */
     
     /* get capabilities (priv->capability is needed!) */
     if (ioctl(priv->video_fd, VIDIOCGCAP, &priv->capability) == -1)
@@ -281,8 +282,9 @@ static int init(priv_t *priv)
 	    
 	    priv->audio_format[i] = AFMT_S16_LE;
 	    priv->audio_samplerate[i] = 44100;
-	    priv->audio_samplesize[i] = /*76000*/priv->audio_channels[i]*
-		16*priv->audio_samplerate[i]/8;
+	    priv->audio_samplesize[i] =
+		priv->audio_samplerate[i]/8/priv->fps*
+		priv->audio_channels[i];
 
 	    /* display stuff */
 	    mp_msg(MSGT_TV, MSGL_V, "  %d: %s: ", priv->audio[i].audio,
@@ -434,7 +436,6 @@ static int uninit(priv_t *priv)
     priv->audio[priv->audio_id].flags |= VIDEO_AUDIO_MUTE;
     ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
     close(priv->audio_fd);
-#warning "Implement uninit!"
 
     return(1);
 }
@@ -540,11 +541,10 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    return(TVI_CONTROL_FALSE);
 	}
 	case TVI_CONTROL_IS_AUDIO:
-//	    return(TVI_CONTROL_FALSE);
+	    return(TVI_CONTROL_FALSE);
 /* also disable audio for as it's not working! */
 	    if (priv->channels[priv->act_channel].flags & VIDEO_VC_AUDIO)
 	    {
-//		printf("yeah, audio csennel!!");
 		return(TVI_CONTROL_TRUE);
 	    }
 	    return(TVI_CONTROL_TRUE);
@@ -738,10 +738,21 @@ static int control(priv_t *priv, int cmd, void *arg)
 	}
 	case TVI_CONTROL_AUD_GET_SAMPLESIZE:
 	{
-	    (int)*(void **)arg = priv->audio_samplesize[priv->audio_id];
+	    (int)*(void **)arg = priv->audio_samplesize[priv->audio_id]/8;
 	    return(TVI_CONTROL_TRUE);
 	}
-	
+	case TVI_CONTROL_AUD_SET_SAMPLERATE:
+	{
+	    priv->audio_samplerate[priv->audio_id] = (int)*(void **)arg;
+	    
+	    if (ioctl(priv->audio_fd, SNDCTL_DSP_SPEED,
+		&priv->audio_samplerate[priv->audio_id]) == -1)
+		return(TVI_CONTROL_FALSE);
+	    priv->audio_samplesize[priv->audio_id] =
+		priv->audio_samplerate[priv->audio_id]/8/priv->fps*
+		priv->audio_channels[priv->audio_id];
+	    return(TVI_CONTROL_TRUE);
+	}
 	/* ========== SPECIFIC controls =========== */
 	case TVI_CONTROL_SPC_GET_INPUT:
 	{
