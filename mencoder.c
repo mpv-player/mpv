@@ -739,7 +739,11 @@ case ACODEC_VBRMP3:
         sh_audio->samplerate,
 	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
 	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
+#ifdef WORDS_BIGENDIAN
+	AFMT_S16_BE, 2,
+#else
 	AFMT_S16_LE, 2,
+#endif
 	4608, mux_a->h.dwRate*mux_a->wf->nChannels*2)){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format!\n");
     }
