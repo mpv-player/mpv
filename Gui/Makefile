@@ -32,7 +32,7 @@ $(LIB):	.depend	$(OBJS)
 all:	$(LIB)
 
 clean:
-	rm -rf $(OBJS) *.o *~ *.bak main $(PRG) $(LIB) .depend
+	rm -rf $(OBJS) *.o *~ *.bak main $(LIB) .depend
 
 #dep:	depend
 #
