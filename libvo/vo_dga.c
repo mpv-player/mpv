@@ -80,7 +80,7 @@ static struct vd_modes vo_dga_modes[] = {
   // so the last two values describe, which HW mode to use and which conversion 
   // function to use for a mode that is not supported by HW
 
-  {  0,  0,  0,  0, 0,          0,          0, 0,      0, 0},
+  {  0,  0,  0,  0, 0,          0,          0, 0,      0, },
   { 15,  0, 15, 16, 2,     0x7c00,     0x03e0, 0x001f, 2, },
   { 16,  0, 16, 16, 2,     0xf800,     0x07e0, 0x001f, 2, },
   { 24,  0, 24, 24, 3,   0xff0000,   0x00ff00, 0x0000ff, 4},
@@ -165,7 +165,7 @@ static char *vd_GetModeString(int index){
 
 //-----------------------------------------------------------------
 
-#ifdef HAVE_XF86VM
+#if defined(HAVE_XF86VM) && !defined(HAVE_DGA2)
 static XF86VidModeModeInfo **vo_dga_vidmodes=NULL;
 #endif
 
@@ -250,7 +250,7 @@ static void draw_alpha( int x0,int y0, int w,int h, unsigned char* src, unsigned
 
 
 // quick & dirty - for debugging only 
-
+#if 0
 static void fillblock(char *strt, int yoff, int lines, int val){
   char *i;
   for(i = strt + yoff * vo_dga_width *HW_MODE.vdm_bytespp; 
@@ -258,7 +258,7 @@ static void fillblock(char *strt, int yoff, int lines, int val){
     *i++ = val;
   }
 }
-
+#endif
 
 //---------------------------------------------------------
 
