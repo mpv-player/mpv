@@ -109,7 +109,7 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "config.h"
+#include "../config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 
