@@ -81,7 +81,17 @@ int demux_y4m_fill_buffer(demuxer_t *demux) {
 
   if (priv->is_older)
   {
-    stream_skip(demux->stream, 6); /* FRAME\n */
+    int c;
+    
+    c = stream_read_char(demux->stream); /* F */
+    if (c == -256)
+	return 0; /* EOF */
+    if (c != 'F')
+    {
+	printf("Bad frame at %p\n", stream_tell(demux->stream)-1);
+	return 0;
+    }
+    stream_skip(demux->stream, 5); /* RAME\n */
     stream_read(demux->stream, buf[0], size);
     stream_read(demux->stream, buf[1], size/4);
     stream_read(demux->stream, buf[2], size/4);
