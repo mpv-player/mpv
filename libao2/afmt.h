@@ -36,3 +36,14 @@
 # define AFMT_S32_BE              0x00002000
 #endif
 
+
+/* native endian formats */
+#ifndef	AFMT_S16_NE
+# if WORDS_BIGENDIAN
+#  define AFMT_S16_NE	AFMT_S16_BE
+#  define AFMT_S32_NE	AFMT_S32_BE
+# else
+#  define AFMT_S16_NE	AFMT_S16_LE
+#  define AFMT_S32_NE	AFMT_S32_LE
+# endif
+#endif

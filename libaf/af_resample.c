@@ -212,11 +212,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
     // Set parameters
     af->data->nch    = n->nch;
-    af->data->format = AFMT_S16_LE;
+    af->data->format = AFMT_S16_NE;
     af->data->bps    = 2;
     if(af->data->format != n->format || af->data->bps != n->bps)
       rv = AF_FALSE;
-    n->format = AFMT_S16_LE;
+    n->format = AFMT_S16_NE;
     n->bps = 2;
 
     // Calculate up and down sampling factors

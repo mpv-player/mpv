@@ -28,6 +28,12 @@
 #define LE 		(1<<2) // Little Endian
 #define END_MASK	(1<<2)
 
+#if WORDS_BIGENDIAN	       // native endian of cpu
+#define	NE	BE
+#else
+#define	NE	LE
+#endif
+
 // Signed
 #define US		(0<<3) // Un Signed
 #define SI		(1<<3) // SIgned
@@ -128,8 +134,8 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 
   la = l->audio;
 
-  // Change to little endian
-  if((cf&END_MASK)!=LE){
+  // Change to cpu native endian
+  if((cf&END_MASK)!=NE){
     switch(cf&NBITS_MASK){
     case(B16):{
       register uint16_t s;
@@ -150,6 +156,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     break;
     }
   }
+
   // Change signed/unsigned
   if((cf&SIGN_MASK) != (lf&SIGN_MASK)){
     switch((cf&NBITS_MASK)){
@@ -234,8 +241,9 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
       break;      
     }
   }
-  // Switch to the correct endainess (again the problem with sun?)
-  if((lf&END_MASK)!=LE){
+
+  // Switch from cpu native endian to the correct endianess 
+  if((lf&END_MASK)!=NE){
     switch(lf&NBITS_MASK){
     case(B16):{
       register uint16_t s;
