@@ -61,6 +61,7 @@ int parse_codec_cfg(char *cfgfile);
 codecs_t* find_video_codec(unsigned int fourcc, unsigned int *fourccmap, codecs_t *start);
 codecs_t* find_audio_codec(unsigned int fourcc, unsigned int *fourccmap, codecs_t *start);
 codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,codecs_t *start,int audioflag);
+void select_codec(char* codecname,int audioflag);
 void list_codecs(int audioflag);
 void codecs_reset_selection(int audioflag);
 

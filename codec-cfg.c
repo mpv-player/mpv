@@ -749,6 +749,23 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 	return NULL;
 }
 
+void select_codec(char* codecname,int audioflag){
+	int i;
+	codecs_t *c;
+//	printf("select_codec('%s')\n",codecname);
+	if (audioflag) {
+		i = nr_acodecs;
+		c = audio_codecs;
+	} else {
+		i = nr_vcodecs;
+		c = video_codecs;
+	}
+	if(i)
+	for (/* NOTHING */; i--; c++)
+	    if(!strcmp(c->name,codecname))
+		c->flags|=CODECS_FLAG_SELECTED;
+}
+
 void codecs_reset_selection(int audioflag){
 	int i;
 	codecs_t *c;
