@@ -15,7 +15,7 @@
 .\" Standardeinrückung ist 7, nicht ändern!
 .nr IN 7
 .\" Einrückung für Unteroptionen
-.nr SS 20
+.nr SS 5
 .\" neue Unteroption hinzufügen
 .de IPs
 .IP "\\$1" \n(SS
@@ -3057,46 +3057,22 @@ automatische Erkennung)
 .br
 16: (mpeg4): Padding-Fehler (automatisch erkennt)
 .br
-32: (mpeg4): Fehler durch ungültigen vlc (automatisch erkennt durch fourcc)
+32: (mpeg4): Fehler durch ungültigen vlc (automatisch erkannt durch fourcc)
 .br
-64: (mpeg4): qpel-Fehler bei XviD und DivX (automatisch erkennt bei
+64: (mpeg4): qpel-Fehler bei XviD und DivX (automatisch erkannt durch
 fourcc/\:version)
 .br
-128: (mpeg4): alter qpel-Standardfehler (automatisch erkennt bei
+128: (mpeg4): alter qpel-Standardfehler (automatisch erkannt durch
 fourcc/\:version)
 .br
-256: (mpeg4): noch ein anderer qpel-Fehler (automatisch erkennt bei
+256: (mpeg4): noch ein anderer qpel-Fehler (automatisch erkannt durch
 fourcc/\:version)
 .br
-512: (mpeg4): Fehler bei direkter qpel-Blockgröße (automatisch erkennt bei
+512: (mpeg4): Fehler bei direkter qpel-Blockgröße (automatisch erkannt durch
 fourcc/\:version)
 .br
-1024: (mpeg4): Randfüllungsfehler (edge padding, automatisch erkennt bei
+1024: (mpeg4): Randfüllungsfehler (edge padding, automatisch erkannt durch
 fourcc/\:version)
-.REss
-.IPs ec\ \ \
-Verbergen von Fehlern:
-.RSss
-1: Benutze einen starken Deblock-Filter bei beschädigten Macroblöcken (MBs).
-.br
-2: iterative Bewegungsvektor (MV)-Suche (langsam)
-.br
-3: alles (Standard)
-.REss
-.IPs er=<Wert>
-Fehlerbehandlung:
-.RSss
-.br
-0: deaktiviert
-.br
-1: vorsichtig (Sollte mit den meisten fehlerhaften Encodern funktionieren.)
-.br
-2: normal (Standard) (Funktioniert mit den meisten konformen Encodern.)
-.br
-3: aggressiv (mehr Überprüfungen, die aber selbst bei konformen Daten
-Fehler liefern können)
-.br
-4: sehr agressiv
 .REss
 .IPs debug=<Wert>
 Debugging:
@@ -3130,11 +3106,31 @@ Debugging:
 .br
 0x1000: Fehler/\:Bugs
 .REss
-.IPs "idct=<0\-99> (siehe \-lavcopts)"
-Um die beste Decodierqualität zu erreichen, benutze denselben idct-Algorithmus
-für Encoding und Decoding.
-Dies kann allerdings auf Kosten der Genauigkeit gehen.
-.IPs fast\
+.IPs ec=<Wert>
+Verbergen von Fehlern:
+.RSss
+1: Benutze einen starken Deblock-Filter bei beschädigten Macroblöcken (MBs).
+.br
+2: iterative Bewegungsvektor (MV)-Suche (langsam)
+.br
+3: alles (Standard)
+.REss
+.IPs er=<Wert>
+Fehlerbehandlung:
+.RSss
+.br
+0: deaktiviert
+.br
+1: vorsichtig (Sollte mit den meisten fehlerhaften Encodern funktionieren.)
+.br
+2: normal (Standard) (Funktioniert mit den meisten konformen Encodern.)
+.br
+3: aggressiv (mehr Überprüfungen, die aber selbst bei konformen Daten
+Fehler liefern können)
+.br
+4: sehr agressiv
+.REss
+.IPs fast\ 
 Aktiviere Optimierungen, die nicht den Spezifikationen entsprechen und
 möglicherweise Probleme verursachen können, wie beispielsweise einfachere
 Dequantisierung, angenommene Benutzung der Standardquantisierungsmatrix, YUV
@@ -3142,6 +3138,10 @@ angenommen 4:2:0 und das Überspringen von ein paar Überprüfungen, die sonst
 vorgenommen werden, um fehlerhafte Bitstreams zu erkennen.
 .IPs gray
 Decodierung nur mit Graustufen (was ein bischen schneller als mit Farbe ist)
+.IPs "idct=<0\-99> (siehe \-lavcopts)"
+Um die beste Decodierqualität zu erreichen, benutze denselben idct-Algorithmus
+für Encoding und Decoding.
+Dies kann allerdings auf Kosten der Genauigkeit gehen.
 .IPs "sb=<Nummer> (nur bei MPEG2)"
 Überspringe unten die angegebene Anzahl von Macroblockreihen.
 .IPs "st=<Nummer> (nur bei MPEG2)"
