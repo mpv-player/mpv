@@ -813,6 +813,7 @@ static void uninit(void)
 static uint32_t preinit(const char *arg)
 {
     XvPortID xv_p;
+    int busy_ports=0;
     
     if(arg) 
     {
@@ -843,12 +844,20 @@ static uint32_t preinit(const char *arg)
 		 xv_port = xv_p;
 		 break;
 	     } else {
-		 mp_msg(MSGT_VO,MSGL_ERR,"Xv: could not grab port %i\n", (int)xv_p);
+		 mp_msg(MSGT_VO,MSGL_WARN,"Xv: could not grab port %i\n", (int)xv_p);
+		 ++busy_ports;
 	     }
       }
     }
     if(!xv_port){
-	mp_msg(MSGT_VO,MSGL_ERR,"Couldn't find free Xvideo port - maybe other applications keep open it\n");
+      if(busy_ports)
+	mp_msg(MSGT_VO,MSGL_ERR,"Couldn't find free Xvideo port - maybe other applications keep open it.\n"
+	    "Close all video applications, and try again. If that does not help,\n"
+	    "see 'mplayer -vo help' for other (non-xv) video out drivers.\n");
+      else
+	mp_msg(MSGT_VO,MSGL_ERR,"It seems there is no Xvideo support for your video card available.\n"
+	    "Run 'xvinfo' to verify its Xv support, and read Xv section of DOCS/video.html !\n"
+	    "See 'mplayer -vo help' for other (non-xv) video out drivers. Try -vo x11\n");
 	return -1;
     }
 
