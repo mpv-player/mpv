@@ -50,7 +50,6 @@ static unsigned int picture_linesize[3];
 
 static int v_width,v_height;
 static int s_width,s_height;
-static int c_width,c_height;
 static int s_pos_x,s_pos_y;
 static int d_pos_x,d_pos_y;
 static int osd_w,osd_h;
@@ -132,30 +131,13 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	    return -1;
 	}
 	
-        if(width<=352 && height<=288){
-          c_width=352;
-          c_height=288;
-        } else
-        if(width<=352 && height<=576){
-          c_width=352;
-          c_height=576;
-        } else
-        if(width<=480 && height<=576){
-          c_width=480;
-          c_height=576;
-        } else
-        if(width<=544 && height<=576){
-          c_width=544;
-          c_height=576;
-        } else {
-          c_width=704;
-          c_height=576;
-        }
+	s_width = (scr_width+15)/16; s_width*=16;
+	s_height = (scr_height+15)/16; s_height*=16;
 	
-	mp1e_context = rte_context_new( c_width, c_height, NULL );
+	mp1e_context = rte_context_new( s_width, s_height, NULL );
 	rte_set_verbosity( mp1e_context, 0 );
 	
-	printf( "VO: [dxr3] %dx%d => %dx%d\n", v_width, v_height, c_width, c_height );
+	printf( "VO: [dxr3] %dx%d => %dx%d\n", v_width, v_height, s_width, s_height );
 
 	if( !mp1e_context )
 	{
@@ -201,38 +183,38 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	    return -1;
 	}
 
-        osd_w=scr_width;
-        d_pos_x=(c_width-(int)scr_width)/2;
+        osd_w=s_width;
+        d_pos_x=(s_width-v_width)/2;
         if(d_pos_x<0)
 	{
     	    s_pos_x=-d_pos_x;d_pos_x=0;
-    	    osd_w=c_width;
+    	    osd_w=s_width;
         } else s_pos_x=0;
     
-        osd_h=scr_height;
-        d_pos_y=(c_height-(int)scr_height)/2;
+        osd_h=s_height;
+        d_pos_y=(s_height-v_height)/2;
         if(d_pos_y<0)
 	{
     	    s_pos_y=-d_pos_y;d_pos_y=0;
-    	    osd_h=c_height;
+    	    osd_h=s_height;
         } else s_pos_y=0;
     
         printf("VO: [dxr3] Position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
                 
-        size = c_width*c_height;
+        size = s_width*s_height;
 
         picture_data[0] = malloc((size * 3)/2);
 	picture_data[1] = picture_data[0] + size;
 	picture_data[2] = picture_data[1] + size / 4;
-	picture_linesize[0] = c_width;
-	picture_linesize[1] = c_width / 2;
-	picture_linesize[2] = c_width / 2;
+	picture_linesize[0] = s_width;
+	picture_linesize[1] = s_width / 2;
+	picture_linesize[2] = s_width / 2;
 
 	// Set the border colorwou
 	RGBTOYUV(0,0,0)
-        memset( picture_data[0], YUV_s.Y, picture_linesize[0]*c_height );
-        memset( picture_data[1], YUV_s.U, picture_linesize[1]*(c_height/2) );
-        memset( picture_data[2], YUV_s.V, picture_linesize[2]*(c_height/2) );
+        memset( picture_data[0], YUV_s.Y, picture_linesize[0]*s_height );
+        memset( picture_data[1], YUV_s.U, picture_linesize[1]*(s_height/2) );
+        memset( picture_data[2], YUV_s.V, picture_linesize[2]*(s_height/2) );
 	
 	if( !rte_start_encoding( mp1e_context ) )
 	{
@@ -290,7 +272,7 @@ static uint32_t draw_frame(uint8_t * src[])
 	unsigned char *s,*dY,*dU,*dV;
 	
         if(d_pos_x+w>picture_linesize[0]) w=picture_linesize[0]-d_pos_x;
-        if(d_pos_y+h>c_height) h=c_height-d_pos_y;
+        if(d_pos_y+h>s_height) h=s_height-d_pos_y;
 
 	s = src[0]+s_pos_x+s_pos_y*(w*2);
 	dY = picture_data[0]+d_pos_x+d_pos_y*picture_linesize[0];
@@ -311,7 +293,7 @@ static uint32_t draw_frame(uint8_t * src[])
 	unsigned char *s,*dY,*dU,*dV;
 	
         if(d_pos_x+w>picture_linesize[0]) w=picture_linesize[0]-d_pos_x;
-        if(d_pos_y+h>c_height) h=c_height-d_pos_y;
+        if(d_pos_y+h>s_height) h=s_height-d_pos_y;
 
 	s = src[0]+s_pos_y*(w*3);
 
@@ -383,7 +365,7 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 	y0+=d_pos_y;
 
         if(x0+w>picture_linesize[0]) w=picture_linesize[0]-x0;
-        if(y0+h>c_height) h=c_height-y0;
+        if(y0+h>s_height) h=s_height-y0;
 
         s=srcimg[0]+s_pos_x+s_pos_y*stride[0];
         d=picture_data[0]+x0+y0*picture_linesize[0];
