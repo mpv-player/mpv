@@ -16,6 +16,15 @@ struct m_config;
 #define PLAY_TREE_ENTRY_TV    2
 #define PLAY_TREE_ENTRY_FILE  3
 
+// Playtree flags
+#define PLAY_TREE_RND  (1<<0)
+// Playtree flags used by the iter
+#define PLAY_TREE_RND_PLAYED  (1<<8)
+
+// Iter mode
+#define PLAY_TREE_ITER_NORMAL 0
+#define PLAY_TREE_ITER_RND 1
+
 typedef struct play_tree play_tree_t;
 typedef struct play_tree_iter play_tree_iter_t;
 typedef struct play_tree_param play_tree_param_t;
@@ -50,6 +59,7 @@ struct play_tree {
   int loop;
   char** files;
   int entry_type;
+  int flags;
 };
   
 struct play_tree_iter {
@@ -60,6 +70,7 @@ struct play_tree_iter {
   int file;
   int num_files;
   int entry_pushed;
+  int mode;
  
   int* status_stack; //  loop/valid stack to save/revert status when we go up/down
   int stack_size;  // status stack size

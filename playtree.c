@@ -406,6 +406,36 @@ play_tree_set_params_from(play_tree_t* dest,play_tree_t* src) {
 
 }
 
+// all childs if deep < 0
+void
+play_tree_set_flag(play_tree_t* pt, int flags , int deep) {
+  play_tree_t*  i;
+
+  pt->flags |= flags;
+
+  if(deep && pt->child) {
+    if(deep > 0) deep--;
+    for(i = pt->child ; i ; i = i->next)
+      play_tree_set_flag(i,flags,deep);
+  }
+}
+
+void
+play_tree_unset_flag(play_tree_t* pt, int flags , int deep) {
+  play_tree_t*  i;
+
+  pt->flags &= ~flags;
+
+  if(deep && pt->child) {
+    if(deep > 0) deep--;
+    for(i = pt->child ; i ; i = i->next)
+      play_tree_unset_flag(i,flags,deep);
+  }
+}
+
+
+//////////////////////////////////// ITERATOR //////////////////////////////////////
+
 static void 
 play_tree_iter_push_params(play_tree_iter_t* iter) {
   int n;
@@ -480,6 +510,34 @@ play_tree_iter_free(play_tree_iter_t* iter) {
   free(iter);
 }
 
+static play_tree_t*
+play_tree_rnd_step(play_tree_t* pt) {
+  int count = 0;
+  int r;
+  play_tree_t *i,*head;
+
+  // Count how many free choice we have
+  for(i = pt ; i->prev ; i = i->prev)
+    if(!(i->flags & PLAY_TREE_RND_PLAYED)) count++;
+  head = i;
+  if(!(i->flags & PLAY_TREE_RND_PLAYED)) count++;
+  for(i = pt->next ; i ; i = i->next)
+    if(!(i->flags & PLAY_TREE_RND_PLAYED)) count++;
+
+  if(!count) return NULL;
+  
+  r = (int)((count-1.0) * rand() / RAND_MAX);
+
+  for(i = head ; i  ; i=i->next) {
+    if(!(i->flags & PLAY_TREE_RND_PLAYED)) r--;
+    if(r < 0) return i;
+  }
+
+  mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Random stepping error\n");
+  return NULL;
+}
+
+
 int
 play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
   play_tree_t* pt;
@@ -503,14 +561,29 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
     m_config_pop(iter->config);
   }
 
-  iter->file = -1;
-  if( d > 0 )
-    pt = iter->tree->next;
-  else if(d < 0)
-    pt = iter->tree->prev;
+  if(iter->tree->parent && (iter->tree->parent->flags & PLAY_TREE_RND))
+    iter->mode = PLAY_TREE_ITER_RND;
   else
-    pt = iter->tree;
+    iter->mode = PLAY_TREE_ITER_NORMAL;
 
+  iter->file = -1;
+  if(iter->mode == PLAY_TREE_ITER_RND)
+    pt = play_tree_rnd_step(iter->tree);
+  else if( d > 0 ) {
+    int i;
+    pt = iter->tree;
+    for(i = d ; i > 0 && pt ; i--)
+      pt = pt->next;
+    d = i ? i : 1;
+  } else if(d < 0) {
+    int i;
+    pt = iter->tree;
+    for(i = d ; i < 0 && pt ; i++)
+      pt = pt->prev;
+    d = i ? i : -1;
+  } else
+    pt = iter->tree;
+  
   if(pt == NULL) { // No next
     // Must we loop?
     if(iter->tree->parent && iter->tree->parent->loop != 0 && ((d > 0 && iter->loop != 0) || ( d < 0 && (iter->loop < 0 || iter->loop < iter->tree->parent->loop) ) ) ) { 
@@ -562,6 +635,8 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
   if(iter->config) {
     play_tree_iter_push_params(iter);
     iter->entry_pushed = 1;
+    if(iter->mode == PLAY_TREE_ITER_RND)
+      pt->flags |= PLAY_TREE_RND_PLAYED;
   }
 
   return PLAY_TREE_ITER_ENTRY;
@@ -625,8 +700,11 @@ play_tree_iter_up_step(play_tree_iter_t* iter, int d,int with_nodes) {
   iter->tree = iter->tree->parent;
 
   // Pop subtree params
-  if(iter->config)
+  if(iter->config) {
     m_config_pop(iter->config);
+    if(iter->mode == PLAY_TREE_ITER_RND)
+      iter->tree->flags |= PLAY_TREE_RND_PLAYED;
+  }
 
   return play_tree_iter_step(iter,d,with_nodes);
 }
