@@ -242,7 +242,7 @@ There are some public mailing lists on MPlayer. Subscribing can be achieved on
 the following addresses:
 
 - MPlayer core/hungarian developers list:
-	http://lists.sourceforge.net/lists/listinfo/mplayer-devel
+	http://mp.dev.hu/mailman/listinfo/mplayer-devel
 
 	I dunno, it is the FLAME list in hungarian language :)
 	Also some talking about mplayer core team internals, like mplayer
@@ -286,7 +286,7 @@ the following addresses:
 	is done.
 
 - MPlayer CVS-log:     
-	http://lists.sourceforge.net/lists/listinfo/mplayer-cvslog
+	http://mp.dev.hu/mailman/listinfo/mplayer-cvslog
 
 	Send only questions about CVS changes here.
 	(if you don't understand why a change is required or you've better fix)
