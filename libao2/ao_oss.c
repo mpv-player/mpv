@@ -248,6 +248,10 @@ static void reset(){
 	return;
     }
 
+#if defined(FD_CLOEXEC) && defined(F_SETFD)
+  fcntl(audio_fd, F_SETFD, FD_CLOEXEC);
+#endif
+
   ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_data.format);
   if(ao_data.format != AFMT_AC3) {
     if (ao_data.channels > 2)
