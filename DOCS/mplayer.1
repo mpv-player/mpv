@@ -679,6 +679,8 @@ i420)
 width of the output window
 .IPs height=<value>
 height of the output window
+.IPs fps=<value>
+framerate at which to capture video (frames per second)
 .IPs buffersize=<value>
 maximum size of the capture buffer in megabytes (default: half of the
 physical memory)
@@ -731,6 +733,11 @@ choose an audio output of the capture card, if it has more of them
 .IPs "[volume|bass|treble|balance]=<0\-65535>"
 These options set parameters of the mixer on the video capture card.
 They will have no effect, if your card doesn't have one.
+.IPs immediatemode=<bool>
+A value of 0 means capture and buffer audio and video together
+(default for mencoder). A value of 1 (default for mplayer) means to do
+video capture only and let the audio go through a loopback cable from
+the TV card to the soundcard.
 .RE
 .
 .TP
@@ -1954,6 +1961,11 @@ p: mix random noise with a (semi)regular pattern
 Activates the software equalizer with interactive controls like the hardware
 eq controls.
 The values can be from -100 to 100.
+.IPs eq2[=gamma:cont:bright]
+Alternative software equalizer that uses lookup tables (very slow),
+allowing gamma correction in addition to simple brightness and
+contrast adjustment. The parameters are given as floating point
+values. Defaults are gamma=1.0, contrast=1.0, and brightness=0.0.
 .IPs halfpack[=f]
 Convert planar YUV 4:2:0 to half-height packed 4:2:2, downsampling luma but
 keeping all chroma samples.
