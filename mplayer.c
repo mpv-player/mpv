@@ -505,7 +505,8 @@ int gui_no_filename=0;
 
 //vo_tune_info_t vtune;
 
-  mp_msg_init(MSGL_STATUS);
+  mp_msg_init();
+  mp_msg_set_level(MSGL_STATUS);
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO,banner_text);
 //  memset(&vtune,0,sizeof(vo_tune_info_t));
@@ -640,7 +641,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       printf("\n");
     }
 
-    mp_msg_init(verbose+MSGL_STATUS);
+    mp_msg_set_level(verbose+MSGL_STATUS);
 
 //------ load global data first ------
 
