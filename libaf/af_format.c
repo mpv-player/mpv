@@ -110,6 +110,11 @@ inline int af_fmt2bits(int format)
     return -1;
 }
 
+inline int af_bits2fmt(int bits)
+{
+    return (bits/8 - 1) << 3;
+}
+
 /* Convert format to str input str is a buffer for the 
    converted string, size is the size of the buffer */
 char* af_fmt2str(int format, char* str, int size)
@@ -194,6 +199,53 @@ char *af_fmt2str_short(int format)
     return "??";
 }
 
+int af_str2fmt_short(char* str)
+{
+    int i;
+    static struct {
+	const char *name;
+	const int format;
+    } table[] = {
+	{ "mulaw", AF_FORMAT_MU_LAW },
+	{ "alaw", AF_FORMAT_A_LAW },
+	{ "mpeg2", AF_FORMAT_MPEG2 },
+	{ "ac3", AF_FORMAT_AC3 },
+	{ "imaadpcm", AF_FORMAT_IMA_ADPCM },
+
+	{ "u8", AF_FORMAT_U8 },
+	{ "s8", AF_FORMAT_S8 },
+	{ "u16le", AF_FORMAT_U16_LE },
+	{ "u16be", AF_FORMAT_U16_BE },
+	{ "u16ne", AF_FORMAT_U16_NE },
+	{ "s16le", AF_FORMAT_S16_LE },
+	{ "s16be", AF_FORMAT_S16_BE },
+	{ "s16ne", AF_FORMAT_S16_NE },
+	{ "u24le", AF_FORMAT_U24_LE },
+	{ "u24be", AF_FORMAT_U24_BE },
+	{ "u24ne", AF_FORMAT_U24_NE },
+	{ "s24le", AF_FORMAT_S24_LE },
+	{ "s24be", AF_FORMAT_S24_BE },
+	{ "s24ne", AF_FORMAT_S24_NE },
+	{ "u32le", AF_FORMAT_U32_LE },
+	{ "u32be", AF_FORMAT_U32_BE },
+	{ "u32ne", AF_FORMAT_U32_NE },
+	{ "s32le", AF_FORMAT_S32_LE },
+	{ "s32be", AF_FORMAT_S32_BE },
+	{ "s32ne", AF_FORMAT_S32_NE },
+	{ "floatle", AF_FORMAT_FLOAT_LE },
+	{ "floatbe", AF_FORMAT_FLOAT_BE },
+	{ "floatne", AF_FORMAT_FLOAT_NE },
+	
+	{ NULL, 0 }
+    };
+    
+    for (i = 0; table[i].name; i++)
+	if (!strcasecmp(str, table[i].name))
+	    return table[i].format;
+
+    return -1;
+}
+
 // Helper functions to check sanity for input arguments
 
 // Sanity check for bytes per sample
@@ -212,6 +264,7 @@ static int check_format(int format)
 {
   char buf[256];
   switch(format & AF_FORMAT_SPECIAL_MASK){
+  case(AF_FORMAT_IMA_ADPCM): 
   case(AF_FORMAT_MPEG2): 
   case(AF_FORMAT_AC3):
     af_msg(AF_MSG_ERROR,"[format] Sample format %s not yet supported \n",
@@ -279,51 +332,21 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     return AF_OK;
   }
   case AF_CONTROL_COMMAND_LINE:{
-    int bps = 2;
-    int format = AF_FORMAT_NE;
-    char str[256];
-    str[0] = '\0';
-    sscanf((char*)arg,"%i:%s",&bps,str);
-    // Convert string to format
-    format = af_str2fmt(str);
-    
-    // Automatic correction of errors
-    switch(format & AF_FORMAT_SPECIAL_MASK){
-    case(AF_FORMAT_A_LAW):
-    case(AF_FORMAT_MU_LAW): 
-      bps=1; break;
-    case(AF_FORMAT_AC3):
-      bps=4; break; // I think
-    }
-    if(AF_FORMAT_F == (format & AF_FORMAT_POINT_MASK))
-      bps=4;
-
-    // set appropriate AF_FORMAT_BITS
-    format |= (bps-1)<<3; // hack
-    
-    if((AF_OK != af->control(af,AF_CONTROL_FORMAT_BPS | AF_CONTROL_SET,&bps)) ||
-       (AF_OK != af->control(af,AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET,&format)))
+    int format = af_str2fmt_short(arg);
+    if(AF_OK != af->control(af,AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET,&format))
       return AF_ERROR;
     return AF_OK;
   }
-  case AF_CONTROL_FORMAT_BPS | AF_CONTROL_SET:
-    // Reinit must be called after this function has been called
-    
-    // Check for errors in configuraton
-    if(AF_OK != check_bps(*(int*)arg))
-      return AF_ERROR;
-
-    af->data->bps = *(int*)arg;
-    return AF_OK;
-  case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET:
-    // Reinit must be called after this function has been called
-
+  case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET:{
     // Check for errors in configuraton
     if(AF_OK != check_format(*(int*)arg))
       return AF_ERROR;
 
     af->data->format = *(int*)arg;
+    af->data->bps = af_fmt2bits(af->data->format)/8;
+
     return AF_OK;
+  }
   }
   return AF_UNKNOWN;
 }

@@ -270,8 +270,8 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 	  if(NULL == (new = af_prepend(s,af,"format")))
 	    return AF_ERROR;
 	  // Set output bits per sample
-	  if(AF_OK != (rv = new->control(new,AF_CONTROL_FORMAT_BPS,&in.bps)) || 
-	     AF_OK != (rv = new->control(new,AF_CONTROL_FORMAT_FMT,&in.format)))
+	  in.format |= af_bits2fmt(in.bps*8);
+	  if(AF_OK != (rv = new->control(new,AF_CONTROL_FORMAT_FMT,&in.format)))
 	    return rv;
 	  // Initialize format filter
 	  if(!new->prev) 
@@ -444,8 +444,8 @@ int af_init(af_stream_t* s, int force_output)
       else
 	af = s->last;
       // Init the new filter
-      if(!af ||(AF_OK != af->control(af,AF_CONTROL_FORMAT_BPS,&(s->output.bps))) 
-	 || (AF_OK != af->control(af,AF_CONTROL_FORMAT_FMT,&(s->output.format))))
+      s->output.format |= af_bits2fmt(s->output.bps*8);
+      if(!af || (AF_OK != af->control(af,AF_CONTROL_FORMAT_FMT,&(s->output.format))))
 	return -1;
       if(AF_OK != af_reinit(s,af))
 	return -1;

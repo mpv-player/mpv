@@ -81,7 +81,9 @@
 #endif
 
 extern int af_str2fmt(char *str);
+extern int af_str2fmt_short(char *str);
 extern int af_fmt2bits(int format);
+extern int af_bits2fmt(int bits);
 extern char* af_fmt2str(int format, char* str, int size);
 extern char* af_fmt2str_short(int format);
 

@@ -113,13 +113,9 @@ typedef struct af_control_ext_s{
 // Set resampling accuracy
 #define AF_CONTROL_RESAMPLE_ACCURACY	0x00000300 | AF_CONTROL_FILTER_SPECIFIC
 
-// Format 
+// Format
 
-// Set output format bits per sample
-#define AF_CONTROL_FORMAT_BPS		0x00000400 | AF_CONTROL_FILTER_SPECIFIC
-
-// Set output format sample format
-#define AF_CONTROL_FORMAT_FMT		0x00000500 | AF_CONTROL_FILTER_SPECIFIC
+#define AF_CONTROL_FORMAT_FMT		0x00000400 | AF_CONTROL_FILTER_SPECIFIC
 
 // Channels
 
