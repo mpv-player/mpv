@@ -547,8 +547,8 @@ linux && _fbdev=yes
 _lirc=no
 _css=no
 _dvdread=no
-_win32dll=yes _dshow=yes
-test "$host_arch" != i386 && _dshow=no _win32dll=no
+_win32=yes _dshow=yes
+test "$host_arch" != i386 && _dshow=no _win32=no
 _fastmemcpy=yes
 _streaming=no
 _libavcodec=no
@@ -602,18 +602,16 @@ for i in $pparam; do
 done
 
 
-_win32libdirnotify=no
-if test "$_win32dll" = yes ; then
+# XXX check codecs presence
+_win32libdir=
+if test "$_win32" = yes ; then
+  for I in /usr/local/lib/win32 /usr/lib/win32 ; do
     if test -d /usr/lib/win32 ; then
-	_win32libdir=/usr/lib/win32
-    elif test -d /usr/local/lib/win32 ; then
-	_win32libdir=/usr/local/lib/win32
-    else
-	# This is our default:
-	_win32libdir=/usr/lib/win32
-	_win32libdirnotify=yes
-    fi
-fi
+      _win32libdir="$I"
+      break;
+    fi;
+  done
+fi      
 
 
 if test -d libavcodec && test -f libavcodec/Makefile ; then
@@ -1394,7 +1392,8 @@ for ac_option do
         _select='#undef HAVE_AUDIO_SELECT'
 	;;
   --disable-win32)
-        _win32dll=no
+	_win32libdir=
+        _win32=no
         _dshow=no # no dshow without win32dlls
 	;;
   --disable-dshow)
@@ -1427,15 +1426,15 @@ for ac_option do
 	;;
   --with-win32libdir=*)
         _win32libdir=`echo $ac_option | cut -d '=' -f 2`
-	_win32libdirnotify=no
+        _win32=yes
         ;;
   --with-csslibdir=*)
         _csslibdir=`echo $ac_option | cut -d '=' -f 2`
-	_css=yes;
+	_css=yes
 	;;
   --with-cssincdir=*)
         _cssincdir=`echo $ac_option | cut -d '=' -f 2`
-        _css=yes;
+        _css=yes
         ;;
   --with-mlibdir=*)
         _mlibdir=`echo $ac_option | cut -d '=' -f 2`
@@ -1649,7 +1648,7 @@ echo "Checking for DirectShow ... $_dshow"
 echo "Checking for iconv function ... $_iconv"
 
 # check if compiler supports C++ and C++-libs are installed correctly
-if test "$_win32dll" = yes && test "$_dshow" = yes ; then
+if test "$_win32" = yes && test "$_dshow" = yes ; then
 cat > $TMPCPP << EOF
 /* very useful C++ test program by atmos */
 #include <string>
@@ -1808,20 +1807,26 @@ fi
 fi
 
 
-if test "$_win32dll" = yes ; then
-    _win32dll='#define USE_WIN32DLL 1'
-    _win32lib='-Lloader -lloader'
-    _win32dep='loader/libloader.a'
-    if test "$_dshow" = yes ; then
-	_dshow='#define USE_DIRECTSHOW'
-	_dshowlib='-Lloader/DirectShow -lDS_Filter -lstdc++'
-	_dshowdep='loader/DirectShow/libDS_Filter.a'
-    else
-	_dshow='#undef USE_DIRECTSHOW' _dshowlib='' _dshowdep=''
-    fi
+if test "$_win32" = yes ; then
+  _use_win32dll="#define USE_WIN32DLL 1"
+  _win32lib="-Lloader -lloader"
+  _win32dep="loader/libloader.a"
+  if test "$_dshow" = yes ; then
+    _use_directshow="#define USE_DIRECTSHOW"
+    _dshowlib="-Lloader/DirectShow -lDS_Filter -lstdc++"
+    _dshowdep="loader/DirectShow/libDS_Filter.a"
+  else
+    _dshow="#undef USE_DIRECTSHOW"
+    _dshowlib=
+    _dshowdep=
+  fi
 else
-    _win32dll='#undef USE_WIN32DLL' _win32lib='' _win32dep=''
-    _dshow='#undef USE_DIRECTSHOW' _dshowlib='' _dshowdep=''
+  _use_win32dll="#undef USE_WIN32DLL"
+  _win32lib=
+  _win32dep=
+  _use_directshow="#undef USE_DIRECTSHOW"
+  _dshowlib=
+  _dshowdep=
 fi
 
 
@@ -2442,10 +2447,10 @@ $_cssdef
 #define HAVE_ODIVX_POSTPROCESS
 
 /* Win32 DLL support */
-$_win32dll
+$_use_win32dll
 
 /* DirectShow support */
-$_dshow
+$_use_directshow
 
 /* ffmpeg's libavcodec support (requires libavcodec source) */
 $_libavcodec
@@ -2629,13 +2634,15 @@ EOF
 fi
 
 if test "$host_arch" = "i386" ; then
-  if test "$_win32libdirnotify" = yes ; then
-    cat <<EOF
+  if test "$_win32" = no ; then
+    if test "$_win32libdir" ; then
+      cat <<EOF
 Failed to find a WIN32 codecs dir at $_win32libdir!
 Create it and copy the DLL files there! (You can get them from your windows
 directory or download them from:
   ftp://ftp.MPlayerHQ.hu/MPlayer/releases/w32codec.zip
 EOF
+    fi
   else
     echo "Ok, found Win32 codecs directory at $_win32libdir."
   fi
