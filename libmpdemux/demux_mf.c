@@ -63,6 +63,17 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
   mf_t         *mf = NULL;
   
   if(!demuxer->stream->url) return NULL;
+
+  if(!mf_type){
+    char* p=strrchr(demuxer->stream->url,'.');
+    if(!p){
+      mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] file type was not set! (try -mf type=xxx)\n" );
+      free( mf ); return NULL;
+    }
+    mf_type=strdup(p+1);
+    mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] file type was not set! trying 'type=%s'...\n", mf_type);
+  }
+
   mf=open_mf(demuxer->stream->url);
   if(!mf) return NULL;
   mf->curr_frame=0;
@@ -80,7 +91,7 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
   // parent video demuxer stream (this is getting wacky), or else
   // video_read_properties() will choke
   sh_video->ds = demuxer->video;
-
+  
   if ( !strcasecmp( mf_type,"jpg" ) || 
         !(strcasecmp(mf_type, "jpeg"))) sh_video->format = mmioFOURCC('I', 'J', 'P', 'G');
   else 
