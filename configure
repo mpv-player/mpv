@@ -166,13 +166,13 @@ Optional features:
   --disable-freetype     Disable freetype2 font rendering support [autodetect]
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
   --disable-new-conf     Disable new experimental config parser code [enabled]
-  --enable-menu          Enable osd menu support (needs new config) [disabled]
+  --enable-menu          Enable OSD menu support (NOT DVD MENU) [disabled]
   --disable-sortsub      Disable subtitles sorting [enabled]
   --enable-fribidi       Enable using the FriBiDi libs [disabled]
   --disable-macosx       Disable Mac OS X specific features [autodetect]
   --disable-inet6        Disable IPv6 support [autodetect]
   --disable-gethostbyname2
-                         gethostbyname() is not provided by the c library [autodetect]
+                         gethostbyname() is not provided by the C library [autodetect]
 Codecs:
   --enable-gif		 enable gif support [autodetect]
   --enable-png		 enable png input/output support [autodetect]
