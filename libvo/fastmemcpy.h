@@ -8,7 +8,7 @@ If you have questions please contact with me: Nick Kurshev: nickols_k@mail.ru.
 
 #ifndef HAVE_MMX2
 //static inline void * __memcpy(void * to, const void * from, unsigned n)
-inline static void * memcpy(void * to, const void * from, unsigned n)
+inline static void * fast_memcpy(void * to, const void * from, unsigned n)
 {
 int d0, d1, d2;
 __asm__ __volatile__(
@@ -27,7 +27,7 @@ return (to);
 }
 #else
 //inline static void *__memcpy_mmx2(void *to, const void *from, unsigned len)
-inline static void * memcpy(void * to, const void * from, unsigned len)
+inline static void * fast_memcpy(void * to, const void * from, unsigned len)
 {
 	void *p;
 	int i;
@@ -91,8 +91,10 @@ inline static void * memcpy(void * to, const void * from, unsigned len)
 	/*
 	 *	Now do the tail of the block
 	 */
-	__memcpy(to, from, len&63);
+	memcpy(to, from, len&63);
 	return p;
 }
 #endif
+
+#define memcpy(a,b,c) fast_memcpy(a,b,c)
 
