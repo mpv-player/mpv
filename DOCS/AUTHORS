@@ -66,7 +66,6 @@ Felix Bünemann: <atmosfear@users.sourceforge.net>
 - PNG file output support in libvo
 
 TeLeNiEkO: <telenieko@telenieko.com>
-- debian packaging support (see debian/* and DOCS/DEBIAN)
 - spanish translations (see DOCS/Spanish/*)
 
 Michael Graffam: <mgraffam@idsi.net>
@@ -86,6 +85,11 @@ Nick Kurshev: <nickols_k@mail.ru>
 German Gomez Garcia: <german@piraos.com>
 - DVD .ifo parser and chapter selection [not yet in the main trunk]
 - SPDIF AC3 output for SBLive!  [not yet in the main trunk]
+
+Dariush Pietrzak: <eyck@incubus.ar.lublin.pl>
+- debian packaging support (see debian/* and DOCS/DEBIAN)
+- support for vplayer subtitle format
+- prelimenary support for .RT subtitle format
 
 Main testers:
   Tibor Balázs (Tibcu)
