@@ -232,7 +232,7 @@ static int af_ladspa_parse_plugin(af_ladspa_t *setup) {
                  * of the suboptions and check LADSPA_?_HINT's later.
                  */
                 setup->inputcontrols[p] = 0.0f;
-            } else if (LADSPA_IS_PORT_OUTPUT(d)); {
+            } else if (LADSPA_IS_PORT_OUTPUT(d)) {
                 /* read and handle these too, otherwise filters that have them
                  * will sig11
                  */
