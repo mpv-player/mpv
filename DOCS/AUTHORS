@@ -44,6 +44,9 @@ László Megyer (Lez, Laaz): <lez@sch.bme.hu>
 Gyula László (Chass, Tégla): <chass-@freemail.hu>
 - fonts
 
+Zoltán Márk Vicián (Se7en): <se7en@sch.bme.hu>
+- SVGA support in libvo
+
 Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 - LIRC support (see DOCS/LIRC)
 - DGA support in libvo
