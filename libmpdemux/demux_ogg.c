@@ -30,6 +30,10 @@ typedef struct ov_struct_st {
 			  settings */
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
   vorbis_block     vb; /* local working space for packet->PCM decode */
+  float            rg_scale; /* replaygain scale */
+#ifdef TREMOR
+  int              rg_scale_int;
+#endif
 } ov_struct_t;
 
 //// OggDS headers
