@@ -594,7 +594,7 @@ static uint32_t Directx_ManageDisplay()
 	}
     else
     {
-        g_lpddclipper->lpVtbl->SetHWnd(g_lpddclipper, 0,vo_fs?hWndFS: hWnd);
+        g_lpddclipper->lpVtbl->SetHWnd(g_lpddclipper, 0,(vo_fs && !vidmode)?hWndFS: hWnd);
     }       
 	
     if(!vidmode && !vo_fs){
@@ -603,7 +603,7 @@ static uint32_t Directx_ManageDisplay()
 //          printf("window: %i %i %ix%i\n",rdw.left,rdw.top,rdw.right - rdw.left,rdw.bottom - rdw.top);      
           SetWindowPos(hWnd,(vo_ontop)?HWND_TOPMOST:(vo_rootwin?HWND_BOTTOM:HWND_NOTOPMOST),rdw.left,rdw.top,rdw.right-rdw.left,rdw.bottom-rdw.top,SWP_NOOWNERZORDER); 
     }
-    else SetWindowPos(hWndFS,vo_rootwin?HWND_BOTTOM:HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOOWNERZORDER);
+    else SetWindowPos(vidmode?hWnd:hWndFS,vo_rootwin?HWND_BOTTOM:HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOOWNERZORDER);
 
   	/*for nonoverlay mode we are finished, for overlay mode we have to display the overlay first*/
 	if(nooverlay)return 0;
@@ -950,7 +950,7 @@ static uint32_t preinit(const char *arg)
 	wc.hbrBackground = CreateSolidBrush(RGB(0,0,0));                     
     wc.lpszClassName = "MPlayer - Fullscreen";
     RegisterClass(&wc);
-    hWndFS = CreateWindow("MPlayer - Fullscreen","MPlayer Fullscreen",WS_POPUP,0,0,GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics(SM_CYSCREEN),hWnd,NULL,hInstance,NULL);			
+    if(!vidmode)hWndFS = CreateWindow("MPlayer - Fullscreen","MPlayer Fullscreen",WS_POPUP,0,0,GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics(SM_CYSCREEN),hWnd,NULL,hInstance,NULL);			
     mp_msg(MSGT_VO, MSGL_DBG3 ,"<vo_directx><INFO>initial mplayer windows created\n");
 	
 	if (Directx_InitDirectDraw()!= 0)return 1;          //init DirectDraw
