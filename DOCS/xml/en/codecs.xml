@@ -510,7 +510,7 @@ decoders.
 </itemizedlist>
 
 <procedure>
-<title>INSTALLING XVID CVS</title>
+<title>COMPILING MPLAYER WITH QUICKTIME LIBRARIES SUPPORT</title>
 <note><para>currently only 32bit Intel platforms are supported.</para></note>
 <step><para>download MPlayer CVS</para></step>
 <step><para>compile MPlayer with:
