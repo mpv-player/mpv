@@ -700,10 +700,18 @@ int vidix_preinit(const char *drvname,void *server)
 	  printf("vosub_vidix: You have wrong version of VIDIX library\n");
 	  return -1;
 	}
+#ifndef __MINGW32__
 	vidix_handler = vdlOpen(MPLAYER_LIBDIR "/mplayer/vidix/",
 				drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
 				TYPE_OUTPUT,
 				verbose);
+#else
+	vidix_handler = vdlOpen(get_path("vidix/"),
+				drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
+				TYPE_OUTPUT,
+				verbose);
+#endif              
+              
 	if(vidix_handler == NULL)
 	{
 		printf("vosub_vidix: Couldn't find working VIDIX driver\n");
