@@ -14,29 +14,29 @@ Requirements:
 
 How to enable?
 ~~~~~~~~~~~~~~
-1. Edit libvo/vo_mpegpes.c, and change first #undef HAVE_DVB to:
-    #define HAVE_DVB
 
-2. Download ffmpeg-CVS and copy libavcodec to mplayer (see DOC for details)
+1. Download ffmpeg-CVS and copy libavcodec to mplayer (see DOC for details)
    Move this line from #ifdef CONFIG_ENCODERS .. #endif section to outside
    (after the #endif line) at libavcodec/utils.c:361 :
        register_avcodec(&mpeg1video_encoder);
-   
-3. Compile mplayer:
-    run ./configure with the option:
+
+2. Compile mplayer:
+    ./configure should detect it. If didn't, force with ./configure --enable-dvb
+        If you have ost headers at non-standard path, set it with:
 	--with-extraincdir=<your DVB source dir>/ost/include
     make
     make install
+   
 
 How to use?
 ~~~~~~~~~~~
 To play standard mpeg 1/2 files:  (hardware decoding)
 
-  mplayer -vo mpegpes -vc mpegpes file.mpg|vob
+  mplayer -ao mpegpes -vo mpegpes -vc mpegpes file.mpg|vob
 
 To play non-standard mpeg files:  (software decoding)
 
-  mplayer -vo mpegpes file.mpg|vob
+  mplayer -ao mpegpes -vo mpegpes file.mpg|vob
 
 To play divx files:
 
@@ -57,13 +57,13 @@ Mailing list:
 ~~~~~~~~~~~~~
   http://mplayerhq.hu/mailman/listinfo/mplayer-dvb
 
+List's language is ENGLISH. Please avoid using german or other languages!
 Subscribe, and ask/discuss your problems here.
 I'll also post feature announces to this list.
 
 Future plans/TODO:
 ~~~~~~~~~~~~~~~~~~
 
-- audio playback through the DVB card (currently it uses soundcard)
 - display OSD and subtitles using DVB card's OSD feature
 - better (more fluent) playback of non-25fps movies
 - more speed optimizations
