@@ -19,6 +19,7 @@ extern af_info_t af_info_equalizer;
 extern af_info_t af_info_gate;
 extern af_info_t af_info_comp;
 extern af_info_t af_info_pan;
+extern af_info_t af_info_surround;
 
 static af_info_t* filter_list[]={ \
    &af_info_dummy,\
@@ -31,6 +32,7 @@ static af_info_t* filter_list[]={ \
    &af_info_gate,\
    &af_info_comp,\
    &af_info_pan,\
+   &af_info_surround,\
    NULL \
 };
 
