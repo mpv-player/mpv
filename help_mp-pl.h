@@ -33,6 +33,7 @@ static char help_text[]=
 " -fs -vm -zoom   opcje pe³noekranowe (pe³en ekran,zmiana trybu,skalowanie)\n"
 " -x <x> -y <y>   skalowanie do rozdzielczo¶ci <x>*<y> [je¶li -vo pozwala!]\n"
 " -sub <file>     wybór pliku z napisami (zobacz tak¿e -subfps, -subdelay)\n"
+" -playlist <file>wybór pliku z playlist±\n"
 " -vid x -aid y   wybór odtwarzanego strumienia video (x) i audio (y)\n"
 " -fps x -srate y wybór prêdko¶ci odtwarzania video (x fps) i audio (y Hz)\n"
 " -pp <quality>   wybór filtra wyg³adzaj±cego (0-4 dla DivX, 0-63 dla mpeg)\n"
@@ -42,6 +43,7 @@ static char help_text[]=
 "Klawisze:\n"
 " Right,Up,PgUp   skok naprzód o 10 sekund, 1 minutê, 10 minut\n"
 " Left,Down,PgDn  skok do ty³u o 10 sekund, 1 minutê, 10 minut\n"
+" < lub >         przeskok o jedn± pozycjê w playli¶cie\n"
 " p lub SPACE     zatrzymanie filmu (kontynuacja - dowolny klawisz)\n"
 " q lub ESC       zatrzymanie odtwarzania i wyj¶cie z programu\n"
 " + lub -         regulacja opó¼nienia d¼wiêku o +/- 0.1 sekundy\n"
@@ -50,7 +52,7 @@ static char help_text[]=
 "                 (naci¶nij 'm' ¿eby wybraæ master/pcm)\n"
 " z lub x         regulacja opó¼nienia napisów o +/- 0.1 sekundy\n"
 "\n"
-" *** SPRAWD¬ DETALE, POMOCNE (ZAAWANSOWANE) OPCJE I KLAWISZE W MANUALU ! ***\n"
+" **** DOK£ADNY SPIS WSZYSTKICH DOSTÊPNYCH OPCJI ZNAJDUJE SIÊ W MANUALU! ****\n"
 "\n";
 #endif
 
@@ -181,7 +183,7 @@ static char help_text[]=
 #define MSGTR_NoDShowAudio "Skompilowane bez obs³ugi DirectShow -> wymuszam brak d¼wiêku :(\n"
 #define MSGTR_NoOggVorbis "Kodek audio OggVorbis wy³±czony -> wymuszam brak d¼wiêku :(\n"
 
-#define MSGTR_MpegPPhint "UWAGA! Za¿±da³e¶ u¿ycia filtra wyg³adzaj±cego dla video MPEG 1/2,\n" \
+#define MSGTR_MpegPPhint "UWAGA! Za¿±da³e¶ u¿ycie filtra wyg³adzaj±cego dla video MPEG 1/2,\n" \
 			 "       ale skompilowa³e¶ MPlayera bez obs³ugi wyg³adzania dla MPEG 1/2!\n" \
 			 "       #define MPEG12_POSTPROC w config.h, i przekompiluj libmpeg2!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF podczas przeszukiwania nag³ówka sekwencji\n"
