@@ -228,6 +228,8 @@ static char help_text[]=
 // --- labels ---
 #define MSGTR_About "O programie"
 #define MSGTR_FileSelect "Wybór pliku ..."
+#define MSGTR_SubtitleSelect "Wybór napisów ..."
+#define MSGTR_OtherSelect "Wybór ..."
 #define MSGTR_MessageBox "Komunikat"
 #define MSGTR_PlayList "Playlista"
 #define MSGTR_SkinBrowser "Przegl±darka Skórek"
