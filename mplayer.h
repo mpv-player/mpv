@@ -38,6 +38,7 @@ extern char * filename;
 extern int stream_cache_size;
 extern int force_ni;
 extern int index_mode;
+extern int autosync;
 
 // libmpcodecs:
 extern int fullscreen;

@@ -186,7 +186,7 @@ static off_t step_sec=0;
 static int loop_times=-1;
 
 // A/V sync:
-static int autosync=0; // 30 might be a good default value.
+       int autosync=0; // 30 might be a good default value.
 
 // may be changed by GUI:  (FIXME!)
 float rel_seek_secs=0;

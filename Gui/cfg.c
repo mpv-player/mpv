@@ -42,6 +42,9 @@ char * gtkAOOSSDevice;
 int    gtkCacheOn = 0;
 int    gtkCacheSize = 2048;
 
+int    gtkAutoSyncOn = 0;
+int    gtkAutoSync = 0;
+
 #ifdef HAVE_DXR3
  char * gtkDXR3Device;
 #endif
@@ -111,11 +114,14 @@ static config_t gui_opts[] =
  { "font_autoscale",&subtitle_autoscale,CONF_TYPE_INT,CONF_RANGE,0,3,NULL },
 #endif
 
- { "cache",&gtkCacheOn,CONF_TYPE_INT,CONF_RANGE,-1,65535,NULL },
+ { "cache",&gtkCacheOn,CONF_TYPE_FLAG,0,0,1,NULL },
  { "cache_size",&gtkCacheSize,CONF_TYPE_INT,CONF_RANGE,-1,65535,NULL },
  
  { "load_fullscreen",&gtkLoadFullscreen,CONF_TYPE_FLAG,0,0,1,NULL },
  { "stopxscreensaver",&stop_xscreensaver,CONF_TYPE_FLAG,0,0,1,NULL },
+
+ { "autosync",&gtkAutoSyncOn,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "autosync_size",&gtkAutoSync,CONF_TYPE_INT,CONF_RANGE,0,10000,NULL },
  
  { "gui_skin",&skinName,CONF_TYPE_STRING,0,0,0,NULL },
 

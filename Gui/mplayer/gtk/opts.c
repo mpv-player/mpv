@@ -70,6 +70,10 @@ static GtkWidget * CBStopXScreenSaver;
 static GtkWidget * SBCache;
 static GtkAdjustment * SBCacheadj;
 
+static GtkWidget * CBAutoSync;
+static GtkWidget * SBAutoSync;
+static GtkAdjustment * SBAutoSyncadj;
+
 static GtkWidget * RBOSDNone;
 static GtkWidget * RBOSDTandP;
 static GtkWidget * RBOSDIndicator;
@@ -316,7 +320,12 @@ void ShowPreferences( void )
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),0 );
  gtk_adjustment_set_value( SBCacheadj,(float)gtkCacheSize );
  if ( !gtkCacheOn ) gtk_widget_set_sensitive( SBCache,FALSE );
-  else gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),1 );
+  else gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),TRUE );
+  
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBAutoSync ),0 );
+ gtk_adjustment_set_value( SBAutoSyncadj,(float)gtkAutoSync );
+ if ( !gtkAutoSyncOn ) gtk_widget_set_sensitive( SBAutoSync,FALSE );
+  else gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBAutoSync ),TRUE );
 
 // -- disables
 #ifndef USE_SUB
@@ -354,6 +363,7 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( RBFontAutoScaleDiagonal ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)7 );
 #endif
  gtk_signal_connect( GTK_OBJECT( CBCache ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)8);
+ gtk_signal_connect( GTK_OBJECT( CBAutoSync ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)9);
 
  gtk_signal_connect( GTK_OBJECT( HSExtraStereoMul ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( HSAudioDelay ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)1 );
@@ -477,6 +487,9 @@ void prButton( GtkButton * button,gpointer user_data )
 
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) { gtkCacheSize=(int)SBCacheadj->value; gtkCacheOn=1; }
 	 else gtkCacheOn=0;
+	
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBAutoSync ) ) ) { gtkAutoSync=(int)SBAutoSyncadj->value; gtkAutoSyncOn=1; }
+	 else gtkAutoSyncOn=0;
 
 	{
 	 int i;
@@ -591,6 +604,10 @@ static void prToggled( GtkToggleButton * togglebutton,gpointer user_data )
    case 8:
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) gtk_widget_set_sensitive( SBCache,TRUE );
 	 else gtk_widget_set_sensitive( SBCache,FALSE );
+	break;
+   case 9:
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBAutoSync ) ) ) gtk_widget_set_sensitive( SBAutoSync,TRUE );
+	 else gtk_widget_set_sensitive( SBAutoSync,FALSE );
 	break;
   }
 }
@@ -763,7 +780,6 @@ GtkWidget * create_Preferences( void )
     gtk_widget_set_usize( vbox5,250,-2 );
 
   CBDoubleBuffer=AddCheckButton( MSGTR_PREFERENCES_DoubleBuffer,vbox5 );
-//  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDoubleBuffer ),TRUE );
   CBDR=AddCheckButton( MSGTR_PREFERENCES_DirectRender,vbox5 );
   CBFramedrop=AddCheckButton( MSGTR_PREFERENCES_FrameDrop,vbox5 );
   CBHFramedrop=AddCheckButton( MSGTR_PREFERENCES_HFrameDrop,vbox5 );
@@ -998,7 +1014,17 @@ GtkWidget * create_Preferences( void )
       AddFrame( MSGTR_PREFERENCES_FRAME_Misc,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
 
   CBLoadFullscreen=AddCheckButton( MSGTR_PREFERENCES_LoadFullscreen,vbox602 );
-  CBStopXScreenSaver=AddCheckButton( MSGTR_PREFERENCES_XSREENSAVER,vbox602 );
+  CBStopXScreenSaver=AddCheckButton( MSGTR_PREFERENCES_XSCREENSAVER,vbox602 );
+
+  AddHSeparator( vbox602 );
+
+  CBAutoSync=AddCheckButton( MSGTR_PREFERENCES_AutoSync,vbox602 );
+  hbox5=AddHBox( vbox602,1 );
+  AddLabel( MSGTR_PREFERENCES_AutoSyncValue,hbox5 );
+  SBAutoSyncadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,10000,1,10,10 ) );
+  SBAutoSync=gtk_spin_button_new( GTK_ADJUSTMENT( SBAutoSyncadj ),1,0 );
+  gtk_widget_show( SBAutoSync );
+  gtk_box_pack_start( GTK_BOX( hbox5 ),SBAutoSync,TRUE,TRUE,0 );
 
   label=AddLabel( MSGTR_PREFERENCES_Misc,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),3 ),label );

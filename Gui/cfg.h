@@ -20,6 +20,9 @@ extern char * gtkDXR3Device;
 extern int    gtkCacheOn;
 extern int    gtkCacheSize;
 
+extern int    gtkAutoSyncOn;
+extern int    gtkAutoSync;
+
 extern int    gtkSubDumpMPSub;
 extern int    gtkSubDumpSrt;
 

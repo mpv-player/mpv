@@ -167,7 +167,9 @@ void guiInit( void )
 #ifdef HAVE_DXR3
  if ( !gtkDXR3Device ) gtkDXR3Device=strdup( "/dev/em8300-0" );
 #endif
- fullscreen=gtkLoadFullscreen;       
+ fullscreen=gtkLoadFullscreen;
+ if ( stream_cache_size != -1 ) { gtkCacheOn=1; gtkCacheSize=stream_cache_size; }
+ if ( autosync && autosync != gtkAutoSync ) { gtkAutoSyncOn=1; gtkAutoSync=autosync; }
    
  gtkInit();
 // --- initialize X 
@@ -551,6 +553,9 @@ int guiGetEvent( int type,char * arg )
 	 
 	if ( gtkCacheOn ) stream_cache_size=gtkCacheSize;
 	 else stream_cache_size=-1;
+
+	if ( gtkAutoSyncOn ) autosync=gtkAutoSync;
+	 else autosync=0;
 
 // -- audio
         if ( audio_out )
