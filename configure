@@ -76,7 +76,8 @@ usage: $0 [options]
 
 params:
         --cc                    use this C compiler to build MPlayer [gcc]
-	--enable-debug[=1-3]	compile debugging information into mplayer
+	--enable-debug[=1-3]	compile debugging information into mplayer [disable]
+	--enable-profile	compile profiling information into mplayer [disable]
         --enable-mmx            build with mmx support [autodetect]
         --enable-mmx2           build with mmx2 support (PIII, Athlon) [autodetect]
         --enable-3dnow          build with 3dnow! support [autodetect]
@@ -507,6 +508,9 @@ rm -f $TMPC $TMPO
 for ac_option
 do
  case "$ac_option" in
+  --enable-profile)
+  	_profile='-p'
+	;;
   --enable-debug)
   	_debug='-g'
 	;;
@@ -806,10 +810,13 @@ if [ $_png = yes ]; then
 fi
 
 # Checking for CFLAGS
-if [ "$CFLAGS" = "" ]; then
- CFLAGS="-O4 $_debug -march=$proc -mcpu=$proc -pipe -ffast-math"
+if [ "$_profile" != "" ] || [ "$_debug" != "" ]; then
+ CFLAGS="-O2 -march=$proc -mcpu=$proc $_debug $_profile"
+else
+if test -z "$CFLAGS"; then
+ CFLAGS="-O4 -march=$proc -mcpu=$proc -pipe -ffast-math -fomit-frame-pointer"
 fi
-
+fi
 echo
 echo "Creating $MCONF"
 cat > $MCONF << EOF
@@ -819,7 +826,7 @@ cat > $MCONF << EOF
 AR=ar
 CC=$_cc
 X11DIR=$_x11libdir
-# OPTFLAGS=-O4 $_debug -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
+# OPTFLAGS=-O4 $_profile $_debug -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=$CFLAGS
 # LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
 X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng
