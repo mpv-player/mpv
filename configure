@@ -1812,46 +1812,6 @@ fi
 echores "$_vsscanf"
 
 
-echocheck "X11 headers"
-if test -z "$_inc_x11" ; then
-  for I in /usr/include /usr/X11R6/include /usr/X11/include /usr/openwin/include ; do
-    if test -d "$I/X11" ; then
-      _inc_x11="-I$I"
-      echores "yes (using $I)"
-      break
-    fi
-  done
-  if test -z "$_inc_x11" ; then
-    _x11=no
-    echores "not found"
-  fi
-else
-  echores "yes (using $_inc_x11)"
-fi
-if test "$_inc_x11" = "-I/usr/include" ; then
-  _inc_x11=""
-fi
-
-
-echocheck "X11 libs"
-if test -z "$_ld_x11" ; then
-  for I in /usr/X11R6/lib /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 ; do
-    if test -d "$I" ; then
-      _ld_x11="-L$I"
-      echores "yes (using $I)"
-      break;
-    fi
-  done
-  if test -z "$_ld_x11" ; then
-    _x11=no
-    echores "not found"
-  fi
-else
-  echores "yes (using $_ld_x11)"
-fi
-_ld_x11="$_ld_x11 -lX11 -lXext $_ld_sock"
-
-
 #########
 # VIDEO #
 #########
@@ -1931,8 +1891,50 @@ else
 fi
 echores "$_directfb0910"
 fi
+
+
+echocheck "X11 headers presence"
+if test -z "$_inc_x11" ; then
+  for I in /usr/include /usr/X11R6/include /usr/X11/include /usr/openwin/include ; do
+    if test -d "$I/X11" && test -f "$I/X11/Xlib.h" ; then
+      _inc_x11="-I$I"
+      echores "yes (using $I)"
+      break
+    fi
+  done
+  if test -z "$_inc_x11" ; then
+    _x11=no
+    echores "not found (check if the dev(el) packages are installed)"
+  fi
+else
+  echores "yes (using $_inc_x11)"
+fi
+if test "$_inc_x11" = "-I/usr/include" ; then
+  _inc_x11=""
+fi
+
+
+echocheck "X11 libs presence"
+if test -z "$_ld_x11" ; then
+  for I in /usr/X11R6/lib /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 ; do
+    if test -d "$I" && ( test -f "$I/libX11.so" || test -f "$I/libX11.a" ) ; then
+      _ld_x11="-L$I"
+      echores "yes (using $I)"
+      break;
+    fi
+  done
+  if test -z "$_ld_x11" ; then
+    _x11=no
+    echores "not found (check if the dev(el) packages are installed)"
+  fi
+else
+  echores "yes (using $_ld_x11)"
+fi
+_ld_x11="$_ld_x11 -lX11 -lXext $_ld_sock"
+
+
 echocheck "X11"
-if test "$_x11" = auto || test "$_x11" = yes ; then
+if test "$_x11" != no ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
