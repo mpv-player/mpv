@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.21  2001/05/03 22:39:38  acki2
+ * - finally: 15to16 conversion included!!!
+ *
  * Revision 1.20  2001/05/02 23:21:27  acki2
  * - now we use fastmemcpy() for copying. Saves about 25% of copying time on K6-2+
  *
@@ -117,7 +120,9 @@ LIBVO_EXTERN( dga )
 #include "x11_common.h"
 
 #include "fastmemcpy.h"
-	
+
+extern void rgb15to16_mmx(char* s0,char* d0,int count);
+
 static vo_info_t vo_info =
 {
 #ifdef HAVE_DGA2
@@ -402,9 +407,28 @@ static uint32_t draw_frame( uint8_t *src[] ){
 	  //    rep_movsl(d, s, lpl, vo_dga_vp_skip, numlines );
     break;
   case VDM_CONV_15TO16:
-    printf("vo_dga: 15 to 16 not implemented yet!!!\n");
-    break;
+        {
+	  int i;
+	  char *e;
+	  for(i=0; i< vo_dga_lines; i++){
+#ifdef HAVE_MMX		  
+            rgb15to16_mmx( s, d, vo_dga_bytes_per_line);
+	    d+=vo_dga_bytes_per_line;
+	    s+=vo_dga_bytes_per_line;
+#else
+            e = s+vo_dga_bytes_per_line;
+	    while( s< e ){
+               register uint16_t x =  *(((uint16_t *)s)++);
+	        *(((uint16_t *)d)++)=( x&0x001F )|( ( x&0x7FE0 )<<1 );
+	    }
+
+#endif  
+            d+= vo_dga_vp_skip;
+	  }
+	}
+	break;
   case VDM_CONV_24TO32:
+
     {
       int i,k,l,m;
       for(i = 0; i< vo_dga_lines; i++ ){
