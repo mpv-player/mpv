@@ -215,7 +215,7 @@ static char help_text[]=
 #define MSGTR_WritingAVIHeader "Writing AVI header...\n"
 #define MSGTR_DuplicateFrames "\n%d duplicate frame(s)!\n"
 #define MSGTR_SkipFrame "\nSkipping frame!\n"
-#define MSGTR_ResolutionDoesntMatch "\nNew video file has different resolution than the previous one.\n"
+#define MSGTR_ResolutionDoesntMatch "\nNew video file has different resolution or colorspace than the previous one.\n"
 #define MSGTR_FrameCopyFileMismatch "\nAll video files must have identical fps, resolution, and codec for -ovc copy.\n"
 #define MSGTR_AudioCopyFileMismatch "\nAll files must have identical audio codec and format for -oac copy.\n"
 #define MSGTR_ErrorWritingFile "%s: Error writing file.\n"

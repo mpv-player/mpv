@@ -24,4 +24,6 @@
 #define VFCAP_ACCEPT_STRIDE 0x400
 // filter does postprocessing (so you shouldn't scale/filter image before it)
 #define VFCAP_POSTPROC 0x800
+// filter cannot be reconfigured to different size & format
+#define VFCAP_CONSTANT 0x1000
 

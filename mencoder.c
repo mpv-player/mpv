@@ -392,8 +392,6 @@ char* frameno_filename="frameno.avi";
 int decoded_frameno=0;
 int next_frameno=-1;
 int curfile=0;
-int prevwidth = 0;
-int prevhieght = 0; ///< When different from 0, after decoding a frame, Resolution must be checked to match previous file
 
 unsigned int timer_start;
 
@@ -739,8 +737,9 @@ case VCODEC_FRAMENO:
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
 	}
     break;
-default:
-
+default: {
+    static vf_instance_t * ve = NULL;
+  if (!ve) {
     switch(mux_v->codec){
     case VCODEC_DIVX4:
 	sh_video->vfilter=vf_open_encoder(NULL,"divx4",(char *)mux_v); break;
@@ -765,6 +764,8 @@ default:
         mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_EncoderOpenFailed);
         mencoder_exit(1,NULL);
     }
+    ve = sh_video->vfilter;
+  } else sh_video->vfilter = ve;
     // append 'expand' filter, it fixes stride problems and renders osd:
     if (auto_expand) {
       char* vf_args[] = { "osd", "1", NULL };
@@ -776,7 +777,7 @@ default:
     init_best_video_codec(sh_video,video_codec_list,video_fm_list);
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
     if(!sh_video->inited) mencoder_exit(1,NULL);
-
+ }
 }
 
 if (!curfile) {
@@ -1544,13 +1545,7 @@ default:
     blit_frame=decode_video(sh_video,start,in_size,
       skip_flag>0 && (!sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE));
     
-    if (prevwidth) {
-	    if ((mux_v->bih->biWidth != prevwidth) || (mux_v->bih->biHeight != prevhieght)) {
-		    mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ResolutionDoesntMatch);
-		    mencoder_exit(1,NULL);
-	    }
-	    prevhieght = prevwidth = 0;
-    }
+    if (sh_video->vf_inited < 0) mencoder_exit(1, NULL);
     
     if(!blit_frame){
       badframes++;
@@ -1724,26 +1719,31 @@ if(sh_audio && !demuxer2){
 
 } // while(!at_eof)
 
-/* Emit the remaining frames in the video system */
-/*TODO emit frmaes delayed by decoder lag*/
-    if(sh_video && sh_video->vfilter){ 
-        mp_msg(MSGT_FIXME, MSGL_FIXME, "\nFlushing video frames\n");
-        ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
-                                                    VFCTRL_FLUSH_FRAMES, 0);
-    }
-
 if (!interrupted && filelist[++curfile].name != 0) {
+        // Before uniniting sh_video and the filter chain, break apart the VE.
+ 	vf_instance_t * ve; // this will be the filter right before the ve.
+	for (ve = sh_video->vfilter; ve->next && ve->next->next; ve = ve->next);
+	if (ve->next)
+		ve->next = NULL; // I'm telling the last filter, before the VE, there is nothing after it
+	else // There is no chain except the VE.
+		sh_video->vfilter = NULL;
+
 	if(sh_video){ uninit_video(sh_video);sh_video=NULL; }
 	if(demuxer) free_demuxer(demuxer);
 	if(stream) free_stream(stream); // kill cache thread
-	
-	prevwidth = mux_v->bih->biWidth;
-	prevhieght = mux_v->bih->biHeight;
 	
 	at_eof = 0;
 	
 	m_config_pop(mconfig);
 	goto play_next_file;
+}
+
+/* Emit the remaining frames in the video system */
+/*TODO emit frmaes delayed by decoder lag*/
+if(sh_video && sh_video->vfilter){
+	mp_msg(MSGT_MENCODER, MSGL_INFO, "\nFlushing video frames\n");
+	((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
+    	                                              VFCTRL_FLUSH_FRAMES, 0);
 }
 
 #ifdef HAVE_MP3LAME

@@ -923,6 +923,7 @@ static void uninit(struct vf_instance_s* vf){
 static int vf_open(vf_instance_t *vf, char* args){
     vf->uninit=uninit;
     vf->config=config;
+    vf->default_caps=VFCAP_CONSTANT;
     vf->control=control;
     vf->query_format=query_format;
     vf->put_image=put_image;

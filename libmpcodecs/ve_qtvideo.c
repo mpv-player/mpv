@@ -278,6 +278,7 @@ if(!codec_inited){
 static int vf_open(vf_instance_t *vf, char* args){
     OSErr cres = 1;
     vf->config=config;
+    vf->default_caps=VFCAP_CONSTANT;
     vf->control=control;
     vf->query_format=query_format;
     vf->put_image=put_image;

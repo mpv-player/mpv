@@ -19,6 +19,11 @@ typedef struct vf_image_context_s {
     int static_idx;
 } vf_image_context_t;
 
+typedef struct vf_format_context_t {
+    int have_configured;
+    int orig_width, orig_height, orig_fmt;
+} vf_format_context_t;
+
 typedef struct vf_instance_s {
     vf_info_t* info;
     // funcs:
@@ -44,6 +49,7 @@ typedef struct vf_instance_s {
     // data:
     int w, h;
     vf_image_context_t imgctx;
+    vf_format_context_t fmt;
     struct vf_instance_s* next;
     mp_image_t *dmpi;
     struct vf_priv_s* priv;
@@ -99,3 +105,6 @@ void vf_list_plugins();
 void vf_uninit_filter(vf_instance_t* vf);
 void vf_uninit_filter_chain(vf_instance_t* vf);
 
+int vf_config_wrapper(struct vf_instance_s* vf,
+		      int width, int height, int d_width, int d_height,
+		      unsigned int flags, unsigned int outfmt);

@@ -251,6 +251,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 static int vf_open(vf_instance_t *vf, char* args){
     vf->config=config;
+    vf->default_caps=VFCAP_CONSTANT;
     vf->control=control;
     vf->query_format=query_format;
     vf->put_image=put_image;

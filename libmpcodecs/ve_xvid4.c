@@ -546,6 +546,7 @@ vf_open(vf_instance_t *vf, char* args)
 
 	/* Setting libmpcodec module API pointers */
 	vf->config       = config;
+	vf->default_caps = VFCAP_CONSTANT;
 	vf->control      = control;
 	vf->uninit       = uninit;
 	vf->query_format = query_format;
