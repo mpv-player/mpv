@@ -13,10 +13,20 @@
 <FONT CLASS="text">
 
 <P><B><A NAME=5>5. FAQ Sektion</A></B></P>
+<UL>
+  <LI><A HREF="#5.1">5.1 Kompilierung</A></LI>
+  <LI><A HREF="#5.2">5.2 Allgemeine Fragen</A></LI>
+  <LI><A HREF="#5.3">5.3 Dateiwiedergabe-Probleme</A></LI>
+  <LI><A HREF="#5.4">5.4 Video/Audio Treiber-Probleme</A></LI>
+  <LI><A HREF="#5.5">5.5 DVD Wiedergabe</A></LI>
+  <LI><A HREF="#5.6">5.6 Feature-Wünsche</A></LI>
+  <LI><A HREF="#5.7">5.7 Konvertierung</A></LI>
+</UL>
 
 <TABLE BORDER=0 WIDTH=100% ALIGN=left>
 
-<TR><TD COLSPAN=3><P><B><A NAME=5.1><FONT CLASS="text">5.1 Kompilierung</A></B></P>
+<TR><TD COLSPAN=3>
+<B><A NAME="5.1"><FONT CLASS="text">5.1 Kompilierung</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -220,7 +230,8 @@ Ich auch. :)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
-<TD COLSPAN=3><B><A NAME=5.2><FONT CLASS="text">5.2. Allgemeine Fragen</A></B>
+<TD COLSPAN=3>
+<B><A NAME="5.2"><FONT CLASS="text">5.2. Allgemeine Fragen</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -386,7 +397,7 @@ Verwende : <CODE>mplayer &lt;Optionen&gt; &lt;Dateiname&gt; &lt; /dev/null &</CO
 
 							
 <TD COLSPAN=3>
-<B><A NAME=5.3><FONT CLASS="text">5.3. Dateiwiedergabe-Probleme</A></B>
+<B><A NAME="5.3"><FONT CLASS="text">5.3. Dateiwiedergabe-Probleme</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -557,7 +568,7 @@ Stecke den externen Stromstecker ein <B>bevor</B> du dein Notebook einschaltest.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.4><FONT CLASS="text">5.4. Video/Audio Treiber-Probleme</A></B>
+<B><A NAME="5.4"><FONT CLASS="text">5.4. Video/Audio Treiber-Probleme</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
@@ -641,9 +652,70 @@ machen ... Hinweis: Du kannst Xv via SDL mit den Optionen <CODE>-forcexv<CODE> u
 <CODE>-noxv</CODE> erzwingen/deaktivieren.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD COLSPAN="3">
+<B><A NAME="5.5">5.5. DVD Wiedergabe</A></B>
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Beim Abspielen der DVD erscheint folgender Fehler:<BR>
+<CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion     nfo_length /
+sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
+Dies ist ein bekannter libdvdread 0.9.1 Bug, er sollte bereits in 0.9.2 und
+libmpdvdkit gefixt sein, verwende letzteres.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+					
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Kann ich libdvdread und libdvdcss z.B. auf meinem süssen Sparc/Solaris kompilieren?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
+Wer weiss ... Bitte teste es und sag uns bescheid. Aber es wird gesagt, dass es
+funktionieren sollte. Bitte lese auch die Documentation von libdvdread und seiner
+homepage. Wir sind nicht die Autoren von libdvdread.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Was ist mit den Untertiteln? Kann MPlayer sie anzeigen?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
+Ja! Siehe oben im DVD-Kapitel.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Wie kann ich den Reginal-Code meine DVD-Laufwerks einstellen ? I habe kein Windows!
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
+Verwende das 'regionset'-Tool:
+<A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz</A>
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Muss ich (setuid) root/setuid sein, dass fibmap_mplayer DVDs spielen kann?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
+No, musst du nicht. Das ist Vergangenheit :) Natürlich brauchst du aber die
+Zugriffsrechte für das DVD-Laufwerk (in /dev).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Wo kann ich die libdvdread und libcss Pakete bekommen?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
+Von der Seite von Ogle:
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Ist es möglich nur ausgewählte Kapitell abzuspielen ?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
+Ja, siehe in der <CODE>-chapter</CODE> Option.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Meine DVD-Wiedergabe ist träge !
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT CLASS="text">
+Benutze die <CODE>-cache</CODE> Option (lies die Manpage!).
+Versuche auch den DMA-Modus für das DVD-Laufwerk zu aktivieren, falls
+es immer noch nicht geht.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.5><FONT CLASS="text">5.5. Feature-Wünsche</A></B>
+<B><A NAME="5.6"><FONT CLASS="text">5.6. Feature-Wünsche</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -706,151 +778,99 @@ Diese Frage wurde hier tiefergehend behandelt:
 </TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A3:</TD><TD><FONT CLASS="text">
 <B>Funktionierende</B> Features unter Linux:<BR>
 Wenn du ein Win32-User bist hast du möglicherweise Unterstützung (von Treiber und DirectX8)
-für Features, die in deinem Chip eingebaut wurden.<BR>
+für Features, die in deinem Chip eingebaut wurden.
 Aber für <B>Linux</B> User gibt es zur Zeit nur einige bekannte Anbieter, 
 die eine mehr oder weniger erweiterten Support für Linux haben:<BR><BR>
 
-<table BORDER=1 COLS=5 WIDTH="100%">
-<tr>
-<td>&nbsp;</td>
+<TABLE BORDER=1 COLS=5 WIDTH="100%">
+<TR>
+<TD>&nbsp;</TD>
+<TD><FONT CLASS="text"><CENTER>Matrox Gxx</CENTER></TD>
+<TD><FONT CLASS="text"><CENTER>ATI m64/r128/Radeon</CENTER></TD>
+<TD><FONT CLASS="text"><CENTER>NVidia TNT/GeForce</CENTER></TD>
+<TD><FONT CLASS="text"><CENTER>S4 Virge/Savage</CENTER></TD>
+</TR>
 
-<td>
-<center>Matrox Gxx</center>
-</td>
+<TR>
+<TD><FONT CLASS="text">Anbieter von Treibern</TD>
+<TD><FONT CLASS="text">OEM und von Begeisterten</TD>
+<TD><FONT CLASS="text">OEM und von Begeisterten</TD>
+<TD><FONT CLASS="text">OEM und von Begeisterten</TD>
+<TD><FONT CLASS="text">von Begeisterten</TD>
+</TR>
 
-<td>
-<center>ATI m64/r128/Radeon</center>
-</td>
+<TR>
+<TD><FONT CLASS="text">Qualität der Treiber</TD>
+<TD><FONT CLASS="text">Beste (X11, Kernel)</TD>
+<TD><FONT CLASS="text">Beste (X11, GATOS, Kernel)</TD>
+<TD><FONT CLASS="text">Fehlerhaft/unstabil (nur X11)</TD>
+<TD><FONT CLASS="text">Langsam (nur X11)</TD>
+</TR>
 
-<td>
-<center>NVidia TNT/GeForce</center>
-</td>
+<TR>
+<TD><FONT CLASS="text">VIDEO OVERLAY</TD>
+<TD><FONT CLASS="text"></TD>
+<TD><FONT CLASS="text"></TD>
+<TD><FONT CLASS="text"></TD>
+<TD><FONT CLASS="text"></TD>
+</TR>
 
-<td>
-<center>S4 Virge/Savage</center>
-</td>
-</tr>
+<TR>
+<TD><FONT CLASS="text">BES und YV2RGB</TD>
+<TD><FONT CLASS="text">JA</TD>
+<TD><FONT CLASS="text">JA</TD>
+<TD><FONT CLASS="text">JA</TD>
+<TD><FONT CLASS="text">JA</TD>
+</TR>
 
-<tr>
-<td>Anbieter von Treibern</td>
+<TR>
+<TD><FONT CLASS="text">Skalierungsfilter</TD>
+<TD><FONT CLASS="text">N/V</TD>
+<TD><FONT CLASS="text">JA</TD>
+<TD><FONT CLASS="text">N/V</TD>
+<TD><FONT CLASS="text">N/V</TD>
+</TR>
 
-<td>OEM und von Begeisterten</td>
+<TR>
+<TD><FONT CLASS="text">anpassungsfähiges Deinterlace</TD>
+<TD><FONT CLASS="text">N/V</TD>
+<TD><FONT CLASS="text">JA</TD>
+<TD><FONT CLASS="text">N/V</TD>
+<TD><FONT CLASS="text">UNBEKANNT</TD>
+</TR>
 
-<td>OEM und von Begeisterten</td>
+<TR>
+<TD><FONT CLASS="text">Videoanpassung (Farbe, Kontrast, Sättigung, Farbkorrektur)</TD>
+<TD><FONT CLASS="text">JA</TD>
+<TD><FONT CLASS="text">JA</TD>
+<TD><FONT CLASS="text">nur GeForce</TD>
+<TD><FONT CLASS="text">N/V</TD>
+</TR>
 
-<td>OEM und von Begeisterten</td>
+<TR>
+<TD><FONT CLASS="text">Alpha-Blending, Farb- und Videotasten</TD>
+<TD><FONT CLASS="text">TEILWEISE</TD>
+<TD><FONT CLASS="text">TEILWEISE&nbsp;(in Entwicklung)</TD>
+<TD><FONT CLASS="text">N/V</TD>
+<TD><FONT CLASS="text">N/V</TD>
+</TR>
 
-<td>von Begeisterten</td>
-</tr>
+<TR>
+<TD><FONT CLASS="text">Videoaufzeichnung</TD>
+<TD><FONT CLASS="text">JA (Marvel)</TD>
+<TD><FONT CLASS="text">JA (GATOS)</TD>
+<TD><FONT CLASS="text">N/V</TD>
+<TD><FONT CLASS="text">N/V</TD>
+</TR>
 
-<tr>
-<td>Qualität der Treiber</td>
-
-<td>Beste (X11, Kernel)</td>
-
-<td>Beste (X11, GATOS, Kernel)</td>
-
-<td>Fehlerhaft/unstabil (nur X11)</td>
-
-<td>Langsam (nur X11)</td>
-</tr>
-
-<tr>
-<td>VIDEO OVERLAY</td>
-
-<td></td>
-
-<td></td>
-
-<td></td>
-
-<td></td>
-</tr>
-
-<tr>
-<td>BES und YV2RGB</td>
-
-<td>JA</td>
-
-<td>JA</td>
-
-<td>JA</td>
-
-<td>JA</td>
-</tr>
-
-<tr>
-<td>Scaling-Filter</td>
-
-<td>N/V</td>
-
-<td>JA</td>
-
-<td>N/V</td>
-
-<td>N/V</td>
-</tr>
-
-<tr>
-<td>anpassungsfähiges Deinterlace</td>
-
-<td>N/V</td>
-
-<td>JA</td>
-
-<td>N/V</td>
-
-<td>UNBAKANNT</td>
-</tr>
-
-<tr>
-<td>Videoanpassung (Farbe, Kontrast, Sättigung, Farbkorrektur)</td>
-
-<td>JA</td>
-
-<td>JA</td>
-
-<td>nur GeForce</td>
-
-<td>N/V</td>
-</tr>
-
-<tr>
-<td>Alpha-Blending, Farb- und Videotasten</td>
-
-<td>TEILWEISE</td>
-
-<td>TEILWEISE&nbsp;(in Entwicklung)</td>
-
-<td>N/V</td>
-
-<td>N/V</td>
-</tr>
-
-<tr>
-<td>Videoaufzeichnung</td>
-
-<td>JA (Marvel)</td>
-
-<td>JA (GATOS)</td>
-
-<td>N/V</td>
-
-<td>N/V</td>
-</tr>
-
-<tr>
-<td>TV-out</td>
-
-<td>nur G400</td>
-
-<td>JA</td>
-
-<td>N/V</td>
-
-<td>N/V</td>
-</tr>
-</table>
+<TR>
+<TD><FONT CLASS="text">TV-out</TD>
+<TD><FONT CLASS="text">nur G400</TD>
+<TD><FONT CLASS="text">JA</TD>
+<TD><FONT CLASS="text">N/V</TD>
+<TD><FONT CLASS="text">N/V</TD>
+</TR>
+</TABLE>
 
 <P>Dies ist eine sehr grobe Beobachtung von Videokarten. Eigentlich sollten wir
 unsere Aufmerksamkeit mehr auf die Modelle der Videokarten richten. Wenn zum Beispiel
@@ -871,13 +891,13 @@ ist dann die S3 Virge zu langsam für diese?<BR>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.6><FONT CLASS="text">5.6. Encoding</A></B>
+<B><A NAME="5.7"><FONT CLASS="text">5.7. Konvertierung</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Wie kann ich enkodieren?
+Wie kann ich konvertieren?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Lese <A HREF="encoding.html">diese Dokumentation</A>.
+Lies <A HREF="encoding.html">diese Dokumentation</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
