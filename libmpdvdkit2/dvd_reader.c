@@ -273,12 +273,23 @@ dvd_reader_t *DVDOpen( const char *path )
 
     if( !path ) return 0;
 
+#ifdef WIN32
+    /* Stat doesn't work on devices under mingwin/cygwin. */
+    if( path[0] && path[1] == ':' && path[2] == '\0' )
+    {
+        /* Don't try to stat the file */
+        fileinfo.st_mode = S_IFBLK;
+    }
+    else
+#endif
+    {
     ret = stat( path, &fileinfo );
     if( ret < 0 ) {
 	/* If we can't stat the file, give up */
 	fprintf( stderr, "libdvdread: Can't stat %s\n", path );
 	perror("");
 	return 0;
+    }
     }
 
     /* Try to open libdvdcss or fall back to standard functions */
