@@ -49,7 +49,7 @@ static short attribute_used intwinbase_MMX[] =
 	  15038
 };
 
-static long intwindiv = 0x47800000;
+static long attribute_used intwindiv = 0x47800000;
 
 void make_decode_tables_MMX(long scaleval)
 {

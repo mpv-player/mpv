@@ -56,7 +56,7 @@ typedef struct complex_s {
 
 static void fft_128p(complex_t *a);
 
-static const int pm128[128] __attribute__((aligned(16))) =
+static const int pm128[128] attribute_used __attribute__((aligned(16))) =
 {
 	0, 16, 32, 48, 64, 80,  96, 112,  8, 40, 72, 104, 24, 56,  88, 120,
 	4, 20, 36, 52, 68, 84, 100, 116, 12, 28, 44,  60, 76, 92, 108, 124,
@@ -69,7 +69,7 @@ static const int pm128[128] __attribute__((aligned(16))) =
 }; 
 
 /* 128 point bit-reverse LUT */
-static uint8_t bit_reverse_512[] = {
+static uint8_t attribute_used bit_reverse_512[] = {
 	0x00, 0x40, 0x20, 0x60, 0x10, 0x50, 0x30, 0x70, 
 	0x08, 0x48, 0x28, 0x68, 0x18, 0x58, 0x38, 0x78, 
 	0x04, 0x44, 0x24, 0x64, 0x14, 0x54, 0x34, 0x74, 
@@ -103,7 +103,7 @@ static uint8_t bit_reverse_256[] = {
 static complex_t __attribute__((aligned(16))) buf[128];
 static float __attribute__((aligned(16))) sseSinCos1c[256];
 static float __attribute__((aligned(16))) sseSinCos1d[256];
-static float __attribute__((aligned(16))) ps111_1[4]={1,1,1,-1};
+static float attribute_used __attribute__((aligned(16))) ps111_1[4]={1,1,1,-1};
 //static float __attribute__((aligned(16))) sseW0[4];
 static float __attribute__((aligned(16))) sseW1[8];
 static float __attribute__((aligned(16))) sseW2[16];
