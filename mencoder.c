@@ -627,8 +627,16 @@ mux_v->buffer=malloc(mux_v->buffer_size);
 mux_v->source=sh_video;
 
 mux_v->h.dwSampleSize=0; // VBR
+#ifdef USE_LIBAVCODEC
+{
+    AVRational q= av_d2q(force_ofps?force_ofps:sh_video->fps, 30000); 
+    mux_v->h.dwScale= q.den;
+    mux_v->h.dwRate = q.num;
+}
+#else
 mux_v->h.dwScale=10000;
 mux_v->h.dwRate=mux_v->h.dwScale*(force_ofps?force_ofps:sh_video->fps);
+#endif
 
 mux_v->codec=out_video_codec;
 
