@@ -153,13 +153,13 @@ mplayer (1.0)
     * fixed MOV demuxer to always read ImageDesc (fixes ffsvq3 bugs)
     * fixed an old bug in AVI/Waveformatex size calculation
     * XviD API-4 (1.0 beta2) support
-    * improved FLAC-in-OGG support
+    * improved FLAC-in-Ogg support
     * Matroska: better AC3 detection
     * Matroska: VobSubs, MP2, FLAC, AAC and HE-AAC support
     * improved detection of Real RTSP through URL analysis
     * fixed stereo 16 bit TWOS
     * fixed MPNG when using BGR24 images
-    * control functions in OGG demuxer
+    * control functions in Ogg demuxer
     * HTTP cookies support
     * LML-M4 MPEG4 capture card raw stream format support
 
@@ -523,7 +523,7 @@ mplayer (0.90)
     * fixed -subcp option with unicode truetype fonts
     * -mf: type detection (based on extension), better defaults
     * vo_xv: -fixed-vo support fixed (fullscreen switching)
-    * OGG-in-AVI (audio format 0xFFFE) demuxing fixed
+    * Ogg-in-AVI (audio format 0xFFFE) demuxing fixed
     * vorbis decoding fixed (outer loop cleanup)
     * swscaler: 4bpp depth 1 pixel/byte format support for -vo svga
     * missing error message in command line parser for missing parameters
@@ -566,7 +566,7 @@ mplayer (0.90)
     * Voxware and QuickTime DLLs finally work (was broken in some contexts)
     * VIDIX Radeon support cleanup, should really solve the pink screen bugs
     * Cygwin: -vo directx crashes and garbled picture with some files fixed
-    * OGM/OGG seeking (broken frames) fixed, subtitle fixes, XCD support
+    * OGM/Ogg seeking (broken frames) fixed, subtitle fixes, XCD support
     * libaf: big (audio filter layer) updates, floating point support, speedup
     * ffwma2 fixed (better error resilience)
     * SPU queueing - fixes missing or early disappearing DVD subtitles
@@ -614,7 +614,7 @@ mplayer (0.90)
     * Subtitles background bounding-box support (optional grey-level & opacity)
     * libaf: 3 new filters: panning, compressor/limiter and a noise gate
     * per-mediafile config file support (for file-specific options)
-    * iconv (codepage conversion) support for OGM (OGG) subtitles
+    * iconv (codepage conversion) support for OGM (Ogg) subtitles
     * v4l: user friendly channel tuning
     * Freetype & old-style RAW font support usable (compilable) at the same time
     * vo_directfb2, vo_dfbmga: DirectFB 0.9.16 support
@@ -939,7 +939,7 @@ mplayer (0.90)
     * new (faster, better) scaler
     * bbox support
     * mmst:// streaming support
-    * .ogm (OGG) audio/video stream selection
+    * .ogm (Ogg) audio/video stream selection
     * native Micro$oft MPEG4v1 (MPG4) codec, error concealement for all MPEG4s
     * various libavcodec encoding improvements
     * MPEG1 && -vo x11 crash fixed when movie's height%16!=0
@@ -1015,7 +1015,7 @@ mplayer (0.90)
     * ability to display subtitles under the image, on black bands
     * FFmpeg (included) now supports decoding MPEG4v2 (MP42) and DivX 5.0 files too
     * greatly enhanced MPEG4 encoder (libavcodec)
-    * audio-only (WAV/MP3/WMA/OGG) file playback (console only)
+    * audio-only (WAV/MP3/WMA/Ogg) file playback (console only)
     * playing/encoding audio from separate WAV/MP3 file
     * support for more fileformats, including the new and very popular .ogg
     * multiple files playback from console, including various playlist formats
