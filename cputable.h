@@ -217,14 +217,14 @@ static const char *cpuname
 				/* 0 */ N_UNKNOWN, /* Argon? */
 				/* 1 */ "Athlon K7",
 				/* 2 */ "Athlon K75 Pluto,Orion",
-				/* 3 */ "Duron SF Spitfire",
-				/* 4 */ "Athlon TB Thunderbird",
+				/* 3 */ "Duron Spitfire",
+				/* 4 */ "Athlon Thunderbird",
 				/* 5 */ N_UNKNOWN, 
-				/* 6 */ "Athlon 4 PM Palomino/Athlon MP Multiprocessor/Athlon XP eXtreme Performance",
+				/* 6 */ "Athlon 4 /Athlon MP/XP Palomino",
 				/* 7 */ "Duron MG Morgan",
-				/* 8 */ N_UNKNOWN, 
+				/* 8 */ "Athlon MP/XP Thoroughbred", 
 				/* 9 */ N_UNKNOWN,
-				/* A */ N_UNKNOWN, 
+				/* A */ "Athlon MP/XP/XP-M Barton", 
 				/* B */ N_UNKNOWN, 
 				/* E */ N_UNKNOWN, 
 				/* C */ N_UNKNOWN, 
@@ -239,7 +239,25 @@ static const char *cpuname
 			/* C */ F_UNKNOWN, 
 			/* D */ F_UNKNOWN, 
 			/* E */ F_UNKNOWN, 
-			/* F */ F_UNKNOWN 
+			/* F Opteron */ {
+				/* 0 */ N_UNKNOWN, 
+				/* 1 */ N_UNKNOWN, 
+				/* 2 */ N_UNKNOWN, 
+				/* 3 */ N_UNKNOWN, 
+				/* 4 */ N_UNKNOWN, 
+				/* 5 */ "Opteron SledgeHammer", 
+				/* 6 */ N_UNKNOWN, 
+				/* 7 */ N_UNKNOWN, 
+				/* 8 */ N_UNKNOWN, 
+				/* 9 */ N_UNKNOWN,
+				/* A */ N_UNKNOWN, 
+				/* B */ N_UNKNOWN, 
+				/* E */ N_UNKNOWN, 
+				/* C */ N_UNKNOWN, 
+				/* D */ N_UNKNOWN, 
+				/* F */ N_UNKNOWN 
+			}
+				
 		},
 		/* Cyrix Corp./VIA Inc., "CyrixInstead" */ {
 			/* 0 */ F_UNKNOWN, 
