@@ -1,7 +1,7 @@
 /*
     Direct Hardware Access kernel helper
     
-    (C) 2002 Alex Beregszaszi <alex@naxine.org>
+    (C) 2002 Alex Beregszaszi <alex@fsn.hu>
 */
 
 #ifndef DHAHELPER_H

@@ -1,7 +1,7 @@
 /*
     Direct Hardware Access kernel helper
     
-    (C) 2002 Alex Beregszaszi <alex@naxine.org>
+    (C) 2002 Alex Beregszaszi <alex@fsn.hu>
     
     Accessing hardware from userspace as USER (no root needed!)
 
@@ -80,7 +80,7 @@
 
 #include "dhahelper.h"
 
-MODULE_AUTHOR("Alex Beregszaszi <alex@naxine.org>");
+MODULE_AUTHOR("Alex Beregszaszi <alex@fsn.hu>");
 MODULE_DESCRIPTION("Provides userspace access to hardware (security violation!)");
 #ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
