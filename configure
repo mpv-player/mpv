@@ -189,12 +189,26 @@ echo "Please wait while ./configure discovers your software and hardware environ
 system_name=`uname -s 2>&1` # name of operating system: Linux, FreeBSD, NetBSD, SunOS
 host_arch=`uname -p 2>&1`   # host's instruction set or processor type
 case "$host_arch" in
-unknown)		    # Linux returns "unknown" for the processor type
+i386|sparc|ppc|alpha)
+    # fine, uname -p output looks good, it has returned
+    # something this configure script recognizes
+    ;;
+
+*)  # uname -p on Linux returns 'unknown' for the processor type,
+    # OpenBSD returns 'Intel Pentium/MMX ("Genuine Intel" 586-class)'
+
+    # Maybe uname -m (machine hardware name) returns something we
+    # recognize.
+
     case "`uname -m 2>&1`" in
     i[3-9]86)
 	host_arch=i386;;
     ppc)
 	host_arch=ppc;;
+    alpha)
+	host_arch=alpha;;
+    sparc64)
+	host_arch=sparc;;
     esac
     ;;
 esac
@@ -651,6 +665,7 @@ sparc)
 
 *)
     echo "The architecture of your CPU ($host_arch) is not supported by this configure script"
+    echo "It seems, as if noone has ported MPlayer to your OS or CPU type yet."
     exit 1
     ;;
 esac
