@@ -238,6 +238,57 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   <CODE>vcodec</CODE> opciónak, pl : <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
 
 
+<P><B><A NAME=2.4.3.6>2.4.3.6.  Enkódolás több bemeneti file-ból (JPEG, PNG)</B></P>
+
+<P>A <B>MEncoder</B> képes több JPEG vagy PNG file-ból filmet létrehozni.
+  Egyszerû framecopy használatával pedig MJPEG (Motion JPEG) vagy MPNG
+  (Motion PNG) filmek hozhatók létre.</P>
+
+<P><B><I>A folyamat magyarázata</I></B></P>
+
+<P>Elõször a <B>MEncoder</B> <I>dekódolja</I> a bemeneti fileokat egy
+  rendelkezésre álló és szabadonválasztott MJPEG dekóderrel (PNG-k dekódolása
+  esetén csak a beépitett PNG dekóder használható). Alapértelmezésben az
+  <CODE>ffmjpeg</CODE> codec-et próbálja használni, így ajánlott libavcodec-kel
+  fordítani. Ennek a codecnek a legnagyobb hátránya hogy bizonyos JPEG
+  fileokat nem tud kezelni (ilyenkor zöld kimenet látható). Ilyenkor különbözõ
+  képkonvertáló programokkal elõtte konvertáld át ezeket a <B>MEncoder</B>
+  által is emészthetõ formába.<BR>
+  Választhatsz más dekódert is, például az <CODE>mcmjpg32.dll</CODE>-t
+  (MainConcept Motion JPEG). Ilyenkor meg kell nézni a <CODE>codecs.conf</CODE>
+  fileban hogy az adott codecre milyen névvel lehet hivatkozni (<CODE>videocodec</CODE>
+  sor), és utána ezt a nevet a <CODE>-vc</CODE> opció után írni. A fenti
+  példát véve: <CODE>-vc mjpeg</CODE>
+</P>
+
+<P>A <B>MEncoder</B> ezután a kiválasztott kimeneti codecnek adja a
+  dekódolt képet (pl DivX4, Xvid, ffmpeg msmpeg4, stb). Vigyázat: a PNG
+  dekóder jelenleg csak RGB formátumú képek kiadására képes, így nem
+  használható olyan codecekkel amelyek YUV formátumot várnak. Ilyen
+  például a DivX4, vagy az ffmpeg-beli msmpeg4.</P>
+
+<P><B><I>Példák</I></B></P>
+
+<P>Az <CODE>-mf</CODE> opció magyarázata a lenti összefoglaló
+  <A HREF=#2.4.5>Opciók</A> fejezetben, illetve a manpage-ben található.</P>
+
+<P><I>DivX4 film létrehozása az aktuális könyvtárban található összes JPEG fileból :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  kimenet.avi</CODE></P>
+
+<P><I>MJPEG (Motion JPEG) film létrehozása az aktuális könyvtárban található összes JPEG fileból :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
+  -o kimenet.avi</CODE></P>
+
+<P><I>Tömörítetlen film létrehozása az aktuális könyvtárban található összes PNG fileból :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw -o
+  kimenet.avi</CODE></P>
+
+<P><I>MPNG (Motion PNG) film létrehozása az aktuális könyvtárban található összes PNG fileból :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  -o kimenet.avi</CODE></P>
+
+
 <P><B><A NAME=2.4.4>2.4.4.  Szintaxis</B></P>
 
 <P>&nbsp;&nbsp;<CODE>mencoder [opciók] [bemeneti file] [opciók] ...</P>

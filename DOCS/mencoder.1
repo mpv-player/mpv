@@ -26,6 +26,7 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-ac3file\ <filename> ]
 .RB [ \-ovc\ <video\ codec\ name> ]
 .RB [ \-oac\ <audio\ codec\ name> ]
+.RB [ \-mf\ <multifile\ options> ]
 .RB [ \-divx4opts\ <codec\ options> ]
 .RB [ \-lavcopts\ <codec\ options> ]
 .RB [ \-lameopts\ <codec\ options> ]
@@ -40,7 +41,7 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-ffourcc\ fourcc ]
 .RB [ \-ss\ <time> ]
 .RB [ \-endpos\ <time> ]
-.I - or file or device
+.I - or file or files specified with escaped wildcard or device
 .PP
 .SH DESCRIPTION
 .I mencoder
@@ -139,6 +140,16 @@ Examples:
   -oac copy      no encoding, just streamcopy
   -oac pcm       encode to uncompressed PCM
   -oac mp3lame   encode to MP3 (using Lame)
+.TP
+.B \-mf <multifile options>
+Used when encoding from multiple JPEG files.
+Its sub-options are:
+
+  on             turns on multifile support
+  w=<value>      width of the output file
+  h=<value>      height of the output file
+  fps=<value>    fps of the output file
+  type=<value>   type of input files (jpeg, png)
 .TP
 .B \-divx4opts
 If encoding to DivX4, you can specify its parameters here, like:

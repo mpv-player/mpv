@@ -228,6 +228,54 @@ unsupported). You can encode to the following codecs :</P>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg</CODE></P>
 
 
+<P><B><A NAME=2.4.3.6>2.4.3.6.  Encoding from multiple input image files (JPEGs or PNGs)</B></P>
+
+<P><B>MEncoder</B> is capable of creating movies from one or more JPEG or PNG
+  files. With simple framecopy it can create MJPEG (Motion JPEG) or MPNG
+  (Motion PNG) files.</P>
+
+<P><B><I>Explanation of the process</I></B></P>
+
+<P><B>MEncoder</B> <I>decodes</I> the input image(s) with an available MJPEG
+  video codec (when decoding PNGs, it will use the internal PNG decoder). By
+  default it uses <CODE>ffmjpeg</CODE>, so you have to compile with libavcodec
+  support (which is recommended anyways). Its disadvantage is that it can't
+  handle some JPEG types (green image will be encoded for these). Use some
+  external utility to convert those images into edible format.<BR> You can
+  freely choose any other MJPEG decoder, like <CODE>mcmjpg32.dll</CODE>
+  (MainConcept Motion JPEG) if installed, and after checking
+  <CODE>codecs.conf</CODE> and checking the <CODE>videocodec</CODE> line which
+  refers to this file, you'll learn you have to use the <CODE>-vc mjpeg</CODE>
+  option for it.
+</P>
+
+<P><B>MEncoder</B> then feeds the decoded image to the chosen video compressor
+  (DivX4, Xvid, ffmpeg msmpeg4, etc...). Watch for the PNG decoder, as
+  currently it can output only to RGB formats, thus can't be used with codecs
+  that require YUV as input, like DivX4 or ffmpeg's msmpeg4.</P>
+
+<P><B><I>Examples</I></B></P>
+
+<P>The explanation of the <CODE>-mf</CODE> option can be found below in the
+  global <A HREF=#2.4.5>Options</A> section and in the manpage.</P>
+
+<P><I>Creating a DivX4 file from all the JPEG files in the current dir :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  output.avi</CODE></P>
+
+<P><I>Creating a Motion JPEG (MJPEG) file from all the JPEG files in the current dir :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
+  -o output.avi</CODE></P>
+
+<P><I>Creating an uncompressed file from all the PNG files in the current dir :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw -o
+  output.avi</CODE></P>
+
+<P><I>Creating a Motion PNG (MPNG) file from all the PNG files in the current dir :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  -o output.avi</CODE></P>
+
+
 <P><B><A NAME=2.4.4>2.4.4.  Syntax</B></P>
 
 <P>&nbsp;&nbsp;<CODE>mencoder [options] [input file] [options] ...</P>
@@ -318,15 +366,28 @@ unsupported). You can encode to the following codecs :</P>
 </TR>
 <TR>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-mf</I> multifile options</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Used when encoding from multiple JPEG files. Its sub-options are:<BR>
+    &nbsp;&nbsp;<B>on</B> - turns on multifile support<BR>
+    &nbsp;&nbsp;<B>w</B>=&lt;value&gt; - width of the output file<BR>
+    &nbsp;&nbsp;<B>h</B>=&lt;value&gt; - height of the output file<BR>
+    &nbsp;&nbsp;<B>fps</B>=&lt;value&gt; - fps of the output file<BR>
+    &nbsp;&nbsp;<B>type</B>=&lt;value&gt; - type of input files (available types : <CODE>jpeg</CODE>, <CODE>png</CODE>)<BR>
+  </TD>
+</TR>
+
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     <I>-divx4opts</I></TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     If encoding to DivX4, you can specify its parameters here, like:<BR>
     &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
     Common options: <B>(for full list, check the manpage!)</B><BR>
     &nbsp;&nbsp;<B>help</B> - get help<BR>
-    &nbsp;&nbsp;<B>br</B>=XXX - specify bitrate in kbit &lt;4-16000&gt; or bit &lt;16001-24000000&gt;<BR>
-    &nbsp;&nbsp;<B>q</B>=XXXX - quality (1-fastest, 5-best - default 5)<BR>
-    &nbsp;&nbsp;<B>key</B>=XXXX - keyframe interval<BR>
+    &nbsp;&nbsp;<B>br</B>=&lt;value&gt; - specify bitrate in kbit &lt;4-16000&gt; or bit &lt;16001-24000000&gt;<BR>
+    &nbsp;&nbsp;<B>q</B>=&lt;value&gt; - quality (1-fastest, 5-best - default 5)<BR>
+    &nbsp;&nbsp;<B>key</B>=&lt;value&gt; - keyframe interval<BR>
   </TD>
 </TR>
 <TR>
@@ -337,10 +398,10 @@ unsupported). You can encode to the following codecs :</P>
     &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
     Common options: <B>(for full list, check the manpage!)</B><BR>
     &nbsp;&nbsp;<B>help</B> - get help<BR>
-    &nbsp;&nbsp;<B>vcodec</B>=XXX - select videocodec (for the full list, see the libavcodec section above)<BR>
-    &nbsp;&nbsp;<B>vbitrate</B>=XXX - specify bitrate in kbit &lt;4-16000&gt; or bit &lt;16001-24000000&gt;<BR>
+    &nbsp;&nbsp;<B>vcodec</B>=&lt;value&gt; - select videocodec (for the full list, see the libavcodec section above)<BR>
+    &nbsp;&nbsp;<B>vbitrate</B>=&lt;value&gt; - specify bitrate in kbit &lt;4-16000&gt; or bit &lt;16001-24000000&gt;<BR>
     &nbsp;&nbsp;<B>vhq</B> - high quality<BR>
-    &nbsp;&nbsp;<B>keyint</B>=XXX - keyframe interval<BR>
+    &nbsp;&nbsp;<B>keyint</B>=&lt;value&gt; - keyframe interval<BR>
   </TD>
 </TR>
 <TR>
@@ -353,8 +414,8 @@ unsupported). You can encode to the following codecs :</P>
     Common options: <B>(for full list, check the manpage!)</B><BR>
     &nbsp;&nbsp;<B>help</B> - get help<BR>
     &nbsp;&nbsp;<B>cbr</B> - select <B>CBR</B> MP3 (default is <B>VBR</B>)<BR>
-    &nbsp;&nbsp;<B>br</B>=XXX - specify bitrate in kbit &lt;0-1024&gt; (this is for <B>CBR</B> only!)<BR>
-    &nbsp;&nbsp;<B>q</B>=XXXX - quality (0-highest, 9-fastest - default 0) (this is for <B>VBR</B> only!)<BR>
+    &nbsp;&nbsp;<B>br</B>=&lt;value&gt; - specify bitrate in kbit &lt;0-1024&gt; (this is for <B>CBR</B> only!)<BR>
+    &nbsp;&nbsp;<B>q</B>=&lt;value&gt; - quality (0-highest, 9-fastest - default 0) (this is for <B>VBR</B> only!)<BR>
   </TD>
 </TR>
 </TABLE>
