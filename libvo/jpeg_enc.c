@@ -74,12 +74,12 @@ static const unsigned short aanscales[64] = {
 };
 
 static void convert_matrix(MpegEncContext *s, int (*qmat)[64], 
-		uint16_t (*qmat16)[64], uint16_t (*qmat16_bias)[64],
-		const uint16_t *quant_matrix, int bias)
+		uint16_t (*qmat16)[2][64], const uint16_t *quant_matrix,
+		int bias, int qmin, int qmax)
 {
     int qscale;
 
-    for(qscale=1; qscale<32; qscale++){
+    for(qscale=qmin; qscale<qmax; qscale++){
         int i;
 	if (s->dsp.fdct == ff_jpeg_fdct_islow) {
 		for (i = 0; i < 64; i++) {
@@ -113,12 +113,11 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
                    so (1<<19) / 16 >= (1<<19) / (qscale * quant_matrix[i]) >= (1<<19) / 7905
                    so 32768        >= (1<<19) / (qscale * quant_matrix[i]) >= 67
                 */
-                qmat  [qscale][i] = (1 << QMAT_SHIFT_MMX) / (qscale * quant_matrix[i]);
-                qmat16[qscale][i] = (1 << QMAT_SHIFT_MMX) / (qscale * quant_matrix[j]);
+                qmat  [qscale][i] = (int)((uint64_t_C(1) << QMAT_SHIFT_MMX) / (qscale * quant_matrix[j]));
+                qmat16[qscale][0][i] = (1 << QMAT_SHIFT_MMX) / (qscale * quant_matrix[j]);
 
-                if(qmat16[qscale][i]==0 || qmat16[qscale][i]==128*256) qmat16[qscale][i]=128*256-1;
-
-                qmat16_bias[qscale][i]= ROUNDED_DIV(bias<<(16-QUANT_BIAS_SHIFT), qmat16[qscale][i]);
+                if(qmat16[qscale][0][i]==0 || qmat16[qscale][0][i]==128*256) qmat16[qscale][0][i]=128*256-1;
+                qmat16[qscale][1][i]= ROUNDED_DIV(bias<<(16-QUANT_BIAS_SHIFT), qmat16[qscale][0][i]);
             }
         }
     }
@@ -368,8 +367,7 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 		j->s->intra_matrix[i] = CLAMP_TO_8BIT(
 			(ff_mpeg1_default_intra_matrix[i]*j->s->qscale) >> 3);
 	convert_matrix(j->s, j->s->q_intra_matrix, j->s->q_intra_matrix16, 
-			j->s->q_intra_matrix16_bias, 
-			j->s->intra_matrix, j->s->intra_quant_bias);
+			j->s->intra_matrix, j->s->intra_quant_bias, 1, 31);
 	return j;
 }	
 
