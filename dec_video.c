@@ -787,6 +787,7 @@ extern int vaa_use_dr;
 
 static int use_dr=0,use_dr_422=0;
 static bes_da_t bda;
+static int multi_buff_num = 0;
 void init_video_vaa( unsigned width )
 {
   unsigned adp;
@@ -816,7 +817,6 @@ int planar=(mpi->flags&MP_IMGFLAG_PLANAR)!=0; //(out_fmt==IMGFMT_YV12||out_fmt==
 int blit_frame=0;
 void *vmem;
 int painted;
-static int double_buff_num = 0;
 
 //uint8_t* planes_[3];
 //uint8_t** planes=planes_;
@@ -959,13 +959,12 @@ switch(sh_video->codec->driver){
 	    vmem = bda.dga_addr + bda.offsets[0] + bda.offset.y;
 	    if(vo_doublebuffering && bda.num_frames>1)
 	    {
-		if(double_buff_num) vmem = bda.dga_addr + bda.offsets[1] + bda.offset.y;
-		else		    vmem = bda.dga_addr + bda.offsets[0] + bda.offset.y;
-		double_buff_num = double_buff_num ? 0 : 1;
+		vmem = bda.dga_addr + bda.offsets[multi_buff_num] + bda.offset.y;
+		multi_buff_num=(multi_buff_num+1)%bda.num_frames;
 	    }
 	}
 	DS_VideoDecoder_DecodeInternal(ds_vdec, start, in_size, 0, drop_frame ? 0 : vmem ? vmem : sh_video->our_out_buffer);
-	if(vmem) painted = 1;
+	if(vmem) painted = 1; 
     }
     if(!drop_frame && sh_video->our_out_buffer) blit_frame=3;
     break;
@@ -1078,9 +1077,8 @@ if(verbose>1){
 	    vmem = bda.dga_addr + bda.offsets[0] + bda.offset.y;
 	    if(vo_doublebuffering && bda.num_frames>1)
 	    {
-		if(double_buff_num) vmem = bda.dga_addr + bda.offsets[1] + bda.offset.y;
-		else		    vmem = bda.dga_addr + bda.offsets[0] + bda.offset.y;
-		double_buff_num = double_buff_num ? 0 : 1;
+		vmem = bda.dga_addr + bda.offsets[multi_buff_num] + bda.offset.y;
+		multi_buff_num=(multi_buff_num+1)%bda.num_frames;
 	    }
 	    sh_video->our_out_buffer = vmem;
 	}
