@@ -2,9 +2,9 @@ The documentation and its translations reside in subdirectories.
 When building the documentation, the toplevel Makefile goes into
 the subdirectories listed in the SUBDIRS variable and executes make
 in each of those directories to create the HTML documentation
-in subdirectories of the 'HTML' directory.
+in subdirectories of the 'HTML' and 'HTML-single' directories.
 
-IMPORTANT: Do NOT place sensitive files under 'HTML'!
+IMPORTANT: Do NOT place sensitive files under 'HTML' or 'HTML-single'!
 	   It is for generated documentation only.
 	   The whole directory tree is wiped out by the Makefile
 	   when running 'make distclean' or 'make clean-html'.
