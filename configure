@@ -132,7 +132,7 @@ Optional features:
   --disable-divx4linux   disable DivX4linux codec [autodetect]
   --enable-opendivx      enable _old_ OpenDivx codec [disable]
   --disable-libavcodec   disable libavcodec [autodetect]
-  --disable-libfame      disable libfame realtime-encoder [autodetect]
+  --enable-libfame       enable libfame realtime-encoder [autodetect]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --enable-faad          build with FAAD (AAC) support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
@@ -2448,6 +2448,33 @@ else
 fi
 echores "$_mp1e"
 
+
+echocheck "libfame"
+if test "$_fame" = auto ; then
+  _fame=no
+  test "$_dxr3" = yes && _fame=auto
+  test "$_dvb" = yes && _fame=auto
+fi
+if test "$_fame" = auto ; then
+  _fame=no
+  if test -d libfame && test -f libfame/fame.h ; then
+    # disable fame on cygwin as no sense to port - atmos	  
+    cygwin || _fame=yes
+    echores $_fame
+  else
+    echores "no (no fame dir)"
+  fi
+else
+  echores "$_fame"
+fi
+
+_def_fame='#undef USE_LIBFAME'
+if test "$_fame" = yes ; then
+  _def_fame='#define USE_LIBFAME 1'	
+  _ld_fame='-Llibfame -lfame'	
+fi  
+
+
 #########
 # AUDIO #
 #########
@@ -3058,26 +3085,6 @@ elif test "$_libavcodecso" = yes ; then
 else
   _nocodecmodules="libavcodec $_nocodecmodules"
 fi
-
-echocheck "libfame"
-if test "$_fame" = auto ; then
-  _fame=no
-  if test -d libfame && test -f libfame/fame.h ; then
-    # disable fame on cygwin as no sense to port - atmos	  
-    cygwin || _fame=yes
-    echores $_fame
-  else
-    echores "no (no fame dir)"
-  fi
-else
-  echores "$_fame"
-fi
-
-_def_fame='#undef USE_LIBFAME'
-if test "$_fame" = yes ; then
-  _def_fame='#define USE_LIBFAME 1'	
-  _ld_fame='-Llibfame -lfame'	
-fi  
 
 echocheck "libdv-0.9.5 (for mencoder)"
 if test "$_libdv" = auto ; then
