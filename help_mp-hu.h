@@ -196,7 +196,7 @@ static char help_text[]=
 #define MSGTR_MpegPPhint "FIGYELEM! Képjavítást kértél egy MPEG1/2 filmre, de az MPlayer-t\n" \
                          "          MPEG1/2 javítási támogatás nélkül fordítottad!\n" \
                          "          #define MPEG12_POSTPROC a config.h-ba, és fordítsd újra libmpeg2-t!\n"
-#define MSGTR_MpegNoSequHdr "MPEG: VÉGZETES: vége lett a filenak mikozben a szekvencia fejlécet kerestem\n"
+#define MSGTR_MpegNoSequHdr "MPEG: VÉGZETES: vége lett a filenak miközben a szekvencia fejlécet kerestem\n"
 #define MSGTR_CannotReadMpegSequHdr "VÉGZETES: Nem tudom olvasni a szekvencia fejlécet!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "VÉGZETES: Nem tudom olvasni a szekvencia fejléc kiterjesztését!\n"
 #define MSGTR_BadMpegSequHdr "MPEG: Hibás szekvencia fejléc!\n"
