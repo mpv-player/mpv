@@ -9,10 +9,10 @@
 <P>Abspielen von Standard Video-CDs:</P>
 
 <P>
-mplayer -vcd <I>tracknummer</I> [Device]<BR><BR>
+mplayer -vcd <I>tracknummer</I> [-cdrom-device Device]<BR><BR>
 Beispiele:<BR>
 mplayer -vcd 1<BR>
-mplayer -fs -vcd 2 /dev/hdc<BR>
+mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
 </P>
 
 <P>
@@ -174,17 +174,17 @@ installiert sind.</P>
 </TD></TR>
 </TABLE>
 
-<P>Standard-Geräte ist <CODE>/dev/dvd</CODE>, du kannst das in config.h (compile time
-option) ändern, oder du kannst es als Dateinamen für <B>MPlayer</B> angeben:
+<P>Standard-Gerät ist <CODE>/dev/dvd</CODE>, du kannst das in config.h (compile time
+Option) ändern, oder du kannst es mit Hilfe der <CODE>-dvd-device</CODE> Option angeben:
 </P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang de /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang de /dev/dvd -chapter 20-25</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -dvd-device /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang de -dvd-device /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang de -dvd-device /dev/dvd -chapter 20-25</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang en -chapter 5 -dvdangle 2</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -sid 5 /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -sid 5 -dvd-device /dev/dvd</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -chapter 5 -dvdangle 2</CODE></P>
 
 <P><B><A NAME=4.3>4.3. DVD Wiedergabe FAQ</A></B></P>

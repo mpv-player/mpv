@@ -11,7 +11,7 @@
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">				
-configure beendet sich mit diesem Text und MPlayer kann nicht kompiliert werden!
+configure beendet sich mit diesem Text und MPlayer kann nicht kompiliert werden!<BR>
 <CODE>Your gcc does not support even i386 for '-march' and '-mcpu'.</CODE>
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Dein gcc ist nicht richtig installiert, prüfe <code>config.log</code> für Details.
@@ -64,6 +64,7 @@ Update deine glibc auf die Neueste. Bei Mandrake verwende 2.2.4-8mdk.
 <TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 ...2.96... (ja, einige Leute schwärmen NOCH IMMER von ihrem gcc 2.96!!)
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<I>
 <P>Aber wir hatten idegs (das Wort 'ideg' wird noch weiter beschrieben in der FAQ).
 Und unser Idegcounter hatte wieder und wieder Overflows.</P>
 
@@ -92,6 +93,7 @@ sind.</P>
 machen und Installationssupport für euch anbieten. Dann könnten wir die unsere aktelle
 Arbeitsstätte verlassen, die Entwicklung ginge schneller, and wir könnten eine Menge
 Geld verdienen und ein großes Haus kaufen, usw. usw.  Willst du das wirklich? Es scheint so.</P>
+</I>
 
 <P ALIGN=RIGHT>Arpi (eine Mail in der mplayer-users-Mailingliste [Übersetzung])</P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -246,7 +248,7 @@ wende das, es ist auch NOCHMALS schneller!
 <TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was ist die Bedeutung der Nummern in der Statusleiste?
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Siehe: <CODE>A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0 4</CODE><BR>
+Siehe: <CODE>A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0 4 49%</CODE><BR>
 <UL>
 <LI>A: Audioposition in Sekunden
 <LI>V: Videoposition in Sekunden
@@ -258,6 +260,7 @@ Siehe: <CODE>A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0 
 <LI>Audio-Codec CPU-Auslastung in Prozent
 <LI>ausgelassene Frames für die A-V Sync
 <LI>aktuelle Level des Bild-Postprocessing (wenn -autoq verwendet)
+<LI>aktuelle benützte Cachegrösse (normal ist ~50%)
 </UL>
 <I>Die meisten sind für debugging-Zwecke und werden bald entfernt.</I>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -369,6 +372,15 @@ Verwendest du FVWM ? Versuche folgendens:<BR>
 Start -&gt; Settings -&gt; Configuration -&gt; Base Configuration<BR><BR>
 Setze "Use Applications position hints" auf "Yes".
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD
+WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Wie kann ich MPlayer im Hintergrund laufen lassen?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Verwende : <CODE>mplayer &lt;Optionen&gt; &lt;Dateiname&gt; &lt; /dev/null &
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 							
 <TD COLSPAN=3>
 <B><A NAME=5.3><font face="Verdana, Arial, Helvetica, sans-serif" size="2">5.3. Dateiwiedergabe-Probleme</A></B>

@@ -567,9 +567,11 @@ den mit der -bpp Option eingestellten Wert zu verwenden.</LI>
 <LI><B>-zoom</B> Option wird nicht unterstützt (Software-Scaling ist langsam).
 -fs Option wird nicht unterstützt. Du kannst keine Moduse mit 8bpp (oder weniger) 
 verwenden.</LI>
-<LI>Wenn du deinen Curser ausschalten willst:: <CODE>echo -e '\033[?25l'</CODE><BR>
+<LI>Wenn du deinen Curser ausschalten willst:: <CODE>echo -e '\033[?25l'</CODE>
+oder <CODE>setterm -cursor off</CODE><BR>
 und den Bildschirmschoner: <CODE>setterm -blank 0</CODE><BR>
 Um den Curser wieder anzuzeigen: <CODE>echo -e '\033[?25h'</CODE>
+oder <CODE>setterm -cursor on</CODE>
 </UL></P>
 
 <P>HINWEIS: FBdev Video-Modus-Änderungen _funktionieren nicht_ mit dem VESA
@@ -1090,13 +1092,14 @@ Du must diese also erst zum Laufen bringen. Kompiliere <B>MPlayer</B> danach neu
     das blinken zu deaktivieren. Führe folgendes Kommando aus:</P>
 
     <P>
-      <CODE>echo -e '\033[?25l'<BR>
+      <CODE>echo -e '\033[?25l'</CODE> oder <CODE>setterm -cursor off<BR>
       setterm -blank 0</CODE>
     </P>
 
     <P>
     Du willst wahrscheinlich das obrige in ein Skript tun und auch den Bildschirm löschen...
     Um den Cursor schwarz zu machen: <BR><CODE>echo -e '\033[?25h'</CODE>
+    oder <CODE>setterm -cursor on</CODE>
     </P>
 
     <P>Starte nun einen Film mit <CODE>mplayer -vo mga -fs -screenw 640
