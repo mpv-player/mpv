@@ -3,6 +3,9 @@
    Copyrights 2002 Nick Kurshev. This file is based on sources from
    GATOS (gatos.sf.net) and X11 (www.xfree86.org)
    Licence: GPL
+
+   31.12.2002 added support for fglrx drivers by Marcel Naziri (zwobbl@zwobbl.de)
+   6.04.2004 fixes to allow compiling vidix without X11 (broken in original patch)
    PPC support by Alex Beregszaszi
 */
 
@@ -21,6 +24,10 @@
 #include "../fourcc.h"
 #include "../../libdha/libdha.h"
 #include "radeon.h"
+
+#ifdef HAVE_X11
+#include <X11/Xlib.h>
+#endif
 
 #ifdef RAGE128
 #define RADEON_MSG "[rage128]"
@@ -198,6 +205,9 @@ static video_registers_t vregs[] =
   DECLARE_VREG(CONFIG_CNTL)
 };
 
+#ifdef HAVE_X11
+static uint32_t firegl_shift = 0;
+#endif
 static void * radeon_mmio_base = 0;
 static void * radeon_mem_base = 0; 
 static int32_t radeon_overlay_off = 0;
@@ -910,6 +920,31 @@ vidix_capability_t def_cap =
     { 0, 0, 0, 0}
 };
 
+#ifdef HAVE_X11
+void probe_fireGL_driver() {
+  Display *dp = XOpenDisplay ((void*)0);
+  int n = 0;
+  char **extlist = XListExtensions (dp, &n);
+  XCloseDisplay (dp);
+  if (extlist) {
+    int i;
+    int ext_fgl = 0, ext_fglrx = 0;
+    for (i = 0; i < n; i++) {
+      if (!strcmp(extlist[i], "ATIFGLEXTENSION")) ext_fgl = 1;
+      if (!strcmp(extlist[i], "ATIFGLRXDRI")) ext_fglrx = 1;
+    }
+    if (ext_fgl) {
+      printf(RADEON_MSG" ATI FireGl driver detected");
+      firegl_shift = 0x500000;
+      if (!ext_fglrx) {
+        printf(", but DRI seems not to be activated\n");
+        printf(RADEON_MSG" Output may not work correctly, check your DRI configuration!");
+      }
+      printf("\n");
+    }
+  }
+}
+#endif
 
 int vixProbe( int verbose,int force )
 {
@@ -944,6 +979,9 @@ int vixProbe( int verbose,int force )
 	}
 #ifndef RAGE128	
 	if(idx != -1)
+#ifdef HAVE_X11
+	probe_fireGL_driver();
+#endif
 	{
           switch(ati_card_ids[idx]) {
             /* Original radeon */
@@ -1669,6 +1707,9 @@ int vixConfigPlayback(vidix_playback_t *info)
   for(;nfr>0; nfr--)
   {
       radeon_overlay_off = radeon_ram_size - info->frame_size*nfr;
+#ifdef HAVE_X11
+      radeon_overlay_off -= firegl_shift;
+#endif
       radeon_overlay_off &= 0xffff0000;
       if(radeon_overlay_off >= (int)rgb_size ) break;
   }
@@ -1678,6 +1719,9 @@ int vixConfigPlayback(vidix_playback_t *info)
    for(;nfr>0; nfr--)
    {
       radeon_overlay_off = radeon_ram_size - info->frame_size*nfr;
+#ifdef HAVE_X11
+      radeon_overlay_off -= firegl_shift;
+#endif
       radeon_overlay_off &= 0xffff0000;
       if(radeon_overlay_off > 0) break;
    }
