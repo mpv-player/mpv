@@ -61,8 +61,8 @@ many other Unices, and <emphasis role="bold">non-x86</emphasis> CPUs, see
 QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska files, supported by
 many native, XAnim, RealPlayer, and Win32 DLL codecs. You can watch
 <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>, and
-<emphasis role="bold">DivX</emphasis> movies too (and you don't need the avifile
-library at all!). Another big feature of mplayer is the wide range of
+<emphasis role="bold">DivX</emphasis> movies too. Another big feature of
+<application>MPlayer</application> is the wide range of
 supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
 fbdev, AAlib, libcaca, DirectFB, but you can use GGI and SDL (and this way all
 their drivers) and some lowlevel card-specific drivers (for Matrox, 3Dfx and
@@ -71,7 +71,7 @@ scaling, so you can enjoy movies in fullscreen.
 <application>MPlayer</application> supports displaying through some
 hardware MPEG decoder boards, such as the <link linkend="dvb">DVB</link> and
 <link linkend="dxr3">DXR3/Hollywood+</link>. And what about the nice big
-antialiased shaded subtitles (<emphasis role="bold">10 supported types</emphasis>)
+antialiased shaded subtitles (<emphasis role="bold">14 supported types</emphasis>)
 with European/ISO 8859-1,2 (Hungarian, English, Czech, etc), Cyrillic, Korean
 fonts, and the onscreen display (OSD)?
 </para>
