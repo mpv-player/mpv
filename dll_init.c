@@ -51,7 +51,28 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
     sh_audio->o_wf.wFormatTag=WAVE_FORMAT_PCM;
     sh_audio->o_wf.nBlockAlign=2*in_fmt->nChannels;
     sh_audio->o_wf.wBitsPerSample=16;
+//    sh_audio->o_wf.wBitsPerSample=in_fmt->wBitsPerSample;
     sh_audio->o_wf.cbSize=0;
+
+    if(verbose) {
+	printf("Input format:\n");
+	    printf("  wFormatTag %d\n", in_fmt->wFormatTag);
+	    printf("  nChannels %d\n", in_fmt->nChannels);
+	    printf("  nSamplesPerSec %ld\n", in_fmt->nSamplesPerSec);
+	    printf("  nAvgBytesPerSec %d\n", in_fmt->nAvgBytesPerSec);
+	    printf("  nBlockAlign %d\n", in_fmt->nBlockAlign);
+	    printf("  wBitsPerSample %d\n", in_fmt->wBitsPerSample);
+	    printf("  cbSize %d\n", in_fmt->cbSize);
+	printf("Output fmt:\n");
+	    printf("  wFormatTag %d\n", sh_audio->o_wf.wFormatTag);
+	    printf("  nChannels %d\n", sh_audio->o_wf.nChannels);
+	    printf("  nSamplesPerSec %ld\n", sh_audio->o_wf.nSamplesPerSec);
+	    printf("  nAvgBytesPerSec %d\n", sh_audio->o_wf.nAvgBytesPerSec);
+	    printf("  nBlockAlign %d\n", sh_audio->o_wf.nBlockAlign);
+	    printf("  wBitsPerSample %d\n", sh_audio->o_wf.wBitsPerSample);
+	    printf("  cbSize %d\n", sh_audio->o_wf.cbSize);
+    }
+
 
     win32_codec_name = sh_audio->codec->dll;
     ret=acmStreamOpen(&sh_audio->srcstream,(HACMDRIVER)NULL,
@@ -132,7 +153,12 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen)
         hr=acmStreamConvert(sh_audio->srcstream,&ash,0);
         if(hr){
           mp_msg(MSGT_WIN32,MSGL_DBG2,"ACM_Decoder: acmStreamConvert error %d\n",(int)hr);
-          
+          switch(hr)
+	  {
+	    case ACMERR_NOTPOSSIBLE:
+	    case ACMERR_UNPREPARED:
+		mp_msg(MSGT_WIN32, MSGL_DBG2, "ACM_Decoder: acmStreamConvert error: probarly not initialized!\n");
+	  }  
 //					return -1;
         }
         if(verbose>1)
