@@ -223,10 +223,11 @@ static int control(int cmd,int arg){
 	fd=open( sun_mixer_device,O_RDONLY );
 	if ( fd != -1 )
 	{
+	    ao_control_vol_t *vol = (ao_control_vol_t *)arg;
 	    struct audio_info info;
 	    ioctl( fd,AUDIO_GETINFO,&info);
-	    ((ao_control_vol_t*)(arg))->left=info.play.gain * 100. / AUDIO_MAX_GAIN;
-	    ((ao_control_vol_t*)(arg))->=info.play.gain * 100. / AUDIO_MAX_GAIN;
+	    vol->left=info.play.gain * 100. / AUDIO_MAX_GAIN;
+	    vol->right=info.play.gain * 100. / AUDIO_MAX_GAIN;
 	    close( fd );
 	    return CONTROL_OK;
 	}	
@@ -234,6 +235,7 @@ static int control(int cmd,int arg){
     }
     case AOCONTROL_SET_VOLUME:
     {
+	ao_control_vol_t *vol = (ao_control_vol_t *)arg;
         int fd,v,cmd,devs;
 
 	fd=open( sun_mixer_device,O_RDONLY );
@@ -241,12 +243,13 @@ static int control(int cmd,int arg){
 	{
 	    struct audio_info info;
 	    AUDIO_INITINFO(&info);
-	    info.play.gain = (r+l) * AUDIO_MAX_GAIN / 100 / 2;
+	    info.play.gain = (vol->right+vol->left) * AUDIO_MAX_GAIN / 100 / 2;
 	    ioctl( fd,AUDIO_SETINFO,&info );
 	    close( fd );
 	    return CONTROL_OK;
 	}	
 	return CONTROL_ERROR;
+    }
     }
     return CONTROL_UNKNOWN;
 }
