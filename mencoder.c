@@ -2,6 +2,7 @@
 #define VCODEC_FRAMENO 1
 #define VCODEC_DIVX4 2
 
+#define ACODEC_COPY 0
 #define ACODEC_PCM 1
 #define ACODEC_VBRMP3 2
 
@@ -49,6 +50,8 @@ static char* banner_text=
 
 #include <inttypes.h>
 #include "../postproc/swscale.h"
+
+#include "fastmemcpy.h"
 
 //--------------------------
 
@@ -560,11 +563,27 @@ mux_a->source=sh_audio;
 mux_a->codec=out_audio_codec;
 
 switch(mux_a->codec){
-case 0:
+case ACODEC_COPY:
+    printf("sh_audio->wf: %x\n", sh_audio->wf);
     mux_a->h.dwSampleSize=sh_audio->audio.dwSampleSize;
     mux_a->h.dwScale=sh_audio->audio.dwScale;
     mux_a->h.dwRate=sh_audio->audio.dwRate;
-    mux_a->wf=sh_audio->wf;
+    if (sh_audio->wf)
+	mux_a->wf=sh_audio->wf;
+    else
+    {
+	mux_a->wf = malloc(sizeof(WAVEFORMATEX));
+	mux_a->wf->nBlockAlign = mux_a->h.dwSampleSize;
+	mux_a->wf->wFormatTag = sh_audio->sample_format;
+	mux_a->wf->nChannels = sh_audio->channels;
+	mux_a->wf->nSamplesPerSec = sh_audio->samplerate;
+	mux_a->wf->nAvgBytesPerSec=mux_a->h.dwSampleSize*mux_a->wf->nSamplesPerSec;
+	mux_a->wf->wBitsPerSample = 16;
+	mux_a->wf->cbSize=0; // FIXME for l3codeca.acm
+    }
+    printf("audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d)\n",
+	mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
+	mux_a->wf->wBitsPerSample);
     break;
 case ACODEC_PCM:
     printf("CBR PCM audio selected\n");
@@ -581,6 +600,7 @@ case ACODEC_PCM:
     mux_a->wf->cbSize=0; // FIXME for l3codeca.acm
     break;
 case ACODEC_VBRMP3:
+    printf("MP3 audio selected\n");
     mux_a->h.dwSampleSize=0; // VBR
     mux_a->h.dwScale=1152; // samples/frame
     mux_a->h.dwRate=sh_audio->samplerate;
@@ -718,7 +738,7 @@ if(sh_audio){
 	if(mux_a->h.dwSampleSize){
 	    // CBR - copy 0.5 sec of audio
 	    switch(mux_a->codec){
-	    case 0: // copy
+	    case ACODEC_COPY: // copy
 		len=sh_audio->i_bps/2;
 		len/=mux_a->h.dwSampleSize;if(len<1) len=1;
 		len*=mux_a->h.dwSampleSize;
@@ -732,8 +752,8 @@ if(sh_audio){
 	} else {
 	    // VBR - encode/copy an audio frame
 	    switch(mux_a->codec){
-	    case 0: // copy
-		printf("not yet implemented!\n");
+	    case ACODEC_COPY: // copy
+		printf("VBR audio framecopy not yet implemented!\n");
 		break;
 #ifdef HAVE_MP3LAME
 	    case ACODEC_VBRMP3:
