@@ -3592,6 +3592,9 @@ fi
 echores "$_xf86keysym"
 
 echocheck "DGA"
+if test "$_x11" = no ; then
+  _dga=no
+fi
 # Version 2 is preferred to version 1 if available
 if test "$_dga" = auto ; then
   cat > $TMPC << EOF
