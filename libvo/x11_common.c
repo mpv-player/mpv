@@ -435,6 +435,7 @@ XSizeHints vo_hint;
 int vo_x11_uninit(Display *display, Window window)
 {
     XSetErrorHandler(NULL);
+    vo_showcursor( display,window );
 
 #ifdef HAVE_NEW_GUI
     /* destroy window only if it's not controlled by GUI */
