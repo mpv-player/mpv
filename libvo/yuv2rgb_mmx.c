@@ -142,14 +142,14 @@ static void yuv420_rgb16_mmx (uint8_t * image, uint8_t * py,
 		     "paddsw %%mm7, %%mm5 # Y odd + Cgreen 00 G7 00 G5 00 G3 00 G1\n\t"
 
 		     /* Limit RGB even to 0..255 */
-		     "packuswb %%mm0, %%mm0 # B6 B4 B2 B0 | B6 B4 B2 B0\n\t"
-		     "packuswb %%mm1, %%mm1 # R6 R4 R2 R0 | R6 R4 R2 R0\n\t"
-		     "packuswb %%mm2, %%mm2 # G6 G4 G2 G0 | G6 G4 G2 G0\n\t"
+		     "packuswb %%mm0, %%mm0 # B6 B4 B2 B0  B6 B4 B2 B0\n\t"
+		     "packuswb %%mm1, %%mm1 # R6 R4 R2 R0  R6 R4 R2 R0\n\t"
+		     "packuswb %%mm2, %%mm2 # G6 G4 G2 G0  G6 G4 G2 G0\n\t"
 
 		     /* Limit RGB odd to 0..255 */
-		     "packuswb %%mm3, %%mm3 # B7 B5 B3 B1 | B7 B5 B3 B1\n\t"
-		     "packuswb %%mm4, %%mm4 # R7 R5 R3 R1 | R7 R5 R3 R1\n\t"
-		     "packuswb %%mm5, %%mm5 # G7 G5 G3 G1 | G7 G5 G3 G1\n\t"
+		     "packuswb %%mm3, %%mm3 # B7 B5 B3 B1  B7 B5 B3 B1\n\t"
+		     "packuswb %%mm4, %%mm4 # R7 R5 R3 R1  R7 R5 R3 R1\n\t"
+		     "packuswb %%mm5, %%mm5 # G7 G5 G3 G1  G7 G5 G3 G1\n\t"
 
 		     /* Interleave RGB even and odd */
 		     "punpcklbw %%mm3, %%mm0 # B7 B6 B5 B4 B3 B2 B1 B0\n\t"
