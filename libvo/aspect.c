@@ -1,5 +1,5 @@
 /* Stuff for correct aspect scaling. */
-#undef ASPECT_DEBUG
+//#define ASPECT_DEBUG
 
 #ifdef ASPECT_DEBUG
 #include <stdio.h>
@@ -12,7 +12,7 @@ float monitor_aspect=4.0/3.0;
  */
 
 void aspect(int *srcw, int *srch, int fitinw, int fitinh){
-  int srcwcp, srchcp;
+  int srcwcp, srchcp, tmp;
   srcwcp=*srcw; srchcp=*srch;
   srcwcp=fitinw;
 #ifdef ASPECT_DEBUG
@@ -26,10 +26,13 @@ void aspect(int *srcw, int *srch, int fitinw, int fitinh){
   printf("aspect(2) wh: %dx%d (org: %dx%d)\n",srcwcp,srchcp,*srcw,*srch);
 #endif
   if(srchcp>fitinh || srchcp<*srch){
-    srchcp=fitinh;
-    srcwcp=(int)(((float)fitinh / (float)*srch * (float)*srcw)
-              * ((float)fitinw / ((float)fitinh / (1/monitor_aspect))));
-    srcwcp+=srcwcp%2; // round
+    tmp=(int)(((float)fitinh / (float)*srch * (float)*srcw)
+           * ((float)fitinw / ((float)fitinh / (1/monitor_aspect))));
+    if(srcwcp>fitinw){
+      srchcp=fitinh;
+      srcwcp=tmp;
+      srcwcp+=srcwcp%2; // round
+    }
   }
 #ifdef ASPECT_DEBUG
   printf("aspect(3) wh: %dx%d (org: %dx%d)\n",srcwcp,srchcp,*srcw,*srch);
