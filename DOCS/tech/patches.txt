@@ -31,7 +31,10 @@ that your patch will be included.
     any remaining cosmetics!
 
  5. Comment parts that really need it (tricky side-effects etc).
-    Commenting trivial code not required. Comments must be English!
+    Always document string operations! Comment on what you are doing
+    and why it is safe. This makes it easy to review and change your
+    code if needed. Commenting trivial code not required.
+    Comments must be English!
 
  6. If you implement new features, add or change command line switches or
     modify the behavior of existing features, please do not forget to also
