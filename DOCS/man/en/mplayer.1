@@ -140,28 +140,27 @@ mencoder \- Movie Encoder for Linux
 .
 .SH DESCRIPTION
 .B mplayer
-is a movie player for LINUX (runs on many other Unices and non-x86 CPUs, see
-the documentation).
+is a movie player for Linux (runs on many other platforms and CPU
+architectures, see the documentation).
 It plays most MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM,
-VIVO, FLI, NuppelVideo, yuv4mpeg, FILM and RoQ files, supported by many
-native, XAnim, and Win32 DLL codecs.
+MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM and RoQ files, supported by many
+native and binary codecs.
 You can watch VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 and even WMV movies,
-too (without using the avifile library).
+too.
 .PP
-Another great feature of MPlayer is the wide range of supported output
-drivers.
+MPlayer supports a wide range of video and audio output drivers.
 It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
 Quartz, but you can also use GGI, SDL (and all their drivers), VESA (on every
 VESA compatible card, even without X11), some low level card-specific drivers
 (for Matrox, 3Dfx and ATI) and some hardware MPEG decoder boards, such as the
 Siemens DVB, DXR2 and DXR3/\:Hollywood+.
 Most of them support software or hardware scaling, so you can enjoy movies in
-fullscreen.
+fullscreen mode.
 .PP
 MPlayer has an onscreen display (OSD) for status information, nice big
 antialiased shaded subtitles and visual feedback for keyboard controls.
 European/\:ISO 8859-1,2 (Hungarian, English, Czech, etc), Cyrillic and Korean
-fonts are supported along with 11 subtitle formats (MicroDVD, SubRip,
+fonts are supported along with 14 subtitle formats (MicroDVD, SubRip, OGM,
 SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS and our own: MPsub) and
 DVD subtitles (SPU streams, VOBsub and Closed Captions).
 .PP
@@ -171,7 +170,7 @@ MPlayer-playable movies (see above) to other MPlayer-playable formats (see
 below).
 It encodes to DivX4, XviD, one of the libavcodec codecs and PCM/\:MP3/\:VBRMP3
 audio in 1, 2 or 3\ passes.
-Furthermore it has stream copying abilities, a powerful plugin system (crop,
+Furthermore it has stream copying abilities, a powerful filter system (crop,
 expand, flip, postprocess, rotate, scale, noise, rgb/\:yuv conversion) and
 more.
 .PP
@@ -188,14 +187,12 @@ It has the same options as MPlayer.
 .
 .SH "KEYBOARD CONTROL"
 MPlayer has a fully configurable, command driven, control layer
-which allow you to control MPlayer using keyboard, mouse, joystick
-or remote control (using lirc).
+which allows you to control MPlayer using keyboard, mouse, joystick
+or remote control (with LIRC).
 .br
 The default configuration file for the input system is
 ~/.mplayer/\:input.conf but it can be overriden
-using the \-input conf option.
-.br
-These keys may/\:may not work, depending on your video output driver.
+using the \-input option.
 .TP
 .B general control
 .PD 0
@@ -233,9 +230,9 @@ and gl2 under Windows.
 .IPs "w and e"
 decrease/\:increase panscan range
 .IPs o\ \ \ \ 
-toggle between OSD states: none / seek / seek+timer
+toggle OSD states: none / seek / seek + timer / seek + timer + total time
 .IPs d\ \ \ \ 
-toggle between frame dropping states:  none / skip display / skip decoding
+toggle frame dropping states:  none / skip display / skip decoding
 (see \-framedrop and \-hardframedrop)
 .IPs v\ \ \ \ 
 toggle subtitle visibility
@@ -323,7 +320,7 @@ command line override either.
 The syntax of the configuration files is 'option=<value>', everything after
 a '#' is considered a comment.
 Options that work without values can be enabled by setting them to 'yes'
-or '1' and disabled by setting them to 'no' or '0'.
+or '1' or 'true' and disabled by setting them to 'no' or '0' or 'false'.
 Even suboptions can be specified in this way.
 .PP
 .I EXAMPLE:
@@ -362,8 +359,8 @@ See also \-afm, \-ac, \-vfm and \-vc.
 Specify configuration file to be parsed after the default ones.
 .TP
 .B \-quiet \ \ 
-With this option the status line (i.e. A:   0.7 V:   0.6 A-V:  0.068 ...)
-will not be displayed.
+Make MPlayer output less verbose, in particular the status line
+(i.e. A:   0.7 V:   0.6 A-V:  0.068 ...) will not be displayed.
 Particularly useful on slow terminals or broken ones that do not properly
 handle carriage return (i.e. \\r).
 .TP
@@ -388,18 +385,18 @@ prints everything related to input parsers (parser debug)
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
 .TP
 .B \-autoq <quality> (use with \-vf [s]pp)
-Dynamically changes the level of postprocessing depending on available spare
+Dynamically changes the level of postprocessing depending on the available spare
 CPU time.
 The number you specify will be the maximum level used.
 Usually you can use some big number.
-You have to use \-vf [s]pp without parameters in order to use this.
+You have to use \-vf [s]pp without parameters in order for this to work.
 .TP
 .B \-autosync <factor>
 Gradually adjusts the A/\:V sync based on audio delay measurements.
 Specifying \-autosync\ 0, the default, will cause frame timing to be based
 entirely on audio delay measurements.
 Specifying \-autosync\ 1 will do the same, but will subtly change the A/\:V
-correction algorithm used.
+correction algorithm.
 An uneven video frame rate in a movie which plays fine with \-nosound can
 often be helped by setting this to an integer value greater than 1.
 The higher the value, the closer the timing will be to \-nosound.
@@ -411,7 +408,7 @@ This delay in reaction time to sudden A/\:V offsets should be the only
 side-effect of turning this option on, for all sound drivers.
 .TP
 .B \-benchmark
-Prints some statistics on CPU usage and dropped frames at the end.
+Prints some statistics on CPU usage and dropped frames at the end of playback.
 Use in combination with \-nosound and \-vo null for benchmarking only the
 video codec.
 .br
@@ -468,7 +465,7 @@ More intense frame dropping (breaks decoding).
 Leads to image distortion!
 .TP
 .B \-identify
-Show file parameters in easy parsable format.
+Show file parameters in an easily parseable format.
 The wrapper script TOOLS/midentify suppresses the other MPlayer output and
 (hopefully) shellescapes the filenames.
 .TP
@@ -485,15 +482,15 @@ Available commands are:
 .RSs
 .IPs conf=<file>
 Read alternative input.conf.
-If given without pathname, ~/\:.mplayer is assumed.
+If no full path is given, ~/\:.mplayer/<file> is assumed.
 .IPs ar-delay
 Delay in msec before we start to autorepeat a key (0 to disable).
 .IPs ar-rate
-How many key presses per second when we autorepeat.
+Number of key presses to generate per second on autorepeat.
 .IPs keylist
-Prints all keys that can be bound.
+Prints all keys that can be bound to commands.
 .IPs cmdlist
-Prints all commands that can be bound.
+Prints all commands that can be bound to keys.
 .IPs js-dev
 Specifies the joystick device to use (default is /dev/\:input/\:js0).
 .IPs file\ 
@@ -508,8 +505,7 @@ several 'echo "seek 10" > mp_pipe' and the pipe will stay valid.
 .
 .TP
 .B \-lircconf <file> (LIRC only)
-Specifies a configuration file for LIRC (Linux Infrared Remote Control, see
-http://www.lirc.org) if you don't like the default ~/\:.lircrc.
+Specifies a configuration file for LIRC (default: ~/\:.lircrc).
 .TP
 .B \-list-options
 Prints out all the available options.
@@ -529,7 +525,6 @@ Specify the main menu.
 .TP
 .B \-nojoystick
 Turns off joystick support.
-Default is on, if compiled in.
 .TP
 .B \-nolirc
 Turns off LIRC support.
@@ -543,11 +538,13 @@ Turns off usage of the Linux RTC (real-time clock \- /dev/\:rtc) as timing
 mechanism.
 .TP
 .B \-playlist <file>
-Play files according to a playlist (1 file per row or Winamp or ASX format).
+Play files according to a playlist file (1 file per line, Winamp or ASX format).
 .br
 .I NOTE:
 This option is considered an entry so options found after it will apply
 only to the elements of this playlist.
+.br
+FIXME: This needs to be clarified and documented thoroughly.
 .TP
 .B \-really-quiet
 Display even less output and status messages.
@@ -555,44 +552,43 @@ Display even less output and status messages.
 .B \-shuffle
 Play files in random order.
 .TP
-.B \-skin <skin\ directory> (GUI only)
-Load skin from the given directory (WITHOUT path name).
+.B \-skin <name> (GUI only)
+Loads a skin from the directory given as parameter below the default skin
+directories, /usr/local/share/mplayer/ and ~/.mplayer/.
 
 .I EXAMPLE:
 .PD 0
 .RSs
 .IPs "\-skin fittyfene"
-tries Skin/fittyfene.
-It first checks
-/usr/local/share/mplayer/
-and afterwards ~/.mplayer/.
+Tries /usr/local/share/mplayer/Skin/fittyfene
+and afterwards ~/.mplayer/Skin/fittyfene.
 .RE
 .PD 1
 .
 .TP
-.B \-slave \ \ 
+.B \-slave (also see \-input)
 This option switches on slave mode.
-This is intended for use of MPlayer as a backend to other programs.
-Instead of intercepting keyboard events, MPlayer will read simplistic command
-lines from its stdin.
+The aim is being able to use MPlayer as a backend for other programs.
+Instead of intercepting keyboard events, MPlayer will read commands from stdin.
+See DOCS/tech/slave.txt and \-input cmdlist for a list of slave commands.
 .TP
 .B \-softsleep
-Uses high quality software timers.
+Use high quality software timers instead of RTC.
 As precise as the RTC without requiring special privileges.
 Comes at the price of higher CPU consumption.
 .TP
 .B \-speed <0.01\-100>
-Set playback speed rate.
+Slow down or speed up playback by the factor given as parameter.
 .TP
 .B \-sstep <sec>
-Specifies seconds between displayed frames.
+Display one frame every <sec> seconds.
 Useful for slideshows.
 .TP
 .B \-use-stdin
-The standard input (aka. stdin) will be used to read data instead of key
-events.  If you open /dev/stdin (or the equivalent on your system), use stdin
+Standard input will be used to read data instead of key events.
+If you open /dev/stdin (or the equivalent on your system), use stdin
 in a playlist or intend to read from stdin later on via the loadfile or
-loadlist commands you
+loadlist slave commands you
 .B need
 this option.
 .
