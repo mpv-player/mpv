@@ -652,7 +652,7 @@ MPlayer affiche les IDs disponibles quand il est lancé en mode verbeux (-v).
 Pour jouer des flux MPEG-TS, MPlayer/MEncoder utilisera le premier programme
 (si présent) avec le flux audio choisi.
 .TP
-.B \-alang <code\ de\ pays\ à\ deux\ lettres> (voir aussi \-aid) \
+.B \-alang <code-pays\ à\ deux\ lettres> (voir aussi \-aid) \
 (DVD uniquement)
 Cela sélectionne la piste audio et tente toujours de lire les flux audio
 dont la langue correspond au code donné.
@@ -1102,7 +1102,7 @@ Défini des noms pour les canaux.
 Utilisez _ pour les espaces dans les noms (ou jouez avec les guillemets ;-).
 Les noms de canaux seront ensuite écrits en utilisant l'OSD, et les commandes 
 tv_step_channel, tv_set_channel et tv_last_channel seront utilisables
-avec une télécommande (voir. LIRC).
+avec une télécommande (voir LIRC).
 Non compatible avec le paramètre frequency.
 .br 
 .I NOTE\ :
@@ -1157,86 +1157,87 @@ Pour v4l1, 0\-65535 est un intervalle valide.
 Pour v4l2, l'intervalle valide est 0 à 100, et 50 corresponds à la valeur par
 défaut du contrôle, tel que reporté par le pilote.
 .IPs immediatemode=<bool>
-Un valeur de 0 signifie capturer et bufferiser l'audio et la vidéo ensemble
-(par défaut pour mencoder).
-Une valeur de 1 (par défaut pour mplayer) signifie ne capturer que la vidéo et
-laisser l'audio passer au travers du câble de loopback de la carte TV à la
-carte son.
+Un valeur de 0 signifie capturer et mettre en cache l'audio et la vidéo
+ensemble (par défaut pour MEncoder).
+Une valeur de 1 (par défaut pour MPlayer) signifie ne capturer que la vidéo et
+laisser l'audio passer directement de la carte TV à la carte son.
 .IPs mjpeg
 Utilise la compression mjpeg matérielle (si la carte le supporte).
 En utilisant cette option, vous n'avez pas besoin de spécifier la largeur
 et la hauteur de la fenêtre de sortie, car MPlayer la déterminera
-automatiquement d'après la valeur de decimation (voir ci-dessous).
+automatiquement d'après la valeur affectée à l'option decimation
+(voir ci-dessous).
 .IPs decimation=<1,2,4>
-choisis la taille de l'image qui sera compressée de façon matérielle:
+choisit la taille de l'image qui sera compressée matériellement\ :
 .RSss
-1: grande taille
+1: pleine résolution
     704x576    PAL
     704x480    NTSC
 .br
-2: taille moyenne
+2: résolution moyenne
     352x288    PAL
     352x240    NTSC
 .br
-4: petite taille
+4: faible résolution
     176x144    PAL
     176x120    NTSC
 .REss
 .IPs quality=<0\-100>
 choisis la qualité de la compression jpeg
 .br
-(quality < 60 recommandé pour la grande taille)
+(quality < 60 recommandé pour la pleine résolution)
 .RE
 .
 .TP
-.B \-user <nom utilisateur> (voir également l'option \-passwd)
+.B \-user <nom utilisateur> (voir également \-passwd) (réseau uniquement)
 Indique un nom d'utilisateur pour l'identification HTTP.
 .TP
 .B \-user-agent <chaine>
-Utilise chaine comme User-Agent pour le streaming HTTP.
+Utilise <chaine> comme User-Agent pour les flux sur HTTP.
 .TP
 .B \-vid <id>
-Sélectionne le canal vidéo [MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190].
+Sélectionne le canal vidéo (MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190).
 Pour lire un flux MPEG-TS, MPlayer/MEncoder utilisera le premier programme
 (si présent) avec le flux vidéo choisi.
 .TP
 .B \-vivo <sub-options> (CODE DE DÉBOGAGE)
-Force les paramètres audio du demuxer .vivo (pour débuggage).
+Force les paramètres audio du démultiplexeur VIVO (pour débogage).
 .
 .
 .SH "OPTIONS OSD/SUB"
 .I NOTE:
-voir \-vf expand également.
+voir également \-vf expand.
 .TP
-.B \-dumpjacosub (MPLAYER uniquement)
-Convertit les sous-titres donnés (via l'option \-sub) au format basé sur le
+.B \-dumpjacosub (MPlayer uniquement)
+Converti les sous-titres donnés (via l'option \-sub) au format basé sur le
 temps JACOsub.
 Crée un fichier dumpsub.js dans le répertoire courant.
 .TP
-.B \-dumpmicrodvdsub (MPLAYER uniquement)
+.B \-dumpmicrodvdsub (MPlayer uniquement)
 Convertit les sous-titres donnés (via l'option \-sub) au format MicroDVD.
 Créé un fichier dumpsub.sub dans le répertoire courant.
 .TP
-.B \-dumpmpsub (MPLAYER uniquement)
+.B \-dumpmpsub (MPlayer uniquement)
 Convertit les sous-titres donnés (via l'option \-sub) au format natif de 
 MPlayer, MPsub.
 Créé un fichier dump.mpsub dans le répertoire courant.
 .TP
-.B \-dumpsami (MPLAYER uniquement)
+.B \-dumpsami (MPlayer uniquement)
 Convertit les sous-titres donnés (via l'option \-sub) au format basé sur le
 temps SAMI.
 Crée un fichier dumpsub.smi dans le répertoire courant.
 .TP
-.B \-dumpsrtsub (MPLAYER uniquement)
-Convertit les sous-titres donnés (via l'option \-sub) au format SubViewer (SRT).
+.B \-dumpsrtsub (MPlayer uniquement)
+Convertit les sous-titres donnés (via l'option \-sub) au format basé sur le
+temps SubViewer (SRT).
 Créé un fichier dump.srt dans le répertoire courant.
 .TP
-.B \-dumpsub (MPLAYER uniquement) (BETA CODE)
+.B \-dumpsub (MPlayer uniquement) (CODE BÉTA)
 Extrait les sous-titres d'un flux VOB.
 Voir également les options \-dump*sub et \-vobsubout*.
 .TP
 .B \-ffactor <nombre>
-Ré-échantillonne l'alphamap de la police.
+Ré-échantillonne le canal de transparence (alpha) de la palette de la police.
 Peut être:
 .
 .PD 0
@@ -1253,14 +1254,13 @@ bordure noire épaisse
 .PD 1
 .
 .TP
-.B \-flip-hebrew
-Active les sous-titres bidirectionnels en utilisant FriBiDi.
+.B \-flip-hebrew (FriBiDi uniquement)
+Active le retournement des sous-titres en utilisant FriBiDi.
 .TP
-.B \-font <chemin\ vers\ le\ fichier\ font.desc>
-Recherche les polices OSD/\:SUB dans un répertoire particulier (répertoire
-par défaut pour les polices normales: ~/\:.mplayer/\:font/\:font.desc, pour les
-polices FreeType:
-~/.mplayer/\:subfont.ttf).
+.B \-font <chemin\ vers\ le\ fichier\ font.desc> (OSD uniquement)
+Recherche les polices OSD/\:SUB dans un répertoire particulier
+(par défaut pour les polices normales: ~/\:.mplayer/\:font/\:font.desc,
+pour les polices FreeType: ~/.mplayer/\:subfont.ttf).
 
 .I NOTE:
 Avec FreeType, cette option détermine le chemin vers le fichier de polices.
@@ -1279,26 +1279,26 @@ Avec Fontconfig, cette option détermine le nom de police fontconfig.
 .PD 1
 .
 .TP
-.B \-fontconfig
+.B \-fontconfig (fontconfig uniquement)
 Active l'utilisation des polices gérées par fontconfig.
 .TP
 .B \-forcedsubsonly
-N'affiche que les sous-titres forcés pour le flux de sous-titres DVD sélectionné
-par (par ex.) \-slang.
+N'affiche que les sous-titres forcés des sous-titres DVD sélectionnés,
+par ex.\& avec \-slang.
 .TP
 .B \-fribidi-charset <nom\ charset>
-Spécifie le charset a passer à FriBiDi pour le décodage de sous-titres non-UTF8.
-La valeur par Défaut est "ISO8859-8".
+Défini le charset à passer à FriBiDi pour le décodage de sous-titres non-UTF8
+(ISO8859-8 par défaut).
 .TP
-.B \-ifo <fichier ifo vobsub>
+.B \-ifo <fichier ifo VOBsub>
 Indique le fichier à utiliser pour charger la palette et la taille des trames
 des sous-titres VOBSUB.
 .TP
 .B \-noautosub
 Désactive le chargement automatique du fichier de sous-titres.
 .TP
-.B \-osdlevel <0\-3> (MPLAYER uniquement)
-Spécifie dans quel mode OSD démarrer.
+.B \-osdlevel <0\-3> (MPlayer uniquement)
+Défini dans quel mode OSD démarrer.
 .
 .PD 0
 .RSs
@@ -1319,21 +1319,18 @@ Permet au prochain sous-titre de s'afficher pendant que l'actuel est toujours
 visible (le comportement par défaut est d'en activer le support que pour des
 formats spécifiques).
 .TP
-.B \-sid <id> (voir aussi l'option \-slang)
-Active l'affichage des sous-titres DVD.
-Vous DEVEZ spécifier un nombre qui corresponds à une langue de sous-titres DVD
-(0\-31).
-Pour obtenir une liste des sous-titres disponibles, utilisez avec l'option \-v
-et regardez le résultat.
+.B \-sid <ID> (voir aussi l'option \-slang)
+Affiche le sous-titre <ID> (0\-31) du DVD lors de sa lecture.
+MPlayer affiche la liste des sous-titres disponibles, quand il est lancé en
+mode verbeux (\-v).
 .TP
-.B \-slang <code\ de\ pays\ à\ deux\ lettres> (voir aussi l'option \-sid)
-Pour la lecture de DVD, active/\:sélectionne la langue des sous-titres.
-Pour obtenir une liste des sous-titres disponibles, utilisez avec l'option \-v
-et regardez le résultat.
-
-Sinon, définie un suffixe optionnel de sous-titres qui aura une priorité plus
-grande lors de la recherche des sous-titres.
-
+.B \-slang <code-pays\ à\ deux\ lettres> (voir aussi l'option \-sid)
+Défini la langue du sous-titre.
+MPlayer affiche la liste des sous-titres disponibles, quand il est lancé en
+mode verbeux (\-v).
+.br
+Vous pouvez aussi donner une liste de codes de pays vers lequel se rabattre
+lors de la recherche des sous-titres.
 .I EXEMPLE:
 .PD 0
 .RSs
@@ -1344,16 +1341,16 @@ disponible.
 .PD 1
 .
 .TP
-.B \-spuaa <mode>
-Mode d'antialiasing/redimmensionnement pour DVD/VobSub.
-Une valeur de 16 peut être ajouté à mode de façon à forcer le redimmensionnement
+.B \-spuaa <mode> (OSD uniquement)
+Mode d'anti-crénelage/redimmensionnement pour DVD/VobSub.
+Une valeur de 16 peut être ajouté à mode pour forcer le redimmensionnement
 même si la trame originale et la trame redimmensionnée correspondent déjà, par
-exemple pour lisser les sous-titres avec le flou gaussien.
+ex.\& pour lisser les sous-titres avec un flou gaussien.
 Les modes disponibles sont:
 .PD 0
 .RSs
 .IPs 0
-aucun (le plus rapide, très sale)
+aucun (le plus rapide, très vilain)
 .IPs 1
 approximatif (cassé ?)
 .IPs 2
@@ -1366,34 +1363,45 @@ utilise le flou gaussien swscaler (très joli)
 .PD 1
 .
 .TP
-.B \-spualign <-1\-2>
-Spécifie comment les sous-titres spu (DVD/VobSub) devrient être alignés.
-Les valeurs sont les mêmes que pour \-subalign, avec le choix supplémentaire -1
-pour la position originale.
+.B \-spualign <-1\-2> (OSD uniquement)
+Défini l'alignement des sous-titres SPU (DVD/VobSub).
+.PD 0
+.RSs
+.IPs -1
+position originale.
+.IPs 0
+aligner en haut (comportement par défaut)
+.IPs 1
+aligner au milieu
+.IPs 2
+aligner en bas
+.RE
+.PD 1
+.
 .TP
-.B \-spugauss <0.0\-3.0>
+.B \-spugauss <0.0\-3.0> (OSD uniquement)
 Paramètre de Variance du gaussien utilisé par \-spuaa 4.
-Plus grands signifie plus de flou.
-La valeur par défaut est 1.0.
+L'accroître augmente le flou (1.0 par défaut).
 .TP
 .B \-sub <fichier\ de\ sous-titres1,fichier\ de\ sous-titres2,...>
-Utilise/\:affiche ces sous-titres uniquement. Un seul fichier peut être affiché
-à la fois et les fichiers peuvent être alternés avec 'j'.
+Utilise/\:affiche ces sous-titres.
+Un seul fichier peut être affiché à la fois et 'j' permet d'alterner entre eux.
 .TP
 .B \-sub-bg-alpha <0\-255>
-Spécifie la valeur du canal alpha pour le fond des sous-titres et de l'OSD.
+Défini la valeur du canal de transparence alpha pour le fond des sous-titres
+et de l'OSD.
 De grandes valeurs signifient plus transparent.
 La valeur 0 est une exception et signifie complètement transparent.
 .TP
 .B \-sub-bg-color <0\-255>
-Spécifie la valeur de la couleur pour le fond des sous-titres et de l'osd.
+Spécifie la valeur de la couleur pour le fond des sous-titres et de l'OSD.
 Actuellement les sous-titres sont en niveau de gris donc cette valeur est
 équivalente à l'intensité de la couleur.
 La valeur 255 signifie blanc et 0 noir.
 .TP
 .B \-sub-demuxer <nombre> (\-subfile uniquement) (CODE BÉTA)
-Force le type de demuxer de sous-titres pour \-subfile.
-Donne l'ID du demuxer tel que defini dans subreader.h.
+Force le type de démultiplexeur de sous-titres pour \-subfile.
+Donnez l'ID du demuxer tel que defini dans subreader.h.
 .TP
 .B \-sub-fuzziness <mode>
 Ajuste l'exactitude de recherche des sous-titres:
@@ -1402,21 +1410,30 @@ Ajuste l'exactitude de recherche des sous-titres:
 .IPs 0
 correspondance exacte
 .IPs 1
-charge tous les sous-titres contenant le nom du film
+Charge tous les sous-titres contenant le nom du film.
 .IPs 2
-charge tous les sous-titres du répertoire courant
+Charge tous les sous-titres du répertoire courant.
 .RE
 .PD 1
 .
 .TP
 .B \-sub-no-text-pp
-Désactive tout post-processing du text après avoir chargé les sous-titres.
+Désactive tout post-traitement du texte après avoir chargé les sous-titres.
 Utilisé pour débogage.
 .TP
-.B \-subalign <0\-2>
-Spécifie comment les sous-titres devraient être alignés avec subpos.
-0 signifie aligner en haut (comportement original/par défaut), 1 signifie
-aligner au centre, et 2 signifie aligner en bas.
+.B \-subalign <0\-2> (OSD uniquement)
+Défini l'alignement des sous-titres alignés avec \-subpos.
+.PD 0
+.RSs
+.IPs 0
+aligner en haut (comportement par défaut)
+.IPs 1
+aligner au milieu
+.IPs 2
+aligner en bas
+.RE
+.PD 1
+.
 .TP
 .B \-subcc \
 Affiche les sous-titres DVD Closed Caption (CC).
@@ -1425,10 +1442,10 @@ malentendants encodés dans les flux VOB sur la plupart des DVD zone 1.
 Actuellement il ne semble pas y avoir de sous-titres CC sur les DVD 
 d'autres zones.
 .TP
-.B \-subcp <codepage>
+.B \-subcp <codepage> (iconv uniquement)
 Si votre système supporte iconv(3), vous pouvez utiliser cette
-option pour spécifier la page de code du sous-titres
-
+option pour définir la page de code du sous-titres
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
@@ -1439,11 +1456,30 @@ option pour spécifier la page de code du sous-titres
 .PD 1
 .
 .TP
+.B \-subcp enca:<langue>:<page\ de\ code\ alternative> (ENCA uniquement)
+Vous pouvez définir votre langue d'après son code à deux lettres pour
+que ENCA détecte automatiquement votre page de code.
+En cas de doute, mettez n'importe quoi et regardez la sortie de mplayer
+en mode verbeux (\-v) pour savoir quelles sont les langues disponibles.
+La page de code alternative sera utilisé en cas d'échec de l'autodétection.
+.sp 1
+.I EXEMPLE:
+.PD 0
+.RSs
+.IPs "\-subcp enca:cs:latin2"
+Devine l'encodage, en faisant l'hypothèse que ce soit du Tchèque, et se rabat
+sur latin 2 si la détection échoue.
+.IPs "\-subcp enca:pl:cp1250"
+Tente avec un code Polonais, ou se rabat sur cp1250.
+.RE
+.PD 1
+.
+.TP
 .B \-subdelay <sec>
-Décale les sous-titres de <sec> secondes.
+Retarde les sous-titres de <sec> secondes.
 Peut être négatif.
 .TP
-.B \-subfile <nomfichier> (CODE BETA)
+.B \-subfile <nomfichier> (CODE BÉTA)
 Inutile actuellement.
 Identique à \-audiofile, mais pour les flux de sous-titres (OggDS ?).
 .TP
@@ -1451,11 +1487,11 @@ Identique à \-audiofile, mais pour les flux de sous-titres (OggDS ?).
 Sélectionne le mode de redimensionnement automatique.
 .br
 .I NOTE:
-Zéro signifie que les tailles du texte et de l'OSD sont des largeur de polices
+0 signifie que les tailles du texte et de l'OSD sont des largeur de polices
 en pixels.
-
+.sp 1
 Le mode peut être:
-
+.sp 1
 .PD 0
 .RSs
 .IPs 0
@@ -1473,7 +1509,7 @@ proportionnel à la diagonale du film (par défaut)
 .B \-subfont-blur <0\-8> (FreeType uniquement)
 Fixe le rayon de flou (blur) sur les polices (par défaut: 2).
 .TP
-.B \-subfont-encoding <valeur>
+.B \-subfont-encoding <valeur> (FreeType uniquement)
 Fixe l'encodage de la police.
 Avec 'unicode', tous les signes du fichier de police seront affichés et unicode
 sera utilisé (par défaut: unicode).
@@ -1486,84 +1522,59 @@ Fixe le coefficient de mise à l'échelle automatique des éléments OSD
 Fixe l'épaisseur de la bordure de police (par défaut: 2).
 .TP
 .B \-subfont-text-scale <0\-100> (FreeType uniquement)
-Fixe le coefficient de mise à l'échelle automatique (en pourcentage de la taille
-de l'écran) (par défaut: 5).
+Fixe le coefficient de mise à l'échelle automatique (en pourcentage de la
+taille de l'écran) (par défaut: 5).
 .TP
-.B \-subfps <rate>
-Spécifie le rapport trame/\:sec du fichier de sous-titres (nombre à virgule),
-par défaut: même rapport que celui du film.
-
+.B \-subfps <flottant>
+Défini le rapport trame/\:sec du sous-titre (le même rapport que celui du
+film par défaut)
+.br
 .I NOTE:
 .br
-UNIQUEMENT pour les fichiers SUB basés sur des trames, c'est-à-dire \& PAS le
-format MicroDVD.
+Uniquement pour les fichiers de sous-titres basés sur des trames,
+c'est-à-dire pas le format MicroDVD.
 .TP
-.B \-subpos <0\-100> (utile avec \-vf expand)
-Spécifie la position des sous-titres sur l'écran.
+.B \-subpos <0\-100> (utile avec \-vf expand) (OSD uniquement)
+Défini la position des sous-titres sur l'écran.
 Cette valeur est la position verticale des sous-titres en % de la hauteur
 de l'écran.
 .TP
-.B \-subwidth <10\-100>
-Spécifie la largeur maximum des sous-titres sur l'écran. 
+.B \-subwidth <10\-100> (OSD uniquement)
+Défini la largeur maximum des sous-titres sur l'écran. 
 Utile pour la sortie TV.
 La valeur est la largeur des sous-titres en % de la largeur de l'écran.
 .TP
 .B \-unicode
-Indique à MPlayer de traiter le fichier de sous-titre au format UNICODE.
+Indique à MPlayer de traiter le fichier de sous-titre au format unicode.
 .TP
 .B \-utf8
-Indique à MPlayer de traiter le fichier de sous-titre au un format UTF8.
+Indique à MPlayer de traiter le fichier de sous-titre au un format UTF-8.
 .TP
-.B \-vobsub <fichier\ vobsub\ sans\ extension>
-Spécifie le fichier VobSub qui sera utilisé pour les sous-titres.
-Indiquez le chemin complet sans extensions, c'est-à-dire sans '.idx',
-\'.ifo' ou '.sub'.
+.B \-vobsub <fichier\ VOBsub\ sans\ extension>
+Défini le fichier VOBsub qui sera utilisé pour les sous-titres.
+Indiquez le chemin complet sans extensions, c'est-à-dire sans '.idx', \
+'.ifo' ou '.sub'.
 .TP
 .B \-vobsubid <0\-31>
-Spécifie le numéro de sous-titre du fichier VobSub.
+Défini le numéro de sous-titre du fichier VOBsub.
 .
 .
 .SH "OPTIONS DE SORTIE AUDIO (MPLAYER UNIQUEMENT)"
 .TP
-.B \-abs <valeur> (OBSOLETE)
+.B \-abs <valeur> (OBSOLÈTE)
 Outrepasse la détection de la taille du buffer audio du pilote/\:de la 
 carte, \-ao oss uniquement
 .TP
-.B \-ao <driver1[:device],driver2,...[,]>
-Spécifie une liste de priorité des drivers (éventuellement avec un
-périphérique) de sortie audio à utiliser.
-\'périphérique' est valide également avec SDL, il signifie alors sous-pilote.
-.br
-.I NOTE:
-Pour obtenir la liste complète des pilotes disponibles, voir \-ao help.
-.br
-Si la liste finit par ',', les autres pilotes seront essayés en cas d'échec.
-
-.I EXEMPLE
-.PD 0
-.RSs
-.IPs "\-ao oss:/\:dev/\:dsp2,oss:/\:dev/\:dsp1,"
-essaie d'utiliser OSS avec le périphérique son spécifié et se rabat sur les
-autres en cas d'échec
-.IPs "\-ao sdl:esd"
-spécifier le sous-pilote SDL
-.RE
-.PD 1
-.
-.TP
-.B \-aofile <nomfichier>
-Nom de fichier pour \-ao pcm.
-.TP
 .B \-aop <list=plugin1,plugin2...:option1=valeur1:opt2=val2...>
-Spécifier le ou les plugins et leurs options (voir également la
+Défini le(s) plugin(s) et leurs options (voir également la
 documentation).
-
+.sp 1
 Les options disponibles sont:
 .
 .RSs
 .IPs list=[plugins]
 liste des plugins séparée par des virgules (resample, surround, format, volume,
-extrastereo, volnorm)
+extrastereo, volnorm, delay)
 .IPs delay=<sec>
 plugin d'exemple, à ne pas utiliser.
 .IPs format=<format>
@@ -1580,10 +1591,10 @@ capacités de compression/\:'soft-clipping' (plugin volume uniquement)
 .
 .TP
 .B \-delay <sec>
-Décalage audio en secondes (peut être +/\:-nombre à virgule).
+Décalage audio en secondes (peut être +/\:- nombre flottant).
 .TP
 .B \-format <0\-8192>
-Sélectionne le format utilisé pour la sortie à partir de la couche filtre 
+Sélectionne le format utilisé pour la sortie depuis la couche filtre 
 (suivant les définitions de libao2/afmt.h):
 .
 .PD 0
@@ -1599,21 +1610,21 @@ Ima-ADPCM
 .IPs 16
 8-bit non signé
 .IPs 32
-16-bit non signé (Little-Endian)
+16-bit non signé (little-endian)
 .IPs 64
-16-bit non signé (Big-Endian)
+16-bit non signé (big-endian)
 .IPs 128
-16-bit non signé (Little-Endian)
+16-bit non signé (little-endian)
 .IPs 256
-16-bit signé (Big-Endian)
+16-bit signé (big-endian)
 .IPs 512
-MPEG (2) Audio
+MPEG (2) audio
 .IPs 1024
 AC3
 .IPs 4096
-32-bit signé (Little-Endian)
+32-bit signé (little-endian)
 .IPs 8192
-32-bit non signé (Big-Endian)
+32-bit non signé (big-endian)
 .RE
 .PD 1
 .
@@ -1621,21 +1632,140 @@ AC3
 .B \-mixer <périph.>
 Cette option indique à MPlayer d'utiliser un autre périphérique de mixage que
 /dev/\:mixer.
+C'est le mixeur utilisé par ALSA
 .TP
-.B \-mixer-channel <mixer line> (\-ao oss uniquement)
-Cette option dit à MPlayer d'utiliser un canal différent du PCM par défaut pour 
-controller le volume. 
-Les options incluent
+.B \-mixer-channel <mixer line> (\-ao oss et \-ao alsa uniquement)
+Cette option dit à MPlayer d'utiliser un canal différent du PCM par défaut
+pour controller le volume. 
+Les options OSS incluent
 .B vol, pcm, line.
 Pour une liste complète des options, cherchez SOUND_DEVICE_NAMES dans
 /usr/include/linux/soundcard.h.
+Pour ALSA vous pouvez utiliser les noms tels qu'indiqués par ex.\& par
+alsamixer, comme
+.B Master, Line, PCM.
 .TP
 .B \-nowaveheader (\-ao pcm uniquement)
-N'inclus pas l'entête wave.
-Utilisé avec RAW PCM.
+Ne pas inclure l'entête wave.
+Utilisé avec PCM brut (RAW).
 .
 .
-.SH "OPTIONS DE SORTIE VIDEO (MPLAYER UNIQUEMENT)"
+.SH "OPTIONS DE SORTIE AUDIO (MPLAYER UNIQUEMENT)"
+Les pilotes de sortie audio sont des interfaces vers différentes
+architectures de sortie.
+La syntaxe est\ :
+.TP
+.B \-ao <driver1[:sous-option1[=valeur]:...],driver2,...[,]>
+Défini une liste de priorité des drivers de sortie audio à utiliser.
+.PP
+Si la liste finit par ',', les autres pilotes seront essayés en cas d'échec.
+Les sous-options sont optionnelles et peuvent, la plupart du temps,
+être omises.
+.br
+.I NOTE:
+Pour obtenir la liste complète des pilotes disponibles, voir \-ao help.
+.sp 1
+.I EXEMPLE
+.PD 0
+.RSs
+.IPs "\-ao alsa,oss,"
+Essaie d'utiliser ALSA, puis OSS ainsi que les autres en cas d'échec.
+.IPs "\-ao alsa:mmap:noblock:device=hw=0.3"
+Initialise le nom de périphérique, en accès non bloquant et mappé en mémoire,
+de la première carte, quatrième périphérique (ouf\ ! ;-).
+.RE
+.PD 1
+.
+.sp 1
+FIXME: Documenter les sous-options de  sdl, arts, esd, jack, nas, macosx,
+sgi, sun, win32, dxr2, mpegpes, null, pcm, plugin.
+.sp 1
+Les pilotes de sorties audio sont\ :
+.
+.TP
+.B alsa\ \ \ 
+Pilote de sortie audio ALSA 0.9/1.x.
+.PD 0
+.RSs
+.IPs mmap\ \ \ 
+Active le mode expérimental mappé en mémoire (ne marche pas avec plus de
+deux canaux)
+.IPs noblock
+Active le mode non-bloquant.
+.IPs device=<device>
+Défini le nom de périphérique.
+Remplacez les ',' par '.' et ':' par '=' dans les noms de périphérique ALSA.
+.RE
+.PD 1
+.TP
+.B alsa1x (OBSOLÈTE)
+Pilote de sortie audio ALSA 1.x.
+Rendu obsolète par le pilote générique audio alsa.
+.TP
+.B alsa9 (OBSOLÈTE)
+Pilote de sortie audio ALSA 0.9.
+Rendu obsolète par le pilote générique audio alsa.
+.TP
+.B alsa5\ \ 
+Pilote de sortie audio ALSA 0.5.
+.TP
+.B oss\ \ \ \ 
+Pilote de sortie audio OSS.
+.PD 0
+.RSs
+.IPs dsp-device
+Défini le périphérique audio d'entrée (/dev/dsp par defaut).
+.RE
+.PD 1
+.TP
+.B sdl\ \ \ \ 
+Pilote de sortie audio de la librairie SDL.
+SDL (Simple Directmedia Layer) est une librairie très indépendante de la
+plateforme.
+.TP
+.B arts\ \ \ 
+Sortie audio par le démon Arts.
+.TP
+.B esd\ \ \ \ 
+Sortie audio par le démon ESD.
+.TP
+.B jack\ \ \ \ 
+Sortie audio par JACK (Jack Audio Connection Kit).
+.TP
+.B nas\ \ \ \ 
+Sortie audio par NAS.
+.TP
+.B macosx (Mac OS X uniquement)
+Pilote de sortie audio natif de Mac OS X.
+.TP
+.B sgi (SGI uniquement)
+Pilote de sortie audio natif de SGI.
+.TP
+.B sun (Sun uniquement)
+Pilote de sortie audio natif de Sun.
+.TP
+.B win32 (Windows uniquement)
+Pilote de sortie audio waveout natif de Windows.
+.TP
+.B dxr2 (also see \-dxr2) (DXR2 uniquement)
+Pilote de sortie de la Creative DXR2.
+.TP
+.B mpegpes (DVB uniquement)
+Pilote de sortie spécifique à DVB.
+.TP
+.B null\ \ \ 
+N'émet pas de son mais maintient la vitesse de lecture.
+Utilisez \-nosound pour des mesures (benchmarking).
+.TP
+.B pcm\ \ \ \ 
+Extrait le son PCM/wave brut.
+Enregistre le son dans ./audiodump.wav.
+.TP
+.B plugin\ \ 
+Pilote de plugin de sortie audio.
+.
+.
+.SH "OPTIONS DE SORTIE VIDÉO (MPLAYER UNIQUEMENT)"
 .TP
 .B \-aa* (\-vo aa uniquement)
 Vous pouvez obtenir une liste et des explication sur les options disponibles
