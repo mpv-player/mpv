@@ -1,0 +1,43 @@
+libmpdemux - MPlayer's input/demuxer layer  (C) A'rpi / MPlayer team
+==========================================
+
+NOTE: It is not in the final form yet! API may change...
+
+Stream input layer:
+===================
+#include "stream.h"
+
+Supported modes:
+- file (by 2048 byte sectors) including STDIN (if filename "-")
+- VCD disk (by 2324 byte mode2 sectors)
+- network (buggy, mpg/avi download-like streaming works, asf not)
+- DVD disk using with libdvdread 0.8 or 0.9
+
+Note: optional CACHE layer with read-ahead and seek-back buffer (not finished)
+
+Demuxer layer:
+==============
+#include "demuxer.h"
+
+Supported formats:
+- MPEG (PS,PES,VOB,ES), including VCD disk image files (.ISO/.BIN)
+- AVI, with or without index, interleaved and non-interleaved formats
+- ASF v1.0 (aka .wmv/.wma)
+- Quicktime MOV - including compressed headers, CBR and VBR
+
+Others:
+=======
+#include "stheader.h" - audio and video stream structs used by header parsers
+#include "parse_es.h" - Mpeg ES stream parser
+
+Using it outside of mplayer tree:
+=================================
+It uses a few things from mplayer tree:
+config.h - system-dependent options, see ./configure
+mp_msg.c/.h - mplayer's message printing code - copy it or impement your own
+help_mp.h - error/info message texts
+bswap.h - little/big endian conversion
+
+If you use it in your project - please tell me!
+
+A'rpi - arpi@thot.banki.hu
