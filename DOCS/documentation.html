@@ -337,11 +337,12 @@ library at all!). The another big feature of mplayer is the wide range of
 supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
 AAlib, DirectFB, but you can use GGI and SDL (and this way all their drivers)
 and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon,
-Mach64, Permedia3) too! Most
+Mach64, Permedia3), too! Most
 of them supports software or hardware scaling, so you can enjoy movies in
 fullscreen. <B>MPlayer</B> supports displaying through some hardware MPEG
-decoder boards, such as the <B><A HREF="DVB">DVB</A></B> and <B> <A
-HREF="DXR3">DXR3/Hollywood+</A></B> ! And what about the nice big antialiased
+decoder boards, such as the <B><A HREF="video.html#2.3.1.16">DVB</A></B> and
+<B> <A HREF="video.html#2.3.1.17">DXR3/Hollywood+</A></B>! And what about the
+nice big antialiased
 shaded subtitles (<B>10 supported types!!!</B>) with european/ISO 8859-1,2
 (Hungarian, English, Czech, etc), Cyrillic, Korean fonts, and the onscreen
 display (OSD)?</P>
@@ -393,7 +394,7 @@ too. So I've decided to write/modify one...</P>
 <LI><B>MPlayer 0.18 "The BugCounter"</B> Jul 9, 2001<BR>
     2 months since 0.17 and here's a new release.. Completed ASF support,
     more subtitle formats, introduced libao (similar to libvo but to audio),
-    even more stable than ever, and so on. It's a MUST !</LI>
+    even more stable than ever, and so on. It's a MUST!</LI>
 <LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B> Oct 8, 2001<BR>
     Hmm. Release again. Tons of new features, beta GUI version, bugs fixed,
     new vo and ao drivers, ported to many systems, including opensource DivX
@@ -423,7 +424,7 @@ will take some time, but it DOES worth it.</P>
   <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
     responsible for generating MMX/3DNow!/etc instructions, thus very important.</LI>
   <LI><B>gcc</B> - suggested versions are: <B>2.95.3</B>, <B>2.95.4</B> and <B>3.1</B>.
-    <B>NEVER</B> use 2.96 or 3.0.x !!! They generate faulty code for MPlayer.
+    <B>NEVER</B> use 2.96 or 3.0.x!!! They generate faulty code for MPlayer.
     If you decide to change gcc from 2.96, then don't decide in favor of 3.0.x
     just because it's newer! Early releases of 3.0.x were even more buggy than
     2.96. So downgrade to 2.95.x (downgrade libstdc++ too, other programs may
@@ -461,19 +462,18 @@ will take some time, but it DOES worth it.</P>
 <P><B>CODECS</B></P>
 
 <UL>
-<LI><B>libavcodec</B> : If you want to use this DivX3/DivX4/DivX5/MP41/MP42/etc
-codec, check the
-<A HREF="codecs.html#2.2.1.2">2.2.1.2</A> section before compiling. Features :<BR>
-<UL>
-  <LI>you can <B>gain DivX/DivX4/DivX5/MP41/MP42 playback on non-x86
-    machines</B></LI>
-  <LI>RealVideo 1.0/VIVO/MJPEG/h263/others playing and encoding</LI>
-  <LI>this codec has the <B>greatest decoding speed</B> for DivX and DivX4/DivX5
-movies (even faster than the original DivX4 library itself) ! Recommended!</LI>
-</UL>
+<LI><B>libavcodec</B>: This codec package is capable of decoding
+  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 encoded video streams on
+  multiple platforms. Details can be found
+  <A HREF="codecs.html#2.2.1.2">here</A>. Features:
+  <UL>
+    <LI>Decoding of above mentioned codecs on non-x86 machines.</LI>
+    <LI>Encoding with most of the above mentioned codecs.</LI>
+    <LI>This is the <B>fastest available</B> codec for DivX/3/4/5 and other
+      MPEG4 types and therefore highly recommended.</LI>
+  </UL>
 </LI>
-
-<LI><B>Win32 codecs</B> : If you plan to use <B>MPlayer</B> on x86
+<LI><B>Win32 codecs:</B> If you plan to use <B>MPlayer</B> on x86
 architecture, you will possibly need them. Download and unzip w32codecs.zip to
 /usr/lib/win32 <B>BEFORE</B> compiling <B>MPlayer</B>, otherwise no Win32
 support will be compiled!<BR>
@@ -489,7 +489,7 @@ package! However, you can use our codecs package with avifile. Features:<BR>
 </UL>
 </LI>
 
-<LI><B>DivX4/DivX5</B> : information about this codec is available in the
+<LI><B>DivX4/DivX5:</B> information about this codec is available in the
 <A HREF="codecs.html#2.2.1.1">2.2.1.1</A> section. If you don't want to encode
 with it, you possibly don't want this codec as <B>libavcodec</B> (see above) is
 much faster than this.<BR>
@@ -497,12 +497,12 @@ Features:
 <UL>
   <LI>1 pass or 2 pass encoding with <A HREF="encoding.html">MEncoder</A></LI>
   <LI>can play old <B>DivX3</B> movies much faster than the Win32 DLL but
-    slower than <B>libavcodec</B> !</LI>
+    slower than <B>libavcodec</B>!</LI>
   <LI>it's closed-source, and only an x86 version is available.</LI>
 </UL>
 </LI>
 
-<LI><B>XviD</B> : Open source encoding alternative to Divx4Linux<BR>
+<LI><B>XviD:</B> Open source encoding alternative to Divx4Linux<BR>
 Features:
 <UL>
   <LI>1 pass or 2 pass encoding with <A HREF="encoding.html">MEncoder</A></LI>
@@ -515,7 +515,7 @@ Features:
 hardware YUV zoom) for decoding <B>3ivx</B> and Indeo 3/4/5 movies, and some
 old formats. And they are multiplatform, so this is the only way to play Indeo on
 non-x86 platforms (well, apart from using XAnim:). But for example Cinepak
-movies are best played with <B>MPlayer</B>'s own Cinepak decoder !</LI>
+movies are best played with <B>MPlayer</B>'s own Cinepak decoder!</LI>
 
 <LI>For <B>Ogg Vorbis</B> audio decoding you need to install
   <CODE>libvorbis</CODE> properly. Use deb/rpm packages if available, or
@@ -544,7 +544,7 @@ their memory, with <B>small CPU usage</B> (zooming doesn't increase it!), thus
 you get a nice and very fast fullscreen playing.</P>
 
 <UL>
-<LI><B>Matrox G200/G400/G450/G550 cards</B>: although a
+<LI><B>Matrox G200/G400/G450/G550 cards:</B> although a
   <A HREF="video.html#2.3.1.9">Vidix driver</A> is provided, it is recommended
   to use the old mga_vid kernel module instead, for it works much better.
   Please see the <A HREF="video.html#2.3.1.7">mga_vid</A> section about its
@@ -552,9 +552,9 @@ you get a nice and very fast fullscreen playing.</P>
   compiling <B>MPlayer</B>, otherwise no mga_vid support will be built. Also
   check out the <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A> section.
   <U><B>If you are non-Linux user</B></U>, your only possibility is the Vidix
-  driver: read <A HREF="video.html#2.3.1.15">Vidix</A> documentation !</LI>
+  driver: read <A HREF="video.html#2.3.1.15">Vidix</A> documentation!</LI>
 
-<LI><B>3Dfx Voodoo3/Banshee cards</B>: please see the
+<LI><B>3Dfx Voodoo3/Banshee cards:</B> please see the
   <A HREF="video.html#2.3.1.9">2.3.1.9</A> section in order to gain big
   speedup. It is important to do these steps <I>before</I> compiling
   <B>MPlayer</B>, otherwise no 3Dfx support will be built. Also see the <A
@@ -562,24 +562,24 @@ you get a nice and very fast fullscreen playing.</P>
   least 4.2.0, as 3dfx Xv driver was broken in 4.1.0, and earlier
   releases!</LI>
 
-<LI><B>ATI cards</B>: <A HREF="video.html#2.3.1.14">Vidix driver</A> is
+<LI><B>ATI cards:</B> <A HREF="video.html#2.3.1.14">Vidix driver</A> is
   provided for the following cards:
   <B>Radeon</B>, <B>Rage128</B>, <B>Mach64</B> (Rage XL/Mobility, Xpert98).
   Also see the <A HREF="video.html#2.3.1.A.2">ATI cards
   section</A> of the TV-out documentation, to know if you card's TV-out is
   supported under Linux/MPlayer.</LI>
 
-<LI><B>S3 cards</B>: the Savage and Virge/DX chips have hardware acceleration. Use as
+<LI><B>S3 cards:</B> the Savage and Virge/DX chips have hardware acceleration. Use as
 new XFree86 version as possible, older drivers are buggy. Savage chips
 have problems with YV12 display, see <A HREF="video.html#2.3.1.2.2">S3 Xv
 section</A> for details. Older, Trio cards have no, or slow hardware
 support.</LI>
 
-<LI><B>nVidia cards</B>: very bad choice for video playing (nVidia has
+<LI><B>nVidia cards:</B> very bad choice for video playing (nVidia has
 <A HREF="users_against_developers.html#nvidia">different opinion</A>!).
 nVidia's cards have very cheap and bad
 quality chips. Moreover, <U>the built-in nVidia driver in XFree86 doesn't
-contain support for hardware YUV acceleration for all nVidia cards !</U>
+contain support for hardware YUV acceleration for all nVidia cards!</U>
 You have to download nVidia's closed-source drivers from nVidia.com. See
 details in <A HREF="video.html#2.3.1.2.3">nVidia Xv driver</A> section.</LI>
 
@@ -587,12 +587,12 @@ details in <A HREF="video.html#2.3.1.2.3">nVidia Xv driver</A> section.</LI>
   (pm3_vid). Please see the <A HREF="video.html#2.3.1.15">Vidix
   instructions</A>.</LI>
 
-<LI><B>other cards</B>: none of the above?
+<LI><B>other cards:</B> none of the above?
   <UL>
     <LI>Try if the XFree86 driver (and your card) supports hardware
       acceleration. See the <A HREF="video.html#2.3.1.2">Xv section</A> for
       details.</LI>
-    <LI>If it doesn't, then your card's video features aren't supported under your OS :(<BR>
+    <LI>If it doesn't, then your card's video features aren't supported under your OS:(<BR>
       If it does hardware scaling under Windows, it doesn't mean it will do the same
       under Linux or other OS, it depends on the drivers! Most manufacturers don't
       make Linux drivers nor release chip specs - so you're unlucky if using their cards.
@@ -613,15 +613,15 @@ or changing to a smaller video mode, for
 example to 352x288. If you don't have YUV acceleration, this latter method is
 the recommended one. Throughout <B>MPlayer</B>, <U>this behavior can
 be switched on by using the <CODE>-vm</CODE> option</U> and with
-the following drivers :
+the following drivers:
 </P>
 
 <UL>
-  <LI><B>using</B> XFree86 : see details in
+  <LI><B>using</B> XFree86: see details in
     <A HREF="video.html#2.3.1.3">DGA driver</A> and
     <A HREF="video.html#2.3.1.13">X11 driver</A> sections. DGA is
     recommended! Also try DGA via SDL, sometimes it's better.</LI>
-  <LI><B>not using</B> XFree86 : try the drivers in the following order :
+  <LI><B>not using</B> XFree86: try the drivers in the following order:
     <A HREF="video.html#2.3.1.12">vesa</A>,
     <A HREF="video.html#2.3.1.6">fbdev</A>,
     <A HREF="video.html#2.3.1.5">svgalib</A>,
@@ -631,18 +631,18 @@ the following drivers :
 <P><B>SOUND CARDS</B></P>
 
 <UL>
-<LI><B>Soundblaster Live!</B> : with this card you can use 4 or 6 (<B>5.1</B>)
+<LI><B>Soundblaster Live!:</B> with this card you can use 4 or 6 (<B>5.1</B>)
 channels AC3 decoding instead of 2. Read the
 <A HREF="codecs.html#2.2.2.1">Software AC3 decoding</A> section.
 For hardware AC3 passthrough you MUST use ALSA 0.9 oss emulation!</LI>
 
-<LI><B>C-Media with SP/DIF out</B> : hardware AC3 passthrough is possible
+<LI><B>C-Media with SP/DIF out:</B> hardware AC3 passthrough is possible
   with these cards, see
   <A HREF="codecs.html#2.2.2.2">Hardware AC3 decoding</A> section.</LI>
 
 <LI><B>other cards'</B> features aren't supported by <B>MPlayer</B>.
   <U>It's very recommended to read the <A HREF="sound.html#2.3.2">sound card
-  section</A> !</U>
+  section</A>!</U>
 </UL>
 
 <P><B>FEATURES</B></P>
@@ -717,7 +717,7 @@ multiuser system!</B> It's a clear way for everyone to gain root.
 <P>At this point, <B>MPlayer</B> is ready to use. The directory
 <CODE>$PREFIX/share/mplayer</CODE> contains the <CODE>codecs.conf</CODE>
 file, which is used to tell the program all the codecs and their capabilities.
-This file should always be kept uptodate together with the main binary !<BR>
+This file should always be kept uptodate together with the main binary!<BR>
 Check if you have codecs.conf in your home directory (~/.mplayer/codecs.conf)
 left from old MPlayer versions, and remove it!</P>
 
@@ -794,7 +794,7 @@ The command line options differ slightly for the different formats:
 <B>VobSub subtitles</B><BR> 
 VobSub subtitles consist of a big (some megabytes) .SUB file, and optional 
 .IDX and/or .IFO files.<BR>
-Usage : if you have files like <CODE>sample.sub</CODE>, <CODE>sample.ifo</CODE>,
+Usage: if you have files like <CODE>sample.sub</CODE>, <CODE>sample.ifo</CODE>,
 <CODE>sample.idx</CODE> - you have to pass the <CODE>-vobsub sample -vobsubid
 &lt;id&gt;</CODE> options (optionally with pathname, of course). The
 <CODE>-vobsubid</CODE> option is like <CODE>-sid</CODE> for DVDs, you can
@@ -804,16 +804,16 @@ choose between subtitle tracks (languages) with it.</P>
 <B>Other subtitles</B><BR>
 The other formats consist of a single text file containing timing, placement
 and text information.<BR>
-Usage : if you have a file like <CODE>sample.txt</CODE>, you have to pass 
+Usage: if you have a file like <CODE>sample.txt</CODE>, you have to pass 
 the option <CODE>-sub sample.txt</CODE> (optionally with pathname, of course). 
 </P>
 
 <P>
 <B>Adjusting subtitle timing and placement</B><BR>
 
-<CODE>-subdelay &lt;sec&gt;</CODE> : Delays subtitles by &lt;sec&gt; seconds. Can be negative.<BR>
-<CODE>-subfps &lt;rate&gt;</CODE> : Specify frame/sec rate of subtitle file (float number)<BR>
-<CODE>-subpos &lt;0 - 100&gt;</CODE> : Specify the position of subtitles.<BR>
+<CODE>-subdelay &lt;sec&gt;</CODE>: Delays subtitles by &lt;sec&gt; seconds. Can be negative.<BR>
+<CODE>-subfps &lt;rate&gt;</CODE>: Specify frame/sec rate of subtitle file (float number)<BR>
+<CODE>-subpos &lt;0 - 100&gt;</CODE>: Specify the position of subtitles.<BR>
 </P>
 <P>
 If you experience a growing delay between the movie and the subtitles when using a MicroDVD
@@ -829,7 +829,7 @@ the MPlayer FTP site to do this conversion for you.</P>
 <P><B>MPlayer</B> introduces a new subtitle format called <B>MPsub</B>.
 It was designed by me (Gabucino). Basically its main feature is being
 <I>dynamically</I> time-based (although it has frame-based mode too). Example (from
-<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>) :
+<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>):
 </P>
 
 <P><CODE><I>
@@ -892,7 +892,7 @@ It's a complete tool to convert from TTF/Type1/etc font to mplayer font pkg.
 
 <P>After that, UNZIP the file you downloaded to <CODE>~/.mplayer</CODE> or
 <CODE>$PREFIX/share/mplayer</CODE>. Then rename or symlink one of them to
-<CODE>font</CODE> (like : <CODE>ln -s ~/.mplayer/arial-24
+<CODE>font</CODE> (like: <CODE>ln -s ~/.mplayer/arial-24
 ~/.mplayer/font</CODE>). Now you have to see a timer at the upper left corner
 of the movie (switch it off with the "o" key).</P>
 
@@ -1278,7 +1278,7 @@ screen, although input works with xawtv or similar, then try to use the
 
 <P><B><U>Description</U></B>:</P>
 
-<P>Draws a white rectangle of the requested width and height at the designated
+<P>Draws a rectangle of the requested width and height at the designated
   coordinates over the image.  Useful to get visual feedback for the parameters
   of <CODE>-vop crop</CODE> before applying them.</P>
 
@@ -1435,7 +1435,7 @@ ENTER pt_step 1 1
 
 <P><B>Mouse</B></P>
 
-<P>Note : mouse is only supported under X</P>
+<P>Note: mouse is only supported under X</P>
 
 <UL>
 <LI>MOUSE_BTN0 (Left button)</LI>
@@ -1449,7 +1449,7 @@ ENTER pt_step 1 1
 
 <P><B>Joystick</B></P>
 
-<P>Note : joystick support must be enabled at compile time</P>
+<P>Note: joystick support must be enabled at compile time</P>
 
 <UL>
 <LI>JOY_RIGHT or JOY_AXIS0_PLUS</LI>
@@ -1605,7 +1605,7 @@ use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
 <P>Playing goes by simply using adding the URL to the command line. <B>MPlayer</B>
 also honors the http_proxy environment variable, and uses proxy if available.
-Proxy usage can also be forced :</P>
+Proxy usage can also be forced:</P>
 
 <P><CODE>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
@@ -1613,7 +1613,8 @@ Proxy usage can also be forced :</P>
 used to play from FTP:</P>
 <P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
 
-<P>Note: it's also recommended to enable CACHE when playback from network:</P>
+<P>Note: It is recommended to enable the cache when playing from the network:</P>
+
 <P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</CODE></P>
 
 
@@ -2526,7 +2527,7 @@ Send Matrox related questions here
 </LI>
 <LI>MPlayer &amp; DVB card users:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
-<P>Things related to the hardware decoder card called DVB. (NOT dxr3!)</P>
+<P>Things related to the hardware decoder card called DVB. (NOT DXR3!)</P>
 </LI>
 <LI>MPlayer CVS-log: <BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A>
