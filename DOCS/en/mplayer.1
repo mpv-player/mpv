@@ -2193,6 +2193,14 @@ likely will not work correctly with mplayer, but it can be used with
 essential! (A/V sync will break if they are wrong.) The optional start
 parameter tells the filter where in the telecine pattern to start
 (0-3).
+.IPs "tfields[=mode]"
+Temporal field separation -- split fields into frames, doubling the
+output framerate. In mode 0, the filter will leave the fields
+unchanged, resulting in half-height output. In mode 1, interlaced
+parts of the image will be interpolated to reconstruct full-height
+frames. Like the telecine filter, "tfields" will only work properly
+with mencoder, and only if both -fps and -ofps are set to the desired
+(double) framerate!
 .IPs "boxblur=radius:power[:radius:power]"
 box blur
 .RSss
