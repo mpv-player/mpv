@@ -79,8 +79,8 @@ go for the 3.0.4 packages offered for version 7.2 and later. You can also
 get <ulink url="ftp://people.redhat.com/jakub/gcc/3.2-10/">gcc-3.2-10 packages</ulink>
 (unofficial, but working fine)
 and you can install them along the gcc-2.96 you already have. MPlayer will
-detect it and use 3.1 instead of 2.96. If you do not want to or cannot use
-the binary packages, here is how you can compile GCC 3.1 from source:
+detect it and use 3.2 instead of 2.96. If you do not want to or cannot use
+the binary packages, here is how you can compile GCC 3.x from source:
 </para>
 
 <procedure>
