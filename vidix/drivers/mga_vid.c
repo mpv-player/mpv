@@ -6,14 +6,12 @@
     YUY2 support (see config.format) added by A'rpi/ESP-team
     double buffering added by A'rpi/ESP-team
 
-    Brightness/contrast support by Nick Kurshev
+    Brightness/contrast support by Nick Kurshev/Dariush Pietrzak (eyck) and me
 
     TODO:
 	* fix doublebuffering for vidix
 	* fix memory size detection (current reading pci userconfig isn't
 	    working as requested - returns the max avail. ram on arch?)
-	* fix/complete brightness/contrast handling (Nick)
-	    MGA users: please test this! (#define MGA_EQUALIZER)
 	* translate all non-english comments to english
 */
 
@@ -45,8 +43,6 @@
 #undef MGA_ALLOW_IRQ
 
 #define MGA_VSYNC_POS 2
-
-#undef MGA_EQUALIZER
 
 #undef MGA_PCICONFIG_MEMDETECT
 
@@ -122,11 +118,7 @@ static vidix_capability_t mga_cap =
     4,
     4,
     -1,
-    FLAG_UPSCALER | FLAG_DOWNSCALER
-#ifdef MGA_EQUALIZER
-    | FLAG_EQUALIZER
-#endif
-    ,
+    FLAG_UPSCALER | FLAG_DOWNSCALER | FLAG_EQUALIZER,
     VENDOR_MATROX,
     -1, /* will be set in vixProbe */
     { 0, 0, 0, 0}
@@ -734,7 +726,7 @@ int vixConfigPlayback(vidix_playback_t *config)
     config->dest.pitch.y=32;
     config->dest.pitch.u=config->dest.pitch.v=16;
 
-    printf("[mga] Setting up a %dx%d+%d+%d video window (src %dx%d) format %X\n",
+    printf("[mga] Setting up a %dx%d-%dx%d video window (src %dx%d) format %X\n",
            dw, dh, x, y, sw, sh, config->fourcc);
 
     if ((sw < 4) || (sh < 4) || (dw < 4) || (dh < 4))
@@ -851,7 +843,6 @@ int vixConfigPlayback(vidix_playback_t *config)
         break;
 
     }
-
 
 	//Disable contrast and brightness control
 	regs.besglobctl |= (1<<5) + (1<<7);
@@ -1443,46 +1434,49 @@ int vixSetGrKeys(const vidix_grkey_t *grkey)
     return(0);
 }
 
-#ifdef MGA_EQUALIZER
-static vidix_video_eq_t equal =
+int vixPlaybackSetEq( const vidix_video_eq_t * eq)
 {
- VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST,
- 0, 0, 0, 0, 0, 0, 0, 0 };
-int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
-{
-   uint32_t beslumactl;
-   int brightness,contrast;
+   uint32_t luma = 0;
+   float factor = 256.0 / 2000;
 
-    /* contrast and brightness control isn't supported with G200,
-       don't enable c/b control and set values, just return error -- alex */
+    /* contrast and brightness control isn't supported on G200 - alex */
     if (!is_g400)
     {
 	if (mga_verbose > 1)
 		printf("[mga] equalizer isn't supported with G200\n");
-	return ENOSYS;
+	return(ENOTSUP);
+    }
+    
+    if (eq->cap & VEQ_CAP_BRIGHTNESS)
+	luma += ((int)(eq->brightness * factor) << 16);
+    if (eq->cap & VEQ_CAP_CONTRAST)
+	luma += ((int)(eq->contrast * factor) & 0xFFFF);
+
+    regs.beslumactl = luma+0x80;
+
+    writel(regs.beslumactl,mga_mmio_base + BESLUMACTL);
+    return(0);
+}
+
+int vixPlaybackGetEq( vidix_video_eq_t * eq)
+{
+    uint32_t luma;
+    float factor = 2000.0 / 256;
+
+    /* contrast and brightness control isn't supported on G200 - alex */
+    if (!is_g400)
+    {
+	if (mga_verbose > 1)
+		printf("[mga] equalizer isn't supported with G200\n");
+	return(ENOTSUP);
     }
 
-    if(eq->cap & VEQ_CAP_BRIGHTNESS) equal.brightness = eq->brightness;
-    if(eq->cap & VEQ_CAP_CONTRAST)   equal.contrast   = eq->contrast;
-    equal.flags = eq->flags;
+    regs.beslumactl = readl(mga_mmio_base + BESLUMACTL);
+    luma = regs.beslumactl-0x80;
 
-	//Enable contrast and brightness control
-	writel(readl(mga_mmio_base + BESGLOBCTL) & ~((1<<5) + (1<<7)),mga_mmio_base + BESGLOBCTL);
-	brightness = (equal.brightness * 128) / 1000;
-	if(brightness < -128) brightness = -128;
-	if(brightness > 127) brightness = 127;
-	contrast = ((equal.contrast + 1000) * 128) / 1000;
-	if(contrast < 0)   contrast = 0;
-	if(contrast > 255) contrast = 255;
-	beslumactl = ((brightness & 0xff) << 16) | (contrast & 0xff);
+    eq->brightness = (luma >> 16) * factor;
+    eq->contrast = (luma & 0xFFFF) * factor;
+    eq->cap = VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST;
 
-    writel(beslumactl,mga_mmio_base + BESLUMACTL);
-    return 0;
+    return(0);
 }
-
-int 	vixPlaybackGetEq( vidix_video_eq_t * eq)
-{
-  memcpy(eq,&equal,sizeof(vidix_video_eq_t));
-  return 0;
-}
-#endif
