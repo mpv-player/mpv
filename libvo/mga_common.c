@@ -421,7 +421,10 @@ static uint32_t preinit(const char *vo_subdevice)
 	}
 
 #ifdef VO_XMGA
-  if (!vo_init()) return -1;
+  if (!vo_init()) {
+    close(f);
+    return -1;
+  }
 #endif
 
   return 0;
