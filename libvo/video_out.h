@@ -38,6 +38,7 @@
 #define VOCTRL_RESUME 8
 /* libmpcodecs direct rendering: */
 #define VOCTRL_GET_IMAGE 9
+#define VOCTRL_DRAW_IMAGE 13
 /* decoding ahead: */
 #define VOCTRL_GET_NUM_FRAMES 10
 #define VOCTRL_GET_FRAME_NUM  11
