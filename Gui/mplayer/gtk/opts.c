@@ -86,8 +86,8 @@ static struct
        int    gtkVPreferences = 0;
 static int    gtkVOSSConfig = 0;
 static int    old_audio_driver = 0;
-static char * ao_driver[2];
-static char * vo_driver[2];
+static char * ao_driver[3];
+static char * vo_driver[3];
 static int    old_video_driver = 0;
 
 void ShowOSSConfig( void );
@@ -115,7 +115,7 @@ void ShowPreferences( void )
  gtk_adjustment_set_value( HSExtraStereoMuladj,gtkAOExtraStereoMul );
  {
   int    i = 0;
-  char * tmp[2]; tmp[1]="";
+  char * tmp[3]; tmp[2]="";
   old_audio_driver=0;
   while ( audio_out_drivers[i] )
    {
@@ -123,12 +123,12 @@ void ShowPreferences( void )
     if ( !strcmp( info->short_name,"plugin" ) ) continue;
     if ( gtkAODriver )
       if ( !strcmp( gtkAODriver,info->short_name ) ) old_audio_driver=i - 1;
-    tmp[0]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLADrivers ),tmp );
+    tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLADrivers ),tmp );
    }
   gtk_clist_select_row( GTK_CLIST( CLADrivers ),old_audio_driver,0 );
   gtk_clist_get_text( GTK_CLIST( CLADrivers ),old_audio_driver,0,(char **)&ao_driver );
   gtk_widget_set_sensitive( AConfig,FALSE );
-  if ( !strcmp( ao_driver[0],"OSS/ioctl audio output" ) ) gtk_widget_set_sensitive( AConfig,TRUE );
+  if ( !strcmp( ao_driver[0],"oss" ) ) gtk_widget_set_sensitive( AConfig,TRUE );
  }
 
 // -- 2. page
@@ -141,7 +141,7 @@ void ShowPreferences( void )
  gtk_adjustment_set_value( HSPanscanadj,vo_panscan );
  {
   int i = 0, c = 0;
-  char * tmp[2]; tmp[1]="";
+  char * tmp[3]; tmp[2]="";
   old_video_driver=0; 
   while ( video_out_drivers[i] )
    if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
@@ -149,7 +149,7 @@ void ShowPreferences( void )
      const vo_info_t *info = video_out_drivers[i - 1]->get_info();
      if ( gtkVODriver )
       if ( !strcmp( gtkVODriver,info->short_name ) ) old_video_driver=c; c++;
-     tmp[0]=(char *)info->short_name; gtk_clist_append( GTK_CLIST( CLVDrivers ),tmp );
+     tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLVDrivers ),tmp );
     }
   gtk_clist_select_row( GTK_CLIST( CLVDrivers ),old_video_driver,0 );
   gtk_clist_get_text( GTK_CLIST( CLVDrivers ),old_video_driver,0,(char **)&vo_driver );
@@ -267,17 +267,10 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkAONoSound=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNoSound ) );
 	gtkSet( gtkSetExtraStereo,HSExtraStereoMuladj->value,NULL );
 	gtkSet( gtkSetAudioDelay,HSAudioDelayadj->value,NULL );
-	{
-	 int    i = 0;
-	 while ( audio_out_drivers[i] )
-	  {
-	   const ao_info_t *info = audio_out_drivers[i++]->info;
-	   if ( !strcmp( info->short_name,"plugin" ) ) continue;
-	   if ( !strcmp( info->name,ao_driver[0] ) ) gtkAODriver=(char *)info->short_name;
-	  }
-	}
-	if ( gtkVODriver ) free( gtkVODriver );
-	gtkVODriver=strdup( vo_driver[0] );
+        gfree( (void **)&gtkAODriver );
+	gtkAODriver=gstrdup( ao_driver[0] );
+	gfree( (void **)&gtkVODriver );
+	gtkVODriver=gstrdup( vo_driver[0] );
 
 	// -- 2. page
 	gtkEnableVideoEqualizer=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBVideoEqualizer ) );
@@ -319,7 +312,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	break;
    case bAConfig:
         gtk_widget_set_sensitive( AConfig,FALSE );
-        if ( !strcmp( ao_driver[0],"OSS/ioctl audio output" ) ) { ShowOSSConfig(); gtk_widget_set_sensitive( AConfig,TRUE ); }
+        if ( !strcmp( ao_driver[0],"oss" ) ) { ShowOSSConfig(); gtk_widget_set_sensitive( AConfig,TRUE ); }
 	break;
 //   case bVconfig:
 //	break;
@@ -386,7 +379,7 @@ static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,g
    case 0: // audio driver 
 	gtk_clist_get_text( GTK_CLIST( CLADrivers ),row,0,(char **)&ao_driver ); 
 	gtk_widget_set_sensitive( AConfig,FALSE );
-	if ( !strcmp( ao_driver[0],"OSS/ioctl audio output" ) ) gtk_widget_set_sensitive( AConfig,TRUE );
+	if ( !strcmp( ao_driver[0],"oss" ) ) gtk_widget_set_sensitive( AConfig,TRUE );
 	break;
    case 1: // video driver 
 	gtk_clist_get_text( GTK_CLIST( CLVDrivers ),row,0,(char **)&vo_driver ); 
@@ -432,9 +425,6 @@ GtkWidget * create_Preferences( void )
   GList	    * CBVFM_items = NULL;
   GtkWidget * frame6;
   GtkWidget * vbox7;
-//  GtkWidget * hbox4;
-//  GtkWidget * label10;
-//  GtkWidget * hbuttonbox4;
   GtkWidget * vbox8;
   GtkWidget * table1;
   GtkWidget * label11;
@@ -457,6 +447,7 @@ GtkWidget * create_Preferences( void )
   GtkWidget * label4;
   GtkWidget * hseparator1;
   GtkWidget * hbuttonbox1;
+  GtkWidget * frame;
   GtkAccelGroup * accel_group;
 
   accel_group=gtk_accel_group_new();
@@ -464,11 +455,7 @@ GtkWidget * create_Preferences( void )
   Preferences=gtk_window_new( GTK_WINDOW_DIALOG );
   gtk_widget_set_name( Preferences,"Preferences" );
   gtk_object_set_data( GTK_OBJECT( Preferences ),"Preferences",Preferences );
-#if 0
-  gtk_widget_set_usize( Preferences,512,440 );
-#else
-  gtk_widget_set_usize( Preferences,512,395 );
-#endif
+  gtk_widget_set_usize( Preferences,512,400 );
   gtk_window_set_title( GTK_WINDOW( Preferences ),MSGTR_Preferences );
   gtk_window_set_position( GTK_WINDOW( Preferences ),GTK_WIN_POS_CENTER );
   gtk_window_set_policy( GTK_WINDOW( Preferences ),FALSE,FALSE,FALSE );
@@ -539,12 +526,21 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( hbox1 ),frame9,TRUE,TRUE,0 );
   gtk_frame_set_shadow_type( GTK_FRAME( frame9 ),GTK_SHADOW_ETCHED_OUT );
 
+  frame=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame,"frame" );
+  gtk_widget_ref( frame );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame );
+  gtk_container_add( GTK_CONTAINER( frame9 ),frame );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+
   vbox2=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox2,"vbox2" );
   gtk_widget_ref( vbox2 );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox2",vbox2,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( vbox2 );
-  gtk_container_add( GTK_CONTAINER( frame9 ),vbox2 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox2 );
 
   scrolledwindow3=gtk_scrolled_window_new( NULL,NULL );
   gtk_widget_set_name( scrolledwindow3,"scrolledwindow3" );
@@ -554,15 +550,16 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( vbox2 ),scrolledwindow3,TRUE,TRUE,0 );
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow3 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
 
-  CLADrivers=gtk_clist_new( 1 );
+  CLADrivers=gtk_clist_new( 2 );
   gtk_widget_set_name( CLADrivers,"CLADrivers" );
   gtk_widget_ref( CLADrivers );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"CLADrivers",CLADrivers,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( CLADrivers );
   gtk_container_add( GTK_CONTAINER( scrolledwindow3 ),CLADrivers );
-  gtk_clist_set_column_width( GTK_CLIST( CLADrivers ),0,80 );
+  gtk_clist_set_column_width( GTK_CLIST( CLADrivers ),0,50 );
   gtk_clist_column_titles_show( GTK_CLIST( CLADrivers ) );
   gtk_clist_set_shadow_type( GTK_CLIST( CLADrivers ),GTK_SHADOW_NONE );
+  gtk_widget_set_usize( CLADrivers,200,-2 );
 
   label8=gtk_label_new( MSGTR_PREFERENCES_AvailableDrivers );
   gtk_widget_set_name( label8,"label8" );
@@ -587,7 +584,6 @@ GtkWidget * create_Preferences( void )
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"AConfig",AConfig,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( AConfig );
   gtk_container_add( GTK_CONTAINER( hbuttonbox2 ),AConfig );
-  GTK_WIDGET_UNSET_FLAGS( AConfig,GTK_CAN_FOCUS );
 
   frame10=gtk_frame_new( NULL );
   gtk_widget_set_name( frame10,"frame10" );
@@ -597,12 +593,21 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( hbox1 ),frame10,TRUE,TRUE,0 );
   gtk_frame_set_shadow_type( GTK_FRAME( frame10 ),GTK_SHADOW_ETCHED_OUT );
 
+  frame=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame,"frame" );
+  gtk_widget_ref( frame );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame );
+  gtk_container_add( GTK_CONTAINER( frame10 ),frame );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+
   vbox3=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox3,"vbox3" );
   gtk_widget_ref( vbox3 );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox3",vbox3,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( vbox3 );
-  gtk_container_add( GTK_CONTAINER( frame10 ),vbox3 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox3 );
   gtk_widget_set_usize( vbox3,250,-2 );
 
   CBNoSound=gtk_check_button_new_with_label( MSGTR_PREFERENCES_DoNotPlaySound );
@@ -724,12 +729,21 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( hbox2 ),frame7,TRUE,TRUE,0 );
   gtk_frame_set_shadow_type( GTK_FRAME( frame7 ),GTK_SHADOW_ETCHED_OUT );
 
+  frame=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame,"frame" );
+  gtk_widget_ref( frame );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame );
+  gtk_container_add( GTK_CONTAINER( frame7 ),frame );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+
   vbox4=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox4,"vbox4" );
   gtk_widget_ref( vbox4 );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox4",vbox4,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( vbox4 );
-  gtk_container_add( GTK_CONTAINER( frame7 ),vbox4 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox4 );
 
   scrolledwindow2=gtk_scrolled_window_new( NULL,NULL );
   gtk_widget_set_name( scrolledwindow2,"scrolledwindow2" );
@@ -739,15 +753,16 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( vbox4 ),scrolledwindow2,TRUE,TRUE,0 );
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow2 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
 
-  CLVDrivers=gtk_clist_new( 1 );
+  CLVDrivers=gtk_clist_new( 2 );
   gtk_widget_set_name( CLVDrivers,"CLVDrivers" );
   gtk_widget_ref( CLVDrivers );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"CLVDrivers",CLVDrivers,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( CLVDrivers );
   gtk_container_add( GTK_CONTAINER( scrolledwindow2 ),CLVDrivers );
-  gtk_clist_set_column_width( GTK_CLIST( CLVDrivers ),0,80 );
+  gtk_clist_set_column_width( GTK_CLIST( CLVDrivers ),0,50 );
   gtk_clist_column_titles_show( GTK_CLIST( CLVDrivers ) );
   gtk_clist_set_shadow_type( GTK_CLIST( CLVDrivers ),GTK_SHADOW_NONE );
+  gtk_widget_set_usize( CLVDrivers,200,-2 );
 
   label7=gtk_label_new( MSGTR_PREFERENCES_AvailableDrivers );
   gtk_widget_set_name( label7,"label7" );
@@ -772,7 +787,6 @@ GtkWidget * create_Preferences( void )
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"VConfig",VConfig,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( VConfig );
   gtk_container_add( GTK_CONTAINER( hbuttonbox3 ),VConfig );
-  GTK_WIDGET_UNSET_FLAGS( VConfig,GTK_CAN_FOCUS );
 
   frame8=gtk_frame_new( NULL );
   gtk_widget_set_name( frame8,"frame8" );
@@ -782,12 +796,21 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( hbox2 ),frame8,TRUE,TRUE,0 );
   gtk_frame_set_shadow_type( GTK_FRAME( frame8 ),GTK_SHADOW_ETCHED_OUT );
 
+  frame=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame,"frame" );
+  gtk_widget_ref( frame );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame );
+  gtk_container_add( GTK_CONTAINER( frame8 ),frame );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+
   vbox5=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox5,"vbox5" );
   gtk_widget_ref( vbox5 );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox5",vbox5,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( vbox5 );
-  gtk_container_add( GTK_CONTAINER( frame8 ),vbox5 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox5 );
   gtk_widget_set_usize( vbox5,250,-2 );
 
   CBVideoEqualizer=gtk_check_button_new_with_label( MSGTR_PREFERENCES_VideoEqu );
@@ -881,12 +904,21 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( vbox6 ),frame5,FALSE,FALSE,0 );
   gtk_frame_set_shadow_type( GTK_FRAME( frame5 ),GTK_SHADOW_ETCHED_OUT );
 
+  frame=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame,"frame" );
+  gtk_widget_ref( frame );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame );
+  gtk_container_add( GTK_CONTAINER( frame5 ),frame );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+
   vbox600=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox600,"vbox600" );
   gtk_widget_ref( vbox600 );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox600",vbox600,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( vbox600 );
-  gtk_container_add( GTK_CONTAINER( frame5 ),vbox600 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox600 );
 
   RBOSDNone=gtk_radio_button_new_with_label( OSD_group,MSGTR_PREFERENCES_None );
   OSD_group=gtk_radio_button_group( GTK_RADIO_BUTTON( RBOSDNone ) );
@@ -921,12 +953,21 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( vbox6 ),frame6,FALSE,FALSE,0 );
   gtk_frame_set_shadow_type( GTK_FRAME( frame6 ),GTK_SHADOW_ETCHED_OUT );
 
+  frame=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame,"frame" );
+  gtk_widget_ref( frame );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame );
+  gtk_container_add( GTK_CONTAINER( frame6 ),frame );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+
   vbox7=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox7,"vbox7" );
   gtk_widget_ref( vbox7 );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox7",vbox7,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( vbox7 );
-  gtk_container_add( GTK_CONTAINER( frame6 ),vbox7 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox7 );
 #if 0
   hbox4=gtk_hbox_new( FALSE,0 );
   gtk_widget_set_name( hbox4,"hbox4" );
@@ -967,7 +1008,6 @@ GtkWidget * create_Preferences( void )
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"BLoadSubtitle",BLoadSubtitle,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( BLoadSubtitle );
   gtk_container_add( GTK_CONTAINER( hbuttonbox4 ),BLoadSubtitle );
-  GTK_WIDGET_UNSET_FLAGS( BLoadSubtitle,GTK_CAN_FOCUS );
 #endif
   vbox8=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox8,"vbox8" );
@@ -1081,12 +1121,21 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( vbox6 ),frame12,TRUE,TRUE,0 );
   gtk_frame_set_shadow_type( GTK_FRAME( frame12 ),GTK_SHADOW_ETCHED_OUT );
 
+  frame=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame,"frame" );
+  gtk_widget_ref( frame );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame );
+  gtk_container_add( GTK_CONTAINER( frame12 ),frame );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+  
   vbox603=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox603,"vbox603" );
   gtk_widget_ref( vbox603 );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox603",vbox603,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( vbox603 );
-  gtk_container_add( GTK_CONTAINER( frame12 ),vbox603 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox603 );
 
   hbox6=gtk_hbox_new( FALSE,0 );
   gtk_widget_set_name( hbox6,"hbox6" );
@@ -1128,7 +1177,6 @@ GtkWidget * create_Preferences( void )
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"BLoadFont",BLoadFont,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( BLoadFont );
   gtk_container_add( GTK_CONTAINER( hbuttonbox5 ),BLoadFont );
-  GTK_WIDGET_UNSET_FLAGS( BLoadFont,GTK_CAN_FOCUS );
 
   hbox7=gtk_hbox_new( FALSE,0 );
   gtk_widget_set_name( hbox7,"hbox7" );
@@ -1178,12 +1226,21 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( vbox601 ),frame11,FALSE,FALSE,0 );
   gtk_frame_set_shadow_type( GTK_FRAME( frame11 ),GTK_SHADOW_ETCHED_OUT );
 
+  frame=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame,"frame" );
+  gtk_widget_ref( frame );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame );
+  gtk_container_add( GTK_CONTAINER( frame11 ),frame );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+
   vbox602=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox602,"vbox602" );
   gtk_widget_ref( vbox602 );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox602",vbox602,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( vbox602 );
-  gtk_container_add( GTK_CONTAINER( frame11 ),vbox602 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox602 );
 
   CBPostprocess=gtk_check_button_new_with_label( MSGTR_PREFERENCES_PostProcess );
   gtk_widget_set_name( CBPostprocess,"CBPostprocess" );
@@ -1226,21 +1283,21 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( vbox601 ),frame11,FALSE,FALSE,0 );
   gtk_frame_set_shadow_type( GTK_FRAME( frame11 ),GTK_SHADOW_ETCHED_OUT );
 
-  frame12=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame12,"frame12" );
-  gtk_widget_ref( frame12 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame12",frame12,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame12 );
-  gtk_container_add( GTK_CONTAINER( frame11 ),frame12 );
-  gtk_container_set_border_width( GTK_CONTAINER( frame12 ),0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame12 ),GTK_SHADOW_NONE );
+  frame=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame,"frame" );
+  gtk_widget_ref( frame );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame );
+  gtk_container_add( GTK_CONTAINER( frame11 ),frame );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
 
   vbox602=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox602,"vbox602" );
   gtk_widget_ref( vbox602 );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox602",vbox602,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( vbox602 );
-  gtk_container_add( GTK_CONTAINER( frame12 ),vbox602 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox602 );
 
   CBNonInterlaved=gtk_check_button_new_with_label( MSGTR_PREFERENCES_NI );
   gtk_widget_set_name( CBNonInterlaved,"CBNonInterlaved" );
@@ -1322,7 +1379,6 @@ GtkWidget * create_Preferences( void )
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"BOk",BOk,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( BOk );
   gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),BOk );
-//  GTK_WIDGET_UNSET_FLAGS( BOk,GTK_CAN_FOCUS );
 
   BCancel=gtk_button_new_with_label( MSGTR_Cancel );
   gtk_widget_set_name( BCancel,"BCancel" );
@@ -1330,7 +1386,6 @@ GtkWidget * create_Preferences( void )
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"BCancel",BCancel,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( BCancel );
   gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),BCancel );
-//  GTK_WIDGET_UNSET_FLAGS( BCancel,GTK_CAN_FOCUS );
   
   gtk_widget_add_accelerator( BOk,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
   gtk_widget_add_accelerator( BCancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );

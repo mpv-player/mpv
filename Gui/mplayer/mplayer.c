@@ -111,6 +111,7 @@ void mplInit( void * disp )
  if ( !appMPlayer.mainDecoration ) wsWindowDecoration( &appMPlayer.mainWindow,0 );
  
  wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
+#if 0
  wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
 
  {
@@ -124,7 +125,7 @@ void mplInit( void * disp )
    mplFullScreen();
    btnModify( evFullScreen,btnPressed );
   }
-
+#endif
  mplSubRender=1;
 }
 

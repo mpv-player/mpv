@@ -49,7 +49,7 @@ char * fsVideoFilterNames[fsNumberOfVideoFilterNames+1][2] =
            { "ASF files (*.asf)",  				  	"*.asf" },
            { "VIVO files (*.viv)", 				  	"*.viv" },
 	   { "Windows Media Video (*.wmv)",			  	"*.wmv" },
-	   { "Audio files (*.mp2,*.mp3,*.wma)",			  	"*.mp2,*.mp3,*.wma" },
+	   { "Audio files (*.wav,*.mp2,*.mp3,*.wma)",			"*.wav,*.mp2,*.mp3,*.wma" },
 	   { "Video files (*.mpg,*.mpeg,*.vob,*.avi,*.mov,*.asf,*.viv,*.wmv)", "*.mpg,*.mpeg,*.vob,*.avi,*.mov,*.asf,*.viv,*.wmv" },
            { "All files (*)",      "*"     } };
 
@@ -424,8 +424,8 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
           guiSetDF( guiIntfStruct.Filename,fsSelectedDirectory,fsSelectedFile );
           guiIntfStruct.StreamType=STREAMTYPE_FILE;
           guiIntfStruct.FilenameChanged=1;
-	  gfree( &guiIntfStruct.AudioFile );
-	  gfree( &guiIntfStruct.Subtitlename );
+	  gfree( (void **)&guiIntfStruct.AudioFile );
+	  gfree( (void **)&guiIntfStruct.Subtitlename );
           break;
    case fsSubtitleSelector:
           guiSetDF( guiIntfStruct.Subtitlename,fsSelectedDirectory,fsSelectedFile );

@@ -378,8 +378,8 @@ void guiGetEvent( int type,char * arg )
 // --- audio opts
 	audio_delay=gtkAODelay;
 	if ( ao_plugin_cfg.plugin_list ) { free( ao_plugin_cfg.plugin_list ); ao_plugin_cfg.plugin_list=NULL; }
-	if ( gtkEnableAudioEqualizer ) gset( &ao_plugin_cfg.plugin_list,"eq" );
 	if ( gtkAONorm ) 	       gset( &ao_plugin_cfg.plugin_list,"volnorm" );
+	if ( gtkEnableAudioEqualizer ) gset( &ao_plugin_cfg.plugin_list,"eq" );
 	if ( gtkAOExtraStereo )
 	 {
 	  gset( &ao_plugin_cfg.plugin_list,"extrastereo" );

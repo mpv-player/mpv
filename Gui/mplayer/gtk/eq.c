@@ -22,7 +22,7 @@
 
 #include "eq.h"
 
-#define eqRange 5
+#define eqRange 15
 
 GtkWidget * Equalizer;
 

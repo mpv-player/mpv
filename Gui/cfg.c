@@ -8,6 +8,10 @@
 #include "../mplayer.h"
 #include "../cfgparser.h"
 
+#ifdef USE_I18N
+#include <locale.h>
+#endif
+
 #include "../../libvo/video_out.h"
 
 #include "cfg.h"
@@ -104,7 +108,7 @@ static config_t gui_opts[] =
  { "equ_channel_6",&gtkEquChannel6,CONF_TYPE_STRING,0,0,0,NULL },
  
 #if 1
-#define audio_equ_row( i,j ) { "equ_band_"#i#j,&gtkEquChannels[i][j],CONF_TYPE_FLOAT,CONF_RANGE,-5.0,5.0,NULL },
+#define audio_equ_row( i,j ) { "equ_band_"#i#j,&gtkEquChannels[i][j],CONF_TYPE_FLOAT,CONF_RANGE,-15.0,15.0,NULL },
    audio_equ_row( 0,0 ) audio_equ_row( 0,1 ) audio_equ_row( 0,2 ) audio_equ_row( 0,3 ) audio_equ_row( 0,4 ) audio_equ_row( 0,5 ) audio_equ_row( 0,6 ) audio_equ_row( 0,7 ) audio_equ_row( 0,8 ) audio_equ_row( 0,9 )
    audio_equ_row( 1,0 ) audio_equ_row( 1,1 ) audio_equ_row( 1,2 ) audio_equ_row( 1,3 ) audio_equ_row( 1,4 ) audio_equ_row( 1,5 ) audio_equ_row( 1,6 ) audio_equ_row( 1,7 ) audio_equ_row( 1,8 ) audio_equ_row( 1,9 )
    audio_equ_row( 2,0 ) audio_equ_row( 2,1 ) audio_equ_row( 2,2 ) audio_equ_row( 2,3 ) audio_equ_row( 2,4 ) audio_equ_row( 2,5 ) audio_equ_row( 2,6 ) audio_equ_row( 2,7 ) audio_equ_row( 2,8 ) audio_equ_row( 2,9 )
@@ -161,6 +165,10 @@ int cfg_write( void )
  char * cfg = get_path( "gui.conf" );
  FILE * f;
  int    i;
+
+#ifdef USE_I18N
+ setlocale( LC_ALL,"" );
+#endif
 
 // -- save configuration 
  if ( (f=fopen( cfg,"wt+" )) )
