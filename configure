@@ -210,8 +210,6 @@ Codecs:
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (MPEG audio) support [autodetect]
   --enable-xmms          build with XMMS inputplugin support [disabled]
-  --enable-flac          build with FLAC support [autodetect]
-  --enable-external-flac build with external libFLAC [disable]
   
 Video output:
   --disable-vidix        disable VIDIX [enable on x86 *nix]
@@ -1158,8 +1156,6 @@ _tremor=no
 _faad_internal=auto
 _faad_external=auto
 _xmms=no
-_flac=auto
-_external_flac=auto
 # dvdnav disabled, it does not work
 #_dvdnav=no
 _dvdread=auto
@@ -1329,10 +1325,6 @@ for ac_option do
   --disable-external-faad)	_faad_external=no	;;
   --enable-xmms)	_xmms=yes	;;
   --disable-xmms)	_xmms=no	;;
-  --enable-flac)	_flac=yes	;;
-  --disable-flac)	_flac=no	;;
-  --enable-external-flac)	_external_flac=yes	;;
-  --disable-external-flac)	_external_flac=no	;;
   --enable-dvdread)	_dvdread=yes	;;
   --disable-dvdread)	_dvdread=no	;;
   --enable-mpdvdkit)	_dvdkit=yes	;;
@@ -5465,63 +5457,6 @@ else
 fi
 echores "$_xmms"
 
-echocheck "FLAC support"
-if ! test "$_flac" = "no" ; then
-  if ! test -f libmpflac/dither.c ; then
-    _flac=no
-    echores "no (necessary files missing)"
-    break
-  fi
-  if ! test -f libmpflac/stream_decoder.c ; then
-    _external_flac=yes
-  fi
-  if test "$_external_flac" = "yes" ; then
-    cat > $TMPC << EOF
-#include <FLAC/stream_decoder.h>
-#include <stdlib.h>
-
-int main()
-{
-  FLAC__StreamDecoder *fdec = FLAC__stream_decoder_new();
-  return fdec != NULL;
-}
-EOF
-    _flac=no
-    if cc_check -lFLAC -lm ; then
-      _flac=external
-    fi
-  else
-    _flac=yes
-  fi
-fi
-
-if test "$_flac" = external ; then
-  _def_flac='#define HAVE_FLAC 1'
-  #Still use dither.c & replay_gain from libmpflac
-  _def_mpflac='#undef USE_MPFLAC_DECODER'
-  _mpflac='process'
-  _ld_flac='-lFLAC -lm -Llibmpflac -lmpflac'
-  _codecmodules="flac(external) $_codecmodules"
-  echores "yes (using external libFLAC)"
-else
-  if test "$_flac" = yes ; then
-    _def_flac='#define HAVE_FLAC 1'
-    #use decoder, dither.c & replay_gain from libmpflac
-    _def_mpflac='#define USE_MPFLAC_DECODER 1'
-    _mpflac='full'
-    _ld_flac='-Llibmpflac -lmpflac'
-    _codecmodules="flac(internal) $_codecmodules"
-    echores "yes (using internal libmpflac)"
-  else
-    _def_flac='#undef HAVE_FLAC'
-    _def_mpflac='#undef USE_MPFLAC_DECODER'
-    _mpflac='none'
-    _ld_flac=''
-    _nocodecmodules="flac $_nocodecmodules"
-    echores "no"
-  fi
-fi
-
 echocheck "inet6"
 if test "$_inet6" = auto ; then
   cat > $TMPC << EOF
@@ -5984,8 +5919,6 @@ XMMS_PLUGINS = $_xmms
 XMMS_LIB = $_xmms_lib
 MACOSX = $_macosx
 MACOSX_FRAMEWORKS = $_macosx_frameworks
-FLAC_LIB = $_ld_flac
-MPFLAC = $_mpflac
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -6231,12 +6164,6 @@ $_def_lirc
  */
 $_def_lircc
 
-/*
- * FLAC decoding
- */
-$_def_flac
-$_def_mpflac
-
 /* DVD navigation support using libdvdnav */
 $_def_dvdnav
 $_def_dvdnav_version
@@ -6281,11 +6208,6 @@ $_def_libavcodecso
 #define USE_MP3LIB
 #define USE_LIBA52
 #define USE_LIBMPEG2
-
-/* Use the SVQ1 decoder in libmpcodecs - we don't want/need it with libavcodec */
-#ifndef USE_LIBAVCODEC
-#define USE_SVQ1
-#endif
 
 /* Use libfame encoder filter */
 $_def_fame
