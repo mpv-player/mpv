@@ -4107,6 +4107,10 @@ Rate distorted optimal coded block pattern
 will select the coded block pattern which minimizes distortion + lambda*rate
 this can only be used together with trellis quantization
 .TP
+.B mv0\ \ \ \ 
+try to encode each MB with MV=<0,0> and choose the better one
+this has no effect if mbd=0
+.TP
 .B last_pred=<0\-99>
 Amount of motion predictors from the previous frame
 .PD 0

@@ -130,6 +130,7 @@ static int lavc_param_context= 0;
 static char *lavc_param_intra_matrix = NULL;
 static char *lavc_param_inter_matrix = NULL;
 static int lavc_param_cbp= 0;
+static int lavc_param_mv0= 0;
 
 #include "m_option.h"
 
@@ -227,6 +228,9 @@ m_option_t lavcopts_conf[]={
 #endif
 #if LIBAVCODEC_BUILD >= 4681
 	{"cbp", &lavc_param_cbp, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_CBP_RD, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4683
+	{"mv0", &lavc_param_mv0, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_MV0, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -471,6 +475,7 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
     lavc_venc_context->flags|= lavc_param_data_partitioning;
     lavc_venc_context->flags|= lavc_param_cbp;
+    lavc_venc_context->flags|= lavc_param_mv0;
     if(lavc_param_gray) lavc_venc_context->flags|= CODEC_FLAG_GRAY;
 
     if(lavc_param_normalize_aqp) lavc_venc_context->flags|= CODEC_FLAG_NORMALIZE_AQP;
