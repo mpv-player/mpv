@@ -4,16 +4,42 @@ Notes for Solaris users
 1. It *only* works on Solaris x86.  It can't work on SPARC systems due to
    the use of win32 codecs.
 
-2. To build the package you will need GNU make (gmake, /opt/sfw/gmake), 
-   native Solaris make will not work.  You also need the GNU C compiler,
-   configured to use the GNU Assembler.  The mplayer code makes heavy use
-   of MMX, SSE and 3DNOW! instructions that cannot be compiled using Sun's
-   assembler /usr/ccs/bin/as.
 
-3. For DVD support you must have the patched libcss installed. Patch:
+2. To build the package you will need GNU make (gmake, /opt/sfw/gmake), 
+   native Solaris make will not work.  
+
+   Typical error you get when building with solaris' make instead of GNU
+   make:
+
+   % /usr/ccs/bin/make
+   make: Fatal error in reader: Makefile, line 122: Unexpected end of line seen
+
+
+3. You also need the GNU assembler;  and the GNU C compiler, configured to use
+   the GNU assembler.  The mplayer code makes heavy use of MMX, SSE and 3DNOW!
+   instructions that cannot be compiled using Sun's assembler /usr/ccs/bin/as.
+
+   Use the "--as=/whereever/you/have/installed/gnu-as" option to tell
+   configure where it can find GNU as on your system.
+
+   Typical error you get when building with a GNU C compiler that does
+   not use GNU as:
+
+   % gmake
+   ...
+   gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math 
+	   -fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
+   Assembler: mplayer.c
+   "<stdin>", line 3567 : Illegal mnemonic
+   "<stdin>", line 3567 : Syntax error
+   ... more "Illegal mnemonic" and "Syntax error" errors ...
+
+
+4. For DVD support you must have the patched libcss installed. Patch:
    http://www.tools.de/solaris/mplayer/
 
-4. Due to two bugs in solaris 8 x86,  you cannot reliably play DVDs using a
+
+5. Due to two bugs in solaris 8 x86,  you cannot reliably play DVDs using a
    capacity >4GB: 
 
    - The sd(7D) driver on solaris 8 x86 driver has bug when accessing a
@@ -29,4 +55,3 @@ Notes for Solaris users
 
 --
 Jürgen Keil
-
