@@ -183,7 +183,7 @@ them. This section is about <emphasis role="bold">copying</emphasis>.
 <listitem><para>
   <emphasis role="bold">Audio stream</emphasis> (option <option>-oac copy</option>):
   straightforward.  It is possible to take an external audio file (MP3,
-  Vorbis) and mux it into the output stream. Use the
+  WAV) and mux it into the output stream. Use the
   <option>-audiofile <replaceable>filename</replaceable></option> option
   for this.
   </para></listitem>
