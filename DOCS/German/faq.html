@@ -10,7 +10,7 @@
 <TD COLSPAN=3><P><B><A NAME=5.1><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.1 Kompilierung</A></B></P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was bedeutet "No such file or directory" ?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Vermutlich gibt es keine solche Datei oder ein solches Verzeichnis.
@@ -19,21 +19,18 @@ Vermutlich gibt es keine solche Datei oder ein solches Verzeichnis.
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was ist das Problem mit gcc 2.96 ?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-gcc 2.96 ist RedHats UNOFFIZIELLE (es kann nur auf RedHat/Mandrake Seiten oder bei
-RedHat/Mandrake Distributionen gefunden werden) und FEHLERHAFTE gcc Version. gcc 2.96
-ist ÜBERHAUPT NICHT unterstützt von <B>MPlayer</B>, denn es IRGNORIERT einfach
-MMX/3DNow-Code, es kompiliert es einfach nicht. Wichtig: dies ist NICHT ein
-<B>MPlayer</B>-spezifisches
-Problem, einige andere Projekte (DRI, avifile, usw..) haben auch
-Probleme mit diesem Scheiß.<BR>** VERWENDE gcc 2.96 NICHT !!! **
+Kurz gesagt: <B><I>VERWENDE gcc 2.96 NICHT !!!</I></B><BR>
+Lese <A HREF="gcc-2.96-3.0.html">hier</A> und <A HREF="../users_against_developers.html">hier (Englisch)</A>!
+Wenn du es aber wirklich und trotzdem willst, stelle sicher das du eine der neuesten Versionen verwendest.
+<BR>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Großartig, ich habe gcc 3.0.1 von RedHat/Mandrake, dann ist alles fein!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Nein. Auch damit gibt es Probleme. :( Verwende einen aus der 2.95.x Serie, diese sind
-zuverlässiger und schneller als 2.96 und 3.x.x . Wenn du wirklich 3.0.x verwenden willst,
-verwende wenigstens immer die neuere Version.
+zuverlässiger (auf keine Fall <A HREF="gcc-2.96-3.0.html">2.96</A>). Wenn du wirklich 3.0.x
+verwenden willst, verwende immer die neuere Version.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -53,7 +50,7 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
 `const
 </PRE>
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Update deine glibc auf die neueste. Bei Mandrake verwende 2.2.4-8mdk.
+Update deine glibc auf die Neueste. Bei Mandrake verwende 2.2.4-8mdk.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
@@ -89,10 +86,17 @@ machen und Installationssupport für euch anbieten. Dann könnten wir die unsere a
 Arbeitsstätte verlassen, die Entwicklung ginge schneller, and wir könnten eine Menge
 Geld verdienen und ein großes Haus kaufen, usw. usw.  Willst du das wirklich? Es scheint so.</P>
 
-<P ALIGN=RIGHT>Arpi (eine Mail in der mplayer-users-Mailingliste (übersetzt))</P>
+<P ALIGN=RIGHT>Arpi (eine Mail in der mplayer-users-Mailingliste [Übersetzung])</P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana,
+Arial, Helvetica, sans-serif" size="2">
+Wo kann ich Informationen über die Bugs von gcc 2.96 erhalten ?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+In <A HREF="gcc-2.96-3.0.html">dieser</A> Documentation. Und <A HREF="users_against_developers.html">hier</A>
+kannst du noch nachlesen warum RedHat herausgebracht hat und andere intessante Dinge.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+					
 <TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 SDL Ausgabe funktioniert nicht oder das Problem beim Kompilieren ist ....
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
