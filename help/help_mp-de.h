@@ -2,6 +2,8 @@
 // Reworked by Klaus Umbach, klaus.umbach@gmx.net and
 // Moritz Bunkus, moritz@bunkus.org
 
+// In synch with rev 1.105
+
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -76,7 +78,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Erzwinge Audiocodecgruppe %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Kann keinen Audiocodec für gewünschte Gruppe finden, verwende anderen.\n"
 #define MSGTR_CantFindAudioCodec "Kann Codec für Audioformat 0x%X nicht finden!\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Versuche, %s durch etc/codecs.conf zu ersetzen.\n*** Sollte es weiterhin nicht gehen, dann lies DOCS/codecs.html!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Versuche, %s durch etc/codecs.conf zu ersetzen.\n*** Sollte es weiterhin nicht gehen, dann lies DOCS/de/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Kann Audiocodec nicht finden! -> Kein Ton\n"
 #define MSGTR_TryForceVideoFmtStr "Erzwinge Videocodecgruppe %s ...\n"
 #define MSGTR_CantFindVideoCodec "Kann keinen Codec passend zum gewählten -vo und Videoformat 0x%X finden!\n"
@@ -94,7 +96,7 @@ static char help_text[]=
 "  - Versuche -ao sdl, verwende ALSA 0.5 oder die OSS Emulation von ALSA 0.9.\n"\
 "  - Du kannst es auch mit -autosync 30 oder anderen Werten probieren.\n"\
 "- Langsame Videoausgabe. Versuche einen anderen -vo Treiber (Liste: -vo help)\n"\
-"  oder versuche es mit -framedrop ! Lies DOCS/German/video.html für Tipps.\n"\
+"  oder versuche es mit -framedrop ! Lies DOCS/de/video.html für Tipps.\n"\
 "- Langsame CPU.\n"\
 "  - Versuche nicht, DVDs/große DivX-Filme auf langsamen CPUs abzuspielen. Probier -hardframedrop\n"\
 "- Defekte Datei.\n"\
@@ -102,9 +104,9 @@ static char help_text[]=
 "- Für Wiedergabe von langsamen Medien (NFS/SMB, DVD, VCD usw) versuche -cache 8192.\n"\
 "- Benutzt du -cache zusammen mit einer schlecht interleavten AVI-Datei?\n"\
 "  - Probiere -nocache.\n"\
-"Lies DOCS/German/video.html und DOCS/German/sound.html; dort stehen Tipps\n"\
+"Lies DOCS/de/video.html und DOCS/de/sound.html; dort stehen Tipps\n"\
 "und Kniffe für optimale Einstellungen.\n"\
-"Wenn nichts davon hilft, lies DOCS/bugreports.html !\n\n"
+"Wenn nichts davon hilft, lies DOCS/de/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer wurde OHNE GUI-Unterstützung kompiliert.\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI erfordert X11.\n"
@@ -137,7 +139,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer stürzte wegen einer 'illegalen Anweisung' ab.\n"\
 "  Es kann sich um einen Fehler im neuen Code für die CPU-Erkennung zur\n"\
-"  Laufzeit handeln... Bitte lies DOCS/German/bugreports.html.\n"
+"  Laufzeit handeln... Bitte lies DOCS/de/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer stürzte wegen einer 'illegalen Anweisung' ab.\n"\
 "  Das passiert normalerweise, wenn du MPlayer auf einer anderen CPU\n"\
@@ -146,12 +148,12 @@ static char help_text[]=
 "- MPlayer stürzte wegen falscher Benutzung der CPU/FPU/des RAMs ab.\n"\
 "  Kompiliere MPlayer erneut mit --enable-debug und erstelle mit 'gdb'\n"\
 "  einen Backtrace und eine Disassemblerausgabe. Details dazu findest du\n"\
-"  in DOCS/German/bugreports.html"
+"  in DOCS/de/bugreports.html"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer ist abgestürzt. Das sollte nicht passieren.\n"\
 "  Es kann sich um einen Fehler im MPlayer-Code _oder_ in deinen Treibern\n"\
 "  _oder_ in deinem gcc handeln. Wenn du meinst, es sei MPlayers Schuld, dann\n"\
-"  lies DOCS/German/bugreports.html, und folge den dortigen Anweisungen.\n"\
+"  lies DOCS/de/bugreports.html, und folge den dortigen Anweisungen.\n"\
 "  Wir können und werden dir nicht helfen, wenn du nicht alle dort aufgeführten\n"\
 "  Informationen zur Verfügung stellst.\n"
 
@@ -282,7 +284,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Kann keine RAW .AVI-Streams durchsuchen. (Index erforderlich, versuche es mit der -idx Option.)\n"
 #define MSGTR_CantSeekFile "Kann diese Datei nicht durchsuchen.\n"
 
-#define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei (wurde ohne libcss Unterstützung kompiliert). Lies DOCS.\n"
+#define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei (wurde ohne libcss Unterstützung kompiliert). Lies DOCS/de/cd-dvd.html.\n"
 #define MSGTR_EncryptedVOBauth "Verschlüsselter Stream, jedoch wurde die Authentifizierung nicht von Dir gefordert.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimierte Header werden (zur Zeit) nicht unterstützt.\n"
