@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.155 (2004. 12. 24.)
+// Sync'ed with help_mp-en.h 1.156 (2005. 01. 12.)
 
 // ========================= MPlayer help ===========================
 
@@ -838,7 +838,7 @@ static char help_text[]=
 // cfg.c
 
 #define MSGTR_ConfigFileReadError "[cfg] hiba a konfigurációs fájl olvasásakor ...\n"
-#define MSGTR_UnableToSaveOption "A(z) '%s' opciót nem sikerült elmenteni.\n"
+#define MSGTR_UnableToSaveOption "[cfg] A(z) '%s' opciót nem sikerült elmenteni.\n"
 
 // interface.c
 
