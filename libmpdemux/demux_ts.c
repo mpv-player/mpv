@@ -41,8 +41,10 @@
 #define NB_PID_MAX 8192
 
 #define MAX_HEADER_SIZE 6			/* enough for PES header + length */
-#define MAX_PROBE_SIZE	500000
+#define MAX_CHECK_SIZE	65535
+#define MAX_PROBE_SIZE	1000000
 #define NUM_CONSECUTIVE_TS_PACKETS 32
+#define NUM_CONSECUTIVE_AUDIO_PACKETS 348
 
 
 int ts_fastparse = 0;
@@ -99,7 +101,7 @@ static uint8_t get_packet_size(const unsigned char *buf, int size)
 			mp_msg(MSGT_DEMUX, MSGL_DBG2, "GET_PACKET_SIZE, pos %d, char: %2x\n", i, buf[i * TS_PACKET_SIZE]);
 			goto try_fec;
 		}
-    	}
+	}
 	return TS_PACKET_SIZE;
 
 try_fec:
@@ -117,13 +119,14 @@ int ts_check_file(demuxer_t * demuxer)
 {
 	const int buf_size = (TS_FEC_PACKET_SIZE * NUM_CONSECUTIVE_TS_PACKETS);
 	unsigned char buf[buf_size], done = 0, *ptr;
-	uint32_t _read, i, count = 0;
+	uint32_t _read, i, count = 0, is_ts;
 	int cc[NB_PID_MAX], last_cc[NB_PID_MAX], pid, cc_ok, c;
 	uint8_t size = 0;
 	off_t pos = 0;
 
 	mp_msg(MSGT_DEMUX, MSGL_V, "Checking for TS...\n");
 
+	is_ts = 0;
 	while(! done)
 	{
 		i = 1;
@@ -131,36 +134,49 @@ int ts_check_file(demuxer_t * demuxer)
 
 		while(((c=stream_read_char(demuxer->stream)) != 0x47)
 			&& (c >= 0)
-			&& (i < MAX_PROBE_SIZE)
+			&& (i < MAX_CHECK_SIZE)
 			&& ! demuxer->stream->eof
 		) i++;
 
 
-	    if(c != 0x47)
-	    {
+		if(c != 0x47)
+		{
 			mp_msg(MSGT_DEMUX, MSGL_V, "NOT A TS FILE1\n");
+			is_ts = 0;
 			done = 1;
 			continue;
-	    }
+		}
 
-	    pos = stream_tell(demuxer->stream) - 1;
-	    buf[0] = c;
-	    _read = stream_read(demuxer->stream, &buf[1], buf_size-1);
+		pos = stream_tell(demuxer->stream) - 1;
+		buf[0] = c;
+		_read = stream_read(demuxer->stream, &buf[1], buf_size-1);
 
-	    if(_read < buf_size-1)
-	    {
+		if(_read < buf_size-1)
+		{
 			mp_msg(MSGT_DEMUX, MSGL_V, "COULDN'T READ ENOUGH DATA, EXITING TS_CHECK\n");
 			stream_reset(demuxer->stream);
 			return 0;
-	    }
+		}
 
-	    size = get_packet_size(buf, buf_size);
-	    if(size)
-		  done = 1;
+		size = get_packet_size(buf, buf_size);
+		if(size)
+		{
+			done = 1;
+			is_ts = 1;
+		}
+
+		if(pos >= MAX_CHECK_SIZE)
+		{
+			done = 1;
+			is_ts = 0;
+		}
 	}
 
-	mp_msg(MSGT_DEMUX, MSGL_V, "TRIED UP TO POSITION %u, FOUND %x, packet_size= %d\n", i, c, size);
+	mp_msg(MSGT_DEMUX, MSGL_V, "TRIED UP TO POSITION %u, FOUND %x, packet_size= %d\n", pos, c, size);
 	stream_seek(demuxer->stream, pos);
+
+	if(! is_ts)
+	  return 0;
 
 	//LET'S CHECK continuity counters
 	for(count = 0; count < NB_PID_MAX; count++)
@@ -193,9 +209,10 @@ int ts_check_file(demuxer_t * demuxer)
 
 
 
+
 static void ts_detect_streams(demuxer_t *demuxer, uint32_t *a,  uint32_t *v, int *fapid, int *fvpid)
 {
-	int video_found = 0, audio_found = 0, i;
+	int video_found = 0, audio_found = 0, i, num_packets = 0;
 	off_t pos=0;
 	ES_stream_t es;
 	unsigned char tmp[TS_FEC_PACKET_SIZE];
@@ -209,6 +226,7 @@ static void ts_detect_streams(demuxer_t *demuxer, uint32_t *a,  uint32_t *v, int
 		{
 			mp_msg(MSGT_DEMUXER, MSGL_DBG2, "TYPE: %x, PID: %d\n", es.type, es.pid);
 
+
 			if((*fvpid == -1) || (*fvpid == es.pid))
 			{
 				if(es.type == VIDEO_MPEG2)
@@ -219,8 +237,9 @@ static void ts_detect_streams(demuxer_t *demuxer, uint32_t *a,  uint32_t *v, int
 				}
 			}
 
-			if((*fvpid == -2) && audio_found)
+			if(((*fvpid == -2) || (num_packets >= NUM_CONSECUTIVE_AUDIO_PACKETS)) && audio_found)
 			{
+				//novideo or we have at least 348 audio packets (64 KB) without video (TS with audio only)
 				*v = 0;
 				break;
 			}
@@ -249,6 +268,9 @@ static void ts_detect_streams(demuxer_t *demuxer, uint32_t *a,  uint32_t *v, int
 					audio_found = 1;
 				}
 			}
+
+			if(audio_found && (*fapid == es.pid) && (! video_found))
+			  num_packets++;
 
 			if((*fapid == -2) && video_found)
 			{
