@@ -351,7 +351,7 @@ static char help_text[]=
 #define MSGTR_CouldNotFindVideoFilter "Couldn't find video filter '%s'.\n"
 #define MSGTR_CouldNotOpenVideoFilter "Couldn't open video filter '%s'.\n"
 #define MSGTR_OpeningVideoFilter "Opening video filter: "
-#define MSGTR_CannotFindColorspace "Cannot find common colorspace, even by inserting 'scale' :(\n"
+#define MSGTR_CannotFindColorspace "Cannot find matching colorspace, even by inserting 'scale' :(\n"
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Codec did not set sh->disp_w and sh->disp_h, trying workaround.\n"
@@ -405,9 +405,9 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] error in skin config file on line %d: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] warning in skin config file on line %d: widget found but before \"section\" not found (%s)"
-#define MSGTR_SKIN_WARNING2 "[skin] warning in skin config file on line %d: widget found but before \"subsection\" not found (%s)"
-#define MSGTR_SKIN_WARNING3 "[skin] warning in skin config file on line %d: this subsection not supported by this widget (%s)"
+#define MSGTR_SKIN_WARNING1 "[skin] warning in config file line %d:\nwidget (%s) found but no \"section\" found before"
+#define MSGTR_SKIN_WARNING2 "[skin] warning in config file line %d:\nwidget (%s) found but no \"subsection\" found before"
+#define MSGTR_SKIN_WARNING3 "[skin] warning in config file line %d:\nthis subsection is not supported by widget (%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "16 bits or less depth bitmap not supported (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "file not found (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "BMP read error (%s)\n"
