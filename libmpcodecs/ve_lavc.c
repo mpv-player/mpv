@@ -95,6 +95,7 @@ static int lavc_param_mpeg_quant=0;
 static int lavc_param_fdct=0;
 static int lavc_param_idct=0;
 static char* lavc_param_aspect = NULL;
+static int lavc_param_autoaspect = 0;
 static float lavc_param_lumi_masking= 0.0;
 static float lavc_param_dark_masking= 0.0;
 static float lavc_param_temporal_cplx_masking= 0.0;
@@ -171,6 +172,7 @@ struct config lavcopts_conf[]={
 	{"vrc_init_cplx", &lavc_param_rc_initial_cplx, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 9999999.0, NULL},
         {"vfdct", &lavc_param_fdct, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
 	{"aspect", &lavc_param_aspect, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"autoaspect", &lavc_param_autoaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"lumi_mask", &lavc_param_lumi_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
 	{"tcplx_mask", &lavc_param_temporal_cplx_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
 	{"scplx_mask", &lavc_param_spatial_cplx_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
@@ -365,6 +367,8 @@ static int config(struct vf_instance_s* vf,
 	    return 0;
 	}
     }
+    else if (lavc_param_autoaspect)
+	lavc_venc_context->aspect_ratio = (float)d_width/d_height;
 
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */
