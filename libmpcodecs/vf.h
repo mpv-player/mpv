@@ -64,6 +64,7 @@ typedef struct vf_seteq_s
 #define VFCTRL_DRAW_OSD 7
 #define VFCTRL_CHANGE_RECTANGLE 9 /* Change the rectangle boundaries */
 #define VFCTRL_FLIP_PAGE 10 /* Tell the vo to flip pages */
+#define VFCTRL_DUPLICATE_FRAME 11 /* For encoding - encode zero-change frame */
 
 #include "vfcap.h"
 
