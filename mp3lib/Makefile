@@ -11,23 +11,23 @@ CFLAGS  = $(OPTFLAGS) $(EXTRA_INC)
 ifeq ($(TARGET_ARCH_X86),yes)
 SRCS += decode_i586.c
 OBJS += decode_i586.o
-ifeq ($(TARGET_MMX),yes)
+#ifeq ($(TARGET_MMX),yes)
 CFLAGS += -fomit-frame-pointer
 SRCS += decode_MMX.c dct64_MMX.c tabinit_MMX.c
 OBJS += decode_MMX.o dct64_MMX.o tabinit_MMX.o
-endif
+#endif
 #ifeq ($(TARGET_SSE),yes)
 #SRCS += dct64_sse.s
 #OBJS += dct64_sse.o
 #endif
-ifeq ($(TARGET_3DNOW),yes)
+#ifeq ($(TARGET_3DNOW),yes)
 SRCS += dct36_3dnow.s dct64_3dnow.c
 OBJS += dct36_3dnow.o dct64_3dnow.o
-endif
-ifeq ($(TARGET_3DNOWEX),yes)
-SRCS += dct36_k7.s dct64_k7.c
+#endif
+#ifeq ($(TARGET_3DNOWEX),yes)
+SRCS += dct36_k7.c dct64_k7.c
 OBJS += dct36_k7.o dct64_k7.o
-endif
+#endif
 endif
 
 .SUFFIXES: .c .o
