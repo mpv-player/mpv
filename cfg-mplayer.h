@@ -327,7 +327,7 @@ static config_t mplayer_opts[]={
 #endif
 
 #ifdef STREAMING_LIVE_DOT_COM
-        {"sdp", "-sdp is deprecated, use sdp://file instead.", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+        {"sdp", "-sdp is deprecated, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	// -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
         {"rtsp-stream-over-tcp", &rtspStreamOverTCP, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
