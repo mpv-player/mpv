@@ -21,6 +21,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * SSE optimizations from Michael Niedermayer (michaelni@gmx.at)
+ * 3DNOW optimizations from Nick Kurshev <nickols_k@mail.ru>
+ *   michael did port them from libac3 (untested, perhaps totally broken)
  */
 
 #include "config.h"
@@ -37,6 +39,12 @@
 #include "a52_internal.h"
 #include "mm_accel.h"
 
+#ifdef RUNTIME_CPUDETECT
+#undef HAVE_3DNOWEX
+#endif
+
+#define USE_AC3_C
+
 void (* imdct_256) (sample_t data[], sample_t delay[], sample_t bias);
 void (* imdct_512) (sample_t data[], sample_t delay[], sample_t bias);
 
@@ -45,6 +53,20 @@ typedef struct complex_s {
     sample_t imag;
 } complex_t;
 
+static void fft_128p(complex_t *a);
+static void fft_128p_3dnow(complex_t *a);
+
+static const int pm128[128] __attribute__((aligned(16))) =
+{
+	0, 16, 32, 48, 64, 80,  96, 112,  8, 40, 72, 104, 24, 56,  88, 120,
+	4, 20, 36, 52, 68, 84, 100, 116, 12, 28, 44,  60, 76, 92, 108, 124,
+	2, 18, 34, 50, 66, 82,  98, 114, 10, 42, 74, 106, 26, 58,  90, 122,
+	6, 22, 38, 54, 70, 86, 102, 118, 14, 46, 78, 110, 30, 62,  94, 126,
+	1, 17, 33, 49, 65, 81,  97, 113,  9, 41, 73, 105, 25, 57,  89, 121,
+	5, 21, 37, 53, 69, 85, 101, 117, 13, 29, 45,  61, 77, 93, 109, 125,
+	3, 19, 35, 51, 67, 83,  99, 115, 11, 43, 75, 107, 27, 59,  91, 123,
+	7, 23, 39, 55, 71, 87, 103, 119, 15, 31, 47,  63, 79, 95, 111, 127
+}; 
 
 /* 128 point bit-reverse LUT */
 static uint8_t bit_reverse_512[] = {
@@ -189,20 +211,17 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	
     /* 512 IMDCT with source and dest data in 'data' */
 	
-    /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
+    /* Pre IFFT complex multiply plus IFFT cmplx conjugate & reordering*/
     for( i=0; i < 128; i++) {
 	/* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */ 
-	buf[i].real =         (data[256-2*i-1] * xcos1[i])  -  (data[2*i]       * xsin1[i]);
-	buf[i].imag = -1.0 * ((data[2*i]       * xcos1[i])  +  (data[256-2*i-1] * xsin1[i]));
+#ifdef USE_AC3_C
+	int j= pm128[i];
+#else
+	int j= bit_reverse_512[i];
+#endif	
+	buf[i].real =         (data[256-2*j-1] * xcos1[j])  -  (data[2*j]       * xsin1[j]);
+	buf[i].imag = -1.0 * ((data[2*j]       * xcos1[j])  +  (data[256-2*j-1] * xsin1[j]));
     }
-
-    /* Bit reversed shuffling */
-    for(i=0; i<128; i++) {
-	k = bit_reverse_512[i];
-	if (k < i)
-	    swap_cmplx(&buf[i],&buf[k]);
-    }
-
 
     /* FFT Merge */
 /* unoptimized variant
@@ -230,6 +249,10 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	}
     }
 */
+#ifdef USE_AC3_C
+	fft_128p (&buf[0]);
+#else
+
     /* 1. iteration */
     for(i = 0; i < 128; i += 2) {
 	tmp_a_r = buf[i].real;
@@ -320,7 +343,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	    }
 	}
     }
-    
+#endif    
     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
     for( i=0; i < 128; i++) {
 	/* y[n] = z[n] * (xcos1[n] + j * xsin1[n]) ; */
@@ -344,7 +367,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	*data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias; 
 	*data_ptr++  =  buf[128-i-1].imag * *window_ptr++ + *delay_ptr++ + bias; 
     }
-
+    
     /* The trailing edge of the window goes into the delay line */
     delay_ptr = delay;
 
@@ -360,6 +383,259 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 }
 
 #ifdef ARCH_X86
+#include "srfftp_3dnow.h"
+
+const i_cmplx_t x_plus_minus_3dnow __attribute__ ((aligned (8))) = { 0x00000000UL, 0x80000000UL }; 
+const i_cmplx_t x_minus_plus_3dnow __attribute__ ((aligned (8))) = { 0x80000000UL, 0x00000000UL }; 
+const complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0.707106781188 };
+
+void
+imdct_do_512_3dnow(sample_t data[],sample_t delay[], sample_t bias)
+{
+    int i,k;
+    int p,q;
+    int m;
+    int two_m;
+    int two_m_plus_one;
+
+    sample_t tmp_a_i;
+    sample_t tmp_a_r;
+    sample_t tmp_b_i;
+    sample_t tmp_b_r;
+
+    sample_t *data_ptr;
+    sample_t *delay_ptr;
+    sample_t *window_ptr;
+	
+    /* 512 IMDCT with source and dest data in 'data' */
+	
+    /* Pre IFFT complex multiply plus IFFT cmplx conjugate & reordering*/
+#if 1
+      __asm__ __volatile__ (
+	"movq %0, %%mm7\n\t"
+	::"m"(x_plus_minus_3dnow)
+	:"memory");
+	for( i=0; i < 128; i++) {
+		int j = pm128[i];
+	__asm__ __volatile__ (
+		"movd	%1, %%mm0\n\t"
+		"movd	%3, %%mm1\n\t"
+		"punpckldq %2, %%mm0\n\t" /* mm0 = data[256-2*j-1] | data[2*j]*/
+		"punpckldq %4, %%mm1\n\t" /* mm1 = xcos[j] | xsin[j] */
+		"movq	%%mm0, %%mm2\n\t"
+		"pfmul	%%mm1, %%mm0\n\t"
+#ifdef HAVE_3DNOWEX
+		"pswapd	%%mm1, %%mm1\n\t"
+#else
+		"movq %%mm1, %%mm5\n\t"
+		"psrlq $32, %%mm1\n\t"
+		"punpckldq %%mm5, %%mm1\n\t"
+#endif
+		"pfmul	%%mm1, %%mm2\n\t"
+#ifdef HAVE_3DNOWEX
+		"pfpnacc %%mm2, %%mm0\n\t"
+#else
+		"pxor	%%mm7, %%mm0\n\t"
+		"pfacc	%%mm2, %%mm0\n\t"
+#endif
+		"pxor	%%mm7, %%mm0\n\t"
+		"movq	%%mm0, %0"
+		:"=m"(buf[i])
+		:"m"(data[256-2*j-1]), "m"(data[2*j]), "m"(xcos1[j]), "m"(xsin1[j])
+		:"memory"
+	);
+/*		buf[i].re = (data[256-2*j-1] * xcos1[j] - data[2*j] * xsin1[j]);
+		buf[i].im = (data[256-2*j-1] * xsin1[j] + data[2*j] * xcos1[j])*(-1.0);*/
+	}
+#else
+  __asm__ __volatile__ ("femms":::"memory");
+    for( i=0; i < 128; i++) {
+	/* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */ 
+	int j= pm128[i];
+	buf[i].real =         (data[256-2*j-1] * xcos1[j])  -  (data[2*j]       * xsin1[j]);
+	buf[i].imag = -1.0 * ((data[2*j]       * xcos1[j])  +  (data[256-2*j-1] * xsin1[j]));
+    }
+#endif
+
+    /* FFT Merge */
+/* unoptimized variant
+    for (m=1; m < 7; m++) {
+	if(m)
+	    two_m = (1 << m);
+	else
+	    two_m = 1;
+
+	two_m_plus_one = (1 << (m+1));
+
+	for(i = 0; i < 128; i += two_m_plus_one) {
+	    for(k = 0; k < two_m; k++) {
+		p = k + i;
+		q = p + two_m;
+		tmp_a_r = buf[p].real;
+		tmp_a_i = buf[p].imag;
+		tmp_b_r = buf[q].real * w[m][k].real - buf[q].imag * w[m][k].imag;
+		tmp_b_i = buf[q].imag * w[m][k].real + buf[q].real * w[m][k].imag;
+		buf[p].real = tmp_a_r + tmp_b_r;
+		buf[p].imag =  tmp_a_i + tmp_b_i;
+		buf[q].real = tmp_a_r - tmp_b_r;
+		buf[q].imag =  tmp_a_i - tmp_b_i;
+	    }
+	}
+    }
+*/
+
+    fft_128p_3dnow (&buf[0]);
+//    asm volatile ("femms \n\t":::"memory");
+    
+    /* Post IFFT complex multiply  plus IFFT complex conjugate*/
+#if 1  
+  __asm__ __volatile__ (
+	"movq %0, %%mm7\n\t"
+	"movq %1, %%mm6\n\t"
+	::"m"(x_plus_minus_3dnow),
+	"m"(x_minus_plus_3dnow)
+	:"eax","memory");
+	for (i=0; i < 128; i++) {
+	    __asm__ __volatile__ (
+		"movq %1, %%mm0\n\t" /* ac3_buf[i].re | ac3_buf[i].im */
+		"movq %%mm0, %%mm1\n\t" /* ac3_buf[i].re | ac3_buf[i].im */
+#ifndef HAVE_3DNOWEX
+		"movq %%mm1, %%mm2\n\t"
+		"psrlq $32, %%mm1\n\t"
+		"punpckldq %%mm2, %%mm1\n\t"
+#else			 
+		"pswapd %%mm1, %%mm1\n\t" /* ac3_buf[i].re | ac3_buf[i].im */
+#endif			 
+		"movd %3, %%mm3\n\t" /* ac3_xsin[i] */
+		"punpckldq %2, %%mm3\n\t" /* ac3_xsin[i] | ac3_xcos[i] */
+		"pfmul %%mm3, %%mm0\n\t"
+		"pfmul %%mm3, %%mm1\n\t"
+#ifndef HAVE_3DNOWEX
+		"pxor  %%mm7, %%mm0\n\t"
+		"pfacc %%mm1, %%mm0\n\t"
+		"movd %%mm0, 4%0\n\t"
+		"psrlq $32, %%mm0\n\t"
+		"movd %%mm0, %0\n\t"
+#else
+		"pfpnacc %%mm1, %%mm0\n\t" /* mm0 = mm0[0] - mm0[1] | mm1[0] + mm1[1] */
+		"pswapd %%mm0, %%mm0\n\t"
+		"movq %%mm0, %0"
+#endif
+		:"=m"(buf[i])
+		:"m"(buf[i]),"m"(xcos1[i]),"m"(xsin1[i])
+		:"memory");
+/*		ac3_buf[i].re =(tmp_a_r * ac3_xcos1[i])  +  (tmp_a_i  * ac3_xsin1[i]);
+		ac3_buf[i].im =(tmp_a_r * ac3_xsin1[i])  -  (tmp_a_i  * ac3_xcos1[i]);*/
+	}
+#else    
+  __asm__ __volatile__ ("femms":::"memory");
+    for( i=0; i < 128; i++) {
+	/* y[n] = z[n] * (xcos1[n] + j * xsin1[n]) ; */
+	tmp_a_r =        buf[i].real;
+	tmp_a_i = -1.0 * buf[i].imag;
+	buf[i].real =(tmp_a_r * xcos1[i])  -  (tmp_a_i  * xsin1[i]);
+	buf[i].imag =(tmp_a_r * xsin1[i])  +  (tmp_a_i  * xcos1[i]);
+    }
+#endif
+	
+    data_ptr = data;
+    delay_ptr = delay;
+    window_ptr = imdct_window;
+
+    /* Window and convert to real valued signal */
+#if 1
+	asm volatile (
+		"movd (%0), %%mm3	\n\t"
+		"punpckldq %%mm3, %%mm3	\n\t"
+	:: "r" (&bias)
+	);
+	for (i=0; i< 64; i++) {
+/* merge two loops in one to enable working of 2 decoders */
+	__asm__ __volatile__ (
+		"movd	516(%1), %%mm0\n\t"
+		"movd	(%1), %%mm1\n\t" /**data_ptr++=-buf[64+i].im**window_ptr+++*delay_ptr++;*/
+		"punpckldq (%2), %%mm0\n\t"/*data_ptr[128]=-buf[i].re*window_ptr[128]+delay_ptr[128];*/
+		"punpckldq 516(%2), %%mm1\n\t"
+		"pfmul	(%3), %%mm0\n\t"/**data_ptr++=buf[64-i-1].re**window_ptr+++*delay_ptr++;*/
+		"pfmul	512(%3), %%mm1\n\t"
+		"pxor	%%mm6, %%mm0\n\t"/*data_ptr[128]=buf[128-i-1].im*window_ptr[128]+delay_ptr[128];*/
+		"pxor	%%mm6, %%mm1\n\t"
+		"pfadd	(%4), %%mm0\n\t"
+		"pfadd	512(%4), %%mm1\n\t"
+		"pfadd %%mm3, %%mm0\n\t"
+		"pfadd %%mm3, %%mm1\n\t"
+		"movq	%%mm0, (%0)\n\t"
+		"movq	%%mm1, 512(%0)"
+		:"=r"(data_ptr)
+		:"r"(&buf[i].real), "r"(&buf[64-i-1].real), "r"(window_ptr), "r"(delay_ptr), "0"(data_ptr)
+		:"memory");
+		data_ptr += 2;
+		window_ptr += 2;
+		delay_ptr += 2;
+	}
+	window_ptr += 128;
+#else    
+  __asm__ __volatile__ ("femms":::"memory");
+    for(i=0; i< 64; i++) { 
+	*data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias; 
+	*data_ptr++   =  buf[64-i-1].real * *window_ptr++ + *delay_ptr++ + bias; 
+    }
+    
+    for(i=0; i< 64; i++) { 
+	*data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias; 
+	*data_ptr++  =  buf[128-i-1].imag * *window_ptr++ + *delay_ptr++ + bias; 
+    }
+#endif
+
+    /* The trailing edge of the window goes into the delay line */
+    delay_ptr = delay;
+#if 1
+	for(i=0; i< 64; i++) {
+/* merge two loops in one to enable working of 2 decoders */
+	    window_ptr -=2;
+	    __asm__ __volatile__(
+		"movd	508(%1), %%mm0\n\t"
+		"movd	(%1), %%mm1\n\t"
+		"punpckldq (%2), %%mm0\n\t"
+		"punpckldq 508(%2), %%mm1\n\t"
+#ifdef HAVE_3DNOWEX
+		"pswapd	(%3), %%mm3\n\t"
+		"pswapd	-512(%3), %%mm4\n\t"
+#else
+		"movq	(%3), %%mm3\n\t"/**delay_ptr++=-buf[64+i].re**--window_ptr;*/
+		"movq	-512(%3), %%mm4\n\t"
+		"psrlq	$32, %%mm3\n\t"/*delay_ptr[128]=buf[i].im**window_ptr[-512];*/
+		"psrlq	$32, %%mm4\n\t"/**delay_ptr++=buf[64-i-1].im**--window_ptr;*/
+		"punpckldq (%3), %%mm3\n\t"/*delay_ptr[128]=-buf[128-i-1].re**window_ptr[-512];*/
+		"punpckldq -512(%3), %%mm4\n\t"
+#endif
+		"pfmul	%%mm3, %%mm0\n\t"
+		"pfmul	%%mm4, %%mm1\n\t"
+		"pxor	%%mm6, %%mm0\n\t"
+		"pxor	%%mm7, %%mm1\n\t"
+		"movq	%%mm0, (%0)\n\t"
+		"movq	%%mm1, 512(%0)"
+		:"=r"(delay_ptr)
+		:"r"(&buf[i].imag), "r"(&buf[64-i-1].imag), "r"(window_ptr), "0"(delay_ptr)
+		:"memory");
+		delay_ptr += 2;
+	}
+  __asm__ __volatile__ ("femms":::"memory");
+#else    
+  __asm__ __volatile__ ("femms":::"memory");
+    for(i=0; i< 64; i++) { 
+	*delay_ptr++  = -buf[64+i].real   * *--window_ptr; 
+	*delay_ptr++  =  buf[64-i-1].imag * *--window_ptr; 
+    }
+    
+    for(i=0; i<64; i++) {
+	*delay_ptr++  =  buf[i].imag       * *--window_ptr; 
+	*delay_ptr++  = -buf[128-i-1].real * *--window_ptr; 
+    }
+#endif    
+}
+
+
 void
 imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 {
@@ -831,8 +1107,9 @@ void imdct_init (uint32_t mm_accel)
     {
 	int i, j, k;
 
-	if(gCpuCaps.hasSSE) fprintf (stderr, "Using SSE optimized IMDCT transform\n");
-	else		    fprintf (stderr, "No accelerated IMDCT transform found\n");
+	if(gCpuCaps.hasSSE) 		fprintf (stderr, "Using SSE optimized IMDCT transform\n");
+	else if(gCpuCaps.has3DNow) 	fprintf (stderr, "Using experimental 3DNow optimized IMDCT transform\n");
+	else		    		fprintf (stderr, "No accelerated IMDCT transform found\n");
 
 	/* Twiddle factors to turn IFFT into IMDCT */
 	for (i = 0; i < 128; i++) {
@@ -908,8 +1185,564 @@ void imdct_init (uint32_t mm_accel)
 
 	imdct_512 = imdct_do_512;
 #ifdef ARCH_X86
-	if(gCpuCaps.hasSSE)	imdct_512 = imdct_do_512_sse;
+	if(gCpuCaps.hasSSE)		imdct_512 = imdct_do_512_sse;
+	else if(gCpuCaps.has3DNow)	imdct_512 = imdct_do_512_3dnow;
 #endif // arch_x86
 	imdct_256 = imdct_do_256;
     }
 }
+
+// Stuff below this line is borrowed from libac3
+#include "srfftp.h"
+
+#ifdef ARCH_X86
+
+static void fft_4_3dnow(complex_t *x)
+{
+  /* delta_p = 1 here */
+  /* x[k] = sum_{i=0..3} x[i] * w^{i*k}, w=e^{-2*pi/4} 
+   */
+  __asm__ __volatile__(
+	"movq	24(%1), %%mm3\n\t"
+	"movq	8(%1), %%mm1\n\t"
+	"pxor	%2, %%mm3\n\t" /* mm3.re | -mm3.im */
+	"pxor   %3, %%mm1\n\t" /* -mm1.re | mm1.im */
+	"pfadd	%%mm1, %%mm3\n\t" /* vi.im = x[3].re - x[1].re; */
+	"movq	%%mm3, %%mm4\n\t" /* vi.re =-x[3].im + x[1].im; mm4 = vi */
+#ifdef HAVE_3DNOWEX
+	"pswapd %%mm4, %%mm4\n\t"
+#else
+	"movq   %%mm4, %%mm5\n\t"
+	"psrlq	$32, %%mm4\n\t"
+	"punpckldq %%mm5, %%mm4\n\t"
+#endif
+	"movq	(%1), %%mm5\n\t" /* yb.re = x[0].re - x[2].re; */
+	"movq	(%1), %%mm6\n\t" /* yt.re = x[0].re + x[2].re; */
+	"movq	24(%1), %%mm7\n\t" /* u.re  = x[3].re + x[1].re; */
+	"pfsub	16(%1), %%mm5\n\t" /* yb.im = x[0].im - x[2].im; mm5 = yb */
+	"pfadd	16(%1), %%mm6\n\t" /* yt.im = x[0].im + x[2].im; mm6 = yt */
+	"pfadd	8(%1), %%mm7\n\t" /* u.im  = x[3].im + x[1].im; mm7 = u */
+
+	"movq	%%mm6, %%mm0\n\t" /* x[0].re = yt.re + u.re; */
+	"movq	%%mm5, %%mm1\n\t" /* x[1].re = yb.re + vi.re; */
+	"pfadd	%%mm7, %%mm0\n\t" /*x[0].im = yt.im + u.im; */
+	"pfadd	%%mm4, %%mm1\n\t" /* x[1].im = yb.im + vi.im; */
+	"movq	%%mm0, (%0)\n\t"
+	"movq	%%mm1, 8(%0)\n\t"
+
+	"pfsub	%%mm7, %%mm6\n\t" /* x[2].re = yt.re - u.re; */
+	"pfsub	%%mm4, %%mm5\n\t" /* x[3].re = yb.re - vi.re; */
+	"movq	%%mm6, 16(%0)\n\t" /* x[2].im = yt.im - u.im; */
+	"movq	%%mm5, 24(%0)" /* x[3].im = yb.im - vi.im; */
+	:"=r"(x)
+	:"0"(x),
+	 "m"(x_plus_minus_3dnow),
+	 "m"(x_minus_plus_3dnow)
+	:"memory");
+}
+
+static void fft_8_3dnow(complex_t *x)
+{
+  /* delta_p = diag{1, sqrt(i)} here */
+  /* x[k] = sum_{i=0..7} x[i] * w^{i*k}, w=e^{-2*pi/8} 
+   */
+  complex_t wT1, wB1, wB2;
+  
+  __asm__ __volatile__(
+	"movq	8(%2), %%mm0\n\t"
+	"movq	24(%2), %%mm1\n\t"
+	"movq	%%mm0, %0\n\t"  /* wT1 = x[1]; */
+	"movq	%%mm1, %1\n\t" /* wB1 = x[3]; */
+	:"=m"(wT1), "=m"(wB1)
+	:"r"(x)
+	:"memory");
+
+  __asm__ __volatile__(
+	"movq	16(%0), %%mm2\n\t"
+	"movq	32(%0), %%mm3\n\t"
+	"movq	%%mm2, 8(%0)\n\t"  /* x[1] = x[2]; */
+	"movq	48(%0), %%mm4\n\t"
+	"movq	%%mm3, 16(%0)\n\t" /* x[2] = x[4]; */
+	"movq	%%mm4, 24(%0)\n\t" /* x[3] = x[6]; */
+	:"=r"(x)
+	:"0"(x)
+	:"memory");
+
+  fft_4_3dnow(&x[0]);
+  
+  /* x[0] x[4] x[2] x[6] */
+  
+  __asm__ __volatile__(
+      "movq	40(%1), %%mm0\n\t"
+      "movq	%%mm0,	%%mm3\n\t"
+      "movq	56(%1),	%%mm1\n\t"
+      "pfadd	%%mm1,	%%mm0\n\t"
+      "pfsub	%%mm1,	%%mm3\n\t"
+      "movq	(%2),	%%mm2\n\t"
+      "pfadd	%%mm2,	%%mm0\n\t"
+      "pfadd	%%mm2,	%%mm3\n\t"
+      "movq	(%3),	%%mm1\n\t"
+      "pfadd	%%mm1,	%%mm0\n\t"
+      "pfsub	%%mm1,	%%mm3\n\t"
+      "movq	(%1),	%%mm1\n\t"
+      "movq	16(%1),	%%mm4\n\t"
+      "movq	%%mm1,	%%mm2\n\t"
+#ifdef HAVE_3DNOWEX
+      "pswapd	%%mm3,	%%mm3\n\t"
+#else
+      "movq	%%mm3,	%%mm6\n\t"
+      "psrlq	$32,	%%mm3\n\t"
+      "punpckldq %%mm6,	%%mm3\n\t"
+#endif
+      "pfadd	%%mm0,	%%mm1\n\t"
+      "movq	%%mm4,	%%mm5\n\t"
+      "pfsub	%%mm0,	%%mm2\n\t"
+      "pfadd	%%mm3,	%%mm4\n\t"
+      "movq	%%mm1,	(%0)\n\t"
+      "pfsub	%%mm3,	%%mm5\n\t"
+      "movq	%%mm2,	32(%0)\n\t"
+      "movd	%%mm4,	16(%0)\n\t"
+      "movd	%%mm5,	48(%0)\n\t"
+      "psrlq	$32, %%mm4\n\t"
+      "psrlq	$32, %%mm5\n\t"
+      "movd	%%mm4,	52(%0)\n\t"
+      "movd	%%mm5,	20(%0)"
+      :"=r"(x)
+      :"0"(x), "r"(&wT1), "r"(&wB1)
+      :"memory");
+  
+  /* x[1] x[5] */
+  __asm__ __volatile__ (
+	"movq	%6,	%%mm6\n\t"
+	"movq	%5,	%%mm7\n\t"
+	"movq	%1,	%%mm0\n\t"
+	"movq	%2,	%%mm1\n\t"
+	"movq	56(%3),	%%mm3\n\t"
+	"pfsub	40(%3),	%%mm0\n\t"
+#ifdef HAVE_3DNOWEX
+	"pswapd	%%mm1,	%%mm1\n\t"
+#else
+	"movq	%%mm1,	%%mm2\n\t"
+	"psrlq	$32,	%%mm1\n\t"
+	"punpckldq %%mm2,%%mm1\n\t"
+#endif
+	"pxor	%%mm7,	%%mm1\n\t"
+	"pfadd	%%mm1,	%%mm0\n\t"
+#ifdef HAVE_3DNOWEX
+	"pswapd	%%mm3,	%%mm3\n\t"
+#else
+	"movq	%%mm3,	%%mm2\n\t"
+	"psrlq	$32,	%%mm3\n\t"
+	"punpckldq %%mm2,%%mm3\n\t"
+#endif
+	"pxor	%%mm6,	%%mm3\n\t"
+	"pfadd	%%mm3,	%%mm0\n\t"
+	"movq	%%mm0,	%%mm1\n\t"
+	"pxor	%%mm6,	%%mm1\n\t"
+	"pfacc	%%mm1,	%%mm0\n\t"
+	"pfmul	%4,	%%mm0\n\t"
+	
+	"movq	40(%3),	%%mm5\n\t"
+#ifdef HAVE_3DNOWEX
+	"pswapd	%%mm5,	%%mm5\n\t"
+#else
+	"movq	%%mm5,	%%mm1\n\t"
+	"psrlq	$32,	%%mm5\n\t"
+	"punpckldq %%mm1,%%mm5\n\t"
+#endif
+	"movq	%%mm5,	%0\n\t"
+	
+	"movq	8(%3),	%%mm1\n\t"
+	"movq	%%mm1,	%%mm2\n\t"
+	"pfsub	%%mm0,	%%mm1\n\t"
+	"pfadd	%%mm0,	%%mm2\n\t"
+	"movq	%%mm1,	40(%3)\n\t"
+	"movq	%%mm2,	8(%3)\n\t"
+	:"=m"(wB2)
+	:"m"(wT1), "m"(wB1), "r"(x), "m"(HSQRT2_3DNOW), 
+	 "m"(x_plus_minus_3dnow), "m"(x_minus_plus_3dnow)
+	:"memory");
+
+
+  /* x[3] x[7] */
+  __asm__ __volatile__(
+	"movq	%1,	%%mm0\n\t"
+#ifdef HAVE_3DNOWEX
+	"pswapd	%3,	%%mm1\n\t"
+#else
+	"movq	%3,	%%mm1\n\t"
+	"psrlq	$32,	%%mm1\n\t"
+	"punpckldq %3,	%%mm1\n\t"
+#endif
+	"pxor	%%mm6,	%%mm1\n\t"	
+	"pfadd	%%mm1,	%%mm0\n\t"
+	"movq	%2,	%%mm2\n\t"
+	"movq	56(%4),	%%mm3\n\t"
+	"pxor	%%mm7,	%%mm3\n\t"
+	"pfadd	%%mm3,	%%mm2\n\t"
+#ifdef HAVE_3DNOWEX
+	"pswapd	%%mm2,	%%mm2\n\t"
+#else
+	"movq	%%mm2,	%%mm5\n\t"
+	"psrlq	$32,	%%mm2\n\t"
+	"punpckldq %%mm5,%%mm2\n\t"
+#endif
+	"movq	24(%4),	%%mm3\n\t"
+	"pfsub	%%mm2,	%%mm0\n\t"
+	"movq	%%mm3,	%%mm4\n\t"
+	"movq	%%mm0,	%%mm1\n\t"
+	"pxor	%%mm6,	%%mm0\n\t"
+	"pfacc	%%mm1,	%%mm0\n\t"
+	"pfmul	%5,	%%mm0\n\t"
+	"movq	%%mm0,	%%mm1\n\t"
+	"pxor	%%mm6,	%%mm1\n\t"
+	"pxor	%%mm7,	%%mm0\n\t"
+	"pfadd	%%mm1,	%%mm3\n\t"
+	"pfadd	%%mm0,	%%mm4\n\t"
+	"movq	%%mm4,	24(%0)\n\t"
+	"movq	%%mm3,	56(%0)\n\t"
+	:"=r"(x)
+	:"m"(wT1), "m"(wB2), "m"(wB1), "0"(x), "m"(HSQRT2_3DNOW)
+	:"memory");
+}
+
+static void fft_asmb_3dnow(int k, complex_t *x, complex_t *wTB,
+		     const complex_t *d, const complex_t *d_3)
+{
+  register complex_t  *x2k, *x3k, *x4k, *wB;
+
+  TRANS_FILL_MM6_MM7_3DNOW();
+  x2k = x + 2 * k;
+  x3k = x2k + 2 * k;
+  x4k = x3k + 2 * k;
+  wB = wTB + 2 * k;
+  
+  TRANSZERO_3DNOW(x[0],x2k[0],x3k[0],x4k[0]);
+  TRANS_3DNOW(x[1],x2k[1],x3k[1],x4k[1],wTB[1],wB[1],d[1],d_3[1]);
+  
+  --k;
+  for(;;) {
+     TRANS_3DNOW(x[2],x2k[2],x3k[2],x4k[2],wTB[2],wB[2],d[2],d_3[2]);
+     TRANS_3DNOW(x[3],x2k[3],x3k[3],x4k[3],wTB[3],wB[3],d[3],d_3[3]);
+     if (!--k) break;
+     x += 2;
+     x2k += 2;
+     x3k += 2;
+     x4k += 2;
+     d += 2;
+     d_3 += 2;
+     wTB += 2;
+     wB += 2;
+  }
+ 
+}
+
+void fft_asmb16_3dnow(complex_t *x, complex_t *wTB)
+{
+  int k = 2;
+
+  TRANS_FILL_MM6_MM7_3DNOW();
+  /* transform x[0], x[8], x[4], x[12] */
+  TRANSZERO_3DNOW(x[0],x[4],x[8],x[12]);
+
+  /* transform x[1], x[9], x[5], x[13] */
+  TRANS_3DNOW(x[1],x[5],x[9],x[13],wTB[1],wTB[5],delta16[1],delta16_3[1]);
+
+  /* transform x[2], x[10], x[6], x[14] */
+  TRANSHALF_16_3DNOW(x[2],x[6],x[10],x[14]);
+
+  /* transform x[3], x[11], x[7], x[15] */
+  TRANS_3DNOW(x[3],x[7],x[11],x[15],wTB[3],wTB[7],delta16[3],delta16_3[3]);
+
+} 
+
+static void fft_128p_3dnow(complex_t *a)
+{
+  fft_8_3dnow(&a[0]); fft_4_3dnow(&a[8]); fft_4_3dnow(&a[12]);
+  fft_asmb16_3dnow(&a[0], &a[8]);
+  
+  fft_8_3dnow(&a[16]), fft_8_3dnow(&a[24]);
+  fft_asmb_3dnow(4, &a[0], &a[16],&delta32[0], &delta32_3[0]);
+
+  fft_8_3dnow(&a[32]); fft_4_3dnow(&a[40]); fft_4_3dnow(&a[44]);
+  fft_asmb16_3dnow(&a[32], &a[40]);
+
+  fft_8_3dnow(&a[48]); fft_4_3dnow(&a[56]); fft_4_3dnow(&a[60]);
+  fft_asmb16_3dnow(&a[48], &a[56]);
+
+  fft_asmb_3dnow(8, &a[0], &a[32],&delta64[0], &delta64_3[0]);
+
+  fft_8_3dnow(&a[64]); fft_4_3dnow(&a[72]); fft_4_3dnow(&a[76]);
+  /* fft_16(&a[64]); */
+  fft_asmb16_3dnow(&a[64], &a[72]);
+
+  fft_8_3dnow(&a[80]); fft_8_3dnow(&a[88]);
+  
+  /* fft_32(&a[64]); */
+  fft_asmb_3dnow(4, &a[64], &a[80],&delta32[0], &delta32_3[0]);
+
+  fft_8_3dnow(&a[96]); fft_4_3dnow(&a[104]), fft_4_3dnow(&a[108]);
+  /* fft_16(&a[96]); */
+  fft_asmb16_3dnow(&a[96], &a[104]);
+
+  fft_8_3dnow(&a[112]), fft_8_3dnow(&a[120]);
+  /* fft_32(&a[96]); */
+  fft_asmb_3dnow(4, &a[96], &a[112], &delta32[0], &delta32_3[0]);
+  
+  /* fft_128(&a[0]); */
+  fft_asmb_3dnow(16, &a[0], &a[64], &delta128[0], &delta128_3[0]);
+}
+#endif //ARCH_X86
+
+static void fft_asmb(int k, complex_t *x, complex_t *wTB,
+	     const complex_t *d, const complex_t *d_3)
+{
+  register complex_t  *x2k, *x3k, *x4k, *wB;
+  register float a_r, a_i, a1_r, a1_i, u_r, u_i, v_r, v_i;
+
+  x2k = x + 2 * k;
+  x3k = x2k + 2 * k;
+  x4k = x3k + 2 * k;
+  wB = wTB + 2 * k;
+  
+  TRANSZERO(x[0],x2k[0],x3k[0],x4k[0]);
+  TRANS(x[1],x2k[1],x3k[1],x4k[1],wTB[1],wB[1],d[1],d_3[1]);
+  
+  --k;
+  for(;;) {
+     TRANS(x[2],x2k[2],x3k[2],x4k[2],wTB[2],wB[2],d[2],d_3[2]);
+     TRANS(x[3],x2k[3],x3k[3],x4k[3],wTB[3],wB[3],d[3],d_3[3]);
+     if (!--k) break;
+     x += 2;
+     x2k += 2;
+     x3k += 2;
+     x4k += 2;
+     d += 2;
+     d_3 += 2;
+     wTB += 2;
+     wB += 2;
+  }
+ 
+}
+
+static void fft_asmb16(complex_t *x, complex_t *wTB)
+{
+  register float a_r, a_i, a1_r, a1_i, u_r, u_i, v_r, v_i;
+  int k = 2;
+
+  /* transform x[0], x[8], x[4], x[12] */
+  TRANSZERO(x[0],x[4],x[8],x[12]);
+
+  /* transform x[1], x[9], x[5], x[13] */
+  TRANS(x[1],x[5],x[9],x[13],wTB[1],wTB[5],delta16[1],delta16_3[1]);
+
+  /* transform x[2], x[10], x[6], x[14] */
+  TRANSHALF_16(x[2],x[6],x[10],x[14]);
+
+  /* transform x[3], x[11], x[7], x[15] */
+  TRANS(x[3],x[7],x[11],x[15],wTB[3],wTB[7],delta16[3],delta16_3[3]);
+
+} 
+
+static void fft_4(complex_t *x)
+{
+  /* delta_p = 1 here */
+  /* x[k] = sum_{i=0..3} x[i] * w^{i*k}, w=e^{-2*pi/4} 
+   */
+
+  register float yt_r, yt_i, yb_r, yb_i, u_r, u_i, vi_r, vi_i;
+  
+  yt_r = x[0].real;
+  yb_r = yt_r - x[2].real;
+  yt_r += x[2].real;
+
+  u_r = x[1].real;
+  vi_i = x[3].real - u_r;
+  u_r += x[3].real;
+  
+  u_i = x[1].imag;
+  vi_r = u_i - x[3].imag;
+  u_i += x[3].imag;
+
+  yt_i = yt_r;
+  yt_i += u_r;
+  x[0].real = yt_i;
+  yt_r -= u_r;
+  x[2].real = yt_r;
+  yt_i = yb_r;
+  yt_i += vi_r;
+  x[1].real = yt_i;
+  yb_r -= vi_r;
+  x[3].real = yb_r;
+
+  yt_i = x[0].imag;
+  yb_i = yt_i - x[2].imag;
+  yt_i += x[2].imag;
+
+  yt_r = yt_i;
+  yt_r += u_i;
+  x[0].imag = yt_r;
+  yt_i -= u_i;
+  x[2].imag = yt_i;
+  yt_r = yb_i;
+  yt_r += vi_i;
+  x[1].imag = yt_r;
+  yb_i -= vi_i;
+  x[3].imag = yb_i;
+}
+
+
+static void fft_8(complex_t *x)
+{
+  /* delta_p = diag{1, sqrt(i)} here */
+  /* x[k] = sum_{i=0..7} x[i] * w^{i*k}, w=e^{-2*pi/8} 
+   */
+  register float wT1_r, wT1_i, wB1_r, wB1_i, wT2_r, wT2_i, wB2_r, wB2_i;
+  
+  wT1_r = x[1].real;
+  wT1_i = x[1].imag;
+  wB1_r = x[3].real;
+  wB1_i = x[3].imag;
+
+  x[1] = x[2];
+  x[2] = x[4];
+  x[3] = x[6];
+  fft_4(&x[0]);
+
+  
+  /* x[0] x[4] */
+  wT2_r = x[5].real;
+  wT2_r += x[7].real;
+  wT2_r += wT1_r;
+  wT2_r += wB1_r;
+  wT2_i = wT2_r;
+  wT2_r += x[0].real;
+  wT2_i = x[0].real - wT2_i;
+  x[0].real = wT2_r;
+  x[4].real = wT2_i;
+
+  wT2_i = x[5].imag;
+  wT2_i += x[7].imag;
+  wT2_i += wT1_i;
+  wT2_i += wB1_i;
+  wT2_r = wT2_i;
+  wT2_r += x[0].imag;
+  wT2_i = x[0].imag - wT2_i;
+  x[0].imag = wT2_r;
+  x[4].imag = wT2_i;
+  
+  /* x[2] x[6] */
+  wT2_r = x[5].imag;
+  wT2_r -= x[7].imag;
+  wT2_r += wT1_i;
+  wT2_r -= wB1_i;
+  wT2_i = wT2_r;
+  wT2_r += x[2].real;
+  wT2_i = x[2].real - wT2_i;
+  x[2].real = wT2_r;
+  x[6].real = wT2_i;
+
+  wT2_i = x[5].real;
+  wT2_i -= x[7].real;
+  wT2_i += wT1_r;
+  wT2_i -= wB1_r;
+  wT2_r = wT2_i;
+  wT2_r += x[2].imag;
+  wT2_i = x[2].imag - wT2_i;
+  x[2].imag = wT2_i;
+  x[6].imag = wT2_r;
+  
+
+  /* x[1] x[5] */
+  wT2_r = wT1_r;
+  wT2_r += wB1_i;
+  wT2_r -= x[5].real;
+  wT2_r -= x[7].imag;
+  wT2_i = wT1_i;
+  wT2_i -= wB1_r;
+  wT2_i -= x[5].imag;
+  wT2_i += x[7].real;
+
+  wB2_r = wT2_r;
+  wB2_r += wT2_i;
+  wT2_i -= wT2_r;
+  wB2_r *= HSQRT2;
+  wT2_i *= HSQRT2;
+  wT2_r = wB2_r;
+  wB2_r += x[1].real;
+  wT2_r =  x[1].real - wT2_r;
+
+  wB2_i = x[5].real;
+  x[1].real = wB2_r;
+  x[5].real = wT2_r;
+
+  wT2_r = wT2_i;
+  wT2_r += x[1].imag;
+  wT2_i = x[1].imag - wT2_i;
+  wB2_r = x[5].imag;
+  x[1].imag = wT2_r;
+  x[5].imag = wT2_i;
+
+  /* x[3] x[7] */
+  wT1_r -= wB1_i;
+  wT1_i += wB1_r;
+  wB1_r = wB2_i - x[7].imag;
+  wB1_i = wB2_r + x[7].real;
+  wT1_r -= wB1_r;
+  wT1_i -= wB1_i;
+  wB1_r = wT1_r + wT1_i;
+  wB1_r *= HSQRT2;
+  wT1_i -= wT1_r;
+  wT1_i *= HSQRT2;
+  wB2_r = x[3].real;
+  wB2_i = wB2_r + wT1_i;
+  wB2_r -= wT1_i;
+  x[3].real = wB2_i;
+  x[7].real = wB2_r;
+  wB2_i = x[3].imag;
+  wB2_r = wB2_i + wB1_r;
+  wB2_i -= wB1_r;
+  x[3].imag = wB2_i;
+  x[7].imag = wB2_r;
+}
+
+
+static void fft_128p(complex_t *a)
+{
+  fft_8(&a[0]); fft_4(&a[8]); fft_4(&a[12]);
+  fft_asmb16(&a[0], &a[8]);
+  
+  fft_8(&a[16]), fft_8(&a[24]);
+  fft_asmb(4, &a[0], &a[16],&delta32[0], &delta32_3[0]);
+
+  fft_8(&a[32]); fft_4(&a[40]); fft_4(&a[44]);
+  fft_asmb16(&a[32], &a[40]);
+
+  fft_8(&a[48]); fft_4(&a[56]); fft_4(&a[60]);
+  fft_asmb16(&a[48], &a[56]);
+
+  fft_asmb(8, &a[0], &a[32],&delta64[0], &delta64_3[0]);
+
+  fft_8(&a[64]); fft_4(&a[72]); fft_4(&a[76]);
+  /* fft_16(&a[64]); */
+  fft_asmb16(&a[64], &a[72]);
+
+  fft_8(&a[80]); fft_8(&a[88]);
+  
+  /* fft_32(&a[64]); */
+  fft_asmb(4, &a[64], &a[80],&delta32[0], &delta32_3[0]);
+
+  fft_8(&a[96]); fft_4(&a[104]), fft_4(&a[108]);
+  /* fft_16(&a[96]); */
+  fft_asmb16(&a[96], &a[104]);
+
+  fft_8(&a[112]), fft_8(&a[120]);
+  /* fft_32(&a[96]); */
+  fft_asmb(4, &a[96], &a[112], &delta32[0], &delta32_3[0]);
+  
+  /* fft_128(&a[0]); */
+  fft_asmb(16, &a[0], &a[64], &delta128[0], &delta128_3[0]);
+}
+
+
+
