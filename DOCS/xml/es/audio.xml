@@ -113,7 +113,7 @@ DEMUXER: Demasiados (945 en 8390980 bytes) paquetes de video en el buffer!<!--
   Si el sonido se entrecorta mientras se reproduce desde un CD-ROM, active
   el enmascaramiento de IRQ, e.g. <command>hdparm -u1 /dev/cdrom</command>
   (<command>man hdparm</command>). Normalmente siempre es buena idea y se
-  describe con más detalle en la <link endlink="drives">sección de CD-ROM</link>.
+  describe con más detalle en la <link linkend="drives">sección de CD-ROM</link>.
  </para></listitem>
 </itemizedlist>
 </sect3>

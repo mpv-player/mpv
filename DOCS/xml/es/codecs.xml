@@ -256,6 +256,17 @@ Debe seguir los pasos anteriores para obtener el código para esta biblioteca.
 </para>
 </note>
 
+<para>
+Con FFmpeg y mi Matrox G400, puedo ver hasta las peliculas DivX de mas alta
+resolución sin perder frames en mi K6-2 500.
+</para>
+</sect3>
+
+
+<sect3 id="xanim">
+<title>Codecs XAnim</title>
+
+
 <formalpara>
 <title>INSTALACIÓN Y USO</title>
 <para>

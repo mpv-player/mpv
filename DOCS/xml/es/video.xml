@@ -206,7 +206,7 @@ mplayer-users por un controlador con soporte para MMX/3DNow.
 
 <para>
 nVidia no son una buena elección bajo Linux (de acuerdo con nVidia esto
-<link linkend="nvidia-options">no es verdad</link>)... Tiene que usar un
+<link linkend="nvidia-opinions">no es verdad</link>)... Tiene que usar un
 controlador de código-cerrado de nVidia, disponible en el sitio web de
 nVidia. El controlador estándar de XFree86 no tiene soporte de XVideo para
 estas tarjetas, debido a las especificaciones/código cerrados de nVidia.
