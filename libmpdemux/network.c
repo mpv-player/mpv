@@ -27,6 +27,8 @@
 #include "asf.h"
 #include "rtp.h"
 
+#include "../version.h"
+
 extern int verbose;
 extern m_config_t *mconfig;
 
@@ -269,7 +271,7 @@ http_send_request( URL_t *url ) {
 	}
 	snprintf(str, 80, "Host: %s", server_url->hostname );
 	http_set_field( http_hdr, str);
-	http_set_field( http_hdr, "User-Agent: MPlayer");
+	http_set_field( http_hdr, "User-Agent: MPlayer/"VERSION);
 	http_set_field( http_hdr, "Connection: closed");
 	if( http_build_request( http_hdr )==NULL ) {
 		return -1;
