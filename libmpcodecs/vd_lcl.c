@@ -208,6 +208,7 @@ static int init(sh_video_t *sh)
       }
       break;
     case CODEC_ZLIB:
+#ifdef HAVE_ZLIB
       switch (hc->compression) {
         case COMP_ZLIB_HISPEED:
           mp_msg(MSGT_DECVIDEO, MSGL_INFO, "[LCL] High speed compression.\n");
@@ -225,6 +226,10 @@ static int init(sh_video_t *sh)
 	  }
           mp_msg(MSGT_DECVIDEO, MSGL_INFO, "[LCL] Compression level for ZLIB: (%d).\n", hc->compression);
       }
+#else
+      mp_msg(MSGT_DECVIDEO, MSGL_ERR, "[LCL] Zlib support not compiled.\n");
+      return 0;
+#endif
       break;
     default:
       mp_msg(MSGT_DECVIDEO, MSGL_ERR, "[LCL] BUG! Unknown codec in compression switch.\n");
