@@ -149,7 +149,7 @@ Installation directories:
 
 Optional features:
   --disable-mencoder     disable mencoder (a/v encoder) compilation [enable]
-  --enable-gui           enable gmplayer compilation (gtk-1.2 GUI) [disable]
+  --enable-gui           enable gmplayer compilation (GTK 1.2 GUI) [disable]
   --enable-largefiles    enable support for files > 2 GBytes [disable]
   --enable-linux-devfs   set default devices to devfs ones [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
@@ -5845,7 +5845,7 @@ EOF
 
 
   # Check for GTK:
-  echocheck "gtk version"
+  echocheck "GTK version"
   if test -z "$_gtkconfig" ; then
     if ( gtk-config --version ) >/dev/null 2>&1 ; then
       _gtkconfig="gtk-config"
