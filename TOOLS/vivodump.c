@@ -151,7 +151,7 @@ int h263_decode_picture_header(unsigned char *b_ptr)
 
 int postable[32768];
 
-int main(int argv,char ** argc){
+int main(int argc,char ** argv){
 int c;
 unsigned int head=-1;
 int pos=0;
@@ -167,13 +167,20 @@ int flag=0;
 int flag2=0;
 int prefix=0;
 
+// check if enough args were given
+if ( argc < 3 ){
+    printf("Too few arguments given!\n"
+           "Usage: %s <input_file> <output_file>\n", argv[0]);
+
+    return -1;
+}
 // input
-if(!(f=fopen(argc[1],"rb"))){
+if(!(f=fopen(argv[1],"rb"))){
        printf("Couldn't open input file.\n");
        return -1;
 }
 // output
-if(!(f2=fopen(argc[2],"wb"))){
+if(!(f2=fopen(argv[2],"wb"))){
        printf("Couldn't open output file.\n");
        return -1;
 }
