@@ -13,13 +13,15 @@
 #define OPT_ARG_INT  1
 #define OPT_ARG_STR  2
 
+typedef int (*opt_test_f)(void *);
+
 /** simple structure for defining the option name, type and storage location */
 typedef struct opt_s
 {
   char * name; ///< string that identifies the option
   int type;    ///< option type as defined in subopt-helper.h
   void * valp; ///< pointer to the mem where the value should be stored
-  int (* test)(void *); ///< argument test func ( optional )
+  opt_test_f test; ///< argument test func ( optional )
   int set;     ///< Is set internally by the parser if the option was found.
                ///< Don't use it at initialization of your opts, it will be
                ///< overriden anyway!
