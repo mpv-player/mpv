@@ -66,7 +66,16 @@ lecteur CD-ROM</P>
 
 <H2><A NAME="dvd">4.2. Lecture de DVDs</A></H2>
 
-<P>Pour voir la liste complète des options disponibles, veuillez lire la page de man.</P>
+<P>Pour voir la liste complète des options disponibles, veuillez lire la page de man.
+  La syntaxe des Digital Versatile Disc (DVD) est la suivante:</P>
+  
+<P><CODE>mplayer -dvd &lt;piste&gt; [-dvd-device &lt;périphérique&gt;]</CODE></P>
+
+<P>Exemple: <CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+
+<P>Le périphérique DVD par défaut est <CODE>/dev/dvd</CODE>. Si votre installation
+  diffère, faites un lien symbolique ou spécifiez le périphérique correct en ligne
+  de commande avec l'option <CODE>-dvd-device</CODE>.</P>
 
 <H4>Nouvelle méthode de lecture DVD (mpdvdkit2)</H4>
 

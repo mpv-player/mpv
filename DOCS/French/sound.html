@@ -467,9 +467,11 @@
 <P>Le contrôle de volume logiciel est implémenté par le filtre audio <CODE>volume</CODE>. 
   Utilisez ce filtre avec précaution 
   car il peut réduire le signal au niveau de bruit du son. Dans la plupart des cas
-  il vaut mieux fixer le niveau du son MASTER au max, laisser ce filtre de côté et contrôler
+  il vaut mieux fixer le niveau du son PCM au max, laisser ce filtre de côté et contrôler
   le niveau de sortie de vos haut-parleurs avec le contrôleur de volume principal du 
-  mixeur. Si il y a un amplificateur externe connecté à l'ordinateur (ce qui est presque
+  mixeur. Au cas où votre carte son ait un mixeur numérique au lieu d'un analogique,
+  et que vous entendez sa distortion, utilisez le mixeur MASTER à la place. 
+  Si il y a un amplificateur externe connecté à l'ordinateur (ce qui est presque
   toujours le cas), le niveau de bruit peut être minimisé en ajustant le niveau maître
   et le bouton du volume jusqu'à ce que le bruit résiduel soit parti. Ce filtre a
   deux options:</P>
@@ -668,7 +670,7 @@
 <P>Actuellement les plugins audio ne peuvent pas être utilisés dans MEncoder.</P>
 
 
-<H5><A NAME="resample">2.3.2.3.1 Up/Downsampling</A></H5>
+<H5><A NAME="resample">2.3.2.4.1 Up/Downsampling</A></H5>
 
 <P>Mplayer supporte pleinement l'up/downsampling du son. Ce plugin peut
   être utilisé si vous avez une carte son à fréquence fixe ou que vous
@@ -686,7 +688,7 @@
   en slow motion assortie d'une distortion audio.</P>
 
 
-<H5><A NAME="surround_decoding">2.3.2.3.2 Décodage son surround</A></H5>
+<H5><A NAME="surround_decoding">2.3.2.4.2 Décodage son surround</A></H5>
 
 <P>MPlayer a un plugin audio qui peut décoder le son surround encodé en matrice.
   Dolby Surround est un exemple de format encodé en matrice. Beaucoup de fichiers
@@ -712,7 +714,7 @@
   list=format:format=&lt;format de sortie requis&gt;</CODE></P>
 
 
-<H5><A NAME="delay">2.3.2.3.4 Décalage</A></H5>
+<H5><A NAME="delay">2.3.2.4.4 Décalage</A></H5>
 
 <P>Ce plugin décale le son est n'est là que comme exemple pour démontrer comment
   développer de nouveaux plugins. Il ne peut être utilisé pour rien d'utile d'un
@@ -724,7 +726,7 @@
   est recommandé pour simplifier cette tâche.</P>
   
    
-<H5><A NAME="volume">2.3.2.3.5 Contrôle de volume logiciel</A></H5>
+<H5><A NAME="volume">2.3.2.4.5 Contrôle de volume logiciel</A></H5>
 
 <P>Ce plugin est un remplacement logiciel pour le contrôleur de volume,
   et peut être utilisé sur des machines avec un périphérique mixeur endommagé.
@@ -734,10 +736,12 @@
   défaut qui équivaut à une amplification de 0dB. Utilisez ce plugin avec précaution
   car il peut réduire le signal jusqu'au bruit. Dans la plupart des cas il vaut mieux
   régler le volume MASTER au maximum, laisser ce plugin, et contrôler le niveau de sortie
-  sur vos haut-parleurs avec le bouton principal du mixeur. Si il y a un ampli
-  externe connecté à votre ordinateur (c'est la plupart du temps le cas), le niveau
-  de bruit peut être minimisé en ajustant le niveau principal et la molette du volume
-  de l'ampli jusqu'a ce que le bruit résiduel soit parti.</P>
+  sur vos haut-parleurs avec le bouton principal du mixeur. Au cas où votre carte son
+  ait un mixeur numérique au lieu d'un analogique, utilisez le contrôle mixeur MASTER
+  à la place. Si il y a un ampli externe connecté à votre ordinateur (c'est la plupart 
+  du temps le cas), le niveau de bruit peut être minimisé en ajustant le niveau 
+  principal et la molette du volume de l'ampli jusqu'a ce que le bruit résiduel soit 
+  parti.</P>
 
 <P>Utilisation:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop
@@ -753,7 +757,7 @@
   list=volume:softclip</CODE></P>
 
 
-<H5><A NAME="extrastereo">2.3.2.3.6 Extrastereo</A></H5>
+<H5><A NAME="extrastereo">2.3.2.4.6 Extrastereo</A></H5>
 
 <P>Ce plugin augmente (linéairement) la différence entre les canaux gauche et
   droit (comme le plugin extrastereo de XMMS) qui donne une sorte d'effet "live"
@@ -769,7 +773,7 @@
   -1.0, les canaux gauche et droit seront inversés.</P>
 
 
-<H5><A NAME="normalizer">2.3.2.3.7 Volume normalizer</A></H5>
+<H5><A NAME="normalizer">2.3.2.4.7 Volume normalizer</A></H5>
 
 <P>Ce plugin maximise le volume sans distordre le son.</P>
 
