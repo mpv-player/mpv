@@ -657,19 +657,20 @@ static int control(priv_t *priv, int cmd, void *arg)
 static int grab_video_frame(priv_t *priv, char *buffer, int len)
 {
     int frame = priv->queue % priv->nbuf;
+    int nextframe = (priv->queue+1) % priv->nbuf;
 
     printf("grab_video_frame(priv=%p, buffer=%p, len=%d\n",
 	priv, buffer, len);
 
     printf("buf: %p + frame: %d => %p\n",
-	priv->buf, frame, &priv->buf[frame]);
-    if (ioctl(priv->fd, VIDIOCMCAPTURE, &priv->buf[frame]) == -1)
+	priv->buf, nextframe, &priv->buf[nextframe]);
+    if (ioctl(priv->fd, VIDIOCMCAPTURE, &priv->buf[nextframe]) == -1)
     {
 	printf("ioctl mcapture failed: %s\n", strerror(errno));
 	return(0);
     }
     
-    if (ioctl(priv->fd, VIDIOCSYNC, &priv->buf[frame]) == -1)
+    if (ioctl(priv->fd, VIDIOCSYNC, &priv->buf[frame].frame) == -1)
 	printf("ioctl sync failed: %s\n", strerror(errno));
     priv->queue++;
     
