@@ -516,10 +516,10 @@ will not be displayed.
 Particularly useful on slow terminals or broken ones that do not properly
 handle carriage return (i.e. \\r).
 .TP
-.B \-really-quiet \ \ 
+.B \-really-quiet
 Display even less output and status messages.
 .TP
-.B \-shuffle \ \ 
+.B \-shuffle
 Play files in random order.
 .TP
 .B \-skin <skin\ directory> (GUI only)
@@ -2630,7 +2630,7 @@ off automatically depending on available CPU time.
 .RE
 .PD 1
 .TP
-.B spp[=quality[:qp]]\ \ \ 
+.B spp[=quality[:qp]]
 simple postprocessing filter
 .RSs
 .IPs quality
@@ -2758,7 +2758,7 @@ The optional parameter f can be 0 to only use even lines, or 1 to only use
 odd lines.
 Any other value for f gives the default (averaging) behavior.
 .TP
-.B ilpack[=mode]\ 
+.B ilpack[=mode]
 When interlaced video is stored in YUV 4:2:0 formats, chroma
 interlacing does not line up properly due to vertical downsampling of
 the chroma channels.
@@ -3846,6 +3846,9 @@ overlapped block motion compensation (H263+)
 loop filter (H263+)
 note, this is broken
 .TP
+.B inter_threshold <-1000\-1000>
+Does absolutely nothing at the moment.
+.TP
 .B keyint=<0\-300>
 maximum interval between keyframes in frames.
 Keyframes are needed for seeking as seeking is only possible to a keyframe but
@@ -4705,7 +4708,7 @@ wide search
 .PD 1
 .TP
 .B psnr\ \ \ 
-print the psnr (peak signal to noise ratio) for the whole video after encoding
+Print the psnr (peak signal to noise ratio) for the whole video after encoding
 and store the per frame psnr in a file with a name like 'psnr_hhmmss.log'.
 Returned values are in dB (decibel), the higher the better.
 .
@@ -4828,20 +4831,19 @@ cat *.vob | mencoder <options> \-
 .\" --------------------------------------------------------------------------
 .
 .SH BUGS
-Probably.
-PLEASE, double-check the documentation (especially bugreports.html),
-the FAQ and the mail archive before!
-.br
-Send your complete bug reports to the MPlayer-users mailing list at
-<mplayer-users@mplayerhq.hu>.
-We love complete bug reports :)
+If you find one, report it to us, but please make sure you have read all
+of the documentation first.
+Many bugs are the result of incorrect setup or parameter usage.
+The bug reporting section of the documentation (DOCS/HTML/en/bugreports.html)
+explains how to create useful bug reports.
 .
 .
 .SH AUTHORS
-Check documentation.
+MPlayer was initially written by Arpad Gereoffy.
+See the AUTHORS file for a list of some of the many other contributors.
 .TP
 MPlayer is (C) 2000\-2003
-.B Arpad Gereoffy
+.B The MPlayer Team
 .TP
 This man page is written and maintained by
 .B Gabucino
@@ -4850,7 +4852,7 @@ This man page is written and maintained by
 .br
 .B Jonas Jermann
 .PP
-Please send mails about it to the MPlayer-users mailing list.
+Please send mails about it to the MPlayer-DOCS mailing list.
 .
 .
 .SH "STANDARD DISCLAIMER"
