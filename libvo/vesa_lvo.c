@@ -19,15 +19,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "config.h"
+
 #include "vesa_lvo.h"
 #include "img_format.h"
 #include "../drivers/mga_vid.h" /* <- should be changed to "linux/'something'.h" */
 #include "fastmemcpy.h"
-
+#include "osd.h"
 #include "video_out.h"
 
 #define WIDTH_ALIGN 32 /* should be 16 for rage:422 and 32 for rage:420 */
 #define NUM_FRAMES 2
+#define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
+
 static uint8_t *frames[NUM_FRAMES];
 
 static int lvo_handler = -1;
@@ -212,10 +216,63 @@ void     vlvo_flip_page(void)
 	lvo_mem=frames[next_frame];
 }
 
+static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
+{
+  UNUSED(x0);
+  UNUSED(y0);
+  UNUSED(w);
+  UNUSED(h);
+  UNUSED(src);
+  UNUSED(srca);
+  UNUSED(stride);
+}
+
+static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
+{
+    uint32_t bespitch = /*(*/mga_vid_config.src_width;// + 15) & ~15;
+    switch(mga_vid_config.format){
+    case IMGFMT_BGR15:
+    case IMGFMT_RGB15:
+	vo_draw_alpha_rgb15(w,h,src,srca,stride,lvo_mem+2*(y0*bespitch+x0),2*bespitch);
+	break;
+    case IMGFMT_BGR16:
+    case IMGFMT_RGB16:
+	vo_draw_alpha_rgb16(w,h,src,srca,stride,lvo_mem+2*(y0*bespitch+x0),2*bespitch);
+	break;
+    case IMGFMT_BGR24:
+    case IMGFMT_RGB24:
+	vo_draw_alpha_rgb24(w,h,src,srca,stride,lvo_mem+3*(y0*bespitch+x0),3*bespitch);
+	break;
+    case IMGFMT_BGR32:
+    case IMGFMT_RGB32:
+	vo_draw_alpha_rgb32(w,h,src,srca,stride,lvo_mem+4*(y0*bespitch+x0),4*bespitch);
+	break;
+    case IMGFMT_YV12:
+    case IMGFMT_IYUV:
+    case IMGFMT_I420:
+        vo_draw_alpha_yv12(w,h,src,srca,stride,lvo_mem+bespitch*y0+x0,bespitch);
+        break;
+    case IMGFMT_YUY2:
+        vo_draw_alpha_yuy2(w,h,src,srca,stride,lvo_mem+2*(bespitch*y0+x0),bespitch);
+        break;
+    case IMGFMT_UYVY:
+        vo_draw_alpha_yuy2(w,h,src,srca,stride,lvo_mem+2*(bespitch*y0+x0)+1,bespitch);
+        break;
+    default:
+        draw_alpha_null(x0,y0,w,h,src,srca,stride);
+    }
+}
+
 void     vlvo_draw_osd(void)
 {
   if(verbose > 1) printf("vesa_lvo: vlvo_draw_osd() was called\n");
   /* TODO: hw support */
+#if 0
+/* disable this stuff until new fbvid.h interface will be implemented
+  because in different fourcc radeon_vid and rage128_vid have different
+  width alignment */
+  vo_draw_text(mga_vid_config.src_width,mga_vid_config.src_height,draw_alpha);
+#endif
 }
 
 uint32_t vlvo_query_info(uint32_t format)
