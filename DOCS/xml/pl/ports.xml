@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.35 -->
+<!-- synced with 1.36 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -57,13 +57,13 @@ Najprostszym sposobem, żeby uzyskać <application>MPlayera</application>,
 jest pobranie go z odpowiedniego źródła pakietów (stable, testing, unstable)
 z witryny <ulink url="http://www.openzaurus.org">OpenZaurus</ulink>. Jeżeli chcesz
 go skompilować samodzielnie, powinieneś przyjrzeć się katalogom 
-<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">MPlayera</ulink>
+<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayera</ulink>
 i biblioteki
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 w głównym katalogu źródłowym OpenZaurusa. Zawierają one najświeższe łatki
 i pliki Makefile, służące do samodzielnej kompilacji
-<application>MPlayera</application> z libavcodec. Jeżeli potrzebujesz interfejsu
-GUI, możesz użyć xmms-embedded.
+<application>MPlayera</application> z <systemitem class="library">libavcodec</systemitem>.
+Jeżeli potrzebujesz interfejsu GUI, możesz użyć xmms-embedded.
 </para>
 </sect2>
 </sect1>
@@ -130,10 +130,13 @@ Zobacz rozdział <link linkend="macos">Mac OS</link>.
 Na <emphasis role="bold">UltraSPARCach</emphasis>,
 <application>MPlayer</application> korzysta z rozszerzenia
 <emphasis role="bold">VIS</emphasis> (odpowiednik MMX), obecnie tylko w
-<emphasis>libmpeg2</emphasis>, <emphasis>libvo</emphasis> i
-<emphasis>libavcodec</emphasis>, ale nie w mp3lib. Możesz oglądać plik VOB na 
+<emphasis><systemitem class="library">libmpeg2</systemitem></emphasis>,
+<emphasis><systemitem class="library">libavo</systemitem></emphasis> i
+<emphasis><systemitem class="library">libavcodec</systemitem></emphasis>,
+ale nie w <systemitem class="library">mp3lib</systemitem>. Możesz oglądać plik VOB na
 procesorze z taktowaniem 400MHz. Będziesz potrzebował do tego biblioteki
-<ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mLib</ulink>.
+<ulink url="http://www.sun.com/sparc/vis/mediaLib.html">
+<systemitem class="library">mLib</systemitem></ulink>.
 </para>
 
 <para>
@@ -400,7 +403,8 @@ obsługę starszych wersji Mac OS oraz przysłać nam łaty!
 
 <para>
 Zmodyfikowane GCC 3.X Apple jest zalecane do kompilacji 
-<application>MPlayera</application>, szczególnie z libavcodec, ponieważ 
+<application>MPlayera</application>, szczególnie z
+<systemitem class="library">libavcodec</systemitem>, ponieważ 
 ich zmodyfikowane GCC 2.95.x nie obsługuje poprawnie składni C99.
 </para>
 

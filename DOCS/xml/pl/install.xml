@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.35 -->
+<!-- synced with 1.36 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -128,8 +128,9 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">libavcodec</emphasis>: Ten pakiet kodeków jest zdolny do dekodowania
-  strumieni video zakodowanych H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3
+  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>:
+  Ten pakiet kodeków jest zdolny do dekodowania strumieni video zakodowanych
+  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3
   i strumieni audio WMA (Windows Media Audio) v1/v2 na wielu platformach.
   Jest również uważany za najszybszy. Przeczytaj rozdział
   <link linkend="ffmpeg">FFmpeg</link>, a dowiesz się więcej. Cechy:
@@ -171,8 +172,9 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   <listitem><simpara>
     Nie są potrzebne do starych plików video ASF z MP41 lub MP42 (mimo, że dźwięk VoxWare
     jest często używany w tych plikach - realizowane jest to przez kodek Win32), lub WMV7. 
-    Nie są również potrzebne do WMA (Windows Media Audio), libavcodec ma potrzebne do
-    niego dekodery ze świata wolnego oprogramowania.
+    Nie są również potrzebne do WMA (Windows Media Audio),
+    <systemitem class="library">libavcodec</systemitem> ma potrzebne do niego dekodery ze
+    świata wolnego oprogramowania.
     </simpara></listitem>
   </itemizedlist>
   </para></listitem>
@@ -185,8 +187,8 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
 <listitem><para>
   <emphasis role="bold">DivX4/DivX5</emphasis>: informacje o tym kodeku są dostępne
   w rozdziale <link linkend="divx4-5">DivX4/DivX5</link>. Prawdopodobnie, nie chcesz 
-  tego kodeka jako, że <emphasis role="bold">libavcodec</emphasis> (zobacz
-  powyżej) jest o wiele szybszy i ma lepszą jakość, zarówno dla dekodowania i
+  tego kodeka jako, że <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>
+  (zobacz powyżej) jest o wiele szybszy i ma lepszą jakość, zarówno dla dekodowania i
   kodowania. Cechy:
   <itemizedlist>
   <listitem><simpara>
@@ -195,7 +197,8 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
     </simpara></listitem>
   <listitem><simpara>
     może odtwarzać stare filmy <emphasis role="bold">DivX3</emphasis> znacznie szybciej
-    niż biblioteki Win32 DLL, ale wolniej niż <emphasis role="bold">libavcodec</emphasis>!
+    niż biblioteki Win32 DLL, ale wolniej niż
+    <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>!
     </simpara></listitem>
   <listitem><simpara>
     ma zamknięte źródło i dostępna jest tylko wersja na x86.
