@@ -113,7 +113,7 @@ playable, the other is neither.</P>
 supported by most of the players. The file format makes it possible to use VBR
 audio, but most players expect CBR audio, thus they fail with VBR. VBR is
 unusual, and Microsoft's AVI specs only describe CBR audio. I also note, that
-most AVI encoders/multiplexers create bad files if using VBR audio. only 2
+most AVI encoders/multiplexers create bad files if using VBR audio. Only 2
 exception (known by me): NaNDub and <A HREF="encoding.html">MEncoder</A>.</P>
 
 
@@ -132,7 +132,9 @@ v2.0 files :) . Note, that .ASF files nowdays come with the extension .WMA or
 
 <P>These are from Macintosh. Usually have extensions of .QT or .MOV . Note
 that since the MPEG4 Group chose QuickTime as the recommended file format
-for MPEG4, their .MOV files come with .MPG or .MP4 extension.</P>
+for MPEG4, their .MOV files come with .MPG or .MP4 extension (interesting
+that in these files the video stream is a real .MPG file. With the
+<CODE>-dumpvideo</CODE> option you can even extract it.).</P>
 
 <P><B>Codecs</B>: any codecs allowed, both CBR and VBR. Note: most new mov files use
 <B>Sorenson</B> video and QDesign Music audio. These formats are completely

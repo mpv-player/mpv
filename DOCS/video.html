@@ -9,39 +9,86 @@
 
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>General:</B></P></TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.13>x11</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>X11 with optional SHM extension</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.2>xv</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>X11 using overlays with the Xvideo extension (hardware YUV & scaling)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.10</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OpenGL renderer, so far works only with:
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2><A HREF=#2.3.1.13>x11</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT
+  face="Verdana, Arial, Helvetica, sans-serif" size=2>X11 with optional SHM
+  extension</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.2>xv</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>X11 using overlays with the Xvideo extension
+  (hardware YUV & scaling)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.10>gl</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>OpenGL renderer, so far works only with:
 <UL><LI>all cards with Utah-GLX
 <LI>Matrox cards with X/DRI >=4.0.3
 <LI>Radeon with X/DRI CVS</UL></TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.3>dga</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>X11 DGA extension</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.6>fbdev</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Output to general framebuffers</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.5>svga</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Output to SVGAlib</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.4>sdl</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.3>dga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>X11 DGA extension</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.6>fbdev</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>Output to general framebuffers</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.5>svga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>Output to SVGAlib</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.4>sdl</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>
 &nbsp;&nbsp;<CODE>1.1.7:</CODE> supports software scaling<BR>
 &nbsp;&nbsp;<CODE>1.1.8:</CODE> supports Xvideo (hardware scaling/fullscreen)<BR>
 &nbsp;&nbsp;<CODE>1.2.0:</CODE> supports AAlib (-vo aa is very recommended, see below!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.14-TODO>ggi</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>similar to SDL</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.11>aa</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>textmode rendering with AAlib</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><a href=#2.3.1.12>vesa</a></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Output to VESA BIOS.</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.14-TODO>ggi</A></TD><TD></TD><TD><FONT face="Verdana,
+  Arial, Helvetica, sans-serif" size=2>similar to SDL</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.11>aa</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>textmode rendering with AAlib</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><a href=#2.3.1.12>vesa</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>Output to VESA BIOS.</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Card specific:</B></P></TD><TR>
+<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>Card specific:</B></P></TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.7>mga</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G200/G400 hardware YUV overlay via the mga_vid device</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.7>xmga</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G200/G400 overlay (mga_vid) in X11 window<BR>
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2><A HREF=#2.3.1.7>mga</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT
+  face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G200/G400 hardware
+  YUV overlay via the mga_vid device</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.7>xmga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>Matrox G200/G400 overlay (mga_vid) in X11
+  window<BR>
 (<I>Xv emulation on X 3.3.x!</I>)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G400 YUV support on framebuffer (obsoleted, use mga/xmga)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo3/Banshee hardware YUV (/dev/3dfx) support (not yet tested, maybe
-broken)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF=#2.3.1.9>tdfxfb</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo3/Banshee hardware YUV support on tdfx framebuffer (works!)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>Matrox G400 YUV support on framebuffer (obsoleted, use
+  mga/xmga)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>Voodoo3/Banshee hardware YUV (/dev/3dfx) support (not yet tested, maybe
+  broken)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.9>tdfxfb</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>Voodoo3/Banshee hardware YUV support on tdfx
+  framebuffer (works!)</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Special:</B></P></TD><TR>
+<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>Special:</B></P></TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>png</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PNG files output (use -z switch to set compression)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pgm</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PGM files output (for testing purposes or ffmpeg encoding)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>md5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>MD5sum output (for MPEG conformance tests)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>null</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Null output (for speed tests/benchmarking)</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>png</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>PNG files output (use -z switch to set
+  compression)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>pgm</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>PGM files output (for testing purposes or ffmpeg encoding)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>md5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>MD5sum output (for MPEG conformance tests)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>null</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>Null output (for speed tests/benchmarking)</TD><TR>
 </TABLE>
 
 <P>NOTE: <I>check the following subsections for details and requirements!</I></P>
@@ -176,10 +223,10 @@ section!</P>
 <P>S3 Savage3D's should work fine, but for Savage4, use XFree86 version 4.0.3
 or greater (in case of image problems, try 16bpp). As for S3 Virge.. sell it.</P>
 
-<P><B>NOTE</B>: Savage4 has a slow YV12 image displaying capability (it needs
+<P><B>NOTE</B>: Savage cards have a slow YV12 image displaying capability (it needs
 to do YV12->YUY2 conversion, because the Savage hardware can't display YV12).
 So when this documentation says at some point "this has YV12 output use this,
-it's faster", you shouldn't. Stick to YUY2.</P>
+it's faster", it's not sure. Try.</P>
 
 
 <P><B><A NAME=2.3.1.2.3>2.3.1.2.3. nVidia cards</A></B></P>
@@ -201,11 +248,10 @@ Complain to NVidia.</UL></P>
 disabling VSYNC somehow, or set refresh rate to n*(fps of the movie) Hz.</LI>
 
 <LI>Radeon VE - currently only XFree86 CVS has driver for this card, version
-4.1.0 doesn't. Of course with <B>MPlayer</B> you can happily get
-<B>accelerated</B> display, with or without <B>TV output</B>, and no libraries
-or X are needed. Read <a href=#2.3.1.12>VESA driver</a> and <A
-HREF=#2.3.1.14>Radeon acceleration</A> sections).</LI>
-</P>
+4.1.0 doesn't. And no TV out support. Of course with <B>MPlayer</B> you can
+happily get <B>accelerated</B> display, with or without <B>TV output</B>, and
+no libraries or X are needed. Read <a href=#2.3.1.12>VESA driver</a> and <A
+HREF=#2.3.1.14>Radeon acceleration</A> sections).</LI> </P>
 
 
 <P><B><A NAME=2.3.1.2.5>2.3.1.2.5. NeoMagic cards</A></B></P>
@@ -890,7 +936,11 @@ we have no chance to get working TV-out on ATI.</P>
 <P>What's status of ATI's tv-out chips under Linux:
 <LI><b>ATI Mach64</b> has <i>ImpacTV</i> which is supported by gatos.
 <LI><b>ASIC Radeon VIVO</b> has <i>Rage Theatre</i> which is supported by gatos.
-<LI><b>Radeon VE</b> and <b>Rage PRO LT</b> have <i>ImpacTV2+</i> which is not supported under Linux.</P>
+<LI><b>Radeon VE</b> and <b>Rage PRO LT</b> have <i>ImpacTV2+</i> which is not supported under Linux.
+But with <B>MPlayer</B> you get <B>full hardware acceleration</B> and <B>TV out</B>
+for Radeons !
+Check <a href=#2.3.1.12>VESA driver</a> and <A HREF=#2.3.1.14>Radeon
+acceleration</A> sections.</P>
 
 <P>
 Fortunately, owners of fast enough CPUs (Duron, Celeron2 and better) <b>can watch
@@ -923,7 +973,7 @@ documentation.
 </P>
 
 
-<P><B><A NAME=2.3.1.A.4>2.3.1.A.4. Voodoo 3</A></B></P>
+<P><B><A NAME=2.3.1.A.3>2.3.1.A.3. Voodoo 3</A></B></P>
 
 <P>
 Check <A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">this URL</A>.

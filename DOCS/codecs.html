@@ -155,11 +155,13 @@ option to tell <B>MPlayer</B> to use them if possible.</P>
 <P><B><A NAME=2.2.1.4>2.2.1.4.  VIVO video</A></B></P>
 
 <P><B>MPlayer</B> can play Vivo (1.0 and 2.0) videos. The most suitable codec
-for this task is XAnim's H263 decoder codec (it supports fast YV12 output), you
-can call it with the <CODE>-vc h263xa</CODE> option. Of course you have to
-compile XAnim codecs support it, for details see the <A HREF=#2.2.1.3>XAnim
-video codecs</A>. If this doesn't work, get the <CODE>ivvideo.dll</CODE> DLL
-file (from <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">here</A>),
+for 1.0 files is FFmpeg's H263 decoder, you can use it with the <CODE>-vc
+ffh263</CODE> option (you'll need the newest libavcodec !). For 2.0 files, use
+XAnim's H263 decoder codec (it supports fast YV12 output). You can call it with
+the <CODE>-vc h263xa</CODE> option. Of course you have to compile XAnim codecs
+support in, for details see the <A HREF=#2.2.1.3>XAnim video codecs</A>. If
+this doesn't work, get the <CODE>ivvideo.dll</CODE> DLL file (from <A
+HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">here</A>),
 and install it under <CODE>/usr/lib/win32</CODE> or wherever you store the
 Win32 codecs. This latter codec doesn't support YV12 nor YUY2 only BGR modes,
 thus usable only with the X11 and OpenGL outputs. Discouraged.</P>

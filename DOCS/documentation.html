@@ -144,6 +144,7 @@
       <LI><A HREF="#6.3">6.3 Solaris</A></LI>
       <LI><A HREF="#6.4">6.4 StrongARM</A></LI>
       <LI><A HREF="#6.5">6.5 SGI/Irix</A></LI>
+      <LI><A HREF="#6.6">6.6 QNX</A></LI>
     </UL>
   <LI><A HREF="#A">A. Authors</A></LI>
   <UL>
@@ -269,16 +270,13 @@ experience any problems:<BR>
 <LI>If you have <B>gcc 2.96</B> on your system, <A HREF="users_against_developers.html"><B><I>READ
 THIS!!!</I></B></A></LI>
 
-<LI>If you plan to use <B>MPlayer</B> on x86 architecture, you possibly want to use
-Win32 codecs. If you only want to play DVDs and DivXes, you probably don't
-want these, since the <B>libavcodec</B>'s DivX decoder (see below) is the
-fastest decoder available, and DVD is decoded with the <B>libmpeg2</B>
-library.<BR>
-If you want to play or encode for example movies recorded with digital cameras (example:
-DV), you must install them. Download and unzip w32codecs.zip to /usr/lib/win32 .
-Note: the avifile project has similar codecs package, but it differs
-from ours, so if you want to use all supported codecs, then use
-our package! However, you can use our codecs package with avifile.</LI>
+<LI>If you plan to use <B>MPlayer</B> on x86 architecture, you possibly want to
+use Win32 codecs. If you want to play or encode for example movies recorded
+with digital cameras (example: DV), you must install them. Download and unzip
+w32codecs.zip to /usr/lib/win32 . Note: the avifile project has similar codecs
+package, but it differs from ours, so if you want to use all supported codecs,
+then use our package! However, you can use our codecs package with
+avifile.</LI>
 
 <LI>If you own a Matrox G200/G400/G450/G550 card, then please see the <A HREF="video.html#2.3.1.7">mga_vid</A>
 section in order to gain big speedup. It is important to do these steps
@@ -293,9 +291,10 @@ otherwise no 3Dfx support will be built. Also see the <A HREF="video.html#2.3.1.
 TV out section</A>.</LI>
 
 <LI>If you own an ATI card, see the <A HREF="video.html#2.3.1.A.2">ATI cards
-section</A> of the TV-out documentation, to know what features of your card is supported under Linux/MPlayer.
-If you have a <B>Radeon</B> card, we have a <B>radeon_vid</B> driver for you !
-Check <A HREF="video.html#2.3.1.14">this</A> section !</LI>
+section</A> of the TV-out documentation, to know what features of your card is
+supported under Linux/MPlayer. If you have a <B>Radeon</B> card, we have a
+<B>radeon_vid</B> driver for you, with TV out ! Check <A
+HREF="video.html#2.3.1.14">this</A> section !</LI>
 
 <LI>If you plan to use the ProjectMayo's <B>DivX4</B> codec, check the
 <A HREF="codecs.html#2.2.1.1">2.2.1.1</A> section before compiling.
@@ -334,9 +333,9 @@ encode movies with <B>MPlayer</B>, read the <A HREF=#2.5>TV input</A> section.</
     make
     make install</PRE>
 
-<P><B><I>ALWAYS browse the output of ./configure</I></B> , it contains info
-about what will be built, and what won't. You may also want to view
-config.h and config.mak files.</P>
+<P><B><I>ALWAYS browse the output of ./configure</I></B>, and the
+<CODE>configure.log</CODE> file, they contain info about what will be built,
+and what won't. You may also want to view config.h and config.mak files.</P>
 
 <P>Though not mandatory, the fonts should be installed in order to gain
 OSD, and subtitle functionality. Download mp-arial-iso-8859-*.zip and/or optional
@@ -570,13 +569,6 @@ TV tuner</B>.</P>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>freq</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  set the tuner to the given frequency (like 511.250)</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>channel</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
@@ -684,7 +676,7 @@ support using  ./configure --enable-lirc</P>
 
 <P>If everything went fine, <B>MPlayer</B> will print a message like
 LIRC init was successful.
-on startup. If an error occurs it will tell you. If it doens't tell you
+on startup. If an error occurs it will tell you. If it doesn't tell you
 anything about LIRC there's no support compiled in. That's it :-)</P>
 
 <P>The application name for <B>MPlayer</B> is - oh wonder - mplayer_lirc.
@@ -884,6 +876,13 @@ all data is accessed modulo 4GB
 
 <P>Reported working. You'll probably have to use the <I>sgi</I> ao driver.
 Anyone has closer info?</P>
+
+
+<P><B><A NAME=6.6>6.6. QNX</A></B></P>
+
+<P>Works. Only has <CODE>-vo x11</CODE> output which is even much slower
+than on Linux, since QNX has only X <I>emulation</I> which is VERY slow.
+No closer info yet.</P>
 
 
 <P><B><A NAME=A>Appendix A - Authors</A></B></P>
