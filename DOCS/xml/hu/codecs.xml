@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.54 -->
+<!-- synced to 1.55 -->
 <sect1 id="codecs">
 <title>Támogatott codec-ek</title>
 
@@ -19,12 +19,12 @@ A legfontosabb dolgok:
 
 <itemizedlist>
 <listitem><simpara>
-  <emphasis role="bold">MPEG1</emphasis> (<emphasis role="bold">VCD</emphasis>) és
-  <emphasis role="bold">MPEG2</emphasis> (<emphasis role="bold">DVD</emphasis>) videó
+  <emphasis role="bold">MPEG-1</emphasis> (<emphasis role="bold">VCD</emphasis>) és
+  <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) videó
   </simpara></listitem>
 <listitem><simpara>
   natív dekódolók <emphasis role="bold">DivX ;-), OpenDivX (DivX4),
-  DivX 5 (Pro), 3ivX, M$ MPEG4</emphasis> v1, v2 és más MPEG4 variánsokhoz
+  DivX 5 (Pro), 3ivX, M$ MPEG-4</emphasis> v1, v2 és más MPEG4 variánsokhoz
   </simpara></listitem>
 <listitem><simpara>
   natív dekódoló <emphasis role="bold">Windows Media Video 7/8</emphasis>
@@ -85,7 +85,7 @@ DivX4 és DivX5 codec-jeiről tartalmaz információkat. AZ első elérhető
 alpha verziójuk az OpenDivX 4.0 alpha 47 és 48 volt. Ezek támogatása
 be volt építve az <application>MPlayer</application>be régen, és
 alapértelmezésként be is lett forgatva. Használtuk az utófeldolgozó kódjukat
-is az MPEG1/2 filmek képminőségének opcionális javításához. Most már a
+is az MPEG-1/2 filmek képminőségének opcionális javításához. Most már a
 sajátunkat használjuk, minden típushoz.
 </para>
 
@@ -205,7 +205,7 @@ DivX4/5 könyvtáraiban!
 </para>
 
 <para>
-Rengeteg szép codec-et tartalmaz, különösen fontosak az MPEG4 variánsok:
+Rengeteg szép codec-et tartalmaz, különösen fontosak az MPEG-4 variánsok:
 DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Nagyon érdekes még a
 WMA dekódoló.
 </para>
@@ -353,11 +353,11 @@ kiválasztja a legjobb codec-et.
 
 
 <sect3 id="mpeg12">
-<title>MPEG 1/2 videó</title>
+<title>MPEG-1/2 videó</title>
 <para>
-Az MPEG1 és MPEG2 a <systemitem class="library">libmpeg2</systemitem> többplatformos,
+Az MPEG-1 és MPEG-2 a <systemitem class="library">libmpeg2</systemitem> többplatformos,
 natív függvénykönyvtár segítségével kerülnek dekódolásra, aminek a forrása benne van
-az <application>MPlayer</application>ben. Le tudjuk kezelni a hibás MPEG 1/2
+az <application>MPlayer</application>ben. Le tudjuk kezelni a hibás MPEG-1/2
 videó fájlokat is a <systemitem>Signal 11</systemitem> elkapásával
 (<systemitem>szegmentálási hiba</systemitem>), és a codec gyors
 újrainicializálásával, pontosan onnan folytatva, ahol a hiba keletkezett. Ennek
