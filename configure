@@ -2253,14 +2253,17 @@ else
     elif ( cc_check -pthread ) ; then
      _ld_pthread='-pthread'
     else
-      die "Static lib pthread not found (needed by Windows and networking stufff)."
+      echores "no static pthread found (v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, Win32 loader disabled)"
+      _ld_pthread='' ; _nas=no ; _tv_v4l=no ; _tv_v4l=no ; _macosx=no ; _win32=no
     fi
   else
-    die "Lib pthread not found (needed by Windows and networking stuff)."
+    echores "no (v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, win32 loader disabled)"
+    _ld_pthread='' ; _nas=no ; _tv_v4l=no ; _tv_v4l=no ; _macosx=no ; _win32=no
   fi
 fi
-echores "yes (using $_ld_pthread)"
-
+if test "$_ld_pthread" != '' ; then
+  echores "yes (using $_ld_pthread)"
+fi
 
 echocheck "sys/soundcard.h"
 cat > $TMPC << EOF
