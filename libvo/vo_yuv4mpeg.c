@@ -222,6 +222,56 @@ static void vo_y4m_write(const void *ptr, const size_t num_bytes)
 		perror("yuv4mpeg: Error writing image to output!");
 }
 
+static int write_last_frame(void)
+{
+
+    uint8_t *upper_y, *upper_u, *upper_v, *rgb_buffer_lower;
+    int rgb_stride, uv_stride, field_height;
+    unsigned int i, low_ofs;
+
+    fprintf(yuv_out, "FRAME\n");
+
+    if (using_format != IMGFMT_YV12)
+    {
+	rgb_stride = image_width * 3;
+	uv_stride = image_width / 2;
+
+	if (Y4M_IS_INTERLACED)
+	{
+	    field_height = image_height / 2;
+
+	    upper_y = image;
+	    upper_u = upper_y + image_width * field_height;
+	    upper_v = upper_u + image_width * field_height / 4;
+	    low_ofs = image_width * field_height * 3 / 2;
+	    rgb_buffer_lower = rgb_buffer + rgb_stride * field_height;
+
+	    /* Write Y plane */
+	    for(i = 0; i < field_height; i++)
+	    {
+		vo_y4m_write(upper_y + image_width * i,           image_width);
+		vo_y4m_write(upper_y + image_width * i + low_ofs, image_width);
+	    }
+
+	    /* Write U and V plane */
+	    for(i = 0; i < field_height / 2; i++)
+	    {
+		vo_y4m_write(upper_u + uv_stride * i,           uv_stride);
+		vo_y4m_write(upper_u + uv_stride * i + low_ofs, uv_stride);
+	    }
+	    for(i = 0; i < field_height / 2; i++)
+	    {
+		vo_y4m_write(upper_v + uv_stride * i,           uv_stride);
+		vo_y4m_write(upper_v + uv_stride * i + low_ofs, uv_stride);
+	    }
+	    return VO_TRUE; /* Image written; We have to stop here */
+	}
+    }
+    /* Write progressive frame */
+    vo_y4m_write(image, write_bytes);
+    return VO_TRUE;
+}
+
 static void flip_page (void)
 {
 	uint8_t *upper_y, *upper_u, *upper_v, *rgb_buffer_lower;
@@ -455,6 +505,8 @@ static uint32_t control(uint32_t request, void *data, ...)
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_DUPLICATE_FRAME:
+    return write_last_frame();
   }
   return VO_NOTIMPL;
 }

@@ -49,7 +49,10 @@
 /* equalizer controls */
 #define VOCTRL_SET_EQUALIZER 17
 #define VOCTRL_GET_EQUALIZER 18
-// ... 20
+//#define VOCTRL_GUI_NOWINDOW 19
+/* Frame duplication */
+#define VOCTRL_DUPLICATE_FRAME 20
+// ... 21
 
 
 #define VO_TRUE		1
