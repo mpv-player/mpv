@@ -106,10 +106,17 @@ is first in your <envar>$PATH</envar> and do a <command>gmake -k</command>, then
 make sure that the native version is used and do <command>gmake</command>.
 </para>
 </sect2>
+
+<sect2 id="darwin">
+<title>Darwin</title>
+<para>
+See the <link linkend="macos">MacOS</link> section.
+</para>
+</sect2>
 </sect1>
 
 <sect1 id="solaris">
-<title>Solaris</title>
+<title>Sun Solaris</title>
 <para>
 <application>MPlayer</application> should work on Solaris 2.6 or newer.
 </para>
@@ -214,8 +221,8 @@ and for color space conversion in the video output drivers.
 </para>
 </sect1>
 
-<sect1 id="sgi">
-<title>Silicon Graphics / Irix</title>
+<sect1 id="irix">
+<title>Silicon Graphics Irix</title>
 <para>
 You can either try to install the GNU install program, and (if you did
 not put it in your global path) then point to the location with:
@@ -361,6 +368,26 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 </sect2>
 
 
+</sect1>
+
+<sect1 id="macos">
+<title>MacOS</title>
+<para>
+Only MacOS X 10.2 and up is supported by the "raw"
+<application>MPlayer</application> source. Feel free to make support for older
+MacOS versions and send patches!
+</para>
+
+<para>
+Apple's modified GCC 3.x is preferred for compiling
+<application>MPlayer</application> especially when using libavcodec as Apple's
+modified GCC 2.95.x doesn't support C99 syntax well.
+</para>
+
+<para>
+One can get an Aqua GUI for <application>MPlayer</application> together with
+compiled <application>MPlayer</application> binaries for MacOS X from the
+<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> project.
 </sect1>
 
 </chapter>
