@@ -36,17 +36,10 @@ It's still under development, but it will be merged and released soon.
 BTW he needs some nice skins, if you are a good graphician, contact him!!!
 
 Win32 codecs?
-Yes, we are using Win32 (Video for Windows) codecs for AVI/ASF decoding.
-They must be installed to the /usr/lib/win32/ directory, with all lower case.
-You can grab the codecs package from our homepage, or can be found in your
-C:\WINDOWS\SYSTEM\ dir, see codecs.c for filenames.
-Some people asked why don't we use ActiveMovie/DirectShow codecs. The reason is
-simple: we'd have to emulate the whole DirectX architecture and implement the
-(patented!) COM interface to be able to use them. BTW the old VfW DivX codec
-is faster than the new .AX version, but it has no quality/CPU setting
-option (this is an improper name, since it doesn't affect the decoder. If
-it's set to 1 or higher, it applies a filter which decreases blockiness and
-eats away CPU cycles).
+Yes, we are using Win32 (Video for Windows, DirectShow) codecs for AVI/ASF
+decoding. They must be installed to the /usr/lib/win32/ directory, with all
+lower case. You can grab the codecs package from our homepage, or can be found
+in your C:\WINDOWS\SYSTEM\ dir, see codecs.c for filenames.
 
 Supported input formats:
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,44 +48,33 @@ Supported input formats:
 - RIFF AVI file format
 - ASF 1.0 file format
 
-Supported audio codecs:
-~~~~~~~~~~~~~~~~~~~~~~~
-- PCM (uncompressed) audio (8/16 bit, mono/stereo)
-- MPEG layer 2/3 audio  (using mp3lib, based on mpg123 [www.mpg123.de])
-- AC3 audio             (using ac3dec/libac3)
-- Win32 ACM audio codecs (the *.ACM files)  [Only in the AVI player]
-  tested with: DivX audio, MS-ADPCM
-- aLaw audio            (using code from xanim)
-- MS-GSM audio          (using modified xa_gsm.c from avifile)
-
-Supported video codecs:
-~~~~~~~~~~~~~~~~~~~~~~~
-- MPEG 1 and MPEG 2 video decoder (using mpeg2dec/libmpeg2, supports         
-  3DNow! and MMX)
-- Win32 ICM (VfW) video codecs (for example DivX using DIVXC32.DLL)
-- OpenDivX encore & decore (see ProjectMayo)
+Supported audio & video codecs:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+See DOCS/CODECS for complete list.
 
 Supported video output devices:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - mga:	Matrox G200/G400 hardware YUV overlay via the mga_vid device
 - xmga:	Matrox G200/G400 overlay (mga_vid) in X11 window
 	(Xv emulation on X 3.3.x !)
-- x11:	X11 optionally with SHM extension
-- dga:	X11 DGA extension (only in 24/32bpp)
-- fsdga:X11 DGA extension with fullscreen scaling (only 24/32bpp and MPEG!)
-- xv:	X11 using overlays with the Xvideo extension (hardware YUV & scaling)
-- gl:	OpenGL renderer, works only with Utah-GLX! (no DRI or nVidia drivers)
 - syncfb: Matrox G400 YUV support on framebuffer (not tested, maybe broken)
-- fbdev:Output to general framebuffers (only MPEG1/2 and OpenDivX)
-- 3dfx:	Voodoo2/3 hardware YUV (/dev/3dfx) support (not yet tested, maybe broken)
-- sdl:	SDL >= v1.1.7 driver (slower than 'x11', but supports software scaling)
+- xv:	X11 using overlays with the Xvideo extension (hardware YUV & scaling)
+- x11:	X11 with SHM extension
+- gl:	OpenGL renderer, works only with Utah-GLX! (no DRI or nVidia drivers)
+- dga:	X11 DGA extension
+- fsdga:X11 DGA extension with fullscreen scaling (only 24/32bpp and MPEG!)
+- sdl:	SDL >= v1.1.7 driver (supports software scaling, and versions >=1.1.8
+        even support Xvideo, thus hardware rendering)
 	(NOT supported by us! Don't submit SDL bugreports!)
+- fbdev:Output to general framebuffers
+- svga: Output to SVGAlib
 - null:	Null output (for speed tests/benchmarking)
+- 3dfx:	Voodoo2/3 hardware YUV (/dev/3dfx) support (not yet tested, maybe broken)
+- odivx:OpenDivX AVI File writer
 - pgm:	PGM file output (for testing purposes)
 - md5:	MD5sum output (for mpeg conformance tests)
 
 NOTE: check DOCS/VIDEOCARDS !
-NOTE: maybe not all are available for AVI files
 
 Supported audio output devices:                                              
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

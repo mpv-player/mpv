@@ -18,12 +18,12 @@ Fully functional Win32 VfW/DShow codecs:
 
 - M$ MPEG4 v1, v2 (MPG4,MP42):
   mpg4c32.dll: works, YUV supported.
-- M$ MPEG4 v3 / DivX ;-)  (MP43,DIV3,DIV4,DIV5,DIV6)
+- M$ MPEG4 v3 / DivX ;-) / AngelPotion  (MP43,DIV3,DIV4,DIV5,DIV6,AP41)
   divxc32.dll: works, YUV supported.
   divx_c32.ax: works, YUV and postprocessing supported.
 - Indeo Video 5.0:  (IV50)
   ir50_32.dll (VfW): works, YUV supported.
-  ir50_32.dll (DShow): not tested
+  ir50_32.dll (DShow): works, YUV supported.
 - Cinepak Video:  (CVID)
   iccvid.dll: works, YUV supported.
 - Microsoft Video v1.0 (CRAM)
@@ -33,6 +33,7 @@ Fully functional Win32 VfW/DShow codecs:
 - Motion JPEG (MJPG)
   m3jpeg32.dll: can't load (segfault)
   mcmjpg32.dll: works, YUV supported
+  m3jpegdec.ax: works, YUV supported
 - Windows Media Video 7 (WMV1)
   wmvds32.ax: works, YUV supported
 - I263:  (I263)
@@ -44,8 +45,6 @@ Problems:
   ir41_32.dll: works, no YUV, image upside-down
 - Indeo Video 3.2:  (IV32)
   ir32_32.dll: works, no YUV, image upside-down
-- ASUS ASV1: (ASV1)
-  asusasvd.dll: ??? not tested
 - ASUS ASV2: (ASV2)
   asusasv2.dll: loads, image upside-down and very pixelized (no YUY2, but YVYU)
 - ATI VCR1:  (VCR1)
@@ -62,6 +61,8 @@ Problems:
 
 Not tested:
 
+- ASUS ASV1: (ASV1)
+  asusasvd.dll: ??? not tested
 - Motion Wavelets: (MWV1)
   icmw_32.dll: not tested (no sample file)
 - Indeo Video 3.1:  (IV31)
@@ -72,6 +73,8 @@ Not tested:
   wmv8ds32.ax: not tested (no sample file)
 - I420: (I420)
   i263_32.drv: not tested, but should work (no sample file)
+- m261: (m261)
+  msh261.drv: not tested, what's this?
 
 Audio codecs:
 ~~~~~~~~~~~~~
@@ -82,7 +85,7 @@ Built-in native codecs:
   mp3lib, based on mpg123  (sometimes segfaults, then use ACM, see below)
 - AC3:  (0x2000)
   libac3
-- aLaw audio: (6)
+- aLaw audio: (0x6)
   aLaw codec from xanim sources
 - MS-GSM: (0x31,0x32)
   xa_gsm from avifile sources
@@ -104,10 +107,13 @@ Fully functional Win32 ACM/DShow codecs:
 
 Problems:
 
+- uLaw audio: (0x7)
+  mess...
+- ACELP.net Sipro Lab Audio (0x130)
+  doesn't work: unk_ ...
+
 Not tested:
 
-- ACELP.net: (0x130)
-  acelpdec.ax: not tested (no sample file)
 - IMC:  (0x401)
   imc32.acm: not tested (no sample file)
 
