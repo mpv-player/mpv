@@ -211,8 +211,10 @@ static int preinit(sh_audio_t *sh){
   unsigned int result;
   int len=0;
   void* prop;
-  char path[4096];
+  char *path;
 
+  path = malloc(strlen(REALCODEC_PATH)+strlen(sh->codec->dll)+2);
+  if (!path) return 0;
   sprintf(path, REALCODEC_PATH "/%s", sh->codec->dll);
 
     /* first try to load linux dlls, if failed and we're supporting win32 dlls,
@@ -226,6 +228,7 @@ static int preinit(sh_audio_t *sh){
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MissingDLLcodec, sh->codec->dll);
 	mp_msg(MSGT_DECVIDEO, MSGL_HINT, "Read the RealAudio section of the DOCS!\n");
+	free(path);
 	return 0;
     }
 
@@ -234,7 +237,9 @@ static int preinit(sh_audio_t *sh){
 #else
   if(raSetDLLAccessPath){
 #endif
+      int i;
       // used by 'SIPR'
+      path = realloc(path, strlen(REALCODEC_PATH) + 12);
       sprintf(path, "DT_Codecs=" REALCODEC_PATH);
       if(path[strlen(path)-1]!='/'){
         path[strlen(path)+1]=0;
@@ -243,7 +248,11 @@ static int preinit(sh_audio_t *sh){
       path[strlen(path)+1]=0;
 #ifdef USE_WIN32DLL
     if (dll_type == 1)
+    {
+      for (i=0; i < strlen(path); i++)
+        if (path[i] == '/') path[i] = '\\';
       wraSetDLLAccessPath(path);
+    }
     else
 #endif
       raSetDLLAccessPath(path);
@@ -266,6 +275,7 @@ static int preinit(sh_audio_t *sh){
       return 0;
     }
 //    printf("opencodec ok (result: %x)\n", result);
+  free(path); /* after this it isn't used anymore */
 
   sh->samplerate=sh->wf->nSamplesPerSec;
   sh->samplesize=sh->wf->wBitsPerSample/8;
