@@ -192,7 +192,6 @@ Advanced options:
 
 Hazardous options a.k.a. "DO NOT BUGREPORT ANYTHING !"
   --disable-gcc-checking   disable gcc version checking [enable]
-  --enable-xp            enable eXtra Performance [default=no]
 
 Use these options if autodetection fails:
   --with-extraincdir=DIR   extra headers (png, dvb, mad, sdl, css, ...) in DIR
