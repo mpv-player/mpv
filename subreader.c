@@ -923,6 +923,8 @@ char * sub_filename(char* path,  char * fname )
   }
  }
  
+ free(sub_name2);
+ free(sub_name1);
  return NULL;
 }
 
