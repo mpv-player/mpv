@@ -399,6 +399,9 @@ char* title="MPlayer";
 // screen info:
 char* video_driver=NULL; //"mga"; // default
 int fullscreen=0;
+#ifdef HAVE_XF86VM
+int vidmode=0;
+#endif
 int screen_size_x=SCREEN_SIZE_X;
 int screen_size_y=SCREEN_SIZE_Y;
 int screen_size_xy=0;
@@ -470,6 +473,12 @@ if(video_driver && strcmp(video_driver,"help")==0){
     return 0;
   }
 
+#ifdef HAVE_XF86VM
+if (!video_driver)
+  vidmode=0;
+else if (strcmp(video_driver,"x11"))
+   vidmode=0;
+#endif
 
 if(!filename){
   if(vcd_track) filename="/dev/cdrom"; 
@@ -1047,6 +1056,12 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
    }
 #endif
 
+#ifdef HAVE_XF86VM
+  if (vidmode) {
+        if ( screen_size_x == SCREEN_SIZE_X ) screen_size_x = 0;
+        if ( screen_size_y == SCREEN_SIZE_Y ) screen_size_y = 0;
+  } else
+#endif
    if(screen_size_xy>0){
      if(screen_size_xy<=8){
        screen_size_x=screen_size_xy*movie_size_x;
@@ -1059,6 +1074,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
      if(screen_size_x<=8) screen_size_x*=movie_size_x;
      if(screen_size_y<=8) screen_size_y*=movie_size_y;
    }
+
    if(verbose) printf("Destination size: %d x %d  out_fmt=%0X\n",
                       screen_size_x,screen_size_y,out_fmt);
 
