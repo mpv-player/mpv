@@ -27,11 +27,8 @@ static inline demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned 
 }
 
 static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int len,int idxpos){
-  int d;
-//  int len;
   int skip;
   float pts=0;
-  unsigned char c=0;
   demux_stream_t *ds=demux_avi_select_stream(demux,id);
   
   if(verbose>=3) printf("demux_avi.read_packet: %X\n",id);
@@ -79,7 +76,6 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
 int demux_avi_fill_buffer(demuxer_t *demux){
 unsigned int id=0;
 unsigned int len;
-int skipped=0;
 int max_packs=128;
 int ret=0;
 
@@ -161,7 +157,6 @@ do{
 int demux_avi_fill_buffer_ni(demuxer_t *demux,demux_stream_t* ds){
 unsigned int id=0;
 unsigned int len;
-int skipped=0;
 int max_packs=128;
 int ret=0;
 
@@ -233,7 +228,6 @@ do{
 int demux_avi_fill_buffer_nini(demuxer_t *demux,demux_stream_t* ds){
 unsigned int id=0;
 unsigned int len;
-int skipped=0;
 int ret=0;
 int *fpos=NULL;
 

@@ -136,7 +136,6 @@ void mpeg_codec_controller(vo_functions_t *video_out){
         //printf("codec: connection synced\n");
         
         while(1){
-          int num_frames;
           int len=0;
           int len2;
           send_cmd(control_fifo2,0x3030303);

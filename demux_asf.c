@@ -17,11 +17,6 @@ typedef struct __attribute__((packed)) {
 
 
 static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,int id,int seq,unsigned long time,unsigned short dur,int offs){
-  int d;
-//  int len;
-  int skip;
-  float pts=0;
-  unsigned char c=0;
   demux_stream_t *ds=NULL;
   
   if(verbose>=4) printf("demux_asf.read_packet: id=%d seq=%d len=%d\n",id,seq,len);
@@ -96,11 +91,6 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
 int demux_asf_fill_buffer(demuxer_t *demux){
-unsigned int id=0;
-unsigned int len;
-int skipped=0;
-int max_packs=128;
-int ret=0;
 
   demux->filepos=stream_tell(demux->stream);
   if(demux->filepos>=demux->endpos){

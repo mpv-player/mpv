@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <signal.h>
 
@@ -588,7 +589,7 @@ switch(file_format){
       } else {
         if(force_ni || abs(a_pos-v_pos)>0x100000){  // distance > 1MB
           printf("Detected NON-INTERLEAVED AVI file-format!\n");
-          file_format=DEMUXER_TYPE_AVI_NI; // HACK!!!!
+//          file_format=DEMUXER_TYPE_AVI_NI; // HACK!!!!
           demuxer->type=DEMUXER_TYPE_AVI_NI; // HACK!!!!
 	  pts_from_bps=1; // force BPS sync!
         }
@@ -1084,7 +1085,7 @@ if(has_audio==4){
 }
 
 if(has_audio==2){
-  if(file_format==DEMUXER_TYPE_AVI || file_format==DEMUXER_TYPE_AVI_NI){
+  if(file_format==DEMUXER_TYPE_AVI){
     // AVI PCM Audio:
     WAVEFORMATEX *h=(WAVEFORMATEX*)&avi_header.wf_ext;
     MP3_channels=h->nChannels;
@@ -1233,7 +1234,7 @@ if(has_audio){
 
 //==================== START PLAYING =======================
 
-if(file_format==DEMUXER_TYPE_AVI || file_format==DEMUXER_TYPE_AVI_NI){
+if(file_format==DEMUXER_TYPE_AVI){
   a_pts=d_audio->pts-(buffer_delay+audio_delay);
   audio_delay-=(float)(avi_header.audio.dwInitialFrames-avi_header.video.dwInitialFrames)/default_fps;
 //  audio_delay-=(float)(avi_header.audio.dwInitialFrames-avi_header.video.dwInitialFrames)/default_fps;
@@ -1581,7 +1582,7 @@ switch(has_video){
 #if 1
 /*================ A-V TIMESTAMP CORRECTION: =========================*/
   if(has_audio){
-    if(pts_from_bps && (file_format==DEMUXER_TYPE_AVI || file_format==DEMUXER_TYPE_AVI_NI)){
+    if(pts_from_bps && (file_format==DEMUXER_TYPE_AVI)){
 //      a_pts=(float)ds_tell(d_audio)/((WAVEFORMATEX*)avi_header.wf_ext)->nAvgBytesPerSec-(buffer_delay+audio_delay);
       a_pts=(float)ds_tell(d_audio)/((WAVEFORMATEX*)avi_header.wf_ext)->nAvgBytesPerSec-(buffer_delay);
       delay_corrected=1; // hack
@@ -1728,7 +1729,6 @@ switch(has_video){
 
 switch(file_format){
 
-  case DEMUXER_TYPE_AVI_NI:
   case DEMUXER_TYPE_AVI: {
   //================= seek in AVI ==========================
     int rel_seek_frames=rel_seek_secs*default_fps;
@@ -1796,7 +1796,6 @@ switch(file_format){
         int i;
         int apos=0;
         int last=0;
-        int temp;
         int len=0;
 
         // calc new audio position in audio stream: (using avg.bps value)
@@ -1990,5 +1989,6 @@ switch(file_format){
 
 //printf("\nEnd of file.\n");
 exit_player("End of file");
-}}
-
+}
+return 1;
+}

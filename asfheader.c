@@ -87,7 +87,6 @@ char* asf_chunk_type(unsigned char* guid){
 
 int asf_check_header(){
   unsigned char asfhdrguid[16]={0x30,0x26,0xB2,0x75,0x8E,0x66,0xCF,0x11,0xA6,0xD9,0x00,0xAA,0x00,0x62,0xCE,0x6C};
-  int i;
   stream_read(demuxer->stream,(char*) &asfh,sizeof(asfh)); // header obj
 //  for(i=0;i<16;i++) printf(" %02X",temp[i]);printf("\n");
 //  for(i=0;i<16;i++) printf(" %02X",asfhdrguid[i]);printf("\n");
