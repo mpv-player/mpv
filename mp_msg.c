@@ -1,4 +1,6 @@
 
+//#define MSG_USE_COLORS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -67,18 +69,34 @@ void mp_msg_c( int x, const char *format, ... ){
 	    case MSGL_ERR:
 		gtkMessageBox(GTK_MB_ERROR|GTK_MB_SIMPLE, tmp);
 		break;
-//	    case MSGL_WARN:
-//		gtkMessageBox(GTK_MB_WARNING|GTK_MB_SIMPLE, tmp);
-//		break;
+	    case MSGL_WARN:
+		gtkMessageBox(GTK_MB_WARNING|GTK_MB_SIMPLE, tmp);
+		break;
 	}
     }
 #endif
 
+#ifdef MSG_USE_COLORS
+#if 1
+    { int c;
+      static int flag=1;
+      if(flag)
+      for(c=0;c<16;c++)
+          printf("\033[%d;3%dm***  COLOR TEST %d  ***\n",(c>7),c&7,c);
+      flag=0;
+    }
+#endif    
+    {	unsigned char v_colors[10]={9,9,11,14,15,7,6,5,5,5};
+	int c=v_colors[(x & 255)];
+	fprintf(((x & 255) <= MSGL_WARN)?stderr:stdout, "\033[%d;3%dm",(c>7),c&7);
+    }
+#endif
     if ((x & 255) <= MSGL_WARN){
 	fprintf(stderr, "%s", tmp);fflush(stderr);
     } else {
 	printf("%s", tmp);fflush(stdout);
     }
+
 #else
     va_list va;
     if((x&255)>mp_msg_levels[x>>8]) return; // do not display
