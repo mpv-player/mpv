@@ -147,8 +147,8 @@ loop:
     /* flags:		*/
     /* 	0x2 - keyframe	*/
 
-    printf("packet#%d: len: %d, stream_id: %d, timestamp: %d, flags: %x\n",
-	priv->num_of_packets, len, stream_id, timestamp, flags);
+//    printf("packet#%d: len: %d, stream_id: %d, timestamp: %d, flags: %x\n",
+//	priv->num_of_packets, len, stream_id, timestamp, flags);
 
     priv->num_of_packets--;
     len -= 12;    
@@ -352,6 +352,8 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->samplerate = stream_read_word(demuxer->stream);
 		    stream_skip(demuxer->stream, 4);
 		    sh->channels = stream_read_word(demuxer->stream);
+		    printf("samplerate: %d, channels: %d\n",
+			sh->samplerate, sh->channels);
 		
 		    /* Desc #1 */
 		    skip_str(1, demuxer);
@@ -453,6 +455,7 @@ void demux_open_real(demuxer_t* demuxer)
 			case 0x10003001:
 			    /* sub id: 3 */
 			    /* codec id: rv10 */
+			    sh->bih->biCompression = sh->format = mmioFOURCC('R', 'V', '1', '3');
 			    break;
 			case 0x20001000:
 			case 0x20100001:

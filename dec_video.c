@@ -483,6 +483,8 @@ switch(sh_video->codec->driver){
     lavc_context.width=sh_video->disp_w;
     lavc_context.height=sh_video->disp_h;
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",lavc_context.width,lavc_context.height);
+    if (sh_video->format == mmioFOURCC('R', 'V', '1', '3'))
+	lavc_context.sub_id = 3;
     /* open it */
     if (avcodec_open(&lavc_context, lavc_codec) < 0) {
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantOpenCodec);
