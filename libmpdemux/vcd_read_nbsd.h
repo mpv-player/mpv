@@ -21,6 +21,20 @@ vcd_set_msf(unsigned int sect)
   vcd_entry_data.addr.msf.minute = sect;
 }
 
+static inline void
+vcd_inc_msf(void)
+{
+  vcd_entry_data.addr.msf.frame++;
+  if (vcd_entry_data.addr.msf.frame==75){
+    vcd_entry_data.addr.msf.frame=0;
+    vcd_entry_data.addr.msf.second++;
+    if (vcd_entry_data.addr.msf.second==60){
+      vcd_entry_data.addr.msf.second=0;
+      vcd_entry_data.addr.msf.minute++;
+    }
+  }
+}
+
 static inline unsigned int 
 vcd_get_msf()
 {
@@ -145,6 +159,7 @@ vcd_read(int fd, char *mem)
 	    sc.error);
     return -1;
   }
+  vcd_inc_msf();
   return VCD_SECTOR_DATA;
 }
 
