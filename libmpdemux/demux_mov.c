@@ -944,11 +944,11 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      sh->wf->nBlockAlign=char2int(trak->stdata,36);
 		}
 		// Selection:
-		if(demuxer->audio->id==-1 || demuxer->audio->id==priv->track_db){
-		    // (auto)selected audio track:
-		    demuxer->audio->id=priv->track_db;
-		    demuxer->audio->sh=sh; sh->ds=demuxer->audio;
-		}
+//		if(demuxer->audio->id==-1 || demuxer->audio->id==priv->track_db){
+//		    // (auto)selected audio track:
+//		    demuxer->audio->id=priv->track_db;
+//		    demuxer->audio->sh=sh; sh->ds=demuxer->audio;
+//		}
 		break;
 	    }
 	    case MOV_TRAK_VIDEO: {
@@ -1178,11 +1178,11 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    trak->tkdata[81]|(trak->tkdata[80]<<8));
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s  Codec: '%.*s'\n",&trak->fourcc,trak->stdata[42]&31,trak->stdata+43);
 		
-		if(demuxer->video->id==-1 || demuxer->video->id==priv->track_db){
-		    // (auto)selected video track:
-		    demuxer->video->id=priv->track_db;
-		    demuxer->video->sh=sh; sh->ds=demuxer->video;
-		}
+//		if(demuxer->video->id==-1 || demuxer->video->id==priv->track_db){
+//		    // (auto)selected video track:
+//		    demuxer->video->id=priv->track_db;
+//		    demuxer->video->sh=sh; sh->ds=demuxer->video;
+//		}
 		break;
 	    }
 	    case MOV_TRAK_GENERIC:
@@ -1440,6 +1440,9 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 
 int mov_read_header(demuxer_t* demuxer){
     mov_priv_t* priv=demuxer->priv;
+    int t_no;
+    int best_a_id=-1, best_a_len=0;
+    int best_v_id=-1, best_v_len=0;
     
     mp_msg(MSGT_DEMUX, MSGL_DBG3, "mov_read_header!\n");
 
@@ -1454,9 +1457,34 @@ int mov_read_header(demuxer_t* demuxer){
     lschunks(demuxer, 0, priv->moov_end, NULL);
 //    mp_msg(MSGT_DEMUX, MSGL_INFO, "--------------\n");
 
+    // find the best (longest) streams:
+    for(t_no=0;t_no<priv->track_db;t_no++){
+        mov_track_t* trak=priv->tracks[t_no];
+	int len=(trak->samplesize) ? trak->chunks_size : trak->samples_size;
+	if(demuxer->audio->id==-1 && demuxer->a_streams[t_no]){ // need audio
+	    if(len>best_a_len){	best_a_len=len; best_a_id=t_no; }
+	}
+	if(demuxer->video->id==-1 && demuxer->v_streams[t_no]){ // need video
+	    if(len>best_v_len){	best_v_len=len; best_v_id=t_no; }
+	}
+    }
+    mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: best streams: A: #%d (%d samples)  V: #%d (%d samples)\n",
+	best_a_id,best_a_len,best_v_id,best_v_len);
+    if(best_a_id>=0) demuxer->audio->id=best_a_id;
+    if(best_v_id>=0) demuxer->video->id=best_v_id;
+    
+    // setup sh pointers:
+    if(demuxer->audio->id>=0){
+	sh_audio_t* sh=demuxer->a_streams[demuxer->audio->id];
+	demuxer->audio->sh=sh; sh->ds=demuxer->audio;
+    }
+    if(demuxer->video->id>=0){
+	sh_video_t* sh=demuxer->v_streams[demuxer->video->id];
+	demuxer->video->sh=sh; sh->ds=demuxer->video;
+    }
+
 #if 1
     if(verbose>2){
-	int t_no;
 	for(t_no=0;t_no<priv->track_db;t_no++){
 	    mov_track_t* trak=priv->tracks[t_no];
 	    if(trak->type==MOV_TRAK_GENERIC){
