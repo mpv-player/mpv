@@ -111,6 +111,7 @@ params:
         --with-win32libdir=DIR  windows codec files
         --with-csslibdir=DIR    directory contains libcss.so shared library
         --with-cssincdir=DIR    directory contains libcss header file (css.h)
+				(--with-css* only needed, if libCSS autodetect fails)
 
 	--size-x=SIZE		default screen width
 	--size-y=SIZE		default screen height
@@ -415,6 +416,33 @@ if $_cc $TMPC -o $TMPO -L/usr/lib/ -L/usr/local/lib/ -lSDL -lpthread &> /dev/nul
 	fi
 fi	
 
+# Atmosfear: added libcss autodetect
+_css=no
+if test -e "/usr/local/lib/libcss.so" ; then
+	_csslibdir="/usr/local/lib/"
+	if test -e "/usr/local/include/css.h" ; then
+		_cssincdir="/usr/local/include"
+		_css=yes
+	else
+		if test -e "/usr/include/css.h" ; then
+			_cssincdir="/usr/include/"
+			_css=yes
+		fi	
+	fi	
+fi
+if test -e "/usr/lib/libcss.so" ; then
+	_csslibdir="/usr/lib/"
+	if test -e "/usr/include/css.h" ; then
+		_cssincdir="/usr/include/"
+		_css=yes
+	else	
+		if test -e "/usr/local/include/css.h" ; then
+			_cssincdir="/usr/local/include"
+			_css=yes
+		fi	
+	fi	
+fi
+	
 _termcap=no
 $_cc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
 
