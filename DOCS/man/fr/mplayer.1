@@ -1,4 +1,4 @@
-.\" synced with 1.811
+.\" synced with 1.816
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "25 Novembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "01 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -556,7 +556,9 @@ Mène à des distorsions d'image!
 .
 .TP
 .B \-identify
-Affiche les paramètres du fichier dans un format facilement analysable.
+Affiche les paramètres de fichier dans un format facilement analysable.
+Affiche aussi des informations plus détaillées à propos des langues et des
+identifiants des sous-titres et des pistes audio.
 Le script TOOLS/\:midentify supprime le reste de l'affichage et (espérons-le)
 formate les noms de fichiers pour le shell.
 .
@@ -600,6 +602,18 @@ donc vous pouvez avoir plusieurs \'echo "seek 10" > mp_pipe\' et le pipe
 restera valide.
 .RE
 .PD 1
+.
+.TP
+.B \-key-fifo-size <2\-65000>
+Définit la taille de la FIFO qui tamponne les évènements clavier
+(par défaut\ :10).
+Une FIFO de taille n peut tamponner (n - 1) évènements.
+Si elle est trop petite, quelques évènements risquent d'être perdus
+(débouchant sur une erreur "stuck mouse button" ou un effet similaire).
+Si elle est trop grande, MPlayer pourrait sembler bloqué alors qu'il
+traite les évènements tamponnés.
+Pour avoir le même comportement que celui existant avant que cette option
+soit introduite, mettez-la à 2 sous Linux et 1024 sous Windows.
 .
 .TP
 .B \-lircconf <nom_fichier> (LIRC uniquement)
@@ -727,6 +741,9 @@ en paramètre.
 .B \-sstep <sec>
 Spécifie le nombre de secondes entre chaque trame.
 Utile pour les diaporamas.
+Cela utilise le déplacement/navigation normal, donc est aussi inexact
+(i.e.\& avez la plupart des formats, vous aurez une trame toutes les <sec>
+à <sec>+120 secondes).
 .
 .
 .SH "OPTIONS DEMULTIPLEXEUR/\:FLUX"
@@ -2071,16 +2088,6 @@ désirez afficher la vidéo.
 .PD 1
 .
 .TP
-.B \-double
-Active le double buffering.
-Evite le scintillement en plaçant deux trames en mémoire, et en affichant
-l'une tandis que l'on décode l'autre.
-Peut affecter négativement l'OSD, mais évite les effets de scintillement
-de l'OSD.
-Nécessite deux fois plus de mémoire que pour un buffer simple, cela ne
-marchera donc pas sur les cartes qui ont très peu de mémoire.
-.
-.TP
 .B \-dr \ \ \ 
 Active le rendu direct (pas géré par tous les codecs et sorties vidéo)
 .br
@@ -2316,6 +2323,17 @@ Fixe le rapport hauteur/\:largeur de votre moniteur ou de votre TV.
 \-monitoraspect 16:9 ou 1.7777
 .RE
 .PD 1
+.
+.TP
+.B \-double
+Désactive le double tamponnage (buffering).
+Le double tamponnage évite les phénomènes de scintillement en plaçant
+deux trames en mémoire, et en affichant l'une tandis que l'on décode
+l'autre.
+Peut affecter négativement l'OSD, mais évite les effets de scintillement
+de l'OSD.
+Cela nécessite deux fois plus de mémoire que pour un tampon unique, et donc
+cela ne marchera donc pas sur les cartes qui ont très peu de mémoire.
 .
 .TP
 .B \-nograbpointer
