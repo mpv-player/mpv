@@ -204,3 +204,8 @@ Current plugins:
     radius	blur filter strength (~0.1-4.0) (slower if larger)
     prefilter	prefilter strength (~0.1-2.0)
     colorDiff	how different the pixels are allowed to be to be considered (~0.1-100.0)
+
+-vop smartblur=radius:stregth:threshold[:radius:stregth:threshold]
+    radius	blur filter strength (~0.1-5.0) (slower if larger)
+    strength	(0.0-1.0) -> blur, (-1.0-0.0) -> sharpen
+    threshold	0 -> filter all, (0-30) -> filter flat areas, (-30-0) -> filter edges

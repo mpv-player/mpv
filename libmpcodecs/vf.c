@@ -50,6 +50,7 @@ extern vf_info_t vf_info_swapuv;
 extern vf_info_t vf_info_il;
 extern vf_info_t vf_info_boxblur;
 extern vf_info_t vf_info_sab;
+extern vf_info_t vf_info_smartblur;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -93,6 +94,7 @@ static vf_info_t* filter_list[]={
     &vf_info_il,
     &vf_info_boxblur,
     &vf_info_sab,
+    &vf_info_smartblur,
     NULL
 };
 

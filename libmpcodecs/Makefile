@@ -14,7 +14,7 @@ VIDEO_SRCS_NAT=vd_null.c vd_cinepak.c vd_qtrpza.c vd_raw.c vd_msvidc.c vd_fli.c 
 VIDEO_SRCS_OPT=vd_realvid.c vd_ffmpeg.c vd_dshow.c vd_vfw.c vd_vfwex.c vd_odivx.c vd_divx4.c vd_xanim.c vd_xvid.c vd_libdv.c
 VIDEO_SRCS=dec_video.c vd.c $(VIDEO_SRCS_NAT) $(VIDEO_SRCS_LIB) $(VIDEO_SRCS_OPT)
 
-VFILTER_SRCS=vf.c vf_vo.c vf_crop.c vf_expand.c vf_pp.c vf_scale.c vf_format.c vf_yuy2.c vf_flip.c vf_rgb2bgr.c vf_rotate.c vf_mirror.c vf_palette.c vf_lavc.c vf_dvbscale.c vf_cropdetect.c vf_test.c vf_noise.c vf_yvu9.c vf_rectangle.c vf_lavcdeint.c vf_eq.c vf_eq2.c vf_halfpack.c vf_dint.c vf_1bpp.c vf_bmovl.c vf_2xsai.c vf_unsharp.c vf_swapuv.c vf_il.c vf_boxblur.c vf_sab.c
+VFILTER_SRCS=vf.c vf_vo.c vf_crop.c vf_expand.c vf_pp.c vf_scale.c vf_format.c vf_yuy2.c vf_flip.c vf_rgb2bgr.c vf_rotate.c vf_mirror.c vf_palette.c vf_lavc.c vf_dvbscale.c vf_cropdetect.c vf_test.c vf_noise.c vf_yvu9.c vf_rectangle.c vf_lavcdeint.c vf_eq.c vf_eq2.c vf_halfpack.c vf_dint.c vf_1bpp.c vf_bmovl.c vf_2xsai.c vf_unsharp.c vf_swapuv.c vf_il.c vf_boxblur.c vf_sab.c vf_smartblur.c
 ENCODER_SRCS=ve.c ve_divx4.c ve_lavc.c ve_vfw.c ve_rawrgb.c ve_libdv.c ve_xvid.c
 
 NATIVE_SRCS=native/RTjpegN.c native/cinepak.c native/cyuv.c native/fli.c native/minilzo.c native/msvidc.c native/nuppelvideo.c native/qtrle.c native/qtrpza.c native/qtsmc.c native/roqav.c native/xa_gsm.c native/svq1.c
