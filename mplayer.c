@@ -951,7 +951,7 @@ float max_pts_correction=0;//default_max_pts_correction;
 int eof=0;
 int force_redraw=0;
 float num_frames=0;      // number of frames played
-int grab_frames=1;
+int grab_frames=0;
 char osd_text_buffer[64];
 int drop_frame=0;
 int drop_frame_cnt=0;
