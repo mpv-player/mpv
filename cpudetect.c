@@ -93,9 +93,13 @@ void GetCpuCaps( CpuCaps *caps)
 	printf("CPU vendor name: %.4s%.4s%.4s  max cpuid level: %d\n",&regs[1],&regs[3],&regs[2],regs[0]);
 	if (regs[0]>=0x00000001)
 	{
+		char *tmpstr;
+		
 		do_cpuid(0x00000001, regs2);
 
-		printf("CPU: %s\n",GetCpuFriendlyName(regs, regs2));
+		tmpstr=GetCpuFriendlyName(regs, regs2);
+		printf("CPU: %s\n",tmpstr);
+		free(tmpstr);
 
 		caps->cpuType=(regs2[0] >> 8)&0xf;
 		if(caps->cpuType==0xf){
@@ -153,17 +157,22 @@ void GetCpuCaps( CpuCaps *caps)
 char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 #include "cputable.h" /* get cpuname and cpuvendors */
 	char vendor[17];
-	char retname[255];
+	char *retname;
 	int i;
+
+	if (NULL==(retname=malloc(256))) {
+		printf("Error: GetCpuFriendlyName() not enough memory\n");
+		exit(1);
+	}
 
 	sprintf(vendor,"%.4s%.4s%.4s",&regs[1],&regs[3],&regs[2]);
 	
 	for(i=0; i<MAX_VENDORS; i++){
 		if(!strcmp(cpuvendors[i].string,vendor)){
 			if(cpuname[i][CPUID_FAMILY][CPUID_MODEL]){
-				sprintf(retname,"%s %s",cpuvendors[i].name,cpuname[i][CPUID_FAMILY][CPUID_MODEL]);
+				snprintf(retname,255,"%s %s",cpuvendors[i].name,cpuname[i][CPUID_FAMILY][CPUID_MODEL]);
 			} else {
-				sprintf(retname,"unknown %s %d. Generation CPU",cpuvendors[i].name,CPUID_FAMILY); 
+				snprintf(retname,255,"unknown %s %d. Generation CPU",cpuvendors[i].name,CPUID_FAMILY); 
 				printf("unknown %s CPU:\n",cpuvendors[i].name);
 				printf("Vendor:   %s\n",cpuvendors[i].string);
 				printf("Type:     %d\n",CPUID_TYPE);
