@@ -22,9 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: hcb_8.h,v 1.1 2003/08/30 22:30:28 arpi Exp $
-** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+** $Id: hcb_8.h,v 1.3 2003/09/09 18:12:01 menno Exp $
 **/
 
 /* 2-step huffman table HCB_8 */
