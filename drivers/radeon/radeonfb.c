@@ -2012,7 +2012,7 @@ static int radeon_init_dda_regs(struct radeonfb_info *rinfo,
 			      (useable_precision << 16) |
 			      (rinfo->ram.rloop << 20));
 	save->dda_on_off = (ron << 16) | roff;
-	return 0;
+	return 1;
 }
 
 /*
@@ -2055,7 +2055,7 @@ RTRACE("radeonfb: radeon_init_mode is called\n");
     prim_mon = PRIMARY_MONITOR(rinfo);
     if (((prim_mon == MT_DFP) || (prim_mon == MT_LCD)))
     {
-        radeon_init_fp_regs(rinfo, save, mode);
+/*        radeon_init_fp_regs(rinfo, save, mode);*/
     }
 
 RTRACE("radeonfb: radeon_init_mode returns SUCCESS\n"); 
@@ -3142,7 +3142,7 @@ RTRACE("radeonfb: radeon_save_state is called\n");
 static int radeon_load_video_mode (struct radeonfb_info *rinfo,
                                     struct fb_var_screeninfo *mode)
 {
-/*
+
 	struct radeon_regs newmode;
 
 RTRACE("radeonfb: radeon_load_video_mode is called\n"); 
@@ -3151,16 +3151,6 @@ RTRACE("radeonfb: radeon_load_video_mode is called\n");
 	radeonfb_blank(VESA_POWERDOWN,&rinfo->info);
 	radeon_write_mode(rinfo, &newmode);
 	radeonfb_blank(VESA_NO_BLANKING,&rinfo->info);
-	return 0;
-*/
-	struct radeon_regs newmode;
-
-radeon_init_common_regs(rinfo,&newmode);
-radeon_init_crtc_regs(rinfo,&newmode,mode);
-radeon_init_pll_regs(rinfo,&newmode,mode);
-radeon_init_dda_regs(rinfo,&newmode,mode);
-	/* do it! */
-	radeon_write_mode (rinfo, &newmode);
 	return 0;
 }
 
