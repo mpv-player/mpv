@@ -373,6 +373,7 @@ vobsub_parse_custom_colors (mkv_track_t *t, const char *start)
 {
   int use_custom_colors, i;
 
+  use_custom_colors = 0;
   start += 14;
   while (isspace(*start))
     start++;
@@ -2343,6 +2344,7 @@ demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
   int i;
 
   *all_lace_sizes = NULL;
+  lace_size = NULL;
   /* lacing flags */
   flags = *buffer++;
   (*size)--;
