@@ -720,8 +720,7 @@ OSD/SUB feature. There are many ways to get it:
 <listitem><para>
   Use the font generator GIMP plugin at <filename
   class="directory">TOOLS/subfont-GIMP</filename> (note: you must have HSI
-  RAW plugin too, see URL below).
-  <!-- FIXME: where's that URL? -->
+  RAW plugin too, see <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
  </para></listitem>  
 <listitem><para>
   using a TrueType (TTF) font, by the means of the <systemitem class="library">freetype</systemitem>
