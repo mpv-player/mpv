@@ -105,6 +105,7 @@
 </LI><LI><A HREF="#B">B. Mailing-Listen</A>
 </LI><LI><A HREF="bugreports.html">C. Wie man einen Fehler berichtet</A>
 </LI><LI><A HREF="#D">D. Bekannte Probleme</A>
+</LI><LI><A HREF="../skin-en.html">X. Wie man eine befühmter SkinMaker in 5 min wird!</A>
 </LI></UL></P>
 
 <P><HR></P>
@@ -178,10 +179,14 @@ So beschloss ich einen zu schreiben/zu modifizieren...</P>
     Die Release-Version nach 0.11pre nach 4 Monaten schwerer Entwicklung!
     Probiere es, und sei überrascht! Tausende von neuen Features hinzugefügt ...
     und natürlich wurde auch der alte Code verbessert, Bugs entfernt usw.
-<LI><B>MPlayer 0.XX "The BugCounter"</B><BR>
+<LI><B>MPlayer 0.18 "The BugCounter"</B><BR>
     2 Monate seit 0.17 und hier ist die neue Release.. Komplette ASF-Unterstützung,
     mehr Untertitel-Formate, libao wurde eingeführt (wie libvo, aber für Audio),
     stabiler den je, und so weiter. Es ist ein MUSS !
+<LI><B>MPlayer 0.50pre "The Faszom(C)ounter"</B><BR>
+    Hmmm. Wieder eine Release. Tonen von neuen Featues, beta GUI Version, Fehler
+    beseitigt, neue vo und ao Treiber, Ports zu vielen Systemen inklusive OpenSource
+    DivX Codecs und vieles mehr. Probier's!
 </UL></P></UL></P>
 
 <P><B><A NAME=1.3>1.3. Installation</A></B></P>
@@ -227,7 +232,7 @@ auf die <A HREF="codecs.html#2.1.2.2">Sektion 2.1.2.2</A>. Du wirst dies brauche
 um <B>DivX</B> Unterstützung auf einer nicht-x86 Maschine zu gewinnen oder um sich
 einen Vorteil im Vergleich mit dem Win32 Codec in der Geschwingkeit zu schaffen.</LI>
 
-<LI>Für DVD-Unterstützung musst libdvdread und libcss kompilieren. Lese dazu die
+<LI>Für DVD-Unterstützung musst libdvdread und libdvdcss kompilieren. Lese dazu die
 <A HREF="cd-dvd.html#4.2">Sektion 4.2</A>.</LI>
 
 </UL>
@@ -258,7 +263,16 @@ für Details zu lesen.</P>
 
 <P><B><A NAME=1.4>1.4. Was ist mit dem GUI?</A></B></P>
 
-<P>TODO<P>
+<P>Das GUI basiert auf GTK, also muss gtk (und die devel-Sachen) installiert sein.
+Du kannst es einbauen durch die Parameter <CODE>--enable-new-gui</CODE> bei ./configure .
+Um MPlayer im GUI-Modus zu betreiben kannst du entweder
+<UL>
+  <LI>die <CODE>-gui</CODE> Option verwenden</LI>
+  <LI><CODE>gui=yes</CODE> in deine Config-File eintragen</LI>
+  <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE> und
+  <CODE>gmplayer</CODE> stattdessen aufrufen.
+</UL>
+</P>
   
 <P><B><A NAME=1.5>1.5. Untertitel und OSD</A></B></P>
 
@@ -363,18 +377,18 @@ in der Konfigurationsdatei einstellen.</P>
 <P><B>GUI Keyboard-Tasten</B></P>
    
 <P><TABLE BORDER=0>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>, und .</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verherige / nächste Datei</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>graues - und +</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verringere / erhöhe Lautstärke</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Enter</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>startet Wiedergabe</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Leertaste</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Pause</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>s</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Stop</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>über</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>l</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>lädt Datei</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Skin-Browser</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>e</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zeigt Equalizer</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zeigt Playliste</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>f</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt zu/von Vollbild</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>aktiviert/deaktiviert Mute</TD><TR>
 
 </TABLE></P>
 
@@ -436,6 +450,9 @@ anzugeben.</P>
 Die Konfigurierung ist einfach, kompiliere <B>MPlayer</B> neu mit</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
+
+<P><B>MPlayer</B> kann <B>KEINE ASF-Dateien</B> vom Netzwerk spielen, weder mit
+HTTP, noch mit MMS.</P>
 
 <P><B>MPlayer</B> kann auch von stdin lesen (NICHT genannte Pipes). Dies ist ein
 Beispiel für die Verwendung um von FTP zu spielen:</P>
