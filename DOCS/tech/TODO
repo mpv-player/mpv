@@ -8,7 +8,6 @@ demuxer:
 - test and cleanup FLI/FLC support (and implement seek)
 - check dvdread/dvdcss version problems
 - add -dumpstream
-- implement seek for VIVO
 - clean up vcd support (so it can be en/disabled)
 - implement forward seeking in indexed avi streams
 
@@ -33,7 +32,7 @@ mencoder:
 - implement VBR audio copy
 - Estimated Size and Time
 - stop/resume
-- image resize filter (->fix/use yuv2yuv scaler?)
+- image resize filter - implement bicubic downscaling
 - image cut/crop filter
 
 gui:
@@ -41,8 +40,12 @@ gui:
 - preferences ?
 
 other:
+- fix DVB a-v sync problems, switch to mp1e
 - dvd server
 - sub database
 - mga_vid crtc2 fix
+- make mach64_vid
 - libvo2
-
+- check if runtime cpu detection works and complete, and add ./configure option
+  and announce it and so on...
+  
