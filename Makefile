@@ -253,7 +253,7 @@ ifeq ($(GUI),yes)
 	-ln -sf $(PRG) $(BINDIR)/gmplayer
 endif
 	if test ! -d $(MANDIR)/man1 ; then mkdir -p $(MANDIR)/man1; fi
-	for i in $(LANGUAGES); do \
+	for i in $(MAN_LANG); do \
 		if test "$$i" = en ; then \
 			$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/mplayer.1 ; \
 		else \
@@ -263,7 +263,7 @@ endif
 	done
 ifeq ($(MENCODER),yes)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
-	for i in $(LANGUAGES); do \
+	for i in $(MAN_LANG); do \
 		if test "$$i" = en ; then \
 			ln -sf mplayer.1 $(MANDIR)/man1/mencoder.1 ; \
 		else \
