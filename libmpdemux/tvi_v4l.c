@@ -988,6 +988,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    }
 
 	    if (priv->channels[priv->act_channel].flags & VIDEO_VC_TUNER) {
+		int prev_mode;
+		
 		control(priv, TVI_CONTROL_TUN_GET_TUNER, 0);
 		if (((req_mode == TV_NORM_PAL
 		      || req_mode == TV_NORM_PALNC
@@ -1000,6 +1002,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 		    mp_msg(MSGT_TV, MSGL_ERR, "Tuner isn't capable to set norm!\n");
 		    return(TVI_CONTROL_FALSE);
 		}
+
+		prev_mode = priv->tuner.mode;
 
 		switch(req_mode) {
 		case TV_NORM_PAL:
@@ -1018,7 +1022,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 		}
 	    
 		if (control(priv, TVI_CONTROL_TUN_SET_TUNER, &priv->tuner) != TVI_CONTROL_TRUE) {
-		    return(TVI_CONTROL_FALSE);
+		    // norm setting failed, but maybe it's only because it's fixed
+		    if (priv->tuner.mode != prev_mode) return(TVI_CONTROL_FALSE); // no it really failed
 		}
 
 	    }
@@ -1282,11 +1287,14 @@ static void *video_grabber(void *data)
 		    interval = (double)framecount/priv->fps;
 		}
 
-		if (!priv->immediate_mode && (
-			(interval - prev_interval < (long long)0.85e6/priv->fps)
-			|| (interval - prev_interval > (long long)1.15e6/priv->fps) ) ) {
-		    mp_msg(MSGT_TV, MSGL_V, "\nvideo capture thread: frame delta ~ %.1lf fps\n",
-			   (double)1e6/(interval - prev_interval));
+		if (!priv->immediate_mode) {
+		    if (interval - prev_interval == 0) {
+			mp_msg(MSGT_TV, MSGL_V, "\nvideo capture thread: frame delta = 0\n");
+		    } else if ((interval - prev_interval < (long long)0.85e6/priv->fps)
+			       || (interval - prev_interval > (long long)1.15e6/priv->fps) ) {
+			mp_msg(MSGT_TV, MSGL_V, "\nvideo capture thread: frame delta ~ %.1lf fps\n",
+			       (double)1e6/(interval - prev_interval));
+		    }
 		}
 
 		// interpolate the skew in time
@@ -1304,7 +1312,8 @@ static void *video_grabber(void *data)
 	    }
 
 	    mp_msg(MSGT_TV, MSGL_DBG3, "\nfps = %lf, interval = %lf, a_skew = %f, corr_skew = %f\n",
-		   (double)1e6/(interval - prev_interval), (double)1e-6*interval, (double)1e-6*xskew, (double)1e-6*skew);
+		   (interval != prev_interval) ? (double)1e6/(interval - prev_interval) : -1,
+		   (double)1e-6*interval, (double)1e-6*xskew, (double)1e-6*skew);
 	    mp_msg(MSGT_TV, MSGL_DBG3, "vcnt = %d, acnt = %d\n", priv->video_cnt, priv->audio_cnt);
 
 	    prev_skew = skew;
