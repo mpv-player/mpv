@@ -192,24 +192,6 @@ const unsigned int vfmt_to_depth[] = {
 
 static int one = 1, zero = 0;
 
-static int alarms;
-
-static void sigalarm(int signal)
-{
-    alarms++;
-    printf("v4l: timeout (got SIGALRM), hardware/driver problems?\n");
-}
-
-static void siginit(void)
-{
-    struct sigaction act, old;
-    
-    memset(&act, 0, sizeof(act));
-    act.sa_handler = sigalarm;
-    sigemptyset(&act.sa_mask);
-    sigaction(SIGALRM, &act, &old);
-}
-
 tvi_handle_t *tvi_init_v4l(char *device)
 {
     tvi_handle_t *h;
@@ -243,22 +225,22 @@ static int init(priv_t *priv, tvi_param_t *params)
     priv->fd = open(priv->video_device, O_RDWR);
     if (priv->fd == -1)
     {
-	printf("v4l: unable to open '%s': %s\n",
+	mp_msg(MSGT_TV, MSGL_ERR, "unable to open '%s': %s\n",
 	    priv->video_device, strerror(errno));
 	goto err;
     }
 
-    printf("fd: %d\n", priv->fd);
+    mp_msg(MSGT_TV, MSGL_V, "Video fd: %d\n", priv->fd);
     
     /* get capabilities (priv->capability is needed!) */
     if (ioctl(priv->fd, VIDIOCGCAP, &priv->capability) == -1)
     {
-	printf("ioctl get capabilites error: %s\n", strerror(errno));
+	mp_msg(MSGT_TV, MSGL_ERR, "ioctl get capabilites failed: %s\n", strerror(errno));
 	goto err;
     }
 
     fcntl(priv->fd, F_SETFD, FD_CLOEXEC);
-    siginit();
+//    siginit();
 
 #if 0
     for (i=0; params[i].opt; i++)
@@ -269,19 +251,19 @@ static int init(priv_t *priv, tvi_param_t *params)
     printf("priv->input: %d\n", priv->input);
 #endif
 
-    printf("Selected device: %s\n", priv->capability.name);
-    printf(" Capabilites: ");
+    mp_msg(MSGT_TV, MSGL_INFO, "Selected device: %s\n", priv->capability.name);
+    mp_msg(MSGT_TV, MSGL_INFO, " Capabilites: ");
     for (i = 0; device_cap[i] != NULL; i++)
 	if (priv->capability.type & (1 << i))
-	    printf("%s ", device_cap[i]);
-    printf("\n");
-    printf(" Device type: %d\n", priv->capability.type);
-    printf(" Supported sizes: %dx%d => %dx%d\n",
+	    mp_msg(MSGT_TV, MSGL_INFO, "%s ", device_cap[i]);
+    mp_msg(MSGT_TV, MSGL_INFO, "\n");
+    mp_msg(MSGT_TV, MSGL_INFO, " Device type: %d\n", priv->capability.type);
+    mp_msg(MSGT_TV, MSGL_INFO, " Supported sizes: %dx%d => %dx%d\n",
 	priv->capability.minwidth, priv->capability.minheight,
 	priv->capability.maxwidth, priv->capability.maxheight);
     priv->width = priv->capability.minwidth;
     priv->height = priv->capability.minheight;
-    printf(" Inputs: %d\n", priv->capability.channels);
+    mp_msg(MSGT_TV, MSGL_INFO, " Inputs: %d\n", priv->capability.channels);
 
     priv->channels = malloc(sizeof(struct video_channel)*priv->capability.channels);
     memset(priv->channels, 0, sizeof(struct video_channel)*priv->capability.channels);
@@ -289,7 +271,7 @@ static int init(priv_t *priv, tvi_param_t *params)
     {
 	priv->channels[i].channel = i;
 	ioctl(priv->fd, VIDIOCGCHAN, &priv->channels[i]);
-	printf("  %d: %s: %s%s%s%s (tuner:%d, norm:%d)\n", i,
+	mp_msg(MSGT_TV, MSGL_INFO, "  %d: %s: %s%s%s%s (tuner:%d, norm:%d)\n", i,
 	    priv->channels[i].name,
 	    (priv->channels[i].flags & VIDEO_VC_TUNER) ? "tuner " : "",
 	    (priv->channels[i].flags & VIDEO_VC_AUDIO) ? "audio " : "",
@@ -301,27 +283,27 @@ static int init(priv_t *priv, tvi_param_t *params)
 
     if (!(priv->capability.type & VID_TYPE_CAPTURE))
     {
-	printf("Only grabbing supported (for overlay use another program)\n");
+	mp_msg(MSGT_TV, MSGL_ERR, "Only grabbing supported (for overlay use another program)\n");
 	goto err;
     }
     
     /* map grab buffer */
     if (ioctl(priv->fd, VIDIOCGMBUF, &priv->mbuf) == -1)
     {
-	printf("ioctl get mbuf failed: %s\n", strerror(errno));
+	mp_msg(MSGT_TV, MSGL_ERR, "ioctl get mbuf failed: %s\n", strerror(errno));
 	goto err;
     }
 
-    printf("mbuf: size=%d, frames=%d\n",
+    mp_msg(MSGT_TV, MSGL_V, "mbuf: size=%d, frames=%d\n",
 	priv->mbuf.size, priv->mbuf.frames);
     priv->mmap = mmap(0, priv->mbuf.size, PROT_READ|PROT_WRITE,
 		MAP_SHARED, priv->fd, 0);
     if (priv->mmap == -1)
     {
-	printf("Unabel to map memory for buffers: %s\n", strerror(errno));
+	mp_msg(MSGT_TV, MSGL_ERR, "Unabel to map memory for buffers: %s\n", strerror(errno));
 	goto err;
     }
-    printf("our buffer: %p\n", priv->mmap);
+    mp_msg(MSGT_TV, MSGL_DBG2, "our buffer: %p\n", priv->mmap);
 
     /* num of buffers */
     priv->nbuf = priv->mbuf.frames;
@@ -350,7 +332,7 @@ static int start(priv_t *priv)
     
     if (ioctl(priv->fd, VIDIOCGPICT, &priv->picture) == -1)
     {
-	printf("ioctl get picture failed: %s\n", strerror(errno));
+	mp_msg(MSGT_TV, MSGL_ERR, "ioctl get picture failed: %s\n", strerror(errno));
 	return(0);
     }
 
@@ -358,17 +340,17 @@ static int start(priv_t *priv)
     priv->picture.depth = palette2depth(priv->picture.palette);
     priv->bytesperline = priv->width * priv->picture.depth / 8;
     
-    printf("Picture values:\n");
-    printf(" Depth: %d, Palette: %d (Format: %s)\n", priv->picture.depth,
+    mp_msg(MSGT_TV, MSGL_INFO, "Picture values:\n");
+    mp_msg(MSGT_TV, MSGL_INFO, " Depth: %d, Palette: %d (Format: %s)\n", priv->picture.depth,
 	priv->picture.palette, vo_format_name(priv->format));
-    printf(" Brightness: %d, Hue: %d, Colour: %d, Contrast: %d\n",
+    mp_msg(MSGT_TV, MSGL_INFO, " Brightness: %d, Hue: %d, Colour: %d, Contrast: %d\n",
 	priv->picture.brightness, priv->picture.hue,
 	priv->picture.colour, priv->picture.contrast);
     
 
     if (ioctl(priv->fd, VIDIOCSPICT, &priv->picture) == -1)
     {
-	printf("ioctl set picture failed: %s\n", strerror(errno));
+	mp_msg(MSGT_TV, MSGL_ERR, "ioctl set picture failed: %s\n", strerror(errno));
 	return(0);
     }
 
@@ -379,20 +361,20 @@ static int start(priv_t *priv)
 	priv->buf[i].frame = i;
 	priv->buf[i].width = priv->width;
 	priv->buf[i].height = priv->height;
-	printf("buffer: %d => %p\n", i, &priv->buf[i]);
+	mp_msg(MSGT_TV, MSGL_DBG2, "buffer: %d => %p\n", i, &priv->buf[i]);
     } 
     
     /* start capture */
     if (ioctl(priv->fd, VIDIOCCAPTURE, &one) == -1)
     {
-	printf("ioctl capture failed: %s\n", strerror(errno));
+	mp_msg(MSGT_TV, MSGL_ERR, "ioctl capture failed: %s\n", strerror(errno));
 	return(0);
     }
 }
 
 static int control(priv_t *priv, int cmd, void *arg)
 {
-    printf("debug: control(priv=%p, cmd=%d, arg=%p)\n",
+    mp_msg(MSGT_TV, MSGL_DBG2, "debug: control(priv=%p, cmd=%d, arg=%p)\n",
 	priv, cmd, arg);
     switch(cmd)
     {
@@ -439,14 +421,14 @@ static int control(priv_t *priv, int cmd, void *arg)
 		    output_fmt = IMGFMT_YV12;
 		    break;
 		default:
-		    printf("no suitable output format found (%s)\n",
+		    mp_msg(MSGT_TV, MSGL_ERR, "no suitable output format found (%s)\n",
 			PALETTE(priv->palette));
 		    return(TVI_CONTROL_FALSE);
 	    }
 #endif
 	    output_fmt = priv->format;
 	    (int)*(void **)arg = output_fmt;
-	    printf("Output format: %s\n", vo_format_name(output_fmt));
+	    mp_msg(MSGT_TV, MSGL_INFO, "Output format: %s\n", vo_format_name(output_fmt));
 	    return(TVI_CONTROL_TRUE);
 	}
 	case TVI_CONTROL_VID_SET_FORMAT:
@@ -465,7 +447,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	{
 	    int req_width = (int)*(void **)arg;
 	    
-	    printf("Requested width: %d\n", req_width);
+	    mp_msg(MSGT_TV, MSGL_INFO, "Requested width: %d\n", req_width);
 	    if ((req_width >= priv->capability.minwidth) &&
 		(req_width <= priv->capability.maxwidth))
 		return(TVI_CONTROL_TRUE);
@@ -481,7 +463,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	{
 	    int req_height = (int)*(void **)arg;
 	    
-	    printf("Requested height: %d\n", req_height);
+	    mp_msg(MSGT_TV, MSGL_INFO, "Requested height: %d\n", req_height);
 	    if ((req_height >= priv->capability.minheight) &&
 		(req_height <= priv->capability.maxheight))
 		return(TVI_CONTROL_TRUE);
@@ -498,7 +480,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    
 	    if (ioctl(priv->fd, VIDIOCGFREQ, &freq) == -1)
 	    {
-		printf("ioctl get freq failed: %s\n", strerror(errno));
+		mp_msg(MSGT_TV, MSGL_ERR, "ioctl get freq failed: %s\n", strerror(errno));
 		return(TVI_CONTROL_FALSE);
 	    }
 	    
@@ -513,15 +495,15 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    /* argument is in MHz ! */
 	    unsigned long freq = (unsigned long)*(void **)arg;
 	    
-	    printf("requested frequency: %lu MHz\n", (float)freq/16);
+	    mp_msg(MSGT_TV, MSGL_V, "requested frequency: %lu MHz\n", (float)freq/16);
 	    
 	    /* tuner uses khz not mhz ! */
 	    if (priv->tuner.flags & VIDEO_TUNER_LOW)
 	        freq *= 1000;
-	    printf(" requesting from driver: freq=%.3f\n", (float)freq/16);
+	    mp_msg(MSGT_TV, MSGL_V, " requesting from driver: freq=%.3f\n", (float)freq/16);
 	    if (ioctl(priv->fd, VIDIOCSFREQ, &freq) == -1)
 	    {
-		printf("ioctl set freq failed: %s\n", strerror(errno));
+		mp_msg(MSGT_TV, MSGL_ERR, "ioctl set freq failed: %s\n", strerror(errno));
 		return(TVI_CONTROL_FALSE);
 	    }
 	    return(TVI_CONTROL_TRUE);
@@ -530,11 +512,11 @@ static int control(priv_t *priv, int cmd, void *arg)
 	{
 	    if (ioctl(priv->fd, VIDIOCGTUNER, &priv->tuner) == -1)
 	    {
-		printf("ioctl get tuner failed: %s\n", strerror(errno));
+		mp_msg(MSGT_TV, MSGL_ERR, "ioctl get tuner failed: %s\n", strerror(errno));
 		return(TVI_CONTROL_FALSE);
 	    }
 	    
-	    printf("Tuner (%s) range: %lu -> %lu\n", priv->tuner.name,
+	    mp_msg(MSGT_TV, MSGL_INFO, "Tuner (%s) range: %lu -> %lu\n", priv->tuner.name,
 		priv->tuner.rangelow, priv->tuner.rangehigh);
 	    return(TVI_CONTROL_TRUE);
 	}
@@ -542,7 +524,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	{
 	    if (ioctl(priv->fd, VIDIOCSTUNER, &priv->tuner) == -1)
 	    {
-		printf("ioctl get tuner failed: %s\n", strerror(errno));
+		mp_msg(MSGT_TV, MSGL_ERR, "ioctl get tuner failed: %s\n", strerror(errno));
 		return(TVI_CONTROL_FALSE);
 	    }
 	    return(TVI_CONTROL_TRUE);
@@ -556,7 +538,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 		((req_mode == VIDEO_MODE_NTSC) && !(priv->tuner.flags & VIDEO_TUNER_NTSC)) ||
 		((req_mode == VIDEO_MODE_SECAM) && !(priv->tuner.flags & VIDEO_TUNER_SECAM)))
 	    {
-		printf("tuner isn't capable to set norm!\n");
+		mp_msg(MSGT_TV, MSGL_ERR, "Tuner isn't capable to set norm!\n");
 		return(TVI_CONTROL_FALSE);
 	    }
 
@@ -609,7 +591,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
 	    if (ioctl(priv->fd, VIDIOCGCHAN, &priv->channels[i]) == -1)
 	    {
-		printf("ioctl get channel failed: %s\n", strerror(errno));
+		mp_msg(MSGT_TV, MSGL_ERR, "ioctl get channel failed: %s\n", strerror(errno));
 		return(TVI_CONTROL_FALSE);
 	    }
 	    return(TVI_CONTROL_TRUE);
@@ -623,7 +605,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    
 	    if (req_chan >= priv->capability.channels)
 	    {
-		printf("Invalid input requested: %d, valid: 0-%d\n",
+		mp_msg(MSGT_TV, MSGL_ERR, "Invalid input requested: %d, valid: 0-%d\n",
 		    req_chan, priv->capability.channels);
 		return(TVI_CONTROL_FALSE);
 	    }
@@ -636,10 +618,10 @@ static int control(priv_t *priv, int cmd, void *arg)
 
 	    if (ioctl(priv->fd, VIDIOCSCHAN, &chan) == -1)
 	    {
-		printf("ioctl set chan failed: %s\n", strerror(errno));
+		mp_msg(MSGT_TV, MSGL_ERR, "ioctl set chan failed: %s\n", strerror(errno));
 		return(TVI_CONTROL_FALSE);
 	    }
-	    printf("Using input '%s'\n", chan.name);
+	    mp_msg(MSGT_TV, MSGL_INFO, "Using input '%s'\n", chan.name);
 
 	    /* update tuner state */
 	    if (priv->capability.type & VID_TYPE_TUNER)
@@ -659,22 +641,22 @@ static int grab_video_frame(priv_t *priv, char *buffer, int len)
     int frame = priv->queue % priv->nbuf;
     int nextframe = (priv->queue+1) % priv->nbuf;
 
-    printf("grab_video_frame(priv=%p, buffer=%p, len=%d\n",
+    mp_msg(MSGT_TV, MSGL_DBG2, "grab_video_frame(priv=%p, buffer=%p, len=%d\n",
 	priv, buffer, len);
 
-    printf("buf: %p + frame: %d => %p\n",
+    mp_msg(MSGT_TV, MSGL_DBG3, "buf: %p + frame: %d => %p\n",
 	priv->buf, nextframe, &priv->buf[nextframe]);
     if (ioctl(priv->fd, VIDIOCMCAPTURE, &priv->buf[nextframe]) == -1)
     {
-	printf("ioctl mcapture failed: %s\n", strerror(errno));
+	mp_msg(MSGT_TV, MSGL_ERR, "ioctl mcapture failed: %s\n", strerror(errno));
 	return(0);
     }
     
     if (ioctl(priv->fd, VIDIOCSYNC, &priv->buf[frame].frame) == -1)
-	printf("ioctl sync failed: %s\n", strerror(errno));
+	mp_msg(MSGT_TV, MSGL_ERR, "ioctl sync failed: %s\n", strerror(errno));
     priv->queue++;
     
-    printf("mmap: %p + offset: %d => %p\n",
+    mp_msg(MSGT_TV, MSGL_DBG3, "mmap: %p + offset: %d => %p\n",
 	priv->mmap, priv->mbuf.offsets[frame],
 	priv->mmap+priv->mbuf.offsets[frame]);
     memcpy(buffer, priv->mmap+priv->mbuf.offsets[frame], len);

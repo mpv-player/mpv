@@ -4,6 +4,7 @@
 #include "../libao2/afmt.h"
 #include "../libvo/img_format.h"
 #include "../libvo/fastmemcpy.h"
+#include "mp_msg.h"
 
 extern unsigned long tv_param_freq;
 extern char *tv_param_channel;

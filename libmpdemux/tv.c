@@ -47,7 +47,7 @@ int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh)
     demux_packet_t* dp;
     int len;
 
-    printf("demux_tv_fill_buffer(sequence:%d) called!\n", seq);
+    mp_msg(MSGT_DEMUX, MSGL_DBG2, "demux_tv_fill_buffer(sequence:%d) called!\n", seq);
 
 //    demux->filepos = -1;
 
@@ -90,7 +90,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
     
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_VIDEO, 0) != TVI_CONTROL_TRUE)
     {
-	printf("Error: no video input present!\n");
+	mp_msg(MSGT_TV, MSGL_ERR, "Error: no video input present!\n");
 	return;
     }
     
@@ -110,8 +110,8 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	sh_video->format = IMGFMT_RGB15;
     else
     {
-	printf("Unknown format given: %s\n", tv_param_outfmt);
-	printf("Using default: Planar YV12\n");
+	mp_msg(MSGT_TV, MSGL_ERR, "Unknown format given: %s\n", tv_param_outfmt);
+	mp_msg(MSGT_TV, MSGL_INFO, "Using default: Planar YV12\n");
 	sh_video->format = IMGFMT_YV12;
     }
     funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &sh_video->format);
@@ -139,7 +139,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	}
 	else
 	{
-	    printf("Unable set requested width: %d\n", tv_param_width);
+	    mp_msg(MSGT_TV, MSGL_ERR, "Unable set requested width: %d\n", tv_param_width);
 	    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &sh_video->disp_w);
 	    tv_param_width = sh_video->disp_w;
 	}    
@@ -157,7 +157,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	}
 	else
 	{
-	    printf("Unable set requested height: %d\n", tv_param_height);
+	    mp_msg(MSGT_TV, MSGL_ERR, "Unable set requested height: %d\n", tv_param_height);
 	    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &sh_video->disp_h);
 	    tv_param_height = sh_video->disp_h;
 	}    
@@ -165,7 +165,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
     else
 	funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &sh_video->disp_h);
 
-    printf("Output size: %dx%d\n", sh_video->disp_w, sh_video->disp_h);
+    mp_msg(MSGT_TV, MSGL_INFO, "Output size: %dx%d\n", sh_video->disp_w, sh_video->disp_h);
     
     demuxer->video->sh = sh_video;
     sh_video->ds = demuxer->video;
@@ -202,7 +202,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	    case AFMT_MPEG:
 	    case AFMT_AC3:
 	    default:
-//		printf("%s unsupported!\n", audio_out_format_name(audio_format));
+		mp_msg(MSGT_TV, MSGL_ERR, "Audio type '%s' unsupported!\n", audio_out_format_name(audio_format));
 		goto no_audio;
 	}
 	
@@ -223,7 +223,7 @@ no_audio:
     funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &tv_param_freq);
 
     funcs->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &tv_param_freq);
-    printf("freq: %lu\n", tv_param_freq);
+    mp_msg(MSGT_TV, MSGL_INFO, "Setting to frequency: %lu\n", tv_param_freq);
     
     /* also start device! */
     funcs->start(tvh->priv);
@@ -245,11 +245,11 @@ int tv_init(tvi_handle_t *tvh)
 {
     tvi_param_t *params;
 
-    printf("Selected driver: %s\n", tvh->info->short_name);
-    printf(" name: %s\n", tvh->info->name);
-    printf(" author: %s\n", tvh->info->author);
+    mp_msg(MSGT_TV, MSGL_INFO, "Selected driver: %s\n", tvh->info->short_name);
+    mp_msg(MSGT_TV, MSGL_INFO, " name: %s\n", tvh->info->name);
+    mp_msg(MSGT_TV, MSGL_INFO, " author: %s\n", tvh->info->author);
     if (tvh->info->comment)
-	printf(" comment: %s\n", tvh->info->comment);
+	mp_msg(MSGT_TV, MSGL_INFO, " comment: %s\n", tvh->info->comment);
 
     params = malloc(sizeof(tvi_param_t)*2);
     params[0].opt = malloc(strlen("input"));
