@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdarg.h>
+#include <string.h>
 
 #include "config.h"
 #include "mp_msg.h"

@@ -1517,7 +1517,7 @@ char* demux_info_get(demuxer_t *demuxer, char *opt) {
   return NULL;
 }
 
-extern int demux_ty(demuxer_t *demuxer, int cmd, void *arg);
+extern int demux_ty_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_mpg_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_asf_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_avi_control(demuxer_t *demuxer, int cmd, void *arg);

@@ -86,6 +86,7 @@ typedef struct {
 
 
 static int ts_parse(demuxer_t *demuxer, ES_stream_t *es, unsigned char *packet, int probe);
+extern void resync_audio_stream( sh_audio_t *sh_audio );
 
 static uint8_t get_packet_size(const unsigned char *buf, int size)
 {
