@@ -137,7 +137,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
       memdxs=dxs;
       memdys=dys;
       
-      memy=dys-vo_font->height/4;
+      memy=dys-vo_font->height/2;
       
       // too long lines divide into smaller ones
       i=k=lines=0; l=vo_sub->lines;
@@ -195,12 +195,14 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
    k=i=0; l=lines;
    while (l--){
        x = xtbl[i++];
+       if(y<dys)
        while ((c=utbl[k++])){
 	     if (x>=0 && x+vo_font->width[c]<=dxs)
 		if ((font=vo_font->font[c])>=0)
 	           draw_alpha(x,y,
 			      vo_font->width[c],
-			      vo_font->pic_a[font]->h,
+//			      vo_font->pic_a[font]->h,
+			      (y+vo_font->pic_a[font]->h<=dys)?vo_font->pic_a[font]->h:dys-y,
 			      vo_font->pic_b[font]->bmp+vo_font->start[c],
 			      vo_font->pic_a[font]->bmp+vo_font->start[c],
 			      vo_font->pic_a[font]->w);
