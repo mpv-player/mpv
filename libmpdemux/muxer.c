@@ -22,6 +22,9 @@ muxer_t *muxer_new_muxer(int type,FILE *f){
       case MUXER_TYPE_MPEG:
 	muxer_init_muxer_mpeg(muxer);
 	break;
+      case MUXER_TYPE_RAWVIDEO:
+        muxer_init_muxer_rawvideo(muxer);
+	break;
       case MUXER_TYPE_AVI:
       default:
 	muxer_init_muxer_avi(muxer);

@@ -6,6 +6,7 @@
 
 #define MUXER_TYPE_AVI 0
 #define MUXER_TYPE_MPEG 1
+#define MUXER_TYPE_RAWVIDEO 2
 
 #define MUXER_MPEG_BLOCKSIZE 2048	// 2048 or 2324 - ?
 
@@ -75,4 +76,4 @@ muxer_t *muxer_new_muxer(int type,FILE *);
 
 void muxer_init_muxer_avi(muxer_t *);
 void muxer_init_muxer_mpeg(muxer_t *);
-
+void muxer_init_muxer_rawvideo(muxer_t *);
