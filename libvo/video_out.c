@@ -99,9 +99,15 @@ extern vo_functions_t video_out_dfbmga;
 #ifdef CONFIG_VIDIX
 extern vo_functions_t video_out_xvidix;
 #endif
+#ifdef HAVE_TDFX_VID
+extern vo_functions_t video_out_tdfx_vid;
+#endif
 
 vo_functions_t* video_out_drivers[] =
 {
+#ifdef HAVE_TDFX_VID
+        &video_out_tdfx_vid,
+#endif
 #ifdef HAVE_DIRECTX
         &video_out_directx,
 #endif
