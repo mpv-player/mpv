@@ -195,6 +195,10 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
 //    XMapWindow(vo_Display], w);
   }
 
+  if(vo_fsmode&8){
+    XSetTransientForHint (vo_Display, w, RootWindow(vo_Display,mScreen));
+  }
+
  vo_MotifHints=XInternAtom( vo_Display,"_MOTIF_WM_HINTS",0 );
  if ( vo_MotifHints != None )
   {
