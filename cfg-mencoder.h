@@ -207,6 +207,9 @@ m_option_t mencoder_opts[]={
 	{"autoexpand", &auto_expand, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noautoexpand", &auto_expand, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	
+	{"encodedups", &encode_duplicates, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noencodedups", &encode_duplicates, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	
 	// info header strings
 	{"info", info_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
