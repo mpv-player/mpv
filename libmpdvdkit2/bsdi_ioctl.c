@@ -694,7 +694,7 @@ static void cdrom_count_tracks(int fd, tracktype *tracks)
 	struct	cdrom_tocentry entry;
 	int	ret, i;
 
-	bzero(tracks, sizeof (*tracks));
+	memset(tracks, 0, sizeof (*tracks));
 	ret = cdrom_ioctl(fd, CDROMREADTOCHDR, &header);
 /*
  * This whole business is a crock anyhow so we don't bother distinguishing
