@@ -1,8 +1,12 @@
 
 
 #ifdef HAVE_3DNOW
-        real decwin[2*(512+32)];
-        real cos64[32],cos32[16],cos16[8],cos8[4],cos4[2];
+        real decwin[2*(512+32)] __attribute__((aligned(8)));
+        real cos64[32] __attribute__((aligned(8)));
+	real cos32[16] __attribute__((aligned(8)));
+	real cos16[8] __attribute__((aligned(8)));
+	real cos8[4] __attribute__((aligned(8)));
+	real cos4[2] __attribute__((aligned(8)));
         real *pnts[]={ cos64,cos32,cos16,cos8,cos4 };
 #else
         real decwin[512+32];
@@ -10,7 +14,7 @@
         real *pnts[] = { cos64,cos32,cos16,cos8,cos4 };
 #endif
 
-       long intwinbase[] = {
+long intwinbase[] = {
      0,    -1,    -1,    -1,    -1,    -1,    -1,    -2,    -2,    -2,
     -2,    -3,    -3,    -4,    -4,    -5,    -5,    -6,    -7,    -7,
     -8,    -9,   -10,   -11,   -13,   -14,   -16,   -17,   -19,   -21,

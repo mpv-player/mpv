@@ -27,6 +27,7 @@
 #include "bswap.h"
 #include "d_cpu.h"
 
+#include "fastmemcpy.h"
 //static FILE* mp3_file=NULL;
 
 int MP3_frames=0;
@@ -177,7 +178,7 @@ LOCAL int decode_header(struct frame *fr,unsigned long newhead){
 
     // head_check:
     if( (newhead & 0xffe00000) != 0xffe00000 ||  
-        (newhead & 0x0000f300) == 0x0000f300) return FALSE;
+        (newhead & 0x0000fc00) == 0x0000fc00) return FALSE;
 
     fr->lay = 4-((newhead>>17)&3);
 //    if(fr->lay!=3) return FALSE;
