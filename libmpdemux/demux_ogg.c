@@ -1176,6 +1176,10 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
   int64_t gp = 0, old_gp;
   void *context = NULL;
   off_t pos, old_pos;
+  int np;
+  int is_gp_valid;
+  float pts;
+  int is_keyframe;
 
   if(demuxer->video->id >= 0) {
     ds = demuxer->video;
@@ -1255,7 +1259,6 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
       first = !(ogg_d->syncpoints);
       do_seek=0;
     }
-    int np;
     ogg_d->pos += ogg_d->last_size;
     ogg_d->last_size = 0;
     np = ogg_sync_pageseek(sync,page);
@@ -1291,9 +1294,7 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
         first = 0;
         break;
       }
-      int is_gp_valid = (op.granulepos >= 0);
-      float pts;
-      int is_keyframe;
+      is_gp_valid = (op.granulepos >= 0);
       demux_ogg_read_packet(os,&op,context,&pts,&is_keyframe);
       if (precision && is_gp_valid) {
         precision--;
