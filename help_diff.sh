@@ -25,4 +25,4 @@ if test $curr != "x" ; then
     echo "$line"
 fi
 
-done < help_mp-en.h
+done
