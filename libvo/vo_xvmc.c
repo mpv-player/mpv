@@ -698,6 +698,11 @@ int rez;
    assert( rndr != NULL );
    assert( rndr->magic == MP_XVMC_RENDER_MAGIC );
 
+   if(rndr->p_past_surface != NULL)
+      xvmc_sync_surface(rndr->p_past_surface);
+   if(rndr->p_future_surface != NULL)
+      xvmc_sync_surface(rndr->p_future_surface);
+
    rez = XvMCRenderSurface(mDisplay,&ctx,rndr->picture_structure,
              		   rndr->p_surface,
                            rndr->p_past_surface,
