@@ -416,7 +416,7 @@ if test -z "$_target" ; then
   # host's CPU/instruction set
    host_arch=`( uname -p ) 2>&1`
    case "$host_arch" in
-   i386|sparc|ppc|alpha|arm|mips)
+   i386|sparc|ppc|alpha|arm|mips|vax)
      ;;
    powerpc) # Darwin returns 'powerpc'
      host_arch=ppc
@@ -997,6 +997,16 @@ EOF
     _def_arch='#define ARCH_S390X 1'
     _target_arch='TARGET_ARCH_S390X = yes'
     iproc='390x'
+    proc=''
+    _march=''
+    _mcpu=''
+    _optimizing=''
+    ;;
+
+  vax)
+    _def_arch='#define ARCH_VAX 1'
+    _target_arch='TARGET_ARCH_VAX = yes'
+    iproc='vax'
     proc=''
     _march=''
     _mcpu=''
