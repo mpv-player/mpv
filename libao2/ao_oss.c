@@ -225,10 +225,12 @@ ac3_retry:
 
 // close audio device
 static void uninit(){
+    if(audio_fd == -1) return;
 #ifdef SNDCTL_DSP_RESET
     ioctl(audio_fd, SNDCTL_DSP_RESET, NULL);
 #endif
     close(audio_fd);
+    audio_fd = -1;
 }
 
 // stop playing and empty buffers (for seeking/pause)
@@ -255,13 +257,13 @@ static void reset(){
 // stop playing, keep buffers (for pause)
 static void audio_pause()
 {
-    // for now, just call reset();
-    reset();
+    uninit();
 }
 
 // resume playing, after audio_pause()
 static void audio_resume()
 {
+    reset();
 }
 
 
