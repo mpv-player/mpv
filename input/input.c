@@ -1108,6 +1108,7 @@ mp_input_parse_config(char *file) {
 	  continue;
 	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading input config file %s : %s\n",file,strerror(errno));
 	mp_input_free_binds(binds);
+	close(fd);
 	return 0;
       } else if(r == 0) 
 	eof = 1;
@@ -1121,6 +1122,7 @@ mp_input_parse_config(char *file) {
       mp_msg(MSGT_INPUT,MSGL_INFO,"Input config file %s parsed : %d binds\n",file,n_binds);
       if(binds)
 	cmd_binds = binds;
+      close(fd);
       return 1;
     }
 
@@ -1179,6 +1181,7 @@ mp_input_parse_config(char *file) {
 	if(! mp_input_get_input_from_name(name,keys)) {
 	  mp_msg(MSGT_INPUT,MSGL_ERR,"Unknown key '%s'\n",name);
 	  mp_input_free_binds(binds);
+	  close(fd);
 	  return 0;
 	}
       }
@@ -1208,6 +1211,7 @@ mp_input_parse_config(char *file) {
 	if(iter == buffer) {
 	  mp_msg(MSGT_INPUT,MSGL_ERR,"Buffer is too small for command %s\n",buffer);
 	  mp_input_free_binds(binds);
+	  close(fd);
 	  return 0;
 	}
 	memmove(buffer,iter,end - iter);
@@ -1232,6 +1236,7 @@ mp_input_parse_config(char *file) {
     }
   }
   mp_msg(MSGT_INPUT,MSGL_ERR,"What are we doing here ?\n");
+  close(fd);
   return 0;
 }
 
