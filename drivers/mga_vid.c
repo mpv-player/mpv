@@ -660,7 +660,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		break;
 
 		case MGA_VID_OFF:
-			printk(KERN_DEBUG "mga_vid: Video OFF\n");
+			printk(KERN_DEBUG "mga_vid: Video OFF (ioctl)\n");
 			vid_src_ready = 0;   
 #ifdef MGA_ALLOW_IRQ
 			if ( mga_irq != -1 ) disable_irq();
@@ -844,6 +844,8 @@ static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 static int mga_vid_release(struct inode *inode, struct file *file)
 {
 	//Close the window just in case
+	printk(KERN_DEBUG "mga_vid: Video OFF (release)\n");
+
 	vid_src_ready = 0;   
 	regs.besctl &= ~1;
 	mga_vid_write_regs();
