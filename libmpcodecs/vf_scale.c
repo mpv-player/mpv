@@ -67,7 +67,7 @@ static int config(struct vf_instance_s* vf,
 	return 0;
     }
     vf->priv->fmt=best;
-    return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,outfmt);
+    return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,best);
 }
 
 static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
