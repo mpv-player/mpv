@@ -369,6 +369,9 @@ Kaplan, Kim Minh <kmkaplan@selfoffice.com>
     * DVD and VobSub subtitles display support
     * DVD subtitles rip to VobSub
 
+Kärkkäinen, Samuli <skarkkai@woods.iki.fi>
+    * first DVD ripping guide
+
 Keil, Jürgen <jk@tools.de>
     * patched MPlayer to work on Solaris 8 x86
     * various fixes (Win32, configure, etc)
@@ -615,6 +618,9 @@ Syrjälä, Ville <syrjala@sci.fi>
 Sandell, Björn <biorn@dce.chalmers.se>
     * various *BSD fixes
 
+Tackaberry, Jason <tack@sault.org>
+    * second DVD ripping guide
+
 Tam, Howell (Pigeon) <pigeon@pigeond.net>
     * native libcaca driver (-vo caca)
 
@@ -623,8 +629,8 @@ Tlalka, Adam (atlka) <atlka@pg.gda.pl>
     * various fixes
 
 Tiesi, Gianluigi <sherpya@netfarm.it>
-    * ac3 passthrough support for AO win32
-    
+    * AC3 passthrough support for ao_win32
+
 Togni, Roberto (rxt) <r_togni@tiscali.it>
     * open source QT RPZA decoder
     * open source HuffYUV decoder
@@ -633,6 +639,7 @@ Togni, Roberto (rxt) <r_togni@tiscali.it>
     * mp_help-it.h updates
     * Realaudio (ra) demuxer, 14_4 and 28_8 codec support
     * Misc bug fixes and enhancements
+    * documentation
 
 Tropea, Salvador Eduardo <salvador@inti.gov.ar>
     * subtitle parsing/displaying related patches
