@@ -12,6 +12,7 @@
 #include "demuxer.h"
 #include "parse_es.h"
 #include "stheader.h"
+#include "mp3_hdr.h"
 
 #include "dvdauth.h"
 
@@ -238,6 +239,7 @@ int num_elementary_packets100=0;
 int num_elementary_packets101=0;
 int num_elementary_packets1B6=0;
 int num_elementary_packetsPES=0;
+int num_mp3audio_packets=0;
 
 int demux_mpg_es_fill_buffer(demuxer_t *demux){
   // Elementary video stream
@@ -266,6 +268,7 @@ do{
     head<<=8;
     if(head!=0x100){
       head|=c;
+      if(mp_check_mp3_header(head)) ++num_mp3audio_packets;
       ++skipped; //++demux->filepos;
       continue;
     }
@@ -304,7 +307,7 @@ do{
       if(head==0x101) ++num_elementary_packets101;
       mp_msg(MSGT_DEMUX,MSGL_DBG3,"Opps... elementary video packet found: %03X\n",head);
     } else
-    if(head>=0x1C0 && head<0x1F0){
+    if((head>=0x1C0 && head<0x1F0) || head==0x1BD){
       ++num_elementary_packetsPES;
       mp_msg(MSGT_DEMUX,MSGL_DBG3,"Opps... PES packet found: %03X\n",head);
     } else
@@ -313,6 +316,11 @@ do{
     if( ( (num_elementary_packets100>50 && num_elementary_packets101>50) ||
           (num_elementary_packetsPES>50) ) && skipped>4000000){
         mp_msg(MSGT_DEMUX,MSGL_V,"sync_mpeg_ps: seems to be ES/PES stream...\n");
+        demux->stream->eof=1;
+        break;
+    }
+    if(num_mp3audio_packets>100 && num_elementary_packets100<10){
+        mp_msg(MSGT_DEMUX,MSGL_V,"sync_mpeg_ps: seems to be MP3 stream...\n");
         demux->stream->eof=1;
         break;
     }
