@@ -4,8 +4,13 @@
     (C) Alex Beregszaszi <alex@naxine.org>
     
     Based on FFmpeg's libav/rm.c.
+
+    TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.9  2002/03/15 15:51:37  alex
+    added PRE-ALPHA seeking ability and index table generator (like avi's one)
+
     Revision 1.8  2002/01/23 19:41:01  alex
     fixed num_of_packets and current_packet handling, bug found by Mike Melanson
 
@@ -45,12 +50,14 @@ Video codecs: (supported by RealPlayer8 for Linux)
 
 #define MKTAG(a, b, c, d) (a | (b << 8) | (c << 16) | (d << 24))
 
-#define MAX_STREAMS 10
+#define MAX_STREAMS 32
 
 typedef struct {
     int		timestamp;
     int		offset;
     int		packetno;
+    int		len; /* only filled by our index generator */
+    int		flags; /* only filled by our index generator */
 } real_index_table_t;
 
 typedef struct {
@@ -62,6 +69,11 @@ typedef struct {
     int		data_chunk_offset;
     int		num_of_packets;
     int		current_packet;
+
+    int		current_aid;
+    int		current_vid;
+    int		current_apacket;
+    int		current_vpacket;
     
     /* stream id table */
     int		last_a_stream;
@@ -101,7 +113,31 @@ static void skip_str(int isbyte, demuxer_t *demuxer)
     printf("skip_str: %d bytes skipped\n", len);
 }
 
-static void parse_index_chunk(demuxer_t *demuxer)
+static void dump_index(demuxer_t *demuxer, int stream_id)
+{
+    real_priv_t *priv = demuxer->priv;
+    real_index_table_t *index;
+    int i, entries;
+
+    if (!verbose)
+	return;
+    
+    if (stream_id > MAX_STREAMS)
+	return;
+
+    index = priv->index_table[stream_id];
+    entries = priv->index_table_size[stream_id];
+    
+    printf("Index table for stream %d\n", stream_id);
+    for (i = 0; i < entries; i++)
+    {
+	printf("packetno: %x pos: %x len: %x timestamp: %x flags: %x\n",
+	    index[i].packetno, index[i].offset, index[i].len, index[i].timestamp,
+	    index[i].flags);
+    }
+}
+
+static int parse_index_chunk(demuxer_t *demuxer)
 {
     real_priv_t *priv = demuxer->priv;
     int origpos = stream_tell(demuxer->stream);
@@ -154,20 +190,116 @@ read_index:
 	priv->index_table[stream_id][i].timestamp = stream_read_dword(demuxer->stream);
 	priv->index_table[stream_id][i].offset = stream_read_dword(demuxer->stream);
 	priv->index_table[stream_id][i].packetno = stream_read_dword(demuxer->stream);
-	printf("Index table: Stream#%d: entry: %d: pos: %d\n",
-	    stream_id, i, priv->index_table[stream_id][i].offset);
+//	printf("Index table: Stream#%d: entry: %d: pos: %d\n",
+//	    stream_id, i, priv->index_table[stream_id][i].offset);
     }
-    demuxer->seekable = 1; /* got index, we're able to seek */
     
+    dump_index(demuxer, stream_id);
+
     if (next_header_pos > 0)
 	goto read_index;
 
-    printf("End of index tables\n");
-
 end:
+    demuxer->seekable = 1; /* got index, we're able to seek */
     if (i == -256)
 	stream_reset(demuxer->stream);
     stream_seek(demuxer->stream, origpos);
+    if (i == -256)
+	return 0;
+    else
+	return 1;
+}
+
+static int generate_index(demuxer_t *demuxer)
+{
+    real_priv_t *priv = demuxer->priv;
+    int origpos = stream_tell(demuxer->stream);
+    int data_pos = priv->data_chunk_offset-10;
+    int num_of_packets = 0;
+    int i, entries = 0;
+    int len, stream_id = 0, timestamp, flags;
+    int tab_pos = 0;
+
+read_index:
+    stream_seek(demuxer->stream, data_pos);
+
+    i = stream_read_dword_le(demuxer->stream);
+    if ((i == -256) || (i != MKTAG('D', 'A', 'T', 'A')))
+    {
+	printf("Something went wrong, no data chunk found on given address (%d)\n",
+	    data_pos);
+	goto end;
+    }
+    stream_skip(demuxer->stream, 4); /* chunk size */
+    stream_skip(demuxer->stream, 2); /* version */
+    
+    num_of_packets = stream_read_dword(demuxer->stream);
+    printf("Generating index table from raw data (pos: 0x%x) for %d packets\n",
+	data_pos, num_of_packets);
+
+    data_pos = stream_read_dword_le(demuxer->stream)-10; /* next data chunk */
+
+    for (i = 0; i < MAX_STREAMS; i++)
+    {
+    priv->index_table_size[i] = num_of_packets;
+    priv->index_table[i] = malloc(priv->index_table_size[i] * sizeof(real_index_table_t));
+//    priv->index_table[stream_id] = realloc(priv->index_table[stream_id],
+//	priv->index_table_size[stream_id] * sizeof(real_index_table_t));
+    }
+
+    tab_pos = 0;
+    
+//    memset(priv->index_table_size, 0, sizeof(int)*MAX_STREAMS);
+//    memset(priv->index_table, 0, sizeof(real_index_table_t)*MAX_STREAMS);
+    
+    while (tab_pos < num_of_packets)
+    {
+    i = stream_read_char(demuxer->stream);
+    if (i == -256)
+	goto end;
+    stream_skip(demuxer->stream, 1);
+//    stream_skip(demuxer->stream, 2); /* version */
+
+    len = stream_read_word(demuxer->stream);
+    stream_id = stream_read_word(demuxer->stream);
+    timestamp = stream_read_dword(demuxer->stream);
+    
+    stream_skip(demuxer->stream, 1); /* reserved */
+    flags = stream_read_char(demuxer->stream);
+
+    i = tab_pos;
+
+//    priv->index_table_size[stream_id] = i;
+//    if (priv->index_table[stream_id] == NULL)
+//	priv->index_table[stream_id] = malloc(priv->index_table_size[stream_id] * sizeof(real_index_table_t));
+//    else
+//	priv->index_table[stream_id] = realloc(priv->index_table[stream_id],
+//	    priv->index_table_size[stream_id] * sizeof(real_index_table_t));
+    
+    priv->index_table[stream_id][i].timestamp = timestamp;
+    priv->index_table[stream_id][i].offset = stream_tell(demuxer->stream)-12;
+    priv->index_table[stream_id][i].len = len;
+    priv->index_table[stream_id][i].packetno = entries;
+    priv->index_table[stream_id][i].flags = flags;
+
+    tab_pos++;
+
+    /* skip data */
+    stream_skip(demuxer->stream, len-12);
+    }
+    dump_index(demuxer, stream_id);
+    if (data_pos)
+	goto read_index;
+
+end:
+    demuxer->seekable = 1; /* got index, we're able to seek */
+    if (i == -256)
+	stream_reset(demuxer->stream);
+    stream_seek(demuxer->stream, origpos);
+    if (i == -256)
+	return 0;
+    else
+	return 1;
 }
 
 int real_check_file(demuxer_t* demuxer)
@@ -242,6 +374,7 @@ loop:
 //	    printf("packet is audio (id: %d)\n", stream_id);
 	    ds = demuxer->audio; /* FIXME */
 	    sh_audio = ds->sh;
+	    priv->current_apacket++;
 	    break;
 	}
     }
@@ -252,6 +385,7 @@ loop:
 	{
 //	    printf("packet is video (id: %d)\n", stream_id);
 	    ds = demuxer->video; /* FIXME */
+	    priv->current_vpacket++;
 	    break;
 	}
     }
@@ -314,9 +448,10 @@ void demux_open_real(demuxer_t* demuxer)
     /* parse chunks */
     for (i = 1; i < num_of_headers; i++)
     {
-	int chunk, chunk_size;
+	int chunk_id, chunk_pos, chunk_size;
 	
-	chunk = stream_read_dword_le(demuxer->stream);
+	chunk_pos = stream_tell(demuxer->stream);
+	chunk_id = stream_read_dword_le(demuxer->stream);
 	chunk_size = stream_read_dword(demuxer->stream);
 
 	stream_skip(demuxer->stream, 2); /* version */
@@ -324,10 +459,10 @@ void demux_open_real(demuxer_t* demuxer)
 	if (chunk_size < 10)
 	    goto fail;
 	
-	printf("Chunk: %.4s (size: %d)\n",
-	    (char *)&chunk, chunk_size);
+	printf("Chunk: %.4s (%x) (size: 0x%x, offset: 0x%x)\n",
+	    (char *)&chunk_id, chunk_id, chunk_size, chunk_pos);
 	
-	switch(chunk)
+	switch(chunk_id)
 	{
 	    case MKTAG('P', 'R', 'O', 'P'):
 		/* Properties header */
@@ -349,6 +484,9 @@ void demux_open_real(demuxer_t* demuxer)
 #else
 		{
 		    int flags = stream_read_word(demuxer->stream);
+		    
+		    if (flags)
+		    {
 		    printf("Flags (%x): ", flags);
 		    if (flags & 0x1)
 			printf("[save allowed] ");
@@ -357,6 +495,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    if (flags & 0x4)
 			printf("[live broadcast] ");
 		    printf("\n");
+		    }
 		}
 #endif
 		break;
@@ -644,7 +783,7 @@ skip_this_chunk:
 		goto header_end;
 	    case MKTAG('I', 'N', 'D', 'X'):
 	    default:
-		printf("Unknown chunk: %x\n", chunk);
+		printf("Unknown chunk: %x\n", chunk_id);
 		stream_skip(demuxer->stream, chunk_size - 10);
 		break;
 	}
@@ -663,7 +802,9 @@ header_end:
     /* disable seeking */
     demuxer->seekable = 0;
 
-    if (priv->index_chunk_offset && ((index_mode == 1) || (index_mode == 2)))
+    if (index_mode == 2)
+	generate_index(demuxer);
+    else if (priv->index_chunk_offset && ((index_mode == 1) || (index_mode == 2)))
 	parse_index_chunk(demuxer);
 
 fail:
@@ -680,7 +821,8 @@ void demux_close_real(demuxer_t *demuxer)
     return;
 }
 
-#if 0
+#if 1
+/* XXX: FIXME!!!! */
 /* will complete it later - please upload RV10 samples WITH INDEX CHUNK */
 int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
@@ -689,30 +831,47 @@ int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
     demux_stream_t *d_video = demuxer->video;
     sh_audio_t *sh_audio = d_audio->sh;
     sh_video_t *sh_video = d_video->sh;
-    int rel_seek_frames = sh->fps*rel_seek_secs;
+    int rel_seek_frames = sh_video->fps*rel_seek_secs;
     int video_chunk_pos = d_video->pos;
-    int stream_id = 0;
+    int vid = priv->current_vid, aid = priv->current_aid;
+    int i;
 
-#if 0
+    printf("real seek\n\n");
+
+    if ((index_mode != 1) && (index_mode != 2))
+	return 0;
+
     if (flags & 1)
 	/* seek absolute */
-	video_chunk_pos = 0;
+	priv->current_apacket = priv->current_vpacket = 0;
 
     if (flags & 2)
-    {
-	int total = sh_video->video.dwLength;
-	
-	rel_seek_frames 
-    }
-#endif
+	rel_seek_frames = rel_seek_secs*sh_video->fps;
 
-    if (rel_seek_frames > 0)
+    printf("rel_seek_frames: %d\n", rel_seek_frames);
+    
+    priv->current_apacket+=rel_seek_frames;
+    priv->current_vpacket+=rel_seek_frames;
+
+    if ((priv->current_apacket > priv->index_table_size[vid]) ||
+	(priv->current_vpacket > priv->index_table_size[aid]))
+	return 0;
+
+    if (priv->current_apacket > priv->current_vpacket)
     {
-	/* seek forward */
-	for (i = 0; i < index_table_size[stream_id]; i++)
-	{
-	    if (index_table[stream_id][i] 
-	}
+	while (!(priv->index_table[vid][priv->current_vpacket].flags & 0x2))
+	    priv->current_vpacket++;
+	i = priv->index_table[vid][priv->current_vpacket].offset;
     }
+    else
+    {
+	while (!(priv->index_table[aid][priv->current_apacket].flags & 0x2))
+	    priv->current_apacket++;	
+	i = priv->index_table[aid][priv->current_apacket].offset;
+    }
+    
+    printf("seek: pos: %d, packets: a: %d, v: %d\n",
+	i, priv->current_apacket, priv->current_vpacket);
+    stream_seek(demuxer->stream, i);
 }
 #endif
