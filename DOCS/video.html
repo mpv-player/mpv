@@ -1188,7 +1188,11 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     <CODE>&lt;device&gt;</CODE> = device number to use if you have more than one
     em8300 card.
     <BR>
-    Any of these options may be left out.</DD>
+    Any of these options may be left out.<BR>
+    <CODE>:prebuf:sync</CODE> seems to work great when playing DivX etc, even on
+    AMD's CPUs. But people have reported problems using these options when playing
+    normal MPEGs. You might want to try running without any options first, if you
+    have sync problems give <CODE>:sync</CODE> a try.</DD>
 
   <DT><CODE>-ao oss:/dev/em8300_ma-X</CODE></DT>
   <DD>For audio output, where <CODE>X</CODE> is the device number
@@ -1209,8 +1213,12 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     page for further info about <CODE>-vop lavc/fame</CODE>.<BR>
     Using lavc is highly recommended. Currently there is no way of setting the
     fps of the em8300 which means that it is fixed to 29.97fps. Because of this
-    it is highly recommended that you use <CODE>-vop lavc=&lt;quality&gt;:29.97</CODE>,
-    especially if you are using prebuffering.</DD>
+    it is highly recommended that you use <CODE>-vop lavc=&lt;quality&gt;:25</CODE>,
+    especially if you are using prebuffering. Then why 25 and not 29.97? Well,
+    the thing is that when you use 29.97 the picture becomes a bit jumpy. The
+    reason for this is unknown to us. If you set it to somewhere between 25 and
+    27 the picture becomes stable. For now all we can do is accept this for a
+    fact.</DD>
   
   <DT><CODE>-ac hwac3</CODE></DT>
   <DD>The em8300 supports playing back AC3 audio (surround sound) through the
@@ -1224,23 +1232,18 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 
 <P>To get overlay run dxr3view that comes with the em8300 package before
   starting MPlayer. You can set various options in dxr3view by pressing
-  <CODE>T</CODE> while holding the mouse cursor above the window.</P>
+  <CODE>T</CODE> while holding the mouse cursor above the window. Activating
+  rectangle mode seems to work for alot of people.</P>
 
 <H4>MPEG1, MPEG2, VCD and DVD Notes</H4>
 
-<P>MPEG1/2 content should now automatically be detected by MPlayer and
-  it will use the hardware acceleration of the DXR3 to play it. If not, you can
-  force it to hardware acceleration with <CODE>-vc mpegpes</CODE>. Also, if you
-  plan to use postprocessing filters you must use <CODE>-vc mpeg12</CODE>.</P>
-
 <P>In some instances, subtitles may not appear properly in sync with the A/V
-  stream when using hardware decoding (<CODE>-vc mpegpes</CODE>). This is a
-  known bug. The em8300 will also improperly handle subtitles that are too big,
-  and may hang for a second or two. At this time, the only workaround is to use
-  <CODE>-vc mpeg12</CODE> when viewing DVDs with subtitles. When running with
-  <CODE>-vc mpeg12</CODE> MPlayer will reencode video to MPEG (even if it
-  already is MPEG). This means that it will need more CPU power, and you might
-  loose some picture quality.</P>
+  stream when using hardware decoding. This is a known bug. The em8300 will
+  also improperly handle subtitles that are too big, and may hang for a second
+  or two. At this time, the only workaround is to use <CODE>-vop lavc</CODE>
+  when viewing DVDs with subtitles. When running with <CODE>-vop lavc</CODE>
+  MPlayer will reencode video to MPEG (even if it already is MPEG). This means
+  that it will need more CPU power, and you might loose some picture quality.</P>
 
 
 <H4><A NAME="tv-out">2.3.1.A TV-out support</A></H4>
