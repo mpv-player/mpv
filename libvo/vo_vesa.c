@@ -96,6 +96,9 @@ uint32_t  multi_buff[MAX_BUFFERS]; /* contains offsets of buffers */
 uint8_t   multi_size=0; /* total number of buffers */
 uint8_t   multi_idx=0; /* active buffer */
 
+/* Linux Video Overlay */
+static const char *lvo_name = NULL;
+
 #define HAS_DGA()  (win.idx == -1)
 #define MOVIE_MODE (MODE_ATTR_COLOR | MODE_ATTR_GRAPHICS)
 #define FRAME_MODE (MODE_WIN_RELOCATABLE | MODE_WIN_WRITEABLE)
@@ -127,6 +130,7 @@ static char * vbeErrToStr(int err)
 static void vesa_term( void )
 {
   int err;
+  if(lvo_name) vlvo_term();
   if((err=vbeRestoreState(init_state)) != VBE_OK) PRINT_VBE_ERR("vbeRestoreState",err);
   if((err=vbeSetMode(init_mode,NULL)) != VBE_OK) PRINT_VBE_ERR("vbeSetMode",err);
   if(HAS_DGA()) vbeUnmapVideoBuffer((unsigned long)win.ptr,win.high);
@@ -240,6 +244,8 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 {
     if(verbose > 2)
 	printf("vo_vesa: draw_slice was called: w=%u h=%u x=%u y=%u\n",w,h,x,y);
+    if(lvo_name) return vlvo_draw_slice(image,stride,w,h,x,y);
+    else
     if(vesa_zoom)
     {
 	 uint8_t *dst[3]= {dga_buffer, NULL, NULL};
@@ -307,21 +313,27 @@ static void draw_osd(void)
  uint32_t w,h;
  if(verbose > 2)
 	printf("vo_vesa: draw_osd was called\n");
- w = HAS_DGA()?video_mode_info.XResolution:image_width;
- h = HAS_DGA()?video_mode_info.YResolution:image_height;
- if(dga_buffer) vo_draw_text(w,h,draw_alpha_fnc);
+ if(lvo_name) vlvo_draw_osd();
+ else
+ {
+   w = HAS_DGA()?video_mode_info.XResolution:image_width;
+   h = HAS_DGA()?video_mode_info.YResolution:image_height;
+   if(dga_buffer) vo_draw_text(w,h,draw_alpha_fnc);
+ }
 }
 
 static void flip_page(void)
 {
   if(verbose > 2)
 	printf("vo_vesa: flip_page was called\n");
+  if(lvo_name) vlvo_flip_page();
+  else
   if(flip_trigger) 
   {
     if(!HAS_DGA()) __vbeCopyData(dga_buffer);
     flip_trigger = 0;
   }
-  if(vo_doublebuffering && multi_size > 1)
+  if(vo_doublebuffering && multi_size > 1 && !lvo_name)
   {
     int err;
     if((err=vbeSetDisplayStart(multi_buff[multi_idx],1)) != VBE_OK)
@@ -352,6 +364,8 @@ static uint32_t draw_frame(uint8_t *src[])
   uint8_t *data = src[0];
     if(verbose > 2)
         printf("vo_vesa: draw_frame was called\n");
+    if(lvo_name) return vlvo_draw_frame(src);
+    else
     if(rgb2rgb_fnc)
     {
       if(HAS_DGA()) 
@@ -379,7 +393,7 @@ static uint32_t draw_frame(uint8_t *src[])
       if(verbose > 2)
           printf("vo_vesa: rgb2rgb_fnc was called\n");
     } 
-    if(!rgb2rgb_fnc || !HAS_DGA()) __vbeCopyData(data);
+    if((!rgb2rgb_fnc || !HAS_DGA()) && !lvo_name) __vbeCopyData(data);
     return 0;
 }
 
@@ -487,6 +501,8 @@ uint32_t parseSubDevice(const char *sd)
    if(strcmp(sd,"nodga") == 0) { flags |= SUBDEV_NODGA; flags &= ~(SUBDEV_FORCEDGA); }
    else
    if(strcmp(sd,"dga") == 0)   { flags &= ~(SUBDEV_NODGA); flags |= SUBDEV_FORCEDGA; }
+   else
+   if(memcmp(sd,"lvo:",4) == 0) lvo_name = &sd[4]; /* lvo_name will be valid within init() */
    else if(verbose) printf("vo_vesa: Unknown subcommand: %s\n", sd);
    return flags;
 }
@@ -684,7 +700,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		      }
 		      scale_xinc=(width << 16) / image_width - 2;  /* needed for proper rounding */
 	    	      scale_yinc=(height << 16) / image_height + 2;
-		      SwScale_Init();
+		      if(!lvo_name) SwScale_Init();
 		      if(verbose) printf("vo_vesa: Using SCALE\n");
 		  }      
     		  else
@@ -693,7 +709,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		      return -1;
 		  }
 		}
-		if(format != IMGFMT_YV12 && image_bpp != video_mode_info.BitsPerPixel)
+		if(format != IMGFMT_YV12 && image_bpp != video_mode_info.BitsPerPixel && !lvo_name)
 		{
 		  if(image_bpp == 24 && video_mode_info.BitsPerPixel == 32) rgb2rgb_fnc = rgb24to32;
 		  else 
@@ -789,7 +805,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		else
 		{
 		  cpy_blk_fnc = __vbeCopyBlock;
-		  if(yuv_fmt || rgb2rgb_fnc)
+		  if((yuv_fmt || rgb2rgb_fnc) && !lvo_name)
 		  {
 		    if(!(dga_buffer = memalign(64,video_mode_info.XResolution*video_mode_info.YResolution*video_mode_info.BitsPerPixel)))
 		    {
@@ -815,6 +831,16 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		{
 		  printf("vo_vesa: Graphics mode was activated\n");
 		  fflush(stdout);
+		}
+		if(lvo_name)
+		{
+		  if(vlvo_init(lvo_name,width,height,x_offset,y_offset,image_width,image_height,format,video_mode_info.BitsPerPixel) != 0)
+		  {
+		    printf("vo_vesa: Can't initialize Linux Video Overlay\n");
+		    vesa_term();
+		    return -1;
+		  }
+		  else printf("vo_vesa: Using video overlay: %s\n",lvo_name);
 		}
 	}
 	else

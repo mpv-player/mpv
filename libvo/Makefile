@@ -8,7 +8,7 @@ OBJS=$(SRCS:.c=.o)
 
 ifeq ($(TARGET_ARCH_X86),yes)
 ifeq ($(TARGET_OS),Linux)
-SRCS += vo_vesa.c
+SRCS += vo_vesa.c vesa_lvo.c
 endif
 endif
 
