@@ -114,7 +114,7 @@ int attrib_count,i;
 static void mDrawColorKey(uint32_t x,uint32_t  y, uint32_t w, uint32_t h)
 {
    if( (keycolor_handling != 2) && (keycolor_handling != 3) ) 
-      return ;//unknow method
+      return ;//unknown method
 
    XSetBackground( mDisplay,vo_gc,0 );
    XClearWindow( mDisplay,vo_window );

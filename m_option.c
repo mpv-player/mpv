@@ -1347,17 +1347,17 @@ static int parse_obj_settings_list(m_option_t* opt,char *name,
       char prefix[len];
       strncpy(prefix,opt->name,len-1);
       prefix[len-1] = '\0';
-      mp_msg(MSGT_VFILTER,MSGL_ERR, "Option %s: unknow posfix %s\n"
-	     "Supported posfix are:\n"
+      mp_msg(MSGT_VFILTER,MSGL_ERR, "Option %s: unknown postfix %s\n"
+	     "Supported postfixes are:\n"
 	     "  %3$s-add\n"
 	     " Append the given list to the current list\n\n"
 	     "  %3$s-pre\n"
 	     " Prepend the given list to the current list\n\n"
 	     "  %3$s-del x,y,...\n"
 	     " Remove the given elements. Take the list element index (starting from 0).\n"
-	     " Neagtive index can be used (ie -1 is the last element)\n\n"
+	     " Negative index can be used (ie -1 is the last element)\n\n"
 	     "  %3$s-clr\n"
-	     " Clear the cureent list.\n",name,n,prefix);
+	     " Clear the current list.\n",name,n,prefix);
       
       return M_OPT_UNKNOWN;
     }

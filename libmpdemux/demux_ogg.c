@@ -777,7 +777,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	//// Unknown header type
       } else
 	mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG stream %d has a header marker but is of an unknown type\n",ogg_d->num_sub);
-      /// Unknow (invalid ?) header
+      /// Unknown (invalid ?) header
     } else
       mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG stream %d is of an unknown type\n",ogg_d->num_sub);
 

@@ -72,7 +72,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   else if(mode == STREAM_WRITE)
     m = O_WRONLY;
   else {
-    mp_msg(MSGT_OPEN,MSGL_ERR, "[file] Unknow open mode %d\n",mode);
+    mp_msg(MSGT_OPEN,MSGL_ERR, "[file] Unknown open mode %d\n",mode);
     m_struct_free(&stream_opts,opts);
     return STREAM_UNSUPORTED;
   }

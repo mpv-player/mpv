@@ -197,8 +197,8 @@ int handle_client(client_t* cl,mp_net_stream_packet_t* pack) {
     }
     return net_stream_close(cl);
   default:
-    mp_msg(MSGT_NETST,MSGL_WARN,"Got unknow command %d\n",pack->cmd);
-    if(!write_error(cl->fd,"Unknow command\n"))
+    mp_msg(MSGT_NETST,MSGL_WARN,"Got unknown command %d\n",pack->cmd);
+    if(!write_error(cl->fd,"Unknown command\n"))
       return 0;
   }
   return 0;
