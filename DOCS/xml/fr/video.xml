@@ -1958,6 +1958,12 @@ SVP!
       <envar>PATH</envar>.
       </para></step>
     <step><para>
+      Si <command>con2fb</command> n'est pas installé, entrez dans
+      <filename class="directory">TVout/con2fb</filename> et tapez <command>make</command>.
+      Installez <filename class="directory">con2fb</filename> quelque part dans votre
+      <envar>PATH</envar>.
+      </para></step>
+    <step><para>
       Ensuite entrez dans le répertoire <filename class="directory">TVout/</filename>
       du source <application>MPlayer</application> et exécutez <filename>./modules</filename>
       en root. Votre console en mode texte va entrer en mode framebuffer (sans retour

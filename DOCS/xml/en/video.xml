@@ -1936,7 +1936,7 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
     Using the <emphasis role="bold">matroxfb modules</emphasis> in the 2.4
     kernels. 2.2 kernels don't have the TVout feature in them, thus unusable
     for this.  You have to enable ALL matroxfb-specific feature during compilation
-    (except MultiHead), and compile them into <emphasis role="bold">modules!</emphasis>
+    (except MultiHead), and compile them into <emphasis role="bold">modules</emphasis>!
     You'll also need I2C enabled.
     </para>
 
@@ -1950,6 +1950,12 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
       If you don't have <command>fbset</command> installed, enter
       <filename class="directory">TVout/fbset</filename> and type <command>make</command>.
       Install <filename class="directory">fbset</filename> into somewhere in your
+      <envar>PATH</envar>.
+      </para></step>
+    <step><para>
+      If you don't have <command>con2fb</command> installed, enter
+      <filename class="directory">TVout/con2fb</filename> and type <command>make</command>.
+      Install <filename class="directory">con2fb</filename> into somewhere in your
       <envar>PATH</envar>.
       </para></step>
     <step><para>
