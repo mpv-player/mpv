@@ -130,7 +130,7 @@ your soundcard via an external cable connection between video card and line-in,
 or using the built-in ADC in the bt878 chip. In the latter case, you have to
 load the <emphasis role="bold">btaudio</emphasis> driver. Read the
 <filename>linux/Documentation/sound/btaudio</filename> file (in the kernel
-tree, not <application>MPlayer's</application>) for some instructions on using
+tree, not <application>MPlayer</application>'s) for some instructions on using
 this driver.
 </para>
 </listitem>

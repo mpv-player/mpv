@@ -71,7 +71,7 @@ cannot encode MPEG1 layer 2 (MP2) audio, which all other players expect in MPEG 
 </para>
 
 <para>
-To change <application>MEncoder's</application> output file format,
+To change <application>MEncoder</application>'s output file format,
 use the <option>-of mpeg</option> option.
 </para>
 
@@ -898,7 +898,7 @@ Notes:
   When <application>MPlayer</application> plays this category, it will
   (often repeatedly) switch back and forth between &quot;30fps
   NTSC&quot; and &quot;24fps progressive NTSC&quot;. Watch the bottom of
-  <application>MPlayer's</application> output to see these messages.
+  <application>MPlayer</application>'s output to see these messages.
 </para>
 
 <para>
@@ -1082,7 +1082,7 @@ Notes:
   ready). It works fine without <option>-ofps</option>, but
   <option>-ofps</option> is needed to prevent choppy output. With
   <option>-ofps</option>, it sometimes fails. The problems arise from
-  <application>MEncoder's</application> behavior of dropping frames to
+  <application>MEncoder</application>'s behavior of dropping frames to
   maintain synchronization between the audio and video: it drops
   frames before sending them through the filter chain, rather than
   after. As a result, <option>pullup</option> is sometimes deprived

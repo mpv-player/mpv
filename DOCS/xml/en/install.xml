@@ -669,7 +669,7 @@ About DVD subtitles, read the <link linkend="dvd">DVD</link> section.
 
 
 <sect2 id="mpsub">
-<title><application>MPlayer's</application> own subtitle format (MPsub)</title>
+<title><application>MPlayer</application>'s own subtitle format (MPsub)</title>
 
 <para>
 <application>MPlayer</application> introduces a new subtitle format called

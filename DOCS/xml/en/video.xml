@@ -2021,7 +2021,7 @@ so it is highly suggested that you turn on <application>MPlayer</application>'s
 <option>sync</option> will turn on the new sync-engine. This is currently an
 experimental feature. With the sync feature turned on the em8300's internal clock
 will be monitored at all times, if it starts to deviate from
-<application>MPlayer's</application> clock it will be reset causing the em8300 to
+<application>MPlayer</application>'s clock it will be reset causing the em8300 to
 drop any frames that are lagging behind.
 <option>norm=x</option> will set the TV norm of the DXR3 card without the need
 for external tools like em8300setup. Valid norms are 5 = NTSC, 4 = PAL-60,
@@ -2080,7 +2080,7 @@ becomes stable. For now all we can do is accept this for a fact.
 <term><option>-vf expand=-1:-1:-1:-1:1</option></term>
 <listitem><para>
 Although the DXR3 driver can put some OSD onto the MPEG1/2/4 video, it has
-much lower quality than <application>MPlayer's</application> traditional OSD,
+much lower quality than <application>MPlayer</application>'s traditional OSD,
 and has several refresh problems as well. The command line above will firstly
 convert the input video to MPEG4 (this is mandatory, sorry), then apply an
 expand filter which won't expand anything (-1: default), but apply the normal

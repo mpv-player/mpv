@@ -55,7 +55,7 @@ it's sound card (driver) problem.
 <itemizedlist>
 <listitem>
 <para>audio buffer problems (buffer size badly detected)</para>
-<para>Workaround: <application>MPlayer's</application> <option>-abs</option> option</para>
+<para>Workaround: <application>MPlayer</application>'s <option>-abs</option> option</para>
 </listitem>
 </itemizedlist>
 <itemizedlist>
