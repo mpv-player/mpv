@@ -6111,9 +6111,8 @@ from being written in the last stage of encoding.
 .
 .TP
 .B debug\ \ 
-Save per-frame statistics in ./xvid.dbg (this is
-.B not
-the 2pass control file).
+Save per-frame statistics in ./xvid.dbg. (This is not the 2pass control
+file.)
 .RE
 .
 .PP
@@ -6135,11 +6134,11 @@ autodetection of some decoders might be confused.
 .
 .TP
 .B divx5bvop
-generate DivX5 compatible B frames (default: on)
+Generate DivX5 compatible B frames (default: on).
 .
 .TP
 .B max_bframes=<0\-4>
-maximum number of B frames to put between I/\:P frames (default: 0)
+Maximum number of B frames to put between I/\:P frames (default: 0).
 .
 .TP
 .B bquant_ratio=<0\-1000>
@@ -6315,10 +6314,10 @@ still blocky (default: 0).
 During pass 1 of 2-pass encoding, a scaled bitrate curve is computed.
 The difference between that expected curve and the result obtained during
 encoding is called overflow.
-Obviously, the two pass Rate Controller tries to compensate for that overflow,
-distributing it over next frames to be encoded.
-This setting controls how much of the overflow is distributed at each new
-frame.
+Obviously, the two pass rate controller tries to compensate for that overflow,
+distributing it over the next frames.
+This setting controls how much of the overflow is distributed every time
+there is a new frame.
 Low values allow lazy overflow control, big rate bursts are compensated for
 more slowly (could lead to lack of precision for small clips).
 Higher values will make changes in bit redistribution more abrupt, possibly
@@ -6352,15 +6351,15 @@ Most of the time users express their target bitrate for video w/o taking
 care of the video container overhead.
 This small but (mostly) constant overhead can cause the target file size
 to be exceeded.
-We decided to allow users to set the amount of overhead per frame the
+XviD allows users to set the amount of overhead per frame the
 container generates (give only an average per frame).
 0 has a special meaning, it lets XviD use its own default values
 (default: 24 - AVI average overhead).
 .
 .TP
 .B par=<mode>
-Specifies the Pixel Aspect Ratio mode, which is not to be confused with DAR
-which is Display Aspect Ratio.
+Specifies the Pixel Aspect Ratio mode (not to be confused with DAR,
+the Display Aspect Ratio).
 PAR is the ratio of the width and height of a single pixel.
 So both are related like this: DAR = PAR * (width/height).
 .br
