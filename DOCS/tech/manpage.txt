@@ -90,6 +90,8 @@ DESCRIPTION
 GENERAL NOTES
     Some general notes about the options and a description of the config file
     format.
+KEYBOARD CONTROL
+    A description of MPlayer's input system and the default keyboard controls.
 PLAYER OPTIONS (MPLAYER ONLY)
     User interface option descriptions (MPlayer only).
 DEMUXER/STREAM OPTIONS
@@ -103,13 +105,11 @@ AUDIO OUTPUT OPTIONS (MPLAYER ONLY)
 VIDEO OUTPUT OPTIONS (MPLAYER ONLY)
     Video output layer (vo) option descriptions (MPlayer only).
 DECODING/FILTERING OPTIONS
-    Decoding and filter layer options (ad, vd, vf, pl).
+    Decoding/Filtering layer options (ad, vd, pl).
+VIDEO FILTERS
+    Video filter description (vf)
 ENCODING OPTIONS (MENCODER ONLY)
     Encoding option descriptions (ve) (MEncoder only).
-KEYBOARD CONTROL
-    A description of MPlayer's input system and the default keyboard controls.
-SLAVE MODE PROTOCOL
-    A description of the slave mode protocol (-slave).
 FILES
     A list and description of all installed/used files/directories.
 EXAMPLES

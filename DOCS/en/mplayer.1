@@ -14,7 +14,7 @@
 .\" default indentation is 7, don't change!
 .nr IN 7
 .\" define indentation for suboptions
-.nr SS 20
+.nr SS 4
 .\" add new suboption
 .de IPs
 .IP "\\$1" \n(SS
@@ -230,6 +230,132 @@ If you wish to have a config file for a file called 'movie.avi', create a file
 named 'movie.avi.conf' with the file-specific options in it and put it in
 ~/.mplayer or in the same directory as the file.
 
+
+.\" --------------------------------------------------------------------------
+.\" Keyboard control
+.\" --------------------------------------------------------------------------
+.
+.SH "KEYBOARD CONTROL"
+.I NOTE:
+.br
+MPlayer has a fully configurable, command driven, control layer
+which allow you to control MPlayer using keyboard, mouse, joystick
+or remote control (using lirc).
+.br
+The default configuration file for the input system is
+~/.mplayer/\:input.conf but it can be overriden
+using the \-input conf option.
+.br
+These keys may/\:may not work, depending on your video output driver.
+.TP
+.B general control
+.PD 0
+.RSs
+.IPs "<\- and \->"
+seek backward/\:forward 10 seconds
+.IPs "up and down"
+seek backward/\:forward  1 minute
+.IPs "pgup and pgdown"
+seek backward/\:forward 10 minutes
+.IPs "< and >"
+backward/\:forward in playlist
+.IPs "HOME and END"
+go to next/\:previous playtree entry in the parent list
+.IPs "INS and DEL"
+go to next/\:previous alternative source (asx playlist only)
+.IPs "p / SPACE"
+pause movie (any key unpauses)
+.IPs "q / ESC"
+stop playing and quit
+.IPs "+ and \-"
+adjust audio delay by +/\:\- 0.1 second
+.IPs "/ and *"
+decrease/\:increase volume
+.IPs "9 and 0"
+decrease/\:increase volume
+.IPs m\ \ \ \ 
+mute sound
+.IPs f\ \ \ \ 
+toggle fullscreen
+.IPs "w and e"
+decrease/\:increase panscan range
+.IPs o\ \ \ \ 
+toggle between OSD states: none / seek / seek+timer
+.IPs d\ \ \ \ 
+toggle frame dropping
+.IPs v\ \ \ \ 
+toggle subtitle visibility
+.IPs j\ \ \ \ 
+switch subtitle language
+.IPs a\ \ \ \ 
+toggle subtitle aligment: top/middle/bottom
+.IPs "z and x"
+adjust subtitle delay by +/\:\- 0.1 second
+.IPs "r and t"
+adjust subtitle position
+.IPs "i"
+set EDL mark
+
+.PP
+(The following keys are valid only when using a hardware accelerated video
+output (xv, (x)vidix, (x)mga, etc), or the software equalizer filter
+(-vf eq or -vf eq2).
+
+.IPs "1 and 2"
+adjust contrast
+.IPs "3 and 4"
+adjust brightness
+.IPs "5 and 6"
+adjust hue
+.IPs "7 and 8"
+adjust saturation
+.RE
+.PD 1
+.
+.TP
+.B GUI keyboard control
+.PD 0
+.RSs
+.IPs "ENTER"
+start playing
+.IPs s\ \ \ \ 
+stop playing
+.IPs l\ \ \ \ 
+load file
+.IPs c\ \ \ \ 
+skin browser
+.IPs p\ \ \ \ 
+toggle playlist
+.RE
+.PD 1
+.
+.TP
+.B TV input control
+.PD 0
+.RSs
+.IPs "h and k"
+select previous/\:next channel
+.IPs n\ \ \ \ 
+change norm
+.IPs u\ \ \ \ 
+change channel list
+.RE
+.PD 1
+.
+.TP
+.B DVDNAV input control
+.PD 0
+.RSs
+.IPs "K,J,H,L"
+browse up/\:down/\:left/\:right
+.IPs M\ \ \ \ 
+jump to main menu
+.IPs S\ \ \ \ 
+select
+.RE
+.PD 1
+
+
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
 .TP
 .B \-use-stdin
@@ -417,9 +543,6 @@ This option switches on slave mode.
 This is intended for use of MPlayer as a backend to other programs.
 Instead of intercepting keyboard events, MPlayer will read simplistic command
 lines from its stdin.
-The section
-.B SLAVE MODE PROTOCOL
-explains the syntax.
 .TP
 .B \-softsleep
 Uses high quality software timers.
@@ -2063,494 +2186,6 @@ try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others
 .PD 1
 .
 .TP
-.B \-vf <filter1[=options],filter2,...>
-Setup a chain of video filters.
-
-.I NOTE:
-.br
-The parameters are optional and if omitted, some of them are set to default
-values.
-Use '-1' to keep the default value.
-Parameters w:h means width x height in pixels, x:y means x;y position counted
-from the upper left corner of the bigger image.
-.br
-To get a full list of available filters, see \-vf help.
-.br
-Available filters are:
-.
-.RSs
-.IPs crop[=w:h:x:y]
-Crops the given part of the image and discards the rest.
-Useful to remove black bands from widescreen movies.
-.RSss
-w,h: Cropped width and height, defaults to original width and height.
-.br
-x,y: Position of the cropped picture, defaults to center.
-.REss
-.IPs cropdetect[=0\-255]
-Calculates necessary cropping parameters and prints the recommended parameters
-to stdout.
-The threshold can be optionally specified from nothing (0) to everything
-(255).
-(default: 24)
-.IPs rectangle[=w:h:x:y]
-Draws a rectangle of the requested width and height at the specified
-coordinates over the image (useful for testing crop parameters).
-.RSss
-w,h: width and height (default: -1, maximum possible width where boundaries
-are still visible.
-.br
-x,y: top left corner position (default: -1, uppermost leftmost)
-.REss
-.IPs
-The plugin responds to the input.conf directive 'change_rectangle'
-that takes two parameters.
-The first parameter can be 0 for w, 1 for h, 2 for x or 3 for y.
-The second parameter is the amount of pixels by which to change the
-designated rectangle boundary.
-.IPs expand[=w:h:x:y:o]
-Expands (not scales) movie resolution to the given value and places the
-unscaled original at coordinates x, y.
-Can be used for placing subtitles/\:OSD in the resulting black bands.
-.RSss
-w,h: expanded width,height (default: original width,height)
-.br
-x,y: position of original image on the expanded image (default: center)
-.br
-o:   OSD/subtitle rendering
-    0: disable (default)
-    1: enable
-.REss
-.IPs
-Negative values for w and h are treated as offsets to the original size, e.g.
-expand=0:-50:0:0 adds a 50 pixel border to the bottom of the picture.
-.IPs flip
-Flips the image upside down.
-See also option \-flip.
-.IPs mirror
-Mirrors the image on the Y axis.
-.IPs rotate[=<0-7>]
-Rotates and flips (optional) the image +/\:\- 90 degrees.
-For parameters between 4-7 rotation is only done if the movie's geometry is
-portrait and not landscape.
-.IPs scale[=w:h[:c[:p]]]
-Scales the image with the software scaler (slow) and performs a YUV<\->RGB
-colorspace conversion (also see \-sws option).
-.RSss
-w,h: new width/height after scaling (default: original width,height)
-    Note: If -zoom is used, and underlying filters (including libvo) are
-    incapable of scaling, then it defaults to d_width/\:d_height!
-    -1: original width/\:height
-    0:  scaled d_width/\:d_height
-    -2: Calculate w/\:h using the other dimension and the prescaled aspect ratio.
-    -3: Calculate w/\:h using the other dimension and the original aspect ratio.
-.br
-c:   chroma skipping
-    0: use all available input lines for chroma
-    1: use only every 2. input line for chroma
-    2: use only every 4. input line for chroma
-    3: use only every 8. input line for chroma
-.br
-p:  scaling parameter (depends upon the scaling method used)
-    for -sws 2 (bicubic)  it is sharpness (0 (soft) - 100 (sharp))
-    for -sws 7 (gaussian) it is sharpness (0 (soft) - 100 (sharp))
-    for -sws 9 (lanczos)  it is filter length (1 - 10)
-The value 0 is used for scaled (aspect) destination w/\:h.
-(default: original w/\:h, destination w/\:h with \-zoom) Optionally chroma
-skipping (c from 0\-3) and scaling parameters can be specified.
-(see the \-sws option for details)
-.REss
-.IPs dsize={aspect|w:h}
-Changes the intended display size/aspect at an arbitrary point in the
-filter chain.
-Aspect can be given as a fraction (4/3) or floating point number
-(1.33).
-Alternatively, you may specify the exact display width and height
-desired.
-Note that this filter does NOT do any scaling itself; it just affects
-what later scalers (software or hardware) will do when auto-scaling to
-correct aspect.
-.IPs yuy2
-Forces software YV12/\:I420 or 422P to YUY2 conversion.
-Useful for video cards/\:drivers with slow YV12 but fast YUY2 support.
-.IPs yvu9
-Forces software YVU9 to YV12 colorspace conversion.
-Deprecated in favor of the software scaler.
-.IPs rgb2bgr[=swap]
-RGB 24/\:32 <\-> BGR 24/\:32 colorspace conversion.
-.RSss
-swap: Also perform  R <\-> B swapping.
-.REss
-.IPs palette
-RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp colorspace conversion using palette.
-.IPs format[=fourcc]
-Restricts the colorspace for the next filter without doing any conversion.
-Use together with the scale filter for a real conversion.
-.RSss
-fourcc: format name like rgb15, bgr24, yv12, etc (default: yuy2)
-.REss
-.IPs pp[=filter1[:option1[:option2...]]/[-]filter2...] (see \-pphelp too)
-This option enables usage of MPlayer's internal postprocessing filter,
-and also gives an interface where you can pass options to the named filter.
-To get a list of available filters, use \-pphelp.
-.br
-Note that each sub-filter must be separated with a / sign.
-.br
-Each filter defaults to 'c' (chrominance).
-.br
-The keywords accept a '\-' prefix to disable the option.
-.br
-A ':' followed by a letter may be appended to the option to indicate its
-scope:
-.RSss
-a: Automatically switches the filter off if the CPU is too slow.
-.br
-c: Do chrominance filtering, too.
-.br
-y: Do not do chrominance filtering (only luminance filtering).
-.REss
-
-.RS
-.I EXAMPLES:
-.RE
-.RSss
-.br
-\-vf pp=hb/vb/dr/al/lb
-.br
-\-vf pp=hb/vb/dr/al
-.br
-Default filters without brightness/\:contrast correction:
-.br
-\-vf pp=de/\-al
-.br
-Enable default filters & temporal denoiser:
-.br
-\-vf pp=de/tn:1:2:3
-.br
-Deblock horizontal only luminance and switch vertical deblocking on or
-off automatically depending on available CPU time:
-.br
-\-vf pp=hb:y/vb:a \-autoq 6
-.REss
-.IPs test
-Generate various test patterns.
-.IPs lavc[=quality:fps]
-Fast software YV12 to MPEG1 conversion with libavcodec for use with DVB/\:DXR3.
-Faster and of better quality than \-vf fame.
-.RSss
-quality:
-    1 \- 31 fixed qscale
-    32 \-   fixed bitrate in kBits
-.br
-fps: force output fps (float value) (default: 0, autodetect based on height)
-.REss
-.IPs fame
-Fast software YV12 to MPEG1 conversion with libfame for use with DVB/\:DXR3.
-.IPs dvbscale[=aspect]
-Set up optimal scaling for DVB cards, scaling the X axis in hardware and
-calculating the Y axis scaling in software to keep aspect.
-.RSss
-aspect: control aspect ratio, calculate as DVB_HEIGHT*ASPECTRATIO (default:
-576*4/3=768), set it to 576*(16/9)=1024 for a 16:9 TV.
-.REss
-.IPs
-Only useful together with expand+scale:
-\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc
-.IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
-Adds noise.
-.RSss
-<0\-100>: luma noise
-.br
-<0\-100>: chroma noise
-.br
-u: uniform noise (gaussian otherwise)
-.br
-t: temporal noise (noise pattern changes between frames)
-.br
-a: averaged temporal noise (smoother, but a lot slower)
-.br
-h: high quality (slightly better looking, slightly slower)
-.br
-p: mix random noise with a (semi)regular pattern
-.REss
-.IPs "denoise3d[=luma:chroma:time]"
-This filter aims to reduce image noise producing smooth images and making still
-images really still (This should enhance compressibility.).
-It can be given from 0 to 3 parameters.   If you omit a parameter, a reasonable
-value will be inferred.
-.RSss
-luma:	spatial luma strength (default = 4)
-.br
-chroma:	spatial chroma strength (default = 3)
-.br
-time:	temporal strength (default = 6)
-.REss
-.IPs "hqdn3d[=luma:chroma:time]"
-High precision/\:quality version of the denoise3d filter.
-Parameters and usage are the same.
-.IPs eq[=bright:cont]
-Software equalizer with interactive controls just like the hardware
-equalizer, for cards/\:drivers that do not support brightness and
-contrast controls in hardware.
-Might also be useful with MEncoder, either for fixing poorly captured
-movies, or for slightly reducing contrast to mask artifacts and get by
-with lower bitrates.
-Initial values in the range -100 \- 100 may be given on the command line.
-.IPs eq2[=gamma:contrast:brightness:saturation:rg:gg:bg]
-Alternative software equalizer that uses lookup tables (very slow),
-allowing gamma correction in addition to simple brightness,
-contrast and saturation adjustment. Note that it uses the same MMX
-optimized code as \-vf eq if all gamma values are 1.0.
-The parameters are given as floating point values.
-Parameters rg, gg, bg are the independent gamma values for the Red, Green
-and Blue components.
-Defaults are 1.0, brightness=0.0.
-Value ranges are 0.1\-10 for gammas, -2\-2 for contrast (negative values result
-in a negative image), -1\-1 for brightness and 0\-3 for saturation.
-.IPs halfpack[=f]
-Convert planar YUV 4:2:0 to half-height packed 4:2:2, downsampling luma but
-keeping all chroma samples.
-Useful for output to low-resolution display devices when hardware downscaling
-is poor quality or is not available.
-Can also be used as a primitive luma-only deinterlacer with very low cpu
-usage.
-By default, halfpack averages pairs of lines when downsampling.
-The optional parameter f can be 0 to only use even lines, or 1 to only use
-odd lines.
-Any other value for f gives the default (averaging) behavior.
-.IPs ilpack
-When interlaced video is stored in YUV 4:2:0 formats, chroma
-interlacing does not line up properly due to vertical downsampling of
-the chroma channels.
-This filter packs the planar 4:2:0 data into YUY2 (4:2:2) format with
-the chroma lines in their proper locations, so that in any given
-scanline, the luma and chroma data both come from the same field.
-.IPs dint[=sense:level]
-Detects and drops first of interlaced frames in video stream.
-Values can be from 0.0 to 1.0 - first (default 0.1) is relative difference
-between neighbor pixels, second (default 0.15) is what part of image have to
-be detected as interlaced to drop the frame.
-.IPs lavcdeint
-Use libavcodec's deinterlace filter.
-.IPs "unsharp=l|cWxH:amount[:l|cWxH:amount]"
-Unsharp mask / gaussian blur.
-.RSss
-l: Apply effect on luma component.
-.br
-c: Apply effect on chroma components.
-.br
-WxH: width and height of the matrix, odd sized in both directions
-(min = 3x3, max = 13x11 or 11x13, usually something between 3x3 and 7x7)
-.br
-amount: Relative amount of sharpness/\:blur to add to the image
-(a sane range should be -1.5 \- 1.5).
-    <0: blur
-    >0: sharpen
-.REss
-.IPs swapuv
-Swap U & V plane.
-.IPs "il=[d|i][s][:[d|i][s]]"
-(de)interleaves lines.
-The goal of this filter is to add the ability to process interlaced images
-pre-field without deinterlacing them.
-You can filter your interlaced DVD and play it on a TV without breaking the
-interlacing.
-While deinterlacing (with the postprocessing filter) removes interlacing
-permanently (by smoothing, averaging, etc) deinterleaving splits the frame into
-2 fields (so called half pictures), so you can process (filter) them
-independently and then re-interleave them.
-.RSss
-d: deinterleave
-.br
-i: interleave
-.br
-s: swap fields (exchange even & odd lines)
-.REss
-.IPs "field[=n]"
-Extracts a single field from an interlaced image using stride arithmetic
-to avoid wasting CPU time. The optional argument n specifies whether
-to extract the even or the odd field (depending on whether n is even
-or odd).
-.IPs "detc[=var1=value2:var2=value2:...]"
-Attempts to reverse the "telecine" process to recover a clean,
-non-interlaced stream at film framerate. This filter is still
-experimental but seems to be usable. Please be aware that there is
-absolutely no use in this filter unless you see interlacing when
-playing the movie! The following arguments (see syntax above) may be
-used to control its behavior:
-.RSss
-dr: Set the frame dropping mode. 0 (default) means don't drop frames
-to maintain fixed output framerate. 1 means always drop a frame when
-there have been no drops or telecine merges in the past 5 frames. 2
-means always maintain exact 5:4 input to output frame ratio. (Note:
-use mode 1 with MEncoder!)
-.br
-am: Analysis mode. Available values are 0 (fixed pattern with initial
-frame number specified by fr=#) and 1 (agressive search for telecine
-pattern). Default is 1.
-.br
-fr: Set initial frame number in sequence. 0-2 are the three clean
-progressive frames; 3 and 4 are the two interlaced frames. The
-default, -1, means "not in telecine sequence". The number specified
-here is the type for the imaginary previous frame before the movie
-starts.
-.br
-tr0, tr1, tr2, tr3: Threshold values to be used in certain modes.
-.REss
-.IPs "ivtc[=1]"
-Experimental "stateless" inverse telecine filter.
-Rather than trying to lock on to a pattern like the detc filter does,
-ivtc makes its decisions independently for each frame.
-This will give much better results for material that has undergone
-heavy editing after telecine was applied, but as a result it is not as
-forgiving of noisy input, for example TV capture.
-The optional parameter (ivtc=1) corresponds to the dr=1 option for the
-detc filter, and should be used with mencoder but not with mplayer.
-As with detc, you must specify the correct output framerate (-ofps
-23.976) when using mencoder.
-.IPs "telecine[=start]"
-Apply 3:2 "telecine" process to increase framerate by 20%. This most
-likely will not work correctly with mplayer, but it can be used
-with 'mencoder -fps 29.97 -ofps 29.97 -vf telecine'. Both fps options are
-essential! (A/V sync will break if they are wrong.) The optional start
-parameter tells the filter where in the telecine pattern to start
-(0-3).
-.IPs "tfields[=mode]"
-Temporal field separation -- split fields into frames, doubling the
-output framerate. Like the telecine filter, "tfields" will only work
-properly with mencoder, and only if both -fps and -ofps are set to the
-desired (double) framerate! Available modes are:
-.RSss
-0: leave fields unchanged (this will jump/flicker)
-.br
-1: interpolate missing lines (the algorithm used might not be so good)
-.br
-2: translate fields by 1/4 pixel with linear interp (no jump)
-.br
-4: translate fields by 1/4 pixel with 4tap filter (higher quality)
-.REss
-.IPs "boxblur=radius:power[:radius:power]"
-box blur
-.RSss
-radius: size of the filter
-.br
-power: How often the filter should be applied.
-.REss
-.IPs "sab=rad:pf:colorDiff[:rad:pf:colorDiff]"
-shape adaptive blur
-.RSss
-rad: blur filter strength (~0.1\-4.0) (slower if larger)
-.br
-pf: prefilter strength (~0.1\-2.0)
-.br
-colorDiff: How different the pixels are allowed to be considered.
-(~0.1-100.0)
-.REss
-.IPs "smartblur=rad:strength:thresh[:rad:strength:thresh]"
-smart blur
-.RSss
-rad: blur filter strength (~0.1\-5.0) (slower if larger)
-.br
-strength: blur (0.0\-1.0) or sharpen (-1.0\-0.0)
-.br
-thresh: filter all (0), filter flat areas (0\-30) or filter edges (-30\-0)
-.REss
-.IPs "perspective=x0:y0:x1:y1:x2:y2:x3:y3:t"
-perspective correction
-.RSss
-x0,y0,...: coordinates of the top left, top right, bottom left, bottom right
-corners
-.br
-t: linear (0) or cubic resampling (1)
-.REss
-.IPs 2xsai
-Use the 2x scale and interpolate algorithm for scaling and smoothing images.
-.IPs 1bpp
-1bpp bitmap to YUV/BGR 8/15/16/32 conversion
-.IPs down3dright[=lines]
-Reposition and resize stereoscopic images.
-Extracts both stereo fields and places them side by side, resizing
-them to maintain the original movie aspect.
-.RSss
-lines: number of lines to select from the middle of the image (default: 12)
-.REss
-.IPs "bmovl=hidden:opaque:<fifo>"
-Read bitmaps from a FIFO and display them in a window.
-.
-.RSss
-hidden: sets the default value of the 'hidden' flag (boolean)
-.br
-opaque: flag switching between alphablended (transparent) and opaque (fast)
-mode
-.br
-fifo: path/filename for the FIFO (named pipe connecting mplayer -vf bmovl
-to the controlling application)
-.REss
-
-.RS
-FIFO commands are:
-.RE
-.RSss
-RGBA32 width height xpos ypos alpha clear
-.br
-followed by width*height*4 Bytes of raw RGBA32 data.
-
-ABGR32 width height xpos ypos alpha clear
-.br
-followed by width*height*4 Bytes of raw ABGR32 data.
-
-RGB24 width height xpos ypos alpha clear
-.br
-followed by width*height*3 Bytes of raw RGB32 data.
-
-BGR24 width height xpos ypos alpha clear
-.br
-followed by width*height*3 Bytes of raw BGR32 data.
-
-ALPHA width height xpos ypos alpha
-.br
-change alpha for area
-
-CLEAR width height xpos ypos
-.br
-clear area
-
-OPAQUE
-.br
-disable all alpha transparency.
-Send "ALPHA 0 0 0 0 0" to enable it again.
-
-HIDE
-.br
-hide bitmap
-
-SHOW
-.br
-show bitmap
-.REss
-
-.RS
-Arguments are:
-.RE
-.RSss
-width, height: size of image/area
-.br
-xpos, ypos: start blitting at X/Y position   
-.br
-alpha: set alpha difference.
-0 means same as original, 255 makes everything
-opaque, -255 makes everything transparent.
-If you set this to -255 you can then send a sequence of ALPHA-commands to set
-the area to -225, -200, -175 etc for a nice fade-in-effect! ;)
-.br
-clear: clear the framebuffer before blitting.
-1 means clear, if 0, the image will just be blitted on top of the old one, so
-you don't need to send 1,8MB of RGBA32 data everytime a small part of the
-screen is updated.
-.REss
-.RE
-.
-.TP
 .B \-vfm <driver1,driver2,...>
 Specify a priority list of video codecs to be used, according to their
 names in codecs.conf.
@@ -2577,10 +2212,6 @@ try XAnim codecs first
 .PD 1
 .
 .TP
-.B \-vop <...,filter3[=options],filter2,filter1> (OBSOLETE)
-Setup a chain of video filters, to be applied in reverse order.
-Deprecated in favor of \-vf.
-.TP
 .B \-x <x> (MPLAYER only)
 Scale image to x width (if sw/\:hw scaling available).
 Disables aspect calculations.
@@ -2598,13 +2229,13 @@ Deactivate direct rendering method 2.
 .PD 1
 .
 .TP
-.B \-xy <x>
+.B \-xy <value>
 .PD 0
 .RSs
-.IPs "x<=8"
-Scale image by factor <x>.
-.IPs "x>8\ "
-Set width to <x> and calculate height to keep correct aspect ratio.
+.IPs "value<=8"
+Scale image by factor <value>.
+.IPs "value>8\ "
+Set width to value and calculate height to keep correct aspect ratio.
 .RE
 .PD 1
 .
@@ -2621,6 +2252,600 @@ Could be used to force scaling with \-vf scale.
 .br
 \-vf scale will IGNORE options \-x / \-y / \-xy / \-fs / \-aspect without
 \-zoom.
+
+
+.SH "VIDEO FILTERS"
+Video filter are plugins that allow you to modify the video stream and its
+properties. The syntax is:
+.TP
+.B \-vf <filter1[=options],filter2,...>
+Setup a chain of video filters.
+.TP
+.B \-vop <...,filter3[=options],filter2,filter1> (OBSOLETE)
+Setup a chain of video filters, to be applied in
+.B reverse
+order.  Deprecated in favor of \-vf.
+.RE
+
+The parameters are optional and if omitted, some of them are set to default
+values.
+Use '-1' to keep the default value.
+Parameters w:h means width x height in pixels, x:y means x;y position counted
+from the upper left corner of the bigger image.
+To get a full list of available filters, see \-vf help.
+
+Available filters are:
+
+.TP
+.B crop[=w:h:x:y]
+Crops the given part of the image and discards the rest.
+Useful to remove black bands from widescreen movies.
+.PD 0
+.RSs
+.IPs w,h
+Cropped width and height, defaults to original width and height.
+.IPs x,y
+Position of the cropped picture, defaults to center.
+.RE
+.PD 1
+.TP
+.B cropdetect[=0\-255]
+Calculates necessary cropping parameters and prints the recommended parameters
+to stdout.
+The threshold can be optionally specified from nothing (0) to everything
+(255).
+(default: 24)
+.TP
+.B rectangle[=w:h:x:y]
+The plugin responds to the input.conf directive 'change_rectangle'
+that takes two parameters.
+.PD 0
+.RSs
+.IPs w,h
+width and height (default: -1, maximum possible width where boundaries
+are still visible.
+.IPs x,y
+top left corner position (default: -1, uppermost leftmost)
+.RE
+.PD 1
+.TP
+.B expand[=w:h:x:y:o]
+Expands (not scales) movie resolution to the given value and places the
+unscaled original at coordinates x, y.
+Can be used for placing subtitles/\:OSD in the resulting black bands.
+.RSs
+.IPs w,h
+expanded width,height (default: original width,height).
+Negative values for w and h are treated as offsets to the original size.
+
+.I EXAMPLE
+.PD 0
+.RSs
+.IP expand=0:-50:0:0
+adds a 50 pixel border to the bottom of the picture
+.RE
+.PD 1
+.IPs x,y
+position of original image on the expanded image (default: center)
+.IPs o
+OSD/subtitle rendering
+.RSss
+0: disable (default)
+.br
+1: enable
+.REss
+.RE
+.TP
+.B flip
+Flips the image upside down.
+See also option \-flip.
+.TP
+.B mirror
+Mirrors the image on the Y axis.
+.TP
+.B rotate[=<0-7>]
+Rotates and flips (optional) the image +/\:\- 90 degrees.
+For parameters between 4-7 rotation is only done if the movie's geometry is
+portrait and not landscape.
+.TP
+.B scale[=w:h[:c[:p]]]
+Scales the image with the software scaler (slow) and performs a YUV<\->RGB
+colorspace conversion (also see \-sws option).
+.RSs
+.IPs w,h
+new width/height after scaling (default: original width,height)
+Note: If -zoom is used, and underlying filters (including libvo) are
+incapable of scaling, then it defaults to d_width/\:d_height!
+.RSss
+ 0:   scaled d_width/\:d_height
+.br
+-1:   original width/\:height
+.br
+-2:   Calculate w/\:h using the other dimension and the prescaled aspect ratio.
+.br
+-3:   Calculate w/\:h using the other dimension and the original aspect ratio.
+.REss
+.IPs c
+chroma skipping
+.RSss
+0: use all available input lines for chroma
+.br
+1: use only every 2. input line for chroma
+.br
+2: use only every 4. input line for chroma
+.br
+3: use only every 8. input line for chroma
+.REss
+.IPs p
+scaling parameter (depends upon the scaling method used)
+.RSss
+-sws 2 (bicubic):  sharpness (0 (soft) - 100 (sharp))
+.br
+-sws 7 (gaussian): sharpness (0 (soft) - 100 (sharp))
+.br
+-sws 9 (lanczos):  filter length (1 - 10)
+.REss
+.RE
+.TP
+.B dsize={aspect|w:h}
+Changes the intended display size/aspect at an arbitrary point in the
+filter chain.
+Aspect can be given as a fraction (4/3) or floating point number
+(1.33).
+Alternatively, you may specify the exact display width and height
+desired.
+Note that this filter does NOT do any scaling itself; it just affects
+what later scalers (software or hardware) will do when auto-scaling to
+correct aspect.
+.TP
+.B yuy2
+Forces software YV12/\:I420 or 422P to YUY2 conversion.
+Useful for video cards/\:drivers with slow YV12 but fast YUY2 support.
+.TP
+.B yvu9
+Forces software YVU9 to YV12 colorspace conversion.
+Deprecated in favor of the software scaler.
+.TP
+.B rgb2bgr[=swap]
+RGB 24/\:32 <\-> BGR 24/\:32 colorspace conversion.
+.PD 0
+.RSs
+.IPs swap
+Also perform  R <\-> B swapping.
+.RE
+.PD 1
+.TP
+.B palette
+RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp colorspace conversion using palette.
+.TP
+.B format[=fourcc]
+Restricts the colorspace for the next filter without doing any conversion.
+Use together with the scale filter for a real conversion.
+.PD 0
+.RSs
+.IPs fourcc
+format name like rgb15, bgr24, yv12, etc (default: yuy2)
+.RE
+.PD 1
+.TP
+.B pp[=filter1[:option1[:option2...]]/[-]filter2...] (see \-pphelp too)
+This option enables usage of MPlayer's internal postprocessing filter,
+and also gives an interface where you can pass options to the named filter.
+To get a list of available filters, use \-pphelp.
+
+Note that each sub-filter must be separated with a / sign.
+.br
+Each filter defaults to 'c' (chrominance).
+.br
+The keywords accept a '\-' prefix to disable the option.
+.br
+A ':' followed by a letter may be appended to the option to indicate its
+scope:
+.PD 0
+.RSs
+.IPs a
+Automatically switches the filter off if the CPU is too slow.
+.IPs c
+Do chrominance filtering, too.
+.IPs y
+Do not do chrominance filtering (only luminance filtering).
+.RE
+.PD 1
+
+.RS
+.I EXAMPLES:
+.RE
+.PD 0
+.RSs
+.IPs "\-vf pp=hb/vb/dr/al/lb"
+.IPs "\-vf pp=hb/vb/dr/al/lb"
+.IPs "\-vf pp=de/\-al"
+default filters without brightness/\:contrast correction
+.IPs "\-vf pp=de/tn:1:2:3"
+enable default filters & temporal denoiser
+.IPs "\-vf pp=hb:y/vb:a \-autoq 6"
+deblock horizontal only luminance and switch vertical deblocking on or
+off automatically depending on available CPU time
+.RE
+.PD 1
+.TP
+.B test
+Generate various test patterns.
+.TP
+.B lavc[=quality:fps]
+Fast software YV12 to MPEG1 conversion with libavcodec for use with DVB/\:DXR3.
+Faster and of better quality than \-vf fame.
+.RSs
+.IPs quality
+.RSss
+1 \- 31: fixed qscale
+.br
+32 \-:   fixed bitrate in kBits
+.REss
+.IPs fps\ \ 
+force output fps (float value) (default: 0, autodetect based on height)
+.RE
+.TP
+.B fame
+Fast software YV12 to MPEG1 conversion with libfame for use with DVB/\:DXR3.
+.TP
+.B dvbscale[=aspect]
+Set up optimal scaling for DVB cards, scaling the X axis in hardware and
+calculating the Y axis scaling in software to keep aspect. It's only useful
+together with expand+scale
+(\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
+.RSs
+.IPs aspect
+control aspect ratio, calculate as DVB_HEIGHT*ASPECTRATIO (default:
+576*4/3=768), set it to 576*(16/9)=1024 for a 16:9 TV.
+.RE
+.TP
+.B "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
+Adds noise.
+.PD 0
+.RSs
+.IPs <0\-100>
+luma noise
+.IPs <0\-100>
+chroma noise
+.IPs u
+uniform noise (gaussian otherwise)
+.IPs t
+temporal noise (noise pattern changes between frames)
+.IPs a
+averaged temporal noise (smoother, but a lot slower)
+.IPs h
+high quality (slightly better looking, slightly slower)
+.IPs p
+mix random noise with a (semi)regular pattern
+.RE
+.PD 1
+.
+.TP
+.B "denoise3d[=luma:chroma:time]"
+This filter aims to reduce image noise producing smooth images and making still
+images really still (This should enhance compressibility.).
+It can be given from 0 to 3 parameters.   If you omit a parameter, a reasonable
+value will be inferred.
+.PD 0
+.RSs
+.IPs luma
+spatial luma strength (default = 4)
+.IPs chroma
+spatial chroma strength (default = 3)
+.IPs time
+temporal strength (default = 6)
+.RE
+.PD 1
+.TP
+.B "hqdn3d[=luma:chroma:time]"
+High precision/\:quality version of the denoise3d filter.
+Parameters and usage are the same.
+.TP
+.B eq[=bright:cont]
+Software equalizer with interactive controls just like the hardware
+equalizer, for cards/\:drivers that do not support brightness and
+contrast controls in hardware.
+Might also be useful with MEncoder, either for fixing poorly captured
+movies, or for slightly reducing contrast to mask artifacts and get by
+with lower bitrates.
+Initial values in the range -100 \- 100 may be given on the command line.
+.TP
+.B eq2[=gamma:contrast:brightness:saturation:rg:gg:bg]
+Alternative software equalizer that uses lookup tables (very slow),
+allowing gamma correction in addition to simple brightness,
+contrast and saturation adjustment. Note that it uses the same MMX
+optimized code as \-vf eq if all gamma values are 1.0.
+The parameters are given as floating point values.
+Parameters rg, gg, bg are the independent gamma values for the Red, Green
+and Blue components.
+Defaults are 1.0, brightness=0.0.
+Value ranges are 0.1\-10 for gammas, -2\-2 for contrast (negative values result
+in a negative image), -1\-1 for brightness and 0\-3 for saturation.
+.TP
+.B halfpack[=f]
+Convert planar YUV 4:2:0 to half-height packed 4:2:2, downsampling luma but
+keeping all chroma samples.
+Useful for output to low-resolution display devices when hardware downscaling
+is poor quality or is not available.
+Can also be used as a primitive luma-only deinterlacer with very low cpu
+usage.
+By default, halfpack averages pairs of lines when downsampling.
+The optional parameter f can be 0 to only use even lines, or 1 to only use
+odd lines.
+Any other value for f gives the default (averaging) behavior.
+.TP
+.B ilpack
+When interlaced video is stored in YUV 4:2:0 formats, chroma
+interlacing does not line up properly due to vertical downsampling of
+the chroma channels.
+This filter packs the planar 4:2:0 data into YUY2 (4:2:2) format with
+the chroma lines in their proper locations, so that in any given
+scanline, the luma and chroma data both come from the same field.
+.TP
+.B dint[=sense:level]
+Detects and drops first of interlaced frames in video stream.
+Values can be from 0.0 to 1.0 - first (default 0.1) is relative difference
+between neighbor pixels, second (default 0.15) is what part of image have to
+be detected as interlaced to drop the frame.
+.TP
+.B lavcdeint
+Use libavcodec's deinterlace filter.
+.TP
+.B "unsharp=l|cWxH:amount[:l|cWxH:amount]"
+Unsharp mask / gaussian blur.
+.RSs
+.IPs l
+Apply effect on luma component.
+.IPs c
+Apply effect on chroma components.
+.IPs WxH
+width and height of the matrix, odd sized in both directions
+(min = 3x3, max = 13x11 or 11x13, usually something between 3x3 and 7x7)
+.IPs amount
+Relative amount of sharpness/\:blur to add to the image
+(a sane range should be -1.5 \- 1.5).
+.RSss
+<0: blur
+.br
+>0: sharpen
+.REss
+.RE
+.TP
+.B swapuv
+Swap U & V plane.
+.TP
+.B "il=[d|i][s][:[d|i][s]]"
+(de)interleaves lines.
+The goal of this filter is to add the ability to process interlaced images
+pre-field without deinterlacing them.
+You can filter your interlaced DVD and play it on a TV without breaking the
+interlacing.
+While deinterlacing (with the postprocessing filter) removes interlacing
+permanently (by smoothing, averaging, etc) deinterleaving splits the frame into
+2 fields (so called half pictures), so you can process (filter) them
+independently and then re-interleave them.
+.PD 0
+.RSs
+.IPs d
+deinterleave
+.IPs i
+interleave
+.IPs s
+swap fields (exchange even & odd lines)
+.RE
+.PD 1
+.TP
+.B "field[=n]"
+Extracts a single field from an interlaced image using stride arithmetic
+to avoid wasting CPU time. The optional argument n specifies whether
+to extract the even or the odd field (depending on whether n is even
+or odd).
+.TP
+.B "detc[=var1=value2:var2=value2:...]"
+Attempts to reverse the "telecine" process to recover a clean,
+non-interlaced stream at film framerate. This filter is still
+experimental but seems to be usable. Please be aware that there is
+absolutely no use in this filter unless you see interlacing when
+playing the movie! The following arguments (see syntax above) may be
+used to control its behavior:
+.RSs
+.IPs dr
+Set the frame dropping mode. 0 (default) means don't drop frames
+to maintain fixed output framerate. 1 means always drop a frame when
+there have been no drops or telecine merges in the past 5 frames. 2
+means always maintain exact 5:4 input to output frame ratio. (Note:
+use mode 1 with MEncoder!)
+.IPs am
+Analysis mode. Available values are 0 (fixed pattern with initial
+frame number specified by fr=#) and 1 (agressive search for telecine
+pattern). Default is 1.
+.IPs fr
+Set initial frame number in sequence. 0-2 are the three clean
+progressive frames; 3 and 4 are the two interlaced frames. The
+default, -1, means "not in telecine sequence". The number specified
+here is the type for the imaginary previous frame before the movie
+starts.
+.IPs tr0, tr1, tr2, tr3
+Threshold values to be used in certain modes.
+.RE
+.TP
+.B "ivtc[=1]"
+Experimental "stateless" inverse telecine filter.
+Rather than trying to lock on to a pattern like the detc filter does,
+ivtc makes its decisions independently for each frame.
+This will give much better results for material that has undergone
+heavy editing after telecine was applied, but as a result it is not as
+forgiving of noisy input, for example TV capture.
+The optional parameter (ivtc=1) corresponds to the dr=1 option for the
+detc filter, and should be used with mencoder but not with mplayer.
+As with detc, you must specify the correct output framerate (-ofps
+23.976) when using mencoder.
+.TP
+.B "telecine[=start]"
+Apply 3:2 "telecine" process to increase framerate by 20%. This most
+likely will not work correctly with mplayer, but it can be used
+with 'mencoder -fps 29.97 -ofps 29.97 -vf telecine'. Both fps options are
+essential! (A/V sync will break if they are wrong.) The optional start
+parameter tells the filter where in the telecine pattern to start
+(0-3).
+.TP
+.B "tfields[=mode]"
+Temporal field separation -- split fields into frames, doubling the
+output framerate. Like the telecine filter, "tfields" will only work
+properly with mencoder, and only if both -fps and -ofps are set to the
+desired (double) framerate! Available modes are:
+.PD 0
+.RSs
+.IPs 0
+leave fields unchanged (this will jump/flicker)
+.IPs 1
+interpolate missing lines (the algorithm used might not be so good)
+.IPs 2
+translate fields by 1/4 pixel with linear interp (no jump)
+.IPs 4
+translate fields by 1/4 pixel with 4tap filter (higher quality)
+.RE
+.PD 1
+.TP
+.B "boxblur=radius:power[:radius:power]"
+box blur
+.PD 0
+.RSs
+.IPs radius
+size of the filter
+.IPs power
+How often the filter should be applied.
+.RE
+.PD 1
+.TP
+.B "sab=rad:pf:colorDiff[:rad:pf:colorDiff]"
+shape adaptive blur
+.PD 0
+.RSs
+.IPs rad
+blur filter strength (~0.1\-4.0) (slower if larger)
+.IPs pf
+prefilter strength (~0.1\-2.0)
+.IPs colorDiff
+How different the pixels are allowed to be considered.
+(~0.1-100.0)
+.RE
+.PD 1
+.TP
+.B "smartblur=rad:strength:thresh[:rad:strength:thresh]"
+smart blur
+.PD 0
+.RSs
+.IPs rad\ \ 
+blur filter strength (~0.1\-5.0) (slower if larger)
+.IPs strength
+blur (0.0\-1.0) or sharpen (-1.0\-0.0)
+.IPs thresh
+filter all (0), filter flat areas (0\-30) or filter edges (-30\-0)
+.RE
+.PD 1
+.TP
+.B "perspective=x0:y0:x1:y1:x2:y2:x3:y3:t"
+perspective correction
+.PD 0
+.RSs
+.IPs x0,y0,...
+coordinates of the top left, top right, bottom left, bottom right corners
+.IPs t
+linear (0) or cubic resampling (1)
+.RE
+.PD 1
+.TP
+.B 2xsai
+Use the 2x scale and interpolate algorithm for scaling and smoothing images.
+.TP
+.B 1bpp
+1bpp bitmap to YUV/BGR 8/15/16/32 conversion
+.TP
+.B down3dright[=lines]
+Reposition and resize stereoscopic images.
+Extracts both stereo fields and places them side by side, resizing
+them to maintain the original movie aspect.
+.PD 0
+.RSs
+.IPs lines
+number of lines to select from the middle of the image (default: 12)
+.RE
+.PD 1
+.TP
+.B "bmovl=hidden:opaque:<fifo>"
+Read bitmaps from a FIFO and display them in a window.
+.
+.PD 0
+.RSs
+.IPs hidden
+sets the default value of the 'hidden' flag (boolean)
+.IPs opaque
+flag switching between alphablended (transparent) and opaque (fast) mode
+.IPs fifo
+path/filename for the FIFO (named pipe connecting mplayer -vf bmovl to the
+controlling application)
+.RE
+.PD 1
+
+.RS
+FIFO commands are:
+.RE
+.PD 0
+.RSs
+.IPs RGBA32 width height xpos ypos alpha clear
+followed by width*height*4 Bytes of raw RGBA32 data.
+.IPs ABGR32 width height xpos ypos alpha clear
+followed by width*height*4 Bytes of raw ABGR32 data.
+.IPs RGB24 width height xpos ypos alpha clear
+followed by width*height*3 Bytes of raw RGB32 data.
+.IPs BGR24 width height xpos ypos alpha clear
+followed by width*height*3 Bytes of raw BGR32 data.
+.IPs ALPHA width height xpos ypos alpha
+change alpha for area
+.IPs CLEAR width height xpos ypos
+clear area
+.IPs OPAQUE
+disable all alpha transparency.
+Send "ALPHA 0 0 0 0 0" to enable it again.
+.IPs HIDE
+hide bitmap
+.IPs SHOW
+show bitmap
+.RE
+.PD 1
+
+.RS
+Arguments are:
+.RE
+.PD 0
+.RSs
+.IPs width, height
+size of image/area
+.IPs xpos, ypos
+start blitting at X/Y position   
+.IPs alpha
+set alpha difference.
+If you set this to -255 you can then send a sequence of ALPHA-commands to set
+the area to -225, -200, -175 etc for a nice fade-in-effect! ;)
+.RSss
+0:    same as original
+.br
+255:  makes everything opaque
+.br
+-255: makes everything transparent
+.REss
+.IPs clear
+clear the framebuffer before blitting.
+.RSss
+0: The image will just be blitted on top of the old one, so you don't need to
+send 1,8MB of RGBA32 data everytime a small part of the screen is updated.
+.br
+1: clear
+.REss
+.RE
+.PD 1
 
 
 .SH "ENCODING OPTIONS (MENCODER ONLY)"
@@ -3524,7 +3749,7 @@ switch to fixed quantizer mode and specify the quantizer to be used
 specify the motion detection quality (default=6)
 .IPs interlacing
 enable support for interlaced content (default=off)
-.IPs 4mv
+.IPs 4mv\ \ 
 use 4 motion vectors per macro-block, might give better compression at the
 cost of a slower encoding (default=off)
 .IPs rc_reaction_delay_factor=<value>
@@ -3578,7 +3803,7 @@ autodetection of some decoders might be confused
 generate DivX5 compatible B-frames (default=on)
 .IPs qpel
 enable quarter-pixel motion estimation (default=off)
-.IPs gmc
+.IPs gmc\ 
 enable global motion compensation, may save bits on panning scenes (default=off)
 .IPs chroma_me
 uses chroma information to estimate motion (default=off)
@@ -3613,220 +3838,6 @@ enable a higher quality ME search using DCT, faster to slower:
 print the psnr (peak signal to noise ratio) for the whole video after encoding
 and store the per frame psnr in a file with a name like 'psnr_hhmmss.log'.
 Returned values are in dB (decibel), the higher the better.
-.RE
-
-
-.\" --------------------------------------------------------------------------
-.\" Keyboard control
-.\" --------------------------------------------------------------------------
-.
-.SH "KEYBOARD CONTROL"
-.I NOTE:
-.br
-MPlayer has a fully configurable, command driven, control layer
-which allow you to control MPlayer using keyboard, mouse, joystick
-or remote control (using lirc).
-.br
-The default configuration file for the input system is
-~/.mplayer/\:input.conf but it can be overriden
-using the \-input conf option.
-.br
-These keys may/\:may not work, depending on your video output driver.
-.TP
-.B general control
-.PD 0
-.RSs
-.IPs "<\- and \->"
-seek backward/\:forward 10 seconds
-.IPs "up and down"
-seek backward/\:forward  1 minute
-.IPs "pgup and pgdown"
-seek backward/\:forward 10 minutes
-.IPs "< and >"
-backward/\:forward in playlist
-.IPs "HOME and END"
-go to next/\:previous playtree entry in the parent list
-.IPs "INS and DEL"
-go to next/\:previous alternative source (asx playlist only)
-.IPs "p / SPACE"
-pause movie (any key unpauses)
-.IPs "q / ESC"
-stop playing and quit
-.IPs "+ and \-"
-adjust audio delay by +/\:\- 0.1 second
-.IPs "/ and *"
-decrease/\:increase volume
-.IPs "9 and 0"
-decrease/\:increase volume
-.IPs m\ \ \ \ 
-mute sound
-.IPs f\ \ \ \ 
-toggle fullscreen
-.IPs "w and e"
-decrease/\:increase panscan range
-.IPs o\ \ \ \ 
-toggle between OSD states: none / seek / seek+timer
-.IPs d\ \ \ \ 
-toggle frame dropping
-.IPs v\ \ \ \ 
-toggle subtitle visibility
-.IPs j\ \ \ \ 
-switch subtitle language
-.IPs a\ \ \ \ 
-toggle subtitle aligment: top/middle/bottom
-.IPs "z and x"
-adjust subtitle delay by +/\:\- 0.1 second
-.IPs "r and t"
-adjust subtitle position
-.IPs "i"
-set EDL mark
-
-.PP
-(The following keys are valid only when using a hardware accelerated video
-output (xv, (x)vidix, (x)mga, etc), or the software equalizer filter
-(-vf eq or -vf eq2).
-
-.IPs "1 and 2"
-adjust contrast
-.IPs "3 and 4"
-adjust brightness
-.IPs "5 and 6"
-adjust hue
-.IPs "7 and 8"
-adjust saturation
-.RE
-.PD 1
-.
-.TP
-.B GUI keyboard control
-.PD 0
-.RSs
-.IPs "ENTER"
-start playing
-.IPs s\ \ \ \ 
-stop playing
-.IPs l\ \ \ \ 
-load file
-.IPs c\ \ \ \ 
-skin browser
-.IPs p\ \ \ \ 
-toggle playlist
-.RE
-.PD 1
-.
-.TP
-.B TV input control
-.PD 0
-.RSs
-.IPs "h and k"
-select previous/\:next channel
-.IPs n\ \ \ \ 
-change norm
-.IPs u\ \ \ \ 
-change channel list
-.RE
-.PD 1
-.
-.TP
-.B DVDNAV input control
-.PD 0
-.RSs
-.IPs "K,J,H,L"
-browse up/\:down/\:left/\:right
-.IPs M\ \ \ \ 
-jump to main menu
-.IPs S\ \ \ \ 
-select
-.RE
-.PD 1
-
-
-.\" --------------------------------------------------------------------------
-.\" Slave mode protocol
-.\" --------------------------------------------------------------------------
-.
-.SH "SLAVE MODE PROTOCOL"
-If the \-slave option is given, playback is controlled by a
-line\-based protocol.
-Each line must contain one of the following commands:
-.TP
-.B Commands
-.RSs
-.IPs "seek <value> [type=<0/\:1/\:2>]"
-Seek to some place in the movie.
-Type 0 is a relative seek of +/\:- <value> seconds.
-Type 1 seek to <value> % in the movie.
-Type 2 is a seek to an absolute position of <value> seconds.
-.IPs "edl_mark"
-????
-.IPs "audio_delay <value>"
-Adjust the audio delay of value seconds
-.IPs quit
-Quit MPlayer
-.IPs pause
-Pause/\:unpause the playback
-.IPs grap_frames
-Somebody know ?
-.IPs "pt_step <value> [force=<value>]"
-Go to next/\:previous entry in the playtree.
-.IPs "pt_up_step <value> [force=<value>]"
-Like pt_step but it jumps to next/\:previous in the parent list.
-.IPs "alt_src_step <value>"
-When more than one source is available it selects the next/\:previous one
-(only supported by asx playlist).
-.IPs "sub_delay <value> [abs=<value>]"
-Adjust the subtitles delay of +/\:- <value> seconds or set it to <value>
-seconds when abs is non zero.
-.IPs "osd [level=<value>]"
-Toggle OSD mode or set it to level when level >= 0.
-.IPs "volume <dir>"
-Increase/\:decrease volume
-.IPs "use_master"
-Switch volume control between master and pcm.
-.IPs "mute"
-Mute/\:unmute sound output.
-.IPs "[contrast|brightness|hue|saturation] <\-100\-100> [abs=<value>]"
-Set/\:Adjust video parameters.
-.IPs "frame_drop [type=<value>]"
-Toggle/\:Set frame dropping mode.
-.IPs "sub_alignment <value>"
-Set subtitle alignment.
-.IPs "sub_visibility"
-Toggle subtitle visibility.
-.IPs "sub_pos <value>"
-Adjust subtitles position.
-.IPs "vobsub_lang"
-Switch the subtitle language when using VOBSub subtitles.
-.IPs "get_percent_pos"
-???
-.IPs "get_time_length"
-???
-.IPs "vo_fullscreen"
-Switch to fullscreen mode.
-.IPs "panscan value [value2]"
-???
-.IPs "loadfile url"
-Load the given file/\:url.
-.IPs "loadlist file"
-Load the given playlist file.
-.IPs "change_rectangle val1 val2"
-??? used by the rectangle video filter.
-.IPs "dvdnav button"
-Press the given dvdnav button.
-.br
-1 is up, 2 is down, 3 is left, 4 is right, 5 is menu and 6 is select.
-.IPs "tv_step_channel <dir>"
-Select next/\:previous tv channel.
-.IPs "tv_step_norm"
-Change TV norm.
-.IPs "tv_step_chanlist"
-Change channel list.
-.IPs "tv_set_channel channel"
-Set the current TV channel.
-.IPs "tv_last_channel"
-Set the current TV channel to the last one.
-.IPs "gui_[loadsubtitle|about|play|stop]"
-GUI actions
 .RE
 
 

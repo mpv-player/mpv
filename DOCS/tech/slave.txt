@@ -1,0 +1,80 @@
+SLAVE MODE PROTOCOL
+-------------------
+
+If the -slave option is given, playback is controlled by a line-based protocol.
+Each line must contain one of the following commands:
+
+seek <value> [type=<0/\:1/\:2>]
+	Seek to some place in the movie.
+	Type 0 is a relative seek of +/\:- <value> seconds.
+	Type 1 seek to <value> % in the movie.
+	Type 2 is a seek to an absolute position of <value> seconds.
+edl_mark
+	????
+audio_delay <value>
+	Adjust the audio delay of value seconds
+quit
+	Quit MPlayer
+pause
+	Pause/\:unpause the playback
+grap_frames
+	Somebody know ?
+pt_step <value> [force=<value>]
+	Go to next/\:previous entry in the playtree.
+pt_up_step <value> [force=<value>]
+	Like pt_step but it jumps to next/\:previous in the parent list.
+alt_src_step <value>
+	When more than one source is available it selects the next/\:previous one
+	(only supported by asx playlist).
+sub_delay <value> [abs=<value>]
+	Adjust the subtitles delay of +/\:- <value> seconds or set it to <value>
+	seconds when abs is non zero.
+osd [level=<value>]
+	Toggle OSD mode or set it to level when level >= 0.
+volume <dir>
+	Increase/\:decrease volume
+use_master
+	Switch volume control between master and pcm.
+mute
+	Mute/\:unmute sound output.
+[contrast|brightness|hue|saturation] <-100-100> [abs=<value>]
+	Set/\:Adjust video parameters.
+frame_drop [type=<value>]
+	Toggle/\:Set frame dropping mode.
+sub_alignment <value>
+	Set subtitle alignment.
+sub_visibility
+	Toggle subtitle visibility.
+sub_pos <value>
+	Adjust subtitles position.
+vobsub_lang
+	Switch the subtitle language when using VOBSub subtitles.
+get_percent_pos
+	???
+get_time_length
+	???
+vo_fullscreen
+	Switch to fullscreen mode.
+panscan value [value2]
+	???
+loadfile url
+	Load the given file/\:url.
+loadlist file
+	Load the given playlist file.
+change_rectangle val1 val2
+	??? used by the rectangle video filter.
+dvdnav button
+	Press the given dvdnav button.
+	1 is up, 2 is down, 3 is left, 4 is right, 5 is menu and 6 is select.
+tv_step_channel <dir>
+	Select next/\:previous tv channel.
+tv_step_norm
+	Change TV norm.
+tv_step_chanlist
+	Change channel list.
+tv_set_channel channel
+	Set the current TV channel.
+tv_last_channel
+	Set the current TV channel to the last one.
+gui_[loadsubtitle|about|play|stop]
+	GUI actions
