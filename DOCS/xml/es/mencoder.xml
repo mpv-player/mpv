@@ -642,7 +642,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Hay dos maneras de evitar esto. Puede intentar codificar de nuevo
-  usando <option>vqscale=4</optoin> y ver si tiene el tamaño de
+  usando <option>vqscale=4</option> y ver si tiene el tamaño de
   archivo y la calidad de imagen aceptables. También peude usar
   <link linkend="menc-feat-divx4">codificación en 2 pasadas</link>.
   Como va a copiar la pista de audio como está y conoce por eso

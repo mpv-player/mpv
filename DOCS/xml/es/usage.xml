@@ -479,7 +479,7 @@ mplayer -cache 5000 <replaceable>mpst://nombre-servidor/vcd://2</replaceable>
 </screen>
 También puede acceder a los archivos en este servidor :
 <screen>
-mplayer -cache 5000 <replaceable>mpst://nombre-servidor//usr/local/peliculas/lol.avi<replaceable>
+  mplayer -cache 5000 <replaceable>mpst://nombre-servidor//usr/local/peliculas/lol.avi</replaceable>
 </screen>
 Note que las rutas que no empiezan con un / deben ser relativas
 al directorio donde el servidor está corriendo. La opción <option>-cache</option> 
