@@ -857,6 +857,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
 	if (pre_init_err) return 1;
 
+#if 0
 	if (zoom
 #ifdef CONFIG_VIDIX
 	 && !vidix_name
@@ -865,6 +866,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		printf(FBDEV "-zoom is not supported\n");
 		return 1;
 	}
+#endif
 	if (fb_mode_name && !vm) {
 		printf(FBDEV "-fbmode can only be used with -vm\n");
 		return 1;
