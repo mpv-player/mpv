@@ -93,8 +93,14 @@ struct config conf[]={
 	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0},
 	{"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nobps", &pts_from_bps, CONF_TYPE_FLAG, 0, 1, 0},
+
 //	{"alsa", &alsa, CONF_TYPE_FLAG, 0, 0, 1},
 //	{"noalsa", &alsa, CONF_TYPE_FLAG, 0, 1, 0},
+	{"alsa", "Option -alsa has been removed, new audio code doesn't need it!\n",
+            CONF_TYPE_PRINT, 0, 0, 0},
+	{"noalsa", "Option -noalsa has been removed, new audio code doesn't need it!\n",
+            CONF_TYPE_PRINT, 0, 0, 0},
+
 	{"ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1},
 	{"noni", &force_ni, CONF_TYPE_FLAG, 0, 1, 0},
 
@@ -115,6 +121,7 @@ struct config conf[]={
 	{"dumpfile", &stream_dump_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1},
 	{"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2},
+	{"dumpsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 3},
 	
 	{"aofile", &ao_outputfilename, CONF_TYPE_STRING, 0, 0, 0},
 	{"waveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 0, 1},
