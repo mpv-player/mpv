@@ -6,22 +6,28 @@
  * Use MPlayer as a framebuffer to read bitmaps and commands from a FIFO
  * and display them in the window.
  *
- * FIXME: INSTRUCTION IS OUT OF DATE!!!
- *
- * It understands the following format:
- * COMMAND width height xpos ypos alpha clear
- *
  * Commands are:
- * RGBA32    Followed by WIDTH*HEIGHT of raw RGBA32 data.
- * BGRA32    Followed by WIDTH*HEIGHT of raw BGRA32 data.
- * RGB24     Followed by WIDTH*HEIGHT of raw RGB24 data.
- * ALPHA     Set alpha for area. Values can be -255 to 255.
- *           0 = No change
- * CLEAR     Zero area
- * OPAQUE    Disable all alpha transparency!
- *           Send an ALPHA command with 0's to enable again!
- * HIDE      Hide bitmap
- * SHOW      Show bitmap
+ *
+ * RGBA32 width height xpos ypos alpha clear
+ *   * Followed by width*height*4 bytes of raw RGBA32 data.
+ * ABGR32 width height xpos ypos alpha clear
+ *   * Followed by width*height*4 bytes of raw ABGR32 data.
+ * RGB24 width height xpos ypos alpha clear
+ *   * Followed by width*height*3 bytes of raw RGB32 data.
+ * BGR24 width height xpos ypos alpha clear
+ *   * Followed by width*height*3 bytes of raw BGR32 data.
+ *
+ * ALPHA width height xpos ypos alpha
+ *   * Change alpha for area
+ * CLEAR width height xpos ypos
+ *   * Clear area
+ * OPAQUE
+ *   * Disable all alpha transparency!
+ *      Send "ALPHA 0 0 0 0 0" to enable again!
+ * HIDE
+ *   * Hide bitmap
+ * SHOW
+ *   * Show bitmap
  *
  * Arguments are:
  * width, height    Size of image/area
@@ -36,9 +42,6 @@
  *                  If 0, the image will just be blitted on top of the old
  *                  one, so you don't need to send 1,8MB of RGBA32 data
  *                  everytime a small part of the screen is updated.
- *
- * Note that you always have to send all arguments, even if they are not
- * used for a particular command!
  *
  * Arguments for the filter are hidden:opaque:fifo
  * For example 1:0:/tmp/myfifo.fifo will start the filter hidden, transparent
