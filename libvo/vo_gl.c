@@ -213,6 +213,7 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
 
   glClearColor( 0.0f,0.0f,0.0f,0.0f );
   glClear( GL_COLOR_BUFFER_BIT );
+  return 1;
 }
 
 /* connect to server, create and map window,
