@@ -534,10 +534,11 @@ int demux_ogg_open(demuxer_t* demuxer) {
 //	  if(sh_a->wf) print_wave_header(sh_a->wf);
 	}
 	/// Is it the stream we want
-	if(demuxer->audio->id == ogg_d->num_sub)
+	if(demuxer->audio->id == ogg_d->num_sub) {
 	  demuxer->audio->sh = sh_a;
 	  sh_a->ds = demuxer->audio;
 	  ds = demuxer->audio;
+	}
       }
       if(sh_v) {
 	/// Also for video
@@ -545,10 +546,11 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	  demuxer->video->id = ogg_d->num_sub;
 //	  if(sh_v->bih) print_video_header(sh_v->bih);
 	}
-	if(demuxer->video->id == ogg_d->num_sub)
+	if(demuxer->video->id == ogg_d->num_sub) {
 	  demuxer->video->sh = sh_v;
 	  sh_v->ds = demuxer->video;
 	  ds = demuxer->video;
+	}
       }
       /// Add the header packets if the stream isn't seekable
       if(ds && (!s->end_pos || index_mode != 2)) {
