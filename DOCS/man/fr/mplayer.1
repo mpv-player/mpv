@@ -1,4 +1,4 @@
-.\" synced with 1.754
+.\" synced with 1.756
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "28 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "29 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -2076,22 +2076,22 @@ valeur minimum pour la couleur de transparence respective (r, v, b).
 .IPs ck-[r|v|b]max=<0\-255>
 valeur minimum pour la couleur de transparence respective (r, v, b).
 .IPs ignore-cache
-Ignore les paramètres de superposition d'affichage.
+Ignore les paramètres d'incrustation.
 .IPs update-cache
-Met à jour les paramètres de superposition.
+Met à jour les paramètres d'incrustation.
 .IPs ol-osd
-Active l'OnScreen Display (OSD) par dessus la vidéo.
+Active l'OnScreen Display (OSD) en incrustation dans la vidéo.
 .IPs nool-osd
-désactive l'OnScreen Display (par défaut)
+Désactive l'incrustation de l'OSD (par défaut)
 .IPs ol[h|l|x|y]-cor=<-20\-20>
 Ajuste la taille (h,l) et la position (x,y) de l'affichage superposé. au
 cas où il ne correspond pas parfaitement à la fenêtre (par défaut\ : 0).
 .IPs overlay
-Active l'affichage superposé (overlay) (par défaut).
+Active l'incrustation (overlay) (par défaut).
 .IPs nooverlay
 Active la sortie TV.
 .IPs overlay-ratio=<1\-2500>
-Règle l'affichage superposé (overlay) (par défaut\ : 1000).
+Règle l'incrustation (par défaut\ : 1000).
 .RE
 .
 .TP
@@ -2450,13 +2450,12 @@ fonctionne dès que X11 est présent.
 .TP
 .B xover (X11 uniquement)
 Ajoute la gestion de X11 à tous les pilotes de sortie vidéo basés sur
-l'overlay.
+l'incrustation (overlay).
 Géré actuellement uniquement par tdfx_vid.
 .PD 0
 .RSs
 .IPs <pilote_vo>
-Sélectionnne le pilote à utiliser comme source pour l'overlay au-dessus
-de X11.
+Sélectionnne le pilote à utiliser comme source pour l'incrustation dans X11.
 .RE
 .PD 1
 .
@@ -2837,7 +2836,7 @@ Pilote de sortie vidéo spécifique aux cartes Creative DXR2.
 .PD 0
 .RSs
 .IPs <pilote_vo>
-Définit le sous-pilote à utiliser pour l'overlay (x11, xv)
+Définit le sous-pilote à utiliser pour l'incrustation (x11, xv).
 .RE
 .PD 1
 .
@@ -2849,7 +2848,7 @@ Voir aussi le filtre vidéo lavc.
 .PD 0
 .RSs
 .IPs overlay
-Active l'overlay au lieu de TVOut.
+Active l'incrustation au lieu de TVOut.
 .IPs prebuf
 Active le pré-buffering.
 .IPs sync\ 
@@ -2910,18 +2909,6 @@ Active la norme vidéo SECAM.
 Active la norme vidéo NTSC.
 .IPs prebuf
 Active le pré-tamponnage (prebuffering), non géré pour le moment.
-.RE
-.PD 1
-.
-.TP
-.B md5\ \ \ \ 
-Ecrit dans un fichier la somme de contrôle md5 (md5sums) de chaque trame en
-activant l'option \-vo pgm.
-Utile pour débogage.
-.PD 0
-.RSs
-.IPs nom_fichier
-Nomme explicitement le fichier de sortie (par défaut: ./md5).
 .RE
 .PD 1
 .
@@ -3047,18 +3034,6 @@ Nombre maximum de fichiers à écrire par sous-répertoire.
 Doit être plus grand ou égal à 1 (par défaut\ : 1000).
 .RE
 .PD 1
-.
-.TP
-.B pgm\ \ \ \ 
-sépare chaque trame dans un fichier PGM du répertoire courant.
-Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
-des zéros.
-Ne gère que le format YV12.
-Les images écrites sont (largeur) * (hauteur * 1.5) de l'image originale
-car les plans Y, U, V sont juxtaposés.
-Aux coordonnées (0,0) jusqu'à (largeur,hauteur) est le plan Y,
-aux coordonnées (0,hauteur) jusqu'à (largeur/2,hauteur/2) est le plan U et
-à (largeur/2,hauteur) jusqu'à (largeur/2,hauteur/2) est le plan V.
 .
 .TP
 .B png (voir aussi \-z)
@@ -3372,8 +3347,9 @@ Cela dit, vous pouriez y perdre en terme de précision.
 .IPs lowres=<valeur>
 Décodage en résolution réduite.
 Le décodage en résoltion basse n'est pas géré par tous les codecs, et risque
-de produire des artefacts disgracieux, ce n'est pas un bogue, mais un effet
-de bord du décodage en résolution réduite.
+de produire des artefacts disgracieux.
+Ceci n'est pas un bogue, mais un effet de bord du décodage en résolution
+réduite.
 .RSss
 .br
 0: désactivé
@@ -4728,9 +4704,9 @@ nombre de lignes à sélectionner à partir du milieu de l'image (par défault: 12)
 .
 .TP
 .B "bmovl=hidden:opaque:fifo"
-Lit les bitmaps depuis une FIFO et les affiche par dessus la vidéo,
-avec éventullement quelques transformation de l'image.
-Soir aussi TOOLS/bmovl-test.c pour un programme de test simple de bmovl.
+Le filtre de superposition d'images lit depuis une FIFO des images (bitmaps)
+et les incruste dans la vidéo, après les avoir préalablement transformées.
+Voir aussi TOOLS/bmovl-test.c pour un programme de test simple de bmovl.
 .PD 0
 .RSs
 .IPs <hidden>
