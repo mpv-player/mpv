@@ -45,32 +45,24 @@ http_free( HTTP_header_t *http_hdr ) {
 
 int
 http_response_append( HTTP_header_t *http_hdr, char *response, int length ) {
-	char *ptr = NULL;
+	char *ptr;
 	if( http_hdr==NULL || response==NULL || length<0 ) return -1;
-	ptr = (char*)malloc( http_hdr->buffer_size+length );
+	http_hdr->buffer = (char*)realloc( http_hdr->buffer, http_hdr->buffer_size+length+1 );
 	if( ptr==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory (re)allocation failed\n");
 		return -1;
 	}
-	if( http_hdr->buffer_size==0 ) {
-		// Buffer empty, copy response into it.
-		memcpy( ptr, response, length );
-		http_hdr->buffer_size = length;
-	} else {
-		// Buffer not empty, grow buffer, copy and append the response.
-		memcpy( ptr, http_hdr->buffer, http_hdr->buffer_size );
-		free( http_hdr->buffer );
-		memcpy( ptr+http_hdr->buffer_size, response, length );
-		http_hdr->buffer_size += length;
-	}
-	http_hdr->buffer = ptr;
+	memcpy( http_hdr->buffer+http_hdr->buffer_size, response, length );
+	http_hdr->buffer_size += length;
+	http_hdr->buffer[http_hdr->buffer_size]=0; // close the string!
 	return http_hdr->buffer_size;
 }
 
 int
 http_is_header_entire( HTTP_header_t *http_hdr ) {
 	if( http_hdr==NULL ) return -1;
-
+	if( http_hdr->buffer==NULL ) return 0; // empty
+	
 	if( strstr(http_hdr->buffer, "\r\n\r\n")==NULL &&
 	    strstr(http_hdr->buffer, "\n\n")==NULL ) return 0;
 	return 1;
