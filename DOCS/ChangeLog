@@ -21,6 +21,7 @@ v0.11-CVS:  yeah, we moved to SourceForge CVS!
   - added DGA driver by Andreas Ackermann
   - added debian/ subdir for the debian package makers... see DOCS/DEBIAN
   - new Makefile/dependency system
+  - added check_events() to libvo, x11 stuff moved to x11_common.c
 
 v0.11-pre24:  small fixes again :(
   - DOCS/LIRC changed: users *must* enable lirc support manually, it is
