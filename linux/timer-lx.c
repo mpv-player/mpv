@@ -1,6 +1,7 @@
 // Precise timer routines for LINUX  (C) LGB & A'rpi/ASTRAL
 
 #include <unistd.h>
+#include <time.h>
 #include <sys/time.h>
 
 int usec_sleep(int usec_delay)

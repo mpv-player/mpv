@@ -21,7 +21,13 @@
 #include "../../config.h"
 
 #include <X11/extensions/XShm.h>
+#ifdef HAVE_XSHAPE
 #include <X11/extensions/shape.h>
+#endif
+#ifdef HAVE_DGA2
+#include <X11/extensions/xf86dga.h>
+#endif
+
 #include <sys/ipc.h>
 #include <sys/shm.h>
 

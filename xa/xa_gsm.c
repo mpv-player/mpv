@@ -28,6 +28,7 @@ improvements that may be of general interest.
 
 
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>  /* POD optional */
 #include "xa_gsm_int.h"
 

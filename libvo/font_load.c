@@ -9,7 +9,7 @@
 #include "config.h"
 #include "font_load.h"
 
-char *get_path ( char * );
+extern char *get_path ( char * );
 
 raw_file* load_raw(char *name,int verbose){
     int bpp;
