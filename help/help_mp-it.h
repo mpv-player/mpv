@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.105
+// Updated to help_mp-en.h v1.107
 
 // ========================= MPlayer help ===========================
 
@@ -78,6 +78,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec audio %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Impossibile trovare i codec audio per la famiglia dei driver richiesta, torno agli altri driver.\n"
 #define MSGTR_CantFindAudioCodec "Impossibile trovare il codec per il formato audio 0x%X !\n"
+#define MSGTR_RTFMCodecs "Leggi DOCS/it/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Impossibile inizializzare il codec audio! -> nessun suono\n"
 #define MSGTR_TryForceVideoFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec video %d ...\n"
 #define MSGTR_CantFindVideoCodec "Impossibile trovare il codec per il formato video 0x%X !\n"
@@ -278,7 +279,7 @@ static char help_text[]=
 #define MSGTR_EncryptedVOB "File VOB criptato (non compilato con il supporto delle libcss)! Leggi il file DOCS/it/cd-dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Flusso criptato di cui non è stata chiesta l\'autenticazione!\n"
 
-#define MSGTR_MOVcomprhdr "MOV: Intestazioni compresse non (ancora) supportate!\n"
+#define MSGTR_MOVcomprhdr "MOV: Il supporto delle intestazioni compresse richiede ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Avvertimento! Rilevato FOURCC variabile!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Avvertimento! troppe tracce!"
 #define MSGTR_FoundAudioStream "==> Trovato flusso audio: %d\n"
