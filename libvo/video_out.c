@@ -104,6 +104,9 @@ extern vo_functions_t video_out_xvidix;
 #ifdef HAVE_TDFX_VID
 extern vo_functions_t video_out_tdfx_vid;
 #endif
+#ifdef HAVE_TGA
+extern vo_functions_t video_out_tga;
+#endif
 
 vo_functions_t* video_out_drivers[] =
 {
@@ -200,6 +203,9 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #if defined(CONFIG_VIDIX) && defined(HAVE_X11) 
 	&video_out_xvidix,
+#endif
+#ifdef HAVE_TGA
+        &video_out_tga,
 #endif
         NULL
 };

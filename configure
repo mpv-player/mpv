@@ -227,7 +227,8 @@ Video output:
   --enable-zr            build with ZR360[56]7/ZR36060 support [autodetect]
   --enable-bl		 build with Blinkenlights support [disable]
   --enable-tdfxvid       build with tdfx vid support [disable]
-
+  --disable_tga          disable targa output support [enable]
+  
 Audio output:
   --disable-ossaudio     disable OSS sound support [autodetect]
   --disable-arts         disable aRts sound support [autodetect]
@@ -1120,6 +1121,7 @@ _termios=auto
 _3dfx=no
 _tdfxfb=no
 _tdfxvid=no
+_tga=yes
 _directfb=auto
 _zr=auto
 _bl=no
@@ -1318,6 +1320,8 @@ for ac_option do
   --enable-tdfxfb)	_tdfxfb=yes	;;
   --disable-tdfxvid)	_tdfxvid=no	;;
   --enable-tdfxvid)	_tdfxvid=yes	;;
+  --disable-tga)	_tga=no	  	;;
+  --enable-tga)		_tga=yes	;;
   --disable-tdfxfb)	_tdfxfb=no	;;
   --enable-directfb)	_directfb=yes	;;
   --disable-directfb)	_directfb=no	;;
@@ -2590,6 +2594,17 @@ else
   _novomodules="tdfx_vid $_novomodules"
 fi
 echores "$_tdfxfb"
+
+echocheck "tga"
+if test "$_tga" = yes ; then
+  _def_tga='#define HAVE_TGA 1'
+  _vosrc="$_vosrc vo_tga.c"
+  _vomodules="tga $_vomodules"
+else
+  _def_tga='#undef HAVE_TGA'
+  _novomodules="tga $_novomodules"
+fi
+echores "$_tga"
 
 echocheck "DirectFB headers presence"
 if test -z "$_inc_directfb" ; then
@@ -6065,6 +6080,7 @@ $_def_svga
 $_def_vesa
 $_def_xdpms
 $_def_aa
+$_def_tga
 
 /* used by GUI: */
 $_def_xshape
