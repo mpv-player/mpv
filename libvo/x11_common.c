@@ -608,18 +608,14 @@ extern int          vo_screenheight;
 static MotifWmHints   vo_MotifWmHints;
 static Atom           vo_MotifHints  = None;
 
-// Note: always d==0 !
 void vo_x11_decoration( Display * vo_Display,Window w,int d )
 {
-
+	static unsigned int olddecor = MWM_DECOR_ALL;
+	static unsigned int oldfuncs = MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE;
+	Atom mtype;
+	int  mformat;
+	unsigned long mn,mb;
   if ( !WinID ) return;
-
-  if(vo_fsmode&1){
-    XSetWindowAttributes attr;
-    attr.override_redirect = (!d) ? True : False;
-    XChangeWindowAttributes(vo_Display, w, CWOverrideRedirect, &attr);
-//    XMapWindow(vo_Display, w);
-  }
 
   if(vo_fsmode&8){
     XSetTransientForHint (vo_Display, w, RootWindow(vo_Display,mScreen));
@@ -628,12 +624,26 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
  vo_MotifHints=XInternAtom( vo_Display,"_MOTIF_WM_HINTS",0 );
  if ( vo_MotifHints != None )
   {
+	  if (!d) {
+		  MotifWmHints *mhints=NULL;
+		  XGetWindowProperty(vo_Display,w, vo_MotifHints, 0, 20, False,
+				  vo_MotifHints, &mtype, &mformat, &mn,
+				  &mb, (unsigned char **)&mhints) ;
+		  if (mhints){
+			  if (mhints->flags & MWM_HINTS_DECORATIONS)
+				  olddecor = mhints->decorations;
+			  if (mhints->flags & MWM_HINTS_FUNCTIONS)
+				  oldfuncs = mhints->functions;
+			  XFree (mhints);
+		  }
+	  }
+
    memset( &vo_MotifWmHints,0,sizeof( MotifWmHints ) );
    vo_MotifWmHints.flags=MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS;
    if ( d )
     {
-     vo_MotifWmHints.functions=MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE;
-     d=MWM_DECOR_ALL;
+     vo_MotifWmHints.functions= oldfuncs;
+     d=olddecor;
     }
 #if 0
    vo_MotifWmHints.decorations=d|((vo_fsmode&2)?0:MWM_DECOR_MENU);
