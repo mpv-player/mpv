@@ -565,10 +565,18 @@ static void set_fullmode (int mode) {
 	/* calculate new video size/aspect */
 	if(!priv->mode) {
 	if(priv->fulltype&FS) {
+#ifdef HAVE_X11		
 		aspect(&newwidth, &newheight, priv->XWidth ? priv->XWidth : priv->dstwidth, priv->XHeight ? priv->XHeight : priv->dstheight);
+#else		
+		aspect(&newwidth, &newheight, priv->dstwidth, priv->dstheight);
+#endif		
 	} else
 	if(priv->fulltype&VM) {	
+#ifdef HAVE_X11		
 		aspect(&newwidth, &newheight, priv->dstwidth, (int)((float)priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth)));
+#else		
+		aspect(&newwidth, &newheight, priv->dstwidth, priv->dstheight);
+#endif		
 	} else {
 		aspect(&newwidth, &newheight, priv->fullmodes[mode]->w, priv->fullmodes[mode]->h);
 	}
@@ -1085,7 +1093,11 @@ static void check_events (void)
 
 				else if ( keypressed == SDLK_n ) {
 					int newwidth = priv->dstwidth, newheight = priv->dstheight;
+#ifdef HAVE_X11					
 					aspect(&newwidth, &newheight, priv->dstwidth, (int)((float)priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth)));
+#else
+					aspect(&newwidth, &newheight, priv->dstwidth, priv->dstheight);
+#endif					
 					if (priv->surface->w != newwidth || priv->surface->h != newheight) {
 						priv->surface = SDL_SetVideoMode(newwidth, newheight, priv->bpp, priv->sdlflags);
 					    	priv->windowsize.w = priv->surface->w;
