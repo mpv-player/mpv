@@ -12,12 +12,15 @@
 
 #include "../libvo/fastmemcpy.h"
 #include "../postproc/rgb2rgb.h"
+#include "vf_scale.h"
 
 //===========================================================================//
 
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
+
+    sws_rgb2rgb_init(get_sws_cpuflags());
     
     if(vf_next_query_format(vf,IMGFMT_YUY2)<=0){
 	printf("yuy2 not supported by next filter/vo :(\n");
