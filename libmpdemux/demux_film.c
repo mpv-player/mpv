@@ -81,6 +81,11 @@ demuxer_t* demux_open_film(demuxer_t* demuxer){
   unsigned int chunk_type;
   unsigned int chunk_size;
   int i;
+  int frame_number;
+
+  int audio_channels;
+  int audio_bits;
+  int audio_frequency;
 
   // go back to the beginning
   stream_reset(demuxer->stream);
@@ -132,8 +137,21 @@ printf ("parsing FDSC chunk\n");
       sh_video->format = stream_read_fourcc(demuxer->stream);
       sh_video->disp_h = stream_read_dword(demuxer->stream);
       sh_video->disp_w = stream_read_dword(demuxer->stream);
-// temporary; one of these fields has to specify FPS
-stream_skip(demuxer->stream, 12);
+      sh_video->fps = stream_read_char(demuxer->stream);
+      sh_video->frametime = 1/sh_video->fps;
+printf ("  FILM video: %d x %d, %f fps\n", sh_video->disp_w,
+  sh_video->disp_h, sh_video->fps);
+
+      // temporary: These will eventually go directly into an audio structure
+      //  of some sort
+      audio_channels = stream_read_char(demuxer->stream);
+      audio_bits = stream_read_char(demuxer->stream);
+      stream_skip(demuxer->stream, 1);  // skip unknown byte
+      audio_frequency = stream_read_word(demuxer->stream);
+printf ("  FILM audio: %d channels, %d bits, %d Hz\n",
+  audio_channels, audio_bits, audio_frequency);
+
+      stream_skip(demuxer->stream, 6);
       break;
 
     case CHUNK_STAB:
@@ -143,8 +161,7 @@ printf ("parsing STAB chunk\n");
 
       // fetch the number of frames
       frames->num_frames = stream_read_dword(demuxer->stream);
-      frames->current_frame = 1;
-//      frames->current_frame = 0;
+      frames->current_frame = 0;
 
       // allocate enough entries for the indices
       frames->filepos = (off_t *)malloc(frames->num_frames * sizeof(off_t));
@@ -153,13 +170,19 @@ printf ("parsing STAB chunk\n");
       frames->flags2 = (int *)malloc(frames->num_frames * sizeof(int));
 
       // build the frame index
+      frame_number = 0;
       for (i = 0; i < frames->num_frames; i++)
       {
-        frames->filepos[i] = demuxer->movi_start + stream_read_dword(demuxer->stream);
-        frames->frame_size[i] = stream_read_dword(demuxer->stream);
-        frames->flags1[i] = stream_read_dword(demuxer->stream);
-        frames->flags2[i] = stream_read_dword(demuxer->stream);
+        if (frames->flags1[i] == 0)
+        {
+          frames->filepos[frame_number] = demuxer->movi_start + stream_read_dword(demuxer->stream);
+          frames->frame_size[frame_number] = stream_read_dword(demuxer->stream) - 8;
+          frames->flags1[frame_number] = stream_read_dword(demuxer->stream);
+          frames->flags2[frame_number] = stream_read_dword(demuxer->stream);
+          frame_number++;
+        }
       }
+      frames->num_frames = frame_number;
       break;
 
     default:
