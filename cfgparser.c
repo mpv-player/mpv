@@ -17,11 +17,11 @@
 #include <errno.h>
 #include <math.h>
 
+#include "config.h"
+
 #ifdef USE_SETLOCALE
 #include <locale.h>
 #endif
-
-#include "config.h"
 
 #include "mp_msg.h"
 
