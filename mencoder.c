@@ -73,8 +73,24 @@ float force_ofps=0; // set to 24 for inverse telecine
 
 int force_srate=0;
 
+char* out_filename="test.avi";
+char* mp3_filename=NULL;
+char* ac3_filename=NULL;
+
+char *out_audio_codec=NULL; // override audio codec
+char *out_video_codec=NULL; // override video codec
+
 //#include "libmpeg2/mpeg2.h"
 //#include "libmpeg2/mpeg2_internal.h"
+
+ENC_PARAM divx4_param;
+
+int lame_param_quality=0; // best
+int lame_param_vbr=vbr_default;
+int lame_param_mode=-1; // unset
+int lame_param_padding=-1; // unset
+int lame_param_br=-1; // unset
+int lame_param_ratio=-1; // unset
 
 //-------------------------- config stuff:
 
@@ -185,7 +201,6 @@ aviwrite_stream_t* mux_a=NULL;
 aviwrite_stream_t* mux_v=NULL;
 FILE* muxer_f=NULL;
 
-ENC_PARAM enc_param;
 ENC_FRAME enc_frame;
 ENC_RESULT enc_result;
 void* enc_handle=NULL;
@@ -302,13 +317,10 @@ if(out_fmt==IMGFMT_YV12 || out_fmt==IMGFMT_I420 || out_fmt==IMGFMT_IYUV){
     vo_image_ptr=vo_image;
 }
 
-divx_quality=4;
-
 if(!init_video(sh_video)){
      mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
      exit(1);
 }
-
 
 
 if(sh_audio){
@@ -354,7 +366,7 @@ video_out.draw_slice=draw_slice;
 video_out.draw_frame=draw_frame;
 
 // set up output file:
-muxer_f=fopen("test.avi","wb");
+muxer_f=fopen(out_filename,"wb");
 muxer=aviwrite_new_muxer();
 
 // ============= VIDEO ===============
@@ -446,23 +458,15 @@ case 0:
     break;
 case VCODEC_DIVX4:
     // init divx4linux:
-    enc_param.x_dim=sh_video->disp_w;
-    enc_param.y_dim=sh_video->disp_h;
-    enc_param.framerate=(float)mux_v->h.dwRate/mux_v->h.dwScale;
-    enc_param.bitrate=800000;
-    enc_param.rc_period=0;
-    enc_param.rc_reaction_period=0;
-    enc_param.rc_reaction_ratio=0;
-    enc_param.max_quantizer=0;
-    enc_param.min_quantizer=0;
-    enc_param.max_key_interval=0;
-    enc_param.use_bidirect=0;
-    enc_param.deinterlace=0;
-    enc_param.quality=5; // the quality of compression ( 1 - fastest, 5 - best )
-    enc_param.obmc=0;
-    enc_param.handle=NULL;
-    encore(NULL,ENC_OPT_INIT,&enc_param,NULL);
-    enc_handle=enc_param.handle;
+    divx4_param.x_dim=sh_video->disp_w;
+    divx4_param.y_dim=sh_video->disp_h;
+    divx4_param.framerate=(float)mux_v->h.dwRate/mux_v->h.dwScale;
+    if(!divx4_param.bitrate) divx4_param.bitrate=800000;
+    else if(divx4_param.bitrate<=16000) divx4_param.bitrate*=1000;
+    if(!divx4_param.quality) divx4_param.quality=5; // the quality of compression ( 1 - fastest, 5 - best )
+    divx4_param.handle=NULL;
+    encore(NULL,ENC_OPT_INIT,&divx4_param,NULL);
+    enc_handle=divx4_param.handle;
     break;
 }
 
@@ -472,25 +476,24 @@ switch(mux_a->codec){
 case ACODEC_VBRMP3:
 
 lame=lame_init();
-
 lame_set_bWriteVbrTag(lame,0);
 lame_set_in_samplerate(lame,sh_audio->samplerate);
 lame_set_num_channels(lame,mux_a->wf->nChannels);
 lame_set_out_samplerate(lame,mux_a->h.dwRate);
-lame_set_quality(lame,0); // best q
-//lame_set_mode(lame,JOINT_STEREO); // j-st
-//lame_set_brate(lame,64);
-//lame_set_compression_ratio(lame,20);
-lame_set_VBR(lame,vbr_default); // ???
-//lame_set_VBR(lame,vbr_abr); // ???
-lame_set_VBR_q(lame,6); // 1 = best vbr q  6=~128k
-//lame_set_VBR_mean_bitrate_kbps(lame,128);
-
+if(lame_param_vbr){  // VBR:
+    lame_set_VBR(lame,lame_param_vbr); // vbr mode
+    lame_set_VBR_q(lame,lame_param_quality+1); // 1 = best vbr q  6=~128k
+    if(lame_param_br>0) lame_set_VBR_mean_bitrate_kbps(lame,lame_param_br);
+} else {    // CBR:
+    lame_set_quality(lame,lame_param_quality); // 0 = best q
+    if(lame_param_br>0) lame_set_brate(lame,lame_param_br);
+}
+if(lame_param_mode>=0) lame_set_mode(lame,lame_param_mode); // j-st
+if(lame_param_ratio>0) lame_set_compression_ratio(lame,lame_param_ratio);
 lame_init_params(lame);
-
 if(verbose){
-lame_print_config(lame);
-lame_print_internals(lame);
+    lame_print_config(lame);
+    lame_print_internals(lame);
 }
     
 }
