@@ -42,6 +42,8 @@ int vo_dheight=0;
 int vo_dbpp=0;
 int vo_doublebuffering = 0;
 
+char *vo_subdevice = NULL;
+
 //
 // Externally visible list of all vo drivers
 //

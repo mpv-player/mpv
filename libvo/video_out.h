@@ -104,3 +104,5 @@ extern int vo_dwidth;
 extern int vo_dheight;
 extern int vo_dbpp;
 
+extern char *vo_subdevice;
+
