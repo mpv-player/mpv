@@ -22,7 +22,7 @@ void BGR8880_to_RGB555_c( unsigned char * in_pixels, unsigned char * out_pixels,
 {
  unsigned short pixel;
  int i;
- for(i = 0; i < num_pixels; i++)
+ for(i = 0; i < num_pixels / 4; i++)
   {
    PACK_RGB15(in_pixels[0],in_pixels[1],in_pixels[2],pixel);
    *(unsigned short*)out_pixels = pixel;
@@ -35,7 +35,7 @@ void BGR8880_to_BGR555_c( unsigned char * in_pixels, unsigned char * out_pixels,
 {
  unsigned short pixel;
  int i;
- for(i = 0; i < num_pixels; i++)
+ for(i = 0; i < num_pixels / 4; i++)
   {
    PACK_RGB15(in_pixels[2],in_pixels[1],in_pixels[0],pixel);
    *(unsigned short*)out_pixels = pixel;
@@ -48,7 +48,7 @@ void BGR8880_to_RGB565_c( unsigned char * in_pixels, unsigned char * out_pixels,
 {
  unsigned short pixel;
  int i;
- for(i = 0; i < num_pixels; i++)
+ for(i = 0; i < num_pixels / 4; i++)
   {
    PACK_RGB16(in_pixels[0],in_pixels[1],in_pixels[2],pixel);
    *(unsigned short*)out_pixels = pixel;
@@ -61,7 +61,7 @@ void BGR8880_to_BGR565_c( unsigned char * in_pixels, unsigned char * out_pixels,
 {
  unsigned short pixel;
  int i;
- for(i = 0; i < num_pixels; i++)
+ for(i = 0; i < num_pixels / 4; i++)
   {
    PACK_RGB16(in_pixels[2],in_pixels[1],in_pixels[0],pixel);
    *(unsigned short*)out_pixels = pixel;
@@ -73,7 +73,7 @@ void BGR8880_to_BGR565_c( unsigned char * in_pixels, unsigned char * out_pixels,
 void BGR8880_to_RGB888_c( unsigned char * in_pixels, unsigned char * out_pixels,int num_pixels )
 {
  int i;
- for(i = 0; i < num_pixels; i++)
+ for(i = 0; i < num_pixels / 4; i++)
   {
    COPY_RGB_24(in_pixels,out_pixels);
    in_pixels += 4;
@@ -84,7 +84,7 @@ void BGR8880_to_RGB888_c( unsigned char * in_pixels, unsigned char * out_pixels,
 void BGR8880_to_BGR888_c( unsigned char * in_pixels, unsigned char * out_pixels,int num_pixels )
 {
  int i;
- for(i = 0; i < num_pixels; i++)
+ for(i = 0; i < num_pixels / 4; i++)
   {
    SWAP_RGB_24(in_pixels,out_pixels);
    in_pixels += 4;
@@ -95,7 +95,7 @@ void BGR8880_to_BGR888_c( unsigned char * in_pixels, unsigned char * out_pixels,
 void BGR8880_to_BGR8880_c( unsigned char * in_pixels, unsigned char * out_pixels,int num_pixels )
 {
  int i;
- for(i = 0; i < num_pixels; i++)
+ for(i = 0; i < num_pixels / 4; i++)
   {
    SWAP_RGB_24(in_pixels,out_pixels);
    in_pixels += 4;
@@ -104,7 +104,7 @@ void BGR8880_to_BGR8880_c( unsigned char * in_pixels, unsigned char * out_pixels
 }
 
 void BGR8880_to_RGB8880_c( unsigned char * in_pixels, unsigned char * out_pixels,int num_pixels )
-{ memcpy( out_pixels,in_pixels,num_pixels * 4 ); }
+{ memcpy( out_pixels,in_pixels,num_pixels ); }
 
 /*
 

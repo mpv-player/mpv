@@ -16,9 +16,12 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <inttypes.h>
+
 #include "ws.h"
 #include "wsconv.h"
 #include "../../config.h"
+#include "../../postproc/rgb2rgb.h"
 
 #include <X11/extensions/XShm.h>
 #ifdef HAVE_XSHAPE
@@ -227,34 +230,57 @@ if(mDisplay){
 #endif
  initConverter();
  wsOutMask=wsGetOutMask();
+ #ifdef DEBUG
+  fprintf( stderr,"[ws] Initialized converter: " );
+ #endif
  switch ( wsOutMask )
   {
    case wsRGB32:
+     #ifdef DEBUG
+      fprintf( stderr,"rgb32 to rgb32\n" );
+     #endif
      wsConvFunc=BGR8880_to_RGB8880_c;
      break;
    case wsBGR32:
+     #ifdef DEBUG
+      fprintf( stderr,"rgb32 to bgr32\n" );
+     #endif
      wsConvFunc=BGR8880_to_BGR8880_c;
      break;
    case wsRGB24:
-     #ifdef xHAVE_MMX
-      wsConvFunc=BGR8880_to_RGB888_mmx;
-     #else
-      wsConvFunc=BGR8880_to_RGB888_c;
+     #ifdef DEBUG
+      fprintf( stderr,"rgb32 to rgb24\n" );
      #endif
+     wsConvFunc=rgb32to24;
      break;
    case wsBGR24:
+     #ifdef DEBUG
+      fprintf( stderr,"rgb32 to bgr24\n" );
+     #endif
      wsConvFunc=BGR8880_to_BGR888_c;
      break;
    case wsRGB16:
-     wsConvFunc=BGR8880_to_RGB565_c;
+     #ifdef DEBUG
+      fprintf( stderr,"rgb32 to rgb16\n" );
+     #endif
+     wsConvFunc=rgb32to16;
      break;
    case wsBGR16:
+     #ifdef DEBUG
+      fprintf( stderr,"rgb32 to bgr16\n" );
+     #endif
      wsConvFunc=BGR8880_to_BGR565_c;
      break;
    case wsRGB15:
-     wsConvFunc=BGR8880_to_RGB555_c;
+     #ifdef DEBUG
+      fprintf( stderr,"rgb32 to rgb15\n" );
+     #endif
+     wsConvFunc=rgb32to15;
      break;
    case wsBGR15:
+     #ifdef DEBUG
+      fprintf( stderr,"rgb32 to bgr15\n" );
+     #endif
      wsConvFunc=BGR8880_to_BGR555_c;
      break;
   }
@@ -784,7 +810,7 @@ void wsDoExit( void )
 //    Put 'Image' to window.
 // ----------------------------------------------------------------------------------------------
 void wsConvert( wsTWindow * win,unsigned char * Image,unsigned int Size )
-{ if ( wsConvFunc ) wsConvFunc( Image,win->ImageData,win->xImage->width * win->xImage->height ); }
+{ if ( wsConvFunc ) wsConvFunc( Image,win->ImageData,win->xImage->width * win->xImage->height * 4 ); }
 
 void wsPutImage( wsTWindow * win )
 {
@@ -890,10 +916,10 @@ void wsSetBackgroundRGB( wsTWindow * win,int r,int g,int b )
    case wsRGB24: color=( r << 16 ) + ( g << 8 ) + b;  break;
    case wsBGR32:
    case wsBGR24: color=( b << 16 ) + ( g << 8 ) + r;  break;
-   case wsRGB16: PACK_RGB16( r,g,b,color ); break;
-   case wsBGR16: PACK_RGB16( b,g,r,color ); break;
-   case wsRGB15: PACK_RGB15( r,g,b,color ); break;
-   case wsBGR15: PACK_RGB15( b,g,r,color ); break;
+   case wsRGB16: PACK_RGB16( b,g,r,color ); break;
+   case wsBGR16: PACK_RGB16( r,g,b,color ); break;
+   case wsRGB15: PACK_RGB15( b,g,r,color ); break;
+   case wsBGR15: PACK_RGB15( r,g,b,color ); break;
   }
  XSetWindowBackground( wsDisplay,win->WindowID,color );
 }
@@ -907,10 +933,10 @@ void wsSetForegroundRGB( wsTWindow * win,int r,int g,int b )
    case wsRGB24: color=( r << 16 ) + ( g << 8 ) + b;  break;
    case wsBGR32:
    case wsBGR24: color=( b << 16 ) + ( g << 8 ) + r;  break;
-   case wsRGB16: PACK_RGB16( r,g,b,color ); break;
-   case wsBGR16: PACK_RGB16( b,g,r,color ); break;
-   case wsRGB15: PACK_RGB15( r,g,b,color ); break;
-   case wsBGR15: PACK_RGB15( b,g,r,color ); break;
+   case wsRGB16: PACK_RGB16( b,g,r,color ); break;
+   case wsBGR16: PACK_RGB16( r,g,b,color ); break;
+   case wsRGB15: PACK_RGB15( b,g,r,color ); break;
+   case wsBGR15: PACK_RGB15( r,g,b,color ); break;
   }
  XSetForeground( wsDisplay,win->wGC,color );
 }
