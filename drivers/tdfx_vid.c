@@ -44,7 +44,7 @@ static struct pci_dev *pci_dev;
 
 static uint8_t *tdfx_mmio_base = 0;
 static uint32_t tdfx_mem_base = 0;
-static struct voodoo_2d_reg_t* tdfx_2d_regs = NULL;
+static uint32_t tdfx_io_base = 0;
 
 static int tdfx_ram_size = 0;
 
@@ -54,7 +54,10 @@ static drm_agp_t *drm_agp = NULL;
 static agp_kern_info agp_info;
 static agp_memory *agp_mem = NULL;
 
+static __initdata int tdfx_map_io = 1;
 
+MODULE_PARM(tdfx_map_io,"i");
+MODULE_PARM_DESC(tdfx_map_io, "Set to 0 to use the page fault handler (you need to patch agpgart_be.c to allow the mapping in user space)\n");
 
 static inline u32 tdfx_inl(unsigned int reg) {
   return readl(tdfx_mmio_base + reg);
@@ -140,12 +143,13 @@ static int tdfx_vid_find_card(void)
 #if LINUX_VERSION_CODE >= 0x020300
   tdfx_mmio_base = ioremap_nocache(dev->resource[0].start,1 << 24);
   tdfx_mem_base =  dev->resource[1].start;
+  tdfx_io_base = dev->resource[2].start;
 #else
   tdfx_mmio_base = ioremap_nocache(dev->base_address[1] & PCI_BASE_ADDRESS_MEM_MASK,0x4000);
   tdfx_mem_base =  dev->base_address[1] & PCI_BASE_ADDRESS_MEM_MASK;
+  tdfx_io_base = dev->base_address[2] & PCI_BASE_ADDRESS_MEM_MASK;
 #endif
   printk(KERN_INFO "tdfx_vid: MMIO at 0x%p\n", tdfx_mmio_base);
-  tdfx_2d_regs = (struct voodoo_2d_reg_t*)tdfx_mmio_base;
   tdfx_ram_size = get_lfb_size();
 
   printk(KERN_INFO "tdfx_vid: Found %d MB (%d bytes) of memory\n",
@@ -224,7 +228,6 @@ static void agp_close(void) {
 }
 
 static int agp_move(tdfx_vid_agp_move_t* m) {
-  //  u32 mov = 0;
   u32 src = 0;
   u32 src_h,src_l;
 
@@ -253,15 +256,6 @@ static int agp_move(tdfx_vid_agp_move_t* m) {
   tdfx_outl(AGPREQSIZE,m->src_stride*m->height);
 
   tdfx_outl(AGPMOVECMD,m->move2 << 3);
-  banshee_wait_idle();
-
-  banshee_make_room(5);
-  tdfx_outl(AGPHOSTADDRESSHIGH,0);
-  tdfx_outl(AGPHOSTADDRESSLOW,0);
-
-  tdfx_outl(AGPGRAPHICSADDRESS,0);
-  tdfx_outl(AGPGRAPHICSSTRIDE,0);
-  tdfx_outl(AGPREQSIZE,0);
   banshee_wait_idle();
 
   return 0;
@@ -358,6 +352,9 @@ inline static u32 tdfx_vid_make_format(int src,u16 stride,u32 fmt) {
     case TDFX_VID_FORMAT_BGR1:
       tdfx_fmt = 0;
       break;
+    case TDFX_VID_FORMAT_BGR15: // To check
+      tdfx_fmt = 2;
+      break;
     case TDFX_VID_FORMAT_YUY2:
       tdfx_fmt = 8;
       break;
@@ -379,6 +376,7 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   u32 src_fmt,dst_fmt;
   u32 cmin,cmax,srcbase,srcxy,srcfmt,srcsize;
   u32 dstbase,dstxy,dstfmt,dstsize;
+  u32 cmd_extra = 0,src_ck[2],dst_ck[2],rop123=0;
   
   //printk(KERN_INFO "tdfx_vid: Make src fmt 0x%x\n",blit->src_format);
   src_fmt = tdfx_vid_make_format(1,blit->src_stride,blit->src_format);
@@ -388,9 +386,14 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   dst_fmt = tdfx_vid_make_format(0,blit->dst_stride,blit->dst_format);
   if(!dst_fmt)
     return 0;
-
+  blit->colorkey &= 0x3;
+  // Be nice if user just want a simple blit
+  if((!blit->colorkey) && (!blit->rop[0]))
+    blit->rop[0] = TDFX_VID_ROP_COPY;
+  
   // Save the regs otherwise fb get crazy
   // we can perhaps avoid some ...
+  banshee_wait_idle();
   cmin = tdfx_inl(CLIP0MIN);
   cmax = tdfx_inl(CLIP0MAX);
   srcbase = tdfx_inl(SRCBASE);
@@ -401,10 +404,26 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   dstxy = tdfx_inl(DSTXY);
   dstfmt = tdfx_inl(DSTFORMAT);
   dstsize = tdfx_inl(DSTSIZE);
-
+  if(blit->colorkey & TDFX_VID_SRC_COLORKEY) {
+    src_ck[0] = tdfx_inl(SRCCOLORKEYMIN);
+    src_ck[1] = tdfx_inl(SRCCOLORKEYMAX);
+    tdfx_outl(SRCCOLORKEYMIN,blit->src_colorkey[0]);
+    tdfx_outl(SRCCOLORKEYMAX,blit->src_colorkey[1]);
+  }
+  if(blit->colorkey & TDFX_VID_DST_COLORKEY) {
+    dst_ck[0] = tdfx_inl(DSTCOLORKEYMIN);
+    dst_ck[1] = tdfx_inl(DSTCOLORKEYMAX);
+    tdfx_outl(SRCCOLORKEYMIN,blit->dst_colorkey[0]);
+    tdfx_outl(SRCCOLORKEYMAX,blit->dst_colorkey[1]);   
+  }
+  if(blit->colorkey) {
+    cmd_extra = tdfx_inl(COMMANDEXTRA_2D);
+    rop123 = tdfx_inl(ROP123);
+    tdfx_outl(COMMANDEXTRA_2D, blit->colorkey);
+    tdfx_outl(ROP123,(blit->rop[1] | (blit->rop[2] << 8) | blit->rop[3] << 16));
+    
+  }
   // Get rid of the clipping at the moment
-  banshee_make_room(11);
-  
   tdfx_outl(CLIP0MIN,0);
   tdfx_outl(CLIP0MAX,0x0fff0fff);
 
@@ -421,11 +440,10 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   tdfx_outl(DSTSIZE,XYREG(blit->dst_w,blit->dst_h));
 
   // Send the command
-  tdfx_outl(COMMAND_2D,0xcc000102); // | (ROP_COPY << 24));
+  tdfx_outl(COMMAND_2D,0x102 | (blit->rop[0] << 24));
   banshee_wait_idle();
 
   // Now restore the regs to make fb happy
-  banshee_make_room(10);
   tdfx_outl(CLIP0MIN, cmin);
   tdfx_outl(CLIP0MAX, cmax);
   tdfx_outl(SRCBASE, srcbase);
@@ -436,8 +454,18 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   tdfx_outl(DSTXY, dstxy);
   tdfx_outl(DSTFORMAT, dstfmt);
   tdfx_outl(DSTSIZE, dstsize);
-  banshee_wait_idle();
-  
+  if(blit->colorkey & TDFX_VID_SRC_COLORKEY) {
+    tdfx_outl(SRCCOLORKEYMIN,src_ck[0]);
+    tdfx_outl(SRCCOLORKEYMAX,src_ck[1]);
+  }
+  if(blit->colorkey & TDFX_VID_DST_COLORKEY) {
+    tdfx_outl(SRCCOLORKEYMIN,dst_ck[0]);
+    tdfx_outl(SRCCOLORKEYMAX,dst_ck[1]);   
+  }
+  if(blit->colorkey) {
+    tdfx_outl(COMMANDEXTRA_2D,cmd_extra);
+    tdfx_outl(ROP123,rop123);
+  }
   return 1;
 }
 
@@ -536,18 +564,87 @@ static ssize_t tdfx_vid_write(struct file *file, const char *buf, size_t count, 
 	return 0;
 }
 
+static void tdfx_vid_mopen(struct vm_area_struct *vma) {
+  int i;
+  struct page *page;
+  unsigned long phys;
+
+  printk(KERN_DEBUG "tdfx_vid: mopen\n");
+  
+  for(i = 0 ; i < agp_mem->page_count ; i++) {
+    phys = agp_mem->memory[i] & ~(0x00000fff);
+    page = virt_to_page(phys_to_virt(phys));
+    if(!page) {
+      printk(KERN_DEBUG "tdfx_vid: Can't get the page %d\%d\n",i,agp_mem->page_count);
+      return;
+    }
+    get_page(page);
+  }
+  MOD_INC_USE_COUNT;
+}
+
+static void tdfx_vid_mclose(struct vm_area_struct *vma)  {
+  int i;
+  struct page *page;
+  unsigned long phys;
+
+  printk(KERN_DEBUG "tdfx_vid: mclose\n");
+
+  for(i = 0 ; i < agp_mem->page_count ; i++) {
+    phys = agp_mem->memory[i] & ~(0x00000fff);
+    page = virt_to_page(phys_to_virt(phys));
+    if(!page) {
+      printk(KERN_DEBUG "tdfx_vid: Can't get the page %d\%d\n",i,agp_mem->page_count);
+      return;
+    }
+    put_page(page);
+  }
+
+  MOD_DEC_USE_COUNT;
+}
+
+static struct page *tdfx_vid_nopage(struct vm_area_struct *vma,
+				    unsigned long address, 
+				    int write_access) {
+  unsigned long off;
+  uint32_t n;
+  struct page *page;
+  unsigned long phys;
+
+  off = address - vma->vm_start + (vma->vm_pgoff<<PAGE_SHIFT);
+  n = off / PAGE_SIZE;
+
+  if(n >= agp_mem->page_count) {
+    printk(KERN_DEBUG "tdfx_vid: Too far away\n");
+    return ((struct page *)0UL);
+  }
+  phys = agp_mem->memory[n] & ~(0x00000fff);
+  page = virt_to_page(phys_to_virt(phys));
+  if(!page) {
+    printk(KERN_DEBUG "tdfx_vid: Can't get the page\n");
+    return ((struct page *)0UL);
+  }
+  return page;
+}
+
+/* memory handler functions */
+static struct vm_operations_struct tdfx_vid_vm_ops = {
+  open:   tdfx_vid_mopen, /* mmap-open */
+  close:  tdfx_vid_mclose,/* mmap-close */
+  nopage: tdfx_vid_nopage, /* no-page fault handler */
+};
+
 
 static int tdfx_vid_mmap(struct file *file, struct vm_area_struct *vma)
 {
   size_t size;
-  //u32 pages;
 #ifdef MP_DEBUG
   printk(KERN_DEBUG "tdfx_vid: mapping agp memory into userspace\n");
 #endif
 
   if(agp_mem)
     return(-EAGAIN);
-	
+ 
   size = (vma->vm_end-vma->vm_start + PAGE_SIZE - 1) / PAGE_SIZE;
   
   agp_mem = drm_agp->allocate_memory(size,AGP_NORMAL_MEMORY);
@@ -566,23 +663,26 @@ static int tdfx_vid_mmap(struct file *file, struct vm_area_struct *vma)
   printk(KERN_INFO "%d pages of AGP mem allocated (%ld/%ld bytes) :)))\n",
 	 size,vma->vm_end-vma->vm_start,size*PAGE_SIZE);
 
-  //setup_fifo(0,size);
 
-
+  if(tdfx_map_io) {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,3)
-  if(remap_page_range(vma, vma->vm_start,agp_info.aper_base,
-		      vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+    if(remap_page_range(vma, vma->vm_start,agp_info.aper_base,
+			vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 #else
-  if(remap_page_range(vma->vm_start, (unsigned long)agp_info.aper_base,
-		      vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+    if(remap_page_range(vma->vm_start, (unsigned long)agp_info.aper_base,
+			vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 #endif
-    {
-      printk(KERN_ERR "tdfx_vid: error mapping video memory\n");
-      return(-EAGAIN);
-    }
-
-  
-  printk(KERN_INFO "AGP Mem mapped in user space !!!!!\n");
+      {
+	printk(KERN_ERR "tdfx_vid: error mapping video memory\n");
+	return(-EAGAIN);
+      }
+  } else {
+    // Never swap it out
+    vma->vm_flags |= VM_LOCKED | VM_IO;
+    vma->vm_ops = &tdfx_vid_vm_ops;
+    vma->vm_ops->open(vma);
+  }
+  printk(KERN_INFO "Page fault handler ready !!!!!\n");
 
   return 0;
 }
@@ -590,7 +690,6 @@ static int tdfx_vid_mmap(struct file *file, struct vm_area_struct *vma)
 
 static int tdfx_vid_release(struct inode *inode, struct file *file)
 {
-  //Close the window just in case
 #ifdef MP_DEBUG
   printk(KERN_DEBUG "tdfx_vid: Video OFF (release)\n");
 #endif

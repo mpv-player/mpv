@@ -7,14 +7,23 @@
 #define TDFX_VID_MOVE_2_3D      2
 #define TDFX_VID_MOVE_2_TEXTURE 3
 
+#define TDFX_VID_SRC_COLORKEY 0x1
+#define TDFX_VID_DST_COLORKEY 0x2
+
+#define TDFX_VID_ROP_COPY        0xcc     // src
+#define TDFX_VID_ROP_INVERT      0x55     // NOT dst
+#define TDFX_VID_ROP_XOR         0x66     // src XOR dst
+#define TDFX_VID_ROP_OR		 0xee     // src OR dst
+
 #define TDFX_VID_FORMAT_BGR1  (('B'<<24)|('G'<<16)|('R'<<8)|1)
 #define TDFX_VID_FORMAT_BGR8  (('B'<<24)|('G'<<16)|('R'<<8)|8)
+#define TDFX_VID_FORMAT_BGR15 (('B'<<24)|('G'<<16)|('R'<<8)|15)
 #define TDFX_VID_FORMAT_BGR16 (('B'<<24)|('G'<<16)|('R'<<8)|16)
 #define TDFX_VID_FORMAT_BGR24 (('B'<<24)|('G'<<16)|('R'<<8)|24)
 #define TDFX_VID_FORMAT_BGR32 (('B'<<24)|('G'<<16)|('R'<<8)|32)
 
 #define TDFX_VID_FORMAT_YUY2 (('2'<<24)|('Y'<<16)|('U'<<8)|'Y')
-#define TDFX_VID_FORMAT_UYVY (('U'<<24)|('Y'<<16)|('V'<<8)|'Y')
+#define TDFX_VID_FORMAT_UYVY (('Y'<<24)|('V'<<16)|('Y'<<8)|'U')
 
 #define TDFX_VID_FORMAT_YV12 0x32315659
 #define TDFX_VID_FORMAT_IYUV (('I'<<24)|('Y'<<16)|('U'<<8)|'V')
@@ -36,6 +45,12 @@ typedef struct tdfx_vid_blit_s {
   uint16_t dst_x,dst_y;
   uint16_t dst_w,dst_h;
   uint32_t dst_format;
+
+  uint32_t src_colorkey[2];
+  uint32_t dst_colorkey[2];
+
+  uint8_t colorkey;
+  uint8_t rop[4];
 } tdfx_vid_blit_t;
 
 typedef struct tdfx_vid_config_s {
@@ -72,3 +87,4 @@ typedef struct tdfx_vid_yuv_s {
 #define TDFX_VID_GET_YUV _IOR('J', 5, tdfx_vid_blit_t)
 
 #define TDFX_VID_BUMP0 _IOR('J', 6, u16)
+
