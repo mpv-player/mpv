@@ -885,7 +885,7 @@ do 2 kana³u wyj¶ciowego (który mo¿e byæ na przyk³ad wys³any do subwoofera).
 <para>
 Filtr subwoofera (<option>sub</option> filter) dodaje kana³ subwoofera do strumienia
 audio. Dane audio u¿yte do stworzenia tego kana³u s± ¶redni± d¼wiêku w 0 i 1 kanale. D¼wiêk 
-wynikowy zostanie poddany dzia³aniu 4-rzêdowego, dolnoprzepustowego filtru Butterwortha 
+wynikowy zostanie poddany dzia³aniu dolnoprzepustowego filtru Butterwortha czwartego rzêdu
 (4th order Butterworth filter) z domy¶ln± czêstotliwo¶ci± graniczn± na poziomie 60Hz i 
 dodany do oddzielnego kana³u w strumieniu audio.
 Uwaga: Wy³±cz ten filtr, je¿eli odtwarzasz DVD z d¼wiêkiem w systemie Dolby Digital 5.1, 
