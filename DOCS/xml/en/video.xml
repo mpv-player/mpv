@@ -79,9 +79,9 @@ echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr
 </para>
 
 <para>
-Not all CPUs support MTRRs. For example older K6-2's (around 266MHz,
-stepping 0) doesn't support MTRR, but stepping 12's do
-(<command>cat /proc/cpuinfo</command> to check it).
+Not all CPUs have MTRRs. For example older K6-2 (around 266MHz,
+stepping 0) CPUs don't have MTRRs, but stepping 12 does
+(execute <command>cat /proc/cpuinfo</command> to check it).
 </para>
 </sect3>
 
