@@ -25,7 +25,8 @@
     M$ MPEG4 v1, v2 and other MPEG4 variants</LI>
   <LI>native decoder for Windows Media Video 7 (WMV1), and Win32 DLL decoder for
     Windows Media Video 8 (WMV2), both used in .wmv files</LI>
-  <LI><B>native Sorenson (SVQ1) decoder</B></LI>
+  <LI>native Sorenson (SVQ1) decoder</LI>
+  <LI>Sorenson (SVQ3) decoder</LI>
   <LI>3ivx decoder</LI>
   <LI>Cinepak and Intel Indeo codecs (3.1, 3.2, 4.1, 5.0)</LI>
   <LI>MJPEG, AVID, VCR2, ASV2 and other hardware formats</LI>
@@ -106,7 +107,7 @@
 
 <P>It contains a lot of nice codecs, especially important are the MPEG4
   variants:
-  DivX 3, DivX 4, DivX 5, Windows Media Video 7 (WMV1). Also a very
+  DivX3, DivX4, DivX5, Windows Media Video 7 (WMV1). Also a very
   interesting one is the WMA decoder.</P>
 
 <P>If you use an MPlayer release you have libavcodec right in the
@@ -225,9 +226,9 @@ MPlayer supports decoding all versions of RealVideo:
 <H4><A NAME="xvid">2.2.1.9 XViD</A></H4>
 
 <P><B>XViD</B> is a forked development of the OpenDivX codec. It happened when
-  ProjectMayo changed OpenDivX to closed-source DivX4, and the non-ProjectMayo
-  people working on OpenDivX got angry, then started XViD. So both projects
-  have the same origin.</P>
+  ProjectMayo changed OpenDivX to closed source DivX4 (now DivX5), and the
+  non-ProjectMayo people working on OpenDivX got angry, then started XViD. So
+  both projects have the same origin.</P>
 
 <H4>Advantages:</H4>
 
@@ -269,22 +270,18 @@ MPlayer supports decoding all versions of RealVideo:
 
 <H4><A NAME="sorenson">2.2.1.10 Sorenson</A></H4>
 
-<P><B>Sorenson</B> is a video codec developed by Apple. We are currently
-  able to decode the first version (SVQ1) with a native decoder.</P>
+<P><B>Sorenson</B> is a video codec used primarily in Apple QuickTime. We are
+  currently able to decode the first version (SVQ1) with a native decoder and
+  SVQ3 through an external DLL.</P>
 
-<H4>Advantages:</H4>
+<P>The Sorenson SVQ1 decoder is compiled and usable per default.</P>
 
-<UL>
-  <LI>Fast, even old Macintosh machines were able to decode it.</LI>
-</UL>
-
-<H4>Disadvantages:</H4>
-
-<UL>
-  <LI>SVQ3 is still not reverse engineered.</LI>
-</UL>
-
-<P>The Sorenson decoder is compiled and usable per default.</P>
+<P>To get Sorenson SVQ3 playback, download the QuickTime 5 (extra stability) or
+  QuickTime 6 (extra speed) DLLs from
+  <A HREF="http://www.mplayerhq.hu/~alex/codecs/">the codecs page</A>, extract
+  them to your Win32 codecs directory
+  (probably <CODE>/usr/local/lib/win32</CODE>) and recompile MPlayer with
+  <CODE>--enable-qtx-codecs</CODE>.</P>
 
 
 <H3><A NAME="audio_codecs">2.2.2 Audio codecs</A></H3>
@@ -303,7 +300,7 @@ MPlayer supports decoding all versions of RealVideo:
   <LI>Voxware audio (using DirectShow DLL)</LI>
   <LI>alaw, msgsm, pcm and other simple old audio formats</LI>
   <LI>VIVO audio (g723, Vivo Siren)</LI>
-  <LI>RealAudio: DNET (low bitrate AC3), Cook, Sipro</LI>
+  <LI>RealAudio: DNET (low bitrate AC3), Cook, Sipro, Atrac</LI>
 </UL>
 
 
@@ -370,12 +367,12 @@ MPlayer supports decoding nearly all versions of RealAudio:
 
 <UL>
   <LI>RealAudio DNET - decoding supported by <B>liba52</B></LI>
-  <LI>RealAudio Cook/Sipro - decoding supported by <B>RealPlayer libraries</B></LI>
-  <LI>RealAudio atrc - decoding not yet supported</LI>
+  <LI>RealAudio Cook/Sipro/Atrac - decoding supported by <B>RealPlayer
+    libraries</B></LI>
 </UL>
 
 <P>On how to install RealPlayer libraries, see the
-  <A HREF="formats.html#real">RealMedia file format</A> section.</P>
+  <A HREF="#realvideo">RealVideo</A> section.</P>
 
 
 <H3><A NAME="importing">2.2.3 Win32 codec importing HOWTO</A></H3>
