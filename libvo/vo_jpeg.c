@@ -154,6 +154,7 @@ static uint32_t jpeg_write( uint8_t * name,uint8_t * buffer )
 static uint32_t draw_frame(uint8_t * src[])
 {
  char buf[256];
+ uint8_t *dst= src[0];
     
  snprintf (buf, 256, "%s/%08d.jpg", jpeg_outdir, ++framenum);
 
@@ -161,14 +162,14 @@ static uint32_t draw_frame(uint8_t * src[])
   {
    rgb32to24( src[0],image_data,image_width * image_height * 4 );
    rgb24tobgr24( image_data,image_data,image_width * image_height * 3 );
-   src[0]=image_data;
+   dst=image_data;
   }
  if ( image_format == IMGFMT_BGR24 )
   {
    rgb24tobgr24( src[0],image_data,image_width * image_height * 3 );
-   src[0]=image_data;
+   dst=image_data;
   }
- return jpeg_write( buf,src[0] );
+ return jpeg_write( buf,dst );
 }
 
 static void draw_osd(void)
