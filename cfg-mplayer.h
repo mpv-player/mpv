@@ -71,10 +71,12 @@ extern int WinID;
 
 #ifdef HAVE_AA
 extern int vo_aa_parseoption(struct config * conf, char *opt, char * param);
+extern void vo_aa_revertoption(config_t* opt,char* param);
 #endif
 
 #ifdef HAVE_ZR
 extern int vo_zr_parseoption(struct config * conf, char *opt, char * param);
+extern void vo_zr_revertoption(config_t* opt,char* pram);
 #endif
 
 #ifdef HAVE_NEW_GUI
@@ -106,6 +108,8 @@ struct config ao_plugin_conf[]={
 
 extern int sws_flags;
 extern int readPPOpt(void *conf, char *arg);
+extern int readNPPOpt(void *conf, char *arg);
+extern void revertPPOpt(void *conf, char* opt);
 
 
 /*
@@ -255,11 +259,11 @@ static config_t mplayer_opts[]={
 #endif
 
 #ifdef HAVE_AA
-	{"aa*",	vo_aa_parseoption,  CONF_TYPE_FUNC_FULL, 0, 0, 0 , NULL},
+	{"aa*",	vo_aa_parseoption,  CONF_TYPE_FUNC_FULL, 0, 0, 0 , &vo_aa_revertoption},
 #endif
 
 #ifdef HAVE_ZR
-	{"zr*", vo_zr_parseoption, CONF_TYPE_FUNC_FULL, 0, 0, 0 },
+	{"zr*", vo_zr_parseoption, CONF_TYPE_FUNC_FULL, 0, 0, 0, &vo_zr_revertoption },
 #endif
 
 #ifdef HAVE_LIRC
