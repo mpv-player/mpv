@@ -1,5 +1,5 @@
-.\" synced with 1.837
-.\" MPlayer (C) 2000-2004 MPlayer Team
+.\" synced with 1.842
+.\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
 .\" Traduzione in italiano di Daniele Forghieri
@@ -326,7 +326,7 @@ Cambia la modalita' a schermo intero (vedi anche \-fs).
 .IPs "option + [ e option + ]"
 Regola il canale alpha della finestra del video.
 .IPs T\ \ \ \ 
-Cambia il layer video: in cima/sotto/normale (vedi anche \-ontop).
+Cambia il layer video: in cima/\:sotto/\:normale (vedi anche \-ontop).
 .RE
 .PD 1
 .
@@ -771,7 +771,7 @@ programma (se presente) con il flusso audio scelto.
 Suona il flusso audio il cui linguaggio corrisponde al codice dato.
 Formati contenitore diversi utilizzano diversi codici.
 I DVD utilizzano i codici a due lettere ISO 639-1, Matroska e NUT usano
-i codici a tre lettere ISO 639-2 mentre OGM usa un identificatore libero. 
+i codici a tre lettere ISO 639-2 mentre OGM usa un identificatore libero.
 MPlayer stampa una lista dei linguaggi disponibili se viene lanciato in
 modalita' verbosa (\-v).
 .sp 1
@@ -808,10 +808,6 @@ Specifica la massima larghezza di banda (bandwidth) per lo streaming attraverso
 una rete (per quei server che sono capaci di inviare contenuti, normalmente
 filmati, a diversi bitrate).
 Utile se vuoi guardare contenuti multimediali dal vivo con una connessione lenta.
-.
-.TP
-.B \-cdrom-device <percorso\ al\ dispositivo>
-Specifica il nome del dispositivo CD-ROM (default: /dev/\:cdrom).
 .
 .TP
 .B \-cache <kBytes>
@@ -866,6 +862,10 @@ Puo' essere negativo.
 .IPs (no)skip
 (Non) accetta una ricostruzione imperfetta dei dati.
 .RE
+.
+.TP
+.B \-cdrom-device <percorso\ al\ dispositivo>
+Specifica il nome del dispositivo CD-ROM (default: /dev/\:cdrom).
 .
 .TP
 .B \-channels <numero>
@@ -1240,7 +1240,7 @@ Per bsdbt848 e v4l sono disponibili PAL, SECAM e NTSC.
 Per v4l2 controlla l'output su console per una lista di tutte le norme
 disponibili, vedi anche l' opzione normid sotto.
 .IPs "normid=<valore>" (solo v4l2)
-Regola la norma all'ID numerico passato. 
+Regola la norma all'ID numerico passato.
 La norma TV dipende dalla scheda di cattura.
 Vedi l'output su console per una lista delle norme TV disponibili.
 .IPs channel=<valore>
@@ -1617,7 +1617,9 @@ Allinea in basso.
 .TP
 .B \-subcc \ 
 Visualizza i sottotitoli Close Caption (CC) dei DVD.
-Questi NON sono i sottotitoli dei VOB, sono sottotitoli speciali in ASCII per
+Questi
+.B non
+sono i sottotitoli dei VOB, sono sottotitoli speciali in ASCII per
 le persone con danni all'udito codificati nei dati utente del flusso VOB in
 molti DVD della regione 1.
 Fino ad ora non sono ancora stati trovati dei sottotitoli CC in DVD
@@ -1844,7 +1846,7 @@ come
 .I NOTA:
 I nome dei canali del mixer ALSA seguiti da un numero devono essere
 specificati nel formato <nome,numero>, cioe' un canale indicato
-come 'PCM 1' in alsamixer deve essere convertito in 
+come 'PCM 1' in alsamixer deve essere convertito in
 .BR PCM,1.
 .TP
 .B \-softvol
@@ -2008,16 +2010,11 @@ Driver di uscita grezzo per scrittura di file PCM/\:wave.
 Inserisce o meno l'intestazione wave (default: intestazione inclusa).
 Se non incluso verra' generato un file grezzo PCM.
 .IPs file=<nomefile>
-Scrive il suono su <nomefile> invece che il default 
+Scrive il suono su <nomefile> invece che il default
 audiodump.wav.
 Se viene specificato nowaveheader il default e' invece audiodump.pcm.
-.REss
-.PD 1
-.RS
-.sp 1
-.I NOTA:
-Controllare cosa viene fatto se nessuna opzione viene specificata.
 .RE
+.PD 1
 .
 .TP
 .B plugin\ \ 
@@ -2911,7 +2908,7 @@ con il rinfresco verticale del tuo monitor.
 .B 3dfx (solo Linux)
 Driver di uscita video specifico per 3Dfx.
 Questo driver utilizza direttamente l'hardware della scheda 3Dfx sopra a
-X11. 
+X11.
 Sono supportati solo 16 bpp.
 FIXME: E' ok la differenza tra 3dfx, tdfxfb e tdfx_vid?
 .
@@ -3157,7 +3154,7 @@ Sono supportati i formati RGB e BGR a 24 bpp.
 .B tga\ \ \ \ 
 Scrive ogni fotogramma in un file Targa (TGA) nella directory corrente.
 Il nome del file viene creato dal numero del fotogramma riempito con zeri iniziali.
-Lo scopo di questo driver di uscita video e' avere un semplice formato 
+Lo scopo di questo driver di uscita video e' avere un semplice formato
 di immagini senza perdita di qualita' da usare senza librerie esterne.
 Supporta i formati colori BGR[A], con 15, 24 e 32 bpp.
 Puoi forzare un formato particolare con il filtro video format.
@@ -3602,9 +3599,9 @@ filtri interni di post elaborazione di XviD:
 .PD 0
 .RSs
 .IPs deblock-chroma (vedi anche \-vf pp)
-filtro di de-block della crominanza 
+filtro di de-block della crominanza
 .IPs deblock-luma (vedi anche \-vf pp)
-filtro di de-block della luminanza 
+filtro di de-block della luminanza
 .IPs dering-luma (vedi anche \-vf pp)
 filtro di eliminazione degli effetti ad anello della luminanza
 .IPs dering-chroma (vedi anche \-vf pp)
@@ -4102,7 +4099,9 @@ L'aspetto puo' essere espresso come frazione (4/\:3) oppure come
 numero floating point (1.33).
 Alternativamente, puoi specificare esattamente le dimensioni di larghezza ed
 altezza di visualizzazione che desideri.
-Nota che questo filtro NON effettua nessuna scalatura, semplicemente influenza
+Nota che questo filtro
+.b non
+effettua nessuna scalatura, semplicemente influenza
 quello che viene eseguito successivamente dalla scalatura (software o hardware)
 quando si esegue un'auto scalatura per correggere il rapporto di aspetto del film.
 .
@@ -4126,7 +4125,7 @@ Conversione dello spazio colore RGB 24/\:32 <\-> BGR 24/\:32.
 .PD 0
 .RSs
 .IPs swap\ 
-Effettua anche lo scambio  R <\-> B.
+Effettua anche lo scambio  R <-> B.
 .RE
 .PD 1
 .
@@ -4548,7 +4547,7 @@ L'argomento opzionale n specifica se estrarre il field pari o dispari
 (a seconda che n sia pari o dispari).
 .
 .TP
-.B detc[=var1=value2:var2=value2:...]
+.B detc[=var1=value1:var2=value2:...]
 Prova a invertire il processo di 'telecine' per ottenere un filmato 'pulito',
 non interlacciato ad un framerate da film.
 Questo e' il primo e piu' primitivo filtro per il processo di telecine
@@ -4759,7 +4758,9 @@ Questo produce i migliori risultati.
 Il passo 1 analizza il video e scrive i risultati in un file di log.
 Il passo 2 quindi legge questo file di log e ne utilizza le informazioni per fare
 effettivamente il lavoro.
-Nota che questi passi NON corrispondono ai passi 1 e 2 del processo di codifica.
+Nota che questi passi
+.B non
+corrispondono ai passi 1 e 2 del processo di codifica.
 Per poter utilizzare la modalita' a due passi di divtc con la codifica a due passi
 devi eseguire tre passi in totale: prima il passo 1 di divtc e il passo 1 di codifica,
 poi il passo 2 di divtc ed il passo 1 di codifica ed infine il passo 2 di divtc ed
@@ -5004,7 +5005,7 @@ Setta il valore di default del flag 'hidden' (0=visibile, 1=nascosto).
 .IPs <opaque>
 Setta il valore di default del flag 'opaque' (0=trasparente, 1=opaca).
 .IPs <fifo>
-percorso/\:file della FIFO (la named pipe che connette mplayer \-vf bmovl
+percorso/\:file della FIFO (la named pipe che connette 'mplayer \-vf bmovl'
 all'applicazione che lo controlla)
 .RE
 .PD 1
@@ -5072,8 +5073,9 @@ schermo e' da aggiornare.
 .B framestep=I|[i]step
 Visualizza solo uno ogni step fotogrammi oppure ogni fotogramma Intra (key).
 .sp 1
-Se chiami il filtro con I (maiuscolo) come parametro, allora SOLO i fotogrammi
-chiave (keyframe) vengono visualizzati.
+Se chiami il filtro con I (maiuscolo) come parametro, allora
+.B solo
+i fotogrammi chiave (keyframe) vengono visualizzati.
 Per i DVD questo generalmente significa uno ogni 15/\:12 fotogrammi (IBBPBBPBBPBBPBB),
 per i file AVI questo significa ogni cambio di scena oppure ogni valore di keyint
 (vedi \-lavcopts keyint=valore se utilizzi MEncoder per codificare i video).
@@ -5162,8 +5164,8 @@ Colore e' il default.
 Decimazione orizzontale: 1, 2 o 4.
 .IPs vdec={1,2,4}
 Decimazione verticale: 1, 2 or 4.
-.IPs quality=1-20
-Seleziona la qualita' della compressione JPEG, 1 migliore, 20 molto brutta.
+.IPs quality=1\-20
+Seleziona la qualita' della compressione JPEG, [MIGLIORE] 1 \- 20 [MOLTO BRUTTA].
 .IPs fd|nofd
 Per default, la decimazione viene eseguita se l'hardware Zoran puo'
 scalare il file MJPEG risultante alla dimensione originale.
@@ -5236,7 +5238,7 @@ Il file di uscita conterra' 'div3' come fourcc del video.
 .B \-force-avi-aspect <0.2\-3.0>
 Sovrascrive il valore del rapporto di aspetto memorizzato nei file AVI nell'intestazione
 vprp OpenDML.
-Puo' essere usato per cambiare il rapporto di aspetto con \-ovc copy.
+Puo' essere usato per cambiare il rapporto di aspetto con '\-ovc copy'.
 .
 .TP
 .B \-info <option1:option2:...> (AVI only)
@@ -5327,7 +5329,7 @@ Codifica in formato AVI.
 .IPs "\-of mpeg"
 Codifica in formato MPEG
 .IPs "\-of rawvideo"
-flusso grezzo video (nessun multiplex - un solo flusso video)
+flusso grezzo video (nessun multiplex \- un solo flusso video)
 .RE
 .PD 1
 .
@@ -5354,7 +5356,7 @@ niente codifica, solo copia del flusso
 .IPs "\-ovc divx4"
 Codifica in formato Divx4/\:Divx5
 .IPs "\-ovc raw"
-Codifica su un formato grezzo non compresso arbitrario (usa \-fv format per
+Codifica su un formato grezzo non compresso arbitrario (usa '\-fv format' per
 selezionare come).
 .IPs "\-ovc lavc"
 Codifica con un codec di libavcodec
@@ -5520,11 +5522,11 @@ bitrate in kbps (solo CBR e ABR)
 .
 .TP
 .B q=<0\-9>
-qualita' (0\-migliore, 9\-peggiore) (solo VBR, Variable BitRate, bitrate variabile)
+qualita' (0 \- migliore, 9 \ -peggiore) (solo VBR, Variable BitRate, bitrate variabile)
 .
 .TP
 .B aq=<0\-9>
-qualita' dell'algoritmo (0\-migliore/\:piu' lento, 9\-peggiore/\:piu' veloce)
+qualita' dell'algoritmo (0 \- migliore/piu' lento, 9 \- peggiore/piu' veloce)
 .
 .TP
 .B ratio=<1\-100>
@@ -5601,7 +5603,7 @@ codifica ABR al bitrate medio specificato
 .RE
 .sp 1
 .RS
-.I ESEMPIO:
+.I ESEMPI:
 .RE
 .PD 0
 .RSs
@@ -5909,7 +5911,7 @@ strategia per la scelta tra fotogrammi I/\:P/\:B (passo\ 1):
 .IPs 0
 Usa sempre il numero massimo di fotogrammi di tipo B (default)
 .IPs 1
-Evita fotogrammi B in scene ad alto movimento. 
+Evita fotogrammi B in scene ad alto movimento.
 .RE
 .PD 1
 .
@@ -6005,7 +6007,7 @@ attivo.
 .B vbitrate=<valore>
 Specifica il bitrate (passo\ 1/\:2) (default: 800).
 .br
-.I ATTENZIONE: 
+.I ATTENZIONE:
 1kBit = 1000 Bit
 .PD 0
 .RSs
@@ -6087,7 +6089,7 @@ lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>.
 .
 .TP
 .B vqblur=<0.0\-1.0> (passo 1)
-Sfocatura di quantizzazione (default: 0.5), valori piu' grandi medieranno 
+Sfocatura di quantizzazione (default: 0.5), valori piu' grandi medieranno
 la quantizzazione maggiormente nel tempo (cambiamenti piu' lenti).
 .PD 0
 .RSs
@@ -6100,7 +6102,7 @@ Media la quantizzazione su tutti i fotogrammi precedenti.
 .
 .TP
 .B vqblur=<0.0\-99.0> (passo 2)
-Sfocatura gaussiana di quantizzazione (default: 0.5), valori piu' grandi 
+Sfocatura gaussiana di quantizzazione (default: 0.5), valori piu' grandi
 medieranno la quantizzazione maggiormente nel tempo (cambiamenti piu' lenti).
 .
 .TP
@@ -7057,8 +7059,8 @@ stabile XviD 1.0.x (api4).
 .
 .TP
 .B (no)packed\ 
-Questa opzione e' studiata per risolvere problemi di ordine di visualizzazione dei 
-fotogrammi quando si codifica in un formato contenitore come il formato AVI che 
+Questa opzione e' studiata per risolvere problemi di ordine di visualizzazione dei
+fotogrammi quando si codifica in un formato contenitore come il formato AVI che
 non riesce a gestire correttamente fotogrammi non in ordine (out-of-order).
 In pratica molti decodificatori (sia software che hardware) sono capaci di gestire
 da soli in modo corretto i fotogrammi non in ordine e possono venir confusi quando
@@ -7101,7 +7103,7 @@ Maggiore il valore, maggiore la probabilita' che vengano usati fotogrammi B.
 .
 .TP
 .B (no)closed_gop
-Questa opzione dice a XviD di chiudere ogni GOP (Group Of Pictures, gruppo di 
+Questa opzione dice a XviD di chiudere ogni GOP (Group Of Pictures, gruppo di
 immagini, racchiuso da due fotogrammi I), cosa che rende i GOP indipendenti
 uno dall'altro.
 Questo semplicemente significa che l'ultimo fotogramma di un GOP e' un fotogramma
@@ -7407,11 +7409,11 @@ Questo valore e' richiesto se desideri una codifica CBR (Bit Rate costante).
 Questo seleziona il quantizzatore da usare.
 Una gamma utilizzabile e' 20\-40 (default: 26)
 Valore piu' bassi generano una miglior fedelta' ma bitrate piu' alti.
-Nota che la quantizzazione in H.264 funziona diversamente che in MPEG[124].
+Nota che la quantizzazione in H.264 funziona diversamente che in MPEG-[124].
 Il valore del parametro di quantizzazione (QP) di H.264 e' in scala logaritmica.
 Come esempio la differenza di bitrate tra QP=20 e QP=40 e' di circa 10 volte.
 In H.264 i valori di quantizzazione utili tendono ad essere molto grandi se
-confrontati a quelli di MPEG[124].
+confrontati a quelli di MPEG-[124].
 .
 .TP
 .B pass=<1\-3>
@@ -7517,7 +7519,7 @@ Un valore positivo riduce di molto gli artefatti dei blocchi ma rovina anche
 i dettagli.
 .br
 Per codifiche che vogliono avere una ragionevole alta qualita', puoi volerlo
-abbassare un poco. 
+abbassare un poco.
 Pero', se il materiale originale ha gia' un po' di effetti a blocchi o del
 rumore che vorresti eliminare, oppure se e' una animazione, puo' essere
 una buona idea alzarlo un poco.
@@ -7600,7 +7602,7 @@ il parametro di quantizzazione piu' costante.
 .B cplx_blur=<0\-999> (solo 2 passi)
 Sfocatura temporale della stima della complessita' dei fotogrammi, prima
 della compressione della curva (default: 20).
-Valori bassi permettono al valore di quantizzazione di mouversi molto, 
+Valori bassi permettono al valore di quantizzazione di mouversi molto,
 valori piu' alti lo forzano a movimenti piu' dolci.
 cplx_blur assicura che ogni fotogramma I ha una qualita' comparabile ai
 fotogrammi P successivi, ed assicura che fotogrammi con alternanza di alta
@@ -7884,7 +7886,7 @@ MPlayer e' stato scritto inizialmente da Arpad Gereöffy.
 Vedi il file AUTHORS per una lista di alcuni dei tanti altri contributori.
 .
 .TP
-MPlayer e' (C) 2000\-2004 The MPlayer Team
+MPlayer e' (C) 2000\-2005 The MPlayer Team
 .PP
 Questa pagina di manuale (versione inglese) e' stata scritta principalmente da
 Gabucino, Jonas Jermann e Diego Biurrun.
@@ -7893,5 +7895,7 @@ La traduzione in italiano e' stata fatta ed e' mantenuta da Daniele Forghieri.
 .
 .PP
 Per favore spedisci qualsiasi messaggio riguardante questa documentazione
-alla mailing list MPlayer-DOCS.
+alla mailing list MPlayer-DOCS per quello che riguarda l'originale inglese ed
+alla mailing list MPlayer-translations per tutto quello che riguarda le varie
+versioni tradotte.
 .\" end of file
