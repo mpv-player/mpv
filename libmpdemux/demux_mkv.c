@@ -236,12 +236,19 @@ demux_mkv_find_track_by_num (mkv_demuxer_t *d, int n, int type)
 static mkv_track_t *
 demux_mkv_find_track_by_language (mkv_demuxer_t *d, char *language, int type)
 {
-  int i;
+  int i, len;
   
-  for (i=0; i < d->num_tracks; i++)
-    if (d->tracks[i] != NULL && d->tracks[i]->language != NULL &&
-        d->tracks[i]->type == type && !strcmp(d->tracks[i]->language,language))
-      return d->tracks[i];
+  language += strspn(language,",");
+  while((len = strcspn(language,",")) > 0)
+    {
+      for (i=0; i < d->num_tracks; i++)
+        if (d->tracks[i] != NULL && d->tracks[i]->language != NULL &&
+            d->tracks[i]->type == type &&
+            !strncmp(d->tracks[i]->language, language, len))
+          return d->tracks[i];
+      language += len;
+      language += strspn(language,",");
+    }
   
   return NULL;
 }
