@@ -2521,6 +2521,7 @@ VO2 = $_vo2
 
 EXTRA_LIB = $_ld_extra
 Z_LIB =  $_ld_static $_ld_zlib
+HAVE_MLIB = $_mlib
 STATIC_LIB = $_ld_static
 
 X11_INC = $_inc_x11
@@ -2531,6 +2532,7 @@ X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_so
 DXR3_LIB =  $_ld_dxr3
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
+MLIB_INC = $_inc_mlib
 PNG_LIB = $_ld_png
 SDL_LIB = $_ld_sdl
 SVGA_LIB = $_ld_svga
