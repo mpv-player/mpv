@@ -164,19 +164,24 @@ too. So I've decided to write/modify one...</P>
 
 <P><B><A NAME=1.3>1.3. Installation</A></B></P>
 
-<P>If you plan to use <B>MPlayer</B> on x86 architecture, you possibly want to use
+<UL>
+<LI>If you plan to use <B>MPlayer</B> on x86 architecture, you possibly want to use
 Win32 codecs. Download and unzip w32codecs.zip to /usr/lib/win32 .
 Note: the avifile project has similar codecs package, but it differs
 from our, so if you want to use all supported codecs, then use
-our package! However, you can use our codecs package with avifile.</P>
+our package! However, you can use our codecs package with avifile.</LI>
 
-<P>If you own a Matrox G200/G400/G450 card, then please see the <A HREF="video.html#2.2.1.7">2.2.1.7</A>
+<LI>If you own a Matrox G200/G400/G450 card, then please see the <A HREF="video.html#2.2.1.7">2.2.1.7</A>
 section in order to gain big speedup. It is important to do these steps
 _before_ compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
-built.</P>
+built.</LI>
 
-<P>If you plan to use the ProjectMayo's <B>DivX4</B> codec, check the
-<A HREF="codecs.html#2.1.2.1">2.1.2.1</A> section before compiling.</P>
+<LI>If you plan to use the ProjectMayo's <B>DivX4</B> codec, check the
+<A HREF="codecs.html#2.1.2.1">2.1.2.1</A> section before compiling.</LI>
+
+<LI>For DVD support, you'll have to compile libdvdread and libcss.
+See <A HREF="cd-dvd.html#4.2">section 4.2</A> for more information.</LI>
+</UL>
 
 <P>Then build <B>MPlayer</B>:</P>
 
