@@ -42,6 +42,8 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
  static int mplSubMoved = 0;
  static int msButton = 0;
 
+ mplPBShow( X,Y );
+
  switch( Button )
   {
    case wsPRMouseButton:
@@ -73,6 +75,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
             case wsPMMouseButton:
                    mplMenuMouseHandle( X,Y,RX,RY );
                    break;
+	    default: mplPBShow( X,Y ); break;
            }
           break;
    case wsRLMouseButton:

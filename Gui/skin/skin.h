@@ -13,8 +13,8 @@ extern int skinBPRead( char * fname, txSample * bf );
 
 // ---
 
-extern char * strdelspacesbeforecommand( char * in );
+extern char * trimleft( char * in );
 extern char * strswap( char * in,char what,char whereof );
-extern char * strdelspaces( char * in );
+extern char * trim( char * in );
 
 #endif

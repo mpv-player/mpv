@@ -16,7 +16,7 @@ CFLAGS = $(OPTIMIZE) $(INCDIR) $(DEBUG)
 
 SRCS = wm/ws.c wm/wsxdnd.c app.c interface.c cfg.c bitmap.c \
 	skin/skin.c skin/font.c skin/cut.c \
-	mplayer/widgets.c mplayer/play.c mplayer/mw.c mplayer/sw.c mplayer/menu.c \
+	mplayer/widgets.c mplayer/play.c mplayer/mw.c mplayer/sw.c mplayer/menu.c mplayer/pb.c mplayer/common.c \
 	mplayer/gtk/menu.c mplayer/gtk/mb.c mplayer/gtk/about.c mplayer/gtk/pl.c mplayer/gtk/sb.c mplayer/gtk/fs.c mplayer/gtk/opts.c mplayer/gtk/url.c mplayer/gtk/eq.c mplayer/gtk/common.c
 OBJS = $(SRCS:.c=.o)
 

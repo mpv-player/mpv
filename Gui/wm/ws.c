@@ -620,12 +620,15 @@ keypressed:
      {
        /* pump all motion events from the display queue:
 	  this way it works faster when moving the window */
-       static XEvent e;
-       while(XCheckTypedWindowEvent(display,Event->xany.window,MotionNotify,&e)){
+      static XEvent e;
+      if ( Event->xmotion.state )
+       {
+        while(XCheckTypedWindowEvent(display,Event->xany.window,MotionNotify,&e)){
 	 /* FIXME: need to make sure we didn't release/press the button in between...*/
 	 /* FIXME: do we need some timeout here to make sure we don't spend too much time
 	    removing events from the queue? */
 	 Event = &e;
+        }
        }
      }
      goto buttonreleased;

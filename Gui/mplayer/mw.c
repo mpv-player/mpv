@@ -43,146 +43,7 @@ int             boxMoved = 0;
 int             sx = 0,sy = 0;
 int             i,pot = 0;
 
-inline void TranslateFilename( int c,char * tmp )
-{
- int i;
- switch ( guiIntfStruct.StreamType )
-  {
-   case STREAMTYPE_STREAM:
-        strcpy( tmp,guiIntfStruct.Filename );
-        break;
-   case STREAMTYPE_FILE:
-          if ( ( guiIntfStruct.Filename )&&( guiIntfStruct.Filename[0] ) )
-           {
-	    if ( strrchr( guiIntfStruct.Filename,'/' ) ) strcpy( tmp,strrchr( guiIntfStruct.Filename,'/' ) + 1 );
-	     else strcpy( tmp,guiIntfStruct.Filename );
-            if ( tmp[strlen( tmp ) - 4] == '.' ) tmp[strlen( tmp ) - 4]=0;
-            if ( tmp[strlen( tmp ) - 5] == '.' ) tmp[strlen( tmp ) - 5]=0;
-           } else strcpy( tmp,MSGTR_NoFileLoaded );
-          break;
-#ifdef USE_DVDREAD
-   case STREAMTYPE_DVD:
-          if ( guiIntfStruct.DVD.current_chapter ) sprintf( tmp,MSGTR_Chapter,guiIntfStruct.DVD.current_chapter );
-            else strcat( tmp,MSGTR_NoChapter );
-          break;
-#endif
-#ifdef HAVE_VCD
-   case STREAMTYPE_VCD:
-        sprintf( tmp,MSGTR_VCDTrack,guiIntfStruct.Track );
-	break;
-#endif
-   default: strcpy( tmp,MSGTR_NoMediaOpened );
-  }
- if ( c )
-  {
-   for ( i=0;i < (int)strlen( tmp );i++ )
-    {
-     int t=0;
-     if ( c == 1 ) { if ( ( tmp[i] >= 'A' )&&( tmp[i] <= 'Z' ) ) t=32; }
-     if ( c == 2 ) { if ( ( tmp[i] >= 'a' )&&( tmp[i] <= 'z' ) ) t=-32; }
-     tmp[i]=(char)( tmp[i] + t );
-    }
-  }
-}
-
-char * Translate( char * str )
-{
- static char   trbuf[512];
-        char   tmp[512];
-        int    i,c;
-        int    t;
- memset( trbuf,0,512 );
- memset( tmp,0,128 );
- for ( c=0,i=0;i < (int)strlen( str );i++ )
-  {
-   if ( str[i] != '$' ) { trbuf[c++]=str[i]; trbuf[c]=0; }
-    else
-    {
-     switch ( str[++i] )
-      {
-       case 't': sprintf( tmp,"%02d",guiIntfStruct.Track ); strcat( trbuf,tmp ); break;
-       case 'o': TranslateFilename( 0,tmp ); strcat( trbuf,tmp ); break;
-       case 'f': TranslateFilename( 1,tmp ); strcat( trbuf,tmp ); break;
-       case 'F': TranslateFilename( 2,tmp ); strcat( trbuf,tmp ); break;
-       case '6': t=guiIntfStruct.LengthInSec; goto calclengthhhmmss;
-       case '1': t=guiIntfStruct.TimeSec;
-calclengthhhmmss:
-            sprintf( tmp,"%02d:%02d:%02d",t/3600,t/60%60,t%60 ); strcat( trbuf,tmp );
-            break;
-       case '7': t=guiIntfStruct.LengthInSec; goto calclengthmmmmss;
-       case '2': t=guiIntfStruct.TimeSec;
-calclengthmmmmss:
-            sprintf( tmp,"%04d:%02d",t/60,t%60 ); strcat( trbuf,tmp );
-            break;
-       case '3': sprintf( tmp,"%02d",guiIntfStruct.TimeSec / 3600 ); strcat( trbuf,tmp ); break;
-       case '4': sprintf( tmp,"%02d",( ( guiIntfStruct.TimeSec / 60 ) % 60 ) ); strcat( trbuf,tmp ); break;
-       case '5': sprintf( tmp,"%02d",guiIntfStruct.TimeSec % 60 ); strcat( trbuf,tmp ); break;
-       case '8': sprintf( tmp,"%01d:%02d:%02d",guiIntfStruct.TimeSec / 3600,( guiIntfStruct.TimeSec / 60 ) % 60,guiIntfStruct.TimeSec % 60 ); strcat( trbuf,tmp ); break;
-       case 'v': sprintf( tmp,"%3.2f%%",guiIntfStruct.Volume ); strcat( trbuf,tmp ); break;
-       case 'V': sprintf( tmp,"%3.1f",guiIntfStruct.Volume ); strcat( trbuf,tmp ); break;
-       case 'b': sprintf( tmp,"%3.2f%%",guiIntfStruct.Balance ); strcat( trbuf,tmp ); break;
-       case 'B': sprintf( tmp,"%3.1f",guiIntfStruct.Balance ); strcat( trbuf,tmp ); break;
-       case 'd': sprintf( tmp,"%d",guiIntfStruct.FrameDrop ); strcat( trbuf,tmp ); break;
-       case 'x': sprintf( tmp,"%d",guiIntfStruct.MovieWidth ); strcat( trbuf,tmp ); break;
-       case 'y': sprintf( tmp,"%d",guiIntfStruct.MovieHeight ); strcat( trbuf,tmp ); break;
-       case 'C': sprintf( tmp,"%s", guiIntfStruct.sh_video? ((sh_video_t *)guiIntfStruct.sh_video)->codec->name : "");
-                 strcat( trbuf,tmp ); break;
-       case 's': if ( guiIntfStruct.Playing == 0 ) strcat( trbuf,"s" ); break;
-       case 'l': if ( guiIntfStruct.Playing == 1 ) strcat( trbuf,"p" ); break;
-       case 'e': if ( guiIntfStruct.Playing == 2 ) strcat( trbuf,"e" ); break;
-       case 'a':
-            if ( muted ) { strcat( trbuf,"n" ); break; }
-            switch ( guiIntfStruct.AudioType )
-             {
-              case 0: strcat( trbuf,"n" ); break;
-              case 1: strcat( trbuf,"m" ); break;
-              case 2: strcat( trbuf,"t" ); break;
-             }
-            break;
-       case 'T':
-           switch ( guiIntfStruct.StreamType )
-            {
-             case STREAMTYPE_FILE:   strcat( trbuf,"f" ); break;
-#ifdef HAVE_VCD
-             case STREAMTYPE_VCD:    strcat( trbuf,"v" ); break;
-#endif
-             case STREAMTYPE_STREAM: strcat( trbuf,"u" ); break;
-#ifdef USE_DVDREAD
-             case STREAMTYPE_DVD:    strcat( trbuf,"d" ); break;
-#endif
-             default:                strcat( trbuf," " ); break;
-            }
-           break;
-       case '$': strcat( trbuf,"$" ); break;
-       default: continue;
-      }
-     c=strlen( trbuf );
-    }
-  }
- return trbuf;
-}
-
-inline void PutImage( txSample * bf,int x,int y,int max,int ofs )
-{
- int i=0,ix,iy;
- uint32_t * buf = NULL;
- uint32_t * drw = NULL;
- uint32_t   tmp;
-
- if ( ( !bf )||( bf->Image == NULL ) ) return;
-
- i=( bf->Width * ( bf->Height / max ) ) * ofs;
- buf=(uint32_t *)mplDrawBuffer;
- drw=(uint32_t *)bf->Image;
-
- for ( iy=y;iy < (int)(y+bf->Height / max);iy++ )
-  for ( ix=x;ix < (int)(x+bf->Width);ix++ )
-   {
-    tmp=drw[i++];
-    if ( tmp != 0x00ff00ff )
-     buf[ iy*appMPlayer.main.Bitmap.Width+ix ]=tmp;
-   }
-}
+#include "common.h"
 
 void mplMainDraw( void )
 {
@@ -196,41 +57,13 @@ void mplMainDraw( void )
       !mainVisible ) return;
 //      !appMPlayer.mainWindow.Mapped ) return;
 
- btnModify( evSetMoviePosition,guiIntfStruct.Position );
- btnModify( evSetVolume,guiIntfStruct.Volume );
-
  if ( mplMainRender && appMPlayer.mainWindow.State == wsWindowExpose )
   {
+   btnModify( evSetMoviePosition,guiIntfStruct.Position );
+   btnModify( evSetVolume,guiIntfStruct.Volume );
+
    memcpy( mplDrawBuffer,appMPlayer.main.Bitmap.Image,appMPlayer.main.Bitmap.ImageSize );
-   for( i=0;i < appMPlayer.NumberOfItems + 1;i++ )
-    {
-     item=&appMPlayer.Items[i];
-     switch( item->type )
-      {
-       case itButton:
-            PutImage( &item->Bitmap,item->x,item->y,3,item->pressed );
-            break;
-       case itPotmeter:
-            PutImage( &item->Bitmap,item->x,item->y,item->phases,( item->phases - 1 ) * ( item->value / 100.0f ) );
-            break;
-       case itHPotmeter:
-            PutImage( &item->Bitmap,item->x,item->y,item->phases,item->phases * ( item->value / 100.0f ) );
-            PutImage( &item->Mask,item->x + (int)( ( item->width - item->psx ) * item->value / 100.0f ),item->y,3,item->pressed );
-            break;
-       case itSLabel:
-            image=fntRender( item,0,"%s",item->label );
-            if ( image ) PutImage( image,item->x,item->y,1,0 );
-       case itDLabel:
-            {
-	     char * t = Translate( item->label );
-	     int    l = fntTextWidth( item->fontid,t );
-             image=fntRender( item,(GetTimerMS() / 20)%(l?l:item->width),"%s",t );
-	    }
-            if ( image ) PutImage( image,item->x,item->y,1,0 );
-            break;
-      }
-    }
-   wsConvert( &appMPlayer.mainWindow,mplDrawBuffer,appMPlayer.main.Bitmap.ImageSize );
+   Render( &appMPlayer.mainWindow,appMPlayer.Items,appMPlayer.NumberOfItems,mplDrawBuffer,appMPlayer.main.Bitmap.ImageSize );
    mplMainRender=0;
   }
  wsPutImage( &appMPlayer.mainWindow );
@@ -498,6 +331,7 @@ set_volume:
    case evRedraw:
         mplMainRender=1;
         wsPostRedisplay( &appMPlayer.mainWindow );
+	wsPostRedisplay( &appMPlayer.barWindow );
         break;
 // --- system events
 #ifdef MP_DEBUG
@@ -542,10 +376,10 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
 
    case wsPLMouseButton:
 	  gtkShow( evHidePopUpMenu,NULL );
-          sx=X; sy=Y; boxMoved=1; itemtype=itPLMButton; // if move the main window
+          sx=X; sy=Y; boxMoved=1; itemtype=itPLMButton;
           SelectedItem=currentselected;
-          if ( SelectedItem == -1 ) break; // yeees, i'm move the fucking window
-          boxMoved=0; //mplMainRender=1; // No, not move the window, i'm pressed one button
+          if ( SelectedItem == -1 ) break;
+          boxMoved=0; 
           item=&appMPlayer.Items[SelectedItem];
           itemtype=item->type;
           item->pressed=btnPressed;
@@ -553,9 +387,9 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
            {
             case itButton:
                  if ( ( SelectedItem > -1 ) &&
-                    ( ( ( appMPlayer.Items[SelectedItem].msg == evPlaySwitchToPause && item->msg == evPauseSwitchToPlay ) ) ||
-                      ( ( appMPlayer.Items[SelectedItem].msg == evPauseSwitchToPlay && item->msg == evPlaySwitchToPause ) ) ) )
-                  { appMPlayer.Items[SelectedItem].pressed=btnDisabled; }
+                    ( ( ( item->msg == evPlaySwitchToPause && item->msg == evPauseSwitchToPlay ) ) ||
+                      ( ( item->msg == evPauseSwitchToPlay && item->msg == evPlaySwitchToPause ) ) ) )
+                  { item->pressed=btnDisabled; }
                  break;
            }
           break;
@@ -576,7 +410,6 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
                  break;
            }
           mplEventHandling( item->msg,value );
-//          mplMainRender=1;
           itemtype=0;
           break;
 
@@ -612,6 +445,9 @@ rollerhandled:
             case itPotmeter:
                  item->value=(float)( X - item->x ) / item->width * 100.0f;
                  goto potihandled;
+            case itVPotmeter:
+                 item->value=(float)( Y - item->y ) / item->height * 100.0f;
+                 goto potihandled;
             case itHPotmeter:
                  item->value=(float)( X - item->x ) / item->width * 100.0f;
 potihandled:
@@ -622,7 +458,6 @@ potihandled:
            }
           break;
   }
-// if ( Button != wsMoveMouse ) wsPostRedisplay( &appMPlayer.mainWindow );
 }
 
 int keyPressed = 0;
@@ -659,15 +494,13 @@ void mplMainKeyHandle( int KeyCode,int Type,int Key )
       case wsXF86Prev:         msg=evPrev; break;
       case wsXF86Next:         msg=evNext; break;
       case wsXF86Media:        msg=evLoad; break;
-      case wsEscape:
+      case wsEscape: 
     	    if ( appMPlayer.subWindow.isFullScreen )
 	     { 
-	      if ( guiIntfStruct.event_struct )
-	       { memset( guiIntfStruct.event_struct,0,sizeof( XEvent ) ); guiIntfStruct.event_struct=NULL; }
+	      if ( guiIntfStruct.event_struct ) ((XEvent *)guiIntfStruct.event_struct)->type=None; 
 	      mplEventHandling( evNormalSize,0 ); 
-	      break; 
+	      return;
 	     }
-
       default:          vo_x11_putkey( Key ); return;
      }
    }

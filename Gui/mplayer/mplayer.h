@@ -29,4 +29,7 @@ extern void mplHideMenu( int mx,int my,int w );
 extern void mplShowMenu( int mx,int my );
 extern void mplMenuMouseHandle( int X,int Y,int RX,int RY );
 
+extern void mplPBInit( void );
+extern void mplPBShow( int x, int y );
+
 #endif

@@ -84,7 +84,7 @@ void mplFullScreen( void )
 
  fullscreen=appMPlayer.subWindow.isFullScreen;
  if ( guiIntfStruct.Playing ) wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
-  else wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+  else wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.sub.R,appMPlayer.sub.G,appMPlayer.sub.B );
 }
 
 extern int mplSubRender;
@@ -126,7 +126,7 @@ void mplEnd( void )
       }
      guiGetEvent( guiCEvent,guiSetStop );
      mplSubRender=1;
-     wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+     wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.sub.R,appMPlayer.sub.G,appMPlayer.sub.B );
      wsClearWindow( appMPlayer.subWindow );
      wsPostRedisplay( &appMPlayer.subWindow );
     }
@@ -192,9 +192,10 @@ void ChangeSkin( char * name )
 {
  int ret;
  int prev = appMPlayer.menuIsPresent;
+ int bprev = appMPlayer.barIsPresent;
 
  mainVisible=0;
-
+ 
  appInitStruct( &tmpList );
  skinAppMPlayer=&tmpList;
  fntFreeFont();
@@ -210,6 +211,8 @@ void ChangeSkin( char * name )
    return;
   }
 
+// --- reload menu window
+
  if ( prev && appMPlayer.menuIsPresent )
   {
    if ( mplMenuDrawBuffer ) free( mplMenuDrawBuffer );
@@ -221,6 +224,7 @@ void ChangeSkin( char * name )
    wsVisibleWindow( &appMPlayer.menuWindow,wsHideWindow );
   } else { mplMenuInit(); }
 
+// --- reload sub window
  if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
  if ( ( !appMPlayer.subWindow.isFullScreen )&&( !guiIntfStruct.Playing ) )
   {
@@ -231,26 +235,20 @@ void ChangeSkin( char * name )
  if ( !guiIntfStruct.Playing )
   {
    mplSubRender=1;
-   wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+   wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.sub.R,appMPlayer.sub.G,appMPlayer.sub.B );
    wsClearWindow( appMPlayer.subWindow );
    wsPostRedisplay( &appMPlayer.subWindow );
   }
 
+// --- reload play bar
+ if ( bprev ) wsDestroyWindow( &appMPlayer.barWindow );
+ mplPBInit();
+
+// --- reload main window
  if ( mplDrawBuffer ) free( mplDrawBuffer );
  if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
   { mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_NEMDB ); return; }
 
-#if 0
-// if ( vo_wm_type == vo_wm_Unknown ) 
-  wsVisibleWindow( &appMPlayer.mainWindow,wsHideWindow );
- wsResizeWindow( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
- wsMoveWindow( &appMPlayer.mainWindow,True,appMPlayer.main.x,appMPlayer.main.y );
- wsResizeImage( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
- wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
- wsWindowDecoration( &appMPlayer.mainWindow,appMPlayer.mainDecoration );
- mainVisible=1; mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
- wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
-#else
  wsDestroyWindow( &appMPlayer.mainWindow );
 
  wsCreateWindow( &appMPlayer.mainWindow,
@@ -269,11 +267,16 @@ void ChangeSkin( char * name )
  if ( !appMPlayer.mainDecoration ) wsWindowDecoration( &appMPlayer.mainWindow,0 );
  wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
  mainVisible=1;
-#endif
+// ---
+
  btnModify( evSetVolume,guiIntfStruct.Volume );
  btnModify( evSetBalance,guiIntfStruct.Balance );
  btnModify( evSetMoviePosition,guiIntfStruct.Position );
  btnModify( evFullScreen,!appMPlayer.subWindow.isFullScreen );
+
+ wsSetLayer( wsDisplay,appMPlayer.mainWindow.WindowID,appMPlayer.subWindow.isFullScreen );
+ wsSetLayer( wsDisplay,appMPlayer.menuWindow.WindowID,appMPlayer.subWindow.isFullScreen );
+ 
 }
 
 void mplSetFileName( char * dir,char * name,int type )

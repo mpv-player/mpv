@@ -68,6 +68,7 @@ static GtkWidget * CBPostprocess;
 static GtkWidget * CBCache;
 static GtkWidget * CBLoadFullscreen;
 static GtkWidget * CBStopXScreenSaver;
+static GtkWidget * CBPlayBar;
 
 static GtkWidget * SBCache;
 static GtkAdjustment * SBCacheadj;
@@ -264,6 +265,8 @@ void ShowPreferences( void )
 #if 0
  if ( guiIntfStruct.Subtitlename ) gtk_entry_set_text( GTK_ENTRY( ESubtitleName ),guiIntfStruct.Subtitlename );
 #endif
+
+// --- 4. page
  // font ...
  if ( font_name ) gtk_entry_set_text( GTK_ENTRY( prEFontName ),font_name );
 #ifndef HAVE_FREETYPE
@@ -290,13 +293,9 @@ void ShowPreferences( void )
   }
 #endif
 
-// -- 4. page
+// -- 5. page
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ),force_ni );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBIndex ),index_mode );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPostprocess ),gtkVopPP );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ),gtkLoadFullscreen );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBStopXScreenSaver ),stop_xscreensaver );
- gtk_adjustment_set_value( HSPPQualityadj,auto_quality );
  {
   int     i;
   GList * Items = NULL;
@@ -328,6 +327,13 @@ void ShowPreferences( void )
   g_list_free( Items );
   if ( name ) gtk_entry_set_text( GTK_ENTRY( EAFM ),name );
  }
+
+// --- 6. page
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPostprocess ),gtkVopPP );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ),gtkLoadFullscreen );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPlayBar ),gtkEnablePlayBar );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBStopXScreenSaver ),stop_xscreensaver );
+ gtk_adjustment_set_value( HSPPQualityadj,auto_quality );
 
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),0 );
  gtk_adjustment_set_value( SBCacheadj,(float)gtkCacheSize );
@@ -484,7 +490,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDTandP ) ) ) osd_level=2;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDTPTT ) ) ) osd_level=3;
 
-        // font ...	
+        // --- 4. page
 	guiSetFilename( font_name,gtk_entry_get_text( GTK_ENTRY( prEFontName ) ) );
 #ifndef HAVE_FREETYPE
 	gtkSet( gtkSetFontFactor,HSFontFactoradj->value,NULL );
@@ -499,19 +505,9 @@ void prButton( GtkButton * button,gpointer user_data )
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBFontAutoScaleDiagonal ) ) ) gtkSet( gtkSetFontAutoScale,3,NULL );
 #endif
 
-	// -- 4. page
+	// -- 5. page
 	force_ni=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ) );
 	index_mode=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBIndex ) );
-	gtkVopPP=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPostprocess ) ); 
-	gtkLoadFullscreen=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ) );
-	stop_xscreensaver=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBStopXScreenSaver ) );
-	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
-
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) { gtkCacheSize=(int)SBCacheadj->value; gtkCacheOn=1; }
-	 else gtkCacheOn=0;
-	
-	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBAutoSync ) ) ) { gtkAutoSync=(int)SBAutoSyncadj->value; gtkAutoSyncOn=1; }
-	 else gtkAutoSyncOn=0;
 
 	{
 	 int i;
@@ -528,6 +524,19 @@ void prButton( GtkButton * button,gpointer user_data )
           if ( !gstrcmp( tmp,(char *)mpcodecs_ad_drivers[i]->info->name ) )
 	   { gaddlist( &audio_fm_list,(char *)mpcodecs_ad_drivers[i]->info->short_name ); break; }
 	}
+
+	// --- 6. page
+	gtkVopPP=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPostprocess ) ); 
+	gtkLoadFullscreen=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ) );
+	stop_xscreensaver=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBStopXScreenSaver ) );
+	gtkEnablePlayBar=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPlayBar ) );
+	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
+
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) { gtkCacheSize=(int)SBCacheadj->value; gtkCacheOn=1; }
+	 else gtkCacheOn=0;
+	
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBAutoSync ) ) ) { gtkAutoSync=(int)SBAutoSyncadj->value; gtkAutoSyncOn=1; }
+	 else gtkAutoSyncOn=0;
 
 	guiSetFilename( dvd_device,gtk_entry_get_text( GTK_ENTRY( prEDVDDevice ) ) );
 	guiSetFilename( cdrom_device,gtk_entry_get_text( GTK_ENTRY( prECDRomDevice ) ) );
@@ -725,7 +734,7 @@ GtkWidget * create_Preferences( void )
   frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox1,1 );
   frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
-// --- 1. panel
+// --- 1. page
 
   vbox2=AddVBox( frame,0 );
 
@@ -777,7 +786,7 @@ GtkWidget * create_Preferences( void )
   label=AddLabel( MSGTR_PREFERENCES_Audio,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),0 ),label );
 
-// --- 2. panel
+// --- 2. page
 
   hbox2=AddVBox( notebook1,0 );
 
@@ -827,7 +836,7 @@ GtkWidget * create_Preferences( void )
   label=AddLabel( MSGTR_PREFERENCES_Video,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),1 ),label );
 
-// --- 3. panel
+// --- 3. page
 
   vbox6=AddVBox( notebook1,0 );
 
@@ -899,7 +908,7 @@ GtkWidget * create_Preferences( void )
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),2 ),label );
   vbox601=AddVBox( notebook1,0 );
 
-// --- 4. panel
+// --- 4. page
 
   vbox603=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
@@ -984,7 +993,7 @@ GtkWidget * create_Preferences( void )
   label=AddLabel( MSGTR_PREFERENCES_FRAME_Font,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),3 ),label );
 
-// --- 5. panel
+// --- 5. page
 
   vbox601=AddVBox( notebook1,0 );
 
@@ -1028,7 +1037,7 @@ GtkWidget * create_Preferences( void )
 
   vbox601=AddVBox( notebook1,0 );
   
-// --- 6. panel
+// --- 6. page
 
   vbox602=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
@@ -1065,6 +1074,7 @@ GtkWidget * create_Preferences( void )
 
   CBLoadFullscreen=AddCheckButton( MSGTR_PREFERENCES_LoadFullscreen,vbox602 );
   CBStopXScreenSaver=AddCheckButton( MSGTR_PREFERENCES_XSCREENSAVER,vbox602 );
+  CBPlayBar=AddCheckButton( MSGTR_PREFERENCES_PlayBar,vbox602 );
 
   AddHSeparator( vbox602 );
 

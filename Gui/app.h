@@ -134,6 +134,8 @@ typedef struct
  char     * label;
 // ---
  int        event;
+// --- 
+ int        R,G,B;
 } wItem;
 
 typedef struct
@@ -144,16 +146,11 @@ typedef struct
 
  wItem           sub;
  wsTWindow       subWindow;
- int             subR,subG,subB;
 
  wItem           bar;
  wsTWindow       barWindow;
- int             barR,barG,barB;
  int             barIsPresent;
-
- wItem           eq;
- wsTWindow       eqWindow;
-
+  
  wItem           menuBase;
  wItem           menuSelected;
  wsTWindow       menuWindow;
@@ -164,7 +161,10 @@ typedef struct
  wItem           Items[256];
 // ---
  int             NumberOfMenuItems;
- wItem           MenuItems[32];
+ wItem           MenuItems[64];
+// ---
+ int		 NumberOfBarItems;
+ wItem		 barItems[32];
 } listItems;
 
 extern listItems   appMPlayer;

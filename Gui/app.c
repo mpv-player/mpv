@@ -109,7 +109,6 @@ void appCopy( listItems * dest,listItems * source )
 
  memcpy( &dest->main,&source->main,sizeof( wItem ) );
  memcpy( &dest->sub,&source->sub,sizeof( wItem ) );
- memcpy( &dest->eq,&source->eq,sizeof( wItem ) );
  memcpy( &dest->menuBase,&source->menuBase,sizeof( wItem ) );
  memcpy( &dest->menuSelected,&source->menuSelected,sizeof( wItem ) );
 }
@@ -135,9 +134,9 @@ void appInitStruct( listItems * item )
  item->sub.x=-1; item->sub.y=-1;
  appClearItem( &item->menuBase );
  appClearItem( &item->menuSelected );
- item->subR=0;
- item->subG=0;
- item->subB=0;
+ item->sub.R=item->sub.G=item->sub.B=0;
+ item->bar.R=item->bar.G=item->bar.B=0;
+ item->main.R=item->main.G=item->main.B=0;
  item->barIsPresent=0;
  item->menuIsPresent=0;
 }
@@ -161,7 +160,7 @@ int appFindMessage( unsigned char * str )
 void btnModify( int event,float state )
 {
  int j;
- for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
+ for ( j=0;j < appMPlayer.NumberOfItems + 1;j++ )
   if ( appMPlayer.Items[j].msg == event )
    {
     switch ( appMPlayer.Items[j].type )
@@ -171,10 +170,30 @@ void btnModify( int event,float state )
             appMPlayer.Items[j].tmp=(int)state;
             break;
       case itPotmeter:
+      case itVPotmeter:
       case itHPotmeter:
     	    if ( state < 0.0f ) state=0.0f;
 	    if ( state > 100.f ) state=100.0f;
 	    appMPlayer.Items[j].value=state;
+	    break;
+     }
+   }
+
+ for ( j=0;j < appMPlayer.NumberOfBarItems + 1;j++ )
+  if ( appMPlayer.barItems[j].msg == event )
+   {
+    switch ( appMPlayer.barItems[j].type )
+     {
+      case itButton:
+            appMPlayer.barItems[j].pressed=(int)state;
+            appMPlayer.barItems[j].tmp=(int)state;
+            break;
+      case itPotmeter:
+      case itVPotmeter:
+      case itHPotmeter:
+    	    if ( state < 0.0f ) state=0.0f;
+	    if ( state > 100.f ) state=100.0f;
+	    appMPlayer.barItems[j].value=state;
 	    break;
      }
    }

@@ -73,10 +73,10 @@ int fntRead( char * path,char * fname )
    for ( c=0;c < (int)strlen( tmp );c++ )
      if ( tmp[c] == ';' ) { tmp[c]=0; break; }
    if ( !tmp[0] ) continue;
-   ptmp=strdelspacesbeforecommand( tmp );
+   ptmp=trimleft( tmp );
    if ( !tmp[0] ) continue;
    ptmp=strswap( ptmp,'\t',' ' );
-   ptmp=strdelspaces( ptmp );
+   ptmp=trim( ptmp );
    cutItem( ptmp,command,'=',0 ); cutItem( ptmp,param,'=',1 );
    if ( command[0] == '"' )
     {

@@ -57,6 +57,7 @@ int    gtkSubDumpMPSub = 0;
 int    gtkSubDumpSrt = 0;
 
 int    gtkLoadFullscreen = 0;
+int    gtkEnablePlayBar = 0;
 
 // ---
 
@@ -128,7 +129,8 @@ static config_t gui_opts[] =
 
  { "cache",&gtkCacheOn,CONF_TYPE_FLAG,0,0,1,NULL },
  { "cache_size",&gtkCacheSize,CONF_TYPE_INT,CONF_RANGE,-1,65535,NULL },
- 
+
+ { "playbar",&gtkEnablePlayBar,CONF_TYPE_FLAG,0,0,1,NULL }, 
  { "load_fullscreen",&gtkLoadFullscreen,CONF_TYPE_FLAG,0,0,1,NULL },
  { "stopxscreensaver",&stop_xscreensaver,CONF_TYPE_FLAG,0,0,1,NULL },
 

@@ -211,12 +211,21 @@ void gtkShow( int type,char * param )
    case evShowPopUpMenu:
         gtkPopupMenu=evNone;
         gtkPopupMenuParam=0;
-        if ( PopUpMenu ) { gtk_widget_hide_on_delete( PopUpMenu ); }
+        if ( PopUpMenu ) 
+	 { 
+	  gtk_widget_hide( PopUpMenu ); 
+	  gtk_widget_destroy( PopUpMenu );
+	 }
         PopUpMenu=create_PopUpMenu();
         gtk_menu_popup( GTK_MENU( PopUpMenu ),NULL,NULL,NULL,NULL,0,0 );
         break;
    case evHidePopUpMenu:
-        if ( PopUpMenu ) { gtk_widget_hide_on_delete( PopUpMenu ); PopUpMenu=NULL; }
+        if ( PopUpMenu ) 
+	 {
+	  gtk_widget_hide( PopUpMenu );
+	  gtk_widget_destroy( PopUpMenu );
+	  PopUpMenu=NULL; 
+	 }
         break;
    case evPlayNetwork:
 	ShowURLDialogBox();

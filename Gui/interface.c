@@ -203,6 +203,9 @@ void guiInit( void )
  wsCreateImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
  wsXDNDMakeAwareness(&appMPlayer.subWindow);
 
+ mplMenuInit();
+ mplPBInit();
+
  vo_setwindow( appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC );
 
 // i=wsHideFrame|wsMaxSize|wsHideWindow;
@@ -214,8 +217,6 @@ void guiInit( void )
 
  wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
  wsXDNDMakeAwareness(&appMPlayer.mainWindow);
-
- mplMenuInit();
 
  #ifdef DEBUG
   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] Depth on screen: %d\n",wsDepthOnScreen );
@@ -233,7 +234,7 @@ void guiInit( void )
  appMPlayer.subWindow.KeyHandler=mplMainKeyHandle;
  appMPlayer.subWindow.DandDHandler=mplDandDHandler;
 
- wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+ wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.sub.R,appMPlayer.sub.G,appMPlayer.sub.B );
  wsClearWindow( appMPlayer.subWindow );
  if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
 
@@ -433,7 +434,7 @@ int guiGetEvent( int type,char * arg )
  switch ( type )
   {
    case guiXEvent:
-	guiIntfStruct.event_struct=(void *)arg;
+        guiIntfStruct.event_struct=(void *)arg;
         wsEvents( wsDisplay,(XEvent *)arg,NULL );
         gtkEventHandling();
         break;
