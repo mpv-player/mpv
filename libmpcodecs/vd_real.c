@@ -146,7 +146,7 @@ static int init(sh_video_t *sh){
 	/* first try to load linux dlls, if failed and we're supporting win32 dlls,
 	   then try to load the windows ones */
 	if(!load_syms_linux(path))
-#ifdef USE_WIN32DLLS
+#ifdef USE_WIN32DLL
 	    if (!load_syms_windows(path))
 #endif
 	{
