@@ -86,6 +86,9 @@ static int lavc_param_rc_min_rate=0;
 static float lavc_param_rc_initial_cplx=0;
 static int lavc_param_mpeg_quant=0;
 static int lavc_param_fdct=0;
+#if LIBAVCODEC_BUILD >= 4623
+static float lavc_param_aspect=0.0;
+#endif
 
 #include "cfgparser.h"
 
@@ -142,6 +145,9 @@ struct config lavcopts_conf[]={
 #if LIBAVCODEC_BUILD >= 4621
         {"vfdct", &lavc_param_fdct, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
 #endif
+#if LIBAVCODEC_BUILD >= 4623
+	{"aspect", &lavc_param_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
+#endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -192,7 +198,6 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context.b_quant_factor= lavc_param_vb_qfactor;
     lavc_venc_context.rc_strategy= lavc_param_vrc_strategy;
     lavc_venc_context.b_frame_strategy= lavc_param_vb_strategy;
-
 #ifdef CODEC_FLAG_PART
     lavc_venc_context.b_quant_offset= lavc_param_vb_qoffset;
     lavc_venc_context.luma_elim_threshold= lavc_param_luma_elim_threshold;
@@ -246,6 +251,30 @@ static int config(struct vf_instance_s* vf,
 
 #if LIBAVCODEC_BUILD >= 4621
     lavc_venc_context.dct_algo= lavc_param_fdct;
+#endif
+
+#if LIBAVCODEC_BUILD >= 4623
+    if (lavc_param_aspect != 0.0)
+    {
+	/* 625 means CIF */
+	if (lavc_param_aspect == (float)(4.0/3.0))
+	    lavc_venc_context.aspect_ratio_info = FF_ASPECT_4_3_625;
+	else if (lavc_param_aspect == (float)(16.0/9.0))
+	    lavc_venc_context.aspect_ratio_info = FF_ASPECT_16_9_625;
+	else if (lavc_param_aspect == (float)(221.0/100.0))
+	{
+    	    lavc_venc_context.aspect_ratio_info = FF_ASPECT_EXTENDED;
+	    lavc_venc_context.aspected_width = 221;
+	    lavc_venc_context.aspected_height = 100;
+	}
+	else
+	{
+	    printf("Unsupported aspect ratio (%f)\n", lavc_param_aspect);
+	}
+	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "aspect_ratio_info: %d\n", lavc_venc_context.aspect_ratio_info);
+	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "par_width: %d\n", lavc_venc_context.aspected_width);
+	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "par_height: %d\n", lavc_venc_context.aspected_height);
+    }
 #endif
 
     /* keyframe interval */
@@ -382,7 +411,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
     case IMGFMT_I420:
-	return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
+      return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
     }
     return 0;
 }
