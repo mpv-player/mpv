@@ -68,18 +68,18 @@ Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (CDROM-Device)</CODE></P>
 
 <P>um den DMA-Zugriff, Vorauslesen und IRQ-Unmasking zu aktivieren.
-(Wenn du das nicht verstehst *lies die hdparm manpage*)</P>
+(Wenn du das nicht verstehst *lies bitte die hdparm manpage*)</P>
 
 <P>Bitte schau dir "<CODE>/proc/ide/[CDROM-Gerät]/settings</CODE>" an um das CD-ROM feineinzustellen.</P>
 
 <P><B><A NAME=4.2>4.2. DVD Wiedergabe</A></B></P>
   
 <P><B>MPlayer</B> benutzt <CODE>libdvdread</CODE> und <CODE>libdvdcss</CODE> für
-  die DVD Entschlüsselung und Wiedergabe. Diese beiden Bibliotheken sind in dem
+  die DVD Entschlüsselung und Wiedergabe. Diese beiden Bibliotheken sind im
   <CODE>libmpdvdkit/</CODE> Unterverzeichnis enthalten, sie müssen nicht separat
-  installiert werden. Wir gehen in diese Richtung, da schon ein libdvdread Bug
+  installiert werden. Wir gehen in diese Richtung, da ein libdvdread Bug
   behoben werden musste und wir einen Patch hinzufügten, welcher
-  <B>Cache Support für gecrackte CSS keys</B> for libdvdcss erlaubt (führt zu einer
+  <B>Cache Support für gecrackte CSS-Keys</B> für libdvdcss erlaubt (führt zu einer
   hohen Geschwindigkeitssteigerung vor der Wiedergabe). Die gecrackten Keys werden
   im <CODE>$HOME/.mplayer/DVDKeys</CODE> Verzeichnis abgelegt.</P>
 
@@ -114,16 +114,16 @@ Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
 <TD VALIGN=top><FONT CLASS="text">-dvd &lt;title_id&gt;&nbsp;</TD>
 <TD><FONT CLASS="text">Aktiviert die DVD-Unterstützung und wählt den Titel aus.</TD><TR>
 <TD VALIGN=top><FONT CLASS="text">-chapter &lt;chapter_id&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">Wählt das DVD-Kapitel (Standard: wiedergabe von Kapitel 1).
+<TD><FONT CLASS="text">Wählt das DVD-Kapitel (Standard: Wiedergabe von Kapitel 1).
   Beispiel : <CODE>-chapter 5-10</CODE> oder <CODE>-chapter -9</CODE></TD><TR>
 <TD VALIGN=top><FONT CLASS="text">-dvdangle &lt;angle_id&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">Zum aus wählen der Kamera-Perspektive (Standard: 1)</TD><TR>
+<TD><FONT CLASS="text">Zum Auswählen der Kamera-Perspektive (Standard: 1)</TD><TR>
 <TD VALIGN=top><FONT CLASS="text">-alang &lt;Ländercode&gt;&nbsp;</TD>
 <TD><FONT CLASS="text">
   Der <CODE>Ländercode</CODE> sagt <B>MPlayer</B> welche Sprache bevorzugt werden soll.
   Gib die Option <CODE>-v</CODE> nach den DVD-Optionen an und betrachte die Ausgabe, 
   um eine Liste der verfügbaren Sprachen zu erhalten.<BR>
-  Zum Beispiel :<BR>
+  Zum Beispiel:<BR>
   &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - versucht zuerst den ungarischen Ton zu finden und spielt
   den englischen Ton, falls es jenen nicht findet.</TD></TR>
 <TD VALIGN=top><FONT CLASS="text">-slang &lt;Ländercode&gt;&nbsp;</TD>
@@ -132,7 +132,7 @@ Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
   welche Sprache bevorzugt werden soll.
   Gib die Option <CODE>-v</CODE> nach den DVD-Optionen an und betrachte die Ausgabe,
   um eine Liste der verf|gbaren Sprachen zu erhalten.<BR>
-  Zum Beispiel :<BR>
+  Zum Beispiel:<BR>
   &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - versucht zuerst die ungarischen Untertitel abzubilden und zeigt
   die englischen Untertitel, dalls es jene nicht findet.</TD></TR>
 <TD VALIGN=top><FONT CLASS="text">-sid &lt;subtitel_id&gt;&nbsp;</TD>
@@ -146,17 +146,17 @@ Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
 </TD></TR>
 <TD VALIGN=top><FONT CLASS="text">-dvdauth &lt;DVD Gerät (Device)&gt;&nbsp;</TD>
 <TD><FONT CLASS="text">
-  (alte DVD Option) Aktiviert die DVD Authentifizierung des angegebenen Devices.
+  (alte DVD Option) Aktiviert die DVD Authentifizierung des angegebenen Gerätes.
 </TD></TR>
 <TD VALIGN=top><FONT CLASS="text">-dvdkey &lt;CSS key&gt;</TD>
 <TD><FONT CLASS="text">
-  (alte DVD Option) Wenn keine DVD dekodiert wird, gibt diese Option den CSS key an, welcher benötigt wird,
-  um die DVD zu knacken. (Der CSS key wird bei der Authentifizierung mit der DVD angezeigt).
+  (alte DVD Option) Wenn keine DVD dekodiert wird, gibt diese Option den CSS Key an welcher benötigt wird,
+  um die DVD zu knacken. (Der CSS Key wird bei der Authentifizierung mit der DVD angezeigt).
 </TD></TR>
 </TABLE>
 
 <P>Standard-Gerät ist <CODE>/dev/dvd</CODE>, du kannst das in config.h (compile time
-Option) ändern, oder du kannst es mit Hilfe der <CODE>-dvd-device</CODE> Option angeben:
+Option) ändern oder es mit Hilfe der <CODE>-dvd-device</CODE> Option angeben:
 </P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -dvd-device /dev/dvd</CODE></P>
