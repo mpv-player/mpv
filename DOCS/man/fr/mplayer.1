@@ -1,5 +1,5 @@
-.\" synced with 1.833
-.\" MPlayer (C) 2000-2004 MPlayer Team
+.\" synced with 1.834
+.\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
 .\"             Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "29 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "02 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -1773,10 +1773,6 @@ Outrepasse la détection de la taille du buffer audio du pilote/\:de la
 carte.
 .
 .TP
-.B \-aofile <nomfichier>
-Outrepasse le nom de fichier par défaut utilisé par \-ao pcm.
-.
-.TP
 .B \-aop <list=plugin1,plugin2...:option1=valeur1:opt2=val2...>
 Définit le(s) plugin(s) et leurs options
 (voir également la section des plugins audio de la documentation).
@@ -1876,11 +1872,6 @@ du niveau courant.
 Avec une valeur inférieure à 100, le niveau initial (qui est 100%) sera
 au-delà du niveau maximum\ ; par conséquent l'OSD ne l'affichera pas
 correctement.
-.
-.TP
-.B \-nowaveheader (\-ao pcm uniquement)
-Ne pas inclure l'entête wave.
-Utilisé avec PCM brut (raw).
 .
 .TP
 .B \-volstep <0\-100>
@@ -2022,9 +2013,23 @@ N'émet pas de son mais maintient la vitesse de lecture.
 Utilisez \-nosound pour des mesures (benchmarking).
 .
 .TP
-.B pcm (voir aussi \-aofile)
+.B pcm
 Extrait le son PCM/\:wave brut.
-Enregistre le son dans ./\:audiodump.wav.
+.PD 0
+.RSs
+.IPs (no)waveheader
+Inclut ou n'inclut pas l'entête wave (par défaut\ inclut).
+Quand l'entête n'est pas incluse, un fichier PCM brut sera généré.
+.IPs file=<nomfichier>
+Écrit le son dans le <nomfichier> au lieu de audiodump.wav par défaut.
+.REss
+.PD 1
+.RS
+.sp 1
+.I NOTE\ :
+Si vous ne spéciez aucune option, la sortie est progressive
+(c-à-d non entrelacée)
+.RE
 .
 .TP
 .B plugin\ \ 
