@@ -561,9 +561,9 @@ static uint32_t preinit(const char *arg) {
       use_ol = 0;
     }
   }
-
-  if(use_ol && !sub_vo) {
-    if(arg)
+  
+  if(!sub_vo) {
+    if(use_ol)
       mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] Sub driver '%s' not found => no overlay\n",arg);
     use_ol = 0;
   } else {
