@@ -180,7 +180,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
 {
  char                 * frame_mem;
 // uint32_t               frame_size;
- int                    mScreen;
+// int                    mScreen;
  unsigned int           fg, bg;
  char                 * mTitle=(title == NULL) ? "XMGA render" : title;
  char                 * name=":0.0";
