@@ -198,6 +198,11 @@ struct config conf[]={
 	{"vc", &video_codec, CONF_TYPE_STRING, 0, 0, 0},
 	{"dshow", &allow_dshow, CONF_TYPE_FLAG, 0, 0, 1}, // Is this still needed? atmos ::
 	{"nodshow", &allow_dshow, CONF_TYPE_FLAG, 0, 1, 0},
+#ifdef USE_STREAM_CACHE
+	{"cache", &stream_cache_size, CONF_TYPE_INT, CONF_RANGE, 4, 65536},
+#else
+	{"cache", "MPlayer was compiled WITHOUT cache2 support", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+#endif
 	{"vcd", &vcd_track, CONF_TYPE_INT, CONF_RANGE, 1, 99},
 #ifdef USE_DVDREAD
 	{"dvd", &dvd_title, CONF_TYPE_INT, CONF_RANGE, 1, 99},

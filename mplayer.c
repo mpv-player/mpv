@@ -222,6 +222,8 @@ static int vcd_track=0;
 static char *stream_dump_name=NULL;
 static int stream_dump_type=0;
 
+static int stream_cache_size=0;
+
 extern int dvd_title;
 
 // AVI demuxer params:
@@ -757,7 +759,7 @@ play_next_file:
   inited_flags|=INITED_STREAM;
   stream->start_pos+=seek_to_byte;
 
-  stream_enable_cache(stream,2048*1024);
+  if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024);
 
   use_stdin=filename && (!strcmp(filename,"-"));
 
