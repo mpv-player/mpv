@@ -48,6 +48,7 @@ extern int vo_gamma_red_intensity;
 extern int vo_gamma_green_intensity;
 extern int vo_gamma_blue_intensity;
 extern int vo_directrendering;
+extern int vd_use_slices;
 
 #ifdef USE_SUB
 extern int sub_unicode;
@@ -268,6 +269,8 @@ static config_t mplayer_opts[]={
 	{"nodr", &vo_directrendering, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"vaa_dr", "Use -dr, -vaa_dr was obsoleted\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"vaa_nodr", "Use -nodr, -vaa_nodr was obsoleted\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"slices", &vd_use_slices, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noslices", &vd_use_slices, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 #ifdef HAVE_AA
 	{"aa*",	vo_aa_parseoption,  CONF_TYPE_FUNC_FULL, 0, 0, 0 , &vo_aa_revertoption},
