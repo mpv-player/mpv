@@ -1,4 +1,4 @@
-/* $Revision$ */
+// $Revision$
 // MASTER FILE. Use this file as base for translations.
 
 // Translated files should be sent to the mplayer-dev-eng mailing list or
