@@ -3712,7 +3712,7 @@ if test "$_vorbis" = yes ; then
   _def_vorbis='#define HAVE_OGGVORBIS 1'
   if test "$_tremor" = yes ; then
     _def_tremor='#define TREMOR 1'
-    _ld_vorbis='-lvorbisidec -logg'
+    _ld_vorbis='-lvorbisidec'
   else
     _def_tremor='#undef TREMOR'
     _ld_vorbis='-lvorbis -logg'
