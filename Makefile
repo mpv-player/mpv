@@ -118,14 +118,14 @@ $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML
 
 install: $(ALL_PRG)
-	if [ ! -e $(BINDIR) ]; then \
+	if [ ! -d $(BINDIR) ]; then \
 		mkdir -p $(BINDIR); \
 	fi
 	install -m 755 -s $(PRG) $(BINDIR)/$(PRG)
 ifeq ($(GUI),yes)
 	-ln -s $(BINDIR)/$(PRG) $(BINDIR)/gmplayer
 endif
-	if [ ! -e $(prefix)/man/man1 ]; then \
+	if [ ! -d $(prefix)/man/man1 ]; then \
 		mkdir -p $(prefix)/man/man1; \
 	fi
 	install -c -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
