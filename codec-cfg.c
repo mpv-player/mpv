@@ -444,7 +444,7 @@ int main(void)
 	codecs_t *codecs;
         int i,j;
 
-	codecs = parse_codec_cfg("codecs.conf");
+	codecs = parse_codec_cfg("DOCS/codecs.conf");
         
         printf("total %d codecs parsed\n",nr_codecs);
         for(i=0;i<nr_codecs;i++){
