@@ -56,6 +56,8 @@ static XImage *myximage = NULL;
 static int depth,bpp,mode;
 static XWindowAttributes attribs;
 
+static int int_pause;
+
 static int Flip_Flag;
 static int zoomFlag;
 
@@ -88,12 +90,15 @@ static int old_vo_dheight=-1;
 static void check_events(){
   int ret = vo_x11_check_events(mDisplay);
   
-   /* clear the old window */
-  if ( (ret & VO_EVENT_RESIZE)||(ret & VO_EVENT_EXPOSE) )
+   /* clear left over borders and redraw frame if we are paused */
+  if ( ret & VO_EVENT_EXPOSE && int_pause)
   {
-    XSetBackground(mDisplay, vo_gc, 0);
-    XClearWindow(mDisplay, vo_window);
-  }
+	  vo_x11_clearwindow_part(mDisplay, vo_window, myximage->width, myximage->height, 0);
+	  flip_page();
+  } else
+      if ( (ret & VO_EVENT_RESIZE)||(ret & VO_EVENT_EXPOSE) )
+              vo_x11_clearwindow_part(mDisplay, vo_window, myximage->width, myximage->height, 0);
+  
 }
 
 static void draw_alpha_32(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
@@ -252,6 +257,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if( flags&0x02 ) vm = 1;
  if( flags&0x08 ) Flip_Flag = 1;
  zoomFlag = flags&0x04;
+
+ int_pause = 0;
 // if(!fullscreen) zoomFlag=1; //it makes no sense to avoid zooming on windowd mode
  
 //printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
@@ -326,10 +333,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
      {
       if ( vo_window == None )
        {
-        vo_window=XCreateWindow( mDisplay,mRootWin,
-    			 vo_dx,vo_dy,
-			 vo_dwidth,vo_dheight,
-                         xswa.border_pixel,depth,CopyFromParent,vinfo.visual,xswamask,&xswa );
+	vo_window=vo_x11_create_smooth_window( mDisplay,mRootWin,vinfo.visual, vo_dx, vo_dy, vo_dwidth, vo_dheight, depth, theCmap );
 
         vo_x11_classhint( mDisplay,vo_window,"x11" );
         vo_hidecursor(mDisplay,vo_window);
@@ -627,6 +631,8 @@ static uint32_t preinit(const char *arg)
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
+  case VOCTRL_PAUSE: return (int_pause=1);
+  case VOCTRL_RESUME: return (int_pause=0);
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   case VOCTRL_GUISUPPORT:
@@ -652,7 +658,10 @@ static uint32_t control(uint32_t request, void *data, ...)
       return vo_x11_get_equalizer(data, value);
     }
   case VOCTRL_FULLSCREEN:
-    vo_x11_fullscreen();
+    {
+      vo_x11_fullscreen();
+      vo_x11_clearwindow(mDisplay, vo_window);
+    }
     return VO_TRUE;
   }
   return VO_NOTIMPL;

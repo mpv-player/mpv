@@ -47,6 +47,8 @@ static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_bytes;
 
+static int int_pause;
+
 static uint32_t texture_width;
 static uint32_t texture_height;
 
@@ -77,12 +79,12 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	XEvent xev;
 
 //	XGCValues xgcv;
-	XSetWindowAttributes xswa;
-	unsigned long xswamask;
 
 	image_height = height;
 	image_width = width;
-  
+
+	int_pause = 0;
+
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
 	aspect_save_screenres(vo_screenwidth,vo_screenheight);
@@ -113,15 +115,12 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     return -1;
   }
 
-	xswa.background_pixel = 0;
-	xswa.border_pixel     = 1;
-	xswa.colormap         = XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone);
-	xswamask = CWBackPixel | CWBorderPixel | CWColormap;
+
 
 	if ( vo_window == None )
 	 {
-      vo_window = XCreateWindow(mDisplay, mRootWin,
-        hint.x, hint.y, hint.width, hint.height, 4, vinfo->depth,CopyFromParent,vinfo->visual,xswamask,&xswa);
+          vo_window = vo_x11_create_smooth_window(mDisplay, mRootWin, vinfo->visual, hint.x, hint.y, hint.width, hint.height,
+			                          vinfo->depth, XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone));
 
       vo_x11_classhint( mDisplay,vo_window,"gl" );
       vo_hidecursor(mDisplay,vo_window);
@@ -155,7 +154,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	XSync(mDisplay, False);
 
 	vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PointerMotionMask
-		     | ButtonPressMask | ButtonReleaseMask
+		     | ButtonPressMask | ButtonReleaseMask | ExposureMask
         );
 
   texture_width=32;
@@ -213,6 +212,7 @@ static void check_events(void)
 {
     int e=vo_x11_check_events(mDisplay);
     if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
+    if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
 }
 
 static void draw_osd(void)
@@ -308,6 +308,8 @@ static uint32_t preinit(const char *arg)
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
+  case VOCTRL_PAUSE: return (int_pause=1);
+  case VOCTRL_RESUME: return (int_pause=0);
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   case VOCTRL_FULLSCREEN:

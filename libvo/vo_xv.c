@@ -81,6 +81,8 @@ static uint32_t image_height;
 static uint32_t image_format;
 static int flip_flag;
 
+static int int_pause;
+
 static Window                 mRoot;
 static uint32_t               drwX,drwY,drwBorderWidth,drwDepth;
 static uint32_t               dwidth,dheight;
@@ -147,6 +149,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  image_format=format;
  
  vo_mouse_autohide=1;
+
+ int_pause=0;
 
  vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
  geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth, vo_screenheight);
@@ -233,16 +237,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
        } else { drwX=vo_dx; drwY=vo_dy; }
     } else 
     if ( vo_window == None ){
-        vo_window = XCreateWindow(mDisplay, mRootWin,
-          hint.x, hint.y, hint.width, hint.height,
-          0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
+        vo_window = vo_x11_create_smooth_window(mDisplay, mRootWin, vinfo.visual, hint.x, hint.y, hint.width, hint.height, depth, CopyFromParent); 
 
         vo_x11_classhint( mDisplay,vo_window,"xv" );
         vo_hidecursor(mDisplay,vo_window);
 
         vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PropertyChangeMask |
 	((WinID==0) ? 0 : (PointerMotionMask
-		| ButtonPressMask | ButtonReleaseMask
+		| ButtonPressMask | ButtonReleaseMask | ExposureMask
 	  )));
         XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
         XSetWMNormalHints( mDisplay,vo_window,&hint );
@@ -401,6 +403,10 @@ static void deallocate_xvimage(int foo)
 static void check_events(void)
 {
  int e=vo_x11_check_events(mDisplay);
+
+ if (e&VO_EVENT_EXPOSE && vo_fs)
+           vo_x11_clearwindow(mDisplay, vo_window);
+
  if(e&VO_EVENT_RESIZE)
   {
       if (vo_fs) {
@@ -424,21 +430,9 @@ static void check_events(void)
      mp_msg(MSGT_VO,MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
     }
   }
- if ( e & VO_EVENT_EXPOSE )
-  {
-#ifdef HAVE_SHM
-   if ( Shmem_Flag )
-    {
-     XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1, False);
-     XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight), False);
-    }
-   else
-#endif
-    {
-     XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1);
-     XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight));
-    }
-  }
+
+ if ( (e&VO_EVENT_EXPOSE || e&VO_EVENT_RESIZE) && int_pause)
+          flip_page();
 }
 
 static void draw_osd(void)
@@ -666,6 +660,8 @@ static uint32_t preinit(const char *arg)
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
+  case VOCTRL_PAUSE: return (int_pause=1);
+  case VOCTRL_RESUME: return (int_pause=0);		      
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
@@ -688,8 +684,8 @@ static uint32_t control(uint32_t request, void *data, ...)
       
       if(old_y != vo_panscan_y)
        {
-        XClearWindow(mDisplay, vo_window);
-        XFlush(mDisplay);
+	vo_x11_clearwindow_part(mDisplay, vo_window, vo_dwidth+vo_panscan_x-1, vo_dheight+vo_panscan_y-1, 1);
+	flip_page();
        }
      }
     return VO_TRUE;

@@ -623,6 +623,7 @@ void vo_x11_classhint( Display * display,Window window,char *name ){
 
 Window     vo_window = None;
 GC         vo_gc = NULL;
+GC         f_gc  = NULL;
 XSizeHints vo_hint;
 
 #ifdef HAVE_NEW_GUI
@@ -635,6 +636,8 @@ void vo_x11_uninit()
 {
     saver_on(mDisplay);
     if(vo_window!=None) vo_showcursor( mDisplay,vo_window );
+    
+    if (f_gc) XFreeGC(mDisplay, f_gc);
 
 #ifdef HAVE_NEW_GUI
     /* destroy window only if it's not controlled by GUI */
@@ -809,6 +812,65 @@ static int vo_x11_get_gnome_layer(Display * mDisplay, Window win)
  }
  return WIN_LAYER_NORMAL;
 }
+
+//
+Window vo_x11_create_smooth_window( Display *mDisplay, Window mRoot, Visual *vis, int x, int y, unsigned int width, unsigned int height, int depth, Colormap col_map)
+{
+   unsigned long xswamask;
+   XSetWindowAttributes xswa;
+   
+   xswamask=CWBackingStore | CWBorderPixel;
+   
+   if (col_map!=CopyFromParent)
+   {
+	   xswa.colormap = col_map;
+	   xswamask|=CWColormap;
+   }	   
+   xswa.background_pixel = 0;
+   xswa.border_pixel = 0;
+   xswa.backing_store = Always;
+   xswa.bit_gravity = StaticGravity;
+   
+   Window ret_win = XCreateWindow(mDisplay, mRootWin, x, y, width, height, 0, depth,
+		        CopyFromParent, vis, xswamask , &xswa);
+   if (!f_gc) f_gc=XCreateGC (mDisplay, ret_win, 0, 0);
+   XSetForeground (mDisplay, f_gc, 0);
+
+   return ret_win;
+}
+	
+
+void vo_x11_clearwindow_part( Display *mDisplay, Window vo_window, int img_wid, int img_hei, int use_fs)
+{
+   if (!f_gc) return;
+   int u_dheight = use_fs?vo_screenheight:vo_dheight;
+   int u_dwidth = use_fs?vo_screenwidth:vo_dwidth;
+   
+   if (u_dheight<=img_hei && u_dwidth<=img_wid) return;
+
+   int left_ov = (u_dheight - img_hei)/2;
+   int left_ov2 = (u_dwidth - img_wid)/2;   
+   
+   XFillRectangle(mDisplay, vo_window, f_gc, 0, 0, u_dwidth, left_ov);
+   XFillRectangle(mDisplay, vo_window, f_gc, 0, u_dheight-left_ov-1, u_dwidth, left_ov+1);
+   
+   if (u_dwidth>img_wid)
+   {
+   XFillRectangle(mDisplay, vo_window, f_gc, 0, left_ov, left_ov2, img_hei);
+   XFillRectangle(mDisplay, vo_window, f_gc, u_dwidth-left_ov2-1, left_ov, left_ov2, img_hei);
+   }
+
+   XFlush(mDisplay);
+}
+
+void vo_x11_clearwindow( Display *mDisplay, Window vo_window )
+{
+   if (!f_gc) return;
+   XFillRectangle(mDisplay, vo_window, f_gc, 0, 0, vo_screenwidth, vo_screenheight);
+   //
+   XFlush(mDisplay);
+}
+      
 
 void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
 {
