@@ -725,7 +725,7 @@ vobsub_parse_one_line(vobsub_t *vob, FILE *fd)
     ssize_t line_size;
     int res = -1;
     do {
-	int line_reserve = 0;
+	size_t line_reserve = 0;
 	char *line = NULL;
 	line_size = getline(&line, &line_reserve, fd);
 	if (line_size < 0) {

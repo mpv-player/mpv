@@ -658,7 +658,7 @@ subtitle* subcp_recode (subtitle *sub)
 		ileft = strlen(ip);
 		oleft = ICBUFFSIZE - 1;
 		
-		if (iconv(icdsc, (const char **) &ip, &ileft,
+		if (iconv(icdsc, &ip, &ileft,
 			  &op, &oleft) == (size_t)(-1)) {
 			printf ("SUB: error recoding line.\n");
 			l++;
