@@ -54,8 +54,8 @@ mencoder \- enkoder (koder) filmów
 .B mplayer
 .RI [opcje]\ [ \ zbiór\  | \ URL\  | \ lista\ odtwarzania\  | \ \-\  ]
 .
-.in
 .br
+.in
 .B mplayer
 'in +\n[.k]u
 [opcje globalne]
@@ -209,7 +209,8 @@ Ma te same opcje co MPlayer.
 MPlayer ma w pe³ni konfiguraln±, sterowan± komendami, warstwê kontroli, która
 pozwala Ci na sterowanie przy pomocy klawiatury, myszy, joystika lub
 zdalnego sterowania (korzysta z LIRC).
-Opcja \-input podpowie ci jakie s± sposoby dopasowania jej do swoich potrzeb.
+Opcja \-input podpowie Ci jakie s± sposoby dopasowania jej do swoich potrzeb.
+.
 .TP
 .B kontrola podstawowa
 .PD 0
@@ -239,7 +240,7 @@ Zmniejsza/\:zwiêksza g³o¶no¶æ.
 .IPs m\ \ \ \ 
 Wycisza d¼wiêk.
 .IPs f\ \ \ \ 
-Prze³±cza tryb pe³noekranowy.
+Prze³±cza tryb pe³noekranowy (patrz te¿ \-fs).
 .IPs T\ \ \ \ 
 Prze³±cza tryb zostañ-na-wierzchu (sprawd¼ równie¿ \-ontop).
 .IPs "w i e"
@@ -362,7 +363,7 @@ w ~/.mplayer lub w tym samym katalogu, co film.
 .SH "OPCJE OGÓLNE"
 .
 .TP
-.B \-codecs-file <plik> (zobacz równie¿ opcje \-afm, \-ac, \-vfm and \-vc)
+.B \-codecs-file <plik> (zobacz równie¿ opcje \-afm, \-ac, \-vfm i \-vc)
 U¿ywa podanego pliku zamiast dostêpnego w systemie lub wbudowanego codecs.conf.
 .
 .TP
@@ -525,7 +526,7 @@ Lista wszystkich komendy, które mog± byæ przypisane do klawiszy.
 Wybiera u¿ywany joystick (domy¶lnie: /dev/\:input/\:js0).
 .IPs plik\ 
 Czyta polecenia z podanego zbioru.
-Opcja g³ównie przydatny przy kolejce FIFO.
+Opcja g³ównie przydatna przy kolejce FIFO.
 .br
 .I INFORMACJA:
 Je¶li podany zbiór jest kolejk±, MPlayer otwiera oba koñce, wiêc mo¿na
@@ -612,7 +613,8 @@ Odtwarza zbiory w losowej kolejno¶ci.
 .TP
 .B \-skin <nazwa> (tylko z GUI)
 Za³aduje skórkê z podanego jako parametr katalogu znajduj±cego siê pod
-domy¶lnymi katalogami skórek, /usr/\:local/\:share/\:mplayer/\:Skin/ i ~/.mplayer/.
+domy¶lnymi katalogami skórek, /usr/\:local/\:share/\:mplayer/\:Skin/
+i ~/.mplayer/Skin.
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -1362,6 +1364,8 @@ gadatliwym (\-v).
 .B \-slang <kod\ kraju[,kod\ kraju,...]> (sprawd¼ te¼ opcjê \-sid)
 Okre¶la priorytetow± listê jêzyków napisów DVD do u¿ycia.
 Jêzyki musz± byæ podane jako dwuliterowe kody krajów.
+MPlayer wy¶wietli dostêpne jêzyki, je¶li jest uruchomiony w trybie
+gadatliwym (\-v).
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -1691,6 +1695,7 @@ Czê¶æ mo¿liwo¶ci dla OSS to
 /usr/\:include/\:linux/\:soundcard.h.
 Dla ALSA mo¿esz u¿yæ nazw, które, na przyk³ad, pokazuje alsamixer, jak
 .B Master, Line, PCM.
+.
 .TP
 .B \-nowaveheader (tylko \-ao pcm)
 Nie do³±cza nag³ówków wave.
@@ -1778,8 +1783,6 @@ Ustawia urz±dzenie wyj¶ciowe d¼wiêku (domy¶lnie: /dev/\:dsp).
 .B sdl\ \ \ \ 
 Sterownik dla biblioteki wysoce niezale¿nej od platformy - SDL (Simple
 Directmedia Layer).
-Jako ¿e SDL u¿ywa w³asnej warstwy X11, opcje MPlayera dotycz±ce X11 nie
-maj± tu ¿adnego wp³ywu.
 .
 .TP
 .B arts\ \ \ 
@@ -2136,7 +2139,7 @@ Dodatkowo, pod X11 Twój manager okien musi rozumieæ zalecenia proporcji okna.
 Wy³±cza u¿ywanie XVideo poprzez sterownik wyj¶cia video sdl.
 .
 .TP
-.B \-ontop
+.B \-ontop\ 
 Sprawia, ¿e okno zostaje nad innymi oknami.
 Obs³ugiwane przez sterowniki wyj¶cia video u¿ywaj±ce X11, poza SDL
 oraz directx i gl2 pod Windows.
@@ -2357,6 +2360,8 @@ Uwa¿any za prze¿ytek.
 .B sdl (tylko SDL)
 Sterownik wyj¶cia oparty na wysoce niezale¿nej od platformy bibliotece SDL
 (Simple Directmedia Layer).
+Poniewa¿ SDL u¿ywa w³asnej warstwy X11, opcje MPlayera dotycz±ce X11 nie maj±
+tu ¿adnego wp³ywu.
 .
 .TP
 .B vidix\ \ 
@@ -2402,6 +2407,7 @@ Nak³adka Windows dla VIDIX
 jak dla vidix
 .RE
 .PD 1
+.
 .TP
 .B directx (tylko Windows)
 Sterownik wyj¶cia video korzystaj±cy z interfejsu DirectX.
@@ -2775,7 +2781,7 @@ Ustala priorytetow± listê u¿ywanych kodeków audio, wed³ug ich nazw
 w codecs.conf.
 U¿yj "-" przed nazw± kodeka aby go pomin±æ.
 Je¿eli lista zakoñczona jest ',', MPlayer bêdzie bra³ pod uwagê
-równie¿ niewymienione w niej kodeki.
+równie¿ niewymienione na niej kodeki.
 .br
 .I INFORMACJA:
 Mo¿esz pobraæ listê dostêpnych kodeków poprzez \-ac help.
@@ -2914,7 +2920,7 @@ Próbuje najpierw kodeki Win32.
 .
 .TP
 .B \-aspect <stosunek>
-Zmienia proporcjê filmu.
+Zmienia proporcje filmu.
 Proporcje s± automatycznie wykrywane w MPEG, ale nie stosuje siê to
 do wiêkszo¶ci zbiorów AVI.
 .sp 1
@@ -3012,7 +3018,6 @@ informacje debugowania:
 .IPs ec=<warto¶æ> 
 ukrywanie b³êdów:
 .RSss
-.br
 1: U¿ywa silnego filtru deblokuj±cego (deblock) dla uszkodzonych
 makrobloków (MB).
 .br
@@ -3021,19 +3026,19 @@ makrobloków (MB).
 3: wszystko (domyslnie)
 .REss
 .IPs er=<warto¶æ>
-elastyczno¶æ na b³êdy:
+szukanie b³êdów w strumieniu
 .RSss
 .br
-0: wy³±czona
+0: wy³±czone
 .br
-1: ostro¿na (Powinna dzia³aæ z zepsutymi koderami.)
+1: ostro¿ne (Powinna dzia³aæ z zepsutymi koderami.)
 .br
-2: normalna (domy¶lnie (Dzia³a uleg³ymi koderami.)
+2: normalne (domy¶lnie) (Dzia³a ze zgodnymi koderami.)
 .br
-3: agresywna (Wiêcej testów, mo¿e jednak sprawiæ problemy nawet z poprawnymi
+3: agresywne (Wiêcej testów, mo¿e jednak sprawiæ problemy nawet z poprawnymi
 strumieniami bitowymi.)
 .br
-4: bardzo agresywna
+4: bardzo agresywne
 .REss
 .IPs fast\ 
 Korzysta z optymalizacji niestosuj±cych siê do specyfikacji i tym samym
@@ -3042,7 +3047,7 @@ domy¶lnej matrycy kwantyzacji, stosowanie YUV 4:2:0, pomijanie kilku testów
 na wykrycie uszkodzonych strumieni bitowych).
 .IPs gray\ 
 dekodowanie tylko w skali szaro¶ci (trochê szybsze ni¿ w kolorze)
-.IPs idct=<0\-99> (zobacz tak¿e \-lavcopts)
+.IPs "idct=<0\-99> (zobacz tak¿e \-lavcopts)"
 ¯eby osi±gn±æ najlepsz± jako¶æ dekodowania, u¿ywaj tego samego algorytmu
 idct do kodowania i dekodowania.
 Mo¿e to jednak zmniejszyæ dok³adno¶æ.
@@ -3093,7 +3098,7 @@ Prawid³owy zakres warto¶ci \-oldpp zale¿y od kodeka, najczê¶ciej jest to
 .TP
 .B \-pp <jako¶æ> (sprawd¼ tak¿e opcjê \-vf pp)
 Ustawia poziom postprocessingu DLL.
-Ta opcja nie jest u¿yteczna z \-vf pp.
+Ta opcja nie wp³ywa ju¿ na \-vf pp.
 Dzia³a tylko z Win32 DirectShow DLL, które maj± wewnêtrzny postprocessing.
 Poprawny zakres dla warto¶ci \-pp zale¿y od kodeka, najczê¶ciej jest to
 0\-6, gdzie 0=wy³±czony, 6=powolny/\:najlepszy.
@@ -3148,7 +3153,7 @@ prawy kana³
 Okre¶la algorytm skalowania programowego dla opcji \-zoom.
 Ma to wp³yw na sterowniki wyj¶ciowe video bez sprzêtowej akceleracji, np.\& x11.
 .sp 1
-Mo¿liwe s± ustawienia:
+Dostêpne s± typy:
 .sp 1
 .PD 0
 .RSs
@@ -3182,7 +3187,6 @@ dwusze¶cienna krzywa sklejana
 Dla \-sws\ 2 i 7 ostro¶æ mo¿e byæ ustawiona parametrem skalowania (p)
 przez \-vf scale (0 (miêkko) \- 100 (ostro)), dla \-sws 9, okre¶la ona
 d³ugo¶æ filtru (1 \- 10).
-.sp 1
 .RE
 .
 .TP
@@ -3191,7 +3195,7 @@ Ustala priorytetow± listê u¿ywanych kodeków video, wed³ug ich nazw
 w codecs.conf.
 U¿yj "-" przed nazw± kodeka aby go pomin±æ.
 Je¿eli lista zakoñczona jest ',', MPlayer bêdzie bra³ pod uwagê
-równie¿ niewymienione w niej kodeki.
+równie¿ niewymienione na niej kodeki.
 .br
 .I INFORMACJA:
 Mo¿esz pobraæ listê dostêpnych kodeków poprzez \-vc help.
@@ -3204,7 +3208,7 @@ Wymusza kodek Win32/\:VFW DivX.
 .IPs "\-vc divx4,"
 Próbuj najpierw kodek divx4linux, pó¼niej pozosta³e.
 .IPs "\-vc -divxds,-divx,"
-Pomija kodek Win32 DivX.
+Pomija kodeki Win32 DivX.
 .IPs "\-vc ffmpeg12,mpeg12,"
 Próbuj kodeki libavcodec MPEG1/\:2, pó¼niej libmpeg2, potem inne.
 .RE
@@ -3989,15 +3993,16 @@ Ustawiaj±c opcjê sb (strict breaks - sta³e przerwy) na 1, zmniejsza siê
 szansa, ¿e pullup stworzy niepasuj±c± klatkê, ale mo¿e równie¿ prowadziæ do
 ominiêcia wielu ramek podczas scen z du¿± ilo¶ci± ruchu.
 Odwrotnie, je¶li ustawisz na -1, to pullup ³atwiej bêdzie dopasowywa³ pola.
-Mo¿e to pomoæ przy przetwarzaniu filmu, w którym jest delikatne rozmazanie miêdzy
-polami, ale mo¿e równie¿ sprawiæ, ¿e w wyj¶ciu znajd± siê klatki z przeplotem.
+Mo¿e to pomóc przy przetwarzaniu filmu, w którym jest delikatne rozmazanie
+miêdzy polami, ale mo¿e równie¿ sprawiæ, ¿e w wyj¶ciu znajd± siê klatki
+z przeplotem.
 Opcja mp (przestrzeñ metryczna) mo¿e byæ ustawiona na 1 lub 2, aby u¿yæ
 przestrzeni barw zamiast przestrzeni jasno¶ci dla obliczeñ pullup.
-Mo¿e to polepszyæ dok³adno¶æ na bardzo czystym materiale ¼ród³owym, ale
-prawdopodobnie spadnie dok³adno¶æ, je¶li film ma zniekszta³cone
-barwy (efekt têczy) lub jest on w skali szaro¶ci.
-G³ownym celem ustawienia mp w przestrzeñ bar jest zmniejszenie obci±¿enia
-CPU i sprawienie, aby pullup by³ u¿yteczny w czasie rzeczywistym na wolnych
+Mo¿e to poprawiæ dok³adno¶æ na bardzo czystym materiale ¼ród³owym, ale
+prawdopodobnie zmniejszy dok³adno¶æ, je¶li film ma zniekszta³cone barwy
+(efekt têczy) lub jest on w skali szaro¶ci.
+G³ównym celem ustawienia mp na przestrzeñ barw jest zmniejszenie obci±¿enia
+CPU i sprawienie, aby pullup móg³ byæ u¿ywany w czasie rzeczywistym na wolnych
 maszynach.
 .br
 .I INFORMACJA:
@@ -4503,7 +4508,7 @@ Parametr fd nakazuje filtrowi zawsze stosowaæ dziesi±tkowanie (okropne).
 .RE
 .
 .
-
+.
 .SH "OGÓLNE OPCJE KODOWANIA (TYLKO MENCODER)"
 .
 .TP
@@ -4682,8 +4687,8 @@ Koduje z kodekiem libavcodec.
 .
 .TP
 .B \-passlogfile <nazwa\ pliku>
-W duprzej¶ciowym kodowaniu, zrzuca informacje o pierwszym przej¶ciu do <nazwa pliku>
-zamiast domy¶lnego divx2pass.log.
+W dwuprzebiegowym kodowaniu, zrzuca informacje o pierwszym przej¶ciu do
+<nazwa pliku> zamiast domy¶lnego divx2pass.log.
 .
 .TP
 .B \-skiplimit <warto¶æ>
@@ -5504,8 +5509,7 @@ poniewa¿ bez b³êdy bêd± zdarza³y siê równo w AC/\:DC/\:MV.
 .
 .TP
 .B vpsize=<0\-10000>
-rozmiar pakietu video, poprawia odporno¶æ na b³êdy (sprawd¼ równie¿ opcjê
-\-vdpart):
+rozmiar pakietu video, poprawia odporno¶æ na b³êdy (sprawd¼ równie¿ vdpart):
 .RSs
 .IPs 0
 wy³±czone (domy¶lnie)
@@ -5689,7 +5693,7 @@ przewidywanie lewej
 .IPs 1
 czyste/\:gradientowe przewidywanie
 .IPs 2
-przewidywanie ¶rodkowej
+przewidywanie mediany
 .RE
 .PD 1
 .
@@ -5707,7 +5711,7 @@ przewidywanie górnej-lewej
 .IPs 3
 p³aszczyznowe/\:gradientowe przewidywanie
 .IPs 6
-u¶rednione przewidywanie
+przewidywanie ¶redniej
 .RE
 .PD 1
 .
@@ -6094,8 +6098,8 @@ Kiedy me_quality > 4, 4mv jest uruchamiane.
 .TP
 .B rc_reaction_delay_factor=<warto¶æ>
 Ten parametr okre¶la ilo¶æ ramek, jak± przeczeka kontroler tempa CBR
-zanim zareaguje na zmianê warto¶ci bitrate i bêdzie próbowa³ wyrównaæ zmianê, tak aby
-uzyskaæ sta³y bitrate na u¶redniaj±cym zakresie klatek.
+zanim zareaguje na zmianê warto¶ci bitrate i bêdzie próbowa³ wyrównaæ zmianê,
+tak aby uzyskaæ sta³y bitrate na u¶redniaj±cym zakresie klatek.
 .
 .TP
 .B rc_averaging_period=<warto¶æ>
@@ -6119,8 +6123,8 @@ Tryb dwuprzej¶ciowy: min.\& i maks.\& kwantyzator dla klatek I/P
 (domy¶lnie: 2\-31/\:2\-31)
 .br
 .I UWAGA:
-Ta opcja jest ju¿ uznawana za przestarza³± w XviD-1.0.x i jest zast±piona
-przez opcje [min|max]_[i|p|b]quant.
+Ta opcja jest odradzana w XviD-1.0.x i jest zast±piona przez
+opcje [min|max]_[i|p|b]quant.
 .
 .TP
 .B min_key_interval=<warto¶æ>
@@ -6142,8 +6146,7 @@ Kiedy wykorzystywane s± okre¶lone przez u¿ytkownika matryce, musi byæ
 wykorzystywany MPEG.
 .br
 .I UWAGA:
-Ta opcja jest ju¿ uznawana za przestarza³± w XviD-1.0.x i jest zast±piona
-przez opcjê quant_type.
+Ta opcja jest odradzana w XviD-1.0.x i jest zast±piona przez opcjê quant_type.
 .
 .TP
 .B mod_quant
@@ -6155,8 +6158,8 @@ Wygeneruje to nieprawid³owy stumieñ bitów, którego prawdopodobnie nie jest w
 stanie zdekodowaæ ¿aden dekoder MPEG4 poza libavcodec albo XviD.
 (tylko tryb dwuprzej¶ciowy)
 .br
-.I WARNING:
-Ta opcja jest uznawana za przestarza³± w XviD-1.0.x.
+.I UWAGA:
+Ta opcja jest odradzana w XviD-1.0.x.
 .
 .TP
 .B keyframe_boost=<0\-1000>
@@ -6174,7 +6177,7 @@ Powy¿sze dwa parametry mog± byæ wykorzystane do okre¶lenia rozmiaru klatek
 kluczowych, których po³o¿enie uwa¿asz za zbyt bliskie do pierwszej (w rzêdzie).
 kfthreshold ustawia zakres, w którym klatki kluczowe s± redukowane, a
 kfreduction okre¶la ich redukcjê bitrate'ow±.
-Ostatnia I-klatka jest traktowana normalnie.
+Ostatnia klatka I jest traktowana normalnie.
 (domy¶lnie: 30, tylko tryb dwuprzej¶ciowy)
 .
 .TP
@@ -6187,7 +6190,7 @@ danych kolorów w ostatniej fazie kodowania.
 .TP
 .B debug\ \ 
 Zapisuje statystyki ka¿dej ramki w ./xvid.dbg.
-(To jest plik kontroli trybu dwuprzej¶ciowego).
+(To nie jest plik kontroli trybu dwuprzej¶ciowego).
 .RE
 .
 .PP
@@ -6217,11 +6220,12 @@ maksymalna ilo¶æ klatek B umieszczonych pomiêdzy klatkami I/\:P (domy¶lnie: 0)
 .
 .TP
 .B bquant_ratio=<0\-1000>
-squantizer ratio between B and non B frames, 150=1.50 (default: 150)
+proporcja kwantyzatora miêdzy ramkami typu B i pozosta³ymi, 150=1.50
+(domy¶lnie: 150)
 .
 .TP
 .B bquant_offset=<-1000\-1000>
-wspó³czynnik offsetu kwantyzatora pomiêdzy klatkami B a innymi,
+wspó³czynnik offsetu kwantyzatora pomiêdzy klatkami B a pozosta³ymi,
 100=1.00 (domy¶lnie: 100)
 .
 .TP
@@ -6234,17 +6238,18 @@ ca³kowicie statyczne).
 Ten parametr umo¿liwia Ci okre¶lenie, jaki priorytet u¿ycia klatek B
 ma byæ ustawiony.
 Im wy¿sza warto¶æ,tym wiêksze prawdopodobieñstwo u¿ycia klatek B.
-(default: 0)
+(domy¶lnie: 0)
 .
 .TP
-.B frame_drop_ratio=<0\-100> (mtylko z ax_bframes=0)
+.B frame_drop_ratio=<0\-100> (tylko z ax_bframes=0)
 Ten parametr umo¿liwia tworzenie strumieni video ze zmienn± szybko¶ci± klatek.
 Je¶li ró¿nica miêdzy bie¿±c± a poprzedni± klatk±
-jest ni¿sza lub równa ustawionemu przez ten parametr progowi,
-klatka nie bêdzie kodowana (tzw. n-vop jest wstawiany w strumieñ).
-On playback, when reaching an n-vop the previous frame will be displayed.
+jest ni¿sza lub równa od ustawionego przez ten parametr progu,
+klatka nie bêdzie kodowana (tzw. n-vop zostanie wstawiany w strumieñ).
+Przy odtwarzaniu, natrafienie na n-vop, powoduje wy¶wietlenie poprzedniej
+klatki.
 .br
-.I WARNING:
+.I OSTRZE¯ENIE:
 Odtwarzanie z tym parametrem mo¿e spowodowaæ, ¿e film bêdzie poszarpany, wiêc
 u¿ywaj go na swoj± w³asn± odpowiedzialno¶æ!
 .
@@ -6284,10 +6289,10 @@ lepsze decyzje o typie ramek i wektorach ruchu dla p³askich rysunków.
 .
 .TP
 .B quant_type=<h263|mpeg>
-Ustawia tym wykorzystywanego kwantyzatora.
+Ustawia typ wykorzystywanego kwantyzatora.
 Dla wysokich warto¶ci bitrate, kwantyzacja MPEG zachowa wiêcej szczegó³ów.
 Dla niskich warto¶ci bitrate, wyg³adzanie H.263 da mniej szumów blokowych.
-Je¶li u¿ywasz w³asnych matryce, kwantyzacja MPEG musi byæ ustawiona.
+Je¶li u¿ywasz w³asnych macierzy, musi byæ ustawiona kwantyzacja MPEG.
 .
 .TP
 .B chroma_me
@@ -6337,7 +6342,6 @@ szerokie przeszukiwanie
 .PD 1
 .
 .TP
-
 .B min_iquant=<0\-31>
 minimalny kwantyzator klatek I (domy¶lnie: 2)
 .
@@ -6363,13 +6367,13 @@ maksymalny kwantyzator klatek B (domy¶lnie: 31)
 .
 .TP
 .B quant_intra_matrix=<nazwa\ pliku>
-Wczytuje plik z okre¶lon± matryc± intra.
-Mo¿esz stworzyæ taki plik edytorem matric xvid4conf.
+Wczytuje plik z okre¶lon± macierz± intra.
+Mo¿esz stworzyæ taki plik edytorem macierzy xvid4conf.
 .
 .TP
 .B quant_inter_matrix=<nazwa\ pliku>
-Wczytuje plik z okre¶lon± matryc± inter.
-Mo¿esz stworzyæ taki plik edytorem matric xvid4conf.
+Wczytuje plik z okre¶lon± macierz± inter.
+Mo¿esz stworzyæ taki plik edytorem macierzy xvid4conf.
 .
 .TP
 .B curve_compression_high=<0\-100>
@@ -6381,7 +6385,6 @@ wygl±daj± ¼le (domyslnie: 0).
 .
 .TP
 .B curve_compression_low=<0\-100>
-.\" paszczi: nie jestem pewien co do ostatniego zdania...
 Ten parametr pozwala XviD'owi na przekazanie okre¶lonego procentu dodatkowych
 bitów do scen z nisk± warto¶ci± bitrate z ca³ego klipu.
 Opcja ta mo¿e byæ przydatna, je¿eli masz kilka scen z nisk± warto¶ci± bitrate,
@@ -6389,21 +6392,22 @@ które s± ci±gle blokowe (domy¶lnie: 0).
 .
 .TP
 .B overflow_control_strength=<0\-100>
-Podczas pierwszego przebiegu w kodowaniu dwuprzej¶ciowym obliczana jest
+Podczas pierwszego przebiegu w kodowaniu dwuprzebiegowym obliczana jest
 przeskalowana krzywa bitrate.
-Ró¿nica miêdzy oczekiwan± krzyw± a wynikow± otrzyman± podczas kodowania nazywana
-jest overflow (przepe³nienie - przyp. t³umacza).
-Oczywi¶cie dwuprzej¶ciowy kontroler tempa stara siê
-zniwelowaæ t± ró¿nicê przez rozpraszanie jej na kolejne klatki.
-Ten parametr kontroluje ile overflow jest rozpraszane za ka¿dym razem, kiedy
-pojawia siê nowa klatka.
-Niske warto¶ci pozwalaj± na leniw± kontrolê overflow, wielkie ró¿nice
+Ró¿nica miêdzy oczekiwan± krzyw± a wynikow± otrzyman± podczas kodowania
+nazywana jest overflow (przepe³nienie - przyp. t³umacza).
+Oczywi¶cie dwuprzebiegowy kontroler tempa stara siê
+zniwelowaæ tê ró¿nicê przez rozpraszanie jej na kolejne klatki.
+Ten parametr kontroluje ile overflow jest rozpraszane za ka¿dym razem,
+kiedy pojawia siê nowa klatka.
+Niskie warto¶ci pozwalaj± na leniw± kontrolê overflow, wielkie ró¿nice
 s± kompensowane wolniej (mo¿e to doprowadziæ do braku precyzji
-przy ma³ych filmach). Wy¿sze warto¶ci sprawiaj±, ¿e redystrybucja bitów jest
-gwa³towniejsza, czasami za gwa³towna, je¶li ustawisz opcjê na zbyt wysok±,
+przy ma³ych filmach).
+Wy¿sze warto¶ci sprawiaj±, ¿e redystrybucja bitów jest gwa³towniejsza,
+czasami zbyt gwa³towna, je¶li ustawisz opcjê na zbyt wysok±,
 co mo¿e doprowadziæ do powstania zniekszta³ceñ (domy¶lnie: 5).
 .br
-.I NOTE:
+.I INFORMACJA:
 Ten parametr ma du¿y wp³yw na jako¶æ, baw siê nim ostro¿nie!
 .
 .TP
@@ -6435,12 +6439,12 @@ warto¶ci domy¶lnych (domy¶lnie: 24 - ¶rednia nadwy¿ka AVI).
 .B par=<tryb>
 Okre¶la tryb Wspó³czynnika Proporcji Piksela (Pixel Aspect Ratio - PAR)
 (nie myliæ z Wspó³czynnikiem Proporcji Obrazu (Display Aspect Ratio - DAR)).
-PAR to stosunek szeroko¶ci do wysoko¶c pojedynczego piksela.
+PAR to stosunek szeroko¶ci do wysoko¶ci pojedynczego piksela.
 Wiêc oba s± zwi±zane: DAR = PAR * (szeroko¶æ/wysoko¶æ).
 .br
-MPEG4 okre¶la 5 wspó³czynników proporcji piksela i defines 5 pixel i
-jeden rozszerzony, daj±cy szansê na podanie konkretnego wspó³czynnika
-proporcji piksela. Mo¿e byæ okre¶lony jeden z 5 standardowych trybów:
+MPEG4 okre¶la 5 wspó³czynników proporcji piksela i jeden rozszerzony,
+daj±cy szansê na podanie konkretnego wspó³czynnika proporcji piksela.
+Mo¿e byæ podany jeden z 5 standardowych trybów:
 .PD 0
 .RSs
 .IPs vga11
@@ -6461,15 +6465,15 @@ i par_height.
 .RE
 .PD 1
 .br
-.I INFORMACJA\ :
+.I INFORMACJA:
 Ogólnie ustawienie opcji aspect i autoaspect jest wystarczaj±ce.
 .
 .TP
-.B par_width=<1..255> (tylko z par=ext)
+.B par_width=<1\-255> (tylko z par=ext)
 Okre¶la szeroko¶æ zadeklarowanego wspó³czynnika proporcji piksela.
 .
 .TP
-.B par_height=<1...255> (tylko z par=ext)
+.B par_height=<1\-255> (tylko z par=ext)
 Okre¶la wysoko¶æ szeroko¶æ zadeklarowanego wspó³czynnika proporcji piksela.
 .
 .TP
@@ -6519,20 +6523,20 @@ Ka¿de <warto¶æ> klatek I jest klatkami IDR (domy¶lnie: 2).
 W H.264 klatki I niekoniecznie przeskakuj± zamkniêty GOP, poniewa¿ jest
 dozwolone dla klatki P, aby by³a przewidziana z wiêkszej liczby poprzedzaj±cych 
 j± klatek ni¿ tylko jedna (sprawd¼ te¿ opcjê frameref).
-Dlatego te¿ klatki I niekoniecznie musz± siê daæ przeszukiwaæ. 
+Dlatego te¿ niekoniecznie da siê przewijaæ do klatek I.
 Ramki IDR ograniczaj± odnoszenie siê klatki P do jakiejkolwiek ramki
 poprzedzaj±cej klatkê IDR.
 .
 .TP
 .B bframe=<warto¶æ>
-liczba klatek B pomiêdzy klatkami I a P (domy¶lnie: 0)
+liczba klatek B pomiêdzy klatkami I i P (domy¶lnie: 0)
 .
 .TP
 .B deblock=<0|1>
 Wykorzystuje filtr deblokuj±cy (deblock) (domy¶lnie: w³±czony).
 .
 .TP
-.B deblockalpha=<-6-6>
+.B deblockalpha=<-6\-6>
 Parametr AlphaC0 dla filtru deblokuj±cego (deblock) (domy¶lnie: 0).
 Opcja ta dostosowuje zakresy dla filtru deblokuj±cego H.264.
 Po pierwsze parametr ten okre¶la maksymaln± ilo¶æ zmian jak± filtr mo¿e
@@ -6541,12 +6545,12 @@ Po drugie opcja ta ma wp³yw na próg filtrowanej ró¿nicy wystêpuj±cej na krawêdzi
 Warto¶æ dodatnia ogranicza blokuj±ce szumy, ale rozmywa równie¿ detale.
 .
 .TP
-.B deblockbeta=<-6-6>
+.B deblockbeta=<-6\-6>
 Parametr Beta filtru deblokuj±cego (deblock) (domy¶lnie: 0).
 Ma wp³yw na maksymalny, dozwolony gradient miêdzy dwoma przylegaj±cymi blokami.
 .
 .TP
-.B cabac
+.B cabac\ \ \ 
 Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding).
 .
 .TP
@@ -6554,41 +6558,41 @@ Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding).
 Warto¶æ pocz±tkowa CABAC IDC.
 Koder musi wybraæ kontekst dla ka¿dego bloku, który koduje, Jednak dla
 pierwszego bloku w klatce, nie ma ¿adnych poprzedzaj±cych go bloków.
-Dostosowanie tego parametru mo¿e mieæ wp³yw na bitrate o u³amek procenta,
-ale bezpo¶rednio nie wp³ywa na zniekszta³cenie.
+Dostosowanie tego parametru mo¿e zmieniæ bitrate o u³amek procenta,
+ale nie ma bezpo¶rednego wp³ywu na zniekszta³cenie.
 .RSs
 -1: Koder wybiera kontekst, zazwyczaj 0 (domy¶lne).
 .br
-0: niska kompleksowo¶æ
+0: niska z³o¿ono¶æ
 .br
-1: ¶rednia kompleksowo¶æ
+1: ¶rednia z³o¿ono¶æ
 .br
-2: wysoka kompleksowo¶æ
+2: wysoka z³o¿ono¶æ
 .REss
 .
 .TP
-.B qp_constant=<2-51>
-Okre¶la, który kwantyzator zostanie u¿yty, 20-40 to u¿yteczny zakres
+.B qp_constant=<2\-51>
+Okre¶la, który kwantyzator zostanie u¿yty, 20\-40 to u¿yteczny zakres
 (domy¶lnie: 26).
 Ni¿sze warto¶ci to lepsze odwzorowanie, ale wiêksze parametry bitrate.
 Zauwa¿, ¿e kwantyzacja w H.264 dzia³a inaczej ni¿ w MPEG[124].
 Parametr kwantyzacji (QP)H.264 jest w skali logarytmicznej.
 Dla przyk³adu, ró¿nica w bitrate pomiêdzy QP=20 a QP=40 to wspó³czynnik
 oko³o 10.
-Przydatne kwantyzatory w H.264 s± wiêksze w porownaniu z MPEG[124].
+Przydatne kwantyzatory w H.264 s± wiêksze ni¿ w MPEG[124].
 .br
 .I INFORMACJA:
 Ta opcja ma wp³yw nawet, je¿eli wybierzesz kodowanie w CBR.
-W takim wypadku, pierwsz kodowana klatka u¿yje wspó³czynnika kwantyzacji,
-jaki poda³es, ale w nastêpnych klatkach kontrola tempa zadecyduje jakie
+W takim wypadku, pierwsza kodowana klatka u¿yje wspó³czynnika kwantyzacji,
+jaki poda³e¶, ale w nastêpnych klatkach kontrola tempa zadecyduje jakie
 kwanty wybraæ.
 .
 .TP
-.B qp_min=<2-51> (tylko CBR)
+.B qp_min=<2\-51> (tylko CBR)
 Minimalny kwantyzator, 20-40 to u¿yteczny zakres (domy¶lnie: 2).
 .
 .TP
-.B qp_max=<2-51>  (tylko CBR)
+.B qp_max=<2\-51>  (tylko CBR)
 Maksymalny kwantyzator.
 .
 .TP
@@ -6598,14 +6602,14 @@ pomiêdzy klatkami.
 .
 .TP
 .B rc_buffer_size=<warto¶æ>
-rozmiar bufora kontroli tempa (domy¶lnie: 1 sekunda zysku okre¶lonego bitrate)
+rozmiar bufora kontroli tempa (domy¶lnie: 1 sekunda przy okre¶lonym bitrate)
 .
 .TP
 .B rc_init_buffer=<warto¶æ>
-Ustawia pocz±tkow bufora kontroli tempa (domy¶lnie: 1/4 rc_buffer_size)
+Ustawia pocz±tkowego bufora kontroli tempa (domy¶lnie: 1/4 rc_buffer_size)
 .
 .TP
-.B rc_sens=<0-100>
+.B rc_sens=<0\-100>
 czu³o¶æ kontroli tempa (domy¶lnie: 100)
 .
 .TP
@@ -6622,14 +6626,14 @@ Uruchamia tryb dwuprzej¶ciowy.
 Pierwsze przej¶cie zachowuje statystyki.
 .
 .TP
-.B qcompress=<0-1>
+.B qcompress=<0\-1>
 Kompresja kwantyzatora (domy¶lnie: 0.6).
 Wp³ywa na kontrolê tempa: ni¿sza warto¶æ sprawia, ¿e bitrate
 jest bardziej sta³y, podczas gdy wy¿sza, sprawia, ¿e parametr kwantyzacji
 jest bardziej sta³y.
 .
 .TP
-.B qblur=<0-1>
+.B qblur=<0\-1>
 Tymczasowe rozmazanie parametru kwantyzacji (domy¶lnie: 0.5).
 Ni¿sze warto¶ci pozwalaj± na wiêksze skoki warto¶ci kwantyzatora,
 wy¿sze zmuszaj± go do delikatniejszych zmian.
@@ -6641,7 +6645,7 @@ Wykorzystuje wszystkie dostêpne metody analizy inter-klatek (i4x4, psub8x8, psub
 (domy¶lnie: 4x4, psub16x16).
 .
 .TP
-.B log=<-1-3>
+.B log=<-1\-3>
 Okre¶la ilo¶æ informacji drukowanych na ekranie.
 .RSs
 -1: ¿adne
@@ -6657,7 +6661,7 @@ Okre¶la ilo¶æ informacji drukowanych na ekranie.
 .
 .TP
 .B psnr
-Drukuje statystyki proporcji sygna³u do szumu.
+Drukuje statystyki stosunku sygna³u do szumu.
 .
 .
 .\" --------------------------------------------------------------------------
@@ -6676,7 +6680,7 @@ ustawienia u¿ytkownika
 .
 .TP
 ~/.mplayer/\:input.conf
-ustawienia wej¶cia (Patrz '\-input keylist' dla pe³nej listy)
+ustawienia wej¶cia (pe³n± listê wy¶wietla '\-input keylist')
 .
 .TP
 ~/.mplayer/\:gui.conf
@@ -6699,7 +6703,7 @@ Zkrakowane klucze CSS
 Zak³adaj±c, ¿e odtwarzana jest /¶cie¿ka/\:do/\:film.avi, MPlayer bêdzie szuka³
 napisów w nastêpuj±cej kolejno¶ci:
 .RSs
-/¶cie¿ka/\:do/\:film.avi
+/¶cie¿ka/\:do/\:film.sub
 .br
 ~/.mplayer/\:sub/\:film.sub
 .br
@@ -6715,11 +6719,11 @@ napisów w nastêpuj±cej kolejno¶ci:
 .SH PRZYK£ADY
 .
 .TP
-.B zzybki start odtwarzania DVD:
+.B szybki start odtwarzania DVD:
 mplayer dvd://1
 .
 .TP
-.B Odtwarza w japoñskim z angielskimi napisami
+.B Odtwarza w japoñskim z angielskimi napisami:
 mplayer dvd://1 \-alang ja \-slang en
 .
 .TP
@@ -6747,7 +6751,7 @@ mplayer http://mplayer.hq/\:przyklad.avi
 mplayer rtsp://serwer.przyklad.com/\:nazwaStrumienia
 .
 .TP
-.B Konwertuje napisy do formatu MPsub (do ./\:dump.mpsub):
+.B Konwertuje napisy do formatu MPsub:
 mplayer test.avi \-sub zród³o.sub \-dumpmpsub
 .
 .TP
@@ -6820,10 +6824,10 @@ sposób tworzenia przydatnych zg³oszeñ b³êdów.
 .SH AUTORZY
 MPlayer zosta³ stworzony przez Arpad'a Gereöffy.
 Lista niektórych z wielu uczestników znajduje siê w zbiorze AUTHORS.
+.PP
 MPlayer (C) 2000\-2004  Za³oga MPlayera
 .PP
-Ta strona manuala zosta³a stworzona g³ównie przez Gabucino, Jonas's Jermann'a
-i Diego Biurrun'a.
+G³ównymi autorami tej strony s± Gabucino, Jonas Jermann i Diego Biurrun.
 Obecnie opiekuje siê ni± Diego Biurrun.
 Proszê przesy³aæ wszelkie maile o niej na listê dyskusyjn± MPlayer-DOCS.
 .
@@ -6831,7 +6835,8 @@ Proszê przesy³aæ wszelkie maile o niej na listê dyskusyjn± MPlayer-DOCS.
 .
 .SH "OD T£UMACZY"
 Strona przet³umaczona przez Wac³awa Schillera <torinthiel@wp.pl> i
-Macieja Pasztê <paszczi@go2.pl>. W t³umaczeniu wykorzystano fragmenty pracy
+Macieja Pasztê <paszczi@go2.pl>.
+W t³umaczeniu wykorzystano fragmenty pracy
 Adriana Pawlika <imoteph@wp.pl> i Konrada Materki <kmaterka@wp.pl>
 .PP
 T³umaczenie mo¿e zawieraæ liczne b³êdy, niektóre s³owa mog³y byæ
