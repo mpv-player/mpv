@@ -440,7 +440,7 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
       if (os->text && d->sub->id == -1 && demux_ogg_check_lang(val, dvdsub_lang))
       {
 	d->sub->id = id;
-	mp_msg(MSGT_DEMUX, MSGL_V, "Stream language matched -slang: %s\n", val);
+        mp_msg(MSGT_DEMUX, MSGL_V, "OGG demuxer: Displaying the subtitle stream with the id %d which matched -slang %s\n", id, val);
       }
       else
 	hdr = "Language";
@@ -966,8 +966,10 @@ int demux_ogg_open(demuxer_t* demuxer) {
      packet is encountered and the user used -slang instead of -sid. */
   if(!n_text)
     demuxer->sub->id = -2;
-  else if (text_id >= 0)
+  else if (text_id >= 0) {
     demuxer->sub->id = text_id;
+    mp_msg(MSGT_DEMUX, MSGL_V, "OGG demuxer: Displaying the subtitle stream with the id %d\n", text_id);
+  }
 
   ogg_d->final_granulepos=0;
   if(!s->end_pos)
