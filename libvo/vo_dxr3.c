@@ -6,6 +6,10 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2003-11-28:
+ *  Added a patch from Anders Rune Jensen to support the latest em8300 CVS
+ *  changes.
+ *
  * 2003-02-19:
  *  Yet another patch from Tamas Kohegyi to fix subpic placement.
  *
@@ -863,7 +867,6 @@ static uint32_t preinit(const char *arg)
 		if (!strncmp("prebuf", arg, 6) && !dxr3_prebuf) {
 			printf("VO: [dxr3] Enabling prebuffering.\n");
 			dxr3_prebuf = 1;
-			fdflags |= O_NONBLOCK;
 		} else if (!strncmp("sync", arg, 4) && !dxr3_newsync) {
 			printf("VO: [dxr3] Using new sync engine.\n");
 			dxr3_newsync = 1;
@@ -951,7 +954,6 @@ static uint32_t preinit(const char *arg)
 	strcpy(fdv_name, devname);
 	
 	/* Open the subpicture interface */
-	fdflags |= O_NONBLOCK;
 	sprintf(devname, "/dev/em8300_sp-%d", dxr3_device_num);
 	fd_spu = open(devname, fdflags);
 	if (fd_spu < 0) {
