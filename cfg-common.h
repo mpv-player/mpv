@@ -131,7 +131,7 @@
         {"nozoom", &softzoom, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"aspect", &movie_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
 	{"noaspect", &movie_aspect, CONF_TYPE_FLAG, 0, 0, 0, NULL},
-	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	{"xy", &screen_size_xy, CONF_TYPE_FLOAT, CONF_RANGE, 0.001, 4096, NULL},
 
         {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1, NULL},
         {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0, NULL},
@@ -180,7 +180,7 @@
 #include "config.h"
 
 // codec/filter opts: (defiend at libmpcodecs/vd.c)
-extern int screen_size_xy;
+extern float screen_size_xy;
 extern float movie_aspect;
 extern int softzoom;
 extern int flip;
