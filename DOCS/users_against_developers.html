@@ -34,12 +34,10 @@
   issued an <A HREF="http://gcc.gnu.org/gcc-2.96.html">official response</A> to
   GCC 2.96. Many developers around the world began having problems with GCC 2.96,
   and started recommending other compilers. Examples are
-  <A HREF="http://www.apachelabs.org/apr-mbox/200106.mbox/%3c20010623194228.C25512@ebuilt.com%3e">Apache</A>,
   <A HREF="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</A>,
   <A HREF="http://avifile.sourceforge.net/news-old1.htm">avifile</A> and
   <A HREF="http://www.winehq.com/news/?view=92#RH%207.1%20gcc%20fixes%20compiler%20bug">Wine</A>.
   Other interesting links are 
-  <A HREF="http://www.realtimelinux.org/archives/rtai/20017/0144.html">Real time Linux</A>,
   <A HREF="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
   Linux kernel news flash about kernel 2.4.17</A> and
   <A HREF="http://www.voy.com/3516/572.html">Voy Forum</A>.
@@ -49,7 +47,7 @@
   bugs, especially since some workarounds may imply a performance penalty.</P>
 
 <P>You can read about the other side of the story
-  <A HREF="http://www.bero.org/gcc296.html">at this site</A>.
+  <A HREF="http://web.archive.org/web/20011024212120/http://www.bero.org/gcc296.html">at this site</A>.
   GCC 2.96 does not allow | (pipe) characters in assembler comments
   because it supports Intel as well as AT&amp;T Syntax and the | character is a
   symbol in the Intel variant. The problem is that it <B>silently</B> ignores the
@@ -63,25 +61,26 @@
   If you want to compile with 2.96 give the <CODE>--disable-gcc-checking</CODE>
   flag to configure. Remember that you are on your own and <B>do not report any
   bugs</B>. If you do, you will only get banned from our mailing list because
-  we have had more than enough flame wars over GCC 2.96. Please let the matter rest.</P>
+  we have had more than enough flame wars over GCC 2.96. Please let the matter
+  rest.</P>
 
 <P>If you have problems with GCC 2.96, you can get 2.96-85 packages from the
   Red Hat <A HREF="ftp://updates.redhat.com">ftp server</A>, or just go for the
   3.0.4 packages offered for version 7.2 and later. You can also get
-  <A HREF="ftp://people.redhat.com/jakub/gcc3/3.1-1/">gcc-3.1 packages</A>
-  (unofficial, but working fine) and you can
-  install them along the GCC 2.96 you already have. MPlayer will detect it and
-  use 3.1 instead of 2.96. If you do not want to or cannot use the binary
-  packages, here is how you can compile GCC 3.1 from source:</P>
+  <A HREF="ftp://people.redhat.com/jakub/gcc/3.2-10/">gcc-3.2-10 packages</A>
+  (unofficial, but working fine) and you can install them along the GCC 2.96 you
+  already have. MPlayer will detect it and use 3.2-10 instead of 2.96. If you do
+  not want to or cannot use the binary packages, here is how you can compile the
+  latest GCC from source:</P>
 
 <OL>
   <LI>Go to the <A HREF="http://gcc.gnu.org/mirrors.html">GCC mirrors page</A>
-    page and download <CODE>gcc-core-3.1.tar.gz</CODE>.  This includes the
-    complete C compiler and is sufficient for MPlayer. If you also want
-    C++, Java or some of the other advanced GCC features
-    <CODE>gcc-3.1.tar.gz</CODE> may better suit your needs.</LI>
+    page and download <CODE>gcc-core-XXX.tar.gz</CODE> where <CODE>XXX</CODE> is
+    the version number. This includes the complete C compiler and is sufficient
+    for MPlayer. If you also want C++, Java or some of the other advanced GCC
+    features <CODE>gcc-XXX.tar.gz</CODE> may better suit your needs.</LI>
   <LI>Extract the archive with<BR>
-    <CODE>tar -xvzf gcc-core-3.1.tar.gz</CODE></LI>
+    <CODE>tar -xvzf gcc-core-XXX.tar.gz</CODE></LI>
   <LI>GCC is not built inside the source directory itself like most programs,
     but needs a build directory outside the source directory.  Thus you need to
     create this directory via<BR>
@@ -89,7 +88,7 @@
   <LI>Then you can proceed to configure GCC in the build directory, but you need
     the configure from the source directory:<BR>
     <CODE>cd gcc-build<BR>
-    ../gcc-3.1/configure</CODE></LI>
+    ../gcc-XXX/configure</CODE></LI>
   <LI>Compile GCC by issuing this command in the build directory:<BR>
     <CODE>make bootstrap</CODE></LI>
   <LI>Now you can install GCC (as root) by typing<BR>
@@ -121,8 +120,8 @@
   <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>
   about problems related to these closed-source drivers
   and their poor quality, instability and poor user and expert support.
-  Here is an example from the
-  <A HREF="http://www.nvnews.net/forum/showthread.php?s=fda5725bc2151e29453b2da3bd5d2930&amp;threadid=14306">
+  Some examples can be found on the
+  <A HREF=http://www.nvnews.net/vbulletin/forumdisplay.php?s=6d83dc289805c37caef49b77857a0b7e&daysprune=&forumid=27">
   nVidia Linux Forum</A>.
   Many of these problems/issues keep appearing repeatedly.
   We have been contacted by nVidia lately, and they said these bugs
