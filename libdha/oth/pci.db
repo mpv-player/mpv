@@ -2613,6 +2613,39 @@ s	10de0253147b8f09	Siluro (Dual VGA/TV-out/DVI)	0
 d	10de0258	Quadro4 900XGL	0	
 d	10de0259	Quadro4 750XGL	0	
 d	10de025b	Quadro4 700XGL	0	
+d	10de0280	NV28 [GeForce4 Ti 4800]	0	
+d	10de0281	NV28 [GeForce4 Ti 4200 AGP 8x]	0	
+d	10de0282	NV28 [GeForce4 Ti 4800 SE]	0	
+d	10de0286	NV28 [GeForce4 Ti 4200 Go AGP 8x]	0	
+d	10de0288	NV28GL [Quadro4 980 XGL]	0	
+d	10de0289	NV28GL [Quadro4 780 XGL]	0	
+d	10de0300	NV30 [GeForce FX]	0	
+d	10de0301	NV30 [GeForce FX 5800 Ultra]	0	
+d	10de0302	NV30 [GeForce FX 5800]	0	
+d	10de0308	NV30GL [Quadro FX 2000]	0	
+d	10de0309	NV30GL [Quadro FX 1000]	0	
+d	10de0311	NV31 [GeForce FX 5600 Ultra]	0	
+d	10de0312	NV31 [GeForce FX 5600]	0	
+d	10de0314	NV31 [GeForce FX 5600XT]	1	
+d	10de031a	NV31M [GeForce FX Go 5600]	1	
+d	10de031c	NVIDIA Quadro FX 700 Go	1	Found in DELL Precision M60
+d	10de0321	NV34 [GeForce FX 5200 Ultra]	0	
+d	10de0322	NV34 [GeForce FX 5200]	0	
+s	10de032214629171	MS-8917 (FX5200-T128)	1	
+s	10de032214629171	Micro-Star International Co., Ltd.	1	MS-8917 (FX5200-T128)
+s	10de03221b130000	3DForce FX5200	1	
+d	10de0324	NV34M [GeForce FX Go 5200]	1	
+d	10de0328	nVidia GeForce FX Go 5200	1	
+d	10de0329	GeForce FX Go5200	1	This is from a PowerBook 12" 1Ghz
+d	10de032b	NV34GL [Quadro FX 500]	0	
+d	10de032c	NV34GLM [GeForce FX Go 5300]	1	Not found on nvidia website, called "GeForce FX Go 5300" by laptop supplier.
+d	10de0330	NV35 [GeForce FX 5900 Ultra]	0	
+s	10de033010438133	V9950 Ultra	1	
+d	10de0331	NV35 [GeForce FX 5900]	0	
+d	10de0333	NV38 [GeForce FX 5950 Ultra]	1	
+d	10de0338	NV35GL [Quadro FX 3000]	0	
+d	10de0341	NV 36 [GeForce 5700 Ultra]	1	MSI MS-8938, 128 MB DDR2, DVI, TV-out, AGP
+d	10de0342	NV 36 [GeForce 5700]	1	MSI FX5700-TD128, 128 MB DDR, DVI, TV-out, AGP
 v	10df	Emulex Corporation	0	
 d	10df1ae5	LP6000 Fibre Channel Host Adapter	0	
 d	10dff085	LP850 Fibre Channel Adapter	0	
