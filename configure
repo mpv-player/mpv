@@ -362,15 +362,15 @@ if [ "$host_arch" = i386 ]; then
 	_cpuinfo="TOOLS/cpuinfo"
     fi
 
-    pname=`$_cpuinfo | grep 'model name' | cut -d ':' -f 2`
-    pparam=`$_cpuinfo | grep 'features' | cut -d ':' -f 2`
+    pname=`$_cpuinfo | grep 'model name' | cut -d ':' -f 2 | head -1`
+    pparam=`$_cpuinfo | grep 'features' | cut -d ':' -f 2 | head -1`
     if [ -z "$pparam" ]; then
-	pparam=`$_cpuinfo | grep 'flags' | cut -d ':' -f 2`
+	pparam=`$_cpuinfo | grep 'flags' | cut -d ':' -f 2 | head -1`
     fi
-    pvendor=`$_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2`
-    pfamily=`$_cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2`
-    pmodel=`$_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2`
-    pstepping=`$_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2`
+    pvendor=`$_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2 | head -1`
+    pfamily=`$_cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -1`
+    pmodel=`$_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -1`
+    pstepping=`$_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -1`
 else
     # not an x86 host, cpuinfo stuff is not relevant
     pname= pparam= pvendor= pfamily= pmodel= pstepping=
