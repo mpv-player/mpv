@@ -25,7 +25,7 @@
   <UL>
     <LI><A HREF="#1.1">1.1 O programie</A></LI>
     <LI><A HREF="#1.2">1.2 Historia</A></LI>
-    <LI><A HREF="#1.3">1.3 Instalacja</A></LI>
+    <LI><A HREF="#1.3">1.3 Instalacja/ Wskazówki</A></LI>
     <LI><A HREF="#1.4">1.4 A co z GUI?</A></LI>
     <LI><A HREF="#1.5">1.5 Napisy i OSD</A></LI>
   </UL>
@@ -44,6 +44,7 @@
 	<LI><A HREF="formats.html#2.1.1.7">2.1.1.7 Pliki RealMedia</A></LI>
 	<LI><A HREF="formats.html#2.1.1.8">2.1.1.8 Pliki NuppelVideo</A></LI>
 	<LI><A HREF="formats.html#2.1.1.9">2.1.1.9 Pliki yuv4mpeg</A></LI>
+	<LI><A HREF="formats.html#2.1.1.10">2.1.1.10 FILM files</A></LI>
       </UL>
       <LI><A HREF="formats.html#2.1.2">2.1.2 D¼wiêk</A></LI>
     </UL>
@@ -113,6 +114,9 @@
 	<LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - wyj¶cie do BIOSu VESA </A></LI>
 	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
 	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon - nak³adkowanie obrazu</A></LI>
+	<LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
+	<LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (dla niektórych kart
+	¶ci±gaj±cych/odgrywaj±cych MJPEG)</A></LI>
 	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A></LI>
 	<UL>
 	  <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox</A></LI>
@@ -138,6 +142,7 @@
           <UL>
             <LI><A HREF="encoding.html#2.4.3">2.4.3 Podsumowanie</A></LI>
             <LI><A HREF="encoding.html#2.4.3.1">2.4.3.1 Kodowanie dwupasmowe DivX4</A></LI>
+	    <LI><A HREF="encoding.html#2.4.3.1">2.4.3.1 Kodowanie 2 i 3-pasmowe DivX4</A></LI>
             <LI><A HREF="encoding.html#2.4.3.2">2.4.3.2 Przeskalowywanie filmów</A></LI>
             <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Streamcopy</A></LI>
 	    <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Naprawa plików AVI z uszkodzonym indeksem</A></LI>
@@ -158,9 +163,10 @@
   </UL>
   <LI><A HREF="#3">3. Sposób u¿ycia</A></LI>
     <UL>
-      <LI><A HREF="#3.1">3.1 Sterowanie z klawiatury</A></LI>
-      <LI><A HREF="#3.2">3.2 Sterowanie przez LIRC (Linux Infrared Remote Control)</A></LI>
-      <LI><A HREF="#3.3">3.3 Przesy³anie przez sieæ lub za pomoc± pipe</A></LI>
+      <LI><A HREF="#3.1">3.1 Linia poleceñ</A></LI>
+      <LI><A HREF="#3.2">3.2 Sterowanie z klawiatury</A></LI>
+      <LI><A HREF="#3.3">3.3 Sterowanie przez LIRC (Linux Infrared Remote Control)</A></LI>
+      <LI><A HREF="#3.4">3.4 Przesy³anie przez sieæ lub za pomoc± pipe</A></LI>
     </UL>
   <LI><A HREF="cd-dvd.html#4">4. Sekcja CD/DVD</A></LI>
     <UL>
@@ -236,16 +242,16 @@ szczê¶cia. Bêdziesz go potrzebowa³ :) </P>
 <P><B>MPlayer</B> jest odgrywark± filmów pod LINUXem (dzia³a pod wieloma innymi
 Unixami, i systemami opartymi na innych procesorach ni¿ <B>x86</B>, zobacz <A
 HREF="#6">sekcja 6</A>). Wy¶wietla wiêkszo¶æ plików MPEG, VOB, AVI, VIVO,
-ASF/WMV, QT/MOV, FLI oraz RM, korzystaj±c z wielu w³asnych, XAnim oraz Win32 DLL
-kodeków. Mo¿esz równie¿ ogl±daæ <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
-<B>3ivx</B>, a nawet filmy <B>DivX</B> (i nie potrzebujesz wcale biblioteki
-avifile!). Kolejn± du¿± zalet± mplayera jest szeroki wachlarz sterowników
-wyj¶cia. Mplayer dzia³a z X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib,
-DirectFB, ale mo¿esz te¿ korzystaæ z GGI i SDL (i w ten sposób z wielu
-sterowników dostarczanych przez SDL), a tak¿e z niskopoziomowych sterowników
-specyficznych dla danej karty (Matrox, 3Dfx i Radeon)!  Wiêkszo¶æ dostêpnych
-sterowników wspiera programowe i sprzêtowe skalowanie, mo¿esz wiêc cieszyæ siê
-ogl±daniem filmów w trybie pe³noekranowym. <B>MPlayer</B> obs³uguje
+ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, korzystaj±c z wielu
+w³asnych, XAnim oraz Win32 DLL kodeków. Mo¿esz równie¿ ogl±daæ <B>VideoCD</B>,
+<B>SVCD</B>, <B>DVD</B>, <B>3ivx</B>, a nawet filmy <B>DivX</B> (i nie
+potrzebujesz wcale biblioteki avifile!). Kolejn± du¿± zalet± mplayera jest
+szeroki wachlarz sterowników wyj¶cia. Mplayer dzia³a z X11, Xv, DGA, OpenGL,
+SVGAlib, fbdev, AAlib, DirectFB, ale mo¿esz te¿ korzystaæ z GGI i SDL (i w ten
+sposób z wielu sterowników dostarczanych przez SDL), a tak¿e z niskopoziomowych
+sterowników specyficznych dla danej karty (Matrox, 3Dfx i Radeon)!  Wiêkszo¶æ
+dostêpnych sterowników wspiera programowe i sprzêtowe skalowanie, mo¿esz wiêc
+cieszyæ siê ogl±daniem filmów w trybie pe³noekranowym. <B>MPlayer</B> obs³uguje
 wy¶wietlanie poprzez pewne sprzêtowe karty dekoduj±ce MPEG , takie jak <B><A
 HREF="DVB">DVB</A></B> i <B> <A HREF="DXR3">DXR3/Hollywood+</A></B> !  A co
 powiesz na ³adne, du¿e, antyaliasowane i cieniowane napisy (<B>wspieranych jest
@@ -314,7 +320,7 @@ zmodyfikowaæ jeden z tych programów...</P>
     oczywi¶cie naprawiono stary kod tak¿e, usuniêto b³êdy itp.</LI>
 <LI><B>MPlayer 0.18 "The BugCounter"</B><BR>
     2 miesi±ce odk±d pojawi³o siê 0.17 i proszê, oto nowe wydanie ... Ukoñczona
-    obs³uga ASF, wiecej formatów napisów, wprowadzenie libao (podobnej do libvo
+    obs³uga ASF, wiêcej formatów napisów, wprowadzenie libao (podobnej do libvo
     ale dla d¼wiêku) i bardziej stabilne, ni¿ kiedykolwiek i tak dalej. To jest
     prze³om!</LI>
 <LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
@@ -337,9 +343,8 @@ przeszukaj t± dokumentacjê, a znajdziesz wyja¶nienie. Kiedy zobaczysz linki,
 przeczytaj uwa¿nie dokumenty, które one wskazuj±. Zajmie ci to trochê czasu,
 ale warto to zrobiæ.</P>
 
-<P>Potrzebna ci bêdzie do¶æ nowa wersja systemu. W Linuksie wymagane s± j±dra
-2.4.x, ale z 2.4.10 i wy¿szymi czasami mo¿esz napotkaæ problemy (licencja,
-b³êdy j±dra, itp.), wiêc s± one odradzane.</P>
+<P>Potrzebna ci bêdzie do¶æ nowa wersja systemu. W Linuksie zalecane s± j±dra
+2.4.x.</P>
 
 <P><B><I>WYMAGANE OPROGRAMOWANIE</I></B><BR>
 
@@ -348,13 +353,15 @@ b³êdy j±dra, itp.), wiêc s± one odradzane.</P>
 odpowiedzialny za generowanie bardzo istotnych instrukcji MMX/3DNow!/itp.</LI>
   <LI><B>gcc</B> - sugerowana wersja od <B>2.95.2</B> do <B>2.95.4</B>.
     <B>NIGDY</B> nie u¿ywaj 2.96 lub 3.x.x !!! One generuj± b³êdny kod. Je¶li
-zdecydujesz siê zmieniæ gcc z 2.96, wtedy nie wybieraj odga³êzieñ 3.0, tylko
-dlatego, ¿ê s± nowsze! W pewnych wzglêdach, to jest wersja nawet gorsza ni¿
-2.96. Tak wiêc zejd¼ do 2.95.x (zejd¼ tak¿e do ni¿szej wersji libstdc++!),
-albo nie zmieniaj nic w ogóle (ale w tym wypadku b±d¼ przygotowany na
-czasoch³onne problemy). Szczegó³owe informacje o b³êdach gcc 2.96 mo¿na znale¼æ
-<A HREF="users_against_developers.html"><B><I>tu</I></B></A> oraz w <A
-HREF="faq.html">FAQ</A>!</I></B></LI>.
+    zdecydujesz siê zmieniæ gcc z 2.96, wtedy nie wybieraj odga³êzieñ 3.0,
+    tylko dlatego, ¿ê s± nowsze! W pewnych wzglêdach, to jest wersja nawet
+    gorsza ni¿ 2.96. Tak wiêc zejd¼ do 2.95.x (zejd¼ tak¿e do ni¿szej wersji
+    libstdc++!), albo nie zmieniaj nic w ogóle (ale w tym wypadku b±d¼
+    przygotowany na czasoch³onne problemy). Szczegó³owe informacje o b³êdach
+    gcc 2.96 (które nadal nie s± naprawione, a które s± rozpracowywane w
+    Mplayerze) mo¿na znale¼æ <A
+    HREF="users_against_developers.html"><B><I>tu</I></B></A> oraz w <A
+    HREF="faq.html">FAQ</A>!</I></B></LI>.
   <LI><B>XFree86</B> - sugerowana wersja, to <B>wersja najnowsza (4.1.0)</B>.
 Normalnie ka¿dy chce tej wersji, gdy¿, poczynaj±c od XFree86 4.0.2, zawiera
 ona rozszerzenie <A HREF="video.html#2.3.1.2">XVideo</A> (gdzie¶ okre¶lane jako
@@ -416,10 +423,11 @@ DLL, ale wolniej ni¿ <B>libavcodec</B>!</LI>
 HREF=codecs.html#2.2.1.3>kodeków XAnim</A>.</LI>
 
 <LI><A HREF=codecs.html#2.2.1.3>Kodeki XAnim</A> s± najlepsze (pe³ny ekran,
-sprzêtowy zoom YUV) do dekodowania starych filmów, takich jak Indeo 3/4/5,
-Cinepak oraz kilka innych. Te kodeki s± wieloplatformowe, wiec to jedyny
-sposób, aby odgrywaæ Indeo na platformach nie-x86 (có¿, niezale¿nie od samego
-u¿ywania XAnim:).</LI>
+sprzêtowy zoom YUV) do dekodowania starych filmów, takich jak Indeo 3/4/5 oraz
+kilka innych. Te kodeki s± wieloplatformowe, wiêc to jedyny sposób, aby
+odgrywaæ Indeo na platformach nie-x86 (có¿, niezale¿nie od samego u¿ywania
+XAnim:). Na przyk³ad filmy Cinepak s± najlepiej odgrywane z w³asnym dekoderem
+Cinepak Mplayera</LI>
 
 </UL>
 
@@ -509,8 +517,12 @@ rekomendowany!</LI>
 <UL>
 
 <LI><B>Soundblaster Live!</B>: z t± kart± mo¿esz u¿ywaæ 4 lub 6 (<B>5.1</B>)
-kana³ów dekodowania AC3, zamiast, jak dot±d, 2. Przeczytaj sekcjê <A
+kana³ów dekodowania AC3, zamiast, jak dot±d, dwóch. Przeczytaj sekcjê <A
 HREF="codecs.html#2.2.2.1">Programowe dekodowanie AC3</A>.</LI>
+
+<LI><B>C-Media z wyj¶ciem SP/DIF</B> : sprzêtowe przej¶cie AC3 jest z tymi
+kartami mo¿liwe, zobacz sekcjê: <A HREF="codecs.html#2.2.2.2">Sprzêtowe
+dekodowanie AC3</A>.</LI>
 
 <LI>w³a¶ciwo¶ci <B>innych kart</B> nie s± obs³ugiwane przez <B>MPlayera</B>.
   <U>Bardzo zaleca siê przeczytanie sekcji<A HREF="sound.html#2.3.2">karty
@@ -599,7 +611,7 @@ wci¶nij prawy i lewy przycisk jednocze¶nie), aby wywo³aæ menu GTK, z opcj±
 odgrywania DVD!</P>
 
 <P>Poniewa¿ <B>MPlayer</B> nie zawiera skórek, musisz ¶ci±gn±æ je, je¿eli
-chcesz uzywaæ GUI. Zobacz 
+chcesz u¿ywaæ GUI. Zobacz 
 <A HREF="http://www.mplayerhq.hu/homepage/dload.html">stronê download</A>.
 Skórki powinny byæ rozpakowane do typowego ogólnodostêpnego katalogu
 systemowego (<CODE>/usr/local/share/mplayer/Skin</CODE>), lub do
@@ -621,7 +633,7 @@ masz pliki w rodzaju: <CODE>sample.sub</CODE>, <CODE>sample.ifo</CODE>,
 <CODE>sample.idx</CODE> - musisz podaæ opcje: <CODE>-vobsub sample
 -vobsubid0</CODE> (opcjonalnie ze ¶cie¿k± dopliku, oczywi¶cie). Opcja
 <CODE>-vobsubid</CODE> jest odpowiednikiem opcji <CODE>-sid</CODE> dla DVD. Z
-t± opcj± mo¿esz wybieraæ wersjê jêzykow± z dostêpnych scie¿ek napisów.</P>
+t± opcj± mo¿esz wybieraæ wersjê jêzykow± z dostêpnych ¶cie¿ek napisów.</P>
 
 <P>O napisach DVD przeczytaæ mo¿esz w <A HREF="cd-dvd.html#4.2">sekcji DVD</A>.</P>
 
@@ -688,9 +700,13 @@ TOOLS/subfont-c/README).
 mieæ równie¿ wtyczkê HSI RAW, zobacz adres URL poni¿ej) </UL>
 </P>
 
-<P>Potem rozpakuj pliki do ~/.mplayer/font/ .
-Teraz powiniene¶ zobaczyæ zegar w lewym górnym rogu ekranu
-(wy³±czysz to za pomoc± klawisza 'o').</P>
+<P>Potem rozpakuj pliki, które ¶ci±gn±³e¶, do <CODE>~/.mplayer</CODE> lub
+<CODE>$PREFIX/share/mplayer</CODE>. Nastêpnie zmieñ nazwê lub stwórz link
+symboliczny do jednego z nich o nazwie <CODE>font</CODE> (np. tak: <CODE>ln -s
+~/.mplayer/arial-24~/.mplayer/font</CODE>).
+
+Teraz powiniene¶ zobaczyæ zegar w lewym górnym rogu ekranu (wy³±czysz to za
+pomoc± klawisza 'o').</P>
 
 <P>OSD ma 3 stany: (prze³±czane za pomoc± 'o')<BR>
 <UL>
@@ -854,12 +870,19 @@ Wej¶cie ze standardowego V4L<BR>
 
 
 <P><B><A NAME=3>3. Sposób u¿ycia</A></B></P>
+<P><B><A NAME=3.1>3.1.  Linia poleceñ</A></B></P>
+
+<P><B>MPlayer</B> u¿ywa complex playtree. Zawiera ono "domy¶lne" opcje zapisane
+jako pierwsze (np.: <CODE>mplayer -vfm 5</CODE>) jak i opcje zapisane za
+nazwami plików, które s± stosowane tylko do podanych plików/URL/czegokolwiek
+(np.: <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).</P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] [path/]filename</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [default options] [path/]filename1 [options for filename1] filename2 filename3 [options for filename3]</CODE></TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>VCD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] -vcd trackno /dev/cdrom</CODE></TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] -dvd titleno [/dev/dvd]</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>net</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] http://site.com/file.[mpg|avi]</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>net</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] http://site.com/file.[mpg|avi] (tu równie¿ mo¿e byæ u¿yte playtree)</CODE></TD><TR>
 </TABLE></P>
 
 <P><PRE>  mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
@@ -869,7 +892,7 @@ Wej¶cie ze standardowego V4L<BR>
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
 
-<P><B><A NAME=3.1>3.1. Sterowanie za pomoc± kalwiatury</A></B></P>
+<P><B><A NAME=3.2>3.2. Sterowanie za pomoc± kalwiatury</A></B></P>
 
 <P><TABLE BORDER=0>
 <TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
@@ -980,7 +1003,7 @@ size=2> zmieñ listê kana³ów</TD></TR>
 
 </TABLE></P>
 
-<P><B><A NAME=3.2>3.2. Sterowanie za pomoc± LIRC</A></B></P>
+<P><B><A NAME=3.3>3.3. Sterowanie za pomoc± LIRC</A></B></P>
 
 <P> Linux Infrared Remote Control - u¿yj ³atwego w budowie, domowej roboty
 odbiornika IR, (prawie) dowolnego pilota i kontroluj za jego pomoc± swoje linux
@@ -1032,7 +1055,7 @@ size=2>PCM</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
 size=2> - u¿yj kana³u pcm miksera;</TD><TR>
 </TABLE></P>
 
-<P>Nie zapomnij ustawiæ flagê powtarzania dla RWND/FWD w .lircrc. Oto
+<P>Nie zapomnij ustawiæ flagi powtarzania dla RWND/FWD w .lircrc. Oto
 fragment z mojego .lircrc:</P>
 
 <P><PRE>  begin
@@ -1053,17 +1076,20 @@ fragment z mojego .lircrc:</P>
 <P>Je¶li nie odpowiada ci standardowa lokalizacja pliku lirc-config (~/.lircrc)
 u¿yj prze³±cznika -lircconf &lt;nazwa_pliku&gt;, aby podaæ inny plik.</P>
 
-<P><B><A NAME=3.3>3.3. Przesy³anie przez sieæ, b±d¼ za pomoc± pipe</A></B></P>
+<P><B><A NAME=3.4>3.4. Przesy³anie przez sieæ, b±d¼ za pomoc± pipe</A></B></P>
 
 <P><B>MPlayer</B> potrafi odgrywaæ pliki przesy³ane przez sieæ, za pomoc± protoko³u HTTP.
 Skonfigurowanie go jest proste, przekompiluj tylko <B>MPlayera</B> z opcj±:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
 
-<P>MPlayer <B>NIE umie czytaæ plików ASF</B> z sieci za pomoc± protoko³u MMS,
-tylko z u¿yciem czystego HTTP.</P>
+<P>Odtwarzanie  uruchamia siê przez zwyczajne podanie adresu URL w linii
+poleceñ. <B>MPlayer</B> honoruje równie¿ zmienn± ¶rodowiskow±  HTTP_PROXY i
+u¿ywa proxy je¶li jest ono dostêpne. Proxy mo¿e byæ równie¿ wymyszone:</P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer
+http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
-<P><B>MPlayer</B> potrafi czytaæ ze standardowego wej¶ciam (NIE z nazwanych rurek (pipes)). 
+<P><B>MPlayer</B> potrafi czytaæ ze standardowego wej¶cia (NIE z nazwanych potoków (pipes)). 
 Mo¿na to zastosowaæ do odgrywania z FTP:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
@@ -1149,7 +1175,7 @@ du¿o korzysta z instrukcji MMX, SSE i 3DNOW!, które nie mog± byæ skompilowane
 za pomoc± assemblera Sun'a <CODE>/usr/ccs/bin/as</CODE>.</P>
 
 <P>Skrypt configure usi³uje dowiedzieæ siê, który program assemblera 
-jest uzywany przez twoje polecenie "gcc" (w przypadku nieudanej autodetekcji,
+jest u¿ywany przez twoje polecenie "gcc" (w przypadku nieudanej autodetekcji,
 u¿yj opcji "--as=/tam/gdzie/zainstalowales/gnu-as", aby poinformowaæ  
 skrypt configure, gdzie mo¿e on znale¼æ GNU "as" w twoim systemie).</P>
 
@@ -1324,21 +1350,26 @@ u¿ytkowników mplayera</P>
   <LI>obs³uga SVGAlib w libvo</LI>
 </UL></LI>
 
-<LI><B><A HREF="mailto:alex@naxine.org">Alex Beregszaszi (Al3x)</A></B>
+<LI><B><A HREF="mailto:alex@naxine.org">Alex Beregszaszi (al3x)</A></B>
 <UL>
   <LI>sterownik wyj¶cia ALSA w libao2</LI>
   <LI>sterownik wyj¶cia vo_ggi w libvo (www.ggi-project.org)</LI>
-  <LI>obs³uga kodeków xanim codecs (jeszcze nieskoñczone!)</LI>
+  <LI>obs³uga kodeków xanim codecs</LI>
   <LI>obs³uga plików VIVO</LI>
   <LI>obs³uga plików odbioru TV</LI>
   <LI>Quicktime hackings</LI>
   <LI>obs³uga libavcodec wn MEncoderze</LI>
-  <LI>demuxer formatu plików RM</LI>
+  <LI>demukser formatu plików RM</LI>
   <LI>mencoder framecopy</LI>
-  <LI>obs³uga yuv4mpeg</LI>
+  <LI>obs³uga yuv4mpeg1</LI>
+  <LI>zmiany w demuxerze Nuppelvideo</LI>
   <LI>subconfig</LI>
-  <LI>ró¿ne rzeczy</LI>
+  <LI>VIDIX and libdha hackings</LI>
+  <LI>sterownik Matrox  przeniesiony do Vidix</LI>
+  <LI>sterownik wyj¶cia wideo XVidix</LI>
+  <LI>i inne ró¿ne rzeczy (w libvo, synchronizacji libmad, dekoderze i loaderze audio/video</LI>
 </UL></LI>
+
 
 <LI><B><A HREF="mailto:asackerm@stud.informatik.uni-erlangen.de">Andreas Ackermann (Acki)</A></B>
 <UL>
@@ -1382,190 +1413,196 @@ u¿ytkowników mplayera</P>
 
 <LI><B><A HREF="mailto:nickols_k@mail.ru">Nick Kurshev</A></B>
 <UL>
-  <LI>memcpy optimizations for AMD K7 and Intel Pentium III  (fastmemcpy.h)</LI>
-  <LI>CDROM tune info</LI>
-  <LI>further 3DNow! optimizations into mp3lib and libac3 and ffmpeg</LI>
-  <LI>russian translation of documentation</LI>
-  <LI>radeonfb</LI>
+  <LI>optymalizacj± memcpy dla AMD K7 oraz Intel Pentium III  (fastmemcpy.h)</LI>
+  <LI>info o dostrajaniu CDROM</LI>
+  <LI>dalsza optymalizacja dla 3DNow! w mp3lib, libac3 i ffmpeg</LI>
+  <LI>rosyjskie t³umaczenie dokumentacji</LI>
+  <LI>radeon_vid, rage128_vid, radeonfb</LI>
   <LI>libvo driver: vo_vesa</LI>
+  <LI>projekt i zaprogramowanie VIDIX i libdha</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:german@piraos.com">German Gomez Garcia</A></B>
 <UL>
-  <LI>SPDIF AC3 output for SBLive!</LI>
+  <LI>wyj¶cie SPDIF AC3 dla SBLive!</LI>
 </UL></LI>
 
-<LI><B><A HREF="mailto:eyck@incubus.ar.lublin.pl">Dariush Pietrzak (Eyck)</A></B>
+<LI><B><A HREF="mailto:eyck@incubus.ar.lublin.pl">Dariusz Pietrzak (Eyck)</A></B>
 <UL>
-  <LI>debian packaging support (see debian/* and this documentation)</LI>
-  <LI>support for vplayer subtitle format</LI>
-  <LI>prelimenary support for .RT subtitle format</LI>
+  <LI>obs³uga pakietów debiana  (zobacz: debian/* i t±  dokumentacjê)</LI>
+  <LI>obs³uga formatu napisów vplayera</LI>
+  <LI>wstêpna obs³uga dla formatu napisów .RT</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:marcus@idonex.se">Marcus Comstedt</A></B>
 <UL>
-  <LI>initial solaris8-x86 support</LI>
-  <LI>configure fixes</LI>
+  <LI>pocz±tkowa obs³uga solaris8-x86</LI>
+  <LI>poprawki w configure</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:jk@tools.de">Jürgen Keil</A></B>
 <UL>
-  <LI>patched <B>MPlayer</B> to work on Solaris 8 x86</LI>
-  <LI>various fixes (win32, configure, etc)</LI>
-  <LI>SUN audio driver in libao2</LI>
-  <LI>mediaLib support in libavcodec</LI>
+  <LI>³ata na <B>MPlayera</B> umo¿liwiaj±ca pracê  na Solaris 8 x86</LI>
+  <LI>ró¿ne poprawki (win32, configure, itp.)</LI>
+  <LI>sterownik d¼wiêku SUN w libao2</LI>
+  <LI>obs³uga mediaLib w libavcodec</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:vkushnir@Alfacom.net">Vladimir Kushnir</A></B>
 <UL>
-  <LI>patched <B>MPlayer</B> to work on FreeBSD x86</LI>
+  <LI>³ata na <B>MPlayera</B> umo¿liwiaj±ca pracê na FreeBSD x86</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:bertrand_baudet@yahoo.com">Bertrand BAUDET</A></B>
 <UL>
-  <LI>network streaming support</LI>
+  <LI>obs³uga przesy³ania przez sieæ</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:zybi@fanthom.irc.pl">Artur Zaprzala</A></B>
 <UL>
-  <LI>Complete font generator prog + OSD font (TOOLS/subfont-c)</LI>
+  <LI>Kompletny generator fontów:  program + font OSD (TOOLS/subfont-c)</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:lanzz@lanzz.org">lanzz@lanzz.org</A></B>
 <UL>
-  <LI>GIMP font generator plugin (TOOLS/subfont-gimp)</LI>
+  <LI>plugin GIMPa do generowania fontów (TOOLS/subfont-gimp)</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:atlka@pg.gda.pl">Adam Tla/lka</A></B>
 <UL>
-  <LI>osd/sub review, fixes, optimization, utf8 support</LI>
-  <LI>various fixes</LI>
+  <LI>recenzja osd/sub, poprawki, optymalizacja, obs³uga utf8</LI>
+  <LI>ró¿ne poprawki</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:folke@ashberg.de">Folke Ashberg</A></B>
 <UL>
-  <LI>native AAlib driver (-vo aa)</LI>
+  <LI>w³asny sterownik Alib (-vo aa)</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:ktoman@email.cz">Kamil Toman</A></B>
 <UL>
-  <LI>czech fonts</LI>
+  <LI>czeskie fonty</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:iive@yahoo.com">Ivan Kalvatchev</A></B>
 <UL>
-  <LI>interlaced MPEG2 support (libmpeg2)</LI>
-  <LI>libvo2 draft</LI>
+  <LI>obs³uga MPEG2 z przeplotem (libmpeg2)</LI>
+  <LI>projekt libvo2</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:p_l@gmx.fr">pl</A></B>
 <UL>
-  <LI>new ./configure script</LI>
-  <LI>general code maintaining, fixes, patch commiting</LI>
+  <LI>nowy skrypt ./configure </LI>
+  <LI>ogólne utrzymywanie kodu, poprawki, nadsy³anie ³at</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:michaelni@gmx.at">Michael Niedermayer</A></B>
 <UL>
-  <LI>new postprocessing code (with deinterlacing etc...)</LI>
-  <LI>software scaling C/MMX/MMX2/3DNow support (swscale.c)</LI>
-  <LI>various rgb/yuv bpp converters</LI>
-  <LI>new, better IDCT code for libavcodec</LI>
-  <LI>runtime cpu detection</LI>
-  <LI>SSE optimization of liba52</LI>
+  <LI>nowy  kod postprocessingu (z rozplotem itp...)</LI>
+  <LI>programowe skalowanie, obs³uga C/MMX/MMX2/3DNow (swscale.c)</LI>
+  <LI>ró¿ne konwertery rgb/yuv bpp </LI>
+  <LI>nowy, lepszy kod IDCT dla libavcodec</LI>
+  <LI>wykrywanie runtime cpu</LI>
+  <LI>optymalizacja SSE w liba52</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:sgoethel@jausoft.com">Sven Goethel</A></B>
 <UL>
-  <LI>libvo driver: vo_gl2</LI>
+  <LI>sterownik libvo: vo_gl2</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:joy@pingfm.org">joy_ping</A></B>
 <UL>
-  <LI>ao_alsa9 fixes</LI>
+  <LI>poprawki ao_alsa9</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:eanholt@gladstone.uoregon.edu">Eric Anholt</A></B>
 <UL>
-  <LI>CPU detection code</LI>
+  <LI>kod wykrywania CPU</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri Svoboda</A></B>
 <UL>
-  <LI>AQT type subtitles support</LI>
-  <LI>CRTC2 YUV support in mga_vid</LI>
-  <LI>DirectFB video output driver</LI>
+  <LI>obs³yga napisów typu AQT</LI>
+  <LI>obs³uga CRTC2 YUV w mga_vid</LI>
+  <LI>obs³uga wyj¶cia wideo DirectFB</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:oliver.schoenbrunner@jku.at">Oliver Schoenbrunner</A></B>
 <UL>
-  <LI>SGI audio driver</LI>
-  <LI>MIPS support</LI>
+  <LI>sterownik d¼wiêku SGI</LI>
+  <LI>obs³uga MIPS</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:jeroen.dobbelaere@acunia.com">Jeroen Dobbelaere</A></B>
 <UL>
-  <LI><A HREF="http://mad.sourceforge.net">libmad</A> support</LI>
+  <LI>obs³uga <A HREF="http://mad.sourceforge.net">libmad</A></LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:dholm@telia.com">David Holm</A></B>
 <UL>
-  <LI>DXR3 support</LI>
-  <LI>libmp1e import</LI>
+  <LI>obs³uga DXR3</LI>
+  <LI>przeniesienie libmp1e</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:takis@lumumba.luc.ac.be">Panagiotis Issaris</A></B>
 <UL>
-  <LI>-playlist option</LI>
-  <LI>NuppelVideo support</LI>
+  <LI>opcja -playlist</LI>
+  <LI>obs³uga NuppelVideo</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:melanson@pcisys.net">Mike Melanson</A></B>
 <UL>
-  <LI>MS Video1 codec open-source implementation</LI>
-  <LI>FLI demuxer, decoder</LI>
-  <LI>Generic ADPCM decoder (supports stereo IMA4 too)</LI>
+  <LI>implementacja open source kodeka MS Video1</LI>
+  <LI>demukser dekoder FLI</LI>
+  <LI>dekoder Generic ADPCM (obs³uguje równie¿ stereo IMA4)</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:ranma@gmx.at">Tobias Diedrich</A></B>
 <UL>
-  <LI>NAS audio output driver</LI>
+  <LI>terownik d¼wiêku wyj¶cia NAS</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:foth@informatik.uni-hamburg.de">Kilian A. Foth</A></B>
 <UL>
-  <LI>-slave mode</LI>
+  <LI>tryb -slave</LI>
 </UL></LI>
 <LI><B><A HREF="mailto:timf@mail.csse.monash.edu.au">Tim Ferguson</A></B>
 <UL>
-  <LI>Opensource Cinepak decoder</LI>
+  <LI>open source dekorer Cinepak</LI>
+  <LI>open source dekoder CYUV</LI>
 </UL></LI>
 <LI><B><A HREF="mailto:itrs@softwell.com.tw">Sam Lin</A></B>
 <UL>
-  <LI>-wid (plugger) patch</LI>
+  <LI>³ata -wid (plugger)</LI>
 </UL></LI>
 <LI><B><A HREF="mailto:johannes.feigl@mcse.at">Johannes Feigl</A></B>
 <UL>
-  <LI>german docs translation</LI>
-  <LI>some improvements in configure, small patches</LI>
+  <LI>niemieckie t³umaczenie dokumentacji</LI>
+  <LI>pewne poprawki w configure, niewielkie ³aty</LI>
   <LI>found somebody (Thilo Wunderlich) how send a DVB card</LI>
 </UL></LI>
 <LI><B><A HREF="mailto:kmkaplan@selfoffice.com">Kim Minh Kaplan</A></B>
 <UL>
-  <LI>DVD subtitles display support</LI>
-  <LI>DVD and VobSub subtitles display support</LI>
+  <LI>obs³uga wy¶wietlania napisów DVD i VobSub</LI>
 </UL></LI>
 <LI><B><A HREF="mailto:bkuschak@yahoo.com">Brian Kuschak</A></B>
 <UL>
-  <LI>RTP streaming support (reading)</LI>
+  <LI>obs³uga przesy³ania RTP (odczyt)</LI>
 </UL></LI>  
 <LI><B><A HREF="mailto:steve@daviesfam.org">Stephen Davies</A></B>
 <UL>
-  <LI>support for large video files (&gt;2^32 bytes in size)</LI>
-  <LI>surround sound</LI>
+  <LI>obs³uga olbrzymich plików wideo (&gt;2^32 bajtów)</LI>
+  <LI>d¼wiêk otaczaj±cy</LI>
 </UL></LI>
+<LI><B><A HREF="mailto:rsnel@cube.dyndns.org">Rik Snel</A></B>
+ <UL>
+  <LI><CODE>zr</CODE>sterownik wyj¶cia wideo</LI>
+ </UL>
+</LI>
 </UL></P>
 
-<P>Main testers:</P>
+<P>G³ówni testerzy:</P>
 
 <P><UL>
 <LI>Tibor Balázs (Tibcu)
@@ -1576,66 +1613,64 @@ u¿ytkowników mplayera</P>
 <LI>Bohdan Horst (Nexus)
 </UL></P>
 
-<P ALIGN=center><B><U>The codecs, libs:</U></B></P>
+<P ALIGN=center><B><U>Kodeki i biblioteki:</U></B></P>
 
 <P><UL>
 <LI>Aaron Holtzman:  &lt;aholtzma@engr.uvic.ca&gt;
-<UL><LI>ac3dec (and libac3) author  [AC3 audio decoder]
-</LI><LI>mga_vid driver  [Matrox G200/G400 YUV Back-end Scaler]
-</LI><LI>mpeg2dec        [Fast MPEG1/MPEG2 video decoder, currently used in player]
+<UL><LI>autor ac3dec (i libac3) [dekoder d¼wiêku AC3]
+</LI><LI>mga_vid driver [Matrox G200/G400 YUV Back-end Scaler]
+</LI><LI>mpeg2dec [szybki dekoder wideo MPEG1/MPEG2, obecnie u¿ywany w Mplayerze]
 </LI></UL>
 
 </LI><LI>Michel Lespinasse:  &lt;walken@zoy.org&gt;
-<UL><LI>did large libmpeg2 changes for better speed and mpeg conformance
+<UL><LI>wykona³ du¿e zmiany w libmpeg2 przy¶pieszaj±ce dzia³anie i usprawniaj±ce mpeg
 </LI></UL>
 
 </LI><LI>Eugene Kuznetsov:  &lt;divx@euro.ru&gt;
-<UL><LI>avifile author  [AVI player library for linux, using Win32 VfW/ACM codecs]
-</LI><LI>technical help about AVI and ASF formats, and how to get YUV using VfW...
-</LI><LI>divx4linux techical support
-</LI></UL>
+<UL><LI>autor avifile [odgrywarka biblioteki AVI pod linuksa, u¿ywaj±ca kodeków Win32 VfW/ACM
+</LI><LI>technniczne wsparcie dotycz±ce formatów AVI i ASF, oraz sposobu na
+uzyskanie YUV za pomoc± VfW...
+</LI><LI>techniczne wsparcie w divx4linux</LI></UL>
 
 </LI><LI>Zdenek Kabelac:  &lt;kabi@informatics.muni.cz&gt;
-<UL><LI>current avifile maintainer(?)
-</LI><LI>some technical help about the win32 stuff and timers
-</LI></UL>
+<UL><LI>obecny maintainer avifile(?)
+</LI><LI>techniczne wsparcie wrzeczach zwi±zanych z win32 i zegarami</LI></UL>
 
 </LI><LI>Gerard Lantau: &lt;glantau@yahoo.fr&gt;
-<UL><LI>ffmpeg/libavcodec author,maintainer (opensource mpeg, mjpeg, divx en/decoder)
+<UL><LI>autor ffmpeg/libavcodec, maintainer (open source mpeg, mjpeg, divx en/decoder)
 </LI></UL>
 
-</LI><LI>Project Mayo:  &lt;<A HREF="http://www.projectmayo.com">http://www.projectmayo.com</A>&gt;
-<UL><LI>the OpenDivX codec authors
-</LI></UL>
+</LI><LI>Projekt Mayo:  &lt;<A HREF="http://www.projectmayo.com">http://www.projectmayo.com</A>&gt;
+<UL><LI>autorzy kodeków OpenDivX</LI></UL>
 
 </LI><LI>Michael Hipp:
-<UL><LI>mpglib author   [isn't used directly but some parts in mp3lib]
+<UL><LI>autor mpglib  [nie jest uzywany wprost, ael w pewnych czê¶ciach w mp3lib]
 </LI></UL>
 
 </LI><LI>Mark Podlipec:
-<UL><LI>xa_gsm.c author  [MS-GSM audio codec]
-                   [from a GSM library by Jutta Degener and Carsten Bormann]
+<UL><LI>autor xa_gsm.c [kodek d¼wiêku MS-GSM]
+                   [z biblioteki GSM autorstwa Jutta Degener i Carsten Bormann]
 </LI></UL>
 
 </LI><LI>Jake Janovetz:
-<UL><LI>remez.c author  [Used to calculate audio filter coefficients]
+<UL><LI>autor remez.c [u¿ywany do obliczeñ wspó³czynników filtracji d¼wiêku]
 </LI></UL>
-/LI></UL></P>
+</LI></UL></P>
 
-<P>Their code is not used in current player version, but I've got some ideas or
-other technical help from:</P>
+<P>Ich kod nie jest u¿ywany w obecnej wersji odgrywarki, ale otrzymujê pewne pomys³y
+i techniczne wsparcie z ich strony: </P>
 
 <P><UL>
 <LI>John F. McGowan   http://www.jmcgowan.com/
-<UL><LI>AVI FAQ author/collector. [site with many useful docs on codecs and avi fmt]
-</LI></UL>
+<UL><LI>autor i kolekcjoner AVI FAQ. [strona w wieloma u¿ytecznymi dokumentami
+i kodekami oraz avi fmt]</LI></UL>
 
 </LI><LI>Dirk Farin:      &lt;farin@ti.uni-mannheim.de&gt;
-<UL><LI>dvdview author  [MPEG1/MPEG2 video decoder, used in v0.5-v0.8]
+<UL><LI>autor dvdview  [dekoder wideo MPEG1/MPEG2, u¿ywany w v0.5-v0.8]
 </LI></UL>
 
 </LI><LI>Adam Williams:   &lt;broadcast@earthling.net&gt;
-<UL><LI>libmpeg3 (and xmovie) author  [MPEG1/MPEG2 video decoder, used in v0.1-v0.4]
+<UL><LI>autor libmpeg3 (oraz xmovie) [dekoder wideo MPEG1/MPEG2, u¿ywany w v0.1-v0.4]
 </LI></UL>
 
 </UL></P>
@@ -1660,12 +1695,12 @@ other technical help from:</P>
   <LI><B>francuskie</B>: <A HREF="mailto:smarteau@eso.org">Stephane Marteau</A> (nieaktualne)
   <LI><B>w³oskie</B>: TeLeNiEkO (nieaktualne)
   <LI><B>rosyjskie</B>: Nick Kurshev (nieaktualne)
-  <LI><B>polskie</B>: Dariush Pietrzak (dawna wersja nieshierarchizowana, w ascii) oraz 
+  <LI><B>polskie</B>: Dariusz Pietrzak (dawna wersja nieshierarchizowana, w ascii) oraz 
   <A HREF="mailto:nell@skrzynka.pl">Justyna Bia³a</A> (wersja aktualna, w html)
 </UL></P>
 <P>Platformy sprzêtowe/porty
 <UL>
-  <LI><B>pakiety DEBIANa</B>: Dariush Pietrzak
+  <LI><B>pakiety DEBIANa</B>: Dariusz Pietrzak
   <LI><B>wsparcie dla FreeBSD</B>: Vladimir Kushnir
   <LI><B>wsparcie dla Solaris 8</B>: Jürgen Keil
   <LI><B>wsparcie dla MIPS</B>: Oliver Schoenbrunner
@@ -1708,12 +1743,12 @@ other technical help from:</P>
   <LI><B>vo_x11.c</B> - Pontscho
   <LI><B>vo_xmga.c</B> - Pontscho
   <LI><B>vo_xv.c</B> - Pontscho
+  <LI><B>vo_zr.c</B> - <A HREF="mailto:rsnel@cube.dyndns.org">Rik Snel</A>
 </UL></P>
 <P>sterowniki libao2:
 <UL>
   <LI><B>ao_alsa5.c</B>  - al3x
   <LI><B>ao_alsa9.c</B>  - al3x (poprawione przez <A HREF="mailto:joy@pingfm.org">joy_ping</A>)
-  <LI><B>ao_dxr3.c</B>   - <A HREF="mailto:dholm@telia.com">David Holm</A>
   <LI><B>ao_null.c</B>   - A'rpi
   <LI><B>ao_oss.c</B>    - A'rpi
   <LI><B>ao_pcm.c</B>    - Atmos
@@ -1722,7 +1757,7 @@ other technical help from:</P>
   <LI><B>ao_sun.c</B>    - Jürgen Keil
 </UL></P>
 <P>NARZÊDZIA:
-<UL>
+<UL>j
   <LI><B>subfont-c</B> - Artur Zaprzala: <zybi@fanthom.irc.pl>
   <LI><B>subfont-GIMP</B> - lanzz@lanzz.org
   <LI><B>*.pl</B> - Atmos
