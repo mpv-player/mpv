@@ -124,8 +124,10 @@ static void set_window(){
          XTranslateCoordinates( mDisplay,mWindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
          fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
+         aspect(&dwidth,&dheight,A_NOZOOM);
          if ( mFullscreen )
           {
+           aspect(&dwidth,&dheight,A_ZOOM);
            drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
            drwcX+=drwX;
            drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;

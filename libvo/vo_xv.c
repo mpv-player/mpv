@@ -286,8 +286,10 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
      XTranslateCoordinates( mDisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
      printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
+     aspect(&dwidth,&dheight,A_NOZOOM);
      if ( mFullscreen )
       {
+       aspect(&dwidth,&dheight,A_ZOOM);
        drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
        drwcX+=drwX;
        drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;
@@ -365,8 +367,10 @@ static void check_events(void)
      }
    #endif
 
+   aspect(&dwidth,&dheight,A_NOZOOM);
    if ( mFullscreen )
     {
+     aspect(&dwidth,&dheight,A_ZOOM);
      drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
      drwcX+=drwX;
      drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;
