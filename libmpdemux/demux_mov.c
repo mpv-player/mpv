@@ -194,12 +194,7 @@ typedef struct {
     mov_track_t* tracks[MOV_MAX_TRACKS];
 } mov_priv_t;
 
-#warning "FIXME - mov support is only working perfectly on Little Endian systems?!"
-//#ifdef WORDS_BIGENDIAN
-//#define MOV_FOURCC(a,b,c,d) ((d)|(c<<8)|(b<<16)|(a<<24))
-//#else
 #define MOV_FOURCC(a,b,c,d) ((a<<24)|(b<<16)|(c<<8)|(d))
-//#endif
 
 int mov_check_file(demuxer_t* demuxer){
     int flags=0;
@@ -250,7 +245,7 @@ int mov_check_file(demuxer_t* demuxer){
 	  break;
 	default:
 	  if(no==0) return 0; // first chunk is bad!
-	  id = bswap_32(id);
+	  id = be2me_32(id);
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
 	}
 	if(!stream_skip(demuxer->stream,len-skipped)) break;
@@ -531,7 +526,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 #warning "Implement atom 'code' for FLASH support"
 	    }
 	    default:
-		id = bswap_32(id);
+		id = be2me_32(id);
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
 		break;
 	  }//switch(id)
@@ -740,7 +735,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	}
 	case MOV_FOURCC('d','c','o','m'): {
 //	    int temp=stream_read_dword(demuxer->stream);
-	    unsigned int len=bswap_32(stream_read_dword(demuxer->stream));
+	    unsigned int len=be2me_32(stream_read_dword(demuxer->stream));
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Compressed header uses %.4s algo!\n",&len);
 	    break;
 	}
@@ -911,7 +906,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    break;
 	} /* eof udta */
 	default:
-	  id = bswap_32(id);
+	  id = be2me_32(id);
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
 	} /* endof switch */
 	} /* endof else */
