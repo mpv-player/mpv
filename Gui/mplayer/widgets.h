@@ -52,7 +52,9 @@ typedef struct
  gtkSkinStruct         sb;
  gtkVisibleStruct      vs;
  gtkOptionsStruct      op;
+ 
  int		       popupmenu;
+ int		       visiblepopupmenu;
 } gtkCommStruct;
 
 extern gtkCommStruct * gtkShMem;

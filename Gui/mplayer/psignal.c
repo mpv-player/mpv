@@ -128,7 +128,14 @@ void gtkSigHandler( int s )
         break;
    case evShowPopUpMenu:
         gtkShMem->popupmenu=evNone;
+	if ( gtkShMem->visiblepopupmenu ) gtk_widget_hide_on_delete( PopUpMenu );
+        PopUpMenu=create_PopUpMenu();
         gtk_menu_popup( GTK_MENU( PopUpMenu ),NULL,NULL,NULL,NULL,0,0 );
+	gtkShMem->visiblepopupmenu=1;
+	break;
+   case evHidePopUpMenu:
+        if ( gtkShMem->visiblepopupmenu ) gtk_widget_hide_on_delete( PopUpMenu );
+	gtkShMem->visiblepopupmenu=0;
 	break;
   }
  gtkShMem->message=0;

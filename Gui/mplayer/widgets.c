@@ -59,7 +59,7 @@ void widgetsCreate( void )
  FileSelect=create_FileSelect();
  MessageBox=create_MessageBox(0);
  Options=create_Options();
- PopUpMenu=create_PopUpMenu();
+// PopUpMenu=create_PopUpMenu();
 }
 
 // --- forked function

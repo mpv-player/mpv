@@ -32,13 +32,15 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
 
  mplMouseTimer=mplMouseTimerConst;
  wsVisibleMouse( &appMPlayer.subWindow,wsShowMouseCursor );
+ 
 
  switch( Button )
   {
    case wsPMMouseButton:
-        gtkSendMessage( evShowPopUpMenu );
-	break;
+          gtkSendMessage( evShowPopUpMenu );
+          break;
    case wsPRMouseButton:
+	  if ( gtkShMem->visiblepopupmenu ) gtkSendMessage( evHidePopUpMenu );
           mplShowMenu( RX,RY );
           msButton=wsPRMouseButton;
           break;
@@ -48,6 +50,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
           break;
 // ---
    case wsPLMouseButton:
+	  if ( gtkShMem->visiblepopupmenu ) gtkSendMessage( evHidePopUpMenu );
           sx=X; sy=Y;
           msButton=wsPLMouseButton;
           mplSubMoved=0;
