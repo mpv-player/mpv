@@ -138,6 +138,8 @@ MPlayer (1.0)
     * New dc1394 grabbing interface
     * preliminary decoding support for H.264 with CABAC and B-frames
     * dvr-ms suport in ASF demuxer
+    * NSV demuxer
+    * DVD compatible MPEG muxer
     * MJPEG-B fixes
     * range coder (arithmetic entropy coder) used by snow and ffv1
     * ffv1 enhancements: signed golomb, range codes
