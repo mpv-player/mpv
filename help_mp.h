@@ -29,13 +29,8 @@ static char* help_text=
 "    -vid <id>       select video channel [MPG: 0-15  AVI:  -- ]\n"
 "    -fps <value>    force frame rate (if value is wrong in the header)\n"
 "    -mc <s/5f>      maximum sync correction per 5 frames (in seconds)\n"
-"    -afm <1-5>      force audio format  1:MPEG 2:PCM 3:AC3 4:Win32 5:aLaw\n"
-#ifdef X11_FULLSCREEN
-"    -fs             fullscreen playing (only gl, xmga and xv drivers)\n"
-#endif
-#ifdef HAVE_XF86VM
-"    -vm             Use XF86VidMode for pseudo-scaling with x11 driver\n                     (requires -fs)\n"
-#endif
+//"    -afm <1-5>      force audio format  1:MPEG 2:PCM 3:AC3 4:Win32 5:aLaw\n"
+"    -fs -vm -zoom   fullscreen playing options (fullsc,vidmode chg,softscale)\n"
 "    -x <x> -y <y>   scale image to <x> * <y> resolution [if scalable!]\n"
 "\n"
 "  Keys:\n"
@@ -44,4 +39,5 @@ static char* help_text=
 "    p or SPACE      pause movie (press any key to continue)\n"
 "    q or ESC        stop playing and quit program\n"
 "    + or -          adjust audio delay by +/- 0.1 second\n"
+"    o               toggle OSD:  none / seek / seek+timer\n"
 "\n";
