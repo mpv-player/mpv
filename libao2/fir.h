@@ -32,6 +32,7 @@
                          :"memory");
 #define SAVE_QUE(x) \
         __asm __volatile("movq %%mm2, %0\n\t" \
+                         "emms          \n\t" \
                          :"=m"(x[0])          \
                          :                    \
                          :"memory");
@@ -68,6 +69,7 @@
 #define SAVE_QUE(x) \
         __asm __volatile("movq %%mm5, %0\n\t" \
                          "movq %%mm4, %1\n\t" \
+                         "emms          \n\t" \
                          :"=m"((x)[0]),       \
                           "=m"((x)[4])        \
                          :                    \

@@ -24,7 +24,7 @@
 #include "audio_plugin.h"
 #include "audio_plugin_internal.h"
 #include "afmt.h"
-// #include "../config.h"
+#include "../config.h"
 
 static ao_info_t info =
 {
