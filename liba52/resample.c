@@ -9,6 +9,11 @@
 
 #include <inttypes.h>
 #include "a52.h"
+#include "../config.h"
+
+#ifdef HAVE_MMX
+static uint64_t __attribute__((aligned(16))) magicF2W= 0x43c0000043c00000LL;
+#endif
 
 static inline int16_t convert (int32_t i)
 {
@@ -43,10 +48,56 @@ int a52_resample(float * _f, int16_t * s16)
     case A52_CHANNEL:
     case A52_STEREO:
     case A52_DOLBY:
+/* benchmark scores are 0.3% better with SSE but we would need to set bias=0 and premultiply it
+#ifdef HAVE_SSE
+	asm volatile(
+		"movl $-1024, %%esi		\n\t"
+		"1:				\n\t"
+		"cvtps2pi (%1, %%esi), %%mm0	\n\t"
+		"cvtps2pi 1024(%1, %%esi), %%mm2\n\t"
+		"movq %%mm0, %%mm1		\n\t"
+		"punpcklwd %%mm2, %%mm0		\n\t"
+		"punpckhwd %%mm2, %%mm1		\n\t"
+		"movq %%mm0, (%0, %%esi)	\n\t"
+		"movq %%mm1, 8(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+		"emms				\n\t"
+		:: "r" (s16+512), "r" (f+256)
+		:"%esi", "memory"
+	);*/
+#ifdef HAVE_MMX
+	asm volatile(
+		"movl $-1024, %%esi		\n\t"
+		"movq magicF2W, %%mm7		\n\t"
+		"1:				\n\t"
+		"movq (%1, %%esi), %%mm0	\n\t"
+		"movq 8(%1, %%esi), %%mm1	\n\t"
+		"movq 1024(%1, %%esi), %%mm2	\n\t"
+		"movq 1032(%1, %%esi), %%mm3	\n\t"
+		"psubd %%mm7, %%mm0		\n\t"
+		"psubd %%mm7, %%mm1		\n\t"
+		"psubd %%mm7, %%mm2		\n\t"
+		"psubd %%mm7, %%mm3		\n\t"
+		"packssdw %%mm1, %%mm0		\n\t"
+		"packssdw %%mm3, %%mm2		\n\t"
+		"movq %%mm0, %%mm1		\n\t"
+		"punpcklwd %%mm2, %%mm0		\n\t"
+		"punpckhwd %%mm2, %%mm1		\n\t"
+		"movq %%mm0, (%0, %%esi)	\n\t"
+		"movq %%mm1, 8(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+		"emms				\n\t"
+		:: "r" (s16+512), "r" (f+256)
+		:"%esi", "memory"
+	);
+#else
 	for (i = 0; i < 256; i++) {
 	    s16[2*i] = convert (f[i]);
 	    s16[2*i+1] = convert (f[i+256]);
 	}
+#endif
 	break;
     case A52_3F:
 	for (i = 0; i < 256; i++) {
