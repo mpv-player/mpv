@@ -1944,23 +1944,13 @@ demux_mkv_open (demuxer_t *demuxer)
     track = demux_mkv_find_track_by_num (mkv_d, demuxer->video->id,
                                          MATROSKA_TRACK_VIDEO);
 
-  if (track)
-    {
-      for (i=0; i < mkv_d->num_tracks; i++)
-        if (mkv_d->tracks[i]->type == MATROSKA_TRACK_VIDEO)
-          {
-            int def = (mkv_d->tracks[i] == track);
-            if (demux_mkv_open_video (demuxer, mkv_d->tracks[i]) && def)
-              demuxer->video->id = -2;
-            else if (def)
+  if (track && !demux_mkv_open_video (demuxer, track))
               {
                 mp_msg (MSGT_DEMUX, MSGL_INFO,
                         "[mkv] Will play video track %u\n", track->tnum);
                 demuxer->video->id = track->tnum;
                 demuxer->video->sh = demuxer->v_streams[track->tnum];
               }
-          }
-    }
   else
     {
       mp_msg (MSGT_DEMUX, MSGL_INFO, "[mkv] No video track found/wanted.\n");
@@ -2000,23 +1990,13 @@ demux_mkv_open (demuxer_t *demuxer)
     track = demux_mkv_find_track_by_num (mkv_d, demuxer->audio->id,
                                          MATROSKA_TRACK_AUDIO);
 
-  if (track)
-    {
-      for (i=0; i < mkv_d->num_tracks; i++)
-        if (mkv_d->tracks[i]->type == MATROSKA_TRACK_AUDIO)
-          {
-            int def = (mkv_d->tracks[i] == track);
-            if (demux_mkv_open_audio (demuxer, mkv_d->tracks[i]) && def)
-              demuxer->audio->id = -2;
-            else if (def)
+  if (track && !demux_mkv_open_audio (demuxer, track))
               {
                 mp_msg (MSGT_DEMUX, MSGL_INFO,
                         "[mkv] Will play audio track %u\n", track->tnum);
                 demuxer->audio->id = track->tnum;
                 demuxer->audio->sh = demuxer->a_streams[track->tnum];
               }
-          }
-    }
   else
     {
       mp_msg (MSGT_DEMUX, MSGL_INFO, "[mkv] No audio track found/wanted.\n");
@@ -2033,19 +2013,14 @@ demux_mkv_open (demuxer_t *demuxer)
     track = demux_mkv_find_track_by_language (mkv_d, dvdsub_lang,
                                               MATROSKA_TRACK_SUBTITLE);
 
-  for (i=0; i < mkv_d->num_tracks; i++)
-    if (mkv_d->tracks[i]->type == MATROSKA_TRACK_SUBTITLE)
-      {
-        int def = (mkv_d->tracks[i] == track);
-        if (demux_mkv_open_sub (demuxer, mkv_d->tracks[i]) && def)
-          demuxer->sub->id = -2;
-        else if (def)
+  if (track && !demux_mkv_open_sub (demuxer, track))
           {
             mp_msg (MSGT_DEMUX, MSGL_INFO,
                     "[mkv] Will display subtitle track %u\n", track->tnum);
             demuxer->sub->id = track->tnum;
           }
-      }
+  else
+    demuxer->sub->id = -2;
 
   if (mkv_d->chapters)
     {
