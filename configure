@@ -2448,7 +2448,7 @@ fi
 if test "$_dvb" = yes ; then
  _have_dvb='#define HAVE_DVB'
 else
- _have_dvb='#undef HAVE_MGA'
+ _have_dvb='#undef HAVE_DVB'
 fi
 
 if test "$_dxr3" = yes ; then
