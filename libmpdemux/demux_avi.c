@@ -579,7 +579,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
 
     if((priv->numberofframes=sh_video->video.dwLength)<=1)
       // bad video header, try to get number of frames from audio
-      if(sh_audio && sh_audio->wf->nAvgBytesPerSec) priv->numberofframes=sh_video->fps*sh_audio->audio.dwLength/sh_audio->wf->nAvgBytesPerSec;
+      if(sh_audio && sh_audio->wf->nAvgBytesPerSec) priv->numberofframes=sh_video->fps*sh_audio->audio.dwLength/sh_audio->audio.dwRate*sh_audio->audio.dwScale;
     if(priv->numberofframes<=1){
       mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CouldntDetFNo);
       priv->numberofframes=0;
@@ -587,7 +587,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
 
     if(sh_audio){
       if(sh_audio->wf->nAvgBytesPerSec && sh_audio->audio.dwSampleSize!=1){
-        asize=sh_audio->wf->nAvgBytesPerSec*priv->numberofframes*sh_video->frametime;
+        asize=(float)sh_audio->wf->nAvgBytesPerSec*sh_audio->audio.dwLength*sh_audio->audio.dwScale/sh_audio->audio.dwRate;
         sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
       } else {
         asize=sh_audio->audio.dwLength;
