@@ -8,7 +8,9 @@
 #ifdef USE_REALCODECS
 
 //#include <stddef.h>
+#ifdef HAVE_LIBDL
 #include <dlfcn.h>
+#endif
 #include "help_mp.h"
 
 #include "ad_internal.h"
@@ -112,6 +114,7 @@ typedef struct __attribute__((__packed__)) {
 } wra_init_t;
 #endif
 
+#ifdef HAVE_LIBDL
 static int load_syms_linux(char *path)
 {
     void *handle;
@@ -147,11 +150,14 @@ static int load_syms_linux(char *path)
     mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Cannot resolve symbols - incompatible dll: %s\n",path);
     dlclose(handle);
     return 0;
-}    
+}
+#endif    
 
 #ifdef USE_WIN32DLL
 
+#ifdef WIN32_LOADER
 #include "../loader/ldt_keeper.h"
+#endif
 void* WINAPI LoadLibraryA(char* name);
 void* WINAPI GetProcAddress(void* handle,char *func);
 int WINAPI FreeLibrary(void *handle);
@@ -161,7 +167,9 @@ static int load_sysm_windows(char *path)
     void *handle;
     
     mp_msg(MSGT_DECVIDEO, MSGL_INFO, "opening win32 dll '%s'\n", path);
+#ifdef WIN32_LOADER
     Setup_LDT_Keeper();
+#endif
     handle = LoadLibraryA(path);
     if (!handle)
     {
@@ -209,7 +217,9 @@ static int preinit(sh_audio_t *sh){
 
     /* first try to load linux dlls, if failed and we're supporting win32 dlls,
        then try to load the windows ones */
-    if (!load_syms_linux(path))
+#ifdef HAVE_LIBDL       
+    if (strstr(sh->codec->dll,".dll") || !load_syms_linux(path))
+#endif
 #ifdef USE_WIN32DLL
 	if (!load_sysm_windows(path))
 #endif

@@ -4,7 +4,9 @@
 #include "config.h"
 #ifdef USE_REALCODECS
 
+#ifdef HAVE_LIBDL
 #include <dlfcn.h>
+#endif
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -96,6 +98,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 }
 
 /* exits program when failure */
+#ifdef HAVE_LIBDL
 static int load_syms_linux(char *path) {
 		void *handle;
 
@@ -126,10 +129,13 @@ static int load_syms_linux(char *path) {
     dlclose(handle);
     return 0;
 }
+#endif
 
 #ifdef USE_WIN32DLL
 
+#ifdef WIN32_LOADER
 #include "../loader/ldt_keeper.h"
+#endif
 void* WINAPI LoadLibraryA(char* name);
 void* WINAPI GetProcAddress(void* handle,char* func);
 int WINAPI FreeLibrary(void *handle);
@@ -138,7 +144,9 @@ static int load_syms_windows(char *path) {
     void *handle;
 
     mp_msg(MSGT_DECVIDEO,MSGL_INFO, "opening win32 dll '%s'\n", path);
+#ifdef WIN32_LOADER
     Setup_LDT_Keeper();
+#endif
     handle = LoadLibraryA(path);
     mp_msg(MSGT_DECVIDEO,MSGL_V,"win32 real codec handle=%p  \n",handle);
     if (!handle) {
@@ -197,7 +205,9 @@ static int init(sh_video_t *sh){
 
 	/* first try to load linux dlls, if failed and we're supporting win32 dlls,
 	   then try to load the windows ones */
-	if(!load_syms_linux(path))
+#ifdef HAVE_LIBDL       
+	if(strstr(sh->codec->dll,".dll") || !load_syms_linux(path))
+#endif
 #ifdef USE_WIN32DLL
 	    if (!load_syms_windows(path))
 #endif
@@ -253,7 +263,9 @@ static void uninit(sh_video_t *sh){
 	    if (rv_handle) FreeLibrary(rv_handle);
 	} else
 #endif
+#ifdef HAVE_LIBDL
 	if(rv_handle) dlclose(rv_handle);
+#endif
 	rv_handle=NULL;
 }
 
