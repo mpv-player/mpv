@@ -99,7 +99,7 @@ static struct {
 static vo_info_t info = {
     "SVGAlib",
     "svga",
-    "Ivan Kalvachev <iive@sf.net>",
+    "Ivan Kalvachev <iive@users.sf.net>",
     ""
 };
 
@@ -645,7 +645,6 @@ vga_modeinfo * vminfo;
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
                        unsigned char *srca, int stride) {
   char* base;
-  int bytelen;
 
   if(verbose>2)
     printf("vo_svga: draw_alpha(x0=%d,y0=%d,w=%d,h=%d,src=%p,srca=%p,stride=%d\n",
@@ -659,19 +658,18 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
   if(verbose>3)
     printf("vo_svga: OSD draw in page %d\n",cpage);
   base=PageStore[cpage].vbase + y0*mode_stride + x0*modeinfo->bytesperpixel;
-  bytelen = modeinfo->width * modeinfo->bytesperpixel;   
   switch (mode_bpp) {
     case 32: 
-      vo_draw_alpha_rgb32(w, h, src, srca, stride, base, bytelen);
+      vo_draw_alpha_rgb32(w, h, src, srca, stride, base, mode_stride);
       break;
     case 24: 
-      vo_draw_alpha_rgb24(w, h, src, srca, stride, base, bytelen);
+      vo_draw_alpha_rgb24(w, h, src, srca, stride, base, mode_stride);
       break;
     case 16:
-      vo_draw_alpha_rgb16(w, h, src, srca, stride, base, bytelen);
+      vo_draw_alpha_rgb16(w, h, src, srca, stride, base, mode_stride);
       break;
     case 15:
-      vo_draw_alpha_rgb15(w, h, src, srca, stride, base, bytelen);
+      vo_draw_alpha_rgb15(w, h, src, srca, stride, base, mode_stride);
       break;
   }
 }
