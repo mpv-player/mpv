@@ -77,6 +77,7 @@
 	{"divxq", "Option -divxq has been renamed to -pp (postprocessing), use -pp !\n",
             CONF_TYPE_PRINT, 0, 0, 0},
 	{"pp", &divx_quality, CONF_TYPE_INT, CONF_MIN, 0, 63},
+	{"npp", readPPOpt, CONF_TYPE_FUNC_PARAM, 0, 0, 0},
 #ifdef HAVE_ODIVX_POSTPROCESS
         {"oldpp", &use_old_pp, CONF_TYPE_FLAG, 0, 0, 1},
 #else

@@ -89,6 +89,8 @@ struct config ao_plugin_conf[]={
 };
 
 extern int sws_flags;
+extern int readPPOpt(void *conf, char *arg);
+
 
 /*
  * CONF_TYPE_FUNC_FULL :
