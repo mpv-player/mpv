@@ -31,7 +31,7 @@
 
 #include "../linux/shmem.h"
 
-int vo_flags=0;
+//int vo_flags=0;
 
 // currect resolution/bpp on screen:  (should be autodetected by vo_init())
 int vo_depthonscreen=0;
