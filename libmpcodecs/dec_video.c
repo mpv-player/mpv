@@ -63,7 +63,7 @@ static vd_functions_t* mpvdec=NULL;
 
 int get_video_quality_max(sh_video_t *sh_video){
   if(mpvdec){
-    int ret=mpvdec->control(sh_video,VDCTRL_QUERY_MAX_PP_LEVEL);
+    int ret=mpvdec->control(sh_video,VDCTRL_QUERY_MAX_PP_LEVEL,NULL);
     if(ret>=0) return ret;
   }
  return 0;
