@@ -16,6 +16,8 @@ char * langRemove = "Remove";
 char * langNEMDB = "Sorry, not enough memory for draw buffer.";
 char * langNEMFMR = "Sorry, not enough memory for menu rendering.";
 char * langNEMFMM = "Sorry, not enough memory for main window shape mask.";
+
+#if 0
 char * langLIRCSNW = "LIRC support not working. Disabled.";
 char * langAudioDriverSelectNotSupported = "Your audio driver DOES NOT support select(). Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !";
 char * langNotSupportedFileFormat = "Sorry, this file format not recognized/supported. If this file is an AVI, ASF or MPEG stream, please contact the author!";
@@ -40,4 +42,4 @@ char * langDSCodecNotFound = "ERROR: Couldn't open required DirectShow codec: %s
                              "Or you should disable DShow support.";
 char * langCantInitVideoDriver = "FATAL: Cannot initialize video driver!";
 char * langUnknowError = "Unknow error. Please contact the developer team.";
-
+#endif

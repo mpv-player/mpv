@@ -5,7 +5,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "../shmem.h"
+#include "../../linux/shmem.h"
 
 typedef struct
 {

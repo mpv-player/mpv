@@ -6,6 +6,6 @@ MPLAYERSRCS = $(MPLAYERDIR)mplayer.c $(MPLAYERDIR)widgets.c $(MPLAYERDIR)play.c 
 	     $(MPLAYERDIR)psignal.c $(MPLAYERDIR)mixer.c
 MPLAYEROBJS = $(MPLAYERSRCS:.c=.o)
 
-SRCS = $(SKINSRC) $(BITMAPSRCS) wm/ws.c wm/wsconv.c app.c config.c events.c timer.c language.c error.c shmem.c
+SRCS = $(SKINSRC) $(BITMAPSRCS) wm/ws.c wm/wsconv.c app.c config.c events.c timer.c language.c error.c
 OBJS = $(SRCS:.c=.o)
 
