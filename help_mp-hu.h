@@ -118,7 +118,7 @@ static char help_text[]=
 #define MSGTR_DVDnumTitles "%d sáv van a DVD-n.\n"
 #define MSGTR_DVDinvalidTitle "Helytelen DVD sáv: %d\n"
 #define MSGTR_DVDnumChapters "Az adott DVD sávban %d fejezet van.\n"
-#define MSGTR_DVDinvalidChapters "Helytelen DVD fejezet: %d\n"
+#define MSGTR_DVDinvalidChapter "Helytelen DVD fejezet: %d\n"
 #define MSGTR_DVDnumAngles "%d darab kameraállás van ezen a DVD sávon.\n"
 #define MSGTR_DVDinvalidAngle "Helytelen DVD kameraállás: %d\n"
 #define MSGTR_DVDnoIFO "Nem tudom a(z) %d. DVD sávhoz megnyitni az IFO file-t.\n"
