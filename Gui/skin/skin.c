@@ -112,6 +112,7 @@ int __base( char * in )
  unsigned char fname[512];
  unsigned char tmp[512];
  int           x,y;
+ int	       sx=0,sy=0;
 
  CHECKDEFLIST( "base" );
  CHECKWINLIST( "base" );
@@ -119,8 +120,10 @@ int __base( char * in )
  cutItem( in,fname,',',0 );
  x=cutItemToInt( in,',',1 );
  y=cutItemToInt( in,',',2 );
+ sx=cutItemToInt( in,',',3 );
+ sy=cutItemToInt( in,',',4 );
  #ifdef DEBUG
-  dbprintf( 3,"\n[skin] base: %s x: %d y: %d\n",fname,x,y );
+  dbprintf( 3,"\n[skin] base: %s x: %d y: %d ( %dx%d )\n",fname,x,y,sx,sy );
  #endif
  if ( !strcmp( winList,"main" ) )
   {
@@ -162,6 +165,11 @@ int __base( char * in )
    defList->sub.y=y;
    defList->sub.width=defList->sub.Bitmap.Width;
    defList->sub.height=defList->sub.Bitmap.Height;
+   if ( sx && sy )
+    {
+     defList->sub.width=sx;
+     defList->sub.height=sy;
+    }
    #ifdef DEBUG
     dbprintf( 3,"[skin]  %d,%d %dx%d\n",defList->sub.x,defList->sub.y,defList->sub.width,defList->sub.height );
    #endif

@@ -74,9 +74,12 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
 
  wsCreateWindow( &appMPlayer.subWindow,
   appMPlayer.sub.x,appMPlayer.sub.y,appMPlayer.sub.width,appMPlayer.sub.height,
-  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsShowFrame|wsShowWindow,"ViDEO" );
+  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsShowFrame|wsHideWindow,"ViDEO" );
 
- vo_setwindow(appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC);
+ wsDestroyImage( &appMPlayer.subWindow );
+ wsCreateImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
+
+ vo_setwindow( appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC );
  vo_setwindowsize( appMPlayer.sub.width,appMPlayer.sub.height );
  
  i=wsHideFrame|wsMaxSize|wsHideWindow;
@@ -86,7 +89,6 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
   wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,i,"MPlayer" ); //wsMinSize|
 
  wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
- wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
  
  mplMenuInit();
 
@@ -106,6 +108,7 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  appMPlayer.subWindow.ReSize=mplResize;
 
  wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+ wsClearWindow( appMPlayer.subWindow );
  if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
 
  wsPostRedisplay( &appMPlayer.mainWindow );
@@ -116,12 +119,9 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  btnModify( evSetMoviePosition,mplShMem->Position );
 
  mplShMem->Playing=0;
- 
-// timerSetHandler( mplTimerHandler );  // various timer hacks
-// timerInit();
 
-// wsMainLoop();  // X event handler (calls mplTimerHandler periodically!)
-
+ wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
+ wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
 }
 
 void mplDone(){
