@@ -206,6 +206,19 @@ Prints some statistics on CPU usage and dropped frames at the end.
 Use in combination with \-nosound and \-vo null for benchmarking only the
 video codec.
 .TP
+.B \-edl <filename>
+Enables edit decision list actions during playback. Video will be
+skipped over and audio will be muted and unmuted according to the
+entries in the given file. See DOCS/edl.html for details on how to use
+this.
+.TP
+.B \-edlout <filename>
+Creates a new file and writes edit decision list records to that
+file. During playback, when the user hits 'i', an entry to skip over
+the last two seconds of playback will be written to the file. This
+provides a starting point from which the user can fine-tune EDL
+entries later. See DOCS/edl.html for details.
+.TP
 .B \-framedrop (also see \-hardframedrop)
 Skips displaying some frames to maintain A/\:V sync on slow systems.
 Decoding of B frames is also skipped and video filters are not used.

@@ -227,6 +227,11 @@ extern int demuxer_type, audio_demuxer_type, sub_demuxer_type;
 
 #include "libmpdemux/tv.h"
 
+#ifdef USE_EDL
+extern char* edl_filename;
+extern char* edl_output_filename;
+#endif
+
 #ifdef USE_TV
 struct config tvopts_conf[]={
 	{"on", &tv_param_on, CONF_TYPE_FLAG, 0, 0, 1, NULL},

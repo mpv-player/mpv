@@ -37,6 +37,10 @@
 #define MP_CMD_GET_TIME_LENGTH 34
 #define MP_CMD_GET_PERCENT_POS 35
 #define MP_CMD_SUB_STEP 36
+//#define MP_CMD_TV_SET_CHANNEL 37
+#ifdef USE_EDL
+#define MP_CMD_EDL_MARK 38
+#endif
 
 #define MP_CMD_GUI_EVENTS       5000
 #define MP_CMD_GUI_LOADFILE     5001

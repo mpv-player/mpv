@@ -56,6 +56,10 @@
 #include <dvdnav.h>
 #endif
 
+#ifdef USE_EDL
+#include "edl.h"
+#endif
+
 #include "spudec.h"
 #include "vobsub.h"
 
@@ -296,6 +300,16 @@ static char* menu_root = "main";
 
 #ifdef HAVE_RTC
 static int nortc;
+#endif
+
+#ifdef USE_EDL
+struct edl_record edl_records[ MAX_EDL_ENTRIES ];
+int num_edl_records = 0;
+FILE* edl_fd = NULL;
+edl_record_ptr next_edl_record = NULL;
+static char* edl_filename = NULL;
+static char* edl_output_filename = NULL;
+short edl_decision = 0;
 #endif
 
 static unsigned int inited_flags=0;
@@ -725,6 +739,102 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       exit(0);
     }
 
+#ifdef USE_EDL
+ {
+   FILE* fd;
+   char line[ 100 ];
+   float start, stop, duration;
+   int action;
+   int next_edl_array_index = 0;
+   int lineCount = 0;
+   next_edl_record = edl_records;
+   if( edl_filename ) {
+     if( ( fd = fopen( edl_filename, "r" ) ) == NULL ) {
+       printf( "Error opening EDL file [%s]!\n", edl_filename );
+       next_edl_record->next = NULL;
+     } else {
+       while( fgets( line, 99, fd ) != NULL ) {
+	 lineCount++;
+	 if( ( sscanf( line, "%f %f %d", &start, &stop, &action ) ) == 0 ) {
+	   printf( "Invalid EDL line: [%s]\n", line );
+	 } else {
+	   if( next_edl_array_index > 0 ) {
+	     edl_records[ next_edl_array_index-1 ].next = &edl_records[ next_edl_array_index ];
+	     if( start <= edl_records[ next_edl_array_index-1 ].stop_sec ) {
+	       printf( "Invalid EDL line [%d]: [%s]\n", lineCount, line );
+	       printf( "Last stop position was [%f]; next start is [%f]. Entries must be in chronological order and cannot overlap. Discarding EDL entry.\n", edl_records[ next_edl_array_index-1 ].stop_sec, start );
+	       continue;
+	     }
+	   }
+	   if( stop <= start ) {
+	     printf( "Invalid EDL line [%d]: [%s]\n", lineCount, line );
+	     printf( "Stop time must follow start time. Discarding EDL entry.\n" );
+	     continue;
+	   }
+	   edl_records[ next_edl_array_index ].action = action;
+	   if( action == EDL_MUTE ) {
+	     edl_records[ next_edl_array_index ].length_sec = 0;
+	     edl_records[ next_edl_array_index ].start_sec = start;
+	     edl_records[ next_edl_array_index ].stop_sec = start;
+	     next_edl_array_index++;
+	     if( next_edl_array_index >= MAX_EDL_ENTRIES-1 ) {
+	       break;
+	     }
+	     edl_records[ next_edl_array_index-1 ].next = &edl_records[ next_edl_array_index ];
+	     edl_records[ next_edl_array_index ].action = EDL_MUTE;
+	     edl_records[ next_edl_array_index ].length_sec = 0;
+	     edl_records[ next_edl_array_index ].start_sec = stop;
+	     edl_records[ next_edl_array_index ].stop_sec = stop;
+	   } else {
+	     edl_records[ next_edl_array_index ].length_sec = stop - start;
+	     edl_records[ next_edl_array_index ].start_sec = start;
+	     edl_records[ next_edl_array_index ].stop_sec = stop;
+	   }
+	   next_edl_array_index++;
+	   if( next_edl_array_index >= MAX_EDL_ENTRIES-1 ) {
+	     break;
+	   }
+	 }
+       }
+       if( next_edl_array_index > 0 ) {
+	 edl_records[ next_edl_array_index-1 ].next = &edl_records[ next_edl_array_index ];
+       }
+       edl_records[ next_edl_array_index ].start_sec = -1;
+       edl_records[ next_edl_array_index ].next = NULL;
+       num_edl_records = ( next_edl_array_index );
+     }
+     fclose( fd );
+   } else {
+     next_edl_record->next = NULL;
+   }
+   if( edl_output_filename ) {
+     if( edl_filename ) {
+       printf( "Sorry; EDL mode and EDL output mode are mutually exclusive! Disabling all EDL functions.\n" );
+       edl_output_filename = NULL;
+       edl_filename = NULL;
+       next_edl_record->next = NULL;
+     } else {
+       if( ( edl_fd = fopen( edl_output_filename, "w" ) ) == NULL ) {
+	 printf( "Error opening file [%s] for writing!\n" );
+	 edl_output_filename = NULL;
+	 next_edl_record->next = NULL;
+       }
+     }
+   }
+#ifdef DEBUG_EDL
+ {
+   printf( "EDL Records:\n" );
+   if( next_edl_record->next != NULL ) {
+     while( next_edl_record->next != NULL ) {
+       printf( "EDL: start [%f], stop [%f], action [%d]\n", next_edl_record->start_sec, next_edl_record->stop_sec, next_edl_record->action );
+       next_edl_record = next_edl_record->next;
+     }
+     next_edl_record = edl_records;
+   }
+ }
+#endif
+ }
+#endif
 
     if(!filename && !vcd_track && !dvd_title && !dvd_nav && !tv_param_on){
       if(!use_gui){
@@ -1955,6 +2065,32 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     dvdnav_stream_sleeping((dvdnav_priv_t*)stream->priv);
 #endif
 
+//================= EDL =========================================
+
+#ifdef USE_EDL
+ if( next_edl_record->next ) { // Are we (still?) doing EDL?
+   if( d_video->pts >= next_edl_record->start_sec ) {
+     if( next_edl_record->action == EDL_SKIP ) {
+       osd_function = OSD_FFW;
+       abs_seek_pos = 0;
+       rel_seek_secs = next_edl_record->length_sec;
+#ifdef DEBUG_EDL
+       printf( "\nEDL_SKIP: start [%f], stop [%f], length [%f]\n", next_edl_record->start_sec, next_edl_record->stop_sec, next_edl_record->length_sec );
+#endif
+       edl_decision = 1;
+       next_edl_record = next_edl_record->next;
+     } else if( next_edl_record->action == EDL_MUTE ) {
+       mixer_mute();
+#ifdef DEBUG_EDL
+       printf( "\nEDL_MUTE: [%f]\n", next_edl_record->start_sec );
+#endif
+       edl_decision = 1;
+       next_edl_record = next_edl_record->next;
+     }
+   }
+ }
+#endif
+
 //================= Keyboard events, SEEKing ====================
 
   current_module="key_events";
@@ -1985,6 +2121,14 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	osd_function= (v > 0) ? OSD_FFW : OSD_REW;
       }
     } break;
+#ifdef USE_EDL
+    case MP_CMD_EDL_MARK:
+      if( edl_fd ) {
+	float v = d_video->pts;
+	fprintf( edl_fd, "%f %f %d\n", v-2, v, 0 );
+      }
+      break;
+#endif
     case MP_CMD_AUDIO_DELAY : {
       float v = cmd->args[0].v.f;
       audio_delay += v;
@@ -2665,12 +2809,18 @@ if(rel_seek_secs || abs_seek_pos){
 #ifdef USE_OSD
         // Set OSD:
       if(osd_level){
-        int len=((demuxer->movi_end-demuxer->movi_start)>>8);
-        if (len>0 && sh_video){
-	   osd_visible=sh_video->fps; // 1 sec
-	   vo_osd_progbar_type=0;
-	   vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
-	   vo_osd_changed(OSDTYPE_PROGBAR);
+#ifdef USE_EDL
+	if( !edl_decision ) {
+#else
+	  if( 1 ) { // Let the compiler optimize this out
+#endif
+	  int len=((demuxer->movi_end-demuxer->movi_start)>>8);
+	  if (len>0 && sh_video){
+	    osd_visible=sh_video->fps; // 1 sec
+	    vo_osd_progbar_type=0;
+	    vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
+	    vo_osd_changed(OSDTYPE_PROGBAR);
+	  }
 	}
       }
 #endif
@@ -2686,6 +2836,22 @@ if(rel_seek_secs || abs_seek_pos){
         if(vo_spudec) spudec_reset(vo_spudec);
       }
   }
+#ifdef USE_EDL
+      {
+	int x;
+	if( !edl_decision ) {
+	  for( x = 0; x < num_edl_records; x++ ) { // FIXME: do binary search
+	    // Find first EDL entry where start follows current time
+	    if( edl_records[ x ].start_sec >= d_video->pts && edl_records[ x ].action != EDL_MUTE ) {
+	      next_edl_record = &edl_records[ x ];
+	      break;
+	    }
+	  }
+	} else {
+	  edl_decision = 0;
+	}
+      }
+#endif
   rel_seek_secs=0;
   abs_seek_pos=0;
   frame_time_remaining=0;

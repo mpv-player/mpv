@@ -203,6 +203,13 @@ static config_t mplayer_opts[]={
             CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"noalsa", "Option -noalsa has been removed, new audio code doesn't need it! Remove it from your config file!\n",
             CONF_TYPE_PRINT, 0, 0, 0, NULL},
+#ifdef USE_EDL
+	{"edl", &edl_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
+	{"edlout", &edl_output_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
+#else
+	{"edl", "MPlayer was compiled without EDL support\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"edlout", "MPlayer was compiled without EDL support\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+#endif
 
 #ifdef HAVE_X11
 	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0, NULL},

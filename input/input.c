@@ -46,6 +46,9 @@
 
 static mp_cmd_t mp_cmds[] = {
   { MP_CMD_SEEK, "seek", 1, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+#ifdef USE_EDL
+  { MP_CMD_EDL_MARK, "edl_mark", 0, { {-1,{0}} } },
+#endif
   { MP_CMD_AUDIO_DELAY, "audio_delay", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
   { MP_CMD_QUIT, "quit", 0, { {-1,{0}} } },
   { MP_CMD_PAUSE, "pause", 0, { {-1,{0}} } },
@@ -246,6 +249,9 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 't', 0 }, "sub_pos +1" },
   { { 'v', 0 }, "sub_visibility" },
   { { 'j', 0 }, "vobsub_lang" },
+#ifdef USE_EDL
+  { { 'i', 0 }, "edl_mark" },
+#endif
 #ifdef USE_TV
   { { 'h', 0 }, "tv_step_channel 1" },
   { { 'k', 0 }, "tv_step_channel -1" },

@@ -140,6 +140,7 @@ Optional features:
   --disable-tv           disable TV Interface (tv/dvb grabbers) [enable]
   --disable-tv-v4l       disable Video4Linux TV Interface support [autodetect]
   --disable-tv-bsdbt848  disable BSD BT848 Interface support [autodetect]
+  --disable-edl          disable EDL (edit decision list) support [enable]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
@@ -1003,6 +1004,7 @@ _select=yes
 _tv=yes
 _tv_v4l=auto
 _tv_bsdbt848=auto
+_edl=yes
 _streaming=yes
 _vidix=auto
 _joystick=no
@@ -1153,6 +1155,8 @@ for ac_option do
   --disable-alsa)	_alsa=no	;;
   --enable-tv)		_tv=yes		;;
   --disable-tv)		_tv=no		;;
+  --enable-edl)		_edl=yes	;;
+  --disable-edl)	_edl=no		;;
   --enable-tv-bsdbt848)	_tv_bsdbt848=yes	;;
   --disable-tv-bsdbt848)	_tv_bsdbt848=no	;;
   --enable-tv-v4l)	_tv_v4l=yes	;;
@@ -4210,6 +4214,16 @@ else
 fi
 echores "$_tv"
 
+echocheck "EDL support"
+if test "$_edl" = yes ; then
+  _def_edl='#define USE_EDL'
+  _inputmodules="edl $_inputmodules"
+else
+  _noinputmodules="edl $_noinputmodules"
+  _def_edl='#undef USE_EDL'
+fi
+echores "$_edl"
+
 echocheck "*BSD BrookTree 848 TV interface"
 if test "$_tv_bsdbt848" = auto ; then
  _tv_bsdbt848=no
@@ -5026,6 +5040,9 @@ $_def_nas
 
 /* Enable TV Interface support */
 $_def_tv
+
+/* Enable EDL support */
+$_def_edl
 
 /* Enable Video 4 Linux TV interface support */
 $_def_tv_v4l
