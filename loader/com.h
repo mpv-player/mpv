@@ -64,3 +64,4 @@ long CoCreateInstance(GUID* rclsid, struct IUnknown* pUnkOuter,
 #endif
 
 #endif
+

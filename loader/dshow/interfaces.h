@@ -415,3 +415,4 @@ struct IHidden2
     struct IHidden2_vt *vt;
 };
 #endif
+
