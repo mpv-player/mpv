@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.28  2001/07/03 23:45:49  arpi
+ * extern vo_doublebuffering cleanup
+ *
  * Revision 1.27  2001/06/22 19:51:25  atmosfear
  * Fixed pointer->integer cast warning.
  *
@@ -291,8 +294,6 @@ static XF86VidModeModeInfo **vo_dga_vidmodes=NULL;
 
 
 extern int       verbose;          
-extern int       vo_dbpp;
-extern int	 vo_doublebuffering;
 
 static int       vo_dga_src_format;
 static int       vo_dga_width;           // bytes per line in framebuffer

@@ -104,5 +104,8 @@ extern int vo_dwidth;
 extern int vo_dheight;
 extern int vo_dbpp;
 
+extern int vo_doublebuffering;
+extern int vo_fsmode;
+
 extern char *vo_subdevice;
 
