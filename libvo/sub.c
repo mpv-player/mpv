@@ -32,17 +32,33 @@ int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
 
-inline static void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
 	unsigned char *cp=vo_osd_text;
-	int c;
-   	int font;
-        int y=10;
-        int x=20;
+	int x=20;
+
+        obj->bbox.x1=obj->x=x;
+        obj->bbox.y1=obj->y=10;
 
         while (*cp){
-          c=*cp++;
+          int c=*cp++;
+          x+=vo_font->width[c]+vo_font->charspace;
+        }
+	
+	obj->bbox.x2=x;
+	obj->bbox.y2=obj->bbox.y1+vo_font->height;
+	obj->flags|=OSDFLAG_BBOX;
+
+}
+
+inline static void vo_draw_text_osd(mp_osd_obj_t* obj,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+	unsigned char *cp=vo_osd_text;
+   	int font;
+        int x=obj->x;
+
+        while (*cp){
+          int c=*cp++;
           if ((font=vo_font->font[c])>=0)
-            draw_alpha(x,y,
+            draw_alpha(x,obj->y,
               vo_font->width[c],
               vo_font->pic_a[font]->h,
               vo_font->pic_b[font]->bmp+vo_font->start[c],
@@ -50,7 +66,6 @@ inline static void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,in
               vo_font->pic_a[font]->w);
           x+=vo_font->width[c]+vo_font->charspace;
         }
-
 }
 
 int vo_osd_progbar_type=-1;
@@ -86,6 +101,7 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
 	obj->bbox.y1=obj->y=y;
 	obj->bbox.x2=x+width+delimw;
 	obj->bbox.y2=y+vo_font->height;
+	obj->flags|=OSDFLAG_BBOX;
 	obj->params.progbar.elems=elems;
     }
     
@@ -186,6 +202,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
    int k,lastk;
    int lastStripPosition;
    int xsize,lastxsize;
+   int xmin=dxs,xmax=0;
    int h,lasth;
    
    obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
@@ -259,6 +276,8 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	      }
 	      obj->params.subtitle.utbl[k++]=0;
 	      obj->params.subtitle.xtbl[obj->params.subtitle.lines++]=(dxs-xsize)/2;
+	      if(xmin>(dxs-xsize)/2) xmin=(dxs-xsize)/2;
+	      if(xmax<(dxs+xsize)/2) xmax=(dxs+xsize)/2;
 	      if (obj->params.subtitle.lines==MAX_UCSLINES||k>MAX_UCS){
 		 l=0; len=j; // end parsing
 	      } else if(l || j<len){ // not the last line or not the last char
@@ -271,18 +290,21 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	      obj->y -=h; // according to max of vo_font->pic_a[font]->h 
 	  }
       }
+
+    if (obj->y >= (dys * sub_pos / 100)) obj->y = dys * sub_pos /100;
       
-      // TODO: calculate bbox
-      
+    // calculate bbox:
+    obj->bbox.x1=xmin;
+    obj->bbox.x2=xmax;
+    obj->bbox.y1=obj->y;
+    obj->bbox.y2=obj->y+obj->params.subtitle.lines*vo_font->height;
+    obj->flags|=OSDFLAG_BBOX;
+    
 }
 
 inline static void vo_draw_text_sub(mp_osd_obj_t* obj,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-   int y,i,j,c,x,l,font;
-
-   // FIXME (bbox):
-   if (obj->y < (obj->dys * sub_pos / 100)) { y = obj->y; } else { y = obj->dys * sub_pos /100;};
-   
-//   printf("lines=%d  y=%d\n",lines,y);
+   int i,j,c,x,l,font;
+   int y=obj->y;
 
    i=j=0;
    if ((l=obj->params.subtitle.lines)) for (;;) {
@@ -336,6 +358,7 @@ int vo_update_osd(int dxs,int dys){
     while(obj){
       if(dxs!=obj->dxs || dys!=obj->dys || obj->flags&OSDFLAG_FORCE_UPDATE){
         int vis=obj->flags&OSDFLAG_VISIBLE;
+	obj->flags&=~OSDFLAG_BBOX;
 	switch(obj->type){
 	case OSDTYPE_SUBTITLE:
 	    vo_update_text_sub(obj,dxs,dys);
@@ -356,15 +379,28 @@ int vo_update_osd(int dxs,int dys){
 		obj->flags&=~OSDFLAG_VISIBLE;
 	    break;
 	case OSDTYPE_OSD:
-	    if(vo_font && vo_osd_text && vo_osd_text[0])
+	    if(vo_font && vo_osd_text && vo_osd_text[0]){
+		vo_update_text_osd(obj,dxs,dys); // update bbox
 		obj->flags|=OSDFLAG_VISIBLE|OSDFLAG_CHANGED;
-	    else
+	    } else
 		obj->flags&=~OSDFLAG_VISIBLE;
 	    break;
 	}
+	// check bbox:
+	if(!(obj->flags&OSDFLAG_BBOX)){
+	    // we don't know, so assume the whole screen changed :(
+	    obj->bbox.x1=obj->bbox.y1=0;
+	    obj->bbox.x2=dxs;
+	    obj->bbox.y2=dys;
+	    obj->flags|=OSDFLAG_BBOX;
+	} else if(obj->flags&OSDFLAG_VISIBLE){
+	    mp_msg(MSGT_OSD,MSGL_V,"OSD update: %d;%d %dx%d  \n",
+		obj->bbox.x1,obj->bbox.y1,obj->bbox.x2-obj->bbox.x1,
+		obj->bbox.y2-obj->bbox.y1);
+	}
 	// check if visibility changed:
 	if(vis != (obj->flags&OSDFLAG_VISIBLE) ) obj->flags|=OSDFLAG_CHANGED;
-	// remove the cause of updating:
+	// remove the cause of automatic update:
 	obj->dxs=dxs; obj->dys=dys;
 	obj->flags&=~OSDFLAG_FORCE_UPDATE;
       }
@@ -406,7 +442,7 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 	    vobsub_draw(vo_vobsub, dxs, dys, draw_alpha);  // FIXME
 	    break;
 	case OSDTYPE_OSD:
-	    vo_draw_text_osd(dxs,dys,draw_alpha);
+	    vo_draw_text_osd(obj,draw_alpha);
 	    break;
 	case OSDTYPE_SUBTITLE:
 	    vo_draw_text_sub(obj,draw_alpha);

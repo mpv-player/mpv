@@ -2448,6 +2448,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	sub_pos+=v;
 	if(sub_pos >100) sub_pos=100;
 	if(sub_pos <0) sub_pos=0;
+	vo_osd_changed(OSDTYPE_SUBTITLE);
     }	break;
 #ifdef USE_DVDNAV
     case MP_CMD_DVDNAV_EVENT: {
