@@ -253,7 +253,11 @@
       <LI><A HREF="#solaris">6.3 Solaris</A></LI>
       <LI><A HREF="#sgi">6.4 SGI/Irix</A></LI>
       <LI><A HREF="#qnx">6.5 QNX</A></LI>
-      <LI><A HREF="#cygwin">6.6 Cygwin</A></LI>
+      <LI><A HREF="#windows">6.6 Windows</A></LI>
+	<UL>
+	  <LI><A HREF="#cygwin">6.6.1 Cygwin</A></LI>
+	  <LI><A HREF="#mingw">6.6.2 Cygwin</A></LI>
+	</UL>
     </UL>
     <LI><A HREF="encoding.html">7. MEncoder - Az MPlayer-en alapuló enkóder</A></LI>
       <UL>
@@ -1696,29 +1700,45 @@ end
   SDL-t.</P>
 
 
-<H2><A NAME=cygwin>6.6. Cygwin</A></H2>
+<H2><A NAME=windows>6.6. Windows</A></H2>
 
-<P>A Cygwin port még mindig gyerekcipõben jár, jelenleg az MPlayer paraméterei
-  közül a Win32-es DLL-ek használata, és az OpenGL
-  nem használható Cygwin platform alatt. Az SDL-rõl ismert hogy egyes esetekben
-  eltorzítja a képet és a hangot, vagy crashel. Szívesen veszünk
-  <A HREF="../tech/patches.txt">patcheket</A> bárkitõl. A legjobb eredmény
-  a natív DirectX-es video kimenet (<CODE>-vo directx</CODE>), és a Windows
-  waveout audio meghajtó használatával (<CODE>-ao win32</CODE>) érhetõ el.
-  Van
-  <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">levelezési listája</A>
-  is.</P>
+<P>Az MPlayer fut <A HREF="http://www.cygwin.org/">Cygwin-en</A> és
+  <A HREF="http://www.mingw.org/">MinGW-n</A>. Egyelõre csak szöveges
+  felület van, grafikus nincs. <A HREF="../tech/patches.txt">Patch-eket</A>
+  természetesen még mindig szívesen fogadunk. Van
+  <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">levelezési
+  lista</A> is.</P>
+
+<P>A legjobb eredményt a natív DirectX video kimenettel
+  (<CODE>-vo directx</CODE>), és a natív Windows waveout audio kimenettel
+  (<CODE>-ao win32</CODE>) lehet elérni. Az OpenGL kimenet nem mûködik, az
+  SDL pedig egyes rendszereken torzítja a képet és/vagy a hangot. A
+  <CODE>-vo directx:ontop</CODE> opció használatával a video ablak mindig
+  a többi ablak fölött marad. A DirectX video kimenet lefordításához
+  le kell tölteni a <A HREF="http://www.videollan.org/vlc/dx7headers.tgz">DirectX
+  7 fejléceket</A>.</P>
+
+<P>Mûködnek a QuickTime és Real DLL-ek is. Ehhez a fordítást a
+  <CODE>--enable-qtx</CODE> és <CODE>--enable-real</CODE> opciókkal kell
+  végezni, a codec-eket pedig az alapértelmezett Windows DLL keresési útvonalba
+  kell helyezni, ami Windows verziótól függõen <CODE>C:\WINNT\system32</CODE>
+  vagy <CODE>C:\Windows\system</CODE>.</P>
+
+<P>Letölthetõek Sascha Sommer által készített elõre lefordított binárisok is a
+  <A HREF="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/">honlapunkról</A>.
+  Joey Parish telepítõvel felszerelt
+  <A HREF="http://joey.nicewarrior.org/cygmp/">nemhivatalos Windows csomagokat</A>
+  készít.</P>
+
+
+<H3><A NAME=cygwin>6.6.1 Cygwin</A></H3>
 
 <P>Amennyiben le akarod fordítani az MPlayer-t, másold vagy linkeld át az
   <CODE>etc/cygwin_inttypes.h</CODE> file-t az MPlayer forrásból az
   <CODE>/usr/include/inttypes.h</CODE> helyre.</P>
 
-<P>Natív DirectX video (<CODE>-vo directx</CODE>) használatához tömörítsd ki
-  a <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header
-  file-okat</A>, az <CODE>/usr/include</CODE> vagy az
-  <CODE>/usr/local/include</CODE> könyvtárba, és fordítsd le az MPlayer-t. 
-  Ha a kép torz, próbáld kapcsold ki a hardveres gyorsítást a <CODE>-vo
-  directx:noaccel</CODE> opcióval.</P>
+<P>A DirectX fejléceket az <CODE>/usr/include/</CODE> vagy az
+  <CODE>/usr/local/include/</CODE> könyvtárak egyikébe kell kitömöríteni.</P>
 
 <P>Az SDL Cygwin-es verzióját a <A HREF="http://www.libsdl.org/extras/win32/cygwin/">libSDL site-ról</A>
   töltheted le.</P>
@@ -1730,10 +1750,33 @@ end
 
 <P><CODE>mplayer dvd://&lt;sáv&gt; -dvd-device '\\.\d:'</CODE></P>
 
-<P>A QuickTime és Real DLL-ek is mûködnek. A fordítást a <CODE>--enable-qtx
-  --enable-real</CODE> opciókkal kell indítani, majd a codec-eket a DLL-ek
-  keresési útvonalába berakni: <CODE>c:\winnt\system32</CODE> vagy
-  <CODE>c:\windows\system</CODE>, Windows verziótol függõen.</P>
+<P>A Cygwin konzol meglehetõsen lassú, így ajánlott a kimenet átirányítása,
+  vagy a <CODE>-quiet</CODE> opció használata.</P>
+
+
+<H3><A NAME=mingw>6.6.2 MinGW</A></H3>
+
+<P>A következõ három egyszerû lépés végrehajtása szükséges, és már fordul is.</P>
+
+<OL>
+  <LI>Installáld a MinGW 3.0.0-ás verzióját, vagy annál újabbat.</LI>
+  <LI>Installáld az MSYS 1.0.9-es verzióját, vagy annál újabbat. Mondd a
+    postinstall-nak hogy a MinGW már installálva van.</LI>
+  <LI>Írd felül a <CODE>/mingw/include/sys/types.h</CODE> file-t
+    <A HREF="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h">ezzel</A>.</LI>
+</OL>
+
+<P>A DirectX fejléceket a <CODE>/mingw/include/</CODE> könyvtárba kell
+  kitömöríteni.</P>
+
+<P>A VCD-k és DVD-k lejátszása úgy mûködik ahogy a Cygwin-nél már
+  megszokhattuk:</P>
+
+<P><CODE>mplayer d:/mpegav/avseq01.dat</CODE></P>
+
+<P><CODE>mplayer /d/MPEG2/AVSEQ01.MPG</CODE></P>
+
+<P><CODE>mplayer dvd://&lt;title&gt; -dvd-device /d/</CODE></P>
 
 
 <H1><A NAME="mailing_lists">A függelék - Levelezési listák</A></H1>
