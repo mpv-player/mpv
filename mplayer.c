@@ -761,21 +761,16 @@ int gui_no_filename=0;
       use_gui=0;
     }
     if (use_gui && playtree_iter){
-      char* cwd;
+      char cwd[MAXPATHLEN+2];
       // Remove Playtree and Playtree-Iter from memory as its not used by gui
       play_tree_iter_free(playtree_iter);
       playtree_iter=NULL;
       
-      if ((cwd=get_current_dir_name()))
+      if (getcwd(cwd, MAXPATHLEN) != (char *)NULL)
       {
-	cwd=(char*)realloc(cwd, strlen(cwd)+2);
-	if (cwd)
-        {
 	  strcat(cwd, "/");
           // Prefix relative paths with current working directory
           play_tree_add_bpf(playtree, cwd);
-	  free(cwd);
-	}
       }      
       // Import initital playtree into gui
       import_initial_playtree_into_gui(playtree, mconfig, enqueue);
