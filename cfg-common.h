@@ -21,10 +21,10 @@
 	{"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
 	{"chapter", dvd_parse_chapter_range, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
 	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #else
 	{"dvd", "MPlayer was compiled WITHOUT libdvdread support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
+	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 #ifdef HAVE_LIBCSS
         {"dvdauth", &dvd_auth_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -192,7 +192,7 @@
 // ------------------------- subtitles options --------------------
 
 #ifdef USE_SUB
-	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"sub", &sub_name, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 #ifdef USE_ICONV
 	{"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif	

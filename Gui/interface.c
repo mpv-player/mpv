@@ -328,7 +328,7 @@ void guiInit( void )
 
  if ( filename ) mplSetFileName( NULL,filename,STREAMTYPE_FILE );
  if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name,STREAMTYPE_FILE );
- if ( sub_name ) guiSetFilename( guiIntfStruct.Subtitlename,sub_name );
+ if ( subdata ) guiSetFilename( guiIntfStruct.Subtitlename, subdata->filename );
 #if defined( USE_OSD ) || defined( USE_SUB )
  guiLoadFont();
 #endif
@@ -416,19 +416,20 @@ void guiLoadFont( void )
 #ifdef USE_SUB
 extern mp_osd_obj_t* vo_osd_list;
 
+extern char **sub_name;
+
 void guiLoadSubtitle( char * name )
 {
  if ( guiIntfStruct.Playing == 0 )
   {
-   guiIntfStruct.SubtitleChanged=1;
+   guiIntfStruct.SubtitleChanged=1; //what is this for? (mw)
    return;
   }
- if ( subtitles )
+ if ( subdata )
   {
    mp_msg( MSGT_GPLAYER,MSGL_INFO,"[gui] Delete subtitles.\n" );
-   sub_free( subtitles );
-   subtitles=NULL;
-   gfree( (void **)&sub_name );
+   sub_free( subdata );
+   subdata=NULL;
    vo_sub=NULL;
    if ( vo_osd_list )
     {
@@ -449,11 +450,15 @@ void guiLoadSubtitle( char * name )
   }
  if ( name )
   {
-   mp_msg( MSGT_GPLAYER,MSGL_INFO,"[gui] Delete Load subtitle: %s\n",name );
-   sub_name=gstrdup( name );
-   subtitles=sub_read_file( sub_name,guiIntfStruct.FPS );
-   if ( !subtitles ) mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_CantLoadSub,name );
+   mp_msg( MSGT_GPLAYER,MSGL_INFO,"[gui] Load subtitle: %s\n",name );
+   subdata=sub_read_file( gstrdup( name ), guiIntfStruct.FPS );
+   if ( !subdata ) mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_CantLoadSub,name );
+   sub_name = (malloc(2 * sizeof(char*))); //when mplayer will be restarted 
+   sub_name[0] = strdup(name);             //sub_name[0] will be read 
+   sub_name[1] = NULL;  
   }
+ update_set_of_subtitles();
+
 }
 #endif
 
@@ -797,7 +802,7 @@ int guiGetEvent( int type,char * arg )
 #endif
 // -- subtitle
 #ifdef USE_SUB
-	sub_name=gstrdup( guiIntfStruct.Subtitlename );
+	//subdata->filename=gstrdup( guiIntfStruct.Subtitlename );
 	stream_dump_type=0;
 	if ( gtkSubDumpMPSub ) stream_dump_type=4;
 	if ( gtkSubDumpSrt ) stream_dump_type=6;

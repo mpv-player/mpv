@@ -946,10 +946,12 @@ For the list of available subtitles, use with the \-v option and look at the
 output.
 .TP
 .B \-slang <two\ letter\ country\ code> (also see \-sid option)
-Works only for DVD playback.
-Turns on/\:selects DVD subtitle language.
+For DVD playback, turns on/\:selects DVD subtitle language.
 For the list of available subtitles, use with the \-v option and look at the
 output.
+
+Otherwise, determines an optional subtitle suffix which gets a higher
+priority when searching for subtitles.
 
 .I EXAMPLE:
 .PD 0
@@ -960,8 +962,9 @@ Selects Hungarian and falls back to English if Hungarian is not available.
 .PD 1
 .
 .TP
-.B \-sub <subtitle\ file>
-Use/\:display this subtitle file.
+.B \-sub <subtitle\-file1,subtitle\-file2,...>
+Use/\:display these subtitle files. Only one file can be displayed 
+at the same time and the files can be switched with 'j'. 
 .TP
 .B \-sub-bg-alpha <0\-255>
 Specify the alpha channel value for subtitles and OSD backgrounds.

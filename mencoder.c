@@ -100,7 +100,7 @@ int video_id=-1;
 int dvdsub_id=-1;
 int vobsub_id=-1;
 static char* audio_lang=NULL;
-static char* dvdsub_lang=NULL;
+char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
 
 static char** audio_codec_list=NULL;  // override audio codec
@@ -163,7 +163,7 @@ static int play_n_frames_mf=-1;
 // sub:
 char *font_name=NULL;
 float font_factor=0.75;
-char *sub_name=NULL;
+char **sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
 int   sub_auto = 0;
@@ -171,7 +171,7 @@ int   subcc_enabled=0;
 int   suboverlap_enabled = 1;
 
 #ifdef USE_SUB
-static subtitle* subtitles=NULL;
+static sub_data* subdata=NULL;
 float sub_last_pts = -303;
 #endif
 
@@ -588,12 +588,12 @@ vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream-
 // we know fps so now we can adjust subtitles time to ~6 seconds AST
 // check .sub
 //  current_module="read_subtitles_file";
-  if(sub_name){
-    subtitles=sub_read_file(sub_name, sh_video->fps);
-    if(!subtitles) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
+  if(sub_name && sub_name[0]){
+    subdata=sub_read_file(sub_name[0], sh_video->fps);
+    if(!subdata) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name[0]);
   } else
   if(sub_auto) { // auto load sub file ...
-    subtitles=sub_read_file( filename ? sub_filename( get_path("sub/"), filename )
+    subdata=sub_read_file( filename ? sub_filenames( get_path("sub/"), filename )[0]
 	                              : "default.sub", sh_video->fps );
   }
 #endif	
@@ -1226,11 +1226,13 @@ if(sh_audio && !demuxer2){
 
 #ifdef USE_SUB
   // find sub
-  if(subtitles && sh_video->pts>0){
+  if(subdata && sh_video->pts>0){
       float pts=sh_video->pts;
       if(sub_fps==0) sub_fps=sh_video->fps;
       if (pts > sub_last_pts || pts < sub_last_pts-1.0 ) {
-         find_sub(subtitles,sub_uses_time?(100*(pts+sub_delay)):((pts+sub_delay)*sub_fps)); // FIXME! frame counter...
+         find_sub(subdata, (pts+sub_delay) * 
+				 (subdata->sub_uses_time? 100. : sub_fps)); 
+	 // FIXME! frame counter...
          sub_last_pts = pts;
       }
   }

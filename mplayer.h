@@ -27,14 +27,14 @@ extern float  font_factor;
 extern float movie_aspect;
 extern float force_fps;
 
-extern char * sub_name;
+//extern char **sub_name;
 extern float  sub_delay;
 extern float  sub_fps;
 extern int    sub_auto;
 extern int    sub_pos;
 extern int    sub_unicode;
 extern char * sub_cp;
-extern subtitle* subtitles;
+extern sub_data* subdata; //currently used subtitles  
 extern subtitle* vo_sub;
 extern int    suboverlap_enabled;
 
@@ -59,5 +59,6 @@ extern int dvdsub_id;
 extern int vobsub_id;
 
 extern void exit_player(char* how);
+extern void update_set_of_subtitles();
 
 #endif

@@ -21,11 +21,12 @@ static int nosub_range_end=-1;
 extern float sub_delay;
 extern float  sub_fps;
 
-void step_sub(subtitle *subtitles, float pts, int movement) {
-    int key = sub_uses_time ? (100*(pts+sub_delay)) : ((pts+sub_delay)*sub_fps);
+void step_sub(sub_data *subd, float pts, int movement) {
+    subtitle *subs; 
+    int key = (pts+sub_delay) * (subd->sub_uses_time ? 100 : sub_fps);
 
-    if (subtitles == NULL)
-    	return;
+    if (subd == NULL) return;
+    subs = subd->subtitles;
 
     /* Tell the OSD subsystem that the OSD contents will change soon */
     vo_osd_changed(OSDTYPE_SUBTITLE);
@@ -33,25 +34,27 @@ void step_sub(subtitle *subtitles, float pts, int movement) {
     /* If we are moving forward, don't count the next (current) subtitle
      * if we haven't displayed it yet. Same when moving other direction.
      */
-    if (movement > 0 && key < subtitles[current_sub].start)
+    if (movement > 0 && key < subs[current_sub].start)
     	movement--;
-    if (movement < 0 && key >= subtitles[current_sub].end)
+    if (movement < 0 && key >= subs[current_sub].end)
     	movement++;
 
     /* Never move beyond first or last subtitle. */
     if (current_sub+movement < 0)
     	movement = 0-current_sub;
-    if (current_sub+movement >= sub_num)
-    	movement = sub_num-current_sub-1;
+    if (current_sub+movement >= subd->sub_num)
+    	movement = subd->sub_num - current_sub - 1;
 
     current_sub += movement;
-    sub_delay = subtitles[current_sub].start/(sub_uses_time ? 100 : sub_fps) - pts;
+    sub_delay = subs[current_sub].start / (subd->sub_uses_time ? 100 : sub_fps) - pts;
 }
 
-void find_sub(subtitle* subtitles,int key){
+void find_sub(sub_data* subd,int key){
+    subtitle *subs;
     int i,j;
     
-    if ( !subtitles ) return;
+    if ( !subd || subd->sub_num == 0) return;
+    subs = subd->subtitles;
     
     if(vo_sub){
       if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
@@ -71,28 +74,29 @@ void find_sub(subtitle* subtitles,int key){
 //    printf("\r---- sub changed ----\n");
     
     // check next sub.
-    if(current_sub>=0 && current_sub+1<sub_num){
-      if(key>subtitles[current_sub].end && key<subtitles[current_sub+1].start){
+    if(current_sub>=0 && current_sub+1 < subd->sub_num){
+      if(key>subs[current_sub].end && key<subs[current_sub+1].start){
           // no sub
-          nosub_range_start=subtitles[current_sub].end;
-          nosub_range_end=subtitles[current_sub+1].start;
+          nosub_range_start=subs[current_sub].end;
+          nosub_range_end=subs[current_sub+1].start;
           vo_sub=NULL;
           return;
       }
       // next sub?
       ++current_sub;
-      vo_sub=&subtitles[current_sub];
+      vo_sub=&subs[current_sub];
       if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
     }
 
 //    printf("\r---- sub log search... ----\n");
     
     // use logarithmic search:
-    i=0;j=sub_num-1;
-//    printf("Searching %d in %d..%d\n",key,subtitles[i].start,subtitles[j].end);
+    i=0; 
+    j = subd->sub_num - 1;
+//    printf("Searching %d in %d..%d\n",key,subs[i].start,subs[j].end);
     while(j>=i){
         current_sub=(i+j+1)/2;
-        vo_sub=&subtitles[current_sub];
+        vo_sub=&subs[current_sub];
         if(key<vo_sub->start) j=current_sub-1;
         else if(key>vo_sub->end) i=current_sub+1;
         else return; // found!
@@ -110,10 +114,10 @@ void find_sub(subtitle* subtitles,int key){
           return;
       }
       --current_sub;
-      if(key>subtitles[current_sub].end && key<subtitles[current_sub+1].start){
+      if(key>subs[current_sub].end && key<subs[current_sub+1].start){
           // no sub
-          nosub_range_start=subtitles[current_sub].end;
-          nosub_range_end=subtitles[current_sub+1].start;
+          nosub_range_start=subs[current_sub].end;
+          nosub_range_end=subs[current_sub+1].start;
 //          printf("No sub... 1 \n");
           vo_sub=NULL;
           return;
@@ -121,7 +125,7 @@ void find_sub(subtitle* subtitles,int key){
       printf("HEH????  ");
     } else {
       if(key<=vo_sub->end) printf("JAJJ!  "); else
-      if(current_sub+1>=sub_num){
+      if(current_sub+1 >= subd->sub_num){
           // at the end?
           nosub_range_start=vo_sub->end;
           nosub_range_end=0x7FFFFFFF; // MAXINT
@@ -129,10 +133,10 @@ void find_sub(subtitle* subtitles,int key){
           vo_sub=NULL;
           return;
       } else
-      if(key>subtitles[current_sub].end && key<subtitles[current_sub+1].start){
+      if(key>subs[current_sub].end && key<subs[current_sub+1].start){
           // no sub
-          nosub_range_start=subtitles[current_sub].end;
-          nosub_range_end=subtitles[current_sub+1].start;
+          nosub_range_start=subs[current_sub].end;
+          nosub_range_end=subs[current_sub+1].start;
 //          printf("No sub... 2 \n");
           vo_sub=NULL;
           return;

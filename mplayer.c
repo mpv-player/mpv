@@ -231,7 +231,7 @@ int video_id=-1;
 int dvdsub_id=-1;
 int vobsub_id=-1;
 static char* audio_lang=NULL;
-static char* dvdsub_lang=NULL;
+char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
 char* filename=NULL; //"MI2-Trailer.avi";
 
@@ -275,7 +275,7 @@ extern int vo_flags;
 // sub:
 char *font_name=NULL;
 float font_factor=0.75;
-char *sub_name=NULL;
+char **sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
 int   sub_auto = 1;
@@ -284,7 +284,9 @@ char *vobsub_name=NULL;
 int   subcc_enabled=0;
 int suboverlap_enabled = 1;
 #ifdef USE_SUB
-subtitle* subtitles=NULL;
+sub_data* set_of_subtitles[MAX_SUBTITLE_FILES];
+int set_of_sub_size = 0;
+int set_of_sub_pos = -1;
 float sub_last_pts = -303;
 #endif
 
@@ -637,6 +639,56 @@ int playtree_add_playlist(play_tree_t* entry)
 
 static int play_tree_step = 1;
 
+#ifdef USE_SUB
+
+sub_data* subdata = NULL;
+
+void add_subtitles(char *filename, float fps, int silent)
+{
+    sub_data *subd;
+
+    if (filename == NULL) {
+	subd = (sub_data*)malloc(sizeof(sub_data));
+	subd->filename = strdup("none");
+	subd->subtitles = NULL;
+	subd->sub_uses_time = 1;
+	subd->sub_num = 0;
+	subd->sub_errs = 0;
+	set_of_subtitles[set_of_sub_size] = subd;
+	++set_of_sub_size;
+	return;
+    }
+
+    subd = sub_read_file(filename, fps);
+    if(!subd && !silent) 
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_CantLoadSub, filename);
+    if (subd == NULL || set_of_sub_size >= MAX_SUBTITLE_FILES) return;
+    set_of_subtitles[set_of_sub_size] = subd;
+    ++set_of_sub_size;
+    printf("SUB: added subtitle file (%d): %s\n", set_of_sub_size, filename);
+}
+
+void update_set_of_subtitles()
+    // subdata was changed, set_of_sub... have to be updated.
+{
+    int i;
+    if (set_of_sub_size > 0 && subdata == NULL) { // *subdata was deleted
+        for (i = set_of_sub_pos + 1; i < set_of_sub_size; ++i)
+            set_of_subtitles[i-1] = set_of_subtitles[i];
+        set_of_subtitles[set_of_sub_size-1] = NULL;
+        --set_of_sub_size;
+        if (set_of_sub_size > 0) subdata = set_of_subtitles[set_of_sub_pos=0];
+    }
+    else if (set_of_sub_size > 0 && subdata != NULL) { // *subdata was changed
+        set_of_subtitles[set_of_sub_pos] = subdata;
+    }
+    else if (set_of_sub_size <= 0 && subdata != NULL) { // *subdata was added
+        set_of_subtitles[set_of_sub_pos=set_of_sub_size] = subdata;
+        ++set_of_sub_size;
+    }
+}
+#endif
+
 /*
  * In Mac OS X the SDL-lib is built upon Cocoa. The easiest way to
  * make it all work is to use the builtin SDL-bootstrap code, which 
@@ -670,6 +722,7 @@ int osd_show_sub_pos = 0;
 int osd_show_sub_visibility = 0;
 int osd_show_sub_alignment = 0;
 int osd_show_vobsub_changed = 0;
+int osd_show_sub_changed = 0;
 int osd_show_percentage = 0;
 int osd_show_tv_channel = 25;
 
@@ -678,6 +731,7 @@ int rtc_fd=-1;
 //float a_frame=0;    // Audio
 
 int i;
+char *tmp;
 
 int gui_no_filename=0;
 
@@ -1485,19 +1539,31 @@ if(sh_video) {
 // check .sub
   current_module="read_subtitles_file";
   if(sub_name){
-    subtitles=sub_read_file(sub_name, sh_video->fps);
-    if(!subtitles) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
-  } else
+    for (i = 0; sub_name[i] != NULL; ++i) 
+        add_subtitles (sub_name[i], sh_video->fps, 0); 
+  } 
   if(sub_auto) { // auto load sub file ...
-    subtitles=sub_read_file( filename ? sub_filename( get_path("sub/"), filename )
-                                     : "default.sub", sh_video->fps );
+    char **tmp = sub_filenames(get_path("sub/"), filename);
+    char **tmp2 = tmp;
+    while (*tmp2)
+        add_subtitles (*tmp2++, sh_video->fps, 0);
+    free(tmp);
+    if (set_of_sub_size == 0)
+        add_subtitles (get_path("default.sub"), sh_video->fps, 1);
+    if (set_of_sub_size > 0)
+        add_subtitles (NULL, sh_video->fps, 1);
   }
-  if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
-  if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, sh_video->fps);
-  if(subtitles && stream_dump_type==6) dump_srt(subtitles, sh_video->fps);
-  if(subtitles && stream_dump_type==7) dump_microdvd(subtitles, sh_video->fps);
-  if(subtitles && stream_dump_type==8) dump_jacosub(subtitles, sh_video->fps);
-  if(subtitles && stream_dump_type==9) dump_sami(subtitles, sh_video->fps);
+  if (set_of_sub_size > 0)  {
+      osd_show_sub_changed = sh_video->fps;
+      subdata = set_of_subtitles[set_of_sub_pos=0];
+  
+      if(stream_dump_type==3) list_sub_file(subdata);
+      if(stream_dump_type==4) dump_mpsub(subdata, sh_video->fps);
+      if(stream_dump_type==6) dump_srt(subdata, sh_video->fps);
+      if(stream_dump_type==7) dump_microdvd(subdata, sh_video->fps);
+      if(stream_dump_type==8) dump_jacosub(subdata, sh_video->fps);
+      if(stream_dump_type==9) dump_sami(subdata, sh_video->fps);
+  }
 }
 #endif
 
@@ -2415,7 +2481,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_SUB_STEP : {
       int movement = cmd->args[0].v.i;
-      step_sub(subtitles, sh_video->pts, movement);
+      step_sub(subdata, sh_video->pts, movement);
       osd_show_sub_delay = 9; // show the subdelay in OSD
     } break;
     case MP_CMD_OSD : 
@@ -2787,8 +2853,17 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         if(new_id != vobsub_id)
 	    osd_show_vobsub_changed = 9;
 	vobsub_id = new_id;
-	break;
     }
+#ifdef USE_SUB  
+    else if (set_of_sub_size > 0){ //change subtitle file  
+        set_of_sub_pos = (set_of_sub_pos + 1) % set_of_sub_size;
+        subdata = set_of_subtitles[set_of_sub_pos];
+        osd_show_sub_changed = sh_video->fps;
+        vo_sub = NULL;
+        vo_osd_changed(OSDTYPE_SUBTITLE); 
+    }
+#endif
+        break;
     case MP_CMD_SCREENSHOT :
       if(vo_config_count) video_out->control(VOCTRL_SCREENSHOT, NULL);
       break;
@@ -3199,6 +3274,20 @@ if(rel_seek_secs || abs_seek_pos){
 	  snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", vobsub_id, language ? language : "unknown");
 	  osd_show_vobsub_changed--;
       } else
+#ifdef USE_SUB
+      if (osd_show_sub_changed) {
+          tmp = subdata->filename;
+	  char *tmp2;
+	  if (tmp2 = strrchr(tmp, '/')) {
+	      tmp = tmp2+1;
+	  }
+	  snprintf(osd_text_tmp, 63, "Sub: (%d) %s%s", 
+                                  set_of_sub_pos + 1,
+                                  strlen(tmp) < 20 ? "" : "...",
+                                  strlen(tmp) < 20 ? tmp : tmp+strlen(tmp)-19);
+	  osd_show_sub_changed--;
+      } else
+#endif
       if (osd_show_sub_delay) {
 	  snprintf(osd_text_tmp, 63, "Sub delay: %d ms", ROUND(sub_delay*1000));
 	  osd_show_sub_delay--;
@@ -3250,12 +3339,14 @@ if(rel_seek_secs || abs_seek_pos){
   
 #ifdef USE_SUB
   // find sub
-  if(subtitles && sh_video->pts>0){
+  if(subdata && sh_video->pts>0){
       float pts=sh_video->pts;
       if(sub_fps==0) sub_fps=sh_video->fps;
       current_module="find_sub";
       if (pts > sub_last_pts || pts < sub_last_pts-1.0 ) {
-         find_sub(subtitles,sub_uses_time?(100*(pts+sub_delay)):((pts+sub_delay)*sub_fps)); // FIXME! frame counter...
+         find_sub(subdata, (pts+sub_delay) * 
+				 (subdata->sub_uses_time ? 100. : sub_fps)); 
+	 // FIXME! frame counter...
          sub_last_pts = pts;
       }
       current_module=NULL;
@@ -3350,14 +3441,14 @@ if(benchmark){
 uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT+(fixed_vo?INITED_VO:0)));
 
 #ifdef USE_SUB  
-  if ( subtitles ) 
+  if ( set_of_sub_size > 0 ) 
    {
     current_module="sub_free";
-    sub_free( subtitles );
-    if ( sub_name ) free( sub_name );
-    sub_name=NULL;
+    for (i = 0; i < set_of_sub_size; ++i)
+        sub_free( set_of_subtitles[i] );
+    set_of_sub_size = 0;
     vo_sub=NULL;
-    subtitles=NULL;
+    subdata=NULL;
    }
 #endif
 
