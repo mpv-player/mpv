@@ -16,6 +16,10 @@
 #include "video_out_internal.h"
 #include "sub.h"
 
+#ifdef HAVE_NEW_GUI
+#include "../Gui/interface.h"
+#endif
+
 #include <GL/gl.h>
 #ifdef GL_WIN32
     #include <windows.h>
@@ -770,6 +774,38 @@ static uint32_t config_glx(uint32_t width, uint32_t height, uint32_t d_width, ui
         return 0;
 }
 
+#ifdef HAVE_NEW_GUI
+static uint32_t config_glx_gui(uint32_t d_width, uint32_t d_height) {
+  XWindowAttributes xw_attr;
+  XVisualInfo *vinfo, vinfo_template;
+  int tmp;
+  vo_dwidth = d_width;
+  vo_dheight = d_height;
+  guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the window
+  XGetWindowAttributes(mDisplay, vo_window, &xw_attr);
+  vinfo_template.visualid=XVisualIDFromVisual(xw_attr.visual);
+  vinfo = XGetVisualInfo(mDisplay, VisualIDMask, &vinfo_template, &tmp);
+
+  if ( vo_config_count ) glXDestroyContext( mDisplay,wsGLXContext );
+  wsGLXContext = glXCreateContext( mDisplay,vinfo,NULL,True );
+  if (wsGLXContext == NULL) {
+    mp_msg(MSGT_VO, MSGL_FATAL, "[gl2] Could not create GLX context!\n");
+    XFree(vinfo);
+    return -1;
+  }
+  glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
+  XFlush(mDisplay);
+  XSync(mDisplay, False);
+
+  if (glXGetConfig(mDisplay,vinfo,GLX_RED_SIZE, &r_sz) != 0) r_sz = 0;
+  if (glXGetConfig(mDisplay,vinfo,GLX_GREEN_SIZE, &g_sz) != 0) g_sz = 0;
+  if (glXGetConfig(mDisplay,vinfo,GLX_BLUE_SIZE, &b_sz) != 0) b_sz = 0;
+  if (glXGetConfig(mDisplay,vinfo,GLX_ALPHA_SIZE, &a_sz) != 0) a_sz = 0;
+  XFree(vinfo);
+  return 0;
+}
+#endif
+
 #endif
 
 static int initGl(uint32_t d_width, uint32_t d_height)
@@ -846,6 +882,12 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	aspect(&d_width,&d_height,A_NOZOOM);
 
+#ifdef HAVE_NEW_GUI
+	if (use_gui) {
+	  if (config_glx_gui(d_width, d_height) == -1)
+	    return -1;
+	} else
+#endif
 #ifdef GL_WIN32
 	if (config_w32(width, height, d_width, d_height, flags, title, format) == -1)
 #else
@@ -1160,6 +1202,8 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_RESUME: return (int_pause=0);
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_GUISUPPORT:
+        return VO_TRUE;
   case VOCTRL_ONTOP:
 #ifdef GL_WIN32
     vo_w32_ontop();
