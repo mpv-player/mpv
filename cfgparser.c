@@ -53,21 +53,29 @@ static int init_conf(struct config *conf, int mode)
 static int read_option(char *opt, char *param)
 {
 	int i;
-	int need_param = -1;
 	int tmp_int;
 	float tmp_float;
+	int ret = -1;
 
 	for (i = 0; i < nr_options; i++) {
 		if (!strcasecmp(opt, config[i].name))
 			break;
 	}
-	if (i == nr_options)
-		return ERR_NOT_AN_OPTION;
-
-	if (config[i].flags & CONF_NOCFG && parser_mode == CONFIG_FILE)
-		return ERR_NOT_AN_OPTION;
-	if (config[i].flags & CONF_NOCMD && parser_mode == COMMAND_LINE)
-		return ERR_NOT_AN_OPTION;
+	if (i == nr_options) {
+		printf("invalid option:\n");
+		ret = ERR_NOT_AN_OPTION;
+		goto out;
+	}
+	if (config[i].flags & CONF_NOCFG && parser_mode == CONFIG_FILE) {
+		printf("this option can only be used on command line:\n");
+		ret = ERR_NOT_AN_OPTION;
+		goto out;
+	}
+	if (config[i].flags & CONF_NOCMD && parser_mode == COMMAND_LINE) {
+		printf("this option can only be used in config file:\n");
+		ret = ERR_NOT_AN_OPTION;
+		goto out;
+	}
 
 	switch (config[i].type) {
 		case CONF_TYPE_FLAG:
@@ -87,78 +95,113 @@ static int read_option(char *opt, char *param)
 				    !strcasecmp(param, "n") ||
 				    !strcmp(param, "0"))
 					*((int *) config[i].p) = config[i].min;
-				else
-					return ERR_OUT_OF_RANGE;
-				need_param = 1;
+				else {
+					printf("invalid parameter for flag:\n");
+					ret = ERR_OUT_OF_RANGE;
+					goto out;
+				}
+				ret = 1;
 			} else {	/* parser_mode == COMMAND_LINE */
 				*((int *) config[i].p) = config[i].max;
-				need_param = 0;
+				ret = 0;
 			}
 			break;
 		case CONF_TYPE_INT:
 			if (param == NULL)
-				return ERR_MISSING_PARAM;
-			if (!isdigit(*param))
-				return ERR_MISSING_PARAM;
+				goto err_missing_param;
+			if (!isdigit(*param)) {
+				printf("parameter must be an integer:\n");
+				ret = ERR_OUT_OF_RANGE;
+				goto out;
+			}
 
 			tmp_int = atoi(param);
 
 			if (config[i].flags & CONF_MIN)
-				if (tmp_int < config[i].min)
-					return ERR_OUT_OF_RANGE;
+				if (tmp_int < config[i].min) {
+					printf("parameter must be >= %d:\n", (int) config[i].min);
+					ret = ERR_OUT_OF_RANGE;
+					goto out;
+				}
 
 			if (config[i].flags & CONF_MAX)
-				if (tmp_int > config[i].max)
-					return ERR_OUT_OF_RANGE;
+				if (tmp_int > config[i].max) {
+					printf("parameter must be <= %d:\n", (int) config[i].max);
+					ret = ERR_OUT_OF_RANGE;
+					goto out;
+				}
 
 			*((int *) config[i].p) = tmp_int;
-			need_param = 1;
+			ret = 1;
 			break;
 		case CONF_TYPE_FLOAT:
 			if (param == NULL)
-				return ERR_MISSING_PARAM;
-			if (!isdigit(*param))
-				return ERR_MISSING_PARAM;
+				goto err_missing_param;
+			if (!isdigit(*param)) {
+				printf("parameter must be a floating point number:\n");
+				ret = ERR_MISSING_PARAM;
+				goto out;
+			}
 
 			tmp_float = atof(param);
 
 			if (config[i].flags & CONF_MIN)
-				if (tmp_float < config[i].min)
-					return ERR_OUT_OF_RANGE;
+				if (tmp_float < config[i].min) {
+					printf("parameter must be >= %f:\n", config[i].min);
+					ret = ERR_OUT_OF_RANGE;
+					goto out;
+				}
 
 			if (config[i].flags & CONF_MAX)
-				if (tmp_float > config[i].max)
-					return ERR_OUT_OF_RANGE;
+				if (tmp_float > config[i].max) {
+					printf("parameter must be <= %f:\n", config[i].max);
+					ret = ERR_OUT_OF_RANGE;
+					goto out;
+				}
 
 			*((float *) config[i].p) = tmp_float;
-			need_param = 1;
+			ret = 1;
 			break;
 		case CONF_TYPE_STRING:
 			if (param == NULL)
-				return ERR_MISSING_PARAM;
+				goto err_missing_param;
 
 			if (config[i].flags & CONF_MIN)
-				if (strlen(param) < config[i].min)
-					return ERR_OUT_OF_RANGE;
+				if (strlen(param) < config[i].min) {
+					printf("parameter must be >= %d chars:\n",
+							(int) config[i].min);
+					ret = ERR_OUT_OF_RANGE;
+					goto out;
+				}
 
 			if (config[i].flags & CONF_MAX)
-				if (strlen(param) > config[i].max)
-					return ERR_OUT_OF_RANGE;
+				if (strlen(param) > config[i].max) {
+					printf("parameter must be <= %d chars:\n",
+							(int) config[i].max);
+					ret = ERR_OUT_OF_RANGE;
+					goto out;
+				}
 
 			*((char **) config[i].p) = strdup(param);
-			need_param = 1;
+			ret = 1;
 			break;
 		case CONF_TYPE_FUNC_PARAM:
 			if (param == NULL)
-				return ERR_MISSING_PARAM;
-			if ((((cfg_func_param_t) config[i].p)(config + i, param)) < 0)
-				return ERR_FUNC_ERR;
-			need_param = 1;
+				goto err_missing_param;
+			if ((((cfg_func_param_t) config[i].p)(config + i, param)) < 0) {
+				printf("parser function returned error:\n");
+				ret = ERR_FUNC_ERR;
+				goto out;
+			}
+			ret = 1;
 			break;
 		case CONF_TYPE_FUNC:
-			if ((((cfg_func_t) config[i].p)(config + i)) < 0)
-				return ERR_FUNC_ERR;
-			need_param = 0;
+			if ((((cfg_func_t) config[i].p)(config + i)) < 0) {
+				printf("parser function returned error:\n");
+				ret = ERR_FUNC_ERR;
+				goto out;
+			}
+			ret = 0;
 			break;
 		case CONF_TYPE_PRINT:
 			printf("%s", (char *) config[i].p);
@@ -167,7 +210,12 @@ static int read_option(char *opt, char *param)
 			printf("picsaba\n");
 			break;
 	}
-	return need_param;
+out:
+	return ret;
+err_missing_param:
+	printf("missing parameter:\n");
+	ret = ERR_MISSING_PARAM;
+	goto out;
 }
 
 int parse_config_file(struct config *conf, char *conffile)
@@ -257,8 +305,8 @@ int parse_config_file(struct config *conf, char *conffile)
 			++line_pos;
 
 		/* read the parameter */
-		for (param_pos = 0; isprint(line[line_pos]) && !isspace(line[line_pos]);
-				/* NOTHING */) {
+		for (param_pos = 0; isprint(line[line_pos]) && !isspace(line[line_pos])
+				&& line[line_pos] != '#'; /* NOTHING */) {
 			param[param_pos++] = line[line_pos++];
 			if (param_pos >= MAX_PARAM_LEN) {
 				PRINT_LINENUM;
@@ -295,26 +343,11 @@ int parse_config_file(struct config *conf, char *conffile)
 		tmp = read_option(opt, param);
 		switch (tmp) {
 		case ERR_NOT_AN_OPTION:
-			PRINT_LINENUM;
-			printf("invalid option: %s\n", opt);
-			ret = -1;
-			continue;
-			/* break; */
 		case ERR_MISSING_PARAM:
-			PRINT_LINENUM;
-			printf("missing parameter: %s\n", opt);
-			ret = -1;
-			continue;
-			/* break; */
 		case ERR_OUT_OF_RANGE:
-			PRINT_LINENUM;
-			printf("parameter of %s out of range\n", opt);
-			ret = -1;
-			continue;
-			/* break; */
 		case ERR_FUNC_ERR:
 			PRINT_LINENUM;
-			printf("parser function returned error: %s\n", opt);
+			printf("%s\n", opt);
 			ret = -1;
 			continue;
 			/* break */
@@ -349,17 +382,6 @@ int parse_command_line(struct config *conf, int argc, char **argv, char **envp, 
 
 		/* remove trailing '-' */
 		opt++;
-#if 0
-		/* check for --help, -h, and --version */
-		if (!strcasecmp(opt, "-help") || !strcasecmp(opt, "h")) {
-			printf("%s%s", banner_text, help_text);
-			continue;
-		}
-		if (!strcasecmp(opt, "-version")) {
-			printf("%s", banner_text);
-			continue;
-		}
-#endif
 
 		tmp = read_option(opt, argv[i + 1]);
 
@@ -369,8 +391,7 @@ not_an_option:
 			/* opt is not an option -> treat it as a filename */
 			if (found_filename) {
 				/* we already have a filename */
-				printf("parse_command_line: invalid option: %s\n", argv[i]);
-				return -1;
+				goto err_out;
 			} else {
 				found_filename = 1;
 				*filename = argv[i];
@@ -379,20 +400,16 @@ not_an_option:
 			}
 			break;
 		case ERR_MISSING_PARAM:
-			printf("parse_command_line: missing parameter: %s\n", argv[i]);
-			return -1;
-			/* break; */
 		case ERR_OUT_OF_RANGE:
-			printf("parse_command_line: parameter of '%s' is out of range\n", argv[i]);
-			return -1;
-			/* break; */
 		case ERR_FUNC_ERR:
-			printf("parse_command_line: parser function returned error: %s\n", argv[i]);
-			return -1;
+			goto err_out;
 			/* break; */
 		}
 
 		i += tmp;	/* we already processed the params (if there was any) */
-	}
+	}	
 	return found_filename;
+err_out:
+	printf("parse_command_line: %s\n", argv[i]);
+	return -1;
 }
