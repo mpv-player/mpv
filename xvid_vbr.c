@@ -612,7 +612,7 @@ static int vbr_finish_2pass1(void *sstate)
 	}while(i < 2);
 
 	/* Prepare to write to the stream */
-	fseek( state->pass1_file, ftell( state->pass1_file ), SEEK_SET );
+	fseek( state->pass1_file, 0L, SEEK_CUR );
 
 	/* Overwrite the frame field - safe as we have written extra spaces */
 	fprintf(state->pass1_file, "# frames    : %.10d\n", state->nb_frames);
