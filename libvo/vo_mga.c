@@ -14,7 +14,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
-#include "kerneltwosix.h"
 #include <linux/fb.h>
 
 #include "drivers/mga_vid.h"

@@ -18,7 +18,6 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <sys/kd.h>
-#include "kerneltwosix.h"
 #include <linux/fb.h>
 
 #include "config.h"
