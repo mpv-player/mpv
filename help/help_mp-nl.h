@@ -1,6 +1,6 @@
 // Translated by:  Panagiotis Issaris <takis@lumumba.luc.ac.be>
 //maintained by:   Philippe De Swert <philippe.deswert@student.denayer.wenk.be>
-//synced with help_mp-en.h revision 1.109
+//synced with help_mp-en.h revision 1.110
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
