@@ -85,7 +85,7 @@ static const char *cpuname
 				/* 6 */ "Celeron A Mendocino/Pentium II Dixon",
 				/* 7 */ "Pentium III Katmai/Pentium III Xeon Tanner",
 				/* 8 */ "Celeron 2/Pentium III Coppermine,Geyserville",
-				/* 9 */ N_UNKNOWN, 
+				/* 9 */ "Pentium M Banias", /* XXX check */
 				/* A */ "Pentium III Xeon Cascades",
 				/* B */ "Celeron 2/Pentium III Tualatin",
 				/* C */ N_UNKNOWN, 
@@ -93,8 +93,8 @@ static const char *cpuname
 				/* E */ N_UNKNOWN, 
 				/* F */ N_UNKNOWNEXT 
 			},
-			/* 7 IA-64 */ { /* FIXME */
-				/* 0 */ N_UNKNOWN, 
+			/* 7 Itanium */ { /* XXX check */
+				/* 0 */ "Itanium Merced", 
 				/* 1 */ N_UNKNOWN, 
 				/* 2 */ N_UNKNOWN, 
 				/* 3 */ N_UNKNOWN, 
@@ -119,9 +119,9 @@ static const char *cpuname
 			/* D */ F_UNKNOWN, 
 			/* E */ F_UNKNOWN, 
 			/* F extended family (P4/new IA-64)*/ {
-				/* 0 */ "Pentium 4 Willamette",
-				/* 1 */ "Pentium 4 Xeon Foster", /*?*/
-				/* 2 */ "Pentium 4 Northwood",
+				/* 0 */ "Pentium 4/Xeon Willamette",
+				/* 1 */ "Pentium 4/Xeon/Celeron Foster",
+				/* 2 */ "Pentium 4/Xeon/Celeron Northwood",
 				/* 3 */ N_UNKNOWN, 
 				/* 4 */ N_UNKNOWN, 
 				/* 5 */ N_UNKNOWN, 
@@ -136,6 +136,26 @@ static const char *cpuname
 				/* E */ N_UNKNOWN, 
 				/* F */ N_UNKNOWNEXT 
 			}
+			#if 0 /* out of table index boundaries */
+			/* 1F Itanium 2 */ { /* XXX check */
+				/* 0 */ "Itanium 2 McKinley", 
+				/* 1 */ "Itanium 2 Madison", /* I coded on that :-) */
+				/* 2 */ N_UNKNOWN, 
+				/* 3 */ N_UNKNOWN, 
+				/* 4 */ N_UNKNOWN, 
+				/* 5 */ N_UNKNOWN, 
+				/* 6 */ N_UNKNOWN, 
+				/* 7 */ N_UNKNOWN, 
+				/* 8 */ N_UNKNOWN, 
+				/* 9 */ N_UNKNOWN, 
+				/* A */ N_UNKNOWN, 
+				/* B */ N_UNKNOWN, 
+				/* C */ N_UNKNOWN, 
+				/* D */ N_UNKNOWN, 
+				/* E */ N_UNKNOWN, 
+				/* F */ N_UNKNOWNEXT 
+			},
+			#endif
 		},
 		/* United Microelectronics Corporation, "UMC UMC UMC " */ {
 			/* 0 */ F_UNKNOWN, 
@@ -239,13 +259,13 @@ static const char *cpuname
 			/* C */ F_UNKNOWN, 
 			/* D */ F_UNKNOWN, 
 			/* E */ F_UNKNOWN, 
-			/* F Opteron */ {
+			/* F K8 */ {
 				/* 0 */ N_UNKNOWN, 
 				/* 1 */ N_UNKNOWN, 
 				/* 2 */ N_UNKNOWN, 
 				/* 3 */ N_UNKNOWN, 
-				/* 4 */ N_UNKNOWN, 
-				/* 5 */ "Opteron SledgeHammer", 
+				/* 4 */ "Athlon 64 Clawhammer", 
+				/* 5 */ "Opteron Sledgehammer", 
 				/* 6 */ N_UNKNOWN, 
 				/* 7 */ N_UNKNOWN, 
 				/* 8 */ N_UNKNOWN, 
@@ -286,7 +306,7 @@ static const char *cpuname
 				/* 0 */ "M1 test-sample", /*?*/ 
 				/* 1 */ N_UNKNOWN, 
 				/* 2 */ "6x86 M1", 
-				/* 3 */ N_UNKNOWN, 
+				/* 3 */ "6x86L M1", 
 				/* 4 */ "GXm", 
 				/* 5 */ N_UNKNOWN, 
 				/* 6 */ N_UNKNOWN, 
@@ -307,9 +327,9 @@ static const char *cpuname
 				/* 3 */ N_UNKNOWN, 
 				/* 4 */ N_UNKNOWN, 
 				/* 5 */ "Cyrix III Joshua (M2 core)", 
-				/* 6 */ "Cyrix III Samuel (WinChip C5A core)", 
-				/* 7 */ "C3 Samuel 2 (WinChip C5B core)", 
-				/* 8 */ N_UNKNOWN, /* XXX Samuel 3/Ezra? */
+				/* 6 */ N_UNKNOWN, 
+				/* 7 */ N_UNKNOWN, 
+				/* 8 */ N_UNKNOWN, 
 				/* 9 */ N_UNKNOWN, 
 				/* A */ N_UNKNOWN, 
 				/* B */ N_UNKNOWN, 
@@ -380,13 +400,30 @@ static const char *cpuname
 				/* 7 */ N_UNKNOWN, 
 				/* 8 */ "WinChip 2 C6+,W2,W2A,W2B", 
 				/* 9 */ "WinChip 3 W3", 
+				/* A */ "WinChip 4 W4A",  /* XXX check */
+				/* B */ N_UNKNOWN, 
+				/* E */ N_UNKNOWN, 
+				/* C */ N_UNKNOWN, 
+				/* D */ N_UNKNOWN, 
+				/* F */ N_UNKNOWN 
+			}, 
+			/* 6 VIA C3 */ {
+				/* 0 */ N_UNKNOWN, 
+				/* 1 */ N_UNKNOWN, 
+				/* 2 */ N_UNKNOWN, 
+				/* 3 */ N_UNKNOWN, 
+				/* 4 */ N_UNKNOWN, 
+				/* 5 */ N_UNKNOWN, 
+				/* 6 */ "Cyrix III Samuel (WinChip C5A core)", 
+				/* 7 */ "C3 Samuel 2 (WinChip C5B core)/C3 Ezra", 
+				/* 8 */ "C3 Ezra-T",
+				/* 9 */ "C3 Nehemiah", 
 				/* A */ N_UNKNOWN, 
 				/* B */ N_UNKNOWN, 
 				/* E */ N_UNKNOWN, 
 				/* C */ N_UNKNOWN, 
 				/* D */ N_UNKNOWN, 
 				/* F */ N_UNKNOWN 
-
 			}, 
 			/* 6 */ F_UNKNOWN, 
 			/* 7 */ F_UNKNOWN, 
