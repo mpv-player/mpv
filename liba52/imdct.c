@@ -75,6 +75,8 @@ static uint8_t bit_reverse_256[] = {
 #ifdef HAVE_SSE
 // NOTE: SSE needs 16byte alignment or it will segfault 
 static complex_t __attribute__((aligned(16))) buf[128];
+static float __attribute__((aligned(16))) sseSinCos1a[256];
+static float __attribute__((aligned(16))) sseSinCos1b[256];
 static float __attribute__((aligned(16))) ps111_1[4]={1,1,1,-1};
 #else
 static complex_t buf[128];
@@ -174,11 +176,32 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
     /* 512 IMDCT with source and dest data in 'data' */
 	
     /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
+#ifdef HAVE_SSE
+	asm volatile(
+		"xorl %%esi, %%esi			\n\t"
+		"movl $1008, %%edi			\n\t"
+		"1:					\n\t"
+		"movaps (%0, %%esi), %%xmm0		\n\t"
+		"movaps (%0, %%edi), %%xmm1		\n\t"
+		"shufps $0xA0, %%xmm0, %%xmm0		\n\t"
+		"shufps $0x5F, %%xmm1, %%xmm1		\n\t"
+		"mulps sseSinCos1a(%%esi), %%xmm0	\n\t"
+		"mulps sseSinCos1b(%%esi), %%xmm1	\n\t"
+		"addps %%xmm1, %%xmm0			\n\t"
+		"movaps %%xmm0, (%1, %%esi)		\n\t"
+		"addl $16, %%esi			\n\t"
+		"subl $16, %%edi			\n\t"
+		" jnc 1b				\n\t"
+		:: "r" (data), "r" (buf)
+		: "%esi", "%edi"
+	);
+#else
     for( i=0; i < 128; i++) {
 	/* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */ 
 	buf[i].real =         (data[256-2*i-1] * xcos1[i])  -  (data[2*i]       * xsin1[i]);
 	buf[i].imag = -1.0 * ((data[2*i]       * xcos1[i])  +  (data[256-2*i-1] * xsin1[i]));
     }
+#endif
 
     /* Bit reversed shuffling */
     for(i=0; i<128; i++) {
@@ -514,6 +537,14 @@ void imdct_init (uint32_t mm_accel)
 	    xcos1[i] = -cos ((M_PI / 2048) * (8 * i + 1));
 	    xsin1[i] = -sin ((M_PI / 2048) * (8 * i + 1));
 	}
+#ifdef HAVE_SSE
+	for (i = 0; i < 128; i++) {
+	    sseSinCos1a[2*i+0]= -xsin1[i];
+	    sseSinCos1a[2*i+1]= -xcos1[i];
+	    sseSinCos1b[2*i+0]= xcos1[i];
+	    sseSinCos1b[2*i+1]= -xsin1[i];
+	}
+#endif
 
 	/* More twiddle factors to turn IFFT into IMDCT */
 	for (i = 0; i < 64; i++) {
