@@ -6,11 +6,10 @@
   Uses libGGI - http://www.ggi-project.org/
 
   TODO:
-   * implement non-directbuffer support
-   * improve directbuffer draw_frame (memcpy)
+   * implement direct rendering support - NEEDS TESTING
+   * implement non-directbuffer support - NEEDS TESTING
    * check on many devices
    * implement gamma handling
-   * implement direct rendering support
 
   Thanks to Andreas Beck for his patches.
   Many thanks to Atmosfear, he hacked this driver to work with Planar
@@ -35,7 +34,9 @@
 /* maximum buffers */
 #define GGI_FRAMES 4
 
-#include "../postproc/rgb2rgb.h"
+#undef GGI_GAMMA
+
+#include "../libmpcodecs/mp_image.h"
 
 LIBVO_EXTERN (ggi)
 
@@ -68,7 +69,12 @@ static struct ggi_conf_s {
     int dstheight;
     
     int async;
+    int directbuffer;
 } ggi_conf;
+
+static uint32_t draw_frame_directbuffer(uint8_t *src[]);
+static void draw_osd_directbuffer(void);
+static void flip_page_directbuffer(void);
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
@@ -140,7 +146,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	return(-1);
     }
 
-    if (ggiGetMode(ggi_conf.vis, &mode) != 0)
+    if (ggiGetMode(ggi_conf.vis, &mode))
     {
 	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to get mode\n");
 	return(-1);
@@ -183,22 +189,16 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	ggi_conf.srcdepth = IMGFMT_BGR_DEPTH(ggi_conf.srcformat);
     }
     else
-    switch(ggi_conf.srcformat)
     {
-	case IMGFMT_IYUV:
-	case IMGFMT_I420:
-	case IMGFMT_YV12:
-	    ggi_conf.srcdepth = vo_dbpp;
-	    yuv2rgb_init(ggi_conf.srcdepth, MODE_RGB);
-	    break;
-	default:
-	    mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] Unknown image format: %s\n",
-		vo_format_name(ggi_conf.srcformat));
-	    return(-1);
+        mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] Unknown image format: %s\n",
+    	    vo_format_name(ggi_conf.srcformat));
+	return(-1);
     }
 
     vo_dwidth = ggi_conf.dstwidth = ggi_conf.gmode.virt.x;
     vo_dheight = ggi_conf.dstheight = ggi_conf.gmode.virt.y;
+
+    ggi_conf.directbuffer = 1;
 
     ggi_conf.frames = ggiDBGetNumBuffers(ggi_conf.vis);
     if (ggi_conf.frames > GGI_FRAMES)
@@ -207,8 +207,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     ggi_conf.currframe = 0;
     if (!ggi_conf.frames)
     {
-	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] direct buffer unavailable\n");
-	return(-1);
+	goto db_err;
     }
 
     for (i = 0; i < ggi_conf.frames; i++)
@@ -231,8 +230,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
     if (ggi_conf.buffer[0] == NULL)
     {
-	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] direct buffer unavailable\n");
-	return(-1);
+	goto db_err;
     }
     
     for (i = 0; i < ggi_conf.frames; i++)
@@ -243,18 +241,35 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	    break;
 	}
     }
-
     ggiSetDisplayFrame(ggi_conf.vis, ggi_conf.currframe);
     ggiSetWriteFrame(ggi_conf.vis, ggi_conf.currframe);    
+
+    goto db_ok;
+
+db_err:
+    mp_msg(MSGT_VO, MSGL_ERR, "[ggi] direct buffer unavailable, using async mode\n");
+    ggi_conf.directbuffer = 0;
+    ggiSetFlags(ggi_conf.vis, GGIFLAG_ASYNC);
+
+db_ok:
+    if (GT_SCHEME(mode.graphtype) == GT_PALETTE)
+	ggiSetColorfulPalette(ggi_conf.vis);
+
+    if (ggiGetFlags(ggi_conf.vis) & GGIFLAG_ASYNC)
+	ggi_conf.async = 1;
 
     mp_msg(MSGT_VO, MSGL_INFO, "[ggi] input: %dx%dx%d, output: %dx%dx%d, frames: %d\n",
 	ggi_conf.srcwidth, ggi_conf.srcheight, ggi_conf.srcdepth, 
 	vo_dwidth, vo_dheight, vo_dbpp, ggi_conf.frames);
+    mp_msg(MSGT_VO, MSGL_INFO, "[ggi] directbuffer: %s, async mode: %s\n",
+	ggi_conf.directbuffer ? "yes" : "no",
+	ggi_conf.async ? "yes" : "no");
 
-    if (ggiGetFlags(ggi_conf.vis) & GGIFLAG_ASYNC)
+    if (ggi_conf.directbuffer)
     {
-	mp_msg(MSGT_VO, MSGL_INFO, "[ggi] using asynchron mode\n");
-	ggi_conf.async = 1;
+	video_out_ggi.draw_frame = draw_frame_directbuffer;
+	video_out_ggi.draw_osd = draw_osd_directbuffer;
+	video_out_ggi.flip_page = flip_page_directbuffer;
     }
 
     return(0);
@@ -265,20 +280,55 @@ static const vo_info_t *get_info(void)
     return &vo_info;
 }
 
-static uint32_t draw_frame(uint8_t *src[])
+static uint32_t get_image(mp_image_t *mpi)
+{
+    /* GGI DirectRendering supports (yet) only BGR/RGB modes */
+    if (!ggi_conf.directbuffer ||
+#if 1
+	(IMGFMT_IS_RGB(mpi->imgfmt) &&
+	    (IMGFMT_RGB_DEPTH(mpi->imgfmt) != vo_dbpp)) ||
+	(IMGFMT_IS_BGR(mpi->imgfmt) &&
+	    (IMGFMT_BGR_DEPTH(mpi->imgfmt) != vo_dbpp)) ||
+#else
+	(mpi->imgfmt != ggi_conf.srcformat) ||
+#endif
+	((mpi->type != MP_IMGTYPE_STATIC) && (mpi->type != MP_IMGTYPE_TEMP)) ||
+	(mpi->flags & MP_IMGFLAG_PLANAR) ||
+	(mpi->flags & MP_IMGFLAG_YUV) ||
+	(mpi->width != ggi_conf.srcwidth) ||
+	(mpi->height != ggi_conf.srcheight)
+    )
+	return(VO_FALSE);
+
+    if (ggi_conf.frames > 1)
+    {
+	mp_msg(MSGT_VO, MSGL_WARN, "[ggi] doublebuffering disabled due to directrendering\n");
+	ggi_conf.currframe = 0;
+	ggi_conf.frames = 1;
+    }
+
+    mpi->planes[0] = ggi_conf.buffer[ggi_conf.currframe]->write;
+    mpi->stride[0] = ggi_conf.srcwidth*((ggi_conf.srcdepth+7)/8);
+    mpi->flags |= MP_IMGFLAG_DIRECT;
+
+    return(VO_TRUE);
+}
+
+static uint32_t draw_frame_directbuffer(uint8_t *src[])
 {
     int x, y, size;
     unsigned char *ptr, *ptr2, *spt;
-    
+
     ggiResourceAcquire(ggi_conf.buffer[ggi_conf.currframe]->resource,
 	GGI_ACTYPE_WRITE);
 
     ggiSetWriteFrame(ggi_conf.vis, ggi_conf.currframe);
 
-    ptr = ggi_conf.buffer[ggi_conf.currframe]->write;
     spt = src[0];
+    ptr = ggi_conf.buffer[ggi_conf.currframe]->write;
     size = ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.pixelformat->size/8;
-    
+
+#if 0
     for (y = 0; y < ggi_conf.srcheight; y++)
     {
 	ptr2 = ptr;
@@ -298,8 +348,53 @@ static uint32_t draw_frame(uint8_t *src[])
 	}
 	ptr += ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.stride;
     }
+#else
+    mem2agpcpy_pic(ptr, spt, ggi_conf.srcwidth*size, ggi_conf.srcheight,
+	ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.stride,
+	ggi_conf.srcwidth*ggi_conf.srcdepth/8);
+#endif
 
     ggiResourceRelease(ggi_conf.buffer[ggi_conf.currframe]->resource);
+
+    return(0);
+}
+
+
+static uint32_t draw_frame(uint8_t *src[])
+{
+    int x, y;
+    unsigned char *spt;
+    ggi_color col;
+
+    spt = src[0];
+
+    for (y = 0; y < ggi_conf.srcheight; y++)
+    {
+	for (x = 0; x < ggi_conf.srcwidth; x++)
+	{
+	    /* add support for RGB */
+	    switch(ggi_conf.srcformat)
+	    {
+		case IMGFMT_BGR24:
+		case IMGFMT_BGR32:
+		    col.r = *spt++ << 8;
+		    col.g = *spt++ << 8;
+		    col.b = *spt++ << 8;
+		    if (ggi_conf.srcformat == IMGFMT_BGR32)
+			spt++;
+		    break;
+		default:
+		    mp_msg(MSGT_VO, MSGL_V, "[ggi] unsupported input format\n");
+		    return(0);
+	    }
+	    
+//	    printf("pixel: x:%d, y:%d, r:%d, g:%d, b:%d\n",
+//		x, y, col.r, col.b, col.g);
+	    ggiPutPixel(ggi_conf.vis, x, y, ggiMapColor(ggi_conf.vis, &col));
+	}
+    }
+    ggiFlush(ggi_conf.vis);
+
     return(0);
 }
 
@@ -327,15 +422,19 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
     }
 }
 
-static void draw_osd(void)
+static void draw_osd_directbuffer(void)
 {
     vo_draw_text(ggi_conf.srcwidth, ggi_conf.srcheight, draw_alpha);
 }
 
-static void flip_page(void)
+static void draw_osd(void)
+{
+}
+
+static void flip_page_directbuffer(void)
 {
     ggiSetDisplayFrame(ggi_conf.vis, ggi_conf.currframe);
-    mp_dbg(MSGT_VO, MSGL_DBG2, "flip_page: current write frame: %d, display frame: %d\n",
+    mp_dbg(MSGT_VO, MSGL_DBG2, "[ggi] flipping, current write frame: %d, display frame: %d\n",
 	ggiGetWriteFrame(ggi_conf.vis), ggiGetDisplayFrame(ggi_conf.vis));
 
     ggi_conf.currframe = (ggi_conf.currframe+1) % ggi_conf.frames;
@@ -344,44 +443,47 @@ static void flip_page(void)
 	ggiFlush(ggi_conf.vis);
 }
 
+static void flip_page(void)
+{
+    ggiFlush(ggi_conf.vis);
+}
+
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h,
     int x, int y)
 {
-    ggiResourceAcquire(ggi_conf.buffer[ggi_conf.currframe]->resource,
-	GGI_ACTYPE_WRITE);
-
-    ggiSetWriteFrame(ggi_conf.vis, ggi_conf.currframe);
-
-    yuv2rgb(((uint8_t *) ggi_conf.buffer[ggi_conf.currframe]->write)+
-	ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.stride*y+
-	x*(ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.pixelformat->size/8),
-	src[0], src[1], src[2], w, h, ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.stride,
-	stride[0], stride[1]);
-
-    ggiResourceRelease(ggi_conf.buffer[ggi_conf.currframe]->resource);
     return(0);
 }
 
 static uint32_t query_format(uint32_t format)
 {
-    switch(format)
+    ggi_mode mode;
+    
+    if ((!vo_depthonscreen || !vo_dbpp) && ggi_conf.vis)
     {
-	case IMGFMT_YV12:
-	case IMGFMT_I420:
-	case IMGFMT_IYUV:
-	    return(0x6);
-	case IMGFMT_RGB8:
-	case IMGFMT_RGB15:
-	case IMGFMT_RGB16:
-        case IMGFMT_RGB24:
-	case IMGFMT_RGB32:
-	case IMGFMT_BGR8:
-	case IMGFMT_BGR15:
-	case IMGFMT_BGR16:
-	case IMGFMT_BGR24:
-	case IMGFMT_BGR32:
-	    return(0x5);
+	if (ggiGetMode(ggi_conf.vis, &mode) == 0)
+	{
+	    vo_depthonscreen = GT_DEPTH(mode.graphtype);
+	    vo_dbpp = GT_SIZE(mode.graphtype);
+	}
     }
+
+    if ((IMGFMT_IS_BGR(format) && (IMGFMT_BGR_DEPTH(format) == vo_dbpp)) ||
+	(IMGFMT_IS_RGB(format) && (IMGFMT_RGB_DEPTH(format) == vo_dbpp)))
+    {
+	if (ggi_conf.directbuffer)
+	    return(3|VFCAP_OSD);
+	else
+	    return(3);
+    }
+    
+    if (IMGFMT_IS_BGR(format) || IMGFMT_IS_RGB(format))
+    {
+	if (ggi_conf.directbuffer)
+	    return(1|VFCAP_OSD);
+	else
+	    return(1);
+    }
+
     return(0);
 }
 
@@ -426,27 +528,32 @@ static int ggi_get_video_eq(vidix_video_eq_t *info)
 {
     memset(info, 0, sizeof(vidix_video_eq_t));
 }
+#endif
 
 static void query_vaa(vo_vaa_t *vaa)
 {
     memset(vaa, 0, sizeof(vo_vaa_t));
+#ifdef GGI_GAMMA
     vaa->get_video_eq = ggi_get_video_eq;
     vaa->set_video_eq = ggi_set_video_eq;
-}
 #endif
+}
 
 static uint32_t control(uint32_t request, void *data, ...)
 {
-  switch (request) {
+    switch(request)
+    {
 #ifdef GGI_GAMMA
-  case VOCTRL_QUERY_VAA:
-    query_vaa((vo_vaa_t*)data);
-    return VO_TRUE;
+	case VOCTRL_QUERY_VAA:
+	    query_vaa((vo_vaa_t*)data);
+	    return VO_TRUE;
 #endif
-  case VOCTRL_QUERY_FORMAT:
-    return query_format(*((uint32_t*)data));
-  }
-  return VO_NOTIMPL;
+	case VOCTRL_QUERY_FORMAT:
+	    return query_format(*((uint32_t*)data));
+	case VOCTRL_GET_IMAGE:
+	    return get_image(data);
+    }
+    return VO_NOTIMPL;
 }
 
 /* EVENT handling */
