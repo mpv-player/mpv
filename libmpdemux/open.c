@@ -370,7 +370,7 @@ if(dvd_title){
     d->packs_left=-1;      // for Navi stuff
     d->angle_seek=0;
     /* XXX dvd_last_chapter is in the range 1..nr_of_ptts */
-    if ( dvd_last_chapter > 0 && dvd_last_chapter < tt_srpt->title[ttn-1].nr_of_ptts ) {
+    if ( dvd_last_chapter > 0 && dvd_last_chapter < tt_srpt->title[dvd_title].nr_of_ptts ) {
 	pgn=vts_file->vts_ptt_srpt->title[ttn-1].ptt[dvd_last_chapter].pgn;
 	d->last_cell=d->cur_pgc->program_map[pgn-1] - 1;
     }
