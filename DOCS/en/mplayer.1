@@ -401,16 +401,20 @@ Use \-audio\-demuxer 17 to force .mp3 detection.
 Play audio from an external file (WAV, MP3 or Ogg Vorbis) while viewing a
 movie.
 .TP
+.B -audiofile-cache <kBytes>
+Enables caching for the stream used by -audiofile, using the specified
+amount of memory.
+.TP
 .B \-bandwidth <value>
 Specify the maximum bandwidth for network streaming (for servers that are
 able to send content in different bitrates).
-Usefull if you want to watch live streamed media behind a slow connection.
+Useful if you want to watch live streamed media behind a slow connection.
 .TP
 .B \-cdrom\-device <path\ to\ device>
 Override default CDROM drive name /dev/\:cdrom.
 .TP
-.B \-cache <kbytes>
-This option specifies how much memory (in kbytes) to use when precaching a
+.B \-cache <kBytes>
+This option specifies how much memory (in kBytes) to use when precaching a
 file/\:URL.
 Especially useful on slow media (default is \-nocache).
 .TP
@@ -655,7 +659,7 @@ set colorspace
 .IPs format=<value>
 colorspace (fourcc) in hex
 .IPs size=<value>
-frame size in bytes
+frame size in Bytes
 .RE
 .PD 1
 .
@@ -1137,7 +1141,7 @@ the exceeding channels are truncated.
 .IPs format[=bps,f]
 Select the format f and bits per sample bps used for output from the
 filter layer.
-The option bps is an integer and denotes bytes per sample.
+The option bps is an integer and denotes Bytes per sample.
 The format f is a string containing a concatenated mix of:
 .br
 alaw, mulaw or imaadpcm
@@ -2371,19 +2375,19 @@ FIFO commands are:
 .RSss
 RGBA32 width height xpos ypos alpha clear
 .br
-followed by width*height*4 bytes of raw RGBA32 data.
+followed by width*height*4 Bytes of raw RGBA32 data.
 
 ABGR32 width height xpos ypos alpha clear
 .br
-followed by width*height*4 bytes of raw ABGR32 data.
+followed by width*height*4 Bytes of raw ABGR32 data.
 
 RGB24 width height xpos ypos alpha clear
 .br
-followed by width*height*3 bytes of raw RGB32 data.
+followed by width*height*3 Bytes of raw RGB32 data.
 
 BGR24 width height xpos ypos alpha clear
 .br
-followed by width*height*3 bytes of raw BGR32 data.
+followed by width*height*3 Bytes of raw BGR32 data.
 
 ALPHA width height xpos ypos alpha
 .br
