@@ -103,6 +103,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-loop\ <num> ]
 .RB [ \-mixer\ <eszköz> ]
 .RB [ \-tv\ <alopciók> ]
+.RB [ \-noaudio ]
 .RB [ \-dapsync ]
 .RB [ \-softsleep ]
 .RB [ \-rootwin ]
@@ -346,6 +347,9 @@ Már nem használt opció, használd helyette a Szoftveres audio mixer plugint
 .B \-tv\ <alopciók>
 Ez az opció TV-nézõ üzemmódba kapcsolja az MPlayer-t. A további dokumentáció
 a documentation.html file 2.5-ös fejezetében található.
+.TP
+.B \-noaudio
+nem kapcsolja be a TV tuner audio kimenetét (nem lesz hang, na)
 .TP
 .B \-rootwin
 új ablak megnyitása helyett a desktop hátterében (root window) történik a
