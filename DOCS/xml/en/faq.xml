@@ -707,7 +707,8 @@ I got this playing MPEG files: Can't find codec for video format 0x10000001!
 You have an old version of <filename>codecs.conf</filename> in
 <filename class="directory">~/.mplayer/</filename>,
 <filename class="directory">/etc/</filename>,
-<filename class="directory">/usr/local/etc/</filename> or similar. Remove it.
+<filename class="directory">/usr/local/etc/</filename> or similar. Remove it,
+it's not needed anymore.
 <emphasis role="bold">OR</emphasis> you have the <option>vc=</option> option or
 something similar in your config file(s).
 </para></answer>
@@ -851,6 +852,17 @@ Try <option>-nocache</option>.
 </para></answer>
 </qandaentry>
 </qandadiv>
+
+<qandaentry>
+<question><para>
+How can i play MPEG Layer 2 (mp2) audio files ?
+</para></question>
+<answer><para>
+You have to use <option>-rawaudio on:format=0x50</option>
+</para></answer>
+</qandaentry>
+</qandadiv>
+
 
 <qandadiv id="faq-driver">
 <title>Video/audio driver problems (vo/ao)</title>
