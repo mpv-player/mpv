@@ -165,6 +165,10 @@ static char help_text[]=
 #define MSGTR_ConnToServer "Connected to server: %s\n"
 #define MSGTR_FileNotFound "File not found: '%s'\n"
 
+#define MSGTR_SMBInitError "Cannot init the libsmbclient library: %d\n"
+#define MSGTR_SMBFileNotFound "Could not open from lan: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer was not compiled with SMB reading support\n"
+
 #define MSGTR_CantOpenDVD "Couldn't open DVD device: %s\n"
 #define MSGTR_DVDwait "Reading disc structure, please wait...\n"
 #define MSGTR_DVDnumTitles "There are %d titles on this DVD.\n"

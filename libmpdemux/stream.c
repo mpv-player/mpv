@@ -44,12 +44,21 @@ void seek_cdda(stream_t* s);
 void close_cdda(stream_t* s);
 #endif
 
+#ifdef LIBSMBCLIENT
+#include "libsmbclient.h"
+#endif
+
 //=================== STREAMER =========================
 
 int stream_fill_buffer(stream_t *s){
   int len;
   if(s->eof){ s->buf_pos=s->buf_len=0; return 0; }
   switch(s->type){
+#ifdef LIBSMBCLIENT
+  case STREAMTYPE_SMB:
+    len=smbc_read(s->fd,s->buffer,STREAM_BUFFER_SIZE);
+    break;
+#endif    
   case STREAMTYPE_FILE:
   case STREAMTYPE_STREAM:
   case STREAMTYPE_PLAYLIST:
@@ -110,6 +119,7 @@ off_t newpos=0;
 
   switch(s->type){
   case STREAMTYPE_FILE:
+  case STREAMTYPE_SMB:
   case STREAMTYPE_STREAM:
 #ifdef _LARGEFILE_SOURCE
     newpos=pos&(~((long long)STREAM_BUFFER_SIZE-1));break;
@@ -140,6 +150,12 @@ if(newpos==0 || newpos!=s->pos){
     s->pos=newpos; // real seek
     if(lseek(s->fd,s->pos,SEEK_SET)<0) s->eof=1;
     break;
+#ifdef LIBSMBCLIENT
+  case STREAMTYPE_SMB:
+    s->pos=newpos; // real seek
+    if(smbc_lseek(s->fd,s->pos,SEEK_SET)<0) s->eof=1;
+    break;
+#endif
 #ifdef HAVE_VCD
   case STREAMTYPE_VCD:
     s->pos=newpos; // real seek
@@ -267,6 +283,11 @@ void free_stream(stream_t *s){
   }
   if(s->fd>0) close(s->fd);
   switch(s->type) {
+#ifdef LIBSMBCLIENT
+  case STREAMTYPE_SMB:
+    smbc_close(s->fd);
+    break;    
+#endif
 #ifdef HAVE_CDDA
   case STREAMTYPE_CDDA:
     close_cdda(s);
