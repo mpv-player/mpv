@@ -45,4 +45,4 @@ nodes:
 vid:
 	make install
 	rmmod radeon_vid
-	modprobe radeon_vid
+	modprobe radeon_vid mtrr=1

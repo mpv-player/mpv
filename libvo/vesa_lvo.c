@@ -29,7 +29,7 @@
 #include "video_out.h"
 
 #define WIDTH_ALIGN 32 /* should be 16 for rage:422 and 32 for rage:420 */
-#define NUM_FRAMES 2
+#define NUM_FRAMES 10
 #define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
 
 static uint8_t *frames[NUM_FRAMES];
@@ -211,9 +211,12 @@ uint32_t vlvo_draw_frame(uint8_t *image[])
 void     vlvo_flip_page(void)
 {
   if(verbose > 1) printf("vesa_lvo: vlvo_flip_page() was called\n");
+  if(vo_doublebuffering)
+  {
 	ioctl(lvo_handler,MGA_VID_FSEL,&next_frame);
 	next_frame=(next_frame+1)%mga_vid_config.num_frames;
 	lvo_mem=frames[next_frame];
+  }	
 }
 
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)

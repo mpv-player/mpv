@@ -14,7 +14,7 @@
  * Also here was used code from CVS of GATOS project and X11 trees.
  */
 
-#define RADEON_VID_VERSION "1.0.1"
+#define RADEON_VID_VERSION "1.0.2"
 
 /*
   It's entirely possible this major conflicts with something else
@@ -311,6 +311,10 @@ RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n
     OUTREG(OV0_AUTO_FLIP_CNTL,OV0_AUTO_FLIP_CNTL_SOFT_BUF_ODD);
 
     OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
+
+    OUTREG(OV0_COLOUR_CNTL, (besr.brightness & 0x7f) |
+			    (besr.saturation << 8) |
+			    (besr.saturation << 16));
    
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
@@ -615,11 +619,13 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 				return -EFAULT;
 			}
 
-			if(radeon_config.num_frames<1 || radeon_config.num_frames>4){
+			if(radeon_config.num_frames<1){
 				printk(RVID_MSG"illegal num_frames: %d\n",radeon_config.num_frames);
 				return -EFAULT;
 			}
-
+			if(radeon_config.num_frames==1) besr.double_buff=0;
+			if(!besr.double_buff) radeon_config.num_frames=1;
+			else                  radeon_config.num_frames=2;
 			radeon_config.card_type = 0;
 			radeon_config.ram_size = radeon_ram_size;
 			radeon_overlay_off = radeon_ram_size*0x100000 - radeon_config.frame_size*radeon_config.num_frames;
