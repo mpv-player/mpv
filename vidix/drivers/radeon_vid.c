@@ -1163,6 +1163,7 @@ int vixInit( void )
     case 120:
     case 150:
     case 250:
+    case 280:
       is_shift_required=1;
       break;
     default:
