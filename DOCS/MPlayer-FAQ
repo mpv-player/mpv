@@ -193,11 +193,15 @@ A: You have to edit SVGAlib's Makefile.cfg and comment "BACKGROUND = y" out.
 Q: LIRC doesn't work, because ...
 A: Are you sure you use "mplayer_lirc" instead of "mplayer" ?
 
-Q: MPlayer exits with error [anything] when using l3codeca.acm .
+Q: MPlayer exits with something error when using l3codeca.acm
 A: Check 'ldd /usr/local/bin/mplayer' output. If it contains
         libc.so.6 => /lib/libc.so.6 (0x4???????)
    where "?" is any number then it's ok, the error is not here. If it is:
-	libc.so.6 => /lib/libc.so.6 (0x001?????)
-   Then contact us, this is a (yet unknown) bug with some systems/kernels/
-   C compilers. Send us a standard bugreport as in DOCS/BUGREPORT, and send us
-   all your kernel patches' list.
+	libc.so.6 => /lib/libc.so.6 (0x00??????)
+   then there is problem with your kernel/libc. Maybe you are using some
+   security patches (for example Solar Designer's OpenWall patch) which
+   forces loading libraries to very low addresses.
+   Because l3codeca.acm is a non-relocatable DLL, it must be loaded to
+   0x00400000, we can't change this. You should use non-patched kernel,
+   or use MPlayer's -afm 1 option to disable using l3codeca.acm.
+   
