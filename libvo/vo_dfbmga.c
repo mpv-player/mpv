@@ -224,6 +224,8 @@ get_layer_by_name( DFBDisplayLayerID id,
      return DFENUM_OK;
 }
 
+static void uninit( void );
+
 static uint32_t
 preinit( const char *arg )
 {
@@ -425,11 +427,13 @@ preinit( const char *arg )
           if (l.res != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR, "vo_dfbmga: Can't get primary layer - %s\n",
                        DirectFBErrorString( l.res ) );
+               uninit();
                return -1;
           }
           if ((res = primary->SetCooperativeLevel( primary, DLSCL_EXCLUSIVE )) != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR, "Can't get exclusive access to primary layer - %s\n",
                        DirectFBErrorString( res ) );
+               uninit();
                return -1;
           }
           use_input = 1;
@@ -451,11 +455,13 @@ preinit( const char *arg )
           if (l.res != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR, "Can't get BES layer - %s\n",
                        DirectFBErrorString( l.res ) );
+               uninit();
                return -1;
           }
           if ((res = bes->SetCooperativeLevel( bes, DLSCL_EXCLUSIVE )) != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR, "Can't get exclusive access to BES - %s\n",
                        DirectFBErrorString( res ) );
+               uninit();
                return -1;
           }
           dlc.flags = DLCONF_PIXELFORMAT;
@@ -481,11 +487,13 @@ preinit( const char *arg )
           if (l.res != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR, "Can't get CRTC2 layer - %s\n",
                        DirectFBErrorString( l.res ) );
+               uninit();
                return -1;
           }
           if ((res = crtc2->SetCooperativeLevel( crtc2, DLSCL_EXCLUSIVE )) != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR, "Can't get exclusive access to CRTC2 - %s\n",
                        DirectFBErrorString( res ) );
+               uninit();
                return -1;
           }
      }
@@ -495,10 +503,16 @@ preinit( const char *arg )
                mp_msg( MSGT_VO, MSGL_ERR,
                        "vo_dfbmga: Can't get keyboard - %s\n",
                        DirectFBErrorString( res ) );
+               uninit();
                return -1;
           }
-          keyboard->CreateEventBuffer( keyboard, &buffer );
-          buffer->Reset( buffer );
+          if ((res = keyboard->CreateEventBuffer( keyboard, &buffer )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Can't create event buffer - %s\n",
+                       DirectFBErrorString( res ) );
+               uninit();
+               return -1;
+          }
      }
 
      return 0;
