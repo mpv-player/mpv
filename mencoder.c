@@ -842,7 +842,11 @@ if (seek_to_sec) {
         sscanf(seek_to_sec, "%f", &d);
 
     demux_seek(demuxer, d, 1);
-    if(demuxer2) demux_seek(demuxer2, d, 1);
+//  there is 2 way to handle the -ss option in 3-pass mode:
+// > 1. do the first pass for the whole file, and use -ss for 2nd/3rd pases only
+// > 2. do all the 3 passes with the same -ss value
+//  this line enables behaviour 1. (and kills 2. at the same time):
+//    if(demuxer2) demux_seek(demuxer2, d, 1);
 }
 
 if(tv_param_on == 1) 
