@@ -1614,16 +1614,16 @@ Anyone has closer info?</P>
 /usr/ports/devel/gmake), native BSD make will not work, and a recent
 binutils (including objcopy).</P>
 
-<P> Presently you must give the option '--disable-mpdvdkit' to 
-configure, else it won't compile. </P>
+<P>Presently you must give the option '<CODE>--disable-mpdvdkit</CODE>' to 
+configure, else it won't compile.</P>
 
-<P>Due to limitations in different versions of gas (relocation vs mmx)
-, you'll need to compile in two steps: First make sure that the
-non-native as is first in PATH and do a 'gmake -k', then make sure
-that the native version i used an do 'gmake'.</P>
+<P>Due to limitations in different versions of gas (relocation vs mmx),
+you'll need to compile in two steps: First make sure that the
+non-native as is first in PATH and do a '<CODE>gmake -k</CODE>', then make sure
+that the native version i used an do '<CODE>gmake</CODE>'.</P>
 
-<P>To w32-dll's with <B>MPlayer</B> you will need to re-compile the
-kernel with "option USER_LDT".</P>
+<P>To use Win32 DLLs with <B>MPlayer</B> you will need to re-compile the
+kernel with "<CODE>option USER_LDT</CODE>".</P>
 
 <P>If <B>MPlayer</B> complains about not finding '/dev/cdrom' or
 '/dev/dvd' make a symbolic link, eg <CODE>ln -s
