@@ -1,6 +1,7 @@
 //  QuickTime MOV file parser by A'rpi
 //  based on TOOLS/movinfo.c by me & Al3x
 //  compressed header support from moov.c of the openquicktime lib.
+//  References: http://openquicktime.sf.net/, http://www.heroinewarrior.com/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +20,8 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+
+#include "bswap.h"
 
 #ifdef HAVE_ZLIB
 #include <zlib.h>
@@ -298,6 +301,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    trak->durmap[i].num=stream_read_dword(demuxer->stream);
 		    trak->durmap[i].dur=stream_read_dword(demuxer->stream);
 		    pts+=trak->durmap[i].num*trak->durmap[i].dur;
+		    
+		    if(i==0)
+		    {
+		    sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
+		    if (!sh->fps)
+			sh->fps = trak->timescale/trak->durmap[i].dur;
+		    /* initial fps */
+		    }
 		}
 		if(trak->length!=pts) printf("Warning! pts=%d  length=%d\n",pts,trak->length);
 		break;
@@ -401,7 +412,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    case MOV_TRAK_VIDEO: {
 		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
 		sh->format=trak->fourcc;
-		sh->fps=trak->timescale;
+		if(!sh->fps) sh->fps=trak->timescale;
 		sh->frametime=1.0f/sh->fps;
 		sh->disp_w=trak->tkdata[77]|(trak->tkdata[76]<<8);
 		sh->disp_h=trak->tkdata[81]|(trak->tkdata[80]<<8);
@@ -444,7 +455,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	} else
 	if(id==MOV_FOURCC('d','c','o','m')){
 //	    int temp=stream_read_dword(demuxer->stream);
-	    unsigned int len=stream_read_dword(demuxer->stream);
+	    unsigned int len=bswap_32(stream_read_dword(demuxer->stream));
 	    printf("Compressed header uses %.4s algo!\n",&len);
 	} else
 	if(id==MOV_FOURCC('c','m','v','d')){
