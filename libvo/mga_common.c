@@ -1,5 +1,5 @@
 
-//#include "fastmemcpy.h"
+#include "fastmemcpy.h"
 
 // mga_vid drawing functions
 
