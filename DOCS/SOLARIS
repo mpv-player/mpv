@@ -1,38 +1,60 @@
 Notes for Solaris users
 =======================
 
-1. It *only* works on Solaris x86.  It can't work on SPARC systems due to
-   the use of win32 codecs.
+1. AVI file playback works best on Solaris x86, because you have the
+   option to use the win32 codecs on the x86 platform.  On Solaris SPARC,
+   you'll find quite a few AVI files with non working video and/or
+   audio playback, because the video/audio codecs using the win32 DLLs
+   are not available.
 
 
 2. To build the package you will need GNU make (gmake, /opt/sfw/gmake), 
-   native Solaris make will not work.  
+   native Solaris make will not work.
 
    Typical error you get when building with solaris' make instead of GNU
    make:
 
    % /usr/ccs/bin/make
-   make: Fatal error in reader: Makefile, line 122: Unexpected end of line seen
+   make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
 
 
-3. You also need the GNU assembler;  and the GNU C compiler, configured to use
-   the GNU assembler.  The mplayer code makes heavy use of MMX, SSE and 3DNOW!
-   instructions that cannot be compiled using Sun's assembler /usr/ccs/bin/as.
+3. On Solaris SPARC, you need the GNU C/C++ Compiler; it does not matter
+   if GNU C/C++ compiler is configured with or without the GNU assembler.
 
-   Use the "--as=/whereever/you/have/installed/gnu-as" option to tell
-   configure where it can find GNU as on your system.
+   On Solaris x86, you need the GNU assembler and the GNU C/C++
+   compiler, configured to use the GNU assembler!  The mplayer code on
+   the x86 platform makes heavy use of MMX, SSE and 3DNOW!
+   instructions that cannot be compiled using Sun's assembler
+   /usr/ccs/bin/as.
+
+
+   The configure script tries to find out, which assembler program is
+   used by your "gcc" command (in case the autodetection fails, use
+   the "--as=/whereever/you/have/installed/gnu-as" option to tell the
+   configure script where it can find GNU "as" on your system).
+
+   Error message from configure on a Solaris x86 system using GCC
+   without GNU assembler:
+
+     % configure
+     ...
+     Checking assembler (/usr/ccs/bin/as) ... , failed
+     Please upgrade(downgrade) binutils to 2.10.1...
+
+   (Solution: Install and use a gcc configured with "--with-as=gas")
+
 
    Typical error you get when building with a GNU C compiler that does
    not use GNU as:
 
-   % gmake
-   ...
-   gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math 
+     % gmake
+     ...
+     gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math 
 	   -fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
-   Assembler: mplayer.c
-   "<stdin>", line 3567 : Illegal mnemonic
-   "<stdin>", line 3567 : Syntax error
-   ... more "Illegal mnemonic" and "Syntax error" errors ...
+     Assembler: mplayer.c
+     "<stdin>", line 3567 : Illegal mnemonic
+     "<stdin>", line 3567 : Syntax error
+     ... more "Illegal mnemonic" and "Syntax error" errors ...
 
 
 4. For DVD support you must have the patched libcss installed. Patch:
@@ -48,9 +70,9 @@ Notes for Solaris users
      address modulo 4GB is accessed.
      (http://groups.yahoo.com/group/solarisonintel/message/22516)
 
-   - The similar bug is present in the hsfs(7FS) filesystem code (aka ISO9660),
-     hsfs currently does not support partitions/disks >4GB,  all data is
-     accessed modulo 4GB
+   - The similar bug is present in the hsfs(7FS) filesystem code (aka
+     ISO9660), hsfs currently does not support partitions/disks >4GB,
+     all data is accessed modulo 4GB
      (http://groups.yahoo.com/group/solarisonintel/message/22592)
 
 --
