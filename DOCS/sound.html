@@ -211,5 +211,28 @@ sound.</p>
   and is mentioned here for the sake of completeness only. Do not use this
   plugin unless you are a developer.</P>
 
+<P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Software volume control</A></B></P>
+
+<P>This plugin is a software replacement for the volume control, and
+  can be used in machines with broken mixer device. It can also be
+  used if one wants to change the output volume from <B>MPlayer</B>
+  without changing the PCM volume setting in the mixer. It has one
+  switch <CODE>volume</CODE> that is used for setting the initial
+  sound level. The initial sound level can be set to values between 0
+  and 255 and defaults to 255. Use this plugin with caution since it
+  can reduce the signal to noise ratio of the sound. In most cases it
+  is best to set the level for the PCM sound to max, leave this plugin
+  out and control the output level to your speakers with the mixers
+  master volume control. If there is an external amplifier connected
+  to the computer (this is almost always the case), the noise level
+  can be minimized by adjusting the master level and the volume knob
+  on the amplifier until the hissing noise in the background is gone.
+</P>
+
+<P>Usage :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=volume:volume=&lt;0-255&gt;</CODE>
+</P>
+
 </BODY>
 </HTML>

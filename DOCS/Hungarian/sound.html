@@ -206,6 +206,27 @@ hangkártyára+meghajtóra van szükség.</P>
 
 <P>Példa plugin, csak developereknek. Lásd angol dox.</P>
 
+<P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Szoftveres hangerõszabályzás</A></B></P>
+
+<P>Ez a plugin szoftveres hangerõállításra képes, ezáltal olyan gépeken
+  is használható, ahol a hardveres mixer eszköz nem mûködik. Használható
+  továbbá olyan esetekben, amikor a PCM hangerõ megváltoztatása nélkül
+  akarod a hangerõt megváltoztatni. Egyetlen opciója van, a <CODE>volume</CODE>
+  ami 0 és 255 közötti értékeket vehet fel (az alapértelmezett érték a 255).
+  Óvatosan használd ezt a plugint. A legtöbb esetben sokkal célravezetõbb a
+  hardveres mixeren a PCM csatorna maximálisra állítása, ezen plugin
+  kihagyása, és a hangerõ "mester" csatornával történõ állítása. Ha külsõ
+  erõsítõ is rá van kapcsolva a hangkártyádra, a zajszint minimálisra
+  csökkentése érdekében érdemes a "mester" csatornával és az erõsítõ
+  hangerõszabályzójával addig szórakozni amig a háttérben sziszegõ zaj
+  elenyészik.
+</P>
+
+<P>Használat :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=volume:volume=&lt;0-255&gt;</CODE> 
+</P>
+
 </BODY>
 
 </HTML>
