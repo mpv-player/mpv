@@ -188,13 +188,65 @@ YUY2 Ausgabe, im Gegenteil zum Win32-Codec, der mit RGB unterstützt.</P>
 
 <P><B><A NAME=2.2.2>2.2.2. Audiocodecs</A></B></P>
 
-	  
-<P><B><A NAME=2.1.2.3>2.1.2.3.  Hardware AC3 decoding</A></B></P>
+<P>Die wichtigsten Audiocodecs als erstes:<BR>
+<UL>
+	<LI>MPEG layer 2 und layer 3 (MP3) Audio (<B>eingebauter</B> Code, mit MMX/SSE/3DNow! Optimierungen)</LI>
+	<LI>MPEG layer 1 Audio (<B>eingebauter</B> Code, mit libavcodec)</LI>
+	<LI>AC3 Dolby Audio (<B>eingebauter</B> Code, mit SSE/3DNow! Optimierungen)</LI>
+	<LI>Ogg Vorbis Audiocodec (<B>eingebaute</B> lib)</LI>
+	<LI>Voxware Audio (Verwendung der DirectShow DLL)</LI>
+	<LI>alaw, MSGSM, PCM und andere einfache, alte Audioformate</LI>
+</UL></P>
+
+<P><B><A NAME=2.2.2.1>2.2.2.1. Softwaremäßige AC3 Dekodierung</A></B></P>
+
+<P>Dieser ist der standardgemäße Dekoder für Dateien mit AC3-Audio.</P>
+
+<P>Der AC3 Dekoder kann die Ausgabe für 2, 4 oder 6 Lautsprecher erzeugen.
+Wenn es für 6 Lautsprecher konfigieriert ist unterstützt dieser Dekoder
+unterschiedliche Ausgabe für alle AC3-Kanäl an den Soundkartentreiber. Dabei
+erlaubt es die vollständige "surround Sound" Erfahrung ohne einen externen
+AC3 Dekoder und ohne Verwendung des hwac3-Codes.</P>
+
+<P>Verwende die <CODE>-channels</CODE> Option um die Anzahl der Aufgabekanäle zu wählen.
+Verwende <CODE>-channels 2</CODE> für Downmix auf Stereo. Für Downmix auf 4 Kanäle (links vorne,
+rechts vorne, links Surround und rechts Surround) verwende <CODE>-channels 4</CODE>.
+In diesem Fall werden alle Center-Känale gleich den Front-Kanälen sein. "-channels 6" gibt alle
+AC3-Kanäle wie Aufgezeichnet aus - in der Reihenfolge links, rechts, links Surround, rechts Surround,
+Centre und LFE.</P>
+
+<P>Die Standardanzahl der Ausgabekanäle ist 2.</P>
+
+<P>Um mehr als 2 Kanäle zu verwenden musst du OSS verwenden und du musst eine Soundkarte
+besitzen, die die Anzahl der Ausgabekanäle via SNDCTL_DSP_CHANNELS ioctl unterstützt. Eine Treiberversion
+von August 2001 oder neuer vom emu10k1 Treiber (verwendet bei SB Live Karten) sollte das unterstützen.</P>
+
+<P>Ausgabe mit mehr als 2 Kanälen sollte als expermentel betrachtet werden.</P>
+
+
+<P><B><A NAME=2.2.2.2>2.2.2.2. Hardwaremäßige AC3 Dekodierung</A></B></P>
 
 <P>Du wird eine AC3-fähige Soundkarte brauchen mit Digital-Out (SP/DIF). Der
 Treiber muss das AFMT_AC3 Format unterstützen (wie die SB Live!).
 Verbinde deinen AC3 Decoder am SP/DIF Ausgang und verwende die '-ac hwac3'
 Option. Es funktioniert möglichweise oder auch nicht (experimentel).</P>
+
+<P><B><A NAME=2.2.2.3>2.2.2.3. libmad Unterstützung</A></B></P>
+
+<P><A HREF="http://mad.sourceforge.net">libmad</A> ist eine multiplatform Bibliothek für
+die Dekodierung von MPEG-Audio. Wenn du nicht weißt warum es so gut ist wirdst du es möglicherweise
+auch nicht brauchen.</P>
+
+<P>Um die Unterstützung zu aktivieren, verwende configure mit der Option <CODE>--enable-mad</CODE>.</P>
+
+
+<P><B><A NAME=2.2.2.4>2.2.2.4. VIVO Audio</A></B></P>
+
+<P>Der verwendete Audiocodec in VIVO-Dateien hängt davon ab, ob es eine VIVO/1.0 oder VIVO/2.0 Datei ist.
+VIVO/1.0 Dateien verwenden <B>g.723</B> Audio und VIVO/2.0 Dateien <B>Vivo Siren</B>. Zur Zeit werden
+keine der beider unterstützt, aber du kannst dir den g.723 Codec von <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">hier</A>
+downloaden und in in das <CODE>/usr/lib/win32</CODE> Verzeichnis (oder wo deine Win32-Codecs sich befinden)
+kopieren.</P>
 
 
 <P><B><A NAME=2.1.4>2.1.4. Codec Einbindungs-Howto</A></B></P>
