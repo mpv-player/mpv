@@ -245,11 +245,14 @@ int parse_config_file(struct config *conf, char *conffile)
 #ifdef DEBUG
 	assert(conffile != NULL);
 #endif
-	if (++recursion_depth > MAX_RECURSION_DEPTH) {
-		printf("too deep 'include'. check your configfiles\n");
-		--recursion_depth;
-		return -1;
-	}		
+	if (++recursion_depth > 1)
+		printf("Reading config file: %s", conffile);
+
+	if (recursion_depth > MAX_RECURSION_DEPTH) {
+		printf(": too deep 'include'. check your configfiles\n");
+		ret = -1;
+		goto out;
+	}
 
 	if (init_conf(conf, CONFIG_FILE) == -1) {
 		ret = -1;
@@ -263,10 +266,14 @@ int parse_config_file(struct config *conf, char *conffile)
 	}
 
 	if ((fp = fopen(conffile, "r")) == NULL) {
+		if (recursion_depth > 1)
+			printf(": %s\n", strerror(errno));
 		free(line);
 		ret = 0;
 		goto out;
 	}
+	if (recursion_depth > 1)
+		printf("\n");
 
 	while (fgets(line, MAX_LINE_LEN, fp)) {
 		line_num++;
@@ -409,6 +416,9 @@ int parse_command_line(struct config *conf, int argc, char **argv, char **envp, 
 	if (init_conf(conf, COMMAND_LINE) == -1)
 		return -1;
 
+	/* in order to work recursion detection properly in parse_config_file */
+	++recursion_depth;
+
 	for (i = 1; i < argc; i++) {
 		opt = argv[i];
 		if (*opt != '-') {
@@ -443,9 +453,11 @@ filename:
 		default:
 			i += tmp;
 		}
-	}	
+	}
+	--recursion_depth;
 	return found_filename;
 err_out:
+	--recursion_depth;
 	printf("command line: %s\n", argv[i]);
 	return -1;
 }
