@@ -12,7 +12,7 @@ configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
 	$(checkdir)
-	./configure --prefix=/usr
+	./configure --prefix=/usr --enable-gui --enable-streaming
 
 	touch configure-stamp
 
@@ -24,6 +24,7 @@ build-stamp:
 	#$(MAKE)
 	#/usr/bin/docbook-to-man debian/etherconf.sgml > etherconf.1
 	${MAKE} mplayer
+	${MAKE} mencoder
 
 	touch build-stamp
 
@@ -54,6 +55,8 @@ install: build
 #	$(MAKE) install prefix=$(CURDIR)/debian/tmp/usr
 #	install -d $(CURDIR)/debian/tmp/usr/bin
 	install -m 755 -s mplayer $(CURDIR)/debian/`dh_listpackages`/usr/bin/mplayer
+	dh_link usr/bin/mplayer usr/bin/gmplayer
+
 #Do we really need this?:	
 #	       install -o root -g root -m 4755 fibmap_mplayer usr/bin/fibmap_mplayer
 	       
