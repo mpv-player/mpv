@@ -142,6 +142,7 @@ void vidix_term( void )
   if(verbose > 1) printf("vosub_vidix: vidix_term() was called\n");
 	vidix_stop();
 	vdlClose(vidix_handler);
+  ((vo_functions_t *)vo_server)->control=server_control;
 }
 
 static uint32_t vidix_draw_slice_swYV12(uint8_t *image[], int stride[], int w,int h,int x,int y)
