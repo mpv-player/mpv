@@ -1696,6 +1696,18 @@ int mov_read_header(demuxer_t* demuxer){
     return 1;
 }
 
+/**
+ * \brief return the mov track that belongs to a demuxer stream
+ * \param ds the demuxer stream, may be NULL
+ * \return the mov track info structure belonging to the stream,
+ *          NULL if not found
+ */
+static mov_track_t *stream_track(mov_priv_t *priv, demux_stream_t *ds) {
+  if (ds && (ds->id >= 0) && (ds->id < priv->track_db))
+    return priv->tracks[ds->id];
+  return NULL;
+}
+
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
@@ -1706,8 +1718,8 @@ int demux_mov_fill_buffer(demuxer_t *demuxer,demux_stream_t* ds){
     int x;
     off_t pos;
     
-    if(ds->id<0 || ds->id>=priv->track_db) return 0;
-    trak=priv->tracks[ds->id];
+    trak = stream_track(priv, ds);
+    if (!trak) return 0;
 
 if(trak->samplesize){
     // read chunk:
@@ -1835,12 +1847,13 @@ return pts;
 void demux_seek_mov(demuxer_t *demuxer,float pts,int flags){
     mov_priv_t* priv=demuxer->priv;
     demux_stream_t* ds;
+    mov_track_t* trak;
 
 //    printf("MOV seek called  %5.3f  flag=%d  \n",pts,flags);
     
     ds=demuxer->video;
-    if(ds && ds->id>=0 && ds->id<priv->track_db){
-	mov_track_t* trak=priv->tracks[ds->id];
+    trak = stream_track(priv, ds);
+    if (trak) {
 	//if(flags&2) pts*=(float)trak->length/(float)trak->timescale;
 	//if(!(flags&1)) pts+=ds->pts;
 	pts=ds->pts=mov_seek_track(trak,pts,flags);
@@ -1848,12 +1861,43 @@ void demux_seek_mov(demuxer_t *demuxer,float pts,int flags){
     }
 
     ds=demuxer->audio;
-    if(ds && ds->id>=0 && ds->id<priv->track_db){
-	mov_track_t* trak=priv->tracks[ds->id];
+    trak = stream_track(priv, ds);
+    if (trak) {
 	//if(flags&2) pts*=(float)trak->length/(float)trak->timescale;
 	//if(!(flags&1)) pts+=ds->pts;
 	ds->pts=mov_seek_track(trak,pts,flags);
     }
 
+}
+
+int demux_mov_control(demuxer_t *demuxer, int cmd, void *arg){
+  mov_track_t* track;
+
+  // try the video track
+  track = stream_track(demuxer->priv, demuxer->video);
+  if (!track || !track->length)
+    // otherwise try to get the info from the audio track
+    track = stream_track(demuxer->priv, demuxer->audio);
+
+  if (!track || !track->length)
+    return DEMUXER_CTRL_DONTKNOW;
+
+  switch(cmd) {
+    case DEMUXER_CTRL_GET_TIME_LENGTH:
+      if (!track->timescale)
+        return DEMUXER_CTRL_DONTKNOW;
+      *((unsigned long *)arg) = track->length / track->timescale;
+      return DEMUXER_CTRL_OK;
+
+    case DEMUXER_CTRL_GET_PERCENT_POS:
+      {
+        off_t pos = track->pos;
+        if (track->durmap_size >= 1)
+          pos *= track->durmap[0].dur;
+        *((int *)arg) = (int)(100 * pos / track->length);
+        return DEMUXER_CTRL_OK;
+      }
+  }
+  return DEMUXER_CTRL_NOTIMPL;
 }
 

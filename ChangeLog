@@ -78,6 +78,7 @@ MPlayer (1.0)
     * improved seeking precision in MPEG files
     * better subtitle language code handling for MKV files
     * support DVHS files and H.264 over MPEG-TS
+    * display length and position (in the seekbar) for mov files
 
     Streaming:
     * -cache-min and -cache-prefill options added
