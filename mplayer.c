@@ -1460,7 +1460,7 @@ switch(has_video){
       if(opendivx_src[0]){
         video_out->draw_slice(opendivx_src,opendivx_stride,
                             movie_size_x,movie_size_y,0,0);
-        video_out->flip_page();
+//        video_out->flip_page();
         opendivx_src[0]=NULL;
       }
 
@@ -1495,7 +1495,7 @@ switch(has_video){
 
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
         video_out->draw_frame((uint8_t **)&avi_header.our_out_buffer);
-        video_out->flip_page();
+//        video_out->flip_page();
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
 
       ++num_frames;
@@ -1663,6 +1663,10 @@ switch(has_video){
   }
 } // switch
 //------------------------ frame decoded. --------------------
+
+    current_module="flip_page";
+
+    video_out->flip_page();
 
     current_module=NULL;
 
