@@ -12,7 +12,7 @@ SRCS += lrmi.c vbelib.c
 endif
 endif
 
-CFLAGS  = $(OPTFLAGS) -I. -I..
+CFLAGS  = $(OPTFLAGS) -I. -I.. $(EXTRA_INC)
 # -I/usr/X11R6/include/
 
 .SUFFIXES: .c .o
