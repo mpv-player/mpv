@@ -10,6 +10,9 @@ extern char *monitor_hfreq_str;
 extern char *monitor_vfreq_str;
 extern char *monitor_dotclock_str;
 #endif
+#ifdef HAVE_PNG
+extern int z_compression;
+#endif
 
 struct config conf[]={
 	/* name, pointer, type, flags, min, max */
@@ -68,6 +71,9 @@ struct config conf[]={
             CONF_TYPE_PRINT, 0, 0, 0},
 	{"pp", &divx_quality, CONF_TYPE_INT, CONF_RANGE, 0, 63},
 	{"br", &encode_bitrate, CONF_TYPE_INT, CONF_RANGE, 10000, 10000000},
+#ifdef HAVE_PNG
+	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 9},
+#endif	
 
 	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
 	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
