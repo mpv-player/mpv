@@ -32,6 +32,7 @@
 #include "bswap.h"
 
 #include "../postproc/swscale.h"
+#include "../postproc/rgb2rgb.h"
 
 LIBVO_EXTERN(vesa)
 extern int verbose;
@@ -73,7 +74,7 @@ static int vesa_zoom=0; /* software scaling */
 static unsigned int scale_xinc=0;
 static unsigned int scale_yinc=0;
 
-static uint32_t image_width, image_height; /* source image dimension */
+static uint32_t image_bpp,image_width, image_height; /* source image dimension */
 static int32_t x_offset,y_offset; /* to center image on screen */
 static unsigned init_mode; /* mode before run of mplayer */
 static void *init_state = NULL; /* state before run of mplayer */
@@ -83,6 +84,7 @@ static unsigned video_mode; /* selected video mode for playback */
 static struct VesaModeInfoBlock video_mode_info;
 static int flip_trigger = 0;
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
+static void (*rgb2rgb_fnc)(uint8_t *src,uint8_t *dst,uint32_t src_size);
 
 #define MOVIE_MODE (MODE_ATTR_COLOR | MODE_ATTR_GRAPHICS)
 #define FRAME_MODE (MODE_WIN_RELOCATABLE | MODE_WIN_READABLE | MODE_WIN_WRITEABLE)
@@ -240,6 +242,8 @@ static void __vbeCopyData(uint8_t *image)
 /* is called for yuv only */
 static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
+    if(verbose > 2)
+	printf("vo_vesa: draw_slice was called: w=%u h=%u x=%u y=%u\n",w,h,x,y);
     if(vesa_zoom)
     {
 	 SwScale_YV12slice_brg24(image,stride,y,h,
@@ -282,24 +286,41 @@ static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsi
 
 static void draw_osd(void)
 {
+ if(verbose > 2)
+	printf("vo_vesa: draw_osd was called\n");
  if(yuv_buffer) vo_draw_text(image_width,image_height,draw_alpha_fnc);
 }
 
 static void flip_page(void)
 {
+  if(verbose > 2)
+	printf("vo_vesa: flip_page was called\n");
   if(flip_trigger) { __vbeCopyData(yuv_buffer); flip_trigger = 0; }
 }
 
 /* is called for rgb only */
 static uint32_t draw_frame(uint8_t *src[])
 {
-	__vbeCopyData(src[0]);
-	return 0;
+  uint8_t *data;
+    if(verbose > 2)
+        printf("vo_vesa: draw_frame was called\n");
+    if(rgb2rgb_fnc)
+    {
+      (*rgb2rgb_fnc)(src[0],yuv_buffer,image_width*image_height*image_bpp);
+      data = yuv_buffer;
+      if(verbose > 2)
+          printf("vo_vesa: rgb2rgb_fnc was called\n");
+    } 
+    else data = src[0];
+    __vbeCopyData(data);
+    return 0;
 }
 
 static uint32_t query_format(uint32_t format)
 {
   uint32_t retval;
+    if(verbose > 2)
+        printf("vo_vesa: query_format was called: %x (%s)\n",format,vo_format_name(format));
 	switch(format)
 	{
 		case IMGFMT_YV12:
@@ -380,6 +401,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	image_width = width;
 	image_height = height;
 	fs_mode = 0;
+	rgb2rgb_fnc = NULL;
 	if(flags & 0x8)
 	{
 	  printf("vo_vesa: switch -flip is not supported\n");
@@ -424,23 +446,16 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	mode_ptr = vib.VideoModePtr;
 	while(*mode_ptr++ != 0xffff) num_modes++;
 	yuv_fmt = format == IMGFMT_YV12 || format == IMGFMT_I420 || format == IMGFMT_IYUV;
-	if(vo_dbpp)
-	{
-	  bpp = vo_dbpp;
-	  if(yuv_fmt)	yuv2rgb_init(bpp, MODE_RGB);
-	}
-	else
 	switch(format)
 	{
 		case IMGFMT_BGR8:
 		case IMGFMT_RGB8:  bpp = 8; break;
 		case IMGFMT_BGR15:
                 case IMGFMT_RGB15: bpp = 15; break;
+		default:
 		case IMGFMT_YV12:
 		case IMGFMT_I420:
-		case IMGFMT_IYUV: bpp=16;
-			yuv2rgb_init(bpp, MODE_RGB);
-		default:
+		case IMGFMT_IYUV:
 		case IMGFMT_BGR16:
 		case IMGFMT_RGB16: bpp = 16; break;
 		case IMGFMT_BGR24:
@@ -448,6 +463,9 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		case IMGFMT_BGR32:
 		case IMGFMT_RGB32: bpp = 32; break;
 	}
+	image_bpp = bpp;
+	if(vo_dbpp) bpp = vo_dbpp;
+	if(yuv_fmt) yuv2rgb_init(bpp, MODE_RGB);
 	switch(bpp)
 	{
 	  case 15: draw_alpha_fnc = draw_alpha_15; break;
@@ -560,6 +578,16 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		      return -1;
 		  }
 		}
+		if(format != IMGFMT_YV12 && image_bpp != video_mode_info.BitsPerPixel)
+		{
+		  if(image_bpp == 24 && video_mode_info.BitsPerPixel == 32) rgb2rgb_fnc = rgb24to32;
+		  else 
+		  {
+		    printf("vo_vesa: Can't convert %u to %u\n",image_bpp,video_mode_info.BitsPerPixel);
+		    return -1;
+		  }
+		  if(verbose) printf("vo_vesa: using %u to %u sw convertor\n",image_bpp,video_mode_info.BitsPerPixel);
+		}		
 		if((video_mode_info.WinAAttributes & FRAME_MODE) == FRAME_MODE)
 		   win.idx = 0; /* frame A */
 		else
@@ -587,12 +615,15 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 			,image_width,image_height
 			,video_mode_info.XResolution,video_mode_info.YResolution
 			,x_offset,y_offset);
-		if(yuv_fmt)
-		  if(!(yuv_buffer = malloc(image_width*image_height*bpp)))
+		if(yuv_fmt || rgb2rgb_fnc)
+		{
+		  if(!(yuv_buffer = malloc(video_mode_info.XResolution*video_mode_info.YResolution*video_mode_info.BitsPerPixel)))
 		  {
 		    printf("vo_vesa: Can't allocate temporary buffer\n");
 		    return -1;
 		  }
+		  if(verbose) printf("vo_vesa: yuv_buffer was allocated = %p\n",yuv_buffer);
+		}
 		if((err=vbeSaveState(&init_state)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeSaveState",err);
@@ -656,17 +687,23 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 static const vo_info_t*
 get_info(void)
 {
+    if(verbose > 2)
+        printf("vo_vesa: get_info was called\n");
 	return &vo_info;
 }
 
 static void
 uninit(void)
 {
+    if(verbose > 2)
+        printf("vo_vesa: uninit was called\n");
 	vesa_term();
 }
 
 
 static void check_events(void)
 {
+    if(verbose > 2)
+        printf("vo_vesa: check_events was called\n");
 /* Nothing to do */
 }
