@@ -27,7 +27,7 @@ MANDIR = ${prefix}/man
 # a BSD compatible 'install' program
 INSTALL = install
 
-SRCS_COMMON = cyuv.c adpcm.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c dec_audio.c dec_video.c msvidc.c cinepak.c fli.c qtrle.c codec-cfg.c cfgparser.c my_profile.c RTjpegN.c minilzo.c nuppelvideo.c spudec.c playtree.c playtreeparser.c asxparser.c
+SRCS_COMMON = cyuv.c adpcm.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c dec_audio.c dec_video.c msvidc.c cinepak.c fli.c qtrle.c codec-cfg.c cfgparser.c my_profile.c RTjpegN.c minilzo.c nuppelvideo.c spudec.c playtree.c playtreeparser.c asxparser.c qtsmc.c
 SRCS_MENCODER = mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/img_format.c libvo/osd.c
 SRCS_MPLAYER = mplayer.c $(SRCS_COMMON) find_sub.c subreader.c lirc_mp.c mixer.c vobsub.c
 

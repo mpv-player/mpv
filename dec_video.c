@@ -157,6 +157,15 @@ void decode_cyuv(
   int height,
   int bit_per_pixel);
 
+void qt_decode_smc(
+  unsigned char *encoded,
+  int encoded_size,
+  unsigned char *decoded,
+  int width,
+  int height,
+  int encoded_bpp,
+  int bytes_per_pixel);
+
 //**************************************************************************//
 //             The OpenDivX stuff:
 //**************************************************************************//
@@ -593,6 +602,7 @@ switch(sh_video->codec->driver){
  case VFM_MSVIDC:
  case VFM_FLI:
  case VFM_QTRLE:
+ case VFM_QTSMC:
    {
 #ifdef USE_MP_IMAGE
     sh_video->image->type=MP_IMGTYPE_STATIC;
@@ -939,6 +949,14 @@ if(verbose>1){
     break;
   case VFM_QTRLE:
     qt_decode_rle(
+        start, in_size, sh_video->our_out_buffer,
+        sh_video->disp_w, sh_video->disp_h,
+        sh_video->bih->biBitCount,
+        ((out_fmt&255)+7)/8);
+    blit_frame = 3;
+    break;
+  case VFM_QTSMC:
+    qt_decode_smc(
         start, in_size, sh_video->our_out_buffer,
         sh_video->disp_w, sh_video->disp_h,
         sh_video->bih->biBitCount,

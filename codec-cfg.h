@@ -53,6 +53,7 @@
 #define VFM_QTRLE 14
 #define VFM_NUV 15
 #define VFM_CYUV 16
+#define VFM_QTSMC 17
 
 #ifndef GUID_TYPE
 #define GUID_TYPE

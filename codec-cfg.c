@@ -241,6 +241,7 @@ static short get_driver(char *s,int audioflag)
 		"qtrle",
 		"nuv",
 		"cyuv",
+		"qtsmc",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;
