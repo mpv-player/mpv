@@ -1,4 +1,4 @@
-.\" synced with 1.876
+.\" synced with 1.883
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1175,7 +1175,7 @@ dostêpne sterowniki: dummy, v4l, v4l2, bsdbt848
 .IPs device=<warto¶æ>
 Podaje urz±dzenie TV (domy¶lnie: /dev/\:video0).
 .IPs input=<warto¶æ>
-Wybiera wej¶cie (domy¶lnie: 0 (TV) (lista jest wypisywana na konsoli).
+Wybiera wej¶cie (domy¶lnie: 0 - TV, lista jest wypisywana na konsoli).
 .IPs freq=<warto¶æ>
 Podaje czêstotliwo¶æ na któr± nale¿y ustawiæ tuner (np.\& 511.250).
 Nie dzia³a z parametrem channels.
@@ -3539,18 +3539,18 @@ Obs³uguje tylko format 16-bit little-endian.
 Z MEncoderem musisz te¿ u¿yæ opcji \-srate <czprób>.
 .PD 0
 .RSs
-.IPs czprób
+.IPs <czprób>
 wyj¶ciowa czêstotliwo¶æ próbkowania
-.IPs d³ug\ 
+.IPs <d³ug>
 d³ugo¶æ filtru ze wzglêdu na ni¿sz± czêstotliwo¶æ próbkowania
 (domy¶lnie: 16)
-.IPs lin\ \ 
+.IPs <lin> 
 je¶li 1 to filtry bêd± liniowo interpolowane pomiêdzy wielofazowymi pozycjami
-.IPs liczba
+.IPs <liczba>
 log2 z liczby wielofazowych pozycji
 (..., 10->1024, 11->2048, 12->4096, ...)
 (domy¶lnie: 10->1024)
-.IPs obcinanie
+.IPs <obcinanie>
 czêstotliwo¶æ obcinania (0.0\-1.0), domy¶lne ustawienie zale¿y od
 d³ugo¶ci filtru
 .RE
@@ -3568,7 +3568,7 @@ zachowuj±c przestrzenno¶æ d¼wiêku.
 .
 .TP
 .B channels[=il]
-Zmienia ilo¶æ kana³ów wyj¶cia na il.
+Zmienia ilo¶æ kana³ów wyj¶cia na <il>.
 Je¶li liczba kana³ów wyj¶ciowych jest wiêksza ni¿ liczba kana³ów wej¶ciowych,
 wstawiane s± puste kana³y (poza miksowaniem z mono na stereo, wtedy kana³ mono
 jest powtarzany w obu kana³ach wyj¶ciowych).
@@ -3576,20 +3576,21 @@ Je¶li liczba kana³ów wyj¶ciowych jest mniejsza ni¿ liczba kana³ów wej¶ciowych
 to dodatkowe kana³y s± obcinane.
 .
 .TP
-.B format[=bps:f]
-Ustawia ilo¶æ bajtów na próbkê i format u¿ywane przy wyj¶ciu z
-warstwy filtruj±cej.
-Opcja bps to liczba ca³kowita oznaczaj±ca Bytes per sample (bajtów na próbkê).
-Format f to ci±g sk³adaj±cy siê z:
-.br
-alaw, mulaw lub imaadpcm
-.br
-float lub int
-.br
-unsigned lub signed
-.br
-le be (little- lub big-endian)
-.br
+.B format[=format]
+Zmienia aktualny format próbek.
+.PD 0
+.RSs
+.IPs <format>
+Wybiera ¿±dany format.
+Ogólny format to 'zbe', gdzie 'z' oznacza znak ('s' dla ze znakiem lub 'u' dla
+bez znaku), 'b' oznacza ilo¶æ bitów na próbkê (16, 24 lub 32) a 'e' oznacza
+który bajt jest wysoki ('le' oznacza little-endian, 'be' big-endian a 'ne'
+format w³a¶ciwy dla komputera).
+Prawid³owymi warto¶ciami (miêdzy innymi) s±: 's16le', 'u32be' i 'u24ne'.
+Wyj±tkami od tej regu³y s±:  u8, s8, floatle, floatbe, floatne, mulaw, alaw,
+mpeg2, ac3 i imaadpcm.
+.RE
+.PD 1
 .
 .TP
 .B volume[=v:sc]
@@ -3597,11 +3598,11 @@ Wybiera g³o¶no¶æ wyj¶cia.
 Ten filtr mo¿e byæ w³±czony tylko raz na ka¿dy strumieñ audio.
 .PD 0
 .RSs
-.IPs v
+.IPs <v>\ \ 
 Ustawia wzmocnienie w dB dla wszystkich kana³ów w strumieniu od
 warto¶ci -200dB do +60dB (gdzie -200dB oznacza ca³kowite wyciszenie
 a +60dB 1000-krotne wzmocnienie).
-.IPs sc
+.IPs <sc>\ 
 W³±cza miêkkie obcinanie (soft-clipping).
 .RE
 .PD 1
@@ -3614,9 +3615,9 @@ tego filtru mo¿esz znale¼æ w przyk³adach pod koniec tej strony podrêcznika
 systemowego man.
 .PD 0
 .RSs
-.IPs n
+.IPs <n>\ \ 
 liczba kana³ów wej¶ciowych (1\-6)
-.IPs lij
+.IPs <lij>
 Jak du¿o z kana³u wej¶ciowego j jest miksowane w kana³ wyj¶ciowy i.
 .RE
 .PD 1
@@ -3626,22 +3627,22 @@ Jak du¿o z kana³u wej¶ciowego j jest miksowane w kana³ wyj¶ciowy i.
 Dodaje kana³ subwoofera.
 .PD 0
 .RSs
-.IPs fc
+.IPs <fc>\ 
 Czêstotliwo¶æ graniczna filtra dolnoprzepustowego (20Hz do 300Hz)
 (domy¶lnie: 60Hz).
-.IPs ch
+.IPs <ch>\ 
 numer kana³u subwoofera
 .RE
 .PD 1
 .
 .TP
-.B surround[=d]
+.B surround[=opo¼nienie]
 Dekoder macierzowo zakodowanego d¼wiêku przestrzennego, dzia³a na wiêkszo¶ci
 zbiorów 2 kana³owych.
 .PD 0
 .RSs
-.IPs d
-opó¼nienie w ms dla tylnych g³o¶ników (0ms do 1000ms) (domy¶lnie: 15ms).
+.IPs <opó¼nienie>
+opó¼nienie w ms dla tylnych g³o¶ników (0ms do 1000ms) (domy¶lnie: 20ms).
 .RE
 .PD 1
 .
@@ -3657,11 +3658,11 @@ Eksportuje przychodz±cy sygna³ do innych procesów u¿ywaj±c mapowania pamiêci
 (mmap()).
 .PD 0
 .RSs
-.IPs mmapowany_zbiór
+.IPs <mmapowany_zbiór>
 Zbiór, na który nale¿y mapowaæ dane
 (domy¶lnie: ~/.mplayer/\:mplayer-af_export).
-.IPs npróbek
-ilo¶æ próbek na kana³ (domy¶lnie 512)
+.IPs <npróbek>
+ilo¶æ próbek na kana³ (domy¶lnie: 512)
 .RE
 .PD 1
 .
@@ -3671,7 +3672,7 @@ Zwiêksza ró¿nicê miêdzy lewym a prawym kana³em,
 aby dodaæ efekt "przekazu na ¿ywo" do odtwarzania.
 .PD 0
 .RSs
-.IPs mul\ \ 
+.IPs <mul>
 wspó³czynnik ró¿nicy (domy¶lnie: 2.5)
 .RE
 .PD 1
@@ -3687,17 +3688,18 @@ Filtr ten mo¿e mieæ wiele instancji, wiêc mo¿na u¿ywaæ kilku wtyczek LADSPA
 jednocze¶nie.
 .PD 0
 .RSs
-.IPs plik\ 
+.IPs <plik>
 Okre¶la plik biblioteki z wtyczk± LADSPA.
-Je¿eli zmienna LADSPA_PATH jest ustawiona, program szuka okre¶lonego pliku.
+Je¿eli zmienna LADSPA_PATH jest ustawiona, program szuka tam okre¶lonego pliku.
 Je¿eli jednak nie jest ona ustawiona, musisz podaæ pe³n± ¶cie¿kê do tego zbioru.
-.IPs etykieta
+.IPs <etykieta>
 Okre¶la filtr wewn±trz biblioteki.
-Niektóre zbiory zawieraj± tylko jeden filtr z kolei inne mog± zawieraæ ich wiele.
+Niektóre zbiory zawieraj± tylko jeden filtr,
+z kolei inne mog± zawieraæ ich wiele.
 Podanie tutaj parametru "help" spowoduje wy¶wietlenie wszystkich dostêpnych
 filtrów w obrêbie konkretnej biblioteki, zastêpuje to funkcjê "listplugins"
 z pakietu SDK LADSPA.
-.IPs parametry
+.IPs <parametry>
 Parametry s± liczbami rzeczywistymi wiêkszymi lub równymi zeru, które okre¶laj±
 zachowanie za³adowanej biblioteki (np. opó¼nienie, próg czy wzmocnienie).
 W trybie "gadatliwym" (dodaj flagê \-v do wiersza poleceñ MPlayera), wypisywane
@@ -5347,7 +5349,7 @@ z poni¿szej sk³adni:
 .B \-<codec>opts <opcja1[=warto¶æ],opcja2,...>
 .
 .PP
-Gdzie <codec> to: lavc, xvidenc, divx4, lame, toolame lub x264enc
+Gdzie <codec> to: lavc, xvidenc, divx4, lame, toolame, x264enc lub mpeg.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -7548,6 +7550,14 @@ PSNR, ale najczê¶ciej ten drugi wygl±da lepiej.
 direct_pred=0 to zazwyczaj metoda wolniejsza i daj±ca gorsz± jako¶æ.
 .
 .TP
+.B (no)weight_b
+U¿ywa wa¿onego przewidywania w ramkach B.
+Bez tej opcji dwukierunkowo przewidywane makrobloki daj± jednakow± wagê ka¿dej
+ramce wzorcowej.
+Z t± opcj± wagi s± ustalane wed³ug pozycji ramki B wzglêdem ramek wzorcowych.
+Wymaga bframes > 1.
+.
+.TP
 .B (no)b8x8mv
 Wykorzystuje dodatkowe typy makrobloków b16x8, b8x16 i b8x8
 (domy¶lnie: wy³±czone).
@@ -7611,6 +7621,13 @@ wszystkich aktywnych typów:
 4x4, 4x8, 8x4 s± sprawdzane tylko, je¿eli 8x8 jest lepszy ni¿ 16x16.
 .
 .TP
+.B level_idc=<10\-51>
+Ustawia parametr Level strumienia bitów, wed³ug definicji w aneksie A standardu
+H.264 (domy¶lnie: 40 - Level 4.0).
+U¿ywane ¿eby przekazaæ dekoderowi jakie mo¿liwo¶ci musi obs³ugiwaæ.
+U¿ywaj tylko je¶li wiesz co to znaczy i musisz tego u¿yæ
+.
+.TP
 .B log=<-1\-3>
 Okre¶la ilo¶æ informacji drukowanych na ekranie.
 .RSs
@@ -7637,6 +7654,79 @@ S± trzymane tylko dla porównania z referencyjnym kodekiem JM.
 Dla wszystkich innych celów, korzystaj albo z "Global" PSNR, albo
 z poszczególnych warto¶ci PSNR przypadaj±cych na klatkê drukowanych przez
 log=3.
+.
+.
+.SS muxer MPEG (\-mpegopts)
+.
+Muxer MPEG mo¿e generowaæ 5 typów strumieni, ka¿dy z nich z sensownymi
+domy¶lnymi parametrami które u¿ytkownik mo¿e zmieniæ.
+Ogólnie, przy generowaniu zbiorów mpeg zalecane jest wy³±czenie kodu
+przeskakiwania ramek mencoder'a (patrz \-noskip, \-mc, harddup, softskip).
+.
+.TP
+.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
+format strumienia (domy¶lnie: mpeg2).
+.
+.TP
+.B size=<do 65535>
+wielko¶æ pakietu w bajtach, nie zmieniaj je¶li dok³adnie nie wiesz co robisz
+(domy¶lnie: 2048).
+.
+.TP
+.B muxrate=<liczba>
+Nominalne tempo muxowania w KBit/s u¿ywane w nag³ówkach pakietów
+(domy¶lnie: 1800 kb/s).
+Bêdzie zaktualizowane w przypadku format=mpeg1 lub mpeg2.
+.
+.TP
+.B tsaf\ \ \ 
+ustawia, je¶li to mo¿liwe, znaczniki czasu w ka¿dej ramce.
+.
+.TP
+.B noreorder
+wy³±cza kod przestawiania ramek, który przechowuje ramki w kolejno¶ci
+dekodowania (a nie wy¶wietlania) (domy¶lnie: wy³±czone).
+U¿ywaj tylko je¶li uwa¿asz ¿e kod przestawiania jest b³êdny i dzia³a
+nieprawid³owo.
+.
+.TP
+.B init_vpts=<100\-700>
+pocz±tkowe pts video, w milisekundach (domy¶lnie: 200).
+.
+.TP
+.B init_apts=<100\-700>
+pocz±tkowe pts audio, w milisekundach (domy¶lnie: 200).
+.
+.TP
+.B init_adelay=<-32760\--1>
+Pocz±tkowy czas oczekiwania na audio = opó¼nienie video, w milisekundach
+(domy¶lnie: 0).
+U¿ywaj, je¶li chcesz opó¼niæ video wzglêdem audio.
+.
+.TP
+.B drop\ \ \ 
+U¿ywane razem z init_delay powoduje ¿e muxer opuszcza oczekiwany kawa³ek
+audio.
+.
+.TP
+.B vwidth, vheight=<1,4095>
+Ustawia wysoko¶æ i szeroko¶æ filmu gdy jest to mpeg1/2.
+.
+.TP
+.B vpswidth, vpsheight=<1,4095>
+Ustawia wysoko¶æ i szeroko¶æ trybu panoramicznego filmu gdy jest to mpeg2.
+.
+.TP
+.B vaspect=<1:1 | 4:3 | 16:9 | 2.21:1>
+Ustawia proporcje filmu mpeg1/2.
+.
+.TP
+.B vbitrate=<liczba>
+Ustawia bitrate video w KBit/s dla filmów mpeg1/2.
+.
+.TP
+.B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
+Ustawia ilo¶æ klatek na sekundê dla filmów mpeg1/2.
 .
 .
 .\" --------------------------------------------------------------------------
@@ -7758,8 +7848,8 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg plik.avi
 .TP
 .B Odtwarzaj d¼wiêk 6-kana³owy w formacie AAC tylko na dwóch g³o¶nikach:
 mplayer \-rawaudio on:format=0xff \-af pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
-Mo¿e bêdziesz chcia³ siê trochê pobawiæ warto¶ciami filtru pan (np. pomno¿yæ przez jaka¶ liczbê),
-aby zwiêkszyæ g³o¶no¶æ albo unikn±æ trzasków.
+Mo¿e bêdziesz chcia³ siê trochê pobawiæ warto¶ciami filtru pan (np. pomno¿yæ
+przez jaka¶ liczbê), aby zwiêkszyæ g³o¶no¶æ albo unikn±æ trzasków.
 .
 .SH PRZYK£ADY U¯YCIA MENCODERA
 .
