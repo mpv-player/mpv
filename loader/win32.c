@@ -3410,6 +3410,18 @@ static void expcos(void)
 // of debuging fixing & testing - it's almost unimaginable - kabi
 
 // _ftol - operated on the float value which is already on the FPU stack
+
+#ifdef MPLAYER
+// Note: the asm version is buggy and causes mysterious sig11 with gcc-3.0
+// flavors so we'd better stick to the old one for the moment (C version
+// is found in release 1.39 of this file in MPlayer CVS) - pl
+int
+exp_ftol (float f)
+{
+  return (int) (f + .5);
+}
+#else
+#warning "exp_ftol may cause sig11"
 static void exp_ftol(void)
 {
     __asm__ __volatile__
@@ -3426,6 +3438,7 @@ static void exp_ftol(void)
 	 "mov	 -12(%ebp), %eax \n\t"
 	);
 }
+#endif
 
 static double exppow(double x, double y)
 {
