@@ -222,13 +222,13 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 	int a1,a2,a3,b1,b2,b3;
 	int setime,etime;
 	char *p=NULL, *q=NULL, *l=NULL,*next;
-	int i,len,len2;
+	int i,len,len2,plen;
 
 	bzero (current, sizeof(current));
 
 	while (!current->text[0]) {
 		if (!fgets (line, 1000, fd)) return NULL;
-		if ((len=sscanf (line, "%d:%d:%d:",&a1,&a2,&a3)) < 3)
+		if ((len=sscanf (line, "%d:%d:%d:%n",&a1,&a2,&a3,&plen)) < 3)
 			continue;
 		if (!fgets (line2, 1000, fd)) return NULL;
 		if ((len2=sscanf (line2, "%d:%d:%d:",&b1,&b2,&b3)) < 3)
@@ -239,7 +239,7 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 		current->start = a1*360000+a2*6000+a3*100;
 		current->end   = b1*360000+b2*6000+b3*100;
 		// teraz czas na wkopiowanie stringu
-		p=line;	p+=9;i=0;
+		p=line;	p+=plen;i=0;
 		if (*p!='|') {
 			//
 			next = p,i=0;
