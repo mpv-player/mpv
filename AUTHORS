@@ -201,6 +201,9 @@ Ivan Kalvachev (iive) <iive@yahoo.com>
     * XvMC support (MPlayer & FFmpeg)
     * XviD4 driver import (vd/ve_xvid4.c by GomGom)
 
+Howell Tam (Pigeon) <pigeon@pigeond.net>
+    * native libcaca driver (-vo caca)
+
 Pierre Lombard (pl) <p_l@gmx.fr>
     * new configure script
     * general code maintaining, fixes, patch committing
