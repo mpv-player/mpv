@@ -1,6 +1,35 @@
 
 mplayer (0.90)
 
+  pre9:
+    Cleanup:
+    * divx4_vbr.c is now really GPL - with the permission of DivX.com guys!
+    * cyuv decoder restructuring, now supports planar YUV formats too
+    * removed obsolete variables, like has_audio, has_video, allow_dshow, fifo
+    * audio/video codec selection (-ac/-afm) rewritten, now uses codec/fm list
+    * help_mp-XX.h files moved to help/ subdir, removed obsolete entries
+    * the obsolete 0x1ff eof hack removed from mpeg-es demuxer and decoders
+    * stheaders.h cleanup, removed unneeded wine includes from mplayer core
+    * tons of compiler warning fixes, including some 10l one
+    
+    Fixes:
+    * Some fullscreen switching fixes
+    * Some GUI bugfixes
+    * -vo DGA fixes, cleanup
+    * -dvdkey sig11 fixed
+    * k6-3's 3dnowex vs. mmxext sigill fixed in mp3lib
+    * -vo gif89, jpeg U-V swapping fixed
+    * RTC setup fixes, more verbose messages, hints
+    * mencoder: demuxer/codec uninit order fixed (solves some sig11)
+    * various v4l and alsa capturing fixes
+
+    Features:
+    * experimental -vo directx driver for cygwin build
+    * unrarlib included for rar'ed vobsubs
+    * native xvid encoding (-ovc xvid) interface
+    * libavcodec: mpeg4 interlaced DCT _en_coding, luma masking support
+    * new softeq filter with gamma support: -vop eq2
+
   pre8:
     Docs:
     * manpage has been rewritten, now has better indenting, and convertable to html
