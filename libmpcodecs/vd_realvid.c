@@ -22,11 +22,33 @@ static vd_info_t info = {
 LIBVD_EXTERN(realvid)
 
 
-static unsigned long (*rvyuv_custom_message)(unsigned long*,void*);
+/*
+ * Structures for data packets.  These used to be tables of unsigned ints, but
+ * that does not work on 64 bit platforms (e.g. Alpha).  The entries that are
+ * pointers get truncated.  Pointers on 64 bit platforms are 8 byte longs.
+ * So we have to use structures so the compiler will assign the proper space
+ * for the pointer.
+ */
+typedef struct cmsg_data_s {
+	uint32_t data1;
+	uint32_t data2;
+	uint32_t* dimensions;
+} cmsg_data_t;
+
+typedef struct transform_in_s {
+	uint32_t len;
+	uint32_t unknown1;
+	uint32_t chunks;
+	uint32_t* extra;
+	uint32_t unknown2;
+	uint32_t timestamp;
+} transform_in_t;
+
+static unsigned long (*rvyuv_custom_message)(cmsg_data_t* ,void*);
 static unsigned long (*rvyuv_free)(void*);
 static unsigned long (*rvyuv_hive_message)(unsigned long,unsigned long);
 static unsigned long (*rvyuv_init)(void*, void*); // initdata,context
-static unsigned long (*rvyuv_transform)(char*, char*,unsigned long*,unsigned long*,void*);
+static unsigned long (*rvyuv_transform)(char*, char*,transform_in_t*,unsigned int*,void*);
 
 static void *rv_handle=NULL;
 
@@ -167,9 +189,9 @@ static int init(sh_video_t *sh){
 	}
 	// setup rv30 codec (codec sub-type and image dimensions):
 	if(extrahdr[1]>=0x20200002){
-	    unsigned long cmsg24[4]={sh->disp_w,sh->disp_h,sh->disp_w,sh->disp_h};
-	    unsigned long cmsg_data[3]={0x24,1+((extrahdr[0]>>16)&7),(unsigned long) &cmsg24};
-	    (*rvyuv_custom_message)(cmsg_data,sh->context);
+	    uint32_t cmsg24[4]={sh->disp_w,sh->disp_h,sh->disp_w,sh->disp_h};
+	    cmsg_data_t cmsg_data={0x24,1+((extrahdr[0]>>16)&7), &cmsg24[0]};
+	    (*rvyuv_custom_message)(&cmsg_data,sh->context);
 	}
 	mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: RealVideo codec init OK!\n");
 	return 1;
@@ -198,12 +220,12 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	unsigned char* dp_data=((unsigned char*)data)+sizeof(dp_hdr_t);
 	uint32_t* extra=(uint32_t*)(((char*)data)+dp_hdr->chunktab);
 
-	unsigned long transform_out[5];
-	unsigned long transform_in[6]={
+	unsigned int transform_out[5];
+	transform_in_t transform_in={
 		dp_hdr->len,	// length of the packet (sub-packets appended)
 		0,		// unknown, seems to be unused
 		dp_hdr->chunks,	// number of sub-packets - 1
-		(unsigned long) extra,	// table of sub-packet offsets
+		extra,		// table of sub-packet offsets
 		0,		// unknown, seems to be unused
 		dp_hdr->timestamp,// timestamp (the integer value from the stream)
 	};
@@ -214,7 +236,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		sh->disp_w, sh->disp_h);
 	if(!mpi) return NULL;
 	
-	result=(*rvyuv_transform)(dp_data, mpi->planes[0], transform_in,
+	result=(*rvyuv_transform)(dp_data, mpi->planes[0], &transform_in,
 		transform_out, sh->context);
 
 	return (result?NULL:mpi);
