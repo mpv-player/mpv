@@ -159,14 +159,14 @@ struct config vivoopts_conf[]={
 extern int    mf_support;
 extern int    mf_w;
 extern int    mf_h;
-extern int    mf_fps;
+extern float  mf_fps;
 extern char * mf_type;
 
 struct config mfopts_conf[]={
         {"on", &mf_support, CONF_TYPE_FLAG, 0, 0, 1, NULL},
         {"w", &mf_w, CONF_TYPE_INT, 0, 0, 0, NULL},
         {"h", &mf_h, CONF_TYPE_INT, 0, 0, 0, NULL},
-        {"fps", &mf_fps, CONF_TYPE_INT, 0, 0, 0, NULL},
+        {"fps", &mf_fps, CONF_TYPE_FLOAT, 0, 0, 0, NULL},
         {"type", &mf_type, CONF_TYPE_STRING, 0, 0, 0, NULL},
         {NULL, NULL, 0, 0, 0, 0, NULL}
 };

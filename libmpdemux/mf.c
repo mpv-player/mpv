@@ -21,7 +21,7 @@
 int    mf_support = 0;
 int    mf_w = 352;
 int    mf_h = 288;
-int    mf_fps = 25;
+float  mf_fps = 25.0;
 char * mf_type = "jpg";
 
 int stream_open_mf(char * filename,stream_t * stream)
@@ -34,8 +34,33 @@ int stream_open_mf(char * filename,stream_t * stream)
  int           error_count = 0;
  int	       count = 0;
 
- fname=malloc( strlen( filename ) + 32 );
  mf=calloc( 1,sizeof( mf_t ) );
+
+ if( strchr( filename,',') )
+  { 
+   fname=malloc( 255 ); 
+   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] filelist: %s\n",filename );
+ 
+   while ( ( fname=strsep( &filename,"," ) ) )
+    {
+     if ( stat( fname,&fs ) ) 
+      {
+       mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname );
+      }
+      else
+      {
+       mf->names=realloc( mf->names,( mf->nr_of_files + 1 ) * sizeof( char* ) );
+       mf->names[mf->nr_of_files]=strdup( fname );
+//       mp_msg( MSGT_STREAM,MSGL_V,"[mf] added file %d.: %s\n",mf->nr_of_files,mf->names[mf->nr_of_files] );
+       mf->nr_of_files++;
+      }
+    }
+   goto exit_mf;
+  } 
+
+ fname=malloc( strlen( filename ) + 32 );
+
+ mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
  
  if ( !strchr( filename,'%' ) )
   {

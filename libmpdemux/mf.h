@@ -5,7 +5,7 @@
 extern int    mf_support;
 extern int    mf_w;
 extern int    mf_h;
-extern int    mf_fps;
+extern float  mf_fps;
 extern char * mf_type;
 
 typedef struct
