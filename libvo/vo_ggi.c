@@ -39,7 +39,6 @@
 /* maximum buffers */
 #define GGI_FRAMES 4
 
-#undef GGI_GAMMA
 #undef GGI_FLIP
 
 #include "../libmpcodecs/mp_image.h"
@@ -526,30 +525,10 @@ static void uninit(void)
     ggiExit();
 }
 
-#ifdef GGI_GAMMA
-/* GAMMA handling */
-static int ggi_get_video_eq(vidix_video_eq_t *info)
-{
-    memset(info, 0, sizeof(vidix_video_eq_t));
-}
-#endif
-
-static void query_vaa(vo_vaa_t *vaa)
-{
-    memset(vaa, 0, sizeof(vo_vaa_t));
-#ifdef GGI_GAMMA
-    vaa->get_video_eq = ggi_get_video_eq;
-    vaa->set_video_eq = ggi_set_video_eq;
-#endif
-}
-
 static uint32_t control(uint32_t request, void *data, ...)
 {
     switch(request)
     {
-	case VOCTRL_QUERY_VAA:
-	    query_vaa((vo_vaa_t*)data);
-	    return VO_TRUE;
 	case VOCTRL_QUERY_FORMAT:
 	    return query_format(*((uint32_t*)data));
 	case VOCTRL_GET_IMAGE:

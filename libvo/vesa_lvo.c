@@ -48,11 +48,6 @@ uint32_t vlvo_control(uint32_t request, void *data, ...);
 
 extern vo_functions_t video_out_vesa;
 
-static void vlvo_query_vaa(vo_vaa_t *vaa)
-{
-  memset(vaa,0,sizeof(vo_vaa_t));
-}
-
 int vlvo_preinit(const char *drvname)
 {
   printf("vesa_lvo: This branch is no longer supported.\n"
@@ -300,9 +295,6 @@ uint32_t vlvo_query_info(uint32_t format)
 uint32_t vlvo_control(uint32_t request, void *data, ...)
 {
   switch (request) {
-  case VOCTRL_QUERY_VAA:
-    vlvo_query_vaa((vo_vaa_t*)data);
-    return VO_TRUE;
   case VOCTRL_QUERY_FORMAT:
     return vlvo_query_info(*((uint32_t*)data));
   }

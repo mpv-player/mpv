@@ -826,10 +826,6 @@ static uint32_t query_format(uint32_t format)
 }
 
 
-static void query_vaa(vo_vaa_t *vaa) {
-  memset(vaa,0,sizeof(vo_vaa_t));
-}
-
 static void uninit(void)
 {
   mp_msg(MSGT_VO,MSGL_DBG2, "VO: [dxr2] Uninitializing\n" );
@@ -1003,9 +999,6 @@ static uint32_t control(uint32_t request, void *data, ...)
     }
     return VO_TRUE; 
   } 
-  case VOCTRL_QUERY_VAA:
-    query_vaa((vo_vaa_t*)data);
-    return VO_TRUE;
   }
   return VO_NOTIMPL;
 }
