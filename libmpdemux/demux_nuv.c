@@ -120,7 +120,13 @@ demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
 	sh_video->disp_w = rtjpeg_fileheader.width;
 	sh_video->disp_h = rtjpeg_fileheader.height;
 
-	sh_video->aspect = (float)rtjpeg_fileheader.aspect;
+	/* NuppelVideo uses pixel aspect ratio
+           here display aspect ratio is used.
+	   For the moment NuppelVideo only supports 1.0 thus
+	   1.33 == 4:3 aspect ratio.   
+	*/
+	if(rtjpeg_fileheader.aspect == 1.0)
+		sh_video->aspect = (float) 1.33;
 
 	/* Get the FPS */
 	sh_video->fps = rtjpeg_fileheader.fps;
