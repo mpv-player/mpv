@@ -208,7 +208,11 @@ typedef struct {
   uint32_t chunktab;            // offset to chunk offset array
 } dp_hdr_t;
 
+#if __GNUC__ == 2
+#pragma pack(2)
+#else
 #pragma pack(push,2)
+#endif
 
 typedef struct {
   uint32_t size;
@@ -272,7 +276,11 @@ typedef struct {
   uint32_t fourcc3;             // fourcc
 } real_audio_v5_props_t;
 
+#if __GNUC__ == 2
+#pragma pack()
+#else
 #pragma pack(pop)
+#endif
 
 static uint16_t get_uint16(const void *buf) {
   uint16_t      ret;
@@ -1733,7 +1741,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         bih->biSize = 48;
         bih->biPlanes = 1;
         type2 = get_uint32_be(&rvp->type2);
-        if ((type2 == 0x10003000) || (type2 == 0x100030001))
+        if ((type2 == 0x10003000) || (type2 == 0x10003001))
           bih->biCompression = mmioFOURCC('R', 'V', '1', '3');
         else
           bih->biCompression = mmioFOURCC('R', 'V', track->codec_id[9], '0');
@@ -2014,7 +2022,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 #define SHOW_BITS(n) ((buffer) >> (32 - (n)))
 
 static float real_fix_timestamp(mkv_track_t *track, unsigned char *s,
-                                int timestamp, float frametime) {
+                                int timestamp) {
   float v_pts;
   uint32_t buffer = (s[0] << 24) + (s[1] << 16) + (s[2] << 8) + s[3];
   int kf = timestamp;
@@ -2095,7 +2103,7 @@ static void handle_realvideo(demuxer_t *demuxer, DataBuffer &data,
     mkv_d->video->rv_kf_pts = hdr->timestamp;
   } else
     dp->pts = real_fix_timestamp(mkv_d->video, &dp->buffer[sizeof(dp_hdr_t)],
-                                 hdr->timestamp, 1 / mkv_d->video->v_frate);
+                                 hdr->timestamp);
   dp->pos = demuxer->filepos;
   dp->flags = keyframe ? 0x10 : 0;
 
