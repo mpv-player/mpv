@@ -349,13 +349,13 @@ static char* rtc_device;
 #endif
 
 #ifdef USE_EDL
-struct edl_record edl_records[ MAX_EDL_ENTRIES ];
-int num_edl_records = 0;
-FILE* edl_fd = NULL;
-edl_record_ptr next_edl_record = NULL;
-static char* edl_filename = NULL;
-static char* edl_output_filename = NULL;
-short edl_decision = 0;
+edl_record_ptr edl_records = NULL; // EDL entries memory area
+edl_record_ptr next_edl_record = NULL; // only for traversing edl_records
+int edl_memory_slots = 0; // No of EDL entries (1 for skip + 2 for each mute)
+int edl_operations = 0; // No of EDL operations, skip + mute
+short edl_decision = 0; // 1 when an EDL operation has been made
+FILE* edl_fd = NULL; // fd to write to when in -edlout mode
+int edl_mute_count = 0; // even number when mute has been matched mute/unmute
 #endif
 
 static unsigned int inited_flags=0;
@@ -959,100 +959,54 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #endif
 
 #ifdef USE_EDL
- {
-   FILE* fd;
-   char line[ 100 ];
-   float start, stop, duration;
-   int action;
-   int next_edl_array_index = 0;
-   int lineCount = 0;
-   next_edl_record = edl_records;
-   if( edl_filename ) {
-     if( ( fd = fopen( edl_filename, "r" ) ) == NULL ) {
-       printf( "Error opening EDL file [%s]!\n", edl_filename );
-       next_edl_record->next = NULL;
-     } else {
-       while( fgets( line, 99, fd ) != NULL ) {
-	 lineCount++;
-	 if( ( sscanf( line, "%f %f %d", &start, &stop, &action ) ) == 0 ) {
-	   printf( "Invalid EDL line: [%s]\n", line );
-	 } else {
-	   if( next_edl_array_index > 0 ) {
-	     edl_records[ next_edl_array_index-1 ].next = &edl_records[ next_edl_array_index ];
-	     if( start <= edl_records[ next_edl_array_index-1 ].stop_sec ) {
-	       printf( "Invalid EDL line [%d]: [%s]\n", lineCount, line );
-	       printf( "Last stop position was [%f]; next start is [%f]. Entries must be in chronological order and cannot overlap. Discarding EDL entry.\n", edl_records[ next_edl_array_index-1 ].stop_sec, start );
-	       continue;
-	     }
-	   }
-	   if( stop <= start ) {
-	     printf( "Invalid EDL line [%d]: [%s]\n", lineCount, line );
-	     printf( "Stop time must follow start time. Discarding EDL entry.\n" );
-	     continue;
-	   }
-	   edl_records[ next_edl_array_index ].action = action;
-	   if( action == EDL_MUTE ) {
-	     edl_records[ next_edl_array_index ].length_sec = 0;
-	     edl_records[ next_edl_array_index ].start_sec = start;
-	     edl_records[ next_edl_array_index ].stop_sec = start;
-	     next_edl_array_index++;
-	     if( next_edl_array_index >= MAX_EDL_ENTRIES-1 ) {
-	       break;
-	     }
-	     edl_records[ next_edl_array_index-1 ].next = &edl_records[ next_edl_array_index ];
-	     edl_records[ next_edl_array_index ].action = EDL_MUTE;
-	     edl_records[ next_edl_array_index ].length_sec = 0;
-	     edl_records[ next_edl_array_index ].start_sec = stop;
-	     edl_records[ next_edl_array_index ].stop_sec = stop;
-	   } else {
-	     edl_records[ next_edl_array_index ].length_sec = stop - start;
-	     edl_records[ next_edl_array_index ].start_sec = start;
-	     edl_records[ next_edl_array_index ].stop_sec = stop;
-	   }
-	   next_edl_array_index++;
-	   if( next_edl_array_index >= MAX_EDL_ENTRIES-1 ) {
-	     break;
-	   }
-	 }
-       }
-       if( next_edl_array_index > 0 ) {
-	 edl_records[ next_edl_array_index-1 ].next = &edl_records[ next_edl_array_index ];
-       }
-       edl_records[ next_edl_array_index ].start_sec = -1;
-       edl_records[ next_edl_array_index ].next = NULL;
-       num_edl_records = ( next_edl_array_index );
-     }
-     fclose( fd );
-   } else {
-     next_edl_record->next = NULL;
-   }
-   if( edl_output_filename ) {
-     if( edl_filename ) {
-       printf( "Sorry; EDL mode and EDL output mode are mutually exclusive! Disabling all EDL functions.\n" );
-       edl_output_filename = NULL;
-       edl_filename = NULL;
-       next_edl_record->next = NULL;
-     } else {
-       if( ( edl_fd = fopen( edl_output_filename, "w" ) ) == NULL ) {
-	 printf( "Error opening file [%s] for writing!\n", edl_output_filename );
-	 edl_output_filename = NULL;
-	 next_edl_record->next = NULL;
-       }
-     }
-   }
-#ifdef DEBUG_EDL
- {
-   printf( "EDL Records:\n" );
-   if( next_edl_record->next != NULL ) {
-     while( next_edl_record->next != NULL ) {
-       printf( "EDL: start [%f], stop [%f], action [%d]\n", next_edl_record->start_sec, next_edl_record->stop_sec, next_edl_record->action );
-       next_edl_record = next_edl_record->next;
-     }
-     next_edl_record = edl_records;
-   }
- }
-#endif
- }
+if (edl_check_mode() == EDL_ERROR && edl_filename)
+{
+    mp_msg(MSGT_CPLAYER, MSGL_WARN,
+           "Cant use -edl and -edlout at the same time\n");
+    mp_msg(MSGT_CPLAYER, MSGL_WARN, "Not using EDL at all!!!\n");
+    edl_filename = NULL;
+    edl_output_filename = NULL;
+    edl_records = NULL;
+    next_edl_record = edl_records;
+} else if (edl_filename)
+{
+    edl_memory_slots = edl_count_entries();
+    if (edl_memory_slots > 0)
+    {
+        edl_records = calloc(edl_memory_slots, sizeof(struct edl_record));
+        if (edl_records == NULL)
+        {
+            mp_msg(MSGT_CPLAYER, MSGL_FATAL,
+                   "Cant allocate enough memory to hold EDL data, exiting!\n");
+            exit_player(NULL);	    
+        } else
+        {
+            if ((edl_operations = edl_parse_file(edl_records)) > 0)
+            {
+                mp_msg(MSGT_CPLAYER, MSGL_INFO, "Readed %d EDL actions\n",
+                       edl_operations);
+            } else
+            {
+
+                mp_msg(MSGT_CPLAYER, MSGL_INFO,
+                       "There are no EDL actions to take care of\n");
+            }
+        }
+    }
+
+    next_edl_record = edl_records;
+
+} else if (edl_output_filename)
+{
+    if ((edl_fd = fopen(edl_output_filename, "w")) == NULL)
+    {
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, 
+	       "Error opening file [%s] for writing!\n",
+               edl_output_filename);
+        edl_output_filename = NULL;
+        next_edl_record = edl_records;
+    }
+}
 #endif
 
     if(!filename){
@@ -2493,7 +2447,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 //================= EDL =========================================
 
 #ifdef USE_EDL
- if( next_edl_record->next ) { // Are we (still?) doing EDL?
+ if( next_edl_record ) { // Are we (still?) doing EDL?
   if ( !sh_video ) {
     mp_msg( MSGT_CPLAYER, MSGL_ERR, "Cannot use edit list without video. EDL disabled.\n" );
     next_edl_record->next = NULL;
@@ -2507,15 +2461,15 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
        printf( "\nEDL_SKIP: start [%f], stop [%f], length [%f]\n", next_edl_record->start_sec, next_edl_record->stop_sec, next_edl_record->length_sec );
 #endif
        edl_decision = 1;
-       next_edl_record = next_edl_record->next;
      } else if( next_edl_record->action == EDL_MUTE ) {
        mixer_mute(&mixer);
+       edl_mute_count++; // new edl seek behavior need this
 #ifdef DEBUG_EDL
        printf( "\nEDL_MUTE: [%f]\n", next_edl_record->start_sec );
 #endif
        edl_decision = 1;
-       next_edl_record = next_edl_record->next;
      }
+     next_edl_record=next_edl_record->next;
    }
   }
  }
@@ -3548,20 +3502,52 @@ if(rel_seek_secs || abs_seek_pos){
       }
   }
 #ifdef USE_EDL
-      {
-	int x;
-	if( !edl_decision ) {
-	  for( x = 0; x < num_edl_records; x++ ) { // FIXME: do binary search
-	    // Find first EDL entry where start follows current time
-	    if( edl_records[ x ].start_sec >= sh_video->pts && edl_records[ x ].action != EDL_MUTE ) {
-	      next_edl_record = &edl_records[ x ];
-	      break;
-	    }
-	  }
-	} else {
-	  edl_decision = 0;
-	}
-      }
+/*
+ * We Saw a seek, have to rewind the edl operations stak
+ * and find the next edl action to take care off
+ */
+
+next_edl_record = edl_records;
+
+while (next_edl_record)
+{
+    /* trying to remember if we need to mute/unmute first
+     * prior edl implementation lacks this
+     */
+  
+    if (next_edl_record->start_sec >= sh_video->pts)
+    {
+        if (edl_mute_count > 0)
+        {
+            if ((edl_mute_count % 2) == 0 &&
+                next_edl_record->mute_state == EDL_MUTE_END)
+            {
+                mixer_mute(&mixer);
+                edl_mute_count++;
+            }
+            if ((edl_mute_count % 2) != 0 &&
+                next_edl_record->mute_state == EDL_MUTE_START)
+            {
+                mixer_mute(&mixer);
+                edl_mute_count++;
+            }
+        } else if (next_edl_record->mute_state == EDL_MUTE_END)
+        {
+            mixer_mute(&mixer);
+            edl_mute_count++;
+        }
+        break;
+    }
+
+    next_edl_record = next_edl_record->next;
+
+    if (!next_edl_record && (edl_mute_count % 2) != 0
+        && edl_mute_count > 0)
+    {
+        mixer_mute(&mixer);
+        edl_mute_count++;
+    }
+}
 #endif
   rel_seek_secs=0;
   abs_seek_pos=0;
