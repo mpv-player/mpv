@@ -30,6 +30,8 @@
 #include "../libvo/fastmemcpy.h"
 #include "osdep/timer.h"
 
+#define WAVE_FORMAT_DOLBY_AC3_SPDIF 0x0092
+
 #define SAMPLESIZE   1024
 #define BUFFER_SIZE  4096
 #define BUFFER_COUNT 16
