@@ -7,7 +7,9 @@
    
 #include <stdio.h>
 #include <inttypes.h>
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 #include "parse_mp4.h"
 #include "mp_msg.h"
 #include "stream.h"
