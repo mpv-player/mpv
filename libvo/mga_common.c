@@ -397,7 +397,7 @@ static int mga_uninit(){
 
 static uint32_t preinit(const char *vo_subdevice)
 {
-  char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
+  const char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 
 	f = open(devname,O_RDWR);
 	if(f == -1)
