@@ -30,7 +30,7 @@
 #warning **                                                               **
 #warning **  Y O U '' R E   U S I N G   U N S T A B L E   S O F T W A R E  **
 #warning **                                                               **
-#warning ** Streams produced by this version aren''nt probably compatible  **
+#warning ** Streams produced by this version aren''t probably compatible   **
 #warning ** with anything else, even the xvid decoder itself. There are   **
 #warning ** bugs, this code could crash, could blow up your PC or the     **
 #warning ** whole building !                                              **
@@ -84,10 +84,10 @@ static int xvidenc_kfreduction = -1;
 static int xvidenc_fixed_quant = 0;
 static int xvidenc_debug = 0;
 static int xvidenc_interlacing = 0;
+static int xvidenc_greyscale = 0;
 #ifdef XVID_API_UNSTABLE
 static int xvidenc_packed = 0;
 static int xvidenc_divx5bvop = 1;
-static int xvidenc_greyscale = 0;
 static int xvidenc_lumi_mask = 0;
 static int xvidenc_qpel = 0;
 static int xvidenc_max_bframes = 0;
@@ -122,10 +122,10 @@ struct config xvidencopts_conf[] = {
     { "fixed_quant", &xvidenc_fixed_quant, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL}, /* for XVID_MODE_FIXED_QUANT */
     { "debug", &xvidenc_debug, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "interlacing", &xvidenc_interlacing, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "greyscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #ifdef XVID_API_UNSTABLE
     { "packed", &xvidenc_packed, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "divx5bvop", &xvidenc_divx5bvop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    { "greyscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     //{ "lumi_mask", &xvidenc_lumi_mask, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "extrastat", &xvidenc_xstat, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "qpel", &xvidenc_qpel, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -186,7 +186,7 @@ config(struct vf_instance_s* vf,
 	    "**                                                               **\n"
 	    "**  Y O U ' R E   U S I N G   U N S T A B L E   S O F T W A R E  **\n"
 	    "**                                                               **\n"
-	    "** Streams produced by this version aren'nt probably compatible  **\n"
+	    "** Streams produced by this version aren't probably compatible   **\n"
 	    "** with anything else, even the xvid decoder itself. There are   **\n"
 	    "** bugs, this code could crash, could blow up your PC or the     **\n"
 	    "** whole building !                                              **\n"
@@ -227,6 +227,8 @@ config(struct vf_instance_s* vf,
     if (xvidenc_xstat)
 	enc_param.global |= XVID_GLOBAL_EXTRASTATS;
 #endif
+    if (xvidenc_greyscale)
+	enc_param.global |= XVID_GREYSCALE;
     enc_param.rc_reaction_delay_factor = xvidenc_rc_reaction_delay_factor;
     enc_param.rc_averaging_period = xvidenc_rc_averaging_period;
     enc_param.rc_buffer = xvidenc_rc_buffer;

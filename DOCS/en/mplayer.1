@@ -3418,6 +3418,8 @@ use MPEG quantizers instead of H.263 (default=off)
 .IPs mod_quant
 decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis.
 (default=off, 2pass mode only)
+.IPs greyscale
+encode in black & white (default=off)
 .IPs debug
 save per-frame statistics in xvid.dbg (default=off)
 .br
@@ -3439,8 +3441,6 @@ not work as intended.
 create a bitstream that can be decoded delay-free (default=off)
 .IPs divx5bvop
 generate DivX5 compatible B-frames (default=on)
-.IPs greyscale
-encode in black & white (default=off)
 .IPs qpel
 enable quarter-pixel motion estimation (default=off)
 .IPs gmc
@@ -3450,7 +3450,7 @@ uses chroma information to estimate motion (default=off)
 .IPs reduced
 enable encoding reduced resolution frames (default=off)
 .IPs max_bframes=<0\-4>
-maximum number of B frames to put between I/P frames (default=0
+maximum number of B frames to put between I/P frames (default=0)
 .IPs bquant_ratio=<0\-1000>
 quantizer ratio between B and non B frames, 150=1.50 (default=150)
 .IPs bquant_offset=<-1000\-1000>
