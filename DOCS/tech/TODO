@@ -24,9 +24,17 @@ mencoder:
 
 other:
 - fix DVB a-v sync problems, switch to mp1e
-- check if runtime cpu detection works and complete, and add ./configure option
-  and announce it and so on...
 
+runtime:
+- add --enable-runtime or something (should change VERSION header and enable
+  runtime cpu detect and print banner telling users to recompile for speed)
+- runtime cpu detection in: 
+     aclib.c
+     vo_dga.c (asm stuff may be removed and replaced by fastmemcpy?)
+     vbelib.c (is it ok for all x86 cpus?)
+     libac3 (should be ported to liba52)
+     win32.c ??? (its cpu detection is unclean for me)
+     
 
 FUTURE:
 ~~~~~~~
