@@ -6,7 +6,13 @@
 
 #include "vd_internal.h"
 
+#ifdef USE_LZO
 #include <lzo1x.h>
+#else
+#include "native/minilzo.h"
+#define lzo_malloc malloc
+#define lzo_free free
+#endif
 
 #define MOD_NAME "DecLZO"
 
