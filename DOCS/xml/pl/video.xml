@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.77 -->
+<!-- synced with 1.78 -->
 <sect1 id="video">
 <title>Urządzenia wyjścia video</title>
 
@@ -2180,11 +2180,11 @@ W tej chwili lavc jest szybszy i daje lepszą jakość obrazu. Sugerowane jest
 użycie właśnie jego, chyba że masz z nim problemy. Spójrz na stronę man, aby
 uzyskać więcej informacji o <option>-vf lavc/fame</option>. Używanie lavc jest
 wysoce zalecane. Obecnie nie istnieje sposób ustawienia współczynnika fps dla
-em8300, co oznacza, że jest on zablokowany na 29.97fps. Z tego powodu jest
+em8300, co oznacza, że jest on zablokowany na 30000/1001fps. Z tego powodu jest
 bardzo wskazane abyś używał
 <option>-vf lavc=<replaceable>quality</replaceable>:25</option>. Szczególnie
-jeżeli używasz buforowania z wyprzedzeniem. Dlaczego 25 a nie 29.97? Cóż,
-przy 29.97 odtwarzanie staje się nieco skokowe. Powód tego nie jest nam znany.
+jeżeli używasz buforowania z wyprzedzeniem. Dlaczego 25 a nie 30000/1001? Cóż,
+przy 30000/1001 odtwarzanie staje się nieco skokowe. Powód tego nie jest nam znany.
 Jeżeli ustawisz fps pomiędzy 25 a 27 obraz stanie się stabilny. W chwili obecnej
 nie możemy zrobić nic poza zaakceptowaniem tego faktu.
 </para></listitem>
