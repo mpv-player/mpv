@@ -118,7 +118,10 @@ static int lavc_param_dia_size= 0;
 static int lavc_param_qpel= 0;
 static int lavc_param_trell= 0;
 static int lavc_param_aic= 0;
+static int lavc_param_aiv= 0;
 static int lavc_param_umv= 0;
+static int lavc_param_obmc= 0;
+static int lavc_param_loop= 0;
 static int lavc_param_last_pred= 0;
 static int lavc_param_pre_me= 1;
 static int lavc_param_me_subpel_quality= 8;
@@ -135,6 +138,10 @@ static int lavc_param_cbp= 0;
 static int lavc_param_mv0= 0;
 static int lavc_param_noise_reduction= 0;
 static int lavc_param_qp_rd= 0;
+static int lavc_param_inter_threshold= 0;
+static int lavc_param_ss= 0;
+static int lavc_param_top= -1;
+
 
 char *lavc_param_acodec = "mp2";
 int lavc_param_atag = 0;
@@ -227,6 +234,15 @@ m_option_t lavcopts_conf[]={
 	{"aic", &lavc_param_aic, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_H263P_AIC, NULL},
 	{"umv", &lavc_param_umv, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_H263P_UMV, NULL},
 #endif
+#ifdef CODEC_FLAG_H263P_AIV
+	{"aiv", &lavc_param_aiv, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_H263P_AIV, NULL},
+#endif
+#ifdef CODEC_FLAG_OBMC
+	{"obmc", &lavc_param_obmc, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_OBMC, NULL},
+#endif
+#ifdef CODEC_FLAG_LOOP_FILTER
+	{"loop", &lavc_param_loop, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_LOOP_FILTER, NULL},
+#endif
 #if LIBAVCODEC_BUILD >= 4663
 	{"ibias", &lavc_param_ibias, CONF_TYPE_INT, CONF_RANGE, -512, 512, NULL},
 	{"pbias", &lavc_param_pbias, CONF_TYPE_INT, CONF_RANGE, -512, 512, NULL},
@@ -249,6 +265,11 @@ m_option_t lavcopts_conf[]={
 #ifdef CODEC_FLAG_QP_RD
 	{"qprd", &lavc_param_qp_rd, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_QP_RD, NULL},
 #endif
+#ifdef CODEC_FLAG_H263P_SLICE_STRUCT
+	{"ss", &lavc_param_ss, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_H263P_SLICE_STRUCT, NULL},
+#endif
+	{"inter_threshold", &lavc_param_inter_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
+	{"top", &lavc_param_top, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -361,6 +382,9 @@ static int config(struct vf_instance_s* vf,
 #endif
 #if LIBAVCODEC_BUILD >= 4690
     lavc_venc_context->noise_reduction= lavc_param_noise_reduction;
+#endif
+#if LIBAVCODEC_BUILD >= 4693
+    lavc_venc_context->inter_threshold= lavc_param_inter_threshold;
 #endif
 #if LIBAVCODEC_BUILD >= 4675
     if (lavc_param_intra_matrix)
@@ -510,12 +534,16 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->flags|= lavc_param_trell;
 #endif 
     lavc_venc_context->flags|= lavc_param_aic;
+    lavc_venc_context->flags|= lavc_param_aiv;
     lavc_venc_context->flags|= lavc_param_umv;
+    lavc_venc_context->flags|= lavc_param_obmc;
+    lavc_venc_context->flags|= lavc_param_loop;
     lavc_venc_context->flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
     lavc_venc_context->flags|= lavc_param_data_partitioning;
     lavc_venc_context->flags|= lavc_param_cbp;
     lavc_venc_context->flags|= lavc_param_mv0;
     lavc_venc_context->flags|= lavc_param_qp_rd;
+    lavc_venc_context->flags|= lavc_param_ss;
     if(lavc_param_gray) lavc_venc_context->flags|= CODEC_FLAG_GRAY;
 
     if(lavc_param_normalize_aqp) lavc_venc_context->flags|= CODEC_FLAG_NORMALIZE_AQP;
@@ -671,6 +699,14 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     pic->linesize[0]=mpi->stride[0];
     pic->linesize[1]=mpi->stride[1];
     pic->linesize[2]=mpi->stride[2];
+
+#if LIBAVCODEC_BUILD >= 4697
+    if(mpi->fields & MP_IMGFIELD_ORDERED)
+        pic->top_field_first= !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
+    
+    if(lavc_param_top!=-1)
+        pic->top_field_first= lavc_param_top;
+#endif
 
 	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    pic);
