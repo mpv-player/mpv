@@ -154,6 +154,7 @@ extern void demux_close_rtp(demuxer_t* demuxer);
 extern void demux_close_demuxers(demuxer_t* demuxer);
 extern void demux_close_avi(demuxer_t *demuxer);
 extern void demux_close_rawdv(demuxer_t* demuxer);
+extern void demux_close_pva(demuxer_t* demuxer);
 
 #ifdef USE_TV
 #include "tv.h"
@@ -170,6 +171,8 @@ void free_demuxer(demuxer_t *demuxer){
     int i;
     mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing demuxer at %p  \n",demuxer);
     switch(demuxer->type) {
+    case DEMUXER_TYPE_PVA:
+      demux_close_pva(demuxer); break;
     case DEMUXER_TYPE_VIVO:
       demux_close_vivo(demuxer); break;
     case DEMUXER_TYPE_REAL:
@@ -284,6 +287,8 @@ int demux_rtp_fill_buffer(demuxer_t *demux, demux_stream_t* ds);
 int demux_rawdv_fill_buffer(demuxer_t *demuxer);
 int demux_y4m_fill_buffer(demuxer_t *demux);
 int demux_audio_fill_buffer(demux_stream_t *ds);
+int demux_pva_fill_buffer(demuxer_t *demux);
+
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 extern int demux_ogg_fill_buffer(demuxer_t *d);
 extern int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds);
@@ -305,6 +310,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_ASF: return demux_asf_fill_buffer(demux);
     case DEMUXER_TYPE_MOV: return demux_mov_fill_buffer(demux,ds);
     case DEMUXER_TYPE_VIVO: return demux_vivo_fill_buffer(demux);
+    case DEMUXER_TYPE_PVA: return demux_pva_fill_buffer(demux);
 #ifdef HAVE_LIBDV095
     case DEMUXER_TYPE_RAWDV: return demux_rawdv_fill_buffer(demux);
 #endif
@@ -532,10 +538,9 @@ extern void demux_open_vivo(demuxer_t *demuxer);
 extern int y4m_check_file(demuxer_t *demuxer);
 extern void demux_open_y4m(demuxer_t *demuxer);
 extern int roq_check_file(demuxer_t *demuxer);
-
+extern int pva_check_file(demuxer_t * demuxer);
 extern int real_check_file(demuxer_t *demuxer);
 extern void demux_open_real(demuxer_t *demuxer);
-
 extern int nuv_check_file(demuxer_t *demuxer);
 extern void demux_open_nuv(demuxer_t *demuxer);
 extern int demux_audio_open(demuxer_t* demuxer);
@@ -740,6 +745,17 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_OGG){
       demuxer = NULL;
   }
 }
+//=============== Try to open as PVA file: =================
+if(file_format == DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_PVA){
+	demuxer=new_demuxer(stream,DEMUXER_TYPE_PVA,audio_id,video_id,dvdsub_id);
+	if(pva_check_file(demuxer)) {
+		mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected PVA file...\n");
+		file_format=DEMUXER_TYPE_PVA;
+	} else {
+		free_demuxer(demuxer);
+		demuxer=NULL;
+	}
+}
 //=============== Try to open as MPEG-PS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  int pes=1;
@@ -921,6 +937,10 @@ switch(file_format){
   demux_open_vivo(demuxer);
   break;
  }
+ case DEMUXER_TYPE_PVA: {
+  demux_open_pva(demuxer);
+  break;
+ }
  case DEMUXER_TYPE_Y4M: {
   demux_open_y4m(demuxer);
   break;
@@ -1069,6 +1089,8 @@ int demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_nuv(demuxer_t *demuxer,float rel_seek_secs,int flags);
 void demux_seek_mov(demuxer_t *demuxer,float pts,int flags);
 int demux_seek_real(demuxer_t *demuxer,float rel_seek_secs,int flags);
+int demux_seek_pva(demuxer_t *demuxer,float rel_seek_secs,int flags);
+
 #ifdef HAVE_LIBDV095
 int demux_seek_rawdv(demuxer_t *demuxer, float pts, int flags);
 #endif
@@ -1140,6 +1162,9 @@ switch(demuxer->file_format){
 
   case DEMUXER_TYPE_MF:
       demux_seek_mf(demuxer,rel_seek_secs,flags);  break;
+
+  case DEMUXER_TYPE_PVA:
+      demux_seek_pva(demuxer,rel_seek_secs,flags); break;
       
   case DEMUXER_TYPE_FLI:
       demux_seek_fli(demuxer,rel_seek_secs,flags);  break;
