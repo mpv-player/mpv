@@ -2222,8 +2222,14 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
     }
 
   ptr1 = block;
-  while ((*ptr1 == '\n' || *ptr1 == '\r') && ptr1 - block <= size)
+  while (ptr1 - block <= size && (*ptr1 == '\n' || *ptr1 == '\r'))
     ptr1++;
+  ptr2 = block + size - 1;
+  while (ptr2 >= block && (*ptr2 == '\n' || *ptr2 == '\r'))
+    {
+      *ptr2 = 0;
+      ptr2--;
+    }
 
   if (mkv_d->subs.lines > SUB_MAX_TEXT - 2)
     {
@@ -2325,11 +2331,24 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
 }
 
 static void
-clear_subtitles(demuxer_t *demuxer, uint64_t timecode)
+clear_subtitles(demuxer_t *demuxer, uint64_t timecode, int clear_all)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   int i, lines_cut = 0;
   char *tmp;
+
+  /* Clear all? */
+  if (clear_all)
+    {
+      lines_cut = mkv_d->subs.lines;
+      mkv_d->subs.lines = 0;
+      if (lines_cut)
+        {
+          vo_sub = &mkv_d->subs;
+          vo_osd_changed (OSDTYPE_SUBTITLE);
+        }
+      return;
+    }
 
   /* Clear the subtitles if they're obsolete now. */
   for (i=0; i < mkv_d->subs.lines; i++)
@@ -2341,7 +2360,7 @@ clear_subtitles(demuxer_t *demuxer, uint64_t timecode)
                    (mkv_d->subs.lines-i-1) * sizeof (*mkv_d->subs.text));
           memmove (mkv_d->clear_subs_at+i, mkv_d->clear_subs_at+i+1,
                    (mkv_d->subs.lines-i-1) * sizeof (*mkv_d->clear_subs_at));
-          mkv_d->subs.text[mkv_d->subs.lines--] = tmp;
+          mkv_d->subs.text[--mkv_d->subs.lines] = tmp;
           i--;
           lines_cut = 1;
         }
@@ -2499,7 +2518,7 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
     return -1;
   current_pts = tc / 1000.0;
 
-  clear_subtitles(demuxer, tc);
+  clear_subtitles(demuxer, tc, 0);
 
   for (i=0; i<mkv_d->num_tracks; i++)
     if (mkv_d->tracks[i]->tnum == num)
@@ -2814,6 +2833,10 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags)
       if (rel_seek_secs > 0.0)
         mkv_d->skip_to_timecode = target_timecode;
       mkv_d->a_skip_to_keyframe = 1;
+
+      /* Clear subtitles. */
+      if (target_timecode <= mkv_d->last_pts * 1000)
+        clear_subtitles(demuxer, 0, 1);
 
       demux_mkv_fill_buffer(demuxer);
 
