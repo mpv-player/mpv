@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan,  technik at domotech.cz
-// Synced to 1.153
+// Synced to 1.154
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -616,12 +616,14 @@ static char help_text[]=
 #define MSGTR_NEMFMR "Bohu¾el není dostatek pamìti pro vykreslení menu."
 #define MSGTR_IDFGCVD "Bohu¾el nebyl nalezen video ovladaè kompatibilní s GUI."
 #define MSGTR_NEEDLAVCFAME "Bohu¾el nelze pøehrávat ne-MPEG s kartou DXR3/H+ bez pøeenkódování.\nProsím, zapnìte lavc nebo fame v konfiguraci DXR3/H+."
+#define MSGTR_UNKNOWNWINDOWTYPE "Nalezen neznámý typ okna ..."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[témata] chyba v konfiguraèním souboru témat na øádce %d: %s"
 #define MSGTR_SKIN_WARNING1 "[témata] varování v konfiguraèním souboru témat na øádce %d:\nwidget nalezen ale pøed ním nebyla nalezena ¾ádná \"section\" (%s)"
 #define MSGTR_SKIN_WARNING2 "[témata] varování v konfiguraèním souboru témat na øádce %d:\nwidget nalezen ale pøed ním nebyla nalezena ¾ádná \"subsection\" (%s)"
 #define MSGTR_SKIN_WARNING3 "[témata] varování v konfiguraèním souboru témat na øádce %d:\nwidget (%s) nepodporuje tuto subsekci"
+#define MSGTR_SKIN_SkinFileNotFound "[skin] soubor ( %s ) nenalezen.\n"
 #define MSGTR_SKIN_BITMAP_16bit  "bitmapa s hloubkou 16 bitù a ménì není podporována (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "soubor nenalezen (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "chyba ètení BMP (%s)\n"
@@ -638,6 +640,7 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "neexistující identifikátor fontu (%s)\n"
 #define MSGTR_SKIN_UnknownParameter "neznámý parametr (%s)\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Téma nenalezeno (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "Vybraný skin ( %s ) nenalezen, zkou¹ím 'výchozí'...\n"
 #define MSGTR_SKIN_SKINCFG_SkinCfgReadError "chyba pøi ètení konfiguraèního souboru témat (%s)\n"
 #define MSGTR_SKIN_LABEL "Témata:"
 
@@ -819,6 +822,45 @@ static char help_text[]=
 #define MSGTR_MSGBOX_LABEL_FatalError "Kritická chyba!"
 #define MSGTR_MSGBOX_LABEL_Error "Chyba!"
 #define MSGTR_MSGBOX_LABEL_Warning "Varování!"
+
+// bitmap.c
+
+#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] nedostatek pamìti pro obrázek\n"
+#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] nedostatek pamìti pro obrázek\n"
+
+// cfg.c
+
+#define MSGTR_ConfigFileReadError "[cfg] chyba pøi ètení konfiguraèního souboru...\n"
+#define MSGTR_UnableToSaveOption "Nelze ulo¾it volbu '%s'.\n"
+
+// interface.c
+
+#define MSGTR_DeletingSubtitles "[GUI] Ma¾u titulky.\n"
+#define MSGTR_LoadingSubtitles "[GUI] Naèítám titulky: %s\n"
+#define MSGTR_AddingVideoFilter "[GUI] Pøidávám video filtr: %s\n"
+#define MSGTR_RemovingVideoFilter "[GUI] Odstraòuji video filtr: %s\n"
+
+// mw.c
+
+#define MSGTR_NotAFile "Toto nevypadá jako soubor: %s !\n"
+
+// ws.c
+
+#define MSGTR_WS_CouldNotOpenDisplay "[ws] Nelze otevøít display.\n"
+#define MSGTR_WS_RemoteDisplay "[ws] Vzdálený display, vypínám XMITSHM.\n"
+#define MSGTR_WS_NoXshm "[ws] Promiòte, ale vá¹ systém nepodporuje roz¹íøení X shared memory.\n"
+#define MSGTR_WS_NoXshape "[ws] Promiòte, ale vá¹ systém nepodporuje roz¹íøení XShape.\n"
+#define MSGTR_WS_ColorDepthTooLow "[ws] Promiòte, ale barevná hloubka je pøíli¾ malá.\n"
+#define MSGTR_WS_TooManyOpenWindows "[ws] Pøíli¾ mnoho otevøených oken.\n"
+#define MSGTR_WS_ShmError "[ws] chyba roz¹íøení shared memory\n"
+#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] Promiòte, nedostatek pamìti pro vykreslení buferu.\n"
+#define MSGTR_WS_DpmsUnavailable "DPMS není k dispozici?\n"
+#define MSGTR_WS_DpmsNotEnabled "Nelze zapnout DPMS.\n"
+
+// wsxdnd.c
+
+#define MSGTR_WS_NotAFile "Toto nevypadá jako soubor...\n"
+#define MSGTR_WS_DDNothing "D&D: Nic se nevrátilo!\n"
 
 #endif
 
