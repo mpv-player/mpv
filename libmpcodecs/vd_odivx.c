@@ -35,6 +35,7 @@ LIBVD_EXTERN(odivx)
 
 #ifndef NEW_DECORE
 #include "opendivx/decore.h"
+#include "postproc/postprocess.h"
 #else
 #include <decore.h>
 #endif
