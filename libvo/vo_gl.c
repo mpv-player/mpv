@@ -58,6 +58,8 @@ static uint32_t image_bytes;
 static uint32_t texture_width;
 static uint32_t texture_height;
 
+static int slice_height=1;
+
 static void resize(int x,int y){
   printf("[gl] Resize: %dx%d\n",x,y);
   glViewport( 0, 0, x, y );
@@ -286,13 +288,13 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y
 	yuv2rgb(ImageData, src[0], src[1], src[2], 
 			w,h, dstride, stride[0],stride[1]);
 
-    for(i=0;i<h;i++){
+    for(i=0;i<h;i+=slice_height){
       glTexSubImage2D( GL_TEXTURE_2D,  // target
 		       0,              // level
 		       x,              // x offset
 		       y+i,            // y offset
 		       w,              // width
-		       1,              // height
+		       (i+slice_height<=h)?slice_height:h-i, // height
 		       (BYTES_PP==4)?GL_RGBA:GL_RGB,        // format
 		       GL_UNSIGNED_BYTE, // type
 		       ImageData+i*dstride );        // *pixels
@@ -310,13 +312,13 @@ int i;
 		image_width, image_height, 
 		image_width*BYTES_PP, image_width, image_width/2 );
 
-    for(i=0;i<image_height;i++){
+    for(i=0;i<image_height;i+=slice_height){
       glTexSubImage2D( GL_TEXTURE_2D,  // target
 		       0,              // level
 		       0,              // x offset
 		       i,              // y offset
 		       image_width,    // width
-		       1,              // height
+		       (i+slice_height<=image_height)?slice_height:image_height-i, // height
 		       (BYTES_PP==4)?GL_RGBA:GL_RGB,        // format
 		       GL_UNSIGNED_BYTE, // type
 		       ImageData+i*BYTES_PP*image_width );        // *pixels
@@ -331,10 +333,11 @@ draw_frame_x11_bgr(uint8_t *src[])
 {
 int i;
 uint8_t *s=src[0];
-uint8_t *de=&ImageData[3*image_width];
 
-    for(i=0;i<image_height;i++){
+    for(i=0;i<image_height;i+=slice_height){
+      int h=(i+slice_height<=image_height)?slice_height:image_height-i;
       uint8_t *d=ImageData;
+      uint8_t *de=&ImageData[3*image_width*h];
       while(d<de){
         d[0]=s[2];
         d[1]=s[1];
@@ -347,7 +350,7 @@ uint8_t *de=&ImageData[3*image_width];
 //		       image_height-1-i,  // y offset
 		       i,  // y offset
 		       image_width,    // width
-		       1,              // height
+		       h, // height
 		       (image_bytes==4)?GL_RGBA:GL_RGB,        // format
 		       GL_UNSIGNED_BYTE, // type
 		       ImageData);        // *pixels
@@ -362,14 +365,14 @@ draw_frame_x11_rgb(uint8_t *src[])
 int i;
 uint8_t *ImageData=src[0];
 
-    for(i=0;i<image_height;i++){
+    for(i=0;i<image_height;i+=slice_height){
       glTexSubImage2D( GL_TEXTURE_2D,  // target
 		       0,              // level
 		       0,              // x offset
 //		       image_height-1-i,  // y offset
 		       i,  // y offset
 		       image_width,    // width
-		       1,              // height
+		       (i+slice_height<=image_height)?slice_height:image_height-i,              // height
 		       (image_bytes==4)?GL_RGBA:GL_RGB,        // format
 		       GL_UNSIGNED_BYTE, // type
 		       ImageData+i*image_bytes*image_width );        // *pixels
@@ -417,9 +420,15 @@ static uint32_t preinit(const char *arg)
 {
     if(arg) 
     {
-	printf("[gl] Unknown subdevice: %s\n",arg);
-	return ENOSYS;
+	    slice_height = atoi(arg);
+	    if (slice_height <= 0)
+		    slice_height = 65536;
     }
+    else
+    {
+	    slice_height = 4;
+    }
+    printf("[vo_gl] Using %d as slice_height (0 means image_height).\n", slice_height);
 
     if( !vo_init() ) return -1; // Can't open X11
 
