@@ -782,9 +782,9 @@ handy, but you need powerful CPU to use software scaling. Don't use the
 SDL driver's software output+scaler, it has worse image quality !</P>
 
 
-<P><B><A NAME=2.3.1.14>2.3.1.14. Radeon video overlay (radeon_vid)</A></B></P>
+<P><B><A NAME=2.3.1.14>2.3.1.14. Rage128 (Pro) / Radeon video overlay (radeon_vid)</A></B></P>
 <P>
-<b>radeon_vid</b> provides support for the <b>BackEnd Scaler</b> on ATI <b>Radeon</b> chipsets.
+<b>radeon_vid</b> provides support for the <b>BackEnd Scaler</b> on ATI <b>Radeon</b> and Rage128 (Pro) chipsets.
 It was designed and introduced as analog of <a href="video.html#2.3.1.7">mga_vid</a> driver, so you can use it in the same way!<br>
 But main goal of this driver usage is <a href="video.html#2.3.1.12">VESA</a> driver.<br>
 Simply because VESA enables TV-out on ATI's card but Backend scaler is used after
@@ -803,7 +803,7 @@ driver.</P>
 <P>
 <UL>
   <LI>
-    <CODE>cd drivers/radeon/radeon<BR>
+    <CODE>cd drivers/radeon<BR>
     make</CODE><BR></LI>
   <LI>install the <CODE>radeon_vid.o</CODE> module to your kernelmodules</LI>
   <LI>execute the following : <CODE>mknod /dev/radeon_vid c 178 0</CODE></LI>
@@ -821,8 +821,7 @@ driver.</P>
 <P><B>NOTE</B>: don't use any framebuffers when you plan to use this driver ! Use
 it only from textmode console.</P>
 
-<P><b>Limitations:</b> Currently it works only with <b>YUY2</b> format, so use the DirectShow codec
-family with it.<br>
+<P>
 <b>Conclusion:</b> I know there are lot of lacks and bugs. So if you are able
 to improve something then simply send me your patches.
 </P>
