@@ -112,7 +112,7 @@ static int preinit(sh_audio_t *sh){
     }
 
   sh->audio_out_minsize=128000; //sh->samplerate*sh->samplesize*sh->channels;
-  sh->audio_in_minsize=2*sh->wf->nBlockAlign;
+  sh->audio_in_minsize=10*sh->wf->nBlockAlign;
 //  sh->samplesize=2;
 //  sh->channels=2;
 //  sh->samplerate=44100;
@@ -141,12 +141,23 @@ static void uninit(sh_audio_t *sh){
 static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen){
   int result;
   int len=-1;
+
+  if(sh->a_in_buffer_len<=0){
+      // fill the buffer!
+      int x,y;
+      for(y=0;y<10;y++)
+        for(x=0;x<10;x++){
+	    demux_read_data(sh->ds, sh->a_in_buffer+10*60*x+60*5*(y&1)+60*(y>>1), 60);
+	}
+      sh->a_in_buffer_len=10*10*60;
+  }
   
-  demux_read_data(sh->ds, sh->a_in_buffer, 60);
+//  demux_read_data(sh->ds, sh->a_in_buffer, 600);
   
-  result=raDecode(sh->context, sh->a_in_buffer, sh->wf->nBlockAlign,
+  result=raDecode(sh->context, sh->a_in_buffer+10*10*60-sh->a_in_buffer_len, sh->wf->nBlockAlign,
        buf, &len, -1);
-       
+  sh->a_in_buffer_len-=sh->wf->nBlockAlign;
+  
   printf("radecode: %d bytes, res=0x%X  \n",len,result);
 
   // audio decoding. the most important thing :)
@@ -168,7 +179,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   //  ds_get_packet(sh->ds, &buffer) - set ptr buffer to next data packet
   // (both func return number of bytes or 0 for error)
 
-  return len/8; // return value: number of _bytes_ written to output buffer,
+  return len; // return value: number of _bytes_ written to output buffer,
               // or -1 for EOF (or uncorrectable error)
 }
 
