@@ -23,11 +23,13 @@ static unsigned int getfmt(unsigned int outfmt){
     case IMGFMT_RGB15:
     case IMGFMT_RGB16:
     case IMGFMT_RGB24:
-    case IMGFMT_RGB32:
+    case IMGFMT_RGBA:
+    case IMGFMT_ARGB:
     case IMGFMT_BGR15:
     case IMGFMT_BGR16:
     case IMGFMT_BGR24:
-    case IMGFMT_BGR32:
+    case IMGFMT_BGRA:
+    case IMGFMT_ABGR:
 	return outfmt;
     }
     return 0;    
@@ -35,18 +37,14 @@ static unsigned int getfmt(unsigned int outfmt){
 
 static void put_pixel(uint8_t *buf, int x, int y, int stride, int r, int g, int b, int fmt){
     switch(fmt){
-    case IMGFMT_RGB15: ((uint16_t*)(buf + y*stride))[x]= ((r>>3)<<10) | ((g>>3)<<5) | (b>>3);
+    case IMGFMT_BGR15: ((uint16_t*)(buf + y*stride))[x]= ((r>>3)<<10) | ((g>>3)<<5) | (b>>3);
     break;
-    case IMGFMT_BGR15: ((uint16_t*)(buf + y*stride))[x]= ((b>>3)<<10) | ((g>>3)<<5) | (r>>3);
+    case IMGFMT_RGB15: ((uint16_t*)(buf + y*stride))[x]= ((b>>3)<<10) | ((g>>3)<<5) | (r>>3);
     break;
-    case IMGFMT_RGB16: ((uint16_t*)(buf + y*stride))[x]= ((r>>3)<<11) | ((g>>2)<<5) | (b>>3);
+    case IMGFMT_BGR16: ((uint16_t*)(buf + y*stride))[x]= ((r>>3)<<11) | ((g>>2)<<5) | (b>>3);
     break;
-    case IMGFMT_BGR16: ((uint16_t*)(buf + y*stride))[x]= ((b>>3)<<11) | ((g>>2)<<5) | (r>>3);
+    case IMGFMT_RGB16: ((uint16_t*)(buf + y*stride))[x]= ((b>>3)<<11) | ((g>>2)<<5) | (r>>3);
     break;
-/*    case IMGFMT_RGB32_ME: ((uint32_t*)(buf + y*stride))[x]= (r<<16) | (g<<8) | b;
-    break;
-    case IMGFMT_BGR32_ME: ((uint32_t*)(buf + y*stride))[x]= (b<<16) | (g<<8) | r;
-    break;*/
     case IMGFMT_RGB24: 
         buf[3*x + y*stride + 0]= r;
         buf[3*x + y*stride + 1]= g;
@@ -57,26 +55,26 @@ static void put_pixel(uint8_t *buf, int x, int y, int stride, int r, int g, int 
         buf[3*x + y*stride + 1]= g;
         buf[3*x + y*stride + 2]= r;
     break;
-    case IMGFMT_RGB32:
+    case IMGFMT_RGBA:
         buf[4*x + y*stride + 0]= r;
         buf[4*x + y*stride + 1]= g;
         buf[4*x + y*stride + 2]= b;
     break;
-    case IMGFMT_BGR32:
+    case IMGFMT_BGRA:
         buf[4*x + y*stride + 0]= b;
         buf[4*x + y*stride + 1]= g;
         buf[4*x + y*stride + 2]= r;
     break;
-/*    case IMGFMT_ARGB32:
+    case IMGFMT_ARGB:
         buf[4*x + y*stride + 1]= r;
         buf[4*x + y*stride + 2]= g;
         buf[4*x + y*stride + 3]= b;
     break;
-    case IMGFMT_ABGR32:
+    case IMGFMT_ABGR:
         buf[4*x + y*stride + 1]= b;
         buf[4*x + y*stride + 2]= g;
         buf[4*x + y*stride + 3]= r;
-    break;*/
+    break;
     }
 }
 
