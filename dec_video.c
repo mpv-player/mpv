@@ -238,7 +238,7 @@ switch(sh_video->codec->driver){
  case VFM_VFW:
  case VFM_DSHOW:
  case VFM_VFWEX:
-   mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_NoWin32Support);
+   mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_NoWfvSupport);
    return 0;
 #endif	/* !USE_WIN32DLL */
  case VFM_ODIVX: {  // OpenDivX
