@@ -747,12 +747,28 @@ very easy to implement this stuff through reading/writing Radeon ports.
 future this stuff will be fully rewritten. This is the first public release of
 driver.</P>
 
+<P><B>Installation</B></P>
+
 <P>
-  <b>Location:</b><BR>
-&nbsp;&nbsp;mplayer-CVS:main/drivers/radeon/radeon_vid*
+<UL>
+  <LI>
+    <CODE>cd drivers/radeon/radeon<BR>
+    make</CODE><BR></LI>
+  <LI>install the <CODE>radeon_vid.o</CODE> module to your kernelmodules</LI>
+  <LI>execute the following : <CODE>mknod /dev/radeon_vid c 178 0</CODE></LI>
+  <LI>add the following at the end of the <CODE>/etc/modules.conf</CODE> file :<BR>
+    <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE>
+  <LI>run <CODE>depmod -a</CODE></LI>
+</UL>
+</P>
+
+<P>
 <br><b>Usage:</b><BR>
 &nbsp;&nbsp;<CODE>mplayer -vo vesa:lvo:/dev/radeon_vid &lt;your options&gt; filename</CODE>
 </P>
+
+<P><B>NOTE</B>: don't use any framebuffers when you plan to use this driver ! Use
+it only from textmode console.</P>
 
 <P><b>Limitations:</b> Currently it works only with <b>YUY2</b> format, so use the DirectShow codec
 family with it. You should have at least 32MB of video memory.<br>
