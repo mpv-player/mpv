@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.15 -->
 <sect1 id="install">
 <title>Instalación</title>
 
@@ -268,9 +268,9 @@ cuando hagan zoom), por lo tanto la pantalla completa es agradable y muy rápida.
   instalación y uso. Es muy importante hacer estos pasos <emphasis>antes</emphasis>
   de compilar <application>MPlayer</application>, de otro modo no se dará soporte
   para mga_vid. También revise la sección 
-  <link linkend="tvout-mga-g400">Salida de TV Matrox</link>. Si <emphasis role="bold">
-  no usa Linux</emphasis>, su única posibilidad es el controlador VIDIX: lea la
-  sección <link linkend="vidix">VIDIX</link>.
+  <link linkend="tvout-mga-g400">Salida de TV Matrox</link>.
+  <emphasis role="bold">Si no usa Linux</emphasis>, su única posibilidad
+  es el controlador VIDIX: lea la sección <link linkend="vidix">VIDIX</link>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">Placas 3Dfx Voodoo3/Banshee</emphasis>: por favor vea la

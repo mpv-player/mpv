@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.18 -->
+<!-- synced with 1.21 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Preguntas de Usuario Frecuentes</title>
 
@@ -307,8 +307,8 @@ Se llaman <filename>XFree86-devel*</filename> bajo Red Hat, y
 <filename class="directory">/usr/include/X11</filename> existen (esto
 puede ser un problema en sistemas Mandrake). Pueden crearse con éstas órdenes:
 <screen>
-     $ ln -sf /usr/X11R6 /usr/X11
-     $ ln -sf /usr/X11R6/include/X11 /usr/include/X11
+     # ln -sf /usr/X11R6 /usr/X11
+     # ln -sf /usr/X11R6/include/X11 /usr/include/X11
 </screen>
 Su distribución puede diferir del
 <ulink url="http://www.pathname.com/fhs/">Filesystem Hierarchy Standard</ulink>.
@@ -509,7 +509,7 @@ Umm, ¿qué es &quot;IdegCounter&quot;?
 </para></question>
 <answer><para>
 Una combinación de una palabra en Húngaro y una Inglesa. &quot;Ideg&quot; en Húngaro 
-quiere decir lo mismo que "nervio" en Español, y es pronunciado algo parecido a
+quiere decir lo mismo que &quot;nervio&quot; en Español, y es pronunciado algo parecido a
 &quot;ydaegh&quot;. Al principio fue  usado para medir el nivel de Nervios de A'rpi, después
 de la (umm) &quot;misteriosa&quot; desaparición de codigo CVS ;)
 </para></answer>
