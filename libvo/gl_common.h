@@ -15,6 +15,11 @@
 
 void glAdjustAlignment(int stride);
 
+const char *glValName(GLint value);
+
+int glFindFormat(uint32_t format, uint32_t *bpp, GLenum *gl_texfmt,
+                  GLenum *gl_format, GLenum *gl_type);
+
 //! could not set new window, will continue drawing into the old one.
 #define SET_WINDOW_FAILED -1
 //! new window is set, could even transfer the OpenGL context.

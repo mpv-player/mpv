@@ -1,5 +1,3 @@
-#define TEXTUREFORMAT_ALWAYS GL_RGB8
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -104,84 +102,6 @@ static void resize(int x,int y){
   }
 }
 
-static int find_gl_format (uint32_t format)
-{
-  image_bytes = (IMGFMT_RGB_DEPTH(format)+7)/8;
-  gl_texfmt = 3;
-  switch (format) {
-    case IMGFMT_RGB24:
-      gl_format = GL_RGB;
-      gl_type = GL_UNSIGNED_BYTE;
-      break;
-    case IMGFMT_RGBA:
-      gl_texfmt = 4;
-      gl_format = GL_RGBA;
-      gl_type = GL_UNSIGNED_BYTE;
-      break;
-    case IMGFMT_Y800:
-    case IMGFMT_Y8:
-      gl_texfmt = 1;
-      image_bytes = 1;
-      gl_format = GL_LUMINANCE;
-      gl_type = GL_UNSIGNED_BYTE;
-      break;
-#ifdef GL_VERSION_1_2
-#if 0
-    // we do not support palettized formats, although the format the
-    // swscale produces works
-    case IMGFMT_RGB8:
-      gl_format = GL_RGB;
-      gl_type = GL_UNSIGNED_BYTE_2_3_3_REV;
-      break;
-#endif
-    case IMGFMT_RGB15:
-      gl_format = GL_RGBA;
-      gl_type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
-      break;
-    case IMGFMT_RGB16:
-      gl_format = GL_RGB;
-      gl_type = GL_UNSIGNED_SHORT_5_6_5_REV;
-      break;
-#if 0
-    case IMGFMT_BGR8:
-      // special case as red and blue have a differen number of bits.
-      // GL_BGR and GL_UNSIGNED_BYTE_3_3_2 isn't supported at least
-      // by nVidia drivers, and in addition would give more bits to
-      // blue than to red, which isn't wanted
-      gl_format = GL_RGB;
-      gl_type = GL_UNSIGNED_BYTE_3_3_2;
-      break;
-#endif
-    case IMGFMT_BGR15:
-      gl_format = GL_BGRA;
-      gl_type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
-      break;
-    case IMGFMT_BGR16:
-      gl_format = GL_RGB;
-      gl_type = GL_UNSIGNED_SHORT_5_6_5;
-      break;
-    case IMGFMT_BGR24:
-      gl_format = GL_BGR;
-      gl_type = GL_UNSIGNED_BYTE;
-      break;
-    case IMGFMT_BGRA:
-      gl_texfmt = 4;
-      gl_format = GL_BGRA;
-      gl_type = GL_UNSIGNED_BYTE;
-      break;
-#endif
-    default:
-      gl_texfmt = 4;
-      gl_format = GL_RGBA;
-      gl_type = GL_UNSIGNED_BYTE;
-      return 0;
-  }
-#ifdef TEXTUREFORMAT_ALWAYS
-  gl_texfmt = TEXTUREFORMAT_ALWAYS;
-#endif
-  return 1;
-}
-
 /**
  * \brief Initialize a (new or reused) OpenGL context.
  */
@@ -230,7 +150,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 {
 	image_height = height;
 	image_width = width;
-	find_gl_format (format);
+	glFindFormat(format, &image_bytes, &gl_texfmt, &gl_format, &gl_type);
+	image_bytes = (image_bytes + 7) / 8;
 
   sub_bg_alpha = 255; // We need alpha = 255 for invisible part of the OSD
 	int_pause = 0;
@@ -529,7 +450,8 @@ query_format(uint32_t format)
       caps |= VFCAP_OSD;
     if ((format == IMGFMT_RGB24) || (format == IMGFMT_RGBA))
         return caps;
-    if (many_fmts && find_gl_format(format))
+    if (many_fmts &&
+         glFindFormat(format, NULL, NULL, NULL, NULL))
         return caps;
     return 0;
 }

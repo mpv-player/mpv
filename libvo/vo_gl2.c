@@ -43,10 +43,8 @@
 //#undef NDEBUG
 
 #undef TEXTUREFORMAT_ALWAYS
-#undef TEXTUREFORMAT_ALWAYS_S
 #ifdef SYS_DARWIN
 #define TEXTUREFORMAT_ALWAYS GL_RGBA8
-#define TEXTUREFORMAT_ALWAYS_S "GL_RGBA8"
 #endif
 
 static vo_info_t info = 
@@ -81,7 +79,6 @@ static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_format;
 static uint32_t image_bpp;
-static int      image_mode;
 static uint32_t image_bytes;
 
 static int int_pause;
@@ -92,12 +89,9 @@ static int texnumx, texnumy, raw_line_len;
 static GLfloat texpercx, texpercy;
 static struct TexSquare * texgrid = NULL;
 static GLint    gl_internal_format;
-static char *   gl_internal_format_s;
 static int      rgb_sz, r_sz, g_sz, b_sz, a_sz;
 static GLint    gl_bitmap_format;
-static char *   gl_bitmap_format_s;
 static GLint    gl_bitmap_type;
-static char *   gl_bitmap_type_s;
 static int      isGL12 = GL_FALSE;
 
 static int      gl_bilinear=1;
@@ -794,10 +788,10 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   gl_set_antialias(0);
   gl_set_bilinear(1);
   
-  mp_msg(MSGT_VO, MSGL_V, "[gl2] Using image_bpp=%d, image_bytes=%d, isBGR=%d, \n\tgl_bitmap_format=%s, gl_bitmap_type=%s, \n\trgb_size=%d (%d,%d,%d), a_sz=%d, \n\tgl_internal_format=%s\n",
-  	image_bpp, image_bytes, image_mode==MODE_BGR, 
-        gl_bitmap_format_s, gl_bitmap_type_s,
-	rgb_sz, r_sz, g_sz, b_sz, a_sz, gl_internal_format_s);
+  mp_msg(MSGT_VO, MSGL_V, "[gl2] Using image_bpp=%d, image_bytes=%d, \n\tgl_bitmap_format=%s, gl_bitmap_type=%s, \n\trgb_size=%d (%d,%d,%d), a_sz=%d, \n\tgl_internal_format=%s\n",
+        image_bpp, image_bytes, 
+        glValName(gl_bitmap_format), glValName(gl_bitmap_type),
+        rgb_sz, r_sz, g_sz, b_sz, a_sz, glValName(gl_internal_format));
 
   resize(&d_width, &d_height);
 
@@ -871,54 +865,33 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   if(r_sz==3 && g_sz==3 && b_sz==2 && a_sz==0) {
 	  gl_internal_format=GL_R3_G3_B2;
-	  gl_internal_format_s="GL_R3_G3_B2";
   } else if(r_sz==4 && g_sz==4 && b_sz==4 && a_sz==0) {
 	  gl_internal_format=GL_RGB4;
-	  gl_internal_format_s="GL_RGB4";
   } else if(r_sz==5 && g_sz==5 && b_sz==5 && a_sz==0) {
 	  gl_internal_format=GL_RGB5;
-	  gl_internal_format_s="GL_RGB5";
   } else if(r_sz==8 && g_sz==8 && b_sz==8 && a_sz==0) {
 	  gl_internal_format=GL_RGB8;
-	  gl_internal_format_s="GL_RGB8";
   } else if(r_sz==10 && g_sz==10 && b_sz==10 && a_sz==0) {
 	  gl_internal_format=GL_RGB10;
-	  gl_internal_format_s="GL_RGB10";
   } else if(r_sz==2 && g_sz==2 && b_sz==2 && a_sz==2) {
 	  gl_internal_format=GL_RGBA2;
-	  gl_internal_format_s="GL_RGBA2";
   } else if(r_sz==4 && g_sz==4 && b_sz==4 && a_sz==4) {
 	  gl_internal_format=GL_RGBA4;
-	  gl_internal_format_s="GL_RGBA4";
   } else if(r_sz==5 && g_sz==5 && b_sz==5 && a_sz==1) {
 	  gl_internal_format=GL_RGB5_A1;
-	  gl_internal_format_s="GL_RGB5_A1";
   } else if(r_sz==8 && g_sz==8 && b_sz==8 && a_sz==8) {
 	  gl_internal_format=GL_RGBA8;
-	  gl_internal_format_s="GL_RGBA8";
   } else if(r_sz==10 && g_sz==10 && b_sz==10 && a_sz==2) {
 	  gl_internal_format=GL_RGB10_A2;
-	  gl_internal_format_s="GL_RGB10_A2";
   } else {
 	  gl_internal_format=GL_RGB;
-	  gl_internal_format_s="GL_RGB";
   }
 
 #ifdef TEXTUREFORMAT_ALWAYS
   gl_internal_format=TEXTUREFORMAT_ALWAYS;
-  gl_internal_format_s=TEXTUREFORMAT_ALWAYS_S;
 #endif
 
-  if (IMGFMT_IS_BGR(format))
-  {
-    image_mode=MODE_BGR;
-    image_bpp=IMGFMT_BGR_DEPTH(format);
-  }
-  else
-  {
-    image_mode=MODE_RGB;
-    image_bpp=IMGFMT_RGB_DEPTH(format);
-  }
+  glFindFormat(format, &image_bpp, NULL, &gl_bitmap_format, &gl_bitmap_type);
 
   image_bytes=(image_bpp+7)/8;
 
@@ -927,58 +900,15 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   switch(image_bpp)
   {
   	case 15:
-  	case 16:	
-                        if(image_mode!=MODE_BGR)
-			{
-			        gl_bitmap_format   = GL_RGB;
-			        gl_bitmap_format_s ="GL_RGB";
-				gl_bitmap_type     = GL_UNSIGNED_SHORT_5_6_5;
-				gl_bitmap_type_s   ="GL_UNSIGNED_SHORT_5_6_5";
-			} else {
-			        gl_bitmap_format   = GL_BGR;
-			        gl_bitmap_format_s ="GL_BGR";
-				gl_bitmap_type     = GL_UNSIGNED_SHORT_5_6_5;
-				gl_bitmap_type_s   ="GL_UNSIGNED_SHORT_5_6_5";
-			}
-
-			if (image_bpp==15)
 			     draw_alpha_fnc=draw_alpha_15;
-			else
+			break;
+  	case 16:	
 			     draw_alpha_fnc=draw_alpha_16;
-
 			break;
   	case 24:	
-                        if(image_mode!=MODE_BGR)
-			{
-				/* RGB888 */
-				gl_bitmap_format   = GL_RGB;
-				gl_bitmap_format_s ="GL_RGB";
-			} else {
-				/* BGR888 */
-				gl_bitmap_format   = GL_BGR;
-				gl_bitmap_format_s ="GL_BGR";
-			}
-			gl_bitmap_type   = GL_UNSIGNED_BYTE;
-			gl_bitmap_type_s ="GL_UNSIGNED_BYTE";
-
 			draw_alpha_fnc=draw_alpha_24; break;
-			break;
   	case 32:	
-			/* RGBA8888 */
-			gl_bitmap_format   = GL_BGRA;
-			gl_bitmap_format_s ="GL_BGRA";
-
-                        if(image_mode!=MODE_BGR)
-			{
-				gl_bitmap_type   = GL_UNSIGNED_INT_8_8_8_8_REV;
-				gl_bitmap_type_s ="GL_UNSIGNED_INT_8_8_8_8_REV";
-			} else {
-				gl_bitmap_type   = GL_UNSIGNED_INT_8_8_8_8;
-				gl_bitmap_type_s ="GL_UNSIGNED_INT_8_8_8_8";
-			}
-
 			draw_alpha_fnc=draw_alpha_32; break;
-			break;
   }
 
   if (initGl(d_width, d_height) == -1)
