@@ -593,7 +593,6 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
 					pcr._cardnum,func,PCI_INTERRUPT_REG);
 	    pcr._user_config = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
 					pcr._cardnum,func,PCI_REG_USERCONFIG);
-	    printf("user_config dword: %x\n", pcr._user_config);
             /* check for pci-pci bridges */
 #define PCI_CLASS_MASK 		0xff000000
 #define PCI_SUBCLASS_MASK 	0x00ff0000
