@@ -121,7 +121,7 @@ Biurrun, Diego (DonDiego) <diego@biurrun.de>
     * second homepage maintainer
     * head of the Ministry for English Composition
     * ultrafina skin
-    * skin overhaul
+    * skin review part I
 
 Blomenkamp, Marcus <Marcus.Blomenkamp@epost.de>
     * VIDIX patches (Rage128, Radeon 7000)
@@ -163,6 +163,11 @@ Cook, Kees <mplayer@outflux.net>
 Davies, Stephen <steve@daviesfam.org>
     * support for large video files (>2^32 bytes in size)
     * surround sound aop plugin
+
+Di Vita, Piero (Scognito) <scognito@libero.it>
+    * gnome, trium skins
+    * new GUI icons
+    * skin review part II
 
 Diedrich, Tobias (ranma) <ranma@gmx.at>
     * NAS audio output driver
@@ -789,9 +794,6 @@ Quiana <quiana@quiana.net>
 
 Riccio, Pasquale <flash@@the-realworld.de>
     * proton
-
-Scognito <scognito@libero.it>
-    * gnome, trium
 
 Sudrien
     * softgrip
