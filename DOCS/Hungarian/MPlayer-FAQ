@@ -172,9 +172,13 @@ Q: Mikor XVideo-t használok, nem tudok lejátszani DivX avi-kat a
     Xvideo image format: 0x32315659 (YV12) planar
     Xvideo image format: 0x30323449 (I420) planar
     ...
-A: Lásd az elõzõ választ.
+A1: Lásd az elõzõ választ.
+A1: A 0.18pre4 verzió óta az MPlayer tartalmazza a libavcodec-et az ffmpeg
+    programból. Ez magában foglal egy C nyelvû DivX és OpenDivX dekódert.
+    A DivX dekóder YV12-es formátumot használ, szóval mûködni fog nálad.
+    Fordítsd be a libavcodec supportot.
 
-Q: Ooo, mi az az "IdegCounter" ?
+Q: Ööö, mi az az "IdegCounter" ?
 A: Az "Ideg" magyar szó, és a "Counter" (számláló) angol szó keveréke.
    Elõször A'rpi idegességét volt hivatott mérni, miután egy kis CVS kód
    (ooo) "rejtelyesen" eltûnt ;)
@@ -262,3 +266,12 @@ Q: nVidia TNT/TNT2 kártyám van, és egy furcsa színekkel teli sáv van a
    film alatt! Kinek a hibája ez?
 A: Az nVidia driver-é. Ezek a hibák CSAK TNT/TNT2 kártyákkal jönnek elõ, és
    nem tehetünk róla, a hiba az Ön készülékében van.
+
+Q: Pontosan mi is ez a libavcodec?
+A: Gerard Lantau ffmpeg programjábol van (http://ffmpeg.sourceforge.net).
+   C nyelvû DivX ;-) és OpenDivX codec-et tartalmaz. A tesztek szerint gyorsabb
+   mint a DirectShow codec (preprocessing nélkül), és csak pár százalékkal
+   lassabb mint a ProjectMayo OpenDivX dekódere. YV12-es pixelformátumot
+   használ, így a régi Voodoo tulajdonosok is használhatják YUV-ra. Továbbá
+   lehetõséget ad arra hogy minden gépen amin van C compiler, lehessen DivX-et
+   lejátszani. Egész jó kis cucc, nem?

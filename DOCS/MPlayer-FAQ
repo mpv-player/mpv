@@ -169,7 +169,10 @@ Q: When using Xvideo, I can't play DivX avis with my Voodoo 3/Banshee !
     Xvideo image format: 0x32315659 (YV12) planar
     Xvideo image format: 0x30323449 (I420) planar
     ...
-A: See the previous answer.
+A1: See the previous answer.
+A2: Since 0.18pre4 we include libavcodec from the ffmpeg package. It contains
+    a C language DivX and OpenDivX decoder. The DivX decoder uses YV12 format
+    for output, thus it should work for you. Compile in libavcodec support.
 
 Q: Umm, what is "IdegCounter" ?
 A: A mixture of a hungarian and an english word. In english, "Ideg" means
@@ -254,3 +257,12 @@ Q: I have an nVidia TNT/TNT2 card, and I have a band with strange colours,
    right under the movie! Whose fault is this?
 A: It's the nVidia X driver's. These bugs are ONLY with the TNT/TNT2 cards,
    and we can't do anything about it, it's not our bug.
+
+Q: What exactly is this libavcodec?
+A: It's from Gerard Lantau's ffmpeg package (http://ffmpeg.sourceforge.net).
+   It has C language DivX ;-) and OpenDivX codec.  Some benchmarks
+   showed that its DivX seems to be even faster than DirectShow codec without
+   preprocessing, and only a few percent slower than ProjectMayo's OpenDivX
+   decoder.  It uses YV12 pixel format, so old Voodoo users can use it for YUV.
+   Also, open the possibility to play DivX on virtually every computer that
+   has a C compiler. Kinda great stuff, isn't it?
