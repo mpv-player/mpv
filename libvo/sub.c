@@ -187,35 +187,6 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 	      memy-=vo_font->height;
 	      xsize=lastxsize=-vo_font->charspace;
 	  }
-          xsize+=w+vo_font->charspace;
-	  if ((dxs<xsize && lastStripPosition>0) || j==len-1)
-	  {
-	    if (j==len-1) lastStripPosition=len;
-	      else xsize=lastxsize;
-	    j=lastStripPosition;
-
-            x=dxs/2-xsize/2;
-
-            for(k=previousStrip;k<lastStripPosition;k++){
-              int c=text[k];
-	      int font;
-              if (sub_unicode && (c>=0x80)) c=(c<<8)+text[++k];
-              font=vo_font->font[c];
-              if(x>=0 && x+vo_font->width[c]<dxs)
-                if(font>=0)
-                  draw_alpha(x,y,
-                    vo_font->width[c],
-                    vo_font->pic_a[font]->h,
-                    vo_font->pic_b[font]->bmp+vo_font->start[c],
-                    vo_font->pic_a[font]->bmp+vo_font->start[c],
-                    vo_font->pic_a[font]->w);
-              x+=vo_font->width[c]+vo_font->charspace;
-            }
-            x=0;
-            y+=vo_font->height;
-	    previousStrip=lastStripPosition;
-            xsize=lastxsize=-vo_font->charspace;
-	  }
         }
    }
    

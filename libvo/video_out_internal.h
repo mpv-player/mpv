@@ -25,6 +25,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 static const vo_info_t* get_info(void);
 static uint32_t draw_frame(uint8_t *src[]);
 static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y);
+static void draw_osd(void);
 static void flip_page(void);
 static void check_events(void);
 static void uninit(void);

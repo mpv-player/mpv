@@ -137,6 +137,10 @@ typedef struct
     DWORD               dwChunkLength;          // Length of chunk
 } AVIINDEXENTRY;
 
+static void draw_osd(void)
+{
+}
+
 static void
 flip_page(void)
 {

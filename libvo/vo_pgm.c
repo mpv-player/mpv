@@ -58,6 +58,10 @@ get_info(void)
     return &vo_info;
 }
 
+static void draw_osd(void)
+{
+}
+
 static void flip_page (void)
 {
     FILE * f;
