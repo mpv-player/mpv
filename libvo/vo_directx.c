@@ -41,6 +41,7 @@
 # define WM_XBUTTONDBLCLK  0x020D
 #endif
 
+static LPDIRECTDRAWCOLORCONTROL	g_cc = NULL;		//color control interface
 static LPDIRECTDRAW7        g_lpdd = NULL;          //DirectDraw Object
 static LPDIRECTDRAWSURFACE7  g_lpddsPrimary = NULL;  //Primary Surface: viewport through the Desktop
 static LPDIRECTDRAWSURFACE7  g_lpddsOverlay = NULL;  //Overlay Surface
@@ -87,6 +88,12 @@ static const GUID IID_IDirectDraw7 =
 {
 	0x15e65ec0,0x3b9c,0x11d2,{0xb9,0x2f,0x00,0x60,0x97,0x97,0xea,0x5b}
 };
+
+static const GUID IID_IDirectDrawColorControl =
+{
+	0x4b9f0ee0,0x0d7e,0x11d0,{0x9b,0x06,0x00,0xa0,0xc9,0x03,0xa3,0xb8}
+}; 
+
 
 typedef struct directx_fourcc_caps
 {
@@ -312,6 +319,11 @@ static uint32_t Directx_CreateBackpuffer()
 
 static void uninit(void)
 {
+	if (g_cc != NULL)
+	{
+		g_cc->lpVtbl->Release(g_cc);
+	}
+	g_cc=NULL;
 	if (g_lpddclipper != NULL) g_lpddclipper->lpVtbl->Release(g_lpddclipper);
 	g_lpddclipper = NULL;
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>clipper released\n");
@@ -1244,6 +1256,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
         if(g_lpddclipper->lpVtbl->SetHWnd (g_lpddclipper, 0, hWnd)!= DD_OK){mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't associate clipper with window\n");return 1;}
         if(g_lpddsPrimary->lpVtbl->SetClipper (g_lpddsPrimary,g_lpddclipper)!=DD_OK){mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't associate primary surface with clipper\n");return 1;}
 	    mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>clipper succesfully created\n");
+	}else{
+		if(DD_OK != g_lpddsOverlay->lpVtbl->QueryInterface(g_lpddsOverlay,&IID_IDirectDrawColorControl,(void**)&g_cc))
+			mp_msg(MSGT_VO, MSGL_V,"<vo_directx><WARN>unable to get DirectDraw ColorControl interface\n");
 	}
 	Directx_ManageDisplay();
 	memset(&ddsdsf, 0,sizeof(DDSURFACEDESC2));
@@ -1252,6 +1267,81 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	dstride = ddsdsf.lPitch;
     image = ddsdsf.lpSurface;
 	return 0;
+}
+
+//function to set color controls
+//  brightness	[0, 10000]
+//  contrast	[0, 20000]
+//  hue		[-180, 180]
+//  saturation	[0, 20000]
+static uint32_t color_ctrl_set(char *what, int value)
+{
+	uint32_t	r = VO_NOTIMPL;
+	DDCOLORCONTROL	dcc;
+	//printf("\n*** %s = %d\n", what, value);
+	if (!g_cc) {
+		//printf("\n *** could not get color control interface!!!\n");
+		return VO_NOTIMPL;
+	}
+	ZeroMemory(&dcc, sizeof(dcc));
+	dcc.dwSize = sizeof(dcc);
+
+	if (!strcmp(what, "brightness")) {
+		dcc.dwFlags = DDCOLOR_BRIGHTNESS;
+		dcc.lBrightness = (value + 100) * 10000 / 200;
+		r = VO_TRUE;
+	} else if (!strcmp(what, "contrast")) {
+		dcc.dwFlags = DDCOLOR_CONTRAST;
+		dcc.lContrast = (value + 100) * 20000 / 200;
+		r = VO_TRUE;
+	} else if (!strcmp(what, "hue")) {
+		dcc.dwFlags = DDCOLOR_HUE;
+		dcc.lHue = value * 180 / 100;
+		r = VO_TRUE;
+	} else if (!strcmp(what, "saturation")) {
+		dcc.dwFlags = DDCOLOR_SATURATION;
+		dcc.lSaturation = (value + 100) * 20000 / 200;
+		r = VO_TRUE;
+	}
+	
+	if (r == VO_TRUE) {
+		g_cc->lpVtbl->SetColorControls(g_cc, &dcc);
+	}
+	return r;
+}
+
+//analoguous to color_ctrl_set
+static uint32_t color_ctrl_get(char *what, int *value)
+{
+	uint32_t	r = VO_NOTIMPL;
+	DDCOLORCONTROL	dcc;
+	if (!g_cc) {
+		//printf("\n *** could not get color control interface!!!\n");
+		return VO_NOTIMPL;
+	}
+	ZeroMemory(&dcc, sizeof(dcc));
+	dcc.dwSize = sizeof(dcc);
+
+	if (g_cc->lpVtbl->GetColorControls(g_cc, &dcc) != DD_OK) {
+		return r;
+	}
+
+	if (!strcmp(what, "brightness") && (dcc.dwFlags & DDCOLOR_BRIGHTNESS)) {
+		*value = dcc.lBrightness * 200 / 10000 - 100;
+		r = VO_TRUE;
+	} else if (!strcmp(what, "contrast") && (dcc.dwFlags & DDCOLOR_CONTRAST)) {
+		*value = dcc.lContrast * 200 / 20000 - 100;
+		r = VO_TRUE;
+	} else if (!strcmp(what, "hue") && (dcc.dwFlags & DDCOLOR_HUE)) {
+		*value = dcc.lHue * 100 / 180;
+		r = VO_TRUE;
+	} else if (!strcmp(what, "saturation") && (dcc.dwFlags & DDCOLOR_SATURATION)) {
+		*value = dcc.lSaturation * 200 / 20000 - 100;
+		r = VO_TRUE;
+	}
+//	printf("\n*** %s = %d\n", what, *value);
+	
+	return r;
 }
 
 static uint32_t control(uint32_t request, void *data, ...)
@@ -1313,6 +1403,24 @@ static uint32_t control(uint32_t request, void *data, ...)
 			}
 		    return VO_TRUE;
 		}
+	case VOCTRL_SET_EQUALIZER: {
+		va_list	ap;
+		int	value;
+		
+		va_start(ap, data);
+		value = va_arg(ap, int);
+		va_end(ap);
+		return color_ctrl_set(data, value);
+	}
+	case VOCTRL_GET_EQUALIZER: {
+		va_list	ap;
+		int	*value;
+		
+		va_start(ap, data);
+		value = va_arg(ap, int*);
+		va_end(ap);
+		return color_ctrl_get(data, value);
+	}
     };
     return VO_NOTIMPL;
 }
