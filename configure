@@ -1451,9 +1451,6 @@ EOF
   elif cc_check $_inc_x11 $_ld_x11 -lGL -lm $_ld_pthread ; then
     _gl=yes
     _ld_gl="-lGL -lm $_ld_pthread"
-  else
-    _gl=no
-    cc_check $_inc_x11 $_ld_x11 -lGL -lm && _gl=yes
   fi
 else
   _gl=no
