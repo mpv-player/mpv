@@ -1,4 +1,4 @@
-.\" synced with 1.758
+.\" synced with 1.760
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -3382,8 +3382,8 @@ dwusze¶cienna krzywa sklejana
 .sp 1
 .RS
 .I INFORMACJA:
-Dla \-sws\ 2 i 7 ostro¶æ mo¿e byæ ustawiona parametrem skalowania (p)
-przez \-vf scale (0 (miêkko) \- 100 (ostro)), dla \-sws 9, okre¶la ona
+Dla \-sws\ 2 i 7 ostro¶æ mo¿e byæ ustawiona parametrem skalowania
+przez \-vf scale (0 (miêkko) \- 100 (ostro)), dla \-sws 9, okre¶la on
 d³ugo¶æ filtru (1 \- 10).
 .RE
 .
@@ -3636,7 +3636,7 @@ Dla parametrów pomiêdzy 4\-7 obracanie wykona siê tylko je¿eli geometria filmu
 jest portretem a nie krajobrazem.
 .
 .TP
-.B scale[=w:h[:interlaced[:chr_drop[:parametr[:parametr2[:presize]]]]]]
+.B scale[=w:h[:przeplot[:pom_kol[:parametr[:parametr2[:presize]]]]]]
 Skaluje obraz (wolnym) programowym skalatorem i wykonuje konwersjê
 kolorów YUV<\->RGB (zobacz te¿ \-sws).
 .RSs
@@ -3655,9 +3655,14 @@ skalowaæ, domy¶lnie jest d_width/\:d_height!
 .br
 -3:   oblicza w/\:h u¿ywaj±c tej drugiej warto¶ci i oryginalnych proporcji.
 .REss
-.IPs interlaced
+.IPs <przeplot>
 Prze³±cza skalowanie z przeplotem.
-.IPs <chr_drop>
+.RSss
+0: wy³±czone (domy¶lnie)
+.br
+1: w³±czone
+.REss
+.IPs <pom_kol>
 opuszcza informacjê o kolorach
 .RSss
 0: U¿yje wszystkich dostêpnych linii wej¶cia koloru.
@@ -3671,16 +3676,19 @@ opuszcza informacjê o kolorach
 .IPs <parametr>
 .RSss
 \-sws 2 (dwu¶ciennie):  B (rozmazywanie) i C (pier¶cieniowanie)
+.IPs "<parametr>[:<parametr2>] (zobacz równie¿ \-sws)"
+Ustawia parametry skalowania zale¿nie od tego jaki skalator zosta³ wybrany
+przez \-sws.
 .br
-(0.00, 0.60) domy¶lnie
+0.00:0.60 domy¶lnie
 .br
-(0.00, 0.75) "precyzyjna dwu¶cienna" VirtualDuba
+0.00:0.75 "precyzyjna dwu¶cienna" VirtualDuba
 .br
-(0.00, 0.50) krzywa skejana Catmull-Rom
+0.00:0.50 krzywa skejana Catmull-Rom
 .br
-(0.33, 0.33) krzywa sklejana Mitchell-Netravali
+0.33: 0.33 krzywa sklejana Mitchell-Netravali
 .br
-(1.00, 0.00) jedno¶cienna krzywa sklejana B
+1.00:0.00 jedno¶cienna krzywa sklejana B
 .br
 \-sws 7 (gaussian): ostro¶æ (0 (g³adkie) \- 100 (wyostrzone))
 .br
@@ -5897,7 +5905,7 @@ rozs±dny zakres
 .B tcplx_mask=<0.0\-1.0>
 maskowanie przej¶ciowej z³o¿ono¶ci (domy¶lnie: 0.0 (wy³±czone))
 Wyobra¼ sobie ujêcie z ptakiem lec±cym przez ca³± scenê. tcplx_mask
-zmniejszy kwantyzatory jego makrobloków (tym samym zmniejszaj±c ich jako¶æ),
+zwiêkszy kwantyzatory jego makrobloków (tym samym zmniejszaj±c ich jako¶æ),
 poniewa¿ ludzkie oko zazwyczaj nie ma czasu, ¿eby zobaczyæ wszystkie jego
 szczegó³y.
 Niestety, je¿eli przedmiot, na którego zosta³a na³o¿ona maska, zatrzyma siê
@@ -6953,11 +6961,46 @@ wspó³czynnik kwantyzatora miêdzy klatkami I a P (domy¶lnie: 2.0)
 wspó³czynnik kwantyzatora miêdzy klatkami P a B (domy¶lnie: 2.0)
 .
 .TP
-.B pass=<1|2>
-Uruchamia tryb dwuprzej¶ciowy.
-Pierwsze przej¶cie zachowuje statystyki.
-Zaleca siê kodowanie zawsze w trybie dwuprzej¶ciowym z uwagi na lepsz±
-dystrubucjê bitów i wzrost jako¶ci.
+.B pass=<1\-3>
+Uruchamia tryb dwu-lub trójprzej¶ciowy.
+Zaleca siê kodowanie zawsze w trybie dwu- lub trójprzej¶ciowym z uwagi na lepsz±
+dystrubucjê bitów i wzrost ogólenj jako¶ci.
+.PD 0
+.RSs
+.IPs 1
+pierwsze przej¶cie
+.IPs 2
+drufie przej¶cie
+.IPs 3
+N-te przej¶cie (drugie i trzecie w trybie trójprzej¶ciowym)
+.RE
+.RS
+A teraz jak to dzia³a i jak tego u¿ywaæ:
+.br
+Pierwsze przej¶cie (pass=1) zbiera statystyki video i zapisuje je do pliku.
+Mo¿e bêdziesz chcia³ wy³±czyæ opcje wymagaj±ce du¿ej mocy obliczeniowej
+poza tymi domy¶lnymi.
+.br
+W trybie dwuprzej¶ciowym, drugie przej¶cie (pass=2) czyta plik ze statystylkami
+i opiera na tym decyzje kontroli tempa.
+.br
+W trybie trójprzej¶ciowym, drugie przej¶cie (pass=3, to nie pomy³ka) robi
+obie rzeczy: Najpierw czyta statystyki i nadpisuje je.
+Mo¿e bêdziesz chcia³ zrobiæ kopiê pliku divx2pass.log zanim to siê stanie, je¿eli
+istnieje szansa, ¿e przerwiesz dzia³anie MEncodera.
+Mo¿esz u¿yæ wszelkich opcji kodowania, poza tymi szczególnie wymagaj±cymi
+du¿ej mocy obliczeniowej.
+.br
+Trzecie przej¶cie (pass=3) dzia³a tak samo jak drugie przej¶cie, poza tym ¿e
+korzysta ze statystyk drugiego przej¶cia.
+Mo¿esz u¿yæ wszelkich opcji kodowania, nawet te wymagaj±ce
+du¿ej mocy obliczeniowej.
+.br
+.I INFORMACJA:
+Obs³uga trybu trójprzej¶ciowego i x264 jest ca³kiem nowa w MEncoderze, mile
+widziane jest wszelkie wsparcie dotycz±ce dobrych kombinacji opcji x264,
+które s±, i szybkie, i daj± dobr± jako¶æ.
+.REss
 .
 .TP
 .B qcomp=<0\-1>
