@@ -5,12 +5,12 @@ include ../config.mak
 
 SRCS = mp3_hdr.c video.c mpeg_hdr.c cache2.c asfheader.c aviheader.c aviprint.c aviwrite.c demux_asf.c demux_avi.c demux_mov.c demux_mpg.c demux_viv.c demuxer.c dvdauth.c open.c parse_es.c stream.c tv.c tvi_dummy.c tvi_v4l.c frequencies.c demux_fli.c
 ifeq ($(STREAMING),yes)
-SRCS += asf_streaming.c url.c http.c network.c
+SRCS += asf_streaming.c url.c http.c network.c rtp.c
 endif
 
 OBJS	= $(SRCS:.c=.o)
 INCLUDE = -I../loader $(CSS_INC) $(EXTRA_INC)
-CFLAGS  = $(OPTFLAGS) $(INCLUDE)
+CFLAGS  = -Wall $(OPTFLAGS) $(INCLUDE)
 
 .SUFFIXES: .c .o
 

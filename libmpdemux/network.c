@@ -23,6 +23,7 @@
 #include "http.h"
 #include "url.h"
 #include "asf.h"
+#include "rtp.h"
 
 static struct {
 	char *mime_type;
@@ -79,6 +80,30 @@ void
 streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl ) {
 	if( streaming_ctrl==NULL ) return;
 	free( streaming_ctrl );
+}
+
+int
+read_rtp_from_server(int fd, char *buffer, int length) {
+	int ret;
+	int done=0;
+	fd_set set;
+	struct timeval tv;
+	struct rtpheader rh;
+	char *data;
+	int len;
+	static int got_first = 0;
+	static int sequence;
+
+	if( buffer==NULL || length<0 ) return -1;
+
+	getrtp2(fd, &rh, &data, &len);
+	if( got_first && rh.b.sequence != sequence+1 )
+		printf("RTP packet sequence error!  Expected: %d, received: %d\n", 
+			sequence+1, rh.b.sequence);
+	got_first = 1;
+	sequence = rh.b.sequence;
+	memcpy(buffer, data, len);
+	return(len);
 }
 
 // Connect to a server using a TCP connection
@@ -251,6 +276,17 @@ extension=NULL;
 		// Checking for RTSP
 		if( !strcasecmp(url->protocol, "rtsp") ) {
 			printf("RTSP protocol not yet implemented!\n");
+			return DEMUXER_TYPE_UNKNOWN;
+		}
+
+		// Checking for RTP
+		if( !strcasecmp(url->protocol, "rtp") ) {
+			if( url->port==0 )
+			{
+				printf("You must enter a port number for RTP streams!\n");
+				exit(1);	//fixme
+			}
+			*fd_out=-1;
 			return DEMUXER_TYPE_UNKNOWN;
 		}
 
@@ -429,6 +465,100 @@ nop_streaming_start( stream_t *stream ) {
 	return fd;
 }
 
+// Start listening on a UDP port. If multicast, join the group.
+int
+rtp_open_socket( URL_t *url ) {
+	int fd;
+	int socket_server_fd;
+	int err, err_len;
+	fd_set set;
+	struct timeval tv;
+	struct sockaddr_in server_address;
+	struct ip_mreq mcast;
+
+	printf("Listening for traffic on %s:%d ...\n", url->hostname, url->port );
+
+	socket_server_fd = socket(AF_INET, SOCK_DGRAM, 0);
+//	fcntl( socket_server_fd, F_SETFL, fcntl(socket_server_fd, F_GETFL) | O_NONBLOCK );
+	if( socket_server_fd==-1 ) {
+		perror("Failed to create socket");
+		return -1;
+	}
+
+	if( isalpha(url->hostname[0]) ) {
+		struct hostent *hp =(struct hostent*)gethostbyname( url->hostname );
+		if( hp==NULL ) {
+			printf("Counldn't resolve name: %s\n", url->hostname);
+			return -1;
+		}
+		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
+	} else {
+		inet_pton(AF_INET, url->hostname, &server_address.sin_addr);
+	}
+	server_address.sin_family=AF_INET;
+	server_address.sin_port=htons(url->port);
+
+	if( bind( socket_server_fd, (struct sockaddr*)&server_address, sizeof(server_address) )==-1 ) {
+		if( errno!=EINPROGRESS ) {
+			perror("Failed to connect to server");
+			close(socket_server_fd);
+			return -1;
+		}
+	}
+	if((ntohl(server_address.sin_addr.s_addr) >> 28) == 0xe) {
+		mcast.imr_multiaddr.s_addr = server_address.sin_addr.s_addr;
+		//mcast.imr_interface.s_addr = inet_addr("10.1.1.2");
+		mcast.imr_interface.s_addr = 0;
+		if( setsockopt( socket_server_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mcast, sizeof(mcast))) {
+			perror("IP_ADD_MEMBERSHIP failed (do you have multicasting enabled in your kernel?)");
+			return -1;
+		}
+	}
+
+	//tv.tv_sec = 0;
+	//tv.tv_usec = (10 * 1000000);	// 10 seconds timeout
+	FD_ZERO( &set );
+	FD_SET( socket_server_fd, &set );
+	//if( select(socket_server_fd+1, &set, NULL, NULL, &tv)>0 ) {
+	if( select(socket_server_fd+1, &set, NULL, NULL, NULL)>0 ) {
+		err_len = sizeof( err );
+		getsockopt( socket_server_fd, SOL_SOCKET, SO_ERROR, &err, &err_len );
+		if( err ) {
+			printf("Timeout! No data from host %s\n", url->hostname );
+			printf("Socket error: %d\n", err );
+			close(socket_server_fd);
+			return -1;
+		}
+	}
+	return socket_server_fd;
+}
+
+int
+rtp_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl ) {
+    return read_rtp_from_server( fd, buffer, size );
+}
+
+int
+rtp_streaming_start( stream_t *stream ) {
+	streaming_ctrl_t *streaming_ctrl;
+	int fd;
+
+	if( streaming_ctrl==NULL ) return -1;
+	streaming_ctrl = stream->streaming_ctrl;
+	fd = stream->fd;
+	
+	if( fd<0 ) {
+		fd = rtp_open_socket( (streaming_ctrl->url) ); 
+		if( fd<0 ) return -1;
+	}
+
+	streaming_ctrl->streaming_read = rtp_streaming_read;
+	streaming_ctrl->prebuffer_size = 180000;
+	streaming_ctrl->buffering = 0; //1;
+	streaming_ctrl->status = streaming_playing_e;
+	return fd;
+}
+
 int
 streaming_start(stream_t *stream, URL_t *url, int demuxer_type) {
 	int ret=-1;
@@ -443,6 +573,13 @@ streaming_start(stream_t *stream, URL_t *url, int demuxer_type) {
 //	stream->streaming_ctrl->demuxer_type = demuxer_type;
 	stream->fd = -1;
 
+	// For RTP streams, we usually don't know the stream type until we open it.
+	if( !strcmp( url->protocol, "rtp"))
+	{
+		stream->fd = rtp_streaming_start( stream );
+	}
+	// For connection-oriented streams, we can usually determine the streaming type.
+	else
 	switch( demuxer_type ) {
 		case DEMUXER_TYPE_ASF:
 			// Send the appropriate HTTP request
