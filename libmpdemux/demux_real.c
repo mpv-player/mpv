@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.15  2002/06/10 13:55:56  arpi
+    export subpacket-size and matrix w*h to the codec (cook)
+
     Revision 1.14  2002/06/10 02:27:31  arpi
     export extra data for cook codec, some debug stuff
 
@@ -771,7 +774,7 @@ void demux_open_real(demuxer_t* demuxer)
 
 		tmp = stream_read_dword(demuxer->stream);
 
-//#define stream_skip(st,siz) { int i; for(i=0;i<siz;i++) mp_msg(MSGT_DEMUX,MSGL_V," %02X",stream_read_char(st)); mp_msg(MSGT_DEMUX,MSGL_V,"\n");}
+#define stream_skip(st,siz) { int i; for(i=0;i<siz;i++) mp_msg(MSGT_DEMUX,MSGL_V," %02X",stream_read_char(st)); mp_msg(MSGT_DEMUX,MSGL_V,"\n");}
 
 		if (tmp == MKTAG(0xfd, 'a', 'r', '.'))
 		{
@@ -779,6 +782,8 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh_audio_t *sh = new_sh_audio(demuxer, stream_id);
 		    char buf[128]; /* for codec name */
 		    int frame_size;
+		    int sub_packet_size;
+		    int sub_packet_h;
 		    int version;
 		    int flavor;
 		    
@@ -786,21 +791,24 @@ void demux_open_real(demuxer_t* demuxer)
 		    version = stream_read_word(demuxer->stream);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"version: %d\n", version);
 //		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
-		    stream_skip(demuxer->stream, 2);
+		    stream_skip(demuxer->stream, 2); // 00 00
 		    stream_skip(demuxer->stream, 4); /* .ra4 or .ra5 */
-		    stream_skip(demuxer->stream, 4);
+		    stream_skip(demuxer->stream, 4); // ???
 		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
-		    stream_skip(demuxer->stream, 4); /* header size */
+		    stream_skip(demuxer->stream, 4); // header size == 0x4E
 		    flavor = stream_read_word(demuxer->stream);/* codec flavor id */
 		    stream_skip(demuxer->stream, 4); /* coded frame size */
 		    stream_skip(demuxer->stream, 4); // big number
 		    stream_skip(demuxer->stream, 4); // bigger number
-		    stream_skip(demuxer->stream, 4); // 2
-		    stream_skip(demuxer->stream, 2); // 10
+		    stream_skip(demuxer->stream, 4); // 2 || -''-
+//		    stream_skip(demuxer->stream, 2); // 0x10
+		    sub_packet_h = stream_read_word(demuxer->stream);
 //		    stream_skip(demuxer->stream, 2); /* coded frame size */
 		    frame_size = stream_read_word(demuxer->stream);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"frame_size: %d\n", frame_size);
-		    stream_skip(demuxer->stream, 4); // 60,0
+		    sub_packet_size = stream_read_word(demuxer->stream);
+		    mp_msg(MSGT_DEMUX,MSGL_V,"sub_packet_size: %d\n", sub_packet_size);
+		    stream_skip(demuxer->stream, 2); // 0
 		    
 		    if (version == 5)
 			stream_skip(demuxer->stream, 6); //0,srate,0
@@ -835,9 +843,10 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->wf->nAvgBytesPerSec = bitrate;
 		    sh->wf->nBlockAlign = frame_size;
 		    sh->wf->cbSize = 0;
+		    sh->format = MKTAG(buf[0], buf[1], buf[2], buf[3]);
 
 		    tmp = 1; /* supported audio codec */
-		    switch (MKTAG(buf[0], buf[1], buf[2], buf[3]))
+		    switch (sh->format)
 		    {
 			case MKTAG('d', 'n', 'e', 't'):
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: DNET -> AC3\n");
@@ -847,12 +856,12 @@ void demux_open_real(demuxer_t* demuxer)
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: SiproLab's ACELP.net\n");
 			    sh->format = 0x130;
 			    /* for buggy directshow loader */
-			    sh->wf = realloc(sh->wf, 18+4);
+			    sh->wf->cbSize = 4;
+			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
 			    sh->wf->wBitsPerSample = 0;
 			    sh->wf->nAvgBytesPerSec = 1055;
 			    sh->wf->nBlockAlign = 19;
 //			    sh->wf->nBlockAlign = frame_size / 288;
-			    sh->wf->cbSize = 4;
 			    buf[0] = 30;
 			    buf[1] = 1;
 			    buf[2] = 1;
@@ -865,26 +874,27 @@ void demux_open_real(demuxer_t* demuxer)
 			    break;
 			case MKTAG('c', 'o', 'o', 'k'):
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Real's GeneralCooker (?) (RealAudio G2?) (unsupported)\n");
-			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+2+24);
-			    *((short*)(sh->wf+1))=flavor;
-			    stream_read(demuxer->stream, ((char*)(sh->wf+1))+2, 24); // extras
-//			    tmp = 0;
+			    sh->wf->cbSize = 4+2+24;
+			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
+			    ((short*)(sh->wf+1))[0]=sub_packet_size;
+			    ((short*)(sh->wf+1))[1]=sub_packet_h;
+			    ((short*)(sh->wf+1))[2]=flavor;
+			    stream_read(demuxer->stream, ((char*)(sh->wf+1))+6, 24); // extras
 			    break;
 			case MKTAG('a', 't', 'r', 'c'):
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Sony ATRAC3 (RealAudio 8) (unsupported)\n");
 			    sh->format = 0x270;
+			    /* 14 bytes extra header needed ! */
+			    sh->wf->cbSize = 14;
+			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
 
 			    sh->wf->nAvgBytesPerSec = 16537; // 8268
 			    sh->wf->nBlockAlign = 384; // 192
 			    sh->wf->wBitsPerSample = 0; /* from AVI created by VirtualDub */
-			    /* 14 bytes extra header needed ! */
-			    sh->wf->cbSize = 14;
-			    sh->wf = realloc(sh->wf, 18+sh->wf->cbSize);
 			    break;
 			default:
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%s)\n", buf);
 			    tmp = 0;
-			    sh->format = MKTAG(buf[0], buf[1], buf[2], buf[3]);
 		    }
 
 		    sh->wf->wFormatTag = sh->format;
