@@ -158,7 +158,6 @@ Optional features:
   --enable-winsock2      enable winsock2 usage [autodetect]
   --enable-smb           enable Samba (SMB) input support [autodetect]
   --enable-live          enable LIVE.COM Streaming Media support [disable]
-  --enable-dvdnav        enable dvdnav support (DOES NOT WORK!!!) [disable]
   --disable-dvdread      Disable libdvdread support [autodetect]
   --disable-mpdvdkit     Disable mpdvdkit/mpdvdkit2 support [autodetect]
   --disable-css          Disable old-style libcss DVD support [autodetect]
@@ -284,7 +283,6 @@ Use these options if autodetection fails:
   --with-csslibdir=DIR     libcss in DIR
   --with-madlibdir=DIR     libmad (libmad shared library) in DIR
   --with-mlibdir=DIR       libmlib (MLIB support) in DIR (Solaris only)
-  --with-libdvdnav=DIR     libdvdnav in DIR
   --with-codecsdir=DIR     Binary codec files in DIR
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
@@ -297,7 +295,6 @@ Use these options if autodetection fails:
                            (e.g. /opt/bin/freetype-config)
   --with-gtk-config=PATH   path to gtk*-config (e.g. /opt/bin/gtk-config)
   --with-glib-config=PATH  path to glib*-config (e.g. /opt/bin/glib-config)
-  --with-dvdnav-config=PATH  path to dvdnav-config
   --with-livelibdir=DIR    path to LIVE.COM Streaming Media libraries
   --with-xmmsplugindir=DIR path to xmms plugins
   --with-xmmslibdir=DIR    path to libxmms.so.1
@@ -1074,7 +1071,8 @@ _tremor=no
 _faad=auto
 _xmms=no
 _css=auto
-_dvdnav=no
+# dvdnav disabled, it does not work
+#_dvdnav=no
 _dvdread=auto
 _dvdkit=auto
 _xanim=auto
@@ -1240,8 +1238,9 @@ for ac_option do
   --disable-dvdread)	_dvdread=no	;;
   --enable-mpdvdkit)	_dvdkit=yes	;;
   --disable-mpdvdkit)	_dvdkit=no	;;
-  --enable-dvdnav)	_dvdnav=yes	;;
-  --disable-dvdnav)	_dvdnav=no	;;
+# dvdnav disabled, it does not work
+#  --enable-dvdnav)	_dvdnav=yes	;;
+#  --disable-dvdnav)	_dvdnav=no	;;
   --enable-xanim)	_xanim=yes	;;
   --disable-xanim)	_xanim=no	;;
   --enable-real)	_real=yes	;;
@@ -1369,10 +1368,11 @@ for ac_option do
   --language=*)
     _language=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --with-libdvdnav=*)
-    _dvdnavdir=`echo $ac_option | cut -d '=' -f 2`
-    _dvdnav=yes
-    ;;
+# dvdnav disabled, it does not work
+#  --with-libdvdnav=*)
+#    _dvdnavdir=`echo $ac_option | cut -d '=' -f 2`
+#    _dvdnav=yes
+#    ;;
 
   --with-codecsdir=*)
     _win32libdir=`echo $ac_option | cut -d '=' -f 2`
@@ -1479,9 +1479,10 @@ for ac_option do
   --with-glib-config=*)
     _glibconfig=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --with-dvdnav-config=*)
-    _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
+# dvdnav disabled, it does not work
+#  --with-dvdnav-config=*)
+#    _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
+#    ;;
   --with-madlibdir=*)
     _ld_mad=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
@@ -3904,56 +3905,49 @@ case "$_dvdread" in
 	;;
 esac
 
-echocheck "DVD support (libdvdnav)"
-if test "$_dvdnav" = yes ; then
-  cat > $TMPC <<EOF
-#include <dvdnav.h>
-int main(void) { dvdnav_t *dvd=0; return 0; }
-EOF
-  _dvdnav=no
-  test -n "$_dvdnavdir" && _legal_dvdnavdir=-L$_dvdnavdir/.libs
-  if test -z "$_dvdnavconfig" ; then
-    if ( dvdnav-config --version ) >/dev/null 2>&1 ; then
-      _dvdnavconfig="dvdnav-config"
-    fi
-  fi
-  test -z "$_dvdnavdir" && test -n "$_dvdnavconfig" && _dvdnavdir=`$_dvdnavconfig --cflags`
-  _used_css=
-  test "$_dvdkit" = no && test "$_dvdkit2" = no && _used_css=$_ld_css
-  cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
-fi
-if test "$_dvdnav" = yes ; then
-  cat <<EOF
-
-!!! WARNING: DVDNAV DOES NOT WORK!
-!!! Do not send bugreports regarding dvdnav support!
-!!! If you want dvdnav, wait for MPlayer G2, send a PATCH,
-!!! or use a different movie player for DVDs.
-
-EOF
-  _largefiles=yes
-  _def_dvdnav='#define USE_DVDNAV 1'
-  if test -n "$_legal_dvdnavdir" ; then
-   _ld_css="$_ld_css $_legal_dvdnavdir -ldvdnav"
-  elif test -n "$_dvdnavconfig" ; then
-   _ld_css="$_ld_css `$_dvdnavconfig --libs`"
-  else
-   _ld_css="$_ld_css -ldvdnav"
-  fi
-  if test -n "$_dvdnavconfig" ; then
-   _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
-   _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
-  fi
-  if test -n "$_dvdnavdir" ; then
-   _inc_extra="$_inc_extra -I$_dvdnavdir"
-  fi
-  _inputmodules="dvdnav $_inputmodules"
-  echores "yes"
-else
-  _def_dvdnav='#undef USE_DVDNAV'
-  _noinputmodules="dvdnav $_noinputmodules"
-  echores "no"
-fi
+# dvdnav disabled, it does not work
+# echocheck "DVD support (libdvdnav)"
+# if test "$_dvdnav" = yes ; then
+#   cat > $TMPC <<EOF
+# #include <dvdnav.h>
+# int main(void) { dvdnav_t *dvd=0; return 0; }
+# EOF
+#   _dvdnav=no
+#   test -n "$_dvdnavdir" && _legal_dvdnavdir=-L$_dvdnavdir/.libs
+#   if test -z "$_dvdnavconfig" ; then
+#     if ( dvdnav-config --version ) >/dev/null 2>&1 ; then
+#       _dvdnavconfig="dvdnav-config"
+#     fi
+#   fi
+#   test -z "$_dvdnavdir" && test -n "$_dvdnavconfig" && _dvdnavdir=`$_dvdnavconfig --cflags`
+#   _used_css=
+#   test "$_dvdkit" = no && test "$_dvdkit2" = no && _used_css=$_ld_css
+#   cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
+# fi
+# if test "$_dvdnav" = yes ; then
+#   _largefiles=yes
+#   _def_dvdnav='#define USE_DVDNAV 1'
+#   if test -n "$_legal_dvdnavdir" ; then
+#    _ld_css="$_ld_css $_legal_dvdnavdir -ldvdnav"
+#   elif test -n "$_dvdnavconfig" ; then
+#    _ld_css="$_ld_css `$_dvdnavconfig --libs`"
+#   else
+#    _ld_css="$_ld_css -ldvdnav"
+#   fi
+#   if test -n "$_dvdnavconfig" ; then
+#    _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
+#    _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
+#   fi
+#   if test -n "$_dvdnavdir" ; then
+#    _inc_extra="$_inc_extra -I$_dvdnavdir"
+#   fi
+#   _inputmodules="dvdnav $_inputmodules"
+#   echores "yes"
+# else
+#   _def_dvdnav='#undef USE_DVDNAV'
+#   _noinputmodules="dvdnav $_noinputmodules"
+#   echores "no"
+# fi
 
 echocheck "cdparanoia"
 if test "$_cdparanoia" = auto ; then
