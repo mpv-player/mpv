@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <errno.h>
 
 #include "../config.h"
 #include "../mp_msg.h"
@@ -171,6 +172,29 @@ static int open(vf_instance_t *vf, char* args){
     
     vf->priv->pp=GET_PP_QUALITY_MAX; //divx_quality;
     return 1;
+}
+
+int readPPOpt(void *conf, char *arg)
+{
+  int val;
+
+  if(arg == NULL)
+    return -2; // ERR_MISSING_PARAM
+  errno = 0;
+  val = (int)strtol(arg,NULL,0);
+  if(errno != 0)
+    return -4;  // What about include cfgparser.h and use ERR_* defines */
+  if(val < 0)
+    return -3; // ERR_OUT_OF_RANGE
+
+  divx_quality = val;
+
+  return 1;
+}
+  
+void revertPPOpt(void *conf, char* opt) 
+{
+  divx_quality=0;
 }
 
 vf_info_t vf_info_pp = {
