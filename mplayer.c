@@ -354,7 +354,9 @@ void uninit_player(unsigned int mask){
 void exit_player(char* how){
 
   uninit_player(INITED_ALL);
-  vo_uninit();
+#ifdef X11_FULLSCREEN
+  vo_uninit();	// close the X11 connection (if any opened)
+#endif
 
   current_module="exit_player";
 
