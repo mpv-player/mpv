@@ -12,6 +12,9 @@ INCDIR  = -I. -I./event -I./wm -I./skin $(GTKINC)
 
 OPTIMIZE =  $(OPTFLAGS) -fomit-frame-pointer \
             -fexpensive-optimizations -fschedule-insns2 -Wall
+ifeq ($(TARGET_ARCH_X86),yes)
+OPTIMIZE += -malign-double
+endif
 
 CFLAGS = $(OPTIMIZE) $(INCDIR) $(DEBUG) 
 

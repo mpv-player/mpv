@@ -162,15 +162,15 @@ int __base( char * in )
   }
  if ( !strcmp( winList,"sub" ) )
   {
-   defList->sub.x=x;
-   defList->sub.y=y;
    defList->sub.type=itBase;
    strcpy( tmp,path ); strcat( tmp,fname );
    if ( skinBPRead( tmp,&defList->sub.Bitmap ) ) return 1;
+   defList->sub.x=x;
+   defList->sub.y=y;
    defList->sub.width=defList->sub.Bitmap.Width;
    defList->sub.height=defList->sub.Bitmap.Height;
    #ifdef DEBUG
-    dbprintf( 3,"[skin]  width: %d height: %d\n",defList->sub.width,defList->sub.height );
+    dbprintf( 3,"[skin]  %d,%d %dx%d\n",defList->sub.x,defList->sub.y,defList->sub.width,defList->sub.height );
    #endif
   }
 /*

@@ -21,13 +21,13 @@ void mplSubDraw( wsParamDisplay )
 
  if ( mplSubRender )
   {
-   wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+//   wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
    if ( appMPlayer.sub.Bitmap.Image )
     {
-     wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
+//     wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
      wsPutImage( &appMPlayer.subWindow );
     } 
-   XFlush( wsDisplay );
+//   XFlush( wsDisplay );
   }
  appMPlayer.subWindow.State=0; 
 }
