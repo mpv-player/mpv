@@ -226,7 +226,7 @@ and for color space conversion in the video output drivers.
 <para>
 You can either try to install the GNU install program, and (if you did
 not put it in your global path) then point to the location with:
-<screen>./configure --install-path=PATH</screen>
+<screen>./configure --with-install=/path/and/name/of/install</screen>
 </para>
 
 <para>
