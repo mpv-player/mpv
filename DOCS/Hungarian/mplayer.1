@@ -80,6 +80,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-bpp\ mélység ]
 .RB [ \-flip ]
 .RB [ \-playlist\ <file> ]
+.RB [ \-channels\ n ]
 .I - vagy file vagy eszköz
 .PP
 .SH LEÍRÁS
@@ -406,6 +407,15 @@ MPEG1 sztereó kimenet tipusának kiválasztása
         Bal csatorna   1
         Jobb csatorna  2
 
+.TP
+.B \-channels n
+kimeneti audio csatornák számának kiválasztása
+
+        Sztereó        2
+        Térhatás       4
+        Teljes 5.1     6
+
+Jelenleg ez az opció csak AC3 audióhoz használható.
 .TP
 .B \-srate Hz
 audio lejátszása a megadott frekvencián. A lejátszás sebességére van

@@ -207,7 +207,37 @@ outputs, in contrary to the Win32 codec which supports only RGB.</P>
 </UL></P>
 
 
-<P><B><A NAME=2.2.2.1>2.2.2.1.  Hardware AC3 decoding</A></B></P>
+<P><B><A NAME=2.2.2.1>2.2.2.1.  Software AC3 decoding</A></B></P>
+
+<P>This is the default decoder used for files with AC3 audio.</P>
+
+<P>The AC3 decoder can create output audio mixes for 2, 4, or 6
+speakers.  When configured for 6 speakers, this decoder provides
+separate output of all the AC3 channels to the soundcard driver,
+allowing the full "surround sound" experience without the external AC3
+decoder required to use the hwac3 codec.</P>
+
+<P>Use the <CODE>-channels</CODE> option to select the number of output channels.
+Use <CODE>-channels 2</CODE> for a stereo downmix.  For a 4 channel downmix (Left
+Front, Right Front, Left Surround and Right Surround outputs), use
+<CODE>-channels 4</CODE>.  In this case, any Centre channel will be mixed
+equally to the front channels.  Lastly, "-channels 6" will output all the AC3
+channels as they are encoded - in the order Left, Right, Left Surround, Right
+Surround, Centre and LFE.</P>
+
+<P>The default number of output channels is 2.</P>
+
+<P>To use more than 2 output channels, you'll need to be using OSS,
+and to have a soundcard driver that supports the appropriate number of
+output channels via the SNDCTL_DSP_CHANNELS ioctl.  For example, a
+version of the emu10k1 driver (used with the SB Live cards) newer than
+August 2001 should be suitable.</P>
+
+<P>Output mixes of more than 2 channels should be considered
+experimental.</P>
+
+
+<P><B><A NAME=2.2.2.2>2.2.2.2.  Hardware AC3 decoding</A></B></P>
 
 <P>You'll need an AC3 capable soundcard, with digital out (SP/DIF). The
 card's driver must support the AFMT_AC3 format (like SB Live! does).
@@ -215,7 +245,7 @@ Connect your AC3 decoder to the SP/DIF output, and use the '-ac hwac3'
 option. It may or may not work (experimental). (probably won't...)</P>
 
 
-<P><B><A NAME=2.2.2.2>2.2.2.2.  libmad support</A></B></P>
+<P><B><A NAME=2.2.2.3>2.2.2.3.  libmad support</A></B></P>
 
 <P><A HREF="http://mad.sourceforge.net">libmad</A> is a multiplatform MPEG audio
 decoding library. If you don't know why is it good, you probably don't need it.</P>
@@ -224,7 +254,7 @@ decoding library. If you don't know why is it good, you probably don't need it.<
 option.</P>
 
 
-<P><B><A NAME=2.2.2.3>2.2.2.3.  VIVO audio</A></B></P>
+<P><B><A NAME=2.2.2.4>2.2.2.4.  VIVO audio</A></B></P>
 
 <P>The audio codec used in VIVO files depends on whether it's a VIVO/1.0 or
 VIVO/2.0 file. VIVO/1.0 files have <B>g.723</B> audio, and VIVO/2.0 files

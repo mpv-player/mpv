@@ -171,7 +171,7 @@ a Win32-es codeceket. Ezutóbbi codec nem támogat se YV12 se YUY2 kimenetet,
 csak BGR-t, ezért kizárólag X11 és OpenGL kimenetekkel mûködik. Remélhetõleg
 hamarosan az ffh263 is tud VIVO 2.0-ás file-okat dekódolni.</P>
 
-<P>Olvasd el a <A HREF=#2.2.2.3>VIVO audio codec</A> fejezetet is!</P>
+<P>Olvasd el a <A HREF=#2.2.2.4>VIVO audio codec</A> fejezetet is!</P>
 
 
 <P><B><A NAME=2.2.1.5>2.2.1.5.  MPEG 1/2 video</A></B></P>
@@ -212,7 +212,34 @@ a Win32 codeccel ami csak RGB-t tud.</P>
 </UL></P>
 
 
-<P><B><A NAME=2.2.2.1>2.2.2.1.  Hardveres AC3 dekódolás</B></P>
+<P><B><A NAME=2.2.2.1>2.2.2.1.  Szoftveres AC3 dekódolás</B></P>
+
+<P>Ez az alapértelmezett AC3 audio dekóder.</P>
+
+<P>Az AC3 dekóder 2, 4 vagy 6 hangszórós mixelési képességgel van ellátva.
+Ha 6 csatornára van állítva, a dekóder külön-külön adja a hangkártyának a 
+csatornákat, ami teljes térhatást eredményez, külsõ - hwac3 codec-kel 
+használható - AC3 dekóder nélkül.</P>
+
+<P>A <CODE>-channels</CODE> opcióval adható meg a kimeneti csatornák száma.
+A <CODE>-channels 2</CODE> stereo mixet eredményez. 4 csatornás mixhez
+(bal elsõ, jobb elsõ, bal térhatás és jobb térhatás) a <CODE>-channels 4</CODE>
+opció használható. Ebben az esetben minden "középsõ" csatorna egyenlõ mértékben
+kerül az elülsõ csatornákra. Végül, a <CODE>-channels 6</CODE> opció
+ugyanúgy adja ki a csatornákat, ahogy azokat enkódolták - sorrendben : bal,
+jobb, bal térhatás, jobb térhatás, közép és LFE.</P>
+
+<P>Az alapértelmezett kimenet a 2 csatornás.</P>
+
+<P>Több mint két csatorna használatához OSS meghajtó kell, és egy olyan
+hangkártya (illetve meghajtó), ami támogatja is az adott mennyiségû
+csatornát a SNDCTL_DSP_CHANNELS ioctl-en keresztül. Például a 2001 augusztusinál
+újabb emu10k1 meghajtó (SB Live kártyákhoz) megfelelõ.</P>
+
+<P>A több mint két csatornás mixelés kísérleti stádiumú.</P>
+
+
+<P><B><A NAME=2.2.2.2>2.2.2.2.  Hardveres AC3 dekódolás</B></P>
 
 <P>Kell egy AC3 képes hangkártya, digitális kimenettel (SP/DIF). A kártya
 meghajtójának támogatnia kell az AFMT_AC3 formátumot (ilyen például az
@@ -220,7 +247,7 @@ SB Live!). Kapcsold rá a hardveres AC3 dekódered az SP/DIF kimenetre,
 és használd az -ac hwac3 opciót. Akár mûködhet is. De nem fog. Tényleg. :)</P>
 
 
-<P><B><A NAME=2.2.2.2>2.2.2.2.  libmad támogatás</A></B></P>
+<P><B><A NAME=2.2.2.3>2.2.2.3.  libmad támogatás</A></B></P>
 
 <P>A <A HREF="http://mad.sourceforge.net">libmad</A> egy többplatformos MPEG
 audio dekóder. Ha nem tudod miért lenne szükséged rá, nincs szükséged rá.</P>
@@ -228,7 +255,7 @@ audio dekóder. Ha nem tudod miért lenne szükséged rá, nincs szükséged rá.</P>
 <P>A támogatást az <CODE>--enable-mad</CODE> configure opcióval lehet bekapcsolni.</P>
 
 
-<P><B><A NAME=2.2.2.3>2.2.2.3. VIVO audio</A></B></P>
+<P><B><A NAME=2.2.2.4>2.2.2.4. VIVO audio</A></B></P>
 
 <P>A VIVO file-okban használt audio codec milyensége attól függ hogy VIVO/1.0
 avagy VIVO/2.0 fileról beszélünk. Az 1.0-ás fileokban <B>g.723</B> audio van,

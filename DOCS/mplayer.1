@@ -48,6 +48,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-nodouble ]
 .RB [ \-double ]
 .RB [ \-stereo\ mode ]
+.RB [ \-channels\ n ]
 .RB [ \-srate\ Hz ]
 .RB [ \-osdlevel\ level ]
 .RB [ \-config\ file ]
@@ -403,7 +404,15 @@ select type of MPEG1 stereo output.
         Stereo         0
         Left channel   1
         Right channel  2
+.TP
+.B \-channels n
+select number of audio output channels to be used
 
+        Stereo         2
+        Surround       4
+        Full 5.1       6
+
+Currently this option is only honoured for AC3 audio.
 .TP
 .B \-srate Hz
 specifies Hz to playback audio on. Has effect on playback speed!
