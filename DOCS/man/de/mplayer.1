@@ -3482,7 +3482,7 @@ bilinear
 .IPs 2
 bicubic (gute Qualität) (Standard)
 .IPs 3
-experimental
+experimentell
 .IPs 4
 nearest neighbour (schlechte Qualität)
 .IPs 5
@@ -5649,7 +5649,7 @@ Benutze die angegebene Windows-Audioformatkennung (z.B.\& atag=0x55).
 .B bit_exact
 Benutze nur bitgenaue Algorithmen (außer (I)DCT).
 Zusätzlich deaktiviert bit_exact mehrere Optimierungen und sollte daher
-nur für rückläufige Tests verwendet werden, die binär identische Dateien
+nur für Regresstionstests verwendet werden, die binär identische Dateien
 benötigen, selbst wenn sich die Version des Encoders ändert.
 Dies unterdrückt in MPEG-4-Streams außerdem den user_data-Header.
 Benutze diese Option nicht, wenn du nicht genau weißt, was du tust.
@@ -5706,7 +5706,7 @@ minimaler Quantisierungsparameter (Durchlauf 1/\:2)
 .RSs
 .IPs 1
 Nicht empfohlen (viel größere Datei, geringer Qualitätsunterschied und
-seltsame Seiteneffekte: Msmpeg4 und h263 werden eine sehr geringe Qualität
+seltsame Seiteneffekte: msmpeg4 und h263 werden eine sehr geringe Qualität
 liefern und die Bitratenkontrolle wird verwirrt sein, was auch eine geringere
 Qualität zur Folge hat; manche Decoder werden es nicht abspielen können).
 .IPs 2
@@ -5768,6 +5768,76 @@ vernünftiger Bereich für MPEG-4
 .RE
 .PD 1
 .
+.TP
+.B vme=<0\-5>
+Verfahren für die Bewegungsabschätzung.
+Verfügbare Modi sind die folgenden:
+.PD 0
+.RSs
+.IPs 0
+keine (sehr geringe Qualität)
+.IPs 1
+volle (langsam, momentan nicht gewartet und deaktiviert)
+.IPs 2
+log (langsam, momentan nicht gewartet und deaktiviert)
+.IPs 3
+phods (langsam, momentan nicht gewartet und deaktiviert)
+.IPs 4
+EPZS: Größe=1 diamond, Größe kann mit den *dia-Optionen angepasst werden
+(Standard).
+.IPs 5
+X1 (experimentell, verweist momentan nur auf EPZS)
+.RE
+.PD 1
+.sp 1
+.RS
+.br
+.I ANMERKUNG:
+0\-3 ignorieren momentan den Umfang der gebrauchten Bits, die Qualität
+kann daher gering sein.
+.RE
+.
+.TP
+.B me_range=<0\-9999>
+Umfang der Bewegungsabschätzung (Standard: 0 (unbegrenzt))
+.
+.TP
+.B mbd=<0\-2>
+Macroblock decision algorithm: Entscheidungsalgorithmus für Macro-Blocks (hohe
+Qualitätsstufe), encodiert jeden Macro-Block in allen Modi und wählt den
+besten aus.
+Dies ist zwar langsam, ist aber hinsichtlich Qualität und Dateigröße besser.
+.PD 0
+.RSs
+.IPs 0
+Benutze mbcmp (Standard).
+.IPs 1
+Wählt denjenigen Modus für einen Macro-Block, der die wenigsten Bits benötigt
+(entspricht vhq).
+.IPs 2
+Wählt den Modus für einen Macro-Block mit der geringsten Verzerrung.
+.RE
+.PD 1
+.
+.TP
+.B vhq\ \ \ \ 
+Bewirkt das gleiche wie mbd=1, wird aus Kompatibilitätsgründen beibehalten.
+.
+.TP
+.B v4mv\ \ \ 
+Erlaubt 4 Motion-Vectors pro Macro-Block (leicht verbesserte Qualität).
+Arbeitet besser in Verbindung mit mbd > 0.
+.
+.TP
+.B obmc\ \ \ 
+Bewegungskompensation überlappender Blöcke (H.263+)
+.
+.TP
+.B loop\ \ \ 
+Loop-Filter (H.263+)
+Beachte, dass diese Option nicht funktioniert.
+.
+.\" manpage is synced from top down to this option.
 .IPs vhq\ \ 
 Modus für hohe Qualität. Encodiert jeden Makroblock in allen Modi und
 wählt dann das kleinste Ergebnis (langsam) (Standard: hohe Qualität
