@@ -961,9 +961,12 @@ int demux_ogg_open(demuxer_t* demuxer) {
     demuxer->audio->id = -2;
   else
     demuxer->audio->id = audio_id;
-  if(!n_text || (text_id < 0))
+  /* Disable the subs only if there are no text streams at all.
+     Otherwise the stream to display might be chosen later when the comment
+     packet is encountered and the user used -slang instead of -sid. */
+  if(!n_text)
     demuxer->sub->id = -2;
-  else
+  else if (text_id >= 0)
     demuxer->sub->id = text_id;
 
   ogg_d->final_granulepos=0;
