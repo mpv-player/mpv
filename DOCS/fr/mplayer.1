@@ -2513,14 +2513,31 @@ chroma.
 Ce filtre place les données 4:2:0 au format YUY2 (4:2:2) avec les lignes chroma
 à leur bon emplacement, de façon à ce que à chaque ligne scannée, les données
 luma et chroma proviennent toutes deux du même champs.
-.IPs dint[=sense:niveau]
+.TP
+.B decimate[=max:haut:bas:frac]
+Saute les trames qui ne différent pas beaucoup de la trame précédente de façon à
+réduire le débit.
+L'argument max (si positif) définit le nombre maximum de trames consécutives qui
+peuvent être sautées, ou (si négatif) l'interval minimum entre les trames
+sautées. Une frame peut être sautée si aucune région 8x8 ne différe de plus de
+la limite de haut, et si pas plus d'une portion de frac (1 signifiant l'image
+entière) ne diffère de plus que la limite de bas.
+Les valeurs de haut et bas sont des blocs de 8x8 pixels et représentent les
+différences actuelles de pixels, donc une limite de 64 coresponds à 1 unité de
+différence pour chaque pixel, ou la même chose répartie différemment sur le
+bloc.
+L'utilisation principale de ce filtre est l'encodage à très bas débit (par ex.
+streaming sur modem bas-débit), mais il peut être utilisé en théorie pour
+réparer les films qui n'ont pas été retro-téléciné correctement.
+.TP
+.B dint[=sense:niveau]
 Détecte et saute la première des trames entrelacées du flux video.
 Les valeurs peuvent aller de 0.0 à 1.0 la première (0.15 par défaut) est la
 différence entre les pixels voisins, la seconde (0.15 par défaut) est la
 partie de l'image qui devra être détectée comme entrelacée pour sauter la trame.
 .IPs lavcdeint
 Utilise le filtre de desentrelacement de libavcodec.
-.IPs "unsharp=l|cLxH:montant[:l|cLxH:montant]"
+.B "unsharp=l|cLxH:montant[:l|cLxH:montant]"
 Masque unsharp / flou gaussien.
 .RSss
 l: Applique l'effet sur le composant luma
@@ -2537,7 +2554,8 @@ montant: taux relatif de dureté / flou à ajouter à l'image
 .REss
 .IPs swapuv
 Echange les plans U & V.
-.IPs "il=[d|i][s][:[d|i][s]]"
+.TP
+.B "il=[d|i][s][:[d|i][s]]"
 (dés)entrelace les lignes.
 Le but de ce filtre est d'ajouter la possibilité de traiter le pré-champs 
 d'images entrelacées sans les désentrelacer.

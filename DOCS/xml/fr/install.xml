@@ -541,7 +541,7 @@ sont supportés:
 <listitem><para>SSA</para></listitem>
 <listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
 <listitem><para>AQTitle</para></listitem>
-<listitem><para>JACOsub</para></listitem>
+<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
 </itemizedlist>
 </para>
 

@@ -1,4 +1,4 @@
-// Last sync on 2003-05-29 with help_mp-en.h 1.97
+// Last sync on 2003-06-13 with help_mp-en.h 1.99
 // Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
 // Original translation by Firebird <firebird@chez.com>
 
@@ -80,9 +80,9 @@ static char help_text[]=
 #define MSGTR_CoreDumped "Core dumped :)\n"
 #define MSGTR_FPSnotspecified "FPS non spécifié ou invalide dans l'entête! Utilisez l'option -fps.\n"
 #define MSGTR_TryForceAudioFmtStr "Tente de forcer la famille de pilotes %s du codec audio ...\n"
-#define MSGTR_CantFindAfmtFallback "Ne peut trouver de codec audio pour la famille de pilotes imposée, utilisation d'autres.\n"
+#define MSGTR_CantFindAfmtFallback "Ne peut trouver de codec audio pour la famille de pilotes imposée, utilisation des autres.\n"
 #define MSGTR_CantFindAudioCodec "Ne peut trouver de codec pour le format audio 0x%X.\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Tentez de mettre à jour %s à partir de etc/codecs.conf\n*** Si ce n'est toujours pas bon, alors lisez DOCS/codecs.html ou DOCS/fr/codecs.html !\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Tentez de mettre à jour %s à partir de etc/codecs.conf\n*** Si ce n'est toujours pas bon, alors lisez DOCS/fr/codecs.html !\n"
 #define MSGTR_CouldntInitAudioCodec "Impossible d'initialiser le codec audio -> pas de son\n"
 #define MSGTR_TryForceVideoFmtStr "Tente de forcer famille de pilotes %s du codec vidéo %s ...\n"
 #define MSGTR_CantFindVideoCodec "Ne peut trouver codec pour format vidéo 0x%X.\n"
@@ -110,8 +110,8 @@ static char help_text[]=
 "  - Essayez -cache 8192\n"\
 "- Utilisez-vous -cache avec un fichier AVI mal multiplexé? \n"\
 "  - Essayez avec -nocache\n"\
-"Lisez DOCS/video.html et DOCS/sound.html pour les astuces de réglage/accélération.\n"\
-"Si rien de tout cela ne résoud le problème, lisez DOCS/bugreports.html.\n\n"
+"Lisez DOCS/fr/video.html et DOCS/fr/sound.html pour les astuces de réglage/accélération.\n"\
+"Si rien de tout cela ne résoud le problème, lisez DOCS/fr/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer a été compilé SANS support GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI a besoin de X11!\n"
@@ -144,7 +144,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer a planté à cause d'une 'Instruction Illégale'.\n"\
 "  Il y a peut-être un bogue dans notre nouveau code de détection CPU...\n"\
-"  Veuillez lire DOCS/bugreports.html\n"
+"  Veuillez lire DOCS/fr/bugreports.html\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer a planté à cause d'une 'Instruction Illégale'.\n"\
 "  Cela se produit généralement quand vous le lancez sur un CPU différent\n"\
@@ -152,11 +152,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer a planté à cause d'une mauvaise utilisation de CPU/FPU/RAM.\n"\
 "  Recompilez MPlayer avec --enable-debug et faites un backtrace 'gdb'\n"\
-"  et désassemblez. Pour les détails, voir DOCS/bugreports.html#crash\n"
+"  et désassemblez. Pour les détails, voir DOCS/fr/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer a planté. Cela n'aurait pas dû arriver.\n"\
 "  Il y a peut-être un bogue dans le code de MPlayer _ou_ dans vos pilotes _ou_ dans votre\n"\
-"  version de gcc. Si vous pensez que c'est la faute de MPlayer, merci de lire DOCS/bugreports.html\n"\
+"  version de gcc. Si vous pensez que c'est la faute de MPlayer, merci de lire DOCS/fr/bugreports.html\n"\
 "  et d'en suivre les instructions. Nous ne pourrons et ne voudrons pas vous aider à moins que vous\n"\
 "  ne fournissiez ces informations en rapportant un bogue possible.\n"
 
@@ -287,7 +287,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Ne peut chercher dans un flux AVI brut! (Index requis, essayez l'option -idx!)\n"
 #define MSGTR_CantSeekFile "Ne peut chercher dans ce fichier.\n"
 
-#define MSGTR_EncryptedVOB "Fichier VOB crypté (support libcss non compilé!) Lire DOCS/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "Fichier VOB crypté (support libcss non compilé!) Lire DOCS/fr/cd-dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Flux crypté mais vous n'avez pas demandé d'authentification !\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Les entêtes compressés ne sont pas (encore) supportés.\n"

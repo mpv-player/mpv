@@ -38,8 +38,8 @@ Dominik Mierzejewski a créé et maintient des paquets Red Hat RPM officiels de
 
 <para>
 Les paquets Mandrake de MPlayer sont disponibles sur le <ulink url="http://plf.zarb.org/">P.L.F.</ulink>,
-SuSE inclus une version limitée de MPlayer dans sa distribution. Si vous voulez toutes les fonctionnalités
-vous devrez installer à partir des sources.
+SuSE inclus une version limitée de MPlayer dans sa distribution. Vous pouvez obtenir des RPMs fonctionnels
+sur <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
 </para>
 </sect2>
 
