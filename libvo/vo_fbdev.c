@@ -107,14 +107,26 @@ static int fb_init(void)
 	if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER")))
 		fb_dev_name = "/dev/fb0";
 	printf("fb_init: using %s\n", fb_dev_name);
+
 	if ((fb_dev_fd = open(fb_dev_name, O_RDWR)) == -1) {
 		printf("fb_init: Can't open %s: %s\n", fb_dev_name, strerror(errno));
 		return 1;
 	}
+
 	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_var_info)) {
 		printf("fb_init: Can't get VSCREENINFO: %s\n", strerror(errno));
 		return 1;
 	}
+
+	/* disable scrolling */
+	fb_var_info.xres_virtual = fb_var_info.xres;
+	fb_var_info.yres_virtual = fb_var_info.yres;
+
+	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_var_info)) {
+		printf("fb_init: Can't put VSCREENINFO: %s\n", strerror(errno));
+		return 1;
+	}
+
 	if (ioctl(fb_dev_fd, FBIOGET_FSCREENINFO, &fb_fix_info)) {
 		printf("fb_init: Can't get VSCREENINFO: %s\n", strerror(errno));
 		return 1;
@@ -145,7 +157,8 @@ static int fb_init(void)
 		default:
 			printf("fb_init: unknown FB_TYPE: %d\n", fb_fix_info.type);
 			return 1;
-	}			
+	}
+
 	fb_bpp = fb_var_info.bits_per_pixel;
 	screen_width = fb_fix_info.line_length;
 	fb_size = fb_fix_info.smem_len;
