@@ -11,7 +11,7 @@
                 libdvdread [now with only libcss with old API (LGB)
    2002/Sep/21  Fix a bug which caused segmentation fault when using
 		-dvdkey option, since css.so was only loaded by -dvdauth.
-		(LGB, reported and suggested by "me andi" <wortelsapje@hotmail.com>)
+		(LGB, reported and suggested by sbmpost <wortelsapje@hotmail.com>)
 		Also some cosmetic fix with return value of dvd_css_descramble().
    2002/Sep/21  Try to load css syms with AND without underscore at their
 		names, probably not only OpenBSD requires this so it's a
@@ -243,6 +243,7 @@ if (!(v=dlsym(dlid,s))) {\
 #undef CSS_DLSYM
 
 	css_so_is_loaded=1;
+	printf("DVD: shared object %s is loaded normally.\n",css_so);
 	return 0;
 }
 
