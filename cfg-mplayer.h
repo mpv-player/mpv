@@ -113,9 +113,9 @@ struct config conf[]={
 	{"frames", &play_n_frames, CONF_TYPE_INT, CONF_MIN, 0, 0},
 	{"benchmark", &benchmark, CONF_TYPE_FLAG, 0, 0, 1},
 	
-	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 256},
-	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 256},
-	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 32},
+	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 255},
+	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 255},
+	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31},
 #ifdef USE_FAKE_MONO
 	{"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2},
 #endif
@@ -133,8 +133,8 @@ struct config conf[]={
 //	{"vids", &avi_header.video_codec, CONF_TYPE_STRING, 0, 0, 0},
 	{"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 10},
 	{"fps", &force_fps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0},
-	{"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000+1},
-	{"afm", &audio_family, CONF_TYPE_INT, CONF_RANGE, 0, 9}, // keep ranges in sync
+	{"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000},
+	{"afm", &audio_family, CONF_TYPE_INT, CONF_RANGE, 0, 8}, // keep ranges in sync
 	{"vfm", &video_family, CONF_TYPE_INT, CONF_RANGE, 0, 6}, // with codec-cfg.c
 	{"ac", &audio_codec, CONF_TYPE_STRING, 0, 0, 0},
 	{"vc", &video_codec, CONF_TYPE_STRING, 0, 0, 0},
@@ -146,7 +146,7 @@ struct config conf[]={
 	{"pp", &divx_quality, CONF_TYPE_INT, CONF_RANGE, 0, 63},
 	{"br", &encode_bitrate, CONF_TYPE_INT, CONF_RANGE, 10000, 10000000},
 #ifdef HAVE_PNG
-	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 10},
+	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 9},
 #endif	
 #ifdef HAVE_SDL
 	{"sdl", "Use -vo sdl:driver instead of -vo sdl -sdl driver\n",
@@ -156,9 +156,9 @@ struct config conf[]={
 	{"sdla", "Use -ao sdl:driver instead of -ao sdl -sdla driver\n",
 	    CONF_TYPE_PRINT, 0, 0, 0},
 #endif	
-	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
-	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
-	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
+	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
+	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
+	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
         {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1},
         {"novm", &vidmode, CONF_TYPE_FLAG, 0, 1, 0},
 	{"fs", &fullscreen, CONF_TYPE_FLAG, 0, 0, 1},
