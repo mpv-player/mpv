@@ -2,7 +2,7 @@ TO DO:
 ~~~~~~
 Urgent:
 - asterix.avi audio delays after 5-10 mins (bps mode only)
-- PAUSE doesn't work in the X11 and SDL windows (because no Check X Events)
+- PAUSE doesn't work in the X11 and SDL windows (no Check X Events) (DONE?)
 - SDL fullscreen problems at quit/eof - DONE?
 - finish ASF seeking
 - fix vo_syncfb - DONE for G400
@@ -12,7 +12,6 @@ Fix compilation problems:
 
 Libvo features:
 - framebuffer and svgalib support (both)
-- DGA support (LGB?)
 - real fullscreen (black bands at unused areas) support - DONE for xmga & x11
 - fix X4.0.x/DRI OpenGL (doesn't work, at least mga & tdfx & nvidia)
 - change libmpeg2 & libvo interface to be compatible with libmpeg2-0.2.0 release
