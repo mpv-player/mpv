@@ -2696,6 +2696,8 @@ if test "$_arts" = yes ; then
   _aomodules="arts $_aomodules"
   _ld_arts=`artsc-config --libs`
   _inc_arts=`artsc-config --cflags`
+else
+  _noaomodules="arts $_noaomodules"
 fi
 echores "$_arts"
 
