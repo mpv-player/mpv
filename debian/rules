@@ -24,7 +24,6 @@ build-stamp:
 	#$(MAKE)
 	#/usr/bin/docbook-to-man debian/etherconf.sgml > etherconf.1
 	${MAKE} mplayer
-	${MAKE} mencoder
 
 	touch build-stamp
 

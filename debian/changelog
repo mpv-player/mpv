@@ -1,3 +1,9 @@
+mplayer (0.50-2) unstable; urgency=low
+
+  * gui added to package/menu 
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Wed,  7 Nov 2001 11:31:46 +0100
+
 mplayer (0.50-1) unstable; urgency=low
 
   * 0.50 released.
