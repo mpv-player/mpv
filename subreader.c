@@ -1,6 +1,5 @@
 /*
  * Subtitle reader with format autodetection
- * Mier nem muxik realloccal!?!?! - nekem muxik :)
  *
  * Written by laaz
  * Some code cleanup & realloc() by A'rpi/ESP-team
@@ -54,7 +53,7 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
 	if (!fgets (line, 1000, fd)) return NULL;
     } while (*line=='\n' || *line == '\r' || !*line);
     
-    if (sscanf (line, "{%i}{%i}%s", &(current->start), &(current->end),line2) <2) {return ERR;}
+    if (sscanf (line, "{%d}{%d}%s", &(current->start), &(current->end),line2) <2) {return ERR;}
 
     p=line;
     while (*p++!='}');
@@ -81,7 +80,7 @@ subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
     
     while (!current->text[0]) {
 	if (!fgets (line, 1000, fd)) return NULL;
-	if (sscanf (line, "%i:%i:%i.%i,%i:%i:%i.%i",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4) < 8) continue;
+	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4) < 8) continue;
 	current->start = a1*360000+a2*6000+a3*100+a4;
 	current->end   = b1*360000+b2*6000+b3*100+b4;
 
@@ -110,12 +109,12 @@ subtitle *sub_read_line_third(FILE *fd,subtitle *current) {
     
     while (!current->text[0]) {
 	if (!fgets (line, 1000, fd)) return NULL;
-	if ((len=sscanf (line, "%i:%i:%i,%i --> %i:%i:%i,%i",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4)) < 8)
+	if ((len=sscanf (line, "%d:%d:%d,%d --> %d:%d:%d,%d",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4)) < 8)
 	    continue;
 	current->start = a1*360000+a2*6000+a3*100+a4/10;
 	current->end   = b1*360000+b2*6000+b3*100+b4/10;
 	for (i=0; i<SUB_MAX_TEXT;) {
-	    if (!fgets (line, 1000, fd)) return NULL;
+	    if (!fgets (line, 1000, fd)) break;
 	    len=0;
 	    for (p=line; *p!='\n' && *p!='\r' && *p; p++,len++);
 	    if (len) {
@@ -144,11 +143,11 @@ int sub_autodetect (FILE *fd) {
 	    return -1;
 
 //	if (sscanf (line, "{%i}{%i}", &i, &i, p)==2) // ha valaki tudja miert 2, mondja mar el nekem ;)
-	if (sscanf (line, "{%i}{%i}", &i, &i)==2) // ha valaki tudja miert 2, mondja mar el nekem ;)
+	if (sscanf (line, "{%d}{%d}", &i, &i)==2) // ha valaki tudja miert 2, mondja mar el nekem ;)
 		{sub_uses_time=0;return 0;}
-	if (sscanf (line, "%i:%i:%i.%i,%i:%i:%i.%i",     &i, &i, &i, &i, &i, &i, &i, &i)==8)
+	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",     &i, &i, &i, &i, &i, &i, &i, &i)==8)
 		{sub_uses_time=1;return 1;}
-	if (sscanf (line, "%i:%i:%i,%i --> %i:%i:%i,%i", &i, &i, &i, &i, &i, &i, &i, &i)==8)
+	if (sscanf (line, "%d:%d:%d,%d --> %d:%d:%d,%d", &i, &i, &i, &i, &i, &i, &i, &i)==8)
 		{sub_uses_time=1;return 2;}
 	if (j>100) return -1;  // too many bad lines or bad coder
     }
@@ -192,7 +191,9 @@ subtitle* sub_read_file (char *filename) {
     fclose(fd);
 
 //    printf ("SUB: Subtitle format %s time.\n", sub_uses_time?"uses":"doesn't use");
-    printf ("SUB: Read %i subtitles, %i errors.\n", sub_num, sub_errs);
+    printf ("SUB: Read %i subtitles", sub_num);
+    if (sub_errs) printf (", %i error(s).\n", sub_errs);
+    else 	  printf (".\n");
 
     return first;
 }
