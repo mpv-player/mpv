@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced to 1.12 -->
+<!-- synced to 1.13 -->
 <sect1 id="tv-input" xreflabel="TV input">
 <title>TV bemenet</title>
 
@@ -192,7 +192,7 @@ capturing long TV series, where the video quality isn't so important.
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
      -oac mp3lame -lameopts cbr:br=48 \
-     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o <replaceable>output.avi</replaceable> tv://
+     -vf crop=720:540:24:18,pp=lb,scale=384:288 -sws 1 -o <replaceable>output.avi</replaceable> tv://
 </screen>
 Meg lehet adni kisebb képméretet is a <option>-tv</option> kapcsolónál és ki lehet
 hagyni a szoftveres méretezést, de ez a megközelítés a lehetõ legtöbb információt
