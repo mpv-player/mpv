@@ -63,6 +63,7 @@
 #define MP_CMD_SPEED_SET 59
 #define MP_CMD_RUN 60
 #define MP_CMD_SUB_LOG 61
+#define MP_CMD_SWITCH_AUDIO 62
 
 #define MP_CMD_GUI_EVENTS       5000
 #define MP_CMD_GUI_LOADFILE     5001

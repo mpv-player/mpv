@@ -1348,26 +1348,7 @@ switch(file_format){
    break;
  }
 
- case DEMUXER_TYPE_MPEG_TY: {
-  sh_video=d_video->sh;sh_video->ds=d_video;
-
-  if(audio_id!=-2) {
-   if(!ds_fill_buffer(d_audio)){
-    mp_msg(MSGT_DEMUXER,MSGL_INFO,"MPEG: " MSGTR_MissingAudioStream);
-    sh_audio=NULL;
-   } else {
-    sh_audio=d_audio->sh;sh_audio->ds=d_audio;
-    switch(d_audio->id & 0xE0){  // 1110 0000 b  (high 3 bit: type  low 5: id)
-      case 0x00: sh_audio->format=0x50;break; // mpeg
-      case 0xA0: sh_audio->format=0x10001;break;  // dvd pcm
-      case 0x80: if((d_audio->id & 0xF8) == 0x88) sh_audio->format=0x2001;//dts
-                 else sh_audio->format=0x2000;break; // ac3
-      default: sh_audio=NULL; // unknown type
-    }
-   }
-  }
-  break;
- }
+ case DEMUXER_TYPE_MPEG_TY: 
  case DEMUXER_TYPE_MPEG_PS: {
   sh_video=d_video->sh;sh_video->ds=d_video;
 //  if(demuxer->stream->type!=STREAMTYPE_VCD) demuxer->movi_start=0; // for VCD
@@ -1378,13 +1359,6 @@ switch(file_format){
     sh_audio=NULL;
    } else {
     sh_audio=d_audio->sh;sh_audio->ds=d_audio;
-    switch(d_audio->id & 0xE0){  // 1110 0000 b  (high 3 bit: type  low 5: id)
-      case 0x00: sh_audio->format=0x50;break; // mpeg
-      case 0xA0: sh_audio->format=0x10001;break;  // dvd pcm
-      case 0x80: if((d_audio->id & 0xF8) == 0x88) sh_audio->format=0x2001;//dts
-                 else sh_audio->format=0x2000;break; // ac3
-      default: sh_audio=NULL; // unknown type
-    }
    }
   }
   break;
@@ -1804,3 +1778,8 @@ int demuxer_get_percent_pos(demuxer_t *demuxer){
     return ans;
 }
 
+int demuxer_switch_audio(demuxer_t *demuxer){     
+    int ans = 0;
+    int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &ans);
+    return ans;
+}

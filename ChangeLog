@@ -45,7 +45,8 @@ MPlayer (1.0)
     * avisynth demuxer
     * Multichannel MP3 in MP4 files support (MP3on4)
     * some classes of nonworking 14.4/28.8 RealAudio files fixed
-    * added code to autodetect and demux mpeg audio layers 1 and 2 
+    * added code to autodetect and demux mpeg audio layers 1 and 2
+    * online audio stream switching in the MPEG demuxer
 
     Streaming:
     * stream selection and bandwidth support for MMS over HTTP

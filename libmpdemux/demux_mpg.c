@@ -32,6 +32,8 @@ typedef struct mpg_demuxer {
   float final_pts;
   int has_valid_timestamps;
   unsigned int es_map[0x40];	//es map of stream types (associated to the pes id) from 0xb0 to 0xef
+  int num_a_streams;
+  int a_stream_ids[MAX_A_STREAMS];
 } mpg_demuxer_t;
 
 static int mpeg_pts_error=0;
@@ -109,6 +111,7 @@ int demux_mpg_open(demuxer_t* demuxer) {
   demuxer->priv = mpg_d;
   mpg_d->final_pts = 0.0;
   mpg_d->has_valid_timestamps = 1;
+  mpg_d->num_a_streams = 0;
   if (demuxer->seekable && stream_tell(demuxer->stream) < end_seq_start) {
     stream_seek(s,(pos + end_seq_start / 2));
     while ((!s->eof) && ds_fill_buffer(demuxer->video) && half_pts == 0.0) {
@@ -152,6 +155,23 @@ static unsigned int read_mpeg_timestamp(stream_t *s,int c){
   pts=(((c>>1)&7)<<30)|((d>>1)<<15)|(e>>1);
   mp_dbg(MSGT_DEMUX,MSGL_DBG3,"{%d}",pts);
   return pts;
+}
+
+static void new_audio_stream(demuxer_t *demux, int aid){
+  if(!demux->a_streams[aid]){
+    mpg_demuxer_t *mpg_d=(mpg_demuxer_t*)demux->priv;
+    sh_audio_t* sh_a;
+    new_sh_audio(demux,aid);
+    sh_a = (sh_audio_t*)demux->a_streams[aid];
+    switch(aid & 0xE0){  // 1110 0000 b  (high 3 bit: type  low 5: id)
+      case 0x00: sh_a->format=0x50;break; // mpeg
+      case 0xA0: sh_a->format=0x10001;break;  // dvd pcm
+      case 0x80: if((aid & 0xF8) == 0x88) sh_a->format=0x2001;//dts
+                  else sh_a->format=0x2000;break; // ac3
+    }
+    if (mpg_d) mpg_d->a_stream_ids[mpg_d->num_a_streams++] = aid;
+  }
+  if(demux->audio->id==-1) demux->audio->id=aid;
 }
 
 static int demux_mpg_read_packet(demuxer_t *demux,int id){
@@ -267,10 +287,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 
 //        aid=128+(aid&0x7F);
         // aid=0x80..0xBF
-
-        if(!demux->a_streams[aid]) new_sh_audio(demux,aid);
-        if(demux->audio->id==-1) demux->audio->id=aid;
-
+        new_audio_stream(demux, aid);
       if(demux->audio->id==aid){
         int type;
         ds=demux->audio;
@@ -327,8 +344,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   if(id>=0x1C0 && id<=0x1DF){
     // mpeg audio
     int aid=id-0x1C0;
-    if(!demux->a_streams[aid]) new_sh_audio(demux,aid);
-    if(demux->audio->id==-1) demux->audio->id=aid;
+    new_audio_stream(demux, aid);
     if(demux->audio->id==aid){
       ds=demux->audio;
       if(!ds->sh) ds->sh=demux->a_streams[aid];
@@ -602,9 +618,7 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
 }
 
 int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
-/*    demux_stream_t *d_audio=demuxer->audio;*/
     demux_stream_t *d_video=demuxer->video;
-/*    sh_audio_t *sh_audio=d_audio->sh;*/
     sh_video_t *sh_video=d_video->sh;
     mpg_demuxer_t *mpg_d=(mpg_demuxer_t*)demuxer->priv;
 
@@ -622,6 +636,28 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
               return DEMUXER_CTRL_OK;
             }
 	    return DEMUXER_CTRL_DONTKNOW;
+
+	case DEMUXER_CTRL_SWITCH_AUDIO:
+            if (mpg_d && mpg_d->num_a_streams > 1 && demuxer->audio && demuxer->audio->sh) {
+              demux_stream_t *d_audio = demuxer->audio;
+              sh_audio_t *sh_audio = d_audio->sh;
+              sh_audio_t *sh_a;
+              int i;
+              for (i = 0; i < mpg_d->num_a_streams; i++) {
+                if (d_audio->id == mpg_d->a_stream_ids[i]) break;
+              }
+              do {
+                i = (i+1) % mpg_d->num_a_streams;
+                sh_a = (sh_audio_t*)demuxer->a_streams[mpg_d->a_stream_ids[i]];
+              } while (sh_a->format != sh_audio->format);
+              if (d_audio->id != mpg_d->a_stream_ids[i]) {
+                d_audio->id = mpg_d->a_stream_ids[i];
+                d_audio->sh = sh_a;
+                ds_free_packs(d_audio);
+              }
+              *((int *)arg)=(int)d_audio->id;
+            }
+            return DEMUXER_CTRL_OK;
 
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
