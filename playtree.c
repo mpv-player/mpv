@@ -32,8 +32,11 @@ play_tree_free(play_tree_t* pt, int childs) {
 #endif
 
   if(childs) {    
-    for(iter = pt->child; iter != NULL; iter = iter->next)
+    for(iter = pt->child; iter != NULL; ) {
+      play_tree_t* nxt=iter->next;
       play_tree_free(iter,1);
+      iter = nxt;
+    }
     pt->child = NULL;
   }
 
@@ -64,8 +67,11 @@ play_tree_free_list(play_tree_t* pt, int childs) {
   for(iter = pt ; iter->prev != NULL ; iter = iter->prev)
     /* NOTHING */;
 
-  for( ; iter != NULL ; iter = iter->next)
+  while(iter) {
+    play_tree_t* nxt = iter->next;
     play_tree_free(iter,childs);
+    iter = nxt;
+  }
     
 
 }
