@@ -686,8 +686,11 @@ int gui_no_filename=0;
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(!parse_codec_cfg(CONFDIR"/codecs.conf")){
-    mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
-    exit(0);  // From unknown reason a hangup occurs here :((((((
+    if(!parse_codec_cfg(NULL)){
+      mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
+      exit(0);
+    }
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_BuiltinCodecsConf);
   }
 }
 

@@ -223,6 +223,11 @@ $(PRG_MENCODER): $(MENCODER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) libmpcodecs/libmpencoders.a $(COMMON_LIBS) $(EXTRA_LIB) $(ENCORE_LIB) $(MLIB_LIB) $(LIRC_LIB) $(ARCH_LIB) -lm 
 endif
 
+codecs.conf.h: $(PRG_CFG)
+	./$(PRG_CFG) ./etc/codecs.conf > $@
+
+codec-cfg.o: codecs.conf.h
+
 # Every mplayer dependency depends on version.h, to force building version.h
 # first (in serial mode) before any other of the dependencies for a parallel make
 # run.  This is necessary, because the make rule for version.h removes objects
@@ -293,11 +298,11 @@ uninstall:
 	@echo "Uninstall completed"
 
 clean:
-	-rm -f *.o *~ $(OBJS)
+	-rm -f *.o *~ $(OBJS) codecs.conf.h
 
 distclean:
 	-rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_MENCODER) $(OBJS)
-	-rm -f *.o *.a .depend configure.log
+	-rm -f *.o *.a .depend configure.log codecs.conf.h
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 
 strip:
@@ -307,7 +312,7 @@ dep:	depend
 
 depend:
 	./version.sh `$(CC) -dumpversion`
-	$(CC) -MM $(CFLAGS) mplayer.c mencoder.c $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
+	$(CC) -MM $(CFLAGS) -DCODECS2HTML mplayer.c mencoder.c $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
 	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
 
 # ./configure must be run if it changed in CVS

@@ -32,6 +32,10 @@
 #include "libvo/img_format.h"
 #include "codec-cfg.h"
 
+#ifndef CODECS2HTML
+#include "codecs.conf.h"
+#endif
+
 #define PRINT_LINENUM mp_msg(MSGT_CODECCFG,MSGL_ERR," at line %d\n", line_num)
 
 #define MAX_NR_TOKEN	16
@@ -480,7 +484,17 @@ int parse_codec_cfg(char *cfgfile)
 	nr_vcodecs = 0;
 	nr_acodecs = 0;
 
-	if(cfgfile==NULL)return 0; 
+	if(cfgfile==NULL) {
+#ifdef CODECS2HTML
+	  	return 0; 
+#else
+		video_codecs = builtin_video_codecs;
+		audio_codecs = builtin_audio_codecs;
+		nr_vcodecs = sizeof(builtin_video_codecs)/sizeof(codecs_t) - 1;
+		nr_acodecs = sizeof(builtin_audio_codecs)/sizeof(codecs_t) - 1;
+		return 1;
+#endif
+	}
 	
 	mp_msg(MSGT_CODECCFG,MSGL_INFO,"Reading %s: ", cfgfile);
 
@@ -909,7 +923,35 @@ void skiphtml(FILE *f1){
         }
 }
 
-int main(void)
+static void print_int_array(const int* a, int size)
+{
+	printf("{ ");
+	while (size--)
+	    if(abs(*a)<256)
+		printf("%d%s", *a++, size?", ":"");
+	    else
+		printf("0x%X%s", *a++, size?", ":"");
+	printf(" }");
+}
+
+static void print_char_array(const unsigned char* a, int size)
+{
+	printf("{ ");
+	while (size--) 
+	    if((*a)<10)
+		printf("%d%s", *a++, size?", ":"");
+	    else
+		printf("0x%02x%s", *a++, size?", ":"");
+	printf(" }");
+}
+
+static void print_string(const char* s)
+{
+	if (!s) printf("NULL");
+	else printf("\"%s\"", s);
+}
+
+int main(int argc, char* argv[])
 {
 	codecs_t *cl;
         FILE *f1;
@@ -922,8 +964,74 @@ int main(void)
         int dshow=-1;
         int win32ex=-1;
 
-	if (!(nr_codecs = parse_codec_cfg("etc/codecs.conf")))
-		return 0;
+	/*
+	 * Take path to codecs.conf from command line, or fall back on
+	 * etc/codecs.conf
+	 */
+	if (!(nr_codecs = parse_codec_cfg((argc>1)?argv[1]:"etc/codecs.conf")))
+		exit(1);
+
+	if (argc > 1) {
+		int i, j;
+		const char* nm[2];
+		codecs_t* cod[2];
+		int nr[2];
+
+		nm[0] = "builtin_video_codecs";
+		cod[0] = video_codecs;
+		nr[0] = nr_vcodecs;
+		
+		nm[1] = "builtin_audio_codecs";
+		cod[1] = audio_codecs;
+		nr[1] = nr_acodecs;
+		
+		printf("/* GENERATED FROM %s, DO NOT EDIT! */\n\n",argv[1]);
+		
+		for (i=0; i<2; i++) {
+		  	printf("codecs_t %s[] = {\n", nm[i]);
+			for (j = 0; j <= nr[i]; j++) {
+			  	printf("{");
+
+				print_int_array(cod[i][j].fourcc, CODECS_MAX_FOURCC);
+				printf(", /* fourcc */\n");
+				
+				print_int_array(cod[i][j].fourccmap, CODECS_MAX_FOURCC);
+				printf(", /* fourccmap */\n");
+				
+				print_int_array(cod[i][j].outfmt, CODECS_MAX_OUTFMT);
+				printf(", /* outfmt */\n");
+				
+				print_char_array(cod[i][j].outflags, CODECS_MAX_OUTFMT);
+				printf(", /* outflags */\n");
+				
+				print_int_array(cod[i][j].infmt, CODECS_MAX_INFMT);
+				printf(", /* infmt */\n");
+				
+				print_char_array(cod[i][j].inflags, CODECS_MAX_INFMT);
+				printf(", /* inflags */\n");
+				
+				print_string(cod[i][j].name);    printf(", /* name */\n");
+				print_string(cod[i][j].info);    printf(", /* info */\n");
+				print_string(cod[i][j].comment); printf(", /* comment */\n");
+				print_string(cod[i][j].dll);     printf(", /* dll */\n");
+				print_string(cod[i][j].drv);     printf(", /* drv */\n");
+				
+				printf("{ 0x%08lx, %hu, %hu,",
+				       cod[i][j].guid.f1,
+				       cod[i][j].guid.f2,
+				       cod[i][j].guid.f3);
+				print_char_array(cod[i][j].guid.f4, sizeof(cod[i][j].guid.f4));
+				printf(" }, /* GUID */\n");
+				printf("%hd /* flags */, %hd /* status */, %hd /* cpuflags */ }\n",
+				       cod[i][j].flags,
+				       cod[i][j].status,
+				       cod[i][j].cpuflags);
+				if (j < nr[i]) printf(",\n");
+			}
+			printf("};\n\n");
+		}
+		exit(0);
+	}
 
         f1=fopen("DOCS/codecs-in.html","rb"); if(!f1) exit(1);
         f2=fopen("DOCS/codecs-status.html","wb"); if(!f2) exit(1);

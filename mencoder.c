@@ -369,8 +369,11 @@ unsigned int timer_start;
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(!parse_codec_cfg(CONFDIR"/codecs.conf")){
-    mp_msg(MSGT_MENCODER,MSGL_HINT,MSGTR_CopyCodecsConf);
-    mencoder_exit(1,NULL);
+    if(!parse_codec_cfg(NULL)){
+      mp_msg(MSGT_MENCODER,MSGL_HINT,MSGTR_CopyCodecsConf);
+      exit(0);
+    }
+    mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_BuiltinCodecsConf);
   }
 }
 
