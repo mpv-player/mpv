@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Version:          0.1.5
+# Version:          0.1.6
 #
 # Licence:          GPL
 #
@@ -34,7 +34,10 @@
 #                     - more options
 # 2002/05/06        v0.1.5
 #                     - new option "-norm"
-#
+# 2002/05/08        v0.1.6
+#                     - bugfixes
+#                     - new option "-vfr"
+#                     - "-norm" renamed to "-vnorm"
 #
 ################################################################################
 #
@@ -66,14 +69,27 @@ function usage() {
    echo "-burnonly     burn only the premastered <name>*.cue/<name>*.bin images"
    echo "-cdsize <n>   maximal size of cd images [646]"
    echo "-denoise      denoises mpeg stream"
+   echo "-vfr <n>      sets the frame-rate: of  the output-stream. Currently"
+   echo "              only the standard MPEG rates are supported."
+   echo "              0 - illegal"
+   echo "              1 - 24000.0/1001.0 (NTSC 3:2 pulldown converted FILM)"
+   echo "              2 - 24.0 (NATIVE FILM)"
+   echo "              3 - 25.0 (PAL/SECAM VIDEO / converted FILM)"
+   echo "              4 - 30000.0/1001.0 (NTSC VIDEO)"
+   echo "              5 - 30.0"
+   echo "              6 - 50.0 (PAL FIELD RATE)"
+   echo "              7 - 60000.0/1001.0 (NTSC FIELD RATE)"
+   echo "              8 - 60.0"
    echo "-noburn       disables burning"
    echo "-mp3          outputs audio in mp3 instead of mp2 format"
    echo "-mpg          don't encode from source, multiplex/burn"
    echo "              only the encoded mpg stream"
-   echo "-norm <p|n|s> sets the output norm p,n,s (pal, ntsc, secam),"
-   echo "              sometimes needed for yuvscaler!"
+   echo "-vnorm p|n|s  sets the output norm p,n or s: forces the input stream to"
+   echo "              be treated as  NTSC|PAL|SECAM  regardless  of  what the"
+   echo "              stream header might suggest.  Basically this just sets"
+   echo "              the defaults for a bunch of other options."
    echo "-ratio <s>    output ratio size of frames, see yuvscaler (1)"
-   echo "-size  <XxY>  sets output size of frames"
+   echo "-size <X>x<Y> sets output size of frames"
    echo "-svcdout      encode to SVCD format [VCD default]"
    echo "-vbr <n>      output video bitrate in kbs [VCD:1152, SVCD:2500]"
    echo
@@ -118,6 +134,7 @@ max=646
 mpegnorm="-f $VCDMODE -b $vbr -B 260 -V 46"
 imaget="-t vcd2"
 yuvout=""
+framerate=""
 
 while [ "$1"x != "x" ]; do
    case $1 in
@@ -151,13 +168,17 @@ while [ "$1"x != "x" ]; do
         burnonly=1
 	burn=1
 	;;
+      -vfr)
+        framerate="-F $2"
+	shift 1
+	;;
       -mp3)
         mp3=1
         ;;
       -mpg)
       	mkstream=0
 	;;
-      -norm)
+      -vnorm)
         yuvout="-n $2"
 	shift 1
 	;;
@@ -230,7 +251,7 @@ if [ $burnonly -eq 0 ]; then
       ($denoise < $VIDEO | \
          yuvscaler -v 0 $wide -O $norm $size $yuvout | \
          mpeg2enc -v 0 -s $mpegnorm -S $max -g 6 -G 15 -r 16 \
-	          -4 2 -2 1 -o $NAME.mpv) &
+	          $framerate $yuvout -4 2 -2 1 -o $NAME.mpv) &
    
       # wait for finishing the subprocesses
       wait
