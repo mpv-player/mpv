@@ -407,6 +407,7 @@ int my_release(void* memory)
 	break;
     default:
 	//memset(memory, 0xcc, header->size);
+	;
     }
 
     header->deadbeef = 0;

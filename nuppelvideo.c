@@ -77,7 +77,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 		    if ( lzo_init() != LZO_E_OK ) 
 			{
 			fprintf ( stderr, "%s\n", "lzo_init() failed !!!" );
-			return NULL;
+			return;
 		    }
 		    is_lzo_inited = 1;
 		}

@@ -59,6 +59,7 @@ m_config_save_option(m_config_t* config, config_t* conf,char* opt, char *param) 
   case CONF_TYPE_SUBCONFIG :
     return;
   default :
+    ;
   }
 
   mp_msg(MSGT_CFGPARSER, MSGL_DBG2,"Saving option %s\n",opt);

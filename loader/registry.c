@@ -18,11 +18,12 @@
 //#undef TRACE
 //#define TRACE printf
 
+extern char *get_path ( char * );
+
 // ...can be set before init_registry() call
-char* regpathname = 0;
+char* regpathname = NULL;
 
-
-static char* localregpathname = 0;
+static char* localregpathname = NULL;
 
 typedef struct reg_handle_s
 {
