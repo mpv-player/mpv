@@ -1,8 +1,3 @@
-#define DISP
-
-// this can be 3 or 4  (regarding 24bpp and 32bpp)
-#define BYTES_PP 3
-
 #define TEXTUREFORMAT_32BPP
 
 #include <stdio.h>
@@ -20,7 +15,6 @@
 //#include <X11/keysym.h>
 #include <GL/glx.h>
 #include <errno.h>
-#include "../postproc/rgb2rgb.h"
 
 #include <GL/gl.h>
 
@@ -51,8 +45,6 @@ static int                  wsGLXAttrib[] = { GLX_RGBA,
 
 static uint32_t image_width;
 static uint32_t image_height;
-static uint32_t image_format;
-static uint32_t image_bpp;
 static uint32_t image_bytes;
 
 static uint32_t texture_width;
@@ -80,8 +72,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 {
 //	int screen;
 	unsigned int fg, bg;
-	char *hello = (title == NULL) ? "OpenGL rulez" : title;
-//	char *name = ":0.0";
 	XSizeHints hint;
 	XVisualInfo *vinfo;
 	XEvent xev;
@@ -92,7 +82,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	image_height = height;
 	image_width = width;
-	image_format = format;
   
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
@@ -140,7 +129,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 //      if ( flags&0x01 ) vo_x11_decoration( mDisplay,vo_window,0 );
 	  XSelectInput(mDisplay, vo_window, StructureNotifyMask);
 	  /* Tell other applications about this window */
-	  XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
+	  XSetStandardProperties(mDisplay, vo_window, title, title, None, NULL, 0, &hint);
 	  /* Map window. */
 	  XMapWindow(mDisplay, vo_window);
 	  if ( flags&1 ) vo_x11_fullscreen();
@@ -169,45 +158,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		     | ButtonPressMask | ButtonReleaseMask
         );
 
-#if 0
-	// If we have blue in the lowest bit then obviously RGB 
-	mode = ((myximage->blue_mask & 0x01) != 0) ? MODE_RGB : MODE_BGR;
-#ifdef WORDS_BIGENDIAN 
-	if (myximage->byte_order != MSBFirst)
-#else
-	if (myximage->byte_order != LSBFirst) 
-#endif
-	{
-		printf("[gl] no support for non-native XImage byte order!\n");
-		return -1;
-	}
-
-  printf("DEPTH=%d  BPP=%d\n",depth,bpp);
-#endif
-
-	/* 
-	 * If depth is 24 then it may either be a 3 or 4 byte per pixel
-	 * format. We can't use bpp because then we would lose the 
-	 * distinction between 15/16bit depth (2 byte formate assumed).
-	 *
-	 * FIXME - change yuv2rgb_init to take both depth and bpp
-	 * parameters
-	 */
-
   texture_width=32;
-  while(texture_width<image_width) texture_width*=2;
-  while(texture_width<image_height) texture_width*=2;
+  while(texture_width<image_width || texture_width<image_height) texture_width*=2;
   texture_height=texture_width;
 
-  if(format==IMGFMT_YV12){
-    yuv2rgb_init(8*BYTES_PP, MODE_BGR);
-    printf("[gl] YUV init OK!\n");
-    image_bpp=8*BYTES_PP;
-    image_bytes=BYTES_PP;
-  } else {
-    image_bpp=format&0xFF;
-    image_bytes=(image_bpp+7)/8;
-  }
+  image_bytes=(IMGFMT_RGB_DEPTH(format)+7)/8;
 
   if ( ImageData ) free( ImageData );
   ImageData=malloc(texture_width*texture_height*image_bytes);
@@ -226,10 +181,18 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 //  glBindTexture(GL_TEXTURE_2D, texture_id);
   glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  /* Old OpenGL 1.0 used the third parameter (known as internalFormat) as an
+     integer, which indicated the bytes per pixel (bpp). Later in OpenGL 1.1
+     they switched to constants, like GL_RGB8. GL_RGB8 means 8 bits for each
+     channel (R,G,B), so it's equal to RGB24. It should be safe to pass the
+     image_bytes to internalFormat with newer OpenGL versions.
+     Anyway, I'm leaving this so as it was, it doesn't hurt, as OpenGL 1.1 is
+     about 10 years old too. -- alex
+  */
 #ifdef TEXTUREFORMAT_32BPP
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, texture_width, texture_height, 0,
 #else
-  glTexImage2D(GL_TEXTURE_2D, 0, BYTES_PP, texture_width, texture_height, 0,
+  glTexImage2D(GL_TEXTURE_2D, 0, image_bytes, texture_width, texture_height, 0,
 #endif
        (image_bytes==4)?GL_RGBA:GL_BGR, GL_UNSIGNED_BYTE, ImageData);
 #endif
@@ -280,87 +243,12 @@ flip_page(void)
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
-    int i;
-    int dstride=w*BYTES_PP;
-    
-//    dstride=(dstride+15)&(~15);
-
-	yuv2rgb(ImageData, src[0], src[1], src[2], 
-			w,h, dstride, stride[0],stride[1]);
-
-    for(i=0;i<h;i+=slice_height){
-      glTexSubImage2D( GL_TEXTURE_2D,  // target
-		       0,              // level
-		       x,              // x offset
-		       y+i,            // y offset
-		       w,              // width
-		       (i+slice_height<=h)?slice_height:h-i, // height
-		       (BYTES_PP==4)?GL_RGBA:GL_RGB,        // format
-		       GL_UNSIGNED_BYTE, // type
-		       ImageData+i*dstride );        // *pixels
-    }
-
 	return 0;
 }
 
-static inline uint32_t 
-draw_frame_x11_yv12(uint8_t *src[])
-{
-int i;
-//  printf("Converting YUV->RGB...\n");
-	yuv2rgb(ImageData, src[0], src[1], src[2],
-		image_width, image_height, 
-		image_width*BYTES_PP, image_width, image_width/2 );
 
-    for(i=0;i<image_height;i+=slice_height){
-      glTexSubImage2D( GL_TEXTURE_2D,  // target
-		       0,              // level
-		       0,              // x offset
-		       i,              // y offset
-		       image_width,    // width
-		       (i+slice_height<=image_height)?slice_height:image_height-i, // height
-		       (BYTES_PP==4)?GL_RGBA:GL_RGB,        // format
-		       GL_UNSIGNED_BYTE, // type
-		       ImageData+i*BYTES_PP*image_width );        // *pixels
-    }
-
-	return 0; 
-}
-
-
-static inline uint32_t 
-draw_frame_x11_bgr(uint8_t *src[])
-{
-int i;
-uint8_t *s=src[0];
-
-    for(i=0;i<image_height;i+=slice_height){
-      int h=(i+slice_height<=image_height)?slice_height:image_height-i;
-      uint8_t *d=ImageData;
-      uint8_t *de=&ImageData[3*image_width*h];
-      while(d<de){
-        d[0]=s[2];
-        d[1]=s[1];
-        d[2]=s[0];
-        s+=3;d+=3;
-      }
-      glTexSubImage2D( GL_TEXTURE_2D,  // target
-		       0,              // level
-		       0,              // x offset
-//		       image_height-1-i,  // y offset
-		       i,  // y offset
-		       image_width,    // width
-		       h, // height
-		       (image_bytes==4)?GL_RGBA:GL_RGB,        // format
-		       GL_UNSIGNED_BYTE, // type
-		       ImageData);        // *pixels
-    }
-
-	return 0; 
-}
-
-static inline uint32_t 
-draw_frame_x11_rgb(uint8_t *src[])
+static uint32_t
+draw_frame(uint8_t *src[])
 {
 int i;
 uint8_t *ImageData=src[0];
@@ -381,29 +269,11 @@ uint8_t *ImageData=src[0];
 	return 0; 
 }
 
-
-static uint32_t
-draw_frame(uint8_t *src[])
-{
-    if(image_format==IMGFMT_YV12)
-	return draw_frame_x11_yv12(src);
-    else 
-    if((image_format&IMGFMT_RGB_MASK)==IMGFMT_RGB)
-	return draw_frame_x11_rgb(src);
-    else
-	return draw_frame_x11_bgr(src);
-}
-
 static uint32_t
 query_format(uint32_t format)
 {
-    switch(format){
-    case IMGFMT_YV12:
-	return VFCAP_CSP_SUPPORTED;
-    case IMGFMT_RGB|24:
-    case IMGFMT_BGR|24:
+    if ((format == IMGFMT_RGB24) || (format == IMGFMT_RGB32))
         return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
-    }
     return 0;
 }
 
