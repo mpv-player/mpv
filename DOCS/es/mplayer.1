@@ -3410,11 +3410,20 @@ X1 (experimental)
 .RE
 .PD 1
 .TP
-.B vhq\ \ \ \ 
-modo de alta calidad, codifica cada macro bloque en todos los modos y elije
-el mejor.
+.B mbd=<0\-2>
+algoritmo de decisión de macrobloque (modo alta calidad), codifica cada macro
+bloque en todos los modos y elije el mejor.
 Esto es lento pero resulta en una mejor calidad y tamaño del archivo.
-(por defecto: desactivado)
+.PD 0
+.RSs
+.IPs 0
+usa mbcmp (por defecto)
+.IPs 1
+selecciona el modo MB que necesita los menos bits posibles (=vhq)
+.IPs 2
+selecciona el modo MB que tiene la mejor razón de distorsión
+.RE
+.PD 1
 .TP
 .B v4mv\ \ \ 
 Permite 4 vectores de movimiento por macrobloque (calidad ligeramente superior).
