@@ -8,6 +8,11 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.22  2002/08/24 22:39:27  arpi
+    - changed re-muxed packet structure (see struct dp_hdr_t)
+      now the packets can be encapsulated into avi or other file formats
+    - skip redundant/resent fragments (bit 0x20 set of first byte of frag)
+
     Revision 1.21  2002/08/14 09:15:31  arpi
     RV20 A-V desync fixed - use timestamp hack only for RV30
 
@@ -398,6 +403,13 @@ static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timesta
     return v_pts;
 }
 
+typedef struct dp_hdr_s {
+    uint32_t chunks;	// number of chunks
+    uint32_t timestamp; // timestamp from packet header
+    uint32_t len;	// length of actual data
+    uint32_t chunktab;	// offset to chunk offset array
+} dp_hdr_t;
+
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
@@ -537,11 +549,13 @@ loop:
 		// as well as a packet may be contained in multiple blocks
 	        int vpkg_header, vpkg_blknum, vpkg_length, vpkg_offset;
 		int vpkg_seqnum=-1, vpkg_oldseqnum=0, vpkg_seqnumread=0;
+		int vpkg_subseq=0;
 		int vpkg_ofs;
-		unsigned int* extra;
-		
 
 	    while(len>2){
+		dp_hdr_t* dp_hdr;
+		unsigned char* dp_data;
+		uint32_t* extra;
 
 //		printf("xxx len=%d  \n",len);
 
@@ -563,9 +577,10 @@ loop:
 		
 		    if (0==(vpkg_header&0x40)) {
 			// sub-seqnum (bits 0-6: number of fragment. bit 7: ???)
-		        vpkg_seqnum=stream_read_char(demuxer->stream);
+		        vpkg_subseq=stream_read_char(demuxer->stream);
 	                --len;
-		        mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "subseq: %0.2X ",vpkg_seqnum);
+		        mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "subseq: %0.2X ",vpkg_subseq);
+			vpkg_subseq&=0x7f;
 	            }
 
 	  	    // size of the complete packet
@@ -604,77 +619,89 @@ loop:
 		    vpkg_header, vpkg_length, vpkg_offset, vpkg_seqnum);
 
 		if(ds->asf_packet){
-		    demux_packet_t* dp=ds->asf_packet;
+		    dp=ds->asf_packet;
+		    dp_hdr=(dp_hdr_t*)dp->buffer;
+		    dp_data=dp->buffer+sizeof(dp_hdr_t);
+		    extra=(uint32_t*)(dp->buffer+dp_hdr->chunktab);
 		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "we have an incomplete packet (oldseq=%d new=%d)\n",ds->asf_seq,vpkg_seqnum);
 		    // we have an incomplete packet:
 		    if(ds->asf_seq!=vpkg_seqnum){
 			// this fragment is for new packet, close the old one
 			mp_msg(MSGT_DEMUX,MSGL_DBG2, "closing probably incomplete packet, len: %d  \n",dp->len);
-			dp->pts=(dp->len<3)?0:
-			    real_fix_timestamp(priv,dp->buffer,timestamp,sh_video->frametime,sh_video->format);
+			dp->pts=(dp_hdr->len<3)?0:
+			    real_fix_timestamp(priv,dp_data,dp_hdr->timestamp,sh_video->frametime,sh_video->format);
 			ds_add_packet(ds,dp);
 			ds->asf_packet=NULL;
 		    } else {
 			// append data to it!
-			extra=(unsigned int*)(dp->buffer+vpkg_length);
-			++extra[0];
-			if((extra[0]&3)==0){ // increase buffer size, if more than 4 subpackets
-			    mp_msg(MSGT_DEMUX,MSGL_DBG2, "buffer too small!!!!!\n");
-			    dp->buffer=realloc(dp->buffer,vpkg_length+(extra[0]+5)*8);
-			    extra=(unsigned int*)(dp->buffer+vpkg_length);
+			++dp_hdr->chunks;
+			mp_msg(MSGT_DEMUX,MSGL_DBG2,"[chunks=%d  subseq=%d]\n",dp_hdr->chunks,vpkg_subseq);
+			if(dp_hdr->chunktab+8*(1+dp_hdr->chunks)>dp->len){
+			    // increase buffer size, this should not happen!
+			    mp_msg(MSGT_DEMUX,MSGL_WARN, "chunktab buffer too small!!!!!\n");
+			    dp->len=dp_hdr->chunktab+8*(4+dp_hdr->chunks);
+			    dp->buffer=realloc(dp->buffer,dp->len);
+			    // re-calc pointers:
+			    dp_hdr=(dp_hdr_t*)dp->buffer;
+			    dp_data=dp->buffer+sizeof(dp_hdr_t);
+			    extra=(uint32_t*)(dp->buffer+dp_hdr->chunktab);
 			}
-			extra[2+2*extra[0]]=1;
-			extra[3+2*extra[0]]=dp->len;
+			extra[2*dp_hdr->chunks+0]=1;
+			extra[2*dp_hdr->chunks+1]=dp_hdr->len;
 			if(0x80==(vpkg_header&0xc0)){
 			    // last fragment!
-			    if(dp->len!=vpkg_length-vpkg_offset)
+			    if(dp_hdr->len!=vpkg_length-vpkg_offset)
 				mp_msg(MSGT_DEMUX,MSGL_V,"warning! assembled.len=%d  frag.len=%d  total.len=%d  \n",dp->len,vpkg_offset,vpkg_length-vpkg_offset);
-            		    stream_read(demuxer->stream, dp->buffer + dp->len, vpkg_offset);
-			    dp->len+=vpkg_offset;
+            		    stream_read(demuxer->stream, dp_data+dp_hdr->len, vpkg_offset);
+			    if(dp_data[dp_hdr->len]&0x20) --dp_hdr->chunks; else
+			    dp_hdr->len+=vpkg_offset;
 			    len-=vpkg_offset;
  			    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "fragment (%d bytes) appended, %d bytes left\n",vpkg_offset,len);
 			    // we know that this is the last fragment -> we can close the packet!
-			    dp->pts=(dp->len<3)?0:
-				real_fix_timestamp(priv,dp->buffer,extra[1],sh_video->frametime,sh_video->format);
+			    dp->pts=(dp_hdr->len<3)?0:
+				real_fix_timestamp(priv,dp_data,dp_hdr->timestamp,sh_video->frametime,sh_video->format);
 			    ds_add_packet(ds,dp);
 			    ds->asf_packet=NULL;
 			    // continue parsing
 			    continue;
 			}
 			// non-last fragment:
-			if(dp->len!=vpkg_offset)
+			if(dp_hdr->len!=vpkg_offset)
 			    mp_msg(MSGT_DEMUX,MSGL_V,"warning! assembled.len=%d  offset=%d  frag.len=%d  total.len=%d  \n",dp->len,vpkg_offset,len,vpkg_length);
-            		stream_read(demuxer->stream, dp->buffer + dp->len, len);
-			dp->len+=len;
+            		stream_read(demuxer->stream, dp_data+dp_hdr->len, len);
+			if(dp_data[dp_hdr->len]&0x20) --dp_hdr->chunks; else
+			dp_hdr->len+=len;
 			len=0;
 			break; // no more fragments in this chunk!
 		    }
 		}
 		// create new packet!
-		dp = new_demux_packet(vpkg_length+8*5);
+		dp = new_demux_packet(sizeof(dp_hdr_t)+vpkg_length+2*(1+(vpkg_header&0x3F)));
 	    	// the timestamp seems to be in milliseconds
 		dp->pts = 0; // timestamp/1000.0f; //timestamp=0;
                 dp->pos = demuxer->filepos;
                 dp->flags = (flags & 0x2) ? 0x10 : 0;
 		ds->asf_seq = vpkg_seqnum;
-		extra=(unsigned int*)(dp->buffer+vpkg_length);
-		extra[0]=0; // blocks
-		extra[1]=timestamp;
-		extra[2]=1; // sub-1
-		extra[3]=0;
+		dp_hdr=(dp_hdr_t*)dp->buffer;
+		dp_hdr->chunks=0;
+		dp_hdr->timestamp=timestamp;
+		dp_hdr->chunktab=sizeof(dp_hdr_t)+vpkg_length;
+		dp_data=dp->buffer+sizeof(dp_hdr_t);
+		extra=(uint32_t*)(dp->buffer+dp_hdr->chunktab);
+		extra[0]=1; extra[1]=0; // offset of the first chunk
 		if(0x00==(vpkg_header&0xc0)){
 		    // first fragment:
-		    dp->len=len;
-		    stream_read(demuxer->stream, dp->buffer, dp->len);
+		    dp_hdr->len=len;
+		    stream_read(demuxer->stream, dp_data, len);
 		    ds->asf_packet=dp;
 		    len=0;
 		    break;
 		}
 		// whole packet (not fragmented):
-		dp->len=vpkg_length; len-=vpkg_length;
-		stream_read(demuxer->stream, dp->buffer, dp->len);
-		dp->pts=(dp->len<3)?0:
-		    real_fix_timestamp(priv,dp->buffer,extra[1],sh_video->frametime,sh_video->format);
+		dp_hdr->len=vpkg_length; len-=vpkg_length;
+		stream_read(demuxer->stream, dp_data, vpkg_length);
+		dp->pts=(dp_hdr->len<3)?0:
+		    real_fix_timestamp(priv,dp_data,dp_hdr->timestamp,sh_video->frametime,sh_video->format);
 		ds_add_packet(ds,dp);
 
 	    } // while(len>0)
