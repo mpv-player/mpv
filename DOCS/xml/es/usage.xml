@@ -418,7 +418,7 @@ la entrada estándar stdin.
 
 <para>
 <application>MPlayer</application> puede reproducir archivos desde la red, usando
-el protocolo HTTP o MMS.
+el protocolo HTTP, FTP, MMS o RTSP/RTP.
 </para>
 
 <para>

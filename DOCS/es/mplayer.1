@@ -482,6 +482,10 @@ Por defecto está activo, si está compilado para él.
 .B \-nolirc
 Desactiva el soporte para LIRC.
 .TP
+.TP
+.B \-nomouseinput
+Desactiva la entrada de pulsación/soltar botón del ratón (el menú
+contextual de mozplayerxp's necesita esta opción).
 .B \-nortc \ \ 
 Desactiva el uso del RTC de Linux (reloj en tiempo real \- /dev/\:rtc) como
 mecanismo de control de tiempo.
@@ -1680,7 +1684,8 @@ También soporta el formato de opción estandar de la opción \-geometry del
 estandar X.
 Los valores dados deben ser enteros.
 
-Nota: Esta opción está solo soportada por vo xv, xvidix y tdfxfb.
+Nota: Esta opción está solo soportada por vo x11, xmga, xv, xvmc, xvidix
+y tdfxfb.
 
 .I EJEMPLO:
 .PD 0
@@ -3017,7 +3022,55 @@ es actualizada.
 .REss
 .RE
 .PD 1
+.TP
+.B "framestep=I|[i]paso"
+Renderiza solo cada n-ésimo marco de cada marco Intra (clave).
 
+Si llama al filtro con I (en mayúsculas) como parámetro entonces
+SOLO los marcos clave son renderizados.
+Para DVDs esto significa, generalmente, un marco cada 15/12 (IBBPBBPBBPBBPBB),
+para AVI significa en cada cambio de escena o en todos los valores clave enteros
+(vea -lavcopts keyint=valor si usa MEncoder para codificar los videos).
+
+Cuando se encuentra un marco clave, se imprime una cadena de texto "I!" seguida
+de un caracter de nueva línea, dejando la línea actual de mplayer/mencoder en la
+pantalla, porque contiene el tiempo (en segundos) y el número de marcos clave.
+(Puede usar esta información para cortar el AVI).
+
+Si llama al filtro con un parámetro numérico 'paso' entonces solo un marco
+cada 'paso' es renderizado.
+
+Si usa una 'i' (en minúsculas) antes del número entonces se escribe una I!
+(como con el parámetro I).
+
+Si coloca solo la i entonces no ocurre nada en los marcos, solo la I! es impresa.
+.TP
+.B "tile=xtile:ytile:output:start:delta"
+Crea un mosaico con una serie de imágenes en una imagen simple, grande.
+
+Los parámetros son:
+.PD 0
+.RSs
+.IPs xtile
+número de mosaicos en el eje x (por defecto: 5)
+.IPs ytile
+número de mosaicos en el eje y (por defecto: 5)
+.IPs output
+Renderiza el mosaico cuando 'output' número de marcos se ha alcanzado,
+donde 'output' debe ser un número menor que xtile * ytile.
+Los marcos que falten se dejan en blanco.
+Usted puede, por ejemplo, escribir un mosaico de 8 * 7 cada 50 marcos para
+obtener una imagen cada 2 segundos @ 25 fps.
+.IPs start
+pixel en el que empezar (x/y) (por defecto: 2)
+.IPs delta
+pixel entre 2 mosaicos, (x/y) (por defecto: 4)
+.RE
+.PD 1
+Si omite un parámetros o usa un valor menor que 0, se usa el valor por
+defecto. También puede parar cuando esté listo (... -vf tile=10:5 ...)
+
+Probablemente es buena idea poner un filtro de escalado antes de tile :-)
 
 .SH "OPCIONES DE CODIFICACIÓN GENERALES (SOLAMENTE MENCODER)"
 .TP
@@ -3099,6 +3152,11 @@ formato original del material que ha sido digitalizado
 comentarios generales acerca del archivo o del asunto del archivo
 .RE
 .
+.TP
+.B \-noautoexpand
+No inserta automáticamente el filtro de expandir en la cadena de filtros
+de MEncoder. Útil para controlar en que punto de la cadena de filtros se
+renderizan los subtítulos cuandor se están codificando dentro de la película.
 .TP
 .B \-noskip
 No se salta imágenes.
