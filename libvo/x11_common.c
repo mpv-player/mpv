@@ -238,6 +238,18 @@ int vo_init( void )
  return 1;
 }
 
+int vo_x11_uninit(Display *display, Window window)
+{
+    XUnmapWindow(display, window);
+
+    /* don't destroy window if -wid specified */
+    if (!(WinID > 0))
+	XDestroyWindow(display, window);
+
+    XCloseDisplay(display);
+    return(1);
+}
+
 #include "../linux/keycodes.h"
 #include "wskeys.h"
 
