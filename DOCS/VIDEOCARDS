@@ -70,7 +70,7 @@ In order to make this work, be sure to check the following:
 	Checking for Xv ... yes
 
 6. If all is fine, try the option '-vo xv' . It should work.
-   (if it doesn't, send us a bugreport. See the README on how to do this.)
+   (if it doesn't, send us a bugreport. See the BUGREPORTS on how to do this.)
 
 
 II. OpenGL drivers with *working* *fast* glTexSubImage() support.
