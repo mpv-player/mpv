@@ -26,19 +26,31 @@ LIBVD_EXTERN(libmpeg2)
 #include "libmpeg2/mpeg2.h"
 #include "libmpeg2/attributes.h"
 #include "libmpeg2/mpeg2_internal.h"
-//#include "libmpeg2/convert.h"
 
 #include "../cpudetect.h"
 
+mpeg2_convert_t mpeg2convert_uyvy;
+
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
+    mpeg2dec_t * mpeg2dec = sh->context;
+
+    switch(cmd) {
+    case VDCTRL_QUERY_FORMAT:
+	if ( (*((int*)arg)) == IMGFMT_YV12 && mpeg2dec->convert == NULL)
+	    return CONTROL_TRUE;
+	if ( (*((int*)arg)) == IMGFMT_UYVY && mpeg2dec->convert == mpeg2convert_uyvy)
+	    return CONTROL_TRUE;
+	return CONTROL_FALSE;
+    }
+    
     return CONTROL_UNKNOWN;
 }
 
 // init driver
 static int init(sh_video_t *sh){
     mpeg2dec_t * mpeg2dec;
-    const mpeg2_info_t * info;
+//    const mpeg2_info_t * info;
     int accel;
 
     accel = 0;
@@ -67,14 +79,16 @@ static int init(sh_video_t *sh){
     mpeg2dec->pending_length = 0;
 
     return 1;
-    //return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
 }
 
 // uninit driver
 static void uninit(sh_video_t *sh){
     mpeg2dec_t * mpeg2dec = sh->context;
     if (mpeg2dec->pending_buffer) free(mpeg2dec->pending_buffer);
-    mpeg2dec->decoder.convert_id=NULL;
+    if (mpeg2dec->convert == NULL) {
+	mpeg2dec->decoder.convert=NULL;
+	mpeg2dec->decoder.convert_id=NULL;
+    }
     mpeg2_close (mpeg2dec);
 }
 
@@ -102,10 +116,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     const mpeg2_info_t * info = mpeg2_info (mpeg2dec);
     int drop_frame, framedrop=flags&3;
 
-    //MPlayer registers its own draw_slice callback, prevent libmpeg2 from freeing the context
-    mpeg2dec->decoder.convert=NULL;
-    mpeg2dec->decoder.convert_id=NULL;
-   
+    // MPlayer registers its own draw_slice callback, prevent libmpeg2 from freeing the context
+    if (mpeg2dec->convert == NULL) {
+	mpeg2dec->decoder.convert=NULL;
+	mpeg2dec->decoder.convert_id=NULL;
+    }
     
     if(len<=0) return NULL; // skipped null frame
     
@@ -124,6 +139,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     
     while(1){
 	int state=mpeg2_parse (mpeg2dec);
+	int type, use_callback;
+	mp_image_t* mpi_new;
+	
 	switch(state){
 	case STATE_BUFFER:
 	    if (mpeg2dec->pending_length) {
@@ -137,13 +155,21 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    break;
 	case STATE_SEQUENCE:
 	    // video parameters inited/changed, (re)init libvo:
-	    if(!mpcodecs_config_vo(sh,
-		info->sequence->width,
-		info->sequence->height, IMGFMT_YV12)) return 0;
+	    if (info->sequence->width >> 1 == info->sequence->chroma_width &&
+		info->sequence->height >> 1 == info->sequence->chroma_height) {
+		if(!mpcodecs_config_vo(sh,
+				       info->sequence->width,
+				       info->sequence->height, IMGFMT_YV12)) return 0;
+	    } else if (info->sequence->width >> 1 == info->sequence->chroma_width &&
+		info->sequence->height == info->sequence->chroma_height) {
+		if (mpeg2_convert(mpeg2dec, mpeg2convert_uyvy, NULL)) return 0;
+		if(!mpcodecs_config_vo(sh,
+				       info->sequence->width,
+				       info->sequence->height, IMGFMT_UYVY)) return 0;
+	    } else return 0;
 	    break;
-	case STATE_PICTURE: {
-	    int type=info->current_picture->flags&PIC_MASK_CODING_TYPE;
-	    mp_image_t* mpi_new;
+	case STATE_PICTURE:
+	    type=info->current_picture->flags&PIC_MASK_CODING_TYPE;
 	    
 	    drop_frame = framedrop && (mpeg2dec->decoder.coding_type == B_TYPE);
             drop_frame |= framedrop>=2; // hard drop
@@ -154,15 +180,20 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    }
             mpeg2_skip(mpeg2dec, 0); //mpeg2skip skips frames until set again to 0
 
+	    if (mpeg2dec->convert == NULL) {
+		use_callback = (!framedrop && vd_use_slices &&
+				(info->current_picture->flags&PIC_FLAG_PROGRESSIVE_FRAME)) ?
+		    MP_IMGFLAG_DRAW_CALLBACK:0;
+	    } else {
+		use_callback = 0;
+	    }
+
 	    // get_buffer "callback":
-	     mpi_new=mpcodecs_get_image(sh,MP_IMGTYPE_IPB,
-				    (type==PIC_FLAG_CODING_TYPE_B)
-		? ((!framedrop && vd_use_slices &&
-		    (info->current_picture->flags&PIC_FLAG_PROGRESSIVE_FRAME)) ?
-			    MP_IMGFLAG_DRAW_CALLBACK:0)
-                : (MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE),
-		(info->sequence->picture_width+15)&(~15),
-		(info->sequence->picture_height+15)&(~15) );
+	    mpi_new=mpcodecs_get_image(sh,MP_IMGTYPE_IPB,
+				       (type==PIC_FLAG_CODING_TYPE_B) ? use_callback : (MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE),
+				       (info->sequence->picture_width+15)&(~15),
+				       (info->sequence->picture_height+15)&(~15) );
+
 	    if(!mpi_new) return 0; // VO ERROR!!!!!!!!
 	    mpeg2_set_buf(mpeg2dec, mpi_new->planes, mpi_new);
 	    if (info->current_picture->flags&PIC_FLAG_TOP_FIELD_FIRST)
@@ -184,15 +215,19 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    mpi_new->qscale_type= 1;
 #endif
 
-	    if(mpi_new->flags&MP_IMGFLAG_DRAW_CALLBACK &&
-		!(mpi_new->flags&MP_IMGFLAG_DIRECT)){
-		   // nice, filter/vo likes draw_callback :)
+	    if (mpeg2dec->convert == NULL) {
+		if (mpi_new->flags&MP_IMGFLAG_DRAW_CALLBACK
+		    && !(mpi_new->flags&MP_IMGFLAG_DIRECT)) {
+		    // nice, filter/vo likes draw_callback :)
 		    mpeg2dec->decoder.convert=draw_slice;
 		    mpeg2dec->decoder.convert_id=sh;
-		} else
+		} else {
 		    mpeg2dec->decoder.convert=NULL;
+		    mpeg2dec->decoder.convert_id=NULL;
+		}
+	    }
+	    
 	    break;
-	}
 	case STATE_SLICE:
 	case STATE_END:
 	case STATE_INVALID_END:
@@ -200,9 +235,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    if(info->display_fbuf) {
 		mp_image_t* mpi = info->display_fbuf->id;
 		if (mpeg2dec->pending_length == 0) {
-		mpeg2dec->pending_length = mpeg2dec->buf_end - mpeg2dec->buf_start;
-		mpeg2dec->pending_buffer = realloc(mpeg2dec->pending_buffer, mpeg2dec->pending_length);
-		memcpy(mpeg2dec->pending_buffer, mpeg2dec->buf_start, mpeg2dec->pending_length);
+		    mpeg2dec->pending_length = mpeg2dec->buf_end - mpeg2dec->buf_start;
+		    mpeg2dec->pending_buffer = realloc(mpeg2dec->pending_buffer, mpeg2dec->pending_length);
+		    memcpy(mpeg2dec->pending_buffer, mpeg2dec->buf_start, mpeg2dec->pending_length);
 		} else {
 		    // still some data in the pending buffer, shouldn't happen
 		    mpeg2dec->pending_length = mpeg2dec->buf_end - mpeg2dec->buf_start;
