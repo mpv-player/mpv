@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.14 -->
 <sect1 id="install">
 <title>Installation</title>
+
+<para>
+Un guide d'installation rapide peut être trouvé dans le fichier <filename>README</filename>.
+Veuillez le lire d'abord et revenir ensuite ici pour le reste des détails.
+</para>
 
 <para>
 Dans ce chapitre je vais essayer de vous guider à travers la compilation
@@ -67,7 +72,8 @@ recommandés.
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - décodeur JPEG optionnel, utilisé par
     l'option <option>-mf</option> et certains fichiers QT MOV.
-    Utile pour MPlayer et Mencoder si vous prévoyez de travailler avec des fichiers jpeg.
+    Utile pour <application>MPlayer</application> et <application>MEncoder</application>
+    si vous prévoyez de travailler avec des fichiers jpeg.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libpng</emphasis> - recommendé et décodeur (M)PNG par défaut.
@@ -78,6 +84,10 @@ recommandés.
   <emphasis role="bold">lame</emphasis> - recommandé, requis pour l'encodage MP3 audio avec
   <application>MEncoder</application>, version conseillée :
   <emphasis>toujours la plus récente</emphasis> (au moins 3.90).
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">zlib</emphasis> - recommandé, nécessaire pour les
+  entêtes MOV compressées et le support PNG.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libogg</emphasis> - optionnel, requis pour lire les fichiers au format OGG.

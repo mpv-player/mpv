@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.21 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
@@ -75,7 +75,7 @@ et une version récente des binutils.
 </para>
 
 <para>
-Si MPlayer se pleind de ne pas trouver <filename>/dev/cdrom</filename> ou
+Si MPlayer se plaint de ne pas trouver <filename>/dev/cdrom</filename> ou
 <filename>/dev/dvd</filename>, créez le lien symbolique approprié:
 <screen>ln -s /dev/<replaceable>votre_périphérique_cdrom</replaceable> /dev/cdrom</screen>
 </para>
@@ -104,10 +104,17 @@ de compiler en deux étapes: D'abord assurez-vous que le non-natif est en premier
 native est utilisée et faites <command>gmake</command>.
 </para>
 </sect2>
+
+<sect2 id="darwin">
+<title>Darwin</title>
+<para>
+Voir la section <link linkend="macos">MacOS</link>.
+</para>
+</sect2>
 </sect1>
 
 <sect1 id="solaris">
-<title>Solaris</title>
+<title>Sun Solaris</title>
 <para>
 <application>MPlayer</application> devrait fonctionner sous Solaris 2.6 ou plus récent.
 </para>
@@ -210,7 +217,7 @@ pour la conversion de palette dans les pilotes de sortie vidéo.
 </para>
 </sect1>
 
-<sect1 id="sgi">
+<sect1 id="irix">
 <title>Silicon Graphics / Irix</title>
 <para>
 Vous pouvez soit essayer d'installer le programme d'installation GNU, et (si vous ne l'avez pas mis
@@ -275,15 +282,17 @@ X qui est TRÈS lente. Utilisez SDL.
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">fichiers d'entête DirectX 7</ulink>
   pour compiler le pilote de sortie vidéo DirectX.</para>
 
-<para>Les codecs Win32, les DLLs QuickTime et les codecs Real Win32 (pas les
-  codecs Real Linux) fonctionnent également. Placez les codecs quelque part dans
+<para>Vous pouvez utiliser les codecs Win32 et les codecs Real Win32 (pas les
+  codecs Real Linux) si vous le désirez. Placez les codecs quelque part dans
   votre path ou passez
   <option>--with-codecsdir=c:/chemin/de/vos/codecs</option> (éventuellement
   <option>--with-codecsdir=/chemin/de/vos/codecs</option> uniquement sous Cygwin) à
   <filename>configure</filename>. Nous avons eu quelques retours indiquant que
   les DLLs Real doivent être accessibles en écriture pour l'utilisateur, mais
   seulement sur certains systèmes. Essayez de les rendre accessibles en écriture
-  si vous avez des problèmes.</para>
+  si vous avez des problèmes. Les DLLs QuickTime focntionnent aussi, mais vous
+  devrez les placer dans le répertoire de Windows
+  (<filename class="directory">C:\Windows\system\</filename> ou similaire).</para>
 
 <para>La console Cygwin/MinGW est plutôt lente. Il semble que rediriger la sortie
   ou utiliser l'option <option>-quiet</option> améliore les performances. Le
@@ -304,8 +313,10 @@ X qui est TRÈS lente. Utilisez SDL.
 
 <para>
 Les versions de Cygwin antérieures à 1.5.0 n'incluent pas <filename>inttypes.h</filename>.
-Vous devrez copier ou lier <filename>etc/cygwin_inttypes.h</filename> depuis le répertoire source de
-MPlayer vers <filename>/usr/include/inttypes.h</filename> pour que MPlayer compile.</para>
+Mettez cet
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
+dans <filename class="directory">/usr/include/</filename> pour que MPlayer puisse
+compiler.</para>
 
 <para>Les fichiers d'entête DirectX doivent être décompressés dans <filename class="directory">/usr/include/</filename>
   ou dans <filename class="directory">/usr/local/include/</filename>.</para>
@@ -356,6 +367,27 @@ MPlayer vers <filename>/usr/include/inttypes.h</filename> pour que MPlayer compi
 </sect2>
 
 
+</sect1>
+
+<sect1 id="macos">
+<title>MacOS</title>
+<para>
+Seul MacOS X 10.2 ou supérieur est supporté par les sources "brutes" de
+<application>MPlayer</application>. Vous êtes libre d'implémenter le support
+pour les anciennes versions de MacOS et d'envoyer des patches !
+</para>
+
+<para>
+Il vaut mieux utiliser le GCC 3.x modifié d'Apple pour compiler
+<application>MPlayer</application>, surtout avec libavcodec car la version
+GCC 2.95.x d'Apple ne supporte pas bien la syntaxe C99.
+</para>
+
+<para>
+On peut obtenir une GUI Aqua et un binaire <application>MPlayer</application>
+pour MacOS X depuis le projet
+<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>.
+</para>
 </sect1>
 
 </chapter>

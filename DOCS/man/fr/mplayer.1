@@ -1,4 +1,4 @@
-.\" synced with 1.472
+.\" synced with 1.476
 .\" MPlayer (C) 2000-2003 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
@@ -392,8 +392,13 @@ lecture de vidéo uniquement (vous pouvez le prendre comme des fps infinis).
 .B \-colorkey <nombre>
 Affecte une valeur RVB de votre choix à la couleur clé.
 0x000000 est noir et 0xffffff est blanc.
-Supporté par les pilotes cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix et
-xover uniquement.
+Supporté par les pilotes vidéo vidix, fbdev, svga, vesa, winvidix, xmga, xvidix
+et xover uniquement.
+.TP
+.B \-nocolorkey
+Désactive la couleur clé.
+Supporté par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
+xvidix et xover uniquement.
 .TP
 .B \-edl <nomfichier>
 Active les actions d'édition de liste de décision (EDL) durant la lecture.
@@ -802,6 +807,16 @@ déplacements (c-a-d pas depuis stdin, un pipe, etc).
 Saute le proxy pour les adresses IPv6.
 Il sera toujours utilisé pour les connections IPv4.
 .TP
+.B \-loadidx <nomfichier>
+Le nom du fichier à partir duquel lire les données d'INDEX, tel que sauvées par
+\-saveidx.
+MPlayer lira l'index depuis le fichier et utilisera ces données pour le
+déplacement. Ces données seront utilisées à la place des éventuelles données
+d'index présentes dans l'AVI lui-même.
+De plus, MPlayer ne vous préviendra pas du chargement d'un fichier d'index
+généré pour un AVI différent, mais cela vous causera sûrement des torts.
+NOTE: cette option sera obsolète dès que AVI aura le support ODML\ !
+.TP
 .B \-mc <secondes/trame>
 Correction de synchro A-V maximum par trame (en secondes).
 .TP
@@ -834,8 +849,8 @@ Aide pour certains fichiers AVI avec une entête cassée.
 .TP
 .B \-noextbased
 Désactive la sélection de demuxer basée sur l'extension du fichier.
-Par défaut, quand le type de fichier (demuxer) ne peut être détecté de façon 
-fiable (le fichier n'a pas d'entête ou n'est pas suffisamment fiable), 
+Par défaut, quand le type de fichier (demuxer) ne peut être détecté de façon
+fiable (le fichier n'a pas d'entête ou n'est pas suffisamment fiable),
 l'extension du fichier est utilisée pour sélectionner le demuxer. Il se rabat
 toujours sur une sélection de demuxer basée sur le contenu.
 .TP
@@ -852,7 +867,7 @@ Se rabat sur IPv4 automatiquement.
 .TP
 .B \-rawaudio <option1:option2:...>
 Cette option vous permet de lire des fichiers audio bruts.
-Il peut aussi être utilisé pour lire des CD audio qui ne sont pas 44KHz 
+Il peut aussi être utilisé pour lire des CD audio qui ne sont pas 44KHz
 16Bit stéréo.
 .br
 Les options disponibles sont:
@@ -901,10 +916,28 @@ taille de trame en octets
 .
 .TP
 .B \-rtsp-stream-over-tcp
-Utilisé avec 'rtsp://', URLs pour spécifier que les paquets RTP et RTCP entrants
-seront streamés sur TCP (en utilisant la même connexion TCP que RTSP). 
+Utilisé avec 'rtsp://', URLs pour spécifier que les paquets RTP et RTCP
+entrants seront streamés sur TCP (en utilisant la même connexion TCP que RTSP).
 Cette option peut être utile si vous avez une connexion Internet cassée qui ne
 redirige pas les paquets UDP entrants (voir http://www.live.com/mplayer/).
+.TP
+.B \-saveidx <nomfichier>
+Force la reconstruction de l'INDEX et le sauvegarde dans un fichier séparé
+spécifié par l'argument nomfichier.
+Pour l'instant cela ne fonctionne qu'avec les fichiers AVI.
+Bien que vous puissiez utiliser MEncoder pour réparer les fichiers sans index,
+le format AVI est limité à l'indexage de fichiers d'au plus 2 Go.
+Il est cependant possible de placer l'index dans un fichier séparé et de
+l'utiliser plus tard avec \-loadidx, ce qui est plus rapide que de reconstruire
+l'index (avec \-idx ou \-forceidx) à chaque fois que le film est lu
+(C'est une limitation du format AVI, et bien qu'il existe une extension pour
+les indexes au delà de 2 Go, MPlayer ne supporte pas encore cette extension).
+Après que le fichier d'index ait été créé, MPlayer va lire la vidéo.
+Si vous voulez automatiser la génération de fichier d'index (après avoir
+encodé un gros fichier à partir d'une carte TV, par exemple), vous pouvez
+spécifier \-frame 0 pour empécher MPlayer de lire la vidéo après avoir généré
+l'index.
+NOTE: cette option sera obsolète dès que AVI aura le support ODML\ !
 .TP
 .B \-sb <position\ octet> (voir l'option \-ss également)
 Se place à la position donnée par 'octet'.
@@ -2560,6 +2593,7 @@ conversion de palette RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp en utilisant palette.
 .B format[=fourcc]
 Restreint la palette pour le prochain filtre sans faire de conversion.
 Utilisez-le avec le filtre scale pour une véritable conversion.
+Pour avoir une liste des formats disponibles, voir format=fmt=help.
 .PD 0
 .RSs
 .IPs fourcc
@@ -2723,7 +2757,7 @@ luminosité et 0\-3 pour la saturation.
 .B hue[=couleur:saturation]
 Les valeur par défaut sont couleur=0.0, saturation=1.0.
 Les intervales sont -180\-180 pour couleur, -2\-2 pour saturation (des valeurs
-négatives impliquent un chroma négatif)
+négatives impliquent un chroma négatif).
 .TP
 .B halfpack[=f]
 Convertit le planar YUV 4:2:0 en 4:2:2 demi-hauteur, en downsamplant le luma
@@ -3619,6 +3653,16 @@ les quantizer par BM dans le futur, msmpeg4 ne peut être corrigé car il ne
 supporte pas cela)
 .RE
 .TP
+.B lmin=<0.01\-255.0>
+Multiplicateur de lagrange minimum pour le contrôle de débit, vous le voudrez
+probablement égal ou inférieur à vqmin. (par défaut: 2.0)
+.RE
+.TP
+.B lmax=<0.01\-255.0>
+Multiplicateur de lagrange maximum pour le contrôle de débit.
+(par défault: 31.0)
+.RE
+.TP
 .B vqscale=<1\-31>
 constant quantizer /\: qualité d'encodage constante (sélectionne le mode
 quantizer fixe). Une valeur basse signifie une meilleur qualité mais de gros
@@ -3784,6 +3828,8 @@ bitrate minimum en kbit/\:sec (passe\ 1/\:2)
 .TP
 .B vrc_buf_size=<valeur>
 taille du tampon en kbit (passe\ 1/\:2).
+Pour MPEG1/2 cela fixe également la taille du tampon vbv, utilisez 327 pour un
+VCD, 917 pour un SVCD et 1835 pour un DVD.
 Note: vratetol ne devrait pas être trop grand durant la seconde passe
 ou il pourrait y avoir des problèmes si vrc_(min|max)rate est utilisé.
 .TP
