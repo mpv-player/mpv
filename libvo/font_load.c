@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "font_load.h"
+#include "mp_msg.h"
 
 extern char *get_path ( char * );
 
@@ -25,7 +26,7 @@ raw_file* load_raw(char *name,int verbose){
     if(raw->w == 0) // 2 bytes were not enough for the width... read 4 bytes from the end of the header
     	raw->w = ((head[28]*0x100 + head[29])*0x100 + head[30])*0x100 + head[31];
     if(raw->c>256) return NULL;                 // too many colors!?
-    if(verbose) printf("RAW: %s  %d x %d, %d colors\n",name,raw->w,raw->h,raw->c);
+    mp_msg(MSGT_OSD, MSGL_DBG2, "RAW: %s  %d x %d, %d colors\n",name,raw->w,raw->h,raw->c);
     if(raw->c){
         raw->pal=malloc(raw->c*3);
         fread(raw->pal,3,raw->c,f);
@@ -59,7 +60,7 @@ int first=1;
 desc=malloc(sizeof(font_desc_t));if(!desc) goto fail_out;
 memset(desc,0,sizeof(font_desc_t));
 
-f=fopen(fname,"rt");if(!f){ printf("font: can't open file: %s\n",fname); goto fail_out;}
+f=fopen(fname,"rt");if(!f){ mp_msg(MSGT_OSD, MSGL_ERR, "font: can't open file: %s\n",fname); goto fail_out;}
 
 i = strlen (fname) - 9;
 if ((dn = malloc(i+1))){
@@ -97,7 +98,7 @@ while(fgets(sor,1020,f)){
   
   if (first) {
     if (!sor[0] || sor[1] == 1 || (sor[0] == 'M' && sor[1] == 'Z') || (sor[0] == 0x1f && sor[1] == 0x8b) || (sor[0] == 1 && sor[1] == 0x66)) {
-      printf("%s doesn't look like a font description, ignoring\n", fname);
+      mp_msg(MSGT_OSD, MSGL_ERR, "%s doesn't look like a font description, ignoring.\n", fname);
       goto fail_out;
     }
     first = 0;
@@ -135,10 +136,10 @@ while(fgets(sor,1020,f)){
       int len=strlen(p[0]);
       if(len && len<63 && p[0][len-1]==']'){
         strcpy(section,p[0]);
-        if(verbose) printf("font: Reading section: %s\n",section);
+        mp_msg(MSGT_OSD, MSGL_DBG2, "font: Reading section: %s\n",section);
         if(strcmp(section,"[files]")==0){
             ++fontdb;
-            if(fontdb>=16){ printf("font: Too many bitmaps defined!\n");goto fail_out;}
+            if(fontdb>=16){ mp_msg(MSGT_OSD, MSGL_ERR, "font: Too many bitmaps defined.\n");goto fail_out;}
         }
         continue;
       }
@@ -168,7 +169,7 @@ while(fgets(sor,1020,f)){
 		snprintf(cp,strlen(default_dir)+strlen(p[1])+2,"%s/%s",
 			 default_dir,p[1]);
 		if (!((desc->pic_a[fontdb]=load_raw(cp,verbose)))){
-		   printf("Can't load font bitmap: %s\n",p[1]);
+		   mp_msg(MSGT_OSD, MSGL_ERR, "Can't load font bitmap: %s\n",p[1]);
 		   free(cp);
 		   goto fail_out;
 		}
@@ -189,7 +190,7 @@ while(fgets(sor,1020,f)){
 		snprintf(cp,strlen(default_dir)+strlen(p[1])+2,"%s/%s",
 			 default_dir,p[1]);
 		if (!((desc->pic_b[fontdb]=load_raw(cp,verbose)))){
-		   printf("Can't load font bitmap: %s\n",p[1]);
+		   mp_msg(MSGT_OSD, MSGL_ERR, "Can't load font bitmap: %s\n",p[1]);
 		   free(cp);
 		   goto fail_out;
 		}
@@ -230,7 +231,7 @@ while(fgets(sor,1020,f)){
           if(sub_unicode && (chr>=0x80)) chr=(chr<<8)+p[0][1];
           else if(strlen(p[0])!=1) chr=strtol(p[0],NULL,0);
           if(end<start) {
-              printf("error in font desc: end<start for char '%c'\n",chr);
+              mp_msg(MSGT_OSD, MSGL_WARN, "error in font desc: end<start for char '%c'\n",chr);
           } else {
               desc->start[chr]=start;
               desc->width[chr]=end-start+1;
@@ -241,7 +242,7 @@ while(fgets(sor,1020,f)){
           continue;
       }
   }
-  printf("Syntax error in font desc: %s\n",sor);
+  mp_msg(MSGT_OSD, MSGL_ERR, "Syntax error in font desc: %s",sor);
   goto fail_out;
 
 }
@@ -249,7 +250,7 @@ fclose(f);
 f = NULL;
 
  if (first == 1) {
-   printf("%s is empty or a directory, ignoring\n", fname);
+   mp_msg(MSGT_OSD, MSGL_ERR, "%s is empty or a directory, ignoring.\n", fname);
    goto fail_out;
  }
 
@@ -257,7 +258,7 @@ f = NULL;
 
 for(i=0;i<=fontdb;i++){
     if(!desc->pic_a[i] || !desc->pic_b[i]){
-        printf("font: Missing bitmap(s) for sub-font #%d\n",i);
+        mp_msg(MSGT_OSD, MSGL_ERR, "font: Missing bitmap(s) for sub-font #%d\n",i);
         goto fail_out;
     }
     //if(factor!=1.0f)
@@ -266,7 +267,7 @@ for(i=0;i<=fontdb;i++){
         int f=factor*256.0f;
         int size=desc->pic_a[i]->w*desc->pic_a[i]->h;
         int j;
-        if(verbose) printf("font: resampling alpha by factor %5.3f (%d) ",factor,f);fflush(stdout);
+        mp_msg(MSGT_OSD, MSGL_DBG2, "font: resampling alpha by factor %5.3f (%d) ",factor,f);fflush(stdout);
         for(j=0;j<size;j++){
             int x=desc->pic_a[i]->bmp[j];	// alpha
             int y=desc->pic_b[i]->bmp[j];	// bitmap
@@ -293,7 +294,7 @@ for(i=0;i<=fontdb;i++){
             desc->pic_a[i]->bmp[j]=x;
 //            desc->pic_b[i]->bmp[j]=0; // hack
         }
-        if(verbose) printf("DONE!\n");
+        mp_msg(MSGT_OSD, MSGL_DBG2, "DONE!\n");
     }
     if(!desc->height) desc->height=desc->pic_a[i]->h;
 }
@@ -308,7 +309,7 @@ for(i=0;i<65536;i++)
 desc->font[' ']=-1;
 desc->width[' ']=desc->spacewidth;
 
-printf("Font %s loaded successfully! (%d chars)\n",fname,chardb);
+mp_msg(MSGT_OSD, MSGL_V, "Font %s loaded successfully! (%d chars)\n",fname,chardb);
 
 return desc;
 
