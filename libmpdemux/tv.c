@@ -250,7 +250,7 @@ static int open_tv(tvi_handle_t *tvh)
 
 		strcpy(tv_channel_current->name, strchr(tmp, '-') + 1);
 		strchr(tmp, '-')[0] = '\0';
-		strncpy(tv_channel_current->number, tmp, 4);
+		strncpy(tv_channel_current->number, tmp, 5);
 
 		while (strchr(tv_channel_current->name, '_'))
 			strchr(tv_channel_current->name, '_')[0] = ' ';
