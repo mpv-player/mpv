@@ -114,12 +114,10 @@ libvo drivers:
     * vo_gl.c - Reimar Döffinger
     * vo_gl2.c - Reimar Döffinger
     * vo_jpeg.c - Ivo van Poorten
-    * vo_md5.c - None
     * vo_md5sum.c - Ivo van Poorten
     * vo_mga.c - Attila Kinali
     * vo_mpegpes.c - None
     * vo_null.c - None
-    * vo_pgm.c - None
     * vo_png.c - Felix Bünemann
     * vo_pnm.c - Ivo van Poorten
     * vo_quartz.c - Nicolas Plourde
