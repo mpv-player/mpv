@@ -7,12 +7,12 @@
 #include <stdio.h>
 
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
 #ifndef HAVE_WINSOCK2
+#include <sys/socket.h>
 #define closesocket close
 #else
 #include <winsock2.h>
