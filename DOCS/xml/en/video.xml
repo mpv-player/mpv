@@ -2242,5 +2242,24 @@ EndSection
 Of course the important thing is the TwinView part.
 </para>
 </sect4>
+
+<sect4 id="tvout-neomagic">
+<title>Neomagic</title>
+<para>
+Tested on a Toshiba Tecra 8000. Its TV output chip is a miserable crap. Avoid
+if possible.
+</para>
+<para>
+You must use <option>-vo vesa</option>. The tested chip was capable of 1.333333
+aspect ratio only, so be sure to use the <option>-x -y</options> and/or the
+<option>-vf scale,crop,expand</option> filters if the box doesn't let you
+enable TV output. Maximum resolution was 720*576 at 16bpp.
+</para>
+<para>
+Known issues: VESA-only, 1.33333 limitation, image isn't always centered,
+movie becomes 4bpp in every 10 minutes, and stays that way. Frequent hard
+freezes, LCD display problems.
+</para>
+</sect4>
 </sect3>
 </sect2>
