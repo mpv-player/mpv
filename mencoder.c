@@ -716,6 +716,7 @@ case ACODEC_PCM:
       mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format!\n");
     }
     break;
+#ifdef HAVE_MP3LAME
 case ACODEC_VBRMP3:
     printf("MP3 audio selected\n");
     mux_a->h.dwSampleSize=0; // VBR
@@ -747,6 +748,7 @@ case ACODEC_VBRMP3:
       mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format!\n");
     }
     break;
+#endif
 }
 
 if (verbose>1) print_wave_header(mux_a->wf);
