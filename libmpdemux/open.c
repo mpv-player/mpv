@@ -144,37 +144,6 @@ if(!filename) {
    return NULL;
 }
 
-//============ Open VideoCD track ==============
-#ifdef HAVE_VCD
-if(strncmp("vcd://",filename,6) == 0){
-  int ret,ret2;
-  if(!cdrom_device) cdrom_device=strdup(DEFAULT_CDROM_DEVICE);
-  f=open(cdrom_device,O_RDONLY);
-  if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CdDevNotfound,cdrom_device);return NULL; }
-  vcd_track = filename[6] == '\0' ? 1 : strtol(filename+6,NULL,0);
-  if(vcd_track < 1){ 
-    mp_msg(MSGT_OPEN,MSGL_ERR,"Invalid vcd track %s\n",filename+6);
-    return NULL;
-  }
-  vcd_read_toc(f);
-  ret2=vcd_get_track_end(f,vcd_track);
-  if(ret2<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (get)\n");return NULL;}
-  ret=vcd_seek_to_track(f,vcd_track);
-  if(ret<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (seek)\n");return NULL;}
-  mp_msg(MSGT_OPEN,MSGL_V,"VCD start byte position: 0x%X  end: 0x%X\n",ret,ret2);
-#ifdef __FreeBSD__
-  if (ioctl (f, CDRIOCSETBLOCKSIZE, &bsize) == -1) {
-        perror ( "Error in CDRIOCSETBLOCKSIZE");
-  }
-#endif
-  stream=new_stream(f,STREAMTYPE_VCD);
-  stream->start_pos=ret;
-  stream->end_pos=ret2;
-  return stream;
-}
-#endif
-
-
 // for opening of vcds in bincue files
 if(strncmp("cue://",filename,6) == 0){
   int ret,ret2;

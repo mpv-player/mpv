@@ -29,18 +29,6 @@ extern int verbose; // defined in mplayer.c
 
 #include "cue_read.h"
 
-#ifdef HAVE_VCD
-
-#ifdef __FreeBSD__
-#include "vcd_read_fbsd.h" 
-#elif defined(__NetBSD__)
-#include "vcd_read_nbsd.h" 
-#else
-#include "vcd_read.h"
-#endif
-
-#endif
-
 //#include "vcd_read_bincue.h"
 
 #ifdef USE_DVDREAD
@@ -49,16 +37,13 @@ void dvd_seek(dvd_priv_t *d,int pos);
 void dvd_close(dvd_priv_t *d);
 #endif
 
-#ifdef HAVE_CDDA
-int read_cdda(stream_t* s);
-void seek_cdda(stream_t* s);
-void close_cdda(stream_t* s);
-#endif
-
 #ifdef LIBSMBCLIENT
 #include "libsmbclient.h"
 #endif
 
+#ifdef HAVE_VCD
+extern stream_info_t stream_info_vcd;
+#endif
 #ifdef HAVE_CDDA
 extern stream_info_t stream_info_cdda;
 #endif
@@ -68,6 +53,9 @@ extern stream_info_t stream_info_netstream;
 extern stream_info_t stream_info_file;
 
 stream_info_t* auto_open_streams[] = {
+#ifdef HAVE_VCD
+  &stream_info_vcd,
+#endif
 #ifdef HAVE_CDDA
   &stream_info_cdda,
 #endif
@@ -186,10 +174,6 @@ int stream_fill_buffer(stream_t *s){
 #else
     len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);break;
 #endif
-#ifdef HAVE_VCD
-  case STREAMTYPE_VCD:
-    len=vcd_read(s->fd,s->buffer);break;
-#endif
   case STREAMTYPE_VCDBINCUE:
     len=cue_vcd_read(s->buffer);break;
 #ifdef USE_DVDNAV
@@ -247,8 +231,6 @@ off_t newpos=0;
 #else
     newpos=pos&(~(STREAM_BUFFER_SIZE-1));break;
 #endif
-  case STREAMTYPE_VCD:
-    newpos=(pos/VCD_SECTOR_DATA)*VCD_SECTOR_DATA;break;
   case STREAMTYPE_VCDBINCUE:
     newpos=(pos/VCD_SECTOR_DATA)*VCD_SECTOR_DATA;break;
   case STREAMTYPE_DVD:
@@ -285,12 +267,6 @@ if(newpos==0 || newpos!=s->pos){
   case STREAMTYPE_SMB:
     s->pos=newpos; // real seek
     if(smbc_lseek(s->fd,s->pos,SEEK_SET)<0) s->eof=1;
-    break;
-#endif
-#ifdef HAVE_VCD
-  case STREAMTYPE_VCD:
-    s->pos=newpos; // real seek
-    vcd_set_msf(s->pos/VCD_SECTOR_DATA);
     break;
 #endif
   case STREAMTYPE_VCDBINCUE:
