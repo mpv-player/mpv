@@ -28,21 +28,30 @@ Homepage:
 English documentation:
     * user docs: Diego Biurrun
     * man page: Diego Biurrun
+    * Help Messages: Diego Biurrun
     * input layer, LIRC, slave mode docs: Alban Bedel
     * tech/* docs: Alex Beregszaszi
     * tech/* documentation docs: Diego Biurrun
 
-Documentation translations:
-    * Help Messages: Diego Biurrun
-    * Hungarian: Gabor Mizda
-    * German: Sebastian Krämer
-    * French: Nicolas Le Gaillart, Guillaume Poirier
-    * Russian: Dmitry Baryshkov
-    * Polish: Waclaw Schiller
-    * Italian: Daniele Forghieri (outdated)
-    * Chinese (simplified): Lu Ran (outdated)
-    * Spanish: Juan Martin
+man pages:
     * Czech: Jiri Heryan
+    * French: Guillaume Poirier
+    * German: Sebastian Krämer (incomplete)
+    * Hungarian: Gabor Mizda
+    * Italian: Daniele Forghieri
+    * Polish: Waclaw Schiller
+    * Spanish: Juan Martin
+    * Swedish: Carl Fürstenberg (incomplete)
+
+Documentation translations:
+    * Chinese (simplified): Lu Ran (outdated)
+    * French: Nicolas Le Gaillart (outdated)
+    * German: outdated
+    * Hungarian: Gabor Mizda (incomplete)
+    * Italian: outdated
+    * Polish: Waclaw Schiller
+    * Russian: Dmitry Baryshkov (incomplete)
+    * Spanish: Juan Martin (outdated)
 
 Platforms/ports: (see also DOCS/tech/porting-status.txt)
     * Debian packaging: Dariusz Pietrzak
