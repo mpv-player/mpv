@@ -315,6 +315,15 @@ if test -z "$_target" ; then
   esac
 else
   system_name=`echo $_target | cut -d '-' -f 2`
+  case "`echo $system_name | tr A-Z a-z`" in
+    linux) system_name=Linux ;;
+    freebsd) system_name=FreeBSD ;;
+    netbsd) system_name=NetBSD ;;
+    bsd/os) system_name=BSD/OS ;;
+    openbsd) system_name=OpenBSD ;;
+    sunos) system_name=SunOS ;;
+    qnx) system_name=QNX ;;
+  esac
   host_arch=`echo $_target | cut -d '-' -f 1`
 fi
 
