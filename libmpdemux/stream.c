@@ -33,8 +33,8 @@ extern int verbose; // defined in mplayer.c
 #endif
 
 #ifdef USE_DVDREAD
-int dvd_read_sector(void* d,void* p2);
-void dvd_seek(void* d,off_t pos);
+int dvd_read_sector(dvd_priv_t *d,unsigned char* data);
+void dvd_seek(dvd_priv_t *d,int pos);
 void dvd_close(dvd_priv_t *d);
 #endif
 
