@@ -183,8 +183,9 @@ n*(fps of the movie) Hz.</LI>
 <LI>Radeon VE - currently only XFree86 CVS has driver for this card, version
 4.1.0 doesn't. And no TV out support. Of course with <B>MPlayer</B> you can
 happily get <B>accelerated</B> display, with or without <B>TV output</B>, and
-no libraries or X are needed. Read <a href=#2.3.1.15>Vidix</a> and <A
-HREF=#2.3.1.14>Radeon video overlay</A> sections).</LI> </P>
+no libraries or X are needed. Read <A HREF=#2.3.1.15>Vidix</A> section.</LI>
+
+</P>
 
 
 <P><B><A NAME=2.3.1.2.5>2.3.1.2.5. NeoMagic cards</A></B></P>
@@ -434,6 +435,9 @@ also help. Thanks!</P>
 
 <P>It also helps with some buggy drivers/cards if the video is jerky
   (not slow system problem), or audio is lagging.</P>
+
+<P>SDL video output supports displaying subtitles under the movie, on the (if
+  present) black bar.</P>
 
 <P>Here are some notes about SDL out in <B>MPlayer</B>.</P>
 
@@ -761,52 +765,8 @@ video modes.</P>
 
 
 <P><B><A NAME=2.3.1.14>2.3.1.14. Rage128 (Pro) / Radeon video overlay (radeon_vid)</A></B></P>
-<P>
-<b>radeon_vid</b> and <B>rage128_vid</B> provides support for the <b>BackEnd Scaler</b> on ATI <b>Radeon</b> and Rage128 (Pro) chipsets.
-It was designed and introduced as analog of <a href="video.html#2.3.1.7">mga_vid</a> driver, so you can use it in the same way!<br>
-But main goal of this driver usage is <a href="video.html#2.3.1.12">VESA</a> driver.<br>
-Simply because VESA enables TV-out on ATI's card but Backend scaler is used after
-mode switching. This implementation outputs video stream on both: <b>TV-screen</b> and <b>CRTC</b>
-display simultaneously. (It slightly degrades quality of video output but it's
-much better than nothing).
-Sorry! I couldn't find out any video overlay's related information
-on ATI pages. (I planned to implement it through <b>int 10h</b> calls). But it was
-very easy to implement this stuff through reading/writing Radeon ports.
-<br><b>NOTE</b>: XXX_VID technology is perfectly undocumented and maybe in the
-future this stuff will be fully rewritten. This is the first public release of
-driver.</P>
 
-<P><B>Installation</B></P>
-
-<P>
-<UL>
-  <LI>
-    <CODE>cd drivers/radeon<BR>
-    make<BR>
-    make install<BR>
-    make nodes</CODE></LI>
-  <LI>add one of the following at the end of the <CODE>/etc/modules.conf</CODE> file :<BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE><BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 rage128_vid</CODE></LI>
-  <LI>run <CODE>depmod -a</CODE></LI>
-</UL>
-</P>
-
-<P>
-<br><b>Usage:</b><BR>
-&nbsp;&nbsp;<CODE>mplayer -vo vesa:vidix &lt;your options&gt; filename</CODE>
-</P>
-
-<P>More examples (for hardware deinterlacing, etc) can be found
-  <A HREF="../drivers/radeon/README">here</A>.</P>
-
-<P><B>NOTE</B>: don't use any framebuffers when you plan to use this driver ! Use
-it only from textmode console.</P>
-
-<P>
-<b>Conclusion:</b> I know there are lot of lacks and bugs. So if you are able
-to improve something then simply send me your patches.
-</P>
+<P>This section is OBSOLETED ! Use Vidix !</P>
 
 
 <P><B><A NAME=2.3.1.15>2.3.1.15. VIDIX</A></B></P>

@@ -125,7 +125,7 @@
 	<LI><A HREF="video.html#2.3.1.11">2.3.1.11 AAlib - szöveges módú megjelenítés</A></LI>
 	<LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - megjelenítés a VESA BIOS segítségével</A></LI>
 	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
-	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 (Pro) és Radeon video overlay (radeon_vid)</A></LI>
+	<LI><A HREF="video.html#2.3.1.15">2.3.1.14 Rage128 (Pro) és Radeon video overlay (OBSOLETED - use Vidix!)</A></LI>
 	<LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
 	<LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (néhány MJPEG dekóder kártyához)</A></LI>
 	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TV kimenet</A></LI>
@@ -373,8 +373,9 @@ problémákba ütközni:<BR>
     Bár általában erre nem kell figyelj.</LI>
   <LI><B>SDL</B> - nem kötelezõ, de néhány esetben segíthet (például ha az
     audio lejátszásba furcsa hangok keverednek, vagy ha az xv meghajtóval
-    történõ lejátszás során furcsa a lejátszás képe). Ajánlott mindig
-    a legújabbat használni.</LI>
+    történõ lejátszás során furcsa a lejátszás képe). Képes továbbá a
+    <B>feliratokat a film alatti fekete sávon megjeleníteni</B>. Ajánlott
+    mindig a legújabbat használni.</LI>
   <LI><B>libjpeg</B> - ajánlott és alapértelmezett (M)JPEG dekóder. Hasznos
     mind az <B>MPlayer</B>hez, mind a <B>MEncoder</B>hez.</LI>
   <LI><B>libpng</B> - ajánlott és alapértelmezett (M)PNG dekóder. Hasznos
@@ -464,10 +465,11 @@ végzi. Így a teljes képernyõs lejátszás szép és gyors lesz.
 
 <LI><B>ATI kártyák</B> : amennyiben valamilyen ATI kártyád van, a <A HREF="video.html#2.3.1.A.2">
   2.3.1.A.2 fejezetben</A> megtalálod a kártyád támogatottságára vonatkozó
-  információkat. Ha <B>Radeon</B> vagy <B>Rage128</B> kártyád van, van neked egy <B>XXX_vid</B>
-  meghajtónk, TV kimenettel ! Lásd <A HREF="video.html#2.3.1.14">ezt</A> a
-  fejezetet ! <U><B>Ha nem Linux-ot használsz</B></U>, olvasd el a <A
-  HREF="video.html#2.3.1.15">Vidix</A> fejezetet !</LI>
+  információkat. Ha <B>Radeon</B>, <B>Rage128</B> vagy <B>Mach64</B> kártyád
+  van, van neked egy <B>XXX_vid</B> meghajtónk, TV kimenettel ! Lásd
+  <A HREF="video.html#2.3.1.14">ezt</A> a fejezetet ! <U><B>Ha nem Linux-ot
+  használsz</B></U>, olvasd el a <A HREF="video.html#2.3.1.15">Vidix</A>
+  fejezetet !</LI>
 
 <LI><B>3Dfx Voodoo3/Banshee kártyák</B> : nézd meg a <A
   HREF="video.html#2.3.1.9">2.3.1.9</A>-es fejezetet.  Ezeket a lépéseket

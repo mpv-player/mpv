@@ -192,8 +192,7 @@ HREF=#2.3.1.9>2.3.1.9-es</A> fejezet.</P>
 <LI>Radeon VE - ehhez a kártyához jelenleg csak az XFree86 CVS-ében van
 meghajtó, TV kimenet nélkül. Természetesen az <B>MPlayer</B>-rel teljeskörû
 <B>hardveres gyorsítást</B> és <B>TV kimenetet</B> kapsz, és semmilyen könyvtár
-vagy X nem kell. Olvasd el a <a href=#2.3.1.15>Vidixó</a> és <A
-HREF=#2.3.1.14>Radeon video overlay</A> fejezeteket.</LI>
+vagy X nem kell. Olvasd el a <A HREF=#2.3.1.15>Vidix</A> fejezetet.</LI>
 </LI>
 </P>
 
@@ -435,6 +434,9 @@ HREF=#2.3.1.14>Radeon video overlay</A> fejezeteket.</LI>
 <P>Jót tesz továbbá olyankor ha a bugos video kártya vagy a meghajtója
   szaggatva jeleníti meg a képet (NEM lassú gépre gondolok), vagy ha
   az audio meghajtó a hibás.</P>
+
+<P>Az SDL kimenet támogatja a feliratoknak a film alatti fekete sávon
+  történõ megjelenítését.</P>
 
 <P>Néhány megjegyzés az <B>MPlayer</B>-nen található SDL meghajtóhoz:</P>
 
@@ -749,52 +751,8 @@ van !</P>
 
 
 <P><B><A NAME=2.3.1.14>2.3.1.14. Rage128 (Pro) / Radeon video overlay (radeon_vid)</A></B></P>
-<P>
-A <B>radeon_vid</B> és <B>rage128_vid</B> támogatást nyújt az ATI <B>Radeon</B> és <B>Rage128 (Pro)</B> kártyákon található
-<B>BackEnd Scaler</B>-hez. A mûködési elve ugyanaz mint az
-<A HREF="video.html#2.3.1.7">mga_vid</A> meghajtónak, és hasonlóképp is
-használható!<BR>
-De ezen meghajtó fõ célja a <A HREF="video.html#2.3.1.12">VESA</A> meghajtóval
-együtt történõ használat. Mégpedig azért mert a VESA meghajtó bekapcsolja az
-ATI kártyákon a TV kimenetet, és a váltás után a Backend Scaler jeleníti
-meg a képet, azaz hardveres gyorsítás lép életbe. Ez az implementáció
-mindkét kimeneten egyszerre jeleníti meg a képet (egy kis minõségromlás
-érzékelhetõ, de a semminél azért jobb).
-Sajnos semmilyen ezzel kapcsolatos információ nincs az ATI lapjain,
-de azért elég könnyen ment az implementálás, a Radeon portjait olvasva/írva.<BR>
-<B>Megj</B>.: az XXX_VID technológia teljességgel dokumentálatlan, és
-lehetséges hogy a jövõben teljesen újra lesz írva. Ez az elsõ publikus
-kiadása a meghajtónak.</P>
 
-<P><B>Installálás</B></P>
-
-<P>
-<UL>
-  <LI>
-    <CODE>cd drivers/radeon<BR>
-    make<BR>
-    make install<BR>
-    make nodes</CODE></LI>
-  <LI>írd az egyiket a következõk közül az <CODE>/etc/modules.conf</CODE> file végére :<BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE><BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 rage128_vid</CODE></LI>
-  <LI>futtasd : <CODE>depmod -a</CODE></LI>
-</UL>
-</P>
-
-<P>
-<br><b>Használat:</b><BR>
-&nbsp;&nbsp;<CODE>mplayer -vo vesa:vidix &lt;opcióid&gt; filenév</CODE>
-</P>
-
-<P>További opciók (pl. hardveres deinterlace) találhatóak
-  <A HREF="../../drivers/radeon/README">itt</A>.</P>
-
-<P><B>Megj</B>.: ne használj semmilyen framebuffert és ezt a meghajtót
-egyidõben ! Csak szöveges konzolról futtasd !</P>
-
-<B>Konklúzió:</B> tudom hogy sok a hiány és a hiba. Ha tudod õket javítani,
-küldj patchet.</P>
+<P>Rossz helyen keresel.. Neked a Vidix kell !</P>
 
 
 <P><B><A NAME=2.3.1.15>2.3.1.15. VIDIX</A></B></P>

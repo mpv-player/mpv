@@ -125,7 +125,7 @@
 	<LI><A HREF="video.html#2.3.1.11">2.3.1.11 AAlib - text mode displaying</A></LI>
 	<LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - output to VESA BIOS</A></LI>
 	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
-	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon video overlay</A></LI>
+	<LI><A HREF="video.html#2.3.1.15">2.3.1.14 Rage128 / Radeon video overlay (OBSOLETED - link to Vidix!)</A></LI>
 	<LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
 	<LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (for some MJPEG capture/playback boards)</A></LI>
 	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A></LI>
@@ -380,7 +380,8 @@ will take some time, but it DOES worth it.</P>
     usually isn't important.</LI>
   <LI><B>SDL</B> - it's not mandatory, but can help in some cases (bad audio,
     videocards that lag strangely with the xv driver). Always use the newest
-    (beginning from 1.2.x).</LI>
+    (beginning from 1.2.x). Also can <B>display subtitles under the movie, on
+    the black bar</B>.</LI>
   <LI><B>libjpeg</B> - optional JPEG decoder, used by -mf and some qt mov files.
     Useful for both <B>MPlayer</B> and <B>MEncoder</B> if you plan to work with jpeg files.</LI>
   <LI><B>libpng</B> - recommended and default (M)PNG decoder. Required for GUI.
@@ -472,7 +473,7 @@ broken in 4.1.0, and earlier releases!</LI>
 <LI><B>ATI cards</B> : see the <A HREF="video.html#2.3.1.A.2">ATI cards
 section</A> of the TV-out documentation, to know what features of your card is
 supported under Linux/MPlayer. If you have a <B>Radeon</B>, <B>Rage128</B>
-or  <B>Mach64</B> (Rage XL/Mobility, Xpert98) card, we have a
+or <B>Mach64</B> (Rage XL/Mobility, Xpert98) card, we have a
 <B>XXX_vid</B> driver for you, with optional TV out ! Check <A
 HREF="video.html#2.3.1.14">this</A> section ! <U><B>If you are non-Linux
 user</B></U>, read <A HREF="video.html#2.3.1.15">Vidix</A> documentation !</LI>
@@ -1560,6 +1561,11 @@ Anyone has closer info?</P>
 <LI><B><A HREF="mailto:wojtekka@bydg.pdi.net">Wojtek Kaniewski</A></B>
 <UL>
   <LI>Mouse wheel support</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:freku045@student.liu.se">Fredrik Kuivinen</A></B>
+<UL>
+  <LI>OSD/subtitles outside movie - for SDL</LI>
 </UL></LI>
 
 </UL></P>
