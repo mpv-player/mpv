@@ -86,13 +86,13 @@ clean:
 	rm -f *.o *~ $(OBJS)
 
 distclean:
-	@for a in mp3lib libac3 libmpeg2 opendivx encore libvo loader loader/DirectShow drivers drivers/syncfb ; do $(MAKE) -C $$a distclean ; done
+	@for a in mp3lib libac3 libmpeg2 opendivx encore libvo libao2 loader loader/DirectShow drivers drivers/syncfb ; do $(MAKE) -C $$a distclean ; done
 	rm -f *~ $(PRG) $(PRG_HQ) $(PRG_AVIP) $(PRG_TV) $(OBJS) *.o *.a .depend
 
 dep:	depend
 
 depend: version.h config.h .depend
-	@for a in mp3lib libac3 libmpeg2 libvo opendivx encore loader/DirectShow ; do $(MAKE) -C $$a dep ; done
+	@for a in mp3lib libac3 libmpeg2 libvo libao2 opendivx encore loader/DirectShow ; do $(MAKE) -C $$a dep ; done
 
 .depend: Makefile config.mak config.h
 	$(CC) -MM $(CFLAGS) mplayer.c $(SRCS) 1>.depend
