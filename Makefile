@@ -170,7 +170,7 @@ $(PRG_FIBMAP): fibmap_mplayer.o
 
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(LIB_LOADER) $(GUI_LIBS) $(COMMON_LIBS) -lmp3lame $(A_LIBS) $(CSS_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(ARCH_LIB) $(DECORE_LIB) $(ENCORE_LIB) $(TERMCAP_LIB) -lm
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(LIB_LOADER) $(GUI_LIBS) $(COMMON_LIBS) $(A_LIBS) $(CSS_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(ARCH_LIB) $(DECORE_LIB) $(ENCORE_LIB) $(TERMCAP_LIB) -lm
 endif
 
 # Every mplayer dependancy depends on version.h, to force building version.h
