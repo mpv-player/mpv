@@ -68,6 +68,8 @@ extern char * skinName;
 extern int use_old_pp;
 #endif
 
+// From audio plugins
+extern int pl_delay_len;
 
 /* from libvo/aspect.c */
 extern float monitor_aspect;
@@ -93,7 +95,10 @@ struct config conf[]={
 	{"o", "Option -o has been renamed to -vo (video-out), use -vo !\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0},
+	// -----options related to audio and audio plugins-------
 	{"ao", &audio_driver, CONF_TYPE_STRING, 0, 0, 0},
+	{"aop", &audio_plugins, CONF_TYPE_STRING, 0, 0, 0},
+	{"aop_delay", &pl_delay_len, CONF_TYPE_INT, CONF_MIN, 0, 0},
 //	{"dsp", &dsp, CONF_TYPE_STRING, CONF_NOCFG, 0, 0},
 	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0},

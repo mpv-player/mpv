@@ -1,11 +1,11 @@
 // prototypes:
 static int control(int cmd,int arg);
-static int init(float*);
+static int init();
 static void uninit();
 static void reset();
-static int play(void* data,int len,int flags);
+static int play();
 
-#define LIBAO_PLUGIN_EXTERN(x) ao_functions_t audio_out_##x =\
+#define LIBAO_PLUGIN_EXTERN(x) ao_functions_t audio_plugin_##x =\
 {\
 	&info,\
 	control,\

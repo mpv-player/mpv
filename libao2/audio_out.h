@@ -59,8 +59,12 @@ extern ao_functions_t* audio_out_drivers[];
 #define AOCONTROL_QUERY_FORMAT 3 /* test for availabilty of a format */
 #define AOCONTROL_GET_VOLUME 4
 #define AOCONTROL_SET_VOLUME 5
+#define AOCONTROL_SET_PLUGIN_DRIVER 6
+#define AOCONTROL_SET_PLUGIN_LIST 7
 
 typedef struct ao_control_vol_s {
 	float left;
 	float right;
 } ao_control_vol_t;
+
+

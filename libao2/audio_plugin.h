@@ -18,10 +18,14 @@ typedef struct ao_plugin_data_s
   int channels;	    /* setup number of channels */
   int format;	    /* setup format */
   double sz_mult;   /* Buffer size multiplier */
-  double sz_fix;    /* Fix extra buffer size */
+  double sz_fix;    /* Fix (as in static) extra buffer size */
   float delay_mult; /* Delay multiplier */
   float delay_fix;  /* Fix delay */
 }ao_plugin_data_t;
 
 extern ao_plugin_data_t ao_plugin_data;
 
+//List of plugins 
+
+
+#define AOCONTROL_PLUGIN_SET_LEN 1
