@@ -73,8 +73,6 @@ int divx_quality=0;
 #include <decore.h>
 #endif
 
-#define USE_XANIM
-
 #ifdef USE_XANIM
 #include "xacodec.h"
 #endif
