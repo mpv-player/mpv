@@ -452,6 +452,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     if(!force_fps) switch(demuxer->file_format){
       case DEMUXER_TYPE_GIF:
       case DEMUXER_TYPE_REAL:
+      case DEMUXER_TYPE_MATROSKA:
 	if(d_video->pts>0 && pts1>0 && d_video->pts>pts1)
 	  frame_time=d_video->pts-pts1;
         break;

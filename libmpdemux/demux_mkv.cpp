@@ -163,10 +163,12 @@ typedef struct mkv_track {
 
   int ok;
 
-  // Stuff for RealMedia packet assembly
+  // Stuff for RealMedia
   bool realmedia;
   demux_packet_t *rm_dp;
-  int rm_seqnum;
+  int rm_seqnum, rv_kf_base, rv_kf_pts;
+  float rv_pts;                 // previous video timestamp
+  float ra_pts;                 // previous audio timestamp
 } mkv_track_t;
 
 typedef struct mkv_demuxer {
@@ -195,8 +197,8 @@ typedef struct mkv_demuxer {
   int64_t *cluster_positions;
   int num_cluster_pos;
 
-  int skip_to_keyframe;
   int64_t skip_to_timecode;
+  bool v_skip_to_keyframe, a_skip_to_keyframe;
 } mkv_demuxer_t;
 
 typedef struct {
@@ -1728,7 +1730,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         src = (unsigned char *)(rvp + 1);
 
         bih = (BITMAPINFOHEADER *)realloc(bih, sizeof(BITMAPINFOHEADER) + 12);
-        bih->biSize += 12;
+        bih->biSize = 48;
+        bih->biPlanes = 1;
         type2 = get_uint32_be(&rvp->type2);
         if ((type2 == 0x10003000) || (type2 == 0x100030001))
           bih->biCompression = mmioFOURCC('R', 'V', '1', '3');
@@ -1956,6 +1959,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       ((short *)(sh_a->wf + 1))[3] = get_uint32_be(&ra4p->coded_frame_size);
       ((short *)(sh_a->wf + 1))[4] = codecdata_length;
       memcpy(((char *)(sh_a->wf + 1)) + 10, src, codecdata_length);
+
+      track->realmedia = true;
     }
 
   } else {
@@ -2004,9 +2009,65 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   return 1;
 }
 
+// Taken from demux_real.c. Thanks to the original developpers :)
+#define SKIP_BITS(n) buffer <<= n
+#define SHOW_BITS(n) ((buffer) >> (32 - (n)))
+
+static float real_fix_timestamp(mkv_track_t *track, unsigned char *s,
+                                int timestamp, float frametime) {
+  float v_pts;
+  uint32_t buffer = (s[0] << 24) + (s[1] << 16) + (s[2] << 8) + s[3];
+  int kf = timestamp;
+  int pict_type;
+  int orig_kf;
+
+  if (!strcmp(track->codec_id, MKV_V_REALV30) ||
+      !strcmp(track->codec_id, MKV_V_REALV40)) {
+
+    if (!strcmp(track->codec_id, MKV_V_REALV30)) {
+      SKIP_BITS(3);
+      pict_type = SHOW_BITS(2);
+      SKIP_BITS(2 + 7);
+    }else{
+      SKIP_BITS(1);
+      pict_type = SHOW_BITS(2);
+      SKIP_BITS(2 + 7 + 3);
+    }
+    kf = SHOW_BITS(13);         // kf= 2*SHOW_BITS(12);
+    orig_kf = kf;
+    if (pict_type <= 1) {
+      // I frame, sync timestamps:
+      track->rv_kf_base = timestamp - kf;
+      mp_msg(MSGT_DEMUX, MSGL_V, "\nTS: base=%08X\n", track->rv_kf_base);
+      kf = timestamp;
+    } else {
+      // P/B frame, merge timestamps:
+      int tmp = timestamp - track->rv_kf_base;
+      kf |= tmp & (~0x1fff);    // combine with packet timestamp
+      if (kf < (tmp - 4096))    // workaround wrap-around problems
+        kf += 8192;
+      else if (kf > (tmp + 4096))
+        kf -= 8192;
+      kf += track->rv_kf_base;
+    }
+    if (pict_type != 3) {       // P || I  frame -> swap timestamps
+      int tmp = kf;
+      kf = track->rv_kf_pts;
+      track->rv_kf_pts = tmp;
+    }
+    mp_msg(MSGT_DEMUX, MSGL_V, "\nTS: %08X -> %08X (%04X) %d %02X %02X %02X "
+           "%02X %5d\n", timestamp, kf, orig_kf, pict_type, s[0], s[1], s[2],
+           s[3], kf - (int)(1000.0 * track->rv_pts));
+  }
+  v_pts = kf * 0.001f;
+  track->rv_pts = v_pts;
+
+  return v_pts;
+}
+
 static void handle_realvideo(demuxer_t *demuxer, DataBuffer &data,
                              bool keyframe, int &found_data) {
-  unsigned char *p, *buffer;
+  unsigned char *p;
   dp_hdr_t *hdr;
   int chunks, isize;
   mkv_demuxer_t *mkv_d;
@@ -2028,11 +2089,41 @@ static void handle_realvideo(demuxer_t *demuxer, DataBuffer &data,
   hdr->chunktab = sizeof(dp_hdr_t) + isize;
 
   dp->len = sizeof(dp_hdr_t) + isize + 8 * (chunks + 1);
-  dp->pts = hdr->timestamp;
+  if (mkv_d->v_skip_to_keyframe) {
+    dp->pts = mkv_d->last_pts;
+    mkv_d->video->rv_kf_base = 0;
+    mkv_d->video->rv_kf_pts = hdr->timestamp;
+  } else
+    dp->pts = real_fix_timestamp(mkv_d->video, &dp->buffer[sizeof(dp_hdr_t)],
+                                 hdr->timestamp, 1 / mkv_d->video->v_frate);
   dp->pos = demuxer->filepos;
   dp->flags = keyframe ? 0x10 : 0;
 
   ds_add_packet(ds, dp);
+
+  found_data++;
+}
+
+static void handle_realaudio(demuxer_t *demuxer, DataBuffer &data,
+                             bool keyframe, int &found_data) {
+  mkv_demuxer_t *mkv_d;
+  demux_packet_t *dp;
+
+  mkv_d = (mkv_demuxer_t *)demuxer->priv;
+
+  dp = new_demux_packet(data.Size());
+  memcpy(dp->buffer, data.Buffer(), data.Size());
+  if ((mkv_d->audio->ra_pts == mkv_d->last_pts) &&
+      !mkv_d->a_skip_to_keyframe)
+    dp->pts = 0;
+  else
+    dp->pts = mkv_d->last_pts;
+  mkv_d->audio->ra_pts = mkv_d->last_pts;
+
+  dp->pos = demuxer->filepos;
+  dp->flags = keyframe ? 0x10 : 0;
+
+  ds_add_packet(demuxer->audio, dp);
 
   found_data++;
 }
@@ -2047,6 +2138,8 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
   EbmlStream *es;
   KaxBlock *block;
   int64_t block_duration, block_ref1, block_ref2;
+  bool use_this_block;
+  float current_pts;
 
   mkv_d = (mkv_demuxer_t *)d->priv;
   es = mkv_d->es;
@@ -2186,40 +2279,67 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                          (mkv_d->audio->tnum == block->TrackNum()))
                 ds = d->audio;
 
-              if (!mkv_d->skip_to_keyframe ||     // Not skipping is ok.
-                  (((elements_found & 4) == 0) && // It's a key frame.
-                   (ds != NULL) &&                // Corresponding track found
-                   (ds == d->video))) {           // track is our video track
-                mkv_d->last_pts = (float)(block->GlobalTimecode() / 1000000.0 -
-                                          mkv_d->first_tc) / 1000.0;
+              use_this_block = true;
+
+              current_pts = (float)(block->GlobalTimecode() / 1000000.0 -
+                                    mkv_d->first_tc) / 1000.0;
+
+              if (ds == d->audio) {
+                if (mkv_d->a_skip_to_keyframe &&       
+                    ((elements_found & 4) == 4))
+                  use_this_block = false;
+                
+                else if (mkv_d->v_skip_to_keyframe)
+                  use_this_block = false;
+
+              } else if ((current_pts * 1000) < mkv_d->skip_to_timecode)
+                use_this_block = false;
+
+              else if (ds == d->video) {
+                if (mkv_d->v_skip_to_keyframe &&
+                    ((elements_found & 4) == 4))
+                  use_this_block = false;
+                
+              } else if ((mkv_d->subs_track != NULL) &&
+                         (mkv_d->subs_track->tnum == block->TrackNum())) {
+                if (!mkv_d->v_skip_to_keyframe)
+                  handle_subtitles(d, block, block_duration);
+                use_this_block = false;
+
+              } else
+                use_this_block = false;
+
+              if (use_this_block) {
+                mkv_d->last_pts = current_pts;
                 d->filepos = mkv_d->in->getFilePointer();
                 mkv_d->last_filepos = d->filepos;
 
-                if ((ds != NULL) && ((block->GlobalTimecode() / 1000000 -
-                                       mkv_d->first_tc) >=
-                                     (uint64_t)mkv_d->skip_to_timecode)) {
-                  for (i = 0; i < (int)block->NumberFrames(); i++) {
-                    DataBuffer &data = block->GetBuffer(i);
-                    if ((mkv_d->video != NULL) &&
-                        mkv_d->video->realmedia &&
-                        (mkv_d->video->tnum == block->TrackNum()))
-                      handle_realvideo(d, data, (elements_found & 4) == 0,
-                                       found_data);
-                    else {
-                      dp = new_demux_packet(data.Size());
-                      memcpy(dp->buffer, data.Buffer(), data.Size());
-                      dp->pts = mkv_d->last_pts;
-                      // keyframe?
-                      dp->flags = (elements_found & 4) == 0 ? 1 : 0;
-                      ds_add_packet(ds, dp);
-                      found_data++;
-                    }
+                for (i = 0; i < (int)block->NumberFrames(); i++) {
+                  DataBuffer &data = block->GetBuffer(i);
+
+                  if ((ds == d->video) && mkv_d->video->realmedia)
+                    handle_realvideo(d, data, (elements_found & 4) == 0,
+                                     found_data);
+
+                  else if ((ds == d->audio) && mkv_d->audio->realmedia)
+                    handle_realaudio(d, data, (elements_found & 4) == 0,
+                                     found_data);
+
+                  else {
+                    dp = new_demux_packet(data.Size());
+                    memcpy(dp->buffer, data.Buffer(), data.Size());
+                    dp->flags = (elements_found & 4) == 0 ? 1 : 0;
+                    dp->pts = mkv_d->last_pts;
+                    ds_add_packet(ds, dp);
+                    found_data++;
                   }
-                  mkv_d->skip_to_keyframe = 0;
+                }
+                if (ds == d->video) {
+                  mkv_d->v_skip_to_keyframe = false;
                   mkv_d->skip_to_timecode = 0;
-                } else if ((mkv_d->subs_track != NULL) &&
-                           (mkv_d->subs_track->tnum == block->TrackNum()))
-                  handle_subtitles(d, block, block_duration);
+                }
+                if (ds == d->audio)
+                  mkv_d->a_skip_to_keyframe = false;
               }
 
               delete block;
@@ -2426,9 +2546,11 @@ extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
     }
 
     if (mkv_d->video != NULL)
-      mkv_d->skip_to_keyframe = 1;
+      mkv_d->v_skip_to_keyframe = true;
     if (rel_seek_secs > 0.0)
       mkv_d->skip_to_timecode = target_timecode;
+
+    mkv_d->a_skip_to_keyframe = true;
 
     demux_mkv_fill_buffer(demuxer);
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] New timecode: %lld\n",
