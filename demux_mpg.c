@@ -341,7 +341,7 @@ do{
   return 1;
 }
 
-extern off_t seek_to_byte;
+//extern off_t seek_to_byte;
 
 void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
@@ -356,7 +356,7 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
         else
           newpos=demuxer->filepos+(sh_video->i_bps)*rel_seek_secs;
 
-        if(newpos<seek_to_byte) newpos=seek_to_byte; // for VCD
+        if(newpos<demuxer->stream->start_pos) newpos=demuxer->stream->start_pos; // for VCD
 #ifdef _LARGEFILE_SOURCE
         newpos&=~((long long)STREAM_BUFFER_SIZE-1);  /* sector boundary */
 #else

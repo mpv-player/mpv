@@ -593,7 +593,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   stream=open_stream(filename,vcd_track,&file_format);
   if(!stream) return 1; // error...
   use_stdin=(!strcmp(filename,"-"));
-  seek_to_byte+=stream->start_pos; // required for VCD
+  stream->start_pos+=seek_to_byte;
 
 #ifdef HAVE_LIBCSS
   if (dvdimportkey) {

@@ -57,6 +57,8 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id){
   d->video=new_demuxer_stream(d,v_id);
   d->sub=new_demuxer_stream(d,s_id);
   d->type=type;
+  stream_reset(stream);
+  stream_seek(stream,stream->start_pos);
   return d;
 }
 
@@ -293,7 +295,7 @@ extern int num_elementary_packets101;
 extern int num_elementary_packetsPES;
 
 // commandline options, flags:
-extern int seek_to_byte;
+//extern int seek_to_byte;
 extern int force_ni;
 extern int pts_from_bps;
 
@@ -321,9 +323,7 @@ sh_video_t *sh_video=NULL;
 
 //=============== Try to open as AVI file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
-  stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_AVI,audio_id,video_id,dvdsub_id);
-  stream_seek(demuxer->stream,seek_to_byte);
   { //---- RIFF header:
     int id=stream_read_dword_le(demuxer->stream); // "RIFF"
     if(id==mmioFOURCC('R','I','F','F')){
@@ -338,9 +338,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
 }
 //=============== Try to open as ASF file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
-  stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_ASF,audio_id,video_id,dvdsub_id);
-  stream_seek(demuxer->stream,seek_to_byte);
   if(asf_check_header(demuxer)){
       printf("Detected ASF file format!\n");
       file_format=DEMUXER_TYPE_ASF;
@@ -350,9 +348,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  int pes=1;
  while(pes>=0){
-  stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id,dvdsub_id);
-  stream_seek(demuxer->stream,seek_to_byte);
   if(!pes) demuxer->synced=1; // hack!
   if(ds_fill_buffer(demuxer->video)){
     if(!pes)
@@ -380,9 +376,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
 }
 //=============== Try to open as MPEG-ES file: =================
 if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
-  stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_ES,audio_id,video_id,dvdsub_id);
-  stream_seek(demuxer->stream,seek_to_byte);
   if(!ds_fill_buffer(demuxer->video)){
     printf("Invalid MPEG-ES stream??? contact the author, it may be a bug :(\n");
     file_format=DEMUXER_TYPE_UNKNOWN;
@@ -393,9 +387,7 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
 //=============== Try to open as MOV file: =================
 #if 1
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
-  stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
-  stream_seek(demuxer->stream,seek_to_byte);
   if(mov_check_file(demuxer)){
       printf("Detected QuickTime/MOV file format!\n");
       file_format=DEMUXER_TYPE_MOV;
@@ -489,3 +481,48 @@ switch(file_format){
 
 return demuxer;
 }
+
+
+
+int demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags);
+int demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags);
+int demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags);
+
+int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
+    demux_stream_t *d_audio=demuxer->audio;
+    demux_stream_t *d_video=demuxer->video;
+    sh_audio_t *sh_audio=d_audio->sh;
+    sh_video_t *sh_video=d_video->sh;
+
+//if(demuxer->file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){
+//    printf("Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n");
+//    return 0;
+//}
+
+    // clear demux buffers:
+    if(sh_audio){ ds_free_packs(d_audio);sh_audio->a_buffer_len=0;}
+    ds_free_packs(d_video);
+    
+    demuxer->stream->eof=0; // clear eof flag
+
+    if(sh_audio) sh_audio->timer=0;
+    sh_video->timer=0; // !!!!!!
+
+switch(demuxer->file_format){
+
+  case DEMUXER_TYPE_AVI:
+      demux_seek_avi(demuxer,rel_seek_secs,flags);  break;
+
+  case DEMUXER_TYPE_ASF:
+      demux_seek_asf(demuxer,rel_seek_secs,flags);  break;
+  
+  case DEMUXER_TYPE_MPEG_ES:
+  case DEMUXER_TYPE_MPEG_PS:
+      demux_seek_mpg(demuxer,rel_seek_secs,flags);  break;
+
+} // switch(demuxer->file_format)
+
+return 1;
+}
+
+
