@@ -395,16 +395,16 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 				mpi->width, mpi->height/2);
 			qpel(dmpi->planes[0], mpi->planes[0] + (i^!tff)*mpi->stride[0],
-				mpi->w*bpp, mpi->h/2, dmpi->stride[0], mpi->stride[0]*2, 0);
+				mpi->w*bpp, mpi->h/2, dmpi->stride[0], mpi->stride[0]*2, (i^!tff));
 			if (mpi->flags & MP_IMGFLAG_PLANAR) {
 				qpel(dmpi->planes[1],
 					mpi->planes[1] + (i^!tff)*mpi->stride[1],
 					mpi->chroma_width, mpi->chroma_height/2,
-					dmpi->stride[1], mpi->stride[1]*2, 0);
+					dmpi->stride[1], mpi->stride[1]*2, (i^!tff));
 				qpel(dmpi->planes[2],
 					mpi->planes[2] + (i^!tff)*mpi->stride[2],
 					mpi->chroma_width, mpi->chroma_height/2,
-					dmpi->stride[2], mpi->stride[2]*2, 0);
+					dmpi->stride[2], mpi->stride[2]*2, (i^!tff));
 			}
 			ret |= vf_next_put_image(vf, dmpi);
 			if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
