@@ -311,16 +311,22 @@ static WINE_MODREF *MODULE_LoadLibraryExA( LPCSTR libname, HFILE hfile, DWORD fl
 		/* decrement the dependencies through the MODULE_FreeLibrary call. */
 		pwm->refCount++;
 
-#ifdef EMU_QTX_API
 		if(strstr(libname,"QuickTime.qts")){
 		    void** ptr=0x62b75ca4;
-		    fprintf(stderr,"QuickTime.qts entrypoint patched!!! old=%p\n",ptr[0]);
+		    int i;
+		    fprintf(stderr,"QuickTime.qts patched!!! old entry=%p\n",ptr[0]);
+		    // NOP out directx, fontmanager and some other init calls:
+		    for(i=0;i<5;i++) ((char*)0x6299e842)[i]=0x90;
+		    for(i=0;i<28;i++) ((char*)0x6299e86d)[i]=0x90;
+		    for(i=0;i<5;i++) ((char*)0x6299e898)[i]=0x90;
+		    for(i=0;i<9;i++) ((char*)0x6299e8ac)[i]=0x90;
+#ifdef EMU_QTX_API
 		    report_entry = report_func;
 		    report_ret   = report_func_ret;
 		    wrapper_target=ptr[0];
 		    ptr[0]=wrapper;
-		}
 #endif
+		}
 
                 SetLastError( err );  /* restore last error */
 		return pwm;
