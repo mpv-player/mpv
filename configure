@@ -890,13 +890,14 @@ int main() {
 EOF
     $_cc -o "$TMPO" "$TMPC"
     case `"$TMPO"` in
-	0-0) proc="ev4" ;;
-	1-0) proc="ev5" ;;
-	1-1) proc="ev56" ;;
-	1-101) proc="pca56" ;;
-	2-303) proc="ev6" ;;
-	2-307) proc="ev67" ;;
-	2-1307) proc="ev68" ;;
+
+        0-0)    proc="ev4";   cpu_understands_mvi="0";;
+        1-0)    proc="ev5";   cpu_understands_mvi="0";;
+        1-1)    proc="ev56";  cpu_understands_mvi="1";; 
+        1-101)  proc="pca56"; cpu_understands_mvi="1";;
+        2-303)  proc="ev6";   cpu_understands_mvi="1";;
+        2-307)  proc="ev67";  cpu_understands_mvi="1";;
+        2-1307) proc="ev68";  cpu_understands_mvi="1";;
     esac
     echores "$proc"
     
@@ -913,12 +914,12 @@ EOF
     _optimizing="$proc"
 
     echocheck "MVI instruction support in GCC"
-    if test "$_cc_major" -ge "3"; then
-    	_def_gcc_mvi_support="#define CAN_COMPILE_ALPHA_MVI 1"
+    if test "$_cc_major" -ge "3" && test "$cpu_understands_mvi" = "1" ; then
+        _def_gcc_mvi_support="#define CAN_COMPILE_ALPHA_MVI 1"
 	echores "yes"
     else
 	_def_gcc_mvi_support="#undef CAN_COMPILE_ALPHA_MVI"
-	echores "no"
+	echores "no, GCC = `( $_cc -dumpversion ) 2>&1` (must be >= 3), CPU = $proc (must be pca56 or later)"
     fi
     ;;
 
