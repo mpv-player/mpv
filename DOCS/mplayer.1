@@ -34,6 +34,8 @@ mplayer \- Movie Player for Linux
 .RB [ \-subdelay\ sec ]
 .RB [ \-dvd\ device ]
 .RB [ \-z\ <0-8> ]
+.RB [ \-idx ]
+.RB [ \-forceidx ]
 .I file
 .PP
 .SH DESCRIPTION
@@ -175,6 +177,14 @@ specify config file to be parsed after the default
 specifies compression level for PNG output
           0 : no compression
           8 : max compression
+.TP
+.B \-idx
+rebuilds INDEX of the AVI. Useful with broken downloads, or badly
+created AVIs.
+.TP
+.B \-forceidx
+force rebuilding of INDEX. Useful for testing, or AVIs with bad
+indexes.
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
