@@ -45,6 +45,11 @@ LIBVD_EXTERN(ffmpeg)
 #define coded_frame coded_picture
 #endif
 
+#if LIBAVCODEC_BUILD < 4654
+#define PIX_FMT_RGB24 PIX_FMT_BGR24
+#define PIX_FMT_RGBA32 PIX_FMT_BGRA32
+#endif
+
 int avcodec_inited=0;
 
 #if defined(FF_POSTPROCESS) && defined(MBR)
@@ -350,8 +355,8 @@ static int init_vo(sh_video_t *sh){
 	case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //photo jpeg
 	case PIX_FMT_YUV411P: ctx->best_csp=IMGFMT_411P;break; //dv ntsc
 	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
-	case PIX_FMT_BGR24 :  ctx->best_csp=IMGFMT_BGR24;break; //huffyuv
-	case PIX_FMT_BGRA32:  ctx->best_csp=IMGFMT_BGR32;break; //huffyuv
+	case PIX_FMT_RGB24 :  ctx->best_csp=IMGFMT_BGR24;break; //huffyuv
+	case PIX_FMT_RGBA32:  ctx->best_csp=IMGFMT_BGR32;break; //huffyuv
 	default:
 	    ctx->best_csp=0;
 	}
