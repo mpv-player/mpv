@@ -771,11 +771,11 @@ void list_codecs(int audioflag){
 		if (audioflag) {
 			i = nr_acodecs;
 			c = audio_codecs;
-			mp_msg(MSGT_CODECCFG,MSGL_INFO,"ac:      afm: status:   info:  [lib/dll]\n");
+			mp_msg(MSGT_CODECCFG,MSGL_INFO,"ac:         afm:      status:   info:  [lib/dll]\n");
 		} else {
 			i = nr_vcodecs;
 			c = video_codecs;
-			mp_msg(MSGT_CODECCFG,MSGL_INFO,"vc:      vfm: status:   info:  [lib/dll]\n");
+			mp_msg(MSGT_CODECCFG,MSGL_INFO,"vc:         vfm:      status:   info:  [lib/dll]\n");
 		}
 		if(!i) return;
 		for (/* NOTHING */; i--; c++) {
@@ -787,9 +787,9 @@ void list_codecs(int audioflag){
 			  case CODECS_STATUS_UNTESTED:    s="untested";break;
 			}
 			if(c->dll)
-			  mp_msg(MSGT_CODECCFG,MSGL_INFO,"%-11s %-6s  %s  %s  [%s]\n",c->name,c->drv,s,c->info,c->dll);
+			  mp_msg(MSGT_CODECCFG,MSGL_INFO,"%-11s %-9s %s  %s  [%s]\n",c->name,c->drv,s,c->info,c->dll);
 			else
-			  mp_msg(MSGT_CODECCFG,MSGL_INFO,"%-11s %-6s  %s  %s\n",c->name,c->drv,s,c->info);
+			  mp_msg(MSGT_CODECCFG,MSGL_INFO,"%-11s %-9s %s  %s\n",c->name,c->drv,s,c->info);
 			
 		}
 
