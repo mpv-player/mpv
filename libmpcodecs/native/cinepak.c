@@ -352,7 +352,7 @@ int uvr, uvg, uvb;
 /* ------------------------------------------------------------------------ */
 inline void cvid_v1_32(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb)
 {
-int stride = mpi->stride[0];
+int stride = mpi->stride[0]/4;
 unsigned long *vptr = (unsigned long *)mpi->planes[0];
 unsigned long rgb;
 
@@ -378,7 +378,7 @@ unsigned long rgb;
 inline void cvid_v4_32(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb0,
 	cvid_codebook *cb1, cvid_codebook *cb2, cvid_codebook *cb3)
 {
-int stride = mpi->stride[0];
+int stride = mpi->stride[0]/4;
 unsigned long *vptr = (unsigned long *)mpi->planes[0];
 
 	if(y+3>=(unsigned int)mpi->height) return; // avoid sig11
@@ -450,8 +450,8 @@ int uvr, uvg, uvb;
 inline void cvid_v1_24(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb)
 {
 unsigned char r, g, b;
-int stride = (mpi->stride[0]-4)*3;
-unsigned char *vptr = mpi->planes[0] + (y * mpi->stride[0] + x) * 3;
+int stride = (mpi->stride[0])-4*3;
+unsigned char *vptr = mpi->planes[0] + (y * mpi->stride[0]) + x * 3;
 
 	if(y+3>=(unsigned int)mpi->height) return; // avoid sig11
 
@@ -481,8 +481,8 @@ unsigned char *vptr = mpi->planes[0] + (y * mpi->stride[0] + x) * 3;
 inline void cvid_v4_24(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb0,
 	cvid_codebook *cb1, cvid_codebook *cb2, cvid_codebook *cb3)
 {
-int stride = (mpi->stride[0]-4)*3;
-unsigned char *vptr = mpi->planes[0] + (y * mpi->stride[0] + x) * 3;
+int stride = (mpi->stride[0])-4*3;
+unsigned char *vptr = mpi->planes[0] + (y * mpi->stride[0]) + x * 3;
 
 	if(y+3>=(unsigned int)mpi->height) return; // avoid sig11
 
