@@ -10,7 +10,7 @@
 <BODY>
 
 
-<H2><A NAME="encoding">2.4  Encoding with MEncoder</A></H2>
+<H2><A NAME="encoding">2.4 Encoding with MEncoder</A></H2>
 
 <P><B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder) is a simple movie encoder,
   designed to encode MPlayer-playable movies
@@ -21,7 +21,7 @@
   for video manipulation.</P>
 
 
-<H3><A NAME="compilation">2.4.1  Compilation</A></H3>
+<H3><A NAME="compilation">2.4.1 Compilation</A></H3>
 
 <UL>
   <LI><B>OPTIONAL</B> - read <B>MPlayer</B>'s compilation instruction.</LI>
@@ -44,8 +44,9 @@
     quality by running <CODE>make test</CODE> after lame's compiling process
     is over. The resulting number should be less than <B>30</B>. Don't
     panic if it's <B>400</B> or so, you shouldn't heard any audible
-    quality decrease. Oh, and if your compiler doesn't even run <CODE>make test</CODE> ...
-    Well, delete that <B>GCC 2.96</B> or upgrade lame to at least <B>3.90</B>.</LI>
+    quality decrease. Oh, and if your compiler doesn't even run
+    <CODE>make test</CODE> ... Well, delete that <B>GCC 2.96</B> or upgrade
+    lame to at least <B>3.90</B>.</LI>
   <LI><B>OPTIONAL</B> - <CODE>libjpeg</CODE> and <CODE>libpng</CODE> -
     as described in the <A HREF="documentation.html#installation">Installation</A>
     section</LI>
@@ -55,7 +56,7 @@
   <I>avifile</I> library installed. <B>MEncoder</B> doesn't need it at all.</P>
 
 
-<H3><A NAME="features">2.4.2  MEncoder features</A></H3>
+<H3><A NAME="features">2.4.2 MEncoder features</A></H3>
 
 <UL>
   <LI>encoding from the wide range of fileformats and decoders of <B>MPlayer</B></LI>
@@ -88,7 +89,7 @@
 </UL>
 
 
-<H4><A NAME="2pass">2.4.2.1  Encoding 2 or 3-pass DivX4</A></H4>
+<H4><A NAME="2pass">2.4.2.1 Encoding 2 or 3-pass DivX4</A></H4>
 
 <P><U><B>2-pass encoding:</B></U> the name comes from the fact that this method
   encodes the file <I>twice</I>. The first encoding (dubbed <I>pass</I>)
@@ -106,8 +107,8 @@
     one)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
     vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 1<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:more_options
-    -oac copy -o movie.avi -pass 2</CODE></P>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+    vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 2</CODE></P>
 
 <P><U><B>3-pass encoding:</B></U> this is an extension of 2-pass encoding,
   where the audio encoding takes place in a separate pass. This method enables
@@ -173,7 +174,7 @@
 </UL>
 
 
-<H4><A NAME="rescaling">2.4.2.2  Rescaling movies</A></H4>
+<H4><A NAME="rescaling">2.4.2.2 Rescaling movies</A></H4>
 
 <P>Often the need to resize movie images' size emerges. Its reasons can be many,
   examples are decreasing output file size, encoding SVCDs to DivX. Ripped DVDs
@@ -195,7 +196,7 @@
     output.avi</CODE></P>
 
 
-<H4><A NAME="copying">2.4.2.3  Stream copying</A></H4>
+<H4><A NAME="copying">2.4.2.3 Stream copying</A></H4>
 
 <P><B>MEncoder</B> can handle input streams in two ways: <B>encode</B> or
   <B>copy</B> them. This section is about <B>copying</B>.</P>
@@ -216,7 +217,7 @@
 </UL>
 
 
-<H4><A NAME="fixing">2.4.2.4  Fixing AVIs with broken index or interleaving</A></H4>
+<H4><A NAME="fixing">2.4.2.4 Fixing AVIs with broken index or interleaving</A></H4>
 
 <P>Easiest thing. We simply copy the video and audio streams, and
   <B>MEncoder</B> generates the index. Of course this cannot fix possible bugs
@@ -227,7 +228,7 @@
 <P>Command: <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
 
-<H4><A NAME="libavcodec">2.4.2.5  Encoding with the libavcodec codec family</A></H4>
+<H4><A NAME="libavcodec">2.4.2.5 Encoding with the libavcodec codec family</A></H4>
 
 <P><A HREF="codecs.html#libavcodec">libavcodec</A> provides simple encoding to a
   lot of interesting video and audio formats (currently its audio codecs are
@@ -252,7 +253,7 @@
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
-<H4><A NAME="image_files">2.4.2.6  Encoding from multiple input image files (JPEGs, PNGs or TGAs)</A></H4>
+<H4><A NAME="image_files">2.4.2.6 Encoding from multiple input image files (JPEGs, PNGs or TGAs)</A></H4>
 
 <P><B>MEncoder</B> is capable of creating movies from one or more JPEG, PNG or TGA
   files. With simple framecopy it can create MJPEG (Motion JPEG), MPNG
@@ -261,8 +262,8 @@
 Explanation of the process:
 
 <OL>
-  <LI><B>MEncoder</B> <I>decodes</I> the input image(s) with <CODE>libjpeg</CODE>
-  (when decoding PNGs, it will use <B>libpng</B>).</LI>
+  <LI><B>MEncoder</B> <I>decodes</I> the input image(s) with
+    <CODE>libjpeg</CODE> (when decoding PNGs, it will use <B>libpng</B>).</LI>
 
   <LI><B>MEncoder</B> then feeds the decoded image to the chosen video compressor
     (DivX4, Xvid, ffmpeg msmpeg4, etc...). Watch for the PNG decoder, as
@@ -276,31 +277,31 @@ Explanation of the process:
   global <A HREF="#options">Options</A> section and in the man page.</P>
 
 <P><I>Creating a DivX4 file from all the JPEG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -oac copy -o
-  output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4
+  -oac copy -o output.avi</CODE></P>
 
 <P><I>Creating a DivX4 file from some JPEG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -oac copy -o
-  output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25
+  -ovc divx4 -oac copy -o output.avi</CODE></P>
 
 <P><I>Creating a Motion JPEG (MJPEG) file from all the JPEG files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
   -oac copy -o output.avi</CODE></P>
 
 <P><I>Creating an uncompressed file from all the PNG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw -oac copy -o
-  output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw
+  -oac copy -o output.avi</CODE></P>
 
 <P><I>Creating a Motion PNG (MPNG) file from all the PNG files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy -oac copy
-  -o output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  -oac copy -o output.avi</CODE></P>
 
 <P><I>Creating a Motion TGA (MTGA) file from all the TGA files in the current dir:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy -oac copy
-  -o output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy
+  -oac copy -o output.avi</CODE></P>
 
 
-<H4><A NAME="vobsub">2.4.2.7  Extracting DVD subtitles to Vobsub file</A></H4>
+<H4><A NAME="vobsub">2.4.2.7 Extracting DVD subtitles to Vobsub file</A></H4>
 
 <P><B>MEncoder</B> is capable of extracting subtitles from a DVD into
   Vobsub fomat files. They consist of a pair of files ending in
@@ -343,8 +344,8 @@ Explanation of the process:
 
 <H3><A NAME="options">2.4.3 Available options</A></H3>
 
-<P>For the complete list of available <B>MEncoder</B> options and examples, please
-  see the man page.</P>
+<P>For the complete list of available <B>MEncoder</B> options and examples,
+  please see the man page.</P>
 
 </BODY>
 </HTML>
