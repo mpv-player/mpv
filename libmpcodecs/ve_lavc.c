@@ -127,6 +127,8 @@ static int lavc_param_pbias= FF_DEFAULT_QUANT_BIAS;
 #endif
 static int lavc_param_coder= 0;
 static int lavc_param_context= 0;
+static char *lavc_param_intra_matrix = NULL;
+static char *lavc_param_inter_matrix = NULL;
 
 #include "m_option.h"
 
@@ -217,6 +219,10 @@ m_option_t lavcopts_conf[]={
 #if LIBAVCODEC_BUILD >= 4669
 	{"coder", &lavc_param_coder, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
 	{"context", &lavc_param_context, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4675
+	{"intra_matrix", &lavc_param_intra_matrix, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"inter_matrix", &lavc_param_inter_matrix, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -319,6 +325,54 @@ static int config(struct vf_instance_s* vf,
 #if LIBAVCODEC_BUILD >= 4669
     lavc_venc_context->coder_type= lavc_param_coder;
     lavc_venc_context->context_model= lavc_param_context;
+#endif
+#if LIBAVCODEC_BUILD >= 4675
+    if (lavc_param_intra_matrix)
+    {
+	char *tmp;
+
+	lavc_venc_context->intra_matrix =
+	    malloc(sizeof(*lavc_venc_context->intra_matrix)*64);
+
+	i = 0;
+	while ((tmp = strsep(&lavc_param_intra_matrix, ",")) && (i < 64))
+	{
+	    if (!tmp || (tmp && !strlen(tmp)))
+		break;
+	    lavc_venc_context->intra_matrix[i++] = atoi(tmp);
+	}
+	
+	if (i != 64)
+	{
+	    free(lavc_venc_context->intra_matrix);
+	    lavc_venc_context->intra_matrix = NULL;
+	}
+	else
+	    mp_msg(MSGT_MENCODER, MSGL_V, "Using user specified intra matrix\n");
+    }
+    if (lavc_param_inter_matrix)
+    {
+	char *tmp;
+
+	lavc_venc_context->inter_matrix =
+	    malloc(sizeof(*lavc_venc_context->inter_matrix)*64);
+
+	i = 0;
+	while ((tmp = strsep(&lavc_param_inter_matrix, ",")) && (i < 64))
+	{
+	    if (!tmp || (tmp && !strlen(tmp)))
+		break;
+	    lavc_venc_context->inter_matrix[i++] = atoi(tmp);
+	}
+	
+	if (i != 64)
+	{
+	    free(lavc_venc_context->inter_matrix);
+	    lavc_venc_context->inter_matrix = NULL;
+	}
+	else
+	    mp_msg(MSGT_MENCODER, MSGL_V, "Using user specified inter matrix\n");
+    }
 #endif
 
     p= lavc_param_rc_override_string;
@@ -648,6 +702,15 @@ static void uninit(struct vf_instance_s* vf){
             psnr((lavc_venc_context->error[0]+lavc_venc_context->error[1]+lavc_venc_context->error[2])/(f*1.5))
             );
     }
+#endif
+
+#if LIBAVCODEC_BUILD >= 4675
+    if (lavc_venc_context->intra_matrix)
+	free(lavc_venc_context->intra_matrix);
+    lavc_venc_context->intra_matrix = NULL;
+    if (lavc_venc_context->inter_matrix)
+	free(lavc_venc_context->inter_matrix);
+    lavc_venc_context->inter_matrix = NULL;
 #endif
 
     avcodec_close(lavc_venc_context);
