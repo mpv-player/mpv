@@ -2125,6 +2125,12 @@ switch(sh_video->codec->driver){
     case 'o':  // toggle OSD
       osd_level=(osd_level+1)%3;
       break;
+    case 'z':
+      sub_delay -= 0.1;
+      break;
+    case 'x':
+      sub_delay += 0.1;
+      break;
     case '*':
     case '/': {
         int mixer_l=0; int mixer_r=0;
