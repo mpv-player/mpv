@@ -100,6 +100,7 @@ static WindowRef theWindow = NULL;
 static WindowGroupRef winGroup = NULL;
 static CGContextRef context;
 static CGRect bounds;
+static GDHandle deviceHdl;
 
 static CGDataProviderRef dataProviderRef;
 static CGImageAlphaInfo alphaInfo;
@@ -110,6 +111,7 @@ static Rect dstRect; // size of the displayed image (after scaling)
 static Rect winRect; // size of the window containg the displayed image (include padding)
 static Rect oldWinRect; // size of the window containg the displayed image (include padding) when NOT in FS mode
 static Rect deviceRect; // size of the display device
+static Rect oldWinBounds;
 
 static MenuRef windMenu;
 static MenuRef movMenu;
@@ -139,6 +141,7 @@ extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w
 void window_resized();
 void window_ontop();
 void window_fullscreen();
+void window_panscan();
 
 static inline int convert_key(UInt32 key, UInt32 charcode)
 {
@@ -402,8 +405,8 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 				break;
 				
 			case kPanScanCmd:
-				vo_panscan = 1;
-				vo_fs = 1; window_fullscreen();
+				vo_panscan = (!(vo_panscan));
+				CheckMenuItem (aspectMenu, 2, vo_panscan);
 				break;
 			
 			default:
@@ -493,6 +496,7 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Keep"), 0, kKeepAspectCmd, &index);
 	CheckMenuItem (aspectMenu, 1, vo_keepaspect);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Pan-Scan"), 0, kPanScanCmd, &index);
+	CheckMenuItem (aspectMenu, 2, vo_panscan);
 	AppendMenuItemTextWithCFString(aspectMenu, NULL, kMenuItemAttrSeparator, NULL, &index);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Original"), 0, kAspectOrgCmd, &index);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("4:3"), 0, kAspectFullCmd, &index);
@@ -537,7 +541,6 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	WindowAttributes	windowAttrs;
-	GDHandle			deviceHdl;
 	OSErr				qterr;
 	int i;
 
@@ -1106,7 +1109,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); window_ontop(); return VO_TRUE;
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
 		case VOCTRL_GET_PANSCAN: return VO_TRUE;
-		case VOCTRL_SET_PANSCAN: window_resized(); return VO_TRUE;
+		case VOCTRL_SET_PANSCAN: window_panscan(); return VO_TRUE;
 			
 		case VOCTRL_GET_IMAGE:
 			switch (image_format)
@@ -1175,13 +1178,6 @@ void window_resized()
 	else
 	{
 		SetRect(&dstRect, 0, 0, winRect.right, winRect.bottom-border);
-	}
-	
-	if(vo_fs)
-	{
-		panscan_calc();
-		MoveWindow(theWindow, 0-(vo_panscan_x >> 1), 0-(vo_panscan_y >> 1), 1);
-		SizeWindow(theWindow, device_width+vo_panscan_x, device_height+vo_panscan_y,1);
 	}
 
 	//Clear Background
@@ -1256,9 +1252,6 @@ void window_ontop()
 void window_fullscreen()
 {
 	static Ptr restoreState = NULL;
-	RGBColor black={0,0,0};
-	GDHandle deviceHdl;
-	static Rect oldWinBounds;
 
 	//go fullscreen
 	if(vo_fs)
@@ -1270,10 +1263,9 @@ void window_fullscreen()
 			
 			if(fs_res_x != 0 || fs_res_y != 0)
 			{
-				BeginFullScreen( &restoreState, NULL, &fs_res_x, &fs_res_y, NULL, &black, NULL);
+				BeginFullScreen( &restoreState, deviceHdl, &fs_res_x, &fs_res_y, NULL, NULL, NULL);
 				
 				//Get Main device info///////////////////////////////////////////////////
-				deviceHdl = GetMainDevice();
 				deviceRect = (*deviceHdl)->gdRect;
         
 				device_width = deviceRect.right;
@@ -1290,9 +1282,10 @@ void window_fullscreen()
 		
 		//go fullscreen
 		border = 0;
+		panscan_calc();
 		ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute);
-		MoveWindow (theWindow, deviceRect.left, deviceRect.top, 1);		
-		SizeWindow(theWindow, device_width, device_height,1);
+		MoveWindow(theWindow, deviceRect.left-(vo_panscan_x >> 1), deviceRect.top-(vo_panscan_y >> 1), 1);
+		SizeWindow(theWindow, device_width+vo_panscan_x, device_height+vo_panscan_y,1);
 
 		vo_quartz_fs = 1;
 	}
@@ -1303,7 +1296,6 @@ void window_fullscreen()
 			EndFullScreen(restoreState, NULL);
 		
 			//Get Main device info///////////////////////////////////////////////////
-			deviceHdl = GetMainDevice();
 			deviceRect = (*deviceHdl)->gdRect;
         
 			device_width = deviceRect.right;
@@ -1324,4 +1316,20 @@ void window_fullscreen()
  		vo_quartz_fs = 0;
 	}
 	
+}
+
+void window_panscan()
+{
+	panscan_calc();
+	
+	if(vo_panscan > 0)
+		CheckMenuItem (aspectMenu, 2, 1);
+	else
+		CheckMenuItem (aspectMenu, 2, 0);
+	
+	if(vo_quartz_fs)
+	{
+		MoveWindow(theWindow, deviceRect.left-(vo_panscan_x >> 1), deviceRect.top-(vo_panscan_y >> 1), 1);
+		SizeWindow(theWindow, device_width+vo_panscan_x, device_height+vo_panscan_y,1);
+	}
 }
