@@ -27,6 +27,7 @@
 #include <wine/elfdll.h>
 #endif
 #include "win32.h"
+#include "module.h"
 //#include "driver.h"
 
 //#undef TRACE

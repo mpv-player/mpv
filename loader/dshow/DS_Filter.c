@@ -1,6 +1,7 @@
 #include "DS_Filter.h"
 #include "driver.h"
 #include "com.h"
+#include "module.h"
 #include <stdio.h>
 #include <string.h>
 
