@@ -862,6 +862,8 @@ static void check_events (void)
                                 case SDLK_MINUS:
                                 case SDLK_KP_MINUS: mplayer_put_key('-');break;
 				case SDLK_TAB: mplayer_put_key('\t');break;
+				case SDLK_PAGEUP: mplayer_put_key(KEY_PAGE_UP);break;
+				case SDLK_PAGEDOWN: mplayer_put_key(KEY_PAGE_DOWN);break;  
 				default:
 					mplayer_put_key(keypressed);
                                 }
