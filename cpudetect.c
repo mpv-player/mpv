@@ -29,6 +29,10 @@ CpuCaps gCpuCaps;
 #include <signal.h>
 #endif
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 //#define X86_FXSR_MAGIC
 /* Thanks to the FreeBSD project for some of this cpuid code, and 
  * help understanding how to use it.  Thanks to the Mesa 
@@ -163,7 +167,7 @@ void GetCpuCaps( CpuCaps *caps)
 #endif
 
 		/* FIXME: Does SSE2 need more OS support, too? */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(WIN32)
 		if (caps->hasSSE)
 			check_os_katmai_support();
 		if (!caps->hasSSE)
@@ -293,6 +297,19 @@ static void sigfpe_handler_sse( int signal, struct sigcontext sc )
 }
 #endif /* __linux__ && _POSIX_SOURCE && X86_FXSR_MAGIC */
 
+#ifdef WIN32
+LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
+{
+   if(ep->ExceptionRecord->ExceptionCode==EXCEPTION_ILLEGAL_INSTRUCTION){
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "SIGILL, " );
+      ep->ContextRecord->Eip +=3;
+      gCpuCaps.hasSSE=0;       
+	  return EXCEPTION_CONTINUE_EXECUTION;
+   }
+   return EXCEPTION_CONTINUE_SEARCH;
+}
+#endif /* WIN32 */
+
 /* If we're running on a processor that can do SSE, let's see if we
  * are allowed to or not.  This will catch 2.4.0 or later kernels that
  * haven't been configured for a Pentium III but are running on one,
@@ -343,6 +360,16 @@ static void check_os_katmai_support( void )
    gCpuCaps.hasSSE = 0;
    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "No OS support for SSE, disabling to be safe.\n" );
 #endif
+#elif defined(WIN32)
+   LPTOP_LEVEL_EXCEPTION_FILTER exc_fil;
+   if ( gCpuCaps.hasSSE ) {
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
+      exc_fil = SetUnhandledExceptionFilter(win32_sig_handler_sse);
+      __asm __volatile ("xorps %xmm0, %xmm0");
+      SetUnhandledExceptionFilter(exc_fil);
+      if ( gCpuCaps.hasSSE ) mp_msg(MSGT_CPUDETECT,MSGL_V, "yes.\n" );
+      else mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
+   }
 #elif defined(__linux__)
 #if defined(_POSIX_SOURCE) && defined(X86_FXSR_MAGIC)
    struct sigaction saved_sigill;
