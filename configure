@@ -1065,8 +1065,9 @@ cat > $TMPC << EOF
 #include <netdb.h>
 int main(void) { (void) gethostbyname(0); return 0; }
 EOF
-cc_check $_ld_sock -lsocket && _ld_sock="$_ld_sock -lsocket"
-cc_check $_ld_sock -lnsl && _ld_sock="$_ld_sock -lnsl"
+cc_check -lsocket && _ld_sock="-lsocket"
+cc_check -lnsl && _ld_sock="-lnsl"
+cc_check -lsocket -lnsl && _ld_sock="-lsocket -lnsl"
 if test "$_ld_sock" ; then
   echores "yes (using $_ld_sock)"
 else
@@ -2134,9 +2135,7 @@ echores "$_vorbis"
 
 
 echocheck "Win32 DLL support"
-if test "$_win32" = auto && qnx ; then
-  _win32=no
-fi
+qnx && _win32=no
 if test "$_win32" = auto ; then
   _win32=no
   if x86 ; then
