@@ -17,6 +17,7 @@ extern int z_compression;
 extern char *sdl_driver;
 extern int sdl_noxv;
 extern int sdl_forcexv;
+extern char *sdl_adriver;
 #endif
 #ifdef USE_FAKE_MONO
 extern int fakemono; // defined in dec_audio.c
@@ -119,6 +120,7 @@ struct config conf[]={
 	{"sdl", &sdl_driver, CONF_TYPE_STRING, 0, 0, 0},
 	{"noxv", &sdl_noxv, CONF_TYPE_FLAG, 0, 0, 1},
 	{"forcexv", &sdl_forcexv, CONF_TYPE_FLAG, 0, 0, 1},
+	{"sdla", &sdl_adriver, CONF_TYPE_STRING, 0, 0, 0},
 #endif	
 	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
 	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
