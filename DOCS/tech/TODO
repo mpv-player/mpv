@@ -52,7 +52,6 @@ mpg demuxer:
 - implement common mpeg 1/2/4 es/ps/pes/mp3 demuxer
 
 avi demuxer: (needs rewrite)
-- implement OpenDML index support (read & write)
 - implement hardcore bruteforce avi re-sync for broken files (-forceidx)
 - fix for growing avi files (movi_end pos > stream->end_pos)
 - implement forward seeking in avi streams with no index
@@ -72,7 +71,9 @@ DOCS:
   - video.html
   - documentation.html
 - enhance the FAQ
-- man page HTML version
+- document missing XviD options
+- add Matroska, NSV and nut to formats.xml
+- split man page into mplayer.1 and mencoder.1
 
 
 FUTURE:
