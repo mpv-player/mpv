@@ -4694,6 +4694,12 @@ static WIN_BOOL WINAPI expGetOpenFileNameA(/*LPOPENFILENAMEA*/ void* lpfn)
     return 1;
 }
 
+static double expfloor(double x)
+{
+    dbgprintf("floor(%lf)\n", x);
+    return floor(x);
+}
+
 struct exports
 {
     char name[64];
@@ -4911,6 +4917,7 @@ struct exports exp_msvcrt[]={
     FF(fprintf,-1)
     FF(printf,-1)
     FF(getenv,-1)
+    FF(floor,-1)
 #ifdef MPLAYER
     FF(_EH_prolog,-1)
 #endif
