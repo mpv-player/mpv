@@ -12,12 +12,14 @@ FOR THE RELEASE:
 ~~~~~~~~~~~~~~~~
 - mencoder: migrate to muxer layer
 
-demuxer:
+avi demuxer: (needs rewrite)
 - fix AVI index offset base position handling ('no video stream found' bug)
 - implement OpenDML index support (read & write)
 - implement hardcore bruteforce avi re-sync for broken files (-forceidx)
 - fix for growing avi files (movi_end pos > stream->end_pos)
 - implement forward seeking in avi streams with no index
+
+demuxer:
 - fix .asf demuxer bugs
 - forward seeking from stdin ?
 - fix the whole syncing mechanism of Real demuxer
