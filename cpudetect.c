@@ -429,6 +429,27 @@ static void check_os_katmai_support( void )
 }
 #else /* ARCH_X86 */
 
+#ifdef SYS_DARWIN
+#include <sys/sysctl.h>
+#else
+#include <signal.h>
+#include <setjmp.h>
+
+static sigjmp_buf jmpbuf;
+static volatile sig_atomic_t canjump = 0;
+
+static void sigill_handler (int sig)
+{
+    if (!canjump) {
+        signal (sig, SIG_DFL);
+        raise (sig);
+    }
+    
+    canjump = 0;
+    siglongjmp (jmpbuf, 1);
+}
+#endif
+
 void GetCpuCaps( CpuCaps *caps)
 {
 	caps->cpuType=0;
@@ -440,5 +461,46 @@ void GetCpuCaps( CpuCaps *caps)
 	caps->hasSSE=0;
 	caps->hasSSE2=0;
 	caps->isX86=0;
+	caps->hasAltiVec = 0;
+#ifdef HAVE_ALTIVEC   
+#ifdef SYS_DARWIN   
+/*
+  rip-off from ffmpeg altivec detection code.
+  this code also appears on Apple's AltiVec pages.
+ */
+        {
+                int sels[2] = {CTL_HW, HW_VECTORUNIT};
+                int has_vu = 0;
+                size_t len = sizeof(has_vu);
+                int err;
+
+                err = sysctl(sels, 2, &has_vu, &len, NULL, 0);   
+
+                if (err == 0)
+                        if (has_vu != 0)
+                                caps->hasAltiVec = 1;
+                mp_msg(MSGT_CPUDETECT,MSGL_INFO,"AltiVec %sfound\n", (caps->hasAltiVec ? "" : "not "));
+        }
+#else /* SYS_DARWIN */
+/* no Darwin, do it the brute-force way */
+/* this is borrowed from the libmpeg2 library */
+        {
+          signal (SIGILL, sigill_handler);
+          if (sigsetjmp (jmpbuf, 1)) {
+            signal (SIGILL, SIG_DFL);
+          } else {
+            canjump = 1;
+            
+            asm volatile ("mtspr 256, %0\n\t"
+                          "vand v0, v0, v0"
+                          :
+                          : "r" (-1));
+            
+            signal (SIGILL, SIG_DFL);
+            caps->hasAltiVec = 1;
+          }
+        }
+#endif /* SYS_DARWIN */
+#endif /* HAVE_ALTIVEC */
 }
 #endif /* !ARCH_X86 */

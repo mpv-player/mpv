@@ -40,6 +40,10 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2
 
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(FREETYPE_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(SDL_INC) # -Wall
 
+ifeq ($(TARGET_ALTIVEC),yes)
+CFLAGS += -faltivec
+endif
+
 PARTS = libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libao2 drivers linux postproc input libvo libaf
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix

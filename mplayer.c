@@ -665,8 +665,8 @@ int gui_no_filename=0;
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO,banner_text);
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
-#ifdef ARCH_X86
   GetCpuCaps(&gCpuCaps);
+#ifdef ARCH_X86
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
       gCpuCaps.hasMMX,gCpuCaps.hasMMX2,
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
