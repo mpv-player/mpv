@@ -193,6 +193,14 @@ void guiInit( void )
    fprintf( stderr,MSGTR_NEMDB );
    exit( 0 );
   }
+
+  if (WinID>0)
+  {
+    appMPlayer.subWindow.Parent=WinID;
+    appMPlayer.mainWindow.Parent=WinID;
+    appMPlayer.sub.x=0;
+    appMPlayer.sub.y=0;
+  }
  
  wsCreateWindow( &appMPlayer.subWindow,
   appMPlayer.sub.x,appMPlayer.sub.y,appMPlayer.sub.width,appMPlayer.sub.height,
@@ -509,6 +517,8 @@ int guiGetEvent( int type,char * arg )
 	   }
 	  guiIntfStruct.MovieWidth=vo_dwidth;
 	  guiIntfStruct.MovieHeight=vo_dheight;
+          if (WinID>0)
+            wsMoveWindow( &appMPlayer.mainWindow,0,0, vo_dheight);
          }
 	break;
 #ifdef USE_DVDREAD
