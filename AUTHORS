@@ -208,7 +208,7 @@ Michael Niedermayer <michaelni@gmx.at>
 Sven Goethel <sgoethel@jausoft.com>
     * libvo driver: vo_gl2
 
-joy_ping <joy@pingfm.org>
+Joy Winter <joy@pingfm.org>
     * ao_alsa9 fixes, AC3 passthrough support
 
 Eric Anholt <eanholt@gladstone.uoregon.edu>
@@ -551,4 +551,3 @@ Dirk Farin <farin@ti.uni-mannheim.de>
 Adam Williams <broadcast@earthling.net>
     * libmpeg3 (and xmovie) author [MPEG1/MPEG2 video decoder, used in
       v0.1-v0.4]
-
