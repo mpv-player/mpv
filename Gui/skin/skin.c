@@ -71,7 +71,7 @@ void ERRORMESSAGE( const char * format, ... )
   } \
 }
 
-char * strlower( char * in )
+static char * strlower( char * in )
 {
  int i;
  for( i=0;i<(int)strlen( in );i++ ) in[i]=( in[i] >= 'A' ? ( in[i] <= 'Z' ?  in[i]+='A' : in[i] ) : in[i] );
