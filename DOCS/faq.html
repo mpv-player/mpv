@@ -481,9 +481,10 @@ happens, after about one minute the video starts playing.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 The KDE arts sound daemon is blocking the sound device, either wait the time
 until video starts or you disable the arts-daemon in kontrol center. If you want
-to use arts sound, specify audio output via SDL (<CODE>ao=sdl</CODE>), and
-make sure your SDL can handle arts sound. Yet another option is to start
-<B>MPlayer</B> with artsdsp.
+to use arts sound, specify audio output via our native arts audio driver
+(<CODE>ao=arts</CODE>), or if it fails or isn't compiled in, try SDL
+(<CODE>ao=sdl</CODE>), and make sure your SDL can handle arts sound. Yet
+another option is to start <B>MPlayer</B> with artsdsp.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
