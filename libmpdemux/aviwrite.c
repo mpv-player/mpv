@@ -146,7 +146,7 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
       return;
 #endif
   riff[0]=mmioFOURCC('R','I','F','F');
-  riff[1]=muxer->file_end;  // filesize
+  riff[1]=muxer->file_end-2*sizeof(unsigned int);  // filesize
   riff[2]=formtypeAVI; // 'AVI '
   riff[0]=le2me_32(riff[0]);
   riff[1]=le2me_32(riff[1]);
