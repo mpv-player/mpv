@@ -217,7 +217,7 @@ static char help_text[]=
 #define MSGTR_ResolutionDoesntMatch "\nAz új videó fájl felbontása vagy színtere különbözik az elõzõétõl.\n"
 #define MSGTR_FrameCopyFileMismatch "\nAz összes videó fájlnak azonos fps-sel, felbontással, és codec-kel kell rendelkeznie az -ovc copy-hoz.\n"
 #define MSGTR_AudioCopyFileMismatch "\nAz összes fájlnak azonos audió codec-kel és formátummal kell rendelkeznie az -oac copy-hoz.\n"
-#define MSGTR_NoSpeedWithFrameCopy "Bleh\n"
+#define MSGTR_NoSpeedWithFrameCopy "FIGYELEM: A -speed nem biztos, hogy jól mûködik az -oac copy-val!\nA KÓDOLÁSOD HIBÁS LEHET!\n"
 #define MSGTR_ErrorWritingFile "%s: hiba a fájl írásánál.\n"
 #define MSGTR_WritingAVIIndex "\nAVI index írása...\n"
 #define MSGTR_FixupAVIHeader "AVI fejléc javítása...\n"
