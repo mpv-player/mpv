@@ -47,6 +47,7 @@ typedef struct {
 	short driver;
 	short flags;
 	short status;
+	short cpuflags;
 } codecs_t;
 
 codecs_t** parse_codec_cfg(char *cfgfile);

@@ -18,13 +18,7 @@
 #include "libvo/video_out.h"
 #include "codec-cfg.h"
 
-#ifdef DEBUG
-#	define DBG(str, args...) printf(str, ##args)
-#else
-#	define DBG(str, args...) do {} while (0)
-#endif
-
-#define PRINT_LINENUM printf("%s(%d): ", cfgfile, line_num)
+#define PRINT_LINENUM printf(" at line %d\n", line_num)
 
 #define MAX_NR_TOKEN	16
 
@@ -65,32 +59,40 @@ static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
 	if (!freeslots)
 		goto err_out_too_many;
 	if (*(--s) != '\0')
-		return 0;
+		goto err_out_parse_error;
 	return 1;
 err_out_duplicated:
-	printf("\nduplicated fourcc/format\n");
+	printf("duplicated fourcc/format");
 	return 0;
 err_out_too_many:
-	printf("\ntoo many fourcc/format...\n");
+	printf("too many fourcc/format...");
+	return 0;
+err_out_parse_error:
+	printf("parse error");
 	return 0;
 }
 
 static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 {
 	int i, j;
+	char *endptr;
 
 	/* find first unused slot */
 	for (i = 0; i < CODECS_MAX_FOURCC && fourcc[i] != 0xffffffff; i++)
 		/* NOTHING */;
 	if (i == CODECS_MAX_FOURCC) {
-		printf("\ntoo many fourcc/format...\n");
+		printf("too many fourcc/format...");
 		return 0;
 	}
 
-        fourcc[i]=fourccmap[i]=strtoul(s,NULL,0);
+        fourcc[i]=fourccmap[i]=strtoul(s,&endptr,0);
+	if (*endptr != '\0') {
+		printf("parse error");
+		return 0;
+	}
 	for (j = 0; j < i; j++)
 		if (fourcc[j] == fourcc[i]) {
-			printf("\nduplicated fourcc/format\n");
+			printf("duplicated fourcc/format");
 			return 0;
 		}
 
@@ -146,21 +148,28 @@ static int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 		goto err_out_too_many;
 
 	flags = 0;
-	if(sflags) do {
-		for (j = 0; flagstr[j] != NULL; j++)
-			if (!strncmp(sflags, flagstr[j], strlen(flagstr[j])))
-				break;
-		if (flagstr[j] == NULL) return 0; // error!
-		flags|=(1<<j);
-		sflags+=strlen(flagstr[j]);
-	} while (*(sflags++) == ',');
+	if(sflags) {
+		do {
+			for (j = 0; flagstr[j] != NULL; j++)
+				if (!strncmp(sflags, flagstr[j],
+							strlen(flagstr[j])))
+					break;
+			if (flagstr[j] == NULL)
+				goto err_out_parse_error;
+			flags|=(1<<j);
+			sflags+=strlen(flagstr[j]);
+		} while (*(sflags++) == ',');
+
+		if (*(--sflags) != '\0')
+			goto err_out_parse_error;
+	}
 
 	do {
 		for (j = 0; fmtstr[j] != NULL; j++)
 			if (!strncmp(sfmt, fmtstr[j], strlen(fmtstr[j])))
 				break;
 		if (fmtstr[j] == NULL)
-			return 0;
+			goto err_out_parse_error;
 		outfmt[i] = fmtnum[j];
 		outflags[i] = flags;
                 ++i;
@@ -170,11 +179,15 @@ static int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 	if (!freeslots)
 		goto err_out_too_many;
 
-	if (*(--sfmt) != '\0') return 0;
+	if (*(--sfmt) != '\0')
+		goto err_out_parse_error;
         
 	return 1;
 err_out_too_many:
-	printf("\ntoo many out...\n");
+	printf("too many out...");
+	return 0;
+err_out_parse_error:
+	printf("parse error");
 	return 0;
 }
 
@@ -257,11 +270,40 @@ static int add_comment(char *s, char **d)
 		(*d)[pos++] = '\n';
 	}
 	if (!(*d = (char *) realloc(*d, pos + strlen(s) + 1))) {
-		printf("can't allocate mem for comment\n");
+		printf("can't allocate mem for comment. ");
 		return 0;
 	}
 	strcpy(*d + pos, s);
 	return 1;
+}
+
+static short get_cpuflags(char *s)
+{
+	static char *flagstr[] = {
+		"mmx",
+		"sse",
+		"3dnow",
+		NULL
+	};
+        int i;
+	short flags = 0;
+
+	do {
+		for (i = 0; flagstr[i]; i++)
+			if (!strncmp(s, flagstr[i], strlen(flagstr[i])))
+				break;
+		if (!flagstr[i])
+			goto err_out_parse_error;
+		flags |= 1<<i;
+		s += strlen(flagstr[i]);
+	} while (*(s++) == ',');
+
+	if (*(--s) != '\0')
+		goto err_out_parse_error;
+
+	return flags;
+err_out_parse_error:
+	return 0;
 }
 
 static FILE *fp;
@@ -277,7 +319,7 @@ static int get_token(int min, int max)
 	char c;
 
 	if (max >= MAX_NR_TOKEN) {
-		printf("\nget_token(): max >= MAX_NR_TOKEN!\n");
+		printf("get_token(): max >= MAX_NR_TOKEN!");
 		goto out_eof;
 	}
 
@@ -347,7 +389,7 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 	assert(cfgfile != NULL);
 #endif
 
-	printf("Reading codec config file: %s\n", cfgfile);
+	printf("Reading %s: ", cfgfile);
 
 	if ((fp = fopen(cfgfile, "r")) == NULL) {
 		printf("can't open '%s': %s\n", cfgfile, strerror(errno));
@@ -355,7 +397,7 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 	}
 
 	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
-		perror("can't get memory for 'line'");
+		printf("can't get memory for 'line': %s\n", strerror(errno));
 		return NULL;
 	}
 
@@ -365,10 +407,11 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 	 */
 	while ((tmp = get_token(1, 1)) == RET_EOL)
 		/* NOTHING */;
-	if (tmp != RET_EOF && (!strcmp(token[0], "audiocodec") ||
-			!strcmp(token[0], "videocodec")))
+	if (tmp == RET_EOF)
+		goto out;
+	if (!strcmp(token[0], "audiocodec") || !strcmp(token[0], "videocodec"))
 		goto loop_enter;
-	goto out;
+	goto err_out_parse_error;
 
 	while ((tmp = get_token(1, 1)) != RET_EOF) {
 		if (tmp == RET_EOL)
@@ -386,13 +429,15 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 				codec_type = TYPE_AUDIO;
 				nr_codecsp = &nr_acodecs;
 				codecsp = &audio_codecs;
+#ifdef DEBUG
 			} else {
-				printf("rohattkurva\n");
+				printf("picsba\n");
 				goto err_out;
+#endif
 			}
 		        if (!(*codecsp = (codecs_t *) realloc(*codecsp,
 				sizeof(codecs_t) * (*nr_codecsp + 2)))) {
-			    perror("can't realloc '*codecsp'");
+			    printf("can't realloc '*codecsp': %s\n", strerror(errno));
 			    goto err_out;
 		        }
 			codec=*codecsp + *nr_codecsp;
@@ -405,68 +450,68 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 				goto err_out_parse_error;
 			for (i = 0; i < *nr_codecsp - 1; i++) {
 				if (!strcmp(token[0], (*codecsp)[i].name)) {
-					PRINT_LINENUM;
-					printf("codec name '%s' isn't unique\n", token[0]);
-					goto err_out;
+					printf("codec name '%s' isn't unique", token[0]);
+					goto err_out_print_linenum;
 				}
 			}
 			if (!(codec->name = strdup(token[0]))) {
-				perror("can't strdup -> 'name'");
+				printf("can't strdup -> 'name': %s\n", strerror(errno));
 				goto err_out;
 			}
 		} else if (!strcmp(token[0], "info")) {
 			if (codec->info || get_token(1, 1) < 0)
 				goto err_out_parse_error;
 			if (!(codec->info = strdup(token[0]))) {
-				perror("can't strdup -> 'info'");
+				printf("can't strdup -> 'info': %s\n", strerror(errno));
 				goto err_out;
 			}
 		} else if (!strcmp(token[0], "comment")) {
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
-			if (!add_comment(token[0], &codec->comment)) {
-				PRINT_LINENUM;
-				printf("add_comment()-tel valami sux\n");
-			}
+			add_comment(token[0], &codec->comment);
 		} else if (!strcmp(token[0], "fourcc")) {
 			if (get_token(1, 2) < 0)
 				goto err_out_parse_error;
 			if (!add_to_fourcc(token[0], token[1],
 						codec->fourcc,
 						codec->fourccmap))
-				goto err_out_parse_error;
+				goto err_out_print_linenum;
 		} else if (!strcmp(token[0], "format")) {
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
 			if (!add_to_format(token[0], codec->fourcc,codec->fourccmap))
-				goto err_out_parse_error;
+				goto err_out_print_linenum;
 		} else if (!strcmp(token[0], "driver")) {
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
-			if ((codec->driver = get_driver(token[0],codec_type)) == -1)
-				goto err_out;
+			if (!(codec->driver = get_driver(token[0],codec_type)))
+				goto err_out_parse_error;
 		} else if (!strcmp(token[0], "dll")) {
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
 			if (!(codec->dll = strdup(token[0]))) {
-				perror("can't strdup -> 'dll'");
+				printf("can't strdup -> 'dll': %s\n", strerror(errno));
 				goto err_out;
 			}
 		} else if (!strcmp(token[0], "guid")) {
 			if (get_token(11, 11) < 0)
 				goto err_out_parse_error;
                         codec->guid.f1=strtoul(token[0],&endptr,0);
-			if (*endptr != '\0' && *endptr != ',')
+			if ((*endptr != ',' || *(endptr + 1) != '\0') &&
+					*endptr != '\0')
 				goto err_out_parse_error;
                         codec->guid.f2=strtoul(token[1],&endptr,0);
-			if (*endptr != '\0' && *endptr != ',')
+			if ((*endptr != ',' || *(endptr + 1) != '\0') &&
+					*endptr != '\0')
 				goto err_out_parse_error;
                         codec->guid.f3=strtoul(token[2],&endptr,0);
-			if (*endptr != '\0' && *endptr != ',')
+			if ((*endptr != ',' || *(endptr + 1) != '\0') &&
+					*endptr != '\0')
 				goto err_out_parse_error;
 			for (i = 0; i < 8; i++) {
                             codec->guid.f4[i]=strtoul(token[i + 3],&endptr,0);
-				if (*endptr != '\0' && *endptr != ',')
+				if ((*endptr != ',' || *(endptr + 1) != '\0') &&
+						*endptr != '\0')
 					goto err_out_parse_error;
 			}
 		} else if (!strcmp(token[0], "out")) {
@@ -474,7 +519,7 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 				goto err_out_parse_error;
 			if (!add_to_out(token[0], token[1], codec->outfmt,
 						codec->outflags))
-				goto err_out;
+				goto err_out_print_linenum;
 		} else if (!strcmp(token[0], "flags")) {
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
@@ -495,11 +540,17 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 				codec->status = CODECS_STATUS_PROBLEMS;
 			else
 				goto err_out_parse_error;
+		} else if (!strcmp(token[0], "cpuflags")) {
+			if (get_token(1, 1) < 0)
+				goto err_out_parse_error;
+			if (!(codec->cpuflags = get_cpuflags(token[0])))
+				goto err_out_parse_error;
 		} else
 			goto err_out_parse_error;
 	}
 	if (!validate_codec(codec, codec_type))
 		goto err_out_not_valid;
+	printf("%d audio & %d video codecs\n", nr_acodecs, nr_vcodecs);
 	video_codecs[nr_vcodecs].name = NULL;
 	audio_codecs[nr_acodecs].name = NULL;
 	ret_codecs[0] = video_codecs;
@@ -509,10 +560,10 @@ out:
 	fclose(fp);
 	return ret_codecs;
 err_out_parse_error:
+	printf("parse error");
+err_out_print_linenum:
 	PRINT_LINENUM;
-	printf("parse error\n");
 err_out:
-	printf("\nOops\n");
 	if (audio_codecs)
 		free(audio_codecs);
 	if (video_codecs)
@@ -521,9 +572,8 @@ err_out:
 	free(fp);
 	return NULL;
 err_out_not_valid:
-	PRINT_LINENUM;
-	printf("codec is not definied correctly\n");
-	goto err_out;
+	printf("codec is not definied correctly");
+	goto err_out_print_linenum;
 }
 
 codecs_t *find_audio_codec(unsigned int fourcc, unsigned int *fourccmap,
@@ -601,17 +651,18 @@ next:
 		    printf("info='%s'\n",c->info);
 		    printf("comment='%s'\n",c->comment);
 		    printf("dll='%s'\n",c->dll);
-		    printf("flags=%X  driver=%d\n",c->flags,c->driver);
+		    printf("flags=%X  driver=%d status=%d cpuflags=%d\n",
+				    c->flags, c->driver, c->status, c->cpuflags);
 
 		    for(j=0;j<CODECS_MAX_FOURCC;j++){
 		      if(c->fourcc[j]!=0xFFFFFFFF){
-			  printf("fourcc %02d:  %08X (%.4s) ===> %08X (%.4s)\n",j,c->fourcc[j],&c->fourcc[j],c->fourccmap[j],&c->fourccmap[j]);
+			  printf("fourcc %02d:  %08X (%.4s) ===> %08X (%.4s)\n",j,c->fourcc[j],(char *) &c->fourcc[j],c->fourccmap[j],(char *) &c->fourccmap[j]);
 		      }
 		    }
 
 		    for(j=0;j<CODECS_MAX_OUTFMT;j++){
 		      if(c->outfmt[j]!=0xFFFFFFFF){
-			  printf("outfmt %02d:  %08X (%.4s)  flags: %d\n",j,c->outfmt[j],&c->outfmt[j],c->outflags[j]);
+			  printf("outfmt %02d:  %08X (%.4s)  flags: %d\n",j,c->outfmt[j],(char *) &c->outfmt[j],c->outflags[j]);
 		      }
 		    }
 
