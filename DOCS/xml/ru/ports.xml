@@ -340,8 +340,8 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
 
 <screen>mplayer /cygdrive/d/MPEG2/AVSEQ01.MPG</screen>
 
-<para>DVD'шники тоже работают, просто укажите в качестве DVD устройства,
-  Ваш CD-ROM привод:</para>
+<para>DVD'шники тоже работают, укажите букву Вашего DVD-ROM'а опцией
+  <option>-dvd-device</option>:</para>
 
 <screen>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</screen>
 
@@ -363,7 +363,7 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
 <para>Распакуйте файлы заголовков DirectX в <filename class="directory">/mingw/include/</filename>.</para>
 
 <para>VCD'шники и DVD'шники работают почти как в Cygwin (подставьте букву Вашего
-  CD-ROM'а):</para>
+  CD-ROM'а/DVD-ROM'а):</para>
 
 <screen>mplayer d:/mpegav/avseq01.dat</screen>
 
