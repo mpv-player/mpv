@@ -1714,9 +1714,11 @@ end
   (<CODE>-ao win32</CODE>) lehet elérni. Az OpenGL kimenet nem mûködik, az
   SDL pedig egyes rendszereken torzítja a képet és/vagy a hangot. A
   <CODE>-vo directx:ontop</CODE> opció használatával a video ablak mindig
-  a többi ablak fölött marad. A DirectX video kimenet lefordításához
-  le kell tölteni a <A HREF="http://www.videollan.org/vlc/dx7headers.tgz">DirectX
-  7 fejléceket</A>.</P>
+  a többi ablak fölött marad. Ha a kép valamilyen szempontból hibás, érdemes
+  kipróbálni a hardveres gyorsítás kikapcsolását a <CODE>-vo directx:noaccel</CODE>
+  opcióval. A DirectX video kimenet lefordításához le kell tölteni a
+  <A HREF="http://www.videollan.org/vlc/dx7headers.tgz">DirectX 7
+  fejléceket</A>.</P>
 
 <P>Mûködnek a QuickTime és Real DLL-ek is. Ehhez a fordítást a
   <CODE>--enable-qtx</CODE> és <CODE>--enable-real</CODE> opciókkal kell
