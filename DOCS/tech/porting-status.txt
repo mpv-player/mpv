@@ -1,0 +1,86 @@
+Porting status:
+~~~~~~~~~~~~~~~
+
+This file should tells you what architectures and or OSes MPlayer/MEncoder
+are currently ported to.
+
+We are always happy about ports to new archs/OSes or improvements to the
+current ones, so if you can help us, read patches.txt and happy hacking! ;-)
+Remember to also send a patch that updates this file if possible!
+
+Of course we are also grateful about hardware/software donations that help
+us to do porting or improvements of ports ourselves. (The MPlayer core
+developers currently mainly own x86 hardware.)
+
+If you would like to donate or have porting questions, feel free to contanct
+the MPlayer developers via the mplayer-dev-eng mailing-list (more info on
+www.mplayerhq.hu).
+
+Here is a list of the architectures/OSes, MPlayer/MEncoder currently run on
+and also some notes or the points that still need to be done or improved:
+(Names in brackets [] mean someone is already working on that)
+
+OSes:
+~~~~~
+-> Linux
+ * main development OS
+
+-> FreeBSD (insert main porters name,email)
+
+-> NetBSD (...)
+
+-> OpenBSD (...)
+ + port VCD-code
+ + port libmpdvdkit
+
+-> BSD/OS (Steven M. Schultz <sms at 2bsd.com>)
+
+-> Darwin/MacOS X (Atmos, Justin Hallet <justin at caisnet.com>)
+ + minor fixes (iconv, sockets) -- will soon be included [Justin Hallet]
+ + VCD support (check videolans vlc/plugins/vcd/cdromtools.[ch]) [Justin Hallet]
+ + DVD support to libmpdvdkit [Justin Hallet]
+
+-> Cygwin (Atmos)
+ + add an automagical fix of sdl-configure's compile flags (contact Atmos for
+   more info)
+ + write vo_directx for hw accelerated yuv overlay (code reference eg. videolan)
+ + write ao_directx using direct sound as alternative to oss (low priority)
+ + port vidix (needs special device driver for NT/2k/XP and 9x/Me)
+ + VCD and DVD support (for the future, maybe vlc helps)
+
+-> QNX
+ + fix alsa (?)
+
+-> Solaris
+ + test/fix vidix (only solaris/x86)
+
+-> OS/2
+ * status? usable?
+
+-> Minix (Gabu)
+ * status? works?
+
+-> IRIX (Oliver Schoenbrunner <oliver.schoenbrunner at jku.at>)
+ + implement native color conversion (using vidix interface?)
+
+
+Architectures:
+~~~~~~~~~~~~~~
+-> x86 IA-32
+-> x86-64
+-> IA-64
+-> Alpha
+-> Sparc
+ + fix mp3lib (?)
+-> Sparc64
+-> PowerPC
+-> ARM
+ * up-to-date?
+-> MIPS
+
+
+-- 
+Thank you!
+
+   Atmos
+
