@@ -211,6 +211,8 @@ extern float vo_fps;
 
 extern char *vo_subdevice;
 
+extern int vo_colorkey;
+
 #if defined(HAVE_FBDEV)||defined(HAVE_VESA) 
 
 typedef struct {

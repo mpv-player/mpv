@@ -53,8 +53,7 @@ LIBVO_EXTERN(xover)
 /* X11 related variables */
 /* Colorkey handling */
 static XGCValues mGCV;
-static uint32_t	fgColor;
-static uint32_t bgColor;
+static int colorkey;
 
 /* Image parameters */
 static uint32_t image_width;
@@ -188,9 +187,9 @@ static void set_window(int force_update)
   /* mDrawColorKey: */
 
   /* fill drawable with specified color */
-  XSetBackground( mDisplay,vo_gc,bgColor );
+  XSetBackground(mDisplay, vo_gc, 0L);
   XClearWindow( mDisplay,vo_window );
-  XSetForeground(mDisplay, vo_gc, fgColor);
+  XSetForeground(mDisplay, vo_gc, colorkey);
   XFillRectangle(mDisplay, vo_window, vo_gc, drwX, drwY, drwWidth,
 		 (vo_fs ? drwHeight - 1 : drwHeight));
   /* flush, update drawable */
@@ -210,7 +209,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   XSetWindowAttributes xswa;
   unsigned long xswamask;
   XWindowAttributes attribs;
-  int window_depth;
+  int window_depth, r, g, b;
   mp_colorkey_t colork;
   char _title[255];
 
@@ -233,24 +232,28 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   window_width = d_width;
   window_height = d_height;
 
-  /* from xmga.c */
-  bgColor = 0x0L;
+  r = (vo_colorkey & 0x00ff0000) >> 16;
+  g = (vo_colorkey & 0x0000ff00) >> 8;
+  b = vo_colorkey & 0x000000ff;
   switch(vo_depthonscreen)
     {
     case 32:
+      colorkey = vo_colorkey;
+      break;
     case 24:
-      fgColor = 0x00ff00ffL;
+      colorkey = vo_colorkey & 0x00ffffff;
       break;
     case 16:
-      fgColor = 0xf81fL;
+      colorkey = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
       break;
     case 15:
-      fgColor = 0x7c1fL;
+      colorkey = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
       break;
     default:
       mp_msg(MSGT_VO, MSGL_ERR, "Sorry, this (%d) color depth is not supported\n",
 	     vo_depthonscreen);
     }
+  mp_msg(MSGT_VO, MSGL_INFO, "Using colorkey: %x\n", colorkey);
 
   aspect(&d_width, &d_height, A_NOZOOM);
 
@@ -332,10 +335,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     mp_msg(MSGT_VO, MSGL_ERR, "xover: sub vo config failed\n");
     return 1;
   }
-  colork.x11 = fgColor;
-  colork.r = 255;
-  colork.g = 0;
-  colork.b = 255;
+  colork.x11 = colorkey;
+  colork.r = r;
+  colork.g = g;
+  colork.b = b;
   if(sub_vo->control(VOCTRL_XOVERLAY_SET_COLORKEY,&colork) != VO_TRUE)
     mp_msg(MSGT_VO, MSGL_WARN, "xover: set_colorkey failed\n");
 

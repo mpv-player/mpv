@@ -47,6 +47,8 @@ float vo_fps=0; // for mp1e rte
 char *vo_subdevice = NULL;
 int vo_directrendering=0;
 
+int vo_colorkey = 0x0000ff00; // default colorkey is green
+
 //
 // Externally visible list of all vo drivers
 //

@@ -53,8 +53,7 @@ LIBVO_EXTERN(xvidix)
 /* X11 related variables */
 /* Colorkey handling */
 static XGCValues mGCV;
-static uint32_t	fgColor;
-static uint32_t bgColor;
+static int colorkey;
 static vidix_grkey_t gr_key;
 
 /* VIDIX related */
@@ -198,9 +197,9 @@ static void set_window(int force_update)
     /* mDrawColorKey: */
 
     /* fill drawable with specified color */
-    XSetBackground( mDisplay,vo_gc,bgColor );
+    XSetBackground(mDisplay, vo_gc, 0L);
     XClearWindow( mDisplay,vo_window );
-    XSetForeground(mDisplay, vo_gc, fgColor);
+    XSetForeground(mDisplay, vo_gc, colorkey);
     XFillRectangle(mDisplay, vo_window, vo_gc, drwX, drwY, drwWidth,
 	(vo_fs ? drwHeight - 1 : drwHeight));
     /* flush, update drawable */
@@ -220,7 +219,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     XSetWindowAttributes xswa;
     unsigned long xswamask;
     XWindowAttributes attribs;
-    int window_depth;
+    int window_depth, r, g, b;
 
     title = "MPlayer VIDIX X11 Overlay";
 
@@ -246,24 +245,28 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 //    if (vo_fs)
 //     { vo_old_width=d_width; vo_old_height=d_height; }
 
-    /* from xmga.c */
-    bgColor = 0x0L;
+    r = (vo_colorkey & 0x00ff0000) >> 16;
+    g = (vo_colorkey & 0x0000ff00) >> 8;
+    b = vo_colorkey & 0x000000ff;
     switch(vo_depthonscreen)
     {
 	case 32:
+	    colorkey = vo_colorkey;
+	    break;
 	case 24:
-	    fgColor = 0x00ff00ffL;
+	    colorkey = vo_colorkey & 0x00ffffff;
 	    break;
 	case 16:
-	    fgColor = 0xf81fL;
+	    colorkey = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
 	    break;
 	case 15:
-	    fgColor = 0x7c1fL;
+	    colorkey = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
 	    break;
 	default:
 	    mp_msg(MSGT_VO, MSGL_ERR, "Sorry, this (%d) color depth is not supported\n",
 		vo_depthonscreen);
     }
+    mp_msg(MSGT_VO, MSGL_INFO, "Using colorkey: %x\n", colorkey);
 
     aspect(&d_width, &d_height, A_NOZOOM);
 
@@ -344,9 +347,9 @@ else
 	vidix_grkey_get(&gr_key);
 	gr_key.key_op = KEYS_PUT;
 	gr_key.ckey.op = CKEY_TRUE;
-	gr_key.ckey.red = 255;
-	gr_key.ckey.green = 0;
-	gr_key.ckey.blue = 255;
+	gr_key.ckey.red = r;
+	gr_key.ckey.green = g;
+	gr_key.ckey.blue = b;
 	vidix_grkey_set(&gr_key);
     }
 

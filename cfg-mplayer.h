@@ -271,6 +271,7 @@ m_option_t mplayer_opts[]={
 	{"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 	// set bpp (x11+vm, dga, fbdev, vesa, svga?)
         {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32, NULL},
+	{"colorkey", &vo_colorkey, CONF_TYPE_INT, 0, 0, 0, NULL},
 	// double buffering:  (mga/xmga, xv, vidix, vesa, fbdev)
 	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nodouble", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 1, 0, NULL},
