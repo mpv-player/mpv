@@ -1648,7 +1648,7 @@ char** sub_filenames(char* path, char *fname)
     for (j = 0; j <= 1; j++) {
 	d = opendir(j == 0 ? f_dir : path);
 	if (d) {
-	    while (de = readdir(d)) {
+	    while ((de = readdir(d))) {
 		// retrieve various parts of the filename
 		strcpy_strip_ext(tmp_fname_noext, de->d_name);
 		strcpy_get_ext(tmp_fname_ext, de->d_name);

@@ -1493,7 +1493,8 @@ static void copy_obj_settings_list(m_option_t* opt,void* dst, void* src) {
     d[n].attribs = NULL;
     copy_str_list(NULL,&(d[n].attribs),&(s[n].attribs));
   }
-  d[n].name = d[n].attribs = NULL;
+  d[n].name = NULL;
+  d[n].attribs = NULL;
   VAL(dst) = d;
 }
 
