@@ -837,15 +837,16 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   int plen;
 
   /// Check that the cbSize is enouth big for the following reads
-  if(sh_audio->wf->cbSize < 3*sizeof(uint32_t)) {
+  if(sh_audio->wf->cbSize < 22+3*sizeof(uint32_t)) {
     mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI OGG : Initial audio header is too small !!!!!\n");
     goto fallback;
   }
   /// Get the size of the 3 header packet
-  memcpy(hdrsizes, ((unsigned char*)sh_audio->wf)+2*sizeof(WAVEFORMATEX), 3*sizeof(uint32_t));
+  memcpy(hdrsizes, ((unsigned char*)sh_audio->wf)+22+sizeof(WAVEFORMATEX), 3*sizeof(uint32_t));
+//  printf("\n!!!!!! hdr sizes: %d %d %d   \n",hdrsizes[0],hdrsizes[1],hdrsizes[2]);
 
   /// Check the size
-  if(sh_audio->wf->cbSize < 3*sizeof(uint32_t) + sizeof(uint32_t)+hdrsizes[0]+hdrsizes[1] + hdrsizes[2]) {
+  if(sh_audio->wf->cbSize < 22+3*sizeof(uint32_t)+hdrsizes[0]+hdrsizes[1] + hdrsizes[2]) {
     mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI OGG : Audio header is too small !!!!!\n");
     goto fallback;
   }
@@ -885,15 +886,15 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   /// Add the header packets in the ogg demuxer audio stream
   // Initial header
   dp = new_demux_packet(hdrsizes[0]);
-  memcpy(dp->buffer,((unsigned char*)sh_audio->wf)+2*sizeof(WAVEFORMATEX)+3*sizeof(uint32_t),hdrsizes[0]);
+  memcpy(dp->buffer,((unsigned char*)sh_audio->wf)+22+sizeof(WAVEFORMATEX)+3*sizeof(uint32_t),hdrsizes[0]);
   ds_add_packet(od->audio,dp);
   /// Comments
   dp = new_demux_packet(hdrsizes[1]);
-  memcpy(dp->buffer,((unsigned char*)sh_audio->wf)+2*sizeof(WAVEFORMATEX)+3*sizeof(uint32_t)+hdrsizes[0],hdrsizes[1]);
+  memcpy(dp->buffer,((unsigned char*)sh_audio->wf)+22+sizeof(WAVEFORMATEX)+3*sizeof(uint32_t)+hdrsizes[0],hdrsizes[1]);
   ds_add_packet(od->audio,dp);
   /// Code book
   dp = new_demux_packet(hdrsizes[2]);
-  memcpy(dp->buffer,((unsigned char*)sh_audio->wf)+2*sizeof(WAVEFORMATEX)+3*sizeof(uint32_t)+hdrsizes[0]+hdrsizes[1],hdrsizes[2]);
+  memcpy(dp->buffer,((unsigned char*)sh_audio->wf)+22+sizeof(WAVEFORMATEX)+3*sizeof(uint32_t)+hdrsizes[0]+hdrsizes[1],hdrsizes[2]);
   ds_add_packet(od->audio,dp);
 
   // Finish setting up the ogg demuxer
