@@ -523,6 +523,15 @@ Corey Hickey <bugfood-ml@fatooh.org>
 Aurelien Jacobs <aurel@gnuage.org>
     * standalone C Matroska demuxer
 
+Dave Lambley <mplayer@davel.me.uk>
+    * HTTP cookie support
+
+Arwed v. Merkatz <v.merkatz@gmx.net>
+    * fontconfig font lookup support
+
+Daniele Forghieri <guru@digitalfantasy.it>
+    * TGA output driver
+    * framestep & tile filters
 
 NOTE: If you think you are missing here, feel free to send a patch.
 =====
