@@ -476,7 +476,7 @@ void HidePreferences( void )
 
 #if defined( HAVE_FREETYPE ) || defined( USE_ICONV )
 static void prEntry( GtkContainer * container,gpointer user_data )
-{
+{	
  char * comment;
  int    i;
 
@@ -1036,6 +1036,15 @@ GtkWidget * create_Preferences( void )
     AddFrame( NULL,GTK_SHADOW_NONE,
       AddFrame( MSGTR_PREFERENCES_FRAME_Font,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
 
+  hbox6=AddHBox( vbox603,1 );
+  AddLabel( MSGTR_PREFERENCES_Font,hbox6 );
+  prEFontName=gtk_entry_new();
+  gtk_widget_set_name( prEFontName,"prEFontName" );
+  gtk_widget_show( prEFontName );
+  gtk_box_pack_start( GTK_BOX( hbox6 ),prEFontName,TRUE,TRUE,0 );
+  hbuttonbox5=AddHButtonBox( hbox6 );
+    gtk_container_set_border_width( GTK_CONTAINER( hbuttonbox5 ),3 );
+  BLoadFont=AddButton( MSGTR_Browse,hbuttonbox5 );
 
 #ifndef HAVE_FREETYPE
   hbox7=AddHBox( vbox603,1 );
@@ -1048,16 +1057,6 @@ GtkWidget * create_Preferences( void )
   BRFontAutoScaleWidth=AddRadioButton( MSGTR_PREFERENCES_FontPropWidth,&Font_group,vbox603 );
   RBFontAutoScaleHeight=AddRadioButton( MSGTR_PREFERENCES_FontPropHeight,&Font_group,vbox603 );
   RBFontAutoScaleDiagonal=AddRadioButton( MSGTR_PREFERENCES_FontPropDiagonal,&Font_group,vbox603 );
-
-  hbox6=AddHBox( vbox603,1 );
-  AddLabel( MSGTR_PREFERENCES_Font,hbox6 );
-  prEFontName=gtk_entry_new();
-  gtk_widget_set_name( prEFontName,"prEFontName" );
-  gtk_widget_show( prEFontName );
-  gtk_box_pack_start( GTK_BOX( hbox6 ),prEFontName,TRUE,TRUE,0 );
-  hbuttonbox5=AddHButtonBox( hbox6 );
-    gtk_container_set_border_width( GTK_CONTAINER( hbuttonbox5 ),3 );
-  BLoadFont=AddButton( MSGTR_Browse,hbuttonbox5 );
 
   table1=gtk_table_new( 3,2,FALSE );
   gtk_widget_set_name( table1,"table1" );
