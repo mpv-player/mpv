@@ -295,6 +295,20 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</ulink>
   to compile the DirectX video output driver.</para>
 
+<para>For best results <application>MPlayer</application> should use a
+  colorspace that your video card supports in hardware.  Unfortunately many
+  Windows graphics drivers wrongly report some colorspaces as supported in
+  hardware. To find out which, try
+
+  <screen>mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>colorspace</replaceable> <replaceable>movie</replaceable></screen>
+
+  where <replaceable>colorspace</replaceable> can be any colorspace
+  printed by the <option>-vf format=fmt=help</option> option.  If you
+  find a colorspace your card handles particularly bad
+  <option>-vf noformat=<replaceable>colorspace</replaceable></option>
+  will keep it from being used. Add this to your config file to permanently
+	keep it from being used.</para>
+
 <para>You can use Win32 codecs and Real Win32 codecs (not Real Linux codecs)
   if you want to. Put the codecs somewhere in your path or pass
   <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option> (alternatively
@@ -305,7 +319,8 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   them writable if you have problems. QuickTime DLLs also work, but you will
   have to put them in your Windows system directory
   (<filename class="directory"><replaceable>C:\Windows\system\</replaceable></filename>
-  or similar).</para>
+  or similar). As a last resort, try putting them in the same directory as
+  <application>MPlayer</application>.</para>
 
 <para>The <application>Cygwin</application>/<application>MinGW</application>
   console is rather slow. Redirecting output or using the
