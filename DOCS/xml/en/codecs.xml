@@ -506,16 +506,14 @@ decoders:
 
 <itemizedlist>
 <listitem><simpara>
-  Sorenson 1 (fourcc <emphasis>SVQ1</emphasis>) - decoding supported by
-  <emphasis role="bold">native codecs</emphasis>. Actually there are two
-  (nearly equal) decoders for SVQ1: one is built in <application>MPlayer</application>,
-  the other in libavcodec. You can invoke each of them with the <option>-vc svq1</option>
-  and <option>-vc ffsvq1</option> options respectively. Some files may work
-  with one of them, and not with the other, so test both decoders.
+  Sorenson Video v1 (fourcc <emphasis>SVQ1</emphasis>) - decoding supported
+  by <emphasis role="bold">native codec</emphasis>
+  (<link linkend="ffmpeg">libavcodec</link>)
   </simpara></listitem>
 <listitem><simpara>
-  Sorenson 3 (fourcc <emphasis>SVQ3</emphasis>) - decoding supported by
-  <emphasis role="bold">native codec</emphasis> (<link linkend="ffmpeg">libavcodec</link>)
+  Sorenson Video v3 (fourcc <emphasis>SVQ3</emphasis>) - decoding supported by
+  <emphasis role="bold">native codec</emphasis>
+  (<link linkend="ffmpeg">libavcodec</link>)
   </simpara></listitem>
 </itemizedlist>
 
