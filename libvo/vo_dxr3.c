@@ -6,11 +6,11 @@
  */
 
 /* ChangeLog added 2002-01-10
- * 2002-01-03:
+ * 2002-11-03:
  *  Cleaned up syncing code and renamed setup variables so
  *   they can be accessed from the GUI.
  *
- * 2002-01-02:
+ * 2002-11-02:
  *  Added native overlay support, activate with :overlay
  *   you have to run dxr3view to modify settings (or manually
  *   edit the files in ~/.overlay.
@@ -418,7 +418,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #ifdef MVCOMMAND_SYNC
 	reg.microcode_register = 1;
 	reg.reg = 0;
-	reg.val = MVCOMMAND_START;
+	reg.val = MVCOMMAND_SYNC;
 	ioctl(fd_control, EM8300_IOCTL_WRITEREG, &reg);
 #endif
 
