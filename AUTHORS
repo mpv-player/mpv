@@ -38,6 +38,7 @@ Balatoni, Dénes <pnis@coder.hu>
 
 Barat, Zsolt (joyping) <joy@streamminister.de>
     * ao_alsa9 fixes, AC3 passthrough support
+    * ao_alsa unified ALSA audio output driver
 
 Baryshkov, Dmitry (lumag) <mitya@school.ioffe.ru>
     * Russian documentation translation
@@ -45,7 +46,7 @@ Baryshkov, Dmitry (lumag) <mitya@school.ioffe.ru>
     * XML build system
 
 Baudet, Bertrand <bertrand_baudet@yahoo.com>
-    * network streaming support author, maintainer
+    * network streaming support author
     * CDDB support
 
 Bedel, Alban (albeu) <albeu@free.fr>
@@ -66,12 +67,11 @@ Belev, Luchezar (lucho) <lucho@haemimont.bg>
     * hw-accelerated video eq support into x11, gl2 (using DirectColor cmap)
 
 Bérczi, Gábor (Gabucino) <gabucino@mplayerhq.hu>
-    * first documentation writer & maintainer
-    * Hungarian translation of documentation, homepage, and help output
+    * large parts the original HTML and TXT documentation
+    * original Hungarian documentation, homepage, console message translation
     * second homepage design & gfx
-    * first homepage maintainer
+    * original homepage content
     * testing, codecs quality & speed comparisons
-    * IRC channels operator (#MPlayer is user channel)
     * experimental MINIX port :) (what's funny about it?)
     * MPsub subtitle format design
     * AlienMind, BlueHeart, CubicPlayer, MidnightLove, netscape4,
@@ -103,7 +103,7 @@ Beregszászi, Alex (al3x) <alex@fsn.hu>
     * XVIDIX video output driver
     * many other things (in libvo, libmad syncing, dec_audio/video and loader)
     * libmpcodecs / libmpdemux hacking
-    * co-patch-maintainer
+    * patch review
     * dynamic a/v plugins (external shared ad/vd/.. objects)
     * millions of bug fixes
 
@@ -111,17 +111,18 @@ Bitterberg, Tilmann <transcode@tibit.org>
     * AVI OpenDML read support
 
 Biurrun, Diego (DonDiego) <diego@biurrun.de>
-    * second documentation writer and maintainer
-    * console output (help_mp-XX.h) maintainer
+    * documentation all over the place
+    * command line option documentation completed
     * README, wishlist, translations.txt
     * random trivial fixes
     * main tester and small fixes for the Cygwin and MinGW ports
     * testing, bug reports
-    * homepage improvements, design7
-    * second homepage maintainer
+    * homepage content improvements, design7, HTML fixed
+    * Hunglish to English translation everywhere
     * head of the Ministry for English Composition
     * ultrafina skin
     * skin review part I
+    * patch review
 
 Blomenkamp, Marcus <Marcus.Blomenkamp@epost.de>
     * VIDIX patches (Rage128, Radeon 7000)
@@ -133,7 +134,6 @@ Bulgroz, Eviv <ebulgroz@yahoo.com>
     * various bug fixes
 
 Bünemann, Felix (Atmos) <atmosfear@users.sourceforge.net>
-    * SDL driver maintainer
     * additional YUV formats fixes
     * new font (mp_font2.zip)
     * PNG file output support in libvo
@@ -544,7 +544,7 @@ Parrish, Joey <joey@nicewarrior.org>
     * -vo gif89a author
     * GIF demuxer author
     * Windows support improvements
-    * Windows installer package maintainer
+    * Cygwin installer package
 
 Pietrzak, Dariusz (Eyck) <eyck@ghost.anime.pl>
     * Debian packaging support (see debian/* and the documentation)
@@ -553,6 +553,10 @@ Pietrzak, Dariusz (Eyck) <eyck@ghost.anime.pl>
 
 Plourde, Nicolas <nicolas.plourde@sympatico.ca>
     * quartz video output driver for Mac OS X
+
+Poirier, Guillaume <guillaume.poirier@ifsic.univ-rennes1.fr>
+	* French documentation translation and synchronization
+	* XviD documentation
 
 Ponekker, Zoltán (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
     * the original configure script and Makefiles for easy compilation
@@ -690,7 +694,7 @@ The codecs, libs
 ~~~~~~~~~~~~~~~~
 
 Bellard, Fabrice <fabrice.bellard@free.fr>
-    * FFmpeg/libavcodec author, maintainer (open source MPEG, MJPEG,
+    * FFmpeg/libavcodec author (open source MPEG, MJPEG,
       DivX, WMA, DV etc audio/video en/decoder)
 
 Chappelier, Vivien and Vincent, Damien
@@ -708,7 +712,7 @@ Janovetz, Jake
     * remez.c author [Used to calculate audio filter coefficients]
 
 Kabelac, Zdenek (kabi) <kabi@informatics.muni.cz>
-    * current avifile maintainer
+    * avifile author
     * some technical help about the Win32 stuff, ASF formats and timers
 
 Kuznetsov, Eugene <divx@euro.ru>
@@ -757,7 +761,7 @@ unknown author
     * iTunes, iTunes-mini
 
 Bekesi, Viktor (FRD)
-    * default, plastic, slim
+    * standard, plastic, slim
 
 bleachie <toku4@cox.net>
     * bluecurve
