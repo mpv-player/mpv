@@ -976,7 +976,8 @@ static inline int get_macroblock_address_increment (picture_t * picture)
 	    break;
 	default:	/* end of slice, or error */
 //	    printf("MB error: %d  \n",(UBITS (bit_buf, 11))); // FIXME!
-	    return 0;
+//	    return 0;
+	    return -1;
 	}
     }
 
@@ -1755,13 +1756,15 @@ int slice_process (picture_t * picture, uint8_t code, uint8_t * buffer)
 
 	NEEDBITS (bit_buf, bits, bit_ptr);
 
-	if (bit_buf & 0x80000000) {
+	if (0 /* FIXME */ && (bit_buf & 0x80000000)) {
 	    DUMPBITS (bit_buf, bits, 1);
 	} else {
 	    int mba_inc;
 
 	    mba_inc = get_macroblock_address_increment (picture);
 	    if (!mba_inc)
+		continue;
+	    else if (mba_inc < 0)
 		break;
 
 	    picture->dc_dct_pred[0] = picture->dc_dct_pred[1] =
