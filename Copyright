@@ -34,7 +34,7 @@ Directory:  liba52
 License:    GNU General Public License
 
 Name:       libdvdcss
-Version:    1.2.8
+Version:    1.2.8 + patches
 Homepage:   http://developers.videolan.org/libdvdcss/
 Directory:  libmpdvdkit2
 License:    GNU General Public License
@@ -56,6 +56,12 @@ Version:    0.59s
 Homepage:   http://www.mpg123.de/
 Directory:  mp3lib
 License:    GNU Lesser General Public License
+
+Name:       Tremor
+Version:    1.0 + parts CVS from December 2004
+Homepage:   http://xiph.org/
+Directory:  tremor
+License:    BSD-like, see tremor/COPYING
 
 Name:       LRMI - Linux Real Mode Interface
 Version:    unknown, taken from svgalib
@@ -104,9 +110,3 @@ Version:    development files as of september 2004
 Homepage:   http://ubiqx.org/libcifs/
 Directory:  libvo/md5sum.[ch]
 License:    GNU Lesser General Public License
-
-Name:       Tremor
-Version:    1.0 + parts CVS from december 2004
-Homepage:   http://xiph.org/
-Directory:  tremor
-License:    BSD-like, see tremor/COPYING
