@@ -7295,17 +7295,16 @@ direct_pred=0 is usually both slower and lower quality.
 .
 .TP
 .B (no)b8x8mv
-Use macroblock types b16x8, b8x16, b8x8 (default: enabled).
-Requires B-frames.
+Use additional macroblock types b16x8, b8x16, b8x8 (default: enabled).
+Without this option, B-frames will use only types
+i16x16, i4x4, b16x16, skip, direct.
 See 4x4mv for details.
 .
 .TP
 .B (no)4x4mv
-Use macroblock types p8x4, p4x8, p4x4 (default: disabled).
-.br
-The available interframe macroblock types are i16x16, i4x4, p16x16, p16x8,
-p8x16, p8x8, p8x4, p4x8, p4x4, b16x16, b16x8, b8x16, b8x8, skip, direct.
-i16x16, i4x4, p16x16-8x8, b16x16, and skip are always used.
+Use additional macroblock types p8x4, p4x8, p4x4 (default: disabled).
+Without this option, P-frames will use only types
+i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, skip.
 .br
 The idea is to find the type and size that best describe a certain area
 of the picture.
@@ -7313,8 +7312,6 @@ For example, a global pan is better represented by 16x16 blocks, while
 small moving objects are better represented by smaller blocks.
 .br
 4x4mv is recommended only with subq >= 3.
-Depending on the source material, it can improve or degrade
-quality, use it with care.
 .
 .TP
 .B subq=<0\-5>
