@@ -116,34 +116,36 @@ void uninit_video(sh_video_t *sh_video){
     sh_video->inited=0;
 }
 
-int init_video(sh_video_t *sh_video,int *pitches)
-{
-//unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
-int i;
-//pitches[0] = pitches[1] =pitches[2] = 0; /* fake unknown */
-
-//sh_video->our_out_buffer=NULL;
-//sh_video->our_out_buffer_size=0U;
-
-  for (i=0; mpcodecs_vd_drivers[i] != NULL; i++)
-    if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver){
-	mpvdec=mpcodecs_vd_drivers[i]; break;
+int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
+    sh_video->codec=NULL;
+    while((sh_video->codec=find_codec(sh_video->format,
+      sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,
+      sh_video->codec,0) )){
+	// ok we found one codec
+	int i;
+	if(codecname && strcmp(sh_video->codec->name,codecname)) continue; // -vc
+	if(vfm>=0 && sh_video->codec->driver!=vfm) continue; // vfm doesn't match
+	if(sh_video->codec->status<status) continue; // too unstable
+	// ok, it matches all rules, let's find the driver!
+	for (i=0; mpcodecs_vd_drivers[i] != NULL; i++)
+	    if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver) break;
+	mpvdec=mpcodecs_vd_drivers[i];
+	if(!mpvdec){ // driver not available (==compiled in)
+	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Requested video codec family [%s] (vfm=%d) not available (enable it at compile time!)\n",
+		sh_video->codec->name, sh_video->codec->driver);
+	    continue;
+	}
+	// it's available, let's try to init!
+	printf("Opening Video Decoder: [%s] %s\n",mpvdec->info->short_name,mpvdec->info->name);
+	if(!mpvdec->init(sh_video)){
+	    printf("VDecoder init failed :(\n");
+	    continue; // try next...
+	}
+	// Yeah! We got it!
+	sh_video->inited=1;
+	return 1;
     }
-  if(!mpvdec){
-      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Requested video codec family [%s] (vfm=%d) not available (enable it at compile time!)\n",
-          sh_video->codec->name, sh_video->codec->driver);
-      return 0; // no such driver
-  }
-  
-  printf("Selecting Video Decoder: [%s] %s\n",mpvdec->info->short_name,mpvdec->info->name);
-  
-  if(!mpvdec->init(sh_video)){
-      printf("VDecoder init failed :(\n");
-      return 0;
-  }
-  
-  sh_video->inited=1;
-  return 1;
+    return 0;
 }
 
 extern int vaa_use_dr;
