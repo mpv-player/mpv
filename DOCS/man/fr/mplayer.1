@@ -1,4 +1,4 @@
-.\" synced with 1.848
+.\" synced with 1.850
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -1775,31 +1775,6 @@ Outrepasse la détection de la taille du buffer audio du pilote/\:de la
 carte.
 .
 .TP
-.B \-aop <list=plugin1,plugin2...:option1=valeur1:opt2=val2...>
-Définit le(s) plugin(s) et leurs options
-(voir également la section des plugins audio de la documentation).
-.sp 1
-Les options disponibles sont:
-.
-.RSs
-.IPs list=[plugins]
-liste des plugins séparée par des virgules (resample, surround, format, volume,
-extrastereo, volnorm, delay)
-.IPs delay=<sec>
-plugin d'exemple, à ne pas utiliser.
-.IPs format=<format>
-format de sortie (plugin format uniquement)
-.IPs fout=<Hz>
-fréquence de sortie (plugin resample uniquement)
-.IPs volume=<0\-255>
-volume (plugin volume uniquement)
-.IPs mul=<valeur>
-coefficient de stéréo (par défaut\ : 2.5) (plugin extrastereo uniquement)
-.IPs softclip
-capacités de compression/\:'soft-clipping' (plugin volume uniquement)
-.RE
-.
-.TP
 .B \-delay <sec>
 Décalage audio en secondes (nombre flottant positif ou négatif).
 .
@@ -2000,6 +1975,18 @@ Choisit explicitement le périphérique audio à utiliser (par défaut\ :
 .TP
 .B win32 (Windows uniquement)
 Pilote de sortie audio waveout natif de Windows.
+.
+.TP
+.B dsound (Windows only)
+Pilote de sortie audio DirectX DirectSound.
+.PD 0
+.RSs
+.IPs device=<num_périph>
+Définit le numéro de périphérique à utiliser.
+Jouer un fichier avec l'option \-v vous donnera une liste des périphériques
+disponibles.
+.RE
+.PD 1
 .
 .TP
 .B dxr2 (also see \-dxr2) (DXR2 uniquement)
