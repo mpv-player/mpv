@@ -97,7 +97,7 @@ static int control(int cmd, void *arg)
       snd_mixer_elem_t *elem;
       snd_mixer_selem_id_t *sid;
 
-      static const char *mix_name = NULL;
+      static char *mix_name = NULL;
       static char *card = NULL;
 
       long pmin, pmax;
