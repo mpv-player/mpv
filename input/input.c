@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <fcntl.h>
 
 
@@ -159,6 +160,16 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { 'l', "tv_step_channel -1" },
   { 'n', "tv_step_norm" },
   { 'b', "tv_step_chanlist" },
+#endif
+#ifdef HAVE_JOYSTICK
+  { JOY_AXIS0_PLUS, "seek 10" },
+  { JOY_AXIS0_MINUS, "seek -10" },
+  { JOY_AXIS1_MINUS, "seek 60" },
+  { JOY_AXIS1_PLUS, "seek -60" },
+  { JOY_BTN0, "pause" },
+  { JOY_BTN1, "osd" },
+  { JOY_BTN2, "volume 1"},
+  { JOY_BTN3, "volume -1"},
 #endif
   { 0, NULL }
 };
@@ -669,7 +680,7 @@ mp_input_free_binds(mp_cmd_bind_t* binds) {
 #define BS_MAX 256
 #define SPACE_CHAR " \n\r\t"
 
-static void
+static int
 mp_input_parse_config(char *file) {
   int fd,code=-1;
   int bs = 0,r,eof = 0;
@@ -682,7 +693,7 @@ mp_input_parse_config(char *file) {
 
   if(fd < 0) {
     printf("Can't open input config file %s : %s\n",file,strerror(errno));
-    return;
+    return 0;
   }
 
   printf("Parsing input config file %s\n",file);
@@ -696,7 +707,7 @@ mp_input_parse_config(char *file) {
 	  continue;
 	printf("Error while reading input config file %s : %s\n",file,strerror(errno));
 	mp_input_free_binds(binds);
-	return;
+	return 0;
       } else if(r == 0) 
 	eof = 1;
       else {
@@ -709,7 +720,7 @@ mp_input_parse_config(char *file) {
       printf("Input config file %s parsed : %d binds\n",file,n_binds);
       if(binds)
 	cmd_binds = binds;
-      return;
+      return 1;
     }
       
     iter = buffer;
@@ -733,7 +744,7 @@ mp_input_parse_config(char *file) {
 	  else
 	    printf("Buffer is too small for this key name : %s\n",iter);
 	  mp_input_free_binds(binds);
-	  return;
+	  return 0;
 	}
 	memmove(buffer,iter,end-iter);
 	bs = end-iter;
@@ -747,7 +758,7 @@ mp_input_parse_config(char *file) {
 	if(code < 0) {
 	  printf("Unknow key %s\n",name);
 	  mp_input_free_binds(binds);
-	  return;
+	  return 0;
 	}
       }
       if( bs > (end-buffer))
@@ -772,7 +783,7 @@ mp_input_parse_config(char *file) {
 	if(iter == buffer) {
 	  printf("Buffer is too small for command %s\n",buffer);
 	  mp_input_free_binds(binds);
-	  return;
+	  return 0;
 	}
 	memmove(buffer,iter,end - iter);
 	bs = end - iter;
@@ -797,6 +808,7 @@ mp_input_parse_config(char *file) {
     }
   }
   printf("What are we doing here ?\n");
+  return 0;
 }
 
 extern char *get_path(char *filename);
@@ -809,7 +821,8 @@ mp_input_init(void) {
   if(!file)
     return;
   
-  mp_input_parse_config(file);
+  if(! mp_input_parse_config(file))
+    printf("Falling back on default (hardcoded) config\n");
 
 #ifdef HAVE_JOYSTICK
   {
