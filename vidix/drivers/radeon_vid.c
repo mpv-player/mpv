@@ -924,18 +924,26 @@ static unsigned radeon_query_pitch(unsigned fourcc,const vidix_yuv_t *spitch)
 static int radeon_vid_init_video( vidix_playback_t *config )
 {
     uint32_t tmp,src_w,src_h,dest_w,dest_h,pitch,h_inc,step_by,left,leftUV,top;
-    int is_420,is_rgb32,best_pitch,mpitch;
+    int is_420,is_rgb32,is_rgb,best_pitch,mpitch;
     radeon_vid_stop_video();
     left = config->src.x << 16;
     top =  config->src.y << 16;
     src_h = config->src.h;
     src_w = config->src.w;
-    is_420 = is_rgb32 = 0;
+    is_420 = is_rgb32 = is_rgb = 0;
     if(config->fourcc == IMGFMT_YV12 ||
        config->fourcc == IMGFMT_I420 ||
        config->fourcc == IMGFMT_IYUV) is_420 = 1;
     if(config->fourcc == IMGFMT_RGB32 ||
        config->fourcc == IMGFMT_BGR32) is_rgb32 = 1;
+    if(config->fourcc == IMGFMT_RGB32 ||
+       config->fourcc == IMGFMT_BGR32 ||
+       config->fourcc == IMGFMT_RGB24 ||
+       config->fourcc == IMGFMT_BGR24 ||
+       config->fourcc == IMGFMT_RGB16 ||
+       config->fourcc == IMGFMT_BGR16 ||
+       config->fourcc == IMGFMT_RGB15 ||
+       config->fourcc == IMGFMT_BGR15) is_rgb = 1;
     best_pitch = radeon_query_pitch(config->fourcc,&config->src.pitch);
     mpitch = best_pitch-1;
     switch(config->fourcc)
@@ -973,7 +981,6 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     besr.v_inc = (src_h << 20) / dest_h;
     h_inc = (src_w << 12) / dest_w;
     step_by = 1;
-
     while(h_inc >= (2 << 12)) {
 	step_by++;
 	h_inc >>= 1;
@@ -999,11 +1006,6 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 	if(besr.fourcc == IMGFMT_I420 || besr.fourcc == IMGFMT_IYUV)
 	{
 	  uint32_t tmp;
-
-	  tmp = besr.vid_buf1_base_adrs;
-	  besr.vid_buf1_base_adrs = besr.vid_buf2_base_adrs;
-	  besr.vid_buf2_base_adrs = tmp;
-
 	  tmp = config->offset.u;
 	  config->offset.u = config->offset.v;
 	  config->offset.v = tmp;
@@ -1043,8 +1045,9 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 
     leftUV = (left >> 17) & 15;
     left = (left >> 16) & 15;
+    if(is_rgb && !is_rgb32) h_inc<<=1;
     if(is_rgb32)
-	besr.h_inc = (h_inc>>1) | ((h_inc >> 1) << 16);
+	besr.h_inc = (h_inc >> 1) | ((h_inc >> 1) << 16);
     else
 	besr.h_inc = h_inc | ((h_inc >> 1) << 16);
     besr.step_by = step_by | (step_by << 8);
