@@ -209,6 +209,8 @@ int af_to_ms(int n, int* in, float* out, int rate);
 /* Helper function for testing the output format */
 int af_test_output(struct af_instance_s* af, af_data_t* out);
 
+float af_softclip(float a);
+
 /** Print a list of all available audio filters */
 void af_help(void);
 
