@@ -2880,7 +2880,10 @@ if(benchmark){
 	   100.0*max_vout_time_usage/total_time_usage+
 	   100.0*max_audio_time_usage/total_time_usage
 	   );
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"TOTAL BENCHMARK: from %u frames should be dropped: %u \n"
+/* This code computes number of frame which should be dropped
+   in ideal case (without SYSTIME); i.e. when file is located
+   in RAM and kernel+other_tasks eat 0% of CPU. */
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"TOTAL BENCHMARK: from %u frames should be dropped: %u at least\n"
 	    ,our_n_frames,bench_dropped_frames);
 }
 
