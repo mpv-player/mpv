@@ -2174,7 +2174,7 @@ if test "$_xanim" = auto ; then
         done
     fi
     test "$_xanimlibdir" && _xanim=yes
-    if test "$_xanim" == yes ; then
+    if test "$_xanim" = yes ; then
       echores "yes (found: $_xanimlibdir)"
     else
       echores "no suitable directory found"
@@ -2314,7 +2314,7 @@ fi
 
 
 echocheck "libmp3lame (for mencoder)"
-if test "$_mp3lame" == auto ; then
+if test "$_mp3lame" = auto ; then
   cat > $TMPC <<EOF
 #include <lame/lame.h>
 int main(void) { (void) lame_init(); return 0; }
