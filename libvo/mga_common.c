@@ -10,37 +10,10 @@ static int f;
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
     int x,y;
     uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
-
-  if (mga_vid_config.format==MGA_VID_FORMAT_YV12){
-
-    for(y=0;y<h;y++){
-        uint8_t *dst = vid_data + bespitch * (y0+y) + x0;
-        for(x=0;x<w;x++){
-//            dst[x]=(dst[x]*srca[x]+src[x]*(srca[x]^255))>>8;
-            if(srca[x])
-	    dst[x]=((dst[x]*srca[x])>>8)+src[x];
-            //dst[x]=(dst[x]*(srca[x]^255)+src[x]*(srca[x]))>>8;
-        }
-        src+=stride;
-        srca+=stride;
-    }
-
-  } else {
-
-    for(y=0;y<h;y++){
-        uint8_t *dst = vid_data + 2*(bespitch * (y0+y) + x0);
-        for(x=0;x<w;x++){
-//            dst[x]=(dst[x]*srca[x]+src[x]*(srca[x]^255))>>8;
-            if(srca[x])
-	    dst[2*x]=((dst[2*x]*srca[x])>>8)+src[x];
-            //dst[2*x]=(dst[2*x]*(srca[x]^255)+src[x]*(srca[x]))>>8;
-        }
-        src+=stride;
-        srca+=stride;
-    }
-
-  }
-
+    if (mga_vid_config.format==MGA_VID_FORMAT_YV12)
+        vo_draw_alpha_yv12(w,h,src,srca,stride,vid_data+bespitch*y0+x0,bespitch);
+    else
+        vo_draw_alpha_yuy2(w,h,src,srca,stride,vid_data+2*(bespitch*y0+x0),2*bespitch);
 }
 
 

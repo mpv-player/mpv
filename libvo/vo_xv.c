@@ -256,38 +256,16 @@ static void check_events(void)
 }
 
 
+//void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride);
+//void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride);
+
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
     int x,y;
 
-  if (xv_format==IMGFMT_YV12){
-
-    for(y=0;y<h;y++){
-	uint8_t *dst = xvimage[0]->data + image_width * (y+y0) + x0;
-        for(x=0;x<w;x++){
-//            dst[x]=(dst[x]*srca[x]+src[x]*(srca[x]^255))>>8;
-            if(srca[x])
-//            dst[x]=(dst[x]*(srca[x]^255)+src[x]*(srca[x]))>>8;
-            dst[x]=((dst[x]*srca[x])>>8)+src[x];
-        }
-        src+=stride;
-        srca+=stride;
-    }
-
-  } else {
-
-    for(y=0;y<h;y++){
-	uint8_t *dst = xvimage[0]->data + 2*(image_width * (y+y0) + x0);
-        for(x=0;x<w;x++){
-//            dst[x]=(dst[x]*srca[x]+src[x]*(srca[x]^255))>>8;
-            if(srca[x])
-//            dst[2*x]=(dst[2*x]*(srca[x]^255)+src[x]*(srca[x]))>>8;
-            dst[2*x]=((dst[2*x]*srca[x])>>8)+src[x];
-        }
-        src+=stride;
-        srca+=stride;
-    }
-
-  }
+  if (xv_format==IMGFMT_YV12)
+    vo_draw_alpha_yv12(w,h,src,srca,stride,xvimage[0]->data+image_width*y0+x0,image_width);
+  else
+    vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[0]->data+2*(image_width*y0+x0),2*image_width);
 
 }
 
