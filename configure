@@ -6,6 +6,9 @@
 #
 # Changes in reversed order:
 #
+# 2001/08/22 by Nick Kurshev
+# - added autodetection of local language
+#
 # 2001/07/31 by Steve Davies
 # - added --enable-largefiles
 #
@@ -326,7 +329,7 @@ EOF
 # config files
 CCONF='config.h'
 MCONF='config.mak'
-
+CHELP='help_mp.h'
 # ---  Check for C compiler:
 
 if [ "$_x11libdir" = "" ]; then
@@ -725,7 +728,17 @@ esac
 
 # ---
 
-
+# Checking for localization ...
+if test -z "$LINGUAS"; then
+LINGUAS="en"
+fi
+echo Checking for language ... "$LINGUAS"
+_mp_help="help_mp-"$LINGUAS".h"
+if test ! -e "$_mp_help"; then
+LINGUAS="en"
+_mp_help="help_mp-"$LINGUAS".h"
+fi
+echo Using ... "$_mp_help" file
 
 $_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -lvgagl -lvga > /dev/null 2>&1 && _svga=yes
 
@@ -2143,6 +2156,11 @@ install with  'make install'. Good luck!
 Note: On non-Linux systems you might need to use gmake
 instead of make.
 
+EOF
+
+echo Creating $CHELP
+cat > $CHELP << EOF
+#include "$_mp_help"
 EOF
 
 if [ $_mtrr = yes ]; then
