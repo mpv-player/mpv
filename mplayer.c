@@ -2038,6 +2038,11 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	sub_delay += v;
       osd_show_sub_delay = 9; // show the subdelay in OSD
     } break;
+    case MP_CMD_SUB_STEP : {
+      int movement = cmd->args[0].v.i;
+      step_sub(subtitles, d_video->pts, movement);
+      osd_show_sub_delay = 9; // show the subdelay in OSD
+    } break;
     case MP_CMD_OSD : 
       if(sh_video) {
 	int v = cmd->args[0].v.i;
