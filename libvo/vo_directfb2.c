@@ -379,7 +379,7 @@ return DFENUM_OK;
 
 static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 		uint32_t d_height, uint32_t fullscreen, char *title,
-		uint32_t format,const vo_tune_info_t *info)
+		uint32_t format)
 {
   /*
    * (Locals)
@@ -539,11 +539,12 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 
 // test surface for flipping	
 	DFBCHECK(primary->GetCapabilities(primary,&caps));
-
+//	primary->Clear(primary,0,0,0,0);
         flipping = 0;
 	if (caps & DSCAPS_FLIPPING) {
 	    ret = primary->Flip(primary,NULL,0);
 	    if (ret==DFB_OK) { 
+//		primary->Clear(primary,0,0,0,0);
 		flipping = 1; 
 	    } 
 	};
