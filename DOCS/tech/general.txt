@@ -186,14 +186,6 @@ Now, go on:
 
    Each vo driver _has_ to implement these:
 
-   query_format()  -  queries if a given pixelformat is supported.
-		      return value:   flags:
-			0x1  -  supported (by hardware or conversion)
-			0x2  -  supported (by hardware, without conversion)
-			0x4  -  sub/osd supported (has draw_alpha)
-			0x8  -  hardware handles subpics
-			0x100  -  driver/hardware handles timing (blocking)
-
    IMPORTANT: it's mandatorial that every vo driver support the YV12 format,
 	 and one (or both) of BGR15 and BGR24, with conversion, if needed.
 	 If these aren't supported, not every codec will work! The mpeg codecs
@@ -211,6 +203,24 @@ Now, go on:
     If it can change bpp (for example DGA 2, fbdev, svgalib), then if possible
 	 we have to change to the desired bpp. If the hardware doesn't support,
 	 we have to change to the one closest to it, and do conversion!
+
+    control()  -  sends control requests to the device
+	 VOCTRL_QUERY_VAA  -  this is used by the vidix extension
+		this is used by the vidix extension to fill a vo_vaa_t struct,
+		I do not know how this works since I'm not the author of this
+		      
+	 VOCTRL_QUERY_FORMAT  -  queries if a given pixelformat is supported.
+		return value:   flags:
+		    0x1  -  supported (by hardware or conversion)
+		    0x2  -  supported (by hardware, without conversion)
+		    0x4  -  sub/osd supported (has draw_alpha)
+		    0x8  -  hardware handles subpics
+		    0x100  -  driver/hardware handles timing (blocking)
+		
+	 VOCTRL_RESET  -  reset the video device
+		This is sent on seeking and similar and is useful if you are
+		using a device which prebuffers frames that need to flush them
+		before refilling audio/video buffers.
 
     init()  -  this is called before displaying of the first frame -
 	 initializing buffers, etc.
