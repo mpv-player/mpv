@@ -154,7 +154,6 @@ int net_wm_support_state_test( Atom atom )
 {
 #define NET_WM_STATE_TEST(x) { if (atom == XA_NET_WM_STATE_##x) { mp_dbg( MSGT_VO,MSGL_STATUS, "[x11] Detected wm supports" #x "state.\n" ); return SUPPORT_##x; } }
  
-// mp_dbg(MSGT_VO,MSGL_DBG2, "[x11] NetWM supports %s\n",name);
  NET_WM_STATE_TEST(FULLSCREEN);
  NET_WM_STATE_TEST(ABOVE);
  NET_WM_STATE_TEST(STAYS_ON_TOP);
