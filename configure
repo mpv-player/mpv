@@ -71,7 +71,7 @@ darwin()  { issystem "Darwin"  ; return "$?" ; }
 # x86/x86pc is used by QNX
 x86() {
   case "$host_arch" in
-    i[3-9]86|x86|x86pc) return 0 ;;
+    i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -329,7 +329,7 @@ if test -z "$_target" ; then
 
       # x86/x86pc is used by QNX
       case "`( uname -m ) 2>&1`" in
-      i[3-9]86|x86|x86pc) host_arch=i386 ;;
+      i[3-9]86|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686) host_arch=i386 ;;
       ia64) host_arch=ia64 ;;
       x86_64) host_arch=x86_64 ;;
       ppc) host_arch=ppc ;;
@@ -353,7 +353,8 @@ else
     sunos) system_name=SunOS ;;
     qnx) system_name=QNX ;;
   esac
-  host_arch=`echo $_target | cut -d '-' -f 1`
+  # We need to convert underscores so that values like k6-2 and pentium-mmx can be passed
+  host_arch=`echo $_target | cut -d '-' -f 1 | tr '_' '-'`
 fi
 
 echo "Detected operating system: $system_name"
@@ -565,45 +566,84 @@ fi
 
 # x86/x86pc is used by QNX
 case "$host_arch" in
-  i[3-9]86|x86|x86pc)
+  i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   _def_arch="#define ARCH_X86 1"
   _target_arch="TARGET_ARCH_X86 = yes"
   _def_words_endian="#undef WORDS_BIGENDIAN"
-  iproc=586
-  proc=pentium
 
   case "$pvendor" in
   AuthenticAMD)
     case "$pfamily" in
     3) proc=i386 iproc=386 ;;
     4) proc=i486 iproc=486 ;;
-    5) proc=k5 iproc=586       # LGB: models are: K5/SSA5 K5 K5 K5 ? ? K6 K6 K6-2 K6-3
-       test "$pmodel" -ge 6 && proc=k6 ;;
-    6|7) proc=k7 iproc=686 ;;
-    *) proc=pentium iproc=586 ;;
+    5) iproc=686       # LGB: models are: K5/SSA5 K5 K5 K5 ? ? K6 K6 K6-2 K6-3
+	# TODO: how to determine if model 13 is a k6-2 or a k6-3? Couldn't find anything on amd.com
+	if test "$pmodel" == 9; then
+		proc=k6-3
+	elif test "$pmodel" -ge 8; then
+		proc=k6-2
+	elif test "$pmodel" -ge 6; then
+		proc=k6
+	else
+		proc=i586
+		iproc=586
+	fi
+	;;
+    6) iproc=686
+	if test "$pmodel" -ge 7; then
+		proc=athlon-xp # or MP, but it doesn't really matter
+	elif test "$pmodel" -ge 6; then
+		if test "$pstepping" -ge 2; then
+			proc=athlon-xp
+		else
+			proc=athlon-4
+		fi
+	elif test "$pmodel" -ge 4; then
+		proc=athlon-tbird
+	else
+		proc=athlon # TODO: should the Duron Spitfire be considered a Thunderbird instead?
+	fi
+	;;
+    
+    *) proc=athlon-xp iproc=686 ;;
     esac
     ;;
   GenuineIntel)
     case "$pfamily" in
     3) proc=i386 iproc=386 ;;
     4) proc=i486 iproc=486 ;;
-    5) proc=pentium iproc=586 ;;
-    6|15) proc=i686 iproc=686 ;;
-    *) proc=pentium iproc=586 ;;
+    5) iproc=586
+	if test "$pmodel" == 4 || test "$pmodel" == 8; then
+		proc=pentium-mmx # 4 is desktop, 8 is mobile
+	else
+		proc=i586
+	fi
+	;;
+    6) iproc=686
+	if test "$pmodel" -ge 7; then
+		proc=pentium3
+	elif test "$pmodel" -ge 3; then
+		proc=pentium2
+	else
+		proc=i686
+	fi
+	;;
+    15) proc=pentium4 iproc=686 ;;
+    *) proc=pentium4 iproc=686 ;;
     esac
     ;;
   unknown)
     case "$pfamily" in
     3) proc=i386 iproc=386 ;;
     4) proc=i486 iproc=486 ;;
-    *) proc=pentium iproc=586 ;;
+    *) proc=i586 iproc=586 ;;
     esac
     ;;
   *)
-    proc=pentium iproc=586 ;;
+    proc=i586 iproc=586 ;;
   esac
 
-    # check that gcc supports our cpu, if not, fallback to pentium
+    # check that gcc supports our cpu, if not, fallback to earlier ones
     # LGB: check -mcpu and -march swithing step by step with enabling
     # to fall back till 386.
 
@@ -612,25 +652,28 @@ cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
   if test "$_runtime_cpudetection" = no ; then
-    if test "$proc" = "k7" ; then
+    if test "$proc" = "athlon-xp" || test "$proc" = "athlon-4" || test "$proc" = "athlon-tbird"; then
       cc_check -march=$proc -mcpu=$proc || proc=athlon
     fi
-    if test "$proc" = "athlon" ; then
-      cc_check -march=$proc -mcpu=$proc || proc=pentiumpro
+    if test "$proc" = "k6-3" || test "$proc" = "k6-2"; then
+      cc_check -march=$proc -mcpu=$proc  || proc=k6
     fi
-    if test "$proc" = "k6" ; then
-      cc_check -march=$proc -mcpu=$proc  || proc=k5
+    if test "$proc" = "k6"; then
+      if ! cc_check -march=$proc -mcpu=$proc; then
+        if cc_check -march=i586 -mcpu=i686; then
+          proc=i586-i686
+        else 
+          proc=i586
+	fi
+      fi
     fi
-    if test "$proc" = "k5" ; then
-      cc_check -march=$proc -mcpu=$proc  || proc=pentium
+    if test "$proc" = "pentium4" || test "$proc" = "pentium3" || test "$proc" = "pentium2" || test "$proc" = "athlon"; then
+      cc_check -march=$proc -mcpu=$proc  || proc=i686
     fi
-    if test "$proc" = "i686" ; then
-      cc_check -march=$proc -mcpu=$proc  || proc=pentiumpro
+    if test "$proc" = "i686" || test "$proc" = "pentium-mmx"; then
+      cc_check -march=$proc -mcpu=$proc  || proc=i586
     fi
-    if test "$proc" = "pentiumpro" ; then
-      cc_check -march=$proc -mcpu=$proc  || proc=pentium
-    fi
-    if test "$proc" = "pentium" ; then
+    if test "$proc" = "i586" ; then
       cc_check -march=$proc -mcpu=$proc  || proc=i486
     fi
     if test "$proc" = "i486" ; then
@@ -643,6 +686,11 @@ EOF
       echores "Your $_cc does not support even \"i386\" for '-march' and '-mcpu'."
       _mcpu=""
       _march=""
+      _optimizing=""
+    elif test "$proc" = "i586-i686"; then
+      _march="-march=i586"
+      _mcpu="-mcpu=i686"
+      _optimizing="$proc"
     else
       _march="-march=$proc"
       _mcpu="-mcpu=$proc"
@@ -660,15 +708,22 @@ EOF
     ## Gabucino : --target takes effect here (hopefully...) by overwriting
     ##             autodetected mcpu/march parameters
     if test "$_target" ; then
-      _march="-march=$host_arch"
-      _mcpu="-mcpu=$host_arch"
-      proc="$_target"
-      # Note: this has to be extended
+      # TODO: it may be a good idea to check GCC and fallback in all cases
+      if test "$host_arch" = "i586-i686"; then
+        _march="-march=i586"
+        _mcpu="-mcpu=i686"
+      else      
+        _march="-march=$host_arch"
+        _mcpu="-mcpu=$host_arch"
+      fi
+    
+      proc="$host_arch"
+
       case "$proc" in
-        i386*) iproc=386 ;;
-        i486*) iproc=486 ;;
-        i586*) iproc=586 ;;
-        i686*) iproc=686 ;;
+        i386) iproc=386 ;;
+        i486) iproc=486 ;;
+        i586|k5|k6|k6-2|k6-3|pentium|pentium-mmx) iproc=586 ;;
+        i686|athlon*|pentium*) iproc=686 ;;
         *) iproc=586 ;;
       esac
     fi
