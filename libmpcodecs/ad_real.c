@@ -13,12 +13,12 @@
 #include "ad_internal.h"
 
 static ad_info_t info =  {
-	"RealAudio decoder",  // name of the driver
-	"real",   // driver name. should be the same as filename without ad_
-	AFM_REAL,    // replace with registered AFM number
-	"A'rpi",     // writer/maintainer of _this_ file
-	"",          // writer/maintainer/site of the _codec_
-	""           // comments
+	"RealAudio decoder",
+	"real",
+	AFM_REAL,
+	"A'rpi",
+	"Florian Schneider",
+	"binary real audio codecs"
 };
 
 LIBAD_EXTERN(real)
@@ -61,6 +61,8 @@ static int preinit(sh_audio_t *sh){
   // let's check if the driver is available, return 0 if not.
   // (you should do that if you use external lib(s) which is optional)
   unsigned int result;
+  int len;
+  void* prop;
   char path[4096];
   sprintf(path, LIBDIR "/real/%s", sh->codec->dll);
   handle = dlopen (path, RTLD_LAZY);
@@ -119,13 +121,18 @@ static int preinit(sh_audio_t *sh){
       return 0;
     }
 
-  sh->audio_out_minsize=128000; //sh->samplerate*sh->samplesize*sh->channels;
+    prop=raGetFlavorProperty(sh->context,((short*)(sh->wf+1))[2],0,&len);
+    mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Audio codec: [%d] %s\n",((short*)(sh->wf+1))[2],prop);
+
+    prop=raGetFlavorProperty(sh->context,((short*)(sh->wf+1))[2],1,&len);
+    sh->i_bps=((*((int*)prop))+4)/8;
+    mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Audio bitrate: %5.3f kbit/s (%d bps)  \n",(*((int*)prop))*0.001f,sh->i_bps);
+
+//    prop=raGetFlavorProperty(sh->context,((short*)(sh->wf+1))[2],0x13,&len);
+//    mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Samples/block?: %d  \n",(*((int*)prop)));
+
+  sh->audio_out_minsize=128000; // no idea how to get... :(
   sh->audio_in_minsize=((short*)(sh->wf+1))[1]*sh->wf->nBlockAlign;
-//  sh->samplesize=2;
-//  sh->channels=2;
-//  sh->samplerate=44100;
-//  sh->sample_format=AFMT_S16_LE;
-  sh->i_bps=64000/8;
   
   return 1; // return values: 1=OK 0=ERROR
 }
