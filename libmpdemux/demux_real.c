@@ -1310,6 +1310,7 @@ void demux_open_real(demuxer_t* demuxer)
 
 		    sh->wf->wFormatTag = sh->format;
 		    
+		    if (verbose > 0)
 		    print_wave_header(sh->wf);
 
 		    if(demuxer->audio->id==stream_id){
