@@ -106,7 +106,6 @@ static char help_text[]=
 #define MSGTR_CompiledWithRuntimeDetection "MPlayer RUNTIME CPU Detection ile oluþturulmuþ. - dikkat, bu hýzlý deðildir! En iyi performansý alabilmek için, MPlayer ý -disable-runtime-cpudetection seçeneði ile tekrar compile edin.\n"
 #define MSGTR_CompiledWithCPUExtensions "x86 CPU için eklerle oluþturulmuþ:"
 #define MSGTR_AvailableVideoOutputDrivers "Video  Çýkýþ  sürücüleri kullanýlabilir:\n"
-#define MSGTR_AvailableVideoOutputPlugins "Video  Çýkýþ  pluginleri kullanýlabilir:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Ses  Çýkýþ sürücüleri kullanýlabilir:\n"
 #define MSGTR_AvailableAudioCodecs "Ses codecleri kullanýlabilir:\n"
 #define MSGTR_AvailableVideoCodecs "Video Codecleri kullanýlabilir:\n"

@@ -111,7 +111,6 @@ static char help_text[]=
 #define MSGTR_FPSforced "FPS vynuceno na hodnotu %5.3f  (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Pøelo¾eno s detekcí CPU za bìhu - UPOZORNÌNÍ - toto není optimální!\nAbyste získali co nejvìt¹í výkon, pøelo¾te znovu mplayer ze zdrojového kódu\ns pøepínaèem --disable-runtime-cpudetection\n"
 #define MSGTR_CompiledWithCPUExtensions "Pøelo¾eno pro CPU x86 s roz¹íøeními:"
-#define MSGTR_AvailableVideoOutputPlugins "Dostupné zásuvné moduly video výstupu:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Dostupné ovladaèe video výstupu:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Dostupné ovladaèe audio výstupu:\n"
 #define MSGTR_AvailableAudioCodecs "Dostupné audio kodeky:\n"

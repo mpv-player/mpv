@@ -112,7 +112,6 @@ static char help_text[]=
 #define MSGTR_FPSforced "FPS присилени да бидат %5.3f  (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Компајлирано со детекција на процесорот при извршувањето - ВНИМАНИЕ - ова не е оптимално!\nЗа да ги добиете најдобрите перформанси, рекомпалирајте го MPlayer со --disable-runtime-cpudetection\n"
 #define MSGTR_CompiledWithCPUExtensions "Компајлирано за x86 Процесорите со наставките:"
-#define MSGTR_AvailableVideoOutputPlugins "Достапни излезни видео додатоци:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Достапни излезни видео драјвери:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Достапни излезни аудио драјвери:\n"
 #define MSGTR_AvailableAudioCodecs "Достапни аудио кодеци:\n"

@@ -118,7 +118,6 @@ static char help_text[]=
 #define MSGTR_Playing "Rulez %s.\n"
 #define MSGTR_NoSound "Audio: fãrã sunet\n"
 #define MSGTR_FPSforced "FPS forþat la %5.3f  (ftime: %5.3f).\n"
-#define MSGTR_AvailableVideoOutputPlugins "Plugin-uri de ieºire video disponibile:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Plugin-uri de ieºire video disponibile:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Plugin-uri de ieºire audio disponibile:\n"
 #define MSGTR_AvailableAudioCodecs "Codec-uri audio disponibile:\n"

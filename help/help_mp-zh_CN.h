@@ -111,7 +111,6 @@ static char help_text[]=
 #define MSGTR_FPSforced "FPS指定为 %5.3f  (ftime: %5.3f).\n"
 #define MSGTR_CompiledWithRuntimeDetection "编译实时CPU检测 - 警告, 这不是最佳选择! 如果你想获得最佳的表现, 加上--disable-runtime-cpudetection选项重新编译mplayer.\n"
 #define MSGTR_CompiledWithCPUExtensions "针对有扩展指令集x86 CPU编译:"
-#define MSGTR_AvailableVideoOutputPlugins "可用的视频输出插件:\n"
 #define MSGTR_AvailableVideoOutputDrivers "可用的视频输出驱动:\n"
 #define MSGTR_AvailableAudioOutputDrivers "可用的音频输出驱动:\n"
 #define MSGTR_AvailableAudioCodecs "可用的音频解码器:\n"

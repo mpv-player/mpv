@@ -111,7 +111,6 @@ static char help_text[]=
 #define MSGTR_FPSforced "FPS가 %5.3f (ftime: %5.3f)으로 변경되었습니다.\n"
 #define MSGTR_CompiledWithRuntimeDetection "런타임 CPU 감지가 가능하도록 컴파일되었습니다. - 경고 - 이것은 최적 조건이 아닙니다!\n최상의 성능을 얻기위해선, MPlayer를 --disable-runtime-cpudetection 옵션으로 다시 컴파일하세요.\n"
 #define MSGTR_CompiledWithCPUExtensions "확장 x86 CPU용으로 컴파일 되었습니다.:"
-#define MSGTR_AvailableVideoOutputPlugins "가능한 비디오 출력 플러그인:\n"
 #define MSGTR_AvailableVideoOutputDrivers "가능한 비디오 출력 드라이버:\n"
 #define MSGTR_AvailableAudioOutputDrivers "가능한 오디오 출력 드리아버:\n"
 #define MSGTR_AvailableAudioCodecs "가능한 오디오 코덱:\n"

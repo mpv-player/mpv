@@ -110,7 +110,6 @@ static char help_text[]=
 #define MSGTR_FPSforced "Кадры/сек форсированы в %5.3f (ftime: %5.3f).\n"
 #define MSGTR_CompiledWithRuntimeDetection "Скомпилировано для определения типа процессора во время выполнения -\nПРЕДУПРЕЖДЕНИЕ - это не оптимально!\nДля получения максимальной производительности,\nперекомпилируйте MPlayer c --disable-runtime-cpudetection.\n"
 #define MSGTR_CompiledWithCPUExtensions "Скомпилировано для x86 CPU со следующими расширениями:"
-#define MSGTR_AvailableVideoOutputPlugins "Доступные плагины вывода видео:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Доступные драйвера вывода видео:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Доступные драйвера вывода звука:\n"
 #define MSGTR_AvailableAudioCodecs "Доступные аудио кодеки:\n"

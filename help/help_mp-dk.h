@@ -113,7 +113,6 @@ static char help_text[]=
 #define MSGTR_FPSforced "Billedfrekvens sat til %5.3f  (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Kompileret med dynamisk processoroptimering - NB: dette er ikke optimalt! For at få den bedre ydelse kompiler MPlayer fra kildekode med --disable-runtime-cpudetection\n"
 #define MSGTR_CompiledWithCPUExtensions "Kompileret til x86 CPU med udvidelser:"
-#define MSGTR_AvailableVideoOutputPlugins "Tilgængelige videoudvidelser:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Tilgængelige videodrivere:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Tilgængelige lyddrivere:\n"
 #define MSGTR_AvailableAudioCodecs "Tilgængelige lyd-codecs:\n"

@@ -107,7 +107,6 @@ static char help_text[]=
 #define MSGTR_FPSforced "FPS forced to be %5.3f  (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "コンパイル時にRuntime CPU Detectionが試用されています、これは最適ではありません\n最適なパフォーマスを得るには、--disable-runtime-cpudetectionを有効にしてMPLayerを再コンパイルして下さい\n"
 #define MSGTR_CompiledWithCPUExtensions "x86 CPU 向けにコンパイルされました:"
-#define MSGTR_AvailableVideoOutputPlugins "有効な音声出力プラグイン:\n"
 #define MSGTR_AvailableVideoOutputDrivers "有効な映像出力ドライバ:\n"
 #define MSGTR_AvailableAudioOutputDrivers "有効な音声出力ドライバ:\n"
 #define MSGTR_AvailableAudioCodecs "有効な音声コーデック:\n"

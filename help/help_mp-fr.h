@@ -113,7 +113,6 @@ static char help_text[]=
 #define MSGTR_FPSforced "FPS forcé à %5.3f  (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Compilé avec détection du CPU à l'exécution - ATTENTION, ce n'est pas optimal! Pour de meilleures performances, recompilez MPlayer avec l'option --disable-runtime-cpudetection\n"
 #define MSGTR_CompiledWithCPUExtensions "Compilé pour CPU x86 avec les extensions:"
-#define MSGTR_AvailableVideoOutputPlugins "Plugins de sortie vidéo disponibles:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Pilotes de sortie vidéo disponibles:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Pilotes de sortie audio disponibles:\n"
 #define MSGTR_AvailableAudioCodecs "Codecs audio disponibles:\n"

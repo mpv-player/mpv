@@ -122,7 +122,6 @@ static char help_text[]=
 #define MSGTR_FPSforced "Видеото е застопорено на %5.3f кадъра в секунда (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Поддръжка RUNTIME CPU Detection - внимание, това не е оптимално! За да получите максимална производителност, прекомпилирайте mplayer от сорса и използвайте ./configure --disable-runtime-cpudetection \n"
 #define MSGTR_CompiledWithCPUExtensions "Поддръжка на x86 CPU с :"
-#define MSGTR_AvailableVideoOutputPlugins "Налични видео plugin-и:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Налични видео драйвери:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Налични аудио драйвери:\n"
 #define MSGTR_AvailableAudioCodecs "Налични аудио декодери:\n"

@@ -114,7 +114,6 @@ static char help_text[]=
 #define MSGTR_FPSforced "FPS kényszerítve %5.3f  (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Futásidejû CPU Detektálás használata - ez nem optimális! A legjobb teljesítmény eléréséhez fordítsd újra az MPlayer-t a --disable-runtime-cpudetection\n opcióval\n"
 #define MSGTR_CompiledWithCPUExtensions "x86-os CPU - a következõ kiterjesztések használata:"
-#define MSGTR_AvailableVideoOutputPlugins "Rendelkezésre álló video pluginek:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Rendelkezésre álló video meghajtók:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Rendelkezésre álló audio meghajtók:\n"
 #define MSGTR_AvailableAudioCodecs "Rendelkezésre álló audio codec-ek:\n"

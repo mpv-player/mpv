@@ -112,7 +112,6 @@ static char help_text[]=
 #define MSGTR_FPSforced "Примусово зм╕нена к╕льк╕сть кадр╕в на секунду на %5.3f (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Скомп╕львано з автовизначенням CPU - УВАГА - це не оптимально!\nДля отримання кращих результат╕в перекомп╕люйте MPlayer з --disable-runtime-cpudetection\n"
 #define MSGTR_CompiledWithCPUExtensions "Скомп╕льовано для x86 CPU з розширеннями:"
-#define MSGTR_AvailableVideoOutputPlugins "Доступн╕ плаг╕ни в╕део виводу:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Доступн╕ модул╕ в╕део виводу:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Доступн╕ модул╕ ауд╕о виводу:\n"
 #define MSGTR_AvailableAudioCodecs "Доступн╕ ауд╕о кодеки:\n"

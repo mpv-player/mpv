@@ -120,7 +120,6 @@ static char help_text[]=
 
 #define MSGTR_CompiledWithRuntimeDetection "Compilado con detección en tiempo de ejecución de CPU - esto no es óptimo! Para obtener mejor rendimiento, recompila MPlayer con --disable-runtime-cpudetection.\n"
 #define MSGTR_CompiledWithCPUExtensions "Compilado para CPU x86 con extensiones:"
-#define MSGTR_AvailableVideoOutputPlugins "Plugins de salida de vídeo disponibles:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Drivers de salida de vídeo disponibles:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Drivers de salida de audio disponibles:\n"
 #define MSGTR_AvailableAudioCodecs "Codecs de audio disponibles:\n"
