@@ -73,7 +73,7 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
     end = strchr(p->iter,'\n');
     if(!end) {
       if(p->stream->eof) {
-	end = p->buffer + p->buffer_end + 1;
+	end = p->buffer + p->buffer_end;
 	break;
       }
       resize = 1;
@@ -88,13 +88,13 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
     return NULL;
   strncpy(p->line,p->iter,line_end - p->iter);
   p->line[line_end - p->iter] = '\0';
-  end++;
+  if(end != '\0')
+    end++;
 
   if(!p->keep) {
-    if(end[1] != '\0') {
-      p->buffer_end = strlen(end);
+    if(end[0] != '\0') {
+      p->buffer_end -= strlen(p->line)+1;
       memmove(p->buffer,end,p->buffer_end);
-      p->buffer[p->buffer_end] = '\0';
     } else
       p->buffer_end = 0;
     p->iter = p->buffer;
