@@ -42,6 +42,14 @@
  *    - Eliminated memcpy's for entire frames
  *    Felix Buenemann <Felix.Buenemann@ePost.de> - March 11, 2001
  *    - Added aspect-ratio awareness for fullscreen
+ *    Felix Buenemann <Felix.Buenemann@gmx.de> - March 11, 2001
+ *    - Fixed aspect-ratio awareness, did only vertical scaling (black bars above
+ *       and below), now also does horizontal scaling (black bars left and right),
+ *       so you get the biggest possible picture with correct aspect-ratio.
+ *    Felix Buenemann <Atmosfear@users.sourceforge.net> - March 12, 2001
+ *    - Minor bugfix to aspect-ratio vor non-4:3-resolutions (like 1280x1024)
+ *    - Bugfix to check_events() to reveal mouse cursor after 'q'-quit in
+ *       fullscreen-mode
  */
 
 #include <stdio.h>
@@ -256,19 +264,24 @@ static void set_fullmode (int mode)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 	SDL_Surface *newsurface = NULL;
-	unsigned int aspect;
+	int haspect, waspect = 0;
 	
 	/* if we haven't set a fullmode yet, default to the lowest res fullmode first */
 	if (mode < 0) 
 		mode = priv->fullmode = findArrayEnd(priv->fullmodes) - 1;
 
-	/* Calculate proper aspect ratio for fullscreen */
-	aspect = (priv->width * 0.75 - priv->height) * (float) ((float) priv->fullmodes[mode]->w / (float) priv->width);
-//	printf ("Aspect: %i\n", aspect);
+	/* Calculate proper aspect ratio for fullscreen
+	 * Height smaller than expected: add horizontal black bars (haspect)*/
+	haspect = (priv->width * (float) ((float) priv->fullmodes[mode]->h / (float) priv->fullmodes[mode]->w) - priv->height) * (float) ((float) priv->fullmodes[mode]->w / (float) priv->width);
+	/* Height bigger than expected: add vertical black bars (waspect)*/
+	if (haspect < 0) {
+		haspect = 0; /* set haspect to zero because image will be scaled horizontal instead of vertical */
+		waspect = priv->fullmodes[mode]->w - ((float) ((float) priv->fullmodes[mode]->h / (float) priv->height) * (float) priv->width);
+	}	
+//	printf ("W-Aspect: %i  H-Aspect: %i\n", waspect, haspect);
 	
-	/* change to given fullscreen mode and hide the mouse cursor
-	   Felix Buenemann: added - aspect to use proper aspect ratio in fullscreen */
-	newsurface = SDL_SetVideoMode(priv->fullmodes[mode]->w, priv->fullmodes[mode]->h - aspect, priv->bpp, priv->sdlfullflags);
+	/* change to given fullscreen mode and hide the mouse cursor */
+	newsurface = SDL_SetVideoMode(priv->fullmodes[mode]->w - waspect, priv->fullmodes[mode]->h - haspect, priv->bpp, priv->sdlfullflags);
 	
 	/* if we were successfull hide the mouse cursor and save the mode */
 	if (newsurface) {
@@ -509,7 +522,7 @@ static void check_events (void)
                                 
                                 else switch(keypressed){
 //                                case SDLK_q: if(!(priv->surface->flags & SDL_FULLSCREEN))mplayer_put_key('q');break;
-                                case SDLK_q: mplayer_put_key('q');break;
+                                case SDLK_q: SDL_ShowCursor(1); mplayer_put_key('q');break; //F.B.: added ShowCursor
 //                                case SDLK_p: mplayer_put_key('p');break;
 //                                case SDLK_SPACE: mplayer_put_key(' ');break;
                                 case SDLK_UP: mplayer_put_key(KEY_UP);break;
