@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.162
+// In synch with rev 1.164
 
 // ========================= MPlayer help ===========================
 
@@ -219,7 +219,7 @@ static char help_text[]=
 #define MSGTR_WritingAVIHeader "Schreibe AVI-Header...\n"
 #define MSGTR_DuplicateFrames "\n%d doppelte(r) Frame(s)!\n"
 #define MSGTR_SkipFrame "\nFrame übersprungen!\n"
-#define MSGTR_ResolutionDoesntMatch "\nNeue Videodatei hat eine andere Auflösung als die vorige.\n"
+#define MSGTR_ResolutionDoesntMatch "\nNeue Videodatei hat eine andere Auflösung oder anderen Farbraum als die vorige.\n"
 #define MSGTR_FrameCopyFileMismatch "\nAlle Videodateien müssen für -ovc copy identische fps, Auflösung und Codec haben.\n"
 #define MSGTR_AudioCopyFileMismatch "\nAlle Videodateien müssen für -oac copy identischen Audiocodec und Format haben.\n"
 #define MSGTR_ErrorWritingFile "%s: Fehler beim Schreiben der Datei.\n"
@@ -904,6 +904,16 @@ static char help_text[]=
 #define MSGTR_VO_ValueOutOfRange "Wert außerhalb des gültigen Bereichs"
 #define MSGTR_VO_NoValueSpecified "Kein Wert angegeben."
 #define MSGTR_VO_UnknownSuboptions "Unbekannte Unteroption(en)"
+
+// vo_aa.c
+
+#define MSGTR_VO_AA_HelpHeader "\n\nDies sind die Unteroptionen von aalib vo_aa:\n"
+#define MSGTR_VO_AA_AdditionalOptions "Zusätzlich von vo_aa bereitgestellte Optionen:\n" \
+"  help        gib diese Hilfsnachricht aus\n" \
+"  osdcolor    setze OSD-Farbe\n  subcolor    setze Untertitelfarbe\n" \
+"        die Farbparameter sind folgende:\n           0 : normal\n" \
+"           1 : dim\n           2 : bold\n           3 : boldfont\n" \
+"           4 : reverse\n           5 : special\n\n\n"
 
  // vo_jpeg.c
 #define MSGTR_VO_JPEG_ProgressiveJPEG "Progressives JPEG aktiviert."
