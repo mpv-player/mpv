@@ -33,7 +33,7 @@
 gchar         * fsSelectedFile = NULL;
 gchar         * fsSelectedDirectory = NULL;
 unsigned char * fsThatDir = ".";
-gchar           fsFilter[256] = "*";
+gchar         * fsFilter = "*";
 
 int             fsPressed = 0;
 int             fsType    = 0;
@@ -173,7 +173,6 @@ void CheckDir( GtkWidget * list,char * directory )
   }
  globfree( &gg );
 
-//printf( "fsFiler: '%s'\n",fsFilter );
  if ( strchr( fsFilter,',' ) )
   {
    char tmp[8];
@@ -335,7 +334,7 @@ void fs_fsFileSelect_destroy( GtkObject * object,gpointer user_data )
 
 void fs_fsFilterCombo_activate( GtkEditable * editable,gpointer user_data )
 {
- strcpy( fsFilter,gtk_entry_get_text( GTK_ENTRY( user_data ) ) );
+ fsFilter=gtk_entry_get_text( GTK_ENTRY( user_data ) );
  CheckDir( fsFNameList,get_current_dir_name() );
 }
 
@@ -351,27 +350,27 @@ void fs_fsFilterCombo_changed( GtkEditable * editable,gpointer user_data )
    case fsVideoSelector:
           for( i=0;fsVideoFilterNames[i][0];i++ )
            if( !strcmp( str,fsVideoFilterNames[i][0] ) )
-            { strcpy( fsFilter,fsVideoFilterNames[i][1] ); break; }
+            { fsFilter=fsVideoFilterNames[i][1]; break; }
           break;
    case fsSubtitleSelector:
           for( i=0;fsSubtitleFilterNames[i][0];i++ )
            if( !strcmp( str,fsSubtitleFilterNames[i][0] ) )
-            { strcpy( fsFilter,fsSubtitleFilterNames[i][1] ); break; }
+            { fsFilter=fsSubtitleFilterNames[i][1]; break; }
           break;
    case fsOtherSelector:
           for( i=0;fsOtherFilterNames[i][0];i++ )
            if( !strcmp( str,fsOtherFilterNames[i][0] ) )
-            { strcpy( fsFilter,fsOtherFilterNames[i][1] ); break; }
+            { fsFilter=fsOtherFilterNames[i][1]; break; }
           break;
    case fsAudioSelector:
           for( i=0;fsAudioFileNames[i][0];i++ )
            if( !strcmp( str,fsAudioFileNames[i][0] ) )
-            { strcpy( fsFilter,fsAudioFileNames[i][1] ); break; }
+            { fsFilter=fsAudioFileNames[i][1]; break; }
 	  break;
    case fsFontSelector:
           for( i=0;fsFontFileNames[i][0];i++ )
 	    if( !strcmp( str,fsFontFileNames[i][0] ) )
-	     { strcpy( fsFilter,fsFontFileNames[i][1] ); break; }
+	     { fsFilter,fsFontFileNames[i][1]; break; }
 	  break;
    default: return;
   }
