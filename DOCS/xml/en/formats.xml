@@ -243,9 +243,8 @@ picture will be messy for a short time after seeking.
 
 <para>
 Yes, <application>MPlayer</application> can read (demux) RealMedia
-(<filename>.rm</filename>) files. Seeking works, but you have to explicitly
-specify the <option>-forceidx</option> option (the format supports
-keyframes). Here are the lists of the supported <link
+(<filename>.rm</filename>) files.
+Here are the lists of the supported <link
 linkend="realvideo">RealVideo</link> and <link
 linkend="realaudio">RealAudio</link> codecs.
 </para>
