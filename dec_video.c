@@ -689,8 +689,8 @@ switch(d_video->demuxer->file_format){
                "SECAM) and the movie resolution (720x576,352x240,480x480,...) to the MPlayer"
                " developers, so that we can add support for it!\nAssuming 1:1 aspect for now.\n",
                picture->aspect_ratio_information);
-     case 1:  // VGA 1:1
-       sh_video->aspect=1.0;
+     case 1:  // VGA 1:1 - do not prescale
+       sh_video->aspect=0.0;
      break;
    }
    // display info:
