@@ -123,12 +123,13 @@ frame
 	if(keyframe){
 		keyframe_startcode		f(64)
 	}
-	lsb_timestamp				v
-	stream_id				v
+	zero_bit				f(1)
 	priority				u(2)
 	checksum_flag				u(1)
 	msb_timestamp_flag			u(1)
-	reserved				u(4)
+	reserved				u(3)
+	lsb_timestamp				v
+	stream_id				v
 	if(msb_timestamp_flag)
 		msb_timestamp			v
 	bitstream
@@ -256,6 +257,11 @@ sample_width/sample_height (aspect ratio)
 depth
 	for compatibility with some win32 codecs
 
+zero_bit
+	MUST be 0, its there to distinguish non keyframes from other packets,
+	Note: all packets have a 64-bit startcode except non-keyframes to reduce
+	      their size, and all startcodes start with a 1 bit
+        
 priority
 	if 0 then the frame isnt used as reference (b frame) and can be droped
 	MUST be > 0 for keyframes
@@ -325,6 +331,7 @@ headers MUST be repeated at least twice (so they exist 3 times in a file)
 
 		Index
 the index can be repeated but there MUST be at least one at the end
+Note: in case of realtime streaming there is no end, so no index there either
 
 		Info packets
 the info_packet can be repeated, it can also contain different names & values
