@@ -13,13 +13,6 @@
 
 #include "../config.h"
 
-#ifndef CAN_COMPILE_X86
-#ifdef  ARCH_X86
-#define CAN_COMPILE_X86
-#endif
-#endif
-
-
 #if 0
  /* old WRITE_SAMPLE */
    /* is portable */
@@ -63,9 +56,9 @@
 
    /* sizeof(int) == 4 */
 #define WRITE_SAMPLE(samples,sum,clip) { \
-  double dtemp; int v;                  \
-  dtemp = ((((65536.0 * 65536.0 * 16)+(65536.0 * 0.5))* 65536.0)) + (sum);\
-  v = (((int *)&dtemp)[MANTISSA_OFFSET] - 0x80000000); \
+  union { double dtemp; int itemp[2]; } u; int v; \
+  u.dtemp = ((((65536.0 * 65536.0 * 16)+(65536.0 * 0.5))* 65536.0)) + (sum);\
+  v = u.itemp[MANTISSA_OFFSET] - 0x80000000; \
   if( v > 32767) { *(samples) = 0x7fff; (clip)++; } \
   else if( v < -32768) { *(samples) = -0x8000; (clip)++; } \
   else { *(samples) = v; } \
