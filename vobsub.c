@@ -379,7 +379,7 @@ packet_queue_insert(packet_queue_t *queue)
     /* XXX packet_size does not reflect the real thing here, it will be updated a bit later */
     memmove(queue->packets + queue->current_index + 2,
 	    queue->packets + queue->current_index + 1,
-	    sizeof(packet_t) * (queue->packets_size - queue->current_index));
+	    sizeof(packet_t) * (queue->packets_size - queue->current_index - 1));
     pkts = queue->packets + queue->current_index;
     ++queue->packets_size;
     ++queue->current_index;
@@ -402,15 +402,16 @@ typedef struct {
     unsigned int spu_streams_current;
 } vobsub_t;
 
+/* Make sure that the spu stream idx exists. */
 static int
-vobsub_add_id(vobsub_t *vob, const char *id, size_t idlen, const unsigned int index)
+vobsub_ensure_spu_stream(vobsub_t *vob, unsigned int index)
 {
     if (index >= vob->spu_streams_size) {
 	/* This is a new stream */
 	if (vob->spu_streams) {
 	    packet_queue_t *tmp = realloc(vob->spu_streams, (index + 1) * sizeof(packet_queue_t));
 	    if (tmp == NULL) {
-		perror("vobsub_add_id: realloc failure");
+		perror("vobsub_ensure_spu_stream: realloc failure");
 		return -1;
 	    }
 	    vob->spu_streams = tmp;
@@ -418,7 +419,7 @@ vobsub_add_id(vobsub_t *vob, const char *id, size_t idlen, const unsigned int in
 	else {
 	    vob->spu_streams = malloc((index + 1) * sizeof(packet_queue_t));
 	    if (vob->spu_streams == NULL) {
-		perror("vobsub_add_id: malloc failure");
+		perror("vobsub_ensure_spu_stream: malloc failure");
 		return -1;
 	    }
 	}
@@ -427,6 +428,14 @@ vobsub_add_id(vobsub_t *vob, const char *id, size_t idlen, const unsigned int in
 	    ++vob->spu_streams_size;
 	}
     }
+    return 0;
+}
+
+static int
+vobsub_add_id(vobsub_t *vob, const char *id, size_t idlen, const unsigned int index)
+{
+    if (vobsub_ensure_spu_stream(vob, index) < 0)
+	return -1;
     if (id && idlen) {
 	if (vob->spu_streams[index].id)
 	    free(vob->spu_streams[index].id);
@@ -667,8 +676,6 @@ vobsub_open(const char *const name)
 		perror("Can't open SUB file");
 	    else {
 		long last_pts_diff = 0;
-		if (vob->spu_streams == NULL)
-		    abort();
 		while (!mpeg_eof(mpg)) {
 		    off_t pos = mpeg_tell(mpg);
 		    if (mpeg_run(mpg) < 0) {
@@ -679,9 +686,11 @@ vobsub_open(const char *const name)
 		    if (mpg->packet_size) {
 			if ((mpg->aid & 0xe0) == 0x20) {
 			    unsigned int sid = mpg->aid & 0x1f;
-			    if (vob->spu_streams_size > sid) {
+			    if (vobsub_ensure_spu_stream(vob, sid) >= 0)  {
 				packet_queue_t *queue = vob->spu_streams + sid;
 				/* get the packet to fill */
+				if (queue->packets_size == 0 && packet_queue_grow(queue)  < 0)
+				  abort();
 				while (queue->current_index + 1 < queue->packets_size
 				       && queue->packets[queue->current_index + 1].filepos <= pos)
 				    ++queue->current_index;
