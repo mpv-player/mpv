@@ -828,7 +828,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
     demuxer = NULL;
   }
 }
-//=============== Try to open as a RTP stream): ===========
+//=============== Try to open as a RTP stream: ===========
  if(file_format==DEMUXER_TYPE_RTP) {
    demuxer=new_demuxer(stream,DEMUXER_TYPE_RTP,audio_id,video_id,dvdsub_id);
  }

@@ -862,7 +862,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 			// RTSP/RTP streaming is handled separately:
 			ret = rtsp_streaming_start( stream );
 			if( ret<0 ) {
-				mp_msg(MSGT_NETWORK,MSGL_ERR,"rtsp_rtp_streaming_start failed\n");
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"rtsp_streaming_start failed\n");
 			}
 			break;
 #endif
