@@ -27,6 +27,7 @@
 #define DVB_CHANNEL_LOWER -1
 #define DVB_CHANNEL_HIGHER 1
 
+#include "inttypes.h"
 
 typedef struct
 {
