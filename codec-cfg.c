@@ -207,6 +207,7 @@ static short get_driver(char *s,int audioflag)
 
 static int validate_codec(codecs_t *c, int type)
 {
+#if 0
 	int i;
 
 	for (i = 0; i < strlen(c->name) && isalnum(c->name[i]); i++)
@@ -241,6 +242,7 @@ static int validate_codec(codecs_t *c, int type)
 			printf("\ncodec(%s) needs an 'outfmt'!\n", c->name);
 			return 0;
 		}
+#endif
 	return 1;
 }
 
