@@ -450,8 +450,8 @@ static unsigned mach64_query_pitch(unsigned fourcc,const vidix_yuv_t *spitch)
 		else						pitch = 32;
 		break;
 	default:
-		if(spy > 16)	pitch = spy;
-		else		pitch = 32;
+		if(spy >= 16)	pitch = spy;
+		else		pitch = 16;
 		break;
   }
   return pitch;
