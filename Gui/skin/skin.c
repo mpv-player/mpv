@@ -706,6 +706,7 @@ void btnModify( int event,float state )
      {
       case itButton:
            appMPlayer.Items[j].pressed=(int)state;
+           appMPlayer.Items[j].tmp=(int)state;
            break;
       case itPotmeter:
       case itHPotmeter:

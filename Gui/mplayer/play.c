@@ -210,6 +210,7 @@ void ChangeSkin( void )
  btnModify( evSetVolume,mplShMem->Volume );
  btnModify( evSetBalance,mplShMem->Balance );
  btnModify( evSetMoviePosition,mplShMem->Position );
+ btnModify( evFullScreen,!appMPlayer.subWindow.isFullScreen );
 }
 
 void EventHandling( void )
