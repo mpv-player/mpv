@@ -165,6 +165,11 @@ static struct pci_dev *pci_dev;
 
 static mga_vid_config_t mga_config; 
 
+static int colkey_saved=0;
+static int colkey_on=0;
+static unsigned char colkey_color[4];
+static unsigned char colkey_mask[4];
+
 static int mga_irq = -1;
 
 //All register offsets are converted to word aligned offsets (32 bit)
@@ -254,13 +259,74 @@ static void mga_vid_frame_sel(int frame)
 }
 
 
-static void mga_vid_write_regs(void)
+static void mga_vid_write_regs(int restore)
 {
 	//Make sure internal registers don't get updated until we're done
 	writel( (readl(mga_mmio_base + VCOUNT)-1)<<16,
 			mga_mmio_base + BESGLOBCTL);
 
 	// color or coordinate keying
+	
+	if(restore && colkey_saved){
+	    // restore it
+	    colkey_saved=0;
+
+		printk("mga_vid: Restoring colorkey (ON: %d  %02X:%02X:%02X)\n",
+			colkey_on,colkey_color[0],colkey_color[1],colkey_color[2]);
+
+		// Set color key registers:
+		writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
+		writeb( colkey_on, mga_mmio_base + X_DATAREG);
+		
+		writeb( XCOLKEY0RED, mga_mmio_base + PALWTADD);
+		writeb( colkey_color[0], mga_mmio_base + X_DATAREG);
+		writeb( XCOLKEY0GREEN, mga_mmio_base + PALWTADD);
+		writeb( colkey_color[1], mga_mmio_base + X_DATAREG);
+		writeb( XCOLKEY0BLUE, mga_mmio_base + PALWTADD);
+		writeb( colkey_color[2], mga_mmio_base + X_DATAREG);
+		writeb( X_COLKEY, mga_mmio_base + PALWTADD);
+		writeb( colkey_color[3], mga_mmio_base + X_DATAREG);
+
+		writeb( XCOLMSK0RED, mga_mmio_base + PALWTADD);
+		writeb( colkey_mask[0], mga_mmio_base + X_DATAREG);
+		writeb( XCOLMSK0GREEN, mga_mmio_base + PALWTADD);
+		writeb( colkey_mask[1], mga_mmio_base + X_DATAREG);
+		writeb( XCOLMSK0BLUE, mga_mmio_base + PALWTADD);
+		writeb( colkey_mask[2], mga_mmio_base + X_DATAREG);
+		writeb( XCOLMSK, mga_mmio_base + PALWTADD);
+		writeb( colkey_mask[3], mga_mmio_base + X_DATAREG);
+
+	} else if(!colkey_saved){
+	    // save it
+	    colkey_saved=1;
+		// Get color key registers:
+		writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
+		colkey_on=(unsigned char)readb(mga_mmio_base + X_DATAREG) & 1;
+		
+		writeb( XCOLKEY0RED, mga_mmio_base + PALWTADD);
+		colkey_color[0]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
+		writeb( XCOLKEY0GREEN, mga_mmio_base + PALWTADD);
+		colkey_color[1]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
+		writeb( XCOLKEY0BLUE, mga_mmio_base + PALWTADD);
+		colkey_color[2]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
+		writeb( X_COLKEY, mga_mmio_base + PALWTADD);
+		colkey_color[3]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
+
+		writeb( XCOLMSK0RED, mga_mmio_base + PALWTADD);
+		colkey_mask[0]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
+		writeb( XCOLMSK0GREEN, mga_mmio_base + PALWTADD);
+		colkey_mask[1]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
+		writeb( XCOLMSK0BLUE, mga_mmio_base + PALWTADD);
+		colkey_mask[2]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
+		writeb( XCOLMSK, mga_mmio_base + PALWTADD);
+		colkey_mask[3]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
+
+		printk("mga_vid: Saved colorkey (ON: %d  %02X:%02X:%02X)\n",
+			colkey_on,colkey_color[0],colkey_color[1],colkey_color[2]);
+
+	}
+	
+if(!restore){
 	writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
 	writeb( mga_config.colkey_on, mga_mmio_base + X_DATAREG);
 	if ( mga_config.colkey_on ) 
@@ -302,6 +368,7 @@ static void mga_vid_write_regs(void)
 		writeb( X_COLKEY, mga_mmio_base + PALWTADD);
 		writeb( 0x00, mga_mmio_base + X_DATAREG);
 
+
 		// Set up color key registers
 		writeb( XCOLKEY0RED, mga_mmio_base + PALWTADD);
 		writeb( r, mga_mmio_base + X_DATAREG);
@@ -318,6 +385,8 @@ static void mga_vid_write_regs(void)
 		writeb( XCOLMSK0BLUE, mga_mmio_base + PALWTADD);
 		writeb( 0xff, mga_mmio_base + X_DATAREG);
 	}
+
+}
 
 	// Backend Scaler
 	writel( regs.besctl,      mga_mmio_base + BESCTL); 
@@ -527,7 +596,7 @@ if(config->format==MGA_VID_FORMAT_YV12
 	regs.besv2wght = regs.besv1wght = (weights << 16) + ((weight & 0x3FFF) << 2);
 	regs.besv2srclst = regs.besv1srclst = sh - 1 - (((ofstop * regs.besviscal) >> 16) & 0x03FF);
 
-	mga_vid_write_regs();
+	mga_vid_write_regs(0);
 	return 0;
 }
 
@@ -687,7 +756,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			if(vid_overlay_on)
 			{
 				regs.besctl |= 1;
-				mga_vid_write_regs();
+				mga_vid_write_regs(0);
 			}
 #ifdef MGA_ALLOW_IRQ
 			if ( mga_irq != -1 ) enable_irq();
@@ -703,7 +772,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 #endif
 			regs.besctl &= ~1;
                         regs.besglobctl &= ~(1<<6);  // UYVY format selected
-			mga_vid_write_regs();
+			mga_vid_write_regs(0);
 		break;
 			
 		case MGA_VID_FSEL:
@@ -879,8 +948,8 @@ static int mga_vid_release(struct inode *inode, struct file *file)
 	vid_src_ready = 0;   
 	regs.besctl &= ~1;
         regs.besglobctl &= ~(1<<6);  // UYVY format selected
-	mga_config.colkey_on=0; //!!!
-	mga_vid_write_regs();
+//	mga_config.colkey_on=0; //!!!
+	mga_vid_write_regs(1);
 	mga_vid_in_use = 0;
 
 	MOD_DEC_USE_COUNT;
