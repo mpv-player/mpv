@@ -13,7 +13,7 @@
 <LI> DVD, közvetlen a lemezrõl, opcionálisan libcss-t használva dekódoláshoz
 <LI> MPEG 1/2 System Stream (PS/PES/VOB) és Elementary Stream (ES) formátumok
 <LI> RIFF AVI formátum
-<LI> ASF 1.0 formátum
+<LI> ASF/WMV 1.0 formátum
 <LI> file olvasása, stdin-rõl is, továbbá hálózatról, HTTP-n keresztül
 </UL></P>
 
@@ -23,13 +23,13 @@
 <P><B><A NAME=2.1.2>2.1.2.  Támogatott audio és video codec-ek</A></B></P>
 
 <P>Lásd <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A> a teljes, naponta
-frissített listához!!!</P>
+generált listához!!!</P>
 
 <P>A legfontosabb video codecek:<BR>
 <UL>
 <LI>MPEG1 (VCD) és MPEG2 (DVD) video
-<LI>DivX, FFmpeg, OpenDivX és más MPEG4 variánsok
-<LI>Windows Media Video 7 (WMV1) és Windows Media Video 8 ami .wmv file-okban
+<LI>DivX ;-), OpenDivX (DivX4) és más MPEG4 variánsok
+<LI>Windows Media Video 7 (WMV1) és 8 (WMV2) ami .wmv file-okban
 van
 <LI>Intel Indeo codecek (3.1, 3.2, 4.1, 5.0)
 <LI>MJPEG, ASV2 és más hardware formátumok
@@ -37,12 +37,12 @@ van
 
 <P>A legfontosabb audio codecek:<BR>
 <UL>
-<LI>MPEG layer 2, és layer 3 (MP3) audio (nativ kód, 3DNow! optimalizációval)
-<LI>AC3 dolby audio (nativ kód, 3DNow! optimalizációval)
+<LI>MPEG layer 2, és layer 3 (MP3) audio (nativ kód, MMX/SSE/3DNow! optimalizációval)
+<LI>AC3 dolby audio (natív kód, SSE/3DNow! optimalizációval)
 <LI>AC3 dekódolás a hangkártya dekóderével
-<LI>VoxWare audio
+<LI>Ogg Vorbis audio codec (natív)
+<LI>VoxWare audio (DirectShow-os DLL használatával)
 <LI>alaw, msgsm, pcm és más régi formátumok
-<LI>Ogg Vorbis audio codec
 </UL></P>
 
 <P>Ha van olyan codeced, ami nincs felsorolva vagy támogatva, olvasd el a
@@ -77,6 +77,8 @@ ln -s /usr/local/lib/libdivxdecore.so.0 /usr/local/lib/libdivxdecore.so<BR>
 ldconfig<BR>
 cp decore.h /usr/local/include/</CODE></P>
 
+<P>Megj: NE felejtsd el hozzáadni az /usr/local/lib-et az /etc/ld.so.conf
+file végére!</P>
 
 <P>Az <B>MPlayer</B> automatikusan detektálja, ha a DivX4 (helyesen) van
 installálva, fordítsd le a szokott módon. Ha nem veszi észre, akkor nem
@@ -137,7 +139,7 @@ fát:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
 
-<P>Link létrehozása NEM elég, másolni kell.</P>
+<P>Link létrehozása NEM elég, másolni vagy mozgatni kell.</P>
 
 <P>./configure detektálja, ha minden rendben. Jelenleg nem támogat
 postprocessinget, és optimalizálás alatt van (gyorsabb mint a DirectShow-os
@@ -181,7 +183,7 @@ az MSACM elõtagot használják :</P>
 <P>Ez az MP3 codec.
 Most, hogy tudod az összes szükséges infót (fourcc, codec file, minta AVI),
 küldd el kérésed levélben, és töltsd fel eme file-okat FTP-re:</P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
 
 
 <P><B><A NAME=2.1.4.2>2.1.4.2.  DirectShow</A></B></P>
@@ -217,7 +219,7 @@ a codec fourcc-jét. (pl.: TM20)
 
 <P>Most, hogy tudod az összes szükséges infót (fourcc, GUID, codec file, minta
   AVI), küldd el kérésed levélben, és töltsd fel eme file-okat FTP-re:
-      ftp://mplayerhq.hu/MPlayer/incoming/[codecname]/</P>
+      ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</P>
 
 </BODY>
 
