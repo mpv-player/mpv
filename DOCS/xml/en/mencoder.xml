@@ -38,8 +38,8 @@ Just two commands are needed:
 remove this file, which can come from a previous 3-pass encoding (it interferes
 with current one)
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>movie.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>movie.avi</replaceable>
 </screen>
 </para>
 
@@ -99,8 +99,8 @@ remove this file, which can come from a previous 3-pass encoding
 (it interferes with current one)
 <screen>
 mencoder dvd://2 -ovc frameno -o frameno.avi -oac mp3lame -lameopts vbr=3
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>movie.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>movie.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -130,7 +130,7 @@ use the <option>-of mpeg</option> option.
 <para>
 Example:
 <screen>
-mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>other options</replaceable> media.avi -o output.mpg
+mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>other_options</replaceable> <replaceable>media.avi</replaceable> -o <replaceable>output.mpg</replaceable>
 </screen>
 </para>
 </sect1>
@@ -222,7 +222,7 @@ to append 2 (or more) AVI files:
 
 <para>
 Command:
-<screen>cat 1.avi 2.avi | mencoder -noidx -ovc copy -oac copy -o output.avi -</screen>
+<screen>cat 1.avi 2.avi | mencoder -noidx -ovc copy -oac copy -o <replaceable>output.avi</replaceable> -</screen>
 </para>
 
 <note><para>
@@ -345,7 +345,7 @@ the man page.
 <para>
 Creating a DivX4 file from all the JPEG files in the current dir:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o output.avi \*.jpg<!--
+mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o <replaceable>output.avi</replaceable> \*.jpg<!--
 --></screen>
 </para>
 </informalexample>
@@ -354,7 +354,7 @@ mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o output.avi \*.jpg<!--
 <para>
 Creating a DivX4 file from some JPEG files in the current dir:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o output.avi frame001.jpg,frame002.jpg <!--
+mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o <replaceable>output.avi</replaceable> <replaceable>frame001.jpg,frame002.jpg</replaceable> <!--
 --></screen>
 </para>
 </informalexample>
@@ -364,7 +364,7 @@ mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o output.avi frame001.jpg,frame00
 Creating a Motion JPEG (MJPEG) file from all the JPEG files in the current
 dir:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25 -ovc copy -o output.avi \*.jpg<!--
+mencoder -mf on:w=800:h=600:fps=25 -ovc copy -o <replaceable>output.avi</replaceable> \*.jpg<!--
 --></screen>
 </para>
 </informalexample>
@@ -373,7 +373,7 @@ mencoder -mf on:w=800:h=600:fps=25 -ovc copy -o output.avi \*.jpg<!--
 <para>
 Creating an uncompressed file from all the PNG files in the current dir:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25:type=png -ovc raw -o output.avi \*.png<!--
+mencoder -mf on:w=800:h=600:fps=25:type=png -ovc raw -o <replaceable>output.avi</replaceable> \*.png<!--
 --></screen>
 </para>
 </informalexample>
@@ -387,7 +387,7 @@ Width must be integer multiple of 4, it's a limitation of the RAW RGB AVI format
 Creating a Motion PNG (MPNG) file from all the PNG files in the current
 dir:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy -o output.avi \*.png<!--
+mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy -o <replaceable>output.avi</replaceable> \*.png<!--
 --></screen>
 </para>
 </informalexample>
@@ -397,7 +397,7 @@ mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy -o output.avi \*.png<!--
 Creating a Motion TGA (MTGA) file from all the TGA files in the current
 dir:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy -o output.avi \*.tga<!--
+mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy -o <replaceable>output.avi</replaceable> \*.tga<!--
 --></screen>
 </para>
 </informalexample>
@@ -459,7 +459,7 @@ mencoder dvd://1 -oac copy -ovc divx4 -pass 2 -vobsubout subtitles -vobsuboutind
 <title>Copying a french subtitle from an MPEG file</title>
 <screen>
 rm subtitles.idx subtitles.sub
-mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1<!--
+mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1<!--
 --></screen>
 </example>
 
@@ -500,7 +500,7 @@ See the man page for the usage of the <systemitem>cropdetect</systemitem> and
 
 <para>
 Usage
-<screen>mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o output.avi</screen>
+<screen>mencoder <replaceable>sample-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>output.avi</replaceable></screen>
 </para>
 </sect1>
 
@@ -552,13 +552,13 @@ Inter:
 <para>
 Usage:
 <screen>
-$ mencoder input.avi -o output.avi -oac copy -ovc lavc -lavcopts inter_matrix=...:intra_matrix=...
+$ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -oac copy -ovc lavc -lavcopts inter_matrix=...:intra_matrix=...
 </screen>
 </para>
 
 <para>
 <screen>
-$ mencoder input.avi -ovc lavc -lavcopts
+$ mencoder <replaceable>input.avi</replaceable> -ovc lavc -lavcopts
 vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 12,14,18,27,29,34,37,38,22,26,27,31,36,37,38,40,26,27,29,36,39,38,40,48,27,
 29,34,37,38,40,48,58,29,34,37,38,40,48,58,69,34,37,38,40,48,58,69,79
