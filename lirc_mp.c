@@ -13,7 +13,7 @@
 // hack, will be remove later when ./configure fixed...
 #include "config.h"
 
-#ifdef HAVE_LIRC
+#if defined(HAVE_LIRC) && ! defined (HAVE_NEW_INPUT)
 
 #include "mp_msg.h"
 #include "help_mp.h"

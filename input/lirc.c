@@ -20,7 +20,7 @@
 #include "../help_mp.h"
 
 static struct lirc_config *lirc_config;
-extern char *lirc_configfile;
+char *lirc_configfile;
 
 static int child_pid=0;
 
