@@ -768,7 +768,7 @@ static char help_text[]=
 #define MSGTR_VO_JPEG_ParsingSuboptions "Unteroptionen werden geparst."
 #define MSGTR_VO_JPEG_SuboptionsParsedOK "Parsen der Unteroptionen OK."
 #define MSGTR_VO_JPEG_ProgressiveJPEG "Progressives JPEG aktiviert."
-#define MSGTR_VO_JPEG_NoProgressiveJPEG "Progressive JPEG deaktiviert."
+#define MSGTR_VO_JPEG_NoProgressiveJPEG "Progressives JPEG deaktiviert."
 #define MSGTR_VO_JPEG_BaselineJPEG "Baseline-JPEG aktiviert."
 #define MSGTR_VO_JPEG_NoBaselineJPEG "Baseline-JPEG deaktiviert."
 #define MSGTR_VO_JPEG_ValueOutOfRange "Wert außerhalb des gültigen Bereichs"
