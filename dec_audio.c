@@ -59,7 +59,11 @@ typedef struct ov_struct_st {
 #endif
 
 #ifdef USE_LIBAVCODEC
+#ifdef USE_LIBAVCODEC_SO
+#include <libffmpeg/avcodec.h>
+#else
 #include "libavcodec/avcodec.h"
+#endif
     static AVCodec *lavc_codec=NULL;
     static AVCodecContext lavc_context;
     extern int avcodec_inited;

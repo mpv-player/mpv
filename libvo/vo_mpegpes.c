@@ -50,8 +50,11 @@ int vo_mpegpes_fd2=-1;
 
 #ifdef USE_LIBAVCODEC
 
+#ifdef USE_LIBAVCODEC_SO
+#include <libffmpeg/avcodec.h>
+#else
 #include "../libavcodec/avcodec.h"
-
+#endif
 static unsigned char *picture_buf=NULL;
 static unsigned char *outbuf=NULL;
 static int outbuf_size = 100000;

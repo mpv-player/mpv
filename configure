@@ -571,6 +571,7 @@ test "$host_arch" != i386 && _dshow=no _win32=no
 _fastmemcpy=yes
 _streaming=no
 _libavcodec=no
+_libavcodec_so=no
 _kernelextcheck=yes
 
 _x=1
@@ -638,13 +639,17 @@ if test -d libavcodec && test -f libavcodec/Makefile ; then
     _libavcodec=yes
 fi
 
+#Checking for libffmpeg.so
+cat > $TMPC << EOF
+#include <libffmpeg/avcodec.h>
+int main( void ) { return 0; }
+EOF
+cc_check $_extraincdir $_extralibdir -lffmpeg && _libavcodec_so=yes
 
 if test -c /dev/mga_vid ; then
  _mga=yes
  _syncfb=yes
 fi
-
-
 
 case "$host_arch" in
 i386)
@@ -1767,6 +1772,7 @@ fi
 fi
 
 echo "Checking for libavcodec ... $_libavcodec"
+echo "Checking for libffmpeg.so ... $_libavcodec_so"
 echo "Checking for divx4linux ... $_divx4linux"
 echo "Checking for fastmemcpy ... $_fastmemcpy"
 echo "Extra libs : $_extralibdir"
@@ -1907,10 +1913,19 @@ if test "$_libavcodec" = yes ; then
    _lavclib='-Llibavcodec -lavcodec'
    _lavcdep='libavcodec/libavcodec.a'
    _libavcodec='#define USE_LIBAVCODEC'
+   _libavcodecso='#undef USE_LIBAVCODEC'
 else
-   _lavclib=''
-   _lavcdep=''
-   _libavcodec='#undef USE_LIBAVCODEC'
+   if test "$_libavcodec_so" = yes ; then
+      _lavclib='-lffmpeg'
+      _lavcdep=''
+      _libavcodec='#define USE_LIBAVCODEC'
+      _libavcodecso='#define USE_LIBAVCODEC_SO'
+   else
+      _lavclib=''
+      _lavcdep=''
+      _libavcodec='#undef USE_LIBAVCODEC'
+      _libavcodecso='#undef USE_LIBAVCODEC'
+   fi
 fi
 
 if test "$_fastmemcpy" = yes ; then
@@ -2548,6 +2563,7 @@ $_use_directshow
 
 /* ffmpeg's libavcodec support (requires libavcodec source) */
 $_libavcodec
+$_libavcodecso
 /* use only decoders from libavcodec: */
 #define CONFIG_DECODERS
 

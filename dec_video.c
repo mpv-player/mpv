@@ -51,7 +51,11 @@ extern picture_t *picture;	// exported from libmpeg2/decode.c
 #endif
 
 #ifdef USE_LIBAVCODEC
+#ifdef USE_LIBAVCODEC_SO
+#include <libffmpeg/avcodec.h>
+#else
 #include "libavcodec/avcodec.h"
+#endif
     static AVCodec *lavc_codec=NULL;
     static AVCodecContext lavc_context;
     static AVPicture lavc_picture;
