@@ -108,18 +108,19 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,in
 		}
 		{
 			// copy U + V:
+			int imgstride = image_width >> 1;
 			uint8_t *src1 = srcimg[1];
 			uint8_t *src2 = srcimg[2];
-			uint8_t *dstu = image_u + image_width * (y / 2) + (x / 2);
-			uint8_t *dstv = image_v + image_width * (y / 2) + (x / 2);
+			uint8_t *dstu = image_u + imgstride * (y >> 1) + (x >> 1);
+			uint8_t *dstv = image_v + imgstride * (y >> 1) + (x >> 1);
 			for (i = 0; i < h / 2; i++)
 			{
-				memcpy(dstu, src1 , w / 2);
-				memcpy(dstv, src2, w / 2);
+				memcpy(dstu, src1 , w >> 1);
+				memcpy(dstv, src2, w >> 1);
 				src1 += stride[1];
 				src2 += stride[2];
-				dstu += image_width / 2;
-				dstv += image_width / 2;
+				dstu += imgstride;
+				dstv += imgstride;
 			}
 		}
 	}
@@ -154,7 +155,6 @@ static uint32_t draw_frame(uint8_t * src[])
 				rgb24toyv12(src[0], image_y, image_u, image_v, 
 							image_width, image_height, 
 							image_width, image_width / 2, image_width * 3);
-//				RGB2YUV(image_width, image_height, src[0], image_y, image_u, image_v, 1);
 			}
 			break;
 	}
