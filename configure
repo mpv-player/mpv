@@ -1080,15 +1080,17 @@ else
 fi
 echores "$_dl"
 
-
 echocheck "pthread"
 cat > $TMPC << EOF
+#include <pthread.h>
 int main(void) { (void) pthread_create (0, 0, 0, 0); return 0; }
 EOF
 if cc_check -lpthread ; then
   _ld_pthread='-lpthread'
 elif cc_check -pthread ; then
   _ld_pthread='-pthread'
+elif cc_check ; then		# QNX
+  _ld_pthread=''
 else
   die "Lib pthread not found."
 fi
