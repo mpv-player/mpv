@@ -660,7 +660,7 @@ asf_http_streaming_start( stream_t *stream ) {
 		do {
 			i = read( fd, buffer, BUFFER_SIZE );
 //printf("read: %d\n", i );
-			if( i<0 ) {
+			if( i<=0 ) {
 				perror("read");
 				http_free( http_hdr );
 				return -1;
