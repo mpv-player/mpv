@@ -183,7 +183,7 @@ Dynamically changes the level of postprocessing depending on available spare
 CPU time.
 The number you specify will be the maximum level used.
 Usually you can use some big number.
-You may not use it together with \-pp but it is OK with \-npp.
+You have to use \-vop pp without parameters in order to use this.
 .TP
 .B \-autosync <factor>
 Gradually adjusts the A/\:V sync based on audio delay measurements.
@@ -469,7 +469,7 @@ For example sometimes '1' is a trailer, and '2' is the real movie.
 .I NOTE:
 .br
 Sometimes deinterlacing is required for DVD playback,
-see the \-pp 0x20000 or \-npp\ lb options.
+see the \-vop pp=0x20000 option.
 .TP
 .B \-dvd\-device <path\ to\ device>
 Override default DVD device name /dev/\:dvd.
@@ -1536,18 +1536,12 @@ Disable automatic movie aspect ratio compensation.
 .B \-nosound
 Do not play/\:encode sound.
 .TP
-.B \-npp <option1,option2,...>
-This option allows giving more literate postprocessing options,
-and is another way of calling it (not with \-pp).
+.B \-vop pp=<option1,option2,...>
+This option enables usage of MPlayer's internal postprocessing filter,
+and also gives an interface where you can pass options to the named filter.
 
-.I NOTE:
-See \-npp help for a full list of available options.
 .br
 Each filter defaults to 'c' (chrominance).
-.br
-\-npp only controls the external postprocess filter, and you HAVE TO
-load it manually by \-vop pp (Usage: \-vop pp \-npp <options>),
-it is not auto-loaded.
 .br
 The keywords accept a '\-' prefix to disable the option.
 .br
@@ -1566,48 +1560,27 @@ y: Do not do chrominance filtering (only luminance filtering).
 .RE
 .PD 0
 .RSs
-.IPs "\-npp hb,vb,dr,al,lb"
-same as \-pp 0x2007f
-.IPs "\-npp hb,vb,dr,al"
-same as \-pp 0x7f
-.IPs "\-npp de,\-al"
+.IPs "\-vop pp=hb,vb,dr,al,lb"
+.IPs "\-vop pp=hb,vb,dr,al"
+.IPs "\-vop pp=de,\-al"
 default filters without brightness/\:contrast correction
-.IPs "\-npp de,tn:1:2:3"
+.IPs "\-vop pp=de,tn:1:2:3"
 Enable default filters & temporal denoiser.
-.IPs "\-npp hb:y,vb:a \-autoq 6"
+.IPs "\-vop pp=hb:y,vb:a \-autoq 6"
 Deblock horizontal only luminance and switch vertical deblocking on or
 off automatically depending on available CPU time.
 .RE
 .PD 1
 .
 .TP
-.B \-pp <quality> (see \-npp option too)
-Apply postprocess filter on decoded image.
+.B \-pp <quality> (see \-vop pp option too)
+Set postprocess level of the DLL. This option is NO LONGER USABLE with
+MPlayer's postprocess filter, but only with Win32 DirectShow DLLs which
+have interal postprocessing routine.
 
-Value given by \-pp is sent to the codec, if the codec has built-in
-postprocess filter (newer win32 DShow DLLs, divx4linux) otherwise the external
-postprocess filter plugin (-vop pp) is auto-loaded and used.
-Note, that you can use the built-in and external pp at the same time, use \-pp
-to set internal pp, and \-vop pp=value to set up the external.
-
-The valid range of \-pp value for built-in pp filters vary on codecs, mostly
+The valid range of \-pp value vary on codecs, mostly
 0\-6, where 0=disable 6=slowest/\:best.
 
-For the external pp filter, this is the numerical mode to use postprocessing.
-The '\-npp' option described above has the same effects but with letters.
-To have several filters at the same time, simply add the hexadecimal values.
-
-.I EXAMPLE:
-The following values are known to give good results:
-.PD 0
-.RSs
-.IPs "\-pp 0x20000 (\-npp lb)"
-deinterlacing (for DVD/\:MPEG2 playback e.g.)
-.IPs "\-pp 0x7f (\-npp hb,vb,dr,al)"
-deblocking filter (for DivX)
-.RE
-.PD 1
-.
 .TP
 .B \-ssf <mode>
 Specifies SwScaler parameters.
@@ -1803,7 +1776,7 @@ It does not do any conversion.
 Use together with the scale filter for a real conversion.
 .IPs pp[=flags]
 Activates the external postprocessing filter.
-(see \-pp option for details)
+(see \-vop pp option for details)
 .IPs lavc[=quality:fps]
 Realtime MPEG1 encoder for use with DVB/\:DXR3 (libavcodec)
 .IPs fame
