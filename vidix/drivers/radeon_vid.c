@@ -710,7 +710,9 @@ int vixGetCapability(vidix_capability_t *to)
 uint32_t supported_fourcc[] = 
 {
   IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV, 
-  IMGFMT_UYVY, IMGFMT_YUY2
+  IMGFMT_UYVY, IMGFMT_YUY2,
+  IMGFMT_RGB16, IMGFMT_BGR16,
+  IMGFMT_RGB32, IMGFMT_BGR32
 };
 
 __inline__ static int is_supported_fourcc(uint32_t fourcc)
@@ -838,12 +840,16 @@ static void radeon_vid_display_video( void )
 #endif
     switch(besr.fourcc)
     {
+/*
         case IMGFMT_RGB15:
         case IMGFMT_BGR15: bes_flags |= SCALER_SOURCE_15BPP; break;
+*/
         case IMGFMT_RGB16:
 	case IMGFMT_BGR16: bes_flags |= SCALER_SOURCE_16BPP; break;
+/*
         case IMGFMT_RGB24:
         case IMGFMT_BGR24: bes_flags |= SCALER_SOURCE_24BPP; break;
+*/
         case IMGFMT_RGB32:
 	case IMGFMT_BGR32: bes_flags |= SCALER_SOURCE_32BPP; break;
         /* 4:1:0*/
@@ -881,16 +887,18 @@ static unsigned radeon_query_pitch(unsigned fourcc)
 static int radeon_vid_init_video( vidix_playback_t *config )
 {
     uint32_t tmp,src_w,src_h,dest_w,dest_h,pitch,h_inc,step_by,left,leftUV,top;
-    int is_420,best_pitch,mpitch;
+    int is_420,is_rgb32,best_pitch,mpitch;
     radeon_vid_stop_video();
     left = config->src.x << 16;
     top =  config->src.y << 16;
     src_h = config->src.h;
     src_w = config->src.w;
-    is_420 = 0;
+    is_420 = is_rgb32 = 0;
     if(config->fourcc == IMGFMT_YV12 ||
        config->fourcc == IMGFMT_I420 ||
        config->fourcc == IMGFMT_IYUV) is_420 = 1;
+    if(config->fourcc == IMGFMT_RGB32 ||
+       config->fourcc == IMGFMT_BGR32) is_rgb32 = 1;
     best_pitch = radeon_query_pitch(config->fourcc);
     mpitch = best_pitch-1;
     switch(config->fourcc)
@@ -899,6 +907,13 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 	case IMGFMT_IYUV:
 	case IMGFMT_YV12:
 	case IMGFMT_I420: pitch = (src_w + mpitch) & ~mpitch;
+			  config->dest.pitch.y = 
+			  config->dest.pitch.u = 
+			  config->dest.pitch.v = best_pitch;
+			  break;
+	/* RGB 4:4:4:4 */
+	case IMGFMT_RGB32:
+	case IMGFMT_BGR32: pitch = (src_w*4 + mpitch) & ~mpitch;
 			  config->dest.pitch.y = 
 			  config->dest.pitch.u = 
 			  config->dest.pitch.v = best_pitch;
@@ -991,7 +1006,10 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 
     leftUV = (left >> 17) & 15;
     left = (left >> 16) & 15;
-    besr.h_inc = h_inc | ((h_inc >> 1) << 16);
+    if(is_rgb32)
+	besr.h_inc = (h_inc>>1) | ((h_inc >> 1) << 16);
+    else
+	besr.h_inc = h_inc | ((h_inc >> 1) << 16);
     besr.step_by = step_by | (step_by << 8);
     besr.y_x_start = (config->dest.x+X_ADJUST) | (config->dest.y << 16);
     besr.y_x_end = (config->dest.x + dest_w+X_ADJUST) | ((config->dest.y + dest_h) << 16);
