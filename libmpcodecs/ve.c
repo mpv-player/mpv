@@ -17,6 +17,7 @@ extern vf_info_t ve_info_libdv;
 extern vf_info_t ve_info_xvid;
 extern vf_info_t ve_info_qtvideo;
 extern vf_info_t ve_info_nuv;
+extern vf_info_t ve_info_x264;
 
 static vf_info_t* encoder_list[]={
 #ifdef HAVE_DIVX4ENCORE
@@ -37,6 +38,9 @@ static vf_info_t* encoder_list[]={
     &ve_info_xvid,
 #endif
     &ve_info_nuv,
+#ifdef HAVE_X264
+    &ve_info_x264,
+#endif
     NULL
 };
 

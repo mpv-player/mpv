@@ -19,7 +19,7 @@ ifeq ($(HAVE_FFPOSTPROCESS),yes)
 VFILTER_SRCS += vf_pp.c
 endif
 
-ENCODER_SRCS=ve.c ve_divx4.c ve_lavc.c ve_vfw.c ve_raw.c ve_libdv.c ve_xvid.c ve_xvid4.c ve_qtvideo.c ve_nuv.c
+ENCODER_SRCS=ve.c ve_divx4.c ve_lavc.c ve_vfw.c ve_raw.c ve_libdv.c ve_xvid.c ve_xvid4.c ve_qtvideo.c ve_nuv.c ve_x264.c
 
 NATIVE_SRCS=native/RTjpegN.c native/minilzo.c native/nuppelvideo.c native/xa_gsm.c native/decode144.c native/decode288.c
 

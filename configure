@@ -198,6 +198,7 @@ Codecs:
   --disable-xanim        disable XAnim DLL support [autodetect]
   --disable-real         disable RealPlayer DLL support [autodetect]
   --disable-xvid         disable XviD codec [autodetect]
+  --disable-x264         disable H.264 encoder [autodetect]
   --disable-divx4linux   disable DivX4linux/Divx5linux codec [autodetect]
   --enable-opendivx      enable _old_ OpenDivx codec [disable]
   --disable-libavcodec   disable libavcodec [autodetect]
@@ -320,6 +321,8 @@ multiple paths separated by ':'):
   --with-reallibdir=DIR    RealPlayer DLL files in DIR
   --with-xvidlibdir=DIR    libxvidcore (XviD) in DIR  (*)
   --with-xvidincdir=DIR    XviD header in DIR (*)
+  --with-x264libdir=DIR    libx264 in DIR
+  --with-x264incdir=DIR    x264 header in DIR
   --with-dtslibdir=DIR     libdts library in DIR  (*)
   --with-dtsincdir=DIR     libdts header in DIR (*)
   --with-livelibdir=DIR    LIVE.COM Streaming Media libraries in DIR
@@ -1298,6 +1301,7 @@ _smbsupport=auto
 _vidix=auto
 _joystick=no
 _xvid=auto
+_x264=auto
 _divx4linux=auto
 _opendivx=no
 _lirc=auto
@@ -1502,6 +1506,8 @@ for ac_option do
   --disable-joystick)	_joystick=no	;;
   --enable-xvid)	_xvid=yes	;;
   --disable-xvid)	_xvid=no	;;
+  --enable-x264)        _x264=yes       ;;
+  --disable-x264)       _x264=no        ;;
   --enable-divx4linux)	_divx4linux=yes	;;
   --disable-divx4linux)	_divx4linux=no	;;
   --enable-opendivx)	_opendivx=yes	;;
@@ -1707,6 +1713,12 @@ for ac_option do
     ;;
   --with-dtsincdir=*)
     _inc_libdts=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
+    ;;
+  --with-x264libdir=*)
+    _ld_x264=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+  --with-x264incdir=*)
+    _inc_x264=-I`echo $ac_option | cut -d '=' -f 2 |sed 's,:, -I,g'`
     ;;
   --with-sdl-config=*)
     _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
@@ -5474,6 +5486,25 @@ EOF
   echores "$_xvidcompat"
 fi
 
+echocheck "x264"
+cat > $TMPC << EOF
+#include <stdint.h>
+#include <stdarg.h>
+#include <x264.h>
+int main(void) { x264_encoder_open((void*)0); return 0; }
+EOF
+_ld_x264="$_ld_x264 -lx264 -lm"
+if test "$_x264" != no && cc_check $_inc_x264 $_ld_x264 ; then
+  _x264=yes
+  _def_x264='#define HAVE_X264 1'
+  _codecmodules="x264 $_codecmodules"
+else
+  _x264=no
+  _ld_x264=''
+  _def_x264='#undef HAVE_X264'
+  _nocodecmodules="x264 $_nocodecmodules"
+fi
+echores "$_x264"
 
 echocheck "DivX4linux/DivX5linux/OpenDivX decore"
 # DivX5: DEC_OPT_MEMORY_REQS - DivX4: DEC_OPT_FRAME_311
@@ -6268,6 +6299,9 @@ ARCH_LIB =  $_ld_arch $_ld_iconv
 XVID = $_xvid
 XVID_INC = $_inc_xvid
 XVID_LIB = $_ld_xvid
+X264 = $_x264
+X264_INC = $_inc_x264
+X264_LIB = $_ld_x264
 CONFIG_DTS = $_libdts
 DTS_INC = $_inc_libdts
 DTS_LIB = $_ld_libdts
@@ -6409,6 +6443,9 @@ $_def_xvid3
 $_def_xvid4
 $_def_decore_xvid
 $_def_encore_xvid
+
+/* Define if you are using the X.264 library */
+$_def_x264
 
 /* Define to include support for libdv-0.9.5 */
 $_def_libdv

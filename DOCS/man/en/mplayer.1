@@ -4308,7 +4308,7 @@ syntax:
 .RE
 .br
 .PP
-Where <codec> may be: lavc, xvidenc, divx4, lame
+Where <codec> may be: lavc, xvidenc, divx4, lame, x264
 .
 .
 .SS divx4 (\-divx4opts)
@@ -5725,6 +5725,141 @@ Print the psnr (peak signal to noise ratio) for the whole video after encoding
 and store the per frame psnr in a file with a name like 'psnr_hhmmss.log' in
 the current directory.
 Returned values are in dB (decibel), the higher the better.
+.SS x264enc (\-x264encopts)
+.TP
+.B bitrate=<value>
+Sets the bitrate to be used in kbits/\:second (default: off).
+This is required if you want a CBR (constant bitrate) encode.
+.TP
+.B iframe=<value>
+Frequency of I frames (default: 60)
+.TP
+.B frameref=<value>
+Number of previous frames used as predictors in a P-frame (default: 1)
+.br
+.I NOTE:
+The current version of x264 (r38) hasn't yet implemented this feature.
+.TP 
+.B idrframe=<value>
+Each <value> I-Frames are IDR-Frames.
+In H.264, I-Frames do not necessarily bound a closed GOP because it is
+allowable for a P-frame to be predicted from more frames than just the one
+frame before it (see the frameref option).
+Therefore, I-frames are not necessarily seekable. IDR-Frames restrict
+subsequent P-frames from referring to any frame prior to the IDR-Frame
+(default: 2)
+.TP
+.B bframe=<value>
+Number of B-Frames between I- and P-Frames (default: 0)
+.TP
+.B deblock=<0|1>
+Use deblocking filter (default: on)
+.TP 
+.B deblockalpha=<-6-6>
+AlphaC0 parameter of deblocking filter.
+This adjusts thresholds for the H.264 deblocking filter.
+First, this parameter adjusts the maximum amount of change that the filter is
+allowed to cause on any one pixel.
+Secondly, this parameter affects the threshold for difference across the
+edge being filtered.
+A positive value reduces blocking artifacts more, but will also smear details
+(default: 0)
+.TP
+.B deblockbeta=<-6-6>
+Beta parameter of deblocking filter.
+Affects the maximum allowed gradient within two adjacent blocks (default: 0)
+.TP
+.B cabac
+Use CABAC (Context-Adaptive Binary Arithmetic Coding) (default: off)
+.TP 
+.B cabacidc=<value>
+Initial value of CABAC IDC.
+The encoder must choose a context for each block it encodes, but for the
+first block in a frame, there are no prior blocks to predict the context.
+Adjusting this may affect bitrate by a fraction of a percent, but it doesn't
+directly affect distortion.
+.RSs
+-1: Let the encoder decide which context (default) (it usually chooses 0)
+.br
+0: low complexity
+.br
+1: medium complexity
+.br
+2: high complexity
+.REss
+.TP
+.B qp_constant=<2-51>
+This selects the quantizer to use.
+Lower values result in better fidelity, but higher bitrates.
+Note that quantization in H.264 works differently from mpeg[124].
+H.264's QP is on a logarithmic scale. As an example, the bitrate difference
+between QP=20 and QP=40 is about a factor of 10.
+Useful quantizers in H.264 tend to be very large compared to mpeg[124].
+20-40 is a useful range (default: 26)
+.br
+.I NOTE:
+This option takes effect even if you specify a cbr encode.
+In such a case, the first frame encoded will use the quantization factor you
+specified, but in later frames, the ratecontrol decides what quants to use.
+.TP
+.B qp_min=<2-51>
+Minimum quantizer. CBR only. 20-40 seems to be a useful range (default: 2)
+.TP
+.B qp_max=<2-51>
+Maximum quantizer. CBR only.
+.TP
+.B qp_step=<value>
+Maximum Value by which the quantizer may be incremented/decremented between
+frames.
+.TP
+.B rc_buffer_size=<value>
+Size of the ratecontrol buffer. (default: 1 second's worth at the bitrate you
+specified)
+.TP
+.B rc_init_buffer=<value>
+Set the initial size of ratecontrol buffer (default: 1/4 of rc_buffer_size)
+.B rc_sens=<0-100>
+Ratecontrol sensitivity (default: 100)
+.TP
+.B ip_factor=<value>
+Quantizer factor between I amd P frames (default: 2.0)
+.TP
+.B pb_factor=<value>
+Quantizer factor between P and B frames (default: 2.0)
+.TP
+.B pass=<1|2>
+For 2-pass mode. The first pass saves statistics.
+.TP
+.B qcompress=<0-1>
+Quantizer compression. This affects the ratecontrol: a lower value makes the
+bitrate more constant, while a higher value makes the quantization parameter
+more constant (default: 0.6)
+.TP
+.B qblur=<0-1>
+Temporal blur of the quantization parameter. Lower values allow the quantizer
+value to jump around more; higher values force it to vary more smoothly
+(default: 0.5)
+.TP
+.B fullinter
+Use all available interframe analyse methods (i4x4, psub8x8, psub16x16)
+(default: 4x4, psub16x16)
+.TP
+.B log=<-1-3>
+Adjust the amount of logging info printed to the screen.
+.RSs
+-1: none
+.br
+ 0: errors (for debugging x264)
+.br
+ 1: warnings
+.br
+ 2: PSNR and other analysis stats when the encode finishes (default)
+.br
+ 3: PSNR, qp, frametype, size, and other stats for every frame
+.REss
+.TP
+.B psnr
+Print signal-to-noise ratio statistics.
 .
 .
 .\" --------------------------------------------------------------------------

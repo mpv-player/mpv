@@ -63,6 +63,10 @@ extern m_option_t vfwopts_conf[];
 extern m_option_t xvidencopts_conf[];
 #endif
 
+#if defined(HAVE_X264)
+extern m_option_t x264encopts_conf[];
+#endif
+
 extern m_option_t nuvopts_conf[];
 
 m_option_t ovc_conf[]={
@@ -78,6 +82,7 @@ m_option_t ovc_conf[]={
 	{"xvid", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_XVID, NULL},
 	{"qtvideo", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_QTVIDEO, NULL},
 	{"nuv", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_NUV, NULL},
+	{"x264", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_X264, NULL},
 	{"help", "\nAvailable codecs:\n"
 	"   copy     - frame copy, without re-encoding. Doesn't work with filters.\n"
 	"   frameno  - special audio-only file for 3-pass encoding, see DOCS.\n"
@@ -102,6 +107,9 @@ m_option_t ovc_conf[]={
 #endif
 #if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 	"   xvid     - XviD encoding\n"
+#endif
+#ifdef HAVE_X264
+	"   x264     - H.264 encoding\n"
 #endif
 	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
@@ -238,6 +246,9 @@ m_option_t mencoder_opts[]={
 #endif
 #if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 	{"xvidencopts", xvidencopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#endif
+#if defined(HAVE_X264)
+	{"x264encopts", x264encopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
 	{"nuvopts",  nuvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
