@@ -81,7 +81,7 @@ static int int_pause;
 
 static uint32_t texture_width;
 static uint32_t texture_height;
-static int texnumx, texnumy, memory_x_len, memory_x_start_offset, raw_line_len;
+static int texnumx, texnumy, raw_line_len;
 static GLfloat texpercx, texpercy;
 static struct TexSquare * texgrid;
 static GLint    gl_internal_format;
@@ -114,6 +114,8 @@ struct TexSquare
   int dirtyXoff, dirtyYoff, dirtyWidth, dirtyHeight;
 };
 
+static void resetTexturePointers(unsigned char *imageSource);
+
 static void CalcFlatPoint(int x,int y,GLfloat *px,GLfloat *py)
 {
   *px=(float)x*texpercx;
@@ -124,7 +126,6 @@ static void CalcFlatPoint(int x,int y,GLfloat *px,GLfloat *py)
 
 static int initTextures()
 {
-  unsigned char *line_1=0, *line_2=0, *mem_start=0;
   struct TexSquare *tsq=0;
   int e_x, e_y, s, i=0;
   int x=0, y=0;
@@ -209,14 +210,7 @@ static int initTextures()
   texgrid = (struct TexSquare *)
     calloc (texnumx * texnumy, sizeof (struct TexSquare));
 
-  line_1 = (unsigned char *) ImageData;
-  line_2 = (unsigned char *) ImageData+(image_width*image_bytes);
-
-  mem_start = (unsigned char *) ImageData;
-
-  raw_line_len = line_2 - line_1;
-
-  memory_x_len = raw_line_len / image_bytes;
+  raw_line_len = image_width * image_bytes;
 
   mp_msg (MSGT_VO, MSGL_DBG2, "[gl2] texture-usage %d*width=%d, %d*height=%d\n",
 		 (int) texnumx, (int) texture_width, (int) texnumy,
@@ -244,16 +238,6 @@ static int initTextures()
       CalcFlatPoint (x + 1, y, &(tsq->fx2), &(tsq->fy2));
       CalcFlatPoint (x + 1, y + 1, &(tsq->fx3), &(tsq->fy3));
       CalcFlatPoint (x, y + 1, &(tsq->fx4), &(tsq->fy4));
-
-      /* calculate the pixel store data,
-         to use the machine-bitmap for our texture 
-      */
-      memory_x_start_offset = 0 * image_bytes + 
-                              x * texture_width * image_bytes;
-
-      tsq->texture = line_1 +                           
-		     y * texture_height * raw_line_len +  
-		     memory_x_start_offset;           
 
       tsq->isDirty=GL_TRUE;
       tsq->isTexture=GL_FALSE;
@@ -294,38 +278,29 @@ static int initTextures()
 
     }	/* for all texnumx */
   }  /* for all texnumy */
+  resetTexturePointers (ImageData);
   
   return 0;
 }
 
 static void resetTexturePointers(unsigned char *imageSource)
 {
-  unsigned char *line_1=0, *line_2=0, *mem_start=0;
-  struct TexSquare *tsq=0;
+  unsigned char *texdata_start, *line_start;
+  struct TexSquare *tsq = texgrid;
   int x=0, y=0;
 
-  line_1 = (unsigned char *) imageSource;
-  line_2 = (unsigned char *) imageSource+(image_width*image_bytes);
-
-  mem_start = (unsigned char *) imageSource;
+  line_start = (unsigned char *) imageSource;
 
   for (y = 0; y < texnumy; y++)
   {
+    texdata_start = line_start;
     for (x = 0; x < texnumx; x++)
     {
-      tsq = texgrid + y * texnumx + x;
-
-      /* calculate the pixel store data,
-         to use the machine-bitmap for our texture 
-      */
-      memory_x_start_offset = 0 * image_bytes + 
-                              x * texture_width * image_bytes;
-
-      tsq->texture = line_1 +                           
-		     y * texture_height * raw_line_len +  
-		     memory_x_start_offset;           
-
+      tsq->texture = texdata_start;
+      texdata_start += texture_width * image_bytes;
+      tsq++;
     }	/* for all texnumx */
+    line_start += texture_height * raw_line_len;
   }  /* for all texnumy */
 }
 
@@ -823,7 +798,7 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   glDepthMask(GL_FALSE);
   glDisable(GL_CULL_FACE);
 
-  glPixelStorei (GL_UNPACK_ROW_LENGTH, memory_x_len);
+  glPixelStorei (GL_UNPACK_ROW_LENGTH, image_width);
 
   /**
    * may give a little speed up for a kinda burst read ..
