@@ -596,6 +596,7 @@ static int play_tree_step = 1;
 #include <SDL.h>
 #endif
 
+
 int main(int argc,char* argv[]){
 
 
@@ -665,7 +666,6 @@ int gui_no_filename=0;
 #endif
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n\n");
 #endif
-
 #endif
 
 #ifdef USE_TV
@@ -2994,69 +2994,69 @@ if(rel_seek_secs || abs_seek_pos){
 #ifdef USE_OSD
   if(osd_level>=1){
       int pts=d_video->pts;
-      char osd_text_tmp[50];
+      char osd_text_tmp[64];
       if(pts==osd_last_pts-1) ++pts; else osd_last_pts=pts;
       vo_osd_text=osd_text_buffer;
 #ifdef USE_DVDNAV
       if (osd_show_dvd_nav_delay) {
-          sprintf(osd_text_tmp, "DVDNAV: %s", dvd_nav_text);
+          snprintf(osd_text_tmp, 63, "DVDNAV: %s", dvd_nav_text);
           osd_show_dvd_nav_delay--;
       } else
 #endif
 #ifdef USE_TV
       if (osd_show_tv_channel && tv_channel_list) {
-	  sprintf(osd_text_tmp, "Channel: %s", tv_channel_current->name);
+	  snprintf(osd_text_tmp, 63, "Channel: %s", tv_channel_current->name);
 	  osd_show_tv_channel--;
       } else
 #endif
       if (osd_show_sub_visibility) {
-	  sprintf(osd_text_tmp, "Subtitles: %sabled", sub_visibility?"en":"dis");
+	  snprintf(osd_text_tmp, 63, "Subtitles: %sabled", sub_visibility?"en":"dis");
 	  osd_show_sub_visibility--;
       } else
       if (osd_show_vobsub_changed) {
 	  const char *language = "none";
 	  if (vo_vobsub && vobsub_id >= 0)
 	      language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
-	  sprintf(osd_text_tmp, "Subtitles: (%d) %s", vobsub_id, language ? language : "unknown");
+	  snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", vobsub_id, language ? language : "unknown");
 	  osd_show_vobsub_changed--;
       } else
       if (osd_show_sub_delay) {
-	  sprintf(osd_text_tmp, "Sub delay: %d ms", ROUND(sub_delay*1000));
+	  snprintf(osd_text_tmp, 63, "Sub delay: %d ms", ROUND(sub_delay*1000));
 	  osd_show_sub_delay--;
       } else
       if (osd_show_sub_pos) {
-         sprintf(osd_text_tmp, "Sub position: %d/100", sub_pos);
+         snprintf(osd_text_tmp, 63, "Sub position: %d/100", sub_pos);
          osd_show_sub_pos--;
       } else
       if (osd_show_sub_alignment) {
-         sprintf(osd_text_tmp, "Sub alignment: %s",
+         snprintf(osd_text_tmp, 63, "Sub alignment: %s",
 	    (sub_alignment == 2 ? "bottom" :
 	    (sub_alignment == 1 ? "center" : "top")));
          osd_show_sub_alignment--;
       } else
       if (osd_show_av_delay) {
-	  sprintf(osd_text_tmp, "A-V delay: %d ms", ROUND(audio_delay*1000));
+	  snprintf(osd_text_tmp, 63, "A-V delay: %d ms", ROUND(audio_delay*1000));
 	  osd_show_av_delay--;
       } else if(osd_level>=2) {
           int len = demuxer_get_time_length(demuxer);
           int percentage = -1;
-          char percentage_text[50];
+          char percentage_text[10];
           if (osd_show_percentage) {
             percentage = demuxer_get_percent_pos(demuxer);
             osd_show_percentage--;
           }
           if (percentage >= 0)
-            sprintf(percentage_text, " (%d%%)", percentage);
+            snprintf(percentage_text, 9, " (%d%%)", percentage);
 	  else
 	    percentage_text[0] = 0;
           if (osd_level == 3) 
-            sprintf(osd_text_tmp,"%c %02d:%02d:%02d / %02d:%02d:%02d%s",osd_function,pts/3600,(pts/60)%60,pts%60,len/3600,(len/60)%60,len%60,percentage_text);
+            snprintf(osd_text_tmp, 63, "%c %02d:%02d:%02d / %02d:%02d:%02d%s",osd_function,pts/3600,(pts/60)%60,pts%60,len/3600,(len/60)%60,len%60,percentage_text);
           else
-            sprintf(osd_text_tmp,"%c %02d:%02d:%02d%s",osd_function,pts/3600,(pts/60)%60,pts%60,percentage_text);
+            snprintf(osd_text_tmp, 63, "%c %02d:%02d:%02d%s",osd_function,pts/3600,(pts/60)%60,pts%60,percentage_text);
       } else osd_text_tmp[0]=0;
       
       if(strcmp(vo_osd_text, osd_text_tmp)) {
-	      strcpy(vo_osd_text, osd_text_tmp);
+	      strncpy(vo_osd_text, osd_text_tmp, 63);
 	      vo_osd_changed(OSDTYPE_OSD);
       }
   } else {
