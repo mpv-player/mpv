@@ -1125,21 +1125,45 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
         
         x/=2;y/=2;w/=2;h/=2;
 
-    dst = priv->overlay->pixels[2] + priv->overlay->pitches[2]*y + x;
-    src = image[1];
+    switch(priv->format) {
+    case IMGFMT_YV12:
+        dst = priv->overlay->pixels[2] + priv->overlay->pitches[2]*y + x;
+        src = image[1];
         for(i=0;i<h;i++){
             memcpy(dst,src,w);
             src+=stride[2];
-        dst += priv->overlay->pitches[2];
+            dst += priv->overlay->pitches[2];
         }
         
-    dst = priv->overlay->pixels[1] + priv->overlay->pitches[1]*y + x;
-    src = image[2];
+        dst = priv->overlay->pixels[1] + priv->overlay->pitches[1]*y + x;
+        src = image[2];
         for(i=0;i<h;i++){
             memcpy(dst,src,w);
             src+=stride[1];
-        dst += priv->overlay->pitches[1];
+            dst += priv->overlay->pitches[1];
         }
+    break;
+    case IMGFMT_IYUV:
+        dst = priv->overlay->pixels[1] + priv->overlay->pitches[1]*y + x;
+        src = image[1];
+        for(i=0;i<h;i++){
+            memcpy(dst,src,w);
+            src+=stride[1];
+            dst += priv->overlay->pitches[1];
+        }
+
+        dst = priv->overlay->pixels[2] + priv->overlay->pitches[2]*y + x;
+        src = image[2];
+        for(i=0;i<h;i++){
+            memcpy(dst,src,w);
+            src+=stride[2];
+            dst += priv->overlay->pitches[2];
+        }
+        
+    break;
+    default:
+    printf("SDL: unsupported image format in draw_slice, contact MPlayer developers!\n");
+    }
 
 	SDL_OVR_UNLOCK
 
@@ -1610,17 +1634,24 @@ static uint32_t preinit(const char *arg)
 
 static uint32_t get_image(mp_image_t *mpi)
 {
-	struct sdl_priv_s *priv = &sdl_priv;
+    struct sdl_priv_s *priv = &sdl_priv;
 
     if(priv->format != mpi->imgfmt) return VO_FALSE;
     if(mpi->type == MP_IMGTYPE_STATIC || mpi->type == MP_IMGTYPE_TEMP) {
-        if(priv->format == IMGFMT_YV12 || priv->format == SDL_IYUV_OVERLAY) {
-            mpi->planes[0] = priv->overlay->pixels[0] + priv->y*priv->overlay->pitches[0];
-            mpi->planes[2] = priv->overlay->pixels[1] + priv->y*priv->overlay->pitches[1]/2;
-            mpi->planes[1] = priv->overlay->pixels[2] + priv->y*priv->overlay->pitches[2]/2;
-            mpi->stride[0] = priv->overlay->pitches[0];
-            mpi->stride[2] = priv->overlay->pitches[1];
-            mpi->stride[1] = priv->overlay->pitches[2];
+        if(mpi->flags&MP_IMGFLAG_PLANAR) {
+	    mpi->planes[0] = priv->overlay->pixels[0] + priv->y*priv->overlay->pitches[0];
+	    mpi->stride[0] = priv->overlay->pitches[0];
+	    if(mpi->flags&MP_IMGFLAG_SWAPPED) {
+		mpi->planes[1] = priv->overlay->pixels[1] + priv->y*priv->overlay->pitches[1]/2;
+		mpi->stride[1] = priv->overlay->pitches[1];
+		mpi->planes[2] = priv->overlay->pixels[2] + priv->y*priv->overlay->pitches[2]/2;
+		mpi->stride[2] = priv->overlay->pitches[2];
+	    } else {
+		mpi->planes[2] = priv->overlay->pixels[1] + priv->y*priv->overlay->pitches[1]/2;
+		mpi->stride[2] = priv->overlay->pitches[1];
+		mpi->planes[1] = priv->overlay->pixels[2] + priv->y*priv->overlay->pitches[2]/2;
+		mpi->stride[1] = priv->overlay->pitches[2];
+	    }
         }
         else if(IMGFMT_IS_RGB(priv->format) || IMGFMT_IS_BGR(priv->format)) {
             if(priv->dblit) {
