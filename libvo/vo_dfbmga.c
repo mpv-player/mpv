@@ -102,7 +102,7 @@ static int osd_dirty;
 static int osd_current;
 static int osd_max;
 
-static int is_g200 = 0;
+static int is_g200;
 
 /******************************
 *	    vo_dfbmga         *
@@ -149,6 +149,12 @@ pixelformat_name( DFBSurfacePixelFormat format )
 	  return "I420";
      case DSPF_ALUT44:
 	  return "ALUT44";
+#if DIRECTFBVERSION > 921
+     case DSPF_NV12:
+          return "NV12";
+     case DSPF_NV21:
+          return "NV21";
+#endif
      default:
 	  return "Unknown pixel format";
      }
@@ -175,6 +181,12 @@ imgfmt_to_pixelformat( uint32_t format )
      case IMGFMT_I420:
      case IMGFMT_IYUV:
           return DSPF_I420;
+#if DIRECTFBVERSION > 921
+     case IMGFMT_NV12:
+          return DSPF_NV12;
+     case IMGFMT_NV21:
+          return DSPF_NV21;
+#endif
      default:
 	  return DSPF_UNKNOWN;
      }
@@ -845,14 +857,23 @@ query_format( uint32_t format )
                if (is_g200)
                     return 0;
           case IMGFMT_YUY2:
-               return (VFCAP_HWSCALE_UP |
-                       VFCAP_HWSCALE_DOWN |
-                       VFCAP_CSP_SUPPORTED_BY_HW |
-                       VFCAP_CSP_SUPPORTED |
-                       VFCAP_OSD);
+               break;
+#if DIRECTFBVERSION > 921
+          case IMGFMT_NV12:
+          case IMGFMT_NV21:
+               if (!use_bes || use_crtc2)
+                    return 0;
+               break;
+#endif
+          default:
+               return 0;
      }
 
-     return 0;
+     return (VFCAP_HWSCALE_UP |
+             VFCAP_HWSCALE_DOWN |
+             VFCAP_CSP_SUPPORTED_BY_HW |
+             VFCAP_CSP_SUPPORTED |
+             VFCAP_OSD);
 }
 
 static void
@@ -946,6 +967,10 @@ draw_alpha( int x0, int y0,
 			      ((uint8_t *) dst) + pitch * y0 + 2 * x0 + 1,
                               pitch );
 	  break;
+#if DIRECTFBVERSION > 921
+     case DSPF_NV12:
+     case DSPF_NV21:
+#endif
      case DSPF_I420:
      case DSPF_YV12:
 	  vo_draw_alpha_yv12( w, h, src, srca, stride,
@@ -977,8 +1002,18 @@ draw_slice( uint8_t * src[], int stride[], int w, int h, int x, int y )
 
      dst += pitch * in_height;
 
-     x /= 2; y /= 2;
-     w /= 2; h /= 2;
+     y /= 2;
+     h /= 2;
+
+#if DIRECTFBVERSION > 921
+     if (frame_format == DSPF_NV12 || frame_format == DSPF_NV21) {
+          memcpy_pic( dst + pitch * y + x, src[1],
+                      w, h, pitch, stride[1] );
+     } else
+#endif
+     {
+     x /= 2;
+     w /= 2;
      pitch /= 2;
 
      if (frame_format == DSPF_I420 )
@@ -996,6 +1031,7 @@ draw_slice( uint8_t * src[], int stride[], int w, int h, int x, int y )
      else
           memcpy_pic( dst + pitch * y + x, src[1],
                       w, h, pitch, stride[1] );
+     }
 
      frame->Unlock( frame );
 
@@ -1162,14 +1198,22 @@ get_image( mp_image_t *mpi )
           mpi->stride[0] = pitch;
 
           if (mpi->flags & MP_IMGFLAG_PLANAR) {
+               if (mpi->num_planes > 2) {
                mpi->stride[1] = mpi->stride[2] = pitch / 2;
 
                if (mpi->flags & MP_IMGFLAG_SWAPPED) {
+                    /* I420 */
                     mpi->planes[1] = dst + in_height * pitch;
                     mpi->planes[2] = mpi->planes[1] + in_height * pitch / 4;
                } else {
+                    /* YV12 */
                     mpi->planes[2] = dst + in_height * pitch;
                     mpi->planes[1] = mpi->planes[2] + in_height * pitch / 4;
+               }
+               } else {
+                    /* NV12/NV21 */
+                    mpi->stride[1] = pitch;
+                    mpi->planes[1] = dst + in_height * pitch;
                }
           }
 
