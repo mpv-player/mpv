@@ -39,6 +39,7 @@ extern "C" {
 #include <matroska/FileKax.h>
 
 extern "C" {
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -75,8 +76,12 @@ extern char *audio_lang;
 // default values for Matroska elements
 #define MKVD_TIMECODESCALE 1000000 // 1000000 = 1ms
 
-#define MKV_SUBTYPE_TEXT   1
-#define MKV_SUBTYPE_SSA    2
+#define MKV_SUBTYPE_TEXT                  1
+#define MKV_SUBTYPE_SSA                   2
+#define MKV_SUBTYPE_VOBSUB                3
+
+#define MKV_SUBCOMPRESSION_NONE           0
+#define MKV_SUBCOMPRESSION_ZLIB           1
 
 class mpstream_io_callback: public IOCallback {
   private:
@@ -182,6 +187,10 @@ typedef struct mkv_track {
   // Stuff for QuickTime
   bool fix_i_bps;
   float qt_last_a_pts;
+
+  // Stuff for VobSubs
+  mkv_sh_sub_t sh_sub;
+  int vobsub_compression;
 } mkv_track_t;
 
 typedef struct mkv_demuxer {
@@ -580,6 +589,74 @@ static mkv_track_t *find_track_by_language(mkv_demuxer_t *d, char *language,
   return NULL;
 }
 
+static bool mkv_parse_idx(mkv_track_t *t) {
+  uint32_t i, p, things_found;
+  int idx;
+  string line, s1, s2;
+  char *src;
+
+  if ((t->private_data == NULL) || (t->private_size < 1))
+    return false;
+
+  things_found = 0;
+  i = 0;
+  src = (char *)t->private_data;
+  do {
+    line = "";
+    while ((i < t->private_size) && (src[i] != '\n') && (src[i] != '\r')) {
+      if (!isspace(src[i]))
+        line += src[i];
+      i++;
+    }
+    while ((i < t->private_size) && ((src[i] == '\n') || (src[i] == '\r')))
+      i++;
+
+    if (!strncasecmp(line.c_str(), "size:", 5)) {
+      s1 = line.substr(5);
+      idx = s1.find('x');
+      if (idx >= 0) {
+        s2 = s1.substr(idx + 1);
+        s1.erase(idx);
+        t->sh_sub.width = strtol(s1.c_str(), NULL, 10);
+        t->sh_sub.height = strtol(s2.c_str(), NULL, 10);
+        things_found |= 1;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub IDX parser: size: %d x %d\n",
+               t->sh_sub.width, t->sh_sub.height);
+      }
+
+    } else if (!strncasecmp(line.c_str(), "palette:", 8)) {
+      s1 = line.substr(8);
+      for (p = 0; p < 15; p++) {
+        idx = s1.find(',');
+        if (idx < 0)
+          break;
+        s2 = s1.substr(0, idx);
+        s1.erase(0, idx + 1);
+        t->sh_sub.palette[p] = (unsigned int)strtol(s2.c_str(), NULL, 16);
+      }
+      if (idx >= 0) {
+        t->sh_sub.palette[15] = (unsigned int)strtol(s1.c_str(), NULL, 16);
+        things_found |= 2;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub IDX parser: palette: 0x%06x "
+               "0x%06x 0x%06x 0x%06x 0x%06x 0x%06x 0x%06x 0x%06x 0x%06x "
+               "0x%06x 0x%06x 0x%06x 0x%06x 0x%06x 0x%06x 0x%06x\n",
+               t->sh_sub.palette[0], t->sh_sub.palette[1],
+               t->sh_sub.palette[2], t->sh_sub.palette[3],
+               t->sh_sub.palette[4], t->sh_sub.palette[5],
+               t->sh_sub.palette[6], t->sh_sub.palette[7],
+               t->sh_sub.palette[8], t->sh_sub.palette[9],
+               t->sh_sub.palette[10], t->sh_sub.palette[11],
+               t->sh_sub.palette[12], t->sh_sub.palette[13],
+               t->sh_sub.palette[14], t->sh_sub.palette[15]);
+      }
+    }
+
+  } while ((i != t->private_size) && (things_found != 3));
+  t->sh_sub.type = 'v';
+
+  return (things_found == 3);
+}
+
 static int check_track_information(mkv_demuxer_t *d) {
   int i, track_num;
   unsigned char *c;
@@ -809,12 +886,23 @@ static int check_track_information(mkv_demuxer_t *d) {
                t->language != NULL ? t->language : "");
         break;
 
-      case 's':                 // Text subtitles do not need any data
-        t->ok = 1;              // except the CodecID.
-        mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: subtitles (%s), "
-               "-sid %u%s%s\n", t->tnum, t->codec_id, t->xid,
-               t->language != NULL ? ", -slang " : "",
-               t->language != NULL ? t->language : "");
+      case 's':
+        if (!strncmp(t->codec_id, MKV_S_VOBSUB, strlen(MKV_S_VOBSUB))) {
+          if (mkv_parse_idx(t)) {
+            t->ok = 1;
+            mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: subtitles (%s), "
+                   "-sid %u%s%s\n", t->tnum, t->codec_id,
+                   t->xid, t->language != NULL ? ", -slang " : "",
+                   t->language != NULL ? t->language : "");
+          }
+
+        } else {                // Text subtitles do not need any data
+          t->ok = 1;            // except the CodecID.
+          mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: subtitles (%s), "
+                 "-sid %u%s%s\n", t->tnum, t->codec_id, t->xid,
+                 t->language != NULL ? ", -slang " : "",
+                 t->language != NULL ? t->language : "");
+        }
         break;
 
       default:                  // unknown track type!? error in demuxer...
@@ -1898,10 +1986,19 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   else if (dvdsub_lang != NULL)
     track = find_track_by_language(mkv_d, dvdsub_lang, NULL);
   if (track) {
-    if (strcmp(track->codec_id, MKV_S_TEXTASCII) &&
-        strcmp(track->codec_id, MKV_S_TEXTUTF8) && 
-        strcmp(track->codec_id, MKV_S_TEXTSSA) &&
-        strcmp(track->codec_id, "S_SSA"))
+    if (!strncmp(track->codec_id, MKV_S_VOBSUB, strlen(MKV_S_VOBSUB))) {
+      mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Will display subtitle track %u\n",
+             track->tnum);
+      mkv_d->subs_track = track;
+      mkv_d->subtitle_type = MKV_SUBTYPE_VOBSUB;
+      demuxer->sub->sh = (mkv_sh_sub_t *)malloc(sizeof(mkv_sh_sub_t));
+      demuxer->sub->id = track->xid;
+      memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(mkv_sh_sub_t));
+
+    } else if (strcmp(track->codec_id, MKV_S_TEXTASCII) &&
+               strcmp(track->codec_id, MKV_S_TEXTUTF8) && 
+               strcmp(track->codec_id, MKV_S_TEXTSSA) &&
+               strcmp(track->codec_id, "S_SSA"))
       mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Subtitle type '%s' is not "
              "supported. Track will not be displayed.\n", track->codec_id);
     else {
@@ -1923,6 +2020,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       } else
         mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] File does not contain a "
                "subtitle track with the id %u.\n", demuxer->sub->id);
+      demuxer->sub->sh = NULL;
     }
   }
 
@@ -2058,6 +2156,214 @@ static void handle_realaudio(demuxer_t *demuxer, DataBuffer &data,
   found_data++;
 }
 
+#define mpeg_read(buf, num) _mpeg_read(srcbuf, size, srcpos, buf, num)
+static uint32_t _mpeg_read(unsigned char *srcbuf, uint32_t size,
+                           uint32_t &srcpos, unsigned char *dstbuf,
+                           uint32_t num) {
+  uint32_t real_num;
+
+  if ((srcpos + num) >= size)
+    real_num = size - srcpos;
+  else
+    real_num = num;
+  memcpy(dstbuf, &srcbuf[srcpos], real_num);
+  srcpos += real_num;
+
+  return real_num;
+}
+
+#define mpeg_getc() _mpeg_getch(srcbuf, size, srcpos)
+static int _mpeg_getch(unsigned char *srcbuf, uint32_t size,
+                       uint32_t &srcpos) {
+  unsigned char c;
+
+  if (mpeg_read(&c, 1) != 1)
+    return -1;
+  return (int)c;
+}
+
+#define mpeg_seek(b, w) _mpeg_seek(size, srcpos, b, w)
+static int _mpeg_seek(uint32_t size, uint32_t &srcpos, uint32_t num,
+                      int whence) {
+  uint32_t new_pos;
+
+  if (whence == SEEK_SET)
+    new_pos = num;
+  else if (whence == SEEK_CUR)
+    new_pos = srcpos + num;
+  else
+    abort();
+
+  if (new_pos >= size) {
+    srcpos = size;
+    return 1;
+  }
+
+  srcpos = new_pos;
+  return 0;
+}
+
+#define mpeg_tell() srcpos
+
+// Adopted from vobsub.c
+static int mpeg_run(demuxer_t *demuxer, unsigned char *srcbuf, uint32_t size) {
+  uint32_t len, idx, version, srcpos, packet_size;
+  int c, aid;
+  float pts;
+  /* Goto start of a packet, it starts with 0x000001?? */
+  const unsigned char wanted[] = { 0, 0, 1 };
+  unsigned char buf[5];
+  demux_packet_t *dp;
+  demux_stream_t *ds;
+  mkv_demuxer_t *mkv_d;
+
+  mkv_d = (mkv_demuxer_t *)demuxer->priv;
+  ds = demuxer->sub;
+
+  srcpos = 0;
+  packet_size = 0;
+  while (1) {
+    if (mpeg_read(buf, 4) != 4)
+      return -1;
+    while (memcmp(buf, wanted, sizeof(wanted)) != 0) {
+      c = mpeg_getc();
+      if (c < 0)
+        return -1;
+      memmove(buf, buf + 1, 3);
+      buf[3] = c;
+    }
+    switch (buf[3]) {
+      case 0xb9:			/* System End Code */
+        return 0;
+        break;
+
+      case 0xba:			/* Packet start code */
+        c = mpeg_getc();
+        if (c < 0)
+          return -1;
+        if ((c & 0xc0) == 0x40)
+          version = 4;
+        else if ((c & 0xf0) == 0x20)
+          version = 2;
+        else {
+          mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] VobSub: Unsupported MPEG "
+                 "version: 0x%02x\n", c);
+          return -1;
+        }
+
+        if (version == 4) {
+          if (mpeg_seek(9, SEEK_CUR))
+            return -1;
+        } else if (version == 2) {
+          if (mpeg_seek(7, SEEK_CUR))
+            return -1;
+        } else
+          abort();
+        break;
+
+      case 0xbd:			/* packet */
+        if (mpeg_read(buf, 2) != 2)
+          return -1;
+        len = buf[0] << 8 | buf[1];
+        idx = mpeg_tell();
+        c = mpeg_getc();
+        if (c < 0)
+          return -1;
+        if ((c & 0xC0) == 0x40) { /* skip STD scale & size */
+          if (mpeg_getc() < 0)
+            return -1;
+          c = mpeg_getc();
+          if (c < 0)
+            return -1;
+        }
+        if ((c & 0xf0) == 0x20) { /* System-1 stream timestamp */
+          /* Do we need this? */
+          abort();
+        } else if ((c & 0xf0) == 0x30) {
+          /* Do we need this? */
+          abort();
+        } else if ((c & 0xc0) == 0x80) { /* System-2 (.VOB) stream */
+          uint32_t pts_flags, hdrlen, dataidx;
+          c = mpeg_getc();
+          if (c < 0)
+            return -1;
+          pts_flags = c;
+          c = mpeg_getc();
+          if (c < 0)
+            return -1;
+          hdrlen = c;
+          dataidx = mpeg_tell() + hdrlen;
+          if (dataidx > idx + len) {
+            mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] VobSub: Invalid header "
+                   "length: %d (total length: %d, idx: %d, dataidx: %d)\n",
+                   hdrlen, len, idx, dataidx);
+            return -1;
+          }
+          if ((pts_flags & 0xc0) == 0x80) {
+            if (mpeg_read(buf, 5) != 5)
+              return -1;
+            if (!(((buf[0] & 0xf0) == 0x20) && (buf[0] & 1) && (buf[2] & 1) &&
+                  (buf[4] & 1))) {
+              mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] VobSub PTS error: 0x%02x "
+                     "%02x%02x %02x%02x \n",
+                     buf[0], buf[1], buf[2], buf[3], buf[4]);
+              pts = 0;
+            } else
+              pts = ((buf[0] & 0x0e) << 29 | buf[1] << 22 |
+                     (buf[2] & 0xfe) << 14 | buf[3] << 7 | (buf[4] >> 1));
+          } else /* if ((pts_flags & 0xc0) == 0xc0) */ {
+            /* what's this? */
+            /* abort(); */
+          }
+          mpeg_seek(dataidx, SEEK_SET);
+          aid = mpeg_getc();
+          if (aid < 0) {
+            mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] VobSub: Bogus aid %d\n", aid);
+            return -1;
+          }
+          packet_size = len - ((unsigned int)mpeg_tell() - idx);
+          
+          dp = new_demux_packet(packet_size);
+          dp->flags = 1;
+          dp->pts = mkv_d->last_pts;
+          if (mpeg_read(dp->buffer, packet_size) != packet_size) {
+            mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] VobSub: mpeg_read failure");
+            packet_size = 0;
+            return -1;
+          }
+          ds_add_packet(ds, dp);
+          idx = len;
+        }
+        break;
+
+      case 0xbe:			/* Padding */
+        if (mpeg_read(buf, 2) != 2)
+          return -1;
+        len = buf[0] << 8 | buf[1];
+        if ((len > 0) && mpeg_seek(len, SEEK_CUR))
+          return -1;
+        break;
+
+      default:
+        if ((0xc0 <= buf[3]) && (buf[3] < 0xf0)) {
+          /* MPEG audio or video */
+          if (mpeg_read(buf, 2) != 2)
+            return -1;
+          len = (buf[0] << 8) | buf[1];
+          if ((len > 0) && mpeg_seek(len, SEEK_CUR))
+            return -1;
+
+        }
+        else {
+          mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] VobSub: unknown header "
+                 "0x%02X%02X%02X%02X\n", buf[0], buf[1], buf[2], buf[3]);
+          return -1;
+        }
+    }
+  }
+  return 0;
+}
+
 extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
   demux_packet_t *dp;
   demux_stream_t *ds;
@@ -2187,6 +2493,9 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
               else if ((mkv_d->audio != NULL) && 
                          (mkv_d->audio->tnum == kblock->TrackNum()))
                 ds = d->audio;
+              else if ((mkv_d->subs_track != NULL) && 
+                       (mkv_d->subs_track->tnum == kblock->TrackNum()))
+                ds = d->sub;
 
               use_this_block = true;
 
@@ -2238,9 +2547,11 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                 
               } else if ((mkv_d->subs_track != NULL) &&
                          (mkv_d->subs_track->tnum == kblock->TrackNum())) {
-                if (!mkv_d->v_skip_to_keyframe)
-                  handle_subtitles(d, kblock, block_duration);
-                use_this_block = false;
+                if (mkv_d->subtitle_type != MKV_SUBTYPE_VOBSUB) {
+                  if (!mkv_d->v_skip_to_keyframe)
+                    handle_subtitles(d, kblock, block_duration);
+                  use_this_block = false;
+                }
 
               } else
                 use_this_block = false;
@@ -2261,6 +2572,10 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                     handle_realaudio(d, data, block_bref == 0,
                                      found_data);
 
+                  else if ((ds == d->sub) &&
+                           (mkv_d->subtitle_type == MKV_SUBTYPE_VOBSUB))
+                    mpeg_run(d, (unsigned char *)data.Buffer(), data.Size());
+
                   else {
                     dp = new_demux_packet(data.Size());
                     memcpy(dp->buffer, data.Buffer(), data.Size());
@@ -2273,8 +2588,7 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                 if (ds == d->video) {
                   mkv_d->v_skip_to_keyframe = false;
                   mkv_d->skip_to_timecode = 0;
-                }
-                if (ds == d->audio)
+                } else if (ds == d->audio)
                   mkv_d->a_skip_to_keyframe = false;
               }
 
