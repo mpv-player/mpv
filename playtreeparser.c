@@ -493,6 +493,26 @@ play_tree_add_basepath(play_tree_t* pt, char* bp) {
   }
 }
 
+// Wrapper for play_tree_add_basepath (add base path from file)
+void play_tree_add_bpf(play_tree_t* pt, char* filename)
+{
+  char *ls, *file;
+  
+  if (pt && filename)
+  {
+    file = strdup(filename);
+    if (file)
+    {
+      ls = strrchr(file,PATH_SEP);
+      if(ls) {
+        ls[1] = '\0';
+        play_tree_add_basepath(pt,file);
+      }
+      free(file);
+    }
+  }
+}
+
 play_tree_t*
 parse_playlist_file(char* file) {
   stream_t *stream;
@@ -517,13 +537,7 @@ parse_playlist_file(char* file) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Warning error while closing playlist file %s : %s\n",file,strerror(errno));
   free_stream(stream);
 
-  if(ret) {
-    char* ls = strrchr(file,PATH_SEP);
-    if(ls) {
-      ls[1] = '\0';
-      play_tree_add_basepath(ret,file);
-    }
-  }
+  play_tree_add_bpf(ret, file);
 
   return ret;
 

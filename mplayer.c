@@ -582,6 +582,8 @@ static int libmpdemux_was_interrupted(int eof) {
 
 int playtree_add_playlist(play_tree_t* entry)
 {
+  play_tree_add_bpf(entry,filename);
+
 #ifdef HAVE_NEW_GUI
   if (use_gui) {
     if (entry) {
@@ -759,9 +761,22 @@ int gui_no_filename=0;
       use_gui=0;
     }
     if (use_gui && playtree_iter){
+      char* cwd;
       // Remove Playtree and Playtree-Iter from memory as its not used by gui
       play_tree_iter_free(playtree_iter);
       playtree_iter=NULL;
+      
+      if ((cwd=get_current_dir_name()))
+      {
+	cwd=(char*)realloc(cwd, strlen(cwd)+2);
+	if (cwd)
+        {
+	  strcat(cwd, "/");
+          // Prefix relative paths with current working directory
+          play_tree_add_bpf(playtree, cwd);
+	  free(cwd);
+	}
+      }      
       // Import initital playtree into gui
       import_initial_playtree_into_gui(playtree, mconfig, enqueue);
     }
