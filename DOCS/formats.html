@@ -15,23 +15,22 @@
 <P><B><A NAME=2.1>2.1. Supported formats</A></B></P>
 
 <P>It is important to clarify a common mistake. When people see a file with a
-<B>.AVI</B> extension, they immediately conclude that it is not a MPEG file.
+<B>.AVI</B> extension, they immediately conclude that it is not an MPEG file.
 That is not true. At least not entirely. Contrary to popular belief such a file
 <B>can</B> contain MPEG1 video.</P>
 
 <P>You see, a <B>codec</B> is not the same as a <B>file format</B>.<BR>
-Video <B>codecs</B> are: MPEG1, MPEG2, DivX, Indeo5, 3ivx.<BR>
-Video <B>formats</B> are: MPG, AVI, ASF.<BR>
+Examples of video <B>codecs</B> are: MPEG1, MPEG2, DivX, Indeo5, 3ivx.<BR>
+Examples of file <B>formats</B> are: MPG, AVI, ASF.<BR>
 </P>
 
-<P>In theory, you can happily put an OpenDivX video and MP3 audio
-into a <B>MPG</B> format file. Most players will not play it, though, since
-they expect MPEG1 video and MP2 audio (<B>.MPG</B> does not have the
-necessary fields to describe its video and audio streams, like <B>.AVI</B>
-does). Or you might put MPEG1 video into an .AVI file. <A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A>
+<P>In theory, you can put an OpenDivX video and MP3 audio
+into an <B>MPG</B> format file. However, most players will not play it, since
+they expect MPEG1 video and MP2 audio (unlike <B>AVI</B>, <B>MPG</B> does not have the
+necessary fields to describe its video and audio streams).
+Or you might put MPEG1 video into an AVI file. <A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A>
 and <A HREF="encoding.html">MEncoder</A> can create these files.</P>
 
-<P>In contrast to that audio <B>codecs</B> and audio <B>formats</B> are basically the same terms.</P>
 
 
 <P><B><A NAME=2.1.1>2.1.1. Video formats</A></B></P>
@@ -39,18 +38,20 @@ and <A HREF="encoding.html">MEncoder</A> can create these files.</P>
 
 <P><B><A NAME=2.1.1.1>2.1.1.1. MPEG files</A></B></P>
 
-<P>
-<LI>MPG : This is the most <B>basic</B> form of the MPEG file formats. It contains
+<P>MPEG files come in different guises:</P>
+
+<UL>
+<LI>MPG: This is the most <B>basic</B> form of the MPEG file formats. It contains
 MPEG1 video, and MP2 (MPEG-1 layer 2) or rarely MP1 audio.</LI>
-<LI>DAT : This is the very same format as MPG with a different extension. It is used
+<LI>DAT: This is the very same format as MPG with a different extension. It is used
 on <B>Video CD</B>s. Due to the way VCDs are created and Linux is designed,
 the DAT files cannot be played nor copied from VCDs as regular files. You have
 to use the <CODE>-vcd</CODE> option to play the Video CD.</LI>
-<LI>VOB : This is the MPEG file format on <B>DVD</B>s. It is the same as MPG, plus the
+<LI>VOB: This is the MPEG file format on <B>DVD</B>s. It is the same as MPG, plus the
 capability to contain subtitles or non-MPEG (AC3) audio. It contains encoded MPEG2
 video and usually AC3 audio, but DTS, MP2 and uncompressed LPCM are allowed, too.<BR>
 <B>Read the <A HREF="cd-dvd.html#4.2">DVD section</A> !</B></LI>
-</P>
+</UL>
 
 <P>Series of frames form independent groups in MPEG files. This means that you
 can cut/join an MPEG file with standard file tools (like dd, cut), and it
@@ -72,26 +73,26 @@ It supports one video stream and 0 to 99 audio streams and can be as big as
 2GB. There exists an extension allowing bigger files called <B>OpenDMS</B>.
 M$ currently strongly discourages its use and encourages ASF/WMV. Not that
 anybody cares.<BR>
-<B>NOTE</B>: DV cameras can create two types of AVI formats. One is common and
+<B>NOTE:</B> DV cameras can create two types of AVI formats. One is common and
 playable, the other is neither.</P>
 
-<P>There are two kinds of AVI files:
+<P>There are two kinds of AVI files:</P>
 <UL>
-  <LI><B>Interleaved</B>: Audio and video content is interleaved. This is the
+  <LI><B>Interleaved:</B> Audio and video content is interleaved. This is the
     standard usage. Recommended and mostly used. Some tools create interleaved
     AVIs with bad sync. <B>MPlayer</B> detects these as interleaved, and this
     climaxes in loss of A/V sync, probably at seeking. These files should be
     played as non-interleaved (with the <CODE>-ni</CODE> option).</LI>
-  <LI><B>Non-interleaved</B>: First comes the whole video stream, then the whole
+  <LI><B>Non-interleaved:</B> First comes the whole video stream, then the whole
     audio stream. It thus needs a lot of seeking, making playing from network or
     CD-Rom difficult.</LI>
 </UL>
-</P>
 
-<P><B>MPlayer</B> supports two kinds of timings for AVI files:
+<P><B>MPlayer</B> supports two kinds of timings for AVI files:</P>
 <UL>
   <LI><B>bps-based</B>: It is based on the bitrate/samplerate of the video/audio stream. This
-    method is used by most players, including avifile and windows media player.
+    method is used by most players, including <A HREF="http://avifile.sourceforge.net">avifile</A>
+    and windows media player.
     Files with broken headers, and files created with VBR audio but not
     VBR-compliant encoder will result in A/V desync with this method (mostly at
     seeking).</LI>
@@ -99,7 +100,6 @@ playable, the other is neither.</P>
     it uses the relative position of interleaved audio and video chunks, making
     badly encoded files with VBR audio playable.</LI>
 </UL>
-</P>
 
 <P>Any audio and video codec is allowed, but note that VBR audio is not well
 supported by most players. The file format makes it possible to use VBR
@@ -116,22 +116,22 @@ variants of ASF, v1.0 and v2.0. v1.0 is used by their media tools (windows
 media player and windows media encoder) and is very secret. v2.0 is published
 and patented :). Of course they differ, there is no compatibility at all (it is
 just another legal game). <B>MPlayer</B> supports only v1.0, as nobody has ever seen
-v2.0 files :) . Note, that .ASF files nowdays come with the extension .WMA or
+v2.0 files :). Note that ASF files nowadays come with the extension .WMA or
 .WMV.</P>
 
 
 <P><B><A NAME=2.1.1.4>2.1.1.4. QuickTime/MOV files</A></B></P>
 
-<P>These are from the Macintosh. They usually have a .QT or .MOV extension. Note
+<P>These formats were designed by Apple. They usually have a .QT or .MOV extension. Note
 that since the MPEG4 group chose QuickTime as the recommended file format
-for MPEG4, their .MOV files come with a .MPG or .MP4 extension (Interestingly
-the video and audio streams in these files are real .MPG and .AAC files. With the
-<CODE>-dumpvideo/-dumpaudio</CODE> options you can even extract them!).</P>
+for MPEG4, their MOV files come with a .MPG or .MP4 extension (Interestingly
+the video and audio streams in these files are real MPG and AAC files. With the
+<CODE>-dumpvideo</CODE> and <CODE>-dumpaudio</CODE> options you can even extract them!).</P>
 
 <P><B>Codecs</B>: Any codec is allowed, both CBR and VBR. Note: most new QuickTime files use
-<B>Sorensen</B> video and QDesign Music audio. These formats are completely
-secret, and only Apple's QuickTime player is able to play these files (on
-win/mac only).</P>
+<B>Sorensen</B> video and QDesign Music audio. These formats have not been
+disclosed and will probably remain so in the future, making Apple's QuickTime
+player the only player able to play these files (on Windows/Mac OS only).</P>
 
 
 <P><B><A NAME=2.1.1.5>2.1.1.5. VIV files</A></B></P>
@@ -144,8 +144,8 @@ and most files lack even keyframes, so forget seeking!</P>
 of VIVO/2.0 files is a modified, nonstandard <B>h.263v2</B>. The audio is the same,
 it may be <B>g.723</B> (standard), or <B>Vivo Siren</B>.</P>
 
-<P>See the <A HREF=codecs.html#2.2.1.4>VIVO video codec</A>
-and <A HREF=codecs.html#2.2.2.4>VIVO audio codec</A> sections for installation
+<P>See the <A HREF="codecs.html#2.2.1.4">VIVO video codec</A>
+and <A HREF="codecs.html#2.2.2.4">VIVO audio codec</A> sections for installation
 instructions.</P>
 
 
@@ -169,7 +169,7 @@ and <A HREF="codecs.html#2.2.2.5">RealAudio</A> codecs.
 <P><B><A NAME=2.1.1.8>2.1.1.8. NuppelVideo files</A></B></P>
 
 <P><A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A>
-is a TV grabber tool (AFAIK:). <B>MPlayer</B> can read its <CODE>.nuv</CODE>
+is a TV grabber tool (AFAIK:). <B>MPlayer</B> can read its .NUV  
 files (only NuppelVideo 5.0). Those files can contain uncompressed YV12,
 YV12+RTJpeg compressed, YV12 RTJpeg+lzo compressed, and YV12+lzo compressed
 frames. <B>MPlayer</B> decodes (and also <B>encodes</B> them with MEncoder to
