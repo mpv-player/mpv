@@ -225,9 +225,6 @@ while(1){
       uint32_t i;
       unsigned msize = 0;
       avisuperindex_chunk *s;
-      // FIXME: do not use odml index for files that don't need it.
-      // apparently the odml code is buggy!
-      if (demuxer->movi_end < 0x7fffffff) break;
       priv->suidx_size++;
       priv->suidx = realloc(priv->suidx, priv->suidx_size * sizeof (avisuperindex_chunk));
       s = &priv->suidx[priv->suidx_size-1];
@@ -262,7 +259,6 @@ while(1){
 		  (s->dwChunkId), i,
 		  (uint64_t)s->aIndex[i].qwOffset, s->aIndex[i].dwSize, s->aIndex[i].dwDuration);
       }
-      priv->isodml++;
 
       break; }
     case ckidSTREAMFORMAT: {      // read 'strf'
@@ -401,6 +397,15 @@ while(1){
 	if (strncmp(riff_type, "AVIX", sizeof riff_type))
 	    mp_msg(MSGT_HEADER, MSGL_WARN,
 		   "** warning: this is no extended AVI header..\n");
+	else {
+		/*
+		 * We got an extended AVI header, so we need to switch to
+		 * ODML to get seeking to work, provided we got indx chunks
+		 * in the header (suidx_size > 0).
+		 */
+		if (priv->suidx_size > 0)
+			priv->isodml = 1;
+	}
 	chunksize = 0;
 	list_end = 0; /* a new list will follow */
 	break; }
