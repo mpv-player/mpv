@@ -13,10 +13,10 @@
 #include "../wm/widget.h"
 #include "../bitmap/bitmap.h"
 #include "../timer.h"
-#include "../language.h"
 #include "../error.h"
 
 #include "../../config.h"
+#include "../../help_mp.h"
 #include "../../libvo/x11_common.h"
 
 #define mplMouseTimerConst  10
@@ -68,7 +68,7 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
 
  if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
   {
-   fprintf( stderr,langNEMDB );
+   fprintf( stderr,MSGTR_NEMDB );
    exit( 0 );
   }
 

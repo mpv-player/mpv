@@ -2,8 +2,6 @@
 #ifndef __MY_MESSAGEBOX
 #define __MY_MESSAGEBOX
 
-#include "../../language.h"
-
 GtkWidget * gtkMessageBoxText;
 
 void on_MessageBox_destroy( GtkObject * object,gpointer user_data )
@@ -36,17 +34,17 @@ GtkWidget * create_MessageBox( void )
   accel_group=gtk_accel_group_new();
 
   MessageBox=gtk_window_new( GTK_WINDOW_DIALOG );
-  gtk_widget_set_name( MessageBox,langMessageBox );
-  gtk_object_set_data( GTK_OBJECT( MessageBox ),langMessageBox,MessageBox );
+  gtk_widget_set_name( MessageBox,MSGTR_MessageBox );
+  gtk_object_set_data( GTK_OBJECT( MessageBox ),MSGTR_MessageBox,MessageBox );
   gtk_widget_set_usize( MessageBox,420,128 );
   GTK_WIDGET_SET_FLAGS( MessageBox,GTK_CAN_FOCUS );
   GTK_WIDGET_SET_FLAGS( MessageBox,GTK_CAN_DEFAULT );
   gtk_widget_set_events( MessageBox,GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK );
-  gtk_window_set_title( GTK_WINDOW( MessageBox ),langMessageBox );
+  gtk_window_set_title( GTK_WINDOW( MessageBox ),MSGTR_MessageBox );
   gtk_window_set_position( GTK_WINDOW( MessageBox ),GTK_WIN_POS_CENTER );
   gtk_window_set_modal( GTK_WINDOW( MessageBox ),TRUE );
   gtk_window_set_policy( GTK_WINDOW( MessageBox ),FALSE,FALSE,FALSE );
-  gtk_window_set_wmclass( GTK_WINDOW( MessageBox ),langMessageBox,langMessageBox );
+  gtk_window_set_wmclass( GTK_WINDOW( MessageBox ),MSGTR_MessageBox,MSGTR_MessageBox );
 
   frame1=gtk_frame_new( NULL );
   gtk_widget_set_name( frame1,"frame1" );
@@ -132,10 +130,10 @@ GtkWidget * create_MessageBox( void )
   gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox1 ),60,0 );
   gtk_button_box_set_child_ipadding( GTK_BUTTON_BOX( hbuttonbox1 ),10,0 );
 
-  Ok=gtk_button_new_with_label( langOk );
-  gtk_widget_set_name( Ok,langOk );
+  Ok=gtk_button_new_with_label( MSGTR_Ok );
+  gtk_widget_set_name( Ok,MSGTR_Ok );
   gtk_widget_ref( Ok );
-  gtk_object_set_data_full( GTK_OBJECT( MessageBox ),langOk,Ok,
+  gtk_object_set_data_full( GTK_OBJECT( MessageBox ),MSGTR_Ok,Ok,
                            ( GtkDestroyNotify ) gtk_widget_unref );
   gtk_widget_show( Ok );
   gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Ok );

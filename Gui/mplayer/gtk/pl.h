@@ -4,8 +4,6 @@
 #ifndef __MY_PLAYLIST
 #define __MY_PLAYLIST
 
-#include "../../language.h"
-
 void HidePlayList( void )
 {
  gtk_widget_hide( PlayList );
@@ -91,12 +89,12 @@ GtkWidget* create_PlayList( void )
   GtkWidget *Cancel;
 
   PlayList = gtk_window_new( GTK_WINDOW_DIALOG );
-  gtk_object_set_data( GTK_OBJECT( PlayList ),langPlayList,PlayList );
+  gtk_object_set_data( GTK_OBJECT( PlayList ),MSGTR_PlayList,PlayList );
   gtk_widget_set_usize( PlayList,512,256 );
   GTK_WIDGET_SET_FLAGS( PlayList,GTK_CAN_FOCUS );
   GTK_WIDGET_SET_FLAGS( PlayList,GTK_CAN_DEFAULT );
   gtk_widget_set_events( PlayList,GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK | GDK_PROPERTY_CHANGE_MASK | GDK_VISIBILITY_NOTIFY_MASK );
-  gtk_window_set_title( GTK_WINDOW( PlayList ),langPlayList );
+  gtk_window_set_title( GTK_WINDOW( PlayList ),MSGTR_PlayList );
   gtk_window_set_position( GTK_WINDOW( PlayList ),GTK_WIN_POS_CENTER );
   gtk_window_set_policy( GTK_WINDOW( PlayList ),FALSE,FALSE,TRUE );
 
@@ -220,36 +218,36 @@ GtkWidget* create_PlayList( void )
   gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox5 ),65,27 );
   gtk_button_box_set_child_ipadding( GTK_BUTTON_BOX( hbuttonbox5 ),2,0 );
 
-  Add = gtk_button_new_with_label( langAdd );
+  Add = gtk_button_new_with_label( MSGTR_Add );
   gtk_widget_ref( Add );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),langAdd,Add,
+  gtk_object_set_data_full( GTK_OBJECT( PlayList ),MSGTR_Add,Add,
                            ( GtkDestroyNotify ) gtk_widget_unref );
   gtk_widget_show( Add );
   gtk_container_add( GTK_CONTAINER( hbuttonbox5 ),Add );
   gtk_widget_set_usize( Add,45,-2 );
   GTK_WIDGET_SET_FLAGS( Add,GTK_CAN_DEFAULT );
 
-  Remove = gtk_button_new_with_label( langRemove );
+  Remove = gtk_button_new_with_label( MSGTR_Remove );
   gtk_widget_ref( Remove );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),langRemove,Remove,
+  gtk_object_set_data_full( GTK_OBJECT( PlayList ),MSGTR_Remove,Remove,
                            ( GtkDestroyNotify ) gtk_widget_unref );
   gtk_widget_show( Remove );
   gtk_container_add( GTK_CONTAINER( hbuttonbox5 ),Remove );
   gtk_widget_set_usize( Remove,45,-2 );
   GTK_WIDGET_SET_FLAGS( Remove,GTK_CAN_DEFAULT );
 
-  Ok = gtk_button_new_with_label( langOk );
+  Ok = gtk_button_new_with_label( MSGTR_Ok );
   gtk_widget_ref( Ok );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),langOk,Ok,
+  gtk_object_set_data_full( GTK_OBJECT( PlayList ),MSGTR_Ok,Ok,
                            ( GtkDestroyNotify ) gtk_widget_unref );
   gtk_widget_show( Ok );
   gtk_container_add( GTK_CONTAINER( hbuttonbox5 ),Ok );
   gtk_widget_set_usize( Ok,45,-2 );
   GTK_WIDGET_SET_FLAGS( Ok,GTK_CAN_DEFAULT );
 
-  Cancel = gtk_button_new_with_label( langCancel );
+  Cancel = gtk_button_new_with_label( MSGTR_Cancel );
   gtk_widget_ref( Cancel );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),langCancel,Cancel,
+  gtk_object_set_data_full( GTK_OBJECT( PlayList ),MSGTR_Cancel,Cancel,
                            ( GtkDestroyNotify ) gtk_widget_unref );
   gtk_widget_show( Cancel );
   gtk_container_add( GTK_CONTAINER( hbuttonbox5 ),Cancel );

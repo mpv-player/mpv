@@ -117,4 +117,45 @@ static char help_text[]=
 
 //#define MSGTR_
 
+#ifdef HAVE_NEW_GUI
+
+// --- labels ---
+#define MSGTR_About "About"
+#define MSGTR_FileSelect "Select file ..."
+#define MSGTR_MessageBox "MessageBox"
+#define MSGTR_PlayList "PlayList"
+#define MSGTR_SkinBrowser "Skin Browser"
+
+// --- buttons ---
+#define MSGTR_Ok "Ok"
+#define MSGTR_Cancel "Cancel"
+#define MSGTR_Add "Add"
+#define MSGTR_Remove "Remove"
+
+// --- error messages ---
+#define MSGTR_NEMDB "Sorry, not enough memory for draw buffer."
+#define MSGTR_NEMFMR "Sorry, not enough memory for menu rendering."
+#define MSGTR_NEMFMM "Sorry, not enough memory for main window shape mask."
+
+// --- skin loader error messages
+#define MSGTR_SKIN_ERRORMESSAGE "[skin] error in skin config file on line %d: %s"
+#define MSGTR_SKIN_WARNING1 "[skin] warning in skin config file on line %d: widget found but before \"section\" n
+#define MSGTR_SKIN_WARNING2 "[skin] warning in skin config file on line %d: widget found but before \"subsection\
+#define MSGTR_SKIN_BITMAP_16bit  "16 bits or less depth bitmap not supported ( %s ).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "file not found ( %s )\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "bmp read error ( %s )\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "tga read error ( %s )\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "png read error ( %s )\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed tga not supported ( %s )\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "unknown file type ( %s )\n"
+#define MSGTR_SKIN_BITMAP_ConvertError "24 bit to 32 bit convert error ( %s )\n"
+#define MSGTR_SKIN_BITMAP_UnknownMessage "unknown message: %s\n"
+#define MSGTR_SKIN_FONT_NotEnoughtMemory "not enought memory\n"
+#define MSGTR_SKIN_FONT_TooManyFontsDeclared "too many fonts declared\n"
+#define MSGTR_SKIN_FONT_FontFileNotFound "font file not found\n"
+#define MSGTR_SKIN_FONT_FontImageNotFound "font image file not found\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "non-existent font identifier ( %s )\n"
+#define MSGTR_SKIN_UnknownParameter "unknown parameter ( %s )\n"
+
+#endif
 

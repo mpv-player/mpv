@@ -2,8 +2,6 @@
 #ifndef __WIDGET_ABOUT
 #define __WIDGET_ABOUT
 
-#include "../../language.h"
-
 void ab_Ok_released( GtkButton * button,gpointer user_data )
 {
  gtk_widget_hide( AboutBox );

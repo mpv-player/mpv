@@ -9,7 +9,6 @@
 #include <unistd.h>
 
 #include "../app.h"
-#include "../../language.h"
 
 GtkWidget * SkinList;
 GtkWidget * sbOk;
@@ -145,14 +144,14 @@ GtkWidget * create_SkinBrowser( void )
  GtkWidget     * Cancel;
 
  SkinBrowser=gtk_window_new( GTK_WINDOW_DIALOG );
- gtk_widget_set_name( SkinBrowser,langSkinBrowser );
- gtk_object_set_data( GTK_OBJECT( SkinBrowser ),langSkinBrowser,SkinBrowser );
+ gtk_widget_set_name( SkinBrowser,MSGTR_SkinBrowser );
+ gtk_object_set_data( GTK_OBJECT( SkinBrowser ),MSGTR_SkinBrowser,SkinBrowser );
  gtk_widget_set_usize( SkinBrowser,256,320 );
  gtk_container_set_border_width( GTK_CONTAINER( SkinBrowser ),1 );
  GTK_WIDGET_SET_FLAGS( SkinBrowser,GTK_CAN_FOCUS );
  GTK_WIDGET_SET_FLAGS( SkinBrowser,GTK_CAN_DEFAULT );
  gtk_widget_set_events( SkinBrowser,GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK | GDK_PROPERTY_CHANGE_MASK | GDK_VISIBILITY_NOTIFY_MASK );
- gtk_window_set_title( GTK_WINDOW( SkinBrowser ),langSkinBrowser );
+ gtk_window_set_title( GTK_WINDOW( SkinBrowser ),MSGTR_SkinBrowser );
  gtk_window_set_position( GTK_WINDOW( SkinBrowser ),GTK_WIN_POS_CENTER );
  gtk_window_set_policy( GTK_WINDOW( SkinBrowser ),FALSE,FALSE,TRUE );
 
@@ -269,20 +268,20 @@ GtkWidget * create_SkinBrowser( void )
  gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox4 ),0 );
  gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox4 ),80,0 );
 
- sbOk=gtk_button_new_with_label( langOk );
- gtk_widget_set_name( sbOk,langOk );
+ sbOk=gtk_button_new_with_label( MSGTR_Ok );
+ gtk_widget_set_name( sbOk,MSGTR_Ok );
  gtk_widget_ref( sbOk );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),langOk,sbOk,
+ gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),MSGTR_Ok,sbOk,
                           ( GtkDestroyNotify ) gtk_widget_unref );
  gtk_widget_show( sbOk );
  gtk_container_add( GTK_CONTAINER( hbuttonbox4 ),sbOk );
  gtk_widget_set_usize( sbOk,-2,33 );
  GTK_WIDGET_SET_FLAGS( sbOk,GTK_CAN_DEFAULT );
 
- Cancel=gtk_button_new_with_label( langCancel );
- gtk_widget_set_name( Cancel,langCancel );
+ Cancel=gtk_button_new_with_label( MSGTR_Cancel );
+ gtk_widget_set_name( Cancel,MSGTR_Cancel );
  gtk_widget_ref( Cancel );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),langCancel,Cancel,
+ gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),MSGTR_Cancel,Cancel,
                           ( GtkDestroyNotify ) gtk_widget_unref );
  gtk_widget_show( Cancel );
  gtk_container_add( GTK_CONTAINER( hbuttonbox4 ),Cancel );

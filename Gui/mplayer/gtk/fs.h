@@ -9,8 +9,6 @@
 #include <glob.h>
 #include <unistd.h>
 
-#include "../../language.h"
-
 #ifdef	__SVR4
 #define	get_current_dir_name()	getcwd(NULL, PATH_MAX)
 #endif
@@ -380,7 +378,7 @@ GtkWidget * create_FileSelect( void )
  GTK_WIDGET_SET_FLAGS( fsFileSelect,GTK_CAN_FOCUS );
  GTK_WIDGET_SET_FLAGS( fsFileSelect,GTK_CAN_DEFAULT );
  gtk_widget_set_events( fsFileSelect,GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK | GDK_PROPERTY_CHANGE_MASK | GDK_VISIBILITY_NOTIFY_MASK );
- gtk_window_set_title( GTK_WINDOW( fsFileSelect ),langFileSelect );
+ gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_FileSelect );
  gtk_window_set_position( GTK_WINDOW( fsFileSelect ),GTK_WIN_POS_CENTER );
  gtk_window_set_policy( GTK_WINDOW( fsFileSelect ),FALSE,FALSE,TRUE );
  fsColorMap=gdk_colormap_get_system();
@@ -590,10 +588,10 @@ GtkWidget * create_FileSelect( void )
 // gtk_container_add( GTK_CONTAINER( hbuttonbox3 ),fsOk );
 // gtk_widget_show( fsOk );
 
- fsOk=gtk_button_new_with_label( langOk );
- gtk_widget_set_name( fsOk,langOk );
+ fsOk=gtk_button_new_with_label( MSGTR_Ok );
+ gtk_widget_set_name( fsOk,MSGTR_Ok );
  gtk_widget_ref( fsOk );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),langOk,fsOk,( GtkDestroyNotify )gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),MSGTR_Ok,fsOk,( GtkDestroyNotify )gtk_widget_unref );
  gtk_container_add( GTK_CONTAINER( hbuttonbox3 ),fsOk );
  gtk_widget_show( fsOk );
 
@@ -607,10 +605,10 @@ GtkWidget * create_FileSelect( void )
 // gtk_container_add( GTK_CONTAINER( hbuttonbox3 ),fsCancel );
 // gtk_widget_show( fsCancel );
 
- fsCancel=gtk_button_new_with_label( langCancel );
- gtk_widget_set_name( fsCancel,langCancel );
+ fsCancel=gtk_button_new_with_label( MSGTR_Cancel );
+ gtk_widget_set_name( fsCancel,MSGTR_Cancel );
  gtk_widget_ref( fsCancel );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),langCancel,fsCancel,( GtkDestroyNotify )gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),MSGTR_Cancel,fsCancel,( GtkDestroyNotify )gtk_widget_unref );
  gtk_container_add( GTK_CONTAINER( hbuttonbox3 ),fsCancel );
  gtk_widget_show( fsCancel );
 

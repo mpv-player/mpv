@@ -121,9 +121,9 @@ void mplMenuInit( void )
  if ( ( mplMenuDrawBuffer = calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
   {
    #ifdef DEBUG
-    dbprintf( 1,langNEMFMR );
+    dbprintf( 1,MSGTR_NEMFMR );
    #endif
-   gtkMessageBox( langNEMFMR );
+   gtkMessageBox( MSGTR_NEMFMR );
    return;
   }
 

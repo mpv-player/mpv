@@ -13,7 +13,6 @@
 #include "../skin/skin.h"
 #include "../wm/ws.h"
 #include "../error.h"
-#include "../language.h"
 
 #include "../../config.h"
 #include "../../libvo/x11_common.h"

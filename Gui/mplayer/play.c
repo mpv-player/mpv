@@ -16,6 +16,7 @@ int    moviex,moviey,moviewidth,movieheight;
 #include "../wm/widget.h"
 
 #include "../../config.h"
+#include "../../help_mp.h"
 #include "../../libvo/x11_common.h"
 
 #include "widgets.h"
@@ -25,7 +26,6 @@ int    moviex,moviey,moviewidth,movieheight;
 
 #include "../skin/skin.h"
 #include "../error.h"
-#include "../language.h"
 
 mplCommStruct * mplShMem;
 char          * Filename = NULL;
@@ -157,7 +157,7 @@ void ChangeSkin( void )
     {
      if ( mplMenuDrawBuffer ) free( mplMenuDrawBuffer );
      if ( ( mplMenuDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
-      { message( False,langNEMDB ); return; }
+      { message( False,MSGTR_NEMDB ); return; }
      wsResizeWindow( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
      wsResizeImage( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
     }
@@ -179,7 +179,7 @@ void ChangeSkin( void )
 
    if ( mplDrawBuffer ) free( mplDrawBuffer );
    if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
-    { message( False,langNEMDB ); return; }
+    { message( False,MSGTR_NEMDB ); return; }
    wsVisibleWindow( &appMPlayer.mainWindow,wsHideWindow );
    wsResizeWindow( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
    wsMoveWindow( &appMPlayer.mainWindow,appMPlayer.main.x,appMPlayer.main.y );

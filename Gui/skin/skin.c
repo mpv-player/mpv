@@ -7,8 +7,8 @@
 #include "error.h"
 #include "font.h"
 #include "../app.h"
-#include "../language.h"
 #include "../../config.h"
+#include "../../help_mp.h"
 
 listItems     * skinAppMPlayer = &appMPlayer;
 
@@ -28,23 +28,27 @@ void ERRORMESSAGE( const char * format, ... )
  va_start( ap,format );
  vsnprintf( p,512,format,ap );
  va_end( ap );
- message( False,"[skin] error in skin config file on line %d: %s",linenumber,p );
+// message( False,"[skin] error in skin config file on line %d: %s",linenumber,p );
+ message( False,MSGTR_SKIN_ERRORMESSAGE,linenumber,p );
 }
 
-#define CHECKDEFLIST( str ) { \
-                              if ( defList == NULL ) \
-                               { \
-                                message( False,"[skin] warning in skin config file on line %d: widget found but before \"section\" not found ("str")",linenumber ); \
-                                return 1; \
-                               } \
-                            }
-#define CHECKWINLIST( str ) { \
-                              if ( !strlen( winList ) ) \
-                               { \
-                                message( False,"[skin] warning in skin config file on line %d: widget found but before \"subsection\" not found ("str")",linenumber ); \
-                                return 1; \
-                               } \
-                            }
+#define CHECKDEFLIST( str ) \
+{ \
+ if ( defList == NULL ) \
+  { \
+   message( False,MSGTR_SKIN_WARNING1,linenumber,str ); \
+   return 1; \
+  } \
+}
+
+#define CHECKWINLIST( str ) \
+{ \
+ if ( !strlen( winList ) ) \
+  { \
+   message( False,MSGTR_SKIN_WARNING2,linenumber,str ); \
+   return 1; \
+  } \
+}
 
 char * strlower( char * in )
 {
@@ -58,14 +62,14 @@ int skinBPRead( char * fname, txSample * bf )
  int i=bpRead( fname,bf );
  switch ( i )
   {
-   case -1: ERRORMESSAGE( "16 bits or less depth bitmap not supported ( %s ).\n",fname ); break;
-   case -2: ERRORMESSAGE( "file not found ( %s )\n",fname ); break;
-   case -3: ERRORMESSAGE( "bmp read error ( %s )\n",fname ); break;
-   case -4: ERRORMESSAGE( "tga read error ( %s )\n",fname ); break;
-   case -5: ERRORMESSAGE( "png read error ( %s )\n",fname ); break;
-   case -6: ERRORMESSAGE( "RLE packed tga not supported ( %s )\n",fname ); break;
-   case -7: ERRORMESSAGE( "unknown file type ( %s )\n",fname ); break;
-   case -8: ERRORMESSAGE( "24 bit to 32 bit convert error ( %s )\n",fname ); break;
+   case -1: ERRORMESSAGE( MSGTR_SKIN_BITMAP_16bit,fname ); break;
+   case -2: ERRORMESSAGE( MSGTR_SKIN_BITMAP_FileNotFound,fname ); break;
+   case -3: ERRORMESSAGE( MSGTR_SKIN_BITMAP_BMPReadError,fname ); break;
+   case -4: ERRORMESSAGE( MSGTR_SKIN_BITMAP_TGAReadError,fname ); break;
+   case -5: ERRORMESSAGE( MSGTR_SKIN_BITMAP_PNGReadError,fname ); break;
+   case -6: ERRORMESSAGE( MSGTR_SKIN_BITMAP_RLENotSupported,fname ); break;
+   case -7: ERRORMESSAGE( MSGTR_SKIN_BITMAP_UnknownFileType,fname ); break;
+   case -8: ERRORMESSAGE( MSGTR_SKIN_BITMAP_ConvertError,fname ); break;
   }
  return i;
 }
@@ -133,7 +137,7 @@ int __base( char * in )
     defList->main.Mask.BPP=1;
     defList->main.Mask.ImageSize=defList->main.Mask.Width * defList->main.Mask.Height / 8;
     defList->main.Mask.Image=(char *)calloc( 1,defList->main.Mask.ImageSize );
-    if ( defList->main.Mask.Image == NULL ) message( True,langNEMFMM );
+    if ( defList->main.Mask.Image == NULL ) message( True,MSGTR_NEMFMM );
     {
      int i,b,c=0; unsigned long * buf = NULL; unsigned char tmp = 0; int nothaveshape = 1;
      buf=(unsigned long *)defList->main.Bitmap.Image;
@@ -244,7 +248,7 @@ int __button( char * in )
  #endif
 
  if ( ( defList->Items[ defList->NumberOfItems ].msg=appFindMessage( msg ) ) == -1 )
-   { ERRORMESSAGE( "unknown message: %s\n",msg ); return 1; }
+   { ERRORMESSAGE( MSGTR_SKIN_BITMAP_UnknownMessage,msg ); return 1; }
  defList->Items[ defList->NumberOfItems ].pressed=btnReleased;
  if ( defList->Items[ defList->NumberOfItems ].msg == evPauseSwitchToPlay ) defList->Items[ defList->NumberOfItems ].pressed=btnDisabled;
  defList->Items[ defList->NumberOfItems ].tmp=1;
@@ -312,7 +316,7 @@ int __menu( char * in )
  #endif
 
  if ( ( defList->MenuItems[ defList->NumberOfMenuItems ].msg=msg ) == -1 )
-  ERRORMESSAGE( "unknown message: %s\n",tmp );
+  ERRORMESSAGE( MSGTR_SKIN_BITMAP_UnknownMessage,tmp );
 
  #ifdef DEBUG
   dbprintf( 3,"[skin]  message: %d\n",defList->Items[ defList->NumberOfItems ].msg );
@@ -449,8 +453,8 @@ int __font( char * in )
  item->fontid=fntAddNewFont( name );
  switch ( item->fontid )
   {
-   case -1: ERRORMESSAGE( "not enought memory\n" ); return 1;
-   case -2: ERRORMESSAGE( "too many fonts\n" ); return 1;
+   case -1: ERRORMESSAGE( MSGTR_SKIN_FONT_NotEnoughtMemory ); return 1;
+   case -2: ERRORMESSAGE( MSGTR_SKIN_FONT_TooManyFontsDeclared ); return 1;
   }
 
  #ifdef DEBUG
@@ -459,8 +463,8 @@ int __font( char * in )
 
  switch ( fntRead( path,name,item->fontid ) )
   {
-   case -1: ERRORMESSAGE( "font file not found\n" ); return 1;
-   case -2: ERRORMESSAGE( "font image not found\n" ); return 1;
+   case -1: ERRORMESSAGE( MSGTR_SKIN_FONT_FontFileNotFound ); return 1;
+   case -2: ERRORMESSAGE( MSGTR_SKIN_FONT_FontImageNotFound ); return 1;
   }
 
  return 0;
@@ -483,7 +487,7 @@ int __slabel( char * in )
  x=cutItemToInt( in,',',0 );
  y=cutItemToInt( in,',',1 );
  cutItem( in,sid,',',2 ); id=fntFindID( sid );
- if ( id < 0 ) { ERRORMESSAGE( "nonexistent font id. ( %s )\n",sid ); return 1; }
+ if ( id < 0 ) { ERRORMESSAGE( MSGTR_SKIN_FONT_NonExistentFontID,sid ); return 1; }
  cutItem( in,tmp,',',3 ); cutItem( tmp,tmp,'"',1 );
 
  #ifdef DEBUG
@@ -498,7 +502,7 @@ int __slabel( char * in )
  item->fontid=id;
  item->x=x; item->y=y;
  item->width=-1; item->height=-1;
- if ( ( item->label=malloc( strlen( tmp ) + 1 ) ) == NULL ) { ERRORMESSAGE( "not enought memory.\n" ); return 1; }
+ if ( ( item->label=malloc( strlen( tmp ) + 1 ) ) == NULL ) { ERRORMESSAGE( MSGTR_SKIN_FONT_NotEnoughtMemory ); return 1; }
  strcpy( item->label,tmp );
 
  return 0;
@@ -523,7 +527,7 @@ int __dlabel( char * in )
  sx=cutItemToInt( in,',',2 );
  a=cutItemToInt( in,',',3 ); 
  cutItem( in,sid,',',4 ); id=fntFindID( sid );
- if ( id < 0 ) { ERRORMESSAGE( "nonexistent font id. ( %s )\n",sid ); return 1; }
+ if ( id < 0 ) { ERRORMESSAGE( MSGTR_SKIN_FONT_NonExistentFontID,sid ); return 1; }
  cutItem( in,tmp,',',5 ); cutItem( tmp,tmp,'"',1 );
 
  #ifdef DEBUG
@@ -538,7 +542,7 @@ int __dlabel( char * in )
  item->fontid=id; item->align=a;
  item->x=x; item->y=y;
  item->width=sx; item->height=-1;
- if ( ( item->label=malloc( strlen( tmp ) + 1 ) ) == NULL ) { ERRORMESSAGE( "not enought memory.\n" ); return 1; }
+ if ( ( item->label=malloc( strlen( tmp ) + 1 ) ) == NULL ) { ERRORMESSAGE( MSGTR_SKIN_FONT_NotEnoughtMemory ); return 1; }
  strcpy( item->label,tmp );
 
  return 0;
@@ -555,7 +559,7 @@ int __decoration( char * in )
   dbprintf( 0,"\n[skin] window decoration is %s\n",in );
  #endif
  cutItem( in,tmp,',',0 );
- if ( strcmp( tmp,"enable" )&&strcmp( tmp,"disable" ) ) { ERRORMESSAGE( "unknown parameter.\n" ); return 1; }
+ if ( strcmp( tmp,"enable" )&&strcmp( tmp,"disable" ) ) { ERRORMESSAGE( MSGTR_SKIN_UnknownParameter,tmp ); return 1; }
  if ( strcmp( tmp,"enable" ) ) defList->mainDecoration=0;
   else defList->mainDecoration=1;
 

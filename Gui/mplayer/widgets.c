@@ -19,6 +19,7 @@
 #include "../events.h"
 
 #include "../../config.h"
+#include "../../help_mp.h"
 #include "../error.h"
 
 #include "pixmaps/up.xpm"
