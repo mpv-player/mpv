@@ -18,6 +18,7 @@
 
 #include "./mplayer.h"
 #include "../events.h"
+#include "../app.h"
 
 #include "gtk/menu.h"
 #include "play.h"
@@ -128,6 +129,12 @@ void gtkMessageBox( int type,gchar * str )
  gtk_widget_show( MessageBox );
 }
 
+void gtkSetLayer( GtkWidget * wdg )
+{
+ GdkWindowPrivate * win = wdg->window;
+ wsSetLayer( gdk_display,win->xwindow,appMPlayer.subWindow.isFullScreen );
+}
+
 void gtkShow( int type,char * param )
 {
  switch( type )
@@ -140,27 +147,34 @@ void gtkShow( int type,char * param )
           gtkSetDefaultToCList( SkinList,param );
           gtk_widget_show( SkinBrowser );
          }
+	gtkSetLayer( SkinBrowser );
         break;
    case evPreferences:
         gtk_widget_hide( Options );
         gtk_widget_show( Options );
+	gtkSetLayer( Options );
         break;
    case evPlayList:
         gtk_widget_hide( PlayList );
         gtk_widget_show( PlayList );
+	gtkSetLayer( PlayList );
         break;
    case evLoad:
         ShowFileSelect( fsVideoSelector );
+	gtkSetLayer( FileSelect );
         break;
    case evFirstLoad:
         ShowFileSelect( fsVideoSelector );
+	gtkSetLayer( FileSelect );
         break;
    case evLoadSubtitle:
         ShowFileSelect( fsSubtitleSelector );
+	gtkSetLayer( FileSelect );
         break;
    case evAbout:
         gtk_widget_hide( AboutBox );
         gtk_widget_show( AboutBox );
+	gtkSetLayer( AboutBox );
         break;
    case evShowPopUpMenu:
         gtkPopupMenu=evNone;
@@ -174,3 +188,5 @@ void gtkShow( int type,char * param )
         break;
   }
 }
+
+

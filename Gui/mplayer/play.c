@@ -54,9 +54,26 @@ void mplFullScreen( void )
    wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
   }// else { vo_x11_fullscreen(); appMPlayer.subWindow.isFullScreen=vo_fs; }
 #else
+  if ( ( guiIntfStruct.Playing )&&( appMPlayer.subWindow.isFullScreen ) )
+   { 
+    appMPlayer.subWindow.OldWidth=guiIntfStruct.MovieWidth; appMPlayer.subWindow.OldHeight=guiIntfStruct.MovieHeight; 
+    switch ( appMPlayer.sub.x )
+     {
+      case -1: appMPlayer.subWindow.OldX=( wsMaxX / 2 ) - ( appMPlayer.subWindow.OldWidth / 2 ); break;
+      case -2: appMPlayer.subWindow.OldX=wsMaxX - appMPlayer.subWindow.OldWidth; break;
+      default: appMPlayer.subWindow.OldX=appMPlayer.sub.x; break;
+     }
+    switch ( appMPlayer.sub.y )
+     {
+      case -1: appMPlayer.subWindow.OldY=( wsMaxY / 2 ) - ( appMPlayer.subWindow.OldHeight / 2 ); break;
+      case -2: appMPlayer.subWindow.OldY=wsMaxY - appMPlayer.subWindow.OldHeight; break;
+      default: appMPlayer.subWindow.OldY=appMPlayer.sub.y; break;
+     }
+   }
   wsFullScreen( &appMPlayer.subWindow );
-  vo_fs=0;
-  if ( appMPlayer.subWindow.isFullScreen ) vo_fs=1;
+  vo_fs=appMPlayer.subWindow.isFullScreen;
+  wsSetLayer( wsDisplay,appMPlayer.mainWindow.WindowID,appMPlayer.subWindow.isFullScreen );
+  wsSetLayer( wsDisplay,appMPlayer.menuWindow.WindowID,appMPlayer.subWindow.isFullScreen );
 #endif
 
  fullscreen=appMPlayer.subWindow.isFullScreen;

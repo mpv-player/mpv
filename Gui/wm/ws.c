@@ -23,6 +23,7 @@
 #include "wsconv.h"
 #include "../../postproc/rgb2rgb.h"
 #include "../../mp_msg.h"
+#include "../../mplayer.h"
 
 #include <X11/extensions/XShm.h>
 #ifdef HAVE_XSHAPE
@@ -51,11 +52,11 @@ int                  wsScreen;
 Window               wsRootWin;
 XEvent               wsEvent;
 int                  wsWindowDepth;
-int		     wsWMType = 1;
-int		     wsIsKDE = 0;
+int		     wsWMType = wsWMUnknown;
 GC                   wsHGC;
 MotifWmHints         wsMotifWmHints;
 Atom                 wsTextProperlyAtom = None;
+int		     wsLayer = 0;
 
 int                  wsDepthOnScreen = 0;
 int                  wsRedMask = 0;
@@ -138,7 +139,57 @@ int wsErrorHandler( Display * dpy,XErrorEvent * Event )
  fprintf(stderr,"[ws]  Error code: %d ( %s )\n",Event->error_code,type );
  fprintf(stderr,"[ws]  Request code: %d\n",Event->request_code );
  fprintf(stderr,"[ws]  Minor code: %d\n",Event->minor_code );
+ fprintf(stderr,"[ws]  Modules: %s\n",current_module );
  exit( 0 );
+}
+
+int wsWindowManagerType( void )
+{
+ Atom            type;
+ int             format;
+ unsigned long   nitems, bytesafter;
+ unsigned char * args = NULL;
+
+ mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is " );
+// --- icewm
+// type=XInternAtom( wsDisplay,"_ICEWM_TRAY",False ); 
+// if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+//  {
+//   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"IceWM\n" );
+//   XFree( args );
+//   return wsWMIceWM;
+//  }
+
+// --- gnome
+// type=XInternAtom( wsDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
+// if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+//  {
+//   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"Gnome\n" );
+//   XFree( args );
+//   return wsWMGnome;
+//  }
+ 
+// --- kde
+// type=XInternAtom( wsDisplay,"_KDE_NET_WM_FRAME_STRUT",False );
+//// type=XInternAtom( wsDisplay,"_KDE_NET_USER_TIME",False );
+// if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+//  {
+//   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"KDE\n" );
+//   XFree( args );
+//   return wsWMKDE;
+//  }
+
+// --- net wm
+ type=XInternAtom( wsDisplay,"_NET_SUPPORTED",False );
+ if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+  {
+   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"NetWM\n" );
+   XFree( args );
+   return wsWMNetWM;
+  }
+ 
+ mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"Unknow\n" );
+ return wsWMUnknown;
 }
 
 void wsXInit( void* mDisplay )
@@ -191,6 +242,8 @@ if(mDisplay){
  wsRootWin=RootWindow( wsDisplay,wsScreen );
  wsMaxX=DisplayWidth( wsDisplay,wsScreen );
  wsMaxY=DisplayHeight( wsDisplay,wsScreen );
+
+ wsWMType=wsWindowManagerType();
 
  wsGetDepthOnScreen();
 #ifdef DEBUG
@@ -253,6 +306,7 @@ if(mDisplay){
      wsConvFunc=BGR8880_to_BGR555_c;
      break;
   }
+ XSetErrorHandler( wsErrorHandler );
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -356,7 +410,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  wsClassHint.res_class="MPlayer";
  XSetClassHint( wsDisplay,win->WindowID,&wsClassHint );
 
- win->SizeHint.flags=PPosition | PSize | PResizeInc | PWinGravity | PBaseSize;
+ win->SizeHint.flags=PPosition | PSize | PResizeInc | PWinGravity;// | PBaseSize;
  win->SizeHint.x=win->X;
  win->SizeHint.y=win->Y;
  win->SizeHint.width=win->Width;
@@ -571,16 +625,25 @@ buttonreleased:
 	 char * name = XGetAtomName( wsDisplay,Event->xproperty.atom );
 	 
          if ( !name ) break;
-	 if ( !strncmp( name,"_ICEWM_TRAY",11 ) ||
-	      !strncmp( name,"_KDE_",5 ) ||
-	      !strncmp( name,"KWM_WIN_DESKTOP",15 ) ) wsWMType=0;
+	 if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
+	  {
+	   wsWMType=wsWMIceWM;
+	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is IceWM.\n" );
+	  }
+	 if ( !strncmp( name,"_KDE_",5 ) )
+	  {
+	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is KDE.\n" );
+	   wsWMType=wsWMKDE;
+	  }
+	 if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
+	  {
+	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is WindowMaker style.\n" );
+	   wsWMType=wsWMWMaker;
+	  }
 	      
-	 if ( !strncmp( name,"_KDE_",5 ) ) wsIsKDE=1;
-							  
 //         fprintf(stderr,"[ws] PropertyNotify %s ( 0x%x )\n",name,Event->xproperty.atom );
 							  
 	 XFree( name );
-	 break;
 	}
         break;
 
@@ -639,12 +702,82 @@ while(wsTrue){
 }
 
 // ----------------------------------------------------------------------------------------------
+//    Move window to selected layer
+// ----------------------------------------------------------------------------------------------
+
+#define WIN_LAYER_ONBOTTOM               2
+#define WIN_LAYER_NORMAL                 4
+#define WIN_LAYER_ONTOP                  6
+
+void wsSetLayer( Display * wsDisplay, Window win, int layer )
+{
+ Atom            type;
+ int             format;
+ unsigned long   nitems, bytesafter;
+ unsigned char * args = NULL;
+
+ type=XInternAtom( wsDisplay,"_NET_SUPPORTED",False );
+ if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+  {
+   XEvent e;
+   e.xclient.type=ClientMessage;
+   e.xclient.message_type=XInternAtom( wsDisplay,"_NET_WM_STATE",False );
+   e.xclient.display=wsDisplay;
+   e.xclient.window=win;
+   e.xclient.format=32;
+   e.xclient.data.l[0]=layer;
+   e.xclient.data.l[1]=XInternAtom( wsDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
+   e.xclient.data.l[2]=0l;
+   e.xclient.data.l[3]=0l;
+   e.xclient.data.l[4]=0l;
+   XSendEvent( wsDisplay,wsRootWin,False,SubstructureRedirectMask,&e );
+								   
+   XFree( args );
+   return;
+  }
+ type=XInternAtom( wsDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
+ if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+  {
+   XClientMessageEvent  xev;
+   
+   memset( &xev,0,sizeof( xev ) );
+   xev.type=ClientMessage;
+   xev.window=win;
+   xev.message_type=XInternAtom( wsDisplay,"_WIN_LAYER",False );
+   xev.format=32;
+   switch ( layer ) 
+    {
+     case -1: xev.data.l[0] = WIN_LAYER_ONBOTTOM; break;
+     case  0: xev.data.l[0] = WIN_LAYER_NORMAL;   break;
+     case  1: xev.data.l[0] = WIN_LAYER_ONTOP;    break;
+    }
+   XSendEvent( wsDisplay,wsRootWin,False,SubstructureNotifyMask,(XEvent*)&xev );
+   if ( layer ) XRaiseWindow( wsDisplay,win );
+								              
+   XFree( args );
+   return;
+  }
+}
+
+// ----------------------------------------------------------------------------------------------
 //    Switch to fullscreen.
 // ----------------------------------------------------------------------------------------------
 void wsFullScreen( wsTWindow * win )
 {
  int decoration = 0;
- if ( wsWMType ) XUnmapWindow( wsDisplay,win->WindowID );
+ 
+ if ( wsWMType == wsWMUnknown ) XUnmapWindow( wsDisplay,win->WindowID );
+
+ switch ( wsWMType )
+   {
+    case wsWMUnknown:
+           XUnmapWindow( wsDisplay,win->WindowID );
+	   break;
+    case wsWMIceWM:
+           if ( !win->isFullScreen ) XUnmapWindow( wsDisplay,win->WindowID );
+           break;
+   }
+
  if ( win->isFullScreen )
   {
    win->X=win->OldX;
@@ -665,10 +798,11 @@ void wsFullScreen( wsTWindow * win )
     wsScreenSaverOff( wsDisplay );
    }
 
- win->SizeHint.flags=PPosition | PSize | PWinGravity | PBaseSize;
+ win->SizeHint.flags=PPosition | PSize | PWinGravity;// | PBaseSize;
  win->SizeHint.x=win->X;              win->SizeHint.y=win->Y;
  win->SizeHint.width=win->Width;      win->SizeHint.height=win->Height;
  win->SizeHint.base_width=win->Width; win->SizeHint.base_height=win->Height;
+ 
  win->SizeHint.win_gravity=StaticGravity;
  if ( win->Property & wsMaxSize )
   {
@@ -684,6 +818,7 @@ void wsFullScreen( wsTWindow * win )
   }
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
 
+ wsSetLayer( wsDisplay,win->WindowID,win->isFullScreen );
  XMoveResizeWindow( wsDisplay,win->WindowID,win->X,win->Y,win->Width,win->Height );
  wsWindowDecoration( win,decoration );
  XMapRaised( wsDisplay,win->WindowID );
@@ -772,12 +907,12 @@ void wsResizeWindow( wsTWindow * win,int sx, int sy )
  win->Width=sx;
  win->Height=sy;
 
- win->SizeHint.flags=PPosition | PSize | PWinGravity | PBaseSize;
+ win->SizeHint.flags=PPosition | PSize | PWinGravity;// | PBaseSize;
  win->SizeHint.x=win->X;
  win->SizeHint.y=win->Y;
  win->SizeHint.width=win->Width;
  win->SizeHint.height=win->Height;
-/*
+
  if ( win->Property & wsMinSize )
   {
    win->SizeHint.flags|=PMinSize;
@@ -790,10 +925,12 @@ void wsResizeWindow( wsTWindow * win,int sx, int sy )
    win->SizeHint.max_width=win->Width;
    win->SizeHint.max_height=win->Height;
   }
-*/
+
  win->SizeHint.win_gravity=StaticGravity;
  win->SizeHint.base_width=sx; win->SizeHint.base_height=sy;
- if ( !wsIsKDE ) XUnmapWindow( wsDisplay,win->WindowID );
+
+ if ( wsWMType == wsWMUnknown ) XUnmapWindow( wsDisplay,win->WindowID );
+
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
  XResizeWindow( wsDisplay,win->WindowID,sx,sy );
  XMapRaised( wsDisplay,win->WindowID );
@@ -811,9 +948,30 @@ void wsIconify( wsTWindow win )
 // ----------------------------------------------------------------------------------------------
 void wsMoveTopWindow( wsTWindow * win )
 {
- if ( wsIsKDE ) return;
- XMapRaised( wsDisplay,win->WindowID );
- XRaiseWindow( wsDisplay,win->WindowID );
+ if ( wsWMType == wsWMIceWM )
+  {
+   XUnmapWindow( wsDisplay,win->WindowID );
+   XMapWindow( wsDisplay,win->WindowID );
+   return;
+  }
+/*  
+ if ( XInternAtom( wsDisplay,"_NET_ACTIVE_WINDOW",False ) != None )
+  {
+   XEvent e;
+
+   e.xclient.type=ClientMessage;
+   e.xclient.message_type=XInternAtom( wsDisplay,"_NET_ACTIVE_WINDOW",False );
+   e.xclient.display=wsDisplay;
+   e.xclient.window=win->WindowID;
+   e.xclient.format=32;
+   e.xclient.data.l[0]=0;
+   XSendEvent( wsDisplay,wsRootWin,False,SubstructureRedirectMask,&e );
+  }
+   else */
+    {
+     XMapRaised( wsDisplay,win->WindowID );
+     XRaiseWindow( wsDisplay,win->WindowID );
+    }
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -929,7 +1087,7 @@ void wsVisibleWindow( wsTWindow * win,int show )
 {
  switch( show )
   {
-   case wsShowWindow: XMapWindow( wsDisplay,win->WindowID ); break;
+   case wsShowWindow: XMapRaised( wsDisplay,win->WindowID ); break;
    case wsHideWindow: XUnmapWindow( wsDisplay,win->WindowID ); break;
   }
  XFlush( wsDisplay );

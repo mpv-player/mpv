@@ -87,6 +87,15 @@
 #define wsPVisible   5
 #define wsRolled     6
 
+#define wsWMWMW      0
+#define wsWMUnknown  1
+#define wsWMNetWM    2
+#define wsWMKDE      3
+#define wsWMIceWM    4
+#define wsWMBlackBox 5
+#define wsWMGnome    6
+#define wsWMWMaker   7
+
 #define wsParamDisplay Display *dpy,Window w
 
 typedef   void (*wsTReDraw)( wsParamDisplay );
@@ -167,9 +176,12 @@ typedef struct
 extern int                  wsMaxX;
 extern int                  wsMaxY;
 
+extern int		    wsWMType;
+
 extern Display            * wsDisplay;
 extern int                  wsScreen;
 extern Window               wsRootWin;
+extern int		    wsLayer;
 
 extern unsigned char      * wsImageData;
 
@@ -219,6 +231,7 @@ extern void wsSetBackgroundRGB( wsTWindow * win,int r,int g,int b );
 extern void wsSetTitle( wsTWindow * win,char * name );
 extern void wsVisibleWindow( wsTWindow * win,int show );
 extern void wsWindowDecoration( wsTWindow * win,long d );
+extern void wsSetLayer( Display * wsDisplay,Window win, int layer );
 extern void wsFullScreen( wsTWindow * win );
 extern void wsPostRedisplay( wsTWindow * win );
 extern void wsSetShape( wsTWindow * win,char * data );

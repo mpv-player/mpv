@@ -13,6 +13,7 @@ extern int vo_screenheight;
 extern int vo_dwidth;
 extern int vo_dheight;
 extern int vo_fs;
+extern int vo_wm_type;
 
 extern char *mDisplayName;
 extern Display *mDisplay;

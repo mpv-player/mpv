@@ -104,7 +104,7 @@ void guiGetEvent( int type,char * arg )
             wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
 	   }
 	  guiIntfStruct.MovieWidth=vo_dwidth;
-	  guiIntfStruct.MovieHeight=vo_dwidth;
+	  guiIntfStruct.MovieHeight=vo_dheight;
          }
 	break;
 #ifdef USE_DVDREAD

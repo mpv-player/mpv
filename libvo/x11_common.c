@@ -46,6 +46,11 @@
  */
 #define	SCAN_VISUALS
 
+#define vo_wm_Unknown     0
+#define vo_wm_NetWM       1
+#define vo_wm_KDE         2
+#define vo_wm_IceWM       3
+#define vo_wm_WMakerStyle 4
 
 extern int verbose;
 
@@ -61,6 +66,7 @@ int mLocalDisplay;
 /* output window id */
 int WinID=-1;
 int vo_mouse_autohide = 0;
+int vo_wm_type = vo_wm_Unknown;
 
 #ifdef HAVE_XINERAMA
 int xinerama_screen = 0;
@@ -289,7 +295,21 @@ int vo_init( void )
 	vo_screenwidth,vo_screenheight,
 	depth, vo_depthonscreen,
 	dispName,mLocalDisplay?"local":"remote");
- 
+
+ {
+  Atom            type;
+  int             format;
+  unsigned long   nitems, bytesafter;
+  unsigned char * args = NULL;
+  type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
+  if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+   {
+    mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[x11] Detected wm is NetWM.\n" );
+    XFree( args );
+    vo_wm_type=vo_wm_NetWM;
+   }
+ }    
+
  return 1;
 }
 
@@ -459,7 +479,6 @@ int vo_x11_uninit(Display *display, Window window)
 
        int vo_mouse_timer_const = 30;
 static int vo_mouse_counter = 30;
-       int vo_wm_type = 1;
 
 int vo_x11_check_events(Display *mydisplay){
  int ret=0;
@@ -548,10 +567,23 @@ int vo_x11_check_events(Display *mydisplay){
     	   {
 	    char * name = XGetAtomName( mydisplay,Event.xproperty.atom );
 	    if ( !name ) break;
-	    if ( !strncmp( name,"_ICEWM_TRAY",11 ) ||
-		 !strncmp( name,"_KDE_",5 ) ||
-	         !strncmp( name,"KWM_WIN_DESKTOP",15 ) ) vo_wm_type=0;
-		
+	    
+            if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
+	      {
+	       mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[x11] Detected wm is IceWM.\n" );
+	       vo_wm_type=vo_wm_IceWM;
+	      }
+	    if ( !strncmp( name,"_KDE_",5 ) )
+	      {
+	       mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[x11] Detected wm is KDE.\n" );
+	       vo_wm_type=vo_wm_KDE;
+	      }
+	    if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
+	      {
+	       mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[x11] Detected wm is WindowMaker style.\n" );
+	       vo_wm_type=vo_wm_WMakerStyle;
+	     }
+
 // 	     fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",vo_window,name,Event.xproperty.atom );
 	      
 	    XFree( name );
@@ -577,26 +609,88 @@ void vo_x11_sizehint( int x, int y, int width, int height, int max )
  XSetWMNormalHints( mDisplay,vo_window,&vo_hint );
 }
 
+#define WIN_LAYER_ONBOTTOM               2
+#define WIN_LAYER_NORMAL                 4
+#define WIN_LAYER_ONTOP                  6
+
+void vo_x11_setlayer( int layer )
+{
+ Atom            type;
+ int             format;
+ unsigned long   nitems, bytesafter;
+ unsigned char * args = NULL;
+
+ if ( vo_wm_type == vo_wm_IceWM ) return;
+
+ type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+  {
+   XEvent e;
+   
+   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] NET style stay on top ( layer %d ).\n",layer );
+   e.xclient.type=ClientMessage;
+   e.xclient.message_type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
+   e.xclient.display=mDisplay;
+   e.xclient.window=vo_window;
+   e.xclient.format=32;
+   e.xclient.data.l[0]=layer;
+   e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
+   e.xclient.data.l[2]=0l;
+   e.xclient.data.l[3]=0l;
+   e.xclient.data.l[4]=0l;
+   XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,&e );
+								   
+   XFree( args );
+   return;
+  }
+ type=XInternAtom( mDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+  {
+   XClientMessageEvent  xev;
+   
+   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Gnome style stay on top ( layer %d ).\n",layer );
+   memset( &xev,0,sizeof( xev ) );
+   xev.type=ClientMessage;
+   xev.window=vo_window;
+   xev.message_type=XInternAtom( mDisplay,"_WIN_LAYER",False );
+   xev.format=32;
+   switch ( layer ) 
+    {
+     case -1: xev.data.l[0] = WIN_LAYER_ONBOTTOM; break;
+     case  0: xev.data.l[0] = WIN_LAYER_NORMAL;   break;
+     case  1: xev.data.l[0] = WIN_LAYER_ONTOP;    break;
+    }
+   XSendEvent( mDisplay,mRootWin,False,SubstructureNotifyMask,(XEvent*)&xev );
+   if ( layer ) XRaiseWindow( mDisplay,vo_window );
+								              
+   XFree( args );
+   return;
+  }
+}
+
 void vo_x11_fullscreen( void )
 {
- if ( vo_wm_type ) XUnmapWindow( mDisplay,vo_window );
+ int x=0,y=0,w=vo_screenwidth,h=vo_screenheight;
 
- if ( !vo_fs )
+ switch ( vo_wm_type )
   {
-   vo_fs=VO_TRUE;
-   vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth;   vo_old_height=vo_dheight;
-   vo_dx=0;        vo_dy=0;        vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight;
+   case vo_wm_Unknown:
+	  XUnmapWindow( mDisplay,vo_window );
+	  break;
+   case vo_wm_IceWM:
+	  if ( !vo_fs ) XUnmapWindow( mDisplay,vo_window );
+	  break;
   }
-  else
-   {
-    vo_fs=VO_FALSE;
-    vo_dx=vo_old_x; vo_dy=vo_old_y; vo_dwidth=vo_old_width; vo_dheight=vo_old_height;
-   }
- vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight,0 );
- XMoveResizeWindow( mDisplay,vo_window,vo_dx,vo_dy,vo_dwidth,vo_dheight );
+
+ if ( vo_fs )
+  { vo_fs=VO_FALSE; x=vo_old_x; y=vo_old_y; w=vo_old_width; h=vo_old_height; }
+   else { vo_fs=VO_TRUE; vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth;   vo_old_height=vo_dheight; }
+
+ vo_x11_sizehint( x,y,w,h,0 );
  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
+ vo_x11_setlayer( vo_fs );
+ XMoveResizeWindow( mDisplay,vo_window,x,y,w,h );
  XMapRaised( mDisplay,vo_window );
- 
  XRaiseWindow( mDisplay,vo_window );
  XFlush( mDisplay );
 }
