@@ -472,13 +472,15 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 	if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
 		// no DR, so get a new image! hope we'll get DR buffer:
-		vf->dmpi=vf_get_image(vf->next,vf->priv->outfmt,
-		MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
-		mpi->w,mpi->h);
-	}
+                dmpi=vf_get_image(vf->next,vf->priv->outfmt,
+                    MP_IMGTYPE_TEMP,
+                    MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
+                    mpi->w,mpi->h);
+                vf_clone_mpi_attributes(dmpi, mpi);
+        }else{
+           dmpi=mpi;
+        }
 
-	dmpi= vf->dmpi;
-        
         vf->priv->mpeg2= mpi->qscale_type;
 	if(vf->priv->log2_count || !(mpi->flags&MP_IMGFLAG_DIRECT)){
 	    if(mpi->qscale || vf->priv->qp){
@@ -491,7 +493,6 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		memcpy_pic(dmpi->planes[2], mpi->planes[2], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, dmpi->stride[2], mpi->stride[2]);
 	    }
 	}
-        vf_clone_mpi_attributes(dmpi, mpi);
 
 #ifdef HAVE_MMX
 	if(gCpuCaps.hasMMX) asm volatile ("emms\n\t");
@@ -566,7 +567,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 
 static int open(vf_instance_t *vf, char* args){
 
-    int log2c;
+    int log2c=0;
     
     vf->config=config;
     vf->put_image=put_image;
