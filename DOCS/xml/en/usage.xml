@@ -422,7 +422,7 @@ play from FTP:
 </para>
 
 <note><para>
-Note: it's also recommended to enable CACHE when playback from network:
+Note: it's also recommended to enable <option>-cache</option> when playback from network:
 <screen>wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</screen>
 </para></note>
 </sect1>
@@ -467,7 +467,7 @@ You can also access files on this server :
 mplayer -cache 5000 mpst://servername//usr/local/movies/lol.avi
 </screen>
 Note that paths wich aren't starting with a / will be relative to
-the directory where the server is running. The cache option is not
+the directory where the server is running. The <option>-cache</option> option is not
 needed but highly recommended.
 </para>
 
