@@ -235,3 +235,13 @@ A: Es?
 
 Q: Akkor az aviplay sokkal jobb !
 A: Hasznald azt, ugyis van szep GUI-ja, meg amugyis jo kis C++ :)
+
+Q: Subtitles are very nice, the most beautiful I've ever seen, but they slow
+   down the playing! I know it's unlikely...
+A: After running ./configure , edit config.h and #define FAST_OSD . Then
+   recompile.
+
+Q: Szepek a feliratok, a legszebbek amiket valaha lattam, viszont lelassitjak
+   a lejatszast! Tudom hogy ez valoszinutlen, de...
+A: Miutan ./configure lefutott, szerkeszd at a config.h-t, es #undef FAST_OSD
+   helyett ird be : #define FAST_OSD . Forditsd ujra.

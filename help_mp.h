@@ -45,6 +45,7 @@ static char help_text[]=
 "    o               toggle OSD:  none / seek / seek+timer\n"
 "    * or /          increase or decrease volume\n"
 "    m               use mixer master or pcm channel\n"
+"    z or x          adjust subtitle delay by +/- 0.1 second\n"
 "\n"
 " * SEE MANPAGE FOR DETAILS/FURTHER OPTIONS AND KEYS !\n"
 "\n";
