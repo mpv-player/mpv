@@ -471,6 +471,20 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
           }
         }
 
+        // Windows Media Video 9 Advanced
+        if (strstr(libname,"wmvadvd.dll") && wm)
+        {
+          // The codec calls IsRectEmpty with coords 0,0,0,0 => result is 0
+          // but it really wants the rectangle to be not empty
+          if (PE_FindExportedFunction(wm, "CreateInstance", TRUE)==(void*)0x08c4b812) {
+            // Dll version is 10.0.0.3645
+            *((char*)0x08c48b0f)=0xeb; // Jump always, ignoring IsRectEmpty result
+          } else {
+            fprintf(stderr, "Unsupported WMVA version\n");
+            return 0;
+          }
+        }
+
 	if (strstr(libname,"QuickTime.qts") && wm)
 	{
 	    void** ptr;
