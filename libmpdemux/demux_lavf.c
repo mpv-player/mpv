@@ -138,7 +138,10 @@ int demux_open_lavf(demuxer_t *demuxer){
 
     register_protocol(&mp_protocol);
 
-    strncpy(mp_filename + 3, demuxer->stream->url, sizeof(mp_filename)-3);
+    if(demuxer->stream->url)
+        strncpy(mp_filename + 3, demuxer->stream->url, sizeof(mp_filename)-3);
+    else
+        strncpy(mp_filename + 3, "foobar.dummy", sizeof(mp_filename)-3);
     
     url_fopen(&priv->pb, mp_filename, URL_RDONLY);
     
