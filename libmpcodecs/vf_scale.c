@@ -15,6 +15,7 @@
 
 struct vf_priv_s {
     int w,h;
+    int v_chr_drop;
     unsigned int fmt;
     SwsContext *ctx;
 };
@@ -58,6 +59,8 @@ static int config(struct vf_instance_s* vf,
 	unsigned int flags, unsigned int outfmt){
     unsigned int best=find_best_out(vf);
     int vo_flags;
+    int int_sws_flags=0;
+    SwsFilter *srcFilter, *dstFilter;
     
     if(!best){
 	mp_msg(MSGT_VFILTER,MSGL_WARN,"SwScale: no supported outfmt found :(\n");
@@ -107,10 +110,13 @@ static int config(struct vf_instance_s* vf,
     if(vf->priv->ctx) freeSwsContext(vf->priv->ctx);
     
     // new swscaler:
-    vf->priv->ctx=getSwsContextFromCmdLine(width,height,
+    swsGetFlagsAndFilterFromCmdLine(&int_sws_flags, &srcFilter, &dstFilter);
+    int_sws_flags|= vf->priv->v_chr_drop << SWS_SRC_V_CHR_DROP_SHIFT;
+    vf->priv->ctx=getSwsContext(width,height,
 	    (outfmt==IMGFMT_I420 || outfmt==IMGFMT_IYUV)?IMGFMT_YV12:outfmt,
 		  vf->priv->w,vf->priv->h,
-	    (best==IMGFMT_I420 || best==IMGFMT_IYUV)?IMGFMT_YV12:best);
+	    (best==IMGFMT_I420 || best==IMGFMT_IYUV)?IMGFMT_YV12:best,
+	    int_sws_flags, srcFilter, dstFilter);
     if(!vf->priv->ctx){
 	// error...
 	mp_msg(MSGT_VFILTER,MSGL_WARN,"Couldn't init SwScaler for this setup\n");
@@ -188,9 +194,11 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->ctx=NULL;
     vf->priv->w=
     vf->priv->h=-1;
-    if(args) sscanf(args, "%d:%d",
+    vf->priv->v_chr_drop=0;
+    if(args) sscanf(args, "%d:%d:%d",
     &vf->priv->w,
-    &vf->priv->h);
+    &vf->priv->h,
+    &vf->priv->v_chr_drop);
     mp_msg(MSGT_VFILTER,MSGL_V,"SwScale params: %d x %d (-1=no scaling)\n",
     vf->priv->w,
     vf->priv->h);
