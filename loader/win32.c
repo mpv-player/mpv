@@ -190,8 +190,14 @@ static inline void dbgprintf(char* fmt, ...)
 #undef MPLAYER
 #ifdef MPLAYER
     #include "../mp_msg.h"
-    if (verbose > 2) 
+    if (verbose > 2)
+    {
+	va_list va;
+	
+	va_start(va, fmt);
 	mp_dbg(MSGT_WIN32, MSGL_DBG3, fmt, va);
+	va_end(va);
+    }
 #endif
 }
 
