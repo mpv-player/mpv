@@ -68,7 +68,7 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
             pts=avi_audio_pts;
             avi_audio_pts=0;
   } else 
-  if(ds==demux->video){
+  if(ds && ds==demux->video){
      // video
      if(skip_video_frames>0){
        // drop frame (seeking)
@@ -82,8 +82,16 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
      //avi_video_pts+=(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
      //avi_video_pts+=((sh_video_t*)ds->sh)->frametime;
 // FIXME!!!
+#if 1
+//       printf("ds=0x%X\n",ds);
+//       printf("packno=%d\n",ds->pack_no);
+       avi_video_pts = demux->video->pack_no *
+         (float)((sh_video_t*)demux->video->sh)->video.dwScale /
+	 (float)((sh_video_t*)demux->video->sh)->video.dwRate;
+#else
      avi_video_pts+=(float)((sh_video_t*)(demux->video->sh))->video.dwScale/(float)((sh_video_t*)(demux->video->sh))->video.dwRate;
 //     avi_video_pts+=avi_video_ftime;
+#endif
      avi_audio_pts=avi_video_pts;
   }
   
