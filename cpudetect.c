@@ -87,7 +87,7 @@ void GetCpuCaps( CpuCaps *caps)
 
 	caps->isX86=1;
 
-	bzero(caps, sizeof(*caps));
+	memset(caps, 0, sizeof(*caps));
 	if (!has_cpuid()) {
 	    printf("CPUID not supported!???\n");
 	    return;

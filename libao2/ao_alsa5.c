@@ -173,7 +173,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     if (info.flags & SND_PCM_INFO_PLAYBACK)
     {
-	bzero(&chninfo, sizeof(chninfo));
+	memset(&chninfo, 0, sizeof(chninfo));
 	chninfo.channel = SND_PCM_CHANNEL_PLAYBACK;
 	if ((err = snd_pcm_channel_info(alsa_handler, &chninfo)) < 0)
 	{

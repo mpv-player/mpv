@@ -92,7 +92,7 @@ static int path_to_lba (char *path)
     fp=popen(cmd,"r");
     if (fp) {
 	    int ret;
-	    bzero(cmd,sizeof(cmd));
+	    memset(cmd,0,sizeof(cmd));
 	    fgets(cmd,99,fp);
 	    if ((ret=pclose(fp)))
 		    fprintf(stderr,"fibmap_mplayer: %s\n",*cmd?cmd:"no error info");
@@ -158,7 +158,7 @@ int dvd_import_key ( unsigned char *hexkey )
 {
 	unsigned char *t=key_title;
 	int digit=4,len;
-	bzero(key_title,sizeof(key_title));
+	memset(key_title,0,sizeof(key_title));
 //	printf("DVD key: %s\n",hexkey);
 	for (len=0;len<10;len++) {
 //		printf("-> %c\n",*hexkey);
