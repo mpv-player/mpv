@@ -67,7 +67,7 @@ static char help_text[]=
 #define MSGTR_IntBySignal "\nMPlayer a fost întrerupt de semnalul %d în modulul: %s\n"
 #define MSGTR_NoHomeDir "Nu gãsesc directorul HOME.\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") problem\n"
-#define MSGTR_CreatingCfgFile "Creez fiºierul de configurare: %s\n"
+#define MSGTR_CreatingCfgFile "Creez fiºierul de configurare: %s\n"\
 	"Încearcã '-vo help' pentru o listã cu driveri video disponibili.\n"
 #define MSGTR_InvalidAOdriver "Numele driverului de ieºire audio e greºit: %s\n"\
 	"Foloseºte '-ao help' pentru lista cu driveri audio disponibili.\n"
