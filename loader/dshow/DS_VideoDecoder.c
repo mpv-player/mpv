@@ -80,7 +80,7 @@ static ct check[] = {
 		{16, fccYVYU, &MEDIASUBTYPE_YVYU, CAP_YVYU},
 		{12, fccI420, &MEDIASUBTYPE_I420, CAP_I420},
 		{9,  fccYVU9, &MEDIASUBTYPE_YVU9, CAP_YVU9},
-		{0},
+		{0, 0, 0, 0},
 	    };
 
 
@@ -451,7 +451,10 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp
 	}
 
         if (ok) {
-	    this->iv.m_obh.biBitCount=bits;
+	    if (bits == 15)
+		this->iv.m_obh.biBitCount=16;
+	    else
+		this->iv.m_obh.biBitCount=bits;
             if( bits == 15 || bits == 16 ) {
 	      this->iv.m_obh.biSize=sizeof(BITMAPINFOHEADER)+12;
 	      this->iv.m_obh.biCompression=3;//BI_BITFIELDS
