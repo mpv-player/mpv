@@ -95,11 +95,12 @@ void mplEnd( void )
      guiIntfStruct.DVD.current_angle=1;
 #endif
 
-     if ( !appMPlayer.subWindow.isFullScreen )
+     if ( !appMPlayer.subWindow.isFullScreen && gtkShowVideoWindow)
       {
        wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
        wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
       }
+      else wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
      guiGetEvent( guiCEvent,guiSetStop );
      mplSubRender=1;
      wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.sub.R,appMPlayer.sub.G,appMPlayer.sub.B );

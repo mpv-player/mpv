@@ -122,7 +122,7 @@ wsXDNDProcessSelection(wsTWindow* wnd, XEvent *event)
 	
       /* Handle the files */
       if(wnd->DandDHandler){
-	wnd->DandDHandler(num,files);
+	wnd->DandDHandler(num-1,files);
       }
     }
 

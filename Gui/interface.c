@@ -135,7 +135,7 @@ char * gconvert_uri_to_filename( char * str )
    if ( out[i] != '%' ) t[c++]=out[i];
     else
      {
-      char tmp[4] = "0xXX"; 
+      char tmp[5] = "0xXX"; 
 //	  if ( out[++i] == '%' ) { t[c++]='%'; continue; };
       tmp[2]=out[++i]; tmp[3]=out[++i]; 
       t[c++]=(char)strtol( tmp,(char **)NULL,0 );
@@ -520,7 +520,7 @@ int guiGetEvent( int type,char * arg )
 	       break;
 	  case guiSetStop:
 	       guiIntfStruct.Playing=0;
-	       if ( !gtkShowVideoWindow ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
+//	       if ( !gtkShowVideoWindow ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
 	       break;
           case guiSetPause: guiIntfStruct.Playing=2; break;
 	 }
