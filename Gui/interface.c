@@ -116,7 +116,7 @@ void gaddlist( char *** list,char * entry )
    free( (*list) );
   }
 
- (*list)=malloc( 8 );
+ (*list)=malloc( 2 * sizeof(char **) );
  (*list)[0]=gstrdup( entry );
  (*list)[1]=NULL;
 }
