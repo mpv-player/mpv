@@ -15,7 +15,7 @@ contains these drivers :</P>
 <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>oss</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS (ioctl) driver</TD></TR>
 <TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sdl</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SDL driver (supports up/downsampling, <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
 <TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>native ALSA 0.5 driver</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa9</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>native ALSA 0.9 driver (buggy, use OSS emulation instead!)</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa9</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>native ALSA 0.9 driver (works, but has problems -> use OSS)</TD></TR>
 <TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sun</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SUN audio driver (/dev/audio) for BSD and Solaris8 users</TD></TR>
 
 </TABLE>
@@ -35,7 +35,8 @@ a message like this:<BR>
   <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></UL>
 </LI>
 <LI>if you have ALSA version 0.9, use <I>-ao oss</I> or <I>-ao sdl</I> as you
-wish.</LI>
+wish. You can also use <I>-ao alsa9</I> as it works now, however it has many
+problems (losing sync, disappearing audio, etc).</LI>
 </UL></P>
 
 <P>On <B>Solaris/FreeBSD</B> systems, use the SUN audio driver with the

@@ -15,7 +15,7 @@ a következõ meghajtókat tartalmazza :</P>
 <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>oss</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS (ioctl) meghajtó</TD></TR>
 <TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sdl</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SDL meghajtó (up/downsampling támogatás, <B>ESD</B>, <B>ARTS</B>, stb)</TD></TR>
 <TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>natív ALSA 0.5 meghajtó</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa9</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>natív ALSA 0.9 meghajtó (bugos, használj OSS emulációt!)</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa9</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>natív ALSA 0.9 meghajtó (mûködik, de vannak vele problémák -> használd az OSS meghajtót)</TD></TR>
 <TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sun</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SUN audio meghajtó (/dev/audio) BSD-re és Solaris-ra</TD></TR>
 
 </TABLE>
@@ -37,7 +37,7 @@ használnod, mert a 0.5 hibás OSS emulációs kódot tartalmaz, amitõl kissé
   <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></UL>
 </LI>
 <LI>ha ALSA 0.9-ed van, használd az <I>-ao oss</I>-t vagy az <I>-ao sdl</I>-t,
-izlés szerint.</LI>
+izlés szerint. Használhatod az <I>-ao alsa9</I>-et is, de az még elég bugos.</LI>
 </UL></P>
 
 <P><B>Solaris/FreeBSD</B> rendszereken természetesen a SUN audio meghajtót
