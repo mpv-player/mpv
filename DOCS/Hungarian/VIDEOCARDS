@@ -9,13 +9,12 @@ scale-t, bilinear filtering-et jelent. Linux alatt jónéhány módszerrel
 lehet ezeket elérni:
 
 I.   Az XFree86 4.0.2 Xv (XVideo) kiterjesztése
-II.  OpenGL driverek, megfelelõ glTexSubImage() támogatással (jelenleg csak
-     az Utah-GLX driverek)
+II.  OpenGL driverek, megfelelõ glTexSubImage() támogatással
 III. Nativ kártyaspecifikus driverek, amik egyes kártyák különleges
-     képességeit használják
+     képességeit használják ki
 IV.  DGA - Direct Graphic Access. Nincs YUV, scaling, de még mindig
-     gyorsabb, mint X11
-V.   Nem igazán gyorsítás, hanem...
+     gyorsabb, mint az X11
+V.   Nem igazán gyorsítás, de...
 
 Nos, lássuk õket részletesen:
 
@@ -27,10 +26,10 @@ I. Az XFree86 4.0.2 Xv (XVideo) kiterjesztése
 
 Ha mûködésre akarod bírni, a következõket kell figyelembe venned:
 
-1. XFree86 4.0.2 szükséges (korábbi verziókban nincs XVideo)
+1. XFree86 4.0.2 vagy újabb szükséges (korábbi verziókban nincs XVideo)
 
-2. A kártyádnak támogatnia kell a hardveres gyorsítást (újabb kártyák közül
-   mind)
+2. A kártyádnak támogatnia kell a hardveres gyorsítást (újabb kártyák
+   szokták támogatni)
 
 3. X-nek be kell töltenie az XVideo kiterjesztést, valahogy így néz ki:
    (II) Loading extension XVideo
@@ -68,16 +67,16 @@ Ha mûködésre akarod bírni, a következõket kell figyelembe venned:
 	(...etc...)
 
    Támogatnia kell a YUY2 packed, YV12 planar pixelformátumokat, hogy
-   használható legyen MPlayer-rel.
+   használható legyen az MPlayer-rel.
 
    Ha az xvinfo nem írja ki mindezt, de az XVideo kiterjesztés be van töltve,
-   és biztos vagy benne, hogy a kartyád tud YUV konverziót,
+   és biztos vagy benne, hogy a kartyád tud YUV konverziót, akkor
     - 3dfx voodoo3/banshee tulajok töltsenek le új DRI-t a
       http://dri.sourceforge.net címrõl
     - S3 Savage4-esek töltsék le az XFree86 >= 4.0.3-at
     - nVidia felhasználók adják el a kártyájukat... vagy nézzenek el az
       nVidia site-jára
-				    
+
 5. MPlayer-t 'xv' támogatással kell fordítani. 'configure'-nak ezt kell
    kiírnia:
 	Checking for Xv ... yes
@@ -113,6 +112,7 @@ III. Nativ kártyaspecifikus driverek
   Ha azt akarod, hogy automatikusan töltõdjön be, írd be a következõ sort az
   /etc/modules.conf végére :
 	alias char-major-178 mga_vid
+  Másold az mga_vid.o-t a modul könyvtáradba!
   Aztán futtasd :
 	depmod -a
 
@@ -185,9 +185,6 @@ a, Ha nincs X-ed...
   átszerkeszteni az /etc/vga/libvga.config-ot, hogy tükrözze a kártyád és
   a monitorod tulajdonságait.
 
-  Érdemes továbbá kipróbálni az 'aalib' outputot ('-vo sdl -sdl aalib'),
-  igazán nagyszerû! :)
-
 b, Framebuffer-t akarsz használni...
   Annak eldöntése, hogy legyen-e framebuffer output, a ./configure alatt
   dõl el. Olvasd el a kernelforrásban található framebuffer dokumentációt
@@ -201,6 +198,10 @@ b, Framebuffer-t akarsz használni...
 
   Megj.: az FBdev output videomód váltása _nem mûködik_ a VESA
          framebuffer-rel, és ne is kérd, mivel ez nem az MPlayer korlátja!
+
+c, Érdemes továbbá kipróbálni az 'aalib' outputot ('-vo sdl -sdl aalib'),
+  igazán nagyszerû! :)
+
 
 	Gabucino & A'rpi
 
