@@ -165,7 +165,6 @@ static void set_window(int force_update,const vo_tune_info_t *info)
 	    vo_screenwidth, vo_screenheight,info) != 0)
         {
 	    mp_msg(MSGT_VO, MSGL_FATAL, "Can't initialize VIDIX driver: %s\n", strerror(errno));
-	    uninit();
     	    exit_player("vidix error"); /* !!! */
 	}
 	vidix_start();
