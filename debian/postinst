@@ -46,6 +46,9 @@ if ($didupgrade) {
 exit unless (get("mplayer/configure") eq 'true');
 exit unless (fget("mplayer/configure", "isdefault") eq 'false');
 
+#%##################################
+get("mplayer/cfgnote");
+
 
 
 sub dealwithupgrades {
