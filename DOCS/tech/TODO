@@ -6,14 +6,13 @@ FOR THE RELEASE:
 ~~~~~~~~~~~~~~~~
 
 URGENT:
-- fix suid root
+- prebuffering to cache2 (req. for MMS) - URGENT!
 - check wmv8 with gcc 3.0x
 - fix cvid on ppc
-- add extra checks for spudec (5.element hun sub)
-- add CRC checks for liba52
-
-demuxer:
-- prebuffering to cache2 (req. for MMS) - URGENT!
+- fix ACELP DirectShow sound decoder (in avifile it's already fixed!)
+- mencoder: implement VBR audio copy
+- mencoder: Estimated Size and Time
+- mencoder: image cut/crop/extend filter
 
 decoders:
 - getting mss1 (Windows Screen Video) DLL codec working... - kabi
@@ -21,17 +20,12 @@ decoders:
 - getting 3ivX DLL working (CoCreateFreeThreadedMarshaler call required)
 - optimize liba52 (downmix.c in 3dnow, rematrix?)
 - fix seeking with libmad audio codec (codec lost sync and can't resync?)
-- fix ACELP DirectShow sound decoder (in avifile it's already fixed!)
 
 mencoder:
 - add some kind of "-ss" option, to start at e.g. 1:0:0 at the video
 - add a endpoint for encoding, like above
 - finish 3-pass encoding (audio, video1, video2)
 - add win32 encoders support
-- implement VBR audio copy
-- Estimated Size and Time
-- image cut/crop/extend filter
-- add Divx4Linux encore detection to configure (#define DIVX4ENCORE)
 
 other:
 - fix DVB a-v sync problems, switch to mp1e
