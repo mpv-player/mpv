@@ -8,6 +8,7 @@
 #define STREAMTYPE_STREAM 2    // same as FILE but no seeking (for stdin)
 #define STREAMTYPE_DVD  3
 #define STREAMTYPE_MEMORY  4
+#define STREAMTYPE_TV	5
 
 #define VCD_SECTOR_SIZE 2352
 #define VCD_SECTOR_OFFS 24

@@ -70,6 +70,11 @@ typedef struct {
 
 extern int vcd_get_track_end(int fd,int track);
 
+#ifdef USE_TV
+#include "tv.h"
+extern tvi_handle_t *tv_handler;
+#endif
+
 // Open a new stream  (stdin/file/vcd/url)
 
 stream_t* open_stream(char* filename,int vcd_track,int* file_format){
@@ -240,6 +245,19 @@ if(dvd_title){
   stream->priv=(void*)d;
   return stream;
 }
+#endif
+
+#ifdef USE_TV
+//============ Check for TV-input ====
+  if (tv_param_on==1)
+  {
+    stream=new_stream(-1,STREAMTYPE_TV);
+    tv_handler = tv_begin();
+    if (!tv_handler)
+	return(NULL);
+    tv_init(tv_handler);
+    return(stream);
+  }
 #endif
 
 //============ Open STDIN ============

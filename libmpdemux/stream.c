@@ -53,6 +53,13 @@ int stream_fill_buffer(stream_t *s){
     break;
   }
 #endif
+#ifdef USE_TV
+  case STREAMTYPE_TV:
+  {
+    len = 0;
+    break;
+  }
+#endif
   default: len=0;
   }
   if(len<=0){ s->eof=1; s->buf_pos=s->buf_len=0; return 0; }
@@ -126,6 +133,11 @@ if(newpos==0 || newpos!=s->pos){
       if(stream_fill_buffer(s)<=0) break; // EOF
     }
     break;
+#ifdef USE_TV
+  case STREAMTYPE_TV:
+    s->pos=newpos; /* no sense */
+    break;
+#endif
   }
 //   putchar('.');fflush(stdout);
 //} else {

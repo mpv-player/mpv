@@ -2,6 +2,8 @@
  * config for cfgparser
  */
 
+#include "cfg-common.h"
+
 #ifdef USE_FAKE_MONO
 extern int fakemono; // defined in dec_audio.c
 #endif
@@ -71,7 +73,9 @@ struct config conf[]={
 	{"divx4opts", divx4opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 	{"lameopts", lameopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 
+#define MAIN_CONF
 #include "cfg-common.h"
+#undef MAIN_CONF
 
 //	{"quiet", &quiet, CONF_TYPE_FLAG, 0, 0, 1},
 	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100},

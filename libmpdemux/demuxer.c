@@ -157,6 +157,9 @@ int demux_avi_fill_buffer_nini(demuxer_t *demux,demux_stream_t *ds);
 int demux_asf_fill_buffer(demuxer_t *demux);
 int demux_mov_fill_buffer(demuxer_t *demux,demux_stream_t* ds);
 int demux_vivo_fill_buffer(demuxer_t *demux);
+#ifdef USE_TV
+int demux_tv_fill_buffer(demuxer_t *demux);
+#endif
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -170,6 +173,9 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_ASF: return demux_asf_fill_buffer(demux);
     case DEMUXER_TYPE_MOV: return demux_mov_fill_buffer(demux,ds);
     case DEMUXER_TYPE_VIVO: return demux_vivo_fill_buffer(demux);
+#ifdef USE_TV
+    case DEMUXER_TYPE_TV: return demux_tv_fill_buffer(demux);
+#endif
   }
   return 0;
 }
@@ -344,6 +350,10 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer);
 int mov_check_file(demuxer_t* demuxer);
 int mov_read_header(demuxer_t* demuxer);
 
+#ifdef USE_TV
+/* tv ! */
+extern int tv_param_on;
+#endif
 
 demuxer_t* demux_open(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id){
 
@@ -359,6 +369,17 @@ sh_video_t *sh_video=NULL;
 
 //printf("demux_open(%p,%d,%d,%d,%d)  \n",stream,file_format,audio_id,video_id,dvdsub_id);
 
+#ifdef USE_TV
+//=============== Try to open as TV-input: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_TV){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_TV,audio_id,video_id,dvdsub_id);
+  if(tv_param_on==1)
+  {
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected TV! ;-)\n");
+    file_format=DEMUXER_TYPE_TV;
+  }
+}
+#endif
 //=============== Try to open as AVI file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_AVI,audio_id,video_id,dvdsub_id);
@@ -427,20 +448,20 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
     mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGESfile);
   }
 }
-//=============== Try to open as VIVO file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_VIVO,audio_id,video_id,dvdsub_id);
-  if(vivo_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected VIVO file format!\n");
-      file_format=DEMUXER_TYPE_VIVO;
-  }
-}
 //=============== Try to open as MOV file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
   if(mov_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedQTMOVfile);
       file_format=DEMUXER_TYPE_MOV;
+  }
+}
+//=============== Try to open as VIVO file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_VIVO,audio_id,video_id,dvdsub_id);
+  if(vivo_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected VIVO file format!\n");
+      file_format=DEMUXER_TYPE_VIVO;
   }
 }
 //=============== Unknown, exiting... ===========================
@@ -531,6 +552,12 @@ switch(file_format){
   }
   break;
  }
+#ifdef USE_TV
+ case DEMUXER_TYPE_TV: {
+    demux_open_tv(demuxer);
+    break;
+ }
+#endif
 } // switch(file_format)
 pts_from_bps=0; // !!!
 return demuxer;
@@ -550,6 +577,10 @@ int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
 if(!demuxer->seekable){
     if(demuxer->file_format==DEMUXER_TYPE_AVI)
 	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekRawAVI);
+#ifdef USE_TV
+    else if (demuxer->file_format==DEMUXER_TYPE_TV)
+	mp_msg(MSGT_SEEK,MSGL_WARN,"TV input isn't seekable! (probarly seeking will be for changing channels ;)\n");
+#endif
     else
 	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekFile);
     return 0;

@@ -2,6 +2,8 @@
  * config for cfgparser
  */
 
+#include "cfg-common.h"
+
 extern char *playlist_file;
 
 #ifdef HAVE_FBDEV
@@ -214,7 +216,9 @@ struct config conf[]={
 	{"skin", &skinName, CONF_TYPE_STRING, 0, 0, 0},
 #endif
 
+#define MAIN_CONF
 #include "cfg-common.h"
+#undef MAIN_CONF
         
 	{"quiet", &quiet, CONF_TYPE_FLAG, 0, 0, 1},
 	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100},

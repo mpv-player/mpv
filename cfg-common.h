@@ -1,4 +1,4 @@
-
+#ifdef MAIN_CONF /* this will be included in conf[] */
 // ------------------------- stream options --------------------
 
 #ifdef USE_STREAM_CACHE
@@ -79,3 +79,28 @@
         {"oldpp", "MPlayer was compiled without opendivx library", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 #endif
 
+#ifdef USE_TV
+	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
+#endif
+
+#else
+
+#include "config.h"
+
+#ifdef USE_TV
+#include "libmpdemux/tv.h"
+
+struct config tvopts_conf[]={
+	{"on", &tv_param_on, CONF_TYPE_FLAG, 0, 0, 1},
+	{"driver", &tv_param_driver, CONF_TYPE_STRING, 0, 0, 0},
+	{"device", &tv_param_device, CONF_TYPE_STRING, 0, 0, 0},
+	{"freq", &tv_param_freq, CONF_TYPE_FLOAT, CONF_RANGE, 0, 2500000},
+	{"channel", &tv_param_channel, CONF_TYPE_STRING, 0, 0, 0},
+	{"norm", &tv_param_norm, CONF_TYPE_STRING, 0, 0, 0},
+	{"width", &tv_param_width, CONF_TYPE_INT, 0, 0, 4096},
+	{"height", &tv_param_height, CONF_TYPE_INT, 0, 0, 4096},
+	{NULL, NULL, 0, 0, 0, 0}
+};
+#endif
+
+#endif
