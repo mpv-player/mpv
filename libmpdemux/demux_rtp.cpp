@@ -120,6 +120,7 @@ static char* openURL_sip(SIPClient* client, char const* url) {
 int rtspStreamOverTCP = 0; 
 
 extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
+  Boolean success = False;
   do {
     TaskScheduler* scheduler = BasicTaskScheduler::createNew();
     if (scheduler == NULL) break;
@@ -253,7 +254,9 @@ extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
       }
       rtpState->flags |= flags;
     }
+    success = True;
   } while (0);
+  if (!success) return NULL; // an error occurred
 
   // Hack: If audio and video are demuxed together on a single RTP stream,
   // then create a new "demuxer_t" structure to allow the higher-level
