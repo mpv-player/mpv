@@ -197,6 +197,7 @@ int demux_open_lavf(demuxer_t *demuxer){
             sh_audio->format= codec->codec_tag;
             sh_audio->channels= codec->channels;
             sh_audio->samplerate= codec->sample_rate;
+            sh_audio->i_bps= codec->bit_rate/8;
             if(verbose>=1) print_wave_header(sh_audio->wf);
             if(demuxer->audio->id != i && demuxer->audio->id != -1)
                 st->discard= AVDISCARD_ALL;
@@ -228,6 +229,7 @@ int demux_open_lavf(demuxer_t *demuxer){
             sh_video->format = bih->biCompression;
             sh_video->aspect=   codec->width * codec->sample_aspect_ratio.num 
                               / (float)(codec->height * codec->sample_aspect_ratio.den);
+            sh_video->i_bps= codec->bit_rate/8;
             mp_msg(MSGT_DEMUX,MSGL_DBG2,"aspect= %d*%d/(%d*%d)\n", 
                 codec->width, codec->sample_aspect_ratio.num,
                 codec->height, codec->sample_aspect_ratio.den);
