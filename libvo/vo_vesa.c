@@ -1,4 +1,4 @@
-/* 
+/*
  *  video_out_vesa.c
  *
  *	Copyright (C) Nick Kurshev <nickols_k@mail.ru> - Oct 2001
@@ -246,8 +246,9 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 	printf("vo_vesa: draw_slice was called: w=%u h=%u x=%u y=%u\n",w,h,x,y);
     if(vesa_zoom)
     {
-	 SwScale_YV12slice_brg24(image,stride,y,h,
-	                     yuv_buffer,
+	 uint8_t *dst[3]= {yuv_buffer, NULL, NULL};
+	 SwScale_YV12slice(image,stride,y,h,
+	                     dst,
 			     image_width*((video_mode_info.BitsPerPixel+7)/8),
 			     image_width, video_mode_info.BitsPerPixel,
 	    		     scale_xinc, scale_yinc);

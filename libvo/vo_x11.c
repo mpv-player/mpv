@@ -484,8 +484,9 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 {
 
 if(scale_xinc){
- SwScale_YV12slice_brg24(src,stride,y,h,
-                         ImageData, image_width*((bpp+7)/8), image_width, ( depth == 24 ) ? bpp : depth,
+ uint8_t *dst[3] = {ImageData, NULL, NULL};
+ SwScale_YV12slice(src,stride,y,h,
+                         dst, image_width*((bpp+7)/8), image_width, ( depth == 24 ) ? bpp : depth,
 			 scale_xinc, scale_yinc);
 } else {
  uint8_t *dst=ImageData + ( image_width * y + x ) * ( bpp/8 );
