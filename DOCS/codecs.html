@@ -23,20 +23,21 @@
 
 <P>The most important ones above all:</P>
 <UL>
-  <LI>MPEG1 (VCD) and MPEG2 (DVD) video</LI>
-  <LI>native decoders for DivX ;-), OpenDivX, DivX4, DivX5,
-    M$ MPEG4 v1, v2 and other MPEG4 variants</LI>
-  <LI>native decoder for Windows Media Video 7/8 (WMV1/WMV2), and Win32 DLL decoder for
-    Windows Media Video 9 (WMV3), both used in .wmv files</LI>
-  <LI><B>native Sorenson 1 (SVQ1) decoder</B></LI>
-  <LI><B>Win32/QT Sorenson 3 (SVQ3) decoder</B></LI>
-  <LI>3ivx v1, v2 decoder</LI>
-  <LI>Cinepak and Intel Indeo codecs (3.1, 3.2, 4.1, 5.0)</LI>
-  <LI>MJPEG, AVID, VCR2, ASV2 and other hardware formats</LI>
-  <LI>VIVO 1.0, 2.0, I263 and other h263(+) variants</LI>
+  <LI><B>MPEG1</B> (<B>VCD</B>) and <B>MPEG2</B> (<B>DVD</B>) video</LI>
+  <LI>native decoders for <B>DivX ;-)</B>, <B>OpenDivX</B>, <B>DivX4</B>, <B>
+    DivX5</B>, <B>M$ MPEG4</B> v1, v2 and other MPEG4 variants</LI>
+  <LI>native decoder for <B>Windows Media Video 7/8</B> (<B>WMV1/WMV2</B>), and
+    Win32 DLL decoder for <B>Windows Media Video 9</B> (<B>WMV3</B>), both
+    used in .wmv files</LI>
+  <LI>native <B>Sorenson 1 (SVQ1)</B> decoder</LI>
+  <LI>Win32/QT <B>Sorenson 3 (SVQ3)</B> decoder</LI>
+  <LI><B>3ivx</B> v1, v2 decoder</LI>
+  <LI>Cinepak and <B>Intel Indeo</B> codecs (3.1, 3.2, 4.1, 5.0)</LI>
+  <LI><B>MJPEG</B>, AVID, VCR2, ASV2 and other hardware formats</LI>
+  <LI>VIVO 1.0, 2.0, I263 and other <B>h263</B>(+) variants</LI>
   <LI>FLI/FLC</LI>
-  <LI>RealVideo 1.0 codec from libavcodec, and RealVideo 2.0, 3.0 and 4.0
-    codecs using RealPlayer libraries</LI>
+  <LI><B>RealVideo 1.0</B> codec from libavcodec, and <B>RealVideo 2.0</B>,
+    <B>3.0</B> and <B>4.0</B> codecs using RealPlayer libraries</LI>
   <LI>native decoder for HuffYUV</LI>
   <LI>various old simple RLE-like formats</LI>
 </UL>
@@ -86,7 +87,7 @@
 
 <P>The Divx4/5 binary codec library can be downloaded from
   <A HREF="http://avifile.sourceforge.net">avifile</A> or
-  <A HREF="http://www.divx.com>divx.com</A>.
+  <A HREF="http://www.divx.com">divx.com</A>.
   Unpack it, run <CODE>./install.sh</CODE> as root and do not forget adding
   <CODE>/usr/local/lib</CODE> to your <CODE>/etc/ld.so.conf</CODE> and running
   <CODE>ldconfig</CODE>.</P>
@@ -168,7 +169,8 @@
 
 <H4><A NAME="xanim">2.2.1.3 XAnim codecs</A></H4>
 
-<P>Foreword:<BR>
+<H5>FOREWORD</H5>
+<P>
   Be advised that the XAnim binary codecs are packaged with a piece of text
   claiming to be a legally binding software license which, besides other
   restrictions, forbids the user to use the codecs in conjunction with any
@@ -176,6 +178,7 @@
   action against anyone for codec-related issues.
 </P>
 
+<H5>INSTALLING AND USAGE</H5>
 <P>MPlayer is capable of employing the XAnim codecs for decoding. Follow
   the instructions to enable them:</P>
 
@@ -183,6 +186,9 @@
   <LI>Download the codecs you wish to use from the
     <A HREF="http://xanim.va.pubnix.com">XAnim site</A>. The <B>3ivx</B> codec
     is not there, but at the <A HREF="http://www.3ivx.com">3ivx site</A>.</LI>
+  <LI><B>OR</B> download the codecs pack from our
+    <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codecs page</A>.
+    </LI>
   <LI>Use the <CODE>--with-xanimlibdir</CODE> option to tell configure where
     to find the XAnim codecs. By default, it looks for them at
     <CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods and /usr/lib/xanim</CODE>.
@@ -205,17 +211,17 @@
   for 1.0 files is FFmpeg's H263 decoder, you can use it with the <CODE>-vc
   ffh263</CODE> option (default). For 2.0 files, use the
   <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">ivvideo.dll</A>
-  Win32 DLL file, and install it under <CODE>/usr/lib/win32</CODE> or wherever you store the
-  Win32 codecs.</P>
+  Win32 DLL file (included in the latest DLL packages), and install it under
+  <CODE>/usr/lib/win32</CODE> or wherever you store the Win32 codecs.</P>
 
 
 <H4><A NAME="mpeg">2.2.1.5 MPEG 1/2 video</A></H4>
 
 <P>MPEG1 and MPEG2 are decoded by the multiplatform native <B>libmpeg2</B>
   library, whose source code is included in MPlayer. We handle buggy
-  MPEG 1/2 video files by catching sig11 (segmentation fault), and quickly
-  reinitializing the codec, continuing exactly from where the failure occurred. 
-  This recovery technique has no measurable speed penalty.</P>
+  MPEG 1/2 video files by catching <CODE>Signal 11 (Segmentation fault)</CODE>,
+  and quickly reinitializing the codec, continuing exactly from where the
+  failure occurred. This recovery technique has no measurable speed penalty.</P>
 
 
 <H4><A NAME="ms_video1">2.2.1.6 MS Video1</A></H4>
@@ -228,9 +234,10 @@
 
 <H4><A NAME="cinepak">2.2.1.7 Cinepak CVID</A></H4>
 
-<P>MPlayer uses its own open source, multiplatform Cinepak decoder by
-  default. It supports YUV outputs, so that hardware scaling is possible if the
-  video output driver permits it.</P>
+<P>MPlayer uses its own open source, multiplatform Cinepak decoder (by
+  <A HREF="mailto:timf@csse.monash.edu.au">Dr. Tim Ferguson</A>), by default.
+  It supports YUV outputs, so that hardware scaling is possible if the video
+  output driver permits it.</P>
 
 
 <H4><A NAME="realvideo">2.2.1.8 RealVideo</A></H4>
@@ -255,30 +262,31 @@ MPlayer supports decoding all versions of RealVideo:
 
 <H4><A NAME="xvid">2.2.1.9 XViD</A></H4>
 
-<P><B>XViD</B> is a forked development of the OpenDivX codec. It happened when
-  ProjectMayo changed OpenDivX to closed source DivX4 (now DivX5), and the
-  non-ProjectMayo people working on OpenDivX got angry, then started XViD. So
-  both projects have the same origin.</P>
+<P><A HREF="http://www.xvid.org/"><B>XViD</B></A> is a forked development of
+  the OpenDivX codec. It happened when ProjectMayo changed OpenDivX to closed
+  source DivX4 (now DivX5), and the non-ProjectMayo people working on OpenDivX
+  got angry, then started XViD. So both projects have the same origin.</P>
 
-<H4>Advantages:</H4>
+<H5>ADVANTAGES</H5>
 
 <UL>
   <LI>open source</LI>
-  <LI>its API is compatible with DivX4 so adding support for
-    it is easy</LI>
+  <LI>its API is compatible with DivX4 so adding support for it is easy</LI>
   <LI>2-pass encoding support</LI>
   <LI>nice encoding quality, higher speed than DivX4 (you can optimize it for
     your box while compiling)</LI>
 </UL>
 
-<H4>Disadvantages:</H4>
+<H5>DISADVANTAGES</H5>
 
 <UL>
-  <LI>currently it does not properly <B>decode</B> all DivX/DivX4 files (no problem as libavcodec can play them)</LI>
-  <LI>you have to choose between DivX4 <B>or</B> XViD support at
-    compiletime</LI>
+  <LI>currently it does not properly <B>decode</B> all DivX/DivX4 files (no 
+    problem as <A HREF="#libavcodec">libavcodec</A> can play them)</LI>
+  <LI>you have to choose between DivX4 <B>or</B> XViD support at compiletime</LI>
   <LI>under development</LI>
 </UL>
+
+<H5>INSTALLING XVID CVS</H5>
 
 <P>XViD is currently available only from CVS. Here are the
   download and installation instructions:</P>
@@ -318,7 +326,7 @@ MPlayer supports decoding all versions of RealVideo:
     QuickTime libraries</B></LI>
 </UL>
 
-<H4>Compiling MPlayer with QuickTime libraries support</H4>
+<H5>COMPILING MPLAYER WITH QUICKTIME LIBRARIES SUPPORT</H5>
 
 <P><B>NOTE:</B> currently only 32bit Intel platforms are supported.</P>
 
