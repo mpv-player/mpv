@@ -23,6 +23,10 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.19  2001/05/01 22:37:37  acki2
+ * - now features 24->32 conversion (this is actually faster than letting the
+ *   codec produce depth 32 in the first place for avis :-))) )
+ *
  * Revision 1.18  2001/05/01 20:24:31  acki2
  * - now mpeg is fast again (no more offscreen buffer rubbish) But is it really ok?
  *
@@ -125,11 +129,11 @@ static vo_info_t vo_info =
 //------------------------------------------------------------------
 
 
-#define BITSPP (vo_dga_modes[vo_dga_active_mode].vdm_bitspp)
-#define BYTESPP (vo_dga_modes[vo_dga_active_mode].vdm_bytespp)
+//#define BITSPP (vo_dga_modes[vo_dga_active_mode].vdm_bitspp)
+//#define BYTESPP (vo_dga_modes[vo_dga_active_mode].vdm_bytespp)
 
-#define HW_MODE (vo_dga_modes[vo_dga_active_mode])
-
+#define HW_MODE (vo_dga_modes[vo_dga_hw_mode])
+#define SRC_MODE (vo_dga_modes[vo_dga_src_mode]) 
 
 struct vd_modes {
   int    vdm_mplayer_depth;
@@ -140,21 +144,32 @@ struct vd_modes {
   int    vdm_rmask;
   int    vdm_gmask;
   int    vdm_bmask;
+  int    vdm_hw_mode;
+  int    vdm_conversion_func;
 };
 
 //------------------------------------------------------------------
 
-static struct vd_modes vo_dga_modes[] = {
+#define VDM_CONV_NATIVE 0
+#define VDM_CONV_15TO16 1
+#define VDM_CONV_24TO32 2
 
-  {  0,  0,  0,  0, 0,          0,          0, 0},
-  { 15,  0, 15, 16, 2,     0x7c00,     0x03e0, 0x001f },
-  { 16,  0, 16, 16, 2,     0xf800,     0x07e0, 0x001f },
-  { 24,  0, 24, 24, 3,   0xff0000,   0x00ff00, 0x0000ff},
-  { 32,  0, 24, 32, 4, 0x00ff0000, 0x0000ff00, 0x000000ff}
+static struct vd_modes vo_dga_modes[] = {
+  // these entries describe HW modes
+  // however, we use the same entries to tell mplayer what we support
+  // so the last two values describe, which HW mode to use and which conversion 
+  // function to use for a mode that is not supported by HW
+
+  {  0,  0,  0,  0, 0,          0,          0, 0,      0, 0},
+  { 15,  0, 15, 16, 2,     0x7c00,     0x03e0, 0x001f, 2, VDM_CONV_15TO16 },
+  { 16,  0, 16, 16, 2,     0xf800,     0x07e0, 0x001f, 2, VDM_CONV_NATIVE },
+  { 24,  0, 24, 24, 3,   0xff0000,   0x00ff00, 0x0000ff, 4, VDM_CONV_24TO32},
+  { 32,  0, 24, 32, 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 4, VDM_CONV_NATIVE}
 };
 
 static int vo_dga_mode_num = sizeof(vo_dga_modes)/sizeof(struct vd_modes);
 
+// enable a HW mode (by description)
 int vd_EnableMode( int depth, int bitspp, 
                     int rmask, int gmask, int bmask){
   int i;
@@ -165,6 +180,8 @@ int vd_EnableMode( int depth, int bitspp,
        vo_dga_modes[i].vdm_gmask == gmask &&
        vo_dga_modes[i].vdm_bmask == bmask){
        vo_dga_modes[i].vdm_supported = 1;
+       vo_dga_modes[i].vdm_hw_mode = i;
+       vo_dga_modes[i].vdm_conversion_func = VDM_CONV_NATIVE;
        return i;
     }
   }
@@ -183,18 +200,22 @@ int vd_ModeEqual(int depth, int bitspp,
 }
 
 
+// enable a HW mode (mplayer_depth decides which)
 int vd_ValidateMode( int mplayer_depth){
   int i;
   if(mplayer_depth == 0)return 0;
   for(i=1; i<vo_dga_mode_num; i++){
     if(vo_dga_modes[i].vdm_mplayer_depth == mplayer_depth ){ 
       vo_dga_modes[i].vdm_supported = 1;
+      vo_dga_modes[i].vdm_hw_mode = i;
+      vo_dga_modes[i].vdm_conversion_func = VDM_CONV_NATIVE;
       return i;
     }
   }
   return 0;
 }
 
+// do we support this mode? (not important whether native or conversion)
 int vd_ModeValid( int mplayer_depth){
   int i;
   if(mplayer_depth == 0)return 0;
@@ -213,12 +234,16 @@ char *vd_GetModeString(int index){
   static char stringbuf[VO_DGA_MAX_STRING_LEN]; 
   stringbuf[VO_DGA_MAX_STRING_LEN-1]=0;
   snprintf(stringbuf, VO_DGA_MAX_STRING_LEN-2, 
-    "depth=%d, bpp=%d, r=%06x, g=%06x, b=%06x (-bpp %d)",
+    "depth=%d, bpp=%d, r=%06x, g=%06x, b=%06x, %s (-bpp %d)",
     vo_dga_modes[index].vdm_depth,
     vo_dga_modes[index].vdm_bitspp,
     vo_dga_modes[index].vdm_rmask,
     vo_dga_modes[index].vdm_gmask,
     vo_dga_modes[index].vdm_bmask,
+    vo_dga_modes[index].vdm_supported ? 
+    (vo_dga_modes[index].vdm_conversion_func == VDM_CONV_NATIVE ? 
+        "native (fast),    " : "conversion (slow),") :
+        "not supported :-( ",
     vo_dga_modes[index].vdm_mplayer_depth);
   return stringbuf;
 }
@@ -249,8 +274,10 @@ static int       vo_dga_src_skip;        // bytes to skip after copying one
                                          // (not supported yet) in src
 static int       vo_dga_vp_skip;         // dto. for dest 
 static int       vo_dga_lines;           // num of lines to copy                                
-static int       vo_dga_active_mode = 0; // index in mode list that is used
-                                         // for movie
+static int       vo_dga_hw_mode = 0;     // index in mode list that is actually
+                                         // used by framebuffer
+static int       vo_dga_src_mode = 0;    // index in mode list that is used by 
+                                         // codec
 static int       vo_dga_XServer_mode = 0;// index in mode list for resolution
                                          // XServer is running
 
@@ -354,8 +381,31 @@ static uint32_t draw_frame( uint8_t *src[] ){
 
   s = *src;
   d = (&((char *)vo_dga_base)[vo_dga_vp_offset + vo_dga_dbf_current * vo_dga_dbf_mem_offset]);
-  rep_movsl(d, s, lpl, vo_dga_vp_skip, numlines );
-
+  
+  switch(SRC_MODE.vdm_conversion_func){
+  case VDM_CONV_NATIVE:
+    rep_movsl(d, s, lpl, vo_dga_vp_skip, numlines );
+    break;
+  case VDM_CONV_15TO16:
+    printf("vo_dga: 15 to 16 not implemented yet!!!\n");
+    break;
+  case VDM_CONV_24TO32:
+    {
+      int i,k,l,m;
+      for(i = 0; i< vo_dga_lines; i++ ){
+	for(k = 0; k< vo_dga_src_width; k+=2 ){
+          l = *(((uint32_t *)s)++);
+          m = (l & 0xff000000)>> 24 ;
+          *(((uint32_t *)d)++) = l & 0x00ffffff;
+          m |= *(((uint16_t *)s)++) << 8;           
+          *(((uint32_t *)d)++) = m;
+	}
+        d+= vp_skip;
+      }
+    }
+    //printf("vo_dga: 24 to 32 not implemented yet!!!\n");
+    break;
+  }
   return 0;
 }
 
@@ -396,9 +446,9 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],
 {
 
   yuv2rgb( vo_dga_base + vo_dga_dbf_current * vo_dga_dbf_mem_offset + vo_dga_vp_offset + 
-          (vo_dga_width * y +x) * BYTESPP,
+          (vo_dga_width * y +x) * HW_MODE.vdm_bytespp,
            src[0], src[1], src[2],
-           w,h, vo_dga_width * BYTESPP,
+           w,h, vo_dga_width * HW_MODE.vdm_bytespp,
            stride[0],stride[1] );
   return 0;
 };
@@ -438,18 +488,18 @@ static uint32_t query_format( uint32_t format )
    if( !vo_init() ){
     vd_printf(VD_ERR, "vo_dga: vo_init() failed!\n");
     return 1; 
-  }
-  vo_dga_XServer_mode = vd_ValidateMode(vo_depthonscreen);
+   }
+   vo_dga_XServer_mode = vd_ValidateMode(vo_depthonscreen);
  
    if(vo_dga_XServer_mode ==0){
 #ifndef HAVE_DGA2
      vd_printf(VD_ERR, "vo_dga: Your X-Server is not running in a ");
      vd_printf(VD_ERR, "resolution supported by DGA driver!\n");
 #endif     
-   }else{
-     vd_printf(VD_INFO, "vo_dga: X running at: %s\n", 
-               vd_GetModeString(vo_dga_XServer_mode));
-   }                                
+   }//else{
+   //  vd_printf(VD_INFO, "vo_dga: X running at: %s\n", 
+   //            vd_GetModeString(vo_dga_XServer_mode));
+   //}                                
  
 #ifdef HAVE_DGA2
    modelines=XDGAQueryModes(qdisp, XDefaultScreen(qdisp),&modecount);
@@ -472,24 +522,31 @@ static uint32_t query_format( uint32_t format )
 	        modelines[i].blueMask);
      }
      XFree(modelines);
-     dga_depths_init = 1;
+
    }
 #endif
-
+   dga_depths_init = 1;
    XCloseDisplay(qdisp);
 
-   for(i=0; i<vo_dga_mode_num; i++){
-     if(vo_dga_modes[i].vdm_supported != 0){
-       vd_printf(VD_INFO, "vo_dga: Supporting mode: %s", vd_GetModeString(i));
-       if(vo_dbpp && vo_dbpp != vo_dga_modes[i].vdm_mplayer_depth){
-         vo_dga_modes[i].vdm_supported = 0;
-         vd_printf(VD_INFO, " ...disabled by -bpp %d", vo_dbpp );
-       }
-       vd_printf(VD_INFO, "\n");
+  if( !vo_dga_modes[1].vdm_supported && vo_dga_modes[2].vdm_supported ){
+    vo_dga_modes[1].vdm_supported = 1;
+  }
+
+  if( !vo_dga_modes[3].vdm_supported && vo_dga_modes[4].vdm_supported ){
+    vo_dga_modes[3].vdm_supported = 1;
+  }
+
+   for(i=1; i<vo_dga_mode_num; i++){
+     vd_printf(VD_INFO, "vo_dga: Mode: %s", vd_GetModeString(i));
+     if(vo_dbpp && vo_dbpp != vo_dga_modes[i].vdm_mplayer_depth){
+       vo_dga_modes[i].vdm_supported = 0;
+       vd_printf(VD_INFO, " ...disabled by -bpp %d", vo_dbpp );
      }
+     vd_printf(VD_INFO, "\n");
    }
  }
 
+ // TODO: respect bit for native/not native
  if( format==IMGFMT_YV12 ) return 7;
  
  if( (format&IMGFMT_BGR_MASK) == IMGFMT_BGR && 
@@ -649,15 +706,24 @@ static uint32_t init( uint32_t width,  uint32_t height,
   if( !vo_dbpp ){
  
     if (format == IMGFMT_YV12){
-      vo_dga_active_mode = vo_dga_XServer_mode;
+      vo_dga_src_mode = vo_dga_XServer_mode;
     }else if((format & IMGFMT_BGR_MASK) == IMGFMT_BGR){
-      vo_dga_active_mode = vd_ModeValid( format & 0xff );
+      vo_dga_src_mode = vd_ModeValid( format & 0xff );
     }
   }else{
-    vo_dga_active_mode = vd_ModeValid(vo_dbpp);
+    vo_dga_src_mode = vd_ModeValid(vo_dbpp);
+  }
+  vo_dga_hw_mode = SRC_MODE.vdm_hw_mode;
+
+  if( format == IMGFMT_YV12 && vo_dga_src_mode != vo_dga_hw_mode ){
+    vd_printf(VD_ERR, 
+    "vo_dga: YV12 supports native modes only. Using %d instead of selected %d.\n",
+       HW_MODE.vdm_mplayer_depth,
+       SRC_MODE.vdm_mplayer_depth );
+    vo_dga_src_mode = vo_dga_hw_mode;
   }
 
-  if(!vo_dga_active_mode){ 
+  if(!vo_dga_src_mode){ 
     vd_printf(VD_ERR, "vo_dga: unsupported video format!\n");
     return 1;
   }
@@ -690,7 +756,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
                      modelines[i].redMask,
 		     modelines[i].greenMask,
 	             modelines[i].blueMask,
-                     vo_dga_active_mode)){
+                     vo_dga_hw_mode)){
 
        vd_printf(VD_DBG, "maxy: %4d, depth: %2d, %4dx%4d, ", 
                        modelines[i].maxViewportY, modelines[i].depth,
@@ -703,15 +769,18 @@ static uint32_t init( uint32_t width,  uint32_t height,
      }
   }
   vd_printf(VD_INFO, 
-  "vo_dga: Selected video mode %4d x %4d @ %3d Hz @ depth %2d, bitspp %2d, video %3d x %3d.\n", 
+     "vo_dga: Selected hardware mode %4d x %4d @ %3d Hz @ depth %2d, bitspp %2d.\n", 
      mX, mY, mVBI,
-     vo_dga_modes[vo_dga_active_mode].vdm_depth,
-     vo_dga_modes[vo_dga_active_mode].vdm_bitspp,
-     width, height);  
-
+     HW_MODE.vdm_depth,
+     HW_MODE.vdm_bitspp);  
+  vd_printf(VD_INFO, 
+     "vo_dga: Video parameters by codec: %3d x %3d, depth %2d, bitspp %2d.\n", 
+     width, height,
+     SRC_MODE.vdm_depth,
+     SRC_MODE.vdm_bitspp);
   vo_dga_vp_width =mX;
   vo_dga_vp_height = mY;
-  vo_dga_width = modelines[j].bytesPerScanline / BYTESPP ;
+  vo_dga_width = modelines[j].bytesPerScanline / HW_MODE.vdm_bytespp ;
   dga_modenum =  modelines[j].num;
   max_vpy_pos =  modelines[j].maxViewportY;
   
@@ -743,7 +812,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
     if(vo_dga_vidmodes != NULL ){
       for (i=0; i<modecount; i++){
 	if ( check_res(i, wanted_width, wanted_height, 
-                        vo_dga_modes[vo_dga_active_mode].vdm_depth,  
+                        vo_dga_modes[vo_dga_hw_mode].vdm_depth,  
 			vo_dga_vidmodes[i]->hdisplay, 
 			vo_dga_vidmodes[i]->vdisplay,
 			GET_VREFRESH(vo_dga_vidmodes[i]->dotclock, 
@@ -755,8 +824,8 @@ static uint32_t init( uint32_t width,  uint32_t height,
       vd_printf(VD_INFO, 
  "vo_dga: Selected video mode %4d x %4d @ %3d Hz @ depth %2d, bitspp %2d, video %3d x %3d.\n", 
 	mX, mY, mVBI, 
-	vo_dga_modes[vo_dga_active_mode].vdm_depth,
-	vo_dga_modes[vo_dga_active_mode].vdm_bitspp,
+	vo_dga_modes[vo_dga_hw_mode].vdm_depth,
+	vo_dga_modes[vo_dga_hw_mode].vdm_bitspp,
         width, height);  
     }else{
       vd_printf(VD_INFO, "vo_dga: XF86VidMode returned no screens - using current resolution.\n");
@@ -838,26 +907,26 @@ static uint32_t init( uint32_t width,  uint32_t height,
   // do some more checkings here ...
 
   if( format==IMGFMT_YV12 ){ 
-    yuv2rgb_init( vo_dga_modes[vo_dga_active_mode].vdm_mplayer_depth , MODE_RGB );
+    yuv2rgb_init( vo_dga_modes[vo_dga_hw_mode].vdm_mplayer_depth , MODE_RGB );
     vd_printf( VD_DBG, "vo_dga: Using mplayer depth %d for YV12\n", 
-               vo_dga_modes[vo_dga_active_mode].vdm_mplayer_depth);
+               vo_dga_modes[vo_dga_hw_mode].vdm_mplayer_depth);
   }
 
   vd_printf(VD_DBG, "vo_dga: bytes/line: %d, screen res: %dx%d, depth: %d, base: %08x, bpp: %d\n", 
           vo_dga_width, vo_dga_vp_width, 
-          vo_dga_vp_height, BYTESPP, vo_dga_base,
-          BITSPP);
+          vo_dga_vp_height, HW_MODE.vdm_bytespp, vo_dga_base,
+          HW_MODE.vdm_bitspp);
 
   x_off = (vo_dga_vp_width - vo_dga_src_width)>>1; 
   y_off = (vo_dga_vp_height - vo_dga_src_height)>>1;
 
-  vo_dga_bytes_per_line = vo_dga_src_width * BYTESPP; 
+  vo_dga_bytes_per_line = vo_dga_src_width * HW_MODE.vdm_bytespp; 
   vo_dga_lines = vo_dga_src_height;                     
 
   vo_dga_src_offset = 0;
-  vo_dga_vp_offset = (y_off * vo_dga_width + x_off ) * BYTESPP;
+  vo_dga_vp_offset = (y_off * vo_dga_width + x_off ) * HW_MODE.vdm_bytespp;
 
-  vo_dga_vp_skip = (vo_dga_width - vo_dga_src_width) * BYTESPP;  // todo
+  vo_dga_vp_skip = (vo_dga_width - vo_dga_src_width) * HW_MODE.vdm_bytespp;  // todo
     
   vd_printf(VD_DBG, "vo_dga: vp_off=%d, vp_skip=%d, bpl=%d\n", 
          vo_dga_vp_offset, vo_dga_vp_skip, vo_dga_bytes_per_line);
@@ -874,7 +943,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
   // note: set vo_dga_dbf_mem_offset to NULL to disable doublebuffering
   
   vo_dga_dbf_y_offset = y_off + vo_dga_src_height;
-  vo_dga_dbf_mem_offset = vo_dga_width * BYTESPP *  vo_dga_dbf_y_offset;
+  vo_dga_dbf_mem_offset = vo_dga_width * HW_MODE.vdm_bytespp *  vo_dga_dbf_y_offset;
   vo_dga_dbf_current = 0;
   
   // if(format ==IMGFMT_YV12 )
@@ -893,13 +962,13 @@ static uint32_t init( uint32_t width,  uint32_t height,
     int size = vo_dga_width *
 	(vo_dga_vp_height + (vo_dga_dbf_mem_offset != 0 ?
 	(vo_dga_src_height+y_off) : 0)) *
-	BYTESPP;
+	HW_MODE.vdm_bytespp;
 #ifndef HAVE_DGA2
     vd_printf(VD_DBG, "vo_dga: wanted size=%d, fb-size=%d\n", size, ram);
     if(size>ram*1024){
       vo_dga_dbf_mem_offset = 0;
       vd_printf(VD_INFO, "vo_dga: Not enough memory for double buffering!\n");
-      size -= (vo_dga_src_height+y_off) * vo_dga_width * BYTESPP;
+      size -= (vo_dga_src_height+y_off) * vo_dga_width * HW_MODE.vdm_bytespp;
     }				        
 #endif
     
