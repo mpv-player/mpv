@@ -143,8 +143,6 @@ Difficult stuff:
 
  * top notch DVD navigation like a hardware player
 
- * JACK support
-
  * write mpdump application to handle all -dump* options
 
  * modular MEncoder with audio encoding API
