@@ -17,7 +17,25 @@ RAGE128_OBJS=rage128_vid.o
 RAGE128_LIBS=-L../../libdha -ldha
 RAGE128_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W -DRAGE128
 
-all:    $(RADEON_VID) $(RAGE128_VID)
+NVIDIA_VID=nvidia_vid.so
+NVIDIA_SRCS=nvidia_vid.c
+NVIDIA_OBJS=nvidia_vid.o
+NVIDIA_LIBS=-L../../libdha -ldha -lm
+NVIDIA_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W
+
+GENFB_VID=genfb_vid.so
+GENFB_SRCS=genfb_vid.c
+GENFB_OBJS=genfb_vid.o
+GENFB_LIBS=-L../../libdha -ldha -lm
+GENFB_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W
+
+MGA_VID=mga_vid.so
+MGA_SRCS=mga_vid.c
+MGA_OBJS=mga_vid.o
+MGA_LIBS=-L../../libdha -ldha -lm
+MGA_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W
+
+all:    $(RADEON_VID) $(RAGE128_VID) $(NVIDIA_VID) $(GENFB_VID) #$(MGA_VID)
 
 
 .SUFFIXES: .c .o
@@ -35,6 +53,24 @@ $(RAGE128_OBJS):    $(RAGE128_SRCS)
 
 $(RAGE128_VID):     $(RAGE128_OBJS)
 	$(LD) $(RAGE128_LIBS) -shared -soname $(RAGE128_VID) -o $(RAGE128_VID) $(RAGE128_OBJS)
+
+$(NVIDIA_OBJS):    $(NVIDIA_SRCS)
+	$(CC) -c $(NVIDIA_CFLAGS) -o $@ $<
+
+$(NVIDIA_VID):     $(NVIDIA_OBJS)
+	$(LD) $(NVIDIA_LIBS) -shared -soname $(NVIDIA_VID) -o $(NVIDIA_VID) $(NVIDIA_OBJS)
+
+$(GENFB_OBJS):    $(GENFB_SRCS)
+	$(CC) -c $(GENFB_CFLAGS) -o $@ $<
+
+$(GENFB_VID):     $(GENFB_OBJS)
+	$(LD) $(GENFB_LIBS) -shared -soname $(GENFB_VID) -o $(GENFB_VID) $(GENFB_OBJS)
+
+$(MGA_OBJS):    $(MGA_SRCS)
+	$(CC) -c $(MGA_CFLAGS) -o $@ $<
+
+$(MGA_VID):     $(MGA_OBJS)
+	$(LD) $(MGA_LIBS) -shared -soname $(MGA_VID) -o $(MGA_VID) $(MGA_OBJS)
 
 clean:
 	rm -f *.o *.so *~
