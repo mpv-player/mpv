@@ -86,8 +86,11 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
         case IMGFMT_YV12:
         case IMGFMT_IYUV:
         case IMGFMT_I420:
+#if LIBAVCODEC_BUILD >= 4615
             if(ctx->yvu9_support) return CONTROL_FALSE;
-            else                  return CONTROL_TRUE;
+            else
+#endif
+                                  return CONTROL_TRUE;
         case IMGFMT_YUY2:
             if(ctx->yuy2_support) return CONTROL_TRUE;
                                   return CONTROL_FALSE;
