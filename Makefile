@@ -11,6 +11,7 @@ GROUP = root
 PERM = 755
 
 PRG = mplayer
+PRG_HQ = mplayerHQ
 PRG_AVIP = aviparse
 PRG_TV = tvision
 prefix = /usr/local
@@ -26,7 +27,7 @@ VO_LIBS = -Llibvo -lvo $(X_LIBS)
 
 # .PHONY: all clean
 
-all:	$(PRG)
+all:	$(PRG) $(PRG_HQ)
 # $(PRG_AVIP)
 
 .c.o:
@@ -58,6 +59,9 @@ encore/libencore.a:
 $(PRG):	.depend mplayer.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
 	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread
 
+$(PRG_HQ):	.depend mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
+	$(CC) $(CFLAGS) -o $(PRG_HQ) mplayerHQ.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread
+
 $(PRG_AVIP):	.depend aviparse.o $(OBJS) loader/libloader.a $(COMMONLIBS)
 	$(CC) $(CFLAGS) -o $(PRG_AVIP) aviparse.o $(OBJS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl $(VO_LIBS) -lpthread
 
@@ -73,7 +77,7 @@ clean:
 
 distclean:
 	@for a in mp3lib libac3 libmpeg2 opendivx encore libvo loader drivers drivers/syncfb ; do $(MAKE) -C $$a distclean ; done
-	rm -f *~ $(PRG) $(PRG_AVIP) $(PRG_TV) $(OBJS) *.o *.a .depend
+	rm -f *~ $(PRG) $(PRG_HQ) $(PRG_AVIP) $(PRG_TV) $(OBJS) *.o *.a .depend
 
 dep:	depend
 
@@ -81,7 +85,7 @@ depend: .depend
 	@for a in mp3lib libac3 libmpeg2 libvo opendivx encore ; do $(MAKE) -C $$a dep ; done
 
 .depend: Makefile config.mak config.h
-	makedepend -f- -- $(CFLAGS) -- mplayer.c aviparse.c tvision.c $(SRCS) 1>.depend 2>/dev/null
+	makedepend -f- -- $(CFLAGS) -- mplayer.c mplayerHQ.c aviparse.c tvision.c $(SRCS) 1>.depend 2>/dev/null
 
 #
 # include dependency files if they exist
