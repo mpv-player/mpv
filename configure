@@ -325,7 +325,7 @@ done # for parm in ...
 # 1st pass checking for vital options
 _install=install
 _ranlib=ranlib
-_cc=gcc
+_cc=cc
 test "$CC" && _cc="$CC"
 _as=auto
 _runtime_cpudetection=no
@@ -485,7 +485,7 @@ fi
 
 # Checking CC version...
 if test "$_skip_cc_check" != yes ; then
- for _cc in "$_cc" gcc-3.1 gcc3 gcc-3.0 cc ; do
+ for _cc in "$_cc" gcc gcc-3.3 gcc-3.2 gcc-3.1 gcc3 gcc-3.0 cc ; do
   echocheck "$_cc version"
   cc_name=`( $_cc -v ) 2>&1 | tail -1 | cut -d ' ' -f 1`
   cc_version=`( $_cc -dumpversion ) 2>&1`
