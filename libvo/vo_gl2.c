@@ -88,7 +88,7 @@ static uint32_t texture_width;
 static uint32_t texture_height;
 static int texnumx, texnumy, raw_line_len;
 static GLfloat texpercx, texpercy;
-static struct TexSquare * texgrid;
+static struct TexSquare * texgrid = NULL;
 static GLint    gl_internal_format;
 static char *   gl_internal_format_s;
 static int      rgb_sz, r_sz, g_sz, b_sz, a_sz;
@@ -212,6 +212,8 @@ static int initTextures()
   if (texpercy > 1.0)
     texpercy = 1.0;
 
+  if (texgrid)
+    free(texgrid);
   texgrid = (struct TexSquare *)
     calloc (texnumx * texnumy, sizeof (struct TexSquare));
 
@@ -1176,6 +1178,10 @@ static void
 uninit(void)
 {
   if ( !vo_config_count ) return;
+  if (texgrid) {
+    free(texgrid);
+    texgrid = NULL;
+  }
 #ifdef GL_WIN32
   vo_w32_uninit();
 #else
