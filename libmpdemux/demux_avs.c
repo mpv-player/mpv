@@ -85,6 +85,9 @@ typedef struct tagAVS
 AVS_T *initAVS(const char *filename)
 {   
     AVS_T *AVS = (AVS_T *) malloc (sizeof(AVS_T));
+    AVS_Value arg0 = avs_new_value_string(filename);
+    AVS_Value args = avs_new_value_array(&arg0, 1);
+    
     memset(AVS, 0, sizeof(AVS_T));
 
 #ifdef WIN32_LOADER
@@ -117,8 +120,6 @@ AVS_T *initAVS(const char *filename)
         return NULL;
     }
     
-    AVS_Value arg0 = avs_new_value_string(filename);
-    AVS_Value args = avs_new_value_array(&arg0, 1);
 
     AVS->handler = AVS->avs_invoke(AVS->avs_env, "Import", args, 0);
     
