@@ -84,7 +84,7 @@ static char * vbeErrToStr(int err)
   static char sbuff[80];
   if((err & VBE_VESA_ERROR_MASK) == VBE_VESA_ERROR_MASK)
   {
-    sprintf(sbuff,"VESA failed = 0x4f%x",err & VBE_VESA_ERRCODE_MASK);
+    sprintf(sbuff,"VESA failed = 0x4f%x",(err & VBE_VESA_ERRCODE_MASK)>>8);
     retval = sbuff;
   }
   else
@@ -104,9 +104,7 @@ static char * vbeErrToStr(int err)
 static void vesa_term( void )
 {
   int err;
-#if 0
   if((err=vbeRestoreState(init_state)) != VBE_OK) PRINT_VBE_ERR("vbeRestoreState",err);
-#endif
   if((err=vbeSetMode(init_mode,NULL)) != VBE_OK) PRINT_VBE_ERR("vbeSetMode",err);
   free(temp_buffer);
   vbeDestroy();
@@ -315,8 +313,22 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		(int)(vib.VESAVersion >> 8) & 0xff,
 		(int)(vib.VESAVersion & 0xff),
 		(int)(vib.OemSoftwareRev & 0xffff));
-	printf("vo_vesa: OEM info: %s\n",vib.OemStringPtr);
 	printf("vo_vesa: Video memory: %u Kb\n",vib.TotalMemory*64);
+	printf("vo_vesa: VESA Capabilities: %s %s %s %s %s\n"
+		,vib.Capabilities & VBE_DAC_8BIT ? "8-bit DAC," : "6-bit DAC,"
+		,vib.Capabilities & VBE_NONVGA_CRTC ? "non-VGA CRTC,":"VGA CRTC,"
+		,vib.Capabilities & VBE_SNOWED_RAMDAC ? "snowed RAMDAC,":"normal RAMDAC,"
+		,vib.Capabilities & VBE_STEREOSCOPIC ? "stereoscopic,":"no stereoscopic,"
+		,vib.Capabilities & VBE_STEREO_EVC ? "Stereo EVC":"no stereo");
+	printf("vo_vesa: !!! Below will be printed OEM info. !!!\n");
+	printf("vo_vesa: You should watch 5 OEM related lines below else you've broken vm86\n");
+	printf("vo_vesa: OEM info: %s\n",vib.OemStringPtr);
+	printf("vo_vesa: OEM Revision: %x\n",vib.OemSoftwareRev);
+	printf("vo_vesa: OEM vendor: %s\n",vib.OemVendorNamePtr);
+	printf("vo_vesa: OEM Product Name: %s\n",vib.OemProductNamePtr);
+	printf("vo_vesa: OEM Product Rev: %s\n",vib.OemProductRevPtr);
+	printf("vo_vesa: Hint: To get workable TV-Out you should have plugged tv-connector in\n"
+	       "vo_vesa: before booting PC since VESA BIOS initializes itself only during POST\n");
 	/* Find best mode here */
 	num_modes = 0;
 	mode_ptr = vib.VideoModePtr;
@@ -423,13 +435,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		win.high= video_mode_info.WinSize*1024;
 		x_offset = (video_mode_info.XResolution - image_width) / 2;
 		y_offset = (video_mode_info.YResolution - image_height) / 2;
-#if 0
 		if((err=vbeSaveState(&init_state)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeSaveState",err);
 			return -1;
 		}
-#endif
 		if((err=vbeSetMode(video_mode,NULL)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeSetMode",err);
@@ -444,7 +454,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	}
 	else
 	{
-	  printf("vo_vesa: Can't find mode for: %ux%u@%x\n",width,height,format);
+	  printf("vo_vesa: Can't find mode for: %ux%u@%u\n",width,height,bpp);
 	  return -1;
 	}
 	if(verbose)
