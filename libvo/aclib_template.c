@@ -353,3 +353,88 @@ static inline void * RENAME(fast_memcpy)(void * to, const void * from, size_t le
 	if(len) small_memcpy(to, from, len);
 	return retval;
 }
+
+/**
+ * special copy routine for mem -> agp/pci copy (based upon fast_memcpy)
+ */
+static inline void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len)
+{
+	void *retval;
+	size_t i;
+	retval = to;
+#ifdef STATISTICS
+	{
+		static int freq[33];
+		static int t=0;
+		int i;
+		for(i=0; len>(1<<i); i++);
+		freq[i]++;
+		t++;
+		if(1024*1024*1024 % t == 0)
+			for(i=0; i<32; i++)
+				printf("mem2agp freq < %8d %4d\n", 1<<i, freq[i]);
+	}
+#endif
+        if(len >= MIN_LEN)
+	{
+	  register unsigned long int delta;
+          /* Align destinition to MMREG_SIZE -boundary */
+          delta = ((unsigned long int)to)&7;
+          if(delta)
+	  {
+	    delta=8-delta;
+	    len -= delta;
+	    small_memcpy(to, from, delta);
+	  }
+	  i = len >> 6; /* len/64 */
+	  len &= 63;
+        /*
+           This algorithm is top effective when the code consequently
+           reads and writes blocks which have size of cache line.
+           Size of cache line is processor-dependent.
+           It will, however, be a minimum of 32 bytes on any processors.
+           It would be better to have a number of instructions which
+           perform reading and writing to be multiple to a number of
+           processor's decoders, but it's not always possible.
+        */
+	for(; i>0; i--)
+	{
+		__asm__ __volatile__ (
+        	PREFETCH" 320(%0)\n"
+		"movq (%0), %%mm0\n"
+		"movq 8(%0), %%mm1\n"
+		"movq 16(%0), %%mm2\n"
+		"movq 24(%0), %%mm3\n"
+		"movq 32(%0), %%mm4\n"
+		"movq 40(%0), %%mm5\n"
+		"movq 48(%0), %%mm6\n"
+		"movq 56(%0), %%mm7\n"
+		MOVNTQ" %%mm0, (%1)\n"
+		MOVNTQ" %%mm1, 8(%1)\n"
+		MOVNTQ" %%mm2, 16(%1)\n"
+		MOVNTQ" %%mm3, 24(%1)\n"
+		MOVNTQ" %%mm4, 32(%1)\n"
+		MOVNTQ" %%mm5, 40(%1)\n"
+		MOVNTQ" %%mm6, 48(%1)\n"
+		MOVNTQ" %%mm7, 56(%1)\n"
+		:: "r" (from), "r" (to) : "memory");
+		((const unsigned char *)from)+=64;
+		((unsigned char *)to)+=64;
+	}
+#ifdef HAVE_MMX2
+                /* since movntq is weakly-ordered, a "sfence"
+		 * is needed to become ordered again. */
+		__asm__ __volatile__ ("sfence":::"memory");
+#endif
+#ifndef HAVE_SSE
+		/* enables to use FPU */
+		__asm__ __volatile__ (EMMS:::"memory");
+#endif
+	}
+	/*
+	 *	Now do the tail of the block
+	 */
+	if(len) small_memcpy(to, from, len);
+	return retval;
+}
+

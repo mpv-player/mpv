@@ -9,8 +9,14 @@
 #include <stddef.h>
 
 extern void * fast_memcpy(void * to, const void * from, size_t len);
+extern void * mem2agpcpy(void * to, const void * from, size_t len);
 #define memcpy(a,b,c) fast_memcpy(a,b,c)
 
-#endif /* HAVE_MMX/MMX2/3DNOW/SSE/SSE2 */
-#endif /* USE_FASTMEMCPY */
+#else /* HAVE_MMX/MMX2/3DNOW/SSE/SSE2 */
+#define mem2agpcpy(a,b,c) memcpy(a,b,c)
+#endif
+
+#else /* USE_FASTMEMCPY */
+#define mem2agpcpy(a,b,c) memcpy(a,b,c)
+#endif
 #endif

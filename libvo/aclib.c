@@ -118,4 +118,34 @@ inline void * fast_memcpy(void * to, const void * from, size_t len)
 #endif //!RUNTIME_CPUDETECT
 }
 
+inline void * mem2agpcpy(void * to, const void * from, size_t len)
+{
+#ifdef RUNTIME_CPUDETECT
+#ifdef CAN_COMPILE_X86_ASM
+	// ordered per speed fasterst first
+	if(gCpuCaps.hasMMX2)
+		mem2agpcpy_MMX2(to, from, len);
+	else if(gCpuCaps.has3DNow)
+		mem2agpcpy_3DNow(to, from, len);
+	else if(gCpuCaps.hasMMX)
+		mem2agpcpy_MMX(to, from, len);
+	else
+#endif //CAN_COMPILE_X86_ASM
+		memcpy(to, from, len); // prior to mmx we use the standart memcpy
+#else
+#ifdef HAVE_MMX2
+		mem2agpcpy_MMX2(to, from, len);
+#elif defined (HAVE_3DNOW)
+		mem2agpcpy_3DNow(to, from, len);
+#elif defined (HAVE_MMX)
+		mem2agpcpy_MMX(to, from, len);
+#else
+		memcpy(to, from, len); // prior to mmx we use the standart memcpy
+#endif
+
+#endif //!RUNTIME_CPUDETECT
+}
+
+
 #endif /* use fastmemcpy */
+
