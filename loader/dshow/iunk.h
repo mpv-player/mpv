@@ -2,10 +2,9 @@
 #define DS_IUNK_H
 
 #include "guids.h"
-#include <stdlib.h>
 
 #define INHERIT_IUNKNOWN() \
-    long STDCALL ( *QueryInterface )(IUnknown * This, GUID* riid, void **ppvObject); \
+    long STDCALL ( *QueryInterface )(IUnknown * This, const GUID* riid, void **ppvObject); \
     long STDCALL ( *AddRef )(IUnknown * This); \
     long STDCALL ( *Release )(IUnknown * This);
 
@@ -14,7 +13,7 @@
 
 #define IMPLEMENT_IUNKNOWN(CLASSNAME) 		\
 static long STDCALL CLASSNAME ## _QueryInterface(IUnknown * This, \
-					  GUID* riid, void **ppvObject) \
+					  const GUID* riid, void **ppvObject) \
 { \
     CLASSNAME * me = (CLASSNAME *)This;		\
     GUID* r; unsigned int i = 0;		\

@@ -5,18 +5,8 @@
 
 #include "allocator.h"
 
-typedef struct _COutputPin COutputPin;
-
 typedef struct _COutputMemPin COutputMemPin;
-struct _COutputMemPin
-{
-    IMemInputPin_vt* vt;
-    DECLARE_IUNKNOWN();
-    char** frame_pointer;
-    long* frame_size_pointer;
-    MemAllocator* pAllocator;
-    COutputPin* parent;
-};
+typedef struct _COutputPin COutputPin;
 
 struct _COutputPin
 {

@@ -17,7 +17,7 @@
 #define WAVE_FILTER_UNKNOWN     0x0000
 #define WAVE_FILTER_DEVELOPMENT 0xFFFF
 
-typedef struct _WAVEFILTER {
+typedef struct __attribute__((__packed__)) _WAVEFILTER {
   DWORD   cbStruct;
   DWORD   dwFilterTag;
   DWORD   fdwFilter;
@@ -28,7 +28,7 @@ typedef struct _WAVEFILTER {
 #ifndef WAVE_FILTER_VOLUME
 #define WAVE_FILTER_VOLUME      0x0001
 
-typedef struct _WAVEFILTER_VOLUME {
+typedef struct __attribute__((__packed__)) _WAVEFILTER_VOLUME {
    WAVEFILTER      wfltr;
    DWORD           dwVolume;
 } VOLUMEWAVEFILTER, *PVOLUMEWAVEFILTER, *NPVOLUMEWAVEFILTER, *LPVOLUMEWAVEFILTER;
@@ -37,7 +37,7 @@ typedef struct _WAVEFILTER_VOLUME {
 #ifndef WAVE_FILTER_ECHO
 #define WAVE_FILTER_ECHO        0x0002
 
-typedef struct WAVEFILTER_ECHO {
+typedef struct __attribute__((__packed__)) WAVEFILTER_ECHO {
    WAVEFILTER      wfltr;
    DWORD           dwVolume;
    DWORD           dwDelay;
@@ -46,7 +46,7 @@ typedef struct WAVEFILTER_ECHO {
     
 #ifndef _WAVEFORMATEX_
 #define _WAVEFORMATEX_
-typedef struct _WAVEFORMATEX {
+typedef struct __attribute__((__packed__)) _WAVEFORMATEX {
   WORD   wFormatTag;
   WORD   nChannels;
   DWORD  nSamplesPerSec;

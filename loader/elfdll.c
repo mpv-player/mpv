@@ -3,16 +3,16 @@
  *
  * Copyright 1999 Bertho A. Stultiens
  */
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_LIBDL
 
-#include <wine/windef.h>
-#include <wine/module.h>
-#include <wine/heap.h>
-#include <wine/elfdll.h>
-#include <wine/debugtools.h>
-#include <wine/winerror.h>
+#include "wine/windef.h"
+#include "wine/module.h"
+#include "wine/heap.h"
+#include "wine/elfdll.h"
+#include "wine/debugtools.h"
+#include "wine/winerror.h"
 
 //DEFAULT_DEBUG_CHANNEL(elfdll)
 
@@ -21,16 +21,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <dlfcn.h>
-
-struct modref_list_t;
-
-typedef struct modref_list_t
-{
-    WINE_MODREF* wm;
-    struct modref_list_t *next;
-    struct modref_list_t *prev;    
-}
-modref_list;
 
 
 //WINE_MODREF *local_wm=NULL;
@@ -202,7 +192,7 @@ static WINE_MODREF *ELFDLL_CreateModref(HMODULE hModule, LPCSTR path)
 //		wm->binfmt.pe.pe_resource = (PIMAGE_RESOURCE_DIRECTORY)RVA(hModule, dir->VirtualAddress);
 
 
-	wm->filename = malloc(strlen(path)+1);
+	wm->filename = (char*) malloc(strlen(path)+1);
 	strcpy(wm->filename, path);
 	wm->modname = strrchr( wm->filename, '\\' );
 	if (!wm->modname) wm->modname = wm->filename;
@@ -221,7 +211,7 @@ static WINE_MODREF *ELFDLL_CreateModref(HMODULE hModule, LPCSTR path)
 	
 	if(local_wm)
         {
-    	    local_wm->next=malloc(sizeof(modref_list));
+    	    local_wm->next = (modref_list*) malloc(sizeof(modref_list));
     	    local_wm->next->prev=local_wm;
     	    local_wm->next->next=NULL;
             local_wm->next->wm=wm;
@@ -229,7 +219,7 @@ static WINE_MODREF *ELFDLL_CreateModref(HMODULE hModule, LPCSTR path)
 	}
 	else
         {
-	    local_wm=malloc(sizeof(modref_list));
+	    local_wm = (modref_list*) malloc(sizeof(modref_list));
 	    local_wm->next=local_wm->prev=NULL;
     	    local_wm->wm=wm;
 	}	

@@ -11,7 +11,7 @@
  
 
 #ifndef  __WINE_WINDEF_H
-#include <wine/windef.h>
+#include "wine/windef.h"
 #endif
 
 #ifndef __WINE_MMSYSTEM_H

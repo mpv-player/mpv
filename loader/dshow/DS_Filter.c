@@ -1,9 +1,10 @@
 #include "DS_Filter.h"
 #include "driver.h"
 #include "com.h"
-#include "module.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include "win32.h" // printf macro
 
 typedef long STDCALL (*GETCLASS) (const GUID*, const GUID*, void**);
 
@@ -145,7 +146,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	object->vt->Release((IUnknown*)object);
 	if (result || !This->m_pFilter)
 	{
-	    em = "object does not have IBaseFilter interface";
+	    em = "object does not provide IBaseFilter interface";
             break;
 	}
 	// enumerate pins
@@ -228,7 +229,6 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
             break;
 	}
 
-	printf("Using DirectShow codec: %s\n", dllname);
 	init++;
         break;
     }

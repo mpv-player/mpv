@@ -2,26 +2,41 @@
 #define DS_INTERFACES_H
 
 /*
-
-Definition of important DirectShow interfaces.
-Created using freely-available DirectX 8.0 SDK
-( http://msdn.microsoft.com )
-
-*/
+ * Definition of important DirectShow interfaces.
+ * Created using freely-available DirectX 8.0 SDK
+ * ( http://msdn.microsoft.com )
+ */
 
 #include "iunk.h"
 #include "com.h"
-
-//typedef GUID& REFIID;
-typedef GUID CLSID;
-typedef GUID IID;
 
 /*    Sh*t. MSVC++ and g++ use different methods of storing vtables.    */
 
 typedef struct _IReferenceClock IReferenceClock;
 typedef struct _IFilterGraph IFilterGraph;
 
-enum PIN_DIRECTION;
+typedef struct _IBaseFilter IBaseFilter;
+
+typedef enum
+{
+    PINDIR_INPUT = 0,
+    PINDIR_OUTPUT
+} PIN_DIRECTION;
+
+typedef struct _PinInfo
+{
+    IBaseFilter* pFilter;
+    PIN_DIRECTION dir;
+    unsigned short achName[128];
+} PIN_INFO;
+
+typedef struct _AllocatorProperties
+{
+    long cBuffers;
+    long cbBuffer;
+    long cbAlign;
+    long cbPrefix;
+} ALLOCATOR_PROPERTIES;
 
 typedef struct _IEnumMediaTypes IEnumMediaTypes;
 typedef struct IEnumMediaTypes_vt

@@ -1,8 +1,19 @@
+#ifndef WINEACM_H
+#define WINEACM_H
 /* -*- tab-width: 8; c-basic-offset: 4 -*- */
 
 /***********************************************************************
  * Wine specific - Win32
  */
+
+
+#include "wine/msacmdrv.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* defined(__cplusplus) */
+
+
 typedef struct _WINE_ACMDRIVERID *PWINE_ACMDRIVERID;
 typedef struct _WINE_ACMDRIVER   *PWINE_ACMDRIVER;
 
@@ -17,6 +28,7 @@ typedef struct _WINE_ACMDRIVER
     HDRVR      		hDrvr;
     DRIVERPROC		pfnDriverProc;
     PWINE_ACMDRIVER	pNextACMDriver;
+    int                 iUsage;
 } WINE_ACMDRIVER;
 
 typedef struct _WINE_ACMSTREAM
@@ -29,8 +41,8 @@ typedef struct _WINE_ACMSTREAM
 
 typedef struct _WINE_ACMDRIVERID
 {
-    LPSTR               pszDriverAlias;
     LPSTR               pszFileName;
+    WORD		wFormatTag;
     HINSTANCE		hInstModule;          /* NULL if global */
     DWORD		dwProcessID;	      /* ID of process which installed a local driver */
     WIN_BOOL                bEnabled;
@@ -43,13 +55,18 @@ typedef struct _WINE_ACMDRIVERID
 extern HANDLE MSACM_hHeap;
 extern PWINE_ACMDRIVERID MSACM_pFirstACMDriverID;
 extern PWINE_ACMDRIVERID MSACM_pLastACMDriverID;
-PWINE_ACMDRIVERID MSACM_RegisterDriver(LPSTR pszDriverAlias,
-				       LPSTR pszFileName,
+
+PWINE_ACMDRIVERID MSACM_RegisterDriver(const char* pszFileName,
+				       WORD wFormatTag,
 				       HINSTANCE hinstModule);
-void MSACM_RegisterAllDrivers(void);
 PWINE_ACMDRIVERID MSACM_UnregisterDriver(PWINE_ACMDRIVERID p);
 void MSACM_UnregisterAllDrivers(void);
 PWINE_ACMDRIVERID MSACM_GetDriverID(HACMDRIVERID hDriverID);
 PWINE_ACMDRIVER MSACM_GetDriver(HACMDRIVER hDriver);
 PWINE_ACMOBJ MSACM_GetObj(HACMOBJ hObj);
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* defined(__cplusplus) */
+
+#endif /* WINEACM_H */

@@ -1,7 +1,7 @@
 #ifndef __WINE_PE_IMAGE_H
 #define __WINE_PE_IMAGE_H
 
-#include "windef.h"
+#include "winnt.h"
 #include "winbase.h"
 
 #define PE_HEADER(module) \

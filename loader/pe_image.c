@@ -34,7 +34,6 @@
  *   to 4096 byte boundaries on disk.
  */
 #include "config.h"
-//#include <wine/config.h>
 
 #include <errno.h>
 #include <assert.h>
@@ -48,13 +47,13 @@
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
-#include <wine/windef.h>
-#include <wine/winbase.h>
-#include <wine/winerror.h>
-#include <wine/heap.h>
-#include <wine/pe_image.h>
-#include <wine/module.h>
-#include <wine/debugtools.h>
+#include "wine/windef.h"
+#include "wine/winbase.h"
+#include "wine/winerror.h"
+#include "wine/heap.h"
+#include "wine/pe_image.h"
+#include "wine/module.h"
+#include "wine/debugtools.h"
 #include "ext.h"
 #include "win32.h"
 
@@ -68,7 +67,7 @@ extern void* LookupExternalByName(const char* library, const char* name);
 static void dump_exports( HMODULE hModule )
 { 
   char		*Module;
-  int		i, j;
+  unsigned int i, j;
   u_short	*ordinal;
   u_long	*function,*functions;
   u_char	**name;
@@ -125,7 +124,8 @@ FARPROC PE_FindExportedFunction(
 {
 	u_short				* ordinals;
 	u_long				* function;
-	u_char				** name, *ename = NULL;
+	u_char				** name;
+	const char *ename = NULL;
 	int				i, ordinal;
 	PE_MODREF			*pem = &(wm->binfmt.pe);
 	IMAGE_EXPORT_DIRECTORY 		*exports = pem->pe_export;
@@ -161,8 +161,8 @@ FARPROC PE_FindExportedFunction(
             while (min <= max)
             {
                 int res, pos = (min + max) / 2;
-                ename = RVA(name[pos]);
-                if (!(res = strcmp( ename, funcName )))
+		ename = (const char*) RVA(name[pos]);
+		if (!(res = strcmp( ename, funcName )))
                 {
                     ordinal = ordinals[pos];
                     goto found;
@@ -171,9 +171,9 @@ FARPROC PE_FindExportedFunction(
                 else min = pos + 1;
             }
             
-            for (i = 0; i < exports->NumberOfNames; i++)
+	    for (i = 0; i < exports->NumberOfNames; i++)
             {
-                ename = RVA(name[i]);
+		ename = (const char*) RVA(name[i]);
                 if (!strcmp( ename, funcName ))
                 {
 		    ERR( "%s.%s required a linear search\n", wm->modname, funcName );

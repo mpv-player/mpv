@@ -4,8 +4,13 @@
  * be modified before program creates first thread
  * - avifile includes this file from C++ code
  * and initializes it at the start of player!
+ * it might sound like a hack and it really is - but
+ * as aviplay is deconding video with more than just one
+ * thread currently it's necessary to do it this way
+ * this might change in the future
  */
 
+/* applied some modification to make make our xine friend more happy */
 #include "ldt_keeper.h"
 
 #include <string.h>
@@ -19,6 +24,14 @@
 #ifdef __linux__
 #include <asm/unistd.h>
 #include <asm/ldt.h>
+/* prototype it here, so we won't depend on kernel headers */
+#ifdef  __cplusplus
+extern "C" {
+#endif
+int modify_ldt(int func, void *ptr, unsigned long bytecount);
+#ifdef  __cplusplus
+}
+#endif
 #else
 #if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__)
 #include <machine/segments.h>
@@ -33,7 +46,7 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
-extern int sysi86(int, void*);
+int sysi86(int, void*);
 #ifdef  __cplusplus
 }
 #endif
@@ -69,20 +82,13 @@ struct modify_ldt_ldt_s {
 /* user level (privilege level: 3) ldt (1<<2) segment selector */
 #define       LDT_SEL(idx) ((idx) << 3 | 1 << 2 | 3)
 
+/* i got this value from wine sources, it's the first free LDT entry */
 #ifndef       TEB_SEL_IDX
-#define       TEB_SEL_IDX     1
+#define       TEB_SEL_IDX     17
 #endif
+
 #define       TEB_SEL LDT_SEL(TEB_SEL_IDX)
 
-/**
- *
- *  This should be performed before we create first thread. See remarks
- *  for write_ldt(), linux/kernel/ldt.c.
- *
- */
-
-void* fs_seg = NULL;
-static char* prev_struct = NULL;
 /**
  * here is a small logical problem with Restore for multithreaded programs -
  * in C++ we use static class for this...
@@ -98,6 +104,8 @@ void Setup_FS_Segment(void)
     );
 }
 
+/* we don't need this - use modify_ldt instead */
+#if 0
 #ifdef __linux__
 /* XXX: why is this routine from libc redefined here? */
 /* NOTE: the redefined version ignores the count param, count is hardcoded as 16 */
@@ -130,6 +138,7 @@ static int LDT_Modify( int func, struct modify_ldt_ldt_s *ptr,
     return -1;
 }
 #endif
+#endif
 
 #if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__)
 static void LDT_EntryToBytes( unsigned long *buffer, const struct modify_ldt_ldt_s *content )
@@ -147,31 +156,34 @@ static void LDT_EntryToBytes( unsigned long *buffer, const struct modify_ldt_ldt
 }
 #endif
 
-void Setup_LDT_Keeper(void)
+//void* fs_seg=0;
+
+ldt_fs_t* Setup_LDT_Keeper(void)
 {
     struct modify_ldt_ldt_s array;
-    int fd;
     int ret;
+    ldt_fs_t* ldt_fs = (ldt_fs_t*) malloc(sizeof(ldt_fs_t));
 
-    if (fs_seg)
-        return;
+    if (!ldt_fs)
+	return NULL;
 
-    prev_struct = 0;
-    fd = open("/dev/zero", O_RDWR);
-    if(fd<0){
-        perror( "Cannot open /dev/zero for READ+WRITE. Check permissions! error: " );
-	return;
+    ldt_fs->fd = open("/dev/zero", O_RDWR);
+    if(ldt_fs->fd<0){
+        perror( "Cannot open /dev/zero for READ+WRITE. Check permissions! error: ");
+	return NULL;
     }
-    fs_seg = mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_PRIVATE,
-		  fd, 0);
-    if(fs_seg==(void*)-1)
+//    fs_seg=
+    ldt_fs->fs_seg = mmap(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_PRIVATE,
+			  ldt_fs->fd, 0);
+    if (ldt_fs->fs_seg == (void*)-1)
     {
 	perror("ERROR: Couldn't allocate memory for fs segment");
-	return;
+        close(ldt_fs->fd);
+        free(ldt_fs);
+	return NULL;
     }
-//    printf("fs seg %p\n", fs_seg);
-    *(void**)((char*)fs_seg+0x18) = fs_seg;
-    array.base_addr=(int)fs_seg;
+    *(void**)((char*)ldt_fs->fs_seg+0x18) = ldt_fs->fs_seg;
+    array.base_addr=(int)ldt_fs->fs_seg;
     array.entry_number=TEB_SEL_IDX;
     array.limit=array.base_addr+getpagesize()-1;
     array.seg_32bit=1;
@@ -180,7 +192,8 @@ void Setup_LDT_Keeper(void)
     array.contents=MODIFY_LDT_CONTENTS_DATA;
     array.limit_in_pages=0;
 #ifdef __linux__
-    ret=LDT_Modify(0x1, &array, sizeof(struct modify_ldt_ldt_s));
+    //ret=LDT_Modify(0x1, &array, sizeof(struct modify_ldt_ldt_s));
+    ret=modify_ldt(0x1, &array, sizeof(struct modify_ldt_ldt_s));
     if(ret<0)
     {
 	perror("install_fs");
@@ -200,7 +213,6 @@ void Setup_LDT_Keeper(void)
 	    printf("Couldn't install fs segment, expect segfault\n");
             printf("Did you reconfigure the kernel with \"options USER_LDT\"?\n");
         }
-	printf("Set_LDT\n");
     }
 #endif  /* __NetBSD__ || __FreeBSD__ || __OpenBSD__ */
 
@@ -223,17 +235,20 @@ void Setup_LDT_Keeper(void)
 
     Setup_FS_Segment();
 
-    prev_struct = (char*)malloc(sizeof(char) * 8);
-    *(void**)array.base_addr = prev_struct;
-    close(fd);
+    ldt_fs->prev_struct = (char*)malloc(sizeof(char) * 8);
+    *(void**)array.base_addr = ldt_fs->prev_struct;
+
+    return ldt_fs;
 }
 
-void Restore_LDT_Keeper(void)
+void Restore_LDT_Keeper(ldt_fs_t* ldt_fs)
 {
-    if (fs_seg == 0)
+    if (ldt_fs == NULL || ldt_fs->fs_seg == 0)
 	return;
-    if (prev_struct)
-	free(prev_struct);
-    munmap((char*)fs_seg, getpagesize());
-    fs_seg = 0;
+    if (ldt_fs->prev_struct)
+	free(ldt_fs->prev_struct);
+    munmap((char*)ldt_fs->fs_seg, getpagesize());
+    ldt_fs->fs_seg = 0;
+    close(ldt_fs->fd);
+    free(ldt_fs);
 }

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int unimplemented(const char* s, void* p)
+static inline int unimplemented(const char* s, void* p)
 {
     Debug printf("%s(%p) called (UNIMPLEMENTED)", s, p);
     return E_NOTIMPL;

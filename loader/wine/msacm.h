@@ -25,7 +25,9 @@ typedef DWORD           FOURCC;         /* a four character code */
 
 
 
+#if !defined(WAVE_FORMAT_PCM)
 #define WAVE_FORMAT_PCM     1
+#endif
 
 /***********************************************************************
  * Defines/Enums
@@ -931,7 +933,6 @@ MMRESULT WINAPI acmStreamSize(
 MMRESULT WINAPI acmStreamUnprepareHeader(
   HACMSTREAM has, PACMSTREAMHEADER pash, DWORD fdwUnprepare
 );
-void MSACM_RegisterAllDrivers(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

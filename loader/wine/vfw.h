@@ -69,11 +69,7 @@ typedef struct tagWINE_HIC {
 	long		type;		/* 08: */
 	long		handler;	/* 0C: */
 	HDRVR		hdrv;		/* 10: */
-#ifndef __cplusplus
-	long		private;	/* 14:(handled by SendDriverMessage)*/
-#else	
-	long		_private;	/* 14:(handled by SendDriverMessage)*/
-#endif	
+	long		driverid;	/* 14:(handled by SendDriverMessage)*/
 	DRIVERPROC	driverproc;	/* 18:(handled by SendDriverMessage)*/
 	long		x1;		/* 1c: name? */
 	short		x2;		/* 20: */
@@ -200,7 +196,7 @@ typedef struct {
     LPBITMAPINFOHEADER	lpbiOutput;
     void*		lpOutput;
     LPBITMAPINFOHEADER	lpbiInput;
-    void*		lpInput;
+    const void*		lpInput;
     long*		lpckid;
     long*		lpdwFlags;
     long		lFrameNum;
@@ -211,10 +207,10 @@ typedef struct {
 } ICCOMPRESS;
 
 long VFWAPIV ICCompress(
-	HIC hic,long dwFlags,LPBITMAPINFOHEADER lpbiOutput,void* lpOutputBuf,
-	LPBITMAPINFOHEADER lpbiInput,void* lpImage,long* lpckid,
+	HIC hic,long dwFlags,LPBITMAPINFOHEADER lpbiOutput,void* lpData,
+	LPBITMAPINFOHEADER lpbiInput,void* lpBits,long* lpckid,
 	long* lpdwFlags,long lFrameNum,long dwFrameSize,long dwQuality,
-	LPBITMAPINFOHEADER lpbiInputPrev,void* lpImagePrev
+	LPBITMAPINFOHEADER lpbiPrev,void* lpPrev
 );
 
 
@@ -350,7 +346,7 @@ typedef struct {
 typedef struct {
     long		dwFlags;	/* flags (from AVI index...) */
     LPBITMAPINFOHEADER	lpbiInput;	/* BITMAPINFO of compressed data */
-    void*		lpInput;	/* compressed data */
+    const void*		lpInput;	/* compressed data */
     LPBITMAPINFOHEADER	lpbiOutput;	/* DIB to decompress to */
     void*		lpOutput;
     long		ckid;		/* ckid from AVI file */
@@ -358,8 +354,8 @@ typedef struct {
 
 typedef struct {
     long		dwFlags;
-    LPBITMAPINFOHEADER	lpbiSrc;
-    void*		lpSrc;
+    LPBITMAPINFOHEADER lpbiSrc;
+    const void*		lpSrc;
     LPBITMAPINFOHEADER	lpbiDst;
     void*		lpDst;
 
@@ -437,11 +433,11 @@ long VFWAPIV ICUniversalEx(HIC hic,int command,LPBITMAPINFOHEADER lpbiFormat,LPB
 WIN_BOOL	VFWAPI	ICInfo(long fccType, long fccHandler, ICINFO * lpicinfo);
 LRESULT	VFWAPI	ICGetInfo(HIC hic,ICINFO *picinfo, long cb);
 HIC	VFWAPI	ICOpen(long fccType, long fccHandler, UINT wMode);
-HIC	VFWAPI	ICOpenFunction(long fccType, long fccHandler, unsigned int wMode, void* lpfnHandler);
+//HIC	VFWAPI	ICOpenFunction(long fccType, long fccHandler, unsigned int wMode, void* lpfnHandler);
 
 LRESULT VFWAPI ICClose(HIC hic);
 LRESULT	VFWAPI ICSendMessage(HIC hic, unsigned int msg, long dw1, long dw2);
-HIC	VFWAPI ICLocate(long fccType, long fccHandler, LPBITMAPINFOHEADER lpbiIn, LPBITMAPINFOHEADER lpbiOut, short wFlags);
+//HIC	VFWAPI ICLocate(long fccType, long fccHandler, LPBITMAPINFOHEADER lpbiIn, LPBITMAPINFOHEADER lpbiOut, short wFlags);
 
 int VFWAPI ICDoSomething(void);
 

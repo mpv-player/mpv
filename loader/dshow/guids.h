@@ -1,5 +1,5 @@
-#ifndef GUIDS_H
-#define GUIDS_H
+#ifndef DS_GUIDS_H
+#define DS_GUIDS_H
 
 #include "com.h"
 #include "wine/module.h"
@@ -22,12 +22,6 @@ typedef struct __attribute__((__packed__)) _MediaType
     char*	pbFormat;		//0x44
 } AM_MEDIA_TYPE;
 
-typedef enum
-{
-    PINDIR_INPUT = 0,
-    PINDIR_OUTPUT
-} PIN_DIRECTION;
-
 typedef long long REFERENCE_TIME;
 
 typedef struct __attribute__((__packed__)) RECT32
@@ -35,8 +29,8 @@ typedef struct __attribute__((__packed__)) RECT32
     int left, top, right, bottom;
 } RECT32;
 
-typedef struct __attribute__((__packed__)) tagVIDEOINFOHEADER {
-
+typedef struct __attribute__((__packed__)) tagVIDEOINFOHEADER
+{
     RECT32            rcSource;          // The bit we really want to use
     RECT32            rcTarget;          // Where the video should go
     unsigned long     dwBitRate;         // Approximate bit data rate
@@ -46,52 +40,39 @@ typedef struct __attribute__((__packed__)) tagVIDEOINFOHEADER {
     //int               reserved[3];
 } VIDEOINFOHEADER;
 
-typedef struct _AllocatorProperties
-{
-    long cBuffers;
-    long cbBuffer;
-    long cbAlign;
-    long cbPrefix;
-} ALLOCATOR_PROPERTIES;
+typedef GUID CLSID;
+typedef GUID IID;
 
-typedef struct _IBaseFilter IBaseFilter;
-typedef struct _PinInfo
-{
-    IBaseFilter* pFilter;
-    PIN_DIRECTION dir;
-    unsigned short achName[128];
-} PIN_INFO;
+extern const GUID IID_IBaseFilter;
+extern const GUID IID_IEnumPins;
+extern const GUID IID_IEnumMediaTypes;
+extern const GUID IID_IMemInputPin;
+extern const GUID IID_IMemAllocator;
+extern const GUID IID_IMediaSample;
+extern const GUID IID_DivxHidden;
+extern const GUID IID_Iv50Hidden;
+extern const GUID CLSID_DivxDecompressorCF;
+extern const GUID IID_IDivxFilterInterface;
+extern const GUID CLSID_IV50_Decoder;
+extern const GUID CLSID_MemoryAllocator;
+extern const GUID MEDIATYPE_Video;
+extern const GUID GUID_NULL;
+extern const GUID FORMAT_VideoInfo;
+extern const GUID MEDIASUBTYPE_RGB565;
+extern const GUID MEDIASUBTYPE_RGB555;
+extern const GUID MEDIASUBTYPE_RGB24;
+extern const GUID MEDIASUBTYPE_RGB32;
+extern const GUID MEDIASUBTYPE_YUYV;
+extern const GUID MEDIASUBTYPE_IYUV;
+extern const GUID MEDIASUBTYPE_YVU9;
+extern const GUID MEDIASUBTYPE_Y411;
+extern const GUID MEDIASUBTYPE_Y41P;
+extern const GUID MEDIASUBTYPE_YUY2;
+extern const GUID MEDIASUBTYPE_YVYU;
+extern const GUID MEDIASUBTYPE_UYVY;
+extern const GUID MEDIASUBTYPE_Y211;
+extern const GUID MEDIASUBTYPE_YV12;
+extern const GUID MEDIASUBTYPE_I420;
+extern const GUID MEDIASUBTYPE_IF09;
 
-
-extern GUID IID_IBaseFilter;
-extern GUID IID_IEnumPins;
-extern GUID IID_IEnumMediaTypes;
-extern GUID IID_IMemInputPin;
-extern GUID IID_IMemAllocator;
-extern GUID IID_IMediaSample;
-extern GUID IID_DivxHidden;
-extern GUID IID_Iv50Hidden;
-extern GUID CLSID_DivxDecompressorCF;
-extern GUID IID_IDivxFilterInterface;
-extern GUID CLSID_IV50_Decoder;
-extern GUID CLSID_MemoryAllocator;
-extern GUID MEDIATYPE_Video;
-extern GUID GUID_NULL;
-extern GUID FORMAT_VideoInfo;
-extern GUID MEDIASUBTYPE_RGB565;
-extern GUID MEDIASUBTYPE_RGB555;
-extern GUID MEDIASUBTYPE_RGB24;
-extern GUID MEDIASUBTYPE_RGB32;
-extern GUID MEDIASUBTYPE_YUYV;
-extern GUID MEDIASUBTYPE_IYUV;
-extern GUID MEDIASUBTYPE_YVU9;
-extern GUID MEDIASUBTYPE_Y411;
-extern GUID MEDIASUBTYPE_Y41P;
-extern GUID MEDIASUBTYPE_YUY2;
-extern GUID MEDIASUBTYPE_YVYU;
-extern GUID MEDIASUBTYPE_UYVY;
-extern GUID MEDIASUBTYPE_Y211;
-extern GUID MEDIASUBTYPE_YV12;
-extern GUID MEDIASUBTYPE_I420;
-
-#endif
+#endif /* DS_GUIDS_H */

@@ -33,20 +33,19 @@ struct _CBaseFilter
 CBaseFilter* CBaseFilterCreate(const AM_MEDIA_TYPE* vhdr, CBaseFilter2* parent);
 
 
-typedef struct _CInputPin CInputPin;
-struct _CInputPin
+typedef struct
 {
     IPin_vt* vt;
     DECLARE_IUNKNOWN();
     CBaseFilter* parent;
     AM_MEDIA_TYPE type;
     GUID interfaces[1];
-};
+} CInputPin;
 
 CInputPin* CInputPinCreate(CBaseFilter* parent, const AM_MEDIA_TYPE* vhdr);
 
 
-typedef struct CRemotePin
+typedef struct
 {
     IPin_vt* vt;
     DECLARE_IUNKNOWN();
@@ -58,7 +57,7 @@ typedef struct CRemotePin
 CRemotePin* CRemotePinCreate(CBaseFilter* pt, IPin* rpin);
 
 
-typedef struct CRemotePin2
+typedef struct
 {
     IPin_vt* vt;
     DECLARE_IUNKNOWN();

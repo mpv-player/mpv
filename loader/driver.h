@@ -1,11 +1,22 @@
-
 #ifndef loader_driver_h
 #define	loader_driver_h
 
-//#include "wine/windef.h"
-//#include "wine/vfw.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern HDRVR VFWAPI DrvOpen(LPARAM lParam2);
-extern void DrvClose(HDRVR hdrvr);
+#include "wine/windef.h"
+#include "wine/driver.h"
+
+void SetCodecPath(const char* path);
+void CodecAlloc(void);
+void CodecRelease(void);
+
+HDRVR DrvOpen(LPARAM lParam2);
+void DrvClose(HDRVR hdrvr);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

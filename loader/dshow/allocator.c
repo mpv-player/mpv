@@ -2,8 +2,16 @@
 #include "com.h"
 #include "wine/winerror.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 static int AllocatorKeeper = 0;
+
+struct _avm_list_t
+{
+    struct _avm_list_t* next;
+    struct _avm_list_t* prev;
+    void* member;
+};
 
 static inline int avm_list_size(avm_list_t* head)
 {
@@ -100,7 +108,7 @@ static inline avm_list_t* avm_list_find(avm_list_t* head, void* member)
     return NULL;
 }
 
-static long MemAllocator_CreateAllocator(GUID* clsid, GUID* iid, void** ppv)
+static long MemAllocator_CreateAllocator(GUID* clsid, const GUID* iid, void** ppv)
 {
     IMemAllocator* p;
     int result;

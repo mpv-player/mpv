@@ -128,6 +128,16 @@ typedef struct resource_nameinfo_s NE_NAMEINFO;
 #define NE_MODULE_NAME(pModule) \
     (((OFSTRUCT *)((char*)(pModule) + (pModule)->fileinfo))->szPathName)
 
+struct modref_list_t;
+
+typedef struct modref_list_t
+{
+    WINE_MODREF* wm;
+    struct modref_list_t *next;
+    struct modref_list_t *prev;
+} modref_list;
+
+
 /* module.c */
 extern FARPROC MODULE_GetProcAddress( HMODULE hModule, LPCSTR function, WIN_BOOL snoop );
 extern WINE_MODREF *MODULE32_LookupHMODULE( HMODULE hModule );

@@ -4,7 +4,7 @@
  * Copyright 1993 Robert J. Amstadt
  * Copyright 1995 Alexandre Julliard
  */
-#include <config.h>
+#include "config.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -14,14 +14,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <wine/winbase.h>
-#include <wine/windef.h>
-#include <wine/winuser.h>
-#include <wine/heap.h>
-#include <wine/module.h>
-#include <wine/debugtools.h>
-#include <wine/winerror.h>
-#include <loader.h>
+
+#include "wine/winbase.h"
+#include "wine/windef.h"
+#include "wine/winuser.h"
+#include "wine/heap.h"
+#include "wine/module.h"
+#include "wine/debugtools.h"
+#include "wine/winerror.h"
+#include "loader.h"
 
 #define CP_ACP					0
 
@@ -281,7 +282,7 @@ INT WINAPI LoadStringA( HINSTANCE instance, UINT resource_id,
     wbuflen ++;
 
     retval = 0;
-    wbuf = HeapAlloc( GetProcessHeap(), 0, wbuflen * sizeof(WCHAR) );
+    wbuf = (LPWSTR) HeapAlloc( GetProcessHeap(), 0, wbuflen * sizeof(WCHAR) );
     wbuflen = LoadStringW(instance,resource_id,wbuf,wbuflen);
     if ( wbuflen > 0 )
     {
@@ -292,7 +293,7 @@ INT WINAPI LoadStringA( HINSTANCE instance, UINT resource_id,
 		retval = abuflen;
 	    else
 	    {
-		abuf = HeapAlloc( GetProcessHeap(), 0, abuflen * sizeof(CHAR) );
+		abuf = (LPSTR) HeapAlloc( GetProcessHeap(), 0, abuflen * sizeof(CHAR) );
 		abuflen = WideCharToMultiByte(CP_ACP,0,wbuf,wbuflen,abuf,abuflen,NULL,NULL);
 		if ( abuflen > 0 )
 		{
@@ -335,7 +336,7 @@ INT WINAPI LoadStringW( HINSTANCE instance, UINT resource_id,
     hmem = LoadResource( instance, hrsrc );
     if (!hmem) return 0;
     
-    p = LockResource(hmem);
+    p = (WCHAR*) LockResource(hmem);
     string_num = resource_id & 0x000f;
     for (i = 0; i < string_num; i++)
 	p += *p + 1;

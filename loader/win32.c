@@ -187,7 +187,7 @@ static inline void dbgprintf(char* fmt, ...)
 	va_end(va);
     }
 #endif
-#undef MPLAYER
+//#undef MPLAYER
 #ifdef MPLAYER
     #include "../mp_msg.h"
     if (verbose > 2)
@@ -251,7 +251,7 @@ static void test_heap(void)
 
 #ifdef MEMORY_DEBUG
 
-void* my_mreq(int size, int to_zero)
+static void* my_mreq(int size, int to_zero)
 {
     static int test=0;
     test++;
@@ -284,7 +284,7 @@ void* my_mreq(int size, int to_zero)
     heap_counter+=size;
     return heap+heap_counter-size;
 }
-int my_release(char* memory)
+static int my_release(char* memory)
 {
     //    test_heap();
     if(memory==NULL)
@@ -342,7 +342,7 @@ void* mreq_private(int size, int to_zero, int type);
 void* mreq_private(int size, int to_zero, int type)
 {
     int nsize = size + sizeof(alloc_header);
-    alloc_header* header = malloc(nsize);
+    alloc_header* header = (alloc_header* ) malloc(nsize);
     if (!header)
         return 0;
     if (to_zero)
@@ -373,7 +373,7 @@ void* mreq_private(int size, int to_zero, int type)
     return header + 1;
 }
 
-int my_release(void* memory)
+static int my_release(void* memory)
 {
     alloc_header* header = (alloc_header*) memory - 1;
 #ifdef GARBAGE
@@ -383,7 +383,7 @@ int my_release(void* memory)
     if (memory == 0)
 	return 0;
 
-    if (header->deadbeef != 0xdeadbeef)
+    if (header->deadbeef != (long) 0xdeadbeef)
     {
 	printf("FATAL releasing corrupted memory! %p  0x%lx  (%d)\n", header, header->deadbeef, alccnt);
 	return 0;
@@ -440,12 +440,12 @@ int my_release(void* memory)
 }
 #endif
 
-inline void* my_mreq(int size, int to_zero)
+static inline void* my_mreq(int size, int to_zero)
 {
     return mreq_private(size, to_zero, AREATYPE_CLIENT);
 }
 
-static /*inline*/ int my_size(void* memory)
+static int my_size(void* memory)
 {
     if(!memory) return 0;
     return ((alloc_header*)memory)[-1].size;
@@ -540,7 +540,7 @@ static void* WINAPI expCreateThread(void* pSecAttr, long dwStackSize,
 {
     pthread_t *pth;
     //    printf("CreateThread:");
-    pth=my_mreq(sizeof(pthread_t), 0);
+    pth = (pthread_t*) my_mreq(sizeof(pthread_t), 0);
     pthread_create(pth, NULL, (void*(*)(void*))lpStartAddress, lpParameter);
     if(dwFlags)
 	printf( "WARNING: CreateThread flags not supported\n");
@@ -788,22 +788,6 @@ static void* WINAPI expWaitForSingleObject(void* object, int duration)
 static int pf_set = 0;
 static BYTE PF[64] = {0,};
 
-static void WINAPI expGetSystemInfo(SYSTEM_INFO* si); /* forward declaration */
-
-static WIN_BOOL WINAPI expIsProcessorFeaturePresent(DWORD v)
-{
-    WIN_BOOL result;
-    if(v>63)result=0;
-    if (!pf_set)
-    {
-	SYSTEM_INFO si;
-	expGetSystemInfo(&si);
-    }
-    else result=PF[v];
-    dbgprintf("IsProcessorFeaturePresent(0x%x) => 0x%x\n", v, result);
-    return result;
-}
-
 static void DumpSystemInfo(const SYSTEM_INFO* si)
 {
     dbgprintf("  Processor architecture %d\n", si->u.s.wProcessorArchitecture);
@@ -1006,7 +990,7 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	    }
 	    if (!lstrncmpiA(line,"processor",strlen("processor"))) {
 		/* processor number counts up...*/
-		int	x;
+		unsigned int x;
 
 		if (sscanf(value,"%d",&x))
 		    if (x+1>cachedsi.dwNumberOfProcessors)
@@ -1053,6 +1037,21 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
     memcpy(si,&cachedsi,sizeof(*si));
     DumpSystemInfo(si);
 }
+
+// avoid undefined expGetSystemInfo
+static WIN_BOOL WINAPI expIsProcessorFeaturePresent(DWORD v)
+{
+    WIN_BOOL result = 0;
+    if (!pf_set)
+    {
+	SYSTEM_INFO si;
+	expGetSystemInfo(&si);
+    }
+    if(v<64) result=PF[v];
+    dbgprintf("IsProcessorFeaturePresent(0x%x) => 0x%x\n", v, result);
+    return result;
+}
+
 
 static long WINAPI expGetVersion()
 {
@@ -1106,7 +1105,11 @@ static long WINAPI expHeapDestroy(void* heap)
 static long WINAPI expHeapFree(HANDLE heap, DWORD dwFlags, LPVOID lpMem)
 {
     dbgprintf("HeapFree(0x%x, 0x%x, pointer 0x%x) => 1\n", heap, dwFlags, lpMem);
-    if (heapfreehack != lpMem && lpMem != (void*)0xffffffff)
+    if (heapfreehack != lpMem && lpMem != (void*)0xffffffff
+	&& lpMem != (void*)0xbdbdbdbd)
+	// 0xbdbdbdbd is for i263_drv.drv && libefence
+	// it seems to be reading from relased memory
+        // EF_PROTECT_FREE doens't show any probleme
 	my_release(lpMem);
     else
     {
@@ -1336,11 +1339,11 @@ static int WINAPI expGetCurrentProcess()
     return getpid();
 }
 
-extern void* fs_seg;
-
-#if 1
+#if 0
 // this version is required for Quicktime codecs (.qtx/.qts) to work.
 // (they assume some pointers at FS: segment)
+
+extern void* fs_seg;
 
 //static int tls_count;
 static int tls_use_map[64];
@@ -1396,7 +1399,7 @@ struct tls_s {
 
 static void* WINAPI expTlsAlloc()
 {
-    if(g_tls==NULL)
+    if (g_tls == NULL)
     {
 	g_tls=my_mreq(sizeof(tls_t), 0);
 	g_tls->next=g_tls->prev=NULL;
@@ -1451,6 +1454,8 @@ static int WINAPI expTlsFree(void* idx)
 	    index->next->prev=index->prev;
 	if(index->prev)
 	    index->prev->next=index->next;
+	if (g_tls == index)
+            g_tls = index->prev;
 	my_release((void*)index);
 	result=1;
     }
@@ -2696,6 +2701,21 @@ static int WINAPI expGetSystemTime(SYSTEMTIME* systime)
     return 0;
 }
 
+#define SECS_1601_TO_1970  ((369 * 365 + 89) * 86400ULL)
+static void WINAPI expGetSystemTimeAsFileTime(FILETIME* systime)
+{
+    struct tm *local_tm;
+    struct timeval tv;
+    unsigned long long secs;
+
+    dbgprintf("GetSystemTime(0x%x)\n", systime);
+    gettimeofday(&tv, NULL);
+    secs = (tv.tv_sec + SECS_1601_TO_1970) * 10000000;
+    secs += tv.tv_usec * 10;
+    systime->dwLowDateTime = secs & 0xffffffff;
+    systime->dwHighDateTime = (secs >> 32);
+}
+
 static int WINAPI expGetEnvironmentVariableA(const char* name, char* field, int size)
 {
     char *p;
@@ -2741,12 +2761,12 @@ void CoTaskMemFree(void* cb)
 struct COM_OBJECT_INFO
 {
     GUID clsid;
-    long (*GetClassObject) (GUID* clsid, GUID* iid, void** ppv);
+    long (*GetClassObject) (GUID* clsid, const GUID* iid, void** ppv);
 };
 
 static struct COM_OBJECT_INFO* com_object_table=0;
 static int com_object_size=0;
-int RegisterComClass(GUID* clsid, GETCLASSOBJECT gcs)
+int RegisterComClass(const GUID* clsid, GETCLASSOBJECT gcs)
 {
     if(!clsid || !gcs)
 	return -1;
@@ -2756,7 +2776,7 @@ int RegisterComClass(GUID* clsid, GETCLASSOBJECT gcs)
     return 0;
 }
 
-int UnregisterComClass(GUID* clsid, GETCLASSOBJECT gcs)
+int UnregisterComClass(const GUID* clsid, GETCLASSOBJECT gcs)
 {
     int found = 0;
     int i = 0;
@@ -2793,19 +2813,19 @@ int UnregisterComClass(GUID* clsid, GETCLASSOBJECT gcs)
 }
 
 
-GUID IID_IUnknown =
+const GUID IID_IUnknown =
 {
     0x00000000, 0x0000, 0x0000,
     {0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46}
 };
-GUID IID_IClassFactory =
+const GUID IID_IClassFactory =
 {
     0x00000001, 0x0000, 0x0000,
     {0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46}
 };
 
 static long WINAPI expCoCreateInstance(GUID* rclsid, struct IUnknown* pUnkOuter,
-				       long dwClsContext, GUID* riid, void** ppv)
+				       long dwClsContext, const GUID* riid, void** ppv)
 {
     int i;
     struct COM_OBJECT_INFO* ci=0;
@@ -2819,7 +2839,7 @@ static long WINAPI expCoCreateInstance(GUID* rclsid, struct IUnknown* pUnkOuter,
 }
 
 long CoCreateInstance(GUID* rclsid, struct IUnknown* pUnkOuter,
-		      long dwClsContext, GUID* riid, void** ppv)
+		      long dwClsContext, const GUID* riid, void** ppv)
 {
     return expCoCreateInstance(rclsid, pUnkOuter, dwClsContext, riid, ppv);
 }
@@ -2829,7 +2849,7 @@ static int WINAPI expIsRectEmpty(CONST RECT *lprc)
     int r = 0;
 //    int r = (!lprc || (lprc->right == lprc->left) || (lprc->top == lprc->bottom));
     int w,h;
-    
+
     if (lprc)
     {
 	w = lprc->right - lprc->left;
@@ -2988,7 +3008,7 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
     }
 
 #if 0
-    /* we need this for some virtualdub filters */  
+    /* we need this for some virtualdub filters */
     {
 	int r;
 	int flg = 0;
@@ -3001,7 +3021,7 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
 	}
 	r=open(cs1, flg);
 	return r;
-    }    
+    }
 #endif
 
     return atoi(cs1+2);
@@ -3049,7 +3069,7 @@ static DWORD WINAPI expGetShortPathNameA
     strcpy(shortpath,longpath);
     return strlen(shortpath);
 }
-			
+
 static WIN_BOOL WINAPI expReadFile(HANDLE h,LPVOID pv,DWORD size,LPDWORD rd,LPOVERLAPPED unused)
 {
     int result;
@@ -3274,7 +3294,7 @@ static int expdelete(void* memory)
     my_release(memory);
     return 0;
 }
-#if 1
+#if 0
 static int exp_initterm(int v1, int v2)
 {
     dbgprintf("_initterm(0x%x, 0x%x) => 0\n", v1, v2);
@@ -3282,24 +3302,48 @@ static int exp_initterm(int v1, int v2)
 }
 #else
 /* merged from wine - 2002.04.21 */
-typedef void (*_INITTERMFUNC)(void);
+typedef void (*_INITTERMFUNC)();
 static int exp_initterm(_INITTERMFUNC *start, _INITTERMFUNC *end)
 {
-    _INITTERMFUNC *current = start;
-
-    dbgprintf("_initterm(0x%x, 0x%x)\n", start, end);
-    while (current < end)
+    dbgprintf("_initterm(0x%x, 0x%x) %p\n", start, end, *start);
+    while (start < end)
     {
-	if (*current)
+	if (*start)
 	{
-	    printf("call init func: %p\n", *current);
-	    (**current)();
+	    //printf("call _initfunc: from: %p %d\n", *start);
+	    // ok this trick with push/pop is necessary as otherwice
+	    // edi/esi registers are being trashed
+	    void* p = *start;
+	    __asm__ __volatile__
+		(
+		 "pushl %%ebx		\n\t"
+		 "pushl %%ecx		\n\t"
+		 "pushl %%edx		\n\t"
+		 "pushl %%edi		\n\t"
+		 "pushl %%esi		\n\t"
+		 "call  *%%eax		\n\t"
+		 "popl  %%esi		\n\t"
+		 "popl  %%edi		\n\t"
+		 "popl  %%edx		\n\t"
+		 "popl  %%ecx		\n\t"
+		 "popl  %%ebx		\n\t"
+		 :
+		 : "a"(p)
+		 : "memory"
+		);
+            //printf("done  %p  %d:%d\n", end);
 	}
-	current++;
+	start++;
     }
     return 0;
 }
 #endif
+
+static void* exp__dllonexit()
+{
+    // FIXME extract from WINE
+    return NULL;
+}
 
 static int expwsprintfA(char* string, char* format, ...)
 {
@@ -3429,7 +3473,7 @@ static char* expstrcat(char* str1, const char* str2)
 static char* exp_strdup(const char* str1)
 {
     int l = strlen(str1);
-    char* result = my_mreq(l + 1,0);
+    char* result = (char*) my_mreq(l + 1,0);
     if (result)
 	strcpy(result, str1);
     dbgprintf("_strdup(0x%x='%s') => %p\n", str1, str1, result);
@@ -3610,6 +3654,7 @@ static int exp_setjmp3(void* jmpbuf, int x)
 	 "movl $0, 36(%%edx)	\n\t"
 	 : // output
 	 : "d"(jmpbuf) // input
+	 : "eax"
 	);
 #if 1
     __asm__ __volatile__
@@ -3622,6 +3667,7 @@ static int exp_setjmp3(void* jmpbuf, int x)
 	 "l1:                   \n\t"
 	 :
 	 :
+	 : "eax"
 	);
 #endif
 
@@ -3791,6 +3837,11 @@ static WINAPI inline unsigned long int expntohl(unsigned long int netlong)
 //    dbgprintf("ntohl(%x) => %x\n", netlong, ntohl(netlong));
     return ntohl(netlong);
 }
+static void WINAPI expVariantInit(void* p)
+{
+    printf("InitCommonControls called!\n");
+    return;
+}
 
 int expRegisterClassA(const void/*WNDCLASSA*/ *wc)
 {
@@ -3912,6 +3963,7 @@ struct exports exp_kernel32[]=
     FF(OutputDebugStringA, -1)
     FF(GetLocalTime, -1)
     FF(GetSystemTime, -1)
+    FF(GetSystemTimeAsFileTime, -1)
     FF(GetEnvironmentVariableA, -1)
     FF(SetEnvironmentVariableA, -1)
     FF(RtlZeroMemory,-1)
@@ -3960,6 +4012,7 @@ struct exports exp_kernel32[]=
 struct exports exp_msvcrt[]={
     FF(malloc, -1)
     FF(_initterm, -1)
+    FF(__dllonexit, -1)
     FF(free, -1)
     {"??3@YAXPAX@Z", -1, expdelete},
     {"??2@YAPAXI@Z", -1, expnew},
@@ -4075,6 +4128,17 @@ struct exports exp_wsock32[]={
 };
 struct exports exp_msdmo[]={
     FF(memcpy, -1) // just test
+/*
+    FF(MoCopyMediaType)
+    FF(MoCreateMediaType)
+    FF(MoDeleteMediaType)
+    FF(MoDuplicateMediaType)
+    FF(MoFreeMediaType)
+    FF(MoInitMediaType)
+*/
+};
+struct exports exp_oleaut32[]={
+    FF(VariantInit, 8)
 };
 
 /*  realplayer8:
@@ -4092,6 +4156,7 @@ struct exports exp_msdmo[]={
 	2300e	   85  __CxxFrameHandler
 	23022	  411  _purecall
 */
+#ifdef MPLAYER
 struct exports exp_pncrt[]={
     FF(malloc, -1) // just test
     FF(free, -1) // just test
@@ -4100,14 +4165,7 @@ struct exports exp_pncrt[]={
     FF(_ftol,-1)
     FF(_initterm, -1)
 };
-
-/* needed for Morgand MJPEG */
-struct exports exp_msvfw32[]={
-    {"ICOpen", -1, (void *)&ICOpen},
-    {"ICClose", -1, (void *)&ICClose},
-    {"ICDecompress", -1, (void *)&ICDecompress},
-    {"ICSendMessage", -1, (void *)&ICSendMessage}
-};
+#endif
 
 #define LL(X) \
     {#X".dll", sizeof(exp_##X)/sizeof(struct exports), exp_##X},
@@ -4121,44 +4179,70 @@ struct libs libraries[]={
     LL(gdi32)
     LL(version)
     LL(ole32)
+    LL(oleaut32)
     LL(crtdll)
     LL(comctl32)
     LL(wsock32)
     LL(msdmo)
-    LL(msvfw32)
+#ifdef MPLAYER
     LL(pncrt)
+#endif
 };
-#include "mangle.h"
-static char* called_unk = "Called unk_%s\n";
+
 static void ext_stubs(void)
 {
     // expects:
     //  ax  position index
     //  cx  address of printf function
+#if 1
     __asm__ __volatile__
 	(
-         "push %edx             \n\t"
-	 "movl $0, %eax		\n\t"
-	 "movl $0, %edx		\n\t"
-	 "shl $5,%eax		\n\t"			// ax * 32
-	 "addl $"MANGLE(export_names)",%eax \n\t"
-	 "pushl %eax		\n\t"
-	 "pushl "MANGLE(called_unk)"	\n\t"
-	 "call *%edx		\n\t"                   // printf (via dx)
-	 "addl $8,%esp		\n\t"
-	 "xorl %eax,%eax	\n\t"
-         "pop %edx             \n\t"
+         "push %%edx		\n\t"
+	 "movl $0xdeadbeef, %%eax \n\t"
+	 "movl $0xdeadbeef, %%edx \n\t"
+	 "shl $5, %%eax		\n\t"			// ax * 32
+	 "addl $0xdeadbeef, %%eax \n\t"			// overwrite export_names
+	 "pushl %%eax		\n\t"
+	 "pushl $0xdeadbeef   	\n\t"                   // overwrite called_unk
+	 "call *%%edx		\n\t"                   // printf (via dx)
+	 "addl $8, %%esp	\n\t"
+	 "xorl %%eax, %%eax	\n\t"
+	 "pop %%edx             \n\t"
+	 :
+	 :
+	 : "eax"
 	);
+#else
+    __asm__ __volatile__
+	(
+         "push %%edx		\n\t"
+	 "movl $0, %%eax	\n\t"
+	 "movl $0, %%edx	\n\t"
+	 "shl $5, %%eax		\n\t"			// ax * 32
+	 "addl %0, %%eax	\n\t"
+	 "pushl %%eax		\n\t"
+	 "pushl %1		\n\t"
+	 "call *%%edx		\n\t"                   // printf (via dx)
+	 "addl $8, %%esp	\n\t"
+	 "xorl %%eax, %%eax	\n\t"
+	 "pop %%edx		\n\t"
+	 ::"m"(*export_names), "m"(*called_unk)
+	: "memory", "edx", "eax"
+	);
+#endif
+
 }
 
 //static void add_stub(int pos)
 
 extern int unk_exp1;
-static char extcode[20000];// place for 200 unresolved exports
 static int pos=0;
+static char extcode[20000];// place for 200 unresolved exports
+static const char* called_unk = "Called unk_%s\n";
 
 static void* add_stub()
 {
+    // generated code in runtime!
     char* answ = (char*)extcode+pos*0x30;
 #if 0
     memcpy(answ, &unk_exp1, 0x64);
@@ -4166,10 +4250,14 @@ static void* add_stub()
     *(int*)(answ+47)-=((int)answ-(int)&unk_exp1);
 #endif
     memcpy(answ, ext_stubs, 0x2f); // 0x2c is current size
-    //answ[0] = 0xb8; // movl $0, eax  (0xb8 0x00000000)
+    //answ[4] = 0xb8; // movl $0, eax  (0xb8 0x00000000)
     *((int*) (answ + 5)) = pos;
-    //answ[5] = 0xb9; // movl $0, edx  (0xb9 0x00000000)
-    *((int*) (answ + 10)) = (int) printf;
+    //answ[9] = 0xba; // movl $0, edx  (0xba 0x00000000)
+    *((long*) (answ + 10)) = (long)printf;
+    //answ[17] = 0x05; // addl $0, eax  (0x05 0x00000000)
+    *((long*) (answ + 18)) = (long)export_names;
+    //answ[23] = 0x68; // pushl $0  (0x68 0x00000000)
+    *((long*) (answ + 24)) = (long)called_unk;
     pos++;
     return (void*)answ;
 }
@@ -4201,7 +4289,7 @@ void* LookupExternal(const char* library, int ordinal)
 
     /* ok, this is a hack, and a big memory leak. should be fixed. - alex */
     {
-	HMODULE hand;
+	int hand;
 	WINE_MODREF *wm;
 	void *func;
 
@@ -4214,23 +4302,23 @@ void* LookupExternal(const char* library, int ordinal)
 	    FreeLibrary(hand);
 	    goto no_dll;
 	}
-	func = PE_FindExportedFunction(wm, ordinal, 0);
+	func = PE_FindExportedFunction(wm, (LPCSTR) ordinal, 0);
 	if (!func)
 	{
 	    printf("No such ordinal in external dll\n");
-	    FreeLibrary(hand);
+	    FreeLibrary((int)hand);
 	    goto no_dll;
 	}
 
-	printf("External dll loaded (offset: %p, func: %p)\n",
-	    hand, func);
+	printf("External dll loaded (offset: 0x%x, func: %p)\n",
+	       hand, func);
 	return func;
     }
 
 no_dll:
     if(pos>150)return 0;
     sprintf(export_names[pos], "%s:%d", library, ordinal);
-    return add_stub(pos);
+    return add_stub();
 }
 
 void* LookupExternalByName(const char* library, const char* name)
@@ -4263,7 +4351,7 @@ void* LookupExternalByName(const char* library, const char* name)
     }
     if(pos>150)return 0;// to many symbols
     strcpy(export_names[pos], name);
-    return add_stub(pos);
+    return add_stub();
 }
 
 void my_garbagecollection(void)
@@ -4271,15 +4359,19 @@ void my_garbagecollection(void)
 #ifdef GARBAGE
     int unfree = 0, unfreecnt = 0;
 
+    int max_fatal = 8;
     free_registry();
     while (last_alloc)
     {
 	alloc_header* mem = last_alloc + 1;
 	unfree += my_size(mem);
 	unfreecnt++;
-	my_release(mem);
+	if (my_release(mem) != 0)
+	    // avoid endless loop when memory is trashed
+	    if (--max_fatal < 0)
+		break;
     }
-    dbgprintf("Total Unfree %d bytes cnt %d [%p,%d]\n",unfree, unfreecnt, last_alloc, alccnt);
+    printf("Total Unfree %d bytes cnt %d [%p,%d]\n",unfree, unfreecnt, last_alloc, alccnt);
 #endif
     g_tls = NULL;
     list = NULL;

@@ -16,31 +16,21 @@
 #include <sys/types.h>
 
 
-#include <wine/windef.h>
-#include <wine/winerror.h>
-#include <wine/heap.h>
-#include <wine/module.h>
-#include <wine/pe_image.h>
-#include <wine/debugtools.h>
+#include "wine/windef.h"
+#include "wine/winerror.h"
+#include "wine/heap.h"
+#include "wine/module.h"
+#include "wine/pe_image.h"
+#include "wine/debugtools.h"
 #ifdef HAVE_LIBDL
 #include <dlfcn.h>
-#include <wine/elfdll.h>
+#include "wine/elfdll.h"
 #endif
 #include "win32.h"
-#include "module.h"
-//#include "driver.h"
+#include "driver.h"
 
 //#undef TRACE
 //#define TRACE printf
-
-struct modref_list_t;
-
-typedef struct modref_list_t
-{
-    WINE_MODREF* wm;
-    struct modref_list_t *next;
-    struct modref_list_t *prev;
-} modref_list;
 
 //WINE_MODREF *local_wm=NULL;
 modref_list* local_wm=NULL;
@@ -217,7 +207,7 @@ static WIN_BOOL MODULE_DllProcessAttach( WINE_MODREF *wm, LPVOID lpReserved )
     //local_wm=wm;
     if(local_wm)
     {
-        local_wm->next=malloc(sizeof(modref_list));
+	local_wm->next = (modref_list*) malloc(sizeof(modref_list));
         local_wm->next->prev=local_wm;
         local_wm->next->next=NULL;
         local_wm->next->wm=wm;
@@ -225,7 +215,7 @@ static WIN_BOOL MODULE_DllProcessAttach( WINE_MODREF *wm, LPVOID lpReserved )
     }
     else
     {
-	local_wm=malloc(sizeof(modref_list));
+	local_wm = (modref_list*)malloc(sizeof(modref_list));
 	local_wm->next=local_wm->prev=NULL;
 	local_wm->wm=wm;
     }
@@ -354,7 +344,6 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 		SetLastError(ERROR_INVALID_PARAMETER);
 		return 0;
 	}
-	printf("Loading DLL: '%s'\n", libname);
 //	if(fs_installed==0)
 //	    install_fs();
 
@@ -406,14 +395,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 
 	if (!wm)
 	    printf("Win32 LoadLibrary failed to load: %s\n", checked);
-	else
-	{
-	    extern char *win32_codec_name;
-//	    printf("Loaded %s to address %p\n", libname, wm->module);
-	    /* XXX: FIXME, _VERY_ UGLY HACK */
-	    if (!strcmp(libname, "m3jpegdec.ax"))
-		win32_codec_name = strdup("m3jpeg32.dll");
-	}
+
 
 	return wm ? wm->module : 0;
 }

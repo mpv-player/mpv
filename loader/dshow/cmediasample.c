@@ -2,9 +2,10 @@
 #include "wine/winerror.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 static long STDCALL CMediaSample_QueryInterface(IUnknown* This,
-						/* [in] */ IID* iid,
+						/* [in] */ const GUID* iid,
 						/* [iid_is][out] */ void **ppv)
 {
     Debug printf("CMediaSample_QueryInterface(%p) called\n", This);
