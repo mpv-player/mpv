@@ -56,7 +56,7 @@ void close_cdda(stream_t* s);
 
 int stream_fill_buffer(stream_t *s){
   int len;
-  if(s->eof){ s->buf_pos=s->buf_len=0; return 0; }
+  if (s->fd == NULL || s->eof) { s->buf_pos = s->buf_len = 0; return 0; }
   switch(s->type){
 #ifdef LIBSMBCLIENT
   case STREAMTYPE_SMB:
