@@ -206,6 +206,46 @@ int demux_audio_open(demuxer_t* demuxer) {
     demuxer->movi_start = stream_tell(s);
     demuxer->movi_end = s->end_pos;
 //    printf("wav: %X .. %X\n",(int)demuxer->movi_start,(int)demuxer->movi_end);
+    // Check if it contains dts audio
+    if((w->wFormatTag == 0x01) && (w->nChannels == 2) && (w->nSamplesPerSec == 44100)) {
+	unsigned char buf[16384]; // vlc uses 16384*4 (4 dts frames)
+	unsigned int i;
+	stream_read(s, buf, sizeof(buf));
+	for (i = 0; i < sizeof(buf); i += 2) {
+	    // DTS, 14 bit, LE
+	    if((buf[i] == 0xff) && (buf[i+1] == 0x1f) && (buf[i+2] == 0x00) &&
+	       (buf[i+3] == 0xe8) && ((buf[i+4] & 0xfe) == 0xf0) && (buf[i+5] == 0x07)) {
+		sh_audio->format = 0x2001;
+		mp_msg(MSGT_DEMUX,MSGL_V,"[demux_audio] DTS audio in wav, 14 bit, LE\n");
+		break;
+	    }
+	    // DTS, 14 bit, BE
+	    if((buf[i] == 0x1f) && (buf[i+1] == 0xff) && (buf[i+2] == 0xe8) &&
+	       (buf[i+3] == 0x00) && (buf[i+4] == 0x07) && ((buf[i+5] & 0xfe) == 0xf0)) {
+		sh_audio->format = 0x2001;
+		mp_msg(MSGT_DEMUX,MSGL_V,"[demux_audio] DTS audio in wav, 14 bit, BE\n");
+		break;
+	    }
+	    // DTS, 16 bit, BE
+	    if((buf[i] == 0x7f) && (buf[i+1] == 0xfe) && (buf[i+2] == 0x80) &&
+	       (buf[i+3] == 0x01)) {
+		sh_audio->format = 0x2001;
+		mp_msg(MSGT_DEMUX,MSGL_V,"[demux_audio] DTS audio in wav, 16 bit, BE\n");
+		break;
+	    }
+	    // DTS, 16 bit, LE
+	    if((buf[i] == 0xfe) && (buf[i+1] == 0x7f) && (buf[i+2] == 0x01) &&
+	       (buf[i+3] == 0x80)) {
+		sh_audio->format = 0x2001;
+		mp_msg(MSGT_DEMUX,MSGL_V,"[demux_audio] DTS audio in wav, 16 bit, LE\n");
+		break;
+	    }
+	}
+	if (sh_audio->format == 0x2001)
+	    mp_msg(MSGT_DEMUX,MSGL_DBG2,"[demux_audio] DTS sync offset = %u\n", i);
+
+    }
+    stream_seek(s,demuxer->movi_start);
   } break;
   case fLaC:
 	    sh_audio->format = mmioFOURCC('f', 'L', 'a', 'C');

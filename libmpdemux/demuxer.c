@@ -1308,7 +1308,8 @@ switch(file_format){
     switch(d_audio->id & 0xE0){  // 1110 0000 b  (high 3 bit: type  low 5: id)
       case 0x00: sh_audio->format=0x50;break; // mpeg
       case 0xA0: sh_audio->format=0x10001;break;  // dvd pcm
-      case 0x80: sh_audio->format=0x2000;break; // ac3
+      case 0x80: if((d_audio->id & 0xF8) == 0x88) sh_audio->format=0x2001;//dts
+                 else sh_audio->format=0x2000;break; // ac3
       default: sh_audio=NULL; // unknown type
     }
    }
@@ -1328,7 +1329,8 @@ switch(file_format){
     switch(d_audio->id & 0xE0){  // 1110 0000 b  (high 3 bit: type  low 5: id)
       case 0x00: sh_audio->format=0x50;break; // mpeg
       case 0xA0: sh_audio->format=0x10001;break;  // dvd pcm
-      case 0x80: sh_audio->format=0x2000;break; // ac3
+      case 0x80: if((d_audio->id & 0xF8) == 0x88) sh_audio->format=0x2001;//dts
+                 else sh_audio->format=0x2000;break; // ac3
       default: sh_audio=NULL; // unknown type
     }
    }

@@ -214,6 +214,7 @@ Codecs:
   --enable-xmms          build with XMMS inputplugin support [disabled]
   --disable-mp3lib       disable builtin mp3lib [enabled]
   --disable-liba52       disable builtin liba52 [enabled]
+  --enable-libdts        enable libdts support [autodetect]
   --disable-libmpeg2     disable builtin libmpeg2 [enabled]
   
 Video output:
@@ -319,6 +320,8 @@ Use these options if autodetection fails:
   --with-xvmclib=PATH      path to adapter specific XvMCxxxxx.so (e.g. NVIDIA)
   --with-xvidlibdir=DIR    libxvidcore (XviD) in DIR 
   --with-xvidincdir=DIR    XviD header in DIR
+  --with-dtslibdir=DIR     libdts library in DIR 
+  --with-dtsincdir=DIR     libdts header in DIR
   --with-livelibdir=DIR    path to LIVE.COM Streaming Media libraries
   --with-xmmsplugindir=DIR path to XMMS plugins
   --with-xmmslibdir=DIR    path to libxmms.so.1
@@ -1217,6 +1220,7 @@ _vorbis=auto
 _theora=auto
 _mp3lib=yes
 _liba52=yes
+_libdts=auto
 _libmpeg2=yes
 _matroska_internal=yes
 _tremor=no
@@ -1394,6 +1398,8 @@ for ac_option do
   --disable-mp3lib)	_mp3lib=no	;;
   --enable-liba52)	_liba52=yes	;;
   --disable-liba52)	_liba52=no	;;
+  --enable-libdts)	_libdts=yes     ;;
+  --disable-libdts)	_libdts=no      ;;
   --enable-libmpeg2)	_libmpeg2=yes	;;
   --disable-libmpeg2)	_libmpeg2=no	;;
   --enable-internal-matroska)  _matroska_internal=yes ;;
@@ -1656,6 +1662,12 @@ for ac_option do
     ;;
   --with-xvidincdir=*)
     _inc_xvid=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
+    ;;
+  --with-dtslibdir=*)
+    _ld_libdts=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+  --with-dtsincdir=*)
+    _inc_libdts=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
     ;;
   --with-sdl-config=*)
     _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
@@ -4852,6 +4864,26 @@ else
 fi
 echores "$_liba52"
 
+echocheck "libdts support"
+if test "$_libdts" = auto ; then
+  _libdts=no
+  cat > $TMPC << EOF
+#include <stdint.h>
+#include <dts.h>
+int main(void) { dts_init (0); return 0; }
+EOF
+  cc_check $_inc_libdts $_ld_libdts -ldts -lm && _libdts=yes
+fi
+if test "$_libdts" = yes ; then
+  _def_libdts='#define CONFIG_DTS 1'
+  _ld_libdts="$_ld_libdts -ldts -lm"
+  _codecmodules="libdts $_codecmodules"
+else
+  _def_libdts='#undef CONFIG_DTS'
+  _nocodecmodules="libdts $_nocodecmodules"
+fi
+echores "$_libdts"
+
 echocheck "libmpeg2 support"
 if test "$_libmpeg2" = yes ; then
   _def_libmpeg2='#define USE_LIBMPEG2 1'
@@ -6192,6 +6224,9 @@ ARCH_LIB =  $_ld_arch $_ld_iconv
 XVID = $_xvid
 XVID_INC = $_inc_xvid
 XVID_LIB = $_ld_xvid
+CONFIG_DTS = $_libdts
+DTS_INC = $_inc_libdts
+DTS_LIB = $_ld_libdts
 DECORE_LIB = $_ld_decore $_ld_mp3lame
 MENCODER = $_mencoder
 ENCORE_LIB =  $_ld_encore $_ld_mp3lame
@@ -6533,6 +6568,7 @@ $_def_libavformat_win32
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib
 $_def_liba52
+$_def_libdts
 $_def_libmpeg2
 
 /* Use libfame encoder filter */
