@@ -105,7 +105,7 @@ void idct_init (void)
  * c[1..7] = 128*sqrt (2)
  */
 
-static void inline idct_row (int16_t * block)
+static inline void idct_row (int16_t * block)
 {
     int x0, x1, x2, x3, x4, x5, x6, x7, x8;
 
@@ -174,7 +174,7 @@ static void inline idct_row (int16_t * block)
  * c[1..7] = (1/1024)*sqrt (2)
  */
 
-static void inline idct_col (int16_t *block)
+static inline void idct_col (int16_t *block)
 {
     int x0, x1, x2, x3, x4, x5, x6, x7, x8;
 
