@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.10 -->
+<!-- synced with 1.11 -->
 <chapter id="cd-dvd">
 <title>Uso de CD/DVD</title>
 
@@ -82,7 +82,7 @@ La Sintaxis para un Disco Versátil Digital (DVD) estándar es la siguiente:
 
 <para>
 Ejemplo:
-<screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
+<screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
 </para>
 
 <para>
@@ -270,7 +270,7 @@ Para una lista completa de las opciones disponibles, lea por favor la página de 
 sintaxis para un Video CD (VCD) estándar es la siguiente:
 <screen>mplayer vcd://<replaceable>&lt;track&gt;</replaceable> [-cdrom-device <replaceable>&lt;device&gt;</replaceable>]</screen>
 Ejemplo:
-<screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
+<screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>
 El dispositivo para VCD Por defecto es <filename>/dev/cdrom</filename>.
 Si su configuracio no coincide con esto, haga un enlace simbólico o
 especifique el dispositivo correcto en la línea de órdenes con la

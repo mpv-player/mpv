@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.30 -->
+<!-- synced with 1.33 -->
 <sect1 id="install">
 <title>Instalación</title>
 
@@ -569,6 +569,7 @@ los archivos de películas. Actualmente los siguientes formatos están soportados:
 <listitem><para>VPlayer</para></listitem>
 <listitem><para>RT</para></listitem>
 <listitem><para>SSA</para></listitem>
+<listitem><para>Unknown</para></listitem>
 <listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
 <listitem><para>AQTitle</para></listitem>
 <listitem><para>JACOsub</para></listitem>
@@ -602,11 +603,14 @@ La linea de comando difiere levemente para los diferentes formatos:
 <para>
 Los subtítulos VobSub consisten de un gran (varios megabytes) archivo <filename>
 .SUB</filename>, y opcionalmente un archivo <filename>.IDX</filename> y/o un archivo
-<filename>.IFO</filename>. Si tiene archivos como <filename>ejemplo.sub</filename>,
-<filename>ejemplo.ifo</filename> (opcional), <filename>ejemplo.idx</filename> - entonces
-debe pasarle a <application>MPlayer</application> la opción <option>
--vobsub ejemplo [-vobsubid <replaceable>id</replaceable>]</option> (el camino
-completo es opcional). La opción <option>-vobsubid</option> es como la opción
+<filename>.IFO</filename>. Si tiene archivos como
+<filename><replaceable>ejemplo.sub</replaceable></filename>,
+<filename><replaceable>ejemplo.ifo</replaceable></filename> (opcional),
+<filename><replaceable>ejemplo.idx</replaceable></filename> - entonces
+debe pasarle a <application>MPlayer</application> la opción
+<option>-vobsub <replaceable>ejemplo</replaceable> [-vobsubid
+<replaceable>id</replaceable>]</option> (la ruta completa es opcional).
+La opción <option>-vobsubid</option> es como la opción
 <option>-sid</option> para DVDs, puede elegir entre pistas de subtítulos
 (lenguajes) con ella. En el caso que <option>-vobsubid</option> se omita,
 <application>MPlayer</application> tratará de usar el lenguaje dado por la
@@ -621,8 +625,10 @@ subtítulos. Si esto falla no habrá subtítulos.
 <para>
 Los otros formatos consisten de un archivo de texto simple conteniendo el 
 tiempo y la información del texto a colocar. Uso: si tiene un archivo como
-<filename>ejemplo.txt</filename>, debe pasarle a <application>MPlayer</application>
-la opción <option>-sub ejemplo.txt</option> (el camino completo es opcional).
+<filename><replaceable>ejemplo.txt</replaceable></filename>, debe pasarle a
+<application>MPlayer</application> la opción
+<option>-sub <replaceable>ejemplo.txt</replaceable></option>
+(la ruta completa es opcional).
 </para>
 </formalpara>
 
@@ -700,7 +706,7 @@ la edición/temporización/unión y cortado de subtítulos más fácil</emphasis>.
 Y, si - por decirlo - consigue un subtitulo SSA pero esta mal temporizado
 o tiene problemas de retraso con su versión de la película, entonces puede
 hacer 
-<screen>mplayer vacío.avi -sub fuente.ssa -dumpmpsub</screen>.
+<screen>mplayer <replaceable>vacío.avi</replaceable> -sub fuente.ssa -dumpmpsub</screen>.
 Un archivo <filename>dump.mpsub</filename> se creara en el directorio actual,
 que contendrá la fuente del texto de los subtítulos, pero en el formato
 <emphasis role="bold">MPsub</emphasis>. Ahora puede agregar/quitar segundos a los
@@ -761,7 +767,7 @@ Hay muchas maneras de conseguirlo:
       Para obtener una lista de los tipos de letra que conoce
       <systemitem class="library">fontconfig</systemitem>,
       use <command>fc-list</command>.
-      Ejemplo: <option>-font 'Bitstream Vera Sans'</option>
+      Ejemplo: <option>-font <replaceable>'Bitstream Vera Sans'</replaceable></option>
   </para></listitem>
 <listitem><para>
   Descargue paquetes de fuentes listos para usar del sitio de MPlayer. Nota:
@@ -815,7 +821,7 @@ class="directory">$PREFIX/share/mplayer</filename>. Entonces renombre o
 enlace simbólicamente uno de los directorios extraídos a
 <filename class="directory">font</filename>, por ejemplo:
 
-<screen>ln -s ~/.mplayer/arial-24 ~/.mplayer/font</screen>
+<screen>ln -s ~/.mplayer/<replaceable>arial-24</replaceable> ~/.mplayer/font</screen>
 
 Ahora debería ver un reloj en la esquina superior izquierda de la película
 (apaguelo pulsado la tecla <keycap>o</keycap>).
@@ -888,7 +894,7 @@ completamente configurable por el usuario.
   </simpara></listitem>
 <listitem><para>
   inicie <application>MPlayer</application> como en el ejemplo:
-  <screen>$ mplayer -menu archivo.avi</screen>
+  <screen>$ mplayer -menu <replaceable>archivo.avi</replaceable></screen>
   </para></listitem>
 <listitem><simpara>
   pulse cualquier tecla de menú que haya definido

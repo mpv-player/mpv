@@ -1,4 +1,4 @@
-.\" synced with 1.509
+.\" synced with 1.514
 .\" MPlayer (C) 2000-2003 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun, Jonas Jermann
 .\" y traducida al español por Juan Martín López <nauj27@teleline.es>
@@ -1191,6 +1191,9 @@ Con Fontconfig, esta opción determina el nombre de la tipografía de fontconfig.
 .PD 1
 .
 .TP
+.B \-fontconfig
+Habilita el uso de tipografías administradas por fontconfig.
+.TP
 .B \-forcedsubsonly
 Muestra solo subtítulos forzados para el flujo de subtítulos de DVD seleccionado,
 p.e.\& \-slang.
@@ -2198,6 +2201,18 @@ debug:
 .br
 0x1000: fallos
 .REss
+.IPs vismv=<valor>
+vismv:
+.RSss
+.br
+0: deshabilitado
+.br
+1: visualiza MVs de marcos de imagen P previstos en adelante
+.br
+2: visualiza MVs de marcos de imagen B previstos en adelante
+.br
+4: visualiza MVs de marcos de imagen B previstos hacia atrás
+.REss
 .IPs bug=<valor>
 corrige manualmente errores en el codificador:
 .RSss
@@ -2542,7 +2557,7 @@ Rota y voltea (opcional) la imagen +/\:- 90 grados.
 Para parámetros entre 4-7 la rotación se hace solo si la geometría de la
 película es en vertical y no en horizontal.
 .TP
-.B scale[=w:h[:c[:p]]]
+.B scale[=w:h[:i[c[:p]]]]
 Escala la imagen con el escalador de software (lento) y realiza una
 conversión en el espacio de color YUV<\->RGB (vea también la opción \-sws).
 .RSs
@@ -2560,6 +2575,8 @@ posible escalar, y entonces se usará d_ancho/\:d_alto por defecto!
 .br
 -3:   Calcula w/\:h usando la otra dimensión y la razón de aspecto original.
 .REss
+.IPs i
+indicador de entrelazado
 .IPs c
 salto de crominancia
 .RSss
@@ -2694,7 +2711,7 @@ Más rápido y mejor calidad que con \-vf fame.
 .RSss
 1\-31: qscale fijo
 .br
-32\-:   bitrate fijo en kBits
+32\-:  bitrate fijo en kBits
 .REss
 .IPs fps\ \ 
 fuerza los fps de salida (valor real) (por defecto: 0, autodetección basada en la altura)
@@ -2745,11 +2762,11 @@ Puede tener de 0 a 3 parámetros. Si omite un parámetros, se usará un valor
 razonable.
 .PD 0
 .RSs
-.IPs luma
+.IPs luma\ 
 dureza de la luminancia espacial (por defecto = 4)
 .IPs chroma
 dureza de crominancia espacial (por defecto = 3)
-.IPs time
+.IPs time\ 
 dureza temporal (por defecto = 6)
 .RE
 .PD 1
@@ -3893,6 +3910,14 @@ del decodificador, codificador y suerte.
 Para un cumplimiento estricto de MPEG1/\:2/\:4 este debe ser <=132.
 (por defecto: 250 o un marco clave cada diez segundos en una película de 25fps)
 .TP
+.B sc_threshold=<-1000000\-1000000>
+Umbral para la detección del cambio de escena.
+Libavcodec inserta un marco clave cuando detecta un cambio de escena.
+Puede especificar la sensibilidad de la detección con esta opción.
+-1000000 significa que se detecta un cambio de escena en cada nuevo
+marco de imagen, 1000000 significa que no se detectan cambios de escena
+(el valor por defecto es 0).
+.TP
 .B vb_strategy=<0\-1>
 estrategia a elegir entre marcos I/\:P/\:B (pasada 2):
 .RSs
@@ -4305,6 +4330,12 @@ Naq intentará ajustar los cuantizadores por-MB para mantener la media correcta.
 .TP
 .B ildct\ \ 
 usa dct entrelazado
+.TP
+.B ilme\ \ \ 
+usa estimación de movimiento entrelazada
+.TP
+.B alt\ \ \ \ 
+usa scantable alternativa
 .TP
 .B format=<valor>
 .RSs

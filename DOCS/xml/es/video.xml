@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.41 -->
+<!-- synced with 1.44 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -393,9 +393,9 @@ ejecutarlo como usuario, entonces instale <application>MPlayer</application>
 SUID root:
 
 <screen>
-chown root /usr/local/bin/mplayer
-chmod 750 /usr/local/bin/mplayer
-chmod +s /usr/local/bin/mplayer
+chown root <replaceable>/usr/local/bin/mplayer</replaceable>
+chmod 750 <replaceable>/usr/local/bin/mplayer</replaceable>
+chmod +s <replaceable>/usr/local/bin/mplayer</replaceable>
 </screen>
 
 Ahora funciona como usuario simple, también.
@@ -831,7 +831,9 @@ La salida FBdev toma parámetros adicionales sobre los otros:
 
 <para>
 Si desea cambiar a un modo específico, use
-<screen>mplayer -vm -fbmode <replaceable>nombre_del_modo</replaceable> <replaceable>nombrearchivo</replaceable></screen>
+<screen>
+mplayer -vm -fbmode <replaceable>nombre_del_modo</replaceable> <replaceable>nombrearchivo</replaceable>
+</screen>
 </para>
 
 <itemizedlist>
@@ -1415,9 +1417,9 @@ Además entiende <option>-double</option> como un parámetro visible globalmente.
 También puede especificar el controlador VIDIX directamente con un  tercer
 argumento en la línea de órdenes:
 
-<screen>mplayer -vo xvidix:mga_vid.so -fs -zoom -double file.avi</screen>
-or
-<screen>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 file.avi</screen>
+<screen>mplayer -vo xvidix:mga_vid.so -fs -zoom -double <replaceable>archivo.avi</replaceable></screen>
+o
+<screen>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 <replaceable>archivo.avi</replaceable></screen>
 
 Pero esto es peligroso, y no debería hacerlo. En ese caso el controlador
 se ve forzado y el resultado puede ser impredicible (puede incluso
@@ -1550,7 +1552,7 @@ con otros.
   wmv7, wmv8</systemitem> y algunos otros. Por favor tenga en cuenta que esto
   es solo algo temporal. La sintaxis de uso es la siguiente:
   <screen>
-    mplayer -vf format=uyvy -vc divxds archivodivx3.avi
+    mplayer -vf format=uyvy -vc divxds <replaceable>archivodivx3.avi</replaceable>
   </screen>
   </para></listitem>
 </itemizedlist>
@@ -1677,15 +1679,15 @@ con esta órden:
 </para>
 </formalpara>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes file.mpg|vob</screen></para>
+<para><screen>mplayer -ao mpegpes -vo mpegpes <replaceable>archivo.mpg|vob</replaceable></screen></para>
 
 <para>
 Decodificación software o transcoding de formatos diferentes a MPEG1 puede hacerse
 usando una órden como esta:
 </para>
 <para><screen>
-mplayer -ao mpegpes -vo mpegpes yourfile.ext
-mplayer -ao mpegpes -vo mpegpes -vf expand yourfile.ext
+mplayer -ao mpegpes -vo mpegpes <replaceable>suarchivo.ext</replaceable>
+mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>yourfile.ext</replaceable>
 </screen></para>
 
 <para>
@@ -1705,19 +1707,28 @@ puede usar el filtro <option>expand=w:h</option> para añadir bandas negras.
 Para ver un DivX de 640x384, pruebe:
 </para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 file.avi
-</screen></para>
+<para>
+<screen>
+mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 <replaceable>archivo.avi</replaceable>
+</screen>
+</para>
 
 <para>Si su CPU es demasiado lenta para un DivX de tamaño completo de 720x576,
 pruebe a subescalar:</para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 file.avi
-</screen></para>
+<para>
+<screen>
+mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 <replaceable>archivo.avi</replaceable>
+</screen>
+</para>
 
 <para>Si la velocidad no mejora, pruebe a subescalar verticalmente, también:</para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 file.avi
-</screen></para>
+<para>
+<screen>
+mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 <replaceable>archivo.avi</replaceable>
+</screen>
+</para>
 
 <para>
 For OSD and subtitles use the OSD feature of the expand filter. So, instead of
@@ -2068,7 +2079,7 @@ en pantalla completa con su DC10+. Hay tres posibilidades principalmente, puede
 escalar la película a un ancho de 768, 384 o 192. Por motivos de rendimiento
 y calidad, puede que quiera elegir escalar la película a 384x204 usando el
 escalador por software rápido bilineal. La línea de órdenes es
-<screen>mplayer -vo zr -sws 0 -vf scale=384:204 movie.avi</screen>
+<screen>mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>película.avi</replaceable></screen>
 </para>
 
 <para>
@@ -2077,12 +2088,12 @@ por este controlador directamente. Supongamos que tenemos una película que
 es demasiado ancha para mostrarla en su Buz y que quiere usar <option>-zrcrop</option>
 para hacer la película menos ancha, entonces puede que le sea útil la siguiente
 órden
-<screen>mplayer -vo zr -zrcrop 720x320+80+0 benhur.avi</screen>
+<screen>mplayer -vo zr -zrcrop 720x320+80+0 <replaceable>benhur.avi</replaceable></screen>
 </para>
 
 <para>
 si quiere usar el filtro <option>crop</option>, puede que desee hacer
-<screen>mplayer -vo zr -vf crop=720:320:80:0 benhur.avi</screen>
+<screen>mplayer -vo zr -vf crop=720:320:80:0 <replaceable>benhur.avi</replaceable></screen>
 </para>
 
 <para>
@@ -2096,7 +2107,8 @@ la derecha en blanco y negro y el otro debe tener imágenes JPEG con calidad 10, 
 todo esto deberá usar la siguiente órden
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
-          -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 movie.avi
+          -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 \
+	  <replaceable>movie.avi</replaceable>
 </screen>
 </para>
 

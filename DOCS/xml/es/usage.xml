@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.15 -->
 <chapter id="usage">
 <title>Uso</title>
 
@@ -16,7 +16,7 @@ primeras, por ejemplo
 y las opciones escritas después de los nombres de archivos, que se
 aplican solamente al nombre de archivo/URL/lo que sea, por ejemplo:
 
-<screen>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</screen>
+<screen>mplayer -vfm 5 movie1.avi <replaceable>movie2.avi</replaceable> -vfm 4</screen>
 </para>
 
 <para>
@@ -88,11 +88,11 @@ Reproduciendo desde RTSP:
 <para>
 Ejemplos:
 <screen>
-mplayer -vo x11 /mnt/Pelis/Contact/contact2.mpg
-mplayer vcd://2 -cd-rom-device /dev/hdc
-mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-mplayer dvd://1 -dvd-device /dev/hdc
-mplayer -abs 65536 -delay -0.4 -nobps ~/pelis/prueba.avi<!--
+mplayer -vo x11 <replaceable>/mnt/Pelis/Contact/contact2.mpg</replaceable>
+mplayer vcd://<replaceable>2</replaceable> -cd-rom-device <replaceable>/dev/hdc</replaceable>
+mplayer -afm 3 <replaceable>/mnt/DVDtrailers/alien4.vob</replaceable>
+mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable>
+mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/pelis/prueba.avi</replaceable><!--
 --></screen>
 </para>
 </sect1>
@@ -423,14 +423,14 @@ La reprodución comienza símplemente añadiendo la URL en la línea de órdenes.
 <application>MPlayer</application> también tiene en cuenta a la variable
 de entorno <envar>http_proxy</envar>, y usa el proxy si está disponible. El 
 uso de proxy también puede forzarse con:
-<screen>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</screen>
+<screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
 </para>
 
 <para>
 <application>MPlayer</application> puede leer desde la entrada estádar
 (<emphasis>no</emphasis> desde tuberías nombradas). Esto puede ser usado
 por ejemplo para reproducir desde FTP:
-<screen>wget ftp://micorsops.com/algo.avi -O - | mplayer -</screen>
+<screen>wget <replaceable>ftp://micorsops.com/algo.avi</replaceable> -O - | mplayer -</screen>
 </para>
 
 <note><para>
@@ -475,11 +475,11 @@ y no tiene ningún argumento en la línea de órdenes nada más que escribir
 <filename>netstream</filename>. Ahora puede por ejemplo reproducir una
 segunda pista de un VCD en el servidor con :
 <screen>
-mplayer -cache 5000 mpst://nombre-servidor/vcd://2
+mplayer -cache 5000 <replaceable>mpst://nombre-servidor/vcd://2</replaceable>
 </screen>
 También puede acceder a los archivos en este servidor :
 <screen>
-mplayer -cache 5000 mpst://nombre-servidor//usr/local/peliculas/lol.avi
+mplayer -cache 5000 <replaceable>mpst://nombre-servidor//usr/local/peliculas/lol.avi<replaceable>
 </screen>
 Note que las rutas que no empiezan con un / deben ser relativas
 al directorio donde el servidor está corriendo. La opción <option>-cache</option> 

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.33 -->
+<!-- synced with 1.34 -->
 <chapter id="ports" xreflabel="Ports">
-<title>Portaciones</title>
+<title>Adaptaciones</title>
 
 <sect1 id="linux">
 <title>Linux</title>
 <para>
 La principal plataforma de desarrollo es Linux en x86, sin embargo
-<application>MPlayer</application> funciona en muchas otras portaciones de Linux.
+<application>MPlayer</application> funciona en muchas otras adaptaciones de Linux.
 Los paquetes binarios de MPlayer están disponibles desde muchos sitios.
 Sin embargo <emphasis role="bold">ninguno de estos paquetes tiene soporte</emphasis>.
 Reporte los problemas a sus autores, no a nosotros.
@@ -54,7 +54,7 @@ que funcionan desde
 <para>
 MPlayer funciona en PDAs con Linux en CPU ARM p.e. Sharp Zaurus, Compaq Ipaq. La
 manera más facil de obtener MPlayer es bajarlo desde uno de los sitios de paquetes de
-<ulink url="http://www.openzaurus.org">OpenZaurus</ulink> Si desea compilarlo usted
+<ulink url="http://www.openzaurus.org">OpenZaurus</ulink>. Si desea compilarlo usted
 mismo, debe mirar en
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">MPlayer</ulink>
 y el directorio 
@@ -298,8 +298,9 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 
 <para>PUede usar codecs Win32 y Real Win32 (los Real de Linux no) si lo desea. Ponga
   los codecs en algún lugar de su ruta/path o
-  pase la opción <option>--with-codecsdir=c:/ruta/a/sus/codecs</option> (alternativamente
-  <option>--with-codecsdir=/ruta/a/sus/codecs</option> solo en Cygwin) a
+  pase la opción <option>--with-codecsdir=<replaceable>c:/ruta/a/sus/codecs</replaceable></option>
+  (alternativamente
+  <option>--with-codecsdir=<replaceable>/ruta/a/sus/codecs</replaceable></option> solo en Cygwin) a
   <filename>configure</filename>. Tenemos informes de que las DLLs de Real deben tener
   permisos de escritura para el usuario que usa MPlayer, pero solo en algunos sistemas.
   Pruebe ha dar permisos de escritura si tiene problemas. Las DLLs de QuickTime también
@@ -341,9 +342,9 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
   <filename>.MPG</filename> que Windows muestra en los VCDs. Esto funciona de la
   siguiente manera (ajuste para la letra de unidad de su CD-ROM):</para>
   
-<screen>mplayer d:/mpegav/avseq01.dat</screen>
+<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
 
-<screen>mplayer /cygdrive/d/MPEG2/AVSEQ01.MPG</screen>
+<screen>mplayer <replaceable>/cygdrive/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
 
 <para>Para DVDs también funciona, ajuste <option>-dvd-device</option> para la letra
   de unidad de su DVD-ROM:</para>
@@ -372,11 +373,11 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 <para>VCDs y DVDs funcionan casi como en Cygwin (ajustando la letra de la unidad de su
   CD-ROM/DVD-ROM):</para>
 
-<screen>mplayer d:/mpegav/avseq01.dat</screen>
+<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
 
-<screen>mplayer /d/MPEG2/AVSEQ01.MPG</screen>
+<screen>mplayer <replaceable>/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
 
-<screen>mplayer dvd://&lt;title&gt; -dvd-device /d/</screen>
+<screen>mplayer dvd://&lt;title&gt; -dvd-device <replaceable>/d/</replaceable></screen>
 
 </sect2>
 
@@ -422,7 +423,7 @@ compilar en HP-UX sin problemas.
 <sect1 id="amiga">
 <title>Amiga/MorphOS (GeedGadgets)</title>
 <para>
-Nicholas Det en Genesi ha hecho un port grande y potente de <application>MPlayer</application>
+Nicholas Det en Genesi ha hecho una gran adaptación, potente, de <application>MPlayer</application>
 para MorphOS. Tristemente basado en la serie 0.90.
 </para>
 
