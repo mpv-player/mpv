@@ -85,6 +85,37 @@ vqcomp (0.0-1.0) quantizer compression (for pass1/2)
 vrc_strategy (0,1,2)
 	FIXME
 
+----------- the following options are only available in the patched version of libavcodec
+patch at http://www.mplayerhq.hu/~michael/
+patch will be merged into ffmpeg cvs in a few days (the reason that its not in cvs yet is that
+the other ffmpeg developers didnt want big untested changes before release)
+        
+vlelim (0-1000) single coefficient elimination threshold for luminance
+	0 disabled (default)
+	4 (JVT recomandition)
+
+vcelim (0-1000) single coefficient elimination threshold for chrominance
+	0 disabled (default)
+	7 (JVT recomandition)
+
+vstrict strict standart compliance
+	only recomanded if u want to feed the output into the mpeg4 reference decoder
+
+vdpart	data partitioning
+	+2 byte per video packet, and much better looking if the file becomes damaged
+
+        
+lavdopts: (decoder options)
+ver	error resilience
+	-1 needed for some very broken, encoders which completly ignore the standarts
+	0 (default)
+	1 more aggressive error detection, lavc might think that some correct streams contain errors
+
+vbug	manual workaround encoder bugs
+	0 (default)
+	1 (workaround for some old lavc generated msmpeg4v3 files)
+
+
 Notes:	1. lavc will strictly follows the quantizer limits vqmin, vqmax, vqdiff even if 
 	   it violates the bitrate / bitrate tolerance
 	2. changing some options between pass1 & 2 can reduce the quality
