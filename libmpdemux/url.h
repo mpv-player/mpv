@@ -21,4 +21,7 @@ URL_t* url_new(char* url);
 URL_t* url_copy(URL_t* url);
 void   url_free(URL_t* url);
 
+void url_unescape_string(char *outbuf, char *inbuf);
+void url_escape_string(char *outbuf, char *inbuf);
+
 #endif

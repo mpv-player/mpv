@@ -1,4 +1,4 @@
-/* 
+/*
  * URL Helper
  * by Bertrand Baudet <bertrand_baudet@yahoo.com>
  * (C) 2001, MPlayer team.
@@ -134,3 +134,63 @@ url_free(URL_t* url) {
 	if(url->password) free(url->password);
 	free(url);
 }
+
+
+/* Replace escape sequences in an URL (or a part of an URL) */
+/* works like strcpy(), but without return argument */
+/* unescape_url_string comes from ASFRecorder */
+void
+url_unescape_string(char *outbuf, char *inbuf)
+{
+	unsigned char c;
+	do {
+		c = *inbuf++;
+		if (c == '%') {
+			unsigned char c1 = *inbuf++;
+			unsigned char c2 = *inbuf++;
+			if (	((c1>='0' && c1<='9') || (c1>='A' && c1<='F')) &&
+				((c2>='0' && c2<='9') || (c2>='A' && c2<='F')) ) {
+				if (c1>='0' && c1<='9') c1-='0';
+				else c1-='A';
+				if (c2>='0' && c2<='9') c2-='0';
+				else c2-='A';
+				c = (c1<<4) + c2;
+			}
+		}
+		*outbuf++ = c;
+	} while (c != '\0');
+}
+
+/* Replace specific characters in the URL string by an escape sequence */
+/* works like strcpy(), but without return argument */
+/* escape_url_string comes from ASFRecorder */
+void
+url_escape_string(char *outbuf, char *inbuf) {
+	unsigned char c;
+	do {
+		c = *inbuf++;
+		if(	(c >= 'A' && c <= 'Z') ||
+			(c >= 'a' && c <= 'z') ||
+			(c >= '0' && c <= '9') ||
+			(c >= 0x7f) ||						/* fareast languages(Chinese, Korean, Japanese) */
+			c=='-' || c=='_' || c=='.' || c=='!' || c=='~' ||	/* mark characters */
+			c=='*' || c=='\'' || c=='(' || c==')' || c=='%' || 	/* do not touch escape character */
+			c==';' || c=='/' || c=='?' || c==':' || c=='@' || 	/* reserved characters */
+			c=='&' || c=='=' || c=='+' || c=='$' || c==',' || 	/* see RFC 2396 */
+			c=='\0' ) {
+			*outbuf++ = c;
+		} else {
+			/* all others will be escaped */
+			unsigned char c1 = ((c & 0xf0) >> 4);
+			unsigned char c2 = (c & 0x0f);
+			if (c1 < 10) c1+='0';
+			else c1+='A';
+			if (c2 < 10) c2+='0';
+			else c2+='A';
+			*outbuf++ = '%';
+			*outbuf++ = c1;
+			*outbuf++ = c2;
+		}
+	} while (c != '\0');
+}
+
