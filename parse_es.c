@@ -1,14 +1,22 @@
-//=================== VIDEO PARSER =========================
+//=================== MPEG-ES VIDEO PARSER =========================
 
-#define MAX_VIDEO_PACKET_SIZE (224*1024+4)
-#define VIDEOBUFFER_SIZE 0x100000
+#include <stdio.h>
+#include <stdlib.h>
+
+extern int verbose; // defined in mplayer.c
+
+#include "config.h"
+
+#include "stream.h"
+#include "demuxer.h"
+
+#include "parse_es.h"
 
 //static unsigned char videobuffer[MAX_VIDEO_PACKET_SIZE];
-static unsigned char* videobuffer=NULL;
-static int videobuf_len=0;
-
-static unsigned char videobuf_code[4];
-static int videobuf_code_len=0;
+unsigned char* videobuffer=NULL;
+int videobuf_len=0;
+unsigned char videobuf_code[4];
+int videobuf_code_len=0;
 
 // sync video stream, and returns next packet code
 int sync_video_packet(demux_stream_t *ds){
