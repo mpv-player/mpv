@@ -721,7 +721,7 @@ screen and nothing happens. After about one minute the video starts playing.
 </para></question>
 <answer><para>
 The KDE arts sound daemon is blocking the sound device. Either wait until the
-video starts or disable the arts-daemon in kontrol center. If you want to use
+video starts or disable the arts-daemon in control center. If you want to use
 arts sound, specify audio output via our native arts audio driver
 (<option>-ao arts</option>). If it fails or isn't compiled in, try SDL
 (<option>-ao sdl</option>) and make sure your SDL can handle arts sound. Yet
