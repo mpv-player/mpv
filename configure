@@ -145,6 +145,8 @@ Optional features:
   --enable-i18n          GNU internationalisation [disable]
   --disable-runtime-cpudetection    disable runtime CPU detection [enable]
   --disable-dvdnav       Disable dvdnav support [autodetect]
+  --disable-dvdread      Disable libdvdread support [autodetect]
+  --disable-mpdvdkit     Disable mpdvdkit support [autodetect]
   
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
@@ -786,6 +788,7 @@ _faad=auto
 _css=auto
 _dvdnav=yes
 _dvdread=auto
+_dvdkit=auto
 _xanim=auto
 _xinerama=auto
 _mga=auto
@@ -895,6 +898,8 @@ for ac_option do
   --disable-css)	_css=no		;;
   --enable-dvdread)	_dvdread=yes	;;
   --disable-dvdread)	_dvdread=no	;;
+  --enable-mpdvdkit)	_dvdkit=yes	;;
+  --disable-mpdvdkit)	_dvdkit=no	;;
   --enable-dvdnav)	_dvdnav=yes	;;
   --disable-dvdnav)	_dvdnav=no	;;
   --enable-xanim)	_xanim=yes	;;
@@ -2448,8 +2453,19 @@ else
   echores "not supported on this OS"
 fi
 
-
-
+echocheck "DVD support (libmpdvdkit)"
+if test "$_dvdkit" = auto ; then
+ _dvdkit=no
+ test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
+fi
+if test "$_dvdkit" = yes ; then
+  echores "yes"
+  _inputmodules="mpdvdkit $_inputmodules"
+  _dvdread=included
+else
+  echores "no"
+  _noinputmodules="mpdvdkit $_noinputmodules"
+fi
 
 echocheck "DVD support (libcss - old style)"
 if test "$_css" = auto ; then
@@ -2489,17 +2505,27 @@ EOF
      _dvdread=yes
   fi
 fi
-if test "$_dvdread" = yes ; then
-  _largefiles=yes
-  _def_dvdread='#define USE_DVDREAD 1'
-  _ld_css='-ldvdread'
-  _inputmodules="dvdread $_inputmodules"
-  echores "yes"
-else
-  _def_dvdread='#undef USE_DVDREAD'
-  _noinputmodules="dvdread $_noinputmodules"
-  echores "no"
-fi
+case "$_dvdread" in
+  yes)
+	_largefiles=yes
+	_def_dvdread='#define USE_DVDREAD 1'
+	_ld_css='-ldvdread'
+	_inputmodules="dvdread $_inputmodules"
+	echores "yes"
+	;;
+  no)
+	_def_dvdread='#undef USE_DVDREAD'
+	_noinputmodules="dvdread $_noinputmodules"
+	echores "no"
+	;;
+  included)
+	_largefiles=yes
+	_def_dvdread='#define USE_DVDREAD 1'
+	_ld_css='-Llibmpdvdkit -lmpdvdkit'
+	_noinputmodules="dvdread $_noinputmodules"
+	echores "disabled by libmpdvdkit"
+	;;
+esac
 
 echocheck "libdvdnav"
 if test "$_dvdnav" = yes ; then
@@ -2508,10 +2534,10 @@ if test "$_dvdnav" = yes ; then
 int main(void) { dvdnav_t *dvd=0; return 0; }
 EOF
   _dvdnav=no
-  if test -n "$_dvdnavdir" ; then 
-   _legal_dvdnavdir=-L$_dvdnavdir/.libs
-  fi
-  cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_ld_css $_ld_dl && _dvdnav=yes
+  test -n "$_dvdnavdir" && _legal_dvdnavdir=-L$_dvdnavdir/.libs
+  _used_css=
+  test "$_dvdkit" = no && _used_css=$_ld_css
+  cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_used_css $_ld_dl && _dvdnav=yes
 fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
@@ -3410,6 +3436,7 @@ TERMCAP_LIB = $_ld_termcap
 LIRC_LIB = $_ld_lirc
 CSS_USE = $_css
 CSS_LIB = $_ld_css
+DVDKIT = $_dvdkit
 SDL_INC = $_inc_sdl
 W32_DEP = $_dep_win32
 W32_LIB = $_ld_win32

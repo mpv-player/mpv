@@ -51,7 +51,7 @@ MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) # -Wall
 
-PARTS = libfame libmpdemux libmpcodecs mp3lib liba52 libmp1e libmpeg2 libavcodec libao2 drivers drivers/syncfb linux postproc input
+PARTS = libfame libmpdemux libmpcodecs mp3lib liba52 libmp1e libmpeg2 libavcodec libao2 drivers drivers/syncfb linux postproc input libmpdvdkit
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
@@ -101,6 +101,12 @@ COMMON_DEPS += libvo2/libvo2.a
 else
 COMMON_DEPS += libvo/libvo.a
 endif
+ifeq ($(DVDKIT),yes)
+COMMON_DEPS += libmpdvdkit/libmpdvdkit.a
+endif
+
+libmpdvdkit/libmpdvdkit.a:
+	$(MAKE) -C libmpdvdkit
 
 loader/libloader.a:
 	$(MAKE) -C loader
