@@ -159,8 +159,9 @@ double video_time_usage=0;
 double vout_time_usage=0;
 static double audio_time_usage=0;
 static int total_time_usage_start=0;
+static int total_frame_cnt=0;
+static int drop_frame_cnt=0; // total number of dropped frames
 int benchmark=0;
-static unsigned bench_dropped_frames=0;
 
 // static int play_in_bg=0;
 
@@ -1343,7 +1344,6 @@ int grab_frames=0;
 char osd_text_buffer[64];
 int drop_frame=0;     // current dropping status
 int dropped_frames=0; // how many frames dropped since last non-dropped frame
-int drop_frame_cnt=0; // total number of dropped frames
 int too_slow_frame_cnt=0;
 int too_fast_frame_cnt=0;
 // for auto-quality:
@@ -1522,6 +1522,7 @@ if(!sh_video) {
 	    } else {
 		drop_frame=dropped_frames=0;
 	    }
+	    ++total_frame_cnt;
 	}
 	// decode:
 	current_module="decode_video";
@@ -2866,6 +2867,15 @@ if(benchmark){
 	   100.0*audio_time_usage/total_time_usage,
 	   100.0*(total_time_usage-tot)/total_time_usage,
 	   100.0);
+  if(total_frame_cnt)
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARKn: disp: %d (%3.2f fps)  drop: %d (%d%%)  total: %d (%3.2f fps)\n",
+	total_frame_cnt-drop_frame_cnt,
+	(total_time_usage>0.5)?((total_frame_cnt-drop_frame_cnt)/total_time_usage):0,
+	drop_frame_cnt,
+	100*drop_frame_cnt/total_frame_cnt,
+	total_frame_cnt,
+	(total_time_usage>0.5)?(total_frame_cnt/total_time_usage):0);
+  
 }
 
 #ifdef HAVE_NEW_GUI
