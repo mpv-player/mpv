@@ -709,7 +709,7 @@ do
   	_debug='-g'
 	;;
   --enable-debug=*)
-        _debug=`echo '-g'; echo $ac_option | cut -d '=' -f 2`
+        _debug=`echo -n '-g'; echo $ac_option | cut -d '=' -f 2`
 	;;
   --enable-css)
 	_css=yes
