@@ -5,9 +5,7 @@
    Licence: GPL
 */
 
-#ifndef __FreeBSD__
-#include <linux/pci_ids.h>
-#endif
+#include "../../libdha/pci_ids.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
