@@ -41,7 +41,11 @@ int demux_mf_fill_buffer(demuxer_t *demuxer){
   stat( mf->names[mf->curr_frame],&fs );
 //  printf( "[demux_mf] frame: %d (%s,%d)\n",mf->curr_frame,mf->names[mf->curr_frame],fs.st_size );
 
+#ifdef WIN32
+  if ( !( f=fopen( mf->names[mf->curr_frame],"rb" ) ) ) return 0;
+#else
   if ( !( f=fopen( mf->names[mf->curr_frame],"r" ) ) ) return 0;
+#endif
   {
    sh_video_t     * sh_video = demuxer->video->sh;
    demux_packet_t * dp = new_demux_packet( fs.st_size );
