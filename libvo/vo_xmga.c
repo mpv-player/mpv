@@ -330,6 +330,13 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
    XSetNormalHints( mDisplay,mWindow,&hint );
    XStoreName( mDisplay,mWindow,mTitle );
    XMapWindow( mDisplay,mWindow );
+
+   XSelectInput(mDisplay, mWindow, StructureNotifyMask | KeyPressMask                             
+#ifdef HAVE_NEW_INPUT                                                                              
+           | ButtonPressMask | ButtonReleaseMask                                              
+#endif                                                                                             
+   );
+		   
 #ifdef HAVE_XINERAMA
    vo_x11_xinerama_move(mDisplay,mWindow);
 #endif

@@ -334,7 +334,13 @@ if (vo_window == None)
     hint.base_height = hint.height = window_height;
     hint.flags = USPosition | USSize;
     XSetNormalHints(mDisplay, mWindow, &hint);
-    
+
+    XSelectInput(mDisplay, mWindow, StructureNotifyMask | KeyPressMask                             
+#ifdef HAVE_NEW_INPUT                                                                              
+       | ButtonPressMask | ButtonReleaseMask                                              
+#endif                                                                                             
+    );
+		       
     XStoreName(mDisplay, mWindow, title);
     /* Map window. */
 
