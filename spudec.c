@@ -153,7 +153,11 @@ static void spudec_process_data(spudec_handle_t *this)
       len = this->width - x;
     /* FIXME have to use palette and alpha map*/
     memset(this->image + y * this->width + x, cmap[color], len);
-    memset(this->aimage + y * this->width + x, alpha[color], len);
+    if (alpha[color] < cmap[color]) {
+      memset(this->aimage + y * this->width + x, 1, len);
+    } else {
+      memset(this->aimage + y * this->width + x, alpha[color] - cmap[color], len);
+    }
     x += len;
     if (x >= this->width) {
       next_line(this);
