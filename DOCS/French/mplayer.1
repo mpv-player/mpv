@@ -39,7 +39,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2002-12-31"
+.TH MPlayer 1 "2003-01-12"
 .
 .SH NAME
 mplayer  \- Lecteur Vidéo pour Linux
@@ -706,6 +706,8 @@ i420)
 largeur de la fenêtre
 .IPs height=<valeur>
 hauteur de la fenêtre
+.IPs fps=<valeur>
+fréquence de la capture vidéo (trames par seconde)
 .IPs buffersize=<valeur>
 taille maximale du tampon de capture en mégaoctets (la moitié de la mémoire 
 physique par défaut)
@@ -762,6 +764,11 @@ choisir la sortie audio de la carte de capture, si elle à plus
 .IPs "[volume|bass|treble|balance]=<0\-65535>"
 Ces options règlent les paramètres du mixeur de la carte de capture vidéo.
 Elles n'auront aucun effet si votre carte ne dispose pas d'un mixeur.
+.IPs immediatemode=<bool>
+Un valeur de 0 signifie capturer et buffériser l'audio et la vidéo ensemble
+(par défaut pour mencoder). Un valeur de 0 (par défaut pour mplayer) signigie
+ne capturer que la vidéo et laisser l'audio passer au travers du cable de
+loopback de la carte TV à la carte son.
 .RE
 .
 .TP
@@ -860,8 +867,14 @@ peut l'être.
 .B \-noautosub
 Désactive le chargement automatique du fichier de sous-titres.
 .TP
+.B \-overlapsub
+Active le support des sous-titres qui dépassent pour tous les formats de
+sous-titres.
+.TP
 .B \-nooverlapsub
-Désactive le support des sous-titres qui dépassent.
+Désactive le support des sous-titres qui dépassent pour tous les formats de
+sous-titres (le comportement par défaut est d'en activer le support uniquement
+pour certains formats).
 .TP
 .B \-osdlevel <0\-3> (MPLAYER uniquement)
 Spécifie dans quel mode OSD démarrer.
@@ -1001,6 +1014,11 @@ Spécifie la position des sous-titres sur l'écran.
 Cette valeur est la position verticale des sous-titres en % de la hauteur
 de l'écran.
 .TP
+.B \-subalign <0\-2>
+Specifie de quelle manière les sous-titres doivent être alignés avec subpos.
+0 signifie aligner en haut (comportement original/par défaut), 1 signifie 
+aligner au centre, et 2 signifie aligner en bas.
+.TP
 .B \-subwidth <10\-100>
 Spécifie la largeur maximum des sous-titres sur l'écran. 
 Utile pour la sortie TV.
@@ -1034,7 +1052,7 @@ options.
 Les filtres disponibles sont:
 .
 .RSs
-.IPs resample[=srate[:sloppy][:fast]]
+.IPs resample[=srate[:sloppy][:type]]
 Change le taux d'échantillonnage du flux audio à un taux entier (Hz).
 Il ne supporte que le format 16 bit little endian.
 .IPs channels[=nc]
@@ -1047,7 +1065,7 @@ d'entrée, les canaux en plus sont tronqués.
 .IPs format[=bps,f]
 Sélectionne le format f et les bits par sample (bps) utilisés pour la sortie
 depuis la couche filtre. 
-L'option bps est un entier et indique les octets par sample.
+L'option bps est un entier et indique le nombre d'octets par sample.
 Le format f est une chaîne contenant un mix concaténé de:
 .br
 alaw, mulaw ou imaadpcm
@@ -1058,7 +1076,7 @@ non-signé ou signé
 .br
 le ou be (little ou big endian)
 .br
-.IPs "volume[=v:sc:pr:en]"
+.IPs "volume[=v:sc]"
 Sélectionne le niveau de sortie audio.
 Ce filtre n'est pas ré-entrant et ne peut donc être activé qu'une fois pour
 chaque flux audio.
@@ -1069,18 +1087,33 @@ complètement et +40dB équivaut à un gain de 1000).
 Le gain par défaut est -20dB.
 .br
 sc: active la coupure douce.
-.br
-pr: active la détection du volume pour chacun des flux audio. 
-Les volumes maximum et instantanés sont détectés. 
-Le volume instantané ne peut être consulté depuis l'interface en cours 
-d'utilisation, mais le volume maximum est affiché à la fin du film. 
-Cette valeur peut être utilisé pour le transcodage des films pour maximiser 
-l'utilisation de l'interval dynamique.
-.br
-en: active et désactive le contrôle du volume.
 .REss
-.IPs delay[=d] (DEBUG CODE)
-Décale la sortie du son de d secondes (nombre à virgule).
+.IPs "pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]"
+Mixe les canaux arbitrairement, voir DOCS/sound.html pour les détails.
+.RSss
+n: nombre de canaux de sortie (1 - 6).
+.br
+lij: combien de canaux j sont mixé dans le canal de sortie i.
+.REss
+.IPs "sub[=fc:ca]"
+Ajoute un canal sub-woofer.
+.RSss
+fc: Fréquence de cutoff pour le filtre passe-bas (20Hz à 300Hz). La valeur par
+défaut est 60Hz.
+.br
+ca: numéro de canal pour le sous-canal.
+.REss
+.IPs "surround[=d]"
+Décodeur pour le son surround matricié, fonctionne sur de nombreux fichiers à
+2 canaux.
+.RSss
+d: Temps de décalage en ms pour les haut-parleurs arrières (0ms à 1000ms). La
+valeur par défaut est 15ms.
+.REss
+.IPs delay[=ca1:ca2:...]
+Décale la sortie du son. 
+Spécifie le décalage séparemment pour chaque canal en millisecondes (nombre à 
+virgule compris entre 0 et 1000).
 .RE
 .
 .TP
@@ -1993,13 +2026,23 @@ p: mixe du bruit aléatoire avec un motif (semi)régulier
 .REss
 .IPs eq[=bright:cont]
 Active l'égaliseur logiciel avec contrôles interactifs comme les ég. matériels.
-
 Les valeurs peuvent aller de -100 à 100.
-.IPs halfpack
+.IPs eq2[=gamma:cont:lumi]
+Égaliseur logiciel alternatif qui utilise des tables de lookup (très lent),
+authorisant une correction du gamma en plus d'un simple ajustement de luminosité
+et de contraste. Les paramètres sont donnés en nombres à virgule. Les valeurs
+par défaut sont gamma=1.0, contraste=1.0, et luminosité=0.0.
+.IPs halfpack[=f]
 Convertit le planar YUV 4:2:0 en 4:2:2 demi-hauteur, en downsamplant le luma
 mais en gardant les samples chroma.
 Utile quand la sortie est un périphérique à basse résolution quand la diminution
-est de mauvais qualité ou n'est pas disponible.
+est de mauvais qualité ou n'est pas disponible. Peut également être utilisé 
+comme désentrelaceur primitif pour luma uniquement avec une utilisation CPU très
+basse.
+Par défaut, halfpack fait une moyenne des paires de lignes pendant le 
+downsampling. Le paramètre optionnel f peut valoir 0 pour n'utiliser que les 
+lignes paires, ou 1 pour n'utiliser que les lignes impaires. Tout autre valeur
+de f renvoie au comportement par défaut (moyenne).
 .IPs dint[=sense:level]
 Détecte et saute la première des trames entrelacées du flux video.
 Les valeurs peuvent aller de 0.0 à 1.0 la première (0.15 par défaut) est la
