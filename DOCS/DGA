@@ -1,0 +1,36 @@
+
+Contents
+~~~~~~~~
+
+ 1. Summary
+ 2. What is DGA
+ 3. DGA & MPlayer
+ 4. Features of DGA driver
+ 5. Speed issues
+ 6. Known bugs
+ 7. Future work
+ 
+ A. Some modelines
+
+
+
+1. Summary
+~~~~~~~~~~
+ This document tries to explain in some words what DGA is in general and
+ what the DGA video output driver for mplayer can do (and what it can't).
+
+2. What is DGA?
+~~~~~~~~~~~~~~~
+
+ DGA is short for Direct Graphics Access and is a means for a programm to
+ bypass the X-Server and directly modifying the framebuffer memory. 
+ Technically spoken this happens by mapping the framebuffer memory into
+ the memory range of your process. This is just allowed by the kernel
+ if 
+
+
+ Acki (acki@acki-netz.de, www.acki-netz.de)                  17.5.2001 
+
+ To be continued...
+
+ 
