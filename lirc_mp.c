@@ -98,8 +98,7 @@ int lirc_mp_getinput(){
     {"PAUSE", 'p'},
     {"INCVOL", '*'},
     {"DECVOL", '/'},
-    {"MASTER", 'm'},
-    {"PCM", 'c'}
+    {"MASTER", 'm'}
   };
        
   char *code;
