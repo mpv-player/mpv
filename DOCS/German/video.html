@@ -72,11 +72,9 @@ Du hast 3 Möglichkeiten um sie zu finden:</P>
 <P><CODE>(--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000<BR>
 (--) SVGA: Linear framebuffer at 0xD8000000</CODE></P>
 <LI>durch /proc/pci (verwende lspci -v Befehl):
-<P><TABLE>
-<TD VALIGN=top><CODE>01:00.0</CODE></TD><TD><CODE>VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525</CODE></TD><TR>
-<TD></TD><TD><CODE>Memory at d8000000 (32-bit, prefetchable)</CODE></TD><TR>
-</TABLE></P></CODE>
-<LI>von den mga_vid Kerneltreiber-Meldungen (verwende dmesg):
+<P><CODE>01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525<BR>
+Memory at d8000000 (32-bit, prefetchable)</CODE></P></CODE>
+<LI>durch die mga_vid Kerneltreiber-Meldungen (verwende dmesg):
 <P><CODE>mga_mem_base = d8000000</CODE></P>
 </UL></P>
 
@@ -101,75 +99,74 @@ Zum Beispiel für die Matrox Karte von oben (base=0xd8000000) mit 32MB RAM
 <P><CODE>&nbsp;&nbsp;echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr</CODE></P>
 
 
-<P>Nicht alle CPUs unterstützen MTRRs. Zum Beispiel ältere K6-2's [etwas bei
-266Mhz, stepping 0] unterstützen kein MTRR, aber stepping 12 CPUs tuen es
-('<CODE>cat /proc/cpuinfo</CODE>' um es zu überprüfen').</P>
+<P>Nicht alle CPUs unterstützen MTRRs. Zum Beispiel ältere K6-2's [z.B. 266Mhz,
+stepping 0] unterstützen kein MTRR, aber stepping 12 CPUs tuen es
+('<CODE>cat /proc/cpuinfo</CODE>' um zu überprüfen').</P>
 
 <P><B><A NAME=2.2.1.2>2.2.1.2. Xv</A></B></P>
 
-<P>Mit XFree86 4.0.2 oder neurer kannst du die Hardware-YUV-Routinen deiner
-Karte verwenden, mit Hilfe der XVideo Erweiterung. Das ist, was die Option 
-'-vo xv' verwendet. Das es funktioniert, prüfe folgendes:</P>
+<P>Bei XFree86 4.0.2 oder neuer kannst du die Hardware-YUV-Routinen deiner
+Grafikkarte verwenden, mit Hilfe der XVideo Erweiterung. Diese Routinen verwendet
+die Option '-vo xv'. Das es funktioniert, prüfe folgendes:</P>
 <P><UL>
 <LI>Du verwendest XFree86 4.0.2 oder neuer (frühere Versionen haben kein
 XVideo)
 <LI>Deine Karte unterstützt Hardwarebeschleunigung (die meisten aktuellen
-tuen das)
-<LI>X läd die XVideo Erweiterung, das sieht etwa so aus:
+tuen dies)
+<LI>X lädt die XVideo Erweiterung, das sieht etwa so aus:
 
 <P><CODE>&nbsp;&nbsp;(II) Loading extension XVideo</CODE></P>
 <P>in /var/log/XFree86.0.log</P>
 
-<P>HINWEIS: dies läd nur die XFree86's Erweiterung. In einer guten Installation
-ist sie immer geladen, aber das bedeutet nicht, dass der Support zu _deiner_
-Karte geladen wurde!</P>
+<P>HINWEIS: dies lädt nur die XFree86 Erweiterung. In einer guten Installation
+ist sie immer geladen, aber das bedeutet nicht, dass der Support mit _deiner_
+Karte funktioniert!</P>
 
 <LI>Deine Karte hat Xv Unterstützung unter Linux. Um es zu überprüfen, tippe
 'xvinfo', es ist ein Teil der XFree86 Distribution. Es sollte einen langen Text
 anzeigen, vergleichbar mit diesem:
-<PRE>
-	X-Video Extension version 2.2
-	screen #0
-	  Adaptor #0: "Savage Streams Engine"
-	    number of ports: 1
-	    port base: 43
-	    operations supported: PutImage 
-	    supported visuals:
-	      depth 16, visualID 0x22
-	      depth 16, visualID 0x23
-	    number of attributes: 5
-	(...)
-	    Number of image formats: 7
-	      id: 0x32595559 (YUY2)
-	        guid: 59555932-0000-0010-8000-00aa00389b71
-	        bits per pixel: 16
-	        number of planes: 1
-	        type: YUV (packed)
-	      id: 0x32315659 (YV12)
-	        guid: 59563132-0000-0010-8000-00aa00389b71
-	        bits per pixel: 12
-	        number of planes: 3
-	        type: YUV (planar)
-	(...usw...)
+<PRE><CODE>
+&nbsp;&nbsp;X-Video Extension version 2.2
+&nbsp;&nbsp;screen #0
+&nbsp;&nbsp;Adaptor #0: "Savage Streams Engine"
+&nbsp;&nbsp;  number of ports: 1
+&nbsp;&nbsp;  port base: 43
+&nbsp;&nbsp;  operations supported: PutImage 
+&nbsp;&nbsp;  supported visuals:
+&nbsp;&nbsp;    depth 16, visualID 0x22
+&nbsp;&nbsp;    depth 16, visualID 0x23
+&nbsp;&nbsp;  number of attributes: 5
+&nbsp;&nbsp;(...)
+&nbsp;&nbsp;  Number of image formats: 7
+&nbsp;&nbsp;    id: 0x32595559 (YUY2)
+&nbsp;&nbsp;      guid: 59555932-0000-0010-8000-00aa00389b71
+&nbsp;&nbsp;      bits per pixel: 16
+&nbsp;&nbsp;      number of planes: 1
+&nbsp;&nbsp;      type: YUV (packed)
+&nbsp;&nbsp;    id: 0x32315659 (YV12)
+&nbsp;&nbsp;      guid: 59563132-0000-0010-8000-00aa00389b71
+&nbsp;&nbsp;      bits per pixel: 12
+&nbsp;&nbsp;      number of planes: 3
+&nbsp;&nbsp;      type: YUV (planar)
+&nbsp;&nbsp;(...usw...)
 </PRE>
 
-<P>Es muss YUY2 gepackte und YV12 Planar Pixelformate unterstützen, um
-hilfreich zu sein für <B>MPlayer</B>.</P>
+<P>Es muss YUY2 gepackte und YV12 planar Pixelformate unterstützen, um
+hilfreich für <B>MPlayer</B> zu sein.</P>
 
-<LI>Und zum Schluss prüfe, ob <B>MPlayer</B> mit 'xv' Unterstützung kompi-
-liert würde.
-./configure zeigt dies.
+<LI>Zum Schluss prüfe, ob <B>MPlayer</B> mit 'xv' Unterstützung kompiliert wurde.
+./configure zeigt an, ob es eingebaut wurde.
 
 </UL></P>
 
 <P><B><A NAME=2.2.1.2.1>2.2.1.2.1. 3dfx Karten</A></B></P>
 
-<P>Ältere 3dfx Treiber sind bekannt, dass sie Probleme mit der XVideo Beschleu-
-nigung machen, der Treiber unterstütze weder YUY2 noch YV12. Prüfe ob du XFree86
+<P>Bei älteren 3dfx Treibern sind bekannt, dass sie Probleme mit der XVideo Beschleunigung
+machen und dass der Treiber unterstützt weder YUY2 noch YV12. Prüfe ob du XFree86
 Version 4.1.0 oder neuer hast, da funktioniert es. Alternativ kannst auch auch 
-<A HREF="http://dri.sourceforge.net">DRI</A> cvs verwenden.
-Wenn du eigenartige Effekte beim Verwenden von -vo xv siehst, versuche SDL (es
-unterstützt auch XVideo) und schaue ob es funkioniert. Siehe <A HREF="#2.2.1.4">SDL Sektion</A>
+<A HREF="http://dri.sourceforge.net">DRI</A> CVS verwenden.
+Wenn du eigenartige Effekte bei der Verwendung von -vo xv siehst, versuche SDL (es
+unterstützt auch XVideo) und prüfe ob es funkioniert. Siehe <A HREF="#2.2.1.4">SDL Sektion</A>
 für Details.</P>
 
 <P><B>Oder</B> versuche den NEUEN -vo tdfxfb -Treiber! Siehe <A HREF="#2.2.1.9">Sektion
@@ -177,8 +174,8 @@ für Details.</P>
 
 <P><B><A NAME=2.2.1.2.2>2.2.1.2.2. S3 Karten</A></B></P>
 
-<P>S3 Savage3Ds sollten gut funktionieren, aber für Savage4 verwende XFree86
-Version 4.0.3 oder neuer (bei Bildproblemen versuche 16bpp). Und für S3 Virge.. verkaufe sie.</P>
+<P>S3 Savage3Ds sollten gut funktionieren, jedoch bei einer Savage4 verwende XFree86
+Version 4.0.3 oder neuer (bei Bildproblemen versuche 16bpp). Und bei S3 Virge.. verkaufe sie.</P>
 
 <P><B><A NAME=2.2.1.2.3>2.2.1.2.3. nVidia Karten</A></B></P>
 
@@ -187,7 +184,7 @@ Treiber, verfügbar auf der nVidia Website, verwenden. Der Standard X-Treiber
 unterstützt kein XVideo für diese Karten, aufgrund der von nVidia geschlossenen
 Sources/Spezifikationen.</P>
 
-<P><UL><LI>Riva128 Karten habe keine XVideo Unterstützung, auch nicht mit dem
+<P><UL><LI>Riva128 Karten haben keine XVideo Unterstützung, auch nicht mit dem
 nVidia-Treiber :(
 Wende dich an NVidia.</UL></P>
 
@@ -198,10 +195,10 @@ Wende dich an NVidia.</UL></P>
 <LI>Beim GATOS Treiber (den du verwenden solltest)
 ist VSYNC standardgemäß eingeschaltet. Das bedeutet, dass
 die Dekodierungsgeschwindigkeit (!) synchron mit der Monitor-Refeshrate ist.
-Wenn die Wiedergabe langsam zu sein scheint, versuche irgentwie VSYNC auszu-
-schalten, oder setze die Refreshrate auf n*(fps des Films) Hz.</LI>
+Wenn die Wiedergabe langsam zu sein scheint, versuche irgendwie VSYNC auszuschalten
+oder setze die Refreshrate auf n*(fps des Films) Hz.</LI>
 
-<LI>Radeon VE - zur Zeit hat nur die XFree86 CVS-Versionen einen Treiber für
+<LI>Radeon VE - zur Zeit hat nur die CVS-Versionen von XFree86 einen Treiber für
 diese Karte, Version 4.1.0 hat keinen. Keine TV-Out Unterstützung.</LI>
 </P>
 
@@ -209,8 +206,8 @@ diese Karte, Version 4.1.0 hat keinen. Keine TV-Out Unterstützung.</LI>
 <P><B><A NAME=2.2.1.2.5>2.2.1.2.5. NeoMagic Karten</A></B></P>
 
 <P>
-Diese Karte kann in vielen Laptops gefunden werden. Unter Linux ist deren
-Höchstleitung leider nur DGA. Unglücklichweise funktioniert der DGA-Treiber in
+Diese Karte kann man in vielen Laptops finden. Unter Linux ist deren
+Höchstleistung leider nur DGA. Unglücklichweise funktioniert der DGA-Treiber in
 X 4.1.0 nicht, also musst du auf 4.2.0 warten oder den modifizierten Treiber für
 4.0.3 oder 4.1.0 von hier downloaden: <A HREF="http://www.mplayerhq.hu/MPlayer/incoming/NeoMagic-driver">http://www.mplayerhq.hu/MPlayer/incoming/NeoMagic-driver</A>
 (hier findet man auch einen Patch für die Treiber-Sourcen).<BR>
@@ -222,55 +219,52 @@ Treiber wurden bereitgestellet von <A HREF="mailto:tomee@cpi.pl">Tomek Jarzynka<
 
 <P><B><A NAME=2.2.1.3.1>2.2.1.3.1. Zusammenfassung</A></B></P>
 
-<P>Dieses Dokument versucht mit einigen Worten was DGA allgemein ist und was
-der DGA Video-Ausgabetreiber für MPlayer alles machen kann (und was es nicht
-kann).</P>
+<P>Dieses Dokument versucht mit einigen Worten zu beschreiben, was DGA allgemein
+ist und was man mit dem DGA Video-Ausgabetreiber für MPlayer alles machen kann
+(und was es nicht kann).</P>
 
 
 <P><B><A NAME=2.2.1.3.2>2.2.1.3.2. Was ist DGA</A></B></P>
 
 <P>DGA ist die Abkürzung für Direct Graphics Access (Direkter Grafik-Zugriff)
 und bedeutet für ein Programm, das es den X-Server überbrückt und direkt den
-Framebuffer-Speicher zu ändern. 
-Technisch gesprochen passiert dies durch verschieben des Framebuffer-Speichers
-in den Speicherbereich des Prozesses. Dies wird vom Kernel nur erlaubt, wenn
-du Superuser-Rechter besitzt. Du kannst diese bekommen duch Einloggen als
-Rooot oder durch das Setzen des Suid-Bits für das MPlayer-Programm (NICHT
-empfohlen!).</P>
+Framebuffer-Speicher ändert. Technisch gesprochen passiert dies durch
+Verschieben des Framebuffer-Speichers in den Speicherbereich des Prozesses.
+Dies wird vom Kernel nur erlaubt, wenn der Anwender Superuser-Rechte besitzt. Man
+kann diese bekommen duch Einloggen als Root oder durch das Setzen des Suid-Bits
+für das MPlayer-Programm (NICHT empfohlen!).</P>
 
-<P>Es gibt zwei Versionen von DGA: DGA1 wird verwendet von XFree 3.x.x und DGA2
+<P>Es gibt zwei Versionen von DGA: DGA1 wird verwendet unter XFree 3.x.x und DGA2
 wurde zu XFree 4.0.1 entwickelt.</P>
 
 <P>DGA1 unterstützt nur den direkten Framebuffer-Zugriff, wie oben beschrieben.
-Für das Andern der Farbtiefe eines Video-Signals muss man auf die XVidMode Er-
-weiterung zugeifen.</P>
+Für das Ändern der Farbtiefe eines Video-Signals muss man auf die XVidMode
+Erweiterung zurückgeifen.</P>
 
-<P>DGA2 arbeitet mit dem Feature der XVidMode Erweiterung zusammen, und erlaubt
+<P>DGA2 arbeitet mit dem Feature der XVidMode Erweiterung zusammen und erlaubt
 auch das Ändern der Farbtiefe. So kannst du dem XServer allgemein auf einer
 32 Bit Auflösung betreiben und die Farbtiefe damit auf 15 Bits verringern. </P>
 
 <P>Wie auch immer, DGA hat auch einige Nachteile. Es scheint, als ob es irgendwie
-abhängig ist vom Grafik-Chip und an der Implementation des XServer's Video-
-Treiber, welcher der Chip kontrolliert. Also funktioniert es nicht auf jedem
-System ...</P>
+abhängig vom Grafik-Chip ist und von der Implementation des XServer Video-Treibers,
+welcher den Chip kontrolliert. Also funktioniert es nicht auf jedem System ...</P>
 
 
-<P><B><A NAME=2.2.1.3.3>2.2.1.3.3. Installation von DGA Unterstützung für MPlayer</A></B></P>
+<P><B><A NAME=2.2.1.3.3>2.2.1.3.3. Installation der DGA Unterstützung für MPlayer</A></B></P>
 
-<P>Als erstes prüfe, dass X die DGA Erweiterung läd, siehe in /var/log/XFree86.0.log:</P>
+<P>Als erstes prüfe, ob X die DGA Erweiterung lädt, siehe /var/log/XFree86.0.log:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>(II) Loading extension XFree86-DGA</CODE></P>
 
-<P>Siehe, XFree86 4.0.x oder neuer ist SEHR EMPFOHLEN!
-<B>MPlayer</B>s DGA-Treiber wird automatisch von ./configure erkannt, oder du kannst
-es erzwingen mit --enable-dga.</P>
+<P>XFree86 4.0.x oder neuer sind STARK EMPFOHLEN! <B>MPlayers</B> DGA-Treiber wird
+automatisch von ./configure erkannt, oder du kannst es mit --enable-dga erzwingen.</P>
 
 <P>Wenn der Treiber nicht zu einer kleineren Auflösung wechseln kann, versuche
-mit den Befehlen -vm (nur mit X 3.3.x), -fs, -bpp, -zoom um ein Video-Modus zu
+mit den Optionen -vm (nur unter X 3.3.x), -fs, -bpp, -zoom um ein Video-Modus zu
 finden, dass das Video passt. Es gibt noch keinen Konverter.. :(</P>
 
 <P>Werde ROOT. DGA braucht Root-Rechte um direkt in den Video-Speicher zu
-schreiben. Wenn du es auch also Anwender starten willst, installiert bei
+schreiben. Wenn du es auch also Anwender starten willst, installiere bei
 <B>MPlayer</B> die SUID root:</P>
 
 <P><CODE>
@@ -285,103 +279,99 @@ schreiben. Wenn du es auch also Anwender starten willst, installiert bei
 <P><B>!!!! ABER SEIT GEWARNT !!!!</B><BR>
 Dies ist ein <B>GROSSES</B> Sicherheitsrisiko! Mache das nie auf einem Server oder
 einem Computer, der von mehreren Personen verwendet wird, da sie durch das
-SUID Root von <b>MPlayer</B> Root-Rechte erhalten könnten.<BR>
+Root SUID von <b>MPlayer</B> Root-Rechte erhalten könnten!<BR>
 <B>!!!! DU WURDEST ALSO GEWARNT ... !!!!</B></P>
 
-<P>Verwende nun die '-vo dga' Option, und es sollte funktionieren! (hoffe es:)
-Du solltest auch probieren, ob die '-vo sdl:dga' Option bei die funktioniert!
+<P>Verwende nun die '-vo dga' Option und es sollte funktionieren! (hoffe es:)
+Du solltest auch probieren, ob die '-vo sdl:dga' Option bei dir funktioniert!
 Es ist um einiges schneller!!!</P>
 
 <P><B><A NAME=2.2.1.3.4>2.2.1.3.4. Änderung der Auflösung</A></B></P>
 
-<P>Der DGA Treiber erlaubt das Ändern der Auflösung des Ausgabe-Signals. Es er-
-spart die Verwendung von (langsamen) softwaremäßigen Scaling und ermöglicht zur
+<P>Der DGA Treiber erlaubt das Ändern der Auflösung des Ausgabe-Signals. Es erspart
+die Verwendung von (langsamem) softwaremäßigem Scaling und ermöglicht zur
 selben Zeit Vollbild-Grafiken. Ideal wäre es, wenn man auf die genaue Auflösung
-des Videos (würde die richtige Rate veraussetzen), aber der XServer erlaubt nur
-das Änderen in eine Auflösung, die in <CODE>/etc/X11/XF86Config</CODE>
-(<CODE>/etc/X11/XF86Config-4</CODE> für XFree 4.0.X) vordefiniert.
-Dies sind so genannte "Modelines" und sind von den Fähigkeiten deiner Video-
-Hardware abhängig. Der XServer scannt die Konfigurationsdatei beim Starten und
+des Videos (würde die richtige Rate voraussetzen) schalten könnte, aber der XServer
+erlaubt nur das Änderen in eine Auflösung, die in <CODE>/etc/X11/XF86Config</CODE>
+(<CODE>/etc/X11/XF86Config-4</CODE> bei XFree 4.0.X) vordefiniert ist.
+Dies sind so genannte "Modelines" und sind von den Fähigkeiten deiner
+Video-Hardware abhängig. Der XServer scannt die Konfigurationsdatei beim Starten und
 schaltet die Modelines aus, die nicht zu der Hardware passen. Du kannst die
 funktionierenden Modelines mithilfe der X11-Logdatei herausfinden. Sie kann
-funden werden unter:
-<CODE>/var/log/XFree86.0.log</CODE>.</P>
+unter <CODE>/var/log/XFree86.0.log</CODE> gefunden werden.</P>
 <P>Siehe Anhang A für einige Beispiele für Modeline-Einstellungen.</P>
 
 <P><B><A NAME=2.2.1.3.5>2.2.1.3.5. DGA &amp; MPlayer</A></B></P>
 
 <P>DGA wird in zwei Plätzen von <B>MPlayer</B> verwendet: Der SDL Treiber kann
-davon Verwendung nehmen (-vo sdl:dga) und der DGA-Treiber (-vo dga). Das oben
+es verwenden (-vo sdl:dga) und der DGA-Treiber (-vo dga). Das oben
 genannte trifft für beide zu; in der folgenden Sektion werde ich erklären, wie
 der DGA-Treiber für <B>MPlayer</B> funktioniert.</P>
 
 <P><B><A NAME=2.2.1.3.6>2.2.1.3.6. Features des DGA-Treibers</A></B></P>
  
-<P>Der DGA Treiber wird wird duch die -vo dga Option auf der Komandozeile aus-
-gewählt. Das normale verhalten ist, dass der DGA-Treiber die Auflösung so weit
+<P>Der DGA Treiber wird durch die -vo dga Option auf der Komandozeile ausgewählt.
+Das normale Verhalten ist, dass der DGA-Treiber die Auflösung so weit
 wie möglich an das Video anzupassen. Es ignoriert die -vm und -fs Optionen (für
-Videomodus-Änderung und Vollbild) - es versucht immer so viel Fläche wie mög-
-lich durch Ändern des Videomodus, dies erspartet eine zusätzliche Verwendung
+Videomodus-Änderung und Vollbild) - es versucht immer so viel Fläche wie möglich
+durch Ändern des Videomodus zu nutzen, dies erspartet eine zusätzliche Verwendung
 der CPU um das Bild zu vergrößern/verkleinern.
-Wenn du den Modus nicht magst, den der Treiber gewählt hat, kannst du das Modus
-das am ehestens passt möglicherweise mit -x und -y auswählen. 
+Wenn dir der Modus, den der Treiber gewählt hat, nicht gefällt, kannst du mit -x
+und -y Option einen auswählen, der besser passt. 
 Mit der -v Option wird der DGA Treiber - neben vielen anderen Dingen - eine
 Liste der Auflösungen, die von deiner aktuellen XF86-Config Datei unterstützt
-werden.
-Unter DGA2 kannst du auch die Farbtiefe mit der -bpp Option einstellen. Gültige
-Farbtiefen sind 15, 16, 24 und 32. Es hängt von deiner Hardware ab, ob diese
-Tiefen grundlegend unterstützt werden oder ob sie (was möglichweise langsam
-ist) konventiert wenden müssen.</P>
+werden ausgeben. Unter DGA2 kannst du auch die Farbtiefe mit der -bpp Option
+einstellen. Gültige Farbtiefen sind 15, 16, 24 und 32bpps. Es hängt von deiner
+Hardware ab, ob diese Tiefen grundlegend unterstützt werden oder ob sie (was
+möglichweise langsam ist) konvertiert werden müssen.</P>
  
-<P>Wenn du Genug glück hast und genug Offscreen-Speicher übrig ist und eine
-ganzes Bild darin zu speichern, wird der DGA Treiber "Doublebuffering" verwen-
-den, was ein flüssigeres Bild ermöglicht. Es wird der sagen, ob Doublebuffering
+<P>Wenn du genug Glück hast und genug Offscreen-Speicher übrig ist um eine
+ganzes Bild darin zu speichern, wird der DGA Treiber "Doublebuffering" verwenden,
+was ein flüssigeres Bild ermöglicht. Es wird ausgeben, ob Doublebuffering
 eingeschaltet ist oder nicht.</P>
 
 <P>Doublebuffering bedeutet, dass der nächste Frame des Videos bereits in den
-Offscreen-Speicher während der akutelle Frame angezeigt wird. Wenn der nächste
-Wenn der nächster Frame fertig ist, wird dem Grafik-Chip nur die Position im
-Speicher mitgeteilet, wo sich der nächste Frame befindet und die Grafik ver-
-verwendet das Bild einfach von dort. In der Zwischenzeit wird der anderer Buf-
-fer wieder mit Video-Daten aufgefüllt.</P>
+Offscreen-Speicher schrieben wird, während der aktuelle Frame angezeigt wird.
+Wenn der nächste Frame fertig ist, wird dem Grafik-Chip nur die Position im
+Speicher mitgeteilet, wo sich der nächste Frame befindet und die Grafik ververwendet
+das Bild einfach von dort. In der Zwischenzeit wird der anderer Buffer wieder
+mit Video-Daten aufgefüllt.</P>
 
 Doublebuffering kann man mit der Option -double ein- und mit der Option
--nodouble ausschalten. Zur Zeit ist die Standard-Option den zusätzlichen Buffer
-ausschaltet. Wenn der DGA-Treiber verwendet wird, funktioniert das Onscreen
-Display (OSD) nur mit eingeschaltetem Doublebuffering. Wie auch immer, das ein-
-schalter von Doublebuffering kann ein großer Geschwindigkeitsnachteil sein (auf
-meinem K6-II+ 525 verwerdet es zusätzliche 20% der CPU-Zeit!), abhängig von der
+-nodouble ausschalten. Zur Zeit ist die Standard-Option, dass der zusätzliche Buffer
+ausschaltet ist. Wenn der DGA-Treiber verwendet wird, funktioniert das Onscreen
+Display (OSD) nur mit eingeschaltetem Doublebuffering. Wie auch immer, das Einschalten
+von Doublebuffering kann einen großer Geschwindigkeitsnachteil sein (auf meinem
+K6-II+ 525 verwerdet es zusätzliche 20% der CPU-Zeit!), abhängig von der
 Implementation von DGA für eine Hardware.</P>
  
-
 <P><B><A NAME=2.2.1.3.7>2.2.1.3.7. Geschwindigkeit</A></B></P>
 
 <P>Allgemein gesprochen sollte der DGA-Framebuffer Zugriff mindestens so
-schnell sein wie Verwendung des X11-Treibers mit den zusätzlichen Vorteils des
-möglichen Vollbildes. Die Prozentuelle Geschwindigkeitsangaben von MPlayer
-sollten aber mit Vorsicht gesehen werden, denn zum Beispiel wird beim X11-Trei-
-ber die Zeit, die vom X-Server benötigt wird um das Bild aufzubauen, nicht ein-
-gerechnet. Logge dich über ein Terminal über eine serielle Verbindung in deine
-Box ein und starte MPlayer damit du wirklich siehst, was los ist ...</P>
+schnell sein wie Verwendung des X11-Treibers, jedoch mit den zusätzlichen Vorteils des
+möglichen Vollbildes. Die prozentuelle Geschwindigkeitsangaben von MPlayer
+sollten aber mit Vorsicht genossen werden, denn zum Beispiel wird beim X11-Treiber
+die Zeit, die vom X-Server benötigt wird um das Bild aufzubauen, nicht eingerechnet.
+Logge dich via ein Terminal über eine serielle Verbindung in deine Box ein und
+starte MPlayer damit du wirklich siehst, was los ist ...</P>
 
 <P>Allgemein gesprochen ist der Geschwindigkeitsvorteil von DGA im Vergleich
 zur normalen Verwendung von X11 stark abhängig von der Grafikkarte und wie gut
 das X-Server Modul dafür optimiert ist.</P>
 
-<P>Wenn du ein langsames system hat, verwende lieber 15 oder 16bit Farbtiefen,
-denn es verwendet nur halbe Speicherbandbreiten im Vergleich mit 32 bit.</P>
+<P>Wenn du ein langsames System besitztst, verwende lieber 15 oder 16 Bit Farbtiefen,
+denn es verwendet nur halbe Speicherbandbreiten im Vergleich zu 32 bit.</P>
 
 <P>Die Verwendung von 24bit ist eine gute Idee, wenn deine Karte 32 Bit Tiefe
-grundlegend unterstützt, denn es sind 25% weniger Daten im vergleich zu einem
-32/32 Modus.</P>
+unterstützt, denn es sind 25% weniger Daten im Vergleich zu einem 32/32 Modus.</P>
  
-<P>Ich habe einige AVI-Dateien schon auf einem Pentium MMX 266 wiedergeben wur-
-den. AMD K6-2 CPUs funktioniere vielleicht ab 400 MHZ oder mehr.</P>
+<P>Ich habe einige AVI-Dateien schon auf einem Pentium MMX 266 wiedergegeben.
+Bei AMD K6-2 CPUs funktioniert es vielleicht ab 400 MHZ oder mehr.</P>
 
 <P><B><A NAME=2.2.1.3.8>2.2.1.3.8. Bekannte Probleme</A></B></P>
 
-<P>Nun, nach einigen Entwicklern von XFree zur Folge ist DGA immer noch ein
-wildes Tier. Sie sagen, es ist besser es nicht zu verwenden. Die Implemetation
+<P>Nun, nach der Aussage von einigen Entwicklern von XFree ist DGA immer noch "ein
+wildes Tier". Sie sagen es ist besser, wenn man es nicht verwendet. Die Implementierung
 ist noch nicht immer fehlerfrei mit jedem Chipset-Treiber von XFree.</P>
 
 <P><UL>
@@ -389,18 +379,18 @@ ist noch nicht immer fehlerfrei mit jedem Chipset-Treiber von XFree.</P>
 <LI>ATI-Treiber erfordern mehrmaliges zurückschalten nach dem Abspielen mit DGA
 <LI>einige Treiber schlagen Fehl bei dem Versuch zurück zur normalen Auflösung
 zu schalten (verwende STRG-ALT-Keypad +, - um manuell zu schalten)
-<LI>einige Treiber haben kleine Farbfehler
-<LI>einige Treiber lügen, im Bezug auf die Speichergange für die Anwendung, dieses
-DGA wird kene Doublebuffering verwenden(SIS?)
-<LI>einige Treiber scheinen einen Fehler zu berichten zeigen nur eine gültige
+<LI>einige Treiber weisen kleine Farbfehler auf
+<LI>einige Treiber lügen, im Bezug auf die Speichergröße für die Anwendung, dieses
+DGA wird kein Doublebuffering verwenden (SIS?)
+<LI>einige Treiber scheinen einen Fehler zu berichten, sie zeigen nur eine gültige
 Auflösung an. In diesem Fall wird der DGA-Treiber abstützen, wenn er von einer
 unsinnigen Auflösungung von 100000x100000 oder ähnlich berichtet ...
-<LI>OSD funktionier nur mit eingeschaltetem Doublebuffering
+<LI>OSD funktioniert nur mit eingeschaltetem Doublebuffering
 </UL></P>
 
 <P><B><A NAME=2.2.1.3.9>2.2.1.3.9. Zukünftige Arbeiten</A></B></P>
 
-<P><UL><LI>Verwendung des neuen X11 Render-Interface für OSD
+<P><UL><LI>Verwendung des neuen X11 Rendering-Interfaces für OSD
 <LI>Wo ist meine TODO Liste ???? :-(((</UL></P>
 
 
@@ -419,18 +409,18 @@ unsinnigen Auflösungung von 100000x100000 oder ähnlich berichtet ...
   EndSection
 </PRE>
 
-<P>Diese Einstellungen funktionen sehr gut mit meinem Riva128 Chip unter ver-
-wendung des nv.o XServer Treibermodules.</P>
+<P>Diese Einstellungen funktionieren sehr gut mit meinem Riva128 Chip unter Verwendung
+des nv.o XServer Treibermodules.</P>
 
 
 <P><B><A NAME=2.2.1.3.B>2.2.1.3.B. Fehlerberichte</A></B></P>
 
-<P>Wenn du Probleme mt dem DGA-Treibers hat, sende mit einen Fehlerbericht
+<P>Wenn du Probleme mit dem DGA-Treibers hat, sende einen Fehlerbericht
 (e-Mail Adresse siehe untern). Bitte starte MPlayer mit der -v Option und
-sende alle Zeilen in dem Fehlerbericht die mit vo_dga: beginnen</P>
+sende alle Zeilen beginnend mit vo_dga: in dem Fehlerbericht.</P>
  
 <P>Bitte schreibe auch, welche Version von X11 du verwendest, die Grafikkarte
-und die Art von CPU. Das X11-Treiber Module (definiert in XF86-Config) hilft
+und die Art von CPU. Das X11-Treiber Modul (definiert in der XFree86-Config) hilft
 auch möglicherweise. Danke!</P>
 
  
