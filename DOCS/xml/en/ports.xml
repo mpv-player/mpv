@@ -318,7 +318,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   Put this
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
   in <filename class="directory">/usr/include/</filename> in order to
-  make MPlayer compile.</para>
+  make <application>MPlayer</application> compile.</para>
 
 <para>DirectX header files need to be extracted to <filename class="directory">/usr/include/</filename> or
   <filename class="directory">/usr/local/include/</filename>.</para>
@@ -386,7 +386,7 @@ modified GCC 2.95.x doesn't support C99 syntax well.
 
 <para>
 One can get an Aqua GUI for <application>MPlayer</application> together with
-compiled <application>MPlayer</application> binaries for MacOS X from the
+compiled <application>MPlayer</application> binaries for Mac OS X from the
 <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> project.
 </para>
 </sect1>
