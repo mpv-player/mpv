@@ -1632,7 +1632,8 @@ if(sh_video) {
         add_subtitles (sub_name[i], sh_video->fps, 0); 
   } 
   if(sub_auto) { // auto load sub file ...
-    char **tmp = sub_filenames(get_path("sub/"), filename);
+    char *psub = get_path( "sub/" );
+    char **tmp = sub_filenames((psub ? psub : ""), filename);
     char **tmp2 = tmp;
     while (*tmp2)
         add_subtitles (*tmp2++, sh_video->fps, 0);
