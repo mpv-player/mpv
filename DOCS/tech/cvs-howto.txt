@@ -1,150 +1,154 @@
 
-About CVS write access:      by A'rpi
+About CVS write access:
 ~~~~~~~~~~~~~~~~~~~~~~~
+
 
 I. TECH SIDE:
 =============
+
 1. Changing password:
 
   As you probably got a restricted CVS-only shell, it's not trivial:
 
-  ssh LOGIN@mplayerhq.hu passwd
+    ssh LOGIN@mplayerhq.hu passwd
   
-  (replace LOGIN with your loginname. leave 'passwd' unchanged, it's command)
+  Replace LOGIN with your login name. Leave 'passwd' unchanged, it's a command.
   
-  Note: if you need real shell for something, tell me.
+  Note: If you need a real shell for something, tell A'rpi.
 
-2. Checkout devel. source tree:
+2. Checking out development source tree:
   
-  export CVS_RSH=ssh
-  cvs -z3 -d:ext:LOGIN@mplayerhq.hu:/cvsroot/mplayer co main
+    export CVS_RSH=ssh
+    cvs -z3 -d:ext:LOGIN@mplayerhq.hu:/cvsroot/mplayer co main
   
-  NOTE: cvs -d:pserver: mode doesn't allow writting, even with password!
+  NOTE: cvs -d:pserver: mode doesn't allow writing, even with password!
   
-3. Commiting changes:
+3. Committing changes:
 
-  cvs -z3 commit -m "comment - what and why did you change" filename(s)
+    cvs -z3 commit -m "comment - what you changed and why" filename(s)
   
-  Do not use such comments: "bugfix." or "files changed" or "dunno"
-  You don't have to include filename in comment, as comments are linked
-  to files. If you have different comments for files, commit them separated,
-  not at same time.
+  Do not use comments such as: "bug fix." or "files changed" or "dunno".
+  You don't have to include the filename in the comment, as comments are linked
+  to files. If you have different comments for different files, commit them
+  separately, not at the same time. If you leave out -m at the command line you
+  will be prompted for a comment in an editor.
   
 4. Adding new files/dirs:
 
-  cvs add filename/dirname
+    cvs add filename/dirname
   
 5. Removing files:
 
-  rm filename
-  cvs remove filename
-  cvs commit -m "reason of removing this file" filename
+    rm filename
+    cvs remove filename
+    cvs commit -m "reason for removing this file" filename
   
-6. Check changes:
+6. Checking changes:
   
-  cvs -z3 diff -u filename(s)
+    cvs -z3 diff -u filename(s)
   
-  it's recommended to check changes first, before commit. especially if you
-  forget what did you change :)
-  and this way you will see if your patch has debug stuff or indenting change,
-  and you can fix it before commiting and triggering me to use cvs-backup.
+  It's recommended to check changes before committing. especially if you forget
+  what you changed :)
+  This way you will see if your patch has debug stuff or indentation changes
+  and you can fix it before committing and triggering me to use cvs-backup.
   
-7. Check changelog:
+7. Checking changelog:
 
   cvs -z3 log filename(s)
   
-8. Rename/move files or content of files:
+8. Renaming/moving files or content of files:
 
-  you can NOT do that. ask CVS server admin (A'rpi) to do it!
-  do NOT remove & re-add file - it will kill changelog!!!!
+  You CANNOT do that. Ask the CVS server admin (A'rpi) to do it!
+  Do NOT remove & re-add a file - it will kill the changelog!!!!
 
-  don't do big cut'n'paste from one file to another without very big
-  and already discussed and allowed (-dev-eng list) reason!
-  it will make those changes untrackable!
+  Don't do a lot of cut'n'paste from one file to another without a very good
+  reason and discuss it on the mplayer-dev-eng mailing list first. It will make
+  those changes untraceable!
 
-  such actions are useless and treated as cosmetics in 99% of cases,
-  so try to avoid these.
+  Such actions are useless and treated as cosmetics in 99% of cases,
+  so try to avoid them.
   
   
-If you have any tech problems with cvs server, contact me:
-A'rpi <arpi@thot.banki.hu>
+Contact A'rpi <arpi@thot.banki.hu> if you have technical problems with the CVS
+server.
+
 
 
 II. POLICY / RULES:
 ===================
 
-1. You shouldn't commit code which makes cvs broken!
-   (i mean unfinished but enabled code which break
-    compiling or compiles but does not work)
+1. You shouldn't commit code which breaks MPlayer! (Meaning unfinished but
+   enabled code which breaks compilation or compiles but does not work.)
 
-2. You don't have over-test things. if it works for you,
-   and you think it should work for others too, then commit.
-   If it has problems (portability, exploits compiler bugs,
-   unusual environment etc) they will be reported, it's ok.
+2. You don't have to over-test things. If it works for you, and you think it
+   should work for others, too, then commit. If your code has problems
+   (portability, exploits compiler bugs, unusual environment etc) they will be
+   reported and eventually fixed.
 
-3. You can commit unfinished stuff (for testing etc), but it
-   must be disabled (#ifdef etc) by default.
+3. You can commit unfinished stuff (for testing etc), but it must be disabled
+   (#ifdef etc) by default.
 
-4. Do not change behaviour of the program (renaming options etc)
-   without discussing first at the MPlayer-dev-eng list.
-   Do not decrease/remove functionality of code. Just improve!
+4. Do not change behavior of the program (renaming options etc) without
+   discussing it first at the mplayer-dev-eng mailing list. Do not remove
+   functionality from the code. Just improve!
 
-5. Source indenting and other cosmetical changes are refused.
-   I'll remove those commits...
-   Every developer has its own indenting style, you shouldn't
-   change it. Of course if you (re)write something then you can
-   use your own style...
-   (Many projects forces a given indenting style - we don't)
+5. We refuse source indentation and other cosmetical changes, such commits will
+   be rejected and removed. Every developer has his own indentation style, you
+   should not change it. Of course if you (re)write something, you can use your
+   own style... (Many projects force a given indentation style - we don't.)
    
-   Note: if you had to put if(){ .. } over big (> 5 lines) code,
-   do NOT change the indent of the inner part (move it right) !
+   Note: If you had to put if(){ .. } over a large (> 5 lines) chunk of code,
+   do NOT change the indentation of the inner part (move it right)!
 
-6. Always fill out the comment at commiting (-m switch of cvs, or
-   in the editor if you left -m).
-   It shouldn't be such lines: "fixed!" or "Changed it."
-   Describe in a few lines (usually 1 line is enough) what did
-   you changed and why did you do that. You can refer mails if bugfix.
+6. Always fill out the comment at committing (-m switch of CVS, or in the
+   editor if you left out -m). Describe in a few lines (usually one line is
+   enough) what you changed and why. You can refer to mailing list postings if
+   you fix a particular bug. Comments such as "fixed!" or "Changed it." are not
+   acceptable.
 
-7. If you apply patch by someone else, include his name and email
-   address in the cvs comment! Do NOT commit patches for other
-   developer's code (code not maintained by you) without his
-   permission! If he didn't commited - he probably has the reason!
+7. If you apply a patch by someone else, include his name and email address in
+   the CVS comment! Do NOT commit patches for other developer's code (code not
+   maintained by you) without his permission! If he didn't commit - he probably
+   has a reason!
 
-8. I've developed something called CVS-Backup. It archives CVS
-   repository after each commit - so I can reverse your commits
-   (without messing up changelog) if they are bad.
-   If you think your bugfix or other change was bad and unneeded,
-   ask me to reverse it instead of commiting previous version!
+8. A'rpi developed something called cvs-backup. It archives the CVS repository
+   after each commit - so commits can be reversed (without messing up the
+   changelog) if they are bad. If you think your bug fix or other change was
+   bad and unneeded, ask A'rpi to reverse it instead of committing the previous
+   version!
 
-9. You won't have write access to DOCS/. (you have to its subdirs).
-   It was changed to avoid breaking docs or getting translations
-   or homepage desynced. Send your DOCS patch to Gabucino, he'll
-   review, and commit (or not. probably not. never...).
+9. You will have write access to DOCS/. This used to be different to avoid
+   breaking docs or getting translations or the homepage desynced. If you are
+   unsure about this, send a patch to dev-eng, the documentation maintainers
+   will review and commit your stuff.
    
 Also read patches.txt !!!!
 
-I think our rules aren't too hard. If you have comments, contact me.
+We think our rules are not too hard. If you have comments, contact us.
+
+
 
 III. Beginners Guide	by David Holm
 ====================
+
 When I first got CVS write access I got banned after only a few hours
 because I didn't fully understand this documentation. This part is for
-those of you who have just got cvs write access and want to avoid the
-most common pitfalls leading to cvs ban.
+those of you who have just got CVS write access and want to avoid the
+most common pitfalls leading to CVS ban.
 I will introduce a step-by-step guide explaining how I'm making sure
-that my cvs commits are proper and won't get me banned.
+that my CVS commits are proper and won't get me banned.
 
-1. You should set up two dirs for mplayer, one which contains the stable
+1. You should set up two directoress for MPlayer, one which contains the stable
    version and has the :ext: option instead of :pserver: in CVS/Root.
-   The other should be your development dir and have the CVS/Root set to
+   The other should be your development directory and have the CVS/Root set to
    :pserver: instead of :ext:, that way you can't commit development code
    by accident (since only :ext: allows writes).
    This is my setup:
    ~/mplayer
 	    /main
 	    /main.dev
-    NOTE: I'll use these dir names from hereon in the guide, what you want
-    to call your dirs are entirely up to you. This is _only_ an example.
+    NOTE: I'll use these directory names from here on in the guide, what you
+    call your directories is entirely up to you. This is _only_ an example.
 
 2. When you are satisfied with the changes in "main.dev" and think you are
    ready to commit the changes to CVS start by doing the following in the
@@ -153,102 +157,116 @@ that my cvs commits are proper and won't get me banned.
    dev2stable is the filename for the patchfile, it doesn't matter what you
    call it.
    
-3. Now comes one of the tricky parts, editing the patch.
-   I prefer using mcedit (comes with Midnight Commander) since it does syntax
-   highlighting in patches (= it uses colors to identify lines =), But most
-   ascii editors should do (meaning don't use staroffice and save it as a
-   star office document for instance ;)
-   I will try to explain this as good as I can.
-	Read throught the patch and remove all occurances of:
-	    * diff -Nur.... that are affecting files YOU have NOT modified
-	      these occur when either main or main.dev are different version
-	      (not checked out at the same time)
-	      EVERYTHING from the diff -Nur... line until the next diff -Nur...
-	      line are changes to the file specified after the diff options,
-	      and ONLY that file.
-	      
-	    * Lines containing "Binary files..." if you add the 'a' switch to
-	      -N(a)ur binary files will be added to the patch as well, making it
-	      huge and puts alot of unnecessary data in it (since you seldom
-	      commit any binaries).
-	      
-	    * If you find changes within a diff block that you don't want to
-	      commit you can delete them if they are the only changes ranging
-	      from the @@ -x,y +x,y @@ until the line before the next
-	      @@ -x,y +x,y @@. You _cannot_ remove single lines after a 
-	      @@ -x,y +x,y @@ because that will break the patch!.
-	        example:
-		...
-		@@ -15,34 +15,6 @@
-		- old_option;
-		+ new_option;
-		@@ -65,13 +65,3 @@
-		...
-		
-		Ok:
-		...
-		@@ -65,13 +65,3 @@
-		...
-		
-		Will break patch:
-		...
-		@@ -15,34 +15,6 @@
-		  old_option;
-		@@ -65,13 +65,3 @@
-		...
-	    
-	      When I end up in situation where I have to remove just smoe lines from
-	      a block I leave it alone, remember (write down) which file it is in and
-	      then edit the file in "main" after I've applied the patch.
-	      
-	    * Now it's time for applying the patch to the "main" (stable) dir. This
-	      should be done in two steps:
-	        1. enter "main" and run "patch -p1 --dry-run < ../dev2stable"
-		    -p1 means that you are one level deep (that you have entered
-		    the "main" directory and that should be stripped when patching,
-		    if you run it from "~/mplayer" you would use -p0).
-		    --dry-run means that patch does everything it normally does
-		    but without modifying ANY files, this is a great way of testing
-		    whether your patch works or not.
-		    "../dev2stable" is your patchfile. (don't forget the '<')
-		    If the dry run fails check the line it failed on and figure out
-		    why it failed, make a new patch, and try again.
-		2. Ok, you finally have a working patch, remove --dry-run and patch
-		   "main" and you are done with the patching part =).
+3. Now comes one of the tricky parts, editing the patch. I prefer using mcedit
+   (comes with Midnight Commander) since it does syntax highlighting in patches
+   (= it uses colors to identify lines =), But most ASCII editors should do
+   (meaning don't use Star Office and save it as a Star Office document for
+   instance ;) I will try to explain this as good as I can.
 
-4. It's almost time for the final step, commiting the changes. But first you MUST make
-   sure your changes compiles without breaking anything and that it follows the Policy 
-   mentioned in section 2. (Read it until your eyes are bleeding if you want to keep CVS 
-   access!)
-   Don't worry about object files etc that will be created in your "main" dir, they won't
-   be sent to CVS on commit, you must use the add command to add new files (discuss it on
-   the list before adding new files!).
-   Now to make sure your additions follow policy do the following on every file you will
-   commit:
-    "cvs -z3 diff -u <filename> > <filename.d> of course the output file (<filename.d>) can
-    have any name you want. This will create a file showing the differences between the
-    file on cvs and your updated local file.
+   Read through the patch and remove all occurrences of:
+
+     * diff -Nur.... that are affecting files YOU have NOT modified. These
+       occur when either main or main.dev are a different version (not checked
+       out at the same time)
+       EVERYTHING from the diff -Nur... line until the next diff -Nur... line
+       are changes to the file specified after the diff options, and ONLY that
+       file.
+       
+     * Lines containing "Binary files..." if you add the 'a' switch to -N(a)ur
+       binary files will be added to the patch as well, making it huge and
+       putting a lot of unnecessary data in it (since you seldom commit any
+       binaries).
+       
+     * If you find changes within a diff block that you don't want to commit
+       you can delete them if they are the only changes ranging from the
+       @@ -x,y +x,y @@ until the line before the next @@ -x,y +x,y @@. You
+       _cannot_ remove single lines after a @@ -x,y +x,y @@ because that will
+       break the patch!.
+       Example:
+         ...
+         @@ -15,34 +15,6 @@
+         - old_option;
+         + new_option;
+         @@ -65,13 +65,3 @@
+         ...
+         
+         OK:
+         ...
+         @@ -65,13 +65,3 @@
+         ...
+         
+         Will break patch:
+         ...
+         @@ -15,34 +15,6 @@
+           old_option;
+         @@ -65,13 +65,3 @@
+         ...
+       
+       When I end up in a situation where I have to remove just some lines from
+       a block, I leave it alone, remember (write down) which file it is in and
+       then edit the file in "main" after I've applied the patch.
+       
+     * Now it's time for applying the patch to the "main" (stable) directory.
+       This should be done in two steps:
+         1. enter "main" and run
+ 
+               patch -p1 --dry-run < ../dev2stable
+ 
+ 	    -p1 means that you are one level deep (that you have entered the
+            "main" directory and that should be stripped when patching, if you
+            run it from "~/mplayer" you would use -p0).
+ 	    --dry-run means that patch does everything it normally does but
+            without modifying ANY files. This is a great way of testing whether
+            your patch works or not.
+ 	    "../dev2stable" is your patchfile. (don't forget the '<')
+ 	    If the dry run fails, check the line it failed on and figure out
+            why it failed, make a new patch and try again.
+ 
+ 	2. OK, you finally have a working patch, remove --dry-run, patch "main"
+           and you are done with the patching part =).
+ 
+4. It's almost time for the final step, committing the changes. But first you
+   MUST make sure your changes compile without breaking anything and that it
+   follows the Policy mentioned in section 2. (Read it until your eyes are
+   bleeding if you want to keep CVS access!)
+   Don't worry about object files etc that will be created in your "main" dir,
+   they won't  be sent to CVS on a commit, you must use the add command to add
+   new files (discuss it on dev-eng before adding new files!).
+   Now to make sure your additions follow policy do the following on every file
+   you will commit:
+  
+     cvs -z3 diff -u <filename> > <filename.d>
+
+   Of course the output file (<filename.d>) can have any name you want. This
+   will create a file showing the differences between the file on CVS and your
+   updated local file.
    I will explain some of the policy rules I had a hard time understanding:
-    5. This means that if for instance you have lines in <filename.d> that look
-       something like this:
-       -
-       +
-       That means that you have either added or removed a tab or spaces on that line.
-       That qualifies as cosmetical changes and is disallowed. Edit the file and put
-       back/remove the added/removed tab/spaces.
-       Do a new diff on the file and make sure it fixed the cosmetics.
-    6. Make sure you read and understand this properly before commiting anything. Commit
-       one file at a time!
 
-5. Ok, you have a working patch following the cvs policy, excellent work. Now for the
-   final step, commiting. This is real simple. Just run the following command in "main"
-   for each file you want to commit:
-    "cvs -z3 commit -m "<comment (changes)>" <filename>" or
-    "cvs -z3 commit <filename>"
-   The latter will bring up your default text editor for writing comments (I prefer this
-   method).
+     II.5: This means that if for instance you have lines in <filename.d> that
+           look something like this:
+
+             -
+             +
+
+           That means you have added or removed tabs or spaces on that line.
+           That qualifies as a cosmetical change and is disallowed. Edit the
+           file and put back/remove the added/removed tabs/spaces.
+           Rediff the file and make sure the cosmetic changes are fixed.
+
+     II.6: Make sure you read and understand this properly before committing
+           anything. Commit one file at a time!
+
+5. OK, you have a working patch following the CVS policy, excellent work. Now
+   for the final step, committing. This is really simple. Just run the
+   following command in "main" for each file you want to commit:
+
+     cvs -z3 commit -m "<comment (changes)>" <filename>
+     cvs -z3 commit <filename>
+
+   The latter will bring up your default text editor for writing comments (I
+   prefer this method).
    
-You are done, congratulations. If you are certain you have followed all the policies you
-shouldn't have any troubles with CVS maintainers at all.
-At first I thought the policy was too strict, I discussed it with Arpi and he made some
-very good points, so don't complain.
+You are done, congratulations. If you are certain you have followed all of the
+policy you shouldn't have any trouble with the CVS maintainers at all.
+At first I thought the policy was too strict, but I discussed it with A'rpi and
+he made some very good points, so don't complain.
