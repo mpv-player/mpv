@@ -1668,10 +1668,11 @@ if(time_frame>0.001 && !(vo_flags&256)){
         unsigned int samples=
 //	  (sh_audio->audio.dwSampleSize)?
 //          ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
-          (d_audio->block_no); // <- used for VBR audio
+          ds_tell_block(d_audio); // <- used for VBR audio
 	samples+=sh_audio->audio.dwStart; // offset
         a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
 	delay_corrected=1;
+	a_pts-=(sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
     } else {
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
       a_pts=d_audio->pts;
