@@ -28,6 +28,7 @@ aviwrite_stream_t* aviwrite_new_stream(aviwrite_t *muxer,int type){
     s->type=type;
     s->id=muxer->avih.dwStreams;
     s->timer=0.0;
+    s->size=0;
     switch(type){
     case AVIWRITE_TYPE_VIDEO:
       s->ckid=mmioFOURCC(('0'+s->id/10),('0'+(s->id%10)),'d','c');
@@ -103,6 +104,7 @@ void aviwrite_write_chunk(aviwrite_t *muxer,aviwrite_stream_t *s, FILE *f,int le
 	s->h.dwLength++;
     }
     s->timer=(double)s->h.dwLength*s->h.dwScale/s->h.dwRate;
+    s->size+=len;
     if(len>s->h.dwSuggestedBufferSize) s->h.dwSuggestedBufferSize=len;
 
 }
