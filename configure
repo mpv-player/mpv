@@ -1273,7 +1273,7 @@ done
 
 # Atmos: moved this here, to be correct, if --prefix is specified
 test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
-test -z "$_confdir" && _confdir="$_datadir"
+test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
 test -z "$_libdir" && _libdir="$_prefix/lib"
 test -z "$_mlibdir" && _mlibdir="$MLIBHOME"
 
