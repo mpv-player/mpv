@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.12 -->
 <!-- FIXME: history really should be in the appendix -->
 <sect1 id="history">
 <title>Történelem</title>
@@ -12,7 +12,7 @@ Egy éve kezdődött... Nagyon sok lejátszót kiprobáltam Linux alatt
 <application>xanim</application>, <application>avifile</application>,
 <application>xmmp</application>), de mind ugyanazokkal a problémákkal küzdött.
 Többnyire a különleges file-okkal, vagy a hang/kép szinkronnal. Legtöbbjük
-képtelen mind MPEG1, MPEG2 és AVI (DivX) lejátszására. Sokuknak gondjuk van
+képtelen mind MPEG-1, MPEG-2 és AVI (DivX) lejátszására. Sokuknak gondjuk van
 a képminőséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...
 </para></blockquote><para>A'rpi, 2001</para>
 
