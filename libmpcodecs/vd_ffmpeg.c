@@ -54,7 +54,11 @@ typedef struct {
 
 #include "cfgparser.h"
 
+#if LIBAVCODEC_BUILD >= 4632
+static int get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type);
+#else
 static void get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type);
+#endif
 
 #ifdef FF_BUG_AUTODETECT
 static int lavc_param_workaround_bugs= FF_BUG_AUTODETECT;
@@ -231,7 +235,9 @@ static int init(sh_video_t *sh){
     }
     if (sh->bih && (sh->bih->biSize != sizeof(BITMAPINFOHEADER)) &&
 	(sh->format == mmioFOURCC('M','4','S','2') ||
-	 sh->format == mmioFOURCC('M','P','4','S')))
+	 sh->format == mmioFOURCC('M','P','4','S') ||
+	 sh->format == mmioFOURCC('W','M','V','2')
+         ))
     {
 	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
 	avctx->extradata = malloc(avctx->extradata_size);
@@ -373,7 +379,11 @@ static int init_vo(sh_video_t *sh){
 }
 
 #if LIBAVCODEC_BUILD > 4615
+#if LIBAVCODEC_BUILD >= 4632
+static int get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type){
+#else
 static void get_buffer(struct AVCodecContext *avctx, int width, int height, int pict_type){
+#endif
     sh_video_t * sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
     mp_image_t* mpi=NULL;
@@ -455,6 +465,9 @@ else if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)
     printf("S");
 else
     printf(".");
+#endif
+#if LIBAVCODEC_BUILD >= 4632
+    return 0;
 #endif
 }
 #endif
