@@ -92,6 +92,14 @@ II. POLICY / RULES:
    discussing it first at the mplayer-dev-eng mailing list. Do not remove
    functionality from the code. Just improve!
 
+4.B. Do not commit changes to the build system (Makefiles, configure script)
+   which changes behaviour, defaults etc, without asking (and being accepted)
+   on the mplayer-dev-eng maillist. The same applies to compiler warning fixes,
+   trivial-looking fixes. We usually have the reason not doing things that way.
+   Send them as patches to the maillist, and if the code maintainers say OK,
+   then you may commit. This paragraph doesn't apply to your own files
+   (written and/or maintained by you).
+   
 5. We refuse source indentation and other cosmetical changes, such commits will
    be rejected and removed. Every developer has his own indentation style, you
    should not change it. Of course if you (re)write something, you can use your
