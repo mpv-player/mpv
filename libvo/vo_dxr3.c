@@ -6,6 +6,10 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-07-05:
+ *  Removed lavc and fame encoder to be compatible with new libvo style.
+ *  Added graphic equalizer support.
+ *
  * 2002-04-15:
  *  The spuenc code isn't 100% stable yet, therefore I'm disabling
  *  it due to the upcoming stable release.
@@ -90,89 +94,11 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "aspect.h"
-#include "postproc/rgb2rgb.h"
-#include "postproc/swscale.h"
 #include "cpudetect.h"
 #include "spuenc.h"
- 
-//#define USE_LIBFAME // this is done in configure now
+#include "../vidix/vidixlib.h"
 
-/* Libfame codec initialisation */
-#ifdef USE_LIBFAME
-#include "../libfame/fame.h"
-static unsigned char *outbuf = NULL;
-static fame_parameters_t fame_params;
-static fame_yuv_t fame_yuv;
-static fame_context_t *fame_ctx = NULL;
-static fame_object_t *fame_obj;
-#endif
-
-/* libavcodec codec initialisation */
-#ifdef USE_LIBAVCODEC
-#ifdef USE_LIBAVCODEC_SO
-#include <libffmpeg/avcodec.h>
-#include <libffmpeg/dsputil.h>
-#else
-#include "libavcodec/avcodec.h"
-#include "libavcodec/dsputil.h"
-#endif
-/* for video encoder */
-static AVCodec *avc_codec = NULL;
-static AVCodecContext *avc_context = NULL;
-static AVPicture avc_picture;
-int avc_outbuf_size = 100000;
-extern int avcodec_inited;
-extern int motion_estimation_method;
-#endif
-
-char *picture_data[] = { NULL, NULL, NULL };
-int picture_linesize[] = { 0, 0, 0 };
-
-#ifdef HAVE_MMX
-#include "mmx.h"
-#endif
-
-LIBVO_EXTERN (dxr3)
-
-/* codec control */
-enum MpegCodec {
-	MPG_CODEC_NON,
-	MPG_CODEC_AVCODEC,
-	MPG_CODEC_FAME
-};
-
-#if defined(USE_LIBAVCODEC)
-static int mpeg_codec = MPG_CODEC_AVCODEC;
-#elif defined(USE_LIBFAME)
-static int mpeg_codec = MPG_CODEC_FAME;
-#else
-static int mpeg_codec = MPG_CODEC_NONE;
-#endif
-
-/* Resolutions and positions */
-static int v_width, v_height;
-static int s_width, s_height;
-static int osd_w, osd_h;
-static int noprebuf = 0;
-static int img_format = 0;
-static SwsContext * sws = NULL;
-
-/* File descriptors */
-static int fd_control = -1;
-static int fd_video = -1;
-static int fd_spu = -1;
-static char fdv_name[80];
-static char fds_name[80];
-
-/* on screen display/subpics */
-static char *osdpicbuf = NULL;
-static int osdpicbuf_w;
-static int osdpicbuf_h;
-static int disposd = 0;
-static encodedata *spued;
-
-/* Static variable used in ioctl's */
-static int ioval = 0;
+#define SPU_SUPPORT
 
 static vo_info_t vo_info = 
 {
@@ -181,10 +107,39 @@ static vo_info_t vo_info =
 	"David Holm <dholm@iname.com>",
 	""
 };
+LIBVO_EXTERN (dxr3)
+
+/* Resolutions and positions */
+static int v_width, v_height;
+static int s_width, s_height;
+static int osd_w, osd_h;
+static int noprebuf = 0;
+static int img_format = 0;
+
+/* File descriptors */
+static int fd_control = -1;
+static int fd_video = -1;
+static int fd_spu = -1;
+static char fdv_name[80];
+static char fds_name[80];
+
+#ifdef SPU_SUPPORT
+/* on screen display/subpics */
+static char *osdpicbuf = NULL;
+static int osdpicbuf_w;
+static int osdpicbuf_h;
+static int disposd = 0;
+static encodedata *spued;
+#endif
+
+/* Static variable used in ioctl's */
+static int ioval = 0;
+
+static int get_video_eq(vidix_video_eq_t *info);
+static int set_video_eq(vidix_video_eq_t *info);
 
 uint32_t control(uint32_t request, void *data, ...)
 {
-	uint32_t flag = 0;
 	switch (request) {
 	case VOCTRL_RESUME:
 		if (!noprebuf) {
@@ -213,29 +168,26 @@ uint32_t control(uint32_t request, void *data, ...)
 		}
 		return VO_TRUE;
 	case VOCTRL_QUERY_FORMAT:
-		switch (*((uint32_t*)data)) {	
-		case IMGFMT_MPEGPES:
-			/* Hardware accelerated | Hardware supports subpics */
-			flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_SPU;
-			break;
-#if defined(USE_LIBFAME) || defined(USE_LIBAVCODEC)
-		case IMGFMT_YV12:
-		case IMGFMT_YUY2:
-		case IMGFMT_RGB24:
-		case IMGFMT_BGR24:
-			/* Conversion needed | OSD Supported */
-			flag = VFCAP_CSP_SUPPORTED | VFCAP_OSD;
-			break;
-#else
-		default:
-			printf("VO: [dxr3] You have disabled libavcodec/libfame support (Read DOCS/codecs.html)!\n");
-#endif
-		}
-		if (noprebuf) {
-			return flag;
-		} else {
-			return (flag | VFCAP_TIMER);
-		}
+	    {
+		uint32_t flag = 0;
+
+		if (*((uint32_t*)data) != IMGFMT_MPEGPES)
+		    return 0;
+
+		flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_SPU;
+		if (!noprebuf)
+		    flag |= VFCAP_TIMER;
+		return flag;
+	    }
+	case VOCTRL_QUERY_VAA:
+	    {
+		vo_vaa_t *vaa = data;
+		
+		memset(vaa,0,sizeof(vo_vaa_t));
+		vaa->get_video_eq=get_video_eq;
+		vaa->set_video_eq=set_video_eq;
+		return VO_TRUE;
+	    }
 	}
 	return VO_NOTIMPL;
 }
@@ -324,160 +276,25 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		printf("VO: [dxr3] Setting aspect ratio to 16:9\n");
 	}
 	ioctl(fd_control, EM8300_IOCTL_SET_ASPECTRATIO, &ioval);
-	
-	if (format != IMGFMT_MPEGPES) {
-		size = s_width * s_height;
-		picture_data[0] = malloc((size * 3) / 2);
-		picture_data[1] = picture_data[0] + size;
-		picture_data[2] = picture_data[1] + size / 4;
-		
-		picture_linesize[0] = s_width;
-		picture_linesize[1] = s_width / 2;
-		picture_linesize[2] = s_width / 2;
-		switch (mpeg_codec) {
-#ifdef USE_LIBFAME
-		case MPG_CODEC_FAME:
-			printf("VO: [dxr3] Using FAME\n");
-			fame_ctx = fame_open();
-			if (!fame_ctx) {
-				printf("VO: [dxr3] Cannot open libFAME!\n");
-				return -1;
-			}
 
-			fame_obj = fame_get_object(fame_ctx, "motion/pmvfast");
-			fame_register(fame_ctx, "motion", fame_obj);
-			
-			memset(&fame_params, 0, sizeof(fame_parameters_t));
-			fame_params.width = s_width;
-			fame_params.height = s_height;
-			fame_params.coding = "IPPPPPPP";
-			fame_params.quality = 90;
-			fame_params.bitrate = 0;
-			fame_params.slices_per_frame = 1;
-			fame_params.frames_per_sequence = (int) (vo_fps + 0.5);
-			fame_params.shape_quality = 100;
-			fame_params.search_range = (int) (vo_fps + 0.5);
-			fame_params.verbose = 0;
-			fame_params.profile = NULL;
-		
-			if (vo_fps < 24.0) {
-				fame_params.frame_rate_num = 24000;
-				fame_params.frame_rate_den = 1001;
-			} else if (vo_fps < 25.0) {
-				fame_params.frame_rate_num = 24;
-				fame_params.frame_rate_den = 1;
-			} else if (vo_fps < 29.0) {
-				fame_params.frame_rate_num = 25;
-				fame_params.frame_rate_den = 1;
-			} else if (vo_fps < 30.0) {
-				fame_params.frame_rate_num = 30000;
-				fame_params.frame_rate_den = 1001;
-			} else if (vo_fps < 50.0) {
-				fame_params.frame_rate_num = 30;
-				fame_params.frame_rate_den = 1;
-			} else if (vo_fps < 55.0) {
-				fame_params.frame_rate_num = 50;
-				fame_params.frame_rate_den = 1;
-			} else if (vo_fps < 60.0) {
-				fame_params.frame_rate_num = 60000;
-				fame_params.frame_rate_den = 1001;
-			} else {
-				fame_params.frame_rate_num = 60;
-				fame_params.frame_rate_den = 1;
-			}
-			
-			outbuf = malloc(100000);
-			fame_init(fame_ctx, &fame_params, outbuf, 100000);
-
-			fame_yuv.w = s_width;
-			fame_yuv.h = s_height;
-			fame_yuv.y = picture_data[0];
-			fame_yuv.u = picture_data[1];
-			fame_yuv.v = picture_data[2];
-			break;
-#endif
-#ifdef USE_LIBAVCODEC
-		case MPG_CODEC_AVCODEC:
-			printf("VO: [dxr3] Using AVCODEC\n");
-			avc_codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
-			if (!avc_codec) {
-				printf("VO: [dxr3] Unable to find mpeg1video codec\n");
-				uninit();
-				return -1;
-			}
-			if (avc_context) {
-				free(avc_context);
-			}
-			avc_context = malloc(sizeof(AVCodecContext));
-			memset(avc_context, 0, sizeof(AVCodecContext));
-			avc_context->width = s_width;
-			avc_context->height = s_height;
-// realy need this line ? -- Pontscho
-//			ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
-			avc_context->gop_size = 7;
-			avc_context->frame_rate = (int) (vo_fps * FRAME_RATE_BASE);
-			avc_context->bit_rate = 0;
-			avc_context->flags = CODEC_FLAG_QSCALE;
-			avc_context->quality = 2;
-			avc_context->pix_fmt = PIX_FMT_YUV420P;
-			motion_estimation_method = ME_EPZS;
-			if (avcodec_open(avc_context, avc_codec) < 0) {
-				printf("VO: [dxr3] Unable to open codec\n");
-				uninit();
-				return -1;
-			}
-			/* Create a pixel buffer and set up pointers for color components */
-			memset(&avc_picture, 0, sizeof(avc_picture));
-			avc_picture.linesize[0] = picture_linesize[0];
-			avc_picture.linesize[1] = picture_linesize[1];
-			avc_picture.linesize[2] = picture_linesize[2];
-		
-			avc_picture.data[0] = picture_data[0];
-			avc_picture.data[1] = picture_data[1];
-			avc_picture.data[2] = picture_data[2];
-			break;
-#endif
-		}
-
-		sws = getSwsContextFromCmdLine(v_width, v_height, img_format, s_width, s_height, IMGFMT_YV12);
-		if (!sws) {
-			printf("vo_vesa: Can't initialize SwScaler\n");
-			return -1;
-		}
-	
-		/* This stuff calculations the relative position of the osd */
-		osd_w = s_width;
-		osd_h = s_height;
-
-		if (format == IMGFMT_BGR24) {
-			yuv2rgb_init(24, MODE_BGR);
-		} else {
-			yuv2rgb_init(24, MODE_RGB);
-		}
-		return 0;
-	} else if (format == IMGFMT_MPEGPES) {
-		printf("VO: [dxr3] Format: MPEG-PES (no conversion needed)\n");
-		osdpicbuf = malloc(s_width * s_height);
-		if (osdpicbuf == NULL) {
-			printf("vo_dxr3: out of mem\n");
-			return -1;
-		}
-		spued = (encodedata *) malloc(sizeof(encodedata));
-		if (spued == NULL) {
-			printf("vo_dxr3:out of mem\n");
-			return -1;
-		}
-		osd_w = s_width;
-		osd_h = s_height;
-		osdpicbuf_w = s_width;
-		osdpicbuf_h = s_height;
-		
-		return 0;
+#ifdef SPU_SUPPORT
+	osdpicbuf = malloc(s_width * s_height);
+	if (osdpicbuf == NULL) {
+		printf("vo_dxr3: out of mem\n");
+		return -1;
 	}
+	spued = (encodedata *) malloc(sizeof(encodedata));
+	if (spued == NULL) {
+		printf("vo_dxr3:out of mem\n");
+		return -1;
+	}
+	osd_w = s_width;
+	osd_h = s_height;
+	osdpicbuf_w = s_width;
+	osdpicbuf_h = s_height;
+#endif
 
-	printf("VO: [dxr3] Format: Unsupported\n");
-	uninit();
-	return -1;
+	return 0;
 }
 
 static const vo_info_t* get_info(void)
@@ -487,46 +304,40 @@ static const vo_info_t* get_info(void)
 
 static void draw_alpha(int x, int y, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
 {
-	/*int lx, ly, bx;
-	unsigned char *buf;
-	buf = &osdpicbuf[(y * osdpicbuf_w) + x];
-	if (img_format == IMGFMT_MPEGPES) {
-		for (ly = 0; ly < h - 1; ly++) {
-			for(lx = 0; lx < w; lx++) {
-				if ((srca[(ly * srcstride) + lx] != 0) && (src[(ly * srcstride) + lx] != 0)) {
-					if(src[(ly * srcstride) + lx] >= 128) {
-						buf[ly * osdpicbuf_w + lx] = 3;
-					}
+#ifdef SPU_SUPPORT
+	int lx, ly, bx;
+	unsigned char *buf = &osdpicbuf[(y * osdpicbuf_w) + x];
+	for (ly = 0; ly < h - 1; ly++) {
+		for(lx = 0; lx < w; lx++) {
+			if ((srca[(ly * srcstride) + lx] != 0) && (src[(ly * srcstride) + lx] != 0)) {
+				if(src[(ly * srcstride) + lx] >= 128) {
+					buf[ly * osdpicbuf_w + lx] = 3;
 				}
 			}
-		}	
-		pixbuf_encode_rle(x, y, osdpicbuf_w, osdpicbuf_h - 1, osdpicbuf, osdpicbuf_w, spued);
-	} else*/ {
-#if defined(USE_LIBAVCODEC) || defined(USE_LIBFAME)
-	vo_draw_alpha_yv12(w, h, src, srca, srcstride,
-		picture_data[0] + x + y * picture_linesize[0], picture_linesize[0]);
-#endif
+		}
 	}
+	pixbuf_encode_rle(x, y, osdpicbuf_w, osdpicbuf_h - 1, osdpicbuf, osdpicbuf_w, spued);
+#endif
 }
 
 static void draw_osd(void)
 {
-	if (img_format != IMGFMT_MPEGPES) {
-		vo_draw_text(osd_w, osd_h, draw_alpha);
-	} /*else if ((disposd % 15) == 0) {
+#ifdef SPU_SUPPORT
+	if ((disposd % 15) == 0) {
 		vo_draw_text(osd_w, osd_h, draw_alpha);
 		memset(osdpicbuf, 0, s_width * s_height);
-*/
+
 		/* could stand some check here to see if the subpic hasn't changed
 		 * as if it hasn't and we re-send it it will "blink" as the last one
 		 * is turned off, and the new one (same one) is turned on
 		 */
-		/*if (!noprebuf) {
+		if (!noprebuf) {
 			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
 		}
 		write(fd_spu, spued->data, spued->count);
 	}
-	disposd++;*/
+	disposd++;
+#endif
 }
 
 
@@ -534,39 +345,18 @@ static uint32_t draw_frame(uint8_t * src[])
 {
 	char *pData;
 	int pSize;
-	if (img_format == IMGFMT_MPEGPES) {
-		vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
+	vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
 		
-		if (p->id == 0x20) {
-			if (!noprebuf) {
-				ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
-			}
-			write(fd_spu, p->data, p->size);
-		} else {
-			write(fd_video, p->data, p->size);
+#ifdef SPU_SUPPORT
+	if (p->id == 0x20) {
+		if (!noprebuf) {
+			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
 		}
-		return 0;
-	} else {
-		int size, srcStride = (img_format == IMGFMT_YUY2) ? (v_width * 2) : (v_width * 3);
-		sws->swScale(sws, src, &srcStride, 0, v_height, picture_data, picture_linesize);
-		draw_osd();
-		switch (mpeg_codec) {
-#ifdef USE_LIBFAME
-		case MPG_CODEC_FAME:
-			size = fame_encode_frame(fame_ctx, &fame_yuv, NULL);
-			write(fd_video, outbuf, size);
-			break;
+		write(fd_spu, p->data, p->size);
+	} else
 #endif
-#ifdef USE_LIBAVCODEC
-		case MPG_CODEC_AVCODEC:
-			size = avcodec_encode_video(avc_context, picture_data[0], avc_outbuf_size, &avc_picture);
-			write(fd_video, picture_data[0], size);
-			break;
-#endif
-		}
-		return 0;
-	}
-	return -1;
+		write(fd_video, p->data, p->size);
+	return 0;
 }
 
 static void flip_page(void)
@@ -575,62 +365,16 @@ static void flip_page(void)
 	if (!noprebuf) {
 		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
 	}
-	if (img_format == IMGFMT_YV12) {
-		switch (mpeg_codec) {
-#ifdef USE_LIBFAME
-		case MPG_CODEC_FAME:
-			size = fame_encode_frame(fame_ctx, &fame_yuv, NULL);
-			write(fd_video, outbuf, size);
-			break;
-#endif
-#ifdef USE_LIBAVCODEC
-		case MPG_CODEC_AVCODEC:
-			size = avcodec_encode_video(avc_context, picture_data[0], avc_outbuf_size, &avc_picture);
-			if (!noprebuf) {
-				ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
-			}
-			write(fd_video, picture_data[0], size);
-			break;
-#endif
-		}
-	}
 }
 
 static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0)
 {
-	if (img_format == IMGFMT_YV12) {
-		sws->swScale(sws, srcimg, stride, y0, h, picture_data, picture_linesize);
-		return 0;
-	}
 	return -1;
 }
 
 static void uninit(void)
 {
 	printf("VO: [dxr3] Uninitializing\n");
-	if (sws) {
-		freeSwsContext(sws);
-	}
-
-	switch (mpeg_codec) {
-#ifdef USE_LIBFAME
-	case MPG_CODEC_FAME:
-		if (fame_ctx) {
-			fame_close(fame_ctx);
-		}
-		break;
-#endif
-#ifdef USE_LIBAVCODEC
-	case MPG_CODEC_AVCODEC:
-		if (avc_context) {
-			avcodec_close(avc_context);
-		}
-		break;
-#endif
-	}
-	if (picture_data[0]) {
-		free(picture_data[0]);
-	}
 	if (fd_video) {
 		close(fd_video);
 	}
@@ -640,12 +384,14 @@ static void uninit(void)
 	if (fd_control) {
 		close(fd_control);
 	}
+#ifdef SPU_SUPPORT
 	if(osdpicbuf) {
 		free(osdpicbuf);
 	}
 	if(spued) {
 		free(spued);
 	}
+#endif
 }
 
 static void check_events(void)
@@ -675,27 +421,6 @@ static uint32_t preinit(const char *arg)
 		noprebuf = 1;
 		fdflags |= O_NONBLOCK;
 	}
-
-#if defined(USE_LIBFAME)
-	printf("VO: [dxr3] FAME supported\n");
-	if (arg && !strncmp("fame", arg, 4)) {
-		mpeg_codec = MPG_CODEC_FAME;
-		arg = strchr(arg, ':');
-		if (arg) {
-			arg++;
-		}
-	}
-#endif
-#if defined(USE_LIBAVCODEC)
-	printf("VO: [dxr3] AVCODEC supported\n");
-	if (arg && !strncmp("avcodec", arg, 7)) {
-		mpeg_codec = MPG_CODEC_AVCODEC;
-		arg = strchr(arg, ':');
-		if (arg) {
-			arg++;
-		}
-	}
-#endif
 
 	if (arg && arg[0]) {
 		printf("VO: [dxr3] Forcing use of device %s\n", arg);
@@ -760,15 +485,35 @@ static uint32_t preinit(const char *arg)
 		}
 	}
 	strcpy(fds_name, devname);
-
-#if defined(USE_LIBAVCODEC)
-	if (mpeg_codec == MPG_CODEC_AVCODEC && !avcodec_inited) {
-		avcodec_init();
-		avcodec_register_all();	
-		avcodec_inited = 1;
-	}
-	
-#endif
 	
 	return 0;
+}
+
+static int get_video_eq(vidix_video_eq_t *info)
+{
+    em8300_bcs_t bcs;
+
+    if (ioctl(fd_control, EM8300_IOCTL_GETBCS, &bcs) < 0)
+	return 1;
+    info->brightness = bcs.brightness;
+    info->contrast = bcs.contrast;
+    info->saturation = bcs.saturation;
+    info->cap = VEQ_CAP_BRIGHTNESS|VEQ_CAP_CONTRAST|VEQ_CAP_SATURATION;
+    return 0;
+}
+
+static int set_video_eq(vidix_video_eq_t *info)
+{
+    em8300_bcs_t bcs;
+
+    if (info->cap & VEQ_CAP_BRIGHTNESS)
+	bcs.brightness = info->brightness;
+    if (info->cap & VEQ_CAP_CONTRAST)
+	bcs.contrast = info->contrast;
+    if (info->cap & VEQ_CAP_SATURATION)
+	bcs.saturation = info->saturation;
+
+    if (ioctl(fd_control, EM8300_IOCTL_SETBCS, &bcs) < 0)
+	return 1;
+    return 0;
 }
