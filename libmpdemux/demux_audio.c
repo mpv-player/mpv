@@ -168,7 +168,7 @@ int demux_audio_open(demuxer_t* demuxer) {
       free_sh_audio(sh_audio);
       return 0;
     }
-    sh_audio->wf = w = (WAVEFORMATEX*)malloc(l);
+    sh_audio->wf = w = (WAVEFORMATEX*)malloc(l > sizeof(WAVEFORMATEX) ? l : sizeof(WAVEFORMATEX));
     w->wFormatTag = sh_audio->format = stream_read_word_le(s);
     w->nChannels = sh_audio->channels = stream_read_word_le(s);
     w->nSamplesPerSec = sh_audio->samplerate = stream_read_dword_le(s);
