@@ -934,10 +934,13 @@ static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count
     {
       long brightness;
       brightness=simple_strtol(&buf[strlen(PARAM_BRIGHTNESS)],NULL,10);
-      if(brightness >= -64 && brightness <= 63) besr.brightness = brightness;
+      if(brightness >= -64 && brightness <= 63) 
+      {
+        besr.brightness = brightness;
 	OUTREG(OV0_COLOUR_CNTL, (brightness & 0x7f) |
 				(besr.saturation << 8) |
 				(besr.saturation << 16));
+      }
     }
     else
     if(memcmp(buf,PARAM_SATURATION,min(count,strlen(PARAM_SATURATION))) == 0)
