@@ -292,10 +292,35 @@ void spudec_assemble(void *this, unsigned char *packet, int len, int pts100)
       spu->packet_offset += len;
     }
   }
+#if 1
+  // check if we have a complete packet (unfortunatelly packet_size is bad
+  // for some disks)
+//  if (spu->packet_offset == spu->packet_size)
+  { int x=0,y;
+    while(x>=0 && x+4<=spu->packet_offset){
+      y=get_be16(spu->packet+x+2); // next control pointer
+      printf("SPUtest: x=%d y=%d off=%d size=%d\n",x,y,spu->packet_offset,spu->packet_size);
+      if(x>=4 && x==y){		// if it points to self - we're done!
+        // we got it!
+	printf("SPUgot: off=%d  size=%d \n",spu->packet_offset,spu->packet_size);
+	spudec_decode(spu);
+	spu->packet_offset = 0;
+	break;
+      }
+      if(y<=x || y>=spu->packet_size){ // invalid?
+	printf("SPUtest: broken packet!!!!! y=%d < x=%d\n",y,x);
+        spu->packet_size = spu->packet_offset = 0;
+        break;
+      }
+      x=y;
+    }
+  }
+#else
   if (spu->packet_offset == spu->packet_size) {
     spudec_decode(spu);
     spu->packet_offset = 0;
   }
+#endif
 }
 
 void spudec_reset(void *this)	// called after seek
