@@ -20,9 +20,9 @@
 #include "fs.h"
 
 typedef struct sh_video_t sh_video_t;
-typedef struct mp_image_t mp_image_t;
 typedef struct sh_audio_t sh_audio_t;
 
+// for mpcodecs_[av]d_drivers:
 #include "../../../libmpcodecs/vd.h"
 #include "../../../libmpcodecs/ad.h"
 
