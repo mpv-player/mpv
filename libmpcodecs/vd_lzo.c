@@ -142,7 +142,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 	    return NULL;
 	}
 
-	mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,priv->codec);
+	if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,priv->codec)) return NULL;
 	init_done++;
 	free(tmp);
     }
