@@ -1,5 +1,14 @@
 <HTML>
 <BODY BGCOLOR=WHITE>
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+
+<P>
+<B>Question:</B> What is GCC 2.96 ? I can't find it at GNU site.
+</P>
+
+<P>
+<B>Answer:</B> Read the <A HREF="http://gcc.gnu.org/gcc-2.96.html">official answer from GNU GCC team.</A>
+</P>
 
 <P>
 <B>Question:</B> What is the problem with GCC 2.96 ? And with 3.x ?
@@ -11,7 +20,9 @@
 
 <P>
 And for the people, who periodically asks what are the exact problems with
-gcc 2.96, my answer: <I>we don't know.</I> We just see various bugreports mostly
+gcc 2.96, my answer: <I>we don't know exactly.</I> 
+There were various problems and new problems / bugs come up periodically.
+It is <I>not a single bug/problem</I>. We just see various bugreports, mostly
 gcc internal bugs, compiler syntax errors in source or bad code compiled. They
 all are solved using different version of gcc. I understand that gcc 2.96
 has different default optimization flags and they conflicts with our inline
@@ -33,7 +44,7 @@ Ah, and about the pipe-in-comment bug: it wasn't really our bug.
 I've talked one of gcc maintainers, and he told me that gcc 2.96 and 3.x
 supports intel asm syntax, and it caused the pipe bug. But it was a bug,
 because gcc silently, without any warning, ignored the whole asm block.
-*They* have fixed that, now it prints warning and doesn't skip the block.
+<I>They</I> have fixed that, now it prints warning and doesn't skip the block.
 (at least he told me, i didn't checked)
 </P>
 
@@ -45,5 +56,53 @@ elements, including gcc 2.96 release number, enabled mplayer features, etc.
 <I>If it works for you using gcc 2.96, it doesn't mean it will work for everyone.</I>
 </P>
 
+<P>
+<B>Question:</B> No! You are wrong! Everything works with gcc 2.96 <I>but</I> MPlayer
+</P>
+
+<P>
+<B>Answer:</B>
+</P>
+
+<P>
+No. You are wrong!
+Several projects (mainly which source contains high optimized inline asm code)
+had problems with gcc 2.96. For example: avifile, MESA / DRI, ffmpeg.
+But other projects already workarounded gcc bugs (changed code which
+triggered compiler bugs) so they work for now.
+</P>
+
+<P>
+<B>Question:</B> No! You are wrong! Everything works with gcc 2.96 <I>including</I> MPlayer
+</P>
+
+<P>
+<B>Answer:</B>
+</P>
+
+Good. Be happy. But you must know, it depends on many environment
+elements, including gcc 2.96 release number, enabled mplayer features, etc.
+<I>If it works for you using gcc 2.96, it doesn't mean it will work for everyone!</I>
+It only means that you are lucky, until you find a problem. But don't forget the
+<B>No.1 rule of gcc 2.96 users: NEVER REPORT BUGS OR PROBLEMS IF YOU ARE USING GCC 2.96</B>
+
+<P>
+<B>Question:</B> Ok. Understood. But I want to give it a try... how to compile with gcc 2.96?
+</P>
+
+<P>
+<B>Answer:</B> Really? Are you sure? Ok. You know... here is it: ./configure --disable-gcc-checking
+</P>
+
+<P>
+<B>Question:</B> No! I don't agree with you, because ...
+</P>
+
+<P>
+<B>Answer:</B> It doesn't matter. Keep your commets for yourself. We're not interested in gcc 2.96 stories.
+</P>
+
+
+</FONT>
 </BODY>
 </HTML>
