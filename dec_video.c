@@ -387,14 +387,10 @@ else
     break;
   }
 #endif
-  case 1: {
-        int t=0;
-        t-=GetTimer();
-          mpeg2_decode_data(video_out, start, start+in_size,drop_frame);
-        t+=GetTimer(); video_time_usage+=t*0.000001;
-	if(!drop_frame) blit_frame=1;
+  case 1:
+    mpeg2_decode_data(video_out, start, start+in_size,drop_frame);
+    if(!drop_frame) blit_frame=1;
     break;
-  }
 } // switch
 //------------------------ frame decoded. --------------------
 
