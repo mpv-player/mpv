@@ -1,0 +1,404 @@
+README for the TOOLS directory
+==============================
+
+Preamble
+--------
+
+In this directory you can find some nice scripts and code that makes
+using MPlayer and MEncoder easier, for example scripts for DVD track
+encoding in three pass mode or creating SVCDs from a movie.
+
+MPlayer scripts in the TOOLS dir
+--------------------------------
+
+midentify
+
+Author:       Tobias Diedrich
+
+Description:  Runs 'mplayer -identify' for all arguments while preventing
+              video window flashing.
+
+Usage:        midentify file1 [file2 ...]
+
+
+mpconsole
+
+Author:       Rich Felker
+
+Description:  Script to run MPlayer on the console (fbdev/mga_vid/etc.) without
+              the console text and/or flashing cursor getting in the way.
+
+Usage:        mpconsole [mplayer options]
+
+
+mplmult.sh
+
+Author:       Reimar Döffinger
+
+Description:  Example how to output video on multiple windows in sync. Might
+              be even more useful in combination with -vo ggi to distribute
+              the video arbitrarily.
+
+Usage:        mplmult.sh <n> <options>
+              n        number of MPlayer instances that display the video
+              options  any options you would pass to MPlayer, more than
+                       one file will usually not work
+
+
+x2mpsub.sh
+
+Author:       Gabucino
+
+Description:  Converts the subtitles in the current directory into MPsub
+              format (subtitles go in ./converted-subtitles/).
+
+Usage:        x2mpsub.sh
+
+
+mp.pl
+
+Author:       Felix Bünemann
+
+Description:  Small helper script that allows to play multiple files with
+              MPlayer. Wildcards are supported.
+
+Usage:        mp.pl <parameters> <files>
+              Where <parameters> are all possible command line switches
+              for MPlayer and <files> can be either a list of files,
+              like file1 file2 file3 and/or a wildcard definition,
+              like *.avi.
+
+              example: mp.pl -vo x11 /dvd/VIDEO_TS/VTS_05_*.VOB movie.asf
+
+
+wma2ogg.pl
+
+Author:       Peter Simon
+
+Description:  Converts WMA files to Ogg or MP3.
+
+Usage:        wma2ogg [options] <-f FILE1 | -f FILE2 ... | -a>
+              -f, -file   filename
+              -a          converts all WMA files in the current directory
+              -t          output filetype (ogg, mp3) [default=ogg]
+              -lame       I wanna use L.A.M.E. sure enough!
+              -br         bitrate (kb/s) [default=from the WMA]
+              -del        remove WMA file(s) after the transcoding
+
+
+
+MEncoder scripts in the TOOLS dir
+---------------------------------
+
+divx2svcd
+
+Author:       Miklos Vajna
+
+Description:  A simple utility that creates an SVCD from a video in an AVI
+              container.
+
+Usage:        divx2svcd <input_avi> [options]
+              see 'divx2svcd -h' for more info
+
+
+mencvcd
+
+Author:       Jürgen Hammelmann
+
+Description:  Converts DVD (or anything else that MPlayer plays) to (S)VCD
+
+Usage:        mencvcd <basename> [mencvcd options] [mplayer options]
+              see 'mencvcd -h' for more info
+
+Note:         Requires MPlayer, mjpegtools, VCDImager, cdrdao, and optionally
+              LAME, tooLAME and SoX.
+
+
+dvd2divxscript.pl
+
+Author:       Florian Schilhabel
+
+Description:  Yet another DVD to divx helper script.
+              This script encodes a DVD track in three pass mode to MPEG-4 with
+              libavcodec. Optionally it writes the resulting movie file to
+              CD-ROM the corresponding audio track to MP3. It can also shut
+              down the computer when it finishes. If you like, you can
+              watch the MEncoder output on /dev/tty8.
+
+Usage:        --help       show help
+              --abr        (AudioBitRate) Please enter the desired bitrate this
+                           can be either [96|128|192] kbit/sec (default: 128).
+              --lang       Specify the Language of the audio track this can be
+                           for example <en> or <de> (default: <de>).
+              --dvd        Specify the DVD track you want to encode.
+              --cdsize     Specify the size of your CD-ROM (default: 700MB).
+              --shutdown   Shutdown the system, when the encoding process has
+                           finished. Needs appropriate privileges.
+              --out        Specify the name of your encoded movie. The file
+                           extension will be appended automatically.
+              --writecd    Takes the newly created movie and writes it to a
+                           CD-ROM.
+              --writedev   cdrecord device identifier, for example 0,1,0
+              --speed      writing speed (default: 4)
+              --dvd-device device to pull the video off (default: /dev/dvd)
+
+
+
+Tech scripts in the TOOLS dir
+-----------------------------
+
+fastmem.sh
+
+Author:       Arpi
+
+Description:  benchmark/testbed for fastmemcpy stuff
+
+Usage:        fastmem.sh
+
+
+sws-test
+
+Author:       Michael Niedermayer
+
+Description:  Very simple script to generate PNG images from a video with all
+              -sws methods.
+
+Usage:        sws-test <video-file> <start-pos> <res>
+
+              example: sws-test abc.avi 10 160:120
+
+
+calcbpp.pl
+
+Author:       Moritz Bunkus
+
+Description:  A script that calculates the $bpp for a movie, mentioned in
+              DOCS/tech/encoding-tips.txt, see that document for more info.
+
+Usage:        calcbpp.pl <resolution> <aspect ratio> <bitrate> <fps>
+              resolution:    the cropped but unscaled resolution
+                             (use '-vf cropdetect')
+              aspect ratio:  the encoded aspect ratio. All DVDs come at
+                             720x576 but contain a flag that tells the player
+                             wether it should display the DVD at an aspect
+                             ratio of 4/3 (1.333) or at 16/9 (1.777). Have a
+                             look at MPlayer's output - there's something
+                             about 'prescaling'. That's what you are looking
+                             for.
+              bitrate:       the video bitrate in kbit/s
+              fps:           the fps
+
+              example: calcbpp.pl 720x440 16/9 896 25
+
+
+countquant.pl
+
+Author:       Moritz Bunkus
+
+Description:  Counts the quantizers used for the encoding, mentioned in
+              DOCS/tech/encoding-tips.txt, see that document for more info.
+
+Usage:        countquant.pl < divx2pass.log
+              It will print out which quantizer was used how often. If you see
+              that e.g. the lowest quantizer (vqmin=2) gets used for > 95% of
+              the frames then you can safely increase your picture size.
+
+
+perlbench.pl
+
+Author:       Felix Bünemann
+
+Description:  fastmemcpy benchmark script
+
+Usage:        perlbench.pl
+
+
+plotpsnr.pl
+
+Author:       Jonas Jermann
+
+Description:  Draw PSNR log graphs using gnuplot.
+
+Usage:        plotpsnr.pl [options] <file>
+              -h, --help    Display this help message
+              -quant        Display quantizers
+              -size         Display size
+              -psnr         Display PSNR
+              -iframes      Display I-frames
+              -pframes      Display P-frames
+              -bframes      Display B-frames
+              -aframes      Display all frames in different colors
+              -cmp <file2>  Compare two files
+              -qs <style>   Quantizer style
+              -ss <style>   Size style
+              -ps <style>   PSNR style
+
+              Default: -quant -size -psnr -qs "p" -ss "i" -ps "p"
+
+Note:         Requires gnuplot. Comparison is based on file2. Comparison
+              assumes that the frame numbers of both files fit.
+
+
+asfinfo
+
+Author:       Arpi
+
+Description:  a simple ASF header display program
+
+Usage:        asfinfo <filename.asf>
+
+Note:         Also see MPlayer's -identify option.
+
+
+avi-fix
+
+Author:       Arpi
+
+Description:  A simple tool to fix chunk sizes in RIFF AVI files.
+
+Usage:        avi-fix [-fix] <badfile.avi>
+
+Note:         It does not check or fix the index, to do this use
+              'mencoder -forceidx -oac copy -ovc copy'.
+
+
+bios2dump
+
+Author:       Nick Kurshev
+
+Description:  Extract your PC BIOS and save it to file.
+
+Usage:        As argument requires DOS interrupt number in hexadecimal form.
+              As output - will write 64KB file which will named:
+              SSSS_OOOO.intXX
+      where:  SSSS - segment of BIOS interrupt handler
+              OOOO - offset of BIOS interrupt handler
+              XX   - interrupt number which was passed as argument
+
+
+cpuinfo
+
+Author:       Jürgen Keil
+
+Description:  the prototype ../cpuinfo.c
+
+Note:         Used by configure to emulate /proc/cpuinfo on non-Linux systems.
+
+
+dump_mp4
+
+Author:       Arpi
+
+Description:  MPEG4-ES stream inspector, dumps the stream startcodes.
+
+
+fastmemcpybench
+
+Author:       Felix Bünemann
+
+Description:  benchmark/testbed for fastmemcpy stuff
+
+Note:         Also see fastmem.sh.
+
+
+mem2dump
+
+Author:   Nick Kurshev
+
+Description:  Dump memory block to file.
+
+Usage:        As argument requires absolute address of memory dump and its
+              length (in hexadecimal form).
+              As output - will write file which will be named:
+              memADDR_LEN.dump
+       where: ADDR - given address of memory
+              LEN  - given length of memory
+
+
+movinfo
+
+Author:       Arpi
+
+Description:  Show QuickTime MOV file structure.
+
+Usage:        movinfo <filename.mov>
+
+
+png2raw
+
+Author:       Arpi
+
+Description:  PNG to RAW image converter, used by .raw font creators.
+
+Usage:        png2raw <file1> [file2...]
+
+
+vivodump
+
+Author:       Arpi
+
+Description:  Dump H.263 frame headers from VIVO files.
+
+Usage:        vivodump <input_file> <output_file>
+
+
+Miscellaneous scripts in the TOOLS dir
+--------------------------------------
+
+subedit.pl
+
+Author:       Michael Klepikov
+
+Description:  A script for pipelined editing of subtitle files.
+
+Usage:        subedit.pl [switches]
+    -if,--input-format <fmt>   input format; supported: SRT (default: SRT)
+    -of,--output-format <fmt>  output format; supported: SRT
+                               (default: input format)
+    -s,--shift <time>          shift all subtitles by <time>
+                               (format: [-]hh:mm:ss,fraction)
+    -c,--scale <time>          scale by adding <time> to overall duration
+    -f,--split-from <time>     drop subtitles that end before <time>
+    -t,--split-to <time>       drop subtitles that start after <time> (will
+                               truncate timing if it overlaps a boundary)
+    -r,--renumber              renumber SRT subtitles in output
+    -d,--debug                 enable debug output
+    -h,--help                  help message
+
+
+w32codec_dl.pl
+
+Author:       Tom Lees
+
+Description:  This script will use the Windows Media Player codec download
+              infrastructure to aquire the codecs listed in codecs.conf and put
+              them in a directory named "codecs/" below the current directory.
+
+Usage:        w32codec_dl.pl <codecs.conf location>
+
+Note:         You will need the libwww-perl stuff and the cabextract utility
+              which can be found at http://www.kyz.uklinux.net/cabextract.php3.
+
+
+subrip.c
+
+Author:       Kim Minh Kaplan
+
+Description:  Transform VOBsub subtitles into Subrip text subtitles using
+              GOCR/JOCR.
+
+Usage:        subrip <vobsub basename> [subid [output filename] ]
+
+Note:         Requires at least JOCR/GOCR 0.37.
+              You will have to change the 'vobsub_id' value if you want a
+              subtitle different from number 0. Hint: You can view the
+              subtitle that is being decoded with "display subtitle-*.pgm".
+
+
+alaw-gen.c
+
+Author:       Arpi
+
+Description:  Generates alaw/ulaw tables.
+
+Note:         Created to work around a past license issue, no longer useful.
