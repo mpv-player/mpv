@@ -133,7 +133,7 @@ ver	error resilience
 	1 more aggressive error detection, lavc might think that some correct
           streams contain errors
 
-vbug	manual workaround encoder bugs
+bug	manual workaround encoder bugs
 	0 (default)
 	1 (workaround for some old lavc generated msmpeg4v3 files)
 
@@ -162,7 +162,7 @@ JVT	Joint Video Team Standard -- http://www.itu.int/ITU-T/news/jvtpro.html
 
 Examples:
 mencoder foobar.avi -lavcopts vcodec=mpeg4:vhq:keyint=300:vqscale=2 -o new-foobar.avi
-mplayer  foobar.avi -lavdopts vbug=1
+mplayer  foobar.avi -lavdopts bug=1
 
 --
 Written 2002 by Michael Niedermayer and reviewed by Felix Buenemann.
