@@ -519,7 +519,10 @@ int vo_x11_check_events(Display *mydisplay){
       case ButtonPress:
            vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const;
            // Ignore mouse whell press event
-           if(Event.xbutton.button == 4 || Event.xbutton.button == 5) break;
+           if(Event.xbutton.button > 3) {
+	   mplayer_put_key(MOUSE_BTN0+Event.xbutton.button-1);
+	   break;
+           }
 	   #ifdef HAVE_NEW_GUI
 	    // Ignor mouse button 1 - 3 under gui 
 	    if ( use_gui && ( Event.xbutton.button >= 1 )&&( Event.xbutton.button <= 3 ) ) break;
