@@ -93,7 +93,7 @@ static void get_str(int isbyte, demuxer_t *demuxer, char *buf, int buf_size)
     if (len > buf_size)
 	stream_skip(demuxer->stream, len-buf_size);
 
-    printf("read_str: %d bytes read\n", len);
+    mp_msg(MSGT_DEMUX, MSGL_V, "read_str: %d bytes read\n", len);
 }
 
 static void skip_str(int isbyte, demuxer_t *demuxer)
@@ -107,7 +107,7 @@ static void skip_str(int isbyte, demuxer_t *demuxer)
 
     stream_skip(demuxer->stream, len);    
 
-    printf("skip_str: %d bytes skipped\n", len);
+    mp_msg(MSGT_DEMUX, MSGL_V, "skip_str: %d bytes skipped\n", len);
 }
 
 static void dump_index(demuxer_t *demuxer, int stream_id)
@@ -125,13 +125,13 @@ static void dump_index(demuxer_t *demuxer, int stream_id)
     index = priv->index_table[stream_id];
     entries = priv->index_table_size[stream_id];
     
-    printf("Index table for stream %d\n", stream_id);
+    mp_msg(MSGT_DEMUX, MSGL_V, "Index table for stream %d\n", stream_id);
     for (i = 0; i < entries; i++)
     {
 #if 1
-	printf("i: %d, pos: %d, timestamp: %d\n", i, index[i].offset, index[i].timestamp);
+	mp_msg(MSGT_DEMUX, MSGL_V,"i: %d, pos: %d, timestamp: %d\n", i, index[i].offset, index[i].timestamp);
 #else
-	printf("packetno: %x pos: %x len: %x timestamp: %x flags: %x\n",
+	mp_msg(MSGT_DEMUX, MSGL_V,"packetno: %x pos: %x len: %x timestamp: %x flags: %x\n",
 	    index[i].packetno, index[i].offset, index[i].len, index[i].timestamp,
 	    index[i].flags);
 #endif
@@ -151,7 +151,7 @@ read_index:
     i = stream_read_dword_le(demuxer->stream);
     if ((i == -256) || (i != MKTAG('I', 'N', 'D', 'X')))
     {
-	printf("Something went wrong, no index chunk found on given address (%d)\n",
+	mp_msg(MSGT_DEMUX, MSGL_WARN,"Something went wrong, no index chunk found on given address (%d)\n",
 	    next_header_pos);
 	index_mode = -1;
         if (i == -256)
@@ -161,24 +161,24 @@ read_index:
 	//goto end;
     }
 
-    printf("Reading index table from index chunk (%d)\n",
+    mp_msg(MSGT_DEMUX, MSGL_V,"Reading index table from index chunk (%d)\n",
 	next_header_pos);
 
     i = stream_read_dword(demuxer->stream);
-    printf("size: %d bytes\n", i);
+    mp_msg(MSGT_DEMUX, MSGL_V,"size: %d bytes\n", i);
 
     i = stream_read_word(demuxer->stream);
     if (i != 0)
-	printf("Hmm, index table with unknown version (%d), please report it to MPlayer developers!\n", i);
+	mp_msg(MSGT_DEMUX, MSGL_WARN,"Hmm, index table with unknown version (%d), please report it to MPlayer developers!\n", i);
 
     entries = stream_read_dword(demuxer->stream);
-    printf("entries: %d\n", entries);
+    mp_msg(MSGT_DEMUX, MSGL_V,"entries: %d\n", entries);
     
     stream_id = stream_read_word(demuxer->stream);
-    printf("stream_id: %d\n", stream_id);
+    mp_msg(MSGT_DEMUX, MSGL_V,"stream_id: %d\n", stream_id);
     
     next_header_pos = stream_read_dword(demuxer->stream);
-    printf("next_header_pos: %d\n", next_header_pos);
+    mp_msg(MSGT_DEMUX, MSGL_V,"next_header_pos: %d\n", next_header_pos);
     if (entries <= 0)
     {
 	if (next_header_pos)
@@ -301,7 +301,7 @@ static int generate_index(demuxer_t *demuxer)
   tag = stream_read_dword(demuxer->stream);
   if (tag != MKTAG('A', 'T', 'A', 'D'))
   {
-    printf("Something went wrong, no data chunk found on given address (%d)\n", data_pos);
+    mp_msg(MSGT_DEMUX, MSGL_WARN,"Something went wrong, no data chunk found on given address (%d)\n", data_pos);
   }
   else
   {
@@ -340,7 +340,7 @@ read_index:
     i = stream_read_dword_le(demuxer->stream);
     if ((i == -256) || (i != MKTAG('D', 'A', 'T', 'A')))
     {
-	printf("Something went wrong, no data chunk found on given address (%d)\n",
+	mp_msg(MSGT_DEMUX, MSGL_WARN,"Something went wrong, no data chunk found on given address (%d)\n",
 	    data_pos);
 	goto end;
     }
@@ -348,7 +348,7 @@ read_index:
     stream_skip(demuxer->stream, 2); /* version */
     
     num_of_packets = stream_read_dword(demuxer->stream);
-    printf("Generating index table from raw data (pos: 0x%x) for %d packets\n",
+    mp_msg(MSGT_DEMUX, MSGL_V,"Generating index table from raw data (pos: 0x%x) for %d packets\n",
 	data_pos, num_of_packets);
 
     data_pos = stream_read_dword_le(demuxer->stream)-10; /* next data chunk */
@@ -467,7 +467,7 @@ static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timesta
     if(pict_type<=1){
       // I frame, sync timestamps:
       priv->kf_base=timestamp-kf;
-      if(verbose>1) printf("\nTS: base=%08X\n",priv->kf_base);
+      mp_msg(MSGT_DEMUX, MSGL_V,"\nTS: base=%08X\n",priv->kf_base);
       kf=timestamp;
     } else {
       // P/B frame, merge timestamps:
@@ -483,7 +483,7 @@ static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timesta
 	priv->kf_pts=tmp;
 //	if(kf<=tmp) kf=0;
     }
-    if(verbose>1) printf("\nTS: %08X -> %08X (%04X) %d %02X %02X %02X %02X %5d\n",timestamp,kf,orig_kf,pict_type,s[0],s[1],s[2],s[3],kf-(int)(1000.0*priv->v_pts));
+    mp_msg(MSGT_DEMUX, MSGL_V,"\nTS: %08X -> %08X (%04X) %d %02X %02X %02X %02X %5d\n",timestamp,kf,orig_kf,pict_type,s[0],s[1],s[2],s[3],kf-(int)(1000.0*priv->v_pts));
   }
 #endif
     v_pts=kf*0.001f;
@@ -535,8 +535,8 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
 	return 0;
     }
     if (len < 12){
-	printf("%08X: packet v%d len=%d  \n",(int)demuxer->filepos,(int)version,(int)len);
-	printf("bad packet len (%d)\n", len);
+	mp_msg(MSGT_DEMUX, MSGL_V,"%08X: packet v%d len=%d  \n",(int)demuxer->filepos,(int)version,(int)len);
+	mp_msg(MSGT_DEMUX, MSGL_WARN,"bad packet len (%d)\n", len);
 	stream_skip(demuxer->stream, len);
 	continue; //goto loop;
     }
@@ -584,7 +584,7 @@ got_audio:
             demux_packet_t *dp = new_demux_packet(len);
 	    stream_read(demuxer->stream, dp->buffer, len);
 #ifdef CRACK_MATRIX
-	    printf("*** audio block len=%d\n",len);
+	    mp_msg(MSGT_DEMUX, MSGL_V,"*** audio block len=%d\n",len);
 	    { // HACK - used for reverse engineering the descrambling matrix
 		FILE* f=fopen("test.rm","r+");
 		fseek(f,spos,SEEK_SET);
@@ -806,6 +806,15 @@ got_video:
 		    break;
 		}
 		// whole packet (not fragmented):
+		if (vpkg_length > len) {
+		    mp_msg(MSGT_DEMUX, MSGL_WARN,"\n******** WARNING: vpkg_length=%i > len=%i ********\n", vpkg_length, len);
+		    /*
+		     * To keep the video stream rolling, we need to break 
+		     * here. We shouldn't touch len to make sure rest of the
+		     * broken packet is skipped.
+		     */
+		    break;
+		}
 		dp_hdr->len=vpkg_length; len-=vpkg_length;
 		stream_read(demuxer->stream, dp_data, vpkg_length);
 		if(priv->video_after_seek){
@@ -821,7 +830,7 @@ got_video:
 	    } // while(len>0)
 	    
 	    if(len){
-		printf("\n******** !!!!!!!! BUG!! len=%d !!!!!!!!!!! ********\n",len);
+		mp_msg(MSGT_DEMUX, MSGL_WARN,"\n******** !!!!!!!! BUG!! len=%d !!!!!!!!!!! ********\n",len);
 		if(len>0) stream_skip(demuxer->stream, len);
 	    }
 	}
@@ -1232,9 +1241,9 @@ void demux_open_real(demuxer_t* demuxer)
 #if 1
 		    stream_skip(demuxer->stream, 4);
 #else
-		    printf("unknown1: 0x%X  \n",stream_read_dword(demuxer->stream));
-		    printf("unknown2: 0x%X  \n",stream_read_word(demuxer->stream));
-		    printf("unknown3: 0x%X  \n",stream_read_word(demuxer->stream));
+		    mp_msg(MSGT_DEMUX, MSGL_V,"unknown1: 0x%X  \n",stream_read_dword(demuxer->stream));
+		    mp_msg(MSGT_DEMUX, MSGL_V,"unknown2: 0x%X  \n",stream_read_word(demuxer->stream));
+		    mp_msg(MSGT_DEMUX, MSGL_V,"unknown3: 0x%X  \n",stream_read_word(demuxer->stream));
 #endif
 //		    if(sh->format==0x30335652 || sh->format==0x30325652 )
 		    if(1)
@@ -1245,7 +1254,7 @@ void demux_open_real(demuxer_t* demuxer)
 			}
 		    } else {
 	    		int fps=stream_read_word(demuxer->stream);
-			printf("realvid: ignoring FPS = %d\n",fps);
+			mp_msg(MSGT_DEMUX, MSGL_WARN,"realvid: ignoring FPS = %d\n",fps);
 		    }
 		    stream_skip(demuxer->stream, 2);
 		    
@@ -1311,8 +1320,8 @@ void demux_open_real(demuxer_t* demuxer)
 #if 0
 		{ int i;
 		  for(i=0;i<codec_data_size - tmp;i++)
-		      printf(" %02X",stream_read_char(demuxer->stream));
-		  printf("\n");
+		      mp_msg(MSGT_DEMUX, MSGL_V," %02X",stream_read_char(demuxer->stream));
+		  mp_msg(MSGT_DEMUX, MSGL_V,"\n");
 		}
 #else
 		stream_skip(demuxer->stream, codec_data_size - tmp);
