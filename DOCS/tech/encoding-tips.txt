@@ -55,7 +55,7 @@ typical mencoder line:
 mencoder -dvd 1 -o /dev/null -oac copy -ovc lavc \
   -lavcopts vcodec=mpeg4:vbitrate=1000:vhq:vqmin=2:\
   vlelim=-4:vcelim=9:lumi_mask=0.05:dark_mask=0.01:vpass=1 \
-  -vop scale=640:480,crop=716:572:2:2
+  -vf crop=716:572:2:2,scale=640:480
 
 Phew, all those parameters! Which ones should I change? NEVER leave
 out 'vhq'. Never ever. 'vqmin=2' is always good if you aim for sane
@@ -77,7 +77,7 @@ $bpp = -----------------------
 
 I've attached a small Perl script that calculates the $bpp for
 a movie. You'll have to give it four parameters:
-a) the cropped but unscaled resolution (use '-vop cropdetect'),
+a) the cropped but unscaled resolution (use '-vf cropdetect'),
 b) the encoded aspect ratio. All DVDs come at 720x576 but contain
 a flag that tells the player wether it should display the DVD at
 an aspect ratio of 4/3 (1.333) or at 16/9 (1.777). Have a look
@@ -415,7 +415,7 @@ typically very "noisy", which doesn't help at all. Anyway :
 > First pass:                                                                   
 > mencoder TITLE01-ANGLE1.VOB -oac copy -ovc lavc -lavcopts                     
 > vcodec=mpeg4:vhq:vpass=1:vbitrate=800:keyint=48 -ofps 23.976 -npp lb          
-> -ss 2:00 -endpos 0:30 -vop scale -zoom -xy 640 -o movie.avi                   
+> -ss 2:00 -endpos 0:30 -vf scale -zoom -xy 640 -o movie.avi                   
 
 1) keyint=48 is way too low. The  default value is 250, this is in *frames*
 not seconds. Key frames are significantly larger than P or B frames, so the

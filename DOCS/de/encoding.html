@@ -135,14 +135,14 @@ allgemein schlecht.</B> Wenn du das vermeiden willst, dann lies den Abschnitt
 H&ouml;hen-/Breitenverh&auml;ltnisses</A>.</P>
 
 <P>Der Skalierungsprozess erfolgt durch den <I>'scale</I>-Videofilter:
-<CODE>-vop scale=breite:hoehe</CODE>. Die Qualit&auml;t kann durch die Option
+<CODE>-vf scale=breite:hoehe</CODE>. Die Qualit&auml;t kann durch die Option
 <CODE>-sws</CODE> angegeben werden. Wenn nichts angegeben ist, verwendet
 MEncoder 0: schnelle bilienare Filterung ('fast bilinear').</P>
 
 <H4>VERWENDUNG</H4>
 
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder beispiel-svcd.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4 -vop scale=640:480 -sws 2 -oac copy -o ausgabe.avi</CODE></P>
+  vcodec=mpeg4 -vf scale=640:480 -sws 2 -oac copy -o ausgabe.avi</CODE></P>
 
 <H3><A NAME="copying">7.4 Stream-Kopiermodus</A></H3>
 
@@ -369,7 +369,7 @@ in der man-Page dazu, wie du die <CODE>cropdetect</CODE>- und
 <H4>BENUTZUNG</H4>
 
 <P><CODE>$ mencoder beispiel-svcd.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4:aspect=16.0/9.0 -vop crop=714:548:0:14 -oac copy -o
+  vcodec=mpeg4:aspect=16.0/9.0 -vf crop=714:548:0:14 -oac copy -o
   ausgabe.avi</CODE></P>
 
 </BODY>

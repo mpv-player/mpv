@@ -113,14 +113,14 @@
   section <A HREF="#aspect">Préserver l'aspect ratio</A>.</P>
 
 <P>Le processus de zoom est géré par le filtre vidéo <I>'scale'</I>:
-  <CODE>-vop scale=largeur:hauteur</CODE>. Sa qualité peut être réglée avec l'option
+  <CODE>-vf scale=largeur:hauteur</CODE>. Sa qualité peut être réglée avec l'option
   <CODE>-sws</CODE>. Si elle n'est pas spécifiée, MEncoder utilisera 0:
   fast bilinear.</P>
 
 <H4>Utilisation:</H4>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder entree.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4 -vop scale=640:480 -oac copy -o
+  vcodec=mpeg4 -vf scale=640:480 -oac copy -o
   sortie.avi</CODE></P>
 
 
@@ -309,7 +309,7 @@ Explication du processus:
 <H4>Utilisation:</H4>
 
 <P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4:aspect=16.0/9.0 -vop crop=714:548:0:14 -oac copy -o sortie.avi</CODE></P>
+  vcodec=mpeg4:aspect=16.0/9.0 -vf crop=714:548:0:14 -oac copy -o sortie.avi</CODE></P>
 
 </BODY>
 </HTML>

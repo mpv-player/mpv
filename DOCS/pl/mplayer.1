@@ -186,12 +186,12 @@ plik nazwany 'movie.avi.conf' z opcjami w nim i przenie¶ go do
 Czytaj dane z stdin.
 Opcja \-idx nie wspó³pracuje w po³±czeniu z tym.
 .TP
-.B \-autoq <jako¶æ> (u¿ywaj z \-vop pp)
+.B \-autoq <jako¶æ> (u¿ywaj z \-vf pp)
 Dynamiczne zmiany poziomu postprocesingu w zale¿no¶ci od dostêpnego wolnego
 czasu procesora.
 Numer, który wyszczególnisz, bêdzie najwy¿szym poziomem.
 Najczê¶ciej mo¿esz u¿ywaæ du¿ych liczb.
-Aby u¿yæ t± opcja musisz u¿yæ w komendzie \-vop pp bez parametrów.
+Aby u¿yæ t± opcja musisz u¿yæ w komendzie \-vf pp bez parametrów.
 .TP
 .B \-autosync <czynnik>
 Stopniowo dostosowuj synchronizacjê A/\:V bazuj±c na pomiarze opó¼nieñ audio.
@@ -811,7 +811,7 @@ Wymu¶ parametry audio dla demuxera .vivo (by usun±æ b³êdy).
 .SH "OPCJE OSD/SUB"
 .I INFORMACJE:
 .br
-Zobacz tak¿e rozszerzenie \-vop.
+Zobacz tak¿e rozszerzenie \-vf.
 .TP
 .B \-dumpmicrodvdsub (tylko MPLAYER)
 Konwertuj podane napisy (okre¶lone przez opcjê \-sub) do formatu napisów
@@ -1025,7 +1025,7 @@ TYLKO dla plików SUB opartych na klatkach tj.\& NIE format MicroDVD!
 Obecnie bezcelowe.
 To samo co \-audiofile, ale dla strumieni napisów (OggDS?).
 .TP
-.B \-subpos <0 \- 100> (u¿yteczny z rozszerzeniem -vop)
+.B \-subpos <0 \- 100> (u¿yteczny z rozszerzeniem -vf)
 Wybierz pozycje napisów na ekranie.
 Warto¶æ jest poziom± pozycj± napisów w % wysoko¶ci ekranu.
 .TP
@@ -1813,7 +1813,7 @@ Wy³±cz automatycznie wyrównywanie trybu wideo filmu.
 .B \-nosound
 Nie odtwarzaj/\:koduj d¼wiêku.
 .TP
-.B \-pp <jako¶æ> (zobacz tak¿e opcjê \-vop pp!)
+.B \-pp <jako¶æ> (zobacz tak¿e opcjê \-vf pp!)
 Ustaw poziom postprocessingu dla DLL.
 Ta opcja jest NIE JEST U?YTECZNA z filtrami postprocessingu MPlayera,
 ale tylko z Win32 DirectShow DLLs które maj? wewn?trzny postprocessing.
@@ -1821,7 +1821,7 @@ ale tylko z Win32 DirectShow DLLs które maj? wewn?trzny postprocessing.
 Poprawny zakres dla warto?ci \-pp ró?nie si? w kodekach, najcz??ciej
 0\-6, gdzie 0=wy??czony 6=powolny/\:najlepszy.
 .TP
-.B \-pphelp (zobacz tak¿e opcjê \-vop pp)
+.B \-pphelp (zobacz tak¿e opcjê \-vf pp)
 Poka¿ streszczenie dostêpnych filtrów postprocesu i ich u¿ycie.
 .TP
 .B \-ssf <tryb>
@@ -1830,7 +1830,7 @@ Okre¶la parametry SwScaler.
 .I PRZYK£AD:
 .PD 0
 .RSs
-\-vop scale -ssf lgb=3.0
+\-vf scale -ssf lgb=3.0
 .RE
 .PD 1
 
@@ -1867,7 +1867,7 @@ Prawy kana³
 .PD 1
 .
 .TP
-.B \-sws <typ\ oprogramowania\ skaluj±cego> (zobacz opcjê skaluj±c± \-vop)
+.B \-sws <typ\ oprogramowania\ skaluj±cego> (zobacz opcjê skaluj±c± \-vf)
 Ta opcja okre¶la jako¶æ (i odpowiednio prêdko¶æ) skalowania programowego,
 dla opcji \-zoom.
 Dla przyk³adu z x11 lub z innym wyj¶ciem sprzêtowej akceleracji. Mo¿liwe
@@ -1876,7 +1876,7 @@ ustawienia to:
 .I INFORMACJA:
 .br
 Dla \-sws\ 2 i 7, ostro¶æ mo¿e myæ ustawiona z parametrem skalowania (p)
-\-vop scale (0 (soft) \- 100 (sharp)), dla \-sws 9, jest okre¶lona d³ugo¶æ
+\-vf scale (0 (soft) \- 100 (sharp)), dla \-sws 9, jest okre¶lona d³ugo¶æ
 filtru (1 \- 10).
 
 .PD 0
@@ -1956,8 +1956,8 @@ próbuj najpierw kodek XAnim
 .PD 1
 .
 .TP
-.B \-vop <...,filter3[=options],filter2,filter1>
-Uruchom, rozdzielon± przecinkami, listê filtrów video w odwrotnym porz±dku.
+.B \-vf <filter1[=options],filter2,...>
+Uruchom, rozdzielon± przecinkami, listê filtrów video.
 
 .I INFORMACJA:
 .br
@@ -1967,7 +1967,7 @@ U¿yj -1 by zatrzymaæ domy¶lnie warto¶ci.
 Parametry w:h oznaczaj± szeroko¶æ x wysoko¶æ w pikselach, x:y oznacza x;y pozycjê
 od wy¿szego lewego rogu wiêkszego obrazu.
 .br
-By pobraæ listê dostêpnych pluginów patrz \-vop help.
+By pobraæ listê dostêpnych pluginów patrz \-vf help.
 .br
 Dostêpne filtry to:
 .
@@ -2043,22 +2043,22 @@ y: Nie wykonuje filtrowania chrominance (tylko korekcja o¶wietlenia).
 .RE
 .RSss
 .br
-\-vop pp=hb/vb/dr/al/lb
+\-vf pp=hb/vb/dr/al/lb
 .br
-\-vop pp=hb/vb/dr/al
+\-vf pp=hb/vb/dr/al
 .br
 domy¶lne filtry bez korekcji jasno¶ci/\:kontrastu
 .br
-.IPs "\-vop pp=de/\-al"
+.IPs "\-vf pp=de/\-al"
 .br
 W³±cz domy¶lne filtry i podrêczne odszumiacze:
 .br
-.IPs "\-vop pp=de/tn:1:2:3"
+.IPs "\-vf pp=de/tn:1:2:3"
 .br
 Odblokowana tylko korekcja o¶wietlenia w pionie i automatycznie odblokowywana
 korekcja pozioma, zale¿nie, czy jest dostêpny czas procesora.
 .br
-\-vop pp=hb:y/vb:a \-autoq 6
+\-vf pp=hb:y/vb:a \-autoq 6
 .REss
 .IPs lavc[=quality:fps]
 Koder realtime MPEG1 dla u¿ycia z DVB/\:DXR3 (libavcodec)
@@ -2108,7 +2108,7 @@ Warto¶æ mo¿e byæ z przedzia³u -100 do 100.
 Alternatywny programowy equalizer u¿ywaj±cy tabel (bardzo wolne),
 pozwala na dodatek na korekcjê gamma jasno¶ci, dostosowania kontrastu
 i nasycenia. Informujemy, ¿e wykorzystuje to kilka otymalizacji kodu dla MMX
-tak jak -vop eq, je¿eli wszystkie warto¶ci gamma s± 1.0!
+tak jak -vf eq, je¿eli wszystkie warto¶ci gamma s± 1.0!
 Parametry s± podane w warto¶ciach zmienno pozycyjnych.
 Domy¶lne to gama=1.0, kontrast=1.0, jasno¶æ=0.0 i nasycenie 1.0.
 Parametry rg, gg, bg s± niezale¿ne od warto¶ci gamma dla komponentów Red, Green
@@ -2214,7 +2214,7 @@ hidden: ustawia domy¶ln± warto¶æ flagi 'hidden' (warto¶æ logiczna)
 opaque: flaga prze³±cza pomiêdzy prze¼roczystym i nieprze¼roczystym (szybki)
 trybem
 .br
-fifo: ¶cie¿ka/nazwa pliku dla FIFO (nazwane rór± ³±cz±c± mplayer -vop bmovl
+fifo: ¶cie¿ka/nazwa pliku dla FIFO (nazwane rór± ³±cz±c± mplayer -vf bmovl
 do aplikacji kontroluj±cej)
 .REss
 
@@ -2315,11 +2315,11 @@ Wy³±czone obliczanie stosunku.
 .TP
 .B \-zoom \
 Pozwalaj na programowe skalowanie, gdy jest dostêpne. Mo¿esz u¿yæ
-wymuszonego skalowania opcj± -vop scale
+wymuszonego skalowania opcj± -vf scale
 
 .I INFORMACJA:
 .br
-Skalowanie -vop ZIGNORUJE opcje \-x / \-y / \-xy / \-fs / \-aspect bez -zoom.
+Skalowanie -vf ZIGNORUJE opcje \-x / \-y / \-xy / \-fs / \-aspect bez -zoom.
 
 
 .SH "OPCJE KODUJ¡CE (TYLKO MENCODER)"
@@ -3435,11 +3435,11 @@ mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 mencoder \-dvd 2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Kodowanie tytu³u #2 DVD, zmieniaj±c rozmiar do 640x480
-mencoder \-dvd 2 \-vop scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \-dvd 2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Kodowanie tytu³u #2 DVD, zmieniaj±c rozmiar do 512xHHH (zachowaj stosunek
 obrazu)
-mencoder \-dvd 2 \-vop scale \-zoom \-xy 512 \-o title2.avi \-oac copy
+mencoder \-dvd 2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
 .B To samo, ale z rodzin± kodeków libavcodec, kompresja MPEG4 (Divx5)

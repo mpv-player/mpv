@@ -572,7 +572,7 @@ Savage的芯片的YV12显示有问题，具体细节请看<A HREF="video.html#xv_s3">S3 Xv</A>部
 
 <H4>非YUV卡片</H4>
 
-<P>可以通过使用<B>软件缩放</B>(使用<CODE>-zoom</CODE>或者<CODE>-vop scale</CODE>参数，但是我先警告你：
+<P>可以通过使用<B>软件缩放</B>(使用<CODE>-zoom</CODE>或者<CODE>-vf scale</CODE>参数，但是我先警告你：
 这会比较慢)，或者通过切换成较小的的分辨率来实现全屏播放，例如352x288。如果你没有YUV加速，我们推荐使用后一种方法。视频模式切换通过<CODE>-vm</CODE>选项打开，它能用于下列驱动：</P>
 
 <UL>
@@ -887,7 +887,7 @@ konwert(Debian)或者iconv(Red Hat)程序完成。<BR>
     解释：使用这个选项，只有26和23频道可以使用，当频道切换时会有一个显示频道名的精致的OSD文字。频道名中的空格必须用"_"代替。</LI>
   <LI>选择完整的图像分辨率。输出图像的分辨率必须能够被16整除。</LI>
   <LI>如果你截取视频的垂直分辨率比完整分辨率的一半还高(PAL制是288，NTSC是240)，确保你打开非交错选项，否则你得到的电影将在
-高速运动的场景中发生扭曲，而且由于交错模式产生大量的细节消耗很多带宽，比特率控制器很可能无法获得指定的比特率。你能使用<CODE>-vop pp=DEINT_TYPE</CODE>打开非交错选项。一般来说<CODE>pp=lb</CODE>工作的不错，但这可能取决于个人的设定。查看manual中的别的
+高速运动的场景中发生扭曲，而且由于交错模式产生大量的细节消耗很多带宽，比特率控制器很可能无法获得指定的比特率。你能使用<CODE>-vf pp=DEINT_TYPE</CODE>打开非交错选项。一般来说<CODE>pp=lb</CODE>工作的不错，但这可能取决于个人的设定。查看manual中的别的
 非交错算法，都尝试一下。</LI>
   <LI>切割到无用的空间。当你截取视频时，边界区域通常时黑的或者包含一些噪音。这同样不必要的消耗了很多带宽。更精确的说不是那些黑的
 区域本身而是在黑的和更亮的视频图像之间的形状变换消耗带宽，但现在这并不重要。在你开始截取之前，调整<CODE>crop</CODE>选项的参数
@@ -924,7 +924,7 @@ konwert(Debian)或者iconv(Red Hat)程序完成。<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=768:height=576 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-oac  mp3lame -lameopts cbr:br=64 \<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;-vop pp=lb,crop=720:544:24:16 -o output.avi
+  &nbsp;&nbsp;&nbsp;&nbsp;-vf crop=720:544:24:16,pp=lb -o output.avi
   </CODE><BR>
 
   <BR>
@@ -934,7 +934,7 @@ konwert(Debian)或者iconv(Red Hat)程序完成。<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=768:height=576 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-oac mp3lame -lameopts cbr:br=48 \<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;-vop scale=384:288,pp=tn/lb,crop=720:540:24:18 -sws 1 -o output.avi
+  &nbsp;&nbsp;&nbsp;&nbsp;-vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o output.avi
   </CODE><BR>
 
   也可以在<CODE>-tv</CODE>选项中设置一个较小的分辨率而忽略软件缩放选项但是上面的方法使用最大的可用信息而且对噪音更有抵抗力。bt8x8芯片

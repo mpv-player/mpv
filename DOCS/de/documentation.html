@@ -774,7 +774,7 @@ weswegen Abspielen im Vollbild gut aussieht und sehr schnell ist.</P>
 <H4>Nicht-YUV-Karten</H4>
 			
 <P>Vollbild kann durch Zoomen durch eine <B>Softwareskalierung</B> (benutze die
-Option <CODE>-zoom</CODE> oder <CODE>-vop scale</CODE>) erreicht werden. Aber
+Option <CODE>-zoom</CODE> oder <CODE>-vf scale</CODE>) erreicht werden. Aber
 sei gewarnt: Es ist <B>langsam</B>! Eventuell reicht es auch schon aus, in
 einen kleineren Videomodus zu wechseln, z.B. zu 352x288. Wenn keine
 YUV-Beschleunigung zur Verf&uuml;gung steht, ist diese letztgenannte Methode zu
@@ -1285,7 +1285,7 @@ verf&uuml;gbar. Hier nur ein paar Tipps:
     verwendete Algorithmus damit warhscheinlich nicht zurecht kommen, da
     Interlacing-Artefakte sehr viele Details erzeugen und der Codec somit eine
     Unmenge an Bandbreite f&uuml;r die Encodierung ben&ouml;tigt. Du kannst
-    Deinterlacing mit der Option <CODE>-vop pp=DEINT_TYPE</CODE> anschalten.
+    Deinterlacing mit der Option <CODE>-vf pp=DEINT_TYPE</CODE> anschalten.
     Normalerweise funktioniert <CODE>pp=lb</CODE> sehr gut, aber das h&auml;ngt
     auch vom pers&ouml;nlichen Geschmack ab. Schau in der man-page nach. Dort
     findest du eine Beschreibung der einzelnen Deinterlacing-Algorithmen.
@@ -1375,8 +1375,8 @@ verf&uuml;gbar. Hier nur ein paar Tipps:
     &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts
     vcodec=mpeg4:vbitrate=900 \<BR> &nbsp;&nbsp;&nbsp;&nbsp;-oac
     mp3lame -lameopts cbr:br=64 \<BR>
-    &nbsp;&nbsp;&nbsp;&nbsp;-vop
-    pp=lb,crop=720:544:24:18 -o output.avi
+    &nbsp;&nbsp;&nbsp;&nbsp;-vf
+    crop=720:544:24:18,pp=lb -o output.avi
   </CODE><BR>
 
   <BR> In diesem Beispiel wird das Bild noch auf 384x288 verkleinert und mit
@@ -1392,7 +1392,7 @@ verf&uuml;gbar. Hier nur ein paar Tipps:
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=768:height=576 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-oac mp3lame -lameopts cbr:br=48 \<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;-vop scale=384:288,pp=tn/lb,crop=720:540:24:18 -sws 1 -o output.avi
+  &nbsp;&nbsp;&nbsp;&nbsp;-vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o output.avi
   </CODE><BR>
 
   Du k&ouml;nntest auch in der <CODE>-tv</CODE>-Option eine kleinere

@@ -214,7 +214,7 @@ Its parameters are already well-known from libvo:
 	d_width/d_height (display size) to preserve the correct aspect ratio!
 	Filters should not rely on d_width, d_height as input parameters,
 	the only exception is when a filter replaces some libvo functionality
-	(like -vop scale with -zoom, or OSD rendering wiht -vop expand).
+	(like -vf scale with -zoom, or OSD rendering wiht -vf expand).
     flags:	       the "good" old flags set of libvo:
         0x01	- force fullscreen (-fs)
 	0x02	- allow mode switching (-vm)

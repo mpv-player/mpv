@@ -187,11 +187,11 @@ könyvtárba, vagy a file mellé.
 Adat olvasása a stdin-rõl.
 Az \-idx opció nem használható ilyenkor.
 .TP
-.B \-autoq <minõség> (használd a \-vop pp mellett)
+.B \-autoq <minõség> (használd a \-vf pp mellett)
 Dinamikusan változtatja a postprocessing értékét a maradék CPU idõ
 függvényében. A megadott szám lesz a maximálisan használandó érték. Általában
 célravezetõ nagy számok beírása.
-Ezen opció használatához elengedhetetlen a \-vop pp opció paraméterek nélküli
+Ezen opció használatához elengedhetetlen a \-vf pp opció paraméterek nélküli
 használata.
 .TP
 .B \-autosync <faktor>
@@ -516,7 +516,7 @@ Például néha az '1'-es egy elõzetes, és a '2'-es az igazi film.
 .I MEGJEGYZÉS:
 .br
 Néha a deinterlace-elés szükséges a DVD lejátszáshoz,
-lásd a \-vop pp=0x20000 opciót.
+lásd a \-vf pp=0x20000 opciót.
 .TP
 .B \-dvd\-device <útvonal\ az\ egységhez>
 Alapértelmezett /dev/\:dvd egységnév felülbírálata.
@@ -799,7 +799,7 @@ A .vivo demuxer audio paramétereinek felülbírálata (hibakeresõ célokra).
 .SH "OSD/SUB OPCIÓK"
 .I MEGJEGYZÉS:
 .br
-Lásd még a \-vop expand opciót.
+Lásd még a \-vf expand opciót.
 .TP
 .B \-dumpmicrodvdsub (csak MPLAYER)
 A használt felirat (amit a \-sub opció ad meg) MicroDVD formátumba
@@ -1010,7 +1010,7 @@ Csak frame alapú feliratokhoz, azaz a MicroDVD formátumhoz NEM.
 Jelenleg haszontalan.
 Ugyanaz mint az \-audiofile, de felirat stream-ekhez (OggDS?).
 .TP
-.B \-subpos <0\-100> (a \-vop expand opcióval hasznos)
+.B \-subpos <0\-100> (a \-vf expand opcióval hasznos)
 A feliratok képernyõn elfoglalt helye.
 Az érték a képernyõ magasságának megadott százaléka, ahol a felirat
 legyen.
@@ -1754,7 +1754,7 @@ Képarány figyelembevételének kikapcsolása.
 .B \-nosound
 Hang lejátszásának/\:enkódolásának kikapcsolása.
 .TP
-.B \-pp <minõség> (lásd még \-vop pp)
+.B \-pp <minõség> (lásd még \-vf pp)
 A DLL minõségjavító szintjének beállítása.
 Ez az opció NEM az MPlayer postprocess szûrõjének beállítására való, hanem
 az olyan Win32 DirectShow DLL-ekre amelyeknek van beépített minõségjavító
@@ -1763,7 +1763,7 @@ kódjuk.
 Az értéktartomány codecfüggõ, többnyire
 0\-6, ahol 0=kikapcsolás 6=leglassabb/\:legjobb.
 .TP
-.B \-pphelp (lásd még \-vop pp)
+.B \-pphelp (lásd még \-vf pp)
 Összefoglaló a postprocess szûrõkrõl és használatukról.
 .TP
 .B \-ssf <mód>
@@ -1772,7 +1772,7 @@ SwScaler paraméterek finomhangolása.
 .I PÉLDA
 .PD 0
 .RSs
-\-vop scale \-ssf lgb=3.0
+\-vf scale \-ssf lgb=3.0
 .RE
 .PD 1
 
@@ -1809,7 +1809,7 @@ Jobb csatorna
 .PD 1
 .
 .TP
-.B \-sws <szoftveres\ scaler\ tipusa> (lásd még \-vop scale opció)
+.B \-sws <szoftveres\ scaler\ tipusa> (lásd még \-vf scale opció)
 Ezzel az opcióval lehet a \-zoom opcióval használható szoftveres nagyítás
 sebességét és minõségét állítani.
 Ez a hardveres gyorsítást nélkülõzõ módokhoz van, mint például az x11.
@@ -1870,35 +1870,8 @@ try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others
 .PD 1
 .
 .TP
-.B \-vfm <driver1,driver2,...>
-Specify a priority list of video drivers to be used, according to their driver
-name in codecs.conf.
-It falls back to default if none is ok.
-
-.I NOTE:
-.br
-If libdivxdecore support was compiled in, then odivx and divx4 now contains
-just the same DivX4 codec, but different APIs to reach it.
-For difference between them and when to use which, check the DivX4 section in
-the documentation.
-.br
-See \-vfm help for a full list of available drivers.
-
-.I EXAMPLE:
-.PD 0
-.RSs
-.IPs "\-vfm ffmpeg,dshow,vfw"
-try the libavcodec, then Directshow, then VFW codecs and fallback to the
-others, if still none is ok
-.IPs "\-vfm xanim"
-try XAnim codecs first
-.RE
-.PD 1
-.
-.TP
-.B \-vop <...,filter3[=options],filter2,filter1>
-Activate a comma separated list of video filters and their options in reverse
-order.
+.B \-vf <filter1[=options],filter2,...>
+Activate a comma separated list of video filters and their options.
 
 .I NOTE:
 .br
@@ -1908,7 +1881,7 @@ Use -1 to keep the default value.
 Parameters w:h means width x height in pixels, x:y means x;y position counted
 from the upper left corner of the bigger image.
 .br
-To get a full list of available plugins, see \-vop help.
+To get a full list of available plugins, see \-vf help.
 .br
 Available filters are:
 .
@@ -1987,22 +1960,22 @@ y: Do not do chrominance filtering (only luminance filtering).
 .RE
 .RSss
 .br
-\-vop pp=hb/vb/dr/al/lb
+\-vf pp=hb/vb/dr/al/lb
 .br
-\-vop pp=hb/vb/dr/al
+\-vf pp=hb/vb/dr/al
 .br
 Default filters without brightness/\:contrast correction:
 .br
-\-vop pp=de/\-al
+\-vf pp=de/\-al
 .br
 Enable default filters & temporal denoiser:
 .br
-\-vop pp=de/tn:1:2:3
+\-vf pp=de/tn:1:2:3
 .br
 Deblock horizontal only luminance and switch vertical deblocking on or
 off automatically depending on available CPU time:
 .br
-\-vop pp=hb:y/vb:a \-autoq 6
+\-vf pp=hb:y/vb:a \-autoq 6
 .REss
 .IPs lavc[=quality:fps]
 Realtime MPEG1 encoder for use with DVB/\:DXR3 (libavcodec)
@@ -2155,7 +2128,7 @@ hidden: sets the default value of the 'hidden' flag (boolean)
 opaque: flag switching between alphablended (transparent) and opaque (fast)
 mode
 .br
-fifo: path/filename for the FIFO (named pipe connecting mplayer -vop bmovl
+fifo: path/filename for the FIFO (named pipe connecting mplayer -vf bmovl
 to the controlling application)
 .REss
 
@@ -2223,6 +2196,32 @@ screen is updated.
 .RE
 .
 .TP
+.B \-vfm <driver1,driver2,...>
+Specify a priority list of video drivers to be used, according to their driver
+name in codecs.conf.
+It falls back to default if none is ok.
+
+.I NOTE:
+.br
+If libdivxdecore support was compiled in, then odivx and divx4 now contains
+just the same DivX4 codec, but different APIs to reach it.
+For difference between them and when to use which, check the DivX4 section in
+the documentation.
+.br
+See \-vfm help for a full list of available drivers.
+
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "\-vfm ffmpeg,dshow,vfw"
+try the libavcodec, then Directshow, then VFW codecs and fallback to the
+others, if still none is ok
+.IPs "\-vfm xanim"
+try XAnim codecs first
+.RE
+.PD 1
+.
+.TP
 .B \-x <x> (MPLAYER only)
 Scale image to x width (if sw/\:hw scaling available).
 Disables aspect calculations.
@@ -2257,11 +2256,11 @@ Disables aspect calculations.
 .TP
 .B \-zoom \ 
 Allow software scaling, where available.
-Could be used to force scaling with \-vop scale.
+Could be used to force scaling with \-vf scale.
 
 .I NOTE:
 .br
-\-vop scale will IGNORE options \-x / \-y / \-xy / \-fs / \-aspect without
+\-vf scale will IGNORE options \-x / \-y / \-xy / \-fs / \-aspect without
 \-zoom.
 
 
@@ -3195,7 +3194,7 @@ EDL bejegyzés
 .PP
 (A következõ billentyûk csak hardveres támogatású videokimeneteken
 (xv, (x)vidix, (x)mga, stb), vagy szoftveres equalizer használatakor
-(-vop eq vagy -vop eq2) mûködnek.
+(-vf eq vagy -vf eq2) mûködnek.
 
 .IPs "1 és 2"
 kontraszt beállítása
@@ -3392,11 +3391,11 @@ mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 mencoder \-dvd 2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B DVD 2-es sávjának enkódolása, átméretezés 640x480-ba
-mencoder \-dvd 2 \-vop scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \-dvd 2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B DVD 2-es sávjának enkódolása, átméretezés 512xMMM-be (képarány
 megtartásával)
-mencoder \-dvd 2 \-vop scale \-zoom \-xy 512 \-o title2.avi \-oac copy
+mencoder \-dvd 2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
 .B Ugyanez, de a libavcodec-kel, MPEG4 tömörítéssel

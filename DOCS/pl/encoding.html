@@ -167,14 +167,14 @@ kontrolera tempa z libavcodec.<BR>
 <UL>
 <B>2-krokowe kodowanie</B> :<BR>
 <CODE>rm -f lavc_stats.txt<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=1 (opcje-audio) -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 (opcje-audio) -o movie.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vpass=1 (opcje-audio) -o movie.avi<BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vpass=2 (opcje-audio) -o movie.avi</CODE><BR>
 <BR>
 <B>3-krokowe kodowanie</B> :<BR>
 <CODE>rm -f frameno.avi lavc_stats.txt<BR>
 mencoder -dvd 2 -ovc frameno (opcje-audio) -o frameno.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=1 -oac copy -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 -oac copy -o movie.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vpass=1 -oac copy -o movie.avi<BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vpass=2 -oac copy -o movie.avi</CODE><BR>
 </UL>
 </P>
 
@@ -190,12 +190,12 @@ mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 -oac copy -o movie.avi</CODE><BR>
   W taki sposób jedynym rozwi±znaniem jest skalowanie.</P>
 
 <P>Proces skalowania jest prowadzony przez filter wideo <I>'scale'</I>:
-  <CODE>-vop scale=X:Y</CODE>. Jako¶æ mo¿e byæ ustawiona przez opcjê
+  <CODE>-vf scale=X:Y</CODE>. Jako¶æ mo¿e byæ ustawiona przez opcjê
   <CODE>-sws</CODE>. Je¶li nie jest okre¶lona, <B>MEncoder</B> u¿yje 0:
   szybki bilinear.</P>
 
 <P>Sposób u¿ycia :<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -divx4opts br=1300 -vop scale=640:480 -sws 2 -o output.avi</CODE></P>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -divx4opts br=1300 -vf scale=640:480 -sws 2 -o output.avi</CODE></P>
 
 
 <P><B><A NAME=2.4.3.3>2.4.3.3.  Kopiowanie strumieniowe</B></P>
@@ -436,7 +436,7 @@ formatów wideo i audio (obecnie kodeki audio s± niedostêpne). Mo¿esz kodowaæ do 
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg</CODE></P>
 
 <P>Kodowanie z DVD, tytu³ 2, ze skalowaniem :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -vop scale=640:480 -sws 2 -o title2.avi</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -vf scale=640:480 -sws 2 -o title2.avi</CODE></P>
 
 <P>Kodowanie z HTTP :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/example.avi  -o  example.avi</CODE></P>

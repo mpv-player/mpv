@@ -481,8 +481,8 @@ esd, arts)</TD><TR>
 <P>A bpp (bits per pixel) értéket kézzel kell 4-re állítani:<BR>
   &nbsp;&nbsp;<CODE>-bpp 4</CODE><BR>
   A filmet valószínûleg le kell kicsinyíteni egy EGA módra:<BR>
-  &nbsp;&nbsp;<CODE>-vop scale=640:350</CODE> vagy<BR>
-  &nbsp;&nbsp;<CODE>-vop scale=320:200</CODE><BR>
+  &nbsp;&nbsp;<CODE>-vf scale=640:350</CODE> vagy<BR>
+  &nbsp;&nbsp;<CODE>-vf scale=320:200</CODE><BR>
   Ehhez pedig egy gyors scaler kell:<BR>
   &nbsp;&nbsp;<CODE>-sws 4</CODE><BR>
   Valószínûleg az aspektus javítást ki kell kapcsolni:<BR>
@@ -490,7 +490,7 @@ esd, arts)</TD><TR>
 </P>
 
 <P><B>Megjegyzés</B>: tapasztalatom szerint EGA monitoron a legjobb a
-  fényességet csökkenteni kicsit: <CODE-vop eq=-20:0</CODE>. A gépemen le
+  fényességet csökkenteni kicsit: <CODE-vf eq=-20:0</CODE>. A gépemen le
   kell csökkenteni a mintavételezési frekit is, mert 44kHz-en rossz a hang:
   <CODE>-srate 22050</CODE>.</P>
 
@@ -970,20 +970,20 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 
 <PRE>
   mplayer -ao mpegpes -vo mpegpes file.ext
-  mplayer -ao mpegpes -vo mpegpes -vop expand file.ext
+  mplayer -ao mpegpes -vo mpegpes -vf expand file.ext
 </PRE>
 
 <P>Fontos megjegyezni hogy a DVB kártyák csak 288 és 576 pixel,
   (PAL esetén), illetve 240 és 480 (NTSC) magasságú videókat támogatnak.
   Más felbontású filmeket át <B>kell</B> méretezni a megfelelõ méretre,
-  a <CODE>scale=szélesség:magasság</CODE> szûrõ megadásával (<CODE>-vop</CODE>
+  a <CODE>scale=szélesség:magasság</CODE> szûrõ megadásával (<CODE>-vf</CODE>
   opció). Szélességbõl többféle is használható, pl. 720, 704, 640, 512, 480,
   352, továbbá a kártyák a horizontális átméretezést hardveresen is képesek
   megoldani, ezért a horizontális nagyítás a legtöbb esetben szükségtelen.
   Es 512x384-es felbontású (aspect 4:3) DivX lejátszása így történik:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop scale=512:576
+  mplayer -ao mpegpes -vo mpegpes -vf scale=512:576
 </PRE>
 
 <P>Ha szélesvásznú filmrõl van szó és nem akarod teljes magasságra nagyítani,
@@ -991,20 +991,20 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
   kép köré rakni. Es 640x384-es DivX-hez a következõ opciók kellenek:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop expand=640:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 file.avi
 </PRE>
 
 <P>Ha a CPU-d túl lassú egy 720x576-os DivX-hez, csökkentsd le a file
   felbontását:</P>
 
 <PRE> 
-  mplayer -ao mpegpes -vo mpegpes -vop scale=352:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 file.avi
 </PRE>
 
 <P>Ha ettõl se javul a sebesség, vertikálisan is csökkentheted a méretet:</P>
 
 <PRE>                                                           
-  mplayer -ao mpegpes -vo mpegpes -vop scale=352:288 file.avi 
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 file.avi 
 </PRE>
 
 <P>OSD és/vagy feliratok megjelenítéséhez az expand szûrõ OSD részét kell
@@ -1024,8 +1024,8 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
   szûrõt:</P>
 
 <PRE>
- 3:4-es TV-hez: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-16:9-es TV-hez: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+ 3:4-es TV-hez: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
+16:9-es TV-hez: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </PRE>
 
 <H4>A JÖVÕ</H4>
@@ -1133,7 +1133,7 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
   22050Hz esetén 44100, 24000Hz esetén 48000. Ez az opció természetesen
   nem mûködik digitális AC3 esetén (<CODE>-ac hwac3</CODE>).</DD>
 
-  <DT><CODE>-vop expand=-1:-1:-1:-1:1</CODE></DT>
+  <DT><CODE>-vf expand=-1:-1:-1:-1:1</CODE></DT>
   <DD>OSD megjelenítése</DD>
 
   <DT><CODE>-ac hwac3</CODE></DT>
@@ -1178,7 +1178,7 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
   a gyors bilineáris szoftever nagyítással. A parancsok:</P>
 
 <PRE>
-  mplayer -vo zr -sws 0 -vop scale=384:204 movie.avi
+  mplayer -vo zr -sws 0 -vf scale=384:204 movie.avi
 </PRE>
 
 <P>A vágást a <CODE>crop</CODE> szûrõvel is el lehet végezni. Tegyük fel hogy
@@ -1192,7 +1192,7 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 <P>ugyanez a <CODE>crop</CODE> szûrõvel:</P>
 
 <PRE>
-  mplayer -vo zr -vop crop=720:320:80:0 benhur.avi
+  mplayer -vo zr -vf crop=720:320:80:0 benhur.avi
 </PRE>
 
 <P>A <CODE>-zrcrop</CODE> használatával állítható be a <I>cinerama</I> mód is.

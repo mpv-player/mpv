@@ -710,7 +710,7 @@
 <H4>Cartes non-YUV</H4>
 
 <P>L'affichage en plein-écran peut être obtenu soit en activant le <B>redimensionnement logiciel</B>
-  (utilisez les options <CODE>-zoom</CODE> ou <CODE>-vop scale</CODE>, mais je vous préviens:
+  (utilisez les options <CODE>-zoom</CODE> ou <CODE>-vf scale</CODE>, mais je vous préviens:
   c'est lent), ou passez dans une résolution plus basse, par exemple 352x288. Si vous
   n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le changement
   de mode vidéo peut être activé en utilisant l'option <CODE>-vm</CODE> et fonctionne
@@ -1146,7 +1146,7 @@ astuces:
     scènes fast-motion et le contrôleur de bitrate ne sera probablement même pas
     capable de garder le bitrate demandé car l'artefact de désentrelacement produit
     un grand taux de détails et donc consomme plus de bande passante. Vous pouvez
-    désactiver l'entrelacement avec <CODE>-vop pp=DEINT_TYPE</CODE>. Généralement
+    désactiver l'entrelacement avec <CODE>-vf pp=DEINT_TYPE</CODE>. Généralement
     <CODE>pp=lb</CODE> peut faire un bon travail, m'est c'est une histoire de préférence
     personnelle. Voyez les autres algorithmes de désentrelacement dans le manuel et
     essayez-les.</LI>
@@ -1211,8 +1211,8 @@ on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
   on:driver=v4l:width=768:height=576 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts
   vcodec=mpeg4:vbitrate=900 \<BR> &nbsp;&nbsp;&nbsp;&nbsp;-oac
-  mp3lame -lameopts cbr:br=64 \<BR> &nbsp;&nbsp;&nbsp;&nbsp;-vop
-  pp=lb,crop=720:544:24:16 -o sortie.avi </CODE><BR>
+  mp3lame -lameopts cbr:br=64 \<BR> &nbsp;&nbsp;&nbsp;&nbsp;-vf
+  crop=720:544:24:16,pp=lb -o sortie.avi </CODE><BR>
 
   <BR>
   Cela dimensionne également l'image en 384x288 et compresse la
@@ -1224,7 +1224,7 @@ on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=768:height=576 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-oac mp3lame -lameopts cbr:br=48 \<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;-vop scale=384:288,pp=tn/lb,crop=720:540:24:18 -sws 1 -o sortie.avi
+  &nbsp;&nbsp;&nbsp;&nbsp;-vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o sortie.avi
   </CODE><BR>
 
   Il est également possible de spécifier des dimensions d'image plus

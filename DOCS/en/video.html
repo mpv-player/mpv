@@ -497,15 +497,15 @@
 <P>The bpp (bits per pixel) value must be set to 4 by hand:<BR>
   &nbsp;&nbsp;<CODE>-bpp 4</CODE><BR>
   The movie probably must be scaled down to fit in EGA mode:<BR>
-  &nbsp;&nbsp;<CODE>-vop scale=640:350</CODE> or<BR>
-  &nbsp;&nbsp;<CODE>-vop scale=320:200</CODE><BR>
+  &nbsp;&nbsp;<CODE>-vf scale=640:350</CODE> or<BR>
+  &nbsp;&nbsp;<CODE>-vf scale=320:200</CODE><BR>
   For that we need fast but bad quality scaling routine:<BR>
   &nbsp;&nbsp;<CODE>-sws 4</CODE><BR>
   Maybe automatic aspect correction has to be shut off:<BR>
   &nbsp;&nbsp;<CODE>-noaspect</CODE></P>
 
 <P><B>NOTE:</B> according to my experience the best image quality on EGA
-  screens can be achieved by decreasing the brightness a bit: <CODE>-vop
+  screens can be achieved by decreasing the brightness a bit: <CODE>-vf
   eq=-20:0</CODE>. I also needed to lower the audio samplerate on my box,
   because the sound was broken on 44kHz: <CODE>-srate 22050</CODE>.</P>
 
@@ -685,7 +685,7 @@
   (using aalib on X), and it's least CPU intensive on standard,
   non-framebuffer console. Use SVGATextMode to set up a big textmode,
   then enjoy! (secondary head Hercules cards rock :)) (but imho you can use
-  <CODE>-vop 1bpp</CODE> option to get graphics on hgafb:)</P>
+  <CODE>-vf 1bpp</CODE> option to get graphics on hgafb:)</P>
 
 <P>Use the <CODE>-framedrop</CODE> option if your computer isn't fast enough to
   render all frames!</P>
@@ -1034,19 +1034,19 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
 
 <PRE>
   mplayer -ao mpegpes -vo mpegpes yourfile.ext
-  mplayer -ao mpegpes -vo mpegpes -vop expand yourfile.ext
+  mplayer -ao mpegpes -vo mpegpes -vf expand yourfile.ext
 </PRE>
 
 <P>Note that DVB cards only support heights 288 and 576 for PAL or 240 and 480
   for NTSC. You <B>must</B> rescale for other heights by adding
   <CODE>scale=width:height</CODE> with the width and height you want to the
-  <CODE>-vop</CODE> option. DVB cards accept various widths, like 720, 704,
+  <CODE>-vf</CODE> option. DVB cards accept various widths, like 720, 704,
   640, 512, 480, 352 etc and do hardware scaling in horizontal direction, so
   you do not need to scale horizontally in most cases. For a 512x384 (aspect
   4:3) DivX try:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop scale=512:576
+  mplayer -ao mpegpes -vo mpegpes -vf scale=512:576
 </PRE>
 
 <P>If you have a widescreen movie and you do not want to scale it to full height,
@@ -1054,19 +1054,19 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   640x384 DivX, try:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop expand=640:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 file.avi
 </PRE>
 
 <P>If your CPU is too slow for a full size 720x576 DivX, try downscaling:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop scale=352:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 file.avi
 </PRE>
 
 <P>If speed does not improve, try vertical downscaling, too:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop scale=352:288 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 file.avi
 </PRE>
 
 <P>For OSD and subtitles use the OSD feature of the expand filter. So, instead
@@ -1085,8 +1085,8 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   right aspect ratio), use the new dvbscale filter:</P>
 
 <PRE>
-for  3:4 TV: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-for 16:9 TV: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+for  3:4 TV: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
+for 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </PRE>
 
 <H4>FUTURE</H4>
@@ -1199,22 +1199,22 @@ for 16:9 TV: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     44100 / 2 = 22050, if it is 24000Hz use 48000Hz as 48000 / 2 = 24000 and so
     on. This does not work with digital audio output (<CODE>-ac hwac3</CODE>).</DD>
 
-  <DT><CODE>-vop lavc/fame</CODE></DT>
+  <DT><CODE>-vf lavc/fame</CODE></DT>
   <DD><B>(AUTO-INSERTED)</B> To watch non-MPEG content on the em8300 (i.e. DivX or RealVideo) you have
     to specify an MPEG1 video filter such as libavcodec (lavc) or libfame
     (fame). At the moment lavc is both faster and gives better image quality, it
     is suggested that you use that unless you have problems with it. See the man
-    page for further info about <CODE>-vop lavc/fame</CODE>.<BR>
+    page for further info about <CODE>-vf lavc/fame</CODE>.<BR>
     Using lavc is highly recommended. Currently there is no way of setting the
     fps of the em8300 which means that it is fixed to 29.97fps. Because of this
-    it is highly recommended that you use <CODE>-vop lavc=&lt;quality&gt;:25</CODE>,
+    it is highly recommended that you use <CODE>-vf lavc=&lt;quality&gt;:25</CODE>,
     especially if you are using prebuffering. Then why 25 and not 29.97? Well,
     the thing is that when you use 29.97 the picture becomes a bit jumpy. The
     reason for this is unknown to us. If you set it to somewhere between 25 and
     27 the picture becomes stable. For now all we can do is accept this for a
     fact.</DD>
 
-  <DT><CODE>-vop expand=-1:-1:-1:-1:1</CODE></DT>
+  <DT><CODE>-vf expand=-1:-1:-1:-1:1</CODE></DT>
   <DD>Although the DXR3 driver can put some OSD onto the MPEG1/2/4 video,
     it has much lower quality than MPlayer's traditional OSD, and has several
     refresh problems as well. The command line above will firstly convert the
@@ -1273,7 +1273,7 @@ for 16:9 TV: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   bilinear software scaler. The commandline is</P>
 
 <PRE>
-  mplayer -vo zr -sws 0 -vop scale=384:204 movie.avi
+  mplayer -vo zr -sws 0 -vf scale=384:204 movie.avi
 </PRE>
 
 <P>Cropping can be done by the <CODE>crop</CODE> filter and by
@@ -1288,7 +1288,7 @@ for 16:9 TV: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 <P>if you want to use the <CODE>crop</CODE> filter, you would do</P>
 
 <PRE>
-  mplayer -vo zr -vop crop=720:320:80:0 benhur.avi
+  mplayer -vo zr -vf crop=720:320:80:0 benhur.avi
 </PRE>
 
 <P>Extra occurances of <CODE>-zrcrop</CODE> invoke <I>cinerama</I> mode, i.e.

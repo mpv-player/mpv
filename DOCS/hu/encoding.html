@@ -117,11 +117,11 @@
   el az <A HREF="#aspect">Aspect ratio megõrzése</A> fejezetet.</P>
 
 <P>Az átméretezést a <I>'scale'</I> nevû video filter végzi:
-  <CODE>-vop scale=X:Y</CODE>. A minõségét pedig az <CODE>-sws</CODE> opcióval
+  <CODE>-vf scale=X:Y</CODE>. A minõségét pedig az <CODE>-sws</CODE> opcióval
   lehet megadni (lásd a manpage-t). Alapértelmezett a 0: gyors bilinear.</P>
 
 <P>Használata:<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1300 -vop
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1300 -vf
   scale=640:480 -oac copy -o output.avi</CODE></P>
 
 <H2><A NAME=copying>7.4 Stream másolása</A></H2>
@@ -307,7 +307,7 @@
 <H4>Használata:</H4>
 
 <P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4:aspect=16.0/9.0 -vop crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
+  vcodec=mpeg4:aspect=16.0/9.0 -vf crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
 
 
 </BODY>

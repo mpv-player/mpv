@@ -714,7 +714,7 @@
 <H4>Non-YUV cards</H4>
 
 <P>Fullscreen playing can be achieved by either enabling <B>software scaling</B>
-  (use the <CODE>-zoom</CODE> or <CODE>-vop scale</CODE>
+  (use the <CODE>-zoom</CODE> or <CODE>-vf scale</CODE>
   option, but I warn you: this is slow), or switching to a small resolution
   video mode, for example 352x288. If you don't have YUV acceleration, the
   latter method is recommended. Video mode switching can be enabled by
@@ -1161,7 +1161,7 @@ are just a few tips:
     during fast-motion scenes and the bitrate controller will be probably even
     unable to retain the specified bitrate as the interlacing artifacts produce
     high amount of detail and thus consume lot of bandwidth. You can enable
-    deinterlacing with <CODE>-vop pp=DEINT_TYPE</CODE>. Usually
+    deinterlacing with <CODE>-vf pp=DEINT_TYPE</CODE>. Usually
     <CODE>pp=lb</CODE> does a good job, but it can be matter of personal
     preference. See other deinterlacing algorithms in the manual and give it a
     try.</LI>
@@ -1227,8 +1227,8 @@ on:driver=v4l:width=640:height=480 -vo xv</CODE><BR>
   on:driver=v4l:width=768:height=576 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts
   vcodec=mpeg4:vbitrate=900 \<BR> &nbsp;&nbsp;&nbsp;&nbsp;-oac
-  mp3lame -lameopts cbr:br=64 \<BR> &nbsp;&nbsp;&nbsp;&nbsp;-vop
-  pp=lb,crop=720:544:24:16 -o output.avi </CODE><BR>
+  mp3lame -lameopts cbr:br=64 \<BR> &nbsp;&nbsp;&nbsp;&nbsp;-vf
+  crop=720:544:24:16,pp=lb -o output.avi </CODE><BR>
 
   <BR>
   This will additionally rescale the image to 384x288 and compresses
@@ -1241,7 +1241,7 @@ on:driver=v4l:width=640:height=480 -vo xv</CODE><BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=768:height=576 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-oac mp3lame -lameopts cbr:br=48 \<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;-vop scale=384:288,pp=tn/lb,crop=720:540:24:18 -sws 1 -o output.avi
+  &nbsp;&nbsp;&nbsp;&nbsp;-vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o output.avi
   </CODE><BR>
 
   It's also possible to specify smaller image dimensions in the

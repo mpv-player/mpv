@@ -1,5 +1,5 @@
-VideoOutPlugins - Video Filters
-===============
+Video Filters
+=============
 
 video filters are plugin-like code modules implementing the interface
 defined in vf.h
@@ -25,13 +25,13 @@ API details:
 Current plugins:
 ================
 
--vop crop[=w:h:x:y]
+-vf crop[=w:h:x:y]
     Simple cropping plugin.
     w,h (cropped width,height) defaults to original width,height
     x,y (position of cropped subimage on the original image) defaults to center
     MPI: EXPORT only, using stride manipulation
 
--vop expand[=w:h:x:y:o]
+-vf expand[=w:h:x:y:o]
     Expanding _and_ (optional) OSD rendering plugin.
     w,h (expanded width,height) defaults (-1) to original width,height
     x,y (position of original image on the expanded image) defaults (-1) to center
@@ -40,18 +40,18 @@ Current plugins:
     Special: mpcodecs core uses it to solve stride restrictions between filters
 	     mencoder uses (autoload) it to render SUB/OSD
 
--vop flip
+-vf flip
     Flips image upside-down (vertical mirroring)
     No parameters.
     MPI: DR (if possible) or EXPORT, using stride manipulation
     Special: dec_video autoloads it when flipping is required and libvo can't do
 
--vop mirror
+-vf mirror
     Horizontal mirroring
     No parameters.
     MPI: TEMP
 
--vop rectangle[=w:h:x:y]
+-vf rectangle[=w:h:x:y]
     Draw a rectangle.  Useful for testing crop plugin parameters.
     w,h (rectangle's width and height) defaults (-1) to maximum
         possible width while keeping the boundaries visible.
@@ -63,12 +63,12 @@ Current plugins:
     change the designated rectangle boundary.
     MPI: TEMP, accepts stride
 
--vop rotate[=x]
+-vf rotate[=x]
     Rotate image +/- 90 degrees
     Optional 'x' parameter (0..3) controls horizontal and vertical mirroring
     MPI: TEMP
 
--vop scale[=w:h[:c[:p]]]
+-vf scale[=w:h[:c[:p]]]
     Software scaling (zoom) _and_ yuv<->rgb colorspace conversion
     w,h (new width/height after scaling) defaults to original width,height
 	note: if -zoom is used, and underlaying filters (including libvo)
@@ -88,21 +88,21 @@ Current plugins:
     MPI: TEMP, accepts stride
     Special: dec_video and mpcodecs core autoloads it for colorspace conv.
 
--vop yuy2
+-vf yuy2
     Forced software YV12/I420 -> YUY2 conversion
     (usefull for video cards/drivers with slow YV12 but fast YUY2 support)
     MPI: TEMP, accepts stride
 
--vop rgb2bgr[=swap]
+-vf rgb2bgr[=swap]
     RGB 24/32 <-> BGR 24/32 colorspace conversion (default) or
     RGB 24/32 <-> RGB 24/32 conversion with R<->B swapping ('swap' option)
     MPI: TEMP, accepts stride
 
--vop palette
+-vf palette
     RGB/BGR 8 -> RGB/BGR 15/16/24/32 colorspace conversion using palette
     MPI: TEMP, accepts stride
     
--vop format[=fourcc]
+-vf format[=fourcc]
     _restrict_ the list of supported colorspaces (query-format()) to a single,
     given fourcc. The 'fourcc' option defaults to 'yuy2', but may be any
     format name, like rgb15, bgr24, yv12 etc...
@@ -110,50 +110,50 @@ Current plugins:
     plugins format list.
     MPI: passthru
 
--vop pp=[<filterName>[:<option>[:<option>...]][/[-]<filterName>[:<option>...]]...]
+-vf pp=[<filterName>[:<option>[:<option>...]][/[-]<filterName>[:<option>...]]...]
     Postprocessing filter.  (usefull for codecs without built-in
     postprocessing, like libmpeg12 or libavcodec)
-    see `mplayer -vop pp=help`
+    see `mplayer -vf pp=help`
     MPI: DR (if possible) or TEMP
     Special: dec_video autoloads it if -pp option used but codec can't do pp.
 
--vop lavc[=quality:fps]
+-vf lavc[=quality:fps]
     Fast software YV12->MPEG1 conversion, usefull for dxr3/dvb drivers
-    It uses libavcodec. Currently faster and better quality than -vop fame!
+    It uses libavcodec. Currently faster and better quality than -vf fame!
     Param quality: fixed qscale (1<=quality<32) or bitrate (32<=quality KBits)
     Param fps: force output fps (float value). If not give, or 0, it's
     autodetected based on height (240,480->29.97fps, others -> 25fps)
     MPI: EXPORT special
 
--vop fame
+-vf fame
     Fast software YV12->MPEG1 conversion, usefull for dxr3/dvb drivers
     It uses libfame.
     MPI: EXPORT special
 
--vop dvbscale[=aspect]
+-vf dvbscale[=aspect]
     Setup scaling to the optimal values for the DVB card.
     (use HW for X-scaling, calc sw Y scaling to keep aspect)
     The 'aspect' parameter controls aspect ratio, it should be calculated
     as aspect=DVB_HEIGHT*ASPECTRATIO, default is 576*(4/3)=768
     (for 16:9 TV set it to 576*(16/9)=1024)
     It's only usefull together with expand+scale:
-	-vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
+	-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc
     MPI: passthru
 
--vop cropdetect[=limit]
+-vf cropdetect[=limit]
     It's a special filter, it doesn't alter the image itself, but detects
     (using some kind of heuristics) the black borders/bands of the image,
-    and prints the optimal -vop crop= parameters to the stdout/console.
+    and prints the optimal -vf crop= parameters to the stdout/console.
     It calculates the average value of pixel luminances for a line, and
     depending on the result it's either black band (result<=limit) or
     picture (result>limit). Optional parameter 'limit' defaults to 24.
     MPI: EXPORT
 
--vop test[=first frame number]
+-vf test[=first frame number]
     generate various test patterns
     MPI: TEMP, accepts stride
 
--vop noise[=lumaNoise[u][t|a][h]:chromaNoise[u][t|a][h]
+-vf noise[=lumaNoise[u][t|a][h]:chromaNoise[u][t|a][h]
     add noise
     0<= lumaNoise, chromaNoise <=100
     u uniform noise (gaussian otherwise)
@@ -163,7 +163,7 @@ Current plugins:
     p mix random noise with a (semi)regular pattern
     MPI: DR (if possible) or TEMP, accepts stride
 
--vop eq[=brightness:contrast]
+-vf eq[=brightness:contrast]
     software equalizer, for use with cards that don't support
     brightness and contrast controls in hardware. It might also be
     useful with mencoder, either for fixing poorly captured movies, or
@@ -172,16 +172,16 @@ Current plugins:
     given on the command line, and the eq filter is controllable
     interactively just like with normal hardware equalizer controls.
 
--vop eq2[=gamma:contrast:brightness:saturation:r_gamma:g_gamma:b_gamma]
+-vf eq2[=gamma:contrast:brightness:saturation:r_gamma:g_gamma:b_gamma]
     advanced software equalizer, for use with cards that don't support
     brightness/contrast/saturation and channel gamma controls in hardware.
     Initial values in the range -2.0 .. 2.0 may be given on the command line,
     and the eq2 filter is controllable interactively just like with normal
-    hardware equalizer controls or -vop eq. Defaults: 1:1:0:1:1:1:1
+    hardware equalizer controls or -vf eq. Defaults: 1:1:0:1:1:1:1
     This filter uses MMX only if available and all gamma == 1.0, otherwise
     LUT (look-up table) is being used.
 
--vop unsharp=l|cWxH:amount[:l|cWxH:amount]
+-vf unsharp=l|cWxH:amount[:l|cWxH:amount]
     unsharp mask / gaussian blur.
         l   apply effect on luma component
         c   apply effect on chroma components
@@ -193,11 +193,11 @@ Current plugins:
             usually you will use something between -1.5 and 1.5
     MPI: DR (if possible) or TEMP, accepts stride
 
--vop swapuv
+-vf swapuv
     swap U & V plane
     MPI: EXPORT
     
--vop il=[d|i][s][:[d|i][s]]
+-vf il=[d|i][s][:[d|i][s]]
     (de)interleaves lines
     d deinterleave
     i interleave
@@ -211,26 +211,26 @@ Current plugins:
     them independently and then re-interleave them.
     MPI: TEMP, accepts stride
 
--vop boxblur=radius:power[:radius:power]
+-vf boxblur=radius:power[:radius:power]
     radius size of the filter
     power  how often the filter should be applied
     MPI: TEMP, accepts stride
 
--vop sab=radius:prefilter:colorDiff[:radius:prefilter:colorDiff]
+-vf sab=radius:prefilter:colorDiff[:radius:prefilter:colorDiff]
     radius	blur filter strength (~0.1-4.0) (slower if larger)
     prefilter	prefilter strength (~0.1-2.0)
     colorDiff	how different the pixels are allowed to be to be considered (~0.1-100.0)
 
--vop smartblur=radius:stregth:threshold[:radius:stregth:threshold]
+-vf smartblur=radius:stregth:threshold[:radius:stregth:threshold]
     radius	blur filter strength (~0.1-5.0) (slower if larger)
     strength	(0.0-1.0) -> blur, (-1.0-0.0) -> sharpen
     threshold	0 -> filter all, (0-30) -> filter flat areas, (-30-0) -> filter edges
 
--vop perspective=x0:y0:x1:y1:x2:y2:x3:y3:t
+-vf perspective=x0:y0:x1:y1:x2:y2:x3:y3:t
     x0,y0,...	coordinates of the topleft, topright, bottomleft, bottomright corners
     t		0-> linear, 1->cubic resampling
 
--vop denoise3d=[luma:chroma:time]
+-vf denoise3d=[luma:chroma:time]
     luma	spatial luma strength (default = 4)
     chroma	spatial chroma strength (default = 3)
     time	temporal strength (default = 6)

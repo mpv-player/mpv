@@ -376,13 +376,13 @@
 <P>bpp(Ã¿ÏóËØ±ÈÌØÊý)µÄÖµ±ØÐëÊÖ¹¤ÉèÎª4£º<BR>
   &nbsp; &nbsp; <CODE>-bpp 4</CODE><BR>
   µçÓ°¿ÉÄÜ±ØÐë±»°´±ÈÀýËõÐ¡µ½EGAÊÊºÏµÄÄ£Ê½£º<BR>
-  &nbsp; &nbsp;<CODE>-vop scale=640:350</CODE>»òÕß<BR>
-  &nbsp; &nbsp;<CODE>-vop scale=320:200</CODE><BR>
+  &nbsp; &nbsp;<CODE>-vf scale=640:350</CODE>»òÕß<BR>
+  &nbsp; &nbsp;<CODE>-vf scale=320:200</CODE><BR>
   Îª×öµ½ÕâÒ»µãÎÒÃÇÐèÒªÊ¹ÓÃ¿ìËÙµ«µÍÖÊÁ¿µÄÀý³Ì£º<BR>
   &nbsp; &nbsp;<CODE>-sws 4</CODE><BR>
   Ò²Ðí×Ô¶¯¾ÀÕý³¤¿í±ÈµÄ¹¦ÄÜÐèÒª¹Ø±Õ£º<BR>
   &nbsp; &nbsp;<CODE>-noaspect</CODE></P>
-<P><B>×¢Òâ£º</B>¸ù¾ÝÎÒµÄ¾­ÑéÓÃ<CODE>-vop eq=-20:0</CODE>ÉÔÉÔ½µµÍÁÁ¶È¿ÉÒÔÔÚEGAÆÁÄ»ÉÏ»ñµÃ×îºÃµÄÍ¼ÏóÖÊÁ¿¡£ÔÚÎÒµÄ
+<P><B>×¢Òâ£º</B>¸ù¾ÝÎÒµÄ¾­ÑéÓÃ<CODE>-vf eq=-20:0</CODE>ÉÔÉÔ½µµÍÁÁ¶È¿ÉÒÔÔÚEGAÆÁÄ»ÉÏ»ñµÃ×îºÃµÄÍ¼ÏóÖÊÁ¿¡£ÔÚÎÒµÄ
 »úÆ÷ÉÏÎÒÒ²Òª½µµÍÒôÆµ²ÉÑùÂÊ£¬ÒòÎªÉùÒôÔÚ44kHzÊ±ºÜ²î£º<CODE>-srate 22050</CODE>.</P>
 
 <P>ÄãÖ»ÓÐ´ò¿ª<CODE>expand</CODE>ÂË¾µ²ÅÄÜÊ¹ÓÃOSDºÍ×ÖÄ»¡£¾ßÌå²ÎÊý²Î¼ûman page¡£</P>
@@ -526,7 +526,7 @@ MPlayer°üº¬Ò»¸öÕë¶ÔËüµÄÊµÓÃµÄÇý¶¯¡£Èç¹û./configure·¢ÏÖ°²×°ÁËaalib£¬aalibµÄlibvoÇ
 </DL>
 
 <P>×¢Òâ£ºäÖÈ¾Ð§¹ûÊÇÊ®·ÖÏûºÄCPUµÄ£¬ÌØ±ðÊÇÊ¹ÓÃAA-on-X(ÔÚXÉÏÊ¹ÓÃaalib)£¬ÔÚ±ê×¼µÄ·ÇÖ¡»º³å¿ØÖÆÌ¨ÉÏµÄCPUÏûºÄÊÇ×îÐ¡µÄ£¬
-ÓÃSVGATextModeÉèÖÃÒ»¸ö´óµÄÎÄ±¾Ä£Ê½£¬È»ºóÔÙÐÀÉÍµçÓ°£¡(´óÁ¦ÉñÏÔ¿¨µÄµÚ¶þ¸ö½Ó¿Ú¾Í²»´í:))(µ«ÎÒ½¨ÒéÄãÓÃ<CODE>-vop
+ÓÃSVGATextModeÉèÖÃÒ»¸ö´óµÄÎÄ±¾Ä£Ê½£¬È»ºóÔÙÐÀÉÍµçÓ°£¡(´óÁ¦ÉñÏÔ¿¨µÄµÚ¶þ¸ö½Ó¿Ú¾Í²»´í:))(µ«ÎÒ½¨ÒéÄãÓÃ<CODE>-vf
  1bpp</CODE>Ñ¡ÏîÔÚhgafbÉÏ»ñµÃÍ¼Ïó;)</P>
 
 <P>Èç¹ûÄãµÄ¼ÆËã»úËÙ¶È²»×ãÒÔäÖÈ¾ËùÓÐÖ¡¾ÍÊ¹ÓÃ<CODE>-framedrop</CODE>Ñ¡Ïî</P>
@@ -771,35 +771,35 @@ HREF="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">Ö÷Ò³</A>»ñµÃ
 
 <PRE>
   mplayer -ao mpegpes -vo mpegpes yourfile.ext
-  mplayer -ao mpegpes -vo mpegpes -vop expand yourfile.ext
+  mplayer -ao mpegpes -vo mpegpes -vf expand yourfile.ext
 </PRE>
 
 <P>×¢Òâµ½£¬DVBÏÔ¿¨Ö»Ö§³Ö¸ß¶ÈÎª288»ò576µÄPAL¸ñÊ½»òÕß240»ò480µÄNTSC¸ñÊ½¡£Äã<B>±ØÐë</B>¶ÔÆäËüµÄ¸ß¶È½øÐÐÖØÐÂËõ·Å£¬
-Í¨¹ýÔÚ<CODE>-vop</CODE>Ñ¡ÏîÖÐÊ¹ÓÃ<CODE>scale=width:height</CODE>Ö¸¶¨ÄãÏëÒª¿í¶ÈºÍ¸ß¶È¡£DVBÏÔ¿¨¿ÉÒÔ½ÓÊÜ¶àÖÖ¿í¶È£¬
+Í¨¹ýÔÚ<CODE>-vf</CODE>Ñ¡ÏîÖÐÊ¹ÓÃ<CODE>scale=width:height</CODE>Ö¸¶¨ÄãÏëÒª¿í¶ÈºÍ¸ß¶È¡£DVBÏÔ¿¨¿ÉÒÔ½ÓÊÜ¶àÖÖ¿í¶È£¬
 Ïñ720£¬704£¬640£¬512£¬480£¬352µÈµÈ£¬¶øÇÒÔÚË®Æ½·½ÏòÉÏ¿ÉÒÔÓ²¼þËõ·Å£¬ËùÒÔ´ó¶àÊýÇé¿öÏÂÄã²»ÐèÒª×÷Ë®Æ½Ëõ·Å¡£
 ÀýÈç¶ÔÓÚ512x384(¿í¸ß±È4:3)µÄDivXÊ¹ÓÃÏÂÁÐÃüÁî£º</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop scale=512:576
+  mplayer -ao mpegpes -vo mpegpes -vf scale=512:576
 </PRE>
 
 <P>Èç¹ûÄãÊ¹ÓÃ¿íÒøÄ»µçÓ°¶øÄã°ÑËü·Å´óµ½Õû¸öÆÁÄ»µÄ¸ß¶È£¬Äã¿ÉÒÔÊ¹ÓÃ<CODE>expand=w:h</CODE>²å¼þÀ´Ôö¼ÓºÚ´ø¡£
 ÎªÁË¿´640x384·Ö±æÂÊµÄDivX£¬Ê¹ÓÃÏÂÁÐÃüÁî£º</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop expand=640:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 file.avi
 </PRE>
 
 <P>Èç¹ûÄãµÄCPU¶ÔÓÚ²¥·Å720x576µÄDivXÌ«Âý£¬³¢ÊÔºáÏòËõ·Å£º</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:576,lavc file.avi
 </PRE>
 
 <P>Èç¹ûËÙ¶ÈÃ»ÓÐÌá¸ß£¬³¢ÊÔÊúÖ±Ëõ·Å£º</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:288,lavc file.avi
 </PRE>
 
 <P>ÒòÎªOSDºÍ×ÖÄ»Ê¹ÓÃOSD²å¼þµÄÀ©Õ¹ÌØÐÔ¡£Òò´Ë£¬²»ÒªÊ¹ÓÃ<CODE>expand=w:h</CODE>»òÕß<CODE>expand=w:h:x:y</CODE>£¬
@@ -812,8 +812,8 @@ HREF="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">Ö÷Ò³</A>»ñµÃ
 <P>ÎªÁË±£³ÖDivXÎÄ¼þµÄ¿í¸ß±È²¢»ñµÃ×îÀíÏëµÄËõ·Å²ÎÊý(Ó²¼þË®Æ½Ëõ·ÅºÍÈí¼þ´¹Ö±Ëõ·Å²¢ÇÒ±£³ÖÕýÈ·¿í¸ß±È)£¬Ê¹ÓÃ×îÐÂµÄdvbscale²å¼þ£º</P>
 
 <PRE>
-for  3:4 TV:  -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-for 16:9 TV:  -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+for  3:4 TV: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
+for 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </PRE>
 
 <H4>½«À´</H4>
@@ -889,15 +889,15 @@ norm = 0(Ä¬ÈÏµÄ)²»¸Ä±äÏÖÔÚµÄÖÆÊ½¡£<BR>
 ÀýÈç¶ÔÊ¹ÓÃ22050HzµÄµçÓ°£¬ÒòÎª44100Hz/2 = 22050£¬ËùÒÔÊ¹ÓÃ44100Hz£¬Èç¹ûÊÇ24000Hz¾ÍÊ¹ÓÃ48000Hz£¬ÒòÎª48000Hz/2 = 24000Èç´ËµÈµÈ¡£
 Õâ¶ÔÓÚÊý×ÖÒôÆµÊä³ö²»Æð×÷ÓÃ(<CODE>-ac hwac3</CODE>)¡£</DD>
 
-  <DT><CODE>-vop lace/fame</CODE></DT>
+  <DT><CODE>-vf lace/fame</CODE></DT>
   <DD><B>(×Ô¶¯²åÈë)</B>ÒªÔÚem8300ÉÏ¹Û¿´·ÇMPEGµÄÄÚÈÝ(ÀýÈçDivX»òÕßRealVideo)Äã±ØÐëÉèÖÃÒ»¸ölibavcodec(lavc)»òÕßlibfame(fame)Ö®ÀàµÄMPEG1ÊÓÆµÂË¾µ
-Ä¿Ç°lavcÓÐ¸üºÃµÄËÙ¶È»¹ÓÐ¸ü¸ßµÄÍ¼ÏñÖÊÁ¿£¬³ý·ÇÄãÊ¹ÓÃÊ±Óöµ½ÎÊÌâ£¬½¨ÒéÄãÊ¹ÓÃËû¡£<CODE>-vop lavc/fame</CODE>µÄ½øÒ»²½µÄÐÅÏ¢¿ÉÒÔ
+Ä¿Ç°lavcÓÐ¸üºÃµÄËÙ¶È»¹ÓÐ¸ü¸ßµÄÍ¼ÏñÖÊÁ¿£¬³ý·ÇÄãÊ¹ÓÃÊ±Óöµ½ÎÊÌâ£¬½¨ÒéÄãÊ¹ÓÃËû¡£<CODE>-vf lavc/fame</CODE>µÄ½øÒ»²½µÄÐÅÏ¢¿ÉÒÔ
 ²Î¿¼man page¡£<BR>
-    Ç¿ÁÒÍÆ¼öÊ¹ÓÃlavc¡£Ä¿Ç°Ã»ÓÐ°ì·¨ÉèÖÃem8300µÄfps£¬Õâ±íÊ¾Ëü½«¹Ì¶¨ÔÚ29.97fps¡£ÒòÎªÕâ¸öÇ¿ÁÒÍÆ¼öÄãÊ¹ÓÃ<CODE>-vop
+    Ç¿ÁÒÍÆ¼öÊ¹ÓÃlavc¡£Ä¿Ç°Ã»ÓÐ°ì·¨ÉèÖÃem8300µÄfps£¬Õâ±íÊ¾Ëü½«¹Ì¶¨ÔÚ29.97fps¡£ÒòÎªÕâ¸öÇ¿ÁÒÍÆ¼öÄãÊ¹ÓÃ<CODE>-vf
 lavc=&lt;quality&gt;:25</CODE>£¬ÌØ±ðÊÇµ±ÄãÊ¹ÓÃprebufferingµÄÊ±ºò¡£ÄÇÃ´ÎªÊ²Ã´ÊÇ25¶ø²»ÊÇ29.97£¿àÅ£¬Ô­ÒòÊÇµ±Ê¹ÓÃ29.97
 µÄÊ±ºòÍ¼ÏñÓÐÒ»Ð©ÌøÔ¾¡£Ä¿Ç°ÎÒÃÇ»¹²»ÖªµÀÔ­Òò¡£Èç¹ûÄã°ÑËüÉèÖÃ³É25µ½27Ö®¼äµÄÖµÊÇÍ¼Ïñ¾ÍÎÈ¶¨ÁË¡£Ä¿Ç°ÎÒÃÇÄÜ×öµÄ¾ÍÊÇ½ÓÊÜÕâ¸öÊÂÊµ¡£</DD>
 
-  <DT><CODE>-vop expand=-1:-1:-1:-1:1</CODE></DT>
+  <DT><CODE>-vf expand=-1:-1:-1:-1:1</CODE></DT>
   <DD>¾¡¹ÜDXR3µÄÇý¶¯ÄÜ°ÑÒ»Ð©OSD·Åµ½MPEG1/2/4µÄÊÓÆµÉÏ£¬Ëü±ÈMPlayerµÄ´«Í³µÄOSDµÄÖÊÁ¿²îµÄ¶à£¬²¢ÇÒ»¹ÓÐÒ»Ð©Ë¢ÐÂµÄÎÊÌâ¡£
 ÉÏÃæµÄÃüÁîÐÐ½«ÏÈ°ÑÊäÈëµÄÊÓÆµ×ª»»³ÉMPEG4(ÕâÊÇ±ØÐëµÄ£¬¶Ô²»Æð)£¬È»ºóÊ¹ÓÃÒ»¸öÀ©Õ¹ÂË¾µ£¬²»½øÐÐÈÎºÎËõ·Å(-1£ºÄ¬ÈÏÖµ)£¬Ö»ÊÇ°ÑÕý³£µÄOSD
 ·Åµ½Í¼ÏñÉÏ(×îºóµÄÄÇ¸ö"1"µÄ×÷ÓÃ)¡£</DD>
@@ -938,7 +938,7 @@ lavc=&lt;quality&gt;:25</CODE>£¬ÌØ±ðÊÇµ±ÄãÊ¹ÓÃprebufferingµÄÊ±ºò¡£ÄÇÃ´ÎªÊ²Ã´ÊÇ25
 ÃüÁîÐÐÊÇÕâÑùµÄ</P>
 
 <PRE>
-  mplayer -vo zr -sws 0 -vop scale=384:204 movie.avi
+  mplayer -vo zr -sws 0 -vf scale=384:204 movie.avi
 </PRE>
 
 <P>»­ÃæµÄÇÐ¸î¿ÉÒÔÓÃ<CODE>crop</CODE>ÂË¾µÒ²¿ÉÒÔÓÃÇý¶¯×Ô¼ºÍê³É¡£¼ÙÉèµçÓ°Ì«¿íÁË£¬ÔÚÄãµÄ»úÆ÷ÉÏÏÔÊ¾²»ÁË£¬ÄÇÃ´Äã»áÏëÒªÓÃ
@@ -951,7 +951,7 @@ lavc=&lt;quality&gt;:25</CODE>£¬ÌØ±ðÊÇµ±ÄãÊ¹ÓÃprebufferingµÄÊ±ºò¡£ÄÇÃ´ÎªÊ²Ã´ÊÇ25
   Èç¹ûÄãÏëÒªÊ¹ÓÃ<CODE>crop</CODE>ÂË¾µ£¬Äã¿ÉÒÔÔËÐÐ
 
 <PRE>
-  mplayer -vo zr -vop crop=720:320:80:0 benhur.avi
+  mplayer -vo zr -vf crop=720:320:80:0 benhur.avi
 </PRE>
 
 <P>¶à¸ö<CODE>-zrcrop</CODE>¾Í»áµ÷ÓÃ<I>cinerama</I>Ä£Ê½£¬Äã¿ÉÒÔ°ÑµçÓ°Í¶Éäµ½¼¸¸öµçÊÓ»òÕßÍ¶Ó°ÒÇÉÏÀ´ÖÆÔìÒ»¸ö´óÒøÄ»£¬ÉèÏëÄãÓÐ

@@ -38,7 +38,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2003-01-11"
+.TH MPlayer 1 "2003-03-22"
 .
 .SH NAME
 mplayer  \- Movie Player for Linux
@@ -186,12 +186,12 @@ named 'movie.avi.conf' with the file-specific options in it and put it in
 Read data from stdin.
 The \-idx option does not work in conjunction with this.
 .TP
-.B \-autoq <quality> (use with \-vop pp)
+.B \-autoq <quality> (use with \-vf pp)
 Dynamically changes the level of postprocessing depending on available spare
 CPU time.
 The number you specify will be the maximum level used.
 Usually you can use some big number.
-You have to use \-vop pp without parameters in order to use this.
+You have to use \-vf pp without parameters in order to use this.
 .TP
 .B \-autosync <factor>
 Gradually adjusts the A/\:V sync based on audio delay measurements.
@@ -523,7 +523,7 @@ For example sometimes '1' is a trailer, and '2' is the real movie.
 .I NOTE:
 .br
 Sometimes deinterlacing is required for DVD playback,
-see the \-vop pp=0x20000 option.
+see the \-vf pp=0x20000 option.
 .TP
 .B \-dvd\-device <path\ to\ device>
 Override default DVD device name /dev/\:dvd.
@@ -809,7 +809,7 @@ mjpeg compression:
     176x120    NTSC
 .REss
 .IPs quality=<0-100>
-choose the quality of the jpeg compression 
+choose the quality of the jpeg compression
 .br
 (quality < 60 recommended for full size)
 .RE
@@ -831,7 +831,7 @@ Force audio parameters for the .vivo demuxer (for debugging purposes).
 .SH "OSD/SUB OPTIONS"
 .I NOTE:
 .br
-See \-vop expand too.
+See \-vf expand too.
 .TP
 .B \-dumpmicrodvdsub (MPLAYER only)
 Convert the given subtitle (specified with the \-sub option) to the
@@ -1048,7 +1048,7 @@ ONLY for frame\-based SUB files, i.e.\& NOT MicroDVD format.
 Currently useless.
 Same as \-audiofile, but for subtitle streams (OggDS?).
 .TP
-.B \-subpos <0\-100> (useful with \-vop expand)
+.B \-subpos <0\-100> (useful with \-vf expand)
 Specify the position of subtitles on the screen.
 The value is the vertical position of the subtitle in % of the screen height.
 .TP
@@ -1116,7 +1116,7 @@ blur. The default is 1.0.
 .B \-abs <value> (OBSOLETE)
 Override audio driver/\:card buffer size detection, \-ao oss only
 .TP
-.B \-af <plugin1,plugin2,plugin3[=options],...>
+.B \-af <plugin1[=options],plugin2,...>
 Activate a comma separated list of audio filters and their options.
 .br
 Available filters are:
@@ -1855,7 +1855,7 @@ Disable automatic movie aspect ratio compensation.
 .B \-nosound
 Do not play/\:encode sound.
 .TP
-.B \-pp <quality> (see \-vop pp option too!)
+.B \-pp <quality> (see \-vf pp option too!)
 Set postprocess level of the DLL.
 This option is NO LONGER USABLE with MPlayer's postprocess filter, but only
 with Win32 DirectShow DLLs which have internal postprocessing routine.
@@ -1863,7 +1863,7 @@ with Win32 DirectShow DLLs which have internal postprocessing routine.
 The valid range of \-pp value vary on codecs, mostly
 0\-6, where 0=disable 6=slowest/\:best.
 .TP
-.B \-pphelp (see \-vop pp option too)
+.B \-pphelp (see \-vf pp option too)
 Show a summary about the available postprocess filters and their usage.
 .TP
 .B \-ssf <mode>
@@ -1872,7 +1872,7 @@ Specifies SwScaler parameters.
 .I EXAMPLE
 .PD 0
 .RSs
-\-vop scale \-ssf lgb=3.0
+\-vf scale \-ssf lgb=3.0
 .RE
 .PD 1
 
@@ -1909,7 +1909,7 @@ Right channel
 .PD 1
 .
 .TP
-.B \-sws <software\ scaler\ type> (see \-vop scale option too)
+.B \-sws <software\ scaler\ type> (see \-vf scale option too)
 This option sets the quality (and speed, respectively) of the software scaler,
 with the \-zoom option.
 For example with x11 or other outputs which lack hardware acceleration.
@@ -1918,7 +1918,7 @@ Possible settings are:
 .I NOTE:
 .br
 For \-sws\ 2 and 7, the sharpness can be set with the scaling parameter (p)
-of \-vop scale (0 (soft) \- 100 (sharp)), for \-sws 9, it specifies the filter
+of \-vf scale (0 (soft) \- 100 (sharp)), for \-sws 9, it specifies the filter
 length (1 \- 10).
 
 .PD 0
@@ -1975,35 +1975,8 @@ try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others
 .PD 1
 .
 .TP
-.B \-vfm <driver1,driver2,...>
-Specify a priority list of video drivers to be used, according to their driver
-name in codecs.conf.
-It falls back to default if none is ok.
-
-.I NOTE:
-.br
-If libdivxdecore support was compiled in, then odivx and divx4 now contains
-just the same DivX4 codec, but different APIs to reach it.
-For difference between them and when to use which, check the DivX4 section in
-the documentation.
-.br
-See \-vfm help for a full list of available drivers.
-
-.I EXAMPLE:
-.PD 0
-.RSs
-.IPs "\-vfm ffmpeg,dshow,vfw"
-try the libavcodec, then Directshow, then VFW codecs and fallback to the
-others, if still none is ok
-.IPs "\-vfm xanim"
-try XAnim codecs first
-.RE
-.PD 1
-.
-.TP
-.B \-vop <...,filter3[=options],filter2,filter1>
-Activate a comma separated list of video filters and their options in reverse
-order.
+.B \-vf <filter1[=options],filter2,...>
+Activate a comma separated list of video filters and their options.
 
 .I NOTE:
 .br
@@ -2013,7 +1986,7 @@ Use -1 to keep the default value.
 Parameters w:h means width x height in pixels, x:y means x;y position counted
 from the upper left corner of the bigger image.
 .br
-To get a full list of available plugins, see \-vop help.
+To get a full list of available plugins, see \-vf help.
 .br
 Available filters are:
 .
@@ -2092,22 +2065,22 @@ y: Do not do chrominance filtering (only luminance filtering).
 .RE
 .RSss
 .br
-\-vop pp=hb/vb/dr/al/lb
+\-vf pp=hb/vb/dr/al/lb
 .br
-\-vop pp=hb/vb/dr/al
+\-vf pp=hb/vb/dr/al
 .br
 Default filters without brightness/\:contrast correction:
 .br
-\-vop pp=de/\-al
+\-vf pp=de/\-al
 .br
 Enable default filters & temporal denoiser:
 .br
-\-vop pp=de/tn:1:2:3
+\-vf pp=de/tn:1:2:3
 .br
 Deblock horizontal only luminance and switch vertical deblocking on or
 off automatically depending on available CPU time:
 .br
-\-vop pp=hb:y/vb:a \-autoq 6
+\-vf pp=hb:y/vb:a \-autoq 6
 .REss
 .IPs lavc[=quality:fps]
 Realtime MPEG1 encoder for use with DVB/\:DXR3 (libavcodec)
@@ -2153,7 +2126,7 @@ The values can be from -100 to 100.
 Alternative software equalizer that uses lookup tables (very slow),
 allowing gamma correction in addition to simple brightness,
 contrast and saturation adjustment. Note that it uses the same MMX
-optimized code as -vop eq if all gamma values are 1.0!
+optimized code as -vf eq if all gamma values are 1.0!
 The parameters are given as floating point values.
 Defaults are gamma=1.0, contrast=1.0, brightness=0.0 and saturation=1.0.
 Parameters rg, gg, bg are the independent gamma values for the Red, Green
@@ -2243,7 +2216,7 @@ tr0, tr1, tr2, tr3: Threshold values to be used in certain modes.
 .IPs "telecine[=start]"
 Apply 3:2 "telecine" process to increase framerate by 20%. This most
 likely will not work correctly with mplayer, but it can be used
-with 'mencoder -fps 29.97 -ofps 29.97 -vop telecine'. Both fps options are
+with 'mencoder -fps 29.97 -ofps 29.97 -vf telecine'. Both fps options are
 essential! (A/V sync will break if they are wrong.) The optional start
 parameter tells the filter where in the telecine pattern to start
 (0-3).
@@ -2302,7 +2275,7 @@ hidden: sets the default value of the 'hidden' flag (boolean)
 opaque: flag switching between alphablended (transparent) and opaque (fast)
 mode
 .br
-fifo: path/filename for the FIFO (named pipe connecting mplayer -vop bmovl
+fifo: path/filename for the FIFO (named pipe connecting mplayer -vf bmovl
 to the controlling application)
 .REss
 
@@ -2370,6 +2343,32 @@ screen is updated.
 .RE
 .
 .TP
+.B \-vfm <driver1,driver2,...>
+Specify a priority list of video drivers to be used, according to their driver
+name in codecs.conf.
+It falls back to default if none is ok.
+
+.I NOTE:
+.br
+If libdivxdecore support was compiled in, then odivx and divx4 now contains
+just the same DivX4 codec, but different APIs to reach it.
+For difference between them and when to use which, check the DivX4 section in
+the documentation.
+.br
+See \-vfm help for a full list of available drivers.
+
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "\-vfm ffmpeg,dshow,vfw"
+try the libavcodec, then Directshow, then VFW codecs and fallback to the
+others, if still none is ok
+.IPs "\-vfm xanim"
+try XAnim codecs first
+.RE
+.PD 1
+.
+.TP
 .B \-x <x> (MPLAYER only)
 Scale image to x width (if sw/\:hw scaling available).
 Disables aspect calculations.
@@ -2404,11 +2403,11 @@ Disables aspect calculations.
 .TP
 .B \-zoom \ 
 Allow software scaling, where available.
-Could be used to force scaling with \-vop scale.
+Could be used to force scaling with \-vf scale.
 
 .I NOTE:
 .br
-\-vop scale will IGNORE options \-x / \-y / \-xy / \-fs / \-aspect without
+\-vf scale will IGNORE options \-x / \-y / \-xy / \-fs / \-aspect without
 \-zoom.
 
 
@@ -3174,7 +3173,7 @@ Outputs to the given filename, instead of the default 'test.avi'.
 .TP
 .B \-oac <codec name>
 Encode with the given audio codec.
-Use \-ovc help to get a list of available codecs.
+Use \-oac help to get a list of available codecs.
 (no default set)
 
 .I EXAMPLE:
@@ -3398,7 +3397,7 @@ set EDL mark
 .PP
 (The following keys are valid only when using a hardware accelerated video
 output (xv, (x)vidix, (x)mga, etc), or the software equalizer filter
-(-vop eq or -vop eq2).
+(-vf eq or -vf eq2).
 
 .IPs "1 and 2"
 adjust contrast
@@ -3595,10 +3594,10 @@ mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 mencoder \-dvd 2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Encoding DVD title #2, resizing to 640x480
-mencoder \-dvd 2 \-vop scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \-dvd 2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Encoding DVD title #2, resizing to 512xHHH (keep aspect ratio)
-mencoder \-dvd 2 \-vop scale \-zoom \-xy 512 \-o title2.avi \-oac copy
+mencoder \-dvd 2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
 .B The same, but with libavcodec family, MPEG4 (Divx5) compression

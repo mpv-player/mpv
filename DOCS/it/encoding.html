@@ -84,14 +84,14 @@ due comandi :<BR>
   le proporzioni</A>.</P>
 
 <P>Il processo di ridimensionamento è gestito dal filtro video <I>'scale'</I>:
-  <CODE>-vop scale=larghezza:altezza</CODE>. La qualità può essere impostata tramite l'opzione
+  <CODE>-vf scale=larghezza:altezza</CODE>. La qualità può essere impostata tramite l'opzione
   <CODE>-sws</CODE>. Se non specificata, <B>MEncoder</B> userà il valore 0 :
   bilineare veloce.</P>
 
 <P>Utilizzo :<BR>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder input.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4 -vop scale=640:480 -oac copy -o
+  vcodec=mpeg4 -vf scale=640:480 -oac copy -o
   output.avi</CODE></P>
 
 
@@ -258,7 +258,7 @@ Quindi dovresti rimuoverli prima di ogni nuova esecuzione.</P>
 <H5>Utilizzo:</H5>
 
 <P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4:aspect=16.0/9.0 -vop crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
+  vcodec=mpeg4:aspect=16.0/9.0 -vf crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
 
 </BODY>
 </HTML>

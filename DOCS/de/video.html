@@ -561,8 +561,8 @@ ist.</P>
   &nbsp;&nbsp;<CODE>-bpp 4</CODE><BR>
 Die Aufl&ouml;sung des Films muss wahrscheinlich verkleinert werden, damit
 er in den EGA-Modus reinpasst:<BR>
-  &nbsp;&nbsp;<CODE>-vop scale=640:350</CODE> or<BR>
-  &nbsp;&nbsp;<CODE>-vop scale=320:200</CODE><BR>
+  &nbsp;&nbsp;<CODE>-vf scale=640:350</CODE> or<BR>
+  &nbsp;&nbsp;<CODE>-vf scale=320:200</CODE><BR>
 Daf&uuml;r brauchen wir eine schnelle, aber schlechte Qualit&auml;t
 produzierende Skalierroutine:<BR>
   &nbsp;&nbsp;<CODE>-sws 4</CODE><BR>
@@ -572,7 +572,7 @@ H&ouml;hen-/Breitenver&auml;ltnisses ausgeschaltet werden:<BR>
 
 <P><B>ANMERKUNG:</B> Die besten Ergebnisse bei EGA-Bildschirmen erh&auml;lt
 man meiner Erfahrung nach, wenn man die Helligkeit ein wenig verringert:
-<CODE>-vop eq=-20:0</CODE>. Ich musste auch die Audiosamplerate erniedrigen,
+<CODE>-vf eq=-20:0</CODE>. Ich musste auch die Audiosamplerate erniedrigen,
 weil bei 44KHz der Sound nicht richtig funktionierte: <CODE>-srate 22050</CODE>.
 </P>
 
@@ -1201,21 +1201,21 @@ diesem Kommando:</P>
 MPEG1 klappt so:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc deinedatei.ext
-  mplayer -ao mpegpes -vo mpegpes -vop fame,expand deinedatei.ext
+  mplayer -ao mpegpes -vo mpegpes -vf lavc deinedatei.ext
+  mplayer -ao mpegpes -vo mpegpes -vf expand,fame deinedatei.ext
 </PRE>
 
 <P>Beachte, dass DVB-Karten nur bestimmte Bildh&ouml;hen unterst&uuml;tzen: 
 288 und 576 f&uuml;r PAL und 240 und 480 f&uuml;r NTSC. Du <B>musst</B> das 
 Bild vorher skalieren, wenn die H&ouml;he nicht einer der oben erw&auml;hnten 
-entspricht: <CODE>-vop scale=width:height</CODE>. DVB-Karten 
+entspricht: <CODE>-vf scale=width:height</CODE>. DVB-Karten 
 unterst&uuml;tzen eine Vielzahl von horizontalen Aufl&ouml;sungen wie z.B. 
 720, 704, 640, 512, 480, 352 etc. Sie skalieren horizontal selber in 
 Hardware, sodass du meistens nicht in horizontaler Richtung skalieren musst. 
 Bei einem 512x384-DivX kannst du folgendes probieren:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=512:576
+  mplayer -ao mpegpes -vo mpegpes -vf scale=512:576,lavc
 </PRE>
 
 <P>Wenn du einen Widescreen-Film hast und du ihn nicht auf die volle 
@@ -1224,21 +1224,21 @@ H&ouml;he skalieren m&ouml;chtest, dann kannst du den
 hinzuzuf&uuml;gen. Um ein 640x384-DivX anzuschauen:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,expand=640:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf expand=640:576,fame file.avi
 </PRE>
 
 <P>Wenn deine CPU f&uuml;r 720x576-DivX zu langsam ist, dann skalier 
 herunter:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:576,lavc file.avi
 </PRE>
 
 <P>Wenn sich die Geschwindigkeit nicht verbessert, dann skalier auch in 
 vertikaler Richtung:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:288,lavc file.avi
 </PRE>
 
 <P>F&uuml;r ein OSD und Untertitel kannst du das OSD-Feature des expand-
@@ -1263,8 +1263,8 @@ Beibehaltung des richtigen H&ouml;hen-/Breitenverh&auml;ltnisses), benutze
 den neuen dvbscale-Filter:</P>
 
 <PRE>
-f&uuml;r  3:4 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-f&uuml;r 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+f&uuml;r  3:4 TV: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc
+f&uuml;r 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1,lavc
 </PRE>
 
 
@@ -1374,23 +1374,23 @@ finden. Die Compilierung sollte auch problemlos funktionieren.</P>
     22050 ist. Bei 24000Hz nimmst du 48000Hz etc. Das funktioniert nicht mit 
     der digitalen Audioausgabe (<CODE>-ac hwac3</CODE>).</DD>
 
-  <DT><CODE>-vop lavc/fame</CODE></DT>
+  <DT><CODE>-vf lavc/fame</CODE></DT>
   <DD>Wenn du nicht-MPEG-Filme mit dem em8300 ansehen m&ouml;chtest (z.B. 
     DivX oder RealVideo), dann musst du einen MPEG1-Videofilter wie lavcodec 
     (lavc) oder libfame (fame) verwenden. Momentan ist lavc sowohl schneller 
     als auch qualitativ besser, sodass die Empfehlung lavc lautet. Schau in 
-    der Manpage nach. Dort stehen weitere Informationen zu <CODE>-vop 
+    der Manpage nach. Dort stehen weitere Informationen zu <CODE>-vf 
     lavc/fame</CODE>.<BR>
     Die Benutzung von lavc wird empfohlen. Momentan gibt es keine 
     M&ouml;glichkeit, die Anzahl der Bilder pro Sekunde des em8300 zu setzen, 
     was bedeutet, dass sie fest bei 29.97 liegt. Aus diesem Grund solltest du 
-    <CODE>-vop lavc=&lt;quality&gt;:25</CODE> verwenden, besonders dann, wenn 
+    <CODE>-vf lavc=&lt;quality&gt;:25</CODE> verwenden, besonders dann, wenn 
     du auch Prebuffering verwendest. Warum aber 25 und nicht 29.97? Tja, die 
     Sache ist, dass das Bild bei 29.97 unruhig wird. Wir wissen leider nicht, 
     warum das so ist. Wenn du Werte zwischen 25 und 27 benutzt, dann wird das 
     Bild stabil. Momentan k&ouml;nnen wir das nur als gegeben hinnehmen.</DD>
 
-  <DT><CODE>-vop lavc,expand=-1:-1:-1:-1:1</CODE></DT>
+  <DT><CODE>-vf expand=-1:-1:-1:-1:1,lavc</CODE></DT>
   <DD>Obwohl der DXR3-Treiber ein OSD &uuml;ber das MPEG1-/2-/4-Video 
     projezieren kann, ist es qualitativ deutlich schlechter als 
     MPlayers traditionelles OSD, und es hat diverse Probleme mit der 
@@ -1456,7 +1456,7 @@ den Film auf <CODE>384x204</CODE> mit dem bilinearen Algorithmus zu
 skalieren. Die Kommandozeile sieht dazu wie folgt aus:</P>
 
 <PRE>
-  mplayer -vo zr -sws 0 -vop scale=384:204 movie.avi
+  mplayer -vo zr -sws 0 -vf scale=384:204 movie.avi
 </PRE>
 
 <P>Das Beschneiden des Bildes kann mit dem <CODE>crop</CODE>-Filter geschehen 
@@ -1472,7 +1472,7 @@ Kommando:</P>
 <P>Mit dem <CODE>crop</CODE>-Filter sieht es so aus:</P>
 
 <PRE>
-  mplayer -vo zr -vop crop=720:320:80:0 benhur.avi
+  mplayer -vo zr -vf crop=720:320:80:0 benhur.avi
 </PRE>
 
 <P>Mehrfache Verwendung von <CODE>-zrcrop</CODE> aktiviert den 

@@ -81,12 +81,12 @@ MEncoderÔÚÕâ¸öpass½áÊøÖ®ºó£¬½«¶ÔÓÚ650Mb£¬700Mb£¬ºÍ800MbµÄÄ¿±ê´óÐ¡´òÓ¡ÍÆ¼öµÄ±ÈÌØÂ
 <P>°ÑµçÓ°Í¼ÏóµÄ³ß´çÖØÐÂÉèÖÃµÄÐèÒª¾­³£³öÏÖ¡£Ô­Òò¿ÉÄÜºÜ¶à£¬ÀýÈç¼õÐ¡Êä³öÎÄ¼þµÄ´óÐ¡£¬ÍøÂç´ø¿íµÈµÈ£¬ºÜ¶àÈËÉõÖÁÔÙ°ÑDVD»òSVCD±àÂëÎªµ½DivX
 µÄAVIµÄÊ±ºòÒ²ÖØÐÂËõ·Å£¬<B>ÕâÊÇ´íÎóµÄ</B>¡£ÔÚÕâÃ´×öÖ®Ç°£¬ÇëÏÈÔÄ¶Á<A HREF="#aspect">±£³ÖÆÁÄ»¸ß¿í±È</A>²¿·Ö¡£</P>
 
-<P>Ëõ·Å¹ý³ÌÓÉ<I>'scale'</I>ÊÓÆµÂË¾µ´¦Àí£º<CODE>-vop scale=width:height</CODE>¡£ÆäÖÊÁ¿ÓÉ<CODE>-sws</CODE>Ñ¡Ïî¿ØÖÆ¡£Èç¹ûËüÃ»ÓÐÖ¸¶¨£¬
+<P>Ëõ·Å¹ý³ÌÓÉ<I>'scale'</I>ÊÓÆµÂË¾µ´¦Àí£º<CODE>-vf scale=width:height</CODE>¡£ÆäÖÊÁ¿ÓÉ<CODE>-sws</CODE>Ñ¡Ïî¿ØÖÆ¡£Èç¹ûËüÃ»ÓÐÖ¸¶¨£¬
 MEncoder½«Ê¹ÓÃ0£º¿ìËÙ¶þ´ÎÏßÐÔËõ·Å¡£</P>
 
 <H4>ÓÃ·¨:</H4>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -lavcopts
-    vcodec=mpeg4:more_options -vop scale=640:480 -sws 2 -o
+    vcodec=mpeg4:more_options -vf scale=640:480 -sws 2 -o
     output.avi</CODE></P>
 
 
@@ -234,7 +234,7 @@ MPNG(Motion PNG )»òMTGA(Motion TGA)ÎÄ¼þ¡£</P>
 <H4>ÓÃ·¨£º</H4>
 
 <P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4:aspect=16.0/9.0 -vop crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
+  vcodec=mpeg4:aspect=16.0/9.0 -vf crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
 
 </BODY>
 </HTML>

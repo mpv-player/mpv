@@ -39,7 +39,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2003-01-11"
+.TH MPlayer 1 "2003-03-22"
 .
 .SH NAME
 mplayer  \- Movie Player for Linux
@@ -193,12 +193,12 @@ gleichen Verzeichnis wie 'movie.avi'.
 .B \-, \-use-stdin
 Liest Daten von stdin. \-idx funktioniert hiermit nicht.
 .TP
-.B \-autoq <Qualität> (zusammen mit \-vop pp)
+.B \-autoq <Qualität> (zusammen mit \-vf pp)
 Ändert dynamisch das Qualitätslevel der Nachbearbeitung, je nachdem, wieviel
 CPU-Zeit gerade frei ist.
 Das angegebene Level ist das maximal verwendete Level.
 Normalerweise kanns du eine große Nummer wählen.
-Um dieses Feature zu benutzen, muss \-vop pp ohne Parameter aufgerufen
+Um dieses Feature zu benutzen, muss \-vf pp ohne Parameter aufgerufen
 werden.
 .TP
 .B \-autosync <Faktor>
@@ -546,7 +546,7 @@ sollen. Beispielsweise ist '1' eine Vorschau und '2' der tatsächliche Film.
 .I ANMERKUNG:
 .br
 Manchmal muss bei einer DVD Deinterlacing eingeschaltet werden. Siehe
-Option \-vop pp=0x20000.
+Option \-vf pp=0x20000.
 .TP
 .B \-dvd\-device <Pfad\ zum\ Gerät>
 Gibt ein anderes DVD-Gerät als das Standardgerät /dev/\:dvd an.
@@ -846,7 +846,7 @@ gedacht).
 .SH "OSD\-/UNTERTITEL\-OPTIONEN"
 .I ANMERKUNG:
 .br
-Siehe auch \-vop expand.
+Siehe auch \-vf expand.
 .TP
 .B \-dumpmicrodvdsub (nur bei MPLAYER)
 Konvertiert die mit der \-sub\-Option angegebenen Untertitel in das
@@ -1064,7 +1064,7 @@ MicroDVD.
 Momentan nutzlos. Macht das gleiche für Untertitel, was \-audiofile für
 Audio macht (OggDS?).
 .TP
-.B \-subpos <0\-100> (nützlich mit \-vop expand)
+.B \-subpos <0\-100> (nützlich mit \-vf expand)
 Gibt die Position der Untertitel auf dem Bildschirm an.
 Der Wert gibt die vertikale Position der Untertitel in % der Anzeigehöhe an.
 .TP
@@ -1134,7 +1134,7 @@ für mehr Unschärfe. Der Standardwert ist 1.0.
 Überschreibt die automatisch erkannte Puffergröße der Audiotreiber/\:\-karte;
 nur mit \-ao oss.
 .TP
-.B \-af <plugin1,plugin2,plugin3[=options],...>
+.B \-af <plugin1[=options],plugin2,...>
 Aktiviert eine kommaseparierte Liste von Audiofiltern zusammen mit ihren
 Optionen.
 .br
@@ -1862,7 +1862,7 @@ Deaktiviert die automatische Anpassung des Höhen-/Breitenverhältnisses.
 .B \-nosound
 Spielt keinen Sound ab bzw. encodiert keinen Sound.
 .TP
-.B \-pp <Qualität> (siehe auch \-vop pp)
+.B \-pp <Qualität> (siehe auch \-vf pp)
 Setzt das Level der Nachbearbeitung der DLL. Diese Option kann
 NICHT MEHR für MPlayers Nachbearbeitungsfilter verwendet werden, sondern
 nur noch für diejnigen Win32-DirectShow-DLLs, die eigene interne
@@ -1871,7 +1871,7 @@ Der gültige Wertebereich für \-pp hängt vom Codec ab, ist meistens aber
 The valid range of \-pp value vary on codecs, mostly
 0\-6, wobei 0=deaktiviert und 6=langsamster/bester Modus bedeutet.
 .TP
-.B \-pphelp (siehe auch \-vop pp)
+.B \-pphelp (siehe auch \-vf pp)
 Zeigt eine Zusammenfassung der vorhandenen Nachbearbeitungsfilter und
 Nutzungshinweise an.
 .TP
@@ -1881,7 +1881,7 @@ Wählt den Modus für den Softwareskalierer.
 .I BEISPIEL:
 .PD 0
 .RSs
-\-vop scale \-ssf lgb=3.0
+\-vf scale \-ssf lgb=3.0
 .RE
 .PD 1
 
@@ -1918,7 +1918,7 @@ Rechter Kanal
 .PD 1
 .
 .TP
-.B \-sws <Typ\ des\ Softwareskalierers> (siehe auch \-vop scale)
+.B \-sws <Typ\ des\ Softwareskalierers> (siehe auch \-vf scale)
 Mit dieser Option wird die Qualität (und damit auch die Geschwindigkeit)
 des Softwareskalierers gewählt, der bei \-zoom zum Einsatz kommt.
 Dieser wird beispielsweise bei x11 oder anderen Videotreibern benutzt,
@@ -1928,7 +1928,7 @@ Mögliche Werte sind:
 .I ANMERKUNG:
 .br
 Für \-sws\ 2 und 7 kann die Schärfe mit dem Skalierungsparameter (p) des
-Skalierungsfilters (\-vop scale (0 (weich) \-  100 (scharf))) gesetzt werden.
+Skalierungsfilters (\-vf scale (0 (weich) \-  100 (scharf))) gesetzt werden.
 Bei \-sws 9 gibt dieser Parameter dagegen die Filterlänge an (1 \- 10).
 
 .PD 0
@@ -1987,36 +1987,9 @@ dann erst andere.
 .PD 1
 .
 .TP
-.B \-vfm <Treiber1,Treiber2,...>
-Gibt eine Prioritätsliste der zu verwendenden Videocodecfamilien an, so wie sie
-in codecs.conf definiert werden.
-Wenn keiner davon funktioniert, werden die Standardfamilien ausprobiert.
-
-.I ANMERKUNG:
-.br
-Falls MPlayer mit Unterstützung für libdivxdecore compiert wurde, dann
-verwenden odivx und divx4 den gleichen DivX4-Codec, benutzen aber ein
-unterschiedliches API.
-Unterschiede und Anmerkungen, wann welcher der beiden benutzt werden sollte,
-befinden sich in der DivX4-Sektion der Dokumentation.
-.br
-Mit \-vfm help wird eine vollständige Liste der verfügbaren Treiber ausgegeben.
-
-.I BEISPIEL:
-.PD 0
-.RSs
-.IPs "\-vfm ffmpeg,dshow,vfw"
-Probiert zuerst libavcodec, dann DirectShow, dann die VfW-Codecs und schließlich
-andere, falls keine der Familien funktioniert hat.
-.IPs "\-vfm xanim"
-Probiert zuerst die XAnim-Codecs.
-.RE
-.PD 1
-.
-.TP
-.B \-vop <...,filter3[=options],filter2,filter1>
+.B \-vf <filter1[=options],filter2,...>
 Aktiviert eine kommaseparierte Liste von Videofiltern zusammen mit ihren
-Optionen. Diese Liste wird UMGEKEHRTER Reihenfolge durchlaufen.
+Optionen.
 
 .I ANMERKUNG:
 .br
@@ -2025,7 +1998,7 @@ wenn sie weggelassen werden. Mit -1 werden die Standardwerte beibehalten.
 Die Parameter w:h bedeuten Breite (width) und Höhe (height); x:y bedeutet
 die x;y-Position relativ zur linken oberen Ecke des größeren Bildes.
 .br
-Eine vollständige Liste aller verfügbaren Plugins liefert \-vop help.
+Eine vollständige Liste aller verfügbaren Plugins liefert \-vf help.
 .br
 Die folgenden Filter sind verfügbar:
 .
@@ -2106,22 +2079,22 @@ y: Filtere nicht den Farbanteil, sondern nur den Helligkeitsanteil (luminance).
 .RE
 .RSss
 .br
-\-vop pp=hb/vb/dr/al/lb
+\-vf pp=hb/vb/dr/al/lb
 .br
-\-vop pp=hb/vb/dr/al
+\-vf pp=hb/vb/dr/al
 .br
 Standardfilter mit Helligkeits\-/\:Kontrastkorrektur:
 .br
-\-vop pp=de/\-al
+\-vf pp=de/\-al
 .br
 Aktiviert die Standardfilter und den zeitlichen Rauschunterdrücker:
 .br
-\-vop pp=de/tn:1:2:3
+\-vf pp=de/tn:1:2:3
 .br
 Entfernt Blockartefakte horizontal im Helligkeitsbereich und abhängig
 von der CPU\-Auslastung auch vertikal:
 .br
-\-vop pp=hb:y/vb:a \-autoq 6
+\-vf pp=hb:y/vb:a \-autoq 6
 .REss
 .IPs lavc[=quality:fps]
 Echtzeit\-MPEG1\-Encoder für DVB/\:DXR3 (libavcodec)
@@ -2286,7 +2259,7 @@ hidden: setzt den Standardwert des 'hidden'-Flag (Boolean)
 opaque: schaltet zwischen Alphablending (transparent) und opaque (schnell)
 um
 .br
-fifo: Pfad und Dateiname des FIFOs (eine named pipe, die mplayer -vop bmovl
+fifo: Pfad und Dateiname des FIFOs (eine named pipe, die mplayer -vf bmovl
 mit der kontrollierenden Anwendung verknüpft)
 .REss
 
@@ -2354,6 +2327,33 @@ kleiner Teil des Bildschirms ändert.
 .RE
 .
 .TP
+.B \-vfm <Treiber1,Treiber2,...>
+Gibt eine Prioritätsliste der zu verwendenden Videocodecfamilien an, so wie sie
+in codecs.conf definiert werden.
+Wenn keiner davon funktioniert, werden die Standardfamilien ausprobiert.
+
+.I ANMERKUNG:
+.br
+Falls MPlayer mit Unterstützung für libdivxdecore compiert wurde, dann
+verwenden odivx und divx4 den gleichen DivX4-Codec, benutzen aber ein
+unterschiedliches API.
+Unterschiede und Anmerkungen, wann welcher der beiden benutzt werden sollte,
+befinden sich in der DivX4-Sektion der Dokumentation.
+.br
+Mit \-vfm help wird eine vollständige Liste der verfügbaren Treiber ausgegeben.
+
+.I BEISPIEL:
+.PD 0
+.RSs
+.IPs "\-vfm ffmpeg,dshow,vfw"
+Probiert zuerst libavcodec, dann DirectShow, dann die VfW-Codecs und schließlich
+andere, falls keine der Familien funktioniert hat.
+.IPs "\-vfm xanim"
+Probiert zuerst die XAnim-Codecs.
+.RE
+.PD 1
+.
+.TP
 .B \-x <x> (nur bei MPLAYER)
 Skaliert das Bild auf eine Breite von x (falls Software\-/\:Hardwareskalierung
 verfügbar ist). Deaktiviert die Berechnung des Höhen\-/\:Breitenverhältnisses.
@@ -2389,11 +2389,11 @@ verfügbar ist). Deaktiviert die Berechnung des Höhen\-/\:Breitenverhältnisses.
 .TP
 .B \-zoom \ 
 Lässt Softwareskalierung zu, wo sie verfügbar ist. Kann benutzt werden,
-um Skalierung mit \-vop scale zu erzwingen.
+um Skalierung mit \-vf scale zu erzwingen.
 
 .I ANMERKUNG:
 .br
-\-vop scale IGNORIERT die Optionen \-x / \-y / \-xy / \-fs / \-aspect, wenn
+\-vf scale IGNORIERT die Optionen \-x / \-y / \-xy / \-fs / \-aspect, wenn
 \-zoom nicht angegeben wird.
 
 
@@ -3555,10 +3555,10 @@ mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 mencoder \-dvd 2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Encodiere Titel Nr. 2 der DVD und skaliere auf 640x480
-mencoder \-dvd 2 \-vop scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \-dvd 2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Encodiere Titel Nr. 2 der DVD und skaliere auf 512xHHH unter Beibehaltung des Höhen\-/\:Breitenverhältnisses
-mencoder \-dvd 2 \-vop scale \-zoom \-xy 512 \-o title2.avi \-oac copy
+mencoder \-dvd 2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
 .B Das gleiche, aber mit libavcodecs MPEG4\-Codec

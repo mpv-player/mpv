@@ -209,7 +209,7 @@ Now, go on:
    ad_*.c - audio decoder (called through dec_audio.c)
    vd_*.c - video decoder (called through dec_video.c)
    ve_*.c - video encoder (used by mencoder)
-   vf_*.c - video filter  (see option -vop)
+   vf_*.c - video filter  (see option -vf)
 
    On this topic, see also:
    libmpcodecs.txt - The structure of the codec-filter path, with explanation

@@ -35,7 +35,7 @@ Small improvements:
  * accept -dvd 9-12 command line
 
  * specify suboptions in a config file without breaking playback (use
-   channel 21 if using -tv, same idea for -vop, -aop, etc...) 
+   channel 21 if using -tv, same idea for -vf, -af, etc...) 
 
 
 Cleanup:
@@ -77,7 +77,7 @@ Enhancements:
 
  * SSA style & colors handling
 
- * plugin structure for vop/aop
+ * plugin structure for vf/af
 
  * support for VirtualDub and Winamp plugins
 

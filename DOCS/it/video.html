@@ -495,8 +495,8 @@ E' un bug di SDL, io non posso cambiarlo (provato con SDL 1.2.1).
 <P>Il valore di bpp (bits per pixel) deve essere impostato manualmente a 4:<BR>
   &nbsp;&nbsp;<CODE>-bpp 4</CODE><BR>
   Il filmato probabilmente deve essere ridimensionato per adattarlo alla modalità EGA:<BR>
-  &nbsp;&nbsp;<CODE>-vop scale=640:350</CODE> or<BR>
-  &nbsp;&nbsp;<CODE>-vop scale=320:200</CODE><BR>
+  &nbsp;&nbsp;<CODE>-vf scale=640:350</CODE> or<BR>
+  &nbsp;&nbsp;<CODE>-vf scale=320:200</CODE><BR>
   Per questo abbiamo bisogno di una routine di ridimensionamento veloca ma di cattiva qualità:<BR>
   &nbsp;&nbsp;<CODE>-sws 4</CODE><BR>
   Forse deve essere disabilitata la correzione automatica dell'aspetto:<BR>
@@ -947,19 +947,19 @@ il riconoscimento con</P>
   usando un comando come questo:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc tuofile.ext
-  mplayer -ao mpegpes -vo mpegpes -vop fame,expand tuofile.ext
+  mplayer -ao mpegpes -vo mpegpes -vf lavc tuofile.ext
+  mplayer -ao mpegpes -vo mpegpes -vf expand,fame tuofile.ext
 </PRE>
 
 <P>Nota che le schede DVB supportano solo un'altezza di 288 o 576 per il PAL e 240 o 480
   per NTSC. <B>Devi</B> ridimensionare se vuoi altre altezze aggiungendo
   <CODE>scale=larghezza:altezza</CODE> con le dimensioni desiderate all'opzione
-  <CODE>-vop</CODE>. Le schede DVB accettano varie larghezze, come 720, 704,
+  <CODE>-vf</CODE>. Le schede DVB accettano varie larghezze, come 720, 704,
   640, 512, 480, 352 ecc e utilizzano il ridimensionamento hardware nella direzione orizzontale,
   quindi nella maggior parte dei casi non devi ridimensionare orizzontalmente. Per un DivX 512x384 (aspetto 4:3) prova:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=512:576
+  mplayer -ao mpegpes -vo mpegpes -vf scale=512:576,lavc
 </PRE>
 
 <P>Se hai un filmato widescreen e non vuoi ridimensionarlo a piena altezza,
@@ -967,19 +967,19 @@ il riconoscimento con</P>
   un DivX 640x384, prova:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,expand=640:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf expand=640:576,lavc file.avi
 </PRE>
 
 <P>Se la tua CPU è troppo lenta per un DivX a dimensione intera 720x576, prova a ridurlo:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:576,lavc file.avi
 </PRE>
 
 <P>Se la velocità non aumenta, prova anche a ridurlo verticalmente:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:288,lavc file.avi
 </PRE>
 
 <P>Per l'OSD e i sottotitoli usa l'opzione OSD del filtro di espansione. Quindi, invece
@@ -998,8 +998,8 @@ il riconoscimento con</P>
   le giuste proporzioni), usa il nuovo filtro dvbscale:</P>
 
 <PRE>
-per TV 3:4: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-per TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+per TV 3:4: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
+per TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </PRE>
 
 <H4>FUTURO</H4>
@@ -1086,22 +1086,22 @@ per TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     44100 / 2 = 22050, se è a 24000Hz, usa 48000Hz dato che 48000 / 2 = 24000 e così via.
     Questo non funziona con output audio digitale (<CODE>-ac hwac3</CODE>).</DD>
 
-  <DT><CODE>-vop lavc/fame</CODE></DT>
+  <DT><CODE>-vf lavc/fame</CODE></DT>
   <DD>Per vedere contenuti non-MPEG sul em8300 (cioè DivX o RealVideo) devi specificare
     un filtro video MPEG1 come libavcodec (lavc) o libfame
     (fame). Al momento lavc è più veloce che e ha una migliore qualità dell'immagine,
     suggeriamo di usarlo a meno che tu non riscontra problemi. Leggi la pagina di man
-    per altre informazioni su <CODE>-vop lavc/fame</CODE>.<BR>
+    per altre informazioni su <CODE>-vf lavc/fame</CODE>.<BR>
     Usare lavc è caldamente consigliato. Al momento non è possibile regolare
     l'fps dell' em8300 e ciò significa che è fisso a 29.97fps. Perciò si
-    consiglia di usare <CODE>-vop lavc=&lt;qualità&gt;:25</CODE>,
+    consiglia di usare <CODE>-vf lavc=&lt;qualità&gt;:25</CODE>,
     specialmente se usi il prebuffering. Quindi perchè 25 e non 29.97? Bhe,
     il fatto è che quando si usa 29.97 l'immagine saltella un po'. La ragione
     è a noi sconosciuta. Se lo si imposta a qualcosa tra 25 e
     27 l'immagine si stabilizza. Per ora tutto quello che possiamo fare è accettarlo
     come un fatto.</DD>
 
-  <DT><CODE>-vop lavc,expand=-1:-1:-1:-1:1</CODE></DT>
+  <DT><CODE>-vf expand=-1:-1:-1:-1:1,lavc</CODE></DT>
   <DD>Anche se il driver DXR3 può inserire degli OSD nei video MPEG1/2/4,
     ha una qualità molto minore dell'OSD di MPlayer, e ha anche alcuni problemi di
     refresh. La riga di comando scritta sopra prima converte il video in entrata

@@ -493,8 +493,8 @@
 <P>La valeur des bpp (bits par pixel) doit être fixé à 4 manuellement:<BR>
   &nbsp;&nbsp;<CODE>-bpp 4</CODE><BR>
   Le film doit probablement être redimensionné pour tenir dans le mode EGA:<BR>
-  &nbsp;&nbsp;<CODE>-vop scale=640:350</CODE> or<BR>
-  &nbsp;&nbsp;<CODE>-vop scale=320:200</CODE><BR>
+  &nbsp;&nbsp;<CODE>-vf scale=640:350</CODE> or<BR>
+  &nbsp;&nbsp;<CODE>-vf scale=320:200</CODE><BR>
   Pour cela nous avons besoin de la routine de redimensionnement rapide
   mais de mauvaise qualité:<BR>
   &nbsp;&nbsp;<CODE>-sws 4</CODE><BR>
@@ -502,7 +502,7 @@
   &nbsp;&nbsp;<CODE>-noaspect</CODE></P>
 
 <P><B>NOTE:</B> d'après mon expérience, la meilleur qualité d'image sur les écrans EGA
-  peut être obtenue en diminuant légèrement la luminosité: <CODE>-vop
+  peut être obtenue en diminuant légèrement la luminosité: <CODE>-vf
   eq=-20:0</CODE>. J'ai également besoin de diminuer la fréquence d'échantillonnage sur ma
   machine, car le son est endommagé en 44kHz: <CODE>-srate 22050</CODE>.</P>
 
@@ -683,7 +683,7 @@
   et prend moins de CPU sur une console standard, sans framebuffer. Utilisez 
   SVGATextMode pour passer en mode texte large, et appréciez ! (une carte hercules 
   en second écran, c'est génial :)) (mais à mon humble avis vous pouvez utiliser 
-  l'option <CODE>-vop 1bpp</CODE> pour avoir des graphismes sur hgafb:)</P>
+  l'option <CODE>-vf 1bpp</CODE> pour avoir des graphismes sur hgafb:)</P>
 
 <P>Utilisez l'option <CODE>-framedrop</CODE> si votre machine n'est pas suffisamment 
   rapide pour afficher toutes les trames !</P>
@@ -1035,19 +1035,19 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
 
 <PRE>
   mplayer -ao mpegpes -vo mpegpes votrefichier.ext
-  mplayer -ao mpegpes -vo mpegpes -vop expand votrefichier.ext
+  mplayer -ao mpegpes -vo mpegpes -vf expand votrefichier.ext
 </PRE>
 
 <P>Notez que les cartes DVB ne supportent que les tailles 288 par 576 pour le PAL
   ou 240 par 480 pour le NTSC. Vous <B>devez</B> redimensionner vers d'autres 
   tailles en ajoutant <CODE>scale=width:height</CODE> avec la largeur et la hauteur
-  que vous voulez à l'option <CODE>-vop</CODE>. Les cartes DVB acceptent des 
+  que vous voulez à l'option <CODE>-vf</CODE>. Les cartes DVB acceptent des 
   largeurs variées, comme 720, 704, 640, 512, 480, 352 etc et font un redimensionnement
   matériel dans le sens horizontal, vous n'avez donc pas besoin de redimensionner
   horizontalement dans la plupart des cas. Pour un Divx en 512x384 (aspect 4:3) essayez:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop scale=512:576
+  mplayer -ao mpegpes -vo mpegpes -vf scale=512:576
 </PRE>
 
 <P>Si vous avez un film plein-écran et que vous ne voulez pas l'afficher
@@ -1055,20 +1055,20 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
   pour ajouter des bandes noires. Pour voir un Divx en 640x384, essayez:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop expand=640:576 fichier.avi
+  mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 fichier.avi
 </PRE>
 
 <P>Si votre CPU est trop lent pour un DivX en taille complète 720x576,
   essayez de diminuer la taille:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop scale=352:576 fichier.avi
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 fichier.avi
 </PRE>
 
 <P>Si la vitesse ne s'améliore pas, essayez également la diminution verticale:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop scale=352:288 fichier.avi
+  mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 fichier.avi
 </PRE>
 
 <P>Pour l'OSD et les sous-titres utilisez la fonction expand du plugin OSD.
@@ -1088,8 +1088,8 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
   original), utilisez le nouveau plugin dvbscale:w/P>
 
 <PRE>
-pour une TV 3:4:  -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-pour une TV 16:9: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+pour une TV 3:4:  -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
+pour une TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </PRE>
 
 <H4>FUTUR</H4>
@@ -1205,23 +1205,23 @@ pour une TV 16:9: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     utilisez 48000Hhz car 48000 / 2 = 24000 et ainsi de suite. Cela ne fonctionne
     pas avec la sortie audio numérique (<CODE>-ac hwac3</CODE>).</DD>
 
-  <DT><CODE>-vop lavc/fame</CODE></DT>
+  <DT><CODE>-vf lavc/fame</CODE></DT>
   <DD><B>(AUTO-INSERTED)</B> Pour voir du contenu non-MPEG sur l'em8300 (c-a-d DivX ou RealVideo),
     vous devrez spécifier un filtre vidéo MPEG1 tel que libavcodec (lavc) ou
     libfame (fame). Pour le moment lavc est à la fois plus rapide et donne une
     meilleur qualité, il est recommandé de l'utiliser à moins que vous ayez des
     problèmes avec. Voir la page de man pour de plus amples infos à propos de 
-     <CODE>-vop lavc/fame</CODE>.<BR>
+     <CODE>-vf lavc/fame</CODE>.<BR>
     Utiliser lavc est hautement recommandé. Actuellement il n'est pas possible
     de régler les fps de l'em8300 ce qui veut dire qu'il est fixé à 29.97fps.
     A cause de cela il est hautement recommandé d'utiliser
-    <CODE>-vop lavc=&lt;qualité&gt;:25</CODE>, surtout si vous utilisez le
+    <CODE>-vf lavc=&lt;qualité&gt;:25</CODE>, surtout si vous utilisez le
     prebuffering. Alors pourquoi 25 et pas 29.97? Hé bien, le truc est que
     si vous utilisez 29.97 l'image devient un peu sautante. Nous n'en connaissons
     pas la raison. Si vous le réglez quelque part entre 25 et 27 l'image devient
     stable. Pour l'instant tous ce que nous pouvons faire est de l'accepter.</DD>
 
-  <DT><CODE>-vop expand=-1:-1:-1:-1:1</CODE></DT>
+  <DT><CODE>-vf expand=-1:-1:-1:-1:1</CODE></DT>
   <DD>Bien que le pilote DXR3 puisse placer quelques OSD sur de la vidéo
     MPEG1/2/4, il est de bien plus basse qualité que l'OSD traditionnel de MPlayer,
     et de plus possède de nombreux problèmes de rafraîchissement. La ligne
@@ -1282,7 +1282,7 @@ pour une TV 16:9: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   le zoom logiciel bilinéaire rapide. La ligne de commande est</P>
 
 <PRE>
-  mplayer -vo zr -sws 0 -vop scale=384:204 film.avi
+  mplayer -vo zr -sws 0 -vf scale=384:204 film.avi
 </PRE>
 
 <P>Le découpage peut être fait avec le filtre <CODE>crop</CODE> et par ce
@@ -1297,7 +1297,7 @@ pour une TV 16:9: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   <P>si vous voulez utiliser le filtre <CODE>crop</CODE>, vous feriez</P>
 
 <PRE>
-  mplayer -vo zr -vop crop=720:320:80:0 benhur.avi
+  mplayer -vo zr -vf crop=720:320:80:0 benhur.avi
 </PRE>
 
 <P>Des occurrences supplémentaires de <CODE>-zrcrop</CODE> invoquent le mode

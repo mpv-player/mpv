@@ -37,7 +37,7 @@ Post-0.90 / CVS CLEANUP work:
 
 FOR THE NEXT RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
-- fix vo_svga vs. -vop scale
+- fix vo_svga vs. -vf scale
 - Re: [Mplayer-cvslog] CVS: main/libvo vo_vesa.c,1.82,1.83
   This patch makes mplayer unusable in console mode, always leaves the 
   console in graphic mode.
@@ -48,7 +48,7 @@ FOR THE NEXT RELEASE:
 - fix partial -dr + ffmpeg + B frames (different stride per frame)
 - implementing 8bpp support in vo_x11.c
 - remove SVQ1 from libmpcodecs
-- remove -vop yuy2, yvu9
+- remove -vf yuy2, yvu9
 - cleanup qtaudio/qtvideo (move globals to context)
 - cleanup DMO interfaces
 - re-design makefile dependency system
