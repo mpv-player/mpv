@@ -351,6 +351,21 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
     if(avctx->dr_uvstride && avctx->dr_uvstride !=mpi->stride[1]){
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Error: uvstride changed\n");
     }
+    
+    assert(mpi->width  >= ((width +align)&(~align)));   
+    assert(mpi->height >= ((height+align)&(~align)));
+    assert(mpi->stride[0] >= mpi->width);
+    if(mpi->imgfmt==IMGFMT_I420 || mpi->imgfmt==IMGFMT_YV12 || mpi->imgfmt==IMGFMT_IYUV){
+        const int y_size= mpi->stride[0] * mpi->height;
+        const int c_size= mpi->stride[1] * mpi->chroma_height;
+        
+        assert(mpi->planes[0] > mpi->planes[1] || mpi->planes[0] + y_size <= mpi->planes[1]);
+        assert(mpi->planes[0] > mpi->planes[2] || mpi->planes[0] + y_size <= mpi->planes[2]);
+        assert(mpi->planes[1] > mpi->planes[0] || mpi->planes[1] + c_size <= mpi->planes[0]);
+        assert(mpi->planes[1] > mpi->planes[2] || mpi->planes[1] + c_size <= mpi->planes[2]);
+        assert(mpi->planes[2] > mpi->planes[0] || mpi->planes[2] + c_size <= mpi->planes[0]);
+        assert(mpi->planes[2] > mpi->planes[1] || mpi->planes[2] + c_size <= mpi->planes[1]);
+    }
 
     avctx->dr_stride   = mpi->stride[0];
     avctx->dr_uvstride = mpi->stride[1];
