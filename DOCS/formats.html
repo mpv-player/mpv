@@ -74,8 +74,17 @@ It supports one video stream and 0 to 99 audio streams and can be as big as
 M$ currently strongly discourages its use and encourages ASF/WMV. Not that
 anybody cares.<BR>
 
-<P><B>NOTE:</B> DV cameras can create two types of AVI formats. One is common and
-playable, the other is neither.</P>
+<P>There is a hack that allows AVI files to contain an Ogg Vorbis audio
+  stream, but makes them incompatible with standard AVI. <B>MPlayer</B>
+  supports playing these files. Seeking is also implemented but severely
+  hampered by badly encoded files with confusing headers. Unfortunately the
+  only encoder currently capable of creating these files, nandub, has this
+  problem.</P>
+
+<P><B>NOTE:</B> DV cameras create raw DV streams that DV grabbing utilities
+convert to two different types of AVI files. The AVI will then contain either
+separate audio and video streams that <B>MPlayer</B> can play or the raw DV
+stream for which support is under development.</P>
 
 <P>There are two kinds of AVI files:</P>
 <UL>
