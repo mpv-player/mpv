@@ -304,29 +304,30 @@ Advanced options:
 Hazardous options a.k.a. "DO NOT REPORT ANY BUGS!"
   --disable-gcc-checking   disable gcc version checking [enable]
 
-Use these options if autodetection fails:
-  --with-extraincdir=DIR   extra headers (png, mad, sdl, ...) in DIR
-  --with-extralibdir=DIR   extra library files (png, mad, sdl, ...) in DIR
-  --with-x11incdir=DIR     X headers in DIR
-  --with-x11libdir=DIR     X library files in DIR
-  --with-dxr2incdir=DIR    DXR2 headers in DIR
-  --with-dvbincdir=DIR     DVB headers in DIR
-  --with-madlibdir=DIR     libmad (libmad shared library) in DIR
+Use these options if autodetection fails (Options marked with (*) accept
+multiple paths separated by ':'):
+  --with-extraincdir=DIR   extra headers (png, mad, sdl, ...) in DIR (*)
+  --with-extralibdir=DIR   extra library files (png, mad, sdl, ...) in DIR (*)
+  --with-x11incdir=DIR     X headers in DIR (*)
+  --with-x11libdir=DIR     X library files in DIR (*)
+  --with-dxr2incdir=DIR    DXR2 headers in DIR (*)
+  --with-dvbincdir=DIR     DVB headers in DIR (*)
+  --with-madlibdir=DIR     libmad (libmad shared library) in DIR (*)
   --with-mlibdir=DIR       libmlib (MLIB support) in DIR (Solaris only)
   --with-codecsdir=DIR     Binary codec files in DIR
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
   --with-reallibdir=DIR    RealPlayer DLL files in DIR
-  --with-xvidlibdir=DIR    libxvidcore (XviD) in DIR 
-  --with-xvidincdir=DIR    XviD header in DIR
-  --with-dtslibdir=DIR     libdts library in DIR 
-  --with-dtsincdir=DIR     libdts header in DIR
-  --with-livelibdir=DIR    path to LIVE.COM Streaming Media libraries
-  --with-xmmsplugindir=DIR path to XMMS plugins
-  --with-xmmslibdir=DIR    path to libxmms.so.1
-  --with-bio2jack=DIR      path to libbio2jack.a (e.g. /home/user/bio2jack)
-  --with-cdparanoiaincdir=DIR  cdparanoia headers in DIR
-  --with-cdparanoialibdir=DIR  cdparanoia libraries (libcdda_*) in DIR
+  --with-xvidlibdir=DIR    libxvidcore (XviD) in DIR  (*)
+  --with-xvidincdir=DIR    XviD header in DIR (*)
+  --with-dtslibdir=DIR     libdts library in DIR  (*)
+  --with-dtsincdir=DIR     libdts header in DIR (*)
+  --with-livelibdir=DIR    LIVE.COM Streaming Media libraries in DIR
+  --with-xmmsplugindir=DIR XMMS plugins in DIR
+  --with-xmmslibdir=DIR    libxmms.so.1 in DIR
+  --with-bio2jack=DIR      libbio2jack.a in DIR
+  --with-cdparanoiaincdir=DIR  cdparanoia headers in DIR (*)
+  --with-cdparanoialibdir=DIR  cdparanoia libraries (libcdda_*) in DIR (*)
   --with-xvmclib=NAME      name of adapter-specific library (e.g. XvMCNVIDIA)
   --with-termcaplib=NAME   name of library with termcap functionality
                            name should be given without leading "lib"
