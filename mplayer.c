@@ -903,8 +903,8 @@ switch(has_video){
    movie_size_x=sh_video->bih.biWidth;
    movie_size_y=abs(sh_video->bih.biHeight);
    break;
- }
 #endif
+ }
  case 3: {  // OpenDivX
    if(verbose) printf("OpenDivX video codec\n");
    { DEC_PARAM dec_param;
