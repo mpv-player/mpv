@@ -359,10 +359,10 @@ name
 	"Copyright"
 	"Encoder"	the name & version of the software used for encoding
 	"Title"
-	"CDCover"	an image of the cd cover (preferable PNG or JPEG)
+	"Cover"		an image of the (cd,dvd,vhs,..) cover (preferable PNG or JPEG)
 	"Source"	"DVD", "VCD", "CD", "MD", "FM radio", "VHS", "TV", 
 			"LD"
-			Optional: appended PAL,NTSC,SECAM, ... int parentheses
+			Optional: appended PAL,NTSC,SECAM, ... in parentheses
 	"CaptureDevice"	"BT878", "BT848", "webcam", ... (more exact names are fine too)
 	"CreationTime"	"2003-01-20 20:13:15Z", ... 
 			(ISO 8601 format, see http://www.cl.cam.ac.uk/~mgk25/iso-time.html)
