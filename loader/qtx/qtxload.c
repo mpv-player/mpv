@@ -30,8 +30,8 @@ main(int argc, char *argv[])
 
     Setup_LDT_Keeper();
     
-    handler = expLoadLibraryA("/usr/lib/win32/qtx/test.qtx");
-    dispatcher = GetProcAddress(handler, "CDComponentDispatch");
+    handler = expLoadLibraryA("/usr/lib/win32/QuickTime.qts");
+    dispatcher = GetProcAddress(handler, "SorensonYUV9Dispatcher");
     printf("handler: %p, dispatcher: %p\n", handler, dispatcher);
     
     {
