@@ -55,21 +55,20 @@ draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y
 	uint8_t *dest;
 	uint32_t bespitch,h,w;
 
-		bespitch = (mga_vid_config.src_width + 31) & ~31;
+	bespitch = (mga_vid_config.src_width + 31) & ~31;
 
-		dest = vid_data + bespitch * y * x;
+	dest = vid_data + bespitch*y + x;
         src = image[0];
-		for(h=0; h < height; h++) 
-		{
-			memcpy(dest, src, width);
-			src += stride[0];
-			dest += bespitch;
-		}
+	for(h=0; h < height; h++) 
+	{
+		memcpy(dest, src, width);
+		src += stride[0];
+		dest += bespitch;
+	}
 
         width/=2;height/=2;x/=2;y/=2;
 
-		dest = vid_data +  bespitch * mga_vid_config.src_height + 
-		bespitch * y + 2*x;
+	dest = vid_data + bespitch*mga_vid_config.src_height + bespitch*y + 2*x;
         src = image[1];
         src2 = image[2];
 	for(h=0; h < height; h++)
@@ -80,8 +79,8 @@ draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y
 			dest[2*w+1] = src2[w];
 		}
 		dest += bespitch;
-        src += stride[1];
-        src2+= stride[2];
+                src += stride[1];
+                src2+= stride[2];
 	}
 }
 
