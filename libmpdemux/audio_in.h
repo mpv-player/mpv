@@ -59,6 +59,7 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer);
 #ifdef HAVE_ALSA9
 int ai_alsa_setup(audio_in_t *ai);
 int ai_alsa_init(audio_in_t *ai);
+int ai_alsa_xrun(audio_in_t *ai);
 #endif
 
 int ai_oss_set_samplerate(audio_in_t *ai);
