@@ -5820,7 +5820,7 @@ fi
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
 _ld_dl_dynamic=''
 bsd && _ld_dl_dynamic='-rdynamic'
-if test "$_real" = yes || test "$_xanim" = yes && not win32 ; then
+if test "$_real" = yes || test "$_xanim" = yes && not win32 && not qnx  ; then
   _ld_dl_dynamic='-rdynamic'
 fi
 
