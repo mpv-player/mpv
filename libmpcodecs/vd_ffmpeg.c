@@ -251,7 +251,11 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
 //    int flags= MP_IMGFLAG_ALIGNED_STRIDE;
     int flags= MP_IMGFLAG_ACCEPT_STRIDE;
     int type= MP_IMGTYPE_IPB;
-    
+    int align=15;
+
+    if(avctx->pix_fmt == PIX_FMT_YUV410P)
+        align=63; //yes seriously, its really needed (16x16 chroma blocks in SVQ1 -> 64x64)
+
     if(init_vo(sh)<0){
         printf("init_vo failed\n");
         return;
@@ -273,8 +277,7 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2, type== MP_IMGTYPE_IPB ? "using IPB\n" : "using IP\n");
 
     mpi= mpcodecs_get_image(sh,type, flags,
-// MN: arpi, is the next line ok? (i doubt it), its needed for height%16!=0 files
-			(width+15)&(~15), (height+15)&(~15));
+			(width+align)&(~align), (height+align)&(~align));
 
     // ok, lets see what did we get:
     if(  mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
@@ -338,7 +341,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	     &got_picture, data, len);
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
     if(!got_picture) return NULL;	// skipped image
-    
+
     if(init_vo(sh)<0) return NULL;
 
 #if LIBAVCODEC_BUILD > 4615
