@@ -3808,6 +3808,14 @@ fi
 
 
 echocheck "GIF support"
+# This is to appease people who want to force gif support.
+# If it is forced to yes, then we still do checks to determine
+# which gif library to use.
+if test "$_gif" = yes ; then
+  _force_gif=yes
+  _gif=auto
+fi
+
 if test "$_gif" = auto ; then
   _gif=no
 cat > $TMPC << EOF
@@ -3829,6 +3837,20 @@ EOF
     _gif=yes
     _ld_gif="-lgif $_ld_x11"
   fi
+fi
+
+# If no library was found, and the user wants support forced,
+# then we force it on with libgif, as this is the safest
+# assumption IMHO.  (libungif & libregif both create symbolic
+# links to libgif.  We also assume that no x11 support is needed,
+# because if you are forcing this, then you _should_ know what
+# you are doing.  [ Besides, package maintainers should never
+# have compiled x11 deps into libungif in the first place. ] )
+# </rant>
+#   --Joey
+if test "$_force_gif" = yes && test "$_gif" = no ; then
+  _gif=yes
+  _ld_gif="-lgif"
 fi
 
 if test "$_gif" = yes ; then
