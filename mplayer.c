@@ -2568,7 +2568,7 @@ if(rel_seek_secs || abs_seek_pos){
 
 //================= Update OSD ====================
 #ifdef USE_OSD
-  if(osd_level>=2){
+  if(osd_level>=1){
       int pts=d_video->pts;
       char osd_text_tmp[50];
       if(pts==osd_last_pts-1) ++pts; else osd_last_pts=pts;
@@ -2580,8 +2580,9 @@ if(rel_seek_secs || abs_seek_pos){
       if (osd_show_av_delay) {
 	  sprintf(osd_text_tmp, "A-V delay: %d ms",(int)(audio_delay*1000));
 	  osd_show_av_delay--;
-      } else
+      } else if(osd_level>=2)
           sprintf(osd_text_tmp,"%c %02d:%02d:%02d",osd_function,pts/3600,(pts/60)%60,pts%60);
+      else osd_text_tmp[0]=0;
       
       if(strcmp(vo_osd_text, osd_text_tmp)) {
 	      strcpy(vo_osd_text, osd_text_tmp);
