@@ -75,17 +75,18 @@
 #include "../postproc/rgb2rgb.h"
 #include "../postproc/swscale.h"
 
-#ifndef USE_LIBAVCODEC
+/*#ifndef USE_LIBAVCODEC*/
 #  define USE_LIBFAME
-#else
+/*#else
 #  undef USE_LIBFAME
-#endif
+#endif*/
 #ifdef USE_LIBFAME
 #include "../libfame/fame.h"
 static unsigned char *outbuf = NULL;
 static fame_parameters_t fame_params;
 static fame_yuv_t fame_yuv;
-static fame_context_t *fame_ctx=NULL;
+static fame_context_t *fame_ctx = NULL;
+static fame_object_t *fame_obj;
 #elif USE_LIBAVCODEC
 #ifdef USE_LIBAVCODEC_SO
 #include <libffmpeg/avcodec.h>
@@ -188,7 +189,7 @@ uint32_t control(uint32_t request, void *data, ...)
 	return VO_NOTIMPL;
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
+static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format, const vo_tune_info_t *info)
 {
 	int tmp1, tmp2, size;
 	em8300_register_t reg;
@@ -278,15 +279,18 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			return -1;
 		}
 
+		fame_obj = fame_get_object(fame_ctx, "motion/none");
+		fame_register(fame_ctx, "motion", fame_obj);
+		
 		fame_params.width = s_width;
 		fame_params.height = s_height;
-		fame_params.coding = "I";
+		fame_params.coding = "IPPPPPPP";
 		fame_params.quality = 90;
-		fame_params.bitrate = 6e6;
+		fame_params.bitrate = 0;
 		fame_params.slices_per_frame = 1;
 		fame_params.frames_per_sequence = (int) (vo_fps + 0.5);
 		fame_params.shape_quality = 100;
-		fame_params.search_range = 8;
+		fame_params.search_range = (int) (vo_fps + 0.5);
 		fame_params.verbose = 0;
 		fame_params.profile = NULL;
 		
@@ -503,17 +507,13 @@ static uint32_t preinit(const char *arg)
 	char devname[80];
 	int fdflags = O_WRONLY;
 
-#ifdef USE_LIBFAME
-	printf("VO: [dxr3] Prebuffering is temporarily disabled\n");
-	noprebuf = 1;
-#else
 	/* Open the control interface */
 	if (arg && !strcmp("noprebuf", arg)) {
 		printf("VO: [dxr3] Disabling prebuffering.\n");
 		noprebuf = 1;
 		fdflags |= O_NONBLOCK;
 	}
-#endif	
+
 	if (arg && !noprebuf) {
 		printf("VO: [dxr3] Forcing use of device %s\n", arg);
 		sprintf(devname, "/dev/em8300-%s", arg);
