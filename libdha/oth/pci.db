@@ -284,10 +284,10 @@ d	10024152	Radeon RV350 AR [Radeon 9600XT]	0
 d	10024168	Radeon R350 [Radeon 9800] (Secondary)	0
 d	10024e48	Radeon R350 NH [Radeon 9800]	0
 d	10024e49	Radeon R350 [Radeon 9800]	0
-d	10024e4a	Radeon RV350 NJ [Radeon 9800 XT]	0
+d	10024e4a	Radeon R360 NJ [Radeon 9800 XT]	0
 d	10024e68	Radeon R350 [Radeon 9800] (Secondary)	0
 d	10024e69	Radeon R350 [Radeon 9800] (Secondary)	0
-d	10024e6a	Radeon RV350 NJ [Radeon 9800 XT] (Secondary)	0
+d	10024e6a	Radeon R360 NJ [Radeon 9800 XT] (Secondary)	0
 d	10025041	Rage 128 PA/PRO	0	
 d	10025042	Rage 128 PB/PRO AGP 2x	0	
 d	10025043	Rage 128 PC/PRO AGP 4x	0	
