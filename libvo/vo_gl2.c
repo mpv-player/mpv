@@ -40,9 +40,9 @@ LIBVO_EXTERN(gl2)
 
 static vo_info_t vo_info = 
 {
-	"X11 (OpenGL)",
+	"X11 (OpenGL) - multiple textures version",
 	"gl2",
-	"Arpad Gereoffy <arpi@esp-team.scene.hu>",
+	"Arpad Gereoffy & Sven Goethel",
 	""
 };
 
