@@ -57,9 +57,6 @@ endif
 
 ifneq ($(W32_LIB),)
 PARTS += loader loader/dshow
-SRCS_MPLAYER += dll_init.c
-SRCS_MENCODER += dll_init.c
-# SRCS += dll_init.c
 endif
 LOADER_DEP = $(W32_DEP) $(DS_DEP)
 LIB_LOADER = $(W32_LIB) $(DS_LIB)
