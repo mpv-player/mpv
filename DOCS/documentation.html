@@ -307,8 +307,9 @@ kernel bugs, etc) so they are discouraged.</P>
     For some videocards you don't need XFree86. See list below.</LI>
   <LI><B>make</B> - suggested version is <B>always the newest</B> (at least 3.79.x). This
     usually isn't important.</LI>
-  <LI><B>SDL</B> - it's not mandatory, but can help in some cases. Always
-    use the newest (beginning from 1.2.x).</LI>
+  <LI><B>SDL</B> - it's not mandatory, but can help in some cases (bad audio,
+    videocards that lag strangely with the xv driver). Always use the newest
+    (beginning from 1.2.x).</LI>
 </UL>
 
 <P><B><I>CODECS</I></B></P>
@@ -485,6 +486,10 @@ to gain root.</LI>
 <PRE>    ./configure
     make
     make install</PRE>
+
+<P><B>Debian users</B> can build a .deb package for themselves, it's very
+simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in <B>MPlayer</B>'s
+root dir. Detailed instructions can be found <A HREF="documentation.html#6.1">here</A>.</P>
 
 <P><B><I>ALWAYS browse the output of ./configure</I></B>, and the
 <CODE>configure.log</CODE> file, they contain info about what will be built,
@@ -1142,6 +1147,9 @@ No closer info yet.</P>
   <LI>xanim codecs support (incomplete yet!)</LI>
   <LI>VIVO files support</LI>
   <LI>TV grabbing support</LI>
+  <LI>Quicktime hackings</LI>
+  <LI>libavcodec support in MEncoder</LI>
+  <LI>various stuff</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:asackerm@stud.informatik.uni-erlangen.de">Andreas Ackermann (Acki)</A></B>
@@ -1352,6 +1360,16 @@ No closer info yet.</P>
   <LI>german docs translation</LI>
   <LI>some improvements in configure, small patches</LI>
   <LI>found somebody (Thilo Wunderlich) how send a DVB card</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:kmkaplan@selfoffice.com">Kim Minh Kaplan</A></B>
+<UL>
+  <LI>DVD subtitles display support</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:bkuschak@yahoo.com">Brian Kuschak</A></B>
+<UL>
+  <LI>RTP streaming support (reading)</LI>
 </UL></LI>
 
 </UL></P>

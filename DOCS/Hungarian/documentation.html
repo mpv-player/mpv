@@ -315,7 +315,9 @@ problémákba ütközni:<BR>
     lehetõvé. Listát lásd lejjebb.</LI>
   <LI><B>make</B> - <B>mindig a legújabb</B> ajánlott (legalább 3.79.x).
     Bár általában erre nem kell figyelj.</LI>
-  <LI><B>SDL</B> - nem kötelezõ, de néhány esetben segíthet. Ajánlott mindig
+  <LI><B>SDL</B> - nem kötelezõ, de néhány esetben segíthet (például ha az
+    audio lejátszásba furcsa hangok keverednek, vagy ha az xv meghajtóval
+    történõ lejátszás során furcsa a lejátszás képe). Ajánlott mindig
     a legújabbat használni.</LI>
 </UL>
 </P>
@@ -504,6 +506,11 @@ gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</LI>
 <PRE>	./configure
 	make
 	make install</PRE>
+
+<P><B>Debian felhasználók</B> egyszerûen készíthetnek .deb csomagot maguknak,
+csak a <CODE>fakeroot debian/rules binary</CODE> parancsot kell beírniuk az
+<B>MPlayer</B> forrás gyökérkönyvtárában. Részletes információ <A
+HREF="documentation.html#6.1">itt</A>.</P>
 
 <P>Ajánlott átnézni a ./configure kimenetét valamint a
   <CODE>configure.log</CODE> file-t, fontos információkat tartalmaznak arra

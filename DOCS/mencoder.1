@@ -37,6 +37,7 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-x\ <rescale\ width> ]
 .RB [ \-y\ <rescale\ height> ]
 .RB [ \-sws\ <0-2> ]
+.RB [ \-ffourcc\ fourcc ]
 .I - or file or device
 .PP
 .SH DESCRIPTION
@@ -120,7 +121,7 @@ Examples:
   -ovc help      get help
   -ovc copy      no encoding, just streamcopy
   -ovc divx4     encode to DivX4
-  -ovc lavc     encode with a libavcodec codec
+  -ovc lavc      encode with a libavcodec codec
 .TP
 .B \-oac <codecname>
 Encode with the given codec (codec names are from codecs.conf).
@@ -235,7 +236,11 @@ Type of scaling method
     0            fast bilinear (default)
     1            bilinear
     2            bicubic (best quality)
-
+.TP
+.B \-ffourcc fourcc
+Can be used to force the video fourcc of the output file. For example -ffourcc
+div3 will have the output file contain "div3" as video fourcc.
+.IP
 .SH FILES AND DIRECTORIES
 .IP
 .SH "EXAMPLES"

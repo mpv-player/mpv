@@ -18,6 +18,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-delay\ secs ]
 .RB [ \-nobps ]
 .RB [ \-aid\ id ]
+.RB [ \-alang\ audio\ stream\ languages ]
 .RB [ \-vid\ id ]
 .RB [ \-fps\ rate ]
 .RB [ \-mc\ seconds/5f ]
@@ -69,6 +70,8 @@ mplayer \- Movie Player for Linux
 .RB [ \-fbmodeconfig\ filename ]
 .RB [ \-benchmark ]
 .RB [ \-dvd\ titleid ]
+.RB [ \-sid\ subtitleid ]
+.RB [ \-slang\ subtitle\ languages ]
 .RB [ \-chapter\ chapterid ]
 .RB [ \-dvdangle\ angleid ]
 .RB [ \-dvdkey\ key ]
@@ -84,7 +87,10 @@ mplayer \- Movie Player for Linux
 .RB [ \-flip ]
 .RB [ \-playlist\ <filename> ]
 .RB [ \-slave ]
-.RB [ \-loop\ <num>]
+.RB [ \-loop\ <num> ]
+.RB [ \-mixer\ <device> ]
+.RB [ \-master\ yes/no ]
+.RB [ \-tv\ suboptions ]
 .I - or file or device
 .PP
 .SH DESCRIPTION
@@ -119,6 +125,11 @@ sometimes '1' are trailers, and '2' is the real movie.
 Turns on DVD subtitle displaying. Also, you MUST specify a number which
 corresponds to a DVD subtitle language (0-...). For the list of available
 subtitles, use with the -v switch and look at the output. (EXPERIMENTAL)
+.TP
+.B \-slang\ subtitle\ language
+See the former, but this option needs a two-letter parameter, a country
+code. Like: -slang hu,us will always select hungarian or if it's non existant
+then english subtitles, if there are any.
 .TP
 .B \-chapter\ chapterid
 specify which chapter to start playing at. Examples can be found below.
@@ -275,6 +286,18 @@ for the syntax.
 .TP
 .B \-loop\ <num>
 Loops movie playback <num> times. 0 means forever.
+.TP
+.B \-mixer\ <device>
+This option will tell MPlayer to use a different device for mixing than
+/dev/mixer.
+.TP
+.B \-master\ yes/no
+Setting this option to "yes" will instruct MPlayer to change the MASTER
+mixer channel when setting the volume, and "no" means the PCM channel.
+.TP
+.B \-tv\ suboptions
+This option enables the TV grabbing feature of MPlayer. For complete
+documentation, please see documentation.html chapter 2.5
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
@@ -367,6 +390,12 @@ don't use avg. byte/sec value for A-V sync (AVI)
 .TP
 .B \-aid\ id
 select audio channel [MPG: 0-31 AVI: 1-99 ASF: 0-127 VOB: 128-...]
+.TP
+.B \-alang\ audio\ stream\ language
+Used when playing DVD disks. Expects a two-letter country code(s) as
+parameter, and always tries to play back audio streams those language
+matches the given code. For example: -alang hu,us will always try to play
+hungarian or if it's non-existant then english audio streams if there are any.
 .TP
 .B \-vid\ id
 select video channel [MPG: 0-15  AVI:  -- ]

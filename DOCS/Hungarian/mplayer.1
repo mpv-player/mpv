@@ -70,6 +70,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-benchmark ]
 .RB [ \-dvd\ cím ]
 .RB [ \-sid\ id ]
+.RB [ \-slang\ felirat\ nyelve ]
 .RB [ \-chapter\ fejezet ]
 .RB [ \-dvdangle\ szög ]
 .RB [ \-dvdkey\ kulcs ]
@@ -86,6 +87,9 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-playlist\ <file> ]
 .RB [ \-slave ]
 .RB [ \-loop\ <num> ]
+.RB [ \-mixer\ <eszköz> ]
+.RB [ \-master\ igen/nem ]
+.RB [ \-tv\ alopciók ]
 .I - vagy file vagy eszköz
 .PP
 .SH LEÍRÁS
@@ -119,6 +123,11 @@ igazi film.
 Bekapcsolja a DVD feliratok megjelenítését. Szükséges egy DVD feliratazonosító
 (0-...) szám megadása. A lehetséges nyelvek listája az ennek és a -v opciónak
 az együttes használata során lesz olvasható a kimenetben.
+.TP
+.B \-slang\ felirat\ nyelve
+Lásd az elõzõ opciót, de ez egy kétbetûs országkódot fogad el paraméterként.
+Például a -slang hu,us opció mindig magyar, vagy ha az nincs akkor angol
+feliratokat fog kiválasztani, ha lehetséges.
 .TP
 .B \-chapter\ fejezet
 megadja hogy melyik fejezetnél (DVD) kezdõdjön a lejátszás. Példákat
@@ -280,6 +289,19 @@ fejezetet.
 .B -loop\ <num>
 Többszörös lejátszás. A 0-ás érték végtelenített lejátszást eredményez.
 .TP
+.B \-mixer\ <eszköz>
+Ezzel az opcióval lehet megadni az MPlayer-nek hogy a /dev/mixer helyett
+más eszközt használjon.
+.TP
+.B \-master\ igen/nem
+Ezen opció "igen" állapotba állítása azt eredményezi hogy az MPlayer a
+hangerõszabályzást a mixer MASTER csatornáján végzi, míg a "nem" állapot
+a PCM csatorna használatát eredményezi.
+.IP
+.B \-tv\ alopciók
+Ez az opció TV-nézõ üzemmódba kapcsolja az MPlayer-t. A további dokumentáció
+a documentation.html file 2.5-ös fejezetében található.
+.IP
 .SH "HALADÓSZINTÛ OPCIÓK"
 .TP
 .I MEGJEGYZÉS
@@ -369,6 +391,12 @@ másik módszer használata a hang/kép szinkronhoz (AVI)
 .TP
 .B \-aid\ id
 másik audio csatorna választása [MPG: 0-31 AVI: 1-99 ASF: 0-127 VOB: 128-...]
+.TP
+.B \-alang\ audio\ stream\ nyelve
+DVD lemezek lejátszásánál használatos. Kétbetûs országkódot illetve kódokat
+fogad el paraméterként, és mindig az adott kódnak megfeleló audio stream-et
+próbálja lejátszani. Például: -alang hu,us mindig elõször magyar, vagy ha
+az nincs akkor angol hanggal játszik le DVD-t.
 .TP
 .B \-vid\ id
 másik video csatorna választása [MPG: 0-15  AVI:  -- ]
