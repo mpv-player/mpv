@@ -1,6 +1,7 @@
 // Precise timer routines for LINUX  (C) LGB & A'rpi/ASTRAL
 
 #include <unistd.h>
+#include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
 #include "../config.h"
