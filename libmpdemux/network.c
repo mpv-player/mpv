@@ -547,6 +547,9 @@ extension=NULL;
 					case 401: // Service Unavailable
 						mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server return service unavailable, skipping!\n");
 						return -1;
+					case 403: // Service Forbidden
+						mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server return 'Service Forbidden'\n");
+						return -1;
 					case 404: // Resource Not Found
 						mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server couldn't find requested stream, skipping!\n");
 						return -1;
