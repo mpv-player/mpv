@@ -80,7 +80,6 @@ extern int vo_ontop;
 extern int vo_rootwin;
 extern int vidmode;
 extern int vo_colorkey;
-extern float monitor_aspect;
 extern int WinID;
 
 /*****************************************************************************
