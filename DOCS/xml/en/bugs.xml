@@ -12,7 +12,7 @@
 </listitem>
 <listitem>
 <para>General SIGILL (signal 4):</para>
-<para>Problem: you compiled and run MPlayer in different machines
+<para>Problem: you compiled and run MPlayer on different machines
 (for example compiled on P3 and running on Celeron)</para>
 <para>Solution: compile MPlayer on the same machine where you will use it!</para>
 <para>Workaround: <command>./configure --disable-sse</command> etc. options</para>
