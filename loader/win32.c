@@ -403,7 +403,7 @@ static int my_release(void* memory)
 
     if (header->deadbeef != (long) 0xdeadbeef)
     {
-	printf("FATAL releasing corrupted memory! %p  0x%lx  (%d)\n", header, header->deadbeef, alccnt);
+	dbgprintf("FATAL releasing corrupted memory! %p  0x%lx  (%d)\n", header, header->deadbeef, alccnt);
 	return 0;
     }
 
@@ -1663,7 +1663,7 @@ static int WINAPI expGlobalSize(void* amem)
     {
 	if (header->deadbeef != 0xdeadbeef)
 	{
-	    printf("FATAL found corrupted memory! %p  0x%lx  (%d)\n", header, header->deadbeef, alccnt);
+	    dbgprintf("FATAL found corrupted memory! %p  0x%lx  (%d)\n", header, header->deadbeef, alccnt);
 	    break;
 	}
 
@@ -5332,7 +5332,7 @@ void my_garbagecollection(void)
 	    if (--max_fatal < 0)
 		break;
     }
-    printf("Total Unfree %d bytes cnt %d [%p,%d]\n",unfree, unfreecnt, last_alloc, alccnt);
+    dbgprintf("Total Unfree %d bytes cnt %d [%p,%d]\n",unfree, unfreecnt, last_alloc, alccnt);
 #endif
     g_tls = NULL;
     list = NULL;
