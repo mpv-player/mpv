@@ -70,7 +70,6 @@ vb
 		Bitstream syntax:
 packet header
 	forward ptr				v
-	backward ptr				v
 
 align_byte
 	while(not byte aligned)
@@ -89,6 +88,7 @@ main header:
 	packet header
 	version					v
 	stream_count				v
+	max_type0_size				v
 	for(i=0; i<256; ){
 		tmp_flag			v
 		tmp_stream			v
@@ -154,20 +154,17 @@ frame
 		frame_type2_startcode		f(64)
 	}
 	frame_code				f(8)
-	if(flags[frame_code]&1){
-		packet header
-	}       
 	if(stream_id_plus1[frame_code]==0){
 		stream_id			v
 	}
-	if(flags[frame_code]&16){
-		if(flags[frame_code]&4){
+	if(flags[frame_code]&4){
+		if(flags[frame_code]&1){
 			timestamp		v
 		}else{
 			lsb_timestamp		v
 		}
 	}
-	if(flags[frame_code]&2){
+	if(flags[frame_code]&8){
 		data_size_msb			v
 	}
 	data
@@ -206,26 +203,9 @@ info_packet: (optional)
         
                 
 forward_ptr
-backward_ptr
-	pointer to the next / previous packet
-	pointers are relative and backward pointer is implicitelly negative
+	size of the packet (exactly the distance from the first byte of the
+	startcode of the current packet to the first byte of the following packet
 	Note: a frame with 0 bytes means that its skiped
-	Note: the forward pointer is equal to the size of this packet including
-              the header
-              the backward pointer is equal to the size of the previous packet
-	Example: 
-                0
-                size1 (size of frame1 including header)
-                frame1
-
-                size1
-                size2
-                frame2
-
-                size2
-                size3
-                frame3
-
 
 *_startcode
         all startcodes start with 'N'
@@ -242,8 +222,14 @@ info_startcode
 	0xAB68B596BA78ULL + (((uint64_t)('N'<<8) + 'I')<<48)
 
 version
-	1 for now
-        
+	2 for now
+
+max_type0_size
+	max cummulative sum of type0 frames between type not 0 frames, this can
+	be used by the deocoder to detect damaged type 0 headers if the damage
+	results in a too long chain
+	SHOULD be set to <=16384 to ensure reasonable error recovery
+
 stream_id
 	Note: streams with a lower relative class MUST have a lower relative id
 	so a stream with class 0 MUST allways have a id which is lower then any
@@ -319,8 +305,7 @@ frame_code
 	different from the first byte of any startcode
 
 flags[frame_code]
-	the bits of the flags from MSB to LSB are KKTTTDP
-	P is 1 for type 1 and 2 packets, 0 for type 0 packets
+	the bits of the flags from MSB to LSB are KDTTT
 	TTT is the timestamp_code, 000,001,010 use the last timestamp + the
 		first, second and third last unique timestamp difference, so if
 		the timestamp differences, are +3,+1,+2,+2,+1 then last diff is
@@ -335,24 +320,21 @@ flags[frame_code]
 		initial_timestamp_predictor values from the stream header if a
 		packet of type not 0 in encountered
 	if D is 1 then data_size_msb is coded, otherwise its 0
-	KK is the keyframe_type 
-		00-> no keyframe, 
-		01-> keyframe, 
-	flags=1 can be used to mark illegal frame_code bytes
-	frame_code=78 must have flags=1
+	K is the keyframe_type 
+		0-> no keyframe, 
+		1-> keyframe, 
+	flags=7 can be used to mark illegal frame_code bytes
+	frame_code=78 must have flags=7
 
 frame_type
-	0       is indicated by (flags[frame_code]&1)==0
-	1       is indicated by (flags[frame_code]&1)==1 && !startcode
-	2       is indicated by (flags[frame_code]&1)==1 && startcode
+	if the first byte of a frame is 'N' then the frame_type is 2 otherwise 
+	its 0
 	there SHOULD not be more then 0.5 seconds or 16kbyte of type 0 frames
 	wihout a intervening frame of different frame_type
-	* type 2 frames MUST be decodeable independantly of any other frames
-	this means they MUST be keyframes and they MUST use a full timestamp
-	* type 1 frames MUST not depend(1) upon any other frames, this means,
+	* type 2 frames MUST not depend(1) upon any other frames, this means,
 	they MUST use a full timestamp
 	* type 0 frames MUST not depend(1) upon frames prior to the last type 
-	1/2 frames
+	2 frame
 	depend(1) means dependancy on the container level (NUT) not dependancy
 	on the codec level
 
@@ -413,11 +395,6 @@ colorspace_type
 samplerate_mul
 	the number of samples per second in one time_base unit
 	samplerate = time_base*samplerate_mul
-
-zero_bit
-	MUST be 0, its there to distinguish non keyframes from other packets,
-	Note: all packets have a 64-bit startcode except non-keyframes to reduce
-	      their size, and all startcodes start with a 1 bit
 
 checksum
 	adler32 checksum
