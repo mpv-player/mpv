@@ -28,6 +28,8 @@
 #include "fastmemcpy.h"
 #include "osd.h"
 #include "video_out.h"
+#include "../mp_image.h"
+
 
 #define NUM_FRAMES VID_PLAY_MAXFRAMES /* Temporary: driver will overwrite it */
 #define UNUSED(x) ((void)(x)) /* Removes warning about unused arguments */
@@ -658,6 +660,23 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	return 0;
 }
 
+static uint32_t vidix_get_image(mp_image_t *mpi)
+{
+    if(mpi->type==MP_IMGTYPE_STATIC && vidix_play.num_frames>1) return VO_FALSE;
+    if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; /* slow video ram */
+    mpi->planes[0]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.y;
+    mpi->stride[0]=vidix_play.dest.pitch.y;
+    if(mpi->flags&MP_IMGFLAG_PLANAR)
+    {
+	mpi->planes[1]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.v;
+	mpi->stride[1]=vidix_play.dest.pitch.v;
+	mpi->planes[2]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.u;
+	mpi->stride[2]=vidix_play.dest.pitch.u;
+    }
+    mpi->flags|=MP_IMGFLAG_DIRECT;
+    return VO_TRUE;
+}
+
 uint32_t vidix_control(uint32_t request, void *data, ...)
 {
   switch (request) {
@@ -668,6 +687,8 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
     return vidix_query_fourcc(*((uint32_t*)data));
   case VOCTRL_SCREENSHOT:
     return (*server_control)(request,data);
+  case VOCTRL_GET_IMAGE:
+    return vidix_get_image(data);
   }
   return VO_NOTIMPL;
 }
