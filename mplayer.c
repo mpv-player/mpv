@@ -569,10 +569,13 @@ if(!filename){
 	{
 	    size_t i2 = strlen(video_driver);
 
-	    vo_subdevice = malloc(i2-i);
-	    if (vo_subdevice != NULL)
-		strncpy(vo_subdevice, (char *)(video_driver+i+1), i2-i);
-	    video_driver[i] = '\0';
+	    if (video_driver[i] == ':')
+	    {
+		vo_subdevice = malloc(i2-i);
+		if (vo_subdevice != NULL)
+		    strncpy(vo_subdevice, (char *)(video_driver+i+1), i2-i);
+		video_driver[i] = '\0';
+	    }
 //	    printf("video_driver: %s, subdevice: %s\n", video_driver, vo_subdevice);
 	}
   if(!video_driver)
@@ -595,10 +598,13 @@ if(!filename){
 	{
 	    size_t i2 = strlen(audio_driver);
 
-	    ao_subdevice = malloc(i2-i);
-	    if (ao_subdevice != NULL)
-		strncpy(ao_subdevice, (char *)(audio_driver+i+1), i2-i);
-	    audio_driver[i] = '\0';
+	    if (audio_driver[i] == ':')
+	    {
+		ao_subdevice = malloc(i2-i);
+		if (ao_subdevice != NULL)
+		    strncpy(ao_subdevice, (char *)(audio_driver+i+1), i2-i);
+		audio_driver[i] = '\0';
+	    }
 //	    printf("audio_driver: %s, subdevice: %s\n", audio_driver, ao_subdevice);
 	}
   if(!audio_driver)
