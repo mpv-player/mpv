@@ -2750,9 +2750,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
   while( !brk_cmd && (cmd = mp_input_get_cmd(0,0,0)) != NULL) {
     switch(cmd->id) {
     case MP_CMD_SEEK : {
-      int v,abs;
+      float v;
+      int abs;
       osd_show_percentage = 25;
-      v = cmd->args[0].v.i;
+      v = cmd->args[0].v.f;
       abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
       if(abs==2) { /* Absolute seek to a specific timestamp in seconds */
         abs_seek_pos = 1;

@@ -46,7 +46,7 @@
 /// is the default value wich is used for optional arguments
 
 static mp_cmd_t mp_cmds[] = {
-  { MP_CMD_SEEK, "seek", 1, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_SEEK, "seek", 1, { {MP_CMD_ARG_FLOAT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
 #ifdef USE_EDL
   { MP_CMD_EDL_MARK, "edl_mark", 0, { {-1,{0}} } },
 #endif
