@@ -662,7 +662,7 @@ void vo_vm_switch(uint32_t X, uint32_t Y, int* modeline_width, int* modeline_hei
       
       for (i=1; i<modecount; i++)
         if ((vidmodes[i]->hdisplay >= X) && (vidmodes[i]->vdisplay >= Y))
-          if ( (vidmodes[i]->hdisplay < *modeline_width ) && (vidmodes[i]->vdisplay < *modeline_height) )
+          if ( (vidmodes[i]->hdisplay <= *modeline_width ) && (vidmodes[i]->vdisplay <= *modeline_height) )
 	    {
 	      *modeline_width=vidmodes[i]->hdisplay;
 	      *modeline_height=vidmodes[i]->vdisplay;
