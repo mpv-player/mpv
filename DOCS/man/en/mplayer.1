@@ -481,13 +481,15 @@ only video (you can think of that as infinite fps).
 Changes the colorkey to an RGB value of your choice.
 0x000000 is black and 0xffffff is white.
 Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix,
-xover and directx video output drivers.
+xover, xv (see -vo xv:ck), xvmc (see -vo xv:ck) and directx video output
+drivers.
 .
 .TP
 .B \-nocolorkey
 Disables colorkeying.
-Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix and
-xover video output drivers.
+Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix,
+xover, xv (see -vo xv:ck), xvmc (see -vo xv:ck) and xover video output
+drivers.
 .
 .TP
 .B \-crash-debug (DEBUG CODE)
@@ -2359,10 +2361,34 @@ Uses the XVideo extension of XFree86 4.x to enable hardware
 accelerated playback.
 If you cannot use a hardware specific driver, this is probably
 the best option.
+For information about what colorkey is used and how it is drawn run mplayer
+with -v option and look out for the lines tagged with [xv common] at the
+beginning.
 .PD 0
 .RSs
 .IPs port=<number>
 Select a specific XVideo port.
+.IPs ck=cur|use|set
+Select the source from which the colorkey is taken (default: cur).
+.RSss
+.IPs cur
+The default takes the colorkey currently set in Xv.
+.IPs use
+Use but do not set the colorkey from mplayer (use -colorkey option to change
+it).
+.IPs set
+Same as use but also sets the supplied colorkey.
+.RE
+.IPs ck-method=man|bg|auto
+Sets the colorkey drawing method (default: man).
+.RSss
+.IPs man
+Draw the colorkey manually (reduces flicker in some cases).
+.IPs bg
+Set the colorkey as window background.
+.IPs auto
+Let Xv draw the colorkey.
+.RE
 .RE
 .PD 1
 .
@@ -2388,19 +2414,23 @@ Video output driver that uses the XvMC (X Video Motion Compensation)
 extension of XFree86 4.x to speed up MPEG-1/2 and VCR2 decoding.
 .PD 0
 .RSs
-.IPs benchmark
+.IPs port=<number>
+Select a specific XVideo port.
+.IPs (no)benchmark
 Disables image display.
 Necessary for proper benchmarking of drivers that change
 image buffers on monitor retrace only (nVidia).
-.IPs queue
+Default is not to disable image display (nobenchmark).
+.IPs (no)queue
 Queue frames for display to allow more parallel work of the video hardware.
-May add a small (not noticeable) constant A/\:V desync.
-.IPs sleep
+May add a small (not noticeable) constant A/\:V desync (default: noqueue).
+.IPs (no)sleep
 Use sleep function while waiting for rendering to finish
-(not recomended on Linux).
-.IPs wait\ 
-Do not use sleep function while waiting for rendering to finish
-(default).
+(not recomended on Linux). Default is not to sleep (nosleep).
+.IPs ck=cur|use|set
+Same as -vo xv:ck (see -vo xv).
+.IPs ck-method=man|bg|auto
+Same as -vo xv:ck-method (see -vo xv).
 .RE
 .PD 1
 .
