@@ -587,6 +587,7 @@ cddb_retrieve(cddb_data_t *cddb_data) {
 	ptr = offsets;
 	for( i=0; i<cddb_data->tracks ; i++ ) {
 		ptr += sprintf(ptr, "%d+", cdtoc[i].frame );
+		if (ptr-offsets > sizeof offsets - 40) break;
 	}
 	ptr[0]=0;
 	time_len = (cdtoc[cddb_data->tracks].frame)/75;
