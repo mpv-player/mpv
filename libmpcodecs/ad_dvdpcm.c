@@ -55,10 +55,12 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 {
   int j,len;
   len=demux_read_data(sh_audio->ds,buf,(minlen+3)&(~3));
+#ifndef WORDS_BIGENDIAN
   for(j=0;j<len;j+=2){
     char x=buf[j];
     buf[j]=buf[j+1];
     buf[j+1]=x;
   }
+#endif
   return len;
 }
