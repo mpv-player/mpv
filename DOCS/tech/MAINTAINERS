@@ -11,7 +11,8 @@ If you're listed here as maintainer of one or more parts, but you don't want
 it to be so, tell us and you will be removed... this list has been created
 based on maillist/cvs activity. It may be wrong.
 
-Always send patches, comments to the mplayer-dev-eng maillist!
+Always send the patches (first read DOCS/tech/patches.txt), comments to
+the mplayer-dev-eng mailing list!!!
 
 Homepage:
     * Design: Chass and Tornado
@@ -33,7 +34,7 @@ Documentation translations:
     * Polish: Justyna Biala <nell@skrzynka.pl>
     * Italian: Matteo Balduzzi
 
-Platforms/ports:
+Platforms/ports: (see also DOCS/tech/porting-status.txt)
     * DEBIAN packaging: Dariusz Pietrzak
     * RedHat/RPM packaging: Dominik Mierzejewski
     * FreeBSD support: Vladimir Kushnir, Nexus
