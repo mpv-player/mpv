@@ -24,7 +24,13 @@ other interesting stuff.</P>
     encoding.</LI>
     <LI>download and install <B>libmp3lame</B> (from lame 3.89beta or lame CVS). This
     is needed for CBR/VBR MP3 audio encoding ability. Note that a single
-    <CODE>lame</CODE> binary isn't sufficient.</LI>
+    <CODE>lame</CODE> binary isn't sufficient. BTW: the less optimization
+    you use for lame, the better the quality will be. You can test
+    quality by running <CODE>make lame</CODE> after lame's compiling process
+    is over. The resulting number should be less than <B>30</B>. Don't
+    panic if it's <B>400</B> or so, you shouldn't heard any audible
+    quality decrease. Oh, and if your compiler doesn't even run <CODE>make test</CODE> ...
+    Well, delete that <B>GCC 2.96</B>.</LI>
     <LI>use <CODE>./configure</CODE> with optional parameters as usual, and
     type : <CODE>make mencoder</CODE> , then <CODE>make install</CODE> .
   </UL>
