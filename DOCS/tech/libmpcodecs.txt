@@ -126,6 +126,16 @@ vf_info_t* info;
     int (*open)(struct vf_instance_s* vf,char* args);
 			// pointer to the open() function:
 
+Sample:
+
+vf_info_t vf_info_foobar = {
+    "Universal Foo and Bar filter",
+    "foobar",
+    "Ms. Foo Bar",
+    "based on algo described at http://www.foo-bar.org",
+    open
+};
+
 The open() function:
 
     open() is called when the filter is appended/inserted to the filter chain.
@@ -169,8 +179,10 @@ The query_format() func. is called one or more times before the config(),
 to find out the capabilities and/or support status of a given colorspace (fmt).
 For the return values, see vfcap.h!
 Normally, a filter should return at least VFCAP_CSP_SUPPORTED for all supported
-colorspaces, and 0 for the unsupported ones. If your filter does linear
-conversion, it should query the next filter, and pass its capability flags.
+colorspaces it accepts as input, and 0 for the unsupported ones.
+If your filter does linear conversion, it should query the next filter,
+and merge in its capability flags. Note: you should always ensure that the
+next filter will accept at least one of your possible output colorspaces!
 
 Sample:
 
@@ -185,6 +197,9 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
+For the more complex case, when you have an N->M colorspace mapping matrix,
+see vf_scale or vf_rgb2bgr for examples.
+
 
     int (*config)(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
@@ -194,6 +209,12 @@ The config() is called to initialize/confugre the filter before using it.
 Its parameters are already well-known from libvo:
     width, height:     size of the coded image
     d_width, d_height: wanted display size (usually aspect corrected w/h)
+	Filters should use width,height as input image dimension, but the
+	resizing filters (crop, expand, scale, rotate, etc) should update
+	d_width/d_height (display size) to preserve the correct aspect ratio!
+	Filters should not rely on d_width, d_height as input parameters,
+	the only exception is when a filter replaces some libvo functionality
+	(like -vop scale with -zoom, or OSD rendering wiht -vop expand).
     flags:	       the "good" old flags set of libvo:
         0x01	- force fullscreen (-fs)
 	0x02	- allow mode switching (-vm)
@@ -267,7 +288,10 @@ fields, may help you a lot creating if() or for() structures:
 	32bpp (actually 24bit color depth) mode!
 	It's 1 for 1bpp, 9 for YVU9, and is 12 for YV12 mode. Get it?
     For planar formats, you also have chroma_width, chroma_height and
-    chroma_x_shift, chroma_y_shift too.
+    chroma_x_shift, chroma_y_shift too, they specify the chroma subsampling
+    for yuv formats:
+	chroma_width = luma_width >>chroma_x_shift;
+	chroma_height= luma_height>>chroma_y_shift;
 
 If you're done, call the rest of the filter chain to process your output
 image:
@@ -287,6 +311,7 @@ You can control the filter in runtime from mplayer/mencoder/dec_video:
 #define VFCTRL_DRAW_OSD 7
 #define VFCTRL_CHANGE_RECTANGLE 9 /* Change the rectangle boundaries */
 
+
     void (*get_image)(struct vf_instance_s* vf,
         mp_image_t *mpi);
 	
@@ -297,14 +322,21 @@ buffer allocation. You SHOULD check the buffer restrictions (stride, type,
 readability etc) and if all OK, then allocate the requested buffer using
 the vf_get_image() func and copying the buffer pointers.
 
+NOTE: You HAVE TO save dmpi pointer, as you'll need it in put_image() later.
+It is not guaranteed that you'll get the same mpi for put_image() as in
+get_image() (think of out-of-order decoding, get_image is called in decoding
+order, while put_image is called for display) so the only safe place to save
+it is in the mpi struct itself: mpi->priv=(void*)dmpi;
+
+
     void (*draw_slice)(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y);
 
 It's the good old draw_slice callback, already known from libvo.
-If you filter can operate on partial images, you can implement this one
+If your filter can operate on partial images, you can implement this one
 to improve performance (cache utilization).
 
-Ah, and there is 2 set of capability/requirement flags (vfcap.h type)
+Ah, and there is two set of capability/requirement flags (vfcap.h type)
 in vf_instance_t, used by default query_format() implementation, and by
 the automatic colorspace/stride matching code (vf_next_config()).
 
