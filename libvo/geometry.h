@@ -3,7 +3,5 @@
 #define __GEOMETRY_H
 
 extern char *vo_geometry;
-int geometryFull(int *pwidth, int *pheight, int *xpos, int *ypos, int scrw, int scrh, int vidw, int vidh);
-int geometry(int *xpos, int *ypos, int scrw, int scrh, int vidw, int vidh);
-
+int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh);
 #endif /* !__GEOMETRY_H */
