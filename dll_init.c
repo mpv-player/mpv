@@ -147,7 +147,8 @@ int init_vfw_video_codec(sh_video_t *sh_video,int ex){
   HRESULT ret;
   int yuv=0;
   unsigned int outfmt=sh_video->codec->outfmt[sh_video->outfmtidx];
-  unsigned char temp[1024];
+  char *temp;
+  int temp_len;
   int i;
 
   mp_msg(MSGT_WIN32,MSGL_V,"======= Win32 (VFW) VIDEO Codec init =======\n");
@@ -163,23 +164,61 @@ int init_vfw_video_codec(sh_video_t *sh_video,int ex){
     return 0;
   }
 
-//  sh_video->bih.biBitCount=32;
+//  sh_video->bih->biBitCount=32;
+
+  temp_len = ICDecompressGetFormatSize(sh_video->hic, sh_video->bih);
+
+  if (temp_len < sh_video->o_bih.biSize)
+    temp_len = sh_video->o_bih.biSize;
+
+  temp = malloc(temp_len);
+  printf("ICDecompressGetFormatSize ret: %d\n", temp_len);
+
+#if 0
+{
+  ICINFO icinfo;
+  ret = ICGetInfo(sh_video->hic, &icinfo, sizeof(ICINFO));
+  printf("%d - %d - %d\n", ret, icinfo.dwSize, sizeof(ICINFO));
+printf("Compressor type: %.4x\n", icinfo.fccType);
+printf("Compressor subtype: %.4x\n", icinfo.fccHandler);
+printf("Compressor flags: %lu, version %lu, ICM version: %lu\n",
+    icinfo.dwFlags, icinfo.dwVersion, icinfo.dwVersionICM);
+printf("Compressor name: %s\n", icinfo.szName);
+printf("Compressor description: %s\n", icinfo.szDescription);
+
+printf("Flags:");
+if (icinfo.dwFlags & VIDCF_QUALITY)
+    printf(" quality");
+if (icinfo.dwFlags & VIDCF_FASTTEMPORALD)
+    printf(" fast-decompr");
+if (icinfo.dwFlags & VIDCF_QUALITYTIME)
+    printf(" temp-quality");
+printf("\n");
+}
+#endif
 
   // Note: DivX.DLL overwrites 4 bytes _AFTER_ the o_bih header, so it corrupts
   // the sh_video struct content. We call it with an 1024-byte temp space and
   // then copy out the data we need:
-  memset(temp,0x77,1024);
+  memset(temp,0x77,temp_len);
 
   ret = ICDecompressGetFormat(sh_video->hic, sh_video->bih, temp);
-  if(ret){
+  if(ret < 0){
     mp_msg(MSGT_WIN32,MSGL_ERR,"ICDecompressGetFormat failed: Error %d\n", (int)ret);
+    for (i=0; i < temp_len; i++) mp_msg(MSGT_WIN32, MSGL_DBG2, "%02x ", temp[i]);
     return 0;
   }
   mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressGetFormat OK\n");
   
   memcpy(&sh_video->o_bih,temp,sizeof(sh_video->o_bih));
-  // for(i=0;i<1024;i++) printf("%02X ",temp[i]);
-  
+
+  if (temp_len > sizeof(sh_video->o_bih))
+  {
+    mp_msg(MSGT_WIN32, MSGL_V, "Extra info in o_bih (%d bytes)!\n",
+	temp_len-sizeof(sh_video->o_bih));
+    for(i=sizeof(sh_video->o_bih);i<temp_len;i++) mp_msg(MSGT_WIN32, MSGL_DBG2, "%02X ",temp[i]);
+  }
+  free(temp);
 //  printf("ICM_DECOMPRESS_QUERY=0x%X",ICM_DECOMPRESS_QUERY);
 
 //  sh_video->o_bih.biWidth=sh_video->bih.biWidth;
