@@ -33,6 +33,7 @@ switch(d_video->demuxer->file_format){
  case DEMUXER_TYPE_ASF: {
   // display info: 
   
+#if 0
     if(sh_video->bih->biCompression == BI_RGB &&
        (sh_video->video.fccHandler == mmioFOURCC('D', 'I', 'B', ' ') ||
         sh_video->video.fccHandler == mmioFOURCC('R', 'G', 'B', ' ') ||
@@ -41,6 +42,7 @@ switch(d_video->demuxer->file_format){
                 sh_video->format = mmioFOURCC(0, 'R', 'G', 'B') | sh_video->bih->biBitCount;
     }
     else 					    
+#endif
         sh_video->format=sh_video->bih->biCompression;
 
     sh_video->disp_w=sh_video->bih->biWidth;
