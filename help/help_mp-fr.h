@@ -1,4 +1,4 @@
-// sync'ed with help_mp-en.h 1.56
+// sync'ed with help_mp-en.h 1.63
 // Updates & fixes by pl <p_l@gmx.fr>
 // Original transation by Firebird <firebird@chez.com>
 
@@ -96,11 +96,13 @@ static char help_text[]=
 			    "!!! Raisons possibles, problèmes, solutions: \n"\
 			    "- Le plus probable: pilote audio _buggé_ => essayer -ao sdl ou\n"\
 			    "  ALSA 0.5 ou l'émulation OSS d'ALSA 0.9 => lire DOCS/sound.html\n"\
+			    "  Essayer aussi avec -autosync 30 ou d'autres valeurs.\n"\
 			    "- Vidéo lente => essayer avec plusieurs pilotes -vo (pour la liste: -vo help) ou\n"\
 			    "  avec -framedrop => lire DOCS/video.html\n"\
 			    "- CPU lent => éviter les gros DVD/DivX => essayer -hardframedrop\n"\
 			    "- Fichier corrompu => essayer des mélanges de -nobps -ni -mc 0 -forceidx\n"\
-			    "- -cache est utilisé avec un fichier mal multiplexé => essayer avec -nocache\n"\
+			    "- Pour jouer d'un média lent (nfs/smb, dvd, vcd, ...), essayer avec -cache 8192\n"\
+			    "- -cache est utilisé avec un fichier AVI mal multiplexé => essayer avec -nocache\n"\
 			    "Si rien de tout cela ne résout le problème, lire DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer a été compilé SANS support GUI!\n"
@@ -123,6 +125,7 @@ static char help_text[]=
 #define MSGTR_InitializingAudioCodec "Initialisation des codecs audio...\n"
 #define MSGTR_ErrorInitializingVODevice "Erreur à l'ouverture/l'initialisation de la sortie vidéo choisie (-vo)!\n"
 #define MSGTR_ForcedVideoCodec "Codec vidéo forcé: %s\n"
+#define MSGTR_ForcedAudioCodec "Codec audio forcé: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: Description: %s\nAO: Auteur: %s\n"
 #define MSGTR_AOComment "AO: Commentaire: %s\n"
 #define MSGTR_Video_NoVideo "Vidéo: pas de vidéo!!!\n"
@@ -160,6 +163,10 @@ static char help_text[]=
 #define MSGTR_UnableOpenURL "Ne peut ouvrir l'URL: %s\n"
 #define MSGTR_ConnToServer "Connecté au serveur: %s\n"
 #define MSGTR_FileNotFound "Fichier non trouvé: '%s'\n"
+
+#define MSGTR_SMBInitError "Ne peut pas initialiser libsmbclient: %d\n"
+#define MSGTR_SMBFileNotFound "Ne peut pas ouvrir depuis le réseau: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer n'a pas été compilé avec le support SMB.\n"
 
 #define MSGTR_CantOpenDVD "Ne peut ouvrir le lecteur DVD: %s\n"
 #define MSGTR_DVDwait "Lecture de la structure du disque, veuillez attendre...\n"
@@ -435,6 +442,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Font "Police"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
+#define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+#define MSGTR_PREFERENCES_FRAME_Misc "Divers"
 #define MSGTR_PREFERENCES_OSS_Device "Device:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Message "ATTENTION: certaines options requièrent de un redémarrage de la lecture!"
@@ -472,6 +481,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontTextScale "Echelle du texte:"
 #define MSGTR_PREFERENCES_FontOSDScale "Echelle de l'OSD:"
 #define MSGTR_PREFERENCES_SubtitleOSD "Sous-titre & OSD"
+#define MSGTR_PREFERENCES_Cache "Cache activé/désactivé"
+#define MSGTR_PREFERENCES_LoadFullscreen "Démarrer en plein écran"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Erreur fatale ..."
