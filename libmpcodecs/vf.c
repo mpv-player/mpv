@@ -72,6 +72,8 @@ extern vf_info_t vf_info_dsize;
 extern vf_info_t vf_info_decimate;
 extern vf_info_t vf_info_softpulldown;
 extern vf_info_t vf_info_pullup;
+extern vf_info_t vf_info_framestep;
+extern vf_info_t vf_info_tile;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
@@ -133,6 +135,8 @@ static vf_info_t* filter_list[]={
     &vf_info_decimate,
     &vf_info_softpulldown,
     &vf_info_pullup,
+    &vf_info_framestep,
+    &vf_info_tile,
     NULL
 };
 
