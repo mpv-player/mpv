@@ -24,8 +24,6 @@ LIBAD_EXTERN(dshow)
 
 #include "dshow/DS_AudioDecoder.h"
 
-static DS_AudioDecoder* ds_adec=NULL;
-
 static int init(sh_audio_t *sh)
 {
   return 1;
@@ -33,6 +31,7 @@ static int init(sh_audio_t *sh)
 
 static int preinit(sh_audio_t *sh_audio)
 {
+  DS_AudioDecoder* ds_adec;
   if(!(ds_adec=DS_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,sh_audio->wf)))
   {
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_MissingDLLcodec,sh_audio->codec->dll);
@@ -47,6 +46,7 @@ static int preinit(sh_audio_t *sh_audio)
     sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
     sh_audio->a_in_buffer_len=0;
     sh_audio->audio_out_minsize=16384;
+    sh_audio->context = ds_adec;
   }
   mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32/DShow audio codec init OK!\n");
   return 1;
@@ -54,7 +54,8 @@ static int preinit(sh_audio_t *sh_audio)
 
 static void uninit(sh_audio_t *sh)
 {
-    // TODO!!!
+    DS_AudioDecoder* ds_adec = sh->context;
+    DS_AudioDecoder_Destroy(ds_adec);
 }
 
 static int control(sh_audio_t *sh_audio,int cmd,void* arg, ...)
@@ -76,6 +77,7 @@ static int control(sh_audio_t *sh_audio,int cmd,void* arg, ...)
 
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
+	DS_AudioDecoder* ds_adec = sh_audio->context;
 //	int len=-1;
         int size_in=0;
         int size_out=0;
