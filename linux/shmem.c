@@ -6,6 +6,8 @@
  *   Sun Apr  6 02:26:26 MET DST 1997
  */
 
+#include "../config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,6 +24,7 @@
 #include <sys/select.h>
 #endif
 
+#ifdef HAVE_SHM
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
@@ -72,7 +75,7 @@ while(1){
     return p;
 	}
   default:
-    printf("FATAL: Cannot alloate %d bytes shared memory :(\n",size);
+    printf("FATAL: Cannot allocate %d bytes of shared memory :(\n",size);
     return NULL;
   }
   ++shmem_type;
@@ -86,3 +89,15 @@ void shmem_free(void* p){
       break;
   }
 }
+#else /* HAVE_SHM */
+void *shmem_alloc(int size)
+{
+    printf("FATAL: no SHM support was compiled in!\n");
+    return(NULL);
+}
+
+void shmem_free(void *p)
+{
+    printf("FATAL: no SHM support was compiled in!\n");    
+}
+#endif /* HAVE_SHM */
