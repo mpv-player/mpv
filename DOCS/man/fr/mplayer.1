@@ -1,4 +1,4 @@
-.\" synced with 1.760
+.\" synced with 1.763
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "02 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "04 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -709,11 +709,14 @@ Pour jouer des flux MPEG-TS, MPlayer/\:MEncoder utilisera le premier programme
 (si présent) avec le flux audio choisi.
 .
 .TP
-.B \-alang <code-pays\ à\ deux\ lettres> (voir aussi \-aid) \
-(DVD uniquement)
-Cela sélectionne la piste audio et tente toujours de lire les flux audio
-dont la langue correspond au code donné.
-Pour afficher la liste des langues disponibles, utilisez l'option \-v.
+.B \-alang <code-pays> (voir aussi \-aid)
+Joue la piste audio dont la langue correspond au code-pays donné.
+Chaque container comprend des codes-pays différent.
+Les DVDs utilisent les codes de langue ISO 639-1 à deux lettres,
+Matroska et NUT utilisent ceux à trois lettres d'ISO 639-2, tandis que
+OGM permet des identifiants libres.
+La liste des langues disponibles s'affiche lorsque MPlayer est lancé avec
+l'option \-v.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -7212,7 +7215,7 @@ gourmandes.
 .br
 .I
 NOTE\ :
-MEncoder gérant x264 et son mode 3 passes depuis peu de temps, nous
+x264 gérant le mode 3 passes depuis peu de temps, nous
 encourageons les utilisateurs à partager avec nous leurs expériences et
 leurs combinaisons d'options d'x264 qui seraient aussi bien rapides que
 de produisant des images de qualité.
@@ -7281,6 +7284,15 @@ statistiques sur chaque trame.
 .TP
 .B psnr | nopsnr
 Affiche les statistiques de rapport signal/bruit.
+.br
+.I NOTE\ :
+Les champs PSNR 'Y', 'U', 'V', et 'Avg' dans le résumé post-encode ne sont
+pas complètement juste mathématiquement parlant (ce sont juste les moyennes
+des PSNR de chaque trame).
+Ils sont affichés uniquement pour pouvoir les comparer à ceux du codec de
+référence JM.
+Dans les autres cas, préférez donc utiliser ou bien le PSNR 'Global', ou bien
+les PSNR de chaque trame affichés par log=3.
 .
 .
 .\" --------------------------------------------------------------------------
