@@ -34,10 +34,11 @@ typedef struct {
     /* audio */
     int		br;
     int		samplerate;
+    int		audio_len;
 } vivo_priv_t;
 
 /* parse all possible extra headers */
-/* (audio headers are seperate - mostly with recordtype=3) */
+/* (audio headers are seperate - mostly with recordtype=3 or 4) */
 #define TEXTPARSE_ALL 1
 
 static void vivo_parse_text_header(demuxer_t *demux, int header_len)
@@ -47,6 +48,7 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
     int i;
     char *token;
     char *opt, *param;
+    int parser_in_audio_block = 0;
 
     if (!demux->priv)
     {
@@ -84,9 +86,8 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Version: %s\n", param);
 	    if (!strncmp(param, "Vivo/1", 6) || !strncmp(param, "Vivo/2", 6))
 	    {
-//	    if (atoi(param) == 1 || atoi(param) == 2)
 		priv->supported = 1;
-		/* safe version for fourcc */
+		/* save major version for fourcc */
 		priv->version = param[5];
 	    }
 	}
@@ -119,6 +120,14 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	}
 
 	/* audio specific */
+	if (!strcmp(opt, "RecordType"))
+	{
+	    /* 3 by Vivo/1.00, 4 by Vivo/2.00 */
+	    if ((atoi(param) == 3) || (atoi(param) == 4))
+		parser_in_audio_block = 1;
+	    else
+		parser_in_audio_block = 0;
+	}
 	if (!strcmp(opt, "NominalBitrate"))
 	{
 	    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Bitrate: %d\n", atoi(param));
@@ -129,32 +138,36 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Samplerate: %d\n", atoi(param));
 	    priv->samplerate = atoi(param);
 	}
+	if (!strcmp(opt, "Length") && (parser_in_audio_block == 1))
+	{
+	    priv->audio_len = atoi(param); /* 24 or 40 kbps */
+	}
 	
 	/* only for displaying some informations about movie*/
 	if (!strcmp(opt, "Title"))
 	{
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Title: %s\n", param);
+//	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Title: %s\n", param);
 	    demux_info_add(demux, "name", param);
 	    priv->title = malloc(strlen(param));
 	    strcpy(priv->title, param);
 	}
 	if (!strcmp(opt, "Author"))
 	{
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Author: %s\n", param);
+//	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Author: %s\n", param);
 	    demux_info_add(demux, "author", param);
 	    priv->author = malloc(strlen(param));
 	    strcpy(priv->author, param);
 	}
 	if (!strcmp(opt, "Copyright"))
 	{
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", param);
+//	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", param);
 	    demux_info_add(demux, "copyright", param);
 	    priv->copyright = malloc(strlen(param));
 	    strcpy(priv->copyright, param);
 	}
 	if (!strcmp(opt, "Producer"))
 	{
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Producer: %s\n", param);
+//	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Producer: %s\n", param);
 	    demux_info_add(demux, "encoder", param);
 	    priv->producer = malloc(strlen(param));
 	    strcpy(priv->producer, param);
@@ -555,13 +568,20 @@ if(demuxer->audio->id>=-1){
   } else
 {		sh_audio_t* sh=new_sh_audio(demuxer,1);
 
-		sh->format=0x111; // 0x112
+		if (priv->version == '2')
+		    sh->format=0x112; /* Vivo Siren */
+		else
+//		if (priv->version == '1')
+		    sh->format=0x111; /* Vivo G.723 */
+
 //		if (sh->format == 0x111) /* G.723 */
-//		sh->samplesize = demuxer->audio->buffer_size;
+//		sh->samplesize = priv->audio_len; /* 24 or 40 kbps */
 //		printf("samplesize: %d\n", sh->samplesize);
+
 		// Emulate WAVEFORMATEX struct:
 		sh->wf=malloc(sizeof(WAVEFORMATEX));
 		memset(sh->wf,0,sizeof(WAVEFORMATEX));
+		sh->wf->wFormatTag=sh->format;
 		sh->wf->nChannels=1;
 		sh->wf->wBitsPerSample=16;
 //		sh->wf->wBitsPerSample=8;
