@@ -33,11 +33,14 @@ config_t demux_rawvideo_opts[] = {
   { "4cif", &size_id, CONF_TYPE_FLAG,0,0,4, NULL },
   { "pal", &size_id, CONF_TYPE_FLAG,0,0,5, NULL },
   { "ntsc", &size_id, CONF_TYPE_FLAG,0,0,6, NULL },
+  { "16cif", &size_id, CONF_TYPE_FLAG,0,0,7, NULL },
+  { "sif", &size_id, CONF_TYPE_FLAG,0,0,8, NULL },
   // format:
   { "format", &format, CONF_TYPE_INT, 0, 0 , 0, NULL },
   { "y420", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_I420, NULL },
   { "yv12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_YV12, NULL },
   { "yuy2", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_YUY2, NULL },
+  { "uyvy", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_UYVY, NULL },
   { "y8", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_Y8, NULL },
   // misc:
   { "fps", &fps, CONF_TYPE_FLOAT,CONF_RANGE,0.001,1000, NULL },
@@ -57,18 +60,21 @@ int demux_rawvideo_open(demuxer_t* demuxer) {
   case 4: width=704; height=576; break;
   case 5: width=720; height=576; break;
   case 6: width=720; height=480; break;
+  case 7: width=1408;height=1152;break;
+  case 8: width=352; height=240; break;
   }
   if(!width || !height){
       mp_msg(MSGT_DEMUX,MSGL_ERR,"rawvideo: width or height not specified!\n");
       return 0;
   }
-  
+
   if(!imgsize)
   switch(format){
   case IMGFMT_I420:
   case IMGFMT_IYUV:
   case IMGFMT_YV12: imgsize=width*height+2*(width>>1)*(height>>1);break;
   case IMGFMT_YUY2: imgsize=width*height*2;break;
+  case IMGFMT_UYVY: imgsize=width*height*2;break;
   case IMGFMT_Y8: imgsize=width*height;break;
   default:
       mp_msg(MSGT_DEMUX,MSGL_ERR,"rawvideo: img size not specified and unknown format!\n");
