@@ -1,4 +1,13 @@
 
+#include "codec-cfg.h"
+#include "../libvo/img_format.h"
+
+#include "stream.h"
+#include "demuxer.h"
+#include "stheader.h"
+
+#include "vd.h"
+
 // prototypes:
 //static vd_info_t info;
 static int control(sh_video_t *sh,int cmd,void* arg,...);

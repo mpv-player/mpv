@@ -10,14 +10,6 @@
 
 #include "bswap.h"
 
-#include "codec-cfg.h"
-#include "../libvo/img_format.h"
-
-#include "stream.h"
-#include "demuxer.h"
-#include "stheader.h"
-
-#include "vd.h"
 #include "vd_internal.h"
 
 static vd_info_t info = {
