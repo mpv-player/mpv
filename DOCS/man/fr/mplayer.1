@@ -2463,6 +2463,8 @@ Considéré comme obsolète.
 .B sdl (SDL uniquement)
 Pilote de sortie vidéo de la librairie multi-plateforme SDL (Simple
 Directmedia Layer).
+Étant donné que SDL dispose de sa propre couche X11, les options X11 de
+MPlayer n'ont aucun effet sur SDL.
 .
 .TP
 .B vidix\ \ 
@@ -2905,6 +2907,9 @@ Essaie tous les codecs excepté le décodeur MP3 de FFmpeg.
 Active un liste (séparés par une virgule) des filtres audio et de leurs
 options.
 Voir aussi la section des filtres audio de la documentation.
+br
+I NOTE\ :
+Voir \-af help pour la liste complètes des filtres audio disponibles.
 .br
 Les filtres disponibles sont:
 .RSs
@@ -4103,7 +4108,7 @@ Comme pour detc, vous devez définir le débit de trame de sortie correct
 (\-ofps 23.976) en utilisant MEncoder.
 .
 .TP
-.B pullup[=jg:jd:jh:jb:cs]\ 
+.B pullup[=jg:jd:jh:jb:cs:mp]\ 
 Filtre d'inversion de pulldown (telecine inversé) de troisième génération,
 capable de gérer une vidéo composée de hard-telecine, 24 fps progressif, et
 30 fps progressif.
@@ -4120,6 +4125,20 @@ sont donné par paquet de 2 lignes.
 Mettre le paramètre cb (changement strict) à 1 réduira les chances que pullup
 reconstruise incorrectement une trame, mais peut aussi déboucher sur un saut
 trop important de trames lors de scènes avec beaucoup de mouvements.
+Réciproquement, le mettre à -1 fera que le pullup aura plus de facilité
+à identifier les champs.
+Cela devrait aider au traitement de vidéos comportant un léger flou
+entre les champs, mais peut aussi faire que des trames entrelacées seront
+encore présentes en sortie.
+L'option mp (metric plane) peut être définie à 1 ou 2 pour que le chroma
+soit utilisé au lieu du luma pour les calculs de pullup.
+Cela devrait améliorer la finesse de l'image sur des vidéos de très bonne
+qualité, mais a plus de chance de la diminuer, surtout si le chroma
+est bruité (effet arc-en-ciel) ou que la vidéo est noir et blanc.
+L'intérêt d'agir sur mp pour que les calculs se fassent sur le chroma
+et de réduire l'utilisation du processeur pour que le pullup puisse se
+faire en temps réel sur une machine peu rapide.
+.br
 .I NOTE\ :
 Faites toujours suivre pullup du filtre logiciel softskip lors d'un encodage
 pour s'assurer que pullup soit capable de voir toutes les trames.
@@ -4722,6 +4741,14 @@ N'insère pas automatiquement le filtre expand dans la chaine de filtres de
 MEncoder.
 Utile pour contrôler à quel point de la chaine de filtre les sous-titres sont
 affichés durant leur insertion en dur dans le film.
+.
+.TP
+.B \-noencodedups
+Ne pas encoder en double les trames en double\ ;
+Les coder par une trame nulle pour indiquer qu'elle était en double.
+Les trames nulles seront écrites quand même, sauf si un filtre ou un
+encodeur capable de gérer l'encodage de doublons est chargé.
+Pour le moment, le seul filtre le permettant est harddup.
 .
 .TP
 .B \-noodml (\-of avi uniquement)
