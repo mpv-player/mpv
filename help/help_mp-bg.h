@@ -1,3 +1,4 @@
+//  Sync'ed with help_mp-en.h 1.104
 //  Translated to Bulgarian Language file. Used encoding: M$ CP1251
 
 // Приемам всякакви предложения, поправки и съвети на ivan@cacad.com
@@ -97,21 +98,24 @@ static char help_text[]=
 "         ************************************************\n"\
 "         ****      Вашата система е твърде бавна     ****\n"\
 "         ************************************************\n"\
-"!!! Възможни причини, проблеми и настройки: \n"\
-"- Най-вероятно: \"развален\" аудио драйвер. настройка: Опитай -ao sdl или\n"\
-"  използвай ALSA 0.5 или OSS емулация на ALSA 0.9. Прочети DOCS/sound.html\n"\
-"  за още съвети!\n"\
-"  Може да пробваш опцията -autosync 30\n"\
-"- Бавно видео. Пробвай с различни -vo драйвери (за пълен списък: -vo help)\n"\
-"  или пробвай с опция -framedrop !  Прочети DOCS/video.html за още настройки.\n"\
-"- Бавен процесор. Не се опитвай да пускаш dvd/divx с голям размер на кадрите\n"\
-"  на бавен процесор! Последно спасение -hardframedrop\n"\
-"- Развален файл. Опитай различни комбинации от тези опции:\n"\
-"   -nobps  -ni  -mc 0  -forceidx\n"\
+"Възможни причини, проблеми и настройки: \n"\
+"- Най-вероятно: \"развален\" аудио драйвер. настройка:\n"\
+"  - Опитай -ao sdl или използвай ALSA 0.5 или OSS емулация на ALSA 0.9. \n"\
+"  - Експериментирай с различни стойности на опцията -autosync 30\n"\
+"- Бавен видео изход.\n"\
+"  - Пробвай с различни -vo драйвери (за пълен списък: -vo help)\n"\
+"    или пробвай с опция -framedrop !\n"\
+"- Бавен процесор.\n"\
+"  - Не се опитвай да пускаш DVD/DivX с голям размер на кадрите\n"\
+"    на бавен процесор! Последно спасение -hardframedrop\n"\
+"- Развален файл.\n"\
+"  - Опитай различни комбинации от тези опции:\n"\
+"    -nobps  -ni  -mc 0  -forceidx\n"\
 "- Ако пускаш от бавен източник (nfs/smb мрежа, cd, dvd, vcd и т.н.)\n"\
-"  опитай с -cache 8192\n"\
+"  - Опитай с -cache 8192\n"\
 "- Използваш опция -cache при неправилно структуриран файл (non-interleaved)? \n"\
-"  Опитай с -nocache\n"\
+"  - Опитай с -nocache\n"\
+"Прочети DOCS/video.html и DOCS/sound.html за съвети и настойки\n"\
 "Ако нищо не помогне, прочети DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer е компилиран БЕЗ Графичен Потребителски Интерфейс (GUI) !\n"
@@ -128,6 +132,7 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "Налични видео декодери:\n"
 #define MSGTR_AvailableAudioFm "\nНалични аудио декодери - фамилии/драйвери:\n"
 #define MSGTR_AvailableVideoFm "\nНалични видео декодери - фамилии/драйвери:\n"
+#define MSGTR_AvailableFsType "Налични слоевe в режим на цял екран:\n"
 #define MSGTR_UsingRTCTiming "Изполвзвам Linux's hardware RTC таймер (%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "Видео: не мога да прочета параметрите на видео потока\n"
 #define MSGTR_NoStreamFound "Потокът не е намерен\n"
@@ -141,6 +146,24 @@ static char help_text[]=
 #define MSGTR_NotInitializeVOPorVO "\nФАТАЛНО: Не мога да пусна видео филтрите (-vop) или видео изхода (-vo) !\n"
 #define MSGTR_Paused "\n------ ПАУЗА -------\r"
 #define MSGTR_PlaylistLoadUnable "\nНе мога да заредя списъка playlist %s\n"
+#define MSGTR_Exit_SIGILL_RTCpuSel \
+"- MPlayer crashed by an 'Illegal Instruction'.\n"\
+"  Може да има бъг в кода за динамично определяне на процесора...\n"\
+"  Моля изпратете рапорт, след като прочетете DOCS/bugreports.html.\n"
+#define MSGTR_Exit_SIGILL \
+"- MPlayer crashed by an 'Illegal Instruction'.\n"\
+"  Тази грешка се получава ако компилирате mplayer за един процесор\n" \
+"  а го пуснете на друг. Прекомилирай от сорса!\n"
+#define MSGTR_Exit_SIGSEGV_SIGFPE \
+"- MPlayer crashed by bad usage of CPU/FPU/RAM.\n"\
+"  Прекомпилирайте MPlayer с --enable-debug, направете make и 'gdb' backtrace с\n"\
+"  disassembly. За по-точни инструкции вижте DOCS/bugreports.html#crash.b .\n"
+#define MSGTR_Exit_SIGCRASH \
+"- MPlayer crashed. This shouldn't happen.\n"\
+"  Може да има бъг в MPlayer _или_ във вашите драйвери _или_ във вашия\n"\
+"  компилатор (gcc). Ако мислите че е грешка в MPlayer's, моля следвайте\n"\
+"  инструкциите в DOCS/bugreports.html. Ние не можем и не бихме могли да\n"\
+"  ви помогнем без тази информация!\n"
 
 // mencoder.c
 
@@ -156,7 +179,7 @@ static char help_text[]=
 #define MSGTR_EncoderOpenFailed "Не успях да отворя енкодер\n"
 #define MSGTR_ForcingOutputFourcc "Налагам fourcc кода да бъде %x [%.4s]\n"
 #define MSGTR_WritingAVIHeader "Записвам AVI header...\n"
-#define MSGTR_DuplicateFrames "\nповтарям %d кадър(и)!!!\n"
+#define MSGTR_DuplicateFrames "\nповтарям %d кадър(а)!!!\n"
 #define MSGTR_SkipFrame "\nпропускам кадър!!!\n"
 #define MSGTR_ErrorWritingFile "%s: грешка при писане във файла.\n"
 #define MSGTR_WritingAVIIndex "\nЗаписвам AVI index...\n"
@@ -164,6 +187,9 @@ static char help_text[]=
 #define MSGTR_RecommendedVideoBitrate "Препоръчителната скорост на видео потока (bitrate) за %s CD е: %d\n"
 #define MSGTR_VideoStreamResult "\nВидео поток: %8.3f kbit/s  (%d bps)  големина: %d байта  %5.3f сек  %d кадъра\n"
 #define MSGTR_AudioStreamResult "\nАудио поток: %8.3f kbit/s  (%d bps)  големина: %d байта  %5.3f сек\n"
+
+// cfg-mencoder.h:
+
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM Устройство '%s' не е намерено!\n"
@@ -239,6 +265,9 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Информацията на demuxer-а %s е вече известна!\n"
 #define MSGTR_ClipInfo "Информация за парчето: \n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Засечена прогресивна поредица, напускам режима 3:2 TELECINE\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE засечен, задействам inverse telecine fx. Кадрите са намалени на %5.3f!  \n"
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "не мога да отворя декодера\n"
 #define MSGTR_CantCloseCodec "не мога да затворя декодера\n"
@@ -310,6 +339,7 @@ static char help_text[]=
 #define MSGTR_Network "Поточно видео ..."
 #define MSGTR_Preferences "Настройки"
 #define MSGTR_OSSPreferences "Конфигурация на OSS драйвера"
+#define MSGTR_SDLPreferences "Конфигурация на SDL драйвера"
 #define MSGTR_NoMediaOpened "no media opened"
 #define MSGTR_VCDTrack "VCD писта %d"
 #define MSGTR_NoChapter "няма глави"
@@ -322,8 +352,8 @@ static char help_text[]=
 #define MSGTR_Add "Добави"
 #define MSGTR_Remove "Махни"
 #define MSGTR_Clear "Изчисти"
-#define MSGTR_Config "Конфигурирай"
-#define MSGTR_ConfigDriver "Конфигурирай драйвера"
+#define MSGTR_Config "Конфигурация"
+#define MSGTR_ConfigDriver "Конфигурация на драйвера"
 #define MSGTR_Browse "Избери"
 
 // --- error messages ---
@@ -336,6 +366,7 @@ static char help_text[]=
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] грешка в конфигурационния файл на кожата в ред %d: %s" 
 #define MSGTR_SKIN_WARNING1 "[skin] предупреждение в конфигурационния файл на кожата в ред %d:\n намерен widget, който го няма в \"section\" - ( %s )"
 #define MSGTR_SKIN_WARNING2 "[skin] предупреждение в конфигурационния файл на кожата в ред %d:\n намерен widget, който го няма в \"subsection\" - ( %s )"
+#define MSGTR_SKIN_WARNING3 "[skin] предупреждение в конфигурационния файл на кожата в ред %d: даденият subsection не се поддържа от този widget (%s)"
 #define MSGTR_SKIN_BITMAP_16bit "Bitmap с 16 и по-малко бита за цвят не се поддържа ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound "файлът липсва ( %s )\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "bmp грешка при четене ( %s )\n"
@@ -402,6 +433,7 @@ static char help_text[]=
 #define MSGTR_EQU_Audio "Аудио"
 #define MSGTR_EQU_Video "Видео"
 #define MSGTR_EQU_Contrast "Контраст: "
+//#define MSGTR_EQU_Brightness "Осветеност: "
 #define MSGTR_EQU_Brightness "Затъмненост: "
 #define MSGTR_EQU_Hue "Цветови тон: "
 #define MSGTR_EQU_Saturation "Цветово насищане: "
@@ -412,6 +444,12 @@ static char help_text[]=
 #define MSGTR_EQU_Center "Среден"
 #define MSGTR_EQU_Bass "Бас"
 #define MSGTR_EQU_All "Всички"
+#define MSGTR_EQU_Channel1 "Канал 1:"
+#define MSGTR_EQU_Channel2 "Канал 2:"
+#define MSGTR_EQU_Channel3 "Канал 3:"
+#define MSGTR_EQU_Channel4 "Канал 4:"
+#define MSGTR_EQU_Channel5 "Канал 5:"
+#define MSGTR_EQU_Channel6 "Канал 6:"
 
 // --- playlist
 #define MSGTR_PLAYLIST_Path "Път"
@@ -441,6 +479,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
 #define MSGTR_PREFERENCES_OSDTimer "Часовник и контроли"
 #define MSGTR_PREFERENCES_OSDProgress "Само временни контроли"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Часовник, контроли и общо време"
 #define MSGTR_PREFERENCES_Subtitle "Субтитри:"
 #define MSGTR_PREFERENCES_SUB_Delay "Закъснение: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
@@ -449,10 +488,12 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_Unicode "Буквите са в Unicode кодировка"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Преобразувай субтитрите в собствен MPlayer формат"
 #define MSGTR_PREFERENCES_SUB_SRT "Преобразувай субтитрите в SubViewer( SRT ) формат"
+#define MSGTR_PREFERENCES_SUB_Overlap "Позволи застъпващи се субтитри"
 #define MSGTR_PREFERENCES_Font "Шрифт:"
+#define MSGTR_PREFERENCES_Codecs "Декодери и разпределители"
 #define MSGTR_PREFERENCES_FontFactor "Дебелина на сянката:"
 #define MSGTR_PREFERENCES_PostProcess "Включи допълнителна обработка на картината (postprocess)"
-#define MSGTR_PREFERENCES_AutoQuality "Автоматично регулиране на качеството: "
+#define MSGTR_PREFERENCES_AutoQuality "Автоматично регулиране на качеството(max): "
 #define MSGTR_PREFERENCES_NI "Третирай всички AVI като неправилно структурирани ( -ni )"
 #define MSGTR_PREFERENCES_IDX "Създай нова индексна таблица (index table) при необходимост (-idx)"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Предпочитана фамилия за видео декодер:"
@@ -461,11 +502,12 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Subtitle "Субтитри"
 #define MSGTR_PREFERENCES_FRAME_Font "Шрифт"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocess"
-#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
+#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Декодери и разпределители"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
 #define MSGTR_PREFERENCES_FRAME_Misc "Разни"
-#define MSGTR_PREFERENCES_OSS_Device "Device:"
+#define MSGTR_PREFERENCES_OSS_Device "Устройство:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
+#define MSGTR_PREFERENCES_SDL_Driver "Устройство:"
 #define MSGTR_PREFERENCES_Message "Не забравяйте, че някои опции остават в сила до следващия филм."
 #define MSGTR_PREFERENCES_DXR3_VENC "Видео енкодер:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "LAVC (ffmpeg)"
@@ -491,6 +533,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Korean charset (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Slavic/Central European Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Без автоматично мащабиране"
 #define MSGTR_PREFERENCES_FontPropWidth    "Пропорционално по дължината на кадъра"
 #define MSGTR_PREFERENCES_FontPropHeight   "Пропорционално по височината на кадъра"
@@ -503,9 +546,20 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Кеширане на входния поток"
 #define MSGTR_PREFERENCES_LoadFullscreen "Старт на цял екран"
 #define MSGTR_PREFERENCES_CacheSize "Големина на кеша: "
+#define MSGTR_PREFERENCES_SaveWinPos "Запази местоположението на прозореца"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Изключи XScreenSaver"
-#define MSGTR_PREFERENCES_AutoSync "Автономна синхронизация (при бъгави звукови карти) "
+#define MSGTR_PREFERENCES_PlayBar "Покажи лента за превъртане"
+#define MSGTR_PREFERENCES_AutoSync "Автономна синхронизация (при бъгави звукови карти)"
 #define MSGTR_PREFERENCES_AutoSyncValue "Степен на Autosync:"
+#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM устройство:"
+#define MSGTR_PREFERENCES_DVDDevice "DVD устройство:"
+#define MSGTR_PREFERENCES_FPS "Кадри в секунда:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Видео прозорецът да е винаги видим"
+
+#define MSGTR_ABOUT_UHU "GUI development sponsored by UHU Linux\n"
+#define MSGTR_ABOUT_CoreTeam "   MPlayer core team:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   Additional coders:\n"
+#define MSGTR_ABOUT_MainTesters "   Main testers:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Фатална грешка ..."
