@@ -257,12 +257,12 @@ void render() {
 	fprintf(f, "[info]\n");
     }
 
-    fprintf(f, "name 'Subtitle font for %s %s, \"%s%s%s\" face, size: %.1f pixels.'\n",
+    fprintf(f, "name 'Subtitle font for %s %s, \"%s%s%s\" face, size: %.1f pixels, blur: %.1f, outline: %.1f'\n",
 	    encoding_name,
 	    unicode_desc ? "charset, Unicode encoding":"encoding",
 	    face->family_name ? face->family_name : font_path,
 	    face->style_name ? " ":"", face->style_name ? face->style_name:"",
-	    ppem);
+	    ppem, radius, thickness);
 
     if (!append_mode) {
 #ifdef NEW_DESC
