@@ -34,6 +34,7 @@
 #define AFM_A52 14
 #define AFM_G72X 15
 #define AFM_IMAADPCM 16
+#define AFM_FOX62ADPCM 17
 
 #define VFM_MPEG 1
 #define VFM_VFW 2

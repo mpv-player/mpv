@@ -32,13 +32,41 @@ static int adpcm_step[89] =
   15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767
 };
 
+//static int fox62_step[89] =
+static int fox62_step[] =
+{
+  0x7, 0x8, 0x9, 0xa,
+  0xb, 0xc, 0xd, 0xf,
+  0x10, 0x12, 0x13, 0x15,
+  0x17, 0x1a, 0x1c, 0x1f,
+  0x22, 0x26, 0x29, 0x2e,
+  0x32, 0x37, 0x3d, 0x43,
+  0x4a, 0x51, 0x59, 0x62,
+  0x6c, 0x76, 0x82, 0x8f,
+  0x9e, 0xad, 0xbf, 0xd2,
+  0xe7, 0xfe, 0x117, 0x133,
+  0x152, 0x174, 0x199, 0x1c2,
+  0x1ef, 0x220, 0x256, 0x292,
+  0x2d4, 0x31d, 0x36c, 0x3c4,
+  0x424, 0x48e, 0x503, 0x583,
+  0x610, 0x6ac, 0x756, 0x812,
+  0x8e1, 0x9c4, 0xabe, 0x8d1,
+  0xcff, 0xe4c, 0xfba, 0x114d,
+  0x1308, 0x14ef, 0x1707, 0x1954,
+  0x1bdd, 0x1ea6, 0x21b7, 0x2516,
+  0x28cb, 0x2cdf, 0x315c, 0x364c,
+  0x3bba, 0x41b2, 0x4844, 0x4f7e,
+  0x5771, 0x6030, 0x69ce, 0x7463,
+  0x7FFF
+};
+
 static int adpcm_index[16] =
 {
   -1, -1, -1, -1, 2, 4, 6, 8,
   -1, -1, -1, -1, 2, 4, 6, 8
 };
 
-static int format_0x62_table[16] =
+static int fox62_extra_table[16] =
 {
   1, 3, 5, 7, 9, 11, 13, 15,
   -1, -3, -5, -7, -9, -11, -13, -15
@@ -268,4 +296,128 @@ int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
   }
 
   return MS_ADPCM_SAMPLES_PER_BLOCK * channels;
+}
+
+// note: This decoder assumes the format 0x62 data always comes in
+// stereo flavor
+int fox62_adpcm_decode_block(unsigned short *output, unsigned char *input,
+  int channels)
+{
+  int predictor_l;
+  int predictor_r;
+  int index_l;
+  int index_r;
+  int code_l;
+  int code_r;
+  int i;
+  int out_ptr = 0;
+
+  int temp1, temp2, edi, eax, edx;
+static int counter = 0;
+
+  predictor_l = LE_16(&input[10]);
+  edi = predictor_r = LE_16(&input[12]);
+  SE_16BIT(predictor_l);
+  SE_16BIT(predictor_r);
+  index_l = input[14];
+  index_r = input[15];
+
+  for (i = 16; i < FOX62_ADPCM_BLOCK_SIZE; i++)
+  {
+    code_l = input[i] & 0x0F;
+    code_r = input[i] >> 4;
+if (counter == 0)
+  printf ("code_l = %02X, predictor_l = %04X, index_l = %02X\n",
+    code_l, predictor_l, index_l);
+if (counter == 0)
+  printf ("code_r = %02X, predictor_r = %04X, index_r = %02X\n",
+    code_r, predictor_r, index_r);
+
+    // left side
+if (counter == 0)
+  printf ("step = %04X, extra = %02X\n", fox62_step[index_l], fox62_extra_table[code_l]);
+    temp1 = fox62_step[index_l] * fox62_extra_table[code_l];
+if (counter == 0)
+  printf ("temp1 (before) = %04X\n", temp1);
+    if (temp1 < 0)
+      temp1 += 7;
+if (counter == 0)
+  printf ("temp1 (after) = %04X\n", temp1);
+
+    temp2 = predictor_l;
+    temp1 /= 8;
+if (counter == 0)
+  printf ("temp1 (after div) = %04X\n", temp1);
+    temp2 += temp1;
+if (counter == 0)
+  printf ("temp2 (predictor_l before clamp) = %04X\n", temp2);
+    CLAMP_S16(temp2);
+if (counter == 0)
+  printf ("temp2 (predictor_l after clamp) = %04X\n", temp2);
+    predictor_l = temp2;
+
+    index_l += adpcm_index[code_l];
+if (counter == 0)
+  printf ("adjusted index_l = %02X\n", index_l);
+    CLAMP_0_TO_88(index_l);
+
+    // right side
+if (counter == 0)
+  printf ("step = %04X, extra = %02X\n", fox62_step[index_r], fox62_extra_table[code_r]);
+    temp1 = fox62_step[index_r] * fox62_extra_table[code_r];
+if (counter == 0)
+  printf ("temp1 (before) = %04X\n", temp1);
+    if (temp1 < 0)
+      temp1 += 7;
+if (counter == 0)
+  printf ("temp1 (after) = %04X\n", temp1);
+
+    temp2 = predictor_r;
+    temp1 /= 8;
+if (counter == 0)
+  printf ("temp1 (after div) = %04X\n", temp1);
+    temp2 += temp1;
+if (counter == 0)
+  printf ("temp2 (predictor_r before clamp) = %04X\n", temp2);
+    CLAMP_S16(temp2);
+if (counter == 0)
+  printf ("temp2 (predictor_r after clamp) = %04X\n", temp2);
+    predictor_r = temp2;
+
+    index_r += adpcm_index[code_r];
+if (counter == 0)
+  printf ("adjusted index_r = %02X\n", index_r);
+    CLAMP_0_TO_88(index_r);
+
+    // do the weird final output process
+    edi += predictor_r;
+    edi /= 2;
+    eax = predictor_l + edi;
+    edx = edi * 2;
+if (counter == 0)
+  printf ("eax = %08X, edx = %08X, edi = %08X\n", eax, edx, edi);
+    output[out_ptr++] = eax;
+
+    predictor_l = eax;
+    eax -= edx;
+if (counter == 0)
+  printf ("eax = %08X, edx = %08X, edi = %08X\n", eax, edx, edi);
+// x24 += 4
+    output[out_ptr++] = eax;
+    predictor_l = eax;
+    eax += edi;
+if (counter == 0)
+  printf ("eax = %08X, edx = %08X, edi = %08X\n", eax, edx, edi);
+    edi = predictor_r;
+if (counter == 0)
+  printf ("eax = %08X, edx = %08X, edi = %08X\n", eax, edx, edi);
+    predictor_l = eax;
+
+if (counter == 0)
+  printf ("L-sample = %04X, R-sample = %04X\n",
+    output[out_ptr-2], output[out_ptr-1]);
+counter++;
+  }
+
+  return FOX62_ADPCM_SAMPLES_PER_BLOCK * channels;
 }
