@@ -70,7 +70,6 @@ static GC mygc;
 static XImage *myximage;
 static int depth,bpp,mode;
 static XWindowAttributes attribs;
-static int X_already_started=0;
 
 //static int vo_dwidth,vo_dheight;
 
@@ -190,7 +189,6 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
   else
 #endif   
    {
-    if ( X_already_started ) return -1;
     if( !vo_init() ) return 0; // Can't open X11
 
     hint.x=0;
@@ -426,7 +424,6 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
    XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask );
    saver_off(mDisplay);
   }
- X_already_started++;
  return 0;
 }
 
@@ -446,7 +443,6 @@ static void Terminate_Display_Process( void )
 #endif
  XDestroyWindow( mDisplay,mywindow );
  XCloseDisplay( mDisplay );
- X_already_started=0;
 }
 
 static void Display_Image( XImage *myximage,uint8_t *ImageData )
