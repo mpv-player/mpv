@@ -629,8 +629,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   quality rip. Suppose you rip a DVD at <option>vqscale=3</option>, and
   the result is 1800Kbit. If you do a two pass encode with
   <option>vbitrate=1800</option>, the resulting video will have <emphasis
-  role="bold">higher quality</emphasis> for the <emphasis role="bold">same
-  bitrate</emphasis>.
+  role="bold">higher quality</emphasis> for the
+  <emphasis role="bold">same bitrate</emphasis>.
 </para>
 
 <para>
@@ -754,9 +754,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  It's highly recommended that you read the section on <link
-  linkend="menc-feat-telecine">How to deal with telecine and interlacing
-  in NTSC DVDs</link> to learn how to handle the different possibilities.
+  It's highly recommended that you read the section on
+  <link linkend="menc-feat-telecine">How to deal with telecine and interlacing in NTSC DVDs</link>
+  to learn how to handle the different possibilities.
 </para>
 
 <para>
@@ -1036,7 +1036,7 @@ Notes:
 <para>
   When you watch progressive video, you should never see any
   interlacing. Beware, however, because sometimes there is a tiny bit
-  of telecine mixed in, where you wouldn't expect. I've encountered TV
+  of telecine mixed in where you wouldn't expect. I've encountered TV
   show DVDs that have one second of telecine at every scene change, or
   at seemingly random places. I once watched a DVD that had a
   progressive first half, and the second half was telecined. If you
@@ -1054,8 +1054,9 @@ Notes:
 </para>
 
 <para>
-  Sometimes progressive video is referred to as &quot;soft-telecine&quot;
-  because it is intended to be telecined by the DVD player.
+  Sometimes progressive video on DVDs is referred to as
+  &quot;soft-telecine&quot; because it is intended to
+  be telecined by the DVD player.
 </para>
 </sect3>
 
@@ -1077,36 +1078,41 @@ Notes:
   You can look closely at this by
   <orderedlist>
   <listitem>
-    <screen>mplayer dvd://1 -speed 0.1</screen>
+    <screen>mplayer dvd://1</screen>
     </listitem>
   <listitem><para>
     Seek to a part with motion.
     </para></listitem>
   <listitem><para>
+    Use the <keycap>.</keycap> key to step forward one frame at a time.
+    </para></listitem>
+  <listitem><para>
     Look at the pattern of interlaced-looking and progressive-looking
     frames. If the pattern you see is PPPII,PPPII,PPPII,... then the
     video is telecined. If you see some other pattern, then the video
-    may have been telecined using some non-standard method and
-    <application>MEncoder</application> cannot losslessly convert it
-    to progressive. If you don't see any pattern at all, then it is
-    most likely interlaced.
+    may have been telecined using some non-standard method;
+    <application>MEncoder</application> cannot losslessly convert
+    non-standard telecine to progressive. If you don't see any
+    pattern at all, then it is most likely interlaced.
     </para></listitem>
   </orderedlist>
 </para>
 
 <para>
-  Sometimes telecined video is referred to as &quot;hard-telecine&quot;.
+  Sometimes telecined video on DVDs is referred to as
+  &quot;hard-telecine&quot;. Since hard-telecine is already 59.94 fields
+  per second, the DVD player plays the video without any manipulation.
 </para>
 </sect3>
 
 <sect3 id="menc-feat-telecine-ident-interlaced">
 <title>Interlaced</title>
 <para>
-
   Interlaced video was originally filmed at 59.94 fields per second,
-  and stored on the DVD as 29.97 frames per second. The interlacing is
-  a result of combining pairs of fields into frames, because within
-  each frame, each field is 1/59.94 seconds apart.
+  and stored on the DVD as 29.97 frames per second. The interlacing effect
+  (often called &quot;combing&quot;) is a result of combining pairs of
+  fields into frames. Each field is supposed to be 1/59.94 seconds apart,
+  and when they are displayed simultaneously the difference is apparent.
 </para>
 
 <para>
@@ -1115,8 +1121,8 @@ Notes:
 </para>
 
 <para>
-  When you view an interlaced video closely with <option>-speed 0.1</option>,
-  you will see that every single frame is interlaced.
+  When you view an interlaced video closely by frame-stepping with the
+  <keycap>.</keycap> key, you will see that every single frame is interlaced.
 </para>
 </sect3>
 
@@ -1129,8 +1135,8 @@ Notes:
 
 <para>
   When <application>MPlayer</application> plays this category, it will
-  (often repeatedly) switch back and forth between &quot;30fps
-  NTSC&quot; and &quot;24fps progressive NTSC&quot;. Watch the bottom of
+  (often repeatedly) switch back and forth between &quot;30fps NTSC&quot;
+  and &quot;24fps progressive NTSC&quot;. Watch the bottom of
   <application>MPlayer</application>'s output to see these messages.
 </para>
 
@@ -1176,6 +1182,15 @@ Notes:
 <para>
   <screen>mencoder dvd://1 -nosound -ovc lavc -ofps 23.976</screen>
 </para>
+
+<para>
+  It is often the case, however, that a video that looks progressive
+  actually has very short parts of telecine mixed in. Unless you are
+  sure, it is safest to treat the video as
+  <link linkend="menc-feat-telecine-encode-mixedpt">mixed progressive and telecine</link>.
+  The performance loss is small
+  <link linkend="menc-feat-telecine-footnotes">[3]</link>.
+</para>
 </sect3>
 
 <sect3 id="menc-feat-telecine-encode-telecined">
@@ -1183,20 +1198,10 @@ Notes:
 <para>
   Telecine can be reversed to retrieve the original 23.976 content,
   using a process called inverse-telecine.
-  <application>MPlayer</application> contains two filters to
-  accomplish this: <option>detc</option> and
-  <option>ivtc</option>. You can read the manual page to see their
-  differences, but for DVDs I've never had a problem with
-  <option>ivtc</option>. Note that you should
-  <emphasis role="bold">always</emphasis> inverse-telecine before any
-  rescaling; unless you really know what you're doing,
-  inverse-telecine before cropping, too
-  <link linkend="menc-feat-telecine-footnotes">[1]</link>. Again,
-  <option>-ofps 23.976</option> is needed, too.
-</para>
-
-<para>
-  <screen>mencoder dvd://1 -nosound -vf ivtc=1 -ovc lavc -ofps 23.976</screen>
+  <application>MPlayer</application> contains several filters to
+  accomplish this; the best filter, <option>pullup</option>, is described
+  in the <link linkend="menc-feat-telecine-encode-mixedpt">mixed
+  progressive and telecine</link> section.
 </para>
 </sect3>
 
@@ -1266,7 +1271,7 @@ Notes:
   <screen>mencoder dvd://1 -nosound -vf tfields=2 -ovc lavc -fps 59.94 -ofps 59.94</screen>
   </para></listitem>
 <listitem><para>
-  If you plan on downscaling dramatically, you can excise and encode
+  If you plan on downscaling dramatically, you can extract and encode
   only one of the two fields. Of course, you'll lose half the vertical
   resolution, but if you plan on downscaling to at most 1/2 of the
   original, the loss won't matter much. The result will be a
@@ -1285,57 +1290,43 @@ Notes:
 <para>
   In order to turn mixed progressive and telecine video into entirely
   progressive video, the telecined parts have to be
-  inverse-telecined. There are two filters that accomplish this
-  natively, but a better solution most of the time is to use two
-  filters in conjunction (read onward for more detail).
+  inverse-telecined. There are three ways to accomplish this,
+  described below. Note that you should
+  <emphasis role="bold">always</emphasis> inverse-telecine before any
+  rescaling; unless you really know what you're doing,
+  inverse-telecine before cropping, too
+  <link linkend="menc-feat-telecine-footnotes">[1]</link>.
+  <option>-ofps 23.976</option> is needed here because the output video
+  will be 23.976 frames per second.
 </para>
 
 <itemizedlist>
 <listitem><para>
-  Currently the most reliable method to deal with this type of video
+  <option>-vf pullup</option> is designed to inverse-telecine
+  telecined material while leaving progressive data alone. In order to
+  work properly, <option>pullup</option> <emphasis role="bold">must</emphasis>
+  be followed by the <option>softskip</option> filter or
+  else <application>MEncoder</application> will crash.
+  <option>pullup</option> is, however, the cleanest and most
+  accurate method available for encoding both telecine and
+  &quot;mixed progressive and telecine&quot;.
+
+  <screen>mencoder dvd://1 -nosound -vf pullup,softskip -ovc lavc -ofps 23.976</screen>
+  </para>
+
+
+  </listitem>
+  <listitem><para>
+  An older method
   is to, rather than inverse-telecine the telecined parts, telecine
   the non-telecined parts and then inverse-telecine the whole
   video. Sound confusing? softpulldown is a filter that goes through
   a video and makes the entire file telecined. If we follow
   softpulldown with either <option>detc</option> or
   <option>ivtc</option>, the final result will be entirely
-  progressive. Cropping and scaling should be done after the
-  inverse-telecine operations, and <option> -ofps 23.976</option> is
-  needed.
+  progressive. <option>-ofps 23.976</option> is needed.
 
   <screen>mencoder dvd://1 -nosound -vf softpulldown,ivtc=1 -ovc lavc -ofps 23.976</screen>
-  </para>
-  </listitem>
-<listitem><para>
-  <option>-vf pullup</option> is designed to inverse-telecine
-  telecined material while leaving progressive data alone. Pullup
-  doesn't really work well with the current
-  <application>MEncoder</application>, though, and is really intended
-  for use with <application>MEncoder G2</application> (whenever it's
-  ready). It works fine without <option>-ofps</option>, but
-  <option>-ofps</option> is needed to prevent choppy output. With
-  <option>-ofps</option>, it sometimes fails. The problems arise from
-  <application>MEncoder</application>'s behavior of dropping frames to
-  maintain synchronization between the audio and video: it drops
-  frames before sending them through the filter chain, rather than
-  after. As a result, <option>pullup</option> is sometimes deprived
-  of the data it needs.
-  </para>
-
-  <para>
-  If <application>MEncoder</application> drops too many frames in a
-  row, it starves <option>pullup</option>'s buffers and causes it to
-  crash.
-  </para>
-
-  <para>
-  Even if <application>MEncoder</application> only drops one frame,
-  <option> pullup</option> still doesn't get to see it, and will end
-  up operating on an incorrect sequence of frames. Even though this
-  doesn't cause a crash, <option> pullup</option> won't be able to
-  make correct decisions on how to reassemble progressive frames, and
-  will either match fields together incorrectly or drop several fields
-  to compensate.
   </para>
   </listitem>
 
@@ -1474,6 +1465,21 @@ Notes:
   <systemitem class="library">libavcodec</systemitem> that increase
   encoding quality (and decrease encoding speed) but that is beyond
   the scope of this document.
+  </para>
+  </formalpara>
+  </listitem>
+
+<listitem><formalpara>
+  <title>About the performance of pullup:</title>
+  <para>
+  It is safe to use <option>pullup</option> (along with <option>softskip
+  </option>) on progressive video, and is usually a good idea unless
+  the source has been definitively verified to be entirely progressive.
+  The performace loss is small for most cases. On a bare-minimum encode,
+  <option>pullup</option> causes <application>MEncoder</application> to
+  be 50% slower. Adding sound processing and advanced <option>lavcopts
+  </option> overshadows that difference, bringing the performance of
+  decrease of using <option>pullup</option> down to 2%.
   </para>
   </formalpara>
   </listitem>
