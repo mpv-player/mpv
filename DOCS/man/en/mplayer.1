@@ -1778,7 +1778,7 @@ Audio output through the ESD daemon.
 .PD 0
 .RSs
 .IPs <server>
-Explicitly choose the ESD server (default: localhost).
+Explicitly choose the ESD server to use (default: localhost).
 .RE
 .PD 1
 .
@@ -3534,9 +3534,8 @@ OSD/\:subtitle rendering
 .RE
 .
 .TP
-.B flip\ \ \ 
+.B flip (also see \-flip)
 Flips the image upside down.
-See also option \-flip.
 .
 .TP
 .B mirror\ 
@@ -3553,7 +3552,7 @@ portrait and not landscape.
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
 colorspace conversion (also see \-sws).
 .RSs
-.IPs w,h\ \ 
+.IPs <w>,<h>
 scaled width/\:height (default: original width/\:height)
 .br
 .I NOTE:
@@ -3570,7 +3569,7 @@ incapable of scaling, it defaults to d_width/\:d_height!
 .REss
 .IPs interlaced
 Toggle interlaced scaling.
-.IPs chr_drop
+.IPs <chr_drop>
 chroma skipping
 .RSss
 0: Use all available input lines for chroma.
@@ -3581,8 +3580,7 @@ chroma skipping
 .br
 3: Use only every 8. input line for chroma.
 .REss
-.IPs param
-scaling parameters (depend upon the scaling method used)
+.IPs <param>
 .RSss
 \-sws 2 (bicubic):  B (blurring) and C (ringing)
 .br
@@ -3600,7 +3598,7 @@ scaling parameters (depend upon the scaling method used)
 .br
 \-sws 9 (lanczos):  filter length (1\-10)
 .REss
-.IPs presize
+.IPs <presize>
 Scale to preset sizes.
 .RSss
 qntsc:   352x240 (NTSC quarter screen)
@@ -3618,7 +3616,7 @@ spal:    768x576 (square pixel PAL)
 .RE
 .
 .TP
-.B dsize={aspect|w:h}
+.B dsize=[aspect|w:h]
 Changes the intended display size/\:aspect at an arbitrary point in the
 filter chain.
 Aspect can be given as a fraction (4/\:3) or floating point number
@@ -3631,7 +3629,7 @@ correct aspect.
 .
 .TP
 .B yuy2\ \ \ 
-Forces software YV12/\:I420 or 422P to YUY2 conversion.
+Forces software YV12/\:I420/\:422P to YUY2 conversion.
 Useful for video cards/\:drivers with slow YV12 but fast YUY2 support.
 .
 .TP
@@ -3661,6 +3659,8 @@ RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp colorspace conversion using palette.
 .B format[=fourcc]
 Restricts the colorspace for the next filter without doing any conversion.
 Use together with the scale filter for a real conversion.
+.br
+.I NOTE:
 For a list of available formats see format=fmt=help.
 .PD 0
 .RSs
@@ -3675,6 +3675,8 @@ Restricts the colorspace for the next filter without doing any conversion.
 Unlike the format filter, this will allow any colorspace
 .B except
 the one you specify.
+.br
+.I NOTE:
 For a list of available formats see noformat=fmt=help.
 .PD 0
 .RSs
@@ -3685,45 +3687,42 @@ format name like rgb15, bgr24, yv12, etc (default: yv12)
 .
 .TP
 .B pp[=filter1[:option1[:option2...]]/\:[-]filter2...] (also see \-pphelp)
-This option enables usage of MPlayer's internal postprocessing filter,
-and also gives an interface where you can pass options to the named filter.
-Subfilters must be separated by /.
-Each filter defaults to 'c' (chrominance).
-The keywords accept a '-' prefix to disable the option.
-A ':' followed by a letter may be appended to the option to indicate its
-scope:
+Enables the specified chain of postprocessing subfilters.
+Subfilters must be separated by '/' and can be disabled by prepending
+a '\-', appending a ':' followed by 'a', 'c' or 'y' determines its
+scope (default: c):
 .PD 0
 .RSs
 .IPs a
-Automatically switches the filter off if the CPU is too slow.
+Switch the subfilter off if the CPU is too slow.
 .IPs c
 Do chrominance filtering, too.
 .IPs y
-Do not do chrominance filtering (only luminance filtering).
+Do luminance filtering only (no chrominance).
 .RE
 .PD 1
 .sp 1
 .RS
 .br
 .I NOTE:
-\-pphelp shows a list of available postprocessing filters.
+\-pphelp shows a list of available subfilters.
 .sp 1
 .I EXAMPLE:
 .RE
 .PD 0
 .RSs
-.IPs "\-vf pp=hb/\:vb/\:dr/\:al"
+.IPs "\-vf pp=hb/vb/dr/al"
 horizontal and vertical deblocking, deringing and automatic
 brightness/\:contrast
-.IPs "\-vf pp=hb/\:vb/\:dr/\:al/\:lb"
+.IPs "\-vf pp=hb/vb/dr/al/lb"
 horizontal and vertical deblocking, deringing, automatic
 brightness/\:contrast and linear blend deinterlacer
-.IPs "\-vf pp=de/\:-al"
+.IPs "\-vf pp=de/-al"
 default filters without brightness/\:contrast correction
-.IPs "\-vf pp=de/\:tn:1:2:3"
+.IPs "\-vf pp=de/tn:1:2:3"
 Enable default filters & temporal denoiser.
-.IPs "\-vf pp=hb:y/\:vb:a \-autoq 6"
-Deblock horizontal only luminance and switch vertical deblocking on or
+.IPs "\-vf pp=hb:y/vb:a"
+Horizontal deblocking on luminance only and switch vertical deblocking on or
 off automatically depending on available CPU time.
 .RE
 .PD 1
@@ -3780,15 +3779,24 @@ Fast software YV12 to MPEG1 conversion with libfame for use with DVB/\:DXR3.
 .
 .TP
 .B dvbscale[=aspect]
-Set up optimal scaling for DVB cards, scaling the X axis in hardware and
-calculating the Y axis scaling in software to keep aspect.
-It's only useful together with expand+scale
-(\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
+Set up optimal scaling for DVB cards, scaling the x axis in hardware and
+calculating the y axis scaling in software to keep aspect.
+Only useful together with expand and scale.
 .RSs
 .IPs aspect
 Control aspect ratio, calculate as DVB_HEIGHT*ASPECTRATIO (default:
 576*4/\:3=768), set it to 576*(16/\:9)=1024 for a 16:9 TV.
 .RE
+.sp 1
+.RS
+.I EXAMPLE:
+.RE
+.PD 0
+.RSs
+.IPs "\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc"
+FIXME: Explain what this does.
+.RE
+.PD 1
 .
 .TP
 .B noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
@@ -3816,16 +3824,14 @@ mix random noise with a (semi)regular pattern
 .B denoise3d[=luma:chroma:time]
 This filter aims to reduce image noise producing smooth images and making still
 images really still (This should enhance compressibility.).
-It can be given from 0 to 3 parameters.
-If you omit a parameter, a reasonable value will be inferred.
 .PD 0
 .RSs
 .IPs luma\ 
-spatial luma strength (default = 4)
+spatial luma strength (default: 4)
 .IPs chroma
-spatial chroma strength (default = 3)
+spatial chroma strength (default: 3)
 .IPs time\ 
-temporal strength (default = 6)
+temporal strength (default: 6)
 .RE
 .PD 1
 .
@@ -3835,14 +3841,14 @@ High precision/\:quality version of the denoise3d filter.
 Parameters and usage are the same.
 .
 .TP
-.B eq[=bright:cont]
+.B eq[=brightness:contrast] (OBSOLETE)
 Software equalizer with interactive controls just like the hardware
 equalizer, for cards/\:drivers that do not support brightness and
 contrast controls in hardware.
+Initial values in the range -100 \- 100 may be given on the command line.
 Might also be useful with MEncoder, either for fixing poorly captured
 movies, or for slightly reducing contrast to mask artifacts and get by
 with lower bitrates.
-Initial values in the range -100\-100 may be given on the command line.
 .
 .TP
 .B eq2[=gamma:contrast:brightness:saturation:rg:gg:bg:weight]
@@ -3852,8 +3858,8 @@ and contrast adjustment.
 Note that it uses the same MMX optimized code as \-vf eq if all
 gamma values are 1.0.
 The parameters are given as floating point values.
-Parameters rg, gg, bg are the independent gamma values for the Red, Green
-and Blue components.
+Parameters rg, gg, bg are the independent gamma values for the red, green
+and blue components.
 The weight parameter can be used to reduce the effect of a high gamma value on
 bright image areas, e.g.\& keep them from getting overamplified and just plain
 white.
@@ -3919,7 +3925,7 @@ before any subsequent filters that are CPU-intensive.
 .
 .TP
 .B decimate[=max:hi:lo:frac]
-Drops frames that don't differ greatly from the previous frame in
+Drops frames that do not differ greatly from the previous frame in
 order to reduce framerate.
 The argument max (if positive) sets the maximum number of consecutive
 frames which can be dropped, or (if negative) the minimum interval
@@ -3937,14 +3943,14 @@ fixing movies that were inverse-telecined incorrectly.
 .
 .TP
 .B dint[=sense:level]
-Detects and drops first of interlaced frames in video stream.
+Detects and drops first interlaced frame in a video stream.
 Values can be from 0.0 to 1.0 \- first (default 0.1) is relative difference
-between neighbor pixels, second (default 0.15) is what part of image have to
+between neighbor pixels, second (default 0.15) is what part of image has to
 be detected as interlaced to drop the frame.
 .
 .TP
 .B lavcdeint
-Use libavcodec's deinterlace filter.
+libavcodec deinterlacing filter
 .
 .TP
 .B kerndeint[=thresh[:map[:order[:sharp[:twoway]]]]]
@@ -3952,7 +3958,7 @@ Donald Graft's adaptive kernel deinterlacer.
 Deinterlaces parts of a video if a configurable threshold is exceeded.
 .PD 0
 .RSs
-.IPs "thresh (0 - 255)"
+.IPs "thresh (0 \- 255)"
 Threshold (default 10).
 .IPs "map (0 or 1)"
 Paint pixels which exceed the threshold white (default: 0).
@@ -3967,13 +3973,13 @@ Enable twoway sharpening (default: 0).
 .
 .TP
 .B unsharp=l|cWxH:amount[:l|cWxH:amount]
-Unsharp mask / gaussian blur.
+unsharp mask / gaussian blur
 .RSs
-.IPs l
+.IPs l\ \ \ \ 
 Apply effect on luma component.
-.IPs c
+.IPs c\ \ \ \ 
 Apply effect on chroma components.
-.IPs WxH
+.IPs <width>x<height>
 width and height of the matrix, odd sized in both directions
 (min = 3x3, max = 13x11 or 11x13, usually something between 3x3 and 7x7)
 .IPs amount
@@ -3992,7 +3998,7 @@ Swap U & V plane.
 .
 .TP
 .B il=[d|i][s][:[d|i][s]]
-(de)interleaves lines.
+(De)interleaves lines.
 The goal of this filter is to add the ability to process interlaced images
 pre-field without deinterlacing them.
 You can filter your interlaced DVD and play it on a TV without breaking the
@@ -4014,9 +4020,9 @@ swap fields (exchange even & odd lines)
 .
 .TP
 .B fil=[i|d]
-(de)interleaves lines.
+(De)interleaves lines.
 This filter is very similar to the il filter but much faster, the main
-disadvantage is that it doesn't always work.
+disadvantage is that it does not always work.
 Especially if combined with other filters it may produce randomly messed
 up images, so be happy if it works but don't complain if it doesn't for
 your combination of filters.
@@ -4052,7 +4058,7 @@ and filmdint are better for most applications.
 The following arguments (see syntax above) may be used to control
 detc's behavior:
 .RSs
-.IPs dr
+.IPs dr\ \ \ 
 Set the frame dropping mode.
 0 (default) means don't drop frames to maintain fixed output framerate.
 1 means always drop a frame when there have been no drops or telecine
@@ -4061,12 +4067,12 @@ merges in the past 5 frames.
 .br
 .I NOTE:
 Use mode 1 or 2 with MEncoder.
-.IPs am
+.IPs am\ \ \ 
 Analysis mode.
 Available values are 0 (fixed pattern with initial frame number
 specified by fr=#) and 1 (agressive search for telecine pattern).
 Default is 1.
-.IPs fr
+.IPs fr\ \ \ 
 Set initial frame number in sequence.
 0\-2 are the three clean progressive frames; 3 and 4 are the two
 interlaced frames.
@@ -6722,8 +6728,8 @@ higher values force it to vary more smoothly.
 .
 .TP
 .B fullinter
-Use all available interframe analysis methods (i4x4, psub8x8, psub16x16)
-(default: 4x4, psub16x16).
+Use all available interframe macroblock types (i16x16, i4x4, p16x16-4x4)
+(default: i16x16, i4x4, p16x16-8x8)
 .
 .TP
 .B log=<-1\-3>
