@@ -77,6 +77,9 @@ int       WINAPI FreeLibrary(HMODULE);
 static int loader_init()
 {
 
+#ifdef USE_WIN32DLL
+    Setup_LDT_Keeper();
+#endif
     qtml_dll = LoadLibraryA("qtmlClient.dll");
     if( qtml_dll == NULL )
     {

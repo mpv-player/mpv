@@ -18,7 +18,7 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(qtvideo)
 
-#include "components.h"
+#include "qtx/qtxsdk/components.h"
 
 //#include "wine/windef.h"
 
@@ -92,6 +92,10 @@ static int init(sh_video_t *sh){
     Component prev=NULL;
     CodecInfo cinfo;	// for ImageCodecGetCodecInfo()
     ImageSubCodecDecompressCapabilities icap; // for ImageCodecInitialize()
+
+#ifdef USE_WIN32DLL
+    Setup_LDT_Keeper();
+#endif
 
     handler = LoadLibraryA("qtmlClient.dll");
 
