@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <css.h>
 #if CSS_MAJOR_VERSION > 0 || (CSS_MAJOR_VERSION == 0 && CSS_MINOR_VERSION > 1)
 # include <dvd.h>
@@ -46,8 +47,10 @@
 #define	DVDCloseDevice(hdl)	close(hdl)
 #define	CSSDVDisEncrypted(hdl)	CSSisEncrypted(hdl)
 #define	CSSDVDAuthDisc		CSSAuthDisc
-#define	CSSDVDAuthTitlePath(hdl,key_title,path) \
-		CSSAuthTitle(hdl,key_title,path_to_lba(path))
+/* Arghhh! Please think before you commit! You forget to check the return
+   value of path_to_lba (-1 for error) in this way ... - LGB */
+//#define	CSSDVDAuthTitlePath(hdl,key_title,path) \
+//		CSSAuthTitle(hdl,key_title,path_to_lba(path))
 
 #else	/*OLD_CSS_API*/
 
@@ -58,6 +61,8 @@
 
 
 char *dvd_auth_device=NULL;
+char *dvd_device=NULL;
+char *dvd_raw_device=NULL;
 unsigned char key_disc[2048];
 unsigned char key_title[5];
 unsigned char *dvdimportkey=NULL;
@@ -79,24 +84,52 @@ int descrambling=0;
 
 static int path_to_lba (char *path)
 {
-    int fd, lba = 0;
+    int lba = 0;
+    char cmd[100];
+    FILE *fp;
 
-    if ((fd = open(path, O_RDONLY)) == -1) {
-        fprintf(stderr, "Cannot open file %s: %s",
-		path ? path : "(NULL)", strerror(errno));
-        return -1;
+    snprintf(cmd,sizeof(cmd),"fibmap_mplayer %s",path);
+    fp=popen(cmd,"r");
+    if (fp) {
+	    int ret;
+	    bzero(cmd,sizeof(cmd));
+	    fgets(cmd,99,fp);
+	    if ((ret=pclose(fp)))
+		    fprintf(stderr,"fibmap_mplayer: %s\n",*cmd?cmd:"no error info");
+	    if(WIFEXITED(ret) && !WEXITSTATUS(ret)) 
+		lba=atoi(cmd);
+	    else
+		fp=NULL;
     }
-    if (ioctl(fd, FIBMAP, &lba) != 0) {
-        perror ("ioctl FIBMAP");
-	fprintf(stderr,"Hint: run mplayer as root!\n");
-        close(fd);
-        return -1;
+    if (!fp) {
+	int fd;
+	printf("fibmap_mplayer could not run, trying with ioctl() ...\n");
+	if ((fd = open(path, O_RDONLY)) == -1) {
+    	    fprintf(stderr, "Cannot open file %s: %s",
+	    path ? path : "(NULL)", strerror(errno));
+    	    return -1;
+	}
+        if (ioctl(fd, FIBMAP, &lba) != 0) {
+            perror ("ioctl FIBMAP");
+	    fprintf(stderr,"Hint: run mplayer as root (or better to install fibmap_mplayer as suid root)!\n");
+            close(fd);
+            return -1;
+        }
+	close(fd);
     }
-
-    close(fd);
-
+    printf("LBA: %d\n",lba);
     return lba;
 }
+
+
+int CSSDVDAuthTitlePath(DVDHandle hdl,unsigned char *key_title,char *path)
+{
+	int lba=path_to_lba(path);
+	if (lba==-1) return -1;
+	return CSSAuthTitle(hdl,key_title,lba);
+}		
+		
+
 #else /*linux*/
 static int path_to_lba (char *path)
 {
