@@ -241,6 +241,33 @@
   <A HREF="http://www.technotrend.de/download/av_format_v1.pdf">http://www.technotrend.de/download/av_format_v1.pdf</A></P>
 
 
+<H4><A NAME="gif">2.1.1.15 GIF files</A></H4>
+
+<P>Le format <B>GIF</B> est un format courant pour les graphismes web. Il y a deux
+  versions des specs GIF, GIF87a et GIF89a. La principale différence est que le
+  GIF89a authorise l'animation. MPlayer supporte les deux formats en utilisant
+  libungif ou une autre librairie compatible libgif. Les GIFs non-animées seront
+  affichées comme des vidéos à simple trame. (Utilisez les options <CODE>-loop</CODE>
+  et <CODE>-fixed-vo</CODE> pour les afficher plus longtemps.)</P>
+
+<P>MPlayer ne supporte actuellement pas le déplacement dans les fichiers GIF. 
+  Les fichiers GIF n'ont pas nécessairement une taille de trame fixe, ni un débit fixe.
+  De plus, chaque trame est de taille indépendante et est sensée être positionné
+  à une certaine place dans un champ de taille fixe. Le débit est contrôlé par un
+  bloc optionnel avant chaque trame qui spécifie le décalage de la prochaine trame
+  en centièmes de seconde.</P>
+
+<P>Les fichiers GIF standard contiennent des trames 24-bit RGB avec au plus une palette
+  8-bit. Ces trames sont généralement compressées en LZW, bien que certains encodeurs
+  GIF produisent des trames non-compressées pour éviter les problèmes de licence avec
+  la compression LZW.</P>
+  
+<P>Si votre distribution ne contient pas libungif, téléchargez-en une copie depuis la
+  <A HREF="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">page de libungif</A>.
+  Pour des informations techniques détaillées, regardez la 
+  <A HREF="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">spécification GIF89a</A>.</P>
+
+  
 <H3><A NAME="audio_formats">2.1.2 Formats audio</A></H3>
 
 <P>Mplayer est un lecteur de <B>Film</B> et pas de <B>Média</B>, bien qu'il

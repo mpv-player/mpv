@@ -84,7 +84,27 @@
     -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o film.avi</CODE></P>
 
 
-<H2><A NAME="rescaling">7.2 Redimensionnement des films</A></H2>
+<H2><A NAME="mpeg">7.2 Encodage au format MPEG</A></H2>
+
+<P>MEncoder peut créer des fichier au format MPEG (MPEG-PS). Ceci n'est probablement
+  utile qu'avec le codec <I>mpeg1video</I> de libavcodec, car les lecteurs
+  - excepté MPlayer - attendent de la vidéo MPEG1, et de l'audio MPEG1 layer 2 (MP2)
+  dans les fichiers MPEG.</P>
+  
+<P>Cette fonction n'est pas vraiment utile actuellement, car elle a probablement
+  de nombreux bogues, mais plus important encore parce qu'actuellement MEncoder 
+  ne peut pas encoder l'audio MPEG1 layer 2 (MP2), qui est attendu par tous
+  les autres lecteurs dans les fichiers MPEG.</P>
+  
+<P>Pour changer le format de sortie de MEncoder, utilisez l'option 
+  <CODE>-of mpeg</CODE>.</P>
+
+<P>Exemple:<BR>
+  &nbsp;&nbsp;<CODE>mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video
+  -oac copy &lt;other options&gt; media.avi -o sortie.mpg</CODE></P>
+
+  
+<H2><A NAME="rescaling">7.3 Redimensionnement des films</A></H2>
 
 <P>Souvent le besoin de redimmensionner les images d'un film se fait sentir.
   Les raisons peuvent être multiples: diminuer la taille du fichier, la bande-passante
@@ -104,7 +124,7 @@
   sortie.avi</CODE></P>
 
 
-<H2><A NAME="copying">7.3 Copie de flux</A></H2>
+<H2><A NAME="copying">7.4 Copie de flux</A></H2>
 
 <P>MEncoder peut gérer les flux entrant de deux façons: les <B>encoder</B>
   ou les <B>copier</B>. Cette section parle de la <B>copie</B>.</P>
@@ -125,7 +145,7 @@
 </UL>
 
 
-<H2><A NAME="fixing">7.4 Réparer les fichiers AVIs ayant un index défectueux</A></H2>
+<H2><A NAME="fixing">7.5 Réparer les fichiers AVIs ayant un index défectueux</A></H2>
 
 <P>Facile. Nous copions simplement les flux vidéo et audio, et
   MEncoder génère l'index. Bien sûr cela ne peut pas réparer les bogues possibles
@@ -135,7 +155,7 @@
 <P>Commande: <CODE>mencoder -idx entree.avi -ovc copy -oac copy -o sortie.avi</CODE></P>
 
 
-<H2><A NAME="libavcodec">7.5 Encodage avec la famille de codecs libavcodec</A></H2>
+<H2><A NAME="libavcodec">7.6 Encodage avec la famille de codecs libavcodec</A></H2>
 
 <P><A HREF="codecs.html#libavcodec">libavcodec</A> permet un encodage simple dans plein
   formats audio et vidéo intéressants (actuellement ses codecs audio ne sont pas
@@ -162,7 +182,7 @@
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
-<H2><A NAME="image_files">7.6 Encodage à partir de multiples fichiers image (JPEGs, PNGs ou TGAs)</A></H2>
+<H2><A NAME="image_files">7.7 Encodage à partir de multiples fichiers image (JPEGs, PNGs ou TGAs)</A></H2>
 
 <P>MEncoder est capable de créer des fichiers à partir de un ou plusieurs fichiers JPEG,
   PNG ou TGA. Avec une simple copie de trame il peut créer des fichiers
@@ -196,7 +216,7 @@ Explication du processus:
   -o sortie.avi \*.jpg</CODE></P>
 
 <P><I>Créer un fichier non-compressé à partir de tous les fichiers PNG du rép courant:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc raw
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc rawrgb
   -o sortie.avi \*.png</CODE></P>
 
 <P><I>Créer un fichier Motion PNG (MPNG) à partir de tous les fichiers PNG du rép courant:</I><BR>
@@ -208,7 +228,7 @@ Explication du processus:
   -o sortie.avi \*.tga</CODE></P>
 
 
-<H2><A NAME="vobsub">7.7 Extractaction des sous-titres DVD dans un fichier Vobsub</A></H2>
+<H2><A NAME="vobsub">7.8 Extractaction des sous-titres DVD dans un fichier Vobsub</A></H2>
 
 <P>MEncoder est capable d'extraire les sous-titres d'un DVD dans des fichiers au format
   VobSub. Ils consistent en une paire de fichiers terminant par <CODE>.idx</CODE> et 
@@ -247,7 +267,7 @@ Explication du processus:
     -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
 
-<H2><A NAME="aspect">7.8 Préserver l'aspect ratio</A></H2>
+<H2><A NAME="aspect">7.9 Préserver l'aspect ratio</A></H2>
 
 <P>Les fichiers des DVDs et des SVCDs (c-a-d MPEG1/2) contiennent une valeur
   d'aspect ratio, qui décrit comment le lecteur devrait dimensionner le flux

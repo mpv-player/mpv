@@ -101,16 +101,16 @@
 <TABLE BORDER="1" WIDTH="100%">
 
   <TR>
-    <TD ROWSPAN="2"><B>CARTE SON</B></TD>
-    <TD COLSPAN="4"><B>PILOTE</B></TD>
-    <TD ROWSPAN="2"><B>kHz Max</B></TD>
+    <TH ROWSPAN="2"><B>CARTE SON</B></TH>
+    <TH COLSPAN="4"><B>PILOTE</B></TH>
+    <TH ROWSPAN="2"><B>kHz Max</B></TH>
   </TR>
 
   <TR>
-    <TD><B>OSS/Libre</B></TD>
-    <TD><B>ALSA</B></TD>
-    <TD><B>OSS/Pro</B></TD>
-    <TD><B>Autres</B></TD>
+    <TH><B>OSS/Libre</B></TH>
+    <TH><B>ALSA</B></TH>
+    <TH><B>OSS/Pro</B></TH>
+    <TH><B>Autres</B></TH>
   </TR>
 
   <TR>
@@ -248,7 +248,7 @@
   Remarquez que la liste ne doit contenir aucun espace, sinon cela échouera.</P>
 
 <P>Les filtres ont souvent des option changeant leur comportement. Ces options sont 
-  expliquées en détail dans les sections ci-dessous. Un filtre sera éxecuté en utilisant
+  expliquées en détail dans les sections ci-dessous. Un filtre sera exécuté en utilisant
   ses paramètres par défaut si ses options sont omises. Voici un exemple de comment utiliser
   les filtres en conjonction avec des options spécifiques à un filtre:</P>
 
@@ -303,13 +303,13 @@
   <DD>Augmente le niveau de verbosité et fait afficher des messages d'état suplémentaires 
     à la plupart des filtres.</DD>
   <DT><CODE>-channels</CODE></DT>
-  <DD>Cette option définie le nombre de canaux de sorties utilisé par votre carte son.
+  <DD>Cette option définie le nombre de canaux de sorties voulus pour votre carte son.
     Il affecte également le nombre de canaux qui sont décodés à partir des media.
     Si le medium contient moins de canaux que le nombre demandé le filtre channels
     (voir plus bas) sera automatiquement inséré. Le routage sera le routage par défaut
     pour le filtre channels.</DD>
   <DT><CODE>-srate</CODE></DT>
-  <DD>Cette option sélectionne le taux d'échantillonage pour votre carte son. Si la fréquence
+  <DD>Cette option sélectionne le taux d'échantillonage voulu pour votre carte son. Si la fréquence
     d'échantillonage de votre carte son est différente de celle du medium, le filtre resample 
     (voir plus bas) sera inséré dans la couche filtre audio pour compenser la différence.</DD>
   <DT><CODE>-format</CODE><DT>
@@ -417,7 +417,7 @@
   <DT><CODE>f &lt;format&gt;</CODE></DT>
   <DD>est une chaine texte décrivant le format de sample. Cette chaine est un mix
     concaténé de: <CODE>alaw</CODE>, <CODE>mulaw</CODE> ou
-    <CODE>imaadpcm</CODE>, <CODE>float</CODE> ou <CODE>int</CODE>,
+    <CODE>imaad</CODE>, <CODE>float</CODE> ou <CODE>int</CODE>,
     <CODE>unsigned</CODE> ou <CODE>signed</CODE>, <CODE>le</CODE> ou
     <CODE>be</CODE> (little ou big endian). Cette option est requise, la laisser vide 
     provoquera une erreur à l'éxecution.</DD>
@@ -467,7 +467,7 @@
 <P>Le contrôle de volume logiciel est implémenté par le filtre audio <CODE>volume</CODE>. 
   Utilisez ce filtre avec précaution 
   car il peut réduire le signal au niveau de bruit du son. Dans la plupart des cas
-  il vaut mieux fixer le niveau du son PCM au max, laisser ce filtre de côté et contrôler
+  il vaut mieux fixer le niveau du son MASTER au max, laisser ce filtre de côté et contrôler
   le niveau de sortie de vos haut-parleurs avec le contrôleur de volume principal du 
   mixeur. Si il y a un amplificateur externe connecté à l'ordinateur (ce qui est presque
   toujours le cas), le niveau de bruit peut être minimisé en ajustant le niveau maître
@@ -638,11 +638,10 @@
   haut-parleurs arrière.</P>
 
 
+<H4><A NAME="plugins">2.3.2.4 Plugins Audio (à ne plus utiliser)</A></H4>
 
 <H2><STRONG>Note: Les plugins audio ont été remplacés par les filtres audio et seront
   prochainements supprimés.</STRONG></H2>
-
-<H4><A NAME="plugins">2.3.2.4 Plugins Audio (à ne plus utiliser)</A></H4>
 
 <P>Mplayer supporte les plugins audio. Les plugins audio peuvent être utilisés
   pour changer les propriétés des données audio avant que le son n'atteigne la
@@ -734,7 +733,7 @@
   qui est utilisée en fixant une valeur entre 0 et 255, 101 étant la valeur par
   défaut qui équivaut à une amplification de 0dB. Utilisez ce plugin avec précaution
   car il peut réduire le signal jusqu'au bruit. Dans la plupart des cas il vaut mieux
-  régler le volume PCM au maximum, laisser ce plugin, et contrôler le niveau de sortie
+  régler le volume MASTER au maximum, laisser ce plugin, et contrôler le niveau de sortie
   sur vos haut-parleurs avec le bouton principal du mixeur. Si il y a un ampli
   externe connecté à votre ordinateur (c'est la plupart du temps le cas), le niveau
   de bruit peut être minimisé en ajustant le niveau principal et la molette du volume

@@ -66,6 +66,7 @@
               <LI><A HREF="formats.html#ogg">2.1.1.12 Fichiers OGG/OGM</A></LI>
               <LI><A HREF="formats.html#sdp">2.1.1.13 Fichiers SDP</A></LI>
 	      <LI><A HREF="formats.html#pva">2.1.1.14 Fichiers PVA</A></LI>
+	      <LI><A HREF="formats.html#gif">2.1.1.15 Fichiers GIF</A></LI>
             </UL>
           </LI>
           <LI><A HREF="formats.html#audio_formats">2.1.2 Formats audio</A>
@@ -275,39 +276,18 @@
   <LI><A HREF="encoding.html">7. Encodage avec MEncoder</A>
     <UL>
       <LI><A HREF="encoding.html#2pass">7.1 Encodage MPEG-4 (&quot;DivX&quot;) 2 ou 3-passes</A></LI>
-      <LI><A HREF="encoding.html#rescaling">7.2 Redimensionnement des films</A></LI>
-      <LI><A HREF="encoding.html#copying">7.3 Copie de flux</A></LI>
-      <LI><A HREF="encoding.html#fixing">7.4 Réparer les fichiers AVIs ayant un index défectueux</A></LI>
-      <LI><A HREF="encoding.html#libavcodec">7.5 Encodage avec la famille de codecs libavcodec</A></LI>
-      <LI><A HREF="encoding.html#image_files">7.6 Encodage à partir de multiples fichiers image (JPEGs ou PNGs)</A></LI>
-      <LI><A HREF="encoding.html#vobsub">7.7 Extraction des sous-titres DVD dans un fichier Vobsub</A></LI>
-      <LI><A HREF="encoding.html#aspect">7.8 Préserver l'aspect ratio</A></LI>
+      <LI><A HREF="encoding.html#mpeg">7.2 Encodage au format MPEG</A></LI>
+      <LI><A HREF="encoding.html#rescaling">7.3 Redimensionnement des films</A></LI>
+      <LI><A HREF="encoding.html#copying">7.4 Copie de flux</A></LI>
+      <LI><A HREF="encoding.html#fixing">7.5 Réparer les fichiers AVIs ayant un index défectueux</A></LI>
+      <LI><A HREF="encoding.html#libavcodec">7.6 Encodage avec la famille de codecs libavcodec</A></LI>
+      <LI><A HREF="encoding.html#image_files">7.7 Encodage à partir de multiples fichiers image (JPEGs ou PNGs)</A></LI>
+      <LI><A HREF="encoding.html#vobsub">7.8 Extraction des sous-titres DVD dans un fichier Vobsub</A></LI>
+      <LI><A HREF="encoding.html#aspect">7.9 Préserver l'aspect ratio</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#mailing_lists">Appendice A - Listes de diffusion</A></LI>
   <LI><A HREF="bugreports.html">Appendice B - Comment reporter un bogue</A>
-    <UL>
-      <LI><A HREF="bugreports.html#fix">B.1 Comment réparer les bogues</A></LI>
-      <LI><A HREF="bugreports.html#report">B.2 Comment rapporter les bogues</A></LI>
-      <LI><A HREF="bugreports.html#where">B.3 Où rapporter les bogues</A></LI>
-      <LI><A HREF="bugreports.html#what">B.4 Que rapporter</A>
-        <UL>
-          <LI><A HREF="bugreports.html#system">B.4.1 Information Système</A></LI>
-          <LI><A HREF="bugreports.html#hardware">B.4.2 Matériel et pilotes</A></LI>
-          <LI><A HREF="bugreports.html#compilation">B.4.3 Problèmes de compilation</A></LI>
-          <LI><A HREF="bugreports.html#configure">B.4.4 Problèmes de configure</A></LI>
-          <LI><A HREF="bugreports.html#playback">B.4.5 Problèmes de lecture</A></LI>
-          <LI><A HREF="bugreports.html#crash">B.4.6 Plantages</A>
-            <UL>
-              <LI><A HREF="bugreports.html#debug">B.4.6.1 Comment conserver les informations avec un plantage reproduisible</A></LI>
-              <LI><A HREF="bugreports.html#core">B.4.6.2 Comment extraire les informations significatives d'un core dump</A></LI>
-            </UL>
-          </LI>
-        </UL>
-      </LI>
-      <LI><A HREF="bugreports.html#advusers">B.5 Je sais ce que je fait...</A></LI>
-    </UL>
-  </LI>
   <LI><A HREF="#known_bugs">Appendice C - Bogues connus</A></LI>
     <LI><A HREF="skin.html">Appendix D - Format de skin de MPlayer</A>
     <UL>
@@ -859,6 +839,8 @@
   sont supportés:</P>
 <UL>
   <LI>VobSub</LI>
+  <LI>OGM</LI>
+  <LI>CC (closed caption)</LI>
   <LI>Microdvd</LI>
   <LI>SubRip</LI>
   <LI>SubViewer</LI>
@@ -871,8 +853,8 @@
   <LI>JACOsub</LI>
 </UL>
 
-<P>MPlayer peut convertir les formats précédemment listés dans dans les formats de 
-  destination suivants, avec les options associées:</P>
+<P>MPlayer peut convertir les formats précédemment listés (<B>excepté les trois premiers</B>)
+  dans dans les formats de destination suivants, avec les options associées:</P>
 
 <UL>
   <LI>MPsub: <CODE>-dumpmpsub</CODE></LI>
@@ -1794,14 +1776,14 @@ end
   et ça devrait être rapide.</P>
 
 <P>La sortie <CODE>-vo x11</CODE> fonctionne encore plus lentement que sous Linux, car
-  QNX n'a que <I>émulation</I> X qui est TRES lente. Utilisez SDL.</P>
+  QNX n'a que <I>émulation</I> X qui est TRÈS lente. Utilisez SDL.</P>
 
 
 <H2><A NAME="cygwin">6.6. Cygwin</A></H2>
 
 <P>Le port Cygwin est toujours à ces débuts. Actuellement il n'y a aucun support pour
   les DLLs Win32 ou OpenGL. SDL est connu pour distordre le son et l'image ou 
-  planter syr certains systèmes. Les <A HREF="tech/patches.txt">patches</A> sont toujours 
+  planter syr certains systèmes. Les <A HREF="../tech/patches.txt">patches</A> sont toujours 
   bienvenus. Les meilleurs résultats peuvent être obtenus avec le pilote SDL natif de 
   sortie vidéo (<CODE>-vo directx</CODE>) et le pilote Windows waveout natif de sortie
   audio (<CODE>-ao win32</CODE>). Vous devriez aussi jeter un oeil à la liste de diffusion
@@ -1833,7 +1815,8 @@ end
 
 <P><CODE>mplayer -dvd &lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
 
-<P>Les DLLs QuickTime sont censées fonctionner. Placez les codecs dans l'emplacement par
+<P>Les DLLs QuickTime doivent normalement fonctionner. Compilez avec 
+  <CODE>--enable-qtx-codecs</CODE> et placez les codecs dans l'emplacement par
   défaut des DLL Windows, <CODE>C:\WINNT\system32</CODE> ou <CODE>C:\Windows\system</CODE> 
   selon votre version de Windows.</P>
 

@@ -701,11 +701,11 @@
 <P>NOTE: Le rendu prend beaucoup de temps CPU, spécialement en utilisant aalib sur X, 
   et prend moins de CPU sur une console standard, sans framebuffer. Utilisez 
   SVGATextMode pour passer en mode texte large, et appréciez ! (une carte hercules 
-  en second écran, c'est génial :)) (Quelqu'un peut-il améliorer bdev pour faire la 
-  conversion/dithering vers hgafb ? Ça serait parfait :)</P>
+  en second écran, c'est génial :)) (mais à mon humble avis vous pouvez utiliser 
+  l'option <CODE>-vop 1bpp</CODE> pour avoir des graphismes sur hgafb:)</P>
 
-<P>Utilisez l'option -framedrop si votre machine n'est pas suffisamment rapide pour 
-  afficher toutes les trames !</P>
+<P>Utilisez l'option <CODE>-framedrop</CODE> si votre machine n'est pas suffisamment 
+  rapide pour afficher toutes les trames !</P>
 
 <P>Sur un terminal vous obtiendrez de meilleures performances en utilisant le driver
   linux, pas curses (<CODE>-aadriver linux</CODE>). Cependant vous devez avoir un accès 
