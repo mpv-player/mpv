@@ -2204,7 +2204,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	static int drop_message=0;
         float x;
 	AV_delay=(a_pts-delay-audio_delay)-v_pts;
-	if(drop_frame_cnt>50+drop_message*250 && AV_delay>0.5){
+	if(AV_delay>0.5 && drop_frame_cnt>50+drop_message*250){
 	  ++drop_message;
 	  mp_msg(MSGT_AVSYNC,MSGL_ERR,MSGTR_SystemTooSlow);
 	}
