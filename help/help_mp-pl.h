@@ -743,7 +743,7 @@ static char help_text[]=
 
 // ======================= VO Video Output drivers ========================
 
-#define MSGTR_VOincompCodec "Wybrane urz±dzenie wyj¶cia video jest niekompatybilne z wybranym kodekiem.\n"
+#define MSGTR_VOincompCodec "Wybrane urz±dzenie wyj¶cia video jest niekompatybilne z tym kodekiem.\n"
 #define MSGTR_VO_GenericError "Wyst±pi³ b³±d"
 #define MSGTR_VO_UnableToAccess "Brak dostêpu"
 #define MSGTR_VO_ExistsButNoDirectory "ju¿ istnieje, ale nie jest katalogiem."
