@@ -2467,7 +2467,8 @@ fi
 
 if test "$_divx4linux" = yes ; then
  _divx4def='#define NEW_DECORE'
- _decorelibs='-ldivxdecore -ldivxencore opendivx/postprocess.o'
+ _decorelibs='-ldivxdecore opendivx/postprocess.o'
+ _encorelibs='-ldivxencore'
 else
  _divx4def='#undef NEW_DECORE'
  _decorelibs='-Lopendivx -ldecore'
@@ -2523,6 +2524,7 @@ SGI_AUDIO_LIB = $_sgi_audio_lib
 ARCH_LIBS = $_archlibs $_iconvlib
 STREAMING=$_streaming
 DECORE_LIBS = $_decorelibs
+ENCORE_LIBS = $_encorelibs
 DIVX4LINUX=$_divx4linux
 MLIB_INC = $_mlibinc
 MLIB_LIB = $_mliblib
