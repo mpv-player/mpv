@@ -1057,8 +1057,10 @@ $_xmmpaudio
 #define PLUGINDIR LIBDIR "/xmmp/Plugins"
 #define XMMP_AUDIO_DRIVER PLUGINDIR "/Sound/oss.so"
 
+/* set up max. outburst. use 65536 for ALSA 0.5, for others 16384 is enough */
+#define MAX_OUTBURST 65536
+
 /* set up audio OUTBURST. Do not change this! */
-#define MAX_OUTBURST 32768
 #ifdef USE_XMMP_AUDIO
 #define OUTBURST 4096
 #else
