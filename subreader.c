@@ -1762,8 +1762,9 @@ char** sub_filenames(char* path, char *fname)
 		    if (prio) {
 			prio += prio;
 #ifdef USE_ICONV
-			if (sub_cp) // prefer UTF-8 coded
+			if (sub_utf8 || (i<3)){ // prefer UTF-8 coded
 			    prio++;
+			}
 #endif
 			sprintf(tmpresult, "%s%s", j == 0 ? f_dir : path, de->d_name);
 //			fprintf(stderr, "%s priority %d\n", tmpresult, prio);
