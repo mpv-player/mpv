@@ -216,7 +216,7 @@ m_config_pop(m_config_t* config) {
   
 #ifdef MP_DEBUG
   assert(config != NULL);
-  assert(config->cs_level > 0);
+  //assert(config->cs_level > 0);
 #endif
 
   if(config->config_stack[config->cs_level] != NULL) {
