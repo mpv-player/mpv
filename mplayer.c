@@ -2197,6 +2197,13 @@ if(step_sec>0) {
 	printf("ABS seek to %5.3f   \n",rel_seek_secs);
 	break;
 #else
+#ifndef USE_LIBVO2
+    /* User wants to have screen shot */
+    case 'S':
+    case 's':
+		video_out->control(VOCTRL_SCREENSHOT, NULL);
+		break;
+#endif
     // Contrast:
     case '1':
     case '2':

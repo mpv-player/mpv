@@ -27,6 +27,8 @@
 #define VOCTRL_GUISUPPORT 4
 /* used to switch to fullscreen */
 #define VOCTRL_FULLSCREEN 5
+/* user wants to have screen shot. (currently without args)*/
+#define VOCTRL_SCREENSHOT 6
 
 #define VO_TRUE		1
 #define VO_FALSE	0
