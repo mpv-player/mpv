@@ -1420,7 +1420,7 @@ movie on any CD. Check if you have libmp3lame installed properly.
 
 <qandaentry>
 <question><para>
-I can't encode ASF files to AVI/MPEG4 (DivX) because it uses 1000 fps?
+I can't encode an ASF file to AVI/MPEG4 (DivX) because it uses 1000 fps.
 </para></question>
 <answer><para>
 Because ASF uses variable frame rate but AVI uses a fixed one, you
