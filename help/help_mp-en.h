@@ -288,7 +288,7 @@ static char help_text[]=
 #define MSGTR_EncryptedVOB "Encrypted VOB file (not compiled with libcss support)! Read DOCS/en/cd-dvd.html.\n"
 #define MSGTR_EncryptedVOBauth "Encrypted stream but you did not request authentication!\n"
 
-#define MSGTR_MOVcomprhdr "MOV: Compressed headers not (yet) supported.\n"
+#define MSGTR_MOVcomprhdr "MOV: Compressed headers support requires ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: WARNING: Variable FOURCC detected!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: WARNING: too many tracks"
 #define MSGTR_FoundAudioStream "==> Found audio stream: %d\n"
