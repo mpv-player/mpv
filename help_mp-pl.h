@@ -5,7 +5,7 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2002 Arpad Gereoffy (see DOCS!)\n"
+"MPlayer " VERSION "(C) 2000-2002 Arpad Gereoffy (zobacz DOCS!)\n"
 "\n";
 
 static char help_text[]=
@@ -139,7 +139,31 @@ static char help_text[]=
 #define MSGTR_Paused "\n------ PAUZA -------\r"
 #define MSGTR_PlaylistLoadUnable "\nNie mo¿na za³adowaæ playlisty %s\n"
 
-// open.c, stream.c
+// mencoder.c:
+
+#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (zobacz DOCS!)\n"
+#define MSGTR_UsingPass3ControllFile "U¿ywam pliku kontrolnego pass3: %s\n"
+#define MSGTR_MissingFilename "\nBrak nazwy pliku!\n\n"
+#define MSGTR_CannotOpenFile_Device "Nie mo¿na otworzyæ pliku/urz±dzenia\n"
+#define MSGTR_ErrorDVDAuth "B³ad w DVD auth...\n"
+#define MSGTR_CannotOpenDemuxer "Nie mo¿na otworzyæ demuxera\n"
+#define MSGTR_NoAudioEncoderSelected "\nNie wybrano encodera audio (-oac)! Wybierz jeden lub u¿yj -nosound. U¿yj -oac help !\n"
+#define MSGTR_NoVideoEncoderSelected "\nNie wybrano encodera video (-ovc)! Wybierz jeden, u¿yj -ovc help !\n"
+#define MSGTR_InitializingAudioCodec "Inicjalizuje kodek audio...\n"
+#define MSGTR_CannotOpenOutputFile "Nie mogê otworzyæ pliku wynikowego: '%s'\n"
+#define MSGTR_EncoderOpenFailed "Nie mogê otworzyæ encodera\n"
+#define MSGTR_ForcingOutputFourcc "Wymuszam fourcc wynikowe na %x [%.4s]\n"
+#define MSGTR_WritingAVIHeader "Zapisuje nag³ówek AVI ...\n"
+#define MSGTR_DuplicateFrames "\npowtórzone %d ramek!!!    \n"
+#define MSGTR_SkipFrame "\nopuszczona ramka!!!    \n"
+#define MSGTR_ErrorWritingFile "%s: b³±d zapisu pliku.\n"
+#define MSGTR_WritingAVIIndex "\nZapisuje indeks AVI...\n"
+#define MSGTR_FixupAVIHeader "Naprawiam nag³ówek AVI...\n"
+#define MSGTR_RecommendedVideoBitrate "Zalecane video bitrate dla %s CD: %d\n"
+#define MSGTR_VideoStreamResult "\nStrumieñ Video: %8.3f kbit/s (%d bps) rozmiar: %d bajtów %5.3f sekund %d ramek\n"
+#define MSGTR_AudioStreamResult "\nStrumieñ Audio: %8.3f kbit/s (%d bps) rozmiar: %d bajtów %5.3f sekund\n"
+
+// open.c, stream.c:
 #define MSGTR_CdDevNotfound "Urz±dzenie CD-ROM '%s' nie znalezione!\n"
 #define MSGTR_ErrTrackSelect "B³±d wyboru ¶cie¿ki VCD!"
 #define MSGTR_ReadSTDIN "Odczytujê ze stdin...\n"
@@ -177,6 +201,14 @@ static char help_text[]=
 #define MSGTR_DetectedMPEGPSfile "Wykryto format MPEG-PS!\n"
 #define MSGTR_DetectedMPEGESfile "Wykryto format MPEG-ES!\n"
 #define MSGTR_DetectedQTMOVfile "Wykryto format QuickTime/MOV!\n"
+#define MSGTR_DetectedYUV4MPEG2file "Wykryto format YUV4MPEG2!\n"
+#define MSGTR_DetectedNuppelVideofile "Wykryto format NuppelVideo!\n"
+#define MSGTR_DetectedVIVOfile "Wykryto format VIVO!\n"
+#define MSGTR_DetectedBMPfile "Wykryto format BMP!\n"
+#define MSGTR_DetectedOGGfile "Wykryto format OGG!\n"
+#define MSGTR_DetectedRAWDVfile "Wykryto format RAWDV!\n"
+#define MSGTR_DetectedAudiofile "Wykryto plik audio!\n"
+#define MSGTR_NotSystemStream "Nie jest to MPEG System Stream ... (mo¿e Transport Stream?)\n"
 #define MSGTR_MissingMpegVideo "Zagubiony strumieñ video MPEG !? skontaktuj siê z autorem, mo¿e to b³±d:(\n"
 #define MSGTR_InvalidMPEGES "B³êdny strumieñ MPEG-ES ??? skontaktuj siê z autorem, mo¿e to b³±d:(\n"
 #define MSGTR_FormatNotRecognized "=========== Przykro mi, format pliku nierozpoznany/nieobs³ugiwany ===========\n"\
@@ -203,6 +235,18 @@ static char help_text[]=
 #define MSGTR_MOVvariableFourCC "MOV: Uwaga! wykryto zmienn± FOURCC!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Uwaga! zbyt du¿o scie¿ek!"
 #define MSGTR_MOVnotyetsupp "\n**** Format Quicktime MOV nie jest na razie obs³ugiwany !!!!!!! ****\n"
+#define MSGTR_FoundAudioStream "==> Znaleziono strumieñ audio: %d\n"
+#define MSGTR_FoundVideoStream "==> Znaleziono strumieñ video: %d\n"
+#define MSGTR_DetectedTV "Wykryto TV! ;-)\n"
+#define MSGTR_ErrorOpeningOGGDemuxer "Nie mo¿na otworzyæ demuxera ogg\n"
+#define MSGTR_ASFSearchingForAudioStream "ASF: Szukanie strumieni audio (id:%d)\n"
+#define MSGTR_CannotOpenAudioStream "Nie mo¿na otworzyæ strumienia audio: %s\n"
+#define MSGTR_CannotOpenSubtitlesStream "Nie mo¿na otworzyæ strumienia z napisami: %s\n"
+#define MSGTR_OpeningAudioDemuxerFailed "Nieudane otwarcie demuxera audio: %s\n"
+#define MSGTR_OpeningSubtitlesDemuxerFailed "Nieudane otwarcie demuxera napisów: %s\n"
+#define MSGTR_TVInputNotSeekable "Wej¶cia TV nie mo¿na przeszukiwaæ! (prawdopodobnie wyszukiwanie bedzie dla zmiany kana³ów ;)\n"
+#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s already present\n!"
+#define MSGTR_ClipInfo "Informacja o clipie: \n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "nie mogê otworzyæ kodeka\n"
