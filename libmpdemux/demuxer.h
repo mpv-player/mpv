@@ -50,6 +50,8 @@ typedef struct {
 // ---- asf -----
   demux_packet_t *asf_packet;  // read asf fragments here
   int asf_seq;
+// ---- mov -----
+  unsigned int ss_mul,ss_div;
 // ---- stream header ----
   void* sh;
 } demux_stream_t;

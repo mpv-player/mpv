@@ -548,10 +548,14 @@ int demux_mov_fill_buffer(demuxer_t *demuxer,demux_stream_t* ds){
 
 if(trak->samplesize){
     // read chunk:
+    int x;
     if(trak->pos>=trak->chunks_size) return 0; // EOF
     stream_seek(demuxer->stream,trak->chunks[trak->pos].pos);
     pts=(float)(trak->chunks[trak->pos].sample*trak->duration)/(float)trak->timescale;
-    ds_read_packet(ds,demuxer->stream,trak->chunks[trak->pos].size*trak->samplesize,pts,trak->chunks[trak->pos].pos,0);
+    x=trak->chunks[trak->pos].size*trak->samplesize;
+    x/=ds->ss_div; x*=ds->ss_mul; // compression ratio fix
+    ds_read_packet(ds,demuxer->stream,x,pts,trak->chunks[trak->pos].pos,0);
+    if(ds==demuxer->audio) printf("sample %d bytes pts %5.3f\n",trak->chunks[trak->pos].size*trak->samplesize,pts);
 } else {
     // read sample:
     if(trak->pos>=trak->samples_size) return 0; // EOF
