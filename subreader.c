@@ -479,6 +479,8 @@ int sub_autodetect (FILE *fd) {
 
 	if (sscanf (line, "{%d}{%d}", &i, &i)==2)
 		{sub_uses_time=0;return SUB_MICRODVD;}
+	if (sscanf (line, "{%d}{}", &i, &i)==1)
+		{sub_uses_time=0;return SUB_MICRODVD;}
 	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",     &i, &i, &i, &i, &i, &i, &i, &i)==8)
 		{sub_uses_time=1;return SUB_SUBRIP;}
 	if (sscanf (line, "%d:%d:%d,%d --> %d:%d:%d,%d", &i, &i, &i, &i, &i, &i, &i, &i)==8)
