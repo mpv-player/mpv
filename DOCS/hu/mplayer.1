@@ -552,7 +552,7 @@ szerepel) (lebegõpontos szám).
 .B \-frames <szám>
 Csak a megadott számú képkocka lejátszása/konvertálása.
 .TP
-.B \-hr\-mp3\-seek (csak .MP3)
+.B \-hr\-mp3\-seek (csak MP3)
 Magas pontosságú MP3 tekerés.
 Alapban csak külsõ MP3 file-ból történõ lejátszásnál van bekapcsolva,
 mivel ilyenkor a pontos helyre kell tekerni az A/\:V szinkronhoz. Fõleg
@@ -588,10 +588,10 @@ bemeneti file-ok tipusa (használható: jpeg, png, tga, sgi)
 .PD 1
 .
 .TP
-.B \-ni (csak .AVI)
+.B \-ni (csak AVI)
 Non\-interleaved AVI parser használata (néhány hibás file lejátszásánál segít.
 .TP
-.B \-nobps (csak .AVI)
+.B \-nobps (csak AVI)
 Ne haszálja az AVI byte/\:sec értékét az A\-V szinkronhoz (AVI).
 Hibás fejlécû AVI-knál használatos.
 .TP
@@ -2258,175 +2258,177 @@ opciókat a \-zoom opció megadása nélkül.
 .SH "AZ ENKÓDOLÁS OPCIÓI (CSAK MENCODER)"
 .TP
 .B \-audio-density <1\-50>
-Number of audio chunks per second (default is 2 for 0.5s long audio chunks).
+A másodpercenkénti audio chunk-ok száma (alapértelmezésben 2 a 0.5 mp
+hosszúságú audio chunk-okhoz).
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-CBR only, VBR ignores this as it puts each packet in a new chunk.
+Csak CBR, a VBR minden egyes csomagot másik chunk-ba tesz.
 .TP
 .B \-audio-delay <0.0\-...>
-Sets the audio delay field in the header.
-Default is 0.0, negative values do not work.
-This does not delay the audio while encoding, but the player will see the
-default audio delay, sparing you the use of the \-delay option.
+A fejlécben szereplõ audio késleltetés értékének beállítása. Alapértelmezésben
+0.0, negatív számokat nem lehet használni.
+Ennek hatása nem az enkódolásnál mutatkozik meg, mert a lejátszó fogja majd
+ez alapján beállítani a késleltetését, ezáltal feleslegessé téve a \-delay
+opció használatát.
 .TP
 .B \-audio-preload <0.0\-2.0>
-Sets up audio buffering time interval (default: 0.5s).
+Az audio bufferelés intervallumának beállítása (alap: 0.5s).
 .TP
-.B \-divx4opts <option1:option2:...>
-If encoding to DivX4, you can specify its parameters here.
+.B \-divx4opts <opció1:opció2:...>
+Ha DivX4-be enkódolsz, annak paramétereit itt állíthatod be.
 .br
-Available options are:
+A rendelkezésre álló opciók:
 .
 .RSs
 .IPs help
-get help
-.IPs br=<value>
-specify bitrate in
+segítség kiírása
+.IPs br=<érték>
+bitráta megadása:
 .RSss
-kbit <4\-16000> or
+kbit <4\-16000> vagy
 .br
 bit  <16001\-24000000>
 .REss
-.IPs key=<value>
-maximum keyframe interval (in frames)
+.IPs key=<érték>
+maximális távolság a keyframe-ek között (képkockában)
 .IPs deinterlace
-enable deinterlacing (avoid it, DivX4 is buggy)
+deinterlace bekapcsolása (ne használd, a DivX4 bugos)
 .IPs q=<1\-5>
-quality (1\-fastest, 5\-best)
+minõség (1\-leggyorsabb, 5\-legjobb)
 .IPs min_quant=<1\-31>
-minimum quantizer
+minimális quantizer
 .IPs max_quant=<1\-31>
-maximum quantizer
-.IPs rc_period=<value>
-rate control period
-.IPs rc_reaction_period=<value>
-rate control reaction period
-.IPs rc_reaction_ratio=<value>
-rate control reaction ratio
+maximális quantizer
+.IPs rc_period=<érték>
+rate control periódus
+.IPs rc_reaction_period=<érték>
+rate control reakció periódus (jó mi?)
+.IPs rc_reaction_ratio=<érték>
+rate control reakció ráció (ez is)
 .IPs crispness=<0\-100>
-specify crispness/\:smoothness
+elmosás mértéke
 .IPs pass=<1\-2>
-With this you can encode 2pass DivX4 files.
-First encode with pass=1, then with the same parameters, encode with
-pass=2.
+Ezzel az opcióval lehet 2 menetes DivX4 file-okat létrehozni. Elõször pass=1
+opcióval, majd ugyanazokkal a paraméterekkel, de pass=2-vel kell futtatni
+a két menetet.
 .IPs vbrpass=<0\-2>
-Override the pass argument and use XviD VBR Library instead of DivX4
-VBR.
-Available options are:
+A pass opció felülbírálata, és a DivX4 VBR-je helyett az XviD VBR-jének
+használata.
+A rendelkezésre álló opciók:
 .
 .RSss
-0: one pass encoding (as in not putting pass on the command line)
+0: egy menetes enkódolás (egyenértékû az opció nem megadásával)
 .br
-1: Analysis (first) pass of two pass encoding.
-The resulting AVI file can be directed to /dev/null.
+1: Az analizáló (elsõ) menet
+A kimeneti AVI file mehet /dev/null-ba is.
 .br
-2: Final (second) pass of two pass encoding.
+2: Az utolsó (második) menet
 .REss
 .RE
 .
 .TP
-.B \-endpos <[[hh:]mm:]ss[.ms]|size[b|kb|mb]> (see \-ss and \-sb option too)
-Stop encoding at given time or byte position.
-Can be specified in many ways:
+.B \-endpos <[[óó:]pp:]mp[.ms]|méret[b|kb|mb]> (lásd még \-ss és \-sb)
+Az enkódolás megállítása a megadott idõ illetve méret elérésekor.
+Sokféleképpen meg lehet adni:
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-Byte position won't be accurate, as it can only stop at
-a frame boundary.
+A byte-ban megadott pozíció nem lesz teljesen pontos, mivel csak képkocka
+után lehet megállni.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "\-endpos 56"
-encode only 56 seconds
+56 másodperc enkódolása
 .IPs "\-endpos 01:10:00"
-encode only 1 hour 10 minutes
+1 óra 10 perc enkódolása
 .IPs "\-endpos 100mb"
-encode only 100 MBytes
+100 MByte enkódolása
 .RE
 .PD 1
 .
 .TP
 .B \-ffourcc <fourcc>
-Can be used to override the video fourcc of the output file.
+A kimeneti file video fourcc-jének felülbírálása.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "-ffourcc div3"
-will have the output file contain 'div3' as video fourcc.
+a kimeneti file video fourcc-je 'div3' lesz.
 .RE
 .PD 1
 .
 .TP
-.B \-include <configuration\ file>
-Specify configuration file to be parsed after the default ones.
+.B \-include <konfigurációs\ file>
+Az alapértelmezetteken kívüli konfigurációs file beolvasása.
 .TP
-.B \-info <option1:option2:...> (.AVI only)
-Specify the info header of the resulting .AVI file.
+.B \-info <opció1:opció2:...> (csak AVI)
+A kimeneti AVI file info fejlécének kitöltése.
 .br
-Available options are:
+A rendelkezésre álló opciók:
 .
 .RSs
 .IPs help
-show this description
-.IPs name=<value>
-title of the subject of the file
-.IPs artist=<value>
-artist or author of the original subject of the file
-.IPs genre=<value>
-original work category
-.IPs subject=<value>
-contents of the file
-.IPs copyright=<value>
-copyright information for the file
-.IPs srcform=<value>
-original form of the material that was digitized
-.IPs comment=<value>
-general comments about the file or the subject of the file
+ezen szöveg kiírása
+.IPs name=<érték>
+a file címe
+.IPs artist=<érték>
+a file eredeti készítõje
+.IPs genre=<érték>
+kategória
+.IPs subject=<érték>
+a file tartalma
+.IPs copyright=<érték>
+a file copyright információi
+.IPs srcform=<érték>
+a digitalizált anyag eredeti formája
+.IPs comment=<érték>
+általános kommentek
 .RE
 .
 .TP
-.B \-lameopts <option1:option2:...>
-If encoding to MP3 with libmp3lame, you can specify its parameters here.
+.B \-lameopts <opció1:opció2:...>
+Ha MP3-ba kódolsz a libmp3lame-el, itt megadhatod a paramétereit.
 .br
-Available options are:
+A rendelkezésre álló opciók:
 .
 .RSs
 .IPs help
-get help
+segítség kiírása
 .IPs vbr=<0\-4>
-variable bitrate method
+a változó bitrátájú enkódolás módja
 .RSss
 0: cbr
 .br
 1: mt
 .br
-2: rh(default)
+2: rh(alap)
 .br
 3: abr
 .br
 4: mtrh
 .REss
 .IPs abr\ \ 
-average bitrate
+átlagos bitráta
 .IPs cbr\ \ 
-constant bitrate.
+konstans bitráta.
 .br
 Forces also CBR mode encoding on subsequent ABR presets modes
 .IPs br=<0\-1024>
-specify bitrate in kBit (CBR and ABR only)
+bitráta megadása kBit-ben (csak CBR és ABR)
 .IPs q=<0\-9>
-quality (0-highest, 9-lowest) (only for VBR)
+minõség (0-legmagasabb, 9-legalacsonyabb) (csak VBR)
 .IPs aq=<0\-9>
-algorithmic quality (0-best/\:slowest, 9-worst/\:fastest)
+algoritmus minõsége (0-legjobb/\:leglassabb, 9-legrosszabb/\:leggyorsabb)
 .IPs ratio=<1\-100>
-compression ratio
+tömörítés mértéke
 .IPs vol=<0\-10>
-set audio input gain
+audio input gain
 .IPs mode=<0\-3>
-(default: auto)
+(alap: auto)
 .RSss
 0: stereo
 .br
@@ -2438,44 +2440,29 @@ set audio input gain
 .REss
 .IPs padding=<0\-2>
 .RSss
-0: no
+0: nincs
 .br
-1: all
+1: mind
 .br
-2: adjust
+2: állítás
 .REss
 .IPs fast
-switch on faster encoding on subsequent VBR presets modes, slightly lower 
-quality and higher bitrates.
-.IPs preset=<value>
-provide the highest possible quality settings.
+valamivel gyorsabb VBR enkódolás, kicsit rosszabb minõség és magasabb
+bitráta
+.IPs preset=<érték>
+elõre beállított értékek
 .RSss
-medium: VBR encoding, good quality, 150\-180 kbps bitrate range.
+medium: VBR enkódolás, szódával elmegy, 150\-180 kbps bitráta tartomány.
 .br
-standard: VBR encoding, high quality, 170\-210 kbps bitrate range.
+standard: VBR enkódolás, jó minõség, 170\-210 kbps bitráta tartomány.
 .br
-extreme: VBR encoding, very high quality, 200\-240 kbps bitrate range.
+extreme: VBR enkódolás, nagyon jó minõség, 200\-240 kbps bitráta tartomány.
 .br
-insane: CBR encoding, highest preset quality, 320 kbps bitrate.
+insane: CBR enkódolás, a lehetõ legjobb minõség, 320 kbps bitráta.
 .br
-<8-320>: ABR encoding at average given kbps bitrate.
+<8-320>: ABR enkódolás, átlaga a megadott bitráta.
 .br
 .REss
-.RE
-
-.I EXAMPLE:
-.PD 0
-.RSs
-.IPs "\-lameopts fast:preset=standard"
-for most people on most music and already quite high in quality.
-.IPs "\-lameopts  cbr:preset=192"
-encode with ABR presets at a 192 kbps forced constant bitrate.
-.IPs "\-lameopts      preset=172"
-encode with ABR presets at a 172 kbps average bitrate.
-.IPs "\-lameopts      preset=extreme"
-for people with extremely good hearing and similar equipment.
-.IPs "\-lameopts preset=help"
-print additional options and informations on presets settings.
 .RE
 .PD 1
 .
