@@ -750,24 +750,17 @@ static void reset()
 {
     int err;
 
-    if (!ao_noblock) {
-      //drain causes error in nonblock-mode!
-      if ((err = snd_pcm_drain(alsa_handler)) < 0)
-	{
-	  printf("alsa-pause: pcm drain error: %s\n", snd_strerror(err));
-	  return;
-	}
-
-      if ((err = snd_pcm_prepare(alsa_handler)) < 0)
-	{
-	  printf("alsa-reset: pcm prepare error: %s\n", snd_strerror(err));
-	  return;
-	}
-    } else {
-      if (verbose>0)
-	printf("alsa-reset: reset nonblocked");
-      return;
+    if ((err = snd_pcm_drop(alsa_handler)) < 0)
+    {
+	printf("alsa-reset: pcm drop error: %s\n", snd_strerror(err));
+	return;
     }
+    if ((err = snd_pcm_prepare(alsa_handler)) < 0)
+    {
+	printf("alsa-reset: pcm prepare error: %s\n", snd_strerror(err));
+	return;
+    }
+    return;
 }
 
 #ifdef USE_POLL
