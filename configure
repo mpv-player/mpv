@@ -1153,7 +1153,7 @@ _alsa5='#undef HAVE_ALSA5'
 _alsa9='#undef HAVE_ALSA9'
 if [ $_alsa = 'yes' ]; then
  [ $_alsaver = '0.5.x' ] && { _aosrc="$_aosrc ao_alsa5.c"; _alsa5='#define HAVE_ALSA5'; _alsalib='-lasound'; }
- # [ $_alsaver = '0.9.x' ] && { _aosrc="$_aosrc ao_alsa9.c"; _alsa9='#define HAVE_ALSA9'; _alsalib='-lasound'; }
+ [ $_alsaver = '0.9.x' ] && { _aosrc="$_aosrc ao_alsa9.c"; _alsa9='#define HAVE_ALSA9'; _alsalib='-lasound'; }
 fi
   
 _esdd='#undef HAVE_ESD'
