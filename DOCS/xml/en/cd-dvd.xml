@@ -274,28 +274,49 @@ and play the resulting file with <application>MPlayer</application>.
 
 <formalpara>
 <title>VCD structure</title>
-<para>VCD disks consist of one or more tracks:</para>
+
+<para>
+A Video CD (VCD) is made up of CD-ROM XA sectors, i.e. CD-ROM mode 2
+form 1 and 2 tracks:</para>
 </formalpara>
 
 <itemizedlist>
 <listitem><para>
-The first track is a small 2048 bytes/sector data track with an iso9660
-filesystem, usually containing Windows VCD player programs and maybe other
-information (images, text, etc).
+The first track is in mode 2 form 2 format which means it uses L2
+error correction. The track contains an ISO-9660 filesystem with 2048
+bytes/sector. This filesystem contains VCD metadata information, as
+well as still frames often used in menus. MPEG segments for menus can
+also be stored in this first track, but the MPEGs have to be broken up
+into a series of 150-sector chunks. The ISO-9660 filesystem may
+contain other files or programs that are not essential for VCD
+operation.
 </para></listitem>
 
 <listitem><para>
-The second and other tracks are raw 2324 bytes/sector MPEG (movie)
-tracks, containing one MPEG PS data packet per sector instead of a
-filesystem. Similar to audio CD tracks, these tracks <emphasis role="bold">cannot
-be mounted</emphasis> (Did you ever mount an audio CD to play it?).
-As most movies are inside this track, you should try <option>vcd://2</option> first.
-</para></listitem>
+The second and remaining tracks are generally raw 2324 bytes/sector
+MPEG (movie) tracks, containing one MPEG PS data packet per
+sector. These are in mode 2 form 1 format, so they store more data per
+sector at the loss of some error correction. It is also legal to have
+CD-DA tracks in a VCD after the first track as well.
+On some operating systems there is some trickery that goes on to make
+these non-ISO-9660 tracks appear in a filesystem. On other operating
+systems like GNU/Linux this is not the case (yet). Here the MPEG data
+<emphasis role="bold">cannot be mounted</emphasis>. As most movies are
+inside this kind of track, you should try <option>vcd://2</option>
+first.</para></listitem>
 
 <listitem><para>
 There exist VCD disks without the first track (single track and no filesystem
 at all). They are still playable, but cannot be mounted.
 </para></listitem>
+
+<listitem><para> The definition of the Video CD standard is called the
+Philips "White Book" and it is not generally available online as it
+must be purchased from Philips. More detailed information about Video
+CDs can be found in the
+<ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">vcdimager documentation</ulink>.
+</para></listitem>
+
 </itemizedlist>
 
 <formalpara>
