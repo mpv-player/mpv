@@ -76,6 +76,10 @@ static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
 
 extern void set_video_eq( int cap );
 
+#ifdef HAVE_XINERAMA
+extern int xinerama_screen;
+#endif
+
 static void set_window(int force_update)
 {
     Window mRoot;
@@ -127,10 +131,26 @@ static void set_window(int force_update)
 	screens = XineramaQueryScreens(mDisplay, &num_screens);
 	
 	/* find the screen we are on */
-	while ((screens[i].x_org <= drwcX) || (screens[i].y_org <= drwcY) ||
+	while (i<num_screens &&
+		((screens[i].x_org < drwcX) || (screens[i].y_org < drwcY) ||
 		(screens[i].x_org + screens[i].width >= drwcX) ||
-		(screens[i].y_org + screens[i].height >= drwcY))
-	    i++;
+		(screens[i].y_org + screens[i].height >= drwcY)))
+	{
+	 	i++;
+	}
+
+	if(i<num_screens)
+	{
+		/* save the screen we are on */
+		xinerama_screen = i;
+	} else {
+		/* oops.. couldnt find the screen we are on
+		 * because the upper left corner left the
+		 * visual range. assume we are still on the
+		 * same screen
+		 */
+		i = xinerama_screen;
+	}
 
 	/* set drwcX and drwcY to the right values */
 	drwcX = drwcX - screens[i].x_org;
