@@ -166,9 +166,9 @@ static int config(struct vf_instance_s* vf,
     int_sws_flags|= vf->priv->v_chr_drop << SWS_SRC_V_CHR_DROP_SHIFT;
     int_sws_flags|= vf->priv->param      << SWS_PARAM_SHIFT;
     vf->priv->ctx=sws_getContext(width,height,
-	    (outfmt==IMGFMT_I420 || outfmt==IMGFMT_IYUV)?IMGFMT_YV12:outfmt,
+	    outfmt,
 		  vf->priv->w,vf->priv->h,
-	    (best==IMGFMT_I420 || best==IMGFMT_IYUV)?IMGFMT_YV12:best,
+	    best,
 	    int_sws_flags, srcFilter, dstFilter);
     if(!vf->priv->ctx){
 	// error...
@@ -229,7 +229,7 @@ static void draw_slice(struct vf_instance_s* vf,
 	return;
     }
 //    printf("vf_scale::draw_slice() y=%d h=%d\n",y,h);
-    sws_scale(vf->priv->ctx,src,stride,y,h,dmpi->planes,dmpi->stride);
+    sws_scale_ordered(vf->priv->ctx,src,stride,y,h,dmpi->planes,dmpi->stride);
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
@@ -244,7 +244,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     dmpi=vf_get_image(vf->next,vf->priv->fmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 	vf->priv->w, vf->priv->h);
-    sws_scale(vf->priv->ctx,mpi->planes,mpi->stride,0,mpi->h,dmpi->planes,dmpi->stride);
+    sws_scale_ordered(vf->priv->ctx,mpi->planes,mpi->stride,0,mpi->h,dmpi->planes,dmpi->stride);
 
   }
 

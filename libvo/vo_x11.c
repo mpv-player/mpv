@@ -241,7 +241,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     title = strdup("MPlayer X11 (XImage/Shm) render");
 
  in_format=format;
- if(in_format==IMGFMT_I420 || in_format==IMGFMT_IYUV) in_format=IMGFMT_YV12;
  srcW= width;
  srcH= height;
  vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
@@ -508,13 +507,13 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
   {
 	dstStride[0]= -image_width*((bpp+7)/8);
 	dst[0]=ImageData - dstStride[0]*(image_height-1);
-	sws_scale(swsContext,src,stride,y,h,dst, dstStride);
+	sws_scale_ordered(swsContext,src,stride,y,h,dst, dstStride);
   }
   else
   {
 	dstStride[0]=image_width*((bpp+7)/8);
 	dst[0]=ImageData;
-	sws_scale(swsContext,src,stride,y,h,dst, dstStride);
+	sws_scale_ordered(swsContext,src,stride,y,h,dst, dstStride);
   }
   return 0;
 }
