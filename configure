@@ -150,6 +150,7 @@ params:
 				if both /dev/mga_vid and x11 are available]
         --enable-xv             build with Xv render support for X 4.x [autodetect]
 	--enable-vm		build with XF86VidMode support for x11 driver
+	--enable-xinerama	build with Xinerama support for x11 driver [autodetect]
         --enable-x11            build with X11 render support [autodetect]
 	--enable-fbdev		build with FBDev render support [_not_ autodetected]
 	--enable-mlib		build with MLIB support ( only Solaris )
@@ -502,6 +503,7 @@ _aa=no
 _ggi=no
 _xv=no
 _vm=no
+_xinerama=no
 _xdpms_3=no
 _xdpms_4=no
 _3dfx=no
@@ -534,6 +536,7 @@ _aalib=
 _ggilib=
 _xvlib=
 _x11lib=
+_xineramalib=
 
 _select='#define HAVE_AUDIO_SELECT'
 
@@ -890,6 +893,7 @@ $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib > /dev/null 2>&1 
 nm `echo $_x11libdir|cut -c 3-`/libXext.a | grep DPMSQueryExtension > /dev/null 2>&1 && _xdpms_4=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv $_socklib > /dev/null 2>&1 && _xv=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib > /dev/null 2>&1 && _vm=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXinerama $_socklib > /dev/null 2>&1 && _xinerama=yes
 
 # this is not yet checked with OpenBSD - atmos
 if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
@@ -1197,6 +1201,9 @@ for ac_option do
   --enable-vm)
         _vm=yes
         ;;
+  --enable-xinerama)
+        _xinerama=yes
+        ;;
   --enable-3dfx)
         _3dfx=yes
         ;;
@@ -1300,6 +1307,9 @@ for ac_option do
         ;;
   --disable-vm)
         _vm=no
+        ;;
+  --disable-xinerama)
+        _xinerama=no
         ;;
   --disable-mlib)
 	_mlib=no
@@ -1557,6 +1567,7 @@ echo "Checking for AA ... $_aa"
 echo "Checking for GGI ... $_ggi"
 echo "Checking for OpenGL ... $_gl"
 echo "Checking for Xv ... $_xv"
+echo "Checking for Xinerama ... $_xinerama"
 echo "Checking for X11 ... $_x11"
 echo "Checking for DGA ... $_dga"
 echo "Checking for DGA 2.0 .. $_dga2"
@@ -1785,6 +1796,10 @@ fi
 
 if [ $_xv = yes ]; then
   _xvlib='-lXv'
+fi
+
+if [ $_xinerama = yes ]; then
+  _xvlib='-lXinerama'
 fi
 
 if [ $_sdl = yes ]; then
@@ -2058,6 +2073,12 @@ else
  _vm='#undef HAVE_XF86VM'
 fi
 
+if [ $_xinerama = yes ]; then
+ _xinerama='#define HAVE_XINERAMA'
+else
+ _xinerama='#undef HAVE_XINERAMA'
+fi
+
 # ---
 
 if [ $_mga = yes ]; then
@@ -2170,7 +2191,7 @@ WIN32_PATH=-DWIN32_PATH=\\"$_win32libdir\\"
 
 X11_INC=$_x11incdir
 X11DIR=$_x11libdir
-X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis
+X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis $_libxinerama
 
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
@@ -2399,6 +2420,7 @@ $_mlibdef  // Sun mediaLib, available only on solaris
 $_x11
 $_xv
 $_vm
+$_xinerama
 $_gl
 $_dga
 $_dga2

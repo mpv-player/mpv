@@ -21,6 +21,9 @@
 #include <X11/extensions/dpms.h>
 #endif
 
+#ifdef HAVE_XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif
 
 /*
  * If SCAN_VISUALS is defined, vo_init() scans all available TrueColor
@@ -135,9 +138,22 @@ int vo_init( void )
   }
  mScreen=DefaultScreen( mDisplay );     // Screen ID.
  mRootWin=RootWindow( mDisplay,mScreen );// Root window ID.
+
+#ifdef HAVE_XINERAMA
+ if(XineramaIsActive(mDisplay))
+  {
+  XineramaScreenInfo *screens;
+  int num_screens;
+  screens = XineramaQueryScreens(mDisplay, &num_screens);
+  vo_screenwidth=screens[0].width;
+  vo_screenheight=screens[0].height;
+  }
+ else
+#endif
+ {
  vo_screenwidth=DisplayWidth( mDisplay,mScreen );
  vo_screenheight=DisplayHeight( mDisplay,mScreen );
-
+ }
  // get color depth (from root window, or the best visual):
  XGetWindowAttributes(mDisplay, mRootWin, &attribs);
  depth=attribs.depth;
