@@ -15,3 +15,35 @@ struct _ASX_Parser_t {
   int deep;
 };
   
+ASX_Parser_t*
+asx_parser_new(void);
+
+void
+asx_parser_free(ASX_Parser_t* parser);
+
+/*
+ * Return -1 on error, 0 when nothing is found, 1 on sucess
+ */
+int
+asx_get_element(ASX_Parser_t* parser,char** _buffer,
+		char** _element,char** _body,char*** _attribs);
+
+int
+asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs);
+
+/////// Attribs utils
+
+char*
+asx_get_attrib(char* attrib,char** attribs);
+
+int
+asx_attrib_to_enum(char* val,char** valid_vals);
+
+#define asx_free_attribs(a) asx_list_free((void***)&a,free)
+
+////// List utils
+
+typedef void (*ASX_FreeFunc)(void* arg);
+
+void
+asx_list_free(void* list_ptr,ASX_FreeFunc free_func);

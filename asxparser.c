@@ -17,8 +17,6 @@ extern m_config_t* mconfig;
 
 ////// List utils
 
-typedef void (*ASX_FreeFunc)(void* arg);
-
 void
 asx_list_add(void* list_ptr,void* entry){
   void** list = *(void***)list_ptr;
@@ -80,7 +78,7 @@ asx_list_free(void* list_ptr,ASX_FreeFunc free_func) {
 
 /////// Attribs utils
 
-static char*
+char*
 asx_get_attrib(char* attrib,char** attribs) {
   char** ptr;
 
@@ -92,7 +90,7 @@ asx_get_attrib(char* attrib,char** attribs) {
   return NULL;
 }
 
-static int
+int
 asx_attrib_to_enum(char* val,char** valid_vals) {
   char** ptr;
   int r = 0;
@@ -150,8 +148,6 @@ asx_get_yes_no_attrib(ASX_Parser_t* parser, char* element, char* attrib,char** a
   return r;
 }
 
-#define asx_free_attribs(a) asx_list_free((void***)&a,free)
-
 #define asx_warning_attrib_required(p,e,a) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : element %s don't have the required attribute %s",p->line,e,a)
 #define asx_warning_body_parse_error(p,e) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : error while parsing %s body",p->line,e)
 
@@ -172,7 +168,7 @@ asx_parser_free(ASX_Parser_t* parser) {
 #define LETTER "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define SPACE " \n\t\r"
 
-static int
+int
 asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs) {
   char *ptr1, *ptr2, *ptr3;
   int n_attrib = 0;
@@ -232,7 +228,7 @@ asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs) {
 /*
  * Return -1 on error, 0 when nothing is found, 1 on sucess
  */
-static int
+int
 asx_get_element(ASX_Parser_t* parser,char** _buffer,
 		char** _element,char** _body,char*** _attribs) {
   char *ptr1,*ptr2, *ptr3, *ptr4;
@@ -240,6 +236,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
   char *element = NULL, *body = NULL, *ret = NULL, *buffer;
   int n_attrib = 0;
   int body_line = 0,attrib_line,ret_line,in = 0;
+  int quotes = 0;
 
   if(_buffer == NULL || _element == NULL || _body == NULL || _attribs == NULL) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"At line %d : asx_get_element called with invalid value",parser->line);
@@ -340,7 +337,8 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
   
 
   for(ptr3 = ptr2; ptr3[0] != '\0'; ptr3++) { // Go to element end
-    if(ptr3[0] == '>' || strncmp(ptr3,"/>",2) == 0)
+    if(ptr3[0] == '"') quotes ^= 1;  
+    if(!quotes && (ptr3[0] == '>' || strncmp(ptr3,"/>",2) == 0))
       break;
     if(ptr3[0] == '\n') parser->line++;
   }
@@ -378,7 +376,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
 	}
 	if(ptr4[0] == '\n') parser->line++;
       }
-      if(strncmp(ptr4,"<!--",4) == 0) { // Comments
+      if(ptr4 && strncmp(ptr4,"<!--",4) == 0) { // Comments
 	for( ; strncmp(ptr4,"-->",3) != 0 ; ptr4++) {
 	if(ptr4[0] == '\0') {
 	  ptr4 = NULL;
