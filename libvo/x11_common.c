@@ -1133,6 +1133,21 @@ int vo_x11_check_events(Display * mydisplay)
     return ret;
 }
 
+/**
+ * \brief sets the size and position of the non-fullscreen window.
+ */
+void vo_x11_nofs_sizepos(int x, int y, int width, int height)
+{
+  if (vo_fs) {
+    vo_old_x = x;
+    vo_old_y = y;
+    vo_old_width = width;
+    vo_old_height = height;
+  }
+  else
+   XMoveResizeWindow(mDisplay, vo_window, x, y, width, height);
+}
+
 void vo_x11_sizehint(int x, int y, int width, int height, int max)
 {
     vo_hint.flags = PPosition | PSize | PWinGravity;

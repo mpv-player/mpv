@@ -1,8 +1,29 @@
 #ifndef __GL_COMMON_H__
 #define __GL_COMMON_H__
 
+#include "mp_msg.h"
+#include "config.h"
+
 #include <GL/gl.h>
+#include "video_out.h"
+
+#ifndef GL_WIN32
+#include <X11/Xlib.h>
+#include <GL/glx.h>
+#include "x11_common.h"
+#endif
 
 void glAdjustAlignment(int stride);
+
+//! could not set new window, will continue drawing into the old one.
+#define SET_WINDOW_FAILED -1
+//! new window is set, could even transfer the OpenGL context.
+#define SET_WINDOW_OK 0
+//! new window is set, but the OpenGL context needs to be reinitialized.
+#define SET_WINDOW_REINIT 1
+
+#ifndef GL_WIN32
+int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win);
+#endif
 
 #endif
