@@ -11,3 +11,4 @@ version.h
 build-stamp
 configure-stamp
 libavcodec
+mplayer.exe.spec.c
