@@ -194,10 +194,12 @@ static int play(void* data,int len,int flags){
   while(plugin(i))
     plugin(i++)->play();
   /* Send data to output */
+  //fprintf(stderr, "ao_plugin: ret_len=%d, len=%d\n", ret_len, len);
   len=driver()->play(ao_plugin_data.data,ao_plugin_data.len,flags);
+  //fprintf(stderr, "ao_plugin: returned len=%d\n", len);
 
   if(len!=ao_plugin_data.len)
-    fprintf(stderr,"[ao_plugin] Warning under or over flow in sound plugin");
+    fprintf(stderr,"[ao_plugin] Warning under or over flow in sound plugin\n");
   
   return ret_len;
 }
