@@ -104,7 +104,7 @@ int mp_header_process_extension (mp_mpeg_header_t * picture, unsigned char * buf
 
 
 //MPEG4 HEADERS
-static unsigned char getbits(unsigned char *buffer, unsigned int from, unsigned char len)
+unsigned char mp_getbits(unsigned char *buffer, unsigned int from, unsigned char len)
 {
     unsigned int n;
     unsigned char m, u, l, y;
@@ -124,6 +124,8 @@ static unsigned char getbits(unsigned char *buffer, unsigned int from, unsigned 
     //	from, (int) len, (int) buffer[n],(int) buffer[n+1], n, (int) m, (int) l, (int) u, (int) y);
     return  y;
 }
+
+#define getbits mp_getbits
 
 static int read_timeinc(mp_mpeg_header_t * picture, unsigned char * buffer, int n)
 {
