@@ -664,25 +664,37 @@ encode movies with <B>MPlayer</B>, read the <A HREF="#2.5">TV input</A> section.
       <CODE>usleep()</CODE> to tune A/V sync, with +/- 10ms accuracy. However
       sometimes the sync has to be tuned even finer.</LI>
     <LI><B>The new timer</B> code uses PC's RTC (Real Time Clock) for this task,
-      because it has precise 1ms timers. This requires root privileges, or a
-      <I>setuid root</I> <B>MPlayer</B> binary. If you are running kernel
-      2.4.19pre8 or later you can adjust the maximum RTC frequency for normal
-      users through the <CODE>/proc</CODE> filesystem. Use this command to enable
-      RTC for normal users:
+      because it has precise 1ms timers. It is automagically enabled when
+      available, but requires root privileges, a <I>setuid root</I>
+      <B>MPlayer</B> binary or a properly set up kernel.
+      <BR>
+      If you are running kernel 2.4.19pre8 or later you can adjust the maximum
+      RTC frequency for normal users through the <CODE>/proc</CODE> filesystem.
+      Use this command to enable RTC for normal users:
       <P>
-      <CODE>echo 1025 > /proc/sys/dev/rtc/max-user-freq</CODE>
+      <CODE>echo 1024 > /proc/sys/dev/rtc/max-user-freq</CODE>
       </P>
       If you do not have such a new kernel, you can also change one line in
-      <CODE>drivers/char/rtc.c</CODE> and recompile your kernel. Find the line
-      <P>
-      <CODE>if ((rtc_freq > 64) && (!capable(CAP_SYS_RESOURCE)))</CODE>
-      </P>
+      <CODE>drivers/char/rtc.c</CODE> and recompile your kernel. Find the
+      section that reads
+      <PRE>
+	 * We don't really want Joe User enabling more
+	 * than 64Hz of interrupts on a multi-user machine.
+	 */
+	if ((rtc_freq > 64) && (!capable(CAP_SYS_RESOURCE)))
+      </PRE>
       and change the 64 to 1024. You should really know what you are doing, though.
       <BR>
-      You can see the new timer's efficiency in the status line. In some hardware
-      combinations (confirmed during usage of non-DMA DVD drive on an ALi1541 board)
-      usage of the RTC timer causes skippy playback. It's recommended to use the
-      following method in these cases.</LI>
+      You can see the new timer's efficiency in the status line.
+      <BR>
+      The power management functions of some notebook BIOSes with speedstep CPUs
+      interact badly with RTC. Audio and video may get out of sync. Plugging the
+      external power connector in before you power up your notebook seems to help.
+      You can always turn off RTC support with the <CODE>-nortc</CODE> switch.
+      In some hardware combinations (confirmed during usage of non-DMA DVD
+      drive on an ALi1541 board) usage of the RTC timer causes skippy playback.
+      
+      It's recommended to use the following method in these cases.</LI>
     <LI><B>The third timer code</B> is turned on with the <CODE>-softsleep</CODE>
       option. It has the efficiency of the RTC, but it doesn't use RTC. On the other
       hand, it requires more CPU.</LI>
@@ -690,7 +702,7 @@ encode movies with <B>MPlayer</B>, read the <A HREF="#2.5">TV input</A> section.
 </LI>
 </UL>
 
-Note: <B>NEVER install setuid MPlayer binary on a
+Note: <B>NEVER install a setuid root MPlayer binary on a
 multiuser system!</B> It's a clear way for everyone to gain root.
 
 
