@@ -99,6 +99,7 @@ General:
 - svga: Output to SVGAlib
 - sdl:	SDL >= v1.1.7 driver (supports software scaling, and versions >=1.1.8
         even support Xvideo, thus hardware rendering)
+- aalib:Text mode rendering (through SDL) (native driver in progress!)
 
 Card specific:
 - mga:	Matrox G200/G400 hardware YUV overlay via the mga_vid device

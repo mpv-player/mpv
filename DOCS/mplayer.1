@@ -36,7 +36,10 @@ mplayer \- Movie Player for Linux
 .RB [ \-z\ <0-8> ]
 .RB [ \-idx ]
 .RB [ \-forceidx ]
-.BR [ \-nodshow ]
+.RB [ \-nodshow ]
+.RB [ \-sdl\ driver ]
+.RB [ \-noxv ]
+.RB [ \-forcexv ]
 .I file
 .PP
 .SH DESCRIPTION
@@ -189,6 +192,15 @@ indexes.
 .TP
 .B \-nodshow
 disables usage of DirectShow video codecs
+.TP
+.B \-sdl\ driver
+specify SDL driver to use. For example: aalib, dga, fbdev, svga, x11, ggi
+.TP
+.B \-noxv
+disable XVideo hardware acceleration (with SDL only!)
+.TP
+.B \-forcexv
+force using XVideo (SDL!)
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
