@@ -12,7 +12,7 @@
 </listitem>
 <listitem>
 <para>General SIGILL (signal 4):</para>
-<para>Problem: you compiled and run mplayer in different machines
+<para>Problem: you compiled and run MPlayer in different machines
 (for example compiled on P3 and running on Celeron)</para>
 <para>Solution: compile MPlayer on the same machine where you will use it!</para>
 <para>Workaround: <command>./configure --disable-sse</command> etc. options</para>
@@ -45,20 +45,20 @@ lame packages, they may have been compiled with gcc 2.96.</para>
 <listitem><para>
 most common: buggy audio driver! - try to use different drivers, try ALSA 0.9 OSS
 emulation with <option>-ao oss</option>, also try <option>-ao sdl</option>,
-sometimes it helps. If your file plays fine with -nosound, then you can be sure
+sometimes it helps. If your file plays fine with <option>-nosound</option>, then you can be sure
 it's sound card (driver) problem.
 </para></listitem>
 </itemizedlist>
 <itemizedlist>
 <listitem>
 <para>audio buffer problems (buffer size badly detected)</para>
-<para>Workaround: mplayer <option>-abs</option> option</para>
+<para>Workaround: MPlayer's <option>-abs</option> option</para>
 </listitem>
 </itemizedlist>
 <itemizedlist>
 <listitem><para>
 samplerate problems - maybe your card doesn't support the samplerate used in your
-files - try the resampling plugin (<option>-aop</option>)
+files - try the resampling plugin (<option>-af resample=...</option>)
 </para></listitem>
 </itemizedlist>
 <itemizedlist>
@@ -102,7 +102,7 @@ If none of these help, please upload the file, we'll check (and fix).
 <listitem>
 <para>your sound card doesn't support 48kHz playback</para>
 <para>Workaround: buy a better sound card... or try to decrease fps by 10% (use
-<option>-fps 27</option> for a 30fps movie) or use the resampler plugin</para>
+<option>-fps 27</option> for a 30fps movie) or use the resample plugin</para>
 </listitem>
 <listitem>
 <para>slow machine(if A-V is not around 0, and the last number in the status

@@ -43,7 +43,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - suggested version is <emphasis role="bold">always the
-  newest</emphasis> (4.2.1).  Normally, everyone wants this, as starting
+  newest</emphasis> (4.3.0).  Normally, everyone wants this, as starting
   with XFree86 4.0.2, it contains the <link linkend="xv">XVideo</link>
   extension (somewhere referred to as <emphasis role="bold">Xv</emphasis>)
   which is needed to enable the hardware YUV acceleration (fast image display)
@@ -114,8 +114,8 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   <emphasis role="bold">libavcodec</emphasis>: This codec package is capable
   of decoding H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 encoded video
   streams and WMA (Windows Media Audio) v1/v2 audio streams, on multiple
-  platforms. It is also known to be the fastest for this task. See the
-  <link linkend="ffmpeg">this section</link> section for details. Features:
+  platforms. It is also known to be the fastest for this task. See
+  <link linkend="ffmpeg">this section</link> for details. Features:
   <itemizedlist>
   <listitem><simpara>
     gain decoding of videos mentioned above, on non-x86 machines
@@ -166,7 +166,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">DivX4/DivX5</emphasis>: information about this codec is
-  available in the <link linkend="divx4-5">DivX4/DivX5</link>. You possibly
+  available in the <link linkend="divx4-5">DivX4/DivX5 section</link>. You possibly
   don't want this codec as <emphasis role="bold">libavcodec</emphasis> (see
   above) is much faster and has better quality than this, for both decoding
   and encoding. Features:
@@ -631,7 +631,7 @@ About DVD subtitles, read the <link linkend="dvd">DVD section</link>.
 
 
 <sect2 id="mpsub">
-<title>MPlayer's own subtitle format</title>
+<title>MPlayer's own subtitle format (MPsub)</title>
 
 <para>
 <application>MPlayer</application> introduces a new subtitle format called
@@ -767,6 +767,11 @@ Now you have to see a timer at the upper left corner of the movie (switch
 it off with the <keycap>o</keycap> key).
 </para>
 
+<para>
+
+</para>
+(subtitles are <emphasis>always enabled</emphasis>, for disabling them please
+read the man page)
 <para>
 OSD has 4 states (switch with <keycap>o</keycap>):
 
