@@ -2311,7 +2311,7 @@ Use \-ovc help to get a list of available codecs.
 .IPs "\-ovc copy"
 no encoding, just streamcopy
 .IPs "\-ovc divx4"
-encode to DivX4/\:DivX5 or XviD
+encode to DivX4/\:DivX5
 .IPs "\-ovc rawrgb"
 encode to uncompressed RGB24
 .IPs "\-ovc lavc"
@@ -2350,41 +2350,35 @@ If encoding to XviD, you can specify its parameters here.
 Available options are:
 .
 .RSs
-.IPs mode=<mode>
-specify the mode to be used for encoding
-.RSss
-help: show this help
-.br
-cbr: constant bit rate (default)
-.br
-2pass-1: first pass of two pass mode
-.br
-2pass-2: second pass of two pass mode
-.br
-fixedquant: fixed quantizer mode
-.REss
+.IPs pass=<1|2>
+specify the pass in 2pass mode
 .IPs quality=<0\-6>
-specify the encoding quality
+specify the encoding quality (default=6)
 .IPs br=<value>
-sets the bitrate to be used in bits/\:seconds
+sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second if >16000
+(CBR or 2pass mode, default=687 kbits/s)
 .IPs rc_reaction_delay_factor=<value>
 specify how fast the rate control reacts, lower values are faster
 .IPs rc_averaging_period=<value>
 period to reach the required average
 .IPs rc_buffer=<value>
 size of the rate control buffer
-.IPs max_quantizer=<value>
-maximum quantizer
 .IPs min_quantizer=<value>
-minimum quantizer
+minimum quantizer (default=2)
+.IPs max_quantizer=<value>
+maximum quantizer (default=31)
 .IPs min_key_interval=<value>
-minimum interval between key frames (2pass only)
+minimum interval between key frames (2pass only, default=0)
 .IPs max_key_interval=<value>
-maximum interval between key frames
-.IPs (no)debug
-save or don't save debug messages in xvid.dbg (default: on)
-.IPs statsfile=<filename>
-filename for the statistics of the first pass (1/\:2pass mode only)
+maximum interval between key frames (default=10*fps)
+.IPs mpeg_quant
+use MPEG quantizers instead of H.263 (default=off)
+.IPs lumi_mask
+use a lumimasking algorithm (default=off)
+.IPs debug
+save per-frame statistics in xvid.dbg (default=off)
+.br
+this is *not* the 2pass control file
 .IPs keyframe_boost=<value>
 (2pass mode only)
 .IPs kfthreshold=<value>
@@ -2392,7 +2386,7 @@ filename for the statistics of the first pass (1/\:2pass mode only)
 .IPs kfreduction=<value>
 (2pass mode only)
 .IPs fixed_quant=<1\-31>
-specify the quantizer (fixed quantizer mode only)
+switch to fixed quantizer mode and specify the quantizer to be used
 .RE
 
 
