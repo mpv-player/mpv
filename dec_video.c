@@ -171,6 +171,7 @@ switch(sh_video->codec->driver){
 //   GUI_MSG( mplCompileWithoutDSSupport )
 //   exit(1);
 #else
+   int bpp;
    if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, &sh_video->our_out_buffer)){
 //   if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, NULL)){
         printf("ERROR: Couldn't open required DirectShow codec: %s\n",sh_video->codec->dll);
@@ -192,14 +193,19 @@ switch(sh_video->codec->driver){
    switch(out_fmt){
    case IMGFMT_YUY2:
    case IMGFMT_UYVY:
+     bpp=16;
      DS_VideoDecoder_SetDestFmt(16,out_fmt);break;        // packed YUV
    case IMGFMT_YV12:
    case IMGFMT_I420:
    case IMGFMT_IYUV:
+     bpp=12;
      DS_VideoDecoder_SetDestFmt(12,out_fmt);break;        // planar YUV
    default:
+     bpp=((out_fmt&255)+7)&(~7);
      DS_VideoDecoder_SetDestFmt(out_fmt&255,0);           // RGB/BGR
    }
+
+   sh_video->our_out_buffer = shmem_alloc(sh_video->disp_w*sh_video->disp_h*bpp/8); // FIXME!!!
 
    DS_VideoDecoder_Start();
 
