@@ -469,6 +469,7 @@ got_audio:
 		if(cnt2>0x150) *((int*)NULL)=1; // sig11 :)
 	    }
 #endif
+#if 0
 	    if( ((sh_audio_t *)ds->sh)->format == 0x2000) {
 		// if DNET, swap bytes, as DNET is byte-swapped AC3:
 		char *ptr = dp->buffer;
@@ -481,6 +482,7 @@ got_audio:
 		    ptr += 2;
 		}
 	    }
+#endif
 	    dp->pts = (priv->a_pts==timestamp) ? 0 : (timestamp/1000.0f);
 	    priv->a_pts=timestamp;
 	    dp->pos = demuxer->filepos;
@@ -959,7 +961,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    {
 			case MKTAG('d', 'n', 'e', 't'):
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: DNET -> AC3\n");
-			    sh->format = 0x2000;
+//			    sh->format = 0x2000;
 			    break;
 			case MKTAG('1', '4', '_', '4'):
 			case MKTAG('2', '8', '_', '8'):
