@@ -4,6 +4,7 @@
 #define VCODEC_DIVX4 2
 #define VCODEC_RAW 3
 #define VCODEC_LIBAVCODEC 4
+#define VCODEC_NULL 5
 
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
@@ -96,6 +97,7 @@ int audio_id=-1;
 int video_id=-1;
 int dvdsub_id=-1;
 
+static int has_audio=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
 int audio_family=-1;     // override audio codec family 
@@ -419,6 +421,8 @@ divx4_param.rc_reaction_ratio  = 20;
   }
 #endif
 
+  if(!has_audio) audio_id=-2; /* do NOT read audio packets... */
+
   //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
   demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
   if(!demuxer){
@@ -657,6 +661,16 @@ case VCODEC_FRAMENO:
     mux_v->bih->biCompression=mmioFOURCC('F','r','N','o');
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
     break;
+case VCODEC_NULL:
+    mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
+    mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
+    mux_v->bih->biWidth=vo_w;
+    mux_v->bih->biHeight=vo_h;
+    mux_v->bih->biPlanes=1;
+    mux_v->bih->biBitCount=24;
+    mux_v->bih->biCompression=0;
+    mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
+    break;
 case VCODEC_DIVX4:
 #ifndef HAVE_DIVX4ENCORE
     printf("No support for Divx4 encore compiled in\n");
@@ -784,6 +798,7 @@ aviwrite_write_header(muxer,muxer_f);
 switch(mux_v->codec){
 case VCODEC_COPY:
 case VCODEC_RAW:
+case VCODEC_NULL:
     break;
 case VCODEC_FRAMENO:
     decoded_frameno=0;
@@ -1299,6 +1314,8 @@ if(sh_audio){
 	AV_delay, c_total, v_pts_corr );
 
 }
+else
+    printf("V:%6.1f \r", d_video->pts );
 
 #if 0
     mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%%  %d%%\r",
@@ -1340,8 +1357,8 @@ fseek(muxer_f,0,SEEK_SET);
 aviwrite_write_header(muxer,muxer_f); // update header
 fclose(muxer_f);
 
-printf("\nVideo stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs\n",
-    (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), mux_v->size, (float)mux_v->timer);
+printf("\nVideo stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs  %d frames\n",
+    (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), mux_v->size, (float)mux_v->timer, decoded_frameno);
 if(sh_audio)
 printf("\nAudio stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs\n",
     (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), mux_a->size, (float)mux_a->timer);

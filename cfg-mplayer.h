@@ -184,8 +184,6 @@ static config_t mplayer_opts[]={
 	{"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"noloop", &loop_times, CONF_TYPE_FLAG, 0, 0, -1, NULL},
 	{"loop", &loop_times, CONF_TYPE_INT, CONF_RANGE, -1, 10000, NULL},
-	{"sound", &has_audio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"abs", &ao_data.buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
 

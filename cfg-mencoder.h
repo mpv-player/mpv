@@ -71,7 +71,8 @@ struct config ovc_conf[]={
 	{"divx4", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_DIVX4, NULL},
 	{"raw", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_RAW, NULL},
 	{"lavc", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_LIBAVCODEC, NULL},
-	{"help", "\nAvailable codecs:\n   copy\n   frameno\n   divx4\n   raw\n   lavc\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"null", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_NULL, NULL},
+	{"help", "\nAvailable codecs:\n   copy\n   frameno\n   divx4\n   raw\n   lavc\n    null\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 

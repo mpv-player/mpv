@@ -60,6 +60,8 @@
 #ifdef USE_FAKE_MONO
 	{"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
 #endif
+	{"sound", &has_audio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 	{"afm", &audio_family, CONF_TYPE_INT, CONF_MIN, 0, 16, NULL}, // keep ranges in sync
 	{"vfm", &video_family, CONF_TYPE_INT, CONF_MIN, 0, 14, NULL}, // with codec-cfg.c
