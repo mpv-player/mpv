@@ -451,10 +451,10 @@ static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
 		if (l > max_l) max_l = l;
 		if (-l > max_r) max_r = -l;
 	}
-	if (max_l + max_r < 32) return;
+	if (max_l + max_r < 64) return;
 	if (max_r > 2*max_l) f->affinity = -1;
 	else if (max_l > 2*max_r) f->affinity = 1;
-	else if (max_l + max_r > 512) {
+	else if (max_l + max_r > 1024) {
 		l = t = 0;
 		for (i = 0; i < c->metric_len; i++) {
 			l += f->comb[i] - f->next->comb[i];
