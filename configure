@@ -1934,8 +1934,9 @@ $_dvdreaddef
 $_divx4def
 
 /* Define this to enable avg. byte/sec-based AVI sync method by default:
-   (use -bps or -nobps commandline option for run-time method selection)    */
-#undef AVI_SYNC_BPS
+   (use -bps or -nobps commandline option for run-time method selection)
+   -bps gives better sync for vbr mp3 audio, it is now default */
+#define AVI_SYNC_BPS
 
 /* Undefine this if you want soundcard-only timing by default:
    You can still change this with the -alsa or -noalsa command-line option!
