@@ -48,6 +48,7 @@ b (binary data or string)
 	for(i=0; i<length; i++){
 		data[i]				u(8)
 	}
+	Note: strings MUST be encoded in utf8
 
         
 f(x)	n fixed bits
@@ -224,8 +225,11 @@ fourcc
 	needed
         
 language_code 
+	ISO 639 and ISO 3166 for language/country code
 	something like "usen" (US english), can be 0
 	if unknown
+	see http://www.loc.gov/standards/iso639-2/englangn.html
+	and http://www.din.de/gremien/nas/nabd/iso3166ma/codlstp1/en_listp1.html
 
 time_base_nom / time_base_denom = time_base
 	the number of timer ticks per second, this MUST be equal to the fps
@@ -498,3 +502,4 @@ video_stream_header (stream 2  subtitle atde, timebase 30, lsb_timestamp_length=
 audio_stream_header (stream 3, audio    jpjp, timebase 1 , lsb_timestamp_length=8)
 audio_stream_header (stream 4, audio    usen, timebase 1 , lsb_timestamp_length=8)
 index (stream 0)
+
