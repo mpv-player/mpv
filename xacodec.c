@@ -311,7 +311,7 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
     xacodec_driver->image.bpp=codec_hdr.depth;
     xacodec_driver->image.width=codec_hdr.x;
     xacodec_driver->image.height=codec_hdr.y;
-    xacodec_driver->image.mem=malloc(codec_hdr.y * ((codec_hdr.x+3)&(~3)) * ((codec_hdr.depth+7)/8));
+    xacodec_driver->image.mem=malloc(codec_hdr.y * codec_hdr.x * ((codec_hdr.depth+7)/8));
 
     if (xacodec_driver->image.mem == NULL)
     {
@@ -450,176 +450,6 @@ void XA_dummy()
     XA_Print("dummy() called");
 }
 
-typedef struct
-{
-    unsigned char r0, g0, b0;
-    unsigned char r1, g1, b1;
-    unsigned char r2, g2, b2;
-    unsigned char r3, g3, b3;
-    unsigned int clr0_0, clr0_1, clr0_2, clr0_3;
-    unsigned int clr1_0, clr1_1, clr1_2, clr1_3;
-    unsigned int clr2_0, clr2_1, clr2_2, clr2_3;
-    unsigned int clr3_0, clr3_1, clr3_2, clr3_3;
-} XA_2x2_Color;
-
-#define ip_OUT_2x2_1BLK(ip, CAST, cmap2x2, rinc) { register CAST d0, d1; \
- *ip++ = d0 = (CAST)(cmap2x2->clr0_0); *ip++ = d0; \
- *ip++ = d1 = (CAST)(cmap2x2->clr1_0); *ip = d1; \
-  ip += rinc; \
- *ip++ = d0; *ip++ = d0; *ip++ = d1; *ip = d1; ip += rinc; \
- *ip++ = d0 = (CAST)(cmap2x2->clr2_0); *ip++ = d0; \
- *ip++ = d1 = (CAST)(cmap2x2->clr3_0); *ip = d1; \
-  ip += rinc; *ip++ = d0; *ip++ = d0; *ip++ = d1; *ip++ = d1; }
-
-#define ip_OUT_2x2_2BLKS(ip, CAST, c2x2map0, c2x2map1, rinc) { \
- *ip++ = (CAST)(c2x2map0->clr0_0); \
- *ip++ = (CAST)(c2x2map0->clr1_0); \
- *ip++ = (CAST)(c2x2map1->clr0_0); \
- *ip   = (CAST)(c2x2map1->clr1_0); ip += rinc; \
- *ip++ = (CAST)(c2x2map0->clr2_0); \
- *ip++ = (CAST)(c2x2map0->clr3_0); \
- *ip++ = (CAST)(c2x2map1->clr2_0); \
- *ip   = (CAST)(c2x2map1->clr3_0); }
-
-void XA_2x2_OUT_1BLK_clr8(unsigned char *image_p, unsigned int x, unsigned int y,
-    unsigned int imagex, XA_2x2_Color *cmap2x2)
-{
-    //unsigned int row_inc = imagex - 3;
-    xacodec_image_t *image=(xacodec_image_t*)image_p;
-
-//    XA_Print("XA_2x2_OUT_1BLK_clr8('image: %08x', 'x: %d', 'y: %d', 'imagex: %d', 'cmap2x2: %08x')",
-//	image, x, y, imagex, cmap2x2);
-    //ip_OUT_2x2_1BLK(ip, unsigned char, cmap2x2, row_inc);
-    
-    // simplified yv12->rgb32bpp converter (Y only)
-//    ip[0]=ip[1]=ip[2]=cmap2x2->clr0_0;
-//    ip[4]=ip[5]=ip[6]=cmap2x2->clr1_0;
-//    ip+=4*imagex;
-//    ip[0]=ip[1]=ip[2]=cmap2x2->clr2_0;
-//    ip[4]=ip[5]=ip[6]=cmap2x2->clr3_0;
-
-    image->planes[0][(x+0)+(y+0)*image->stride[0]]=cmap2x2->clr0_0;
-    image->planes[0][(x+1)+(y+0)*image->stride[0]]=cmap2x2->clr1_0;
-    image->planes[0][(x+0)+(y+1)*image->stride[0]]=cmap2x2->clr2_0;
-    image->planes[0][(x+1)+(y+1)*image->stride[0]]=cmap2x2->clr3_0;
-
-    image->planes[1][(x>>1)+(y>>1)*image->stride[1]]=cmap2x2->clr0_1;
-    image->planes[2][(x>>1)+(y>>1)*image->stride[2]]=cmap2x2->clr0_2;
-    
-}
-
-void XA_2x2_OUT_4BLKS_clr8(unsigned char *image, unsigned int x, unsigned int y,
-    unsigned int imagex, XA_2x2_Color *cm0, XA_2x2_Color *cm1, XA_2x2_Color *cm2,
-    XA_2x2_Color *cm3)
-{
-/*
-    unsigned int row_inc = imagex - 3;
-    unsigned char *ip = (unsigned char *)(image + y * imagex + x);
-
-    XA_Print("XA_2x2_OUT_4BLKS_clr8('image: %08x', 'x: %d', 'y: %d', 'imagex: %d', 'cm0: %08x', 'cm1: %08x', 'cm2: %08x', 'cm3: %08x')",
-	image, x, y, imagex, cm0, cm1, cm2, cm3);
-    ip_OUT_2x2_2BLKS(ip, unsigned char, cm0, cm1, row_inc);
-    ip += row_inc;
-    ip_OUT_2x2_2BLKS(ip, unsigned char, cm2, cm3, row_inc);
-*/
-
-XA_2x2_OUT_1BLK_clr8(image,x,y,imagex,cm0);
-XA_2x2_OUT_1BLK_clr8(image,x+2,y,imagex,cm1);
-XA_2x2_OUT_1BLK_clr8(image,x,y+2,imagex,cm2);
-XA_2x2_OUT_1BLK_clr8(image,x+2,y+2,imagex,cm3);
-
-}
-
-
-void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
-{
-    void (*color_func)();
-
-//    XA_Print("YUV2x2_Blk_Func('image_type: %d', 'blks: %d', 'dith_flag: %d')",
-//	    image_type, blks, dith_flag);
-
-    if (blks == 1)
-    {
-	switch(image_type)
-	{
-	    default:
-		color_func = XA_2x2_OUT_1BLK_clr8;
-		break;
-	}
-    }
-    else if(blks == 4)
-    {
-	switch(image_type)
-	{
-	    default:
-		color_func = XA_2x2_OUT_4BLKS_clr8;
-		break;
-	}
-    }
-    else printf("Ajajj!\n");
-
-//    XA_Print("YUV2x2_Blk_Func -> %08x", color_func);
-
-    return((void *)color_func);
-}
-
-
-/*****************************************************************************
- * Take Four Y's and UV and put them into a 2x2 Color structure.
- * Convert to display clr.
- ******************/
-
-void XA_YUV_2x2_clr(cmap2x2,Y0,Y1,Y2,Y3,U,V,map_flag,map,chdr)
-XA_2x2_Color *cmap2x2;
-xaULONG Y0,Y1,Y2,Y3,U,V;
-xaULONG map_flag,*map;
-XA_CHDR *chdr;
-{ xaLONG cr,cg,cb; xaULONG r,g,b;
-
-//  printf("XA_YUV_2x2_clr(%p [%d,%d,%d,%d][%d][%d] %d %p %p)\n",
-//          cmap2x2,Y0,Y1,Y2,Y3,U,V,map_flag,map,chdr);
-
-  cmap2x2->clr0_0=Y0;
-  cmap2x2->clr1_0=Y1;
-  cmap2x2->clr2_0=Y2;
-  cmap2x2->clr3_0=Y3;
-  cmap2x2->clr0_1=U;
-  cmap2x2->clr0_2=V;
-
-//  cmap2x2->clr0_0 = 0x1111;
-//  cmap2x2->clr1_0 = 0x3535;
-//  cmap2x2->clr2_0 = 0x7272;
-//  cmap2x2->clr3_0 = 0xbfbf;
-
-/*
-  xaUBYTE *rl = xa_byte_limit;
-
-  cr = YUV2_VR_tab[V];
-  cb = YUV2_UB_tab[U];
-  cg = YUV2_UG_tab[U] + YUV2_VG_tab[V];
-
-  YUV_TO_RGB(Y0,cr,cg,cb,rl,r,g,b);
-  cmap2x2->clr0_0 = XA_RGB24_To_CLR32(r,g,b,map_flag,map,chdr);
-  YUV_TO_RGB(Y1,cr,cg,cb,rl,r,g,b);
-  cmap2x2->clr1_0 = XA_RGB24_To_CLR32(r,g,b,map_flag,map,chdr);
-  YUV_TO_RGB(Y2,cr,cg,cb,rl,r,g,b);
-  cmap2x2->clr2_0 = XA_RGB24_To_CLR32(r,g,b,map_flag,map,chdr);
-  YUV_TO_RGB(Y3,cr,cg,cb,rl,r,g,b);
-  cmap2x2->clr3_0 = XA_RGB24_To_CLR32(r,g,b,map_flag,map,chdr);
-*/
-}
-
-
-
-void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
-{
-//    XA_Print("YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
-//	    image_type, dith_type);
-    if(image_type!=0)printf("izeeeeee!\n");
-    return (void*)XA_YUV_2x2_clr;
-}
-
-
 int XA_Gen_YUV_Tabs(XA_ANIM_HDR *anim_hdr)
 {
     XA_Print("XA_Gen_YUV_Tabs('anim_hdr: %08x')", anim_hdr);
@@ -641,6 +471,102 @@ void JPG_Alloc_MCU_Bufs(XA_ANIM_HDR *anim_hdr, unsigned int width,
     XA_Print("JPG_Alloc_MCU_Bufs('anim_hdr: %08x', 'width: %d', 'height: %d', 'full_flag: %d')",
 	    anim_hdr, width, height, full_flag);
 }
+
+
+/* ---------------  4x4 pixel YUV block fillers (CVID) ----------------- */
+
+typedef struct
+{
+    unsigned char r0, g0, b0;
+    unsigned char r1, g1, b1;
+    unsigned char r2, g2, b2;
+    unsigned char r3, g3, b3;
+    unsigned int clr0_0, clr0_1, clr0_2, clr0_3;
+    unsigned int clr1_0, clr1_1, clr1_2, clr1_3;
+    unsigned int clr2_0, clr2_1, clr2_2, clr2_3;
+    unsigned int clr3_0, clr3_1, clr3_2, clr3_3;
+} XA_2x2_Color;
+
+#define SET_4_YUV_PIXELS(image,x,y,cmap2x2) \
+    image->planes[0][((x)+0)+((y)+0)*image->stride[0]]=cmap2x2->clr0_0;\
+    image->planes[0][((x)+1)+((y)+0)*image->stride[0]]=cmap2x2->clr0_1;\
+    image->planes[0][((x)+0)+((y)+1)*image->stride[0]]=cmap2x2->clr0_2;\
+    image->planes[0][((x)+1)+((y)+1)*image->stride[0]]=cmap2x2->clr0_3;\
+    image->planes[1][((x)>>1)+((y)>>1)*image->stride[1]]=cmap2x2->clr1_0;\
+    image->planes[2][((x)>>1)+((y)>>1)*image->stride[2]]=cmap2x2->clr1_1;
+
+void XA_2x2_OUT_1BLK_clr8(unsigned char *image_p, unsigned int x, unsigned int y,
+    unsigned int imagex, XA_2x2_Color *cmap2x2)
+{
+    xacodec_image_t *image=(xacodec_image_t*)image_p;
+
+#if 0
+    SET_4_YUV_PIXELS(image,x,y,cmap2x2)
+#else
+    SET_4_YUV_PIXELS(image,x,y,cmap2x2)
+    SET_4_YUV_PIXELS(image,x+2,y,cmap2x2)
+    SET_4_YUV_PIXELS(image,x,y+2,cmap2x2)
+    SET_4_YUV_PIXELS(image,x+2,y+2,cmap2x2)
+#endif
+
+}
+
+void XA_2x2_OUT_4BLKS_clr8(unsigned char *image_p, unsigned int x, unsigned int y,
+    unsigned int imagex, XA_2x2_Color *cm0, XA_2x2_Color *cm1, XA_2x2_Color *cm2,
+    XA_2x2_Color *cm3)
+{
+    xacodec_image_t *image=(xacodec_image_t*)image_p;
+
+    SET_4_YUV_PIXELS(image,x,y,cm0)
+    SET_4_YUV_PIXELS(image,x+2,y,cm1)
+    SET_4_YUV_PIXELS(image,x,y+2,cm2)
+    SET_4_YUV_PIXELS(image,x+2,y+2,cm3)
+}
+
+void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
+{
+    void (*color_func)();
+
+    switch(blks){
+    case 1:
+	return (void*) XA_2x2_OUT_1BLK_clr8;
+    case 4:
+	return (void*) XA_2x2_OUT_4BLKS_clr8;
+    }
+
+    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Unimplemented: YUV2x2_Blk_Func(image_type=%d  blks=%d  dith=%d)\n",image_type,blks,dith_flag);
+    return (void*) XA_dummy;
+}
+
+//  Take Four Y's and UV and put them into a 2x2 Color structure.
+
+void XA_YUV_2x2_clr(cmap2x2,Y0,Y1,Y2,Y3,U,V,map_flag,map,chdr)
+XA_2x2_Color *cmap2x2;
+xaULONG Y0,Y1,Y2,Y3,U,V;
+xaULONG map_flag,*map;
+XA_CHDR *chdr;
+{
+
+//  printf("XA_YUV_2x2_clr(%p [%d,%d,%d,%d][%d][%d] %d %p %p)\n",
+//          cmap2x2,Y0,Y1,Y2,Y3,U,V,map_flag,map,chdr);
+
+  cmap2x2->clr0_0=Y0;
+  cmap2x2->clr0_1=Y1;
+  cmap2x2->clr0_2=Y2;
+  cmap2x2->clr0_3=Y3;
+  cmap2x2->clr1_0=U;
+  cmap2x2->clr1_1=V;
+
+}
+
+void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
+{
+//    XA_Print("YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
+//	    image_type, dith_type);
+    return (void*)XA_YUV_2x2_clr;
+}
+
+/* -------------------- whole YV12 frame converter ------------------- */
 
 typedef struct
 {
@@ -665,20 +591,23 @@ typedef struct
 
 #define XA_IMTYPE_RGB	0x0001
 
-void XA_YUV1611_To_RGB(unsigned char *image, unsigned int imagex, unsigned int imagey,
-    unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
+void XA_YUV1611_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned int imagey,
+    unsigned int i_x, unsigned int i_y, YUVBufs *yuv, YUVTabs *yuv_tabs,
     unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
 {
-    XA_Print("XA_YUV1611_To_RGB('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
-	image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
-}
+    xacodec_image_t *image=(xacodec_image_t*)image_p;
 
-void XA_YUV1611_To_CLR8(unsigned char *image, unsigned int imagex, unsigned int imagey,
-    unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
-    unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
-{
     XA_Print("XA_YUV1611_To_CLR8('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
-	image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
+	image, imagex, imagey, i_x, i_y, yuv, yuv_tabs, map_flag, map, chdr);
+
+//    memcpy(image,yuv->Ybuf,imagex*imagey);
+//    memcpy(image+imagex*imagey,yuv->Vbuf,imagex*imagey/4);
+//    memcpy(image+imagex*imagey*5/4,yuv->Ubuf,imagex*imagey/4);
+    
+    memcpy(image->planes[0],yuv->Ybuf,imagex*imagey);
+    memcpy(image->planes[1],yuv->Ubuf,imagex*imagey/4);
+    memcpy(image->planes[2],yuv->Vbuf,imagex*imagey/4);
+
 }
 
 void *XA_YUV1611_Func(unsigned int image_type)
@@ -687,17 +616,7 @@ void *XA_YUV1611_Func(unsigned int image_type)
 
     XA_Print("XA_YUV1611_Func('image_type: %d')", image_type);
 
-    switch(image_type)
-    {
-	case XA_IMTYPE_RGB:
-	    color_func = XA_YUV1611_To_RGB;
-	    break;
-	default:
-	    color_func = XA_YUV1611_To_CLR8;
-	    break;
-    }
-
-    return((void *)color_func);
+    return XA_YUV1611_To_CLR8;
 }
 
 /* YUV 41 11 11 routines */
@@ -724,6 +643,8 @@ void *XA_YUV411111_Func(unsigned int image_type)
     return((void *)color_func);
 }
 
+
+// input frame format:  YUV 4:2:0 (YV12)
 void XA_YUV221111_To_CLR8(image_p,imagex,imagey,i_x,i_y,yuv,yuv_tabs,map_flag,map,chdr)
 xaUBYTE *image_p;		xaULONG imagex,imagey,i_x,i_y;
 YUVBufs *yuv;	YUVTabs *yuv_tabs;
@@ -754,24 +675,9 @@ if(imagex==image->width && imagey==image->height){
     image->stride[0]=imagex; // yuv->y_w
     image->stride[1]=image->stride[2]=imagex/2; // yuv->uv_w
 } else {
-    int y;
     printf("partial YV12 not implemented!!!!!!\n");
 
 }
-
-//    memcpy(image,yuv->Ybuf,imagex*imagey);
-//    memcpy(image+imagex*imagey,yuv->Vbuf,imagex*imagey/4);
-//    memcpy(image+imagex*imagey*5/4,yuv->Ubuf,imagex*imagey/4);
-
-/*
-    unsigned char *Ybuf;
-    unsigned char *Ubuf;
-    unsigned char *Vbuf;
-    unsigned char *the_buf;
-    unsigned int the_buf_size;
-    unsigned short y_w, y_h;
-    unsigned short uv_w, uv_h;
-*/
 
 }
 
