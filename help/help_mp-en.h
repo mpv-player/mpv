@@ -86,7 +86,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Trying to force audio codec driver family %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Cannot find audio codec for forced driver family, falling back to other drivers.\n"
 #define MSGTR_CantFindAudioCodec "Cannot find codec for audio format 0x%X.\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Try to upgrade %s from etc/codecs.conf\n*** If it still does not work, read DOCS/codecs.html!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Try to upgrade %s from etc/codecs.conf\n*** If it still does not work, read DOCS/en/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Could not initialize audio codec -> no sound.\n"
 #define MSGTR_TryForceVideoFmtStr "Trying to force video codec driver family %s ...\n"
 #define MSGTR_CantFindVideoCodec "Cannot find codec matching selected -vo and video format 0x%X.\n"
@@ -113,8 +113,8 @@ static char help_text[]=
 "  - Try -cache 8192.\n"\
 "- Are you using -cache to play a non-interleaved AVI file?\n"\
 "  - Try -nocache.\n"\
-"Read DOCS/video.html and DOCS/sound.html for tuning/speedup tips.\n"\
-"If none of this helps you, read DOCS/bugreports.html.\n\n"
+"Read DOCS/en/video.html and DOCS/en/sound.html for tuning/speedup tips.\n"\
+"If none of this helps you, read DOCS/en/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer was compiled WITHOUT GUI support.\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI requires X11.\n"
@@ -147,7 +147,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer crashed by an 'Illegal Instruction'.\n"\
 "  It may be a bug in our new runtime CPU-detection code...\n"\
-"  Please read DOCS/bugreports.html.\n"
+"  Please read DOCS/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer crashed by an 'Illegal Instruction'.\n"\
 "  It usually happens when you run it on a CPU different than the one it was\n"\
@@ -155,11 +155,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer crashed by bad usage of CPU/FPU/RAM.\n"\
 "  Recompile MPlayer with --enable-debug and make a 'gdb' backtrace and\n"\
-"  disassembly. For details, see DOCS/bugreports.html#crash\n"
+"  disassembly. For details, see DOCS/en/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer crashed. This shouldn't happen.\n"\
 "  It can be a bug in the MPlayer code _or_ in your drivers _or_ in your gcc\n"\
-"  version. If you think it's MPlayer's fault, please read DOCS/bugreports.html\n"\
+"  version. If you think it's MPlayer's fault, please read DOCS/en/bugreports.html\n"\
 "  and follow the instructions there. We can't and won't help unless you provide\n"\
 "  this information when reporting a possible bug.\n"
 
@@ -291,7 +291,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Cannot seek in raw AVI streams. (Index required, try with the -idx switch.)\n"
 #define MSGTR_CantSeekFile "Cannot seek in this file.\n"
 
-#define MSGTR_EncryptedVOB "Encrypted VOB file (not compiled with libcss support)! Read DOCS/cd-dvd.html.\n"
+#define MSGTR_EncryptedVOB "Encrypted VOB file (not compiled with libcss support)! Read DOCS/en/cd-dvd.html.\n"
 #define MSGTR_EncryptedVOBauth "Encrypted stream but you did not request authentication!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Compressed headers not (yet) supported.\n"
