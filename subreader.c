@@ -212,13 +212,14 @@ subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
 
 	p=q=line;
 	for (current->lines=1; current->lines < SUB_MAX_TEXT; current->lines++) {
-	    for (q=p,len=0; *p && *p!='\r' && *p!='\n' && strncmp(p,"[br]",4); p++,len++);
+	    for (q=p,len=0; *p && *p!='\r' && *p!='\n' && *p!='|' && strncmp(p,"[br]",4); p++,len++);
 	    current->text[current->lines-1]=(char *)malloc (len+1);
 	    if (!current->text[current->lines-1]) return ERR;
 	    strncpy (current->text[current->lines-1], q, len);
 	    current->text[current->lines-1][len]='\0';
 	    if (!*p || *p=='\r' || *p=='\n') break;
-	    while (*p++!=']');
+	    if (*p=='|') p++;
+	    else while (*p++!=']');
 	}
 	break;
     }
