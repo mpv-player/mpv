@@ -297,13 +297,13 @@ static void uninit(sh_video_t *sh){
 }
 
 static void draw_slice(struct AVCodecContext *s,
-                	UINT8 **src, int linesize,
+                	uint8_t **src, int linesize,
                 	int y, int width, int height){
     sh_video_t * sh = s->opaque;
     int stride[3];
     int start=0, i;
     int skip_stride= (s->width+15)>>4;
-    UINT8 *skip= &s->coded_frame->mbskip_table[(y>>4)*skip_stride];
+    uint8_t *skip= &s->coded_frame->mbskip_table[(y>>4)*skip_stride];
     int threshold= s->coded_frame->age;
 
     stride[0]=linesize;
@@ -318,7 +318,7 @@ static void draw_slice(struct AVCodecContext *s,
             if(i*16>=width || skip[i]>=threshold){
                 if(start==i) start++;
                 else{
-                    UINT8 *src2[3]= {src[0] + start*16, 
+                    uint8_t *src2[3]= {src[0] + start*16, 
                                      src[1] + start*8, 
                                      src[2] + start*8};
 //printf("%2d-%2d x %d\n", start, i, y);
