@@ -19,17 +19,17 @@ typedef struct __attribute__((__packed__))
 #define _BITMAPINFOHEADER_
 typedef struct __attribute__((__packed__))
 {
-    long 	biSize;
-    long  	biWidth;
-    long  	biHeight;
+    int 	biSize;
+    int  	biWidth;
+    int  	biHeight;
     short 	biPlanes;
     short 	biBitCount;
-    long 	biCompression;
-    long 	biSizeImage;
-    long  	biXPelsPerMeter;
-    long  	biYPelsPerMeter;
-    long 	biClrUsed;
-    long 	biClrImportant;
+    int 	biCompression;
+    int 	biSizeImage;
+    int  	biXPelsPerMeter;
+    int  	biYPelsPerMeter;
+    int 	biClrUsed;
+    int 	biClrImportant;
 } BITMAPINFOHEADER, *PBITMAPINFOHEADER, *LPBITMAPINFOHEADER;
 typedef struct {
 	BITMAPINFOHEADER bmiHeader;
