@@ -578,10 +578,10 @@ static uint32_t vidix_get_image(mp_image_t *mpi)
 	mpi->width=mpi->stride[0]=dstrides.y;
 	if(mpi->flags&MP_IMGFLAG_PLANAR)
 	{
-	    mpi->planes[2]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.v;
-	    mpi->stride[2]=dstrides.v;
-	    mpi->planes[1]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.u;
-	    mpi->stride[1]=dstrides.u;
+	    mpi->planes[1]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.v;
+	    mpi->stride[1]=dstrides.v >> mpi->chroma_x_shift;
+	    mpi->planes[2]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.u;
+	    mpi->stride[2]=dstrides.u >> mpi->chroma_x_shift;
 	} else
 	    mpi->width/=mpi->bpp/8;
 	mpi->flags|=MP_IMGFLAG_DIRECT;
