@@ -2236,6 +2236,16 @@ s: échange les champs (échange les lignes paires & impaires)
 Extrait un seul champs de l'image entrelacée en utilisant un calcul large
 pour éviter de gaspiller le temps CPU. L'argument optionnel n spécifie si
 l'on doit extraire un champs pair ou impair (selon que n soit pair ou impair).
+.IPs "detc"
+Filtre expérimental pour inverser le processus de telecine de façon à nettoyer
+les trames progressives. Pas encore configurable et son comportement sera
+peut-être changé à l'avenir.
+.IPs "telecine[=départ]"
+Applique un processus telecine 3:2 "telecine" pour augmenter le débit de 20%.
+Cela ne fonctionnera surement pas correctement avec MPlayer, mais peut être
+utilisé avec "mencoder -fps 29.97 -ofps 29.97 -vop telecine". Les deux options
+fps sont essentielles ! (la synchro A/V sera brisée si elles sont mauvaises.)
+Le paramètre optionnel départ indique où démarrer (0-3).
 .IPs "boxblur=rayon:puissance[:rayon:puissance]"
 flou boite
 .RSss
