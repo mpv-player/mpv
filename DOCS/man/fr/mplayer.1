@@ -376,10 +376,9 @@ fichier et placez-le dans ~/.mplayer ou dans le même répertoire que le fichier.
 .SH "OPTIONS GÉNÉRALES"
 .
 .TP
-.B \-codecs-file <nomfichier>
+.B \-codecs-file <nomfichier> (voir aussi \-afm, \-ac, \-vfm et \-vc)
 Définit le fichier de codecs au lieu de celui du système ou de celui inclus
 dans mplayer.
-Voir aussi \-afm, \-ac, \-vfm et \-vc.
 .
 .TP
 .B \-include <fichier\ de\ configuration>
@@ -2265,10 +2264,10 @@ hauteur/\:largeur de fenêtres.
 Désactive l'utilisation de XVideo au travers du pilote de sortie vidéo SDL.
 .
 .TP
-.B \-ontop
-Rends le lecteur toujours visible.
-Permise par les pilotes qui utilisent X11, excepté SDL, aussi bien que directx
-et gl2 sous Windows.
+.B \-ontop\ 
+Rends la fenêtre de lecture toujours visible.
+Permise par les pilotes de sortie vidéo qui utilisent X11, excepté SDL,
+aussi bien que directx et gl2 sous Windows.
 .
 .TP
 .B \-panscan <0.0\-1.0>
@@ -2902,7 +2901,7 @@ Force le codec MP3 l3codeca.acm.
 Essaie d'abord libmad, puis se rabat sur les autres.
 .IPs "\-ac hwac3,a52,"
 Essaie le transfert matériel AC3 (vers un décodeur externe par ex.\&),
-ensuite le codec logiciel AC3, puis les autres.
+le codec logiciel AC3, puis les autres.
 .IPs "\-ac -ffmp3,"
 Essaie tous les codecs excepté le décodeur MP3 de FFmpeg.
 .RE
@@ -2912,11 +2911,12 @@ Essaie tous les codecs excepté le décodeur MP3 de FFmpeg.
 .B \-af <plugin1[=options],plugin2,...>
 Active un liste (séparés par une virgule) des filtres audio et de leurs
 options.
+Voir aussi la section des filtres audio de la documentation.
 .br
 Les filtres disponibles sont:
 .RSs
 .IPs resample[=srate[:sloppy][:type]]
-Change la fréquence d'échantionnage du flux audio à un entier srate (Hz).
+Change la fréquence d'échantionnage du flux audio à un entier srate en Hz.
 Il ne permet que le format 16 bit little endian.
 .IPs channels[=nch]
 Change le nombre de canaux à nch canaux de sortie.
@@ -2926,8 +2926,8 @@ stéréo, où le canal audio est répété sur chacun des canaux de sortie).
 Si le nombre de canaux de sortie est plus petit que le nombre de canaux
 d'entrée les canaux en trop seront tronqués.
 .IPs format[=bps:f]
-Sélectionne le format f et octets par échantillon bps utilisés pour la sortie
-depuis la couche filtre.
+Sélectionne le nombre d'octets par échantillon et le format utilisé pour la
+sortie depuis la couche filtre.
 L'option bps est un entier et s'exprime en Octets par échantillon.
 Le format f est une chaine contenant un mix concaténé de:
 .br
@@ -2944,17 +2944,17 @@ Selectionne le niveau du volume de sortie.
 Ce filtre n'est pas réentrant et ne peux donc être activé qu'une seule fois
 pour chaque flux audio.
 .RSss
-v: gain désiré en dB pour tous les canaux du flux.
-Le gain peut être fixé de -200dB à +60dB (où -200dB coupe le son complètement
+v: Défini le gain désiré en dB pour tous les canaux du flux,
+de -200dB à +60dB (où -200dB coupe le son complètement
 et +40dB équivaut à un gain de 1000).
 .br
-sc: active le découpage logiciel.
+sc: Active le découpage logiciel.
 .REss
 .IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
 Mixe les canaux arbitrairement, voir DOCS/\:HTML/\:fr/\:devices.html#audio-dev
 pour les détails.
 .RSss
-n: nombre de canaux de sortie (1\-6).
+n: nombre de canaux de sortie (1\-6)
 .br
 lij: Combien du canal j est mixé dans le canal de sortie i.
 .REss
@@ -2964,7 +2964,7 @@ Ajoute le canal du caisson de basse.
 fc: Fréquence de coupure pour le filtre passe-bas (20Hz à 300Hz)
 (par défaut\ : 60Hz).
 .br
-ca: numéro de canal pour le sous-canal.
+ca: numéro de canal pour le sous-canal
 .REss
 .IPs surround[=d]
 Décodeur pour le son surround encodé en matrice, fonctionne sur de nombreux
@@ -2981,8 +2981,8 @@ flottant entre 0 et 1000).
 Exporte le signal entrant vers un autre processus en utilisant le mappage
 mémoire (nmap()).
 .RSss
-fichier_nmappé: Fichier où mapper les données
-(par défaut\ : ~/.mplayer/\:mplayer-af_export).
+fichier_nmappé: fichier où mapper les données
+(par défaut\ : ~/.mplayer/\:mplayer-af_export)
 .br
 nsamples: nombre d'échantillons par canal (par défaut\ : 512)
 .REss
@@ -2995,13 +2995,13 @@ Défini les options avancées de filtrage audio\ :
 .IPs force=<0\-3>
 Force l'insertion de filtres audios de l'une des façons suivantes:
 .RSss
-0: Insertion totalement automatique des filtres (par défaut)
+0: insertion totalement automatique des filtres (par défaut)
 .br
 1: Optimise pour fidélité.
 .br
 2: Optimise pour la vitesse.
 .br
-3: Désactive auto.
+3: Désactive l'insertion automatique de filtre.
 .REss
 .IPs list=<filtres>
 Identique à \-af.
@@ -3014,22 +3014,22 @@ d'après leur nom de pilote dans codecs.conf.
 Il se rabat sur celui par défaut si aucun ne convient.
 .br
 .I NOTE:
-Voir \-afm help pour la liste complètes des pilotes disponibles.
+Voir \-afm help pour la liste complètes des familles de codecs disponibles.
 .sp 1
 .I EXEMPLE\ :
 .PD 0
 .RSs
 .IPs "\-afm ffmpeg"
-essaie les codecs libavcodec (mp1/\:2/\:3) de FFmpeg en premier
+Essaie les codecs libavcodec de FFmpeg en premier.
 .IPs "\-afm acm,dshow"
-essaie les codecs Win32 en premier
+Essaie les codecs Win32 en premier.
 .RE
 .PD 1
 .
 .TP
 .B \-aspect <ratio>
 Force le rapport hauteur/\:largeur des films.
-Autodétecté dans les fichiers MPEG, mais ne peut l'être dans la plupart
+Autodétecté dans les fichiers MPEG, mais ne peut l'être avec la plupart
 des fichiers AVI.
 .sp 1
 .I EXEMPLE:
@@ -3051,7 +3051,7 @@ Renverse l'image de haut en bas.
 .
 .TP
 .B \-lavdopts <option1:option2:...> (CODE DE DÉBOGUAGE)
-Si vous décodez avec libavcodec, vous pouvez spécifier ses paramètres ici.
+Définit les paramètres de décodage de libavcodec.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -3061,17 +3061,14 @@ Si vous décodez avec libavcodec, vous pouvez spécifier ses paramètres ici.
 .PD 1
 .sp 1
 .RS
-.I NOTE:
-Ajoutez juste les valeurs des choses que vous voulez activer.
-.sp 1
 Les options disponibles sont:
 .RE
 .
 .RSs
-.IPs ec
+.IPs ec\ \ \ 
 cacher les erreurs\ :
 .RSss
-1: utilise un filtre de déblocage fort pour les macro-blocs endommagés
+1: Utilise un filtre de déblocage fort pour les macro-blocs endommagés.
 .br
 2: recherche du vecteur de mouvement itérative (lente)
 .br
@@ -3083,11 +3080,11 @@ résilience aux erreurs\ :
 .br
 0: désactivé
 .br
-1: prudente (devrait fonctionner avec les encodeurs cassés)
+1: prudente (Devrait fonctionner avec les encodeurs cassés.)
 .br
-2: normale (par défaut) (fonctionne avec les encodeurs conformes)
+2: normale (par défaut) (Fonctionne avec les encodeurs conformes.)
 .br
-3: agressive (plus de vérifications mais peut causer des problèmes même avec
+3: agressive (Plus de vérifications, mais peut causer des problèmes même avec
 les flux valides)
 .br
 4: très agressive
@@ -3110,7 +3107,7 @@ débogage:
 .br
 32: Vecteur de mouvement (MV)
 .br
-0x0040: Visualisation du vecteur de mouvement (utilisez -noslices)
+0x0040: visualisation du vecteur de mouvement (utilisez -noslices)
 .br
 0x0080: saut macro-bloc
 .br
@@ -3137,7 +3134,7 @@ vismv:
 4: visualise les MVs prédits en arrière des trames B
 .REss
 .IPs bug=<valeur>
-contourne manuellement les bogues des encodeurs\ :
+Contourne manuellement les bogues des encodeurs\ :
 .RSss
 0: rien
 .br
@@ -3154,15 +3151,15 @@ d'autodétection)
 .br
 32 (mpeg4):  bogue vlc illégal (autodétecté par fourcc)
 .br
-64 (mpeg4): bogue qpel XVID et DIVX (autodétecté par foorcc/\:ver)
+64 (mpeg4): bogue qpel XVID et DIVX (autodétecté par foorcc/\:version)
 .br
-128 (mpeg4): vieux standard qpel (autodétecté par fourcc/\:ver)
+128 (mpeg4): vieux standard qpel (autodétecté par fourcc/\:version)
 .br
-256 (mpeg4): un autre bogue qpel (autodétecté par fourcc/\:ver)
+256 (mpeg4): un autre bogue qpel (autodétecté par fourcc/\:version)
 .br
-512 (mpeg4): bogue direct-qpel-blocksize (autodétecté par fourcc/\:ver)
+512 (mpeg4): bogue direct-qpel-blocksize (autodétecté par fourcc/\:version)
 .br
-1024 (mpeg4): bogue de remplissage des bords (autodétecté par fourcc/\:ver)
+1024 (mpeg4): bogue de remplissage des bords (autodétecté par fourcc/\:version)
 .REss
 .IPs "idct=<0\-99> (voir \-lavcopts)"
 Pour obtenir la meilleur qualité d'encodage utilisez le même algorithme idct
@@ -3198,19 +3195,17 @@ Ne pas jouer/\:encoder la vidéo.
 Utilise le code de post-traitement d'opendivx au lieu de l'interne.
 À ne plus utiliser au profit de \-pp, car le postprocessing interne offre
 une meilleur qualité visuelle et de meilleurs performances.
-.
-L'intervalle valide des valeurs de \-oldpp varie suivant le codec, la plupart
-du temps 0\-6, où 0=désactive 6=plus lent/\:meilleur.
+L'intervalle valide des valeurs de \-oldpp varie suivant le codec, il est
+la plupart du temps 0\-6, où 0=désactive 6=plus lent/\:meilleur.
 .
 .TP
 .B \-pp <qualité> (voir aussi \-vf pp)
 Initialise le niveau de post-traitement de la DLL.
-Cette option N'EST PLUS UTILISABLE avec le filtre de post-traitement de
-MPlayer, mais uniquement avec les DLLs DirectShow Win32 qui ont des routines
+Cette option n'est plus utilisable avec \-vf pp.
+Fonctionne uniquement avec les DLLs DirectShow Win32 qui ont des routines
 de post-traitement interne.
-.
 L'intervalle valide de la valeur \-pp pour les filtres de pp varient suivant
-les codecs, généralement 0\-6, où 0=désactivé 6=plus lent/\:meilleur.
+les codecs, il est généralement 0\-6, où 0=désactivé 6=plus lent/\:meilleur.
 .
 .TP
 .B \-pphelp (voir aussi \-vf pp)
@@ -3333,7 +3328,7 @@ d'après leur nom de pilote dans codecs.conf.
 Il se rabat sur celui par défaut si aucun ne convient.
 .br
 .I NOTE\ :
-Voir \-vfm help pour une liste complète des pilotes disponibles.
+Voir \-vfm help pour une liste complète des familles de codecs disponibles.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -4522,27 +4517,26 @@ morceau.
 .
 .TP
 .B \-audio-preload <0.0\-2.0>
-Initialise l'intervalle de mémoire tampon (par défaut\ : 0.5s).
+Initialise l'intervalle de temps du tampon audio (par défaut\ : 0.5s).
 .
 .TP
-.B \-endpos <[[hh:]mm:]ss[.ms]|taille[o|ko|mo]> (voir aussi \-ss et \-sb
+.B \-endpos <[[hh:]mm:]ss[.ms]|taille[o|ko|mo]> (voir aussi \-ss et \-sb \
 également)
 Stoppe l'encodage à la position temps ou octet indiquée.
-Peut être spécifié de plusieurs façons:
 .br
 .I NOTE:
-La position en octet ne sera pas approprié, car on ne peut
+La position en octet ne sera pas précise, car on ne peut
 s'arrêter qu'à une limite de trame.
 
 .I EXEMPLE:
 .PD 0
 .RSs
 .IPs "\-endpos 56"
-n'encode que 56 secondes
+N'encode que 56 secondes
 .IPs "\-endpos 01:10:00"
-n'encode que 1 heure 10 minutes
+N'encode que 1 heure 10 minutes
 .IPs "\-endpos 100mb"
-n'encode que 100 Mo
+N'encode que 100 Mo
 .RE
 .PD 1
 .
@@ -4554,7 +4548,7 @@ Peut être utilisé pour outrepasser le fourcc vidéo du fichier de destination.
 .PD 0
 .RSs
 .IPs "\-ffourcc div3"
-le fichier de destination contiendra 'div3' en tant que fourcc vidéo.
+Le fichier de destination contiendra 'div3' en tant que fourcc vidéo.
 .RE
 .PD 1
 .
@@ -4566,7 +4560,7 @@ Les options disponibles sont:
 .
 .RSs
 .IPs help
-affiche cette description
+Affiche cette description.
 .IPs name=<valeur>
 titre du sujet du fichier
 .IPs artist=<valeur>
@@ -4603,88 +4597,96 @@ Envoie dans le nom fichier indiqué, au lieu de 'test.avi' par défaut.
 .
 .TP
 .B \-oac <nom codec>
-Encode avec le codec audio.
+Encode avec le codec audio (pas de valeur par défaut).
+.br
+.I NOE\ :
 Utilisez \-ovc help pour obtenir une liste des codecs disponibles.
-(pas de valeur par défaut)
-
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
 .IPs "\-oac copy"
 pas d'encodage, juste une copie du flux
 .IPs "\-oac pcm"
-encode en PCM non-compressé
+Encode en PCM non-compressé
 .IPs "\-oac mp3lame"
-encode en MP3 (en utilisant Lame)
+Encode en MP3 (en utilisant Lame)
 .IPs "\-oac lavc"
-encode avec un des codecs de libavcodec
+Encode avec un des codecs de libavcodec
 .RE
 .PD 1
 .
 .TP
-.B \-of <format> (CODE BETA!)
-Encode dans le format spécifié.
-Utilisez \-of help pour obtenir une liste des formats disponibles.
-
+.B \-of <format> (CODE BÉTA!)
+Encode dans le format de conteneur donné (par défaut\ : AVI).
+.br
+.I NOTE\ :
+Utilisez \-of help pour obtenir une liste des formats de conteneur
+disponibles.
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
 .IPs "\-of avi"
-encode en avi (par défaut)
+encode en avi
 .IPs "\-of mpeg"
 encode en mpeg
+.IPs "\-of rawvideo"
+flux vidéo brut (pas de multiplexage - uniquement un flux vidéo)
 .RE
 .PD 1
 .
 .TP
 .B \-ofps <fps>
-Le fichier de destination a un rapport trame/\:sec différent du fichier
-source. Vous DEVEZ l'initialiser pour les fichiers à fps variables
-(asf, quelques mov) et progressifs (mpeg telecine à 29.97fps).
+Définit le rapport trame/\:sec (fps) du fichier de sortie,
+qui peut être différent de celui de la source.
+source.
+Vous devez l'initialiser pour les fichiers à fps variables
+(ASF, quelques MOV) et progressifs (MPEG téléciné à 29.97fps).
 .
 .TP
 .B \-ovc <nom codec>
-Encode avec le codec vidéo indiqué.
+Encode avec le codec vidéo indiqué (pas de valeur par défaut).
+.br
+.I NOTE\ :
 Utilisez \-ovc help pour avoir une liste des codecs disponibles.
-(pas de valeur par défaut)
-
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
 .IPs "\-ovc copy"
 pas d'encodage, juste une copie du flux
 .IPs "\-ovc divx4"
-encode en DivX4/\:DivX5 ou XviD
+Encode en DivX4/\:DivX5 ou XviD.
 .IPs "\-ovc rawrgb"
 encode en RGB24 non-compressé
 .IPs "\-ovc rawyuv"
 encode en YUV non-compressé (I420)
 .IPs "\-ovc lavc"
-encode avec un codec libavcodec
+Encode avec un codec de libavcodec.
 .RE
 .PD 1
 .
 .TP
 .B \-passlogfile <nomfichier>
-Pendant l'encodage en mode 2passes, MEncoder envoie les informations de
-la première passe dans le fichier indiqué au lieu de l'envoyer dans
-divx2pass.log.
+Envoie les informations de la première passe dans <nomfichier>
+au lieu de divx2pass.log par défaut.
 .
 .TP
 .B \-skiplimit <valeur>
-Nombre maximal de trames sautables après une non-sautée
-(\-noskiplimit pour un nombre illimité).
+Définit le nombre maximal de trames pouvant être sautés après avoir encodé
+une trame (\-noskiplimit pour un nombre illimité).
 .
 .TP
 .B \-vobsubout <nomdebase>
-Spécifie le nomdebase pour les fichiers .idx et .sub de destination.
+Définit le nomdebase pour les fichiers .idx et .sub de destination.
 Cela désactive le rendu des sous-titres dans le film encodé et le redirige
 vers les fichiers de sous-titre Vobsub.
 .
 .TP
 .B \-vobsuboutindex <index>
-Spécifie l'index des sous-titres dans les fichiers de sortie.
-(par défaut\ : 0)
+Définit l'index des sous-titres dans les fichiers de sortie
+(par défaut\ : 0).
 .
 .TP
 .B \-vobsuboutid <langid>
@@ -4877,14 +4879,14 @@ légèrement inférieure et bitrates plus hauts.
 Fixe la fréquence du filtre passe-haut en Hz.
 Les fréquences en dessous de celle spécifiée seront coupées.
 Une valeur de -1 désactivera le filtrage, une valeur de 0
-laissera lame choisir la valeur automatiquement.
+laissera LAME choisir la valeur automatiquement.
 .
 .TP
 .B lowpassfreq=<fréq>
 Fixe la fréquence du filtre passe-bas en Hz.
 Les fréquences au dessus de celle spécifiée seront coupées.
 Une valeur de -1 désactivera le filtrage, une valeur de 0
-laissera lame choisir la valeur automatiquement.
+laissera LAME choisir la valeur automatiquement.
 .
 .TP
 .B preset=<valeur>
