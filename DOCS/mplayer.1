@@ -272,9 +272,6 @@ but requires more CPU.
 .B \-sstep <sec>
 Specifies seconds between displayed frames. Useful for slideshows.
 .TP
-.B \-stop_xscreensaver
-Turns off xscreensaver at startup and turns it on again on exit.
-.TP
 .B \-use-stdin
 
 
@@ -611,6 +608,10 @@ Convert the given subtitle (specified with the \-sub switch) to the time-based
 SubViewer (SRT) subtitle format. Creates a dumpsub.srt file in current
 directory.
 .TP
+.B \-dumpmicrodvdsub (MPLAYER only)
+Convert the given subtitle (specified with the \-sub switch) to the
+MicroDVD subtitle format. Creates a dumpsub.sub file in current directory.
+.TP
 .B \-ifo <vobsub\ ifo\ file>
 Indicate the file that will be used to load palette and frame size for VOBSUB
 subtitles.
@@ -901,7 +902,7 @@ than a single buffer, so it won't work on cards with very few video memory.
 .TP
 .B \-dr \ \ \ 
 Turns on direct rendering (not supported by all codecs and video outputs)
-(default is off).
+(default is off). Warning: may cause OSD/SUB corruption!
 .TP
 .B \-dxr2 <option1:option2:...>
 This option is used to control the dxr2 driver.
@@ -1004,7 +1005,7 @@ Look into etc/example.conf for further information and in DOCS/video.html.
 .B \-monitor_vfreq <vertical frequency range> (fbdev only)
 .TP
 .B \-monitoraspect <ratio>
-Set aspect ratio of your screen.
+Set aspect ratio of your monitor or TV screen. See also -aspect for movie aspect.
 
 .I EXAMPLE:
 .PD 0
@@ -1015,6 +1016,9 @@ Set aspect ratio of your screen.
 .RE
 .PD 1
 .
+.TP
+.B \-nograbpointer
+Do not grab mouse pointer after VidMode change (-vm), useful for multihead setup.
 .TP
 .B \-noslices
 Disable drawing video by 16-pixel height slices/bands, instead draws the
@@ -1029,18 +1033,21 @@ drivers.
 .br
 The range controls how much of the image is cropped.
 .TP
-.B \-saturation <\-100\ \-\ 100>
-Adjust saturation of video output (default 0). You can get grayscale output
-with this option.
-.TP
 .B \-rootwin
 Play movie in the root window (desktop background) instead of opening
 a new one. Works only with x11, xv, xmga and xvidix drivers.
+.TP
+.B \-saturation <\-100\ \-\ 100>
+Adjust saturation of video output (default 0). You can get grayscale output
+with this option.
 .TP
 .B \-screenw <pixels> \-screenh <pixels>
 If you use an output driver which can't know the resolution of the screen
 (fbdev/x11 and/or TVout) this is where you can specify the horizontal and
 vertical resolution.
+.TP
+.B \-stop_xscreensaver
+Turns off xscreensaver at startup and turns it on again on exit.
 .TP
 .B \-vm \ \ \ 
 Try to change to a better video mode. dga, x11/xv (XF86VidMode) and sdl
@@ -1228,7 +1235,7 @@ manual workaround encoder bugs:
 .br
 1: workaround for some old lavc generated msmpeg4v3 and some opendivx files
 .br
-2: workaround XviD interlacing bug
+2: workaround old XviD interlacing bug
 .br
 3: workaround UMP4 bugs
 .REss
@@ -1238,7 +1245,7 @@ grayscale only decoding (a bit faster than with color)
 .
 .TP
 .B \-noaspect
-Disable automatic aspect compensation.
+Disable automatic movie aspect ratio compensation.
 .TP
 .B \-nosound
 Do not play/encode sound.
@@ -1453,12 +1460,14 @@ try XAnim codecs first
 .
 .TP
 .B \-vop <...,plugin3[=options],plugin2,plugin1>
-Activate a comma separated list of video filters.
+Activate a comma separated list of video filters in reverse order.
 
 .I NOTE:
 .br
 The parameters are optional and if omitted, some of them are set to default
-values. Use -1 to keep the default value.
+values. Use -1 to keep the default value. Parameters w:h means width x height
+in pixels, x:y means x;y position counted from the upper left corner of the
+bigger image.
 .br
 To get a full list of available plugins, see \-vop help.
 .br
@@ -1478,11 +1487,11 @@ unscaled original at coordinates x y. Can be used for placing subtitles/OSD in
 the resulting black bands (default: original w/h, centered x/y). The last
 parameter (de)activates OSD rendering (default: 0).
 .IPs flip
-Flips the image upside down.
+Flips the image upside down. See also option -flip.
 .IPs mirror
 Flips the image on Y axis.
 .IPs rotate[=<0-3>]
-Rotates and flips the image +/\- 90 degrees.
+Rotates and flips (optional) the image +/\- 90 degrees.
 .IPs scale[=w:h[:c[:p]]]
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
 colorspace conversion (see \-sws option too!). The value 0 is used for scaled
@@ -1490,7 +1499,7 @@ colorspace conversion (see \-sws option too!). The value 0 is used for scaled
 Optionaly chroma skipping (c from 0\-3) and scaling parameters can be
 specified. (see the \-sws option for details)
 .IPs yuy2
-Forces software YV12/I420 to YUY2 conversion.
+Forces software YV12/I420 or 422P to YUY2 conversion.
 .IPs rgb2bgr[=swap]
 RGB 24/32 <\-> BGR 24/32 colorspace conversion with optional R <\-> B
 swapping.
@@ -1498,7 +1507,7 @@ swapping.
 RGB/BGR 8 \-> 15/16/24/32bpp colorspace conversion using palette.
 .IPs format[=fourcc]
 Restricts the colorspace for next filter. It does not do any conversion! Use
-the scale filter for a real conversion.
+together with the scale filter for a real conversion.
 .IPs pp[=flags]
 Activates the external postprocessing filter. (see \-pp option for details)
 .IPs lavc[=quality:fps]
@@ -1506,7 +1515,7 @@ Realtime MPEG1 encoder for use with DVB/DXR3 (libavcodec)
 .IPs fame
 Realtime MPEG1 encoder for use with DVB/DXR3 (libfame)
 .IPs dvbscale[=aspect]
-Set up optimal scaling for DVB cards. (aspect=DVB_HEIGHT*ASPECTRATIO)
+Set up optimal scaling for DVB cards. (aspect=DVB_HEIGHT*ASPECTRATIO, default: 768)
 .IPs cropdetect[=0\-255]
 Calculates necessary cropping parameters and prints the recommended parameters
 to stdout. The threshold can be optionally specified from nothing (0) to
