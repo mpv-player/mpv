@@ -401,18 +401,6 @@ static void uninit_player(unsigned int mask){
     vo_spudec=NULL;
   }
 
-#ifdef USE_SUB  
-  if ( subtitles ) 
-   {
-    current_module="sub_free";
-    sub_free( subtitles );
-    if ( sub_name ) free( sub_name );
-    sub_name=NULL;
-    vo_sub=NULL;
-    subtitles=NULL;
-   }
-#endif
-
   if(mask&INITED_AO){
     inited_flags&=~INITED_AO;
     current_module="uninit_ao";
@@ -3258,6 +3246,18 @@ if(benchmark){
 
 // time to uninit all, except global stuff:
 uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT+(fixed_vo?INITED_VO:0)));
+
+#ifdef USE_SUB  
+  if ( subtitles ) 
+   {
+    current_module="sub_free";
+    sub_free( subtitles );
+    if ( sub_name ) free( sub_name );
+    sub_name=NULL;
+    vo_sub=NULL;
+    subtitles=NULL;
+   }
+#endif
 
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
   eof = eof == PT_NEXT_ENTRY ? 1 : -1;
