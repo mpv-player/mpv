@@ -74,81 +74,80 @@ typedef struct ao_macosx_s
   AudioStreamBasicDescription outputStreamBasicDescription;
 
   /* Ring-buffer */
-  pthread_mutex_t buffer_mutex; /* mutex covering buffer variables */
-
-  unsigned char *buffer[NUM_BUFS];
-  unsigned int buffer_len;
+  /* does not need explicit synchronization, but needs to allocate
+   * (num_chunks + 1) * chunk_size memory to store num_chunks * chunk_size
+   * data */
+  unsigned char *buffer;
+  unsigned int buffer_len; ///< must always be (num_chunks + 1) * chunk_size
+  unsigned int num_chunks;
+  unsigned int chunk_size;
   
-  unsigned int buf_read;
-  unsigned int buf_write;
   unsigned int buf_read_pos;
   unsigned int buf_write_pos;
-  int full_buffers;
-  int buffered_bytes;
 } ao_macosx_t;
 
 static ao_macosx_t *ao;
 
-/* General purpose Ring-buffering routines */
-static int write_buffer(unsigned char* data,int len){
-  int len2=0;
-  int x;
-
-  while(len>0){
-    if(ao->full_buffers==NUM_BUFS) {
-      ao_msg(MSGT_AO,MSGL_V, "Buffer overrun\n");
-      break;
-    }
-
-    x=ao->buffer_len-ao->buf_write_pos;
-    if(x>len) x=len;
-    memcpy(ao->buffer[ao->buf_write]+ao->buf_write_pos,data+len2,x);
-
-    /* accessing common variables, locking mutex */
-    pthread_mutex_lock(&ao->buffer_mutex);
-    len2+=x; len-=x;
-    ao->buffered_bytes+=x; ao->buf_write_pos+=x;
-    if(ao->buf_write_pos>=ao->buffer_len) {
-      /* block is full, find next! */
-      ao->buf_write=(ao->buf_write+1)%NUM_BUFS;
-      ++ao->full_buffers;
-      ao->buf_write_pos=0;
-    }
-    pthread_mutex_unlock(&ao->buffer_mutex);
-  }
-
-  return len2;
+/**
+ * \brief return number of free bytes in the buffer
+ *    may only be called by mplayer's thread
+ * \return minimum number of free bytes in buffer, value may change between
+ *    two immediately following calls, and the real number of free bytes
+ *    might actually be larger!
+ */
+static int buf_free() {
+  int free = ao->buf_read_pos - ao->buf_write_pos - ao->chunk_size;
+  if (free < 0) free += ao->buffer_len;
+  return free;
 }
 
-static int read_buffer(unsigned char* data,int len){
-  int len2=0;
-  int x;
+/**
+ * \brief return number of buffered bytes
+ *    may only be called by playback thread
+ * \return minimum number of buffered bytes, value may change between
+ *    two immediately following calls, and the real number of buffered bytes
+ *    might actually be larger!
+ */
+static int buf_used() {
+  int used = ao->buf_write_pos - ao->buf_read_pos;
+  if (used < 0) used += ao->buffer_len;
+  return used;
+}
 
-  while(len>0){
-    if(ao->full_buffers==0) {
-      ao_msg(MSGT_AO,MSGL_V, "Buffer underrun\n");
-      break;
-    }
-
-    x=ao->buffer_len-ao->buf_read_pos;
-    if(x>len) x=len;
-    memcpy(data+len2,ao->buffer[ao->buf_read]+ao->buf_read_pos,x);
-    len2+=x; len-=x;
-
-    /* accessing common variables, locking mutex */
-    pthread_mutex_lock(&ao->buffer_mutex);
-    ao->buffered_bytes-=x; ao->buf_read_pos+=x;
-    if(ao->buf_read_pos>=ao->buffer_len){
-      /* block is empty, find next! */
-       ao->buf_read=(ao->buf_read+1)%NUM_BUFS;
-       --ao->full_buffers;
-       ao->buf_read_pos=0;
-    }
-    pthread_mutex_unlock(&ao->buffer_mutex);
+/**
+ * \brief add data to ringbuffer
+ */
+static int write_buffer(unsigned char* data, int len){
+  int first_len = ao->buffer_len - ao->buf_write_pos;
+  int free = buf_free();
+  if (len > free) len = free;
+  if (first_len > len) first_len = len;
+  // till end of buffer
+  memcpy (&ao->buffer[ao->buf_write_pos], data, first_len);
+  if (len > first_len) { // we have to wrap around
+    // remaining part from beginning of buffer
+    memcpy (ao->buffer, &data[first_len], len - first_len);
   }
-  
-  
-  return len2;
+  ao->buf_write_pos = (ao->buf_write_pos + len) % ao->buffer_len;
+  return len;
+}
+
+/**
+ * \brief remove data from ringbuffer
+ */
+static int read_buffer(unsigned char* data,int len){
+  int first_len = ao->buffer_len - ao->buf_read_pos;
+  int buffered = buf_used();
+  if (len > buffered) len = buffered;
+  if (first_len > len) first_len = len;
+  // till end of buffer
+  memcpy (data, &ao->buffer[ao->buf_read_pos], first_len);
+  if (len > first_len) { // we have to wrap around
+    // remaining part from beginning of buffer
+    memcpy (&data[first_len], ao->buffer, len - first_len);
+  }
+  ao->buf_read_pos = (ao->buf_read_pos + len) % ao->buffer_len;
+  return len;
 }
 
 /* end ring buffer stuff */
@@ -157,7 +156,7 @@ static int read_buffer(unsigned char* data,int len){
 static OSStatus audioDeviceIOProc(AudioDeviceID inDevice, const AudioTimeStamp *inNow, const AudioBufferList *inInputData, const AudioTimeStamp *inInputTime, AudioBufferList *outOutputData, const AudioTimeStamp *inOutputTime, void *inClientData)
 {
   outOutputData->mBuffers[0].mDataByteSize =
-    read_buffer((char *)outOutputData->mBuffers[0].mData, ao->buffer_len);
+    read_buffer((char *)outOutputData->mBuffers[0].mData, ao->chunk_size);
 
   return 0;
 }
@@ -245,10 +244,6 @@ static int init(int rate,int channels,int format,int flags)
   int i;
 
   ao = (ao_macosx_t *)malloc(sizeof(ao_macosx_t));
-
-  /* initialise mutex */
-  pthread_mutex_init(&ao->buffer_mutex, NULL);
-  pthread_mutex_unlock(&ao->buffer_mutex);
 
   /* get default output device */ 
   propertySize = sizeof(ao->outputDeviceID);
@@ -378,17 +373,17 @@ static int init(int rate,int channels,int format,int flags)
 
     /* get requested buffer length */
     // TODO: set NUM_BUFS dinamically, based on buffer size!
-    propertySize = sizeof(ao->buffer_len);
-    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyBufferSize, &propertySize, &ao->buffer_len);
+    propertySize = sizeof(ao->chunk_size);
+    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyBufferSize, &propertySize, &ao->chunk_size);
     if (status) {
         ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceGetProperty returned %d when getting kAudioDevicePropertyBufferSize\n", (int)status);
 	return CONTROL_FALSE;
     }
-    ao_msg(MSGT_AO,MSGL_V, "%5d ao->buffer_len\n", (int)ao->buffer_len);
+    ao_msg(MSGT_AO,MSGL_V, "%5d chunk size\n", (int)ao->chunk_size);
 
     ao_data.samplerate = ao->outputStreamBasicDescription.mSampleRate;
 	ao_data.channels = channels;
-    ao_data.outburst = ao_data.buffersize = ao->buffer_len;
+    ao_data.outburst = ao_data.buffersize = ao->chunk_size;
     ao_data.bps = 
       ao_data.samplerate * ao->outputStreamBasicDescription.mBytesPerFrame;
 
@@ -410,14 +405,13 @@ static int init(int rate,int channels,int format,int flags)
     }
   
     /* Allocate ring-buffer memory */
-    for(i=0;i<NUM_BUFS;i++) 
-      ao->buffer[i]=(unsigned char *) malloc(ao->buffer_len);
+    ao->num_chunks = NUM_BUFS;
+    ao->buffer_len = (ao->num_chunks + 1) * ao->chunk_size;
+    ao->buffer = (unsigned char *)malloc(ao->buffer_len);
 
 
     /* Prepare for playback */
 
-    reset();
-    
     /* Set the IO proc that CoreAudio will call when it needs data */
     status = AudioDeviceAddIOProc(ao->outputDeviceID, audioDeviceIOProc, NULL);
     if (status) {
@@ -426,12 +420,7 @@ static int init(int rate,int channels,int format,int flags)
     }
  
     /* Start callback */
-    status = AudioDeviceStart(ao->outputDeviceID, audioDeviceIOProc);
-    if (status) {
-      ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceStart returned %d\n",
-	     (int)status);
-      return CONTROL_FALSE;
-    }
+    reset();
     
     return CONTROL_OK;
 }
@@ -445,25 +434,12 @@ static int play(void* output_samples,int num_bytes,int flags)
 /* set variables and buffer to initial state */
 static void reset()
 {
-  int i;
-  
-  pthread_mutex_lock(&ao->buffer_mutex);
-  
+  audio_pause();
   /* reset ring-buffer state */
-  ao->buf_read=0;
-  ao->buf_write=0;
   ao->buf_read_pos=0;
   ao->buf_write_pos=0;
+  audio_resume();
   
-  ao->full_buffers=0;
-  ao->buffered_bytes=0;
-  
-  /* zero output buffer */
-  for (i = 0; i < NUM_BUFS; i++)
-    memset(ao->buffer[i], 0, ao->buffer_len);
-
-  pthread_mutex_unlock(&ao->buffer_mutex);
-       
   return;
 }
 
@@ -471,14 +447,16 @@ static void reset()
 /* return available space */
 static int get_space()
 {
-  return (NUM_BUFS-ao->full_buffers)*ao_data.buffersize - ao->buf_write_pos;
+  return buf_free();
 }
 
 
 /* return delay until audio is played */
 static float get_delay()
 {
-  return (float)(ao->buffered_bytes)/(float)ao_data.bps;
+  int buffered = ao->buffer_len - ao->chunk_size - buf_free(); // could be less
+  // inaccurate, should also contain the data buffered e.g. by the OS
+  return (float)(buffered)/(float)ao_data.bps;
 }
 
 
@@ -495,7 +473,7 @@ static void uninit(int immed)
     ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceRemoveIOProc "
 	   "returned %d\n", (int)status);
 
-  for(i=0;i<NUM_BUFS;i++) free(ao->buffer[i]);
+  free(ao->buffer);
   free(ao);
 }
 
