@@ -167,6 +167,9 @@ vo_functions_t* video_out_drivers[] =
         &video_out_dga,
 //        &video_out_fsdga,
 #endif
+#ifdef MACOSX
+	&video_out_quartz,
+#endif
 #ifdef HAVE_SDL
         &video_out_sdl,
 #endif
@@ -235,9 +238,6 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_TGA
         &video_out_tga,
-#endif
-#ifdef MACOSX
-	&video_out_quartz,
 #endif
         NULL
 };
