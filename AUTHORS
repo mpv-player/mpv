@@ -90,6 +90,7 @@ Alex Beregszaszi (al3x) <alex@fsn.hu>
     * libmpcodecs / libmpdemux hacking
     * co-patch-maintainer
     * dynamic a/v plugins (external shared ad/vd/.. objects)
+    * millions of bug fixes
 
 Andreas Ackermann (Acki) <asackerm@stud.informatik.uni-erlangen.de>
     * LIRC support (see documentation)
@@ -186,7 +187,7 @@ Adam Tla/lka <atlka@pg.gda.pl>
 Folke Ashberg <folke@ashberg.de>
     * native AAlib driver (-vo aa)
 
-Ivan Kalvatchev <iive@yahoo.com>
+Ivan Kalvachev <iive@yahoo.com>
     * interlaced MPEG2 support (libmpeg2)
     * libvo2 draft
     * configfile parser fixes
@@ -317,13 +318,17 @@ Dominik Mierzejewski <dominik@rangers.eu.org>
 
 Diego Biurrun <diego@biurrun.de>
     * documentation reviewer and co-maintainer
+    * console output translation (help_mp-XX.h) maintainer
     * README
     * random trivial fixes
+    * testing, bug reports
+    * homepage improvements
 
 Sascha Sommer <saschasommer@freenet.de>
     * directx VO driver
     * windows waveout AO driver
     * quicktime audio+video decoding, video encoding (using win32 DLLs) support
+    * MinGW port
 
 Sidik Isani <lksi@cfht.hawaii.edu>
     * get_delay() smoothing code (-autosync)
