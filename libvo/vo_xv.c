@@ -385,7 +385,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
     } else 
-	XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
+       if ( !(flags&1) ) XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
+
 
     vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
     XFlush(mDisplay);
