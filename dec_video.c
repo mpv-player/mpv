@@ -1024,6 +1024,10 @@ if(verbose>1){
 		mpi->stride[0]=lavc_picture.linesize[0];
 		mpi->stride[1]=lavc_picture.linesize[1];
 		mpi->stride[2]=lavc_picture.linesize[2];
+		if(lavc_context.pix_fmt==PIX_FMT_YUV422P){
+		    mpi->stride[1]*=2;
+		    mpi->stride[2]*=2;
+		}
 		
 		//stride[1]=stride[2]=0;
 		//stride[0]/=2;
