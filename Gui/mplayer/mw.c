@@ -9,6 +9,7 @@
 
 #include "../app.h"
 #include "../skin/font.h"
+#include "../skin/skin.h"
 #include "../wm/ws.h"
 
 #include "../../config.h"
