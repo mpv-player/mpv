@@ -107,18 +107,18 @@ void appInit( int argc,char* argv[], char *envp[] )
  if ( ( skinMPlayerDir=(char *)calloc( 1,strlen( appMPlayerDir ) + 5 ) ) != NULL )
   { strcpy( skinMPlayerDir,appMPlayerDir ); strcat( skinMPlayerDir,"/Skin" ); }
 
- initDebug(NULL);
+ initDebug(NULL); // write messages to stderr
 
- cfgDefaults();
- cfgRead();
- if ( !strcmp( cfgAppName,"movieplayer" ) )
-  {
+ cfgDefaults(); // set skin to "default"
+ cfgRead();     // empty function - NOP
+// if ( !strcmp( cfgAppName,"movieplayer" ) )
+//  {
    appMPlayer.sub.x=-1; appMPlayer.sub.y=-1; appMPlayer.sub.width=512; appMPlayer.sub.height=256;
    switch ( skinRead( cfgSkin ) )
     {
      case -1: dbprintf( 0,"[app] skin configfile not found.\n" ); exit( 0 );
      case -2: dbprintf( 0,"[app] skin configfile read error.\n" ); exit( 0 );
     }
-   mplInit( argc,argv,envp );
-  }
+   mplInit( argc,argv,envp ); // does gtk & ws initialization, create windows
+//  }
 }
