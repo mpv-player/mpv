@@ -267,8 +267,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // Reinit must be called after this function has been called
     
     // Sanity check
-    if(((int*)arg)[0] < 2000 || ((int*)arg)[0] > 192000){
-      mp_msg(MSGT_AFILTER,MSGL_ERR,"[resample] The output sample frequency must be between 2kHz and 192kHz. Current value is %i \n",((int*)arg)[0]);
+    if(((int*)arg)[0] < 8000 || ((int*)arg)[0] > 192000){
+      mp_msg(MSGT_AFILTER,MSGL_ERR,"[resample] The output sample frequency must be between 8kHz and 192kHz. Current value is %i \n",((int*)arg)[0]);
       return AF_ERROR;
     }
 
