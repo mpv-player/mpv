@@ -9,7 +9,6 @@ demuxer:
 - prebuffering to cache2 (req. for MMS) - URGENT!
 - implement seeking to FLI/FLC
 - test & fix -loop
-- fix vivo audio/video PTS (for A-V sync)
 
 decoders:
 - getting mss1 (Windows Screen Video) DLL codec working... - kabi
