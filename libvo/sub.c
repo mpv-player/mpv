@@ -37,7 +37,7 @@ void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int 
         int y=dys/2;
         int x;
         int c,font;
-        int width=(dxs/2-vo_font->width[0x10]-vo_font->width[0x12]);
+        int width=(dxs*2/3-vo_font->width[0x10]-vo_font->width[0x12]);
         int elems=width/vo_font->width[0x11];
         int mark=(vo_osd_progbar_value*(elems+1))>>8;
         x=(dxs-width)/2;
