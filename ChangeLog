@@ -1,6 +1,6 @@
 mplayer (1.0)
 
-  pre2:  "ImportCounter"
+  pre2:
 
     Security:
     * remotely exploitable buffer overflow in the asf streaming code fixed
@@ -57,6 +57,7 @@ mplayer (1.0)
     * indeo3 decoder fixed
     * new options: mv0, cbp
     * DV video encoder
+    * MPEG1 now works with Trellis quantization
 
     Faad2:
     * synced to latest CVS
