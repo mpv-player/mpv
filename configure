@@ -1930,12 +1930,13 @@ int main(void) { return 0; }
 EOF
 _soundcard=no
 cc_check && _soundcard=yes
-if ! linux && test "$_ossaudio" = no ; then
-  # we don't want touse soundcard.h on non-linux if no OSS support enabled!
+if linux || test "$_ossaudio" != no ; then
+  # use soundcard.h on linux, or when OSS support is enabled
+  echores "$_soundcard"
+else
+  # we don't want to use soundcard.h on non-linux if no OSS support enabled!
   echores "$_soundcard, but ignored!"
   _soundcard=no
-else
-  echores "$_soundcard"
 fi
 if test "$_soundcard" = yes ; then
   _def_soundcard='#define HAVE_SOUNDCARD_H 1'
