@@ -2402,10 +2402,21 @@ Specify additional parameters when decoding with XviD.
 .
 .PD 0
 .RSs
+.IPs deblock-chroma
+Activate xvid internal postprocessing filter: chroma deblock filter.
+See also \-vf pp, which is faster than XviD's own filter.
+.IPs deblock-luma
+Activate xvid internal postprocessing filter: luma deblock filter.
+See also \-vf pp, which is faster than XviD's own filter.
 .IPs dr2\ \ 
 Activate direct rendering method 2.
 .IPs nodr2
 Deactivate direct rendering method 2.
+.IPs filmeffect
+Activate XviD internal film grain effect.
+Adds artificial film grain to the video. 
+May increase perceived quality, while lowering true quality.
+Also see \-vf noise.
 .RE
 .PD 1
 .

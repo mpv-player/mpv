@@ -43,10 +43,16 @@
  ****************************************************************************/
 
 static int do_dr2 = 1;
+static int filmeffect = 0;
+static int lumadeblock = 0;
+static int chromadeblock = 0;
 
 m_option_t xvid_dec_opts[] = {
 	{ "dr2", &do_dr2, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{ "nodr2", &do_dr2, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{ "filmeffect", &filmeffect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{ "deblock-luma", &lumadeblock, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{ "deblock-chroma", &chromadeblock, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -194,7 +200,10 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
 	dec.bitstream = data;
 	dec.length = len;
 
-	dec.general |= XVID_LOWDELAY;
+	dec.general |= XVID_LOWDELAY 
+	        | (filmeffect ? XVID_FILMEFFECT : 0 )
+	        | (lumadeblock ? XVID_DEBLOCKY : 0 )
+	        | (chromadeblock ? XVID_DEBLOCKUV : 0 );
 
 	dec.output.csp = p->cs;   
 
