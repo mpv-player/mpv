@@ -20,6 +20,8 @@ extern int verbose; // defined in mplayer.c
 
 #include "dec_audio.h"
 
+#include "roqav.h"
+
 //==========================================================================
 
 #include "libao2/afmt.h"
@@ -433,6 +435,13 @@ case AFM_FOX62ADPCM:
   sh_audio->ds->ss_div=FOX62_ADPCM_SAMPLES_PER_BLOCK;
   sh_audio->ds->ss_mul=FOX62_ADPCM_BLOCK_SIZE;
   break;
+case AFM_ROQAUDIO:
+  // minsize was stored in wf->nBlockAlign by the RoQ demuxer
+  sh_audio->audio_out_minsize=sh_audio->wf->nBlockAlign;
+  sh_audio->ds->ss_div=FOX62_ADPCM_SAMPLES_PER_BLOCK;
+  sh_audio->ds->ss_mul=FOX62_ADPCM_BLOCK_SIZE;
+  sh_audio->context = roq_decode_audio_init();
+  break;
 case AFM_MPEG:
   // MPEG Audio:
   sh_audio->audio_out_minsize=4608;
@@ -725,6 +734,11 @@ case AFM_FOX62ADPCM:
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
   sh_audio->i_bps=FOX62_ADPCM_BLOCK_SIZE*
     (sh_audio->channels*sh_audio->samplerate) / FOX62_ADPCM_SAMPLES_PER_BLOCK;
+  break;
+case AFM_ROQAUDIO:
+  sh_audio->channels=sh_audio->wf->nChannels;
+  sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
+  sh_audio->i_bps = (sh_audio->channels * 22050) / 2;
   break;
 case AFM_MPEG: {
   // MPEG Audio:
@@ -1164,6 +1178,27 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
           break; // EOF
         len = 2 * fox62_adpcm_decode_block(
           (unsigned short*)buf,ibuf);
+        break;
+      }
+      case AFM_ROQAUDIO:
+      {
+        static unsigned char *ibuf = NULL;
+        unsigned char header_data[6];
+        int read_len;
+
+        if (!ibuf)
+          ibuf = (unsigned char *)malloc(sh_audio->audio_out_minsize / 2);
+
+        // figure out how much data to read
+        if (demux_read_data(sh_audio->ds, header_data, 6) != 6)
+          break; // EOF
+        read_len = (header_data[5] << 24) | (header_data[4] << 16) |
+          (header_data[3] << 8) | header_data[2];
+        read_len += 2;  // 16-bit arguments
+        if (demux_read_data(sh_audio->ds, ibuf, read_len) != read_len)
+          break;
+        len = 2 * roq_decode_audio((unsigned short *)buf, ibuf,
+          read_len, sh_audio->channels, sh_audio->context);          
         break;
       }
 #ifdef USE_LIBAC3

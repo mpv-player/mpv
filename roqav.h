@@ -7,6 +7,6 @@ void roq_decode_video(unsigned char *encoded, int encoded_size,
 
 void *roq_decode_audio_init(void);
 int roq_decode_audio(unsigned short *output, unsigned char *input,
-  int channels, void *context);
+  int encoded_size, int channels, void *context);
 
 #endif // ROQAV_H

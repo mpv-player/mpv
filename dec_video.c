@@ -34,6 +34,8 @@ extern int verbose; // defined in mplayer.c
 
 #include "dec_video.h"
 
+#include "roqav.h"
+
 // ===================================================================
 
 extern double video_time_usage;
@@ -424,6 +426,15 @@ sh_video->image=new_mp_image(sh_video->disp_w,sh_video->disp_h);
 mp_image_setfmt(sh_video->image,out_fmt);
 
 switch(sh_video->codec->driver){
+ case VFM_ROQVIDEO:
+#ifdef USE_MP_IMAGE
+   sh_video->image->type=MP_IMGTYPE_STATIC;
+#else
+   sh_video->our_out_buffer = 
+     (char*)memalign(64, sh_video->disp_w * sh_video->disp_h * 1.5);
+#endif
+   sh_video->context = roq_decode_video_init();
+   break;
  case VFM_CINEPAK: {
 #ifdef USE_MP_IMAGE
    sh_video->image->type=MP_IMGTYPE_STATIC;
@@ -1078,6 +1089,11 @@ if(verbose>1){
  case VFM_CYUV:
    decode_cyuv(start, in_size, sh_video->our_out_buffer,
       sh_video->disp_w, sh_video->disp_h, (out_fmt==IMGFMT_YUY2)?16:(out_fmt&255));
+   blit_frame = 3;
+   break;
+ case VFM_ROQVIDEO:
+   roq_decode_video(start, in_size, sh_video->our_out_buffer,
+     sh_video->disp_w, sh_video->disp_h, sh_video->context);
    blit_frame = 3;
    break;
 } // switch
