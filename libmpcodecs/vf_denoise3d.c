@@ -265,7 +265,8 @@ vf_info_t vf_info_denoise3d = {
     "denoise3d",
     "Daniel Moreno",
     "",
-    open
+    open,
+    NULL
 };
 
 //===========================================================================//

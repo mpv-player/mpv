@@ -13,7 +13,10 @@
 #include "../libvo/fastmemcpy.h"
 #include "../postproc/swscale.h"
 
-struct vf_priv_s {
+#include "m_option.h"
+#include "m_struct.h"
+
+static struct vf_priv_s {
     int w,h;
     int v_chr_drop;
     int param;
@@ -21,6 +24,14 @@ struct vf_priv_s {
     struct SwsContext *ctx;
     unsigned char* palette;
     mp_image_t *dmpi;
+} vf_priv_dflt = {
+  -1,-1,
+  0,
+  0,
+  0,
+  NULL,
+  NULL,
+  NULL
 };
 
 extern int opt_screen_size_x;
@@ -348,6 +359,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->put_image=put_image;
     vf->query_format=query_format;
     vf->control= control;
+    if(!vf->priv) {
     vf->priv=malloc(sizeof(struct vf_priv_s));
     // TODO: parse args ->
     vf->priv->ctx=NULL;
@@ -356,6 +368,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->v_chr_drop=0;
     vf->priv->param=0;
     vf->priv->palette=NULL;
+    } // if(!vf->priv)
     if(args) sscanf(args, "%d:%d:%d:%d",
     &vf->priv->w,
     &vf->priv->h,
@@ -367,12 +380,66 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
+/// An example of presets usage
+static struct size_preset {
+  char* name;
+  int w, h;
+} vf_size_presets_defs[] = {
+  // TODO add more 'standard' resolutions
+  { "pal", 768, 576 },
+  { NULL, 0, 0}
+};
+
+#define ST_OFF(f) M_ST_OFF(struct size_preset,f)
+static m_option_t vf_size_preset_fields[] = {
+  {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
+  {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
+  { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+
+static m_struct_t vf_size_preset = {
+  "scale_size_preset",
+  sizeof(struct size_preset),
+  NULL,
+  vf_size_preset_fields
+};
+
+static m_struct_t vf_opts;
+static m_obj_presets_t size_preset = {
+  &vf_size_preset, // Input struct desc
+  &vf_opts, // Output struct desc
+  vf_size_presets_defs, // The list of presets
+  ST_OFF(name) // At wich offset is the name field in the preset struct
+};
+
+/// Now the options
+#undef ST_OFF
+#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+static m_option_t vf_opts_fields[] = {
+  {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
+  {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
+  {"chr-drop", ST_OFF(v_chr_drop), CONF_TYPE_INT, M_OPT_RANGE, 0, 3, NULL},
+  {"param", ST_OFF(param), CONF_TYPE_INT, M_OPT_RANGE, 0, 100, NULL},
+  // Note that here the 2 field is NULL (ie 0)
+  // As we want this option to act on the option struct itself
+  {"presize", 0, CONF_TYPE_OBJ_PRESETS, 0, 0, 0, &size_preset},
+  { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+
+static m_struct_t vf_opts = {
+  "scale",
+  sizeof(struct vf_priv_s),
+  &vf_priv_dflt,
+  vf_opts_fields
+};
+
 vf_info_t vf_info_scale = {
     "software scaling",
     "scale",
     "A'rpi",
     "",
-    open
+    open,
+    &vf_opts
 };
 
 //===========================================================================//

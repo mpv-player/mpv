@@ -168,5 +168,6 @@ vf_info_t vf_info_rectangle = {
     "rectangle",
     "Kim Minh Kaplan",
     "",
-    open
+    open,
+    NULL
 };

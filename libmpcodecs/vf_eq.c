@@ -219,6 +219,7 @@ vf_info_t vf_info_eq = {
 	"eq",
 	"Richard Felker",
 	"",
-	open
+	open,
+	NULL
 };
 

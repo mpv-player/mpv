@@ -239,7 +239,7 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
     char** lst = NULL;
     int i,sr;
     // Parse the child options
-    r = m_option_parse(co->opt,arg,param,&lst,config->mode);
+    r = m_option_parse(co->opt,arg,param,&lst,M_COMMAND_LINE);
     // Set them now
     if(r >= 0)
     for(i = 0 ; lst && lst[2*i] ; i++) {

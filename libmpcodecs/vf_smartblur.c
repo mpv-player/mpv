@@ -266,7 +266,8 @@ vf_info_t vf_info_smartblur = {
     "smartblur",
     "Michael Niedermayer",
     "",
-    open
+    open,
+    NULL
 };
 
 //===========================================================================//

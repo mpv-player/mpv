@@ -145,7 +145,8 @@ vf_info_t vf_info_telecine = {
     "telecine",
     "Rich Felker",
     "",
-    open
+    open,
+    NULL
 };
 
 

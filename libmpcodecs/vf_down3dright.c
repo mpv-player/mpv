@@ -139,6 +139,7 @@ vf_info_t vf_info_down3dright = {
 	"down3dright",
 	"Zdenek Kabelac",
 	"",
-	open
+	open,
+	NULL
 };
 

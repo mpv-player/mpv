@@ -452,5 +452,6 @@ vf_info_t vf_info_bmovl = {
     "bmovl",
     "Per Wigren",
     "",
-    vf_open
+    vf_open,
+    NULL
 };

@@ -9,6 +9,8 @@
 
 #include "../mp_msg.h"
 #include "../help_mp.h"
+#include "../m_option.h"
+#include "../m_struct.h"
 
 
 #include "img_format.h"
@@ -59,8 +61,6 @@ extern vf_info_t vf_info_hqdn3d;
 extern vf_info_t vf_info_detc;
 extern vf_info_t vf_info_telecine;
 extern vf_info_t vf_info_tfields;
-
-char** vo_plugin_args=(char**) NULL;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
@@ -114,6 +114,17 @@ static vf_info_t* filter_list[]={
     &vf_info_telecine,
     &vf_info_tfields,
     NULL
+};
+
+// For the vf option
+m_obj_settings_t* vf_settings = NULL;
+// For the vop option
+m_obj_settings_t* vo_plugin_args = NULL;
+m_obj_list_t vf_obj_list = {
+  (void**)filter_list,
+  M_ST_OFF(vf_info_t,name),
+  M_ST_OFF(vf_info_t,info),
+  M_ST_OFF(vf_info_t,opts)
 };
 
 //============================================================================
@@ -306,7 +317,7 @@ static int vf_default_query_format(struct vf_instance_s* vf, unsigned int fmt){
   return vf_next_query_format(vf,fmt);
 }
 
-vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char *name, char *args){
+vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char *name, char **args){
     vf_instance_t* vf;
     int i;
     for(i=0;;i++){
@@ -326,18 +337,48 @@ vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char
     vf->put_image=vf_next_put_image;
     vf->default_caps=VFCAP_ACCEPT_STRIDE;
     vf->default_reqs=0;
-    if(vf->info->open(vf,args)>0) return vf; // Success!
+    if(vf->info->opts) { // vf_vo get some special argument
+      m_struct_t* st = vf->info->opts;
+      void* vf_priv = m_struct_alloc(st);
+      int n;
+      for(n = 0 ; args && args[2*n] ; n++)
+	m_struct_set(st,vf_priv,args[2*n],args[2*n+1]);
+      vf->priv = vf_priv;
+      args = NULL;
+    } else // Otherwise we should have the '_oldargs_'
+      if(args && !strcmp(args[0],"_oldargs_"))
+	args = (char**)args[1];
+      else
+	args = NULL;
+    if(vf->info->open(vf,(char*)args)>0) return vf; // Success!
     free(vf);
     mp_msg(MSGT_VFILTER,MSGL_ERR,MSGTR_CouldNotOpenVideoFilter,name);
     return NULL;
 }
 
-vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args){
-    if(strcmp(name,"vo"))
-    mp_msg(MSGT_VFILTER,MSGL_INFO,
-	args ? MSGTR_OpeningVideoFilter "[%s=%s]\n"
-	     : MSGTR_OpeningVideoFilter "[%s]\n",name,args);
-    return vf_open_plugin(filter_list,next,name,args);
+vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char **args){
+  if(args && strcmp(args[0],"_oldargs_")) {
+    int i,l = 0;
+    for(i = 0 ; args && args[2*i] ; i++)
+      l += 1 + strlen(args[2*i]) + 1 + strlen(args[2*i+1]);
+    l += strlen(name);
+    {
+      char str[l+1];
+      char* p = str;
+      p += sprintf(str,"%s",name);
+      for(i = 0 ; args && args[2*i] ; i++)
+	p += sprintf(p," %s=%s",args[2*i],args[2*i+1]);
+      mp_msg(MSGT_VFILTER,MSGL_INFO,MSGTR_OpeningVideoFilter "[%s]\n",str);
+    }
+  } else if(strcmp(name,"vo")) {
+    if(args && strcmp(args[0],"_oldargs_") == 0)
+      mp_msg(MSGT_VFILTER,MSGL_INFO,MSGTR_OpeningVideoFilter
+	     "[%s=%s]\n", name,args[1]);
+    else
+      mp_msg(MSGT_VFILTER,MSGL_INFO,MSGTR_OpeningVideoFilter
+	     "[%s]\n", name);
+  }
+  return vf_open_plugin(filter_list,next,name,args);
 }
 
 //============================================================================
@@ -425,19 +466,27 @@ void vf_next_draw_slice(struct vf_instance_s* vf,unsigned char** src, int * stri
 //============================================================================
 
 vf_instance_t* append_filters(vf_instance_t* last){
-    vf_instance_t* vf;
-    char** plugin_args = vo_plugin_args;
-    if(!vo_plugin_args) return last;
-    while(*plugin_args){
-	char* name=strdup(*plugin_args);
-	char* args=strchr(name,'=');
-	if(args){args[0]=0;++args;}
-	vf=vf_open_filter(last,name,args);
-	if(vf) last=vf;
-	free(name);
-	++plugin_args;
+  vf_instance_t* vf;
+  int i; 
+
+  // -vf take precedence over -vop
+  if(vf_settings) {
+    // We want to add them in the 'right order'
+    for(i = 0 ; vf_settings[i].name ; i++)
+      /* NOP */;
+    for(i-- ; i >= 0 ; i--) {
+      //printf("Open filter %s\n",vf_settings[i].name);
+      vf = vf_open_filter(last,vf_settings[i].name,vf_settings[i].attribs);
+      if(vf) last=vf;
     }
-    return last;
+  } else if(vo_plugin_args) {
+    for(i = 0 ; vo_plugin_args[i].name ; i++) {
+      vf = vf_open_filter(last,vo_plugin_args[i].name,
+			  vo_plugin_args[i].attribs);
+      if(vf) last=vf;
+    }
+  }
+  return last;
 }
 
 //============================================================================

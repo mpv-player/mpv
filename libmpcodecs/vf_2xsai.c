@@ -357,7 +357,8 @@ vf_info_t vf_info_2xsai = {
     "2xsai",
     "A'rpi",
     "http://elektron.its.tudelft.nl/~dalikifa/",
-    open
+    open,
+    NULL
 };
 
 //===========================================================================//

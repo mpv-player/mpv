@@ -5,6 +5,7 @@
 
 typedef struct m_option_type m_option_type_t;
 typedef struct m_option m_option_t;
+struct m_struct;
 
 ///////////////////////////// Options types declarations ////////////////////////////
 
@@ -52,6 +53,30 @@ typedef struct {
 } m_span_t;
 extern m_option_type_t m_option_type_span;
 
+typedef struct {
+  void** list;
+  void* name_off;
+  void* info_off;
+  void* desc_off;
+} m_obj_list_t;
+
+typedef struct {
+  char* name;
+  char** attribs;
+} m_obj_settings_t;
+extern m_option_type_t m_option_type_obj_settings_list;
+
+// Presets are mean to be used with options struct
+
+
+typedef struct {
+  struct m_struct* in_desc;
+  struct m_struct* out_desc;
+  void* presets; // Pointer to an arry of struct defined by in_desc
+  void* name_off; // Offset of the preset name inside the in_struct
+} m_obj_presets_t;
+extern m_option_type_t m_option_type_obj_presets;
+
 // Don't be stupid keep tho old names ;-)
 #define CONF_TYPE_FLAG		(&m_option_type_flag)
 #define CONF_TYPE_INT		(&m_option_type_int)
@@ -67,7 +92,8 @@ extern m_option_type_t m_option_type_span;
 #define CONF_TYPE_POSITION	(&m_option_type_position)
 #define CONF_TYPE_IMGFMT		(&m_option_type_imgfmt)
 #define CONF_TYPE_SPAN		(&m_option_type_span)
-
+#define CONF_TYPE_OBJ_SETTINGS_LIST (&m_option_type_obj_settings_list)
+#define CONF_TYPE_OBJ_PRESETS (&m_option_type_obj_presets)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -181,6 +207,7 @@ struct m_option {
 #define M_OPT_OUT_OF_RANGE	-4
 #define M_OPT_PARSER_ERR		-5
 
+m_option_t* m_option_list_find(m_option_t* list,char* name);
 
 inline static int
 m_option_parse(m_option_t* opt,char *name, char *param, void* dst, int src) {

@@ -181,7 +181,8 @@ vf_info_t vf_info_tfields = {
     "tfields",
     "Rich Felker",
     "",
-    open
+    open,
+    NULL
 };
 
 

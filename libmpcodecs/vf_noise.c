@@ -464,7 +464,8 @@ vf_info_t vf_info_noise = {
     "noise",
     "Michael Niedermayer",
     "",
-    open
+    open,
+    NULL
 };
 
 //===========================================================================//

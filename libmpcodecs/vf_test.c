@@ -325,7 +325,8 @@ vf_info_t vf_info_test = {
     "test",
     "Michael Niedermayer",
     "",
-    open
+    open,
+    NULL
 };
 
 //===========================================================================//

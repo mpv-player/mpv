@@ -335,7 +335,8 @@ vf_info_t vf_info_perspective = {
     "perspective",
     "Michael Niedermayer",
     "",
-    open
+    open,
+    NULL
 };
 
 //===========================================================================//

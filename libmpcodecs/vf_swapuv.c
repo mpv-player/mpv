@@ -106,7 +106,8 @@ vf_info_t vf_info_swapuv = {
     "swapuv",
     "Michael Niedermayer",
     "",
-    open
+    open,
+    NULL
 };
 
 //===========================================================================//

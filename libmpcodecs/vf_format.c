@@ -66,7 +66,8 @@ vf_info_t vf_info_format = {
     "format",
     "A'rpi",
     "FIXME! get_image()/put_image()",
-    open
+    open,
+    NULL
 };
 
 //===========================================================================//

@@ -334,7 +334,8 @@ vf_info_t vf_info_unsharp = {
     "unsharp",
     "Rémi Guyomarch",
     "",
-    open
+    open,
+    NULL
 };
 
 //===========================================================================//

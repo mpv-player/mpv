@@ -212,7 +212,8 @@ vf_info_t vf_info_boxblur = {
     "boxblur",
     "Michael Niedermayer",
     "",
-    open
+    open,
+    NULL
 };
 
 //===========================================================================//

@@ -457,7 +457,8 @@ vf_info_t vf_info_detc = {
     "detc",
     "Rich Felker",
     "",
-    open
+    open,
+    NULL
 };
 
 

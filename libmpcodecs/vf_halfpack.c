@@ -216,6 +216,7 @@ vf_info_t vf_info_halfpack = {
 	"halfpack",
 	"Richard Felker",
 	"",
-	open
+	open,
+	NULL
 };
 

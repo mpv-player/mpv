@@ -15,6 +15,26 @@
 //#include "m_config.h"
 #include "mp_msg.h"
 
+// Don't free for 'production' atm
+#ifndef MP_DEBUG
+#define NO_FREE
+#endif
+
+m_option_t* m_option_list_find(m_option_t* list,char* name) {
+  int i;
+
+  for(i = 0 ; list[i].name ; i++) {
+    int l = strlen(list[i].name) - 1;
+    if((list[i].type->flags & M_OPT_TYPE_ALLOW_WILDCARD) &&
+       (l > 0) && (list[i].name[l] == '*')) {
+      if(strncasecmp(list[i].name,name,l) == 0)
+	return &list[i];
+    } else if(strcasecmp(list[i].name,name) == 0)
+      return &list[i];
+  }
+  return NULL;
+}
+
 // Default function that just do a memcpy
 
 static void copy_opt(m_option_t* opt,void* dst,void* src) {
@@ -321,14 +341,18 @@ static char* print_str(m_option_t* opt,  void* val) {
 
 static void copy_str(m_option_t* opt,void* dst, void* src) {
   if(dst && src) {
-//    if(VAL(dst)) free(VAL(dst)); //FIXME!!!
+#ifndef NO_FREE
+    if(VAL(dst)) free(VAL(dst)); //FIXME!!!
+#endif
     VAL(dst) = VAL(src) ? strdup(VAL(src)) : NULL;
   }
 }
   
 static void free_str(void* src) {
-  if(src && VAL(src)){ 
-//    free(VAL(src)); //FIXME!!!
+  if(src && VAL(src)){
+#ifndef NO_FREE
+    free(VAL(src)); //FIXME!!!
+#endif
     VAL(src) = NULL;
   }
 }
@@ -366,9 +390,11 @@ static void free_str_list(void* dst) {
   d = VAL(dst);
 
 // FIXME!!!
-//  for(i = 0 ; d[i] != NULL ; i++)
-//    free(d[i]);
-//  free(d);
+#ifndef NO_FREE
+  for(i = 0 ; d[i] != NULL ; i++)
+    free(d[i]);
+  free(d);
+#endif
   VAL(dst) = NULL;
 }
 
@@ -809,7 +835,7 @@ m_option_type_t m_option_type_print_indirect = {
 static int parse_subconf(m_option_t* opt,char *name, char *param, void* dst, int src) {
   char *subparam;
   char *subopt;
-  int nr = 0;
+  int nr = 0,i,r;
   m_option_t *subopts;
   char *token;
   char *p;
@@ -839,6 +865,16 @@ static int parse_subconf(m_option_t* opt,char *name, char *param, void* dst, int
 	case 1:
 	  subparam[0] = 0;
 	case 2:
+	  for(i = 0 ; subopts[i].name ; i++) {
+	    if(!strcmp(subopts[i].name,subopt)) break;
+	  }
+	  if(!subopts[i].name) {
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: Unknow suboption %s\n",name,subopt);
+	    return M_OPT_UNKNOW;
+	  }
+	  r = m_option_parse(&subopts[i],subopt,
+			     subparam[0] == 0 ? NULL : subparam,NULL,src);
+	  if(r < 0) return r;
 	  if(dst) {
 	    lst = (char**)realloc(lst,2 * (nr+2) * sizeof(char*));
 	    lst[2*nr] = strdup(subopt);
@@ -857,7 +893,8 @@ static int parse_subconf(m_option_t* opt,char *name, char *param, void* dst, int
   free(subparam);
   free(subopt);
   free(p);
-  VAL(dst) = lst;
+  if(dst)
+    VAL(dst) = lst;
 
   return 1;
 }
@@ -1036,6 +1073,397 @@ m_option_type_t m_option_type_span = {
   NULL,
   copy_opt,
   copy_opt,
+  NULL,
+  NULL
+};
+
+
+//// Objects (ie filters, etc) settings
+
+#include "m_struct.h"
+
+#undef VAL
+#define VAL(x) (*(m_obj_settings_t**)(x))
+
+static int find_obj_desc(char* name,m_obj_list_t* l,m_struct_t** ret) {
+  int i;
+  char* n;
+
+  for(i = 0 ; l->list[i] ; i++) {
+    n = M_ST_MB(char*,l->list[i],l->name_off);
+    if(!strcmp(n,name)) {
+      *ret = M_ST_MB(m_struct_t*,l->list[i],l->desc_off);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static int get_obj_param(char* opt_name,char* obj_name, m_struct_t* desc,
+			 char* str,int* nold,int oldmax,char** dst) {
+  char* eq,param;
+  m_option_t* opt;
+  int r;
+
+  eq = strchr(str,'=');
+  if(eq && eq == str)
+    eq = NULL;
+
+  if(eq) {
+    char* p = eq + 1;
+    if(p[0] == '\0') p = NULL;
+    eq[0] = '\0';
+    opt = m_option_list_find(desc->fields,str);
+    if(!opt) {
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: %s doesn't have a %s parameter\n",opt_name,obj_name,str);
+      return M_OPT_UNKNOW;
+    }
+    r = m_option_parse(opt,str,p,NULL,M_CONFIG_FILE);
+    if(r < 0) {
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while parsing %s parameter %s (%s)\n",opt_name,obj_name,str,p);
+      eq[0] = '=';
+      return r;
+    }
+    if(dst) {
+      dst[0] = strdup(str);
+      dst[1] = p ? strdup(p) : NULL;
+    }
+    eq[0] = '=';
+  } else {
+    if((*nold) >= oldmax) {
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: %s have only %d params, so yon can't give more than that unnamed params\n",
+	     opt_name,obj_name,oldmax);
+      return M_OPT_OUT_OF_RANGE;
+    }
+    opt = &desc->fields[(*nold)];
+    r = m_option_parse(opt,opt->name,str,NULL,M_CONFIG_FILE);
+    if(r < 0) {
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while parsing %s parameter %s (%s)\n",opt_name,obj_name,opt->name,str);
+      return r;
+    }
+    if(dst) {
+      dst[0] = strdup(opt->name);
+      dst[1] = strdup(str);
+    }
+    (*nold)++;
+  }
+  return 1;
+}
+
+static int get_obj_params(char* opt_name, char* name,char* params,
+			  m_struct_t* desc,char*** _ret) {
+  int n = 0,nold = 0, nopts,r;
+  char* ptr,*last_ptr = params,*eq;
+  char** ret;
+
+  if(!strcmp(params,"help")) { // Help
+    char min[50],max[50];
+    if(!desc->fields) {
+      printf("%s doesn't have any options\n\n",name);
+      //exit_player();
+      exit(0);
+    }
+    printf("\n Name                 Type            Min        Max\n\n");
+    for(n = 0 ; desc->fields[n].name ; n++) {
+      m_option_t* opt = &desc->fields[n];
+      if(opt->type->flags & M_OPT_TYPE_HAS_CHILD) continue;
+      if(opt->flags & M_OPT_MIN)
+	sprintf(min,"%-8.0f",opt->min);
+      else
+	strcpy(min,"No");
+      if(opt->flags & M_OPT_MAX)
+	sprintf(max,"%-8.0f",opt->max);
+      else
+	strcpy(max,"No");
+      printf(" %-20.20s %-15.15s %-10.10s %-10.10s\n",
+	     opt->name,
+	     opt->type->name,
+	     min,
+	     max);
+    }
+    printf("\n");
+    //exit_player() isn't avaible in mencoder
+    exit(0);
+  }
+
+  for(nopts = 0 ; desc->fields[nopts].name ; nopts++)
+    /* NOP */;
+
+  // TODO : Check that each opt can be parsed
+  r = 1;
+  while(last_ptr && last_ptr[0] != '\0') {
+    ptr = strchr(last_ptr,':');
+    if(!ptr) {
+      r = get_obj_param(opt_name,name,desc,last_ptr,&nold,nopts,NULL);
+      n++;
+      break;
+    }
+    ptr[0] = '\0';
+    r = get_obj_param(opt_name,name,desc,last_ptr,&nold,nopts,NULL);
+    ptr[0] = ':';
+    if(r < 0) break;
+    n++;
+    last_ptr = ptr+1;
+  }
+  if(r < 0) return r;
+  if(!_ret) // Just test
+    return 1;
+
+  ret = malloc((n+2)*2*sizeof(char*));
+  n = nold = 0;
+  last_ptr = params;
+  
+  while(last_ptr && last_ptr[0] != '\0') {
+    ptr = strchr(last_ptr,':');
+    if(!ptr) {
+      get_obj_param(opt_name,name,desc,last_ptr,&nold,nopts,&ret[n*2]);
+      n++;
+      break;
+    }
+    ptr[0] = '\0';
+    get_obj_param(opt_name,name,desc,last_ptr,&nold,nopts,&ret[n*2]);
+    n++;
+    last_ptr = ptr+1;
+  }
+  ret[n*2] = ret[n*2+1] = NULL;  
+  *_ret = ret;
+  
+  return 1;
+}
+
+
+static int parse_obj_settings(char* opt,char* str,m_obj_list_t* list,
+			      m_obj_settings_t **_ret, int ret_n) {
+  int r;
+  char *param,**plist = NULL;
+  m_struct_t* desc;
+  m_obj_settings_t *ret = _ret ? *_ret : NULL;
+  
+
+  // Now check that the object exist
+  param = strchr(str,'=');
+  if(param) {
+    param[0] = '\0';
+    param++;
+    if(strlen(param) <= 0)
+      param = NULL;
+  }
+
+
+  if(!find_obj_desc(str,list,&desc)) {
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: %s doesn't exist\n",opt,str);
+    return M_OPT_INVALID;
+  }
+
+  if(param) {
+    if(!desc && _ret) {
+      plist = calloc(4,sizeof(char*));
+      plist[0] = strdup("_oldargs_");
+      plist[1] = strdup(param);
+    } else if(desc) {
+      r = get_obj_params(opt,str,param,desc,_ret ? &plist : NULL);
+      if(r < 0)
+	return r;
+    }
+  }
+  if(!_ret)
+    return 1;
+
+  ret = realloc(ret,(ret_n+2)*sizeof(m_obj_settings_t));
+  memset(&ret[ret_n],0,2*sizeof(m_obj_settings_t));
+  ret[ret_n].name = strdup(str);
+  ret[ret_n].attribs = plist;
+
+  *_ret = ret;
+  return 1;
+}
+
+
+static int parse_obj_settings_list(m_option_t* opt,char *name,
+				   char *param, void* dst, int src) {
+  int n = 0,r;
+  char *str;
+  char *ptr, *last_ptr;
+  m_obj_settings_t *res = NULL;
+
+  // We need the objects list
+  if(!opt->priv)
+    return M_OPT_INVALID;
+
+  if (param == NULL || strlen(param) == 0)
+    return M_OPT_MISSING_PARAM;
+
+  if(!strcmp(param,"help")) {
+    m_obj_list_t* ol = opt->priv;
+    for(n = 0 ; ol->list[n] ; n++)
+      mp_msg(MSGT_VFILTER,MSGL_INFO,"  %-15s: %s\n",
+	     M_ST_MB(char*,ol->list[n],ol->name_off),
+	     M_ST_MB(char*,ol->list[n],ol->info_off));
+    exit(0);
+  }
+  ptr = str = strdup(param);
+
+  while(ptr[0] != '\0') {
+    last_ptr = ptr;
+    ptr = strchr(ptr,LIST_SEPARATOR);
+    if(!ptr) {
+      r = parse_obj_settings(name,last_ptr,opt->priv,dst ? &res : NULL,n);
+      if(r < 0) {
+	free(str);
+	return r;
+      }
+      n++;
+      break;
+    }
+    ptr[0] = '\0';
+    r = parse_obj_settings(name,last_ptr,opt->priv,dst ? &res : NULL,n);
+    if(r < 0) {
+      free(str);
+      return r;
+    }
+    ptr++;
+    n++;
+  }
+  free(str);
+  if(n == 0)
+    return M_OPT_INVALID;
+
+  if( ((opt->flags & M_OPT_MIN) && (n < opt->min)) || 
+      ((opt->flags & M_OPT_MAX) && (n > opt->max)) )
+    return M_OPT_OUT_OF_RANGE;
+  
+  if(dst)
+    VAL(dst) = res;
+
+  return 1;
+}
+
+static void free_obj_settings_list(void* dst) {
+  int n;
+  m_obj_settings_t *d;
+
+  if(!dst || !VAL(dst)) return;
+
+  d = VAL(dst);
+#ifndef NO_FREE
+  for(n = 0 ; d[n].name ; n++) {
+    free(d[n].name);
+    free_str_list(&(d[n].attribs));
+  }
+  free(d);
+#endif
+  VAL(dst) = NULL;
+}
+
+static void copy_obj_settings_list(m_option_t* opt,void* dst, void* src) {
+  m_obj_settings_t *d,*s;
+  int n;
+
+  if(!(dst && src))
+    return;
+
+  s = VAL(src);
+
+  if(VAL(dst))
+    free_obj_settings_list(dst);
+  if(!s) return;
+    
+    
+  
+  for(n = 0 ; s[n].name ; n++)
+    /* NOP */;
+  d = malloc((n+1)*sizeof(m_obj_settings_t));
+  for(n = 0 ; s[n].name ; n++) {
+    d[n].name = strdup(s[n].name);
+    d[n].attribs = NULL;
+    copy_str_list(NULL,&(d[n].attribs),&(s[n].attribs));
+  }
+  d[n].name = d[n].attribs = NULL;
+  VAL(dst) = d;
+}
+
+m_option_type_t m_option_type_obj_settings_list = {
+  "Object settings list",
+  "",
+  sizeof(m_obj_settings_t*),
+  M_OPT_TYPE_DYNAMIC,
+  parse_obj_settings_list,
+  NULL,
+  copy_obj_settings_list,
+  copy_obj_settings_list,
+  copy_obj_settings_list,
+  free_obj_settings_list,
+};
+
+
+
+static int parse_obj_presets(m_option_t* opt,char *name,
+			    char *param, void* dst, int src) {
+  m_obj_presets_t* obj_p = (m_obj_presets_t*)opt->priv;
+  m_struct_t *in_desc,*out_desc;
+  int s,i;
+  unsigned char* pre = obj_p->presets;
+  char* pre_name = NULL;
+
+  if(!obj_p) {
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: presets need a pointer to a m_obj_presets_t in the priv field\n",name);
+    return M_OPT_PARSER_ERR;
+  }
+
+  if(!param)
+    return M_OPT_MISSING_PARAM;
+
+  in_desc = obj_p->in_desc;
+  out_desc = obj_p->out_desc ? obj_p->out_desc : obj_p->in_desc;
+  s = in_desc->size;
+
+  if(!strcmp(param,"help")) {
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Avaible presets for %s->%s :",out_desc->name,name);
+    for(pre = obj_p->presets;(pre_name = M_ST_MB(char*,pre,obj_p->name_off)) ; 
+	pre +=  s) 
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, " %s",pre_name);
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "\n");
+    exit(0);
+  }
+
+  for(pre_name = M_ST_MB(char*,pre,obj_p->name_off) ; pre_name ;
+      pre +=  s, pre_name = M_ST_MB(char*,pre,obj_p->name_off)) {
+    if(!strcmp(pre_name,param)) break;
+  }
+  if(!pre_name) {
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: there no preset named %s\n"
+	   "Avaible presets are :",name,param);
+    for(pre = obj_p->presets;(pre_name = M_ST_MB(char*,pre,obj_p->name_off)) ; 
+	pre +=  s) 
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, " %s",pre_name);
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "\n");
+    return M_OPT_INVALID;
+  }
+
+  if(!dst) return 1;
+  
+  for(i = 0 ; in_desc->fields[i].name ; i++) {
+    m_option_t* out_opt = m_option_list_find(out_desc->fields,
+					     in_desc->fields[i].name);
+    if(!out_opt) {
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: unable to find the target option for field %s.\nYou should report that to the developpers\n",name,in_desc->fields[i].name);
+      return M_OPT_PARSER_ERR;
+    }
+    m_option_copy(out_opt,M_ST_MB_P(dst,out_opt->p),M_ST_MB_P(pre,in_desc->fields[i].p));
+  }
+  return 1;
+}
+
+
+m_option_type_t m_option_type_obj_presets = {
+  "Object presets",
+  "",
+  0,
+  0,
+  parse_obj_presets,
+  NULL,
+  NULL,
+  NULL,
   NULL,
   NULL
 };

@@ -150,7 +150,8 @@
         {"pphelp", &pp_help, CONF_TYPE_PRINT_INDIRECT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
-	{"vop", &vo_plugin_args, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+	{"vop", &vo_plugin_args, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0,&vf_obj_list },
+	{"vf", &vf_settings, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0, &vf_obj_list},
 
 	// scaling:
 	{"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
@@ -336,6 +337,8 @@ extern int    mf_w;
 extern int    mf_h;
 extern float  mf_fps;
 extern char * mf_type;
+extern m_obj_settings_t* vf_settings;
+extern m_obj_list_t vf_obj_list;
 
 struct config mfopts_conf[]={
         {"on", &mf_support, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -346,7 +349,7 @@ struct config mfopts_conf[]={
         {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 						
-extern char** vo_plugin_args;
+extern m_obj_settings_t* vo_plugin_args;
 
 #include "libaf/af.h"
 extern af_cfg_t af_cfg; // Audio filter configuration, defined in libmpcodecs/dec_audio.c

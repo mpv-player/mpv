@@ -463,5 +463,6 @@ vf_info_t vf_info_eq2 = {
   "eq2",
   "Hampa Hug, Daniel Moreno, Richard Felker",
   "",
-  &open
+  &open,
+  NULL
 };

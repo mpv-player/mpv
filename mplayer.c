@@ -772,13 +772,6 @@ int gui_no_filename=0;
     }
 #endif
 
-    if(vo_plugin_args && vo_plugin_args[0] && strcmp(vo_plugin_args[0],"help")==0){
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputPlugins);
-      vf_list_plugins();
-      printf("\n");
-      exit(0);
-    }
-
     if(video_driver_list && strcmp(video_driver_list[0],"help")==0){
       list_video_out();
       exit(0);
@@ -1539,11 +1532,14 @@ inited_flags|=INITED_VO;
 }
 
 current_module="init_video_filters";
-
-sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",(char *)video_out);
+{
+  char* vf_arg[] = { "_oldargs_", (char*)video_out , NULL };
+  sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",vf_arg);
+}
 #ifdef HAVE_MENU
 if(use_menu) {
-  vf_menu = vf_open_plugin(libmenu_vfs,sh_video->vfilter,"menu",menu_root);
+  char* vf_arg[] = { "_oldargs_", menu_root, NULL };
+  vf_menu = vf_open_plugin(libmenu_vfs,sh_video->vfilter,"menu",vf_arg);
   if(!vf_menu) {
     mp_msg(MSGT_CPLAYER,MSGL_ERR,"Can't open libmenu video filter with root menu %s\n",menu_root);
     use_menu = 0;

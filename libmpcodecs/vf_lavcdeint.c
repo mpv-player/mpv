@@ -183,7 +183,8 @@ vf_info_t vf_info_lavcdeint = {
     "Joe Rabinoff",
     "libavcodec's internal deinterlacer, in case you don't like "
       "the builtin ones (invoked with -pp or -npp)",
-    open
+    open,
+    NULL
 };
 
 

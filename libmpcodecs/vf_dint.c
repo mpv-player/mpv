@@ -191,5 +191,6 @@ vf_info_t vf_info_dint = {
     "dint",
     "A.G.",
     "",
-    open
+    open,
+    NULL
 };
