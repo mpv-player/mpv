@@ -4254,7 +4254,7 @@ if test "$_mencoder" != no ; then
 int main(void) { lame_version_t lv; (void) lame_init(); get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor); return 0; }
 EOF
   # Note: libmp3lame usually depends on vorbis
-  cc_check -lmp3lame $_ld_vorbis -lm && _mp3lame=yes
+  cc_check -lmp3lame $_ld_vorbis -lm && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _mp3lame=yes
   if test "$_mp3lame" = yes ; then
     _def_mp3lame="#define HAVE_MP3LAME `$TMPO`"
     _ld_mp3lame="-lmp3lame $_ld_vorbis"
