@@ -324,6 +324,10 @@ draw_frame(uint8_t *src[])
 int i;
 uint8_t *ImageData=src[0];
 
+  if (slice_height == 0)
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image_width, image_height,
+		    gl_format, gl_type, ImageData);
+  else
     for(i=0;i<image_height;i+=slice_height){
       glTexSubImage2D( GL_TEXTURE_2D,  // target
 		       0,              // level
@@ -361,23 +365,43 @@ uninit(void)
 
 static uint32_t preinit(const char *arg)
 {
+    int parse_err = 0;
     many_fmts = 0;
     slice_height = 4;
     if(arg) 
     {
-	    if (strncmp (arg, "manyfmts", 8) == 0) {
-		    mp_msg (MSGT_VO, MSGL_WARN, "[gl] make sure you have OpenGL >= 1.2 and used corresponding headers for compiling!");
-		    many_fmts = 1;
-		    arg = &arg[8];
-	    }
-	    if (arg[0] != 0) {
-	    slice_height = atoi(arg);
-	    if (slice_height <= 0)
-		    slice_height = 65536;
-	    }
+        char *parse_pos = &arg[0];
+        while (parse_pos[0] && !parse_err) {
+            if (strncmp (parse_pos, "manyfmts", 8) == 0) {
+                parse_pos = &parse_pos[8];
+                many_fmts = 1;
+            } else if (strncmp (parse_pos, "slice-height=", 13) == 0) {
+                parse_pos = &parse_pos[13];
+                slice_height = strtol(parse_pos, &parse_pos, 0);
+                if (slice_height < 0) parse_err = 1;
+            }
+            if (parse_pos[0] == ':') parse_pos = &parse_pos[1];
+            else if (parse_pos[0]) parse_err = 1;
+        }
     }
-    mp_msg(MSGT_VO, MSGL_INFO, "[vo_gl] Using %d as slice_height (0 means image_height).\n", slice_height);
-
+    if (parse_err) {
+      mp_msg(MSGT_VO, MSGL_ERR,
+              "\n-vo gl command line help:\n"
+              "Example: mplayer -vo gl:slice-height=4\n"
+              "\nOptions:\n"
+              "  manyfmts\n"
+              "    Enable extended color formats for OpenGL 1.2 and later\n"
+              "  slice-height=<0-...>\n"
+              "    Slice size for texture transfer, 0 for whole image\n"
+              "\n" );
+      return -1;
+    }
+    if (many_fmts)
+      mp_msg (MSGT_VO, MSGL_WARN, "[gl] using extended formats.\n"
+               "Make sure you have OpenGL >= 1.2 and used corresponding "
+               "headers for compiling!\n");
+    mp_msg (MSGT_VO, MSGL_INFO, "[gl] Using %d as slice height "
+             "(0 means image height).\n", slice_height);
     if( !vo_init() ) return -1; // Can't open X11
 
     return 0;
