@@ -185,13 +185,13 @@ void guiInit( void )
 // --- load skin
  skinDirInHome=get_path("Skin");
  skinMPlayerDir=MPLAYER_DATADIR "/Skin";
- printf("SKIN dir 1: '%s'\n",skinDirInHome);
- printf("SKIN dir 2: '%s'\n",skinMPlayerDir);
+ mp_msg( MSGT_GPLAYER,MSGL_V,"SKIN dir 1: '%s'\n",skinDirInHome);
+ mp_msg( MSGT_GPLAYER,MSGL_V,"SKIN dir 2: '%s'\n",skinMPlayerDir);
  if ( !skinName ) skinName=strdup( "default" );
  i = skinRead( skinName );
  if ((i == -1) && strcmp(skinName,"default"))
  {
-    mp_msg( MSGT_GPLAYER,MSGL_INFO,"Selected skin ( %s ) not found, trying 'default'...\n", skinName);
+    mp_msg( MSGT_GPLAYER,MSGL_WARN,MSGTR_SKIN_SKINCFG_SelectedSkinNotFound, skinName);
     skinName=strdup( "default" );
     i = skinRead( skinName );
  }
@@ -246,7 +246,7 @@ void guiInit( void )
  wsXDNDMakeAwareness(&appMPlayer.mainWindow);
 
  #ifdef DEBUG
-  mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] Depth on screen: %d\n",wsDepthOnScreen );
+  mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] depth on screen: %d\n",wsDepthOnScreen );
   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] parent: 0x%x\n",(int)appMPlayer.mainWindow.WindowID );
   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] sub: 0x%x\n",(int)appMPlayer.subWindow.WindowID );
  #endif
@@ -340,7 +340,7 @@ void guiInit( void )
 void guiDone( void )
 {
  mplMainRender=0;
- mp_msg( MSGT_GPLAYER,MSGL_V,"[gui] done.\n" );
+ mp_msg( MSGT_GPLAYER,MSGL_V,"[GUI] done.\n" );
 
  if ( gui_save_pos )
   {
@@ -430,7 +430,7 @@ void guiLoadSubtitle( char * name )
   }
  if ( subdata )
   {
-   mp_msg( MSGT_GPLAYER,MSGL_INFO,"[gui] Delete subtitles.\n" );
+   mp_msg( MSGT_GPLAYER,MSGL_INFO,MSGTR_DeletingSubtitles );
    sub_free( subdata );
    subdata=NULL;
    vo_sub=NULL;
@@ -453,7 +453,7 @@ void guiLoadSubtitle( char * name )
   }
  if ( name )
   {
-   mp_msg( MSGT_GPLAYER,MSGL_INFO,"[gui] Load subtitle: %s\n",name );
+   mp_msg( MSGT_GPLAYER,MSGL_INFO,MSGTR_LoadingSubtitles,name );
    subdata=sub_read_file( gstrdup( name ), guiIntfStruct.FPS );
    if ( !subdata ) mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_CantLoadSub,name );
    sub_name = (malloc(2 * sizeof(char*))); //when mplayer will be restarted 
@@ -467,7 +467,7 @@ void guiLoadSubtitle( char * name )
 
 static void add_vop( char * str )
 {
- mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[gui] add video filter: %s\n",str );
+ mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_AddingVideoFilter,str );
  if ( vo_plugin_args )
   {
    int i = 0;
@@ -483,7 +483,7 @@ static void remove_vop( char * str )
 
  if ( !vo_plugin_args ) return;
 
- mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[gui] remove video filter: %s\n",str );
+ mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_RemovingVideoFilter,str );
 
  while ( vo_plugin_args[n++].name ); n--;
  if ( n > -1 )

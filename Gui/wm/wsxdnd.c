@@ -11,6 +11,8 @@
 
 #include <X11/Xatom.h>
 
+#include "../../mp_msg.h"
+#include "../../help_mp.h"
 
 #define XDND_VERSION 3L
 
@@ -81,7 +83,7 @@ wsXDNDProcessSelection(wsTWindow* wnd, XEvent *event)
     XSendEvent(wsDisplay, selowner, 0, 0, &xevent);
 
     if (!delme){
-      printf("D&D: Nothing returned!\n");
+      mp_msg( MSGT_GPLAYER,MSGL_WARN,MSGTR_WS_DDNothing );
       return False;
     }
 
@@ -151,7 +153,7 @@ wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event)
 	}
       }
       if (atom_support == None) {
-	printf("This doesn't seem as a file...\n");
+	mp_msg( MSGT_GPLAYER,MSGL_WARN,MSGTR_WS_NotAFile );
       }
     } else {
       /* need to check the whole list here */

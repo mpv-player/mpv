@@ -121,7 +121,7 @@ int cmd_window( char * in )
   else if ( !strncmp( in,"sub",3 ) ) currSection=&skinAppMPlayer->sub;
    else if ( !strncmp( in,"playbar",7 ) ) { currSection=&skinAppMPlayer->bar; currSubItem=&skinAppMPlayer->NumberOfBarItems; currSubItems=skinAppMPlayer->barItems; }
     else if ( !strncmp( in,"menu",4 ) ) { currSection=&skinAppMPlayer->menuBase; currSubItem=&skinAppMPlayer->NumberOfMenuItems; currSubItems=skinAppMPlayer->MenuItems; }
-     else ERRORMESSAGE( "Unknown window type found ..." );
+     else ERRORMESSAGE( MSGTR_UNKNOWNWINDOWTYPE );
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"\n[skin] window: %s\n",window_name );
  return 0;
 }
@@ -676,7 +676,7 @@ int skinRead( char * dname )
    setname( skinMPlayerDir,dname );
    if ( ( skinFile = fopen( fn,"rt" ) ) == NULL )
     {
-     mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[skin] file ( %s ) not found.\n",fn );
+     mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_SKIN_SkinFileNotFound,fn );
      return -1;
     }
   }

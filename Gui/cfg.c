@@ -5,6 +5,7 @@
 
 #include "../config.h"
 #include "../mp_msg.h"
+#include "../help_mp.h"
 #include "../mplayer.h"
 #include "../m_config.h"
 #include "../m_option.h"
@@ -212,12 +213,12 @@ int cfg_read( void )
 #endif
 
 // -- read configuration
- mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[cfg] read config file: %s\n",cfg );
+ mp_msg( MSGT_GPLAYER,MSGL_V,"[cfg] reading config file: %s\n",cfg );
  gui_conf=m_config_new();
  m_config_register_options( gui_conf,gui_opts );
  if ( m_config_parse_config_file( gui_conf,cfg ) < 0 ) 
   {
-   mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[cfg] config file read error ...\n" );
+   mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_ConfigfileError );
 //   exit( 1 );
   }
  free( cfg );
@@ -298,7 +299,7 @@ int cfg_write( void )
 	fprintf( f,"%s = \"%s\"\n",gui_opts[i].name, v);
 	free(v);
       } else if((int)v == -1)
-	mp_msg(MSGT_GPLAYER,MSGL_WARN,"Unable to save the '%s' option\n", gui_opts[i].name);
+	mp_msg(MSGT_GPLAYER,MSGL_WARN,MSGTR_UnableToSaveOption, gui_opts[i].name);
     }
    fclose( f );
   }

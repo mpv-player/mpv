@@ -27,6 +27,7 @@
 #include "../../postproc/rgb2rgb.h"
 #include "../../libmpcodecs/vf_scale.h"
 #include "../../mp_msg.h"
+#include "../../help_mp.h"
 #include "../../mplayer.h"
 
 #include <X11/extensions/XShm.h>
@@ -168,7 +169,7 @@ void wsWindowDecoration( wsTWindow * win,long d )
 
 int wsIOErrorHandler( Display * dpy )
 {
- fprintf( stderr,"[ws] io error in display.\n" );
+ fprintf( stderr,"[ws] IO error in display.\n" );
  exit( 0 );
 }
 
@@ -197,7 +198,7 @@ if(mDisplay){
  wsDisplay=XOpenDisplay( DisplayName );
  if ( !wsDisplay )
   {
-   mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] couldn't open the display !\n" );
+   mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_WS_CouldNotOpenDisplay );
    exit( 0 );
   }
 }
@@ -212,19 +213,19 @@ wsXDNDInitialize();
     localdisp=0;
     wsUseXShm=0;
  }
- mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[ws] Display name: %s => %s display.\n",dispname,localdisp?"local":"REMOTE");
- if (!localdisp) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Remote display, disabling XMITSHM\n");
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[ws] display name: %s => %s display.\n",dispname,localdisp?"local":"REMOTE");
+ if (!localdisp) mp_msg( MSGT_GPLAYER,MSGL_V,MSGTR_WS_RemoteDisplay );
 }
 
  if ( !XShmQueryExtension( wsDisplay ) )
   {
-   mp_msg( MSGT_GPLAYER,MSGL_ERR,"[ws] sorry, your system is not supported X shared memory extension.\n" );
+   mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_WS_NoXshm );
    wsUseXShm=0;
   }
 #ifdef HAVE_XSHAPE
   if ( !XShapeQueryExtension( wsDisplay,&eventbase,&errorbase ) )
    {
-    mp_msg( MSGT_GPLAYER,MSGL_ERR,"[ws] sorry, your system is not supported XShape extension.\n" );
+    mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_WS_NoXshape );
     wsUseXShape=0;
    }
 #else
@@ -247,7 +248,7 @@ wsXDNDInitialize();
   wsOrgY = screens[xinerama_screen].y_org;
   wsMaxX=screens[xinerama_screen].width;
   wsMaxY=screens[xinerama_screen].height;
-  mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[ws] screens %d Max %d, %d Org %d,%d\n", 
+  mp_msg( MSGT_GPLAYER,MSGL_V,"[ws] screens %d Max %d, %d Org %d,%d\n",
     num_screens, wsMaxX, wsMaxY, wsOrgX, wsOrgY);
   XFree(screens);
   }
@@ -391,7 +392,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  depth = vo_find_depth_from_visuals( wsDisplay,wsScreen,NULL );
  if ( depth < 15 )
   {
-   mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] sorry, this color depth is not enough.\n" );
+   mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_WS_ColorDepthTooLow );
    exit( 0 );
   }
  XMatchVisualInfo( wsDisplay,wsScreen,depth,TrueColor,&win->VisualInfo );
@@ -505,7 +506,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
   for ( i=0;i < wsWLCount;i++ )
    if ( wsWindowList[i] == NULL ) break;
   if ( i == wsWLCount )
-   {  mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] there are too many open windows\n" ); exit( 0 ); }
+   {  mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_WS_TooManyOpenWindows ); exit( 0 ); }
   wsWindowList[i]=win;
  }
 
@@ -578,7 +579,7 @@ Bool wsEvents( Display * display,XEvent * Event,XPointer arg )
           if ( (Atom)Event->xclient.data.l[0] == wsWindowList[l]->AtomTakeFocus )
            { i=wsWindowFocusIn;  wsWindowList[l]->Focused=wsFocused; goto expose; }
           if ( (Atom)Event->xclient.data.l[0] == wsWindowList[l]->AtomRolle )
-           { mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[ws] rolled.\n" ); }
+           { mp_msg( MSGT_GPLAYER,MSGL_V,"[ws] role set.\n" ); }
          } else {
 	   /* try to process DND events */
 	   wsXDNDProcessClientMessage(wsWindowList[l],&Event->xclient);
@@ -720,7 +721,7 @@ void wsHandleEvents( void ){
 void wsMainLoop( void )
 {
  int delay=20;
- mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[ws] init threads: %d\n",XInitThreads() );
+ mp_msg( MSGT_GPLAYER,MSGL_V,"[ws] init threads: %d\n",XInitThreads() );
  XSynchronize( wsDisplay,False );
  XLockDisplay( wsDisplay );
 // XIfEvent( wsDisplay,&wsEvent,wsEvents,NULL );
@@ -1115,14 +1116,14 @@ void wsCreateImage( wsTWindow * win,int Width,int Height )
                    win->VisualInfo.depth,ZPixmap,NULL,&win->Shminfo,Width,Height );
    if ( win->xImage == NULL )
     {
-     mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] shared memory extension error.\n" );
+     mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_WS_ShmError );
      exit( 0 );
     }
    win->Shminfo.shmid=shmget( IPC_PRIVATE,win->xImage->bytes_per_line * win->xImage->height,IPC_CREAT|0777 );
    if ( win->Shminfo.shmid < 0 )
     {
      XDestroyImage( win->xImage );
-     mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] shared memory extension error.\n" );
+     mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_WS_ShmError );
      exit( 0 );
     }
    win->Shminfo.shmaddr=(char *)shmat( win->Shminfo.shmid,0,0 );
@@ -1131,7 +1132,7 @@ void wsCreateImage( wsTWindow * win,int Width,int Height )
     {
      XDestroyImage( win->xImage );
      if ( win->Shminfo.shmaddr != ((char *) -1) ) shmdt( win->Shminfo.shmaddr );
-     mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] shared memory extension error.\n" );
+     mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_WS_ShmError );
      exit( 0 );
     }
    win->xImage->data=win->Shminfo.shmaddr;
@@ -1147,7 +1148,7 @@ void wsCreateImage( wsTWindow * win,int Width,int Height )
                               0 );
     if ( ( win->xImage->data=malloc( win->xImage->bytes_per_line * win->xImage->height ) ) == NULL )
      {
-      mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] sorry, not enough memory for draw buffer.\n" );
+      mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_WS_NotEnoughMemoryDrawBuffer );
       exit( 0 );
      }
    }
@@ -1190,15 +1191,15 @@ void wsScreenSaverOn( Display *mDisplay )
   {
    if ( DPMSQueryExtension( mDisplay,&nothing,&nothing ) )
     {
-     if ( !DPMSEnable( mDisplay ) ) mp_msg( MSGT_GPLAYER,MSGL_ERR,"DPMS not available ?\n" ); // restoring power saving settings
+     if ( !DPMSEnable( mDisplay ) ) mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_WS_DpmsUnavailable ); // restoring power saving settings
       else
        {
         // DPMS does not seem to be enabled unless we call DPMSInfo
         BOOL onoff;
         CARD16 state;
         DPMSInfo( mDisplay,&state,&onoff );
-        if ( onoff ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"Successfully enabled DPMS.\n" );
-         else mp_msg( MSGT_GPLAYER,MSGL_STATUS,"Could not enable DPMS.\n" );
+        if ( onoff ) mp_msg( MSGT_GPLAYER,MSGL_V,"Successfully enabled DPMS.\n" );
+         else mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_WS_DpmsNotEnabled );
        }
     }
   }

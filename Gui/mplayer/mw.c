@@ -551,7 +551,7 @@ void mplDandDHandler(int num,char** files)
 
     if(stat(str,&buf) == 0 && S_ISDIR(buf.st_mode) == 0) {
       /* this is not a directory so try to play it */
-      printf("Received D&D %s\n",str);
+      mp_msg( MSGT_GPLAYER,MSGL_V,"Received D&D %s\n",str );
       
       /* check if it is a subtitle file */
       {
@@ -590,7 +590,7 @@ void mplDandDHandler(int num,char** files)
       }
       gtkSet(gtkAddPlItem,0,(void*)item);
     } else {
-      printf("Received not a file: %s !\n",str);
+      mp_msg( MSGT_GPLAYER,MSGL_WARN,MSGTR_NotAFile,str );
     }
     free( str );
   }

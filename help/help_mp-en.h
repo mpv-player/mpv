@@ -624,12 +624,14 @@ static char help_text[]=
 #define MSGTR_NEMFMR "Sorry, not enough memory for menu rendering."
 #define MSGTR_IDFGCVD "Sorry, I did not find a GUI compatible video output driver."
 #define MSGTR_NEEDLAVCFAME "Sorry, you cannot play non-MPEG files with your DXR3/H+ device without reencoding.\nPlease enable lavc or fame in the DXR3/H+ configbox."
+#define MSGTR_UNKNOWNWINDOWTYPE "Unknown window type found ..."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] error in skin config file on line %d: %s"
 #define MSGTR_SKIN_WARNING1 "[skin] warning in config file line %d:\nwidget (%s) found but no \"section\" found before"
 #define MSGTR_SKIN_WARNING2 "[skin] warning in config file line %d:\nwidget (%s) found but no \"subsection\" found before"
 #define MSGTR_SKIN_WARNING3 "[skin] warning in config file line %d:\nthis subsection is not supported by widget (%s)"
+#define MSGTR_SKIN_SkinFileNotFound "[skin] file ( %s ) not found.\n"
 #define MSGTR_SKIN_BITMAP_16bit  "16 bits or less depth bitmap not supported (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "file not found (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "BMP read error (%s)\n"
@@ -646,6 +648,7 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "non-existent font identifier (%s)\n"
 #define MSGTR_SKIN_UnknownParameter "unknown parameter (%s)\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin not found (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "Selected skin ( %s ) not found, trying 'default'...\n"
 #define MSGTR_SKIN_SKINCFG_SkinCfgReadError "skin configfile read error (%s)\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
@@ -827,6 +830,45 @@ static char help_text[]=
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatal error!"
 #define MSGTR_MSGBOX_LABEL_Error "Error!"
 #define MSGTR_MSGBOX_LABEL_Warning "Warning!"
+
+// bitmap.c
+
+#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] not enough memory for image\n"
+#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] not enough memory for image\n"
+
+// cfg.c
+
+#define MSGTR_ConfigFileReadError "[cfg] config file read error ...\n"
+#define MSGTR_UnableToSaveOption "Unable to save the '%s' option.\n"
+
+// interface.c
+
+#define MSGTR_DeletingSubtitles "[GUI] Deleting subtitles.\n"
+#define MSGTR_LoadingSubtitles "[GUI] Loading subtitles: %s\n"
+#define MSGTR_AddingVideoFilter "[GUI] Adding video filter: %s\n"
+#define MSGTR_RemovingVideoFilter "[GUI] Removing video filter: %s\n"
+
+// mw.c
+
+#define MSGTR_NotAFile "This does not seem to be a file: %s !\n"
+
+// ws.c
+
+#define MSGTR_WS_CouldNotOpenDisplay "[ws] Could not open the display.\n"
+#define MSGTR_WS_RemoteDisplay "[ws] Remote display, disabling XMITSHM.\n"
+#define MSGTR_WS_NoXshm "[ws] Sorry, your system does not support the X shared memory extension.\n"
+#define MSGTR_WS_NoXshape "[ws] Sorry, your system does not support the XShape extension.\n"
+#define MSGTR_WS_ColorDepthTooLow "[ws] Sorry, the color depth is too low.\n"
+#define MSGTR_WS_TooManyOpenWindows "[ws] There are too many open windows.\n"
+#define MSGTR_WS_ShmError "[ws] shared memory extension error\n"
+#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] Sorry, not enough memory for draw buffer.\n"
+#define MSGTR_WS_DpmsUnavailable "DPMS not available?\n"
+#define MSGTR_WS_DpmsNotEnabled "Could not enable DPMS.\n"
+
+// wsxdnd.c
+
+#define MSGTR_WS_NotAFile "This does not seem to be a file...\n"
+#define MSGTR_WS_DDNothing "D&D: Nothing returned!\n"
 
 #endif
 
