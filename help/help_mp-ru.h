@@ -1,6 +1,6 @@
 /* Translated by:  Nick Kurshev <nickols_k@mail.ru>,
  *		Dmitry Baryshkov <lumag@qnc.ru>
-   Was synced with help_mp-en.h: rev 1.110
+   Was synced with help_mp-en.h: rev 1.111
  ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -42,6 +42,7 @@ static char help_text[]=
 " o               цикличный перебор OSD режимов:  нет / навигация / навигация+таймер\n"
 " * или /         прибавить или убавить PCM громкость\n"
 " z или x         регулировать задержку субтитров по +/- 0.1 секунде\n"
+" r или t         регулировка вертикальной позиции субтитров,см. также -vf expand\n"
 "\n"
 " * * * ПОДРОБНЕЕ СМ. ДОКУМЕНТАЦИЮ, О ДОПОЛНИТЕЛЬНЫХ ОПЦИЯХ И КЛЮЧАХ! * * *\n"
 "\n";
@@ -62,20 +63,20 @@ static char help_text[]=
 #define MSGTR_InvalidVOdriver "Недопустимое имя драйвера видео вывода: %s\nСм. '-vo help' чтобы получить список доступных драйверов.\n"
 #define MSGTR_InvalidAOdriver "Недопустимое имя драйвера аудио вывода: %s\nСм. '-ao help' чтобы получить список доступных драйверов.\n"
 #define MSGTR_CopyCodecsConf "(скопируйте etc/codecs.conf (из исходников MPlayer) в ~/.mplayer/codecs.conf)\n"
-#define MSGTR_BuiltinCodecsConf "Используется встроенный codecs.conf\n"
+#define MSGTR_BuiltinCodecsConf "Используется встроенный codecs.conf.\n"
 #define MSGTR_CantLoadFont "Не могу загрузить шрифт: %s\n"
 #define MSGTR_CantLoadSub "Не могу загрузить субтитры: %s\n"
 #define MSGTR_ErrorDVDkey "Ошибка обработки DVD КЛЮЧА.\n"
 #define MSGTR_CmdlineDVDkey "Для расшифровки используется затребованный DVD ключ.\n"
 #define MSGTR_DVDauthOk "Авторизация DVD выглядит OK.\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: выбранный поток потерян!\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: Выбранный поток потерян!\n"
 #define MSGTR_CantOpenDumpfile "Не могу открыть файл для дампирования!!!\n"
 #define MSGTR_CoreDumped "Core dumped ;)\n"
 #define MSGTR_FPSnotspecified "В заголовке кадры/сек не указаны (или недопустимые)! Используйте -fps опцию!\n"
 #define MSGTR_TryForceAudioFmtStr "Попытка форсировать семейство аудио кодеков %s...\n"
 #define MSGTR_CantFindAfmtFallback "Не могу найти аудио кодек для форсированного семейства драйверов, переход на другие драйвера.\n"
 #define MSGTR_CantFindAudioCodec "Не могу найти кодек для аудио формата 0x%X!\n"
-#define MSGTR_RTFMCodecs "Прочтите DOCS/HTML/en/codecs.html!\n"
+#define MSGTR_RTFMCodecs "Прочтите DOCS/HTML/ru/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Не смог инициализировать аудио кодек! -> без звука\n"
 #define MSGTR_TryForceVideoFmtStr "Попытка форсировать семейство видео кодеков %s...\n"
 #define MSGTR_CantFindVideoCodec "Не могу найти кодек для видео формата 0x%X!\n"
@@ -101,15 +102,15 @@ static char help_text[]=
 "  - Используйте -cache 8192.\n"\
 "- Используете ли Вы -cache для проигрывания не-'слоёных'[non-interleaved] AVI файлов?\n"\
 "  - Используйте -nocache.\n"\
-"Читайте DOCS/HTML/en/devices.html для советов по подстройке/ускорению.\n"\
-"Если ничего не помогло, тогда читайте DOCS/HTML/en/bugreports.html!\n\n"
+"Читайте DOCS/HTML/ru/devices.html для советов по подстройке/ускорению.\n"\
+"Если ничего не помогло, тогда читайте DOCS/HTML/ru/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer был скомпилирован БЕЗ поддержки GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI требует X11!\n"
-#define MSGTR_Playing "Проигрывание %s\n"
+#define MSGTR_Playing "Проигрывание %s.\n"
 #define MSGTR_NoSound "Аудио: без звука!!!\n"
-#define MSGTR_FPSforced "Кадры/сек форсированы в %5.3f (ftime: %5.3f)\n"
-#define MSGTR_CompiledWithRuntimeDetection "Скомпилировано с Определением типа процессора во время выполнения - ПРЕДУПРЕЖДЕНИЕ - это не оптимально!\nДля получения максимальной производительности, перекомпилируйте MPlayer c --disable-runtime-cpudetection\n"
+#define MSGTR_FPSforced "Кадры/сек форсированы в %5.3f (ftime: %5.3f).\n"
+#define MSGTR_CompiledWithRuntimeDetection "Скомпилировано с Определением типа процессора во время выполнения - ПРЕДУПРЕЖДЕНИЕ - это не оптимально!\nДля получения максимальной производительности, перекомпилируйте MPlayer c --disable-runtime-cpudetection.\n"
 #define MSGTR_CompiledWithCPUExtensions "Скомпилировано для x86 CPU со следующими расширениями:"
 #define MSGTR_AvailableVideoOutputPlugins "Доступные плагины вывода видео:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Доступные драйвера вывода видео:\n"
@@ -134,20 +135,21 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer сломался из-за 'Неправильной инструкции'.\n"\
 "  Это может быть ошибкой нашего нового кода определения типа CPU во время выполнения...\n"\
-"  Пожалуйста, читайте DOCS/HTML/en/bugreports.html.\n"
+"  Пожалуйста, читайте DOCS/HTML/ru/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer сломался из-за 'Неправильной инструкции'.\n"\
 "  Обычно, это происходит когда вы его запускаете на CPU, отличном от того, для которого\n"\
-"  он был скомпилирован/оптимизирован.\n  Проверьте это!\n"
+"  он был скомпилирован/оптимизирован.\n"\
+"  Проверьте это!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer сломался из-за плохого использования CPU/FPU/RAM.\n"\
 "  Перекомпилируйте MPlayer с --enable-debug и сделайте 'gdb' backtrace и\n"\
-"  дизассемблирование. Для подробностей, см. DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
+"  дизассемблирование. Для подробностей, см. DOCS/HTML/ru/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer сломался. Это не должно происходить.\n"\
 "  Это может быть ошибкой в коде MPlayer'а _или_ в Вашем драйвере _или_\n"\
 "  Вашей версии gcc. Если Вы думаете, что в этом виноват MPlayer, пожалуйста,\n"\
-"  прочтите DOCS/HTML/en/bugreports.html и следуйте инструкциям оттуда. Мы не сможем\n"\
+"  прочтите DOCS/HTML/ru/bugreports.html и следуйте инструкциям оттуда. Мы не сможем\n"\
 "  и не будем помогать, если Вы не предоставите эту информацию,\n"\
 "  сообщая о возможной ошибке.\n"
 
@@ -159,8 +161,8 @@ static char help_text[]=
 #define MSGTR_CannotOpenFile_Device "Не могу открыть файл/устройство.\n"
 #define MSGTR_ErrorDVDAuth "Ошибка при DVD авторизации.\n"
 #define MSGTR_CannotOpenDemuxer "Не могу открыть демуксер[demuxer].\n"
-#define MSGTR_NoAudioEncoderSelected "\nКодировщик аудио (-oac) не выбран. Выберете один или используйте -nosound. Используйте -oac help!\n"
-#define MSGTR_NoVideoEncoderSelected "\nКодировщик видео (-ovc) не выбран. Выберете один, используйте -ovc help!\n"
+#define MSGTR_NoAudioEncoderSelected "\nКодировщик аудио (-oac) не выбран. Выберете какой-нибудь (см. -oac help) или используйте -nosound.\n"
+#define MSGTR_NoVideoEncoderSelected "\nКодировщик видео (-ovc) не выбран. Выберете какой-нибудь (см. -ovc help), используйте -ovc help!\n"
 #define MSGTR_InitializingAudioCodec "Инициализация аудио кодека...\n"
 #define MSGTR_CannotOpenOutputFile "Не могу открыть файл '%s'для вывода.\n"
 #define MSGTR_EncoderOpenFailed "Не могу открыть кодировщик.\n"
@@ -211,10 +213,10 @@ static char help_text[]=
 "                1: все\n"\
 "                2: регулируемое\n"\
 "\n"\
-" fast          переключиться на быстрое кодирование в некоторых предустановленных VBR\n"\
+" fast          Переключиться на быстрое кодирование в некоторых предустановленных VBR\n"\
 "               режимах, значительно худшее качество и высокие битпотоки.\n"\
 "\n"\
-" preset=<value> представляют наибольшие возможные установки качества.\n"\
+" preset=<value> Представляют наибольшие возможные установки качества.\n"\
 "                 medium: VBR  кодирование,  хорошее качество\n"\
 "                 (амплитуда битпотока - 150-180 kbps)\n"\
 "                 standard:  VBR кодирование, высокое качество\n"\
@@ -237,7 +239,7 @@ static char help_text[]=
 
 #define MSGTR_SMBInitError "Не могу инициализировать библиотеку libsmbclient: %d\n"
 #define MSGTR_SMBFileNotFound "Не могу открыть по сети: '%s'\n"
-#define MSGTR_SMBNotCompiled "MPlayer не был скомпилирован с поддержкой чтения SMB\n"
+#define MSGTR_SMBNotCompiled "MPlayer не был скомпилирован с поддержкой чтения SMB.\n"
 
 #define MSGTR_CantOpenDVD "Не смог открыть DVD: %s\n"
 #define MSGTR_DVDwait "Чтение структуры диска, подождите, пожалуйста...\n"
@@ -276,11 +278,11 @@ static char help_text[]=
 #define MSGTR_NI_Message "%s 'НЕСЛОЁНЫЙ' формат AVI файла!\n"
 
 #define MSGTR_UsingNINI "Использование 'НЕСЛОЁНОГО' испорченного формата AVI файла!\n"
-#define MSGTR_CouldntDetFNo "Не смог определить число кадров (для абсолютного перемещения)\n"
+#define MSGTR_CouldntDetFNo "Не смог определить число кадров (для абсолютного перемещения).\n"
 #define MSGTR_CantSeekRawAVI "Не могу переместиться в сыром потоке AVI! (требуется индекс, попробуйте с ключом -idx!)\n"
 #define MSGTR_CantSeekFile "Не могу перемещаться в этом файле!\n"
 
-#define MSGTR_EncryptedVOB "Шифрованный VOB файл! См. DOCS/HTML/en/dvd.html\n"
+#define MSGTR_EncryptedVOB "Шифрованный VOB файл! См. DOCS/HTML/ru/dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Шифрованный поток, но авторизация не была Вами затребована!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Для поддержки сжатых заголовков необходима zlib!\n"
@@ -299,8 +301,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Информация демуксера[demuxer] %s уже существует!\n"
 #define MSGTR_ClipInfo "Информация о клипе:\n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: обнаружена продолжительная[Progressive] последовательность, покидаю 3:2 TELECINE режим\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE обнаружено, включаю обратный telecine fx. FPS изменено в %5.3f!  \n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: обнаружена продолжительная[Progressive] последовательность, покидаю 3:2 TELECINE режим.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE обнаружено, включаю обратный telecine fx. FPS изменено в %5.3f!\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Не смог открыть кодек\n"
@@ -316,16 +318,16 @@ static char help_text[]=
 #define MSGTR_BadMpegSequHdr "MPEG: Плохая последовательность заголовков!\n"
 #define MSGTR_BadMpegSequHdrEx "MPEG: Плохое расширение последовательности заголовков!\n"
 
-#define MSGTR_ShMemAllocFail "Не могу зарезервировать разделяемую память\n"
-#define MSGTR_CantAllocAudioBuf "Не могу зарезервировать выходной аудио буфер\n"
+#define MSGTR_ShMemAllocFail "Не могу зарезервировать разделяемую память.\n"
+#define MSGTR_CantAllocAudioBuf "Не могу зарезервировать выходной аудио буфер.\n"
 
 #define MSGTR_UnknownAudio "Неизвестный/потерянный аудио формат -> без звука\n"
 
 #define MSGTR_UsingExternalPP "[PP] Использую внешний фильтр постобработки, max q = %d.\n"
 #define MSGTR_UsingCodecPP "[PP] Использую постобработку из кодека, max q = %d.\n"
 #define MSGTR_VideoAttributeNotSupportedByVO_VD "Видео атрибут '%s' не поддерживается выбранными vo & vd.\n"
-#define MSGTR_VideoCodecFamilyNotAvailableStr "Запрошенное семейство видео кодеков [%s] (vfm=%s) не доступно (включите во время компиляции)\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "Запрошенное семейство аудио кодеков [%s] (afm=%s) не доступно (включите во время компиляции)\n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "Запрошенное семейство видео кодеков [%s] (vfm=%s) не доступно.\nВключите его во время компиляции.\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "Запрошенное семейство аудио кодеков [%s] (afm=%s) не доступно.\nВключите его во время компиляции.\n"
 #define MSGTR_OpeningVideoDecoder "Открываю декодер видео: [%s] %s\n"
 #define MSGTR_OpeningAudioDecoder "Открываю декодер аудио: [%s] %s\n"
 #define MSGTR_UninitVideoStr "деинициализация видео: %s\n"
@@ -333,8 +335,8 @@ static char help_text[]=
 #define MSGTR_VDecoderInitFailed "Ошибка инициализации Декодера Видео :(\n"
 #define MSGTR_ADecoderInitFailed "Ошибка инициализации Декодера Аудио :(\n"
 #define MSGTR_ADecoderPreinitFailed "Ошибка преинициализации Декодера Аудио :(\n"
-#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Захватываю %d байт(а/ов) для входного буфера\n"
-#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Захватываю %d + %d = %d байт(а/ов) для буфера вывода\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Захватываю %d байт(а/ов) для входного буфера.\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Захватываю %d + %d = %d байт(а/ов) для буфера вывода.\n"
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Установка поддержки LIRC...\n"
@@ -343,8 +345,8 @@ static char help_text[]=
 #define MSGTR_LIRCcfgerr "Неудачная попытка чтения файла конфигурации LIRC %s!\n"
 
 // vf.c
-#define MSGTR_CouldNotFindVideoFilter "Не могу найти видео фильтр '%s'\n"
-#define MSGTR_CouldNotOpenVideoFilter "Не могу открыть видео фильтр '%s'\n"
+#define MSGTR_CouldNotFindVideoFilter "Не могу найти видео фильтр '%s'.\n"
+#define MSGTR_CouldNotOpenVideoFilter "Не могу открыть видео фильтр '%s'.\n"
 #define MSGTR_OpeningVideoFilter "Открываю видео фильтр: "
 #define MSGTR_CannotFindColorspace "Не могу найти общее цветовое пространство, даже вставив 'scale' :(\n"
 
@@ -413,14 +415,14 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_ConvertError "ошибка преобразования 24-бит в 32-бит (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "неизвестное сообщение: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "не хватает памяти\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "объявлено слишком много шрифтов\n"
-#define MSGTR_SKIN_FONT_FontFileNotFound "файл шрифта не найден\n"
-#define MSGTR_SKIN_FONT_FontImageNotFound "файл образов шрифта не найден\n"
+#define MSGTR_SKIN_FONT_TooManyFontsDeclared "Объявлено слишком много шрифтов.\n"
+#define MSGTR_SKIN_FONT_FontFileNotFound "Файл шрифта не найден.\n"
+#define MSGTR_SKIN_FONT_FontImageNotFound "Файл образов шрифта не найден.\n"
 #define MSGTR_SKIN_FONT_NonExistentFontID "несуществующий идентификатор шрифта (%s)\n"
 #define MSGTR_SKIN_UnknownParameter "неизвестный параметр (%s)\n"
-#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] не хватает памяти.\n"
+#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] не хватает памяти\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin не найден (%s).\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Ошибка чтения фала конфигурации skin (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Ошибка чтения фала конфигурации skin (%s)\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
 // --- gtk menus
@@ -590,7 +592,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_CDROMDevice "CD-ROM устройство:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD устройство:"
 #define MSGTR_PREFERENCES_FPS "FPS фильма:"
-#define MSGTR_PREFERENCES_ShowVideoWindow "Показывать Окно Видео, когда неактивен"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Показывать окно видео, когда неактивен"
 
 #define MSGTR_ABOUT_UHU "Разработка GUI спонсирована UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   Основная команда MPlayer'а:\n"
