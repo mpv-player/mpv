@@ -1,5 +1,7 @@
 // Translated by:  Anders Rune Jensen <anders@gnulinux.dk>
-// Sync'ed with help_mp-en.h 1.100
+// Særlig tak til: Tomas Groth <tomasgroth@hotmail.com>
+//                 Dan Christiansen <danchr@daimi.au.dk>
+// Sync'ed with help_mp-en.h 1.102
 
 
 // ========================= MPlayer help ===========================
@@ -14,43 +16,43 @@ static char help_text[]=
 "Benyt:   mplayer [indstillinger] [URL|sti/]filnavn\n"
 "\n"
 "Basale indstillinger (se manualen for en komplet liste):\n"
-" -vo <drv[:enhed]> vælg videodriver og -enhed (se '-vo help' for en komplet liste)\n"
-" -ao <drv[:enhed]> vælg lyddriver og -enhed (se '-ao help' for en komplet liste)\n"
+" -vo <drv[:enhed]> vælg videodriver og enhed (detaljer, se '-vo help')\n"
+" -ao <drv[:enhed]> vælg lyddriver og enhed (detaljer, se '-ao help')\n"
 #ifdef HAVE_VCD
-" vcd://<trackno>  afspil et VCD (Video CD) spor fra et drev i stedet for en fil\n"
+" vcd://<spor>  afspil et VCD (Video CD) spor fra et drev i stedet for en fil\n"
 #endif
 #ifdef HAVE_LIBCSS
-" -dvdauth <dev>  specificer DVD enhed til godkendelse (krypterede diske)\n"
+" -dvdauth <enhed>  angiv DVD enhed til verificering (krypterede diske)\n"
 #endif
 #ifdef USE_DVDREAD
-" dvd://<titleno>  afspiller DVD titel fra et drev i stedet for en fil\n"
-" -alang/-slang   vælg DVD lyd / undertekst sprog (vha. landekode på 2 tegn)\n"
+" dvd://<titelnr> afspil DVD titel fra et drev i stedet for en fil\n"
+" -alang/-slang   vælg sprog til lyd og undertekster (vha. landekode på 2 tegn)\n"
 #endif
-" -ss <timepos>   søger til en given position (sekund eller hh:mm:ss)\n"
-" -nosound        afspiller uden lyd\n"
-" -fs             afspiller i fuldskærm (eller -vm, -zoom, se manualen for detaljer)\n"
-" -x <x> -y <y>   sæt afspilnings opløsning (bruges med -vm eller -zoom)\n"
-" -sub <fil>      specificer undertekst-fil (se også -subfps, -subdelay)\n"
-" -playlist <fil> specificer afspilningsliste\n"
-" -vid x -aid y   afspil film (x) og lyd (y)\n"
-" -fps x -srate y tving filmen til x billeder per sekund og lyden til y Hz\n"
-" -pp <quality>   slå efterprocesseringsfilter til (se manualen for flere detaljer)\n"
-" -framedrop      slå billede-skip til (kan hjælpe langsomme maskiner)\n"
+" -ss <tidspos>   søg til en given position (sekund eller hh:mm:ss)\n"
+" -nosound        slå lyd fra\n"
+" -fs             afspil i fuldskærm (el. -vm, -zoom, se manualen)\n"
+" -x <x> -y <y>   skærmopløsning til -vm eller -zoom)\n"
+" -sub <fil>      angiv fil med undertekster (se også -subfps, -subdelay)\n"
+" -playlist <fil> angiv afspilningsliste\n"
+" -vid x -aid y   vælg filmspor (x) og lydspor (y)\n"
+" -fps x -srate y sæt billedfrekvensen til x billeder pr. sekund og lydfrekvensen til y Hz\n"
+" -pp <kvalitet>  benyt efterbehandlingsfiltre (detaljer, se manualen)\n"
+" -framedrop      spring enkelte billeder over hvis nødvendigt (til langsomme maskiner)\n"
 "\n"
-"Taster: (se manualen for en komplet liste, check også input.conf)\n"
-" <-  eller  ->   søger 10 sekunder frem eller tilbage\n"
-" up eller down   søger 1 minut frem eller tilbage \n"
-" pgup el. pgdown søger 10 minutter frem eller tilbage\n"
-" < eller >       søger frem eller tilbage i afspilningslisten\n"
+"Basale taster: (se manualen for en fuldstændig liste, check også input.conf)\n"
+" <-  eller  ->   søg 10 sekunder frem eller tilbage\n"
+" up eller down   søg 1 minut frem eller tilbage \n"
+" pgup el. pgdown søg 10 minutter frem eller tilbage\n"
+" < eller >       søg frem eller tilbage i afspilningslisten\n"
 " p eller SPACE   pause filmen (starter igen ved tryk på en vilkårlig tast)\n"
 " q eller ESC     stop afspilning og afslut program\n"
-" + eller -       juster lydforsinkelse med +/- 0.1 sekundt\n"
-" o               vælger OSD type:  ingen / søgebar / søgebar+tid\n"
-" * eller /       forøg eller formindsk volumen (tryk 'm' for at vælge master/pcm)\n"
-" z eller x       juster undertekstforsinkelse med +/- 0.1 sekund\n"
-" r eller t       juster undertekst position op/ned, se også -vop expand\n"
+" + eller -       juster lydens forsinkelse med +/- 0.1 sekundt\n"
+" o               vælg OSD type:  ingen / søgebjælke / søgebjælke+tid\n"
+" * eller /       juster lydstyrken op og ned\n"
+" z eller x       tilpas underteksters forsinkelse med +/- 0.1 sekund\n"
+" r eller t       tilpas underteksters position op/ned, se også -vop expand\n"
 "\n"
-" *** SE MANUALEN FOR FLERE DETALJER, FLERE (AVANCEREDE) MULIGHEDER OG TASTER ***\n"
+" * * * SE MANUALEN FOR DETALJER, FLERE (AVANCEREDE) MULIGHEDER OG TASTER * * *\n"
 "\n";
 #endif
 
@@ -63,62 +65,62 @@ static char help_text[]=
 #define MSGTR_Exit_eof "Slut på filen"
 #define MSGTR_Exit_error "Fatal fejl"
 #define MSGTR_IntBySignal "\nMPlayer afbrudt af signal %d i modul: %s \n"
-#define MSGTR_NoHomeDir "Kan ikke finde hjemmekatalog\n"
+#define MSGTR_NoHomeDir "Kunne ikke finde hjemmekatalog\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") problem\n"
 #define MSGTR_CreatingCfgFile "Genererer konfigurationsfil: %s\n"
 #define MSGTR_InvalidVOdriver "Ugyldig videodriver: %s\nBrug '-vo help' for at få en komplet liste over gyldige videodrivere.\n"
 #define MSGTR_InvalidAOdriver "Ugyldig lyddriver: %s\nBrug '-ao help' for at få en komplet liste over gyldige lyddrivere.\n"
 #define MSGTR_CopyCodecsConf "(kopier/link etc/codecs.conf (fra MPlayer kilde katalog) til ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Benytter indbyggede standardværdier for codecs.conf\n"
-#define MSGTR_CantLoadFont "Kan ikke indlæse skrifttypen:  %s\n"
-#define MSGTR_CantLoadSub "Kan ikke indlæse undertekstfilen: %s\n"
-#define MSGTR_ErrorDVDkey "Fejl under afvikling af DVD nøgle.\n"
-#define MSGTR_CmdlineDVDkey "DVD kommandolinjenøgle er gemt til dekryptering.\n"
-#define MSGTR_DVDauthOk "DVD auth sekvens synes af være OK.\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: kan ikke finde den valge fil eller adresse!\n"
-#define MSGTR_CantOpenDumpfile "Kan ikke åbne dump filen!!!\n"
+#define MSGTR_CantLoadFont "Kunne ikke indlæse skrifttype: %s\n"
+#define MSGTR_CantLoadSub "Kunne ikke indlæse undertekstfil: %s\n"
+#define MSGTR_ErrorDVDkey "Fejl under behandling af DVD-nøgle.\n"
+#define MSGTR_CmdlineDVDkey "Den valgte DVD-nøgle vil blive anvendt til dekryptering.\n"
+#define MSGTR_DVDauthOk "DVD-verifikationssekvens synes OK.\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATALT: Kunne ikke finde det valgte spor!\n"
+#define MSGTR_CantOpenDumpfile "Kunne ikke åbne dump filen.\n"
 #define MSGTR_CoreDumped "kernen dumpede ;)\n"
-#define MSGTR_FPSnotspecified "FPS ikke specificeret (eller ugyldig) i headeren! Brug -fps !\n"
-#define MSGTR_TryForceAudioFmtStr "Prøver at tvinge en lyd-codec driverfamilie %s ...\n"
-#define MSGTR_CantFindAfmtFallback "Kan ikke finde lyd-codec for driverfamilien, falder tilbage på en anden driver.\n"
-#define MSGTR_CantFindAudioCodec "Kan ikke finde codec til lydformatet 0x%X !\n"
+#define MSGTR_FPSnotspecified "Billedfrekvensen er enten ikke angivet i filen eller ugyldig. Brug -fps !\n"
+#define MSGTR_TryForceAudioFmtStr "Gennemtvinger lyd-codec driverfamilie %s ...\n"
+#define MSGTR_CantFindAfmtFallback "Kunne ikke finde lyd-codec for driverfamilien, prøver en anden driver.\n"
+#define MSGTR_CantFindAudioCodec "Kunne ikke finde codec til lydformatet 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Prøv at opgradere %s fra etc/codecs.conf\n*** Hvis dette ikke hjælper, så læs filen DOCS/en/codecs.html\n"
 #define MSGTR_CouldntInitAudioCodec "Kunne ikke initialisere lyd-codec -> ingen lyd\n"
-#define MSGTR_TryForceVideoFmtStr "Prøver at tvinge en video-codec driver familie %s ...\n"
-#define MSGTR_CantFindVideoCodec "Kan ikke finde video-codec til formatet 0x%X !\n"
-#define MSGTR_VOincompCodec "Desværre, den valgte video-driverenhed er ikke kompatibel med dette codec.\n"
-#define MSGTR_CannotInitVO "FATAL: Kan ikke initialisere videodriveren\n"
+#define MSGTR_TryForceVideoFmtStr "Gennemtvinger video-codec driver familie %s ...\n"
+#define MSGTR_CantFindVideoCodec "Kunne ikke finde video-codec til den valgte -vo og formatet 0x%X !\n"
+#define MSGTR_VOincompCodec "Beklager, den valgte video-driverenhed er ikke kompatibel med dette codec.\n"
+#define MSGTR_CannotInitVO "FATAL: Kunne ikke initialisere videodriveren\n"
 #define MSGTR_CannotInitAO "Kunne ikke åbne/initialisere lydkortet -> INGEN LYD\n"
-#define MSGTR_StartPlaying "Starter afspilning ...\n"
+#define MSGTR_StartPlaying "Påbegynder afspilning ...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
-"      ***********************************************************\n"\
-"      **** Dit system er for langsomt til at afspille dette! ****\n"\
-"      ***********************************************************\n"\
-"Possible reasons, problems, workarounds:\n"\
-"- Mest almindelige: ødelagt/dårlig _lydkort_ driver\n"\
+"      ************************************************************\n"\
+"      **** Din computer er for LANGSOM til at afspille dette! ****\n"\
+"      ************************************************************\n\n"\
+"Mulige årsager, problemer, løsninger:\n"\
+"- Oftest: dårlig driver til lydkort\n"\
 "  - Prøv -ao sdl eller brug ALSA 0.5 eller OSS emulation af ALSA 0.9.\n"\
-"  - Prøv med forskellige værdier for -autosync, 30 er en god start.\n"\
+"  - Experimenter med forskellige værdier for -autosync, 30 er en god start.\n"\
 "- Langsom video output\n"\
-"  - Prøv en anden -vo driver (-vo help for en liste) eller prøv -framedrop!\n"\
-"- Langsom CPU\n"\
-"  - Afspil ikke en stor DVD/DivX på en langsom CPU! Prøv -hardframedrop.\n"\
+"  - Prøv en anden -vo driver (se -vo help) eller prøv med -framedrop!\n"\
+"- Langsom processor\n"\
+"  - Undlad at afspille højopløsnings DVD eller DivX på en langsom processor! Prøv -hardframedrop.\n"\
 "- Ødelagt fil\n"\
-"  - Prøv forskellige kombinationer af -nobps -ni -forceidx -mc 0.\n"\
-"- Langsomt medie (NFS/SMB, DVD, VCD etc)\n"\
+"  - Prøv med forskellige sammensætninger af -nobps -ni -forceidx -mc 0.\n"\
+"- Langsomt medie (NFS/SMB, DVD, VCD osv.)\n"\
 "  - Prøv -cache 8192.\n"\
 "- Bruger du -cache til at afspille en non-interleaved AVI fil?\n"\
 "  - Prøv -nocache.\n"\
-"Læs DOCS/en/video.html og DOCS/sound.html for tuning/optimerings tips.\n"\
-"Hvis intet af dette hjalp, læs da DOCS/bugreports.html !\n\n"
+"Se DOCS/en/video.html og DOCS/en/sound.html for tuning/optimerings tips.\n"\
+"Hvis intet af dette hjalp, så læs DOCS/en/bugreports.html !\n\n"
 
-#define MSGTR_NoGui "MPlayer blev kompileret UDEN grafisk grænseflade!\n"
-#define MSGTR_GuiNeedsX "MPlayer grafisk grænseflade kræver X11!\n"
+#define MSGTR_NoGui "MPlayer blev kompileret UDEN grafisk brugergrænseflade!\n"
+#define MSGTR_GuiNeedsX "MPlayer grafisk brugergrænseflade kræver X11!\n"
 #define MSGTR_Playing "Afspiller %s\n"
-#define MSGTR_NoSound "Lyd: ingen lyd!!!\n"
-#define MSGTR_FPSforced "FPS tvunget til %5.3f  (ftime: %5.3f)\n"
-#define MSGTR_CompiledWithRuntimeDetection "Kompileret med dynamisk CPU valg - advarsel, dette er ikke optimalt! For at få den bedre ydelse rekompiler MPlayer fra kildekode med --disable-runtime-cpudetection\n"
-#define MSGTR_CompiledWithCPUExtensions "Kompileret til x86 CPU med udvidelse:"
+#define MSGTR_NoSound "Lyd: ingen lyd\n"
+#define MSGTR_FPSforced "Billedfrekvens sat til %5.3f  (ftime: %5.3f)\n"
+#define MSGTR_CompiledWithRuntimeDetection "Kompileret med dynamisk processoroptimering - NB: dette er ikke optimalt! For at få den bedre ydelse kompiler MPlayer fra kildekode med --disable-runtime-cpudetection\n"
+#define MSGTR_CompiledWithCPUExtensions "Kompileret til x86 CPU med udvidelser:"
 #define MSGTR_AvailableVideoOutputPlugins "Tilgængelige videoudvidelser:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Tilgængelige videodrivere:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Tilgængelige lyddrivere:\n"
@@ -126,188 +128,188 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "Tilgængelige video-codecs:\n"
 #define MSGTR_AvailableAudioFm "\nTilgængelige (prækompilerede) lyd-codec familier/drivere:\n"
 #define MSGTR_AvailableVideoFm "\nTilgængelige (prækompilerede) video-codec familier/drivere:\n"
-#define MSGTR_AvailableFsType "Tilgængelige fuldskærms modes:\n"
-#define MSGTR_UsingRTCTiming "Benytter Linux's hardware RTC timing (%ldHz)\n"
-#define MSGTR_CannotReadVideoProperties "Video: kan ikke læse egenskaber\n"
-#define MSGTR_NoStreamFound "Ingen stream fundet\n"
+#define MSGTR_AvailableFsType "Tilgængelige fuldskærmstilstande:\n"
+#define MSGTR_UsingRTCTiming "Benytter Linux' hardware RTC timer (%ldHz)\n"
+#define MSGTR_CannotReadVideoProperties "Video: Kunne ikke læse egenskaber\n"
+#define MSGTR_NoStreamFound "Ingen spor fundet\n"
 #define MSGTR_InitializingAudioCodec "Initialiserer lyd-codec...\n"
-#define MSGTR_ErrorInitializingVODevice "Fejl under initialisering/åbning af den valgte video (-vo) enhed!\n"
-#define MSGTR_ForcedVideoCodec "Tvunget video-codec: %s\n"
-#define MSGTR_ForcedAudioCodec "Tvunget lyd-codec: %s\n"
+#define MSGTR_ErrorInitializingVODevice "Fejl under åbning/initialisering af den valgte videodriver (-vo)!\n"
+#define MSGTR_ForcedVideoCodec "Gennemtvunget video-codec: %s\n"
+#define MSGTR_ForcedAudioCodec "Gennemtvunget lyd-codec: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: Beskrivelse: %s\nAO: forfatter: %s\n"
 #define MSGTR_AOComment "AO: Kommentar: %s\n"
-#define MSGTR_Video_NoVideo "Video: ingen video!!!\n"
-#define MSGTR_NotInitializeVOPorVO "\nFATAL: Kunne ikke initialisere video filtre (-vop) eller video udgang (-vo) !\n"
+#define MSGTR_Video_NoVideo "Video: ingen video\n"
+#define MSGTR_NotInitializeVOPorVO "\nFATALT: Kunne ikke initialisere videofiltre (-vop) eller videodriver (-vo) !\n"
 #define MSGTR_Paused "\n------ PAUSE -------\r"
 #define MSGTR_PlaylistLoadUnable "\nKunne ikke indlæse afspilningslisten %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
-"- MPlayer fejlede ved en 'ulovlig instruktion'.\n"\
-"  Det kan være en fejl i den nye kørselstids cpu-detekteringskode...\n"\
-"  Læs venligst DOCS/en/bugreports.html.\n"
+"- MPlayer fik en alvorlig fejl af typen 'ulovlig instruktion'.\n"\
+"  Det kan være en fejl i den nye dynamiske processoroptimeringskode...\n"\
+"  Se DOCS/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
-"- MPlayer fejlede ved en 'ulovlig instruktion'.\n"\
-"  Dette sker oftest kun hvis du kører på en cpu forskellig fra den\n"\
-"  mplayer var kompileret til.\n Undersøg venligst dette!\n"
+"- MPlayer fik en alvorlig fejl af typen 'ulovlig instruktion'.\n"\
+"  Dette sker oftest kun hvis du kører på en processor forskellig fra den\n"\
+"  MPlayer var kompileret til.\n Check venligst dette!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
-"- MPlayer fejlede pga. ulovlig brug af CPU/FPU/RAM.\n"\
-"  Rekompiler MPlayer med --enable-debug og lav en 'gdb' backtrace og\n"\
+"- MPlayer fik en alvorlig fejl pga. forkert brug af CPU/FPU/RAM.\n"\
+"  Rekompiler MPlayer med --enable-debug og lav et 'gdb' backtrace og\n"\
 "  disassemling. For detaljer læs venligst DOCS/en/bugreports.html#crash.b.\n"
 #define MSGTR_Exit_SIGCRASH \
-"- MPlayer fejlede. Dette skulle ikke ske.\n"\
+"- MPlayer fik en alvorlig fejl af ukendt type. Dette burde ikke ske.\n"\
 "  Det kan være en fejl i MPlayer koden _eller_ i andre drivere _ eller_ i \n"\
 "  den version af gcc du kører. Hvis du tror det er en fejl i MPlayer læs da \n"\
 "  venligst DOCS/en/bugreports.html og følg instruktionerne der. Vi kan ikke \n"\
-"  og vil ikke hjælpe medmindre du følger instruktionerne når du rapporterer en mulig fejl.\n"
+"  og vil ikke hjælpe medmindre du følger instruktionerne når du rapporterer \n"\
+"  en mulig fejl.\n"
 
 
 // mencoder.c:
 
-#define MSGTR_MEncoderCopyright "(C) 2000-2003 Arpad Gereoffy ((se dokumentationen!)\n"
+#define MSGTR_MEncoderCopyright "(C) 2000-2003  Árpád Gereöffy ((se dokumentationen!)\n"
 #define MSGTR_UsingPass3ControllFile "Benytter 3. pass kontrolfilen: %s\n"
-#define MSGTR_MissingFilename "\nManglende filnavn!\n\n"
-#define MSGTR_CannotOpenFile_Device "Kan ikke åbne fil/enhed\n"
-#define MSGTR_ErrorDVDAuth "Fejl i DVD auth...\n"
-#define MSGTR_CannotOpenDemuxer "Kan ikke åbne demuxer\n"
-#define MSGTR_NoAudioEncoderSelected "\nIngen lydenkoder (-oac) valgt! Vælg en eller brug -nosound. Brug -oac for hjælp !\n"
-#define MSGTR_NoVideoEncoderSelected "\nIngen videoenkoder (-ovc) valgt! Vælg en eller brug, brug -ovc for hjælp !\n"
+#define MSGTR_MissingFilename "\nFilnavn mangler\n\n"
+#define MSGTR_CannotOpenFile_Device "Kunne ikke åbne fil/enhed\n"
+#define MSGTR_ErrorDVDAuth "Fejl i DVD-verificering...\n"
+#define MSGTR_CannotOpenDemuxer "Kunne ikke åbne demuxer\n"
+#define MSGTR_NoAudioEncoderSelected "\nIngen lydenkoder (-oac) valgt! Vælg en eller brug -nosound. Se også -oac help!\n"
+#define MSGTR_NoVideoEncoderSelected "\nIngen videoenkoder (-ovc) valgt! Vælg en, se -ovc help!\n"
 #define MSGTR_InitializingAudioCodec "Initialiserer lyd-codec...\n"
-#define MSGTR_CannotOpenOutputFile "Kan ikke skrive til filen '%s'\n"
+#define MSGTR_CannotOpenOutputFile "Kunne ikke åbne '%s' til skrivning\n"
 #define MSGTR_EncoderOpenFailed "Kunne ikke åbne enkoderen\n"
-#define MSGTR_ForcingOutputFourcc "Tvinger udgang fourcc til %x [%.4s]\n"
+#define MSGTR_ForcingOutputFourcc "Tvinger udgangskode (fourcc) til %x [%.4s]\n"
 #define MSGTR_WritingAVIHeader "Skriver AVI header...\n"
-#define MSGTR_DuplicateFrames "\nduplikerer %d bille(r)!!!    \n"
-#define MSGTR_SkipFrame "\nskip billede!!!    \n"
-#define MSGTR_ErrorWritingFile "%s: fejl under skrivning af fil.\n"
+#define MSGTR_DuplicateFrames "\n%d ens billede(r)!!!    \n"
+#define MSGTR_SkipFrame "\nSpringer over billede!!!    \n"
+#define MSGTR_ErrorWritingFile "%s: Fejl ved skrivning til fil.\n"
 #define MSGTR_WritingAVIIndex "\nSkriver AVI index...\n"
 #define MSGTR_FixupAVIHeader "Fixup AVI header...\n"
-#define MSGTR_RecommendedVideoBitrate "Anbefalet video bitrate for %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nVideo stream: %8.3f kbit/s  (%d bps)  størrelse: %d bytes  %5.3f sek.  %d billeder\n"
-#define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/s  (%d bps)  størrelse: %d bytes  %5.3f sek.\n"
+#define MSGTR_RecommendedVideoBitrate "Anbefalet video bitrate til %s CD: %d\n"
+#define MSGTR_VideoStreamResult "\nVideospor: %8.3f kbit/s  (%d bps)  størrelse: %d bytes  %5.3f sek.  %d billeder\n"
+#define MSGTR_AudioStreamResult "\nAudiospor: %8.3f kbit/s  (%d bps)  størrelse: %d bytes  %5.3f sek.\n"
 
 // cfg-mencoder.h:
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
-" vbr=<0-4>     variabel bitrate metode\n"\
+" vbr=<0-4>     bitratemetode (vbr)\n"\
 "                0: cbr\n"\
 "                1: mt\n"\
 "                2: rh(default)\n"\
 "                3: abr\n"\
 "                4: mtrh\n"\
 "\n"\
-" abr           middel bitrate\n"\
+" abr           gennemsnitlig bitrate\n"\
 "\n"\
 " cbr           konstant bitrate\n"\
-"               Tvinger også CBR mode enkoding på efterfølgende ABR præset modes\n"\
+"               Gennemtvinger også CBR på efterfølgende ABR indstilligner\n"\
 "\n"\
-" br=<0-1024>   specificerer bitrate i kBit (kun CBR og ABR)\n"\
+" br=<0-1024>   specificer bitrate i kBit (kun CBR og ABR)\n"\
 "\n"\
-" q=<0-9>       kvalitet (0-højest, 9-lavest) (kun til VBR)\n"\
+" q=<0-9>       kvalitet (0-højest, 9-lavest) (kun VBR)\n"\
 "\n"\
 " aq=<0-9>      algoritmisk kvalitet (0-bedst/langsomst, 9-værst/hurtigst)\n"\
 "\n"\
-" ratio=<1-100> kompressionsrate\n"\
+" ratio=<1-100> komprimeringsforhold\n"\
 "\n"\
-" vol=<0-10>    sæt lyd input forstærkning\n"\
+" vol=<0-10>    indstil lydstyrke\n"\
 "\n"\
 " mode=<0-3>    (standard: auto)\n"\
 "                0: stereo\n"\
 "                1: joint-stereo\n"\
-"                2: flere kanals\n"\
+"                2: dobbelt mono\n"\
 "                3: mono\n"\
 "\n"\
 " padding=<0-2>\n"\
-"                0: nej\n"\
+"                0: ingen\n"\
 "                1: alle\n"\
 "                2: justeret\n"\
 "\n"\
-" fast          skift til hurtigere enkodning af efterfølgende VBR præset modes,\n"\
-"               svagt lavere kvalitet og højere bitrate.\n"\
+" fast          vælg hastighed fremfor kvalitet i efterfølgende VBR indstillinger,\n"\
+"               giver lavere kvalitet og højere bitrate.\n"\
 "\n"\
-" preset=<value> tilbyder de bedste kvalitets indstillinger.\n"\
-"                 medium: VBR  enkodning,  god  kvalitet\n"\
+" preset=<value> tunede indstillinger til høj kvalitet.\n"\
+"                 medium: VBR,  god  kvalitet\n"\
 "                 (150-180 kbps bitrate interval)\n"\
-"                 standard:  VBR enkodning, høj kvalitet\n"\
+"                 standard: VBR, høj kvalitet\n"\
 "                 (170-210 kbps bitrate interval)\n"\
-"                 extreme: VBR enkodning, meget høj kvalitet\n"\
+"                 extreme: VBR, meget høj kvalitet\n"\
 "                 (200-240 kbps bitrate interval)\n"\
-"                 insane:  CBR  enkodning, højeste præsets kvalitet\n"\
+"                 insane:  CBR, højeste præsets kvalitet\n"\
 "                 (320 kbps bitrate)\n"\
-"                 <8-320>: ABR enkodning ved middel kbps bitrate.\n\n"
+"                 <8-320>: ABR med den angivne, gennemsnitlige bitrate.\n\n"
 
 // open.c, stream.c:
-#define MSGTR_CdDevNotfound "CD-ROM Drev '%s' ikke fundet!\n"
+#define MSGTR_CdDevNotfound "CD-ROM drev '%s' ikke fundet!\n"
 #define MSGTR_ErrTrackSelect "Fejl i valg af VCD nummer!"
 #define MSGTR_ReadSTDIN "Læser fra stdin...\n"
-#define MSGTR_UnableOpenURL "Ikke mulig at få kontakt til adressen: %s\n"
-#define MSGTR_ConnToServer "Koblet op til serveren: %s\n"
+#define MSGTR_UnableOpenURL "Kunne ikke åbne adressen: %s\n"
+#define MSGTR_ConnToServer "Forbundet til serveren: %s\n"
 #define MSGTR_FileNotFound "Filen blev ikke fundet: '%s'\n"
 
-#define MSGTR_SMBInitError "Kan ikke initialisere libsmbclient bibliotek: %d\n"
-#define MSGTR_SMBFileNotFound "Kunne ikke åbne: '%s'\n"
-#define MSGTR_SMBNotCompiled "MPlayer var ikke kompileret med SMB læse-understøttelse\n"
+#define MSGTR_SMBInitError "Kunne ikke initialisere libsmbclient bibliotek: %d\n"
+#define MSGTR_SMBFileNotFound "Kunne ikke åbne netværksadressen '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer er ikke blevet kompileret med SMB læse-understøttelse\n"
 
 #define MSGTR_CantOpenDVD "Kunne ikke åbne DVD drev: %s\n"
-#define MSGTR_DVDwait "Læser disken struktur, vent venligst...\n"
+#define MSGTR_DVDwait "Indlæser diskstruktur, vent venligst...\n"
 #define MSGTR_DVDnumTitles "Der er %d titler på denne DVD.\n"
-#define MSGTR_DVDinvalidTitle "Forkert DVD titel nummer: %d\n"
-#define MSGTR_DVDnumChapters "Der er %d kapitler på denne DVD titel.\n"
-#define MSGTR_DVDinvalidChapter "Forkert DVD katalog nummmer: %d\n"
-#define MSGTR_DVDnumAngles "Der er %d vinkler i denne DVD titel.\n"
-#define MSGTR_DVDinvalidAngle "Forkert DVD vinkelnummer: %d\n"
-#define MSGTR_DVDnoIFO "Kan ikke finde IFO filen for DVD titlen %d.\n"
-#define MSGTR_DVDnoVOBs "Kan ikke åbne titlen VOBS (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD korrekt åbnet!\n"
+#define MSGTR_DVDinvalidTitle "Ugyldig DVD-titel: %d\n"
+#define MSGTR_DVDnumChapters "Der er %d kapitler i denne DVD-titel.\n"
+#define MSGTR_DVDinvalidChapter "Ugyldigt DVD-kapitel: %d\n"
+#define MSGTR_DVDnumAngles "Der er %d vinkler i denne DVD-titel.\n"
+#define MSGTR_DVDinvalidAngle "Ugyldig DVD-vinkel: %d\n"
+#define MSGTR_DVDnoIFO "Kunne ikke finde IFO filen for DVD-titel %d.\n"
+#define MSGTR_DVDnoVOBs "Kunne ikke åbne titlen VOBS (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDopenOk "DVD indlæst!\n"
 
 // demuxer.c, demux_*.c:
-#define MSGTR_AudioStreamRedefined "Advarsel! Lyd-filens header %d er blevet omdefineret!\n"
-#define MSGTR_VideoStreamRedefined "Advarsel! Video-filens header %d er blevet omdefineret!\n"
+#define MSGTR_AudioStreamRedefined "Advarsel! Lydfilens header %d er blevet omdefineret!\n"
+#define MSGTR_VideoStreamRedefined "Advarsel! Videofilens header %d er blevet omdefineret!\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: For mange (%d i %d bytes) lydpakker i bufferen!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: For mange (%d i %d bytes) videopakker i bufferen!\n"
-#define MSGTR_MaybeNI "Måske afspiller du en 'non-interleaved' stream/fil ellers fejlede codec'et)\n"\
+#define MSGTR_MaybeNI "Måske afspiller du en 'ikke-interleaved' stream/fil ellers der kan være en fejl i afspilleren\n"\
 		      "For AVI filer, prøv at påtvinge non-interleaved tilstand med -ni.\n"
-#define MSGTR_SwitchToNi "\nDetekteret defekt .AVI - skifter til -ni!\n"
-#define MSGTR_Detected_XXX_FileFormat "Detekterede %s filformat!\n"
-#define MSGTR_DetectedAudiofile "Detekterede lydfil!\n"
+#define MSGTR_SwitchToNi "\nDefekt .AVI - skifter til ikke-interleaved (-ni)...\n"
+#define MSGTR_Detected_XXX_FileFormat "Filformat er %s\n"
+#define MSGTR_DetectedAudiofile "Filen er en lydfil!\n"
 #define MSGTR_NotSystemStream "Ikke MPEG System Stream format... (måske Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "Ugyldig MPEG-ES stream??? Rapporter venligst dette, det kunne være en fejl i programmet :(\n"
-#define MSGTR_FormatNotRecognized "========= Beklager, dette fil format er ikke understøttet/detekteret =========\n"\
-				  "==== Hvis denne fil er en AVI, ASF eller MPEG stream, så rapporter dette! ====\n"
-#define MSGTR_MissingVideoStream "Ingen videostream fundet!\n"
-#define MSGTR_MissingAudioStream "Ingen lydstream fundet...  ->ingen lyd\n"
-#define MSGTR_MissingVideoStreamBug "Manglende videostream!? Rapporter venligst dette, det kunne være en fejl i programmet :(\n"
+#define MSGTR_FormatNotRecognized "============ Desværre, dette filformat kunne ikke genkendes =================\n"\
+"=== Er denne fil af typen AVI, ASF eller MPEG, så rapporter venligst dette, det kan skyldes en fejl. ==\n"
+#define MSGTR_MissingVideoStream "Ingen videospor fundet.\n"
+#define MSGTR_MissingAudioStream "Ingen lydspor fundet -> ingen lyd\n"
+#define MSGTR_MissingVideoStreamBug "Manglende videospor!? Rapporter venligst dette, det kunne skyldes en fejl i programmet :(\n"
 
-#define MSGTR_DoesntContainSelectedStream "demux: filen indeholder ikke den valgte lyd- eller video-stream\n"
+#define MSGTR_DoesntContainSelectedStream "demux: filen indeholder ikke det angivne lyd- eller videospor\n"
 
-#define MSGTR_NI_Forced "Tvunget"
-#define MSGTR_NI_Detected "Detekteret"
-#define MSGTR_NI_Message "%s NON-INTERLEAVED AVI fil-format!\n"
+#define MSGTR_NI_Forced "Gennemtvang"
+#define MSGTR_NI_Detected "Opdagede"
+#define MSGTR_NI_Message "%s IKKE-INTERLEAVED AVI fil-format!\n"
 
-#define MSGTR_UsingNINI "Bruger NON-INTERLEAVED (-ni), ødelagt AVI fil-format!\n"
-#define MSGTR_CouldntDetFNo "Kunne ikke finde antallet af billeder (for en absolutte søgning)  \n"
-#define MSGTR_CantSeekRawAVI "Kan ikke søge i rå .AVI stream! (manglende index, prøv med -idx!)  \n"
-#define MSGTR_CantSeekFile "Kan ikke søge i denne fil!  \n"
+#define MSGTR_UsingNINI "Bruger IKKE-INTERLEAVED (-ni), <F8>delagt AVI fil-format!\n"
+#define MSGTR_CouldntDetFNo "Kunne ikke beregne antallet af billeder (til søgning)  \n"
+#define MSGTR_CantSeekRawAVI "Søgning i rå AVI-filer ikke mulig. (Index kræves, prøv -idx.)  \n"
+#define MSGTR_CantSeekFile "Kan ikke søge i denne fil.\n"
+#define MSGTR_EncryptedVOB "Krypteret VOB fil (ikke kompileret med libcss support)! Se DOCS/en/cd-dvd.html\n"
+#define MSGTR_EncryptedVOBauth "Krypteret film men autorisation blev ikke påbegyndt.\n"
 
-#define MSGTR_EncryptedVOB "Krypteret VOB fil (ikke kompileret med libcss support)! Læs filen DOCS/en/cd-dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Krypteret stream men autoriseringen blev ikke påbegyndt af dig!!\n"
-
-#define MSGTR_MOVcomprhdr "MOV: Komprimeret header (endnu) ikke understøttet!\n"
-#define MSGTR_MOVvariableFourCC "MOV: Advarsel! variablen FOURCC detekteret!?\n"
-#define MSGTR_MOVtooManyTrk "MOV: Advarsel! For mange numre!"
-#define MSGTR_FoundAudioStream "==> Fandt lydstream: %d\n"
-#define MSGTR_FoundVideoStream "==> Fandt videostream: %d\n"
-#define MSGTR_DetectedTV "Detekteret TV! ;-)\n"
-#define MSGTR_ErrorOpeningOGGDemuxer "Ikke i stand til at åbne ogg demuxer\n"
-#define MSGTR_ASFSearchingForAudioStream "ASF: Søger efter lydstream (id:%d)\n"
-#define MSGTR_CannotOpenAudioStream "Kan ikke åbne lydstream: %s\n"
-#define MSGTR_CannotOpenSubtitlesStream "Kan ikke åbne undertekststream: %s\n"
+#define MSGTR_MOVcomprhdr "MOV: Komprimerede headers (endnu) ikke understøttet!\n"
+#define MSGTR_MOVvariableFourCC "MOV: Advarsel! variabel FOURCC!?\n"
+#define MSGTR_MOVtooManyTrk "MOV: Advarsel! For mange spor"
+#define MSGTR_FoundAudioStream "==> Fandt lydspor: %d\n"
+#define MSGTR_FoundVideoStream "==> Fandt videospor: %d\n"
+#define MSGTR_DetectedTV "TV genkendt! ;-)\n"
+#define MSGTR_ErrorOpeningOGGDemuxer "Kan ikke åbne ogg demuxe.r\n"
+#define MSGTR_ASFSearchingForAudioStream "ASF: Søger efter lydspor (id:%d)\n"
+#define MSGTR_CannotOpenAudioStream "Kan ikke åbne lydsspor: %s\n"
+#define MSGTR_CannotOpenSubtitlesStream "Kan ikke åbne spor %s af underteksterne\n"
 #define MSGTR_OpeningAudioDemuxerFailed "Kan ikke åbne lyddemuxer: %s\n"
-#define MSGTR_OpeningSubtitlesDemuxerFailed "Kunne ikke åbne undertekstdemuxer: %s\n"
-#define MSGTR_TVInputNotSeekable "TV input er ikke søgebart! (kan være du skulle skifte kanal ;))\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s allerede tilstede\n!"
+#define MSGTR_OpeningSubtitlesDemuxerFailed "Kunne ikke åbne undertekstsdemuxer: %s\n"
+#define MSGTR_TVInputNotSeekable "TV input er ikke søgbart! (Kunne være du skulle skifte kanal ;)\n"
+#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s findes allerede!\n"
 #define MSGTR_ClipInfo "Klip info: \n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: Progressiv følge detekteret, forbliver i 3:2 TELECINE mode\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE detekteret, benytter inverse telecine fx. FPS ændret til %5.3f!  \n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE detekteret, benytter inverse telecine f.eks. Billedfrekvensen ændret til %5.3f!\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "kunne ikke åbne codec\n"
@@ -359,8 +361,8 @@ static char help_text[]=
 #define MSGTR_CodecDidNotSet "VDek: codec satte ikke sh->disp_w og sh->disp_h, prøver en anden løsning!\n"
 #define MSGTR_VoConfigRequest "VDek: vo konfig. anmodning - %d x %d (foretrukket csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Kunne ikke finde colorspace som matcher - prøver med -vop scale...\n"
-#define MSGTR_MovieAspectIsSet "Film-Aspect er %.2f:1 - præskalerer for at rette film-aspect.\n"
-#define MSGTR_MovieAspectUndefined "Film-Aspect er ikke defineret - ingen præskalering benyttet.\n"
+#define MSGTR_MovieAspectIsSet "Størrelsesforhold er %.2f:1 - præskalerer for at rette størrelsesforholdet.\n"
+#define MSGTR_MovieAspectUndefined "Størrelsesforholdet er ikke defineret - ingen præskalering benyttet.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -522,7 +524,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Timer, procent og total tid"
 #define MSGTR_PREFERENCES_Subtitle "Undertekst:"
 #define MSGTR_PREFERENCES_SUB_Delay "Forsinkelse: "
-#define MSGTR_PREFERENCES_SUB_FPS "FPS:"
+#define MSGTR_PREFERENCES_SUB_FPS "Billedfrekvens:"
 #define MSGTR_PREFERENCES_SUB_POS "Position: "
 #define MSGTR_PREFERENCES_SUB_AutoLoad "Deaktiver automatisk undertekster"
 #define MSGTR_PREFERENCES_SUB_Unicode "Unicode undertekst"
@@ -590,9 +592,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_PlayBar "Anvend afspilningsbar"
 #define MSGTR_PREFERENCES_AutoSync "AutoSynk. til/fra"
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosynk.: "
-#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM enhed:"
-#define MSGTR_PREFERENCES_DVDDevice "DVD enhed:"
-#define MSGTR_PREFERENCES_FPS "Film FPS:"
+#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM drev:"
+#define MSGTR_PREFERENCES_DVDDevice "DVD drev:"
+#define MSGTR_PREFERENCES_FPS "Filmens billedfrekvens:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Vis video vindue når inaktiv"
 
 #define MSGTR_ABOUT_UHU "GUI udvikling sponsereret af UHU Linux\n"
