@@ -552,9 +552,14 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to parse HTTP response\n");
 		return -1;
 	}
-	if( http_hdr->status_code!=200 ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Server return %d:%s\n", http_hdr->status_code, http_hdr->reason_phrase);
-		return -1;
+	switch( http_hdr->status_code ) {
+		case 200:
+			break;
+		case 401: // Authentication required
+			return ASF_Authenticate_e;
+		default:
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Server return %d:%s\n", http_hdr->status_code, http_hdr->reason_phrase);
+			return -1;
 	}
 
 	content_type = http_get_field( http_hdr, "Content-Type");
@@ -609,6 +614,7 @@ asf_http_streaming_start( stream_t *stream ) {
 	int i, ret;
 	int fd = stream->fd;
 	int done;
+	int auth_retry = 0;
 
 	asf_http_ctrl = (asf_http_streaming_ctrl_t*)malloc(sizeof(asf_http_streaming_ctrl_t));
 	if( asf_http_ctrl==NULL ) {
@@ -701,6 +707,11 @@ asf_http_streaming_start( stream_t *stream ) {
 				}
 				stream->type = STREAMTYPE_PLAYLIST;
 				done = 1;
+				break;
+			case ASF_Authenticate_e:
+				if( http_authenticate( http_hdr, url, &auth_retry)<0 ) return -1;
+				asf_http_ctrl->streaming_type = ASF_Unknown_e;
+				done = 0;
 				break;
 			case ASF_Unknown_e:
 			default:
