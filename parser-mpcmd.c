@@ -177,6 +177,8 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
       {
 	play_tree_t* entry = play_tree_new();
 	UNSET_GLOBAL;
+	if(last_parent->flags & PLAY_TREE_RND)
+	  entry->flags |= PLAY_TREE_RND;
 	if(last_entry == NULL) {
 	  play_tree_set_child(last_parent,entry);
 	} else {
@@ -222,6 +224,16 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	    pt->loop = l;
 	    tmp = 1;
 	  }
+	} else if(strcasecmp(opt,"rnd") == 0) {
+	  if(last_entry && last_entry->child)
+	    last_entry->flags |= PLAY_TREE_RND;
+	  else
+	    last_parent->flags |= PLAY_TREE_RND;
+	} else if(strcasecmp(opt,"nornd") == 0) {
+	  if(last_entry && last_entry->child)
+	    last_entry->flags &= ~PLAY_TREE_RND;
+	  else
+	    last_parent->flags &= ~PLAY_TREE_RND;
 	} else {
 	  m_option_t* mp_opt = NULL;
 	  play_tree_t* entry = NULL;
@@ -230,6 +242,8 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	  if(tmp > 0)  { // It's an entry
 	    if(entry) {
 	      add_entry(entry);
+	      if((last_parent->flags & PLAY_TREE_RND) && entry->child)
+		entry->flags |= PLAY_TREE_RND;
 	      UNSET_GLOBAL;
 	    } else if(mode == LOCAL) // Entry is empty we have to drop his params
 	      mode = DROP_LOCAL;
