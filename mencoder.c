@@ -327,7 +327,7 @@ divx4_param.rc_reaction_ratio  = 20;
 
   num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
   if(num_filenames<0) exit(1); // error parsing cmdline
-  if(!num_filenames && !vcd_track && !dvd_title){
+  if(!num_filenames && !vcd_track && !dvd_title && !tv_param_on){
 	printf("\nMissing filename!\n\n");
 	exit(1);
   }
