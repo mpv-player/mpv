@@ -119,10 +119,12 @@ int getrtp(int fd, struct rtpheader *rh, char** data, int* lengthData) {
   int i;
 
   lengthPacket=recv(fd,buf,1590,0);
+  // FIXME: error handling to write here
   headerSize = 3;
   *lengthData = lengthPacket - headerSize;
   *data = (char*) buf + headerSize;
   fprintf(stderr,"[%d] %02x %x\n",lengthPacket,buf[8],buf[0]);
+  return(0);
 }
 
 /* create a sender socket. */

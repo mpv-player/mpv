@@ -286,8 +286,8 @@ int vivo_check_file(demuxer_t* demuxer){
 return 1;
 }
 
-static audio_pos=0;
-static audio_rate=0;
+static int audio_pos=0;
+static int audio_rate=0;
 
 // return value:
 //     0 = EOF or no stream found
