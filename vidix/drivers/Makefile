@@ -46,6 +46,12 @@ MGA_CRTC2_OBJS=mga_crtc2_vid.o
 MGA_CRTC2_LIBS=-L../../libdha -ldha -lm
 MGA_CRTC2_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -DCRTC2
 
+NVIDIA_VID=nvidia_vid.so
+NVIDIA_SRCS=nvidia_vid.c
+NVIDIA_OBJS=nvidia_vid.o
+NVIDIA_LIBS=-L../../libdha -ldha -lm
+NVIDIA_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. 
+
 all:    $(CYBERBLADE_VID) $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID) $(PM3_VID)
 
 
