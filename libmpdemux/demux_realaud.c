@@ -92,7 +92,7 @@ extern void print_wave_header(WAVEFORMATEX *h);
 
 
 
-void demux_open_ra(demuxer_t* demuxer)
+int demux_open_ra(demuxer_t* demuxer)
 {
 	ra_priv_t* ra_priv = demuxer->priv;
 	sh_audio_t *sh;
@@ -101,7 +101,7 @@ void demux_open_ra(demuxer_t* demuxer)
 
   if ((ra_priv = (ra_priv_t *)malloc(sizeof(ra_priv_t))) == NULL) {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "[RealAudio] Can't allocate memory for private data.\n");
-    return NULL;
+    return 0;
   }
 	memset(ra_priv, 0, sizeof(ra_priv_t));
 
@@ -116,7 +116,7 @@ void demux_open_ra(demuxer_t* demuxer)
 	if ((ra_priv->version < 3) || (ra_priv->version > 4)) {
 		mp_msg(MSGT_DEMUX,MSGL_WARN,"[RealAudio] ra version %d is not supported yet, please "
 			"contact MPlayer developers\n", ra_priv->version);
-		return NULL;
+		return 0;
 	}
 	if (ra_priv->version == 3) {
 		ra_priv->hdr_size = stream_read_word(demuxer->stream);
@@ -255,6 +255,8 @@ void demux_open_ra(demuxer_t* demuxer)
 
 	if(!ds_fill_buffer(demuxer->audio))
 		mp_msg(MSGT_DEMUXER,MSGL_INFO,"[RealAudio] No data.\n");
+
+    return 1;
 }
 
 
