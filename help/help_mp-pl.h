@@ -301,7 +301,7 @@ static char help_text[]=
 #define MSGTR_Preferences "Preferencje"
 #define MSGTR_OSSPreferences "Konfiguracja sterownika OSS"
 #define MSGTR_NoMediaOpened "Nie otwarto no¶nika"
-#define MSGTR_VCDTrack "Scie¿ka VCD: %d"
+#define MSGTR_VCDTrack "¦cie¿ka VCD: %d"
 #define MSGTR_NoChapter "Brak rozdzia³u"
 #define MSGTR_Chapter "Rozdzia³ %d"
 #define MSGTR_NoFileLoaded "Nie za³adowano pliku"
@@ -384,6 +384,9 @@ static char help_text[]=
 #define MSGTR_MENU_Mute "Mute"
 #define MSGTR_MENU_Original "Oryginalne"
 #define MSGTR_MENU_AspectRatio "Aspect ratio"
+#define MSGTR_MENU_AudioTrack "¦cie¿ka Audio"
+#define MSGTR_MENU_Track "¦cie¿ka %d"
+#define MSGTR_MENU_VideoTrack "¦cie¿ka Video"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "Audio"
