@@ -2689,7 +2689,7 @@ static void WINAPI expCoTaskMemFree(void* cb)
 
 
 
-void* CoTaskMemAlloc(ULONG cb)
+void* CoTaskMemAlloc(unsigned long cb)
 {
     return expCoTaskMemAlloc(cb);
 }
