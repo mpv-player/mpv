@@ -1,8 +1,8 @@
 /* Imported from the dvbstream-0.2 project */
 #include <stdlib.h>
 #include <string.h>
-#include <netinet/in.h>
 #include <unistd.h>
+#include <netinet/in.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
