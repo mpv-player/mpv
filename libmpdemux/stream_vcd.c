@@ -23,12 +23,14 @@
 #include "vcd_read.h"
 #endif
 
+extern char *cdrom_device;
+
 static struct stream_priv_s {
   int track;
   char* device;
 } stream_priv_dflts = {
   1,
-  DEFAULT_CDROM_DEVICE
+  NULL
 };
 
 #define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
@@ -73,6 +75,13 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   if(mode != STREAM_READ) {
     m_struct_free(&stream_opts,opts);
     return STREAM_UNSUPORTED;
+  }
+
+  if (!p->device) {
+    if(cdrom_device)
+      p->device = strdup(cdrom_device);
+    else
+      p->device = strdup(DEFAULT_CDROM_DEVICE);
   }
 
   f=open(p->device,O_RDONLY);

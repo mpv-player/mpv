@@ -12,6 +12,8 @@
 
 #include "cdd.h"
 
+extern char *cdrom_device;
+
 static struct cdda_params {
   int speed;
   int paranoia_mode;
@@ -32,7 +34,7 @@ static struct cdda_params {
   0,
   0,
   0,
-  DEFAULT_CDROM_DEVICE,
+  NULL,
   { 0, 0 }
 };
 
@@ -99,6 +101,13 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   if(m != STREAM_READ) {
     m_struct_free(&stream_opts,opts);
     return STREAM_UNSUPORTED;
+  }
+
+  if(!p->device) {
+    if (cdrom_device)
+      p->device = strdup(cdrom_device);
+    else
+      p->device = strdup(DEFAULT_CDROM_DEVICE);
   }
 
 #ifdef MPLAYER_NETWORK
