@@ -394,6 +394,12 @@ else
 } // switch
 //------------------------ frame decoded. --------------------
 
+#ifdef HAVE_MMX
+	// some codecs is broken, and doesn't restore MMX state :(
+	// it happens usually with broken/damaged files.
+	__asm __volatile ("emms;":::"memory");
+#endif
+
 t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
 
 switch(blit_frame){
