@@ -73,20 +73,20 @@ static __s32 RTjpeg_ws[64+31];
 #endif
 __u8 RTjpeg_alldata[2*64+4*64+4*64+4*64+4*64+32];
 
-__s16 *block; // rh
-__s16 *RTjpeg_block;
-__s32 *RTjpeg_lqt;
-__s32 *RTjpeg_cqt;
-__u32 *RTjpeg_liqt;
-__u32 *RTjpeg_ciqt;
+static __s16 *block; // rh
+static __s16 *RTjpeg_block;
+static __s32 *RTjpeg_lqt;
+static __s32 *RTjpeg_cqt;
+static __u32 *RTjpeg_liqt;
+static __u32 *RTjpeg_ciqt;
 
-unsigned char RTjpeg_lb8;
-unsigned char RTjpeg_cb8;
-int RTjpeg_width, RTjpeg_height;
-int RTjpeg_Ywidth, RTjpeg_Cwidth;
-int RTjpeg_Ysize, RTjpeg_Csize;
+static unsigned char RTjpeg_lb8;
+static unsigned char RTjpeg_cb8;
+static int RTjpeg_width, RTjpeg_height;
+static int RTjpeg_Ywidth, RTjpeg_Cwidth;
+static int RTjpeg_Ysize, RTjpeg_Csize;
 
-__s16 *RTjpeg_old=NULL;
+static __s16 *RTjpeg_old=NULL;
 
 #ifdef MMX
 mmx_t RTjpeg_lmask;
