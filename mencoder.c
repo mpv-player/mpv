@@ -143,7 +143,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h, int x0,int
   
   // copy Y:
   for(y=0;y<h;y++){
-      unsigned char* s=src[0]+stride[0]*(y0+y)+x0;
+      unsigned char* s=src[0]+stride[0]*y;
       unsigned char* d=vo_image+vo_w*(y0+y)+x0;
       memcpy(d,s,w);
   }
@@ -151,13 +151,13 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h, int x0,int
   w>>=1;h>>=1;
   // copy U:
   for(y=0;y<h;y++){
-      unsigned char* s=src[2]+stride[2]*(y0+y)+x0;
+      unsigned char* s=src[2]+stride[2]*y;
       unsigned char* d=vo_image+vo_w*vo_h+(vo_w>>1)*(y0+y)+x0;
       memcpy(d,s,w);
   }
   // copy V:
   for(y=0;y<h;y++){
-      unsigned char* s=src[1]+stride[1]*(y0+y)+x0;
+      unsigned char* s=src[1]+stride[1]*y;
       unsigned char* d=vo_image+vo_w*vo_h+vo_w*vo_h/4+(vo_w>>1)*(y0+y)+x0;
       memcpy(d,s,w);
   }
@@ -464,7 +464,7 @@ case ACODEC_VBRMP3:
     mux_a->wf=malloc(sizeof(MPEGLAYER3WAVEFORMAT)); // should be 30
     mux_a->wf->wFormatTag=0x55; // MP3
     mux_a->wf->nChannels=sh_audio->channels;
-    mux_a->wf->nSamplesPerSec=sh_audio->samplerate;
+    mux_a->wf->nSamplesPerSec=force_srate?force_srate:sh_audio->samplerate;
     mux_a->wf->nAvgBytesPerSec=192000/8; // FIXME!
     mux_a->wf->nBlockAlign=1;
     mux_a->wf->wBitsPerSample=0; //16;
@@ -508,7 +508,7 @@ lame=lame_init();
 lame_set_bWriteVbrTag(lame,0);
 lame_set_in_samplerate(lame,sh_audio->samplerate);
 lame_set_num_channels(lame,mux_a->wf->nChannels);
-lame_set_out_samplerate(lame,mux_a->h.dwRate);
+lame_set_out_samplerate(lame,mux_a->wf->nSamplesPerSec);
 if(lame_param_vbr){  // VBR:
     lame_set_VBR(lame,lame_param_vbr); // vbr mode
     lame_set_VBR_q(lame,lame_param_quality+1); // 1 = best vbr q  6=~128k
@@ -579,6 +579,7 @@ if(sh_audio){
 		}
 		if(mux_a->buffer_len<4) break;
 		len=mp_decode_mp3_header(mux_a->buffer);
+		//printf("%d\n",len);
 		if(len<=0) break; // bad frame!
 		while(mux_a->buffer_len<len){
 		  unsigned char tmp[2304];
@@ -633,14 +634,14 @@ if( (v_pts_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag<0)
   }
 
 
-if(skip_flag<=0){ // don't have to skip frame.
 switch(mux_v->codec){
 case 0:
     mux_v->buffer=start;
-    aviwrite_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
+    if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
     break;
 case VCODEC_DIVX4:
     blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+    if(skip_flag>0) break;
     if(!blit_frame){
 	// empty.
 	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
@@ -676,9 +677,8 @@ if(skip_flag<0){
 	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
 	++skip_flag;
     }
-}
-
-} else {
+} else
+if(skip_flag>0){
     // skip frame
     printf("\nskip frame!!!    \n");
     --skip_flag;
