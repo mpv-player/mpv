@@ -26,19 +26,16 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "../postproc/rgb2rgb.h"
+#include "aspect.h"
+#include "../postproc/swscale.h"
 #include "font_load.h"
 #include "sub.h"
 
 #include "linux/keycodes.h"
 #include <aalib.h>
 #include "cfgparser.h"
+#include "mp_msg.h"
 
-#define RGB 0
-#define BGR 1
-
-#define DO_INC(val,max,step) if (val + step <=max) val+=step; else val=max;  
-#define DO_DEC(val,min,step) if (val - step >=min) val-=step; else val=min;  
 
 #define MESSAGE_DURATION 3
 #define MESSAGE_SIZE 512
@@ -49,7 +46,7 @@ LIBVO_EXTERN(aa)
 	static vo_info_t vo_info = {
 	    "AAlib",
 	    "aa",
-	    "Folke Ashberg <folke@ashberg.de>",
+	    "Alban Bedel <albeu@free.fr> and Folke Ashberg <folke@ashberg.de>",
 	    ""
 	};
 
@@ -57,14 +54,19 @@ LIBVO_EXTERN(aa)
 aa_context *c;
 aa_renderparams *p;
 static int fast =0;
-/* used for YV12 streams for the converted RGB image */
-uint8_t * convertbuf=NULL;
+/* used for the sws */
+static uint8_t * image[3];
+static int image_stride[3];
 
 /* image infos */
-static int image_format, bpp=24;
+static int image_format;
 static int image_width;
 static int image_height;
-static int bppmul;
+static int image_x, image_y;
+static int screen_x, screen_y;
+static int screen_w, screen_h;
+static int src_width;
+static int src_height;
 
 /* osd stuff */
 time_t stoposd = 0;
@@ -72,14 +74,13 @@ static int showosdmessage = 0;
 char osdmessagetext[MESSAGE_SIZE];
 char posbar[MESSAGE_SIZE];
 static int osdx, osdy;
+static int osd_text_length = 0;
 int aaconfigmode=1;
-/* for resizing/scaling */
-static int *stx;
-static int *sty;
-double accum;
 #ifdef USE_OSD
-char * osdbuffer=NULL;
+font_desc_t* vo_font_save = NULL;
 #endif
+static SwsContext *sws=NULL;
+extern m_config_t *mconfig;
 
 /* our version of the playmodes :) */
 
@@ -103,38 +104,37 @@ resize(void){
      * a little bit
      */
 
-    int i;
     aa_resize(c);
 
+    aspect_save_screenres(aa_imgwidth(c),aa_imgheight(c));
+    image_height =  aa_imgheight(c); //src_height;
+    image_width = aa_imgwidth(c); //src_width;
+
+    aspect(&image_width,&image_height,A_ZOOM);
+
+    image_x = (aa_imgwidth(c) - image_width) / 2;
+    image_y = (aa_imgheight(c) - image_height) / 2;
+    screen_w = image_width * aa_scrwidth(c) / aa_imgwidth(c);
+    screen_h = image_height * aa_scrheight(c) / aa_imgheight(c);
+    screen_x = (aa_scrwidth(c) - screen_w) / 2;
+    screen_y = (aa_scrheight(c) - screen_h) / 2;
+    
+    if(sws) freeSwsContext(sws);
+    // Use YV12 while Y8/Y800 isn't avaible as sws output :-(
+    sws = getSwsContextFromCmdLine(src_width,src_height,image_format,
+				   image_width,image_height,IMGFMT_YV12);
+
+    image[0] = aa_image(c) + image_y * image_width + image_x;
+    image[1] = NULL;
+    // Allocate the V plan for YV12
+    image[2] = realloc(image[2], image_width * image_height / 4);
+
+    image_stride[0] = image_width;
+    image_stride[1] = 0; 
+    image_stride[2] = image_width / 2;
+
     showosdmessage=0;
-    osdy=aa_scrheight(c) - ( aa_scrheight(c)/10 );
 
-    /* now calculating the needed values for resizing */
-
-    /* We only need to use floating point to determine the correct
-       stretch vector for one line's worth. */
-    stx = (int *) malloc(sizeof(int) * image_width);
-    sty = (int *) malloc(sizeof(int) * image_height);
-    accum = 0;
-    for (i=0; (i < image_width); i++) {
-	int got;
-	accum += (double)aa_imgwidth(c)/(double)image_width;
-	got = (int) floor(accum);
-	stx[i] = got;
-	accum -= got;
-    }
-    accum = 0;
-    for (i=0; (i < image_height); i++) {
-	int got;
-	accum += (double)aa_imgheight(c)/(double)image_height;
-	got = (int) floor(accum);
-	sty[i] = got;
-	accum -= got;
-    }
-#ifdef USE_OSD
-    if (osdbuffer!=NULL) free(osdbuffer);
-    osdbuffer=malloc(aa_scrwidth(c) * aa_scrheight(c));
-#endif
 }
 
 void
@@ -146,11 +146,18 @@ osdmessage(int duration, int deko, char *fmt, ...)
      */
     va_list ar;
     char m[MESSAGE_SIZE];
+    unsigned int old_len = strlen(osdmessagetext);
+
     va_start(ar, fmt);
     vsprintf(m, fmt, ar);
     va_end(ar);
     if (deko==1) sprintf(osdmessagetext, MESSAGE_DEKO , m);
     else strcpy(osdmessagetext, m);
+
+    if(old_len > strlen(osdmessagetext)) {
+      memset(c->textbuffer + osdy * aa_scrwidth(c) + osdx,' ',old_len);
+      memset(c->attrbuffer + osdy * aa_scrwidth(c) + osdx,0,old_len);
+    }
     showosdmessage=1;
     stoposd = time(NULL) + duration;
     osdx=(aa_scrwidth(c) / 2) - (strlen(osdmessagetext) / 2 ) ;
@@ -165,15 +172,12 @@ osdpercent(int duration, int deko, int min, int max, int val, char * desc, char 
      */
     float step;
     int where;
-    char m[MESSAGE_SIZE];
     int i;
 
     
     step=(float)aa_scrwidth(c) /(float)(max-min);
     where=(val-min)*step;
-    sprintf(m,"%s: %i%s",desc, val, unit);
-    if (deko==1) sprintf(osdmessagetext, MESSAGE_DEKO , m);
-    else strcpy(osdmessagetext, m);
+    osdmessage(duration,deko,"%s: %i%s",desc, val, unit);
     posbar[0]='|';
     posbar[aa_scrwidth(c)-1]='|';
     for (i=0;i<aa_scrwidth(c);i++){
@@ -182,21 +186,39 @@ osdpercent(int duration, int deko, int min, int max, int val, char * desc, char 
     }
     if (where!=0) posbar[0]='|';
     if (where!=(aa_scrwidth(c)-1) ) posbar[aa_scrwidth(c)-1]='|';
-    /* snipp */
+
     posbar[aa_scrwidth(c)]='\0';
-    showosdmessage=1;
-    stoposd = time(NULL) + duration;
-    osdx=(aa_scrwidth(c) / 2) - (strlen(osdmessagetext) / 2 ) ;
+ 
 }
 
 void
 printosdtext()
 {
+  if(osd_text_length > 0 && !vo_osd_text) {
+    memset(c->textbuffer,' ',osd_text_length);
+    memset(c->attrbuffer,0,osd_text_length);
+    osd_text_length = 0;
+  }
     /* 
      * places the mplayer status osd
      */
-    if (vo_osd_text)
-	aa_printf(c, 0, 0 , aaopt_osdcolor, "%s %s ", __sub_osd_names_short[vo_osd_text[0]], vo_osd_text+1);
+  if (vo_osd_text) {
+    int len;
+    if(vo_osd_text[0] < 32) {
+      len = strlen(__sub_osd_names_short[vo_osd_text[0]]) + strlen(vo_osd_text+1) + 2;
+      aa_printf(c, 0, 0 , aaopt_osdcolor, "%s %s ", __sub_osd_names_short[vo_osd_text[0]], vo_osd_text+1);
+    } else {
+      len = strlen(vo_osd_text) + 1;
+      aa_printf(c, 0, 0 , aaopt_osdcolor, "%s ",vo_osd_text);
+    }
+
+    if(len < osd_text_length) {
+      memset(c->textbuffer + len,' ',osd_text_length - len);
+      memset(c->attrbuffer + len,0,osd_text_length - len);
+    }
+    osd_text_length = len;
+    
+  }
 }
 
 void
@@ -214,132 +236,51 @@ config(uint32_t width, uint32_t height, uint32_t d_width,
      * main init
      * called by mplayer
      */
-    FILE * fp;
-    char fname[12];
-    int fd, vt, major, minor;
-    struct stat sbuf;
-    char * hidis = NULL;
+
     int i;
-    extern aa_linkedlist *aa_displayrecommended;
 
-    switch(format) {
-	case IMGFMT_BGR24:
-	    bpp = 24;
-	    break;     
-	case IMGFMT_RGB24:
-	    bpp = 24;
-	    break;     
-	case IMGFMT_BGR32:
-	    bpp = 32;
-	    break;     
-	case IMGFMT_RGB32:
-	    bpp = 32;
-	    break;     
-	case IMGFMT_IYUV:
-	case IMGFMT_I420:
-	case IMGFMT_YV12:
-	    bpp = 24;
-	    /* YUV ? then initialize what we will need */
-	    convertbuf=malloc(width*height*3);
-	    yuv2rgb_init(24,MODE_BGR);
-	    break;
-	default:
-	    return 1;     
-    }
-    bppmul=bpp/8;
-    
+    aspect_save_orig(width,height);
+    aspect_save_prescale(d_width,d_height);
 
-    /* initializing of aalib */
-    
-    hidis=aa_getfirst(&aa_displayrecommended); 
-    if ( hidis==NULL ){
-	/* check /dev/vcsa<vt> */
-	/* check only, if no driver is explicit set */
-	fd = dup (fileno (stderr));
-	fstat (fd, &sbuf);
-	major = sbuf.st_rdev >> 8;
-	vt = minor = sbuf.st_rdev & 0xff;
-	close (fd);
-	sprintf (fname, "/dev/vcsa%i", vt);
-	fp = fopen (fname, "w+");
-	if (fp==NULL){
-	    fprintf(stderr,"VO: [aa] cannot open %s for writing,"
-			"so we'll not use linux driver\n", fname);
-    	    aa_recommendlowdisplay("linux");
-    	    aa_recommendhidisplay("curses");
-    	    aa_recommendhidisplay("X11");
-	}else fclose(fp);
-    } else aa_recommendhidisplay(hidis);
-    c = aa_autoinit(&aa_defparams);
-    aa_resizehandler(c, (void *)resize);
-
-    if (c == NULL) {
-	printf("Can not intialize aalib\n");
-	return 0;
-    }   
-    if (!aa_autoinitkbd(c,0)) {
-	printf("Can not intialize keyboard\n");
-	aa_close(c);
-	return 0;
-    }
-    /*
-    if (!aa_autoinitmouse(c,0)) {
-	printf("Can not intialize mouse\n");
-	aa_close(c);
-	return 0;
-    }
-    */
-    aa_hidecursor(c);
-    p = aa_getrenderparams();
-
-    if ((strstr(c->driver->name,"Curses")) || (strstr(c->driver->name,"Linux"))){
-	freopen("/dev/null", "w", stderr);
-	quiet=1; /* disable mplayer outputs */
-	/* disable console blanking */
-	printf("\033[9;0]");
-    }
-    
-    image_height = height;
-    image_width = width;
+    src_height = height;
+    src_width = width;
     image_format = format;
-
-    /* needed by prepare_image */
-    stx = (int *) malloc(sizeof(int) * image_width);
-    sty = (int *) malloc(sizeof(int) * image_height);
 
     /* nothing will change its size, be we need some values initialized */
     resize();
 
 #ifdef USE_OSD
     /* now init out own 'font' (to use vo_draw_text_sub without edit them) */
-    vo_font=malloc(sizeof(font_desc_t));//if(!desc) return NULL;
-    memset(vo_font,0,sizeof(font_desc_t));
-    vo_font->pic_a[0]=malloc(sizeof(raw_file));
-    vo_font->pic_b[0]=malloc(sizeof(raw_file));
+    if(!vo_font_save) vo_font_save = vo_font;
+    if(vo_font == vo_font_save) {
+      vo_font=malloc(sizeof(font_desc_t));//if(!desc) return NULL;
+      memset(vo_font,0,sizeof(font_desc_t));
+      vo_font->pic_a[0]=malloc(sizeof(raw_file));
+      vo_font->pic_b[0]=malloc(sizeof(raw_file));
 
-    vo_font->spacewidth=1;
-    vo_font->charspace=0;
-    vo_font->height=1;
-    vo_font->pic_a[0]->bmp=malloc(255);
-    vo_font->pic_b[0]->bmp=malloc(255);
-    vo_font->pic_a[0]->w=1;
-    vo_font->pic_a[0]->h=1;
-    for (i=1; i<256; i++){
+      vo_font->spacewidth=1;
+      vo_font->charspace=0;
+      vo_font->height=1;
+      vo_font->pic_a[0]->bmp=malloc(255);
+      vo_font->pic_b[0]->bmp=malloc(255);
+      vo_font->pic_a[0]->w=1;
+      vo_font->pic_a[0]->h=1;
+      for (i=0; i<255; i++){
 	vo_font->width[i]=1;
 	vo_font->font[i]=0;
 	vo_font->start[i]=i;
 	vo_font->pic_a[0]->bmp[i]=i;
 	vo_font->pic_b[0]->bmp[i]=i;
-    };
+      }
+    }
 #endif
     /* say hello */
     osdmessage(5, 1, "Welcome to ASCII ARTS MPlayer");  
 
-    printf("VO: [aa] screendriver:   %s\n", c->driver->name);
-    printf("VO: [aa] keyboarddriver: %s\n", c->kbddriver->name);
-    //printf("VO: mousedriver:    %s\n", c->mousedriver->name);
+    mp_msg(MSGT_VO,MSGL_V,"VO: [aa] screendriver:   %s\n", c->driver->name);
+    mp_msg(MSGT_VO,MSGL_V,"VO: [aa] keyboarddriver: %s\n", c->kbddriver->name);
 
-    printf(
+    mp_msg(MSGT_VO,MSGL_INFO,
 		"\n"
 		"Important Options\n"
 		"\t-aaextended  use use all 256 characters\n"
@@ -371,13 +312,21 @@ query_format(uint32_t format) {
     /*
      * ...are we able to... ?
      * called by mplayer
+     * All input format supported by the sws
      */
     switch(format){
 	case IMGFMT_YV12:
-	case IMGFMT_RGB24:
+	case IMGFMT_I420:
+	case IMGFMT_IYUV:
+	case IMGFMT_IYU2:
+	case IMGFMT_BGR32:
 	case IMGFMT_BGR24:
-//	case IMGFMT_RGB32:
-//	case IMGFMT_BGR32:
+	case IMGFMT_BGR16:
+	case IMGFMT_BGR15:
+	case IMGFMT_RGB32:
+	case IMGFMT_RGB24:
+	case IMGFMT_Y8:
+	case IMGFMT_Y800:
 	    return 1;
     }
     return 0;
@@ -389,134 +338,89 @@ get_info(void) {
     return (&vo_info);
 }
 
-int
-prepare_image(uint8_t *data, int inx, int iny, int outx, int outy){
-    /*
-     * copies an RGB-Image to the aalib imagebuffer
-     * also scaling an grayscaling is done here
-     * show_image calls us
-     */
-
-    int value;
-    int x, y;
-    int tox, toy;
-    int ydest;
-    int i;
-    int pos;
-
-    toy = 0;
-    for (y=0; (y < (0 + iny)); y++) {
-	for (ydest=0; (ydest < sty[y-0]); ydest++) {
-	    tox = 0;
-	    for (x=0; (x < (0 + inx)); x++) {
-		if (!stx[x - 0]) {
-		    continue;
-		}
-		pos=3*(inx*y)+(3*x);
-		value=(data[pos]+data[pos+1]+data[pos+2])/3;
-		for (i=0; (i < stx[x - 0]); i++) {
-		    //printf("ToX: %i, ToY %i, i=%i, stx=%i, x=%i\n", tox, toy, i, stx[x], x);
-		    c->imagebuffer[(toy*outx) +tox]=value;
-		    tox++;
-		}
-	    }
-	    toy++;
-	}
-    }
-    return 0;
-}
-
-void 
-show_image(uint8_t * src){
-    /*
-     * every frame (flip_page/draw_frame) we will be called
-     */
-#ifdef USE_OSD
-    int i;
-#endif
-
-    /* events? */
-    check_events();
-
-    /* RGB->gray , scaling/resizing, stores data in aalib imgbuf */ 
-    prepare_image( src, image_width, image_height,
-		aa_imgwidth(c), aa_imgheight(c) );
-
-    /* Now 'ASCIInate' the image */ 
-    if (fast)
-      aa_fastrender(c, 0, 0, aa_scrwidth(c), aa_scrheight(c) );
-    else
-      aa_render(c, p, 0, 0, aa_scrwidth(c),  aa_scrheight(c));
-
-    /* do we have to put *our* (messages, progbar) osd to aa's txtbuf ? */
-    if (showosdmessage)
-      {
-	if (time(NULL)>=stoposd ) showosdmessage=0;
-	/* update osd */
-	aa_puts(c, osdx, osdy, AA_SPECIAL, osdmessagetext);
-	/* posbar? */
-	if (posbar[0]!='\0')
-	  aa_puts(c, 0, osdy + 1, AA_SPECIAL, posbar);
-      }
-    /* OSD time & playmode , subtitles */
-#ifdef USE_OSD
-    printosdtext();
-    /* now write the subtitle osd buffer */
-    for (i=0;i<aa_scrwidth(c)*aa_scrheight(c);i++){
-	if (osdbuffer[i]){
-	    c->textbuffer[i]=osdbuffer[i];
-	    c->attrbuffer[i]=aaopt_subcolor;
-	}
-    }
-#endif
-
-    /* print out */
-    aa_flush(c);
-}
-
 static uint32_t 
 draw_frame(uint8_t *src[]) {
-    /*
-     * RGB-Video's Only
-     * src[0] is handled by prepare_image
-     */
-    show_image(src[0]);
-    return 0;
+  int stride[3] = { 0 , 0 , 0 };
+
+  switch(image_format) {
+  case IMGFMT_BGR15:
+  case IMGFMT_BGR16:
+    stride[0] = src_width*2;
+    break;
+  case IMGFMT_IYU2:
+  case IMGFMT_BGR24:
+    stride[0] = src_width*3;
+    break;
+  case IMGFMT_BGR32:
+    stride[0] = src_width*4;
+    break;
+  }
+
+  sws->swScale(sws,src,stride,0,src_height,image,image_stride);
+
+   /* Now 'ASCIInate' the image */ 
+  if (fast)
+    aa_fastrender(c, screen_x, screen_y, screen_w + screen_x, screen_h + screen_y );
+  else
+    aa_render(c, p,screen_x, screen_y, screen_w + screen_x, screen_h + screen_y );
+
+  return 0;
 }
 
 static uint32_t 
 draw_slice(uint8_t *src[], int stride[], 
 	    int w, int h, int x, int y) {
-    /*
-     * for MPGEGS YV12
-     * draw a rectangle converted to RGB to a
-     * temporary RGB Buffer
-     */
-    uint8_t *dst;
 
-    dst = convertbuf+(image_width * y + x) * 3;
-    if ((image_format == IMGFMT_IYUV) || (image_format == IMGFMT_I420))
-    {
-	uint8_t *src_i420[3];
-	
-	src_i420[0] = src[0];
-	src_i420[1] = src[2];
-	src_i420[2] = src[1];
-	src = src_i420;
-    }
+  int dx1 = screen_x + (x * screen_w / src_width);
+  int dy1 = screen_y + (y * screen_h / src_height);
+  int dx2 = screen_x + ((x+w) * screen_w / src_width);
+  int dy2 = screen_y + ((y+h) * screen_h / src_height);
 
-    yuv2rgb(dst,src[0],src[1],src[2],w,h,image_width*3,stride[0],stride[1]);
+  sws->swScale(sws,src,stride,y,h,image,image_stride);
 
-    return 0;
+  /* Now 'ASCIInate' the image */ 
+  if (fast)
+    aa_fastrender(c, dx1, dy1, dx2, dy2 );
+  else
+    aa_render(c, p,dx1, dy1, dx2, dy2 );
+
+  
+  return 0;
 }
 
 static void 
 flip_page(void) {
-    /*
-     * wow! another ready Image, so draw it !
-     */
-    if(image_format == IMGFMT_YV12 || image_format == IMGFMT_IYUV || image_format == IMGFMT_I420)
-      show_image(convertbuf);
+
+   /* do we have to put *our* (messages, progbar) osd to aa's txtbuf ? */
+    if (showosdmessage)
+      {
+	if (time(NULL)>=stoposd ) {
+	  showosdmessage=0;
+	  if(osdmessagetext) {
+	    memset(c->textbuffer + osdy * aa_scrwidth(c) + osdx,' ',strlen(osdmessagetext));
+	    memset(c->attrbuffer + osdy * aa_scrwidth(c) + osdx ,0,strlen(osdmessagetext));
+	    osdmessagetext[0] = '\0';
+	  }
+	  if(posbar) {
+	    memset(c->textbuffer + (osdy+1) * aa_scrwidth(c),' ',strlen(posbar));
+	    memset(c->attrbuffer + (osdy+1) * aa_scrwidth(c),0,strlen(posbar));
+	  }
+	} else {
+	  /* update osd */
+	  aa_puts(c, osdx, osdy, AA_SPECIAL, osdmessagetext);
+	  /* posbar? */
+	  if (posbar[0]!='\0')
+	    aa_puts(c, 0, osdy + 1, AA_SPECIAL, posbar);
+	}
+      }
+    /* OSD time & playmode , subtitles */
+#ifdef USE_OSD
+    printosdtext();
+#endif
+
+
+    /* print out */
+    aa_flush(c);
 }
 
 static void 
@@ -559,27 +463,11 @@ check_events(void) {
 	if (key=='a' || key=='A'){
 	    aaconfigmode=!aaconfigmode;
 	    osdmessage(MESSAGE_DURATION, 1, "aa config mode is now %s",
-		    aaconfigmode==1 ? "on. use keys 1-7" : "off");
+		    aaconfigmode==1 ? "on. use keys 5-7" : "off");
 	}
 	if (aaconfigmode==1) {
 	    switch (key) {
 		/* AA image controls */
-		case '1':		/* contrast */
-		    DO_DEC(p->contrast,0,1);
-		    osdpercent(MESSAGE_DURATION, 1, 0, 255, p->contrast, "AA-Contrast", "");
-		    break;
-		case '2':		/* contrast */
-		    DO_INC(p->contrast,255,1);
-		    osdpercent(MESSAGE_DURATION, 1, 0, 255, p->contrast, "AA-Contrast", "");
-		    break;
-		case '3':		/* brightness */
-		    DO_DEC(p->bright,0,1);
-		    osdpercent(MESSAGE_DURATION, 1, 0, 255, p->bright, "AA-Brightnes", "");
-		    break;
-		case '4':		/* brightness */
-		    DO_INC(p->bright,255,1);
-		    osdpercent(MESSAGE_DURATION, 1, 0, 255, p->bright, "AA-Brightnes", "");
-		    break;
 		case '5':
 		    fast=!fast;
 		    osdmessage(MESSAGE_DURATION, 1, "Fast mode is now %s", fast==1 ? "on" : "off");
@@ -618,28 +506,43 @@ static void
 uninit(void) {
     /*
      * THE END
-     */ 
+     */
+
     if (strstr(c->driver->name,"Curses") || strstr(c->driver->name,"Linux")){
 	freopen("/dev/tty", "w", stderr);
-	quiet=0; /* enable mplayer outputs */
+	m_config_set_flag(mconfig,"quiet",0); /* enable mplayer outputs */
     }
 #ifdef USE_OSD
-    if (osdbuffer!=NULL) free(osdbuffer);
+    if(vo_font_save) {
+      free(vo_font->pic_a[0]->bmp);
+      free(vo_font->pic_a[0]);
+      free(vo_font->pic_b[0]->bmp);
+      free(vo_font->pic_b[0]);
+      free(vo_font);
+      vo_font = vo_font_save;
+      vo_font_save = NULL;
+    }
 #endif
     aa_close(c);
-    free(stx);
-    free(sty);
-    if (convertbuf!=NULL) free(convertbuf);
+    if(image[2]) free(image[2]);
 }
 
 #ifdef USE_OSD
 static void draw_alpha(int x,int y, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-    /* alpha, hm, grr, only the char into our osdbuffer */
-    int pos;
-    pos=(x)+(y)*(aa_scrwidth(c));
-    osdbuffer[pos]=src[0];
+ 
+    c->textbuffer[x + y*aa_scrwidth(c)] = src[0];
+    c->attrbuffer[x + y*aa_scrwidth(c)] = aaopt_subcolor;
+
 }
 
+static void clear_alpha(int x0,int y0, int w,int h) {
+  int l;
+
+  for(l = 0 ; l < h ; l++) {
+    memset(c->textbuffer + (y0 + l) * aa_scrwidth(c) + x0,' ',w);
+    memset(c->attrbuffer + (y0 + l) * aa_scrwidth(c) + x0,0,w);
+  }
+}
 
 
 #endif
@@ -647,22 +550,16 @@ static void draw_alpha(int x,int y, int w,int h, unsigned char* src, unsigned ch
 static void
 draw_osd(void){
 #ifdef USE_OSD
-    /* 
-     * the subtiles are written into a own osdbuffer
-     * because draw_osd is called after show_image/flip_page
-     * the osdbuffer is written the next show_image/flip_page
-     * into aatextbuf
-     */
     char * vo_osd_text_save;
     int vo_osd_progbar_type_save;
 
-    memset(osdbuffer,0,aa_scrwidth(c)*aa_scrheight(c));
     printosdprogbar();
     /* let vo_draw_text only write subtitle */
     vo_osd_text_save=vo_osd_text; /* we have to save the osd_text */
     vo_osd_text=NULL;
     vo_osd_progbar_type_save=vo_osd_progbar_type;
     vo_osd_progbar_type=-1;
+    vo_remove_text(aa_scrwidth(c), aa_scrheight(c),clear_alpha);
     vo_draw_text(aa_scrwidth(c), aa_scrheight(c), draw_alpha);
     vo_osd_text=vo_osd_text_save;
     vo_osd_progbar_type=vo_osd_progbar_type_save;
@@ -768,20 +665,103 @@ vo_aa_parseoption(struct config * conf, char *opt, char *param){
 
 void
 vo_aa_revertoption(config_t* opt,char* param) {
-  if (!strcasecmp(opt, "aaosdcolor"))
+  if (!strcasecmp(param, "aaosdcolor"))
     aaopt_osdcolor= AA_SPECIAL;
-  else if (!strcasecmp(opt, "aasubcolor"))
+  else if (!strcasecmp(param, "aasubcolor"))
     aaopt_subcolor= AA_SPECIAL;
 }
 
 static uint32_t preinit(const char *arg)
 {
+    char * hidis = NULL;
+    struct stat sbuf;
+    int fd, vt, major, minor;
+    FILE * fp;
+    char fname[12];
+    extern aa_linkedlist *aa_displayrecommended;
+
     if(arg) 
     {
-	printf("vo_aa: Unknown subdevice: %s\n",arg);
+	mp_msg(MSGT_VO,MSGL_ERR,"vo_aa: Unknown subdevice: %s\n",arg);
 	return ENOSYS;
     }
+
+        /* initializing of aalib */
+    
+    hidis=aa_getfirst(&aa_displayrecommended); 
+    if ( hidis==NULL ){
+	/* check /dev/vcsa<vt> */
+	/* check only, if no driver is explicit set */
+	fd = dup (fileno (stderr));
+	fstat (fd, &sbuf);
+	major = sbuf.st_rdev >> 8;
+	vt = minor = sbuf.st_rdev & 0xff;
+	close (fd);
+	sprintf (fname, "/dev/vcsa%2.2i", vt);
+	fp = fopen (fname, "w+");
+	if (fp==NULL){
+	    fprintf(stderr,"VO: [aa] cannot open %s for writing,"
+			"so we'll not use linux driver\n", fname);
+    	    aa_recommendlowdisplay("linux");
+    	    aa_recommendhidisplay("curses");
+    	    aa_recommendhidisplay("X11");
+	}else fclose(fp);
+    } else aa_recommendhidisplay(hidis);
+    c = aa_autoinit(&aa_defparams);
+
+    if (c == NULL) {
+	mp_msg(MSGT_VO,MSGL_ERR,"Can not intialize aalib\n");
+	return VO_ERROR;
+    }   
+    if (!aa_autoinitkbd(c,0)) {
+	mp_msg(MSGT_VO,MSGL_ERR,"Can not intialize keyboard\n");
+	aa_close(c);
+	return VO_ERROR;
+    }
+
+    aa_resizehandler(c, (void *)resize);
+    aa_hidecursor(c);
+    p = aa_getrenderparams();
+
+    if ((strstr(c->driver->name,"Curses")) || (strstr(c->driver->name,"Linux"))){
+	freopen("/dev/null", "w", stderr);
+	m_config_set_flag(mconfig,"quiet",0); /* disable mplayer outputs */
+	/* disable console blanking */
+	printf("\033[9;0]");
+    }
+
+    memset(image,0,3*sizeof(uint8_t));
+    osdmessagetext[0] = '\0';
+    osdx = osdy = 0;
+
     return 0;
+}
+
+static int get_video_eq(vidix_video_eq_t *info) {
+
+  memset(info,0,sizeof(vidix_video_eq_t));
+  
+  info->cap = VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST;
+  
+  info->contrast = (p->contrast - 64) * 1000 / 64;
+  info->brightness = (p->bright - 128) * 1000 / 128;
+
+  return 0;
+}
+
+static int set_video_eq(const vidix_video_eq_t *info) {
+
+  p->contrast = ( info->contrast + 1000 ) * 64 / 1000;
+  p->bright = ( info->brightness + 1000) * 128 / 1000;
+
+  return 0;
+}
+
+static void query_vaa(vo_vaa_t *vaa)
+{
+  memset(vaa,0,sizeof(vo_vaa_t));
+  vaa->get_video_eq = get_video_eq;
+  vaa->set_video_eq = set_video_eq;
 }
 
 static uint32_t control(uint32_t request, void *data, ...)
@@ -789,6 +769,9 @@ static uint32_t control(uint32_t request, void *data, ...)
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_QUERY_VAA:
+    query_vaa((vo_vaa_t*)data);
+    return VO_TRUE;
   }
   return VO_NOTIMPL;
 }
