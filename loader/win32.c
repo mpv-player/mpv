@@ -533,6 +533,10 @@ static HMODULE WINAPI expGetDriverModuleHandle(DRVR* pdrv)
 #define	MODULE_HANDLE_ddraw	((HMODULE)0x123)
 #define	MODULE_HANDLE_advapi32	((HMODULE)0x124)
 #endif
+#define	MODULE_HANDLE_comdlg32	((HMODULE)0x125)
+#define	MODULE_HANDLE_msvcrt	((HMODULE)0x126)
+#define	MODULE_HANDLE_ole32	((HMODULE)0x127)
+#define	MODULE_HANDLE_winmm	((HMODULE)0x128)
 
 static HMODULE WINAPI expGetModuleHandleA(const char* name)
 {
@@ -2293,6 +2297,15 @@ static int WINAPI expLoadLibraryA(char* name)
 	return MODULE_HANDLE_advapi32;
 #endif
 
+    if (strcasecmp(name, "comdlg32.dll") == 0 || strcasecmp(name, "comdlg32") == 0)
+	return MODULE_HANDLE_comdlg32;
+    if (strcasecmp(name, "msvcrt.dll") == 0 || strcasecmp(name, "msvcrt") == 0)
+	return MODULE_HANDLE_msvcrt;
+    if (strcasecmp(name, "ole32.dll") == 0 || strcasecmp(name, "ole32") == 0)
+	return MODULE_HANDLE_ole32;
+    if (strcasecmp(name, "winmm.dll") == 0 || strcasecmp(name, "winmm") == 0)
+	return MODULE_HANDLE_winmm;
+
     result=LoadLibraryA(name);
     dbgprintf("Returned LoadLibraryA(0x%x='%s'), def_path=%s => 0x%x\n", name, name, def_path, result);
 
@@ -2326,6 +2339,14 @@ static void* WINAPI expGetProcAddress(HMODULE mod, char* name)
     case MODULE_HANDLE_advapi32:
 	result=LookupExternalByName("advapi32.dll", name); break;
 #endif
+    case MODULE_HANDLE_comdlg32:
+	result=LookupExternalByName("comdlg32.dll", name); break;
+    case MODULE_HANDLE_msvcrt:
+	result=LookupExternalByName("msvcrt.dll", name); break;
+    case MODULE_HANDLE_ole32:
+	result=LookupExternalByName("ole32.dll", name); break;
+    case MODULE_HANDLE_winmm:
+	result=LookupExternalByName("winmm.dll", name); break;
     default:
 	result=GetProcAddress(mod, name);
     }
@@ -4585,6 +4606,12 @@ static void *exprealloc(void *ptr, size_t size)
 	return my_realloc(ptr, size);        
 }
 
+/* Fake GetOpenFileNameA from comdlg32.dll for ViVD codec */
+static WIN_BOOL WINAPI expGetOpenFileNameA(/*LPOPENFILENAMEA*/ void* lpfn)
+{
+    return 1;
+}
+
 struct exports
 {
     char name[64];
@@ -4975,6 +5002,10 @@ struct exports exp_ddraw[]={
 };
 #endif
 
+struct exports exp_comdlg32[]={
+    FF(GetOpenFileNameA, -1)
+};
+
 #define LL(X) \
     {#X".dll", sizeof(exp_##X)/sizeof(struct exports), exp_##X},
 
@@ -4998,6 +5029,7 @@ struct libs libraries[]={
 #ifdef QTX
     LL(ddraw)
 #endif
+    LL(comdlg32)
 };
 
 static void ext_stubs(void)
