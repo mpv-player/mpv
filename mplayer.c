@@ -44,11 +44,6 @@ void* mDisplay; // Display* mDisplay;
 #include "libvo/sub.h"
 //#endif
 
-#ifdef HAVE_NEW_GUI
-#define COMPILE_GMPLAYER
-#include "Gui/mplayer/play.h"
-#endif
-
 #include "libao2/audio_out.h"
 
 #include "libmpeg2/mpeg2.h"
@@ -73,6 +68,10 @@ void* mDisplay; // Display* mDisplay;
 
 #ifdef HAVE_LIRC
 #include "lirc_mp.h"
+#endif
+
+#ifdef HAVE_NEW_GUI
+#include "Gui/mplayer/play.h"
 #endif
 
 #define DEBUG if(0)
