@@ -8,11 +8,9 @@ FOR THE v0.90 RELEASE:
 - codec (vc/ac) priority option
 - ao/vo priority option
 
-demuxer:
-- fix .asf demuxer bugs - DONE?
+real demuxer:
 - fix buggy .rm files (broken rv20/30 frames) - Florian?
 - add+test non-cook realaudio codecs - samples?
-- fix .mp4 demuxer bugs - Atmos? (sig11, bad AAC audio)
 
 FOR THE v1.00 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
