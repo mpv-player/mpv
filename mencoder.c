@@ -5,6 +5,7 @@
 #define VCODEC_LIBAVCODEC 4
 #define VCODEC_NULL 5
 #define VCODEC_RAWRGB 6
+#define VCODEC_VFW 7
 
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
@@ -78,6 +79,8 @@ int lavc_param_vme = 3;
 int lavc_param_vqscale = 0;
 int lavc_param_keyint = -1;
 #endif
+
+static BITMAPINFOHEADER* vfw_bih=NULL;
 
 #ifdef HAVE_LIBCSS
 #include "libmpdemux/dvdauth.h"
@@ -545,6 +548,9 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
     
     if(out_video_codec == VCODEC_RAWRGB) {
         if(IMGFMT_IS_BGR(out_fmt) && IMGFMT_BGR_DEPTH(out_fmt) == 32) break;
+    } else
+    if(out_video_codec == VCODEC_VFW) {
+        if(IMGFMT_IS_BGR(out_fmt) && IMGFMT_BGR_DEPTH(out_fmt) == 24) break;
     }
     else {
         if(IMGFMT_IS_BGR(out_fmt)) break;   
@@ -652,7 +658,7 @@ muxer=aviwrite_new_muxer();
 
 mux_v=aviwrite_new_stream(muxer,AVIWRITE_TYPE_VIDEO);
 
-mux_v->buffer_size=0x200000;
+mux_v->buffer_size=0x200000; // 2MB
 mux_v->buffer=malloc(mux_v->buffer_size);
 
 mux_v->source=sh_video;
@@ -736,6 +742,23 @@ case VCODEC_FRAMENO:
     mux_v->bih->biCompression=mmioFOURCC('F','r','N','o');
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
     break;
+case VCODEC_VFW:
+#ifdef USE_WIN32DLL
+    vfw_bih=malloc(sizeof(BITMAPINFOHEADER));
+    vfw_bih->biSize=sizeof(BITMAPINFOHEADER);
+    vfw_bih->biWidth=vo_w;
+    vfw_bih->biHeight=vo_h;
+    vfw_bih->biPlanes=0;
+    vfw_bih->biBitCount=24;
+    vfw_bih->biCompression=0;
+    vfw_bih->biSizeImage=vo_w*vo_h*((vfw_bih->biBitCount+7)/8);
+//    mux_v->bih=vfw_open_encoder("divxc32.dll",vfw_bih);
+    mux_v->bih=vfw_open_encoder("AvidAVICodec.dll",vfw_bih);
+    break;
+#else
+    printf("No support for Win32/VfW codecs compiled in\n");
+    return 0; /* FIXME */
+#endif
 case VCODEC_NULL:
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
@@ -1396,6 +1419,26 @@ case VCODEC_FRAMENO: {
     mux_v->buffer=&decoded_frameno; // tricky
     if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,sizeof(int),0x10);
     break; }
+#ifdef USE_WIN32DLL
+case VCODEC_VFW: {
+//int vfw_encode_frame(BITMAPINFOHEADER* biOutput,void* OutBuf,
+//		     BITMAPINFOHEADER* biInput,void* Image,
+//		     long* keyframe, int quality);
+    long flags=0;
+    int ret;
+    blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+    if(skip_flag>0) break;
+    if(!blit_frame){
+	// empty.
+	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
+	break;
+    }
+    ret=vfw_encode_frame(mux_v->bih, mux_v->buffer, vfw_bih, vo_image_ptr, &flags, 10000);
+//    printf("vfw_encode_frame -> %d  (size=%d,flag=%X)\n",ret,mux_v->bih->biSizeImage,flags);
+    aviwrite_write_chunk(muxer,mux_v,muxer_f,mux_v->bih->biSizeImage,flags);
+    break;
+}
+#endif
 case VCODEC_DIVX4:
 #ifndef HAVE_DIVX4ENCORE
     printf("No support for Divx4 encore compiled in\n");
