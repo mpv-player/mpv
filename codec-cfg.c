@@ -227,6 +227,7 @@ static short get_driver(char *s,int audioflag)
 		"dk4adpcm",
 		"dk3adpcm",
 		"roqaudio",
+		"faad",
 		NULL
 	};
 	static char *videodrv[] = {

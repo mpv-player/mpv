@@ -83,6 +83,18 @@ typedef struct ov_struct_st {
 } ov_struct_t;
 #endif
 
+#ifdef HAVE_FAAD
+#include <faad.h>
+static faacDecHandle faac_hdec;
+static faacDecFrameInfo faac_finfo;
+static int faac_bytesconsumed = 0;
+static unsigned char *faac_buffer;
+/* configure maximum supported channels, *
+ * this is theoretically max. 64 chans   */
+#define FAAD_MAX_CHANNELS 6
+#define FAAD_BUFFLEN (FAAD_MIN_STREAMSIZE*FAAD_MAX_CHANNELS)		       
+#endif
+
 #ifdef USE_LIBAVCODEC
 #ifdef USE_LIBAVCODEC_SO
 #include <libffmpeg/avcodec.h>
@@ -387,6 +399,17 @@ case AFM_VORBIS:
   // Is there always 1024 samples/frame ? ***** Albeu
   sh_audio->audio_out_minsize=1024*4; // 1024 samples/frame
 #endif
+  break;
+case AFM_AAC:
+  // AAC (MPEG2 Audio, MPEG4 Audio)
+#ifndef HAVE_FAAD
+  mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Error: Cannot decode AAC data, because MPlayer was compiled without FAAD support\n"/*MSGTR_NoFAAD*/);
+  driver=0;
+#else  
+  mp_msg(MSGT_DECAUDIO,MSGL_V,"Using FAAD to decode AAC content!\n"/*MSGTR_UseFAAD*/);
+  // Samples per frame * channels per frame, this might not work with >2 chan AAC, need test samples! ::atmos
+  sh_audio->audio_out_minsize=2048*2;
+#endif  
   break;
 case AFM_PCM:
 case AFM_DVDPCM:
@@ -810,6 +833,66 @@ case AFM_VORBIS: {
   mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Init OK!\n");
 } break;
 #endif
+
+#ifdef HAVE_FAAD
+case AFM_AAC: {
+  unsigned long faac_samplerate, faac_channels;
+  faacDecConfigurationPtr faac_conf;
+  faac_hdec = faacDecOpen();
+
+#if 0
+  /* Set the default object type and samplerate */
+  /* This is useful for RAW AAC files */
+  faac_conf = faacDecGetCurrentConfiguration(faac_hdec);
+  if(sh_audio->samplerate)
+    faac_conf->defSampleRate = sh_audio->samplerate;
+  /* XXX: is outputFormat samplesize of compressed data or samplesize of
+   * decoded data, maybe upsampled? Also, FAAD support FLOAT output,
+   * how do we handle that (FAAD_FMT_FLOAT)? ::atmos
+   */
+  if(sh_audio->samplesize)
+    switch(sh_audio->samplesize){
+      case 1: // 8Bit
+	mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: 8Bit samplesize not supported by FAAD, assuming 16Bit!\n");
+      default:
+      case 2: // 16Bit
+	faac_conf->outputFormat = FAAD_FMT_16BIT;
+	break;
+      case 3: // 24Bit
+	faac_conf->outputFormat = FAAD_FMT_24BIT;
+	break;
+      case 4: // 32Bit
+	faac_conf->outputFormat = FAAD_FMT_32BIT;
+	break;
+    }
+  faac_conf->defObjectType = LTP; // => MAIN, LC, SSR, LTP available.
+
+  faacDecSetConfiguration(faac_hdec, faac_conf);
+#endif
+
+  if(faac_buffer == NULL)
+    faac_buffer = (unsigned char*)malloc(FAAD_BUFFLEN);
+  memset(faac_buffer, 0, FAAD_BUFFLEN);
+  demux_read_data(sh_audio->ds, faac_buffer, FAAD_BUFFLEN);
+
+  /* init the codec */
+  if((faac_bytesconsumed = faacDecInit(faac_hdec, faac_buffer, &faac_samplerate, &faac_channels)) < 0) {
+    mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: Failed to initialize the decoder!\n"); // XXX: deal with cleanup!
+    faacDecClose(faac_hdec);
+    free(faac_buffer);
+    faac_buffer = NULL;
+    driver = 0;
+  } else {
+    mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: Decoder init done (%dBytes)!\n", faac_bytesconsumed); // XXX: remove or move to debug!
+    mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: Negotiated samplerate: %dHz  channels: %d\n", faac_samplerate, faac_channels);
+    sh_audio->channels = faac_channels;
+    sh_audio->samplerate = faac_samplerate;
+    sh_audio->i_bps = 128*1000/8; // XXX: HACK!!! There's currently no way to get bitrate from libfaad2! ::atmos
+  }  
+	    
+} break;		
+#endif
+
 #ifdef USE_LIBMAD
  case AFM_MAD:
    {
@@ -974,6 +1057,50 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	}
       } break;
 #endif
+		       
+#ifdef HAVE_FAAD		       
+      case AFM_AAC: {
+	int /*i,*/ k, j = 0;	      
+	void *faac_sample_buffer;
+	
+	len = 0;
+	while(len < minlen) {
+	  /* update buffer */
+    	  if (faac_bytesconsumed > 0) {
+	    for (k = 0; k < (FAAD_BUFFLEN - faac_bytesconsumed); k++)
+	      faac_buffer[k] = faac_buffer[k + faac_bytesconsumed];
+	    demux_read_data(sh_audio->ds, faac_buffer + (FAAD_BUFFLEN) - faac_bytesconsumed, faac_bytesconsumed);
+	    faac_bytesconsumed = 0;
+	  }
+	  /*for (i = 0; i < 16; i++)
+	    printf ("%02X ", faac_buffer[i]);
+	  printf ("\n");*/
+	  do {
+	    faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, faac_buffer+j);
+	    /* update buffer index after faacDecDecode */
+	    faac_bytesconsumed += faac_finfo.bytesconsumed;
+	    if(faac_finfo.error > 0) {
+	      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: Trying to resync!\n");
+	      j++;
+	    } else
+	      break;
+	  } while(j < FAAD_BUFFLEN);	  
+
+
+	  if(faac_finfo.error > 0) {
+	    mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: Failed to decode frame: %s \n",
+	      faacDecGetErrorMessage(faac_finfo.error));
+	  } else if (faac_finfo.samples == 0)
+	    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Decoded zero samples!\n");
+	  else {
+	    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Successfully decoded frame (%dBytes)!\n", faac_finfo.samples*faac_finfo.channels);
+	    memcpy(buf+len,faac_sample_buffer, faac_finfo.samples*faac_finfo.channels);
+	    len += faac_finfo.samples*faac_finfo.channels;
+	  }
+	}
+
+      } break;
+#endif		    
       case AFM_PCM: // AVI PCM
         len=demux_read_data(sh_audio->ds,buf,minlen);
         break;
@@ -1224,6 +1351,14 @@ void resync_audio_stream(sh_audio_t *sh_audio){
           sh_audio->ac3_frame=ac3_decode_frame(); // resync
     //      if(verbose) printf(" OK!\n");
           break;
+#endif
+#ifdef HAVE_FAAD
+	case AFM_AAC:
+	  //if(faac_buffer != NULL)
+	  faac_bytesconsumed = 0;
+	  memset(faac_buffer, 0, FAAD_BUFFLEN);
+  	  //demux_read_data(sh_audio->ds, faac_buffer, FAAD_BUFFLEN);
+	  break;
 #endif
         case AFM_A52:
         case AFM_ACM:

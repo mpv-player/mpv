@@ -40,6 +40,7 @@
 #define AFM_DK4ADPCM 17
 #define AFM_DK3ADPCM 18
 #define AFM_ROQAUDIO 19
+#define AFM_AAC 20
 
 #define VFM_MPEG 1
 #define VFM_VFW 2

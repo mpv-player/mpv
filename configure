@@ -131,6 +131,7 @@ Optional features:
   --disable-divx4linux   disable DivX4linux codec [autodetect]
   --disable-opendivx     disable OpenDivx codec [enable]
   --enable-vorbis        build with OggVorbis support [autodetect]
+  --enable-faad          build with FAAD (AAC) support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-mp1e         disable libmp1e support
@@ -756,6 +757,7 @@ _rtc=auto
 _ossaudio=auto
 _mad=auto
 _vorbis=auto
+_faad=auto
 _css=auto
 _dvdread=auto
 _xanim=auto
@@ -859,6 +861,8 @@ for ac_option do
   --disable-mad)	_mad=no		;;
   --enable-vorbis)	_vorbis=yes	;;
   --disable-vorbis)	_vorbis=no	;;
+  --enable-faad)	_faad=yes	;;
+  --disable-faad)	_faad=no	;;
   --enable-css)		_css=yes	;;
   --disable-css)	_css=no		;;
   --enable-dvdread)	_dvdread=yes	;;
@@ -2477,6 +2481,24 @@ fi
 echores "$_vorbis"
 
 
+echocheck "FAAD (AAC) support"
+if test "$_faad" = auto ; then
+  _faad=no
+  cat > $TMPC << EOF
+#include <faad.h>
+int main(void) { return 0; }
+EOF
+  cc_check -lfaad -lm && _faad=yes
+fi
+if test "$_faad" = yes ; then
+  _def_faad='#define HAVE_FAAD 1'
+  _ld_faad='-lfaad'
+else
+  _def_faad='#undef HAVE_FAAD'
+fi
+echores "$_faad"
+
+
 echocheck "Win32 DLL support"
 qnx && _win32=no
 if test "$_win32" = auto ; then
@@ -3226,6 +3248,7 @@ ALSA_LIB = $_ld_alsa
 NAS_LIB = $_ld_nas
 MAD_LIB = $_ld_mad
 VORBIS_LIB = $_ld_vorbis
+FAAD_LIB = $_ld_faad
 SGIAUDIO_LIB = $_ld_sgiaudio
 
 # input
@@ -3516,6 +3539,9 @@ $_def_mad
 
 /* enable OggVorbis support */
 $_def_vorbis
+
+/* enable FAAD (AAC) support */
+$_def_faad
 
 /* enable streaming */
 $_def_streaming
