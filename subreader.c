@@ -27,6 +27,8 @@ char *sub_cp=NULL;
 #endif
 #ifdef USE_FRIBIDI
 #include <fribidi/fribidi.h>
+char *fribidi_charset = NULL;
+int flip_hebrew = 1;
 #endif
 
 extern char* dvdsub_lang;
@@ -1040,11 +1042,12 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
   int l=sub->lines;
   int char_set_num;
   fribidi_boolean log2vis;
+  if(flip_hebrew) { // Please fix the indentation someday
   fribidi_set_mirroring (FRIBIDI_TRUE);
   fribidi_set_reorder_nsm (FRIBIDI_FALSE);
    
   if( sub_utf8 == 0 ) {
-    char_set_num = fribidi_parse_charset ("ISO8859-8");//We might want to make this a config option
+    char_set_num = fribidi_parse_charset (fribidi_charset?fribidi_charset:"ISO8859-8");
   }else {
     char_set_num = fribidi_parse_charset ("UTF-8");
   }
@@ -1065,7 +1068,6 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
       len = fribidi_remove_bidi_marks (visual, len, NULL, NULL,
 				       NULL);
       if((op = (char*)malloc(sizeof(char)*(max(2*orig_len,2*len) + 1))) == NULL) {
-      if((op = ALLOCATE(char,(max(2*orig_len,2*len) + 1))) == NULL) {
 	mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error allocating mem.\n");
 	l++;
 	break;	
@@ -1079,6 +1081,7 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
     for (l = sub->lines; l;)
       free (sub->text[--l]);
     return ERR;
+  }
   }
   return sub;
 }
