@@ -19,6 +19,7 @@ struct vf_priv_s {
     int param;
     unsigned int fmt;
     SwsContext *ctx;
+    unsigned char* palette;
 };
 
 extern int opt_screen_size_x;
@@ -162,6 +163,32 @@ static int config(struct vf_instance_s* vf,
     }
     vf->priv->fmt=best;
 
+    if(vf->priv->palette){
+	free(vf->priv->palette);
+	vf->priv->palette=NULL;
+    }
+    switch(best){
+    case IMGFMT_BGR8: {
+      /* set 332 palette for 8 bpp */
+	int i;
+	vf->priv->palette=malloc(4*256);
+	for(i=0; i<256; i++){
+	    vf->priv->palette[4*i+0]=4*(i&3)*21;
+	    vf->priv->palette[4*i+1]=4*((i>>2)&7)*9;
+	    vf->priv->palette[4*i+2]=4*((i>>5)&7)*9;
+	}
+	break; }
+    case IMGFMT_BGR4: {
+	int i;
+	vf->priv->palette=malloc(4*16);
+	for(i=0; i<16; i++){
+	    vf->priv->palette[4*i+0]=4*(i&1)*63;
+	    vf->priv->palette[4*i+1]=4*((i>>1)&3)*21;
+	    vf->priv->palette[4*i+2]=4*((i>>3)&1)*63;
+	}
+	break; }
+    }
+
     if(!opt_screen_size_x && !opt_screen_size_y){
 	d_width=d_width*vf->priv->w/width;
 	d_height=d_height*vf->priv->h/height;
@@ -184,6 +211,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	dmpi->qscale=mpi->qscale;
 	dmpi->qstride=mpi->qstride;
     }
+
+    if(vf->priv->palette) dmpi->planes[1]=vf->priv->palette; // export palette!
     
     return vf_next_put_image(vf,dmpi);
 }
@@ -237,6 +266,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->h=-1;
     vf->priv->v_chr_drop=0;
     vf->priv->param=0;
+    vf->priv->palette=NULL;
     if(args) sscanf(args, "%d:%d:%d:%d",
     &vf->priv->w,
     &vf->priv->h,
