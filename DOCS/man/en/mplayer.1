@@ -7193,7 +7193,7 @@ quantizer factor between I- and P-frames (default: 1.4)
 .
 .TP
 .B pb_factor=<value>
-quantizer factor between P- and B-frames (default: 1.4)
+quantizer factor between P- and B-frames (default: 1.3)
 .
 .TP
 .B pass=<1\-3>
@@ -7262,14 +7262,46 @@ Lower values allow the quantizer value to jump around more,
 higher values force it to vary more smoothly.
 .
 .TP
+.B direct_pred=<0\-2>
+Determines the type of motion prediction used for direct macroblocks
+in B-frames.
+.PD 0
+.RSs
+.IPs 0
+None: direct macroblocks are not used.
+.IPs 1
+Temporal: motion vectors are interpolated from the following P-frame.
+.IPs 2
+Spatial: motion vectors are extrapolated from neighboring blocks.
+.RE
+.PD 1
+Spatial and temporal are approximately the same speed, and neither is
+strictly better than the other.
+The best choice depends on the movie.
+direct_pred=0 is usually both slower and lower quality.
+.
+.TP
+.B (no)b8x8mv
+Use macroblock types b16x8, b8x16, b8x8 (default: enabled).
+Requires B-frames.
+See 4x4mv for details.
+.
+.TP
 .B (no)4x4mv
-Use all available interframe macroblock types (i16x16, i4x4, p16x16,
-p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, skip)
+Use macroblock types p8x4, p4x8, p4x4 (default: disabled).
+.br
+The available interframe macroblock types are i16x16, i4x4, p16x16, p16x8,
+p8x16, p8x8, p8x4, p4x8, p4x4, b16x16, b16x8, b8x16, b8x8, skip, direct.
+i16x16, i4x4, p16x16-8x8, b16x16, and skip are always used.
+.br
 The idea is to find the type and size that best describe a certain area
-of the picture, i.e.\& very effective for Anime, which usually contains
-large areas of the same color (default: i16x16, i4x4, p16x16-8x8, skip).
-Depending on the source material, it can improve or degrade quality, use
-it with care.
+of the picture.
+For example, a global pan is better represented by 16x16 blocks, while
+small moving objects are better represented by smaller blocks.
+.br
+4x4mv is recommended only with subq >= 3.
+Depending on the source material, it can improve or degrade
+quality, use it with care.
 .
 .TP
 .B subq=<0\-5>
@@ -7280,11 +7312,11 @@ It can improve quality significantly.
 .RSs
 0: halfpel only
 .br
-1: 1 iteration of qpel on the winning candidate (default)
+1: 1 iteration of qpel on the winning candidate
 .br
 2: 2 iterations of qpel on the winning candidate
 .br
-3: halfpel on all MB types, qpel on the winner
+3: halfpel on all MB types, qpel on the winner (default)
 .br
 4: qpel on all
 .br
