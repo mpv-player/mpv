@@ -1,6 +1,6 @@
 mplayer (1.0)
 
-  pre2:  "Onjelolt-maintainerek-hava" /* FIXME */
+  pre2:  "ImportCounter"
 
     Security:
     * remotely exploitable buffer overflow in the asf streaming code fixed
@@ -39,6 +39,7 @@ mplayer (1.0)
     * new delogo filter (for removing TV channel logos)
     * presets support in swscaler filter
     * new audio filter export, for supporting visual effect applications
+    * correct select handling in bmovl filter
     
     FFmpeg/libavcodec:
     * better divx/xvid bug detection code
@@ -76,7 +77,8 @@ mplayer (1.0)
     * fullscreen and geometry support in directx
     * fullscreen support with opengl drivers
     * OSD fixed with svga
-    * New consolevidix and winvidix drivers
+    * new consolevidix and winvidix drivers
+    * user settable colorkey
 
     Others:
     * several leak fixes
