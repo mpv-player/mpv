@@ -62,12 +62,16 @@ int divx_quality=0;
 static vd_functions_t* mpvdec=NULL;
 
 int get_video_quality_max(sh_video_t *sh_video){
-// switch(sh_video->codec->driver){
+  if(mpvdec){
+    int ret=mpvdec->control(sh_video,VDCTRL_QUERY_MAX_PP_LEVEL);
+    if(ret>=0) return ret;
+  }
  return 0;
 }
 
 void set_video_quality(sh_video_t *sh_video,int quality){
-// switch(sh_video->codec->driver){
+  if(mpvdec)
+    mpvdec->control(sh_video,VDCTRL_SET_PP_LEVEL, (void*)(&quality));
 }
 
 int set_video_colors(sh_video_t *sh_video,char *item,int value)

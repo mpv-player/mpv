@@ -35,6 +35,8 @@ extern vd_functions_t* mpcodecs_vd_drivers[];
 #define CONTROL_NA -3
 
 #define VDCTRL_QUERY_FORMAT 3 /* test for availabilty of a format */
+#define VDCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */
+#define VDCTRL_SET_PP_LEVEL 5 /* test for postprocessing support (max level) */
 
 // callbacks:
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt);
