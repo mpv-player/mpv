@@ -414,6 +414,7 @@ int force_ni=0;
 char *conffile;
 int conffile_fd;
 char *font_name=NULL;
+float font_factor=0.75;
 #include "cfg-mplayer.h"
 
   printf("%s",banner_text);
@@ -461,7 +462,7 @@ if(video_driver && strcmp(video_driver,"help")==0){
 
 // check font
   if(font_name){
-       vo_font=read_font_desc(font_name);
+       vo_font=read_font_desc(font_name,font_factor);
        if(!vo_font) printf("Can't load font: %s\n",font_name);
   }
 

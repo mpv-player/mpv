@@ -32,7 +32,7 @@ raw_file* load_raw(char *name){
     return raw;
 }
 
-font_desc_t* read_font_desc(char* fname){
+font_desc_t* read_font_desc(char* fname,float factor){
 unsigned char sor[1024];
 unsigned char sor2[1024];
 font_desc_t *desc;
@@ -173,6 +173,25 @@ for(i=0;i<=fontdb;i++){
     if(!desc->pic_a[i] || !desc->pic_b[i]){
         printf("font: Missing bitmap(s) for sub-font #%d\n",i);
         return NULL;
+    }
+    if(factor!=1.0f){
+        // re-sample alpha
+        int f=factor*256.0f;
+        int size=desc->pic_a[i]->w*desc->pic_a[i]->h;
+        int j;
+        printf("font: resampling alpha by factor %5.3f (%d) ",factor,f);fflush(stdout);
+        for(j=0;j<size;j++){
+            int x=desc->pic_a[i]->bmp[j];
+            int y=desc->pic_b[i]->bmp[j];
+            
+            x=((x*f*(255-y))>>16)+y;
+            //x=(x*f)>>8;if(x<y) x=y;
+            
+            if(x<0) x=0; else
+            if(x>255) x=255;
+            desc->pic_a[i]->bmp[j]=x;
+        }
+        printf("DONE!\n");
     }
     if(!desc->height) desc->height=desc->pic_a[i]->h;
 }

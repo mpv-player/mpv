@@ -20,4 +20,4 @@ typedef struct {
 } font_desc_t;
 
 raw_file* load_raw(char *name);
-font_desc_t* read_font_desc(char* fname);
+font_desc_t* read_font_desc(char* fname,float factor);
