@@ -5876,6 +5876,7 @@ DS_DEP = $_dep_dshow
 DS_LIB = $_ld_dshow
 AV_DEP = $_dep_libavcodec
 AV_LIB = $_ld_libavcodec
+ZORAN = $_zr
 FAME = $_fame
 FAME_LIB = $_ld_fame
 MP1E_DEP = $_dep_mp1e
