@@ -326,6 +326,7 @@ int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start){
 extern int num_elementary_packets100; // for MPEG-ES fileformat detection
 extern int num_elementary_packets101;
 extern int num_elementary_packetsPES;
+extern int num_elementary_packets1B6;
 
 // commandline options, flags:
 //extern int seek_to_byte;
@@ -353,6 +354,8 @@ demux_stream_t *d_video=NULL;
 
 sh_audio_t *sh_audio=NULL;
 sh_video_t *sh_video=NULL;
+
+//printf("demux_open(%p,%d,%d,%d,%d)  \n",stream,file_format,audio_id,video_id,dvdsub_id);
 
 //=============== Try to open as AVI file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
@@ -383,6 +386,11 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  while(pes>=0){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id,dvdsub_id);
   if(!pes) demuxer->synced=1; // hack!
+  num_elementary_packets100=0;
+  num_elementary_packets101=0;
+  num_elementary_packets1B6=0;
+  num_elementary_packetsPES=0;
+
   if(ds_fill_buffer(demuxer->video)){
     if(!pes)
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGPESfile);
