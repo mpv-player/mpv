@@ -68,34 +68,12 @@ aquí hasta el final de la sección de instalación, y siga los enlaces
 que vaya encontrando. Si tiene otras preguntas, vuelva a la <link linkend="toc">
 Tabla de Contenidos</link> y busque el asunto particular, lea las <link 
 linkend="faq">preguntas frecuentes</link>, o intente usando grep entre los
-archivos.
+archivos. La mayoría de las cuestiones debe estar contestadas en algún lugar de por
+aquí y el resto probablemente ya haya sido preguntado en nuestras
+<link linkend="mailinglists">listas de correo</link>. Compruebe los
+<ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch">archivos</ulink>, hay un montón
+de información valiosa allí.
 </para>
-
-<para>
-La regla principal de esta documentación: si no esta documentado, 
-<emphasis>no existe</emphasis>. Si no dice que puede codificar audio
-desde un sintonizador de TV, entonces no puede. Sin embargo, una saludable 
-cantidad de habilidad para combinar opciones es bienvenida. Buena suerte.
-La va a necesitar :). Y otro buen consejo, déjeme citar a Chris Phillips de
-la lista de correo de los
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">usuarios de MPlayer</ulink>
-</para>
-
-<blockquote><para>
-He dicho un tiempo atrás que hay una gran diferencia entre un iniciado y
-un idiota. No importa realmente cuanto conoce de un sistema (linux, autos,
-chicas :D) siempre debería poder volver un paso atrás y ser objetivo,
-de otro modo, Ud. es un idiota según mi opinión. Una chica con la que vivo
-suponía que una aspiradora estaba rota porque no chupaba cosas. Nunca pensó
-en cambiar la bolsa, porque nunca lo había hecho antes... eso es simplemente
-estúpido, no un simple caso de no saber que hacer... El hecho de no estar
-familiarizado con las cosas que le rodean no es una excusa para a) vagancia y
-b) ignorancia. Tanta gente parece que ve la palabra "error"y entonces se
-detiene... poca gente parece realmente leer las palabras en el OTRO lado de
-los dos puntos.
-</para></blockquote>
-</preface>
-
 
 <chapter id="intro">
 <title>Introducción</title>
