@@ -2190,6 +2190,8 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
 
               current_pts = (float)(kblock->GlobalTimecode() / 1000000.0 -
                                     mkv_d->first_tc) / 1000.0;
+              if (current_pts < 0.0)
+                current_pts = 0.0;
 
               if (ds == d->audio) {
                 if (mkv_d->a_skip_to_keyframe &&       
