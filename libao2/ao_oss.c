@@ -289,8 +289,9 @@ ac3_retry:
     format=AF_FORMAT_S16_NE;
   }
   if( ioctl(audio_fd, SNDCTL_DSP_SETFMT, &oss_format)<0 ||
-      oss_format != format2oss(format)) if(format == AF_FORMAT_AC3){
-    mp_msg(MSGT_AO,MSGL_WARN, MSGTR_AO_OSS_CantSetAC3, dsp);
+      oss_format != format2oss(format)) {
+    mp_msg(MSGT_AO,MSGL_WARN, MSGTR_AO_OSS_CantSet, dsp,
+            af_fmt2str_short(format), af_fmt2str_short(AF_FORMAT_S16_NE) );
     format=AF_FORMAT_S16_NE;
     goto ac3_retry;
   }
