@@ -13,6 +13,8 @@
 
 #ifdef HAVE_GLOB
 #include <glob.h>
+#else
+#include "../osdep/glob.h"
 #endif
 
 #include "mp_msg.h"
@@ -27,7 +29,7 @@ float  mf_fps = 25.0;
 char * mf_type = NULL; //"jpg";
 
 mf_t* open_mf(char * filename){
-#ifdef HAVE_GLOB
+#if defined(HAVE_GLOB) || defined(__MINGW32__)
  glob_t        gg;
  struct stat   fs;
  int           i;
