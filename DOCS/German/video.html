@@ -1,5 +1,7 @@
 <HTML>
-<BODY>
+<BODY BGCOLOR=white>
+
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 
 <P><B><A NAME=2.2.1>2.2.1. Video Ausgabe-Geräte</A></B></P>
 
@@ -38,7 +40,7 @@ möglicherweise keine Funktion)
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top>png</TD><TD>&nbsp;&nbsp;</TD><TD>PNG-Datei Ausgabe (-z Parameter um die Kompression einzustellen)</TD><TR>
 <TD></TD><TD VALIGN=top>pgm</TD><TD></TD><TD>PGM-Datei Ausgabe (für Testzwecke oder ffmpeg-Encoding)</TD><TR>
 <TD></TD><TD VALIGN=top>md5</TD><TD></TD><TD>MD5sum Ausgabe (für MPEG Tests)</TD><TR>
-<TD></TD><TD VALIGN=top>odivx</TD><TD></TD><TD>OpenDivX AVI-Datei Ausgabe (-br um die Bitrate einzustellen)</TD><TR>
+<TD></TD><TD VALIGN=top>odivx</TD><TD></TD><TD>OpenDivX AVI-Datei Ausgabe (-br um die Bitrate einzustellen) (<B>OHNE SOUND</B>)</TD><TR>
 <TD></TD><TD VALIGN=top>null</TD><TD></TD><TD>Null Ausgabe (für Geschwindigkeitsmessungen/Benchmark)</TD><TR>
 </TABLE>
 
@@ -48,7 +50,20 @@ möglicherweise keine Funktion)
 <P><B><A NAME=2.2.1.1>2.2.1.1. MTRR</A></B></P>
 
 <P>Es ist SEHR zu empfehlen, dass man die MTRR Register aktivieren, denn sie
-können eine großen Geschwindigkeits-Schub bringen. Als erstes musst du die
+können eine großen Geschwindigkeits-Schub bringen.
+
+<P>Mache ein '<CODE>cat /proc/mtrr</CODE>' :</P>
+
+<P><CODE>
+--($:~)-- cat /proc/mtrr<BR>
+reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9<BR>
+reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<BR>
+</CODE></P>
+
+<P>Dies ist richtig, es zeigt meine Matrox G400 mit 16Mb Speicher. Ich habe das
+von XFree 4.x.x, was die MTRR Register automatisch einstellt.</P>
+
+Wenn nichts funktioniert, muss du es manuell setzen. Als erstes musst du die
 Base-Adresse finden.
 Du hast 3 Möglichkeiten um sie zu finden:</P>
 
@@ -178,10 +193,27 @@ Wende dich an NVidia.</UL></P>
 
 <P><B><A NAME=2.2.1.2.4>2.2.1.2.4. ATI Karten</A></B></P>
 
-<P>Beim GATOS Treiber ist VSYNC standardgemäß eingeschaltet. Das bedeutet, dass
+<P>
+<LI>Beim GATOS Treiber ist VSYNC standardgemäß eingeschaltet. Das bedeutet, dass
 die Dekodierungsgeschwindigkeit (!) synchron mit der Monitor-Refeshrate ist.
 Wenn die Wiedergabe langsam zu sein scheint, versuche irgentwie VSYNC auszu-
-schalten, oder setze die Refreshrate auf n*(fps des Films) Hz.</P>
+schalten, oder setze die Refreshrate auf n*(fps des Films) Hz.</LI>
+
+<LI>Radeon VE - zur Zeit hat nur die XFree86 CVS-Versionen einen Treiber für
+diese Karte, Version 4.1.0 hat keinen. Keine TV-Out Unterstützung.</LI>
+</P>
+
+
+<P><B><A NAME=2.2.1.2.5>2.2.1.2.5. NeoMagic Karten</A></B></P>
+
+<P>
+Diese Karte kann in vielen Laptops gefunden werden. Unter Linux ist deren
+Höchstleitung leider nur DGA. Unglücklichweise funktioniert der DGA-Treiber in
+X 4.1.0 nicht, also musst du auf 4.2.0 warten oder den modifizierten Treiber für
+4.0.3 oder 4.1.0 von hier downloaden: <A HREF="http://www.mplayerhq.hu/MPlayer/incoming/NeoMagic-driver">http://www.mplayerhq.hu/MPlayer/incoming/NeoMagic-driver</A>
+(hier findet man auch einen Patch für die Treiber-Sourcen).<BR>
+Treiber wurden bereitgestellet von <A HREF="mailto:tomee@cpi.pl">Tomek Jarzynka</A>.
+<P>
 
 
 <P><B><A NAME=2.2.1.3>2.2.1.3. DGA</A></B></P>
@@ -609,8 +641,8 @@ um alle Frames zu Verarbeiten!</P>
 Qualität bekommen, wenn du den Linux-Treiber, und nicht den Curses (-aadriver
 linux) verwendest. Aber dazu brauchst du Scheibzugriff auf/dev/vcsa&lt;terminal&gt;!
 Dies wird nicht automatisch erkannt von aalib, aber vo_aa versucht die beste
-Möglichkeit zu finden. Siehe <A HREF="http://aa-project.sourceforge.net/tune">http://aa-project.sourceforge.net/tune/</A> für zusätz-
-liche Tuning-Möglichkeiten.</P>
+Möglichkeit zu finden. Siehe <A HREF="http://aa-project.sourceforge.net/tune">http://aa-project.sourceforge.net/tune/</A> für
+zusätzliche Tuning-Möglichkeiten.</P>
 
 <P><B><A NAME=2.2.1.A>2.2.1.A. TV-Out Unterstützung</A></B></P>
 
