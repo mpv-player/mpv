@@ -60,7 +60,7 @@ static tvi_info_t info = {
 #define MAX_AUDIO_CHANNELS	10
 
 #define VID_BUF_SIZE_IMMEDIATE 2
-#define VIDEO_AVG_BUFFER_SIZE 300
+#define VIDEO_AVG_BUFFER_SIZE 600
 
 typedef struct {
     /* general */
@@ -1255,12 +1255,12 @@ static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *
 #define MAX_SKEW_DELTA 0.6
 static void *video_grabber(void *data)
 {
+#define MAXTOL (priv->nbuf)
     priv_t *priv = (priv_t*)data;
     struct timeval curtime;
     long long skew, prev_skew, xskew, interval, prev_interval;
     int frame;
     int i;
-    int first = 1;
     int framecount;
     int tolerance;
 
@@ -1273,10 +1273,18 @@ static void *video_grabber(void *data)
 	}
     }
 
+    gettimeofday(&curtime, NULL);
+    priv->starttime = (long long)1e6*curtime.tv_sec + curtime.tv_usec;
+    priv->audio_skew_measure_time = 0;
+    pthread_mutex_unlock(&priv->audio_starter);
+    xskew = 0;
+    skew = 0;
+    interval = 0;
+
     prev_interval = 0;
     prev_skew = 0;
 
-    tolerance = priv->nbuf*2;
+    tolerance = MAXTOL;
 
     for (framecount = 0; !priv->shutdown;)
     {
@@ -1298,25 +1306,16 @@ static void *video_grabber(void *data)
 	    mp_dbg(MSGT_TV, MSGL_DBG3, "\npicture sync failed\n");
 
 	    gettimeofday(&curtime, NULL);
-	    if (first) {
-		// this was a first frame - let's launch the audio capture thread immediately
-		// before that, just initialize some variables
-		priv->starttime = (long long)1e6*curtime.tv_sec + curtime.tv_usec;
-		priv->audio_skew_measure_time = 0;
-		pthread_mutex_unlock(&priv->audio_starter);
-		// first frame must always have timestamp of zero
-		xskew = 0;
-		skew = 0;
-		interval = 0;
-		first = 0;
+	    if (!priv->immediate_mode) {
+		interval = (long long)1e6*curtime.tv_sec + curtime.tv_usec - priv->starttime;
 	    } else {
-		if (!priv->immediate_mode) {
-		    interval = (long long)1e6*curtime.tv_sec + curtime.tv_usec - priv->starttime;
-		} else {
-		    interval = (long long)1e6*framecount/priv->fps;
-		}
+		interval = (long long)1e6*framecount/priv->fps;
+	    }
 
-		if (!priv->immediate_mode) {
+	    if (!priv->immediate_mode) {
+		long long period, orig_interval;
+
+		if (tolerance == 0) {
 		    if (interval - prev_interval == 0) {
 			mp_msg(MSGT_TV, MSGL_V, "\nvideo capture thread: frame delta = 0\n");
 		    } else if ((interval - prev_interval < (long long)0.85e6/priv->fps)
@@ -1324,27 +1323,35 @@ static void *video_grabber(void *data)
 			mp_msg(MSGT_TV, MSGL_V, "\nvideo capture thread: frame delta ~ %.1lf fps\n",
 			       (double)1e6/(interval - prev_interval));
 		    }
-
-		    // correct the rate fluctuations on a small scale
-		    if ((interval - prev_interval < (long long)0.95e6/priv->fps)
-			|| (interval - prev_interval > (long long)1.05e6/priv->fps) ) {
-			if (tolerance > 0) {
-			    mp_msg(MSGT_TV, MSGL_DBG3, "correcting timestamp\n");
-			    interval = prev_interval + priv->video_interval_sum/VIDEO_AVG_BUFFER_SIZE;
-			    tolerance--;
-			} else {
-			    mp_msg(MSGT_TV, MSGL_DBG3, "bad - frames were dropped\n");
-			    tolerance = priv->nbuf*2;
-			}
-		    } else {
-			if (tolerance < priv->nbuf*2) {
-			    mp_msg(MSGT_TV, MSGL_DBG3, "fluctuation overcome\n");
-			}
-			tolerance = priv->nbuf*2;
-		    }
-		    
 		}
 
+		// correct the rate fluctuations on a small scale
+		orig_interval = interval;
+		period = priv->video_interval_sum/VIDEO_AVG_BUFFER_SIZE;
+		if ((interval - prev_interval < 95*period/100)
+		    || (interval - prev_interval > 105*period/100) ) {
+		    if (tolerance > 0) {
+			mp_msg(MSGT_TV, MSGL_DBG3, "correcting timestamp\n");
+			interval = prev_interval + priv->video_interval_sum/VIDEO_AVG_BUFFER_SIZE;
+			tolerance--;
+		    } else {
+			mp_msg(MSGT_TV, MSGL_DBG3, "bad - frames were dropped\n");
+			tolerance = MAXTOL;
+		    }
+		} else {
+		    if (tolerance < MAXTOL) {
+			mp_msg(MSGT_TV, MSGL_DBG3, "fluctuation overcome\n");
+		    }
+		    tolerance = MAXTOL;
+		}
+		    
+		priv->video_interval_sum -= priv->video_avg_buffer[priv->video_avg_ptr];
+		priv->video_avg_buffer[priv->video_avg_ptr++] = orig_interval-prev_interval;
+		priv->video_interval_sum += orig_interval-prev_interval;
+		if (priv->video_avg_ptr >= VIDEO_AVG_BUFFER_SIZE) priv->video_avg_ptr = 0;
+
+//		fprintf(stderr, "fps: %lf\n", (double)1e6*VIDEO_AVG_BUFFER_SIZE/priv->video_interval_sum);
+		
 		// interpolate the skew in time
 		pthread_mutex_lock(&priv->skew_mutex);
 		xskew = priv->audio_skew + (interval - priv->audio_skew_measure_time)*priv->audio_skew_factor;
@@ -1364,11 +1371,6 @@ static void *video_grabber(void *data)
 		   (double)1e-6*interval, (double)1e-6*xskew, (double)1e-6*skew);
 	    mp_msg(MSGT_TV, MSGL_DBG3, "vcnt = %d, acnt = %d\n", priv->video_cnt, priv->audio_cnt);
 
-	    priv->video_interval_sum -= priv->video_avg_buffer[priv->video_avg_ptr];
-	    priv->video_avg_buffer[priv->video_avg_ptr++] = interval-prev_interval;
-	    priv->video_interval_sum += interval-prev_interval;
-	    if (priv->video_avg_ptr >= VIDEO_AVG_BUFFER_SIZE) priv->video_avg_ptr = 0;
-	    
 	    prev_skew = skew;
 	    prev_interval = interval;
 
@@ -1440,6 +1442,7 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
     priv->video_cnt--;
     priv->video_head = (priv->video_head+1)%priv->video_buffer_size_current;
     pthread_mutex_unlock(&priv->video_buffer_mutex);
+
     return interval;
 }
 
