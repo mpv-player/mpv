@@ -29,9 +29,6 @@ struct vf_priv_s
   int       pix_fmt;
 };
 
-#define lavc_venc_context (vf->priv->context)
-
-
 /* Support for avcodec's built-in deinterlacer.
  * Based on vf_lavc.c
  */
