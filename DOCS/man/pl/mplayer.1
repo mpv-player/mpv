@@ -1,4 +1,4 @@
-.\" synced with 1.708
+.\" synced with 1.717
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -2297,11 +2297,6 @@ Wykoszysta sterownik DirectX z wy³±czonymi funkcjami przyspieszaj±cymi.
 .RE
 .PD 1
 .sp 1
-FIXME: W dokumentacji uwzglêdniæ podopcje dla x11, xover, dga, sdl, vidix,
-xvidix, fbdev, fbdev2, vesa, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx,
-tdfx_vid, tdfxfb, dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm,
-png, tga.
-.sp 1
 Dostêpne sterowniki wyj¶ciowe:
 .
 .TP
@@ -2326,6 +2321,12 @@ który dzia³a gdziekolwiek, je¿eli tylko obecne jest X11.
 .B xover (tylko X11)
 Dodaje obs³ugê X11 dla wszystkich sterowników opartych o overlay.
 Obecnie u¿yteczne tylko z tdfx_vid.
+.PD 0
+.RSs
+.IPs <sterownik_vo>
+Wybiera sterownik, którego nale¿y u¿yæ jako nak³adki na X11.
+.RE
+.PD 1
 .
 .TP
 .B xvmc (tylko X11, \-vc ffmpeg12mc)
@@ -2357,11 +2358,17 @@ Odtwarza video korzystaj±c z rozszerzenia XFree86 Direct Graphics Access.
 Uwa¿any za prze¿ytek.
 .
 .TP
-.B sdl (tylko SDL)
+.B sdl (tylko SDL) (patrz te¿ \-forcexc, \-noxv)
 Sterownik wyj¶cia oparty na wysoce niezale¿nej od platformy bibliotece SDL
 (Simple Directmedia Layer).
 Poniewa¿ SDL u¿ywa w³asnej warstwy X11, opcje MPlayera dotycz±ce X11 nie maj±
 tu ¿adnego wp³ywu.
+.PD 0
+.RSs
+.IPs <sterownik>
+Wybiera u¿ywany sterownik SDL.
+.RE
+.PD 1
 .
 .TP
 .B vidix\ \ 
@@ -2434,11 +2441,25 @@ Okre¶la jakie urz±dzenia ma byæ u¿yte w trybie pe³noekranowym.
 .TP
 .B fbdev (tylko Linux)
 U¿ywa bufora ramki oferowanego przez j±dro do wy¶wietlania obrazu.
+.PD 0
+.RSs
+.IPs <urz±dzenie>
+Wybiera nazwê u¿ywanego urz±dzenia fbdev (np.\& /dev/\:fb0) albo nazwê
+podurz±dzenia vidix je¶li nazwa zaczyna siê od vidix (np.\& vidixsis_vid w³±cza
+sterownik sis).
+.RE
+.PD 1
 .
 .TP
 .B fbdev2 (tylko Linux)
 U¿ywa bufora ramki oferowanego przez j±dro do wy¶wietlania obrazu,
 alternatywna implementacja.
+.PD 0
+.RSs
+.IPs <urz±dzenie>
+Wybiera nazwê u¿ywanego urz±dzenia fbdev (domy¶lnie: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B vesa\ \ \ 
@@ -2450,10 +2471,14 @@ kartami obs³uguj±cymi standard VESA VBE 2.0.
 W³±cza tryb DGA.
 .IPs nodga
 Wy³±cza tryb DGA.
+.IPs neotv_pal
+W³±cza wyj¶cie TV karty NeoMagic i ustawia je na normê PAL.
+.IPs neotv_ntsc
+W³±cza wyj¶cie TV karty NeoMagic i ustawia je na normê NTSC.
 .IPs vidix
-FIXME: udokumentowaæ
-.IPs lvo\ \ 
-FIXME: udokumentowaæ
+U¿ywa sterownika VIDIX.
+.IPs lvo:\ \ 
+W³±cza Linux Video Overlay na trybie vesa.
 .RE
 .PD 1
 .
@@ -2491,7 +2516,7 @@ maksymalny rozmiar tekstury dostêpny w Twojej implementacji OpenGL.
 Zamiarem by³o dzia³anie na nawet najprostszych implementacjach OpenGL.
 .PD 0
 .RSs
-.IPs manyfmts
+.IPs (no)manyfmts
 W³±cza obs³ugê wiêkszej ilo¶ci formatów kolorów (RGB i BGR).
 Wymaga wersji OpenGL >= 1.2, JESZCZE NIE DZIA£A poprawnie.
 .IPs slice-height=<0\-...>
@@ -2511,7 +2536,7 @@ Nie tworzy danych wyj¶ciowych video.
 U¿yteczne dla testowania wydajno¶ci.
 .
 .TP
-.B aa\ \ \ \ \ 
+.B aa (patrz te¿ \-aa*)
 Sterownik wyj¶cia video ASCII art, który dzia³a na konsoli tekstowej.
 .
 .TP
@@ -2522,10 +2547,24 @@ Sterownik wyj¶cia video Colour AsCii Art, który dzia³a na konsoli tekstowej.
 .B bl\ \ \ \ \ 
 Odtwarzanie video przy u¿yciu protoko³u Blinkenlights UDP.
 Sterownik jest wysoce zale¿ny od sprzêtu.
+.PD 0
+.RSs
+.IPs <podurz±dzenie>
+Wybiera u¿ywane podurz±dzenie Blinkenlights.
+Jest to co¶ typu arcade:host=localhost:2323 lub hdl:file=nazwa1,file=nazwa2.
+Musisz podaæ podurz±dzenie.
+.RE
+.PD 1
 .
 .TP
 .B ggi\ \ \ \ 
 Sterownik wyj¶cia video dla systemu grafiki GGI.
+.PD 0
+.RSs
+.IPs <sterownik>
+Wybiera u¿ywany sterownik GGI.
+.RE
+.PD 1
 .
 .TP
 .B directfb
@@ -2604,10 +2643,22 @@ uwagê na ilo¶æ klatek na sekundê filmu.
 Sterownik wyj¶cia video przystosowany do kart Matrox, wykorzystuj±cy koñcowy
 system skaluj±cy YUV na kartach z serii Gxxx poprzez modu³ j±dra.
 Je¿eli posiadasz tak± kartê, jest to wybór oferuj±cy najwiêksz± szybko¶æ.
+.PD 0
+.RSs
+.IPs <urz±dzenie>
+Wybiera urzywane urz±dzenie matrox (domy¶lnie: /dev/\:mga_vid).
+.RE
+.PD 1
 .
 .TP
 .B xmga (tylko Linux, X11)
 Sterownik wyj¶cia video mga dzia³aj±cy w oknie X11.
+.PD 0
+.RSs
+.IPs <urz±dzenie>
+Wybiera urzywane urz±dzenie matrox (domy¶lnie: /dev/\:mga_vid).
+.RE
+.PD 1
 .
 .TP
 .B syncfb\ 
@@ -2619,29 +2670,41 @@ do pionowej czêstotliwo¶ci Twojego monitora.
 .TP
 .B 3dfx (tylko Linux)
 Sterownik wyj¶cia video specyficzny dla 3Dfx.
+Sterownik ten u¿ywa bezpo¶rednio sprzêtu 3Dfx na X11.
+Obs³uguje tylko 16 bpp.
 FIXME: Jak jest ró¿nica miêdzy 3dfx, tdfxfb i tdfx_vid?
 .
 .TP
 .B tdfxfb (tylko Linux)
 Sterownik ten wykorzystuje bufor ramki tdfx do wy¶wietlania filmów z
-akceleracj± YUV.
+akceleracj± YUV na kartach 3Dfx.
 FIXME: Jak jest ró¿nica miêdzy 3dfx, tdfxfb i tdfx_vid?
+.PD 0
+.RSs
+.IPs <urz±dzenie>
+Wybiera u¿ywane urz±dzenie fbdev (domy¶lnie: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B tdfx_vid (tylko Linux)
 Sterownik wyj¶cia video przeznaczony dla 3Dfx.
-Dzia³a w po³±czeniu z modu³em j±dra.
+Korzysta bezpo¶rednio z modu³u j±dra tdfx_vid.
 FIXME: Jak jest ró¿nica miêdzy 3dfx, tdfxfb i tdfx_vid?
+.PD 0
+.RSs
+.IPs <urz±dzenie>
+Wybiera u¿ywane urz±dzenie fbdev (domy¶lnie: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B dxr2 (zobacz te¿ \-dxr2) (tylko DXR2)
 Sterownik przeznaczony dla Creative DXR2.
 .PD 0
 .RSs
-.IPs x11
-W³±cza overlay.
-.IPs xv
-W³±cza overlay.
+.IPs <sterownik_vo>
+Wybiera podsterownik video u¿ywany jako nak³adka (x11, xv).
 .RE
 .PD 1
 .
@@ -2673,7 +2736,7 @@ Okre¶la normê TV.
 .br
 5: NTSC
 .REss
-.IPs device=<numer>
+.IPs 0\ 1\ 2\ 3\ 
 Okre¶la numer urz±dzenia, które ma byæ u¿yte, je¿eli masz wiêcej ni¿ jedn±
 kartê em8300.
 .RE
@@ -2681,12 +2744,15 @@ kartê em8300.
 .
 .TP
 .B mpegpes (tylko DVB)
-Sterownik wyj¶cia video przeznaczony dla DVB.
+Sterownik wyj¶cia video przeznaczony dla DVB albo do zapisu zbiorów MPEG-PES.
 .PD 0
 .RSs
 .IPs card=<1\-4>
 Okre¶la numer urz±dzenia, które ma byæ u¿yte, je¶li masz wiêcej ni¿ jedn±
 kartê DVB (tylko API V3, tak jak sterowniki z serii 1.x.y).
+.IPs <nazwa\ zbioru>
+Je¶li nie masz karty DVB ten sterownik zapisuje zbiór w formacie MPEG-PES pod
+nazw±, któr± podasz (domy¶lnie: ./grab.mpg).
 .RE
 .PD 1
 .
@@ -2700,6 +2766,20 @@ przechwytuj±cych/\:odtwarzaj±cych MJPEG.
 Sterownik wyj¶cia video drugiej generacji przeznaczony dla wielu kart
 przechwytuj±cych/\:odtwarzaj±cych MJPEG.
 Zwróæ równie¿ uwagê na filtr video zrmjpeg.
+.PD 0
+.RSs
+.IPs dev=<urz±dzenie>
+Wybiera u¿ywane urz±dzenie.
+.IPs PAL\ \ \ 
+W³acza normê video pal.
+.IPs SECAM
+W³±cza normê video secam.
+.IPs NTSC\ \ \ 
+W³±cza normê video ntsc.
+.IPs prebuf
+W³±cza prebuforowanie, jeszcze nie obs³ugiwane.
+.RE
+.PD 1
 .
 .TP
 .B md5\ \ \ \ 
@@ -2719,11 +2799,47 @@ Zmienia strumieñ video na nieskompresowan± sekwencjê obrazów YUV 4:2:0
 i przechowuje j± w pliku "stream.yuv" w bie¿±cym katalogu.
 Format jest taki sam jak ten stosowany przez mjpegtools, wiêc jest to przydatne
 je¶li chcesz poddaæ film obróbce przy pomocy tego pakietu.
+Obs³uguje formaty YV12, RGB (24 bpp) i BGR (24bpp).
+.PD 0
+.RSs
+.IPs interlaced
+Zapisuje ramki z przeplotem, najpierw górne pole.
+.IPs interlaced_bf
+Zapisuje ramki z przeplotem, najpierw dolne pole.
+.REss
+.PD 1
+.RS
+.sp 1
+.I INFORMACJA:
+Je¶li nie podasz ¿adnej opcji wyj¶cie jest progresywne (czyli bez przeplotu).
+.RE
 .
 .TP
 .B gif89a\ 
-Zapisuje ka¿d± ramkê do pliku GIF w bie¿±cym katalogu.
-Ka¿dy plik dostaje jako nazwê numer ramki poprzedzony zerami.
+Zapisuje wszystkie ramki do jednego animowanego pliku GIF w bie¿±cym katalogu.
+Obs³uguje tylko format RGB z 24 bpp, wyj¶cie natomiast jest konwertowane do
+256 kolorów.
+.PD 0
+.RSs
+.IPs <fps>\ \ \ 
+Liczba rzeczywista opisuj±ca ilo¶æ klatek na sekundê (domy¶lnie: 5.0).
+.IPs <nazwa\ zbioru>
+Nazwa zbioru wyj¶ciowego (domy¶lnie: ./out.gif).
+.REss
+.PD 1
+.RS
+.sp 1
+.I INFORMACJA:
+Musisz podaæ ilo¶æ ramek na sekundê przed nazw± zbioru, albo stanie siê ona
+czê¶ci± nazwy.
+.sp 1
+.I PRZYK£AD:
+.RE
+.PD 0
+.RSs
+mplayer video.nut \-vo gif89a:15.0:test.gif
+.RE
+.PD 1
 .
 .TP
 .B jpeg\ \ \ 
@@ -2760,16 +2876,34 @@ Warto¶æ musi byæ równa lub wiêksza ni¿ 1 (domy¶lnie: 1000).
 .B pgm\ \ \ \ 
 Zapisuje ka¿d± ramkê do pliku PGM w bie¿±cym katalogu.
 Ka¿dy plik dostaje jako nazwê numer ramki poprzedzony zerami.
+Obs³uguje tylko format YV12.
+Wynikowy obraz ma wymiary (szeroko¶æ) x (wysoko¶æ * 1.5) oryginalnego obrazu.
+Od wspó³rzêdnych 0,0 dla wysoko¶ci,szeroko¶ci zaczyna siê p³aszczyzna Y, od
+wspó³rzêdnych 0,wysoko¶æ przez wysoko¶æ/2,szeroko¶æ/2 jesp p³aszczyzna U za¶ od
+wyskoko¶æ/2,szeroko¶æ przez wysoko¶æ/2,szeroko¶æ/2 jest p³aszczyzna V.
 .
 .TP
-.B png\ \ \ \ 
+.B png (patrz te¿ \-z)
 Zapisuje ka¿d± ramkê do pliku PNG w bie¿±cym katalogu.
 Ka¿dy plik dostaje jako nazwê numer ramki poprzedzony zerami.
+Obs³uguje formaty RGB i BGR z 24 bpp.
 .
 .TP
 .B tga\ \ \ \ 
 Zapisuje ka¿d± ramkê do pliku TARGA w bie¿±cym katalogu.
 Ka¿dy plik dostaje jako nazwê numer ramki poprzedzony zerami.
+Sterownik ten istnieje by dostarczaæ ³atwy sposób bezstratnego zapisywania
+obrazów bez zewnêtrznej biblioteki.
+Obs³uguje format BGR[A], z 15, 24 i 32 bpp.
+Mo¿na wymusiæ konkretny format filtrem video format.
+.sp 1
+.I PRZYK£AD:
+.RE
+.PD 0
+.RSs
+mplayer video.nut \-vf format=bgr15 \-vo tga
+.RE
+.PD 1
 .
 .
 .
@@ -3043,7 +3177,7 @@ strumieniami bitowymi.)
 .IPs fast\ 
 Korzysta z optymalizacji niestosuj±cych siê do specyfikacji i tym samym
 mog±cych sprawiæ problemy (takie jak prostsza dekwantyzacja, stosowanie
-domy¶lnej matrycy kwantyzacji, stosowanie YUV 4:2:0, pomijanie kilku testów
+domy¶lnej matrycy kwantyzacji, stosowanie YUV 4:2:0 i pomijanie kilku testów
 na wykrycie uszkodzonych strumieni bitowych).
 .IPs gray\ 
 dekodowanie tylko w skali szaro¶ci (trochê szybsze ni¿ w kolorze)
@@ -3373,7 +3507,7 @@ Próg, który mo¿e byæ opcjonalnie podany od niczego (0) do wszystkiego (255)
 (domy¶lnie: 24).
 .br
 .IPs round
-Warto¶æ, przez któr± szeroko¶æ/wysoko¶æ powinny byæ podzielne (domy¶lnie: 16).
+Warto¶æ, przez któr± szeroko¶æ/\:wysoko¶æ powinny byæ podzielne (domy¶lnie: 16).
 Offset jest automatycznie dopasowywany tak, aby wycentrowaæ film.
 U¿yj 2, aby otrzymaæ równe wymiary (wymagane przez film 4:2:2).
 16 to najlepsza warto¶æ przy kodowaniu do wiêkszo¶ci kodeków.
@@ -3388,7 +3522,7 @@ input.conf.
 .RSs
 .IPs w,h
 szeroko¶æ i wysoko¶æ (domy¶lnie: -1, maksymalny mo¿liwy rozmiar przy którym
-granice wci±¿ s± widoczne).
+granice wci±¿ s± widoczne.)
 .IPs x,y
 pozycja lewego górnego rogu (domy¶lnie: -1, najwy¿ej i najbardziej w lewo jak
 to tylko mo¿liwe)
@@ -3402,14 +3536,14 @@ nieprzeskalowany obraz pod wspó³rzêdnymi x, y.
 Mo¿e byæ u¿yty do umieszczenia napisów/\:OSD w otrzymanym czarnym pasku.
 .RSs
 .IPs w,h
-szeroko¶æ i wysoko¶æ po poszerzeniu (domy¶lnie: oryginalna szeroko¶æ, wysoko¶æ)
+Szeroko¶æ i wysoko¶æ po poszerzeniu (domy¶lnie: oryginalna szeroko¶æ, wysoko¶æ).
 Ujemne warto¶ci traktowane s± jak zmiany oryginalnej wielko¶ci
 .sp 1
 .I PRZYK£AD:
 .PD 0
 .RSs
 .IP expand=0:-50:0:0
-dodaje 50 pixeli ramki na dole obrazka
+Dodaje 50 pixeli ramki na dole obrazka.
 .RE
 .PD 1
 .IPs x,y
@@ -3463,13 +3597,13 @@ Prze³±cza skalowanie z przeplotem.
 .IPs gub_kolor
 opuszcza informacjê o kolorach
 .RSss
-0: u¿yje wszystkich dostêpnych linii wej¶cia koloru
+0: U¿yje wszystkich dostêpnych linii wej¶cia koloru.
 .br
-1: u¿yje tylko co 2g± liniê wej¶cia koloru
+1: U¿yje tylko co 2g± liniê wej¶cia koloru.
 .br
-2: u¿yje tylko co 4t± liniê wej¶cia koloru
+2: U¿yje tylko co 4t± liniê wej¶cia koloru.
 .br
-3: u¿yje tylko co 8m± liniê wej¶cia koloru
+3: U¿yje tylko co 8m± liniê wej¶cia koloru.
 .REss
 .IPs parametr
 parametr skalowania (zale¿nie od u¿ytej metody)
@@ -4419,7 +4553,7 @@ a dla AVI ka¿d± zmianê sceny lub ka¿d± warto¶æ keyint (sprawd¼ warto¶æ
 \-lavcopts keyint= je¿eli korzystasz z MEncodera przy kodowaniu video).
 .sp 1
 Kiedy klatka kluczowa zostaje znaleziona, drukowany jest ci±g znaków "I!"
-i znak koñca wiersza, zostawiaj±c aktualn± liniê wyj¶cia mplayera/\:mencodera na
+i znak koñca wiersza, zostawiaj±c aktualn± liniê wyj¶cia MPlayera/\:MEncodera na
 ekranie, poniewa¿ zawiera ona czas (w sekundach) i numer ramki klatki kluczowej
 (Mo¿esz u¿yæ tych informacji do podzielenia zbioru AVI.).
 .sp 1
@@ -6513,9 +6647,8 @@ Czêstotliwo¶æ wystêpowania klatek I (domy¶lnie: 60)
 .B frameref=<warto¶æ>
 Ilo¶æ poprzednich klatek wykorzystanych do przewidywania w klatkach P
 (domy¶lnie: 1).
-.br
-.I INFORMACJA:
-Do obecnej wersji x264 r38 obs³uga tej opcji nie zosta³a zaimplementowana.
+Mo¿e to wywo³aæ niewielkie zmiany w bitrate i PSNR.
+Niektóre dekodery nie radz± sobie z du¿ymi warto¶ciami frameref.
 .
 .TP
 .B idrframe=<warto¶æ>
@@ -6580,20 +6713,14 @@ Parametr kwantyzacji (QP)H.264 jest w skali logarytmicznej.
 Dla przyk³adu, ró¿nica w bitrate pomiêdzy QP=20 a QP=40 to wspó³czynnik
 oko³o 10.
 Przydatne kwantyzatory w H.264 s± wiêksze ni¿ w MPEG[124].
-.br
-.I INFORMACJA:
-Ta opcja ma wp³yw nawet, je¿eli wybierzesz kodowanie w CBR.
-W takim wypadku, pierwsza kodowana klatka u¿yje wspó³czynnika kwantyzacji,
-jaki poda³e¶, ale w nastêpnych klatkach kontrola tempa zadecyduje jakie
-kwanty wybraæ.
 .
 .TP
 .B qp_min=<2\-51> (tylko CBR)
-Minimalny kwantyzator, 20-40 to u¿yteczny zakres (domy¶lnie: 2).
+Minimalny kwantyzator, 15\-35 to u¿yteczny zakres (domy¶lnie: 10).
 .
 .TP
 .B qp_max=<2\-51>  (tylko CBR)
-Maksymalny kwantyzator.
+maksymalny kwantyzator (domy¶lnie: 51)
 .
 .TP
 .B qp_step=<warto¶æ>
@@ -6610,7 +6737,7 @@ Ustawia pocz±tkowego bufora kontroli tempa (domy¶lnie: 1/4 rc_buffer_size)
 .
 .TP
 .B rc_sens=<0\-100>
-czu³o¶æ kontroli tempa (domy¶lnie: 100)
+czu³o¶æ kontroli tempa (domy¶lnie: 4)
 .
 .TP
 .B ip_factor=<warto¶æ>
@@ -6633,11 +6760,10 @@ jest bardziej sta³y, podczas gdy wy¿sza, sprawia, ¿e parametr kwantyzacji
 jest bardziej sta³y.
 .
 .TP
-.B qblur=<0\-1>
+.B qblur=<0\-99>
 Tymczasowe rozmazanie parametru kwantyzacji (domy¶lnie: 0.5).
 Ni¿sze warto¶ci pozwalaj± na wiêksze skoki warto¶ci kwantyzatora,
 wy¿sze zmuszaj± go do delikatniejszych zmian.
-
 .
 .TP
 .B fullinter
@@ -6650,17 +6776,18 @@ Okre¶la ilo¶æ informacji drukowanych na ekranie.
 .RSs
 -1: ¿adne
 .br
- 0: b³êdy (dla debugowania x264)
+ 0: Wy¶wietla tylko b³êdy.
 .br
  1: ostrze¿enia
 .br
- 2: PSNR i inne statystyki analiz po skoñczonym kodowaniu (domy¶lne)
+ 2: PSNR, czas kodowania i inne statystyki analiz po skoñczonym kodowaniu
+ (domy¶lne)
 .br
  3: PSNR, QP, typ klatki, rozmiar i inne statystyki dla ka¿dej klatki
 .REss
 .
 .TP
-.B psnr
+.B psnr\ \ \ 
 Drukuje statystyki stosunku sygna³u do szumu.
 .
 .
@@ -6671,7 +6798,7 @@ Drukuje statystyki stosunku sygna³u do szumu.
 .SH PLIKI
 .
 .TP
-/usr/\:/local\:etc/\:mplayer/\:mplayer.conf
+/usr/\:local/\:etc/\:mplayer/\:mplayer.conf
 g³ówny plik ustawieñ
 .
 .TP
@@ -6719,7 +6846,7 @@ napisów w nastêpuj±cej kolejno¶ci:
 .SH PRZYK£ADY
 .
 .TP
-.B szybki start odtwarzania DVD:
+.B Szybki start odtwarzania DVD:
 mplayer dvd://1
 .
 .TP
@@ -6791,7 +6918,7 @@ mencoder dvd://2 \-o tytu³2.avi \-oac copy \-ovc lavc
 \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
 .
 .TP
-.B To samo, ale z kompresj± MJPEG
+.B To samo, ale z kompresj± MJPEG:
 mencoder dvd://2 \-o tytul2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800 \-oac copy
 .
