@@ -274,14 +274,14 @@ They also support several non-Linux systems.
   </row>
 
   <row>
-    <entry>C-Media cards (which ones?)</entry>
-    <entry>not OK (hissing) (?)</entry>
+    <entry>C-Media cards (CMI8338/8738)</entry>
     <entry>OK</entry>
-    <entry></entry>
-    <entry></entry>
+    <entry>OK SP/DIF is supported with ALSA 0.9.x</entry>
     <entry>?</entry>
     <entry></entry>
-    <entry></entry>
+    <entry>44</entry>
+    <entry>stereo</entry>
+    <entry>1</entry>
   </row>
 
   <row>
