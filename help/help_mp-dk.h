@@ -9,9 +9,9 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-"Benyt:   mplayer [instilling] [url|sti/]filnavn\n"
+"Benyt:   mplayer [indstilling] [URL|sti/]filnavn\n"
 "\n"
-"Basale indstillinger (se mansiden for en komplet liste):\n"
+"Basale indstillinger (se manpage for en komplet liste):\n"
 " -vo <drv[:dev]> vælg video driver og enhed (se '-vo help' for en komplet liste)\n"
 " -ao <drv[:dev]> vælg lyd driver og enhed (se '-ao help' for en komplet liste)\n"
 #ifdef HAVE_VCD
@@ -32,22 +32,22 @@ static char help_text[]=
 " -playlist <file> specificer afspilningsliste\n"
 " -vid x -aid y   afspil film (x) og lyd (y)\n"
 " -fps x -srate y ændre filmens (x fps) og lydens (y Hz)\n"
-" -pp <quality>   slå efterprocesseringsfilter til (bedre billedkvalitet) (0-4 for DivX, 0-63 for mpegs)\n"
+" -pp <quality>   slå efterprocesseringsfilter til (bedre billedkvalitet) (se manpage for flere detaljer)\n"
 " -framedrop      slå billede-skip til (kan hjælpe langsomme maskiner)\n"
 "\n"
 "Basis taster:\n"
 " <-  or  ->      søger 10 sekunder frem eller tilbage\n"
 " up or down      søger 1 minut frem eller tilbage \n"
 " pgup or pgdown  søger 10 minutter frem eller tilbage\n"
-" < or >          søger frem og tilbage en afspilningslisten\n"
-" p or SPACE      pause filmen (starter igen ved en vilkårlig tast)\n"
+" < or >          søger frem og tilbage i afspilningslisten\n"
+" p or SPACE      pause filmen (starter igen ved tryk på en vilkårlig tast)\n"
 " q or ESC        stop afspilning og afslut program\n"
 " + or -          juster lydforsinkelse med +/- 0.1 sekundt\n"
 " o               vælger OSD type:  ingen / søgebar / søgebar+tid\n"
 " * or /          forøger eller formindsker volumen (tryk 'm' for at vælge master/pcm)\n"
 " z or x          justerer undertekstforsinkelse med +/- 0.1 sekund\n"
 "\n"
-" * * * SE MANSIDEN FOR FLERE DETALJER, YDERLIGERE (AVANCEREDE) MULIGHEDER OG TASTER ! * * *\n"
+" * * * SE MANPAGE FOR FLERE DETALJER, YDERLIGERE (AVANCEREDE) MULIGHEDER OG TASTER ! * * *\n"
 "\n";
 #endif
 
@@ -120,6 +120,7 @@ static char help_text[]=
 #define MSGTR_InitializingAudioCodec "Initialiserer lydcodec...\n"
 #define MSGTR_ErrorInitializingVODevice "Fejl under initialisering/åbning af den valgte video (-vo) enhed!\n"
 #define MSGTR_ForcedVideoCodec "Tvunget videocodec: %s\n"
+#define MSGTR_ForcedAudioCodec "Tvunget lydcodec: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: Beskrivelse: %s\nAO: forfatter: %s\n"
 #define MSGTR_AOComment "AO: Kommentar: %s\n"
 #define MSGTR_Video_NoVideo "Video: ingen video!!!\n"
@@ -431,7 +432,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Font "Skriftype"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Efterprocesseringsfilter"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
-#define MSGTR_PREFERENCES_OSS_Device "Device:"
+#define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+#define MSGTR_PREFERENCES_FRAME_Misc "Misc"
+#define MSGTR_PREFERENCES_OSS_Device "Enhed:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Message "Husk, nogle funktioner kræver at MPlayer bliver genstartet for at de virker."
 #define MSGTR_PREFERENCES_DXR3_VENC "Video enkoder:"
@@ -457,6 +460,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding18 "Japansk tegnsæt (SHIFT-JIS)"
 #define MSGTR_PREFERENCES_FontEncoding19 "Koreansk tegnsæt (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai tegnsæt (CP874)"
+#define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Ingen autoskalering"
 #define MSGTR_PREFERENCES_FontPropWidth "Proportional med film bredde"
 #define MSGTR_PREFERENCES_FontPropHeight "Proportional med film højde"
@@ -467,6 +471,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontTextScale "Text skalering:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSD skalering:"
 #define MSGTR_PREFERENCES_SubtitleOSD "Undertekst & OSD"
+#define MSGTR_PREFERENCES_Cache "Cache on/off"
+#define MSGTR_PREFERENCES_LoadFullscreen "Start i fullskærm"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "fatal fejl ..."
