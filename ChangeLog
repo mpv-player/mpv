@@ -3,15 +3,16 @@ mplayer (0.90)
 
   final:  "CounterCounter"
 
-  rc4:
+  rc4:  "FlameCounter"
+
     DOCS:
     * some clarification and updates in the English DOCS
-    * many translation and help-file updates
+    * massive translation and help-file updates
 
     Fixes:    
     * -ac hwac3 fixed (was broken in rc3)
     * vo_svga: 4bp & 8bpp fixes
-    * various GUI fixes
+    * various GUI fixes, including some critical bugs
     * rage128 VIDIX PPC fixes
     * libmenu: one crash fixed, some cleanup
     * fixed ./configure --cc="ccache gcc"
@@ -31,19 +32,32 @@ mplayer (0.90)
     * ogg-in-avi (audio format 0xFFFE) demuxing fixed
     * vorbis decoding fixed (outer loop cleanup)
     * swscaler: 4bpp depth 1 pixel/byte format support for -vo svga
-    * various GUI fixes
     * missing error message in command line parser for missing parameters
+    * swscaler: YVU9->YV12 fixes
+    * -ao mpegpes + -ac hwac3 fixed
+    * -ao pcm bogus wav header fixed
+    * -vo x11 + -wid fixed
+    * auto-insert the 'palette' filter if needed, support fixed in filters
+    * the sig11 when playing second audio-only file fixed
+    * configure: detection of cdda, nas, i18n, svgalib, faad2, lame fixed
+    * -af/-af-adv support in mencoder fixed
+    * libmpdvdkit2: upgraded to use libdvdcss 1.2.5
     
     Features:
     * raw video support (-rawvideo, similar to -rawaudio)
     * experimental mpeg4-ES support (enable with -demuxer 27 -fps xxx)
-    * new video filter: field
-    * dvd/vobsub improvements: positioning, gaussian blur scaler
+    * new video filter: field (cheap deinterlacer)
+    * dvd/vobsub improvements: positioning, optional gaussian blur scaler
     * vf_bmovl: 400% speedup :)
     * libavcodec: native DV audio decoder
     * GIF demuxer (for animated GIFs)
     * new noise removal filter: -vop denoise3d
-    * per-channel gamma and MMX-opt'ed br/co/saturation support in -vop eq2
+    * per-channel gamma and MMX-opt'ed bri/cont/saturation support in -vop eq2
+    * live.com lib support cleanup, support for more stream types
+    * importing the playtree into the Gui instead of gui's own playlist hack
+    * support for the xvid and divx4/5linux libraries at the same time
+    * -fstype option: override priority/layer of the fullscreen switch methods
+    * libavcodec: some B-frames related encoding failures/crashes fixed
 
   rc3:  "BugfixCounter"
   
