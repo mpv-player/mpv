@@ -1984,6 +1984,12 @@ if test "$_profile" || test "$_debug" ; then
  CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
 elif test -z "$CFLAGS" ; then
  CFLAGS="-O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer"
+else
+ cat <<EOF
+MPlayer is using custom CFLAGS set by you, it is strongly recommended that you
+let MPlayer choose the correct CFLAGS!
+To do so execute CFLAGS= ./configure <your options>
+EOF
 fi
 
 # XXX check this for OpenBSD and BSD/OS
@@ -2236,7 +2242,7 @@ prefix = $_prefix
 AR=ar
 CC=$_cc
 # OPTFLAGS=-O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
-OPTFLAGS=$CFLAGS
+OPTFLAGS=$CFLAGS -fomit-frame-pointer # make sure -fomit-frame-pointer is always used
 EXTRA_INC=$_extraincdir $_gtkinc
 WIN32_PATH=-DWIN32_PATH=\\"$_win32libdir\\"
 
