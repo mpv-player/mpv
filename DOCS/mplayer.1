@@ -43,6 +43,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-ss\ time ]
 .RB [ \-dumpaudio ]
 .RB [ \-dumpvideo ]
+.RB [ \-dumpstream ]
 .RB [ \-noframedrop ]
 .RB [ \-framedrop ]
 .RB [ \-nodouble ]
@@ -393,6 +394,10 @@ force using XVideo (SDL!)
 .B \-dumpaudio
 writes audio stream of the file to ./stream.dump (mostly usable
 with mpeg/ac3)
+.TP
+.B \-dumpstream
+dumps the file to ./stream.dump . Useful for example
+when ripping from DVD.
 .TP
 .B \-noframedrop
 no frame dropping : every frame is played, audio and video may be out of

@@ -43,6 +43,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-ss\ másodperc ]
 .RB [ \-dumpaudio ]
 .RB [ \-dumpvideo ]
+.RB [ \-dumpstream ]
 .RB [ \-noframedrop ]
 .RB [ \-framedrop ]
 .RB [ \-nodouble ]
@@ -380,6 +381,10 @@ XVideo használatának kényszerítése (csak SDL-el!)
 .B \-dumpaudio
 a file-ban található audio kimentése a ./stream.dump file-ba
 (leginkább mpeg/ac3-mal használható)
+.TP
+.B \-dumpstream
+az egész stream-et kiírja a ./stream.dump file-ba.
+Hasznos például DVD rippelésnél.
 .TP
 .B \-noframedrop
 képkockaeldobás kikapcsolása : minden képkocka lejátszásra kerül, igy az
