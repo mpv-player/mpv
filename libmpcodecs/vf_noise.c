@@ -43,7 +43,6 @@
 
 static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift);
 static inline void lineNoiseAvg_C(uint8_t *dst, uint8_t *src, int len, int8_t **shift);
-static inline void lineNoiseAvg_CX(uint8_t *dst, uint8_t *src, int len, int8_t **shift, int add);
 
 static void (*lineNoise)(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift)= lineNoise_C;
 static void (*lineNoiseAvg)(uint8_t *dst, uint8_t *src, int len, int8_t **shift)= lineNoiseAvg_C;
@@ -56,6 +55,7 @@ typedef struct FilterParam{
         int averaged;
         int shiftptr;
 	int8_t *noise;
+	int8_t *prev_shift[MAX_RES][3];
 }FilterParam;
 
 struct vf_priv_s {
@@ -66,7 +66,6 @@ struct vf_priv_s {
 };
 
 static int nonTempRandShift[MAX_RES]= {-1};
-static int8_t *prev_shift[MAX_RES][3];
 
 static int8_t *initNoise(FilterParam *fp){
 	int strength= fp->strength;
@@ -107,7 +106,7 @@ static int8_t *initNoise(FilterParam *fp){
 
 	for (i = 0; i < MAX_RES; i++)
 	    for (j = 0; j < 3; j++)
-		prev_shift[i][j] = noise + (rand()&(MAX_SHIFT-1));
+		fp->prev_shift[i][j] = noise + (rand()&(MAX_SHIFT-1));
 
 	if(nonTempRandShift[0]==-1){
 		for(i=0; i<MAX_RES; i++){
@@ -194,7 +193,7 @@ static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int le
 /***************************************************************************/
 
 static inline void lineNoiseAvg_C(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
-	int i, j, n, v;
+	int i, j, n;
 	
 	for(i=0; i<len; i++)
 	{
@@ -235,8 +234,8 @@ static void noise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int 
 
 		if(fp->quality==0) shift&= ~7;
 		if (fp->averaged) {
-		    lineNoiseAvg(dst, src, width, prev_shift[y]);
-		    prev_shift[y][fp->shiftptr] = noise + shift;
+		    lineNoiseAvg(dst, src, width, fp->prev_shift[y]);
+		    fp->prev_shift[y][fp->shiftptr] = noise + shift;
 		} else {
 		    lineNoise(dst, src, noise, width, shift);
 		}
