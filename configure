@@ -943,7 +943,6 @@ cat > $TMPC << EOF
 #include <dvdread/dvd_reader.h>
 #include <dvdread/ifo_types.h>
 #include <dvdread/ifo_read.h>
-#include <dvdread/dvd_udf.h>
 #include <dvdread/nav_read.h>
 int main( void ) { return 0; }
 EOF

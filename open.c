@@ -31,9 +31,22 @@ int dvd_angle=1;
 #include <dvdread/dvd_reader.h>
 #include <dvdread/ifo_types.h>
 #include <dvdread/ifo_read.h>
-#include <dvdread/dvd_udf.h>
 #include <dvdread/nav_read.h>
-//#include <dvdread/nav_print.h>
+
+#define	DVDREAD_VERSION(maj,min,micro)	((maj)*10000 + (min)*100 + (micro))
+
+/*
+ * Try to autodetect the libdvd-0.9.0 library
+ * (0.9.0 removed the <dvdread/dvd_udf.h> header, and moved the two defines
+ * DVD_VIDEO_LB_LEN and MAX_UDF_FILE_NAME_LEN from it to
+ * <dvdread/dvd_reader.h>)
+ */
+#if defined(DVD_VIDEO_LB_LEN) && defined(MAX_UDF_FILE_NAME_LEN)
+#define	LIBDVDREAD_VERSION	DVDREAD_VERSION(0,9,0)
+#else
+#define	LIBDVDREAD_VERSION	DVDREAD_VERSION(0,8,0)
+#endif
+
 
 typedef struct {
     dvd_reader_t *dvd;
@@ -351,7 +364,11 @@ read_next:
     if(data[38]==0 && data[39]==0 && data[40]==1 && data[41]==0xBF &&
        data[1024]==0 && data[1025]==0 && data[1026]==1 && data[1027]==0xBF){
 	// found a Navi packet!!!
+#if LIBDVDREAD_VERSION >= DVDREAD_VERSION(0,9,0)
+        navRead_DSI( &d->dsi_pack, &(data[ DSI_START_BYTE ]) );
+#else
         navRead_DSI( &d->dsi_pack, &(data[ DSI_START_BYTE ]), sizeof(dsi_t) );
+#endif
 	if(d->cur_pack != d->dsi_pack.dsi_gi.nv_pck_lbn ){
 	    mp_msg(MSGT_DVD,MSGL_V, "Invalid NAVI packet! lba=0x%X  navi=0x%X  \n",
 		d->cur_pack,d->dsi_pack.dsi_gi.nv_pck_lbn);
