@@ -31,18 +31,23 @@ int	mtrr_set_type(unsigned base,unsigned size,int type)
     mtrr_fd = fopen("/proc/mtrr","wt");
     if(mtrr_fd)
     {
-	fprintf(mtrr_fd,"base=0x%08X size=0x%08X type=%s\n",base,size,stype);
-	printf("base=0x%08X size=0x%08X type=%s\n",base,size,stype);
+	char sout[256];
+	unsigned wr_len;
+	sprintf(sout,"base=0x%08X size=0x%08X type=%s\n",base,size,stype);
+	wr_len = fprintf(mtrr_fd,sout);
+	/*printf("MTRR: %s\n",sout);*/
 	fclose(mtrr_fd);
-	return 0;
+	return wr_len == strlen(sout) ? 0 : EPERM;
     }
     return ENOSYS;
 #else
 #warning Please port MTRR stuff!!!
+    return ENOSYS
 #endif
 }
 #else
 int	mtrr_set_type(unsigned base,unsigned size,int type)
 {
+    return ENOSYS;
 }
 #endif
