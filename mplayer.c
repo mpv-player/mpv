@@ -628,7 +628,7 @@ void load_per_file_config (m_config_t* conf, const char *const file)
 // The function return a new value for eof.
 static int libmpdemux_was_interrupted(int eof) {
   mp_cmd_t* cmd;
-  if((cmd = mp_input_get_cmd(0,0)) != NULL) {
+  if((cmd = mp_input_get_cmd(0,0,0)) != NULL) {
        switch(cmd->id) {
        case MP_CMD_QUIT:
 	 exit_player_with_rc(MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
@@ -1234,7 +1234,7 @@ if(!noconsolecontrols && !slave_mode){
 	usec_sleep(20000);
 	guiEventHandling();
 	guiGetEvent( guiReDraw,NULL );
-	if ( (cmd = mp_input_get_cmd(0,0)) != NULL) guiGetEvent( guiIEvent,(char *)cmd->id );
+	if ( (cmd = mp_input_get_cmd(0,0,0)) != NULL) guiGetEvent( guiIEvent,(char *)cmd->id );
        } 
       guiGetEvent( guiSetParameters,NULL );
       if ( guiIntfStruct.StreamType == STREAMTYPE_STREAM )
@@ -2468,7 +2468,7 @@ if(auto_quality>0){
       if (audio_out && sh_audio)
          audio_out->pause();	// pause audio, keep data if possible
 
-      while( (cmd = mp_input_get_cmd(20,1)) == NULL) {
+      while( (cmd = mp_input_get_cmd(20,1,1)) == NULL) {
 	     if(sh_video && video_out && vo_config_count) video_out->check_events();
 #ifdef HAVE_NEW_GUI
              if(use_gui){
@@ -2483,7 +2483,10 @@ if(auto_quality>0){
 #endif
              usec_sleep(20000);
          }
+      if (cmd->id == MP_CMD_PAUSE) {
+      cmd = mp_input_get_cmd(0,1,0);
       mp_cmd_free(cmd);
+      }
          osd_function=OSD_PLAY;
       if (audio_out && sh_audio)
         audio_out->resume();	// resume audio
@@ -2548,7 +2551,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 {
   mp_cmd_t* cmd;
   int brk_cmd = 0;
-  while( !brk_cmd && (cmd = mp_input_get_cmd(0,0)) != NULL) {
+  while( !brk_cmd && (cmd = mp_input_get_cmd(0,0,0)) != NULL) {
     switch(cmd->id) {
     case MP_CMD_SEEK : {
       int v,abs;

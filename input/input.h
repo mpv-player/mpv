@@ -195,7 +195,7 @@ mp_input_queue_cmd(mp_cmd_t* cmd);
 // This function retrieves the next available command waiting no more than time msec.
 // If pause is true, the next input will always return a pause command.
 mp_cmd_t*
-mp_input_get_cmd(int time, int paused);
+mp_input_get_cmd(int time, int paused, int peek_only);
 
 mp_cmd_t*
 mp_input_parse_cmd(char* str);

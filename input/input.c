@@ -1126,7 +1126,7 @@ mp_input_queue_cmd(mp_cmd_t* cmd) {
 }
 
 static mp_cmd_t*
-mp_input_get_queued_cmd(void) {
+mp_input_get_queued_cmd(int peek_only) {
   mp_cmd_t* ret;
 
   if(cmd_queue_length == 0)
@@ -1134,20 +1134,29 @@ mp_input_get_queued_cmd(void) {
 
   ret = cmd_queue[cmd_queue_start];
   
+  if (!peek_only) {  
   cmd_queue_length--;
   cmd_queue_start = (cmd_queue_start + 1) % CMD_QUEUE_SIZE;
+  }
   
   return ret;
 }  
 
+/**
+ * \param peek_only when set, the returned command stays in the queue.
+ * Do not free the returned cmd whe you set this!
+ */
 mp_cmd_t*
-mp_input_get_cmd(int time, int paused) {
+mp_input_get_cmd(int time, int paused, int peek_only) {
   mp_cmd_t* ret = NULL;
   mp_cmd_filter_t* cf;
+  int from_queue;
 
   while(1) {
-    ret = mp_input_get_queued_cmd();
+    from_queue = 1;
+    ret = mp_input_get_queued_cmd(peek_only);
     if(ret) break;
+    from_queue = 0;
     ret = mp_input_read_keys(time,paused);
     if(ret) break;
     ret = mp_input_read_cmds(time);
@@ -1159,6 +1168,9 @@ mp_input_get_cmd(int time, int paused) {
     if(cf->filter(ret,paused,cf->ctx))
       return NULL;
   }
+
+  if (!from_queue && peek_only)
+    mp_input_queue_cmd(ret);
 
   return ret;
 }
@@ -1610,7 +1622,7 @@ static int mp_input_print_cmd_list(m_option_t* cfg) {
 int
 mp_input_check_interrupt(int time) {
   mp_cmd_t* cmd;
-  if((cmd = mp_input_get_cmd(time,0)) == NULL)
+  if((cmd = mp_input_get_cmd(time,0,1)) == NULL)
     return 0;
   switch(cmd->id) {
   case MP_CMD_QUIT:
@@ -1618,12 +1630,10 @@ mp_input_check_interrupt(int time) {
   case MP_CMD_PLAY_TREE_UP_STEP:
   case MP_CMD_PLAY_ALT_SRC_STEP:
     // The cmd will be executed when we are back in the main loop
-    if(! mp_input_queue_cmd(cmd)) {
-      mp_msg(MSGT_INPUT,MSGL_ERR,"mpdemux_check_interrupt: can't queue cmd %s\n",cmd->name);
-      mp_cmd_free(cmd);
-    }
     return 1;
   }
+  // remove the cmd from the queue
+  cmd = mp_input_get_cmd(time,0,0);
   mp_cmd_free(cmd);
   return 0;
 }
