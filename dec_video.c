@@ -747,6 +747,7 @@ if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
   return 1;
 }
 
+extern int vaa_use_dr;
 #ifdef USE_LIBVO2
 int decode_video(vo2_handle_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
 #else
@@ -776,6 +777,7 @@ painted = 0;
   use_dr = 0;
   if(vo_vaa.query_bes_da)
     use_dr = vo_vaa.query_bes_da(&bda) ? 0 : 1;
+  if(!vaa_use_dr) use_dr = 0;
 #ifdef USE_MP_IMAGE
 if(mpi->type!=MP_IMGTYPE_EXPORT)
 if( !(mpi->flags&MP_IMGFLAG_ALLOCATED) && !(mpi->flags&MP_IMGFLAG_DIRECT) ){

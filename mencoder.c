@@ -93,6 +93,7 @@ int lavc_param_keyint = -1;
 **************************************************************************/
 vo_vaa_t vo_vaa;
 int vo_doublebuffering;
+int vaa_use_dr;
 
 //--------------------------
 

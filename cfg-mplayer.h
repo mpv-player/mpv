@@ -47,6 +47,7 @@ extern int vo_gamma_hue;
 extern int vo_gamma_red_intensity;
 extern int vo_gamma_green_intensity;
 extern int vo_gamma_blue_intensity;
+extern int vaa_use_dr;
 #endif
 
 #ifdef USE_SUB
@@ -254,6 +255,8 @@ static config_t mplayer_opts[]={
 	{"red_intensity",&vo_gamma_red_intensity, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 	{"green_intensity",&vo_gamma_green_intensity, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 	{"blue_intensity",&vo_gamma_blue_intensity, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
+        {"vaa_dr", &vaa_use_dr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"vaa_nodr", &vaa_use_dr, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #endif
 
 #ifdef HAVE_AA
