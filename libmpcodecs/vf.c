@@ -24,6 +24,7 @@ extern vf_info_t vf_info_rgb2bgr;
 extern vf_info_t vf_info_rotate;
 extern vf_info_t vf_info_mirror;
 extern vf_info_t vf_info_palette;
+extern vf_info_t vf_info_lavc;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -45,6 +46,7 @@ static vf_info_t* filter_list[]={
     &vf_info_rotate,
     &vf_info_mirror,
     &vf_info_palette,
+    &vf_info_lavc,
     NULL
 };
 
