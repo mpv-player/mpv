@@ -36,7 +36,7 @@ Fully functional Win32 VfW/DShow codecs:
 - Windows Media Video 7 (WMV1)
   wmvds32.ax: works, YUV supported
 - I263:  (I263)
-  i263_32.drv: works
+  i263_32.drv: works, YUV supported
 
 Problems:
 
