@@ -329,23 +329,25 @@ NoPause:
    case evNormalSize:
         if ( mplShMem->Playing ) 
 	 {
-//	  wsWindowDecoration( &appMPlayer.subWindow,appMPlayer.subWindow.Decorations );
-//	  wsWindowDecoration( &appMPlayer.subWindow,0 );
-//	  appMPlayer.subWindow.isFullScreen=0;
-//	  wsMoveWindow( &appMPlayer.subWindow,appMPlayer.subWindow.OldX,appMPlayer.subWindow.OldY );
-//	  wsResizeWindow( &appMPlayer.subWindow,moviewidth,movieheight );
 	  appMPlayer.subWindow.isFullScreen=True;
+	  appMPlayer.subWindow.OldX=( wsMaxX - moviewidth ) / 2;
+	  appMPlayer.subWindow.OldY=( wsMaxY - movieheight ) / 2;
 	  appMPlayer.subWindow.OldWidth=moviewidth; appMPlayer.subWindow.OldHeight=movieheight;
 	  wsFullScreen( &appMPlayer.subWindow );
 	  mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,moviewidth,movieheight );
 	 } 
-//	 else
-//	  {
-//	   wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
-//	   wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
-//	  }
 	break;
-//   case evDoubleSize: if ( mplShMem->Playing ) wsResizeWindow( &appMPlayer.subWindow,mplwidth * 2,mplheight * 2 ); break;
+   case evDoubleSize: 
+        if ( mplShMem->Playing ) 
+	 {
+	  appMPlayer.subWindow.isFullScreen=True; 
+	  appMPlayer.subWindow.OldX=( wsMaxX - moviewidth * 2 ) / 2;
+	  appMPlayer.subWindow.OldY=( wsMaxY - movieheight * 2 ) / 2;
+	  appMPlayer.subWindow.OldWidth=moviewidth * 2; appMPlayer.subWindow.OldHeight=movieheight * 2;
+	  wsFullScreen( &appMPlayer.subWindow );
+	  mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,moviewidth,movieheight );
+	 }
+	break;
 
 // --- timer events
    case evHideMouseCursor:
