@@ -491,7 +491,9 @@ int asf_mmst_streaming_start(stream_t *stream)
   path=unescpath;
   
 
-  url1->port=1755;
+  if( url1->port==0 ) {
+	url1->port=1755;
+  }
   s = connect2Server( url1->hostname, url1->port, 1);
   if( s<0 ) {
 	  free(path);
