@@ -478,7 +478,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   else
     LINEWIDTH=vga_getmodeinfo(vid_mode)->linewidth;
 
-  vga_setlinearaddressing();
+//  vga_setlinearaddressing(); //it is not compatable with vga_draw* for "some" cards
   if(oldmethod) {
      buffer=malloc(HEIGHT*LINEWIDTH);
      maxframes=0;
