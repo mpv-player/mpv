@@ -419,10 +419,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     mp_msg(MSGT_VO,MSGL_ERR,"BGR%d not supported, please contact the developers\n", bpp);
     return -1;
   }
-  if(mode==MODE_RGB && bpp==32){
-    mp_msg(MSGT_VO,MSGL_ERR,"RGB32 not supported on big-endian systems, please contact the developers\n");
-    return -1;
-  }
 #else
   if(mode==MODE_BGR){
     mp_msg(MSGT_VO,MSGL_ERR,"BGR not supported, please contact the developers\n");
