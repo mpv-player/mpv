@@ -54,7 +54,8 @@ while(1){
       demuxer->movi_end=demuxer->movi_start+len;
       mp_msg(MSGT_HEADER,MSGL_V,"Found movie at 0x%X - 0x%X\n",(int)demuxer->movi_start,(int)demuxer->movi_end);
       if(demuxer->stream->end_pos) demuxer->movi_end=demuxer->stream->end_pos;
-      if(index_mode==-2) break; // reading from non-seekable source (stdin)
+      if(index_mode==-2 || index_mode==2 || index_mode==0)
+        break; // reading from non-seekable source (stdin) or forced index or no index forced
       len=(len+1)&(~1);
       stream_skip(demuxer->stream,len);
     }
