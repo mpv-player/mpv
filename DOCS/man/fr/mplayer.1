@@ -4348,7 +4348,6 @@ au carré des champs pour les modes t, b, and p.
 .RE
 .
 .TP
-.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .B "telecine[=départ]"
 Applique un processus telecine 3:2 "telecine" pour augmenter le débit de 20%.
 Cela ne fonctionnera surement pas correctement avec MPlayer, mais peut être
@@ -4360,15 +4359,17 @@ Le paramètre optionnel départ indique où démarrer (0-3).
 .TP
 .B "tinterlace[=mode]"
 Entrelacement temporel de champs \- réunis des paires de trames dans une trame
-entrelacée, divisant le debit par deux. Les trames paires sont déplacées dans le
-champ supérieur, les trames impaires le sont dans le champ inférieur. Ceci peut
-être utilisé pour inverser complètement les effets du filtre tfields (en mode
-0). Les modes disponibles sont:
+entrelacée, divisant le debit par deux.
+Les trames paires sont déplacées dans le champ supérieur, les trames impaires
+le sont dans le champ inférieur.
+Ceci peut être utilisé pour inverser complètement l'effets du filtre tfields
+(en mode 0).
+Les modes disponibles sont:
 .PD 0
 .RSs
 .IPs 0
-trames impaires dans le champs supérieur, paires dans l'inférieur, pour générer
-un trame de pleine taille à débit moitié moindre
+les trames impaires dans le champs supérieur, les paires dans l'inférieur,
+pour générer une trame complète à un débit moitié moindre
 .IPs 1
 afficher uniquement les trames impaires, les trames paires sont sautées, la
 taille est inchangée
@@ -4376,8 +4377,8 @@ taille est inchangée
 afficher uniquement les trames paires, les trames paires sont sautées, la
 taille est inchangée
 .IPs 3
-étends chaque trame en pleine taille, mais remplit altérnativement les lignes
-de noir, le débit est inchangé
+étend chaque trame en pleine résolution, mais remplit une ligne sur deux
+en noir, le débit est inchangé
 .RE
 .PD 1
 .
@@ -4396,17 +4397,17 @@ laisse les champs inchangés (cela va sauter/\:scintiller)
 fait une interpolation des lignes manquantes (l'algorithme utilisé peut ne
 pas être si bon)
 .IPs 2
-fait une translation de champs de 1/\:4 pixel avec interp linéaire
+fait une translation de champs de 1/\:4 pixel avec interpolation linéaire
 (pas de saut)
 .IPs 4
-fait une translation de champs de 1/\:4 pixel avec le filtre 4tap (meilleur
+fait une translation de champs de 1/\:4 pixel avec le filtre 4tap (meilleure
 qualité)
 .RE
 .PD 1
 .
 .TP
 .B "boxblur=rayon:puissance[:rayon:puissance]"
-flou boite
+Floute l'image.
 .PD 0
 .RSs
 .IPs rayon
@@ -4418,12 +4419,13 @@ taille du filtre
 .
 .TP
 .B "sab=rad:pf:colorDiff[:rad:pf:colorDiff]"
-flou adapté aux formes
+flou de forme adaptative
 .PD 0
 .RSs
-.IPs rad
-force du filtre de flou (~0.1\-4.0) (le plus bas est le plus large)
-.IPs pf
+.IPs rad\ \ \ 
+force du filtre de flou (~0.1\-4.0) (plus la valeur est
+grande, moins il est rapide)
+.IPs pf\ \ \ 
 force du préfiltre (~0.1\-2.0)
 .IPs colorDiff
 différence autorisée des pixels.
@@ -4433,15 +4435,17 @@ différence autorisée des pixels.
 .
 .TP
 .B "smartblur=rad:strength:thresh[:rad:strength:thresh]"
-flou smart
+flou intelligent
 .PD 0
 .RSs
-.IPs rad
-force du filtre de  flou (~0.1\-5.0) (le plus bas est le plus large)
+.IPs rad\ \ 
+force du filtre de  flou (~0.1\-5.0) (plus la valeur est
+grande, moins il est rapide)
 .IPs strength
 flou (0.0\-1.0) ou accentuation (-1.0\-0.0)
 .IPs thresh
-filtre tout (0), filtre les surfaces plates (0\-30) ou filtre les bords (-30\-0)
+filtre tout (0), filtre les surfaces plates (0\-30) ou filtre les
+bords (-30\-0)
 .RE
 .PD 1
 .
@@ -4451,20 +4455,20 @@ correction de perspective
 .PD 0
 .RSs
 .IPs x0,y0,...
-coordonnées des coins supérieur-gauche, supérieur-droit, inférieur-gauche et
-inférieur-droit
-.IPs t
+coordonnées des coins supérieur-gauche, supérieur-droit, inférieur-gauche
+et inférieur-droit
+.IPs t\ \ \ \ 
 ré-échantillonnage linéaire (0) ou cubique (1)
 .RE
 .PD 1
 .
 .TP
-.B 2xsai
-Utilise le zoom x2 et l'algorithme d'interpolation pour dimensionner et lisser
-les images.
+.B 2xsai\ \ 
+Utilise le zoom x2 et l'algorithme d'interpolation pour redimensionner et
+lisser les images.
 .
 .TP
-.B 1bpp
+.B 1bpp\ \ \ 
 conversion bitmap 1bpp vers YUV/\:BGR 8/\:15/\:16/\:32
 .
 .TP
@@ -4482,19 +4486,18 @@ nombre de lignes à sélectionner à partir du milieu de l'image (par défault: 12)
 .TP
 .B "bmovl=hidden:opaque:<fifo>"
 Lit les bitmaps depuis un FIFO et les affiche dans une fenêtre.
-.
 .PD 0
 .RSs
 .IPs hidden
-définie la valeur par défaut de l'option 'hidden' (booléen)
+définie la valeur par défaut du drapeau 'hidden' (booléen)
 .IPs opaque
-option changeant de mode entre alphablended (transparent) et opaque (rapide)
-.IPs fifo
+drapeau changeant de mode entre 'alphablended' (transparent) et opaque (rapide)
+.IPs fifo\ 
 chemin/\:nom de fichier pour le FIFO (pipe nommé connectant mplayer
 \-vf bmovl à l'application le contrôlant)
 .RE
 .PD 1
-
+.sp 1
 .RS
 les commandes FIFO sont:
 .RE
@@ -4515,15 +4518,15 @@ efface la surface
 .IPs OPAQUE
 désactive toute transparence alpha.
 Envoyez  "ALPHA 0 0 0 0 0" pour la réactiver.
-.IPs HIDE
+.IPs HIDE\ 
 cache la bitmap
-.IPs SHOW
+.IPs SHOW\ 
 montre la bitmap
 .RE
 .PD 1
-
+.sp 1
 .RS
-Les arguments sont:
+Les arguments sont\ :
 .RE
 .PD 0
 .RSs
@@ -4532,9 +4535,10 @@ taille de l'image/\:surface
 .IPs "xpos, ypos"
 démarre le blitting à la position X/\:Y
 .IPs alpha
-fixe la différence alpha.
-Si vous le fixez à \-255 vous pouvez envoyer une séquence de commandes ALPHA
-pour fixer la surface à \-225, \-200, \-175 etc pour un joli effet de fondu ! ;)
+Fixe la différence alpha.
+Si vous le fixez à \-255 vous pouvez envoyer une séquence de commandes
+ALPHA pour mettre la surface à \-225, \-200, \-175 etc pour un joli effet
+de fondu ! ;)
 .RSss
 0:    la même que l'original
 .br
@@ -4543,11 +4547,11 @@ pour fixer la surface à \-225, \-200, \-175 etc pour un joli effet de fondu ! ;)
 -255: rends tout transparent
 .REss
 .IPs clear
-efface le framebuffer avant blitting.
+efface le framebuffer avant 'blitting'.
 .RSss
-0: l'image sera simplement blittée par dessus l'ancienne, donc vous n'aurez pas
-à envoyer 1,8 Mo de données RGBA32 chaque fois qu'une petite partie de l'écran
-est mise à jour.
+0: l'image sera simplement 'blittée' par dessus l'ancienne, donc vous
+n'aurez pas à envoyer 1,8 Mo de données RGBA32 chaque fois qu'une petite
+partie de l'écran est mise à jour.
 .br
 1: clear
 .REss
@@ -4556,62 +4560,63 @@ est mise à jour.
 .
 .TP
 .B "framestep=I|[i]step"
-N'affiche que toutes les n trames ou que chaque trame (clé) Intra.
-
+N'affiche qu'une trame toutes les n trames ou que chaque trame (clé) Intra.
+.sp 1
 Si vous appelez ce filtre avec I (en majuscule) en paramètre, alors SEULES
-les trames-clé seront affichées.
+les trames-clées seront affichées.
 Pour les DVDs cela signifie une toute les 15/\:12 trames (IBBPBBPBBPBBPBB),
 pour l'AVI cela signifie à chaque changement de scène ou à chaque valeur de
 keyint (voir \-lavcopts keyint=valeur si vous utilisez MEncoder pour encoder la
 vidéo).
-
+.sp 1
 Quand une trame clé est trouvée, la chaine "I!" suivi d'un retour chariot est
-affiché, laissant la ligne courante de MPlayer/\:MEncoder sur l'écran, car elle
+affiché, laissant la ligne courante de MPlayer/\:MEncoder à l'écran, car elle
 contient le temps (en secondes) et le numéro de trame de la trame clé
-(Vous pouvez utiliser cette information pour diviser l'AVI).
-
+(Vous pouvez utiliser cette information pour couper un AVI).
+.sp 1
 Si vous appelez le filtre avec un paramètre numérique 'step' alors seule une
 sur 'step' trames sera affichée.
-
+.sp 1
 Si vous mettez un 'i' (minuscule) devant le nombre alors un I! sera affiché
 (comme le paramètre I).
-
+.sp 1
 Si vous n'indiquez que i alors rien ne sera fait aux trames, seul I! est
 affiché.
 .
 .TP
 .B "tile=xtile:ytile:output:start:delta"
 Crée un mosaïque d'images à partir d'une série d'images plus petites.
-Si vous ommétez un paramètre ou utilisez une valeur plus petite que 0, alors la
-valeur par défaut est utilisée. Vous pouvez également arréter quand c'est bon
-(... \-vf tile=10:5 ...)
+Si vous omettez un paramètre ou utilisez une valeur plus petite que 0, alors
+la valeur par défaut est utilisée.
+Vous pouvez également arréter quand c'est bon (... \-vf tile=10:5 ...)
 C'est probablement une bonne idée de placer le filtre scale avant tile :-)
 .sp 1
 Les paramètres sont:
-
+.sp 1
 .PD 0
 .RSs
 .IPs xtile
-nombre de tuiles sur l'axe x (par défaut\ : 5)
+nombre d'éléments de mosaïque sur l'axe x (par défaut\ : 5)
 .IPs ytile
-nombre de tuiles sur l'axe y (par défaut\ : 5)
+nombre d'éléments de mosaïque sur l'axe y (par défaut\ : 5)
 .IPs output
-Affiche la tuile quand le nombre de trame est égal à 'output', où 'output' doit
-être un nombre inférieur à xtile * ytile.
-Les tuiles manquantes sont laissées vides.
-Vous pouvez, par exemple, écrire une tuile de 8 * 7 toutes les 50 trames pour
-obtenir une image toutes les 2 secondes à 25 fps.
+Affiche la mosaïque quand le nombre de trame est égal à 'output', où
+'output' doit être un nombre inférieur à xtile * ytile.
+Les éléments de la mosaïque manquants sont laissées vides.
+Vous pouvez, par exemple, écrire une mosaïque de 8 * 7 toutes les 50 trames
+pour obtenir une image toutes les 2 secondes à 25 fps.
 .IPs start
 pixel au départ (x/\:y) (par défaut\ : 2)
 .IPs delta
-pixels entre 2 tuiles, (x/\:y) (par défaut\ : 4)
+pixels entre 2 éléments de mosaïque, (x/\:y) (par défaut\ : 4)
 .RE
 .PD 1
 .
 .TP
 .B delogo[=x:y:l:h:t]
 Supprime un logo de station de télé par simple interpolation des pixels
-environants. Définissez juste un rectangle recouvrant le logo et regardez-le
+environants.
+Définissez juste un rectangle recouvrant le logo et regardez-le
 disparaître (et parfois quelque chose d'encore pire apparaître \- les résultats
 peuvent varier).
 .PD 0
@@ -4621,19 +4626,20 @@ Position du coin supérieur gauche du logo.
 .IPs l,h
 Largeur et hauteur du rectangle nettoyé.
 .IPs t
-Duretée des bords du rectangle (ajouté à l et h). Quand mis à -1, un rectangle
-vert est dessiné sur l'écran pour simplifier la recherche des paramètres
-x,y,l,h.
+Épaisseur des bords du rectangle (ajouté à l et h).
+Quand il est égal à -1, un rectangle vert est dessiné sur l'écran pour
+simplifier la recherche des paramètres x,y,l,h.
 .RE
 .PD 1
 .
 .TP
 .B zrmjpeg[=options]
-Encodeur logiciel YV12 vers MJPEG pour utilisation avec le périphérique zr2.
+Encodeur logiciel YV12 vers MJPEG pour utilisation avec le périphérique de
+sortie vidéo zr2.
 .RSs
 .IPs maxheight=h|maxwidth=l
 Ces options initialisent les largeur et hauteur maximum que la carte zr peut
-gérer. (la couche de filtres de MPlayer ne peut actuellement pas les deviner)
+gérer (la couche de filtres de MPlayer ne peut actuellement pas les deviner).
 .IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
 Utilisez ces options pour initialiser maxwidth et maxheight automatiquement
 avec les valeurs connues de combinaisons carte/\:mode.
@@ -4641,22 +4647,24 @@ Par exemple, voici des options valides: dc10-PAL et buz-NTSC
 (par défaut\ : dc10+PAL).
 .IPs color|bw
 Sélectionne l'encodage couleur ou noir et blanc.
-L'encodage N&B est plus rapide.
-L'encodage couleur est utilisé par défaut.
+L'encodage N&B est plus rapide (par défaut\ : color).
 .IPs hdec={1,2,4}
-Décimation horizontale 1, 2 ou 4.
+Décimation (sous-échantillonnage) horizontale 1, 2 ou 4.
 .IPs vdec={1,2,4}
 Décimation verticale 1, 2 ou 4.
 .IPs quality=1-20
-Définie la qualité de la compression JPEG [MEILLEUR] 1 - 20 [TRÈS MAUVAIS].
+Définit la qualité de la compression JPEG [MEILLEUR] 1 - 20 [TRÈS MAUVAIS].
 .IPs fd|nofd
 Par défaut, le sous-échantillonnage n'est appliqué que si le matériel zoran
 peut agrandir les images MJPEG à leur taille originale.
-L'option fd dit au filtre de toujours appliquer la décimation demandée (sale).
+L'option fd dit au filtre de toujours appliquer la décimation demandée
+(image médiocre).
 .RE
 .
 .
-.SH "OPTIONS GÉNÉRALES D'ENCODAGE (MENCODER UNIQUEMENT)"
+.
+.SH "OPTIONS D'ENCODAGE GÉNÉRALES (MENCODER UNIQUEMENT)"
+.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .
 .TP
 .B \-audio-delay <0.0\-...>
