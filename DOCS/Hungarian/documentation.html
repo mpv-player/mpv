@@ -1606,7 +1606,7 @@ end
 <H2><A NAME=cygwin>6.7. Cygwin</A></H2>
 
 <P>A Cygwin port még mindig gyerekcipõben jár, jelenleg az MPlayer paraméterei
-  közül a Win32-es DLL-ek használata, a Video CD-k lejátszása és az OpenGL
+  közül a Win32-es DLL-ek használata, és az OpenGL
   nem használható Cygwin platform alatt. Az SDL-rõl ismert hogy egyes esetekben
   eltorzítja a képet és a hangot, vagy crashel. Szívesen veszünk
   <A HREF="../tech/patches.txt">patcheket</A> bárkitõl. A legjobb eredmény
@@ -1629,6 +1629,17 @@ end
 
 <P>Az SDL Cygwin-es verzióját a <A HREF="http://www.libsdl.org/extras/win32/cygwin/">libSDL site-ról</A>
   töltheted le.</P>
+
+<P>A VCD-k lejátszása egyszerûen a CD-n lévõ <CODE>.DAT</CODE> illetve
+  <CODE>.MPG</CODE> file-ok lejátszásával történik.</P>
+
+<P>A DVD-k is mûködnek, csak helyesen kell megadni a DVD egység nevét:</P>
+
+<P><CODE>mplayer -dvd &lt;sáv&gt; -dvd-device d:</CODE></P>
+
+<P>A QuickTime DLL-ek is mûködnek állítólag, ha a DLL keresési útvonalba
+  berakod õket: <CODE>c:\winnt\system32</CODE> vagy
+  <CODE>c:\windows\system</CODE>, Windows verziótol függõen.</P>
 
 
 <H1><A NAME="mailing_lists">A függelék - Levelezési listák</A></H1>
