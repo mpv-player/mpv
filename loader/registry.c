@@ -350,7 +350,7 @@ static reg_handle_t* find_handle_2(long key, const char* subkey)
 	return t;
 }
 
-long RegOpenKeyExA(long key, const char* subkey, long reserved, long access, int* newkey)
+long __stdcall RegOpenKeyExA(long key, const char* subkey, long reserved, long access, int* newkey)
 {
     char* full_name;
     reg_handle_t* t;
@@ -380,7 +380,7 @@ long RegOpenKeyExA(long key, const char* subkey, long reserved, long access, int
 
     return 0;
 }
-long RegCloseKey(long key)
+long __stdcall RegCloseKey(long key)
 {
     reg_handle_t *handle;
     if(key==(long)HKEY_LOCAL_MACHINE)
@@ -402,7 +402,7 @@ long RegCloseKey(long key)
     return 1;
 }
 
-long RegQueryValueExA(long key, const char* value, int* reserved, int* type, int* data, int* count)
+long __stdcall RegQueryValueExA(long key, const char* value, int* reserved, int* type, int* data, int* count)
 {
     struct reg_value* t;
     char* c;
@@ -435,7 +435,7 @@ long RegQueryValueExA(long key, const char* value, int* reserved, int* type, int
     }
     return 0;
 }
-long RegCreateKeyExA(long key, const char* name, long reserved,
+long __stdcall RegCreateKeyExA(long key, const char* name, long reserved,
 		     void* classs, long options, long security,
 		     void* sec_attr, int* newkey, int* status)
 {
@@ -478,7 +478,7 @@ LONG RegEnumValue(
 );
 */
 
-long RegEnumValueA(HKEY hkey, DWORD index, LPSTR value, LPDWORD val_count,
+long __stdcall RegEnumValueA(HKEY hkey, DWORD index, LPSTR value, LPDWORD val_count,
 		   LPDWORD reserved, LPDWORD type, LPBYTE data, LPDWORD count)
 {
     // currenly just made to support MSZH & ZLIB
@@ -502,7 +502,7 @@ long RegEnumValueA(HKEY hkey, DWORD index, LPSTR value, LPDWORD val_count,
     return ERROR_NO_MORE_ITEMS;
 }
 
-long RegSetValueExA(long key, const char* name, long v1, long v2, const void* data, long size)
+long __stdcall RegSetValueExA(long key, const char* name, long v1, long v2, const void* data, long size)
 {
     struct reg_value* t;
     char* c;
@@ -518,7 +518,7 @@ long RegSetValueExA(long key, const char* name, long v1, long v2, const void* da
     return 0;
 }
 
-long RegEnumKeyExA(HKEY hKey, DWORD dwIndex, LPSTR lpName, LPDWORD lpcbName,
+long __stdcall RegEnumKeyExA(HKEY hKey, DWORD dwIndex, LPSTR lpName, LPDWORD lpcbName,
 		   LPDWORD lpReserved, LPSTR lpClass, LPDWORD lpcbClass,
 		   LPFILETIME lpftLastWriteTime)
 {
