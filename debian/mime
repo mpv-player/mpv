@@ -1,0 +1,5 @@
+video/x-msvideo; mplayer %s
+video/mpeg; mplayer %s
+video/quicktime; mplayer %s
+video/x-ms-asf; mplayer %s
+video/x-ms-wmv; mplayer %s

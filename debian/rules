@@ -64,7 +64,7 @@ binary-arch: build
 	dh_installdocs --exclude=CVS --exclude=mplayer.1 DOCS/*
 	dh_installexamples etc/example.conf etc/dvb-menu.conf etc/input.conf etc/menu.conf
 	dh_installmenu
-#	dh_installmime
+	dh_installmime
 	dh_installinfo
 	dh_installchangelogs
 	#ChangeLog
