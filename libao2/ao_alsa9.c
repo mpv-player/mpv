@@ -18,6 +18,7 @@
 #include <sys/poll.h>
 
 #include "../config.h"
+#include "../mixer.h"
 
 #if HAVE_SYS_ASOUNDLIB_H
 #include <sys/asoundlib.h>
@@ -96,12 +97,27 @@ static int control(int cmd, void *arg)
       snd_mixer_elem_t *elem;
       snd_mixer_selem_id_t *sid;
 
-      const char *mix_name = "PCM";
-      char *card = "default";
+      static const char *mix_name = NULL;
+      static char *card = NULL;
 
       long pmin, pmax;
       long get_vol, set_vol;
       float calc_vol, diff, f_multi;
+
+      if(mix_name == NULL){
+        if(mixer_device) {
+          card = strdup(mixer_device);
+          mix_name = strchr(card, '/');
+          if(mix_name) {
+            *mix_name++ = 0;
+          } else {
+            mix_name = "PCM";
+          }
+        } else {
+          mix_name = "PCM";
+          card = "default";
+        }
+      }
 
       if(ao_data.format == AFMT_AC3)
 	return CONTROL_TRUE;
