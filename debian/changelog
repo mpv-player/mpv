@@ -1,3 +1,11 @@
+mplayer (0.60-1) unstable; urgency=low
+
+  * Post 0.60 release.
+  * Changed installation - make install now handles codecs.conf, manpages
+  *  and fontdir, so we now use make install for those.
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Fri,  4 Jan 2002 11:28:54 +0100
+
 mplayer (0.60pre2-1) unstable; urgency=low
 
   * 0.60 pre2 release
