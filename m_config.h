@@ -28,6 +28,9 @@ typedef struct m_config {
   int mode;
 } m_config_t;
 
+#define M_CFG_OPT_SET    (1<<0)
+#define M_CFG_OPT_ALIAS  (1<<1)
+
 
 //////////////////////////// Functions ///////////////////////////////////
 

@@ -68,7 +68,9 @@ m_config_push(m_config_t* config) {
       continue;
     if(co->opt->flags & (M_OPT_GLOBAL|M_OPT_NOSAVE))
       continue;
-    if((co->opt->flags & M_OPT_OLD) && !co->flags)
+    if((co->opt->flags & M_OPT_OLD) && !(co->flags && M_CFG_OPT_SET))
+      continue;
+    if(co->flags & M_CFG_OPT_ALIAS)
       continue;
 
     // Update the current status
@@ -80,8 +82,8 @@ m_config_push(m_config_t* config) {
     slot->prev = co->slots;
     co->slots = slot;
     m_option_copy(co->opt,co->slots->data,co->slots->prev->data);
-    // Reset our flags
-    co->flags=0;
+    // Reset our set flag
+    co->flags &= ~M_CFG_OPT_SET;
   }
   
   mp_msg(MSGT_CFGPARSER, MSGL_DBG2,"Config pushed level is now %d\n",config->lvl);
@@ -102,6 +104,8 @@ m_config_pop(m_config_t* config) {
     if(co->opt->type->flags & M_OPT_TYPE_HAS_CHILD)
       continue;
     if(co->opt->flags & (M_OPT_GLOBAL|M_OPT_NOSAVE))
+      continue;
+    if(co->flags & M_CFG_OPT_ALIAS)
       continue;
     if(co->slots->lvl > config->lvl)
       mp_msg(MSGT_CFGPARSER, MSGL_WARN,"Too old save slot found from lvl %d : %d !!!\n",config->lvl,co->slots->lvl);
@@ -151,6 +155,18 @@ m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
     for(i = 0 ; ol[i].name != NULL ; i++)
       m_config_add_option(config,&ol[i], co->name);
   } else {
+    m_config_option_t *i;
+    // Check if there is alredy an option pointing to this address
+    if(arg->p) {
+      for(i = config->opts ; i ; i = i->next ) {
+	if(i->opt->p == arg->p) { // So we don't save the same vars more than 1 time
+	  co->slots = i->slots;
+	  co->flags |= M_CFG_OPT_ALIAS;
+	  break;
+	}
+      }
+    }
+    if(!(co->flags & M_CFG_OPT_ALIAS)) {
     // Allocate a slot for the defaults
     sl = (m_config_save_slot_t*)calloc(1,sizeof(m_config_save_slot_t) + arg->type->size);
     m_option_save(arg,sl->data,(void**)arg->p);
@@ -165,6 +181,7 @@ m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
     co->slots->prev = sl;
     co->slots->lvl = config->lvl;
     m_option_copy(co->opt,co->slots->data,sl->data);
+    } // !M_OPT_ALIAS
   }
   co->next = config->opts;
   config->opts = co;
@@ -274,7 +291,7 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
   // Set the option
   if(set) {
     m_option_set(co->opt,co->opt->p,co->slots->data);
-    co->flags = 1;
+    co->flags |= M_CFG_OPT_SET;
   }
 
   return r;
