@@ -305,10 +305,13 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
 subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	int hour1, min1, sec1, hunsec1,
 	    hour2, min2, sec2, hunsec2, nothing;
+	int num;
 	
 	char line[1000],
 	     line3[1000],
 	     *line2;
+	char *tmp;
+
 	do {
 		if (!fgets (line, 1000, fd)) return NULL;
 	} while (sscanf (line, "Dialogue: Marked=%d,%d:%d:%d.%d,%d:%d:%d.%d,"
@@ -321,11 +324,23 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	line2 ++;
 	line2 ++;
 
-	current->lines=1; // ez a kiraly!!!
+	current->lines=1;num=0;
 	current->start = 360000*hour1 + 6000*min1 + 100*sec1 + hunsec1;
 	current->end   = 360000*hour2 + 6000*min2 + 100*sec2 + hunsec2;
-	current->text[0]=(char *) malloc(strlen(line2)+1);
-	strcpy(current->text[0],line2);
+	
+	while (tmp=strstr(line2, "\\n")) {
+		current->text[num]=(char *)malloc(tmp-line2+1);
+		strncpy (current->text[num], line2, tmp-line2);
+		current->text[num][tmp-line2]='\0';
+		line2=tmp+2;
+		num++;
+		current->lines++;
+		if (current->lines >=  SUB_MAX_TEXT) return current;
+	}
+
+
+	current->text[num]=(char *) malloc(strlen(line2)+1);
+	strcpy(current->text[num],line2);
 
 	return current;
 }
