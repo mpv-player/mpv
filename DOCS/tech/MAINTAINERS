@@ -45,10 +45,10 @@ Platforms/ports: (see also DOCS/tech/porting-status.txt)
     * OpenBSD support: Björn Sandell
     * Solaris 8 support: Jürgen Keil, Pierre Lombard
     * MIPS support: Oliver Schoenbrunner
-    * Win32/Cygwin/MinGW support: Sascha Sommer, Atmosfear, Diego
+    * Win32/Cygwin/MinGW support: Sascha Sommer, Atmosfear, Diego Biurrun
 
 MPlayer code:
-    * A-V sync code, mplayer/mencoder core: A'rpi
+    * A-V sync code, MPlayer/MEncoder core: A'rpi
     * libmpdemux, libmpcodecs: A'rpi (sometimes Alex too)
     * TV input/capture: Alex, Jindrich Makovicka
     * DVD support (experimental - dvdnav): -
@@ -69,7 +69,6 @@ Imported libs/projects:
     * liba52, libmpeg2: A'rpi, Michel LESPINASSE @ liba52.sf.net
     * libmpdvdkit2: A'rpi, libdvdcss-devel@videolan.org
     * libfaad2: Alex, A'rpi, audiocoding.sf.net
-    * libmpflac (libFLAC): Dmitry Baryshkov, flac.sf.net
 
 libvo drivers:
     * vo_3dfx.c - OBSOLETED, use xv or tdfxfb
