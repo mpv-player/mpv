@@ -15,6 +15,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
+#include "audio_plugin.h"
 
 void perror( const char *s );
 #include <errno.h>
@@ -33,6 +34,7 @@ LIBAO_EXTERN(dxr3)
 
 static audio_buf_info dxr3_buf_info;
 static int fd_control = 0, fd_audio = 0;
+int need_conversion = 0;
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg)
@@ -54,6 +56,15 @@ static int control(int cmd,int arg)
 static int init(int rate,int channels,int format,int flags)
 {
     int ioval;
+    ao_plugin_data.rate = rate;
+    ao_plugin_data.channels = channels;
+    ao_plugin_data.format = format;
+    ao_plugin_data.sz_mult = 1;
+    ao_plugin_data.sz_fix = 0;
+    ao_plugin_data.delay_mult = 1;
+    ao_plugin_data.delay_fix = 0;
+    ao_plugin_cfg.pl_format_type = format;
+    ao_plugin_cfg.pl_resample_fout = rate;
     fd_audio = open( "/dev/em8300_ma", O_WRONLY );  
     if( fd_audio < 0 )
     {
@@ -69,17 +80,17 @@ static int init(int rate,int channels,int format,int flags)
     }
 
     ioctl(fd_audio, SNDCTL_DSP_RESET, NULL);
+    
     ao_data.format = format;
     if( ioctl (fd_audio, SNDCTL_DSP_SETFMT, &ao_data.format) < 0 )
-	printf( "AO: [dxr3] Unable to set audio format\n" );
-    if(format == AFMT_AC3 && ao_data.format != AFMT_AC3) 
+        printf( "AO: [dxr3] Unable to set audio format\n" );
+    if(format != ao_data.format)
     {
-	printf("AO: [dxr3] Can't set audio device /dev/em8300_ma to AC3 output\n");
-	return 0;
+	need_conversion |= 0x1;
+	ao_data.format = AFMT_S16_LE;
+	ao_plugin_data.format = format;
+	ao_plugin_cfg.pl_format_type = ao_data.format;
     }
-  
-    printf("AO: [dxr3] Sample format: %s (requested: %s)\n",
-    audio_out_format_name(ao_data.format), audio_out_format_name(format));
   
     ao_data.channels=channels;
     if(format != AFMT_AC3)
@@ -102,19 +113,12 @@ static int init(int rate,int channels,int format,int flags)
         printf( "AO: [dxr3] Unable to set samplerate\n" );
         return 0;
     }
-    if( rate < ao_data.samplerate )
+    if( rate != ao_data.samplerate )
     {
-        ao_data.samplerate = 44100;
-        ioctl(fd_audio, SNDCTL_DSP_SPEED, &ao_data.samplerate);
-        if( ao_data.samplerate != 44100 )
-        {
-            printf( "AO: [dxr3] Unable to set samplerate\n" );
-            return 0;
-        }
-        printf("AO: [dxr3] Using %d Hz samplerate (requested: %d) (Upsampling)\n",ao_data.samplerate,rate);
-        ao_data.samplerate = rate;
+	need_conversion |= 0x2;
+	ao_plugin_data.rate = rate;
+	ao_plugin_cfg.pl_resample_fout = ao_data.samplerate;
     }
-	else printf("AO: [dxr3] Using %d Hz samplerate (requested: %d)\n",ao_data.samplerate,rate);
 
   if( ioctl(fd_audio, SNDCTL_DSP_GETOSPACE, &dxr3_buf_info)==-1 )
   {
@@ -138,6 +142,24 @@ static int init(int rate,int channels,int format,int flags)
       ao_data.outburst=dxr3_buf_info.fragsize;
   }
 
+  if(need_conversion)
+  {
+    
+    if(need_conversion & 0x1)
+    {
+	if(!audio_plugin_format.init())
+	    return 0;
+	ao_plugin_data.len = ao_data.buffersize*2;
+	audio_plugin_format.control(AOCONTROL_PLUGIN_SET_LEN,0);
+    }
+    if(need_conversion & 0x2)
+    {
+	if(!audio_plugin_resample.init())
+	    return 0;
+	ao_plugin_data.len = ao_data.buffersize*2;
+	audio_plugin_resample.control(AOCONTROL_PLUGIN_SET_LEN,0);
+    }
+  }
   ioval = EM8300_PLAYMODE_PLAY;
   if( ioctl( fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval ) < 0 )
     printf( "AO: [dxr3] Unable to set playmode\n" );
@@ -152,6 +174,8 @@ static void uninit()
     printf( "AO: [dxr3] Uninitializing\n" );
     if( ioctl(fd_audio, SNDCTL_DSP_RESET, NULL) < 0 )
 	printf( "AO: [dxr3] Unable to reset device\n" );
+    if(need_conversion & 0x1) audio_plugin_format.uninit();
+    if(need_conversion & 0x2) audio_plugin_resample.uninit();
     close( fd_audio );
     close( fd_control ); /* Just in case */
 }
@@ -161,6 +185,8 @@ static void reset()
 {
     if( ioctl(fd_audio, SNDCTL_DSP_RESET, NULL) < 0 )
 	printf( "AO: [dxr3] Unable to reset device\n" );
+    if(need_conversion & 0x1) audio_plugin_format.reset();
+    if(need_conversion & 0x2) audio_plugin_resample.reset();
 }
 
 // stop playing, keep buffers (for pause)
@@ -216,8 +242,14 @@ static int get_space()
 // return: number of bytes played
 static int play(void* data,int len,int flags)
 {
-    len /= ao_data.outburst;
-    return write(fd_audio,data,len*ao_data.outburst);
+    int tmp = get_space();
+    int size = (tmp<len)?tmp:len;
+    ao_plugin_data.data = data;
+    ao_plugin_data.len = size;
+    if(need_conversion & 0x1) audio_plugin_format.play();
+    if(need_conversion & 0x2) audio_plugin_resample.play();
+    write(fd_audio,ao_plugin_data.data,ao_plugin_data.len);
+    return size;
 }
 
 // return: delay in seconds between first and last sample in buffer
