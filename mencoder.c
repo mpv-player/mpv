@@ -402,6 +402,8 @@ unsigned int timer_start;
 #endif
 #endif
   
+  InitTimer();
+
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
