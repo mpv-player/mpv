@@ -34,6 +34,9 @@ Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 - LIRC support (see DOCS/LIRC)
 - DGA support in libvo
 
+Felix Bünemann: <Felix.Buenemann@gmx.de>
+- SDL driver
+
 Main testers:
   Gabucino
   Balazs Tibor (Tibcu)
