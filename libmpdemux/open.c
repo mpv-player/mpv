@@ -645,7 +645,7 @@ if(lang){
   }
   mp_msg(MSGT_OPEN,MSGL_WARN,"No matching DVD audio language found!\n");
 }
-return d->nr_of_channels ? d->audio_streams[0].id : -1;
+return -1;
 }
 
 int dvd_number_of_subs(stream_t *stream)
