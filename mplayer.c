@@ -318,12 +318,11 @@ static sh_video_t *sh_video=NULL;
 
 char* current_module=NULL; // for debugging
 
-// also modified by Gui/mplayer/gtk/eq.c:
-int vo_gamma_gamma = 1000;
-int vo_gamma_brightness = 1000;
-int vo_gamma_contrast = 1000;
-int vo_gamma_saturation = 1000;
-int vo_gamma_hue = 1000;
+extern int vo_gamma_gamma;
+extern int vo_gamma_brightness;
+extern int vo_gamma_contrast;
+extern int vo_gamma_saturation;
+extern int vo_gamma_hue;
 
 // ---
 
@@ -1755,19 +1754,6 @@ if(auto_quality>0){
 // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
 
 current_module="init_vo";
-    if (sh_video)
-    {
-        if (vo_gamma_gamma != 1000)
-          set_video_colors (sh_video, "gamma", vo_gamma_gamma);
-	if (vo_gamma_brightness != 1000)
-	    set_video_colors(sh_video, "brightness", vo_gamma_brightness);
-	if (vo_gamma_contrast != 1000)
-	    set_video_colors(sh_video, "contrast", vo_gamma_contrast);
-	if (vo_gamma_saturation != 1000)
-	    set_video_colors(sh_video, "saturation", vo_gamma_saturation);
-	if (vo_gamma_hue != 1000)
-	    set_video_colors(sh_video, "hue", vo_gamma_hue);
-    }
 
    if(vo_flags & 0x08 && vo_spudec)
       spudec_set_hw_spu(vo_spudec,video_out);

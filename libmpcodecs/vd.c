@@ -126,6 +126,17 @@ float movie_aspect=-1.0;
 int vo_flags=0;
 int vd_use_slices=1;
 
+/** global variables for gamma, brightness, contrast, saturation and hue 
+    modified by mplayer.c and Gui/mplayer/gtk/eq.c:
+    ranges -100 - 100
+    1000 if the vo default should be used
+*/   
+int vo_gamma_gamma = 1000;
+int vo_gamma_brightness = 1000;
+int vo_gamma_contrast = 1000;
+int vo_gamma_saturation = 1000;
+int vo_gamma_hue = 1000;
+
 extern vd_functions_t* mpvdec; // FIXME!
 extern int divx_quality;
 
@@ -306,6 +317,18 @@ csp_again:
     }
 
     sh->vf_inited=1;
+
+    if (vo_gamma_gamma != 1000)
+        set_video_colors(sh, "gamma", vo_gamma_gamma);
+    if (vo_gamma_brightness != 1000)
+        set_video_colors(sh, "brightness", vo_gamma_brightness);
+    if (vo_gamma_contrast != 1000)
+        set_video_colors(sh, "contrast", vo_gamma_contrast);
+    if (vo_gamma_saturation != 1000)
+        set_video_colors(sh, "saturation", vo_gamma_saturation);
+    if (vo_gamma_hue != 1000)
+        set_video_colors(sh, "hue", vo_gamma_hue);
+
     return 1;
 }
 
