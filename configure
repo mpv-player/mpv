@@ -146,7 +146,7 @@ params:
         --with-cssincdir=DIR    directory contains libcss header file (css.h)
                                 (--with-css* only needed, if libCSS autodetect fails)
         --with-sdl-config=PATH  specify location of sdl-config if it's not in your PATH
-                                (example: --with-sdl-cofig=/usr/sdl/bin/sdl-config)
+                                (example: --with-sdl-config=/usr/sdl/bin/sdl-config)
 
 	--size-x=SIZE		default screen width
 	--size-y=SIZE		default screen height
