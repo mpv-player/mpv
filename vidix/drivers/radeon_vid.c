@@ -23,13 +23,17 @@
 #define X_ADJUST 0
 #else
 #define RADEON_MSG "Radeon_vid:"
-#define X_ADJUST (!IsR200 ? 8 : 0)
+#define X_ADJUST (is_shift_required ? 8 : 0)
 #ifndef RADEON
 #define RADEON
 #endif
 #endif
 
 static int __verbose = 0;
+#ifdef RADEON
+static int rage_ckey_model=0;
+static int is_shift_required;
+#endif
 
 typedef struct bes_registers_s
 {
@@ -927,6 +931,30 @@ int vixInit( void )
   printf(RADEON_MSG" Video memory = %uMb\n",radeon_ram_size/0x100000);
   err = mtrr_set_type(pci_info.base0,radeon_ram_size,MTRR_TYPE_WRCOMB);
   if(!err) printf(RADEON_MSG" Set write-combining type of video memory\n");
+
+#ifdef RADEON
+  switch(def_cap.device_id)
+    {
+    case DEVICE_ATI_RADEON_QW:
+    case DEVICE_ATI_RADEON_MOBILITY_M6:
+    case DEVICE_ATI_RADEON_MOBILITY_M62:
+    case DEVICE_ATI_RADEON_MOBILITY_M63:
+    case DEVICE_ATI_RADEON_MOBILITY_M64:
+      rage_ckey_model=1;
+      is_shift_required=1;
+      break;
+    case DEVICE_ATI_RADEON_QD:
+    case DEVICE_ATI_RADEON_QE:
+    case DEVICE_ATI_RADEON_QF:
+    case DEVICE_ATI_RADEON_QG:
+    case DEVICE_ATI_RADEON_VE_QY:
+    case DEVICE_ATI_RADEON_VE_QZ:
+      is_shift_required=1;
+      break;
+    default: break;
+    }
+#endif
+
   if(__verbose > 1) radeon_vid_dump_regs();
   return 0;  
 }
@@ -1678,7 +1706,11 @@ static void set_gr_key( void )
 	besr.ckey_cntl = VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_NE|CMP_MIX_AND;
 #else
 	besr.graphics_key_msk=besr.graphics_key_clr;
-	besr.ckey_cntl = VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_EQ|CMP_MIX_AND;
+	besr.ckey_cntl = VIDEO_KEY_FN_TRUE|CMP_MIX_AND;
+	if(rage_ckey_model)
+	    besr.ckey_cntl |= GRAPHIC_KEY_FN_NE;
+	else
+	    besr.ckey_cntl |= GRAPHIC_KEY_FN_EQ;
 #endif
     }
     else
