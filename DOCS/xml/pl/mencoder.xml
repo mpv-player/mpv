@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.34 -->
+<!-- Synced with 1.36 -->
 <chapter id="mencoder">
 <title>Kodowanie z <application>MEncoderem</application></title>
 
@@ -13,15 +13,15 @@ przy pomocy <application>MEncodera</application>.
 </para>
 
 <sect1 id="menc-feat-mpeg4">
-<title>Kodowanie 2-przebiegowe MPEG-4 ("DivX")</title>
+<title>Kodowanie dwu-przebiegowe MPEG-4 ("DivX")</title>
 
 <para>
-Nazwa pochodzi od faktu, że przy użyciu tej metody plik kodowany jest <emphasis>dwa razy</emphasis>.
+Nazwa związana jest z faktem, iż przy użyciu tej metody plik kodowany jest <emphasis>dwa razy</emphasis>.
 Pierwsze kodowanie (dubbed pass) tworzy pliki tymczasowe
 (<filename>*.log</filename>) o rozmiarze kilku megabajtów, nie kasuj ich od razu
 (możesz natomiast skasować plik AVI). W drugim przebiegu
 przy pomocy danych o bitrate'cie z plików tymczasowych tworzony jest plik wyjściowy
-2-przebiegu. Plik końcowy będzie miał o wiele lepszą jakość w porównaniu ze standardowym 1-przebiegowym kodowaniem.
+drugiego przebiegu. Plik końcowy będzie miał o wiele lepszą jakość w porównaniu ze standardowym 1-przebiegowym kodowaniem.
 Jeżeli pierwszy raz o tym słyszysz, powinieneś zajrzeć do któregoś z wielu
 przewodników dostępnych w sieci.
 </para>
@@ -29,7 +29,7 @@ przewodników dostępnych w sieci.
 <example>
 <title>kopiowanie ścieżki dźwiękowej</title>
 <para>
-2-przebiegowe kodowanie DVD do MPEG-4 ("DivX") AVI z kopiowaniem ścieżki dźwiękowej.
+Dwu-przebiegowe kodowanie DVD do MPEG-4 ("DivX") AVI z kopiowaniem ścieżki dźwiękowej.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>film.avi</replaceable>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>film.avi</replaceable>
@@ -40,7 +40,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replacea
 <example>
 <title>kodowanie ścieżki dzwiękowej</title>
 <para>
-2-przebiegowe kodowanie DVD do MPEG-4 ("DivX") AVI z kodowaniem ścieżki dźwiękowej do MP3.
+Dwu-przebiegowe kodowanie DVD do MPEG-4 ("DivX") AVI z kodowaniem ścieżki dźwiękowej do MP3.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o <replaceable>film.avi</replaceable>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>film.avi</replaceable>
@@ -378,7 +378,7 @@ i <filename>.sub</filename> istnieją. Więc powinieneś je usunąć przed uruchomien
 </para>
 
 <example>
-<title>Kopiowanie dwóch napisów z DVD podczas 2-przebiegowego kodowania</title>
+<title>Kopiowanie dwóch napisów z DVD podczas dwu-przebiegowego kodowania</title>
 <screen>
 rm subtitles.idx subtitles.sub
 mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout subtitles -vobsuboutindex 0 -sid 2
@@ -539,11 +539,11 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <sect2 id="menc-feat-dvd-mpeg4-2pass">
-<title>Stały Kwantyzator vs. 2-przebiegowe</title>
+<title>Stały Kwantyzator vs. dwu-przebiegowe</title>
 
 <para>
   Istnieją trzy podejścia do kodowania video: stały bitrate (CBR), 
-  stały kwantyzator i kodowanie 2-przebiegowe (ABR, uśredniony bitrate).
+  stały kwantyzator i kodowanie dwu-przebiegowe (ABR, uśredniony bitrate).
 </para>
 
 <para>
@@ -854,16 +854,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-     Jesteśmy gotowi do 2-przebiegowego kodowania. Przebieg 1:
+     Jesteśmy gotowi do dwu-przebiegowego kodowania. Przebieg 1:
      
   <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
--lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
 -o Harry_Potter_2.avi</screen>
 
      Drugi przebieg jest taki sam, podajemy tylko opcję <option>vpass=2</option>:
 
   <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
--lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
 -o Harry_Potter_2.avi</screen>
 </para>
 
