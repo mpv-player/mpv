@@ -1,5 +1,5 @@
 Um das Paket zu erzeugen:
- Besorg dir die CVS-Version oder .tgz und entpacke es,
+ Besorge dir die CVS-Version oder .tgz und entpacke sie,
  wechsle in das Programm-Verzeichnis:
 eyck@incubus:~/src$ cd main
 eyck@incubus:~/src/main$ fakeroot debian/rules binary
