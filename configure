@@ -449,6 +449,7 @@ if test -z "$_target" ; then
       s390) host_arch=s390 ;;
       s390x) host_arch=s390x ;;
       mips) host_arch=mips ;;
+      vax) host_arch=vax ;;
       *) host_arch=UNKNOWN ;;
     esac
     ;;
