@@ -1,4 +1,4 @@
-Welcome to MPlayer, the Unix movie player. MPlayer can play most standard video
+Welcome to MPlayer, The Movie Player. MPlayer can play most standard video
 formats out of the box and almost all others with the help of external codecs.
 MPlayer currently works best from the command line, but visual feedback for
 many functions is available from its onscreen status display (OSD), which is
@@ -51,12 +51,10 @@ from the download section of our homepage at
 
   http://www.mplayerhq.hu/homepage/dload.html
 
-A set of fonts is necessary for the OSD and subtitles, the GUI needs at least
-one skin and codec packages add support for some more video and audio formats.
-MPlayer does not come with any of these by default, you have to download and
-install them separately. A wide range of codec packages can be downloaded at
-
-  http://www.mplayerhq.hu/MPlayer/releases/codecs/
+A set of fonts is necessary for the OSD and subtitles unless you are using
+TrueType fonts, the GUI needs at least one skin and codec packages add support
+for some more video and audio formats. MPlayer does not come with any of these
+by default, you have to download and install them separately.
 
 You can also get MPlayer via anonymous CVS. Issue the following commands to get
 the latest sources:
