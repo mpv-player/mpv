@@ -1455,9 +1455,13 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    case MOV_FOURCC('A','l','l','F'):
 		    default:
 		    {
+			if( udta_len>udta_size)
+				udta_len=udta_size;
+			{
 			char dump[udta_len-4];
 			stream_read(demuxer->stream, (char *)&dump, udta_len-4-4);
 			udta_size -= udta_len;
+			}
 		    }
 		}
 	    }
