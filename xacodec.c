@@ -589,24 +589,46 @@ typedef struct
     long	*YUV_VG_tab;
 } YUVTabs;
 
-#define XA_IMTYPE_RGB	0x0001
-
+//  Here's are the YUV 16 1 1  routines.
 void XA_YUV1611_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv, YUVTabs *yuv_tabs,
     unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
 {
     xacodec_image_t *image=(xacodec_image_t*)image_p;
+    int y;
+    int uvstride;
 
+#if 0
     XA_Print("XA_YUV1611_To_CLR8('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
 	image, imagex, imagey, i_x, i_y, yuv, yuv_tabs, map_flag, map, chdr);
 
-//    memcpy(image,yuv->Ybuf,imagex*imagey);
-//    memcpy(image+imagex*imagey,yuv->Vbuf,imagex*imagey/4);
-//    memcpy(image+imagex*imagey*5/4,yuv->Ubuf,imagex*imagey/4);
-    
+    printf("YUV: %p %p %p %X (%d) %dx%d %dx%d\n",
+	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
+	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
+#endif
+
+    // copy Y plane:
     memcpy(image->planes[0],yuv->Ybuf,imagex*imagey);
-    memcpy(image->planes[1],yuv->Ubuf,imagex*imagey/4);
-    memcpy(image->planes[2],yuv->Vbuf,imagex*imagey/4);
+
+    // scale U,V planes by 2:
+    imagex>>=2;
+    imagey>>=2;
+    
+    uvstride=(yuv->uv_w)?yuv->uv_w:imagex;
+
+    for(y=0;y<imagey;y++){
+	unsigned char *su=yuv->Ubuf+uvstride*y;
+	unsigned char *sv=yuv->Vbuf+uvstride*y;
+	unsigned int strideu=image->stride[1];
+	unsigned int stridev=image->stride[2];
+	unsigned char *du=image->planes[1]+2*y*strideu;
+	unsigned char *dv=image->planes[2]+2*y*stridev;
+	int x;
+	for(x=0;x<imagex;x++){
+	    du[2*x]=du[2*x+1]=du[2*x+strideu]=du[2*x+strideu+1]=su[x];
+	    dv[2*x]=dv[2*x+1]=dv[2*x+stridev]=dv[2*x+stridev+1]=sv[x];
+	}
+    }
 
 }
 
@@ -618,6 +640,7 @@ void *XA_YUV1611_Func(unsigned int image_type)
 
     return XA_YUV1611_To_CLR8;
 }
+
 
 /* YUV 41 11 11 routines */
 void XA_YUV411111_To_RGB(unsigned char *image, unsigned int imagex, unsigned int imagey,
@@ -631,16 +654,10 @@ void XA_YUV411111_To_RGB(unsigned char *image, unsigned int imagex, unsigned int
 
 void *XA_YUV411111_Func(unsigned int image_type)
 {
-    void (*color_func)();
 
-    XA_Print("XA_YUV411111_Func('image_type: %d')", image_type);    
-
-    switch(image_type)
-    {
-	case XA_IMTYPE_RGB:	color_func = XA_YUV411111_To_RGB;	break;
-    }
+    XA_Print("XA_YUV411111_Func('image_type: %d')", image_type);
     
-    return((void *)color_func);
+    return (void*) XA_YUV411111_To_RGB;
 }
 
 
