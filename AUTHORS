@@ -408,7 +408,7 @@ Madick, Puk <pingy@swirvemail.com>
     * KDE/GNOME2 fullscreen fix
     * configparser fixes
 
-Makovicka, Jindrich <makovick@KMLinux.fjfi.cvut.cz>
+Makovicka, Jindrich (henry) <makovick@KMLinux.fjfi.cvut.cz>
     * various bug fixes
     * rewrote v4l video capturing, implemented audio capturing layer
     * freetype2 font rendering support
@@ -562,7 +562,7 @@ Tam, Howell (Pigeon) <pigeon@pigeond.net>
 TeLeNiEkO <telenieko@telenieko.com>
     * first Spanish documentation translation (outdated)
 
-Tlalka, Adam <atlka@pg.gda.pl>
+Tlalka, Adam (atlka) <atlka@pg.gda.pl>
     * OSD/subtitle review, fixes, optimization, UTF8 support
     * various fixes
 
