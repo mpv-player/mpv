@@ -2634,6 +2634,9 @@ demux_mkv_fill_buffer (demuxer_t *demuxer)
                     break;
                   }
 
+                case EBML_ID_INVALID:
+                  return 0;
+
                 default:
                   ebml_read_skip (s, &l);
                   break;
@@ -2675,6 +2678,9 @@ demux_mkv_fill_buffer (demuxer_t *demuxer)
                   mkv_d->blockgroup_size = ebml_read_length (s, &tmp);
                   l = tmp;
                   break;
+
+                case EBML_ID_INVALID:
+                  return 0;
 
                 default:
                   ebml_read_skip (s, &l);
