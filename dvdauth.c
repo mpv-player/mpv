@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 //#include <string.h>      // FIXME: conflicts with fs.h
+#include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -76,7 +77,6 @@ int descrambling=0;
  */
 #ifdef __linux__
 #include <linux/fs.h>
-#include <errno.h>
 
 #ifndef FIBMAP
 #define FIBMAP 1
@@ -185,7 +185,8 @@ int dvd_auth ( char *dev , char *filename )
     	DVDHandle dvd;  /* DVD device handle */
 
 	if ((dvd=DVDOpenDevice(dev)) == DVDOpenFailed) {
-		fprintf(stderr,"DVD: cannot open DVD device \"%s\".\n",dev);
+		fprintf(stderr,"DVD: cannot open DVD device \"%s\": %s.\n",
+			dev, strerror(errno));
 		return 1;
 	}
 	
