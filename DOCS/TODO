@@ -2,9 +2,12 @@ TO DO:
 ~~~~~~
 For the Release:
 - play_only_n_frames option (chl)
-- seek_to_frame and seek_to_index options
+- fast forward (changing fps on-the-fly)
+- -benchmark option [Gabucino]
 
 DONE:
+- gcc 3.0 fixup - DONE
+- ': File not found!' bug - DONE [szabi]
 - sub sync +/- keys - DONE (lez)
 - fix subtitle path in sub_filename() - DONE (lez)
 - fix -nobps avi seeking - DONE? (arpi)
@@ -23,6 +26,7 @@ High Priority:
 - further optimizations - DONE?
 - support mpeg2 interlaced files (field pictures) - hacked
 - integrating the gui? - DONE?
+- seek_to_frame and seek_to_index options
 
 Low Priority:
 - support for MPEG TS (transport streams) - I need sample files!
