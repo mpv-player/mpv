@@ -15,6 +15,7 @@
 #include "video_out_internal.h"
 
 #include "yuv2rgb.h"
+#include "mmx.h"
 
 LIBVO_EXTERN(svga)
 
@@ -33,7 +34,7 @@ GraphicsContext *virt;
 static uint8_t *scalebuf = NULL, *yuvbuf = NULL;
 
 static uint32_t orig_w, orig_h, maxw, maxh; // Width, height
-static float scaling = 0;
+static float scaling = 1.0;
 static uint32_t x_pos, y_pos; // Position
 
 // Order must not change!
@@ -82,7 +83,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   pformat = format;
   if (format == IMGFMT_YV12) bpp = 32;
   else bpp = format & 255;
-  if (width > 800)
+  if (d_width > 800)
     switch (bpp) {
       case 32: vid_mode = 36; break;
       case 24: vid_mode = 25; break;
@@ -90,7 +91,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
       case 15: vid_mode = 23; break;
     }
   else
-    if (width > 640)
+    if (d_width > 640)
       switch (bpp) {
         case 32: vid_mode = 35; break;
         case 24: vid_mode = 22; break;
@@ -149,8 +150,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     yuv2rgb_init(bpp, MODE_RGB);
     yuvbuf = malloc(maxw * maxh * BYTESPERPIXEL);
   }
-  
-//  printf("Vid_mode: %d\n",vid_mode);
+
   printf("SVGAlib resolution: %dx%d %dbpp - ", WIDTH, HEIGHT, bpp);
   if (maxw != orig_w || maxh != orig_h) printf("Video scaled to: %dx%d\n",maxw,maxh);
   else printf("No video scaling\n");
@@ -220,15 +220,18 @@ static uint32_t draw_frame(uint8_t *src[]) {
 static uint32_t draw_slice(uint8_t *image[], int stride[], 
                            int w, int h, int x, int y) {
   uint8_t *src = yuvbuf;
-
+  uint32_t sw, sh;
+  
+  emms();
+  sw = (uint32_t) (w * scaling);
+  sh = (uint32_t) (h * scaling);
   yuv2rgb(yuvbuf, image[0], image[1], image[2], w, h, orig_w * BYTESPERPIXEL, stride[0], stride[1]);
   if (scalebuf) {
-    gl_scalebox(w, h, yuvbuf,(int) (w * scaling), (int) (h * scaling), scalebuf);
+    gl_scalebox(w, h, yuvbuf, sw, sh, scalebuf);
     src = scalebuf;
   }
-  gl_putbox(x + x_pos, y + y_pos, (int) (w * scaling), (int) (h * scaling), src);
+  gl_putbox((int)(x * scaling) + x_pos, (int)(y * scaling) + y_pos, sw, sh, src);
 }
-
 
 static void flip_page(void) {
   if (y_pos) {
