@@ -4505,7 +4505,7 @@ echores "$_sgiaudio"
 
 
 echocheck "VCD support"
-if linux || bsdos || freebsd || netbsd || sunos ; then
+if linux || bsdos || freebsd || netbsd || sunos || (darwin && ppc) ; then
   _inputmodules="vcd $_inputmodules"
   _def_vcd='#define HAVE_VCD 1'
   echores "ok"
@@ -6897,8 +6897,8 @@ $_def_vcd
 #define DEFAULT_CDROM_DEVICE    "D:"
 #define DEFAULT_DVD_DEVICE	"D:"
 #elif defined(SYS_DARWIN)
-#define DEFAULT_CDROM_DEVICE    "/dev/rdiskN"
-#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#define DEFAULT_CDROM_DEVICE    "/dev/disk1"
+#define DEFAULT_DVD_DEVICE	"/dev/rdiskN"
 #elif defined(__OpenBSD__)
 #define DEFAULT_CDROM_DEVICE	"/dev/rcd0a"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE

@@ -18,7 +18,9 @@
 #include <sys/cdrio.h>
 #include "vcd_read_fbsd.h" 
 #elif defined(__NetBSD__) || defined (__OpenBSD__)
-#include "vcd_read_nbsd.h" 
+#include "vcd_read_nbsd.h"
+#elif defined(MACOSX)
+#include "vcd_read_macosx.h" 
 #else
 #include "vcd_read.h"
 #endif
