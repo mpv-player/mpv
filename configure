@@ -233,6 +233,7 @@ Advanced options:
   --enable-profile       compile profiling information into mplayer [disable]
   --disable-sighandler   disable sighandler for crashes [enable]
   --enable-i18n          _experimental_ gnu gettext() support [autodetect]
+  --enable-dynamic-plugins  Enable support for dynamic a/v plugins [disable]
 
 Hazardous options a.k.a. "DO NOT REPORT ANY BUGS!"
   --disable-gcc-checking   disable gcc version checking [enable]
@@ -1004,6 +1005,7 @@ _language=en
 _shm=auto
 _linux_devfs=no
 _i18n=auto
+_dynamic_plugins=no
 _setlocale=auto
 _sighandler=yes
 _libdv=auto
@@ -1032,6 +1034,8 @@ for ac_option do
   --disable-mencoder)	_mencoder=no	;;
   --enable-i18n)	_i18n=yes	;;
   --disable-i18n)	_i18n=no	;;
+  --enable-dynamic-plugins) _dynamic_plugins=yes ;;
+  --disable-dynamic-plugins) _dynamic_plugins=no ;;
   --enable-setlocale)   _setlocale=yes  ;;
   --disable-setlocale)  _setlocale=no   ;;
   --enable-x11)		_x11=yes	;;
@@ -1540,6 +1544,7 @@ else
 fi
 echores "$_runtime_cpudetection"
 
+
 echocheck "restrict keyword"
 for restrict_keyword in restrict __restrict __restrict__ ; do
   echo "void foo(char * $restrict_keyword p); int main(){}" > $TMPC
@@ -1553,6 +1558,7 @@ if [ -n "$_def_restrict_keyword" ]; then
 else
   echores "none"
 fi
+
 
 echocheck "kstat"
 cat > $TMPC << EOF
@@ -1680,6 +1686,7 @@ if test "$_use_aton" != no; then
   _def_use_aton='#define USE_ATON 1'
 fi
 
+
 echocheck "inttypes.h (required)"
 cat > $TMPC << EOF
 #include <inttypes.h>
@@ -1695,6 +1702,7 @@ else
 fi
 echores "$_inttypes"
 
+
 echocheck "word size"
 _mp_wordsize="#undef MP_WORDSIZE"
 cat > $TMPC << EOF
@@ -1704,6 +1712,7 @@ int main(void) { printf("%d\n", sizeof(size_t)*8); return 0; }
 EOF
 cc_check && _wordsize=`$TMPO` && _mp_wordsize="#define MP_WORDSIZE $_wordsize"
 echores "$_wordsize"
+
 
 echocheck "stddef.h"
 cat > $TMPC << EOF
@@ -1804,6 +1813,18 @@ fi
 echores "$_dl"
 
 
+echocheck "dynamic a/v plugins support"
+if test "$_dl" = no ; then
+  _dynamic_plugins = no
+fi
+if test "$_dynamic_plugins" = yes ; then
+  _def_dynamic_plugins='#define DYNAMIC_PLUGINS 1'
+else
+  _def_dynamic_plugins='#undef DYNAMIC_PLUGINS'
+fi
+echores "$_dynamic_plugins"
+
+
 #echocheck "dynamic linking"
 # FIXME !! make this dynamic detection work and modify at the end (search _ld_dl_dynamic)
 # also gcc flags are different, but ld flags aren't (-Bdynamic/-Bstatic/-Bsymbolic)
@@ -1888,6 +1909,7 @@ fi
 else
   _def_soundcard='#undef HAVE_SOUNDCARD_H'
 fi
+
 
 echocheck "sys/dvdio.h"
 cat > $TMPC << EOF
@@ -4595,6 +4617,9 @@ $_def_setlocale
 
 /* Runtime CPU detection */
 $_def_runtime_cpudetection
+
+/* Dynamic a/v plugins */
+$_def_dynamic_plugins
 
 /* "restrict" keyword */
 #define restrict $_def_restrict_keyword
