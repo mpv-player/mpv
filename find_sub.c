@@ -25,6 +25,9 @@ static int nosub_range_end=-1;
 
 void find_sub(subtitle* subtitles,int key){
     int i,j;
+    
+    if ( !subtitles ) return;
+    
     if(vo_sub){
       if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
     } else {

@@ -802,7 +802,18 @@ void dump_mpsub(subtitle* subs){
 	printf ("Subtitles dumped in \'dump.mpsub\'.\n");
 }
 
-
+void sub_free( subtitle * subs )
+{
+ int i;
+ 
+ if ( !subs ) return;
+ 
+ sub_num=0;
+ sub_errs=0;
+ for ( i=0;i<subs->lines;i++ ) free( subs->text[i] );
+ free( subs );
+ subs=NULL;
+}
 
 #ifdef DUMPSUBS
 int main(int argc, char **argv) {  // for testing

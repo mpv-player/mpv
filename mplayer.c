@@ -663,13 +663,17 @@ play_next_file:
 	usleep(20000);
 	EventHandling();
       }
-      if(mplShMem->FilenameChanged){
-        filename=mplShMem->Filename;
-      }
+      
 #ifdef USE_SUB
-      sub_name=NULL;
-      if ( mplShMem->SubtitleChanged ) sub_name=mplShMem->Subtitlename;
+      if ( mplShMem->SubtitleChanged || !mplShMem->FilenameChanged )
+       { sub_name=mplShMem->Subtitlename; mplShMem->SubtitleChanged=0; }
 #endif
+
+      if ( mplShMem->FilenameChanged || !filename )
+       {
+        filename=mplShMem->Filename;
+	mplShMem->FilenameChanged=0;
+       }
     }
 #endif
 
@@ -2178,7 +2182,15 @@ if(use_gui || ++curr_filename<num_filenames){
 
   current_module="free_stream";
   if(stream) free_stream(stream);
-
+  
+  current_module="sub_free";
+  if ( subtitles ) 
+   {
+    sub_free( subtitles );
+    sub_name=NULL;
+    vo_sub=NULL;
+   }
+  
   video_out=NULL;
   audio_out=NULL;
 
