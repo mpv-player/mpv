@@ -740,6 +740,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 
 		if(trak->stdata_len >= 86) { // extra atoms found
 		  int pos=78;
+		  int atom_len;
 		  while(pos+8<=trak->stdata_len &&
 		    (pos+(atom_len=char2int(trak->stdata,pos)))<=trak->stdata_len){
 		   switch(char2int(trak->stdata,pos+4)) { // switch atom type
