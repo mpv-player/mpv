@@ -10,23 +10,24 @@ OpenDivX version supported in MPlayer : 4.0alpha48
 Decoder:
 ~~~~~~~~
 Now it's used for AVI files with fourcc 'dvx1'
-You can adjust Quality level using the -divxq option. Valid values:
+You can adjust Quality level using the -pp option.
+Combine (add) flags you need:
 
- postprcc_level =  0      ---->  no post processing (fastest)
- postproc_level =  1 ~  9 ---->  horizontal Y deblocking only
- postproc_level = 10 ~ 19 ---->  hor. + ver. Y deblocking
- postproc_level = 20 ~ 29 ---->  hor. + ver. Y and hor. C deblocking
- postproc_level = 30 ~ 39 ---->  hor. + ver. Y and hor.+ver. C deblocking
- postproc_level = 40 ~ 49 ---->  h+v Y, h+v C deblock and Y deringing
- postproc_level = 50 ~ 59 ---->  h+v Y, h+v C deblock and Y+C deringing
+1   Y  horizontal deblocking
+2   Y  vertical deblocking
+4   C  horizontal deblocking
+8   C  vertical deblocking
+16  Y dering
+32  C dering
 
-Note: last level (Chroma deringing) sometimes crashes.
+For example, if you want horiz+vert chroma deblocking, then use
+  -pp 12    (4+8=12)
 
-Note: also check the manpage.
+Note: C filters works only with n*16 height movies.
 
 Encoder:
 ~~~~~~~~
-There is a very alpha hack to convert mpeg video into OpenDivX .avi files.
+There is a very alpha hack to convert video into OpenDivX .avi files.
 Audio is automatically disabled. Select 'odivx' video device as output:
   mplayer input.mpg -vo odivx -encode output.avi
 Yes, I know that it's unusable now, it's only for testing purposes.
