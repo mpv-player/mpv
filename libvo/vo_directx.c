@@ -118,13 +118,13 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
     case IMGFMT_I420 :
 	case IMGFMT_IYUV :
 	case IMGFMT_YVU9 :
-    	vo_draw_alpha_yv12(w,h,src,srca,stride,((uint8_t *) image) + image_width*y0 + x0,image_width);
+    	vo_draw_alpha_yv12(w,h,src,srca,stride,((uint8_t *) image) + dstride*y0 + x0,dstride);
 	break;
 	case IMGFMT_YUY2 :
-	    vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) image)+ 2*image_width*y0 + 2*x0 ,2*image_width);
+	    vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) image)+ dstride*y0 + 2*x0 ,dstride);
     break;
     case IMGFMT_UYVY :
-        vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) image) + 2*image_width*y0 + 2*x0 + 1,dstride);
+        vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) image) + dstride*y0 + 2*x0 + 1,dstride);
     break;
 	case IMGFMT_RGB15:	
     case IMGFMT_BGR15:
@@ -1047,11 +1047,8 @@ static void flip_page(void)
 		}
 		if(dxresult != DD_OK)mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>can't flip page\n");
     }
-	g_lpddsBack->lpVtbl->Lock(g_lpddsBack,NULL,&ddsdsf, DDLOCK_NOSYSLOCK | DDLOCK_WAIT , NULL);
 	g_lpddsBack->lpVtbl->Unlock (g_lpddsBack,NULL);
-	dstride = ddsdsf.lPitch;
-    image = ddsdsf.lpSurface;
-	if(nooverlay == 1) 
+	if(nooverlay) 
 	{
 		DDBLTFX  ddbltfx;
         // ask for the "NOTEARING" option
@@ -1060,6 +1057,9 @@ static void flip_page(void)
         ddbltfx.dwDDFX = DDBLTFX_NOTEARING;
         g_lpddsPrimary->lpVtbl->Blt(g_lpddsPrimary, &rd, g_lpddsBack, NULL, DDBLT_WAIT, &ddbltfx);
     }	
+	g_lpddsBack->lpVtbl->Lock(g_lpddsBack,NULL,&ddsdsf, DDLOCK_NOSYSLOCK | DDLOCK_WAIT , NULL);
+	dstride = ddsdsf.lPitch;
+    image = ddsdsf.lpSurface;
 }
 
 static uint32_t draw_frame(uint8_t *src[])
@@ -1241,7 +1241,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	memset(&ddsdsf, 0,sizeof(DDSURFACEDESC));
 	ddsdsf.dwSize = sizeof (DDSURFACEDESC);
 	g_lpddsBack->lpVtbl->Lock(g_lpddsBack,NULL,&ddsdsf, DDLOCK_NOSYSLOCK | DDLOCK_WAIT, NULL);
-	g_lpddsBack->lpVtbl->Unlock (g_lpddsBack,NULL);
 	dstride = ddsdsf.lPitch;
     image = ddsdsf.lpSurface;
 	if(image_format==IMGFMT_I420||image_format==IMGFMT_IYUV)
