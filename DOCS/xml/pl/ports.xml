@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.58 -->
+<!-- synced with 1.60 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -145,6 +145,7 @@ Zobacz rozdział <link linkend="macos">Mac OS</link>.
 <title>Sun Solaris</title>
 <para>
 <application>MPlayer</application> powinien działać na Solarisie 2.6 lub nowszym.
+Możesz skorzystać ze sterownika dźwięku SUN'a podająć opcję <option>-ao sun</option>.
 </para>
 
 <para>
@@ -471,20 +472,18 @@ wolna. Używaj SDL.
   <option>-vf noformat=<replaceable>przestrzeń</replaceable></option>
   zapobiegnie jej używaniu. Możesz to na stałe dodać do Twojego pliku konfiguracyjnego.</para>
 
-
-
-<para>Możesz wykorzystać kodeki Win32 i Real dla Win32 (nie kodeki Real dla Linuksa),
-  jeżeli chcesz. Umieść je gdzieś w swojej
-  ścieżce (zmienna PATH - przyp. tłumacza) albo użyj opcji
-  <option>--with-codecsdir=c:/ścieżka/do/twoich/kodeków</option> (lub
-  <option>--with-codecsdir=/ścieżka/do/twoich/kodeków</option> tylko na
-  <application>Cygwin</application>) dla <filename>configure</filename>.
-  Mieliśmy doniesienia, że biblioteki Real muszą być zapisywalne dla użytkownika,
-  który korzysta z <application>MPlayera</application>, ale tylko na niektórych
-  systemach. Spróbuj nadać im atrybut zapisywalności, jeżeli napotkasz jakieś problemy.
-  Biblioteki DLL QuickTime również działają, ale będzisz musiał je umieścić
-  w katalogu systemowym Windows
-  (<filename class="directory"><replaceable>C:\Windows\system\</replaceable></filename>).</para>
+<para>Dostępne są specjalne zbiory z kodekami przeznaczone dla systemu Windows, znajdziesz je na
+  <ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">stronie kodeków</ulink>.
+  Pozwolą Ci one na odtwarzanie formatów, które nie są jeszcze bezpośrednio obsługiwane w
+  <application>MPlayerze</application>. Umieść je, gdzieś w swojej ścieżce (w katalogu podanym w
+  zmiennej PATH - przyp. tłumacza) lub przekaż opcję
+  <option>--with-codecsdir=<replaceable>c:/ścieżka/do/Twoich/kodeków</replaceable></option>
+  (lub, tylko w środowkisku Cygwin,
+  <option>--with-codecsdir=<replaceable>/ścieżka/do/Twoich/kodeków</replaceable></option>)
+  do skryptu <filename>configure</filename>.
+  Mieliśmy doniesienia, że biblioteki Real, muszą być zapisywalne dla użytkownika, który
+  uruchamia <application>MPlayera</application>, ale tylko na niektórych systemach (NT4).
+  Spróbuj nadać im atrybut zapisywalności.</para>
 
 <para>Możesz odtwarzać VCD, odtwarzając pliki <filename>.DAT</filename> lub <filename>.MPG</filename>,
   które Windows pokazuje na VCD. To działa mniej więcej tak (dopasuj literę dysku do Twojego

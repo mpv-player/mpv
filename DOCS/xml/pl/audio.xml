@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.28 -->
+<!-- synced with 1.30 -->
 <sect1 id="audio">
 <title>Urządzenia wyjściowe audio</title>
 <sect2 id="sync">
@@ -34,17 +34,13 @@ Jeśli masz kiepski sterownik dźwięku, spróbuj użyć opcji <option>-autosync</opti
 Powinna ona rozwiązać Twój problem. Dokładniejsze informacje znajdziesz na stronie
 man.
 </para>
+</sect2>
 
-<itemizedlist>
-<title>Kilka uwag:</title>
-<listitem><para>
-  Jeśli posiadasz sterownik OSS, spróbuj najpierw opcji <option>-ao oss</option>
-  (domyślna). Jeżeli zauważysz niestabilne działanie systemu, jego ciągłe
-  zawieszanie się lub inne dziwne zachowanie, wypróbuj <option>-ao sdl</option>
-  (UWAGA: potrzebujesz zainstalowanych bibliotek i plików nagłówkowych SDL).
-  Sterownik SDL pomaga w wielu wypadkach, a dodatkowo obsługuje ESD (GNOME) i ARTS (KDE).
-  </para></listitem>
-<listitem><para>
+<sect2 id="troubleshooting">
+<title>Rozwiązywanie problemów</title>
+
+<para>Kilka uwag:</para>
+<para>
   Jeżeli posiadasz sterowniki ALSA w wersji 0.5, prawie zawsze konieczne będzie
   użycie <option>-ao alsa5</option>, ponieważ ich kod emulacji OSS jest wadliwy i
   spowoduje <emphasis role="bold">błąd <application>MPlayera</application></emphasis>
@@ -53,243 +49,13 @@ man.
     DEMUXER: Za dużo (945 w 8390980 bajtach) pakietów video w buforze!
     (DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!)<!--
 --></screen>
-  </para></listitem>
-<listitem><para>
-  Na Solarisie konieczne jest użycie sterownika SUN przy pomocy opcji
-  <option>-ao sun</option>, w przeciwnym wypadku nie będzie działać ani audio,
-  ani video.
-  </para></listitem>
-<listitem><para>
+</para>
+<para>
   Jeśli dźwięk przerywany jest krótkimi trzaskami podczas odtwarzania z CD-ROMu,
-  włącz odmaskowywanie przerwań, wpisując np. <command>hdparm -u1 /dev/cdrom</command>
-  (<command>man hdparm</command>). Jest to bardzo przydatne i opisane bardziej
-  szczegółowo w sekcji dotyczącej <link linkend="drives">CD-ROMu</link>.
- </para></listitem>
-</itemizedlist>
-</sect2>
-
-<sect2 id="experiences">
-<title>Doświadczenia związane z użytkowaniem kart dźwiękowych i zalecenia</title>
-<para>
-Przy stosowaniu Linuksa, zalecamy jądro z serii 2.4.x. Jądro w wersji 2.2 nie było
-testowane.
-</para>
-
-<para>
-Sterowniki kart dźwiękowych w Linuksie są dostarczane głównie przez
-wolną wersję OSS. Sterowniki te zostały zastąpione w wersji rozwojowej jądra 2.5
-przez system <ulink url="http://www.alsa-project.org">ALSA</ulink>
-(Advanced Linux Sound Architecture). Jeżeli Twoja dystrybucja nie używa jeszcze
-ALSA, możesz chcieć ją wypróbować, jeżeli będziesz miał jakieś kłopoty
-z dźwiękiem. Sterowniki ALSA generalnie przewyższają OSS pod względem zgodności,
-wydajności i możliwości, Jednak niektóre karty są obsługiwane wyłącznie przez
-komercyjną wersję OSS z witryny
-<ulink url="http://www.opensound.com/">4Front Technologies</ulink>.
-Obsługuje ona również kilka innych systemów poza Linuksem.
-</para>
-
-<informaltable>
-<tgroup cols="8">
-  <colspec colname="c1"/>
-  <colspec colname="c2"/>
-  <colspec colname="c3"/>
-  <colspec colname="c4"/>
-  <colspec colname="c5"/>
-  <colspec colname="c6"/>
-  <colspec colname="c7"/>
-  <colspec colname="c8"/>
-  <spanspec spanname="driver" namest="c2" nameend="c5"/>
-  <spanspec spanname="ossfree" namest="c2" nameend="c2"/>
-  <spanspec spanname="alsa" namest="c3" nameend="c3"/>
-  <spanspec spanname="osspro" namest="c4" nameend="c4"/>
-  <spanspec spanname="others" namest="c5" nameend="c5"/>
-<thead>
-  <row>
-    <entry morerows="2" valign="middle">KARTA DŹWIĘKOWA</entry>
-    <entry spanname="driver">STEROWNIK</entry>
-    <entry morerows="2" valign="middle">Maks. częstotliwość (kHz)</entry>
-    <entry morerows="2" valign="middle">Maks. liczba kanałów</entry>
-    <entry morerows="2" valign="middle">Maks. liczba aplikacji
-      <footnote id="maxopens">
-        <para>liczba aplikacji, które mogą <emphasis>jednocześnie</emphasis>
-         używać urządzenia.</para>
-      </footnote>
-    </entry>
-  </row>
-
-  <row>
-    <entry spanname="ossfree">OSS/Free</entry>
-    <entry spanname="alsa">ALSA</entry>
-    <entry spanname="osspro">OSS/Pro</entry>
-    <entry spanname="others">inne</entry>
-  </row>
-</thead>
-
-<tbody>
-  <row>
-    <entry>Zintegrowane karty VIA (686/A/B, 8233, 8235)</entry>
-    <entry>
-      <ulink url="http://sf.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</ulink>
-    </entry>
-    <entry>snd-via82xx</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry>4-48 kHz lub wyłącznie 48 kHz, w zależności od układu</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>Aureal Vortex 2</entry>
-    <entry>brak</entry>
-    <entry>brak</entry>
-    <entry>OK</entry>
-    <entry>
-      <ulink url="http://aureal.sf.net">Sterowniki do Aureala dla Linuksa</ulink>
-      <ulink url="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2"> bufor zwiększony do 32k</ulink>
-    </entry>
-    <entry>48</entry>
-    <entry>4.1</entry>
-    <entry>5+</entry>
-  </row>
-
-  <row>
-    <entry>SB Live!</entry>
-    <entry>Wyjście analogowe-OK, S/PDIF nie działa</entry>
-    <entry>Oba działają</entry>
-    <entry>Oba działają</entry>
-    <entry>
-      <ulink url="http://opensource.creative.com">Sterowniki OSS Creative'a (obsługa S/PDIF)</ulink>
-    </entry>
-    <entry>192</entry>
-    <entry>4.0/5.1</entry>
-    <entry>32</entry>
-  </row>
-
-  <row>
-    <entry>SB 128 PCI (es1371)</entry>
-    <entry>OK</entry>
-    <entry>?</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry>48</entry>
-    <entry>stereo</entry>
-    <entry>2</entry>
-  </row>
-
-  <row>
-    <entry>SB AWE 64</entry>
-    <entry>max 44kHz</entry>
-    <entry>źle brzmi na 48kHz</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry>48</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>GUS PnP</entry>
-    <entry>brak</entry>
-    <entry>OK</entry>
-    <entry>OK</entry>
-    <entry></entry>
-    <entry>48</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>Gravis UltraSound ACE</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>Gravis UltraSound MAX</entry>
-    <entry>OK</entry>
-    <entry>OK (?)</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry>48</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>ESS 688</entry>
-    <entry>OK</entry>
-    <entry>OK (?)</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry>48</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>Karty C-Media (CMI8338/8738)</entry>
-    <entry>OK</entry>
-    <entry>OK S/PDIF jest obsługiwane przez ALSA 0.9.x</entry>
-    <entry>?</entry>
-    <entry></entry>
-    <entry>44</entry>
-    <entry>stereo</entry>
-    <entry>1</entry>
-  </row>
-
-  <row>
-    <entry>Karty Yamaha (*ymf*)</entry>
-    <entry>złe (?) (może <option>-ao sdl</option>)</entry>
-    <entry>Działa poprawnie tylko z ALSA 0.5 z włączoną emulacją OSS
-      <emphasis role="bold">i</emphasis> <option>-ao sdl</option> (!) (?)</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>Karty z układem envy24 (np. Terratec EWS88MT)</entry>
-    <entry>?</entry>
-    <entry>?</entry>
-    <entry>OK</entry>
-    <entry></entry>
-    <entry>?</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>PC Speaker lub DAC</entry>
-    <entry>OK</entry>
-    <entry>brak</entry>
-    <entry></entry>
-    <entry>
-      <ulink url="http://www.geocities.com/stssppnn/pcsp.html">Sterowniki do PC speakera dla Linuksa (OSS)</ulink>
-    </entry>
-    <entry>Sterownik emuluje 44.1, może więcej.</entry>
-    <entry>mono</entry>
-    <entry>1</entry>
-  </row>
-
-</tbody>
-</tgroup>
-</informaltable>
-
-<para>
-Pomoc przy tworzeniu tego dokumentu jest mile widziana. Powiedz nam, jak
-<application>MPlayer</application> i Twoja karta dźwiękowa
-(karty dźwiękowe) współpracują ze sobą.
+  włącz odmaskowywanie przerwań, tak jak opisano to w rozdziale dotyczącym
+  <link linkend="drives">CD-ROMu</link>.
 </para>
 </sect2>
-
 
 </sect1>
 
