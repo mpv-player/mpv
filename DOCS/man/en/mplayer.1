@@ -7560,6 +7560,81 @@ For all other purposes, please use either the 'Global' PSNR, or the per-frame
 PSNRs printed by log=3.
 .
 .
+.SS MPEG muxer (\-mpegopts)
+.
+The MPEG muxer can generate 5 types of streams, each of which has reasonable default
+parameters that the user can override. Generally, when generating mpeg files, it's 
+advisable to disable mencoder's frame-skip code (see -noskip, -mc, harddup, softskip).
+.br
+.
+.TP
+.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
+stream format (default: mpeg2).
+.
+.TP
+.B size=<up to 65535>
+pack size in bytes, don't change it if you don't know exactly what you are doing (default: 2048).
+.
+.TP
+.B muxrate=<int>
+nominal muxrate in Kbit/s used in the pack headers (default: 1800 kb/s).
+Will be updated as necessary in the case of format=mpeg1 or mpeg2.
+.
+.TP
+.B tsaf
+sets timestamps on all frames, if possible.
+.
+.TP
+.B noreorder
+disable the frame reordering code, that stores frames in decoding (rather than display) order.
+Use it only if you believe the reordering code is buggy and working improperly.
+Default: disabled.
+.
+.TP
+.B init_vpts=<100\-700>
+Initial video pts, in milliseconds (default: 200).
+.
+.TP
+.B init_apts=<100\-700> 
+Initial audio pts, in milliseconds (default: 200).
+.
+.
+.TP
+.B init_adelay=<-32760\--1> 
+Initial audio anticipation time == video delay, in milliseconds (default: 0).
+Use it if you want to delay video respect to audio.
+.
+.
+.TP
+.B drop 
+When used with init_adelay the muxer drops the part of audio that was anticipated.
+.
+.
+.TP
+.B vwidth, vheight=<1,4095> 
+These parameters patch the video width and height when video is mpeg1/2.
+.
+.
+.TP
+.B vpswidth, vpsheight=<1,4095> 
+Patch pan and scan video width and height when video is mpeg2.
+.
+.
+.TP
+.B vaspect=<1:1 | 4:3 | 16:9 | 2.21:1> 
+Patches the aspect ratio for mpeg1/2 video.
+.
+.
+.TP
+.B vbitrate=<int> 
+Patches the video bitrate in Kbit/s for mpeg1/2 video.
+.
+.
+.TP
+.B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 > 
+Patches the framerate for mpeg1/2 video.
+.
+.
 .\" --------------------------------------------------------------------------
 .\" Files
 .\" --------------------------------------------------------------------------
