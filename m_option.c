@@ -1617,7 +1617,7 @@ static int parse_custom_url(m_option_t* opt,char *name,
 	// skip
       } else {
 	if(dst) {
-	  r = m_struct_set(desc,dst,"filename",ptr2);
+	  r = m_struct_set(desc,dst,"filename",ptr2+1);
 	  if(r < 0) {
 	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while setting filename\n");
 	    return r;
