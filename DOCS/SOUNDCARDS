@@ -2,9 +2,10 @@
 Recommendations for misc. soundcards
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// (new audio code, what now?)
-// Aureal Vortex 2:
-//			run ./configure script with --disable-select option
+Aureal Vortex 2:
+			OSS	: OK
+			ALSA	: no driver
+			Max kHz : 48 (probably)
 
 GUS PnP:
 			OSS	: none
@@ -17,8 +18,9 @@ SB Live!:
 			Max kHz : 48
 
 Gravis UltraSound ACE:
-			OSS     : sucks, max 44Khz !
-			ALSA    : if video lags, use OSS
+			OSS     : sucks, max 44Khz ! Also has problems with the
+				  new sound code.
+			ALSA    : OK
 			Max kHz : 48
 
 Gravis UltraSound MAX:
