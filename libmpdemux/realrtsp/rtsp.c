@@ -623,9 +623,9 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
   s->mrl = strdup(mrl);
   s->host = strdup(host);
   s->port = port;
+  s->path = strdup(path);
   while (*path == '/')
     path++;
-  s->path = strdup(path);
   if ((s->param = strchr(s->path, '?')) != NULL)
     s->param++;
   //printf("path=%s\n", s->path);
