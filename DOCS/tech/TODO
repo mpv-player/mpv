@@ -12,7 +12,7 @@ demuxer:
 
 decoders:
 - finish native g72x audio decoder
-- fix the MSVideo1-bugs -- DONE?
+- fix the MSVideo1-bugs (DONE)
 - finish and switch to C directshow code
 
 mencoder:
