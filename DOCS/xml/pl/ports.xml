@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.39 -->
+<!-- synced with 1.40 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -302,13 +302,32 @@ wolna. Używaj SDL.
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">pliki nagłówkowe DirectX 7</ulink>,
   żeby skompilować sterownik do wyjścia video DirectX.</para>
 
+<para><link linkend="vidix">VIDIX</link> działa teraz również pod Windowsem jako
+  <option>-vo winvidix</option>, chociaż jego obsługa jest eksperymentalna i wymaga
+  trochę ręcznego przygotowania. Pobierz
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelper.sys">dhahelper.sys</ulink>
+  i skopiuj go do
+  <filename class="directory">libdha/dhahelperwin</filename> w drzewie źródłowym
+  <application>MPlayera</application>. Uruchom konsolę, następnie przejdź do tego katalogu i wykonaj
+
+  <screen>gcc -o dhasetup.exe dhasetup.c</screen>
+
+  i
+
+  <screen>dhasetup.exe install</screen>
+
+  jako Administrator. Będziesz musiał ponownie uruchomić komputer. Teraz, skopiuj wszystkie pliki
+  z rozszerzeniem <systemitem class="library">.so</systemitem> z katalogu
+  <filename class="directory">vidix/drivers</filename> do
+  <filename class="directory">mplayer/vidix</filename>
+  względem położnia pliku <filename>mplayer.exe</filename>.</para>
+
 <para>Dla osiągnięcia najlepszych wyników <application>MPlayer</application> powinien
   korzystać z przestrzeni kolorów, którą Twoja karta wspiera sprzętowo. Niestety
   wiele sterowników graficznych Windowsa źle informuje o wspieranych przez kartę 
   przestrzeniach. Aby sprawdzić które są źle obsługiwane, wykonaj poniższą komendę:
 
-  <screen>mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>przestrzeń</replaceable> \
-	<replaceable>film</replaceable></screen>
+  <screen>mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>przestrzeń</replaceable> <replaceable>film</replaceable></screen>
 
   gdzie <replaceable>przestrzeń</replaceable> może być jakąkolwiek
   wartością spośród tych uzyskanych przez opcję <option>-vf format=fmt=help</option>.
@@ -375,6 +394,9 @@ zawiera <filename>inttypes.h</filename>. Umieść plik
 <para>DVD również działa, podaj literę Twojego DVD-ROMu przez 
   opcję <option>-dvd-device</option>:</para>
 
+
+<screen>mplayer dvd://<replaceable>&lt;tytuł&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
+
 <screen>mplayer dvd://<replaceable>&lt;tytuł&gt;</replaceable> -dvd-device '\\.\<replaceable>d</replaceable>:'</screen>
 
 </sect2>
@@ -406,6 +428,8 @@ zawiera <filename>inttypes.h</filename>. Umieść plik
 <screen>mplayer <replaceable>/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
 
 <screen>mplayer dvd://<replaceable>&lt;tytuł&gt;</replaceable> -dvd-device /<replaceable>d</replaceable>/</screen>
+
+<screen>mplayer dvd://<replaceable>&lt;tytuł&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:\\</screen>
 
 </sect2>
 
