@@ -6,7 +6,7 @@ include ../config.mak
 SRCS    = resample.c bit_allocate.c bitstream.c downmix.c imdct.c imdct_mlib.c parse.c
 OBJS	= $(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS)
+CFLAGS  = $(MLIB_INC) $(OPTFLAGS) 
 
 .SUFFIXES: .c .o
 
