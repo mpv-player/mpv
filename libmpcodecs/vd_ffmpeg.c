@@ -57,8 +57,6 @@ typedef struct {
 
 #include "cfgparser.h"
 
-extern int vo_directrendering;
-
 static int lavc_param_workaround_bugs=0;
 static int lavc_param_error_resilience=0;
 static int lavc_param_gray=0;
@@ -117,7 +115,7 @@ static int init(sh_video_t *sh){
     if(vd_use_slices && lavc_codec->capabilities&CODEC_CAP_DRAW_HORIZ_BAND)
 	ctx->do_slices=1;
  
-    if(vo_directrendering && lavc_codec->capabilities&CODEC_CAP_DR1)
+    if(lavc_codec->capabilities&CODEC_CAP_DR1)
 	ctx->do_dr1=1;
     
     ctx->avctx = malloc(sizeof(AVCodecContext));
