@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+
+<HEAD>
+  <TITLE>CD，DVD，VCD -- MPlayer -- Linux的电影播放器</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gb_2312-80">
+</HEAD>
+
+<BODY>
+
+
+<H2><A NAME="drives">4.1 CD与DVD光驱</A></H2>
+
+<P>Linux文件摘录：</P>
+
+<P>现代的CD-ROM光驱能达到十分高的头速度，还有一些CD-ROM光驱能运行在被正常情况低的速度上。你考虑改变CD-ROM光驱的速度可能有若干原因：</P>
+
+<UL>
+  <LI>在告诉情况下发生读取错误，尤其对于压制不好的CD-ROM。降低速度能防止这种情况下的数据丢失。</LI>
+  <LI>很多CD-ROM光驱的声音吵的讨厌，低的速度可以降低噪音。</LI>
+</UL>
+
+<P>你能使用hdparm或一个叫setcd的程序来降低光驱的速度。它是这样工作的：</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -E [speed] [cdrom device]</CODE></P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>setcd -x [speed] [cdrom device]</CODE></P>
+
+<P>你也可以试试</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 &gt; /proc/ide/[cdrom device]/settings</CODE></P>
+
+<P>但这样你需要root权限。下面这个命令也有用处：</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 &gt; /proc/ide/[cdrom device]/settings</CODE></P>
+
+<P>这把文件预读取设置为2MB，对于刮伤的CD-ROM有好处。推荐你同时也用hdparm调整你的CD-ROM光驱：</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (cdrom device)</CODE></P>
+
+<P>这开启DMA存取，预读取，和IRQ unmasking(细节解释请阅读hdparm的man page)。</P>
+
+<P>为了优化你的CD-ROM请参考"<CODE>/proc/ide/[cdrom device]/settings</CODE>"。</P>
+
+
+<H2><A NAME="dvd">4.2 DVD回放</A></H2>
+  
+<P><B>MPlayer</B>使用<CODE>libdvdread</CODE>和<CODE>libdvdcss</CODE>进行DVD解密和回放。这两个库包含在<B>MPlayer</B>源码树的<CODE>libmpdvdkit/</CODE>
+子目录中，你不需要单独安装他们。我们选择这种解决方案是因为我们必须修正一个libdvdread的bug，并且给libdvdcss添加一个<B>cracked CSS keys caching support</B>的补丁。
+这带来极大的速度提升，因为不用在每次播放之前都破解密钥。破解的密钥储存在<CODE>~/.mplayer/DVDKeys</CODE>目录里面。</P>
+
+<P><B>MPlayer</B>也能使用系统的<CODE>libdvdread</CODE>和<CODE>libdvdcss</CODE>库，但这种解决方法<B>不</B>被推荐，因为它会导致bug，库的不兼容，并且降低速度。</P>
+
+<P>使用<CODE>dvdnav</CODE>DVD导航的支持正在开发，但目前还没有完成。</P>
+
+<H4>旧式DVD支持 -- 可选</H4>
+
+<P>如果你想从硬盘上播放编码的VOB是有用。为此要编译并安装<B>libcss</B>0.0.1(不要更新的)(如果<B>MPlayer</B>检测不到它，使用<CODE>-csslib /path/to/libcss.so</CODE>选项)。</P>
+
+<P>可用选项的完全列表，请阅读man page。</P>
+
+
+<H2><A NAME="vcd">4.3 VCD回放</A></H2>
+
+<P>播放标准的Video CDs：</P>
+
+<P><CODE>mplayer -vcd &lt;track&gt; [-cdrom-device device]</CODE></P>
+
+<P>例子：<BR>
+  <CODE>mplayer --vcd 1<BR>
+  mplayer --fs --vcd 2 --dev / hdc </CODE></P>
+
+注意：
+<UL>
+  <LI>一定<B>不要</B>mount VCD来直接播放DAT文件！在Windows下可能可以但在Linux下不行。你必须用<CODE>-vcd</CODE>选项来播放VCD。</LI>
+  <LI>VCD盘通常有2条轨道：数据轨道(包含autostart Windows回放程序，karaoke数据等等)和mode-2轨道(电影)。因此，试试<CODE>-vcd 2</CODE>先。</LI>
+  <LI>默认的VCD设备是<CODE>/dev/cdrom</CODE>。如果你的设置不同，做个符号链接，或者在命令行上用<CODE>-cdrom-device</CODE>选项指定正确的设备。</LI>
+</UL>
+
+</BODY>
+</HTML>

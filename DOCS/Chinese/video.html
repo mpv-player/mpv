@@ -1,0 +1,1016 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+
+<HEAD>
+  <TITLE>视频 -- MPlayer -- Linux的电影播放器</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gb_2312-80">
+</HEAD>
+
+<BODY>
+
+
+<H3><A NAME="video">2.3.1 视频输出设备</A></H3>
+
+
+<H4><A NAME="mtrr">2.3.1.1 MTRR的设置</A></H4>
+
+<P>强烈建议你检查你的MTRR注册是否正确的设定了，因为他们能极大的提高性能。</P>
+
+<P>运行'<CODE>cat /proc/mtrr</CODE>':</P>
+
+<P><CODE>
+  --($:~)-- cat /proc/mtrr<BR>
+  reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9<BR>
+  reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1</CODE></P>
+
+<P>这是正确的，显示我的Matrox G400有16MB显存存。我从XFree 4.x.x得到这个，它会自动地设定MTRR注册。</P>
+
+<P>如果没有什么自动工作，你将不得不手工做。首先，你必须找到基地址。你有3种方法找它：</P>
+
+<UL>
+  <LI>根据X11的启动信息，例如：
+    <P><CODE>(--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000<BR>
+    (--) SVGA: Linear framebuffer at 0xD8000000</CODE></P></LI>
+  <LI>从/proc/pci(使用lspci -v命令)：
+    <P>
+    <CODE>01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525</CODE>
+    <CODE>Memory at d8000000 (32-bit, prefetchable)</CODE>
+    </P></LI>
+  <LI>根据mga_vid内核驱动的信息(使用dmesg)：
+    <P><CODE>mga_mem_base = d8000000</CODE></P></LI>
+</UL>
+
+<P>接着让我们来确定显存大小。这十分容易，只要把显存大小变为十六进制，或者使用这个表格：</P>
+
+<TABLE BORDER=0>
+  <TR><TD>&nbsp;&nbsp;</TD><TD>1 MB</TD><TD WIDTH="10%"></TD><TD>0x100000</TD></TR>
+  <TR><TD></TD><TD>2 MB</TD><TD></TD><TD>0x200000</TD></TR>
+  <TR><TD></TD><TD>4 MB</TD><TD></TD><TD>0x400000</TD></TR>
+  <TR><TD></TD><TD>8 MB</TD><TD></TD><TD>0x800000</TD></TR>
+  <TR><TD></TD><TD>16 MB</TD><TD></TD><TD>0x1000000</TD></TR>
+  <TR><TD></TD><TD>32 MB</TD><TD></TD><TD>0x2000000</TD></TR>
+</TABLE>
+
+
+<P>你知道了基地址和显存大小，下面让我们进行MTRR注册！例如，对于上述32MB显存( size=0x2000000 )的Matrox显卡(base=0xd8000000)就执行：</P>
+
+
+<P><CODE>&nbsp;&nbsp;echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr</CODE></P>
+
+
+<P>并非所有CPU都支持MTRR。比如较老的K6-2[266MHz左右，步进值0]不支持MTRR，但是步进值12的就支持(用'<CODE>cat /proc/cpuinfo</CODE>'命令检查)。</P>
+
+
+<H4><A NAME="xv">2.3.1.2 Xv</A></H4>
+
+<P>在XFree86 4.0.2或者更新的版本下，你能使用XVideo扩展来使用你的显卡的硬件YUV例程。这是就是'-vo xv'所使用的。同时，
+这是支持调节亮度/对比度/色相/等等的驱动(除非你使用旧的，缓慢的DirectShow DivX解码器，什么驱动它都支持)，参见man page。</P>
+
+<P>为了使它工作，确信做如下检查：</P>
+
+<UL>
+  <LI>你必须使用XFree86 4.0.2或者更新的版本(以前的版本没有XVideo)</LI>
+  <LI>你的显卡确实支持硬件加速(现在的显卡都支持)</LI>
+  <LI>X加载了XVideo扩展，它是像这样的：
+
+    <P><CODE>&nbsp;&nbsp;(II) Loading extension XVideo</CODE></P>
+
+    <P>显示在/var/log/XFree86.0.log中</P>
+
+    <P>注意： 这只是加载XFree86的扩展。在正常的安装中，这是总被加载的，这并不意味着<B>显卡的</B>XVideo支持被加载了！</P>
+  </LI>
+  <LI>你的显卡在Linux下有Xv支持。为了检查，运行'xvinfo'，它是XFree86程序集的一部分。它应该显示一段很长的文字，类似于这样：
+  <PRE>
+	X_video Extension version 2.2
+	screen #0
+	  Adaptor #0: "Savage Streams Engine"
+	    number of ports: 1
+	    port base: 43
+	    operations supported: PutImage
+	    supported visuals:
+	      depth 16, visualID 0x22
+	      depth 16, visualID 0x23
+	    number of attributes: 5
+	(...)
+	    Number of image formats: 7
+	      id: 0x32595559 (YUY2)
+	        guid: 59555932-0000-0010-8000-00aa00389b71
+	        bits per pixel: 16
+	        number of planes: 1
+	        type: YUV (packed)
+	      id: 0x32315659 (YV12)
+	        guid: 59563132-0000-0010-8000-00aa00389b71
+	        bits per pixel: 12
+	        number of planes: 3
+	        type: YUV (planar)
+	(...etc...)
+  </PRE>
+    <P>它必须支持YUY2 packed和YV12 planar象素格式，<B>MPlayer</B>才能利用它。</P>
+  </LI>
+  <LI>最后，检查<B>MPlayer</B>是否编译了'xv'支持。
+    ./configure可以显示出来。</LI>
+</UL>
+
+
+<H5><A NAME="xv_3dfx">2.3.1.2.1 3dfx显卡</A></H5>
+
+<P>老的的3dfx驱动存在XVideo加速的问题，它不支持YUY2或者YV12，诸如此类。确定你的XFree86版本在4.2.0以上，
+它在YV12和YUY2模式下工作很好。以前的版本，包括4.1.0，<B>会在YV12下崩溃</B>。如果你使用-vo xv时遇到奇怪的问题，
+尝试使用SDL(它也有XVideo)看是否有帮助。细节请察看<A HREF="#sdl">SDL</A>部分。</P>
+
+<P><B>或者</B>，试试新的-vo tdfxfb驱动！ 参见<A HREF="#tdfxfb">tdfxfb</A>部分。</P>
+
+
+<H5><A NAME="xv_s3">2.3.1.2.2 S3显卡</A></H5>
+
+<P>S3 Savage3D应该能正常工作，不过对于Savage4，请使用XFree86 4.0.3或更新的版本(如果图象有问题，试试16bpp)。
+至于S3 Virge，虽然有xv支持，但是这种显卡实在太慢，因此你最好买了它。</P>
+
+<P><B>注意</B>：Savage显卡能显示YV12图像但是速度很慢(它需要做YV12->YUY2转化，因为Savage的硬件不能显示YV12)。
+因此当这个文档在什么地方说“这个有YV12输出，用这个，它快”的时候，并不完全是这样。试试
+<A HREF="http://www.mplayerhq.hu/MPlayer/contrib/Savage-driver/savage_drv.o.mmx2.bz2">这个驱动</A>，
+它使用MMX2完成这个任务，比X自己的驱动快。</P>
+
+
+<H5><A NAME="xv_nvidia">2.3.1.2.3 nVidia显卡</A></H5>
+
+<P>nVidia在Linux下不是很好的选择(nVidia认为，这<A HREF="users_against_developers.html#nvidia">并非真实情况</A>)..
+你将不得不使用二进制的非开源的nVidia驱动，nVidia的网站可以找到。标准XFree86驱动没有这些显卡的XVideo支持，
+因为nVidia没有公开源码/规格。</P>
+
+<P>据我所知最新的XFree86驱动包含了GeForce2和3的XVideo支持。</P>
+
+<P>Riva128显卡即使用nVidia的驱动也没有XVideo支持:(向nVidia抱怨去吧。</P>
+
+
+<H5><A NAME="xv_ati">2.3.1.2.4 ATI显卡</A></H5>
+
+<UL>
+  <LI><A HREF="http://www.linuxvideo.org/gatos">GATOS驱动</A>(除非你有Rage128或者Radeon，否则你应该使用它)缺省打开VSYNC。
+这意味着解码速度(！)与显示器的刷新率是同步的。如果觉得播放速度缓慢，以某种方式禁用VSYNC，或者把刷新率调到到n*(电影的fps)Hz。</LI>
+  <LI>Radeon VE -- 目前只有XFree86的CVS里有这种显卡的驱动，4.1.0版没有。同时没有电视支持。当然，
+使用<B>MPlayer</B>你能幸福地得到<B>加速</B>显示，有或没有<B>电视输出</B>，而且不需要任何库或者X。阅读<A HREF="#vidix">Vidix</A>一节。</LI>
+</UL>
+
+
+<H5><A NAME="xv_neomagic">2.3.1.2.5 NeoMagic显卡</A></H5>
+
+<P>这些显卡能在许多笔记本电脑里找到。不幸的是，X 4.2.0的驱动不能使用Xv，但是我们为你准备了一个经过修改，能够使用Xv的驱动。
+<A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">到这里下载</A>。
+这个驱动是由Stefan Seyfried提供的。</P>
+
+<P>像这样修改你的XF86Config使之能进行DVD大小的内容的回放：</P>
+
+<P>Section "Device"<BR>
+  &nbsp; &nbsp; <I>[...]</I><BR>
+  &nbsp; &nbsp; Driver "neomagic"<BR>
+  &nbsp; &nbsp; <B>Option "OverlayMem" "829440"</B><BR>
+  &nbsp; &nbsp; <I>[...]</I><BR>
+  EndSection</P>
+
+
+<H5><A NAME="xv_trident">2.3.1.2.6 Trident显卡</A></H5>
+
+<P>如果你想要在Trident显卡上使用xv，它在4.1.0下不工作，尝试XFree最新的CVS或者等候XFree 4.2.0。最新的CVS加入了Cyberblade XP显卡的全屏xv支持。</P>
+
+
+<H4><A NAME="dga">2.3.1.3 DGA</A></H4>
+
+
+<H5><A NAME="dga_summary">2.3.1.3.1 总论</A></H5>
+
+<P>这篇文件试图花些篇幅来解释DGA大概是什么以及<B>MPlayer</B>的DGA视频输出驱动能做什么(以及不能做什么)。</P>
+
+
+<H5><A NAME="dga_whatis">2.3.1.3.2 DGA是什么</A></H5>
+
+<P>DGA是Direct Graphics Access的简称，是一种使程序绕过X-服务器直接修改帧缓冲显存的方法。从技术角度说这是通过把帧缓冲显存映射到你的处理器的内存范围之内。
+只有你有超级用户权限的时候内核才允许这种操作。用root登录或者给<B>MPlayer</B>的执行文件设置SUID位(推荐使用！)可以做到这一点。</P>
+
+<P>DGA有两种版本： DGA1用于XFree 3.x.x和DGA2从XFree 4.0.1开始引入。</P>
+
+<P>DGA1只提供了前述的帧缓冲直接操作功能。你不得不使用XVidMode扩展来切换视频信号的分辨率。</P>
+
+<P>DGA2结合了XVidMode扩展的特性而且也允许切换显示的色彩深度。因此，虽然一般使用32位色X服务器，你也能切换到15位色深，反之亦然。</P>
+
+<P>然而DGA也有一些弊端。它似乎有些依赖于你使用的图形芯片和X服务器中控制该芯片的视频驱动。因此，它并不是对所有的系统都起作用...</P>
+
+
+<H5><A NAME="dga_installation">2.3.1.3.3 为MPlayer安装DGA支持</A></H5>
+
+<P>首先确保X装载了DGA扩展，察看/var/log/XFree86.0.log:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>(II) Loading extension XFree86-DGA</CODE></P>
+
+<P>可见，强烈推荐XFree86 4.0.x或更高版本，<B>MPlayer</B>的DGA驱动在./configure时会自动检测到，否则你可以用--enable-dga强行编译它。</P>
+
+<P>如果你的驱动不能切换到一个较小的分辨率，尝试使用选项-vm(只用于X 3.3.x)，-fs，-bpp，-zoom找一个你的电影适合的视频模式。目前没有转换功能:(</P>
+
+<P>成为root。DGA需要root权限来直接写显存。如果你想用普通用户运行它，给<B>MPlayer</B>设置SUID root权限：</P>
+
+<P><CODE>
+  &nbsp;&nbsp;&nbsp;&nbsp;chown root /usr/local/bin/mplayer<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;chmod 750 /usr/local/bin/mplayer<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;chmod +s /usr/local/bin/mplayer</CODE></P>
+
+<P>它现在也能被普通用户使用了。</P>
+
+<BLOCKQUOTE>
+  <B>警告：安全风险</B><BR>
+  这是一个<B>很大的</B>安全风险！永远不要在除了你之外还有人可以使用的服务器上这样做，因为他们能通过SUID root的<B>MPlayer</B>获得root权限。
+</BLOCKQUOTE>
+
+<P>现在使用<CODE>-vo dga</CODE>选项，开始使用(如此希望:))！
+  你也应该尝试看看<CODE>-vo sdl:dga</CODE>选项能否正常工作。它快得多。</P>
+
+
+<H5><A NAME="dga_resolution">2.3.1.3.4 切换分辨率</A></H5>
+
+<P>DGA驱动允许切换输出信号的分辨率。这样能避免使用(缓慢的)软件缩放同时又提供全屏图象。理想情况下，它将精确切换成视频数据的分辨率(除了为了保持长宽比)，
+但是X服务器仅允许切换到<CODE>/etc/X11/XF86Config</CODE>(XFree 4.0.X使用<CODE>/etc/X11/XF86Config-4</CODE>用于区别)中预定义的分辨率。
+它们被所谓的modelines定义并且依赖于你的视频硬件的能力。X服务器启动时扫描这个配制文件并且禁用那些不适用于你的硬件的modelines。你能通过X11的log文件找出
+哪些方式可用。它能在这里找到：
+<CODE>/var/log/XFree86.0.log</CODE>。</P>
+
+<P>modeline定义分辨率的一些例子参见附录A。</P>
+
+
+<H5><A NAME="dga_mplayer">2.3.1.3.5 DGA &amp; MPlayer</A></H5>
+
+<P><B>MPlayer</B>在两个地方使用DGA：SDL驱动能使用它(-vo sdl:dga)以及在DGA驱动(-vo dga)中使用。上面说的内容对两者都有效；
+在下列的几段中我将解释<B>MPlayer</B>中DGA驱动是如何工作的。</P>
+
+
+<H5><A NAME="dga_features">2.3.1.3.6 DGA驱动的特性</A></H5>
+
+<P>DGA驱动通过命令行中的-vo dga选项调用。默认操作是转换成与原来的视频尽可能接近的分辨率。它将忽略-vm和-fs选项(开启视频模式切换和全屏方式) 
+-- 它总试图通过切换显示模式尽可能多的覆盖你的屏幕，这样阻碍你的CPU使用一个单一的附加的周期来放大图像。
+如果你不喜欢它选择的模式你能强迫它选择最接近于你通过-x和-y选项规定的分辨率的模式。使用-v选项，DGA驱动将在一大堆别的东西中打印出你
+当前XF86-Config文件支持的所有分辨率的列表。
+如果是DGA2你也能通过使用-bpp选项强迫它使用一定的色彩深度。有效的色深是15，16，24和32。这取决于你的硬件对这些色深是否本地支持，
+还是通过某种(有可能很慢)的转化来完成的。</P>
+
+<P>如果你非常幸运，有足够显存的屏外缓冲区来存放整个图象，DGA驱动将使用双重缓冲，这能使电影播放更加平滑。它会告诉你双重缓冲是否被打开。</P>
+
+<P>双重缓冲的意思是在你的视频的当前帧被显示时，下一帧在屏外缓冲区中被绘制。当下一帧准备完毕时，
+图形芯片被告知下一帧在显存中的位置并且直接从那里将要显示的数据读出来。在此期间其它在记忆中的缓冲器将再一次被装满新的视频数据。</P>
+
+<P>双重缓冲可以用-double选项开启也可以用-nodouble选项禁止。目前缺省选项是禁用双重缓冲。屏幕显示功能(OSD)在使用DGA驱动模式时必须打开双重缓冲功能。
+然而，使用双重缓冲可能导致较大的速度下降(在我的K6-II+ 525上它多占用20%的CPU时间！)，下降程度取决于DGA操作你的硬件的方法。</P>
+
+
+<H5><A NAME="dga_speed">2.3.1.3.7 速度问题</A></H5>
+
+<P>一般来说，DGA帧缓冲至少应该跟X11驱动一样快同时还有全屏图象的附加好处。对<B>MPlayer</B>打印出的百分比速度的评价应该小心，
+比如X11驱动它们并不包括X-服务器真正绘制所用的时间。开一个终端连到你的机器的串口上运行top命令看看你的机器真正在干什么...</P>
+
+<P>一般来说，使用DGA相对“普通的”使用X11所产生的速度提高高度依赖于你的显卡，以及X-服务器中它的模块做了多少优化。</P>
+
+<P>如果你的系统较慢，最好使用15或者16bit色深，因为他们仅仅要求32bit显示的显存带宽的一半。</P>
+
+<P>即使你的显卡自身就支持32bit色深，使用24bit的色深也是个好主意，因为它被32/32方式少传输25%的数据。</P>
+
+<P>我曾见过一些AVI文件能在Pentium MMX 266上播放。AMD K6-2 CPU在400 MHZ以上的应该可以工作。</P>
+
+
+<H5><A NAME="dga_bugs">2.3.1.3.8 已知的bug</A></H5>
+
+<P>嗯，据一些XFree的开发者说，DGA像头野兽。他们告诉你不要使用它。并非对任何芯片的驱动它的操作都是没有瑕疵的。</P>
+
+<UL>
+  <LI>在XFree 4.0.3的nv.o有一个bug导致奇怪的颜色。</LI>
+  <LI>ATI驱动在使用DGA完成之后要不只一次的切换显示模式。</LI>
+  <LI>一些驱动无法切换会正常的分辨率(用Ctrl-Alt-小键盘+，-来手工切换)。</LI>
+  <LI>一些驱动显示奇怪的颜色。</LI>
+  <LI>一些驱动错误报告他们映射到处理器地址空间中的显存数量，这样vo-dga将无法使用双重缓冲(SIS?)。</LI>
+  <LI>一些驱动好像根本找不到一个可用的模式。在这种情况下，DGA驱动将crash并报告100000x100000的无效模式之类的东西...</LI>
+  <LI>OSD只能在双重缓冲开启的时候才能工作。</LI>
+</UL>
+
+
+<H5><A NAME="dga_future">2.3.1.3.9 未来的工作</A></H5>
+
+<UL>
+  <LI>为OSD提供新的X11的渲染接口</LI>
+  <LI>我的TODO列表在什么地方????:-(((</LI>
+</UL>
+
+
+<H5><A NAME="dga_modelines">2.3.1.3.A 一些modelines </A></H5>
+
+<PRE>
+  Section "Modes"
+    Identifier    "Modes[0]"
+    Modeline	"800x600"  40     800 840 968 1056  600 601 605 628
+    Modeline	"712x600"  35.0   712 740 850 900   400 410 412 425
+    Modeline	"640x480"  25.175 640 664 760 800   480 491 493 525
+    Modeline 	"400x300"  20     400 416 480 528   300 301 303 314 Doublescan
+    Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
+    Modeline	"352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
+    Modeline	"320x240"  12.588 320 336 384 400   240 245 246 262 Doublescan
+  EndSection
+</PRE>
+
+<P>这些条目在我的Riva128芯片上工作的很好，使用nv.o的X服务器驱动模块。</P>
+
+
+<H5><A NAME="dga_bug_reports">2.3.1.3.B 报告bug</A></H5>
+
+<P>如果你在使用DGA驱动时遇到麻烦请别介意，发一个bug报告给我(e-mail地址在下面)。请用-v选项启动<B>MPlayer</B>并且在bug报告中包括所有以vo-dga开始的输出行：</P>
+
+<P>请一并附带你使用的X11的版本，显卡和你的CPU类型。X11驱动模块(在XF86-Config中定义)也可能有帮助。谢谢！</P>
+
+<P><I>Acki (acki@acki-netz.de，www.acki-netz.de)</I></P>
+
+
+<H4><A NAME="sdl">2.3.1.4 SDL</A></H4>
+
+<P>SDL(Simple Directmedia Layer)基本上是一种统一的视频/音频接口。使用它的程序只要知道SDL，而不需要了解SDL实际上使用的视频或音频驱动。
+例如使用SDL的Doom移植能在svgalib，aalib，X，fbdev，和其他东西上使用，你仅需要用环境变量SDL_VIDEODRIVER规定(例如)使用的视频驱动。嗯，至少在理论上。</P>
+
+<P>在<B>MPlayer</B>中，我们使用它的X11驱动的软件缩放功能，用于不支持XVideo的芯片/显卡，直到我们做出我们自己的(更快，更好)的软件缩放代码。
+同时我们使用它的aalib输出，但是现在我们自己的更合适的了。它的DGA模式比我们的好，直到最近。现在明白了？ :)</P>
+
+<P>它对一些buggy的驱动/显卡也有帮助，例如视频跳跃(不是系统缓慢的问题)，或者音频延迟。</P>
+
+<P>SDL视频输出支持在电影下面，(如果出现)的黑条上显示字幕。</P>
+
+<P><B>这里是一些关于SDL输出的控制选项：</B></P>
+
+<DL>  
+  <DT><CODE>-vo sdl:name</CODE></DT>
+  <DD>规定使用的sdl视频驱动(例如aalib，dga，x11)</DD>
+  
+  <DT><CODE>-ao sdl:name</CODE></DT>
+  <DD>规定使用的sdl音频驱动(例如dsp，esd，arts)</DD>
+  
+  <DT><CODE>-noxv</CODE></DT>
+  <DD>禁用XVideo硬件加速</DD>
+  
+  <DT><CODE>-forcexv</CODE></DT>
+  <DD>尝试强制XVideo加速</DD>
+
+</DL>
+  
+<TABLE BORDER=0>
+  <TR><TD COLSPAN=4><P><B>SDL控制键：</B></P></TD></TR>
+  <TR><TD></TD><TD><CODE>F</CODE></TD><TD></TD><TD>切换全屏/窗口方式</TD></TR>
+  <TR><TD></TD><TD><CODE>C</CODE></TD><TD></TD><TD>循环切换可用的全屏方式</TD></TR>
+  <TR><TD></TD><TD><CODE>W与S</CODE></TD><TD></TD><TD>*和/的映射(音量控制)</TD></TR>
+</TABLE>
+
+<H4>已知的bug：</H4>
+
+<UL>
+  <LI>在sdl:aalib控制台驱动下按下的键将永远重复。(使用-vo aa！)它是SDL中的bug，我无法改变它(用SDL 1.2.1测试)。</LI>
+</UL>
+
+
+<H4><A NAME="svgalib">2.3.1.5 SVGAlib</A></H4>
+
+<H4>安装</H4>
+<P>你必须安装svgalib和它的开发包来使<B>MPlayer</B>编译它的SVGAlib驱动(自动检测，但是也能强制使用)，
+别忘了编辑/etc/vga/libvga.config来配合你的显卡&amp;监视器。</P>
+
+<H4>注意</H4>
+<P>一定不要用-fs选项，因为它将导致使用软件缩放，速度会很慢，如果你确实需要，使用<CODE>-sws 4</CODE>选项，
+质量会有点差，但是无论如何它更快。</P>
+
+<H4>EGA(4bpp)支持</H4>
+<P>SVGAlib结合了EGAlib，使得<B>MPlayer</B>有可能用16种颜色播放任何电影，下列的配制中可以使用：</P>
+
+<UL>
+  <LI>EGA显卡和EGA显示器： 320x200x4bpp，640x200x4bpp，640x350x4bpp</LI>
+  <LI>EGA显卡和CGA显示器： 320x200x4bpp，640x200x4bpp</LI>
+</UL>
+
+<P>bpp(每象素比特数)的值必须手工设为4：<BR>
+  &nbsp; &nbsp; <CODE>-bpp 4</CODE><BR>
+  电影可能必须被按比例缩小到EGA适合的模式：<BR>
+  &nbsp; &nbsp;<CODE>-vop scale=640:350</CODE>或者<BR>
+  &nbsp; &nbsp;<CODE>-vop scale=320:200</CODE><BR>
+  为做到这一点我们需要使用快速但低质量的例程：<BR>
+  &nbsp; &nbsp;<CODE>-sws 4</CODE><BR>
+  也许自动纠正长宽比的功能需要关闭：<BR>
+  &nbsp; &nbsp;<CODE>-noaspect</CODE></P>
+
+
+<H4><A NAME="fbdev">2.3.1.6 帧缓冲输出(FBdev)</A></H4>
+
+<P>是否编译FBdev目标是在./configure期间自动检测的。阅读内核源码中的帧缓冲的文档(Documentation/fb/*)来了解更多信息。</P>
+
+<P>如果你的显卡不支持VBE 2.0标准(较旧的ISA与PCI显卡，诸如S3 Trio64)，仅支持VBE 1.2(或者更老的?)：
+嗯，VESAfb仍然是可用的，但是你将必须在启动Linux之前装载SciTech Display Doctor(从前叫UniVBE )。
+用DOS启动盘或随便什么。同时，别忘了注册你的UniVBE ;))</P>
+
+<P>FBdev输出有些除了以前说过的参数外的附加参数：</P>
+
+<DL>
+  <DT><CODE>-fb</CODE></DT>
+  <DD>规定使用的帧缓冲设备(/dev/fb0)</DD>
+  
+  <DT><CODE>-fbmode</CODE></DT>
+  <DD>使用的模式名(按照/etc/fb.modes文件)</DD>
+  
+  <DT><CODE>-fbmodeconfig</CODE></DT>
+  <DD>模式的配置文件方式(默认为/etc/fb.modes)</DD>
+  
+  <DT><CODE>-monitor_hfreq</CODE></DT>
+  <DT><CODE>-monitor_vfreq</CODE></DT>
+  <DT><CODE>-monitor_dotclock</CODE></DT>
+  <DD><STRONG>重要的</STRONG>参数，参见<CODE>example.conf<CODE></DD>
+</DL>
+
+<P>如果你想要切换到某个具体模式，那么使用</P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -vm -fbmode (NameOfMode) filename</CODE></P>
+
+<UL>
+  <LI><B>-vm</B>单独使用将从/etc/fb.modes中选出最适合的模式。也可以与-x和-y选项一起使用。-flip选项只有当电影的像素格式
+与视频模式的像素格式相同时才支持。注意bpp的值，fbdev驱动将尝试使用当前值，如果你设定-bpp选项，那么就是那个值。</LI>
+  <LI><B>-zoom</B>选项不支持(软件定标太慢了)。-fs选项不支持。你不能使用8bpp(或者更少)的模式。</LI>
+  <LI>你有可能想要关掉光标：<CODE>echo -e '\033[?25l'</CODE>或<CODE>setterm -cursor off</CODE><BR>
+    和屏幕保护：<CODE>setterm -blank 0</CODE><BR>
+    要重新开启光标：<CODE>echo -e '\033[?25h'</CODE>或<CODE>setterm -cursor on</CODE></LI>
+</UL>
+
+<P>注意：使用VESA 帧缓冲时FBdev视频方式不能改变，也不要要求这个功能，因为它不是由于<B>MPlayer</B>自身的限制。</P>
+
+
+<P><B><A NAME="mga_vid">2.3.1.7 Matrox 帧缓冲(mga_vid)</A></B></P>
+
+<P>这一段是关于Matrox G200/G400/G450/G550 BES (Back-End Scaler)的支持，mga_vid内核驱动。它现在是由我(A'rpi)开发的，
+它有三重缓冲的硬件VSYNC支持。它在帧缓冲控制台下和X下都可以工作。</P>
+
+<P><B>警告</B>：在非Linux系统上，使用<A HREF="#vidix">VIDIX </A>实现mga_vid！</P>
+
+
+<P><B>安装:</B></P>
+<OL>
+  <LI>为了使用它，你首先必须编译mga_vid.o：</P>
+    <P><CODE>cd drivers<BR>
+      make</CODE></P></LI>
+  <LI>然后创建/dev/mga_vid设备：
+    <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mknod /dev/mga_vid c 178 0</CODE></P>
+    <P>然后这样加载驱动</P>
+    <P><CODE>insmod mga_vid.o</CODE></P></LI>
+  <LI>你应该使用'dmesg'命令检查显存大小的检测结果。如果不对，那么使用mga_ram_size选项(先rmmod mga_vid)，以MB为单位指定显卡的显存大小：
+    <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;insmod mga_vid.o mga_ram_size=16</CODE></P></LI>
+  <LI>为了使它在需要时自动地加载/卸载，首先在<CODE>/etc/modules.conf</CODE>的末尾加上下面这一行：
+    <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;alias char-major-178 mga_vid</CODE></P>
+    <P>然后把<CODE>mga_vid.o</CODE>模块复制到<CODE>/lib/modules/&lt;kernel version&gt;/somewhere</CODE>下的适当位置。</P>
+    <P>然后运行</P>
+    <P><CODE>depmod -a</CODE></P></LI>
+  <LI>你现在需要(重新)编译<B>MPlayer</B>，./configure将发现/dev/mga_vid并且编译'mga'驱动。如果你使用matroxfb控制台，
+  在<B>MPlayer</B>中用'-vo mga'使用它，或者在XFree86 3.x.x或者4.x.x下的使用'-vo xmga'。</P>
+</OL>
+
+<P>mga_vid驱动能与Xv协同工作。</P>
+
+<P>可以阅读<CODE>/dev/mga_vid</CODE>设备文件(例如<CODE>cat /dev/mga_vid</CODE>)来查找一些信息，
+也可以通过写它来调整亮度：<CODE>echo "brightness=120" > /dev/mga_vid</CODE></P>
+
+
+<H4><A NAME="tdfxfb">2.3.1.8 3dfx YUV支持(tdfxfb)</A></H4>
+
+<P>这个驱动使用内核的tdfx帧缓冲驱动来利用YUV加速播放电影。你需要一个支持tdfxfb的内核，
+然后用<CODE>./configure --enable-tdfxfb</CODE>重新编译</P>
+
+
+<H4><A NAME="opengl">2.3.1.9 OpenGL输出</A></H4>
+
+<P><B>MPlayer</B>支持使用OpenGL显示电影，但是如果你的平台/驱动支持xv，就象使用linux的PC机那样，就使用xv，OpenGL的效果与它相比相当坏。
+如果你只有没有xv支持的X11程序，OpenGL是可用的选择。</P>
+
+<P>不幸的是并非所有驱动都支持这个特性。Utah-GLX驱动(针对XFree86 3.3.6)对所有显卡都支持它。访问
+<A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A>了解安装它的细节问题。</P>
+
+<P>XFree86(DRI)>= 4.0.3支持Matrox和Radeon显卡的OpenGL，4.2.0或更新版本支持Rage128。
+访问<A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A>以寻找下载和安装指导。</P>
+
+
+<H4><A NAME="aalib">2.3.1.11 AAlib -- 文本方式显示</A></H4>
+
+<P><B>AAlib </B>是一个用于在文本模式下显示图形的库，它使用强大的ASCII渲染器。有许多程序提供对它的支持，像Doom，Quake等等。
+<B>MPlayer</B>包含一个针对它的实用的驱动。如果./configure发现安装了aalib，aalib的libvo驱动将被编译。</P>
+
+<TABLE BORDER=0>
+  <TR><TD COLSPAN=4><P><B>你能在AA窗口中使用一些控制键来改变渲染参数：</B></P></TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD><TD><CODE>1</CODE></TD><TD>&nbsp;&nbsp;</TD><TD>减少对比度</TD></TR>
+  <TR><TD></TD><TD><CODE>2</CODE></TD><TD></TD><TD>增加对比度</TD></TR>
+  <TR><TD></TD><TD><CODE>3</CODE></TD><TD></TD><TD>减少亮度</TD></TR>
+  <TR><TD></TD><TD><CODE>4</CODE></TD><TD></TD><TD>增加亮度</TD></TR>
+  <TR><TD></TD><TD><CODE>5</CODE></TD><TD></TD><TD>打开/关闭快速渲染</TD></TR>
+  <TR><TD></TD><TD><CODE>6</CODE></TD><TD></TD><TD>设置抖动方式(不抖动, 误差分布算法, Floyd Steinberg算法)</TD></TR>
+  <TR><TD></TD><TD><CODE>7</CODE></TD><TD></TD><TD>反转图象</TD></TR>
+  <TR><TD></TD><TD><CODE>a</CODE></TD><TD></TD><TD>转换aa和<B>MPlayer</B>的控制键</TD></TR>
+</TABLE>
+
+<P><B>下列的命令行选项能够使用：</B></P>
+<DL>
+  <DT><CODE>-aaosdcolor=V</CODE></DT>
+  <DD>改变OSD颜色</DD>
+  
+  <DT><CODE>-aasubcolor=V</CODE></DT>
+  <DD>改变字幕颜色
+    <P><I>V的值可以是：(0/正常，1/暗色，2/粗体，3/粗体字体，4/反转，5/特殊) </I></P></DD>
+</DL>
+    
+<P><B>AAlib自身也提供了大量的选项。这里是一些重要的：</B></P>
+<DL>
+  <DT><CODE>-aadriver</CODE></DT>
+  <DD>设置推荐aa的驱动( X11，curses，Linux )</DD>
+  
+  <DT><CODE>-aaextended</CODE></DT>
+  <DD>使用所有的256个字符</DD>
+  
+  <DT><CODE>-aaeight</CODE></DT>
+  <DD>使用8比特的ASCII</DD>
+  
+  <DT><CODE>-aahelp</CODE></DT>
+  <DD>列出所有的aalib选项</DD>
+</DL>
+
+<P>注意：渲染效果是十分消耗CPU的，特别是使用AA-on-X(在X上使用aalib)，在标准的非帧缓冲控制台上的CPU消耗是最小的，
+用SVGATextMode设置一个大的文本模式，然后再欣赏电影！(大力神显卡的第二个接口就不错:))(任何人能加强fbdev做hgafb?
+的转化与抖动的效率将是不错的：)</P>
+
+<P>如果你的计算机速度不足以渲染所有帧就使用<CODE>-framedrop</CODE>选项</P>
+
+<P>在终端中播放电影时使用Linux驱动你将会得到更好的速度和画面质量，不要用curses(<CODE>-aadriver Linux</CODE>)。
+但是为此你需要<CODE>/dev/vcsa&lt;terminal&gt;</CODE>的写权限。那是aalib不能自动检测的，但vo_aa会尝试搜索最佳模式，
+进一步的调节问题参见<A HREF="http://aa-project.sourceforge.net/tune/">http://aa-project.sourceforge.net/tune/</A>。</P>
+
+
+<H4><A NAME="vesa">2.3.1.12 VESA -- 输出到VESA BIOS</A></H4>
+
+<P>这个驱动被设计并引入作为一个<B>通用的驱动</B>用于任何有VESA VBE 2.0兼容的BIOS的显卡。这驱动的另一个优点是能试图迫使在其上进行电视输出。<BR>
+  <B>VESA BIOS EXTENSION(VBE)3.0版 日期：1998年九月16日</B>(第70页)说：</P>
+
+<BLOCKQUOTE>
+  <B>双重控制器设计</B><BR>
+  VBE 3.0支持双重控制器设计基于如下假设，由于两个控制器一般是同样的OEM提供的，被同一块显卡上的一个的BIOS ROM，所以可以对程序隐藏有两个
+控制器在作用的事实。这限制了同时的使用独立的控制器的功能，但是允许VBE 3.0发布前的程序能正常工作。VBE函数00h(返回控制器信息)返回经过合并的
+两个控制器的信息，包括经过合并的可供使用的方式的列表。当程序选择一个方式时，相应的控制器被激活。然后剩下的VBE函数都作用在激活的控制器上。
+</BLOCKQUOTE>
+
+<P>因此，你有可能通过这个驱动得到电视输出。<BR>
+  (我猜想电视至少经常地是使用独立的头或者独立的输出)。</P>
+
+<H4>优点：</H4>
+
+<UL>
+  <LI><B>即使Linux不能识别</B>你的视频硬件你或许还能看电影。</LI>
+  <LI>你不需要在你的Linux上安装任何图形相关的东西(像X11(或者叫XFree86)，fbdev诸如此类)。这个驱动能从<B>文本方式</B>运行。</LI>
+  <LI>你有机会获得<B>可用的电视输出</B>。(至少已知ATI的显卡可以)。</LI>
+  <LI>这个驱动调用<B>int 10h</B>中断因此它不是模拟器 -- 它<B>实时</B>调用<B>真正的</B>BIOS中的<B>真正的</B>功能。(效果不错 -- 按vm86方式)。</LI>
+  <LI>你可以对它使用Vidix，这样能加速视频显示<B>同时</B>也加快电视输出！(ATI显卡推荐)</LI>
+</UL>
+
+<H4>缺点：</H4>
+
+<UL>
+  <LI>它只能在<B>x86系统</B>上工作。</LI>
+  <LI>它只能由<B>root</B>使用。</LI>
+  <LI>它目前只有<B>Linux</B>可用。</LI>
+</UL>
+
+<P>使用<B>GCC 2.96</B>就不要使用这个驱动！它将不能工作！</P>
+
+<P><B>这些命令行的选项目前可用于VESA：</B></P>
+<DL>
+  <DT><CODE>-vo vesa:opts</CODE></DT>
+  <DD>当前能识别的： <B>dga</B>强迫dga方式，<B>nodga</B>禁用dga方式。注意：你能省略这些参数来开启<B>自动检测</B>dga方式。
+  (在未来也将设定诸如刷新率，交错式，双重扫描式诸如此类的模式参数。例如： i43，85，d100)</DD>
+  
+  <DT><CODE>-screenw, -screenh, -bpp</CODE></DT>
+  <DD>强制使用用户自定义的模式</DD>
+  
+  <DT><CODE>-x, -y</CODE></DT>
+  <DD>设置用户自定义模式的预采数</DT>
+  
+  <DT><CODE>-zoom</CODE></DT>
+  <DD>使用用户自定义模式的预采数</DD>
+  
+  <DT><CODE>-fs</CODE></DT>
+  <DD>把图像缩放到全屏幕</DD>
+  
+  <DT><CODE>-fs -zoom</CODE></DT>
+  <DD>将用户自定义的预采数缩放到全屏幕</DD>
+  
+  <DT><CODE>-double</CODE></DT>
+  <DD>使用双重缓冲。(只用于DGA方式)。会比单一缓冲慢，但没有闪烁。</DD>
+</DL>
+
+<H4>已知的问题和绕过办法：</H4>
+
+<UL>
+  <LI>如果你在你的Linux机器上安装了<B>NLS</B>并且从文本方式运行VESA驱动，那么<B>MPlayer</B>终止后你将看到<B>ROM字体</B>
+而不是本地的字体。你可以重新加载本地的字体例如在Mandrake中使用<B><I>setsysfont</I></B>。</BR>
+    (<B>提示：</B>相同的工具也用于fbdev的地方化)。</LI>
+  <LI>一些<B>Linux显卡驱动</B>不更新在DOS内存中的活动的<B>BIOS模式</B>。因此如果你有这样问题 -- 总是只从<B>文本方式</B>使用VESA驱动。
+否则，文本方式(#03)总要被激活接着你将需要重起你的计算机。</LI>
+  <LI>通常在终止VESA驱动之后你将看到<B>黑屏</B>。为了把你的屏幕回复原状 -- 只要切换到其它控制台(通过按<B>Alt-Fx</B>)然后再用
+同样的方法切换回你以前的控制台。</LI>
+  <LI>为了得到<B>可用的电视输出</B>你需要在启动导入你的电脑之前将电视连接器插上，因为视频BIOS只在自举过程中进行一次初始化。</LI>
+</UL>
+
+
+<P><B><A NAME="x11">2.3.1.13 X11</A></B></P>
+
+<P>尽量避免使用它。输出到X11(使用共享内存扩展)，完全没有硬件加速。支持(MMX/3DNow与SSE加速，但是仍然缓慢的)软件缩放，
+使用选项<CODE>-fs -zoom</CODE>。大多数显卡有硬件缩放支持，使用<CODE>-vo xv</CODE>对他们输出，或者对于Matroxes使用<CODE>-vo xmga</CODE>。</P>
+
+<P>问题在于大多数显卡的驱动在第二个接口/电视接口上不支持硬件加速。在那些情况下，你将看到绿色和蓝色的彩色窗口而不是电影。
+这是这个驱动方便利用的地方，但是你需要强大的CPU来使用软件缩放。不要使用SDL驱动的软件输出+缩放，它的图象质量太差！</P>
+
+<P>软件缩放是十分缓慢的，你最好尝试用改变视频模式的方法代替它。它十分简单。参见<A HREF="#dga_modelines">DGA一节的modelines</A>，
+并且将他们插入到你的XF86Config。</P>
+
+<UL>
+  <LI>如果你有XFree86 4.x.x -- 使用<CODE>-vm</CODE>选择。它将切换到适合你的电影的分辨率。如果你的XFree86不是：</LI>
+  <LI>使用XFree86 3.x.x -- 你必须使用<B>CTRL-ALT-+</B>和<B>-</B>控制键循环可用的分辨率。</LI>
+</UL>
+
+<P>如果你调整不到你设定的模式，检查XFree86的输出。有些驱动不能使用低分辨率视频方式所需要的低的像素频率。</P>
+
+
+<P><B><A NAME="vidix">2.3.1.14 VIDIX</A></B></P>
+
+<P>VIDIX是<B>VID</B>eo <B>I</B>nterface for *ni<B>X</B>的缩写。<BR>
+  VIDIX被设计和引入作为快速的用户空间驱动的接口提供类似mga_vid为了Matrox显卡提供的这样视频性能的。它也十分易于移植。</P>
+
+<P>这个接口被设计来作为一个将存在的视频加速接口(就是mga_vid，rage128_vid，radeon_vid，pm3_vid )统一到一个固定的系统的尝试。
+它给芯片提供BES(BackEnd  scalers)或OV(Video Overlays)之类的高层接口。它不为那些图像服务器该做的事情提供底层接口。
+(我不想跟X11开发组在切换图像模式上竞争)。即这接口的主要目的是充分提高视频回放的速度。</P>
+
+<H4>用法</H4>
+
+<UL>
+  <LI>你能使用独立的视频输出驱动：<CODE>-vo xvidix</CODE><BR>
+    这个驱动被设计为使用VIDIX技术的X11的前端。它要求X服务器而且仅仅只能在X服务器下工作。</LI>
+  <LI>你能在若干视频的输出驱动中使用VIDIX副驱动，诸如：<BR>
+    <CODE>-vo vesa:vidix</CODE>(<B>只用于Linux</B>)和<CODE>-vo fbdev:vidix</CODE></LI>
+</UL>
+
+实际上什么视频输出驱动与<B>VIDIX</B>配合使用并不重要。
+
+<H4>要求</H4>
+
+<UL>
+  <LI>视频显卡应该工作于图形方式(我所以写<B>应该</B>只是因为我在文本方式下测试了它 -- 它能工作但是输出效果很可怕 ;) 对它还是使用AAlib)。<BR>
+    <I>注意：每个人能通过注释掉vo_vesa驱动的模式切换部分的方式尝试这个技巧。</I></LI>
+  <LI><B>MPlayer</B>的视频输出驱动应该知道活动的视频方式和能够告诉达到VIDIX副驱动服务器的一些视频特性。</LI>
+</UL>
+
+我希望可能<B>MPlayer</B>所有的视频输出驱动都能识别<CODE>:vidix</CODE>副驱动。
+
+<H4>使用方式</H4>
+
+<P>当VIDIX被用作<B>副驱动</B>时(<CODE>-vo vesa:vidix</CODE>)视频方式的配置由视频输出设备执行(简单来说就是<B>vo_server</B>)。
+因此，你能对<B>MPlayer</B>使用与vo_server同样的命令行指令。此外，它能使用<CODE>-double</CODE>作为全局的参数。
+(我建议至少在使用ATI显卡时对VIDIX使用这个参数)。<BR>
+   至于<CODE>-vo xvidix</CODE>：目前它能识别下列的选项： <CODE>-fs -zoom -x -y -double</CODE>。</P>
+
+<P>你还能在命令行中使用第三个副参数直接制定VIDIX的驱动：<BR>
+  <BR>
+  &nbsp;&nbsp;<code>mplayer -vo xvidix:mga_vid.so -fs -zoom -double
+    file.avi</code><BR>
+  or<BR>
+  &nbsp;&nbsp;<code>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp
+    32 file.avi</code><BR>
+  <BR>
+  但这有点危险，所以你不应该这么做。在这种情况下，被指定的驱动会被强制使用而其结果是无法预计的(它可以把你的计算机<B>锁死</B>)。
+只有在你绝对确信它能工作，而<B>MPlayer</B>没有自动选择它时，你才能这么做。请把情况报告给开发者。
+正确的使用方法是使用没有参数的VIDIX来使用驱动的自动检测。</P>
+
+<P>VIDIX是十分新的技术所以在你的系统(OS=abc CPU=xyz)上它极有可能不能正常工作。在这种情况下，你唯一的解决办法是移植它(主要libdha)。
+但它在X11能正常工作的那些系统的上有正常工作的希望。</P>
+
+<BLOCKQUOTE>
+  <B>警告：安全风险</B><BR>
+  不幸的是你<B>必须</B>有<B>ROOT</B>权限才能使用VIDIX因为需要直接硬件写入。至少给<B>MPlayer</B>的可执行文件设置<B>SUID</B>位。</P>
+</BLOCKQUOTE>
+
+<H4>视频均衡器</H4>
+
+<P>这是特别为了VIDIX植入的视频均衡器。你能通过man page里描述的<B>1-8</B>数字键或者命令行参数来使用它。<B>MPlayer</B>能识别下列的选项：</P>
+
+<DL>
+  <DT><CODE>-brightness</CODE></DT>
+  <DD>调整视频输出的<B>亮度</B>。它不等同于在显示器面板上或电视上的亮度调整。它把白屏的视频信号的RGB成分逐渐改变到黑屏</DD>
+  
+  <DT><CODE>-contrast</CODE></DT>
+  <DD>调整视频输出的<B>对比度</B>。工作方式跟调整亮度差不多</DD>
+  
+  <DT><CODE>-saturation</CODE></DT>
+  <DD>调整视频输出的<B>饱和度</B>。通过使用这个选项你可以获得灰度输出。</DD>
+  
+  <DT><CODE>-hue</CODE></DT>
+  <DD>调整视频输出的<B>色相</B>。通过使用这个选项你可以获得图像的彩色负片。</DD>
+  
+  <DT><CODE>-red_intensity</CODE></DT>
+  <DD>调整视频信号的<B>红色</B>部分的强度。</DD>
+  
+  <DT><CODE>-green_intensity</CODE></DT>
+  <DD>调整视频信号的<B>绿色</B>部分的强度。</DD>
+  <DT><CODE>-blue_intensity</CODE></DT>
+  <DD>调整视频信号的<B>蓝色</B>部分的强度。</DD>
+</DL>
+
+<P>每一参数的取值可以从<B>-1000</B>到<B>+1000</B>。<BR>
+  每一参数的默认值<B>0</B>。</P>
+
+<P><B>注意：</B>并非所有驱动都支持所有这些参数。目前只有<B>radeon_vid.so</B>完全支持视频均衡器。
+  其它驱动部分地仅仅部分地支持这些选择。</P>
+
+<P><B>例子：</B><BR>
+  <CODE>mplayer -vo vesa:vidix -brightness -300 -contrast 200
+  filename.avi</CODE><BR>
+  or<BR>
+  <CODE>mplayer -vo xvidix -red_intensity -50 -saturation 400 -hue 300
+  filename.vob</CODE></P>
+
+
+<P><B><A NAME="zr">2.3.1.15 Zr</A></B></P>
+
+<P>这是用于那些MJPEG视频捕捉/回放显卡(经过DC10+和Buz的测试，对LML33，DC10应该也能工作)的显示驱动(<CODE>-vo zr</CODE>)。
+驱动通过把每帧图像编码成为jpeg格式和然后把它发送到显卡来工作。在jpeg编码时要使用<B>libavcodec</B>，而且必须使用。</P>
+用特殊的<I>cinerama</I>模式，你可以通过两个投影仪和两块MJPEG卡用真正的宽银幕方式观看电影。根据分辨率和质量的设置，这个
+驱动可能要求极强的CPU处理能力，如果你的机器太慢的话记住使用<CODE>-framedrop</CODE>，注意：我的AMD K6-2 350MHz(加上
+<CODE>-framedrop</CODE>选项)足够看VCD尺寸的东西和经过缩小的电影
+
+<P>这个驱动需要一个内核驱动，可以在<A HREF="http://mjpeg.sourceforge.net">http://mjpeg.sourceforge.net</A>找到，
+你必须先让它工作。MJPEG卡的存在能被configure脚本自动检测到，如果自动检测失败，用这个命令强制检测
+
+<PRE>
+  ./configure --enable-zr
+</PRE>
+
+<P>驱动的输出可以用一些选项设置，在man page里面可以找到一份长长的可用选项的描述，一个比较短的选项列表可以运行这个命令获得
+
+<PRE>
+  mplayer -zrhelp
+</PRE>
+
+
+<P>缩放和OSD (on screen display)这类功能这个驱动不能处理，但可以用视频滤镜来完成，例如你有一个分辨率是<CODE>512x272</CODE>
+的电影，而你希望用你的DC10+用全屏幕观看，主要有三种可能的方法，你可以把电影宽度缩放到<CODE>768</CODE>，<CODE>384</CODE>，
+或者<CODE>192</CODE>。考虑到运行速度和质量的原因，我会选择使用快速二次线型软件缩放滤镜把电影缩放到<CODE>384x204</CODE>。
+命令行是这样的
+
+<PRE>
+  mplayer -vo zr -sws 0 -vop scale=384:204 movie.avi
+</PRE>
+
+<P>画面的切割可以用<CODE>crop</CODE>滤镜也可以用驱动自己完成。假设电影太宽了，在你的机器上显示不了，那么你会想要用
+<CODE>-zrcrop</CODE>来切割电影的宽度，那么你应该输入下面的命令
+
+<PRE>
+  mplayer -vo zr -zrcrop 720x320+80+0 benhur.avi
+</PRE>
+
+  如果你想要使用<CODE>crop</CODE>滤镜，你可以运行
+
+<PRE>
+  mplayer -vo zr -vop crop=720:320:80:0 benhur.avi
+</PRE>
+
+<P>多个<CODE>-zrcrop</CODE>就会调用<I>cinerama</I>模式，你可以把电影投射到几个电视或者投影仪上来制造一个大银幕，设想你有
+两个投影仪，左边那个连到你的机器的<CODE>/dev/video1</CODE>而右边那个连到你的机器的<CODE>/dev/video0</CODE>上的DC10+上，
+电影的分辨率是<CODE>704x288</CODE>，同时假设你希望右边的投影仪显示黑白效果而右边的投影仪显示的用质量<CODE>10</CODE>来显示jpeg帧
+那么你需要使用下列命令：
+
+<PRE>
+  mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
+          -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 movie.avi
+</PRE>
+
+<P>你发现在第二个<CODE>-zrcrop</CODE>之前出现的选项只作用于DC10+，而第二个<CODE>-zrcrop</CODE>之后的选项作用于你的机器。
+在<I>cinerama</I>中能使用的MJPEG卡最多为4块，所以你可以制作一片<CODE>2x2</CODE>的视频墙</P>
+
+<P>最后还有一个重要的注意事项：不要在回放期间在回放设备上启动或停止XawTV，它将导致你的计算机崩溃。然而，<B>首先</B>启动XawTV，
+<B>然后</B>启动<B>MPlayer</B>，等<B>MPlayer</B>播放结束，<B>然后</B>停止XawTV是没有问题的。</P>
+
+
+<H4><A NAME="dvb">2.3.1.16 DVB</A></H4>
+
+<P><B>MPlayer</B>支持Siemens，Technotrend，Galaxis或Hauppauge提供的使用Siemens DVB芯片的显卡。
+最新的DVB驱动在<A HREF="http://www.linuxtv.org">Linux TV site</A>。如果你想要软件解码你需要一个至少1GHz的CPU。</P>
+
+<P>Configure应该能检测到你的DVB显卡。如果它没有，使用下列命令强制使用
+
+<PRE>
+  ./configure --enable-dvb
+</PRE>
+
+<P>如果你在非标准的路径下有ost头文件，使用下列命令设置路径</P>
+
+<PRE>
+  ./configure --with-extraincdir=&lt;DVB source directory&gt;/ost/include
+</PRE>
+
+<P>然后就可以按正常程序编译安装。</P>
+
+<H4>使用方法</H4>
+
+<P>硬件解码(播放标准的MPEG1/2文件)使用下列命令：</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes file.mpg|vob
+</PRE>
+
+<P>MPEG1的软件解码或转化为其他格式使用下列命令：</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc yourfile.ext
+  mplayer -ao mpegpes -vo mpegpes -vop fame,expand yourfile.ext
+</PRE>
+
+<P>注意到，DVB显卡只支持高度为288或576的PAL格式或者240或480的NTSC格式。你<B>必须</B>对其它的高度进行重新缩放，
+通过在<CODE>-vop</CODE>选项中使用<CODE>scale=width:height</CODE>指定你想要宽度和高度。DVB显卡可以接受多种宽度，
+像720，704，640，512，480，352等等，而且在水平方向上可以硬件缩放，所以大多数情况下你不需要作水平缩放。
+例如对于512x384(宽高比4:3)的DivX使用下列命令：</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=512:576
+</PRE>
+
+<P>如果你使用宽银幕电影而你把它放大到整个屏幕的高度，你可以使用<CODE>expand=w:h</CODE>插件来增加黑带。
+为了看640x384分辨率的DivX，使用下列命令：</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,expand=640:576 file.avi
+</PRE>
+
+<P>如果你的CPU对于播放720x576的DivX太慢，尝试横向缩放：</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 file.avi
+</PRE>
+
+<P>如果速度没有提高，尝试竖直缩放：</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi
+</PRE>
+
+<P>因为OSD和字幕使用OSD插件的扩展特性。因此，不要使用<CODE>expand=w:h</CODE>或者<CODE>expand=w:h:x:y</CODE>，
+使用<CODE>expand=w:h:x:y:1</CODE>(第5个参数<CODE>:1</CODE>将开启OSD渲染)。你也许想要把图象向上移动一点来给
+字幕更大的黑色区域。如果你也想要移动字幕，因为他们可能在你电视屏幕的外面，使用<CODE>-subpos <0-100></CODE>来
+调整它(<CODE>-subpos 80</CODE>是个不错的选择)。</P>
+
+<P>为了在PAL电视上播放非25fps的电影或者因为CPU太慢，加上<CODE>-framedrop</CODE>选项。</P>
+
+<P>为了保持DivX文件的宽高比并获得最理想的缩放参数(硬件水平缩放和软件垂直缩放并且保持正确宽高比)，使用最新的dvbscale插件：</P>
+
+<PRE>
+for  3:4 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
+for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+</PRE>
+
+<H4>将来</H4>
+
+<P>如果你有使用问题或想要了解特性通告或者参加这个问题的讨论，加入我们的<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</A>的邮件列表。
+请记住列表的语言是英语。</P>
+
+<P>在未来你可以期待使用DVB显卡的自带OSD特性显示OSD和字幕，还有更流畅的非25fps电影回放和实时的MPEG2和MPEG4转换(部分的解压)。</P>
+
+
+<H4><A NAME="dxr3">2.3.1.17 DXR3</A></H4>
+
+<P><B>MPlayer</B>支持Creative DXR3和Sigma Designs Hollywood Plus卡的硬件加速回放。这些卡都使用SigmaDesigns的
+em8300 MPEG解码芯片</P>
+
+<P>首先，你将需要正确地安装DXR3/H+的驱动，版本至少0.12.0或者更新的。你能在<A HREF="http://dxr3.sourceforge.net/">
+DXR3 &amp; Hollywood Plus for Linux</A>的站点找到驱动和安装指导。Configure应该自动检测到你的显卡，编译应该没有任何问题。</P>
+
+<H4>用法</H4>
+
+<DL>
+  <DT><CODE>-vo dxr3:noprebuf:&lt;device&gt;</CODE></DT>
+  <DD><CODE>noprebuf</CODE>设定关闭预缓冲。预缓冲是em8300的一个特性，是它可以同时处理一帧以上的视频。这表示当你开启
+预缓冲(默认的)运行时，<B>MPlayer</B>将试图保持视频缓冲区里面总是填满数据的。如果你是用的一台比较慢的机器<B>MPlayer</B>
+大概会占用接近100%的CPU。这在你播放纯MPEG流(例如DVD，SVCD之类)的时候尤其明显，因为<B>MPlayer</B>不需要把它重新编码成
+MPEG所以他会以很高的速度填充缓冲区。<BR>
+    预缓冲不是在所有的机器上都能够工作(特别是在Athlon的机器上它会被自动关闭)。如果你遇到视频/音频同步的问题就使用<CODE>noprebuf</CODE>
+当不用预缓冲运行时em8300对CPU的占用率十分敏感，所以建议你打开<B>MPlayer</B>的<CODE>-framedrop</CODE>选项来防止进一步
+的不同步<BR>
+    <CODE>&lt;device&gt;</CODE> = 使用的设备号如果你有超过一块em8300显卡。
+    <BR>
+    任何这些选择都可以被省略，但是他们必须按顺序指定，例如<CODE>dxr3:fame</CODE>能正常工作，<CODE>dxr3:1</CODE>能正常工作，
+但是<CODE>dxr3:1:avcodec</CODE>将无法工作。</DD>
+
+  <DT><CODE>-ao oss:/dev/em8300_ma-X</CODE></DT>
+  <DD>音频输出，在其中<CODE>X</CODE>是设备号(为0如果只有一块显卡)。</DD>
+
+  <DT><CODE>-aop list=resample:fout=xxxxx</CODE></DT>
+  <DD>em8300不能工作在采样率低于44100Hz的情况。如果采样率在44100Hz之下，在44100Hz和48000Hz中选择最接近的一个。
+例如对使用22050Hz的电影，因为44100Hz/2 = 22050，所以使用44100Hz，如果是24000Hz就使用48000Hz，因为48000Hz/2 = 24000如此等等。
+这对于数字音频输出不起作用(<CODE>-ac hwac3</CODE>)。</TD></TR>
+
+  <DT><CODE>-vop lace/fame</CODE></DT>
+  <DD>要在em8300上观看非MPEG的内容(例如DivX或者RealVideo)你必须设置一个libavcodec(lavc)或者libfame(fame)之类的MPEG1视频滤镜
+目前lavc有更好的速度还有更高的图像质量，除非你使用时遇到问题，建议你使用他。<CODE>-vop lavc/fame</CODE>的进一步的信息可以
+参考man page。
+
+  <DT><CODE>-ac hwac3</CODE></DT>
+  <DD>em8300支持使用芯片的数字音量输出来播放AC3音频(环绕音效)。阅读<A HREF="codecs.html#hardware_ac3">硬件AC3</A>来了解AC3的
+更进一步的信息</DD>
+</DL>
+
+<H4>Overlay</H4>
+
+<P>为了使用overlay请在启动<B>MPlayer</B>之前先运行em8300包中的dxr3view。当鼠标光标在窗口上时你能通过按<CODE>T</CODE>键来设置
+dxr3view中的各种选项。</P>
+
+<H4>MPEG1，MPEG2，VCD和DVD注意事项</H4>
+
+<P>MPEG1/2格式应该能被<B>MPlayer</B>自动发现而且它将使用DXR3的硬件加速来播放它。否则没有，你可以使用<CODE>-vc mpegpes</CODE>强制硬件加速。
+同时，如果你计划使用任何后处理你必须使用滤镜<CODE>-vc mpeg12</CODE>。</P>
+
+<P>在一些情况下，使用硬件解码(<CODE>-vc mpegpes</CODE>)时字幕可能与A/V流不同步。这是个已知的bug。em8300也不适于处理比较大的字幕，
+可能会有1到2秒的停顿，在这种情况下，唯一的处理方法是使用<CODE>-vc mpeg12</CODE>来播放带有字幕的DVD。当用<CODE>-vc mpeg12</CODE>
+选项运行时<B>MPlayer</B>会把视频重新编码成MPEG(即使它已经是MPEGE了)。这表示它需要更多的CPU,同时你可能会损失一些画面质量。</P>
+
+
+<H4><A NAME="tv-out">2.3.1.A 电视输出支持</A></H4>
+
+
+<H5><A NAME="tv-out_matrox">2.3.1.A.1 Matrox G400显卡</A></H5>
+
+<P>在Linux下你有2种方法使G400的电视输出工作：</P>
+
+<P><B>注意：</B>对于Matrox G450/G550的电视输出方法看下一节！
+
+<UL>
+  <LI><B>XFree86</B>：使用能在<A HREF="http://www.matrox.com">Matrox的站点</A>获得的驱动和HAL模块。这将在电视上实现X。
+<BR><B>这种方法不给你加速回放</B>，不像Windoze！ 第二个输出头只有YUV帧缓冲，<I>BES</I>(Back End Scaler，在G200与G400与G450与
+G550显卡上的YUV缩放)无法用于它！windows的驱动以某种方式解决了这个问题，有可能是通过使用3D引擎来缩放，并用YUV帧缓冲显示图像。
+如果你确实想要使用X，使用<CODE>-vo x11 -fs -zoom</CODE>选项，但这将<B>十分缓慢</B>，而且会开启<B>Macrovision</B>版权保护
+(你能使用<A HREF="http://avifile.sourceforge.net/mgamacro.pl">这个</A>perl脚本绕过Macrovision。</LI>
+  <LI><B>帧缓冲</B>：在2.4的内核中可以使用<B>matroxfb模块</B>而2.2的内核中没有电视输出的特性，所以对它是没有用的。
+你必须在编译时开启所有与matroxfb相关的特性(除了MultiHead之外)，并且把他们全部编译成<B>模块</B>！ 你还需要开启I2C功能。
+    <OL>
+      <LI>
+	进入<CODE>TVout/matroxset</CODE>然后运行<CODE>make</CODE>。把<CODE>matroxset</CODE>安装到你的PATH中的某个地方。</LI>
+      <LI>
+	如果你没有装<CODE>fbset</CODE>，进入<CODE>TVout/fbset</CODE>然后运行<CODE>make</CODE>。把<CODE>fbset</CODE>安装到你的PATH中的某个地方。</LI>
+      <LI>
+        然后进入到<B>MPlayer</B>源码目录中的<CODE>TVout/</CODE>子目录，以root执行<CODE>./modules</CODE>。
+你的文本模式的控制台将进入到帧缓冲模式(没有方法改回来！)。</LI>
+      <LI>下一步，修改并运行<CODE>./matroxtv</CODE>脚本。这将给你提供一个十分简单的菜单。按<B>2</B>和<B>ENTER</B>。现在你的显示器和电视上应该有一样的图像。
+如果电视(默认PAL)图画有些奇怪的条纹，脚本不能够正确地设置分辨率(使用缺省的640x512)。试试菜单里的其他分辨率或者/和试试fbset。</LI>
+    </OL>
+
+    <P>Yoh。接着的任务是使tty1上的光标(或者别的什么)消失，和关闭屏幕抑制显示。执行下列的命令：</P>
+
+    <P><CODE>echo -e '\033[?25l'</CODE>或者<CODE>setterm -cursor off<BR>setterm -blank 0</CODE></P>
+
+    <P>你可能想把上述内容脚本，同时也清屏.. 让光标出现的命令是：<BR><CODE>echo -e '\033[?25h'</CODE>或者<CODE>setterm -cursor on</CODE></P>
+
+    <P>Yeah kewl。用<CODE>mplayer -vo mga -fs -screenw 640 -screenh 512 &lt;filename&gt;</CODE>来播放电影<BR>
+    (如果你正在使用X，用CTRL-ALT-F1之类的快捷键换成matroxfb！)<BR>
+    分辨率换成640x512如果你用的不是这个分辨率。<BR>
+    <B>享受超快超多特性的Matrox电视输出(比Xv还要好)！</B></P>
+  </LI>
+</UL>
+
+<H5><A NAME="tv-out_matrox_g450">2.3.1.A.2 Matrox G450/G550 cards</A></H5>
+
+<P>这些显卡的电视输出支持最近刚被引入，而且还没有进入内核的主流。据我所知目前不能使用<B>mga_vid</B>
+因为G450/G550的驱动只能工作在一种配置下面：第一个CRTC芯片(有更多特性)接第一个display(显示器)，第二个
+CRTC(没有<B>BES</B> -- BES的解释看上面G400的部分)接电视上，所以你目前只能使用<B>MPlayer</B>的
+<I>fbdev</I>的输出设备。</P>
+
+<P>目前第一个CRTC不能传送到第二个头。内核的matroxfb驱动的作者 -- Petr Vandrovec -- 可能正在努力支持
+它，使用把第一个CRTC的输出同时显示在两个头上的方法，像目前G400推荐的一样，看上面的部分。</P>
+
+<P>需要的内核补丁和howto的细节可以从<A HREF="http://www3.sympatico.ca/dan.eriksen/matrox_tvout">
+http://www3.sympatico.ca/dan.eriksen/matrox_tvout</A>下载。</P>
+
+<H5><A NAME="tv-out_ati">2.3.1.A.2 ATI显卡</A></H5>
+
+<H5>引言</H5>
+<P>ATI目前不想对他的任何一种电视输出芯片提供Linux下的支持，主要是由于他们的授权的Macrovision技术。</P>
+
+<H5>ATI显卡在Linux上电视输出的支持情况</H5>
+
+<UL>
+  <LI><B>ATI Mach64 </B>：<A HREF="http://gatos.sf.net">gatos</A>支持。</LI>
+  <LI><B>ASIC Radeon VIVO </B>：<A HREF="http://gatos.sf.net">gatos</A>支持。</LI>
+  <LI><B>Radeon</B>和<B>Rage128</B>：<B>MPlayer</B>支持！查阅<a href="#vesa">VESA驱动</a>和<A HREF="#vidix">VIDIX</A>两节。</LI>
+</UL>
+
+<P>在其它显卡上，只能使用<a href="#vesa">VESA驱动</a>，没有VIDIX可用。需要强大的CPU。</P>
+
+<P>你唯一需要做的事情 -- <B>在启动你的电脑之前插上电视连接器的插头</B>因为视频BIOS只在自举期间初始化一次。</P>
+
+
+<H5><A NAME="tv-out_voodoo">2.3.1.A.3 Voodoo 3</A></H5>
+
+<P>查阅<A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">这个网址</A>。</P>
+
+</BODY>
+</HTML>

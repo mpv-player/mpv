@@ -1,0 +1,274 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+
+<HEAD>
+  <TITLE>编码 -- MEncoder -- Linux的电影编码器</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gb_2312-80">
+</HEAD>
+
+<BODY>
+
+
+<H2><A NAME="encoding">2.4 用MEncoder编码</A></H2>
+
+<P><B>MEncoder</B>(<B>MPlayer</B>的电影编码器)是一个简单的电影编码器，设计用来把MPlayer可播放的电影(<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/
+VIV/FLI/RM/NUV/NET</B>)编码成其它MPlayer可播放的格式(见下面)。它能以各种各样的编码格式进行编码，像<B>DivX4</B>(1或者2 pass)，libavcodec，
+<B>PCM</B>/<B>MP3</B>/<B>VBR MP3</B>音频。同时也有强大的插件系统来操控视频。</P>
+
+
+<H3><A NAME="compilation">2.4.1 编缉</A></H3>
+
+<UL>
+  <LI><B>可选</B> -- 阅读<B>MPlayer</B>的编缉指令。</LI>
+  <LI><B>可选(Linux仅仅)</B> -- 从<A HREF="http://avifile.sourceforge.net/download.htm">avifile.sourceforge.net</A>下载最新<B>DivX4linux</B>的库，
+并且正确的安装他们。你需要他们如果你希望使用DivX4(1/2 passes)编码。</LI>
+  <LI><B>可选</B> -- <A HREF="codecs.html#xvid">下载并且安装<B>XViD</B></A>。不是十分有用，libavcodec的<I>mpeg4</I>编码器能以比XViD
+或者DivX4/5好得多的速度和质量编码。</LI>
+  <LI><B>可选</B> -- 对于libavcodec支持，按<A HREF="codecs.html#libavcodec">libavcodec部分</A>的内容安装libavcodec。</LI>
+  <LI><B>可选</B> -- 下载并且编译<B>libmp3lame</B>(lame 3.89beta或者lame的CVS中的)。<BR>
+    <B>警告：不要用<U>GCC 2.96</U>编辑LAME &lt; 3.90！ 它将不能正常工作！</B><BR>
+    这对于CBR/VBR MP3音频编码的是需要的。注意，单一<CODE>lame</CODE>的二进制文件是不够的。顺便说一下：你对lame使用的优化越少，质量越好。lame编译完成之后，
+你能通过运行<CODE>make test</CODE>来测试质量。结果的数字应该少于<B>30</B>。如果它是<B>400</B>之类也不必惊慌，你不应该听到任何可觉察的质量降低。
+啊，如果你的编译程序连<CODE>make test</CODE>都运行不了...好吧，把那个<B>GCC 2.96</B>删掉或者把lame升级到至少<B>3.90</B>。</LI>
+  <LI><B>可选</B> -- <CODE>libjpeg</CODE>和<CODE>libpng</CODE>，-- 如同<A HREF="documentation.html#installation">安装</A>部分中所说的</LI>
+</UL>
+
+<P>准备完毕。正如你可能知道的，其它编码的工具需要安装<I>avifile</I>的库。<B>MEncoder</B>根本不需要。</P>
+
+
+<H3><A NAME="features">2.4.2 MEncoder特性</A></H3>
+
+<UL>
+  <LI>在<B>MPlayer</B>支持的广泛的文件格式和译码器中编码</LI>
+  <LI>编码所有ffmpeg的<A HREF="codecs.html#libavcodec">libavcodec</A>的编码格式</LI>
+  <LI>从<B>V4L兼容的电视选台器</B>编码视频</LI>
+  <LI>编码/复用有适当索引的交错的AVI文件</LI>
+  <LI>从外部音频流创建文件</LI>
+  <LI>1，2或者3 pass编码</LI>
+  <LI><B>VBR</B> MP3音频 -- <B>重要的注意事项：</B>VBR MP3的音频在Windows的播放器上播放的效果并不总是很好！另一方面，目前<B>MEncoder</B>
+的CBR编码在Win32播放器上完全不能播放:)</LI>
+  <LI>PCM音频</LI>
+  <LI>流复制</LI>
+  <LI>输入A/V同步(基于PTS，用-mc 0选项禁用)</LI>
+  <LI>用<CODE>-ofps</CODE>选项进行FPS修正(用于把29.97fps的VOB编码成为24fps的AVI)</LI>
+  <LI>使用我们的十分强大的插件系统(裁减，扩展，翻转，后处理，旋转，缩放，rgb/yuv转化)</LI>
+  <LI>能把DVD与VOBsub<B>和</B>文本字幕编码到输出文件中</LI>
+  <LI>能把DVD的字幕提取为Vobsub格式</LI>
+</UL>
+
+<H4>计划中的特性：</H4>
+
+<UL>
+  <LI>更加广泛的可用的编/解码格式/解码器(用DivX4/Indeo5/VIVO流创建VOB文件 :)</LI>
+  <LI>v4l的音频编码(FreeBSD已完成？)</LI>
+</UL>
+
+
+<H4><A NAME="2pass">2.4.2.1 编码2或者3-pass的DivX4</A></H4>
+
+<P><U><B>2-pass编码：</B></U>名称来自这种方法实际把文件编码<I>两次</I>的事实。第一次编码(又称为<I>pass</I>)创建一些临时性的几兆的文件(*.log)，
+先不要删除他们(你可以把AVI删了)。在第二次pass中，将使用临时文件的比特率数据创建输出文件，最后产生的文件将有好得多的图象质量。如果这是你第一次听到这个，
+你应该在网上查阅一些可用的指南。</P>
+
+<P>这个例子演示如何把DVD编码成为2-pass DivX4 AVI。只需要两个命令：<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> -- 删掉这个文件，它可能来自以前的3-pass编码(它会干扰当前这个)<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts
+    -vcodec=mpeg4:more_options -o movie.avi -pass 1<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:more_options
+    -o movie.avi -pass 2</CODE></P>
+
+<P><U><B>3-pass编码：</B></U>这是2-pass编码的扩展，对音频的编码使用一个单独的pass。这种方法提供推荐视频比特率的估计以使之能够适合CD的容量。同时，
+不同于2-pass方式，音频仅仅被编码一次。示例：</P>
+
+<OL>
+  <LI>删除冲突的临时性的文件：
+    <P><CODE>rm frameno.avi</CODE></P></LI>
+  <LI>第一次pass：
+    <P><CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o frameno.avi</CODE></P>
+    <P>将创建一个只有音频的avi文件，<B>只</B>包含要求的音频流。不要忘记<CODE>-lameopts</CODE>，如果需要的话设置它。如果你对一部长的电影进行编码，
+<B>MEncoder</B>在这个pass结束之后，将对于650Mb，700Mb，和800Mb的目标大小打印推荐的比特率值。</P></LI>
+  <LI>第二次pass：
+    <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
+      -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></P>
+    <P>又称为DivX4视频编码的第一次pass。可以选择指定在上一步结束时<B>MEncoder</B>打印的视频比特率。</P></LI>
+  <LI>第三次pass：
+    <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
+      -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></P>
+    <P>又称为DivX4视频编码的第二次pass。可以选择指定在上一步结束时<B>MEncoder</B>打印的视频比特率。在这次pass中，用<CODE>frameno.avi</CODE>
+中的音频将被插入到目的文件中..这就全部搞定了！</P></LI>
+</OL>
+
+<H4>3-pass编码的例子：</H4>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> -- 移去这个文件，它可能来自以前的3-pass编码(它会干扰当前这个)<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+    -o frameno.avi<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
+    -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 1<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
+    -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 2</CODE></P>
+
+<P><U><B>使用内部的libavcodec控制器的2或者3-pass编码：</B></U>你可以选择使用libavcodec内部的2或者3-pass方式，
+它在使用libavcodec时可能能提供比使用外部的DivX4制作的2-pass控制器更好的最终比特率的精确度。</P>
+
+<UL>
+  <LI><B>2-pass编码：</B><BR>
+    <CODE>rm -f lavc_stats.txt<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 (audio-options) -o
+      movie.avi<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 (audio-options) -o
+      movie.avi</CODE></LI>
+  <LI><B>3-pass编码：</B><BR>
+    <CODE>rm -f frameno.avi lavc_stats.txt<BR>
+    mencoder -dvd 2 -ovc frameno (audio-options) -o frameno.avi<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o
+      movie.avi<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o
+      movie.avi</CODE></LI>
+</UL>
+
+
+<H4><A NAME="rescaling">2.4.2.2 重新缩放电影</A></H4>
+
+<P>把电影图象的尺寸重新设置的需要经常出现。原因可能很多，例如减小输出文件的大小，把SVCD编码为到DivX。提取的DVD多半需要重新缩放，例如一个4:3的
+DVD应该是640x480，当你希望它合适1张CD，并且同时还有不错的质量的时候。SVCD是480x480的尺寸，而他们的头部包含播放器应该使用的长宽比(例如：
+480x480 + 4:3 = 640x480)。
+然而当编码成为AVI(DivX)文件时，你必须了解AVI的头部不存储这个值。这样，唯一的解决方法是重新缩放。</P>
+
+<P>缩放过程由<I>'scale'</I>视频滤镜处理：<CODE>-vop scale=X:Y</CODE>。其质量由<CODE>-sws</CODE>选项控制。如果它没有指定，
+<B>MEncoder</B>将使用0：快速二次线性。</P>
+
+<P>用法：<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -lavcopts
+    vcodec=mpeg4:more_options -vop scale=640:480 -sws 2 -o
+    output.avi</CODE></P>
+
+
+<H4><A NAME="copying">2.4.2.3 流复制</A></H4>
+
+<P><B>MEncoder</B>能用两种方式处理输入流：<B>编码</B>或者<B>复制</B>他们。这部分是关于<B>复制</B>的。</P>
+
+<UL>
+  <LI><B>视频流</B>(<CODE>-ovc copy</CODE>选项)： 可以干的很好:)<BR>
+    比如，把FLI或者VIVO或者MPEG1的视频放(不是转化)到AVI文件中。当然只有<B>MPlayer</B>能播放这样的文件：)。而且可能在现实生活中没有任何价值。
+合理使用：视频流复制可以用于例如只有音频流需要被编码(比如，非压缩的PCM到MP3)时。</LI>
+
+  <LI><B>音频流</B>(<CODE>-oac copy</CODE>选项)： 直接了当。可以把一个外部音频文件(MP3，Vorbis)合波到输出流中。
+使用<CODE>-audiofile &lt;filename&gt;</CODE>选择来实现这个功能。</LI>
+</UL>
+
+
+<H4><A NAME="fixing">2.4.2.4 修复索引或者交错损坏的AVI </A></H4>
+
+<P>最容易的事情。我们简单地复制视频和音频流，并用<B>MEncoder</B>产生索引。当然这不能修复视频和/或者音频流中可能的错误。
+这同样也可以修复交错损坏的文件，
+使它们不再需要<CODE>-ni</CODE>选项。</P>
+
+<P>命令：<CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
+
+
+<H4><A NAME="libavcodec">2.4.2.5 用libavcodec编码器族编码</A></H4>
+
+<P><A HREF="codecs.html#libavcodec">libavcodec</A>提供简单编码许多有趣的视频和音频格式(目前其音频编码器还不支持)的方法。
+你能编码下列的编码格式：</P>
+
+<UL>
+  <LI>mjpeg -- Motion JPEG</LI>
+  <LI>h263 -- H263</LI>
+  <LI>h263p -- H263 Plus</LI>
+  <LI>mpeg4 -- DivX4</LI>
+  <LI>msmpeg4 -- 老的DivX</LI>
+  <LI>msmpeg4v2 -- Micro$oft MPEG4 V2 (DivX的又称为MP43的前辈)</LI>
+  <LI>rv10 -- 老的RealVideo编码格式</LI>
+  <LI>mpeg1video -- MPEG1视频：)</LI>
+</UL>
+
+<P>第一个列包含应该传给<CODE>vcodec</CODE>配置的编码格式的名称，比如：<CODE>-lavcopts vcodec=msmpeg4</CODE></P>
+
+<P>例如，对于使用MJPEG压缩：<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc
+    -lavcopts vcodec=mjpeg</CODE></P>
+
+
+<H4><A NAME="image_files">2.4.2.6 从多个图象文件(JPEG，PNG或TGA)的输入编码</A></H4>
+
+<P><B>MEncoder</B>具有从一个或多个JPEG，PNG或TGA文件创建电影的能力。通过简单的framecopy它能创建MJPEG(Motion JPEG)，
+MPNG(Motion PNG )或MTGA(Motion TGA)文件。</P>
+
+处理过程的解释：
+
+<OL>
+  <LI><B>MEncoder</B>使用<CODE>libjpeg</CODE><I>解码</I>输入图像(当解码PNG时将使用<B>libpng</B>)。</LI>
+
+  <LI><B>MEncoder</B>接着把解码后的图象喂给所选的的视频压缩器(DivX4，Xvid，ffmpeg msmpeg4等等)。注意因为PNG解码器
+目前只能输出RGB格式，所以不能用于要求YUV输入的编码格式，像DivX4或者ffmpeg的msmpeg4之类。</LI>
+</OL>
+
+<H4>例子</H4>
+
+<P><CODE>-mf</CODE>选项的解释能在全局<A HREF="#options">选项</A>部分和manpage中被找到。</P>
+
+<P><I>用当前目录中的所有JPEG文件创建DivX4文件：</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  output.avi</CODE></P></P>
+
+<P><I>用当前目录中的一些JPEG文件创建DivX4文件：</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  output.avi</CODE></P>
+
+<P><I>用当前目录中的所有JPEG文件创建Motion JPEG(MJPEG)文件：</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
+  -o output.avi</CODE></P>
+
+<P><I>用当前目录中的所有PNG文件创建一个非压缩的文件：</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw -o
+  output.avi</CODE></P>
+
+<P><I>用当前目录中的所有PNG文件创建Motion PNG(MPNG)文件：</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  -o output.avi</CODE></P>
+
+<P><I>用当前目录中的所有TGA文件创建Motion TGA(MTGA)文件：</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy
+  -o output.avi</CODE></P>
+
+
+<H4><A NAME="vobsub">2.4.2.7 DVD字幕提取为Vobsub文件</A></H4>
+
+<P><B>MEncoder</B>有把DVD字幕提取到Vobsub格式的文件的能力。包括以<CODE>.idx</CODE>和<CODE>.sub</CODE>结尾的一对
+文件而且通常打包在一个单一的<CODE>.rar</CODE>文档中。<B>MPlayer</B>能使用<CODE>-vobsub</CODE>和<CODE>-vobsubid</CODE>
+选项播放它们。</P>
+
+<P>你使用<CODE>-vobsubout</CODE>选项规定输出文件的基名称(就是不包括<CODE>.idx</CODE>或者<CODE>.sub</CODE>的后缀)和
+<CODE>-vobsuboutindex</CODE>指定字幕在输出文件中的索引号。</P>
+
+<P>如果输入不是来自DVD你必须使用<CODE>-ifo</CODE>来指明构造<CODE>.idx</CODE>文件需要的<CODE>.ifo</CODE>文件。</P>
+
+<P>如果输入不是来自DVD而且你也没有<CODE>.ifo</CODE>文件你将需要使用<CODE>-vobsubid</CODE>选项让它了解在<CODE>.idx</CODE>
+文件中放置什么样的language id。</P>
+
+<P>如果<CODE>.idx</CODE>和<CODE>.sub</CODE>文件已经存在，每次运行将追加运行获得的字幕。因此，你应该在开始之前删掉所有东西。</P>
+
+<H4>例子</H4>
+
+<P><I>在进行3-pass编码的同时从DVD复制两份字幕</I><BR>
+  &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0
+    -sid 2 -o frameno.avi -ovc frameno</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout
+    subtitles -vobsuboutindex 1 -sid 5</CODE></P>
+
+<P><I>从一个MPEG文件中复制法语字幕</I><BR>
+  &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles
+    -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
+
+
+<H3><A NAME="options">2.4.3 可用的选项</A></H3>
+
+<P><B>MEncoder</B>可用的选项和例子的完全列表，请参见manpage。</P>
+
+</BODY>
+</HTML>

@@ -1,0 +1,230 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+
+<HEAD>
+  <TITLE>声音-- MPlayer -- Linux的电影表演者</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gb_2312-80">
+</HEAD>
+
+<BODY>
+
+
+<H3><A NAME="audio">2.3.2 音频输出设备</A></H3>
+
+<P><B>MPlayer</B>的音频接口称为<I>libao2</I>。它目前包含这些驱动：</P>
+
+<TABLE BORDER=0>
+  <TR><TD COLSPAN=4><P><B>一般：</B></P></TD></TR>
+  <TR><TD>&nbsp; &nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS(ioctl)驱动(支持硬件AC3中转)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL驱动(支持升/降采样率，<B>ESD</B>，<B>ARTS</B>等等)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS(Network Audio System)驱动</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>本地的ALSA 0.5驱动</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>本地的ALSA 0.9驱动(支持硬件AC3中转)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>BSD和Solaris8用户的SUN音频驱动(<CODE>/dev/audio</CODE>)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>本地的ARTS驱动(主要针对KDE用户)</TD></TR>
+</TABLE>
+
+<P>事实上，Linux声卡驱动有兼容问题。<B>可能</B>需要一定时间找到你最理想的设置。</P>
+
+<UL>
+  <LI>如果你有OSS驱动，先尝试<CODE>-ao oss</CODE>(这是默认的)。如果你遇到毛刺，停止或者任何不正常的事情，
+尝试<CODE>-ao sdl</CODE>(注意：你需要安装SDL库和头文件)。许多情况下SDL的音频驱动都会有帮助，也支持ESD，
+ARTS，和升/降采样率。(ESD是GNOME的音频守护进程，ARTS是KDE的)。</LI>
+  <LI>如果你使用ALSA 0.5的版本，那么你几乎总是不得不使用<CODE>-ao alsa5</CODE>，因为ALSA 0.5的OSS仿真很buggy，
+会导致<B>MPlayer崩溃</B>并出现这样的信息：<BR>
+    <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
+  <LI>如果你使用ALSA 0.9的版本，你能在<CODE>-ao oss</CODE>和<CODE>-ao sdl</CODE>之间选择。你也能使用<CODE>-ao alsa9 </CODE>。它能工作，
+但是可能出现不同步或者声音消失之类的问题。</LI>
+</UL>
+
+<P>在<B>Solaris和FreeBSD</B>系统上，用<CODE>-ao sun</CODE>选项使用SUN的音频驱动，否则视频音频都无法工作。</P>
+
+
+<H4><A NAME="experiences">2.3.2.1 声卡体验，推荐</A></H4>
+
+<TABLE BORDER=0 WIDTH="100%">
+  <TR><TD COLSPAN=3><B>VIA板载芯片(via82cxxx)只能48kHz</B></TD></TR>
+  <TR><TD></TD><TD>驱动：</TD><TD>在<A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">sourceforge.net</A></TD></TR>
+
+  <TR><TD COLSPAN=3><B>Aureal Vortex 2 </B></TD></TR>
+  <TR><TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS：</TD><TD>没有驱动</TD></TR>
+  <TR><TD></TD><TD>OSS/Pro：</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA：</TD><TD>没有驱动</TD></TR>
+  <TR><TD></TD><TD>Max kHz：</TD><TD>48</TD></TR>
+  <TR><TD></TD><TD>驱动：</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net </A></TD></TR>
+  <TR><TD></TD><TD>驱动2：</TD><TD>在<A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">Pontscho的主页</A><BR>
+    (<I>缓冲大小增加到32k</I>)</TD></TR>
+
+  <TR><TD COLSPAN=3><B>GUS PnP</B></TD></TR>
+  <TR><TD></TD><TD>OSS：</TD><TD>没有驱动</TD></TR>
+  <TR><TD></TD><TD>OSS/Pro：</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA：</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>Max kHz：</TD><TD>48</TD></TR>
+
+  <TR><TD COLSPAN=3><B>SB Live!</B></TD></TR>
+  <TR><TD></TD><TD>OSS：</TD><TD>模拟方式很好，SP与DIF不能工作</TD></TR>
+  <TR><TD></TD><TD>ALSA：</TD><TD>两个都很好</TD></TR>
+  <TR><TD></TD><TD>Max kHz：</TD><TD>192</TD></TR>
+
+  <TR><TD COLSPAN=3><B>SB AWE 64</B></TD></TR>
+  <TR><TD></TD><TD>OSS：</TD><TD>max 44kHz</TD></TR>
+  <TR><TD></TD><TD>ALSA：</TD><TD>48kHz听起来很糟</TD></TR>
+  <TR><TD></TD><TD>Max kHz：</TD><TD>48</TD></TR>
+
+  <TR><TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD></TR>
+  <TR><TD></TD><TD>OSS：</TD><TD>不是很好</TD></TR>
+  <TR><TD></TD><TD>ALSA：</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>Max kHz：</TD><TD>44</TD></TR>
+
+  <TR><TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD></TR>
+  <TR><TD></TD><TD>OSS：</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA：</TD><TD>OK(？)</TD></TR>
+  <TR><TD></TD><TD>Max kHz：</TD><TD>48</TD></TR>
+
+  <TR><TD COLSPAN=3><B>ESS 688</B></TD></TR>
+  <TR><TD></TD><TD>OSS：</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA：</TD><TD>OK(？)</TD></TR>
+  <TR><TD></TD><TD>Max kHz：</TD><TD>48</TD></TR>
+
+  <TR><TD COLSPAN=3><B>C-Media声卡(那种？)</B></TD></TR>
+  <TR><TD></TD><TD>OSS：</TD><TD>不是很好(有嘶嘶声) (？)</TD></TR>
+  <TR><TD></TD><TD>ALSA：</TD><TD>OK(？)</TD></TR>
+  <TR><TD></TD><TD>Max kHz：</TD><TD>？</TD></TR>
+
+  <TR><TD COLSPAN=3><B>Yamaha声卡(*ymf*) </B></TD></TR>
+  <TR><TD></TD><TD>OSS：</TD><TD>不是很好(？)(<CODE>-ao sdl</CODE>)</TD></TR>
+  <TR><TD></TD><TD>ALSA：</TD><TD>仅在使用ALSA 0.5的OSS仿真<B>和</B><CODE>-ao sdl</CODE>(！)(？)时很好</TD></TR>
+  <TR><TD></TD><TD>Max kHz：</TD><TD>？</TD></TR>
+
+  <TR><TD COLSPAN=3><B>使用envy24芯片(Terratec EWS88MT之类)的声卡</B></TD></TR>
+  <TR><TD></TD><TD>OSS：</TD><TD>？</TD></TR>
+  <TR><TD></TD><TD>OSS/Pro：</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA：</TD><TD>？</TD></TR>
+  <TR><TD></TD><TD>Max kHz：</TD><TD>？</TD></TR>
+
+  <TR><TD COLSPAN=3><B>PC Speaker或者DAC</B></TD></TR>
+  <TR><TD></TD><TD>OSS：</TD><TD>OK(使用SDL驱动：<CODE>-ao sdl</CODE>)</TD></TR>
+  <TR><TD></TD><TD>ALSA：</TD><TD>没有驱动</TD></TR>
+  <TR><TD></TD><TD>Max kHz：</TD><TD>驱动模拟44.1，也许更高。</TD></TR>
+  <TR><TD></TD><TD>驱动：</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD></TR>
+</TABLE>
+
+<P>在Linux上，高度推荐2.4.x的内核。2.2的内核没有经过测试。</P>
+
+<P>如果从CD-ROM播放时声音跳跃，开启IRQ unmasking，例如。<CODE>hdparm -u1 /dev/cdrom</CODE>(<CODE>man hdparm</CODE>)。
+这在大多数情况下有好处，更详细的描述在<A HREF="cd-dvd.html#drives">CD-ROM部分</A>。</P>
+
+<P>与另一个像XMMS一样的程序共享你的声卡是<B>强烈不推荐的</B>！如果其它音频程序使用ESD，用<CODE>-vo sdl:esd</CODE>选项
+启动<B>MPlayer</B>可以把两个音频流混合起来。事实上，选项<CODE>-vo sdl:esd</CODE>甚至在单独播放<B>Mplayer</B>时也可以对ESD使用。</P>
+
+<P>对这个文件的反馈是受欢迎的。请告诉我们你的声卡是如何与<B>MPlayer</B>共同工作的。</P>
+
+
+<H4><A NAME="插件s">2.3.2.2 音频插件</A></H4>
+
+<P><B>MPlayer</B>支持音频插件。音频插件s用于在声音到达声卡之前改变音频数据的属性。他们用<CODE>-aop</CODE>开关加上
+<CODE>list=插件1,插件2,...</CODE>参数打开。必须有<CODE>list</CODE>参数用来确定应该使用哪些插件，以及他们执行的顺序。例如：</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample,format</CODE></P>
+
+<P>将让声音先通过重新采样插件然后再经过格式化插件。</P>
+
+<P>插件也有改变他们行为的开关。这些开关在下面将详细地解释。如果开关被省略，插件将按照默认设置运行。
+这是一个关于如何组合使用指定参数的插件的例子：</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=resample,format:fout=44100:format=0x8</CODE></P>
+
+<P>这将会将重新采样插件的输出频率设为44100Hz格式化插件的输出格式设置为AFMT-U8。</P>                         
+
+<P>目前音频插件不能用于<B>MEncoder</B>。</P>
+
+
+<H5><A NAME="resample">2.3.2.2.1 升/降采样率</A></H5>
+
+<P><B>MPlayer</B>完全支持对声音升/降采样率。如果你使用固定采样率的声卡或者如果你被只兼容
+最大44.1kHz的老声卡郁闷时可以使用这个插件。你硬件的限制是不能自动检测的，因此你必须明确地规定采样频率。
+这个插件有一个参数：<CODE>fout</CODE>用于设置期望的输出的采样率。默认是48kHz，单位是&lt;Hz&gt;。</P>
+
+<P>用法：<BR>
+   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;required
+  frequency in Hz, like 44100&gt;</CODE></P>
+
+<P>注意输出频率不能从默认值升高。因为升高会导致音频和视频流播放缓慢而且音频也会扭曲。</P>
+
+
+<H5><A NAME="surround_decoding">2.3.2.2.2 环绕音效解码</A></H5>
+
+<P><B>MPlayer</B>有一个能解码矩阵编码的环绕音效的音频插件。杜比环绕是矩阵编码格式的一个例子。
+大多数2通道音频的文件实际上包含了矩阵编码的环绕音效。为使用这个特性你需要至少支持4个声道的声卡。</P>
+
+<P>用法：<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
+
+
+<H5><A NAME="format">2.3.2.2.3 采样格式转换</A></H5>
+                                                                               
+<P>如果你的声卡驱动不支持带符号的16位<CODE>int</CODE>数据类型，这个插件能被用来把它转换为一个你的
+声卡能理解的格式。它有一个参数，<CODE>format</CODE>，可以设置为你在<CODE>libao2/afmt.h</CODE>中找到的数字。
+这个插件几乎很少会用到而且是面向高级用户的。记住这个插件仅仅改变采样格式而不改变采样频率或者声道数。</P>
+
+<P>用法：<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=format:format=&lt;required output format&gt;</CODE></P>
+
+
+<H5><A NAME="delay">2.3.2.2.4 延迟</A></H5>
+
+<P>这个插件将声音延迟，被计划当做如何开发新的插件的例子。它不能用于任何以用户观点来说有用的东西，
+在这里被提到只是为了完整的缘故。不要使用这个插件除非你是开发者。</P>
+
+
+<H5><A NAME="volume">2.3.2.2.5 软件音量控制</A></H5>
+
+<P>这个插件是音量控制功能的软件替代，用于哪些使用蹩脚的混音设备的机器。如果你想要改变<B>MPlayer</B>
+的输出音量而不改变混音器中PCM音量的设置也可以使用这个插件。它有一个<CODE>volume</CODE>参数初始的音量水平。
+初始音量水平能取0到255之间的值，默认值是101相当于放大0分贝。谨慎使用这个插件因为它会降低声音的信噪比。
+在大多数情况下最好是把PCM音量设为最大是，放弃这个插件并且通过混音器的主音量控制来控制你的扬声器输出水平。
+如果有连接到计算机的外部功放(这几乎是普遍情况)，噪音水平能通过调整在主音量级别和功放上的旋钮而最大限度的减少，
+直到去除嘶嘶的背景噪音。</P>
+
+<P>Usage:<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=volume:volume=&lt;0-255&gt;</CODE></P>
+
+<P>这插件也有压缩器或称为“软控制”的功能。
+  压缩用于声音的动态范围十分高或者如果扬声器的动态范围十分低的的情况。注意这个特性将造成扭曲并且应该
+是最后一种被考虑的手段。</P>
+
+<P>Usage:<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=volume:softclip</CODE></P>
+
+
+<H5><A NAME="extrastereo">2.3.2.2.6 加强立体声</A></H5>
+
+<P>这个插件(线性地)增加左右声道的差别(像XMMS的extrastereo插件一样)使回放产生某种“现场”效果。</P>
+
+<P>Usage:<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo</CODE><BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo:mul=3.45</CODE></P>
+
+<P>默认参数(<CODE>mul</CODE>)是默认值为2.5的浮点数。如果你把它设置到0.0，你将获得单声道(两个声道的平均值)。
+如果你把它设置到1.0，声音不变，如果你把它设置为-1.0，左右声道将被交换。</P>
+
+
+<H5><A NAME="normalizer">2.3.2.2.7 音量正则化</A></H5>
+
+<P>这个插件能没有变形的最大化音量。</P>
+
+<P>用法：<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=volnorm</CODE><BR>
+
+
+<H5><A NAME="surround">2.3.2.2.8 环绕</A></H5>
+
+<P>谁应该在什么时候写点什么。</P>
+
+</BODY>
+</HTML>

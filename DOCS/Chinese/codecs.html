@@ -1,0 +1,354 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+
+<HEAD>
+  <TITLE>编码格式 -- MPlayer -- Linux的电影播放器</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gb_2312-80">
+</HEAD>
+
+<BODY>
+
+
+<H2><A NAME="codecs">2.2 支持的编码格式 </A></H2>
+
+
+<H3><A NAME="video_codecs">2.2.1 视频编码格式</A></H3>
+
+<P>看<A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">编码格式状态表格</A>来了解完整的，每日更新的列表。</P>
+
+<P>所有之中最重要的：</P>
+<UL>
+  <LI>MPEG1(VCD)和MPEG2(DVD)视频</LI>
+  <LI>DivX的本地的解码器;-)，OpenDivX，DivX4，DivX5，M$ MPEG4 v1，v2和其它的MPEG4变种</LI>
+  <LI>Windows Media Video 7(WMV1)的本地的解码器，和Windows Media Video 8(WMV2)的Win32 DLL解码器，用于.wmv文件的他们两个都</LI>
+  <LI><B>本地的Sorenson(SVQ1)解码器</B></LI>
+  <LI>3ivx解码器</LI>
+  <LI>Cinepak和Intel Indeo解码器(3.1,3.2,4.1,5.0)</LI>
+  <LI>MJPEG，AVID，VCR2，ASV2和其它硬件格式</LI>
+  <LI>VIVO 1.0，2.0，I263和其它h263(+)的变种</LI>
+  <LI>FLI/FLC</LI>
+  <LI>libavcodec的RealVideo 1.0解码器，和使用RealPlayer库的RealVideo 2.0，3.0解码器</LI>
+  <LI>HuffYUV的本地的解码器</LI>
+  <LI>各种各样的老的简单的类似RLE的格式</LI>
+</UL>
+
+<P>如果你有一个Win32解码器没有列出来而且目前没有被支持，请读取<A HREF="#importing">解码器导入HOWTO</A>并且帮助我们添加对它的支持。</P>
+
+
+<H4><A NAME="divx">2.2.1.1 DivX4与DivX5</A></H4>
+
+<P>这部分包含关于<A HREF="http://www.projectmayo.com">Mayo工程</A>的DivX4和DivX5编码格式的信息，他们的第一个可用的alpha版本是
+OpenDivX 4.0 alpha 47和48。 对它们的支持以前包括仔<B>MPlayer</B>中，并且是默认编译的。 我们也使用其后处理代码来有选择地提高MPEG1/2电影的视觉质量。
+现在我们使用我们自己的，对于所有文件类型。</P>
+
+<P>这个解码器的新一代产品称为DivX4，它甚至能解码以声名狼籍的DivX编码格式制作的电影！ 此外，它比本地的Win32 DivX DLL快得多比但是比libavcodec慢。
+因此，<B>不鼓励</B>把它当解码器用。 然而，它对编码有用。 这个编码格式的缺点之一是它目前不开放源代码。</P>
+
+<P>解码器可以从下列URLs之一下载：</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://avifile.sourceforge.net">http://avifile.sourceforge.net</A><BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://divx.com">http://divx.com</A></P>
+
+<P>解开它，然后以root身份运行<CODE>./install.sh</CODE>。</P>
+
+<P><B>注意：</B>一定<B>不要</B>忘记在你的<CODE>/etc/ld.so.conf</CODE>里添加<CODE>/usr/local/lib</CODE>然后运行<CODE>ldconfig</CODE>！</P>
+
+<P>如果安装正确<B>MPlayer</B>会自动检测到DivX4/DivX5，然后按通常方法编译。如果没有找到，那么你没有正确地安装或配制它。</P>
+
+<P>DivX4Linux有两种工作方式：</P>
+
+<DL>
+  <DT><CODE>-vc odivx</CODE></DT>
+  <DD>以OpenDivX方式使用解码器。在这种情况下，它在自己的缓冲中产生YV12图象，然后由<B>MPlayer</B>通过libvo做色彩空间转换。(<B>推荐，快！</B>)</DD>
+
+  <DT><CODE>-vc divx4</CODE></DT>
+  <DD>使用解码器的色彩空间转换。以这种方式你也能使用YUY2与UYVY。(<B>慢</B>)</DD>
+</DL>
+
+<P><CODE>-vc odivx</CODE>方式通常更快，因为它以YV12(planar YUV 4:2:0)格式传输图象数据，这样占用少的多的总线带宽。对于packed YUV方式
+(YUY2，UYVY)使用<CODE>-vc divx4</CODE>方式。对于RGB模式两者速度是相同的，差别最多是你当前的色彩深度。</P>
+
+<P><B>注意：</B>如果你的<CODE>-vo</CODE>驱动支持直接渲染，那么<CODE>-vc divx4</CODE>可以是很快甚至最快的解决方案。</P>
+
+
+<H4><A NAME="libavcodec">2.2.1.2 FFmpeg DivX/libavcodec</A></H4>
+
+<P><A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A>包括一组<B>开源的</B>解码器包，能够以兼容方式解码以
+H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1编码格式编码的视频流。它不仅能对其中一些进行编码，
+同时提供比Win32解码器或Mayo工程的DivX4/5库更高的速度！</P>
+
+<P>它包含很多不错的解码器，尤其重要的是MPEG4的几个变种：DivX 3，DivX 4，DivX 5，Windows Media Video 7 (WMV1)</P>
+
+<P>如果你使用<B>MPlayer</B>发行版，在你的源码包里就有libavcodec，正常编译。如果你使用CVS的<B>MPlayer</B>
+那么你必须从FFmpeg的CVS树中提取libavcodec因为FFmpeg 0.4.5<B>不能</B>用于<B>MPlayer</B>。你应该这样来完成：</P>
+
+OL>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login</CODE></LI>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg</CODE></LI>
+  <LI>把<CODE>libavcodec</CODE>目录从FFmpeg的源代码里移到<B>MPlayer</B>的CVS树的根部。应该看起来象这样：
+    <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
+    符号链接是<B>不</B>够的，你必须复制或移动它！</LI>
+  <LI>编译。Configure应该在编译之前发现可能的问题。</LI>
+</OL>
+
+<P><B>注意：</B>CVS的MPlayer确实有libavcodec子目录，但是它确实<B>没有</B>包含libavcodec的源代码！你必须按照上述的步骤来得到这个库的源代码。</P>
+
+<P>用FFmpeg和我的Matrox G400，我甚至能在我的K6/2 500上无掉帧的观看最高分辨率的DivX电影。</P>
+
+
+<H4><A NAME="xanim">2.2.1.3 XAnim解码器</A></H4>
+
+<P>前言：<BR>
+  XAnim的二进制的解码器包里面有一份关于合法捆绑软件许可的声明，除其它限制之外，禁止用户用除XAnim外的任何程序使用其解码器。然而，
+XAnim的作者到目前为止没有就解码器有关的问题对着任何人采取法律行动。
+</P>
+
+<P><B>MPlayer</B>可以使用XAnim的解码器解码。按照下列指令来开启它：</P>
+
+<OL>
+  <LI>从<A HREF="http://xanim.va.pubnix.com">XAnim的站点</A>下载你想要的解码器。<B>3ivx</B>的解码器不在那里，在
+<A HREF="http://www.3ivx.com">3ivx的站点</A>。</LI>
+  <LI>使用<CODE>--with-xanimlibdir</CODE>选项来告诉configure在何处可以找到XAnim的解码器。缺省的话，它在
+<CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods and /usr/lib/xanim</CODE>里寻找。或者你可以把<I>XANIM_MOD_DIR</I>环境变量
+设置为XAnim解码器所在的目录。</LI>
+  <LI>给文件改名/做符号链接，去掉代表平台构架之类的东西，让他们看起来像这样：<CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>。</LI>
+</OL>
+
+<P>XAnim的视频解码器族号码是10，因此你可以使用<CODE>-vfm 10</CODE>选项让<B>MPlayer</B>尽可能的使用他们。</P>
+
+<P>测试过的解码器包括：<B>Indeo 3.2</B>，<B>4.1</B>，<B>5.0</B>，<B>CVID</B>，<B>3ivX</B>，<B>h263</B>。</P>
+
+
+<H4><A NAME="vivo_video">2.2.1.4 VIVO视频</A></H4>
+
+<P><B>MPlayer</B>能播放Vivo(1.0和2.0)视频。对于1.0的文件最适合的解码器是FFmpeg的H263解码器，你可以用<CODE>-vc ffh263</CODE>选项
+(默认的)来使用它(需要最新的libavcodec)。对于2.0个文件，使用<A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">
+ivvideo.dll</A>这个Win32 DLL文件，将它安装在<CODE>/usr/lib/win32</CODE>或者你放Win32解码器的那个什么地方。后面这个解码器不支持YV12或YUY2，
+只使用BGR，只能限定在X11和OpenGL输出方式。希望ffh263将来支持VIVO 2.0的文件。</P>
+
+
+<H4><A NAME="mpeg">2.2.1.5 MPEG 1/2视频</A></H4>
+
+<P>MPEG1和MPEG2用本地的多平台的<B>libmpeg2</B>库解码，其源代码被包括在<B>MPlayer</B>中。对于buggy的MPEG 1/2视频文件我们通过截获sig11
+(segmentation fault)，然后迅速再次初始化解码器，从失败的地方继续。这种恢复技术会带来无法估量的速度损失。</P>
+
+
+<H4><A NAME="ms_video1">2.2.1.6 MS Video1</A></H4>
+
+<P>这是微软的又旧又差的编码格式。过去它用<CODE>msvidc32.dll</CODE>的Win32解码器解码，现在我们有我们自己的开源的实现(由
+<A HREF="mailto:melanson@pcisys.net">Mike Melanson</A>提供)。</P>
+
+
+<H4><A NAME="cinepak">2.2.1.7 Cinepak CVID</A></H4>
+
+<P><B>MPlayer</B>默认将使用自己的开源的，多平台的Cinepak解码器。它支持YUV输出，所以只要硬件驱动允许它将使用硬件缩放。</P>
+
+
+<H4><A NAME="realvideo">2.2.1.8 RealVideo</A></H4>
+
+<B>MPlayer</B>支持所有版本的RealVideo的解码：
+
+<UL>
+  <LI>RealVideo 1.0 (fourcc RV10) -- 编/解码由<B>libavcodec</B>支持</LI>
+  <LI>RealVideo 2.0，3.0，4.0(fourcc RV20，RV30，RV40) -- 解码由<B>RealPlayer库</B>支持</LI>
+</UL>
+
+<P>推荐下载并安装RealPlayer8或者RealONE，因为<B>MPlayer</B>能使用他们的库来解码RealVideo 2.0或者RealVideo 3.0的视频文件。
+<B>MPlayer</B>的配置脚本应该在一个完全安装的RealPlayer的标准位置找到它的库。如果它没找到，用<CODE>--with-reallibdir</CODE>
+选项告诉configure到哪里去找。</P>
+
+<P><B>注意：</B>RealPlayer库目前<B>只能用于x86平台上的Linux，FreeBSD，NetBSD和Cygwin。</B></P>
+
+<P><B>注意：</B>我们不能分发RealPlayer库，它的许可证不允许这样。你必须自己搞到他们。</P>
+
+
+<H4><A NAME="xvid">2.2.1.9 XViD</A></H4>
+
+<P><B>XViD</B>OpenDivX编码格式的开发分支。故事发生在Mayo工程把OpenDivX变成封闭源码的DivX4的时候，那些从事于OpenDivX的非Mayo工程
+的人们感到愤怒，于是开始了XViD。所以两个项目有相同的起源。</P>
+
+<H4>优点：</H4>
+
+<UL>
+  <LI>开放源码</LI>
+  <LI>它的API与DivX4相同，所以加入对它的支持很容易</LI>
+  <LI>支持2-pass编码</LI>
+  <LI>不错的编码质量，DivX4更快的速度(编译时你能针对你的机器优化它)</LI>
+</UL>
+
+<H4>缺点：</H4>
+
+<UL>
+  <LI>目前还不能正确的<B>解码</B>所有的DivX与DivX4文件(没问题因为libavcodec能播放他们)</LI>
+  <LI>编译时你必须选择支持DivX4<B>或者</B>支持XViD</LI>
+  <LI>还在开发中</LI>
+</UL>
+
+<P>XViD目前只能从CVS中得到。这是下载和安装的指令：</P>
+
+<OL>
+  <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</CODE></LI>
+  <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</CODE></LI>
+  <LI><CODE>cd xvidcore/build/generic</CODE></LI>
+  <LI>按照你的需要编辑<CODE>Makefile.linux</CODE>。</LI>
+  <LI><CODE>make -f Makefile.linux</CODE></LI>
+  <LI>从DivX4Linux包中找出<CODE>encore2.h </CODE>和<CODE>decore.h </CODE>，把它们复制到<CODE>/usr/local/include/</CODE>。</LI>
+  <LI>加上<CODE>--with-xvidcore=/path/to/libcore.a</CODE>选项重新编译<B>MPlayer </B>。</LI>
+</OL>
+
+
+<H4><A NAME="sorenson">2.2.1.10 Sorenson </A></H4>
+
+<P><B>Sorenson </B>是苹果开发的视频编码格式。目前我们能用本地解码器解码第一个版本(SVQ1)。</P>
+
+<H4>优点：</H4>
+
+<UL>
+  <LI>快，甚至很老的Macintosh机器也能够解码它。</LI>
+</UL>
+
+<H4>缺点：</H4>
+
+<UL>
+  <LI>SVQ3仍然没有完成逆向工程。</LI>
+</UL>
+
+<P>Sorenson解码器是默认编译使用的。</P>
+
+
+<H3><A NAME="audio_codecs">2.2.2 音频编码格式 </A></H3>
+
+<P>所有音频编码中最重要的是：<BR></P>
+
+<UL>
+  <LI>MPEG layer 2, 和layer 3(MP3)(<B>本地</B>代码，经过MMX/SSE/3DNow!优化)</LI>
+  <LI>MPEG layer 1音频(<B>本地</B>代码，使用libavcodec)</LI>
+  <LI>AC3杜比音频(<B>本地</B>代码，经过MMX/SSE/3DNow!优化)</LI>
+  <LI>Ogg Vorbis音频编码格式(<B>本地</B>库)</LI>
+  <LI>Voxware音频(使用DirectShow DLL)</LI>
+  <LI>alaw，msgsm，pcm和其它简单的老的音频格式</LI>
+  <LI>VIVO音频(g723，Vivo Siren)的</LI>
+  <LI>RealAudio：DNET(低比特率的AC3)，Cook</LI>
+</UL>
+
+
+<H4><A NAME="software_ac3">2.2.2.1 软件AC3解码</A></H4>
+
+<P>这是含有AC3音频的文件的默认解码器。</P>
+
+<P>AC3解码器能为了2，4或者6个扬声器创建音频混合输出。当配置为6个扬声器时，这个解码器向声卡驱动提供所有AC3通道的单独的输出，
+允许彻底的“环绕立体声”感受而不需要使用需要hwac3解码器的外部AC3解码器。</P>
+
+<P>使用<CODE>-channels</CODE>选项可以选择输出的通道数。使用<CODE>-channels 2</CODE>获得立体声的降混频。
+对于4通道的降混频(左前，右前，左环绕和右环绕)，使用<CODE>-channels 4</CODE>。在这种情况下，中心通道的任何输出将与前通道均匀混合。
+<CODE>-channels 6</CODE>将按照编码时的形式输出所有AC3通道-- 依次为左，右，左环绕，右环绕，中间和低频效果。</P>
+
+<P>默认的输出通道数是2。</P>
+
+<P>为使用超过2个通道的输出，你需要使用OSS，和一块能通过SNDCTL_DSP_CHANNELS ioctl支持适当输出通道数的声卡。合适的驱动的一个例子是
+2001年8月的或者更新的emu10k1(用于Soundblaster Live!卡)(ALSA的CVS应该也能工作)。</P>
+
+
+<H4><A NAME="hardware_ac3">2.2.2.2 硬件AC3解码</A></H4>
+
+<P>你需要一个AC3兼容声卡，加上数字输出(SP/DIF)。声卡的驱动必须正确地支持AFMT_AC3格式(C-Media就支持)。把你的AC3解码器连接到SP/DIF输出，
+然后使用<CODE>-ac hwac3</CODE>选项。这还在试验阶段但已经知道能用于C-Media声卡，使用ALSA驱动(但不能是OSS)的Soundblaster Live!
+还有DXR3/Hollywood+ MPEG译码卡。</P>
+
+
+<H4><A NAME="libmad">2.2.2.3 libmad支持</A></H4>
+
+<P><A HREF="http://mad.sourceforge.net">libmad</A>是多平台的MPEG音频解码库。它不能很好的处理损坏的文件，而且有时候搜索也有问题。</P>
+
+<P>为了支持它，加上<CODE>--enable-mad</CODE>配置选项编译。</P>
+
+
+<H4><A NAME="vivo_audio">2.2.2.4 VIVO音频</A></H4>
+
+<P>VIVO文件的使用的音频编码取决于它是VIVO/1.0还是VIVO/2.0。VIVO/1.0文件使用<B>g.723</B>音频，而VIVO/2.0文件使用<B>Vivo Siren</B>音频。
+他们两个都支持。你能从MPlayer站点下载<A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">g.723/Siren</A>的Win32 DLL，
+然后把它复制到<CODE>/usr/lib/win32</CODE>目录下。</P>
+
+
+<H4><A NAME="realaudio">2.2.2.5 RealAudio</A></H4>
+
+<B>MPlayer</B>支持解码几乎所有版本的RealAudio：
+
+<UL>
+  <LI>RealAudio DNET -- 解码由<B>liba52</B>支持</LI>
+  <LI>RealAudioCook/Sipro -- 解码由<B>RealPlayer库</B>支持</LI>
+  <LI>RealAudio atrc -- 解码尚未支持</LI>
+</UL>
+
+<P>至于如何安装RealPlayer库，参见<A HREF="formats.html#real">RealMedia文件格式</A>部分。</P>
+
+
+<H3><A NAME="importing">2.2.3 Win32解码器导入HOWTO</A></H3>
+
+
+<H4><A NAME="importing_vfw">2.2.3.1 VFW codecs</A></H4>
+
+<P>VFW(Video for Windows)是Windows的老的视频API。它的解码器以.DLL或者(很少的).DRV为扩展名。
+如果<B>MPlayer</B>无法播放你的AVI并显示这种信息：</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>UNKNOWN video codec: HFYU (0x55594648)</CODE></P>
+
+<P>它意味着你的AVI在编码时使用了HFYU fourcc(HFYU = HuffYUV codec，DIV3 = DivX Low Motion，等等...)
+的编码格式。现在你知道了，你必须查明Windows为了播放这个文件装载了哪一个DLL。在我们的情况下，
+<CODE>system.ini</CODE>在这样的一行上包含这个信息：</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>VIDC.HFYU=huffyuv.dll</CODE></P>
+
+<P>因此，你需要<CODE>huffyuv.dll</CODE>文件。注意，音频解码器通过MSACM前缀指定：</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>msacm.l3acm=L3codeca.acm</CODE></P>
+
+
+<P>这是MP3编码格式。现在你有了所有必要的信息(fourcc，解码器文件，AVI样本)，把你的解码器支持要求通过邮件提交，
+并把相关文件上载到我们的FTP站点：</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
+
+
+<H4><A NAME="importing_directshow">2.2.3.2 DirectShow codecs</A></H4>
+
+<P>DirectShow是较新的视频API，比它的前辈更恶劣。对于DirectShow事情变的困难了，</P>
+
+<UL>
+  <LI><CODE>system.ini</CODE>不再包含需要的信息，它们被储存在注册表里，此外
+  <LI>我们需要解码器的的GUID。
+</UL>
+
+<P><B>新方法：</B>使用微软的GraphEdit(快速)</P>
+<OL>
+  <LI>从DirecX SDK或者<A HREF="http://doom9.org">Doom9</A>中取得GraphEdit
+  <LI>运行<CODE>graphedit.exe</CODE>
+  <LI>从菜单中选择Graph -&gt; Insert Filters
+  <LI>展开<CODE>DirectShow Filters</CODE>项目
+  <LI>选择正确的解码器名称然后展开项目
+  <LI>在<CODE>DisplayName</CODE>一项中看反斜杠后面花括号里面的文字并把它记下来(小短横分隔开的五块，就是GUID)
+  <LI>解码器的二进制文件是<CODE>Filename</CODE>项里指定的文件
+</OL>
+
+<P><B>注意：</B>如果没有<CODE>Filename</CODE>项而<CODE>DisplayName</CODE>中包含类似<CODE>device:dmo</CODE>的东西，
+那么这是一个DMO-Codec，MPlayer目前不支持</P>
+<P><B>老方法：</B>做个深呼吸然后开始搜索注册表...</P>
+
+<OL>
+  <LI>运行<CODE>regedit</CODE>。
+  <LI>按<CODE>Ctrl-f</CODE>，禁用头两个复选框，填写解码器的fourcc(例如TM20)。
+  <LI>你应该看见一个包含路径和文件名的域(例如<CODE>C:\WINDOWS\SYSTEM\TM20DEC.AX</CODE>)。
+  <LI>现在你找到了文件，我们需要GUID。尝试再次搜索，但现在搜索解码器的名称，fourcc。用媒体播放器播放文件时，
+察看File -&gt; Properties  -&gt; Advanced可以获得解码器名。如果没有，你真不走运。猜猜看吧(例如搜索TrueMotion)。
+  <LI>如果找到GUID你将看见FriendlyName和CLSID域。写出16字节CLSID，这就是我们需要的GUID。
+</OL>
+
+<P><B>注意：</B>如果搜索失败，试试选上所有的复选框。你可能找到错误的内容，不过说不定你会走运...</P>
+
+<P>现在你有所有必要的信息(fourcc，GUID，解码器文件，AVI样本)，把你的解码器支持要求通过邮件提交，并把相关文件上载到我们的FTP站点</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
+
+</BODY>
+</HTML>
