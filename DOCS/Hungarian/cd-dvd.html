@@ -14,15 +14,17 @@
 <P>A Linux dokumentációjából:</P>
 
 <P>Néhány CDROM meghajtó képes szabályozni az olvasás sebességét. Jónéhány okunk
-  lehet arra, hogy ezt kihasználjuk. Például rosszul készített CDROM-oknak
-  elõnyé válik a lassabb fejmozgás. A mai meghajtók nagyon magas fordulatszámon
-  pörögnek, és ilyen nagy sebességnél bizony elõfordulnak olvasási hibák, amik
-  a sebesseg csökkentésével kiküszöbölhetõk. Nem elhanyagolható a sebességgel
-  arányos zajszint sem.</P>
+  lehet arra, hogy ezt kihasználjuk:</P>
 
-<P>Ajánlott a 'setcd' nevû programot használni. Elég régi, de könnyen fellelhetõ
-  a Neten. VALAMINT az újabb hdparm-oknak is van erre opciójuk !
-  Használata:</P>
+  <UL>
+    <LI>Magas sebességen elõfordulhatnak olvasási hibák, fõleg hibásan
+      készített CD lemezek esetén.</LI>
+    <LI>Nem elhanyagolható a sebességgel arányos zajszint sem.</LI>
+  </UL>
+
+<P>Ajánlott a 'hdparm' vagy a 'setcd' nevû programot használni.</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -E [sebesség] [meghajtó]</CODE></P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>setcd -x [sebesség] [meghajtó]</CODE></P>
 
@@ -30,8 +32,8 @@
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 >/proc/ide/[meghajtó]/settings</CODE></P>
 
-<P>de ehhez rendszergazdai jogosultság szükséges. A következõ parancsot is
-  használom:</P>
+<P>de ehhez rendszergazdai jogosultság szükséges. A következõ parancs is
+  hasznos lehet:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 >/proc/ide/[meghajtó]/settings</CODE></P>
 
@@ -60,83 +62,14 @@
 <P>A <CODE>libdvdnav</CODE> támogatásának készítése folyamatban van, jelenleg
   nem használható.</P>
 
-<LI><P><B>Régi tipusú DVD támogatás - <I>OPCIONÁLIS</I></B></P>
+<P><B>Régi tipusú DVD támogatás - <I>OPCIONÁLIS</I></B></P>
 
 <P><I>Ez akkor hasznos ha pl merevlemezrõl akarsz kódolt VOB-ot lejátszani.
   Fordítsd le és installáld a <B>libcss</B> 0.0.1-et (és ne újabbat).
   Ha az <B>MPlayer</B> nem találja, használd a <CODE>-csslib /útvonal/libcss.so</CODE>
-  opciót.</P></LI>
+  opciót.</P>
 
-<LI><P><B>Fordítsd le az MPlayer-t.</B></P>
-
-<P><I>Futtasd a <CODE>./configure</CODE>-t. Ha nem törölted le a
-  <CODE>libmpdvdkit</CODE> könyvtárat, a ./configure valami ilyesmit fog
-  kiírni:</P>
-
-<P><CODE>Checking for DVD support (libmpdvdkit) ... yes</CODE></P>
-
-<P>Az <B>MPlayer</B> képes már installált <CODE>libdvdread</CODE> és
-  <CODE>libdvdcss</CODE> használatára, de ezen módszer használata NEM
-  AJÁNLOTT mivel használata különféle hibákhoz, inkompatibilitásokhoz, és
-  lassabb sebességhez vezet.</P>
-
-<P>Ezután a szokott módon <CODE>make</CODE> és <CODE>make install</CODE>.</P>
-
-<P>Természetesen miután felinstalláltad a libdvdcss-t és a libdvdread-et,
-  nem kell újrafordítanod õket minden alkalommal mikor az <B>MPlayer</B>-t.</P>
-
-<P><B>MPlayer használata DVD lejátszáshoz:</B></P>
-
-<TABLE BORDER=0 WIDTH=100%>
-<TD VALIGN=top>-dvd &lt;cím_id&gt;&nbsp;</TD>
-<TD>DVD támogatás bekapcsolása, és cím kiválasztása.</TD><TR>
-<TD VALIGN=top>-chapter &lt;fejezet_id&gt;&nbsp;</TD>
-<TD>DVD fejezet(ek) kiválasztása (alap: elsõ fejezettõl kezdve).
-  Például : <CODE>-chapter 5-7</CODE>, vagy <CODE>-chapter -9</CODE></TD><TR>
-<TD VALIGN=top>-dvdangle &lt;szög_id&gt;&nbsp;</TD>
-<TD>Kamera szög kiválasztása (alap: 1)</TD><TR>
-<TD VALIGN=top>-alang &lt;ország kód&gt;&nbsp;</TD>
-<TD>  A megadott <CODE>országkód</CODE> mondja meg az <B>MPlayer</B>-nek hogy
-  milyen nyelvû audiosávokat játsszon le.  A lehetséges nyelvek listája a
-  <CODE>-v</CODE> opció hozzáadásával kérhetõ le, és olvasd el a kimenetet. Íme
-  egy példa:<BR>
-  &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - elõször magyar hangot próbál
-  lejátszani, de ha nem talál akkor angolt.</TD><TR>
-<TD VALIGN=top>-slang &lt;ország kód&gt;&nbsp;</TD>
-<TD>  DVD feliratok megjelenítésének bekapcsolása. A megadott <CODE>országkód</CODE>
-  mondja meg az <B>MPlayer</B>-nek hogy milyen felirato(ka)t keressen.
-  A lehetséges nyelvek listája a <CODE>-v</CODE> opció hozzáadásával
-  kérhetõ le, és olvasd el a kimenetet. Íme egy példa:<BR>
-  &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - elõször magyar feliratokat próbál
-  megjeleníteni, és ha nem talál akkor angolt.</TD><TR>
-<TD VALIGN=top>-sid &lt;felirat_id&gt;&nbsp;</TD>
-<TD>  A megadott <CODE>id</CODE>-vel rendelkezõ feliratot (nyelvet) jeleníti meg.
-  Hasznos például hibás DVD-nél ahol az országkód nem a megfelelõ feliratot
-  jelenti.</TD><TR>
-<TD VALIGN=top>-csslib &lt;útvonal/filenév&gt;</TD>
-<TD>  (régi DVD lejátszó kóddal) Ezzel az opcióval definiálható felül a
-  <CODE>libcss.so</CODE> helye (alapértelmezésben keres).
-  </TD><TR>
-<TD VALIGN=top>-dvdauth &lt;DVD egység&gt;</TD>
-<TD>  (régi DVD lejátszó kóddal) A megadott DVD egységgel történõ autentikálás
-  megadása.
-  </TD><TR>
-<TD VALIGN=top>-dvdkey &lt;CSS kulcs&gt;</TD>
-<TD>  (régi DVD lejátszó kóddal) Mikor nem DVD-rõl történik a kódolt MPEG2
-  lejátszása, ezzel az opcióval adható meg a dekódoláshoz szükséges CSS
-  kulcs. Ezt a kulcsot a DVD-vel történõ autentikálásnál írja ki az <B>MPlayer</B>.
-  </TD><TR>
-</TABLE>
-
-<P>Az egység alapbeállítás szerint <CODE>/dev/dvd</CODE>, ezt a config.h-ban
-  változtathatod meg (fordításkor), van megadhatod a -dvd-device opcióval:</P>
-
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -dvd-device /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang hu -dvd-device /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang hu -chapter 5 -dvdangle 2</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang hu -chapter 5-9 -dvdangle 2</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
+<P>Az opciók teljes listájához lásd a manpage-t.</P>
 
 
 <P><B><A NAME="vcd">4.3.  VCD lejátszás</A></B></P>

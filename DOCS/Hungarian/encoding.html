@@ -39,7 +39,8 @@
       fejezetben</A> le van írva.</LI>
     <LI><B>OPCIONÁLIS</B> - töltsd és fordítsd le a <B>libmp3lame-t</B> (a lame 3.89bétából vagy
       CVS-bõl).<BR>
-      <B>NE GCC 2.96-TAL FORDÍTSD ! Nem fog helyesen mûködni !</B><BR>
+      <B>A lame 3.90 elõtti verzióit NE GCC 2.96-TAL FORDÍTSD! Nem fognak
+      helyesen mûködni!</B><BR>
       Ez szükségeltetik a CBR/VBR MP3 audio enkódoláshoz. Egy
       egyszerû <CODE>lame</CODE> bináris nem elég. Mégvalami: minél kevesebb
       optimalizációt használsz a lame fordításánál, annál jobb lesz a minõsége.
@@ -347,136 +348,10 @@
   &nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles
     -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
+<P><B><A NAME="2.4.4">2.4.4 Opciók</A></B></P>
 
-<P><B><A NAME=2.4.4>2.4.4.  Szintaxis</B></P>
-
-<P>&nbsp;&nbsp;<CODE>mencoder [opciók] [bemeneti file] [opciók] ...</P>
-
-
-<P><B><A NAME=2.4.5>2.4.5.  Opciók</B></P>
-
-<P>Megj.: az összes rendelkezésre álló opcióhoz <B>olvasd el a manpage-t !</B></P>
-
-<P>
-  Tekintve hogy a <B>MEncoder</B> alapjában véve ugyanarra a kódra épül amire
-  az <B>MPlayer</B>, sok olyan <B>MPlayer</B> opció van ami enkódolásnál is
-  használható. Például a <CODE>-sid</CODE> itt arra használható hogy a DVD
-  feliratokat bekódold a keletkezõ AVI-ba. Vagy a <CODE>-noidx</CODE> opcióval
-  itt is figyelmen kívül hagyható az esetleges hibás index a bemeneti AVI-ban.
-</P>
-
-<TABLE BORDER=1>
-<TR>
-  <TD>    <I>-ss</I> idõpont</TD>
-  <TD>    enkódolás indítása a megadott idõponttól (csak keyframe-tõl indulhat !)
-  </TD>
-</TR>
-<TR>
-  <TD>    <I>-endpos</I> idõpont/idõtartam</TD>
-  <TD>    enkódolás megállítása a megadott idõ letelte után, vagy adott idõpont
-    elérésekor. Lásd a manpage-t !
-  </TD>
-</TR>
-<TR>
-  <TD>    <I>-o</I> filenév</TD>
-  <TD>    kimeneti filenév megadása
-  </TD>
-</TR>
-<TR>
-  <TD>    <I>-sws</I> 0-2</TD>
-  <TD>    átmérezetési módszer meghatározása<BR>
-    &nbsp;&nbsp;0 - fast bilinear<BR>
-    &nbsp;&nbsp;1 - bilinear<BR>
-    &nbsp;&nbsp;2 - bicubic (legjobb minõség)<BR>
-  </TD>
-</TR>
-<TR>
-  <TD>    <I>-ovc</I> codecnév</TD>
-  <TD>    Enkódolás a megadott codec-kel (a codec nevek a codecs.conf-ból származnak). Példák :<BR>
-    &nbsp;&nbsp;<B>help</B> - codecek listája<BR>
-    &nbsp;&nbsp;<B>rawrgb</B> - ?<BR>
-    &nbsp;&nbsp;<B>copy</B> - nincs enkódolás, csak stream másolás (most csak AVI/ASF-bõl)<BR>
-    &nbsp;&nbsp;<B>divx4</B> - enkódolás DivX4-be<BR>
-    &nbsp;&nbsp;<B>lavc</B> - enkódolás egy libavcodec-ben lévõ codec-kel<BR>
-    &nbsp;&nbsp;<B>vfw</B> - enkódolás egy Windows-os DLL-lel<BR>
-  </TD>
-</TR>
-<TR>
-  <TD>    <I>-oac</I> codecnév</TD>
-  <TD>    Enkódolás a megadott codec-kel (a codec nevek a codecs.conf-ból származnak). Példák :<BR>
-    &nbsp;&nbsp;<B>help</B> - codecek listája<BR>
-    &nbsp;&nbsp;<B>copy</B> - nincs enkódolás, csak stream másolás (most csak AVI/ASF-bõl, és csak CBR audiot)<BR>
-    &nbsp;&nbsp;<B>pcm</B> - tömörítetlen PCM<BR>
-    &nbsp;&nbsp;<B>mp3lame</B> - MP3 enkódolás<BR>
-  </TD>
-</TR>
-<TR>
-  <TD>    <I>-divx4opts</I></TD>
-  <TD>    Ha DivX4-be enkódolsz, itt megadhatod a paramétereket, pl :<BR>
-    &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
-    Leghasznosabb opciók: <B>(a teljes lista a manpage-ban található !)</B><BR>
-    &nbsp;&nbsp;<B>help</B> - segíccség<BR>
-    &nbsp;&nbsp;<B>br</B>=XXX - bitráta megadása kbit-ben &lt;4-16000&gt; vagy bitben &lt;16001-24000000&gt;<BR>
-    &nbsp;&nbsp;<B>q</B>=XXXX - minõség (1-leggyorsabb, 5-legjobb - alapértelmezett)<BR>
-    &nbsp;&nbsp;<B>key</B>=XXXX - keyframe-k közötti idõintervallum<BR>
-  </TD>
-</TR>
-<TR>
-  <TD>    <I>-lavcopts</I></TD>
-  <TD>    Ha egy libavcodec-es codec-kel enkódolsz, itt megadhatod a paramétereket, pl :<BR>
-    &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
-    Leghasznosabb opciók: <B>(a teljes lista a manpage-ban található !)</B><BR>
-    &nbsp;&nbsp;<B>help</B> - segíccség<BR>
-    &nbsp;&nbsp;<B>vcodec</B>=XXX - video codec kiválasztása (a teljes lista a fenti libavcodec bekezdésben megtalálható)<BR>
-    &nbsp;&nbsp;<B>vbitrate</B>=XXX - bitráta megadása kbit-ben &lt;4-16000&gt; vagy bitben &lt;16001-24000000&gt;<BR>
-    &nbsp;&nbsp;<B>vhq</B> - legjobb minõség (?)<BR>
-    &nbsp;&nbsp;<B>keyint</B>=XXX - keyframe-k közötti idõintervallum<BR>
-  </TD>
-</TR>
-<TR>
-  <TD>    <I>-lameopts</I></TD>
-  <TD>    Ha MP3-ba kódolsz, itt adhatod meg a paramétereket, pl :<BR>
-    &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
-    &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>
-    Leghasznosabb opciók: <B>(a teljes lista a manpage-ban található !)</B><BR>
-    &nbsp;&nbsp;<B>help</B> - törpítség<BR>
-    &nbsp;&nbsp;<B>cbr</B> - <B>CBR</B>-es MP3 kiválasztása (az alapértelmezett a <B>VBR</B>)<BR>
-    &nbsp;&nbsp;<B>br</B>=XXX - bitráta megadása kbit-ben &lt;0-1024&gt; (csak <B>CBR</B>-nél!)<BR>
-    &nbsp;&nbsp;<B>q</B>=XXXX - minõség (0-legjobb, 9-leggyorsabb) (csak <B>VBR</B>-nél!)<BR>
-    &nbsp;&nbsp;<B>vbr</B>=XXXX - VBR alüzemmód (3-ABR, ennek van a legjobb
-      sebesség/minõség mutatója) (csak <B>VBR</B>-nél!)<BR>
-  </TD>
-</TR>
-</TABLE>
-
-<P><B><A NAME=2.4.6>2.4.6.  Példák</B></P>
-
-<P>A <B>MEncoder</B> használata a legkönnyebb dolog a Földön.</P>
-
-<P>A DVD 2-es fejezetének enkódolása :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi</CODE></P>
-
-<P>Ugyanez libavcodec-kel, MJPEG tömörítéssel :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg</CODE></P>
-
-<P>A DVD 2-es fejezetének enkódolása, átméretezéssel :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -vop scale=640:480 -sws 2 -o title2.avi</CODE></P>
-
-<P>Enkódolás HTTP-rõl :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/example.avi  -o  example.avi</CODE></P>
-
-<P>Enkódolás standard bemenetrõl :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -</CODE></P>
-
-<P>Több VOB file enkódolása :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;cat *.vob | mencoder &lt;options&gt; -</CODE></P>
-
-<P>Enkódolás tuner-rõl (a tuner opciók a <A HREF="documentation.html#2.5">TV input</A> fejezetben találhatóak) :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=640:height=480 &lt;options&gt;</CODE></P>
-
-<P>Az összes opció listájához <B><I>lásd a MEncoder manpage-t !</I></B>
-<P>
-</FONT>
+<P>A rendelkezésre álló összes opció listája példákkal együtt a manpage-ben
+  található.</P>
 
 </BODY>
 </HTML>

@@ -172,9 +172,7 @@
             <LI><A HREF="encoding.html#2.4.3.6">2.4.3.6 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></LI>  
             <LI><A HREF="encoding.html#2.4.3.7">2.4.3.7 DVD feliratok VOBsub formátumúvá alakítása</A></LI>  
           </UL>
-        <LI><A HREF="encoding.html#2.4.4">2.4.4 Szintaxis</A></LI>
-        <LI><A HREF="encoding.html#2.4.5">2.4.5 Opciók</A></LI>
-        <LI><A HREF="encoding.html#2.4.6">2.4.6 Példák</A></LI>
+        <LI><A HREF="encoding.html#2.4.4">2.4.4 Opciók</A></LI>
       </UL>
     <LI><A HREF=#2.5>2.5 TV bemenet</A></LI>
     <UL>
@@ -631,28 +629,6 @@ meghajtókat érdemes kipróbálni :</P>
 <LI>Ha van V4L kompatibilis <B>TV tunered</B>, nézd meg a <A HREF=#2.5>TV bemenet</A>
   fejezetet.</LI>
 
-<LI>Három idõzítõ kód van az <B>MPlayerben</B>.<BR>
-<BR>
-<B>A régi módszer használatához</B> nem kell semmit tenned, alapértelmezett.
-Lényege hogy <CODE>usleep()</CODE>-et használ az A/V szinkron javításához, +/-
-10ms pontossággal. Néha ez nem elég pontos.<BR>
-<BR>
-<B>Az új kód</B> a PC-k RTC-jét (Real Time Clock) használja erre a célra, mivel
-ezzel sokkal pontosabb, +/- 1ms-os idõzítést lehet elérni. Ez root jogokat
-követel, vagy egy <I>setuid root</I> <B>MPlayer</B> binárist (nos, vagy egy kis
-kernel átirást, ezt azért inkább ne..). Az új idõzítõ kód hatékonysága szépen
-látszik a státuszsorban. Néhány hardware kombinációban (ellenõrizve egy
-DMA nélküli DVD drive használatakor egy ALi1541 alaplapon) az RTC
-használata szaggatott lejátszáshoz vezet. Ilyenkor a következõ módszer
-használata javallott.<BR>
-<BR>
-<B>A harmadik módszer haszálatához</B> a <CODE>-softsleep</CODE> opciót kell
-megadni. Ez van olyan hatékony mint az RTC, de nem használja az RTC-t. Viszont
-sajnos több CPU-t igényel.<BR>
-<BR>
-Megj.: <B>SOHA ne installálj setuid MPlayer binárist többfelhasználós
-gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</LI>
-
 </UL>
 
 <P>Ezután fordítsd le az <B>MPlayer</B>-t:</P>
@@ -846,13 +822,60 @@ film bal felsõ sarkában (kikapcsolás az 'o' billentyûvel).</P>
 
 <P>Az OSD-nek 3 állása van: ('o' billentyûvel lehet váltani)<BR>
 <UL>
-  <LI>timer + hangerõ + keresõ + feliratok (alapállapot)
-  <LI>hangerõ + keresõ + feliratok
-  <LI>csak feliratok
+  <LI>timer + hangerõ + keresõ + feliratok</LI>
+  <LI>hangerõ + keresõ + feliratok (alapállapot)</LI>
+  <LI>csak feliratok</LI>
 </UL>
 
 <P>Az alapértelmezést megváltoztathatod az <CODE>osdlevel=</CODE> változóval a
-konfigurációs file-ban.</P>
+  konfigurációs file-ban.</P>
+
+
+<P><B><A NAME="rtc">1.6 RTC</A></B></P>               
+
+Három idõzítõ kód van az <B>MPlayerben</B>.
+
+<UL>
+  <LI><B>A régi módszer használatához</B> nem kell semmit tenned, alapértelmezett.
+    Lényege hogy <CODE>usleep()</CODE>-et használ az A/V szinkron javításához, +/-
+    10ms pontossággal. Néha ez nem elég pontos.</LI>
+  <LI><B>Az új kód</B> a PC-k RTC-jét (Real Time Clock) használja erre a célra, mivel
+    ezzel sokkal pontosabb, +/- 1ms-os idõzítést lehet elérni. Ez root jogokat
+    követel, vagy egy <I>setuid root</I> <B>MPlayer</B> binárist, vagy egy
+    megfelelõen beállított kernelt.<BR>
+    Ha 2.4.19pre8-as vagy annál újabb kernelt használsz, a <CODE>/proc</CODE>
+    filerendszeren belül beállíthatod a felhasználók számára elérhetõ
+    legmagasabb RTC frekvenciát:
+    <P>
+      <CODE>echo 1024 > /proc/sys/dev/rtc/max-user-freq</CODE>
+    </P>
+    Ha nincs ilyen új kerneled, a kernel forrásában található
+    <CODE>drivers/char/rtc.c</CODE> file átírásával is megoldható a
+    probléma. Keresd meg azt a részt amelyik így néz ki:
+    <PRE>
+       * We don't really want Joe User enabling more
+       * than 64Hz of interrupts on a multi-user machine.
+       */
+      if ((rtc_freq > 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
+    </PRE>
+    és írd át a 64-et 1024-re. Azért jó ha tudod hogy mit csinálsz.<BR>
+    Az új idõzítõ kód hatékonysága szépen látszik a státuszsorban.<BR>
+    Néhány speedstep-pel rendelkezõ notebook BIOS-ának power management
+    funkciói összeakadhatnak az RTC-vel, ilyenkor az audio és a video lejátszás
+    nem lesz szinkronban. Az ilyen notebookokat indítás elõtt csatlakoztatni
+    kell az elektronikus hálózatba. Az RTC használatát bármikor ki lehet
+    kapcsolni a <CODE>-nortc</CODE> opcióval.  Néhány hardware kombinációban
+    (ellenõrizve egy DMA nélküli DVD drive használatakor egy ALi1541 alaplapon)
+    az RTC használata szaggatott lejátszáshoz vezet. Ilyenkor a következõ
+    módszer használata javallott.</LI>
+  <LI><B>A harmadik módszer haszálatához</B> a <CODE>-softsleep</CODE> opciót kell
+    megadni. Ez van olyan hatékony mint az RTC, de nem használja az RTC-t. Viszont
+    sajnos több CPU-t igényel.</LI>
+</UL>
+
+<B>Megj.:</B> <B>SOHA ne installálj setuid MPlayer binárist többfelhasználós
+  gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</LI>
+
 
 
 <P><B><A NAME=2>2.  Funkciók</A></B></P>
@@ -1733,6 +1756,10 @@ Ne növeljük a lista forgalmát.</P>
 (ha nem érted, mire kell egy változtatás, vagy jobb fixet tudsz, esetleg
 bugot találsz az illetõ commitban)
 Bizonyosodj meg róla, hogy a kívánt fejlesztõ is olvassa a listát!</P>
+
+</LI><LI>MPlayer Cygwin-portolási lista:
+<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin">http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin</A>
+<P>Az MPlayer Cygwin portjáról szóló megbeszélések helye.</P>
 
 </LI></UL></P>
 
