@@ -1346,13 +1346,13 @@ GList *appendOSSMixerChannels(GList *l) {
 #if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
 GList *appendALSADevices(GList *l) {
   l = g_list_append(l, (gpointer)"default");
-  l = g_list_append(l, (gpointer)"hw#0.0");
-  l = g_list_append(l, (gpointer)"hw#0.1");
-  l = g_list_append(l, (gpointer)"hw#0.2");
+  l = g_list_append(l, (gpointer)"hw=0.0");
+  l = g_list_append(l, (gpointer)"hw=0.1");
+  l = g_list_append(l, (gpointer)"hw=0.2");
   l = g_list_append(l, (gpointer)"surround40");
   l = g_list_append(l, (gpointer)"surround51");
-  l = g_list_append(l, (gpointer)"plug:surround40");
-  l = g_list_append(l, (gpointer)"plug:surround51");
+  l = g_list_append(l, (gpointer)"plug=surround40");
+  l = g_list_append(l, (gpointer)"plug=surround51");
   return l;
 }
 
@@ -1365,6 +1365,7 @@ GList *appendALSAMixerChannels(GList *l) {
   l = g_list_append(l, (gpointer)"Master");
   l = g_list_append(l, (gpointer)"Line");
   l = g_list_append(l, (gpointer)"PCM");
+  l = g_list_append(l, (gpointer)"PCM,1");
   return l;
 }
 #endif
