@@ -92,7 +92,7 @@ typedef int (*kill_warn)(const void*, const void*);
 
 static int mylstat(char *dir, char *file,struct stat* st) {
   int l = strlen(dir) + strlen(file);
-  char s[l+1];
+  char s[l+2];
   sprintf(s,"%s/%s",dir,file);
   return lstat(s,st);
 }
@@ -175,11 +175,13 @@ bailout:
   }
   while(n--) {
     e = calloc(1,sizeof(list_entry_t));
+    e->p.next = NULL;
     e->p.txt = strdup(namelist[n]);
     if(strchr(namelist[n], '/') != NULL)
       e->d = 1;
     menu_list_add_entry(menu,e);
     free(namelist[n]);
+    free(e);
   }
   free(namelist);
 
