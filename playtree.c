@@ -525,7 +525,7 @@ play_tree_rnd_step(play_tree_t* pt) {
 
   if(!count) return NULL;
   
-  r = (int)((count-1.0) * rand() / RAND_MAX);
+  r = (int)((float)(count) * rand() / (RAND_MAX + 1.0));
 
   for(i = head ; i  ; i=i->next) {
     if(!(i->flags & PLAY_TREE_RND_PLAYED)) r--;
