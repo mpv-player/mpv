@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.15 -->
+<!-- synced with 1.16 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Odtwarzacz filmów dla LINUKSA</title>
@@ -158,7 +158,7 @@ do manipulacji obrazem.
   w zbiór wyjściowy
   </simpara></listitem>
 <listitem><simpara>
-  Możliwość zapisu napisów DVD do formatu Vobsub
+  Możliwość zapisu napisów DVD do formatu VOBsub
   </simpara></listitem>
 </itemizedlist>
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.17 -->
+<!-- synced with 1.18 -->
 <chapter id="usage">
 <title>Sposób użycia</title>
 
@@ -297,7 +297,7 @@ Z powodów oczywistych nie tłumaczyłem parametrów (np. type). Poza tym dodałem
   </para></listitem>
 <listitem><para><literal>vobsub_lang</literal></para>
   <para>
-  Zmienia język napisów VobSub.
+  Zmienia język napisów VOBsub.
   </para></listitem>
 <listitem><para><literal>vo_fullscreen</literal></para>
   <para>

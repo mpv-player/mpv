@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.39 -->
+<!-- synced with 1.40 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -567,7 +567,7 @@ program korzystał ze skórki w katalogu
 <application>MPlayer</application> może wyświetlać napisy podczas odtwarzania
 filmu. Obecnie następujące formaty są obsługiwane:
 <itemizedlist>
-<listitem><para>VobSub</para></listitem>
+<listitem><para>VOBsub</para></listitem>
 <listitem><para>OGM</para></listitem>
 <listitem><para>CC (zamknięty format napisów)</para></listitem>
 <listitem><para>MicroDVD</para></listitem>
@@ -599,7 +599,7 @@ jeśli podasz odpowiednią opcję:
 
 <para>
 <application>MEncoder</application> może zrzucić napisy DVD do formatu
-<link linkend="menc-feat-extractsub">VobSub</link>.
+<link linkend="menc-feat-extractsub">VOBsub</link>.
 </para>
 
 <para>
@@ -607,9 +607,9 @@ Opcje dla wiersza poleceń różnią się delikatnie dla różnych formatów:
 </para>
 
 <formalpara>
-<title>Format VobSub</title>
+<title>Format VOBsub</title>
 <para>
-Napisy VobSub składają się z dużego (kilku megabajtowego) pliku <filename>.SUB</filename>
+Napisy VOBsub składają się z dużego (kilku megabajtowego) pliku <filename>.SUB</filename>
 i opcjonalnych plików <filename>.IDX</filename> i/lub <filename>.IFO</filename>.
 Jeżeli masz takie pliki, jak
 <filename><replaceable>przykład.sub</replaceable></filename>,
