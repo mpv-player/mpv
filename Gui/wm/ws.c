@@ -814,6 +814,7 @@ void wsMoveWindow( wsTWindow * win,int x, int y )
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
 
  XMoveWindow( wsDisplay,win->WindowID,win->X,win->Y );
+ if ( win->ReSize ) win->ReSize( win->X,win->Y,win->Width,win->Height );
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -841,6 +842,7 @@ void wsResizeWindow( wsTWindow * win,int sx, int sy )
   }
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
  XResizeWindow( wsDisplay,win->WindowID,sx,sy );
+ if ( win->ReSize ) win->ReSize( win->X,win->Y,win->Width,win->Height );
 }
 
 // ----------------------------------------------------------------------------------------------
