@@ -86,7 +86,6 @@
 	<LI><A HREF="video.html#2.2.1.A">2.2.1.A TVout</A></LI>
 	<UL>
 	  <LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox cards</A></LI>
-	  <LI><A HREF="video.html#2.2.1.A.1a">2.2.1.A.1a Matrox cards - method 2</A></LI>
 	  <LI><A HREF="video.html#2.2.1.A.2">2.2.1.A.2 ATI cards</A></LI>
 	  <LI><A HREF="video.html#2.2.1.A.3">2.2.1.A.3 Voodoo 3</A></LI>
 	</UL>
@@ -238,6 +237,9 @@ experience any problems:<BR>
 <P>Read the following before trying to compile <B>MPlayer</B>:</P>
 
 <UL>
+<LI>If you have <B>gcc 2.96</B> on your system, <A HREF="faq.html#5.1"><B><I>READ
+THIS!!!</A></LI>
+
 <LI>If you plan to use <B>MPlayer</B> on x86 architecture, you possibly want to use
 Win32 codecs. Download and unzip w32codecs.zip to /usr/lib/win32 .
 Note: the avifile project has similar codecs package, but it differs
@@ -247,13 +249,14 @@ our package! However, you can use our codecs package with avifile.</LI>
 <LI>If you own a Matrox G200/G400/G450/G550 card, then please see the <A HREF="video.html#2.2.1.7">2.2.1.7</A>
 section in order to gain big speedup. It is important to do these steps
 <I>before</I> compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
-built. Also check out the <A HREF="video.html#2.2.1.A.1">first</A> and
-<A HREF="video.html#2.2.1.A.1a">second</A> <B>Matrox TV-out</B> sections.</LI>
+built. Also check out the <A HREF="video.html#2.2.1.A.1">Matrox TV-out</A>
+section.</LI>
 
 <LI>If you own a 3Dfx Voodoo3/Banshee card, then please see the <A
 HREF="video.html#2.2.1.9">2.2.1.9</A> section in order to gain big speedup. It
 is important to do these steps <I>before</I> compiling <B>MPlayer</B>,
-otherwise no 3Dfx support will be built.</LI>
+otherwise no 3Dfx support will be built. Also see the <A HREF="video.html#2.2.1.A.3">3dfx
+TV out section</A>.</LI>
 
 <LI>If you own an ATI card, see the <A HREF="video.html#2.2.1.A.2">2.2.1.A.2
 section</A> to know what features of your card is supported under Linux/MPlayer.</LI>
@@ -1167,7 +1170,7 @@ otherwise.  Please do not send messages using other language!</P>
 
 <LI>No image (black image) in RGB 15/16bpp (x11,dga,fbdev,svga) playing
   MPEG or OpenDivX files:<BR>
-  Problem: gcc 2.96 bug<BR>
+  Problem: gcc 2.96 bug, read <A HREF="gcc-2.96-3.0.html">this</A><BR>
   Workaround: ./configure --disable-mmx, or use gcc 2.95.x<BR>
   SOLVED: code fixed</LI>
 
