@@ -4,6 +4,7 @@
 #include "../cpudetect.h"
 #include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"
+#include "../libmpcodecs/vf_scale.h"
 #include "mp_msg.h"
 
 // mga_vid drawing functions
@@ -413,13 +414,6 @@ static int mga_uninit(){
 	f = -1;
   }
   return 0;
-}
-
-static int get_sws_cpuflags(){
-    return 
-          (gCpuCaps.hasMMX   ? SWS_CPU_CAPS_MMX   : 0)
-	| (gCpuCaps.hasMMX2  ? SWS_CPU_CAPS_MMX2  : 0)
-	| (gCpuCaps.has3DNow ? SWS_CPU_CAPS_3DNOW : 0);
 }
 
 static uint32_t preinit(const char *vo_subdevice)

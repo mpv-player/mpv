@@ -34,6 +34,7 @@
 #include "vf.h"
 #include "../libvo/fastmemcpy.h"
 #include "../postproc/swscale.h"
+#include "vf_scale.h"
 
 
 //===========================================================================//

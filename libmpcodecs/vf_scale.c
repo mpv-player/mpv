@@ -13,6 +13,7 @@
 
 #include "../libvo/fastmemcpy.h"
 #include "../postproc/swscale.h"
+#include "vf_scale.h"
 
 #include "m_option.h"
 #include "m_struct.h"
@@ -30,7 +31,6 @@ static struct vf_priv_s {
   0,
   0,
   NULL,
-  NULL,
   NULL
 };
 
@@ -40,7 +40,6 @@ extern int opt_screen_size_y;
 //===========================================================================//
 
 void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, SwsFilter **dstFilterParam);
-struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, int dstW, int dstH, int dstFormat);
 
 static unsigned int outfmt_list[]={
 // RGB:
@@ -319,6 +318,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 
 	return CONTROL_TRUE;
     default:
+	break;
     }
     
     return vf_next_control(vf,request,data);

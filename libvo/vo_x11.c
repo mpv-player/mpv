@@ -25,6 +25,7 @@
 #include "../postproc/swscale.h"
 #include "../postproc/swscale_internal.h" //FIXME
 #include "../postproc/rgb2rgb.h"
+#include "../libmpcodecs/vf_scale.h"
 
 #include "../mp_msg.h"
 

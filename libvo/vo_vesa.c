@@ -45,6 +45,7 @@
 #endif
 
 #include "../postproc/swscale.h"
+#include "../libmpcodecs/vf_scale.h"
 
 
 #ifdef HAVE_PNG

@@ -25,6 +25,7 @@
 #include "../../cpudetect.h"
 #include "../../postproc/swscale.h"
 #include "../../postproc/rgb2rgb.h"
+#include "../../libmpcodecs/vf_scale.h"
 #include "../../mp_msg.h"
 #include "../../mplayer.h"
 
@@ -92,13 +93,6 @@ int XShmGetEventBase( Display* );
 inline int wsSearch( Window win );
 
 // ---
-
-static int get_sws_cpuflags()
-{
-    return (gCpuCaps.hasMMX ? SWS_CPU_CAPS_MMX : 0) |
-	(gCpuCaps.hasMMX2 ? SWS_CPU_CAPS_MMX2 : 0) |
-	(gCpuCaps.has3DNow ? SWS_CPU_CAPS_3DNOW : 0);
-}
 
 #define PACK_RGB16(r,g,b,pixel) pixel=(b>>3);\
                                 pixel<<=6;\

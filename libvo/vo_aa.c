@@ -28,6 +28,7 @@
 #include "video_out_internal.h"
 #include "aspect.h"
 #include "../postproc/swscale.h"
+#include "../libmpcodecs/vf_scale.h"
 #include "font_load.h"
 #include "sub.h"
 
