@@ -610,6 +610,9 @@ Sabbi, Nico <nsabbi@tiscali.it>
     * DVB input support
     * MPEG TS support
 
+Sandell, Björn <biorn@dce.chalmers.se>
+    * various *BSD fixes
+
 Sauerbeck, Tilman <tsauerbeck@users.sourceforge.net>
     * TGA decoder (RLE/uncomp), -mf tga support
 
@@ -648,8 +651,8 @@ Svoboda, Jiri (zar) <Jiri.Svoboda@seznam.cz>
 Syrjälä, Ville <syrjala@sci.fi>
     * -vo dfbmga driver (G400 DVDMax-like feature using dfb 0.9.14)
 
-Sandell, Björn <biorn@dce.chalmers.se>
-    * various *BSD fixes
+Szecsi Gabor <deje@miki.hu>
+    * directsound AO driver
 
 Tackaberry, Jason <tack@sault.org>
     * second DVD ripping guide
