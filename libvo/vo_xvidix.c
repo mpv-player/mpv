@@ -292,7 +292,8 @@ if (vo_window == None)
     xswa.border_pixel     = 0;
     xswa.colormap         = XCreateColormap(mDisplay, RootWindow(mDisplay, mScreen),
 					    vinfo.visual, AllocNone);
-    xswa.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
+    xswa.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask | 
+       ((WinID==0)?0:(ButtonPressMask | ButtonReleaseMask | PointerMotionMask));
     xswamask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
     if (WinID >= 0)
