@@ -228,7 +228,10 @@ stream_t* new_stream(int fd,int type){
 
 void free_stream(stream_t *s){
   printf("\n*** free_stream() called ***\n");
-  if(s->cache_pid) kill(s->cache_pid,SIGTERM);
+  if(s->cache_pid) {
+    kill(s->cache_pid,SIGTERM);
+    waitpid(s->cache_pid,NULL,0);
+  }
   if(s->priv) free(s->priv);
   free(s);
 }
