@@ -98,9 +98,6 @@ static int mylstat(char *dir, char *file,struct stat* st) {
 }
 
 static int compare(char **a, char **b){
-  int la,lb;
-  la = strlen(*a);
-  lb = strlen(*b);
   if((*a)[strlen(*a) - 1] == '/') {
     if((*b)[strlen(*b) - 1] == '/')
       return strcmp(*b, *a) ;
@@ -149,6 +146,7 @@ static int open_dir(menu_t* menu,char* args) {
       if((tp = (char **) realloc(namelist, (n+20) * sizeof (char *)))
          == NULL) {
         printf("realloc error: %s", strerror(errno));
+	n--;
         goto bailout;
       } 
       namelist=tp;
@@ -157,6 +155,7 @@ static int open_dir(menu_t* menu,char* args) {
     namelist[n] = (char *) malloc(strlen(dp->d_name) + 2);
     if(namelist[n] == NULL){
       printf("malloc error: %s", strerror(errno));
+      n--;
       goto bailout;
     }
      
@@ -166,20 +165,24 @@ static int open_dir(menu_t* menu,char* args) {
       strcat(namelist[n], "/");
     n++;
   }
-  qsort(namelist, n, sizeof(char *), (kill_warn)compare);
 
 bailout:
+  qsort(namelist, n, sizeof(char *), (kill_warn)compare);
+
   if (n < 0) {
-    printf("scandir error: %s\n",strerror(errno));
+    printf("readdir error: %s\n",strerror(errno));
     return 0;
   }
   while(n--) {
-    e = calloc(1,sizeof(list_entry_t));
+    if((e = calloc(1,sizeof(list_entry_t))) != NULL){
     e->p.next = NULL;
     e->p.txt = strdup(namelist[n]);
     if(strchr(namelist[n], '/') != NULL)
       e->d = 1;
     menu_list_add_entry(menu,e);
+    }else{
+      printf("malloc error: %s", strerror(errno));
+    }
     free(namelist[n]);
   }
   free(namelist);
