@@ -1166,7 +1166,18 @@ sub_data* sub_read_file (char *filename, float fps) {
     
     if(filename==NULL) return NULL; //qnx segfault
     fd=fopen (filename, "r"); if (!fd) return NULL;
-
+    {
+	    int l;
+	    if ((l=strlen(filename))>4){
+		    int k;
+		    char *exts[] = {".utf", ".utf8", ".utf-8" };
+		    for (k=3;--k>=0;)
+			if (!strcasecmp(filename+(l - strlen(exts[k])), exts[k])){
+			    sub_utf8 = 1;
+			    break;
+			}
+	    }
+    }
     sub_format=sub_autodetect (fd, &uses_time);
     mpsub_multiplier = (uses_time ? 100.0 : 1.0);
     if (sub_format==SUB_INVALID) {mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: Could not determine file format\n");return NULL;}
@@ -1589,7 +1600,7 @@ char** sub_filenames(char* path, char *fname)
     char *tmp_fname_noext, *tmp_fname_trim, *tmp_fname_ext, *tmpresult;
  
     int len, pos, found, i, j;
-    char * sub_exts[] = { "utf", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", NULL};
+    char * sub_exts[] = {  "utf", "utf8", "utf-8", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", NULL};
     subfn *result;
     char **result2;
     
@@ -1657,7 +1668,7 @@ char** sub_filenames(char* path, char *fname)
 		// does it end with a subtitle extension?
 		found = 0;
 #ifdef USE_ICONV
-		for (i = (sub_cp ? 1 : 0); sub_exts[i]; i++) {
+		for (i = (sub_cp ? 3 : 0); sub_exts[i]; i++) {
 #else
 		for (i = 0; sub_exts[i]; i++) {
 #endif
@@ -1699,6 +1710,9 @@ char** sub_filenames(char* path, char *fname)
 		    }
 
 		    if (prio) {
+			prio += prio;
+			if (i<3) // prefer UTF-8 coded
+			    prio++;
 			sprintf(tmpresult, "%s%s", j == 0 ? f_dir : path, de->d_name);
 //			fprintf(stderr, "%s priority %d\n", tmpresult, prio);
 			if ((f = fopen(tmpresult, "rt"))) {
