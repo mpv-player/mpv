@@ -4326,7 +4326,7 @@ la syntaxe suivante:
 .RE
 .br
 .PP
-Où <codec> peut être: lavc, xvidenc, divx4, lame
+Où <codec> peut être: lavc, xvidenc, divx4, lame, x264
 .
 .
 .SS divx4 (\-divx4opts)
@@ -4596,7 +4596,7 @@ codec vidéo sans perte de FFmpeg
 .PD 1
 .TP
 .B vqmin=<1\-31>
-minimum quantificateur (passe\ 1/\:2)
+quantificateur minimum (passe\ 1/\:2)
 .RSs
 .IPs 1
 Non recommandé (fichier bien plus gros, petite différence de qualité et
@@ -5736,6 +5736,162 @@ bruit) pour l'ensemble de la vidéo après encodage et stocke le psnr par trame
 dans un fichier portant un nom tel que 'psnr_hhmmss.log'.
 Les valeurs renvoyées sont en dB (décibel), plus elles sont hautes, plus la
 vidéo générée est fidèle à l'originale.
+.SS x264enc (\-x264encopts)
+.TP
+.B bitrate=<valeur>
+Fixe le débit binaire (bitrate) à utiliser en kbits/\:seconde
+(par défaut\ : désactivé).
+Pour un encodage en en débit binaire constant (CBR), vous devez définir ce
+paramètre.
+.TP
+.B iframe=<valeur>
+Fréquence des trames-I (par défaut\ : 60)
+.TP
+.B frameref=<valeur>
+Nombre des trames précédentes à utiliser comme prédicteur pour les trames-P
+(par défaut\ : 1)
+.br
+.I NOTE\ :
+Actuellement, cette version de x264 (r38) ne comporte pas cette
+fonctionnalité.
+.TP 
+.B idrframe=<valeur>
+Tous les <valeur> trames-I, on insère une trame-IDR.
+En H.264, les trames-I n'encadrent pas nécessairement un groupe fermé de
+trames prédites (closed GOP) car une trame-P peut aussi être prédite
+à partir d'autres trames que celles la précédant (voir l'option frameref).
+Ainsi, les trames-I ne permettent pas nécessairement une navigation précise
+dans le film.
+Les trames-IDR empêchent les trames-P qui les suivent d'être prédites à partir
+de trames précédant mes trames-IDR (par défaut\ : 2)
+.TP
+.B bframe=<valeur>
+Nombre de trames-B entre les trames I et P (par défaut\ : 0).
+.TP
+.B deblock=<0|1>
+Utilise un filtre atténuant l'effet de blocs (deblocking)
+(par défaut\ : activé)
+.TP 
+.B deblockalpha=<-6-6>
+Paramètre alphaC0 du filtre de deblocking.
+Il détermine les seuils du filtre de deblocking de H.264.
+Tout d'abord, cette option détermine à quel point le filtre peut modifier
+l'apparence de chacun des pixels de l'image.
+Ensuite, cette option détermine la différence maximale à la limite des blocs
+filtrés.
+Une valeur positive réduit les artefacts de blocking, mais réduira les détails.
+(par défaut\ : 0)
+.TP
+.B deblockbeta=<-6-6>
+Paramètre beta du filtre de deblocking.
+Affecte le gradient maximum autorisé entre deux blocs adjacents
+(par défaut\ : 0)
+.TP
+.B cabac
+Utilise CABAC (codage de l'information adaptée en fonction du contexte\ :
+Context-Adaptive Binary Arithmetic Coding) (par défaut\ : désactivé)
+.TP 
+.B cabacidc=<value>
+Valeur initiale de l'IDC de CABAC.
+L'encodeur doit choisir un contexte pour chaque block qu'il encode, mais pour
+le premier d'une trame, il n'existe pas de contexte de prédiction.
+Agir sur ce paramètre peut affecter le débit binaire vidéo (bitrate) de
+quelques pour-millièmes, mais ne change pas la distortion par rapport à
+l'image d'origine.
+FIXME: indiquer ce que signifie IDC.
+.RSs
+-1: Laisse l'encodeur décider lui-même du contexte (par défaut)
+(Il choisit 0 la plupart du temps)
+.br
+0: complexité faible
+.br
+1: complexité moyenne
+.br
+2: complexité importante
+.REss
+.TP
+.B qp_constant=<2-51>
+Défini le quantificateur à utiliser
+Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
+Notez que la quantification dans H.264 fonctionne différemment de mpeg[124].
+L'échelle des quantificateurs de H.264 est logarithmique, ainsi, la différence
+de débit binaire entre QP=20 et QP=40 est d'environ un facteur 10.
+Les quantificateurs utiles en H.264 ont tendance à être bien plus importants
+comparés à mpeg[124].
+Une valeur comprise dans l'intervalle 20-40 semble convenir
+(par défaut\ : 26).
+.br
+.I NOTE\ :
+Cette option fonctionne même si vous avez demandé un encodage à débit binaire
+contant (CBR).
+Dans ce cas, la première trame utilisera le quantificateur que vous avez donné,
+mais pas les suivantes, qui seront quantifiées par le "ratecontrol".
+.TP
+.B qp_min=<2-51> (mode CBR uniquement)
+Quantificateur minimum.
+Une valeur comprise dans l'intervalle 20-40 semble convenir (par défaut\ : 2)
+.TP
+.B qp_max=<2-51> (mode CBR uniquement)
+Quantificateur maximum.
+.TP
+.B qp_step=<value>
+Différence de quantification maximale autorisée d'une trame à l'autre.
+.TP
+.B rc_buffer_size=<value>
+Taille du tampon ratecontrol. (par défaut\ : la taille nécessaire pour 1
+seconde au débit binaire (bitrate) que vous avez défini).
+.br
+FIXME: expliquer ce que veut dire ratecontrol
+.TP
+.B rc_init_buffer=<value>
+Taille du initiale du tampon ratecontrol (par défaut\ : 1/4 de rc_buffer_size)
+.TP
+.B rc_sens=<0-100>
+Sensibilité du ratecontrol (default: 100)
+.TP
+.B ip_factor=<value>
+Facteur de quantification entre les trames I et P (par défaut\ : 2.0)
+.TP
+.B pb_factor=<value>
+Facteur de quantification entre les trames P et B (par défaut\ : 2.0)
+.TP
+.B pass=<1|2>
+Définit quelle est la passe pour le mode 2-passes.
+La première passe est celle qui récolte des statistiques sur le vidéo.
+.TP
+.B qcompress=<0-1>
+Compression des quantificateurs.
+Cela affecte le ratecontrol\ : une faible valeur rend le débit binaire plus
+contant, alors qu'une valeur importante rend les quantificateurs plus contants
+(par défaut\ : 0.6)
+.TP
+.B qblur=<0-1>
+Flou temporel entre les quantificateurs.
+Une faible valeur permet aux quantificateurs de voir leur valeur varier plus
+d'une trame à l'autre\ ; une valeur forte oblige la variation à être plus
+progressive (par défaut\ : 0.5).
+.TP
+.B fullinter
+Utilise tous les méthodes d'analyse inter-trames (i4x4, psub8x8, psub16x16)
+(par défaut\ : 4x4, psub16x16)
+.TP
+.B log=<-1-3>
+Ajuste la quantité d'informations de log à afficher à l'écran.
+.RSs
+-1: aucune
+.br
+ 0: erreurs (pour le débogage de x264)
+.br
+ 1: avertissements
+.br
+ 2: PSNR et autres analyses statistiques lorsque l'encodage se termine
+(par défaut)
+.br
+ 3: PSNR, quantificateurs, type de trame, taille, et autres statistiques sur chaque trame.
+.REss
+.TP
+.B psnr
+Affiche les statistiques de rapport signal/bruit.
 .
 .
 .\" --------------------------------------------------------------------------
