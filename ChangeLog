@@ -5,12 +5,18 @@ mplayer (0.99)
     0.90-rc5 (and later 0.90 releases) changes are independent!
     (it also means that there are main-only and 0_90-only changes too)
 
+    DOCS:
+    * DOCS/Language/ dirs renamed to DOCS/id, English files moved to DOCS/en
+    * HTML --> XML format conversion (English, Russian and French for now)
+    * new Spanish DOCS translation
+    * man page restructured, options ordered
+    * Finally merged libavc-option.txt into the man page.
+    * traditional Chinese help file
+
     Big/Structural changes:
     * linux/ dir renamed to osdep/
     * postproc/postproc* files moved to libavcodec
     * old libmpeg2 replaced with patched version of the 0.3.1 release
-    * DOCS/Language/ dirs renamed to DOCS/id, english files moved to DOCS/en
-    * HTML->XML transformed documentation (english & russian for now)
     * docs priority & installation (--language=ab,cd,ef,all and so on)
     * yuv2rgb conversion removed from most vo drivers (like fbdev, gif89 etc)
     * -vop option obsoleted by reverse-order -vf, big config layer changes
@@ -79,7 +85,6 @@ mplayer (0.99)
     * tdfx_vid driver & vo support (3dfx cards overlay)
     * mga_vid: various fixes, 16MB G400 detection, support for multiple cards
     * new svgalib vo driver
-    * Finally merged libavc-option.txt into the man page.
     * v4l capturing: various bugfixes, video eq support
     * network streaming layer: IPv6 support
     * playtree parsing speedup :)
