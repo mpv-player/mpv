@@ -116,6 +116,7 @@ struct config tvopts_conf[]={
 #endif
 
 /* VIVO demuxer options: */
+extern int vivo_param_version;
 extern char *vivo_param_acodec;
 extern int vivo_param_abitrate;
 extern int vivo_param_samplerate;
@@ -125,6 +126,7 @@ extern int vivo_param_height;
 extern int vivo_param_vformat;
 
 struct config vivoopts_conf[]={
+	{"version", &vivo_param_version, CONF_TYPE_INT, 0, 0, 0},
 	/* audio options */
 	{"acodec", &vivo_param_acodec, CONF_TYPE_STRING, 0, 0, 0},
 	{"abitrate", &vivo_param_abitrate, CONF_TYPE_INT, 0, 0, 0},

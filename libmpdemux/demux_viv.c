@@ -16,6 +16,7 @@
 #include "bswap.h"
 
 /* parameters ! */
+int vivo_param_version = -1;
 char *vivo_param_acodec = NULL;
 int vivo_param_abitrate = -1;
 int vivo_param_samplerate = -1;
@@ -547,6 +548,8 @@ void demux_open_vivo(demuxer_t* demuxer){
   
   h263_decode_picture_header(demuxer->video->buffer);
   
+  if (vivo_param_version != -1)
+    priv->version = '0' + vivo_param_version;
 
 {		sh_video_t* sh=new_sh_video(demuxer,0);
 
