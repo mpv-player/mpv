@@ -25,6 +25,11 @@ that your patch will be included.
 4. Read your patch. We'll *refuse* it if it changes indentation of the
    code or if it does tab/space conversion or other cosmetical changes!
 
+   NOTE: If you alread wrote some code and did cosmetic changes, you can use
+   'diff -uwbBE' to help you remove them. Don't forget to check the patch
+   to make sure diff didn't ignore some important change and remove any
+   remaining cosmetics!
+
 5. Comment parts that really need it (tricky side-effects etc).
    Commenting trivial code not required. Comments must be English!
 
