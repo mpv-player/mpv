@@ -467,10 +467,17 @@
     how much of input channel j is mixed into output channel i.</DD>
 </DL>
 
-<P>Example:<BR>
+<P>Example 1:<BR>
   &nbsp;&nbsp;<CODE>mplayer -af pan=1:0.5:0.5 -channels 1 media.avi</CODE></P>
 
 <P>would down-mix from stereo to mono.</P>
+
+<P>Example 2:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi</CODE></P>
+
+<P>would give 3 channel output leaving channels 0 and 1 intact, and mix channels
+  0 and 1 into output channel 2 (which could be sent to a sub-woofer for
+  example).</P>
 
 
 <H2><STRONG>Note: Audio plugins have been deprecated by audio filters and will be
