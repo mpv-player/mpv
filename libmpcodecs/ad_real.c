@@ -58,7 +58,9 @@ static int preinit(sh_audio_t *sh){
   // let's check if the driver is available, return 0 if not.
   // (you should do that if you use external lib(s) which is optional)
   unsigned int result;
-  handle = dlopen ("/usr/local/RealPlayer8/Codecs/cook.so.6.0", RTLD_LAZY);
+  char path[4096];
+  sprintf(path, LIBDIR "/real/%s", sh->codec->dll);
+  handle = dlopen (path, RTLD_LAZY);
   if(!handle){
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Cannot open dll: %s\n",dlerror());
       return 0;
@@ -148,7 +150,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   int w=sh->wf->nBlockAlign/sps; // 5
   int h=((short*)(sh->wf+1))[1];
   
-  printf("bs=%d  sps=%d  w=%d h=%d \n",sh->wf->nBlockAlign,sps,w,h);
+//  printf("bs=%d  sps=%d  w=%d h=%d \n",sh->wf->nBlockAlign,sps,w,h);
 
 #if 1
   if(sh->a_in_buffer_len<=0){
@@ -175,7 +177,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
        buf, &len, -1);
   sh->a_in_buffer_len-=sh->wf->nBlockAlign;
   
-  printf("radecode: %d bytes, res=0x%X  \n",len,result);
+//  printf("radecode: %d bytes, res=0x%X  \n",len,result);
 
   return len; // return value: number of _bytes_ written to output buffer,
               // or -1 for EOF (or uncorrectable error)
