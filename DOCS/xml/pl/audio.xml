@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.22 -->
+<!-- synced with 1.23 -->
 <sect1 id="audio">
 <title>Urządzenia wyjściowe audio</title>
 <sect2 id="sync">
@@ -42,6 +42,9 @@ Interfejs audio <application>MPlayera</application> nazywa się
   </entry></row>
 <row><entry>win32</entry><entry>
   rdzenny sterownik Win32
+  </entry></row>
+<row><entry>dsound</entry><entry>
+  Sterownik Directx DirectSound
   </entry></row>
 <row><entry>arts</entry><entry>
   rdzenny sterownik ARTS (głównie dla użytkowników KDE)
