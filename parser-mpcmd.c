@@ -34,15 +34,15 @@ static int is_entry_option(char *opt, char *param, play_tree_t** ret) {
   if(strcasecmp(opt,"playlist") == 0) { // We handle playlist here
     if(!param)
       return M_OPT_MISSING_PARAM;
+
     entry = parse_playlist_file(param);
     if(!entry)
-      return 1;
+      return -1;
+    else {
+       *ret=entry;
+       return 1;
+    }
   }
-
-  if(entry) {
-    *ret = entry;
-    return 1;
-  } else
     return 0;
 }
 
