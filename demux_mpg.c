@@ -293,7 +293,7 @@ do{
     if(head==0x1BA) demux->synced=1;
   } else
   if(demux->synced==1){
-    if(head==0x1BB || (head>=0x1C0 && head<=0x1EF)){
+    if(head==0x1BB || head==0x1BD || (head>=0x1C0 && head<=0x1EF)){
       demux->synced=2;
       if(verbose) printf("system stream synced at 0x%X (%d)!\n",demux->filepos,demux->filepos);
       num_elementary_packets100=0; // requires for re-sync!
