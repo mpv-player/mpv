@@ -1,6 +1,5 @@
 // Transated by: Firebird <firebird@chez.com>
 
-
 // ========================= Aide MPlayer ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -17,38 +16,48 @@ static char help_text[]=
 #endif
 "\n"
 "Options:\n"
-" -vo <pil[:pér]> Sélectionne le pilote et le périphérique de sortie vidéo ('-vo help' pour la liste)\n"
-" -ao <pil[:pér]> Sélectionne le pilote et le périphérique de sortie audio ('-ao help' pour la liste)\n"
-" -vcd <nrpiste>  Joue une piste VCD (Vidéo CD) d'un périphérique plutôt que d'un fichier\n"
+" -vo <pil[:pér]>  Sélectionne le pilote et le périphérique de sortie vidéo\n"
+"                  ('-vo help' pour la liste)\n"
+" -ao <pil[:pér]>  Sélectionne le pilote et le périphérique de sortie audio\n"
+"                  ('-ao help' pour la liste)\n"
+" -vcd <nrpiste>   Joue une piste VCD (Vidéo CD) d'un périphérique plutôt\n"
+"                  que d'un fichier\n"
 #ifdef HAVE_LIBCSS
-" -dvdauth <pér>  Spécifie le périph. DVD pour l'auth. (pour disques encryptés)\n"
+" -dvdauth <pér>   Spécifie le périphérique DVD pour utilisé pour\n"
+"                  l'authentification (pour disques encryptés)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <nrtitre>  Joue titre/piste DVD d'un périph. plutôt que d'un fichier\n"
+" -dvd <nrtitre>   Joue titre/piste DVD d'un périph. plutôt que d'un fichier\n"
 #endif
-" -ss <postemp>   Démarre la lecture à partir de la pos. (secondes ou hh:mm:ss)\n"
-" -nosound        Ne jouer aucun son\n"
+" -ss <postemp>    Démarre la lecture à partir de la pos. (secondes ou hh:mm:ss)\n"
+" -nosound         Ne jouer aucun son\n"
 #ifdef USE_FAKE_MONO
-" -stereo <mode>  Sélect. la sortie stéréo MPEG1 (0:stereo 1:gauche 2:droite)\n"
+" -stereo <mode>   Choisit la sortie stéréo MPEG1 (0:stereo 1:gauche 2:droite)\n"
 #endif
-" -fs -vm -zoom   Options pl. écr. (Plein écran, mode vidéo, échel. par progr.)\n"
-" -x <x> -y <y>   Échelonner l'image en <x> * <y> [si le pilote vo le supporte]\n"
-" -sub <file>     Util. le fich. de sous-titres (voir aussi -subfps, -subdelay)\n"
-" -vid x -aid y   Options pour jouer les flux vidéo (x) et audio (y)\n"
-" -fps x -srate y Options pour changer les fréq. vidéo (x fps) et audio (y Hz)\n"
-" -pp <qualité>   Activer le filtre de sortie (0-4 pour DivX, 0-63 pour MPEG)\n"
-" -nobps          Utilise des méth. de sync A-V pour fichiers AVI (peut aider!)\n"
-" -framedrop      Active le drop d'images (pour ordinateurs lents)\n"
+" -fs -vm -zoom    Options plein-écran (fs: plein-écran, vm: changement de mode\n"
+"                  vidéo, zoom: changement de taille (logiciel)\n"
+" -x <x> -y <y>    Dimensionne l'image en <x> * <y> \n"
+"                  [si le pilote vo le supporte]\n"
+" -sub <fichier>   Utilise les sous-titres dans 'fichier'\n"
+"                  (voir aussi -subfps, -subdelay)\n"
+" -playlist <fich.>Spécifie la liste des fichiers à jouer\n"
+" -vid x -aid y    Options pour jouer les flux vidéo (x) et audio (y)\n"
+" -fps x -srate y  Options pour changer les fréq. vidéo (x fps) et audio (y Hz)\n"
+" -pp <qualité>    Active le filtre de sortie (0-4 pour DivX, 0-63 pour MPEG)\n"
+" -nobps           Utilise des méthodes de synchro A-V pour fichiers AVI\n"
+"                  (peut aider!)\n"
+" -framedrop       Active le drop d'images (pour ordinateurs lents)\n"
 "\n"
 "Touches:\n"
-" <- ou ->        Saute en avant ou en arrière de 10 secondes\n"
-" haut / bas      Saute en avant ou en arrière de 1 minute\n"
-" p ou ESPACE     Pause (presser n'importe quelle touche pour continuer)\n"
-" q ou ESC        Arrêter la lecture et quitter le programme\n"
-" + ou -          Ajuster le délai audio de +/- 0.1 seconde\n"
-" o               Mode OSD:  aucun / cherchable / cherchable+temps\n"
-" * ou /          Augmenter/réduire vol. (presser 'm' pour sélect. maître/pcm)\n"
-" z ou x          Ajuster le délai des sous-titres de +/- 0.1 seconde\n"
+" gauche ou droite Saute en avant/arrière de 10 secondes\n"
+" haut ou bas      Saute en avant/arrière de 1 minute\n"
+" < ou >           Saute en avant/arrière dans la playlist\n"
+" p ou ESPACE      Pause (presser n'importe quelle touche pour continuer)\n"
+" q ou ESC         Arrête la lecture et quitter le programme\n"
+" + ou -           Ajuste le délai audio de +/- 0.1 seconde\n"
+" o                Mode OSD:  aucun / cherchable / cherchable+temps\n"
+" * ou /           Augmente/diminue volume ('m' pour sélectionner maître/pcm)\n"
+" z ou x           Ajuste le délai des sous-titres de +/- 0.1 seconde\n"
 "\n"
 " * * * IL Y A D'AUTRES TOUCHES ET OPTIONS DANS LA PAGE MAN ! * * *\n"
 "\n";
@@ -81,7 +90,7 @@ static char help_text[]=
 #define MSGTR_FPSnotspecified "FPS non spécifié (ou invalide) dans l'entête! Utiliser l'option -fps!\n"
 #define MSGTR_NoVideoStream "Désolé, aucun flux vidéo... c'est injouable\n"
 #define MSGTR_TryForceAudioFmt "Tente de forcer famille de pilotes codec audio de famille %d ...\n"
-#define MSGTR_CantFindAfmtFallback "Ne peut trouver de codec audio pour famille de pil. choisie, utilise d'autres.\n"
+#define MSGTR_CantFindAfmtFallback "Ne peut trouver de codec audio pour famille de pilotes choisie, utilise d'autres.\n"
 #define MSGTR_CantFindAudioCodec "Ne peut trouver codec pour format audio 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Tente de mettre à jour %s de etc/codecs.conf\n*** Si ce n'est toujours pas bon, alors lisez DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Ne peut trouver de codec audio! -> Aucun son\n"
@@ -95,9 +104,9 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATAL: Ne peut initialiser le pilote vidéo!\n"
 #define MSGTR_CannotInitAO "Ne peut ouvrir/initialiser le périphérique audio -> Aucun son\n"
 #define MSGTR_StartPlaying "Démarre la reproduction...\n"
-#define MSGTR_SystemTooSlow "\n************************************************************************"\
-			    "\n** Votre système est trop lent. Essayez l'option -framedrop ou  RTFM! **"\
-			    "\n************************************************************************\n"
+#define MSGTR_SystemTooSlow "\n***********************************************************************"\
+			    "\n** Votre système est trop lent. Essayez l'option -framedrop ou RTFM! **"\
+			    "\n***********************************************************************\n"
 
 #define MSGTR_NoGui "MPlayer a été compilé SANS support GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI nécessite X11!\n"
@@ -127,7 +136,7 @@ static char help_text[]=
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Attention! Entête du flux audio %d redéfini!\n"
-#define MSGTR_VideoStreamRedefined "Attention! Entête du flux vidéo %d redéfini\n"
+#define MSGTR_VideoStreamRedefined "Attention! Entête du flux vidéo %d redéfini!\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Trop (%d dans %d octets) de packets audio dans le tampon!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Trop (%d dans %d octets) de packets vidéo dans le tampon!\n"
 #define MSGTR_MaybeNI "(Peut-être jouez-vous un flux/fichier non-entrelacé, ou le codec manque...)\n"
@@ -166,20 +175,20 @@ static char help_text[]=
 #define MSGTR_MOVnotyetsupp "\n******** Format Quicktime MOV pas encore supporté!!!!!!! *********\n"
 
 // dec_video.c & dec_audio.c:
-#define MSGTR_CantOpenCodec "Ne peut ouvrir le Codec\n"
-#define MSGTR_CantCloseCodec "Ne peut fermer le Codec\n"
+#define MSGTR_CantOpenCodec "Ne peut ouvrir le codec\n"
+#define MSGTR_CantCloseCodec "Ne peut fermer le codec\n"
 
-#define MSGTR_MissingDLLcodec "ERREUR: Ne peut trouver le Codec DirectShow requis: %s\n"
-#define MSGTR_ACMiniterror "Ne peut charger/initialiser le Codec AUDIO Win32/ACM (fichier DLL manquant?)\n"
-#define MSGTR_MissingLAVCcodec "Ne peut trouver le Codec '%s' de libavcodec...\n"
+#define MSGTR_MissingDLLcodec "ERREUR: Ne peut trouver le codec DirectShow requis: %s\n"
+#define MSGTR_ACMiniterror "Ne peut charger/initialiser le codec AUDIO Win32/ACM (fichier DLL manquant?)\n"
+#define MSGTR_MissingLAVCcodec "Ne peut trouver le codec '%s' de libavcodec...\n"
 
 #define MSGTR_NoDShowSupport "MPlayer a été compilé SANS support DirectShow!\n"
-#define MSGTR_NoWfvSupport "Support des Codecs Win32désactivée, ou non disponible sur plateformes non-x86!\n"
+#define MSGTR_NoWfvSupport "Support des codecs Win32 désactivé, ou non disponible sur plateformes non-x86!\n"
 #define MSGTR_NoDivx4Support "MPlayer a été compilé SANS le support DivX4Linux (libdivxdecore.so)!\n"
 #define MSGTR_NoLAVCsupport "MPlayer a été compilé SANS le support ffmpeg/libavcodec!\n"
-#define MSGTR_NoACMSupport "Codecs Audio Win32/ACM désactivés ou non disponibles sur plateformes non-x86 -> force -nosound :(\n"
+#define MSGTR_NoACMSupport "Codecs audio Win32/ACM désactivés ou non disponibles sur plateformes non-x86 -> force -nosound :(\n"
 #define MSGTR_NoDShowAudio "MPlayer a été compilé sans support DirectShow -> force -nosound :(\n"
-#define MSGTR_NoOggVorbis "Codec Audio OggVorbis désactivé -> force -nosound :(\n"
+#define MSGTR_NoOggVorbis "Codec audio OggVorbis désactivé -> force -nosound :(\n"
 
 #define MSGTR_MpegPPhint "ATTENTION! Vous avez demandé un filtre de sortie pour une vidéo MPEG 1/2,\n" \
 			 "           mais avez compilé MPlayer sans support de filtre MPEG 1/2!\n" \
@@ -192,11 +201,11 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "Ne peut allouer de mémoire partagée\n"
 #define MSGTR_CantAllocAudioBuf "Ne peut allouer de tampon de sortie audio\n"
-#define MSGTR_NoMemForDecodedImage "pas assez de mémoire pour le tampon d'image décodée (%ld Octets)\n"
+#define MSGTR_NoMemForDecodedImage "pas assez de mémoire pour le tampon d'image décodée (%ld octets)\n"
 
 #define MSGTR_AC3notvalid "Flux AC3 non-valide.\n"
 #define MSGTR_AC3only48k "Seuls les flux 48000 Hz sont supportés.\n"
-#define MSGTR_UnknownAudio "Format audio inconnu ou manquant -> Aucun son\n"
+#define MSGTR_UnknownAudio "Format audio inconnu/manquant -> pas de son\n"
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "définition du support LIRC...\n"
@@ -215,7 +224,7 @@ static char help_text[]=
 #define MSGTR_FileSelect "Choisir fichier ..."
 #define MSGTR_MessageBox "BoiteMessage"
 #define MSGTR_PlayList "PlayList"
-#define MSGTR_SkinBrowser "Vision des skins"
+#define MSGTR_SkinBrowser "Browser de skins"
 
 // --- boutons ---
 #define MSGTR_Ok "Ok"
