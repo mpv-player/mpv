@@ -628,6 +628,33 @@ fourcc in hex
 .PD 1
 .
 .TP
+.B \-rawvideo <option1:option2:...>
+This option lets you play raw video files.
+.br
+Available options are:
+
+.PD 0
+.RSs
+.IPs on\ \ \ 
+use raw video demuxer
+.IPs fps=<value>
+rate in frames per second, default 25.0
+.IPs sqcif|qcif|cif|4cif|pal|ntsc
+set standard image size
+.IPs w=<value>
+image width in pixels
+.IPs h=<value>
+image height in pixels
+.IPs y420|yv12|yuy2|y8
+set colorspace
+.IPs format=<value>
+colorspace (fourcc) in hex
+.IPs size=<value>
+frame size in bytes
+.RE
+.PD 1
+.
+.TP
 .B \-rtsp-stream-over-tcp
 Used with 'rtsp://' URLs to specify that the resulting incoming RTP and RTCP
 packets be streamed over TCP (using the same TCP connection as RTSP).

@@ -280,6 +280,7 @@ int demux_xmms_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 extern int demux_ogg_fill_buffer(demuxer_t *d);
 extern int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds);
+extern int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds);
 extern int demux_smjpeg_fill_buffer(demuxer_t* demux);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
@@ -318,6 +319,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_OGG: return demux_ogg_fill_buffer(demux);
 #endif
     case DEMUXER_TYPE_RAWAUDIO: return demux_rawaudio_fill_buffer(demux,ds);
+    case DEMUXER_TYPE_RAWVIDEO: return demux_rawvideo_fill_buffer(demux,ds);
 #ifdef STREAMING_LIVE_DOT_COM
     case DEMUXER_TYPE_RTP: return demux_rtp_fill_buffer(demux, ds);
 #endif
@@ -540,6 +542,7 @@ extern void demux_open_nuv(demuxer_t *demuxer);
 extern int demux_audio_open(demuxer_t* demuxer);
 extern int demux_ogg_open(demuxer_t* demuxer);
 extern int demux_rawaudio_open(demuxer_t* demuxer);
+extern int demux_rawvideo_open(demuxer_t* demuxer);
 extern int smjpeg_check_file(demuxer_t *demuxer);
 extern int demux_open_smjpeg(demuxer_t* demuxer);
 extern int bmp_check_file(demuxer_t *demuxer);
@@ -548,6 +551,7 @@ extern int demux_xmms_open(demuxer_t* demuxer);
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
 extern int use_rawaudio;
+extern int use_rawvideo;
 
 int extension_parsing=1; // 0=off 1=mixed (used only for unstable formats)
 
@@ -574,6 +578,10 @@ if ( mf_support )
 if(stream->type == STREAMTYPE_CDDA || use_rawaudio) {
   demuxer = new_demuxer(stream,DEMUXER_TYPE_RAWAUDIO,audio_id,video_id,dvdsub_id);
   file_format = DEMUXER_TYPE_RAWAUDIO;
+}
+if(use_rawvideo) {
+  demuxer = new_demuxer(stream,DEMUXER_TYPE_RAWVIDEO,audio_id,video_id,dvdsub_id);
+  file_format = DEMUXER_TYPE_RAWVIDEO;
 }
 
 #ifdef USE_TV
@@ -920,6 +928,10 @@ switch(file_format){
    demux_rawaudio_open(demuxer);
    break;
  }
+ case DEMUXER_TYPE_RAWVIDEO: {
+   demux_rawvideo_open(demuxer);
+   break;
+ }
  case DEMUXER_TYPE_MF: {
   if (!demux_open_mf(demuxer)) return NULL;
   break;
@@ -1147,6 +1159,7 @@ extern void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
+extern void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
@@ -1229,6 +1242,8 @@ switch(demuxer->file_format){
 #endif
  case DEMUXER_TYPE_RAWAUDIO:
       demux_rawaudio_seek(demuxer,rel_seek_secs,flags);  break;
+ case DEMUXER_TYPE_RAWVIDEO:
+      demux_rawvideo_seek(demuxer,rel_seek_secs,flags);  break;
 #ifdef HAVE_XMMS
  case DEMUXER_TYPE_XMMS:
       demux_xmms_seek(demuxer,rel_seek_secs,flags); break;

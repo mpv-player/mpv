@@ -72,6 +72,7 @@
 	{ "nohr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 	{ "rawaudio", &demux_rawaudio_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{ "rawvideo", &demux_rawvideo_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
 #ifdef HAVE_CDDA
 	{ "cdda", &cdda_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
@@ -224,6 +225,7 @@ extern int   network_bandwidth;
 /* defined in libmpdemux: */
 extern int hr_mp3_seek;
 extern config_t demux_rawaudio_opts[];
+extern config_t demux_rawvideo_opts[];
 extern config_t cdda_opts[];
 
 extern char* audio_stream;
