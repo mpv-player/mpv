@@ -433,4 +433,58 @@ Note: it's also recommended to enable CACHE when playback from network:
 <screen>wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</screen>
 </para>
 </sect1>
+
+<sect1 id="mpst" xreflabel="Remote streams">
+<title>Remote streams</title>
+
+<para>
+Remote streams allow you to access most <application>MPlayer</application>
+stream type from a remote host. The main purpose of this feature is to make
+it possible to directly use the CD or DVD drive of another computer on the
+network (provided you have the required bandwidth). On the downside some
+stream type (currently TV and MF) are not useable remotely because they are
+implemented at the demuxer level. It's sad for MF but TV stream would anyway
+require an insane amount of bandwith.
+</para>
+
+<sect2 id="compile_mpst_server">
+<title>Compiling the server</title>
+<para>
+After having compiled <application>MPlayer</application> go to the
+<filename>TOOLS/netstream</filename> directory and enter
+<application>make</application> to build the server binary.
+You can then copy the <application>netstream</application> binary
+to the right place on your system (usely <filename>/usr/local/bin</filename>
+on Linux).
+</para>
+</sect2>
+
+<sect2 id="use_mpst">
+<title>Using remote streams</title>
+<para>
+First you have to start the server on the computer you intend to remotely
+access. Currently the server is very basic and doesn't have any commands
+line arguments so just enter <filename>netstream</filename>. Now you can
+for example play the second track of a VCD on the server with :
+<screen>
+mplayer -cache 5000 mpst://servername/vcd://2
+</screen>
+You can also access files on this server :
+<screen>
+mplayer -cache 5000 mpst://servername//usr/local/movies/lol.avi
+</screen>
+Note that paths wich aren't starting with a / will be relative to
+the directory where the server is running. The cache option is not
+needed but highly recommended.
+</para>
+
+<para>
+Be aware that currently the server is not secure at all. So don't complain
+about the numerous exploits wich are possible through this. Instead send
+some (good) patch to make it better or start writing your own server.
+</para>
+
+</sect2>
+
+</sect1>
 </chapter>
