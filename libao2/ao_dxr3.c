@@ -113,7 +113,7 @@ static int init(int rate,int channels,int format,int flags)
   {
       printf("AO: [dxr3] frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
           dxr3_buf_info.fragments+1, dxr3_buf_info.fragstotal, dxr3_buf_info.fragsize, dxr3_buf_info.bytes);
-      ao_data.buffersize=(dxr3_buf_info.bytes/2)-1;
+      ao_data.buffersize=(dxr3_buf_info.bytes/2);
       ao_data.outburst=dxr3_buf_info.fragsize;
   }
 

@@ -35,6 +35,13 @@ LIBVO_EXTERN (dxr3)
 rte_context* mp1e_context = NULL;
 rte_codec* mp1e_codec = NULL;
 rte_buffer mp1e_buffer;
+struct { uint16_t Y,U,V; } YUV_s;
+#define RGBTOY(R,G,B) (uint16_t)( (0.257 * R) + (0.504 * G) + (0.098 * B) + 16 )
+#define RGBTOU(R,G,B) (uint16_t)( -(0.148 * R) - (0.291 * G) + (0.439 * B) + 128 )
+#define RGBTOV(R,G,B) (uint16_t)( (0.439 * R) - (0.368 * G) - (0.071 * B) + 128 )
+#define RGBTOYUV(R,G,B) YUV_s.Y = RGBTOY(R,G,B); \
+			YUV_s.U = RGBTOU(R,G,B); \
+			YUV_s.V = RGBTOV(R,G,B);
 #endif
 
 static unsigned char *picture_data[3];
@@ -70,8 +77,7 @@ void write_dxr3( rte_context* context, void* data, size_t size, void* user_data 
 }
 #endif
 
-static uint32_t
-init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
+static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
 {
     fd_control = open( "/dev/em8300", O_WRONLY );
     if( fd_control < 1 )
@@ -216,7 +222,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
     	    osd_h=c_height;
         } else s_pos_y=0;
     
-        printf("VO: [dxr3] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
+        printf("VO: [dxr3] Position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
                 
         size = c_width*c_height;
 
@@ -226,7 +232,12 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
 	picture_linesize[0] = c_width;
 	picture_linesize[1] = c_width / 2;
 	picture_linesize[2] = c_width / 2;
-	memset(picture_data[0],0,size);
+
+	// Set the border colorwou
+	RGBTOYUV(0,0,0)
+        memset( picture_data[0], YUV_s.Y, picture_linesize[0]*c_height );
+        memset( picture_data[1], YUV_s.U, picture_linesize[1]*(c_height/2) );
+        memset( picture_data[2], YUV_s.V, picture_linesize[2]*(c_height/2) );
 	
 	if( !rte_start_encoding( mp1e_context ) )
 	{
@@ -285,7 +296,7 @@ static uint32_t draw_frame(uint8_t * src[])
 	
         if(d_pos_x+w>picture_linesize[0]) w=picture_linesize[0]-d_pos_x;
         if(d_pos_y+h>c_height) h=c_height-d_pos_y;
-	
+
 	s = src[0]+s_pos_x+s_pos_y*(w*2);
 	dY = picture_data[0]+d_pos_x+d_pos_y*picture_linesize[0];
 	dU = picture_data[1]+(d_pos_x/2)+(d_pos_y/2)*picture_linesize[1];
@@ -319,12 +330,13 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 {
     unsigned char* s;
     unsigned char* d;
-    
+
     if( img_format == IMGFMT_YV12 )
     {
 #ifdef USE_MP1E
 	x0+=d_pos_x;
         y0+=d_pos_y;
+
         if(x0+w>picture_linesize[0]) w=picture_linesize[0]-x0;
         if(y0+h>c_height) h=c_height-y0;
 
@@ -332,13 +344,15 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
         d=picture_data[0]+x0+y0*picture_linesize[0];
 	memcpy(d,s,(w*h));
 
+	w/=2;h/=2;x0/=2;y0/=2;
+	
 	s=srcimg[1]+s_pos_x+s_pos_y*stride[1];
-	d=picture_data[1]+(x0/2)+(y0/2)*picture_linesize[1];
-	memcpy(d,s,(w*h)/4);
+	d=picture_data[1]+x0+y0*picture_linesize[1];
+	memcpy(d,s,(w*h));
 
 	s=srcimg[2]+s_pos_x+s_pos_y*stride[2];
-	d=picture_data[2]+(x0/2)+(y0/2)*picture_linesize[2];
-	memcpy(d,s,(w*h)/4);
+	d=picture_data[2]+x0+y0*picture_linesize[2];
+	memcpy(d,s,(w*h));
 	
 	return 0;
 #endif
