@@ -44,10 +44,16 @@ void __builtin_vec_delete(void *mem) {
 }
 
 void __pure_virtual(void) {
-	fprintf(stderr, "I'm outa here!\n");
-	exit(1);
+	printf("FATAL: __pure_virtual() called!\n");
+//	exit(1);
 }
 
+#ifdef __FreeBSD__
+void ___brk_addr(void) {exit(0);}
+char** __environ={NULL};
+#undef stderr
+FILE* stderr=NULL;
+#endif
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
@@ -68,40 +74,28 @@ int load_syms(char *path) {
 		void *handle;
 		char *error;
 
-		fprintf(stderr, "opening dll %s\n", path);
+		mp_msg(MSGT_DECVIDEO,MSGL_INFO, "opening shared obj '%s'\n", path);
 		rv_handle = dlopen (path, RTLD_LAZY);
 		handle=rv_handle;
 		if (!handle) {
-			fputs (dlerror(), stderr);
+			mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error: %s\n",dlerror());
 			return 0;
 		}
 
 		rvyuv_custom_message = dlsym(handle, "RV20toYUV420CustomMessage");
-		if ((error = dlerror()) != NULL)  {
-			fprintf (stderr, "dlsym(rvyuvCustomMessage): %s\n", error);
-			return 0;
-		}
 		rvyuv_free = dlsym(handle, "RV20toYUV420Free");
-		if ((error = dlerror()) != NULL)  {
-			fprintf (stderr, "dlsym(rvyuvFree): %s\n", error);
-			return 0;
-		}
 		rvyuv_hive_message = dlsym(handle, "RV20toYUV420HiveMessage");
-		if ((error = dlerror()) != NULL)  {
-			fprintf (stderr, "dlsym(rvyuvHiveMessage): %s\n", error);
-			return 0;
-		}
 		rvyuv_init = dlsym(handle, "RV20toYUV420Init");
-		if ((error = dlerror()) != NULL)  {
-			fprintf (stderr, "dlsym(rvyuvInit): %s\n", error);
-			return 0;
-		}
 		rvyuv_transform = dlsym(handle, "RV20toYUV420Transform");
-		if ((error = dlerror()) != NULL)  {
-			fprintf (stderr, "dlsym(rvyuvTransform): %s\n", error);
-			return 0;
-		}
-	return 1;
+
+    if(rvyuv_custom_message &&
+       rvyuv_free &&
+       rvyuv_hive_message &&
+       rvyuv_init &&
+       rvyuv_transform) return 1;
+
+    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error resolving symbols! (version incompatibility?)\n");
+    return 0;
 }
 
 #else
@@ -110,7 +104,7 @@ int load_syms(char *path) {
     void *handle;
     Setup_LDT_Keeper();
     rv_handle = handle = LoadLibraryA(path);
-    printf("win32 real codec handle=%p  \n",handle);
+    mp_msg(MSGT_DECVIDEO,MSGL_V,"win32 real codec handle=%p  \n",handle);
 
     rvyuv_custom_message = GetProcAddress(handle, "RV20toYUV420CustomMessage");
     rvyuv_free = GetProcAddress(handle, "RV20toYUV420Free");
