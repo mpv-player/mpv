@@ -117,8 +117,10 @@ int menu_init(char* cfg_file) {
   char* buffer = NULL;
   int bl = BUF_STEP, br = 0;
   int f, fd;
+#ifndef HAVE_FREETYPE
   if(vo_font == NULL)
     return 0;
+#endif
   fd = open(cfg_file, O_RDONLY);
   if(fd < 0) {
     printf("Can't open menu config file: %s\n",cfg_file);
