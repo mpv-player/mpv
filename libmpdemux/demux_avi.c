@@ -182,7 +182,7 @@ int ret=0;
 demux_stream_t *ds;
 
 do{
-  int flags=0;
+  int flags=1;
   AVIINDEXENTRY *idx=NULL;
 #if 0
   demux->filepos=stream_tell(demux->stream);
@@ -214,7 +214,7 @@ do{
     }
 
     pos = priv->idx_offset + (unsigned long)idx->dwChunkOffset;
-    if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start)){
+    if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start) && (demux->stream->type!=STREAMTYPE_STREAM)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!   idx=0x%X  \n",pos);
       continue;
     }
@@ -243,10 +243,10 @@ do{
       if(len>0x200000 && idx->dwChunkLength>0x200000) continue; // both values bad :(
       len=choose_chunk_len(idx->dwChunkLength,len);
     }
-    if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
+    if(!(idx->dwFlags&AVIIF_KEYFRAME)) flags=0;
   } else {
     demux->filepos=stream_tell(demux->stream);
-    if(demux->filepos>=demux->movi_end && demux->movi_end>demux->movi_start){
+    if(demux->filepos>=demux->movi_end && demux->movi_end>demux->movi_start && (demux->stream->type!=STREAMTYPE_STREAM)){
           demux->stream->eof=1;
           return 0;
     }
@@ -302,7 +302,7 @@ unsigned int len;
 int ret=0;
 
 do{
-  int flags=0;
+  int flags=1;
   AVIINDEXENTRY *idx=NULL;
   int idx_pos=0;
   demux->filepos=stream_tell(demux->stream);
@@ -354,7 +354,7 @@ do{
       if(len>0x200000 && idx->dwChunkLength>0x200000) continue; // both values bad :(
       len=choose_chunk_len(idx->dwChunkLength,len);
     }
-    if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
+    if(!(idx->dwFlags&AVIIF_KEYFRAME)) flags=0;
   } else return 0;
   ret=demux_avi_read_packet(demux,demux_avi_select_stream(demux,id),id,len,idx_pos,flags);
 //      if(!ret && priv->skip_video_frames<=0)
