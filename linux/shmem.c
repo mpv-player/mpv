@@ -59,8 +59,8 @@ while(1){
     if(p==MAP_FAILED) break; // failed
     mp_dbg(MSGT_OSDEP, MSGL_DBG2, "shmem: %d bytes allocated using mmap /dev/zero (%p)\n",size,p);
     return p;
-#ifdef HAVE_SHM
   case 2: { // ========= shmget() ==========
+#ifdef HAVE_SHM
     struct shmid_ds shmemds;
     int shmemid;
     if ((shmemid = shmget(IPC_PRIVATE, size, IPC_CREAT | 0600)) == -1) break;
@@ -80,7 +80,7 @@ while(1){
     mp_msg(MSGT_OSDEP, MSGL_FATAL, "shmem: no SHM support was compiled in!\n");
     return(NULL);
 #endif
-	}
+    }
   default:
     mp_msg(MSGT_OSDEP, MSGL_FATAL,
 	"FATAL: Cannot allocate %d bytes of shared memory :(\n",size);
