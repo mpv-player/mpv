@@ -101,7 +101,7 @@ GtkWidget * create_About( void )
 	"     * German Gomez Garcia\n" \
 	"     * Dariusz Pietrzak (Eyck)\n" \
 	"     * Marcus Comstedt\n" \
-	"     * Jurgen Keil\n" \
+	"     * Juergen Keil\n" \
 	"     * Vladimir Kushnir\n" \
 	"     * Bertrand BAUDET\n" \
 	"     * Derek J Witt\n" \
