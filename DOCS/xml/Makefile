@@ -42,3 +42,5 @@ distclean: clean-html
 
 xsltproc.sh: configure
 	./configure
+
+clean: clean-html
