@@ -113,12 +113,6 @@ mencoder \- Movie Encoder for Linux
 .in
 .B mplayer
 'in +\n[.k]u
-.I dvdnav://[device]
-[options]
-.br
-.in
-.B mplayer
-'in +\n[.k]u
 .I sdp://file
 [options]
 .br
@@ -345,19 +339,6 @@ select previous/\:next channel
 change norm
 .IPs u\ \ \ \ 
 change channel list
-.RE
-.PD 1
-.
-.TP
-.B DVDNAV input control
-.PD 0
-.RSs
-.IPs "K,J,H,L"
-browse up/\:down/\:left/\:right
-.IPs M\ \ \ \ 
-jump to main menu
-.IPs S\ \ \ \ 
-select
 .RE
 .PD 1
 
@@ -886,9 +867,6 @@ not pass incoming UDP packets (see http://www.live.com/mplayer/).
 .B \-sb <byte\ position> (see \-ss option too)
 Seek to byte position.
 Useful for playback from CDROM images / .VOB files with junk at the beginning.
-.TP
-.B \-skipopening
-Skip DVD opening (dvdnav only).
 .TP
 .B \-srate <Hz>
 Forces the given audio playback rate, changing video speed to keep a-v sync.
