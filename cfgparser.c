@@ -405,6 +405,7 @@ int parse_config_file(struct config *conf, char *conffile)
 			/* break */
 		}	
 nextline:
+		;
 	}
 
 	free(line);
