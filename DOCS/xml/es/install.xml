@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with en CVS version 1.8  -->
+<!-- $Revision$ -->
 <sect1 id="install">
 <title>Instalación</title>
 
@@ -456,6 +456,17 @@ el archivo <filename>codecs.conf</filename> en su directorio de inicio
 (<filename>~/.mplayer/codecs.conf</filename>) olvidado de alguna instalación
 previa de <application>MPlayer</application> y borrela.
 </para>
+
+<para>Note qeu si tiene un <filename>codecs.conf</filename> en
+<filename>~/.mplayer/</filename>, el <filename>codecs.conf</filename>
+interno y el de sistema serán ignorados por completo.
+No use esto a menos que quiera trapichear con las cosas internas
+de MPlayer lo que puede ocasionarle problemas. Si quiere cambiar el órden
+de búsqueda de los codecs, use la opción <option>-vc</option>,
+<option>-ac</option>, <option>-vfm</option>, o <option>-afm</option> en la
+línea de órdenes o en su archivo de configuración (vea la página de manual).
+</para>
+
 
 <para>
 Los usuarios de Debian pueden construir un paquete .deb, es muy simple.

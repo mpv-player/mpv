@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- $Revision$ -->
 <chapter id="cd-dvd">
 <title>Uso de CD/DVD</title>
 
@@ -37,10 +38,7 @@ Funciona de la siguiente manera:
 </para>
 
 <para>
-También puede probar
-<screen>echo current_speed:4 &gt; /proc/ide/<replaceable>[cdrom device]</replaceable>/settings</screen>
-pero necesita privilegios de administrador. La siguiente órden también le puede
-ser de ayuda:
+Si tiene privilegios de root la siguiente órden puede también ayudarle:
 <screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[cdrom device]</replaceable>/settings</screen>
 </para>
 

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- $Revision$ -->
 <sect1 id="formats">
 <title>Formatos soportados</title>
 
@@ -26,7 +27,7 @@ video MPEG1 y audio MP2 (al contrario que los <emphasis role="bold">AVI</emphasi
 los <emphasis role="bold">MPG</emphasis> no tienen los campos necesarios para
 describir sus flujos de video y audio).
 O puede también poner video MPEG1 dentro de un archivo AVI.
-<ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> y 
+<ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> y
 <link linkend="mencoder">MEncoder</link> pueden crear estos archivos.
 </para>
 

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- $Revision$ -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portaciones</title>
 
@@ -346,17 +347,26 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 <title>MinGW</title>
 
 <para>Instalar una versión de MinGW que pueda usarse para compilar MPlayer es
-  bastante artificioso, pero únicamente consiste en tres simples pasos ahora y
-  debe funcionar fuera de la caja pronto.</para>
+  bastante artificioso, pero ya funciona fuera de la caja. Solo instale MinGW 3.1.0
+  o posterior y MSYS 1.0.9 o posterior y diga a MSYS en la postinstalación que MinGW
+  está instalado.</para>
 
-<itemizedlist>
-  <listitem><para>Instale MinGW 3.0.0 o posterior.</para></listitem>
-  <listitem><para>Instale MSYS 1.0.9 o posterior y diga a MSYS en la
-    postinstalación que MinGW está instalado.</para></listitem>
-  <listitem><para>Reemplace <filename>/mingw/include/sys/types.h</filename>
-    con este
-    <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><filename>types.h</filename></ulink>.</para></listitem>
-</itemizedlist>
+<para>Si usa una versión de MinGW anterior a la 3.1.0, necesita reemplazar
+  <filename>/mingw/include/sys/types.h</filename> con esta
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h">
+  <filename>types.h</filename></ulink>.</para>
+
+<para>Extraiga los archivos de cabecera de DirectX a 
+  <filename class="directory">/mingw/include/</filename>.</para>
+
+<para>VCDs y DVDs funcionan casi como en Cygwin (ajustando la letra de la unidad de su
+  CD-ROM):</para>
+
+<screen>mplayer d:/mpegav/avseq01.dat</screen>
+
+<screen>mplayer /d/MPEG2/AVSEQ01.MPG</screen>
+
+<screen>mplayer dvd://&lt;title&gt; -dvd-device /d/</screen>
 
 </sect2>
 

@@ -287,6 +287,8 @@ cambia el saltarse imágenes
 cambia la visibilidad de los subtítulos
 .IPs j\ \ \ \ 
 cambia el idioma de los subtítulos
+.IP F\ \ \ \ 
+cambia la visibilidad de "subtítulos forzados"
 .IPs a\ \ \ \ 
 cambia la alineación de los subtítulos: arriba/enmedio/abajo
 .IPs "z y x"
@@ -1132,6 +1134,10 @@ Las opciones \-subfont-* están disponibles solo con soporte FreeType compilado.
 .PD 1
 .
 .TP
+.B \-forcedsubsonly
+Muestra solo "subtítulos forzados" para el flujo de subtítulos de DVD seleccionado,
+p.e. \-slang.
+.TP
 .B \-fribidi_charset <nombre\ de\ conjunto\ de\ caracteres>
 Especifica el conjunto de caracteres que será pasado a FriBiDi
 cuando se decodifiquen subtítulos no-utf8. Por defecto es "ISO8859-8".
@@ -1675,16 +1681,18 @@ Vea la ayuda de \-fstype para una lista completa de los modos disponibles.
 .TP
 .B \-geometry x[%][:y[%]] or [WxH][+x+y]
 Ajusta donde se tendrá la salida en pantalla inicialmente.
-Las especificacioens x e y son medidas en pixels desde arriba-derecha de la
+Las especificaciones x e y son medidas en pixels desde arriba-derecha de la
 pantalla hasta arriba-derecha de la imagen que será mostrada, sin embargo
 si se indica el signo de porcentaje después del argumento el valor se toma
 como un porcentaje del tamaño de la pantalla en esa dirección.
 También soporta el formato de opción estandar de la opción \-geometry del
 estandar X.
+Tenga en cuenta que el tamaño de la ventana se cambia para ajustarse al aspecto
+de la película. Si quiere desactivar este comportamiento por favor use \-noaspect.
 Los valores dados deben ser enteros.
 
-Nota: Esta opción está solo soportada por vo x11, xmga, xv, xvmc, xvidix
-y tdfxfb.
+Nota: Esta opción está solo soportada por vo x11, xmga, xv, xvmc, xvidix,
+directx y tdfxfb.
 
 .I EJEMPLO:
 .PD 0
@@ -4396,7 +4404,7 @@ con extensión .RAW.)
 ~/.mplayer/\:DVDkeys/
 claves CSS en caché 
 .TP
-Los archivos sub son buscados en esta prioridad (por ejemplo /mnt/\:cdrom/\:pelicula.avi):
+Los archivos sub son buscados en este orden (por ejemplo /mnt/\:cdrom/\:pelicula.avi):
 .RS
 /mnt/\:cdrom/\:pelicula.sub
 .br
