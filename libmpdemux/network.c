@@ -94,7 +94,8 @@ static struct {
 	// OGG Streaming
 	{ "application/x-ogg", DEMUXER_TYPE_OGG },
 	// NullSoft Streaming Video
-	{ "video/nsv", DEMUXER_TYPE_NSV}
+	{ "video/nsv", DEMUXER_TYPE_NSV},
+	{ "misc/ultravox", DEMUXER_TYPE_NSV}
 
 };
 
@@ -769,7 +770,7 @@ extension=NULL;
 						// If content-type == video/nsv we most likely have a winamp video stream 
 						// otherwise it should be mp3. if there are more types consider adding mime type 
 						// handling like later
-				                if ( (field_data = http_get_field(http_hdr, "content-type")) != NULL && !strcmp(field_data, "video/nsv"))
+				                if ( (field_data = http_get_field(http_hdr, "content-type")) != NULL && (!strcmp(field_data, "video/nsv") || !strcmp(field_data, "misc/ultravox")))
 							*file_format = DEMUXER_TYPE_NSV;
 						else
 							*file_format = DEMUXER_TYPE_AUDIO;
