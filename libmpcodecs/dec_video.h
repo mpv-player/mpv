@@ -12,5 +12,6 @@ extern int get_video_quality_max(sh_video_t *sh_video);
 extern void set_video_quality(sh_video_t *sh_video,int quality);
 
 extern int set_video_colors(sh_video_t *sh_video,char *item,int value);
+extern int set_rectangle(sh_video_t *sh_video,int param,int value);
 
 extern int divx_quality;

@@ -118,6 +118,21 @@ int get_video_colors(sh_video_t *sh_video,char *item,int *value)
     return 0;
 }
 
+int set_rectangle(sh_video_t *sh_video,int param,int value)
+{
+    vf_instance_t* vf=sh_video->vfilter;
+    int data[] = {param, value};
+
+    mp_dbg(MSGT_DECVIDEO,MSGL_V,"set rectangle \n");
+    if (vf)
+    {
+        int ret = vf->control(vf, VFCTRL_CHANGE_RECTANGLE, data);
+	if (ret)
+	    return(1);
+    }
+    return 0;
+}
+
 void uninit_video(sh_video_t *sh_video){
     if(!sh_video->inited) return;
     mp_msg(MSGT_DECVIDEO,MSGL_V,"uninit video: %d  \n",sh_video->codec->driver);
