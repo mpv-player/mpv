@@ -808,15 +808,6 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	}
 	if (spu->scaled_image) {
 	  unsigned int x, y;
-	  /* Kludge: draw_alpha needs width multiple of 8. */
-	  if (spu->scaled_width < spu->scaled_stride)
-	    for (y = 0; y < spu->scaled_height; ++y) {
-	      memset(spu->scaled_aimage + y * spu->scaled_stride + spu->scaled_width, 0,
-		     spu->scaled_stride - spu->scaled_width);
-	      /* FIXME: Why is this one needed? */
-	      memset(spu->scaled_image + y * spu->scaled_stride + spu->scaled_width, 0,
-		     spu->scaled_stride - spu->scaled_width);
-	    }
 	  if (spu->scaled_width <= 1 || spu->scaled_height <= 1) {
 	    goto nothing_to_do;
 	  }
@@ -1061,6 +1052,12 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	  }
 	  }
 nothing_to_do:
+	  /* Kludge: draw_alpha needs width multiple of 8. */
+	  if (spu->scaled_width < spu->scaled_stride)
+	    for (y = 0; y < spu->scaled_height; ++y) {
+	      memset(spu->scaled_aimage + y * spu->scaled_stride + spu->scaled_width, 0,
+		     spu->scaled_stride - spu->scaled_width);
+	    }
 	  spu->scaled_frame_width = dxs;
 	  spu->scaled_frame_height = dys;
 	}
