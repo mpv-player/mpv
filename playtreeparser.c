@@ -16,6 +16,13 @@
 #include "libmpdemux/stream.h"
 #include "mp_msg.h"
 
+
+#if defined(__CYGWIN__) || defined(__OS2__)
+#define PATH_SEP '\\'
+#else
+#define PATH_SEP '/'
+#endif
+
 extern play_tree_t*
 asx_parser_build_tree(char* buffer, int ref);
 
@@ -412,6 +419,30 @@ parse_playtree(stream_t *stream) {
   return ret;
 }
 
+static void
+play_tree_add_basepath(play_tree_t* pt, char* bp) {
+  int i,bl = strlen(bp),fl;
+
+  if(pt->child) {
+    play_tree_t* i;
+    for(i = pt->child ; i != NULL ; i = i->next)
+      play_tree_add_basepath(i,bp);
+    return;
+  }
+
+  if(!pt->files)
+    return;
+
+  for(i = 0 ; pt->files[i] != NULL ; i++) {
+    fl = strlen(pt->files[i]);
+    if(fl <= 0 || pt->files[i][0] == PATH_SEP)
+      continue;
+    pt->files[i] = (char*)realloc(pt->files[i],bl+fl+1);
+    memmove(pt->files[i] + bl,pt->files[i],fl+1);
+    memcpy(pt->files[i],bp,bl);
+  }
+}
+
 play_tree_t*
 parse_playlist_file(char* file) {
   stream_t *stream;
@@ -435,6 +466,14 @@ parse_playlist_file(char* file) {
   if(close(fd) < 0)
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Warning error while closing playlist file %s : %s\n",file,strerror(errno));
   free_stream(stream);
+
+  if(ret) {
+    char* ls = strrchr(file,PATH_SEP);
+    if(ls) {
+      ls[1] = '\0';
+      play_tree_add_basepath(ret,file);
+    }
+  }
 
   return ret;
 
