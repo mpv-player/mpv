@@ -25,6 +25,8 @@
 #define VOCTRL_RESET 3
 /* true if vo driver can use GUI created windows */
 #define VOCTRL_GUISUPPORT 4
+/* used to switch to fullscreen */
+#define VOCTRL_FULLSCREEN 5
 
 #define VO_TRUE		1
 #define VO_FALSE	0
