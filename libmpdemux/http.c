@@ -30,7 +30,6 @@ http_free( HTTP_header_t *http_hdr ) {
 	if( http_hdr->protocol!=NULL ) free( http_hdr->protocol );
 	if( http_hdr->uri!=NULL ) free( http_hdr->uri );
 	if( http_hdr->reason_phrase!=NULL ) free( http_hdr->reason_phrase );
-	if( http_hdr->body!=NULL ) free( http_hdr->body );
 	if( http_hdr->field_search!=NULL ) free( http_hdr->field_search );
 	if( http_hdr->method!=NULL ) free( http_hdr->method );
 	if( http_hdr->buffer!=NULL ) free( http_hdr->buffer );
@@ -164,14 +163,8 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 
 	if( pos_hdr_sep+4<http_hdr->buffer_size ) {
 		// Response has data!
-		int data_length = http_hdr->buffer_size-(pos_hdr_sep+4);
-		http_hdr->body = (char*)malloc( data_length );
-		if( http_hdr->body==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
-			return -1;
-		}
-		memcpy( http_hdr->body, http_hdr->buffer+pos_hdr_sep+4, data_length );
-		http_hdr->body_size = data_length;
+		http_hdr->body = http_hdr->buffer+pos_hdr_sep+4;
+		http_hdr->body_size = http_hdr->buffer_size-(pos_hdr_sep+4);
 	}
 
 	http_hdr->is_parsed = 1;
