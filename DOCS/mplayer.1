@@ -783,21 +783,24 @@ Specify the VobSub subtitle id. Valid values range from 0 to 31.
 .B \-abs <value> (OBSOLETE)
 Override audio driver/card buffer size detection, \-ao oss only
 .TP
-.B \-ao <driver>[:<device>]
-Select audio output driver and optionally device. "device" is valid with
-SDL, too, it means subdriver then.
+.B \-ao <driver1[:device],driver2,...>
+Specify a priority list of audio output drivers (optionally with device) to be
+used. "device" is valid with SDL, too, it means subdriver then.
 
 .I NOTE:
 .br
 To get a full list of available drivers, see \-ao help.
+.br
+If the list has a trailing ',' it will fallback to drivers not listed.
 
 .I EXAMPLE
 .PD 0
 .RSs
-.IPs "\-ao oss:/dev/dsp1"
-specifies the sound device to use with OSS (replaces the old \-dsp option)
+.IPs "\-ao oss:/dev/dsp1,"
+try to use OSS with the specified sound device and fallback to others if it
+fails
 .IPs "\-ao sdl:esd"
-specifies the SDL subdriver
+specify the SDL subdriver
 .RE
 .PD 1
 .
@@ -1043,20 +1046,23 @@ vertical resolution.
 Try to change to a better video mode. dga, x11/xv (XF86VidMode) and sdl
 output drivers support it.
 .TP
-.B \-vo <driver>[:<device>]
-Select video output driver and optionally device. "device" is valid with
-SDL and GGI too, it means subdriver then.
+.B \-vo <driver1[:device],driver2,...>
+Specify a priority list of video output drivers (optionally with device) to be
+used. "device" is valid with SDL and GGI, too, it means subdriver then.
 
 .I NOTE:
 .br
 See \-vo help for a full list of available drivers.
+.br
+If the list has a trailing ',' it will fallback to drivers not listed.
 
 .I EXAMPLE:
 .PD 0
 .RSs
-\-vo xmga
-.br
+\-vo xmga,xv,
+Try Matrox kernel driver, then Xv driver, then others
 \-vo sdl:aalib
+specify the SDL subdriver
 .RE
 .PD 1
 .
@@ -1132,38 +1138,36 @@ is centered by default.
 
 .SH "DECODING/FILTERING OPTIONS"
 .TP
-.B \-ac <codec name>
-Force usage of a specific audio codec, according to its codec name in
-codecs.conf.
+.B \-ac <[-]codec1,codec2,...>
+Specify a priority list of audio codecs to be used, according to their codec
+name in codecs.conf. Use a '-' before the codec name to omit it.
 
 .I NOTE:
 .br
 See \-ac help for a full list of available codecs.
+.br
+If the list has a trailing ',' it will fallback to codecs not listed.
 
 .I EXAMPLE:
 .PD 0
 .RSs
-.IPs "\-ac mp3"
-use mp3lib
-.IPs "\-ac mad"
-use libmad
 .IPs "\-ac mp3acm"
-use l3codeca.acm MP3 codec
-.IPs "\-ac ac3"
-use AC3 codec
-.IPs "\-ac hwac3"
-enable hardware AC3 passthrough (see documentation)
-.IPs "\-ac vorbis"
-use libvorbis
-.IPs "\-ac ffmp3"
-use FFmpeg's MP3 decoder (SLOW)
+force l3codeca.acm MP3 codec
+.IPs "\-ac mad,"
+try libmad first, then fallback to others
+.IPs "\-ac ,mp3"
+try others first, then fallback to mp3lib
+.IPs "\-ac hwac3,ac3,"
+try hardware AC3 passthrough, then normal AC3 codec, then others
+.IPs "\-ac -ffmp3,"
+try other codecs except FFmpeg's MP3 decoder
 .RE
 .PD 1
 .
 .TP
-.B \-afm <driver name>
-Force usage of a specific audio codec family, according to its driver name
-in codecs.conf and fall back to default if it failed.
+.B \-afm <driver1,driver2,...>
+Specify a priority list of audio drivers to be used, according to their driver
+name in codecs.conf. It falls back to default if none is ok.
 
 .I NOTE:
 .br
@@ -1173,9 +1177,9 @@ See \-afm help for a full list of available drivers.
 .PD 0
 .RSs
 .IPs "\-afm ffmpeg"
-use FFmpeg's libavcodec (mp1/2/3)
-.IPs "\-afm acm"
-use a matching Win32 codec
+try FFmpeg's libavcodec (mp1/2/3) first
+.IPs "\-afm acm,dshow"
+try Win32 codecs first
 .RE
 .PD 1
 .
@@ -1400,34 +1404,36 @@ bicubic spline
 .PD 1
 .
 .TP
-.B \-vc <codec name>
-Force usage of a specific video codec, according to its codec name in
-codecs.conf.
+.B \-vc <[-]codec1,codec2,...>
+Specify a priority list of video codecs to be used, according to their codec
+name in codecs.conf. Use a '-' before the codec name to omit it.
 
 .I NOTE:
 .br
 See \-vc help for a full list of available codecs.
+.br
+If the list has a trailing ',' it will fallback to codecs not listed.
 
 .I EXAMPLE:
 .PD 0
 .RSs
 .IPs "\-vc divx"
-use Win32/VFW DivX codec
-.IPs "\-vc divxds"
-use Win32/DShow DivX codec
-.IPs "\-vc ffdivx"
-use libavcodec's DivX codec
-.IPs "\-vc ffmpeg12"
-use libavcodec's MPEG1/2 codec
-.IPs "\-vc divx4"
-use divx4linux codec
+force Win32/VFW DivX codec, no fallback
+.IPs "\-vc divx4,"
+try divx4linux codec first, then fallback to others
+.IPs "\-vc -divxds,-divx,"
+try other codecs except Win32 DivX codec
+.IPs "\-vc ffmpeg12,mpeg12,"
+try libavcodec's MPEG1/2 codec, then libmpeg2, then others
+.IPs "\-vc ,ffdivx"
+try others (non-crashing codecs), fallback to libavcodec's DivX codec
 .RE
 .PD 1
 .
 .TP
-.B \-vfm <driver name>
-Force usage of a specific video codec family, according to its driver name
-in codecs.conf and fall back to default if it failed.
+.B \-vfm <driver1,driver2,...>
+Specify a priority list of video drivers to be used, according to their driver
+name in codecs.conf. It falls back to default if none is ok.
 
 .I NOTE:
 .br
@@ -1441,18 +1447,15 @@ See \-vfm help for a full list of available drivers.
 .I EXAMPLE:
 .PD 0
 .RSs
-.IPs "\-vfm ffmpeg"
-use libavcodec codecs
-.IPs "\-vfm vfw"
-use VFW (Win32) codecs
+.IPs "\-vfm ffmpeg,dshow,vfw"
+try the libavcodec, then Directshow, then VFW codecs and fallback to the others, if
+still none is ok
 .IPs "\-vfm odivx"
-use OpenDivX/DivX4 codec (YV12) (same as \-vc odivx but fallback)
-.IPs "\-vfm dshow"
-use DirectShow (Win32) codecs
+try OpenDivX/DivX4 codecs (YV12) first
 .IPs "\-vfm divx4"
-use DivX4 codec (YUY2) (same as \-vc divx4 but fallback)
+try DivX4 codecs (YUY2) first
 .IPs "\-vfm xanim"
-use XAnim codecs
+try XAnim codecs first
 .RE
 .PD 1
 .
