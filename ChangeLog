@@ -2,9 +2,11 @@
 mplayer (0.90)
 
   final:  "CounterCounter"
+
+  rc4:
     DOCS:
-    * some clarification in english DOCS
-    * more translation updates
+    * some clarification and updates in english DOCS
+    * many translation and help-files updates
 
     Fixes:    
     * -ac hwac3 fixed (was broken in rc3)
@@ -15,6 +17,22 @@ mplayer (0.90)
     * fixed ./configure --cc="ccache gcc"
     * -loop fixes, now -loop 2 plays it twice :)
     * the volume symbol of OSD fixed (|\ -> /|)
+    * 32bpp QT-RLE support
+    * Altivec on non-darwin systems support
+    * QuickTime reference files support fixes
+    * mp3lib: layer-2 decoding fixes
+    * updates to extension->demuxer mapping table
+    * libavcodec: DivX 5.03 decoding fix
+    * ao_oss: limited channels handling fixed
+    * fixed OGM subtitles and iconv
+    * fixed -subcp option with unicode truetype fonts
+    * -mf: type detection (based on extension), better defaults
+    * vo_xv: -fixed-vo support fixed (fullscreen switching)
+    * ogg-in-avi (audio format 0xFFFE) demuxing fixed
+    * vorbis decoding fixed (outer loop cleanup)
+    * swscaler: 4bpp depth 1 pixel/byte format support for -vo svga
+    * various GUI fixes
+    * missing error message in commandline parser for missing parameters
     
     Features:
     * raw video support (-rawvideo, similar to -rawaudio)
@@ -22,6 +40,10 @@ mplayer (0.90)
     * new video filter: field
     * dvd/vobsub improvements: positioning, gaussian blur scaler
     * vf_bmovl: 400% speedup :)
+    * libavcodec: native DV audio decoder
+    * GIF demuxer (for animated GIFs)
+    * new noise removal filter: -vop denoise3d
+    * per-channel gamma and MMX-opt'ed br/co/saturation support in -vop eq2
 
   rc3:  "BugfixCounter"
   
