@@ -209,10 +209,8 @@
 
 <P>MPlayer can play Vivo (1.0 and 2.0) videos. The most suitable codec
   for 1.0 files is FFmpeg's H263 decoder, you can use it with the <CODE>-vc
-  ffh263</CODE> option (default). For 2.0 files, use the
-  <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">ivvideo.dll</A>
-  Win32 DLL file (included in the latest DLL packages), and install it under
-  <CODE>/usr/lib/win32</CODE> or wherever you store the Win32 codecs.</P>
+  ffh263</CODE> option. For 2.0 files, use the Win32 DLL (<CODE>-vc vivo</CODE>).
+  Anyway, MPlayer selects automatically the best codec.</P>
 
 
 <H4><A NAME="mpeg">2.2.1.5 MPEG 1/2 video</A></H4>
@@ -415,11 +413,7 @@ MPlayer supports decoding all versions of RealVideo:
 
 <P>The audio codec used in VIVO files depends on whether it is a VIVO/1.0 or
   VIVO/2.0 file. VIVO/1.0 files have <B>g.723</B> audio, and VIVO/2.0 files
-  have <B>Vivo Siren</B> audio. Both are supported. You can grab the
-  <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">g.723/Siren</A>
-  Win32 DLL from the MPlayer site,
-  then copy it into the <CODE>/usr/lib/win32</CODE> directory.</P>
-
+  have <B>Vivo Siren</B> audio. Both are supported.</P>
 
 <H4><A NAME="realaudio">2.2.2.5 RealAudio</A></H4>
 
