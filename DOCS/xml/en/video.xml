@@ -2483,19 +2483,49 @@ Of course the important thing is the TwinView part.
 <sect4 id="tvout-neomagic">
 <title>Neomagic</title>
 <para>
-Tested on a Toshiba Tecra 8000. Its TV output chip is a miserable crap. Avoid
-if possible.
-</para>
-<para>
-You must use <option>-vo vesa</option>. The tested chip was capable of 1.333333
-aspect ratio only, so be sure to use the <option>-x</option>, <option>-y</option> options and/or the
-<option>-vf scale,crop,expand</option> filters if the box doesn't let you
-enable TV output. Maximum resolution was 720*576 at 16bpp.
-</para>
-<para>
-Known issues: VESA-only, 1.33333 limitation, image isn't always centered,
-movie becomes 4bpp in every 10 minutes, and stays that way. Frequent hard
-freezes, LCD display problems.
+The Neomagic chip is found in a variety of laptops, some of them are equipped
+with a simple analog TV encoder, some have a more advanced one.
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">Analog encoder chip</emphasis>:
+  Tested on a Toshiba Tecra 8000. Its TV output chip is miserable crap. Avoid
+  if possible.
+  </simpara> <simpara>
+  You must use <option>-vo vesa</option>. The tested chip was capable of
+  1.333333 aspect ratio only, so be sure to use the <option>-x</option>,
+  <option>-y</option> options and/or the
+  <option>-vf scale,crop,expand</option> filters if the box doesn't let
+  you enable TV output. Maximum resolution was 720*576 at 16bpp.
+  </simpara>
+  <simpara>
+  Known issues: VESA-only, 1.33333 limitation, image isn't always centered,
+  movie becomes 4bpp in every 10 minutes, and stays that way. Frequent hard
+  freezes, LCD display problems.
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">Chrontel 70xx encoder chip</emphasis>:
+  Found in IBM Thinkpad 390E and possibly other Thinkpads or notebooks.
+  </simpara><simpara>
+  You must use <option>-vo vesa:neotv_pal</option> for PAL or
+  <option>-vo vesa:neotv_ntsc</option> for NTSC.
+  It will provide TV output function in the following 16 bpp and 8 bpp modes:
+  </simpara>
+  <itemizedlist>
+    <listitem><simpara>NTSC 320x240, 640x480 and maybe 800x600 too.</simpara></listitem>
+    <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.  </simpara></listitem>
+  </itemizedlist>
+  <simpara>Mode 512x384 is not supported in BIOS. You must scale the image
+  to a different resolution to activate TV out. If you can see an image on the
+  screen in 640x480 or in 800x600 but not in 320x240 or other smaller
+  resolution you need to replace two tables in <filename>vbelib.c</filename>.
+  See the vbeSetTV function for details. Please contact the author in this case.
+  </simpara>
+  <simpara>
+  Known issues: VESA-only, no other controls such as brightness, contrast,
+  blacklevel, flickfilter are implemented.
+  </simpara>
+</listitem>
+</itemizedlist>
 </para>
 </sect4>
 </sect3>
