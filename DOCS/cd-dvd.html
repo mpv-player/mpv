@@ -87,7 +87,7 @@
   install <B>libcss</B> 0.0.1 (not newer) for this (If MPlayer fails to
   detect it, use the <CODE>-csslib /path/to/libcss.so</CODE> option). To use it,
   you need to be root, use a suid root MPlayer binary or let MPlayer call the
-  suid root fibmap_mplayer wrapper program.</P>
+  suid-root fibmap_mplayer wrapper program.</P>
 
 <H4>DVD structure</H4>
 
@@ -108,8 +108,8 @@ be root (under Linux) to get the sector address of a file. You got the
 following choices:</P>
 
 <UL>
-  <LI>Force the user to be root or use a suid root mplayer binary.</LI>
-  <LI>Let MPlayer call the suid root fibmap_mplayer wrapper program to access
+  <LI>Force the user to be root or use a suid-root mplayer binary.</LI>
+  <LI>Let MPlayer call the suid-root fibmap_mplayer wrapper program to access
     the DVD (used in the old-style DVD playback over libcss).</LI>
   <LI>Don't use the kernel's filesystem driver at all and re-implement it in
     userspace. libdvdread 0.9.x and libmpdvdkit does this (New-style DVD
@@ -214,17 +214,19 @@ Example: <CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE></P>
 <P>About .DAT files:</P>
 
 <P>The ~600 MB file visible on the first track of the mounted vcd isn't a real
-track! It's a so called iso gateway, created to allow Windows to handle such
+file! It's a so called iso gateway, created to allow Windows to handle such
 tracks (Windows doesn't allow raw device access to applications at all).
 Under linux, you cannot copy or play such files (they contain garbage).
 Under Windows it is possible as its iso9660 driver emulates the raw reading of
-tracks in this file.
-To play a .DAT file you need a kernel driver which can be found on a powerdvd
-Linux version. It is a modified iso9660 fs driver, which is able to emulate the
+tracks in this file. To play a .DAT file you need a kernel driver which can be
+found in the Linux version of PowerDVD. It has a modified iso9660 filesystem
+(vcdfs/isofs-2.4.X.o) driver, which is able to emulate the
 raw tracks through this shadow .DAT file. If you mount the disc using their
 driver, you can copy and even play .DAT files with mplayer. But it <B>won't
 work</B> with the standard iso9660 driver of the kernel! It is recommended to
-use the <CODE>-vcd</CODE> option instead.</P>
+use the <CODE>-vcd</CODE> option instead. Alternate options for VCD copy are
+the new cdfs kernel driver (shows CD <I>sessions</I> as image files) and
+cdrdao (a bit-to-bit cd grabber/copier application).</P>
 
 <P>The default VCD device is <CODE>/dev/cdrom</CODE>. If your setup differs,
 make a symlink, or specify the correct device on the command line with the
