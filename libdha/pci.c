@@ -720,3 +720,13 @@ int pci_config_read(unsigned char bus, unsigned char dev,
     
     return(0);
 }
+
+int enable_app_io( void )
+{
+  return enable_os_io();  
+}
+
+int disable_app_io( void )
+{
+  return disable_os_io();
+}

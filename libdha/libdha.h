@@ -27,9 +27,9 @@ extern "C" {
 
 typedef struct pciinfo_s
 {
-  int	bus,card,func ;			/* PCI/AGP bus:card:func */
-  unsigned short vendor,device ;			/* Card vendor+device ID */
-  unsigned	base0,base1,base2,baserom ;	/* Memory and I/O base addresses */
+  int		bus,card,func;			/* PCI/AGP bus:card:func */
+  unsigned short vendor,device;			/* Card vendor+device ID */
+  unsigned	base0,base1,base2,baserom;	/* Memory and I/O base addresses */
 }pciinfo_t;
 
 /* needed for mga_vid */
@@ -40,6 +40,10 @@ extern int pci_config_read(unsigned char bus, unsigned char dev, unsigned char o
 extern int  pci_scan(pciinfo_t *pci_list,unsigned *num_card);
 
 
+	    /* Enables/disables accessing to IO space from application side.
+	       Should return 0 if o'k or errno on error. */
+extern int enable_app_io( void );
+extern int disable_app_io( void );
 
 extern unsigned char  INPORT8(unsigned idx);
 extern unsigned short INPORT16(unsigned idx);
