@@ -419,7 +419,7 @@ _termcap=no
 $_cc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
 
 _png=no
-$_cc $TMPC -o $TMPO -lpng &> /dev/null && _png=yes
+$_cc $TMPC -o $TMPO -lpng -lz&> /dev/null && _png=yes
 
 _binutils=no
 as libac3/downmix/downmix_i386.S -o $TMPO &> /dev/null && _binutils=yes
@@ -768,7 +768,7 @@ else
 fi
 
 if [ $_png = yes ]; then
-   _libpng='-lpng'
+   _libpng='-lpng -lz'
 fi
 
 echo
