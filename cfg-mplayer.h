@@ -114,6 +114,8 @@ struct config conf[]={
         {"novm", &vidmode, CONF_TYPE_FLAG, 0, 1, 0},
 	{"fs", &fullscreen, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0},
+        {"zoom", &zoom, CONF_TYPE_FLAG, 0, 0, 1},
+        {"nozoom", &zoom, CONF_TYPE_FLAG, 0, 1, 0},
         {"flip", &flip, CONF_TYPE_FLAG, 0, 0, 1},
         {"noflip", &flip, CONF_TYPE_FLAG, 0, 1, 0},
        
