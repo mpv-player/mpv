@@ -426,11 +426,10 @@ extension=NULL;
 								return 0; 
 							}
 						}
-						// Not found in the mime type table, don't fail,
-						// we should try raw HTTP
-						return 0;
 					}
-					break;
+					// Not found in the mime type table, don't fail,
+					// we should try raw HTTP
+					return 0;
 				// Redirect
 				case 301: // Permanently
 				case 302: // Temporarily
