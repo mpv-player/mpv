@@ -396,7 +396,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	VERBOSE("tv: %dx%d, out: %dx%d+%d+%d, in: %ux%u %s%s%s\n",
 			p->vc.maxwidth, p->vc.maxheight,
 			zptmp.img_width, 2*zptmp.img_height,
-			zptmp.img_x, zptmp.img_y*(fields - 3),
+			zptmp.img_x, 2*zptmp.img_y,
 			width, height, (fields == 1) ? "non-interlaced" : "",
 			(fields == 2 && top_first == 1) 
 			?  "interlaced top first" : "",
