@@ -1,11 +1,12 @@
 .\" MPlayer (C) 2000-2001 Arpad Gereoffy <arpi@esp-team.scene.hu>
 .\" This manpage was/is done by Gabucino
 .\"
-.TH MPlayer-CVS
+.TH MPlayer
 .SH NAME
 mplayer \- Movie Player for Linux
 .SH SYNOPSIS
 .B mplayer
+.RB [ \-gui ]
 .RB [ \-v ]
 .RB [ \-quiet ]
 .RB [ \-vo\ <driver>[:<device>] ]
@@ -15,7 +16,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-nosound ]
 .RB [ \-abs\ bytes ]
 .RB [ \-delay\ secs ]
-.RB [ \-bps ]
+.RB [ \-nobps ]
 .RB [ \-aid\ id ]
 .RB [ \-vid\ id ]
 .RB [ \-fps\ rate ]
@@ -39,57 +40,62 @@ mplayer \- Movie Player for Linux
 .RB [ \-nodshow ]
 .RB [ \-noxv ]
 .RB [ \-forcexv ]
-.RB [ \-ss\ sec\]
-.RB [ \-dumpaudio]
-.RB [ \-dumpvideo]
-.RB [ \-noframedrop]
-.RB [ \-framedrop]
-.RB [ \-nodouble]
-.RB [ \-double]
-.RB [ \-stereo\ mode]
-.RB [ \-srate\ Hz]
-.RB [ \-osdlevel\ level]
-.RB [ \-config\ file]
-.RB [ \-display\ name]
-.RB [ \-unicode]
-.RB [ \-utf8]
-.RB [ \-fsmode\ mode]
-.RB [ \-vc\ video\ codec\ name]
-.RB [ \-ac\ audio\ codec\ name]
-.RB [ \-vfm\ video\ codec\ family]
-.RB [ \-afm\ audio\ codec\ family]
-.RB [ \-frames\ number]
-.RB [ \-autoq\ quality]
-.RB [ \-fb\ device]
-.RB [ \-fbmode\ modename]
-.RB [ \-fbmodeconfig\ filename]
-.RB [ \-benchmark]
-.RB [ \-dvd\ titleid]
-.RB [ \-chapter\ chapterid]
-.RB [ \-dvdangle\ angleid]
-.RB [ \-dvdkey\ key]
-.RB [ \-skin\ skin]
+.RB [ \-ss\ time ]
+.RB [ \-dumpaudio ]
+.RB [ \-dumpvideo ]
+.RB [ \-noframedrop ]
+.RB [ \-framedrop ]
+.RB [ \-nodouble ]
+.RB [ \-double ]
+.RB [ \-stereo\ mode ]
+.RB [ \-srate\ Hz ]
+.RB [ \-osdlevel\ level ]
+.RB [ \-config\ file ]
+.RB [ \-display\ name ]
+.RB [ \-unicode ]
+.RB [ \-utf8 ]
+.RB [ \-fsmode\ mode ]
+.RB [ \-vc\ video\ codec\ name ]
+.RB [ \-ac\ audio\ codec\ name ]
+.RB [ \-vfm\ video\ codec\ family ]
+.RB [ \-afm\ audio\ codec\ family ]
+.RB [ \-frames\ number ]
+.RB [ \-autoq\ quality ]
+.RB [ \-fb\ device ]
+.RB [ \-fbmode\ modename ]
+.RB [ \-fbmodeconfig\ filename ]
+.RB [ \-benchmark ]
+.RB [ \-dvd\ titleid ]
+.RB [ \-chapter\ chapterid ]
+.RB [ \-dvdangle\ angleid ]
+.RB [ \-dvdkey\ key ]
+.RB [ \-skin\ skin ]
 .RB [ \-aspect\ ratio ]
 .I - or file or device
 .PP
 .SH DESCRIPTION
 .I mplayer
-Yes. Yet another movie player for linux.
-What is the special with this? It works, at least for me :)
-I've tried lots of players under linux (mtv,xmps,dvdview,livid/oms,VideoLAN,
-xine,xanim,avifile,xmmp) but they all have some problem. Mostly with
-special files or with audio/video sync. Most of them is unable to play
-both mpeg1, mpeg2 and avi (DivX) files. Many players have image quality
-or speed problems too. So I've decided to write/modify one...
+MPlayer is a movie player for LINUX (runs on many other Unices, and
+non-x86 CPUs, see section 6). It plays most MPEG, AVI and ASF/WMV files,
+supported by many native and Win32 DLL codecs. You can watch VideoCD,
+SVCD, DVD and even DivX movies too (and you don't need the avifile library
+at all!). The another big feature of mplayer is the wide range of
+supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
+fbdev, AAlib, but you can use SDL (and this way all drivers of SDL) and
+some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon) too!
+Most of them supports software or hardware scaling, so you can enjoy
+movies in fullscreen. And what about the nice big antialiased shaded
+subtitles (7 supported types!!!) with european/ISO 8859-1,2 (hungarian,
+english, czech, etc), cyrillic, korean fonts, and OSD?
 .LP
 .SH "GENERAL OPTIONS"
 .TP
 .I NOTE
-MPlayer works out-of-the-box, so you generally don't have to mess with
-any options.
-.TP
-.I NOTE
 Every "flag" option has "noflag" pair, e.g. -fs opposite is -nofs
+.TP
+.B \-gui
+start MPlayer with the GUI mode. You have to compile it in, for details
+see the documentation.
 .TP
 .B \-dvd\ titleid
 tell MPlayer which movies (marked with titleid) to play. For example
@@ -100,7 +106,7 @@ specify which chapter to start playing at. Examples can be found below.
 .TP
 .B \-dvdangle\ angleid
 some DVD discs contain scenes that can be viewed from multiple angles.
-Here you can tell MPlayer which angels to use. Examples can be found below.
+Here you can tell MPlayer which angles to use. Examples can be found below.
 .TP
 .B \-vo\ <driver>[:<device>]
 select video output driver and optinaly device. "device" is valid with
@@ -112,7 +118,7 @@ you can get the list of available drivers executing
 .TP
 .B \-ao\ <driver>[:<device>]
 select audio output driver and optinaly device. "device" is valid with
-SDL and GGI too, it means sub-driver then (for example: -vo sdl:esd).
+SDL too, it means sub-driver then (for example: -vo sdl:esd).
 
 If using OSS, you can specify which sound device to use like this :
 -ao oss:/dev/dsp1     (replaces the old -dsp option)
@@ -156,8 +162,6 @@ The supported formats and settings are:
         DivX4      0 (none) - 60
         DivX       0 (none), 1, 2, 3, 4
 
-.I NOTE
-Maybe less/more.
 .TP
 .B \-autoq\ quality
 dynamically changes the level of postprocess, depending on spare CPU
@@ -283,8 +287,12 @@ See -ac help for FULL list !
 .B \-sb\ position
 seek to byte position
 .TP
-.B \-ss\ second
-seek to second position
+.B \-ss\ time
+seek to given time position. For example :
+
+    -ss 56
+    -ss 01:10:00
+
 .TP
 .B \-abs\ bytes
 sound card audio buffer size (in bytes, default: measuring)
@@ -292,8 +300,8 @@ sound card audio buffer size (in bytes, default: measuring)
 .B \-delay\ secs
 audio delay in seconds (may be +/- float value)
 .TP
-.B \-bps
-use avg. byte/sec value for A-V sync (AVI)
+.B \-nobps
+don't use avg. byte/sec value for A-V sync (AVI)
 .TP
 .B \-aid\ id
 select audio channel [MPG: 0-31  AVI: 1-99]
@@ -310,7 +318,7 @@ maximum sync correction per 5 frames (in seconds)
 .B \-ni
 force usage of non-interleaved AVI parser
 .TP
-.B \-include
+.B \-include configfile
 specify config file to be parsed after the default
 .TP
 .B \-z\ <0-8>
