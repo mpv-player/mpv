@@ -101,6 +101,10 @@ static config_t mencoder_opts[]={
 	{"noskiplimit", &skip_limit, CONF_TYPE_FLAG, 0, 0, -1, NULL},
 	{"noskip", &skip_limit, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 
+	{"audio-density", &audio_density, CONF_TYPE_INT, CONF_RANGE, 1, 50, NULL},
+	{"audio-preload", &audio_preload, CONF_TYPE_FLOAT, CONF_RANGE, 0, 2, NULL},
+	{"audio-delay",   &audio_delay, CONF_TYPE_FLOAT, 0, 0, 0, NULL},
+
 	{"x", "This option is obsolete, use -vop scale=w:h for scaling\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"xsize", "This option is obsolete, use -vop crop=w:h:x0:y0 for cropping\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 

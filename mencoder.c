@@ -140,6 +140,10 @@ static float default_max_pts_correction=-1;//0.01f;
 static float max_pts_correction=0;//default_max_pts_correction;
 static float c_total=0;
 
+float audio_preload=0.5;
+float audio_delay=0.0;
+int audio_density=2;
+
 float force_fps=0;
 float force_ofps=0; // set to 24 for inverse telecine
 static int skip_limit=-1;
@@ -330,8 +334,6 @@ off_t muxer_f_size=0;
 #ifdef HAVE_MP3LAME
 lame_global_flags *lame;
 #endif
-
-float audio_preload=0.5;
 
 double v_pts_corr=0;
 double v_timer_corr=0;
@@ -724,6 +726,7 @@ case ACODEC_COPY:
 	mux_a->h.dwSampleSize=sh_audio->audio.dwSampleSize;
 	mux_a->h.dwScale=sh_audio->audio.dwScale;
 	mux_a->h.dwRate=sh_audio->audio.dwRate;
+//	mux_a->h.dwStart=sh_audio->audio.dwStart;
     } else {
 	mux_a->h.dwSampleSize=mux_a->wf->nBlockAlign;
 	mux_a->h.dwScale=mux_a->h.dwSampleSize;
@@ -769,9 +772,15 @@ case ACODEC_VBRMP3:
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nCodecDelay=0;
     break;
 }
-}
 
 if (verbose>1) print_wave_header(mux_a->wf);
+
+if(audio_delay!=0.0){
+    mux_a->h.dwStart=audio_delay*mux_a->h.dwRate/mux_a->h.dwScale;
+    printf("Setting AUDIO DELAY to %5.3f\n",mux_a->h.dwStart*mux_a->h.dwScale/(float)mux_a->h.dwRate);
+}
+
+} // if(sh_audio)
 
 printf("Writing AVI header...\n");
 aviwrite_write_header(muxer,muxer_f);
@@ -869,13 +878,13 @@ if(sh_audio){
 	    // CBR - copy 0.5 sec of audio
 	    switch(mux_a->codec){
 	    case ACODEC_COPY: // copy
-		len=mux_a->wf->nAvgBytesPerSec/2;
+		len=mux_a->wf->nAvgBytesPerSec/audio_density;
 		len/=mux_a->h.dwSampleSize;if(len<1) len=1;
 		len*=mux_a->h.dwSampleSize;
 		len=demux_read_data(sh_audio->ds,mux_a->buffer,len);
 		break;
 	    case ACODEC_PCM:
-		len=mux_a->h.dwSampleSize*(mux_a->h.dwRate/2);
+		len=mux_a->h.dwSampleSize*(mux_a->h.dwRate/audio_density);
 		len=dec_audio(sh_audio,mux_a->buffer,len);
 		break;
 	    }
