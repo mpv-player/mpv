@@ -169,10 +169,10 @@ MPlayer verfügt über ein onscreen display (OSD) für Statusinformationen,
 schöne, große, schattierte und kantengeglättete Untertitel und visuelles
 Feedback bei Tastatureingaben.
 Europäische/\:ISO 8859\-1,2 (Ungarisch, Englisch, Tschechisch etc), Kyrillische
-und Koreanische Schriftarten werden ebenso wie zehn Untertitelformate
-(MicroDVD, SubRip, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub und 
-unser eigenes\: MPsub) unterstützt, ebenso wie DVD\-Untertitel (SPU\-Streams, 
-VOBsub und Closed Captions).
+und Koreanische Schriftarten werden ebenso wie zwölf Untertitelformate
+(MicroDVD, SubRip, OGM, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub,
+PJS und unser eigenes: MPsub) unterstützt, ebenso wie DVD-Untertitel
+(SPU-Streams, VOBsub und Closed Captions).
 .PP
 .B mencoder
 (MPlayer's Movie Encoder) ist ein einfacher Movie-Encoder, der so entworfen
@@ -549,6 +549,15 @@ Benutzt eine andere menu.conf.
 .B \-menu\-root <Wert> (nur bei OSD)
 Gibt das Hauptmenü an.
 .TP
+.B \-noconsolecontrols
+Standardinput (stdin) wird anstelle von Schlüssel-Events verwendet.
+Wenn du /dev/stdin (oder das Äquivalent auf deinem System) öffnest, stdin in
+einer Playlist öffnest, oder vorhast, irgendwann später von stdin via loadfile
+oder loadlist Slave-Kommandos einzulesen, dann
+.B brauchst
+du diese Option.
+Die Option -idx ist in diesem Falle nicht verfügbar.
+.TP
 .B \-nojoystick
 Schaltet die Joystickunterstützung aus.
 .TP
@@ -616,17 +625,8 @@ Erhöht oder verringert die Abspielgeschwindigkeit abhängig vom angegebenen Fakto
 .TP
 .B \-sstep <Sekunden>
 Zeigt einen Frame alle <Sekunden> Sekunden. Für Slideshows nützlich.
-.TP
-.B \-use-stdin
-Standardinput (stdin) wird anstelle von Schlüssel-Events verwendet.
-Wenn du /dev/stdin (oder das Äquivalent auf deinem System) öffnest, stdin in
-einer Playlist öffnest, oder vorhast, irgendwann später von stdin via loadfile
-oder loadlist Slave-Kommandos einzulesen, dann
-.B brauchst
-du diese Option.
-Die Option -idx ist in diesem Falle nicht verfügbar.
-.
-.
+
+
 .SH "DEMUXER/STREAM-OPTIONEN"
 .TP
 .B \-a52drc <Level>
@@ -978,11 +978,11 @@ am Anfang.
 .B \-srate <Hz>
 Erzwingt eine Audioabspielrate, wobei die Videogeschwindigkeit angepasst
 wird, um die A/V-Synchronisation beizubehalten.
-MEncoder übergibt diesen Wert an lame für's Resampling.
+MEncoder übergibt diesen Wert an lame für das Resampling.
 .TP
 .B \-ss <Zeit> (siehe auch bei \-sb)
 Springt zu der angegebenen Zeitposition.
-.
+
 .I BEISPIELE:
 .PD 0
 .RSs
@@ -995,7 +995,7 @@ springt zu 1 Stunde 10 Minuten
 .
 .TP
 .B \-tskeepbroken 
-Sorgt dafür, daß Mplayer solche TS-Pakete, die als unbrauchbar markiert wurden,
+Sorgt dafür, daß MPlayer solche TS-Pakete, die als unbrauchbar markiert wurden,
 nicht ignoriert.
 Diese Option wird manchmal gebraucht, um korrupte MPEG-TS-Dateien abzuspielen.
 .
@@ -1008,27 +1008,26 @@ Kann in Verbindung mit \-vid und \-aid benutzt werden.
 .TP
 .B \-tsprobe <Byte-Position>
 Beim Abspielen eines MPEG-TS-Streams kannst du mit dieser Option auswählen,
-wieviele Bytes MPlayer nach den gewünschten Program-IDs durchsuchen soll.
+wie viele Bytes MPlayer nach den gewünschten Program-IDs durchsuchen soll.
 .
 .TP
 .B \-tv <Option1:Option2:...> (nur bei TV)
 Diese Option steuert verschiedene Einstellungen des TV-Empfang-Moduls.
-Um mit MPlayer fernzusehen, benutze die Optionen 'tv://' oder
-'tv://<Kanalnummer>' oder sogar 'tv://Kanalname' (siehe unten für die Option
-'channels' für die Kanalnamen) als Film-URL.
+Um mit MPlayer fernzusehen, benutze die Optionen 'tv://'
+oder 'tv://<Kanalnummer>' oder sogar 'tv://Kanalname' (siehe unten die
+Option 'channels' für die Kanalnamen) als Film-URL.
 .br
 .I ANMERKUNG:
-MPlayer akzeptiert keine Doppelpunkte, benutze statt dessen also Punkte
+MPlayer akzeptiert keine Doppelpunkte, benutze stattdessen also Punkte
 in der Geräte-ID (z.B.\& hw.0,0 anstelle von hw:0,0).
 .br
 Sei gewarnt, dass du zwar eine beliebige Samplerate angeben kannst, wenn
 du ALSA verwendest, der LAME-Audiocodec aber nur die 'Standard'-Sampleraten
 unterstützt.
-Du wirst ein .AVI ohne Sound erhalten, wenn du eine ungerade Samplerate
+Du wirst ein AVI ohne Sound erhalten, wenn du eine ungerade Samplerate
 bei diesem Codec wählst.
-.
+.sp 1
 Verfügbare Optionen:
-.
 .RSs
 .IPs noaudio
 kein Sound
@@ -1073,8 +1072,8 @@ Die Sendernamen werden dann mit dem OSD angezeigt, und die Kommandos
 tv_step_channel, tv_set_channel und tv_last_channel werden dann z.B.\& mit
 einer Fernbedienung benutzbar sein (siehe LIRC).
 Kann nicht zusammen mit dem frequency\-Parameter benutzt werden.
-Warnung: Die Sendernummer wird dann die Position des Eintrags in der
-'channels'-Liste sein, wobei der erste Eintrag die 1 bekommt.
+Warnung: Die Sendernummer wird dann die Position des Eintrags in 
+der 'channels'-Liste sein, wobei der erste Eintrag die 1 bekommt.
 Benutze also z.B.\&  tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
 .IPs [brightness|contrast|hue|saturation]=<-100\-100>
 Setzt Werte des Farb-Equaliziers der Karte.
@@ -1119,9 +1118,9 @@ Bei V4L2 geht der gültige Bereich von 0 bis 100, und 50 steht für den vom
 Treiber angegebenen Default-Wert.
 .IPs immediatemode=<Boolean>
 Ein Wert von 0 bedeutet: Nimm Audio und Video zusammen in einem Puffer auf
-(Standardwert für Mencoder).
-Ein Wert von 1 beduetet: Nimm nur Video direkt von der Karte und Audio
-über ein externes Kabel von der TV\-Karte zur Soundkarte auf (Standardwert
+(Standardwert für MEncoder).
+Ein Wert von 1 bedeutet: Nimm nur Video direkt von der Karte und Audio
+über ein externes Kabel von der TV-Karte zur Soundkarte auf (Standardwert
 für MPlayer).
 .IPs mjpeg
 Benutzte Hardware-mjpeg-Kompression (wenn dies die Karte unterstützt). 
@@ -1129,7 +1128,7 @@ Bei dieser Option mußt du Breite und Höhe des Ausgabefensters nicht
 angeben, denn MPlayer ermittelt diese Werte automatisch vom
 Dezimierungswert (siehe unten).
 .IPs decimation=<1,2,4>
-Wählt die Bildgröße für die Hardware-mjpeg-Kompression:
+Wählt die Bildgröße für die Hardware-MJPEG-Kompression:
 .RSss
 1: volle Größe
     704x576    PAL
@@ -1158,52 +1157,50 @@ Benutze Zeichenkette als User-Agent beim HTTP-Streaming.
 .TP
 .B \-vid <id>
 Wählt die Videospur [MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190].
-Beim Abspielen von MPEG-TS-Streams benutzt MPlayer/Mencoder das erste Programm
+Beim Abspielen von MPEG-TS-Streams benutzt MPlayer/MEncoder das erste Programm
 (falls vorhanden) mit dem gewählten Video-Stream.
 .TP
 .B \-vivo <sub\-Optionen> (DEBUG\-CODE)
-Erzwingt Audioparameter für den .vivo-Demuxer (nur für Debugging-Zwecke).
-.
-.
+Erzwingt Audioparameter für den VIVO-Demuxer (nur für Debugging-Zwecke).
+
+
 .SH "OSD\-/UNTERTITEL\-OPTIONEN"
 .I ANMERKUNG:
 Siehe auch \-vf expand.
 .TP
-.B \-dumpmicrodvdsub (nur bei MPlayer)
-Konvertiert die mit der \-sub-Option angegebenen Untertitel in das
-MicroDVD\-Format. Erstellt eine Datei dumpsub.sub im aktuellen Verzeichnis.
-.TP
-.B \-dumpmpsub (nur bei MPlayer)
-Konvertiert die mit der \-sub\-Option angegebenen Untertitel in das
-MPlayer\-Format MPsub. Erstellt eine Datei dump.mpsub im aktuellen Verzeichnis.
-.TP
-.B \-dumpsrtsub (nur bei MPlayer)
-Konvertiert die mit der \-sub\-Option angegebenen Untertitel in das
-zeitbasierende SubViewer\-Format (SRT).
-Erstellt eine Datei dumpsub.srt im aktuellen Verzeichnis.
-.TP
 .B \-dumpjacosub (nur bei MPlayer)
-Konvertiert die mit der \-sub\-Option angegebenen Untertitel in das
-zeitbasierende JACOsub\-Format.
+Konvertiert die mit der \-sub-Option angegebenen Untertitel in das
+zeitbasierende JACOsub-Format.
 Erstellt eine Datei dumpsub.js im aktuellen Verzeichnis.
 .TP
-.B \-dumpsami (nur bei MPlayer)
-Konvertiert die mit der \-sub\-Option angegebenen Untertitel in das
-zeitbasierende SAMI\-Format.
+.B \-dumpmicrodvdsub (nur bei MPlayer)
+Konvertiert die mit der \-sub-Option angegebenen Untertitel in das
+MicroDVD-Format.
+Erstellt eine Datei dumpsub.sub im aktuellen Verzeichnis.
+.TP
+.B \-dumpmpsub (nur bei MPlayer)
+Konvertiert die mit der \-sub-Option angegebenen Untertitel in das
+MPlayer-Format MPsub.
+Erstellt eine Datei dump.mpsub im aktuellen Verzeichnis.
+.TP
+.B \-dumpsami (MPlayer only)
+Konvertiert die mit der \-sub-Option angegebenen Untertitel in das
+zeitbasierende SAMI-Format.
 Erstellt eine Datei dumpsub.smi im aktuellen Verzeichnis.
+.TP
+.B \-dumpsrtsub (nur bei MPlayer)
+Konvertiert die mit der \-sub-Option angegebenen Untertitel in das
+zeitbasierende SubViewer-Format (SRT).
+Erstellt eine Datei dumpsub.srt im aktuellen Verzeichnis.
 .TP
 .B \-dumpsub (nur bei MPlayer) (BETA\-CODE)
 Speichert den Untertitel-Substream eines VOB-Streams.
 Siehe auch -dump*sub und -vobsubout*.
 .TP
-.B \-ifo <VOBsub\ IFO\-Datei>
-Gibt die Datei an, aus der MPlayer die Palette und die Framegröße für
-VOBsub-Untertitel lädt.
-.TP
-.B \-ffactor <Nummer>
+.B \-ffactor <Nummer> (nur bei OSD)
 Resamplet die Alpha-Matrix der Schrift.
 Mögliche Werte:
-
+.
 .PD 0
 .RSs
 .IPs 0\ \ \ \ 
@@ -1218,18 +1215,19 @@ dicker schwarzer Umriss
 .PD 1
 .
 .TP
-.B \-font <Pfad\ zur\ font.desc\-Datei>
-Sucht nach den OSD\-/\:Untertitelschriften in einem anderen Verzeichnis
+.B \-flip-hebrew (nur bei FriBiDi)
+Schaltet horizontales Spiegeln der Untertitel ein.
+Benutzt dazu FriBiDi.
+.TP
+.B \-font <Pfad\ zur\ font.desc\-Datei> (nur bei OSD)
+Sucht nach den OSD-/\:Untertitelschriften in einem anderen Verzeichnis
 (Standard für normale Schriften: ~/\:.mplayer/\:font/\:font.desc,
 Standard für FreeType\-Schriften: ~/.mplayer/\:subfont.ttf).
-
-.I ANMERKUNG:
 .br
+.I ANMERKUNG:
 Bei FreeType gibt diese Option den Pfad zur Textschriftdatei an.
 .br
-Die \-subfont-*-Optionen sind nur verfügbar, wenn FreeType eincompieliert
-wurde. Wenn die FreeType-Unterstützung aktiviert wurde, dann kann die
-alte Schriftunterstützung nicht mehr benutzt werden.
+Bei fontconfig gibt diese Option den fontconfig-Schriftnamen an.
 
 .I BEISPIELE:
 .PD 0
@@ -1243,46 +1241,61 @@ alte Schriftunterstützung nicht mehr benutzt werden.
 .PD 1
 .
 .TP
+.B \-fontconfig (nur bei fontconfig)
+Ermöglicht die Benutzung von Schriften, die von fontconfig verwaltet werden.
+.TP
 .B \-forcedsubsonly
-Nur "erzwungene" DVD-Untertitel in der z.B. mit \-slang gewähten Sprache darstellen. 
+Nur "erzwungene" DVD-Untertitel in der z.B.\& mit \-slang gewähten Sprache
+darstellen.
+.TP
+.B \-fribidi-charset <Zeichensatzname> (nur bei FriBiDi)
+Gibt den Zeichensatz an, der an FriBiDi übergeben wird, wenn Untertitel
+dekodiert werden, die nicht im UTF8-Format sind (Standard: ISO8859-8).
+.TP
+.B \-ifo <VOBsub\ IFO-Datei>
+Gibt die Datei an, aus der MPlayer die Palette und die Framegröße für
+VOBsub-Untertitel lädt.
 .TP
 .B \-noautosub
 Deaktiviert das automatische Laden von Untertiteln.
 .TP
-.B \-overlapsub
-Aktiviert die Überlappung von Untertiteln bei allen Untertitelformaten.
-.TP
-.B \-nooverlapsub
-Deaktiviert das Überlappen von Untertiteln. Normalerweise wird es bei
-bestimmten Formaten automatisch aktiviert.
-.TP
 .B \-osdlevel <0\-3> (nur bei MPlayer)
 Gibt den Modus an, in dem das OSD startet:
-
+.
 .PD 0
 .RSs
-.IPs 0:
+.IPs 0
 nur Untertitel
-.IPs 1:
+.IPs 1
 Lautstärkeleiste und Positionsanzeige (Standard)
-.IPs 2:
+.IPs 2
 Lautstärkeleiste, Positionsanzeige und prozentuale Dateiposition
-.IPs 3:
+.IPs 3
 Lautstärkeleiste, Positionsanzeige, prozentuale Dateiposition und
-Dateidauer
+Gesamtzeit
 .RE
+.PD 1
+.
+.TP
+.B \-overlapsub
+Erlaubt die Anzeige des nächsten Untertitels, während der aktuelle noch
+sichtbar ist.
+Standard ist, diese Unterstützung nur bei bestimmten Formaten zu
+aktivieren.
 .TP
 .B \-sid <id> (siehe auch \-slang)
-Aktiviert die Anzeige von DVD-Untertiteln. Du MUSST eine ID angeben, die
-einer DVD-Untertitelsprache entspricht (0\-31).
-Eine Liste mit verfügbaren Untertiteln erhälst du bei der Verwendung
+Aktiviert die Anzeige von DVD-Untertiteln.
+Du MUSST eine ID angeben, die einer DVD-Untertitelsprache entspricht (0\-31).
+Eine Liste der verfügbaren Untertitel erhältst du bei der Verwendung
 der Option \-v.
 .TP
 .B \-slang <zweibuchstabiger\ Ländercode> (siehe auch \-sid)
-Funktioniert nur bei DVD-Wiedergabe.
-Aktiviert/\:selektiert die Sprache der DVD-Untertitel.
-Eine Liste mit verfügbaren Untertiteln erhälst du bei der Verwendung
+Aktiviert/\:selektiert bei DVD-Wiedergabe die Sprache der Untertitel.
+Eine Liste der verfügbaren Untertitel erhältst du bei der Verwendung
 der Option \-v.
+.br
+Sonst gibt dies ein optionales Untertitel-Suffix an, das bei der Suche nach
+Untertiteln eine höhere Priorität bekommt.
 
 .I BEISPIEL:
 .PD 0
@@ -1294,145 +1307,12 @@ es keine ungarischen gibt.
 .PD 1
 .
 .TP
-.B \-sub <Untertiteldatei>
-Benutzt diese Untertitel.
-.TP
-.B \-sub-bg-alpha <0\-255>
-Gibt an, wie transparent der Alphakanal bei Untertiteln und dem OSD ist.
-Große Werte bedeuten mehr Transparenz.
-Der Wert 0 ist eine Ausnahme und bedeutet 'vollständig transparent'.
-.TP
-.B \-sub-bg-color <0\-255>
-Gibt die Hintergrundfarbe für Untertitel und das OSD an.
-Momentan werden Untertitel nur in Graustufen dargestellt, sodass dieser
-Wert äquivalent zur Farbintensität ist.
-Der Wert 255 steht für weiß und 0 für schwarz.
-.TP
-.B \-subcc \ 
-Zeigt DVD-Closed-Caption-Untertitel an (CC).
-Diese sind KEINE VOB-Untertitel. Hierbei handelt es sich um spezielle
-ASCII-Untertitel für Hörgeschädigte, die in VOB-Userdatenstreams auf
-den meisten Region-1-DVDs zu finden sind. CC-Untertitel wurden bisher
-nicht auf DVDs für andere Regionen gefunden.
-.TP
-.B \-subcp <Codepage>
-Wenn dein System iconv(3) unterstützt, so kannst du mit dieser Option
-die Codepage für die Untertitel angeben.
-
-.I BEISPIEL:
-.PD 0
-.RSs
-\-subcp latin2
-.br
-\-subcp cp1250
-.RE
-.PD 1
-.
-.TP
-.B \-sub\-demuxer <Nummer> (BETA\-CODE)
-Erzwingt den Untertiteldemuxertyp für \-subfile.
-.TP
-.B \-subdelay <sek>
-Verzögert die Untertitel um <sek> Sekunden. Kann negativ sein.
-.TP
-.B \-subfont-autoscale <0\-3>
-Setzt den Modus für automatische Skalierung der Untertitel.
-
-.I ANMERKUNG:
-.br
-Null bedeutet, dass text-scale und osd-scale Schrifthöhen in Punkten sind.
-.br
-Der Modus kann folgende Werte annehmen:
-
-.PD 0
-.RSs
-.IPs 0
-keine automatische Skalierung
-.IPs 1
-proportional zur Höhe des Films
-.IPs 2
-proportional zur Breite des Films
-.IPs 3
-proportional zur Diagonale des Films (Standard)
-.RE
-.PD 1
-.
-.TP
-.B \-subfont-blur <0\-8>
-Setzt den Verwischradius für die Schriften (Standard: 2).
-.TP
-.B \-subfont-encoding <Wert>
-Setzt die Schriftcodierung.
-Wenn 'unicode' angegeben wird, so werden alle Zeichen der Schriftdatei
-gerendert, und unicode wird benutzt werden (Standard: unicode).
-.TP
-.B \-subfont-osd-scale <0\-100>
-Setzt den Koeffizienten für die automatische Skalierung der OSD-Elemente
-(Standard: 6).
-.TP
-.B \-subfont-outline <0\-8>
-Setzt die Schriftumrissstärke (Standard: 2).
-.TP
-.B \-subfont-text-scale <0\-100>
-Setzt den Koeffizienten für die automatische Skalierung der Untertitel
-(prozentualer Anteil der Anzeigegröße) (Standard: 5).
-.TP
-.B \-subfps <Rate>
-Gibt die Bilder/\:Sekunde-Rate der Untertitel an (Fließkommazahl). Standard
-ist die gleiche FPS wie der Film.
-
-.I ANMERKUNG:
-.br
-Funktioniert NUR bei bildbasierenden Untertitelformaten, NICHT mit z.B.
-MicroDVD.
-.TP
-.B \-subfile <Dateiname> (BETA\-CODE)
-Momentan nutzlos. Macht das gleiche für Untertitel, was \-audiofile für
-Audio macht (OggDS?).
-.TP
-.B \-subpos <0\-100> (nützlich mit \-vf expand)
-Gibt die Position der Untertitel auf dem Bildschirm an.
-Der Wert gibt die vertikale Position der Untertitel in % der Anzeigehöhe an.
-.TP
-.B \-subalign <0\-2>
-Gibt an, wie die Untertitel an subpos ausgerichtet werden.
-0 bedeutet Ausrichtung oben (Standardverhalten), 1 bedeutet Ausrichtung in
-der Mitte, und 2 bedeutet Ausrichtung unten.
-.TP
-.B \-subwidth <10\-100>
-Gibt die maximale Breite der Untertitel an. Nützlich für Ausgabe auf dem
-Fernseher.
-Der Wert ist die Breite in Prozent der Bildschirmbreite.
-.TP
-.B \-unicode
-Sagt MPlayer, dass er die Untertitel als UNICODE behandeln soll.
-.TP
-.B \-utf8 \ \ 
-Sagt MPlayer, dass er die Untertitel als UTF8 behandeln soll.
-.TP
-.B \-sub-no-text-pp
-Deaktiviert jegliche Textbearbeitung, die normalerweise nach dem Laden der
-Untertitel geschieht. Wird für's Debuggen benutzt.
-.TP
-.B \-vobsub <VOBsub\-Datei ohne Erweiterung>
-Gibt die VOBsub-Dateien an, die als Untertitel angezeigt werden sollen.
-Angegeben wird der volle Pfadname ohne Erweiterung, z.B.\& ohne '.idx',
-\'.ifo' oder '.sub'.
-.TP
-.B \-vobsubid <0-31>
-Gibt die ID für die VOBsubs an.
-.TP
-.B \-spualign <-1\-2>
-Gibt an, wie SPU\-Untertitel (DVD/\:VOBsub) angeordnet werden. Es gelten
-die gleichen Werte wie bei \-subpos, wobei -1 für die Originalposition
-steht.
-.TP
-.B \-spuaa <Modus>
+.B \-spuaa <Modus> (nur bei OSD)
 Antialiasingmodus/Skalierungmodus für DVD/\:VOBsub. Ein Wert von 16 kann zum
 Modus hinzuaddiert werden, um die Skalierung auch dann zu erzwingen, wenn
 das Orignalbild und das skalierte Bild bereits die gleiche Größe haben, um
-z.B. auch dann die Untertitel mit einem Gaußschen Unschärfefilter zu
-bearbeiten. Die verfügbaren Modi lauten:
+z.B.\& auch dann die Untertitel mit einem Gaußschen Unschärfefilter zu glätten.
+Die verfügbaren Modi lauten:
 .PD 0
 .RSs
 .IPs 0
@@ -1449,14 +1329,182 @@ benutzt Gaußsche Unschärfe des Softwareskalierers (sieht sehr gut aus)
 .PD 1
 .
 .TP
-.B \-forcedsubsonly
-Display only "forced subtitles" for the DVD subtitle stream selected by e.g. \-slang.
+.B \-spualign <-1\-2> (nur bei OSD)
+Gibt an, wie SPU-Untertitel (DVD/\:VOBsub) positioniert werden
+sollen.
+Es gelten die gleichen Werte wie bei \-subpos, wobei -1 für die
+Originalposition steht.
 .TP
-.B \-spugauss <0.0\-3.0>
-Varianzparameter der Gaußschen Unschärfe bei \-spuaa 4. Höhere Werte stehen
-für mehr Unschärfe. Der Standardwert ist 1.0.
+.B \-spugauss <0.0\-3.0> (nur bei OSD)
+Varianzparameter des Gaußschen Weichzeichners bei Benutzung von \-spuaa 4.
+Höhere Werte stehen für stärkere Weichzeichnung.
+Standardwert ist 1.0.
+.TP
+.B \-sub <Untertiteldatei1, Untertiteldatei2,...>
+Diese Untertitel werden benutzt/\:angezeigt.
+Nur ein Untertitel kann zu einer Zeit angezeigt werden, zwischen
+verschiedenen Untertitel wird mit 'j' umgeschaltet.
+.TP
+.B \-sub-bg-alpha <0\-255>
+Gibt an, wie transparent der Alphakanal bei Untertiteln und dem OSD ist.
+Große Werte bedeuten mehr Transparenz.
+Der Wert 0 ist eine Ausnahme und bedeutet 'vollständig transparent'.
+.TP
+.B \-sub-bg-color <0\-255>
+Gibt den Farbwert für Untertitel und den OSD-Hintergrund an.
+Momentan werden Untertitel nur in Graustufen dargestellt, so dass dieser
+Wert äquivalent zur Farbintensität ist.
+Der Wert 255 steht für weiß und 0 für schwarz.
+.TP
+.B \-sub-demuxer <Nummer> (nur mit \-subfile-Option) (BETA CODE)
+Erzwinge Untertitel-Demuxertyp für \-subfile.
+Gib die Demuxer ID wie in subreader.h definiert an.
+.TP
+.B \-sub-fuzziness <Modus>
+Passe die Unschärfe für die Suche nach Untertiteln an:
+.PD 0
+.RSs
+.IPs 0
+exakter Treffer
+.IPs 1
+Lade alle Untertitel, die den Filmnamen enthalten
+.IPs 2
+Lade alle Untertitel im aktuellen Verzeichnis
+.RE
+.PD 1
+.
+.TP
+.B \-sub-no-text-pp
+Deaktiviert Text-Postprocessing jeder Art nach dem Laden der Untertitel.
+Wird für Debugging-Zwecke verwendet.
+.TP
+.B \-subalign <0\-2> (nur bei OSD)
+Gibt an, wie die Untertitel mit \-subpos positioniert werden sollen.
+0 bedeutet eine Ausrichtung oben (Standardverhalten), 1 bedeutet 
+Ausrichtung in der Mitte, und 2 bedeutet Ausrichtung unten.
+.TP
+.B \-subcc \ 
+Zeigt DVD-Closed-Caption-Untertitel an (CC).
+Diese sind KEINE VOB-Untertitel. Hierbei handelt es sich um spezielle
+ASCII-Untertitel für Hörgeschädigte, die in VOB-Userdatenstreams auf
+den meisten Region-1-DVDs zu finden sind.
+CC-Untertitel wurden bisher nicht auf DVDs für andere Regionen gefunden.
+.TP
+.B \-subcp <Codepage> (nur bei iconv)
+Wenn dein System iconv(3) unterstützt, so kannst du mit dieser Option
+die Codepage für die Untertitel angeben.
 
+.I BEISPIEL:
+.PD 0
+.RSs
+\-subcp latin2
+.br
+\-subcp cp1250
+.RE
+.PD 1
+.
+.TP
+.B \-subcp enca:<Sprache>:<alternative Codepage> (nur bei ENCA)
+Du kannst eine Sprache im 2-Zeichen-Sprachcode angeben, um ENCA automatisch
+eine Codepage wählen zu lassen.
+Wenn du nicht sicher bist, gib irgendetwas ein und sieh dir die Ausgaben von
+mplayer \-v an, um die verfügbaren Sprachen zu sehen.
+Die alternative Codepage gibt die zu benutzende Codepage an, falls die
+automatische Erkennung versagt.
 
+.I BEISPIEL:
+.PD 0
+.RSs
+.IPs "\-subcp enca:cs:latin2"
+Nimm an, die Untertitel seien tschechisch, und rate die Kodierung.
+Wenn die Erkennung versagt, benutze latin2.
+.IPs "\-subcp enca:pl:cp1250"
+Rate die Kodierung für polnisch, benutze sonst cp1250.
+.RE
+.PD 1
+.
+.TP
+.B \-subdelay <sek>
+Verzögert die Untertitel um <sek> Sekunden.
+Kann negativ sein.
+.TP
+.B \-subfile <Dateiname> (BETA CODE)
+Zur Zeit unbrauchbar.
+Das gleiche wie \-audiofile, jedoch für Untertitel-Streams (OGGDS?).
+.TP
+.B \-subfont-autoscale <0\-3> (nur bei FreeType)
+Setzt den Modus für automatische Skalierung der Untertitel.
+.br
+.I ANMERKUNG:
+Null bedeutet, dass text-scale und osd-scale Schrifthöhen in Punkten sind.
+
+Der Modus kann folgende Werte annehmen:
+
+.PD 0
+.RSs
+.IPs 0
+keine automatische Skalierung
+.IPs 1
+proportional zur Höhe des Films
+.IPs 2
+proportional zur Breite des Films
+.IPs 3
+proportional zur Diagonale des Films (Standard)
+.RE
+.PD 1
+.
+.TP
+.B \-subfont-blur <0\-8> (nur bei FreeType)
+Setzt den Verwischradius für die Schriften (Standard: 2).
+.TP
+.B \-subfont-encoding <Wert> (nur bei FreeType)
+Setzt die Schriftcodierung.
+Wenn 'unicode' angegeben wird, so werden alle Zeichen der Schriftdatei
+gerendert, und unicode wird benutzt werden (Standard: unicode).
+.TP
+.B \-subfont-osd-scale <0\-100> (nur bei FreeType)
+Setzt den Koeffizienten für die automatische Skalierung der OSD-Elemente
+(Standard: 6).
+.TP
+.B \-subfont-outline <0\-8> (nur bei FreeType)
+Setzt die Schriftumrissstärke (Standard: 2).
+.TP
+.B \-subfont-text-scale <0\-100> (nur bei FreeType)
+Setzt den Koeffizienten für die automatische Skalierung der Untertitel
+(prozentualer Anteil der Anzeigegröße) (Standard: 5).
+.TP
+.B \-subfps <Rate>
+Gibt die Bilder/\:Sekunde-Rate der Untertitel an (Fließkommazahl).
+Standard ist die gleiche FPS wie der Film.
+.br
+.I ANMERKUNG:
+Funktioniert NUR bei bildbasierenden Untertitelformaten, NICHT mit z.B.\&
+MicroDVD.
+.TP
+.B \-subpos <0\-100> (nützlich mit \-vf expand) (nur bei OSD)
+Gibt die Position der Untertitel auf dem Bildschirm an.
+Der Wert gibt die vertikale Position der Untertitel in % der Anzeigehöhe an.
+.TP
+.B \-subwidth <10\-100> (nur bei OSD)
+Gibt die maximale Breite der Untertitel an.
+Nützlich für Ausgabe auf dem Fernseher.
+Der Wert ist die Breite in Prozent der Bildschirmbreite.
+.TP
+.B \-unicode
+Sagt MPlayer, dass er die Untertitel als UNICODE behandeln soll.
+.TP
+.B \-utf8 \ \ 
+Sagt MPlayer, dass er die Untertitel als UTF8 behandeln soll.
+.TP
+.B \-vobsub <VOBsub\-Datei ohne Erweiterung>
+Gibt die VOBsub-Dateien an, die als Untertitel angezeigt werden sollen.
+Angegeben wird der volle Pfadname ohne Erweiterung, z.B.\& ohne '.idx',
+\'.ifo' oder '.sub'.
+.TP
+.B \-vobsubid <0-31>
+Gibt die ID für die VOBsubs an.
+.
+.
 .SH "OPTIONEN FÜR DIE AUDIOAUSGABE (NUR BEI MPLAYER)"
 .TP
 .B \-abs <Wert> (VERALTET)
@@ -2987,10 +3035,14 @@ Wenn du mit libavcodec encodierst, kannst du hiermit die Optionen angeben.
 .PD 1
 
 .RS
-Verfügbare Optionen sind:
+(FIXME) Verfügbare Optionen sind: 
 .RE
 .
-.RSs
+.TP
+.B threads=<1\-8>
+Maximale Anzahl benutzter Threads (Standardwert: 1).
+.RE
+.TP
 .IPs vcodec=<Wert>
 benutzt den angegeben Codec (kein Standardwert, du musst einen angeben):
 .RSss
