@@ -217,7 +217,6 @@ static uint32_t draw_frame(uint8_t *src[])
     static uint32_t framecounter = 0, subdircounter = 0;
     char buf[BUFLENGTH];
     static char subdirname[BUFLENGTH] = "";
-    struct stat stat_p;
 
     /* Start writing to new subdirectory after a certain amount of frames */
     if ( framecounter == jpeg_maxfiles ) {
@@ -228,8 +227,8 @@ static uint32_t draw_frame(uint8_t *src[])
      * number and create the subdirectory.
      * If jpeg_subdirs is not set, do nothing and resort to old behaviour. */
     if ( !framecounter && jpeg_subdirs ) {
-        snprintf(subdirname, BUFLENGTH, "%s%08d", jpeg_subdirs,
-                                                            ++subdircounter);
+        subdircounter++;
+        snprintf(subdirname, BUFLENGTH, "%s%08d", jpeg_subdirs, subdircounter);
         snprintf(buf, BUFLENGTH, "%s/%s", jpeg_outdir, subdirname);
         jpeg_mkdir(buf, 0); /* This function only returns if creation was
                                successful. If not, the player will exit. */
