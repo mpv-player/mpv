@@ -447,6 +447,18 @@ make install</screen>
 
 
 <para>
+Обратите внимание на то, что если у Вас в <filename>~/.mplayer/</filename> есть 
+файл <filename>codecs.conf</filename>, то встроенный и системный файлы
+<filename>codecs.conf</filename> будут полностью игнорированы. Не делайте
+этого, если только Вы не собираетесь развлекаться в внутренностями MPlayer'а,
+поскольку это может вызвать множество проблем. Если Вы хотите поменять порядок
+подбора кодеков, используйте опции <option>-vc</option>, <option>-ac</option>,
+<option>-vfm</option>, и <option>-afm</option> либо в командной строке, либо
+в Вашем конфигурационном файле (см. страницу руководства).
+</para>
+
+
+<para>
 Пользователи Debian могут сами создать .deb пакеты, это очень
 просто. Просто запустите <screen>fakeroot debian/rules binary</screen> в корневом
 каталоге <application>MPlayer'а</application>. См. <link linkend="debian">Создание Debian пакетов</link> для более подробных инструкций.
