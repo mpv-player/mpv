@@ -365,8 +365,14 @@ Colin Leroy <colin@colino.net>
     * mach64 vidix driver endianness fixes
 
 Mark Zealey <mark@zealos.org>
-   * tdfxfb driver
-   * -geometry window positioning code
+    * -vo tdfxfb driver
+    * -geometry window positioning code
+
+Gregory Kovriga <gkovriga@techunix.technion.ac.il>
+    * GUI drag&drop support
+    * GUI DVD fixes
+    * various small bugfixes in ASX/URL parser
+
 
 NOTE: If you feel you were missed here, feel free to send a patch.
 =====
