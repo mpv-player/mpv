@@ -737,7 +737,7 @@ static int control(priv_t *priv, int cmd, void *arg)
     case TVI_CONTROL_AUD_SET_SAMPLERATE:
 	mp_msg(MSGT_TV, MSGL_V, "%s: set audio samplerate: %d\n",
 	       info.short_name, *(int *)arg);
-	if (audio_in_set_samplerate(&priv->audio_in, (int)*(void **)arg) < 0) return TVI_CONTROL_FALSE;
+	if (audio_in_set_samplerate(&priv->audio_in, *(int*)arg) < 0) return TVI_CONTROL_FALSE;
 //	setup_audio_buffer_sizes(priv);
 	return TVI_CONTROL_TRUE;
     }
