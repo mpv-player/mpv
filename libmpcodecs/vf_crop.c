@@ -15,6 +15,7 @@
 static struct vf_priv_s {
     int crop_w,crop_h;
     int crop_x,crop_y;
+    mp_image_t *dmpi;
 } vf_priv_dflt = {
   -1,-1,
   -1,-1
@@ -68,7 +69,10 @@ static int config(struct vf_instance_s* vf,
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
-    mp_image_t *dmpi=vf_get_image(vf->next,mpi->imgfmt,
+    mp_image_t *dmpi;
+    if (mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)
+	return vf_next_put_image(vf,vf->priv->dmpi);
+    dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	MP_IMGTYPE_EXPORT, 0,
 	vf->priv->crop_w, vf->priv->crop_h);
     if(mpi->flags&MP_IMGFLAG_PLANAR){
@@ -96,12 +100,20 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
 	mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
 	return;
     }
-    vf_get_image(vf->next, mpi->imgfmt, mpi->type, mpi->flags,
+    vf->priv->dmpi = vf_get_image(vf->next, mpi->imgfmt, mpi->type, mpi->flags,
 	vf->priv->crop_w, vf->priv->crop_h);
 }
 
 static void draw_slice(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
+    unsigned char *src2[3];
+    src2[0] = src[0] + vf->priv->crop_y*stride[0] + vf->priv->crop_x;
+    if (vf->priv->dmpi->flags & MP_IMGFLAG_PLANAR) {
+	src2[1] = src[1] + (vf->priv->crop_y>>vf->priv->dmpi->chroma_y_shift)*stride[1]
+		+ (vf->priv->crop_x>>vf->priv->dmpi->chroma_x_shift);
+	src2[2] = src[2] + (vf->priv->crop_y>>vf->priv->dmpi->chroma_y_shift)*stride[2]
+		+ (vf->priv->crop_x>>vf->priv->dmpi->chroma_x_shift);
+    }
     //mp_msg(MSGT_VFILTER, MSGL_V, "crop slice %d %d %d %d ->", w,h,x,y);
     if ((x -= vf->priv->crop_x) < 0) {
 	w += x;
@@ -115,7 +127,7 @@ static void draw_slice(struct vf_instance_s* vf,
     if (y+h > vf->priv->crop_h) h = vf->priv->crop_h-y;
     //mp_msg(MSGT_VFILTER, MSGL_V, "%d %d %d %d\n", w,h,x,y);
     if ((w < 0) || (h < 0)) return;
-    vf_next_draw_slice(vf,src,stride,w,h,x,y);
+    vf_next_draw_slice(vf,src2,stride,w,h,x,y);
 }
 
 //===========================================================================//
