@@ -240,6 +240,9 @@ static char help_text[]=
 #define MSGTR_OtherSelect "Vybrat ..."
 #define MSGTR_AudioFileSelect "Vybrat externí zvukový kanál ..."
 #define MSGTR_Network "Sí» ..." //opravit
+#define MSGTR_FontSelect "Vybrat font ..."
+#define MSGTR_OSSPreferences "Konfigurace ovladaèe OSS"
+#define MSGTR_Preferences "Nastavení" // Pøedvolby?
 
 // --- buttons ---
 #define MSGTR_Ok "Ok"
@@ -248,11 +251,14 @@ static char help_text[]=
 #define MSGTR_Remove "Odebrat"
 #define MSGTR_Clear "Vynulovat"
 #define MSGTR_Config "Konfigurace"
+#define MSGTR_ConfigDriver "Konfigurovat ovladaè"
+#define MSGTR_Browse "Prohlí¾et"
 
 // --- error messages ---
 #define MSGTR_NEMDB "Bohu¾el, nedostatek pamìti pro buffer pro kreslení."
 #define MSGTR_NEMFMR "Bohu¾el, nedostatek pamìti pro vytváøení menu."
 #define MSGTR_NEMFMM "Bohu¾el, nedostatek pamìti pro masku hlavního okna."
+#define MSGTR_IDFGCVD "Bohu¾el, nebyl nalezen video ovladaè kompatibilní s GUI."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[témata] chyba v konfiguraèním soubory témat %d: %s"
@@ -333,6 +339,56 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_Selected "Vybrané soubory"
 #define MSGTR_PLAYLIST_Files "Soubory"
 #define MSGTR_PLAYLIST_DirectoryTree "Adresáøe"
+
+// --- preferences
+#define MSGTR_PREFERENCES_None "Nic"
+#define MSGTR_PREFERENCES_Codec1 "Pou¾ít VFW (Win32) kodeky"
+#define MSGTR_PREFERENCES_Codec2 "Pou¾ít OpenDivX/DivX4 kodek (YV12)"
+#define MSGTR_PREFERENCES_Codec3 "Pou¾ít DirectShow (Win32) kodeky"
+#define MSGTR_PREFERENCES_Codec4 "Pou¾ít ffmpeg (libavcodec) kodeky"
+#define MSGTR_PREFERENCES_Codec5 "Pou¾ít DivX4 kodek (YUY2)"
+#define MSGTR_PREFERENCES_Codec6 "Pou¾ít XAnim kodeky"
+#define MSGTR_PREFERENCES_AvailableDrivers "Dostupné ovladaèe:"
+#define MSGTR_PREFERENCES_DoNotPlaySound "Nepøehrávat zvuk"
+#define MSGTR_PREFERENCES_NormalizeSound "Normalizovat zvuk"
+#define MSGTR_PREFERENCES_EnEqualizer "Aktivovat ekvalizér"
+#define MSGTR_PREFERENCES_ExtraStereo "Aktivovat extra stereo"
+#define MSGTR_PREFERENCES_Coefficient "Koeficient:"
+#define MSGTR_PREFERENCES_AudioDelay "Zpo¾dìní zvuku"
+#define MSGTR_PREFERENCES_Audio "Zvuk"
+#define MSGTR_PREFERENCES_VideoEqu "Aktivovat video ekvalizér"
+#define MSGTR_PREFERENCES_DoubleBuffer "Aktivovat double buffering"
+#define MSGTR_PREFERENCES_DirectRender "Aktivovat direct rendering"
+#define MSGTR_PREFERENCES_FrameDrop "Aktivovat zahazování snímkù"
+#define MSGTR_PREFERENCES_HFrameDrop "Aktivovat TVRDÉ zahazování snímkù (nebezpeèné)"
+#define MSGTR_PREFERENCES_Flip "Obrátit obraz vzhùru nohama"
+#define MSGTR_PREFERENCES_Panscan "Panscan:"
+#define MSGTR_PREFERENCES_Video "Video"
+#define MSGTR_PREFERENCES_OSDTimer "Èas a ostatní ukazatele"
+#define MSGTR_PREFERENCES_OSDProgress "Pouze ukazatel pozice" // progressbar
+#define MSGTR_PREFERENCES_Subtitle "Titulky:"
+#define MSGTR_PREFERENCES_SUB_Delay "Zpo¾dìní: "
+#define MSGTR_PREFERENCES_SUB_FPS "FPS:"
+#define MSGTR_PREFERENCES_SUB_POS "Pozice: "
+#define MSGTR_PREFERENCES_SUB_AutoLoad "Vypnout automatické naètení titulkù"
+#define MSGTR_PREFERENCES_SUB_Unicode "Titulky v UNICODE"
+#define MSGTR_PREFERENCES_SUB_MPSUB "Pøevést dané titulky do vlastního formátu titulkù MPlayeru"
+#define MSGTR_PREFERENCES_SUB_SRT "Pøevést dané titulky do èasovì orientovaného formátu SubViewer (SRT)"
+#define MSGTR_PREFERENCES_Font "Font:"
+#define MSGTR_PREFERENCES_FontFactor "Font factor:" //????
+#define MSGTR_PREFERENCES_PostProcess "Aktivovat postprocessing"
+#define MSGTR_PREFERENCES_AutoQuality "Automatická kontrola kvality:"
+#define MSGTR_PREFERENCES_NI "Pou¾ít parser pro neprokládaný AVI formát"
+#define MSGTR_PREFERENCES_IDX "Vytvoøit tabulku indexù pokud je tøeba"
+#define MSGTR_PREFERENCES_VideoCodecFamily "Rodina video kodeku:"
+#define MSGTR_PREFERENCES_FRAME_OSD_Level "Typ OSD"
+#define MSGTR_PREFERENCES_FRAME_Subtitle "Titulky"
+#define MSGTR_PREFERENCES_FRAME_Font "Font"
+#define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
+#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Kodek & demuxer"
+#define MSGTR_PREFERENCES_OSS_Device "Zaøízení:"
+#define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
+#define MSGTR_PREFERENCES_Message "Pozor, nìkterá nastavení potøebují pro svou funkci restartovat pøehrávání."
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatální chyba ..."
