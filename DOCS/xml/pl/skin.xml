@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.4 -->
+<!-- synced with 1.5 -->
 <appendix id="skin">
 <title>Format skórki MPlayera</title>
 <para>
@@ -301,8 +301,8 @@ MPlayer próbuje wczytać pliki <filename>main</filename>, <filename>main.png</fil
 <title>Okno główne i panel odtwarzania</title>
 <para>
 Poniżej znajduje się lista wpisów, które mogą być użyte w blokach
-'<literal>window = main</literal>'.&nbsp;.&nbsp;.'<literal>end</literal>',
-oraz '<literal>window = playbar</literal>' .&nbsp;.&nbsp;. '<literal>end</literal>'.
+'<literal>window = main</literal>'...'<literal>end</literal>',
+oraz '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
 </para>
 
 <variablelist>
