@@ -270,6 +270,18 @@ static uint32_t radeon_get_yres( void )
   return yres + 1;
 }
 
+static void radeon_wait_vsync(void)
+{
+    int i;
+
+    OUTREG(GEN_INT_STATUS, VSYNC_INT_AK);
+    for (i = 0; i < 2000000; i++) 
+    {
+	if (INREG(GEN_INT_STATUS) & VSYNC_INT) break;
+    }
+}
+
+
 static __inline__ void radeon_engine_flush ( void )
 {
 	int i;
@@ -919,6 +931,8 @@ static void radeon_vid_display_video( void )
     OUTREG(FCP_CNTL, FCP_CNTL__GND);
     OUTREG(CAP0_TRIG_CNTL, 0);
 
+    OUTREG(VID_BUFFER_CONTROL, (1<<16) | 0x01);
+    OUTREG(DISP_TEST_DEBUG_CNTL, 0);
 
     OUTREG(OV0_AUTO_FLIP_CNTL,OV0_AUTO_FLIP_CNTL_SOFT_BUF_ODD);
 
@@ -1292,6 +1306,7 @@ int vixPlaybackFrameSelect(unsigned frame)
       off[4] = besr.vid_buf4_base_adrs;
       off[5] = besr.vid_buf5_base_adrs;
     }
+    radeon_wait_vsync();
     radeon_fifo_wait(2);
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     radeon_engine_idle();
