@@ -18,19 +18,61 @@
 <H1><A NAME="faq">5. FAQ</A></H1>
 
 <UL>
-  <LI><A HREF="#compilation">5.1 Compilation</A></LI>
-  <LI><A HREF="#general">5.2 General questions</A></LI>
-  <LI><A HREF="#playback">5.3 Playback problems</A></LI>
-  <LI><A HREF="#driver">5.4 Video/audio driver problems (vo/ao)</A></LI>
-  <LI><A HREF="#dvd">5.5 DVD playback</A></LI>
-  <LI><A HREF="#features">5.6 Feature requests</A></LI>
-  <LI><A HREF="#encoding">5.7 Encoding</A></LI>
+  <LI><A HREF="#development">5.1 Development</A></LI>
+  <LI><A HREF="#compilation">5.2 Compilation</A></LI>
+  <LI><A HREF="#general">5.3 General questions</A></LI>
+  <LI><A HREF="#playback">5.4 Playback problems</A></LI>
+  <LI><A HREF="#driver">5.5 Video/audio driver problems (vo/ao)</A></LI>
+  <LI><A HREF="#dvd">5.6 DVD playback</A></LI>
+  <LI><A HREF="#features">5.7 Feature requests</A></LI>
+  <LI><A HREF="#encoding">5.8 Encoding</A></LI>
 </UL>
 
 
-<H2><A NAME="compilation">5.1 Compilation</A></H2>
+<H2><A NAME="development">5.1 Development</A></H2>
 
 <DL>
+
+  <DT>Q: How do I create a proper patch for MPlayer?</DT>
+  <DD>A: Send a <B>unified</B> diff (<CODE>diff -u</CODE>) of your changes
+    against the CVS version of MPlayer to the
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
+    mailing list. We wrote a <A HREF="../tech/patches.txt">short document</A>
+    that has more details. Please follow those instructions.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: How can I support MPlayer development?</DT>
+  <DD>A: We are more than happy to accept your hardware and software
+    <A HREF="http://www.mplayerhq.hu/homepage/donations.html">donations</A>.
+    They help us in continuously improving MPlayer.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: How can I become an MPlayer developer?</DT>
+  <DD>A: We always welcome coders and documenters.  Read the
+    <A HREF="../tech/">technical documentation</A> to get a first grasp. Then you
+    should subscribe to the
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
+    mailing list and start coding.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Why don't you use autoconf/automake?</DT>
+  <DD>A: We have a modular, handwritten build system. It does a reasonably good
+    job, so why change? Besides, we dislike the auto* tools, just like
+    <A HREF="http://freshmeat.net/articles/view/889/">other people</A>.</DD>
+  <DD>&nbsp;</DD>
+
+</DL>
+
+
+<H2><A NAME="compilation">5.2 Compilation</A></H2>
+
+<DL>
+
+  <DT>Q: Are there binary (RPM/deb) packages of MPlayer?</DT>
+  <DD>A: See the
+    <A HREF="documentation.html#debian">Debian</A> and
+    <A HREF="documentation.html#rpm">RPM</A> section for details.</DD>
+  <DD>&nbsp;</DD>
 
   <DT>Q: Compilation stops with an error message similar to this one:
     <PRE>
@@ -51,10 +93,6 @@
     </DT>
   <DD>A: Your gcc isn't installed correctly, check the <CODE>config.log</CODE>
     file for details.</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q: What does "No such file or directory" mean?</DT>
-  <DD>A: Probably there is no such file or directory.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: What's the problem with gcc 2.96?</DT>
@@ -155,15 +193,17 @@
     be prepared for problems).</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: I have a G200/G400, how do I compile/use the mga_vid driver?</DT>
-  <DD>A: Read the <A HREF="video.html#mga_vid">mga_vid documentation</A>.</DD>
+  <DT>Q: I have a Matrox G200/G400/G450/G550, how do I compile and use the
+    mga_vid kernel driver?</DT>
+  <DD>A: Read the <A HREF="video.html#mga_vid">mga_vid</A> section.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Are there rpm/deb/... packages of MPlayer?</DT>
-  <DD>A: You can make a .deb package for yourself, check the
-    <A HREF="documentation.html#debian">Debian packaging</A> section.
-    There are links to official Red Hat RPM packages available on our
-    <A HREF="http://www.mplayerhq.hu/homepage/dload.html">download page</A>.</DD>
+  <DT>Q: Hmm, strange. When loading the mga_vid.o kernel module, I found this in
+    the logs:<BR>
+    <CODE>Warning: loading mga_vid.o will taint the kernel: no license</CODE></DT>
+  <DD>A: The latest kernel modutils require a flag indicating the license
+    (mainly to avoid kernel hackers debugging closed source drivers).
+    Upgrade your kernel, modutils and MPlayer.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: During 'make', MPlayer complains about X11 libraries. I don't
@@ -193,14 +233,6 @@
     <CODE>ldconfig</CODE>.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Hmm, strange. When loading the mga_vid.o kernel module, I found this in
-    the logs:<BR>
-    <CODE>Warning: loading mga_vid.o will taint the kernel: no license</CODE></DT>
-  <DD>A: The latest kernel modutils require a flag indicating the license
-    (mainly to avoid kernel hackers debugging closed source drivers).
-    Upgrade your kernel, modutils and MPlayer.</DD>
-  <DD>&nbsp;</DD>
-
     <DT>Q: When compiling MEncoder, it segfaults at linking!</DT>
     <DD>A: This is a linker problem. Upgrading binutils should help (2.11.92.*
       or newer should be good). Since it is not our fault, please do <B>not</B>
@@ -218,35 +250,34 @@
 </DL>
 
 
-<H2><A NAME="general">5.2 General questions</A></H2>
+<H2><A NAME="general">5.3 General questions</A></H2>
 
 <DL>
 
-  <DT>Q: How do I create a proper patch for MPlayer?</DT>
-  <DD>A: We made a <A HREF="../tech/patches.txt">short document</A> describing
-    all the necessary details. Please follow the instructions.</DD>
+  <DT>Q: Are there any mailing lists on MPlayer?</DT>
+  <DD>A: Yes. See the
+    <A HREF="documentation.html#mailing_lists">mailing lists</A> section.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: How can I support MPlayer development?</DT>
-  <DD>A: We are more than happy to accept your hardware and software
-    <A HREF="http://www.mplayerhq.hu/homepage/donations.html">donations</A>.
-    They help us in continuously improving MPlayer.</DD>
+  <DT>Q: I've found a nasty bug when I tried to play my favorite video!
+    Who should I inform?</DT>
+  <DD>A: Please read the <A HREF="bugreports.html">bug reporting guidelines</A>
+    and follow the instructions.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: How can I become an MPlayer developer?</DT>
-  <DD>A: We always welcome coders and documenters.  Read the
-    <A HREF="../tech/">technical documentation</A> to get a first grasp. Then you
-    should subscribe to the
-    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
-    mailing list and start coding.</DD>
+  <DT>Q: I have problems playing files with the ... codec. Can I use them?</DT>
+  <DD>A: Check the
+    <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">codec status</A>,
+    if it doesn't contain your codec, read the
+    <A HREF="codecs.html">codec documentation</A>, especially the
+    <A HREF="codecs.html#importing">codec importing HOWTO</A> and contact us.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Can I run multiple instances of MPlayer?</DT>
-  <DD>A: Yes. Some video out drivers like xv, dga or (x)mga are exclusive, some
-    are exclusive in combination with certain graphics boards and drivers. You
-    will not be able to run more than one instance of MPlayer with one of those
-    video out drivers. To a lesser degree this also applies to audio drivers.
-    Not all allow playback of multiple streams on the same device.</DD>
+  <DT>Q: When I start playing, I get this message but everything seems fine:<BR>
+    <CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE></DT>
+  <DD>A: You need root privileges or a
+    specially set up kernel to use the new timing code. For details see the
+    <A HREF="documentation.html#rtc">RTC section</A> of the documentation.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: There is a timer in the upper left corner. How can I get rid of it?</DT>
@@ -286,7 +317,8 @@
   <DD>&nbsp;</DD>
 
   <DT>Q: What if I don't want them to appear?</DT>
-  <DD>A: Use the <CODE>-quiet</CODE> option and read the man page.</DD>
+  <DD>A: Use the <CODE>-quiet</CODE> or <CODE>-really-quiet</CODE> option as
+    described in the man page.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Why is video_out cpu usage zero (0%) for some files?</DT>
@@ -300,30 +332,18 @@
   <DD>&nbsp;</DD>
 
   <DT>Q: There are error messages about file not found
-    <CODE>/usr/local/lib/codecs/</CODE> ...</DT>
+    <CODE>/usr/local/lib/codecs/...</CODE></DT>
   <DD>A: Download the Win32 codecs from our
     <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codecs page</A>
     (avifile's codec package has a different DLL set) and install it.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Are there any mailing lists on MPlayer?</DT>
-  <DD>A: Yes. See the bottom of the info page on
-    <A HREF="http://www.mplayerhq.hu/homepage/info.html">our homepage</A> to
-    subscribe.</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q: I've found a nasty bug when I tried to play my favorite video!
-    Who should I inform?</DT>
-  <DD>A: Please read the <A HREF="bugreports.html">bug reporting guidelines</A>
-    and follow the instructions.</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q: I have problems playing files with the ... codec. Can I use them?</DT>
-  <DD>A: Check the
-    <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">codec status</A>,
-    if it doesn't contain your codec, read the
-    <A HREF="codecs.html">codec documentation</A>, especially the
-    <A HREF="codecs.html#importing">codec importing HOWTO</A> and contact us.</DD>
+  <DT>Q: Can I run multiple instances of MPlayer?</DT>
+  <DD>A: Yes. Some video out drivers like xv, dga or (x)mga are exclusive, some
+    are exclusive in combination with certain graphics boards and drivers. You
+    will not be able to run more than one instance of MPlayer with one of those
+    video out drivers. To a lesser degree this also applies to audio drivers.
+    Not all allow playback of multiple streams on the same device.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Umm, what is "IdegCounter"?</DT>
@@ -354,7 +374,7 @@
 
   <DT>Q: The onscreen display (OSD) is flickering!</DT>
   <DD>A: You use a vo driver with single buffering (x11,xv). With xv,
-    use the <CODE>-double</CODE> option. Also try <CODE>-vf expand</CODE></DD>
+    use the <CODE>-double</CODE> option. Also try <CODE>-vf expand</CODE>.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: What exactly is this libavcodec thing?</DT>
@@ -387,34 +407,23 @@
 </DL>
 
 
-<H2><A NAME="playback">5.3 Playback problems</A></H2>
+<H2><A NAME="playback">5.4 Playback problems</A></H2>
 
 <DL>
 
-  <DT>Q: I can play certain AVIs but I get no sound and this kind of error:
-    <PRE>
-    Detected audio codec: [divx] afm:4 (DivX audio (WMA))
-    Requested audio codec family [divx] (afm=4) not available (enable it at
-    compile time!)
-    </PRE>
-  </DT>
-  <DD>A: Probably the audio uses a codec not natively supported by
-    MPlayer. Install the Win32 codec package as described in the README
-    or in the <A HREF="documentation.html#installation">Installation</A> section.</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q: ... works with avifile/aviplay but doesn't with MPlayer.</DT>
-  <DD>A: MPlayer is not avifile.
-    The only common thing between these players is the Win32 DLL loader.
-    The codecs (DLL) set, synchronization, demultiplexing etc is totally
-    different and shouldn't be compared.
-    If something works with aviplay it doesn't mean that MPlayer will
-    work and vice versa.</DD>
+  <DT>Q: ... works with xine/avifile/... but doesn't with MPlayer.</DT>
+  <DD>A: MPlayer is not xine/avifile/... Although these players have some code
+    in common, the codecs (DLL) set, synchronization, demultiplexing etc is
+    different and should not be compared. If you have a file MPlayer fails to
+    play correctly but works in another player, pleaseread the
+    <A HREF="bugreports.html">bug reporting guidelines</A> and upload the file
+    to our FTP server.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Audio goes out of sync playing an AVI file.</DT>
   <DD>A: Try the <CODE>-bps</CODE> or <CODE>-nobps</CODE> option. If it does not
-    improve, read <A HREF="bugreports.html">this</A> and upload the file to FTP.</DD>
+    improve, read the <A HREF="bugreports.html">bug reporting guidelines</A> and
+    upload the file to our FTP server.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: MPlayer exits with some error when using l3codeca.acm.</DT>
@@ -507,13 +516,6 @@
     documentation</A>).</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: When I start playing, I get this message but everything seems fine:<BR>
-    <CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE></DT>
-  <DD>A: You need root privileges or a
-    specially set up kernel to use the new timing code. For details see the
-    <A HREF="documentation.html#rtc">RTC section</A> of the documentation.</DD>
-  <DD>&nbsp;</DD>
-
   <DT>Q: I have A/V sync problems. Some of my AVIs play fine, but some play with
     double speed!</DT>
   <DD>A: You have a buggy sound card/driver. Most likely it's fixed at 44100Hz,
@@ -554,7 +556,7 @@
 </DL>
 
 
-<H2><A NAME="driver">5.4 Video/audio driver problems (vo/ao)</A></H2>
+<H2><A NAME="driver">5.5 Video/audio driver problems (vo/ao)</A></H2>
 
 <DL>
 
@@ -640,11 +642,6 @@
     been fixed.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: When I use the GUI with SDL video output, a second video window is
-    created.</DT>
-  <DD>A: Known, don't use SDL for the GUI yet.</DD>
-  <DD>&nbsp;</DD>
-
   <DT>Q: Oh the world is cruel ...! SDL has only <CODE>x11</CODE> target, but
     not <CODE>xv</CODE>!</DT>
   <DD>A: Try that <CODE>x11</CODE> target again. Now try
@@ -657,7 +654,7 @@
 </DL>
 
 
-<H2><A NAME="dvd">5.5 DVD playback</A></H2>
+<H2><A NAME="dvd">5.6 DVD playback</A></H2>
 
 <DL>
 
@@ -721,7 +718,7 @@
 </DL>
 
 
-<H2><A NAME="features">5.6 Feature requests</A></H2>
+<H2><A NAME="features">5.7 Feature requests</A></H2>
 
 <DL>
 
@@ -737,13 +734,6 @@
     to implement it, and send a patch. Don't ask for it.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Where is the Windows version?</DT>
-  <DD>A: It's not released, and won't be. Look around the Windows scene (open
-    source ASF parsers, open source ASF encoders, etc) and you'll know why. We
-    don't want to go to jail. BTW you can compile it yourself, under
-    <A HREF="documentation.html#cygwin">Cygwin</A>.</DD>
-  <DD>&nbsp;</DD>
-
   <DT>Q: How can I make MPlayer remember the options I use for this
     particular file?</DT>
   <DD>A: Create a file named <CODE>movie.avi.conf</CODE> with the
@@ -754,7 +744,7 @@
 </DL>
 
 
-<H2><A NAME="encoding">5.7 Encoding</A></H2>
+<H2><A NAME="encoding">5.8 Encoding</A></H2>
 
 <DL>
 
