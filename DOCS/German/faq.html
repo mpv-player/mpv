@@ -15,7 +15,7 @@
 <BODY>
 
 
-<P><B><A NAME="faq">5. FAQ Sektion</A></B></P>
+<H1><A NAME="faq">5. FAQ</A></H1>
 
 <UL>
   <LI><A HREF="#compilation">5.1 Kompilierung</A></LI>
@@ -28,7 +28,7 @@
 </UL>
 
 
-<P><B><A NAME="compilation">5.1 Kompilierung</A></B></P>
+<H2><A NAME="compilation">5.1 Kompilierung</A></H2>
 
 <DL>
 
@@ -41,7 +41,8 @@
     with preprocessed source if appropriate.
     </PRE></DT>
   <DD>A: Dies ist ein bekanntes Problem des gcc 3.0.4, upgrade auf 3.1 um es zu lösen. Wie gcc
-    installiert werden sollte, ist <A HREF="users_against_developers.html">hier</A> beschrieben.</DD>
+    installiert werden sollte, ist in der <A HREF="users_against_developers.html">gcc 2.96</A>
+    Sektion beschrieben.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Configure beendet sich mit diesem Text und MPlayer kann nicht kompiliert werden!
@@ -56,7 +57,7 @@
   <DD>&nbsp;</DD>
 
   <DT>Q: Was ist das Problem mit gcc 2.96?</DT>
-  <DD>A: Es wird sehr davon abgeraten, den gcc 2.96 zu gebrauchen!!!<BR>
+  <DD>A: Es wird sehr davon abgeraten, den gcc 2.96 zu gebrauchen!<BR>
     Lies <A HREF="../users_against_developers.html">dieses</A> Dokument (Englisch) für weiter Details
     über die Gründe der gcc 2.96 Herausgabe und die Probleme dabei.
     Wenn du es aber trotzdem wirklich willst, stelle sicher das du eine der neuesten Versionen verwendest
@@ -89,7 +90,7 @@
   <DD>A: Update deine glibc auf die neueste Release. Bei Mandrake verwende 2.2.4-8mdk.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: ... 2.96 ... (ja, einige Leute schwärmen NOCH IMMER von ihrem gcc 2.96!!)</DT>
+  <DT>Q: ... 2.96 ... (ja, einige Leute schwärmen NOCH IMMER von ihrem gcc 2.96!)</DT>
   <DD>A: Zitat aus einer <A HREF="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-October/005351.html">Mail</A>
     A'rpi's an die <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>
     Mailing-Liste [Übersetzung] (Das Wort 'ideg' ist unten beschrieben):
@@ -127,7 +128,7 @@
   
   <DT>Q: SDL Ausgabe funktioniert/kompiliert nicht. Das Problem ist ...</DT>
   <DD>A: Es wurde mit SDL 1.2.x getestet und läuft vielleicht auf SDL 1.1.7+.
-    Es funktioniert NICHT mit irgendeiner früheren Version.</DD>
+    Es funktioniert <B>nicht</B> mit irgendeiner früheren Version.</DD>
   <DD>&nbsp;</DD>
   
   <DT>Q: Ich habe immer noch Probleme mit dem SDL Support. gcc sagt etwas über
@@ -191,7 +192,7 @@
     Update deinen Kernel, modutils und <B>MPlayer</B>.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Während des Linkens von <B>MEncoder</B>, passiert ein segfault!!!</DT>
+  <DT>Q: Während des Linkens von <B>MEncoder</B>, passiert ein segfault!</DT>
   <DD>A: Dies ist ein Linker Problem. Ein Upgrade deiner binutils sollte helfen (2.11.92.* oder neuer
     wäre gut). Melde den Fehler <B>nicht</B>, da er nicht von uns ist!</DD>
   <DD>&nbsp;</DD>
@@ -208,9 +209,15 @@
 </DL>
 
 
-<P><B><A NAME="general">5.2. Allgemeine Fragen</A></B></P>
+<H2><A NAME="general">5.2. Allgemeine Fragen</A></H2>
 
 <DL>
+
+  <DT>Q: Kann ich <B>MPlayer</B> mehrmals aufrufen?</DT>
+  <DD>A: Ja. Einige Video-Ausgabetreiber, wie xv, dga oder (x)mga erlauben jedoch
+    nur eine Ausgabe, so dass in diesen Fällen <B>MPlayer</B> mit nur einmal mit
+    dem jeweiligen Video-Ausgabetreiber gestartet werden kann.</DD>
+  <DD>&nbsp;</DD>
 
   <DT>Q: Ich sehe in der linken oberen Ecke einen Timer,
     wie werde ich den los?</DT>
@@ -220,7 +227,7 @@
   <DT>Q: Die <CODE>-xy</CODE> oder <CODE>-fs</CODE> Option funktioniert
     nicht mit dem X11-Treiber (<CODE>-vo x11</CODE>)</DT>
   <DD>A: Es unterstützt Scaling, aber du musst die musst Softwarescaling mit <CODE>-zoom</CODE>
-    deutlich angeben (es ist SEHR LANGSAM!). Es ist besser, wenn du die XF86VidMode Unterstützung verwendest:
+    deutlich angeben (es ist <B>sehr langsam</B>). Es ist besser, wenn du die XF86VidMode Unterstützung verwendest:
     Du musst dazu die <CODE>-vm</CODE> Option und die <CODE>-fs</CODE> Option verwenden.
     Stelle sicher, dass du die richtigen modelines in deiner XF86Config-Datei hast
     und versuche den <A HREF="video.html#dga">DGA Treiber</A> and
@@ -269,11 +276,11 @@
   <DD>&nbsp;</DD>
 
   <DT>Q: Gibt es Mailing-Listen über MPlayer?</DT>
-  <DD>A: Ja! Lies dazu das Ende der Infoseite auf
+  <DD>A: Ja. Lies dazu das Ende der Infoseite auf
     <A HREF="http://www.mplayerhq.hu/homepage/info.html">unserer Homepage</A> um dich anzumelden!</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Ich habe einen bösen Fehler beim Abspielen meines Lieblingsvideos gefunden!!
+  <DT>Q: Ich habe einen bösen Fehler beim Abspielen meines Lieblingsvideos gefunden.
     Wen soll ich informieren?</DT>
   <DD>A: Bitte lies die <A HREF="bugreports.html">Leitlinien zu Fehlerberichten</A> und folge den Anweisungen.</DD>
   <DD>&nbsp;</DD>
@@ -343,7 +350,7 @@
 </DL>
 
 
-<P><B><A NAME="playback">5.3. Dateiwiedergabe-Probleme</A></B></P>
+<H2><A NAME="playback">5.3. Dateiwiedergabe-Probleme</A></H2>
 
 <DL>
 
@@ -355,11 +362,12 @@
     </PRE></DT>
   <DD>A: Wahrscheinlich wird ein Audiocodec verwendet,
     der nicht in <B>MPlayer</B> eingebaut ist. Zur Abhilfe sollte das Win32 Codec Paket
-    wie im README oder <A HREF="documentation.html#installation">hier</A> beschrieben installiert werden.</DD>
+    wie im README oder in der <A HREF="documentation.html#installation">Installation</A>
+    beschrieben installiert werden.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: ... funktioniert mit avifile/aviplay während bei MPlayer nicht.</DT>
-  <DD>A: <B>MPlayer</B>!= avifile.
+  <DD>A: <B>MPlayer</B> ist nicht avifile.
     Der einzige gemeinsame Teil zwischen diesen beiden Playern ist der Win32 DLL
     Loader. Die Codec (DLL) Set, Synchronisation, Demultiplexing usw sind total
     unterschiedlich und sollten nicht verglichen werden.
@@ -374,10 +382,10 @@
 
   <DT>Q: MPlayer endet sich mit einem Fehler bei der Verwendung von l3codeca.acm.</DT>
   <DD>A: Prüfe die <CODE>ldd /usr/local/bin/mplayer</CODE> Ausgabe. Wenn es<BR>
-    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 => /lib/libc.so.6 (0x4???????)</CODE><BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 =&gt; /lib/libc.so.6 (0x4???????)</CODE><BR>
     enthält, wobei "?" irgendeine Nummer ist, ist es OK und der Fehler liegt nicht
     hier. Wenn aber die Ausgabe<BR>
-    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 => /lib/libc.so.6 (0x00??????)</CODE><BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 =&gt; /lib/libc.so.6 (0x00??????)</CODE><BR>
     ist, hast du ein Problem mit deinem Kernel und/oder deiner libc.
     Möglichweise verwendet du auch einige Sicherheits-Patches (z.B. Solar Designer's
     OpenWall Patch), welcher das Landen von Libs in sehr niedrige Speicheradressen
@@ -436,7 +444,7 @@
     </PRE></DT>
   <DD>A: Dies kann mehrere Gründe haben.<BR>
     <UL>
-      <LI>Deine CPU <B>und/oder</B> deine Grafikkarte <B>und/oder</B> dein BUS ist/sind zu LANGSAM.</LI>
+      <LI>Deine CPU <B>und/oder</B> deine Grafikkarte <B>und/oder</B> dein BUS ist/sind zu <B>langsam</B>.</LI>
         <B>MPlayer</B> zeigt in diesem Fall eine Meldung (und der Zähler für die ausgelassenen
         Frames steigt.</LI>
       <LI>Wenn es eine AVI-Datei ist hat es möglichweise ein schlechtes Interleaving. Versuche die <CODE>-ni</CODE> Option.</LI>
@@ -495,7 +503,7 @@
 </DL>
 
 
-<P><B><A NAME="driver">5.4. Video/Audio Treiber-Probleme</A></B></P>
+<H2><A NAME="driver">5.4. Video/Audio Treiber-Probleme</A></H2>
 
 <DL>
 
@@ -504,7 +512,7 @@
     <PRE>
     AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
     audio_setup: Can't open audio device /dev/dsp: Device or resource busy
-    couldn't open/init audio device -> NOSOUND
+    couldn't open/init audio device -&gt; NOSOUND
     Audio: no sound!!!
     Start playing...
     </PRE></DT>
@@ -513,27 +521,29 @@
     Option, um <B>MPlayer</B> arts verwenden zu lassen.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Was ist mit dem DGA-Treiber? Ich kann ihn nicht finden!!!</DT>
+  <DT>Q: Was ist mit dem DGA-Treiber? Ich kann ihn nicht finden!</DT>
   <DD>A: ./configure erkennt den DGA-Treiber automatisch. Wenn -vo help DGA nichts anzeigt,
     gibt es ein Problem mit der X Installation. Versuche ./configure --enable-dga (und RTFM)
     Alternativ kannst du auch versuchen den SDL-DGA Treiber mit der '-vo sdl:dga'
     Option zu verwenden.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: OK, <CODE>-vo help</CODE> zeigt den DGA-Treiber, aber es beschwert sich über die Zugriffsrechte!
+  <DT>Q: <CODE>-vo help</CODE> zeigt den DGA-Treiber, aber es beschwert sich über die Zugriffsrechte!
     Hilft mir!</DT>
   <DD>A: Es funktioniert nur als Root! Dies ist eine DGA-Beschränkung.
     Du solltest Root werden (<CODE>su -</CODE>) und es erneut versuchen.
     Eine andere Lösung ist <B>MPlayer</B> auf SUID Root zu stellen, aber es ist
-    <B>NICHT EMPFHOHLEN!</B><BR>
+    <B>nicht empfohlen!</B><BR>
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chown root /usr/local/bin/mplayer</CODE><BR>
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod 755 /usr/local/bin/mplayer</CODE><BR>
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod +s /usr/local/bin/mplayer</CODE><BR>
-    <B>!!!! ABER SEI GEWARNT!!!!</B><BR>
-    Dies ist ein *GRÖSSERES* Sicherheitsrisiko! Mach das *NIE* auf einem Server oder
-    einem Computer, den du nicht vollständig kontrollierst, die User können durch
-    einen SUID root MPlayer Root-Privilegien bekommen!!!<BR>
-    <B>!!!! DU BIST ALSO GEWARNT WORDEN ...!!!!</B></DD>
+    <BLOCKQUOTE>
+    <B>Warnung: Sicherheitsrisiko</B><BR>
+    Dies ist ein <B>grösseres</B> Sicherheitsrisiko! Es sollte <B>nie</B> auf einem Server oder
+    einem Computer, der nicht vollständig kontrolliert wird angewandt werden. Da die User durch
+    einen SUID root <B>MPlayer</B> Root-Privilegien bekommen!<BR>
+    <B>Du bist also gewarnt worden!</B>
+    </BLOCKQUOTE></DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Wenn ich Xvideo verwende, meldet meine Voodoo 3/Banshee:
@@ -590,14 +600,14 @@
 </DL>
 
 
-<P><B><A NAME="dvd">5.5. DVD Wiedergabe</A></B></P>
+<H2><A NAME="dvd">5.5. DVD Wiedergabe</A></H2>
 
 <DL>
 
   <DT>Q: Beim Abspielen der DVD erscheint folgender Fehler:
     <PRE>
     mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion     nfo_length /
-    sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.
+    sizeof(cell_adr_t) &gt;= c_adt-&gt;nr_of_vobs' failed.
     </PRE></DT>
   <DD>A: Dies ist ein bekannter libdvdread 0.9.1 Bug.
     Verwende <B>libmpdvdkit</B>, welches sich in den <B>MPlayer</B> Sourcen befindet
@@ -612,7 +622,7 @@
   <DD>&nbsp;</DD>
 
   <DT>Q: Was ist mit den Untertiteln? Kann MPlayer sie anzeigen?</DT>
-  <DD>A: Ja! Siehe oben im DVD-Kapitel.</DD>
+  <DD>A: Ja. Siehe oben im DVD-Kapitel.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Wie kann ich den Reginal-Code meine DVD-Laufwerks einstellen? I habe kein Windows!</DT>
@@ -644,7 +654,7 @@
 </DL>
 
 
-<P><B><A NAME="features">5.6. Feature-Wünsche</A></B></P>
+<H2><A NAME="features">5.6. Feature-Wünsche</A></H2>
 
 <DL>
 
@@ -669,7 +679,7 @@
 </DL>
 
 
-<P><B><A NAME="encoding">5.7. Konvertierung</A></B></P>
+<H2><A NAME="encoding">5.7. Konvertierung</A></H2>
 
 <DL>
 

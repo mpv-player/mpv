@@ -101,7 +101,8 @@ Es kann \-alang benutzt werden, um die Sprache zu wählen.
 Wird bei der Wiedergabe von DVDs benutzt. Erwartet einen zwei-Zeichen Ländercode als
 Parameter und versucht die Tonspur immer in der Sprache für diesen Code wiederzugeben. 
 Zum Beispiel versucht -alang hu,en die Tonspur in ungarisch wiederzugeben und 
-versucht danach englisch, falls erstere nicht vorhanden ist.
+versucht danach englisch, falls erstere nicht vorhanden ist. Um eine Liste der verfügbaren
+Sprachen zu erhalten, kann die \-v Option verwendet und die Ausgabe davon betrachtet werden.
 .TP
 .B \-audio-demuxer <Nummer>
 Erzwingt den Audio demuxer Typ für -audiofile. Es muss eine Demuxer ID, welche in
@@ -120,7 +121,7 @@ Besonders nützlich für langsamen Medien (normal ist \-nocache).
 .TP
 .B \-chapter\ <Kapitel\ id>[-<Endkapitel\ id>]
 Gibt an bei welchem Kapitel die Wiedergabe starten soll. Gibt optional an, bei welchem Kapitel
-die Wiedergabe beendet werden soll. Beispiele können unten gefunden werden.
+die Wiedergabe beendet werden soll (standard: 1). Beispiele können unten gefunden werden.
 .TP
 .B \-cdda <Option1:Option2:...>
 Diese Option kann verwendet werden, um das CD-Audio Lesefeature von MPlayer zu konfigurieren.
@@ -177,8 +178,8 @@ Es sollten dann die '-pp 0x20000' oder '-npp lb' Optionen verwendet werden.
 .TP
 .B \-dvdangle\ <Winkel\ id>
 Einige DVDs enthalten Szenen, welche von mehreren Standpunkten betrachtet werden können.
-Hier kannst du MPlayer sagen, welcher Standpunkt verwendet werden soll. Beispiele können
-unten gefunden werden.
+Hier kannst du MPlayer sagen, welcher Standpunkt verwendet werden soll (Standard: 1).
+Beispiele können unten gefunden werden.
 .TP
 .B \-dvdauth <DVD\ Device>
 (alte DVD-Option) Aktiviert die DVD Authentifizierung über das angegebene Device.
@@ -265,24 +266,41 @@ Sucht die angegebene Zeitposition.
 Diese Option aktiviert das TV-Grabbing Feature von MPlayer (siehe Dokumentation).
 Verfügbare Optionen sind:
 
-    on               verwende den TV-Eingang
-    noaudio          kein Ton
-    driver=<Wert>    verfügbar: dummy, v4l, bsdbt484
-    device=<Wert>    gibt ein anderes Device an als
-                     das normale /dev/video0
-    input=<Wert>     gibt einen anderen Input als der
-                     normale 0 (Television) an
-                     (siehe Ausgabe für eine Liste)
-    freq=<Wert>      gibt die zu verwendende Frequenz
-                     an (z.B. 511.250)
-    outfmt=<Wert>    Ausgabeformat des Tuners: rgb32,
-                     rgb24, rgb16, yuy2, yv12, uyvy, i420)
-    width=<Wert>     Höhe der Ausgabe
-    height=<Wert>    Breite der Ausgabe
-    norm=<Wert>      verfügbar: PAL, SECAM, NTSC
-    channel=<Wert>   wechselt zum angegebenen Kanal
-    chanlist=<Wert>  verfügbar: us-bcast, us-cable,
-                     europe-west, europe-east, etc
+  on                verwende den TV-Eingang
+  noaudio           kein Ton
+  driver=<Wert>     verfügbar: dummy, v4l, bsdbt484
+  device=<Wert>     gibt ein anderes Device an als
+                    das normale /dev/video0
+  input=<Wert>      gibt einen anderen Input als der
+                    normale 0 (Television) an
+                    (siehe Ausgabe für eine Liste)
+  freq=<Wert>       gibt die zu verwendende Frequenz
+                    an (z.B. 511.250)
+  outfmt=<Wert>     Ausgabeformat des Tuners: rgb32,
+                    rgb24, rgb16, yuy2, yv12, uyvy, i420)
+  width=<Wert>      Höhe der Ausgabe
+  height=<Wert>     Breite der Ausgabe
+  norm=<Wert>       verfügbar: PAL, SECAM, NTSC
+  channel=<Wert>    wechselt zum angegebenen Kanal
+  chanlist=<Wert>   verfügbar: us-bcast, us-cable,
+                    europe-west, europe-east, etc
+  audiorate=<Wert>  gibt die Audio Einlese\-Bitrate an
+  alsa              liest von ALSA ein
+  mono              erzwingt Mono\-Audio
+  adevice=<Wert>    gibt das Audiodevice an:
+                      /dev/... für OSS,
+                      Hardware ID für ALSA
+  audioid=<Wert>    wählt den Audioausgang der Karte,
+                    falls mehrere vorhanden sind
+
+.I HINWEIS:
+Mplayer akzeptiert keine Spalten, so dass Punkte bei der Deviceid verwendet
+werden müssen (z.B. hw.0,0 anstatt hw:0,0)
+
+Es sei darauf hingewiesen, dass bei ALSA irgendeine Samplerate verwendet werden
+kann, der LAME Audiocodec, kann jedoch nur in "standard" Sampleraten konvertieren,
+so dass man eine .avi Datei ohne Sound erhölt, falls eine unpassende Rate mit
+diesem Codec gewählt wurde.
 .TP
 .B \-user <Name> (siehe auch \-passwd Option!)
 Gibt den für die http Authentifizierung zu verwendenden Benutzername an.
@@ -506,7 +524,7 @@ Verfügbare Plugins sind:
                      DVB_HEIGHT*ASPECTRATIO)
  cropdetect[=limit]  erkennt schwarze Ränder
                      (gibt crop Werte aus)
- noise[=Licht[u][t][h]:Farbe[u][t][h]
+ noise[=Licht[u][t][h][p]:Farbe[u][t][h][p]
                      fügt Rauschen hinzu
                        <0-100>  Licht
                        <0-100>  Farbe
@@ -515,6 +533,10 @@ Verfügbare Plugins sind:
                        a        zeitlicher
                                 Durchschnitt
                        h        hohe Qualität
+                       p        Vermischung
+                                mit Muster
+ eq[=hell:kont]      Software Equalizer (interaktiv)
+                     bedient sich wie der hw eq
 
 .I Parameter:
  w,h  Ausgabe Höhe/Breite
@@ -613,6 +635,12 @@ falls erstere nicht vorhanden sind. Für eine Liste der verfügbaren Untertitel ka
 .TP
 .B \-sub\ <Dateiname>
 Benutzt/zeigt diese Untertitel-Datei.
+.TP
+.B \-subcc
+Aktiviert die Wiedergabe von DVD Closed Caption (CC) Untertiteln. Diese sind NICHT VOB
+Untertitel, sondern spezielle ASCII Untertitel für Höhrgeschädigte, welche sich im VOB
+Benutzerdaten Stream auf den meisten Code 1 DVDs befinden. CC Untertitel sind bis jetzt
+auf keinen anderen DVDs (ausser Code 1) gesichtet worden.
 .TP
 .B \-subcp\ <Codepage>
 Wenn dein System iconv(3) unterstützt, kannst du diese Option benutzen um die Codepage 
@@ -1053,160 +1081,170 @@ Wenn mit libmp3lame zu MP3 konvertiert wird, kann man dessen Parameter hier
 angeben.
 
 .I BEISPIEL:
-    -lameopts br=192:cbr
+  -lameopts br=192:cbr
 
 Verfügbare Optionen sind:
 
-    help           gibt Hilfe
-    abr            Durchschnitts-Bitrate
-    cbr            konstante Bitrate
-    br=<Wert>      gibt die Bitrate an in 
-                   kbit <0-1024>
-                   (nur für CBR und ABR)
-    vbr=<Wert>     variable Bitrate-Methode
-                     0=cbr
-                     1=mt
-                     2=rh(standard)
-                     3=abr
-                     4=mtrh
-    q=<0-9>        Qualität für VBR
-                   (0-höchste, 9-schnellste)
-    aq=<Wert>      ?
-    mode=<Wert>    0=stereo
-                   1=joint-stereo
-                   2=Doppelkanal
-                   3=mono
-                   (Standard: auto)
-    padding=<0-2>  0=nein
-                   1=alles
-                   2=anpassen
-    ratio=<1-100>  Kompressionsrate
-    vol=<0-10>     Audio-Verstärkung (Eingang)
+  help           gibt Hilfe
+  abr            Durchschnitts-Bitrate
+  cbr            konstante Bitrate
+  br=<Wert>      gibt die Bitrate an in 
+                 kbit <0-1024>
+                 (nur für CBR und ABR)
+  vbr=<Wert>     variable Bitrate-Methode
+                   0=cbr
+                   1=mt
+                   2=rh(standard)
+                   3=abr
+                   4=mtrh
+  q=<0-9>        Qualität für VBR
+                 (0-höchste, 9-schnellste)
+  aq=<Wert>      ?
+  mode=<Wert>    0=stereo
+                 1=joint-stereo
+                 2=Doppelkanal
+                 3=mono
+                 (Standard: auto)
+  padding=<0-2>  0=nein
+                 1=alles
+                 2=anpassen
+  ratio=<1-100>  Kompressionsrate
+  vol=<0-10>     Audio-Verstärkung (Eingang)
 .TP
 .B \-lavcopts <option1:option2:...>
 Wenn man mit einem Codec von libavcodec konvertiert, kann hier dessen 
 Parameter angeben werden.
 
 .I BEISPIEL:
-    -lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
+  -lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
 
 Verfügbare Optionen sind:
 
-    help              Gibt Hilfe.
+  help              Gibt Hilfe.
 
-    vcodec=<Wert>     Benutzt den angegebenen Codec:
-                        mjpeg - Motion JPEG
-                        h263 - H263
-                        h263p - H263 Plus
-                        mpeg4 - DivX 4/5
-                        msmpeg4 - DivX 3
-                        rv10 - ein alter RealVideo Codec
-                        mpeg1video - MPEG1-Video :)
-                      Es gibt keine Voreinstellung,
-                      etwas muss angegeben werden.
+  vcodec=<Wert>     Benutzt den angegebenen Codec:
+                      mjpeg - Motion JPEG
+                      h263 - H263
+                      h263p - H263 Plus
+                      mpeg4 - DivX 4/5
+                      msmpeg4 - DivX 3
+                      rv10 - ein alter RealVideo Codec
+                      mpeg1video - MPEG1-Video :)
+                    Es gibt keine Voreinstellung,
+                    etwas muss angegeben werden.
 
-    vbitrate=<Wert>   Gibt die Bitrate an in
-                      kbit <4-16000> oder
-                      bit  <16001-24000000>
-                      (Achtung: 1kbit = 1000 bits)
-                      Standard = 800k
+  vbitrate=<Wert>   Gibt die Bitrate an in
+                    kbit <4-16000> oder
+                    bit  <16001-24000000>
+                    (Achtung: 1kbit = 1000 bits)
+                    Standard = 800k
 
-    vratetol=<Wert>   Angenäherte Toleranz der Dateigrösse in kbits.
-                      (Achtung: 1kbit = 1000 bits)
-                      Standard = 1024*8 kbits = 1MByte
+  vratetol=<Wert>   Angenäherte Toleranz der Dateigrösse in kbits.
+                    (Achtung: 1kbit = 1000 bits)
+                    Standard = 1024*8 kbits = 1MByte
 
-    keyint=<Wert>     Interval zwischen den Keyframes
-                      (in Frames, Werte > 300 sind nicht empfohlen)
-                      Standard = 250 (1 Keyframe/10s in einem 25fps Film)
+  keyint=<Wert>     Interval zwischen den Keyframes
+                    (in Frames, Werte > 300 sind nicht empfohlen)
+                    Standard = 250 (1 Keyframe/10s in einem 25fps Film)
 
-    vhq               Hochqualitäts-Modus, Macroblocks werden mehrfach
-                      codiert, das kleinste Ergebnis wird verwendet.
-                      Standard = deaktiviert
+  vhq               Hochqualitäts-Modus, Macroblocks werden mehrfach
+                    codiert, das kleinste Ergebnis wird verwendet.
+                    Standard = deaktiviert
 
-    vme=<Wert>        Methode zur Schätzung von Bewegungen:
-                         0 - no ME at all
-                         1 - ME_FULL
-                         2 - ME_LOG
-                         3 - ME_PHODS
-                         4 - ME_EPZS
-                         5 - ME_X1
-                      EPZS gibt normalerweise die besten Resulate,
-                      X1 kann auch getestet werden. FULL ist sehr
-                      langsam und die anderen sind experimentell.
-                      Standard = EPZS
+  vme=<Wert>        Methode zur Schätzung von Bewegungen:
+                       0 - no ME at all
+                       1 - ME_FULL
+                       2 - ME_LOG
+                       3 - ME_PHODS
+                       4 - ME_EPZS
+                       5 - ME_X1
+                    EPZS gibt normalerweise die besten Resulate,
+                    X1 kann auch getestet werden. FULL ist sehr
+                    langsam und die anderen sind experimentell.
+                    Standard = EPZS
 
-    vqcomp=<0.0-1.0>  Wenn der Wert auf 1.0 gesetzt wird, bleibt
-                      der Quantizer annährend konstant (Szenen mit
-                      vielen Bewegungen sehen schlecht aus).
-                      Wenn er auf 0.0 gesetzt wird, wird der
-                      Quantizer geändert, um Frames annöhernd
-                      gleicher Grösse zu erzeugen (Szenen mit wenig
-                      Bewegungen sehen schlecht aus).
-                      Standard = 0.5
+  vqcomp=<0.0-1.0>  Wenn der Wert auf 1.0 gesetzt wird, bleibt
+                    der Quantizer annährend konstant (Szenen mit
+                    vielen Bewegungen sehen schlecht aus).
+                    Wenn er auf 0.0 gesetzt wird, wird der
+                    Quantizer geändert, um Frames annöhernd
+                    gleicher Grösse zu erzeugen (Szenen mit wenig
+                    Bewegungen sehen schlecht aus).
+                    Standard = 0.5
 
-    vqblur=<0.0-1.0>  Verwischt den Quantizer-Graph mit der Zeit (blur).
-                        0.0 : keine Verwischung
-                        1.0 : nimmt den Durchschnitt aller bisheriger
-                              Quantizer
-                      Standard = 0.5
+  vqblur=<0.0-1.0>  Verwischt den Quantizer-Graph mit der Zeit (blur).
+                      0.0 : keine Verwischung
+                      1.0 : nimmt den Durchschnitt aller bisheriger
+                            Quantizer
+                    Standard = 0.5
 
-    vqscale=<2-31>    Gibt jedem Frame denselben Quantizer
-                      (verwendet festen Quantizer-Modus).
-                      Standard = 0 (fester Quantizer-Modus deaktiviert)
+  vqscale=<2-31>    Gibt jedem Frame denselben Quantizer
+                    (verwendet festen Quantizer-Modus).
+                    Standard = 0 (fester Quantizer-Modus deaktiviert)
 
-    vrc_strategy=<0\-2>
-                      unterschiedliche Strategien zu entscheiden,
-                      welche Frames welchen Quantizer erhalten sollen.
-                      Standard = 2
+  vrc_strategy=<0\-2>
+                    unterschiedliche Strategien zu entscheiden,
+                    welche Frames welchen Quantizer erhalten sollen.
+                    Standard = 2
 
-    v4mv              4 Bewegungs-Vektoren pro Macroblock,
-                      kann zu leicht besserer Qualität führen,
-                      kann nur im HQ-Modus verwendet werden und
-                      ist momentan fehlerbehaftet mit B-Frames.
-                      Standard = deaktiviert
+  v4mv              4 Bewegungs-Vektoren pro Macroblock,
+                    kann zu leicht besserer Qualität führen,
+                    kann nur im HQ-Modus verwendet werden und
+                    ist momentan fehlerbehaftet mit B-Frames.
+                    Standard = deaktiviert
                       
-    vpass=<1/2>       Wählt den internen 1pass bzw. 2pass Modus
-                      Standard = 0 (1pass Modus)
+  vpass=<1/2>       Wählt den internen 1pass bzw. 2pass Modus
+                    Standard = 0 (1pass Modus)
+
+  gray              konvertiert im Graustufen Modus.
+                    Standard = deaktiviert
+
+  mpeg_quant        Verwendet den MPEG Quantizer
+                    anstelle des H.263.
+                    Standard = deaktiviert
 
 Die nächsten 3 Optionen gelten nur für I- und P-Frames:
 
-    vqmin=<1-31>      minimaler Quantizer
-                      Standard = 3
-                      
-    vqmax=<1-31>      maximaler Quantizer
-                      Standard = 15
-                      
-    vqdiff=<1-31>     Beschränkt die maximale Quantizer-Differenz
-                      zwischen Frames.
-                      Standard = 3
+  vqmin=<1-31>      minimaler Quantizer
+                    Standard = 3
+                    
+  vqmax=<1-31>      maximaler Quantizer
+                    Standard = 15
+                    
+  vqdiff=<1-31>     Beschränkt die maximale Quantizer-Differenz
+                    zwischen Frames.
+                    Standard = 3
 
 Die folgenden Optionen gelten nur für B-Frames:
 
-    vmax_b_frames=<0\-4>
-                      Maximale Anzahl von Frames zwischen jedem I/P Frame.
-                      Standard = 0 (B-Frame Erzeugung deaktiviert)
+  vmax_b_frames=<0\-4>
+                    Maximale Anzahl von Frames zwischen jedem I/P Frame.
+                    Standard = 0 (B-Frame Erzeugung deaktiviert)
 
-    vb_strategy=<Wert>
-                      Strategien, um I/P/B Frames auszuwählen:
-                        0 verwendet immer max B
-                        1 vermeidet B-Frames in Szenen mit
-                          viel Bewegungen (kann zu falschen Voraussagen
-                          der Dateigrösse führen)
-                      Standard = 0
+  vb_strategy=<Wert>
+                    Strategien, um I/P/B Frames auszuwählen:
+                      0 verwendet immer max B
+                      1 vermeidet B-Frames in Szenen mit
+                        viel Bewegungen (kann zu falschen Voraussagen
+                        der Dateigrösse führen)
+                    Standard = 0
 
-   vb_qfactor=<Wert>
-                      Quantizer-Faktor zwischen B- und I/P-Frames
-                      (grösser bedeutet höhere Quantizer für B-Frames)
-                      Standard = 2.0
+  vb_qoffset=<Wert>
+                    Quantizer-Offset zwischen B- und I/P-Frames
+                    (grösser bedeutet höhere Quantizer für B-Frames)
+                    Standard = 0.0
+
+Der eigentliche Quantizer für ein gegebenes B-Frame wird wie folgt im 1pass berechnet:
+  vorheriger_IoderP_quantizer * vb_qfactor + vb_qoffset
 
 Im festen Quantizer-Modus kann man folgende Optionen verwenden:
-   vqscale, vmax_b_frames, vhq, vme, keyint
+  vqscale, vmax_b_frames, vhq, vme, keyint
 
 Die folgenden Optionen können nur im 1. Schritt des 2pass Modus oder im 1pass Modus verwendet werden:
-   vqblur, vqdiff
+  vqblur, vqdiff
 
 Die folgenden Optionen können nur im 2. Schritt des 2pass Modus verwendet werden:
-   vrc_strategy, vb_strategy
+  vrc_strategy, vb_strategy
 
 Alle anderen Optionen können überall verwendet werden.
 .TP
@@ -1475,6 +1513,9 @@ werden in folgender Reihenfolge gesucht (Beispiel für /mnt/movie/film.avi):
 .B Einfache DVD-Wiedergabe
 mplayer -dvd 1
 .TP
+.B Englisch mit deutschen Untertiteln
+mplayer -dvd 1 -alang en -slang de
+.TP
 .B Spiele nur die Kapitel 5, 6 und 7
 mplayer -dvd 1 -chapter 5\-7
 .TP
@@ -1486,6 +1527,9 @@ mplayer -dvd 1 -dvd-device /dev/dvd2
 .TP
 .B Alte DVD-Wiedergabe (VOB)
 mplayer \-dvdauth /dev/dvd /mnt/dvd/VIDEO_TS/VTS_02_4.VOB
+.TP
+.B nicht entschlüsselte .VOB Datei
+mplayer -dvdkey C005D4A16D VTS_02_4.VOB
 .TP
 .B Streams von HTTP
 mplayer http://mplayer.hq/beispiel.avi
@@ -1505,8 +1549,17 @@ mencoder -dvd 2 -vop scale=640:480 -o titel2.avi -oac copy -ovc divx4
 .B Konvertierung des 2. DVD-Titels, neue Grösse: 512xHHH (behält Seitenverhältnis bei)
 mencoder -dvd 2 -vop scale -zoom -xy 512 -o titel2.avi -oac copy -ovc divx4
 .TP
-.B Dasselbe mit der libavcodec (MPEG4 (Divx5) Komüpression)
-mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=1800 -oac copy
+.B Dasselbe mit der libavcodec (MPEG4 (Divx5) Kompression)
+mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts vcodec=mpeg4:weitere_optionen -oac copy
+.TP
+.B Dasselbe mit der libavcodec (MJPEG Kompression)
+mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts vcodec=mjpeg:weitere_optionen -ffourcc mjpg -oac copy
+.TP
+.B Kopieren von DVD Untertiteln (für mehrere, mehrmals mit steigendem -vobsuboutindex eingeben)
+mencoder -dvd 2 -slang en -vobsubout untertitel -vobsuboutindex 0 -oac copy -ovc copy
+.TP
+.B Kopieren eines deutschen Untertitels von einer MPEG Datei
+mencoder film.mpg -ifo film.ifo -sid 1 -vobsubout untertitel -vobsuboutindex 0 -vobsuboutid de -oac copy -ovc copy
 .TP
 .B Konvertierung aller .jpg Dateien im aktuellen Verzeichnis
 mencoder \\*.jpg -mf on:fps=25 -o ausgabe.avi -ovc divx4
@@ -1517,8 +1570,8 @@ mencoder -tv on:driver=v4l:width=640:height=480 -o tv.avi -ovc rawrgb
 .B Konvertierung von einer Pipe
 rar p test-SVCD.rar | mencoder -ovc divx4 -divx4opts br=800 -ofps 24 -pass 1 -- -
 .TP
-.B Konvertierung mehrerer .vob Dateien
-cat *.vob | mencoder <options> -
+.B Konvertierung mehrerer .VOB Dateien
+cat *.vob | mencoder <optionen> -
 
 
 .SH "FEHLER (BUGS)"
