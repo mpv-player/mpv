@@ -1,4 +1,6 @@
 
+#define NUM_BUFFERS 1
+
 /*
  * vo_xv.c, X11 Xv interface
  *
@@ -61,7 +63,9 @@ static unsigned int ver,rel,req,ev,err;
 static unsigned int formats, adaptors,i,xv_port,xv_format;
 static XvAdaptorInfo        *ai;
 static XvImageFormatValues  *fo;
-static XvImage *xvimage[1];
+
+static int current_buf=0;
+static XvImage* xvimage[NUM_BUFFERS];
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -69,7 +73,7 @@ static XvImage *xvimage[1];
 
 static int Shmem_Flag;
 static int Quiet_Flag;
-static XShmSegmentInfo Shminfo[1];
+static XShmSegmentInfo Shminfo[NUM_BUFFERS];
 static int gXErrorFlag;
 static int CompletionType = -1;
 
@@ -185,7 +189,10 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
     {
      printf( "using Xvideo port %d for hw scaling\n",xv_port );
 
-     allocate_xvimage(0);
+     for(current_buf=0;current_buf<NUM_BUFFERS;++current_buf)
+       allocate_xvimage(current_buf);
+
+     current_buf=0;
 
      XGetGeometry( mydisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
      drwX=0; drwY=0;
@@ -267,14 +274,14 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 	case IMGFMT_YV12:  
 	case IMGFMT_I420:
         case IMGFMT_IYUV:
-    		vo_draw_alpha_yv12(w,h,src,srca,stride,xvimage[0]->data+image_width*y0+x0,image_width);
+    		vo_draw_alpha_yv12(w,h,src,srca,stride,xvimage[current_buf]->data+image_width*y0+x0,image_width);
 	break;
 	case IMGFMT_YUY2:
         case IMGFMT_YVYU:	
-    		vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[0]->data+2*(image_width*y0+x0),2*image_width);
+    		vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[current_buf]->data+2*(image_width*y0+x0),2*image_width);
 	break;
         case IMGFMT_UYVY:
-    		vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[0]->data+2*(image_width*y0+x0)+1,2*image_width);
+    		vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[current_buf]->data+2*(image_width*y0+x0)+1,2*image_width);
 	break;
   }		
 
@@ -284,11 +291,12 @@ static void flip_page(void)
 {
  vo_draw_text(image_width,image_height,draw_alpha);
  check_events();
- XvShmPutImage(mydisplay, xv_port, mywindow, mygc, xvimage[0],
+ XvShmPutImage(mydisplay, xv_port, mywindow, mygc, xvimage[current_buf],
          0, 0,  image_width, image_height,
          drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight),
          False);
  XFlush(mydisplay);
+ current_buf=(current_buf+1)%NUM_BUFFERS;
  return;
 }
 
@@ -300,7 +308,7 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
  uint8_t *dst;
  int i;
 
- dst = xvimage[0]->data + image_width * y + x;
+ dst = xvimage[current_buf]->data + image_width * y + x;
  src = image[0];
  if(w==stride[0] && w==image_width) memcpy(dst,src,w*h);
    else
@@ -313,7 +321,7 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 
  x/=2;y/=2;w/=2;h/=2;
 
- dst = xvimage[0]->data + image_width * image_height + image_width/2 * y + x;
+ dst = xvimage[current_buf]->data + image_width * image_height + image_width/2 * y + x;
  src = image[2];
  if(w==stride[2] && w==image_width/2) memcpy(dst,src,w*h);
   else
@@ -323,7 +331,7 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
      src+=stride[2];
      dst+=image_width/2;
    }
- dst = xvimage[0]->data + image_width * image_height * 5 / 4 + image_width/2 * y + x;
+ dst = xvimage[current_buf]->data + image_width * image_height * 5 / 4 + image_width/2 * y + x;
  src = image[1];
  if(w==stride[1] && w==image_width/2) memcpy(dst,src,w*h);
   else
@@ -349,7 +357,7 @@ static uint32_t draw_frame(uint8_t *src[])
 #if 0
      int i;
      unsigned short *s=(unsigned short *)src[0];
-     unsigned short *d=(unsigned short *)xvimage[0]->data;
+     unsigned short *d=(unsigned short *)xvimage[current_buf]->data;
      s+=image_width*image_height;
      for(i=0;i<image_height;i++) {
 	 s-=image_width;
@@ -357,7 +365,7 @@ static uint32_t draw_frame(uint8_t *src[])
 	 d+=image_width;
      }
 #else
-     memcpy(xvimage[0]->data,src[0],image_width*image_height*2);
+     memcpy(xvimage[current_buf]->data,src[0],image_width*image_height*2);
 #endif
      break;
 
@@ -366,9 +374,9 @@ static uint32_t draw_frame(uint8_t *src[])
  case IMGFMT_IYUV:
 
      // YV12 planar
-     memcpy(xvimage[0]->data,src[0],image_width*image_height);
-     memcpy(xvimage[0]->data+image_width*image_height,src[2],image_width*image_height/4);
-     memcpy(xvimage[0]->data+image_width*image_height*5/4,src[1],image_width*image_height/4);
+     memcpy(xvimage[current_buf]->data,src[0],image_width*image_height);
+     memcpy(xvimage[current_buf]->data+image_width*image_height,src[2],image_width*image_height/4);
+     memcpy(xvimage[current_buf]->data+image_width*image_height*5/4,src[1],image_width*image_height/4);
      break;
  }
 
