@@ -202,8 +202,10 @@ void free_demuxer(demuxer_t *demuxer){
 #endif
     case DEMUXER_TYPE_AUDIO:
       demux_close_audio(demuxer); break;
+#ifdef HAVE_OGGVORBIS
     case DEMUXER_TYPE_OGG:
       demux_close_ogg(demuxer); break;
+#endif
 #ifdef STREAMING_LIVE_DOT_COM
     case DEMUXER_TYPE_RTP:
       demux_close_rtp(demuxer); break;
@@ -326,7 +328,9 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_Y4M: return demux_y4m_fill_buffer(demux);
     case DEMUXER_TYPE_AUDIO: return demux_audio_fill_buffer(ds);
     case DEMUXER_TYPE_DEMUXERS: return demux_demuxers_fill_buffer(demux,ds);
+#ifdef HAVE_OGGVORBIS
     case DEMUXER_TYPE_OGG: return demux_ogg_fill_buffer(demux);
+#endif
     case DEMUXER_TYPE_RAWAUDIO: return demux_rawaudio_fill_buffer(demux,ds);
 #ifdef STREAMING_LIVE_DOT_COM
     case DEMUXER_TYPE_RTP: return demux_rtp_fill_buffer(demux, ds);
@@ -752,6 +756,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_SMJPEG){
       demuxer = NULL;
   }
 }
+#ifdef HAVE_OGGVORBIS
 //=============== Try to open as Ogg file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_OGG){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_OGG,audio_id,video_id,dvdsub_id);
@@ -763,6 +768,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_OGG){
       demuxer = NULL;
   }
 }
+#endif
 //=============== Try to open as PVA file: =================
 if(file_format == DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_PVA){
 	demuxer=new_demuxer(stream,DEMUXER_TYPE_PVA,audio_id,video_id,dvdsub_id);
@@ -933,6 +939,8 @@ switch(file_format){
    if(!demuxer) return NULL; // failed to open
    sh_a = (sh_audio_t*)demuxer->audio->sh;
    if(demuxer->audio->id != -2 && sh_a) {
+#ifdef HAVE_OGGVORBIS
+    // support for Ogg-in-AVI:
      if(sh_a->format == 0xFFFE)
        demuxer = init_avi_with_ogg(demuxer);
      else if(sh_a->format == 0x674F) {
@@ -947,6 +955,7 @@ switch(file_format){
        } else
 	 demuxer = new_demuxers_demuxer(demuxer,od,demuxer);
      }
+#endif
    }       
    return demuxer;
 //  break;
@@ -1119,9 +1128,7 @@ int demux_seek_rawdv(demuxer_t *demuxer, float pts, int flags);
 
 extern void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
-#ifdef HAVE_OGGVORBIS
 extern void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
-#endif
 extern void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){

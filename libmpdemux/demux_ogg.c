@@ -1,6 +1,7 @@
 
 #include "config.h"
 
+#ifdef HAVE_OGGVORBIS
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,28 +11,6 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-
-#ifndef HAVE_OGGVORBIS
-/// Some dummy function to use when no Ogg and Vorbis lib are avaible
-int demux_ogg_open(demuxer_t* demuxer) {
-  return 0;
-}
-
-int demux_ogg_fill_buffer(demuxer_t *d) {
-  return 0;
-}
-
-demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
-  mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_NoOggVorbis);
-  // disable audio
-  demuxer->audio->id = -2;
-  return demuxer;
-}
-
-void demux_close_ogg(demuxer_t* demuxer) {
-
-}
-#else
 
 #include <ogg/ogg.h>
 #include <vorbis/codec.h>
