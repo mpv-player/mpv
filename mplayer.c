@@ -1814,13 +1814,13 @@ if(step_sec>0) {
 	if(curr_filename>=num_filenames-1)
 		break;
     case KEY_ENTER: // ESC
-      eof=1;  // jump to next file
+      eof=2;  // jump to next file
       break;
     case '<':
 	if(curr_filename < 1)
 		break;
         curr_filename-=2;
-	eof=1;
+	eof=2;
       break;
     case 'g': grab_frames=2;break;
     // pause
@@ -1994,22 +1994,16 @@ if(step_sec>0) {
   }
   
   /* Looping. */
-  if(eof==5 && loop_times>-1) {
+  if(eof==1 && loop_times>=0) {
 
-    if(loop_times!=0) {
-      
-      loop_times--;
-      
-      if(loop_times==0)
-        loop_times=-1;
-      
-    }
-    
+    mp_msg(MSGT_CPLAYER,MSGL_V,"loop_times = %d, eof = %d\n", loop_times,eof);
+
+    if(loop_times>1) loop_times--; else
+    if(loop_times==1) loop_times=-1;
+
     eof=0;
-    abs_seek_pos=1;
+    abs_seek_pos=3; rel_seek_secs=0; // seek to start of movie (0%)
 
-    mp_msg(MSGT_CPLAYER,MSGL_V,"loop_times = %d, eof = 0\n", loop_times);
-    
   }
 
 if(rel_seek_secs || abs_seek_pos){
