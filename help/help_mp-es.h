@@ -4,7 +4,7 @@
 // Sefanja Ruijsenaars <sefanja at gmx.net>,
 // Andoni Zubimendi <andoni at lpsat.net>
 
-// Updated to help_mp-en.h v1.123
+// Updated to help_mp-en.h v1.126
 
 // ========================= MPlayer help ===========================
 
@@ -85,7 +85,6 @@ static char help_text[]=
 #define MSGTR_CouldntInitAudioCodec "No se pudo inicializar el codec de audio, no se reproducirá sonido!\n"
 #define MSGTR_TryForceVideoFmtStr "Tratando de forzar la familia de codecs de vídeo %d...\n"
 #define MSGTR_CantFindVideoCodec "No se encuentra codec para el formato de vídeo 0x%X!\n"
-#define MSGTR_VOincompCodec "Disculpe, el dispositivo de salida de vídeo es incompatible con este codec.\n"
 #define MSGTR_CannotInitVO "FATAL: No se puede inicializar el driver de vídeo!\n"
 #define MSGTR_CannotInitAO "No se puede abrir o inicializar dispositivo de audio, no se reproducirá sonido.\n"
 #define MSGTR_StartPlaying "Empezando reproducción...\n"
@@ -190,6 +189,136 @@ static char help_text[]=
 #define MSGTR_RecommendedVideoBitrate "Bitrate recomendado para %s CD: %d.\n"
 #define MSGTR_VideoStreamResult "\nStream de vídeo: %8.3f kbit/s (%d bps), tamaño: %d bytes, %5.3f segundos, %d frames\n"
 #define MSGTR_AudioStreamResult "\nStream de audio: %8.3f kbit/s (%d bps), tamaño: %d bytes, %5.3f segundos\n"
+#define MSGTR_OpenedStream "exito: formato: %d  datos: 0x%X - 0x%x\n"
+#define MSGTR_VCodecFramecopy "codec de video: copia de cuadro (%dx%d %dbpp fourcc=%x)\n"
+#define MSGTR_ACodecFramecopy "codec de audio: copia de cuadro (formato=%x canales=%d razón=%ld bits=%d bps=%ld muestra-%ld)\n"
+#define MSGTR_CBRPCMAudioSelected "audio PCM CBR seleccionado\n"
+#define MSGTR_MP3AudioSelected "audio MP3 seleccionado\n"
+#define MSGTR_CannotAllocateBytes "No se pueden asignar %d bytes\n"
+#define MSGTR_SettingAudioDelay "Ajustando el RETRASO DEL AUDIO a %5.3f\n"
+#define MSGTR_SettingAudioInputGain "Ajustando la ganancia de entrada de audio input a %f\n"
+#define MSGTR_LamePresetEquals "\npreconfiguración=%s\n\n"
+#define MSGTR_LimitingAudioPreload "Limitando la pre-carda de audio a 0.4s\n"
+#define MSGTR_IncreasingAudioDensity "Incrementando la densidad de audio a 4\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forzando la precarga de audio a 0, puntos máximos de corrección ajustado a 0\n"
+#define MSGTR_CBRAudioByterate "\n\naudio CBR: %ld bytes/seg, %d bytes/bloque\n"
+#define MSGTR_LameVersion "versión de LAME %s (%s)\n\n"
+#define MSGTR_InvalidBitrateForLamePreset "Error: La tasa de bits especificada esta fuera de los rangos de valor para esta preconfiguración\n"\
+"\n"\
+"Cuando usa este modo debe ingresar un valor entre \"8\" y \"320\"\n"\
+"\n"\
+"Para mayor informción prueba: \"-lameopts preset=help\"\n"
+#define MSGTR_InvalidLamePresetOptions "Error: No ingreso un perfil valido y/o opciones con una preconfiguración\n"\
+"\n"\
+"Los perfiles disponibles son:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (Modo ABR) - Implica el Modo ABR Mode. Para usarlo,\n"\
+"                      solamente especifique la tasa de bits.. Por ejemplo:\n"\
+"                      \"preset=185\" activates esta\n"\
+"                      preconfiguración y usa 185 como el kbps promedio.\n"\
+"\n"\
+"    Algunos ejemplos:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" o  \"-lameopts  cbr:preset=192       \"\n"\
+" o  \"-lameopts      preset=172       \"\n"\
+" o  \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"Para mayor información pruebe: \"-lameopts preset=help\"\n"
+#define MSGTR_LamePresetsLongInfo "\n"\
+"Las opciones de preconfiguración estan hechas para proveer la mayor calidad posible.\n"\
+"\n"\
+"Estas han sido en su mayor sometidas y ajustadas por medio de pruebas rigurosas de\n"\
+"doble escucha ciega (double blind listening) para verificar y lograr este objetivo\n"\
+"\n"\
+"Son continuamente actualizadas para con el desarrollo actual que esta\n"\
+"ocurriendo y como resultado debería proveer practicamente la mejor calidad\n"\
+"actualmente posible de LAME.\n"\
+"\n"\
+"Para activar estas preconfiguración:\n"\
+"\n"\
+"   For modos VBR (en general mayor calidad):\n"\
+"\n"\
+"     \"preset=standard\" Esta preconfiguración generalmente debería ser transparente\n"\
+"                             para la mayoría de la genta en la música y ya es bastante\n"\
+"                             buena en calidad.\n"\
+"\n"\
+"     \"preset=extreme\" Si tiene un oido extramademente bueno y un equipo\n"\
+"                             similar, esta preconfiguración normalmente le\n"\
+"                             proveera una calidad levemente superior al modo "\
+                               "\"standard\"\n"\
+"\n"\
+"   Para 320kbps CBR (la mayor calidad posible desde las preconfiguraciones):\n"\
+"\n"\
+"     \"preset=insane\"  Esta preconfiguración será excesiva para la mayoria\n"\
+"                             de la gente en la mayoria de las ocasiones, pero si debe\n"\
+"                             tener la mayor calidad posible sin tener en cuenta el\n"\
+"                             tamaño del archivo, esta es la opción definitiva.\n"\
+"\n"\
+"   Para modos ABR (alta calidad por tasa de bits dado pero no tan alto como modo VBR):\n"\
+"\n"\
+"     \"preset=<kbps>\"  Usando esta preconfiguración normalmente obtendrá buena\n"\
+"                             calidad a la tasa de bits especificada. Dependiendo de\n"\
+"                             la tasa de bits ingresada, esta preconfiguración determinará\n"\
+"                             las opciones optimas para esa situación particular.\n"\
+"                             A pessar que funciona, no es tan flexible como el modo\n"\
+"                             VBR, y normalmente no llegarán a obtener el mismo nivel\n"\
+"                             de calidad del modo VBR a mayores tasas de bits.\n"\
+"\n"\
+"Las siguientes opciones también están disponibles para los correspondientes perfiles:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (Modo ABR) - Implica el Modo ABR Mode. Para usarlo,\n"\
+"                      solamente especifique la tasa de bits.. Por ejemplo:\n"\
+"                      \"preset=185\" activates esta\n"\
+"                      preconfiguración y usa 185 como el kbps promedio.\n"\
+"\n"\
+"   \"fast\" - Activa el nuevo modo rápido VBR para un perfil en particular. La\n"\
+"            desventaja al cambio de velocidad es que muchas veces la tasa de\n"\
+"            bits será levemente más alta respecto del modo normal y la calidad\n"\
+"            puede llegar a ser un poco más baja también.\n"\
+"Advertencia: con la versión actual las preconfiruaciones \"fast\" puede llegar a\n"\
+"             dar como resultado tasas de bits demasiado altas comparadas a los normales.\n"\
+"\n"\
+"   \"cbr\"  - Si usa el modo ABR (ver más arriba) con una tasa de bits significativa\n"\
+"            como 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
+"            puede usar la opción \"cbr\" para forzar la codificación en modo CBR\n"\
+"            en lugar del modo por omisión ABR. ABR provee mayor calidad pero\n"\
+"            CBR podría llegar a ser util en  situaciones tales como cuando se\n"\
+"            recibe un flujo mp3 a través de internet.\n"\
+"\n"\
+"    Por ejemplo:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" o  \"-lameopts  cbr:preset=192       \"\n"\
+" o  \"-lameopts      preset=172       \"\n"\
+" o  \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"\n"\
+"Unos poco alias estan disponibles para el modo ABR:\n"\
+"phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"\
+"mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
+"fm/radio/tape => 112kbps    hifi => 160kbps\n"\
+"cd => 192kbps               studio => 256kbps"
+#define MSGTR_ConfigfileError "error en archivo de configuración"
+#define MSGTR_ErrorParsingCommandLine "error en parametros de la línea de comando"
+#define MSGTR_VideoStreamRequired "¡El flujo de video es obligatorio!\n"
+#define MSGTR_ForcingInputFPS "en su lugar los cuadros por segundos de entrada serán interpretados como %5.2f\n"
+#define MSGTR_RawvideoDoesNotSupportAudio "El formato de archivo de salida RAWVIDEO no soporta audio - desactivando audio\n"
+#define MSGTR_DemuxerDoesntSupportNosound "Este demuxer todavía no soporta -nosound.\n"
+#define MSGTR_MemAllocFailed "falló la asignación de memoria"
+#define MSGTR_NoMatchingFilter "¡No se encontró filtro o formato de salida concordante!\n"
+#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, ¿quiza este fallado el compilador de C?\n"
+#define MSGTR_NoLavcAudioCodecName "LAVC Audio,¡falta el nombre del codec!\n"
+#define MSGTR_LavcAudioCodecNotFound "LAVC Audio, no se encuentra el codificador para el codec %s\n"
+#define MSGTR_CouldntAllocateLavcContext "LAVC Audio, ¡no se puede asignar contexto!\n"
+#define MSGTR_CouldntOpenCodec "No se puede abrir el codec %s, br=%d\n"
+#define MSGTR_FramesizeBufsizeTag "TAMAÑO_DEL_CUADRO: %d, TAMAÑO_DEL_BUFFER: %d, ETIQUETA: 0x%x\n"
 
 // cfg-mencoder.h
 
@@ -626,3 +755,16 @@ static char help_text[]=
 #define MSGTR_MSGBOX_LABEL_Warning "Advertencia"
 
 #endif
+
+// ======================= VO Video Output drivers ========================
+
+#define MSGTR_VOincompCodec "Disculpe, el dispositivo de salida de vídeo es incompatible con este codec.\n"
+
+// vo_jpeg.c
+#define MSGTR_VO_JPEG_GenericError "Este error ha ocurrido"
+#define MSGTR_VO_JPEG_UnableToAccess "No es posible acceder"
+#define MSGTR_VO_JPEG_ExistsButNoDirectory "ya existe, pero no es un directorio."
+#define MSGTR_VO_JPEG_DirExistsButNotWritable "El directorio ya existe, pero no se puede escribir en él."
+#define MSGTR_VO_JPEG_DirExistsAndIsWritable "El directorio ya existe y se puede escribir en él."
+#define MSGTR_VO_JPEG_CantCreateDirectory "No es posible crear el directorio de salida."
+#define MSGTR_VO_JPEG_DirectoryCreateSuccess "Directorio de salida creado exitosamente."
