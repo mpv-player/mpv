@@ -1579,6 +1579,18 @@ switch(sh_video->codec->driver){
     case 'o':  // toggle OSD
       osd_level=(osd_level+1)%3;
       break;
+    case '*':
+      mixer_incvolume();
+      break;
+    case '/':
+      mixer_decvolume();
+      break;
+    case 'm':
+      mixer_usemaster=1;
+      break;
+    case 'c':
+      mixer_usemaster=0;
+      break;
   }
   if(rel_seek_secs)
   if(file_format==DEMUXER_TYPE_AVI && avi_header.idx_size<=0){
