@@ -15,6 +15,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
+#include "afmt.h"
 
 #include "../libvo/fastmemcpy.h"
 
@@ -46,7 +47,7 @@ char *sdl_adriver;
 // General purpose Ring-buffering routines
 
 #define BUFFSIZE 4096
-#define NUM_BUFS 16
+#define NUM_BUFS 16 
 
 static unsigned char *buffer[NUM_BUFS];
 
@@ -132,7 +133,10 @@ static int control(int cmd,int arg){
 // SDL Callback function
 void outputaudio(void *unused, Uint8 *stream, int len) {
 	//SDL_MixAudio(stream, read_buffer(buffers, len), len, SDL_MIX_MAXVOLUME);
+	//if(!full_buffers) printf("SDL: Buffer underrun!\n");
+
 	read_buffer(stream, len);
+	//printf("SDL: Full Buffers: %i\n", full_buffers);
 }
 
 // open & setup audio device
@@ -154,11 +158,33 @@ static int init(int rate,int channels,int format,int flags){
 	}	
 	
 	
+	/* The desired audio format (see SDL_AudioSpec) */
+	switch(format) {
+	    case AFMT_U8:
+		aspec.format = AUDIO_U8;
+	    break;
+	    case AFMT_S16_LE:
+		aspec.format = AUDIO_S16LSB;
+	    break;
+	    case AFMT_S16_BE:
+		aspec.format = AUDIO_S16MSB;
+	    break;
+	    case AFMT_S8:
+		aspec.format = AUDIO_S8;
+	    break;
+	    case AFMT_U16_LE:
+		aspec.format = AUDIO_U16LSB;
+	    break;
+	    case AFMT_U16_BE:
+		aspec.format = AUDIO_U16MSB;
+	    break;
+	    default:
+                printf("SDL: Unsupported audio format: 0x%x.\n", format);
+                return 0;
+	}
+
 	/* The desired audio frequency in samples-per-second. */
 	aspec.freq     = rate;
-
-	/* The desired audio format (see SDL_AudioSpec) */
-	aspec.format   = (format == 16) ? AUDIO_S16 : AUDIO_U8;
 
 	/* Number of channels (mono/stereo) */
 	aspec.channels = channels;
@@ -203,7 +229,9 @@ static void uninit(){
 
 // stop playing and empty buffers (for seeking/pause)
 static void reset(){
-	
+
+	//printf("SDL: reset called!\n");	
+
 	/* Reset ring-buffer state */
 	buf_read=0;
 	buf_write=0;
