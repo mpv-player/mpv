@@ -47,6 +47,8 @@
 #define WIN_LAYER_ABOVE_DOCK             10
  
 int ice_layer=WIN_LAYER_ABOVE_DOCK;
+int orig_layer=WIN_LAYER_NORMAL;
+
 int stop_xscreensaver=0;
 
 static int dpms_disabled=0;
@@ -693,6 +695,25 @@ void vo_x11_sizehint( int x, int y, int width, int height, int max )
  XSetWMNormalHints( mDisplay,vo_window,&vo_hint );
 }
 
+int vo_x11_get_gnome_layer (Display * mDisplay, Window win)
+{
+ Atom type;
+ int format;
+ unsigned long nitems;
+ unsigned long bytesafter;
+ unsigned short *args = NULL;
+
+ if (XGetWindowProperty (mDisplay, win, XA_WIN_LAYER, 0, 16384,
+                         False, AnyPropertyType, &type, &format, &nitems,
+                         &bytesafter, (unsigned char **) &args) == Success
+     && nitems > 0 && args)
+ {
+    mp_msg (MSGT_VO, MSGL_STATUS, "[x11] original window layer is %d.\n", *args);
+    return *args;
+ }
+ return WIN_LAYER_NORMAL;
+}
+
 void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
 {
  if ( WinID >= 0 ) return;
@@ -704,13 +725,16 @@ void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
  { case vo_wm_Layered:
   {
     XClientMessageEvent xev;
+    
+    if (layer) orig_layer=vo_x11_get_gnome_layer( mDisplay, vo_window );
+
     memset(&xev, 0, sizeof(xev));
     xev.type = ClientMessage;
     xev.display= mDisplay;
     xev.window = vo_window;
     xev.message_type = XA_WIN_LAYER;
     xev.format = 32;
-    xev.data.l[0] = layer?ice_layer:WIN_LAYER_NORMAL; // if not fullscreen, stay on layer "Normal"
+    xev.data.l[0] = layer?ice_layer:orig_layer; // if not fullscreen, stay on default layer
     xev.data.l[1] = CurrentTime;
     mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Layered style stay on top ( layer %d ).\n",xev.data.l[0] );
     printf( "[x11] Layered style stay on top ( layer %d ).\n",xev.data.l[0] );
