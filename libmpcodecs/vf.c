@@ -105,7 +105,13 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	  } else {
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
 	      if(mpi->flags&MP_IMGFLAG_YUV){
-	          // TODO: clear packed yuv plane
+		  int size=mpi->bpp*mpi->width*mpi->height/8/4;
+		  unsigned int* p=mpi->planes[0];
+		  int i;
+		  if(mpi->flags&MP_IMGFLAG_SWAPPED)
+		      for(i=0;i<size;i+=4) p[i]=p[i+1]=p[i+2]=p[i+3]=0x00800080;
+		  else
+		      for(i=0;i<size;i+=4) p[i]=p[i+1]=p[i+2]=p[i+3]=0x80008000;
 	      } else
 	          memset(mpi->planes[0],0,mpi->bpp*mpi->width*mpi->height/8);
 	  }
