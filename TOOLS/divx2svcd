@@ -1,22 +1,22 @@
 #!/bin/bash
 
 # (c) 2003 Vajna Miklos <mainroot@freemail.hu>
-# divx2svcd for MPlayer+dumpvideo patch
+# divx2svcd for MPlayer
 # distributed under GPL License
 
 # A simple utility that creates SvcD from a video which uses avi container
 
 # The newest version of this utility can be found at
 # http://vmiklos.uw.hu/divx2svcd/divx2svcd
-
 # MPlayer avariable at
 # http://www1.mplayerhq.hu/MPlayer/releases/MPlayer-1.0pre3.tar.bz2
-# dumpvideo patch at
-# http://vmiklos.uw.hu/divx2svcd/mplayer-1.0pre3-dumpvideo.diff
 
 ###changelog###
 #nobody cares about it :-)
 cat >/dev/null <<EOF
+0.5.0
+- needless for dumpvideo patch ;-)
+
 0.4.9
 - changed default bitrate to 1600 for better quality
 - fix for burning more than one cd
@@ -93,8 +93,8 @@ EOF
 }
 
 #initializating constants
-version='0.4.9'
-bitrate=1600
+version='0.5.0'
+bitrate=1375
 cdsize=795
 burning=0
 cleaning=0
@@ -319,7 +319,7 @@ fi
 
 ###start working###
 #encoding
-mencoder -ofps 25 -oac lavc "$input" -ovc lavc -lavcopts vcodec=mpeg2video:vbitrate=$bitrate:acodec=mp2:abitrate=128:keyint=25:aspect=4/3:$paraopts -o "${nev}2.avi" -srate 44100 -channels 2 $vfopts $subs "$subopts"
+mencoder -ofps 25 -oac lavc "$input" -ovc lavc -lavcopts vcodec=mpeg2video:vbitrate=$bitrate:acodec=mp2:abitrate=128:keyint=25:aspect=4/3:$paraopts -o "${nev}2.avi" -srate 44100 -of mpeg -channels 2 $vfopts $subs "$subopts"
 
 #splitting
 mplayer -dumpvideo -dumpfile "$nev.m2v" "${nev}2.avi"
