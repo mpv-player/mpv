@@ -74,6 +74,7 @@ static mach_port_t clock_port;
 /* sleep usec_delay microseconds */
 int usec_sleep(int usec_delay)
 {
+#if 0
   mach_timespec_t start_time, end_time;
 
   clock_get_time(clock_port, &start_time);
@@ -86,6 +87,9 @@ int usec_sleep(int usec_delay)
   clock_get_time(clock_port, &end_time);
 
   return usec_delay - udiff_time(start_time, end_time);
+#else
+  usleep(usec_delay);
+#endif
 }
 
 
