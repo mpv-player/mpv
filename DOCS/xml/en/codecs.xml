@@ -417,7 +417,7 @@ If you want to store them in a different location, pass the
 </para>
 
 <para>
-On Mac OS X you must make sure <filename>pncrt.Shlb</filename> (including it's
+On Mac OS X you must make sure <filename>pncrt.Shlb</filename> (including its
 resource fork!) is in the same directory as the Real codecs. Copy it using, for
 example
 <screen>ditto -rsrcFork "RealOne Player.app/Contents/MacOS/pncrt.Shlb" "RealOne Player.app/Contents/MacOS/Library/Codecs"</screen>
@@ -704,7 +704,7 @@ RealAudio:
 </itemizedlist>
 
 <para>
-Instructions how to install the RealPlayer libraries are in the
+Instructions on how to install the RealPlayer libraries are in the
 <link linkend="realvideo">RealVideo</link> section.
 </para>
 </sect3>
