@@ -22,7 +22,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-#include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"
 
 LIBVO_EXTERN (png)
@@ -44,8 +43,6 @@ static int image_width;
 static int image_height;
 static int image_format;
 static uint8_t *image_data=NULL;
-//static char *image_data;
-static unsigned int scale_srcW = 0, scale_srcH = 0;
 
 static int bpp = 24;
 static int cspace = RGB;
@@ -65,28 +62,12 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 static uint32_t
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
 {
-    if (fullscreen&0x04 && (width != d_width || height != d_height) &&
-	((format==IMGFMT_YV12) /*|| (format == IMGFMT_I420) || (format == IMGFMT_IYUV)*/)) {
-	/* software scaling */
-	image_width = (d_width + 7) & ~7;
-	image_height = d_height;
-	scale_srcW = width;
-	scale_srcH = height;
-	SwScale_Init();
-    }
-    else {
-	image_height = height;
-	image_width = width;
-    }
+    image_height = height;
+    image_width = width;
     image_format = format;
     //printf("Verbose level is %i\n", verbose);
     
     switch(format) {
-	case IMGFMT_BGR32:
-	     bpp = 24;
-	     cspace = BGR;
-	     image_data = malloc(image_width*image_height*3);
-	break;
 	case IMGFMT_BGR24:
 	     bpp = 24;
 	     cspace = BGR;
@@ -224,12 +205,6 @@ static uint32_t draw_frame(uint8_t * src[])
     
     snprintf (buf, 100, "%08d.png", ++framenum);
 
-    if (image_format == IMGFMT_BGR32)
-    {
-      rgb32to24(src[0], image_data, image_width * image_height * 4);
-      src[0] = image_data;
-    }
-
     png = create_png(buf);
 
     if(png.status){
@@ -252,7 +227,7 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void draw_osd(void)
 {
-    vo_draw_text(image_width, image_height, draw_alpha);
+    if(image_data) vo_draw_text(image_width, image_height, draw_alpha);
 }
 
 static void flip_page (void)
@@ -287,27 +262,8 @@ static void flip_page (void)
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
-  /* hack: swap planes for I420 ;) -- alex */
-  if ((image_format == IMGFMT_IYUV) || (image_format == IMGFMT_I420))
-  {
-    uint8_t *src_i420[3];
-    
-    src_i420[0] = src[0];
-    src_i420[1] = src[2];
-    src_i420[2] = src[1];
-    src = src_i420;
-  }
-
-  if (scale_srcW) {
-    uint8_t *dst[3] = {image_data, NULL, NULL};
-    SwScale_YV12slice(src,stride,y,h,
-		      dst, image_width*((bpp+7)/8), bpp,
-		      scale_srcW, scale_srcH, image_width, image_height);
-  }
-  else {
   uint8_t *dst = image_data + (image_width * y + x) * (bpp/8);
   yuv2rgb(dst,src[0],src[1],src[2],w,h,image_width*(bpp/8),stride[0],stride[1]);
-  }
   return 0;
 }
 
@@ -318,10 +274,10 @@ query_format(uint32_t format)
     case IMGFMT_IYUV:
     case IMGFMT_I420:
     case IMGFMT_YV12:
+	return VFCAP_CSP_SUPPORTED|VFCAP_OSD;
     case IMGFMT_RGB|24:
     case IMGFMT_BGR|24:
-    case IMGFMT_BGR|32:
-        return 1;
+        return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW;
     }
     return 0;
 }
