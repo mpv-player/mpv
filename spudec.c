@@ -3,7 +3,7 @@
    1: aproximate
    2: full (slowest, best looking)
  */
-#define ANTIALIASING_ALGORITHM 1
+#define ANTIALIASING_ALGORITHM 2
 
 /* SPUdec.c
    Skeleton of function spudec_process_controll() is from xine sources.
@@ -389,7 +389,8 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 		   spu->image, spu->aimage, spu->stride);
     }
     else {
-      if (!spu->scaled) {	/* Resizing is needed */
+      if (!spu->scaled ||
+          spu->orig_frame_width != dxs || spu->orig_frame_height != dys) {	/* Resizing is needed */
 	/* scaled_x = scalex * x / 0x100
 	   scaled_y = scaley * y / 0x100
 	   order of operations is important because of rounding. */
