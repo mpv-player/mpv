@@ -14,6 +14,9 @@
 
 #include "pullup.h"
 
+#undef MAX
+#define MAX(a,b) ((a)>(b)?(a):(b))
+
 struct vf_priv_s {
 	struct pullup_context *ctx;
 	int init;
@@ -31,6 +34,25 @@ static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int 
 		memcpy(dst, src, bytesPerLine);
 		src+= srcStride;
 		dst+= dstStride;
+	}
+
+	return retval;
+}
+
+static inline void *il_memcpy_pic(void *dst, void *src0, void *src1, int w, int h, int ds, int ss)
+{
+	int i;
+	void *retval=dst;
+	ss += ss;
+
+	for(i=h>>1; i; i--)
+	{
+		memcpy(dst, src0, w);
+		src0 += ss;
+		dst += ds;
+		memcpy(dst, src1, w);
+		src1 += ss;
+		dst += ds;
 	}
 
 	return retval;
@@ -58,6 +80,7 @@ static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
 		c->metric_plane = 0;
 	}
 
+	c->strict_breaks = 0;
 	c->junk_left = c->junk_right = 1;
 	c->junk_top = c->junk_bottom = 4;
 	c->verbose = verbose;
@@ -165,6 +188,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 		}
 	}
 
+#if 0
 	/* Average qscale tables from both frames. */
 	if (mpi->qscale) {
 		for (i=0; i<c->w[3]; i++) {
@@ -172,6 +196,14 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				+ f->ofields[1]->planes[3][i+c->w[3]])>>1;
 		}
 	}
+#else
+	/* Take worst of qscale tables from both frames. */
+	if (mpi->qscale) {
+		for (i=0; i<c->w[3]; i++) {
+			vf->priv->qbuf[i] = MAX(f->ofields[0]->planes[3][i], f->ofields[1]->planes[3][i+c->w[3]]);
+		}
+	}
+#endif
 
 	/* If the frame isn't already exportable... */
 	while (!f->buffer) {
@@ -184,6 +216,24 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 			break;
 		}
 		/* Direct render fields into output buffer */
+#if 0
+		/* Write-order copy seems to have worse cache performance
+		 * than read-order, but both should be checked on
+		 * various cpus to see which is actually better...*/
+		il_memcpy_pic(dmpi->planes[0], f->ofields[0]->planes[0],
+			f->ofields[1]->planes[0] + c->stride[0],
+			mpi->w, mpi->h, dmpi->stride[0], c->stride[0]);
+		if (mpi->flags & MP_IMGFLAG_PLANAR) {
+			il_memcpy_pic(dmpi->planes[1], f->ofields[0]->planes[1],
+				f->ofields[1]->planes[1] + c->stride[1],
+				mpi->chroma_width, mpi->chroma_height,
+				dmpi->stride[1], c->stride[1]);
+			il_memcpy_pic(dmpi->planes[2], f->ofields[0]->planes[2],
+				f->ofields[1]->planes[2] + c->stride[2],
+				mpi->chroma_width, mpi->chroma_height,
+				dmpi->stride[2], c->stride[2]);
+		}
+#else
 		my_memcpy_pic(dmpi->planes[0], f->ofields[0]->planes[0],
 			mpi->w, mpi->h/2, dmpi->stride[0]*2, c->stride[0]*2);
 		my_memcpy_pic(dmpi->planes[0] + dmpi->stride[0],
@@ -205,6 +255,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				mpi->chroma_width, mpi->chroma_height/2,
 				dmpi->stride[2]*2, c->stride[2]*2);
 		}
+#endif
 		pullup_release_frame(f);
 		if (mpi->qscale) {
 			dmpi->qscale = vf->priv->qbuf;

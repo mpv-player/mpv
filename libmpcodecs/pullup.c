@@ -424,8 +424,11 @@ static void compute_breaks(struct pullup_context *c, struct pullup_field *f0)
 
 	/* Special case when fields are 100% identical */
 	if (f0->buffer == f2->buffer && f1->buffer != f3->buffer) {
-		f0->breaks |= BREAK_LEFT;
 		f2->breaks |= BREAK_RIGHT;
+		return;
+	}
+	if (f0->buffer != f2->buffer && f1->buffer == f3->buffer) {
+		f1->breaks |= BREAK_LEFT;
 		return;
 	}
 
@@ -677,7 +680,7 @@ void pullup_init_context(struct pullup_context *c)
 			c->comb = licomb_y_mmx;
 		}
 #endif
-		//c->comb = qpcomb_y;
+		/* c->comb = qpcomb_y; */
 		break;
 #if 0
 	case PULLUP_FMT_YUY2:
