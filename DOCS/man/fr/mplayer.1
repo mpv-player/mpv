@@ -154,8 +154,8 @@ même des films WMV (sans utiliser la bibliothèque avifile).
 Un autre gros atout de MPlayer est la grande variété de pilotes de
 sortie supportés.
 Il fonctionne avec X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib,
-DirectFB, mais vous pouvez aussi utiliser GGI, SDL (et de cette façon
-tous leurs drivers), VESA (sur n'importe quelle carte compatible
+DirectFB, Quartz, mais vous pouvez aussi utiliser GGI, SDL (et de cette
+façon tous leurs drivers), VESA (sur n'importe quelle carte compatible
 VESA, même sans X11), quelques drivers spécifiques à certaines cartes
 (pour Matrox, 3Dfx et ATI) et certaines carte de décompression MPEG,
 telles que les Siemens DVB, DXR2 et DXR3/\:Hollywood+.
@@ -3539,6 +3539,9 @@ Désactive l'accélération matérielle.
 Essayez cette option si vous avez des problèmes d'affichage.
 .RE
 .PD 1
+.TP
+.B quartz (Mac OS X uniquement)
+Pilote de sortie Quartz pour Mac OS X.
 .TP
 .B fbdev (Linux uniquement)
 Utilise le framebuffer du noyau pour la sortie vidéo.
