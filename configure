@@ -6998,10 +6998,6 @@ $_def_alloca
 $_def_mman
 $_def_mman_has_map_failed
 
-#ifndef MAP_ANONYMOUS
-#define MAP_ANONYMOUS MAP_ANON
-#endif
-
 /* Define this if you have the elf dynamic linker -ldl library */
 $_def_dl
 
