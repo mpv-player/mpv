@@ -144,14 +144,17 @@ int uninit_video(sh_video_t *sh_video){
     if(!sh_video->inited) return;
     printf("uninit video: %d  \n",sh_video->codec->driver);
     switch(sh_video->codec->driver){
+#ifdef USE_LIBAVCODEC
     case VFM_FFMPEG:
         if (avcodec_close(&lavc_context) < 0)
     	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, "could not close codec\n");
 	break;
+#endif
+#ifndef USE_DIRECTSHOW
     case VFM_DSHOW: // Win32/DirectShow
 	DS_VideoDecoder_Close();
 	break;
-
+#endif
     case VFM_MPEG:
 	mpeg2_free_image_buffers (picture);
 	break;
