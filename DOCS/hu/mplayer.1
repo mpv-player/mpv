@@ -67,7 +67,7 @@ mencoder \- Filmenkóder Linux alá
 'in +\n[.k]u
 [globális opciók]
 .RI { "file-ok csoportja és opcióik" }
-[csopotspecifikus opciók]
+[csoportspecifikus opciók]
 .br
 .in
 .B mplayer
@@ -3132,122 +3132,122 @@ NEM a 2. menet file-ja!
 .\" Irányítás billentyûzetrõl
 .\" --------------------------------------------------------------------------
 .
-.SH "KEYBOARD CONTROL"
-.I NOTE:
+.SH "IRÁNYÍTÁS BILLENTYÛZETRÕL"
+.I MEGJEGYZÉS:
 .br
-MPlayer has a fully configurable, command driven, control layer
-which allow you to control MPlayer using keyboard, mouse, joystick
-or remote control (using lirc).
+Az MPlayer egy teljesen személyre szabható irányitóréteggel rendelkezik,
+lehetõséget adva a billentyûzettel, egérrel, joystick-kal, és távírányítóval
+történõ irányításra.
 .br
-The default configuration file for the input system is
-~/.mplayer/\:input.conf but it can be overriden
-using the \-input conf option.
+Ez az input rendszer alapértelmezésben a ~/.mplayer/\:input.conf file
+átírásával konfigurálható, de az \-input opcióval megadható más útvonal is.
 .br
-These keys may/\:may not work, depending on your video output driver.
+Az itt leírt billentyûk mûködése a használt video kimenettõl függ.
 .TP
-.B general control
+.B általános irányítás
 .PD 0
 .RSs
-.IPs "<\- and \->"
-seek backward/\:forward 10 seconds
-.IPs "up and down"
-seek backward/\:forward  1 minute
-.IPs "pgup and pgdown"
-seek backward/\:forward 10 minutes
-.IPs "< and >"
-backward/\:forward in playlist
-.IPs "HOME and END"
-go to next/\:previous playtree entry in the parent list
-.IPs "INS and DEL"
-go to next/\:previous alternative source (asx playlist only)
+.IPs "<\- és \->"
+hátra illetve elõretekerés 10 másodperccel
+.IPs "fel és le"
+hátra illetve elõretekerés 1 perccel
+.IPs "pgup és pgdown"
+hátra illetve elõretekerés 10 perccel
+.IPs "< és >"
+hátra illetve elõrelépés a lejátszási listában
+.IPs "HOME és END"
+a következõ illetve az elõzõ szülõi playtree bejegyzésre ugrás
+.IPs "INS és DEL"
+a következõ illetve az elõzõ alternatív forrás kiválasztása (asx)
 .IPs "p / SPACE"
-pause movie (any key unpauses)
+szünet
 .IPs "q / ESC"
-stop playing and quit
+lejátszás leállítása és kilépés
 .IPs "+ and \-"
-adjust audio delay by +/\:\- 0.1 second
-.IPs "/ and *"
-decrease/\:increase volume
-.IPs "9 and 0"
-decrease/\:increase volume
+audio késleltetés +/\:\- 0.1 másodperccel
+.IPs "/ és *"
+hangerõ csökkentése/\:növelése
+.IPs "9 és 0"
+hangerõ csökkentése/\:növelése
 .IPs m\ \ \ \ 
-mute sound
+hang elnémítása
 .IPs f\ \ \ \ 
-toggle fullscreen
+teljesképernyõs illetve ablakos mód közti váltás
 .IPs "w and e"
-decrease/\:increase panscan range
+panscan mértékének megváltoztatása
 .IPs o\ \ \ \ 
-toggle between OSD states: none / seek / seek+timer
+váltás az OSD állapotai között: nincs / seek / seek+idõ
 .IPs d\ \ \ \ 
-toggle frame dropping
+képkockák eldobásának ki/bekapcsolása
 .IPs v\ \ \ \ 
-toggle subtitle visibility
+feliratok megjelenítésének ki/bekapcsolása
 .IPs j\ \ \ \ 
-switch subtitle language
+feliratok nyelvének kiválasztása
 .IPs a\ \ \ \ 
-toggle subtitle aligment: top/middle/bottom
-.IPs "z and x"
-adjust subtitle delay by +/\:\- 0.1 second
-.IPs "r and t"
-adjust subtitle position
+feliratok elrendezése: fent / közép / lent
+.IPs "z és x"
+feliratkésleltetés +/\:\- 0.1 másodperccel
+.IPs "r és t"
+feliratok pozícionálása
 .IPs "i"
-set EDL mark
+EDL bejegyzés
 
 .PP
-(The following keys are valid only when using \-vo xv or
-\-vo [vesa|fbdev]:vidix or \-vo xvidix \-vo (x)mga or \-vc divxds (slow).)
+(A következõ billentyûk csak hardveres támogatású videokimeneteken
+(xv, (x)vidix, (x)mga, stb), vagy szoftveres equalizer használatakor
+(-vop eq vagy -vop eq2) mûködnek.
 
-.IPs "1 and 2"
-adjust contrast
-.IPs "3 and 4"
-adjust brightness
-.IPs "5 and 6"
-adjust hue
-.IPs "7 and 8"
-adjust saturation
+.IPs "1 és 2"
+kontraszt beállítása
+.IPs "3 és 4"
+fényerõ beállítása
+.IPs "5 és 6"
+hue beállítása
+.IPs "7 és 8"
+szaturáció beállítása
 .RE
 .PD 1
 .
 .TP
-.B GUI keyboard control
+.B A GUI irányítása billentyûzetrõl
 .PD 0
 .RSs
 .IPs "ENTER"
-start playing
+lejátszás indítása
 .IPs s\ \ \ \ 
-stop playing
+lejátszás leállítása
 .IPs l\ \ \ \ 
-load file
+file betöltése
 .IPs c\ \ \ \ 
-skin browser
+skin böngészõ
 .IPs p\ \ \ \ 
-toggle playlist
+playlist ki/bekapcsolása
 .RE
 .PD 1
 .
 .TP
-.B TV input control
+.B TV bemenet irányítása
 .PD 0
 .RSs
 .IPs "h and k"
-select previous/\:next channel
+elõzõ/\:következõ csatorna
 .IPs n\ \ \ \ 
-change norm
+normaváltás
 .IPs u\ \ \ \ 
-change channel list
+csatornalista átváltása
 .RE
 .PD 1
 .
 .TP
-.B DVDNAV input control
+.B DVDNAV bemenet irányítása
 .PD 0
 .RSs
 .IPs "K,J,H,L"
-browse up/\:down/\:left/\:right
+fel/\:le/\:balra/\:jobbra
 .IPs M\ \ \ \ 
-jump to main menu
+ugrás a fõmenûbe
 .IPs S\ \ \ \ 
-select
+kiválasztás
 .RE
 .PD 1
 
@@ -3256,91 +3256,91 @@ select
 .\" Slave mode protocol
 .\" --------------------------------------------------------------------------
 .
-.SH "SLAVE MODE PROTOCOL"
-If the \-slave option is given, playback is controlled by a
-line\-based protocol.
-Each line must contain one command otherwise one of the following tokens:
+.SH "SLAVE MÓD PROTOKOLL"
+A \-slave opció megadása után az MPlayer egy sor-alapú protokollal lesz
+vezérelhetõ.
+Minden sor egy parancsot kell tartalmazzon.
 .TP
-.B Commands
+.B Parancsok
 .RSs
-.IPs "seek <value> [type=<0/\:1/\:2>]"
-Seek to some place in the movie.
-Type 0 is a relative seek of +/\:- <value> seconds.
-Type 1 seek to <value> % in the movie.
-Type 2 is a seek to an absolute position of <value> seconds.
-.IPs "audio_delay <value>"
-Adjust the audio delay of value seconds
+.IPs "seek <érték> [tipus=<0/\:1/\:2>]"
+Ugrás a film adott pozíciójára.
+A 0-ás tipus relatív +/\:- <érték> mennyiségû tekerést tesz lehetõvé.
+Az 1-es tipus a film <érték> százalékához ugrik.
+A 2-es tipus abszolut <érték> másodperc pozícióra ugrik.
+.IPs "audio_delay <érték>"
+Audio késleltetésének beállítása adott másodpercre.
 .IPs quit
-Quit MPlayer
+Kilépés az MPlayer-bõl
 .IPs pause
-Pause/\:unpause the playback
+Lejátszás szüneteltetése
 .IPs grap_frames
-Somebody know ?
-.IPs "pt_step <value> [force=<value>]"
-Go to next/\:previous entry in the playtree.
-.IPs "pt_up_step <value> [force=<value>]"
-Like pt_step but it jumps to next/\:previous in the parent list.
-.IPs "alt_src_step <value>"
-When more than one source is available it selects the next/\:previous one
-(only supported by asx playlist).
-.IPs "sub_delay <value> [abs=<value>]"
-Adjust the subtitles delay of +/\:- <value> seconds or set it to <value>
-seconds when abs is non zero.
-.IPs "osd [level=<value>]"
-Toggle osd mode or set it to level when level > 0.
+Tudja valaki?
+.IPs "pt_step <érték> [force=<érték>]"
+A következõ/\:elõzõ playtree bejegyzésre ugrás.
+.IPs "pt_up_step <érték> [force=<érték>]"
+Mint a pt_step, de a szülõi bejegyzésben történõ ugrás.
+.IPs "alt_src_step <érték>"
+Ha egynél több kiválasztható forrás áll rendelkezésre, ezzel az opcióval
+lehet a következõ/\:elõzõ között váltani (csak asx lejátszási listában).
+.IPs "sub_delay <érték> [abs=<érték>]"
+Feliratok késleltetésének beállítása +/\:- <érték> másodpercre.
+.IPs "osd [level=<érték>]"
+OSD mód átváltása.
 .IPs "volume <dir>"
-Increase/\:decrease volume
-.IPs "[contrast|brightness|hue|saturation] <\-100\-100> [abs=<value>]"
-Set/\:Adjust video parameters.
-.IPs "frame_drop [type=<value>]"
-Toggle/\:Set frame dropping mode.
+Hangerõ növelése/\:csökkentése
+.IPs "[contrast|brightness|hue|saturation] <\-100\-100> [abs=<érték>]"
+Video paramétereinek beállítása.
+.IPs "frame_drop [type=<érték>]"
+Képkockák eldobásának bekapcsolása/módjának kiválasztása.
 .IPs "sub_visibility"
-Toggle subtitle visibility.
-.IPs "sub_pos <value>"
-Adjust subtitles position.
+Feliratok megjelenítésének ki/bekapcsolása.
+.IPs "sub_pos <érték>"
+Feliratok pozíciójának megváltoztatása.
 .IPs vo_fullscreen
-Switch to fullscreen mode.
+Teljesképernyõs módba váltás.
 .IPs "tv_step_channel <dir>"
-Select next/\:previous tv channel.
+Következõ/\:elõzõ tv csatornára váltás.
 .IPs "tv_step_norm"
-Change TV norm.
+TV norma átváltása.
 .IPs "tv_step_chanlist"
-Change channel list.
+Csatornalista átváltása.
 .IPs "gui_[loadsubtitle|about|play|stop]"
-GUI actions
+GUI funkciók
 .RE
 
 
 .\" --------------------------------------------------------------------------
-.\" Files
+.\" File-ok
 .\" --------------------------------------------------------------------------
 .
-.SH FILES
+.SH FILE-OK
 .TP
 /etc/\:mplayer/\:mplayer.conf
-system\-wide settings
+rendszerszintû beállítások
 .TP
 ~/.mplayer/\:config
-user settings
+felhasználói beállítások
 .TP
 ~/.mplayer/\:input.conf
-input bindings (see '\-input keylist' for full keylist)
+input rendszer konfigurációja (lásd '\-input keylist')
 .TP
 ~/.mplayer/\:gui.conf
-GUI configuration file
+GUI konfigurációs file-ja
 .TP
 ~/.mplayer/\:gui.pl
-GUI playlist
+GUI lejátszási listája
 .TP
 ~/.mplayer/\:font/
-font directory (There must be a font.desc file and files with .RAW extension.)
+betûtipusok könyvtára (egy font.desc file-t, és több .RAW kiterjesztésû
+file-t kell tartalmaznia)
 .TP
 ~/.mplayer/\:DVDkeys/
-cracked CSS keys
+feltört CSS kulcsok
 .PD 0
 .TP
-Sub files
-are searched for in this priority (for example /mnt/\:movie/\:movie.avi):
+A felirat file-ok keresési sorrendje a következõ (a példa film
+/mnt/\:movie/\:movie.avi):
 .RSs
 /mnt/\:cdrom/\:movie.sub
 .br
@@ -3352,71 +3352,72 @@ are searched for in this priority (for example /mnt/\:movie/\:movie.avi):
 
 
 .\" --------------------------------------------------------------------------
-.\" Examples
+.\" Példák
 .\" --------------------------------------------------------------------------
 .
-.SH EXAMPLES
+.SH PÉLDÁK
 .TP
-.B Quickstart DVD playing
+.B DVD lejátszás indítása
 mplayer \-dvd 1
 .TP
-.B Play in japanese with english subtitles
+.B Japán hanggal, és angol felirattal
 mplayer \-dvd 1 \-alang ja \-slang en
 .TP
-.B Play only chapters 5, 6, 7
+.B Csak az 5, 6, 7 fejezetek lejátszása
 mplayer \-dvd 1 \-chapter 5\-7
 .TP
-.B Multiangle DVD playing
+.B Más nézõpont kiválasztása
 mplayer \-dvd 1 \-dvdangle 2
 .TP
-.B Playing from a different DVD device
+.B Más DVD egység használata
 mplayer \-dvd 1 \-dvd\-device /dev/\:dvd2
 .TP
-.B Old style DVD (VOB) playing
+.B Régi tipusú DVD (VOB) lejátszás
 mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
 .TP
-.B Stream from HTTP
+.B HTTP stream lejátszása
 mplayer http://mplayer.hq/\:example.avi
 .TP
-.B Stream using RTSP
+.B RTSP stream lejátszása
 mplayer rtsp://server.example.com/\:streamName
 .TP
-.B Convert subtitle to MPsub (to ./\:dump.mpsub)
+.B Felirat konvertálása MPsub-á (./\:dump.mpsub)
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .TP
-.B Input from standard V4L
+.B V4L bemenet használata
 mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
-.B Encoding DVD title #2, only selected chapters
+.B DVD 2-es sávjának enkódolása, csak a kiválasztott fejezetekkel
 mencoder \-dvd 2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
-.B Encoding DVD title #2, resizing to 640x480
+.B DVD 2-es sávjának enkódolása, átméretezés 640x480-ba
 mencoder \-dvd 2 \-vop scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
-.B Encoding DVD title #2, resizing to 512xHHH (keep aspect ratio)
+.B DVD 2-es sávjának enkódolása, átméretezés 512xMMM-be (képarány
+megtartásával)
 mencoder \-dvd 2 \-vop scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
-.B The same, but with libavcodec family, MPEG4 (Divx5) compression
+.B Ugyanez, de a libavcodec-kel, MPEG4 tömörítéssel
 mencoder \-dvd 2 \-o title2.avi \-ovc lavc
 \-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
 .TP
-.B The same, but with libavcodec family, MJPEG compression
+.B Ugyanez MJPEG-gel
 mencoder \-dvd 2 \-o titel2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
 .TP
-.B Encoding all *.jpg files in the current dir
+.B A jelenlegi könyvtárban lévõ összes *.jpg file enkódolása
 mencoder \\*.jpg \-mf on:fps=25 \-o output.avi \-ovc divx4
 .TP
-.B Encoding from tuner
+.B Enkódolás tunerrõl
 mencoder \-tv on:driver=v4l:width=640:height=480 \-o tv.avi \-ovc rawrgb
 .TP
-.B Encoding from a pipe
+.B Enkódolás pipe-ból
 rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24
 \-\- \-
 .TP
-.B Encoding multiple *.vob files
+.B Több *.vob file enkódolása
 cat *.vob | mencoder <options> \-
 
 
@@ -3424,36 +3425,31 @@ cat *.vob | mencoder <options> \-
 .\" Bugs, authors, standard disclaimer
 .\" --------------------------------------------------------------------------
 .
-.SH BUGS
-Probably.
-PLEASE, double-check the documentation (especially bugreports.html),
-the FAQ and the mail archive before!
+.SH BUGOK
+Nyüzsögnek. Ott is meg ott is!
+De mielõtt ezt a tapasztalatodat velünk is megosztod, rágd át magad a
+dokumentáción (fõleg a bugreports.html-en), a FAQ-n, és a listaarchivumokon!
 .br
-Send your complete bug reports to the MPlayer-users mailing list at
-<mplayer-users@mplayerhq.hu>.
-We love complete bug reports :)
+A mindenre kiterjedõ jelentést az MPlayer-users levelezési listára
+várjuk <mplayer-users@mplayerhq.hu>.
 
 
-.SH AUTHORS
-Check documentation.
+.SH KÉSZÍTÕK
+Lásd a dokumentációban.
 .TP
-MPlayer is (C) 2000\-2003
+MPlayer (C) 2000\-2003
 .B Arpad Gereoffy
 .TP
-This man page is written and maintained by
+Ezen man page készítõi és karbantartói
 .B Gabucino
 .br
 .B Diego Biurrun
 .br
 .B Jonas Jermann
 .PP
-Please send mails about it to the MPlayer-users mailing list.
+A véleményeket az MPlayer-users levelezési listára várjuk.
 
 
-.SH "STANDARD DISCLAIMER"
-Use only at your own risk!
-There may be errors and inaccuracies that could be damaging to your system or
-your eye.
-Proceed with caution, and although this is highly unlikely, the authors don't
-take any responsibility for that!
+.SH "A SZOKÁSOS SZÖVEG"
+Semmiféle felelõsséget nem vállalunk semmiért.
 .\" end of file
