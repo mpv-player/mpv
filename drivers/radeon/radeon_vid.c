@@ -130,7 +130,8 @@ typedef struct bes_registers_s
   uint32_t exclusive_horz;
   uint32_t auto_flip_cntl;
   uint32_t filter_cntl;
-  uint32_t colour_cntl;
+  int brightness;
+  int saturation;
   uint32_t graphics_key_msk;
   uint32_t graphics_key_clr;
   uint32_t key_cntl;
@@ -186,7 +187,7 @@ static uint32_t radeon_vid_in_use = 0;
 static uint8_t *radeon_mmio_base = 0;
 static uint32_t radeon_mem_base = 0; 
 static int32_t radeon_overlay_off = 0;
-
+static int radeon_double_buff=1;
 static uint32_t radeon_ram_size = 0;
 
 static mga_vid_config_t radeon_config; 
@@ -334,10 +335,10 @@ RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n
     OUTREG(OV0_P23_V_ACCUM_INIT,	besr.p23_v_accum_init);
 
     bes_flags = SCALER_ENABLE |
-                SCALER_DOUBLE_BUFFER |
                 SCALER_ADAPTIVE_DEINT |
                 SCALER_SMART_SWITCH |
                 SCALER_HORZ_PICK_NEAREST;
+    if(radeon_double_buff) bes_flags |= SCALER_DOUBLE_BUFFER;
 #ifdef RAGE128
     bes_flags |= SCALER_BURST_PER_PLANE;
 #endif
@@ -549,6 +550,7 @@ RTRACE(RVID_MSG"BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
 static void radeon_vid_frame_sel(int frame)
 {
     uint32_t off0,off1,off2;
+    if(!radeon_double_buff) return;
     if(frame%2)
     {
       off0 = besr.vid_buf3_base_adrs;
@@ -567,6 +569,14 @@ static void radeon_vid_frame_sel(int frame)
     OUTREG(OV0_VID_BUF1_BASE_ADRS,	off1);
     OUTREG(OV0_VID_BUF2_BASE_ADRS,	off2);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
+}
+
+static void radeon_vid_preset(void)
+{
+  unsigned tmp;
+  tmp = INREG(OV0_COLOUR_CNTL);
+  besr.saturation = (tmp>>8)&0x1f;
+  besr.brightness = tmp & 0x7f;
 }
 
 static int video_on = 0;
@@ -730,6 +740,8 @@ const struct ati_card_id_s ati_card_ids[]=
 #endif
 };
 
+static int detected_chip;
+
 static int radeon_vid_config_card(void)
 {
 	struct pci_dev *dev = NULL;
@@ -756,20 +768,62 @@ static int radeon_vid_config_card(void)
 	/* mem size is bits [28:0], mask off the rest. Range: from 1Mb up to 512 Mb */
 	radeon_ram_size &=  CONFIG_MEMSIZE_MASK;
 	radeon_ram_size /= 0x100000;
+	detected_chip = i;
 	printk(RVID_MSG"Found %s (%uMb memory)\n",ati_card_ids[i].name,radeon_ram_size);
 
 	return TRUE;
 }
 
+#define PARAM_BRIGHTNESS "brightness="
+#define PARAM_SATURATION "saturation="
+#define PARAM_DOUBLE_BUFF "double_buff="
 
 static ssize_t radeon_vid_read(struct file *file, char *buf, size_t count, loff_t *ppos)
 {
-	return -EINVAL;
+    unsigned len,saturation;
+    long brightness;
+    brightness = besr.brightness;
+    saturation = besr.saturation;
+    len = 0;
+    len += sprintf(&buf[len],"Chip: %s\n",ati_card_ids[detected_chip].name);
+    len += sprintf(&buf[len],"Memory: %p:%x\n",radeon_mem_base,radeon_ram_size*0x100000);
+    len += sprintf(&buf[len],"MMIO: %p\n",radeon_mmio_base);
+    len += sprintf(&buf[len],"Configurable stuff:\n");
+    len += sprintf(&buf[len],PARAM_DOUBLE_BUFF"%s\n",radeon_double_buff?"on":"off");
+    len += sprintf(&buf[len],PARAM_BRIGHTNESS"%i\n",brightness);
+    len += sprintf(&buf[len],PARAM_SATURATION"%u\n",saturation);
+    return len;
 }
 
 static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count, loff_t *ppos)
 {
-	return -EINVAL;
+    if(memcmp(buf,PARAM_BRIGHTNESS,min(count,strlen(PARAM_BRIGHTNESS))) == 0)
+    {
+      long brightness;
+      brightness=simple_strtol(&buf[strlen(PARAM_BRIGHTNESS)],NULL,10);
+      if(brightness >= -64 && brightness <= 63)
+	OUTREG(OV0_COLOUR_CNTL, (brightness & 0x7f) |
+				     (besr.saturation << 8) |
+				     (besr.saturation << 16));
+    }
+    else
+    if(memcmp(buf,PARAM_SATURATION,min(count,strlen(PARAM_SATURATION))) == 0)
+    {
+      long saturation;
+      saturation=simple_strtol(&buf[strlen(PARAM_SATURATION)],NULL,10);
+      if(saturation >= 0 && saturation <= 31)
+	OUTREG(OV0_COLOUR_CNTL, (besr.brightness & 0x7f) |
+				     (saturation << 8) |
+				     (saturation << 16));
+    }
+    else
+    if(memcmp(buf,PARAM_DOUBLE_BUFF,min(count,strlen(PARAM_DOUBLE_BUFF))) == 0)
+    {
+      if(memcmp(&buf[strlen(PARAM_DOUBLE_BUFF)],"on",2) == 0) radeon_double_buff = 1;
+      else radeon_double_buff = 0;
+    }
+    radeon_vid_preset();
+    return count;
 }
 
 static int radeon_vid_mmap(struct file *file, struct vm_area_struct *vma)
@@ -868,6 +922,7 @@ static int radeon_vid_initialize(void)
 		return -EINVAL;
 	}
 	radeon_vid_save_state();
+	radeon_vid_preset();
 	return(0);
 }
 
