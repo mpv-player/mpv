@@ -218,4 +218,8 @@ typedef struct af_control_ext_s{
 // Export
 #define AF_CONTROL_EXPORT_SZ            0x00002000 | AF_CONTROL_FILTER_SPECIFIC
 
+
+// ExtraStereo Multiplier
+#define AF_CONTROL_ES_MUL		0x00002100 | AF_CONTROL_FILTER_SPECIFIC
+
 #endif /*__af_control_h */

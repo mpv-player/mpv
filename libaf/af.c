@@ -23,6 +23,8 @@ extern af_info_t af_info_pan;
 extern af_info_t af_info_surround;
 extern af_info_t af_info_sub;
 extern af_info_t af_info_export;
+extern af_info_t af_info_volnorm;
+extern af_info_t af_info_extrastereo;
 
 static af_info_t* filter_list[]={ 
    &af_info_dummy,
@@ -40,6 +42,8 @@ static af_info_t* filter_list[]={
 #ifdef HAVE_SYS_MMAN_H
    &af_info_export,
 #endif
+   &af_info_volnorm,
+   &af_info_extrastereo,
    NULL 
 };
 

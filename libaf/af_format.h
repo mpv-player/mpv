@@ -18,7 +18,7 @@
 #define AF_FORMAT_US		(1<<1) // Un Signed
 #define AF_FORMAT_SIGN_MASK	(1<<1)
 
-// Fixed of floating point
+// Fixed or floating point
 #define AF_FORMAT_I		(0<<2) // Int
 #define AF_FORMAT_F		(1<<2) // Foating point
 #define AF_FORMAT_POINT_MASK	(1<<2)

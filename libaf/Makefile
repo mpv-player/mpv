@@ -2,7 +2,7 @@ include ../config.mak
 
 LIBNAME = libaf.a
 
-SRCS=af.c af_mp.c af_dummy.c af_delay.c af_channels.c af_format.c af_resample.c window.c filter.c af_volume.c af_equalizer.c af_tools.c af_comp.c af_gate.c af_pan.c af_surround.c af_sub.c af_export.c
+SRCS=af.c af_mp.c af_dummy.c af_delay.c af_channels.c af_format.c af_resample.c window.c filter.c af_volume.c af_equalizer.c af_tools.c af_comp.c af_gate.c af_pan.c af_surround.c af_sub.c af_export.c af_volnorm.c af_extrastereo.c
 
 OBJS=$(SRCS:.c=.o)
 
