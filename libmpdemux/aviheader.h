@@ -106,6 +106,7 @@ typedef struct {
   unsigned int pts_corr_bytes;
   unsigned char pts_corrected;
   unsigned char pts_has_video;
+  unsigned int numberofframes;
 } avi_priv_t;
 
 #define AVI_PRIV ((avi_priv_t*)(demuxer->priv))

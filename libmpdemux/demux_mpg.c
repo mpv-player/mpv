@@ -403,7 +403,28 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
           if(i==0x1B3 || i==0x1B8) break; // found it!
           if(!i || !skip_video_packet(d_video)) break; // EOF?
         }
-
-
 }
 
+int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
+    demux_stream_t *d_audio=demuxer->audio;
+    demux_stream_t *d_video=demuxer->video;
+    sh_audio_t *sh_audio=d_audio->sh;
+    sh_video_t *sh_video=d_video->sh;
+
+    switch(cmd) {
+	case DEMUXER_CTRL_GET_TIME_LENGTH:
+	    if(!sh_video->i_bps)  // unspecified or VBR 
+    		return DEMUXER_CTRL_DONTKNOW;
+	    *((unsigned long *)arg)=(demuxer->movi_end-demuxer->movi_start)/sh_video->i_bps;
+	    return DEMUXER_CTRL_GUESS;
+
+	case DEMUXER_CTRL_GET_PERCENT_POS:
+	    if (demuxer->movi_end==demuxer->movi_start) 
+    		return DEMUXER_CTRL_DONTKNOW;
+    	    *((int *)arg)=(int)((demuxer->filepos-demuxer->movi_start)/((demuxer->movi_end-demuxer->movi_start)/100));
+	    return DEMUXER_CTRL_OK;
+
+	default:
+	    return DEMUXER_CTRL_NOTIMPL;
+    }
+}

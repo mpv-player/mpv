@@ -1245,3 +1245,41 @@ char* demux_info_get(demuxer_t *demuxer, char *opt) {
   return NULL;
 }
 
+extern int demux_mpg_control(demuxer_t *demuxer, int cmd, void *arg);
+extern int demux_asf_control(demuxer_t *demuxer, int cmd, void *arg);
+extern int demux_avi_control(demuxer_t *demuxer, int cmd, void *arg);
+
+int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
+    switch(demuxer->type) {
+	case DEMUXER_TYPE_MPEG_ES:
+	case DEMUXER_TYPE_MPEG_PS:
+	    return demux_mpg_control(demuxer,cmd,arg);
+	case DEMUXER_TYPE_ASF:
+	    return demux_asf_control(demuxer,cmd,arg);
+	case DEMUXER_TYPE_AVI:
+	    return demux_avi_control(demuxer,cmd,arg);
+
+	default:
+	    return DEMUXER_CTRL_NOTIMPL;
+    }
+}
+
+
+
+unsigned long demuxer_get_time_length(demuxer_t *demuxer){     
+    unsigned long get_time_ans;     
+    if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,(void *)&get_time_ans)<=0)  {
+        get_time_ans=0;     
+    }
+    return get_time_ans;
+}
+
+int demuxer_get_percent_pos(demuxer_t *demuxer){     
+    int ans;     
+    if (demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans)<=DEMUXER_CTRL_OK)  {
+        ans=0;     
+    }
+    if (ans>100 || ans<0) ans=0;
+    return ans;
+}
+

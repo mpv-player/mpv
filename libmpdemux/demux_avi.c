@@ -552,6 +552,15 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   if(sh_audio) sh_video->i_bps-=sh_audio->audio.dwLength;
   mp_msg(MSGT_DEMUX,MSGL_V,"AVI video length=%lu\n",(unsigned long)sh_video->i_bps);
   sh_video->i_bps=((float)sh_video->i_bps/(float)sh_video->video.dwLength)*sh_video->fps;
+  
+  if((priv->numberofframes=sh_video->video.dwLength)<=1)
+    // bad video header, try to get number of frames from audio
+    if(sh_audio && sh_audio->wf->nAvgBytesPerSec) priv->numberofframes=sh_video->fps*sh_audio->audio.dwLength/sh_audio->wf->nAvgBytesPerSec;
+  if(priv->numberofframes<=1){
+    mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CouldntDetFNo);
+    priv->numberofframes=0;
+  }          
+ 
   mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     (char *)&sh_video->bih->biCompression,
     sh_video->bih->biWidth,
@@ -588,17 +597,7 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
       }
       
       if(flags&2){
-        // float 0..1
-	int total=sh_video->video.dwLength;
-	if(total<=1){
-	    // bad video header, try to get it from audio
-	    if(sh_audio) total=sh_video->fps*sh_audio->audio.dwLength/sh_audio->wf->nAvgBytesPerSec;
-	    if(total<=1){
-              mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CouldntDetFNo);
-	      total=0;
-	    }
-	}
-	rel_seek_frames=rel_seek_secs*total;
+	rel_seek_frames=rel_seek_secs*priv->numberofframes;
       }
     
       priv->skip_video_frames=0;
@@ -784,4 +783,36 @@ void demux_close_avi(demuxer_t *demuxer) {
   if(priv->idx_size > 0)
     free(priv->idx);
   free(priv);
+}
+
+
+int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
+    avi_priv_t *priv=demuxer->priv;
+    demux_stream_t *d_audio=demuxer->audio;
+    demux_stream_t *d_video=demuxer->video;
+    sh_audio_t *sh_audio=d_audio->sh;
+    sh_video_t *sh_video=d_video->sh;
+
+
+
+    switch(cmd) {
+	case DEMUXER_CTRL_GET_TIME_LENGTH:
+    	    if (!priv->numberofframes) return DEMUXER_CTRL_DONTKNOW;
+	    *((unsigned long *)arg)=priv->numberofframes/sh_video->fps;
+	    if (sh_video->video.dwLength<=1) return DEMUXER_CTRL_GUESS;
+	    return DEMUXER_CTRL_OK;
+
+	case DEMUXER_CTRL_GET_PERCENT_POS:
+    	    if (!priv->numberofframes) {
+		if (demuxer->movi_end==demuxer->movi_start) return DEMUXER_CTRL_DONTKNOW;
+		*((int *)arg)=(int)((demuxer->filepos-demuxer->movi_start)/((demuxer->movi_end-demuxer->movi_start)/100));
+		return DEMUXER_CTRL_OK; 
+	    }
+	    *((int *)arg)=(int)(priv->video_pack_no*100/priv->numberofframes);
+	    if (sh_video->video.dwLength<=1) return DEMUXER_CTRL_GUESS;
+	    return DEMUXER_CTRL_OK;
+
+	default:
+	    return DEMUXER_CTRL_NOTIMPL;
+    }
 }

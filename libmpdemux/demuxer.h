@@ -50,6 +50,14 @@
 #define DEMUXER_TIME_BPS 3
 
 
+// DEMUXER control commands/answers
+#define DEMUXER_CTRL_NOTIMPL -1
+#define DEMUXER_CTRL_DONTKNOW 0
+#define DEMUXER_CTRL_OK 1
+#define DEMUXER_CTRL_GUESS 2
+#define DEMUXER_CTRL_GET_TIME_LENGTH 10
+#define DEMUXER_CTRL_GET_PERCENT_POS 11
+
 // Holds one packet/frame/whatever
 typedef struct demux_packet_st {
   int len;
@@ -234,5 +242,9 @@ extern int pts_from_bps;
 int demux_info_add(demuxer_t *demuxer, char *opt, char *param);
 char* demux_info_get(demuxer_t *demuxer, char *opt);
 int demux_info_print(demuxer_t *demuxer);
+int demux_control(demuxer_t *demuxer, int cmd, void *arg);
 
 #endif
+
+extern unsigned long demuxer_get_time_length(demuxer_t *demuxer);
+extern int demuxer_get_percent_pos(demuxer_t *demuxer);

@@ -48,6 +48,8 @@ int asf_scrambling_h=1;
 int asf_scrambling_w=1;
 int asf_scrambling_b=1;
 int asf_packetsize=0;
+double asf_packetrate=0;
+int asf_movielength=0;
 
 //int i;
 
@@ -214,6 +216,8 @@ while(!stream_eof(demuxer->stream)){
       mp_msg(MSGT_HEADER,MSGL_V,"ASF: packets: %d  flags: %d  max_packet_size: %d  min_packet_size: %d  max_bitrate: %d  preroll: %d\n",(int)fileh.num_packets,(int)fileh.flags,(int)fileh.min_packet_size,(int)fileh.max_packet_size,(int)fileh.max_bitrate,(int)fileh.preroll);
       asf_packetsize=fileh.max_packet_size;
       asf_packet=malloc(asf_packetsize); // !!!
+      asf_packetrate=fileh.max_bitrate/8.0/(double)asf_packetsize;
+      asf_movielength=fileh.send_duration/10000000LL;
       break;
     case ASF_GUID_PREFIX_data_chunk: // guid_data_chunk
       demuxer->movi_start=stream_tell(demuxer->stream)+26;

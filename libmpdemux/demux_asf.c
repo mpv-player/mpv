@@ -35,7 +35,8 @@ extern int asf_scrambling_h;
 extern int asf_scrambling_w;
 extern int asf_scrambling_b;
 extern int asf_packetsize;
-
+extern double asf_packetrate;
+extern int asf_movielength;
 
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 
@@ -357,7 +358,7 @@ void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags){
   //FIXME: reports good or bad to steve@daviesfam.org please
 
   //================= seek in ASF ==========================
-    float p_rate=10; // packets / sec
+    float p_rate=asf_packetrate; // packets / sec
     off_t rel_seek_packs=(flags&2)?	 // FIXME: int may be enough?
 	(rel_seek_secs*(demuxer->movi_end-demuxer->movi_start)/asf_packetsize):
 	(rel_seek_secs*p_rate);
@@ -395,3 +396,25 @@ void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags){
 
 }
 
+int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
+    demux_stream_t *d_audio=demuxer->audio;
+    demux_stream_t *d_video=demuxer->video;
+    sh_audio_t *sh_audio=d_audio->sh;
+    sh_video_t *sh_video=d_video->sh;
+
+    switch(cmd) {
+	case DEMUXER_CTRL_GET_TIME_LENGTH:
+	    *((unsigned long *)arg)=(unsigned long)(asf_movielength);
+	    return DEMUXER_CTRL_OK;
+
+	case DEMUXER_CTRL_GET_PERCENT_POS:
+	    if (demuxer->movi_end==demuxer->movi_start) {
+		return DEMUXER_CTRL_DONTKNOW;
+	    }
+    	    *((int *)arg)=(int)((demuxer->filepos-demuxer->movi_start)/((demuxer->movi_end-demuxer->movi_start)/100));
+	    return DEMUXER_CTRL_OK;
+
+	default:
+	    return DEMUXER_CTRL_NOTIMPL;
+    }
+}
