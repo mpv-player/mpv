@@ -49,6 +49,15 @@ static int is_entry_option(char *opt, char *param, play_tree_t** ret) {
     return 0;
 }
 
+static inline void add_entry(play_tree_t *last_parent,
+	play_tree_t *last_entry, play_tree_t *entry) {
+    if(last_entry == NULL)
+      play_tree_set_child(last_parent,entry);		      
+    else 
+      play_tree_append_entry(last_entry,entry);
+    last_entry = entry;
+}
+
 play_tree_t*
 m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 {
@@ -57,13 +66,6 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
   char *opt;
   int no_more_opts = 0;
   play_tree_t *last_parent, *last_entry = NULL, *root;
-  void add_entry(play_tree_t *entry) {
-    if(last_entry == NULL)
-      play_tree_set_child(last_parent,entry);		      
-    else 
-      play_tree_append_entry(last_entry,entry);
-    last_entry = entry;
-  }
 
 #ifdef MP_DEBUG
   assert(config != NULL);
@@ -160,7 +162,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	  tmp = is_entry_option(opt,(i+1<argc) ? argv[i + 1] : NULL,&entry);
 	  if(tmp > 0)  { // It's an entry
 	    if(entry) {
-	      add_entry(entry);
+	      add_entry(last_parent,last_entry,entry);
 	      if((last_parent->flags & PLAY_TREE_RND) && entry->child)
 		entry->flags |= PLAY_TREE_RND;
 	      UNSET_GLOBAL;
@@ -201,7 +203,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	// Lock stdin if it will be used as input
 	if(strcasecmp(argv[i],"-") == 0)
 	  m_config_set_option(config,"use-stdin",NULL);
-	add_entry(entry);
+	add_entry(last_parent,last_entry,entry);
 	UNSET_GLOBAL; // We start entry specific options
 
       }
