@@ -12,7 +12,8 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-quiet ]
 .RB [ \-vo\ <meghajtó>[:<egység>] ]
 .RB [ \-ao\ <meghajtó>[:<egység>] ]
-.RB [ \-vcd\ <sáv>\ ]
+.RB [ \-vcd\ <sáv> ]
+.RB [ \-cdrom-pathname\ <útvonal> ]
 .RB [ \-sb\ <byte\ pozíció> ]
 .RB [ \-nosound ]
 .RB [ \-abs\ <byte-ok> ]
@@ -77,6 +78,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-monitor_dotclock\ <dotclock\ (vagy\ pixelclock)\ tartomány> ]
 .RB [ \-benchmark ]
 .RB [ \-dvd\ <cím> ]
+.RB [ \-dvd-device\ <útvonal> ]
 .RB [ \-chapter\ fejezet ]
 .RB [ \-dvdangle\ szög ]
 .RB [ \-alang\ <audio\ stream\ nyelve> ]
@@ -144,10 +146,13 @@ Például a '-skin fittyfene' ezeket próbálja végig :
 .I MEGJEGYZÉS:
 Ezek az opciók csak a DVD támogatás befordítása után elérhetõek. A részletekhez
 lásd a dokumentációt.
-.B \-dvd\ cím
+.B \-dvd\ <cím>
 megadja hogy az MPlayer a DVD-n található mely filmeket (amiket számokkal
 jelölnek) játssza le. Például az 1-esek általában elõzetesek, és a 2 az
 igazi film.
+.TP
+.B \-dvd-device\ <útvonal>
+az alapértelmezett /dev/dvd helyett más egység használata
 .TP
 .B \-sid\ <id>
 Bekapcsolja a DVD feliratok megjelenítését. Szükséges egy DVD feliratazonosító
@@ -203,6 +208,9 @@ lekérni :
 .TP
 .B \-vcd\ <sáv>
 Video CD sáv lejátszása file helyett
+.TP
+.B \-cdrom-device\ <útvonal>
+az alapértelmezett /dev/cdrom helyett más egység használata
 .TP
 .B \-nosound
 hang nélküli lejátszás
@@ -706,7 +714,7 @@ mplayer -dvd 1 -chapter 5-7
 mplayer -dvd 1 -dvdangle 2
 .TP
 .B Lejátszás más DVD egységrõl
-mplayer -dvd 1 /dev/dvd2
+mplayer -dvd 1 -dvd-device /dev/dvd2
 .TP
 .B HTTP-rõl lejátszás
 mplayer http://mplayer.hq/example.avi

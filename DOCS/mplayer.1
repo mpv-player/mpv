@@ -13,6 +13,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-vo\ <driver>[:<device>] ]
 .RB [ \-ao\ <driver>[:<device>] ]
 .RB [ \-vcd\ <track\ number> ]
+.RB [ \-cdrom-device\ <path\ to\ device> ]
 .RB [ \-sb\ <byte\ position> ]
 .RB [ \-nosound ]
 .RB [ \-abs\ <bytes> ]
@@ -78,6 +79,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-monitor_dotclock\ <dotclock\ (or\ pixelclock)\ range> ]
 .RB [ \-benchmark ]
 .RB [ \-dvd\ <title\ id> ]
+.RB [ \-dvd-device\ <path\ to\ device> ]
 .RB [ \-chapter\ <chapter\ id> ]
 .RB [ \-dvdangle\ <angle\ id> ]
 .RB [ \-alang\ <country\ code> ]
@@ -151,6 +153,9 @@ DVD playback sometimes requires deinterlacing: see '-pp 0x20000' or '-npp lb' op
 tell MPlayer which movies (marked with titleid) to play. For example
 sometimes '1' are trailers, and '2' is the real movie.
 .TP
+.B \-dvd-device\ <path\ to\ device>
+override default DVD device name /dev/dvd
+.TP
 .B \-chapter\ <chapter\ id>
 specify which chapter to start playing at. Optionally specify which chapter to
 end playing at. Examples can be found below.
@@ -202,6 +207,9 @@ you can get the list of available drivers executing
 .TP
 .B \-vcd\ <track>
 play video cd track from device instead of plain file
+.TP
+.B \-cdrom-device\ <path\ to\ device>
+override default CDROM drive name /dev/cdrom
 .TP
 .B \-nosound
 don't play sound
@@ -769,7 +777,7 @@ mplayer -dvd 1 -chapter 5-7
 mplayer -dvd 1 -dvdangle 2
 .TP
 .B Playing from a different DVD device
-mplayer -dvd 1 /dev/dvd2
+mplayer -dvd 1 -dvd-device /dev/dvd2
 .TP
 .B Stream from HTTP
 mplayer http://mplayer.hq/example.avi
