@@ -65,6 +65,7 @@ másoló, és video átméretezõ képességgel.</P>
       is</LI>
     <LI>enkódolás <B>V4L kompatibilis TV tunerekrõl</B></LI>
     <LI>enkódolása/multiplexelése interleaved AVI-knak, megfelelõ index-szel</LI>
+    <LI>opcionálisan külsõ audio stream használata</LI>
     <LI>1, 2 vagy 3 menetes <B>DivX4</B> video</LI>
     <LI><B>VBR</B> MP3 audio - <B>FONTOS</B> : a VBR-es mp3-ak nem minden
       körülmények között lejátszhatóak windows rendszereken! Ha windows-on
@@ -81,10 +82,9 @@ másoló, és video átméretezõ képességgel.</P>
 
 <P><B><I>Tervezett funkciók</I></B> :
   <UL>
-    <LI>audio külön file-ból vétele (AC3, MP3, OGG)</LI>
     <LI>még szélesebb skálája a be/kimeneti formátumoknak, codec-eknek
       (VOB file-ok DivX4/Indeo5/VIVO videoval... :)</LI>
-    <LI>audio enkódolása v4l-rõl</LI>
+    <LI>audio enkódolása v4l-rõl (BSD-n már kész?)</LI>
   </UL>
 </P>
 
@@ -212,7 +212,9 @@ mutatja be. Csak két parancs szükséges :<BR>
     például amikor csak az audio stream-et kell enkódolni (pl tömörítetlen
     PCM-et MP3-ba).</LI>
 
-  <LI><B>Audio stream-ek</B> (<CODE>-oac copy</CODE> opció) : egyértelmû.</LI>
+  <LI><B>Audio stream-ek</B> (<CODE>-oac copy</CODE> opció) : egyértelmû.
+  Lehetséges az audio streamet egy külsõ fileból (MP3, AC3, Vorbis) is venni,
+  ehhez az <CODE>-audiofile &lt;filenév&gt;</CODE> opciót kell használni.</LI>
 </UL>
 </P>
 

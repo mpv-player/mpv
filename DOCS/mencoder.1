@@ -41,6 +41,7 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-ffourcc\ fourcc ]
 .RB [ \-ss\ <time> ]
 .RB [ \-endpos\ <time> ]
+.RB [ \-audiofile\ <file\ name> ]
 .I - or file or files specified with escaped wildcard or device
 .PP
 .SH DESCRIPTION
@@ -140,6 +141,9 @@ Examples:
   -oac copy      no encoding, just streamcopy
   -oac pcm       encode to uncompressed PCM
   -oac mp3lame   encode to MP3 (using Lame)
+.TP
+.B \-audiofile <file name>
+Copy audio from external file.
 .TP
 .B \-mf <multifile options>
 Used when encoding from multiple JPEG files.

@@ -62,6 +62,7 @@ stream copying and video resizing abilities.</P>
       <A HREF=codecs.html#2.2.1.2>libavcodec</A></LI>
     <LI>video encoding from <B>V4L compatible TV tuners</B></LI>
     <LI>encoding/multiplexing to interleaved AVI files with proper index</LI>
+    <LI>creating files from external audio stream</LI>
     <LI>1, 2 or 3 pass <B>DivX4</B> video</LI>
     <LI><B>VBR</B> MP3 audio - <B>IMPORTANT NOTE</B> : VBR MP3 audio doesn't
       always play nicely on windows players! If you intend to encode AVIs
@@ -77,10 +78,9 @@ stream copying and video resizing abilities.</P>
 
 <P><B><I>Planned features</I></B> :
   <UL>
-    <LI>using audio from separate file (AC3, MP3, OGG)</LI>
     <LI>even wider variety of available en/decoding formats/codecs
     (creating VOB files with DivX4/Indeo5/VIVO streams :)</LI>
-    <LI>audio encoding from v4l</LI>
+    <LI>audio encoding from v4l (DONE for FreeBSD ?)</LI>
   </UL>
 </P>
 
@@ -197,7 +197,10 @@ commands are needed :<BR>
   example when only the audio stream has to be encoded (like, uncompressed PCM
   to MP3).</LI>
 
-  <LI><B>Audio stream</B> (option <CODE>-oac copy</CODE>) : straightforward.</LI>
+  <LI><B>Audio stream</B> (option <CODE>-oac copy</CODE>) : straightforward.
+  It is possible to take an external audio file (MP3, AC3, Vorbis) and mux it
+  into the output stream. Use the <CODE>-audiofile &lt;filename&gt;</CODE>
+  option for this.</LI>
 </UL>
 </P>
 
