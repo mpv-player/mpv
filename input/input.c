@@ -276,6 +276,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'p', 0 }, "pause" },
 #endif
   { { ' ', 0 }, "pause" },
+  { { '.', 0 }, "frame_step" },
   { { KEY_HOME, 0 }, "pt_up_step 1" },
   { { KEY_END, 0 }, "pt_up_step -1" },
   { { '>', 0 }, "pt_step 1" },
