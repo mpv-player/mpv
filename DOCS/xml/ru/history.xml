@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with 1.5 -->
+<!-- synced with 1.6 -->
 <!-- FIXME: history really should be in the appendix -->
 <sect1 id="history">
 <title>История</title>
@@ -103,7 +103,19 @@ Windows Media 9, MPlayer - это первый в мире плеер, поддерживающий все
 	приготовьтесь к...
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 0.91 "?"</emphasis> Дата ещё не известна
+  <emphasis role="bold">MPlayer 0.91</emphasis> Aug 13, 2003
+  </para><para>Все вышеупомянутые и множество других ошибок исправлены.
+    Это последняя стабильная версия.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 1.0pre1 "Development on the beach"</emphasis> Sep 1, 2003
+  </para><para>Хотя это и не стабильный релиз, я хочу упомянуть его, поскольку
+    это &mdash; первая пре версия серии 1.0 MPlayer'а и она предназначена помочь
+    <emphasis>большой компании по отлову ошибок</emphasis>.
+    Это огромный шаг вперёд!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 1.0</emphasis> дата ещё не известна
   </para></listitem>
 </itemizedlist>
 </para>

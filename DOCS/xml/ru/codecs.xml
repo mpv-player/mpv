@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.18 -->
+<!-- synced with 1.21 -->
 <sect1 id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -725,6 +725,29 @@ AAC (Advanced Audio Coding) - это кодек, иногда обнаруживаемый в MOV и MP4
 файлах. Декодер с открытым исходным кодом, называемый FAAD, доступен с
 <ulink url="http://www.audiocoding.com"/>.
 MPlayer включает в себя libfaad 2.0RC1, поэтому Вам ничего не нужно дополнительно скачивать.
+</para>
+
+<para>
+Если Вы используете gcc 3.2, который не может скомпилировать встроенный FAAD,
+или просто хотите использовать внешнюю библиотеку, скачаете её с 
+<ulink url="http://www.audiocoding.com/download.php">страницы скачивания</ulink>
+и укажите <filename>configure</filename> <option>--with-externalfaad</option>.
+Вам не нужен весь faad2, чтобы декодировать AAC файлы, достаточно libfaad.
+Вот как Вы можете её собрать:
+<screen>
+cd faad2/
+chmod +x bootstrap
+./bootstrap
+./configure
+cd libfaad
+make
+make install
+</screen>
+Бинарии отсутствуют на audiocoding.com, но вы можете скачать (apt-get) Debian
+пакеты с <ulink url="http://marillat.free.fr">домашней страницы Christian Marillat</ulink>,
+Mandrake RPM'ники с <ulink url="http://plf.zarb.org">P.L.F</ulink> и RedHat RPM'ники
+с <ulink url="http://www.piorunek.pl/~dominik/">домашней страницы Dominik
+Mierzejewski</ulink>.
 </para>
 </sect3>
 
