@@ -981,8 +981,10 @@ Specify other input than the default 0 (Television) (see output for a list)
 Specify the frequency to set the tuner to (e.g.\& 511.250).
 Not compatible with channels parameter.
 .IPs outfmt=<value>
-output format of the tuner (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2,
-i420)
+Specify the output format of the tuner with a preset value supported by the
+V4L driver (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2, i420) or an
+arbitrary format given as hex value.
+Try outfmt=help for a list of all available formats.
 .IPs width=<value>
 width of the output window
 .IPs height=<value>
