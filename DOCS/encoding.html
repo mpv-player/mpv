@@ -101,9 +101,11 @@ commands are needed :<BR>
   AVI (DivX) files, you have be aware that AVI headers don't store this
   value. Thus, the only solution is rescaling.</P>
 
-<P>The output size is specified with the <CODE>-x</CODE>, and <CODE>-y</CODE>
-  options.  Furthermore, there are 3 rescaling filters in <B>MEncoder</B>, <I>0
-  : fast bilinear</I>, <I>1 : bilinear</I>, <I>2 : bicubic</I> (best quality).
+<P><B>MEncoder can scale input images if they come in YV12 format (for example:
+  ffdivx, odivx drivers, or mpeg1/2). The output size is specified with the
+  <CODE>-x</CODE>, and <CODE>-y</CODE> options.  Furthermore, there are 3
+  rescaling filters in <B>MEncoder</B>, <I>0
+  : fast bilinear</I>, <I>1 : bilinear</I>, <I>2 : bicubic</I> (best quality). 
   They can be specified with the <CODE>-sws</CODE> option. If not specified,
   <B>MEncoder</B> will use 0 : fast bilinear.</P>
 

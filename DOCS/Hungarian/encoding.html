@@ -109,11 +109,13 @@ mutatja be. Csak két parancs szükséges :<BR>
   történõ kódolásnál figyelembe kell venni azt is, hogy az AVI file-ok ezen
   információ eltárolására nem képesek. Így az egyetlen megoldás az átméretezés.</P>
 
-<P>A kimeneti file képméretét az <CODE>-x</CODE> és <CODE>-y</CODE> opciókkal
-  lehet megadni. Ezenkívül 3 féle átméretezõszûrõ közül is lehet választani,
-  <I>0 : gyors bilinear</I>, <I>1 : bilinear</I>, <I>2 : bicubic</I> (ennek
-  van a legjobb minõsége). Ezt az <CODE>-sws</CODE> opcióval lehet megadni.
-  Alapértelmezett a 0 : gyors bilinear.</P>
+<P>A <B>MEncoder</B> képes nagyításra, ha a képeket YV12 formátumban kapja
+  (azaz például az ffdivx, odivx meghajtókkal, vagy mpeg1/2-t). A kimeneti file
+  képméretét az <CODE>-x</CODE> és <CODE>-y</CODE> opciókkal lehet megadni. 
+  Ezenkívül 3 féle átméretezõszûrõ közül is lehet választani, <I>0 : gyors
+  bilinear</I>, <I>1 : bilinear</I>, <I>2 : bicubic</I> (ennek van a legjobb
+  minõsége). Ezt az <CODE>-sws</CODE> opcióval lehet megadni.  Alapértelmezett
+  a 0 : gyors bilinear.</P>
 
 <P>Az átméretezés egyszerû :<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -divx4opts br=1300 -x 640 -y 480 -sws 2 -o output.avi</CODE></P
