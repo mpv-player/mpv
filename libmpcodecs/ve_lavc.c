@@ -95,6 +95,7 @@ static float lavc_param_temporal_cplx_masking= 0.0;
 static float lavc_param_spatial_cplx_masking= 0.0;
 static float lavc_param_p_masking= 0.0;
 static int lavc_param_normalize_aqp= 0;
+static int lavc_param_interlaced_dct= 0;
 
 #include "cfgparser.h"
 
@@ -163,6 +164,9 @@ struct config lavcopts_conf[]={
 #endif
 #if LIBAVCODEC_BUILD >= 4626
 	{"dark_mask", &lavc_param_dark_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4627
+	{"ildct", &lavc_param_interlaced_dct, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -331,6 +335,9 @@ static int config(struct vf_instance_s* vf,
 
 #if LIBAVCODEC_BUILD >= 4625
     if(lavc_param_normalize_aqp) lavc_venc_context->flags|= CODEC_FLAG_NORMALIZE_AQP;
+#endif
+#if LIBAVCODEC_BUILD >= 4627
+    if(lavc_param_interlaced_dct) lavc_venc_context->flags|= CODEC_FLAG_INTERLACED_DCT;
 #endif
 
     /* lavc internal 2pass bitrate control */
