@@ -424,13 +424,22 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh->format=trak->fourcc;
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio bits: %d  chans: %d\n",trak->stdata[19],trak->stdata[17]);
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s\n",&trak->fourcc);
+#if 0
+		{ FILE* f=fopen("stdata.dat","wb");
+		  fwrite(trak->stdata,trak->stdata_len,1,f);
+		  fclose(f); }
+		{ FILE* f=fopen("tkdata.dat","wb");
+		  fwrite(trak->tkdata,trak->tkdata_len,1,f);
+		  fclose(f); }
+#endif
 		// Emulate WAVEFORMATEX struct:
 		sh->wf=malloc(sizeof(WAVEFORMATEX));
 		memset(sh->wf,0,sizeof(WAVEFORMATEX));
-		sh->wf->nChannels=trak->stdata[17];
-		sh->wf->wBitsPerSample=trak->stdata[19];
-		sh->wf->nSamplesPerSec=trak->timescale;
-		sh->wf->nAvgBytesPerSec=sh->wf->nChannels*((sh->wf->wBitsPerSample+7)/8)*sh->wf->nSamplesPerSec;
+		sh->wf->nChannels=(trak->stdata[16]<<8)+trak->stdata[17];
+		sh->wf->wBitsPerSample=(trak->stdata[18]<<8)+trak->stdata[19];
+		// sh->wf->nSamplesPerSec=trak->timescale;
+		sh->wf->nSamplesPerSec=(trak->stdata[24]<<8)+trak->stdata[25];
+		sh->wf->nAvgBytesPerSec=sh->wf->nChannels*sh->wf->wBitsPerSample*sh->wf->nSamplesPerSec/8;
 		// Selection:
 		if(demuxer->audio->id==-1 || demuxer->audio->id==priv->track_db){
 		    // (auto)selected audio track:
@@ -697,8 +706,20 @@ if(trak->samplesize){
     if(trak->pos>=trak->chunks_size) return 0; // EOF
     stream_seek(demuxer->stream,trak->chunks[trak->pos].pos);
     pts=(float)(trak->chunks[trak->pos].sample*trak->duration)/(float)trak->timescale;
-    x=trak->chunks[trak->pos].size*trak->samplesize;
-    x/=ds->ss_div; x*=ds->ss_mul; // compression ratio fix
+    x=trak->chunks[trak->pos].size;
+//    x=trak->chunks[trak->pos].size*trak->samplesize;
+    if(trak->samplesize!=1) printf("WARNING! Samplesize=%d   \n",trak->samplesize);
+    if(trak->stdata_len>=36){
+	// extended stsd header - works for CBR MP3:
+	x/=(trak->stdata[30]<<8)+trak->stdata[31];  // samples/packet
+	// x*=(trak->stdata[34]<<8)+trak->stdata[35];  // bytes/packet
+	x*=(trak->stdata[38]<<8)+trak->stdata[39];  // bytes/frame
+    } else {
+	// works for ima4:   -- we should find this info in mov headers!
+	x/=ds->ss_div; x*=ds->ss_mul; // compression ratio fix  ! HACK !
+	// x*=(trak->stdata[18]<<8)+trak->stdata[19];x/=8;  // bits/sample
+	
+    }
     ds_read_packet(ds,demuxer->stream,x,pts,trak->chunks[trak->pos].pos,0);
     if(ds==demuxer->audio) mp_msg(MSGT_DEMUX, MSGL_DBG2, "sample %d bytes pts %5.3f\n",trak->chunks[trak->pos].size*trak->samplesize,pts);
 } else {
