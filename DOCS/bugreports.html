@@ -12,6 +12,7 @@
 
 <P><B><A NAME=C>Appendix C - How to report bugs</A></B></P>
 
+
 <P><B>How to fix bugs</B></P>
 
 <P>If you feel have the necessary skills you are invited to have a go at fixing
@@ -20,6 +21,7 @@
   your code included in <B>MPlayer</B>. The people on the
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
   mailing list will assist you if you have questions.</P>
+
 
 <P><B>How to report bugs</B></P>
 
@@ -52,6 +54,7 @@
   voluntarily in our free time. We are very busy and cannot guarantee that you
   will get a solution for your problem or even an answer.</P>
 
+
 <P><B>Where to report bugs?</B></P>
 
 <P>Subscribe to the mplayer-users mailing list:<BR>
@@ -64,6 +67,7 @@
   <B>do not send HTML mail</B> to any of our mailing lists.  You will only get
   ignored or banned. Also note that we will not individually CC (carbon-copy)
   people so it is a good idea to subscribe to actually receive your answer.</P>
+
 
 <P><B>What to report?</B></P>
 
@@ -102,6 +106,7 @@
   </LI>
 </UL>
 
+
 <P><B>Hardware &amp; drivers</B></P>
 
 <UL>
@@ -131,6 +136,7 @@
   <LI>If in doubt include <CODE>lspci -vv</CODE> output on Linux systems.</LI>
 </UL>
 
+
 <P><B>For compilation problems/errors</B></P>
 
 <P><B>Please include these files:</B></P>
@@ -141,26 +147,27 @@
   <LI>libvo/config.mak</LI>
 </UL>
 
+
 <P><B>For playback problems</B></P>
 
 <P>Please include the output of <B>MPlayer</B> at verbosity level 1, but
-remember to <B>not truncate the output</B> when you paste it into your mail. The
-developers need all of the messages to properly diagnose a problem. You can
-direct the output into a file like this:</P>
+  remember to <B>not truncate the output</B> when you paste it into your mail.
+  The developers need all of the messages to properly diagnose a problem. You
+  can direct the output into a file like this:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [options] [filename] &amp;&gt; mplayer.log</CODE></P>
 
 <P>If your problem is specific to one or more files, then please upload the
-offender(s) to:</P>
+  offender(s) to:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">ftp://mplayerhq.hu/MPlayer/incoming/</A></P>
 
 <P>Also upload a small text file having the same base name as your file
-with a .txt extension. Describe the problem you are having with the
-particular file there and include your email address as well as the output
-of <B>MPlayer</B> at verbosity level 1.<BR> 
-Usually the first 1-5 MB of a file are enough to reproduce the problem,
-but to be sure we ask you to:
+  with a .txt extension. Describe the problem you are having with the
+  particular file there and include your email address as well as the output
+  of <B>MPlayer</B> at verbosity level 1.<BR> 
+  Usually the first 1-5 MB of a file are enough to reproduce the problem,
+  but to be sure we ask you to:
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;dd if=yourfile of=smallfile bs=1024k count=5</CODE></P>
 
@@ -173,10 +180,12 @@ but to be sure we ask you to:
   If the file is accessible on the net, then sending the
   <STRONG>exact</STRONG> URL is sufficient.</P>
 
+
 <P><B>For crashes</B></P>
 
 <P>If you have a core dump of the crash continue reading the next paragraph,
   otherwise skip it.</P>
+
 
 <P><B>How to extract meaningful information from a core dump</B></P>
 
@@ -196,6 +205,7 @@ but to be sure we ask you to:
 <P>Then simply execute the following on your command line:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file &gt; mplayer.bug</CODE></P>
+
 
 <P><B>How to conserve information about a reproducible crash</B></P>
 
@@ -219,11 +229,13 @@ return you to the command line prompt where you have to enter
 
 and send the complete output to us.
 
+
 <P><B>General note</B></P>
 
 <P>If something is quite big (logs for instance) then it is better to upload
   it to the FTP server in a compressed format (gzip and bzip preferred) and
   include only the path and filename in your bug report.</P>
+
 
 <P><B>I know what I am doing...</B></P>
 
