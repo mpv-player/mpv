@@ -2695,6 +2695,9 @@ echores "$_macosx"
 
 
 echocheck "Samba support (libsmbclient)"
+if test "$_smbsupport" = yes; then
+	_ld_smb="-lsmbclient"
+fi
 if test "$_smbsupport" = auto; then
     _smbsupport=no
     cat > $TMPC << EOF
