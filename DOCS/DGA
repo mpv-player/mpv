@@ -23,17 +23,18 @@ Contents
 2. What is DGA?
 ~~~~~~~~~~~~~~~
 
- DGA is short for Direct Graphics Access and is a means for a programm to
+ DGA is short for Direct Graphics Access and is a means for a program to
  bypass the X-Server and directly modifying the framebuffer memory. 
  Technically spoken this happens by mapping the framebuffer memory into
- the memory range of your process. This is just allowed by the kernel
+ the memory range of your process. This is allowed by the kernel only
  if you have superuser privileges. You can get these either by logging in 
- as root or by setting the suid bit on the mplayer excecutable.
+ as root or by setting the suid bit on the mplayer excecutable (NOT
+ recommended!).
 
- There are two versions of DGA: DGA1 is used by XFree 3.X.X and DGA2 was 
+ There are two versions of DGA: DGA1 is used by XFree 3.x.x and DGA2 was 
  introduced with XFree 4.0.1.
 
- DGA1 just provides direct framebuffer access as described above. For 
+ DGA1 provides only direct framebuffer access as described above. For 
  switching the resolution of the video signal you have to rely on the 
  XVidMode extension.
 
@@ -57,12 +58,12 @@ Contents
  /etc/X11/XF86Config (/etc/X11/XF86Config-4 for XFree 4.0.X respectively).
  Those are defined by so-called modelines and depend on the capabilites
  of your video hardware. The XServer scans this config file on startup and
- disables those modelines not suitable for your hardware. You can find 
+ disables the modelines not suitable for your hardware. You can find 
  out which modes survive with the X11 log file. It can be found at:
- /var/log/XFree86.0.log (on Debian systems ... :-) )
+ /var/log/XFree86.0.log
  See appendix A for some sample modeline definitions.
 
-4. DGA & MPLayer
+4. DGA & MPlayer
 ~~~~~~~~~~~~~~~~
 
  DGA is used in two places with MPlayer: The SDL driver can be made to make
