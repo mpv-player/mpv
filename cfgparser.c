@@ -277,7 +277,6 @@ int parse_config_file(struct config *conf, char *conffile)
 		printf("\n");
 
 	while (fgets(line, MAX_LINE_LEN, fp)) {
-nextline:
 		if (errors >= 16) {
 			printf("too many errors\n");
 			goto out;
@@ -405,6 +404,7 @@ nextline:
 			continue;
 			/* break */
 		}	
+nextline:
 	}
 
 	free(line);
