@@ -4,8 +4,8 @@
   It partly emulates the Xanim codebase.
   You need the -rdynamic flag to use this with gcc.
 
-  (C) 2001 Alex Beregszaszi <alex@naxine.org>
-       and Arpad Gereoffy <arpi@thot.banki.hu>
+  (C) 2001-2002 Alex Beregszaszi <alex@naxine.org>
+            and Arpad Gereoffy <arpi@thot.banki.hu>
 */
 
 #include <stdio.h>
@@ -42,6 +42,8 @@ LIBVD_EXTERN(xanim)
 
 #include "linux/timer.h"
 #include "libvo/fastmemcpy.h"
+
+#define mp_dbg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
 
 #if 0
 /* this should be removed */
@@ -166,6 +168,7 @@ typedef struct {
     long (*iq_func)(XA_CODEC_HDR *codec_hdr);
     unsigned int (*dec_func)(unsigned char *image, unsigned char *delta,
 	unsigned int dsize, XA_DEC_INFO *dec_info);
+    mp_image_t *mpi;
 } vd_xanim_ctx;
 
 #if 0
@@ -439,7 +442,7 @@ void XA_2x2_OUT_4BLKS_Convert(unsigned char *image_p, unsigned int x, unsigned i
 
 void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
 {
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV2x2_Blk_Func(image_type=%d, blks=%d, dith_flag=%d)\n",
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "YUV2x2_Blk_Func(image_type=%d, blks=%d, dith_flag=%d)\n",
 	image_type, blks, dith_flag);
     switch(blks){
     case 1:
@@ -473,7 +476,7 @@ void XA_YUV_2x2_clr(XA_2x2_Color *cmap2x2, unsigned int Y0, unsigned int Y1,
 
 void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
 {
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
 	    image_type, dith_type);
     return((void*)XA_YUV_2x2_clr);
 }
@@ -510,10 +513,12 @@ void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsigned in
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv, YUVTabs *yuv_tabs,
     unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
 {
-    mp_image_t *mpi = (mp_image_t *)image_p;
-    mp_image_t *image = (mp_image_t *)image_p;
+    sh_video_t *sh = (sh_video_t*)image_p;
+    vd_xanim_ctx *priv = sh->context;
+    mp_image_t *mpi;
     int y;
-    int uvstride;
+    int ystride=(yuv->y_w)?yuv->y_w:imagex;
+    int uvstride=(yuv->uv_w)?yuv->uv_w:(imagex/4);
 
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUVTabs:  %d %p %p %p %p %p\n",yuv_tabs->Uskip_mask,
 	yuv_tabs->YUV_Y_tab,
@@ -529,67 +534,56 @@ void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsigned in
 	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
 
-    if(mpi->imgfmt == IMGFMT_YVU9 && !yuv_tabs->YUV_Y_tab)
-    {
-	if(((int)i_x==mpi->width) && ((int)i_y==mpi->height)){
-	    mpi->planes[0]=yuv->Ybuf;
-	    mpi->planes[1]=yuv->Ubuf;
-	    mpi->planes[2]=yuv->Vbuf;
-	    mpi->stride[0]=i_x; // yuv->y_w
-	    mpi->stride[1]=mpi->stride[2]=i_x/4; // yuv->uv_w
-	} else {
-	    int y;
-	    for(y=0;y<(int)i_y;y++)
-		memcpy(mpi->planes[0]+y*mpi->stride[0],yuv->Ybuf+y*i_x,i_x);
-	    i_x>>=2; i_y>>=2;
-	    for(y=0;y<(int)i_y;y++){
-		memcpy(mpi->planes[1]+y*mpi->stride[1],yuv->Ubuf+y*i_x,i_x);
-		memcpy(mpi->planes[2]+y*mpi->stride[2],yuv->Vbuf+y*i_x,i_x);
-	    }
-	}
+    if(!yuv_tabs->YUV_Y_tab){
+	// standard YVU9 - simply export it!
+	mpi = mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0,
+	    sh->disp_w, sh->disp_h);
+	priv->mpi=mpi; if(!mpi) return; // ERROR!
+	mpi->planes[0]=yuv->Ybuf;
+	mpi->planes[1]=yuv->Ubuf;
+	mpi->planes[2]=yuv->Vbuf;
+	mpi->width=imagex;
+	mpi->stride[0]=ystride; //i_x; // yuv->y_w
+	mpi->stride[1]=mpi->stride[2]=uvstride; //i_x/4; // yuv->uv_w
 	return;
     }
 
-    // copy Y plane:
-    if(yuv_tabs->YUV_Y_tab){     // dirty hack to detect iv32:
-	for(y=0;y<(int)(imagey*imagex);y++)
-	    mpi->planes[0][y]=yuv->Ybuf[y]<<1;
-    } else
-	memcpy(mpi->planes[0],yuv->Ybuf,imagex*imagey);
+    // allocate TEMP buffer and convert the image:
+    mpi = mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+	sh->disp_w, sh->disp_h);
+    priv->mpi=mpi; if(!mpi) return; // ERROR!
 
-    // scale U,V planes by 2:
-    imagex>>=2;
-    imagey>>=2;
-    
-    uvstride=(yuv->uv_w)?yuv->uv_w:imagex;
-
+    // convert the Y plane:
     for(y=0;y<(int)imagey;y++){
-	unsigned char *su=yuv->Ubuf+uvstride*y;
-	unsigned char *sv=yuv->Vbuf+uvstride*y;
-	unsigned int strideu=mpi->stride[1];
-	unsigned int stridev=mpi->stride[2];
-	unsigned char *du=mpi->planes[1]+2*y*strideu;
-	unsigned char *dv=mpi->planes[2]+2*y*stridev;
-	int x;
-	if(yuv_tabs->YUV_Y_tab){     // dirty hack to detect iv32:
-	    for(x=0;x<(int)imagex;x++){
-		du[2*x]=du[2*x+1]=du[2*x+strideu]=du[2*x+strideu+1]=su[x]*2;
-		dv[2*x]=dv[2*x+1]=dv[2*x+stridev]=dv[2*x+stridev+1]=sv[x]*2;
-	    }
-	} else {
-	    for(x=0;x<(int)imagex;x++){
-		du[2*x]=du[2*x+1]=du[2*x+strideu]=du[2*x+strideu+1]=su[x];
-		dv[2*x]=dv[2*x+1]=dv[2*x+stridev]=dv[2*x+stridev+1]=sv[x];
-	    }
-	}
+	unsigned int x;
+	unsigned char* s=yuv->Ybuf+ystride*y;
+	unsigned char* d=mpi->planes[0]+mpi->stride[0]*y;
+	for(x=0;x<imagex;x++) d[x]=s[x]<<1;
     }
 
-    return;
+    imagex>>=2;
+    imagey>>=2;
+
+    // convert the U plane:
+    for(y=0;y<(int)imagey;y++){
+	unsigned int x;
+	unsigned char* s=yuv->Ubuf+uvstride*y;
+	unsigned char* d=mpi->planes[1]+mpi->stride[1]*y;
+	for(x=0;x<imagex;x++) d[x]=s[x]<<1;
+    }
+
+    // convert the V plane:
+    for(y=0;y<(int)imagey;y++){
+	unsigned int x;
+	unsigned char* s=yuv->Vbuf+uvstride*y;
+	unsigned char* d=mpi->planes[2]+mpi->stride[2]*y;
+	for(x=0;x<imagex;x++) d[x]=s[x]<<1;
+    }
 }
 
 void *XA_YUV1611_Func(unsigned int image_type)
 {
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV1611_Func('image_type: %d')", image_type);
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "XA_YUV1611_Func('image_type: %d')", image_type);
     return((void *)XA_YUV1611_Convert);
 }
 
@@ -609,7 +603,7 @@ void XA_YUV411111_Convert(unsigned char *image, unsigned int imagex, unsigned in
 
 void *XA_YUV411111_Func(unsigned int image_type)
 {
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV411111_Func('image_type: %d')", image_type);
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "XA_YUV411111_Func('image_type: %d')", image_type);
     return((void*)XA_YUV411111_Convert);
 }
 #endif
@@ -620,7 +614,13 @@ void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned 
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv, YUVTabs *yuv_tabs, unsigned int map_flag,
     unsigned int *map, XA_CHDR *chdr)
 {
-    mp_image_t *mpi = (mp_image_t *)image_p;
+#if 1
+    sh_video_t *sh = (sh_video_t*)image_p;
+    vd_xanim_ctx *priv = sh->context;
+    mp_image_t *mpi;
+    // note: 3ivX codec doesn't set y_w, uv_w, they are random junk :(
+    int ystride=imagex; //(yuv->y_w)?yuv->y_w:imagex;
+    int uvstride=imagex/2; //(yuv->uv_w)?yuv->uv_w:(imagex/2);
 
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV221111_Convert(%p  %dx%d %d;%d [%dx%d]  %p %p %d %p %p)\n",
 	image_p,imagex,imagey,i_x,i_y, mpi->width,mpi->height,
@@ -630,33 +630,21 @@ void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned 
 	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
 
-if(((int)i_x==mpi->width) && ((int)i_y==mpi->height)){
+    // standard YV12 - simply export it!
+    mpi = mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, sh->disp_w, sh->disp_h);
+    priv->mpi=mpi; if(!mpi) return; // ERROR!
     mpi->planes[0]=yuv->Ybuf;
-    if(mpi->imgfmt==IMGFMT_YV12){
-	mpi->planes[1]=yuv->Ubuf;
-	mpi->planes[2]=yuv->Vbuf;
-    } else {
-	mpi->planes[1]=yuv->Vbuf;
-	mpi->planes[2]=yuv->Ubuf;
-    }
-    mpi->stride[0]=i_x; // yuv->y_w
-    mpi->stride[1]=mpi->stride[2]=i_x/2; // yuv->uv_w
-} else {
-    int y;
-    for(y=0;y<(int)i_y;y++)
-	memcpy(mpi->planes[0]+y*mpi->stride[0],yuv->Ybuf+y*i_x,i_x);
-    i_x>>=1; i_y>>=1;
-    for(y=0;y<(int)i_y;y++){
-	memcpy(mpi->planes[1]+y*mpi->stride[1],yuv->Ubuf+y*i_x,i_x);
-	memcpy(mpi->planes[2]+y*mpi->stride[2],yuv->Vbuf+y*i_x,i_x);
-    }
-}
-    return;
+    mpi->planes[1]=yuv->Ubuf;
+    mpi->planes[2]=yuv->Vbuf;
+    mpi->width=imagex;
+    mpi->stride[0]=ystride; //i_x; // yuv->y_w
+    mpi->stride[1]=mpi->stride[2]=uvstride;  //=i_x/4; // yuv->uv_w
+#endif
 }
 
 void *XA_YUV221111_Func(unsigned int image_type)
 {
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV221111_Func('image_type: %d')\n",image_type);
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "XA_YUV221111_Func('image_type: %d')\n",image_type);
     return((void *)XA_YUV221111_Convert);
 }
 
@@ -666,9 +654,6 @@ void *XA_YUV221111_Func(unsigned int image_type)
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
 }
-
-//int xacodec_init_video(sh_video_t *vidinfo, int out_format);
-/* out_format = sh->codec->outfmt[sh->codec->outfmtidx]; */
 
 // init driver
 static int init(sh_video_t *sh)
@@ -726,16 +711,6 @@ static int init(sh_video_t *sh)
 	    codec_hdr.depth = 12;
 	    break;
 	case IMGFMT_YVU9:
-#if 0
-	    if (sh->bih->biCompression == mmioFOURCC('I','V','3','2') ||
-		sh->bih->biCompression == mmioFOURCC('i','v','3','2') ||
-		sh->bih->biCompression == mmioFOURCC('I','V','3','1') ||
-		sh->bih->biCompression == mmioFOURCC('i','v','3','2'))
-	    {
-		mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supporting YVU9 output with Indeo3\n");
-		return(0);
-	    }
-#endif
 	    codec_hdr.depth = 9;
 	    break;
 	default:
@@ -794,8 +769,6 @@ static void uninit(sh_video_t *sh)
     free(priv);
 }
 
-//mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
-
 //    unsigned int (*dec_func)(unsigned char *image, unsigned char *delta,
 //	unsigned int dsize, XA_DEC_INFO *dec_info);
 
@@ -803,23 +776,28 @@ static void uninit(sh_video_t *sh)
 static mp_image_t* decode(sh_video_t *sh, void *data, int len, int flags)
 {
     vd_xanim_ctx *priv = sh->context;
-    mp_image_t *mpi;
     unsigned int ret;
     
     if (len <= 0)
 	return NULL; // skipped frame
 
-    mpi = mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0, 
-	sh->disp_w, sh->disp_h);
-    if (!mpi)
-	return NULL;
-
     priv->decinfo->skip_flag = (flags&3)?1:0;
 
-    ret = priv->dec_func((uint8_t*)mpi, data, len, priv->decinfo);
+    if(sh->codec->outflags[sh->outfmtidx] & CODECS_FLAG_STATIC){
+	// allocate static buffer for cvid-like codecs:
+	priv->mpi = mpcodecs_get_image(sh, MP_IMGTYPE_STATIC, 
+	    MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
+	    (sh->disp_w+3)&(~3), (sh->disp_h+3)&(~3));
+	if (!priv->mpi) return NULL;
+	ret = priv->dec_func((uint8_t*)priv->mpi, data, len, priv->decinfo);
+    } else {
+	// left the buffer allocation to the codecs, pass sh_video && priv
+	priv->mpi=NULL;
+	ret = priv->dec_func((uint8_t*)sh, data, len, priv->decinfo);
+    }
 
     if (ret == ACT_DLTA_NORM)
-	return mpi;
+	return priv->mpi;
 
     if (ret & ACT_DLTA_MAPD)
 	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "mapd\n");
@@ -836,7 +814,7 @@ static mp_image_t* decode(sh_video_t *sh, void *data, int len, int flags)
     if (ret & ACT_DLTA_XOR)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "xor\n");
-	return mpi;
+	return priv->mpi;
     }
 
     /* nothing changed */
@@ -866,6 +844,6 @@ static mp_image_t* decode(sh_video_t *sh, void *data, int len, int flags)
 	return NULL;
     }
     
-    return mpi;
+    return priv->mpi;
 }
 #endif
