@@ -229,7 +229,6 @@ void set_video_quality(sh_video_t *sh_video,int quality){
 
 int set_video_colors(sh_video_t *sh_video,char *item,int value){
 #ifdef USE_DIRECTSHOW
-#ifndef NEW_DSHOW
     if(sh_video->codec->driver==VFM_DSHOW){
 #ifdef NEW_DSHOW
 	DS_VideoDecoder_SetValue(ds_vdec,item,value);
@@ -238,7 +237,6 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value){
 #endif
 	return 1;
     }
-#endif
 #endif
 
 #ifdef NEW_DECORE
