@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.53 -->
+<!-- synced with 1.54 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -19,7 +19,25 @@ akkor a bináris csomag készítőjével kell felvenni a kapcsolatot, nem pedig velün
 <para>
 Debian csomag készítéséhez futtasd az alábbi parancsot az
 <application>MPlayer</application> forrásának könyvtárában:
+
 <screen>fakeroot debian/rules binary</screen>
+
+Ha különleges kapcsolókat akarsz átadni a configure-nak, állítsd be a
+<envar>DEB_BUILD_OPTIONS</envar> környezeti változót. például ha
+szeretnél GUI-t és OSD menü támogatást, ezt kell használnod:
+
+<screen>DEB_BUILD_OPTIONS="--enable-gui --enable-menu" fakeroot debian/rules binary</screen>
+
+Pár változót is átadhatsz a Makefile-nak. Például ha gcc 3.4-et szeretnél
+használni a fordításhoz annak ellenére, hogy nem az az alapértelmezett
+fordító:
+
+<screen>CC=gcc-3.4 DEB_BUILD_OPTIONS="--enable-gui" fakeroot debian/rules binary</screen>
+
+A forrás fa kitakarításához add ki a következő parancsot:
+
+<screen>fakeroot debian/rules clean</screen>
+
 Rendszergazdaként a szokásos módszerrel telepíthető a <filename>.deb</filename> csomag:
 <screen>dpkg -i ../mplayer_<replaceable>verziószám</replaceable>.deb</screen>
 </para>
