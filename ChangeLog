@@ -1,0 +1,245 @@
+TODO: collect old version changelogs from freshmeat.net, news/maillist archive...
+
+mplayer (0.90)
+
+  release:
+  
+  pre7:
+    Cleanup:
+    * libvo2, old input code & sis_vid removed, other code cleanups
+    * tons of compiler warning fixes, some configure/makefile improvements
+    * more messages are translated, many translations updated
+    * docs review continued, html cleanups
+    * option -vfm/-afm now uses names instead of numbers, driver IDs removed
+    
+    Code:
+    * vfw/vfwex cleanup, support for runtime csp queries, 8bpp support
+    * new native mszh/zlib codec
+    * libavcodec: 2-pass control code rewritten, now everything customizable
+    * libavcodec: mpeg4/xvid en/decoding support improved, rv10 decoding fixes
+    * various realvideo demuxer and video codec fixes, sipr audio support
+    * new video filters: soft eq (brightness), halfpack (deinterlacer), film noise  
+    * .ogm subtitles support
+    * optional freetype 2.1+ support for runtime-scalable .ttf font rendering
+    * various networking and mms:// fixes, live.com support improved
+    * various v4l video capturing and audio capturing fixes, audio input layer
+    * libmpdvdkit2 - based on libdvdcss 1.2.2 + libdvdread 0.9.3 + key cache
+    * alsa: iec958-init completly rewritten - better SP/DIF AC3 support
+    
+    Gui:
+    * gui.conf locale bug fixed (hopefully)
+    * gui preferences menu extended, runtime subtitle loading support
+    * gui: drag'n'drop support
+  
+  pre6:
+    * WMV1, Sorenson v1 (SVQ1) and RealPlayer 8.0 (RV20/30, Cook) codecs support
+    * libavcodec M1 direct rendering
+    * IPB support with Xv
+    * libavcodec improvements, bugfixes (encoder and decoder side)
+    * Raw DV demuxer
+    * libdv-based DV audio/video decoder
+    * Various MOV/MP4, RM and ASF/WMV demuxer bugfixes, improvements
+    * Detection of AVI files which needs -ni
+    * workaround for some Nandub bugs
+    * Support for live.com RTP/RTSP streaming libraries
+    * Support to rip DVD subs in VobSub format
+    * bugfixes of mpsub/srt converter
+    * Closed Captioning (ascii subs on RC1 DVDs) support
+    * Massive directfb updates
+    * Vidix fixes/updates, including fixes of all known radeon bugs
+    * dithered 1/4/8 bpp support with -vo svga (EGA rulez:))
+    * alsa9 fixes/improvements
+    * native ARTS driver
+    * various endianess and 64-bit fixes (including mencoder and -ao pcm)
+    * tons of small compatibility/portability fixes (better cygwin, darwin support)
+    * GUI fixes (playlist, audio/video equalizer, preferences)
+    * Skins (fixed many small glitches, few new skins)
+    * 'mencvcd' script (creating VCD/SVCD with mencoder)
+    * html DOCS updates
+    * manpage & README restructured (again :))
+
+  pre5:
+    Documentation:
+    * lot of fixes, updates, cleanups
+    * new README containing quick install guide
+    * tech level docs on libavcodec encoding options
+    * HTML doc is now IE 6.0.2600 compatible! :)))
+
+    Code changes:
+    * subreader (ASCII subtitle file parser) fixes
+    * spudec (VOBsub) cleanup/fixes
+    * new (faster, better) scaler
+    * bbox support
+    * mmst:// streaming support
+    * .ogm (OGG) audio/video stream selection
+    * native Micro$oft MPEG4v1 (MPG4) codec, error concealement for all MPEG4s
+    * various libavcodec encoding improvements
+    * MPEG1 && -vo x11 crash fixed when movie's height%16!=0
+    * raw (uncompressed) video fixed (avi & mov)
+    * flickering/blocking fixed for old vfw codecs (indeo3, cinepak etc)
+    * introduced codecs.conf versioning to avoid problems caused by too old conf
+
+    Display:
+    * some more X11 cleanup, icewm fullscreen fixes, -vo gl/gl2 fixed
+    * xscreensaver disabling support (optional, disabled by default)
+    * pan&scan support in xv, xmga, xvidix
+    * Xv YV12 stride problems fixed when width%8!=0
+    * vidix r128/radeon driver synced with mplayerxp, various xvidix fixes
+    * DVB A/V sync fixes, libfame updated to 0.9.0
+    * native -ao arts driver
+    * AC3 passthrough support for -ao alsa9
+    * -ao nas fixed
+
+    Miscellaneous fixes:
+    * GUI: VCD and URL support, some bugs fixed
+    * some cleanup of messages (less debug stuff) printed by MPlayer
+    * gcc 3.1 support
+    * various portability fixes (cygwin, darwin, 64bit sparc/alpha)
+
+  pre4:
+    * X11 fullscreen toggle fixes with various windowmanagers, multifile playback
+    * DXR2 support
+    * Output into animated GIF
+    * "cropdetect" video filter to autodetect needed size to crop
+    * libavcodec marked as default encoder for MEncoder
+    * manpage rewrite
+    * lot of other fixes
+
+  pre3:
+    * 3DNow optimization of AC3 4ch downmix fixed, optims re-enabled
+    * DGA error/fail after 1 second of playing fixed
+    * big A-V desync for some AVI files fixed
+    * image distortions when seeking in some MPEG files fixed
+    * libmpdvdkit + gcc 3.x issue solved (our CFLAGS triggered a gcc3 bug...)
+    * GUI aspect ratio and fullscreen switch fixes, cleanups
+    * low FPS .wmv playback fixed
+    * MACOS-X (Darwin) port?
+    * buggy v4l audio grabbing disabled, we cannot fix, but patches are welcomed!
+    * various mjpeg improvements in libavcodec
+
+  pre2:
+    * hwac3 fixes (try AFMT_AC3 first), bigendian fixes for PCM audio
+    * 2-pass encoding with libavcodec (-lavcopts vpass=x), B frames support
+    * faster .ogg seeking (use -forceidx for slow but accurate one)
+    * audio-only with gui fixed
+    * -rootwin fixed for x11,xv,xmga,xvidix
+    * aspect ratio fix for ffmpeg12
+    * mpeg-es detection fixed
+    * runtime cpudetect disabled by default
+    * support for many new win32 codecs, including mss1, tm20, ucod, truespeech
+    * divx audio dll sig11 with glibc 2.1.(2|3) fixed
+    * includes libmpdvdkit - patched kit of dvd libraries (enabled for linux+freebsd)
+    * manpages updated
+    * 'f' (fullscreen switch) fixed for some WMs, still has problems
+    * various freebsd and openbsd portability patches
+    * options -xy,-zoom,-flip usable with mencoder too, -xy keeps aspect
+    * -vop lavc, using new fast best libavcodec for realtime mpeg1 transcoding
+    * fixed gtk gui crash with --disable-mencoder
+    * no more black vobsub subtitles :)
+
+  pre1:
+    * 100% GPL - yeah, so what?
+    * runtime CPU detection code - any x86 MPlayer binary can run on "any" other x86 CPU
+    * video filter layer - with numerous plugins (crop, expand, etc, see the documentation)
+    * ability to view or encode DVD/vobsub and/or text subtitles into the output AVI
+    * prelimenary dvdnav support (experimental)
+    * Direct Rendering - can't be used with libavcodec yet, sorry
+    * ability to display subtitles under the image, on black bands
+    * FFmpeg (included) now supports decoding MPEG4v2 (MP42) and DivX 5.0 files too
+    * greatly enhanced MPEG4 encoder (libavcodec)
+    * audio-only (wav/mp3/wma/ogg) file playback (console only)
+    * playing/encoding audio from separate wav/mp3 file
+    * support for more fileformats, including the new and very popular .ogg
+    * multiple files playback from console, including various playlist formats
+    * and of course, faster than ever... :)
+
+
+mplayer (0.60) "The RTFMCounter"
+
+  release:
+    * minor bugfixes for realmedia/nuppelvideo demuxers
+    * docs updates
+    * help file translation updates
+
+  pre2:
+    * build fixes (install codecs.conf)
+    * dvd subtitles improved (stability and pts fixes)
+    * new options: -alang, -vlang, -rootwin, -npp ... (rtfm)
+    * dxr3 fixes
+    * ac3 passthrough fix
+    * docs updates
+    * make install
+
+  pre1:
+    * new file formats (MOV, FLI/FLC, VIVO, RealMedia, NuppelVideo, yuv4mpeg, yuv4mpeg2)
+    * more native codecs (CRAM, CVID, FLI, generic ADPCM (and IMA) decoder, g723, xanim)
+    * mencoder (a tool for encoding video to divx4+mp3)
+    * rewritten configure script (better autodetect, cleaner messages)
+    * MMX/SSE optimizations
+    * faster postprocessing filter, syntax change (deinterlacing support)
+    * directshow code in C
+    * software YV12 scaling
+    * aspect ratio fixes
+    * input cache for smoother network/DVD playback
+    * GUI fixes and new skins
+    * DVD subtitles
+    * playing in root window (-rootwin)
+    * liba52
+    * audio filters (surround, 5.1, up/downsample, etc)
+    * new homepage design
+    * grabbing from TV through v4l
+    * hardware MPEG decoder support (DXR3, Siemens DVB)
+
+
+mplayer (0.50) "The Faszom(C)ounter"
+
+  release:
+    * documentation updates
+    * non-linux build fixes
+
+  prex?:
+    * some pre-beta nationalization support
+    * HTMLized documentation, splitted to sections
+    * lot of bugfixing
+    * new AAlib driver (independent of SDL, SUB/OSD support)
+    * DivX DirectShow equalizer over keyboard
+    * dynamic setting of DivX postprocessing quality (-autoq)
+    * updated FAQ section on the homepage
+
+mplayer (0.18) "The BugCounter"
+
+  pre 1-5:
+    * mp3lib even more optimized to 3DNow!/MMX
+    * GGI driver
+    * ICCCM patch
+
+    * skin support
+    * GUI support
+
+    * Introduced libao2 (null, oss, alsa, sdl)
+    * ASF seeking fixed
+    * option to force audio playback samplerate (-srate)
+    * Framedropping for MPEG files as well
+    * X11 driver works on remote display (without SHM)
+    * A-V sync for AVI files fixed (both -bps and -nobps)
+
+
+mplayer (0.17a) "The IdegCounter"
+
+  * DVD playing (libcss)
+  * OSD and subtitles with antialiased fonts
+  * new Win32 codecs (WMV1,AP42,ASV2 etc)
+  * new VO drivers (SVGAlib,fbdev,DGA,SDL etc)
+  * source cleanup, most part of the code rewritten
+
+mplayer (0.11pre 1-24)
+mplayer (0.10)
+mplayer (0.10 pre 1-7)
+mplayer (0.3-0.9)
+
+  * new stream selection code (autodetected)
+  * pre-devel-alpha DVD code (libcss)
+  * subtitle code 100% (perfected timing code)
+  * new output drivers (SVGAlib, FBdev)
+  * faster memcpy() routine (MMX/3DNow!/SSE optimized)
+  
