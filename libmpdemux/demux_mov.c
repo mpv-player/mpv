@@ -71,6 +71,8 @@ typedef struct {
     mov_chunkmap_t* chunkmap;
     int durmap_size;
     mov_durmap_t* durmap;
+    int keyframes_size;
+    unsigned int* keyframes;
 } mov_track_t;
 
 void mov_build_index(mov_track_t* trak){
@@ -372,15 +374,12 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		int ver = (temp << 24);
 		int flags = (temp << 16)|(temp<<8)|temp;
 		int i;
-	
 		mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*sSyncing samples (keyframes) table! (%d entries) (ver:%d,flags:%ld)\n",
 		    level, "",entries, ver, flags);
-#if 0
-		for (i=0;i<entries;i++)
-		{
-		    printf("entry#%d: %ld\n", i, stream_read_dword(demuxer->stream));
-		}
-#endif
+		trak->keyframes_size=entries;
+		trak->keyframes=malloc(sizeof(unsigned int)*entries);
+		for (i=0;i<entries;i++) trak->keyframes[i]=stream_read_dword(demuxer->stream)-1;
+//		for (i=0;i<entries;i++) printf("%3d: %d\n",i,trak->keyframes[i]);
 		break;
 	    }
 	    case MOV_FOURCC('m','d','i','a'): {
@@ -751,8 +750,20 @@ if(trak->samplesize){
     unsigned int ipts=pts;
 //    printf("MOV track seek - sample: %d  \n",ipts);
     if(!(flags&1)) ipts+=trak->samples[trak->pos].pts;
-    trak->pos=0;
-    while(trak->pos<trak->samples_size && trak->samples[trak->pos].pts<ipts) ++trak->pos;
+    for(trak->pos=0;trak->pos<trak->samples_size;++trak->pos){
+	if(trak->samples[trak->pos].pts>=ipts) break; // found it!
+    }
+    if(trak->keyframes_size){
+	// find nearest keyframe
+	int i;
+	for(i=0;i<trak->keyframes_size;i++){
+	    if(trak->keyframes[i]>=trak->pos) break;
+	}
+	if(i>0 && 
+	  (trak->keyframes[i]-trak->pos) > (trak->pos-trak->keyframes[i-1])) --i;
+	trak->pos=trak->keyframes[i];
+//	printf("nearest keyframe: %d  \n",trak->pos);
+    }
     pts=(float)trak->samples[trak->pos].pts/(float)trak->timescale;
 }
 
