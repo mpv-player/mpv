@@ -6,12 +6,14 @@
  * Hampa Hug <hampa@hampa.ch> (original LUT gamma/contrast/brightness filter)
  * Daniel Moreno <comac@comac.darktech.org> (saturation, R/G/B gamma support)
  * Richard Felker (original MMX contrast/brightness code (vf_eq.c))
+ * Michael Niedermayer <michalni@gmx.at> (LUT16)
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <inttypes.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -25,10 +27,14 @@
 #include <locale.h>
 #endif
 
+#define LUT16
 
 /* Per channel parameters */
 typedef struct eq2_param_t {
   unsigned char lut[256];
+#ifdef LUT16
+  uint16_t lut16[256*256];
+#endif
   int           lut_clean;
 
   void (*adjust) (struct eq2_param_t *par, unsigned char *dst, unsigned char *src,
@@ -89,6 +95,12 @@ void create_lut (eq2_param_t *par)
       }
     }
   }
+
+#ifdef LUT16
+  for(i=0; i<256*256; i++){
+    par->lut16[i]= par->lut[i&0xFF] + (par->lut[i>>8]<<8);
+  }
+#endif
 
   par->lut_clean = 1;
 }
@@ -165,17 +177,43 @@ static
 void apply_lut (eq2_param_t *par, unsigned char *dst, unsigned char *src,
   unsigned w, unsigned h, unsigned dstride, unsigned sstride)
 {
-  unsigned      i, j;
+  unsigned      i, j, w2;
   unsigned char *lut;
+  uint16_t *lut16;
 
   if (!par->lut_clean) {
     create_lut (par);
   }
 
   lut = par->lut;
-
+#ifdef LUT16
+  lut16 = par->lut16;
+  w2= (w>>3)<<2;
   for (j = 0; j < h; j++) {
-    for (i = 0; i < w; i++) {
+    uint16_t *src16= (uint16_t*)src;
+    uint16_t *dst16= (uint16_t*)dst;
+    for (i = 0; i < w2; i+=4) {
+      dst16[i+0] = lut16[src16[i+0]];
+      dst16[i+1] = lut16[src16[i+1]];
+      dst16[i+2] = lut16[src16[i+2]];
+      dst16[i+3] = lut16[src16[i+3]];
+    }
+    i <<= 1;
+#else
+  w2= (w>>3)<<3;
+  for (j = 0; j < h; j++) {
+    for (i = 0; i < w2; i+=8) {
+      dst[i+0] = lut[src[i+0]];
+      dst[i+1] = lut[src[i+1]];
+      dst[i+2] = lut[src[i+2]];
+      dst[i+3] = lut[src[i+3]];
+      dst[i+4] = lut[src[i+4]];
+      dst[i+5] = lut[src[i+5]];
+      dst[i+6] = lut[src[i+6]];
+      dst[i+7] = lut[src[i+7]];
+    }
+#endif
+    for (; i < w; i++) {
       dst[i] = lut[src[i]];
     }
 
