@@ -4821,7 +4821,7 @@ send 1.8MB of RGBA32 data every time a small part of the screen is updated.
 .
 .TP
 .B framestep=I|[i]step
-Renders only every nth frame or every Intra (key) frame.
+Renders only every nth frame or every intra frame (keyframe).
 .sp 1
 If you call the filter with I (uppercase) as the parameter, then
 .B only
@@ -7513,7 +7513,7 @@ mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
 .
 .TP
-.B Play a 6-channel aac file with only two speakers:
+.B Play a 6-channel AAC file with only two speakers:
 mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
 .
 .
