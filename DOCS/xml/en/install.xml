@@ -238,8 +238,10 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   <application>MPlayer</application> can use the libraries of RealPlayer 8
-  or RealONE to play files with <emphasis role="bold">RealVideo 2.0-4.0</emphasis>
-  video, and Sipro/Cook audio. See <link linkend="realmedia">RealMedia file format</link>
+  or RealONE to play files with
+  <emphasis role="bold">RealVideo 3.0 and 4.0</emphasis>
+  video, and Sipro/Cook audio. See the
+  <link linkend="realmedia">RealMedia file format</link>
   section for installation instructions and more information.
   </para></listitem>
 </itemizedlist>
