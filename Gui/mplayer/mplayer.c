@@ -108,7 +108,11 @@ void mplInit( int argc,char* argv[], char *envp[] )
 // timerSetHandler( mplTimerHandler );  // various timer hacks
 // timerInit();
 
- wsMainLoop();  // X event handler (calls mplTimerHandler periodically!)
+// wsMainLoop();  // X event handler (calls mplTimerHandler periodically!)
+
+}
+
+void mplDone(){
 
  dbprintf( 1,"[mplayer] exit.\n" );
 
@@ -116,4 +120,6 @@ void mplInit( int argc,char* argv[], char *envp[] )
 // timerDone();
  gtkDone();  // kills the gtkThreadProc() process
  wsXDone();
+
 }
+

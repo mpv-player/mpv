@@ -230,6 +230,8 @@ struct config conf[]={
 	{"aa*",	vo_aa_parseoption,  CONF_TYPE_FUNC_FULL, 0, 0, 0 },
 #endif
 
+	{"gui", &use_gui, CONF_TYPE_FLAG, 0, 0, 1},
+	{"nogui", &use_gui, CONF_TYPE_FLAG, 0, 1, 0},
       
 	{"noidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 0},
 	{"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1},

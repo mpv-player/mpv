@@ -631,6 +631,16 @@ buttonreleased:
 Bool wsDummyEvents( Display * display,XEvent * Event,XPointer arg )
 { return True; }
 
+// mplTimerHandler(0); // handle timer event
+void wsHandleEvents(){
+ // handle pending events
+ while ( XPending(wsDisplay) ){
+   XNextEvent( wsDisplay,&wsEvent );
+//   printf("### X event: %d  [%d]\n",wsEvent.type,delay);
+   wsEvents( wsDisplay,&wsEvent,NULL );
+ }
+}
+
 void wsMainLoop( void )
 {
  int delay=20;

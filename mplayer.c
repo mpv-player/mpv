@@ -200,6 +200,8 @@ int divx_quality=0;
 static int auto_quality=0;
 static int output_quality=0;
 
+int use_gui=0;
+
 int osd_level=2;
 char *seek_to_sec=NULL;
 off_t seek_to_byte=0;
@@ -462,21 +464,24 @@ int use_stdin=0; //int f; // filedes
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
 
-#ifdef HAVE_NEW_GUI
 //  this one segfaults if running 'mplayer' (without path containing '/')
 //  if ( !strcmp( strrchr( argv[0],'/' ),"/gmplayer" ) ) appInit( argc,argv,envp );
-  if ( strstr( argv[0],"gmplayer" ) ) appInit( argc,argv,envp );
-
-#endif
-
-
-#ifdef HAVE_GUI
-  if ( nogui ) {
-#endif
+  if ( argv[0] )
+    if(!strcmp(argv[0],"gmplayer") ||
+      (strrchr(argv[0],'/') && !strcmp(strrchr(argv[0],'/'),"/gmplayer") ) )
+          use_gui=1;
 
     parse_cfgfiles();
     num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
     if(num_filenames<0) exit(1); // error parsing cmdline
+
+#ifndef HAVE_NEW_GUI
+    if(use_gui){
+      mp_msg(MSGT_CPLAYER,MSGL_WARN,"MPlayer was compiled WITHOUT GUI support!\n");
+      use_gui=0;
+    }
+#endif
+
 
 #ifndef USE_LIBVO2
     if(video_driver && strcmp(video_driver,"help")==0){
@@ -501,7 +506,7 @@ int use_stdin=0; //int f; // filedes
       exit(0);
     }
 
-    if(!num_filenames && !vcd_track && !dvd_title){
+    if(!num_filenames && !vcd_track && !dvd_title && !use_gui){
 	// no file/vcd/dvd -> show HELP:
 	printf("%s",help_text);
 	exit(0);
@@ -514,10 +519,6 @@ int use_stdin=0; //int f; // filedes
       printf("\n");
       printf("num_filenames: %d\n",num_filenames);
     }
-
-#ifdef HAVE_GUI
-   }
-#endif
 
     mp_msg_init(verbose+MSGL_STATUS);
 
@@ -556,6 +557,12 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 #endif
 
+  // It's time to init the GUI code: (and fork() the GTK process)
+#ifdef HAVE_NEW_GUI
+  if(use_gui){
+       appInit( argc,argv,envp );
+  }
+#endif
 
 #ifdef HAVE_LIRC
  #ifdef HAVE_GUI
@@ -1288,6 +1295,11 @@ if(1)
 	  }
       }
       video_out->check_events(); // check events AST
+#ifdef HAVE_NEW_GUI
+      if(use_gui){
+        wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+      }
+#endif
     } else {
       // It's time to sleep...
       current_module="sleep";
@@ -1319,6 +1331,12 @@ if(1)
 //      if(verbose>1)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",time_frame,sh_audio->timer,sh_video->timer);
 
       aq_sleep_time+=time_frame;
+
+#ifdef HAVE_NEW_GUI
+      if(use_gui){
+        wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+      }
+#endif
       
       while(time_frame>0.005){
           if(time_frame<=0.020)
@@ -1326,6 +1344,11 @@ if(1)
              usec_sleep(0); // sleeps 1 clock tick (10ms)!
           else
              usec_sleep(1000000*(time_frame-0.002));
+#ifdef HAVE_NEW_GUI
+          if(use_gui){
+	    wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+          }
+#endif
           time_frame-=GetRelativeTime();
       }
 
@@ -1492,6 +1515,11 @@ if(auto_quality>0){
              (use_stdin || getch2(20)<=0) && mplayer_get_key()<=0){
 #ifndef USE_LIBVO2
 	     video_out->check_events();
+#endif
+#ifdef HAVE_NEW_GUI
+             if(use_gui){
+		wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+             }
 #endif
              if(use_stdin) usec_sleep(1000); // do not eat the CPU
          }
