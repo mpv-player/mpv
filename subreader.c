@@ -40,6 +40,8 @@ static int sub_slacktime = 20000; //20 sec
 int sub_no_text_pp=0;   // 1 => do not apply text post-processing
                         // like {\...} elimination in SSA format.
 
+int subfuzzy_enabled=0; // be _really_ fuzzy when looking for subtitles
+
 /* Use the SUB_* constant defined in the header file */
 int sub_format=SUB_INVALID;
 #ifdef USE_SORTSUB
@@ -1696,7 +1698,7 @@ char** sub_filenames(char* path, char *fname)
 		    } else {
 			// doesn't contain the movie name
 			// don't try in the mplayer subtitle directory
-			if (j == 0) {
+			if ((j == 0) && subfuzzy_enabled) {
 			    sprintf(tmpresult, "%s%s", f_dir, de->d_name);
 			    if ((f = fopen(tmpresult, "rt"))) {
 				fclose(f);

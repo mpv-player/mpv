@@ -3,6 +3,7 @@
 
 extern int suboverlap_enabled;
 extern int sub_no_text_pp;  // disable text post-processing
+extern int subfuzzy_enabled;
 
 // subtitle formats
 #define SUB_INVALID   -1
