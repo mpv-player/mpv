@@ -1,11 +1,12 @@
 /*
  * MPlayer
  * 
- * Video driver for AAlib - alpha version
+ * Video driver for AAlib - 1.0
  * 
  * by Folke Ashberg <folke@ashberg.de>
  * 
  * Code started: Sun Aug 12 2001
+ * Version 1.0 : Thu Aug 16 2001
  *
  */
 
