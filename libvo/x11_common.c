@@ -151,8 +151,10 @@ int vo_init( void )
  else
 #endif
  {
- vo_screenwidth=DisplayWidth( mDisplay,mScreen );
- vo_screenheight=DisplayHeight( mDisplay,mScreen );
+ if (! vo_screenwidth)
+   vo_screenwidth=DisplayWidth( mDisplay,mScreen );
+ if (! vo_screenheight)
+   vo_screenheight=DisplayHeight( mDisplay,mScreen );
  }
  // get color depth (from root window, or the best visual):
  XGetWindowAttributes(mDisplay, mRootWin, &attribs);
