@@ -886,12 +886,12 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	    for(i=0;i<MAX_BUFFERS;i++)
 	    {
 		win.ptr = dga_buffer = video_base + multi_buff[i];
-		if(verbose) paintBkGnd();
+		if(verbose>1) paintBkGnd();
 	    }
 	}
 	else
 	{
-	    if(verbose) paintBkGnd();
+	    if(verbose>1) paintBkGnd();
 	    {
 	        int x;
 	        x = (video_mode_info.XResolution/video_mode_info.XCharSize)/2-strlen(title)/2;
