@@ -140,7 +140,7 @@ Optional features:
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable DirectShow support [autodetect]
   --disable-xanim        disable XAnim DLL support [autodetect]
-  --disable-real         disable RealPlayer8 DLL support [autodetect]
+  --disable-real         disable RealPlayer DLL support [autodetect]
   --disable-xvid         disable XviD codec [autodetect]
   --disable-divx4linux   disable DivX4linux codec [autodetect]
   --enable-opendivx      enable _old_ OpenDivx codec [disable]
@@ -235,6 +235,7 @@ Use these options if autodetection fails:
   --with-libdvdnav=DIR     libdvdnav in DIR
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
+  --with-reallibdir=DIR    RealPlayer DLL files in DIR
   --with-xvidcore=PATH     path to XviD libcore.a (e.g: /opt/lib/libcore.a)
   --with-sdl-config=PATH   path to sdl*-config (e.g.: /opt/bin/sdl-config)
   --with-gtk-config=PATH   path to gtk*-config (e.g.: /opt/bin/gtk-config)
@@ -1083,6 +1084,10 @@ for ac_option do
   --with-xanimlibdir=*)
     _xanimlibdir=`echo $ac_option | cut -d '=' -f 2`
     _xanim=yes
+    ;;
+  --with-reallibdir=*)
+    _reallibdir=`echo $ac_option | cut -d '=' -f 2`
+    _real=yes
     ;;
   --with-csslibdir=*)
     _csslibdir=`echo $ac_option | cut -d '=' -f 2`
@@ -3252,18 +3257,34 @@ else
   _nocodecmodules="xanim $_nocodecmodules"
 fi
 
-echocheck "RealPlayer8 DLL"
+echocheck "RealPlayer DLL"
 if test "$_real" = auto ; then
   _real=no
   if test "$_dl" = yes ; then
     if linux ; then
       _real=yes
-      echores "yes"
     elif freebsd ; then
       _real=yes
-      echores "yes"
+    elif netbsd ; then
+      _real=yes
     else
-      echores "no (tested only on Linux and FreeBSD arch)"
+      echores "no (tested only on Linux/FreeBSD/NetBSD)"
+    fi
+    if test "$_real" = yes ; then
+      if test -z "$_reallibdir" ; then
+	for I in /usr/lib/real /usr/lib/RealPlayer*/Codecs ; do
+          if test -d "$I" ; then
+            _reallibdir="$I"
+            break;
+          fi;
+        done
+      fi
+    fi
+    test "$_reallibdir" || _real=no
+    if test "$_real" = yes ; then
+      echores "yes (using $_reallibdir)"
+    else
+      echores "no (no suitable directory found - see DOCS/codecs.html)"
     fi
   else
     echores "no (dynamic loader support needed)"
@@ -3273,9 +3294,11 @@ else
 fi
 if test "$_real" = yes ; then
   _def_real='#define USE_REALCODECS 1'
+  _def_real_path="#define REALCODEC_PATH \"$_reallibdir\""
   _codecmodules="real $_codecmodules"
 else
   _def_real='#undef USE_REALCODECS'
+  _def_real_path="#undef REALCODEC_PATH"
   _nocodecmodules="real $_nocodecmodules"
 fi
 
@@ -4218,6 +4241,8 @@ $_def_xanim_path
 
 /* RealPlayer DLL support */
 $_def_real
+/* Default search path */
+$_def_real_path
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
 $_def_fastmemcpy

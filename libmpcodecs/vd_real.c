@@ -14,7 +14,7 @@
 #include "vd_internal.h"
 
 static vd_info_t info = {
-	"RealPlayer 8 video codecs",
+	"RealVideo decoder",
 	"real",
 	VFM_REAL,
 	"Florian Schneider",
@@ -48,11 +48,11 @@ void __pure_virtual(void) {
 //	exit(1);
 }
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 void ___brk_addr(void) {exit(0);}
-char** __environ={NULL};
+char **__environ={NULL};
 #undef stderr
-FILE* stderr=NULL;
+FILE *stderr=NULL;
 #endif
 
 // to set/get/query special features/parameters
@@ -147,11 +147,11 @@ static int init(sh_video_t *sh){
 
 	mp_msg(MSGT_DECVIDEO,MSGL_V,"realvideo codec id: 0x%08X  sub-id: 0x%08X\n",extrahdr[1],extrahdr[0]);
 
-	sprintf(path, LIBDIR "/real/%s", sh->codec->dll);
+	sprintf(path, REALCODEC_PATH "/%s", sh->codec->dll);
 	if(!load_syms(path)){
 		mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingDLLcodec,sh->codec->dll);
-		mp_msg(MSGT_DECVIDEO,MSGL_HINT,"You need to copy the contents of the codecs directory from RealPlayer8\n");
-		mp_msg(MSGT_DECVIDEO,MSGL_HINT,"into " LIBDIR "/real/ !\n");
+		mp_msg(MSGT_DECVIDEO,MSGL_HINT,"You need to copy the contents from the RealPlayer codecs directory\n");
+		mp_msg(MSGT_DECVIDEO,MSGL_HINT,"into " REALCODEC_PATH "/ !\n");
 		return 0;
 	}
 	// only I420 supported

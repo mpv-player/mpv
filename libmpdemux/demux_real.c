@@ -8,6 +8,13 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.16  2002/06/13 00:14:28  atmos4
+    Implement Nilmoni's and Bernd Ernesti's patches for:
+    Better real codec dir detection and NetBSD real support.
+    Fix Nilmonis code, so it's working like expected.
+    Move a debug printf to mp_msg and some fixes in demux_real.c.
+    Some cosmetics :) -> RealPlayer 8 to RealPlayer, as RealOne (aka RealPlayer 9 works, too)
+
     Revision 1.15  2002/06/10 13:55:56  arpi
     export subpacket-size and matrix w*h to the codec (cook)
 
@@ -446,7 +453,7 @@ loop:
 	if (sh_audio != NULL) {
             dp = new_demux_packet(len);
 	    stream_read(demuxer->stream, dp->buffer, len);
-	    fprintf(stderr,"audio block len=%d\n",len);
+	    mp_dbg(MSGT_DEMUX,MSGL_DBG2,"audio block len=%d\n",len);
 	    if (sh_audio->format == 0x2000)
 	    {
 		char *ptr = dp->buffer;
@@ -1073,7 +1080,7 @@ int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
     sh_video_t *sh_video = d_video->sh;
     int video_chunk_pos = d_video->pos;
     int vid = d_video->id, aid = d_audio->id;
-    int next_offset;
+    int next_offset = 0;
     int rel_seek_frames = 0;
     int streams = 0;
 
@@ -1144,5 +1151,5 @@ int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
     
 //    printf("seek: pos: %d, current packets: a: %d, v: %d\n",
 //	next_offset, priv->current_apacket, priv->current_vpacket);
-    stream_seek(demuxer->stream, next_offset);
+    return stream_seek(demuxer->stream, next_offset);
 }

@@ -31,8 +31,8 @@ void *__builtin_new(unsigned long size) {
 	return malloc(size);
 }
 
-#ifdef __FreeBSD__
-void* __ctype_b=NULL;
+#if defined(__FreeBSD__) || defined(__NetBSD__)
+void *__ctype_b=NULL;
 #endif
 
 static ulong (*raCloseCodec)(ulong);
@@ -64,7 +64,7 @@ static int preinit(sh_audio_t *sh){
   int len;
   void* prop;
   char path[4096];
-  sprintf(path, LIBDIR "/real/%s", sh->codec->dll);
+  sprintf(path, REALCODEC_PATH "/%s", sh->codec->dll);
   handle = dlopen (path, RTLD_LAZY);
   if(!handle){
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Cannot open dll: %s\n",dlerror());
