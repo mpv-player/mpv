@@ -1,17 +1,24 @@
-Description of what all thouse libavcodec options do ...
-WARNING: iam no encoding expert so the recomanditions might be bad ...
-if u find any errors, missing stuff, ... send a patch or cvs commit if u have an cvs account :)
+Description of what all those libavcodec options do ...
+WARNING: I am no encoding expert so the recommendations might be bad ...
+if you find any errors, missing stuff, ... send a patch or cvs commit if you
+have an cvs account :)
+
+lavcopts: (encoder options)
+---------------------------
 
 vqmin 1-31 (minimum quantizer) for pass1/2
-	1 is not recomanded (much larger file, little quality difference and possible other weird things)
-	2 is recommanded for normal mpeg4/mpeg1video encoding
-	3 is recommanded for h263(p)/msmpeg4 (default)
-	   the reason for 3 instead of 2 is that 2 could lead to overflows (this will be fixed for h263(p)
-	   by chageing the quanizer per MB in the future, but msmpeg4 doesnt support that so it cant be fixed
-	   for that)
+	1 is not recommended (much larger file, little quality difference and
+           possibly other weird things)
+	2 is recommended for normal mpeg4/mpeg1video encoding
+	3 is recommended for h263(p)/msmpeg4 (default)
+	   the reason for 3 instead of 2 is that 2 could lead to overflows
+           (this will be fixed for h263(p) by changing the quanizer per MB in	    
+           the future, but msmpeg4 doesnt support that so it cant be fixed for
+	   that)
 
-vqscale 1-31 quantizer for constant quantizer /constant quality encoding
-	1 is not recomanded (much larger file, little quality difference and possible other weird things)
+vqscale 1-31 quantizer for constant quantizer / constant quality encoding
+	1 is not recommended (much larger file, little quality difference and
+        possible other weird things)
 	lower means better quality but larger files
 	see vqmin
 
@@ -22,7 +29,7 @@ vqmax 1-31 (maximum quantizer) for pass1/2
 vqdiff  1-31 (maximum quantizer difference between I or P frames) for pass1/2
 	3 default
 
-vmax_b_frames 0-4 (maximum number of b frames between non b frames)
+vmax_b_frames 0-4 (maximum number of B frames between non B frames)
 	0 no b frames (default)
 
 vme 0-5 (motion estimation)
@@ -34,104 +41,123 @@ vme 0-5 (motion estimation)
 	5 X1
 
 vhq (high quality mode)
-	encode each MB as in all modes and choose the best (this is slow but better filesize/quality)
+	encode each MB as in all modes and choose the best (this is slow but
+        better filesize/quality)
 	disabled by default
 
 v4mv
 	allow 4 MV per MB (little difference in filesize/quality)
 	disabled by default
-	cannot be used with b frames or in lq mode currently
-	disabled by default
+	cannot be used with B frames (should now work in lq mode)
 
 keyint  0-300 (maximum interval between keyframes)
-	keyframes are needed for seeking as seeking is only possible to a keyframe but keyframes need more space
-	than non keyframes so larger numbers here mean slightly smaller files
+	keyframes are needed for seeking as seeking is only possible to a
+        keyframe but they need more space than non-keyframes so larger numbers here
+        mean slightly smaller files, but less precise seeking
 	0 no keyframes 
-	>300 is not recomanded as the quality might be bad (depends upon decoder & encoder & luck)
+	>300 is not recommended as the quality might be bad (depends upon
+        decoder, encoder and luck)
 
 vb_strategy 0-1 for pass 2
-	0 allways use the max number of b frames (default)
-	1 avoid b frames in high motion scenes (this will cause bitrate missprediction)
+	0 allways use the max number of B frames (default)
+	1 avoid B frames in high motion scenes (this will cause bitrate
+          misprediction)
 
 vpass
 	1 first pass
         2 second pass
+          (only need to specify if two-pass encoding is used)
 
-vbitrate (kbits per sec) for pass1/2
+vbitrate (kbits per second) for pass1/2
 	800 is default
+        (if value is bigger then 16000 it is interpreted as bit not kbit!)
 
 vratetol (filesize tolerance in kbit) for pass1/2
-	this is just approximate, the real difference can be much smaller or larger
-	1000- 100000 is a sane range
+	this is just an approximation, the real difference can be much smaller
+        or larger
+	1000-100000 is a sane range
 	8000 is default
 
-vb_qfactor (1.0-31.0) (BFrame quantizer= PFrame quantizer * vb_qfactor) for pass1/2
+vb_qfactor (1.0-31.0) for pass1/2
+        (B-Frame quantizer = IP-Frame quantizer * vb_qfactor)
 	2.0 is default
-	tip: to do constant quantizer encoding with different quantizers for I/P and B frames
-	     u can use vqmin=<ip-quant>:vqmax=<ip-quant>:vb_qfactor=<b_quant/ip_quant>
+	tip: to do constant quantizer encoding with different quantizers for
+             I/P and B frames you can use:
+             vqmin=<ip_quant>:vqmax=<ip_quant>:vb_qfactor=<b_quant/ip_quant>
 
-vqblur (0.0-1.0) quantizer blur (for pass1)
+vqblur (0.0-1.0) quantizer blur (only for pass1)
 	0.0 qblur disabled
 	0.5 is the default
 	1.0 average the quantizer over all previous frames
-	larger values will average the quantizer over time more so that the quantizer will be changed slower
+	larger values will average the quantizer more over time so that it will
+        be changed slower
 
 vqcomp (0.0-1.0) quantizer compression (for pass1/2)
-	0.0 constant bitrate encoding, so fast moton frames will get as many bits as low motion
-	    (high motion scenes look bad)
+	0.0 constant bitrate encoding, so fast motion frames will get as many
+            bits as low motion (high motion scenes look bad)
 	0.5 (default)
 	1.0 constant quantizer encoding (low motion scenes look bad)
 
 vrc_strategy (0,1,2)
-	FIXME
+	FIXME (different rate control strategies)
 
 vlelim (0-1000) single coefficient elimination threshold for luminance
 	0 disabled (default)
-	4 (JVT recomandition)
+	4 (JVT recommendation)
 
 vcelim (0-1000) single coefficient elimination threshold for chrominance
 	0 disabled (default)
-	7 (JVT recomandition)
+	7 (JVT recommendation)
 
-vstrict strict standart compliance
-	only recomanded if u want to feed the output into the mpeg4 reference decoder
+vstrict strict standard compliance
+	only recommended if you want to feed the output into the mpeg4 reference
+        decoder
 
 vdpart	data partitioning
-	+2 byte per video packet
-	improves resistance against damages after encoding
+	adds 2 byte per video packet
+	improves error-resistance when transfering over unreliable channels (eg.
+        streaming over the internet) -- CHECKME (atmos)
 
 vpsize	(0-10000) video packet size
 	0 disabled (default)
 	500-1000 good choice
-	improves resistance against damages after encoding
+	improves error-resistance (see vdpart for more info)
 
 lavdopts: (decoder options)
+---------------------------
+
 ver	error resilience
-	-1 needed for some very broken, encoders which completly ignore the standarts
+	-1 needed for some very broken, encoders which completly ignore the
+           standards -- FIXME: which are these? (atmos)
 	0 (default)
-	1 more aggressive error detection, lavc might think that some correct streams contain errors
+	1 more aggressive error detection, lavc might think that some correct
+          streams contain errors
 
 vbug	manual workaround encoder bugs
 	0 (default)
 	1 (workaround for some old lavc generated msmpeg4v3 files)
 
 
-Notes:	1. lavc will strictly follows the quantizer limits vqmin, vqmax, vqdiff even if 
-	   it violates the bitrate / bitrate tolerance
+Notes:	1. lavc will strictly follow the quantizer limits vqmin, vqmax, vqdiff
+           even if it violates the bitrate / bitrate tolerance
 	2. changing some options between pass1 & 2 can reduce the quality
 
-FAQ:	Q: the file is much too small
-	A: vqmin=2 or 1 (be carefull with 1, it could cause strange things to happen)
-	Q: i want to use -pass 1 & -pass 2 with vmax_b_frames>0
-	A: read DOCS/tech/patches.txt and send a patch ;)
-	Q: which provides better error recovery per filesize increase data partitioning or video packets?
-	A: data partitioning
+FAQ:	Q: Why is the filesize much too small?
+	A: Try to increase vqmin=2 or 1 (be carefull with 1, it could cause
+           strange things to happen).
+	Q: Can I use -pass 1 & -pass 2 with vmax_b_frames>0 ?
+	A: Read DOCS/tech/patches.txt and send a patch ;) (XXX still not fixed?)
+	Q: What provides better error recovery while keeping the filesize low?
+           Should I increase data partitioning or the number of video packets?
+	A: Data partitioning is better in this case.
 
-glossary:
-MB	Macroblock (16x16 luminance & 8x8 chrominance samples)
+Glossary:
+MB	Macroblock (16x16 luminance and 8x8 chrominance samples)
 MV	Motion vector
 ME	Motion estimation
 MC	Motion compensation
+JVT	Joint Video Team Standard -- http://www.itu.int/ITU-T/news/jvtpro.html
 
-example:
+Examples:
 mencoder foobar.avi -lavcopts vcodec=mpeg4:vhq:keyint=300:vqscale=2 -o new-foobar.avi
+mplayer  foobar.avi -lavdopts vbug=1
