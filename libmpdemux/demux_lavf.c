@@ -41,6 +41,7 @@ typedef struct lavf_priv_t{
     ByteIOContext pb;
     int audio_streams;
     int video_streams;
+    int64_t last_pts;
 }lavf_priv_t;
 
 extern void print_wave_header(WAVEFORMATEX *h);
@@ -305,6 +306,8 @@ int demux_lavf_fill_buffer(demuxer_t *demux){
         av_free_packet(&pkt);
     }
 
+    priv->last_pts= pkt.pts;
+    
     dp->pts=pkt.pts / (float)AV_TIME_BASE;
     dp->pos=demux->filepos;
     dp->flags= !!(pkt.flags&PKT_FLAG_KEY);
@@ -314,7 +317,10 @@ int demux_lavf_fill_buffer(demuxer_t *demux){
 }
 
 void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags){
-    mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_seek_lavf()\n");
+    lavf_priv_t *priv = demuxer->priv;
+    mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_seek_lavf(%p, %f, %d)\n", demuxer, rel_seek_secs, flags);
+    
+    av_seek_frame(priv->avfc, -1, priv->last_pts + rel_seek_secs*AV_TIME_BASE);
 }
 
 int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
@@ -322,19 +328,19 @@ int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
     lavf_priv_t *priv = demuxer->priv;
     
     switch (cmd) {
-/*        case DEMUXER_CTRL_GET_TIME_LENGTH:
-	    if (priv->duration == 0)
+        case DEMUXER_CTRL_GET_TIME_LENGTH:
+	    if (priv->avfc->duration == 0)
 	        return DEMUXER_CTRL_DONTKNOW;
 	    
-	    *((unsigned long *)arg) = priv->duration;
+	    *((unsigned long *)arg) = priv->avfc->duration / AV_TIME_BASE;
 	    return DEMUXER_CTRL_OK;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:
-	    if (priv->duration == 0)
+	    if (priv->avfc->duration == 0)
 	        return DEMUXER_CTRL_DONTKNOW;
 	    
-	    *((int *)arg) = (int)(100 * lastpts / priv->duration);
-	    return DEMUXER_CTRL_OK;*/
+	    *((int *)arg) = (int)(priv->last_pts*100 / priv->avfc->duration);
+	    return DEMUXER_CTRL_OK;
 	
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
