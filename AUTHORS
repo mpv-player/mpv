@@ -489,6 +489,9 @@ Melanson, Mike (tmmm) <melanson@pcisys.net>
     * QT RLE decoder
     * MS RLE decoder reimplementation
 
+von Merkatz, Arwed <v.merkatz@gmx.net>
+    * fontconfig font lookup support
+
 Mierzejewski, Dominik (Rathann) <dominik@rangers.eu.org>
     * compiler warning fixes
     * official Red Hat RPM packages
@@ -566,6 +569,10 @@ Ponekker, Zoltán (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
       bpp detect, etc)
     * libvo: adding xmga driver
     * audio mixer (volume) support
+
+van Poorten, Ivo (ivop) <ivop@euronet.nl>
+    * multiple directory support for vo_jpeg
+    * vo_jpeg suboptions parser
 
 Ran, Lu <hephooey@fastmail.fm>
     * Chinese documentation translation
@@ -659,15 +666,8 @@ Tropea, Salvador Eduardo <salvador@inti.gov.ar>
 Vajna, Miklós (VMiklos) <mamajom@axelero.hu>
     * TOOLS/divx2svcd author
 
-van Poorten, Ivo (ivop) <ivop@euronet.nl>
-    * multiple directory support for vo_jpeg
-    * vo_jpeg suboptions parser
-
 Verdejo Pinochet, Reynaldo H. (reynaldo) <reynaldo@opendot.cl>
     * improved EDL support
-
-von Merkatz, Arwed <v.merkatz@gmx.net>
-    * fontconfig font lookup support
 
 Wigren, Per <wigren@home.se>
     * bmovl - Bitmap Overlay video filter
@@ -827,7 +827,7 @@ Naumov, Dan (Jago) <dan.naumov@ofw.fi>
 Northam, Ryan
     * OSX-Brushed
 
-nostrildamus
+nostrildamus <nostrildamus3k@yahoo.com>
     * xmmplayer
 
 Park, DongCheon <pdc@kaist.ac.kr>
