@@ -147,11 +147,11 @@
 <P>Les cartes S3 Savage3D doivent fonctionner correctement, mais pour les Savage4,
   utilisez XFree86 version 4.0.3 ou plus (en cas de problèmes d'image, essayez 16bpp).
   Comme pour les S3 Virge.. il y a un support xv, mais la carte elle-même est très lente,
-  donc vous fairiez mieux de la vendre.</P>
+  donc vous feriez mieux de la vendre.</P>
 
 <P><B>NOTE</B>: il n'est actuellement pas facile de savoir quels modèles de Savage 
   manquent de support YV12, et de le convertir par un pilote (lent). Si vous
-  suspectez votre carte, prenez un driver plus récent, ou demandez poliement
+  suspectez votre carte, prenez un driver plus récent, ou demandez poliment
   un pilote qui gère MMX/3DNow sur la liste de diffusion mplayer-users.</P>
 
 
@@ -166,8 +166,8 @@
 <P>D'après ce que je sais les derniers pilotes XFree86 contiennent le support XVideo
   pour les GeForce 2 et 3.</P>
 
-<P>Les cartes Riva128 n'ont pas de support XVideo même avec le driver nvidia :( 
-  Plaignez vous-en à NVidia.</P>
+<P>Les cartes Riva128 n'ont pas de support XVideo même avec le driver nVidia :( 
+  Plaignez-vous en à nVidia.</P>
 
 
 <H4><A NAME="xv_ati">2.3.1.2.1.4 Cartes ATI</A></H4>
@@ -356,7 +356,7 @@
 
 <P>Le doublebuffering peut s'activer dans MPlayer avec l'option -double et se 
   désactiver avec -nodouble. Actuellement l'option par défaut est de désactiver 
-  le doublebuffering. En utilisant le driver DGA, l'onscreen display (OSD) 
+  le doublebuffering. En utilisant le driver DGA, l'on-screen display (OSD) 
   fonctionne uniquement avec le doublebuffering activé. Cependant, activer 
   le doublebuffering peut demander des calculs supplémentaires au processeur 
   (sur mon K6-II+ 525 il utilisait 20% de temps CPU en plus !), ceci dépendant 
@@ -403,7 +403,7 @@
     Ctrl-Alt-Keypad +, - pour y retourner manuellement).</LI>
   <LI>Certains drivers affichent simplement des couleurs étranges.</LI>
   <LI>Certains pilotes mentent a propos de la quantité de mémoire allouée dans
-    l'espace d'adressage du process, empêchant vo_dga d'utiliser le doublebuffering (SIS ?) </LI>
+    l'espace d'adressage du processus, empêchant vo_dga d'utiliser le doublebuffering (SIS ?) </LI>
   <LI>Certains pilotes semblent ne pas pouvoir reporter ne serait ce qu'un seul mode 
     valide. Dans ce cas le driver DGA plantera en vous affichant un mode 100000x100000 
     ou similaire...</LI>
@@ -421,10 +421,10 @@
   SDL_VIDEODRIVER. Enfin, en théorie.</P>
 
 <P>Avec MPlayer, nous avons utilisé le redimensionnement logiciel de ses pilotes X11 
-  pour les cartes qui ne supportent pas XVideo, jusqu'a ce que nous fassions notre propre
-  dimmensionneur logiciel(plus rapide, plus agréable). Nous avons également utilisé sa sortie aalib, mais
-  maintenant nous avons la notre qui est plus confortable. Son support DGA était meilleurs
-  que le notre, jusqu'à récemment. Prenez-le maintenant? :)</P>
+  pour les cartes qui ne supportent pas XVideo, jusqu'à ce que nous fassions notre propre
+  "dimensionneur" logiciel(plus rapide, plus agréable). Nous avons également utilisé sa sortie aalib, mais
+  maintenant nous avons la notre qui est plus confortable. Son support DGA était meilleur
+  que le nôtre, jusqu'à récemment. Prenez-le maintenant? :)</P>
 
 <P>Cela aide également avec certains pilotes/cartes bogués si la vidéo est saccadé
   (pas de problème de lenteur du système), ou si l'audio est retardé.</P>
@@ -476,7 +476,7 @@
 <H4>NOTES</H4>
 
 <P>Assurez-vous de ne pas utiliser l'option -fs, car elle active l'utilisation
-  du redimmensionneur logiciel, et c'est lent. Si vous en avez réellement besoin,
+  du redimensionneur logiciel, et c'est lent. Si vous en avez réellement besoin,
   utilisez l'option <CODE>-sws 4</CODE> qui donnera une qualité mauvaise, mais
   qui est un peu plus rapide.</P>
 
@@ -495,7 +495,7 @@
   Le film doit probablement être redimensionné pour tenir dans le mode EGA:<BR>
   &nbsp;&nbsp;<CODE>-vop scale=640:350</CODE> or<BR>
   &nbsp;&nbsp;<CODE>-vop scale=320:200</CODE><BR>
-  Pour cela nous avons besoin de la routine de redimmensionement rapide
+  Pour cela nous avons besoin de la routine de redimensionnement rapide
   mais de mauvaise qualité:<BR>
   &nbsp;&nbsp;<CODE>-sws 4</CODE><BR>
   Peut être que la correction d'aspect automatique doit être coupée:<BR>
@@ -503,7 +503,7 @@
 
 <P><B>NOTE:</B> d'après mon expérience, la meilleur qualité d'image sur les écrans EGA
   peut être obtenue en diminuant légèrement la luminosité: <CODE>-vop
-  eq=-20:0</CODE>. J'ai également besoin de diminuer la fréquence d'échantionnage sur ma
+  eq=-20:0</CODE>. J'ai également besoin de diminuer la fréquence d'échantillonnage sur ma
   machine, car le son est endommagé en 44kHz: <CODE>-srate 22050</CODE>.</P>
 
 <P>Vous pouvez activer l'OSD et les sous-titres uniquement avec le filtre <CODE>expand</CODE>,
@@ -650,7 +650,7 @@
   <TR><TD></TD><TD><CODE>5</CODE></TD><TD></TD><TD>active/désactive le rendu rapide</TD></TR>
   <TR><TD></TD><TD><CODE>6</CODE></TD><TD></TD><TD>active le mode de dithering (none, error distribution, Floyd Steinberg)</TD></TR>
   <TR><TD></TD><TD><CODE>7</CODE></TD><TD></TD><TD>inverse l'image</TD></TR>
-  <TR><TD></TD><TD><CODE>a</CODE></TD><TD></TD><TD>passe des contôles de aa vers ceux de mplayer et vice-versa</TD></TR>
+  <TR><TD></TD><TD><CODE>a</CODE></TD><TD></TD><TD>passe des contrôles de aa vers ceux de mplayer et vice-versa</TD></TR>
 </TABLE>
 
 <P><B>Vous pouvez utiliser les lignes de commande suivantes :</B></P>
@@ -781,7 +781,7 @@
     console (en tapant <B>Alt-Fx</B>) et revenez à la première de la même façon.</LI>
   <LI>Pour faire <B>fonctionner la sortie TV</B> vous devez avoir branché le connecteur
   TV avant le démarrage de votre PC car le BIOS vidéo s'initialise une seule fois
-  à ce moment-là.</LI>
+  à ce moment là.</LI>
 </UL>
 
 
@@ -796,7 +796,7 @@
   sur la seconde tête/TV. Dans ce cas, vous voyez une fenêtre verte/bleue à la place
   du film. C'est ici que ce pilote entre en jeu, mais vous aurez besoin d'un CPU puissant
   pour utiliser le redimensionnement logiciel. N'utilisez pas le pilote SDL de
-  sortie+dimmensionnement logiciel, la qualité d'image est pire!</P>
+  sortie+dimensionnement logiciel, la qualité d'image est pire!</P>
 
 <P>Le redimensionnement logiciel est très lent, vous devriez essayer de changer de
   mode vidéo à la place. C'est très simple. Voyez la <A HREF="#dga_modelines">section DGA modelines</A>,
@@ -888,13 +888,13 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
   indiqué sera forcé et le résultat sera imprévisible (cela peut <B>geler</B>
   votre ordinateur). Vous ne devriez le faire UNIQUEMENT si vous êtes absolument
   sûr que cela va fonctionner, et MPlayer ne le fait pas automatiquement. Dites-le
-  au développeurs SVP. La bonne façon est d'utiliser VIDIX sans arguments pour
+  aux développeurs SVP. La bonne façon est d'utiliser VIDIX sans argument pour
   activer l'autodétection du pilote.</P>
 
 <P>VIDIX est une toute nouvelle technologie et il est fortement possible que
   sur votre système (OS=abc CPU=xyz) elle ne fonctionne pas. Dans ce cas votre
-  seule solution est de le porter (principalement libdha). Mais il y a de bon
-  espoir qu'il fonctionne sur ces systèmes où X11 fonctionne.
+  seule solution est de le porter (principalement libdha). Mais il y a de bons
+  espoirs qu'il fonctionne sur les systèmes où X11 fonctionne.
 
 <P>Comme, VIDIX requiert l'accès direct au matériel, vous avez le choix entre le
   lançer en tant que root ou définir le bit SUID du binaire MPlayer (<B>Attention:
@@ -1039,11 +1039,11 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
 </PRE>
 
 <P>Notez que les cartes DVB ne supportent que les tailles 288 par 576 pour le PAL 
-  ou 240 par 480 pour le NTSC. Vous <B>devez</B> redimmensionner vers d'autres 
+  ou 240 par 480 pour le NTSC. Vous <B>devez</B> redimensionner vers d'autres 
   tailles en ajoutant <CODE>scale=width:height</CODE> avec la largeur et la hauteur
   que vous voulez à l'option <CODE>-vop</CODE>. Les cartes DVB acceptent des 
   largeurs variées, comme 720, 704, 640, 512, 480, 352 etc et font un redimensionnement
-  matériel dans le sens horizontal, vous n'avez donc pas besoin de redimmensionner
+  matériel dans le sens horizontal, vous n'avez donc pas besoin de redimensionner
   horizontalement dans la plupart des cas. Pour un Divx en 512x384 (aspect 4:3) essayez:</P>
 
 <PRE>
@@ -1136,13 +1136,13 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     d'utiliser dxr3view.<BR>
     <CODE>prebuf</CODE> active le prebuffering. C'est une fonction du chip em8300
     qui l'active pour garder plus d'une trame de vidéo à la fois. Cela signifie
-    que quand vous utilisez le prebuffuring MPlayer essaiera de garder le buffer
+    que quand vous utilisez le prebuffering MPlayer essaiera de garder le buffer
     vidéo rempli de données à tout moment. Si vous êtes sur une machine lente
     MPlayer utilisera près de, voir exactement 100% du CPU. C'est particulièrement
     courant si vous lisez de purs flux MPEG (comme les DVDs, SVCDs et ainsi de suite) 
-    car comme MPlayer n'aura pas besoin de le réencoder en MPEG, il remplira le buffer
+    car comme MPlayer n'aura pas besoin de le ré-encoder en MPEG, il remplira le buffer
     très rapidement.<BR>
-    Avec le prebuferring la lecture est <B>bien</B> moins sensible aux autres
+    Avec le prebuffering la lecture est <B>bien</B> moins sensible aux autres
     programmes monopolisant le CPU, il ne sautera pas d'images à moins que des
     programmes monopolisent le CPU pour une longue durée<BR>
     En l'utilisant sans doublebuffering, l'em8300 est bien plus sensible à la charge
@@ -1194,7 +1194,7 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     <CODE>-vop lavc=&lt;qualité&gt;:25</CODE>, surtout si vous utilisez le
     prebuffering. Alors pourquoi 25 et pas 29.97? Hé bien, le truc est que
     si vous utilisez 29.97 l'image devient un peu sautante. Nous n'en connaissons
-    pas la raison. Si vous le reglez quelque part entre 25 et 27 l'image devient
+    pas la raison. Si vous le réglez quelque part entre 25 et 27 l'image devient
     stable. Pour l'instant tous ce que nous pouvons faire est de l'accepter.</DD>
 
   <DT><CODE>-vop lavc,expand=-1:-1:-1:-1:1</CODE></DT>
@@ -1203,8 +1203,8 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     et de plus possède de nombreux problèmes de rafraîchissement. La ligne
     de commande ci-dessus va d'abord convertir l'entrée vidéo en MPEG4
     (c'est obligatoire, désolé), ensuite appliquer un filtre expand qui ne
-    va rien étendre du tout (-1: défaut), laus s'applique sur l'OSD normal
-    dans l'image (c'est ce que fait le "1" à la fin).</DD>
+    va rien étendre du tout (-1: défaut), mais afficher l'OSD dans l'image
+    (c'est ce que fait le "1" à la fin).</DD>
 
   <DT><CODE>-ac hwac3</CODE></DT>
   <DD>L'em8300 supporte la lecture audio AC3 (son surround) au travers de la
@@ -1227,7 +1227,7 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   résolution et les réglages, ce pilote requiert beaucoup de puissance CPU,
   rappelez-vous de spécifier <CODE>-framedrop</CODE> si votre machine est trop
   lente. Note: Mon AMD K6-2 350Mhz est (avec <CODE> -framedrop</CODE>) très
-  adapté pour voir du materiel de taille VCD et les films dont la taille est réduite.</P>
+  adapté pour voir du matériel de taille VCD et les films dont la taille est réduite.</P>
 
 <P>Ce pilote parle au module noyau disponible sur
   <A HREF="http://mjpeg.sourceforge.net">http://mjpeg.sourceforge.net</A>, donc
@@ -1294,7 +1294,7 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   ne s'appliquent qu'a la DC10+ et que les options après le second
   <CODE>-zrcrop</CODE> s'appliquent à la Buz. Le nombre maximum de cartes
   MJPEG participant au <I>cinerama</I> est quatre, vous pouvez donc construire
-  un vidéomur de <CODE>2x2</CODE>.</P>
+  un mur vidéo de <CODE>2x2</CODE>.</P>
 
 <P>Pour finir une remarque importante: Ne lancez ou n'arrêtez pas XawTV sur le
   périphérique en cours de lecture, cela cracherait votre ordinateur. Il est,
@@ -1325,7 +1325,7 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     <A HREF="http://www.matrox.com">site de Matrox</A>. Cela vous donnera X sur
     la TV.<BR> <B>Cette méthode ne vous donne pas la lecture accélérée</B> comme
     sous Windoze! La seconde tête n'a qu'un framebuffer YUV, le <I>BES</I>
-    (Back End Scaler, le redimmensionneur YUV des cartes G200/G400/G450/G550)
+    (Back End Scaler, le redimensionneur YUV des cartes G200/G400/G450/G550)
     ne fonctionne pas dessus! Le pilote Windows contourne cela, probablement
     en utilisant le moteur 3D pour zoomer, et le framebuffer YUV pour afficher
     l'image zoomée. Si vous voulez vraiment utiliser X, utilisez les options
@@ -1353,7 +1353,7 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
         un menu très simple. Pressez <B>2</B> et <B>ENTREE</B>. Maintenant vous devriez avoir
 	la même image sur votre moniteur, et sur la TV. Si l'image TV (PAL par défaut)à de
 	vilaines bandes dessus, le script n'a pas été capable de fixer
-	la resolution correctement (en 640x512 par défaut). Essayez d'autres
+	la résolution correctement (en 640x512 par défaut). Essayez d'autres
 	résolutions depuis le menu et/ou expérimentez avec fbset.</LI>
     </OL>
 
@@ -1422,7 +1422,7 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 <UL>
   <LI><B>ATI Mach64</B>: Supporté par
     <A HREF="http://gatos.sf.net">gatos</A>.</LI>
-  <LI><B>ASIC Radeon VIVO</B>: Supporté âr
+  <LI><B>ASIC Radeon VIVO</B>: Supporté par
   <A HREF="http://gatos.sf.net">gatos</A>.</LI>
   <LI><B>Radeon</B> et <B>Rage128</B>: Supporté par MPlayer!
     Reportez-vous aux sections <a href="#vesa">VESA driver</a> et

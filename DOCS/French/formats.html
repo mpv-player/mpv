@@ -62,7 +62,7 @@
 
 <P>Une fonction importante des MPGs est qu'ils ont un champ décrivant le rapport d'aspect
   du flux vidéo, et dans l'entête ce champs est fixé à 4:3, il est donc lu en 640x480.
-  Les fichiers AVI n'ont pas ce champs, donc ils doivent être redimmensionnés durant
+  Les fichiers AVI n'ont pas ce champs, donc ils doivent être redimensionné durant
   l'encodage ou joués avec l'option <CODE>-aspect</CODE>.</P>
 
 
@@ -70,7 +70,7 @@
 <H4><A NAME="avi">2.1.1.2 Fichiers AVI</A></H4>
 
 <P>Conçu par Microsoft, <B>AVI (Audio Video Interleaved)</B> est un format
-  répandu et multi-usage actuellement utilisé par la plupart des vidéos
+  répandu et multi-usages actuellement utilisé par la plupart des vidéos
   DivX et DivX4. Il a de nombreux inconvénients et défauts (par exemple en
   streaming). Il supporte un flux vidéo et de 0 à 99 flux audio. La taille
   du fichier est limité à 2Go, mais il existe une extension permettant des
@@ -93,11 +93,11 @@
 <UL>
   <LI><B>Entrelacé:</B> Les contenus audio et vidéo sont entrelacés. C'est l'utilisation
     standard. Recommandé et généralement utilisé. Certains outils crées des
-    AVIs entralacés avec une mauvaise synchro. MPlayer les détecte comme entrelacés,
+    AVIs entrelacés avec une mauvaise synchro. MPlayer les détecte comme entrelacés,
     ce qui va enduire une perte de synchro A/V, probablement pendant un déplacement.
     Ces fichiers devraient être lu en temps que non-entrelacés (avec l'option
     <CODE>-ni</CODE>.</LI>
-  <LI><B>Non-entrelacé:</B> D'abord vient le flux vidéo entier, puis le flux audio entier.
+  <LI><B>Non-entrelacés:</B> D'abord vient le flux vidéo entier, puis le flux audio entier.
   Il a donc besoin de beaucoup de déplacements, rendant la lecture depuis le réseau ou
   un CD-ROM difficile./LI>
 </UL>
@@ -111,7 +111,7 @@
     VBR mais pas avec un encodeur VBR-compliant auront une désynchro A/V avec cette
     méthode (la plupart du temps en se déplaçant).</LI>
   <LI><B>basé sur l'entrelacement</B>: N'utilise pas le bitrate de l'entête, à la place
-    utilise la position relative des morceaux d'audio et de vidéo entralacés, rendant
+    utilise la position relative des morceaux d'audio et de vidéo entrelacés, rendant
     lisibles les fichiers mal encodés avec de l'audio VBR.</LI>
 </UL>
 
@@ -119,7 +119,7 @@
   VBR n'est pas très bien supporté par la plupart des lecteurs. Le format de 
   fichier rend l'utilisation d'audio VBR possible, mais la plupart des lecteurs
   attendent de l'audio CBR, donc ils échouent avec VBR. VBR n'est pas très courant
-  et les specs Microsoft AVI ne décrivent que l'audio CBR. La plupart des encodeurs
+  et les spécs Microsoft AVI ne décrivent que l'audio CBR. La plupart des encodeurs
   /multiplexeurs créés de mauvais fichiers en utilisant l'audio VBR. Il n'y a que
   deux exceptions: NanDub et <A HREF="encoding.html">MEncoder</A>.</P>
 
@@ -153,9 +153,9 @@
 
 <H4><A NAME="vivo">2.1.1.5 Fichiers VIVO</A></H4>
 
-<P>Mplayer demuxe les fichiers VIVO avec plaisir. Le plus gros désavantage de ce
+<P>Mplayer démuxe les fichiers VIVO avec plaisir. Le plus gros désavantage de ce
   format est qu'il n'a pas de bloc d'index, ni de taille de paquets fixe ou d'octet
-  de synchro et la plupart des fichiers manquent même de frames-clé, donc oubliez
+  de synchro et la plupart des fichiers manquent même de trames clés, donc oubliez
   le déplacement!</P>
 
 <P>Le codec vidéo des fichiers VIVO/1.0 est le <B>h.263</B> standard. Le codec
@@ -171,9 +171,9 @@
 
 <P><B>FLI</B> est un très ancien format de fichier utilisé par Autodesk Animator,
   mais c'est un format courant pour les animations courtes trouvées sur le net.
-  MPlayer demuxe et décode les films FLI et est même capable de ce déplacer à
+  MPlayer démuxe et décode les films FLI et est même capable de ce déplacer à
   l'intérieur (utile en utilisant l'option <CODE>-loop</CODE>). Les fichiers FLI
-  n'ont pas de trame-clé, donc l'image sera sale pendant un court instant après
+  n'ont pas de trame clé, donc l'image sera sale pendant un court instant après
   le déplacement.</P>
 
 
@@ -181,7 +181,7 @@
 
 <P>Oui, MPlayer peut lire (démuxer)les fichiers RealMedia (.rm). Le déplacement fonctionne
   mais vous devrez spécifier explicitement l'option  <CODE>-forceidx</CODE>
-  (le format supporte les trames-clé). Voici une liste des codecs
+  (le format supporte les trames cl). Voici une liste des codecs
   <A HREF="codecs.html#realvideo">RealVideo</A>
   et <A HREF="codecs.html#realaudio">RealAudio</A> supportés.</P>
 
@@ -245,7 +245,7 @@
 
 <P>Le format <B>GIF</B> est un format courant pour les graphismes web. Il y a deux
   versions des specs GIF, GIF87a et GIF89a. La principale différence est que le
-  GIF89a authorise l'animation. MPlayer supporte les deux formats en utilisant
+  GIF89a autorise l'animation. MPlayer supporte les deux formats en utilisant
   libungif ou une autre librairie compatible libgif. Les GIFs non-animées seront
   affichées comme des vidéos à simple trame. (Utilisez les options <CODE>-loop</CODE>
   et <CODE>-fixed-vo</CODE> pour les afficher plus longtemps.)</P>
@@ -271,8 +271,8 @@
 <H3><A NAME="audio_formats">2.1.2 Formats audio</A></H3>
 
 <P>Mplayer est un lecteur de <B>Film</B> et pas de <B>Média</B>, bien qu'il
-  puisse lire quelques formats audio (listés dans les sections çi-dessous).
-  Ce n'est pas un usage recommandé de MPlayer, vous fairiez mieux d'utiliser
+  puisse lire quelques formats audio (listés dans les sections ci-dessous).
+  Ce n'est pas un usage recommandé de MPlayer, vous feriez mieux d'utiliser
   <A HREF="http://www.xmms.org">xmms</A>.</P>
 
 

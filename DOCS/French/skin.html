@@ -87,11 +87,11 @@ et le <a href="#skinmenu">menu</a> (activable par un clic droit).</p>
 <ul>
   <li><p>Vous controlez MPlayer par la <b>fenêtre principale</b> et/ou la barre de lecture. 
     L'arrière plan est une image. Divers objets doivent venir se placer dans cette fenêtre : 
-    <em>boutons</em>, <em>podomètres</em> (ou des sliders si vous préferez) 
+    <em>boutons</em>, <em>podomètres</em> (ou des sliders si vous préférez) 
     et des <em>labels</em>. Pour chaque objet, vous devez spécifier sa taille et
     sa position.</p>
 
-    <p>Un <b>bouton</b> comprend trois états (pressé, relaché,
+    <p>Un <b>bouton</b> comprend trois états (pressé, relâché,
       désactivé), donc l'image doit se diviser en trois parties, verticalement.
       c.f. l'objet <a href="#main.button">bouton</a> pour plus de détails.</p>
 
@@ -108,19 +108,19 @@ et le <a href="#skinmenu">menu</a> (activable par un clic droit).</p>
       C.f. <a href="#main.dlabel">dlabel</a> et <a href="#main.slabel">slabel</a>
       pour plus de détails.</p>
 
-    <p><em class=note><b>Note:</b> toutes les images diposent de la couleur de transparence décrite dans
+    <p><em class=note><b>Note:</b> toutes les images disposent de la couleur de transparence décrite dans
       la section <a href="#images">formats d'images</a>. Si le serveur X ne supporte pas
-      l'extension Xshape, les parties transparantes seront noires. Si vous voulez utiliser
+      l'extension Xshape, les parties transparentes seront noires. Si vous voulez utiliser
       cette fonction, la largeur de l'image de la fenêtre principale devra être divisible par 8.</em></p>
   </li>
 
   <li>La <b>sous-fenêtre</b> contient la vidéo en elle même. Elle peut
-    affichier une image si aucun film n'est chargé (ce n'est jamais plaisant
+    afficher une image si aucun film n'est chargé (ce n'est jamais plaisant
     d'avoir une fenêtre vide :-)) <em class=note><b>Note:</b> la couleur de transparence n'est <b>pas
     autorisée</b> ici.</em>
   </li>
 
-  <li><p>Le <b>menu</b> est simplement un moyen de controler MPlayer par des entrées
+  <li><p>Le <b>menu</b> est simplement un moyen de contrôler MPlayer par des entrées
     graphiques. Deux images sont nécessaires pour le menu : l'une d'elle, l'image
     de base, affiche le menu dans son été normal, l'autre est utilisée
     pour afficher les entrées sélectionnées. Quand vous faites
@@ -222,9 +222,9 @@ décorer le menu et la sous-fenêtre.)</p>
 <p>Dans un bloc window, vous pouvez définir chaque objet sous la forme :</p>
 
 <dl>
-  <dt><b><code>item = parametre</code></b></dt>
+  <dt><b><code>item = paramètre</code></b></dt>
   <dd>ou <code>item</code> est une ligne identifiant le type d'objet de la GUI,
-    <code>parametre</code> est une valeur numérique ou textuelle (ou une liste 
+    <code>paramètre</code> est une valeur numérique ou textuelle (ou une liste 
     de valeurs séparées par des virgules).</dd>
 </dl>
 
@@ -302,11 +302,11 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
 <dl>
   <dt><a name="main.base"><b>base = <code>image, X, Y</code></b></a></dt>
   <dd>Vous spécifiez ici l'image de fond utilisée dans la fenêtre principale.
-    La fenêtre apparaitra a la position <code>X,Y</code> sur l'écran. La fenêtre a la
+    La fenêtre apparaîtra a la position <code>X,Y</code> sur l'écran. La fenêtre a la
     taille de l'image.
-    <div><em class="warn"><b>Note:</b> Ces coordonées ne fonctionnent actuellement
+    <div><em class="warn"><b>Note:</b> Ces coordonnées ne fonctionnent actuellement
       pas pour la fenêtre d'affichage.</em><br>
-      <em class="warn"><b>Attention :</b> les régions transparentes (couleur #FF00FF) apparaitront en noir
+      <em class="warn"><b>Attention :</b> les régions transparentes (couleur #FF00FF) apparaîtront en noir
       sur les serveurs X n'ayant pas l'extension XShape. La largeur de l'image doit être
       divisible par 8.</em>
     </div>
@@ -316,14 +316,14 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
     message</code></b></a></dt>
   <dd>Place un bouton de taille <code>largeur</code> * <code>hauteur</code> a la 
     position <code>X</code>,<code>Y</code>. Le <code>message</code> sera 
-    généré au clic sur ce bouton. L'image appellée par <code>image</code> doit 
+    généré au clic sur ce bouton. L'image appelée par <code>image</code> doit 
     avoir trois états empilés verticalement (pour les trois états du bouton), 
     comme ceci:
 <pre>
 +---------------+
 |  pressé	|
 +---------------+
-|  relaché	|
+|  relâché	|
 +---------------+
 |  désactivé	|
 +---------------+
@@ -387,7 +387,7 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
     largeur, hauteur, message</code></b></a></dt>
   <dd>Un <code>hpotmeter</code> sans boutons. (je suppose qu'il est censé tourner
     en rond, mais il réagit uniquement aux tractions horizontales.)
-    Pour une descritpion de ses paramètres lisez
+    Pour une description de ses paramètres lisez
     <a href="#main.hpotmeter">hpotmeter</a>. Ses <code>états</code> peuvent être
     <code>NULL</code>, mais ce n'est pas vraiment utile, puisque vous ne pouvez pas voir 
     son niveau.</dd>
@@ -403,7 +403,7 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
     </a></dt>
   <dd>Place un label statique à the position <code>X</code>,<code>Y</code>.
     <code>text</code> est affiché en utilisant la police identifiée par <code>fontid</code>.
-    Le texte est juste une chaine brute (les variables <code>$x</code> ne fonctionnent pas) 
+    Le texte est juste une chaîne brute (les variables <code>$x</code> ne fonctionnent pas) 
     qui doit être mise entre doubles quotes (mais le caractère <code>&quot;</code> ne peut pas
     faire partie du texte). Le label est affiché en utilisant la police identifiée par
     <code>fontid</code>.</dd>
@@ -411,13 +411,13 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
   <dt><a name="main.dlabel"><b>dlabel = <code>X, Y, longueur, align, fontid, 
     &quot;texte&quot;</code></b></a></dt>
   <dd>Place un label statique à la position <code>X</code>,<code>Y</code>. Le label est
-    appelé dynamique parce que sont texte est rafraichi péridiquement.
-    La longeur maximum du label est définie par <code>longueur</code> (sa
+    appelé dynamique parce que son texte est rafraîchi périodiquement.
+    La longueur maximum du label est définie par <code>longueur</code> (sa
     hauteur dépend de la hauteur des caractères). Si le texte a afficher
-    dépasse cette longeur il sera scrollé, au bien aligné dans l'espace
+    dépasse cette longueur il sera scrollé, ou bien aligné dans l'espace
     spécifié par la valeur du paramètre <code>align</code> :
     <code>0</code> pour droite, <code>1</code> pour centré, <code>2</code> pour gauche.<br>
-    Le texte a afficher est donné par <code>texte</code>: il doit être écrit entre doubles quotes
+    Le texte à afficher est donné par <code>texte</code>: il doit être écrit entre doubles quotes
     (mais le caractère <code>&quot;</code> ne peut pas faire partie du texte).
     Le texte s'affiche en utilisant la police spécifiée par <code>fontid</code>.
     Vous pouvez utiliser les variables suivantes dans le texte :
@@ -435,9 +435,9 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
       <tr><td align=center><kbd>$5</kbd></td>
         <td>temps de lecture en <em>ss</em>(secondes)</td></tr>
       <tr><td align=center><kbd>$6</kbd></td>
-        <td>longeur du film en <em>hh:mm:ss</em></td></tr>
+        <td>longueur du film en <em>hh:mm:ss</em></td></tr>
       <tr><td align=center><kbd>$7</kbd></td>
-        <td>longeur du film en <em>mmmm:ss</em></td></tr>
+        <td>longueur du film en <em>mmmm:ss</em></td></tr>
       <tr><td align=center><kbd>$8</kbd></td>
         <td>temps de lecture en <em>h:mm:ss</em></td></tr>
       <tr><td align=center><kbd>$v</kbd></td>
@@ -452,7 +452,7 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
         <td>le caractère <kbd>$</kbd></td></tr>
       <tr><td align=center><kbd>$a</kbd></td>
         <td>un caractère dépendant du type audio (aucun: <code>n</code>,
-          mono: <code>m</code>, stereo: <code>t</code>)</td></tr>
+          mono: <code>m</code>, stéréo: <code>t</code>)</td></tr>
       <tr><td align=center><kbd>$t</kbd></td>
         <td>numéro de piste (dans la playlist)</td></tr>
       <tr><td align=center><kbd>$o</kbd></td>
@@ -512,7 +512,7 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
   <dt><a name="sub.background"><b><code>background = R, G, B</code></b></a></dt>
   <dd>Vous permet de définir la couleur de fond. Utile si l'image est plus petite 
     que la fenêtre. <code>R</code>, <code>G</code> et <code>B</code> spécifient 
-    les composantes rouge, verte et bleue de la couleur  (d'un interval entre 0 
+    les composantes rouge, verte et bleue de la couleur  (d'un intervalle entre 0 
     et 255).</dd>
 </dl>
 
@@ -520,7 +520,7 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
 <h3><a name="skinmenu">D.2.3 Menu</a></h3>
 
 <p>Comme mentionné précédemment, le menu s'affiche en utilisant deux images.
-  Les entrées normales du menu sont extraitres de l'image spécifiée par 
+  Les entrées normales du menu sont extraite de l'image spécifiée par 
   l'objet <code>base</code>, tandis que l'entrée actuellement sélectionnée
   est extraite de l'image spécifiée par l'objet <code>selected</code>. Vous
   devez définir la taille et la position de chaque entrée du menu par l'objet
@@ -534,13 +534,13 @@ pour centre et <code>-2</code> pour droite ou bas, comme montré sur cette illust
   <dd>L'image utilisée pour les entrées normales.</dd>
 
   <dt><a name="menu.selected"><b><code>selected = image</code></b></a></dt>
-  <dd>L'image utilisée pour les entrées selectionnées.</dd>
+  <dd>L'image utilisée pour les entrées sélectionnées.</dd>
 
   <dt><a name="menu.menu"><b>menu = <code>x, y, largeur, hauteur, message</code></b>
     </a></dt>
   <dd>Définit la position <code>X</code>,<code>Y</code> et la taille des entrées du
     menu dans les images. <code>message</code> est le message généré 
-    quand le bouton de la souris est relaché.</dd>
+    quand le bouton de la souris est relâché.</dd>
 </dl>
 
 
@@ -589,7 +589,7 @@ image = font.png
 
 <h3><a name="symbols">D.3.1 Symboles</a></h3>
 
-<p>Certains caractères ont une sugnifaction spéciale quand retournés 
+<p>Certains caractères ont une signification spéciale quand retournés 
   par des variables utilisées dans <a href="#main.dlabel">dlabel</a>; ces
   caractères sont censés s'afficher comme des symboles. (par exemple, dans 
   le cas d'une lecture DVD, vous pouvez afficher un beau logo DVD a la place du 
@@ -611,7 +611,7 @@ image = font.png
   <tr><td align=center><kbd>m</kbd></td>
     <td align=left>son mono</td></tr>
   <tr><td align=center><kbd>t</kbd></td>
-    <td align=left>son stereo</td></tr>
+    <td align=left>son stéréo</td></tr>
   <tr><td align=center><kbd>f</kbd></td>
     <td align=left>lecture depuis un fichier</td></tr>
   <tr><td align=center><kbd>v</kbd></td>
@@ -660,7 +660,7 @@ podomètres et entrées du menu.</p>
       indiquer que le bouton peut être pressé pour mettre en pause la lecture).</dd>
 
     <dt><b>evPrev</b></dt>
-    <dd>Saute à la piste précedente dans la playlist.</dd>
+    <dd>Saute à la piste précédente dans la playlist.</dd>
 
     <dt><b>evStop</b></dt>
     <dd>Stoppe la lecture.</dd>
@@ -705,7 +705,7 @@ podomètres et entrées du menu.</p>
 </blockquote>
 
 
-<h3>Contôle audio :</h3>
+<h3>Contrôle audio :</h3>
 
 <blockquote>
   <dl>
@@ -754,7 +754,7 @@ podomètres et entrées du menu.</p>
     <dd>Active/désactive l'equalizer.</dd>
 
     <dt><b>evExit</b></dt>
-    <dd>Quite le programme.</dd>
+    <dd>Quitte le programme.</dd>
 
     <dt><b>evIconify</b></dt>
     <dd>Iconifie la fenêtre.</dd>
@@ -768,10 +768,10 @@ podomètres et entrées du menu.</p>
       automatiquement après le chargement du fichier.</dd>
 
     <dt><b>evLoadSubtitle</b></dt>
-    <dd>Charge un fichier de sous-titres (avec un selectionneur de fichier)</dd>
+    <dd>Charge un fichier de sous-titres (avec un sélecteur de fichier)</dd>
 
     <dt><b>evLoadAudioFile</b></dt>
-    <dd>Charge un fichier audio (avec un selectionneur de fichier)</dd>
+    <dd>Charge un fichier audio (avec un sélecteur de fichier)</dd>
 
     <dt><b>evNone</b></dt>
     <dd>Message vide, sans effet. (A part peut-être dans les versions CVS :-)).</dd>
@@ -780,10 +780,10 @@ podomètres et entrées du menu.</p>
     <dd>Ouvre/ferme la playlist.</dd>
 
     <dt><b>evPlayDVD</b></dt>
-    <dd>Essaie d'ouvrir le disque dans le lecteur DVDROM indiqué.</dd>
+    <dd>Essaie d'ouvrir le disque dans le lecteur DVD-ROM indiqué.</dd>
 
     <dt><b>evPlayVCD</b></dt>
-    <dd>Essaie d'ouvrir le disque dans le lecteur CDROM indiqué.</dd>
+    <dd>Essaie d'ouvrir le disque dans le lecteur CD-ROM indiqué.</dd>
 
     <dt><b>evPreferences</b></dt>
     <dd>Ouvre la fenêtre de preferences.</dd>

@@ -68,7 +68,7 @@
       -ovc lavc -lavcopts vcodec=mpeg4:vpass=2:vbitrate=&lt;bitrate&gt;</CODE></P>
     <P>Ceci est la seconde passe de l'encodage vidéo.
       Spécifiez le même bitrate vidéo que celui de la passe précédente à moins que vous
-      ne sachiez réélement ce que vous faites. Dans cette passe, l'audio de <CODE>frameno.avi</CODE>
+      ne sachiez réellement ce que vous faites. Dans cette passe, l'audio de <CODE>frameno.avi</CODE>
       sera inséré dans le fichier de destination.. et c'est tout prêt!</P></LI>
  </OL>
 
@@ -106,14 +106,14 @@
   
 <H2><A NAME="rescaling">7.3 Redimensionnement des films</A></H2>
 
-<P>Souvent le besoin de redimmensionner les images d'un film se fait sentir.
-  Les raisons peuvent être multiples: diminuer la taille du fichier, la bande-passante
-  du réseau, etc. La plupart des gens redimmensionnent même en convertissant des
+<P>Souvent le besoin de redimensionner les images d'un film se fait sentir.
+  Les raisons peuvent être multiples: diminuer la taille du fichier, la bande passante
+  du réseau, etc. La plupart des gens redimensionnement même en convertissant des
   DVDs ou SVCDs en AVI DivX. <B>C'est mauvais.</B> Plutôt que faire ça, lisez la
   section <A HREF="#aspect">Préserver l'aspect ratio</A>.</P>
 
 <P>Le processus de zoom est géré par le filtre vidéo <I>'scale'</I>:
-  <CODE>-vop scale=largeur:hauteur</CODE>. Ca qualité peut être réglée avec l'option
+  <CODE>-vop scale=largeur:hauteur</CODE>. Sa qualité peut être réglée avec l'option
   <CODE>-sws</CODE>. Si elle n'est pas spécifiée, MEncoder utilisera 0:
   fast bilinear.</P>
 
@@ -244,7 +244,7 @@ Explication du processus:
   -o sortie.avi \*.tga</CODE></P>
 
 
-<H2><A NAME="vobsub">7.8 Extractaction des sous-titres DVD dans un fichier Vobsub</A></H2>
+<H2><A NAME="vobsub">7.8 Extraction des sous-titres DVD dans un fichier Vobsub</A></H2>
 
 <P>MEncoder est capable d'extraire les sous-titres d'un DVD dans des fichiers au format
   VobSub. Ils consistent en une paire de fichiers terminant par <CODE>.idx</CODE> et
@@ -289,7 +289,7 @@ Explication du processus:
   d'aspect ratio, qui décrit comment le lecteur devrait dimensionner le flux
   vidéo, pour que les humains n'aient pas des têtes d'oeuf (ex. 480x480 + 4:3 = 640x480).
   De toute façon, quand vous encodez un fichier AVI (DivX), vous devez être conscients
-  que les entêtes AVI ne stockent pas cette valeur. Redimmensionner le film est
+  que les entêtes AVI ne stockent pas cette valeur. Redimensionner le film est
   dégouttant et coûteux en temps, il doit y avoir une meilleur fonction!</P>
 
 <P>Il y en a une.</P>

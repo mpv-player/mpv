@@ -77,7 +77,7 @@
     <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
   <LI>Sur <B>Solaris</B>, utilisez le pilote audio SUN avec l'option
   <CODE>-ao sun</CODE>, sinon ni la vidéo ni le son ne fonctionneront.</LI>
-  <LI>Si le son émet des cliquements lors d'une lecture depuis le CD-ROM, activez l'IRQ 
+  <LI>Si le son émet des cliquètements lors d'une lecture depuis le CD-ROM, activez l'IRQ 
     unmasking, ex.
     <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). Ceci est généralement
     bénéfique et décrit plus en détail dans la 
@@ -279,7 +279,7 @@
   des données audio différent de celles requises par la carte son et désactivés si 
   nécessaire. L'option <CODE>-af filtre1,filtre2,...</CODE> est utilisée pour outrepasser
   l'activation automatique des filtres ou pour insérer des filtres qui ne le sont pas
-  automatiquement. Les filtres seront éxecutés dans l'ordre où ils apparaissent dans la
+  automatiquement. Les filtres seront exécutés dans l'ordre où ils apparaissent dans la
   liste séparée par des virgules.</P>
 
 <P>Exemple:<BR>
@@ -296,10 +296,10 @@
 <P>&nbsp;&nbsp;<CODE>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1
   -srate 11025 media.avi</CODE></P>
 
-<P>définirait la fréquence de sortie du filtre resample filter à 11025Hz et downmixerait
-  l'audio dans 1 cannal en utilisant le filtre pan.</P>
+<P>définirait la fréquence de sortie du filtre resample à 11025Hz et downmixerait
+  l'audio dans 1 canal en utilisant le filtre pan.</P>
 
-<P>Le fonctionnement général de la couche filtre est controllé en utilisant l'option
+<P>Le fonctionnement général de la couche filtre est contrôlé en utilisant l'option
   <CODE>-af-adv</CODE>. Cette option a deux sous-options:</P>
 
 <DL>
@@ -328,7 +328,7 @@
       <DD>Utilise l'insertion automatique des filtres comme indiqué au champ 2, mais fait des calculs
         à virgule flottante si possible.</DD>
       <DT><CODE>7</CODE></DT>
-      <DD>N'utilise pas d'insertion automatique des filtrescomme indiqué au champ 3, et fait des calculs
+      <DD>N'utilise pas d'insertion automatique des filtres comme indiqué au champ 3, et fait des calculs
         à virgule flottante si possible.</DD>
     </DL>
   </DD>
@@ -341,22 +341,22 @@
 
 <DL>
   <DT><CODE>-v</CODE></DT>
-  <DD>Augmente le niveau de verbosité et fait afficher des messages d'état suplémentaires 
+  <DD>Augmente le niveau de verbosité et fait afficher des messages d'état supplémentaires 
     à la plupart des filtres.</DD>
   <DT><CODE>-channels</CODE></DT>
   <DD>Cette option définie le nombre de canaux de sorties voulus pour votre carte son.
-    Il affecte également le nombre de canaux qui sont décodés à partir des media.
-    Si le medium contient moins de canaux que le nombre demandé le filtre channels
+    Il affecte également le nombre de canaux qui sont décodés à partir des média.
+    Si le médium contient moins de canaux que le nombre demandé le filtre channels
     (voir plus bas) sera automatiquement inséré. Le routage sera le routage par défaut
     pour le filtre channels.</DD>
   <DT><CODE>-srate</CODE></DT>
   <DD>Cette option sélectionne le taux d'échantillonage voulu pour votre carte son. Si la fréquence
-    d'échantillonage de votre carte son est différente de celle du medium, le filtre resample 
+    d'échantillonage de votre carte son est différente de celle du médium, le filtre resample 
     (voir plus bas) sera inséré dans la couche filtre audio pour compenser la différence.</DD>
   <DT><CODE>-format</CODE><DT>
   <DD>Cette option définie le format de sample de la couche audio et de la carte son. Si le format de
-    sample demandé pour votre carte son est différent de celui du medium, un filtre format (voir plus bas)
-    sera inséré pour réctifier la différence.</DD>
+    sample demandé pour votre carte son est différent de celui du médium, un filtre format (voir plus bas)
+    sera inséré pour rectifier la différence.</DD>
 </DL>
 
 
@@ -372,32 +372,32 @@
 <DL>
   <DT><CODE>srate &lt;8000-192000&gt;</CODE></DT>
   <DD>est un entier utilisé pour définir la fréquence d'échantillonage de sortie
-    en Hz. L'intervale valide pour ce paramètre va de 8kHz à 192kHz. Si les fréquences
+    en Hz. L'intervalle valide pour ce paramètre va de 8kHz à 192kHz. Si les fréquences
     d'entrée et de sortie sont les mêmes ou si les paramètres sont
-    ommis, le filtre est automatiquement retiré. Un fréquence d'échantillonage haute
-    augmente normallement la qualité audio, surtout utilisé en conjonction avec d'autres
+    omis, le filtre est automatiquement retiré. Un fréquence d'échantillonage haute
+    augmente normalement la qualité audio, surtout utilisé en conjonction avec d'autres
     filtres.</DD>
 
   <DT><CODE>sloppy</CODE></DT>
   <DD>est un paramètre binaire optionnel qui permet à la fréquence de sortie de différer
     légèrement de la fréquence donnée par <CODE>srate</CODE>. Cette option est utilisé
-    au démarrage si la lecture est extremement lente.</DD>
+    au démarrage si la lecture est extrêmement lente.</DD>
 
   <DT><CODE>type &lt;0-2&gt;</CODE><DT>
   <DD>est un entier optionnel compris entre <CODE>0</CODE> et <CODE>2</CODE> qui
-    sélectionne quelle méthode de ré-échantillonage utiliser. Ici <CODE>0</CODE> représente
-    l'interpolation linéaire comme méthode de ré-échantillonage,  <CODE>1</CODE> représente
-    un rééchantillonage en utilisant une banque de filtres poly-phase et des calculs d'entiers
-    et <CODE>2</CODE> représente un ré-échantillonage en utilisant une banque de filtres poly-phase 
-    et des calculs à virgule flottante. L'interpolation linéaire est extrémement rapide, mais souffre d'une
+    sélectionne quelle méthode de ré-échantillonnage utiliser. Ici <CODE>0</CODE> représente
+    l'interpolation linéaire comme méthode de ré-échantillonnage,  <CODE>1</CODE> représente
+    un ré-échantillonnage en utilisant une banque de filtres poly-phase et des calculs d'entiers
+    et <CODE>2</CODE> représente un ré-échantillonnage en utilisant une banque de filtres poly-phase 
+    et des calculs à virgule flottante. L'interpolation linéaire est extrêmement rapide, mais souffre d'une
     pauvre qualité sonore surtout quand elle est utilisée pour l'up-sampling. La meilleur qualité est donnée par
     <CODE>2</CODE> mais cette méthode souffre également de la plus forte charge CPU.</DD>
 </DL>
 
-<P>Example:<BR>
+<P>Exemple:<BR>
   &nbsp;&nbsp;<CODE>mplayer -af resample=44100:0:0</CODE></P>
 
-<P>fixerait la fréquence de sortie du filtre resample à 44100Hz en utilisant une echelle 
+<P>fixerait la fréquence de sortie du filtre resample à 44100Hz en utilisant une échelle 
   de fréquence exacte et l'interpolation linéaire.</P>
 
 
@@ -412,7 +412,7 @@
 <DL>
   <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
   <DD>est un entier entre <CODE>1</CODE> et <CODE>6</CODE> qui est utilisé pour définir 
-    le nombre de canaux de sortie. Cette option est requise, la laisser vide provoquera une erreur à l'éxecution.</DD>
+    le nombre de canaux de sortie. Cette option est requise, la laisser vide provoquera une erreur à l'exécution.</DD>
 
   <DT><CODE>nr</CODE></DT>
   <DD>est un entier entre <CODE>1</CODE> et <CODE>6</CODE> qui est utilisé pour définir le nombre de routes.
@@ -425,7 +425,7 @@
 
 <P>Si seul <CODE>nch</CODE> est indiqué le routage par défaut est utilisé, il fonctionne
   comme cela: Si le nombre de canaux de sortie est plus grand que le nombre de canaux
-  d'entrée des canaux vides sont insérés (exepté le mixage de mono vers stéréo, dans ce
+  d'entrée des canaux vides sont insérés (excepté le mixage de mono vers stéréo, dans ce
   cas le canal mono est répété sur chacun des canaux de sortie). Si le nombre de canaux de
   sortie est plus petit que le nombre de canaux d'entrée les canaux en trop seront 
   tronqués.</P>
@@ -433,9 +433,9 @@
 <P>Exemple 1:<BR>
   &nbsp;&nbsp;<CODE>mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi </CODE></P>
 
-<P>changerait le nombre de canaux à 4 et définirait 4 routes qui interchangent le canal
+<P>changerait le nombre de canaux à 4 et définirait 4 routes qui échangent le canal
   0 et le canal 1 et laissent les canaux 2 et 3 intacts. Remarquez que si le 
-  media qui contient deux canaux était joué en arrière, les canaux 2 et 3 contiendraient
+  média qui contient deux canaux était joué en arrière, les canaux 2 et 3 contiendraient
   du silence mais les 0 et 1 seraient tout de même inversés.</P>
 
 <P>Exemple 2:<BR>
@@ -453,18 +453,18 @@
 <DL>
   <DT><CODE>bps &lt;number&gt;</CODE></DT>
   <DD>peut être <CODE>1</CODE>, <CODE>2</CODE> ou <CODE>4</CODE> et définie le nombre 
-    d'octets par sample. Cette option est requise, la laisser vide provoquera une erreur à l'éxecution.</DD>
+    d'octets par sample. Cette option est requise, la laisser vide provoquera une erreur à l'exécution.</DD>
 
   <DT><CODE>f &lt;format&gt;</CODE></DT>
-  <DD>est une chaine texte décrivant le format de sample. Cette chaine est un mix
+  <DD>est une chaîne texte décrivant le format de sample. Cette chaîne est un mix
     concaténé de: <CODE>alaw</CODE>, <CODE>mulaw</CODE> ou
     <CODE>imaad</CODE>, <CODE>float</CODE> ou <CODE>int</CODE>,
     <CODE>unsigned</CODE> ou <CODE>signed</CODE>, <CODE>le</CODE> ou
     <CODE>be</CODE> (little ou big endian). Cette option est requise, la laisser vide 
-    provoquera une erreur à l'éxecution.</DD>
+    provoquera une erreur à l'exécution.</DD>
 </DL>
 
-<P>Example:<BR>
+<P>Exemple:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -af format=4:float</CODE></P>
 
 <P>initialiserait le format de sortie en données à virgule de 4 octets par sample.</P>
@@ -486,11 +486,11 @@
 <P>Pour calculer le décalage requis pour chaque canal, faites comme ceci:</P>
 
 <OL>
-  <LI>Mesurez la distance entre les hauts parleurs et votre position d'écoute (en metres) 
+  <LI>Mesurez la distance entre les hauts parleurs et votre position d'écoute (en mètres) 
     ce qui vous donne les distances s1 à s5 (pour un système 5.1).
     Ce n'est pas la peine de le faire pour le caisson de basses (vous n'entendrez pas la 
     différence de toute façon).</LI>
-  <LI>Soustraiez les distances s1 à s5 à la distance maximum c-a-d.<BR>
+  <LI>Soustrayez les distances s1 à s5 à la distance maximum c-a-d.<BR>
     s[i] = max(s) - s[i]; i = 1...5</LI>
   <LI>Les décalages requis (en ms) sont calculés avec<BR>
     d[i] = 1000*s[i]/342; i = 1...5 </LI>
@@ -511,7 +511,7 @@
   il vaut mieux fixer le niveau du son PCM au max, laisser ce filtre de côté et contrôler
   le niveau de sortie de vos haut-parleurs avec le contrôleur de volume principal du 
   mixeur. Au cas où votre carte son ait un mixeur numérique au lieu d'un analogique,
-  et que vous entendez sa distortion, utilisez le mixeur MASTER à la place. 
+  et que vous entendez sa distorsion, utilisez le mixeur MASTER à la place. 
   Si il y a un amplificateur externe connecté à l'ordinateur (ce qui est presque
   toujours le cas), le niveau de bruit peut être minimisé en ajustant le niveau maître
   et le bouton du volume jusqu'à ce que le bruit résiduel soit parti. Ce filtre a
@@ -523,10 +523,10 @@
     qui représente le niveau du volume en dB. Le niveau par défaut est 0dB.</DD>
 
   <DT><CODE>c</CODE></DT>
-  <DD>est un contrôle binaire qui active et désactuve le soft clipping. Le Soft-clipping 
+  <DD>est un contrôle binaire qui active et désactive le Soft-Clipping. Le Soft-Clipping 
     peut rendre le son plus fluide si de très gros niveaux de volume de son sont utilisés. 
-    Activez cette option si l'intervale dynamique de vos haut-parleurs est très bas.
-    Soyez conscient que cette fonction crée une distortion et ne devrait être utilisé
+    Activez cette option si l'intervalle dynamique de vos haut-parleurs est très bas.
+    Soyez conscient que cette fonction crée une distorsion et ne devrait être utilisé
     qu'en dernier recours.</DD>
 </DL>
 
@@ -537,7 +537,7 @@
 
 <P>Ce filtre a une seconde fonction: Il mesure le niveau maximum du son et l'affiche 
   quand MPlayer se termine. Cette estimation de volume peut être utilisée pour définir
-  le niveau de son dans MEncoder pour que l'intervale dynamique maximum soit utilisé.</P>
+  le niveau de son dans MEncoder pour que l'intervalle dynamique maximum soit utilisé.</P>
 
 
 <H5><A NAME="af_equalizer">2.3.2.3.6 Egaliseur</A></H5>
@@ -589,7 +589,7 @@
   principales pour ce filtre: </P>
 
 <OL>
-  <LI>Down-mixage de nombreux canaux dans seulement quelques-un, stéréo vers mono par 
+  <LI>Down-mixage de plusieurs canaux vers seulement quelques uns, stéréo vers mono par 
   exemple.</LI>
   <LI>Faire varier la "largeur" du haut parleur central dans un système de son surround.</LI>
 </OL>
@@ -602,7 +602,7 @@
   <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
   <DD>est un entier compris entre <CODE>1</CODE> et <CODE>6</CODE> et est utilisé pour définir le 
     nombre de canaux de sortie. Cette option est requise, la laisser vide provoquera une erreur à 
-    l'éxecution.</DD>
+    l'exécution.</DD>
 
   <DT><CODE>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</CODE></DT>
   <DD>sont des nombres à virgule compris entre <CODE>0</CODE> et <CODE>1</CODE>. 
@@ -628,18 +628,18 @@
 <P>Le filtre <CODE>sub</CODE> ajoute un canal de sub woofer au flux audio. 
   Les données audio
   utilisées pour créer le canal sub-woofer sont une moyenne des canaux 0 et 1.
-  Le fréquences basses sont ensuites filtrées par un filtre Butterworth de 4ème
-  ordre avec une fréquence de cutoff par défaut de 60Hz et ajoutées à
+  Le fréquences basses sont ensuite filtrées par un filtre Butterworth de 4ème
+  ordre avec une fréquence de cut-off par défaut de 60Hz et ajoutées à
   un canal séparé du flux audio. Attention: Désactivez ce filtre quand vous lisez
-  des DVDs en son Dolby Digital 5.1, sinon ce filtre empèchera l'envoi du son au
+  des DVDs en son Dolby Digital 5.1, sinon ce filtre empêchera l'envoi du son au
   sub-woofer. Ce filtre a deux paramètres:</P>
 
 <DL>
   <DT><CODE>fc &lt;20-300&gt;</CODE></DT>
-  <DD>est un nombre à virgule optionnel utilisé pour définir la fréquence decutoff
+  <DD>est un nombre à virgule optionnel utilisé pour définir la fréquence de cut-off
     du filtre en Hz. L'intervalle valide est de 20Hz à 300Hz. Pour les meilleurs
-    résultats essayez de fixer la fréquence de cutoff le plus bas possible. Cela
-    améliorera la stéréo ou le son surround. La fréquence de cutoff par défaut est
+    résultats essayez de fixer la fréquence de cut-off le plus bas possible. Cela
+    améliorera la stéréo ou le son surround. La fréquence de cut-off par défaut est
     60Hz.</DD>
 
   <DT><CODE>ch &lt;0-5&gt;</CODE></DT>
@@ -652,7 +652,7 @@
 <P>Exemple:<BR>
   &nbsp;&nbsp;<CODE>mplayer -af sub=100:4 -channels 5 media.avi</CODE></P>
 
-<P>ajouterait un canal sub-woofer avec une fréquence de cutoff de 100Hz au canal
+<P>ajouterait un canal sub-woofer avec une fréquence de cut-off de 100Hz au canal
   de sortie 4.</P>
 
 <H5><A NAME="af_surround">2.3.2.3.9 Décodeur de son surround</A></H5>
@@ -684,7 +684,7 @@
 <H4><A NAME="plugins">2.3.2.4 Plugins Audio (à ne plus utiliser)</A></H4>
 
 <H2><STRONG>Note: Les plugins audio ont été remplacés par les filtres audio et seront
-  prochainements supprimés.</STRONG></H2>
+  prochainement supprimés.</STRONG></H2>
 
 <P>Mplayer supporte les plugins audio. Les plugins audio peuvent être utilisés
   pour changer les propriétés des données audio avant que le son n'atteigne la
@@ -726,7 +726,7 @@
 
 <P>Notez que la fréquence de sortie ne devrait pas être augmentée au dessus de sa
   valeur par défaut. Le dépassement provoquera la lecture des flux audio et vidéo
-  en slow motion assortie d'une distortion audio.</P>
+  en slow motion assortie d'une distorsion audio.</P>
 
 
 <H5><A NAME="surround_decoding">2.3.2.4.2 Décodage son surround</A></H5>
@@ -781,17 +781,17 @@
   ait un mixeur numérique au lieu d'un analogique, utilisez le contrôle mixeur MASTER
   à la place. Si il y a un ampli externe connecté à votre ordinateur (c'est la plupart 
   du temps le cas), le niveau de bruit peut être minimisé en ajustant le niveau 
-  principal et la molette du volume de l'ampli jusqu'a ce que le bruit résiduel soit 
+  principal et la molette du volume de l'ampli jusqu'à ce que le bruit résiduel soit 
   parti.</P>
 
 <P>Utilisation:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop
   list=volume:volume=&lt;0-255&gt;</CODE></P>
 
-<P>Ce plugin a également des capacités de compression ou "soft-clipping".
+<P>Ce plugin a également des capacités de compression ou "Soft-Clipping".
   La compression peut être utilisé si si la dynamique du son est très élevée
   ou si la dynamique de vos haut-parleurs est très basse. Soyez contient que cette
-  fonction crée des distortions et ne devrait être envisagée qu'en dernier ressort.</P>
+  fonction crée des distorsion et ne devrait être envisagée qu'en dernier ressort.</P>
 
 <P>Utilisation:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop

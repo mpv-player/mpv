@@ -108,7 +108,7 @@
     cp ../../src/decore.h /usr/local/include
     </PRE>
     </LI>
-  <LI>Élas, pour la librairie d'encodage il n'y a pas de Makefile Linux
+  <LI>Hélas, pour la librairie d'encodage il n'y a pas de Makefile Linux
     disponible, et le code optimisé pour MMX ne fonctionne que sous
     Windows. Vous pouvez quand même le compiler en utilisant ce
     <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</A>.
@@ -276,7 +276,7 @@ MPlayer décode toutes les versions de RealVideo:
   <LI>son API est compatible avec DivX4 donc en inclure le support est facile</LI>
   <LI>encodage en 2 passes</LI>
   <LI>bonne qualité d'encodage, plus grande vitesse que DivX4 (vous pouvez l'optimiser
-    pour votre ordi pendant la compilation)</LI>
+    pour votre machine pendant la compilation)</LI>
 </UL>
 
 <H5>DÉSAVANTAGES:</H5>
@@ -297,7 +297,7 @@ MPlayer décode toutes les versions de RealVideo:
   <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</CODE></LI>
   <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</CODE></LI>
   <LI><CODE>cd xvidcore/build/generic</CODE></LI>
-  <LI>Editez le Makefile pour votre architecture (probablement
+  <LI>Éditez le Makefile pour votre architecture (probablement
     <CODE>Makefile.linuxx86</CODE>) pour l'adapter à vos besoins.</LI>
   <LI><CODE>make -f Makefile.linuxx86</CODE></LI>
   <LI>Copiez les fichiers d'entête <CODE>divx4.h</CODE> et <CODE>xvid.h</CODE> depuis
@@ -318,7 +318,7 @@ MPlayer décode toutes les versions de RealVideo:
 <UL>
   <LI>Sorenson 1 (fourcc <I>SVQ1</I>) - décodage supporté par des <B>codecs
     natifs</B><BR>
-    En fait il y a deux (presque égaux) décodeurs pour SVQ1: l'un est inclu dans
+    En fait il y a deux (presque égaux) décodeurs pour SVQ1: l'un est inclus dans
     MPlayer, l'autre est dans libavcodec. Vous pouvez invoquer chacun d'eux avec les
     options <CODE>-vc svq1</CODE> et <CODE>-vc ffsvq1</CODE> respectivement.
     Certains fichiers peuvent fonctionner avec l'un, et pas avec l'autre, donc testez
@@ -502,7 +502,7 @@ MPlayer supporte le décodage de presque toutes les versions de RealAudio:
   <LI>Sélectionnez le bon nom de codec et dépliez l'élément.</LI>
   <LI>Dans l'entrée <CODE>DisplayName</CODE> regardez le texte entre accolades
     après le backslash et notez-le (cinq blocs délimités par des tirets, le GUID).</LI>
-  <LI>Le binaire du codec binary est le fichier spécifié dans l'entrée <CODE>Filename</CODE>.</LI>
+  <LI>Le binaire du codec est le fichier spécifié dans l'entrée <CODE>Filename</CODE>.</LI>
 </OL>
 
 <P><B>Note:</B> Si il n'y a pas d'entrée <CODE>Filename</CODE> et que
