@@ -53,6 +53,7 @@
 #include <linux/pci.h>
 #include <linux/ioport.h>
 #include <linux/init.h>
+#include <linux/byteorder/swab.h>
 
 #include "radeon_vid.h"
 #include "radeon.h"
@@ -80,6 +81,15 @@ MODULE_DESCRIPTION("Accelerated YUV BES driver for Radeons. Version: "RADEON_VID
 #ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
 #endif
+#ifdef CONFIG_MTRR 
+MODULE_PARM(mtrr, "i");
+MODULE_PARM_DESC(mtrr, "Tune MTRR (touch=1(default))");
+static int mtrr __initdata = 1;
+static struct { int vram; int vram_valid; } smtrr;
+#endif
+MODULE_PARM(swap_fourcc, "i");
+MODULE_PARM_DESC(swap_fourcc, "Swap fourcc (dont't swap=0(default))");
+static int swap_fourcc __initdata = 0;
 
 #ifdef RAGE128
 #define RVID_MSG "rage128_vid: "
@@ -260,14 +270,14 @@ static char *fourcc_format_name(int format)
 #define INREG(addr)		readl((radeon_mmio_base)+addr)
 #define OUTREG(addr,val)	writel(val, (radeon_mmio_base)+addr)
 
-static void radeon_vid_save_state( void )
+static void __init radeon_vid_save_state( void )
 {
   size_t i;
   for(i=0;i<sizeof(vregs)/sizeof(video_registers_t);i++)
 	vregs[i].value = INREG(vregs[i].name);
 }
 
-static void radeon_vid_restore_state( void )
+static void __exit radeon_vid_restore_state( void )
 {
   size_t i;
   for(i=0;i<sizeof(vregs)/sizeof(video_registers_t);i++)
@@ -624,6 +634,7 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 				printk(RVID_MSG"failed copy to userspace\n");
 				return -EFAULT;
 			}
+			if(swap_fourcc) radeon_config.format = swab32(radeon_config.format); 
 			printk(RVID_MSG"configuring for '%s' fourcc\n",fourcc_format_name(radeon_config.format));
 			return radeon_vid_init_video(&radeon_config);
 		break;
@@ -740,7 +751,7 @@ const struct ati_card_id_s ati_card_ids[]=
 
 static int detected_chip;
 
-static int radeon_vid_config_card(void)
+static int __init radeon_vid_config_card(void)
 {
 	struct pci_dev *dev = NULL;
 	size_t i;
@@ -791,6 +802,8 @@ static void radeon_param_buff_fill( void )
     len += sprintf(&radeon_param_buff[len],"Memory: %p:%x\n",radeon_mem_base,radeon_ram_size*0x100000);
     len += sprintf(&radeon_param_buff[len],"MMIO: %p\n",radeon_mmio_base);
     len += sprintf(&radeon_param_buff[len],"Overlay offset: %p\n",radeon_overlay_off);
+    len += sprintf(&radeon_param_buff[len],"Tune MTRR: %s\n",mtrr?"on":"off");
+    len += sprintf(&radeon_param_buff[len],"Swapped fourcc: %s\n",swap_fourcc?"on":"off");
     len += sprintf(&radeon_param_buff[len],"Last fourcc: %s\n\n",fourcc_format_name(besr.fourcc));
     len += sprintf(&radeon_param_buff[len],"Configurable stuff:\n");
     len += sprintf(&radeon_param_buff[len],"~~~~~~~~~~~~~~~~~~~\n");
@@ -941,8 +954,7 @@ static struct file_operations radeon_vid_fops =
  * Main Initialization Function 
  */
 
-
-static int radeon_vid_initialize(void)
+static int __init radeon_vid_initialize(void)
 {
 	radeon_vid_in_use = 0;
 #ifdef RAGE128
@@ -967,15 +979,24 @@ static int radeon_vid_initialize(void)
 	radeon_vid_save_state();
 	radeon_vid_make_default();
 	radeon_vid_preset();
+#ifdef CONFIG_MTRR
+	if (mtrr) {
+		smtrr.vram = mtrr_add(radeon_mem_base,
+				radeon_ram_size*0x100000, MTRR_TYPE_WRCOMB, 1);
+		smtrr.vram_valid = 1;
+		/* let there be speed */
+		printk(RVID_MSG"MTRR set to ON\n");
+	}
+#endif /* CONFIG_MTRR */
 	return(0);
 }
 
-int init_module(void)
+int __init init_module(void)
 {
 	return radeon_vid_initialize();
 }
 
-void cleanup_module(void)
+void __exit cleanup_module(void)
 {
 	radeon_vid_restore_state();
 	if(radeon_mmio_base)
@@ -983,5 +1004,10 @@ void cleanup_module(void)
 	kfree(radeon_param_buff);
 	RTRACE(RVID_MSG"Cleaning up module\n");
 	unregister_chrdev(RADEON_VID_MAJOR, "radeon_vid");
+#ifdef CONFIG_MTRR
+        if (smtrr.vram_valid)
+            mtrr_del(smtrr.vram, radeon_mem_base,
+                     radeon_ram_size*0x100000);
+#endif /* CONFIG_MTRR */
 }
 

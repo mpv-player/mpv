@@ -65,8 +65,27 @@ colour_key=hexval          defines colour key
 deinterlace=on/off         enables/disables adaprive deinterlacing
 deinterlace_pattern=hexval defines deinterlacing pattern
 
+Driver parameters:
+~~~~~~~~~~~~~~~~~~
+
+You can use some additional parameters during module loading:
+Example:
+modprobe radeon_vid swap_fourcc=1
+
+List of driver's parameters:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mtrr=1/0                   configures MTRR (if available) default = 1
+swap_fourcc=1/0            performs byte swapping of passed fourcc.
+			   (It's required for compatibility with -vo mga)
+			   
+To know more about driver's parameters execute:
+modinfo radeon_vid
+or
+modinfo rage128_vid
+			   
 Note:
 ~~~~~
+For command line of mplayer: 
 You can pass only options with can be recognized by vo_vesa driver.
 (Indeed radeon_vid and rage128_vid are stupid things and can create
 video overlay only. But mode switching and other adjustement performs
@@ -77,4 +96,10 @@ Conslusion:
 This stuff (radeon(rage128)_vid) currently doesn't support any standards.
 So after implementing linux standards I'll fully rewrite this driver.
 
-Enjoy
+Full example:
+~~~~~~~~~~~~~
+modprobe radeon_vid mtrr=1
+echo "deinterlace_pattern=F0055555">>/dev/radeon_vid
+mplayer -vo vesa:lvo:/dev/radeon_vid -fs -zoom -bpp 32 filename
+
+Enjoy!
