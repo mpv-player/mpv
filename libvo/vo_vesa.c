@@ -277,7 +277,7 @@ static void __vbeCopyData(uint8_t *image)
 /* is called for yuv only */
 static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
-    unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
+    int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
     uint8_t *dst[3]= {dga_buffer, NULL, NULL};
     int dstStride[3];
     if(verbose > 2)
@@ -296,7 +296,7 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 
 static void draw_alpha_32(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
-   unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
+   int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
 #ifndef OSD_OUTSIDE_MOVIE
    if(HAS_DGA())
    {
@@ -309,7 +309,7 @@ static void draw_alpha_32(int x0,int y0, int w,int h, unsigned char* src, unsign
 
 static void draw_alpha_24(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
-   unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
+   int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
 #ifndef OSD_OUTSIDE_MOVIE
    if(HAS_DGA())
    {
@@ -322,7 +322,7 @@ static void draw_alpha_24(int x0,int y0, int w,int h, unsigned char* src, unsign
 
 static void draw_alpha_16(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
-   unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
+   int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
 #ifndef OSD_OUTSIDE_MOVIE
    if(HAS_DGA())
    {
@@ -335,7 +335,7 @@ static void draw_alpha_16(int x0,int y0, int w,int h, unsigned char* src, unsign
 
 static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
-   unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
+   int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
 #ifndef OSD_OUTSIDE_MOVIE
    if(HAS_DGA())
    {
@@ -416,7 +416,7 @@ static uint32_t draw_frame(uint8_t *src[])
         printf("vo_vesa: draw_frame was called\n");
     if(sws)
     {
-	unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
+	int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
 	int srcStride[1];
 	uint8_t *dst[3]= {dga_buffer, NULL, NULL};
 	int dstStride[3];
