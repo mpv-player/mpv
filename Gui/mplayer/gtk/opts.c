@@ -69,6 +69,7 @@ static GtkWidget * CBDumpSrt;
 static GtkWidget * CBPostprocess;
 static GtkWidget * CBCache;
 static GtkWidget * CBLoadFullscreen;
+static GtkWidget * CBSaveWinPos;
 static GtkWidget * CBStopXScreenSaver;
 static GtkWidget * CBPlayBar;
 
@@ -352,6 +353,7 @@ void ShowPreferences( void )
 // --- 6. page
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPostprocess ),gtkVopPP );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ),gtkLoadFullscreen );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBSaveWinPos ),gui_save_pos );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBShowVideoWindow ),gtkShowVideoWindow );
  if ( !gtkShowVideoWindow )
   {
@@ -592,6 +594,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	// --- 6. page
 	gtkVopPP=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPostprocess ) ); 
 	gtkLoadFullscreen=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ) );
+	gui_save_pos=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBSaveWinPos ) );
 	gtkShowVideoWindow=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBShowVideoWindow ) );
 	stop_xscreensaver=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBStopXScreenSaver ) );
 	gtkEnablePlayBar=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPlayBar ) );
@@ -1195,6 +1198,7 @@ GtkWidget * create_Preferences( void )
 
   CBShowVideoWindow=AddCheckButton( MSGTR_PREFERENCES_ShowVideoWindow,vbox602 );
   CBLoadFullscreen=AddCheckButton( MSGTR_PREFERENCES_LoadFullscreen,vbox602 );
+  CBSaveWinPos=AddCheckButton( MSGTR_PREFERENCES_SaveWinPos,vbox602 );
   CBStopXScreenSaver=AddCheckButton( MSGTR_PREFERENCES_XSCREENSAVER,vbox602 );
   CBPlayBar=AddCheckButton( MSGTR_PREFERENCES_PlayBar,vbox602 );
 

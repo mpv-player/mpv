@@ -204,14 +204,21 @@ void guiInit( void )
    exit( 0 );
   }
 
+ if ( gui_save_pos )
+ {
+  appMPlayer.main.x = gui_main_pos_x;
+  appMPlayer.main.y = gui_main_pos_y;
+  appMPlayer.sub.x = gui_sub_pos_x;
+  appMPlayer.sub.y = gui_sub_pos_y;
+ }
+
   if (WinID>0)
-  {
+   {
     appMPlayer.subWindow.Parent=WinID;
     appMPlayer.sub.x=0;
     appMPlayer.sub.y=0;
-  }
-  if (guiWinID>=0)
-    appMPlayer.mainWindow.Parent=guiWinID;
+   }
+  if (guiWinID>=0) appMPlayer.mainWindow.Parent=guiWinID;
  
  wsCreateWindow( &appMPlayer.subWindow,
   appMPlayer.sub.x,appMPlayer.sub.y,appMPlayer.sub.width,appMPlayer.sub.height,
@@ -331,6 +338,13 @@ void guiDone( void )
 {
  mplMainRender=0;
  mp_msg( MSGT_GPLAYER,MSGL_V,"[gui] done.\n" );
+
+ if ( gui_save_pos )
+  {
+   gui_main_pos_x=appMPlayer.mainWindow.X; gui_main_pos_y=appMPlayer.mainWindow.Y;
+   gui_sub_pos_x=appMPlayer.subWindow.X; gui_sub_pos_y=appMPlayer.subWindow.Y;
+  }
+
  cfg_write();
  wsXDone();
 }

@@ -42,6 +42,12 @@ extern int    gtkLoadFullscreen;
 extern int    gtkShowVideoWindow;
 extern int    gtkEnablePlayBar;
 
+extern int    gui_save_pos;
+extern int    gui_main_pos_x;
+extern int    gui_main_pos_y;
+extern int    gui_sub_pos_x;
+extern int    gui_sub_pos_y;
+
 extern int cfg_read( void );
 extern int cfg_write( void );
 

@@ -174,7 +174,7 @@ txSample * fntRender( wItem * item,int px,char * fmt,... )
  if ( item->Bitmap.Image == NULL ) 
   {
    item->Bitmap.Height=item->height=fntTextHeight( id,p );
-   item->Bitmap.Width=iw;
+   item->Bitmap.Width=item->width=iw;
    item->Bitmap.ImageSize=item->height * iw * 4;
    if ( !item->Bitmap.ImageSize ) return NULL;
    item->Bitmap.BPP=32;

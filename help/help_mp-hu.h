@@ -503,6 +503,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Gyorsítótár be/ki"
 #define MSGTR_PREFERENCES_CacheSize "Gyorsítótár merete:"
 #define MSGTR_PREFERENCES_LoadFullscreen "Indítás teljes képernyõn"
+#define MSGTR_PREFERENCES_SaveWinPos "Ablakok pozíciójának mentése"
 #define MSGTR_PREFERENCES_XSCREENSAVER "XScreenSaver leállítása film lejátszásakor"
 #define MSGTR_PREFERENCES_PlayBar "PlayBar engedélyezése"
 #define MSGTR_PREFERENCES_AutoSync "AutoSync ki/be kapcsolása"

@@ -119,17 +119,20 @@ void appInitStruct( listItems * item )
   appClearItem( &item->Items[i] );
  for ( i=0;i<item->NumberOfMenuItems;i++ )
   appClearItem( &item->MenuItems[i] );
+ for ( i=0;i<item->NumberOfBarItems;i++ )
+  appClearItem( &item->barItems[i] );
 
  item->NumberOfItems=-1;
- memset( item->Items,0,128 * sizeof( wItem ) );
+ memset( item->Items,0,256 * sizeof( wItem ) );
  item->NumberOfMenuItems=-1;
- memset( item->MenuItems,0,32 * sizeof( wItem ) );
+ memset( item->MenuItems,0,64 * sizeof( wItem ) );
+ item->NumberOfBarItems=-1;
+ memset( item->barItems,0,256 * sizeof( wItem ) );
 
  appClearItem( &item->main );
  item->mainDecoration=0;
  appClearItem( &item->sub );
- item->sub.Bitmap.Width=384; item->sub.Bitmap.Height=384;
- item->sub.width=384; item->sub.height=384;
+ item->sub.width=0; item->sub.height=0;
  item->sub.x=-1; item->sub.y=-1;
  appClearItem( &item->menuBase );
  appClearItem( &item->menuSelected );

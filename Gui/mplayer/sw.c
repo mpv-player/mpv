@@ -5,6 +5,7 @@
 
 #include "../../config.h"
 #include "../../libvo/x11_common.h"
+#include "../../libvo/fastmemcpy.h"
 
 #include "../app.h"
 #include "../interface.h"

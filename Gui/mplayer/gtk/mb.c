@@ -11,7 +11,7 @@
 #include "common.h"
 
 GtkWidget * gtkMessageBoxText;
-GtkWidget * MessageBox;
+GtkWidget * MessageBox = NULL;
 
 void ShowMessageBox( char * msg )
 {

@@ -15,6 +15,7 @@
 #include "../../config.h"
 #include "../../help_mp.h"
 #include "../../libvo/x11_common.h"
+#include "../../libvo/fastmemcpy.h"
 
 #include "../../libmpdemux/stream.h"
 #include "../../mixer.h"
@@ -214,13 +215,13 @@ void mplPBShow( int x, int y )
 
 void mplPBInit( void )
 {
- gfree( (void**)&mplPBDrawBuffer );
-
  if ( !appMPlayer.barIsPresent ) return;
 
- if ( ( mplPBDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.bar.Bitmap.ImageSize ) ) == NULL )
+ gfree( (void**)&mplPBDrawBuffer );
+
+ if ( ( mplPBDrawBuffer = (unsigned char *)malloc( appMPlayer.bar.Bitmap.ImageSize ) ) == NULL )
   {
-   fprintf( stderr,MSGTR_NEMDB );
+   mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_NEMDB );
    exit( 0 );
   }
 

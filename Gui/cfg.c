@@ -60,6 +60,11 @@ int    gtkLoadFullscreen = 0;
 int    gtkShowVideoWindow = 1;
 int    gtkEnablePlayBar = 1;
 
+int    gui_save_pos = 1;
+int    gui_main_pos_x = -2;
+int    gui_main_pos_y = -2;
+int    gui_sub_pos_x = -1;
+int    gui_sub_pos_y = -1;
 // ---
 
 extern char * get_path( char * filename );
@@ -143,6 +148,12 @@ static config_t gui_opts[] =
  { "autosync_size",&gtkAutoSync,CONF_TYPE_INT,CONF_RANGE,0,10000,NULL },
  
  { "gui_skin",&skinName,CONF_TYPE_STRING,0,0,0,NULL },
+
+ { "gui_save_pos", &gui_save_pos, CONF_TYPE_FLAG,0,0,1,NULL},
+ { "gui_main_pos_x", &gui_main_pos_x, CONF_TYPE_INT,0,0,0,NULL},
+ { "gui_main_pos_y", &gui_main_pos_y, CONF_TYPE_INT,0,0,0,NULL},
+ { "gui_video_out_pos_x", &gui_sub_pos_x, CONF_TYPE_INT,0,0,0,NULL},
+ { "gui_video_out_pos_y", &gui_sub_pos_y, CONF_TYPE_INT,0,0,0,NULL},
 
  { "equ_channel_1",&gtkEquChannel1,CONF_TYPE_STRING,0,0,0,NULL },
  { "equ_channel_2",&gtkEquChannel2,CONF_TYPE_STRING,0,0,0,NULL },

@@ -585,6 +585,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Cache on/off"
 #define MSGTR_PREFERENCES_CacheSize "Cache size: "
 #define MSGTR_PREFERENCES_LoadFullscreen "Start in fullscreen"
+#define MSGTR_PREFERENCES_SaveWinPos "Save window position"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Stop XScreenSaver"
 #define MSGTR_PREFERENCES_PlayBar "Enable playbar"
 #define MSGTR_PREFERENCES_AutoSync "AutoSync on/off"

@@ -15,6 +15,7 @@
 #include "../../config.h"
 #include "../../help_mp.h"
 #include "../../libvo/x11_common.h"
+#include "../../libvo/fastmemcpy.h"
 
 #include "../../libmpdemux/stream.h"
 #include "../../mixer.h"

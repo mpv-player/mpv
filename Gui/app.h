@@ -164,7 +164,7 @@ typedef struct
  wItem           MenuItems[64];
 // ---
  int		 NumberOfBarItems;
- wItem		 barItems[32];
+ wItem		 barItems[256];
 } listItems;
 
 extern listItems   appMPlayer;
