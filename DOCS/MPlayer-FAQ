@@ -69,7 +69,7 @@ A: your opengl driver doesn't support dynamic texture chanegs (glTexSubImage)
    it will not work with 3DFX cards because the 256x256 texture size limit.
 
 Q: I have G200/G400, how to compile/use mga_vid driver?
-A: read INSTALL and README...
+A: read VIDEOCARDS, INSTALL, README
 
 Q: What's XMMP? (it's XMMS or XMPS but mispelled?)
 A: It's a new project, see http://frozenproductions.com for details
@@ -130,7 +130,7 @@ A: Check DOCS/TODO , if it doesn't contain your codec, contact us.
 Q: What about DGA driver? I can't find it!!!
 A: ./configure autodetects your DGA driver. If -vo help doesn't show
    DGA, then there's a problem with your X installation.
-   Try ./configure --enable-dga
+   Try ./configure --enable-dga (and read VIDEOCARDS)
 
 Q: Ok, -vo help shows DGA driver, but it is babbling about permissions!
    Help me!
