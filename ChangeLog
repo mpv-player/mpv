@@ -29,6 +29,8 @@ mplayer (1.0)
     * -vop option obsoleted by reverse-order -vf, big config layer changes
     * stream layer "cleanup", -dvd -> dvd:// etc
     * autosub fuzziness, it tries to load all subs with similar filenames
+    * removed the whole old config reader, leaving only the newer one
+      (no backward compatibilty!)
     
     Ports:
     * HPUX fixes
@@ -47,12 +49,12 @@ mplayer (1.0)
     * realaudio v4 demuxer
     * realaudio 14_4 and 28_8 codecs support (both binary dlls and native code)
     * realmedia rtsp:// support (independent from the live.com rtsp stuff!)
-    * matroska demuxer
+    * Matroska demuxer
     * demuxer: enabling mpeg4-es autodetection, h264-es support
     * .wav extradata parsing (for truespeech, atrac3 etc)
     * DVB input driver, mpeg-TS demuxer
     * hwac3: DTS passthru support
-    * new filters: down3dright, detc, telecine, tfields, ilpack, ivtc, dsize
+    * new filters: down3dright, detc, telecine, tfields, ilpack, ivtc, dsize, tinterlace
     * vf layer: slices support (crop, expand, swscale only)
     * vf scale aspect fixes
     * swscaler: cleanup & API change, yv12 -> yuy2 in alpha asm, -fPIC compileable
@@ -66,6 +68,11 @@ mplayer (1.0)
     * support for Vanguard's win32 h264 etc codecs
     * Video for Linux 1: various bugfixes, video eq support
     * Video for Linux 2 support
+    * TV support: kick-ass image format handling
+    * mp3lib: moved the assembly sources into gcc inline assembly (c)
+    * mp3lib: sync with mpg123 0.59s-pre
+    * mp3lib: final layer-1 support
+    * mp3lib: skip trashed first mp3 frame, fixes lot of buggy/misdetected files
 
     FFmpeg/libavcodec:
     * libavcodec: static,const,compiler warning cleanup, UINTX -> uintx_t
@@ -109,10 +116,8 @@ mplayer (1.0)
     * playtree parsing speedup :)
     * various URL parsing fixes
     * crashing on broken config files finally fixed!
-    * GUI PPC (reverse byteorder) fixes
-    * mp3lib: moved the assembly sources into gcc inline assembly (c)
-    * mp3lib: sync with mpg123 0.59s-pre
-    * mp3lib: final layer-1 support
+    * GUI: PPC (reverse byteorder) fixes
+    * GUI: revert to 'default' skin if configured skin failed
     * TOOLS/plotpsnr.pl: PSNR plotting tool using gnuplot 
     * DOCS/tech/mpcf.txt: MPCF/NUT draft/specification
     * TVout/matroxtv: various improvements
