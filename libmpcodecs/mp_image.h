@@ -69,6 +69,7 @@
 #define MP_IMGFIELD_REPEAT_FIRST 0x04
 #define MP_IMGFIELD_TOP 0x08
 #define MP_IMGFIELD_BOTTOM 0x10
+#define MP_IMGFIELD_INTERLACED 0x20
 
 typedef struct mp_image_s {
     unsigned short flags;

@@ -253,6 +253,8 @@ static int init(sh_video_t *sh){
     if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
        || sh->format == mmioFOURCC('R', 'V', '1', '3')
        || sh->format == mmioFOURCC('R', 'V', '2', '0')
+       || sh->format == mmioFOURCC('R', 'V', '3', '0')
+       || sh->format == mmioFOURCC('R', 'V', '4', '0')
        ){
         avctx->extradata_size= 8;
         avctx->extradata = malloc(avctx->extradata_size);
@@ -680,7 +682,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 //    if(sh->ds->demuxer->type == DEMUXER_TYPE_REAL){
     if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
        || sh->format == mmioFOURCC('R', 'V', '1', '3')
-       || sh->format == mmioFOURCC('R', 'V', '2', '0'))
+       || sh->format == mmioFOURCC('R', 'V', '2', '0')
+       || sh->format == mmioFOURCC('R', 'V', '3', '0')
+       || sh->format == mmioFOURCC('R', 'V', '4', '0'))
     if(sh->bih->biSize==sizeof(*sh->bih)+8){
         int i;
         dp_hdr_t *hdr= (dp_hdr_t*)data;
@@ -700,7 +704,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     ret = avcodec_decode_video(avctx, pic,
 	     &got_picture, data, len);
     dr1= ctx->do_dr1;
-
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
 //printf("repeat: %d\n", pic->repeat_pict);
 //-- vstats generation
@@ -818,6 +821,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mpi->pict_type=pic->pict_type;
 #if LIBAVCODEC_BUILD >= 4664
     mpi->qscale_type= pic->qscale_type;
+#endif
+#if LIBAVCODEC_BUILD >= 4697
+    mpi->fields = MP_IMGFIELD_ORDERED;
+    if(pic->interlaced_frame) mpi->fields |= MP_IMGFIELD_INTERLACED;
+    if(pic->top_field_first ) mpi->fields |= MP_IMGFIELD_TOP_FIRST;    
 #endif
     
     return mpi;
