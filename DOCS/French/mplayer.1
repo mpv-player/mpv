@@ -946,6 +946,10 @@ Spécifie la position des sous-titres sur l'écran.
 Cette valeur est la position verticale des sous-titres en % de la hauteur
 de l'écran.
 .TP
+.B \-subwidth <10\-100>
+Spécifie la largeur maximum des sous-titres sur l'écran. Utile pour la sortie TV.
+La valeur est la largeur des sous-titres en % de la largeur de l'écran.
+.TP
 .B \-unicode
 Indique à MPlayer de traiter le fichier de sous-titre au format UNICODE.
 .TP
@@ -2096,7 +2100,7 @@ le fichier de destination contiendra 'div3' en tant que fourcc vidéo.
 .B \-include <fichier\ de\ configuration>
 Spécifie le fichier de configuration à analyser après celui par défaut
 .TP
-.B \-info <option1:option2:...> (.AVI only)
+.B \-info <option1:option2:...> (.AVI uniquement)
 Spécifie l'entête d'info dans le fichier .AVI de destination.
 .br
 Les options par défaut sont:
@@ -2181,7 +2185,7 @@ fixer le gain d'entrée audio
 .IPs fast
 passe au mode VBR préselectionné suivant, plus rapide que l'actuel, qualité
 légerement inférieure et bitrates plus hauts.
-.IPs preset
+.IPs preset=<valeur>
 fournit les paramètres pour la plus haute qualité possible.
 .RSss
 medium: encodage VBR, bonne qualité, interval bitrate 150\-180 kbps.
