@@ -264,9 +264,12 @@ Miscellaneous options:
                          honored) [en]
                          (Available: $LANGUAGES all)
   --enable-shared-pp     install & use shared postprocessing lib
-  --install-path=PATH    the path to a custom install program (useful if
-                         your OS uses a GNU-incompatible install utility by
-                         default and you want to point to the GNU version)
+  --with-install=PATH    use a custom install program (useful if your OS uses 
+                         a GNU-incompatible install utility by default and 
+                         you want to use GNU version)
+  --install-path=PATH    the path to a custom install program 
+                         this option is obsolete and will be removed soon,
+                         use --with-install instead.
 
 Advanced options:
   --enable-mmx           build with MMX support [autodetect]
@@ -371,6 +374,9 @@ for ac_option do
     ;;
   --install-path=*)
     _install=`echo $ac_option | cut -d '=' -f 2 | sed 's/\/$//'`"/install"
+    ;;
+  --with-install=*)
+    _install=`echo $ac_option | cut -d '=' -f 2 `
     ;;
   esac
 done
@@ -1200,6 +1206,7 @@ for ac_option do
   --enable-runtime-cpudetection) ;;
   --disable-runtime-cpudetection) ;;
   --install-path=*) ;;
+  --with-install=*) ;;
 
   # Real 2nd pass
   --enable-mencoder)	_mencoder=yes	;;
