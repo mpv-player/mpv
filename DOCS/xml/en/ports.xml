@@ -281,8 +281,19 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para>QuickTime DLLx and Real Win32 codecs (not Real Linux codecs) also work.
   Compile with <option>--enable-qtx</option>
   and <option>--enable-real</option> and put the codecs into the
-  default Windows DLL location, <filename class="directory">C:\WINNT\system32</filename> or
-  <filename class="directory">C:\Windows\system</filename> depending on your Windows version.</para>
+  default Windows DLL location,
+  <filename class="directory">C:\WINNT\system32</filename> or
+  <filename class="directory">C:\Windows\system</filename> depending on your
+  Windows version. We have had some reports that Real DLLs need to be
+  writable by the user running MPlayer, but only on some systems.</para>
+
+<para>The Cygwin/MinGW console is rather slow. Redirecting output or using
+  the <option>-quiet</option> option has been reported to improve performance
+  on some systems. Direct rendering (<option>-dr</option>) may also help.
+  You can prevent OSD flicker through double buffering with the
+  <option>-double</option> option. If playback is jerky, try
+  <option>-autosync 100</option>. If some of these options help you, you
+  may want to put them in your config file.</para>
 
 <para>There are precompiled binary versions made by Sascha Sommer available for
   download from
@@ -317,9 +328,6 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   device is:</para>
 
 <screen>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</screen>
-
-<para>The Cygwin console is rather slow. Redirecting output or using the
-  <option>-quiet</option> option has been reported to improve performance.</para>
 
 </sect2>
 

@@ -1839,10 +1839,18 @@ end
   to compile the DirectX video output driver.</P>
 
 <P>QuickTime DLLs and Real Win32 codecs (not Real Linux codecs) also work.
-  Compile with <CODE>--enable-qtx</CODE>
-  and <CODE>--enable-real</CODE> and put the codecs into the
-  default Windows DLL location, <CODE>C:\WINNT\system32</CODE> or
-  <CODE>C:\Windows\system</CODE> depending on your Windows version.</P>
+  Compile with <CODE>--enable-qtx</CODE> and <CODE>--enable-real</CODE> and
+  put the codecs into the default Windows DLL location,
+  <CODE>C:\WINNT\system32</CODE> or <CODE>C:\Windows\system</CODE> depending
+  on your Windows version. We have had some reports that Real DLLs need to be
+  writable by the user running MPlayer, but only on some systems.</P>
+
+<P>The Cygwin/MinGW console is rather slow. Redirecting output or using the
+  <CODE>-quiet</CODE> option has been reported to improve performance on some
+  systems. Direct rendering (<CODE>-dr</CODE>) may also help. You can prevent
+  OSD flicker through double buffering with the <CODE>-double</CODE> option.
+  If playback is jerky, try <CODE>-autosync 100</CODE>. If some of
+  these options help you, you may want to put them in your config file.</P>
 
 <P>There are precompiled binary versions made by Sascha Sommer available for
   download from
@@ -1877,9 +1885,6 @@ end
   device is:</P>
 
 <P><CODE>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
-
-<P>The Cygwin console is rather slow. Redirecting output or using the
-  <CODE>-quiet</CODE> option has been reported to improve performance.</P>
 
 
 <H3><A NAME="mingw">6.6.2 MinGW</A></H3>
