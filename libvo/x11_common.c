@@ -48,7 +48,7 @@
 #define WIN_LAYER_ONBOTTOM               2
 #define WIN_LAYER_NORMAL                 4
 #define WIN_LAYER_ONTOP                  6
-#define WIN_LAYER_ABOVE_DOCK             12
+#define WIN_LAYER_ABOVE_DOCK             10
  
 int ice_layer=WIN_LAYER_ABOVE_DOCK;
 int stop_xscreensaver=0;
@@ -158,6 +158,20 @@ int vo_wm_detect( void )
  
  if ( WinID >= 0 ) return vo_wm_Unknown;
  
+// -- supports layers
+ type=XInternAtom( mDisplay,"_WIN_PROTOCOLS",False );
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **) &args ) && nitems > 0 )
+  {
+   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm supports layers.\n" );
+   for (i = 0; i < nitems; i++)
+     if (!strcmp( XGetAtomName (mDisplay, args[i]), "_WIN_LAYER"))
+     {
+       XFree( args );
+       return vo_wm_Layered;
+     }
+   XFree( args );
+  }
+
 // --- netwm 
  type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
  if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **) &args ) && nitems > 0 )
@@ -167,20 +181,25 @@ int vo_wm_detect( void )
      net_wm_support |= net_wm_support_state_test (XGetAtomName (mDisplay, args[i]));
    XFree( args );
    if (net_wm_support)
+   {
+     // ugly hack for broken OpenBox _NET_WM_STATE_FULLSCREEN support
+     // (in their implementation it only changes internal state of window, nothing more!!!)
+     if (vo_wm_NetWM == SUPPORT_FULLSCREEN)
+     {
+        type=XInternAtom( mDisplay,"_BLACKBOX_PID",False );
+	if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **) &args ) && nitems > 0 )
+	{
+           mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is a broken OpenBox.\n" );
+	   net_wm_support=0;
+	   XFree( args );
+           return vo_wm_Unknown;
+	}
+	XFree (args);
+     }
      return vo_wm_NetWM;
+   }
   }
 
-// -- supports layers
- type=XInternAtom( mDisplay,"_WIN_PROTOCOLS",False );
- if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **) &args ) && nitems > 0 )
-  {
-   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm supports layers.\n" );
-   for (i = 0; i < nitems; i++)
-     if (!strcmp( XGetAtomName (mDisplay, args[i]), "_WIN_LAYER"));
-       return vo_wm_Layered;
-   XFree( args );
-  }
- 
  if ( wm == vo_wm_Unknown ) mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Unknown wm type...\n" );
  return wm;
 }    
