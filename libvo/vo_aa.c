@@ -227,6 +227,14 @@ config(uint32_t width, uint32_t height, uint32_t d_width,
 	case IMGFMT_RGB24:
 	    bpp = 24;
 	    break;     
+	case IMGFMT_BGR32:
+	    bpp = 32;
+	    break;     
+	case IMGFMT_RGB32:
+	    bpp = 32;
+	    break;     
+	case IMGFMT_IYUV:
+	case IMGFMT_I420:
 	case IMGFMT_YV12:
 	    bpp = 24;
 	    /* YUV ? then initialize what we will need */
@@ -366,6 +374,8 @@ query_format(uint32_t format) {
 	case IMGFMT_YV12:
 	case IMGFMT_RGB|24:
 	case IMGFMT_BGR|24:
+	case IMGFMT_RGB|32:
+	case IMGFMT_BGR|32:
 	    return 1;
     }
     return 0;
@@ -483,6 +493,16 @@ draw_slice(uint8_t *src[], int stride[],
     uint8_t *dst;
 
     dst = convertbuf+(image_width * y + x) * 3;
+    if ((image_format == IMGFMT_IYUV) || (image_format == IMGFMT_I420))
+    {
+	uint8_t *src_i420[3];
+	
+	src_i420[0] = src[0];
+	src_i420[1] = src[2];
+	src_i420[2] = src[1];
+	src = src_i420;
+    }
+
     yuv2rgb(dst,src[0],src[1],src[2],w,h,image_width*3,stride[0],stride[1]);
 
     return 0;
@@ -493,7 +513,7 @@ flip_page(void) {
     /*
      * wow! another ready Image, so draw it !
      */
-    if(image_format == IMGFMT_YV12)
+    if(image_format == IMGFMT_YV12 || image_format == IMGFMT_IYUV || image_format == IMGFMT_I420)
       show_image(convertbuf);
 }
 
