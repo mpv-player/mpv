@@ -469,7 +469,7 @@ switch(sh_video->codec->driver){
    break;
  case VFM_CINEPAK: {
 #ifdef USE_MP_IMAGE
-   sh_video->image->type=MP_IMGTYPE_STATIC;
+   sh_video->image->type=MP_IMGTYPE_IP;
 #else
    int bpp=((out_fmt&255)+7)/8;
    sh_video->our_out_buffer_size = sh_video->disp_w*sh_video->disp_h*bpp;
@@ -1190,9 +1190,8 @@ if(verbose>1){
    blit_frame = 3;
    break;
  case VFM_ROQVIDEO:
-   roq_decode_video(start, in_size, sh_video->our_out_buffer,
-     sh_video->disp_w, sh_video->disp_h, sh_video->context);
-   blit_frame = 3;
+   roq_decode_video(sh_video->context, start, in_size, mpi);
+   blit_frame = 2;
    break;
   case VFM_QTRPZA:
     qt_decode_rpza(
