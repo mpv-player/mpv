@@ -30,10 +30,18 @@ char *audio_out_format_name(int format)
 	    return("MPEG (2) audio");
 	case AFMT_AC3:
 	    return("AC3");
+	case AFMT_U32_LE:
+	    return("Unsigned 32-bit (Little-Endian)");
+	case AFMT_U32_BE:
+	    return("Unsigned 32-bit (Big-Endian)");
 	case AFMT_S32_LE:
 	    return("Signed 32-bit (Little-Endian)");
 	case AFMT_S32_BE:
 	    return("Signed 32-bit (Big-Endian)");
+	case AFMT_U24_LE:
+	    return("Unsigned 24-bit (Little-Endian)");
+	case AFMT_U24_BE:
+	    return("Unsigned 24-bit (Big-Endian)");
 	case AFMT_S24_LE:
 	    return("Signed 24-bit (Little-Endian)");
 	case AFMT_S24_BE:
@@ -56,11 +64,15 @@ int audio_out_format_bits(int format){
 
 	case AFMT_S32_LE:
 	case AFMT_S32_BE:
+	case AFMT_U32_LE:
+	case AFMT_U32_BE:
 	case AFMT_FLOAT:
 	return 32;
 
 	case AFMT_S24_LE:
 	case AFMT_S24_BE:
+	case AFMT_U24_LE:
+	case AFMT_U24_BE:
 	return 24;
 	
 	case AFMT_MU_LAW:
