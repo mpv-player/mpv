@@ -118,9 +118,18 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
       }
   }
 
-  for(j=0; j<in_len; j++){
-      for(i=0; i<chans; i++){
-          s->in[i][j + s->index]= *(in++);
+  if(chans==1){
+      memcpy(&s->in[0][s->index], in, in_len * sizeof(int16_t));
+  }else if(chans==2){
+      for(j=0; j<in_len; j++){
+          s->in[0][j + s->index]= *(in++);
+          s->in[1][j + s->index]= *(in++);
+      }
+  }else{
+      for(j=0; j<in_len; j++){
+          for(i=0; i<chans; i++){
+              s->in[i][j + s->index]= *(in++);
+          }
       }
   }
   in_len += s->index;
@@ -135,9 +144,18 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
       memmove(s->in[i], s->in[i] + consumed, s->index*sizeof(int16_t));
   }
 
-  for(j=0; j<out_len; j++){
-      for(i=0; i<chans; i++){
-          *(out++)= tmp[i][j];
+  if(chans==1){
+      memcpy(out, tmp[0], out_len*sizeof(int16_t));
+  }else if(chans==2){
+      for(j=0; j<out_len; j++){
+          *(out++)= tmp[0][j];
+          *(out++)= tmp[1][j];
+      }
+  }else{
+      for(j=0; j<out_len; j++){
+          for(i=0; i<chans; i++){
+              *(out++)= tmp[i][j];
+          }
       }
   }
 
