@@ -75,8 +75,9 @@ Now, go on:
 3. mplayer.c - ooh, he's the boss :)
    The timing is solved odd, since it has/recommended to be done differently
 	 for each of the formats, and sometimes can be done in many ways.
-	 A new frame is displayed if v_frame<a_frame, and sound is decoded if
-	 a_frame<v_frame.
+
+	 There is are float variables called a_frame and v_frame, they store
+	 the just played A/V position is seconds.
 
 	 The structure of the playing loop :
          while(not EOF) {
