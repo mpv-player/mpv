@@ -228,6 +228,7 @@ typedef struct __attribute__((__packed__))
 extern char *dvdsub_lang;
 extern char *audio_lang;
 extern int dvdsub_id;
+extern int demux_aid_vid_mismatch;
 
 
 static mkv_track_t *
@@ -1484,14 +1485,26 @@ display_tracks (mkv_demuxer_t *mkv_d)
         {
         case MATROSKA_TRACK_VIDEO:
           type = "video";
+          if (identify)
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
           sprintf (str, "-vid %u", vid++);
           break;
         case MATROSKA_TRACK_AUDIO:
           type = "audio";
+          if (identify)
+            {
+              mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", aid);
+              mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AID_%d_LANG=%s\n", aid, mkv_d->tracks[i]->language);
+            }
           sprintf (str, "-aid %u, -alang %.5s",aid++,mkv_d->tracks[i]->language);
           break;
         case MATROSKA_TRACK_SUBTITLE:
           type = "subtitles";
+          if (identify)
+            {
+              mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
+              mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sid, mkv_d->tracks[i]->language);
+            }
           sprintf (str, "-sid %u, -slang %.5s",sid++,mkv_d->tracks[i]->language);
           break;
         }
@@ -2096,6 +2109,8 @@ demux_mkv_open (demuxer_t *demuxer)
   ebml_read_length (s, NULL);  /* return bytes number until EOF */
 
   mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] + a segment...\n");
+
+  demux_aid_vid_mismatch = 1; // don't identify in new_sh_* since ids don't match
 
   mkv_d = (mkv_demuxer_t *) malloc (sizeof (mkv_demuxer_t));
   memset (mkv_d, 0, sizeof(mkv_demuxer_t));

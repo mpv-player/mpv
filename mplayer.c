@@ -760,6 +760,11 @@ void add_subtitles(char *filename, float fps, int silent)
         mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_CantLoadSub, filename);
     if (subd == NULL || set_of_sub_size >= MAX_SUBTITLE_FILES) return;
     set_of_subtitles[set_of_sub_size] = subd;
+    if (identify)
+    {
+      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_FILE_SUB_ID=%d\n", set_of_sub_size);
+      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n", filename);
+    }
     ++set_of_sub_size;
     mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_AddedSubtitleFile, set_of_sub_size, filename);
 }

@@ -21,6 +21,10 @@
 #include "../libao2/afmt.h"
 #include "../libvo/fastmemcpy.h"
 
+// Should be set to 1 by demux module if ids it passes to new_sh_audio and
+// new_sh_video don't match aids and vids it accepts from the command line
+int demux_aid_vid_mismatch = 0;
+
 void free_demuxer_stream(demux_stream_t *ds){
     ds_free_packs(ds);
     free(ds);
@@ -89,6 +93,8 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
         sh->samplesize=2;
         sh->sample_format=AFMT_S16_NE;
         sh->audio_out_minsize=8192;/* default size, maybe not enough for Win32/ACM*/
+        if (identify && !demux_aid_vid_mismatch)
+          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", id);
     }
     return demuxer->a_streams[id];
 }
@@ -112,6 +118,8 @@ sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundVideoStream,id);
         demuxer->v_streams[id]=malloc(sizeof(sh_video_t));
         memset(demuxer->v_streams[id],0,sizeof(sh_video_t));
+        if (identify && !demux_aid_vid_mismatch)
+          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", id);
     }
     return demuxer->v_streams[id];
 }
@@ -1403,6 +1411,8 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
   stream_t *as = NULL,*ss = NULL;
   demuxer_t *vd,*ad = NULL,*sd = NULL;
   int afmt =DEMUXER_TYPE_UNKNOWN,sfmt = DEMUXER_TYPE_UNKNOWN ;
+
+  demux_aid_vid_mismatch = 0;
 
   if(audio_stream) {
     as = open_stream(audio_stream,0,&afmt);

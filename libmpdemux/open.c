@@ -378,6 +378,12 @@ if(strncmp("dvd://",filename,6) == 0){
 	    tmp,
 	    d->audio_streams[d->nr_of_channels].id
 	    );
+	  if (identify)
+	  {
+	    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", d->audio_streams[d->nr_of_channels].id);
+	    if (language && tmp[0])
+	      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AID_%d_LANG=%s\n", d->audio_streams[d->nr_of_channels].id, tmp);
+	  }
 	    
 	  d->nr_of_channels++;
 	 }
@@ -414,6 +420,12 @@ if(strncmp("dvd://",filename,6) == 0){
 	  d->nr_of_subtitles,
 	  tmp
 	  );
+        if (identify)
+        {
+	  mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", d->nr_of_subtitles);
+	  if (language && tmp[0])
+	    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SID_%d_LANG=%s\n", d->nr_of_subtitles, tmp);
+        }
         d->nr_of_subtitles++;
        }
      mp_msg(MSGT_OPEN,MSGL_V,"[open] number of subtitles on disk: %d\n",d->nr_of_subtitles );

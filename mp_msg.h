@@ -2,7 +2,9 @@
 #ifndef _MP_MSG_H
 #define _MP_MSG_H
 
-extern int verbose; // defined in mplayer.c
+// defined in mplayer.c and mencoder.c
+extern int verbose;
+extern int identify;
 
 // verbosity elevel:
 

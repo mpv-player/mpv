@@ -54,6 +54,7 @@ int ts_prog;
 int ts_keep_broken=0;
 off_t ts_probe = TS_MAX_PROBE_SIZE;
 extern char *dvdsub_lang, *audio_lang;	//for -alang
+extern int demux_aid_vid_mismatch;
 
 typedef enum
 {
@@ -510,12 +511,20 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 
 			if(is_video)
 			{
+				if (identify)
+					mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", es.pid);
     				chosen_pid = (req_vpid == es.pid);
 				if((! chosen_pid) && (req_vpid > 0))
 					continue;
 			}
 			else if(is_audio)
 			{
+				if (identify)
+				{
+					mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", es.pid);
+					if (es.lang[0] > 0)
+						mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AID_%d_LANG=%s\n", es.pid, es.lang);
+				}
 				if(req_apid > 0)
 				{
 					chosen_pid = (req_apid == es.pid);
@@ -533,6 +542,12 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 			}
 			else if(is_sub)
 			{
+				if (identify)
+				{
+					mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", es.pid);
+					if (es.lang[0] > 0)
+						mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SID_%d_LANG=%s\n", es.pid, es.lang);
+				}
 				chosen_pid = (req_spid == es.pid);
 				if((! chosen_pid) && (req_spid > 0))
 					continue;
@@ -788,6 +803,7 @@ demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	demuxer->sub->id = params.spid;
 	priv->prog = params.prog;
 
+	demux_aid_vid_mismatch = 1; // don't identify in new_sh_* since ids don't match
 
 	if(params.vtype != UNKNOWN)
 	{

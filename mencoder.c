@@ -143,6 +143,7 @@ int out_file_format=MUXER_TYPE_AVI;	// default to AVI
 //void resync_audio_stream(sh_audio_t *sh_audio){}
 
 int verbose=0; // must be global!
+int identify=0;
 int quiet=0;
 double video_time_usage=0;
 double vout_time_usage=0;
