@@ -283,6 +283,7 @@ wsXDNDInitialize();
 #endif
  wsOutMask=wsGetOutMask();
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[ws] Initialized converter: " );
+ sws_rgb2rgb_init(get_sws_cpuflags());
  switch ( wsOutMask )
   {
    case wsRGB32:
@@ -318,7 +319,6 @@ wsXDNDInitialize();
      wsConvFunc=rgb32tobgr15;
      break;
   }
-  sws_rgb2rgb_init(get_sws_cpuflags());
  XSetErrorHandler( wsErrorHandler );
 }
 
