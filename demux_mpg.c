@@ -5,6 +5,8 @@
 
 extern int verbose; // defined in mplayer.c
 
+#include "config.h"
+#include "dvdauth.h"
 #include "stream.h"
 #include "demuxer.h"
 
