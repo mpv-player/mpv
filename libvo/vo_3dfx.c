@@ -49,7 +49,7 @@ LIBVO_EXTERN(3dfx)
 
 #include "drivers/3dfx.h"
 
-#include "mmx.h"
+#include "fastmemcpy.h"
 
 static vo_info_t vo_info = 
 {

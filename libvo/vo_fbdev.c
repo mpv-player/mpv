@@ -24,7 +24,7 @@
 #include "yuv2rgb.h"
 extern void rgb15to16_mmx(char *s0, char *d0, int count);
 
-#include "mmx.h"
+#include "fastmemcpy.h"
 
 LIBVO_EXTERN(fbdev)
 

@@ -43,7 +43,7 @@ LIBVO_EXTERN(syncfb)
 
 #include "drivers/syncfb/syncfb.h"
 
-#include "mmx.h"
+#include "fastmemcpy.h"
 
 static vo_info_t vo_info =
 {

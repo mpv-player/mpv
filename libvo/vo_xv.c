@@ -28,7 +28,7 @@ LIBVO_EXTERN(xv)
 
 #include "x11_common.h"
 
-#include "mmx.h"
+#include "fastmemcpy.h"
 
 static vo_info_t vo_info =
 {

@@ -73,8 +73,8 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
+#include "fastmemcpy.h"
 
-#include "mmx.h"
 LIBVO_EXTERN(sdl)
 
 //#include "log.h"

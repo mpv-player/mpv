@@ -19,7 +19,7 @@ LIBVO_EXTERN(odivx)
 
 #include "../encore/encore.h"
 
-#include "mmx.h"
+#include "fastmemcpy.h"
 
 static vo_info_t vo_info = 
 {

@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+//#include "fastmemcpy.h"
 
 #include "linux/keycodes.h"
 #include "config.h"
@@ -63,8 +64,6 @@ static int       vo_dga_src_format;
 static unsigned char     *vo_dga_base;
 static Display  *vo_dga_dpy;
 
-
-#include "mmx.h"
 
 #if defined (HAVE_SSE) || defined (HAVE_3DNOW)
 #define movntq "movntq" // use this for processors that have SSE or 3Dnow
