@@ -448,18 +448,9 @@ static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
 
     /* Load text. */
     while ((unsigned int)(s1 - buffer) < data.Size()) {
-      if ((*s1 == '{') && ((unsigned int)(s1 + 2 - buffer) < data.Size())) {
-        /* Newline */
-        if (*(s1 + 1) == '\\' && (*(s1 + 2) == 'N' || *(s1 + 2) == 'n')) {
-          mkv_d->clear_subs_at[mkv_d->subs.lines - 1] = 
-            block->GlobalTimecode() / 1000000 - mkv_d->first_tc + duration;
-
-          mkv_d->subs.lines++;
-          *s2 = 0;
-          s2 = mkv_d->subs.text[mkv_d->subs.lines - 1];
-        }
+      if (*s1 == '{')
         state = 1;
-      } else if (*s1 == '}' && state == 1)
+      else if ((*s1 == '}') && (state == 1))
         state = 2;
 
       if (state == 0) {
@@ -470,6 +461,18 @@ static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
       }
       s1++;
       
+      /* Newline */
+      if ((*s1 == '\\') && ((unsigned int)(s1 + 1 - buffer) < data.Size()) &&
+          ((*(s1 + 1) == 'N') || (*(s1 + 1) == 'n'))) {
+        mkv_d->clear_subs_at[mkv_d->subs.lines - 1] = 
+          block->GlobalTimecode() / 1000000 - mkv_d->first_tc + duration;
+        
+        mkv_d->subs.lines++;
+        *s2 = 0;
+        s2 = mkv_d->subs.text[mkv_d->subs.lines - 1];
+        s1 += 2;
+      }
+
       if (state == 2)
         state = 0;
     }
@@ -1910,9 +1913,10 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 
         if (!strcmp(track->codec_id, MKV_S_TEXTUTF8))
           sub_utf8 = 1;       // Force UTF-8 conversion.
-        if (!strcmp(track->codec_id, MKV_S_TEXTSSA))
+        if (!strcmp(track->codec_id, MKV_S_TEXTSSA)) {
           mkv_d->subtitle_type = MKV_SUBTYPE_SSA;
-        else
+          sub_utf8 = 1;
+        } else
           mkv_d->subtitle_type = MKV_SUBTYPE_TEXT;
       } else
         mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] File does not contain a "
