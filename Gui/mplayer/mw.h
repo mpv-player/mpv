@@ -140,7 +140,22 @@ void mplMainDraw( wsParamDisplay )
 
  btnModify( evSetMoviePosition,mplShMem->Position );
  btnModify( evSetVolume,mplShMem->Volume );
- 
+
+ switch ( mplShMem->Playing )
+  {
+   case 2:
+   case 0:
+        btnModify( evPlaySwitchToPause,btnReleased );
+        btnModify( evPauseSwitchToPlay,btnDisabled );
+	break;
+   case 1:
+        if ( strlen( mplShMem->Filename ) )
+	 {
+          btnModify( evPlaySwitchToPause,btnDisabled );
+	  btnModify( evPauseSwitchToPlay,btnReleased );
+	 }
+  }	 
+
 // --- erosen ideiglenes.
  strcpy( gtkShMem->fs.filename,mplShMem->Filename );
 // ---
