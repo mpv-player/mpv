@@ -68,6 +68,7 @@ extern int ao_pcm_waveheader;
 #ifdef HAVE_X11
 extern char *mDisplayName;
 extern int WinID;
+extern int ice_layer;
 #endif
 
 #ifdef HAVE_AA
@@ -241,6 +242,7 @@ static config_t mplayer_opts[]={
 	// x11,xv,xmga,xvidix
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0, NULL},
+	{"icelayer", &ice_layer, CONF_TYPE_INT, CONF_RANGE, 0, 15, NULL},
 #endif
 
 #ifdef HAVE_XINERAMA

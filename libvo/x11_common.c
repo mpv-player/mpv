@@ -54,6 +54,8 @@
 #define vo_wm_IceWM       3
 #define vo_wm_WMakerStyle 4
 
+int ice_layer=12;
+
 extern int verbose;
 
 static int dpms_disabled=0;
@@ -691,15 +693,16 @@ void vo_x11_setlayer( int layer )
  
  if ( vo_wm_type == vo_wm_IceWM )
   {
-   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] IceWM style stay on top ( layer %d ).\n",layer );
-   switch ( layer )
-    {
-     case -1: layer=2; break; // WinLayerBelow
-     case  0: layer=4; break; // WinLayerNormal
-     case  1: layer=8; break; // WinLayerOnTop
-    }
-   XChangeProperty( mDisplay,vo_window,
-     XInternAtom( mDisplay,"_WIN_LAYER",False ),XA_CARDINAL,32,PropModeReplace,(unsigned char *)&layer,1 );
+    XClientMessageEvent xev;
+    memset(&xev, 0, sizeof(xev));
+    xev.type = ClientMessage;
+    xev.window = vo_window;
+    xev.message_type = XInternAtom(mDisplay, "_WIN_LAYER", False);
+    xev.format = 32;
+    xev.data.l[0] = layer?ice_layer:4; // if not fullscreen, stay on layer "Normal"
+    xev.data.l[1] = CurrentTime;
+    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] IceWM style stay on top ( layer %d ).\n",xev.data.l[0] );
+    XSendEvent(mDisplay, mRootWin, False, SubstructureNotifyMask, (XEvent *) &xev);
    return;
   }
 
