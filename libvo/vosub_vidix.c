@@ -460,6 +460,13 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	    ,src_width,src_height,x_org,y_org,dst_width,dst_height
 	    ,vo_format_name(format),dest_bpp,vid_w,vid_h);
 
+	if(vidix_query_fourcc(format) == 0)
+	{
+	  printf("vosub_vidix: unsupported fourcc for this vidix driver: %x (%s)\n",
+	    format,vo_format_name(format));
+	  return -1;
+	} 
+
 	if(((vidix_cap.maxwidth != -1) && (vid_w > vidix_cap.maxwidth)) ||
 	    ((vidix_cap.minwidth != -1) && (vid_w < vidix_cap.minwidth)) ||
 	    ((vidix_cap.maxheight != -1) && (vid_h > vidix_cap.maxheight)) ||
