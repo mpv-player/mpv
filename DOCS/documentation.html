@@ -267,7 +267,12 @@
   </LI>
   <LI><A HREF="#ports">6. Ports</A>
     <UL>
-      <LI><A HREF="#debian">6.1 Debian packaging</A></LI>
+      <LI><A HREF="#linux">6.1 Linux</A>
+        <UL>
+	  <LI><A HREF="#debian">6.1.1 Debian packaging</A></LI>
+	  <LI><A HREF="#rpm">6.1.2 RPM packaging</A></LI>
+	</UL>
+      </LI>
       <LI><A HREF="#bsd">6.2 *BSD</A>
         <UL>
           <LI><A HREF="#freebsd">6.2.1 FreeBSD</A></LI>
@@ -1533,35 +1538,49 @@ end
 <H1><A NAME="ports">6. Ports</A></H1>
 
 
-<H2><A NAME="debian">6.1 Debian packaging</A></H2>
+<H2><A NAME="linux">6.1 Linux</A></H2>
 
-<P>To build the package, get the cvs version, or .tgz and uncompress it,
-  and cd into programs directory:</P>
+<P>The main development platform is Linux on x86, altough MPlayer works on many
+  other Linux ports.</P>
+
+
+<H3><A NAME="debian">6.1.1 Debian packaging</A></H3>
+
+<P>To build a Debian package, run the following command in the MPlayer source
+  directory:</P>
 
 <PRE>
-    cd main
     fakeroot debian/rules binary
 </PRE>
 
-<P>(... mplayer detects hardware/software, builds itself and.. )
-  dpkg-deb: building package `mplayer' in `../mplayer_0.90-1_i386.deb'.</P>
-
-<P>And now just become root, and:</P>
+<P>As root you can then install the <CODE>.deb</CODE> package as usual:</P>
 
 <PRE>
-    dpkg -i ../mplayer_0.90-1_i386.deb as root.
+    dpkg -i ../mplayer_&lt;version&gt;.deb
 </PRE>
 
-<P>Here's how it looks like:</P>
+<P>Christian Marillat has been making unofficial Debian MPlayer, MEncoder and
+  font packages for a while, you can (apt-)get them from his
+  <A HREF="http://marillat.free.fr/">homepage</A>. These packages are highly
+  unofficial, however, as Christian made and redistributed these packages when
+  MPlayer was still not fully GPLed and
+  <A HREF="users_against_developers.html#binary">binary redistribution</A>
+  not allowed. Christian ignored requests to stop redistributing his packages,
+  which caused bad blood with MPlayer developers. Binary redistribution is not
+  a problem anymore, but we <B>do not support</B> these packages!</P>
 
-<PRE>
-	eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.90-1_i386.deb
-	Password:
-	(Reading database ... 26946 files and directories currently installed.)
-	Preparing to replace mplayer 0.50-1 (using ../mplayer_0.90-1_i386.deb)
-	Unpacking replacement mplayer ...
-	Setting up mplayer (0.90-1) ...
-</PRE>
+
+<H3><A NAME="rpm">6.1.2 RPM packaging</A></H3>
+
+<P>Dominik Mierzejewski created and maintains official Red Hat RPM packages of
+  MPlayer. They are available from his
+  <A HREF="http://www.piorunek.pl/~dominik/linux/pkgs/mplayer/">homepage</A>.
+  Please read the instructions there and report problems to him, not us.</P> 
+
+<P>There are other RPM versions (SuSE now includes MPlayer in their official
+  distribution, Mandrake packages are available from the
+  <A HREF="http://plf.zarb.org/">P.L.F</A>) of MPlayer, but none of them is
+  officially supported.</P>
 
 
 <H2><A NAME="bsd">6.2 *BSD</A></H2>
