@@ -368,7 +368,7 @@ if(dvd_title){
   stream=new_stream(-1,STREAMTYPE_DVD);
   stream->start_pos=(off_t)d->cur_pack*2048;
   stream->end_pos=(off_t)(d->cur_pgc->cell_playback[d->last_cell-1].last_sector)*2048;
-  printf("DVD start=%d end=%d  \n",d->cur_pack,d->cur_pgc->cell_playback[d->last_cell-1].last_sector);
+  mp_msg(MSGT_DVD,MSGL_V,"DVD start=%d end=%d  \n",d->cur_pack,d->cur_pgc->cell_playback[d->last_cell-1].last_sector);
   stream->priv=(void*)d;
   return stream;
 }
@@ -511,7 +511,7 @@ int code,i;
     }
     lang+=2; while (lang[0]==',' || lang[0]==' ') ++lang;
   }
-  mp_msg(MSGT_OPEN,MSGL_INFO,"No matching DVD audio language found!\n");
+  mp_msg(MSGT_OPEN,MSGL_WARN,"No matching DVD audio language found!\n");
   return -1;
 }
 
@@ -529,7 +529,7 @@ int code,i;
     }
     lang+=2; while (lang[0]==',' || lang[0]==' ') ++lang;
   }
-  mp_msg(MSGT_OPEN,MSGL_INFO,"No matching DVD subtitle language found!\n");
+  mp_msg(MSGT_OPEN,MSGL_WARN,"No matching DVD subtitle language found!\n");
   return -1;
 }
 
