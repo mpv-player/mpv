@@ -21,7 +21,7 @@ BINDIR = ${prefix}/bin
 # a BSD compatible 'install' program
 INSTALL = install
 
-SRCS_MENCODER = divx4_vbr.c mencoder.c libvo/aclib.c libvo/img_format.c ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c dec_audio.c dec_video.c msvidc.c codec-cfg.c cfgparser.c
+SRCS_MENCODER = libao2/afmt.c divx4_vbr.c mencoder.c libvo/aclib.c libvo/img_format.c ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c dec_audio.c dec_video.c msvidc.c codec-cfg.c cfgparser.c my_profile.c
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 
 SRCS_MPLAYER = mplayer.c ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c msvidc.c codec-cfg.c subreader.c lirc_mp.c cfgparser.c mixer.c spudec.c my_profile.c
@@ -197,15 +197,21 @@ config.h: configure
 	@echo "############################################################"
 	@exit 1
 
+# do not rebuild after cvs commits if .developer file is present!
+
 # rebuild at every config.h/config.mak change:
 version.h: config.h config.mak Makefile
 	./version.sh
+ifeq ($(wildcard .developer),)
 	$(MAKE) distclean
+endif
 	$(MAKE) depend
 
 # rebuild at every CVS update:
+ifeq ($(wildcard .developer),)
 ifneq ($(wildcard CVS/Entries),)
 version.h: CVS/Entries
+endif
 endif
 
 #
