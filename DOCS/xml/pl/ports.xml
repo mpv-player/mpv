@@ -16,7 +16,7 @@ Zg³aszaj problemy do ich opiekunów, a nie do nas.
 <sect2 id="debian">
 <title>Pakiety Debiana</title>
 <para>
-Aby zbudowaæ pakiet dla Debiana, wywo³aj poni¿sz± komendê w katalogu ze ¼ród³ami
+Aby zbudowaæ pakiet dla Debiana, wywo³aj poni¿sze polecenie w katalogu ze ¼ród³ami
 <application>MPlayera</application>:
 
 <screen>fakeroot debian/rules binary</screen>
@@ -458,8 +458,9 @@ wolna. U¿ywaj SDL.
   <filename class="directory">mplayer/vidix</filename>
   wzglêdem po³o¿nia pliku <filename>mplayer.exe</filename>.</para>
 
-<para>Dla osi±gniêcia najlepszych wyników <application>MPlayer</application> powinien
-  korzystaæ z przestrzeni kolorów, któr± Twoja karta obs³uguje sprzêtowo. Niestety
+<para>¯eby osi±gn±æ najlepsze wyniki <application>MPlayer</application> powinien
+  korzystaæ z przestrzeni kolorów, któr± Twoja karta wspomaga sprzêtowo. Niestety
+  <!-- Motywacja: Obs³ugiwaæ mozna prawie wszysko. Chodiz o akceleracjê -->
   wiele sterowników graficznych Windowsa ¼le informuje o obs³ugiwanych przez kartê
   przestrzeniach. Aby sprawdziæ które s± ¼le obs³ugiwane, wykonaj poni¿sz± komendê:
 
@@ -467,7 +468,7 @@ wolna. U¿ywaj SDL.
 
   gdzie <replaceable>przestrzeñ</replaceable> mo¿e byæ jak±kolwiek
   warto¶ci± spo¶ród tych uzyskanych przez opcjê <option>-vf format=fmt=help</option>.
-  Je¶li, która¶ z nich dzia³a szczególnie ¼le, opcja
+  Je¶li która¶ z nich dzia³a szczególnie ¼le, opcja
   <option>-vf noformat=<replaceable>przestrzeñ</replaceable></option>
   zapobiegnie jej u¿ywaniu. Mo¿esz to na sta³e dodaæ do Twojego pliku konfiguracyjnego.</para>
 
@@ -498,8 +499,8 @@ wolna. U¿ywaj SDL.
 <screen>mplayer dvd://<replaceable>&lt;tytu³&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
 
 <para>Konsola <application>Cygwin</application>/<application>MinGW</application>
-  jest raczej wolna. Przekierowywanie wyj¶cia albo u¿ywanie
-  opcji <option>-quiet</option> zg³oszono jako poprawiaj±ce wydajno¶æ na
+  jest raczej wolna. Zg³oszono, ¿e przekierowywanie wyj¶cia albo u¿ywanie
+  opcji <option>-quiet</option> poprawia wydajno¶æ na
   niektórych systemach. Bezpo¶rednie renderowanie (<option>-dr</option>) równie¿
   mo¿e pomóc. Mo¿esz zapobiec migotaniu OSD, w³±czaj±c podwójne buforowanie
   opcj± <option>-double</option>. Je¿eli odtwarzanie jest nierówne, spróbuj u¿yæ

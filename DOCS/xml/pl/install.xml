@@ -203,7 +203,7 @@ Potrzebujesz do¶æ nowego sprzêtu. Je¶li u¿ywasz Linuksa, zalecane s± j±dra z ser
   kodowania. Cechy:
   <itemizedlist>
   <listitem><simpara>
-    1 lub  2 przebiegowe kodowanie przy pomocy <link linkend="mencoder">
+    1 lub 2 przebiegowe kodowanie przy pomocy <link linkend="mencoder">
     <application>MEncodera</application></link>
     </simpara></listitem>
   <listitem><simpara>
@@ -459,7 +459,7 @@ dzia³a ona z nastêpuj±cymi sterownikami:
   </para></listitem>
 <listitem><para>
   Je¿eli masz <emphasis role="bold">tuner TV</emphasis> kompatybilny z V4L i
-  chcesz ogl±daæ/przechwytywaæ, i kodowaæ filmy przy pomocy <application>MPlayera</application>,
+  chcesz ogl±daæ/przechwytywaæ i kodowaæ filmy przy pomocy <application>MPlayera</application>,
   przeczytaj rozdzia³ <link linkend="tv-input">wej¶cie TV</link>.
   </para></listitem>
 <listitem><para>
@@ -613,7 +613,7 @@ je¶li podasz odpowiedni± opcjê:
 </para>
 
 <para>
-Opcje dla wiersza poleceñ ró¿ni± siê nieco dla ró¿nych formatów:
+Opcje dla wiersza poleceñ ró¿ni± siê nieco dla poszczególnych formatów:
 </para>
 
 <formalpara>
