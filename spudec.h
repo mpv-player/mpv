@@ -15,5 +15,7 @@ int spudec_visible(void *this); // check if spu is visible
 void spudec_set_font_factor(void * this, double factor); // sets the equivalent to ffactor
 void spudec_set_hw_spu(void *this, vo_functions_t *hw_spu);
 int spudec_changed(void *this);
+void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int* bbox);
+void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 #endif
 
