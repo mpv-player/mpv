@@ -733,10 +733,7 @@ void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned 
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
 #endif
 
-    /* hotfix for Vivo/2.00 - do not fault - but no decode ;( */
 #warning "FIXME! Decoder doesn't supports Vivo/2.00 :("
-    if (!yuv->the_buf_size)
-	return;
 
 if(i_x==image->width && i_y==image->height){
 //    printf("Direct render!!!\n");
