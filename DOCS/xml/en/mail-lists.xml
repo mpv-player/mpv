@@ -24,9 +24,10 @@ Subscribe here if you want to get security and release announcements.
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users</ulink>
 </para>
 <para>General support mailing list for questions related to
-<application>MPlayer</application> and <application>MEncoder</application>.
+<application>MPlayer</application>.
 Please read the <emphasis role="bold">whole documentation</emphasis> before
-posting your problems and feature requests here. Bug reports belong on this
+posting your problems and feature requests here.
+<application>MPlayer</application> bug reports belong on this
 list as well, but read the <link linkend="bugs">known bugs</link> and
 <link linkend="bugreports">bug reporting</link> section first.
 </para></listitem>
@@ -47,6 +48,17 @@ XFree86 4.x.x), matroxfb-TVout stuff.
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"><application>MPlayer</application>-dvb</ulink>
 </para>
 <para>Things related to the hardware decoder card called DVB (not <emphasis role="bold">DXR3</emphasis>!).
+</para></listitem>
+<listitem><para>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mencoder-users"><application>MEncoder</application>-users</ulink>
+</para>
+<para>General support mailing list for questions related to
+<application>MEncoder</application>.
+Please read the <emphasis role="bold">whole documentation</emphasis> before
+posting your problems and feature requests here.
+<application>MEncoder</application> bug reports belong on this
+list as well, but read the <link linkend="bugs">known bugs</link> and
+<link linkend="bugreports">bug reporting</link> section first.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"><application>MPlayer</application>-dev-eng</ulink>
