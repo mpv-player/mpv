@@ -158,7 +158,7 @@ if(format==IMGFMT_YV12){
     codec_context.frame_rate=25*FRAME_RATE_BASE; // !!!!!
     codec_context.gop_size=0; // I frames only
     codec_context.flags=CODEC_FLAG_QSCALE;
-    codec_context.quality=2; // quality!  1..31  (1=best,slowest)
+    codec_context.quality=1; // quality!  1..31  (1=best,slowest)
 
 #if 0
     codec_context.width=width;
@@ -352,7 +352,8 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x0,i
     
     x0+=d_pos_x;
     y0+=d_pos_y;
-    if(w>picture.linesize[0]) w=picture.linesize[0]; // !!
+    if(x0+w>picture.linesize[0]) w=picture.linesize[0]-x0; // !!
+    if(y0+h>codec_context.height) h=codec_context.height-y0;
 
     // Y
     s=srcimg[0]+s_pos_x+s_pos_y*stride[0];
