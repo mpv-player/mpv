@@ -154,9 +154,12 @@ connect2Server(char *host, int port) {
 int
 http_send_request( URL_t *url ) {
 	HTTP_header_t *http_hdr;
+	char str[80];
 	int fd;
 	http_hdr = http_new_header();
 	http_set_uri( http_hdr, url->file );
+	snprintf(str, 80, "Host: %s", url->hostname );
+	http_set_field( http_hdr, str);
 	http_set_field( http_hdr, "User-Agent: MPlayer");
 	http_set_field( http_hdr, "Connection: closed");
 	if( http_build_request( http_hdr )==NULL ) {
