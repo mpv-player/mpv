@@ -80,7 +80,11 @@ int lavc_param_vqscale = 0;
 int lavc_param_keyint = -1;
 #endif
 
+#ifdef USE_WIN32DLL
 static BITMAPINFOHEADER* vfw_bih=NULL;
+char *vfw_codecname = NULL;
+codecs_t *vfw_codec = NULL;
+#endif
 
 #ifdef HAVE_LIBCSS
 #include "libmpdemux/dvdauth.h"
@@ -223,6 +227,17 @@ static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, in
 #include "spudec.h"
 #endif
 
+/* FIXME */
+void mencoder_exit(int level, char *how)
+{
+    if (how)
+	printf("Exiting... (%s)\n", how);
+    else
+	printf("Exiting...\n");
+
+    exit(level);
+}
+
 void parse_cfgfiles( m_config_t* conf )
 {
   char *conffile;
@@ -230,7 +245,7 @@ void parse_cfgfiles( m_config_t* conf )
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_GetpathProblem);
   } else {
     if (m_config_parse_config_file(conf, conffile) < 0)
-      exit(1);
+      mencoder_exit(1,"configfile error");
     free(conffile);
   }
 }
@@ -396,7 +411,7 @@ unsigned int timer_start;
 if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(!parse_codec_cfg(CONFDIR"/codecs.conf")){
     mp_msg(MSGT_MENCODER,MSGL_HINT,MSGTR_CopyCodecsConf);
-    exit(1);
+    mencoder_exit(1,NULL);
   }
 }
 
@@ -431,7 +446,7 @@ divx4_param.rc_reaction_ratio  = 20;
   // TODO : add something to let modules register their options
   parse_cfgfiles(mconfig);
 
-  if(m_config_parse_command_line(mconfig, argc, argv, envp) < 0) exit(1); // error parsing cmdline
+  if(m_config_parse_command_line(mconfig, argc, argv, envp) < 0) mencoder_exit(1, "error parsing cmdline");
   playtree = play_tree_cleanup(playtree);
   if(playtree) {
     playtree_iter = play_tree_iter_new(playtree,mconfig);
@@ -446,7 +461,7 @@ divx4_param.rc_reaction_ratio  = 20;
 
   if(!filename && !vcd_track && !dvd_title && !tv_param_on){
 	printf("\nMissing filename!\n\n");
-	exit(1);
+	mencoder_exit(1,NULL);
   }
 
   mp_msg_init(verbose+MSGL_STATUS);
@@ -455,7 +470,7 @@ divx4_param.rc_reaction_ratio  = 20;
 
   if(!stream){
 	printf("Cannot open file/device\n");
-	exit(1);
+	mencoder_exit(1,NULL);
   }
 
   printf("success: format: %d  data: 0x%X - 0x%X\n",file_format, (int)(stream->start_pos),(int)(stream->end_pos));
@@ -467,7 +482,7 @@ divx4_param.rc_reaction_ratio  = 20;
   if (dvdimportkey) {
     if (dvd_import_key(dvdimportkey)) {
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorDVDkey);
-      exit(1);
+      mencoder_exit(1,NULL);
     }
     mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CmdlineDVDkey);
   }
@@ -475,7 +490,7 @@ divx4_param.rc_reaction_ratio  = 20;
     //  if (dvd_auth(dvd_auth_device,f)) {
     if (dvd_auth(dvd_auth_device,filename)) {
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error in DVD auth...\n");
-      exit(1);
+      mencoder_exit(1,NULL);
     }
     mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_DVDauthOk);
   }
@@ -487,7 +502,7 @@ divx4_param.rc_reaction_ratio  = 20;
   demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
   if(!demuxer){
 	printf("Cannot open demuxer\n");
-	exit(1);
+	mencoder_exit(1,NULL);
   }
 
 d_audio=demuxer2 ? demuxer2->audio : demuxer->audio;
@@ -498,7 +513,7 @@ sh_video=d_video->sh;
 
   if(!video_read_properties(sh_video)){
       printf("Couldn't read video properties\n");
-      exit(1);
+      mencoder_exit(1,NULL);
   }
 
   mp_msg(MSGT_MENCODER,MSGL_INFO,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
@@ -527,7 +542,7 @@ while(1){
     if(bestprio==-1 || !video_codec) {
       mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
       mp_msg(MSGT_MENCODER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-      exit(1);
+      mencoder_exit(1,NULL);
     }
   } else {
     if(video_codec && strcmp(sh_video->codec->name,video_codec)) continue;
@@ -575,7 +590,7 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
 }
 if(i>=CODECS_MAX_OUTFMT){
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_VOincompCodec);
-    exit(1); // exit_player(MSGTR_Exit_error);
+    mencoder_exit(1,NULL); // exit_player(MSGTR_Exit_error);
 }
 sh_video->outfmtidx=i;
 
@@ -606,7 +621,7 @@ if (IMGFMT_IS_RGB(out_fmt))
 
 if(!init_video(sh_video,pitches)){
      mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
-     exit(1);
+     mencoder_exit(1,NULL);
 }
 
 } // if(out_video_codec)
@@ -663,7 +678,7 @@ vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream-
 muxer_f=fopen(out_filename,"wb");
 if(!muxer_f) {
   printf("Cannot open output file '%s'\n", out_filename);
-  exit(1);
+  mencoder_exit(1,NULL);
 }
 
 muxer=aviwrite_new_muxer();
@@ -758,6 +773,13 @@ case VCODEC_FRAMENO:
     break;
 case VCODEC_VFW:
 #ifdef USE_WIN32DLL
+#if 0
+    if (!vfw_codecname)
+    {
+	printf("No vfw/dshow codec specified! It's requested!\n");
+	mencoder_exit(1, NULL);
+    }
+#endif
     vfw_bih=malloc(sizeof(BITMAPINFOHEADER));
     vfw_bih->biSize=sizeof(BITMAPINFOHEADER);
     vfw_bih->biWidth=vo_w;
@@ -771,7 +793,7 @@ case VCODEC_VFW:
     break;
 #else
     printf("No support for Win32/VfW codecs compiled in\n");
-    return 0; /* FIXME */
+    mencoder_exit(1,NULL);
 #endif
 case VCODEC_NULL:
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
@@ -786,7 +808,7 @@ case VCODEC_NULL:
 case VCODEC_DIVX4:
 #ifndef HAVE_DIVX4ENCORE
     printf("No support for Divx4 encore compiled in\n");
-    return 0; /* FIXME */
+    mencoder_exit(1,NULL);
 #else
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
@@ -804,7 +826,7 @@ case VCODEC_DIVX4:
 case VCODEC_LIBAVCODEC:
 #ifndef USE_LIBAVCODEC
     printf("No support for FFmpeg's libavcodec compiled in\n");
-    return 0; /* FIXME */
+    mencoder_exit(1,NULL);
 #else
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
@@ -815,7 +837,7 @@ case VCODEC_LIBAVCODEC:
     if (!lavc_param_vcodec)
     {
 	printf("No libavcodec codec specified! It's requested!\n");
-	return 0; /* FIXME */
+	mencoder_exit(1,NULL);
     }
     else
     {
@@ -960,7 +982,7 @@ case VCODEC_FRAMENO:
 case VCODEC_DIVX4:
 #ifndef HAVE_DIVX4ENCORE
     printf("No support for Divx4 encore compiled in\n");
-    return 0; /* FIXME */
+    mencoder_exit(1,NULL);
 #else
     // init divx4linux:
     divx4_param.x_dim=vo_w;
@@ -984,6 +1006,7 @@ case VCODEC_DIVX4:
     default:
 	mp_msg(MSGT_MENCODER,MSGL_ERR,"divx4: unsupported picture format (%s)!\n",
 	    vo_format_name(out_fmt));
+	mencoder_exit(1,NULL);
     }
     switch(pass){
     case 1:
@@ -1044,7 +1067,7 @@ case VCODEC_LIBAVCODEC:
     if (!lavc_venc_codec)
     {
 	printf(MSGTR_MissingLAVCcodec, lavc_param_vcodec);
-	return 0; /* FIXME */
+	mencoder_exit(1,NULL);
     }
 
     memset(&lavc_venc_context, 0, sizeof(lavc_venc_context));
@@ -1090,21 +1113,21 @@ case VCODEC_LIBAVCODEC:
     if (avcodec_open(&lavc_venc_context, lavc_venc_codec) != 0)
     {
 	printf(MSGTR_CantOpenCodec);
-	return 0; /* FIXME */
+	mencoder_exit(1,NULL);
     }
 
     if (lavc_venc_context.codec->encode == NULL)
     {
 	printf("avcodec init failed (ctx->codec->encode == NULL)!\n");
-	return 0;
+	mencoder_exit(1,NULL);
     }
 
 #if 1
-    if (out_fmt != IMGFMT_YV12 && out_fmt != IMGFMT_I420)
+    if (out_fmt != IMGFMT_YV12 && out_fmt != IMGFMT_I420 && out_fmt != IMGFMT_IYUV)
     {
         printf("Not supported image format! (%s)\n",
     	    vo_format_name(out_fmt));
-	return 0; /* FIXME */
+	mencoder_exit(1,NULL);
     }
 
     memset(&lavc_venc_picture, 0, sizeof(lavc_venc_picture));
@@ -1147,7 +1170,7 @@ case VCODEC_LIBAVCODEC:
 	default:
 	    printf("Not supported image format! (%s)\n",
 		vo_format_name(out_fmt));
-	    return 0; /* FIXME */
+	    mencoder_exit(1,NULL);
     }
 
     printf("Using picture format: %s\n", vo_format_name(out_fmt));
@@ -1470,7 +1493,7 @@ case VCODEC_VFW: {
 case VCODEC_DIVX4:
 #ifndef HAVE_DIVX4ENCORE
     printf("No support for Divx4 encore compiled in\n");
-    return 0; /* FIXME */
+    mencoder_exit(1,NULL);
 #else
     blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
     draw_sub();
