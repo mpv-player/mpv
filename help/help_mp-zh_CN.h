@@ -1,5 +1,5 @@
 // Translated by Lu Ran <hephooey@fastmail.fm>
-// Synced with help_mp-en.h 1.111
+// Synced with help_mp-en.h 1.121
 
 // ========================= MPlayer help ===========================
 
@@ -295,6 +295,8 @@ static char help_text[]=
 #define MSGTR_TVInputNotSeekable "TV输入不能搜索! (可能搜索应该用来更换频道;)\n"
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s 已经显示!\n"
 #define MSGTR_ClipInfo "Clip info: \n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 检测到30fps的NTSC内容, 改变帧速率.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 检测到24fps渐进的NTSC内容, 改变帧速率.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "无法打开解码器\n"
@@ -340,7 +342,7 @@ static char help_text[]=
 #define MSGTR_CouldNotFindVideoFilter "找不到视频滤镜 '%s'.\n"
 #define MSGTR_CouldNotOpenVideoFilter "无法打开视频滤镜 '%s'.\n"
 #define MSGTR_OpeningVideoFilter "打开视频滤镜: "
-#define MSGTR_CannotFindColorspace "无法找到公用的色彩空间, 甚至靠插入'scale'也不行 :(\n"
+#define MSGTR_CannotFindColorspace "无法找到合适的色彩空间, 甚至靠插入'scale'也不行 :(\n"
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: 解码器无法设置sh->disp_w和sh->disp_h, 尝试绕过!\n"
@@ -348,6 +350,16 @@ static char help_text[]=
 #define MSGTR_CouldNotFindColorspace "无法找到匹配的色彩空间 - 重新尝试 -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "电影宽高比为 %.2f:1 - 预放大到正确的电影宽高比.\n"
 #define MSGTR_MovieAspectUndefined "电影宽高比未定义 - 无法使用预放大.\n"
+
+// vd_dshow.c, vd_dmo.c
+#define MSGTR_DownloadCodecPackage "你需要升级/安装二进制编解码器包.\n请访问http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: Win32/DShow视频解码器初始化OK.\n"
+#define MSGTR_DMOInitOK "INFO: Win32/DMO视频解码器初始化OK.\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: 不能发送EWMH全屏事件!\n"
+
+#define MSGTR_NeedAfVolume "Mixer: 音频输出驱动需要\"-af volume\"来改变音量.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -391,9 +403,9 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] skin配置文件的 %d: %s行出错"
-#define MSGTR_SKIN_WARNING1 "[skin] 警告, 在skin配置文件的 %d行: 找到widget但在这之前没有找到\"section\" (%s)"
-#define MSGTR_SKIN_WARNING2 "[skin] 警告, 在skin配置文件的 %d行: 找到widget但在这之前没有找到 \"subsection\" (%s) "
-#define MSGTR_SKIN_WARNING3 "[skin] 警告, 在skin配置文件的 %d行: 这个widget不支持这个subsection(%s)"
+#define MSGTR_SKIN_WARNING1 "[skin] 警告, 在配置文件的 %d行:\n找到widget但在这之前没有找到\"section\" (%s)"
+#define MSGTR_SKIN_WARNING2 "[skin] 警告, 在配置文件的 %d行:\n找到widget但在这之前没有找到 \"subsection\" (%s) "
+#define MSGTR_SKIN_WARNING3 "[skin] 警告, 在配置文件的 %d行:\n这个widget不支持这个subsection(%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "不支持少于16 bits色深的位图(%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "找不到文件(%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "BMP读取错误(%s)\n"

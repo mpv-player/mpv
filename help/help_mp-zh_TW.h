@@ -1,4 +1,4 @@
-// Sync'ed on 2003-07-26 with help_mp-en.h 1.110
+// Sync'ed on 2003-07-26 with help_mp-en.h 1.121
 // Translated by Kenneth Chan <chantk@ctk.sytes.net>
 // With reference from help_mp-zh.h
 // Synced by Lu Ran <hephooey@fastmail.fm>
@@ -298,6 +298,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "已經有 demuxer 資訊 %s﹗\n"
 #define MSGTR_ClipInfo "片段資料:\n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 偵測到30fps的NTSC內容，改變幀速率。\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 偵測到24fps的漸近NTSC內容，改變幀速率。\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "無法開啟 codec。\n"
@@ -351,6 +353,16 @@ static char help_text[]=
 #define MSGTR_CouldNotFindColorspace "無法找到配合的 colorspace — 用 -vf scale 再嘗試...\n"
 #define MSGTR_MovieAspectIsSet "電影比例是 %.2f:1 — 使用 prescaling 調校至正確比例。\n"
 #define MSGTR_MovieAspectUndefined "電影比例未有說明 — 並無使用 prescaling。\n"
+
+// vd_dshow.c, vd_dmo.c
+#define MSGTR_DownloadCodecPackage "你需要升級/安裝二進制codecs包。\n請訪問http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: Win32/DShow影像codec初始OK。\n"
+#define MSGTR_DMOInitOK "INFO: Win32/DMO影像codec初始。\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: 無法發送EWMH全螢幕事件！\n"
+
+#define MSGTR_NeedAfVolume "Mixer: 該音效驅動程式需要\"-af volume\"來改變音量。\n"
 
 // ====================== GUI messages/buttons ============================
 
