@@ -367,7 +367,7 @@ int find_best_svga_mode(int req_w,int req_h, int req_bpp){
     vminfo = vga_getmodeinfo(i);
     if( vminfo == NULL ) continue;
     if(verbose>3)
-      printf("vo_svga: testing mode %d (%s) %d\n",i,vga_getmodename(i));
+      printf("vo_svga: testing mode %d (%s)\n",i,vga_getmodename(i));
     if( vga_hasmode(i) == 0 ) continue;
     if( req_bpp != bpp_from_vminfo(vminfo) )continue;
     if( (vminfo->width < req_w) || (vminfo->height < req_h) ) continue;
@@ -431,7 +431,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     modeinfo=vga_getmodeinfo(vid_mode);
   }else{//force_vm
     vid_mode=force_vm;
-    if(vga_hasmode(vid_mode) != 0){
+    if(vga_hasmode(vid_mode) == 0){
       printf("vo_svga: forced vid_mode %d (%s) not available\n",
              vid_mode,vga_getmodename(vid_mode));
       return 1; //error;
@@ -598,8 +598,8 @@ int page;
   if(verbose > 2)
     printf("vo_svga: viewing page %d\n",page);
   if(sync_flip && oldpage!=page){
+    if(verbose > 2) printf("vo_svga:vga_waitretrace\n");
     vga_waitretrace();
-    printf("vo_svga:vga_waitretraced\n");
   }
   vga_setdisplaystart(PageStore[cpage].doffset);
   oldpage=page;
