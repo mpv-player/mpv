@@ -831,6 +831,33 @@ case 3:
 	else
 	    planes[1]=NULL;
       }
+//#define VFM_RAW_POSTPROC
+#ifdef VFM_RAW_POSTPROC
+    if (sh_video->codec->driver == VFM_RAW)
+    {
+	mp_dbg(MSGT_DECVIDEO, MSGL_V, "Postprocessing raw %s!\n",
+	    vo_format_name(out_fmt));
+	switch(out_fmt)
+	{
+	    case IMGFMT_YV12:
+		postprocess(planes, stride[0], planes, stride[0],
+		    sh_video->disp_w, sh_video->disp_h, planes[0],
+		    0, /*0x20000*/divx_quality);
+		break;
+//	    case IMGFMT_UYVY:
+//		uyvytoyv12(start, planes[0], planes[1], planes[2],
+//		    sh_video->disp_w, sh_video->disp_h, stride[0], stride[1],
+//		    sh_video->disp_w*2);
+//		postprocess(planes, stride[0], planes, stride[0],
+//		    sh_video->disp_w, sh_video->disp_h, planes[0],
+//		    0, /*0x20000*/divx_quality);
+//		break;
+	    default:
+		mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "Unsuitable outformat (%s) for raw pp!\n",
+		    vo_format_name(out_fmt));
+	}
+    }
+#endif
 case 2:
 #ifdef USE_LIBVO2
     if(planar)
