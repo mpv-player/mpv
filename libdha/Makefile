@@ -7,7 +7,7 @@ VERSION = 0.1
 SHORTNAME = libdha.so
 LIBNAME = libdha-$(VERSION).so
 
-SRCS=libdha.c pci.c
+SRCS=libdha.c pci.c pci_names.c
 OBJS=$(SRCS:.c=.o)
 
 CFLAGS  = $(OPTFLAGS) -fPIC -I. -I.. -Wall -W
@@ -25,6 +25,10 @@ $(LIBNAME):     $(OBJS)
 
 all:    $(LIBNAME) $(SHORTNAME)
 
+pci_names.c:
+	gzip -d -c oth/pci.db.gz >pci.db
+	gawk -f pci_db2c.awk pci.db
+
 test:
 	$(CC) test.c -o test $(SHORTNAME)
 
@@ -33,6 +37,7 @@ clean:
 
 distclean:
 	rm -f Makefile.bak *.o *.so test *~ .depend
+	rm -f pci_dev_ids.c pci_ids.h pci_names.c pci_names.h pci_vendors.h pci.db
 
 dep:    depend
 
