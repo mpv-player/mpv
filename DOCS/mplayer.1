@@ -20,10 +20,10 @@ mencoder \- Movie Encoder for Linux
 .RB [global\ options]\ {\fIgroup\ of\ files\ and\ options\fP}\ [group\ specific\ options]
 .br
 .B mplayer
-.RB [dvd|vcd|cdda|tv]://[title]\ [options]
+.RB [dvd|vcd|cdda|cddb|tv]://[title]\ [options]
 .br
 .B mplayer
-.RB [mms|http|http_proxy|rtp]://URL[:port]\ [options]
+.RB [mms|mmst|http|http_proxy|rtp]://[user:pass@]URL[:port]\ [options]
 .br
 .B mencoder
 .RB [options]\ [\fIfile\fP\ |\ \fIURL\fP\ |\ \-\ ]\ [\-o\ file]
@@ -140,6 +140,7 @@ end playing at. Examples can be found below.
 .TP
 .B \-demuxer <number>
 Force demuxer type. Give the demuxer ID as defined in demuxers.h.
+Use \-demuxer 17 to force .mp3 detection.
 .TP
 .B \-dumpaudio (MPLAYER only)
 Dumps raw compressed audio stream to ./stream.dump (useful with mpeg/ac3).
@@ -226,15 +227,19 @@ of some bad AVI files).
 Do not use average byte/sec value for A\-V sync (AVI).
 Helps with some AVI files with broken header.
 .TP
+.B \-passwd <password> (see \-user option too!)
+Specify password for http authentication.
+.TP
 .B \-rawaudio <option1:option2:...>
 This option lets you play raw audio files. It may also be used to
-play audio CDs wich are not 44KHz 16 bit stereo.
+play audio CDs which are not 44KHz 16Bit stereo.
+Available options are:
 
-    on                 use raw audio demuxer
-    channels=<value>   number of channels
-    rate=<value>       rate in samples per second
-    samplesize=<value> sample size in byte
-    format=<value>     fourcc in hex
+    on                  use raw audio demuxer
+    channels=<value>    number of channels
+    rate=<value>        rate in samples per second
+    samplesize=<value>  sample size in byte
+    format=<value>      fourcc in hex
 .TP
 .B \-skipopening
 Skip DVD opening (dvdnav only).
@@ -326,6 +331,25 @@ autodetected on most AVI files.
 .TP
 .B \-flip
 Flip image upside-down.
+.TP
+.B \-lavdopts <option1:option2:...> (DEBUG CODE)
+If decoding with a codec from libavcodec, you can specify its parameters here.
+
+.I EXAMPLE:
+    \-lavdopts bug=1
+
+Available options are:
+  
+    ver=<value>  error resilience:
+                   -1  needed for some very broken
+                       encoders
+                    0  default
+                    1  more aggressive error
+                       detection
+    bug=<value>  manual workaround encoder bugs:
+                   0  default
+                   1  workaround for some old lavc
+                      generated msmpeg4v3 files
 .TP
 .B \-nosound
 Do not play/encode sound.
@@ -471,6 +495,13 @@ Available plugins are:
                         DVB_HEIGHT*ASPECTRATIO)
     cropdetect          black border detection
                         (print crop values)
+    noise[=lumaNoise[u][t][h]:chromaNoise[u][t][h]
+                        add noise
+                          <0-100>  lumaNoise
+                          <0-100>  chromaNoise
+                          u        uniform noise
+                          t        temporal noise
+                          h        high quality
 
 .I parameters:
 .br
@@ -795,7 +826,7 @@ It has effect only with libmpeg2 and libavcodec codecs.
 .B \-panscan <range>
 Enables Pan & Scan functionality, i.e. in order to display a 16:9 movie
 on a 4:3 display, the sides of the movie are cropped to get a 4:3 image
-which fits the screen. This function works only with xv, (x)mga and xvidix
+which fits the screen. This function works only with xv, xmga and xvidix
 drivers.
 
 The range varies between 0.0 and 1.0 and controls how much of the image is
@@ -1287,6 +1318,8 @@ q / ESC         stop playing and quit program
 .br
 / and *         decrease/increase volume
 .br
+9 and 0         decrease/increase volume
+.br
 m               mute sound
 .br
 f               toggle fullscreen
@@ -1315,10 +1348,6 @@ or \-vo xvidix \-vo (x)mga or \-vc divxds (slow).)
 7 and 8         adjust saturation
 .TP
 .B GUI keyboard control
-, and .         previous / next file
-.br
-gray \- and +    decrease/increase volume
-.br
 ENTER           start playing
 .br
 s               stop playing
@@ -1327,18 +1356,16 @@ a               about
 .br
 l               load file
 .br
-b               skin browser
-.br
-e               toggle equalizer
+c               skin browser
 .br
 p               toggle playlist
 .TP
 .B TV input control
-h and l         select previous/next channel
+h and k         select previous/next channel
 .br
 n               change norm
 .br
-b               change channel list
+u               change channel list
 .TP
 .B DVDNAV input control
 K,J,H,L         browse up/down/left/right
