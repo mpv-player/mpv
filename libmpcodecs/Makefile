@@ -71,6 +71,7 @@ $(LIBNAME2):     $(OBJS2)
 
 clean:
 	rm -f *.o *.a *~
+	rm -f native/*.o native/*.a native/*~
 
 distclean:
 	rm -f Makefile.bak $(OBJS) $(OBJS2) $(LIBNAME) $(LIBNAME2) *~ .depend
