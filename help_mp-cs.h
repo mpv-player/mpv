@@ -96,7 +96,7 @@ static char help_text[]=
 #define MSGTR_VOincompCodec "Bohu¾el, vybrané video_out zaøízení je nekompatibilní s tímto kodekem.\n"
 #define MSGTR_CouldntInitVideoCodec "FATAL: Nemohu inicializovat videokodek :(\n"
 #define MSGTR_EncodeFileExists "Soubor ji¾ existuje: %s (nepøepi¹te si svùj oblíbený AVI soubor!)\n"
-#define MSGTR_CantCreateEncodeFile "Nemohu vytvoøit soubor pro encoding\n" // tohle urèitì opravit
+#define MSGTR_CantCreateEncodeFile "Nemohu vytvoøit soubor\n" // toto doopravit - need to be corrected
 #define MSGTR_CannotInitVO "FATAL: Nemohu inicializovat video driver!\n"
 #define MSGTR_CannotInitAO "nemohu otevøít/inicializovat audio driver -> TICHO\n"
 #define MSGTR_StartPlaying "Zaèínám pøehrávat...\n"
@@ -153,10 +153,10 @@ static char help_text[]=
 #define MSGTR_DetectedMPEGPSfile "Detekován MPEG-PS formát souboru!\n"
 #define MSGTR_DetectedMPEGESfile "Detekován MPEG-ES formát souboru!\n"
 #define MSGTR_DetectedQTMOVfile "Detekován QuickTime/MOV formát souboru!\n"
-#define MSGTR_MissingMpegVideo "Chybìjící MPEG video proud!? kontaktujte autora, mo¾ná to je chyba (bug) :(\n"
-#define MSGTR_InvalidMPEGES "Neplatný MPEG-ES proud??? kontaktuje autora, mo¾ná to je chyba (bug) :(\n"
+#define MSGTR_MissingMpegVideo "Chybìjící MPEG video proud!? Kontaktujte autora, mo¾ná to je chyba (bug) :(\n"
+#define MSGTR_InvalidMPEGES "Neplatný MPEG-ES proud!? Kontaktuje autora, mo¾ná to je chyba (bug) :(\n"
 #define MSGTR_FormatNotRecognized "========== Bohu¾el, tento formát souboru není rozpoznán/podporován =========\n"\
-				  "==== Pokud je tento sounor AVI, ASF nebo MPEG proud, kontaktuje autora! ====\n"
+                                 "==== Pokud je tento soubor AVI, ASF nebo MPEG proud, kontaktuje autora! ====\n"
 #define MSGTR_MissingVideoStream "®ádný video proud nenalezen!\n"
 #define MSGTR_MissingAudioStream "®ádný audio proud nenalezen...  ->beze zvuku\n"
 #define MSGTR_MissingVideoStreamBug "Chybìjící video proud!? Kontaktuje autora, mo¾ná to je chyba (bug) :(\n"
@@ -230,8 +230,8 @@ static char help_text[]=
 #define MSGTR_About "O aplikaci"
 #define MSGTR_FileSelect "Výbìr souboru ..."
 #define MSGTR_SubtitleSelect "Vybrat titulky ..."
-#define MSGTR_MessageBox "MessageBox"
-#define MSGTR_PlayList "PlayList"
+#define MSGTR_MessageBox "Zpráva"
+#define MSGTR_PlayList "Soubory pro pøehrání"
 #define MSGTR_SkinBrowser "Prohlí¾eè témat"
 #define MSGTR_OtherSelect "Vybrat ..."
 
@@ -278,7 +278,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayDVD "Pøehrát DVD ..."
 #define MSGTR_MENU_PlayURL "Ètení URL ..."
 #define MSGTR_MENU_LoadSubtitle "Naèíst titulky ..."
-#define MSGTR_MENU_Playing "Pøehrávám"
+#define MSGTR_MENU_Playing "Ovládání pøehrávání"
 #define MSGTR_MENU_Play "Pøehrát"
 #define MSGTR_MENU_Pause "Pauza"
 #define MSGTR_MENU_Stop "Zastavit"
@@ -298,15 +298,15 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Kapitola %2d"
 #define MSGTR_MENU_AudioLanguages "Jazyk zvuku"
 #define MSGTR_MENU_SubtitleLanguages "Jazyk titulkù"
-#define MSGTR_MENU_PlayList "Playlist"
+#define MSGTR_MENU_PlayList "Soubory pro pøehrání"
 #define MSGTR_MENU_SkinBrowser "Prohli¾eè témat"
 #define MSGTR_MENU_Preferences "Pøedvolby"
 #define MSGTR_MENU_Exit "Konec ..."
 
 // --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "fatální chyba ..."
-#define MSGTR_MSGBOX_LABEL_Error "chyba ..."
-#define MSGTR_MSGBOX_LABEL_Warning "upozornìní ..."
+#define MSGTR_MSGBOX_LABEL_FatalError "Fatální chyba ..."
+#define MSGTR_MSGBOX_LABEL_Error "Chyba ..."
+#define MSGTR_MSGBOX_LABEL_Warning "Upozornìní ..."
 
 #endif
 
