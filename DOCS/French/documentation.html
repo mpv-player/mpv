@@ -188,7 +188,7 @@ MPEG2 et AVI (DivX). De plus ils avaient des probl&egrave;mes de vitesse/qualit&
     Deux mois apr&egrave;s la 0.17, une nouvelle parution.. Compl&eacute;t&eacute; le support ASF,
     plus de formats pour les sous-titres, introduction de libao (similaire &agrave; libvo pour 		l'audio),
     encore plus stable et performant.... C'est un MUST !  
-<LI><B>MPlayer 0.50pre &quot;The Faszom(C)ounter&quot;</B><BR>
+<LI><B>MPlayer 0.50 &quot;The Faszom(C)ounter&quot;</B><BR>
 	Hmm. Une nouvelle sortie. Des tonnes de nouvelles fonctionnalit&eacute;s, une GUI en version 		b&ecirc;ta, des bogues fix&eacute;s, de nouveaux drivers vo et ao,port&eacute; sur de nombreux syst&egrave;mes, 		incluant les codecs DivX Open-Source, et bien plus encore... Essayez le !
 
 </UL></P>
@@ -211,6 +211,9 @@ MPEG2 et AVI (DivX). De plus ils avaient des probl&egrave;mes de vitesse/qualit&
 <P>Lisez ce qui suit avant de compiler <B>MPlayer</B> :</P>
 
 <UL>
+
+<LI>Si vous avez <B>gcc 2.96</B> sur votre système, <A HREF="faq.html#5.1"><B><I>LISEZ CECI !!!</A></LI>
+
 <LI>Si vous pr&eacute;voyez d'utiliser <B>MPlayer</B> sur une architecture x86, vous voudrez peut &ecirc;tre utiliser les librairies
 Win32. T&eacute;l&eacute;chargez et d&eacute;zippez w32codecs.zip dans le r&eacute;pertoire /usr/lib/win32 .
 Note: le projet avifile a un paquetage de codecs &eacute;quivalent, mais diff&eacute;rent du notre, donc si vous voulez profiter de tous les
@@ -223,6 +226,8 @@ pour obtenir une acc&eacute;l&eacute;ration optimale. C'est important de r&eacut
 <LI>Si vous avez une carte 3DFX (quel mod&egrave;le ?), lisez la section <A HREF="video.html#2.2.1.9">2.2.1.9</A>
 pour obtenir une acc&eacute;l&eacute;ration optimale. C'est important de r&eacute;aliser ces &eacute;tapes 
 <I>avant</I> de compiler <B>MPlayer</B>, sinon aucun support sp&eacute;cifique &agrave; la 3DFX ne sera fait.</LI>
+
+<LI>Si vous avez une carte ATI, lisez la section <A HREF="video.html#2.2.1.A.2">2.2.1.A.2</A> Pour connaitre les fonctions de votre carte supportés par Linux/MPlayer.</LI>
 
 <LI>Si vous voulez utiliser le codec <B>DivX4</B> de ProjectMayo, lisez la section
 <A HREF="codecs.html#2.1.2.1">2.1.2.1</A> avant de compiler.
@@ -281,10 +286,34 @@ pour utiliser la skin dans le r&eacute;pertoire <CODE>*/Skin/newskin</CODE>.</P>
 <P><B><A NAME=1.5>1.5. Sous-titres et OSD</A></B></P>
 
 <P>Oui, <B>MPlayer</B> supporte &eacute;galement de nombreux types de sous-titres. Actuellement 7 types de sous-titres peuvent &ecirc;tre
-utilis&eacute;s par le code de lecture. Pour en savoir plus, lisez le fichier subreader.c, ligne ~20.</P>
+utilis&eacute;s par le code de lecture. Pour en savoir plus, lisez le fichier subreader.c, ligne ~30.</P>
 
-<P>Les sous-titres sont affich&eacute;s gr&acirc;ce &agrave; la technique <B>'OSD', On Screen Display</B>.
+<P><B>MPlayer</B> introduit un nouveau format de sous-titres appel&eacute; <B><I>MPsub</I></B>.
+Il a &eacute;t&eacute; con&ccedil;u par moi (Gabucino). Son principal avantage est de se baser
+<I>dynamiquement</I> sur la dur&eacute;e (bien qu'il poss&egrave;de &eacute;galement un mode bas&eacute; sur les frames). Exemple (de
+<A HREF=&quot;http://www.mplayerhq.hu/DOCS/tech/mpsub.sub&quot;>DOCS/tech/mpsub.sub</A>) :
+</P>
+
+<P><CODE><I>
+# premier nombre  : attends cette dur&eacute;e par&egrave;s la disparition du dernier sous-titre<BR>
+# second nombre : affiche le sous-titre en cours pour tant de secondes<BR>
+<BR>
+15 3<BR>
+A long, long time ago...<BR>
+<BR>
+0 3<BR>
+in a galaxy far away...<BR>
+<BR>
+0 3<BR>
+Naboo was under an attack.<BR>
+</I></CODE></P>
+
+<P>Comme vous pouvez le constater, l'objectif ici est de <B>faciliter l'&eacute;dition la synchronisation, la jointure et le d&eacute;coupage</B> des sous-titres. Si vous avez un sous-titre SSA mal synchronis&eacute; avec votre version de la vid&eacute;o, faites simplement un <I>mplayer dummy.avi -sub source.ssa
+-dumpmpsub</I> . Un fichier <CODE>dump.mpsub</CODE> sera cr&eacute;e dans le r&eacute;pertoire courant, contenant le texte du sous-titre au format <B>MPsub</B>. Vous pourez alors ais&eacute;ment ajouter/soustraire du temps entre les sous-titres .</P>
+
+<P>Les sous-titres sont affich&eacute;s par la technique de l'<B>'OSD', On Screen Display</B>.
 OSD est utilis&eacute; pour afficher le temps de lecture, la barre de volume, d'avance/retour rapide, le contraste, etc...</P>
+
 
 <P><B>Installer OSD et SUB</B></P>
 
@@ -332,7 +361,7 @@ Vous pouvez maintenant voir un compteur dans le coin sup&eacute;rieur gauche du 
 
 <P><A NAME=2.1>2.1. <A HREF="codecs.html">Formats vid&eacute;o, codecs audio & vid&eacute;o</A></P>
 
-<P><A NAME=2.2>2.2. P&eacute;riph&eacute;rique <A HREF="video.html&quot;>vid&eacute;o</A> & <A HREF=&quot;sound.html">audio</A></P>
+<P><A NAME=2.2>2.2. P&eacute;riph&eacute;rique <A HREF="video.html">vid&eacute;o</A> & <A HREF="sound.html">audio</A></P>
 
 <P><B><A NAME=3>3. Utilisation</A></B></P>
 
@@ -495,6 +524,7 @@ La configuration en est simple, recompilez <B>MPlayer</B> avec l'option</P>
 
 <P><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure
 --enable-streaming</CODE></FONT></P>
+<P>MPlayer <B>ne lit pas les fichiers ASF</B> depuis le r&eacute;seau, ni par HTTP ni par MMS.</P>
 
 <P><B>MPlayer</B> peut lire depuis l'entr&eacute;e standard stdin (pas pour les pipes nominatifs). Cela peut &ecirc;tre par exemple
 utilis&eacute; pour lire depuis le FTP :</P>
@@ -637,6 +667,11 @@ palette des drivers de sortie.</P>
 
 <P><PRE><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
 	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking</FONT></PRE></P>
+		  
+<P><B><A NAME=6.5>6.5. Silicon Graphics Indigo / IRIX</A></B></P>
+
+<P>Parais fonctionner. Vous devrez probablement utiliser le driver ao <I>sgi</I>.
+Quelqu'un a t'il plus d'infos ?</P>
 	      
 <P><B><A NAME=A>Appendice A - Auteurs</A></B></P>
 
@@ -647,7 +682,7 @@ palette des drivers de sortie.</P>
 <P ALIGN=center><B><U>Le projet <B>MPlayer</B> :</U></B></P>
 
 <P><UL>
-<LI>&Aacute;rp&aacute;d Gere&ouml;ffy (A'rpi/ESP-team):  &lt;arpi@thot.banki.hu&gt;
+<LI><A HREF="mailto:arpi@thot.banki.hu">&Aacute;rp&aacute;d Gere&ouml;ffy (A'rpi/ESP-team):<A>
 <UL><LI>code du lecteur (demultiplexeur du flux mpeg et parser avi/asf, synchronisation A-V, seek...)
 </LI><LI>mp3lib, bas&eacute; sur les sources de mpglib [MP3 audio decoder]
 </LI><LI>getch2  [fonctions clavier]
@@ -662,7 +697,7 @@ palette des drivers de sortie.</P>
 </LI><LI>support de DivX4Linux (ProjectMayo, c.f. documentation)
 </LI></UL>
 
-</LI><LI>Zolt&aacute;n Ponekker (Pontscho/Fresh!):  &lt;pontscho@makacs.poliod.hu&gt; 
+</LI><LI><A HREF="mailto:pontscho@makacs.poliod.hu">Zolt&aacute;n Ponekker (Pontscho/Fresh!):</A>
 <UL><LI>script configure et Makefiles pour une compilation facile
 </LI><LI>syst&egrave;me d'interface graphique
 </LI><LI>support 3DNow! dans mp3lib
@@ -672,14 +707,14 @@ palette des drivers de sortie.</P>
 </LI><LI>support du mixer audio audio mixer (volume)
 </LI></UL>
 
-</LI><LI>G&aacute;bor L&eacute;n&aacute;rt (LGB): &lt;lgb@lgb.hu&gt;
+</LI><LI><A HREF="mailto:lgb@lgb.hu">G&aacute;bor L&eacute;n&aacute;rt (LGB)</A>: &lt;lgb@lgb.hu&gt;
 <UL><LI>am&eacute;lioration du script ./configure
 </LI><LI>am&eacute;lioration du Makefile
 </LI><LI>impl&eacute;mentation primaire du support DVD
 </LI><LI>divers bogues fix&eacute;s pour X11
 </LI></UL>
 
-</LI><LI>G&aacute;bor B&eacute;rczi (Gabucino):  &lt;gabucino@k2.jozsef.kando.hu&gt;
+</LI><LI><A HREF="mailto:gabucino@mplayerhq.hu">G&aacute;bor B&eacute;rczi (Gabucino):</A>
 <UL><LI>maintainer de la documentation 
 </LI><LI>traduction de la documentation en hongrois
 </LI><LI>design de la page web & gfx
@@ -690,7 +725,7 @@ palette des drivers de sortie.</P>
 </LI><LI>port exp&eacute;rimental sur MINIX :)
 </LI></UL>
 
-</LI><LI>Szabolcs Berecz (Szabi): &lt;szabi@inf.elte.hu&gt;
+</LI><LI><A HREF="mailto:szabi@inf.elte.hu">Szabolcs Berecz (Szabi): </A>;
 <UL><LI>parser du fichier codecs.conf
 </LI><LI>parser des fichiers de configuration et de la ligne de commande
 </LI><LI>fixes mga_vid, option du module, etc...
@@ -698,31 +733,31 @@ palette des drivers de sortie.</P>
 </LI><LI>support des sous-titres type #7
 </LI></UL>
 
-</LI><LI>L&aacute;szl&oacute; Megyer (Lez, Laaz): &lt;lez@sch.bme.hu&gt;
+</LI><LI><A HREF="mailto:lez@sch.bme.hu">L&aacute;szl&oacute; Megyer (Lez, Laaz):</A>
 <UL><LI>lecteur SUB
 </LI><LI>fixes du screensaver+DPMS pour libvo
 </LI></UL>
 
-</LI><LI>Gyula L&aacute;szl&oacute; (Chass, T&eacute;gla): &lt;chass-@freemail.hu&gt;
+</LI><LI><A HREF="mailto:chass-@freemail.hu">Gyula L&aacute;szl&oacute; (Chass, T&eacute;gla):</A>
 <UL><LI>ploices principales (mp_font1.zip)
 </LI><LI>troisi&egrave;me designe page web(current) & gfx
 </LI></UL>
 
-</LI><LI>Zolt&aacute;n M&aacute;rk Vici&aacute;n (Se7en): &lt;se7en@sch.bme.hu&gt;
+</LI><LI><A HREF="mailto:se7en@sch.bme.hu">Zolt&aacute;n M&aacute;rk Vici&aacute;n (Se7en):</A>
 <UL><LI>support SVGAlib dans libvo
 </LI></UL>
 
-</LI><LI>Alex Beregszaszi (Al3x): &lt;alex@naxine.org&gt;
+</LI><LI><A HREF="mailto:alex@naxine.org">Alex Beregszaszi (Al3x):</A>
 <UL><LI>driver sortie ALSA dans libao2
 </LI><LI>driver sortie vo_ggi dans libvo (www.ggi-project.org)
 </LI></UL>
 
-</LI><LI>Andreas Ackermann (Acki):  &lt;asackerm@stud.informatik.uni-erlangen.de&gt;
+</LI><LI><A HREF="mailto:asackerm@stud.informatik.uni-erlangen.de">Andreas Ackermann (Acki):  </A>
 <UL><LI>support LIRC (c.f. documentation)
 </LI><LI>support DGA dans libvo
 </LI></UL>
 
-</LI><LI>Felix B&uuml;nemann (Atmos): &lt;atmosfear@users.sourceforge.net&gt;
+</LI><LI><A HREF="mailto:atmosfear@users.sourceforge.net">Felix B&uuml;nemann (Atmos):</A>
 <UL><LI>maintainer du driver SDL 
 </LI><LI>fixes des formats additionnels YUV
 </LI><LI>Nouvelles polices (mp_font2.zip)
@@ -732,43 +767,43 @@ palette des drivers de sortie.</P>
 </LI><LI>sortie fichier RAW PCM/WAVE pour libao2
 </LI></UL>
 
-</LI><LI>TeLeNiEkO: &lt;telenieko@telenieko.com&gt;
+</LI><LI><A HREF="mailto:telenieko@telenieko.com">TeLeNiEkO: </A>
 <UL><LI>traduction de la documentation en espagnol
 </LI></UL>
 
-</LI><LI>Michael Graffam: &lt;mgraffam@idsi.net&gt;
+</LI><LI><A HREF="mailto:mgraffam@idsi.net">Michael Graffam: </A>
 <UL><LI>support XF86VidMode pour vo_x11 et vo_dga
 </LI><LI>switching video mode pour vo_dga
 </LI></UL>
 
-</LI><LI>Jens Hoffmann: &lt;hoffmajs@gmx.de&gt;
+</LI><LI><A HREF="mailto:hoffmajs@gmx.de">Jens Hoffmann:</A>
 <UL><LI>support formats YUV additionnels
 </LI><LI>trouv&eacute; le gros probl&egrave;me BITMAPINFOHEADER -> r&eacute;solu pix&eacute;lisation ASV2
 </LI></UL>
 
-</LI><LI>Nick Kurshev: &lt;nickols_k@mail.ru&gt;
+</LI><LI><A HREF="mailto:nickols_k@mail.ru">Nick Kurshev:</A>
 <UL><LI>optimisations memcpypour AMD K7 et Intel Pentium III  (fastmemcpy.h)
 </LI><LI>infos tuning CDROM
 </LI><LI>optimisation 3DNow! dans mp3lib et libac3 et ffmpeg
 </LI><LI>traduction de la documentation en russe
 </LI></UL>
 
-</LI><LI>German Gomez Garcia: &lt;german@piraos.com&gt;
+</LI><LI><A HREF="mailto:german@piraos.com">German Gomez Garcia: </A>
 <UL><LI>parser DVD .ifo et s&eacute;lection de chapitres [pas encore dans le code principal]
 </LI><LI>sortie SPDIF AC3 pour SBLive!
 </LI></UL>
 
-</LI><LI>Dariush Pietrzak (Eyck): &lt;eyck@incubus.ar.lublin.pl&gt;
+</LI><LI><A HREF="mailto:eyck@incubus.ar.lublin.pl">Dariush Pietrzak (Eyck):</A>
 <UL><LI>support packaging debian (c.f. debian/* et cette documentation)
 </LI><LI>support sous-titres format vplayer
 </LI><LI>support pr&eacute;liminaire pour les sous-titres format .RT 
 </LI></UL>
 
-</LI><LI>Marcus Comstedt: &lt;marcus@idonex.se&gt;
+</LI><LI><A HREF="mailto:marcus@idonex.se">Marcus Comstedt: </A>
 <UL><LI>support initial solaris8-x86
 </LI></UL>
 
-</LI><LI>J&uuml;rgen Keil and Marcus Comstedt: &lt;jk@tools.de&gt; &lt;marcus@idonex.se&gt;
+</LI><LI><A HREF="mailto:jk@tools.de">J&uuml;rgen Keil and Marcus Comstedt: </A>
 <UL><LI>patch <B>MPlayer</B> pour fonctionner sur Solaris 8 x86
 </LI><LI>fixes configure
 </LI><LI>divers fixes (win32, configure, etc)
@@ -776,34 +811,87 @@ palette des drivers de sortie.</P>
 </LI><LI>msupport mediaLib dans libavcodec
 </LI></UL>
 
-</LI><LI>Vladimir Kushnir: &lt;vkushnir@Alfacom.net&gt;
+</LI><LI><A HREF="mailto:vkushnir@Alfacom.net">Vladimir Kushnir:</A>
 <UL><LI>patch <B>MPlayer</B> pour fonctionner sur FreeBSD x86
 </LI></UL>
 
-</LI><LI>Bertrand BAUDET: &lt;bertrand_baudet@yahoo.com&gt;
+</LI><LI><A HREF="mailto:bertrand_baudet@yahoo.com">Bertrand BAUDET:</A>
 <UL><LI>support streaming r&eacute;seau
 </LI></UL>
 
-</LI><LI>Artur Zaprzala: <zybi@fanthom.irc.pl>
+</LI><LI><A HREF="mailto:zybi@fanthom.irc.pl">Artur Zaprzala: </A>
 <UL><LI>g&eacute;n&eacute;rateur de polices + polices OSD (TOOLS/subfont-c)
 </LI></UL>
 
-</LI><LI>lanzz@lanzz.org:
+</LI><LI><A HREF="mailto:lanzz@lanzz.org">lanzz@lanzz.org : </A>
 <UL><LI>g&eacute;n&eacute;rateur de polices avec GIMP (TOOLS/subfont-gimp)
 </LI></UL>
 
-</LI><LI>Adam Tla/lka: &lt;atlka@pg.gda.pl&gt;
+</LI><LI><A HREF="mailto:atlka@pg.gda.pl">Adam Tla/lka: </A>
 <UL><LI>am&eacute;liorations osd/sub, fixes, optimisation, support utf8
 </LI><LI>divers fixes
 </LI></UL>
 
-</LI><LI>Folke Ashberg: &lt;folke@ashberg.de&gt;
+</LI><LI><A HREF="mailto:folke@ashberg.de">Folke Ashberg:</A>
 <UL><LI>driver AAlib natif (-vo aa)
 </LI></UL>
 
-</LI><LI>Kamil Toman &lt;ktoman@email.cz&gt;
+</LI><LI><A HREF="mailto:ktoman@email.cz">Kamil Toman</A>
 <UL><LI>polices czech
 </LI></UL>
+
+<LI><B><A HREF="mailto:iive@yahoo.com>Ivan Kalvatchev</A></B>
+<UL>
+  <LI>interlaced MPEG2 support</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:p_l@gmx.fr">pl</A></B>
+<UL>
+  <LI>./configure fixes</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:michaelni@gmx.at">Michael Niedermayer</A></B>
+<UL>
+  <LI>postprocessing support</LI>
+  <LI>software scaling C/MMX/MMX2/3DNow support (swscale.c)</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:sgoethel@jausoft.com">Sven Goethel</A></B>
+<UL>
+  <LI>libvo driver: vo_gl2</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:nexus@hoth.amu.edu.pl">Bohdan Horst</A></B>
+<UL>
+  <LI>iconv support on FreeBSD</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:joy@pingfm.org">joy_ping</A></B>
+<UL>
+  <LI>ao_alsa9 fixes</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:eanholt@gladstone.uoregon.edu">Eric Anholt</A></B>
+<UL>
+  <LI>runtime CPU detection</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri Svoboda</A></B>
+<UL>
+  <LI>AQT type subtitles support</LI>
+  <LI>CRTC2 YUV support in mga_vid</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:oliver.schoenbrunner@jku.at">Oliver Schoenbrunner</A></B>
+<UL>
+  <LI>SGI audio driver</LI>
+  <LI>MIPS support</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:jeroen.dobbelaere@acunia.com">Jeroen Dobbelaere</A></B>
+<UL>
+  <LI><A HREF="http://mad.sourceforge.net">libmad</A> support</LI>
+</UL></LI>
 
 </LI></UL></P>
 
@@ -893,7 +981,7 @@ palette des drivers de sortie.</P>
 <UL>
   <LI><B>Hongrois</B>: Gabucino
   <LI><B>Allemand</B>: <A HREF="mailto:johannes.feigl@mcse.at">Johannes Feigl</A>
-  <LI><B>Fran&ccedil;ais</B>; Yves Dessertine, MoZ 
+  <LI><B>Fran&ccedil;ais</B>: <A HREF="mailto:moz@gmx.fr">MoZ</A>
   <LI><B>Espagnol</B>: TeLeNiEkO (outdated)
   <LI><B>Russe</B>: Nick Kurshev (outdated)
   <LI><B>Polonais</B>: Dariush Pietrzak (outdated)
