@@ -253,6 +253,8 @@ Video output:
   --enable-bl		 build with Blinkenlights support [disable]
   --enable-tdfxvid       build with tdfx_vid support [disable]
   --disable-tga          disable targa output support [enable]
+  --disable-pnm		 disable pnm output support [enable]
+  --disable-md5sum	 disable md5sum output support [enable]
   
 Audio output:
   --disable-alsa         disable ALSA sound support [autodetect]
@@ -1264,6 +1266,8 @@ _win32waveout=auto
 _nas=auto
 _png=auto
 _jpg=auto
+_pnm=yes
+_md5sum=yes
 _gif=auto
 _gl=auto
 _ggi=auto
@@ -1414,6 +1418,10 @@ for ac_option do
   --disable-png)	_png=no		;;
   --enable-jpeg)	_jpg=yes	;;
   --disable-jpeg)	_jpg=no		;;
+  --enable-pnm)		_pnm=yes	;;
+  --disable-pnm)	_pnm=no		;;
+  --enable-md5sum)	_md5sum=yes	;;
+  --disable-md5sum)	_md5sum=no	;;
   --enable-gif)	_gif=yes	;;
   --disable-gif)	_gif=no		;;
   --enable-gl)		_gl=yes		;;
@@ -3877,6 +3885,33 @@ else
   _novomodules="jpeg $_novomodules"
   _mkf_jpg="no"
 fi
+
+
+
+echocheck "PNM support"
+if test "$_pnm" = yes; then
+  _def_pnm="#define HAVE_PNM"
+  _vosrc="$_vosrc vo_pnm.c"
+  _vomodules="pnm $_vomodules"
+else
+  _def_pnm="#undef HAVE_PNM"
+  _novomodules="pnm $_novomodules"
+fi
+echores "$_pnm"
+
+
+
+echocheck "md5sum support"
+if test "$_md5sum" = yes; then
+  _def_md5sum="#define HAVE_MD5SUM"
+  _vosrc="$_vosrc vo_md5sum.c md5sum.c"
+  _vomodules="md5sum $_vomodules"
+else
+  _def_md5sum="#undef HAVE_MD5SUM"
+  _novomodules="md5sum $_novomodules"
+fi
+echores "$_md5sum"
+
 
 
 echocheck "GIF support"
@@ -6958,6 +6993,12 @@ $_def_png
 
 /* enable JPEG support */
 $_def_jpg
+
+/* enable PNM support */
+$_def_pnm
+
+/* enable md5sum support */
+$_def_md5sum
 
 /* enable GIF support */
 $_def_gif

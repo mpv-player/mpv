@@ -122,8 +122,12 @@ extern vo_functions_t video_out_tga;
 #ifdef MACOSX
 extern vo_functions_t video_out_quartz;
 #endif
+#ifdef HAVE_PNM
 extern vo_functions_t video_out_pnm;
+#endif
+#ifdef HAVE_MD5SUM
 extern vo_functions_t video_out_md5sum;
+#endif
 
 vo_functions_t* video_out_drivers[] =
 {
@@ -237,8 +241,12 @@ vo_functions_t* video_out_drivers[] =
 #ifdef HAVE_TGA
         &video_out_tga,
 #endif
+#ifdef HAVE_PNM
     &video_out_pnm,
+#endif
+#ifdef HAVE_MD5SUM
     &video_out_md5sum,
+#endif
         NULL
 };
 
