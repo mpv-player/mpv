@@ -45,6 +45,7 @@ int gtkInited = 0;
 #include "gtk/about.h"
 #include "gtk/opts.h"
 #include "gtk/menu.h"
+#include "gtk/url.h"
 
 // --- init & close gtk
 
@@ -187,6 +188,9 @@ void gtkShow( int type,char * param )
    case evHidePopUpMenu:
         if ( PopUpMenu ) gtk_widget_hide_on_delete( PopUpMenu );
         break;
+   case evPlayNetwork:
+	ShowURLDialogBox();
+	break;
   }
 }
 

@@ -20,6 +20,9 @@ inline void TranslateFilename( int c,char * tmp )
  int i;
  switch ( guiIntfStruct.StreamType )
   {
+   case STREAMTYPE_STREAM:
+        strcpy( tmp,guiIntfStruct.Filename );
+        break;
    case STREAMTYPE_FILE:
           if ( ( guiIntfStruct.Filename )&&( guiIntfStruct.Filename[0] ) )
            {
@@ -221,6 +224,13 @@ void mplEventHandling( int msg,float param )
         exit_player( "Exit" );
         break;
 
+   case evPlayNetwork:
+	guiIntfStruct.StreamType=STREAMTYPE_STREAM;
+        goto play;
+   case evSetURL:
+        gtkShow( evPlayNetwork,NULL );
+	break;
+	
 #ifdef HAVE_VCD
    case evSetVCDTrack:
         guiIntfStruct.Track=(int)param;
@@ -247,6 +257,7 @@ play:
 
         switch ( guiIntfStruct.StreamType )
          {
+	  case STREAMTYPE_STREAM:
 	  case STREAMTYPE_FILE:
 	       guiGetEvent( guiClearStruct,guiALL );
 	       break;

@@ -275,7 +275,7 @@ GtkWidget * create_PopUpMenu( void )
 #ifdef USE_DVDREAD
     AddMenuItem( SubMenu,MSGTR_MENU_PlayDVD, evPlayDVD );
 #endif
-    AddMenuItem( SubMenu,MSGTR_MENU_PlayURL, evNone );
+    AddMenuItem( SubMenu,MSGTR_MENU_PlayURL, evSetURL );
     AddMenuItem( SubMenu,MSGTR_MENU_LoadSubtitle"   ", evLoadSubtitle );
    SubMenu=AddSubMenu( Menu,MSGTR_MENU_Playing );
     AddMenuItem( SubMenu,MSGTR_MENU_Play"        ", evPlay );
