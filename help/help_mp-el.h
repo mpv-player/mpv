@@ -50,7 +50,8 @@ static char help_text[]=
 
 // mplayer.c:
 
-#define MSGTR_Exiting "\n Έξοδος... (%s)\n"
+#define MSGTR_Exiting "\n Έξοδος...\n"
+#define MSGTR_ExitingHow "\n Έξοδος... (%s)\n"
 #define MSGTR_Exit_quit "Κλείσιμο"
 #define MSGTR_Exit_eof "Τέλος του αρχείου"
 #define MSGTR_Exit_error "Κρίσιμο σφάλμα"

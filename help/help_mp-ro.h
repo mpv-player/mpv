@@ -59,7 +59,8 @@ static char help_text[]=
 // ========================= MPlayer messages ===========================
 
 // mplayer.c:
-#define MSGTR_Exiting "\nIeºire... (%s)\n"
+#define MSGTR_Exiting "\nIeºire...\n"
+#define MSGTR_ExitingHow "\nIeºire... (%s)\n"
 #define MSGTR_Exit_quit "Ieºire"
 #define MSGTR_Exit_eof "Sfârºit fiºier"
 #define MSGTR_Exit_error "Eroare fatalã"

@@ -49,7 +49,8 @@ static char help_text[]=
 
 // mplayer.c: 
 
-#define MSGTR_Exiting "\n종료합니다... (%s)\n"
+#define MSGTR_Exiting "\n종료합니다.\n"
+#define MSGTR_ExitingHow "\n종료합니다... (%s)\n"
 #define MSGTR_Exit_quit "종료"
 #define MSGTR_Exit_eof "파일의 끝"
 #define MSGTR_Exit_error "치명적 오류"

@@ -51,7 +51,8 @@ static char help_text[]=
 
 // mplayer.c:
 
-#define MSGTR_Exiting "\n終了しています... (%s)\n"
+#define MSGTR_Exiting "\n終了しています\n"
+#define MSGTR_ExitingHow "\n終了しています... (%s)\n"
 #define MSGTR_Exit_quit "終了"
 #define MSGTR_Exit_eof "ファイルの末端です"
 #define MSGTR_Exit_error "致命的エラー"

@@ -51,7 +51,8 @@ static char help_text[]=
 
 // mplayer.c: 
 
-#define MSGTR_Exiting "\nKilépek... (%s)\n"
+#define MSGTR_Exiting "\nKilépek...\n"
+#define MSGTR_ExitingHow "\nKilépek... (%s)\n"
 #define MSGTR_Exit_quit "Kilépés"
 #define MSGTR_Exit_eof "Vége a file-nak"
 #define MSGTR_Exit_error "Végzetes hiba"

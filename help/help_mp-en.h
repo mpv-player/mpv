@@ -57,7 +57,8 @@ static char help_text[]=
 
 // mplayer.c:
 
-#define MSGTR_Exiting "\nExiting... (%s)\n"
+#define MSGTR_Exiting "\nExiting...\n"
+#define MSGTR_ExitingHow "\nExiting... (%s)\n"
 #define MSGTR_Exit_quit "Quit"
 #define MSGTR_Exit_eof "End of file"
 #define MSGTR_Exit_error "Fatal error"
@@ -182,6 +183,135 @@ static char help_text[]=
 #define MSGTR_RecommendedVideoBitrate "Recommended video bitrate for %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nVideo stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs  %d frames\n"
 #define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs\n"
+#define MSGTR_OpenedStream "success: format: %d  data: 0x%X - 0x%x\n"
+#define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
+#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d bps=%ld sample-%ld)\n"
+#define MSGTR_CBRPCMAudioSelected "CBR PCM audio selected\n"
+#define MSGTR_MP3AudioSelected "MP3 audio selected\n"
+#define MSGTR_CannotAllocateBytes "Couldn't allocate %d bytes\n"
+#define MSGTR_SettingAudioDelay "Setting AUDIO DELAY to %5.3f\n"
+#define MSGTR_SettingAudioInputGain "Setting audio input gain to %f\n"
+#define MSGTR_LamePresetEquals "\npreset=%s\n\n"
+#define MSGTR_LimitingAudioPreload "Limiting audio preload to 0.4s\n"
+#define MSGTR_IncreasingAudioDensity "Increasing audio density to 4\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forcing audio preload to 0, max pts correction to 0\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR audio: %ld bytes/sec, %d bytes/block\n"
+#define MSGTR_LameVersion "LAME version %s (%s)\n\n"
+#define MSGTR_InvalidBitrateForLamePreset "Error: The bitrate specified is out of the valid range for this preset\n"\
+"\n"\
+"When using this mode you must enter a value between \"8\" and \"320\"\n"\
+"\n"\
+"For further information try: \"-lameopts preset=help\"\n"
+#define MSGTR_InvalidLamePresetOptions "Error: You did not enter a valid profile and/or options with preset\n"\
+"\n"\
+"Available profiles are:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (ABR Mode) - The ABR Mode is implied. To use it,\n"\
+"                      simply specify a bitrate. For example:\n"\
+"                      \"preset=185\" activates this\n"\
+"                      preset and uses 185 as an average kbps.\n"\
+"\n"\
+"    Some examples:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" or \"-lameopts  cbr:preset=192       \"\n"\
+" or \"-lameopts      preset=172       \"\n"\
+" or \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"For further information try: \"-lameopts preset=help\"\n"
+#define MSGTR_LamePresetsLongInfo "\n"\
+"The preset switches are designed to provide the highest possible quality.\n"\
+"\n"\
+"They have for the most part been subject to and tuned via rigorous double blind\n"\
+"listening tests to verify and achieve this objective.\n"\
+"\n"\
+"These are continually updated to coincide with the latest developments that\n"\
+"occur and as a result should provide you with nearly the best quality\n"\
+"currently possible from LAME.\n"\
+"\n"\
+"To activate these presets:\n"\
+"\n"\
+"   For VBR modes (generally highest quality):\n"\
+"\n"\
+"     \"preset=standard\" This preset should generally be transparent\n"\
+"                             to most people on most music and is already\n"\
+"                             quite high in quality.\n"\
+"\n"\
+"     \"preset=extreme\" If you have extremely good hearing and similar\n"\
+"                             equipment, this preset will generally provide\n"\
+"                             slightly higher quality than the \"standard\"\n"\
+"                             mode.\n"\
+"\n"\
+"   For CBR 320kbps (highest quality possible from the preset switches):\n"\
+"\n"\
+"     \"preset=insane\"  This preset will usually be overkill for most\n"\
+"                             people and most situations, but if you must\n"\
+"                             have the absolute highest quality with no\n"\
+"                             regard to filesize, this is the way to go.\n"\
+"\n"\
+"   For ABR modes (high quality per given bitrate but not as high as VBR):\n"\
+"\n"\
+"     \"preset=<kbps>\"  Using this preset will usually give you good\n"\
+"                             quality at a specified bitrate. Depending on the\n"\
+"                             bitrate entered, this preset will determine the\n"\
+"                             optimal settings for that particular situation.\n"\
+"                             While this approach works, it is not nearly as\n"\
+"                             flexible as VBR, and usually will not attain the\n"\
+"                             same level of quality as VBR at higher bitrates.\n"\
+"\n"\
+"The following options are also available for the corresponding profiles:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (ABR Mode) - The ABR Mode is implied. To use it,\n"\
+"                      simply specify a bitrate. For example:\n"\
+"                      \"preset=185\" activates this\n"\
+"                      preset and uses 185 as an average kbps.\n"\
+"\n"\
+"   \"fast\" - Enables the new fast VBR for a particular profile. The\n"\
+"            disadvantage to the speed switch is that often times the\n"\
+"            bitrate will be slightly higher than with the normal mode\n"\
+"            and quality may be slightly lower also.\n"\
+"   Warning: with the current version fast presets might result in too\n"\
+"            high bitrate compared to regular presets.\n"\
+"\n"\
+"   \"cbr\"  - If you use the ABR mode (read above) with a significant\n"\
+"            bitrate such as 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
+"            you can use the \"cbr\" option to force CBR mode encoding\n"\
+"            instead of the standard abr mode. ABR does provide higher\n"\
+"            quality but CBR may be useful in situations such as when\n"\
+"            streaming an mp3 over the internet may be important.\n"\
+"\n"\
+"    For example:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" or \"-lameopts  cbr:preset=192       \"\n"\
+" or \"-lameopts      preset=172       \"\n"\
+" or \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"\n"\
+"A few aliases are available for ABR mode:\n"\
+"phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"\
+"mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
+"fm/radio/tape => 112kbps    hifi => 160kbps\n"\
+"cd => 192kbps               studio => 256kbps"
+#define MSGTR_ConfigfileError "configfile error"
+#define MSGTR_ErrorParsingCommandLine "error parsing cmdline"
+#define MSGTR_VideoStreamRequired "Video stream is mandatory!\n"
+#define MSGTR_ForcingInputFPS "input fps will be interpreted as %5.2f instead\n"
+#define MSGTR_RawvideoDoesNotSupportAudio "Output file format RAWVIDEO does not support audio - disabling audio\n"
+#define MSGTR_DemuxerDoesntSupportNosound "This demuxer doesn't support -nosound yet.\n"
+#define MSGTR_MemAllocFailed "memory allocation failed"
+#define MSGTR_NoMatchingFilter "Couldn't find matching filter/ao format!\n"
+#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, maybe broken C compiler?\n"
+#define MSGTR_NoLavcAudioCodecName "Audio LAVC, Missing codec name!\n"
+#define MSGTR_LavcAudioCodecNotFound "Audio LAVC, couldn't find encoder for codec %s\n"
+#define MSGTR_CouldntAllocateLavcContext "Audio LAVC, couldn't allocate context!\n"
+#define MSGTR_CouldntOpenCodec "Couldn't open codec %s, br=%d\n"
 
 // cfg-mencoder.h:
 

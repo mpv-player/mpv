@@ -54,7 +54,8 @@ static char help_text[]=
 // ========================= MPlayer Ausgaben ===========================
 
 // mplayer.c: 
-#define MSGTR_Exiting "\nBeenden... (%s)\n"
+#define MSGTR_Exiting "\nBeenden...\n"
+#define MSGTR_ExitingHow "\nBeenden... (%s)\n"
 #define MSGTR_Exit_quit "Ende"
 #define MSGTR_Exit_eof "Dateiende erreicht."
 #define MSGTR_Exit_error "Fataler Fehler"

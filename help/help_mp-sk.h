@@ -50,7 +50,8 @@ static char help_text[]=
 // ========================= MPlayer messages ===========================
 // mplayer.c:
 
-#define MSGTR_Exiting "\nKonèím... (%s)\n"
+#define MSGTR_Exiting "\nKonèím...\n"
+#define MSGTR_ExitingHow "\nKonèím... (%s)\n"
 #define MSGTR_Exit_quit "Koniec"
 #define MSGTR_Exit_eof "Koniec súboru"
 #define MSGTR_Exit_error "Záva¾ná chyba"

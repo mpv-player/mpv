@@ -273,9 +273,9 @@ static int parse_end_at(m_option_t *conf, const char* param);
 static void mencoder_exit(int level, char *how)
 {
     if (how)
-	printf("Exiting... (%s)\n", how);
+	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_ExitingHow, mp_gettext(how));
     else
-	printf("Exiting...\n");
+	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_Exiting);
 
     exit(level);
 }
@@ -287,7 +287,7 @@ void parse_cfgfiles( m_config_t* conf )
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_GetpathProblem);
   } else {
     if (m_config_parse_config_file(conf, conffile) < 0)
-      mencoder_exit(1,"configfile error");
+      mencoder_exit(1,MSGTR_ConfigfileError);
     free(conffile);
   }
 }
@@ -437,7 +437,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   stream2=open_stream(frameno_filename,0,&i);
   if(stream2){
     demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2,NULL);
-    if(demuxer2) printf(MSGTR_UsingPass3ControllFile,frameno_filename);
+    if(demuxer2) mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_UsingPass3ControllFile, frameno_filename);
     else mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
   }
 
@@ -445,12 +445,12 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
  m_config_register_options(mconfig,mencoder_opts);
  parse_cfgfiles(mconfig);
  filelist = m_config_parse_me_command_line(mconfig, argc, argv);
- if(!filelist) mencoder_exit(1, "error parsing cmdline");
+ if(!filelist) mencoder_exit(1, MSGTR_ErrorParsingCommandLine);
  m_entry_set_options(mconfig,&filelist[0]);
  filename = filelist[0].name;
 
   if(!filename){
-	printf(MSGTR_MissingFilename);
+	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_MissingFilename);
 	mencoder_exit(1,NULL);
   }
 
@@ -484,11 +484,11 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   stream=open_stream(filename,0,&file_format);
 
   if(!stream){
-	printf(MSGTR_CannotOpenFile_Device);
+	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CannotOpenFile_Device);
 	mencoder_exit(1,NULL);
   }
 
-  printf("success: format: %d  data: 0x%X - 0x%X\n",file_format, (int)(stream->start_pos),(int)(stream->end_pos));
+  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_OpenedStream, file_format, (int)(stream->start_pos), (int)(stream->end_pos));
 
 #ifdef USE_DVDREAD
 if(stream->type==STREAMTYPE_DVD){
@@ -507,7 +507,7 @@ if(stream->type==STREAMTYPE_DVD){
   demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id,filename);
   if(!demuxer){
         mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
-	printf(MSGTR_CannotOpenDemuxer);
+	mp_msg(MSGT_DEMUXER, MSGL_ERR, MSGTR_CannotOpenDemuxer); //correct target/level? FIXME?
 	mencoder_exit(1,NULL);
   }
 
@@ -519,12 +519,12 @@ sh_video=d_video->sh;
 
   if(!sh_video)
   {
-	mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Video stream is mandatory!\n"); 
+	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VideoStreamRequired); 
 	mencoder_exit(1,NULL);
   }
 
   if(!video_read_properties(sh_video)){
-      printf(MSGTR_CannotReadVideoProperties);
+      mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CannotReadVideoProperties);
       mencoder_exit(1,NULL);
   }
 
@@ -536,16 +536,16 @@ sh_video=d_video->sh;
   if(force_fps){
     sh_video->fps=force_fps;
     sh_video->frametime=1.0f/sh_video->fps;
-    mp_msg(MSGT_MENCODER,MSGL_INFO,"input fps will be interpreted as %5.2f instead\n", sh_video->fps);
+    mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_ForcingInputFPS, sh_video->fps);
   }
 
   if(sh_audio && out_file_format==MUXER_TYPE_RAWVIDEO){
-      mp_msg(MSGT_MENCODER,MSGL_ERR,"Output file format RAWVIDEO does not support audio - disabling audio\n");
+      mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_RawvideoDoesNotSupportAudio);
       sh_audio=NULL;
   }
   if(sh_audio && out_audio_codec<0){
     if(audio_id==-2)
-	mp_msg(MSGT_MENCODER,MSGL_ERR,"This demuxer doesn't support -nosound yet.\n");
+	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_DemuxerDoesntSupportNosound);
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_NoAudioEncoderSelected);
     mencoder_exit(1,NULL);
   }
@@ -626,7 +626,7 @@ spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
 // set up output file:
 muxer_f=fopen(out_filename,"wb");
 if(!muxer_f) {
-  printf(MSGTR_CannotOpenOutputFile, out_filename);
+  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CannotOpenOutputFile, out_filename);
   mencoder_exit(1,NULL);
 }
 
@@ -675,7 +675,7 @@ case VCODEC_COPY:
 	mux_v->bih->biBitCount=24; // FIXME!!!
 	mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
     }
-    printf("videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n",
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_VCodecFramecopy,
 	mux_v->bih->biWidth, mux_v->bih->biHeight,
 	mux_v->bih->biBitCount, mux_v->bih->biCompression);
     break;
@@ -733,7 +733,7 @@ if ((force_fourcc != NULL) && (strlen(force_fourcc) >= 4))
 {
     mux_v->bih->biCompression = mmioFOURCC(force_fourcc[0], force_fourcc[1],
 					    force_fourcc[2], force_fourcc[3]);
-    printf(MSGTR_ForcingOutputFourcc,
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_ForcingOutputFourcc,
 	mux_v->bih->biCompression, (char *)&mux_v->bih->biCompression);
 }
 
@@ -747,7 +747,7 @@ mux_a=muxer_new_stream(muxer,MUXER_TYPE_AUDIO);
 mux_a->buffer_size=0x100000; //16384;
 mux_a->buffer=malloc(mux_a->buffer_size);
 if (!mux_a->buffer)
-    mencoder_exit(1,"memory allocation failed");
+    mencoder_exit(1,MSGTR_MemAllocFailed);
 
 mux_a->source=sh_audio;
 
@@ -778,12 +778,12 @@ case ACODEC_COPY:
 	mux_a->h.dwScale=mux_a->h.dwSampleSize;
 	mux_a->h.dwRate=mux_a->wf->nAvgBytesPerSec;
     }
-    printf("audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d bps=%ld sample=%ld)\n",
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_ACodecFramecopy,
 	mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
 	mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
     break;
 case ACODEC_PCM:
-    printf("CBR PCM audio selected\n");
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CBRPCMAudioSelected);
     mux_a->h.dwScale=1;
     mux_a->h.dwRate=force_srate?force_srate:sh_audio->samplerate;
     mux_a->wf=malloc(sizeof(WAVEFORMATEX));
@@ -803,16 +803,16 @@ case ACODEC_PCM:
 	(mux_a->wf->wBitsPerSample==8)?	AFMT_U8:AFMT_S16_LE,
 	mux_a->wf->wBitsPerSample/8,
 	16384, mux_a->wf->nAvgBytesPerSec)){
-      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format!\n");
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
     }
     break;
 #ifdef HAVE_MP3LAME
 case ACODEC_VBRMP3:
-    printf("MP3 audio selected\n");
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_MP3AudioSelected);
     mux_a->h.dwSampleSize=0; // VBR
     mux_a->h.dwRate=force_srate?force_srate:sh_audio->samplerate;
     mux_a->h.dwScale=(mux_a->h.dwRate<32000)?576:1152; // samples/frame
-    if(sizeof(MPEGLAYER3WAVEFORMAT)!=30) mp_msg(MSGT_MENCODER,MSGL_WARN,"sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, maybe broken C compiler?\n",sizeof(MPEGLAYER3WAVEFORMAT));
+    if(sizeof(MPEGLAYER3WAVEFORMAT)!=30) mp_msg(MSGT_MENCODER,MSGL_WARN,MSGTR_MP3WaveFormatSizeNot30,sizeof(MPEGLAYER3WAVEFORMAT));
     mux_a->wf=malloc(sizeof(MPEGLAYER3WAVEFORMAT)); // should be 30
     mux_a->wf->wFormatTag=0x55; // MP3
     mux_a->wf->nChannels= (lame_param_mode<0) ? sh_audio->channels :
@@ -839,7 +839,7 @@ case ACODEC_VBRMP3:
 	AFMT_S16_LE, 2,
 #endif
 	4608, mux_a->h.dwRate*mux_a->wf->nChannels*2)){
-      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format!\n");
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
     }
     break;
 #endif
@@ -847,7 +847,7 @@ case ACODEC_VBRMP3:
 case ACODEC_LAVC:
     if(!lavc_param_acodec)
     {
-	mp_msg(MSGT_MENCODER, MSGL_FATAL, "Audio LAVC, Missing codec name!\n");
+	mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_NoLavcAudioCodecName);
 	exit(1);
     }
 
@@ -860,14 +860,14 @@ case ACODEC_LAVC:
     lavc_acodec = avcodec_find_encoder_by_name(lavc_param_acodec);
     if (!lavc_acodec)
     {
-	mp_msg(MSGT_MENCODER, MSGL_FATAL, "Audio LAVC, couldn't find encoder for codec %s\n", lavc_param_acodec);
+	mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LavcAudioCodecNotFound, lavc_param_acodec);
 	exit(1);
     }
 
     lavc_actx = avcodec_alloc_context();
     if(lavc_actx == NULL)
     {
-	mp_msg(MSGT_MENCODER, MSGL_FATAL, "Audio LAVC, couldn't allocate context!\n");
+	mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_CouldntAllocateLavcContext);
 	exit(1);
     }
 
@@ -896,7 +896,7 @@ case ACODEC_LAVC:
 
     if(avcodec_open(lavc_actx, lavc_acodec) < 0)
     {
-	mp_msg(MSGT_MENCODER, MSGL_FATAL, "Couldn't open codec %s, br=%d\n", lavc_param_acodec, lavc_param_abitrate);
+	mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_CouldntOpenCodec, lavc_param_acodec, lavc_param_abitrate);
 	exit(1);
     }
 
@@ -908,7 +908,7 @@ case ACODEC_LAVC:
     lavc_abuf = malloc(lavc_actx->frame_size * 2 * lavc_actx->channels);
     if(lavc_abuf == NULL)
     {
-	fprintf(stderr, "Couldn't allocate %d bytes\n", lavc_actx->frame_size * 2 * lavc_actx->channels);
+	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CannotAllocateBytes, lavc_actx->frame_size * 2 * lavc_actx->channels); // Converted from fprintf(stderr, ...);
 	exit(1);
     }
 
@@ -977,11 +977,11 @@ case ACODEC_LAVC:
 	AFMT_S16_NE, 2,
 	mux_a->h.dwSuggestedBufferSize,
 	mux_a->h.dwSuggestedBufferSize*2)) {
-	mp_msg(MSGT_CPLAYER, MSGL_ERR, "Couldn't find matching filter / ao format!\n");
+	mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_NoMatchingFilter);
 	exit(1);
     }
 
-    mp_msg(MSGT_MENCODER, MSGL_V, "FRAME_SIZE: %d, BUFFER_SIZE: %d, TAG: 0x%x\n", lavc_actx->frame_size, lavc_actx->frame_size * 2 * lavc_actx->channels, mux_a->wf->wFormatTag);
+    mp_msg(MSGT_MENCODER, MSGL_V, MSGTR_FramesizeBufsizeTag, lavc_actx->frame_size, lavc_actx->frame_size * 2 * lavc_actx->channels, mux_a->wf->wFormatTag);
 
     break;
 #endif
@@ -991,12 +991,12 @@ if (verbose>1) print_wave_header(mux_a->wf);
 
 if(audio_delay!=0.0){
     mux_a->h.dwStart=audio_delay*mux_a->h.dwRate/mux_a->h.dwScale;
-    printf("Setting AUDIO DELAY to %5.3f\n",mux_a->h.dwStart*mux_a->h.dwScale/(float)mux_a->h.dwRate);
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_SettingAudioDelay,mux_a->h.dwStart*mux_a->h.dwScale/(float)mux_a->h.dwRate);
 }
 
 } // if(sh_audio)
 
-printf(MSGTR_WritingAVIHeader);
+mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_WritingAVIHeader);
 if (muxer->cont_write_header) muxer_write_header(muxer);
 
 decoded_frameno=0;
@@ -1026,14 +1026,14 @@ if(lame_param_vbr){  // VBR:
 if(lame_param_mode>=0) lame_set_mode(lame,lame_param_mode); // j-st
 if(lame_param_ratio>0) lame_set_compression_ratio(lame,lame_param_ratio);
 if(lame_param_scale>0) {
-    printf("Setting audio input gain to %f\n", lame_param_scale);
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_SettingAudioInputGain, lame_param_scale);
     lame_set_scale(lame,lame_param_scale);
 }
 if(lame_param_lowpassfreq>=-1) lame_set_lowpassfreq(lame,lame_param_lowpassfreq);
 if(lame_param_highpassfreq>=-1) lame_set_highpassfreq(lame,lame_param_highpassfreq);
 #if HAVE_MP3LAME >= 392
 if(lame_param_preset != NULL){
-  printf ("\npreset=%s\n\n",lame_param_preset);
+  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LamePresetEquals,lame_param_preset);
   lame_presets_set(lame,lame_param_fast, (lame_param_vbr==0), lame_param_preset);
 }
 #endif
@@ -1073,18 +1073,18 @@ if (seek_to_sec) {
 if (out_file_format == MUXER_TYPE_MPEG)
 	{
 	if (audio_preload > 0.4) {
-	  fprintf(stderr,"Limiting audio preload to 0.4s\n");
+	  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LimitingAudioPreload);
 	  audio_preload = 0.4;
 	}
 	if (audio_density < 4) {
-	  fprintf(stderr,"Increasing audio density to 4\n");
+	  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_IncreasingAudioDensity);
 	  audio_density = 4;
 	}
 	}
 
 if(file_format == DEMUXER_TYPE_TV) 
 	{
-	fprintf(stderr,"Forcing audio preload to 0, max pts correction to 0\n");
+	mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection);
 	audio_preload = 0.0;
 	default_max_pts_correction = 0;
 	}
@@ -1326,7 +1326,7 @@ videorate+=(GetTimerMS() - ptimer_start);
 
 if(skip_flag<0){
     // duplicate frame
-	if(file_format != DEMUXER_TYPE_TV && !verbose) printf(MSGTR_DuplicateFrames,-skip_flag);
+	if(file_format != DEMUXER_TYPE_TV && !verbose) mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DuplicateFrames,-skip_flag);
     while(skip_flag<0){
 	duplicatedframes++;
 	if (!encode_duplicates || !sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
@@ -1336,7 +1336,7 @@ if(skip_flag<0){
 } else
 if(skip_flag>0){
     // skip frame
-	if(file_format != DEMUXER_TYPE_TV && !verbose) printf(MSGTR_SkipFrame);
+	if(file_format != DEMUXER_TYPE_TV && !verbose) mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_SkipFrame);
 	skippedframes++;
     --skip_flag;
 }
@@ -1487,15 +1487,15 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
     mux_a->h.dwRate=mux_a->wf->nAvgBytesPerSec;
     mux_a->h.dwScale=1;
     mux_a->wf->nBlockAlign=1;
-    printf("\n\nCBR audio: %ld bytes/sec, %d bytes/block\n",
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CBRAudioByterate,
 	    mux_a->h.dwRate,((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nBlockSize);
 }
 #endif
 
-printf(MSGTR_WritingAVIIndex);
+mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_WritingAVIIndex);
 if (muxer->cont_write_index) muxer_write_index(muxer);
 muxer_f_size=ftello(muxer_f);
-printf(MSGTR_FixupAVIHeader);
+mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_FixupAVIHeader);
 fseek(muxer_f,0,SEEK_SET);
 if (muxer->cont_write_header) muxer_write_header(muxer); // update header
 if(ferror(muxer_f) || fclose(muxer_f) != 0) {
@@ -1506,18 +1506,18 @@ if(vobsub_writer)
     vobsub_out_close(vobsub_writer);
 
 if(out_video_codec==VCODEC_FRAMENO && mux_v->timer>100){
-    printf(MSGTR_RecommendedVideoBitrate,"650MB",(int)((650*1024*1024-muxer_f_size)/mux_v->timer/125));
-    printf(MSGTR_RecommendedVideoBitrate,"700MB",(int)((700*1024*1024-muxer_f_size)/mux_v->timer/125));
-    printf(MSGTR_RecommendedVideoBitrate,"800MB",(int)((800*1024*1024-muxer_f_size)/mux_v->timer/125));
-    printf(MSGTR_RecommendedVideoBitrate,"2 x 650MB",(int)((2*650*1024*1024-muxer_f_size)/mux_v->timer/125));
-    printf(MSGTR_RecommendedVideoBitrate,"2 x 700MB",(int)((2*700*1024*1024-muxer_f_size)/mux_v->timer/125));
-    printf(MSGTR_RecommendedVideoBitrate,"2 x 800MB",(int)((2*800*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"650MB",(int)((650*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"700MB",(int)((700*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"800MB",(int)((800*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"2 x 650MB",(int)((2*650*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"2 x 700MB",(int)((2*700*1024*1024-muxer_f_size)/mux_v->timer/125));
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_RecommendedVideoBitrate,"2 x 800MB",(int)((2*800*1024*1024-muxer_f_size)/mux_v->timer/125));
 }
 
-printf(MSGTR_VideoStreamResult,
+mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_VideoStreamResult,
     (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), (int)mux_v->size, (float)mux_v->timer, decoded_frameno);
 if(sh_audio)
-printf(MSGTR_AudioStreamResult,
+mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_AudioStreamResult,
     (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), (int)mux_a->size, (float)mux_a->timer);
 
 if(sh_video){ uninit_video(sh_video);sh_video=NULL; }
@@ -1609,7 +1609,7 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
     int mono = 0;
 
     if (strcmp(preset_name, "help") == 0) {
-        fprintf(stdout, "LAME version %s (%s)\n\n", get_lame_version(), get_lame_url());
+        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LameVersion, get_lame_version(), get_lame_url());
         lame_presets_longinfo_dm( stdout );
         return -1;
     }
@@ -1710,42 +1710,17 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
 
         }
         else {
-            fprintf(stderr, "LAME version %s (%s)\n\n", get_lame_version(), get_lame_url());
-            fprintf(stderr,"Error: The bitrate specified is out of the valid range for this preset\n"
-                           "\n"
-                           "When using this mode you must enter a value between \"8\" and \"320\"\n"
-                           "\n"
-                           "For further information try: \"-lameopts preset=help\"\n"                  
-                   );
+            mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LameVersion, get_lame_version(), get_lame_url());
+            mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_InvalidBitrateForLamePreset);
             return -1;
         }
     }
 
 
 
-    fprintf(stderr, "LAME version %s (%s)\n\n", get_lame_version(), get_lame_url());
-    fprintf(stderr,"Error: You did not enter a valid profile and/or options with preset\n"
-                   "\n"
-                   "Available profiles are:\n"
-                   "\n"
-                   "   <fast>        standard\n"
-                   "   <fast>        extreme\n"
-                   "                 insane\n"
-                   "   <cbr> (ABR Mode) - The ABR Mode is implied. To use it,\n"
-                   "                      simply specify a bitrate. For example:\n"
-                   "                      \"preset=185\" activates this\n"
-                   "                      preset and uses 185 as an average kbps.\n" 
-                   "\n"
-                   "    Some examples:\n"
-                   "\n"
-   		   "    \"-lameopts fast:preset=standard  \"\n"
-   		   " or \"-lameopts  cbr:preset=192       \"\n"
-   		   " or \"-lameopts      preset=172       \"\n"
-   		   " or \"-lameopts      preset=extreme   \"\n"
-                   "\n"
-                   "For further information try: \"-lameopts preset=help\"\n"                  
-           );
-    mencoder_exit(1, "error parsing cmdline");
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LameVersion, get_lame_version(), get_lame_url());
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_InvalidLamePresetOptions);
+    mencoder_exit(1, MSGTR_ErrorParsingCommandLine);
 }
 #endif
 
@@ -1754,84 +1729,7 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
    taken out of presets_longinfo_dm in lame-3.93.1/frontend/parse.c and modified */
 static void  lame_presets_longinfo_dm ( FILE* msgfp )
 {
-        fprintf ( msgfp,
-        "\n" 
-        "The preset switches are designed to provide the highest possible quality.\n"
-        "\n"
-        "They have for the most part been subject to and tuned via rigorous double blind\n"
-        "listening tests to verify and achieve this objective.\n"
-        "\n"
-        "These are continually updated to coincide with the latest developments that\n"
-        "occur and as a result should provide you with nearly the best quality\n"
-        "currently possible from LAME.\n"
-        "\n"
-        "To activate these presets:\n"
-        "\n"
-        "   For VBR modes (generally highest quality):\n"
-        "\n"
-        "     \"preset=standard\" This preset should generally be transparent\n"
-        "                             to most people on most music and is already\n"
-        "                             quite high in quality.\n"
-        "\n"
-        "     \"preset=extreme\" If you have extremely good hearing and similar\n"
-        "                             equipment, this preset will generally provide\n"
-        "                             slightly higher quality than the \"standard\"\n"
-        "                             mode.\n"
-        "\n"
-        "   For CBR 320kbps (highest quality possible from the preset switches):\n"
-        "\n"
-        "     \"preset=insane\"  This preset will usually be overkill for most\n"
-        "                             people and most situations, but if you must\n"
-        "                             have the absolute highest quality with no\n"
-        "                             regard to filesize, this is the way to go.\n"
-        "\n"
-        "   For ABR modes (high quality per given bitrate but not as high as VBR):\n"
-        "\n"
-        "     \"preset=<kbps>\"  Using this preset will usually give you good\n"
-        "                             quality at a specified bitrate. Depending on the\n"
-        "                             bitrate entered, this preset will determine the\n"
-        "                             optimal settings for that particular situation.\n"
-        "                             While this approach works, it is not nearly as\n"
-        "                             flexible as VBR, and usually will not attain the\n"
-        "                             same level of quality as VBR at higher bitrates.\n"  
-        "\n"
-        "The following options are also available for the corresponding profiles:\n"
-        "\n"
-        "   <fast>        standard\n"
-        "   <fast>        extreme\n"
-        "                 insane\n"
-        "   <cbr> (ABR Mode) - The ABR Mode is implied. To use it,\n"
-        "                      simply specify a bitrate. For example:\n"
-        "                      \"preset=185\" activates this\n"
-        "                      preset and uses 185 as an average kbps.\n" 
-        "\n"
-        "   \"fast\" - Enables the new fast VBR for a particular profile. The\n"
-        "            disadvantage to the speed switch is that often times the\n"
-        "            bitrate will be slightly higher than with the normal mode\n"
-        "            and quality may be slightly lower also.\n"
-	"   Warning: with the current version fast presets might result in too\n"
-	"            high bitrate compared to regular presets.\n"
-        "\n"
-        "   \"cbr\"  - If you use the ABR mode (read above) with a significant\n"
-        "            bitrate such as 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"
-        "            you can use the \"cbr\" option to force CBR mode encoding\n"
-        "            instead of the standard abr mode. ABR does provide higher\n"
-        "            quality but CBR may be useful in situations such as when\n"
-        "            streaming an mp3 over the internet may be important.\n"
-        "\n"
-        "    For example:\n"
-        "\n"
-        "    \"-lameopts fast:preset=standard  \"\n"
-        " or \"-lameopts  cbr:preset=192       \"\n"
-        " or \"-lameopts      preset=172       \"\n"
-        " or \"-lameopts      preset=extreme   \"\n"
-        "\n"
-        "\n"
-        "A few aliases are available for ABR mode:\n"
-        "phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"
-        "mw-us => 40kbps/mono        voice => 56kbps/mono\n"
-        "fm/radio/tape => 112kbps    hifi => 160kbps\n"
-        "cd => 192kbps               studio => 256kbps");
+        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_LamePresetsLongInfo);
 	mencoder_exit(0, NULL);
 }
 #endif

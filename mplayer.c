@@ -478,7 +478,7 @@ static void exit_player_with_rc(char* how, int rc){
 
   current_module="exit_player";
 
-  if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Exiting,mp_gettext(how));
+  if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,mp_gettext(how));
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"max framesize was %d bytes\n",max_framesize);
 
   exit(rc);

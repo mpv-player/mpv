@@ -49,7 +49,8 @@ static char help_text[]=
 
 // mplayer.c:
 
-#define MSGTR_Exiting "\n正在退出... (%s)\n"
+#define MSGTR_Exiting "\n正在退出..\n"
+#define MSGTR_ExitingHow "\n正在退出... (%s)\n"
 #define MSGTR_Exit_quit "退出"
 #define MSGTR_Exit_eof "文件结束"
 #define MSGTR_Exit_error "致命错误"

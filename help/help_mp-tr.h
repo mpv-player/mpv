@@ -49,7 +49,8 @@ static char help_text[]=
 
 // mplayer.c:
 
-#define MSGTR_Exiting "\nÇýkýlýyor... (%s)\n"
+#define MSGTR_Exiting "\nÇýkýlýyor...\n"
+#define MSGTR_ExitingHow "\nÇýkýlýyor... (%s)\n"
 #define MSGTR_Exit_quit "Çýkýþ"
 #define MSGTR_Exit_eof "Dosyanýn Sonu"
 #define MSGTR_Exit_error "Ölümcül Hata"

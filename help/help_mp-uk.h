@@ -53,7 +53,8 @@ static char help_text[]=
 
 // mplayer.c: 
 
-#define MSGTR_Exiting "\nВиходимо... (%s)\n"
+#define MSGTR_Exiting "\nВиходимо...\n"
+#define MSGTR_ExitingHow "\nВиходимо... (%s)\n"
 #define MSGTR_Exit_quit "Вих╕д"
 #define MSGTR_Exit_eof "К╕нець файлу"
 #define MSGTR_Exit_error "Фатальна помилка"
