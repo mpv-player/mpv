@@ -20,131 +20,6 @@
  *      BGR_24_24_888
  *      BGR_32_24_888
  *
- * $Log$
- * Revision 1.47  2002/09/25 21:08:44  arpi
- * Attached patch improves the vertical retrace synchronisation (vsync)
- * of the mplayer DGA driver.
- * It implements a more general buffer scheme than double buffers that
- * allows for deeper buffer queues.
- *
- * by Fredrik Noring <noring@nocrew.org>
- *
- * Revision 1.46  2002/08/28 21:32:31  alex
- * finally removed query_vaa, bes_da and vo_tune_info - the obsoleted libvo api
- *
- * Revision 1.45  2002/05/27 17:14:13  alex
- * revised query_format. added support for native/conversion detection
- *
- * Revision 1.44  2002/02/17 08:24:43  nick
- * I don't like such reports: '-vo dga:vidix or -vo x11:vidix works fine for me'
- *
- * Revision 1.42  2002/02/12 23:19:37  michael
- * use mem2agpcpy() instead of fast_memcpy()
- *
- * Revision 1.41  2002/02/09 01:21:48  arpi
- * 10000hl to Holm... control MUST BE static...
- *
- * Revision 1.40  2002/02/09 00:47:26  arpi
- * query_ stuff replaced by new control() - patch by David Holm
- *
- * Revision 1.39  2002/01/31 11:45:25  alex
- * removed obsoleted Terminate_Display_Process
- *
- * Revision 1.38  2002/01/31 09:52:45  nick
- * new info for tuning
- *
- * Revision 1.35  2001/12/28 20:52:54  alex
- * use XF86VidMode later in init (at line 1031) only if we've got support (if have_vm==1)
- *
- * Revision 1.34  2001/12/04 17:24:25  alex
- * do not crash if can't get modelines (dga2.0)
- *
- * Revision 1.33  2001/11/06 11:21:08  nick
- * Move yuv2rgb to postprocess
- *
- *
- * Revision 1.31  2001/10/30 17:04:31  nick
- * Using new stuff of rgb15to16
- *
- * Revision 1.30  2001/08/13 11:08:18  atlka
- * changes according to -utf8 option, draw_osd() function added
- *
- * Revision 1.29  2001/07/16 18:41:52  jkeil
- * vo_dga doesn't compile on non-x86 architecture due to x86 asm usage.
- *
- * Revision 1.28  2001/07/03 23:45:49  arpi
- * extern vo_doublebuffering cleanup
- *
- * Revision 1.27  2001/06/22 19:51:25  atmosfear
- * Fixed pointer->integer cast warning.
- *
- * Revision 1.26  2001/06/18 16:38:06  acki2
- * - just modified an error message
- *
- * Revision 1.25  2001/06/17 22:21:47  acki2
- * - if DGA fails to report some valid modes, vo_dga now exits gracefully
- *   instead of crashing ... (100000x100000 bug ...)
- *
- * Revision 1.24  2001/06/17 20:59:39  acki2
- * - doublebuffering now can be switched on and off with the -(no)double switch.
- *   Default in libvo is disabled.
- *
- * Revision 1.23  2001/05/24 20:48:45  arpi_esp
- * removed redundant osd.h includes
- *
- * Revision 1.22  2001/05/07 19:16:04  acki2
- * - now chooses mode with highest ymax (enables doublebuffering in some cases
- *   it didn't work before)
- * - use my own memcopy() on non MMX machines again
- * - do memcpy() in one single block if stride==0
- *
- * Revision 1.21  2001/05/03 22:39:38  acki2
- * - finally: 15to16 conversion included!!!
- *
- * Revision 1.20  2001/05/02 23:21:27  acki2
- * - now we use fastmemcpy() for copying. Saves about 25% of copying time on K6-2+
- *
- * Revision 1.19  2001/05/01 22:37:37  acki2
- * - now features 24->32 conversion (this is actually faster than letting the
- *   codec produce depth 32 in the first place for avis :-))) )
- *
- * Revision 1.18  2001/05/01 20:24:31  acki2
- * - now mpeg is fast again (no more offscreen buffer rubbish) But is it really ok?
- *
- * Revision 1.17  2001/04/24 11:42:04  pontscho
- * clean up
- *
- * Revision 1.16  2001/04/24 10:21:12  szabii
- * some warnings killed
- *
- * Revision 1.15  2001/04/19 21:39:10  arpi_esp
- * driver info now depends on detected DGA version
- *
- * Revision 1.14  2001/04/17 22:28:09  acki2
- * - now also supports OSD for YV12 (big speed penalty by having to build image
- *   in offscreen memory and then copying;
- * - OSD still works just with doublebuffering enabled :-(
- *
- * Revision 1.13  2001/04/17 20:51:58  acki2
- * - query_format() now uses new return value concept
- * - now support for OSD :-))) for RGB modes
- *   YV12 is flickering in quite an ugly fashion; have to fix this, but
- *   will cost an extra copying of image data ... :-(((
- *
- * Revision 1.12  2001/04/13 22:11:08  acki2
- * - fixed bug with depth and mpg when current bpp of XServer was != 32
- * - when -bpp is selected, I accept only query_modes() for THIS particular depth
- *   (if it's supported by hardware)
- *
- * Revision 1.10  2001/04/01 22:01:28  acki2
- * - still more debug output to be able to fix 15/16 bpp problem
- *
- * Revision 1.9  2001/04/01 08:07:14  acki2
- * - added detection of memsize of graphics card to check if double buffering is possible
- * - fixed resolution switching a little and added more debug output
- * - resolution switching is still according to d_width and d_height which
- *   is not always a good idea ...
- *
  * 
  * 30/02/2001
  *
@@ -175,7 +50,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
 #include <errno.h>
 
@@ -206,7 +80,11 @@ static vo_info_t vo_info =
 #ifdef HAVE_DGA2
         "DGA ( Direct Graphic Access V2.0 )",
 #else
-        "DGA ( Direct Graphic Access V1.0+XF86VidModeExtension )",
+#ifdef HAVE_XF86VM
+        "DGA ( Direct Graphic Access V1.0+XF86VidModeExt. )",
+#else
+        "DGA ( Direct Graphic Access V1.0 )",
+#endif
 #endif
         "dga",
         "Andreas Ackermann <acki@acki-netz.de>",
@@ -260,7 +138,7 @@ static struct vd_modes vo_dga_modes[] = {
 static int vo_dga_mode_num = sizeof(vo_dga_modes)/sizeof(struct vd_modes);
 
 // enable a HW mode (by description)
-int vd_EnableMode( int depth, int bitspp, 
+static int vd_EnableMode( int depth, int bitspp, 
                     int rmask, int gmask, int bmask){
   int i;
   for(i=1; i<vo_dga_mode_num; i++){
@@ -278,7 +156,7 @@ int vd_EnableMode( int depth, int bitspp,
   return 0;
 }
 
-int vd_ModeEqual(int depth, int bitspp, 
+static int vd_ModeEqual(int depth, int bitspp, 
 		 int rmask, int gmask, int bmask, int index){
   return (
      (vo_dga_modes[index].vdm_depth == depth &&
@@ -291,7 +169,7 @@ int vd_ModeEqual(int depth, int bitspp,
 
 
 // enable a HW mode (mplayer_depth decides which)
-int vd_ValidateMode( int mplayer_depth){
+static int vd_ValidateMode( int mplayer_depth){
   int i;
   if(mplayer_depth == 0)return 0;
   for(i=1; i<vo_dga_mode_num; i++){
@@ -306,7 +184,7 @@ int vd_ValidateMode( int mplayer_depth){
 }
 
 // do we support this mode? (not important whether native or conversion)
-int vd_ModeValid( int mplayer_depth){
+static int vd_ModeValid( int mplayer_depth){
   int i;
   if(mplayer_depth == 0)return 0;
   for(i=1; i<vo_dga_mode_num; i++){
@@ -318,7 +196,7 @@ int vd_ModeValid( int mplayer_depth){
   return 0;
 }
 
-int vd_ModeSupportedMethod( int mplayer_depth){
+static int vd_ModeSupportedMethod( int mplayer_depth){
   int i;
   if(mplayer_depth == 0)return 0;
   for(i=1; i<vo_dga_mode_num; i++){
@@ -330,7 +208,7 @@ int vd_ModeSupportedMethod( int mplayer_depth){
   return 0;
 }
 
-char *vd_GetModeString(int index){
+static char *vd_GetModeString(int index){
 
 #define VO_DGA_MAX_STRING_LEN 100
   static char stringbuf[VO_DGA_MAX_STRING_LEN]; 
@@ -410,27 +288,6 @@ static unsigned int scale_srcW = 0,
                     scale_srcH = 0,
                     scale_dstH = 0;
 
-
-//---------------------------------------------------------
-
-#define VD_INFO  0
-#define VD_ERR   0
-#define VD_DBG   2
-#define VD_RES   1
-
-void vd_printf( int level, const char *str, ...){
-  va_list ap;
-
-#ifndef VO_DGA_DBG
-  // show resolution and DBG-messages only in verbose mode ...
-  if( !verbose && level)return;         
-#endif
-  
-  va_start(ap, str);
-  vprintf(mp_gettext(str), ap);
-  va_end(ap);
-}
-
 //---------------------------------------------------------
 
 static void draw_alpha( int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride ){
@@ -468,7 +325,7 @@ static void draw_alpha( int x0,int y0, int w,int h, unsigned char* src, unsigned
 
 // quick & dirty - for debugging only 
 
-void fillblock(char *strt, int yoff, int lines, int val){
+static void fillblock(char *strt, int yoff, int lines, int val){
   char *i;
   for(i = strt + yoff * vo_dga_width *HW_MODE.vdm_bytespp; 
       i< strt + (lines+yoff) * vo_dga_width *HW_MODE.vdm_bytespp;  ){
@@ -631,22 +488,22 @@ static uint32_t query_format( uint32_t format )
  if(dga_depths_init == 0){
 
    if((qdisp = XOpenDisplay(0))==NULL){
-     vd_printf(VD_ERR, "vo_dga: Can't open display!\n");
+     mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: Can't open display!\n");
      return 0;
    }
    if( !vo_init() ){
-    vd_printf(VD_ERR, "vo_dga: vo_init() failed!\n");
+    mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: vo_init() failed!\n");
     return 0; 
    }
    vo_dga_XServer_mode = vd_ValidateMode(vo_depthonscreen);
  
    if(vo_dga_XServer_mode ==0){
 #ifndef HAVE_DGA2
-     vd_printf(VD_ERR, "vo_dga: Your X-Server is not running in a ");
-     vd_printf(VD_ERR, "resolution supported by DGA driver!\n");
+     mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: Your X-Server is not running in a ");
+     mp_msg(MSGT_VO, MSGL_ERR, "resolution supported by DGA driver!\n");
 #endif     
    }//else{
-   //  vd_printf(VD_INFO, "vo_dga: X running at: %s\n", 
+   //  mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: X running at: %s\n", 
    //            vd_GetModeString(vo_dga_XServer_mode));
    //}                                
  
@@ -654,7 +511,7 @@ static uint32_t query_format( uint32_t format )
    modelines=XDGAQueryModes(qdisp, XDefaultScreen(qdisp),&modecount);
    if(modelines){
      for(i=0; i< modecount; i++){
-        vd_printf(VD_DBG, "vo_dga: (%03d) depth=%d, bpp=%d, r=%08x, g=%08x, b=%08x, %d x %d\n",
+        mp_msg(MSGT_VO, MSGL_V, "vo_dga: (%03d) depth=%d, bpp=%d, r=%08x, g=%08x, b=%08x, %d x %d\n",
 	  	i,
 		modelines[i].depth,
 		modelines[i].bitsPerPixel,
@@ -686,12 +543,12 @@ static uint32_t query_format( uint32_t format )
   }
 
    for(i=1; i<vo_dga_mode_num; i++){
-     vd_printf(VD_INFO, "vo_dga: Mode: %s", vd_GetModeString(i));
+     mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: Mode: %s", vd_GetModeString(i));
      if(vo_dbpp && vo_dbpp != vo_dga_modes[i].vdm_mplayer_depth){
        vo_dga_modes[i].vdm_supported = 0;
-       vd_printf(VD_INFO, " ...disabled by -bpp %d", vo_dbpp );
+       mp_msg(MSGT_VO, MSGL_INFO, " ...disabled by -bpp %d", vo_dbpp );
      }
-     vd_printf(VD_INFO, "\n");
+     mp_msg(MSGT_VO, MSGL_INFO, "\n");
    }
  }
 
@@ -721,7 +578,7 @@ uninit(void)
 
   if(vo_dga_is_running){	
     vo_dga_is_running = 0;
-    vd_printf( VD_DBG, "vo_dga: in uninit\n");
+    mp_msg(MSGT_VO,  MSGL_V, "vo_dga: in uninit\n");
     XUngrabPointer (vo_dga_dpy, CurrentTime);
     XUngrabKeyboard (vo_dga_dpy, CurrentTime);
 #ifdef HAVE_DGA2
@@ -736,7 +593,7 @@ uninit(void)
 #ifdef HAVE_XF86VM
     if (vo_dga_vidmodes != NULL ){
       int screen; screen=XDefaultScreen( vo_dga_dpy );
-      vd_printf(VD_DBG, "vo_dga: VidModeExt: Switching back..\n");
+      mp_msg(MSGT_VO, MSGL_V, "vo_dga: VidModeExt: Switching back..\n");
       // seems some graphics adaptors need this more than once ...
       XF86VidModeSwitchToMode(vo_dga_dpy,screen,vo_dga_vidmodes[0]);
       XF86VidModeSwitchToMode(vo_dga_dpy,screen,vo_dga_vidmodes[0]);
@@ -755,13 +612,13 @@ uninit(void)
 // TODO: check for larger maxy value 
 // (useful for double buffering!!!)
 
-int check_res( int num, int x, int y, int bpp,  
+static int check_res( int num, int x, int y, int bpp,  
 	       int new_x, int new_y, int new_vbi, int new_maxy,
                 int *old_x, int *old_y, int *old_vbi, int *old_maxy){
 
-  vd_printf(VD_RES, "vo_dga: (%3d) Trying %4d x %4d @ %3d Hz @ depth %2d ..",
+  mp_msg(MSGT_VO, MSGL_V, "vo_dga: (%3d) Trying %4d x %4d @ %3d Hz @ depth %2d ..",
           num, new_x, new_y, new_vbi, bpp );
-  vd_printf(VD_RES, "(old: %dx%d@%d).", *old_x, *old_y, *old_vbi);	
+  mp_msg(MSGT_VO, MSGL_V, "(old: %dx%d@%d).", *old_x, *old_y, *old_vbi);	
   if (
       (new_x >= x) && 
       (new_y >= y) &&
@@ -817,10 +674,10 @@ int check_res( int num, int x, int y, int bpp,
       *old_y = new_y;
       *old_maxy = new_maxy;
       *old_vbi = new_vbi;
-      vd_printf(VD_RES, ".ok!!\n");
+      mp_msg(MSGT_VO, MSGL_V, ".ok!!\n");
       return 1;
     }else{
-      vd_printf(VD_RES, ".no\n");
+      mp_msg(MSGT_VO, MSGL_V, ".no\n");
       return 0;
     }
 }
@@ -894,7 +751,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
   if(!wanted_width)  wanted_width = width;
 
   if( !vo_init() ){
-    vd_printf(VD_ERR, "vo_dga: vo_init() failed!\n");
+    mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: vo_init() failed!\n");
     return 1; 
   }
 
@@ -911,7 +768,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
   vo_dga_hw_mode = SRC_MODE.vdm_hw_mode;
 
   if( format == IMGFMT_YV12 && vo_dga_src_mode != vo_dga_hw_mode ){
-    vd_printf(VD_ERR, 
+    mp_msg(MSGT_VO, MSGL_ERR, 
     "vo_dga: YV12 supports native modes only. Using %d instead of selected %d.\n",
        HW_MODE.vdm_mplayer_depth,
        SRC_MODE.vdm_mplayer_depth );
@@ -919,19 +776,19 @@ static uint32_t config( uint32_t width,  uint32_t height,
   }
 
   if(!vo_dga_src_mode){ 
-    vd_printf(VD_ERR, "vo_dga: unsupported video format!\n");
+    mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: unsupported video format!\n");
     return 1;
   }
   
   if((vo_dga_dpy = XOpenDisplay(0))==NULL){
-    vd_printf (VD_ERR, "vo_dga: Can't open display\n");
+    mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: Can't open display\n");
     return 1;
   } 
 
   vo_dga_vp_width = DisplayWidth( vo_dga_dpy, DefaultScreen(vo_dga_dpy));
   vo_dga_vp_height = DisplayHeight( vo_dga_dpy, DefaultScreen(vo_dga_dpy));
 
-  vd_printf(VD_DBG, "vo_dga: XServer res: %dx%d\n", 
+  mp_msg(MSGT_VO, MSGL_V, "vo_dga: XServer res: %dx%d\n", 
                      vo_dga_vp_width, vo_dga_vp_height);
 
 // choose a suitable mode ...
@@ -942,16 +799,16 @@ static uint32_t config( uint32_t width,  uint32_t height,
   if (modelines==NULL)
     modelines=XDGAQueryModes(vo_dga_dpy, XDefaultScreen(vo_dga_dpy),&modecount);
 
-  vd_printf(VD_DBG,
+  mp_msg(MSGT_VO, MSGL_V,
 	    "vo_dga: modelines=%p, modecount=%d\n", modelines, modecount);
 
   if (modelines == NULL)
   {
-    vd_printf(VD_ERR, "vo_dga: can't get modelines\n");
+    mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: can't get modelines\n");
     return 1;
   }
   
-  vd_printf(VD_INFO, 
+  mp_msg(MSGT_VO, MSGL_INFO, 
             "vo_dga: DGA 2.0 available :-) Can switch resolution AND depth!\n");	
   for (i=0; i<modecount; i++)
   {
@@ -962,7 +819,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
 	             modelines[i].blueMask,
                      vo_dga_hw_mode)){
 
-       vd_printf(VD_DBG, "maxy: %4d, depth: %2d, %4dx%4d, ", 
+       mp_msg(MSGT_VO, MSGL_V, "maxy: %4d, depth: %2d, %4dx%4d, ", 
                        modelines[i].maxViewportY, modelines[i].depth,
 		       modelines[i].imageWidth, modelines[i].imageHeight );
        if ( check_res(i, wanted_width, wanted_height, modelines[i].depth,  
@@ -973,12 +830,12 @@ static uint32_t config( uint32_t width,  uint32_t height,
                    &mX, &mY, &mVBI, &mMaxY )) j = i;
      }
   }
-  vd_printf(VD_INFO, 
+  mp_msg(MSGT_VO, MSGL_INFO, 
      "vo_dga: Selected hardware mode %4d x %4d @ %3d Hz @ depth %2d, bitspp %2d.\n", 
      mX, mY, mVBI,
      HW_MODE.vdm_depth,
      HW_MODE.vdm_bitspp);  
-  vd_printf(VD_INFO, 
+  mp_msg(MSGT_VO, MSGL_INFO, 
      "vo_dga: Video parameters by codec: %3d x %3d, depth %2d, bitspp %2d.\n", 
      width, height,
      SRC_MODE.vdm_depth,
@@ -999,7 +856,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
       aspect(&scale_dstW,&scale_dstH,A_ZOOM);
     else if(flags&0x04) /* -fs */
       aspect(&scale_dstW,&scale_dstH,A_NOZOOM);
-    vd_printf(VD_INFO,
+    mp_msg(MSGT_VO, MSGL_INFO,
        "vo_dga: Aspect corrected size for SwScaler: %4d x %4d.\n",
        scale_dstW, scale_dstH);
     /* XXX this is a hack, but I'm lazy ;-) :: atmos */
@@ -1019,15 +876,15 @@ static uint32_t config( uint32_t width,  uint32_t height,
 
 #ifdef HAVE_XF86VM
 
-  vd_printf( VD_INFO, 
+  mp_msg(MSGT_VO,  MSGL_INFO, 
      "vo_dga: DGA 1.0 compatibility code: Using XF86VidMode for mode switching!\n");
 
   if (XF86VidModeQueryExtension(vo_dga_dpy, &vm_event, &vm_error)) {
     XF86VidModeQueryVersion(vo_dga_dpy, &vm_ver, &vm_rev);
-    vd_printf(VD_INFO, "vo_dga: XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
+    mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
     have_vm=1;
   } else {
-    vd_printf(VD_ERR, "vo_dga: XF86VidMode Extension not available.\n");
+    mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: XF86VidMode Extension not available.\n");
   }
 
 #define GET_VREFRESH(dotclk, x, y)( (((dotclk)/(x))*1000)/(y) )
@@ -1050,14 +907,14 @@ static uint32_t config( uint32_t width,  uint32_t height,
 			&mX, &mY, &mVBI, &mMaxY )) j = i;
       }
     
-      vd_printf(VD_INFO, 
+      mp_msg(MSGT_VO, MSGL_INFO, 
  "vo_dga: Selected video mode %4d x %4d @ %3d Hz @ depth %2d, bitspp %2d, video %3d x %3d.\n", 
 	mX, mY, mVBI, 
 	vo_dga_modes[vo_dga_hw_mode].vdm_depth,
 	vo_dga_modes[vo_dga_hw_mode].vdm_bitspp,
         width, height);  
     }else{
-      vd_printf(VD_INFO, "vo_dga: XF86VidMode returned no screens - using current resolution.\n");
+      mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: XF86VidMode returned no screens - using current resolution.\n");
     }
     dga_modenum = j;
     vo_dga_vp_width = mX;
@@ -1066,8 +923,8 @@ static uint32_t config( uint32_t width,  uint32_t height,
 
 
 #else
-  vd_printf( VD_INFO, "vo_dga: Only have DGA 1.0 extension and no XF86VidMode :-(\n");
-  vd_printf( VD_INFO, "        Thus, resolution switching is NOT possible.\n");
+  mp_msg(MSGT_VO,  MSGL_INFO, "vo_dga: Only have DGA 1.0 extension and no XF86VidMode :-(\n");
+  mp_msg(MSGT_VO,  MSGL_INFO, "        Thus, resolution switching is NOT possible.\n");
 
 #endif
 #endif
@@ -1078,7 +935,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
   if(vo_dga_src_width > vo_dga_vp_width ||
      vo_dga_src_height > vo_dga_vp_height)
   {
-     vd_printf( VD_ERR, "vo_dga: Sorry, video larger than viewport is not yet supported!\n");
+     mp_msg(MSGT_VO,  MSGL_ERR, "vo_dga: Sorry, video larger than viewport is not yet supported!\n");
      // ugly, do something nicer in the future ...
 #ifndef HAVE_DGA2
 #ifdef HAVE_XF86VM
@@ -1092,9 +949,9 @@ static uint32_t config( uint32_t width,  uint32_t height,
   }
 
   if(vo_dga_vp_width == VO_DGA_INVALID_RES){
-    vd_printf( VD_ERR, "vo_dga: Something is wrong with your DGA. There doesn't seem to be a\n"
+    mp_msg(MSGT_VO,  MSGL_ERR, "vo_dga: Something is wrong with your DGA. There doesn't seem to be a\n"
 		       "         single suitable mode!\n"
-		       "         Please file a bug report (see DOCS/DGA)\n");
+		       "         Please file a bug report (see DOCS/bugreports.html)\n");
 #ifndef HAVE_DGA2
 #ifdef HAVE_XF86VM
     if(vo_dga_vidmodes){
@@ -1111,7 +968,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
 #ifdef HAVE_DGA2
     
   if (!XDGAOpenFramebuffer(vo_dga_dpy, XDefaultScreen(vo_dga_dpy))){
-    vd_printf(VD_ERR, "vo_dga: Framebuffer mapping failed!!!\n");
+    mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: Framebuffer mapping failed!!!\n");
     XCloseDisplay(vo_dga_dpy);
     return 1;
   }
@@ -1155,11 +1012,11 @@ static uint32_t config( uint32_t width,  uint32_t height,
 
   if( format==IMGFMT_YV12 ){ 
     yuv2rgb_init( vo_dga_modes[vo_dga_hw_mode].vdm_mplayer_depth , MODE_RGB );
-    vd_printf( VD_DBG, "vo_dga: Using mplayer depth %d for YV12\n", 
+    mp_msg(MSGT_VO,  MSGL_V, "vo_dga: Using mplayer depth %d for YV12\n", 
                vo_dga_modes[vo_dga_hw_mode].vdm_mplayer_depth);
   }
 
-  vd_printf(VD_DBG, "vo_dga: bytes/line: %d, screen res: %dx%d, depth: %d, base: %08x, bpp: %d\n", 
+  mp_msg(MSGT_VO, MSGL_V, "vo_dga: bytes/line: %d, screen res: %dx%d, depth: %d, base: %08x, bpp: %d\n", 
           vo_dga_width, vo_dga_vp_width, 
           vo_dga_vp_height, HW_MODE.vdm_bytespp, vo_dga_base,
           HW_MODE.vdm_bitspp);
@@ -1175,7 +1032,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
 
   vo_dga_vp_skip = (vo_dga_width - vo_dga_src_width) * HW_MODE.vdm_bytespp;  // todo
     
-  vd_printf(VD_DBG, "vo_dga: vp_off=%d, vp_skip=%d, bpl=%d\n", 
+  mp_msg(MSGT_VO, MSGL_V, "vo_dga: vp_off=%d, vp_skip=%d, bpl=%d\n", 
          vo_dga_vp_offset, vo_dga_vp_skip, vo_dga_bytes_per_line);
 
   
@@ -1187,7 +1044,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
 
   init_video_buffers(modeline, vo_dga_base, vo_doublebuffering);
 
-  vd_printf(VD_DBG, "vo_dga: Using %d frame buffer%s.\n",
+  mp_msg(MSGT_VO, MSGL_V, "vo_dga: Using %d frame buffer%s.\n",
 	    vo_dga_nr_video_buffers, vo_dga_nr_video_buffers == 1 ? "" : "s");
   
   vo_dga_is_running = 1;
@@ -1198,7 +1055,7 @@ static uint32_t preinit(const char *arg)
 {
     if(arg) 
     {
-	vd_printf(VD_INFO, "vo_dga: Unknown subdevice: %s\n",arg);
+	mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: Unknown subdevice: %s\n",arg);
 	return ENOSYS;
     }
     return 0;
@@ -1214,17 +1071,3 @@ static uint32_t control(uint32_t request, void *data, ...)
 }
 
 //---------------------------------------------------------
-
-// deleted the old vo_dga_query_event() routine 'cause it is obsolete  
-// since using check_events()
-// acki2 on 30/3/2001
-
-
-
-
-
-
-
-
-
-
