@@ -719,6 +719,7 @@ cvs -z3 -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac co faad2
 cd faad2/
 chmod +x bootstrap
 ./bootstrap
+./configure
 make
 make install
 </screen>
