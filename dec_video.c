@@ -174,10 +174,26 @@ void set_video_quality(sh_video_t *sh_video,int quality){
 
 int set_video_colors(sh_video_t *sh_video,char *item,int value){
 #ifdef USE_DIRECTSHOW
-    if(!strcmp(sh_video->codec->name,"divxds")){
+    if(sh_video->codec->driver==VFM_DSHOW){
 	DS_SetValue_DivX(item,value);
 	return 1;
     }
+#endif
+#ifdef NEW_DECORE
+#ifdef DECORE_VERSION
+#if DECORE_VERSION >= 20011010
+    if(sh_video->codec->driver==VFM_DIVX4){
+         int option;
+         if(!strcmp(item,"Brightness")) option=DEC_GAMMA_BRIGHTNESS;
+         else if(!strcmp(item, "Contrast")) option=DEC_GAMMA_CONTRAST;
+         else if(!strcmp(item,"Saturation")) option=DEC_GAMMA_SATURATION;
+         else return 0;
+         value = (value * 256) / 100 - 128;
+         decore(0x123, DEC_OPT_GAMMA, (void *)option, (void *) value);
+         return 1;
+    }
+#endif
+#endif
 #endif
     return 0;
 }
