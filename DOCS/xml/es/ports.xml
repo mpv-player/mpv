@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.25 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portaciones</title>
 
@@ -42,8 +42,9 @@ Dominik Mierzejewski ha creado y mantiene los paquetes oficiales RPM para Red Ha
 <para>
 Los paquetes RPM para Mandrake están disponibles en el
 <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
-SuSE incluye una versión mutilada de MPlayer en su distribución. Puede obtener RPMs que
-funcionan desde
+SuSE los usa para incluir una versión mutilada de MPlayer en su distribución.
+Esta versión será eliminada en sus próximas liberaciones. Puede obtener RPMs
+que funcionan desde
 <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
 </para>
 </sect2>

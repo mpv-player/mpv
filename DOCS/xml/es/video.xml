@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.38 -->
+<!-- synced with 1.41 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -156,7 +156,7 @@ screen #0
 <listitem><para>
   Y finalmente, compruebe si <application>MPlayer</application> fue
   compilado con soporte 'xv'.
-  Haga <filename>mplayer -vo help | grep "xv"</filename> y, si fue compilado
+  Haga <command>mplayer -vo help | grep "xv"</command>. Si fue compilado
   con soporte 'xv', aparecerá una línea similar a:
   <screen>
   xv    X11/Xv<!--
@@ -214,8 +214,9 @@ nVidia no es siempre una buena elección bajo Linux (de acuerdo con nVidia esto
 <link linkend="nvidia-opinions">no es verdad</link>)... El controlador de
 código abierto de XFree86 tiene soporte en la mayoría de los casos, pero para
 algunas tarjetas, tiene que usar un controlador de código-cerrado de nVidia,
-disponible en el sitio web de nVidia. Siempre necesitará ese controlador de
-todos modos si quiere también aceleración 3D.
+disponible en
+<ulink url="http://www.nvidia.com/object/linux.html">el sitio web de nVidia</ulink>.
+Siempre necesitará ese controlador de todos modos si quiere también aceleración 3D.
 </para>
 
 <para>
@@ -2178,17 +2179,17 @@ para instrucciones sobre salida-TV de Matrox G450/G550 , ¡vaya a la sección sigu
     <step><para>
       Entre en <filename class="directory">TVout</filename> y escriba
       <command>./compile.sh</command>. Instale
-      <filename class="directory">TVout/matroxset/matroxset</filename>
+      <filename>TVout/matroxset/matroxset</filename>
       en cualquier lugar de su <envar>PATH</envar>.
       </para></step>
     <step><para>
       Si no tiene <command>fbset</command> instalado, ponga
-      <filename class="directory">TVout/fbset/fbset</filename>
+      <filename>TVout/fbset/fbset</filename>
       en cualquier lugar de su <envar>PATH</envar>.
       </para></step>
     <step><para>
       Si no tiene <command>con2fb</command> instalado, ponga
-      <filename class="directory">TVout/con2fb/con2fb</filename>
+      <filename>TVout/con2fb/con2fb</filename>
       en cualquier lugar de su <envar>PATH</envar>.
       </para></step>
     <step><para>
