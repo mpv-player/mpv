@@ -142,6 +142,8 @@ VIDIX drivers:
 libao2 drivers:
     * ao_alsa5.c - None
     * ao_alsa9.c - Zsolt Barat
+    * ao_alsa1x.c - Zsolt Barat
+    * ao_alsa.c - Zsolt Barat
     * ao_arts.c - None
     * ao_dxr2.c - None
     * ao_esd.c - None
