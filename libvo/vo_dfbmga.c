@@ -105,6 +105,8 @@ static int use_crtc2 = 1;
 static int use_spic  = 1;
 
 static int osd_changed;
+static int osd_dirty;
+static int osd_current;
 
 /******************************
 *	    vo_directfb       *
@@ -436,6 +438,9 @@ config( uint32_t width, uint32_t height,
      if (use_spic)
           spic->SetOpacity( spic, 0xFF );
 
+     osd_dirty = 0;
+     osd_current = 1;
+
      return 0;
 }
 
@@ -497,8 +502,17 @@ draw_alpha( int x0, int y0,
      void *dst;
      int pitch;
 
-     if (use_spic && !osd_changed)
-          return;
+     if (use_spic) {
+          if (!osd_changed)
+               return;
+          osd_dirty |= osd_current;
+     } else if (use_crtc2) {
+          if (x0 < drect.x ||
+              y0 < drect.y ||
+              x0 + w > drect.x + drect.w ||
+              y0 + h > drect.y + drect.h)
+               osd_dirty |= osd_current;
+     }
 
      if (subframe->Lock( subframe, DSLF_WRITE, &dst, &pitch ) != DFB_OK)
           return;
@@ -608,7 +622,7 @@ draw_osd( void )
 
      osd_changed = vo_osd_changed( 0 );
 
-     if (osd_changed) {
+     if (osd_dirty & osd_current) {
           if (use_spic) {
                subframe->Clear( subframe, 0, 0, 0, 0 );
           } else if (use_crtc2) {
@@ -627,6 +641,7 @@ draw_osd( void )
                                         drect.x + drect.w, drect.y,
                                         drect.x, drect.h );
           }
+          osd_dirty &= ~osd_current;
      }
 
      if (use_crtc2) {
@@ -644,8 +659,10 @@ draw_osd( void )
 
      vo_draw_text( sub_width, sub_height, draw_alpha );
 
-     if (use_spic)
+     if (use_spic && osd_changed) {
           subframe->Flip( subframe, NULL, 0 );
+          osd_current ^= 3;
+     }
 }
 
 static void
@@ -657,6 +674,8 @@ flip_page( void )
      } else {
           /* Flip CRTC2 */
           c2frame->Flip( c2frame, NULL, vo_vsync ? DSFLIP_WAITFORSYNC : 0 );
+          if (!use_spic)
+               osd_current ^= 3;
      }
 
      current_buf = 0;
