@@ -272,7 +272,7 @@ float sub_fps=0;
 int   sub_auto = 1;
 /*DSP!!char *dsp=NULL;*/
 
-float rel_seek_secs=0;
+//float rel_seek_secs=0;
 //float initial_pts_delay=0;
 
 extern char *vo_subdevice;
@@ -446,6 +446,7 @@ int v_saturation=50;
 //float a_frame=0;    // Audio
 
 float rel_seek_secs=0;
+int abs_seek_pos=0;
 
 int i;
 int use_stdin=0; //int f; // filedes
@@ -1554,6 +1555,20 @@ if(auto_quality>0){
       mixer_usemaster=!mixer_usemaster;
       break;
 
+#if 0  // change to 1 for absolute seeking tests
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+	rel_seek_secs=0.99*(float)(c-'1')/7.0;
+	abs_seek_pos=3;
+	printf("ABS seek to %5.3f   \n",rel_seek_secs);
+	break;
+#else
     // Contrast:
     case '1':
     case '2':
@@ -1629,6 +1644,7 @@ if(auto_quality>0){
 #endif
 	}
 	break;
+#endif
 
     case 'd':
       frame_dropping=(frame_dropping+1)%3;
@@ -1650,9 +1666,9 @@ if(auto_quality>0){
      seek_to_sec = NULL;
   }
   
-if(rel_seek_secs){
+if(rel_seek_secs || abs_seek_pos){
   current_module="seek";
-  if(demux_seek(demuxer,rel_seek_secs,0)){
+  if(demux_seek(demuxer,rel_seek_secs,abs_seek_pos)){
       // success:
 
       if(sh_audio){
@@ -1692,6 +1708,7 @@ if(rel_seek_secs){
   
   }
   rel_seek_secs=0;
+  abs_seek_pos=0;
   current_module=NULL;
 }
 
