@@ -5835,7 +5835,7 @@ RANLIB = $_ranlib
 INSTALL = $_install
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
 EXTRA_INC = $_inc_extra $_inc_gtk
-OPTFLAGS = $CFLAGS \$(EXTRA_INC)
+OPTFLAGS = -I../libvo/ -I../../libvo $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
 
 $_live_libs_def
