@@ -374,6 +374,7 @@ typedef struct {
 } tsdemux_init_t;
 
 
+#ifdef USE_LIBA52
 //second stage: returns the count of A52 syncwords found
 static int a52_check(char *buf, int len)
 {
@@ -401,6 +402,7 @@ static int a52_check(char *buf, int len)
 	mp_msg(MSGT_DEMUXER, MSGL_V, "A52_CHECK(%d input bytes), found %d frame syncwords of %d bytes length\n", len, ok, frame_length);	
 	return ok;
 }
+#endif
 
 
 static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
@@ -432,6 +434,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 		pos = stream_tell(demuxer->stream);
 		if(ts_parse(demuxer, &es, tmp, 1))
 		{
+#ifdef USE_LIBA52
 			//Non PES-aligned A52 audio may escape detection if PMT is not present;
 			//in this case we try to find at least 3 A52 syncwords
 			if((es.type == PES_PRIVATE1) && (! audio_found))
@@ -449,6 +452,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 					}
 				}
 			}
+#endif
 			
 			is_audio = ((es.type == AUDIO_MP2) || (es.type == AUDIO_A52) || (es.type == AUDIO_LPCM_BE) || (es.type == AUDIO_AAC));
 			is_video = ((es.type == VIDEO_MPEG1) || (es.type == VIDEO_MPEG2) || (es.type == VIDEO_MPEG4));

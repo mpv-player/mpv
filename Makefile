@@ -33,7 +33,7 @@ OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 VO_LIBS = $(AA_LIB) $(X_LIB) $(SDL_LIB) $(GGI_LIB) $(MP1E_LIB) $(MLIB_LIB) $(SVGA_LIB) $(DIRECTFB_LIB) $(CACA_LIB)
 AO_LIBS = $(ARTS_LIB) $(ESD_LIB) $(JACK_LIB) $(NAS_LIB) $(SGIAUDIO_LIB)
 CODEC_LIBS = $(AV_LIB) $(FAME_LIB) $(MAD_LIB) $(VORBIS_LIB) $(THEORA_LIB) $(FAAD_LIB) $(LIBLZO_LIB) $(DECORE_LIB) $(XVID_LIB) $(DTS_LIB) $(PNG_LIB) $(Z_LIB) $(JPEG_LIB) $(ALSA_LIB) $(XMMS_LIB) $(X264_LIB)
-COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libswscale.a osdep/libosdep.a $(DVDREAD_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(MPLAYER_NETWORK_LIB) $(WIN32_LIB) $(GIF_LIB) $(MACOSX_FRAMEWORKS) $(SMBSUPPORT_LIB) $(FRIBIDI_LIB) $(FONTCONFIG_LIB) $(ENCA_LIB)
+COMMON_LIBS = libmpcodecs/libmpcodecs.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libswscale.a osdep/libosdep.a $(DVDREAD_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(MPLAYER_NETWORK_LIB) $(WIN32_LIB) $(GIF_LIB) $(MACOSX_FRAMEWORKS) $(SMBSUPPORT_LIB) $(FRIBIDI_LIB) $(FONTCONFIG_LIB) $(ENCA_LIB)
 
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(FREETYPE_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(SDL_INC) $(X11_INC) $(FRIBIDI_INC) $(DVB_INC) $(XVID_INC) $(FONTCONFIG_INC) $(CACA_INC) # -Wall
 ifeq ($(TOOLAME),yes)
@@ -41,7 +41,16 @@ CFLAGS += $(TOOLAME_EXTRAFLAGS)
 CODEC_LIBS += $(TOOLAME_LIB)
 endif
 
-PARTS = libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libavformat libao2 drivers osdep postproc input libvo libaf
+PARTS = libmpdemux libmpcodecs libavcodec libavformat libao2 drivers osdep postproc input libvo libaf
+ifeq ($(MP3LIB),yes)
+PARTS += mp3lib
+endif
+ifeq ($(LIBA52),yes)
+PARTS += liba52
+endif
+ifeq ($(LIBMPEG2),yes)
+PARTS += libmpeg2
+endif
 ifeq ($(INTERNAL_FAAD),yes)
 COMMON_LIBS += libfaad2/libfaad2.a 
 PARTS += libfaad2
@@ -74,8 +83,20 @@ ifeq ($(MENCODER),yes)
 ALL_PRG += $(PRG_MENCODER)
 endif
 
-COMMON_DEPS = $(W32_DEP) $(DS_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a osdep/libosdep.a postproc/libswscale.a input/libinput.a libvo/libvo.a libaf/libaf.a
+COMMON_DEPS = $(W32_DEP) $(DS_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a osdep/libosdep.a postproc/libswscale.a input/libinput.a libvo/libvo.a libaf/libaf.a
 
+ifeq ($(MP3LIB),yes)
+COMMON_DEPS += mp3lib/libMP3.a
+COMMON_LIBS += mp3lib/libMP3.a
+endif
+ifeq ($(LIBA52),yes)
+COMMON_DEPS += liba52/liba52.a
+COMMON_LIBS += liba52/liba52.a
+endif
+ifeq ($(LIBMPEG2),yes)
+COMMON_DEPS += libmpeg2/libmpeg2.a
+COMMON_LIBS += libmpeg2/libmpeg2.a
+endif
 ifeq ($(INTERNAL_FAAD),yes)
 COMMON_DEPS += libfaad2/libfaad2.a
 endif

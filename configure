@@ -4989,7 +4989,7 @@ if test "$_liba52" = yes ; then
   _def_liba52='#define USE_LIBA52 1'
   _codecmodules="liba52 $_codecmodules"
 else
-  _def_liba52'#undef USE_LIBA52'
+  _def_liba52='#undef USE_LIBA52'
   _nocodecmodules="liba52 $_nocodecmodules"
 fi
 echores "$_liba52"
@@ -5019,7 +5019,7 @@ if test "$_libmpeg2" = yes ; then
   _def_libmpeg2='#define USE_LIBMPEG2 1'
   _codecmodules="libmpeg2 $_codecmodules"
 else
-  _def_libmpeg2'#undef USE_LIBMPEG2'
+  _def_libmpeg2='#undef USE_LIBMPEG2'
   _nocodecmodules="libmpeg2 $_nocodecmodules"
 fi
 echores "$_libmpeg2"
@@ -6293,6 +6293,10 @@ I18NLIBS = $_i18n_libs
 MATROSKA = $_matroska_internal
 
 OPENDIVX = $_opendivx
+
+MP3LIB = $_mp3lib
+LIBA52 = $_liba52
+LIBMPEG2 = $_libmpeg2
 
 UNRARLIB = $_unrarlib
 HAVE_FFPOSTPROCESS = $_def_haveffpostprocess
