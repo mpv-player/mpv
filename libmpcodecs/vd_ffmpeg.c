@@ -194,8 +194,13 @@ static int init(sh_video_t *sh){
 #endif
 
 #ifdef HAVE_XVMC
+
+#ifdef CODEC_CAP_HWACCEL
+    if(lavc_codec->capabilities & CODEC_CAP_HWACCEL){
+#else
     if(lavc_codec->id == CODEC_ID_MPEG2VIDEO_XVMC){
-        printf("vd_ffmpeg: XVMC accelerated MPEG2\n");
+#endif
+        printf("vd_ffmpeg: XVMC accelerated codec\n");
         assert(ctx->do_dr1);//these are must to!
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
         avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
@@ -674,10 +679,15 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     if(len<=0) return NULL; // skipped frame
 
+#if LIBAVCODEC_BUILD < 4707
+
 #ifdef HAVE_XVMC
-// in fact if(!dr1) should be the only condition, but this way we hide an 
-//ffmpeg interlace (mpeg2) bug. use -noslices to avoid it.
-    if( !avctx->xvmc_acceleration )// && (!dr1) )
+    if( !avctx->xvmc_acceleration )
+#endif
+
+#else
+//ffmpeg interlace (mpeg2) bug have been fixed. no need of -noslices
+    if (!dr1)
 #endif
     avctx->draw_horiz_band=NULL;
     avctx->opaque=sh;
