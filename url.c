@@ -78,13 +78,23 @@ set_url(char* url) {
 		// check if it's not a trailing '/'
 		if( strlen(ptr2)>1 ) {
 			// copy the path/filename in the URL container
-			Curl->file = (char*)malloc(strlen(ptr2));
+			Curl->file = (char*)malloc(strlen(ptr2)+1);
 			if( Curl->file==NULL ) {
 				printf("Memory allocation failed!\n");
 				exit(1);
 			}
-			strcpy(Curl->file, ptr2+1);
+			Curl->file[0]='/';
+			strcpy(Curl->file+1, ptr2+1);
 		}
+	} 
+	// Check if a filenme was given or set else set it with '/'
+	if( Curl->file==NULL ) {
+		Curl->file = (char*)malloc(2);
+		if( Curl->file==NULL ) {
+			printf("Memory allocation failed!\n");
+			exit(1);
+		}
+		strcpy(Curl->file, "/");
 	}
 	
 	return Curl;
