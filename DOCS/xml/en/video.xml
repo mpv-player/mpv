@@ -2082,10 +2082,10 @@ the moment lavc is both faster and gives better image quality, it is suggested
 that you use that unless you have problems with it. See the man page for further
 info about <option>-vf lavc/fame</option>.
 Using lavc is highly recommended. Currently there is no way of setting the fps
-of the em8300 which means that it is fixed to 29.97fps. Because of this it is
+of the em8300 which means that it is fixed to 30000/1001 fps. Because of this it is
 highly recommended that you use <option>-vf lavc=<replaceable>quality</replaceable>:25</option>
-especially if you are using prebuffering. Then why 25 and not 29.97? Well, the
-thing is that when you use 29.97 the picture becomes a bit jumpy. The reason for
+especially if you are using prebuffering. Then why 25 and not 30000/1001? Well, the
+thing is that when you use 30000/1001 the picture becomes a bit jumpy. The reason for
 this is unknown to us. If you set it to somewhere between 25 and 27 the picture
 becomes stable. For now all we can do is accept this for a fact.
 </para></listitem>

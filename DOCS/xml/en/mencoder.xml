@@ -718,12 +718,12 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Interlacing and Telecine</title>
 
 <para>
-  Almost all movies are shot at 24 fps. Because NTSC is 29.97 fps, some
+  Almost all movies are shot at 24 fps. Because NTSC is 30000/1001 fps, some
   processing must be done to this 24 fps video to make it run at the correct
   NTSC framerate. The process is called 3:2 pulldown, commonly referred to
   as telecine (because pulldown is often applied during the telecine
   process), and, naively described, it works by slowing the film down to
-  23.976 fps, and repeating every fourth frame.
+  24000/1001 fps, and repeating every fourth frame.
 </para>
 
 <para>
@@ -746,7 +746,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   For movies shot at 24 fps, the video on the NTSC DVD is either telecined
-  29.97 fps, or else it is progressive 24 fps and intended to be telecined
+  30000/1001, or else it is progressive 24000/1001 fps and intended to be telecined
   on-the-fly by a DVD player. On the other hand, TV series are usually
   only interlaced, not telecined. This is not a hard rule: some TV series
   are interlaced (such as Buffy the Vampire Slayer) whereas some are a
@@ -810,7 +810,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   of Secrets (widescreen edition, of course), and you want to rip this DVD
   so that you can add it to your Home Theatre PC. This is a region 1 DVD,
   so it's NTSC. The example below will still apply to PAL, except you'll
-  omit <option>-ofps 23.976</option> (because the output framerate is the
+  omit <option>-ofps 24000/1001</option> (because the output framerate is the
   same as the input framerate), and of course the crop dimensions will be
   different.
 </para>
@@ -819,7 +819,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   After running <option>mplayer dvd://1</option>, we follow the process
   detailed in the section <link linkend="menc-feat-telecine">How to deal
   with telecine and interlacing in NTSC DVDs</link> and discover that it's
-  24 fps progressive video, which means that we needn't use an inverse
+  24000/1001 fps progressive video, which means that we needn't use an inverse
   telecine filter, such as <option>pullup</option> or
   <option>filmdint</option>.
 </para>
@@ -888,13 +888,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   We're now ready to do the two pass encode. Pass one:
 
-  <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
 -o Harry_Potter_2.avi</screen>
 
   And pass two is the same, except that we specify <option>vpass=2</option>:
 
-  <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
 -o Harry_Potter_2.avi</screen>
 </para>
@@ -943,8 +943,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <sect1 id="menc-feat-telecine">
 <title>How to deal with telecine and interlacing within NTSC DVDs</title>
 
-<formalpara>
+<sect2 id="menc-feat-telecine-intro">
 <title>Introduction</title>
+<formalpara>
+<title>What is telecine?</title>
 <para>
   I suggest you visit this page if you don't understand much of what
   is written in this document:
@@ -953,48 +955,80 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   description of what telecine is.
 </para></formalpara>
 
+<formalpara>
+<title>A note about the numbers.</title>
 <para>
-  For technical reasons pertaining to the limitations of early
-  television hardware, all video intended to be displayed on an NTSC
-  television set must be 59.94 fields per second. Made-for-TV movies
-  and shows are often filmed directly at 59.94 fields per second, but
-  the majority of cinema is filmed at 24 or 23.976 frames per
-  second. When cinematic movie DVDs are mastered, the video is then
-  converted for television using a process called telecine.
+  Many documents, including the guide linked above, refer to the fields
+  per second value of NTSC video as 59.94 and the corresponding frames
+  per second values as 29.97 (for telecined and interlaced) and 23.976
+  (for progressive). For simplicity, some documents even round these
+  numbers to 60, 30, and 24.
+</para></formalpara>
+
+<para>
+  Strictly speaking, all those numbers are approximations. Black and
+  white NTSC video was exactly 60 fields per second, but 60000/1001
+  was later chosen to accomodate color data while remaining compatible
+  with contemporary black and white televisions. Digital NTSC video
+  (such as on a DVD) is also 60000/1001 fields per second. From this,
+  interlaced and telecined video are derived to be 30000/1001 frames
+  per second; progressive video is 24000/1001 frames per second.
 </para>
 
 <para>
-  On a DVD, the video is never actually stored as 59.94 fields per
-  second. For video that was originally 59.94, each pair of fields is
-  combined to form a frame, resulting in 29.97 frames per
+  Older versions of the <application>MEncoder</application> documentation
+  and many archived mailing list posts refer to 59.94, 29.97, and 23.976.
+  All <application>MEncoder</application> documentation has been updated
+  to use the fractional values, and you should use them too.
+</para>
+
+<para>
+  <option>-ofps 23.976</option> is incorrect.
+  <option>-ofps 24000/1001</option> should be used instead.
+</para>
+
+<formalpara>
+<title>How telecine is used.</title>
+<para>
+  All video intended to be displayed on an NTSC
+  television set must be 60000/1001 fields per second. Made-for-TV movies
+  and shows are often filmed directly at 60000/1001 fields per second, but
+  the majority of cinema is filmed at 24 or 24000/1001 frames per
+  second. When cinematic movie DVDs are mastered, the video is then
+  converted for television using a process called telecine.
+</para></formalpara>
+
+<para>
+  On a DVD, the video is never actually stored as 60000/1001 fields per
+  second. For video that was originally 60000/1001, each pair of fields is
+  combined to form a frame, resulting in 30000/1001 frames per
   second. Hardware DVD players then read a flag embedded in the video
   stream to determine whether the odd- or even-numbered lines should
   form the first field.
 </para>
 
 <para>
-  Usually, 23.976 frames per second content stays as it is when
+  Usually, 24000/1001 frames per second content stays as it is when
   encoded for a DVD, and the DVD player must perform telecining
   on-the-fly. Sometimes, however, the video is telecined
   <emphasis>before</emphasis> being stored on the DVD; even though it
-  was originally 23.976 frames per second, it becomes 59.94 fields per
-  second, and is stored on the disk as 29.97 frames per second.
+  was originally 24000/1001 frames per second, it becomes 60000/1001 fields per
+  second. When it is stored on the DVD, pairs of fields are combined to form
+  30000/1001 frames per second.
 </para>
 
 <para>
-  When looking at individual frames formed from 59.94 fields per
+  When looking at individual frames formed from 60000/10001 fields per
   second video, telecined or otherwise, interlacing is clearly visible
   wherever there is any motion, because one field (say, the
-  even-numbered lines) represents a moment in time 1/59.94th of a
-  second later than the other. Playing interlaced video on a computer
+  even-numbered lines) represents a moment in time 1/(60000/1001)
+  seconds later than the other. Playing interlaced video on a computer
   looks ugly both because the monitor is higher resolution and because
   the video is shown frame-after-frame instead of field-after-field.
 </para>
 
-<para>
-Notes:
-</para>
 <itemizedlist>
+<title>Notes:</title>
 <listitem><para>
   This section only applies to NTSC DVDs, and not PAL.
   </para></listitem>
@@ -1011,6 +1045,7 @@ Notes:
   <link linkend="menc-feat-telecine-footnotes">[1]</link>
   </para></listitem>
 </itemizedlist>
+</sect2>
 
 <sect2 id="menc-feat-telecine-ident">
 <title>How to tell what type of video you have</title>
@@ -1018,7 +1053,7 @@ Notes:
 <sect3 id="menc-feat-telecine-ident-progressive">
 <title>Progressive</title>
 <para>
-  Progressive video was originally filmed at 23.976 fps, and stored
+  Progressive video was originally filmed at 24000/1001 fps, and stored
   on the DVD without alteration.
 </para>
 
@@ -1027,10 +1062,10 @@ Notes:
   <application>MPlayer</application> will print the following line as
   soon as the movie begins to play:
 
-  <screen> demux_mpg: 24fps progressive NTSC content detected, switching framerate.</screen>
+  <screen> demux_mpg: 24000/1001 fps progressive NTSC content detected, switching framerate.</screen>
 
   From this point forward, demux_mpg should never say it finds
-  &quot;30fps NTSC content.&quot;
+  &quot;30000/1001 fps NTSC content.&quot;
 </para>
 
 <para>
@@ -1063,7 +1098,7 @@ Notes:
 <sect3 id="menc-feat-telecine-ident-telecined">
 <title>Telecined</title>
 <para>
-  Telecined video was originally filmed at 23.976, but was telecined
+  Telecined video was originally filmed at 24000/1001, but was telecined
   <emphasis>before</emphasis> it was written to the DVD.
 </para>
 
@@ -1100,7 +1135,7 @@ Notes:
 
 <para>
   Sometimes telecined video on DVDs is referred to as
-  &quot;hard-telecine&quot;. Since hard-telecine is already 59.94 fields
+  &quot;hard-telecine&quot;. Since hard-telecine is already 60000/1001 fields
   per second, the DVD player plays the video without any manipulation.
 </para>
 </sect3>
@@ -1108,10 +1143,10 @@ Notes:
 <sect3 id="menc-feat-telecine-ident-interlaced">
 <title>Interlaced</title>
 <para>
-  Interlaced video was originally filmed at 59.94 fields per second,
-  and stored on the DVD as 29.97 frames per second. The interlacing effect
+  Interlaced video was originally filmed at 60000/1001 fields per second,
+  and stored on the DVD as 30000/1001 frames per second. The interlacing effect
   (often called &quot;combing&quot;) is a result of combining pairs of
-  fields into frames. Each field is supposed to be 1/59.94 seconds apart,
+  fields into frames. Each field is supposed to be 1/(60000/1001) seconds apart,
   and when they are displayed simultaneously the difference is apparent.
 </para>
 
@@ -1130,18 +1165,18 @@ Notes:
 <title>Mixed progressive and telecine</title>
 <para>
   All of a &quot;mixed progressive and telecine&quot; video was originally
-  23.976 frames per second, but some parts of it ended up being telecined.
+  24000/1001 frames per second, but some parts of it ended up being telecined.
 </para>
 
 <para>
   When <application>MPlayer</application> plays this category, it will
-  (often repeatedly) switch back and forth between &quot;30fps NTSC&quot;
-  and &quot;24fps progressive NTSC&quot;. Watch the bottom of
+  (often repeatedly) switch back and forth between &quot;30000/1001 fps NTSC&quot;
+  and &quot;24000/1001 fps progressive NTSC&quot;. Watch the bottom of
   <application>MPlayer</application>'s output to see these messages.
 </para>
 
 <para>
-  You should check the &quot;30fps NTSC&quot; sections to make sure
+  You should check the &quot;30000/1001 fps NTSC&quot; sections to make sure
   they are actually telecine, and not just interlaced.
 </para>
 </sect3>
@@ -1155,7 +1190,7 @@ Notes:
 
 <para>
   This category looks just like &quot;mixed progressive and telecine&quot;,
-  until you examine the 30fps sections and see that they don't have the
+  until you examine the 30000/1001 fps sections and see that they don't have the
   telecine pattern.
 </para>
 </sect3>
@@ -1175,12 +1210,12 @@ Notes:
 <para>
   Progressive video requires no special filtering to encode. The only
   parameter you need to be sure to use is
-  <option>-ofps 23.976</option>. Otherwise, <application>MEncoder</application>
-  will try to encode at 29.97 fps and duplicate frames.
+  <option>-ofps 24000/1001</option>. Otherwise, <application>MEncoder</application>
+  will try to encode at 30000/1001 fps and will duplicate frames.
 </para>
 
 <para>
-  <screen>mencoder dvd://1 -nosound -ovc lavc -ofps 23.976</screen>
+  <screen>mencoder dvd://1 -nosound -ovc lavc -ofps 24000/1001</screen>
 </para>
 
 <para>
@@ -1196,7 +1231,7 @@ Notes:
 <sect3 id="menc-feat-telecine-encode-telecined">
 <title>Telecined</title>
 <para>
-  Telecine can be reversed to retrieve the original 23.976 content,
+  Telecine can be reversed to retrieve the original 24000/1001 content,
   using a process called inverse-telecine.
   <application>MPlayer</application> contains several filters to
   accomplish this; the best filter, <option>pullup</option>, is described
@@ -1251,7 +1286,7 @@ Notes:
   <application>MEncoder G2</application>, but that isn't here yet. You
   might experience crahes. Anyway, the purpose of <option> -vf
   tfields</option> is to create a full frame out of each field, which
-  makes the framerate 59.94. The advantage of this approach is that no
+  makes the framerate 60000/1001. The advantage of this approach is that no
   data is ever lost; however, since each frame comes from only one
   field, the missing lines have to be interpolated somehow. There are
   no very good methods of generating the missing data, and so the
@@ -1268,14 +1303,14 @@ Notes:
   <option>-fps</option> and <option>-ofps</option> to be twice the
   framerate of your original source.
 
-  <screen>mencoder dvd://1 -nosound -vf tfields=2 -ovc lavc -fps 59.94 -ofps 59.94</screen>
+  <screen>mencoder dvd://1 -nosound -vf tfields=2 -ovc lavc -fps 60000/1001 -ofps 60000/1001</screen>
   </para></listitem>
 <listitem><para>
   If you plan on downscaling dramatically, you can extract and encode
   only one of the two fields. Of course, you'll lose half the vertical
   resolution, but if you plan on downscaling to at most 1/2 of the
   original, the loss won't matter much. The result will be a
-  progressive 29.97 frames per second file. The procedure is to use
+  progressive 30000/1001 frames per second file. The procedure is to use
   <option>-vf field</option>, then crop
   <link linkend="menc-feat-telecine-footnotes">[1]</link> and scale
   appropriately. Remember that you'll have to adjust the scale to
@@ -1296,8 +1331,8 @@ Notes:
   rescaling; unless you really know what you're doing,
   inverse-telecine before cropping, too
   <link linkend="menc-feat-telecine-footnotes">[1]</link>.
-  <option>-ofps 23.976</option> is needed here because the output video
-  will be 23.976 frames per second.
+  <option>-ofps 24000/1001</option> is needed here because the output video
+  will be 24000/1001 frames per second.
 </para>
 
 <itemizedlist>
@@ -1311,7 +1346,7 @@ Notes:
   accurate method available for encoding both telecine and
   &quot;mixed progressive and telecine&quot;.
 
-  <screen>mencoder dvd://1 -nosound -vf pullup,softskip -ovc lavc -ofps 23.976</screen>
+  <screen>mencoder dvd://1 -nosound -vf pullup,softskip -ovc lavc -ofps 24000/1001</screen>
   </para>
 
 
@@ -1324,9 +1359,9 @@ Notes:
   a video and makes the entire file telecined. If we follow
   softpulldown with either <option>detc</option> or
   <option>ivtc</option>, the final result will be entirely
-  progressive. <option>-ofps 23.976</option> is needed.
+  progressive. <option>-ofps 24000/1001</option> is needed.
 
-  <screen>mencoder dvd://1 -nosound -vf softpulldown,ivtc=1 -ovc lavc -ofps 23.976</screen>
+  <screen>mencoder dvd://1 -nosound -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001</screen>
   </para>
   </listitem>
 
@@ -1363,10 +1398,10 @@ Notes:
   <para>
   This option should definitely not be used if you want to eventually
   display the video on an interlaced device (with a TV card, for
-  example). If you have interlaced frames in a 23.976 frames per
+  example). If you have interlaced frames in a 24000/1001 frames per
   second video, they will be telecined along with the progressive
   frames. Half of the interlaced "frames" will be displayed for three
-  fields' duration (3/59.94 seconds), resulting in a flicking
+  fields' duration (3/(60000/1001) seconds), resulting in a flicking
   &quot;jump back in time&quot; effect that looks quite bad. If you
   even attempt this, you <emphasis role="bold">must</emphasis> use a
   deinterlacing filter like <option>lb</option> or
@@ -1377,9 +1412,9 @@ Notes:
   It may also be a bad idea for progressive display, too. It will drop
   pairs of consecutive interlaced fields, resulting in a discontinuity
   that can be more visible than with the second method, which shows
-  some progressive frames twice. 29.97 frames per second interlaced
+  some progressive frames twice. 30000/1001 frames per second interlaced
   video is already a bit choppy because it really should be shown at
-  59.94 fields per second, so the duplicate frames don't stand out as
+  60000/1001 fields per second, so the duplicate frames don't stand out as
   much.
   </para>
 

@@ -526,8 +526,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s already present!\n"
 #define MSGTR_ClipInfo "Clip info:\n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30fps NTSC content detected, switching framerate.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24fps progressive NTSC content detected, switching framerate.\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC content detected, switching framerate.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progressive NTSC content detected, switching framerate.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Could not open codec.\n"

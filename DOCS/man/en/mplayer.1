@@ -4841,14 +4841,14 @@ forgiving of noisy input, for example TV capture.
 The optional parameter (ivtc=1) corresponds to the dr=1 option for the
 detc filter, and should be used with MEncoder but not with MPlayer.
 As with detc, you must specify the correct output framerate (\-ofps
-23.976) when using MEncoder.
+24000/1001) when using MEncoder.
 Further development on ivtc has stopped, as the pullup and filmdint
 filters appear to be much more accurate.
 .
 .TP
 .B pullup[=jl:jr:jt:jb:sb:mp]\ 
 Third-generation pulldown reversal (inverse telecine) filter,
-capable of handling mixed hard-telecine, 24 fps progressive, and 30
+capable of handling mixed hard-telecine, 24000/1001 fps progressive, and 30000/1001
 fps progressive content.
 The pullup filter is designed to be much more robust than detc or
 ivtc, by taking advantage of future context in making its decisions.
@@ -4898,7 +4898,7 @@ access to the field-flags set by the MPEG-2 decoder.
 Depending on the source MPEG, you may be fine ignoring this advice, as
 long as you do not see lots of "Bottom-first field" warnings.
 With no options it does normal inverse telecine, and should be used
-together with mencoder \-fps 29.97 \-ofps 23.976.
+together with mencoder \-fps 30000/1001 \-ofps 24000/1001.
 When this filter is used with mplayer, it will result in an uneven
 framerate during playback, but it is still generally better than using
 pp=lb or no deinterlacing at all.
@@ -4974,7 +4974,7 @@ a juddering video that has every fourth frame duplicated.
 This filter is intended to find and drop those duplicates and restore the
 original film framerate.
 When using this filter, you must specify \-ofps that is 4/\:5 of the fps of the
-input file (23.976 if the input is 29.97fps).
+input file (24000/1001 if the input is 30000/1001 fps).
 The options are:
 .RSs
 .IPs pass=1|2
@@ -5079,7 +5079,7 @@ between fields for t, b, and p alternatives.
 .B telecine[=start]
 Apply 3:2 'telecine' process to increase framerate by 20%.
 This most likely will not work correctly with MPlayer, but it can
-be used with 'mencoder \-fps 29.97 \-ofps 29.97 \-vf telecine'.
+be used with 'mencoder \-fps 30000/1001 \-ofps 30000/1001 \-vf telecine'.
 Both fps options are essential!
 (A/\:V sync will break if they are wrong.)
 The optional start parameter tells the filter where in the telecine
@@ -5531,7 +5531,7 @@ raw video stream (no muxing \- one video stream only)
 Specify a frames per second (fps) value for the output file,
 which can be different from that of the source material.
 Must be set for variable fps (ASF, some MOV) and progressive
-(29.97fps telecined MPEG) files.
+(30000/1001 fps telecined MPEG) files.
 .
 .TP
 .B \-ovc <codec name>
@@ -7986,7 +7986,7 @@ Sets the aspect ratio for MPEG-1/2 video.
 Sets the video bitrate in kbit/s for MPEG-1/2 video.
 .
 .TP
-.B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
+.B vframerate=<24000/1001 | 24 | 25 | 30000/1001 | 30 | 50 | 60000/1001 | 60 >
 Sets the framerate for MPEG-1/2 video.
 This option will be ignored if used with option telecine.
 .

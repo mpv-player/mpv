@@ -141,7 +141,7 @@ audio.
   </simpara></listitem>
 <listitem><simpara>
   FPS correction with <option>-ofps</option> option (useful when encoding
-  29.97 fps VOB to 24 fps AVI)
+  30000/1001 fps VOB to 24000/1001 fps AVI)
   </simpara></listitem>
 <listitem><simpara>
   Using our very powerful filter system (crop, expand, flip, postprocess,
