@@ -103,7 +103,6 @@ mplayer \- Movie Player für Linux
 .RB [ \-slave ]
 .RB [ \-loop\ <Nummer> ]
 .RB [ \-mixer\ <Device> ]
-.RB [ \-master\ yes/no ]
 .RB [ \-tv\ <Unteroptionen> ]
 .RB [ \-dapsync ]
 .RB [ \-softsleep ]
@@ -332,10 +331,8 @@ Wiederholt den Film <Nummer> mal. 0 entspricht endlosen Wiederholungen.
 Diese Option lässt MPlayer ein anderes Device zum Mischen (mixing) verwenden
 als /dev/mixer.
 .TP
-.B \-master\ yes/no
-Das Setzen dieser Option auf "yes" lässt MPlayer bei einer Lautstärkeänderung den
-MASTER-Mischkanal (mixer channel) ändern, bei "no" den PCM-Kanal.
-.TP
+.B \-master
+veraltete Option, es sollte das Software Audiomixer-Plugin verwendet werden (siehe DOCS).
 .B \-tv\ <suboptions>
 Diese Option aktiviert das TV-Grabbing Feature von MPlayer. Für eine vollständige 
 Dokumentation sollte das Kapitel 2.5 der documentation.html gelesen werden.

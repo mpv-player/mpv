@@ -1,7 +1,16 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+       .text
+               {font-family    :       Verdana, Arial, Helvetica, sans-serif;
+               font-size       :       14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=WHITE>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=2.2>2.2. Unterstützte Codecs</A></B></P>
 
@@ -66,12 +75,12 @@ OpenDivX-Code deaktiviert und der OpenDivX-Treiber verwendet auch diese Bibiliot
 <P>Wir können diese Tatsache ausnützen um zwei Optionen für den Codec zu verwenden:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verwendet den DivX4 Codec als eine
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">verwendet den DivX4 Codec als eine
 neue Version von OpenDivX. In diesem Fall produziert es YV12 Bilder in seinem eigenen Buffer, und
 <B>MPlayer</B> (libvo) führt die Colorspace-Konversion durch (<B>EMPFOHLEN</B>).</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;divx4</TD><TD></TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verwendet die Colorspace-Konversion
+<TD></TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;divx4</TD><TD></TD>
+<TD><FONT CLASS="text">verwendet die Colorspace-Konversion
 des DivX4 Codecs. In diesem Fall kannst du auch YUY2/UYVY verwenden.</TD><TR>
 </TABLE></P>
 
@@ -85,12 +94,12 @@ möglicherweise ist sie jedoch unterschiedlich bei deiner Farbtiefe.</P>
 ist groß:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>0</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&nbsp;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kein Postprocessing</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 .. 20</TD>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Postprocessing, normal (wie Level 2 mit DivX-DS)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>30 .. 60</TD>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>starkes Postprocessing, benötigt viel CPU Zeit (wie Level 4 bei DivX-DS)</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>0</TD><TD><FONT CLASS="text">&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">kein Postprocessing</TD><TR>
+<TD></TD><TD><FONT CLASS="text">10 .. 20</TD>
+<TD></TD><TD><FONT CLASS="text">Postprocessing, normal (wie Level 2 mit DivX-DS)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">30 .. 60</TD>
+<TD></TD><TD><FONT CLASS="text">starkes Postprocessing, benötigt viel CPU Zeit (wie Level 4 bei DivX-DS)</TD><TR>
 </TABLE></P>
 
 <P><B><A NAME=2.1.2.2>2.1.2.2. ffmpeg's DivX/libavcodec</A></B></P>
@@ -259,10 +268,9 @@ von August 2001 oder neuer vom emu10k1 Treiber (verwendet bei SB Live Karten) so
 <P>Du wird eine AC3-fähige Soundkarte brauchen mit Digital-Out (SP/DIF). Der
 Treiber muss das AFMT_AC3 Format unterstützen (wie die SB Live!).
 Verbinde deinen AC3 Decoder am SP/DIF Ausgang und verwende die '-ac hwac3'
-Option. Es funktioniert möglichweise oder auch nicht (experimentel). (wahrscheinlich 
-läuft es momentan nur mit C-Media Karten, es steht dir jedoch frei es auch für die SB Live
-zu korrigieren)
-</P>
+Option. Es funktioniert möglichweise oder auch nicht (experimentel). Es läuft mit 
+C-Media Karten und SB Live! + ALSA Treiber, jedoch nicht mit den OSS-Treibern 
+von SB Live!</P>
 
 <P><B><A NAME=2.2.2.3>2.2.2.3. libmad Unterstützung</A></B></P>
 

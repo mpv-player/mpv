@@ -1,7 +1,16 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+       .text
+               {font-family    :       Verdana, Arial, Helvetica, sans-serif;
+               font-size       :       14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=2.4>2.4.  Encodieren mit MEncoder</A></B></P>
 
@@ -41,6 +50,7 @@ Er verfügt auch über eine stream-copy-Funktion und kann die Grösse der Videos än
   <UL>
     <LI>Encodieren von der großen Reichweite an Dateiformaten und Decodern von <B>MPlayer</B></LI>
     <LI>Encodieren von allen Codecs von <A HREF=codecs.html#2.2.1.2>libavcodec</A></LI>
+    <LI>Erzeugung von Dateien aus einer externen Tonspur</LI>
     <LI>Encodieren von <B>V4L kompatiblem TV-Tunern</B></LI>
     <LI>Encodieren/Multiplexen zu interleaved AVI-Datei mit Index</LI>
     <LI>1, 2 oder 3 Pass <B>DivX4</B> Video</LI>
@@ -57,10 +67,9 @@ Er verfügt auch über eine stream-copy-Funktion und kann die Grösse der Videos än
 
 <P><B><I>Geplante Features</I></B> :
   <UL>
-    <LI>Verwendung von Audio auf eigenen Dateien (AC3, MP3, OGG)</LI>
     <LI>Erhöhen der verfügbaren En-/Decodierungs Formate/Codecs
     (erzeugen von VOB Dateien mit DivX4/Indeo5/VIVO Streams :)</LI>
-    <LI>Audio Encodierung von v4l</LI>
+    <LI>Audio Encodierung von v4l (FERTIG für FreeBSD ?)</LI>
   </UL>
 </P>
 
@@ -89,16 +98,16 @@ erforderlich:<BR>
 <P>
   <TABLE>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>rm frameno.avi</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B>Lösche störende temporäre Dateien</B></TD>
   </TR>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>mencoder &lt;datei/DVD&gt; -ovc frameno -o
         frameno.avi</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B><U>Erster Durchlauf</U> : Eine Audio-only avi Datei wird erzeugt, welche
       NUR den verlangten Audiostream enthält. Vergiss nicht <CODE>-lameopts</CODE> zu setzen,
       wenn du sie setzen musst. Wenn du einen langen Film encodierst, zeigt MEncoder
@@ -106,19 +115,19 @@ erforderlich:<BR>
       wenn er diesen Durchlauf beendet hat.</B></TD>
   </TR>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>mencoder &lt;datei/DVD&gt; -oac copy -pass 1
         -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B><U>Zweiter Durchlauf</U> : Integriert den ersten Durchlauf der DivX4 Video-Encodierung. 
       Optional kann die Video-Bitrate, welche am Ende des letzten Durchlaufes gezeigt wurde, 
       hier definiert werden.</B></TD>
   </TR>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>mencoder &lt;datei/DVD&gt; -oac copy -pass 2
         -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B><U>Dritter Durchlauf</U> : Integriert den zweiten Durchlauf der DivX4 Video Encodierung. 
       Optional kann die Video-Bitrate, welche am Ende des letzten Durchlaufes gezeigt wurde, 
       In diesem Durchlauf wird der Ton vom <CODE>frameno.avi</CODE> in die endgültige Datei
@@ -175,6 +184,9 @@ erforderlich:<BR>
   zu MP3).</LI>
 
   <LI><B>Audiostreams</B> (Option <CODE>-oac copy</CODE>) : siehe oben.</LI>
+  Es ist möglich eine externe Audiodatei (MP3, AC3, Vorbis) zu nehmen und diese
+  dem Ausgabestream hinzuzufügen. Benutze dazu die Option 
+  <CODE>-audiofile &lt;dateiname&gt;</CODE>.</LI>
 </UL>
 </P>
 
@@ -211,7 +223,55 @@ werden sollte, wie z.B.: <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
 
 <P>Ein Beispiel mit MJPEG Kompression :<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts vcodec=mjpeg</CODE></P>
-                  
+
+
+<P><B><A NAME=2.4.3.6>2.4.3.6 Encodierung von mehreren Eingangsbildern (MJPEG/MPNG)</B></P>
+
+<P><B>MEncoder</B> kann Filme aus einer oder mehreren JPEG oder PNG Dateien.
+durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG 
+(Motion PNG) Dateien erzeugen.</P>
+
+<P><B><I>Erklärung des Prozesses</I></B></P>
+
+<P><B>MEncoder</B> <I>decodiert</I> das/die Eingangsbild(er) mit einem verfügbaren
+  MJPEG Videocodec (wenn er PNGs decodiert, verwendet er einen eingebauten PNG Decoder).
+  Standardmässig wird <CODE>ffmjpeg</CODE> verwendet, so dass man die libavcodec-Unterstützung
+  einkompilieren muss (was sowieso empfohlen ist). Der Nachteil ist, dass er gewisse JPEG-Typen
+  nicht verarbeiten kann (für diese wird ein grünes Bild encodiert). Benutze dazu ein externes
+  Werkzeug um diese Bilder in ein verträgliches Format zu konvertieren.<BR> Du kannst frei 
+  irgendeinen anderen MJPEG-Decoder wählen, wie <CODE>mcmjpg32.dll</CODE> (MainConcept Motion 
+  JPEG), wenn dieser installiert ist. Nach einer Begutachtung der <CODE>codecs.conf</CODE>
+  und einer anschliessenden Überprüfung der <CODE>videocodec</CODE> Zeile, welche auf zu dieser
+  Datei verweist, erkennt man, dass man dazu die <CODE>-vc mjpeg</CODE> Option benutzen muss.
+</P>
+
+<P><B>MEncoder</B> führt die decodierten Bilder danach dem gewählten Videokompressor zu
+  (DivX4, Xvid, ffmpeg msmpeg4, etc...). Der eingebaute PNG-Decoder, kann momentan leider nur
+  RGB-Formate ausgeben und kann desshalb nicht mit Codecs, welche YUV als Input benötigen 
+  (wie Divx 4 oder ffmpeg's msmpeg4), gebraucht werden.</P>
+
+<P><B><I>Beispiele</I></B></P>
+
+<P>Die Erklärung der <CODE>-mf</CODE> Option kann unten, in der globalen
+  <A HREF=#2.4.5>Optionen</A> Sektion und in den Manpages gefunden werden.</P>
+
+<P><I>Erstellung einer DivX4-Datei aus allen JPEG-Dateien im momentanen Verzeichnis :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  ausgabe.avi</CODE></P>
+
+<P><I>Erstellung einer Motion JPEG (MJPEG) Datei aus allen JPEG-Dateien im momentanen Verzeichnis :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
+  -o ausgabe.avi</CODE></P>
+
+<P><I>Erstellung einer unkomprimierten Datei aus allen PNG-Dateien im momentanen Verzeichnis :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw -o
+  ausgabe.avi</CODE></P>
+
+<P><I>Erstellung einer Motion PNG (MPNG) Datei aus allen PNG-Dateien im momentanen Verzeichnis :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  -o ausgabe.avi</CODE></P>
+
+
 
 <P><B><A NAME=2.4.4>2.4.4.  Syntax</B></P>
 
@@ -230,44 +290,44 @@ werden sollte, wie z.B.: <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
         
 <TABLE BORDER=1>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-ss</I> Zeit</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Startet die Encodierung von der gegebenen Zeit an (er kann nur von Keyframes aus starten !)
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-endpos</I> Zeit</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Stoppt die Encodierung zu der gegebenen Zeit. Lies die Manpage für Beispiele !
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-o</I> Dateiname</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     definiert den Namen der Ausgabedatei
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-x</I> Breite in Pixel</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     ändert die Videoausgabe auf die angegebene Anzahl von Pixel
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-y</I> Höhe in Pixel</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     ändert die Videoausgabe auf die angegebene Anzahl von Pixel
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-sws</I> 0-2</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Arte der Scaling-Methode<BR>
     &nbsp;&nbsp;0 - fast bilinear<BR>
     &nbsp;&nbsp;1 - bilinear<BR>
@@ -275,9 +335,9 @@ werden sollte, wie z.B.: <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-ovc</I> Codecname</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Encodiert mit dem angegebenen Codec (Codecnamen sind von codecs.conf). Beispiele:<BR>
     &nbsp;&nbsp;<B>help</B> - zeigt eine Liste der verfügbaren Codecs an<BR>
     &nbsp;&nbsp;<B>null</B> - erzeugt keinen Videostream in dem Ausgabe-AVI<BR>
@@ -290,9 +350,9 @@ werden sollte, wie z.B.: <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-oac</I> Codecname</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Encodiert mit dem angegebenen Codec (Codecnamen sind von codecs.conf). Beispiele:<BR>
     &nbsp;&nbsp;<B>help</B> - zeigt eine Liste der verfügbaren Codecs an<BR>
     &nbsp;&nbsp;<B>copy</B> - kein Encodieren, kopiert den Stream (nur von AVI/ASF zur Zeit)<BR>
@@ -301,44 +361,59 @@ werden sollte, wie z.B.: <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
   </TD>
 </TR>
 <TR>
+  <TD><FONT CLASS="text">
+    <I>-mf</I>Optionen für mehrere Eingangsdateien</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Wenn von mehreren JPEG-Dateien konvertiert wird, kann man folgende Unteroptionen
+    angeben:<BR>
+    &nbsp;&nbsp;<B>on</B> - aktiviert die Unterstützung für mehrere Eingangsdateien<BR>
+    &nbsp;&nbsp;<B>w</B>=&lt;Wert&gt; - Breite der Ausgabedatei<BR>
+    &nbsp;&nbsp;<B>h</B>=&lt;Wert&gt; - Höhe der Ausgabedatei<BR>
+    &nbsp;&nbsp;<B>fps</B>=&lt;Wert&gt; - fps der Ausgabedatei<BR>
+    &nbsp;&nbsp;<B>type</B>=&lt;Wert&gt; - Typ der Eingangsdateien 
+    (verfügbare Typen : <CODE>jpeg</CODE>, <CODE>png</CODE>)<BR>
+  </TD>
+</TR>
+
+<TR>
+  <TD><FONT CLASS="text">
     <I>-divx4opts</I></TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Wenn du zu DivX4 encodierst kannst du hier die Parameter angeben, wie z.B.:<BR>
     &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
     Allgemeine Optionen: <B>(Lies in der Manpage für die vollständige Liste!)</B><BR>
     &nbsp;&nbsp;<B>help</B> - zeigt die Hilfe<BR>
-    &nbsp;&nbsp;<B>br</B>=XXX - gibt die Bitrate in kBit &lt;4-16000&gt; oder Bit &lt;16001-24000000&gt; an<BR>
-    &nbsp;&nbsp;<B>q</B>=XXXX - Qualität (1-schnellste, 5-beste - standard 5)<BR>
-    &nbsp;&nbsp;<B>key</B>=XXXX - Keyframe Interval<BR>
+    &nbsp;&nbsp;<B>br</B>=&lt;Wert&gt; - gibt die Bitrate in kBit &lt;4-16000&gt; oder Bit &lt;16001-24000000&gt; an<BR>
+    &nbsp;&nbsp;<B>q</B>=&lt;Wert&gt; - Qualität (1-schnellste, 5-beste - standard 5)<BR>
+    &nbsp;&nbsp;<B>key</B>=&lt;Wert&gt; - Keyframe Interval<BR>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-lavcopts</I></TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
      Wenn du mit der libavcodec encodierst, kannst du deren Parameter hier angeben, wie:<BR>
      &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
      Häufige Optionen: <B>(Lies in der Manpage für die vollständige Liste!)</B><BR>
      &nbsp;&nbsp;<B>help</B> - zeigt die Hilfe<BR>
-     &nbsp;&nbsp;<B>vcodec</B>=XXX - wählt den Videocodec (Siehe in der libavcodec Sektion unten nach für die vollständige Liste)<BR>
-     &nbsp;&nbsp;<B>vbitrate</B>=XXX - gibt die Bitrate in kbit &lt;4-16000&gt; oder bit &lt;16001-24000000&gt; an<BR>
+     &nbsp;&nbsp;<B>vcodec</B>=&lt;Wert&gt; - wählt den Videocodec (Siehe in der libavcodec Sektion unten nach für die vollständige Liste)<BR>
+     &nbsp;&nbsp;<B>vbitrate</B>=&lt;Wert&gt; - gibt die Bitrate in kbit &lt;4-16000&gt; oder bit &lt;16001-24000000&gt; an<BR>
      &nbsp;&nbsp;<B>vhq</B> - hohe Qualität<BR>
-     &nbsp;&nbsp;<B>keyint</B>=XXX - Keyframe Interval<BR>
+     &nbsp;&nbsp;<B>keyint</B>=&lt;Wert&gt; - Keyframe Interval<BR>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-lameopts</I></TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Wenn du zu MP3 mit libmp3lame encodierst kannst du hier die Parameter angeben, wie z.B.:<BR>
     &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
     &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>
     Allgemeine Optionen: <B>(Lies in der Manpage für die vollständige Liste!)</B><BR>
     &nbsp;&nbsp;<B>help</B> - zeigt die Hilfe<BR>
     &nbsp;&nbsp;<B>cbr</B> - wählt <B>CBR</B> MP3 (standard ist <B>VBR</B>)<BR>
-    &nbsp;&nbsp;<B>br</B>=XXX - definiert die Bitrate in &lt;0-1024&gt; (dies ist nur für <B>CBR</B>!)<BR>
-    &nbsp;&nbsp;<B>q</B>=XXXX - Qualität (0-höchste, 9-schnellste - standard 0) (dies ist nur für <B>VBR</B>!)<BR>
+    &nbsp;&nbsp;<B>br</B>=&lt;Wert&gt; - definiert die Bitrate in &lt;0-1024&gt; (dies ist nur für <B>CBR</B>!)<BR>
+    &nbsp;&nbsp;<B>q</B>=&lt;Wert&gt; - Qualität (0-höchste, 9-schnellste - standard 0) (dies ist nur für <B>VBR</B>!)<BR>
   </TD>
 </TR>
 </TABLE>

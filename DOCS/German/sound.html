@@ -1,7 +1,16 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+       .text
+               {font-family    :       Verdana, Arial, Helvetica, sans-serif;
+               font-size       :       14px;}
+</STYLE>
+</HEAD>
+
 <BODYBGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=2.2.2>2.2.2. Audio Ausgabe-Geräte</A></P></B>
 
@@ -10,14 +19,14 @@ zur Zeit diese Treiber:</P>
 
 <TABLE BORDER=0>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>General:</B></P></TD>
+<TD COLSPAN=4><P><B><FONT CLASS="text">General:</B></P></TD>
 
-<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>oss</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS (ioctl) Treiber</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sdl</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SDL Treiber (unterstützt Up-/Downsampling, <B>ESD</B>, <B>ARTS</B> usw.)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nas</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>NAS (Network Audio System) Treiber</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA 0.5 Treiber</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa9</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA 0.9 Treiber (funkioniert, macht aber Probleme -> verwende OSS)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sun</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SUN Audio-Treiber (/dev/audio) für BSD und Solaris8 Anwender</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">oss</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">OSS (ioctl) Treiber</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">sdl</TD><TD></TD><TD><FONT CLASS="text">SDL Treiber (unterstützt Up-/Downsampling, <B>ESD</B>, <B>ARTS</B> usw.)</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">nas</TD><TD></TD><TD><FONT CLASS="text">NAS (Network Audio System) Treiber</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">alsa5</TD><TD></TD><TD><FONT CLASS="text">ALSA 0.5 Treiber</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">alsa9</TD><TD></TD><TD><FONT CLASS="text">ALSA 0.9 Treiber (funkioniert, macht aber Probleme -> verwende OSS)</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">sun</TD><TD></TD><TD><FONT CLASS="text">SUN Audio-Treiber (/dev/audio) für BSD und Solaris8 Anwender</TD></TR>
 
 </TABLE>
 
@@ -46,70 +55,70 @@ ansonsten wirst du weder Video noch Ton haben.</P>
 <P><B><A NAME=2.2.2.1>2.2.2.1. Soundkarten Erfahrungen, Empfehlungen</A></B></P>
 
 <P><TABLE BORDER=0 WIDTH=100%>
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>VIA Onboard-Chipset (via82cxxx) nur 48Khz</B></TD><TR>
-		<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Treiber:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2> siehe <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&release_id=59602">hier</A></TD><TR>
+<TD COLSPAN=3><B><FONT CLASS="text">VIA Onboard-Chipset (via82cxxx) nur 48Khz</B></TD><TR>
+		<TD></TD><TD><FONT CLASS="text">Treiber:</TD><TD><FONT CLASS="text"> siehe <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&release_id=59602">hier</A></TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Aureal Vortex 2</B></TD><TR>
-<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS/Free:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kein Treiber</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>HW AC3 funktioniert nicht</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Treiber:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Treiber2:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2> von <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">hier</A><BR>
+<TD COLSPAN=3><B><FONT CLASS="text">Aureal Vortex 2</B></TD><TR>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD><FONT CLASS="text">OSS/Free:</TD><TD><FONT CLASS="text">kein Treiber</TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">HW AC3 funktioniert nicht</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Treiber:</TD><TD><FONT CLASS="text"><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
+<TD></TD><TD><FONT CLASS="text">Treiber2:</TD><TD><FONT CLASS="text"> von <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">hier</A><BR>
 (<I>Buffergröße erhöht auf 32k</I>)</TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>GUS PnP</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kein Treiber</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS/Pro:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+<TD COLSPAN=3><B><FONT CLASS="text">GUS PnP</B></TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">kein Treiber</TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS/Pro:</TD><TD><FONT CLASS="text">OK</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SB Live!</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(?)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+<TD COLSPAN=3><B><FONT CLASS="text">SB Live!</B></TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">(?)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SB AWE 64</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>max 44kHz</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48kHz hört sich scheisse an</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+<TD COLSPAN=3><B><FONT CLASS="text">SB AWE 64</B></TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">max 44kHz</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">48kHz hört sich scheisse an</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Gravis UltraSound ACE</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nicht OK</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+<TD COLSPAN=3><B><FONT CLASS="text">Gravis UltraSound ACE</B></TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">nicht OK</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Gravis UltraSound MAX</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK (?)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+<TD COLSPAN=3><B><FONT CLASS="text">Gravis UltraSound MAX</B></TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ESS 688</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK (?)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+<TD COLSPAN=3><B><FONT CLASS="text">ESS 688</B></TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>C-Media Karten (welche?)</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nicht OK (zischen) (?)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK (?)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
+<TD COLSPAN=3><B><FONT CLASS="text">C-Media Karten (welche?)</B></TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">nicht OK (zischen) (?)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Yamaha Karten (*ymf*)</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nicht OK (?)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK, nur mit ALSA 0.5 mit OSS-Emulation <B>UND</B> <I>-ao sdl</I> (!) (?)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
+<TD COLSPAN=3><B><FONT CLASS="text">Yamaha Karten (*ymf*)</B></TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">nicht OK (?)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK, nur mit ALSA 0.5 mit OSS-Emulation <B>UND</B> <I>-ao sdl</I> (!) (?)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Karten mit envy24 Chips (wie Terratec EWS88MT)</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS/Pro:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
+<TD COLSPAN=3><B><FONT CLASS="text">Karten mit envy24 Chips (wie Terratec EWS88MT)</B></TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">?</TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS/Pro:</TD><TD><FONT CLASS="text">OK</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">?</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PC Speaker oder DAC</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK (<I>verwende den SDL-Treiber: -ao sdl</I>)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kein Treiber</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>der Treiber emuliert 44.1, möglicherweise mehr</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Treiber:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD><TR>
+<TD COLSPAN=3><B><FONT CLASS="text">PC Speaker oder DAC</B></TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK (<I>verwende den SDL-Treiber: -ao sdl</I>)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">kein Treiber</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">der Treiber emuliert 44.1, möglicherweise mehr</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Treiber:</TD><TD><FONT CLASS="text"><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD><TR>
 </TABLE></P>
 
 <P><UL>
@@ -155,10 +164,10 @@ ansonsten wirst du weder Video noch Ton haben.</P>
 <P>würde die Ausgabefrequenz des Resample-Plugins auf 44100Hz and das
   Ausgabeformat des Format-Plugins auf AFMT_U8 stellen.
 </P>
-                      
+           
 <P>Momentan können Audio-Plugins nicht im <B>MEncoder</B> verwendet werden.</P>
-                     
-                      
+          
+           
 <P><B><A NAME=2.3.2.2.1>2.3.2.2.1. Up/Downsampling</A></B></P>
 
 <P><B>MPlayer</B> unterstützt vollständiges up/downsampling von Audiostreams.
@@ -204,12 +213,51 @@ Sound.</p>
 
 
 <P><B><A NAME=2.3.2.2.4>2.3.2.2.4. Verzögerung</A></B></P>
-             
+  
 <P>Dieses Plugin verzögert den Ton und ist als Beispiel gedacht, wie man neue Plugins 
   schreibt. Es kann für nichts sinnvolles aus der Anwenderperspektive verwendet werden
   und ist hier nur aus Gründen der Vollständigkeit erwähnt. Verwende dieses Plugin nicht,
   wenn du kein Entwickler bist.</P>
 
+<P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Software Lautstärkeregelung</A></B></P>
+
+<P>Dieses Plugin ist ein Software-Ersatz für die Lautstärkereglung und
+  kann in Maschinen mit kaputtem Mixer-Device verwendet werden. Es kann
+  auch verwendet werden, wenn man die Ausgabelautstärke von <B>MPlayer</B>
+  zu ändern ohne die Einstellung der PCM-Lautstärke im Mixer zu ändern.
+  Es gibt einen Schalter <CODE>volume</CODE>, welcher verwendet wird um
+  den anfänglichen Schallpegel festzulegen. Der anfängliche Schallpegel
+  kann auf Werte zwischen 0 und 255 festgelegt werden (normal auf 255).
+  Benutze dieses Plugin mit Vorsicht, da es das Signal auf das 
+  Geräuschverhältnis des Tons reduzieren kann. In den meisten Fällen ist
+  es das beste, die Stufe für den PCM-Ton auf das Maximum zu stellen,
+  dieses Plugin nicht zu verwenden und die Regelung der 
+  Master-Lautstärkeregelung zu überlassen. Wenn ein externer Verstärker mit
+  dem Computer verbunden ist (was fast immer der Fall ist), kann der
+  Geräuschepegel durch die Anpassung des Master-Stufe und der Lautstärkeknöpfe 
+  des Verstärkers minimiert werden, bis das Hintergrundrauschen verschwindet.
+</P>
+
+<P>Verwendung :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=volume:volume=&lt;0-255&gt;</CODE>
+</P>
+
+
+<P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Extrastereo</A></B></P>
+
+<P>Dieses Plugin erhäht (linear) die Differenz zwischen dem linken und rechten
+  Kanal (wie das XMMS Extrastereo-Plugin), was zum Teil zu "live"-Effekten
+  bei der Wiedergabe führt.
+</P>
+
+<P>Verwendung :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo</CODE><BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo:mul=3.45</CODE></P>
+
+<P>Der normale Koeffizient (<CODE>mul</CODE>) ist eine Fliesskommazahl welche standardmässig
+  auf 2.5 gestellt ist. Wenn man den Wert auf 0.0 setzt, erhält man einen Mono-Ton 
+  (Durchschnitt beider Kanäle). Wenn man den Wert auf 1.0 setzt, bleibt der Ton gleich.</P>
 
 </BODY>
 </HTML>

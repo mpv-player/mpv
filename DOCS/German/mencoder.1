@@ -26,6 +26,7 @@ mencoder \- Movie Encoder für Linux
 .RB [ \-ac3file\ <Dateiname> ]
 .RB [ \-ovc\ <Videocodec\ Name> ]
 .RB [ \-oac\ <Audiocodec\ Name> ]
+.RB [ \-mf\ <Optionen\ für\ mehrere\ Eingangsdateien> ]
 .RB [ \-divx4opts\ <Codec\ Optionen> ]
 .RB [ \-lavcopts\ <Codec\ Optionen> ]
 .RB [ \-lameopts\ <Codec\ Optionen> ]
@@ -40,7 +41,8 @@ mencoder \- Movie Encoder für Linux
 .RB [ \-ffourcc\ <fourcc> ]
 .RB [ \-ss\ <Zeit> ]
 .RB [ \-endpos\ <Zeit> ]
-.I < - | Datei | URL | Device >
+.RB [ \-audiofile\ <Dateiname> ]
+.I < - | Datei | Dateien (mit umgangenen Wildcards) | URL | Device >
 .PP
 .SH BESCHREIBUNG
 .I mencoder
@@ -138,6 +140,19 @@ Beispiele:
   -oac copy      keine Konvertierung, nur Streamkopierung
   -oac pcm       konvertiert zu unkomprimiertem PCM
   -oac mp3lame   konvertiert zu MP3 (benutzt Lame)
+.TP
+.B \-audiofile <Dateiname>
+kopiert Audio von einer externen Datei
+.TP
+.B \-mf <Optionen\ für\ mehrere\ Eingangsdateien>
+Wenn von mehreren JPEG-Dateien konvertiert wird, kann man folgende Unteroptionen 
+angeben:
+
+  on            aktiviert die Unterstützung für mehrere Eingangsdateien
+  w=<Wert>      Breite der Ausgabedatei
+  h=<Wert>      Höhe der Ausgabedatei
+  fps=<Wert>    fps der Ausgabedatei
+  type=<Wert>   Typ der Eingangsdateien (jpeg, png)
 .TP
 .B \-divx4opts
 Wenn zu DivX4 konvertiert wird, kann man dessen Parameter hier angeben, wie:

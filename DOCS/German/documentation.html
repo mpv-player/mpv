@@ -1,7 +1,16 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+       .text
+               {font-family    :       Verdana, Arial, Helvetica, sans-serif;
+               font-size       :       14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=WHITE>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><CENTER><B>MPlayer - Movie Player für LINUX (C) 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
 <BR><A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A><BR><BR>
@@ -135,7 +144,9 @@
             <LI><A HREF="sound.html#2.3.2.2.2">2.3.2.2.2 Surround Sound Decodierung</A></LI>
 	    <LI><A HREF="sound.html#2.3.2.2.3">2.3.2.2.3 Beispiel Formats-Konvertierer</A></LI>
 	    <LI><A HREF="sound.html#2.3.2.2.4">2.3.2.2.4 Verzögerung</A></LI>
-          </UL>
+            <LI><A HREF="sound.html#2.3.2.2.5">2.3.2.2.5 Software Lautstärkeregelung</A></LI>
+            <LI><A HREF="sound.html#2.3.2.2.6">2.3.2.2.6 Extrastereo</A></LI>
+         </UL>
       </UL>
     </UL>
     <LI><A HREF="encoding.html#2.4">2.4 MEncoder - Ein Encoder basierend auf MPlayer</A></LI>
@@ -150,6 +161,7 @@
 	    <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Streamcopy</A></LI>
 	    <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Reparieren von AVIs mit defektem Index</A></LI>
 	    <LI><A HREF="encoding.html#2.4.3.5">2.4.3.5 Encodierung mit der libavcodec Codec-Familie</A></LI>
+	    <LI><A HREF="encoding.html#2.4.3.6">2.4.3.6 Encodierung von mehreren Eingangsbildern (MJPEG/MPNG)</A></LI>
           </UL>
         <LI><A HREF="encoding.html#2.4.4">2.4.4 Syntax</A></LI>
 	<LI><A HREF="encoding.html#2.4.5">2.4.5 Verfügbare Optionen</A></LI>
@@ -738,84 +750,84 @@ TV-Tuner ermöglicht</B>.</P>
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>on</I></TD>
+  <TD><FONT CLASS="text"><I>on</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verwenden des TV-Inputs</TD>
+  <TD><FONT CLASS="text">verwenden des TV-Inputs</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>driver</I></TD>
+  <TD><FONT CLASS="text"><I>driver</I></TD>
   <TD></TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <B>dummy</B> - NULL TV-Input :) Nur zum Testen, erzeugt Dummy-Input.<BR>
     <B>v4l</B> - nimmt Bilder vom Standard-V4L-Interface (normalerweise
     <CODE>/dev/video0</CODE>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>device</I></TD>
+  <TD><FONT CLASS="text"><I>device</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wählt einen anderen
+  <TD><FONT CLASS="text">wählt einen anderen
   Treiber als <CODE>/dev/video0</CODE></TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>input</I></TD>
+  <TD><FONT CLASS="text"><I>input</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>welcher Eingang
+  <TD><FONT CLASS="text">welcher Eingang
     des TV-Tuners verwendet werden soll (z.B. <B>television</B>, <B>s-video</B>, 
     <B>composite</B>, ...)<BR>
     Beim Inizialisieren werden die verfügbaren Eingänge angezeigt.</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>freq</I></TD>
+  <TD><FONT CLASS="text"><I>freq</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wählt die Frequenz
+  <TD><FONT CLASS="text">wählt die Frequenz
   für den Tuner (z.B. <B>511.250</B>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>outfmt</I></TD>
+  <TD><FONT CLASS="text"><I>outfmt</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Format, mit
+  <TD><FONT CLASS="text">Format, mit
     dem ausgegeben werden soll (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, 
     <B>i420</B> (für i420 musst du die Option <CODE>-vc rawi420</CODE> übergeben, 
     wegen eines fourcc Konflikts))</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>width</I></TD>
+  <TD><FONT CLASS="text"><I>width</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     die Breite des Ausgabe-Fensters, in Pixel</TD>
 </TR>
   <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>height</I></TD>
+  <TD><FONT CLASS="text"><I>height</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     die Höhe des Ausgabe-Fensters, in Pixel</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>norm</I></TD>
+  <TD><FONT CLASS="text"><I>norm</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
   verfügbare Normen: PAL, SECAM, NTSC</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>channel</I></TD>
+  <TD><FONT CLASS="text"><I>channel</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
   Tuner auf eingestellten Kanal setzen</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>chanlist</I></TD>
+  <TD><FONT CLASS="text"><I>chanlist</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
   verfügbar: <CODE>us-bcast, us-cable, europe-west, europe-east, usw</CODE></TD>
 </TR>
 </TABLE>
@@ -824,10 +836,10 @@ TV-Tuner ermöglicht</B>.</P>
 <A NAME=2.5.4><P><B><I>2.5.4.  Tastatursteuerung</I></B></P>
 
 <TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wählt
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">wählt
 vorherigen/nächsten Kanal</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Norm</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Kanalliste</TD><TR>
+<TD></TD><TD><FONT CLASS="text">n</TD><TD></TD><TD><FONT CLASS="text">ändern der Norm</TD><TR>
+<TD></TD><TD><FONT CLASS="text">b</TD><TD></TD><TD><FONT CLASS="text">ändern der Kanalliste</TD><TR>
 </TABLE>
 
 <A NAME=2.5.5><P><B><I>2.5.5.  Beispiele</I></B></P>
@@ -851,11 +863,11 @@ welche nur für die jeweilige Datei/URL/etc gelten (z.B.
 <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).</P>
       
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Datei</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [Optionen] [Pfad/]Dateiname</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Datei</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [standard Optionen] [Pfad/]Dateiname [Optionen für datei1] datei2 datei3 [Optionen für datei3]</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>VCD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [Optionen] -vcd Tracknr -cdrom-device /dev/cdrom</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [Optionen] -dvd Titelnr [-dvd-device /dev/dvd]</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Netz</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [Optionen] http://site.com/datei.[mpg|avi]</CODE></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">Datei</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] [Pfad/]Dateiname</CODE></TD><TR>
+<TD></TD><TD><FONT CLASS="text">Datei</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [standard Optionen] [Pfad/]Dateiname [Optionen für datei1] datei2 datei3 [Optionen für datei3]</CODE></TD><TR>
+<TD></TD><TD><FONT CLASS="text">VCD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] -vcd Tracknr -cdrom-device /dev/cdrom</CODE></TD><TR>
+<TD></TD><TD><FONT CLASS="text">DVD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] -dvd Titelnr [-dvd-device /dev/dvd]</CODE></TD><TR>
+<TD></TD><TD><FONT CLASS="text">Netz</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] http://site.com/datei.[mpg|avi]</CODE></TD><TR>
 </TABLE></P>
 
 <P><PRE>  mplayer -vo x11 /mnt/Filme/Contact/contact2.mpg
@@ -868,49 +880,49 @@ welche nur für die jeweilige Datei/URL/etc gelten (z.B.
 <P><B><A NAME=3.1>3.1. Steuerung mit der Tastatur</A></B></P>
 
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt;-  oder  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Suche zurück/vorwärts 10 Sekunden</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nach-oben und nach-unten</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>suche zurück/vorwärts 1 Minute</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Bild-nach-oben und Bild-nach-unten</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>suche zurück/vorwärts 10 Minute</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt; oder &gt;</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>suche rück-/vorwärts in der Playliste</TD><TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p oder Leertaste</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Pause (drücke irgendeine Taste um weiterzumachen)</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>q oder ESC</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>stoppe die Wiedergabe und beende Programm</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>+ oder -</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>einstellen des Audio-Delays, +/- 0,1 Sekunden</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>/  und *</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>vermindere/erhöhe Lautstärke</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>o</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt OSD: kein / Suchleiste / Suchleiste und Zeit</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt zwischen Master/PCM-Channel für Lautstärkenregelung</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>z oder x</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>einstellen des Untertitel-Delays, +/- 0,1 Sekunden</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">&lt;-  oder  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">Suche zurück/vorwärts 10 Sekunden</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">nach-oben und nach-unten</TD><TD></TD><TD><FONT CLASS="text">suche zurück/vorwärts 1 Minute</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">Bild-nach-oben und Bild-nach-unten</TD><TD></TD><TD><FONT CLASS="text">suche zurück/vorwärts 10 Minute</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">&lt; oder &gt;</TD><TD></TD><TD><FONT CLASS="text">suche rück-/vorwärts in der Playliste</TD><TR>
+<TR><TD></TD><TD><FONT CLASS="text">p oder Leertaste</TD><TD></TD><TD><FONT CLASS="text">Pause (drücke irgendeine Taste um weiterzumachen)</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">q oder ESC</TD><TD></TD><TD><FONT CLASS="text">stoppe die Wiedergabe und beende Programm</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">+ oder -</TD><TD></TD><TD><FONT CLASS="text">einstellen des Audio-Delays, +/- 0,1 Sekunden</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">/  und *</TD><TD></TD><TD><FONT CLASS="text">vermindere/erhöhe Lautstärke</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">o</TD><TD></TD><TD><FONT CLASS="text">wechselt OSD: kein / Suchleiste / Suchleiste und Zeit</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">m</TD><TD></TD><TD><FONT CLASS="text">wechselt zwischen Master/PCM-Channel für Lautstärkenregelung</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">z oder x</TD><TD></TD><TD><FONT CLASS="text">einstellen des Untertitel-Delays, +/- 0,1 Sekunden</TD></TR>
 
-<TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(die folgende Tasten sind nur gültig, wenn man <CODE>-vo xv</CODE> verwendet)</I></P></TD></TR>
+<TR><TD COLSPAN=4><P><I><FONT CLASS="text">(die folgende Tasten sind nur gültig, wenn man <CODE>-vo xv</CODE> verwendet)</I></P></TD></TR>
 
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3 oder 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Helligkeits-Einstellung</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5 oder 6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Farbton-Einstellung</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7 oder 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Sättigungs-Einstellung</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">1 oder 2</TD><TD></TD><TD><FONT CLASS="text">Kontrast-Einstellung</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">3 oder 4</TD><TD></TD><TD><FONT CLASS="text">Helligkeits-Einstellung</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">5 oder 6</TD><TD></TD><TD><FONT CLASS="text">Farbton-Einstellung</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">7 oder 8</TD><TD></TD><TD><FONT CLASS="text">Sättigungs-Einstellung</TD></TR>
 </TABLE></P>
 
 <P><B>GUI Keyboard-Tasten</B></P>
    
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>, und .</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>vorherige / nächste Datei</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>graues - und +</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verringere / erhöhe Lautstärke</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Enter</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>startet Wiedergabe</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Leertaste</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Pause</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>s</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Stop</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>über</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>l</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>lädt Datei</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Skin-Browser</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>e</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zeigt Equalizer</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zeigt Playliste</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>f</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt zu/von Vollbild</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>aktiviert/deaktiviert Mute</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">, und .</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">vorherige / nächste Datei</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">graues - und +</TD><TD></TD><TD><FONT CLASS="text">verringere / erhöhe Lautstärke</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">Enter</TD><TD></TD><TD><FONT CLASS="text">startet Wiedergabe</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">Leertaste</TD><TD></TD><TD><FONT CLASS="text">Pause</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">s</TD><TD></TD><TD><FONT CLASS="text">Stop</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">a</TD><TD></TD><TD><FONT CLASS="text">über</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">l</TD><TD></TD><TD><FONT CLASS="text">lädt Datei</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">b</TD><TD></TD><TD><FONT CLASS="text">Skin-Browser</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">e</TD><TD></TD><TD><FONT CLASS="text">zeigt Equalizer</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">p</TD><TD></TD><TD><FONT CLASS="text">zeigt Playliste</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">f</TD><TD></TD><TD><FONT CLASS="text">wechselt zu/von Vollbild</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">m</TD><TD></TD><TD><FONT CLASS="text">aktiviert/deaktiviert Mute</TD></TR>
 </TABLE></P>
 
 <P><B>TV Input Kontrolle</B></P>
 
 <P><TABLE BORDER=0>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>vorheriger/nächster Kanal</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Norm</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Kanalliste/TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">vorheriger/nächster Kanal</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">n</TD><TD></TD><TD><FONT CLASS="text">ändern der Norm</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">b</TD><TD></TD><TD><FONT CLASS="text">ändern der Kanalliste/TD></TR>
 
 </TABLE></P>
 
@@ -933,16 +945,16 @@ Das wars :-)</P>
 Es versteht die folgenden Befehle:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PAUSE</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Pause für die Wiedergabe. Irgendein Tastendruck zum Weiterspielen.</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>QUIT</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Beenden von MPlayer</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>RWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 Sekunden zurück</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FRWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>60 Sekunden zurück</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Überspringt 10 Sekunden</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FFWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Überspringt 60 Sekunden</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>INCVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Verhöht die Lautstärke um 1 Prozent</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DECVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Verringert die Lautstärke um 1 Prozent</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>MASTER</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Verwendung des Haupt-Mixer Kanals</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PCM</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Verwendung des PCM-Mixer Kanals</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">PAUSE</TD><TD></TD><TD><FONT CLASS="text">Pause für die Wiedergabe. Irgendein Tastendruck zum Weiterspielen.</TD><TR>
+<TD></TD><TD><FONT CLASS="text">QUIT</TD><TD></TD><TD><FONT CLASS="text">Beenden von MPlayer</TD><TR>
+<TD></TD><TD><FONT CLASS="text">RWND</TD><TD></TD><TD><FONT CLASS="text">10 Sekunden zurück</TD><TR>
+<TD></TD><TD><FONT CLASS="text">FRWND</TD><TD></TD><TD><FONT CLASS="text">60 Sekunden zurück</TD><TR>
+<TD></TD><TD><FONT CLASS="text">FWD</TD><TD></TD><TD><FONT CLASS="text">Überspringt 10 Sekunden</TD><TR>
+<TD></TD><TD><FONT CLASS="text">FFWD</TD><TD></TD><TD><FONT CLASS="text">Überspringt 60 Sekunden</TD><TR>
+<TD></TD><TD><FONT CLASS="text">INCVOL</TD><TD></TD><TD><FONT CLASS="text">Verhöht die Lautstärke um 1 Prozent</TD><TR>
+<TD></TD><TD><FONT CLASS="text">DECVOL</TD><TD></TD><TD><FONT CLASS="text">Verringert die Lautstärke um 1 Prozent</TD><TR>
+<TD></TD><TD><FONT CLASS="text">MASTER</TD><TD></TD><TD><FONT CLASS="text">Verwendung des Haupt-Mixer Kanals</TD><TR>
+<TD></TD><TD><FONT CLASS="text">PCM</TD><TD></TD><TD><FONT CLASS="text">Verwendung des PCM-Mixer Kanals</TD><TR>
 </TABLE></P>
 
 <P>Vergiss nicht den Wiederholungsparameter [repeat] zu setzten für RWND/FWD in
