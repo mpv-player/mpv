@@ -13,8 +13,8 @@ endif
 
 getch = getch2.c
 timer = timer-lx.c
-ifeq ($(MACOSX),yes)
-timer = timer-macosx.c
+ifeq ($(TARGET_OS),Darwin)
+timer = timer-darwin.c
 endif
 ifeq ($(TARGET_CYGWIN),yes)
 timer = timer-win2.c
