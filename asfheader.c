@@ -84,6 +84,7 @@ int asf_packetsize=0;
 // the variable string is modify in this function
 void pack_asf_string(char* string, int length) {
   int i,j;
+  if( string==NULL ) return;
   for( i=0, j=0; i<length && string[i]!='\0'; i+=2, j++) {
     string[j]=string[i];
   }
@@ -217,25 +218,35 @@ if(verbose){
         char *string;
         stream_read(demuxer->stream,(char*) &contenth,sizeof(contenth));
         // extract the title
-        string=(char*)malloc(contenth.title_size);
-        stream_read(demuxer->stream, string, contenth.title_size);
-        print_asf_string("\n Title: ", string, contenth.title_size);
+        if( contenth.title_size!=0 ) {
+          string=(char*)malloc(contenth.title_size);
+          stream_read(demuxer->stream, string, contenth.title_size);
+          print_asf_string("\n Title: ", string, contenth.title_size);
+        }
         // extract the author 
-        string=(char*)realloc((void*)string, contenth.author_size);
-        stream_read(demuxer->stream, string, contenth.author_size);
-        print_asf_string(" Author: ", string, contenth.author_size);
+        if( contenth.author_size!=0 ) {
+          string=(char*)realloc((void*)string, contenth.author_size);
+          stream_read(demuxer->stream, string, contenth.author_size);
+          print_asf_string(" Author: ", string, contenth.author_size);
+        }
         // extract the copyright
-        string=(char*)realloc((void*)string, contenth.copyright_size);
-        stream_read(demuxer->stream, string, contenth.copyright_size);
-        print_asf_string(" Copyright: ", string, contenth.copyright_size);
+        if( contenth.copyright_size!=0 ) {
+          string=(char*)realloc((void*)string, contenth.copyright_size);
+          stream_read(demuxer->stream, string, contenth.copyright_size);
+          print_asf_string(" Copyright: ", string, contenth.copyright_size);
+        }
         // extract the comment
-        string=(char*)realloc((void*)string, contenth.comment_size);
-        stream_read(demuxer->stream, string, contenth.comment_size);
-        print_asf_string(" Comment: ", string, contenth.comment_size);
+        if( contenth.comment_size!=0 ) {
+          string=(char*)realloc((void*)string, contenth.comment_size);
+          stream_read(demuxer->stream, string, contenth.comment_size);
+          print_asf_string(" Comment: ", string, contenth.comment_size);
+        }
         // extract the rating
-        string=(char*)realloc((void*)string, contenth.rating_size);
-        stream_read(demuxer->stream, string, contenth.rating_size);
-        print_asf_string(" Rating: ", string, contenth.rating_size);
+        if( contenth.rating_size!=0 ) {
+          string=(char*)realloc((void*)string, contenth.rating_size);
+          stream_read(demuxer->stream, string, contenth.rating_size);
+          print_asf_string(" Rating: ", string, contenth.rating_size);
+        }
 	printf("\n");
         free(string);
       }
