@@ -961,7 +961,9 @@ static int parse_imgfmt(m_option_t* opt,char *name, char *param, void* dst, int 
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
     return M_OPT_EXIT;
   }
-
+  
+  if (sscanf(param, "0x%x", &fmt) != 1)
+  {
   for(i = 0 ; mp_imgfmt_list[i].name ; i++) {
     if(!strcasecmp(param,mp_imgfmt_list[i].name)) {
       fmt=mp_imgfmt_list[i].fmt;
@@ -971,6 +973,7 @@ static int parse_imgfmt(m_option_t* opt,char *name, char *param, void* dst, int 
   if(!mp_imgfmt_list[i].name) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: unknown format name: '%s'\n",name,param);
     return M_OPT_INVALID;
+  }
   }
 
   if(dst)
