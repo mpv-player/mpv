@@ -72,8 +72,6 @@ struct win_frame
 static int vesa_zoom=0; /* software scaling */
 static unsigned int scale_xinc=0;
 static unsigned int scale_yinc=0;
-static float aspect_factor;
-
 
 static uint32_t image_width, image_height; /* source image dimension */
 static int32_t x_offset,y_offset; /* to center image on screen */
@@ -83,6 +81,7 @@ static struct win_frame win; /* real-mode window to video memory */
 static uint8_t *yuv_buffer = NULL; /* for yuv2rgb and sw_scaling */
 static unsigned video_mode; /* selected video mode for playback */
 static struct VesaModeInfoBlock video_mode_info;
+static int flip_trigger = 0;
 
 #define MOVIE_MODE (MODE_ATTR_COLOR | MODE_ATTR_GRAPHICS)
 #define FRAME_MODE (MODE_WIN_RELOCATABLE | MODE_WIN_READABLE | MODE_WIN_WRITEABLE)
@@ -236,32 +235,6 @@ static void __vbeCopyData(uint8_t *image)
    }
 }
 
-static void __vbeCopySliceData(uint8_t *image,int x, int y, int w, int h)
-{
-   unsigned long i,j,image_offset,offset;
-   unsigned pixel_size,image_line_size,screen_line_size,x_shift;
-   pixel_size = (video_mode_info.BitsPerPixel+7)/8;
-   screen_line_size = video_mode_info.XResolution*pixel_size;
-   image_line_size = w*pixel_size;
-#if 0
-   if(image_width == video_mode_info.XResolution && w == image_width)
-   {
-     /* Special case for zooming */
-     __vbeCopyBlock((y_offset+y)*screen_line_size,image,image_line_size*image_height);
-   }
-   else
-#endif
-   {
-     x_shift = (x_offset+x)*pixel_size;
-     for(j=0,i=y_offset+y;j<h;i++,j++)
-     {
-       offset = i*screen_line_size+x_shift;
-       image_offset = j*image_line_size;
-       __vbeCopyBlock(offset,&image[image_offset],image_line_size);
-     }
-   }
-}
-
 /* is called for yuv only */
 static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
@@ -272,23 +245,16 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 			     image_width*((video_mode_info.BitsPerPixel+7)/8),
 			     image_width, video_mode_info.BitsPerPixel,
 	    		     scale_xinc, scale_yinc);
-	if(y || x || w != image_width || h != image_height)
-	{
-	    w = image_width;
-	    h = image_height;
-	    y = 0;
-	    x = 0;
-	}
     }
     else
     {
-	yuv2rgb(yuv_buffer, image[0], image[1], image[2], w, h,
+	uint8_t *yuv_slice;
+	yuv_slice=yuv_buffer+(image_width*y+x)*((video_mode_info.BitsPerPixel+7)/8);
+	yuv2rgb(yuv_slice, image[0], image[1], image[2], w, h,
 		image_width * ((video_mode_info.BitsPerPixel+7)/8),
 		stride[0], stride[1]);
     }
-    if(y || x || w != image_width || h != image_height)
-	 __vbeCopySliceData((uint8_t*)yuv_buffer,x,y,w,h);
-    else __vbeCopyData((uint8_t *)yuv_buffer);
+    flip_trigger = 1;
     return 0;
 }
 
@@ -299,7 +265,7 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
-/*Is not required*/
+  if(flip_trigger) { __vbeCopyData(yuv_buffer); flip_trigger = 0; }
 }
 
 /* is called for rgb only */
@@ -342,6 +308,7 @@ static void vesa_aspect(uint32_t width,uint32_t height,
 		    	uint32_t xres,uint32_t yres,
 			uint32_t *image_width,uint32_t *image_height)
 {
+  float aspect_factor;
   aspect_factor = (float)width / height;
   *image_width = xres;
   *image_height = xres /aspect_factor;
