@@ -14,14 +14,14 @@
 
 static ad_info_t info =  {
 	"RealAudio decoder",
-	"real",
+	"realaud",
 	AFM_REAL,
 	"A'rpi",
 	"Florian Schneider",
 	"binary real audio codecs"
 };
 
-LIBAD_EXTERN(real)
+LIBAD_EXTERN(realaud)
 
 static void *handle=NULL;
 

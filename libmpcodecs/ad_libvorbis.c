@@ -18,7 +18,7 @@ static ad_info_t info =
 	"buggy"
 };
 
-LIBAD_EXTERN(vorbis)
+LIBAD_EXTERN(libvorbis)
 
 #include <vorbis/codec.h>
 

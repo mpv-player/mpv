@@ -13,14 +13,14 @@
 
 static vd_info_t info = {
 	"RealVideo decoder",
-	"real",
+	"realvid",
 	VFM_REAL,
 	"Florian Schneider & A'rpi",
 	"using original closed source codecs for Linux",
 	"binary real video codecs"
 };
 
-LIBVD_EXTERN(real)
+LIBVD_EXTERN(realvid)
 
 
 unsigned long (*rvyuv_custom_message)(unsigned long,unsigned long);
