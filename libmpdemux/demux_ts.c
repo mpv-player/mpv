@@ -36,6 +36,7 @@
 
 #include "bswap.h"
 #include "../unrarlib.h"
+#include "ms_hdr.h"
 
 #define TS_PH_PACKET_SIZE 192
 #define TS_FEC_PACKET_SIZE 204
@@ -63,6 +64,7 @@ typedef enum
 	VIDEO_MPEG2 	= 0x10000002,
 	VIDEO_MPEG4 	= 0x10000004,
 	VIDEO_H264 	= 0x10000005,
+	VIDEO_AVC	= mmioFOURCC('a', 'v', 'c', '1'),
 	AUDIO_MP2   	= 0x50,
 	AUDIO_A52   	= 0x2000,
 	AUDIO_LPCM_BE  	= 0x10001,
@@ -91,6 +93,8 @@ typedef struct {
 	int last_cc;				// last cc code (-1 if first packet)
 	int is_synced;
 	ts_section_t section;
+	uint8_t *extradata;
+	int extradata_alloc, extradata_len;
 	struct {
 		uint8_t au_start, au_end, last_au_end;
 	} sl;
@@ -112,6 +116,9 @@ typedef struct {
 typedef struct {
 	int32_t object_type;	//aka codec used
 	int32_t stream_type;	//video, audio etc.
+	uint8_t buf[4096];
+	uint16_t buf_size;
+	uint8_t szm1;
 } mp4_decoder_config_t;
 
 typedef struct {
@@ -211,7 +218,7 @@ typedef struct {
 
 
 #define IS_AUDIO(x) (((x) == AUDIO_MP2) || ((x) == AUDIO_A52) || ((x) == AUDIO_LPCM_BE) || ((x) == AUDIO_AAC))
-#define IS_VIDEO(x) (((x) == VIDEO_MPEG1) || ((x) == VIDEO_MPEG2) || ((x) == VIDEO_MPEG4) || ((x) == VIDEO_H264))
+#define IS_VIDEO(x) (((x) == VIDEO_MPEG1) || ((x) == VIDEO_MPEG2) || ((x) == VIDEO_MPEG4) || ((x) == VIDEO_H264) || ((x) == VIDEO_AVC))
 
 static int ts_parse(demuxer_t *demuxer, ES_stream_t *es, unsigned char *packet, int probe);
 extern void resync_audio_stream( sh_audio_t *sh_audio );
@@ -728,10 +735,20 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 	}
 						
 	if(video_found)
-		mp_msg(MSGT_DEMUXER, MSGL_INFO, "VIDEO %s(pid=%d)...", (param->vtype == VIDEO_MPEG1 ? "MPEG1" : (param->vtype == VIDEO_MPEG2 ? "MPEG2" : (param->vtype == VIDEO_MPEG4 ? "MPEG4" : "H264"))), param->vpid);
+	{
+		if(param->vtype == VIDEO_MPEG1)
+			mp_msg(MSGT_DEMUXER, MSGL_INFO, "VIDEO MPEG1(pid=%d)", param->vpid);
+		else if(param->vtype == VIDEO_MPEG2)
+			mp_msg(MSGT_DEMUXER, MSGL_INFO, "VIDEO MPEG2(pid=%d)", param->vpid);
+		else if(param->vtype == VIDEO_MPEG4)
+			mp_msg(MSGT_DEMUXER, MSGL_INFO, "VIDEO MPEG4(pid=%d)...", param->vpid);
+		else if(param->vtype == VIDEO_H264)
+			mp_msg(MSGT_DEMUXER, MSGL_INFO, "VIDEO H264(pid=%d)...", param->vpid);
+		else if(param->vtype == VIDEO_AVC)
+			mp_msg(MSGT_DEMUXER, MSGL_INFO, "VIDEO AVC(NAL-H264, pid=%d)...", param->vpid);
+	}
 	else
 	{
-		video_found = 0;
 		param->vtype = UNKNOWN;
 		//WE DIDN'T MATCH ANY VIDEO STREAM
 		mp_msg(MSGT_DEMUXER, MSGL_INFO, "NO VIDEO! ");
@@ -871,7 +888,18 @@ demuxer_t *demux_open_ts(demuxer_t * demuxer)
 
 	if(params.vtype != UNKNOWN)
 	{
+		ES_stream_t *es = priv->ts.pids[params.vpid];
 		sh_video = new_sh_video(demuxer, 0);
+		if(params.vtype == VIDEO_AVC && es->extradata && es->extradata_len)
+		{
+			sh_video->bih = (BITMAPINFOHEADER *) calloc(1, sizeof(BITMAPINFOHEADER) + 4096);
+			sh_video->bih->biSize= sizeof(BITMAPINFOHEADER) + es->extradata_len;
+			memcpy(sh_video->bih + 1, es->extradata, es->extradata_len);
+			mp_msg(MSGT_DEMUXER,MSGL_DBG2, "EXTRADATA(%d BYTES): \n", es->extradata_len);
+			for(i = 0;i < es->extradata_len; i++)
+				mp_msg(MSGT_DEMUXER,MSGL_DBG2, "%02x ", (int) es->extradata[i]);
+			mp_msg(MSGT_DEMUXER,MSGL_DBG2,"\n");
+		}
 		sh_video->ds = demuxer->video;
 		sh_video->format = params.vtype;
 		demuxer->video->sh = sh_video;
@@ -950,31 +978,31 @@ void demux_close_ts(demuxer_t * demuxer)
 extern unsigned char mp_getbits(unsigned char*, unsigned int, unsigned char);
 #define getbits mp_getbits
 
-static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, int pid, int is_aligned, ES_stream_t *pes_es)
+static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, int pid, ES_stream_t *pes_es)
 {
-	int i, n, m, es_id = -1;
+	int i, n, m, mp4_es_id = -1;
 	uint64_t v = 0;
 	uint32_t pl_size = 0; 
 	int deg_flag = 0;
 	mp4_es_descr_t *es = NULL;
 	mp4_sl_config_t *sl = NULL;
-	uint8_t au_start = 0, au_end = 0, rap_flag = 0, ocr_flag = 0, random_accesspoint = 0, random_accesspoint_only = 0,
-		padding = 0,  padding_bits = 0, use_ts = 0, idle = 0, duration = 0;
+	uint8_t au_start = 0, au_end = 0, rap_flag = 0, ocr_flag = 0, padding = 0,  padding_bits = 0, idle = 0;
 	
-	if(! pmt || ! is_aligned || !packet_len)	//FIXME
+	mp_msg(MSGT_DEMUXER,MSGL_V, "mp4_parse_sl_packet, pid: %d, pmt: %pm, packet_len: %d\n", pid, pmt, packet_len);	
+	if(! pmt || !packet_len)
 		return 0;
 	
 	for(i = 0; i < pmt->es_cnt; i++)
 	{
 		if(pmt->es[i].pid == pid)
-			es_id = pmt->es[i].mp4_es_id;
+			mp4_es_id = pmt->es[i].mp4_es_id;
 	}
-	if(es_id < 0)
+	if(mp4_es_id < 0)
 		return -1;
 	
 	for(i = 0; i < pmt->mp4es_cnt; i++)
 	{
-		if(pmt->mp4es[i].id == es_id)
+		if(pmt->mp4es[i].id == mp4_es_id)
 			es = &(pmt->mp4es[i]);
 	}
 	if(! es)
@@ -987,7 +1015,7 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 		return -1;
 		
 	//now es is the complete es_descriptor of out mp4 ES stream
-	mp_msg(MSGT_DEMUXER,MSGL_DBG2, "ID: %d, FLAGS: 0x%x\n", es->id, sl->flags);
+	mp_msg(MSGT_DEMUXER,MSGL_DBG2, "ID: %d, FLAGS: 0x%x, subtype: %x\n", es->id, sl->flags, pes_es->subtype);
 	
 	n = 0;
 	if(sl->au_start)
@@ -1025,7 +1053,7 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 	//(! idle && (!padding || padding_bits != 0)) is true
 	n += sl->packet_seqnum_len;
 	if(sl->degr_len)
-		deg_flag = getbits(buf, n++, 3);
+		deg_flag = getbits(buf, n++, 1);
 	if(deg_flag)
 		n += sl->degr_len;
 	
@@ -1042,7 +1070,6 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 	if(au_start)
 	{
 		int dts_flag = 0, cts_flag = 0, ib_flag = 0;
-		uint64_t dts, cts;
 		
 		if(sl->random_accesspoint)
 			rap_flag = getbits(buf, n++, 1);
@@ -1055,11 +1082,11 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 			return -1;
 		if(sl->use_ts)
 		{
-			dts_flag = getbits(buf, n++, 3);
-			cts_flag = getbits(buf, n++, 3);
+			dts_flag = getbits(buf, n++, 1);
+			cts_flag = getbits(buf, n++, 1);
 		}
 		if(sl->instant_bitrate_len)
-			ib_flag = getbits(buf, n++, 3);
+			ib_flag = getbits(buf, n++, 1);
 		if(packet_len * 8 <= n+8)
 			return -1;
 		if(dts_flag && (sl->ts_len > 0))
@@ -1109,14 +1136,11 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 	}
 	
 	m = (n+7)/8;
-	pes_es->payload_size -= min(m, pes_es->payload_size);
 	if(0 < pl_size && pl_size < pes_es->payload_size)
 		pes_es->payload_size = pl_size;
 	
-	if(pes_es->sl.au_start && pes_es->payload_size)
-		mp_msg(MSGT_DEMUXER,MSGL_DBG2, "4bytes of payload (%d bytes) %02x %02x %02x %02x \n", pes_es->payload_size, buf[m], buf[m+1], buf[m+2], buf[m+3]);
-	mp_msg(MSGT_DEMUXER,MSGL_DBG2, "mp4_parse_sl_packet, final n=%d, m=%d, RAP_FLAG: %d, RAP_ALWAYS: %d, size from pes hdr: %u, size from sl hdr: %d\n", 
-		n, m, rap_flag, sl->random_accesspoint_only, pes_es->payload_size, pl_size);
+	mp_msg(MSGT_DEMUXER,MSGL_V, "mp4_parse_sl_packet, n=%d, m=%d, size from pes hdr: %u, sl hdr size: %u, RAP FLAGS: %d/%d\n", 
+		n, m, pes_es->payload_size, pl_size, (int) rap_flag, (int) sl->random_accesspoint_only);
 	
 	return m;
 }
@@ -1187,11 +1211,6 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 
 	p += header_len + 9;
 	packet_len -= header_len + 3;
-
-	/*
-	if(packet_len <= 0)
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "\n\nNow: %d, prima: %d, ORIG: %d\n\n\n", packet_len, packet_len+3+header_len, pkt_len);
-	*/
 
 	if(es->payload_size)
 		es->payload_size -= header_len + 3;
@@ -1308,23 +1327,26 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 			es->start   = p;
 			es->size    = packet_len;
 			es->type    = type_from_pmt;
-			if(es->payload_size)
-				es->payload_size -= es->size;
 				
 			if(type_from_pmt == SL_PES_STREAM)
 			{
-				l = mp4_parse_sl_packet(pmt, p, packet_len, pid, pes_is_aligned, es);
-				mp_msg(MSGT_DEMUX, MSGL_DBG2, "L=%d, TYPE=%x\n", l, type_from_pmt);
-				if(l < 0)
-				{
-					mp_msg(MSGT_DEMUX, MSGL_DBG2, "pes_parse2: couldn't parse SL header, passing along full PES payload\n");
-					l = 0;
-				}
+				//if(pes_is_aligned)
+				//{
+					l = mp4_parse_sl_packet(pmt, p, packet_len, pid, es);
+					mp_msg(MSGT_DEMUX, MSGL_DBG2, "L=%d, TYPE=%x\n", l, type_from_pmt);
+					if(l < 0)
+					{
+						mp_msg(MSGT_DEMUX, MSGL_DBG2, "pes_parse2: couldn't parse SL header, passing along full PES payload\n");
+						l = 0;
+					}
+				//}
 			
 				es->start   += l;
 				es->size    -= l;
 			}
 
+			if(es->payload_size)
+				es->payload_size -= packet_len;
 			return 1;
 		}
 	}
@@ -1614,7 +1636,6 @@ static uint16_t get_mp4_desc_len(uint8_t *buf, int *len)
 static uint16_t parse_mp4_slconfig_descriptor(pmt_t *pmt, uint8_t *buf, int len, void *elem)
 {
 	int i = 0;
-	uint64_t tslen = 0;
 	mp4_es_descr_t *es;
 	mp4_sl_config_t *sl;
 	
@@ -1639,7 +1660,7 @@ static uint16_t parse_mp4_slconfig_descriptor(pmt_t *pmt, uint8_t *buf, int len,
 		i += 4;
 		sl->ocr_resolution = (buf[i] << 24) | (buf[i+1] << 16) | (buf[i+2] << 8) | buf[i+3];
 		i += 4;
-		tslen = sl->ts_len = buf[i];
+		sl->ts_len = buf[i];
 		i++;
 		sl->ocr_len = buf[i];
 		i++;
@@ -1657,8 +1678,8 @@ static uint16_t parse_mp4_slconfig_descriptor(pmt_t *pmt, uint8_t *buf, int len,
 	else if(buf[0] == 1)
 	{
 		sl->flags = 0;
-		tslen = sl->ts_resolution = 1000;
-		tslen = sl->ts_len = 32;
+		sl->ts_resolution = 1000;
+		sl->ts_len = 32;
 		i++;
 	}
 	else if(buf[0] == 2)
@@ -1693,7 +1714,7 @@ static uint16_t parse_mp4_slconfig_descriptor(pmt_t *pmt, uint8_t *buf, int len,
 	else	//no support for fixed durations atm
 		sl->timescale = sl->au_duration = sl->cts_duration = 0;
 	
-	mp_msg(MSGT_DEMUX, MSGL_V, "MP4SLCONFIG(0x%x), predef: %d, flags: %x, use_ts: %d, tslen: %d, timescale: %d, dts: %llu, cts: %llu\n", 
+	mp_msg(MSGT_DEMUX, MSGL_V, "MP4SLCONFIG(len=0x%x), predef: %d, flags: %x, use_ts: %d, tslen: %d, timescale: %d, dts: %llu, cts: %llu\n", 
 		len, buf[0], sl->flags, sl->use_ts, sl->ts_len, sl->timescale, (uint64_t) sl->dts, (uint64_t) sl->cts);
 	
 	return len;
@@ -1733,7 +1754,9 @@ static uint16_t parse_mp4_decoder_config_descriptor(pmt_t *pmt, uint8_t *buf, in
 		else if(dec->object_type == 0x20)
 			dec->object_type = VIDEO_MPEG4;
 		else if(dec->object_type == 0x21)
-			dec->object_type = VIDEO_H264;
+			dec->object_type = VIDEO_AVC;
+		/*else if(dec->object_type == 0x22)
+			fprintf(stderr, "TYPE 0x22\n");*/
 		else dec->object_type = UNKNOWN;
 	}
 	else if(dec->stream_type == 5)
@@ -1748,7 +1771,34 @@ static uint16_t parse_mp4_decoder_config_descriptor(pmt_t *pmt, uint8_t *buf, in
 	else
 		dec->object_type = dec->stream_type = UNKNOWN;
 	
+	if(len > 13)
+		parse_mp4_descriptors(pmt, &buf[13], len-13, dec);
+	
 	mp_msg(MSGT_DEMUX, MSGL_V, "MP4DECODER(0x%x), object_type: 0x%x, stream_type: 0x%x\n", len, dec->object_type, dec->stream_type);
+	
+	return len;
+}
+
+static uint16_t parse_mp4_decoder_specific_descriptor(pmt_t *pmt, uint8_t *buf, int len, void *elem)
+{
+	int i;
+	mp4_decoder_config_t *dec;
+	
+	mp_msg(MSGT_DEMUX, MSGL_V, "PARSE_MP4_DECODER_SPECIFIC_DESCRIPTOR(%d)\n", len);
+	dec = (mp4_decoder_config_t *) elem;
+	if(!dec)
+	{
+		mp_msg(MSGT_DEMUX, MSGL_V, "argh! NULL elem passed, skip\n");
+		return len;
+	}
+	
+	mp_msg(MSGT_DEMUX, MSGL_DBG2, "MP4 SPECIFIC INFO BYTES: \n");
+	for(i=0; i<len; i++)
+		mp_msg(MSGT_DEMUX, MSGL_DBG2, "%02x ", buf[i]);
+	mp_msg(MSGT_DEMUX, MSGL_DBG2, "\n");
+
+	memcpy(dec->buf, buf, len);
+	dec->buf_size = len;
 	
 	return len;
 }
@@ -1757,10 +1807,10 @@ static uint16_t parse_mp4_es_descriptor(pmt_t *pmt, uint8_t *buf, int len, void 
 {
 	int i = 0, j = 0, k, found;
 	uint8_t flag;
-	mp4_es_descr_t es, *target_es, *tmp;
+	mp4_es_descr_t es, *target_es = NULL, *tmp;
 	
 	mp_msg(MSGT_DEMUX, MSGL_V, "PARSE_MP4ES: len=%d\n", len);
-	
+	memset(&es, 0, sizeof(mp4_es_descr_t));
 	while(i < len)
 	{
 		es.id = (buf[i] << 8) | buf[i+1];
@@ -1897,6 +1947,9 @@ static int parse_mp4_descriptors(pmt_t *pmt, uint8_t *buf, int len, void *elem)
 			case 0x4:
 				parse_mp4_decoder_config_descriptor(pmt, &buf[i], descr_len, elem);
 				break;
+			case 0x05:
+				parse_mp4_decoder_specific_descriptor(pmt, &buf[i], descr_len, elem);
+				break;
 			case 0x6:
 				parse_mp4_slconfig_descriptor(pmt, &buf[i], descr_len, elem);
 				break;
@@ -1922,6 +1975,8 @@ static ES_stream_t *new_pid(ts_priv_t *priv, int pid)
 	tss->type = UNKNOWN;
 	tss->subtype = UNKNOWN;
 	tss->is_synced = 0;
+	tss->extradata = NULL;
+	tss->extradata_alloc = tss->extradata_len = 0;
 	priv->ts.pids[pid] = tss;
 	
 	return tss;
@@ -2255,9 +2310,9 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 	return 1;
 }
 
-static pmt_t* pmt_of_pid(ts_priv_t *priv, int pid)
+static pmt_t* pmt_of_pid(ts_priv_t *priv, int pid, mp4_decoder_config_t **mp4_dec)
 {
-	int32_t i, j;
+	int32_t i, j, k;
 
 	if(priv->pmt)
 	{
@@ -2266,11 +2321,28 @@ static pmt_t* pmt_of_pid(ts_priv_t *priv, int pid)
 			if(priv->pmt[i].es && priv->pmt[i].es_cnt)
 			{
 				for(j = 0; j < priv->pmt[i].es_cnt; j++)
+				{
 					if(priv->pmt[i].es[j].pid == pid)
+					{
+						//search mp4_es_id
+						if(priv->pmt[i].es[j].mp4_es_id)
+						{
+							for(k = 0; k < priv->pmt[i].mp4es_cnt; k++)
+							{
+								//fprintf(stderr, "K=%d, ID: %x, MP4ESID:%x\n", k, priv->pmt[i].mp4es[k].id, priv->pmt[i].es[j].mp4_es_id);
+								if(priv->pmt[i].mp4es[k].id == priv->pmt[i].es[j].mp4_es_id)
+								{
+									*mp4_dec = &(priv->pmt[i].mp4es[k].decoder);
+									break;
+								}
+							}
+						}
+						
 						return &(priv->pmt[i]);
+					}
+				}
 			}	
 		}
-		
 	}
 	
 	return NULL;
@@ -2340,13 +2412,34 @@ static int fill_packet(demuxer_t *demuxer, demux_stream_t *ds, demux_packet_t **
 			ret = *dp_offset;
 			resize_demux_packet(*dp, ret);	//shrinked to the right size
 			ds_add_packet(ds, *dp);
-			mp_msg(MSGT_DEMUX, MSGL_DBG2, "ADDED %d  bytes to %s fifo, PTS=%f\n", ret, (ds == demuxer->audio ? "audio" : (ds == demuxer->video ? "video" : "sub")), (*dp)->pts);
+			mp_msg(MSGT_DEMUX, MSGL_DBG2, "ADDED %d  bytes to %s fifo, PTS=%.3f\n", ret, (ds == demuxer->audio ? "audio" : (ds == demuxer->video ? "video" : "sub")), (*dp)->pts);
 	}
 
 	*dp = NULL;
 	*dp_offset = 0;
 
 	return ret;
+}
+
+static int fill_extradata(mp4_decoder_config_t * mp4_dec, ES_stream_t *tss)
+{
+	uint8_t *tmp;
+	
+	mp_msg(MSGT_DEMUX, MSGL_DBG2, "MP4_dec: %p, pid: %d\n", mp4_dec, tss->pid);
+		
+	if(mp4_dec->buf_size > tss->extradata_alloc)
+	{
+		tmp = (uint8_t *) realloc(tss->extradata, mp4_dec->buf_size);
+		if(!tmp)
+			return 0;
+		tss->extradata = tmp;
+		tss->extradata_alloc = mp4_dec->buf_size;
+	}
+	memcpy(tss->extradata, mp4_dec->buf, mp4_dec->buf_size);
+	tss->extradata_len = mp4_dec->buf_size;
+	mp_msg(MSGT_DEMUX, MSGL_V, "EXTRADATA: %p, alloc=%d, len=%d\n", tss->extradata, tss->extradata_alloc, tss->extradata_len);
+	
+	return tss->extradata_len;
 }
 
 // 0 = EOF or no stream found
@@ -2359,13 +2452,14 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 	int len, cc, cc_ok, afc, retv = 0, is_video, is_audio, is_sub;
 	ts_priv_t * priv = (ts_priv_t*) demuxer->priv;
 	stream_t *stream = demuxer->stream;
-	char *p, tmp[TS_FEC_PACKET_SIZE];
+	char *p;
 	demux_stream_t *ds = NULL;
 	demux_packet_t **dp = NULL;
 	int *dp_offset = 0, *buffer_size = 0;
 	int32_t progid, pid_type, bad, ts_error;
 	int junk = 0, rap_flag = 0;
 	pmt_t *pmt;
+	mp4_decoder_config_t *mp4_dec;
 
 
 	while(! done)
@@ -2375,6 +2469,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		dp = (demux_packet_t **) NULL;
 		dp_offset = buffer_size = NULL;
 		rap_flag = 0;
+		mp4_dec = NULL;
 
 		junk = priv->ts.packet_size - TS_PACKET_SIZE;
 		buf_size = priv->ts.packet_size - junk;
@@ -2472,7 +2567,10 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 		//find the program that the pid belongs to; if (it's the right one or -1) && pid_type==SL_SECTION
 		//call parse_sl_section()
-		pmt = pmt_of_pid(priv, pid);
+		pmt = pmt_of_pid(priv, pid, &mp4_dec);
+		if(mp4_dec)
+			fill_extradata(mp4_dec, tss);
+		
 		
 		//TABLE PARSING
 
@@ -2493,7 +2591,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				if(pmt->mp4es[k].decoder.object_type == MP4_OD && pmt->mp4es[k].decoder.stream_type == MP4_OD)
 					mp4_es_id = pmt->mp4es[k].id;
 			}
-			mp_msg(MSGT_DEMUX, MSGL_V, "ESID: %d\n", mp4_es_id);
+			mp_msg(MSGT_DEMUX, MSGL_DBG2, "MP4ESID: %d\n", mp4_es_id);
 			for(k = 0; k < pmt->es_cnt; k++)
 			{
 				if(pmt->es[k].mp4_es_id == mp4_es_id)
@@ -2793,7 +2891,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 					resize_demux_packet(*dp, *buffer_size);
 					//we'll skip at least one RESIZE() in the next iteration of ts_parse()
 					mp_msg(MSGT_DEMUX, MSGL_DBG2, "RESIZE DP TO %d\n", *buffer_size);
-					//mp_msg(MSGT_DEMUX, MSGL_INFO, "SECOND TYPE=%x, bytes=%d, afc=%d, psize=%d, tell=%llu\n", es->type, sz, afc, tss->payload_size, (uint64_t) stream_tell(demuxer->stream));
 				}
 
 				stream_read(stream, &((*dp)->buffer[*dp_offset]), sz);
