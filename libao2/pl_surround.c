@@ -148,8 +148,10 @@ static void uninit(){
     free(pl_surround.Ls_delaybuf);
   if(pl_surround.Rs_delaybuf) 
     free(pl_surround.Rs_delaybuf);
-  if(pl_surround.databuf) 
+  if(pl_surround.databuf) {
     free(pl_surround.databuf);
+    pl_surround.databuf = NULL;
+  }
   pl_surround.delaybuf_len=0;
 }
 
