@@ -25,6 +25,7 @@ extern vd_functions_t mpcodecs_vd_null;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
+        &mpcodecs_vd_cinepak,
 	NULL
 };
 
