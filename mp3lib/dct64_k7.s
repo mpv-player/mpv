@@ -3,44 +3,9 @@
 # Applied to mplayer by Nick Kurshev <nickols_k@mail.ru>
 # Partial 3dnowex-DSP! optimization by Nick Kurshev
 #
-# TODO: finish 3dnow! optimization at least in scalar mode
+# TODO: optimize scalar 3dnow! code
+# Warning: Phases 7 & 8 are not tested
 #
-
-.data
-	.align 8
-plus_minus_3dnow: .long 0x00000000, 0x80000000
-costab:
-	.long 1056974725
-	.long 1057056395
-	.long 1057223771
-	.long 1057485416
-	.long 1057855544
-	.long 1058356026
-	.long 1059019886
-	.long 1059897405
-	.long 1061067246
-	.long 1062657950
-	.long 1064892987
-	.long 1066774581
-	.long 1069414683
-	.long 1073984175
-	.long 1079645762
-	.long 1092815430
-	.long 1057005197
-	.long 1057342072
-	.long 1058087743
-	.long 1059427869
-	.long 1061799040
-	.long 1065862217
-	.long 1071413542
-	.long 1084439708
-	.long 1057128951
-	.long 1058664893
-	.long 1063675095
-	.long 1076102863
-	.long 1057655764
-	.long 1067924853
-	.long 1060439283
 
 .text
 
@@ -57,10 +22,10 @@ dct64_MMX_3dnowex:
 	leal 128(%esp),%edx
 	movl 272(%esp),%esi
 	movl 276(%esp),%edi
-	movl $costab,%ebx
+	movl $costab_mmx,%ebx
 	orl %ecx,%ecx
 	movl %esp,%ecx
-	femms	
+
 /* Phase 1*/
 	movq	(%eax), %mm0
 	movq	8(%eax), %mm4
@@ -407,395 +372,419 @@ dct64_MMX_3dnowex:
 	movq	%mm7, 120(%ecx)
 	
 /* Phase 6. This is the end of easy road. */
-	movl	$1, %eax
-	movd	%eax, %mm7
-	pi2fd	%mm7, %mm7
-	movq	32(%ecx), %mm0
-	punpckldq 120(%ebx), %mm7 /* 1.0 | 120(%ebx) */	
-	movq	%mm0, %mm1
-	movq	plus_minus_3dnow, %mm6
-	/* n.b.: pfpnacc */
-	pxor	%mm6, %mm1
-	pfacc	%mm1, %mm0
-	/**/
-	pfmul	%mm7, %mm0
-	movq	%mm0, 32(%edx)
-	femms
+/* Code below is coded in scalar mode. Should be optimized */
 
-	flds   44(%ecx)
-	fsubs  40(%ecx)
-	fmuls 120(%ebx)
+	movd   32(%ecx), %mm0
+	pfadd  36(%ecx), %mm0
+	movd   %mm0, 32(%edx)
 
-	fsts   44(%edx)
-	fadds  40(%ecx) /* pfacc 40(ecx), 56(%ecx) */
-	fadds  44(%ecx)
-	fstps  40(%edx)
+	movd   32(%ecx), %mm0
+	pfsub  36(%ecx), %mm0
+	pfmul  120(%ebx),%mm0
+	movd   %mm0, 36(%edx)
 
-	flds   48(%ecx)
-	fsubs  52(%ecx)
-	fmuls 120(%ebx)
+	movd   44(%ecx), %mm0
+	pfsub  40(%ecx), %mm0
+	pfmul  120(%ebx),%mm0
 
-	flds   60(%ecx)
-	fsubs  56(%ecx)
-	fmuls 120(%ebx)
+	movd   %mm0, 44(%edx)
+	pfadd  40(%ecx), %mm0
+	pfadd  44(%ecx), %mm0
+	movd   %mm0, 40(%edx)
 
-	fld      %st(0)
-	fadds  56(%ecx)
-	fadds  60(%ecx)
+	movd   48(%ecx), %mm3
+	pfsub  52(%ecx), %mm3
+	pfmul 120(%ebx), %mm3
 
-	fld      %st(0)
-	fadds  48(%ecx)
-	fadds  52(%ecx)
-	fstps  48(%edx)
-	fadd     %st(2)
-	fstps  56(%edx)
-	fsts   60(%edx)
-	faddp    %st(1)
-	fstps  52(%edx)
+	movd   60(%ecx), %mm2
+	pfsub  56(%ecx), %mm2
+	pfmul 120(%ebx), %mm2
+	movq	%mm2, %mm1
+
+	pfadd  56(%ecx), %mm1
+	pfadd  60(%ecx), %mm1
+	movq	%mm1, %mm0
+
+	pfadd  48(%ecx), %mm0
+	pfadd  52(%ecx), %mm0
+	movd   %mm0, 48(%edx)
+	pfadd  %mm3, %mm1
+	movd   %mm1, 56(%edx)
+	movd   %mm2, 60(%edx)
+	pfadd  %mm3, %mm2
+	movd   %mm2, 52(%edx)
+
 /*---*/
-	flds   64(%ecx)
-	fadds  68(%ecx)
-	fstps  64(%edx)
+	movd   64(%ecx), %mm0
+	pfadd  68(%ecx), %mm0
+	movd   %mm0, 64(%edx)
 
-	flds   64(%ecx)
-	fsubs  68(%ecx)
-	fmuls 120(%ebx)
-	fstps  68(%edx)
+	movd   64(%ecx), %mm0
+	pfsub  68(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	movd   %mm0, 68(%edx)
 
-	flds   76(%ecx)
-	fsubs  72(%ecx)
-	fmuls 120(%ebx)
-	fsts   76(%edx)
-	fadds  72(%ecx)
-	fadds  76(%ecx)
-	fstps  72(%edx)
+	movd   76(%ecx), %mm0
+	pfsub  72(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	movd   %mm0, 76(%edx)
+	pfadd  72(%ecx), %mm0
+	pfadd  76(%ecx), %mm0
+	movd   %mm0, 72(%edx)
 
-	flds   92(%ecx)
-	fsubs  88(%ecx)
-	fmuls 120(%ebx)
-	fsts   92(%edx)
-	fadds  92(%ecx)
-	fadds  88(%ecx)
+	movd   92(%ecx), %mm0
+	pfsub  88(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	movd   %mm0, 92(%edx)
+	pfadd  92(%ecx), %mm0
+	pfadd  88(%ecx), %mm0
+	movq   %mm0, %mm1
+	
+	pfadd  80(%ecx), %mm0
+	pfadd  84(%ecx), %mm0
+	movd   %mm0, 80(%edx)
 
-	fld      %st(0)
-	fadds  80(%ecx)
-	fadds  84(%ecx)
-	fstps  80(%edx)
+	movd   80(%ecx), %mm0
+	pfsub  84(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	pfadd  %mm0, %mm1
+	pfadd  92(%edx), %mm0
+	movd   %mm0, 84(%edx)
+	movd   %mm1, 88(%edx)
 
-	flds   80(%ecx)
-	fsubs  84(%ecx)
-	fmuls 120(%ebx)
-	fadd  %st(0), %st(1)
-	fadds 92(%edx)
-	fstps 84(%edx)
-	fstps 88(%edx)
+	movd   96(%ecx), %mm0
+	pfadd 100(%ecx), %mm0
+	movd   %mm0, 96(%edx)
 
-	flds   96(%ecx)
-	fadds 100(%ecx)
-	fstps  96(%edx)
+	movd   96(%ecx), %mm0
+	pfsub 100(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	movd  %mm0, 100(%edx)
 
-	flds   96(%ecx)
-	fsubs 100(%ecx)
-	fmuls 120(%ebx)
-	fstps 100(%edx)
+	movd  108(%ecx), %mm0
+	pfsub 104(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	movd  %mm0, 108(%edx)
+	pfadd 104(%ecx), %mm0
+	pfadd 108(%ecx), %mm0
+	movd  %mm0, 104(%edx)
 
-	flds  108(%ecx)
-	fsubs 104(%ecx)
-	fmuls 120(%ebx)
-	fsts  108(%edx)
-	fadds 104(%ecx)
-	fadds 108(%ecx)
-	fstps 104(%edx)
+	movd  124(%ecx), %mm0
+	pfsub 120(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	movd  %mm0, 124(%edx)
+	pfadd 120(%ecx), %mm0
+	pfadd 124(%ecx), %mm0
+	movq  %mm0, %mm1
 
-	flds  124(%ecx)
-	fsubs 120(%ecx)
-	fmuls 120(%ebx)
-	fsts  124(%edx)
-	fadds 120(%ecx)
-	fadds 124(%ecx)
+	pfadd 112(%ecx), %mm0
+	pfadd 116(%ecx), %mm0
+	movd  %mm0, 112(%edx)
 
-	fld      %st(0)
-	fadds 112(%ecx)
-	fadds 116(%ecx)
-	fstps 112(%edx)
+	movd  112(%ecx), %mm0
+	pfsub 116(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	pfadd %mm0,%mm1
+	pfadd 124(%edx), %mm0
+	movd  %mm0, 116(%edx)
+	movd  %mm1, 120(%edx)
 
-	flds  112(%ecx)
-	fsubs 116(%ecx)
-	fmuls 120(%ebx)
-	fadd  %st(0),%st(1)
-	fadds 124(%edx)
-	fstps 116(%edx)
-	fstps 120(%edx)
 	jnz .L01
 	
 /* Phase 7*/
+/* Code below is coded in scalar mode. Should be optimized */
 
-	flds      (%ecx)
-	fadds    4(%ecx)
-	fstps 1024(%esi)
+	movd      (%ecx), %mm0
+	pfadd    4(%ecx), %mm0
+	movd     %mm0, 1024(%esi)
 
-	flds      (%ecx)
-	fsubs    4(%ecx)
-	fmuls  120(%ebx)
-	fsts      (%esi)
-	fstps     (%edi)
+	movd      (%ecx), %mm0
+	pfsub    4(%ecx), %mm0
+	pfmul  120(%ebx), %mm0
+	movd      %mm0, (%esi)
+	movd      %mm0, (%edi)
 
-	flds   12(%ecx)
-	fsubs   8(%ecx)
-	fmuls 120(%ebx)
-	fsts  512(%edi)
-	fadds  12(%ecx)
-	fadds   8(%ecx)
-	fstps 512(%esi)
+	movd   12(%ecx), %mm0
+	pfsub   8(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	movd    %mm0, 512(%edi)
+	pfadd   12(%ecx), %mm0
+	pfadd   8(%ecx), %mm0
+	movd    %mm0, 512(%esi)
 
-	flds   16(%ecx)
-	fsubs  20(%ecx)
-	fmuls 120(%ebx)
+	movd   16(%ecx), %mm0
+	pfsub  20(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	movq	%mm0, %mm3
 
-	flds   28(%ecx)
-	fsubs  24(%ecx)
-	fmuls 120(%ebx)
-	fsts  768(%edi)
-	fld      %st(0)
-	fadds  24(%ecx)
-	fadds  28(%ecx)
-	fld      %st(0)
-	fadds  16(%ecx)
-	fadds  20(%ecx)
-	fstps 768(%esi)
-	fadd     %st(2)
-	fstps 256(%esi)
-	faddp    %st(1)
-	fstps 256(%edi)
+	movd   28(%ecx), %mm0
+	pfsub  24(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	movd    %mm0, 768(%edi)
+	movq	%mm0, %mm2
+	
+	pfadd  24(%ecx), %mm0
+	pfadd  28(%ecx), %mm0
+	movq	%mm0, %mm1
+
+	pfadd  16(%ecx), %mm0
+	pfadd  20(%ecx), %mm0
+	movd   %mm0, 768(%esi)
+	pfadd  %mm3, %mm1
+	movd   %mm1, 256(%esi)
+	pfadd  %mm3, %mm2
+	movd   %mm2, 256(%edi)
 	
 /* Phase 8*/
 
-	flds   32(%edx)
-	fadds  48(%edx)
-	fstps 896(%esi)
+	movq   32(%edx), %mm0
+	movq   48(%edx), %mm1
+	pfadd  48(%edx), %mm0
+	pfadd  40(%edx), %mm1
+	movd   %mm0, 896(%esi)
+	movd   %mm1, 640(%esi)
+	psrlq  $32, %mm0
+	psrlq  $32, %mm1
+	movd   %mm0, 128(%edi)
+	movd   %mm1, 384(%edi)
 
-	flds   48(%edx)
-	fadds  40(%edx)
-	fstps 640(%esi)
+	movd   40(%edx), %mm0
+	pfadd  56(%edx), %mm0
+	movd   %mm0, 384(%esi)
 
-	flds   40(%edx)
-	fadds  56(%edx)
-	fstps 384(%esi)
+	movd   56(%edx), %mm0
+	pfadd  36(%edx), %mm0
+	movd   %mm0, 128(%esi)
 
-	flds   56(%edx)
-	fadds  36(%edx)
-	fstps 128(%esi)
+	movd   60(%edx), %mm0
+	movd   %mm0, 896(%edi)
+	pfadd  44(%edx), %mm0
+	movd   %mm0, 640(%edi)
 
-	flds   36(%edx)
-	fadds  52(%edx)
-	fstps 128(%edi)
+	movq   96(%edx), %mm0
+	movq   112(%edx), %mm2
+	movq   104(%edx), %mm4
+	pfadd  112(%edx), %mm0
+	pfadd  104(%edx), %mm2
+	pfadd  120(%edx), %mm4
+	movq   %mm0, %mm1
+	movq   %mm2, %mm3
+	movq   %mm4, %mm5
+	pfadd  64(%edx), %mm0
+	pfadd  80(%edx), %mm2
+	pfadd  72(%edx), %mm4
+	movd   %mm0, 960(%esi)
+	movd   %mm2, 704(%esi)
+	movd   %mm4, 448(%esi)
+	psrlq  $32, %mm0
+	psrlq  $32, %mm2
+	psrlq  $32, %mm4
+	movd   %mm0, 64(%edi)
+	movd   %mm2, 320(%edi)
+	movd   %mm4, 576(%edi)
+	pfadd  80(%edx), %mm1
+	pfadd  72(%edx), %mm3
+	pfadd  88(%edx), %mm5
+	movd   %mm1, 832(%esi)
+	movd   %mm3, 576(%esi)
+	movd   %mm5, 320(%esi)
+	psrlq  $32, %mm1
+	psrlq  $32, %mm3
+	psrlq  $32, %mm5
+	movd   %mm1, 192(%edi)
+	movd   %mm3, 448(%edi)
+	movd   %mm5, 704(%edi)
 
-	flds   52(%edx)
-	fadds  44(%edx)
-	fstps 384(%edi)
+	movd   120(%edx), %mm0
+	pfadd  100(%edx), %mm0
+	movq   %mm0, %mm1
+	pfadd  88(%edx), %mm0
+	movd   %mm0, 192(%esi)
+	pfadd  68(%edx), %mm1
+	movd   %mm1, 64(%esi)
 
-	flds   60(%edx)
-	fsts  896(%edi)
-	fadds  44(%edx)
-	fstps 640(%edi)
+	movd  124(%edx), %mm0
+	movd  %mm0, 960(%edi)
+	pfadd  92(%edx), %mm0
+	movd  %mm0, 832(%edi)
 
-	flds   96(%edx)
-	fadds 112(%edx)
-	fld      %st(0)
-	fadds  64(%edx)
-	fstps 960(%esi)
-	fadds  80(%edx)
-	fstps 832(%esi)
-
-	flds  112(%edx)
-	fadds 104(%edx)
-	fld      %st(0)
-	fadds  80(%edx)
-	fstps 704(%esi)
-	fadds  72(%edx)
-	fstps 576(%esi)
-
-	flds  104(%edx)
-	fadds 120(%edx)
-	fld      %st(0)
-	fadds  72(%edx)
-	fstps 448(%esi)
-	fadds  88(%edx)
-	fstps 320(%esi)
-
-	flds  120(%edx)
-	fadds 100(%edx)
-	fld      %st(0)
-	fadds  88(%edx)
-	fstps 192(%esi)
-	fadds  68(%edx)
-	fstps  64(%esi)
-
-	flds  100(%edx)
-	fadds 116(%edx)
-	fld      %st(0)
-	fadds  68(%edx)
-	fstps  64(%edi)
-	fadds  84(%edx)
-	fstps 192(%edi)
-
-	flds  116(%edx)
-	fadds 108(%edx)
-	fld      %st(0)
-	fadds  84(%edx)
-	fstps 320(%edi)
-	fadds  76(%edx)
-	fstps 448(%edi)
-
-	flds  108(%edx)
-	fadds 124(%edx)
-	fld      %st(0)
-	fadds  76(%edx)
-	fstps 576(%edi)
-	fadds  92(%edx)
-	fstps 704(%edi)
-
-	flds  124(%edx)
-	fsts  960(%edi)
-	fadds  92(%edx)
-	fstps 832(%edi)
 	jmp	.L_bye
 .L01:	
 /* Phase 9*/
+	movd      (%ecx), %mm0
+	pfadd    4(%ecx), %mm0
+	pf2id    %mm0, %mm0
+	movd	 %mm0, %eax
+	movw     %ax, 512(%esi)
 
-	flds      (%ecx)
-	fadds    4(%ecx)
-	fistp  512(%esi)
+	movd      (%ecx), %mm0
+	pfsub    4(%ecx), %mm0
+	pfmul  120(%ebx), %mm0
+	pf2id    %mm0, %mm0
+	movd	 %mm0, %eax
+	movw     %ax, (%esi)
 
-	flds      (%ecx)
-	fsubs    4(%ecx)
-	fmuls  120(%ebx)
+	movd    12(%ecx), %mm0
+	pfsub    8(%ecx), %mm0
+	pfmul  120(%ebx), %mm0
+	pf2id    %mm0, %mm7
+	movd	 %mm7, %eax
+	movw     %ax, 256(%edi)
+	pfadd   12(%ecx), %mm0
+	pfadd    8(%ecx), %mm0
+	pf2id    %mm0, %mm0
+	movd	 %mm0, %eax
+	movw     %ax, 256(%esi)
 
-	fistp     (%esi)
+	movd   16(%ecx), %mm0
+	pfsub  20(%ecx), %mm0
+	pfmul  120(%ebx), %mm0
+	movq   %mm0, %mm3
 
-
-	flds    12(%ecx)
-	fsubs    8(%ecx)
-	fmuls  120(%ebx)
-	fist   256(%edi)
-	fadds   12(%ecx)
-	fadds    8(%ecx)
-	fistp  256(%esi)
-
-	flds   16(%ecx)
-	fsubs  20(%ecx)
-	fmuls 120(%ebx)
-
-	flds   28(%ecx)
-	fsubs  24(%ecx)
-	fmuls 120(%ebx)
-	fist  384(%edi)
-	fld      %st(0)
-	fadds  24(%ecx)
-	fadds  28(%ecx)
-	fld      %st(0)
-	fadds  16(%ecx)
-	fadds  20(%ecx)
-	fistp  384(%esi)
-	fadd     %st(2)
-	fistp  128(%esi)
-	faddp    %st(1)
-	fistp  128(%edi)
+	movd   28(%ecx), %mm0
+	pfsub  24(%ecx), %mm0
+	pfmul 120(%ebx), %mm0
+	pf2id  %mm0, %mm7
+	movd   %mm7, %eax
+	movw   %ax, 384(%edi)
+	movq   %mm0, %mm2
+	
+	pfadd  24(%ecx), %mm0
+	pfadd  28(%ecx), %mm0
+	movq   %mm0, %mm1
+	pfadd  16(%ecx), %mm0
+	pfadd  20(%ecx), %mm0
+	pf2id  %mm0, %mm0
+	movd   %mm0, %eax
+	movw   %ax, 384(%esi)
+	pfadd  %mm3, %mm1
+	pf2id  %mm1, %mm1
+	movd   %mm1, %eax
+	movw   %ax, 128(%esi)
+	pfadd  %mm3, %mm2
+	pf2id  %mm2, %mm2
+	movd   %mm2, %eax
+	movw   %ax, 128(%edi)
+	
 	
 /* Phase 10*/
 
-	flds    32(%edx)
-	fadds   48(%edx)
-	fistp  448(%esi)
+	movq    32(%edx), %mm0
+	movq    48(%edx), %mm1
+	pfadd   48(%edx), %mm0
+	pfadd   40(%edx), %mm1
+	pf2id   %mm0, %mm0
+	pf2id   %mm1, %mm1
+	movd	%mm0, %eax
+	movd	%mm1, %ecx
+	movw    %ax, 448(%esi)
+	movw    %cx, 320(%esi)
+	psrlq   $32, %mm0
+	psrlq   $32, %mm1
+	movd	%mm0, %eax
+	movd	%mm1, %ecx
+	movw    %ax, 64(%edi)
+	movw    %cx, 192(%edi)
 
-	flds   48(%edx)
-	fadds  40(%edx)
-	fistp 320(%esi)
+	movd   40(%edx), %mm0
+	pfadd  56(%edx), %mm0
+	pf2id  %mm0, %mm0
+	movd   %mm0, %eax
+	movw   %ax, 192(%esi)
 
-	flds   40(%edx)
-	fadds  56(%edx)
-	fistp 192(%esi)
+	movd   56(%edx), %mm0
+	pfadd  36(%edx), %mm0
+	pf2id  %mm0, %mm0
+	movd   %mm0, %eax
+	movw   %ax, 64(%esi)
 
-	flds   56(%edx)
-	fadds  36(%edx)
-	fistp  64(%esi)
+	movd   60(%edx), %mm0
+	pf2id  %mm0, %mm7
+	movd   %mm7, %eax
+	movw   %ax, 448(%edi)
+	pfadd  44(%edx), %mm0
+	pf2id  %mm0, %mm0
+	movd   %mm0, %eax
+	movw   %ax, 320(%edi)
 
-	flds   36(%edx)
-	fadds  52(%edx)
-	fistp  64(%edi)
+	movq   96(%edx), %mm0
+	movq  112(%edx), %mm2
+	movq  104(%edx), %mm4
+	pfadd 112(%edx), %mm0
+	pfadd 104(%edx), %mm2
+	pfadd 120(%edx), %mm4
+	movq  %mm0, %mm1
+	movq  %mm2, %mm3
+	movq  %mm4, %mm5
+	pfadd  64(%edx), %mm0
+	pfadd  80(%edx), %mm2
+	pfadd  72(%edx), %mm4
+	pf2id  %mm0, %mm7
+	pf2id  %mm2, %mm6
+	pf2id  %mm4, %mm4
+	movd   %mm7, %eax
+	movd   %mm6, %ecx
+	movd   %mm4, %ebx
+	movw   %ax, 480(%esi)
+	movw   %cx, 352(%esi)
+	movw   %bx, 224(%esi)
+	psrlq  $32, %mm7
+	psrlq  $32, %mm6
+	psrlq  $32, %mm4
+	movd   %mm7, %eax
+	movd   %mm6, %ecx
+	movd   %mm4, %ebx
+	movw   %ax, 32(%edi)
+	movw   %cx, 160(%edi)
+	movw   %bx, 288(%edi)
+	pfadd  80(%edx), %mm1
+	pfadd  72(%edx), %mm3
+	pfadd  88(%edx), %mm5
+	pf2id  %mm1, %mm1
+	pf2id  %mm3, %mm3
+	pf2id  %mm5, %mm5
+	movd   %mm1, %eax
+	movd   %mm3, %ecx
+	movd   %mm5, %ebx
+	movw   %ax, 416(%esi)
+	movw   %cx, 288(%esi)
+	movw   %bx, 160(%esi)
+	psrlq  $32, %mm1
+	psrlq  $32, %mm3
+	psrlq  $32, %mm5
+	movd   %mm1, %eax
+	movd   %mm3, %ecx
+	movd   %mm5, %ebx
+	movw   %ax, 96(%edi)
+	movw   %cx, 224(%edi)
+	movw   %bx, 352(%edi)
 
-	flds   52(%edx)
-	fadds  44(%edx)
-	fistp 192(%edi)
+	movd  120(%edx), %mm0
+	pfadd 100(%edx), %mm0
+	movq  %mm0, %mm1
+	pfadd  88(%edx), %mm0
+	pf2id  %mm0, %mm0
+	movd   %mm0, %eax
+	movw   %ax, 96(%esi)
+	pfadd  68(%edx), %mm1
+	pf2id  %mm1, %mm1
+	movd   %mm1, %eax
+	movw   %ax, 32(%esi)
 
-	flds   60(%edx)
-	fist   448(%edi)
-	fadds  44(%edx)
-	fistp 320(%edi)
+	movq  124(%edx), %mm0
+	pf2id  %mm0, %mm1
+	movd   %mm1, %eax
+	movw   %ax, 480(%edi)
+	pfadd  92(%edx), %mm0
+	pf2id  %mm0, %mm0
+	movd   %mm0, %eax
+	movw   %ax, 416(%edi)
 
-	flds   96(%edx)
-	fadds 112(%edx)
-	fld      %st(0)
-	fadds  64(%edx)
-	fistp 480(%esi)
-	fadds  80(%edx)
-	fistp 416(%esi)
-
-	flds  112(%edx)
-	fadds 104(%edx)
-	fld      %st(0)
-	fadds  80(%edx)
-	fistp 352(%esi)
-	fadds  72(%edx)
-	fistp 288(%esi)
-
-	flds  104(%edx)
-	fadds 120(%edx)
-	fld      %st(0)
-	fadds  72(%edx)
-	fistp 224(%esi)
-	fadds  88(%edx)
-	fistp 160(%esi)
-
-	flds  120(%edx)
-	fadds 100(%edx)
-	fld      %st(0)
-	fadds  88(%edx)
-	fistp  96(%esi)
-	fadds  68(%edx)
-	fistp  32(%esi)
-
-	flds  100(%edx)
-	fadds 116(%edx)
-	fld      %st(0)
-	fadds  68(%edx)
-	fistp  32(%edi)
-	fadds  84(%edx)
-	fistp  96(%edi)
-
-	flds  116(%edx)
-	fadds 108(%edx)
-	fld      %st(0)
-	fadds  84(%edx)
-	fistp 160(%edi)
-	fadds  76(%edx)
-	fistp 224(%edi)
-
-	flds  108(%edx)
-	fadds 124(%edx)
-	fld      %st(0)
-	fadds  76(%edx)
-	fistp 288(%edi)
-	fadds  92(%edx)
-	fistp 352(%edi)
-
-	flds  124(%edx)
-	fist  480(%edi)
-	fadds  92(%edx)
-	fistp 416(%edi)
 	movsw
+
 .L_bye:
 	addl $256,%esp
+	femms
 	popl %edi
 	popl %esi
 	popl %ebx
