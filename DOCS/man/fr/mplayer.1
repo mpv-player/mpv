@@ -1,4 +1,4 @@
-.\" synced with 1.860
+.\" synced with 1.861
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "20 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "21 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -769,6 +769,7 @@ Pour jouer des flux MPEG-TS, MPlayer/\:MEncoder utilisera le premier programme
 .
 .TP
 .B \-alang <code-de-langue> (voir aussi \-aid)
+Définit une liste de langues de pistes audio à jouer en priorité.
 Joue la piste audio dont la langue correspond au code-pays donné.
 Chaque container comprend des codes-pays différents.
 Les DVDs utilisent les codes de langue ISO 639-1 à deux lettres,
@@ -1506,25 +1507,27 @@ visible (le comportement par défaut est d'en activer la gestion que pour des
 formats spécifiques).
 .
 .TP
-.B \-sid <ID> (voir aussi l'option \-slang)
-Affiche le sous-titre <ID> (0\-31) du DVD lors de sa lecture.
-MPlayer affiche la liste des sous-titres disponibles, quand il est lancé en
-mode verbeux (\-v).
+.B \-sid <ID> (voir aussi \-slang)
+Affiche la piste de sous-titre correspondant à <ID> (0\-31).
+MPlayer affiche la liste des IDs de sous-titres disponibles quand il est
+lancé en mode bavard (\-v).
 .
 .TP
-.B \-slang <code-pays\ à\ deux\ lettres> (voir aussi l'option \-sid)
-Définit la langue du sous-titre.
+.B \-slang <code\ de\ pays[,code\ de\ langue,...]> (voir aussi l'option \-sid)
+Définit une liste de langues de sous-titres à afficher en priorité.
+Chaque format de conteneur utilise des codes de pays différents.
+Les DVDs utilisent les codes à deux lettres ISO 639-1, Matroska
+les codes à trois lettres ISO 639-2, tandis que OGM utilise des
+identifiants à forme libre.
 MPlayer affiche la liste des sous-titres disponibles, quand il est lancé en
 mode verbeux (\-v).
-.br
-Vous pouvez aussi donner une liste de codes de pays vers lequel se rabattre
-lors de la recherche des sous-titres.
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
-.IPs "\-slang hu,en"
-Sélectionne le hongrois et se rabat sur l'anglais si le hongrois n'est pas
-disponible.
+.IPs "mplayer dvd://1 \-slang hu,en"
+Sélectionne la piste de sous-titres hongroise du DVD et se rabat sur
+l'anglaise si le hongrois n'est pas disponible.
 .RE
 .PD 1
 .
