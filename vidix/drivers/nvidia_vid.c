@@ -486,7 +486,7 @@ static void nv_getscreenproperties(struct rivatv_info *info){
 void rivatv_overlay_start (struct rivatv_info *info,int bufno){
     uint32_t base, size, offset, xscale, yscale, pan;
     uint32_t value;
-	int x=8, y=8;
+	int x=info->wx?info->wx:8, y=info->wy?info->wy:8;
 	int lwidth=info->d_width, lheight=info->d_height;
 	int bps;
 
