@@ -59,6 +59,8 @@ static int alsa_fragsize = 4096;
 static int alsa_fragcount = 16;
 static int chunk_size = 1024; //is alsa_fragsize / 4
 
+#define MIN_CHUNK_SIZE 1024
+
 static size_t bits_per_sample, bytes_per_sample, bits_per_frame;
 static size_t chunk_bytes;
 
@@ -1084,6 +1086,10 @@ static int get_space()
       ret = 0;
     }
  
+    // workaround for too small value returned
+    if (ret < MIN_CHUNK_SIZE)
+      ret = 0;
+
     return(ret);
 }
 
