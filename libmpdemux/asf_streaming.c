@@ -16,6 +16,8 @@
 typedef struct {
 	ASF_StreamType_e streaming_type;
 	int request;
+	int packet_size;
+        int *audio_streams,n_audio,*video_streams,n_video;
 } asf_http_streaming_ctrl_t;
 
 #ifdef ARCH_X86
@@ -25,7 +27,8 @@ typedef struct {
 	((guid)[3] << 24 | (guid)[2] << 16 | (guid)[1] << 8 | (guid)[0])
 #endif
 
-
+extern int audio_id,video_id;
+extern int verbose;
 
 // ASF streaming support several network protocol.
 // One use UDP, not known, yet!
@@ -70,23 +73,79 @@ asf_streaming_start( stream_t *stream ) {
 }
 
 static int
-asf_streaming_parse_header(char* buffer,int size) {
+asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
   ASF_header_t asfh;
   ASF_obj_header_t objh;
   ASF_file_header_t fileh;
-  int pos = 0;
-
-  if(size < (int)sizeof(asfh)) {
-    printf("Error chunk is too small\n");
-    return -1;
-  }
-  memcpy(&asfh,buffer,sizeof(asfh));
-  le2me_ASF_header_t(&asfh);
-  if(size < (int)asfh.objh.size) {
-    printf("Error chunk is too small\n");
-    return -1;
-  }
+  ASF_stream_header_t streamh;
+  ASF_stream_chunck_t chunk;
+  asf_http_streaming_ctrl_t* asf_ctrl = (asf_http_streaming_ctrl_t*) streaming_ctrl->data;
+  char* buffer=NULL, *chunk_buffer=NULL;
+  int i,r,size,pos = 0;
+  int buffer_size = 0;
+  int chunk_size2read = 0;
   
+  if(asf_ctrl == NULL) return -1;
+
+	// The ASF header can be in several network chunks. For example if the content description
+	// is big, the ASF header will be split in 2 network chunk.
+	// So we need to retrieve all the chunk before starting to parse the header.
+  do {
+	  for( r=0; r < sizeof(ASF_stream_chunck_t) ; ) {
+		i = nop_streaming_read(fd,((char*)&chunk)+r,sizeof(ASF_stream_chunck_t) - r,streaming_ctrl);
+		if(i <= 0) return -1;
+		r += i;
+	  }
+	  size = asf_streaming( &chunk, &r) - sizeof(ASF_stream_chunck_t);
+//printf("size=%d\n", size);
+	  if(r) printf("Warning : drop header ????\n");
+	  if(size < 0){
+	    printf("Error while parsing chunk header\n");
+		return -1;
+	  }
+	  if (chunk.type != 0x4824) {
+	    printf("Don't got a header as first chunk !!!!\n");
+	    return -1;
+	  }
+	  
+	  buffer = (char*) malloc(size+buffer_size);
+	  if(buffer == NULL) {
+	    printf("Error can't allocate %d bytes buffer\n",buffer_size);
+	    return -1;
+	  }
+	  if( chunk_buffer!=NULL ) {
+	  	memcpy( buffer, chunk_buffer, buffer_size );
+		free( chunk_buffer );
+	  }
+	  chunk_buffer = buffer;
+	  buffer += buffer_size;
+	  buffer_size += size;
+	  
+	  for(r = 0; r < size;) {
+	    i = nop_streaming_read(fd,buffer+r,size-r,streaming_ctrl);
+	    if(i < 0) {
+		    printf("Error while reading network stream\n");
+		    return -1;
+	    }
+	    r += i;
+	  }  
+//for(i=0;i<30;i++) printf(" 0x%02x", buffer[i] );
+
+	  if( chunk_size2read==0 ) {
+		if(size < (int)sizeof(asfh)) {
+		    printf("Error chunk is too small\n");
+		    return -1;
+		} else printf("Got chunk\n");
+	  	memcpy(&asfh,buffer,sizeof(asfh));
+	  	le2me_ASF_header_t(&asfh);
+		chunk_size2read = asfh.objh.size;
+		printf("Size 2 read=%d\n", chunk_size2read);
+	  }
+//printf("buffer_size=%d\n", buffer_size );
+  } while( buffer_size<chunk_size2read);
+  buffer = chunk_buffer;
+//for(i=0;i<30;i++) printf(" 0x%02x", buffer[i] );
+	  
   if(asfh.cno > 256) {
     printf("Error sub chunks number is invalid\n");
     return -1;
@@ -98,17 +157,62 @@ asf_streaming_parse_header(char* buffer,int size) {
     memcpy(&objh,buffer+pos,sizeof(objh));
     le2me_ASF_obj_header_t(&objh);
 
-    if(ASF_LOAD_GUID_PREFIX(objh.guid) == 0x8CABDCA1) {
+    switch(ASF_LOAD_GUID_PREFIX(objh.guid)) {
+    case 0x8CABDCA1 : // File header
+//printf("Found file header\n");
       pos += sizeof(objh);
       memcpy(&fileh,buffer + pos,sizeof(fileh));
       le2me_ASF_file_header_t(&fileh);
-      return fileh.packetsize == fileh.packetsize2 ? fileh.packetsize : -1;
-    } else {
+      if(fileh.packetsize != fileh.packetsize2) {
+	printf("Error packetsize check don't match\n");
+	return -1;
+      }
+      asf_ctrl->packet_size = fileh.packetsize;
+      // FIXME: preroll contains the amount of time to bufferize
+      // before playing. To be able to do that we need to
+      // read the timestamp of the first data packet and bufferize.
+      streaming_ctrl->prebuffer_size = fileh.preroll;
+      pos += sizeof(fileh);
+      break;
+    case 0xB7DC0791 : // stream header
+//printf("Found stream header\n");
+      pos += sizeof(objh);
+      memcpy(&streamh,buffer + pos,sizeof(streamh));
+      le2me_ASF_stream_header_t(&streamh);
+      pos += sizeof(streamh) + streamh.type_size;
+      switch(ASF_LOAD_GUID_PREFIX(streamh.type)) {
+      case 0xF8699E40 : // audio stream
+	if(asf_ctrl->audio_streams == NULL){
+	  asf_ctrl->audio_streams = (int*)malloc(sizeof(int));
+	  asf_ctrl->n_audio = 1;
+	} else {
+	  asf_ctrl->n_audio++;
+	  asf_ctrl->audio_streams = (int*)realloc(asf_ctrl->audio_streams,
+						     asf_ctrl->n_audio*sizeof(int));
+	}
+	asf_ctrl->audio_streams[asf_ctrl->n_audio-1] = streamh.stream_no;
+	pos += streamh.stream_size;
+	break;
+      case 0xBC19EFC0 : // video stream
+	if(asf_ctrl->video_streams == NULL){
+	  asf_ctrl->video_streams = (int*)malloc(sizeof(int));
+	  asf_ctrl->n_video = 1;
+	} else {
+	  asf_ctrl->n_video++;
+	  asf_ctrl->video_streams = (int*)realloc(asf_ctrl->video_streams,
+						     asf_ctrl->n_video*sizeof(int));
+	}
+	asf_ctrl->video_streams[asf_ctrl->n_video-1] = streamh.stream_no;
+	break;
+      }
+      break;
+    default :
       pos += objh.size;
+      break;
     }
   }
-
-  return -1;
+  free(buffer);
+  return 1;
 }
 
 int
@@ -116,7 +220,7 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
   static ASF_stream_chunck_t chunk;
   int read,chunk_size = 0;
   static int rest = 0, drop_chunk = 0, waiting = 0;
-  static int asf_packetsize = 0;
+  asf_http_streaming_ctrl_t *asf_http_ctrl = (asf_http_streaming_ctrl_t*)streaming_ctrl->data;
 
   while(1) {
     if (rest == 0 && waiting == 0) {
@@ -131,19 +235,19 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
 	}
 	read += r;
       }
-      chunk_size = asf_streaming(  (char*)&chunk, read, &drop_chunk );
+      chunk_size = asf_streaming( &chunk, &drop_chunk );
       if(chunk_size < 0) {
 	printf("Error while parsing chunk header\n");
 	return -1;
       }
       chunk_size -= sizeof(ASF_stream_chunck_t);
 	
-      if(asf_packetsize && (!drop_chunk)) {
-	if (asf_packetsize < chunk_size) {
-	  printf("Error chunk_size > asf_packetsize\n");
+      if(chunk.type != 0x4824 && (!drop_chunk)) {
+	if (asf_http_ctrl->packet_size < chunk_size) {
+	  printf("Error chunk_size > packet_size\n");
 	  return -1;
 	}
-	waiting = asf_packetsize;
+	waiting = asf_http_ctrl->packet_size;
       } else {
 	waiting = chunk_size;
       }
@@ -177,49 +281,18 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
       read += s;
     }
     break;
-}
-
-  if (chunk.type == 0x4824) { // Header
-    static char* save_buffer = NULL;
-    static int save_pos = 0,save_size = 0;
-    if(rest > 0 || save_buffer) {
-      if(save_buffer == NULL){
-	save_size = read+rest;
-	save_pos = 0;
-	save_buffer = (char*)malloc(save_size);
-      }
-      memcpy(save_buffer+save_pos,buffer,MIN(read,save_size-save_pos));
-      save_pos += MIN(read,save_size-save_pos);
-    }     
-    if( rest == 0 ){
-      if(save_buffer && save_pos != save_size){
-	printf("Header buffer inconsitency\n");
-	return -1;
-      }
-      asf_packetsize = asf_streaming_parse_header(save_buffer ? save_buffer : buffer,
-						  save_buffer ? save_pos : read);
-      if(save_buffer) {
-	free(save_buffer);
-	save_buffer = NULL;
-      }
-      if(asf_packetsize < 0) {
-	printf("Error during header parsing\n");
-	return -1;
-      }
-    }
   }
+
   return read;
 }
 
 int 
-asf_streaming(char *data, int length, int *drop_packet ) {
-	ASF_stream_chunck_t *stream_chunck=(ASF_stream_chunck_t*)data;
+asf_streaming(ASF_stream_chunck_t *stream_chunck, int *drop_packet ) {
 /*	
 printf("ASF stream chunck size=%d\n", stream_chunck->size);
 printf("length: %d\n", length );
 printf("0x%02X\n", stream_chunck->type );
 */
-	if( data==NULL || length<=0 ) return -1;
 	if( drop_packet!=NULL ) *drop_packet = 0;
 
 	if( stream_chunck->size<8 ) {
@@ -301,7 +374,6 @@ asf_http_streaming_type(char *content_type, char *features) {
 }
 
 HTTP_header_t *
-//asf_http_request(URL_t *url) {
 asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	HTTP_header_t *http_hdr;
 	URL_t *url = streaming_ctrl->url;
@@ -309,10 +381,10 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	char str[250];
 	char *ptr;
 	char *request;
-	int i;
+	int i,as = -1,vs = -1;
 
 	int offset_hi=0, offset_lo=0, length=0;
-	int asf_nb_stream;
+	int asf_nb_stream=0;
 
 	// Common header for all requests.
 	http_hdr = http_new_header();
@@ -333,26 +405,40 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 			http_set_field( http_hdr, "Pragma: xPlayStrm=1" );
 			ptr = str;
 			ptr += sprintf( ptr, "Pragma: stream-switch-entry=");
-
-#if 0
-			for( i=0, asf_nb_stream=0 ; i<256 ; i++ ) {
-				// FIXME START
-				if( demuxer==NULL ) {
-					ptr += sprintf( ptr, " ffff:1:0" );
-					asf_nb_stream = 1;
-					break;
+			if(asf_http_ctrl->n_audio > 0) {
+				if(audio_id > 0) {
+					for( i=0; i<asf_http_ctrl->n_audio ; i++ ) {
+						if(asf_http_ctrl->audio_streams[i] == audio_id) {
+							as = audio_id;
+							break;
+						}
+					}
+				}				
+				if(as < 0) {
+					if(audio_id > 0) 
+		       				printf("Audio stream %d don't exist\n");
+					as = asf_http_ctrl->audio_streams[0];
 				}
-				// FIXME END
-				if( demuxer->a_streams[i] ) {
-					ptr += sprintf( ptr, " ffff:%d:0", i );
-					asf_nb_stream++;
-				}
-				if( demuxer->v_streams[i] ) {
-					ptr += sprintf( ptr, " ffff:%d:0", i );
-					asf_nb_stream++;
-				}
+				ptr += sprintf(ptr, " ffff:%d:0",as);
+				asf_nb_stream++;
 			}
-#endif
+			if(asf_http_ctrl->n_video > 0) {
+				if(video_id > 0) {
+					for( i=0; i<asf_http_ctrl->n_video ; i++ ) {
+						if(asf_http_ctrl->video_streams[i] == video_id) {
+							vs = video_id;
+							break;
+						}
+					}
+				}
+				if(vs < 0) {
+					if(video_id > 0) 
+						printf("Video stream %d don't exist\n");
+					vs = asf_http_ctrl->video_streams[0];
+		       		}
+				ptr += sprintf( ptr, " ffff:%d:0",vs);
+				asf_nb_stream++;
+			}
 			http_set_field( http_hdr, str );
 			sprintf( str, "Pragma: stream-switch-count=%d", asf_nb_stream );
 			http_set_field( http_hdr, str );
@@ -405,10 +491,12 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 				  if(s > sizeof(features)) {
 				    printf("ASF HTTP PARSE WARNING : Pragma %s cuted from %d bytes to %d\n",pragma,s,sizeof(features));
 				    len = sizeof(features);
-				  } else				   
+				  } else {				   
 				    len = s;
-				} else 
+				  }
+				} else { 
 				  len = MIN(end-pragma,sizeof(features));
+				}
 				strncpy( features, pragma, len );
 				features[len]='\0';
 				break;
@@ -455,9 +543,10 @@ asf_http_streaming_start( stream_t *stream ) {
 	}
 	asf_http_ctrl->streaming_type = ASF_Unknown_e;
 	asf_http_ctrl->request = 1;
+	asf_http_ctrl->audio_streams = asf_http_ctrl->video_streams = NULL;
+	asf_http_ctrl->n_audio = asf_http_ctrl->n_video = 0;
 	stream->streaming_ctrl->data = (void*)asf_http_ctrl;
 
-//streaming_type = ASF_Live_e;
 	do {
 		done = 1;
 		if( fd>0 ) close( fd );
@@ -466,18 +555,19 @@ asf_http_streaming_start( stream_t *stream ) {
 		fd = connect2Server( url->hostname, url->port );
 		if( fd<0 ) return -1;
 
-		//http_hdr = asf_http_request( url );
 		http_hdr = asf_http_request( stream->streaming_ctrl );
-printf("Request [%s]\n", http_hdr->buffer );
-                                for(i=0; i <  http_hdr->buffer_size ; ) {
+		if( verbose>0 ) {
+			printf("Request [%s]\n", http_hdr->buffer );
+		}
+		for(i=0; i <  http_hdr->buffer_size ; ) {
 			int r = write( fd, http_hdr->buffer+i, http_hdr->buffer_size-i );
 			if(r <0) {
-			  printf("Socket write error : %s\n",strerror(errno));
-			  return -1;
+				printf("Socket write error : %s\n",strerror(errno));
+				return -1;
 			}
 			i += r;
 		}       
-	//	http_free( http_hdr );
+		http_free( http_hdr );
 		http_hdr = http_new_header();
 		do {
 			i = read( fd, buffer, BUFFER_SIZE );
@@ -489,8 +579,10 @@ printf("read: %d\n", i );
 			}
 			http_response_append( http_hdr, buffer, i );
 		} while( !http_is_header_entire( http_hdr ) );
-http_hdr->buffer[http_hdr->buffer_size]='\0';
-printf("Response [%s]\n", http_hdr->buffer );
+		if( verbose>0 ) {
+			http_hdr->buffer[http_hdr->buffer_size]='\0';
+			printf("Response [%s]\n", http_hdr->buffer );
+		}
 		streaming_type = asf_http_parse_response(http_hdr);
 		if( streaming_type<0 ) {
 			printf("Failed to parse header\n");
@@ -509,9 +601,15 @@ printf("Response [%s]\n", http_hdr->buffer );
 					}
 				}
 				if( asf_http_ctrl->request==1 ) {
-					// First request, we only got the ASF header.
-					// We can redo the request and ask for all the stream.
-					// TODO: Here goes the code to read the ASF header and get the proper values.
+					if( streaming_type!=ASF_PlainText_e ) {
+						// First request, we only got the ASF header.
+						ret = asf_streaming_parse_header(fd,stream->streaming_ctrl);
+						if(ret < 0) return -1;
+						if(asf_http_ctrl->n_audio == 0 && asf_http_ctrl->n_video == 0) {
+							printf("No stream found\n");
+							return -1;
+						}
+					}
 					asf_http_ctrl->request++;
 					done = 0;
 				}
