@@ -1,7 +1,7 @@
 # Makefile for generating the HTML documentation
 
 # List of subdirectories to be processed.
-SUBDIRS = en es fr hu pl ru
+SUBDIRS = en es fr hu pl ru cs
 
 # Generated chunked HTML files go here.
 HTML_CHUNKED = ../HTML
