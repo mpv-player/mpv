@@ -50,6 +50,29 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
   return NULL;
 }
 
+static int valid_fourcc(unsigned int id){
+    unsigned char* fcc=(unsigned char*)(&id);
+#define FCC_CHR_CHECK(x) (x<48 || x>=96)
+    if(FCC_CHR_CHECK(fcc[0])) return 0;
+    if(FCC_CHR_CHECK(fcc[1])) return 0;
+    if(FCC_CHR_CHECK(fcc[2])) return 0;
+    if(FCC_CHR_CHECK(fcc[3])) return 0;
+    return 1;
+#undef FCC_CHR_CHECK
+}
+
+static int choose_chunk_len(unsigned int len1,unsigned int len2){
+    // len1 has a bit more priority than len2. len1!=len2
+    // Note: this is a first-idea-logic, may be wrong. comments welcomed.
+
+    // prefer small frames rather than 0
+    if(!len1) return (len2>0x80000) ? len1 : len2;
+    if(!len2) return (len1>0x100000) ? len2 : len1;
+
+    // choose the smaller value:
+    return (len1<len2)? len1 : len2;
+}
+
 static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int len,int idxpos,int flags){
   avi_priv_t *priv=demux->priv;
   int skip;
@@ -185,16 +208,18 @@ do{
     
     if(id!=idx->ckid){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkID mismatch! raw=%.4s idx=%.4s  \n",(char *)&id,(char *)&idx->ckid);
-      id=idx->ckid;
-//      continue;
+      if(valid_fourcc(idx->ckid))
+          id=idx->ckid;	// use index if valid
+      else
+          if(!valid_fourcc(id)) continue; // drop chunk if both id and idx bad
     }
     len=stream_read_dword_le(demux->stream);
 //    if((len&(~1))!=(idx->dwChunkLength&(~1))){
 //    if((len)!=(idx->dwChunkLength)){
     if((len!=idx->dwChunkLength)&&((len+1)!=idx->dwChunkLength)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
-      len=idx->dwChunkLength;
-//      continue;
+      if(len>0x200000 && idx->dwChunkLength>0x200000) continue; // both values bad :(
+      len=choose_chunk_len(idx->dwChunkLength,len);
     }
     if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
   } else {
@@ -276,16 +301,18 @@ do{
 
     if(id!=idx->ckid){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkID mismatch! raw=%.4s idx=%.4s  \n",(char *)&id,(char *)&idx->ckid);
-      id=idx->ckid;
-//      continue;
+      if(valid_fourcc(idx->ckid))
+          id=idx->ckid;	// use index if valid
+      else
+          if(!valid_fourcc(id)) continue; // drop chunk if both id and idx bad
     }
     len=stream_read_dword_le(demux->stream);
 //    if((len&(~1))!=(idx->dwChunkLength&(~1))){
 //    if((len)!=(idx->dwChunkLength)){
     if((len!=idx->dwChunkLength)&&((len+1)!=idx->dwChunkLength)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
-      len=idx->dwChunkLength;
-//      continue;
+      if(len>0x200000 && idx->dwChunkLength>0x200000) continue; // both values bad :(
+      len=choose_chunk_len(idx->dwChunkLength,len);
     }
     if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
   } else return 0;
