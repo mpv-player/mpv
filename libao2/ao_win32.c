@@ -152,6 +152,7 @@ static int init(int rate,int channels,int format,int flags)
 	waveOutGetVolume(hWaveOut,&restoredvolume); 
 	//allocate buffer memory as one big block
 	buffer = malloc(totalBufferSize);
+	memset(buffer,0x0,totalBufferSize);
     //and setup pointers to each buffer 
     waveBlocks = (WAVEHDR*)buffer;
     buffer += sizeof(WAVEHDR) * BUFFER_COUNT;
