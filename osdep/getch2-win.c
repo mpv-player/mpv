@@ -74,9 +74,11 @@ int getch2(int time){
 						return KEY_RIGHT;
 					case VK_DOWN:
 						return KEY_DOWN;
+                    case VK_SHIFT:
+                        continue;              
 					}
 					/*check for function keys*/
-        			if(eventbuffer[i].Event.KeyEvent.wVirtualKeyCode >= 0x70)
+        			if(0x87 >= eventbuffer[i].Event.KeyEvent.wVirtualKeyCode >= 0x70)
 						return (KEY_F + 1 + eventbuffer[i].Event.KeyEvent.wVirtualKeyCode - 0x70);
  						
 					/*only characters should be remaining*/
