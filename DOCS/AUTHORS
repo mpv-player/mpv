@@ -41,6 +41,10 @@ Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 Felix Bünemann: <Felix.Buenemann@gmx.de>
 - SDL driver fixes
 
+TeLeNiEkO: <telenieko@telenieko.com>
+- debian packaging support (see debian/* and DOCS/DEBIAN)
+- spanish translations (see DOCS/Spanish/*)
+
 Main testers:
   Balazs Tibor (Tibcu)
   Sasi Peter (SaPe)
