@@ -15,11 +15,12 @@
 #   _ld_opt : ' -L/path/dir -lopt ' that is: some GCC option
 #   _inc_opt : ' -I/path/dir/include '
 #
+# In this file, a tab is 8 chars and indentation shift is 2 characters
+#
 # GOTCHAS:
 #  - config files are currently:
 #    config.h config.mak libvo/config.mak libao2/config.mak
 #    Gui/config.mak libvo2/config.mak
-#  - removed dvbincdir/madincdir/cssincdir: add them to extraincdir
 #
 #############################################################################
 
@@ -76,7 +77,7 @@ x86() {
 # Use this before starting a check
 echocheck() {
   echo "============ Checking for $@ ============" >> "$TMPLOG"
-  echo "$_echo_n" "Checking for $@ ... $_echo_c"
+  echo ${_echo_n} "Checking for $@ ... ${_echo_c}"
 }
 
 # Use this to echo the results of a check
@@ -90,8 +91,8 @@ echores() {
 
 # Check how echo works in this /bin/sh
 case `echo -n` in
-  -n)	_echo_n=''	_echo_c='\c'	;;	# SysV echo
-  *)	_echo_n=-n	_echo_c=''	;;	# BSD echo
+  -n)	_echo_n=	_echo_c='\c'	;;	# SysV echo
+  *)	_echo_n='-n '	_echo_c=	;;	# BSD echo
 esac
 
 LANGUAGES=`echo help_mp-??.h | sed "s/help_mp-\(..\).h/\1/g"`
@@ -132,7 +133,7 @@ Optional features:
                          (use this option if it does not compile) [enable] 
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
-  --disable-vidix	 disable VIDIX stuff [enable]
+  --disable-vidix        disable VIDIX stuff [enable]
   --enable-new-input     enable new input system [disable]
   --enable-joystick      enable joystick support in new input [disable]
 Video:
@@ -153,7 +154,7 @@ Video:
   --enable-xinerama      build with Xinerama support for X11 [autodetect]
   --enable-x11           build with X11 render support [autodetect]
   --enable-fbdev         build with FBDev render support [autodetect]
-  --enable-fbdev=nocopy   yuv12 converts directly into framebuffer
+  --enable-fbdev=nocopy  yuv12 converts directly into framebuffer
   --enable-mlib          build with MLIB support (Solaris only) [autodetect]
   --enable-3dfx          build with 3dfx support [disable]
   --enable-tdfxfb        build with tdfxfb support [disable]
@@ -196,6 +197,7 @@ Use these options if autodetection fails:
   --with-x11libdir=DIR     X library files in DIR
   --with-csslibdir=DIR     libcss in DIR
   --with-madlibdir=DIR     libmad (libmad shared lib.) in DIR
+  --with-mlibdir=DIR       libmlib (MLIB support) in DIR (Solaris only)
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
   --with-sdl-config=PATH   path to sdl*-config (e.g.: /opt/bin/sdl-config)
@@ -848,10 +850,10 @@ for ac_option do
   --disable-streaming)	_streaming=no	;;
   --enable-vidix)	_vidix=yes	;;
   --disable-vidix)	_vidix=no	;;
-  --enable-new-input)            _new_input=yes      ;;
-  --disable-new-input)           _new_input=no       ;;
-  --enable-joystick)                 _joystick=yes           ;;
-  --disable-joystick)                _joystick=no            ;;
+  --enable-new-input)	_new_input=yes	;;
+  --disable-new-input)	_new_input=no	;;
+  --enable-joystick)	_joystick=yes	;;
+  --disable-joystick)	_joystick=no	;;
   --enable-divx4linux)	_divx4linux=yes	;;
   --disable-divx4linux)	_divx4linux=no	;;
   --enable-opendivx)	_opendivx=yes	;;
@@ -871,7 +873,7 @@ for ac_option do
   --enable-directfb)	_directfb=yes	;;
   --disable-directfb)	_directfb=no	;;
   --enable-zr)		_zr=yes		;;
-  --disable-zr)	_zr=no		;;
+  --disable-zr)		_zr=no		;;
   --enable-mtrr)	_mtrr=yes	;;
   --disable-mtrr)	_mtrr=no	;;
   --enable-largefiles)	_largefiles=yes	;;
@@ -975,9 +977,10 @@ for ac_option do
 done
 
 # Atmos: moved this here, to be correct, if --prefix is specified
-test -z "$_datadir" && _datadir=$_prefix"/share/mplayer"
-test -z "$_confdir" && _confdir=$_datadir
-test -z "$_libdir" && _libdir=$_prefix"/lib/mplayer"
+test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
+test -z "$_confdir" && _confdir="$_datadir"
+test -z "$_libdir" && _libdir="$_prefix/lib/mplayer"
+test -z "$_mlibdir" && _mlibdir="$MLIBHOME"
 
 if x86 ; then
   # Checking assembler (_as) compatibility...
