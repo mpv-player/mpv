@@ -1,18 +1,7 @@
-#include "../config.h"
-
-#ifdef USE_FASTMEMCPY
 /*
   aclib - advanced C library ;)
   This file contains functions which improve and expand standard C-library
 */
-
-#include <stddef.h>
-
-#define BLOCK_SIZE 4096
-#define CONFUSION_FACTOR 0
-//Feel free to fine-tune the above 2, it might be possible to get some speedup with them :)
-
-//#define STATISTICS
 
 #ifndef HAVE_SSE2
 /*
@@ -74,7 +63,6 @@ If you have questions please contact with me: Nick Kurshev: nickols_k@mail.ru.
 // 3dnow memcpy support from kernel 2.4.2
 //  by Pontscho/fresh!mindworkz
 
-#if defined( HAVE_MMX2 ) || defined( HAVE_3DNOW ) || defined( HAVE_MMX )
 
 #undef HAVE_MMX1
 #if defined(HAVE_MMX) && !defined(HAVE_MMX2) && !defined(HAVE_3DNOW) && !defined(HAVE_SSE)
@@ -106,6 +94,7 @@ __asm__ __volatile__(\
 	: "memory");\
 }
 
+#undef MMREG_SIZE
 #ifdef HAVE_SSE
 #define MMREG_SIZE 16
 #else
@@ -113,6 +102,8 @@ __asm__ __volatile__(\
 #endif
 
 /* Small defines (for readability only) ;) */
+#undef PREFETCH
+#undef EMMS
 #ifdef HAVE_K6_2PLUS
 #define PREFETCH "prefetch"
 /* On K6 femms is faster of emms. On K7 femms is directly mapped on emms. */
@@ -122,19 +113,21 @@ __asm__ __volatile__(\
 #define EMMS     "emms"
 #endif
 
+#undef MOVNTQ
 #ifdef HAVE_MMX2
 #define MOVNTQ "movntq"
 #else
 #define MOVNTQ "movq"
 #endif
 
+#undef MIN_LEN
 #ifdef HAVE_MMX1
 #define MIN_LEN 0x800  /* 2K blocks */
 #else
 #define MIN_LEN 0x40  /* 64-byte blocks */
 #endif
 
-void * fast_memcpy(void * to, const void * from, size_t len)
+static inline void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 {
 	void *retval;
 	size_t i;
@@ -360,7 +353,3 @@ void * fast_memcpy(void * to, const void * from, size_t len)
 	if(len) small_memcpy(to, from, len);
 	return retval;
 }
-
-
-#endif /* #if defined( HAVE_MMX2 ) || defined( HAVE_3DNOW ) || defined( HAVE_MMX ) */
-#endif /* USE_FASTMEMCPY */
