@@ -281,40 +281,21 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 
     switch(out_format)
     {
-/*	case IMGFMT_RGB8:
-	    codec_hdr.depth = 8;
-	    break;
-	case IMGFMT_RGB15:
-	    codec_hdr.depth = 15;
-	    break;
-	case IMGFMT_RGB16:
-	    codec_hdr.depth = 16;
-	    break;
-	case IMGFMT_RGB24:
-	    codec_hdr.depth = 24;
-	    break;
-	case IMGFMT_RGB32:
-	    codec_hdr.depth = 32;
-	    break;
-	case IMGFMT_BGR8:
-	    codec_hdr.depth = 8;
-	    break;
-	case IMGFMT_BGR15:
-	    codec_hdr.depth = 15;
-	    break;
-	case IMGFMT_BGR16:
-	    codec_hdr.depth = 16;
-	    break;
-	case IMGFMT_BGR24:
-	    codec_hdr.depth = 24;
-	    break;
-	case IMGFMT_BGR32:
-	    codec_hdr.depth = 32;
-	    break;*/
 	case IMGFMT_IYUV:
 	case IMGFMT_I420:
 	case IMGFMT_YV12:
 	    codec_hdr.depth = 12;
+	    break;
+	case IMGFMT_YVU9:
+	    if (vidinfo->bih->biCompression == mmioFOURCC('I','V','3','2') ||
+		vidinfo->bih->biCompression == mmioFOURCC('i','v','3','2') ||
+		vidinfo->bih->biCompression == mmioFOURCC('I','V','3','1') ||
+		vidinfo->bih->biCompression == mmioFOURCC('i','v','3','2'))
+	    {
+		mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supporting YVU9 output with Indeo3\n");
+		return(0);
+	    }
+	    codec_hdr.depth = 9;
 	    break;
 	default:
 	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supported image out format (%s)\n",
@@ -392,16 +373,22 @@ xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_f
 
     image->planes[0]=image->mem;
     image->stride[0]=image->width;
-    image->stride[1]=image->stride[2]=image->width/2;
     switch(image->out_fmt){
     case IMGFMT_YV12:
 	image->planes[2]=image->planes[0]+image->width*image->height;
 	image->planes[1]=image->planes[2]+image->width*image->height/4;
+	image->stride[1]=image->stride[2]=image->width/2;
 	break;
     case IMGFMT_I420:
     case IMGFMT_IYUV:
 	image->planes[1]=image->planes[0]+image->width*image->height;
 	image->planes[2]=image->planes[1]+image->width*image->height/4;
+	image->stride[1]=image->stride[2]=image->width/2;
+	break;
+    case IMGFMT_YVU9:
+	image->planes[2]=image->planes[0]+image->width*image->height;
+	image->planes[1]=image->planes[2]+(image->width>>2)*(image->height>>2);
+	image->stride[1]=image->stride[2]=image->width/4;
 	break;
     }
 
@@ -641,7 +628,7 @@ typedef struct
 YUVBufs jpg_YUVBufs;
 YUVTabs def_yuv_tabs;
 
-/* -------------- YUV 4x4 1x1 1x1  [Indeo 3,4,5] ------------------ */
+/* -------------- YUV 4x4 1x1 1x1  (4:1:0 aka YVU9) [Indeo 3,4,5] ------------------ */
 
 void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv, YUVTabs *yuv_tabs,
@@ -664,6 +651,27 @@ void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsigned in
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV: %p %p %p %X (%d) %dx%d %dx%d\n",
 	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
+
+    if(image->out_fmt == IMGFMT_YVU9 && !yuv_tabs->YUV_Y_tab)
+    {
+	if(i_x==image->width && i_y==image->height){
+	    image->planes[0]=yuv->Ybuf;
+	    image->planes[1]=yuv->Ubuf;
+	    image->planes[2]=yuv->Vbuf;
+	    image->stride[0]=i_x; // yuv->y_w
+	    image->stride[1]=image->stride[2]=i_x/4; // yuv->uv_w
+	} else {
+	    int y;
+	    for(y=0;y<i_y;y++)
+		memcpy(image->planes[0]+y*image->stride[0],yuv->Ybuf+y*i_x,i_x);
+	    i_x>>=2; i_y>>=2;
+	    for(y=0;y<i_y;y++){
+		memcpy(image->planes[1]+y*image->stride[1],yuv->Ubuf+y*i_x,i_x);
+		memcpy(image->planes[2]+y*image->stride[2],yuv->Vbuf+y*i_x,i_x);
+	    }
+	}
+	return;
+    }
 
     // copy Y plane:
     if(yuv_tabs->YUV_Y_tab){     // dirty hack to detect iv32:
@@ -707,7 +715,7 @@ void *XA_YUV1611_Func(unsigned int image_type)
     return((void *)XA_YUV1611_Convert);
 }
 
-/* -------------- YUV 4x1 1x1 1x1 (4:1:1 ?) [CYUV] ------------------ */
+/* -------------- YUV 4x1 1x1 1x1 (4:1:1 but interleaved) [CYUV] ------------------ */
 
 void XA_YUV411111_Convert(unsigned char *image, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
@@ -739,8 +747,6 @@ void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned 
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV: %p %p %p %X (%X) %Xx%X %Xx%X\n",
 	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
-
-#warning "FIXME! Decoder doesn't supports Vivo/2.00 :("
 
 if(i_x==image->width && i_y==image->height){
 //    printf("Direct render!!!\n");

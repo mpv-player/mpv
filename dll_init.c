@@ -55,7 +55,7 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
     sh_audio->o_wf.cbSize=0;
 
     if(verbose) {
-#if 0
+#if 1
 	printf("Input format:\n");
 	    printf("  wFormatTag %d\n", in_fmt->wFormatTag);
 	    printf("  nChannels %d\n", in_fmt->nChannels);
@@ -75,6 +75,7 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
 #else
 	printf("Input format:\n");
 	print_wave_header(in_fmt);
+	print_wave_header(sh_audio->wf);
 	printf("Output fmt:\n");
 	print_wave_header(&sh_audio->o_wf);
 	printf("\n");
@@ -312,6 +313,11 @@ printf("\n");
   case IMGFMT_I420:
   case IMGFMT_IYUV:
       sh_video->o_bih.biBitCount=12;
+      yuv=1;
+      break;
+  case IMGFMT_YVU9:
+  case IMGFMT_IF09:
+      sh_video->o_bih.biBitCount=9;
       yuv=1;
       break;
 

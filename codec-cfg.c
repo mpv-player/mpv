@@ -119,6 +119,7 @@ static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 		{"I420",  IMGFMT_I420},
 		{"IYUV",  IMGFMT_IYUV},
 		{"YVU9",  IMGFMT_YVU9},
+		{"IF09",  IMGFMT_IF09},
 
 		{"YUY2",  IMGFMT_YUY2},
 		{"UYVY",  IMGFMT_UYVY},
