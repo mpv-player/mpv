@@ -248,7 +248,7 @@ parse_pls(play_tree_parser_t* p) {
   char *line,*v;
   pls_entry_t* entries = NULL;
   int n_entries = 0,max_entry=0,num;
-  play_tree_t *list = NULL, *entry = NULL;
+  play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying winamp playlist...\n");
   if (!(line = play_tree_parser_get_line(p)))
@@ -310,9 +310,10 @@ parse_pls(play_tree_parser_t* p) {
       play_tree_add_file(entry,entries[num].file);
       free(entries[num].file);
       if(list)
-	play_tree_append_entry(list,entry);
+	play_tree_append_entry(last_entry,entry);
       else
 	list = entry;
+      last_entry = entry;
     }
     if(entries[num].title) {
       // When we have info in playtree we add this info
@@ -337,7 +338,7 @@ parse_pls(play_tree_parser_t* p) {
 play_tree_t*
 parse_ref_ini(play_tree_parser_t* p) {
   char *line,*v;
-  play_tree_t *list = NULL, *entry = NULL;
+  play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying reference-ini playlist...\n");
   if (!(line = play_tree_parser_get_line(p)))
@@ -362,9 +363,10 @@ parse_ref_ini(play_tree_parser_t* p) {
         entry = play_tree_new();
         play_tree_add_file(entry,v);
         if(list)
-  	  play_tree_append_entry(list,entry);
+  	  play_tree_append_entry(last_entry,entry);
         else
   	  list = entry;
+	last_entry = entry;
       }
     }
     line = play_tree_parser_get_line(p);
@@ -379,7 +381,7 @@ parse_ref_ini(play_tree_parser_t* p) {
 play_tree_t*
 parse_m3u(play_tree_parser_t* p) {
   char* line;
-  play_tree_t *list = NULL, *entry = NULL;
+  play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying extended m3u playlist...\n");
   if (!(line = play_tree_parser_get_line(p)))
@@ -414,7 +416,8 @@ parse_m3u(play_tree_parser_t* p) {
     if(!list)
       list = entry;
     else
-      play_tree_append_entry(list,entry);
+      play_tree_append_entry(last_entry,entry);
+    last_entry = entry;
   }
    
   if(!list) return NULL;
@@ -426,7 +429,7 @@ parse_m3u(play_tree_parser_t* p) {
 play_tree_t*
 parse_textplain(play_tree_parser_t* p) {
   char* line;
-  play_tree_t *list = NULL, *entry = NULL;
+  play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying plaintext playlist...\n");
   play_tree_parser_stop_keeping(p);
@@ -440,7 +443,8 @@ parse_textplain(play_tree_parser_t* p) {
     if(!list)
       list = entry;
     else
-      play_tree_append_entry(list,entry);
+      play_tree_append_entry(last_entry,entry);
+    last_entry = entry;
   }
    
   if(!list) return NULL;
