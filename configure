@@ -2134,7 +2134,10 @@ echores "$_vorbis"
 
 
 echocheck "Win32 DLL support"
-if test "$_win32" = auto && ! qnx ; then
+if test "$_win32" = auto && qnx ; then
+  _win32=no
+fi
+if test "$_win32" = auto ; then
   _win32=no
   if x86 ; then
     if test -z "$_win32libdir" ; then
