@@ -103,11 +103,11 @@ static int read_option(char *opt, char *param)
 
 			tmp_int = atoi(param);
 
-			if (config[i].flags & CONF_CHK_MIN)
+			if (config[i].flags & CONF_MIN)
 				if (tmp_int < config[i].min)
 					return ERR_OUT_OF_RANGE;
 
-			if (config[i].flags & CONF_CHK_MAX)
+			if (config[i].flags & CONF_MAX)
 				if (tmp_int > config[i].max)
 					return ERR_OUT_OF_RANGE;
 
@@ -122,11 +122,11 @@ static int read_option(char *opt, char *param)
 
 			tmp_float = atof(param);
 
-			if (config[i].flags & CONF_CHK_MIN)
+			if (config[i].flags & CONF_MIN)
 				if (tmp_float < config[i].min)
 					return ERR_OUT_OF_RANGE;
 
-			if (config[i].flags & CONF_CHK_MAX)
+			if (config[i].flags & CONF_MAX)
 				if (tmp_float > config[i].max)
 					return ERR_OUT_OF_RANGE;
 
@@ -137,11 +137,11 @@ static int read_option(char *opt, char *param)
 			if (param == NULL)
 				return ERR_MISSING_PARAM;
 
-			if (config[i].flags & CONF_CHK_MIN)
+			if (config[i].flags & CONF_MIN)
 				if (strlen(param) < config[i].min)
 					return ERR_OUT_OF_RANGE;
 
-			if (config[i].flags & CONF_CHK_MAX)
+			if (config[i].flags & CONF_MAX)
 				if (strlen(param) > config[i].max)
 					return ERR_OUT_OF_RANGE;
 

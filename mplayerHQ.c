@@ -79,6 +79,11 @@ extern int errno;
 #define DEBUG if(0)
 static int verbose=0;
 
+static int cfg_inc_verbose(struct config *conf){
+    ++verbose;
+    return 0;
+}
+
 static int max_framesize=0;
 
 static int dbg_es_sent=0;

@@ -79,6 +79,11 @@ extern int errno;
 #define DEBUG if(0)
 static int verbose=0;
 
+static int cfg_inc_verbose(struct config *conf){
+    ++verbose;
+    return 0;
+}
+
 static int max_framesize=0;
 
 static int dbg_es_sent=0;
@@ -312,16 +317,6 @@ void exit_sighandler(int x){
   exit_player(NULL);
 }
 
-void usage(void){
-  printf("%s",help_text);
-  exit(0);
-}
-
-void missing_param(char *s){
-  printf("Missing parameter: %s\n", s);
-  exit(1);
-}
-
 int divx_quality=0;
 
 int main(int argc,char* argv[], char *envp[]){
@@ -435,9 +430,9 @@ if(video_driver && strcmp(video_driver,"help")==0){
 
 if(!filename){
   if(vcd_track) filename="/dev/cdrom"; 
-  else
-  //filename="MI2-Trailer.avi";
-  usage();
+  else {
+    printf("%s",help_text); exit(0);
+  }
 }
 
 

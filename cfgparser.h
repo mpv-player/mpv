@@ -13,8 +13,9 @@
 #define CONF_TYPE_FUNC_PARAM	5
 #define CONF_TYPE_PRINT		6
 
-#define CONF_CHK_MIN		(1<<0)
-#define CONF_CHK_MAX		(1<<1)
+#define CONF_MIN		(1<<0)
+#define CONF_MAX		(1<<1)
+#define CONF_RANGE		(CONF_MIN|CONF_MAX)
 #define CONF_NOCFG		(1<<2)
 #define CONF_NOCMD		(1<<3)
 
