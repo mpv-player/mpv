@@ -125,6 +125,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->put_image=put_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->priv->limit=24; // should be option
+    if(args) vf->priv->limit=atoi(args);
     return 1;
 }
 
