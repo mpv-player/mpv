@@ -64,7 +64,6 @@ static vo_tune_info_t vtune;
 static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_format;
-static uint32_t image_depth;
 
 /* Window parameters */
 static uint32_t window_x, window_y;
@@ -174,7 +173,7 @@ static void set_window(int force_update,const vo_tune_info_t *info)
 	vidix_start();
     }
     
-    mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] window properties: pos: %dx%d, size: %dx%d\n",
+    mp_msg(MSGT_VO, MSGL_V, "[xvidix] window properties: pos: %dx%d, size: %dx%d\n",
 	vo_dx, vo_dy, window_width, window_height);
 
     /* mDrawColorKey: */
@@ -214,42 +213,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     image_width = width;
     image_format = format;
     vo_mouse_autohide=1;
-
-    if (IMGFMT_IS_RGB(format))
-    {
-	image_depth = IMGFMT_RGB_DEPTH(format);
-    }
-    else
-    if (IMGFMT_IS_BGR(format))
-    {
-	image_depth = IMGFMT_BGR_DEPTH(format);
-    }
-    else
-    switch(format)
-    {
-	case IMGFMT_IYUV:
-	case IMGFMT_I420:
-	case IMGFMT_YV12:
-	    image_depth = 12;
-	    break;
-	case IMGFMT_UYVY:
-	case IMGFMT_YUY2:
-	    image_depth = 16;
-	    break;
-	case IMGFMT_YVU9:
-	case IMGFMT_IF09:
-	    image_depth = 9;
-	    break;
-	case IMGFMT_Y800:
-	case IMGFMT_Y8:
-	    image_depth = 8;
-	    break;
-	default:
-	    image_depth = 16;
-	    mp_msg(MSGT_VO, MSGL_FATAL, "Unknown image format: %s\n",
-		vo_format_name(format));
-	    break;
-    }
 
     if (!vo_init())
         return(-1);
@@ -296,6 +259,9 @@ if(use_gui) guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the 
 else
 {
 #endif
+
+    /* destroy window before creating one */
+    if (vo_window) XDestroyWindow(mDisplay, vo_window);
 
 #ifdef X11_FULLSCREEN
     if ( ( flags&1 )||(flags & 0x04) ) aspect(&d_width, &d_height, A_ZOOM);
@@ -355,9 +321,6 @@ else
 }
 #endif
 
-    mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] image properties: %dx%d depth: %d\n",
-	image_width, image_height, image_depth);
-	
     if ( ( !WinID )&&( flags&1 ) ) { vo_dx=0; vo_dy=0; vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight; vo_fs=1; }
 
     if (vidix_grkey_support())
@@ -425,14 +388,14 @@ static uint32_t draw_slice(uint8_t *src[], int stride[],
     UNUSED(x);
     UNUSED(y);
     mp_msg(MSGT_VO, MSGL_FATAL, "[xvidix] error: didn't used vidix draw_slice!\n");
-    return(0);
+    return(-1);
 }
 
 static uint32_t draw_frame(uint8_t *src[])
 {
     UNUSED(src);
     mp_msg(MSGT_VO, MSGL_FATAL, "[xvidix] error: didn't used vidix draw_frame!\n");
-    return(0);
+    return(-1);
 }
 
 static uint32_t query_format(uint32_t format)
@@ -486,6 +449,6 @@ static uint32_t control(uint32_t request, void *data, ...)
         }
       return VO_TRUE;
   }
-  vidix_control(request, data);
+  return vidix_control(request, data);
 //  return VO_NOTIMPL;
 }

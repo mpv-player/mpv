@@ -29,6 +29,7 @@
 #include "fastmemcpy.h"
 #include "osd.h"
 #include "video_out.h"
+#include "sub.h"
 
 #include "../libmpcodecs/vfcap.h"
 #include "../libmpcodecs/mp_image.h"
@@ -142,7 +143,7 @@ void vidix_term( void )
   if(verbose > 1) printf("vosub_vidix: vidix_term() was called\n");
 	vidix_stop();
 	vdlClose(vidix_handler);
-  ((vo_functions_t *)vo_server)->control=server_control;
+//  ((vo_functions_t *)vo_server)->control=server_control;
 }
 
 static uint32_t vidix_draw_slice_swYV12(uint8_t *image[], int stride[], int w,int h,int x,int y)
@@ -215,6 +216,7 @@ static uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h
 		}
 		return 0;
     }
+    return -1;
 }
 
 static uint32_t vidix_draw_slice_410(uint8_t *image[], int stride[], int w,int h,int x,int y)
@@ -260,12 +262,14 @@ static uint32_t vidix_draw_slice_410(uint8_t *image[], int stride[], int w,int h
 		}
 		return 0;
     }
+    return -1;
 }
 
 static uint32_t vidix_draw_slice_410_fast(uint8_t *image[], int stride[], int w, int h, int x, int y)
 {
     uint8_t *src;
     uint8_t *dest;
+
     UNUSED(w);
     UNUSED(stride);
     dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
@@ -297,6 +301,7 @@ static uint32_t vidix_draw_slice_packed(uint8_t *image[], int stride[], int w,in
     uint8_t *src;
     uint8_t *dest;
     int i;
+
     dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
     dest += dstrides.y*y + x;
     src = image[0];
@@ -312,7 +317,9 @@ static uint32_t vidix_draw_slice_packed_fast(uint8_t *image[], int stride[], int
 {
     uint8_t *src;
     uint8_t *dest;
-    int i;
+
+    UNUSED(w);
+    UNUSED(stride);
     dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
     dest += dstrides.y*y + x;
     src = image[0];
@@ -322,6 +329,12 @@ static uint32_t vidix_draw_slice_packed_fast(uint8_t *image[], int stride[], int
 
 uint32_t vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
+	UNUSED(image);
+	UNUSED(stride);
+	UNUSED(w);
+	UNUSED(h);
+	UNUSED(x);
+	UNUSED(y);
 	printf("vosub_vidix: Error unoptimized draw_slice was called\nExiting...");
 	vidix_term();
 	exit( EXIT_FAILURE );
@@ -379,6 +392,10 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
     case IMGFMT_I420:
+    case IMGFMT_YVU9:
+    case IMGFMT_IF09:
+    case IMGFMT_Y8:
+    case IMGFMT_Y800:
 	bespitch = (vidix_play.src.w + apitch) & (~apitch);
         vo_draw_alpha_yv12(w,h,src,srca,stride,lvo_mem+bespitch*y0+x0,bespitch);
         break;
@@ -444,7 +461,7 @@ uint32_t vidix_query_fourcc(uint32_t format)
     }
     return 0;
   }
-  return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN;
+  return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN|VFCAP_OSD;
 }
 
 int vidix_grkey_support(void)
@@ -523,7 +540,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		   unsigned dst_height,unsigned format,unsigned dest_bpp,
 		   unsigned vid_w,unsigned vid_h,const void *info)
 {
-  size_t i,awidth;
+  size_t i;
   int err;
   uint32_t sstride,apitch;
   if(verbose > 1)
@@ -642,7 +659,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		printf("vosub_vidix: Can't configure playback: %s\n",strerror(err));
 		return -1;
 	}
-	printf("vosub_vidix: using %d buffers\n", vidix_play.num_frames);
+	if (verbose) printf("vosub_vidix: using %d buffer(s)\n", vidix_play.num_frames);
 
 	vidix_mem = vidix_play.dga_addr;
 
@@ -656,13 +673,13 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		vidix_play.frame_size);
 	switch(format)
 	{
-	    case IMGFMT_Y800:
-	    case IMGFMT_Y8:
-	    case IMGFMT_YVU9:
-	    case IMGFMT_IF09:
+	    case IMGFMT_YV12:
 	    case IMGFMT_I420:
 	    case IMGFMT_IYUV:
-	    case IMGFMT_YV12:
+	    case IMGFMT_YVU9:
+	    case IMGFMT_IF09:
+	    case IMGFMT_Y800:
+	    case IMGFMT_Y8:
 		apitch = vidix_play.dest.pitch.y-1;
 		dstrides.y = (image_width + apitch) & ~apitch;
 		apitch = vidix_play.dest.pitch.v-1;
@@ -714,8 +731,8 @@ static uint32_t vidix_get_image(mp_image_t *mpi)
 {
     if(mpi->type==MP_IMGTYPE_STATIC && vidix_play.num_frames>1) return VO_FALSE;
     if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; /* slow video ram */
-    if((is_422_planes_eq || (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) && 
-       !forced_fourcc && !(vidix_play.flags & VID_PLAY_INTERLEAVED_UV)))
+    if((is_422_planes_eq || (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH))) && 
+       (!forced_fourcc && !(vidix_play.flags & VID_PLAY_INTERLEAVED_UV)))
     {
 	if(mpi->flags&MP_IMGFLAG_ACCEPT_WIDTH){
 	    // check if only width is enough to represent strides:
@@ -795,8 +812,8 @@ int vidix_preinit(const char *drvname,void *server)
 	((vo_functions_t *)server)->draw_frame=vidix_draw_frame;
 	((vo_functions_t *)server)->flip_page=vidix_flip_page;
 	((vo_functions_t *)server)->draw_osd=vidix_draw_osd;
-	server_control = ((vo_functions_t *)server)->control;
-	((vo_functions_t *)server)->control=vidix_control;
+//	server_control = ((vo_functions_t *)server)->control;
+//	((vo_functions_t *)server)->control=vidix_control;
 	vo_server = server;
 	return 0;
 }
