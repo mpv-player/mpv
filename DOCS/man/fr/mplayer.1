@@ -1,4 +1,4 @@
-.\" synced with 1.834
+.\" synced with 1.835
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "02 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "03 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -7387,6 +7387,65 @@ Pour un encodage en débit binaire constant (CBR), vous devez définir ce
 paramètre.
 .
 .TP
+.B qp_constant=<1\-51>
+Définit le quantum à utiliser.
+Une valeur comprise dans l'intervalle 20-40 semble convenir
+(par défaut\ : 26).
+Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
+Notez que la quantification dans H.264 fonctionne différemment de MPEG[124].
+L'échelle des paramètres de quantification (QP) de H.264 est logarithmique.
+Ainsi, la différence de débit binaire entre QP=20 et QP=40 est d'environ un
+facteur 10.
+Les quantum utiles en H.264 ont tendance à être bien plus importants
+comparés à MPEG[124].
+.
+.TP
+.B pass=<1\-2>
+Active le mode 2 ou 3-passes.
+Il est recommandé de toujours encoder en mode 2 ou 3 passes puisque cela
+permet une distribution plus adéquate des bits et améliore la qualité
+globale.
+.PD 0
+.RSs
+.IPs 1
+première passe
+.IPs 2
+seconde passe
+.IPs 3
+Nième passe (seconde et troisième passes de l'encodage trois passes)
+.RE
+.RS
+Voici comment cela fonctionne, et comment l'utiliser\ :
+.br
+La première passe (pass=1) écrit le fichier de statistiques.
+Vous devriez désactiver des options gourmandes en temps processeur.
+.br
+En mode deux passes, la seconde passe (pass=2) se base sur le fichier de
+stats pour allouer le bon nombre de bits aux trames (ratecontrol).
+.br
+En mode trois passes, la seconde passe (pass=3, non ce n'est pas une
+erreur) fait les deux\ : elle lit le fichier de stats, puis ré-écrit
+par dessus.
+Peut-être que vous devriez sauver le fichier divx2pass.log avant si
+MEncoder peut être interrompu dans son cours.
+Vous devriez utiliser toutes les options d'encodage, à l'exception de celles
+vraiment très gourmandes.
+.br
+La troisième passe (pass=3) fait la même chose que la seconde, à la
+différence près qu'elle dispose des stats de la deuxième passe pour mieux
+travailler.
+Vous pouvez utiliser toutes les options d'encodage, même les plus
+gourmandes.
+.br
+.I
+NOTE\ :
+x264 gérant le mode 3 passes depuis peu de temps, nous
+encourageons les utilisateurs à partager avec nous leurs expériences et
+leurs combinaisons d'options d'x264 qui seraient aussi bien rapides que
+produisant des images de qualité.
+.REss
+.
+.TP
 .B keyint=<valeur>
 Définit l'intervalle maximum autorisé entre trames-I.
 Un intervalle plus grand fait économiser des bits, et donc améliore la
@@ -7491,40 +7550,29 @@ FIXME: indiquer ce que signifie IDC.
 .REss
 .
 .TP
-.B qp_constant=<1\-51>
-Définit le quantum à utiliser.
-Une valeur comprise dans l'intervalle 20-40 semble convenir
-(par défaut\ : 26).
-Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
-Notez que la quantification dans H.264 fonctionne différemment de MPEG[124].
-L'échelle des paramètres de quantification (QP) de H.264 est logarithmique.
-Ainsi, la différence de débit binaire entre QP=20 et QP=40 est d'environ un
-facteur 10.
-Les quantum utiles en H.264 ont tendance à être bien plus importants
-comparés à MPEG[124].
-.
-.TP
-.B qp_min=<1\-51> (CBR uniquement)
-Quantificateur minimum, 15\-35 semble être un intervalle raisonnable
+.B qp_min=<1\-51> (CBR ou 2 passes)
+Quantificateur minimum, 10\-35 semble être un intervalle raisonnable
 (par défaut\ : 10).
 .
 .TP
-.B qp_max=<1\-51> (CBR uniquement)
+.B qp_max=<1\-51> (CBR ou 2 passes)
 quantum maximum (par défaut\ : 51)
 .
 .TP
-.B qp_step=<valeur>
-Différence de quantum maximale autorisée d'une trame à l'autre.
+.B qp_step=<1\-50> (CBR ou 2 passes)
+Différence de quantum maximale autorisée d'une trame à l'autre
+(par défaut\ : 1)
 .
 .TP
-.B rc_buffer_size=<valeur>
-taille du tampon ratecontrol (tampon permettant de distribuer intelligemment
-les bits aux trames) (par défaut\ : la taille nécessaire pour 1
+.B rc_buffer_size=<valeur> (CBR ou 2 passes)
+taille du tampon ratecontrol, en kbits (tampon permettant de distribuer
+intelligemment les bits aux trames) (par défaut\ : la taille nécessaire pour 1
 seconde au débit binaire (bitrate) que vous avez défini).
 .
 .TP
-.B rc_init_buffer=<value>
-taille initiale du tampon ratecontrol (par défaut\ : 1/4 de rc_buffer_size)
+.B rc_init_buffer=<0.0\-1.0>  (CBR uniquement)
+Définit le niveau initial du tampon ratecontrol (fraction de la taille totale
+de ce tampon) (par défaut\ : 0.25).
 .
 .TP
 .B rc_sens=<0\-100> (CBR uniquement)
@@ -7539,60 +7587,13 @@ facteur de quantification entre les trames-I et -P (par défaut\ : 1.4)
 facteur de quantification entre les trames-P et -B (par défaut\ : 1.3)
 .
 .TP
-.B pass=<1\-2>
-Active le mode 2 ou 3-passes.
-Il est recommandé de toujours encoder en mode 2 ou 3 passes puisque cela
-permet une distribution plus adéquate des bits et améliore la qualité
-globale.
-.PD 0
-.RSs
-.IPs 1
-première passe
-.IPs 2
-seconde passe
-.IPs 3
-Nième passe (seconde et troisième passes de l'encodage trois passes)
-.RE
-.RS
-Voici comment cela fonctionne, et comment l'utiliser\ :
-.br
-La première passe (pass=1) écrit le fichier de statistiques.
-Vous devriez désactiver des options gourmandes en temps processeur.
-.br
-En mode deux passes, la seconde passe (pass=2) se base sur le fichier de
-stats pour allouer le bon nombre de bits aux trames (ratecontrol).
-.br
-En mode trois passes, la seconde passe (pass=3, non ce n'est pas une
-erreur) fait les deux\ : elle lit le fichier de stats, puis ré-écrit
-par dessus.
-Peut-être que vous devriez sauver le fichier divx2pass.log avant si
-MEncoder peut être interrompu dans son cours.
-Vous devriez utiliser toutes les options d'encodage, à l'exception de celles
-vraiment très gourmandes.
-.br
-La troisième passe (pass=3) fait la même chose que la seconde, à la
-différence près qu'elle dispose des stats de la deuxième passe pour mieux
-travailler.
-Vous pouvez utiliser toutes les options d'encodage, même les plus
-gourmandes.
-.br
-.I
-NOTE\ :
-x264 gérant le mode 3 passes depuis peu de temps, nous
-encourageons les utilisateurs à partager avec nous leurs expériences et
-leurs combinaisons d'options d'x264 qui seraient aussi bien rapides que
-produisant des images de qualité.
-.REss
-.
-.TP
-.B qcomp=<0\-1>
+.B qcomp=<0\-1> (2 passes uniquement)
 compression des quantum (par défaut\ : 0.6)
-Cela affecte le ratecontrol\ : une faible valeur rend le débit binaire plus
-constant, alors qu'une valeur importante rend les quantum plus
-constants.
+Une faible valeur rend le débit binaire plus constant,
+alors qu'une valeur importante rend les quantum plus constants.
 .
 .TP
-.B cplx_blur=<0\-999>
+.B cplx_blur=<0\-999> (2 passes uniquement)
 Flou temporel de la complexité de trame estimée, avant la compression de
 la courbe (défaut\ : 20).
 Des valeurs plus faibles permettent au quantum de plus changer d'une
@@ -7603,7 +7604,7 @@ forte et faible (par exemple un dessin animé dont la cadence d'animation est
 faible) ne gâche pas de bits en faisant fluctuer les quantum.
 .
 .TP
-.B qblur=<0\-99>
+.B qblur=<0\-99> (2 passes uniquement)
 Flou temporel entre les quantum, après la compression de la courbe
 (par défaut\ : 0.5).
 Une faible valeur permet aux quantum de voir leur valeur varier plus
@@ -7620,7 +7621,7 @@ directs dans les trames-B.
 Aucun\ : les macro-blocs directs ne sont pas utilisés.
 .IPs 1
 Temporel\ : les vecteur de mouvements sont interpolés d'après la trame-P
-suivante.
+suivante (par défaut).
 .IPs 2
 Spatial\ : les vecteur de mouvements sont extrapolés d'après les blocs
 adjacents.
