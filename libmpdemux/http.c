@@ -321,6 +321,56 @@ http_set_uri( HTTP_header_t *http_hdr, const char *uri ) {
 	strcpy( http_hdr->uri, uri );
 }
 
+int
+http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, const char *password ) {
+	char *auth, *usr_pass, *b64_usr_pass;
+	int encoded_len, pass_len=0, out_len;
+	if( http_hdr==NULL || username==NULL ) return -1;
+
+	if( password!=NULL ) {
+		pass_len = strlen(password);
+	}
+	
+	usr_pass = (char*)malloc(strlen(username)+pass_len+2);
+	if( usr_pass==NULL ) {
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+		return -1;
+	}
+
+	sprintf( usr_pass, "%s:%s", username, (password==NULL)?"":password );
+
+	// Base 64 encode with at least 33% more data than the original size
+	encoded_len = strlen(usr_pass)*2;
+	b64_usr_pass = (char*)malloc(encoded_len);
+	if( b64_usr_pass==NULL ) {
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+		return -1;
+	}
+
+	out_len = base64_encode( usr_pass, strlen(usr_pass), b64_usr_pass, encoded_len);
+	if( out_len<0 ) {
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Base64 out overflow\n");
+		return -1;
+	}
+
+	b64_usr_pass[out_len]='\0';
+	
+	auth = (char*)malloc(encoded_len+22);
+	if( auth==NULL ) {
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+		return -1;
+	}
+	
+	sprintf( auth, "Authorization: Basic %s", b64_usr_pass);
+	http_set_field( http_hdr, auth );
+	
+	free( usr_pass );
+	free( b64_usr_pass );
+	free( auth );
+	
+	return 0;
+}
+
 void
 http_debug_hdr( HTTP_header_t *http_hdr ) {
 	HTTP_field_t *field;
@@ -344,3 +394,53 @@ http_debug_hdr( HTTP_header_t *http_hdr ) {
 	}
 	mp_msg(MSGT_NETWORK,MSGL_V,"--- HTTP DEBUG HEADER --- END ---\n");
 }
+
+int 
+base64_encode(const void *enc, int encLen, char *out, int outMax) {
+	static const char	b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+	unsigned char		*encBuf;
+	int			outLen;
+	unsigned int		bits;
+	unsigned int		shift;
+
+	encBuf = (unsigned char*)enc;
+	outLen = 0;
+	bits = 0;
+	shift = 0;
+
+	while( outLen<outMax ) {
+		if( encLen>0 ) {
+			// Shift in byte
+			bits <<= 8;
+			bits |= *encBuf;
+			shift += 8;
+			// Next byte
+			encBuf++;
+			encLen--;
+		} else if( shift>0 ) {
+			// Pad last bits to 6 bits - will end next loop
+			bits <<= 6 - shift;
+			shift = 6;
+		} else {
+			// Terminate with Mime style '='
+			*out = '=';
+			outLen++;
+
+			return outLen;
+		}
+
+		// Encode 6 bit segments
+		while( shift>=6 ) {
+			shift -= 6;
+			*out = b64[ (bits >> shift) & 0x3F ];
+			out++;
+			outLen++;
+		}
+	}
+
+	// Output overflow
+	return -1;
+}
+
+

@@ -25,7 +25,7 @@ typedef struct {
 	int field_nb;
 	char *field_search;
 	HTTP_field_t *field_search_pos;
-	// Body varibles
+	// Body variables
 	char *body;
 	int body_size;
 	char *buffer;
@@ -44,7 +44,9 @@ char*		http_get_next_field( HTTP_header_t *http_hdr );
 void		http_set_field( HTTP_header_t *http_hdr, const char *field_name );
 void		http_set_method( HTTP_header_t *http_hdr, const char *method );
 void		http_set_uri( HTTP_header_t *http_hdr, const char *uri );
+int		http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, const char *password );
 
 void		http_debug_hdr( HTTP_header_t *http_hdr );
 
+int 		base64_encode(const void *enc, int encLen, char *out, int outMax);
 #endif // __HTTP_H
