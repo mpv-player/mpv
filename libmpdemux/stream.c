@@ -102,8 +102,8 @@ int stream_fill_buffer(stream_t *s){
         break;
         }
       case DVDNAV_STILL_FRAME: {
-          printf( "Still Frame\n" );
           dvdnav_still_event_t *still_event = (dvdnav_still_event_t*)(s->buffer);
+          printf( "Still Frame\n" );
 	  if(still_event->length==0xff) { printf( "Sleeping indefinately\n" ); sleeping=2; }
 	  else  {
 	    InitTimer();
