@@ -357,7 +357,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
   if(align & MENU_TEXT_VCENTER)
     sy = ymin + ((h - need_h)/2);
   else if(align & MENU_TEXT_BOT) 
-    sy = ymax - need_h;
+    sy = ymax - need_h - 1;
   else
     sy = y;
 
@@ -443,7 +443,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
 	if(align & MENU_TEXT_HCENTER)
 	  sx = xmid - ll/2;
 	else
-	  sx = xmax - ll;
+	  sx = xmax - 1 - ll;
       }
     } else {
       for(sx = xrmin ;  sx < xmin && txt != line_end ; txt++) {
@@ -455,15 +455,20 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
     while(sx < xmax && txt != line_end) {
       unsigned char c = *txt++;
       font = vo_font->font[c];
-      if ( (font >= 0) && (sx + vo_font->width[c] <= xmax) /*&& (sy + vo_font->pic_a[font]->h <= ymax)*/)
-	draw_alpha(vo_font->width[c], vo_font->pic_a[font]->h,
-		   vo_font->pic_b[font]->bmp+vo_font->start[c],
-		   vo_font->pic_a[font]->bmp+vo_font->start[c],
-		   vo_font->pic_a[font]->w,
-		   mpi->planes[0] + sy * mpi->stride[0] + sx * (mpi->bpp>>3),
-		   mpi->stride[0]);
-/*        else */
-/* 	printf("Can't draw '%c'\n",c); */
+      if(font >= 0) {
+ 	int cs = (vo_font->pic_a[font]->h - vo_font->height) / 2;
+	if ((sx + vo_font->width[c] < xmax)  &&  (sy + vo_font->height < ymax) )
+	  draw_alpha(vo_font->width[c], vo_font->height,
+		     vo_font->pic_b[font]->bmp+vo_font->start[c] +
+		     cs * vo_font->pic_a[font]->w,
+		     vo_font->pic_a[font]->bmp+vo_font->start[c] +
+		     cs * vo_font->pic_a[font]->w,
+		     vo_font->pic_a[font]->w,
+		     mpi->planes[0] + sy * mpi->stride[0] + sx * (mpi->bpp>>3),
+		     mpi->stride[0]);
+	//	else
+	//printf("Can't draw '%c'\n",c);
+      }
       sx+=vo_font->width[c]+vo_font->charspace;
     }
     txt = line_end;
