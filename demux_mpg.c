@@ -238,7 +238,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 		    printf("Encrypted stream but authentication was not requested by you!!\n");
     }
 #endif
-    ds_read_packet(ds,demux->stream,len,pts/90000.0f,0);
+    ds_read_packet(ds,demux->stream,len,pts/90000.0f,0,0);
 //    if(ds==demux->sub) parse_dvdsub(ds->last->buffer,ds->last->len);
     return 1;
   }
@@ -255,7 +255,7 @@ int demux_mpg_es_fill_buffer(demuxer_t *demux){
   // Elementary video stream
   if(demux->stream->eof) return 0;
   demux->filepos=stream_tell(demux->stream);
-  ds_read_packet(demux->video,demux->stream,STREAM_BUFFER_SIZE,0,0);
+  ds_read_packet(demux->video,demux->stream,STREAM_BUFFER_SIZE,0,0,0);
   return 1;
 }
 

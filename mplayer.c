@@ -1611,6 +1611,8 @@ switch(sh_video->codec->driver){
     if(in_size<0){ eof=1;break;}
     if(in_size>max_framesize) max_framesize=in_size;
 
+    if(d_video->flags) if(verbose) printf("***keyframe***\n");
+
     if(drop_frame<2) DS_VideoDecoder_DecodeFrame(start, in_size, 0, !drop_frame);
     current_module="draw_frame";
 
@@ -1640,6 +1642,8 @@ switch(sh_video->codec->driver){
     int in_size=ds_get_packet(d_video,&start);
     if(in_size<0){ eof=1;break;}
     if(in_size>max_framesize) max_framesize=in_size;
+    
+    if(d_video->flags) if(verbose) printf("***keyframe***\n");
     
     if(in_size){
       sh_video->bih->biSizeImage = in_size;

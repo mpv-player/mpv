@@ -70,11 +70,12 @@ void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp){
         dp->len,dp->pts,dp->pos,ds->demuxer->audio->packs,ds->demuxer->video->packs);
 }
 
-void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,int pos){
+void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,int pos,int flags){
     demux_packet_t* dp=new_demux_packet(len);
     stream_read(stream,dp->buffer,len);
     dp->pts=pts; //(float)pts/90000.0f;
     dp->pos=pos;
+    dp->flags=flags;
     // append packet to DS stream:
     ds_add_packet(ds,dp);
 }
@@ -128,6 +129,7 @@ int ds_fill_buffer(demux_stream_t *ds){
         ds->pts_bytes=0;
       }
       ds->pts_bytes+=p->len; // !!!
+      ds->flags=p->flags;
       // free packet:
       ds->bytes-=p->len;
       ds->first=p->next;

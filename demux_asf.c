@@ -58,7 +58,7 @@ static void asf_descrambling(unsigned char *src,int len){
 }
 
 
-static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,int id,int seq,unsigned long time,unsigned short dur,int offs){
+static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,int id,int seq,unsigned long time,unsigned short dur,int offs,int keyframe){
   demux_stream_t *ds=NULL;
   
   if(verbose>=4) printf("demux_asf.read_packet: id=%d seq=%d len=%d\n",id,seq,len);
@@ -118,6 +118,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
       dp=new_demux_packet(len);
       memcpy(dp->buffer,data,len);
       dp->pts=time*0.001f;
+      dp->flags=keyframe;
 //      if(ds==demux->video) printf("ASF time: %8d  dur: %5d  \n",time,dur);
       dp->pos=demux->filepos;
       ds->asf_packet=dp;
@@ -207,6 +208,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
               unsigned long x;
               unsigned char type;
               unsigned long time2;
+	      int keyframe=0;
 
               if(p>=p_end) printf("Warning! invalid packet 1, sig11 coming soon...\n");
 
@@ -218,6 +220,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
               }
               
               streamno=p[0]&0x7F;
+	      if(p[0]&0x80) keyframe=1;
               seq=p[1];
               p+=2;
 
@@ -279,7 +282,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
 		  int len2=p[0];
 		  p++;
                   //printf("  group part: %d bytes\n",len2);
-                  demux_asf_read_packet(demux,p,len2,streamno,seq,x,duration,-1);
+                  demux_asf_read_packet(demux,p,len2,streamno,seq,x,duration,-1,keyframe);
                   p+=len2;
 		  len-=len2+1;
 		}
@@ -290,7 +293,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
               case 0x08:
                 // NO GROUPING:
                 //printf("fragment offset: %d  \n",sh->x);
-                demux_asf_read_packet(demux,p,len,streamno,seq,time2,duration,x);
+                demux_asf_read_packet(demux,p,len,streamno,seq,time2,duration,x,keyframe);
                 p+=len;
                 break;
 	      }

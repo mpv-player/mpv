@@ -21,6 +21,7 @@ typedef struct demux_packet_st {
   float pts;
   int pos;  // pozicio indexben (AVI) ill. fileban (MPG)
   unsigned char* buffer;
+  int flags; // keyframe, etc
   struct demux_packet_st* next;
 } demux_packet_t;
 
@@ -34,6 +35,7 @@ typedef struct {
   int pos;                 // position in the input stream (file)
   int dpos;                // position in the demuxed stream
   int pack_no;		   // serial number of packet
+  int flags;               // flags of current packet (keyframe etc)
 //---------------
   int packs;              // number of packets in buffer
   int bytes;              // total bytes of packets in buffer
@@ -87,6 +89,7 @@ inline static demux_packet_t* new_demux_packet(int len){
   dp->next=NULL;
   dp->pts=0;
   dp->pos=0;
+  dp->flags=0;
   return dp;
 }
 
@@ -99,7 +102,7 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id);
 demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id);
 
 void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp);
-void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,int pos);
+void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,int pos,int flags);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 int ds_fill_buffer(demux_stream_t *ds);

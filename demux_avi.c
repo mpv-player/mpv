@@ -57,7 +57,7 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
   return NULL;
 }
 
-static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int len,int idxpos){
+static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int len,int idxpos,int flags){
   int skip;
   float pts=0;
   demux_stream_t *ds=demux_avi_select_stream(demux,id);
@@ -92,7 +92,7 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
   
   if(ds){
     if(verbose>=2) printf("DEMUX_AVI: Read %d data bytes from packet %04X\n",len,id);
-    ds_read_packet(ds,demux->stream,len,pts,idxpos);
+    ds_read_packet(ds,demux->stream,len,pts,idxpos,flags);
     skip-=len;
   }
   if(skip){
@@ -115,6 +115,7 @@ int max_packs=128;
 int ret=0;
 
 do{
+  int flags=0;
   AVIINDEXENTRY *idx=NULL;
   demux->filepos=stream_tell(demux->stream);
   if(demux->filepos>=demux->movi_end){
@@ -166,6 +167,7 @@ do{
       printf("ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
       continue;
     }
+    if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
   } else {
     id=stream_read_dword_le(demux->stream);
     len=stream_read_dword_le(demux->stream);
@@ -174,7 +176,7 @@ do{
       continue;
     }
   }
-  ret=demux_avi_read_packet(demux,id,len,demux->idx_pos-1);
+  ret=demux_avi_read_packet(demux,id,len,demux->idx_pos-1,flags);
       if(!ret && skip_video_frames<=0)
         if(--max_packs==0){
           demux->stream->eof=1;
@@ -196,6 +198,7 @@ int max_packs=128;
 int ret=0;
 
 do{
+  int flags=0;
   AVIINDEXENTRY *idx=NULL;
   int idx_pos=0;
   demux->filepos=stream_tell(demux->stream);
@@ -245,8 +248,9 @@ do{
       printf("ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
       continue;
     }
+    if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
   } else return 0;
-  ret=demux_avi_read_packet(demux,id,len,idx_pos);
+  ret=demux_avi_read_packet(demux,id,len,idx_pos,flags);
       if(!ret && skip_video_frames<=0)
         if(--max_packs==0){
           demux->stream->eof=1;
@@ -291,7 +295,7 @@ do{
   
   if(ds==demux_avi_select_stream(demux,id)){
     // read it!
-    ret=demux_avi_read_packet(demux,id,len,demux->idx_pos-1);
+    ret=demux_avi_read_packet(demux,id,len,demux->idx_pos-1,0);
   } else {
     // skip it!
     int skip=(len+1)&(~1); // total bytes in this chunk
