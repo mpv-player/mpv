@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+	"/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd"
+[
+<!ENTITY audio.xml		SYSTEM "audio.xml">
+<!ENTITY bugreports.xml		SYSTEM "bugreports.xml">
+<!ENTITY bugs.xml		SYSTEM "bugs.xml">
+<!ENTITY cd-dvd.xml		SYSTEM "cd-dvd.xml">
+<!ENTITY codecs.xml		SYSTEM "codecs.xml">
+<!ENTITY edl.xml		SYSTEM "edl.xml">
+<!ENTITY faq.xml		SYSTEM "faq.xml">
+<!ENTITY features.xml		SYSTEM "features.xml">
+<!ENTITY formats.xml		SYSTEM "formats.xml">
+<!ENTITY history.xml		SYSTEM "history.xml">
+<!ENTITY install.xml		SYSTEM "install.xml">
+<!ENTITY mail-lists.xml		SYSTEM "mail-lists.xml">
+<!ENTITY mencoder.xml		SYSTEM "mencoder.xml">
+<!ENTITY patches.xml		SYSTEM "patches.xml">
+<!ENTITY ports.xml		SYSTEM "ports.xml">
+<!ENTITY skin.xml		SYSTEM "skin.xml">
+<!ENTITY tvinput.xml		SYSTEM "tvinput.xml">
+<!ENTITY usage.xml		SYSTEM "usage.xml">
+<!ENTITY users-vs-dev.xml	SYSTEM "users-vs-dev.xml">
+<!ENTITY video-filters.xml	SYSTEM "video-filters.xml">
+<!ENTITY video.xml		SYSTEM "video.xml">
+]>
+
+<book lang="fr">
+<bookinfo id="toc">
+<title>MPlayer - Le lecteur vidéo pour LINUX</title>
+<subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
+<date>24 Mars 2003</date>
+<copyright>
+  <year>2000</year>
+  <year>2001</year>
+  <year>2002</year>
+  <year>2003</year>
+  <holder>Arpad Gereoffy (A'rpi/ESP-team)</holder>
+</copyright>
+
+<!--
+<legalnotice>
+  <title>License</title>
+  <para>This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by the
+  Free Software Foundation; either version 2 of the License, or (at your
+  option) any later version.</para>
+
+  <para>This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+  for more details.</para>
+
+  <para>You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 59 Temple Place, Suite 330, Boston, MA, 02111-1307, USA.</para>
+</legalnotice>
+-->
+</bookinfo>
+
+
+<preface id="howtoread">
+<title>Comment lire cette documentation</title>
+
+<para>
+Si c'est votre première installation, assurez-vous de tout lire d'ici
+jusqu'à la fin de la section Installation, et de suivre tous les liens que vous
+pourrez trouver. Si vous avez d'autres questions, retournez à la
+<link linkend="toc">table des matières</link>, lisez la  <xref linkend="faq"/>
+ou faites une recherche dans ces fichiers.
+</para>
+
+<para>
+Règle principale de cette documentation: si ce n'est pas documenté, cela
+<emphasis>n'existe pas</emphasis>. Si je ne dit pas que vous encodez l'audio à partir du tuner TV, c'est que vous ne pouvez pas. Cependant, une bonne quantité de talents combinés est la bienvenue. Bonne chance. Vous en aurez besoin :) Et pour un autre bon conseil, laissez-moi citer Chris Phillips sur la liste de diffusion <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>:
+</para>
+
+<blockquote><para>
+  J'ai dit il y a quelque temps qu'il y avait une énorme différence entre
+  être novice et être idiot. Peu importe ce que vous pensez réellement
+  maîtriser (que ce soit à propos de linux, des voitures ou des femmes :D)
+  vous devriez TOUJOURS être capable de prendre du recul et d'être objectif.
+  Sinon vous êtes juste idiot, à mon humble avis. Une fille avec qui j'habite
+  pensait que l'aspirateur était cassé car il n'aspirait plus rien.
+  Elle n'a jamais pensé à remplacer le sac car elle ne l'avait jamais fait.
+  Ok, ça c'est juste bête, pas un exemple de méconnaissance...Simplement ne pas
+  être si familiarisé avec votre environnement n'est pas une excuse pour être
+  a) fainéant b) ignorant. Il y a tellement de personnes qui voient le mot
+  "erreur" et s'arrêtent là... Quelques-uns seulement semblent lire les mots       qui SUIVENT.
+</para></blockquote>
+</preface>
+
+
+<chapter id="intro">
+<title>Introduction</title>
+
+<para>
+<application>MPlayer</application> est un lecteur de vidéos pour GNU/Linux
+(fonctionne sur de nombreux autres Un*x, et processeurs <emphasis role="bold">non-x86</emphasis>
+voir la section <xref linkend="ports"/>). Il lit la majorité des fichiers MPEG,
+VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ,
+PVA supportés par de nombreux codecs natifs, XAnim et les DLLs Win32. Vous pouvez
+voir les <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia</emphasis>,
+ainsi que les vidéos au format <emphasis role="bold">DivX</emphasis> (et vous
+n'avez même pas besoin de la bibliothèque avifile pour cela !). L'autre point fort
+de <application>MPlayer</application> supporte la décompression matérielle fournie
+par certaines cartes MPEG, telles que la <link linkend="dvb">DVB</link> et la
+<link linkend="dxr3">DXR3/Hollywood+</link>. Et que dire de ces superbes sous-titres
+lissés (<emphasis role="bold">10 types supportés</emphasis>) avec des polices
+européennes/ISO 8859-1,2 (Hongrois, Anglais, tchèque, etc.), Cyrilliques, Coréennes,
+ainsi que de l'OnScreenDisplay (OSD) ?
+</para>
+
+<para>
+Ce lecteur peut lire les fichiers MPEG endommagés (utile pour certains VCDs),
+ainsi que les mauvais fichiers AVI qui ne sont pas lisibles par le célèbre Windows
+Media Player. Même les fichiers AVI sans index sont lisibles, et vous pouvez
+reconstruire ses indexes soit temporairement avec l'option <option>-idx</option>,
+soit de manière définitive avec <application>MEncoder</application>, autorisant
+ainsi l'avance/retour rapide ! Comme vous pouvez le constater, le stabilité et la
+qualité sont mes objectifs prioritaires, même si la vitesse est aussi considérée
+comme importante.
+</para>
+
+<para>
+<application>MEncoder</application> (MPlayer's Movie Encoder) est un simple encodeur  de  vidéos, conçu  pour  encoder  des  vidéos jouables par MPlayer
+(<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
+dans d'autres formats jouables par MPlayer (voir plus bas). Il peut encoder avec
+des codecs variés comme <emphasis role="bold">DivX4</emphasis> (1 ou 2 passes),
+libavcodec, audio <emphasis role="bold">PCM</emphasis>/<emphasis role="bold">MP3</emphasis>/<emphasis role="bold">MP3 VBR</emphasis>.
+Il possède également un puissant système de plugins pour la manipulation vidéo.
+</para>
+
+
+<itemizedlist>
+<title>Fonctionnalités de MEncoder</title>
+<listitem><simpara>
+  Encodage à partir de la grande variété de formats de fichiers et de décodeurs de
+  <application>MPlayer</application>
+  </simpara></listitem>
+<listitem><simpara>
+  Encodage dans tous les codecs <link linkend="ffmpeg">libavcodec</link> de ffmpeg
+  </simpara></listitem>
+<listitem><simpara>
+  Encodage vidéo depuis <emphasis role="bold">les tuners TV compatibles V4L</emphasis>
+  </simpara></listitem>
+<listitem><simpara>
+  Encodage/multiplexage vers fichiers AVI entrelacés avec index propre
+  </simpara></listitem>
+<listitem><simpara>
+  Création de fichiers à partir de flux audio externes
+  </simpara></listitem>
+<listitem><simpara>
+  Encodage 1, 2 ou 3 passes
+  </simpara></listitem>
+<listitem><para>
+  MP3 audio <emphasis role="bold">VBR</emphasis>
+  <important><simpara>
+  L'audio MP3 VBR ne peut pas toujours être bien lu sur les lecteurs Windows!
+  </simpara></important>
+  </para></listitem>
+<listitem><simpara>
+  PCM audio
+  </simpara></listitem>
+<listitem><simpara>
+  Copie de flux (stream)
+  </simpara></listitem>
+<listitem><simpara>
+  Synchronisation A/V de la source (basé sur PTS, peut être désactivé avec l'option
+  <option>-mc 0</option>)
+  </simpara></listitem>
+<listitem><simpara>
+  Correction FPS avec l'option <option>-ofps</option> (utile pour l'encodage d'un VOB 29.97fps en AVI 24fps)
+  </simpara></listitem>
+<listitem><simpara>
+  Utilise notre très puissant système de plugins (crop, expand, flip, postprocess, rotate, scale, conversion rgb/yuv)
+  </simpara></listitem>
+<listitem><simpara>
+  Peut encoder les sous-titres DVD/VOBsub <emphasis role="bold">ET</emphasis>
+  texte dans le fichier de destination
+  </simpara></listitem>
+<listitem><simpara>
+  Peut ripper les sous-titres DVD en format Vobsub
+  </simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Fonctionnalités prévues</title>
+<listitem><simpara>
+variété encore plus importante de formats/codecs disponibles
+(création de fichiers VOB avec des flux DivX4/Indeo5/VIVO :)
+  </simpara></listitem>
+</itemizedlist>
+
+<!-- FIXME: the license should be in bookinfo -->
+<para>
+<application>MPlayer</application> et <application>MEncoder</application>
+peuvent être distribués selon les termes de la GNU General Public License Version 2.
+</para>
+
+&history.xml;
+&install.xml;
+</chapter>
+
+
+&features.xml;
+&usage.xml;
+&faq.xml;
+&cd-dvd.xml;
+&ports.xml;
+&mencoder.xml;
+&mail-lists.xml;
+&bugreports.xml;
+&bugs.xml;
+&skin.xml;
+&users-vs-dev.xml;
+&patches.xml;
+</book>

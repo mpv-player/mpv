@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<sect1 id="edl" xreflabel="TV input">
+<title>Listes d'Edition de Décision (EDL)</title>
+
+<para>
+Le système de liste d'édition de décision (Edit Decision Lists - EDL) vous
+permet de sauter ou rendre muet des sections de vidéos pendant la lecture,
+basé sur un fichier de configuration EDL spécifique au film.
+</para>
+
+<para>
+Ceci est utile pour ceux qui veulent voir un film en mode "tout public".
+Vous pouvez couper toutes violence, profanation, Jar-Jar Binks .. d'un film
+suivant vos propres préférences personnelles. A part ça, il y a d'autres
+utilisations, comme sauter automatiquement les pubs dans les fichiers vidéos
+que vous regardez.
+</para>
+
+<para>
+Le format de fichier EDL est plutôt rudimentaire. Une fois que le système EDL
+aura atteint un certain niveau de maturité, un format de fichier basé sur XML
+sera probablement implémenté (en gardant une compatibilité descendante avec les
+précédents formats EDL).
+</para>
+
+<para>
+Le nombre maximum d'entrées EDL pour l'incarnation actuelle de EDL est 1000.
+Si vous avez besoin de plus, changez le <systemitem>#define MAX_EDL_ENTRIES</systemitem>
+dans le fichier <filename>edl.h</filename>.
+</para>
+
+<sect2 id="edl_using">
+<title>Utiliser un fichier EDL</title>
+<para>
+Incluez l'option <option>-edl &lt;nomfichier&gt;</option> quand vous lancez
+<application>MPlayer</application>, avec le nom du fichier EDL que vous voulez
+appliquer à la video.
+</para>
+</sect2>
+
+<sect2 id="edl_making">
+<title>Faire un fichier EDL</title>
+<para>
+Le format de fichier actuel EDL est:
+<programlisting>
+[seconde de départ] [seconde de fin] [action]
+</programlisting>
+Où les secondes sont des nombres à virgule et l'action est soit
+<literal>0</literal> pour sauter, soit <literal>1</literal> pour couper le son.
+Exemple:
+<programlisting>
+5.3   7.1    0
+15    16.7   1
+420   422    0
+</programlisting>
+Cela va sauter de la seconde 5.3 à la seconde 7.1 de la vidéo, puis va couper
+le son à 15 secondes, le remettre à 16.7 secondes et sauter de la seconde 420
+à la seconde 422 de la vidéo. Ces actions seront appliqués quand le temps de
+lecture atteint le temps indiqué dans le fichier.
+</para>
+
+<para>
+Pour créer un fichier EDL à partir duquel travailler, utilisez l'option
+<option>-edlout &lt;nomfichier&gt;</option>. Durant la lecture, quand vous
+voulez marquer les deux secondes précédentes à sauter, tapez sur <keycap>i</keycap>.
+Une entrée correspondante sera écrite dans le fichier. Vous pouvez ensuite revenir
+et affiner le fichier EDL généré.
+</para>
+</sect2>
+</sect1>

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<sect1 id="tv-input" xreflabel="TV input">
+<title>Entrée TV</title>
+
+<para>
+Cette section concerne l'activation de la <emphasis role="bold">lecture/enregistrement
+à partir d'un tuner TV compatible V4L.</emphasis>. Voir la page de man pour une
+description des options TV et des contrôles clavier.
+
+</para>
+
+
+<sect2 id="tv-compilation">
+<title>Compilation</title>
+
+<procedure>
+<step><para>
+  D'abord, vous devez recompiler. <filename>./configure</filename> autodétectera les
+  entêtes v4l du noyau et l'existence des entrées
+  <filename>/dev/video*</filename>. Si elles existent, le support TV sera activé
+  (voir le résultat de <filename>./configure</filename>).
+  </para></step>
+<step><para>
+  Assurez-vous que votre tuner fonctionne avec d'autres logiciels TV pour Linux.
+  par exemple <application>XawTV</application>.
+  </para></step>
+</procedure>
+</sect2>
+
+<sect2 id="tv-tips">
+<title>Astuces d'utilisation</title>
+<para>
+La liste complète des options est disponible sur la page de manuel. Voci juste
+quelques astuces:
+</para>
+<itemizedlist>
+<listitem>
+<para>
+Use the <option>channels</option> option. An example:
+<screen>-tv on:channels=26-MTV1,23-TV2</screen>
+Explication: en utilisant cette option, seuls les canaux 26 et 23 seront utilisables,
+et il y a un joli texte OSD lors des changements de canal affichant le nom du nouveau.
+Les espaces dans le nom du canal doivent être remplacés par le caractère &quot;_&quot;.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Choisissez des dimensions d'image sensées. Les dimensions de l'image de destination
+devraient être divisible par 16.
+</para>
+</listitem>
+
+<listitem>
+<para>
+
+Si vous capturez la vidéo avec une résolution verticale supérieure à la moitié de la
+pleine résolution (c-a-d. 288 pour PAL ou 240 pour NTSC, assurez-vous d'avoir
+désactivé l'entrelacement. Sinon votre film sera distordu pendant les scènes
+fast-motion et le contrôleur de bitrate ne sera probablement même pas capable de
+garder le bitrate demandé car l'artefact de désentrelacement produit un grand taux de
+détails et donc consomme plus de bande passante. Vous pouvez désactiver
+l'entrelacement avec <option>-vop pp=DEINT_TYPE</option>. Généralement
+<option>pp=lb</option> peut faire du bon travail, m'est c'est une histoire de
+préférence personnelle. Voyez les autres algorithmes de désentrelacement dans le
+manuel et essayez-les.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Coupez les espaces morts. Quand vous capturez la vidéo, les bords sont généralement
+noirs ou contiennent du &quot;bruit&quot;. De nouveau cela consomme de la bande
+passante inutilement. Plus précisément ce ne sont pas les zones noires elles-mêmes
+mais les transitions nettes entre le noir et la vidéo plus claire qui jouent, mais
+ce n'est pas très important pour le moment. Avant que vous commenciez la capture,
+ajustez les arguments de l'option <option>crop</option> pour que toutes les saletés
+des bords soient coupées. De nouveau, n'oubliez pas de garder des dimensions sensées.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Regardez la charge CPU. Elle ne devrait pas dépasser la limite des 90% la plupart du
+temps. Si vous avez un gros tampon, MEncoder peut survivre à une surcharge pendant
+quelques secondes mais pas plus. Il vaut mieux désactiver l'économiseur d'écran
+OpenGL et les trucs similaires.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Ne jouez pas avec l'horloge système. <application>MEncoder</application> l'utilise
+pour la synchro A/V. Si vous réglez l'horloge système (surtout en arrière dans le
+temps), MEncoder va se sentir perdu et va perdre des trames. C'est un problème
+important lorsque vous êtes en réseau et que vous utilisez certains logiciels de
+synchronisation comme NTP. Vous devrez désactiver NTP pendant le processus de capture
+si vous voulez capturer correctement.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Ne changez pas le <option>outfmt</option> à moins que vous sachiez ce que vous faites
+ou votre si votre carte/pilote ne supporte pas la valeur par défaut (palette YV12)
+Dans les versions précédentes de  <application>MPlayer</application>/<application>MEncoder</application>
+il était nécessaire de spécifier le format de sortie. Ce problème devrait être résolu dans la version
+actuelle et <option>outfmt</option> n'est plus requis, et la valeur par défaut
+convient dans la plupart des cas. Par exemple, si vous capturez en DivX en utilisant
+libavcodec et que vous spécifiez <option>outfmt=RGB24</option> de façon à augmenter
+la qualité de l'image capturée, l'image capturée sera reconverti plus tard en YV12;
+donc la seule chose que vous obtiendrez est un gaspillage massif de puissance CPU.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Pour spécifier la palette I420 (<option>outfmt=i420</option>), vous devez ajouter
+une option <option>-vc rawi420</option> à cause d'un conflit entre fourcc et un
+codec vidéo Intel Indeo.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Il y a plusieurs façons de capturer l'audio. Vous pouvez attraper le son soit avec
+votre carte son via un cable externe entre la carte vidéo et l'entrée-ligne, soit
+en utilisant le DAC intégré au chip bt878. Dans ce dernier cas, vous devrez charger
+le pilote <emphasis role="bold">btaudio</emphasis>. Lisez le fichier
+<filename>linux/Documentation/sound/btaudio</filename> (dans l'arborescence du noyau,
+pas celle de MPlayer) pour les instructions d'utilisations de ce pilote.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Si <application>MEncoder</application> ne peut pas ouvrir le périphérique audio,
+assurez-vous qu'il soit réellement disponible. Il peut y avoir des ennuis avec
+certains serveurs de son comme arts(KDE) ou esd (GNOME). Si vous avez une carte
+son full duplex (presques toutes les cartes descentes le supportent aujourd'hui),
+et que vous utilisez KDE, essayez d'activer l'otpion &quot;full duplex&quot; dans le
+menu des préférences du serveur de son.
+</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+
+<sect2 id="tv-examples">
+<title>Exemples</title>
+
+<informalexample>
+<para>
+Sortie muette, vers AAlib :)
+<screen>
+mplayer -tv on:driver=dummy:width=640:height=480 -vo aa<!--
+--></screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Entrée depuis V4L standard
+<screen>
+mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv<!--
+--></screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Un exemple plus élaboré. MEncoder capture l'image PAL entière, coupe les marges, et
+désentrelace l'image en utilisant un algorithme de mélange linéaire. L'audio est
+compressé à un bitrate constant de 64kbps, en utilisant le codec LAME. Cette
+combinaison est adaptée pour capturer des films.
+<screen>
+     mencoder -tv on:driver=v4l:width=768:height=576 \
+     -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
+     -oac mp3lame -lameopts cbr:br=64 \
+     -vop pp=lb,crop=720:544:24:16 -o output.avi
+</screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Cela dimensionne également l'image en 384x288 et compresse la vidéo avec un bitrate
+de 350kbps en mode haute qualité. L'option vqmax perd le quantizer et permet au
+compresseur vidéo d'atteindre un bitrate plus bas au détriment de la qualité. Cela
+peut être utilisé pour capturer des longues séries TV, quand la qualité n'est pas
+très importante.
+<screen>
+     mencoder -tv on:driver=v4l:width=768:height=576 \
+     -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
+     -oac mp3lame -lameopts cbr:br=48 \
+     -vop scale=384:288,pp=tn/lb,crop=720:540:24:18 -sws 1 -o output.avi 
+</screen>
+Il est également possible de spécifier des dimensions d'image plus petites
+dans l'option <option>-tv</option> et d'omettre le zoom logiciel mais cette approche
+utilise le maximum d'informations disponibles et est un peut plus résistant au bruit.
+Les chips bt8x8 peuvent faire une moyenne de pixels uniquement dans la direction
+horizontale à cause d'une limitation matérielle.
+</para>
+</informalexample>
+</sect2>
+</sect1>

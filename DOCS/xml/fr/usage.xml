@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<chapter id="usage">
+<title>Utilisation</title>
+
+<sect1 id="commandline">
+<title>Ligne de commande</title>
+
+<para>
+<application>MPlayer</application> utilise un ordre de lecture complexe.
+Il consiste en les options globales écrites en premier, par exemple
+
+<screen>mplayer -vfm 5</screen>
+
+et les options écrites après les noms de fichier, qui s'appliquent
+uniquement au nom de fichier/URL/autre donné, par exemple
+
+<screen>mplayer -vfm 5 film1.avi film2.avi -vfm 4</screen>
+</para>
+
+<para>
+Vous pouvez regrouper les noms de fichiers/URLs en utilisant <literal>{</literal>
+et <literal>}</literal>. C'est utile avec l'option <option>-loop</option>:
+
+<screen>mplayer { 1.avi - loop 2 2.avi } -loop 3</screen>
+
+La commande ci-dessus jouera les fichiers dans cet ordre: 1, 1, 2, 1, 1, 2, 1, 1, 2.
+</para>
+
+<para>
+Lecture d'un fichier:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>options</replaceable>]<!--
+--> [<replaceable>chemin</replaceable>/]<replaceable>nomfichier</replaceable>
+</synopsis>
+</para>
+
+<para>
+Lecture de plusieurs fichiers:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>options par défaut</replaceable>]<!--
+--> [<replaceable>chemin</replaceable>/]<replaceable>nomfichier1</replaceable><!--
+--> [<replaceable>options pour nomfichier1</replaceable>]<!--
+--> <replaceable>nomfichier2</replaceable><!--
+--> [<replaceable>options pour nomfichier2</replaceable>] ...
+</synopsis>
+</para>
+
+<para>
+Lecture de VCD:
+<synopsis>
+<command>mplayer</command> [<replaceable>options</replaceable>]<!--
+--> -vcd <replaceable>N°piste</replaceable><!--
+--> [-cdrom-device <replaceable>/dev/cdrom</replaceable>]
+</synopsis>
+</para>
+
+<para>
+Lecture de DVD:
+<synopsis>
+<command>mplayer</command> [<replaceable>options</replaceable>]<!--
+--> -dvd <replaceable>N°titre</replaceable><!--
+--> [-dvd-device <replaceable>/dev/dvd</replaceable>]
+</synopsis>
+</para>
+
+<para>
+Lecture à partir du web:
+<synopsis>
+<command>mplayer</command> [<replaceable>options</replaceable>]<!--
+--> http://<replaceable>site.com/fichier.asf</replaceable>
+</synopsis>
+(les listes de lecture peuvent également être utilisées)
+</para>
+
+<para>
+Lecture à partir de RTSP:
+<synopsis>
+<command>mplayer</command> [<replaceable>options</replaceable>]<!--
+--> rtsp://<replaceable>serveur.exemple.com/nomFlux</replaceable>
+</synopsis>
+</para>
+
+<para>
+Les dernières versions de <application>MPlayer</application> acceptent
+également les pistes VCD et DVD en style URL, comme <application>Xine</application>:
+<screen>mplayer dvd://1</screen>
+ou
+<screen>mplayer vcd://1</screen>
+</para>
+
+<para>
+Exemples:
+<screen>
+mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
+mplayer -vcd 2
+mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
+mplayer -dvd 1 -dvd-device /dev/hdc
+mplayer -abs 65536 -delay -0.4 -nobps ~/films/test.avi<!--
+--></screen>
+</para>
+</sect1>
+
+
+<sect1 id="control">
+<title>Contrôles</title>
+
+<para>
+<application>MPlayer</application> dispose d'une couche de contrôle pleinement
+configurable, qui vous permet de contrôler <application>MPlayer</application>
+avec le clavier, la souris, le joystick ou une télécommande (en utilisant LIRC).
+Voir la page de man pour une liste complète des contrôles clavier.
+</para>
+
+
+<sect2 id="ctrl-cfg">
+<title>Configuration des contrôles</title>
+
+<para>
+<application>MPlayer</application> vous permet d'associer n'importe quel
+touche/bouton à n'importe quelle commande MPlayer en utilisant un simple fichier
+de config. La syntaxe consiste un nom de touche suivi d'une commande. Le fichier
+de config par défaut est <filename>$HOME/.mplayer/input.conf</filename> mais cela
+peut être outrepassé en utilisant l'option <option>-input <replaceable>conf</replaceable></option>
+(les chemins relatifs le sont par rapport à <filename>$HOME/.mplayer</filename>).
+</para>
+
+<example>
+<title>Un simple fichier de contrôles</title>
+<programlisting>
+##
+## MPlayer input control file
+##
+
+RIGHT seek +10
+LEFT seek -10
+- audio_delay 0.100
++ audio_delay -0.100
+q quit
+&gt; pt_step 1
+&lt; pt_step -1
+ENTER pt_step 1 1<!--
+--></programlisting>
+</example>
+
+
+<sect3 id="ctrl-cfg-keys">
+<title>Noms des touches</title>
+
+<para>
+Vous pouvez obtenir la liste complète en exécutant
+<command>mplayer -input keylist</command>.
+</para>
+
+<itemizedlist>
+<title>Keyboard</title>
+<listitem><simpara>N'importe quel caractère imprimable</simpara></listitem>
+<listitem><simpara><literal>SPACE</literal></simpara></listitem>
+<listitem><simpara><literal>ENTER</literal></simpara></listitem>
+<listitem><simpara><literal>TAB</literal></simpara></listitem>
+<listitem><simpara><literal>CTRL</literal></simpara></listitem>
+<listitem><simpara><literal>BS</literal></simpara></listitem>
+<listitem><simpara><literal>DEL</literal></simpara></listitem>
+<listitem><simpara><literal>INS</literal></simpara></listitem>
+<listitem><simpara><literal>HOME</literal></simpara></listitem>
+<listitem><simpara><literal>END</literal></simpara></listitem>
+<listitem><simpara><literal>PGUP</literal></simpara></listitem>
+<listitem><simpara><literal>PGDWN</literal></simpara></listitem>
+<listitem><simpara><literal>ESC</literal></simpara></listitem>
+<listitem><simpara><literal>RIGHT</literal></simpara></listitem>
+<listitem><simpara><literal>LEFT</literal></simpara></listitem>
+<listitem><simpara><literal>UP</literal></simpara></listitem>
+<listitem><simpara><literal>DOWN</literal></simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Souris (uniquement sous X)</title>
+<listitem><simpara>
+  <literal>MOUSE_BTN0</literal> (Left button)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN1</literal> (Right button)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN2</literal> (Middle button)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN3</literal> (Wheel)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN4</literal> (Wheel)</simpara></listitem>
+<listitem><simpara>...</simpara></listitem>
+<listitem><simpara><literal>MOUSE_BTN9</literal></simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Joystick (son support doit avoir été activé à la compilation)</title>
+<listitem><simpara>
+  <literal>JOY_RIGHT</literal> or
+  <literal>JOY_AXIS0_PLUS</literal></simpara></listitem>
+<listitem><simpara>
+  <literal>JOY_LEFT</literal> or
+  <literal>JOY_AXIS0_MINUS</literal></simpara></listitem>
+<listitem><simpara>
+  <literal>JOY_UP</literal> or
+  <literal>JOY_AXIS1_MINUS</literal></simpara></listitem>
+<listitem><simpara>
+  <literal>JOY_DOWN</literal> or
+  <literal>JOY_AXIS1_PLUS</literal></simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS2_PLUS</literal></simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS2_MINUS</literal></simpara></listitem>
+<listitem><simpara>...</simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS9_PLUS</literal></simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS9_MINUS</literal></simpara></listitem>
+</itemizedlist>
+</sect3>
+
+
+<sect3 id="ctrl-cfg-commands">
+<title>Commandes</title>
+
+<para>
+Vous pouvez obtenir la liste complète des commandes en exécutant
+<command>mplayer -input cmdlist</command>.
+</para>
+
+<itemizedlist>
+<listitem><para><literal>seek</literal> (int) val [(int) type=0]</para>
+  <para>
+  Saute à une position donnée.
+  Le type <literal>0</literal> est un déplacement relatif de +/- val secondes.
+  Le type <literal>1</literal> se déplace à val% du film.
+  </para></listitem>
+<listitem><para><literal>audio_delay</literal> (float) val</para>
+  <para>
+  Ajuste le décalage audio de val secondes
+  </para></listitem>
+<listitem><para><literal>quit</literal></para>
+  <para>
+  Quitte <application>MPlayer</application>
+  </para></listitem>
+<listitem><para><literal>pause</literal></para>
+  <para>
+  Pause/dépause la lecture
+  </para></listitem>
+<listitem><para><literal>grap_frames</literal></para>
+  <para>
+  Quelqu'un sait ?
+  </para></listitem>
+<listitem><para><literal>pt_step</literal> (int) val [(int) force=0]</para>
+  <para>
+  Va vers l'entrée précédente/suivante de l'ordre de lecture. Le signe de val
+  indique la direction. Si aucune entrée n'est disponible dans la direction
+  demandée, cela ne fera rien à moins que force ne soit pas égal à 0.
+  </para></listitem>
+<listitem><para><literal>pt_up_step</literal> (int) val [(int) force=0]</para>
+  <para>
+  Comme pt_step mais il saute au prochain/précédent dans la liste parente. Il
+  est utilisé pour casser les boucles internes dans le playtree.
+  </para></listitem>
+<listitem><para><literal>alt_src_step</literal> (int) val</para>
+  <para>
+  Quand plusieurs sources sont disponibles cela sélectionne la prochaine/précédente
+  (pas supporté par les playlists asx).
+  </para></listitem>
+<listitem><para><literal>sub_delay</literal> (float) val [(int) abs=0]</para>
+  <para>
+  Ajuste le décalage des sous-titres de +/- val secondes or ou le fixe à val secondes
+  quand abs est différent de zéro.
+  </para></listitem>
+<listitem><para><literal>osd</literal> [(int) level=-1]</para>
+  <para>
+  Bascule le mode osd ou change le niveau quand level > 0.
+  </para></listitem>
+<listitem><para><literal>volume</literal> (int) dir</para>
+  <para>Augmente/diminue le volume
+  </para></listitem>
+<listitem><simpara><literal>contrast</literal> (int) val [(int) abs=0]
+  </simpara></listitem>
+<listitem><simpara><literal>brightness</literal> (int) val [(int) abs=0]
+  </simpara></listitem>
+<listitem><simpara><literal>hue</literal> (int) val [(int) abs=0]
+  </simpara></listitem>
+<listitem><para><literal>saturation</literal> (int) val [(int) abs=0]</para>
+  <para>
+  Fixe/Ajuste les paramètres vidéo. L'intervalle de Val va de -100 à 100.
+  </para></listitem>
+<listitem><para><literal>frame_drop</literal> [(int) type=-1]</para>
+  <para>
+  Bascule/Fixe le mode saut de trames.
+  </para></listitem>
+<listitem><para><literal>sub_visibility</literal></para>
+  <para>
+  Bascule l'affichage des sous-titres.
+  </para></listitem>
+<listitem><para><literal>sub_pos</literal> (int) val</para>
+  <para>
+  Ajuste la position des sous-titres.
+  </para></listitem>
+<listitem><para><literal>vobsub_lang</literal></para>
+  <para>
+  Change la langue des sous-titres VobSub.
+  </para></listitem>
+<listitem><para><literal>vo_fullscreen</literal></para>
+  <para>
+  Active le plein-écran.
+  </para></listitem>
+<listitem><para><literal>tv_step_channel</literal> (int) dir</para>
+  <para>
+  Sélectionne le prochain/précédent canal TV.
+  </para></listitem>
+<listitem><para><literal>tv_step_norm</literal></para>
+  <para>
+  Change la norme TV.
+  </para></listitem>
+<listitem><para><literal>tv_step_chanlist</literal></para>
+  <para>
+  Change la liste des canaux.
+  </para></listitem>
+<listitem><simpara><literal>gui_loadfile</literal></simpara></listitem>
+<listitem><simpara><literal>gui_loadsubtitle</literal></simpara></listitem>
+<listitem><simpara><literal>gui_about</literal></simpara></listitem>
+<listitem><simpara><literal>gui_play</literal></simpara></listitem>
+<listitem><simpara><literal>gui_stop</literal></simpara></listitem>
+<listitem><simpara><literal>gui_playlist</literal></simpara></listitem>
+<listitem><simpara><literal>gui_preferences</literal></simpara></listitem>
+<listitem><para><literal>gui_skinbrowser</literal></para>
+  <para>
+  actions GUI
+  </para></listitem>
+</itemizedlist>
+</sect3>
+</sect2>
+
+
+<sect2 id="lirc">
+<title>Control from LIRC</title>
+
+<para>
+Linux Infrared Remote Control - utilisez un récepteur infrarouge fait
+maison, une télécommande, et contrôlez votre linux à distance ! Plus d'infos
+sur <ulink url="http://www.lirc.org">www.lirc.org</ulink>.
+</para>
+
+<para>
+Si vous avez installé le paquetage lirc, configure l'autodétectera. Si
+tout c'est bien passé, <application>MPlayer</application> affichera un
+message du genre "<computeroutput>Setting up lirc support...</computeroutput>"
+au démarrage. Si une erreur se produit il vous le dira. Si il ne vous dis
+rien à propos de LIRC c'est que son support n'est pas compilé. C'est tout :-)
+</para>
+
+<para>
+Le nom de l'application à lancer avec <application>MPlayer</application> est
+- oh surprise - <filename>mplayer</filename>. Vous pouvez utiliser n'importe
+quelle commande mplayer et même passer plus d'une commande en les séparant avec
+<literal>\n</literal>. N'oubliez pas d'activer le flag repeat dans
+<filename>.lircrc</filename> quand cela est approprié (déplacement, volume, etc).
+Voici un extrait de mon
+<filename>.lircrc</filename>:
+</para>
+
+<programlisting>
+begin
+     button = VOLUME_PLUS
+     prog = mplayer
+     config = volume 1
+     repeat = 1
+end
+
+begin
+    button = VOLUME_MINUS
+    prog = mplayer
+    config = volume -1
+    repeat = 1
+end
+
+begin
+    button = CD_PLAY
+    prog = mplayer
+    config = pause
+end
+
+begin
+    button = CD_STOP
+    prog = mplayer
+    config = seek 0 1\npause
+end<!--
+--></programlisting>
+
+<para>
+Si vous n'aimez pas l'emplacement standard du fichier de config de lirc
+(<filename>~/.lircrc</filename>) utilisez <option>-lircconf
+<replaceable>nomfichier</replaceable></option> pour spécifier un autre fichier.
+</para>
+</sect2>
+
+
+<sect2 id="slave-mode">
+<title>Mode esclave</title>
+<para>
+Le mode esclave vous permet de construire un frontend à
+<application>MPlayer</application>. Quand il est activé (avec
+<option>-slave</option>) <application>MPlayer</application> lit les commandes
+séparées par un saut de ligne (\n) depuis l'entrée par défaut (stdin).
+</para>
+</sect2>
+</sect1>
+
+
+<sect1 id="streaming">
+<title>Streaming depuis le réseau ou les pipes</title>
+
+<para>
+<application>MPlayer</application> peut lire des fichiers depuis le réseau, en
+utilisant les protocoles HTTP, MMS ou RTSP/RTP.
+</para>
+
+<para>
+La lecture se fait juste en ajoutant l'URL à la ligne de commande.
+<application>MPlayer</application> utilise également la variable d'environnement
+<envar>http_proxy</envar>, et utilise le proxy si disponible. L'utilisation du Proxy
+peut aussi être forcé:
+<screen>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</screen>
+</para>
+
+<para>
+<application>MPlayer</application> peut lire depuis stdin
+(<emphasis>pas</emphasis> depuis les pipes nommés). Cela peut être utilisé par
+exemple pour lire depuis le FTP:
+<screen>wget ftp://micorsops.com/quelquechose.avi -O - | mplayer -</screen>
+</para>
+
+<para>
+Note: il est également recommandé d'activer le CACHE pour une lecture depuis le réseau:
+<screen>wget ftp://micorsops.com/quelquechose.avi -O - | mplayer -cache 8192 -</screen>
+</para>
+</sect1>
+</chapter>

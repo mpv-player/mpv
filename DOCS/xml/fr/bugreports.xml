@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<appendix id="bugreports">
+<title>Comment rapporter les bogues</title>
+<para>
+Les bons rapports de bogue sont une contribution précieuse pour tout projet en
+développement. Mais tout comme pour écrire un bon logiciel, les bons rapports de
+problème exigent du travail. Rendez-vous compte que la plupart des développeurs sont
+extrêmement occupés et reçoivent un nombre obscène d'emails. Donc bien que votre retour
+soit crucial pour l'amélioration de MPlayer et soit très apprécié, comprenez que vous
+devez fournir <emphasis role="bold">toutes</emphasis>  les informations que nous demandons
+et suivre de près les instructions de ce document.
+</para>
+<sect1 id="bugreports_fix">
+<title>Comment réparer les bogues</title>
+<para>
+Si vous pensez avoir les talents nécessaires vous êtes invité à essayer de réparer le bogue
+vous-même. Ou peut-être l'avez-vous déjà fait ? Veuillez lire
+<ulink url="../../tech/patches.txt">ce court document</ulink> (en anglais) pour trouver
+comment faire inclure votre code dans MPlayer. Les gens de la liste de diffusion
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+vous assisterons si vous avez des questions.
+</para>
+</sect1>
+<sect1 id="bugreports_report">
+<title>Comment rapporter les bogues</title>
+<para>
+Tout d'abord veuillez essayer la dernière version CVS de MPlayer car votre bogue y est
+peut-être déjà réparé. Le développement évolue très rapidement, la plupart des problèmes
+des versions officielles sont rapportés dans les jours voir les heures qui suivent, donc
+n'utilisez <emphasis role="bold">que le CVS</emphasis> pour rapporter les bogues. Ceci
+est également valable pour les paquets binaires de MPlayer. Ne rapportez pas de bogues
+sur les divers paquets RPM ou Debian de MPlayer. Les instructions CVS peuvent être
+trouvées en bas de <ulink url="http://www.mplayerhq.hu/homepage/dload.html">cette page</ulink>
+ou dans le README. Si tout cela ne vous aide pas veuillez vous référer à
+<link linkend="bugs">la liste des bogues connus</link> et au reste de la documentation.
+Si votre problème n'est pas connu ou non résolvable par nos instructions, alors merci
+de rapporter le bogue.
+</para>
+
+<para>
+Merci de ne pas envoyer de rapports de bogues en privé à chaque développeur. C'est un
+travail commun et il y a donc plein de gens que cela pourrait intéresser. Parfois
+d'autres utilisateurs on rencontré les mêmes ennuis que vous et savent comment
+contourner le problème même si c'est un bogue dans le code de MPlayer.
+</para>
+
+<para>
+Merci de décrire votre problème avec le plus de détails possibles. Faites un petit
+travail de détective pour restreindre les conditions d'occurrence du problème. Est ce
+que le bogue ne se montre que dans certaines situations ? Est-il spécifique à certains
+fichiers ou types de fichier ? Apparaît-il avec un seul codec ou est-ce indépendant du
+codec ? Pouvez-vous le reproduire avec tous les pilotes de sortie ? Plus vous fournissez
+d'information, plus grandes sont nos chances de résoudre votre problème. Merci de ne
+pas oublier d'inclure également les informations importantes requises plus bas, sinon
+nous ne pourront établir un diagnostic précis de votre problème.
+</para>
+
+<para>
+Un guide excellent et bien écrit pour poser des questions sur les forums publiques est
+<ulink url="http://www.linux-france.org/article/these/smart-questions/smart-questions-fr.html">
+Comment Poser Les Questions De Manière Intelligente</ulink> par <ulink url="http://www.catb.org/~esr/">Eric S. Raymond</ulink>.
+Il y en a un autre (en anglais) appelé
+<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report
+Bugs Effectively</ulink> par <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</ulink>.
+Si vous suivez ces règles vous devriez pouvoir obtenir de l'aide. Mais merci de
+comprendre que nous suivons tous les listes de diffusion volontairement sur notre temps
+libre. Nous sommes très occupés et ne pouvons garantir que vous aurez une solution à
+votre problème ou même une réponse.
+</para>
+
+</sect1>
+
+<sect1 id="bugreports_where">
+<title>Où rapporter les bogues</title>
+<para>
+Souscrivez à la liste de diffusion mplayer-users:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+et décrivez votre problème:
+<ulink url="mailto:mplayer-users@mplayerhq.hu"/>
+</para>
+<para>
+La langue de cette liste est l'<emphasis role="bold">Anglais</emphasis>. Suivez les
+<ulink url="http://www.ietf.org/rfc/rfc1855.txt">Règles de la Netiquette</ulink> SVP et
+<emphasis role="bold">n'envoyez de mails en HTML</emphasis> sur aucune de nos listes de
+diffusion. Vous ne serez qu'ignoré ou banni. Si vous ne savez pas ce qu'est un mail en
+HTML ou pourquoi c'est mauvais, lisez ce <ulink url="http://expita.com/nomime.html">sympatique document</ulink>.
+Il explique tous les détails et a des instructions pour désactiver le HTML. Notez
+également que nous ne ferons pas de CC (copie-conforme) individuelle et que c'est donc
+une bonne idée de souscrire pour recevoir votre réponse.
+</para>
+</sect1>
+
+<sect1 id="bugreports_what">
+<title>Que rapporter</title>
+<para>
+Vous pouvez avoir besoin d'inclure des fichiers de log, de configuration ou
+d'échantillon. Si certains sont très gros alors il vaut mieux les uploader sur notre
+<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/">serveur FTP</ulink> en format
+compressé (gzip et bzip2 préférés) et indiquer uniquement leur chemin et nom dans le
+rapport de bug. Nos listes de diffusion ont une taille de message limite de 80k, si
+vous avez quelque chose de plus gros vous devrez le compresser ou l'uploader.
+</para>
+
+<sect2 id="bugreports_system">
+<title>Information Système</title>
+<para>
+<itemizedlist>
+<listitem><para>
+Votre distribution Linux ou système d'exploitation et version ex.:
+  <itemizedlist>
+    <listitem><para>Red Hat 7.1</para></listitem>
+    <listitem><para>Slackware 7.0 + paquets de développement de la 7.1 ...</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+version du noyau:
+<screen>uname -a</screen>
+</para></listitem>
+<listitem><para>
+version de la libc:
+<screen>ls -l /lib/libc[.-]*</screen>
+</para></listitem>
+<listitem><para>
+version des binutils:
+<screen>as --version</screen>
+</para></listitem>
+<listitem><para>
+versions de gcc et ld :
+<screen>
+gcc -v
+ld -v
+</screen>
+</para></listitem>
+<listitem><para>
+Si vous avez des problèmes avec le mode plein-écran:
+  <itemizedlist>
+    <listitem><para>Type de gestionnaire de fenêtre et version</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Si vous avez des problèmes avec XVIDIX:
+  <itemizedlist>
+    <listitem><para>profondeur de couleur de X:
+<screen>xdpyinfo | grep &quot;depth of root&quot;</screen>
+    </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Si seule la GUI est boguée:
+  <itemizedlist>
+    <listitem><para>version de GTK</para></listitem>
+    <listitem><para>version de GLIB</para></listitem>
+    <listitem><para>version de libpng</para></listitem>
+    <listitem><para>Endroit de la GUI où le bogue se produit</para></listitem>
+  </itemizedlist>
+</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_hardware">
+<title>Matériel et pilotes</title>
+<para>
+<itemizedlist>
+<listitem><para>
+Info CPU (cela ne fonctionne que sous Linux):
+<screen>cat /proc/cpuinfo</screen>
+</para></listitem>
+<listitem><para>
+Fabricant et modèle de votre carte vidéo, ex.:
+  <itemizedlist>
+    <listitem><para>chip ASUS V3800U: nVidia TNT2 Ultra pro 32MB SDRAM</para></listitem>
+    <listitem><para>Matrox G400 DH 32MB SGRAM</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Type et version des drivers vidéo, ex.:
+  <itemizedlist>
+    <listitem><para>Pilote X intégré</para></listitem>
+    <listitem><para>nVidia 0.9.623</para></listitem>
+    <listitem><para>Utah-GLX CVS 2001-02-17</para></listitem>
+    <listitem><para>DRI de X 4.0.3</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Type et version des drivers son, ex.:
+  <itemizedlist>
+    <listitem><para>Creative SBLive! Gold avec pilote OSS de oss.creative.com</para></listitem>
+    <listitem><para>Creative SB16 avec pilotes noyau OSS</para></listitem>
+    <listitem><para>GUS PnP avec émulation OSS ALSA</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+En cas de doute, joignez y le résultat de <command>lspci -vv</command> sur les systèmes Linux.
+</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_configure">
+<title>Problèmes de configuration</title>
+<para>
+Si vous rencontrez des erreurs pendant l'éxecution de <command>./configure</command>,
+ou si l'autodetection ou autre chose échoue, lisez <filename>configure.log</filename>.
+Vous pouvez y trouver la réponse, par exemple des versions multiples de la même
+librairie mélangés dans votre système, ou vous avez oublié d'installer les paquets de
+développement (ceux avec le suffixe -dev). Si vous pensez que c'est un bogue, incluez
+<filename>configure.log</filename> dans votre rapport de bogue.
+</para>
+</sect2>
+
+<sect2 id="bugreports_conpilation">
+<title>Problèmes de compilation</title>
+<para>
+Veuillez inclure ces fichiers:
+<itemizedlist>
+<listitem><para>config.h</para></listitem>
+<listitem><para>config.mak</para></listitem>
+</itemizedlist>
+Uniquement si la compilation échoue à partir d'un de ces répertoires, incluez ces fichiers:
+<itemizedlist>
+<listitem><para>Gui/config.mak</para></listitem>
+<listitem><para>libvo/config.mak</para></listitem>
+<listitem><para>libao2/config.mak</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_playback">
+<title>Pour les problèmes de lecture</title>
+<para>
+Merci d'inclure la sortie de <application>MPlayer</application> en verbosité niveau 1,
+mais rappelez-vous de <emphasis role="bold">ne pas tronquer la sortie</emphasis> en le
+copiant dans votre mail. Les développeurs ont besoin de tous les messages pour
+diagnostiquer correctement un problème. Vous pouvez rediriger la sortie dans un fichier
+comme ceci:
+<screen>mplayer -v <replaceable>options</replaceable> <replaceable>nomfichier</replaceable> &gt; mplayer.log 2&gt;&amp;1</screen>
+</para>
+
+<para>
+Si votre problème est spécifique à un ou plusieurs fichiers, alors merci d'uploader
+le(s) fautif(s) sur:
+<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/"/>
+</para>
+
+<para>
+Uploadez aussi un petit fichier texte ayant le même nom que votre fichier mais avec une
+extension .txt. Décrivez le problème que vous avez avec ce fichier et incluez votre
+adresse e-mail ainsi que la sortie de MPlayer en verbosité niveau 1. Généralement les
+premiers 1-5 MB sont suffisants pour reproduire le problème, mais pour être sûrs nous
+vous demandons de faire:
+<screen>dd if=<replaceable>votrefichier</replaceable> of=<replaceable>petitfichier</replaceable> bs=1024k count=5</screen>
+Cela coupera les 5 premiers Mo de '<emphasis role="bold">votrefichier</emphasis>'
+et les sauvera dans '<emphasis role="bold">petitfichier</emphasis>'. Essayez alors de
+lire le petit fichier, et si le bogue persiste vous pouvez envoyer le petit fichier par
+ftp. <emphasis role="bold">N'envoyez jamais</emphasis> ces fichiers par e-mail SVP !
+Envoyez les par FTP, et postez seulement leur nom/adresse sur ce FTP. Si le fichier est
+accessible en téléchargement, envoyez seulement son adresse <emphasis role="bold">exacte</emphasis>.
+</para>
+</sect2>
+
+<sect2 id="bugreports_crash">
+<title>Plantages</title>
+<para>
+Vous devez lancer <application>MPlayer</application> à l'intérieur de <command>gdb</command>
+et nous envoyer le résultat complet ou si vous avez un core dump du plantage vous
+pouvez extraire des informations utiles du fichier <filename>core</filename>. Voici comment:
+</para>
+
+<sect3 id="bugreports_debug">
+<title>Comment conserver les informations avec un plantage reproduisible</title>
+<para>
+Recompilez MPlayer avec les instructions de déboguage:
+<screen>
+./configure --enable-debug=3
+make
+</screen>
+ et ensuite lancez MPlayer à l'intérieur de gdb en utilisant:
+<screen>gdb ./mplayer</screen>
+Vous êtes maintenant à l'intérieur de gdb. Tapez:
+<screen>run -v <replaceable>options-pour-mplayer</replaceable> <replaceable>nomfichier</replaceable></screen>
+et reproduisez votre plantage. Aussitôt que vous l'avez fait, gdb va vous renvoyer à la
+ligne de commande où vous devrez entrer
+<screen>
+bt
+disass $pc-32 $pc+32
+info all-registers
+</screen>
+</para>
+</sect3>
+
+<sect3 id="bugreports_core">
+<title>Comment extraire les informations significatives d'un core dump</title>
+<para>
+créez le fichier de commande suivant:
+<screen>
+bt
+disass $pc-32 $pc+32
+info all-registers
+</screen>
+puis exécutez simplement la ligne de commande suivante:
+<screen>gdb mplayer --core=core -batch --command=<replaceable>fichier_de_commande</replaceable> &gt; mplayer.bug</screen>
+</para>
+</sect3>
+</sect2>
+</sect1>
+
+<sect1 id="bugreports_advusers">
+<title>Je sais ce que je fait...</title>
+<para>
+Si vous avez créé un rapport de bogue correct en suivant les étapes ci-dessus et que
+vous êtes persuadé qu'il s'agit d'un bug dans MPlayer, pas un problème de compilateur
+ou un fichier endommagé, vous avez déjà lu la documentation et vous n'arrivez pas à
+trouver une solution, vos pilotes son sont OK, alors vous pouvez souscrire à la liste
+mplayer-advusers et envoyer votre rapport dessus pour obtenir une réponse meilleure et
+plus rapide.
+</para>
+
+<para>
+Soyez prévenu que si vous posez des questions de newbie ou des questions dont les
+réponses sont dans le manuel dessus, vous serez ignoré ou insulté au lieu de recevoir
+une réponse appropriée. Donc ne nous insultez pas et ne vous inscrivez à -advusers que
+si vous savez vraiment ce que vous faites et vous sentez en mesure d'être un utilisateur
+avancé de MPlayer ou un développeur. Si vous correspondez à ces critères il ne devrait
+pas être difficile de trouver comment on s'inscrit...
+</para>
+
+</sect1>
+
+</appendix>

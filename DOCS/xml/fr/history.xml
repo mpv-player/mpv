@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- FIXME: history really should be in the appendix -->
+<sect1 id="history">
+<title>Histoire</title>
+ 
+<para>
+Cela a commenc&eacute; un an auparavant...
+J'ai (A'rpi) essay&eacute; de nombreux lecteurs de vid&eacute;os sous GNU/Linux (mtv,xmps,dvdview,livid/oms,VideoLAN,
+xine,xanim,avifile,xmmp) mais il pr&eacute;sentaient tous des d&eacute;fauts, particuli&egrave;rement sur
+certains fichiers ou avec la synchronisation audio/video. La plupart &eacute;taient incapables de lire &agrave;
+la fois les fichiers MPEG1, MPEG2 et AVI (DivX). De plus ils avaient des probl&egrave;mes de vitesse/qualit&eacute;
+d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">mpg12play v0.1-v0.3</emphasis>: 22-25 Sep 2000
+  </para>
+  <para>Le premier essai, r&eacute;alis&eacute; en une demi-heure !
+  J'ai utilis&eacute; libmpeg3 de <ulink url="http://www.heroinewarrior.com"/>
+  dans sa version 0.3, mais il pr&eacute;sentait des probl&egrave;mes de
+  vitesse/qualit&eacute; d'images.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">mpg12play v0.5-v0.87</emphasis>: 28 Sep-20 Oct 2000
+  </para><para>codec Mpeg a &eacute;t&eacute; remplac&eacute; par DVDview de Dirk Farin, du bon boulot,
+    mais c'&eacute;tait lent et &eacute;crit en C++ (je d&eacute;teste le C++!!!)
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">mpg12play v0.9-v0.95pre5</emphasis>: 21 Oct-2 Nov 2000
+  </para><para>codec mpeg &eacute;tait libmpeg2 (mpeg2dec) par Aaron Holtzman &amp; Michel Lespinasse.
+    Il est excellent, un code C rapide et bien optimis&eacute; avec une qualit&eacute; d'image parfaite
+    et 100% compatible avec les standards MPEG.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.3-v0.9</emphasis>: 18 Nov-4 Dec 2000
+  </para><para>condens&eacute; de deux programmes: mpg12playv0.95pre6 et mon nouveau lecteur de AVI 'avip'
+    bas&eacute; sur le chargeur de DLL Win32 de avifile.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.10</emphasis>: 1er Jan 2001
+  </para><para>Les lecteurs MPEG et AVI dans un seul binaire !
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">série MPlayer v0.11pre</emphasis>:
+  </para><para>De nouveaux d&eacute;veloppeurs ont joint le projet et depuis la version 0.11 le projet
+    mplayer est un travail d'&eacute;quipe ! Ajout&eacute; le support des fichiers .ASF, et
+    de l'encodage/d&eacute;codage OpenDivX (c.f. <ulink url="http://www.projectmayo.com"/>).
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.17a "The IdegCounter"</emphasis> 27 Avr 2001
+  </para><para>La finalisation de la version 0.11pre apr&egrave;s 4 mois de d&eacute;veloppement intensif !
+    Essayez la, et soyez conquis ! Des dizaines de nouvelles fonctionnalit&eacute;s...
+    et bien 	s&ucirc;r le code existant a &eacute;t&eacute; am&eacute;lior&eacute;,
+    les bogues fix&eacute;s, etc...
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.18 "The BugCounter"</emphasis> 9 Juillet 2001
+  </para><para>Deux mois apr&egrave;s la 0.17, une nouvelle parution.. Compl&eacute;t&eacute; le support ASF,
+    plus de formats pour les sous-titres, introduction de libao (similaire &agrave; libvo pour l'audio),
+    encore plus stable et performant.... C'est un MUST !
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.50 "The Faszom(C)ounter"</emphasis> 8 Oct 2001
+  </para><para>Hmm. Une nouvelle sortie. Des tonnes de nouvelles fonctionnalit&eacute;s, une GUI en version
+    b&ecirc;ta, des bogues fix&eacute;s, de nouveaux drivers vo et ao,port&eacute;
+    sur de nombreux syst&egrave;mes, incluant les codecs DivX Open-Source, et bien plus
+    encore... Essayez le !
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.60 "The RTFMCounter"</emphasis> 3 Jan 2002
+  </para><para>Support des formats de fichier MOV/VIVO/RM/FLI/NUV, CRAM natif, Cinepak,
+    codecs ADPCM, et support des codecs XAnim binaires; support des sous-titres DVD,
+    première sortie de MEncoder, capture TV, cache, liba52, réparations innombrables.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.90pre10 "The BirthdayCounter"</emphasis> 11 Nov 2002
+  </para><para>MPlayer 0.90pre10 "The BirthdayCounter" 11 Nov 2002
+    Bien que ce ne soit pas une version officielle, Je la mentionne parce qu'elle est sortie 2 ans
+    après MPlayer v0.01. Joyeux anniversaire, MPlayer!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.90rc1 "The CodecCounter"</emphasis> 7 Dec 2002
+  </para><para>Là encore, pas une version officielle, mais après l'ajout du support Sorenson 3 (QuickTime)
+    et Windows Media 9, MPlayer est le premier lecteur de film au monde qui supporte
+    tous les formats vidéos connus!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.90 "The CounterCounter"</emphasis> 6 Avr 2003
+  </para></listitem>
+</itemizedlist>
+</para>
+</sect1>

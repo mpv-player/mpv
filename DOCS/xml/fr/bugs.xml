@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<appendix id="bugs">
+<title>Bogues connus</title>
+<sect1 id="bugs-special">
+<title>Bogues spécifiques au système ou au CPU/Problèmes</title>
+<itemizedlist>
+<listitem>
+<para>SIGILL (signal 4) sur P3 en utilisant les noyaux 2.2.x:</para>
+<para>Problème: le noyau 2.2.x n'a pas un support natif (fonctionnel) du SSE</para>
+<para>Solution: mettez à jour le noyau en 2.4.x</para>
+<para>Contournement: <command>./configure --disable-sse</command></para>
+</listitem>
+<listitem>
+<para>SIGILL (signal 4) Général:</para>
+<para>Problème: vous avez compilé et utilisez mplayer sur des machines différentes
+(par exemple compilé sur P3 et tournant sur Celeron)</para>
+<para>Solution: compilez MPlayer sur la machine sur laquelle vous l'utiliserez!</para>
+<para>Contournement: <command>./configure --disable-sse</command> etc. options</para>
+</listitem>
+<listitem>
+<para>&quot;Internal buffer inconsistency&quot; pendant l'exécution de MEncoder:</para>
+<para>Problème: problème connu quand lame &lt; 3.90 à été compilé avec gcc 2.96 ou 3.x</para>
+<para>Solution: utilisez lame &gt;=3.90.</para>
+<para>Contournement: compilez lame avec gcc 2.95.x et retirez les paquetages lame éventuellement
+installés, ils peuvent avoir été compilé avec gcc 2.96.</para>
+</listitem>
+<listitem>
+<para>Son MP2/MP3 sale sur PPC:</para>
+<para>Problème: bogue de GCC sur les plateformes PPC, pas encore de réparation.</para>
+<para>Contournement: utilisez le décodeur MP1/MP2/MP3 de FFmpeg (lent) (<option>-ac ffmpeg</option>)</para>
+</listitem>
+<listitem>
+<para>sig11 dans libmpeg2, pendant le redimensionnement+encodage:</para>
+<para>Problème: bogue MMX connu du GCC 2.95.2, mettez à jour en 2.95.3.</para>
+</listitem>
+</itemizedlist>
+</sect1>
+
+<sect1 id="bugs-audio">
+<title>Problèmes de synchro A-V et d'audio</title>
+
+<sect2 id="bugs-delay-all">
+<title>Décalage audio général ou son saccadé (existe avec tous ou de nombreux fichiers)</title>
+<itemizedlist>
+<listitem><para>Le plus commun: pilote audio bogué! - Essayez d'utiliser différent pilotes, essayez
+l'émulation OSS ALSA 0.9 avec <option>-ao oss</option>, essayez aussi <option>-ao sdl</option>,
+des fois ça aide. Si votre fichier est lu correctement avec <option>-nosound</option>,
+alors vous pouvez être certain qu'il s'agit d'un problème de carte son (pilote).
+</para></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem>
+<para>Problèmes de buffer audio (taille de buffer mal détectée)</para>
+<para>Contournement: option <option>-abs</option> de MPlayer</para>
+</listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem><para>
+problèmes de taux d'échantillonage - peut être que votre carte ne supporte pas le taux
+d'échantillonage utilisé dans vos fichiers - essayez le plugin resampling (<option>-af resample=...</option>)
+</para></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem>
+<para>machine lente (CPU ou VGA)</para>
+<para>essayez avec <option>-vo null</option>, si la lecture fonctionne bien, alors vous
+avez un(e) carte/pilote VGA lent(e).</para>
+<para>Contournement: achetez une carte plus rapide ou lisez cette documentation pour
+augmenter la vitesse.</para>
+<para>Essayez aussi <option>-framedrop</option></para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-delay-specific">
+<title>Décalage audio/désynchro spécifique à un ou quelques fichiers</title>
+<itemizedlist>
+<listitem>
+<para>mauvais fichier</para>
+<para>
+Contournement:
+  <itemizedlist>
+  <listitem>
+    <para>option <option>-ni</option> ou <option>-nobps</option> (pour les fichiers
+    non-entrelacés ou mauvais)</para>
+    <para>et/ou</para>
+  </listitem>
+  <listitem>
+    <para><option>-mc 0</option>(requis pour les fichiers avec de l'audio VBR mal entrelacé)</para>
+    <para>et/ou</para>
+  </listitem>
+  <listitem>
+    <para><option>-delay</option> ou les touches <keycap>+</keycap>/<keycap>-</keycap>
+    pendant l'exécution pour régler le décalage</para>
+  </listitem>
+  </itemizedlist>
+Si rien de tous ça n'aide, uploadez le fichier SVP, nous regarderons (et réparerons).
+</para>
+</listitem>
+<listitem>
+<para>votre carte son ne supporte pas la lecture à 48kHz</para>
+<para>Contournement: achetez une meilleur carte son... ou essayez de décrémenter les
+fps de 10% (utilisez <option>-fps 27</option> pour un film à 30fps) ou utilisez le
+plugin resampler</para>
+</listitem>
+<listitem>
+<para>machine lente (si A-V n'est pas proche de 0, et que le dernier nombre de la ligne
+d'état augmente)</para>
+<para>Contournement: <option>-framedrop</option></para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-nosound">
+<title>Pas de son du tout</title>
+<itemizedlist>
+<listitem>
+<para>votre fichier utilise un codec audio non-supporté</para>
+<para>Contournement: lisez la documentation et aidez-nous à en ajouter le support</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-nopicture">
+<title>Pas d'image du tout (juste une fenêtre complètement grise/verte)</title>
+<itemizedlist>
+<listitem>
+<para>votre fichier utilise un codec vidéo non-supporté</para>
+<para>Contournement: lisez la documentation et aidez-nous à en ajouter le support</para>
+</listitem>
+<listitem>
+<para>
+le codec auto-sélectionné ne peut décoder le fichier, essayez avec un autre en
+utilisant les options <option>-vc</option> ou <option>-vfm</option>
+</para>
+</listitem>
+<listitem>
+<para>
+vous essayez de lire un fichier DivX 3.x avec le décodeur OpenDivX ou XviD
+(<option>-vc odivx</option>) - installez Divx4Linux et recompilez MPlayer
+</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-video">
+<title>Problèmes de sortie vidéo</title>
+<para>
+Première note: les options <option>-fs -vm</option> et <option>-zoom</option> sont
+juste des recommandations, pas (encore) supporté par tous les pilotes. Donc ce n'est
+pas un bogue si ça ne marche pas. Seuls quelques pilotes supportent le
+redimensionnement/zoom, ne l'espérez pas de x11 ou dga.
+</para>
+
+<formalpara>
+<title>OSD/sub papillotant</title>
+<para>
+<itemizedlist>
+<listitem><para>pilote x11: désolé, cela ne peut être réparé maintenant</para></listitem>
+<listitem><para>pilote xv: utilisez l'option <option>-double</option></para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+<formalpara>
+<title>Image verte en utilisant mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
+<para>
+<itemizedlist>
+<listitem><para>mga_vid a mal détecté la quantité de RAM de votre carte, rechargez-le
+en utilisant l'option <option>mga_ram_size</option>
+</para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+</sect2>
+</sect1>
+
+</appendix>

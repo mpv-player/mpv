@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<appendix id="mailinglists">
+<title>Listes de diffusion</title>
+<para>
+Il y a des listes de diffusion publiques sur <application>MPlayer</application>. À
+moins que cela soit explicitement précisé la langue utilisée sur ces listes est l'<emphasis role="bold">anglais</emphasis>.
+S'il vous plaît, n'envoyez pas de messages dans d'autres langues ou des mails HTML! La
+taille limite des message est 80k. Si vous avez quelque chose de plus gros, mettez-le
+en téléchargement quelque part. Sur les listes de diffusion, les règles d'écriture et
+de citation sont les même que sur usenet. Suivez-les SVP, elles simplifient énormément
+la vie de ceux qui lisent vos mails. Si vous ne connaissez pas ces règles, lisez le
+<ulink url="http://learn.to/edit_messages">HOWTO edit messages</ulink> ou (si vous êtes
+pressé) <ulink url="http://www.xs4all.nl/~hanb/documents/quotingguide.html">Quoting HOWTO</ulink>.
+<itemizedlist>
+<listitem><para>
+Liste d'annonces de MPlayer:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"/>
+Liste pour les annonces MPlayer. Inscrivez-vous si vous voulez obtenir les annonces de
+nouvelles fonctionalités.
+</para></listitem>
+<listitem><para>
+Liste des développeurs de MPlayer:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"/>
+Cette liste est à propos du développement de MPlayer! Parler des changements
+d'interface/API, des nouvelles librairies, des optimisations de code, des changements
+de configuration est à-propos ici. Envoyez des patches mais PAS de rapports de bogue,
+de questions d'utilisateur, de suggestions ou d'insultes ici, pour garder un trafic
+raisonnable.
+</para></listitem>
+<listitem><para>
+Liste des utilisateurs de MPlayer:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+  <itemizedlist>
+  <listitem><para>
+  Envoyez vos rapports de bogue après avoir lu les sections <link linkend="bugs">Bogues connus</link>
+  et <link linkend="bugreports">Rapport de bogue</link>).
+  </para></listitem>
+  <listitem><para>
+  Envoyez vos suggestions ici (après avoir <emphasis role="bold">entièrement</emphasis>
+  lu la documentation).
+  </para></listitem>
+  <listitem><para>
+  Envoyez vos questions d'utilisateur ici (après avoir <emphasis role="bold">entièrement</emphasis>
+  lu la documentation).
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Liste des utilisateurs hongrois de MPlayer:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"/>
+  <itemizedlist>
+  <listitem><para>
+  Liste en langue hongroise
+  </para></listitem>
+  <listitem><para>
+  Sujet? Eh bien regardez par vous-même... que des insultes ou des questions à la RTFM maintenant :(
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Utilisateurs de MPlayer &amp; Matrox G200/G400/G450/G550:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"/>
+Questions relatives à Matrox comme
+  <itemizedlist>
+  <listitem><para>
+  choses à propos de mga_vid
+  </para></listitem>
+  <listitem><para>
+  les pilotes béta Matrox officiels (pour X 4.x.x)
+  </para></listitem>
+  <listitem><para>
+  trucs matroxfb-TVout
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Utilisateurs de MPlayer &amp; carte DVB:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"/>
+Choses relatives à la carte de décodage matériel appelé DVB (<emphasis role="bold">pas</emphasis> DXR3 !).
+</para></listitem>
+<listitem><para>
+MPlayer CVS-log:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"/>
+Tous les changements de code dans MPlayer sont automatiquement envoyés sur cette liste.
+Seules les questions à propos de ses changements sont autorisées ici (si vous ne
+comprenez pas pourquoi un changement est requis ou si vous en avez un meilleur ou si
+vous avez remarquer un bogue/problème possible dans l'envoi).
+</para></listitem>
+<listitem><para>
+Liste du portage Cygwin de MPlayer:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
+Liste pour la discussion à propos du port MPlayer sur Cygwin.
+</para></listitem>
+<listitem><para>
+Liste de portage OS/2 de MPlayer:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"/>
+Liste pour les discussions sur le portage OS/2 de MPlayer.
+</para></listitem>
+<listitem><para>
+Liste des éditeurs et traducteurs des MPlayer Weekly News (Nouvelles Hebdomadaires de MPlayer):
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn"/>
+Liste pour les discussions sur les Weekly News.
+</para></listitem>
+</itemizedlist>
+<note><para>
+Vous pouvez obtenir les archives avec recherche possible à l'adresse
+<ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch"/>.
+</para></note>
+</para>
+</appendix>
