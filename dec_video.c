@@ -75,6 +75,8 @@ extern picture_t *picture;	// exported from libmpeg2/decode.c
 #include "xacodec.h"
 #endif
 
+#include "mmx_defs.h"
+
 void AVI_Decode_RLE8(char *image,char *delta,int tdsize,
     unsigned int *map,int imagex,int imagey,unsigned char x11_bytes_pixel);
 
@@ -662,7 +664,7 @@ if(verbose>1){
 #ifdef HAVE_MMX
 	// some codecs is broken, and doesn't restore MMX state :(
 	// it happens usually with broken/damaged files.
-	__asm __volatile ("emms;":::"memory");
+	__asm __volatile (EMMS:::"memory");
 #endif
 
 t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
