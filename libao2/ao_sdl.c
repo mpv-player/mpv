@@ -95,8 +95,8 @@ static int read_buffer(unsigned char* data,int len){
 
 // end ring buffer stuff
 
-#if	defined(sun) && defined(__svr4__)
-/* setenv is missing on solaris */
+#if	 defined(HPUX) || defined(sun) && defined(__svr4__)
+/* setenv is missing on solaris and HPUX */
 static void setenv(const char *name, const char *val, int _xx)
 {
   int len  = strlen(name) + strlen(val) + 2;

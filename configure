@@ -57,6 +57,7 @@ issystem() {
 }
 linux()   { issystem "Linux"   ; return "$?" ; }
 sunos()   { issystem "SunOS"   ; return "$?" ; }
+hpux()    { issystem "HP-UX"   ; return "$?" ; }
 irix()    { issystem "IRIX"    ; return "$?" ; }
 cygwin()  { issystem "CYGWIN"  ; return "$?" ; }
 freebsd() { issystem "FreeBSD" ; return "$?" ; }
@@ -309,6 +310,9 @@ if test -z "$_target" ; then
   IRIX*)
     system_name=IRIX
     ;;
+  HP-UX*)
+    system_name=HP-UX
+    ;;
   [cC][yY][gG][wW][iI][nN]*)
     system_name=CYGWIN
     ;;
@@ -340,6 +344,7 @@ if test -z "$_target" ; then
       ppc) host_arch=ppc ;;
       alpha) host_arch=alpha ;;
       sparc*) host_arch=sparc ;;
+      9000*) host_arch=hppa ;;
       arm*) host_arch=arm ;;
       s390) host_arch=s390 ;;
       s390x) host_arch=s390x ;;
@@ -810,6 +815,15 @@ EOF
     _def_arch='#define ARCH_SGI_MIPS 1'
     _target_arch='TARGET_ARCH_SGI_MIPS = yes'
     iproc='sgi-mips'
+    proc=''
+    _march=''
+    _mcpu=''
+    ;;
+
+  hppa)
+    _def_arch='#define ARCH_PA_RISC 1'
+    _target_arch='TARGET_ARCH_PA_RISC = yes'
+    iproc='PA-RISC'
     proc=''
     _march=''
     _mcpu=''
@@ -3987,6 +4001,10 @@ if darwin ; then
   # use gnu style cpp on Darwin
   CFLAGS="$CFLAGS -no-cpp-precomp -DSYS_DARWIN"
 fi
+if hpux ; then
+  # use flag for HPUX missing setenv()
+  CFLAGS="$CFLAGS -DHPUX"
+fi
 # Thread support
 if linux ; then
   CFLAGS="$CFLAGS -D_REENTRANT"
@@ -3994,7 +4012,6 @@ elif bsd ; then
   # FIXME bsd needs this so maybe other OS'es
   CFLAGS="$CFLAGS -D_THREAD_SAFE"
 fi
-
 # 64 bit file offsets?
 if test "$_largefiles" = yes || freebsd ; then
   CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
@@ -4487,6 +4504,9 @@ $_def_vcd
 #ifdef sun
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#elif defined(HPUX)
+#define DEFAULT_CDROM_DEVICE    "/dev/cdrom:"
+#define DEFAULT_DVD_DEVICE     "/dev/dvd"
 #elif defined(WIN32)
 #define DEFAULT_CDROM_DEVICE    "D:"
 #define DEFAULT_DVD_DEVICE	"D:"

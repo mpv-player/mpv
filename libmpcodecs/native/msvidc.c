@@ -11,6 +11,7 @@
 
 #include "config.h"
 #include "bswap.h"
+#define quad quad_m
 
 #define LE_16(x) (le2me_16(*(unsigned short *)(x)))
 

@@ -143,8 +143,8 @@ static vo_info_t vo_info =
 #include <SDL.h>
 //#include <SDL/SDL_syswm.h>
 
-#if	defined(sun) && defined(__svr4__)
-/* setenv is missing on solaris */
+#if	 defined(HPUX) || defined(sun) && defined(__svr4__)
+/* setenv is missing on solaris and HPUX */
 static void setenv(const char *name, const char *val, int _xx)
 {
     int len  = strlen(name) + strlen(val) + 2;
