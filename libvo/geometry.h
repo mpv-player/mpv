@@ -3,5 +3,6 @@
 #define __GEOMETRY_H
 
 extern char *vo_geometry;
+extern int geometry_wh_changed;
 int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh);
 #endif /* !__GEOMETRY_H */

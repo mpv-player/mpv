@@ -7,6 +7,8 @@
 
 /* A string of the form [WxH][+X+Y] or xpos[%]:ypos[%] */
 char *vo_geometry = NULL;
+// set when either width or height is changed
+int geometry_wh_changed = 0;
 
 #define RESET_GEOMETRY width = height = xoff = yoff = xper = yper = -1;
 
@@ -69,15 +71,20 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 		  " widh: %i, scrw: %i, scrh: %i\n",*widw, *widh, scrw, scrh);
 		  
 		/* FIXME: better checking of bounds... */
-		if(width < 0 || width > scrw) width = (scrw < *widw) ? scrw : *widw;
-		if(height < 0 || height > scrh) height = (scrh < *widh) ? scrh : *widh;
-		if(xoff < 0 || xoff + width > scrw) xoff = 0;
-		if(yoff < 0 || yoff + height > scrh) yoff = 0;
+		if( width != -1 && (width < 0 || width > scrw))
+		    width = (scrw < *widw) ? scrw : *widw;
+		if( height != -1 && (height < 0 || height > scrh))
+		    height = (scrh < *widh) ? scrh : *widh;
+		if(xoff != -1 && (xoff < 0 || xoff + width > scrw)) xoff = 0;
+		if(yoff != -1 && (yoff < 0 || yoff + height > scrh)) yoff = 0;
 
-		if(xpos) *xpos = xoff;
-		if(ypos) *ypos = yoff;
-		if(widw) *widw = width;
-		if(widh) *widh = height;
+		if(xoff != -1 && xpos) *xpos = xoff;
+		if(yoff != -1 && ypos) *ypos = yoff;
+		if(width != -1 && widw) *widw = width;
+		if(height != -1 && widh) *widh = height;
+
+		if( width != -1 || height != -1)
+		    geometry_wh_changed = 1;
         }
 	return 1;
 }

@@ -1,5 +1,6 @@
 /* Stuff for correct aspect scaling. */
 #include "aspect.h"
+#include "geometry.h"
 #ifndef ASPECT_TEST
 #include "../mp_msg.h"
 #endif
@@ -60,12 +61,13 @@ void aspect_save_screenres(int scrw, int scrh){
 void aspect(int *srcw, int *srch, int zoom){
   int tmpw;
 
-  if(!zoom && movie_aspect == 0) {
+  if( !zoom && geometry_wh_changed ) {
 #ifdef ASPECT_DEBUG
     printf("aspect(0) no aspect forced!\n");
 #endif
     return; // the user doesn't want to fix aspect
   }
+
 #ifdef ASPECT_DEBUG
   printf("aspect(0) fitin: %dx%d zoom: %d screenaspect: %.2f\n",aspdat.scrw,aspdat.scrh,
       zoom,monitor_aspect);
