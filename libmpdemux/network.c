@@ -63,12 +63,15 @@ static struct {
 } extensions_table[] = {
 	{ "mpeg", DEMUXER_TYPE_MPEG_PS },
 	{ "mpg", DEMUXER_TYPE_MPEG_PS },
+	{ "mpe", DEMUXER_TYPE_MPEG_ES },
 	{ "avi", DEMUXER_TYPE_AVI },
 	{ "mov", DEMUXER_TYPE_MOV },
+	{ "qt", DEMUXER_TYPE_MOV },
 	{ "asx", DEMUXER_TYPE_ASF },
 	{ "asf", DEMUXER_TYPE_ASF },
 	{ "wmv", DEMUXER_TYPE_ASF },
 	{ "wma", DEMUXER_TYPE_ASF },
+	{ "viv", DEMUXER_TYPE_VIVO },
 };
 
 streaming_ctrl_t *
