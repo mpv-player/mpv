@@ -110,7 +110,7 @@ libvo drivers:
     * vo_gl2.c - Reimar Döffinger
     * vo_jpeg.c - None
     * vo_md5.c - None
-    * vo_mga.c - None
+    * vo_mga.c - Attila Kinali
     * vo_mpegpes.c - None
     * vo_null.c - None
     * vo_pgm.c - None
@@ -122,11 +122,11 @@ libvo drivers:
     * vo_tga.c - Daniele Forghieri
     * vo_vesa.c - None
     * vo_winvidix.c - Sascha Sommer
-    * vo_x11.c - None
-    * vo_xmga.c - None
+    * vo_x11.c - Attila Kinali
+    * vo_xmga.c - Attila Kinali
     * vo_xover.c - Alban Bedel
-    * vo_xv.c - None
-    * vo_xvidix.c - None
+    * vo_xv.c - Attila Kinali
+    * vo_xvidix.c - Attila Kinali
     * vo_xvmc.c - Ivan Kalvachev
     * vo_yuv4mpeg.c - None
     * vo_zr.c - Rik Snel
