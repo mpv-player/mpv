@@ -26,11 +26,11 @@
   <LI>MPEG1 (VCD) and MPEG2 (DVD) video</LI>
   <LI>native decoders for DivX ;-), OpenDivX, DivX4, DivX5,
     M$ MPEG4 v1, v2 and other MPEG4 variants</LI>
-  <LI>native decoder for Windows Media Video 7 (WMV1), and Win32 DLL decoder for
-    Windows Media Video 8 (WMV2), both used in .wmv files</LI>
+  <LI>native decoder for Windows Media Video 7/8 (WMV1/WMV2), and Win32 DLL decoder for
+    Windows Media Video 9 (WMV3), both used in .wmv files</LI>
   <LI><B>native Sorenson 1 (SVQ1) decoder</B></LI>
   <LI><B>Win32/QT Sorenson 3 (SVQ3) decoder</B></LI>
-  <LI>3ivx decoder</LI>
+  <LI>3ivx v1, v2 decoder</LI>
   <LI>Cinepak and Intel Indeo codecs (3.1, 3.2, 4.1, 5.0)</LI>
   <LI>MJPEG, AVID, VCR2, ASV2 and other hardware formats</LI>
   <LI>VIVO 1.0, 2.0, I263 and other h263(+) variants</LI>
@@ -84,13 +84,14 @@
 <P><B>Note:</B> If your <CODE>-vo</CODE> driver supports direct rendering, then
   <CODE>-vc divx4</CODE> may be faster or even the fastest solution.</P>
 
-<P>The codec can be downloaded from
-  <A HREF="http://avifile.sourceforge.net">avifile</A>.
+<P>The Divx4/5 binary codec library can be downloaded from
+  <A HREF="http://avifile.sourceforge.net">avifile</A> or
+  <A HREF="http://www.divx.com>divx.com</A>.
   Unpack it, run <CODE>./install.sh</CODE> as root and do not forget adding
   <CODE>/usr/local/lib</CODE> to your <CODE>/etc/ld.so.conf</CODE> and running
   <CODE>ldconfig</CODE>.</P>
 
-<P>Get the CVS version of the core library like this:</P>
+<P>Get the CVS version of the OLD OpenDivx core library like this:</P>
 
 <OL>
   <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</CODE></LI>
@@ -132,7 +133,7 @@
 <P><A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A> contains an
   <B>open source</B> codec package, which is capable of decoding streams
   encoded with
-  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1
+  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV
   video, or WMA (Windows Media Audio) audio codecs. Not only some of
   them can be encoded with, but it also offers higher speed than the Win32
   codecs or the DivX.com DivX4/5 library!</P>
@@ -191,7 +192,7 @@
     have filenames like these: <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>.</LI>
 </OL>
 
-<P>XAnim is video codec family number 10, so you may want to use the <CODE>-vfm 10</CODE>
+<P>XAnim is video codec family <I>xanim</I>, so you may want to use the <CODE>-vfm xanim</CODE>
   option to tell MPlayer to use them if possible.</P>
 
 <P>Tested codecs include: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>,
@@ -311,7 +312,7 @@ MPlayer supports decoding all versions of RealVideo:
     MPlayer, the other is in libavcodec. You can invoke each of them with the
     <CODE>-vc svq1</CODE> and <CODE>-vc ffsvq1</CODE> options respectively.
     Some files may work with one of them, and not with the other, so test
-    both decoders.</LI>
+    both decoders. Decoder written (reverse engineered) by the Xine authors.</LI>
   <LI>Sorenson 3 (fourcc <I>SVQ3</I>) - decoding supported by <B>Win32
     QuickTime libraries</B></LI>
 </UL>
@@ -502,8 +503,7 @@ MPlayer supports decoding nearly all versions of RealAudio:
 </OL>
 
 <P><B>Note:</B> If there is no <CODE>Filename</CODE> entry and <CODE>DisplayName</CODE>
-  contains something like <CODE>device:dmo</CODE>, then it is a DMO-Codec, which are
-  currently not supported by MPlayer.</P>
+  contains something like <CODE>device:dmo</CODE>, then it is a DMO-Codec.</P>
 
 <P><B>Old Method:</B> Take a deep breath and start searching the registry...</P>
 
