@@ -102,6 +102,13 @@ static int swap_fourcc __initdata = 0;
 #endif
 #endif
 
+#undef DEBUG
+#if DEBUG
+#define RTRACE		printk
+#else
+#define RTRACE(...)	((void)0)
+#endif
+
 typedef struct bes_registers_s
 {
   /* base address of yuv framebuffer */
@@ -158,71 +165,80 @@ typedef struct bes_registers_s
 
 typedef struct video_registers_s
 {
+#ifdef DEBUG
   const char * sname;
+#endif
   uint32_t name;
   uint32_t value;
 }video_registers_t;
 
 static bes_registers_t besr;
+
+#ifdef DEBUG
+#define DECLARE_VREG(name) { #name, name, 0 }
+#else
+#define DECLARE_VREG(name) { name, 0 }
+#endif
+
 static video_registers_t vregs[] = 
 {
-  { "OV0_Y_X_START", OV0_Y_X_START, 0 },
-  { "OV0_Y_X_END", OV0_Y_X_END, 0 },
-  { "OV0_PIPELINE_CNTL", OV0_PIPELINE_CNTL, 0 },
-  { "OV0_EXCLUSIVE_HORZ", OV0_EXCLUSIVE_HORZ, 0 },
-  { "OV0_EXCLUSIVE_VERT", OV0_EXCLUSIVE_VERT, 0 },
-  { "OV0_REG_LOAD_CNTL", OV0_REG_LOAD_CNTL, 0 },
-  { "OV0_SCALE_CNTL", OV0_SCALE_CNTL, 0 },
-  { "OV0_V_INC", OV0_V_INC, 0 },
-  { "OV0_P1_V_ACCUM_INIT", OV0_P1_V_ACCUM_INIT, 0 },
-  { "OV0_P23_V_ACCUM_INIT", OV0_P23_V_ACCUM_INIT, 0 },
-  { "OV0_P1_BLANK_LINES_AT_TOP", OV0_P1_BLANK_LINES_AT_TOP, 0 },
-  { "OV0_P23_BLANK_LINES_AT_TOP", OV0_P23_BLANK_LINES_AT_TOP, 0 },
-  { "OV0_BASE_ADDR", OV0_BASE_ADDR, 0 },
-  { "OV0_VID_BUF0_BASE_ADRS", OV0_VID_BUF0_BASE_ADRS, 0 },
-  { "OV0_VID_BUF1_BASE_ADRS", OV0_VID_BUF1_BASE_ADRS, 0 },
-  { "OV0_VID_BUF2_BASE_ADRS", OV0_VID_BUF2_BASE_ADRS, 0 },
-  { "OV0_VID_BUF3_BASE_ADRS", OV0_VID_BUF3_BASE_ADRS, 0 },
-  { "OV0_VID_BUF4_BASE_ADRS", OV0_VID_BUF4_BASE_ADRS, 0 },
-  { "OV0_VID_BUF5_BASE_ADRS", OV0_VID_BUF5_BASE_ADRS, 0 },
-  { "OV0_VID_BUF_PITCH0_VALUE", OV0_VID_BUF_PITCH0_VALUE, 0 },
-  { "OV0_VID_BUF_PITCH1_VALUE", OV0_VID_BUF_PITCH1_VALUE, 0 },
-  { "OV0_AUTO_FLIP_CNTL", OV0_AUTO_FLIP_CNTL, 0 },
-  { "OV0_DEINTERLACE_PATTERN", OV0_DEINTERLACE_PATTERN, 0 },
-  { "OV0_SUBMIT_HISTORY", OV0_SUBMIT_HISTORY, 0 },
-  { "OV0_H_INC", OV0_H_INC, 0 },
-  { "OV0_STEP_BY", OV0_STEP_BY, 0 },
-  { "OV0_P1_H_ACCUM_INIT", OV0_P1_H_ACCUM_INIT, 0 },
-  { "OV0_P23_H_ACCUM_INIT", OV0_P23_H_ACCUM_INIT, 0 },
-  { "OV0_P1_X_START_END", OV0_P1_X_START_END, 0 },
-  { "OV0_P2_X_START_END", OV0_P2_X_START_END, 0 },
-  { "OV0_P3_X_START_END", OV0_P3_X_START_END, 0 },
-  { "OV0_FILTER_CNTL", OV0_FILTER_CNTL, 0 },
-  { "OV0_FOUR_TAP_COEF_0", OV0_FOUR_TAP_COEF_0, 0 },
-  { "OV0_FOUR_TAP_COEF_1", OV0_FOUR_TAP_COEF_1, 0 },
-  { "OV0_FOUR_TAP_COEF_2", OV0_FOUR_TAP_COEF_2, 0 },
-  { "OV0_FOUR_TAP_COEF_3", OV0_FOUR_TAP_COEF_3, 0 },
-  { "OV0_FOUR_TAP_COEF_4", OV0_FOUR_TAP_COEF_4, 0 },
-  { "OV0_FLAG_CNTL", OV0_FLAG_CNTL, 0 },
-  { "OV0_COLOUR_CNTL", OV0_COLOUR_CNTL, 0 },
-  { "OV0_VID_KEY_CLR", OV0_VID_KEY_CLR, 0 },
-  { "OV0_VID_KEY_MSK", OV0_VID_KEY_MSK, 0 },
-  { "OV0_GRAPHICS_KEY_CLR", OV0_GRAPHICS_KEY_CLR, 0 },
-  { "OV0_GRAPHICS_KEY_MSK", OV0_GRAPHICS_KEY_MSK, 0 },
-  { "OV0_KEY_CNTL", OV0_KEY_CNTL, 0 },
-  { "OV0_TEST", OV0_TEST, 0 },
-  { "OV0_LIN_TRANS_A", OV0_LIN_TRANS_A, 0 },
-  { "OV0_LIN_TRANS_B", OV0_LIN_TRANS_B, 0 },
-  { "OV0_LIN_TRANS_C", OV0_LIN_TRANS_C, 0 },
-  { "OV0_LIN_TRANS_D", OV0_LIN_TRANS_D, 0 },
-  { "OV0_LIN_TRANS_E", OV0_LIN_TRANS_E, 0 },
-  { "OV0_LIN_TRANS_F", OV0_LIN_TRANS_F, 0 },
-  { "OV0_GAMMA_0_F", OV0_GAMMA_0_F, 0 },
-  { "OV0_GAMMA_10_1F", OV0_GAMMA_10_1F, 0 },
-  { "OV0_GAMMA_20_3F", OV0_GAMMA_20_3F, 0 },
-  { "OV0_GAMMA_40_7F", OV0_GAMMA_40_7F, 0 },
-  { "OV0_GAMMA_380_3BF", OV0_GAMMA_380_3BF, 0 },
-  { "OV0_GAMMA_3C0_3FF", OV0_GAMMA_3C0_3FF, 0 }
+  DECLARE_VREG(OV0_Y_X_START),
+  DECLARE_VREG(OV0_Y_X_END),
+  DECLARE_VREG(OV0_PIPELINE_CNTL),
+  DECLARE_VREG(OV0_EXCLUSIVE_HORZ),
+  DECLARE_VREG(OV0_EXCLUSIVE_VERT),
+  DECLARE_VREG(OV0_REG_LOAD_CNTL),
+  DECLARE_VREG(OV0_SCALE_CNTL),
+  DECLARE_VREG(OV0_V_INC),
+  DECLARE_VREG(OV0_P1_V_ACCUM_INIT),
+  DECLARE_VREG(OV0_P23_V_ACCUM_INIT),
+  DECLARE_VREG(OV0_P1_BLANK_LINES_AT_TOP),
+  DECLARE_VREG(OV0_P23_BLANK_LINES_AT_TOP),
+  DECLARE_VREG(OV0_BASE_ADDR),
+  DECLARE_VREG(OV0_VID_BUF0_BASE_ADRS),
+  DECLARE_VREG(OV0_VID_BUF1_BASE_ADRS),
+  DECLARE_VREG(OV0_VID_BUF2_BASE_ADRS),
+  DECLARE_VREG(OV0_VID_BUF3_BASE_ADRS),
+  DECLARE_VREG(OV0_VID_BUF4_BASE_ADRS),
+  DECLARE_VREG(OV0_VID_BUF5_BASE_ADRS),
+  DECLARE_VREG(OV0_VID_BUF_PITCH0_VALUE),
+  DECLARE_VREG(OV0_VID_BUF_PITCH1_VALUE),
+  DECLARE_VREG(OV0_AUTO_FLIP_CNTL),
+  DECLARE_VREG(OV0_DEINTERLACE_PATTERN),
+  DECLARE_VREG(OV0_SUBMIT_HISTORY),
+  DECLARE_VREG(OV0_H_INC),
+  DECLARE_VREG(OV0_STEP_BY),
+  DECLARE_VREG(OV0_P1_H_ACCUM_INIT),
+  DECLARE_VREG(OV0_P23_H_ACCUM_INIT),
+  DECLARE_VREG(OV0_P1_X_START_END),
+  DECLARE_VREG(OV0_P2_X_START_END),
+  DECLARE_VREG(OV0_P3_X_START_END),
+  DECLARE_VREG(OV0_FILTER_CNTL),
+  DECLARE_VREG(OV0_FOUR_TAP_COEF_0),
+  DECLARE_VREG(OV0_FOUR_TAP_COEF_1),
+  DECLARE_VREG(OV0_FOUR_TAP_COEF_2),
+  DECLARE_VREG(OV0_FOUR_TAP_COEF_3),
+  DECLARE_VREG(OV0_FOUR_TAP_COEF_4),
+  DECLARE_VREG(OV0_FLAG_CNTL),
+  DECLARE_VREG(OV0_COLOUR_CNTL),
+  DECLARE_VREG(OV0_VID_KEY_CLR),
+  DECLARE_VREG(OV0_VID_KEY_MSK),
+  DECLARE_VREG(OV0_GRAPHICS_KEY_CLR),
+  DECLARE_VREG(OV0_GRAPHICS_KEY_MSK),
+  DECLARE_VREG(OV0_KEY_CNTL),
+  DECLARE_VREG(OV0_TEST),
+  DECLARE_VREG(OV0_LIN_TRANS_A),
+  DECLARE_VREG(OV0_LIN_TRANS_B),
+  DECLARE_VREG(OV0_LIN_TRANS_C),
+  DECLARE_VREG(OV0_LIN_TRANS_D),
+  DECLARE_VREG(OV0_LIN_TRANS_E),
+  DECLARE_VREG(OV0_LIN_TRANS_F),
+  DECLARE_VREG(OV0_GAMMA_0_F),
+  DECLARE_VREG(OV0_GAMMA_10_1F),
+  DECLARE_VREG(OV0_GAMMA_20_3F),
+  DECLARE_VREG(OV0_GAMMA_40_7F),
+  DECLARE_VREG(OV0_GAMMA_380_3BF),
+  DECLARE_VREG(OV0_GAMMA_3C0_3FF)
 };
 
 static uint32_t radeon_vid_in_use = 0;
@@ -236,13 +252,6 @@ static uint8_t *radeon_param_buff = NULL;
 static uint32_t radeon_param_buff_size=0;
 static uint32_t radeon_param_buff_len=0; /* real length of buffer */
 static mga_vid_config_t radeon_config; 
-
-#undef DEBUG
-#if DEBUG
-#define RTRACE		printk
-#else
-#define RTRACE(...)	((void)0)
-#endif
 
 static char *fourcc_format_name(int format)
 {
@@ -301,15 +310,6 @@ static char *fourcc_format_name(int format)
 #define INREG(addr)		readl((radeon_mmio_base)+addr)
 #define OUTREG(addr,val)	writel(val, (radeon_mmio_base)+addr)
 
-static __inline__ void _radeon_fifo_wait (int entries)
-{
-	int i;
-
-	for (i=0; i<2000000; i++)
-		if ((INREG(RBBM_STATUS) & 0x7f) >= entries)
-			return;
-}
-
 static uint32_t radeon_vid_get_dbpp( void )
 {
   uint32_t dbpp,retval;
@@ -367,6 +367,8 @@ static void radeon_vid_display_video( void )
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
 
     OUTREG(OV0_AUTO_FLIP_CNTL,OV0_AUTO_FLIP_CNTL_SOFT_BUF_ODD);
+    OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
+    OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
 
     OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
 
@@ -382,9 +384,6 @@ static void radeon_vid_display_video( void )
     }
     else OUTREG(OV0_KEY_CNTL,GRAPHIC_KEY_FN_NE);
    
-    OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
-    OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
-
     OUTREG(OV0_H_INC,			besr.h_inc);
     OUTREG(OV0_STEP_BY,			besr.step_by);
     OUTREG(OV0_Y_X_START,		besr.y_x_start);
@@ -457,23 +456,6 @@ static void radeon_vid_display_video( void )
 void radeon_vid_set_color_key(int ckey_on, uint8_t R, uint8_t G, uint8_t B)
 {
     besr.ckey_on = ckey_on;
-    switch(radeon_vid_get_dbpp() == 16)
-    { 
-	case 16:
-        	/* 5.6.5 mode, 
-    	    	note that these values depend on DAC_CNTL.EXPAND_MODE setting */
-		R = (R<<3);
-		G = (G<<2);
-		B = (B<<3);
-//		besr.graphics_key_msk=((R|0x7)<<16)|((G|0x3)<<8)|(B|0x7)|(0xff<<24);
-		besr.graphics_key_msk=((R|0x7)<<16)|((G|0x3)<<8)|(B|0x7)|(0xff<<24);
-		break;
-	case 24: besr.graphics_key_msk = ((R)<<16)|((G)<<8)|(B);
-		break;
-	case 32:
-	default: besr.graphics_key_msk = ((R)<<16)|((G)<<8)|(B)|(0xff<<24);
-		break;
-    }
     besr.graphics_key_msk=(1ULL<<radeon_vid_get_dbpp()) - 1;
     besr.graphics_key_clr=(R<<16)|(G<<8)|(B)|(0x00 << 24);
 }
