@@ -241,6 +241,7 @@ int parse_config_file(struct config *conf, char *conffile)
 	int opt_pos;	/* opt pos */
 	int param_pos;	/* param pos */
 	int ret = 1;
+	int errors = 0;
 
 #ifdef DEBUG
 	assert(conffile != NULL);
@@ -276,6 +277,12 @@ int parse_config_file(struct config *conf, char *conffile)
 		printf("\n");
 
 	while (fgets(line, MAX_LINE_LEN, fp)) {
+nextline:
+		if (errors >= 16) {
+			printf("too many errors\n");
+			goto out;
+		}
+
 		line_num++;
 		line_pos = 0;
 
@@ -296,14 +303,16 @@ int parse_config_file(struct config *conf, char *conffile)
 			if (opt_pos >= MAX_OPT_LEN) {
 				PRINT_LINENUM;
 				printf("too long option\n");
+				errors++;
 				ret = -1;
-				continue;
+				goto nextline;
 			}
 		}
 		if (opt_pos == 0) {
 			PRINT_LINENUM;
 			printf("parse error\n");
 			ret = -1;
+			errors++;
 			continue;
 		}
 		opt[opt_pos] = '\0';
@@ -321,6 +330,7 @@ int parse_config_file(struct config *conf, char *conffile)
 			PRINT_LINENUM;
 			printf("option without parameter\n");
 			ret = -1;
+			errors++;
 			continue;
 		}
 
@@ -338,7 +348,8 @@ int parse_config_file(struct config *conf, char *conffile)
 					PRINT_LINENUM;
 					printf("too long parameter\n");
 					ret = -1;
-					continue;
+					errors++;
+					goto nextline;
 				}
 			}
 			line_pos++;	/* skip the closing " or ' */
@@ -350,7 +361,8 @@ int parse_config_file(struct config *conf, char *conffile)
 					PRINT_LINENUM;
 					printf("too long parameter\n");
 					ret = -1;
-					continue;
+					errors++;
+					goto nextline;
 				}
 			}
 		}
@@ -361,6 +373,7 @@ int parse_config_file(struct config *conf, char *conffile)
 			PRINT_LINENUM;
 			printf("option without parameter\n");
 			ret = -1;
+			errors++;
 			continue;
 		}
 #ifdef DEBUG
@@ -388,6 +401,7 @@ int parse_config_file(struct config *conf, char *conffile)
 			PRINT_LINENUM;
 			printf("%s\n", opt);
 			ret = -1;
+			errors++;
 			continue;
 			/* break */
 		}	
