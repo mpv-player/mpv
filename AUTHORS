@@ -462,7 +462,7 @@ Madick, Puk <pingy@swirvemail.com>
     * KDE/GNOME2 fullscreen fix
     * configparser fixes
 
-Makovicka, Jindrich (henry) <makovick@KMLinux.fjfi.cvut.cz>
+Makovicka, Jindrich (henry, x0rph) <makovick@KMLinux.fjfi.cvut.cz>
     * various bug fixes
     * rewrote v4l video capturing, implemented audio capturing layer
     * freetype2 font rendering support
@@ -629,7 +629,7 @@ Tam, Howell (Pigeon) <pigeon@pigeond.net>
     * native libcaca driver (-vo caca)
 
 Tlalka, Adam (atlka) <atlka@pg.gda.pl>
-    * OSD/subtitle review, fixes, optimization, UTF8 support
+    * OSD/subtitle review, fixes, optimization, UTF-8 support
     * various fixes
 
 Tiesi, Gianluigi <sherpya@netfarm.it>
