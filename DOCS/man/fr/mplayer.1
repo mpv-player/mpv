@@ -681,24 +681,30 @@ pendant la visualisation d'un film.
 Active la mise en cache pour le flux utilisé par \-audiofile, en utilisant
 la quantité demandée de mémoire.
 .TP
-.B \-bandwidth <valeur>
+.B \-bandwidth <valeur> (réseau uniquement)
 Spécifie la bande passante maximum pour le streaming par le réseau (pour les
 serveurs capable d'envoyer du contenu à différents débits).
-Utile si vous voulez voir en direct des média streamés avec un connexion lente.
+Utile si vous voulez voir en direct avec un connexion lente des média streamés.
 .TP
 .B \-cdrom-device <périph>
 Outrepasse le nom par défaut du lecteur de CDROM (/dev/\:cdrom).
 .TP
 .B \-cache <Koctets>
-Cette option indique combien de mémoire (en Ko) à utiliser mettant un fichier
-en cache/\:URL.
-Particulièrement utile sur des média lents (le comportement par défaut est
-\-nocache).
+Cette option indique combien de mémoire (en Ko) utiliser pour mettre un
+fichier ou une URL en cache.
+Particulièrement utile sur des média lents.
+.TP
+.B \-cache-min <pourcentage>
+Commence la lecture quand <pourcentage> du cache est rempli.
+.TP
+.B \-cache-prefill <pourcentage> (pas encore implémenté)
+Si le cache se trouve vidé, MPlayer marquera une pose tant que
+<pourcentage> du cache ne sera pas rempli.
 .TP
 .B \-cdda <option1:option2>
 Cette option est utilisé pour régler les capacités de lecture de CD Audio
 de MPlayer.
-
+.sp 1
 Les options disponibles sont:
 .
 .RSs
@@ -734,26 +740,27 @@ Peut être négatif.
 .
 .TP
 .B \-channels <nombre>
-Indique le nombre de canaux audio à utiliser, '2' par défaut si non spécifié.
+Indique le nombre de canaux audio à utiliser. (défaut\ : 2).
 Si le nombre de canaux de sortie est plus grand que celui des canaux 
 d'entrée des canaux vides sont insérés (à moins de mixer de mono vers stéréo, 
 dans ce cas le canal mono est répété sur les deux canaux de sortie).
 Si le nombre de canaux de sortie est plus petit que celui des canaux 
 d'entrée, les résultats dépendront du décodeur audio (\-afm).
-MPlayer demande au décodeur de décoder l'audio dans le nombre requis de canaux.
+MPlayer demande au décodeur de décoder l'audio sur le nombre requis de canaux.
 Maintenant c'est au décodeur de satisfaire cette demande. 
 Si le décodeur sort sur plus de canaux que demandé, les canaux en plus seront 
 tronqués. 
-C'est généralement seulement important en jouant des vidéos avec de l'audio AC3 
-(comme les DVDs). Dans ce cas liba52 fait le décodage par défaut et downmixe
+C'est généralement seulement important en jouant des vidéos avec de l'audio
+AC3 (comme les DVDs).
+Dans ce cas liba52 fait le décodage par défaut et fusionne
 correctement l'audio dans le nombre requis de canaux.
 .br
 .I NOTE:
-Cette option est utilisé par les codecs (ac3 uniquement) filtres (surround)
+Cette option est comprise par les codecs (ac3 uniquement) filtres (surround)
 et drivers ao (OSS au moins).
-
+.sp 1
 Les options disponibles sont:
-
+.sp 1
 .PD 0
 .RSs
 .IPs 2
@@ -761,7 +768,7 @@ Stereo
 .IPs 4
 Surround
 .IPs 6
-Plein 5.1
+5.1 complet
 .RE
 .PD 1
 .
@@ -769,65 +776,66 @@ Plein 5.1
 .B \-chapter <id\ chapitre>[\-<id\ fin\ chapitre>]
 Indique à quel chapitre commencer la lecture.
 Vous pouvez également indiquer à quel chapitre arrêter la lecture 
-(par défaut: 1). Des exemples sont disponibles plus bas.
+(par défaut: 1).
 .TP
-.B \-cookies
+.B \-cookies (réseau uniquement)
 Envoie des cookies lors des requêtes HTTP.
 .TP
-.B \-cookies-file <fichier>
-Lis les cookies HTTP depuis ce fichier.
+.B \-cookies-file <fichier> (réseau uniquement)
+Lit les cookies HTTP depuis <fichier> au lieu des chemins par défaut
+
+(~/.mozilla/ et ~/.netscape/).
 Ce fichier est supposé être au format Netscape.
-Si vous utilisez cette option, MPlayer ne cherchera pas de cookies
-dans ~/.netscape/ et ~/.mozilla/.
 .TP
 .B \-demuxer <nombre>
-Forcer le type de demuxer.
-Indiquez l'ID demuxer comme défini dans demuxers.h.
+Forcer le type de démultiplexeur.
+Indiquez l'ID du démultiplexeur comme défini dans libmpdemux/demuxer.h.
 Utilisez \-demuxer 17 pour forcer la détection des .mp3.
 .TP
-.B \-dumpaudio (MPLAYER uniquement)
-Décharge le flux audio brut dans ./\:stream.dump (utile avec mpeg/\:ac3).
+.B \-dumpaudio (MPlayer uniquement)
+Décharge le flux audio brut dans ./stream.dump (utile avec
+mpeg/\:ac3).
 .TP
-.B \-dumpfile <nomfichier> (MPLAYER uniquement)
+.B \-dumpfile <nomfichier> (MPlayer uniquement)
 Indique dans quel fichier MPlayer doit décharger.
 Devrait être utilisé avec \-dumpaudio / \-dumpvideo / \-dumpstream.
 .TP
-.B \-dumpstream (MPLAYER uniquement)
+.B \-dumpstream (MPlayer uniquement)
 Décharge le flux brut dans /\:stream.dump.
 Utile en rippant depuis un DVD ou depuis le réseau.
 .TP
-.B \-dumpvideo (MPLAYER uniquement)
-Décharge le flux vidéo brut dans /\:stream.dump (pas très utilisable).
+.B \-dumpvideo (MPlayer uniquement)
+Décharge le flux vidéo brut dans /stream.dump (pas très utilisable).
 .TP
-.B \-dvbin <options>
-Passe les paramètres suivant au module d'entrée DVB, de façon à outrepasser ceux
-par défaut:
-
+.B \-dvbin <options> (DVB uniquement)
+Passe les paramètres suivant au module d'entrée DVB, de façon à
+outrepasser ceux par défaut:
+.sp 1
 .PD 0
 .RSs
 .IPs card=<1\-4>
 Spécifie le numéro de carte à utiliser (par défaut: 1).
 .IPs file=<fichier>
 Dit à MPlayer de lire les canaux depuis <fichier>.
-.IPs type=<SAT|TER|CBL>
-Spécifie quel type de carte: SATellite, TERrestre ou CaBLe. Si non spécifié
-le type sera détecté automatiquement.
+~/.mplayer/channels.conf.{sat,ter,cbl} par défaut (en fonction de votre
+type de carte) ou ~/.mplayer/channels.conf en dernier recours.
 .RE
 .PD 1
 .
 .TP
-.B \-dvd-device <chemin\ périphérique>
-Outrepasse le nom de périphérique DVD par défaut /dev/\:dvd.
+.B \-dvd-device <périph> (DVD uniquement)
+Défini le nom du périphérique DVD (/dev/\:dvd par défaut).
 .TP
-.B \-dvdangle <id\ angle>
+.B \-dvdangle <id\ angle> (DVD uniquement)
 Certains DVD contiennent des scènes qui peuvent être vues sous différents
-angles. Ici vous pouvez dire à MPlayer quels angles utiliser (par
-défaut: 1). Des exemples sont disponibles plus bas.
+angles.
+Vous pouvez ainsi dire à MPlayer quels angles utiliser (1 par défaut).
 .TP
 .B \-forceidx
-Forcer la reconstruction de l'INDEX.
+Forcer la reconstruction de l'index.
 Utile pour les fichiers possédant un index cassé (désynchro, etc).
-La recherche sera possible.
+Cela vous permettra aussi de naviguer en avant/arrière si cela n'était
+pas possible.
 Vous pouvez réparer l'index de façon permanente avec MEncoder (voir la
 documentation).
 .br
@@ -835,9 +843,8 @@ documentation).
 Vous ne pouvez utiliser cette option que si le media en question supporte les
 déplacements (c-a-d pas depuis stdin, un pipe, etc).
 .TP
-.B \-fps <valeur>
-Forcer le débit vidéo (si la valeur est mauvaise/\:absente de l'entête)
-(nombre à virgule).
+.B \-fps <flottant>
+Forcer le débit vidéo (si la valeur est mauvaise ou absente de l'entête).
 .TP
 .B \-frames <nombre>
 Joue/\:convertit uniquement les <nombre> premières trames, puis sort.
