@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.110
+// Updated to help_mp-en.h v1.115
 
 // ========================= MPlayer help ===========================
 
@@ -291,6 +291,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s already present!\n"
 #define MSGTR_ClipInfo "Informazioni sulla clip: \n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Rilevato formato NTSC 30fps, cambio framerate.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: Rilevato formato NTSC 24fps progressivo, cambio framerate.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "impossibile aprire il codec\n"
