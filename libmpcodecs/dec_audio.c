@@ -49,6 +49,14 @@ void afm_help(){
 
 int init_audio_codec(sh_audio_t *sh_audio)
 {
+  if ((af_cfg.force & AF_INIT_FORMAT_MASK) == AF_INIT_FLOAT) {
+      int fmt = AF_FORMAT_FLOAT_NE;
+      if (mpadec->control(sh_audio, ADCTRL_QUERY_FORMAT,
+				       &fmt) == CONTROL_TRUE) {
+	  sh_audio->sample_format = fmt;
+	  sh_audio->samplesize = 4;
+      }
+  }
   if(!mpadec->preinit(sh_audio))
   {
       mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_ADecoderPreinitFailed);
