@@ -113,12 +113,12 @@ installiert sind.</P>
 
 
 <TABLE BORDER=0 WIDTH=100%>
-<TD VALIGN=top>-dvd &lt;title_id&gt;&nbsp;</TD>
-<TD>Aktiviert die DVD-Unterstützung und wählt den Titel aus.</TD><TR>
-<TD VALIGN=top>-chapter &lt;chapter_id&gt;&nbsp;</TD>
-<TD>Wählt das DVD-Kapitel (Standard: wiedergabe von Kapitel 1)</TD><TR>
-<TD VALIGN=top>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
-<TD>Zum aus wählen der Kamera-Perspektive (Standard: 1)</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvd &lt;title_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Aktiviert die DVD-Unterstützung und wählt den Titel aus.</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-chapter &lt;chapter_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Wählt das DVD-Kapitel (Standard: wiedergabe von Kapitel 1)</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Zum aus wählen der Kamera-Perspektive (Standard: 1)</TD><TR>
 </TABLE>
 
 <P>Standard-Geräte ist <CODE>/dev/dvd</CODE>, du kannst das in config.h (compile time
@@ -132,26 +132,26 @@ option) ändern, oder du kannst es als Dateinamen für <B>MPlayer</B> angeben:
 
 <TABLE BORDER=0 ALIGN=left WIDTH=100%>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Kann ich libdvdread und libcss z.B. auf meinem süssen Sparc/Solaris kompilieren?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Was weiss ... Bitte teste es und sag uns bescheid. Aber es wird gesagt, dass es
 funktionieren sollte. Bitte lese auch die Documentation von libdvdread und seiner
 homepage. Wir sind nicht die Autoren von libdvdread.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Was ist mit den Untertiteln? Kann MPlayer die dekodieren?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Ja, das kann es (oder es sollte zumindest so sein) aber es ist z.Z. DVD-Unter-
 titel keine Anzeige-Funktion implementiert in <B>MPlayer</B> (DVD-Untertitel
 werden als Bilder, nicht als Text gespeichert!). Wie auch immer, es ist ein
 gaplantes Feature (in der Zeit von libvo2).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 I höre keinen Sound / schlechten Sound (Spanisch oder anderen grässliche Dinge).
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 <B>MPlayer</B> verwendent zur Zeit noch nicht alle Informationen der IFO Blöcke
 der DVD. Du kannst den richtigen DVD-Audio Stream mit der '-aid 128' Option
 auswählen, wobei 128 die Stream ID des gewünschten Audio-Streams ist. Du kannst
@@ -159,48 +159,48 @@ probiren mit Nummern: 128,129,... und so weiter. Natürlich wird diese Problem
 in Zukunft gelöst werden.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Es gibt eigenartige Effekte (ändlich wie Interlace) speziell wenn schnellere
 Bewegungen von Objekten in Film gezeigt werden.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Bekanntes Problem, wie versuchen es später zu lösen (wenn wir zu libvo2 wechseln).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Wie kann ich den Reginal-Code meine DVD-Laufwerks einstellen ? I habe kein Win-
 dows!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Verwende das 'regionset'-Tool:
 <A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz</A>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Also MPlayer kann DVDs abspielen? Dann musst du DeCSS verwerden! Du bist ver-
 haftet unter dem XYZ#$ Paragraphen von dem--
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Weiche von mir Arschloch, es ist kein DeCSS-Code im <B>MPlayer</B>. <B>MPlayer</B> 
 verwendet libdvdread durch linken und libdvdread verwendet libcss durch dynami-
 sches laden.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Muss ich (setuid) root/setuid sein, dass fibmap_mplayer DVDs spielen kann?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 No, musst du nicht. Das ist Vergangenheit :) Natürlich brauchst du aber die
 Zugriffsrechte für das DVD-Laufwerk (in /dev).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Wie kann ich ... (füge hier erwartetes Features eines DVD Player ein)?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Die aktuelle Implementation ist die Erste mit einer richtiger DVD-Player
 Funkionalität. Als erstes möchten wir aber bestehende Bugs lösen und grund-
 legende Funtionen einbauen, bevor wir zu den neuen Features gehen.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Wo kann ich die libdvdread und libcss Pakete bekommen?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Von der Seite von Ogle:
 <A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
