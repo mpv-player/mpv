@@ -2045,6 +2045,41 @@ echocheck "DVB"
 if test "$_dvb" != no ; then
   _dvb=no
   test -c /dev/ost/video && _dvb=yes
+cat >$TMPC << EOF
+#include <sys/poll.h>
+#include <sys/ioctl.h>
+#include <stdio.h>
+#include <time.h>
+#include <unistd.h>
+
+#include <ost/dmx.h>
+#include <ost/frontend.h>
+#include <ost/sec.h>
+#include <ost/video.h>
+#include <ost/audio.h>
+int main(void) {return 0;}
+EOF
+    if cc_check ; then
+        _dvb=yes
+        echores "yes"
+    else
+	if cc_check -I/usr/src/DVB/ost/include ; then
+    	    _dvb=yes
+    	    echores "yes (using source from /usr/src/DVB/ost/include)"
+	    _inc_dvb="-I/usr/src/DVB/ost/include"
+	else
+	    if cc_check $_inc_extra/ost/include ; then
+		_dvb=yes
+		echores "yes (using source from $_inc_extra/ost/include)"
+		_inc_dvb="$_inc_extra/ost/include"
+	    else
+		_dvb=no
+		echores "no (driver source not in /usr/src/DVB/ost/include, please add path with --with-extraincdir=DIR)"
+	    fi
+	fi
+    fi
+else
+    echores "no"
 fi
 if test "$_dvb" = yes ; then
   _def_dvb='#define HAVE_DVB 1'
@@ -2053,7 +2088,6 @@ else
   _def_dvb='#undef HAVE_DVB'
   _vomodules="mpegpes(file) $_vomodules"  
 fi
-echores "$_dvb"
 
 
 echocheck "PNG support"
@@ -3316,6 +3350,7 @@ X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_so
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
 MLIB_INC = $_inc_mlib
+DVB_INC = $_inc_dvb
 PNG_LIB = $_ld_png
 JPEG_LIB = $_ld_jpg
 SDL_LIB = $_ld_sdl
