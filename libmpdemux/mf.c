@@ -55,13 +55,13 @@ int stream_open_mf(char * filename,stream_t * stream)
        mf->nr_of_files++;
       }
     }
+   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
+ 
    goto exit_mf;
   } 
 
  fname=malloc( strlen( filename ) + 32 );
 
- mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
- 
  if ( !strchr( filename,'%' ) )
   {
    strcpy( fname,filename ); 
