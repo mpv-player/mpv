@@ -7935,6 +7935,12 @@ Sets the video bitrate in kbit/s for MPEG-1/2 video.
 .B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
 Sets the framerate for MPEG-1/2 video.
 .
+.TP
+.B telecine
+Enables soft telecine mode: the muxer will trick the video stream so as 
+to make it look like encoded at 29.97 or 30 fps; it only works with MPEG-2 
+video when framerate is either 23.976 or 24 fps.
+.
 .
 .\" --------------------------------------------------------------------------
 .\" Files
