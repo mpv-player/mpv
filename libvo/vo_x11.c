@@ -288,7 +288,12 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
   else
 #endif   
    {
- 
+     if(vo_window != None) {
+       freeMyXImage();
+       XUnmapWindow( mDisplay,vo_window );
+       XDestroyWindow(mDisplay, vo_window);
+     }
+
 #ifdef HAVE_XF86VM
     if ( vm )
    {
