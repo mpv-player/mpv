@@ -84,7 +84,7 @@ streaming_ctrl_new( ) {
 	streaming_ctrl_t *streaming_ctrl;
 	streaming_ctrl = (streaming_ctrl_t*)malloc(sizeof(streaming_ctrl_t));
 	if( streaming_ctrl==NULL ) {
-		printf("Failed to allocate memory\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Failed to allocate memory\n");
 		return NULL;
 	}
 	memset( streaming_ctrl, 0, sizeof(streaming_ctrl_t) );
@@ -112,7 +112,7 @@ read_rtp_from_server(int fd, char *buffer, int length) {
 
 	getrtp2(fd, &rh, &data, &len);
 	if( got_first && rh.b.sequence != (unsigned short)(sequence+1) )
-		printf("RTP packet sequence error!  Expected: %d, received: %d\n", 
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"RTP packet sequence error!  Expected: %d, received: %d\n", 
 			sequence+1, rh.b.sequence);
 	got_first = 1;
 	sequence = rh.b.sequence;
@@ -130,11 +130,11 @@ connect2Server(char *host, int port) {
 	struct timeval tv;
 	struct sockaddr_in server_address;
 
-	printf("Connecting to server %s:%d ...\n", host, port );
+	mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s:%d ...\n", host, port );
 
 	socket_server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if( socket_server_fd==-1 ) {
-		perror("Failed to create socket");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create socket");
 		return -1;
 	}
 
@@ -142,7 +142,7 @@ connect2Server(char *host, int port) {
 		struct hostent *hp;
 		hp=(struct hostent*)gethostbyname( host );
 		if( hp==NULL ) {
-			printf("Counldn't resolve name: %s\n", host);
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Counldn't resolve name: %s\n", host);
 			return -1;
 		}
 		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
@@ -156,7 +156,7 @@ connect2Server(char *host, int port) {
 	fcntl( socket_server_fd, F_SETFL, fcntl(socket_server_fd, F_GETFL) | O_NONBLOCK );
 	if( connect( socket_server_fd, (struct sockaddr*)&server_address, sizeof(server_address) )==-1 ) {
 		if( errno!=EINPROGRESS ) {
-			perror("Failed to connect to server");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server");
 			close(socket_server_fd);
 			return -1;
 		}
@@ -167,13 +167,13 @@ connect2Server(char *host, int port) {
 	FD_SET( socket_server_fd, &set );
 	// When the connection will be made, we will have a writable fd
 	while((ret = select(socket_server_fd+1, NULL, &set, NULL, &tv)) == 0) {
-	      if( ret<0 ) perror("select failed");
+	      if( ret<0 ) mp_msg(MSGT_NETWORK,MSGL_ERR,"select failed");
 	      else if(ret > 0) break;
 	      else if(count > 15 || mpdemux_check_interrupt(500)) {
 		if(count > 15)
-		  printf("Connection timeout\n");
+		  mp_msg(MSGT_NETWORK,MSGL_ERR,"Connection timeout\n");
 		else
-		  printf("Connection interuppted by user\n");
+		  mp_msg(MSGT_NETWORK,MSGL_V,"Connection interuppted by user\n");
 		return -1;
 	      }
 	      count++;
@@ -187,11 +187,11 @@ connect2Server(char *host, int port) {
 	err_len = sizeof(int);
 	ret =  getsockopt(socket_server_fd,SOL_SOCKET,SO_ERROR,&err,&err_len);
 	if(ret < 0) {
-		printf("getsockopt failed : %s\n",strerror(errno));
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"getsockopt failed : %s\n",strerror(errno));
 		return -1;
 	}
 	if(err > 0) {
-		printf("Connect error : %s\n",strerror(err));
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Connect error : %s\n",strerror(err));
 		return -1;
 	}
 	return socket_server_fd;
@@ -203,7 +203,7 @@ check4proxies( URL_t *url ) {
 	if( url==NULL ) return NULL;
 	url_out = url_new( url->url );
 	if( !strcasecmp(url->protocol, "http_proxy") ) {
-		printf("Using HTTP proxy: http://%s:%d\n", url->hostname, url->port );
+		mp_msg(MSGT_NETWORK,MSGL_V,"Using HTTP proxy: http://%s:%d\n", url->hostname, url->port );
 		return url_out;
 	}
 	// Check if the http_proxy environment variable is set.
@@ -218,18 +218,18 @@ check4proxies( URL_t *url ) {
 			URL_t *proxy_url = url_new( proxy );
 
 			if( proxy_url==NULL ) {
-				printf("Invalid proxy setting...Trying without proxy.\n");
+				mp_msg(MSGT_NETWORK,MSGL_WARN,"Invalid proxy setting...Trying without proxy.\n");
 				return url_out;
 			}
 
-			printf("Using HTTP proxy: %s\n", proxy_url->url );
+			mp_msg(MSGT_NETWORK,MSGL_V,"Using HTTP proxy: %s\n", proxy_url->url );
 			len = strlen( proxy_url->hostname ) + strlen( url->url ) + 20;	// 20 = http_proxy:// + port
 			new_url = malloc( len+1 );
 			if( new_url==NULL ) {
-				printf("Memory allocation failed\n");
+				mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 				return url_out;
 			}
-			sprintf( new_url, "http_proxy://%s:%d/%s", proxy_url->hostname, proxy_url->port, url->url );
+			sprintf(new_url, "http_proxy://%s:%d/%s", proxy_url->hostname, proxy_url->port, url->url );
 			tmp_url = url_new( new_url );
 			if( tmp_url==NULL ) {
 				return url_out;
@@ -281,13 +281,11 @@ http_send_request( URL_t *url ) {
 	if( fd<0 ) {
 		return -1; 
 	}
-	if( verbose ) {
-		printf("Request: [%s]\n", http_hdr->buffer );
-	}
+	mp_msg(MSGT_NETWORK,MSGL_DBG2,"Request: [%s]\n", http_hdr->buffer );
 	
 	ret = write( fd, http_hdr->buffer, http_hdr->buffer_size );
 	if( ret!=http_hdr->buffer_size ) {
-		printf("Error while sending HTTP request: didn't sent all the request\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Error while sending HTTP request: didn't sent all the request\n");
 		return -1;
 	}
 	
@@ -310,12 +308,12 @@ http_read_response( int fd ) {
 	do {
 		i = read( fd, response, BUFFER_SIZE ); 
 		if( i<0 ) {
-			printf("Read failed\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Read failed\n");
 			http_free( http_hdr );
 			return NULL;
 		}
 		if( i==0 ) {
-			printf("http_read_response read 0 -ie- EOF\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"http_read_response read 0 -ie- EOF\n");
 			http_free( http_hdr );
 			return NULL;
 		}
@@ -362,7 +360,7 @@ autodetectProtocol(streaming_ctrl_t *streaming_ctrl, int *fd_out, int *file_form
 		}
 extension=NULL;	
 		if( extension!=NULL ) {
-			printf("Extension: %s\n", extension );
+			mp_msg(MSGT_NETWORK,MSGL_DBG2,"Extension: %s\n", extension );
 			// Look for the extension in the extensions table
 			for( i=0 ; i<(sizeof(extensions_table)/sizeof(extensions_table[0])) ; i++ ) {
 				if( !strcasecmp(extension, extensions_table[i].extension) ) {
@@ -374,14 +372,14 @@ extension=NULL;
 
 		// Checking for RTSP
 		if( !strcasecmp(url->protocol, "rtsp") ) {
-			printf("RTSP protocol not yet implemented!\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"RTSP protocol not yet implemented!\n");
 			return -1;
 		}
 
 		// Checking for RTP
 		if( !strcasecmp(url->protocol, "rtp") ) {
 			if( url->port==0 ) {
-				printf("You must enter a port number for RTP streams!\n");
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"You must enter a port number for RTP streams!\n");
 				return -1;
 			}
 			return 0;
@@ -422,28 +420,28 @@ extension=NULL;
 						// note: I skip icy-notice1 and 2, as they contain html <BR>
 						// and are IMHO useless info ::atmos
 						if( (field_data = http_get_field(http_hdr, "icy-name")) != NULL )
-							printf("Name   : %s\n", field_data); field_data = NULL;
+							mp_msg(MSGT_NETWORK,MSGL_INFO,"Name   : %s\n", field_data); field_data = NULL;
 						if( (field_data = http_get_field(http_hdr, "icy-genre")) != NULL )
-							printf("Genre  : %s\n", field_data); field_data = NULL;
+							mp_msg(MSGT_NETWORK,MSGL_INFO,"Genre  : %s\n", field_data); field_data = NULL;
 						if( (field_data = http_get_field(http_hdr, "icy-url")) != NULL )
-							printf("Website: %s\n", field_data); field_data = NULL;
+							mp_msg(MSGT_NETWORK,MSGL_INFO,"Website: %s\n", field_data); field_data = NULL;
 						// XXX: does this really mean public server? ::atmos
 						if( (field_data = http_get_field(http_hdr, "icy-pub")) != NULL )
-							printf("Public : %s\n", atoi(field_data)?"yes":"no"); field_data = NULL;
+							mp_msg(MSGT_NETWORK,MSGL_INFO,"Public : %s\n", atoi(field_data)?"yes":"no"); field_data = NULL;
 						if( (field_data = http_get_field(http_hdr, "icy-br")) != NULL )
-							printf("Bitrate: %skbit/s\n", field_data); field_data = NULL;
+							mp_msg(MSGT_NETWORK,MSGL_INFO,"Bitrate: %skbit/s\n", field_data); field_data = NULL;
 						// Ok, we have detected an mp3 stream
 						*file_format = DEMUXER_TYPE_AUDIO;
 						return 0;
 					}
 					case 401: // Service Unavailable
-						printf("Error: ICY-Server return service unavailable, skipping!\n");
+						mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server return service unavailable, skipping!\n");
 						return -1;
 					case 404: // Resource Not Found
-						printf("Error: ICY-Server couldn't find requested stream, skipping!\n");
+						mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server couldn't find requested stream, skipping!\n");
 						return -1;
 					default:
-						printf("Error: unhandled ICY-Errorcode, contact MPlayer developers!\n");
+						mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: unhandled ICY-Errorcode, contact MPlayer developers!\n");
 						return -1;
 				}
 			}
@@ -455,9 +453,9 @@ extension=NULL;
 					content_type = http_get_field( http_hdr, "Content-Type" );
 					if( content_type!=NULL ) {
 						char *content_length = NULL;
-						printf("Content-Type: [%s]\n", content_type );
+						mp_msg(MSGT_NETWORK,MSGL_V,"Content-Type: [%s]\n", content_type );
 						if( (content_length = http_get_field(http_hdr, "Content-Length")) != NULL)
-							printf("Content-Length: [%s]\n", http_get_field(http_hdr, "Content-Length"));
+							mp_msg(MSGT_NETWORK,MSGL_V,"Content-Length: [%s]\n", http_get_field(http_hdr, "Content-Length"));
 						// Check in the mime type table for a demuxer type
 						for( i=0 ; i<(sizeof(mime_type_table)/sizeof(mime_type_table[0])) ; i++ ) {
 							if( !strcasecmp( content_type, mime_type_table[i].mime_type ) ) {
@@ -483,11 +481,11 @@ extension=NULL;
 					}
 					break;
 				default:
-					printf("Server returned %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
+					mp_msg(MSGT_NETWORK,MSGL_ERR,"Server returned %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
 					return -1;
 			}
 		} else {
-			printf("Unknown protocol '%s'\n", url->protocol );
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Unknown protocol '%s'\n", url->protocol );
 			return -1;
 		}
 	} while( redirect );
@@ -500,7 +498,7 @@ streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size) {
 //printf("streaming_bufferize\n");
 	streaming_ctrl->buffer = (char*)malloc(size);
 	if( streaming_ctrl->buffer==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return -1;
 	}
 	memcpy( streaming_ctrl->buffer, buffer, size );
@@ -533,7 +531,7 @@ nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctr
 		int ret;
 		ret = read( fd, buffer+len, size-len );
 		if( ret<0 ) {
-			printf("nop_streaming_read error : %s\n",strerror(errno));
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"nop_streaming_read error : %s\n",strerror(errno));
 		}
 		len += ret;
 //printf("read %d bytes from network\n", len );
@@ -562,8 +560,8 @@ nop_streaming_start( stream_t *stream ) {
 
 		switch( http_hdr->status_code ) {
 			case 200: // OK
-				printf("Content-Type: [%s]\n", http_get_field(http_hdr, "Content-Type") );
-				printf("Content-Length: [%s]\n", http_get_field(http_hdr, "Content-Length") );
+				mp_msg(MSGT_NETWORK,MSGL_V,"Content-Type: [%s]\n", http_get_field(http_hdr, "Content-Type") );
+				mp_msg(MSGT_NETWORK,MSGL_V,"Content-Length: [%s]\n", http_get_field(http_hdr, "Content-Length") );
 				if( http_hdr->body_size>0 ) {
 					if( streaming_bufferize( stream->streaming_ctrl, http_hdr->body, http_hdr->body_size )<0 ) {
 						http_free( http_hdr );
@@ -572,7 +570,7 @@ nop_streaming_start( stream_t *stream ) {
 				}
 				break;
 			default:
-				printf("Server return %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"Server return %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
 				close( fd );
 				fd = -1;
 		}
@@ -611,19 +609,19 @@ rtp_open_socket( URL_t *url ) {
 	struct ip_mreq mcast;
         struct timeval tv;
 
-	printf("Listening for traffic on %s:%d ...\n", url->hostname, url->port );
+	mp_msg(MSGT_NETWORK,MSGL_V,"Listening for traffic on %s:%d ...\n", url->hostname, url->port );
 
 	socket_server_fd = socket(AF_INET, SOCK_DGRAM, 0);
 //	fcntl( socket_server_fd, F_SETFL, fcntl(socket_server_fd, F_GETFL) | O_NONBLOCK );
 	if( socket_server_fd==-1 ) {
-		perror("Failed to create socket");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create socket");
 		return -1;
 	}
 
 	if( isalpha(url->hostname[0]) ) {
 		struct hostent *hp =(struct hostent*)gethostbyname( url->hostname );
 		if( hp==NULL ) {
-			printf("Counldn't resolve name: %s\n", url->hostname);
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Counldn't resolve name: %s\n", url->hostname);
 			return -1;
 		}
 		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
@@ -635,7 +633,7 @@ rtp_open_socket( URL_t *url ) {
 
 	if( bind( socket_server_fd, (struct sockaddr*)&server_address, sizeof(server_address) )==-1 ) {
 		if( errno!=EINPROGRESS ) {
-			perror("Failed to connect to server");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server");
 			close(socket_server_fd);
 			return -1;
 		}
@@ -644,7 +642,7 @@ rtp_open_socket( URL_t *url ) {
 	// Increase the socket rx buffer size to maximum -- this is UDP
 	rxsockbufsz = 240 * 1024;
 	if( setsockopt( socket_server_fd, SOL_SOCKET, SO_RCVBUF, &rxsockbufsz, sizeof(rxsockbufsz))) {
-		perror("Couldn't set receive socket buffer size");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Couldn't set receive socket buffer size");
 	}
 
 	if((ntohl(server_address.sin_addr.s_addr) >> 28) == 0xe) {
@@ -652,7 +650,7 @@ rtp_open_socket( URL_t *url ) {
 		//mcast.imr_interface.s_addr = inet_addr("10.1.1.2");
 		mcast.imr_interface.s_addr = 0;
 		if( setsockopt( socket_server_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mcast, sizeof(mcast))) {
-			perror("IP_ADD_MEMBERSHIP failed (do you have multicasting enabled in your kernel?)");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"IP_ADD_MEMBERSHIP failed (do you have multicasting enabled in your kernel?)");
 			return -1;
 		}
 	}
@@ -666,8 +664,8 @@ rtp_open_socket( URL_t *url ) {
 		err_len = sizeof( err );
 		getsockopt( socket_server_fd, SOL_SOCKET, SO_ERROR, &err, &err_len );
 		if( err ) {
-			printf("Timeout! No data from host %s\n", url->hostname );
-			printf("Socket error: %d\n", err );
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Timeout! No data from host %s\n", url->hostname );
+			mp_msg(MSGT_NETWORK,MSGL_DBG2,"Socket error: %d\n", err );
 			close(socket_server_fd);
 			return -1;
 		}
@@ -723,7 +721,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 	if( !strcasecmp( stream->streaming_ctrl->url->protocol, "rtp")) {
 		if(stream->fd >= 0) {
 			if(close(stream->fd) < 0)
-				printf("streaming_start : Closing socket %d failed %s\n",stream->fd,strerror(errno));
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"streaming_start : Closing socket %d failed %s\n",stream->fd,strerror(errno));
 		}
 		stream->fd = -1;
 		ret = rtp_streaming_start( stream );
@@ -736,7 +734,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 			// ASF raw stream is encapsulated.
 			ret = asf_streaming_start( stream );
 			if( ret<0 ) {
-				printf("asf_streaming_start failed\n");
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"asf_streaming_start failed\n");
 			}
 			break;
 		case DEMUXER_TYPE_MPEG_ES:
@@ -756,13 +754,13 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 			// the network stream, it's a raw stream
 			ret = nop_streaming_start( stream );
 			if( ret<0 ) {
-				printf("nop_streaming_start failed\n");
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"nop_streaming_start failed\n");
 			}
 			if((*demuxer_type) == DEMUXER_TYPE_PLAYLIST)
 			  stream->type = STREAMTYPE_PLAYLIST;
 			break;
 		default:
-			printf("Unable to detect the streaming type\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to detect the streaming type\n");
 			ret = -1;
 	}
 
@@ -774,14 +772,14 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		int ret, val;
 		ret = m_config_is_option_set(mconfig,"cache");
 		if(ret < 0) {
-			printf("Unable to know if cache size option was set\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to know if cache size option was set\n");
 		} else if(!ret) {
 			// cache option not set, will use the our computed value.
 			// buffer in KBytes, *5 because the prefill is 20% of the buffer.
 			val = (stream->streaming_ctrl->prebuffer_size/1024)*5;
 			if( val<16 ) val = 16;	// 16KBytes min buffer
 			if( m_config_set_int( mconfig, "cache", val )<0 ) { 
-				printf("Unable to set the cache size option\n");
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to set the cache size option\n");
 			} else {
 				cache_size = val;
 			}
@@ -789,12 +787,12 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 			// cache option set, will use the given one.
 			val = m_config_get_int( mconfig, "cache", NULL );
 			if( val<0 ) {
-				printf("Unable to retrieve the cache option value\n");
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to retrieve the cache option value\n");
 			} else {
 				cache_size = val;
 			}
 		}
-		printf("Cache size set to %d KBytes\n", cache_size );
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %d KBytes\n", cache_size );
 	}
 	return ret;
 }

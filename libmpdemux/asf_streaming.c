@@ -51,28 +51,28 @@ asf_streaming_start( stream_t *stream ) {
 	strncpy( proto_s, stream->streaming_ctrl->url->protocol, 10 );
 	
 	if( !strncasecmp( proto_s, "mms", 3) && strncasecmp( proto_s, "mmst", 4) ) {
-		printf("Trying ASF/UDP...\n");
+		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/UDP...\n");
 		//fd = asf_mmsu_streaming_start( stream );
 		if( fd!=-1 ) return fd;
-		printf("  ===> ASF/UDP failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/UDP failed\n");
 	}
 	if( !strncasecmp( proto_s, "mms", 3) ) {
-		printf("Trying ASF/TCP...\n");
+		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/TCP...\n");
 		//fd = asf_mmst_streaming_start( stream );
 		if( fd!=-1 ) return fd;
-		printf("  ===> ASF/TCP failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/TCP failed\n");
 	}
 	if( 	!strncasecmp( proto_s, "http", 4) || 
 		!strncasecmp( proto_s, "mms", 3)  ||
 		!strncasecmp( proto_s, "http_proxy", 10)
 		) {
-		printf("Trying ASF/HTTP...\n");
+		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/HTTP...\n");
 		fd = asf_http_streaming_start( stream );
 		if( fd!=-1 ) return fd;
-		printf("  ===> ASF/HTTP failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/HTTP failed\n");
 	}
 
-	printf("Unknown protocol: %s\n", proto_s );
+	mp_msg(MSGT_NETWORK,MSGL_ERR,"Unknown protocol: %s\n", proto_s );
 	return -1;
 }
 
@@ -86,11 +86,11 @@ printf("0x%02X\n", stream_chunck->type );
 	if( drop_packet!=NULL ) *drop_packet = 0;
 
 	if( stream_chunck->size<8 ) {
-		printf("Ahhhh, stream_chunck size is too small: %d\n", stream_chunck->size);
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Ahhhh, stream_chunck size is too small: %d\n", stream_chunck->size);
 		return -1;
 	}
 	if( stream_chunck->size!=stream_chunck->size_confirm ) {
-		printf("size_confirm mismatch!: %d %d\n", stream_chunck->size, stream_chunck->size_confirm);
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"size_confirm mismatch!: %d %d\n", stream_chunck->size, stream_chunck->size_confirm);
 		return -1;
 	}
 /*	
@@ -102,7 +102,7 @@ printf("0x%02X\n", stream_chunck->type );
 */
 	switch(stream_chunck->type) {
 		case ASF_STREAMING_CLEAR:	// $C	Clear ASF configuration
-			printf("=====> Clearing ASF stream configuration!\n");
+			mp_msg(MSGT_NETWORK,MSGL_V,"=====> Clearing ASF stream configuration!\n");
 			if( drop_packet!=NULL ) *drop_packet = 1;
 			return stream_chunck->size;
 			break;
@@ -110,15 +110,15 @@ printf("0x%02X\n", stream_chunck->type );
 //			printf("=====> Data follows\n");
 			break;
 		case ASF_STREAMING_END_TRANS:	// $E	Transfer complete
-			printf("=====> Transfer complete\n");
+			mp_msg(MSGT_NETWORK,MSGL_V,"=====> Transfer complete\n");
 			if( drop_packet!=NULL ) *drop_packet = 1;
 			return stream_chunck->size;
 			break;
 		case ASF_STREAMING_HEADER:	// $H	ASF header chunk follows
-			printf("=====> ASF header chunk follows\n");
+			mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF header chunk follows\n");
 			break;
 		default:
-			printf("=====> Unknown stream type 0x%x\n", stream_chunck->type );
+			mp_msg(MSGT_NETWORK,MSGL_V,"=====> Unknown stream type 0x%x\n", stream_chunck->type );
 	}
 	return stream_chunck->size+4;
 }
@@ -150,19 +150,19 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 	  // Endian handling of the stream chunk
 	  le2me_ASF_stream_chunck_t(&chunk);
 	  size = asf_streaming( &chunk, &r) - sizeof(ASF_stream_chunck_t);
-	  if(r) printf("Warning : drop header ????\n");
+	  if(r) mp_msg(MSGT_NETWORK,MSGL_WARN,"Warning : drop header ????\n");
 	  if(size < 0){
-	    printf("Error while parsing chunk header\n");
+	    mp_msg(MSGT_NETWORK,MSGL_ERR,"Error while parsing chunk header\n");
 		return -1;
 	  }
 	  if (chunk.type != ASF_STREAMING_HEADER) {
-	    printf("Don't got a header as first chunk !!!!\n");
+	    mp_msg(MSGT_NETWORK,MSGL_ERR,"Don't got a header as first chunk !!!!\n");
 	    return -1;
 	  }
 	  
 	  buffer = (char*) malloc(size+buffer_size);
 	  if(buffer == NULL) {
-	    printf("Error can't allocate %d bytes buffer\n",size+buffer_size);
+	    mp_msg(MSGT_NETWORK,MSGL_FATAL,"Error can't allocate %d bytes buffer\n",size+buffer_size);
 	    return -1;
 	  }
 	  if( chunk_buffer!=NULL ) {
@@ -176,7 +176,7 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 	  for(r = 0; r < size;) {
 	    i = nop_streaming_read(fd,buffer+r,size-r,streaming_ctrl);
 	    if(i < 0) {
-		    printf("Error while reading network stream\n");
+		    mp_msg(MSGT_NETWORK,MSGL_ERR,"Error while reading network stream\n");
 		    return -1;
 	    }
 	    r += i;
@@ -184,20 +184,20 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 
 	  if( chunk_size2read==0 ) {
 		if(size < (int)sizeof(asfh)) {
-		    printf("Error chunk is too small\n");
+		    mp_msg(MSGT_NETWORK,MSGL_ERR,"Error chunk is too small\n");
 		    return -1;
-		} else printf("Got chunk\n");
+		} else mp_msg(MSGT_NETWORK,MSGL_DBG2,"Got chunk\n");
 	  	memcpy(&asfh,buffer,sizeof(asfh));
 	  	le2me_ASF_header_t(&asfh);
 		chunk_size2read = asfh.objh.size;
-		printf("Size 2 read=%d\n", chunk_size2read);
+		mp_msg(MSGT_NETWORK,MSGL_DBG2,"Size 2 read=%d\n", chunk_size2read);
 	  }
   } while( buffer_size<chunk_size2read);
   buffer = chunk_buffer;
   size = buffer_size;
 	  
   if(asfh.cno > 256) {
-    printf("Error sub chunks number is invalid\n");
+    mp_msg(MSGT_NETWORK,MSGL_ERR,"Error sub chunks number is invalid\n");
     return -1;
   }
 
@@ -280,7 +280,7 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
 				    streaming_ctrl );
 	if(r <= 0){
 	  if( r < 0) 
-	    printf("Error while reading chunk header\n");
+	    mp_msg(MSGT_NETWORK,MSGL_ERR,"Error while reading chunk header\n");
 	  return -1;
 	}
 	read += r;
@@ -290,14 +290,14 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
       le2me_ASF_stream_chunck_t(&chunk);
       chunk_size = asf_streaming( &chunk, &drop_chunk );
       if(chunk_size < 0) {
-	printf("Error while parsing chunk header\n");
+	mp_msg(MSGT_NETWORK,MSGL_ERR,"Error while parsing chunk header\n");
 	return -1;
       }
       chunk_size -= sizeof(ASF_stream_chunck_t);
 	
       if(chunk.type != ASF_STREAMING_HEADER && (!drop_chunk)) {
 	if (asf_http_ctrl->packet_size < chunk_size) {
-	  printf("Error chunk_size > packet_size\n");
+	  mp_msg(MSGT_NETWORK,MSGL_ERR,"Error chunk_size > packet_size\n");
 	  return -1;
 	}
 	waiting = asf_http_ctrl->packet_size;
@@ -320,7 +320,7 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
 	int got = nop_streaming_read( fd,buffer+read,chunk_size-read,streaming_ctrl );
 	if(got <= 0) {
 	  if(got < 0)
-	    printf("Error while reading chunk\n");
+	    mp_msg(MSGT_NETWORK,MSGL_ERR,"Error while reading chunk\n");
 	  return -1;
 	}
 	read += got;
@@ -361,13 +361,13 @@ asf_http_streaming_type(char *content_type, char *features, HTTP_header_t *http_
 	if( content_type==NULL ) return ASF_Unknown_e;
 	if( !strcasecmp(content_type, "application/octet-stream") ) {
 		if( features==NULL ) {
-			printf("=====> ASF Prerecorded\n");
+			mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Prerecorded\n");
 			return ASF_Prerecorded_e;
 		} else if( strstr(features, "broadcast")) {
-			printf("=====> ASF Live stream\n");
+			mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Live stream\n");
 			return ASF_Live_e;
 		} else {
-			printf("=====> ASF Prerecorded\n");
+			mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Prerecorded\n");
 			return ASF_Prerecorded_e;
 		}
 	} else {
@@ -377,10 +377,10 @@ asf_http_streaming_type(char *content_type, char *features, HTTP_header_t *http_
 		// So we have to check for an asf header :(, but it works :p
 		if( http_hdr->body_size>sizeof(ASF_obj_header_t) ) {
 			if( asf_header_check( http_hdr )==0 ) {
-				printf("=====> ASF Plain text\n");
+				mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Plain text\n");
 				return ASF_PlainText_e;
 			} else {
-				printf("=====> ASF Redirector\n");
+				mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Redirector\n");
 				return ASF_Redirector_e;
 			}
 		} else {
@@ -391,13 +391,13 @@ asf_http_streaming_type(char *content_type, char *features, HTTP_header_t *http_
 				(!strcasecmp(content_type, "video/x-ms-wvx")) ||
 				(!strcasecmp(content_type, "video/x-ms-wmv")) ||
 				(!strcasecmp(content_type, "video/x-ms-wma")) ) {
-				printf("=====> ASF Redirector\n");
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"=====> ASF Redirector\n");
 				return ASF_Redirector_e;
 			} else if( !strcasecmp(content_type, "text/plain") ) {
-				printf("=====> ASF Plain text\n");
+				mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Plain text\n");
 				return ASF_PlainText_e;
 			} else {
-				printf("=====> ASF unknown content-type: %s\n", content_type );
+				mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF unknown content-type: %s\n", content_type );
 				return ASF_Unknown_e;
 			}
 		}
@@ -433,7 +433,7 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	if( !strcasecmp( url->protocol, "http_proxy" ) ) {
 		server_url = url_new( (url->file)+1 );
 		if( server_url==NULL ) {
-			printf("Invalid proxy URL\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Invalid proxy URL\n");
 			http_free( http_hdr );
 			return NULL;
 		}
@@ -469,7 +469,7 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 				}				
 				if(as < 0) {
 					if(audio_id > 0) 
-		       				printf("Audio stream %d don't exist\n", as);
+		       				mp_msg(MSGT_NETWORK,MSGL_ERR,"Audio stream %d don't exist\n", as);
 					as = asf_http_ctrl->audio_streams[0];
 				}
 				ptr += sprintf(ptr, " ffff:%d:0",as);
@@ -486,7 +486,7 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 				}
 				if(vs < 0) {
 					if(video_id > 0) 
-						printf("Video stream %d don't exist\n",vs);
+						mp_msg(MSGT_NETWORK,MSGL_ERR,"Video stream %d don't exist\n",vs);
 					vs = asf_http_ctrl->video_streams[0];
 		       		}
 				ptr += sprintf( ptr, " ffff:%d:0",vs);
@@ -502,7 +502,7 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 			// First request goes here.
 			break;
 		default:
-			printf("Unknown asf stream type\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Unknown asf stream type\n");
 	}
 
 	http_set_field( http_hdr, "Connection: Close" );
@@ -517,11 +517,11 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 	char features[64] = "\0";
 	int len;
 	if( http_response_parse(http_hdr)<0 ) {
-		printf("Failed to parse HTTP response\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to parse HTTP response\n");
 		return -1;
 	}
 	if( http_hdr->status_code!=200 ) {
-		printf("Server return %d:%s\n", http_hdr->status_code, http_hdr->reason_phrase);
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Server return %d:%s\n", http_hdr->status_code, http_hdr->reason_phrase);
 		return -1;
 	}
 
@@ -542,7 +542,7 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 				if( end==NULL ) {
 				  int s = strlen(pragma);
 				  if(s > sizeof(features)) {
-				    printf("ASF HTTP PARSE WARNING : Pragma %s cuted from %d bytes to %d\n",pragma,s,sizeof(features));
+				    mp_msg(MSGT_NETWORK,MSGL_WARN,"ASF HTTP PARSE WARNING : Pragma %s cuted from %d bytes to %d\n",pragma,s,sizeof(features));
 				    len = sizeof(features);
 				  } else {				   
 				    len = s;
@@ -580,7 +580,7 @@ asf_http_streaming_start( stream_t *stream ) {
 
 	asf_http_ctrl = (asf_http_streaming_ctrl_t*)malloc(sizeof(asf_http_streaming_ctrl_t));
 	if( asf_http_ctrl==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return -1;
 	}
 	asf_http_ctrl->streaming_type = ASF_Unknown_e;
@@ -602,13 +602,11 @@ asf_http_streaming_start( stream_t *stream ) {
 		if( fd<0 ) return -1;
 
 		http_hdr = asf_http_request( stream->streaming_ctrl );
-		if( verbose>0 ) {
-			printf("Request [%s]\n", http_hdr->buffer );
-		}
+		mp_msg(MSGT_NETWORK,MSGL_DBG2,"Request [%s]\n", http_hdr->buffer );
 		for(i=0; i <  http_hdr->buffer_size ; ) {
 			int r = write( fd, http_hdr->buffer+i, http_hdr->buffer_size-i );
 			if(r <0) {
-				printf("Socket write error : %s\n",strerror(errno));
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"Socket write error : %s\n",strerror(errno));
 				return -1;
 			}
 			i += r;
@@ -627,11 +625,11 @@ asf_http_streaming_start( stream_t *stream ) {
 		} while( !http_is_header_entire( http_hdr ) );
 		if( verbose>0 ) {
 			http_hdr->buffer[http_hdr->buffer_size]='\0';
-			printf("Response [%s]\n", http_hdr->buffer );
+			mp_msg(MSGT_NETWORK,MSGL_DBG2,"Response [%s]\n", http_hdr->buffer );
 		}
 		streaming_type = asf_http_parse_response(http_hdr);
 		if( streaming_type<0 ) {
-			printf("Failed to parse header\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to parse header\n");
 			http_free( http_hdr );
 			return -1;
 		}
@@ -652,7 +650,7 @@ asf_http_streaming_start( stream_t *stream ) {
 						ret = asf_streaming_parse_header(fd,stream->streaming_ctrl);
 						if(ret < 0) return -1;
 						if(asf_http_ctrl->n_audio == 0 && asf_http_ctrl->n_video == 0) {
-							printf("No stream found\n");
+							mp_msg(MSGT_NETWORK,MSGL_ERR,"No stream found\n");
 							return -1;
 						}
 						asf_http_ctrl->request++;
@@ -674,7 +672,7 @@ asf_http_streaming_start( stream_t *stream ) {
 				break;
 			case ASF_Unknown_e:
 			default:
-				printf("Unknown ASF streaming type\n");
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"Unknown ASF streaming type\n");
 				close(fd);
 				http_free( http_hdr );
 				return -1;

@@ -10,6 +10,7 @@
 
 #include "http.h"
 #include "url.h"
+#include "mp_msg.h"
 
 HTTP_header_t *
 http_new_header() {
@@ -49,7 +50,7 @@ http_response_append( HTTP_header_t *http_hdr, char *response, int length ) {
 	if( http_hdr==NULL || response==NULL || length<0 ) return -1;
 	ptr = (char*)malloc( http_hdr->buffer_size+length );
 	if( ptr==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return -1;
 	}
 	if( http_hdr->buffer_size==0 ) {
@@ -87,27 +88,27 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 	// Get the protocol
 	hdr_ptr = strstr( http_hdr->buffer, " " );
 	if( hdr_ptr==NULL ) {
-		printf("Malformed answer. No space separator found.\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Malformed answer. No space separator found.\n");
 		return -1;
 	}
 	len = hdr_ptr-http_hdr->buffer;
 	http_hdr->protocol = (char*)malloc(len+1);
 	if( http_hdr->protocol==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return -1;
 	}
 	strncpy( http_hdr->protocol, http_hdr->buffer, len );
 	http_hdr->protocol[len]='\0';
 	if( !strncasecmp( http_hdr->protocol, "HTTP", 4) ) {
 		if( sscanf( http_hdr->protocol+5,"1.%d", &(http_hdr->http_minor_version) )!=1 ) {
-			printf("Malformed answer. Unable to get HTTP minor version.\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Malformed answer. Unable to get HTTP minor version.\n");
 			return -1;
 		}
 	}
 
 	// Get the status code
 	if( sscanf( ++hdr_ptr, "%d", &(http_hdr->status_code) )!=1 ) {
-		printf("Malformed answer. Unable to get status code.\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Malformed answer. Unable to get status code.\n");
 		return -1;
 	}
 	hdr_ptr += 4;
@@ -115,13 +116,13 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 	// Get the reason phrase
 	ptr = strstr( hdr_ptr, "\n" );
 	if( hdr_ptr==NULL ) {
-		printf("Malformed answer. Unable to get the reason phrase.\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Malformed answer. Unable to get the reason phrase.\n");
 		return -1;
 	}
 	len = ptr-hdr_ptr;
 	http_hdr->reason_phrase = (char*)malloc(len+1);
 	if( http_hdr->reason_phrase==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return -1;
 	}
 	strncpy( http_hdr->reason_phrase, hdr_ptr, len );
@@ -135,7 +136,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 	if( ptr==NULL ) {
 		ptr = strstr( http_hdr->buffer, "\n\n" );
 		if( ptr==NULL ) {
-			printf("Header may be incomplete. No CRLF CRLF found.\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Header may be incomplete. No CRLF CRLF found.\n");
 			return -1;
 		}
 	}
@@ -150,7 +151,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 		if( len==0 ) break;
 		field = (char*)realloc(field, len+1);
 		if( field==NULL ) {
-			printf("Memory allocation failed\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
 			return -1;
 		}
 		strncpy( field, hdr_ptr, len );
@@ -166,7 +167,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 		int data_length = http_hdr->buffer_size-(pos_hdr_sep+4);
 		http_hdr->body = (char*)malloc( data_length );
 		if( http_hdr->body==NULL ) {
-			printf("Memory allocation failed\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
 			return -1;
 		}
 		memcpy( http_hdr->body, http_hdr->buffer+pos_hdr_sep+4, data_length );
@@ -189,7 +190,7 @@ http_build_request( HTTP_header_t *http_hdr ) {
 	else {
 		uri = (char*)malloc(strlen(http_hdr->uri)*2);
 		if( uri==NULL ) {
-			printf("Memory allocation failed\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
 			return NULL;
 		}
 		url_escape_string( uri, http_hdr->uri );
@@ -217,7 +218,7 @@ http_build_request( HTTP_header_t *http_hdr ) {
 	}
 	http_hdr->buffer = (char*)malloc(len+1);
 	if( http_hdr->buffer==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
 		return NULL;
 	}
 	http_hdr->buffer_size = len;
@@ -248,7 +249,7 @@ http_get_field( HTTP_header_t *http_hdr, const char *field_name ) {
 	http_hdr->field_search_pos = http_hdr->first_field;
 	http_hdr->field_search = (char*)realloc( http_hdr->field_search, strlen(field_name)+1 );
 	if( http_hdr->field_search==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return NULL;
 	}
 	strcpy( http_hdr->field_search, field_name );
@@ -283,13 +284,13 @@ http_set_field( HTTP_header_t *http_hdr, const char *field_name ) {
 
 	new_field = (HTTP_field_t*)malloc(sizeof(HTTP_field_t));
 	if( new_field==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return;
 	}
 	new_field->next = NULL;
 	new_field->field_name = (char*)malloc(strlen(field_name)+1);
 	if( new_field->field_name==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return;
 	}
 	strcpy( new_field->field_name, field_name );
@@ -309,7 +310,7 @@ http_set_method( HTTP_header_t *http_hdr, const char *method ) {
 
 	http_hdr->method = (char*)malloc(strlen(method)+1);
 	if( http_hdr->method==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return;
 	}
 	strcpy( http_hdr->method, method );
@@ -321,7 +322,7 @@ http_set_uri( HTTP_header_t *http_hdr, const char *uri ) {
 
 	http_hdr->uri = (char*)malloc(strlen(uri)+1);
 	if( http_hdr->uri==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return;
 	}
 	strcpy( http_hdr->uri, uri );
@@ -333,20 +334,20 @@ http_debug_hdr( HTTP_header_t *http_hdr ) {
 	int i = 0;
 	if( http_hdr==NULL ) return;
 
-	printf("--- HTTP DEBUG HEADER --- START ---\n");
-	printf("protocol:           [%s]\n", http_hdr->protocol );
-	printf("http minor version: [%d]\n", http_hdr->http_minor_version );
-	printf("uri:                [%s]\n", http_hdr->uri );
-	printf("method:             [%s]\n", http_hdr->method );
-	printf("status code:        [%d]\n", http_hdr->status_code );
-	printf("reason phrase:      [%s]\n", http_hdr->reason_phrase );
-	printf("body size:          [%d]\n", http_hdr->body_size );
+	mp_msg(MSGT_NETWORK,MSGL_V,"--- HTTP DEBUG HEADER --- START ---\n");
+	mp_msg(MSGT_NETWORK,MSGL_V,"protocol:           [%s]\n", http_hdr->protocol );
+	mp_msg(MSGT_NETWORK,MSGL_V,"http minor version: [%d]\n", http_hdr->http_minor_version );
+	mp_msg(MSGT_NETWORK,MSGL_V,"uri:                [%s]\n", http_hdr->uri );
+	mp_msg(MSGT_NETWORK,MSGL_V,"method:             [%s]\n", http_hdr->method );
+	mp_msg(MSGT_NETWORK,MSGL_V,"status code:        [%d]\n", http_hdr->status_code );
+	mp_msg(MSGT_NETWORK,MSGL_V,"reason phrase:      [%s]\n", http_hdr->reason_phrase );
+	mp_msg(MSGT_NETWORK,MSGL_V,"body size:          [%d]\n", http_hdr->body_size );
 
-	printf("Fields:\n");
+	mp_msg(MSGT_NETWORK,MSGL_V,"Fields:\n");
 	field = http_hdr->first_field;
 	while( field!=NULL ) {
-		printf(" %d - %s\n", i++, field->field_name );
+		mp_msg(MSGT_NETWORK,MSGL_V," %d - %s\n", i++, field->field_name );
 		field = field->next;
 	}
-	printf("--- HTTP DEBUG HEADER --- END ---\n");
+	mp_msg(MSGT_NETWORK,MSGL_V,"--- HTTP DEBUG HEADER --- END ---\n");
 }
