@@ -419,10 +419,11 @@ void spudec_assemble(void *this, unsigned char *packet, unsigned int len, unsign
       mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUasm: packet too short\n");
       return;
   }
-  if (spu->packet_pts < pts100) {
-    spu->packet_pts = pts100;
+  if ((spu->packet_pts + 10000) < pts100) {
+    // [cb] too long since last fragment: force new packet
     spu->packet_offset = 0;
   }
+  spu->packet_pts = pts100;
   if (spu->packet_offset == 0) {
     unsigned int len2 = get_be16(packet);
     // Start new fragment
@@ -456,7 +457,9 @@ void spudec_assemble(void *this, unsigned char *packet, unsigned int len, unsign
 #if 1
   // check if we have a complete packet (unfortunatelly packet_size is bad
   // for some disks)
-  if (spu->packet_offset == spu->packet_size){
+  // [cb] packet_size is padded to be even -> may be one byte too long
+  if ((spu->packet_offset == spu->packet_size) ||
+      ((spu->packet_offset + 1) == spu->packet_size)){
     unsigned int x=0,y;
     while(x+4<=spu->packet_offset){
       y=get_be16(spu->packet+x+2); // next control pointer
@@ -475,6 +478,8 @@ void spudec_assemble(void *this, unsigned char *packet, unsigned int len, unsign
       }
       x=y;
     }
+    // [cb] packet is done; start new packet
+    spu->packet_offset = 0;
   }
 #else
   if (spu->packet_offset == spu->packet_size) {
