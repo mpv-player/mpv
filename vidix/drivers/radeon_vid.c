@@ -198,6 +198,12 @@ static void * radeon_mmio_base = 0;
 static void * radeon_mem_base = 0; 
 static int32_t radeon_overlay_off = 0;
 static uint32_t radeon_ram_size = 0;
+/* Restore on exit */
+static uint32_t SAVED_OV0_GRAPHICS_KEY_CLR = 0;
+static uint32_t SAVED_OV0_GRAPHICS_KEY_MSK = 0;
+static uint32_t SAVED_OV0_VID_KEY_CLR = 0;
+static uint32_t SAVED_OV0_VID_KEY_MSK = 0;
+static uint32_t SAVED_OV0_KEY_CNTL = 0;
 
 #define GETREG(TYPE,PTR,OFFZ)		(*((volatile TYPE*)((PTR)+(OFFZ))))
 #define SETREG(TYPE,PTR,OFFZ,VAL)	(*((volatile TYPE*)((PTR)+(OFFZ))))=VAL
@@ -932,6 +938,14 @@ int vixInit( void )
   err = mtrr_set_type(pci_info.base0,radeon_ram_size,MTRR_TYPE_WRCOMB);
   if(!err) printf(RADEON_MSG" Set write-combining type of video memory\n");
 
+  radeon_fifo_wait(3);
+  SAVED_OV0_GRAPHICS_KEY_CLR = INREG(OV0_GRAPHICS_KEY_CLR);
+  SAVED_OV0_GRAPHICS_KEY_MSK = INREG(OV0_GRAPHICS_KEY_MSK);
+  SAVED_OV0_VID_KEY_CLR = INREG(OV0_VID_KEY_CLR);
+  SAVED_OV0_VID_KEY_MSK = INREG(OV0_VID_KEY_MSK);
+  SAVED_OV0_KEY_CNTL = INREG(OV0_KEY_CNTL);
+  printf(RADEON_MSG" Saved overlay colorkey settings\n");
+
 #ifdef RADEON
   switch(def_cap.device_id)
     {
@@ -963,11 +977,12 @@ void vixDestroy( void )
 {
   /* remove colorkeying */
   radeon_fifo_wait(3);
-  OUTREG(OV0_GRAPHICS_KEY_CLR, 0);
-  OUTREG(OV0_GRAPHICS_KEY_MSK, 0);
-  OUTREG(OV0_VID_KEY_CLR, 0);
-  OUTREG(OV0_VID_KEY_MSK, 0);
-  OUTREG(OV0_KEY_CNTL, 0);
+  OUTREG(OV0_GRAPHICS_KEY_CLR, SAVED_OV0_GRAPHICS_KEY_CLR);
+  OUTREG(OV0_GRAPHICS_KEY_MSK, SAVED_OV0_GRAPHICS_KEY_MSK);
+  OUTREG(OV0_VID_KEY_CLR, SAVED_OV0_VID_KEY_CLR);
+  OUTREG(OV0_VID_KEY_MSK, SAVED_OV0_VID_KEY_MSK);
+  OUTREG(OV0_KEY_CNTL, SAVED_OV0_KEY_CNTL);
+  printf(RADEON_MSG" Restored overlay colorkey settings\n");
 
   unmap_phys_mem(radeon_mem_base,radeon_ram_size);
   unmap_phys_mem(radeon_mmio_base,0xFFFF);
