@@ -4,6 +4,7 @@ MPlayer (1.0)
 
     DOCS:
     * Czech documentation translation started
+    * German man page almost synced
 
     Ports:
     * DirectX video output fixed on Windows95
@@ -18,7 +19,7 @@ MPlayer (1.0)
     * TWinVQ decoder via binary DLL
     * integrated Tremor decoder for Ogg/Vorbis
     * fixed decoding of stereo alaw files
-    * preload QuickTime dlls to workaround problems caused by hardcoded paths in the dlls
+    * preload QT DLLs to work around problems with their hardcoded paths
 
     Demuxers:
     * vqf demuxer
@@ -34,16 +35,17 @@ MPlayer (1.0)
     FFmpeg/libavcodec:
     * RV20 fixes
     * many H.264 fixes
-    * B-frames in H.264 support
-    * Lots of integer overflow and pointer fixes
+    * B-frames in H.264, H.264 weighted prediction support
+    * a lot of integer overflow and pointer fixes
 
     Filters:
     * big cleanup of audio filter layer
     * faster af_format for most common cases
-    * audio plugins finally removed.
+    * audio plugins finally removed
 
     Others:
     * -z option replaced by -vo png suboption
+    * icc fix in the Win32 loader
 
 
   pre6: "X-mas present" December 23, 2004
