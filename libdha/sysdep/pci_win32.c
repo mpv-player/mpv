@@ -7,10 +7,12 @@
 
 /* Nothing to do for Win9x. For WinNT I have no solution */
 
-static __inline__ void enable_os_io(void)
+static __inline__ int enable_os_io(void)
 {
+    return(0);
 }
 
-static __inline__ void disable_os_io(void)
+static __inline__ int disable_os_io(void)
 {
+    return(0);
 }

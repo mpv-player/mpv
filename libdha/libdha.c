@@ -7,6 +7,7 @@
     		  Modified for GATOS/win/gfxdump.
 		  
     2002	- library implementation by Nick Kurshev
+		- some changes by Alex Beregszaszi
     
     supported O/S's:	SVR4, UnixWare, SCO, Solaris,
 			FreeBSD, NetBSD, 386BSD, BSDI BSD/386,
@@ -25,6 +26,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+/* instead exit() use libdha_exit, and do the 'mother-application' deinit
+   only in this code */
+void libdha_exit(const char *message, int level)
+{
+    printf("libdha: FATAL: %s\n", message);
+    exit(level); /* FIXME */
+}
 
 #if defined(_WIN32)
 #include "sysdep/libdha_win32.c"
@@ -97,3 +106,4 @@ void          OUTPORT32(unsigned idx,unsigned val)
 {
   outl(idx,val);
 }
+

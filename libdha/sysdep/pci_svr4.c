@@ -19,20 +19,22 @@
 #define __EXTENSIONS__
 #endif
 
-static __inline__ void enable_os_io(void)
+static __inline__ int enable_os_io(void)
 {
 #if defined(SI86IOPL)
     sysi86(SI86IOPL, 3);
 #else
     sysi86(SI86V86, V86SC_IOPL, PS_IOPL);
 #endif
+    return(0);
 }
 
-static __inline__ void disable_os_io(void)
+static __inline__ int disable_os_io(void)
 {
 #if defined(SI86IOPL)
     sysi86(SI86IOPL, 0);
 #else
     sysi86(SI86V86, V86SC_IOPL, 0);
 #endif
+    return(0);
 }

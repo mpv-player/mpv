@@ -4,15 +4,19 @@
    Modified for readability by Nick Kurshev
 */
 
-static __inline__ void enable_os_io(void)
+#include <errno.h>
+
+static __inline__ int enable_os_io(void)
 {
     if (i386_iopl(1) < 0) {
 	perror("i386_iopl");
-	exit(1);
+	return(errno);
     }
+    return(0);
 }
 
-static __inline__ void disable_os_io(void)
+static __inline__ int disable_os_io(void)
 {
  /* Nothing to do */
+    return(0);
 }

@@ -122,7 +122,7 @@ static swapl(unsigned long val)
 #define PCIBIOS_DEVICE_NOT_FOUND	0x86
 #define PCIBIOS_SUCCESSFUL		0x00
  
-static int pciconfig_read(
+int pciconfig_read(
           unsigned char bus,
           unsigned char dev,
           unsigned char offset,
@@ -144,7 +144,7 @@ static int pciconfig_read(
 	return PCIBIOS_SUCCESSFUL;
 }
  
-static int pciconfig_write(
+int pciconfig_write(
           unsigned char bus,
           unsigned char dev,
           unsigned char offset,
@@ -528,10 +528,13 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
     struct pci_config_reg pcr;
     int do_mode1_scan = 0, do_mode2_scan = 0;
     int func, hostbridges=0;
+    int ret = -1;
     
     pci_lst = pci_list;
  
-    enable_os_io();
+    ret = enable_os_io();
+    if (ret != 0)
+	return(ret);
 
     if((pcr._configtype = pci_config_type()) == 0xFFFF) return ENODEV;
  
@@ -694,4 +697,26 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
  
     return 0 ;
  
+}
+
+#if !defined(ENOTSUP)
+#if defined(EOPNOTSUPP)
+#define ENOTSUP EOPNOTSUPP
+#else
+#warning "ENOTSUP nor EOPNOTSUPP defined!"
+#endif
+#endif
+
+int pci_config_read(unsigned char bus, unsigned char dev,
+		    unsigned char offset, int len, unsigned long *val)
+{
+    if (len != 4)
+    {
+	printf("pci_config_read: reading non-dword not supported!\n");
+	return(ENOTSUP);
+    }
+    
+    *val = pci_config_read_long(bus, dev, offset, 0);
+    
+    return(0);
 }
