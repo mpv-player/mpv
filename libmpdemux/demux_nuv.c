@@ -245,7 +245,7 @@ demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
 	   1.33 == 4:3 aspect ratio.   
 	*/
 	if(rtjpeg_fileheader.aspect == 1.0)
-		sh_video->aspect = (float) 1.33;
+		sh_video->aspect = (float) 4.0f/3.0f;
 
 	/* Get the FPS */
 	sh_video->fps = rtjpeg_fileheader.fps;
