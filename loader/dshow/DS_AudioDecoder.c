@@ -105,7 +105,8 @@ DS_AudioDecoder * DS_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX* 
 
 	props.cBuffers=1;
         props.cbBuffer=this->m_sOurType.lSampleSize;
-	props.cbAlign=props.cbPrefix=0;
+	props.cbAlign=1;
+	props.cbPrefix=0;
 	this->m_pDS_Filter->m_pAll->vt->SetProperties(this->m_pDS_Filter->m_pAll, &props, &props1);
 	this->m_pDS_Filter->m_pAll->vt->Commit(this->m_pDS_Filter->m_pAll);
     }

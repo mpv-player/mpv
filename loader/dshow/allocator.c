@@ -306,7 +306,8 @@ MemAllocator* MemAllocatorCreate()
     This->refcount = 1;
     This->props.cBuffers = 1;
     This->props.cbBuffer = 65536; /* :/ */
-    This->props.cbAlign = This->props.cbPrefix = 0;
+    This->props.cbAlign = 1;
+    This->props.cbPrefix = 0;
 
     This->vt = (IMemAllocator_vt*) malloc(sizeof(IMemAllocator_vt));
 

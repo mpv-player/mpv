@@ -280,8 +280,8 @@ void DMO_VideoDecoder_StartInternal(DMO_VideoDecoder *this)
     props.cBuffers = 1;
     props.cbBuffer = this->m_sDestType.lSampleSize;
 
-    //don't know how to do this correctly
-    props.cbAlign = props.cbPrefix = 0;
+    props.cbAlign = 1;
+    props.cbPrefix = 0;
     this->m_pDMO_Filter->m_pAll->vt->SetProperties(this->m_pDMO_Filter->m_pAll, &props, &props1);
     this->m_pDMO_Filter->m_pAll->vt->Commit(this->m_pDMO_Filter->m_pAll);
 #endif    

@@ -277,9 +277,8 @@ void DS_VideoDecoder_StartInternal(DS_VideoDecoder *this)
     
     props.cBuffers = 1;
     props.cbBuffer = this->m_sDestType.lSampleSize;
-
-    //don't know how to do this correctly
-    props.cbAlign = props.cbPrefix = 0;
+    props.cbAlign = 1;
+    props.cbPrefix = 0;
     this->m_pDS_Filter->m_pAll->vt->SetProperties(this->m_pDS_Filter->m_pAll, &props, &props1);
     this->m_pDS_Filter->m_pAll->vt->Commit(this->m_pDS_Filter->m_pAll);
     
