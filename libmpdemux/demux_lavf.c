@@ -47,6 +47,8 @@ typedef struct lavf_priv_t{
 extern void print_wave_header(WAVEFORMATEX *h);
 extern void print_video_header(BITMAPINFOHEADER *h);
 
+int64_t ff_gcd(int64_t a, int64_t b);
+
 static int mp_open(URLContext *h, const char *filename, int flags){
     return 0;
 }
@@ -129,7 +131,7 @@ int demux_open_lavf(demuxer_t *demuxer){
     AVFormatContext *avfc;
     AVFormatParameters ap;
     lavf_priv_t *priv= demuxer->priv;
-    int i;
+    int i,g;
     char mp_filename[256]="mp:";
 
     memset(&ap, 0, sizeof(AVFormatParameters));
@@ -193,6 +195,18 @@ int demux_open_lavf(demuxer_t *demuxer){
                     codec->extradata_size);
             }
             sh_audio->wf= wf;
+            sh_audio->audio.dwSampleSize= codec->block_align;
+            if(codec->frame_size && codec->sample_rate){
+                sh_audio->audio.dwScale=codec->frame_size;
+                sh_audio->audio.dwRate= codec->sample_rate;
+            }else{
+                sh_audio->audio.dwScale= codec->block_align ? codec->block_align*8 : 8;
+                sh_audio->audio.dwRate = codec->bit_rate;
+            }
+            g= ff_gcd(sh_audio->audio.dwScale, sh_audio->audio.dwRate);
+            sh_audio->audio.dwScale /= g;
+            sh_audio->audio.dwRate  /= g;
+//            printf("sca:%d rat:%d fs:%d sr:%d ba:%d\n", sh_audio->audio.dwScale, sh_audio->audio.dwRate, codec->frame_size, codec->sample_rate, codec->block_align);
             sh_audio->ds= demuxer->audio;
             sh_audio->format= codec->codec_tag;
             sh_audio->channels= codec->channels;

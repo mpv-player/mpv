@@ -161,7 +161,9 @@ static void fix_parameters(muxer_stream_t *stream, void *sh)
 		ctx->sample_rate = stream->wf->nSamplesPerSec;
 //                mp_msg(MSGT_MUXER, MSGL_INFO, "stream->h.dwSampleSize: %d\n", stream->h.dwSampleSize);
 		ctx->channels = stream->wf->nChannels;
-		ctx->frame_size = 576;
+                if(stream->h.dwRate && (stream->h.dwScale * (int64_t)ctx->sample_rate) % stream->h.dwRate == 0)
+                    ctx->frame_size= (stream->h.dwScale * (int64_t)ctx->sample_rate) / stream->h.dwRate;
+//                printf("ctx->block_align = stream->wf->nBlockAlign; %d=%d stream->wf->nAvgBytesPerSec:%d\n", ctx->block_align, stream->wf->nBlockAlign, stream->wf->nAvgBytesPerSec);
 		ctx->block_align = stream->wf->nBlockAlign;
 	}
 	else if(stream->type == MUXER_TYPE_VIDEO)
@@ -171,8 +173,8 @@ static void fix_parameters(muxer_stream_t *stream, void *sh)
 		ctx->width = stream->bih->biWidth;
 		ctx->height = stream->bih->biHeight;
 		ctx->bit_rate = 800000;
-		ctx->frame_rate = (int) (10000 * stream->h.dwRate)/ stream->h.dwScale;;
-		ctx->frame_rate_base = 10000;
+		ctx->frame_rate = stream->h.dwRate;
+		ctx->frame_rate_base = stream->h.dwScale;
 	}
 }
 
