@@ -2542,18 +2542,20 @@ minimum interval between key frames (2pass only, default=0)
 maximum interval between key frames (default=10*fps)
 .IPs mpeg_quant
 use MPEG quantizers instead of H.263 (default=off)
+.IPs mod_quant
+decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis. (default=off, 2pass mode only)
 .IPs lumi_mask
 use a lumimasking algorithm (default=off)
 .IPs debug
 save per-frame statistics in xvid.dbg (default=off)
 .br
 this is *not* the 2pass control file
-.IPs keyframe_boost=<value>
-(2pass mode only)
+.IPs keyframe_boost=<0-1000>
+(default=0, 2pass mode only)
 .IPs kfthreshold=<value>
-(2pass mode only)
-.IPs kfreduction=<value>
-(2pass mode only)
+(default=10, 2pass mode only)
+.IPs kfreduction=<0-100>
+(default=30, 2pass mode only)
 .IPs fixed_quant=<1\-31>
 switch to fixed quantizer mode and specify the quantizer to be used
 .RE
