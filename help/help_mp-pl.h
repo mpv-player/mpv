@@ -441,6 +441,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_Unicode "Napisy w Unicode"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Konertuj podane napisy do formatu napisów Mplayera"
 #define MSGTR_PREFERENCES_SUB_SRT "Konwertuj podane napisy do formatu SRT (time based SubViewer)"
+#define MSGTR_PREFERENCES_SUB_Overlap "Prze³±cz nak³adanie siê napisów"
 #define MSGTR_PREFERENCES_Font "Font:"
 #define MSGTR_PREFERENCES_FontFactor "Font factor:"
 #define MSGTR_PREFERENCES_PostProcess "W³±cz postprocesing"
