@@ -28,7 +28,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-#ifndef __FreeBSD__
+#if defined (linux)
 #include <linux/videodev.h>
 #endif
 
