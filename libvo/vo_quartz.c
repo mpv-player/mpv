@@ -10,16 +10,12 @@
 	MPlayer Mac OSX Quartz video out module.
 	
 	todo:   -'plist' resource
-			-Redo event handling.
 			-Choose fullscreen display device (-xineramascreen / -multiscreen).
 			-resize black bar without CGContext
 			-rootwin
+			-screen overlay output
 			-non-blocking event
 			-(add sugestion here)
-
-	Direct YUV support is functional, and is now enabled
-	by default. To constrain what format should be used,
-	use the format=XXX video filter (i.e. -vf format=uyvy).
  */
 
 //SYS
@@ -104,9 +100,7 @@ void window_resized();
 void window_ontop();
 void window_fullscreen();
 
-static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
-static OSStatus MainKeyboardEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
-static OSStatus MainMouseEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
+static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
 {
@@ -130,149 +124,170 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 }
 
 //default window event handler
-static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
+static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus err = noErr;
-	WindowRef     window;
-	Rect          rectPort = {0,0,0,0};
-	OSStatus      result = eventNotHandledErr;
-	UInt32        class = GetEventClass (event);
-	UInt32        kind = GetEventKind (event);
-
-	GetEventParameter(event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(WindowRef), NULL, &window);
-	if(window)
-	{
-		GetWindowPortBounds (window, &rectPort);
-	}
+	OSStatus result = eventNotHandledErr;
+	UInt32 class = GetEventClass (event);
+	UInt32 kind = GetEventKind (event); 
   
-    switch (kind)
-    {
-		//close window
-        case kEventWindowClosed:
-			HideWindow(window);
-			mplayer_put_key(KEY_ESC);
-		break;
+	if(class == kEventClassWindow)
+	{
+		WindowRef     window;
+		Rect          rectPort = {0,0,0,0};
 		
-		//resize window
-		case kEventWindowBoundsChanged:
-			window_resized();
-			flip_page();
-		break;
+		GetEventParameter(event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(WindowRef), NULL, &window);
+	
+		if(window)
+		{
+			GetWindowPortBounds (window, &rectPort);
+		}   
+	
+		switch (kind)
+		{
+			//close window
+			case kEventWindowClosed:
+				mplayer_put_key(KEY_ESC);
+				break;
+		
+			//resize window
+			case kEventWindowBoundsChanged:
+				window_resized();
+				flip_page();
+				break;
 			
-        default:
-            err = eventNotHandledErr;
-            break;
-    }
-    
-    return err;
-}
-
-//keyboard event handler
-static OSStatus MainKeyboardEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
-{
-    OSStatus err = noErr;
-	UInt32 macKeyCode;
+			default:
+				err = eventNotHandledErr;
+				break;
+		}
+	}
+	else if(class == kEventClassKeyboard)
+	{
+		char macCharCodes;
+		UInt32 macKeyCode;
+		UInt32 macKeyModifiers;
 	
-	GetEventParameter(event, kEventParamKeyCode, typeUInt32, NULL, sizeof(macKeyCode), NULL, &macKeyCode);
+		GetEventParameter(event, kEventParamKeyMacCharCodes, typeChar, NULL, sizeof(macCharCodes), NULL, &macCharCodes);
+		GetEventParameter(event, kEventParamKeyCode, typeUInt32, NULL, sizeof(macKeyCode), NULL, &macKeyCode);
+		GetEventParameter(event, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(macKeyModifiers), NULL, &macKeyModifiers);
 	
-    switch (GetEventKind (event))
-    {
-        case kEventRawKeyDown: 
+		switch (kind)
 		{
-			switch(macKeyCode)
-			{
-				case QZ_RETURN: mplayer_put_key(KEY_ENTER);break;
-				case QZ_ESCAPE: mplayer_put_key(KEY_ESC);break;
-				case QZ_q: mplayer_put_key('q');break;
- 				case QZ_F1: mplayer_put_key(KEY_F+1);break;
- 				case QZ_F2: mplayer_put_key(KEY_F+2);break;
- 				case QZ_F3: mplayer_put_key(KEY_F+3);break;
- 				case QZ_F4: mplayer_put_key(KEY_F+4);break;
- 				case QZ_F5: mplayer_put_key(KEY_F+5);break;
- 				case QZ_F6: mplayer_put_key(KEY_F+6);break;
- 				case QZ_F7: mplayer_put_key(KEY_F+7);break;
- 				case QZ_F8: mplayer_put_key(KEY_F+8);break;
- 				case QZ_F9: mplayer_put_key(KEY_F+9);break;
- 				case QZ_F10: mplayer_put_key(KEY_F+10);break;
- 				case QZ_F11: mplayer_put_key(KEY_F+11);break;
- 				case QZ_F12: mplayer_put_key(KEY_F+12);break;
-				case QZ_o: mplayer_put_key('o');break;
-				case QZ_SPACE: mplayer_put_key(' ');break;
-                case QZ_p: mplayer_put_key('p');break;
-				//case QZ_7: mplayer_put_key(shift_key?'/':'7');
-                //case QZ_PLUS: mplayer_put_key(shift_key?'*':'+');
-				case QZ_KP_PLUS: mplayer_put_key('+');break;
-				case QZ_MINUS:
-				case QZ_KP_MINUS: mplayer_put_key('-');break;
-				case QZ_TAB: mplayer_put_key('\t');break;
-				case QZ_PAGEUP: mplayer_put_key(KEY_PAGE_UP);break;
-				case QZ_PAGEDOWN: mplayer_put_key(KEY_PAGE_DOWN);break;  
-				case QZ_UP: mplayer_put_key(KEY_UP);break;
-				case QZ_DOWN: mplayer_put_key(KEY_DOWN);break;
-                case QZ_LEFT: mplayer_put_key(KEY_LEFT);break;
-				case QZ_RIGHT: mplayer_put_key(KEY_RIGHT);break;
-				//case QZ_LESS: mplayer_put_key(shift_key?'>':'<'); break;
-				//case QZ_GREATER: mplayer_put_key('>'); break;
-				//case QZ_ASTERISK:
-				case QZ_KP_MULTIPLY: mplayer_put_key('*'); break;
-				case QZ_SLASH:
-				case QZ_KP_DIVIDE: mplayer_put_key('/'); break;
-				case QZ_KP0: mplayer_put_key(KEY_KP0); break;
-				case QZ_KP1: mplayer_put_key(KEY_KP1); break;
-				case QZ_KP2: mplayer_put_key(KEY_KP2); break;
-				case QZ_KP3: mplayer_put_key(KEY_KP3); break;
-				case QZ_KP4: mplayer_put_key(KEY_KP4); break;
-				case QZ_KP5: mplayer_put_key(KEY_KP5); break;
-				case QZ_KP6: mplayer_put_key(KEY_KP6); break;
-				case QZ_KP7: mplayer_put_key(KEY_KP7); break;
-				case QZ_KP8: mplayer_put_key(KEY_KP8); break;
-				case QZ_KP9: mplayer_put_key(KEY_KP9); break;
-				case QZ_KP_PERIOD: mplayer_put_key(KEY_KPDEC); break;
-				case QZ_KP_ENTER: mplayer_put_key(KEY_KPENTER); break;
-				case QZ_LEFTBRACKET: SetWindowAlpha(theWindow, winAlpha-=0.05);break;
-				case QZ_RIGHTBRACKET: SetWindowAlpha(theWindow, winAlpha+=0.05);break;
-				case QZ_f: mplayer_put_key('f'); break;
-				case QZ_t: mplayer_put_key('T'); break;
-				default:
-					break;
+			case kEventRawKeyDown: 
+			{			
+				switch(macKeyCode)
+				{ 
+					case QZ_RETURN: mplayer_put_key(KEY_ENTER);break;
+					case QZ_ESCAPE: mplayer_put_key(KEY_ESC);break;
+					case QZ_F1: mplayer_put_key(KEY_F+1);break;
+					case QZ_F2: mplayer_put_key(KEY_F+2);break;
+					case QZ_F3: mplayer_put_key(KEY_F+3);break;
+					case QZ_F4: mplayer_put_key(KEY_F+4);break;
+					case QZ_F5: mplayer_put_key(KEY_F+5);break;
+					case QZ_F6: mplayer_put_key(KEY_F+6);break;
+					case QZ_F7: mplayer_put_key(KEY_F+7);break;
+					case QZ_F8: mplayer_put_key(KEY_F+8);break;
+					case QZ_F9: mplayer_put_key(KEY_F+9);break;
+					case QZ_F10: mplayer_put_key(KEY_F+10);break;
+					case QZ_F11: mplayer_put_key(KEY_F+11);break;
+					case QZ_F12: mplayer_put_key(KEY_F+12);break;
+					//case QZ_7: mplayer_put_key(shift_key?'/':'7');
+					//case QZ_PLUS: mplayer_put_key(shift_key?'*':'+');
+					case QZ_KP_PLUS: mplayer_put_key('+');break;
+					case QZ_MINUS:
+					case QZ_KP_MINUS: mplayer_put_key('-');break;
+					case QZ_TAB: mplayer_put_key('\t');break;
+					case QZ_PAGEUP: mplayer_put_key(KEY_PAGE_UP);break;
+					case QZ_PAGEDOWN: mplayer_put_key(KEY_PAGE_DOWN);break;  
+					case QZ_UP: mplayer_put_key(KEY_UP);break;
+					case QZ_DOWN: mplayer_put_key(KEY_DOWN);break;
+					case QZ_LEFT: mplayer_put_key(KEY_LEFT);break;
+					case QZ_RIGHT: mplayer_put_key(KEY_RIGHT);break;
+					case QZ_KP_MULTIPLY: mplayer_put_key('*'); break;
+					case QZ_SLASH:
+					case QZ_KP_DIVIDE: mplayer_put_key('/'); break;
+					case QZ_KP0: mplayer_put_key(KEY_KP0); break;
+					case QZ_KP1: mplayer_put_key(KEY_KP1); break;
+					case QZ_KP2: mplayer_put_key(KEY_KP2); break;
+					case QZ_KP3: mplayer_put_key(KEY_KP3); break;
+					case QZ_KP4: mplayer_put_key(KEY_KP4); break;
+					case QZ_KP5: mplayer_put_key(KEY_KP5); break;
+					case QZ_KP6: mplayer_put_key(KEY_KP6); break;
+					case QZ_KP7: mplayer_put_key(KEY_KP7); break;
+					case QZ_KP8: mplayer_put_key(KEY_KP8); break;
+					case QZ_KP9: mplayer_put_key(KEY_KP9); break;
+					case QZ_KP_PERIOD: mplayer_put_key(KEY_KPDEC); break;
+					case QZ_KP_ENTER: mplayer_put_key(KEY_KPENTER); break;
+					case QZ_LEFTBRACKET: SetWindowAlpha(theWindow, winAlpha-=0.05);break;
+					case QZ_RIGHTBRACKET: SetWindowAlpha(theWindow, winAlpha+=0.05);break;
+				
+					default:mplayer_put_key(macCharCodes);break;
+				}
 			}
-		}		
-		break;
-        default:
-            err = eventNotHandledErr;
-            break;
-    }
-    
-    return err;
-}
+			
+			default:
+				err = eventNotHandledErr;
+				break;
+		}
+	}
+	else if(class == kEventClassMouse)
+	{
+		WindowPtr tmpWin;
+		Point mousePos;
 
-//Mouse event handler
-static OSStatus MainMouseEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
-{
-    OSStatus err = noErr;
-	WindowPtr tmpWin;
-	Point mousePos;
-	
-	GetEventParameter(event, kEventParamMouseLocation, typeQDPoint, 0, sizeof(Point), 0, &mousePos);
+		GetEventParameter(event, kEventParamMouseLocation, typeQDPoint, 0, sizeof(Point), 0, &mousePos);
 
-    switch (GetEventKind (event))
-    {
-        case kEventMouseDown: 
+		switch (kind)
 		{
+			case kEventMouseDown:
+			{
+				EventMouseButton button;
+				GetEventParameter(event, kEventParamMouseButton, typeMouseButton, 0, sizeof(EventMouseButton), 0, &button);
+				
 				short part = FindWindow(mousePos,&tmpWin);
 				
 				if(part == inMenuBar)
 				{
 					MenuSelect(mousePos);
+					HiliteMenu(0);
 				}
-		}		
-		break;
-        default:
-            err = eventNotHandledErr;
-            break;
-    }
-    
-	HiliteMenu(0);
+				else if(part == inContent)
+				{
+					switch(button)
+					{ 
+						case 1: mplayer_put_key(MOUSE_BTN0);break;
+						case 2: mplayer_put_key(MOUSE_BTN2);break;
+						case 3: mplayer_put_key(MOUSE_BTN1);break;
+				
+						default:break;
+					}
+				}
+			}		
+			break;
+			
+			case kEventMouseWheelMoved:
+			{
+				int wheel;
+				GetEventParameter(event, kEventParamMouseWheelDelta, typeSInt32, 0, sizeof(int), 0, &wheel);
+
+				short part = FindWindow(mousePos,&tmpWin);
+				
+				if(part == inContent)
+				{
+					if(wheel > 0)
+						mplayer_put_key(MOUSE_BTN3);
+					else
+						mplayer_put_key(MOUSE_BTN4);
+				}
+			}
+			break;
+			
+			default:
+				err = eventNotHandledErr;
+				break;
+		}
+	}
+	
     return err;
 }
 
@@ -341,14 +356,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	CFRelease(windowTitle);
 
 	//Install event handler
-	const EventTypeSpec winEvents[] = { { kEventClassWindow, kEventWindowClosed }, { kEventClassWindow, kEventWindowBoundsChanged } };
-	const EventTypeSpec keyEvents[] = { { kEventClassKeyboard, kEventRawKeyDown } };
-	const EventTypeSpec mouseEvents[] = { { kEventClassMouse, kEventMouseDown } };
+	const EventTypeSpec winEvents[] = { { kEventClassKeyboard, kEventRawKeyDown },
+										{ kEventClassMouse, kEventMouseDown },
+										{ kEventClassMouse, kEventMouseWheelMoved },
+										{ kEventClassWindow, kEventWindowClosed }, 
+										{ kEventClassWindow, kEventWindowBoundsChanged } };
 	
-    InstallWindowEventHandler (theWindow, NewEventHandlerUPP (MainWindowEventHandler), GetEventTypeCount(winEvents), winEvents, theWindow, NULL);	
-	InstallWindowEventHandler (theWindow, NewEventHandlerUPP (MainKeyboardEventHandler), GetEventTypeCount(keyEvents), keyEvents, theWindow, NULL);
-	InstallApplicationEventHandler (NewEventHandlerUPP (MainMouseEventHandler), GetEventTypeCount(mouseEvents), mouseEvents, 0, NULL);
-
+    //InstallWindowEventHandler (theWindow, NewEventHandlerUPP (MainEventHandler), GetEventTypeCount(winEvents), winEvents, theWindow, NULL);	
+	InstallApplicationEventHandler (NewEventHandlerUPP (MainEventHandler), GetEventTypeCount(winEvents), winEvents, 0, NULL);
 	if (!EnterMoviesDone)
 	{
 		qterr = EnterMovies();
@@ -779,8 +794,8 @@ static uint32_t control(uint32_t request, void *data, ...)
 	{
 		case VOCTRL_PAUSE: return (int_pause=1);
 		case VOCTRL_RESUME: return (int_pause=0);
-		case VOCTRL_FULLSCREEN: window_fullscreen(); return VO_TRUE;
-		case VOCTRL_ONTOP: window_ontop(); return VO_TRUE;
+		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); window_fullscreen(); return VO_TRUE;
+		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); window_ontop(); return VO_TRUE;
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
 		case VOCTRL_GET_IMAGE:
 			switch (image_format)
@@ -860,37 +875,23 @@ void window_resized()
 }
 
 void window_ontop()
-{	
+{
 	if(vo_ontop)
 		SetWindowClass( theWindow, kUtilityWindowClass);
 	else
 		SetWindowClass( theWindow, kDocumentWindowClass);
-		
-	vo_ontop = (!(vo_ontop));
 }
 
 void window_fullscreen()
 {
 	static Rect oldRect;
-	static Ptr *restoreState = nil;
-	short width=640;
-	short height=480;
-	RGBColor black={0,0,0};
 	GDHandle deviceHdl;
 	Rect deviceRect;
 
 	//go fullscreen
 	if(vo_fs)
 	{
-		//BeginFullScreen( &restoreState,nil,&width,&height,nil,&black,nil);
 		HideMenuBar();
-
-		//Get Main device info///////////////////////////////////////////////////
-		deviceHdl = GetMainDevice();
-		deviceRect = (*deviceHdl)->gdRect;
-	
-		device_width = deviceRect.right;
-		device_height = deviceRect.bottom;
 
 		//save old window size
 		GetWindowPortBounds(theWindow, &oldRect);
@@ -906,15 +907,7 @@ void window_fullscreen()
 	}
 	else //go back to windowed mode
 	{
-		//EndFullScreen( restoreState,0);
 		ShowMenuBar();
-		
-		//Get Main device info///////////////////////////////////////////////////
-		deviceHdl = GetMainDevice();
-		deviceRect = (*deviceHdl)->gdRect;
-	
-		device_width = deviceRect.right;
-		device_height = deviceRect.bottom;
 
 		//show mouse cursor
 		ShowCursor();
@@ -925,8 +918,6 @@ void window_fullscreen()
 		SizeWindow(theWindow, oldRect.right, oldRect.bottom,1);
 		RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 	}
-	
-	vo_fs = (!(vo_fs));
 	
 	window_resized();
 }
