@@ -685,5 +685,59 @@ so i have to swap CRTC's, but this way your console will framebuffer
 <P><I>Anyway i also just get monochrome output on the tv ...</I>
 Maybe you have NTSC TV? Or just didn't run one of TV-* scripts.</P>
 
+
+<P><B><A NAME=2.2.1.A.2>2.2.1.A.2. ATI cards</A></B></P>
+
+<P>
+<b>A few word about ATI's TV-out:</b><BR>
+Currently ATI doesn't want to support any of its TV-out chips under Linux.
+Below is official answer from ATI Inc.:
+
+<P>
+<code>
+<i>
+<br>&gt; Hello!
+<br>&gt;
+<br>&gt; On your pages you wrote that you support linux developers.
+<br>&gt; Currently I participate with mplayer project (www.mplayerhq.hu)
+<br>&gt; I'm interesting with enabling TV-out on Radeon VE chips during
+<br>&gt; movie playback. I would be glad to add this feature to radeonfb driver
+<br>&gt; (which can be found in CVS tree of mplayer project at main/drivers/radeon).
+<br>&gt; Do I have a chance to get any official technical documenation?
+</i>
+<br>We will not provide TV out related documents due to macrovision concerns.
+<br>Also mpeg2 decoding is something that we MAY consider in the future but not
+<br>at this current time. This is again due to proprietary and 3rd party
+<br>information.
+</code>
+</P>
+
+<P>Pity isn't?</P>
+
+<P>
+<code>
+<B>Q:What is Macrovision?</B><BR>
+A:It's copy protection mechanism.</code>
+</P>
+
+<P>It means that if they open any TV-out related information then
+hackers will be able to disable copy protection on their chips. Therefore
+we have no chance to get working TV-out on ATI.</P>
+
+<P>What's status of ATI's tv-out chips under Linux:
+<LI><b>ATI Mach64</b> has <i>ImpacTV</i> which is supported by gatos.
+<LI><b>ASIC Radeon VIVO</b> has <i>Rage Theatre</i> which is supported by gatos.
+<LI><b>Radeon VE</b> and <b>Rage PRO LT</b> have <i>ImpacTV2+</i> which is not supported under Linux.</P>
+
+<P>
+From other side - we could have a chance to have TV-out support through
+<b>VESA drivers</b> on x86 systems but since Linux has too limited <i>vm86 syscall</i>
+- it's unreachable on practice. Finely every access to IO space causes exception
+and driver attempts to emulate even VESA calls instead passing them to native
+int_10h handler.
+</P>
+
+</P>
+
 </BODY>
 </HTML>

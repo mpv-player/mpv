@@ -607,7 +607,7 @@ Here are some important:</P></B></TD><TR>
 
 <P><B><A NAME=2.2.1.A.1>2.2.1.A.1.  Matrox kártyák</A></B></P>
 
-<P><I> Nagyon szeretném, ha az MPlayer tudná azt, amit a windows-os gépem. Amikor
+<P><I>Nagyon szeretném, ha az MPlayer tudná azt, amit a windows-os gépem. Amikor
    elindítok egy lejátszást a windows-ban (ablakos vagy teljesképernyõs)
    a film megjelenik a tv-kimeneten is. Imádom ezt, és azon gondolkoztam, milyen
    nehéz lenne ezt beépíteni mplayer-be.</I></P>
@@ -670,9 +670,56 @@ Here are some important:</P></B></TD><TR>
   a konzolod framebufferes lesz (mert a CRTC2 nem tud szöveges módot) és  
   egy kicsit lassú. :(</P>
 
-<P><I> egyébként csak fekete-fehér kimenet sikerült a tv-n ...</I>
+<P><I>egyébként csak fekete-fehér kimenet sikerült a tv-n ...</I><BR>
   Nem lehet hogy NTSC TV-d van? Vagy csak nem futtattad le a TV-*
   scriptet.</P>
+
+<P><B><A NAME=2.2.1.A.2>2.2.1.A.2. ATI kártyák</A></B></P>
+
+<P>
+<b>Néhány szó az ATI kártyák TV kimenetérõl:</b><BR>
+Jelenleg az ATI nem akarja hogy bármely TV kimeneti chip-je Linux alatt
+is támogatott legyen. Íme a tõlük származó hivatalos állásfoglalás :
+
+<P>
+<code>
+<i>
+<br>&gt; Hello!
+<br>&gt;
+<br>&gt; A honlapjukon azt írják hogy támogatják a Linuxos fejlesztõket.
+<br>&gt; Jelenleg az mplayer projectben veszek részt, (www.mplayerhq.hu)
+<br>&gt; és a Radeon VE kártyák TV kimenetét szeretném bekapcsolni
+<br>&gt; filmlejátszás alatt. Ezt a képességet szeretném a radeonfb-be is beépíteni
+<br>&gt; (ami az mplayer CVS fa main/drivers/radeon könyvtárában található).
+<br>&gt; Lehetséges hogy hivatalos technikai dokumentációt kapjak?
+</i>
+<br>A TV kimeneti dokumentációt a Macrovision miatt nem adjuk ki.
+<br>Az MPEG2 dekódolást LEHET hogy megfontoljuk a jövõben, de ezt se most.
+<br>Szintén a nem kiadható információk miatt.
+</code>
+</P>
+
+<P>Milyen kár.</P>
+
+<P>
+<code>
+<B>Q:Mi az a Macrovision?</B><BR>
+A:Egy másolásvédelmi mechanizmus.</code>
+</P>
+
+<P>Tehát ha kiadnák a dokumentációt, a hackerek képesek lennének kikapcsolni
+a másolásvédelmet a chipjeiken. Ígyhát nincs esélyünk TV kimenetre.</P>
+
+<P>Az ATI TV kimenetek jelenlegi támogatottsága :
+<LI><b>ATI Mach64</b> : <i>ImpacTV</i> van rajta, amit a gatos támogat.
+<LI><b>ASIC Radeon VIVO</b> : <i>Rage Theatre</i>, ami szintén támogatott a gatos által.
+<LI><b>Radeon VE</b> és <b>Rage PRO LT</b> : <i>ImpacTV2+</i> ami jelenleg nem támogatott Linux alatt.</P>
+
+<P>
+A másik oldalról megközelítve - x86-os rendszereken elvileg lehetséges lenne
+a TV kimenet a <B>VESA meghajtókon</B> át, de mivel a Linuxnak túlságosan
+le van szûkítve a <I>vm86 rendszerhívásai</I> - ez gyakorlatilag lehetetlen.
+</P>
 
 </BODY>
 
