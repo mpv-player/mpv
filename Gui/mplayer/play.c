@@ -66,13 +66,13 @@ void mplStop()
  guiIntfStruct.TimeSec=0;
  guiIntfStruct.Position=0;
  guiIntfStruct.AudioType=0;
- mplState();
 // if ( !guiIntfStruct.Playing ) return;
  if ( !appMPlayer.subWindow.isFullScreen )
   {
    wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
    wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
   }
+ guiGetEvent( guiCEvent,guiSetStop );
  mplSubRender=1;
  wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
  wsClearWindow( appMPlayer.subWindow );
@@ -215,4 +215,43 @@ void mplSetFileName( char * fname )
  if ( !fname ) return;
  if ( guiIntfStruct.Filename ) free( guiIntfStruct.Filename );
  guiIntfStruct.Filename=strdup( fname );
+}
+
+void mplPrev( void )
+{
+ int stop = 0;
+ switch ( guiIntfStruct.StreamType )
+  {
+//   case STREAMTYPE_FILE:
+   case STREAMTYPE_DVD:
+	if ( guiIntfStruct.Playing == 2 ) break;
+	if ( --guiIntfStruct.DVD.current_chapter == 0 )
+	 {
+	  guiIntfStruct.DVD.current_chapter=1;
+	  if ( --guiIntfStruct.DVD.current_title <= 0 ) { guiIntfStruct.DVD.current_title=1; stop=1; }
+	 }
+	guiIntfStruct.Track=guiIntfStruct.DVD.current_title;
+	if ( stop ) mplEventHandling( evStop,0 );
+	if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evPlay,0 );
+	break;
+  }
+}
+
+void mplNext( void )
+{
+ int stop = 0;
+ switch ( guiIntfStruct.StreamType )
+  {
+//   case STREAMTYPE_FILE:
+   case STREAMTYPE_DVD:
+	if ( guiIntfStruct.DVD.current_chapter++ == guiIntfStruct.DVD.chapters )
+	 {
+	  guiIntfStruct.DVD.current_chapter=1;
+	  if ( ++guiIntfStruct.DVD.current_title > guiIntfStruct.DVD.titles ) { guiIntfStruct.DVD.current_title=guiIntfStruct.DVD.titles; stop=1; }
+	 }
+	guiIntfStruct.Track=guiIntfStruct.DVD.current_title;
+	if ( stop ) mplEventHandling( evStop,0 );
+	if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evPlay,0 );
+	break;
+  }
 }

@@ -297,12 +297,12 @@ NoPause:
         gtkShow( evLoadSubtitle,NULL );
         break;
    case evPrev:
+	mplPrev();
         mplMainRender=1;
-        mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[mw.h] previous stream ...\n" );
         break;
    case evNext:
+	mplNext();
         mplMainRender=1;
-        mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[mw.h] next stream ...\n" );
         break;
 
    case evPlayList:
