@@ -109,6 +109,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-softsleep ]
 .RB [ \-rootwin ]
 .RB [ \-font\ <path\ to\ font.desc\ file> ]
+.RB [ \-conf\ <path\ to\ input.conf\ file> ]
 .I < - | file | URL | device >
 .PP
 .SH DESCRIPTION
@@ -245,6 +246,9 @@ hardware acceleration. Possible settings are :
     0 - fast bilinear (default)
     1 - bilinear
     2 - bicubic (best quality)
+    3 - ?
+    4 - nearest neighbor (bad quality)
+    5 - area averageing scaling support
 .TP
 .B \-xy\ <factor>
 scale image by <factor>
@@ -314,7 +318,7 @@ set aspect ratio of your screen. Examples:
 
 .TP
 .B \-playlist <file>
-play files according to this filelist (1 file/row or ASX format).
+play files according to this filelist (1 file/row or Winamp or ASX format).
 .TP
 .B \-ss\ <time>
 seek to given time position. For example :
@@ -347,6 +351,10 @@ search for the OSD/SUB fonts in an alternative directory (default :
 ~/.mplayer/font/font.desc). For example:
 
     -font ~/.mplayer/arial-14/font.desc
+.TP
+.B \-conf\ <path\ to\ input.conf\ file>
+get input bindings from an alternative input.conf file (default :
+~/.mplayer/input.conf).
 .IP
 .SH "ADVANCED OPTIONS"
 .TP

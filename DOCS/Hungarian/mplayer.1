@@ -108,6 +108,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-softsleep ]
 .RB [ \-rootwin ]
 .RB [ \-font\ <útvonal\ a\ font.desc\ file-hoz> ]
+.RB [ \-conf\ <útvonal\ az\ input.conf\ file-hoz> ]
 .I < - | file | URL | eszköz >
 .PP
 .SH LEÍRÁS
@@ -247,6 +248,10 @@ beállítások :
     0 - gyors bilinear (alapértelmezett)
     1 - bilinear
     2 - bicubic (legjobb minõség)
+    3 - ?
+    4 - nearest neighbor (rossz minõség)
+    5 - area averageing scaling support
+
 .TP
 .B \-xy\ <factor>
 a kép nagyítása <factor>-szorosra
@@ -318,7 +323,7 @@ a képernyõ aspektusarányának beállítása. Példák:
 .TP
 .B \-playlist <file>
 az itt megadott fileban található fileok lejátszása (1 file/sor vagy ASX
-formátum).
+illetve Winamp formátum).
 .TP
 .B \-ss\ <idõ>
 lejátszás kezdése a megadott idõponttól. Például:
@@ -348,11 +353,15 @@ a documentation.html file 2.5-ös fejezetében található.
 lejátszás. Csak az xv és xmga meghajtókkal mûködik.
 .TP
 .B \-font\ <útvonal\ a\ font.desc\ file-hoz>
-az alapértelmezettol eltéro betutipus használata (alap:
+az alapértelmezettõl eltérõ betûtipus használata (alap:
 ~/.mplayer/font/font.desc).
 Például:
 
     -font ~/.mplayer/arial-14/font.desc
+.TP
+.B \-font\ <útvonal\ az\ input.conf\ file-hoz>
+az alapértelmezettõl eltérõ helyen lévõ input.conf betöltése (alap:
+~/.mplayer/input.conf).
 .IP
 .SH "HALADÓSZINTÛ OPCIÓK"
 .TP
