@@ -392,18 +392,17 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
 
   while(1){
 
-#if 0
-    /* also don't check if no num_of_packets was defined in header */
-    if ((priv->current_packet > priv->num_of_packets) &&
-	(priv->num_of_packets != -10)){
-	printf("num_of_packets reached!\n");
-	return 0; /* EOF */
-    }
-#endif
-
     demuxer->filepos = stream_tell(demuxer->stream);
     version = stream_read_word(demuxer->stream); /* version */
     len = stream_read_word(demuxer->stream);
+    if ((version==0x4441) && (len==0x5441)) { // new data chunk
+	mp_msg(MSGT_DEMUX,MSGL_INFO,"demux_real: New data chunk is comming!!!\n");
+	stream_skip(demuxer->stream,14); 
+	demuxer->filepos = stream_tell(demuxer->stream);
+        version = stream_read_word(demuxer->stream); /* version */
+	len = stream_read_word(demuxer->stream);	
+    }
+
     
     if (len == -256){ /* EOF */
 //	printf("len==-256!\n");
@@ -1042,8 +1041,8 @@ void demux_open_real(demuxer_t* demuxer)
 		    mp_msg(MSGT_DEMUX,MSGL_V,"video fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);
 
 		    /* emulate BITMAPINFOHEADER */
-		    sh->bih = malloc(sizeof(BITMAPINFOHEADER)+8);
-		    memset(sh->bih, 0, sizeof(BITMAPINFOHEADER)+8);
+		    sh->bih = malloc(sizeof(BITMAPINFOHEADER)+12);
+		    memset(sh->bih, 0, sizeof(BITMAPINFOHEADER)+12);
 	    	    sh->bih->biSize = 48;
 		    sh->disp_w = sh->bih->biWidth = stream_read_word(demuxer->stream);
 		    sh->disp_h = sh->bih->biHeight = stream_read_word(demuxer->stream);
@@ -1052,7 +1051,8 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->bih->biCompression = sh->format;
 		    sh->bih->biSizeImage= sh->bih->biWidth*sh->bih->biHeight*3;
 
-		    sh->fps = stream_read_word(demuxer->stream);
+		    sh->fps = (float) stream_read_word(demuxer->stream);
+		    if (sh->fps<=0) sh->fps=24; // we probably won't even care about fps
 		    sh->frametime = 1.0f/sh->fps;
 		    
 #if 1
@@ -1062,10 +1062,13 @@ void demux_open_real(demuxer_t* demuxer)
 		    printf("unknown2: 0x%X  \n",stream_read_word(demuxer->stream));
 		    printf("unknown3: 0x%X  \n",stream_read_word(demuxer->stream));
 #endif
-		    if (sh->format==0x30335652 ||
-			sh->format==0x30325652 ) {
-		        sh->fps = stream_read_word(demuxer->stream);
-	        	sh->frametime = 1.0f/sh->fps;
+//		    if(sh->format==0x30335652 || sh->format==0x30325652 )
+		    if(1)
+		    {
+			int tmp=stream_read_word(demuxer->stream);
+			if(tmp>0){
+			    sh->fps=tmp; sh->frametime = 1.0f/sh->fps;
+			}
 		    } else {
 	    		int fps=stream_read_word(demuxer->stream);
 			printf("realvid: ignoring FPS = %d\n",fps);
@@ -1106,6 +1109,12 @@ void demux_open_real(demuxer_t* demuxer)
 			    /* codec id: none */
 			    mp_msg(MSGT_DEMUX,MSGL_V,"unknown id: %x\n", tmp);
 		    }
+
+		    if((sh->format<=0x30335652) && (tmp>=0x20200002)){
+			// read secondary WxH for the cmsg24[] (see vd_realvid.c)
+			((unsigned short*)(sh->bih+1))[4]=4*(unsigned short)stream_read_char(demuxer->stream); //widht
+			((unsigned short*)(sh->bih+1))[5]=4*(unsigned short)stream_read_char(demuxer->stream); //height
+		    } 
 		    
 		    if(demuxer->video->id==stream_id){
 			demuxer->video->id=stream_id;
@@ -1177,6 +1186,13 @@ header_end:
 	if(!ds_fill_buffer(demuxer->audio)){
           mp_msg(MSGT_DEMUXER,MSGL_INFO,"RM: " MSGTR_MissingAudioStream);
 	}
+    }
+
+    if(demuxer->video->sh){
+	sh_video_t *sh=demuxer->video->sh;
+	mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  %.4s [%08X,%08X]  %dx%d  (aspect %4.2f)  %4.2f fps\n",
+	    &sh->format,((unsigned int*)(sh->bih+1))[1],((unsigned int*)(sh->bih+1))[0],
+	    sh->disp_w,sh->disp_h,sh->aspect,sh->fps);
     }
 
 }
