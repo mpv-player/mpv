@@ -783,11 +783,19 @@ static int use_dr=0,use_dr_422=0;
 static bes_da_t bda;
 void init_video_vaa( unsigned width )
 {
+  unsigned adp;
   memset(&bda,0,sizeof(bes_da_t));
   if(vo_vaa.query_bes_da)
     use_dr = vo_vaa.query_bes_da(&bda) ? 0 : 1;
   if(!vaa_use_dr) use_dr = 0;
-  use_dr_422 = use_dr && bda.dest.pitch.y == 16 && (width*2+15)&~15 == width*2;
+  if(use_dr)
+  {
+    uint32_t sstride,dstride;
+    sstride=width*2;
+    adp = bda.dest.pitch.y-1;
+    dstride=(width*2+adp)&~adp;
+    if(sstride == dstride) use_dr_422 = 1;
+  }
 }
 
 #ifdef USE_LIBVO2

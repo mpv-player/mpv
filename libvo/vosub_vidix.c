@@ -229,8 +229,6 @@ static uint32_t vidix_draw_slice_422(uint8_t *image[], int stride[], int w,int h
         src+=stride[0];
         dest += bespitch;
     }
-printf("\nw = %u apitch=%u stride[0] = %u bespitch=%u\n",w,apitch,stride[0],bespitch);
-
     return 0;
 }
 
@@ -373,34 +371,40 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
     void *lvo_mem;
     lvo_mem = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
     apitch = vidix_play.dest.pitch.y-1;
-    bespitch = (vidix_play.src.w + apitch) & (~apitch);
     switch(vidix_play.fourcc){
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
     case IMGFMT_I420:
+	bespitch = (vidix_play.src.w + apitch) & (~apitch);
         vo_draw_alpha_yv12(w,h,src,srca,stride,lvo_mem+bespitch*y0+x0,bespitch);
         break;
     case IMGFMT_YUY2:
-        vo_draw_alpha_yuy2(w,h,src,srca,stride,lvo_mem+2*(bespitch*y0+x0),2*bespitch);
+	bespitch = (vidix_play.src.w*2 + apitch) & (~apitch);
+        vo_draw_alpha_yuy2(w,h,src,srca,stride,lvo_mem+bespitch*y0+2*x0,bespitch);
         break;
     case IMGFMT_UYVY:
-        vo_draw_alpha_yuy2(w,h,src,srca,stride,lvo_mem+2*(bespitch*y0+x0)+1,2*bespitch);
+	bespitch = (vidix_play.src.w*2 + apitch) & (~apitch);
+        vo_draw_alpha_yuy2(w,h,src,srca,stride,lvo_mem+bespitch*y0+2*x0+1,bespitch);
         break;
     case IMGFMT_RGB32:
     case IMGFMT_BGR32:
-	vo_draw_alpha_rgb32(w,h,src,srca,stride,lvo_mem+4*(y0*bespitch+x0),4*bespitch);
+	bespitch = (vidix_play.src.w*4 + apitch) & (~apitch);
+	vo_draw_alpha_rgb32(w,h,src,srca,stride,lvo_mem+y0*bespitch+4*x0,bespitch);
         break;
     case IMGFMT_RGB24:
     case IMGFMT_BGR24:
-	vo_draw_alpha_rgb24(w,h,src,srca,stride,lvo_mem+3*(y0*bespitch+x0),3*bespitch);
+	bespitch = (vidix_play.src.w*3 + apitch) & (~apitch);
+	vo_draw_alpha_rgb24(w,h,src,srca,stride,lvo_mem+y0*bespitch+3*x0,bespitch);
         break;
     case IMGFMT_RGB16:
     case IMGFMT_BGR16:
-	vo_draw_alpha_rgb16(w,h,src,srca,stride,lvo_mem+2*(y0*bespitch+x0),2*bespitch);
+	bespitch = (vidix_play.src.w*2 + apitch) & (~apitch);
+	vo_draw_alpha_rgb16(w,h,src,srca,stride,lvo_mem+y0*bespitch+2*x0,bespitch);
         break;
     case IMGFMT_RGB15:
     case IMGFMT_BGR15:
-	vo_draw_alpha_rgb15(w,h,src,srca,stride,lvo_mem+2*(y0*bespitch+x0),2*bespitch);
+	bespitch = (vidix_play.src.w*2 + apitch) & (~apitch);
+	vo_draw_alpha_rgb15(w,h,src,srca,stride,lvo_mem+y0*bespitch+2*x0,bespitch);
         break;
     default:
         draw_alpha_null(x0,y0,w,h,src,srca,stride);
@@ -500,6 +504,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 {
   size_t i,awidth;
   int err,is_422_planes_eq;
+  uint32_t sstride,dstride;
   if(verbose > 1)
      printf("vosub_vidix: vidix_init() was called\n"
     	    "src_w=%u src_h=%u dest_x_y_w_h = %u %u %u %u\n"
@@ -627,9 +632,9 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	    memset(vidix_mem + vidix_play.offsets[i], 0x80,
 		vidix_play.frame_size);
         /* tune some info here */
-	is_422_planes_eq = vidix_play.src.pitch.y == vidix_play.dest.pitch.y &&
-		       src_width*2 == (src_width*2+(vidix_play.dest.pitch.y-1))&~
-		       (vidix_play.dest.pitch.y-1);
+	sstride = src_width*2;
+	dstride = (src_width*2+(vidix_play.dest.pitch.y-1))&~(vidix_play.dest.pitch.y-1);
+	is_422_planes_eq = sstride == dstride;
         if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
 		vo_server->draw_slice = vidix_draw_slice_420;
 	else
