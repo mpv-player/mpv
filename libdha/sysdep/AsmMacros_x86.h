@@ -25,6 +25,16 @@ extern int dhahelper_initialized;
 #include <sys/ioctl.h>
 #include <svgalib_helper.h>
 
+#ifndef SVGALIB_HELPER_IOC_MAGIC
+/* svgalib 1.9.18+ compatibility ::atmos */
+#define SVGALIB_HELPER_IOCSOUTB	SVGAHELPER_OUTB
+#define SVGALIB_HELPER_IOCSOUTW	SVGAHELPER_OUTW
+#define SVGALIB_HELPER_IOCSOUTL	SVGAHELPER_OUTL
+#define SVGALIB_HELPER_IOCGINB	SVGAHELPER_INB
+#define SVGALIB_HELPER_IOCGINW	SVGAHELPER_INW
+#define SVGALIB_HELPER_IOCGINL	SVGAHELPER_INL
+#endif
+
 extern int svgahelper_fd;
 extern int svgahelper_initialized;
 

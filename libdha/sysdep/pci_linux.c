@@ -26,6 +26,10 @@ int dhahelper_fd = 0;
 #include <linux/ioctl.h>
 #endif
 #include <fcntl.h>
+#ifndef SVGALIB_HELPER_IOC_MAGIC
+/* svgalib 1.9.18+ compatibility ::atmos */
+#define SVGALIB_HELPER_IOCGPCIINL SVGAHELPER_PCIINL
+#endif
 int svgahelper_initialized = 0;
 int svgahelper_fd = 0;
 
