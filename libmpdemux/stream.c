@@ -22,6 +22,8 @@ extern int verbose; // defined in mplayer.c
 
 #ifdef __FreeBSD__
 #include "vcd_read_fbsd.h" 
+#elif defined(__NetBSD__)
+#include "vcd_read_nbsd.h" 
 #else
 #include "vcd_read.h"
 #endif

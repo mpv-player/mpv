@@ -39,8 +39,12 @@
 #include <signal.h>
 #include <string.h>
 
+#ifdef __NetBSD__
+#include <dev/ic/bt8xx.h>
+#else
 #include <machine/ioctl_meteor.h>
 #include <machine/ioctl_bt848.h>
+#endif
 
 #ifdef HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>

@@ -21,6 +21,7 @@
 #include <asm/ldt.h>
 #else
 #if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__)
+#include <machine/segments.h>
 #include <machine/sysarch.h>
 #endif
 

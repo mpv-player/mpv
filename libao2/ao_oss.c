@@ -292,9 +292,11 @@ static int audio_delay_method=2;
 static float get_delay(){
   /* Calculate how many bytes/second is sent out */
   if(audio_delay_method==2){
+#ifdef SNDCTL_DSP_GETODELAY
       int r=0;
       if(ioctl(audio_fd, SNDCTL_DSP_GETODELAY, &r)!=-1)
          return ((float)r)/(float)ao_data.bps;
+#endif
       audio_delay_method=1; // fallback if not supported
   }
   if(audio_delay_method==1){

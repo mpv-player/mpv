@@ -4096,7 +4096,7 @@ struct libs libraries[]={
     LL(msdmo)
     LL(msvfw32)
 };
-
+#include "mangle.h"
 static char* called_unk = "Called unk_%s\n";
 static void ext_stubs(void)
 {
@@ -4109,9 +4109,9 @@ static void ext_stubs(void)
 	 "movl $0, %eax		\n\t"
 	 "movl $0, %edx		\n\t"
 	 "shl $5,%eax		\n\t"			// ax * 32
-	 "addl $export_names,%eax \n\t"
+	 "addl $"MANGLE(export_names)",%eax \n\t"
 	 "pushl %eax		\n\t"
-	 "pushl called_unk	\n\t"
+	 "pushl "MANGLE(called_unk)"	\n\t"
 	 "call *%edx		\n\t"                   // printf (via dx)
 	 "addl $8,%esp		\n\t"
 	 "xorl %eax,%eax	\n\t"

@@ -264,6 +264,7 @@ for ac_option do
     ;;
   --with-extralibdir=*)
     _ld_extra=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+#    _ld_extra="${_ld_extra} -Wl,-R"`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -Wl\,-R,g'`" -L"`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
   --enable-runtime-cpudetection)
     _runtime_cpudetection=yes
@@ -1527,11 +1528,28 @@ _sys_soundcard=no
 cc_check && _sys_soundcard=yes
 if test "$_sys_soundcard" = yes ; then
   _def_sys_soundcard='#define HAVE_SYS_SOUNDCARD_H 1'
+  _inc_soundcard='#include <sys/soundcard.h>'
 else
   _def_sys_soundcard='#undef HAVE_SYS_SOUNDCARD_H'
 fi
 echores "$_sys_soundcard"
 
+if test "$_sys_soundcard" != yes ; then
+echocheck "soundcard.h"
+cat > $TMPC << EOF
+#include <soundcard.h>
+int main(void) { return 0; }
+EOF
+_soundcard=no
+cc_check && _soundcard=yes
+if test "$_soundcard" = yes ; then
+  _def_soundcard='#define HAVE_SOUNDCARD_H 1'
+  _inc_soundcard='#include <soundcard.h>'
+else
+  _def_soundcard='#undef HAVE_SOUNDCARD_H'
+fi
+echores "$_soundcard"
+fi
 
 echocheck "sys/dvdio.h"
 cat > $TMPC << EOF
@@ -2434,7 +2452,7 @@ echores "$_mp1e"
 echocheck "OSS Audio"
 if test "$_ossaudio" = auto ; then
   cat > $TMPC << EOF
-#include <sys/soundcard.h>
+$_inc_soundcard
 int main(void) { int arg = SNDCTL_DSP_SETFRAGMENT; return 0; }
 EOF
   _ossaudio=no
@@ -2448,7 +2466,11 @@ if test "$_ossaudio" = yes ; then
     _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound/dsp"'
     _def_ossaudio_devmixer='#define PATH_DEV_MIXER "/dev/sound/mixer"'
   else
-    _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
+     if netbsd || openbsd ; then
+       _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound"'
+     else
+       _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
+     fi
     _def_ossaudio_devmixer='#define PATH_DEV_MIXER "/dev/mixer"'
   fi  
 else
@@ -2575,7 +2597,7 @@ echores "$_sgiaudio"
 
 
 echocheck "VCD support"
-if linux || bsdos || freebsd || sunos ; then
+if linux || bsdos || freebsd || netbsd || sunos ; then
   _inputmodules="vcd $_inputmodules"
   _def_vcd='#define HAVE_VCD 1'
   echores "ok"
@@ -3254,7 +3276,11 @@ if test "$_tv_bsdbt848" = auto ; then
  if test "$_tv" = yes ; then
     cat > $TMPC <<EOF
 #include <sys/types.h>
+#ifdef __NetBSD__
+#include <dev/ic/bt8xx.h>
+#else
 #include <machine/ioctl_bt848.h>
+#endif
 int main(void) { return 0; }
 EOF
     cc_check && _tv_bsdbt848=yes
@@ -3482,6 +3508,7 @@ test "$_xanim" = yes && _ld_dl_dynamic='-rdynamic'
 
 _ld_arch="$_ld_arch $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 bsdos && _ld_arch="$_ld_arch -ldvd"
+netbsd && _ld_arch="$_ld_arch -li386 -lossaudio"
 
 _def_debug='#undef MP_DEBUG'
 test "$_debug" && _def_debug='#define MP_DEBUG 1'
@@ -3755,6 +3782,10 @@ $_def_rtc
 
 /* Define this if your system has the header file for the OSS sound interface */
 $_def_sys_soundcard
+
+/* Define this if you system has the header file for the OSS sound interface
+ * in /usr/include */
+$_def_soundcard
 
 /* Define this if your system uses ftello() for off_t seeking */
 

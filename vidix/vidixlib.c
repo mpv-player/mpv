@@ -91,6 +91,13 @@ static int vdl_fill_driver(VDL_HANDLE stream)
   return 1;
 }
 
+#ifndef RTLD_GLOBAL
+#define RTLD_GLOBAL RTLD_LAZY
+#endif
+#ifndef RTLD_NOW
+#define RTLD_NOW RTLD_LAZY
+#endif
+
 static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,unsigned cap,int verbose)
 {
   vidix_capability_t vid_cap;

@@ -440,9 +440,11 @@ static int get_space(){
     }
 #endif
 
+#ifndef __OpenBSD__
     ioctl(audio_fd, AUDIO_GETINFO, &info);
     if (queued_bursts - info.play.eof > 2)
 	return 0;
+#endif
 
     return ao_data.outburst;
 }
@@ -500,9 +502,13 @@ static int play(void* data,int len,int flags){
 static float get_delay(){
     audio_info_t info;
     ioctl(audio_fd, AUDIO_GETINFO, &info);
+#ifdef __OpenBSD__
+    return (float) info.play.seek/ (float)byte_per_sec ;
+#else
     if (info.play.samples && enable_sample_timing == RTSC_ENABLED)
 	return (float)(queued_samples - info.play.samples) / (float)byte_per_sec;
     else
 	return (float)((queued_bursts - info.play.eof) * ao_data.outburst) / (float)byte_per_sec;
+#endif
 }
 

@@ -31,8 +31,11 @@
 #include <sys/wait.h>
 // #include <css.h>
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 #  include <sys/dvdio.h>
+#elif defined(__OpenBSD__)
+#  include <sys/cdio.h>
+#  define RTLD_NOW RTLD_LAZY
 #elif defined(__linux__)
 #  include <linux/cdrom.h>
 #elif defined(__sun)
@@ -169,6 +172,9 @@ static void reset_agids ( DVDHandle dvd )
 		ioctl(dvd, DVDIOCREPORTKEY, &ai);
 	}
 #else
+#if defined(__OpenBSD__)
+        union
+#endif
         dvd_authinfo ai;
         int i;
         for (i = 0; i < 4; i++) {
@@ -219,9 +225,15 @@ int dvd_auth ( char *dev , char *filename )
 		return 1;
 	} printf("DVD: dlopen OK!\n");
 
+#ifdef __OpenBSD__
+#define CSS_DLSYM(v,s) if (!(v=dlsym(dlid,"_" s))) {\
+fprintf(stderr,"DVD: %s\n  Hint: use libcss version 0.1!\n",dlerror());\
+return 1; }
+#else
 #define CSS_DLSYM(v,s) if (!(v=dlsym(dlid,s))) {\
 fprintf(stderr,"DVD: %s\n  Hint: use libcss version 0.1!\n",dlerror());\
 return 1; }
+#endif
 
 	CSS_DLSYM(dl_CSSisEncrypted,"CSSisEncrypted");
 	CSS_DLSYM(dl_CSSAuthDisc,"CSSAuthDisc");

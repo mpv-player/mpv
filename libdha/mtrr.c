@@ -12,6 +12,12 @@
 #include "libdha.h"
 #include "AsmMacros.h"
 
+#if defined (__i386__) && defined (__NetBSD__)
+#include <stdint.h>
+#include <stdlib.h>
+#include <machine/mtrr.h>
+#include <machine/sysarch.h>
+#endif
 
 #if defined( __i386__ )
 int	mtrr_set_type(unsigned base,unsigned size,int type)
@@ -40,6 +46,23 @@ int	mtrr_set_type(unsigned base,unsigned size,int type)
 	return wr_len == strlen(sout) ? 0 : EPERM;
     }
     return ENOSYS;
+#elif defined (__NetBSD__)
+    struct mtrr *mtrrp;
+    int n;
+
+    mtrrp = malloc(sizeof (struct mtrr));
+    mtrrp->base = base;
+    mtrrp->len = size;
+    mtrrp->type = type;  
+    mtrrp->flags = MTRR_VALID | MTRR_PRIVATE;
+    n = 1;
+
+    if (i386_set_mtrr(mtrrp, &n) < 0) {
+	free(mtrrp);
+	return errno;
+    }
+    free(mtrrp);
+    return 0;
 #else
 #warning Please port MTRR stuff!!!
     return ENOSYS;
