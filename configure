@@ -247,10 +247,12 @@ Use these options if autodetection fails:
   --with-reallibdir=DIR    RealPlayer DLL files in DIR
   --with-xvidcore=PATH     path to XviD libcore.a (e.g. /opt/lib/libcore.a)
   --with-sdl-config=PATH   path to sdl*-config (e.g. /opt/bin/sdl-config)
+  --with-freetype-config=PATH  path to freetype-config
+                           (e.g. /opt/bin/freetype-config)
   --with-gtk-config=PATH   path to gtk*-config (e.g. /opt/bin/gtk-config)
   --with-glib-config=PATH  path to glib*-config (e.g. /opt/bin/glib-config)
   --with-dvdnav-config=PATH  path to dvdnav-config
-  --with-livelibdir=DIR       path to LIVE.COM Streaming Media libraries
+  --with-livelibdir=DIR    path to LIVE.COM Streaming Media libraries
 
 EOF
     exit 0
@@ -1231,6 +1233,9 @@ for ac_option do
     ;;
   --with-sdl-config=*)
     _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-freetype-config=*)
+    _freetypeconfig=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --with-gtk-config=*)
     _gtkconfig=`echo $ac_option | cut -d '=' -f 2`
@@ -3239,14 +3244,15 @@ else
 fi
 echores "$_cdparanoia"
 
-echocheck "freetype 2"
+echocheck "freetype >= 2.1"
 if test "$_freetype" = yes ; then
-    if ( freetype-config --version ) >/dev/null 2>&1 ; then
+    test -z "$_freetypeconfig" && _freetypeconfig='freetype-config'
+    if ( $_freetypeconfig --version ) >/dev/null 2>&1 ; then
 	cat > $TMPC << EOF
 #include <stdio.h>
 #include <freetype/freetype.h>
-#if !(FREETYPE_MAJOR >= 2)
-#error "Need FreeType 2.0 or newer"
+#if !((FREETYPE_MAJOR >= 2) && (FREETYPE_MINOR >= 1))
+#error "Need FreeType 2.1 or newer"
 #endif
 int main()
 {
@@ -3257,7 +3263,6 @@ int main()
 	printf("Couldn't initialize freetype2 lib, err code: %d\n",err);
 	exit(err);
     }
-#if (FREETYPE_MINOR >= 1)
     FT_Library_Version(library,&major,&minor,&patch); // in v2.1.0+ only :(((
     printf("freetype2  header version: %d.%d.%d  library version: %d.%d.%d\n",
 	FREETYPE_MAJOR,FREETYPE_MINOR,FREETYPE_PATCH,
@@ -3266,20 +3271,19 @@ int main()
 	printf("Library and header version mismatch! Fix it in your distribution!\n");
 	exit(1);
     }
-#endif
     return 0;
 }
 EOF
 	_freetype=no
-	cc_check `freetype-config --cflags` `freetype-config --libs` && ( $TMPO >> "$TMPLOG" ) && _freetype=yes
+	cc_check `$_freetypeconfig --cflags` `$_freetypeconfig --libs` && ( $TMPO >> "$TMPLOG" ) && _freetype=yes
     else
 	_freetype=no
     fi
 fi
 if test "$_freetype" = yes ; then
     _def_freetype='#define HAVE_FREETYPE'
-    _inc_freetype=`freetype-config --cflags`
-    _ld_freetype=`freetype-config --libs`
+    _inc_freetype=`$_freetypeconfig --cflags`
+    _ld_freetype=`$_freetypeconfig --libs`
 else
     _def_freetype='#undef HAVE_FREETYPE'
 fi
