@@ -196,12 +196,6 @@ server:
 or:
 	wget ftp://micorsops.com/something.avi -O - | mplayer -
 
-Playing from the net currently works only with HTTP, other methods (including
-ASF) coming soon.
-	mplayer http://test.localdomain/dune.mpg
-
-NOTE : you have to compile MPlayer with --enable-streaming !!!
-
 
 TV output:
 ~~~~~~~~~~

@@ -198,12 +198,6 @@ Például egy épp most letöltött divx film megnézése:
 vagy :
 	wget ftp://micorsops.com/something.avi -O - | mplayer -
 
-A netrol egyelore csak HTTP-n keresztul lehet lejatszani, a tobbi (peldaul ASF)
-keszuloben. Pelda :
-        mplayer http://test.localdomain/dune.mpg   
-
-Megj.: az MPlayer-t --enable-streaming opcioval forditsd !!!
-
 
 TV output:
 ~~~~~~~~~~~

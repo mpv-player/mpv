@@ -54,6 +54,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-osdlevel\ level ]
 .RB [ \-config\ file ]
 .RB [ \-display\ name ]
+.RB [ \-unicode ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -267,6 +268,10 @@ specifies where to search for config file
 .B \-display name
 specify the hostname and display number of the X server you want
 to display on. For example : -display xtest.localdomain:0
+.TP
+.B \-unicode
+tells MPlayer to handle the subtitle file (with -sub option) as UNICODE.
+Contrary: -nounicode
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
