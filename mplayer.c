@@ -256,7 +256,7 @@ static float force_fps=0;
 static int force_srate=0;
 static int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
 static int play_n_frames=-1;
-static int our_n_frames;
+static uint32_t our_n_frames=0;
 
 // screen info:
 char* video_driver=NULL; //"mga"; // default
@@ -1563,7 +1563,6 @@ InitTimer();
 total_time_usage_start=GetTimer();
 audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 max_audio_time_usage=0; max_video_time_usage=0; max_vout_time_usage=0;
-our_n_frames=play_n_frames;
 while(!eof){
 //    unsigned int aq_total_time=GetTimer();
     float aq_sleep_time=0;
@@ -1864,6 +1863,7 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 	   vout_time_usage+=tt;
 	   if(cur_vout_time_usage + tt > max_vout_time_usage)
 		    max_vout_time_usage = cur_vout_time_usage + tt;
+	   our_n_frames++;
 	}
 #endif
 //        usec_sleep(50000); // test only!
