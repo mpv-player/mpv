@@ -1,4 +1,4 @@
-.\" synced with 1.770
+.\" synced with 1.778
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -37,7 +37,7 @@
 .\" Tytu³
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-09-19" "Projekt MPlayer" "Odtwarzacz filmów"
+.TH MPlayer 1 "2004-10-14" "Projekt MPlayer" "Odtwarzacz filmów"
 .
 .SH NAZWA
 mplayer  \- odtwarzacz filmów
@@ -232,6 +232,10 @@ nastêpna/\:poprzednia pozycja drzewa odtwarzania z listy wy¿szego poziomu.
 nastêpne/\:poprzednie alternatywne ¼ród³o (tylko lista odtwarzania ASX)
 .IPs "p / SPACE"
 Zatrzymuje odtwarzanie (dowolny klawisz wznawia odtwarzanie).
+.IPs "."
+Krok do przodu.
+Jednokrotne naci¶niêcie zatrzyma odtwarzane, ka¿de nastêpne przesunie o jedn±
+klatkê do przodu i znów zatrzyma (dowolny inny klawisz wznawia odtwarzanie).
 .IPs "q / ESC"
 Zatrzymuje odtwarzanie i wychodzi.
 .IPs "+ i \-"
@@ -437,14 +441,14 @@ Z t± opcj± MPlayer ignoruje czas trwania ramki, je¶li odtwarza tylko video
 .
 .TP
 .B \-colorkey <numer>
-Zmienia klucz koloru (colorkey) na wybran± warto¶æ RGB.
+Zmienia kolor kluczowy (colorkey) na wybran± warto¶æ RGB.
 0x000000 to czarny a 0xffffff to bia³y.
 Obs³ugiwane tylko przez sterowniki wyj¶cia video cvidix, fbdev, svga, vesa,
 winvidix, xmga, xvidix i xover.
 .
 .TP
 .B \-nocolorkey
-Wy³±cza klucz koloru.
+Wy³±cza kolor kluczowy.
 Obs³ugiwane tylko przez sterowniki wyj¶cia video cvidix, fbdev, svga, vesa,
 winvidix, xmga, xvidix i xover.
 .
@@ -524,7 +528,7 @@ Ilo¶æ generowanych przyci¶niêæ klawisza na sekundê przy autopowtarzaniu.
 .IPs keylist
 Lista wszystkich klawiszy, które mog± byæ przypisane do komend.
 .IPs cmdlist
-Lista wszystkich komendy, które mog± byæ przypisane do klawiszy.
+Lista wszystkich komend, które mog± byæ przypisane do klawiszy.
 .IPs js-dev
 Wybiera u¿ywany joystick (domy¶lnie: /dev/\:input/\:js0).
 .IPs file\ 
@@ -684,16 +688,17 @@ programu (je¿eli jest dostêpny) z wybranym strumieniem.
 .TP
 .B \-alang <kod\ jêzyka> (sprawd¼ te¿ \-aid)
 Odtwarza ¶cie¿kê d¼wiêkow±, która odpowiada podanemu kodowi jêzyka.
-Ró¿ne formaty u¿ywaj± ró¿nych kodów. DVD korzysta z dwuliterowych w standardzie
-ISO 639-1, Matroska i NUT operuj± na trzyliterowych ISO 639-2, a OGM
-korzysta z dowolnego identyfikatora. MPlayer wy¶wietli listê dostêpnych jêzyków,
+Ró¿ne formaty u¿ywaj± ró¿nych kodów.
+DVD korzysta z dwuliterowych w standardzie ISO 639-1, Matroska i NUT operuj± na
+trzyliterowych ISO 639-2, a OGM korzysta z dowolnego identyfikatora.
+MPlayer wy¶wietli listê dostêpnych jêzyków,
 je¶li jest uruchomiony w trybie gatatliwym (\-v).
 .sp 1
 .I PRZYK£AD:
 .PD 0
 .RSs
-.IPs "mplayer dvd://1 \-alang hu,en"
-Wybiera z DVD ¶cie¿kê w jêzyku wêgierskim, a je¿eli jej nie ma, korzysta z
+.IPs "mplayer dvd://1 \-alang pl,en"
+Wybiera z DVD ¶cie¿kê w jêzyku polskim, a je¿eli jej nie ma, korzysta z
 angielskiej.
 .IPs "mplayer \-alang jpn example.mkv"
 Odtwarza film w formacie Matroska w jêzyku japoñskim.
@@ -874,8 +879,8 @@ Twojej karty) lub w ostateczno¶ci ~/.mplayer/\:channels.conf.
 Podaje ¶cie¿kê do urz±dzenia DVD (domy¶lnie: /dev/\:dvd).
 Mo¿esz równie¿ okre¶liæ katalog z plikami uprzednio skopiowanymi prosto z
 DVD (np. przez vobcopy).
-\-dumpstream jest lepsz± drog± na kopiowanie tytu³ów DVD
-(zobacz przyk³ady).
+Zauwa¿, ¿e \-dumpstream jest zazwyczaj lepszym sposobem
+na kopiowanie tytu³ów DVD (zobacz przyk³ady).
 .
 .TP
 .B \-dvdangle <ID\ ujêcia> (tylko DVD)
@@ -1675,7 +1680,7 @@ Ima-ADPCM
 .IPs 8
 8-bit bez znaku
 .IPs 16
-16-bit (little-endian) ze znakiem 
+16-bit (little-endian) ze znakiem
 .IPs 32
 16-bit (big-endian) ze znakiem
 .IPs 64
@@ -1714,7 +1719,7 @@ Dla ALSA mo¿esz u¿yæ nazw, które, na przyk³ad, pokazuje alsamixer, jak
 .I INFORMACJA:
 Nazwy kana³ów miksera ALSA z do³±czonym numerem musz± byæ zapisane w formacie
 <nazwa, numer>, np.\& kana³ nazwany 'PCM 1' w alsamixer musi byæ zamieniony na
-.BR PCM,1.
+.BR PCM,1 .
 .
 .TP
 .B \-nowaveheader (tylko \-ao pcm)
@@ -1917,7 +1922,7 @@ wy¶wietlaæ.
 .I PRZYK£AD:
 .PD 0
 .RSs
-\-display  xtest.localdomain:0
+\-display xtest.localdomain:0
 .RE
 .PD 1
 .
@@ -2185,7 +2190,7 @@ oraz directx i gl2 pod Windows.
 W³±cza tryb panoramiczny (obcina boki filmu np.\& 16:9 tak, by pasowa³ na
 ekran 4:3 bez czarnych pasków).
 Zasiêg kontroluje jak du¿a czê¶æ obrazu bêdzie przyciêta.
-Dzia³a tylko ze sterownikami wyj¶cia video xv, xmga, mga i xvidix.
+Dzia³a tylko ze sterownikami wyj¶cia video xv, xmga, mga, gl i xvidix.
 .
 .TP
 .B \-refreshrate <Hz>
@@ -2481,8 +2486,8 @@ U¿ywa bufora ramki oferowanego przez j±dro do wy¶wietlania obrazu.
 .RSs
 .IPs <urz±dzenie>
 Wybiera nazwê u¿ywanego urz±dzenia fbdev (np.\& /dev/\:fb0) albo nazwê
-podurz±dzenia VIDIX, je¶li zaczyna siê od "vidix" (np.\& vidixsis_vid w³±cza
-sterownik sis).
+podurz±dzenia VIDIX, je¶li zaczyna siê od "vidix"
+(np.\& "vidixsis_vid" w³±cza sterownik sis).
 .RE
 .PD 1
 .
@@ -2548,8 +2553,8 @@ U¿ywa svga z VIDIX.
 .B gl\ \ \ \ \ 
 Sterownik wyj¶cia video OpenGL.
 Prosta wersja, obraz musi byæ mniejszy ni¿ maksymalny rozmiar tekstury
-dostêpny w Twojej implementacji OpenGL. Zamiarem by³o dzia³anie na nawet
-najprostszych implementacjach OpenGL.
+dostêpny w Twojej implementacji OpenGL.
+Zamiarem by³o dzia³anie na nawet najprostszych implementacjach OpenGL.
 .PD 0
 .RSs
 .IPs (no)manyfmts
@@ -2559,8 +2564,13 @@ Wymaga wersji OpenGL >= 1.2.
 Ilo¶æ lini kopiowana do tekstury w jednym kawa³ku (domy¶lnie: 4).
 0 oznacza ca³y obraz.
 .IPs (no)osd
-W³±cza lub wy³±cza obs³ugê renderowania OSD przez OpenGL (domy¶lnie: w³±czona). 
-Przeznaczone g³ównie do testów, powiniene¶ skorzystaæ z \-osdlevel 0, aby wy³±czyæ OSD.
+W³±cza lub wy³±cza obs³ugê wy¶wietlania OSD przez OpenGL (domy¶lnie: w³±czona).
+Przeznaczone g³ównie do testów,
+powiniene¶ skorzystaæ z \-osdlevel 0, aby wy³±czyæ OSD.
+.IPs (no)aspect
+W³±cza lub wy³±cza przeliczanie proporcji i trybu panoramicznego
+(domy¶lnie: w³±czone)
+Wy³±czenie mo¿e zwiêkszyæ prêdko¶æ.
 .RE
 .PD 1
 .
@@ -2758,7 +2768,7 @@ Sprawd¼ równie¿ filtr video lavc.
 W³±cza overlay zamiast wyj¶cia TV.
 .IPs prebuf
 W³±cza prebuforowanie.
-.IPs sync\
+.IPs sync\ 
 W³±cz± nowy silnik synchronizuj±cy.
 .IPs norm=<norma>
 Okre¶la normê TV.
@@ -2775,7 +2785,7 @@ Okre¶la normê TV.
 .br
 5: NTSC
 .REss
-.IPs <0\-3> 
+.IPs <0\-3>
 Okre¶la numer urz±dzenia, które ma byæ u¿yte, je¿eli masz wiêcej ni¿ jedn±
 kartê em8300.
 .RE
@@ -2796,12 +2806,12 @@ Okre¶la nazwê pliku, do którego zostanie zapisane wyj¶cie (domy¶lnie: ./grab.mpg
 .PD 1
 .
 .TP
-.B zr (patrz te¿ \-zr* i \-zrhelp i filtr video zrmjpeg)
+.B zr (patrz te¿ \-zr* i \-zrhelp)
 Sterownik wyj¶cia video przeznaczony dla wielu kart
 przechwytuj±cych/\:odtwarzaj±cych MJPEG.
 .
 .TP
-.B zr2\ \ \ \ 
+.B zr2 (patrz te¿ filtr video zrmjpeg)
 Sterownik wyj¶cia video drugiej generacji przeznaczony dla wielu kart
 przechwytuj±cych/\:odtwarzaj±cych MJPEG.
 Zwróæ równie¿ uwagê na filtr video zrmjpeg.
@@ -2809,8 +2819,8 @@ Zwróæ równie¿ uwagê na filtr video zrmjpeg.
 .RSs
 .IPs dev=<urz±dzenie>
 Wybiera u¿ywane urz±dzenie.
-.IPs pal\ \
-W³acza normê video PAL.
+.IPs pal\ \ 
+W³±cza normê video PAL.
 .IPs secam
 W³±cza normê video SECAM.
 .IPs ntsc\ 
@@ -2860,7 +2870,7 @@ Obs³uguje tylko format RGB z 24 bpp, wyj¶cie natomiast jest konwertowane do
 256 kolorów.
 .PD 0
 .RSs
-.IPs <fps> 
+.IPs <fps>
 Liczba rzeczywista opisuj±ca ilo¶æ klatek na sekundê (domy¶lnie: 5.0).
 .IPs <nazwa\ zbioru>
 Nazwa zbioru wyj¶ciowego (domy¶lnie: ./out.gif).
@@ -2900,7 +2910,7 @@ wspó³czynnik jako¶ci (domy¶lnie: 75)
 Okre¶la katalog, w którym bêd± zapisywane pliki JPEG (domy¶lnie: ./).
 .IPs subdirs=<prefiks>
 Tworzy ponumerowane podkatalogi z okre¶lonym prefiksem, gdzie zachowa
-pliki zamiast zapisywaæ je bie¿±cego katalogu.
+pliki zamiast zapisywaæ je w bie¿±cym katalogu.
 .IPs maxfiles=<warto¶æ> (tylko z subdirs)
 Maksymalna liczba plików zapisywanych do ka¿dego podkatalogu.
 Warto¶æ musi byæ równa lub wiêksza ni¿ 1 (domy¶lnie: 1000).
@@ -2912,7 +2922,7 @@ Warto¶æ musi byæ równa lub wiêksza ni¿ 1 (domy¶lnie: 1000).
 Zapisuje ka¿d± ramkê do pliku PNM w bie¿±cym katalogu.
 Ka¿dy plik dostaje jako nazwê numer ramki poprzedzony zerami.
 Obs³uguje pliki PPM, PGM i PGMYUV w trybie surowym (raw) i ASCII.
-Zobacz równie¿ pnm(5),ppm (5) i pgm(5).
+Zobacz równie¿ pnm(5), ppm(5) i pgm(5).
 .PD 0
 .RSs
 .IPs ppm
@@ -2931,7 +2941,7 @@ Zapisuje pliki PNM w trybie ASCII.
 Okre¶la katalog, w którym bêd± zachowane pliki PNM (domy¶lnie: ./).
 .IPs subdirs=<prefiks>
 Tworzy ponumerowane podkatalogi z okre¶lonym prefiksem, gdzie zachowa
-pliki zamiast zapisywaæ je bie¿±cego katalogu.
+pliki zamiast zapisywaæ je w bie¿±cym katalogu.
 .IPs maxfiles=<warto¶æ> (tylko z subdirs)
 Maksymalna liczba plików zapisywanych do ka¿dego podkatalogu.
 Warto¶æ musi byæ wiêksza lub równa 1 (domy¶lnie: 1000).
@@ -3069,13 +3079,13 @@ mmapowany_zbiór: Zbiór, na który nale¿y mapowaæ dane
 npróbek: ilo¶æ próbek na kana³ (domy¶lnie 512)
 .REss
 .IPs extrastereo[=mul]
-Zwiêksza ró¿nicê miêdzy lewym a prawym kana³em, aby dodaæ efekt "przekazu na ¿ywo" do
-odtwarzania.
+Zwiêksza ró¿nicê miêdzy lewym a prawym kana³em,
+aby dodaæ efekt "przekazu na ¿ywo" do odtwarzania.
 .RSss
 mul: wspó³czynnik ró¿nicy (domy¶lnie: 2.5)
 .REss
 .IPs volnorm
-Maksymalnie zwiêksza g³o¶no¶æ, nie wprowadzaj±c przy tym szumów do d¼wiêku.
+Maksymalnie zwiêksza g³o¶no¶æ, nie zniekszta³caj±c przy tym d¼wiêku.
 .RE
 .
 .TP
@@ -3154,7 +3164,7 @@ Okre¶la parametry dekodowania z libavcodec.
 Dostêpne s± opcje:
 .RE
 .RSs
-.IPs bug=<warto¶æ> 
+.IPs bug=<warto¶æ>
 Rêczne obej¶cie b³êdów kodera:
 .RSss
 0: nic
@@ -3213,7 +3223,7 @@ informacje debugowania:
 .br
 0x1000: b³êdy
 .REss
-.IPs ec=<warto¶æ> 
+.IPs ec=<warto¶æ>
 ukrywanie b³êdów:
 .RSss
 1: U¿ywa silnego filtru odblokowywuj±cego (deblock) dla uszkodzonych
@@ -3249,11 +3259,12 @@ dekodowanie tylko w skali szaro¶ci (trochê szybsze ni¿ w kolorze)
 ¯eby osi±gn±æ najlepsz± jako¶æ dekodowania, u¿ywaj tego samego algorytmu
 idct do kodowania i dekodowania.
 Mo¿e to jednak zmniejszyæ dok³adno¶æ.
-.IPs lowres=<numer> 
+.IPs lowres=<numer>
 Dekoduje w niskiej rozdzielczo¶ci.
-Dekodowanie w niskiej rozdzielczo¶ci nie jest obs³ugiwane przez wszystkie
-kodeki i czêsto powoduje pojawienie siê okropnych zniekszta³ceñ. Nie jest
-to ¿aden b³±d, a jedynie efekty uboczny niedekodowania w pe³nej rozdzielczo¶ci.
+Nie wszystkie kodeki obs³uguj± dekodowanie w niskiej czêstotliwo¶ci
+i czêsto powoduje to pojawienie siê okropnych zniekszta³ceñ.
+Nie jest to ¿aden b³±d,
+a jedynie efekt uboczny nie dekodowania w pe³nej rozdzielczo¶ci.
 .RSss
 .br
 0: wy³±czone
@@ -3391,7 +3402,7 @@ sincR
 .IPs 9
 lanczos
 .IPs 10
-dwusze¶cienna krzywa sklejana
+naturalna dwusze¶cienna krzywa sklejana
 .RE
 .PD 1
 .sp 1
@@ -3655,7 +3666,7 @@ jest portretem a nie krajobrazem.
 Skaluje obraz (wolnym) programowym skalatorem i wykonuje konwersjê
 kolorów YUV<\->RGB (zobacz te¿ \-sws).
 .RSs
-.IPs <w>,<h> 
+.IPs <w>,<h>
 Przeskalowana szeroko¶æ/\:wysoko¶æ (domy¶lnie: oryginalna szeroko¶æ/\:wysoko¶æ)
 .br
 .I INFORMACJA:
@@ -3688,22 +3699,21 @@ opuszcza informacjê o kolorach
 .br
 3: U¿yje tylko co 8m± liniê wej¶cia koloru.
 .REss
-.IPs <parametr>
-.RSss
-\-sws 2 (dwu¶ciennie):  B (rozmazywanie) i C (pier¶cieniowanie)
 .IPs "<parametr>[:<parametr2>] (zobacz równie¿ \-sws)"
 Ustawia parametry skalowania zale¿nie od tego jaki skalator zosta³ wybrany
 przez \-sws.
+.RSss
+\-sws 2 (dwusze¶ciennie):  B (rozmazywanie) i C (pier¶cieniowanie)
 .br
 0.00:0.60 domy¶lnie
 .br
-0.00:0.75 "precyzyjna dwu¶cienna" VirtualDuba
+0.00:0.75 "precyzyjna dwusze¶cienna" VirtualDuba
 .br
-0.00:0.50 krzywa skejana Catmull-Rom
+0.00:0.50 krzywa sklejana Catmull-Rom
 .br
 0.33: 0.33 krzywa sklejana Mitchell-Netravali
 .br
-1.00:0.00 jedno¶cienna krzywa sklejana B
+1.00:0.00 sze¶cienna krzywa B-sklejana
 .br
 \-sws 7 (gaussian): ostro¶æ (0 (g³adkie) \- 100 (wyostrzone))
 .br
@@ -3789,6 +3799,8 @@ konwersji.
 Przeciwnie ni¿ filtr formatu, pozwala na u¿ycie dowolnej przestrzeni kolorów
 .B z wyj±tkiem
 tej, któr± okre¶li³e¶.
+.br
+.I INFORMACJA:
 Listê dostêpnych formatów mo¿na uzyskaæ wywo³uj±c format=fmt=help.
 .PD 0
 .RSs
@@ -3801,7 +3813,7 @@ nazwa formatu taka jak rgb15, bgr24, yv12, itp (domy¶lnie: yv12)
 .B pp[=filtr1[:opcja1[:opcja2...]]/\:[-]filtr2...] (zobacz tak¿e \-pphelp)
 Ta opcja uruchamia okre¶lony ³añcuch podfiltrów postprocessingu.
 Podfiltry musz± byæ oddzielone znakiem "/" i mog± byæ wy³±czone przez
-poprzedzenie ich kombinacj± "'\-".
+poprzedzenie ich znakiem "\-".
 Zakres podfiltru mo¿e zostaæ okre¶lony przez dodanie ":" i "a", "c"
 lub "y" (domy¶lnie: c):
 .PD 0
@@ -3811,7 +3823,7 @@ Automatycznie wy³±cza filtr, je¶li procesor jest zbyt wolny.
 .IPs c
 Filtruje te¿ kolory.
 .IPs y
-Wykonuje tylko filtrownie jasno¶ci.
+Wykonuje tylko filtrowanie jasno¶ci (nie filtruje barw).
 .RE
 .PD 1
 .sp 1
@@ -3881,7 +3893,7 @@ Szybsza i lepsza jako¶æ ni¿ \-vf fame.
 .RSss
 1\-31: ustalone qscale
 .br
-32\-:  ustalone tempo bitowe w kBitach
+32\-: ustalone tempo bitowe w kBitach
 .REss
 .IPs fps\ \ 
 wymusza fps wyj¶cia (liczba rzeczywista) (domy¶lnie: 0, wykrywanie wg wysoko¶ci)
@@ -3909,7 +3921,7 @@ Kontroluje proporcje, wyliczane przez wzór DVB_HEIGHT*ASPECTRATIO (domy¶lnie:
 .PD 0
 .RSs
 .IPs "\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc"
-FIXME: Wyt³umaæzyc co to robi.
+FIXME: Wyt³umaczyæ co to robi.
 .RE
 .PD 1
 .
@@ -4087,11 +4099,11 @@ W³±cza dwustronne wyostrzanie (domy¶lnie: 0).
 .B unsharp=l|cWxH:ilo¶æ[:l|cWxH:ilo¶æ]
 maska zmiêkczaj±ca / rozmycie gaussa
 .RSs
-.IPs l\ \ \ \
+.IPs l\ \ \ \ 
 Stosuje efekty na sk³adowej jasno¶ci.
-.IPs c\ \ \ \
+.IPs c\ \ \ \ 
 Stosuje efekty na sk³adowych koloru.
-.IPs WxH
+.IPs <wysoko¶æ>x<szeroko¶æ>
 szeroko¶æ i wysoko¶æ macierzy, nieparzysty rozmiar w obu kierunkach
 (min = 3x3, max = 13x11 lub 11x13, zazwyczaj co¶ pomiêdzy 3x3 i 7x7)
 .IPs ilo¶æ
@@ -4170,7 +4182,7 @@ siê do wiêkszo¶ci zastosowañ.
 Poni¿sze argumenty (sk³adnia jest opisana wy¿ej) mog± byæ u¿yte by kontrolowaæ
 jego dzia³anie:
 .RSs
-.IPs dr\ \
+.IPs dr\ \ 
 Ustawia tryb gubienia klatek.
 0 (domy¶lnie) oznacza, ¿e klatki
 nie bêd± porzucane by utrzymaæ ustalon± wyj¶ciow± prêdko¶æ klatek.
@@ -4181,12 +4193,12 @@ wej¶ciowych do wyj¶ciowych.
 .br
 .I INFORMACJA:
 Z MEncoderem u¿ywaj zawsze trybu 1 lub 2!
-.IPs am\ \
+.IPs am\ \ 
 Tryb analizy.
 Dostêpne warto¶ci to 0 (ustalony wzorzec z numerem klatki inicjalizuj±cej
 okre¶lony przez fr=#) i 1 (agresywne szukanie wzorca telecine).
 Domy¶lnie jest 1.
-.IPs fr\ \ \
+.IPs fr\ \ \ 
 Ustawia numer pocz±tkowej klatki w sekwencji.
 0\-2 to trzy nastêpuj±ce po sobie klatki bez przeplotu; 3 i 4 to dwie klatki
 z przeplotem.
@@ -4459,8 +4471,8 @@ Dostêpne s± tryby:
 .PD 0
 .RSs
 .IPs 0
-Przesunie nieparzyste klatki w górne pole, parzyste w dolne, tworz±c ramkê pe³nej
-wysoko¶ci przy po³owie prêdko¶ci klatek.
+Przesunie nieparzyste klatki w górne pole, parzyste w dolne,
+tworz±c ramkê pe³nej wysoko¶ci przy po³owie prêdko¶ci klatek.
 .IPs 1
 Opuszcza klatki parzyste, na wyj¶cie przekazuje tylko nieparzyste, wysoko¶æ
 pozostaje niezmieniona.
@@ -4468,7 +4480,7 @@ pozostaje niezmieniona.
 Opuszcza klatki nieparzyste, na wyj¶cie przekazuje tylko parzyste, wysoko¶æ
 pozostaje niezmieniona.
 .IPs 3
-Poszerza ka¿d± klatkê do pe³nej wysoko¶ci i wype³nia pozosta³e linie na czarno;
+Poszerza ka¿d± klatkê do pe³nej wysoko¶ci i wype³nia co drug± liniê na czarno;
 szybko¶æ klatek pozostaje niezmieniona.
 .RE
 .PD 1
@@ -4486,7 +4498,7 @@ Dostêpne tryby:
 .IPs 0
 Pozostawia pola niezmienione. (Zaobserwujesz przeskoki/\:migotanie.)
 .IPs 1
-Interpoluje brakuj±ce linie (stosowany algorytm mo¿e nie byæ zbyt dobry).
+Interpoluje brakuj±ce linie. (Stosowany algorytm mo¿e nie byæ zbyt dobry.)
 .IPs 2
 Przesunie pola o 1/4 piksela z wykorzystaniem interpolacji liniowej
 (bez przeskoków).
@@ -4514,11 +4526,11 @@ adaptatywne rozmycie figur
 .RSs
 .IPs <promieñ>
 si³a filtru rozmycia (~0.1\-4.0) (wolniejsze je¿eli wiêksze)
-.IPs <pf>\
+.IPs <pf>\ 
 si³a prefiltru (~0.1\-2.0)
 .IPs <ró¿nKol>
-Maksymalna ró¿nic± miêdzy pikselami, która bêdzie jeszcze rozpatrywana
-(~0.1\-100.0).
+maksymalna ró¿nica miêdzy pikselami, która bêdzie jeszcze rozpatrywana
+(~0.1\-100.0)
 .RE
 .PD 1
 .
@@ -4527,7 +4539,7 @@ Maksymalna ró¿nic± miêdzy pikselami, która bêdzie jeszcze rozpatrywana
 eleganckie rozmycie
 .PD 0
 .RSs
-.IPs <promieñ> 
+.IPs <promieñ>
 si³a filtru rozmycia (~0.1\-5.0) (wolniejsze je¿eli wiêksze)
 .IPs <si³a>
 rozmycie (0.0\-1.0) lub wyostrzenie (-1.0\-0.0)
@@ -4539,7 +4551,7 @@ lub filtruj krawêdzie (-30\-0)
 .
 .TP
 .B perspective=x0:y0:x1:y1:x2:y2:x3:y3:t
-Popraw perspektywê w filmach, niekrêconych prostopadle do obrzu.
+Popraw perspektywê w filmach, nie krêconych prostopadle do ekranu.
 .PD 0
 .RSs
 .IPs x0,y0,...
@@ -4551,8 +4563,8 @@ liniowy (0) lub sze¶cienny resampling (1)
 .
 .TP
 .B 2xsai\ \ 
-Przeskaluje i wyg³adzi obraz przy pomocy podwójnego skalowania i
-algorytmu interpolacji.
+Przeskaluje i wyg³adzi obraz przy pomocy podwójnego algorytmu skalowania i
+interpolacji.
 .
 .TP
 .B 1bpp\ \ \ 
@@ -4579,10 +4591,9 @@ TOOLS/bmovl-test.c jest ma³ym programem do testowania bmovl.
 .RSs
 .IPs <ukryty>
 Ustawia domy¶ln± warto¶æ flagi "hidden" (0=widoczny, 1=ukryty).
-.IPs <nieprzejzroczysty>
-Ustawia domy¶ln± warto¶æ flagi "opaque" czystym
-(0=przezroczysty, 1=nieprzezroczysty)).
-.IPs <kolejka> 
+.IPs <nieprzezroczysty>
+Ustawia domy¶ln± warto¶æ flagi "opaque" (0=przezroczysty, 1=nieprzezroczysty).
+.IPs <kolejka>
 ¶cie¿ka/\:nazwa pliku FIFO (nazwana kolejka ³±cz±ca mplayer \-vf bmovl
 z aplikacj± kontroluj±)
 .RE
@@ -4596,7 +4607,7 @@ Komendy FIFO:
 .IPs "RGBA32 szeroko¶æ wysoko¶æ xpoz ypoz alfa clear"
 i nastêpnie szeroko¶æ*wysoko¶æ*4 bajtów danych ¼ród³owych RGBA32.
 .IPs "ABGR32 szeroko¶æ wysoko¶æ xpoz ypoz alfa clear"
-i nastêpnie szeroko¶æ*wysoko¶æ*4 bajtów danych ¼ród³owych ABGR2.
+i nastêpnie szeroko¶æ*wysoko¶æ*4 bajtów danych ¼ród³owych ABGR32.
 .IPs "RGB24 szeroko¶æ wysoko¶æ xpoz ypoz alfa clear"
 i nastêpnie szeroko¶æ*wysoko¶æ*3 bajtów danych ¼ród³owych RGB24.
 .IPs "BGR24 szeroko¶æ wysoko¶æ xpoz ypoz alfa clear"
@@ -4678,7 +4689,7 @@ drukowane.
 Je¿eli ominiesz parametr lub podasz warto¶æ mniejsz± ni¿ 0, domy¶lna
 warto¶æ bêdzie u¿yta.
 Mo¿esz równie¿ przestaæ podawaæ opcje w ka¿dej chwili (... \-vf tile=10:5 ...).
-Dobrym pomys³em bêdzie umieszczenie filtra skalowania (scale) przed ³±czeniem
+Dobrym pomys³em bêdzie umieszczenie filtru skalowania (scale) przed ³±czeniem
 (tile) :-).
 .sp 1
 Dostêpne parametry:
@@ -4691,12 +4702,12 @@ ilo¶æ kawa³ków na osi X (domy¶lnie: 5)
 ilo¶æ kawa³ków na osi Y (domy¶lnie: 5)
 .IPs <wyj¶cie>
 Renderuje kawa³ek kiedy wyj¶ciowa ("wyj¶cie") ilo¶æ klatek jest osi±gniêta,
-gdzie "output" powinien byæ liczb± mniejsz± ni¿ xtile * ytile.
+gdzie "wyj¶cie" powinno byæ liczb± mniejsz± ni¿ xtile * ytile.
 Brakuj±ce kawa³ki s± pozostawiane puste.
 Mo¿esz, na przyk³ad, zapisaæ kawa³ek 8 * 7 co ka¿de 50 klatek, aby uzyskiwaæ
 obraz co 2 sekundy (przy szybko¶ci 25 fps).
 .IPs <start>
-grubo¶æ zewnêtrznego obramowanie w pikselach (domy¶lnie: 2)
+grubo¶æ zewnêtrznego obramowania w pikselach (domy¶lnie: 2)
 .IPs delta
 grubo¶æ wewnêtrznego obramowania w pikselach (domy¶lnie: 4)
 .RE
@@ -4960,7 +4971,7 @@ z poni¿szej sk³adni:
 .B \-<codec>opts <opcja1[=warto¶æ],opcja2,...>
 .
 .PP
-Gdzie <codec> to: lavc, xvidenc, divx4, lame lub x264enc
+Gdzie <codec> to: lavc, xvidenc, divx4, lame, toolame lub x264enc
 .
 .
 .SS divx4 (\-divx4opts)
@@ -4974,7 +4985,7 @@ wy¶wietla pomoc
 .
 .TP
 .B br=<warto¶æ>
-okre¶la bitrate
+Okre¶la bitrate.
 .RSs
 .IPs 4\-16000
 (w kbit)
@@ -4988,7 +4999,7 @@ maksymalna przerwa miêdzy kluczowymi klatkami (w klatkach)
 .
 .TP
 .B deinterlace
-w³±cza usuwanie przeplotu (unikaj tej opcji, DivX4 ma pe³no b³êdów)
+W³±cza usuwanie przeplotu (unikaj tej opcji, DivX4 ma pe³no b³êdów).
 .
 .TP
 .B q=<1\-5>
@@ -5021,7 +5032,8 @@ okre¶la chropowato¶æ/\:g³adko¶æ
 .TP
 .B pass=<1\-2>
 Z t± opcj± mo¿esz kodowaæ dwuprzej¶ciowo pliki DivX4.
-Najpierw koduj z pass=1, pó¼niej, z tymi samymi parametrami, koduj z pass=2.
+Najpierw koduj z pass=1,
+pó¼niej koduj jeszcze raz z tymi samymi parametrami i pass=2.
 .
 .TP
 .B vbrpass=<0\-2>
@@ -5068,12 +5080,12 @@ mtrh
 .
 .TP
 .B cbr\ \ \ \ 
-sta³y bitrate.
-Wymusza równie¿ tryb CBR koduj±c na kolejnych trybach ustawieñ ABR
+sta³y bitrate
+Wymusza równie¿ kodowanie CBR na pó¼niejszych kodowaniach ABR.
 .
 .TP
 .B br=<0\-1024>
-okre¶la bitrate w kBit (tylko CBR i ABR)
+bitrate w kBit (tylko CBR i ABR)
 .
 .TP
 .B q=<0\-9>
@@ -5089,7 +5101,7 @@ wspó³czynnik kompresji
 .
 .TP
 .B vol=<0\-10>
-ustawia g³o¶no¶æ wej¶cia audio
+wzmocnienie g³o¶no¶ci wej¶cia audio
 .
 .TP
 .B mode=<0\-3>
@@ -5112,9 +5124,9 @@ mono
 .PD 0
 .RSs
 .IPs 0
-nie
+¿aden
 .IPs 1
-wszystko
+pe³en
 .IPs 2
 dostraja
 .RE
@@ -5122,8 +5134,8 @@ dostraja
 .
 .TP
 .B fast\ \ \ 
-prze³±cza na szybsze kodowanie kolejnych trybów ustawieñ VBR, nieznacznie
-ni¿sza jako¶æ i wiêksze warto¶ci bitrate.
+prze³±cza na szybsze kodowanie kolejnych trybów ustawieñ VBR, co skutkuje
+nieznacznie ni¿sz± jako¶ci± i wiêkszymi warto¶ciami bitrate.
 .
 .TP
 .B highpassfreq=<czêstotliwo¶æ>
@@ -5141,18 +5153,20 @@ pozwoli LAME wykryæ warto¶ci automatycznie.
 .
 .TP
 .B preset=<warto¶æ>
-warto¶ci ustawieñ
+standardowe ustawienia
 .RSs
+.IPs help
+Wy¶wietla dodatkowe opcje i informacje o standardowych ustawieniach.
 .IPs medium
-Kodowanie VBR, dobra jako¶æ, warto¶ci bitrate 150\-180 kbps.
+kodowanie VBR, dobra jako¶æ, warto¶ci bitrate 150\-180 kbps
 .IPs standard
-Kodowanie VBR, wysoka jako¶æ, warto¶ci bitrate 170\-210 kbps.
+kodowanie VBR, wysoka jako¶æ, warto¶ci bitrate 170\-210 kbps
 .IPs extreme
-Kodowanie VBR, bardzo wysoka jako¶æ, warto¶ci bitrate 200\-240 kbps.
+kodowanie VBR, bardzo wysoka jako¶æ, warto¶ci bitrate 200\-240 kbps
 .IPs insane
-Kodowanie CBR, najwy¿sza ustawiona jako¶æ, bitrate 320 kbps.
+kodowanie CBR, najwy¿sza ustawiona jako¶æ, bitrate 320 kbps
 .IPs <8\-320>
-Kodowanie ABR z u¶rednion± warto¶ci± podanego bitrate.
+kodowanie ABR z u¶rednion± warto¶ci± podanego bitrate
 .RE
 .sp 1
 .RS
@@ -5161,15 +5175,13 @@ Kodowanie ABR z u¶rednion± warto¶ci± podanego bitrate.
 .PD 0
 .RSs
 .IPs fast:preset=standard
-dla wiêkszo¶ci ludzi i typów muzyki ju¿ ca³kiem wysoka jako¶æ.
+stosowne dla wiêkszo¶ci ludzi i typów muzyki i ju¿ ca³kiem wysoka jako¶æ
 .IPs cbr:preset=192
-koduje z ustawieniami ABR na wymuszonym, sta³ym bitrate wynosz±cym 192 kbps.
+Koduje z ustawieniami ABR na wymuszonym, sta³ym bitrate wynosz±cym 192 kbps.
 .IPs preset=172
-kodowanie z ustawieniami ABR przy ¶rednim bitrate 172 kbps.
+Kodowanie z ustawieniami ABR przy ¶rednim bitrate 172 kbps.
 .IPs preset=extreme
-dla ludzi z niewiarygodnie dobrym s³uchem i podobnym wyposa¿eniem.
-.IPs preset=help
-drukuje dodatkowe opcje i informacje o ustawieniach.
+Dla ludzi z niewiarygodnie dobrym s³uchem i podobnym wyposa¿eniem.
 .RE
 .PD 1
 .
@@ -5466,12 +5478,12 @@ drugie przej¶cie
 .IPs 3
 n-te przej¶cie (drugie i trzecie przej¶cie kodowania trójprzej¶ciowego)
 .RE
-.RS 
+.RS
 Jak to dzia³a i jak tego u¿ywaæ:
 .br
 Pierwsze przej¶cie (vpass=1) zapisuje plik ze statystykami.
 Mo¿e bêdziesz chcia³ wy³±czyæ niektóre opcje znacznie obci±¿aj±ce procesor,
-podobnie jak tryb "turbo".
+podobnie jak robi to tryb "turbo".
 .br
 W trybie dwuprzej¶ciowym drugie przej¶cie (vpass=2) czyta plik ze statystykami
 i opiera decyzje o kontroli tempa na nim.
@@ -5506,8 +5518,8 @@ Koduje z optymaln± tablic± Huffmana opart± o wyniki pierwszego przej¶cia.
 .B turbo (tylko tryb dwuprzej¶ciowy)
 Znacznie zwiêksza szybko¶æ pierwszego przej¶cia u¿ywaj±c szybszych algorytmów
 i wy³±czaj±c opcje obci±¿aj±ce w znacznym stopniu procesor.
-Prawdopodobnie zmniejszy to trochê globalny wspó³czynnik PSNR (o oko³o 0.01dB) i
-zmieni typy pojedynczych klatek i trochê PSNR (do 0.03dB).
+Prawdopodobnie zmniejszy to trochê globalny wspó³czynnik PSNR (o oko³o 0.01dB)
+i zmieni typy pojedynczych klatek i trochê PSNR (do 0.03dB).
 .
 .TP
 .B aspect=<x/\:y>
@@ -5560,10 +5572,12 @@ mog± wyst±piæ problemy, je¿eli wykorzystane bêdzie vrc_(min|max)rate.
 .TP
 .B vrc_maxrate=<warto¶æ>
 maksymalny bitrate w kbit/\:sek (przej¶cie\ 1/\:2)
+(domy¶lnie: 0, nieograniczony)
 .
 .TP
 .B vrc_minrate=<warto¶æ>
 minimalny bitrate w kbit/\:sek (przej¶cie\ 1/\:2)
+(domy¶lnie: 0, nieograniczony)
 .
 .TP
 .B vrc_buf_size=<warto¶æ>
@@ -5879,8 +5893,8 @@ sh4
 Maskowanie jasno¶ci jest "psychosensorycznym" parametrem, który wykorzystuje
 fakt, ¿e ludzkie oko widzi mniej szczegó³ów na bardzo jasnych polach obrazu.
 Kompresuje on mocniej jasne obszary ni¿ te o ¶redniej jasno¶ci, wiêc zachowa to
-kilka bitów, które mog± byæ wykorzystane przez nastêpne klatki, podnosz±c ogóln±,
-subiektywn± jako¶æ, przy jednoczesnym, prawdopodobnym spadku warto¶ci PSNR.
+kilka bitów, które mog± byæ wykorzystane przez nastêpne klatki, podnosz±c
+ogóln±, subiektywn± jako¶æ, przy jednoczesnym mo¿liwym spadku warto¶ci PSNR.
 .br
 .I UWAGA:
 B±d¼ ostro¿ny, zbyt du¿e warto¶ci mog± spowodowaæ okropne rzeczy.
@@ -5897,11 +5911,11 @@ rozs±dny zakres
 .
 .TP
 .B dark_mask=<0.0\-1.0>
-Maskowanie jasno¶ci jest "psychosensorycznym" parametrem, który wykorzystuje
+Maskowanie ciemno¶ci jest "psychosensorycznym" parametrem, który wykorzystuje
 fakt, ¿e ludzkie oko widzi mniej szczegó³ów na bardzo ciemnych polach obrazu.
 Kompresuje on mocniej ciemne obszary ni¿ te o ¶redniej jasno¶ci, wiêc zachowa to
-kilka bitów, które mog± byæ wykorzystane przez nastêpne klatki, podnosz±c ogóln±,
-subiektywn± jako¶æ, przy jednoczesnym, prawdopodobnym spadku warto¶ci PSNR.
+kilka bitów, które mog± byæ wykorzystane przez nastêpne klatki, podnosz±c
+ogóln±, subiektywn± jako¶æ, przy jednoczesnym mo¿liwym spadku warto¶ci PSNR.
 .br
 .I UWAGA:
 B±d¼ ostro¿ny, zbyt du¿e warto¶ci mog± spowodowaæ okropne rzeczy.
@@ -5929,7 +5943,7 @@ krótk± chwilê, dopóki koder nie zauwa¿y tego, ¿e przedmiot ju¿ siê nie porusza
 i potrzebuje nowych bloków.
 Zaoszczêdzone bity, bêd± wykorzystane w innych czê¶ciach filmu, co mo¿e
 zwiêkszyæ subiektywn± jako¶æ, pod warunkiem, ¿e warto¶æ tcplx_mask jest
-dobierana ostro¿nie.
+starannie dobrana.
 .
 .TP
 .B scplx_mask=<0.0\-1.0>
@@ -5937,10 +5951,10 @@ Maskowanie z³o¿ono¶ci przestrzennej.
 Wiêksze warto¶ci pomagaj± przy blokowaniu, je¿eli ¿aden filtr odblokowania nie
 jest stosowany przy dekodowaniu - nie jest to najlepszy pomys³.
 .br
-Wyobra¼ sobie scenê z traw± (która ma zazwyczaj du¿± kompleksowo¶æ przestrzenn±),
-niebieskim niebem i domem. scplx_mask zwiêkszy kwantyzatory makrobloków trawy
-,tym samym zmniejszaj±c jej jako¶æ, tak ¿eby wykorzystaæ wiêcej bitów na
-niebo i dom.
+Wyobra¼ sobie scenê z traw± (która ma zazwyczaj du¿± kompleksowo¶æ
+przestrzenn±), niebieskim niebem i domem;
+scplx_mask zwiêkszy kwantyzatory makrobloków trawy, tym samym zmniejszaj±c jej
+jako¶æ, tak ¿eby wykorzystaæ wiêcej bitów na niebo i dom.
 .br
 .I WSKAZÓWKA:
 Usuñ wszystkie czarne krawêdzie, jako ¿e zmniejszaj± one jako¶æ
@@ -5953,10 +5967,10 @@ rozs±dny zakres
 .RE
 .sp 1
 .I INFORMACJA:
-Ten parametr nie dzia³a tak samo, jak u¿ycie w³asnej matrycy, która kompesowa³a
-by wy¿sze czêstotliwo¶ci lepiej, jako ¿e scplx_mask zmniejszy jako¶æ bloków P,
-nawet je¶li tylko DC siê zmienia -  nie bêdzieto prawdopodobnie wygl±da³o
-za dobrze.
+Ten parametr nie dzia³a tak samo, jak u¿ycie w³asnej matrycy, która
+kompresowa³a by wy¿sze czêstotliwo¶ci lepiej, jako ¿e scplx_mask zmniejszy
+jako¶æ bloków P, nawet je¶li tylko DC siê zmienia.
+scplx_mask nie da tak dobrych wyników.
 .
 .TP
 .B p_mask=<0.0\-1.0>
@@ -5966,7 +5980,7 @@ Maskowanie inter MB (domy¶lnie: 0.0 (wy³±czone))
 Zmniejsza jako¶æ inter makrobloków.
 Jest to jednoznaczne z podniesieniem jako¶ci intra bloków, poniewa¿ ta sama,
 przeciêtna warto¶æ bitrate, bêdzie rozprowadzona przez kontroler tempa
-(rate controller) na ca³± sekwencjê video (domy¶lnie: 0.0 (wy³±czone)). 
+(rate controller) na ca³± sekwencjê video (domy¶lnie: 0.0 (wy³±czone)).
 p_mask=1.0 podwoja lo¶æ bitów alokowanych do ka¿dego inta bloku.
 .
 .TP
@@ -6080,7 +6094,7 @@ Wskazówka: Przydatne tylko dla kodowanie z wysokim bitrate.
 .TP
 .B mbcmp=<0\-2000>
 Ustawia funkcjê porównawcz± przy podejmowaniu decyzji dla makrobloku,
-wykorzystywana tylko, je¿eli mbd=0
+wykorzystywana tylko, je¿eli mbd=0.
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -6113,29 +6127,32 @@ wykorzystuje te¿ barwê, obecnie nie dzia³a (prawid³owo) z klatkami typu B
 .TP
 .B ildctcmp=<0\-2000>
 Ustawia funkcjê porównawcz± przy podejmowaniu decyzji dla przeplatanego dct
-(sprawd¼ opcjê mbcmp dla listy dostêpnych funkcji porównawczych).
+(lista dostêpnych funkcji porównawczych jest taka sama jak w opcji mbcmp).
 .
 .TP
 .B precmp=<0\-2000>
 Ustawia funkcjê porównawcz± dla wstêpnego przej¶cia przewidywania ruchu
-(sprawd¼ opcjê mbcmp dla listy dostêpnych funkcji porównawczych) (domy¶lnie: 0).
+(lista dostêpnych funkcji porównawczych jest taka sama jak w opcji mbcmp)
+(domy¶lnie: 0).
 .
 .TP
 .B cmp=<0\-2000>
 Ustawia funkcjê porównawcz± dla przewidywania ruchu full pel
-(sprawd¼ opcjê mbcmp dla listy dostêpnych funkcji porównawczych) (domy¶lnie: 0).
+(lista dostêpnych funkcji porównawczych jest taka sama jak w opcji mbcmp)
+(domy¶lnie: 0).
 .
 .TP
 .B subcmp=<0\-2000>
 Ustawia funkcjê porównawcz± dla przewidywania ruchu sub pel
-(sprawd¼ opcjê mbcmp dla listy dostêpnych funkcji porównawczych) (domy¶lnie: 0).
+(lista dostêpnych funkcji porównawczych jest taka sama jak w opcji mbcmp)
+(domy¶lnie: 0).
 .
 .TP
 .B nssew=<0\-100>
 Ten parametr kontroluje wagê NSSE, gdzie wiêksze warto¶ci zaowocuj±
 wiêkszymi szumami.
 NSSE 0 jest identyczne z SSE.
-Mo¿e ci siê on przydaæ, je¶li wolisz zachowaæ jakie¶ szumy w zakodowanym video,
+Mo¿e Ci siê on przydaæ, je¶li wolisz zachowaæ jakie¶ szumy w zakodowanym video,
 ni¿ przefiltrowaæ je przed kodowaniem.
 .
 .TP
@@ -6145,12 +6162,12 @@ Typ i rozmiar diamentu dla wstêpnego przej¶cia przewidywania ruchu
 .TP
 .B dia=<-99\-6>
 Typ i rozmiar diamentu dla przewidywania ruchu
-Preces wyszukiwania ruchu jest iteracyjny.
+Proces wyszukiwania ruchu jest iteracyjny.
 Korzystanie z ma³ego diamentu nie ogranicza przeszukiwania tylko do ma³ych
 wektorów ruchu, zwiêksza siê jednak prawdopodobieñstwo zatrzymania przed
-znalezieniem tego najlepszego szczególnie, gdy obraz zawiera szum.
+znalezieniem tego najlepszego, szczególnie gdy obraz zawiera szum.
 Wiêksze diamenty pozwalaj± na wyszukiwanie najlepszego w szerszym zakresie,
-dlatego te¿ s± wolniejsze ale daj± leszp± jako¶æ.
+dlatego te¿ s± wolniejsze ale daj± lepsz± jako¶æ.
 .br
 Wielkie, normalne diamenty s± lepsze ni¿ te przystosowuj±ce kszta³ty.
 .br
@@ -6218,7 +6235,7 @@ Spróbuje zakodowaæ ka¿dy MB z MV=<0,0> i wybierze lepszy.
 Nie ma to znaczenia je¿eli mbd=0.
 .
 .TP
-.B qprd (tylko z mbd=2) 
+.B qprd (tylko z mbd=2)
 parametr kwantyzacji (QP) optymalny pod wzglêdem zniekszta³ceñ tempa dla
 lambda podanej dla ka¿dego makrobloku
 .
@@ -6295,8 +6312,8 @@ vfdct=1 lub 2).
 .
 .TP
 .B pbias=<-256\-256>
-bias kwantyzatora inter (256 odpowiada 1.0, domy¶lny kwantyzator w stylu MPEG: 0,
-domy¶lny kwantyzator w stylu H.263: -64)
+bias kwantyzatora inter (256 odpowiada 1.0,
+domy¶lny kwantyzator w stylu MPEG: 0, domy¶lny kwantyzator w stylu H.263: -64)
 .I INFORMACJA:
 Kwantyzator MMX H.263 nie umie obs³u¿yæ dodatnich warto¶ci bias (ustaw
 vfdct=1 lub 2),
@@ -6315,8 +6332,8 @@ redukcja szumów, 0 oznacza wy³±czon±
 Kszta³towanie szumu kwantyzatora.
 Zamiast wybieraæ kwantyzacjê jak najbli¿sz± ¼ród³owemu plikowi video (w sensie
 PSNR), wybiera tak±, ¿e szum (zazwyczaj d¼wiêcz±cy) bêdzie
-zamaskowany przez zawarto¶æ obrazu o podobnej czêstosliwo¶ci.
-Wiêksze warto¶ci s± wolniejsze, ale nie koniecznie wp³yn± na polepszenie jako¶ci.
+zamaskowany przez zawarto¶æ obrazu o podobnej czêstotliwo¶ci.
+Wiêksze warto¶ci s± wolniejsze, ale nie koniecznie poprawi± jako¶ci.
 Opcja mo¿e i powinna byæ u¿ywana razem z kwantyzacj± kratow±, w takim przypadku
 kwantyzacja kratowa (optymalna dla sta³ej wagi) bêdzie wykorzystana jako
 punkt startowy dla przeszukiwania iteracyjnego.
@@ -6364,11 +6381,11 @@ Obecnie nie dzia³a (jeszcze).
 .
 .SS nuv (\-nuvopts)
 .
-Video Nuppel jest oparte na rtjpeg i lzo.
-Domy¶lnie najpierw ramki s± kodowane przez rtjpeg, potem kompresowane przez lzo.
+Video Nuppel jest oparte na RTJPEG i LZO.
+Domy¶lnie najpierw ramki s± kodowane przez RTJPEG, potem kompresowane przez LZO.
 Ale oba przej¶cia mog± byæ w³±czone lub nie.
 Czyli w³a¶ciwie mo¿esz stworzyæ wyj¶cie w formacie raw i420, spakowane przez
-lzo i420, rtjpeg, lub domy¶lne spakowane przez lzo rtjpeg.
+LZO i420, RTJPEG, lub domy¶lne spakowane przez LZO RTJPEG.
 .br
 .I INFORMACJA:
 Dokumentacja nuvrec zawiera kilka porad i przyk³adów obrazuj±cych u¿ycie
@@ -6376,23 +6393,27 @@ ró¿nych ustawieñ dla najbardziej popularnych kodowañ TV.
 .
 .TP
 .B c=<0\-20>
-zakres barw
+zakres barw (domy¶lnie: 1)
 .
 .TP
 .B l=<0\-20>
-zakres jasno¶ci
+zakres jasno¶ci (domy¶lnie: 1)
 .
 .TP
-.B nolzo \ 
-Wy³±cza kompresjê lzo.
+.B lzo\ \ \ 
+W³±cza kompresjê LZO (domy¶lnie).
+.
+.TP
+.B nolzo\ \ 
+Wy³±cza kompresjê LZO.
 .
 .TP
 .B q=<3\-255>
-Ustawia poziom jako¶ci.
+poziom jako¶ci (domy¶lnie: 255)
 .
 .TP
 .B raw \ \ \ 
-Wy³±cza kodowanie rtjpeg.
+Wy³±cza kodowanie rtjpeg (domy¶lnie).
 .
 .TP
 .B rtjpeg\ 
@@ -6423,11 +6444,10 @@ Prze³±cza w tryb ustalonego kwantyzatora i okre¶la jego wielko¶æ.
 .TP
 .B me_quality=<0\-6>
 Opcja ta kontroluje podsystem przewidywania ruchu.
-Im wy¿sza warto¶æ, tym przewidywanie bêdzie dok³adniejsze.
+Im wy¿sza warto¶æ, tym przewidywanie bêdzie dok³adniejsze (domy¶lnie: 6).
 Im lepsze przewidywanie tym lepsza kompresja.
 Precyzja jest osi±gana kosztem mocy obliczeniowej, wiêc zmniejsz jej warto¶æ,
 je¿eli masz zamiar kodowaæ w czasie rzeczywistym.
-(domy¶lnie: 6)
 .
 .TP
 .B interlacing
@@ -6557,7 +6577,7 @@ wersjach XviD 1.0.x (api4).
 Tworzy strumieñ który mo¿e byæ dekodowany bez opó¼nieñ.
 .br
 .I UWAGA:
-Stworzy to niepoprawny strumieñ bitów i NIE BÊDZIE on odtwarzany przez
+Stworzy to niepoprawny strumieñ bitów i nie bêdzie on odtwarzany przez
 dekodery ISO-MPEG4 poza DivX/\:libavcodec/\:XviD.
 .br
 .I UWAGA:
@@ -6851,6 +6871,17 @@ kodowaniu i przechowuje PSNR dla ka¿dej klatki w pliku o nazwie typu
 "psnr_hhmmss.log" w bie¿±cym katalogu.
 Zwracane warto¶ci s± w dB (decybelach), im wy¿sze tym lepsze.
 .
+.PP
+.sp 1
+Nastêpna opcja jest dostêpna tylko w rozwojowych wersjach XviD 1.1.x.
+.
+.TP
+.B bvhq=<0|1>
+To ustawienie pozwala na takie wybieranie spo¶ród kandydatów na wektory dla
+klatek B, ¿eby zminimalizowaæ zaburzenia,
+tak jak opcja vhq robi to dla klatek P. 
+Daje to ³adniejsze ramki B nie wprowadzaj±c prawie ¿adnego spadku wydajno¶ci.
+.
 .
 .SS x264enc (\-x264encopts)
 .
@@ -6867,9 +6898,9 @@ odbywa siê to jednak kosztem precyzji przy przeszukiwaniu (domy¶lnie: 250).
 .
 .TP
 .B idrint=<warto¶æ>
-Ka¿de <warto¶æ> klatek I jest klatkami IDR (domy¶lnie: 2).
+Jedna na ka¿de <warto¶æ> klatek I jest klatkami IDR (domy¶lnie: 2).
 W H.264 klatki I niekoniecznie przeskakuj± zamkniêty GOP, poniewa¿ jest
-dozwolone dla klatki P, aby by³a przewidziana z wiêkszej liczby poprzedzaj±cych 
+dozwolone dla klatki P, aby by³a przewidziana z wiêkszej liczby poprzedzaj±cych
 j± klatek ni¿ tylko jedna (sprawd¼ te¿ opcjê frameref).
 Dlatego te¿ niekoniecznie da siê przewijaæ do klatek I.
 Ramki IDR ograniczaj± odnoszenie siê klatki P do jakiejkolwiek ramki
@@ -6879,13 +6910,15 @@ poprzedzaj±cej klatkê IDR.
 .B scenecut=<-1\-100>
 Kontroluje agresywno¶æ wstawiania klatek I (domy¶lnie: 40).
 Ma³e warto¶ci powoduj±, ¿e kodek czêsto musi wymuszaæ klatkê I, je¶li
-przekroczy warto¶æ keyint. Poprawne warto¶ci mog± odszukaæ lepsze miejsca
-dla klatek I, wy¿sze powoduj± utratê bitów.
+przekroczy warto¶æ keyint.
+Poprawne warto¶ci mog± odszukaæ lepsze miejsca dla klatek I,
+wy¿sze powoduj± marnowanie bitów.
 -1 wy³±cza wykrywanie obciêæ scen (scenecut), wiêc klatki I s± wstawiane tylko
 raz po ka¿dych innych klatkach keyint, nawet je¶li takie obciêcie zdarzy siê
-wcze¶niej. Nie jest to zalecane i marnuje bitrate, jako ¿e obciêcia scen
-(scenecut) s± kodowane jako klatki P, które s± tak du¿e jak klatki I, ale nie
-resetuj± "licznika keyint".
+wcze¶niej.
+Nie jest to zalecane i marnuje bitrate, jako ¿e obciêcia scen (scenecut) s±
+kodowane jako klatki P, które s± tak du¿e jak klatki I,
+ale nie resetuj± "licznika keyint".
 .
 .TP
 .B frameref=<1\-15>
@@ -6914,7 +6947,7 @@ nanie¶æ na pojedynczy piksel.
 Po drugie opcja ta ma wp³yw na próg filtrowanej ró¿nicy wystêpuj±cej na krawêdzi.
 Warto¶æ dodatnia ogranicza blokuj±ce szumy, ale rozmywa równie¿ detale.
 .br
-Dla kodowañ z zamierzon± wysok± jako¶ci±, zmniejsz trochê warto¶æ tego parametru.
+Dla kodowañ które maj± mieæ wysok± jako¶æ, zmniejsz trochê warto¶æ tego parametru.
 Jednak, je¿eli materia³ ¼ród³owy zawiera jakie¶ szumy albo sceny z przeskokami,
 które bêdziesz chcia³ usun±æ lub je¶li to animacja, dobrym pomys³em bêdzie
 nieznaczne zwiêkszenie jego warto¶ci.
@@ -6925,10 +6958,11 @@ Parametr Beta filtru odblokowywuj±cego (deblock) (domy¶lnie: 0).
 Ma wp³yw na maksymalny, dozwolony gradient miêdzy dwoma przylegaj±cymi blokami.
 .
 .TP
-.B cabac | nocabac 
-Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding).
-Spowalnia kodowanie i dekodowanie, ale oszczêdza okolo 10-15% bitów.
-Nie powiniene¶ go wy³±czaæ, chyba ¿e zale¿y ci na szybko¶ci.
+.B cabac | nocabac
+Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding)
+(domy¶lnie: w³±czony).
+Nieco spowalnia kodowanie i dekodowanie, ale oszczêdza ok³lo 10-15% bitów.
+Nie powiniene¶ go wy³±czaæ, chyba ¿e zale¿y Ci na szybko¶ci.
 .
 .TP
 .B cabacidc=<warto¶æ>
@@ -6963,7 +6997,7 @@ Przydatne kwantyzatory w H.264 s± wiêksze ni¿ w MPEG[124].
 Minimalny kwantyzator, 15\-35 to u¿yteczny zakres (domy¶lnie: 10).
 .
 .TP
-.B qp_max=<1\-51>  (tylko CBR)
+.B qp_max=<1\-51> (tylko CBR)
 maksymalny kwantyzator (domy¶lnie: 51)
 .
 .TP
@@ -6993,15 +7027,15 @@ wspó³czynnik kwantyzatora miêdzy klatkami P a B (domy¶lnie: 2.0)
 .
 .TP
 .B pass=<1\-3>
-Uruchamia tryb dwu-lub trójprzej¶ciowy.
-Zaleca siê kodowanie zawsze w trybie dwu- lub trójprzej¶ciowym z uwagi na lepsz±
-dystrubucjê bitów i wzrost ogólenj jako¶ci.
+Uruchamia tryb dwu- lub trójprzej¶ciowy.
+Zaleca siê kodowanie zawsze w trybie dwu- lub trójprzej¶ciowym z uwagi na
+lepsz± dystrybucjê bitów i poprawê ogólnej jako¶ci.
 .PD 0
 .RSs
 .IPs 1
 pierwsze przej¶cie
 .IPs 2
-drufie przej¶cie
+drugie przej¶cie
 .IPs 3
 N-te przej¶cie (drugie i trzecie w trybie trójprzej¶ciowym)
 .RE
@@ -7012,13 +7046,13 @@ Pierwsze przej¶cie (pass=1) zbiera statystyki video i zapisuje je do pliku.
 Mo¿e bêdziesz chcia³ wy³±czyæ opcje wymagaj±ce du¿ej mocy obliczeniowej
 poza tymi domy¶lnymi.
 .br
-W trybie dwuprzej¶ciowym, drugie przej¶cie (pass=2) czyta plik ze statystylkami
+W trybie dwuprzej¶ciowym, drugie przej¶cie (pass=2) czyta plik ze statystykami
 i opiera na tym decyzje kontroli tempa.
 .br
 W trybie trójprzej¶ciowym, drugie przej¶cie (pass=3, to nie pomy³ka) robi
 obie rzeczy: Najpierw czyta statystyki i nadpisuje je.
-Mo¿e bêdziesz chcia³ zrobiæ kopiê pliku divx2pass.log zanim to siê stanie, je¿eli
-istnieje szansa, ¿e przerwiesz dzia³anie MEncodera.
+Mo¿e bêdziesz chcia³ zrobiæ kopiê pliku divx2pass.log zanim to siê stanie,
+je¿eli istnieje szansa, ¿e przerwiesz dzia³anie MEncodera.
 Mo¿esz u¿yæ wszelkich opcji kodowania, poza tymi szczególnie wymagaj±cymi
 du¿ej mocy obliczeniowej.
 .br
@@ -7029,8 +7063,8 @@ du¿ej mocy obliczeniowej.
 .br
 .I INFORMACJA:
 Obs³uga trybu trójprzej¶ciowego x264 jest ca³kiem nowa w MEncoderze, mile
-widziane jest wszelkie wsparcie dotycz±ce dobrych kombinacji opcji x264,
-które s±, i szybkie, i daj± dobr± jako¶æ.
+widziane s± wszelkie informacje o dobrych kombinacjach opcji x264,
+które s± i szybkie i daj± dobr± jako¶æ.
 .REss
 .
 .TP
@@ -7051,23 +7085,24 @@ wy¿sze zmuszaj± go do delikatniejszych zmian.
 Wykorzystuje wszystkie dostêpne makrobloki inter-klatek
 (i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, pskip).
 Idea polega na tym, aby odnale¼æ typ i rozmiar, który najlepiej opisuje
-okre¶lony obszar obrazu, np.\& bardzo dore rezultaty dla Anime, które zazwyczaj
-zawieraj± du¿e obszary tego samego koloru (domy¶lnie: i16x16, i2x4, p16x16-8x8).
+okre¶lony obszar obrazu, np.\& daje to bardzo dobre rezultaty dla Anime, które
+zazwyczaj zawieraj± du¿e obszary tego samego koloru
+(domy¶lnie: i16x16, i2x4, p16x16-8x8).
 Zale¿nie od materia³u ¼ród³owego, parametr ten mo¿e zwiêkszyæ lub
-zmniejszyæ jako¶æ, u¿ywaj go z ostro¿no¶ci±.
+zmniejszyæ jako¶æ, u¿ywaj go ostro¿nie.
 .
 .TP
 .B subq=<0\-5>
 Dopasowuje jako¶æ udoskonalenia subpel.
 Ten parametr kontroluje kompromis miêdzy jako¶ci± a szybko¶ci± bior±cy
-udzia³ w procesie podejmowania decyzji dotycz±cych  przewidywania ruchu.
+udzia³ w procesie podejmowania decyzji dotycz±cych przewidywania ruchu.
 Mo¿e znacznie poprawiæ jako¶æ.
 .RSs
 0: tylko halfpel
 .br
 1: 1 iteracja qpel na wygrywaj±cym kandydacie (domy¶lnie)
 .br
-2: 2 iteracj2 qpel na wygrywaj±cym kandydacie
+2: 2 iteracje qpel na wygrywaj±cym kandydacie
 .br
 3: halfpel na wszystkich typach makrobloków (MB), qpel na zwyciêzcy
 .br
@@ -7093,16 +7128,16 @@ Okre¶la ilo¶æ informacji drukowanych na ekranie.
 .REss
 .
 .TP
-.B psnr | nopsnr 
+.B psnr | nopsnr
 Drukuje statystyki stosunku sygna³u do szumu.
 .br
 .I INFORMACJA:
 Pola PSNR 'Y', 'U', 'V', i 'Avg' nie s± matematycznie poprawne
 (s± po prostu u¶rednion± warto¶ci± PSNR branego z ka¿dej klatki).
 S± trzymane tylko dla porównania z referencyjnym kodekiem JM.
-Dla wszytkich innych celów, korzystaj albo z "Global" PSNR, albo z poszczególnych
-warto¶ci PSNR przypadaj±cych na klatkê drukowanych przez log=3.
-
+Dla wszystkich innych celów, korzystaj albo z "Global" PSNR, albo
+z poszczególnych warto¶ci PSNR przypadaj±cych na klatkê drukowanych przez
+log=3.
 .
 .
 .\" --------------------------------------------------------------------------
