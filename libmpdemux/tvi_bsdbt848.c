@@ -93,8 +93,8 @@ typedef struct {
     int videoready;
     int btfd;
     int source;
-    int maxfps;
-    int fps;
+    float maxfps;
+    float fps;
     int iformat;
     int maxheight;
     int maxwidth;
@@ -419,7 +419,7 @@ static int control(priv_t *priv, int cmd, void *arg)
         return(TVI_CONTROL_TRUE);        
 
     case TVI_CONTROL_VID_GET_FPS:
-        (int)*(void **)arg = (int)priv->fps;
+        *(float *)arg = priv->fps;
         return(TVI_CONTROL_TRUE);        
 
 /*

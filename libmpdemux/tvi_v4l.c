@@ -81,7 +81,7 @@ typedef struct {
     int				width;
     int				height;
     int				bytesperline;
-    int				fps;
+    float			fps;
 
     struct video_mbuf		mbuf;
     unsigned char               *mmap;
@@ -1072,7 +1072,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_GET_FPS:
-	    (int)*(void **)arg=priv->fps;
+	    *(float *)arg=priv->fps;
 	    return(TVI_CONTROL_TRUE);
 
 	/* ========== TUNER controls =========== */

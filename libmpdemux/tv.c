@@ -449,7 +449,7 @@ int demux_open_tv(demuxer_t *demuxer)
 
     if(!sh_video->fps)
     {
-        int tmp;
+        float tmp;
         if (funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FPS, &tmp) != TVI_CONTROL_TRUE)
              sh_video->fps = 25.0f; /* on PAL */
         else sh_video->fps = tmp;
