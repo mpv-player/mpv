@@ -24,8 +24,19 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
 }
 
+extern int avcodec_inited;
+
 // init driver
 static int init(sh_video_t *sh){
+
+#ifdef USE_LIBAVCODEC
+    if(!avcodec_inited){
+      avcodec_init();
+      avcodec_register_all();
+      avcodec_inited=1;
+    }
+#endif
+
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YVU9)) return 0;
 
     sh->context=malloc(sizeof(svq1_t));
