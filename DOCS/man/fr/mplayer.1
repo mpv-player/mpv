@@ -282,7 +282,7 @@ Créé une marque EDL.
 .PD 1
 .PP
 (Les touches suivantes ne sont valides qu'en utilisant une sortie vidéo
-accélérée matériellement (xv, (x)vidix, (x)mga, etc) ou le filtre égualiseur
+accélérée matériellement (xv, (x)vidix, (x)mga, etc) ou le filtre égaliseur
 logiciel (\-vf eq ou \-vf eq2).
 .PP
 .PD 0
@@ -340,7 +340,7 @@ Chaque option a son opposé, par ex.\& l'inverse de l'option
 \-fs est \-nofs.
 .PP
 Si une option est documentée comme (XXX uniquement), cela veut dire
-qu'elle ne fonctionnera uniquement si vous activers l'option XXX ou
+qu'elle ne fonctionnera uniquement si vous activez l'option XXX ou
 que XXX a été compilé dans mplayer.
 Vous pouvez placer toutes les options dans un fichier de configuration qui sera
 lu à chaque exécution de MPlayer.
@@ -353,8 +353,8 @@ global, et les options données sur la ligne de commande ont priorité sur tous
 les fichiers.
 La syntaxe des fichiers de configuration est 'option=<valeur>', tout ce qui
 suit un '#' est considéré comme commentaire.
-Les options qui nécessitent des valeurs peuvent être activés en les
-initialisant à 'yes' ou '1' ou désactivés en les initialisant à 'no'
+Les options qui nécessitent des valeurs peuvent être activées en les
+initialisant à 'yes' ou '1' ou désactivées en les initialisant à 'no'
 ou '0'.
 Ceci est même applicable aux sous-options.
 .PP
@@ -367,8 +367,8 @@ flip=yes
 # Décode/\:encode des fichiers png,
 # démarre avec mf://filemask
 mf=type=png:fps=25
-# Les images en eerie negative, c'est cool.
-vf=eq2=1.0:-0.8
+# Les images en negatif, c'est cool.
+-vf eq2=1.0:-0.8
 .fi
 .PP
 Vous pouvez également écrire des fichiers de config spécifiques à un fichier.
@@ -632,7 +632,7 @@ formats Winamp ou ASX).
 Cette option est considérée comme une entrée donc les options trouvées à la
 suite s'appliqueront uniquement aux éléments de la liste de lecture.
 .br
-FIXME: Cette decription est quelque peu alambiquée, et devrait être mieux
+FIXME: Cette description est quelque peu alambiquée, et devrait être mieux
 documentée.
 .
 .TP
@@ -1096,7 +1096,7 @@ début.
 .
 .TP
 .B \-srate <Hz>
-Sélectionne  la fréquence d'échantillonage audio, en ré-échantillonant si
+Sélectionne  la fréquence d'échantillonnage audio, en ré-échantillonnant si
 nécessaire.
 MEncoder passe cette valeur à LAME pour le ré-échantillonnage.
 .TP
@@ -1538,11 +1538,11 @@ Définit l'alignement des sous-titres alignés avec \-subpos.
 .PD 0
 .RSs
 .IPs 0
-Aligner en haut (par défaut)
+Aligner en haut (par défaut).
 .IPs 1
-Aligner au milieu
+Aligner au milieu.
 .IPs 2
-Aligner en bas
+Aligner en bas.
 .RE
 .PD 1
 .
@@ -1574,7 +1574,7 @@ Vous pouvez définir votre langue d'après son code à deux lettres pour
 que ENCA détecte automatiquement votre page de code.
 En cas de doute, mettez n'importe quoi et regardez la sortie de mplayer
 en mode verbeux (\-v) pour savoir quelles sont les langues disponibles.
-La page de code alternative sera utilisé en cas d'échec de l'autodétection.
+La page de code alternative sera utilisée en cas d'échec de l'autodétection.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -1602,7 +1602,7 @@ Identique à \-audiofile, mais pour les flux de sous-titres (OggDS ?).
 Sélectionne le mode de redimensionnement automatique.
 .br
 .I NOTE:
-0 signifie que les tailles du texte et de l'OSD sont des largeur de polices
+0 signifie que les tailles du texte et de l'OSD sont des largeurs de police
 en pixels.
 .sp 1
 Le mode peut être:
@@ -1769,7 +1769,7 @@ C'est le mixeur utilisé par ALSA
 .TP
 .B \-mixer-channel <ligne de mixeur>[,index de mixeur] (\-ao oss et \-ao alsa uniquement)
 Cette option dit à MPlayer d'utiliser un canal différent du PCM par défaut
-pour controller le volume.
+pour contrôler le volume.
 Les options OSS incluent
 .B vol, pcm, line.
 Pour une liste complète des options, cherchez SOUND_DEVICE_NAMES dans
@@ -3371,6 +3371,21 @@ décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
 Pour obtenir la meilleur qualité d'encodage utilisez le même algorithme idct
 pour le décodage et l'encodage.
 Cela dit, vous pouriez y perdre en terme de précision.
+.IPs lowres=<valeur>
+Décodage en résolution réduite.
+Le décodage en résoltion basse n'est pas géré par tous les codecs, et risque
+de produire des artefacts disgracieux, ce n'est pas un bogue, mais un effet
+de bord du décodage en résolution réduite.
+.RSss
+.br
+0: désactivé
+.br
+1: 1/2 résolution
+.br
+2: 1/4 résolution
+.br
+3: 1/8 résolution
+.REss
 .IPs "sb=<valeur> (MPEG2 uniquement)"
 Saute <valeur> lignes de macro-blocs au bas de l'image.
 .IPs "st=<valeur> (MPEG2 uniquement)"
@@ -3956,8 +3971,8 @@ filtre de postprocessing simple
 .IPs qualité
 0\-6 (par défaut\ : 3)
 .IPs qp\ \ \ 
-Paramètre pour forcer la quantisation (par défaut\ : 0, utilise le QP de
-la video)
+Force le paramètre de quantisation (par défaut\ : 0, utilise le QP de
+la video).
 .IPs mode\ \ \ 
 0: fort seuillage (hard thresholding) (par défaut)
 .br
@@ -4599,17 +4614,17 @@ Les modes disponibles sont:
 .PD 0
 .RSs
 .IPs 0
-les trames impaires dans le champs supérieur, les paires dans l'inférieur,
-pour générer une trame complète à un débit moitié moindre
+Déplace les trames impaires dans le champs supérieur, les paires dans
+l'inférieur, pour générer une trame complète à un débit moitié moindre
 .IPs 1
-afficher uniquement les trames impaires, les trames paires sont sautées, la
-taille est inchangée
+Afficher uniquement les trames impaires, les trames paires sont sautées, la
+taille est inchangée.
 .IPs 2
-afficher uniquement les trames paires, les trames paires sont sautées, la
-taille est inchangée
+Afficher uniquement les trames paires, les trames paires sont sautées, la
+taille est inchangée.
 .IPs 3
-étend chaque trame en pleine résolution, mais remplit une ligne sur deux
-en noir, le débit est inchangé
+Étend chaque trame en pleine résolution, mais remplit une ligne sur deux
+en noir, le débit est inchangé.
 .RE
 .PD 1
 .
@@ -4623,16 +4638,16 @@ Les modes disponibles sont:
 .PD 0
 .RSs
 .IPs 0
-laisse les champs inchangés (cela va sauter/\:scintiller)
+Laisse les champs inchangés. (Cela va sauter/\:scintiller.)
 .IPs 1
-fait une interpolation des lignes manquantes (l'algorithme utilisé peut ne
-pas être si bon)
+Interpole les lignes manquantes. (L'algorithme utilisé peut ne pas être si
+bon.)
 .IPs 2
-fait une translation de champs de 1/\:4 pixel avec interpolation linéaire
-(pas de saut)
+Fait une translation de champs de 1/\:4 pixel avec interpolation linéaire
+(pas de saut).
 .IPs 4
-fait une translation de champs de 1/\:4 pixel avec le filtre 4tap (meilleure
-qualité)
+Fait une translation de champs de 1/\:4 pixel avec le filtre 4tap (meilleure
+qualité).
 .RE
 .PD 1
 .
@@ -4653,28 +4668,28 @@ taille du filtre
 flou de forme adaptative
 .PD 0
 .RSs
-.IPs rad\ \ \ 
+.IPs <rad>
 force du filtre de flou (~0.1\-4.0) (plus la valeur est
 grande, moins il est rapide)
-.IPs pf\ \ \ 
+.IPs <pf>
 force du préfiltre (~0.1\-2.0)
-.IPs colorDiff
-différence autorisée des pixels.
+.IPs <colorDiff>
+différence maximale autorisée entre pixels pour être toujours significatif
 (~0.1\-100.0)
 .RE
 .PD 1
 .
 .TP
-.B "smartblur=rad:strength:thresh[:rad:strength:thresh]"
+.B "smartblur=rayon:force:limite[:rayon:force:limite]"
 flou intelligent
 .PD 0
 .RSs
-.IPs rad\ \ 
+.IPs <rayon>
 force du filtre de  flou (~0.1\-5.0) (plus la valeur est
 grande, moins il est rapide)
-.IPs strength
+.IPs <force>
 flou (0.0\-1.0) ou accentuation (-1.0\-0.0)
-.IPs thresh
+.IPs <limite>
 filtre tout (0), filtre les surfaces plates (0\-30) ou filtre les
 bords (-30\-0)
 .RE
@@ -4682,7 +4697,7 @@ bords (-30\-0)
 .
 .TP
 .B "perspective=x0:y0:x1:y1:x2:y2:x3:y3:t"
-correction de perspective
+Corrige la perspective des vidéo non filmées perpendiculairement à l'écran.
 .PD 0
 .RSs
 .IPs x0,y0,...
@@ -4695,8 +4710,8 @@ ré-échantillonnage linéaire (0) ou cubique (1)
 .
 .TP
 .B 2xsai\ \ 
-Utilise le zoom x2 et l'algorithme d'interpolation pour redimensionner et
-lisser les images.
+Redimensionne et lisser l'image avec le zoom x2 et l'algorithme
+d'interpolation.
 .
 .TP
 .B 1bpp\ \ \ 
@@ -4715,15 +4730,18 @@ nombre de lignes à sélectionner à partir du milieu de l'image (par défault: 12)
 .PD 1
 .
 .TP
-.B "bmovl=hidden:opaque:<fifo>"
-Lit les bitmaps depuis un FIFO et les affiche dans une fenêtre.
+.B "bmovl=hidden:opaque:fifo"
+Lit les bitmaps depuis une FIFO et les affiche par dessus la vidéo,
+avec éventullement quelques transformation de l'image.
+Soir aussi TOOLS/bmovl-test.c pour un programme de test simple de bmovl.
 .PD 0
 .RSs
-.IPs hidden
-définie la valeur par défaut du drapeau 'hidden' (booléen)
-.IPs opaque
-drapeau changeant de mode entre 'alphablended' (transparent) et opaque (rapide)
-.IPs fifo\ 
+.IPs <hidden>
+Définit la valeur par défaut du drapeau 'hidden' (0=visible, 1=caché)
+.IPs <opaque>
+Définit la valeur par défaut du drapeau 'alphablended' (0=transparent,
+1=opaque)
+.IPs <fifo>
 chemin/\:nom de fichier pour le FIFO (pipe nommé connectant mplayer
 \-vf bmovl à l'application le contrôlant)
 .RE
@@ -4736,23 +4754,23 @@ les commandes FIFO sont:
 .RSs
 .IPs "RGBA32 largeur hauteur xpos ypos alpha clear"
 suivi de largeur*hauteur*4 octets de données RGBA32 brutes.
-.IPs "ABGR32 largeur hauteur xpos ypos alpha clear"
-suivi de largeur*hauteur*4 octets de données ABGR32 brutes.
 .IPs "RGB24 largeur hauteur xpos ypos alpha clear"
-suivi de largeur*hauteur*3 octets de données RGB32 brutes.
+suivi de largeur*hauteur*4 octets de données ABGR24 brutes.
+.IPs "RGB24 largeur hauteur xpos ypos alpha clear"
+suivi de largeur*hauteur*3 octets de données RGB24 brutes.
 .IPs "BGR24 largeur hauteur xpos ypos alpha clear"
-suivi de largeur*hauteur*3 octets de données BGR32 brutes.
+suivi de largeur*hauteur*3 octets de données BGR24 brutes.
 .IPs "ALPHA largeur hauteur xpos ypos alpha"
-change l'alpha de la surface
+Change la transparence du canal alpha de la surface donnée.
 .IPs "CLEAR largeur hauteur xpos ypos"
-efface la surface
+Efface la surface.
 .IPs OPAQUE
-désactive toute transparence alpha.
+Désactive toute transparence alpha.
 Envoyez  "ALPHA 0 0 0 0 0" pour la réactiver.
 .IPs HIDE\ 
-cache la bitmap
+Cache la bitmap.
 .IPs SHOW\ 
-montre la bitmap
+Sontre la bitmap.
 .RE
 .PD 1
 .sp 1
@@ -4764,7 +4782,7 @@ Les arguments sont\ :
 .IPs "largeur, hauteur"
 taille de l'image/\:surface
 .IPs "xpos, ypos"
-démarre le blitting à la position X/\:Y
+Démarre le blitting à la position x/\:y.
 .IPs alpha
 Fixe la différence alpha.
 Si vous le fixez à \-255 vous pouvez envoyer une séquence de commandes
@@ -4773,12 +4791,12 @@ de fondu ! ;)
 .RSss
 0:    la même que l'original
 .br
-255:  rends tout opaque
+255:  Rends tout opaque.
 .br
--255: rends tout transparent
+-255: Rends tout transparent.
 .REss
 .IPs clear
-efface le framebuffer avant 'blitting'.
+Efface le framebuffer avant 'blitting'.
 .RSss
 0: l'image sera simplement 'blittée' par dessus l'ancienne, donc vous
 n'aurez pas à envoyer 1,8 Mo de données RGBA32 chaque fois qu'une petite
@@ -4815,31 +4833,32 @@ Si vous n'indiquez que i alors rien ne sera fait aux trames, seul I! est
 affiché.
 .
 .TP
-.B "tile=xtile:ytile:output:start:delta"
+.B "tile=xtiles:ytiles:output:start:delta"
 Crée un mosaïque d'images à partir d'une série d'images plus petites.
 Si vous omettez un paramètre ou utilisez une valeur plus petite que 0, alors
 la valeur par défaut est utilisée.
-Vous pouvez également arréter quand c'est bon (... \-vf tile=10:5 ...)
+Vous pouvez également arrêter quand vous êtes satisfait (...
+\-vf tile=10:5 ...)
 C'est probablement une bonne idée de placer le filtre scale avant tile :-)
 .sp 1
 Les paramètres sont:
 .sp 1
 .PD 0
 .RSs
-.IPs xtile
+.IPs <xtile>
 nombre d'éléments de mosaïque sur l'axe x (par défaut\ : 5)
-.IPs ytile
+.IPs <ytile>
 nombre d'éléments de mosaïque sur l'axe y (par défaut\ : 5)
-.IPs output
+.IPs <output>
 Affiche la mosaïque quand le nombre de trame est égal à 'output',
 où 'output' doit être un nombre inférieur à xtile * ytile.
 Les éléments de la mosaïque manquants sont laissées vides.
 Vous pouvez, par exemple, écrire une mosaïque de 8 * 7 toutes les 50 trames
 pour obtenir une image toutes les 2 secondes à 25 fps.
-.IPs start
-pixel au départ (x/\:y) (par défaut\ : 2)
-.IPs delta
-pixels entre 2 éléments de mosaïque, (x/\:y) (par défaut\ : 4)
+.IPs <start>
+épaisseur en pixels de la bordure extérieure (par défaut\ : 2)
+.IPs <delta>
+épaisseur en pixel de la bordure intérieure (par défaut\ : 4)
 .RE
 .PD 1
 .
@@ -4853,9 +4872,9 @@ peuvent varier).
 .PD 0
 .RSs
 .IPs x,y
-Position du coin supérieur gauche du logo.
+position du coin supérieur gauche du logo
 .IPs l,h
-Largeur et hauteur du rectangle nettoyé.
+largeur et hauteur du rectangle nettoyé
 .IPs t
 Épaisseur des bords du rectangle (ajouté à l et h).
 Quand il est égal à -1, un rectangle vert est dessiné sur l'écran pour
