@@ -43,6 +43,12 @@ extern int verbose;
 //   internet connection, the TCP connection will not get
 //   through
 // * Then we can try HTTP.
+// 
+// Note: 	MMS/HTTP support is now a "well known" support protocol,
+// 		it has been tested for while, not like MMST support.
+// 		WMP sequence is MMSU then MMST and then HTTP.
+// 		In MPlayer case since HTTP support is more reliable,
+// 		we are doing HTTP first then we try MMST if HTTP fail.
 int
 asf_streaming_start( stream_t *stream ) {
 	char proto_s[10];
@@ -50,18 +56,6 @@ asf_streaming_start( stream_t *stream ) {
 	
 	strncpy( proto_s, stream->streaming_ctrl->url->protocol, 10 );
 	
-	if( !strncasecmp( proto_s, "mms", 3) && strncasecmp( proto_s, "mmst", 4) ) {
-		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/UDP...\n");
-		//fd = asf_mmsu_streaming_start( stream );
-		if( fd!=-1 ) return fd;
-		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/UDP failed\n");
-	}
-	if( !strncasecmp( proto_s, "mms", 3) ) {
-		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/TCP...\n");
-		//fd = asf_mmst_streaming_start( stream );
-		if( fd!=-1 ) return fd;
-		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/TCP failed\n");
-	}
 	if( 	!strncasecmp( proto_s, "http", 4) || 
 		!strncasecmp( proto_s, "mms", 3)  ||
 		!strncasecmp( proto_s, "http_proxy", 10)
@@ -70,6 +64,18 @@ asf_streaming_start( stream_t *stream ) {
 		fd = asf_http_streaming_start( stream );
 		if( fd!=-1 ) return fd;
 		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/HTTP failed\n");
+	}
+	if( !strncasecmp( proto_s, "mms", 3) && strncasecmp( proto_s, "mmst", 4) ) {
+		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/UDP...\n");
+		//fd = asf_mmsu_streaming_start( stream );
+		if( fd!=-1 ) return fd;
+		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/UDP failed\n");
+	}
+	if( !strncasecmp( proto_s, "mms", 3) ) {
+		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/TCP...\n");
+		fd = asf_mmst_streaming_start( stream );
+		if( fd!=-1 ) return fd;
+		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/TCP failed\n");
 	}
 
 	mp_msg(MSGT_NETWORK,MSGL_ERR,"Unknown protocol: %s\n", proto_s );
