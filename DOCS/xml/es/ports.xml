@@ -305,7 +305,8 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
   permisos de escritura para el usuario que usa MPlayer, pero solo en algunos sistemas.
   Pruebe ha dar permisos de escritura si tiene problemas. Las DLLs de QuickTime también
   funcionan, pero debe colocarlas en su directorio de sistema de Windows
-  (<filename class="directory">C:\Windows\system\</filename> o similar).</para>
+  (<filename class="directory"><replaceable>C:\Windows\system\</replaceable></filename>
+  o similar).</para>
 
 <para>La consola de Cygwin/MinGW es extrañamente lenta. Redirigir la salida o usar
   la opción <option>-quiet</option> se ha informado que mejora el rendimiento en algunos
@@ -349,7 +350,7 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 <para>Para DVDs también funciona, ajuste <option>-dvd-device</option> para la letra
   de unidad de su DVD-ROM:</para>
 
-<screen>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</screen>
+<screen>mplayer dvd://<replaceable>&lt;título&gt;</replaceable> -dvd-device '\\.\d:'</screen>
 
 </sect2>
 
@@ -377,7 +378,7 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 
 <screen>mplayer <replaceable>/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
 
-<screen>mplayer dvd://&lt;title&gt; -dvd-device <replaceable>/d/</replaceable></screen>
+<screen>mplayer dvd://i<replaceable>&lt;título&gt;</replaceable> -dvd-device <replaceable>/d/</replaceable></screen>
 
 </sect2>
 

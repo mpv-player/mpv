@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.12 -->
+<!-- synced with 1.14 -->
 <chapter id="mencoder">
 <title>Codificando con MEncoder</title>
 
@@ -236,10 +236,9 @@ se describe <link linkend="menc-feat-fix-avi">más arriba</link>.
 <title>Codificando con la familia de codecs de libavcodec</title>
 
 <para>
-<link linkend="ffmpeg">libavcodec</link> provee desde codificación simple hasta
-un montón de interesantes formatos de video y audio (actualmente sus codecs de
-audio no están soportados). Puede codificar con los siguientes codecs (más o menos
-actualizado):
+<link linkend="ffmpeg">libavcodec</link> provee un montón de interesantes
+formatos de video y audio (actualmente sus codecs de audio no están soportados).
+Puede codificar con los siguientes codecs (más o menos actualizado):
 
 <informaltable frame="all">
 <tgroup cols="2">
@@ -641,7 +640,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  Hay dos maneras de evitar esto. Puede intentar codificar de nuevo
+  Hay tres maneras de evitar esto. Puede intentar codificar de nuevo
   usando <option>vqscale=4</option> y ver si tiene el tamaño de
   archivo y la calidad de imagen aceptables. También peude usar
   <link linkend="menc-feat-divx4">codificación en 2 pasadas</link>.
@@ -651,6 +650,15 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <option>-lavcopts vbitrate=<replaceable>bitrate</replaceable></option>
   sin usar
   <link linkend="menc-feat-divx4">codificación en 3 pasadas</link>.
+</para>
+
+<para>
+  La tercera y posiblemente la mejor opción puede ser rebajar ligeramente
+  la resolución. El rebajado suaviza ligeramente y la pérdida de detalle
+  es visualmente menos dañina que el ver bloques y otros artifactos
+  causados por la compresión MPEG. Escalar a un tamaño menor también reduce
+  de manera efectiva el ruido en la imagen, lo que es aún mejor, ya que
+  el ruido es más dificil de comprimir.
 </para></sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-deinterlacing">
@@ -712,7 +720,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Escalado y razón de aspecto</title>
 <para>
   Para mejor calidad, no escale la película durante el ripeo. El
-  escalado causa artefactos y hace el archivo mayor en tamaño. Los
+  escalado a tamaño menor obviamente pierde detalle, y el escalado
+  a mayor tamaño causa artefactos y hace el archivo mayor en tamaño. Los
   pixels en las películas DVD no son cuadrados, por eso las películas
   en DVD incluyen información acerca de la razón de aspecto correcta. Es
   posible almacenar la razón de aspecto en la cabecera del archivo

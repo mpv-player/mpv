@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
-<!-- synced with 1.6 -->
+<!-- synced with 1.8 -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
 	"/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd"
 [
@@ -8,7 +8,6 @@
 <!ENTITY bugs.xml		SYSTEM "bugs.xml">
 <!ENTITY cd-dvd.xml		SYSTEM "cd-dvd.xml">
 <!ENTITY codecs.xml		SYSTEM "codecs.xml">
-<!ENTITY edl.xml		SYSTEM "edl.xml">
 <!ENTITY faq.xml		SYSTEM "faq.xml">
 <!ENTITY features.xml		SYSTEM "features.xml">
 <!ENTITY formats.xml		SYSTEM "formats.xml">

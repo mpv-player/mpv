@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.25 -->
+<!-- synced with 1.26 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Preguntas de Usuario Frecuentes</title>
 
@@ -154,30 +154,7 @@ sección de <link linkend="install">Instalación</link>.
 
 <qandaentry>
 <question><para>
-He intentado compilar MPlayer, pero obtengo esta salida:
-<screen>
-    En el archivo incluído en /usr/include/g++-v3/bits/std_cwchar.h:42,
-                           de /usr/include/g++-v3/bits/fpos.h:40,
-                           de /usr/include/g++-v3/bits/char_traits.h:40,
-                           de /usr/include/g++-v3/bits/std_string.h:41,
-                           de /usr/include/g++-v3/string:31,
-                           de libwin32.h:36,
-                           de DS_AudioDecoder.h:4,
-                           de DS_AudioDec.cpp:5:
-    /usr/include/wchar.h: En función Long long int wcstoq(const wchar_t*,
-       wchar_t**, int)':
-    /usr/include/wchar.h:514: no se puede convertir `const wchar_t* __restrict' a
-    `const
-</screen>
-</para></question>
-<answer><para>
-Actualice su glibc a la última versión. En Mandrake, use 2.2.4-8mdk.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-.. gcc 2.96 ... (Sí, ¡alguna gente SIGUE molestándonos con gcc 2.96!!)
+.. gcc 2.96 ... (Sí, ¡alguna gente SIGUE molestándonos con gcc 2.96!)
 </para></question>
 <answer><para>
 Citado de un <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-October/005351.html">correo</ulink>

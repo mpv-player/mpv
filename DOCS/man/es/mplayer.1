@@ -1,7 +1,7 @@
-.\" synced with 1.514
-.\" MPlayer (C) 2000-2003 El equipo de MPlayer 
-.\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun, Jonas Jermann
-.\" y traducida al español por Juan Martín López <nauj27@teleline.es>
+.\" synced with 1.521
+.\" MPlayer (C) 2000-2004 El equipo de MPlayer 
+.\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun,
+.\" Jonas Jermann y traducida al español por Juan Martín López.
 .\" 
 .
 .\" --------------------------------------------------------------------------
@@ -35,7 +35,7 @@
 .\" Título
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2003-12-23"
+.TH MPlayer 1 "2004-01-19" "Proyecto MPlayer" "El Reproductor de Películas para Linux"
 .
 .SH NOMBRE
 mplayer  \- Reproductor de películas para Linux
@@ -217,6 +217,10 @@ flip=si
 # empezando con mf://mascaradearchivo
 .br
 mf=type=png:fps=25
+.br
+# Las imágenes en negativo son extrañamente bonitas.
+.br
+vf=eq2=1.0:-0.8
 .PP
 También puede escribir archivos de configuración para archivos específicos.
 Si dispone de un archivo de configuración para un archivo llamado 'pelicula.avi',
@@ -1175,8 +1179,6 @@ tipografías FreeType:
 .I NOTA:
 Con FreeType, esta opción determina la ruta al archivo de tipografía de texto.
 .br
-Las opciones \-subfont-* están disponibles solo con soporte FreeType compilado.
-.br
 Con Fontconfig, esta opción determina el nombre de la tipografía de fontconfig.
 
 .I EJEMPLO:
@@ -1360,7 +1362,7 @@ Puede ser negativo.
 Actualmente no es útil.
 Lo mismo que \-audiofile, pero para flujos de subtítulos (¿OggDS?).
 .TP
-.B \-subfont-autoscale <0\-3>
+.B \-subfont-autoscale <0\-3> (solamente FreeType)
 Establece el modo de autoescala.
 .br
 .I NOTA:
@@ -1383,21 +1385,21 @@ proporcional a la diagonal de la película (por defecto)
 .PD 1
 .
 .TP
-.B \-subfont-blur <0\-8>
+.B \-subfont-blur <0\-8> (solamente FreeType)
 Establece el radio de difuminado de la tipografía (por defecto: 2).
 .TP
-.B \-subfont-encoding <valor>
+.B \-subfont-encoding <valor> (solamente FreeType)
 Establece la codificación del tipo de letra.
 Cuando se establece a 'unicode', todos los símbolos del archivo de tipo de letra
 son renderizados y es usado unicode (por defecto: unicode).
 .TP
-.B \-subfont-osd-scale <0\-100>
+.B \-subfont-osd-scale <0\-100> (solamente FreeType)
 Establece el coeficiente de autoescala de los elementos del osd (por defecto: 6).
 .TP
-.B \-subfont-outline <0\-8>
+.B \-subfont-outline <0\-8> (solamente FreeType)
 Establece el grosor de la línea de contorno de las letras (por defecto: 2).
 .TP
-.B \-subfont-text-scale <0\-100>
+.B \-subfont-text-scale <0\-100> (solamente FreeType)
 Establece el coeficiente de autoescala del texto de subtítulos (porcentaje
 del tamaño de pantalla) (por defecto: 5).
 .TP
@@ -1869,30 +1871,6 @@ al finalizar.
 Intenta cambiar a un modo de video mejor.
 dga, x11/\:xv (XF86VidMode) y los drivers de salida sdl lo soportan.
 .TP
-.B \-vo <driver1[:dispositivo],driver2,...[,]>
-Especifica una lista de prioridades de controladores de salida de video
-(opcionalmente con el dispositivo) a ser usada.
-Con el 'dispositivo' SDL y GGI también es válido, indicando en ese caso
-un subcontrolador.
-.br
-.I NOTA:
-Vea \-vo help para una lista completa de los controladores disponibles.
-.br
-Si la lista tiene ',' adicionales se volverá en caso de fallo a controladores
-no listados.
-
-.I EJEMPLO:
-.PD 0
-.RSs
-.IPs "\-vo xmga,xv,"
-Prueba el controlador del kernel de Matrox, luego el Xv, y finalmente otros
-.br
-.IPs "\-vo sdl:aalib"
-especifica el subcontrolador de SDL
-.RE
-.PD 1
-.
-.TP
 .B \-vsync \ \ 
 Activa VBI para vesa.
 .TP
@@ -2122,6 +2100,11 @@ mayoría de los archivos AVI.
 .RE
 .PD 1
 .
+.TP
+.B \-codecs-file <nombrearchivo>
+Usa el archivo especificado en lugar del instalado en el sistema o
+compilado internamente.
+Vea también \-afm, \-ac, \-vfm y \-vc.
 .TP
 .B \-flip \ 
 Voltea la imagen arriba-abajo.
@@ -2471,7 +2454,6 @@ Configura una cadena de filtros de video
 Configura una cadena de filtros de video, a ser aplicados en orden
 .B inverso.
 Anticuado en favor de \-vf.
-.RE
 .PP
 Los parámetros son opcionales y si son omitidos, algunos serán tomados sus
 valores por defecto.
@@ -2480,6 +2462,23 @@ Los parámetros w:h significan ancho x alto en pixels, x:y significa posición
 x;y contada desde la esquina superior izquierda de la imagen grande.
 Para obtener una lista completa de los filtros disponibles, vea \-vf help.
 
+Los filtros son administrados en listas.
+Hay unas pocas órdenes para administrar la lista de filtros.
+.TP
+.B \-vf-add <filtro1[,filtro2,...]>
+Añade los filtros dados como argumentos a la lista de filtros.
+.TP
+.B \-vf-pre <filtro1[,filtro2,...]>
+Quita los filtros dados como argumentos a la lista de filtros.
+.TP
+.B \-vf-del <índice1[,índice2,...]>
+Borra los filtros en los índices dados.
+Los números de índices comienzan en 0, los números negativos se
+direccionan al final de la lista (-1 es el último).
+.TP
+.B \-vf-clr
+Vacía por completo la lista de filtros.
+.PP
 Los filtros disponibles son:
 .
 .TP
@@ -3322,7 +3321,7 @@ simplificarla busqueda de los parámetros x, y, w, h correctos.
 .TP
 .B zrmjpeg[=opciones]
 Codificador por software de YV12 a MJPEG para uso con dispositivo de
-salida de video zr2. Pueden especificarse múltiples opciones con ':'.
+salida de video zr2.
 .RSs
 .IPs maxheight=h|maxwidth=w
 Estas opciones establecen el ancho y alto máximos que la tarjeta zr
@@ -3330,12 +3329,12 @@ puede manejar.
 La capa de filtros de MPlayer no puede hacer actualmente esto.
 .IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
 Use estas opciones para establecer maxheight y maxwidth automáticamente
-a los valores conocidos por la combinación tarjeta/modo. Por ejemplo,
-opciones válidas son:
-dc10-PAL y buz-NTSC. Por defecto se toma dc10+PAL.
+a los valores conocidos por la combinación tarjeta/modo.
+Por ejemplo, opciones válidas son: dc10-PAL y buz-NTSC (por defecto: dc10+PAL).
 .IPs color|bw
-Elige color o blanco y negro para la codificación. La codificación en
-blanco y negro es más rápida. Por defecto es en color.
+Elige color o blanco y negro para la codificación.
+La codificación en blanco y negro es más rápida.
+Por defecto es en color.
 .IPs hdec={1,2,4}
 Decimación horizontal 1, 2 ó 4.
 .IPs vdec={1,2,4}
@@ -3344,9 +3343,399 @@ Decimación vertical 1, 2 ó 4.
 Establece la calidad en la compresión JPEG [MEJOR] 1 - 20 [MUY MALA].
 .IPs fd|nofd
 Por defecto, la decimación solo se hace si el hardware zoran puede
-sobreescalar las imágenes MJPEG resultantes al tamaño original. La
-opción fd le indica al filtro que siempre haga la decimación (antiestético).
+sobreescalar las imágenes MJPEG resultantes al tamaño original.
+La opción fd le indica al filtro que siempre haga la decimación
+(antiestético).
 .RE
+.
+.
+.SH "CONTROLADORES DE SALIDA DE VIDEO (SOLAMENTE MPLAYER)"
+Los controladores de salida de video con interfaces para las distintas
+facilidades de salida.
+La sintaxis es:
+.TP
+.B \-vo <controlador1[:opcion],controlador2,...[,]>
+Especifica una lista de controladores de video prioritarios para usar.
+.PP
+Si la lista tiene la ',' restante se probarán después otros controladores
+no listados en la línea de órdenes.
+Las subopciones son opcionales y la mayoría pueden omitirse.
+.br
+.I NOTA:
+Vea \-vo help para una lista de controladores compilados.
+
+.I EJEMPLO:
+.PD 0
+.RSs
+.IPs "\-vo xmga,xv,"
+Prueba el controlador Matrox X11, luego el controlador Xv, y luego los otros.
+.br
+.IPs "\-vo directx:noaccel"
+Usa el controlador DirectX con las características de aceleración
+desactivadas.
+.RE
+.PD 1
+.
+
+Los controladores de salida disponibles son:
+.
+.TP
+.B xv (solamente X11)
+Usa la extensión XVideo de XFree86 4.x para activar la reproducción acelarada
+por hardware.
+Si no puede usar un controlador de video específico para su hardware,
+probablemente sea esta la mejor opción.
+.PD 0
+.RSs
+.IPs port=<número>
+Selecciona el puerto de XVideo específico.
+.RE
+.PD 1
+.TP
+.B x11 (solamente X11)
+Controlador de salida de memoria compartida sin aceleración hardware que
+funciona en cualquier X11 que esté presente.
+.TP
+.B xover (solamente X11)
+Añade soporte X11 a todos los controladores de salida de video basado
+en overlay.
+Actualmente solo soportado por tdfx_vid.
+.TP
+.B xvmc (solamente X11)
+Este controlador de salida de video emplea la extensión XvMC (X Video
+Motion Compensation) de XFree86 4.x.
+.TP
+.B dga (solamente X11)
+Salida de video a través de la extensión XFree86 Direct Graphics Access.
+Considerado obsoleto.
+.TP
+.B sdl\ \ \ \ 
+Biblioteca de controlador de salida SDL (Simple Directmedia Layer) altamente
+independiente de la plataforma.
+.TP
+.B vidix\ \ 
+VIDIX (VIDeo Interface for *niX) es una interfaz para las características
+de aceleración de video de las diferentes tarjetas gráficas.
+Controlador de salida muy rápido en tarjetas que lo soporten.
+.TP
+.B xvidix (solamente X11)
+VIDIX funcionando bajo X11.
+.TP
+.B cvidix\ 
+VIDIX funcionando en una consola.
+.TP
+.B winvidix (solamente Windows)
+Versión para Windows del controlador VIDIX.
+.TP
+.B directx (solamente Windows)
+Controlador de salida que usa la interfaz DirectX.
+.PD 0
+.RSs
+.IPs noaccel
+Desactiva la aceleración hardware.
+Pruebe esta opción si tiene problemas con la representación en pantalla.
+.RE
+.PD 1
+.TP
+.B fbdev (solamente Linux)
+Usa el framebuffer del núcleo para la salida de video.
+.TP
+.B fbdev2 (solamente Linux)
+Usa el framebuffer del núcleo para la salida de video,
+implementación alternativa.
+.TP
+.B vesa\ \ \ 
+Controlador de salida de video muy general que debe funcionar en cualquier
+tarjeta compatible con VESA VBE 2.0.
+.PD 0
+.RSs
+.IPs dga\ \ 
+Activa el modo DGA.
+.IPs nodga
+Desactiva el modo DGA.
+.IPs vidix
+FIXME: documentar esto.
+.IPs lvo\ \ 
+FIXME: documentar esto.
+.RE
+.PD 1
+.TP
+.B svga\ \ \ 
+Salida de video usando la biblioteca SVGA.
+.TP
+.B gl\ \ \ \ \ 
+Controlador de salida OpenGL.
+.TP
+.B gl2\ \ \ \ 
+Controlador de salida de OpenGL, segunda generación.
+.TP
+.B null\ \ \ 
+No produce salida de video.
+Útil para pruebas de rendimiento.
+.TP
+.B aa\ \ \ \ \ 
+Controlador de salida ASCII art que funciona en una consola de texto.
+.TP
+.B bl\ \ \ \ \ 
+Reproducción de video usando el protocolo UDP Blinkenlights.
+Este controlador es altamente para hardware específico.
+.TP
+.B ggi\ \ \ \ 
+Controlador de salida para el sistema gráfico GGI.
+.TP
+.B directfb
+Reproduce video usando la biblioteca DirectFB.
+.PD 0
+.RSs
+.IPs número
+Elige la capa.
+.RE
+.PD 1
+.TP
+.B directfb2
+Reproduce video usando la biblioteca DirectFB, segunda generación.
+.TP
+.B dfbmga\ 
+Controlador específico de salida para Matrox G400/G450/G550 que usa
+la biblioteca DirectFB.
+Activa CRTC2 (segundo monitor), mostrando el video independientemente
+del primer monitor.
+.TP
+.B mga (solamente Linux)
+Controlador de salida específico de Matrox que hace uso del backend
+scaler YUV en tarjetas Gxxx a través del módulo del núcleo.
+Si tiene una tarjeta Matrox, esta es la opción más rápida.
+.TP
+.B xmga (solamente Linux, X11)
+El controlador de salida mga, funcionando en una ventana X11.
+.TP
+.B syncfb\ 
+Controlador de salida de video para el módulo del núcleo SyncFB, que provee
+características de hardware especiales para las tarjetas Matrox Gxxx como
+desentrelazado por hardware, escalado y sincronización de la salida de video
+con el refresco vertical de su monitor.
+.TP
+.B 3dfx (solamente Linux sea esta la mejor opción.
+.TP
+.B x11 (solamente X11)
+Controlador de salida de memoria compartida sin aceleración hardware que
+funciona en cualquier X11 que esté presente.
+.TP
+.B xover (solamente X11)
+Añade soporte X11 a todos los controladores de salida de video basado
+en overlay.
+Actualmente solo soportado por tdfx_vid.
+.TP
+.B xvmc (solamente X11)
+Este controlador de salida de video emplea la extensión XvMC (X Video
+Motion Compensation) de XFree86 4.x.
+.TP
+.B dga (solamente X11)
+Salida de video a través de la extensión XFree86 Direct Graphics Access.
+Considerado obsoleto.
+.TP
+.B sdl\ \ \ \ 
+Biblioteca de controlador de salida SDL (Simple Directmedia Layer) altamente
+independiente de la plataforma.
+.TP
+.B vidix\ \ 
+VIDIX (VIDeo Interface for *niX) es una interfaz para las características
+de aceleración de video de las diferentes tarjetas gráficas.
+Controlador de salida muy rápido en tarjetas que lo soporten.
+.TP
+.B xvidix (solamente X11)
+VIDIX funcionando bajo X11.
+.TP
+.B cvidix\ 
+VIDIX funcionando en una consola.
+.TP
+.B winvidix (solamente Windows)
+Versión para Windows del controlador VIDIX.
+.TP
+.B directx (solamente Windows)
+Controlador de salida que usa la interfaz DirectX.
+.PD 0
+.RSs
+.IPs noaccel
+Desactiva la aceleración hardware.
+Pruebe esta opción si tiene problemas con la representación en pantalla.
+.RE
+.PD 1
+.TP
+.B fbdev (solamente Linux)
+Usa el framebuffer del núcleo para la salida de video.
+.TP
+.B fbdev2 (solamente Linux)
+Usa el framebuffer del núcleo para la salida de video,
+implementación alternativa.
+.TP
+.B vesa\ \ \ 
+Controlador de salida de video muy general que debe funcionar en cualquier
+tarjeta compatible con VESA VBE 2.0.
+.PD 0
+.RSs
+.IPs dga\ \ 
+Activa el modo DGA.
+.IPs nodga
+Desactiva el modo DGA.
+.IPs vidix
+FIXME: documentar esto.
+.IPs lvo\ \ 
+FIXME: documentar esto.
+.RE
+.PD 1
+.TP
+.B svga\ \ \ 
+Salida de video usando la biblioteca SVGA.
+.TP
+.B gl\ \ \ \ \ 
+Controlador de salida OpenGL.
+.TP
+.B gl2\ \ \ \ 
+Controlador de salida de OpenGL, segunda generación.
+.TP
+.B null\ \ \ 
+No produce salida de video.
+Útil para pruebas de rendimiento.
+.TP
+.B aa\ \ \ \ \ 
+Controlador de salida ASCII art que funciona en una consola de texto.
+.TP
+.B bl\ \ \ \ \ 
+Reproducción de video usando el protocolo UDP Blinkenlights.
+Este controlador es altamente para hardware específico.
+.TP
+.B ggi\ \ \ \ 
+Controlador de salida para el sistema gráfico GGI.
+.TP
+.B directfb
+Reproduce video usando la biblioteca DirectFB.
+.PD 0
+.RSs
+.IPs número
+Elige la capa.
+.RE
+.PD 1
+.TP
+.B directfb2
+Reproduce video usando la biblioteca DirectFB, segunda generación.
+.TP
+.B dfbmga\ 
+Controlador específico de salida para Matrox G400/G450/G550 que usa
+la biblioteca DirectFB.
+Activa CRTC2 (segundo monitor), mostrando el video independientemente
+del primer monitor.
+.TP
+.B mga (solamente Linux)
+Controlador de salida específico de Matrox que hace uso del backend
+scaler YUV en tarjetas Gxxx a través del módulo del núcleo.
+Si tiene una tarjeta Matrox, esta es la opción más rápida.
+.TP
+.B xmga (solamente Linux, X11)
+El controlador de salida mga, funcionando en una ventana X11.
+.TP
+.B syncfb\ 
+Controlador de salida de video para el módulo del núcleo SyncFB, que provee
+características de hardware especiales para las tarjetas Matrox Gxxx como
+desentrelazado por hardware, escalado y sincronización de la salida de video
+con el refresco vertical de su monitor.
+.TP
+.B 3dfx (solamente Linux)
+Este controlador emplea el controlador del framebuffer tdfx para reproducir
+películas con aceleración YUV.
+.TP
+.B tdfx_vid (solamente Linux)
+Controlador de salida específico para 3Dfx.
+Funciona conjuntamente con el módulo del núcleo.
+.TP
+.B dxr2\ \ \ 
+Controlador de salida específico para Creative DXR2.
+Vea también la opción -dxr2.
+.PD 0
+.RSs
+.IPs x11
+Activa overlay.
+.IPs xv
+Activa overlay.
+.RE
+.PD 1
+.TP
+.B dxr3\ \ \ 
+Controlador de salida específico para el chip decodificador Sigma Design
+em8300 MPEG (Creative DXR3, Sigma Designs Hollywood Plus).
+Vea también el filtro de video lavc.
+.PD 0
+.RSs
+.IPs overlay
+Activa overlay en lugar de TVOut.
+.IPs prebuf
+Activa prebuffering.
+.IPs sync
+Debe activar el nuevo motor de sincronización.
+.IPs norm=<norm>
+Especifica la norma de TV.
+.RSss
+0: No cambia la norma actual (por defecto).
+.br
+1: Auto-ajusta usando PAL/NTSC.
+.br
+2: Auto-ajusta usando PAL/PAL-60.
+.br
+3: PAL
+.br
+4: PAL-60
+.br
+5: NTSC
+.REss
+.IPs device=<número>
+Especifica el número de dispositivo a usar si su hardware tiene más de una
+tarjeta em8300.
+.RE
+.PD 1
+.TP
+.B mpegpes
+Controlador de salida específico para DVB.
+.TP
+.B zr\ \ \ \ \ 
+Controlador de salida para unas cuantas tarjetas capturadoras/reproductoras
+de MJPEG.
+Vea también las opciones -zr* y -zrhelp.
+.TP
+.B zr2\ \ \ \ 
+Controlador de salida para unas cuantas tarjetas capturadoras/reproductoras
+de MJPEG, segunda generación.
+Vea también el filtro de video zrmjpeg.
+.TP
+.B md5\ \ \ \ 
+Escribe md5sums para cada marco de imagen a un archivo llamado 'md5' en
+el directorio actual.
+Útil para debug.
+.TP
+.B yuv4mpeg
+Transforma el flujo de video en una secuencia de imágenes YUV 4:2:0 sin
+comprimir y las almacena en un archivo llamado 'stream.yuv' en el directorio
+actual.
+Útil si quiere procesar el video con la suite mjpegtools.
+.TP
+.B gif89a\ 
+Saca cada marco de imagen en un archivo GIF en el diretorio actual.
+Cada archivo toma el número de marco rellenado con ceros como nombre.
+.TP
+.B jpeg\ \ \ 
+Saca cada marco de imagen en un archivo JPEG en el directorio actual.
+Cada archivo toma el número de marco rellenado con ceros como nombre.
+.TP
+.B pgm\ \ \ \ 
+Saca cada marco de imagen en un archivo PGM en el directorio actual.
+Cada archivo toma el número de marco rellenado con ceros como nombre.
+.TP
+.B png\ \ \ \ 
+Saca cada marco de imagen en un archivo PNG en el directorio actual.
+Cada archivo toma el número de marco rellenado con ceros como nombre.
+.TP
+.B tga\ \ \ \ 
+Saca cada marco de imagen en un archivo Targa en el directorio actual.
+Cada archivo toma el número de marco rellenado con ceros como nombre.
 .
 .
 .SH "OPCIONES DE CODIFICACIÓN GENERALES (SOLAMENTE MENCODER)"
@@ -4407,6 +4796,8 @@ modelo de contexto grande
 usa compensación de movimiento quarter pel
 Consejo: Esto es útil solamente para codificaciones con tasa de bits alta.
 .TP
+.B ildctcmp=<0\-2000>
+función de comparación para la decisión de dct entrelazado
 .B precmp=<0\-2000>
 función de comparación para la estimación de movimiento pre pass
 .TP
@@ -4437,6 +4828,10 @@ número de bits necesarios para el bloque
 razón de distorsión óptima, lento
 .IPs "7 (ZERO)"
 0
+.IPs "8 (VSAD)"
+suma de las diferencias verticales absolutas
+.IPs "9 (VSSE)"
+suma de las diferencias verticales al cuadrado
 .IPs +256\ 
 usar también crominancia, no funciona (correctamente) actualmente con marcos B
 .RE
@@ -4895,7 +5290,7 @@ MPlayer fue inicialmente escrito por Arpad Gereoffy.
 Vea el archivo AUTORES para obtener una lista de muchos otros
 contribuyentes.
 .TP
-MPlayer es (C) 2000\-2003
+MPlayer es (C) 2000\-2004
 .B El Equipo MPlayer
 .TP
 Esta página de manual está escrita y mantenida por

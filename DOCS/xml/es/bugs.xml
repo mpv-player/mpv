@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.4 -->
+<!-- synced with 1.6 -->
 <appendix id="bugs">
 <title>Problemas conocidos</title>
 <sect1 id="bugs-special">
@@ -143,7 +143,7 @@ codec usando las opciones <option>-vc</option> o <option>-vfm</option>.
 <listitem>
 <para>
 intentó reproducir un archivo DivX 3.x con el decodificador OpenDivX o XviD
-(<option>-vc odivx</option>) - instale Divx4Linux y recompile <application>MPlayer</application>
+(<option>-vc odivx</option>) - instale DivX4Linux y recompile <application>MPlayer</application>
 </para>
 </listitem>
 </itemizedlist>

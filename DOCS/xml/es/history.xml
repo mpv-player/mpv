@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.8 -->
+<!-- synced with 1.10 -->
 <!-- FIXME: history really should be in the appendix -->
 <sect1 id="history">
 <title>Historia</title>
@@ -25,12 +25,12 @@ uno...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.5-v0.87</emphasis>: Sep 28-Oct 20, 2000
-  </para><para>El codec de mpeg fue reemplazado por DVDview por Dirk Farin, 
+  </para><para>El codec de MPEG fue reemplazado por DVDview por Dirk Farin, 
   era una cosa grandiosa, pero era lenta y estaba escrita en C++ (¡¡¡A'rpi odia C++!!¡)
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.9-v0.95pre5</emphasis>: Oct 21-Nov 2, 2000
-  </para><para>El codec de mpeg era libmpeg2 (mpeg2dec) por Aaron Holtzman y
+  </para><para>El codec de MPEG era libmpeg2 (mpeg2dec) por Aaron Holtzman y
   Michael Lespinasse. Es grandioso, código C optimizado y muy rápido con una
   calidad de imagen perfecta y que cumple al 100% el estándar MPEG.
   </para></listitem>
