@@ -4705,6 +4705,25 @@ static double expfloor(double x)
     return floor(x);
 }
 
+#define FPU_DOUBLE(var) double var; \
+  __asm__ __volatile__( "fstpl %0;fwait" : "=m" (var) : )
+
+static double exp_CIcos(void)
+{
+    FPU_DOUBLE(x);
+
+    dbgprintf("_CIcos(%lf)\n", x);
+    return cos(x);
+}
+
+static double exp_CIsin(void)
+{
+    FPU_DOUBLE(x);
+
+    dbgprintf("_CIsin(%lf)\n", x);
+    return sin(x);
+}
+
 struct exports
 {
     char name[64];
@@ -4914,6 +4933,8 @@ struct exports exp_msvcrt[]={
     FF(cos, -1)
     FF(_ftol,-1)
     FF(_CIpow,-1)
+    FF(_CIcos,-1)
+    FF(_CIsin,-1)
     FF(ldexp,-1)
     FF(frexp,-1)
     FF(sprintf,-1)
