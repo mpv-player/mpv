@@ -627,12 +627,33 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 
 		sh->samplesize=char2short(trak->stdata,18)/8;
 		sh->channels=char2short(trak->stdata,16);
+		/*printf("MOV: timescale: %d samplerate: %d durmap: %d (%d) -> %d (%d)\n",
+		    trak->timescale, char2short(trak->stdata,24), trak->durmap[0].dur,
+		    trak->durmap[0].num, trak->timescale/trak->durmap[0].dur,
+		    char2short(trak->stdata,24)/trak->durmap[0].dur);*/
 		sh->samplerate=char2short(trak->stdata,24);
+		if((sh->samplerate < 8000) && trak->durmap) {
+		  switch(char2short(trak->stdata,24)/trak->durmap[0].dur) {
+		    // TODO: add more cases.
+		    case 31:
+		      sh->samplerate = 32000; break;
+		    case 43:
+		      sh->samplerate = 44100; break;
+		    case 47:
+		      sh->samplerate = 48000; break;
+		    default:
+		      mp_msg(MSGT_DEMUX, MSGL_WARN,
+			  "MOV: unable to determine audio samplerate, "
+			  "assuming 44.1kHz (got %d)\n",
+			  char2short(trak->stdata,24)/trak->durmap[0].dur);
+		      sh->samplerate = 44100;
+		  }  
+		}  
 
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio bits: %d  chans: %d\n",
 		    trak->stdata[19],trak->stdata[17]);
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio sample rate: %d\n",
-		    char2short(trak->stdata,24));
+		    sh->samplerate/*char2short(trak->stdata,24)*/);
 		if((trak->stdata[9]==0) && trak->stdata_len >= 36) { // version 0 with extra atoms
 		    int atom_len = char2int(trak->stdata,28);
 		    switch(char2int(trak->stdata,32)) { // atom type
