@@ -33,7 +33,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-11-02" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2004-11-07" "The MPlayer Project" "The Movie Player"
 .
 .SH NAME
 mplayer  \- movie player
@@ -6495,8 +6495,8 @@ Use 4 motion vectors per macroblock.
 This might give better compression, but slows down encoding.
 .br
 .I WARNING:
-This option is deprecated in XviD-1.0.x, as all is now taken care of
-by the me_quality option.
+As of XviD-1.0.x, this option is no longer available separately, and its
+functionality is included in the me_quality option.
 When me_quality > 4, 4mv is activated.
 .
 .TP
@@ -6525,7 +6525,7 @@ CBR mode: min & max quantizer for all frames (default: 2\-31)
 2pass mode: min & max quantizer for I/\:P-frames (default: 2\-31/\:2\-31)
 .br
 .I WARNING:
-This option is deprecated in XviD-1.0.x, and is replaced by the
+As of XviD-1.0.x, this option is replaced by the
 [min|max]_[i|p|b]quant options.
 .
 .TP
@@ -6544,8 +6544,7 @@ For low bitrates, the smoothing of H.263 will give you less block noise.
 When using custom matrices, MPEG must be used.
 .br
 .I WARNING:
-This option is deprecated in XviD-1.0.x, and is replaced by the quant_type
-option.
+As of XviD-1.0.x, this option is replaced by the quant_type option.
 .
 .TP
 .B mod_quant
@@ -6557,7 +6556,7 @@ This will generate an illegal bitstream, and most likely not be decodable
 by any MPEG4 decoder besides libavcodec or XviD.
 .br
 .I WARNING:
-This option is deprecated in XviD-1.0.x.
+As of XviD-1.0.x, this option is no longer available.
 .
 .TP
 .B keyframe_boost=<0\-1000>
@@ -6579,6 +6578,14 @@ The last I-frame will get treated normally.
 (default: 30, 2pass mode only)
 .
 .TP
+.B divx5bvop
+Generate DivX5 compatible B-frames (default: on).
+This seems to be mandatory only for old versions of DivX's decoder.
+.br
+.I WARNING:
+As of XviD-1.0.x, this option is replaced by the closed_gop option.
+.
+.TP
 .B (no)greyscale
 Make XviD discard chroma planes so the encoded video is greyscale only.
 Note that this does not speed up encoding, it just prevents chroma data
@@ -6597,7 +6604,12 @@ releases of XviD 1.0.x (api4).
 .
 .TP
 .B (no)packed
-Create a bitstream which can be decoded delay-free.
+This option is meant to solve frame-order issues when encoding to
+container formats like AVI that cannot cope with out-of-order frames.
+In practise, most decoders (both software and hardware) are able to deal
+with frame-order themselves, and may get confused when this option is
+turned on, so you can safely leave if off, unless you really know what
+you are doing.
 .br
 .I WARNING:
 This will generate an illegal bitstream, and will not be
@@ -6606,10 +6618,6 @@ decodable by ISO-MPEG4 decoders except DivX/\:libavcodec/\:XviD.
 .I WARNING:
 This will also store a fake DivX version in the file so the bug
 autodetection of some decoders might be confused.
-.
-.TP
-.B divx5bvop
-Generate DivX5 compatible B-frames (default: on).
 .
 .TP
 .B max_bframes=<0\-4>
@@ -6633,6 +6641,14 @@ This setting allows you to specify what priority to place on the use of
 B-frames.
 The higher the value, the higher the probability of B-frames being used.
 (default: 0)
+.
+.TP
+.B (no)closed_gop
+This option tells XviD to close every GOP (Group Of Pictures bounded
+by two I-frames), which makes GOPs independent from each other.
+This just implies that the last frame of the GOP is eiter a P-frame or a
+N-frame but not a B-frame.
+It is usually a good idea to turn this option on (default: on).
 .
 .TP
 .B frame_drop_ratio=<0\-100> (max_bframes=0 only)

@@ -1,4 +1,4 @@
-.\" synced with 1.800
+.\" synced with 1.801
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2 Novembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "7 Novembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -3010,7 +3010,7 @@ Transforme le flux vidéo en une séquence d'images YUV 4:2:0 non compressées
 et les stocke dans un fichier nommé 'stream.yuv' dans le répertoire courant.
 Ce format est identique à celui employé par la suite mjpegtools, ce qui peut
 vous être utile pour retraiter cette vidéo avec cette suite.
-Ne que gère les formats YV12, RGB (24 bits/pixel) et BGR (24 bits/pixel).
+Ne gère que les formats YV12, RGB (24 bits/pixel) et BGR (24 bits/pixel).
 .PD 0
 .RSs
 .IPs interlaced
@@ -6785,6 +6785,7 @@ redimentionnement adapté à ce genre de vidéo, ce qui se fait avec
 .B 4mv\ \ \ \ 
 Utilise 4 vecteurs de mouvement par macro-bloc.
 Peut améliorer la compressibilité mais ralenti l'encodage.
+.br
 .I ATTENTION\ :
 Cette option n'existe plus séparément avec XviD 1.0.x, mais est activée
 automatiquement quand me_quality > 4.
@@ -6816,7 +6817,7 @@ mode 2passes\ : quantificateur min & max pour trames-I/\:P
 (par défaut\ : 2\-31/\:2\-31)
 .br
 .I ATTENTION\ :
-Cette option est dépassée avec XviD-1.0.x, où elle est remplacée par les
+À partir de XviD-1.0.x, cette option est remplacée par les
 options [min|max]_[i|p|b]quant.
 .
 .TP
@@ -6837,19 +6838,20 @@ image où les macro-blocs se verront moins.
 Si vous utilisez vos propres matrices de quantization, vous devez
 utiliser MPEG.
 .I ATTENTION\ :
-Cette option est dépassée avec XviD-1.0.x, où elle est remplacée par l'option
+À partir de XviD-1.0.x, cette option est remplacée par l'option
 quant_type.
 .
 .TP
 .B mod_quant
 Décide  trame par trame d'utiliser ou non les quantificateurs MPEG ou H.263.
+.br
 .I ATTENTION\ :
 Cette option génèrera un flux vidéo incompatible avec la norme MPEG4.
 Ainsi, ne pourrez-vous vraisemblablement le lire qu'avec libavcodec ou XviD.
 (mode 2passes uniquement)
 .br
 .I ATTENTION\ :
-Cette option n'existe plus avec XviD-1.0.x.
+Cette option n'existe plus à partir de XviD-1.0.x.
 .
 .TP
 .B keyframe_boost=<0\-1000>
@@ -6871,6 +6873,15 @@ La dernière trame-clé est traitée normalement.
 (défaut\ : 0, mode 2passes uniquement)
 .
 .TP
+.B divx5bvop
+Génère des trames-B compatibles DivX5 (par défaut\ : on).
+Ceci ne semble nécessaire qu'avec de vieilles versions du décodeur de DivX.
+.br
+.I ATTENTION\ :
+À partir de XviD-1.0.x, cette option est remplacée par l'option
+closed_gop.
+.
+.TP
 .B (no)greyscale
 Indique à XviD de ne pas enregistrer l'information de chroma pour que la
 vidéo produite ne soit qu'en noir & blanc.
@@ -6890,7 +6901,14 @@ stables 1.0.x de XviD (api4).
 .
 .TP
 .B (no)packed
-Crée un flux de bits pouvant être décodé sans délais.
+Cette option a pour but de résoudre les problèmes de l'ordre des trames
+lorsque l'encodage est fait vers un container comme AVI qui ne gère pas
+les trames dans le désordre.
+En pratique, la plupart des décodeurs (autant logiciels que matériels)
+sont capables de gérer les trames dans le désordre eux-même, et peuvent
+même être gênés lorsque cette option est activée, c'est pourquoi vous
+pouvez sans problème laisser cette option désactivée, à moins de savoir
+précisément ce que vous faites.
 .br
 .I ATTENTION\ :
 Ceci engendrera un flux de bits illégal vis à vis de la norme MPEG4,
@@ -6899,10 +6917,6 @@ et NE SERA PAS décodable par les décodeurs excepté DivX/\:libavcodec/\:XviD.
 .I ATTENTION\ :
 Ceci ajoutera également une fausse version de divx dans le fichier donc
 l'autodétection de bogues risque de ne pas fonctionner.
-.
-.TP
-.B divx5bvop
-Génère des trames-B compatibles DivX5 (par défaut\ : on).
 .
 .TP
 .B max_bframes=<0\-4>
@@ -6926,6 +6940,15 @@ région en mouvement rapide.
 Cette option permet de changer la probabilité qu'une trame soit une trame-B.
 Plus la valeur est haute, plus la probabilité que la trame générée soit
 une trame-B est forte (par défaut\ : 0).
+.
+.TP
+.B (no)closed_gop
+Cette option demande à XviD de fermer chaque GOP (Group Of Pictures\ :
+Groupe D'Images encadrées par deux trames-I), ce qui signifie que chaque
+GOP sera indépendant des GOP suivants.
+Ceci implique que la dernière trame du GOP est soit une trame-P ou une
+trame-N, mais pas une trame-B.
+Il est plutôt recommandé d'activer cette option (par défaut\ : activé)
 .
 .TP
 .B frame_drop_ratio=<0\-100> (max_bframes=0 uniquement)
