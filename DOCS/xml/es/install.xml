@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.16 -->
+<!-- synced with 1.19 -->
 <sect1 id="install">
 <title>Instalación</title>
 
@@ -128,7 +128,7 @@ núcleo 2.4.x es recomendado.
   H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3
   y decodificar flujo de audio WMA (Windows Media Audio) v1/v2, en múltiples
   plataformas. Es también reconocido como el más rápido para esta tarea. Vea
-  <link linkend="ffmpeg">está sección</link> para más detalles. Características:
+  la sección <link linkend="ffmpeg">FFmpeg</link> para más detalles. Características:
   <itemizedlist>
   <listitem><simpara>
     obtener la decodificación de formatos de vídeo mencionados arriba, en máquinas no-x86
@@ -181,7 +181,7 @@ núcleo 2.4.x es recomendado.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">DivX4/DivX5</emphasis>: información acerca de este codec
-  está disponible en la <link linkend="divx4-5">sección DivX4/DivX5</link>. 
+  está disponible en la sección <link linkend="divx4-5">DivX4/DivX5</link>. 
   Posiblemente no quiera este codec ya que <emphasis role="bold">libavcodec</emphasis>
   (ver más arriba) es más rápido y tiene mejor calidad que este, tanto para codificar
   como para decodificar. Características:
@@ -304,8 +304,8 @@ cuando hagan zoom), por lo tanto la pantalla completa es agradable y muy rápida.
   no soporta aceleración YUV por hardware en todas las placas nVidia.</emphasis> Debe descargar
   los controladores de código cerrado de <ulink url="http://nvidia.com">nVidia.com</ulink>.
   Vea la sección sobre <link linkend="nvidia">controlador de Xv de nVidia</link> para detalles.
-  Por favor, compruebe también la <link linkend="tvout-nvidia">sección de salida-TV de nVidia</link>
-  si desea usar una TV.
+  Por favor, compruebe también la sección de
+  <link linkend="tvout-nvidia">salida-TV de nVidia</link> si desea usar una TV.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">3DLabs GLINT R3 y Permedia3</emphasis>: se provee un controlador

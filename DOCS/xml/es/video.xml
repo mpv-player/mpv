@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.34 -->
+<!-- synced with 1.37 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -171,7 +171,7 @@ versión 4.2.0 o posterior, este funciona bien con YV12 y YUY2. Versiones
 previas, incluyendo 4.1.0, <emphasis role="bold">falla con YV12</emphasis>.
 Si experiencia efectos extraños usando <option>-vo xv</option>, pruebe SDL
 (tiene XVideo también) y vea si eso puede ayudarle. Compruebe la
-<link linkend="sdl">sección SDL</link> para más detalles.
+sección <link linkend="sdl">SDL</link> para más detalles.
 </para>
 
 <para>
@@ -221,9 +221,9 @@ XFree86 :( Las quejas a nVidia.
 
 <para>
 Sin embargo, MPlayer contiene un controlador <link linkend="vidix">VIDIX</link>
-(<link linkend="vidix-nvidia">nvidia_vid</link>) para la mayoría de las
-tarjetas nVidia. Actualmente está en estado beta, y tiene algunos problemas.
-Para más información, <link linkend="vidix-nvidia">clic aquí</link>.
+para la mayoría de las tarjetas nVidia. Actualmente está en estado beta,
+y tiene algunos problemas. Para más información, vea la sección
+<link linkend="vidix-nvidia">nVidia VIDIX</link>.
 </para>
 </sect5>
 
@@ -285,7 +285,7 @@ EndSection<!--
 <title>Tarjetas Trident</title>
 <para>
 Si quiere usar xv con una tarjeta trident, sepa que no funciona con
-4.1.0, instale XFree 4.2.0. 4.2.0 añade soporte para xv en pantalla completa
+4.1.0, instale XFree 4.2.0. 4.2.0 añade soporte para Xv en pantalla completa
 con la tarjeta Cyberblade XP.
 </para>
 
@@ -368,7 +368,7 @@ sistemas...
 
 <programlisting>(II) Loading extension XFree86-DGA</programlisting>
 
-Vea, XFree86 4.0.x o posterior es ¡ALTAMENTE RECOMENDADO!
+Vea, ¡XFree86 4.0.x o posterior es <emphasis role="bold">altamente recomendado</emphasis>!
 El controlador DGA de <application>MPlayer</application> es autodetectado
 por <filename>./configure</filename>, o puede forzarlo con <option>--enable-dga</option>.
 </para>
@@ -1364,7 +1364,7 @@ de la reproducción de video.
   fastidiará su pantalla), y obtendrá un efecto similar al que se obtiene con
   <option>-vo mga</option> o <option>-vo fbdev</option>. Las tarjetas nVidia, sin
   embargo, son capaces de mostrar gráficos reales de video sobre una consola
-  de texto real. Vea la <link linkend="vidix-nvidia">sección nvidia_vid</link>
+  de texto real. Vea la sección <link linkend="vidix-nvidia">nvidia_vid</link>
   para más información.
   </simpara></listitem>
 <listitem><simpara>
@@ -1490,7 +1490,7 @@ disponibles.
 <sect5 id="vidix-mga">
 <title>Tarjetas Matrox</title>
 <para>
-Hemos sido informados de que funcionan Matrox G200,G400,G450 y G550.
+Hemos sido informados de que funcionan Matrox G200, G400, G450 y G550.
 </para>
 
 <para>
@@ -1611,7 +1611,7 @@ La capa de selección puede hacerse con el método de subdispositivo, p.e.:
 <sect4 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
-Lea por favor la <link linkend="directfb">sección principal de DirectFB</link> o
+Lea por favor la sección <link linkend="directfb">principal de DirectFB</link> o
 la información general.
 </para>
 
@@ -1622,7 +1622,7 @@ del monitor primario.
 
 <para>
 Instrucciones sobre cómo hacer que esto funcione se pueden encontrar en la
-<ulink url="../../tech/directfb.txt">sección tech</ulink>
+sección <ulink url="../../tech/directfb.txt">tech</ulink>
 o directamente en la
 <ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">web personal</ulink>
 de Ville Syrjala.
@@ -2172,21 +2172,20 @@ para instrucciones sobre salida-TV de Matrox G450/G550 , ¡vaya a la sección sigu
 
     <procedure>
     <step><para>
-      Entre en <filename class="directory">TVout/matroxset</filename> y escriba
-      <command>make</command>. Instale <filename class="directory">matroxset</filename> en
-      cualquier sitio que se encuentre en su <envar>PATH</envar>.
+      Entre en <filename class="directory">TVout</filename> y escriba
+      <command>./compile.sh</command>. Instale
+      <filename class="directory">TVout/matroxset/matroxset</filename>
+      en cualquier lugar de su <envar>PATH</envar>.
       </para></step>
     <step><para>
-      Si no tiene <command>fbset</command> instalado, entre en
-      <filename class="directory">TVout/fbset</filename> y escriba <command>make</command>.
-      Instale <filename class="directory">fbset</filename> en cualquier sitio
-      que se encuentre en su <envar>PATH</envar>.
+      Si no tiene <command>fbset</command> instalado, ponga
+      <filename class="directory">TVout/fbset/fbset</filename>
+      en cualquier lugar de su <envar>PATH</envar>.
       </para></step>
     <step><para>
-      Si no tiene <command>con2fb</command> instalado, entre en
-      <filename class="directory">TVout/con2fb</filename> y escriba <command>make</command>.
-      Instale <filename class="directory">con2fb</filename> en cualquier sitio
-      que se encuentre en su <envar>PATH</envar>.
+      Si no tiene <command>con2fb</command> instalado, ponga
+      <filename class="directory">TVout/con2fb/con2fb</filename>
+      en cualquier lugar de su <envar>PATH</envar>.
       </para></step>
     <step><para>
       Después entre en el directorio  <filename class="directory">TVout/</filename>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.4 -->
+<!-- synced with 1.5 -->
 <appendix id="mailinglists">
 <title>Listas de correo</title>
 <para>
@@ -38,14 +38,17 @@ Lista para usuarios de MPlayer:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
   <itemizedlist>
   <listitem><para>
-  Envíe reporte de fallos aquí luego de haber leído la lista de <link linkend="bugs">Fallos Conocidos</link>
-  y la sección <link linkend="bugreports">reportando fallos</link>.
+  Envíe reporte de fallos aquí luego de haber leído la lista de
+  <link linkend="bugs">Fallos Conocidos</link> y la sección
+  <link linkend="bugreports">reportando fallos</link>.
   </para></listitem>
   <listitem><para>
-  Envíe pedido de nuevas funciones aquí (después de haber leído la <emphasis role="bold">documentación completa</emphasis>).
+  Envíe pedido de nuevas funciones aquí (después de haber leído la
+  <emphasis role="bold">documentación completa</emphasis>).
   </para></listitem>
   <listitem><para>
-  Envíe preguntas de usuario aquí (después de haber leído la <emphasis role="bold">documentación completa</emphasis>).
+  Envíe preguntas de usuario aquí (después de haber leído la
+  <emphasis role="bold">documentación completa</emphasis>).
   </para></listitem>
   </itemizedlist>
 </para></listitem>

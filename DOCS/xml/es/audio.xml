@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.10 -->
+<!-- synced with 1.11 -->
 <sect2 id="audio-dev">
 <title>Dispositivos de salida de audio</title>
 <sect3 id="sync">
@@ -113,7 +113,7 @@ DEMUXER: Demasiados (945 en 8390980 bytes) paquetes de video en el buffer!<!--
   Si el sonido se entrecorta mientras se reproduce desde un CD-ROM, active
   el enmascaramiento de IRQ, e.g. <command>hdparm -u1 /dev/cdrom</command>
   (<command>man hdparm</command>). Normalmente siempre es buena idea y se
-  describe con más detalle en la <link linkend="drives">sección de CD-ROM</link>.
+  describe con más detalle en la sección de <link linkend="drives">CD-ROM</link>.
  </para></listitem>
 </itemizedlist>
 </sect3>

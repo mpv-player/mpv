@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.21 -->
+<!-- synced with 1.22 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Preguntas de Usuario Frecuentes</title>
 
@@ -413,7 +413,7 @@ Cuando inicio la reproducción, obtenego este mensaje pero todo parece ir bien:
 </para></question>
 <answer><para>
 Necesita privilegios de root o establecer un kernel especial para usar el nuevo código
-de temporización. Para más detalles vea la <link linkend="rtc">sección RTC</link> de
+de temporización. Para más detalles vea la sección<link linkend="rtc">RTC</link> de
 la documentación.
 </para></answer>
 </qandaentry>
@@ -564,7 +564,7 @@ Está usando el controlador vo con un solo buffer (x11,xv). Con xv, use la opción
 ¿Qué es exactamente libavcodec?
 </para></question>
 <answer><para>
-Consulte la <link linkend="ffmpeg">sección libavcodec</link>.
+Consulte la sección <link linkend="ffmpeg">libavcodec</link>.
 </para></answer>
 </qandaentry>
 
@@ -574,7 +574,7 @@ Consulte la <link linkend="ffmpeg">sección libavcodec</link>.
 </para></question>
 <answer><para>
 Necesita obtener libavcodec del CVS de FFmpeg. Lea las instrucciones en la
-<link linkend="ffmpeg">sección libavcodec</link>.
+sección <link linkend="ffmpeg">libavcodec</link>.
 </para></answer>
 </qandaentry>
 

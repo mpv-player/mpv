@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.23 -->
+<!-- synced with 1.24 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portaciones</title>
 
@@ -234,7 +234,7 @@ video.
 <para>
 Puede probar a instalar el programa de instalación GNU, y (si no lo tiene
 en su ruta global) apuntar a donde esté con:
-<screen>./configure --install-path=RUTA</screen>
+<screen>./configure --with-install=/ruta/y/nombre/del/instalador</screen>
 </para>
 
 <para>
