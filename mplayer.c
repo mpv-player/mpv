@@ -152,7 +152,7 @@ static int cfg_include(m_option_t *conf, char *filename){
 //**************************************************************************//
 
 #ifdef HAVE_X11
-void xscreensaver_heartbeat(float time);
+void xscreensaver_heartbeat(void);
 #endif
 
 //**************************************************************************//
@@ -3622,7 +3622,7 @@ if(rel_seek_secs || abs_seek_pos){
 #ifdef HAVE_X11
 if (stop_xscreensaver && sh_video) {
   current_module="stop_xscreensaver";
-  xscreensaver_heartbeat(sh_video->pts);
+  xscreensaver_heartbeat();
   current_module=NULL;
 }
 #endif
