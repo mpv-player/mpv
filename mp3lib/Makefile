@@ -16,7 +16,7 @@ CFLAGS  = $(OPTFLAGS)
 .s.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-libMP3.a:	.depend $(OBJS)
+libMP3.a:	$(OBJS)
 	$(AR) r libMP3.a $(OBJS)
 
 test1:	libMP3.a test.c
@@ -34,9 +34,8 @@ distclean:
 	rm -f *~ *.o *.a Makefile.bak .depend
 
 dep:    depend
-depend: .depend
 
-.depend: Makefile config.mak ../config.mak ../config.h
+depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #

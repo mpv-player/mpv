@@ -18,7 +18,7 @@ CFLAGS  = $(OPTFLAGS) $(INCLUDE)
 .cpp.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-$(LIBNAME):	.depend $(OBJS)
+$(LIBNAME):	$(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
 
 test:   test.c $(LIBNAME)
@@ -33,9 +33,8 @@ distclean:
 	rm -f Makefile.bak *.o *.a *~ .depend test test.raw
 
 dep:    depend
-depend: .depend
 
-.depend: Makefile ../../config.mak
+depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #
