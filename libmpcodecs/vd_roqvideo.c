@@ -16,7 +16,10 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(roqvideo)
 
-#include "roqav.h"
+// in native/roqav.c:
+void *roq_decode_video_init(void);
+void roq_decode_video(void *context, unsigned char *encoded, 
+  int encoded_size, mp_image_t *mpi);
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){

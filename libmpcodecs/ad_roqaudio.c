@@ -4,7 +4,6 @@
 
 #include "config.h"
 #include "ad_internal.h"
-#include "roqav.h"
 
 static ad_info_t info = 
 {
@@ -16,6 +15,11 @@ static ad_info_t info =
 };
 
 LIBAD_EXTERN(roqaudio)
+
+// in native/roqav.c:
+void *roq_decode_audio_init(void);
+int roq_decode_audio(unsigned short *output, unsigned char *input,
+  int encoded_size, int channels, void *context);
 
 static int preinit(sh_audio_t *sh_audio)
 {
