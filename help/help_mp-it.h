@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.63
+// Updated to help_mp-en.h v1.65
 
 // Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming
 // and send a notify message to mplayer-dev-eng maillist.
@@ -385,6 +385,9 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Skin browser"
 #define MSGTR_MENU_Preferences "Preferenze"
 #define MSGTR_MENU_Exit "Uscita ..."
+#define MSGTR_MENU_Mute "Mute"
+#define MSGTR_MENU_Original "Originale"
+#define MSGTR_MENU_AspectRatio "Aspetto"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "Audio"
