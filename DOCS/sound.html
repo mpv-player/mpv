@@ -234,5 +234,21 @@ sound.</p>
   list=volume:volume=&lt;0-255&gt;</CODE>
 </P>
 
+
+<P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Extrastereo</A></B></P>
+
+<P>This plugin increases (linearly) the difference between left and right
+  channels (as the XMMS extrastereo plugin) which has some of "live" effect 
+  on playback.
+</P>
+
+<P>Usage :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo</CODE><BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo:mul=3.45</CODE></P>
+
+<P>The default coefficient (<CODE>mul</CODE>) is a float number that defaults
+  to 2.5.  If you set it to 0.0, you will have a mono sound (average of both
+  channels), if you set it to 1.0, sound will be unchanged.</P>
+
 </BODY>
 </HTML>
