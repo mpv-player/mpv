@@ -121,17 +121,17 @@ static char help_text[]=
 #ifdef HAVE_NEW_GUI
 
 // --- labels ---
-#define MSGTR_About "About"
-#define MSGTR_FileSelect "Select file ..."
+#define MSGTR_About "Über"
+#define MSGTR_FileSelect "Wähle Datei ..."
 #define MSGTR_MessageBox "MessageBox"
-#define MSGTR_PlayList "PlayList"
+#define MSGTR_PlayList "Playlist"
 #define MSGTR_SkinBrowser "Skin Browser"
 
 // --- buttons ---
 #define MSGTR_Ok "Ok"
-#define MSGTR_Cancel "Cancel"
-#define MSGTR_Add "Add"
-#define MSGTR_Remove "Remove"
+#define MSGTR_Cancel "Abbrechen"
+#define MSGTR_Add "Hinzufügen"
+#define MSGTR_Remove "Entfernen"
 
 // --- error messages ---
 #define MSGTR_NEMDB "Sorry, not enough memory for draw buffer."
@@ -140,8 +140,8 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] error in skin config file on line %d: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] warning in skin config file on line %d: widget found but before \"section\" n
-#define MSGTR_SKIN_WARNING2 "[skin] warning in skin config file on line %d: widget found but before \"subsection\
+#define MSGTR_SKIN_WARNING1 "[skin] warning in skin config file on line %d: widget found but before \"section\" not found ( %s )"
+#define MSGTR_SKIN_WARNING2 "[skin] warning in skin config file on line %d: widget found but before \"subsection\" not found ( %s )"
 #define MSGTR_SKIN_BITMAP_16bit  "16 bits or less depth bitmap not supported ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "file not found ( %s )\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "bmp read error ( %s )\n"
