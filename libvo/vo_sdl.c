@@ -329,9 +329,9 @@ static int sdl_open (void *plugin, void *name)
 	const SDL_VideoInfo *vidInfo = NULL;
 	static int opened = 0;
 	
-	if (opened)
+	/*if (opened)
 	    return 0;
-	opened = 1;
+	opened = 1;*/
 
 	if(verbose > 2) printf("SDL: Opening Plugin\n");
 
@@ -560,7 +560,7 @@ static void set_fullmode (int mode) {
 	/* if we haven't set a fullmode yet, default to the lowest res fullmode first */
 	/* But select a mode where the full video enter */
 	if (mode < 0) {
-	                int i;
+	        int i = 0;
 		mode = 0; // Default to the biggest mode avaible
 		for(i = findArrayEnd(priv->fullmodes) - 1; i >=0; i--) {
 		  if( (priv->fullmodes[i]->w >= priv->width) && 
