@@ -300,19 +300,24 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
 
 #ifdef USE_OSD
     /* now init out own 'font' (to use vo_draw_text_sub without edit them) */
+    vo_font=malloc(sizeof(font_desc_t));//if(!desc) return NULL;
+    memset(vo_font,0,sizeof(font_desc_t));
+    vo_font->pic_a[0]=malloc(sizeof(raw_file));
+    vo_font->pic_b[0]=malloc(sizeof(raw_file));
+
     vo_font->spacewidth=1;
     vo_font->charspace=0;
     vo_font->height=1;
-    vo_font->pic_a[1]->bmp=malloc(255);
-    vo_font->pic_b[1]->bmp=malloc(255);
-    vo_font->pic_a[1]->w=1;
-    vo_font->pic_a[1]->h=1;
+    vo_font->pic_a[0]->bmp=malloc(255);
+    vo_font->pic_b[0]->bmp=malloc(255);
+    vo_font->pic_a[0]->w=1;
+    vo_font->pic_a[0]->h=1;
     for (i=1; i<256; i++){
 	vo_font->width[i]=1;
-	vo_font->font[i]=1;
+	vo_font->font[i]=0;
 	vo_font->start[i]=i;
-	vo_font->pic_a[1]->bmp[i]=i;
-	vo_font->pic_b[1]->bmp[i]=i;
+	vo_font->pic_a[0]->bmp[i]=i;
+	vo_font->pic_b[0]->bmp[i]=i;
     };
 #endif
     /* say hello */
