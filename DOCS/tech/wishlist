@@ -12,14 +12,6 @@ Documentation:
 
  * write documentation HOWTO/rules document
 
- * New german documentation maintainer ;)
-
-
-Bug fixes:
-
- * fix mf ijpg encoding
-
- * fix crashing DLLs
 
 
 Small improvements:
@@ -32,15 +24,22 @@ Small improvements:
 
  * -vo fbdev -fb device ---> -fbdev:device
 
- * accept -dvd 9-12 command line
+ * accept dvd://9-12 command line
 
- * specify suboptions in a config file without breaking playback (use
-   channel 21 if using -tv, same idea for -vf, -af, etc...) 
+ * make -geometry work with all vo drivers
+
+ * Make the output windows remember their positions when resizing to
+   double size.
+
+ * Ability to completely disable those popups ('cannot access cdrom',
+   'your system is too slow...').
+
+ * Ability to resize to full size/double size/triple (or half) size
+   upon key presses.
+
 
 
 Cleanup:
-
- * move -dump* options to mencoder
 
  * integrate dvdnav into mplayer structure
 
@@ -49,31 +48,29 @@ Cleanup:
 
  * remove all obsolete code, options, files etc
 
- * modularize all VOs, AOs, as well as audio/video codecs/filters like
-   vidix drivers; it'd make the main binary smaller and packager's job
-   easier
-
  * move zoran jpeg encoder to video filters
 
  * convert -zr options to -zr suboption:suboption format
+
+ * Restructure configure and fix CPU flags supported but not shown.
+
 
 
 Filters:
 
  * eq filter should support RGB in addition to YUV
 
- * drop-deinterlace plugin
-
- * hue, saturation sw eq filters
-
- * implement gamma correcture filter
 
 
 Enhancements:
 
  * adapt colored output from MPlayerXP
 
- * merge VIDIX from MPlayerXP
+ * merge VIDIX from MPlayerXP/sourceforge
+
+ * port asf muxing from MPlayerXP
+
+ * write nut muxer/demuxer
 
  * SSA style & colors handling
 
@@ -93,29 +90,44 @@ Enhancements:
 
  * guess correct DVD title
 
- * syuv support in swscaler
+ * syuv and paletted rgb support in swscaler
+
+ * implement Plextor compatible SCSI VCD reading
+
+ * udp:// support (like xine and vlc)
+
+ * write native MacOS X video driver
+
 
 
 Difficult stuff:
 
- * reverse engineer all closed codecs (SVQ3, QDM2, WMV8/9...)
+ * reverse engineer all closed source codecs (QDM2, WMV9, Real, ...)
+
+ * support for Bink/Smacker codecs
+
+ * frame stepping
+
+ * allow frame insertion & removal in video filters (with timestamps)
+
+ * mixing of multiple videos (picture in picture, ...)
 
  * stay in pause after seek, fullscreen etc
 
  * write something like mptv to replace xawtv
 
- * write a C implementation of rtsp (redundant)
+ * write/adapt a C implementation of rtsp
 
  * real mmsu:// support
 
- * encode to mpg, ogm, mp4, asf
-
- * develop new video overlay interface (something like vidix but with
-   less idiotic interface and more compatible with Xv for easier
-   driver porting) 
-
- * scale playback speed
+ * encode to ogm, mp4, asf, nut
 
  * xinerama video filter that splits movie to 2 screens (like zr)
 
  * top notch DVD navigation like a hardware player
+
+ * FLAC and JACK support
+
+ * write mpdump application to handle all -dump* options
+
+ * modular MEncoder with audio encoding API
