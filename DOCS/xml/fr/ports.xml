@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.21 -->
+<!-- synced with 1.23 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
@@ -108,7 +108,7 @@ native est utilisée et faites <command>gmake</command>.
 <sect2 id="darwin">
 <title>Darwin</title>
 <para>
-Voir la section <link linkend="macos">MacOS</link>.
+Voir la section <link linkend="macos">Mac OS</link>.
 </para>
 </sect2>
 </sect1>
@@ -315,8 +315,8 @@ X qui est TRÈS lente. Utilisez SDL.
 Les versions de Cygwin antérieures à 1.5.0 n'incluent pas <filename>inttypes.h</filename>.
 Mettez cet
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
-dans <filename class="directory">/usr/include/</filename> pour que MPlayer puisse
-compiler.</para>
+dans <filename class="directory">/usr/include/</filename> pour que
+<application>MPlayer</application> puisse compiler.</para>
 
 <para>Les fichiers d'entête DirectX doivent être décompressés dans <filename class="directory">/usr/include/</filename>
   ou dans <filename class="directory">/usr/local/include/</filename>.</para>
@@ -370,11 +370,11 @@ compiler.</para>
 </sect1>
 
 <sect1 id="macos">
-<title>MacOS</title>
+<title>Mac OS</title>
 <para>
-Seul MacOS X 10.2 ou supérieur est supporté par les sources "brutes" de
+Seul Mac OS X 10.2 ou supérieur est supporté par les sources "brutes" de
 <application>MPlayer</application>. Vous êtes libre d'implémenter le support
-pour les anciennes versions de MacOS et d'envoyer des patches !
+pour les anciennes versions de Mac OS et d'envoyer des patches !
 </para>
 
 <para>
@@ -385,7 +385,7 @@ GCC 2.95.x d'Apple ne supporte pas bien la syntaxe C99.
 
 <para>
 On peut obtenir une GUI Aqua et un binaire <application>MPlayer</application>
-pour MacOS X depuis le projet
+pour Mac OS X depuis le projet
 <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>.
 </para>
 </sect1>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.15 -->
 <sect1 id="install">
 <title>Installation</title>
 
@@ -271,7 +271,7 @@ taille qui tient dans leur mémoire, avec <emphasis role="bold">peu d'utilisation
   <emphasis>avant</emphasis> la compilation de <application>MPlayer</application>,
   sinon aucun support mga_vid ne sera construit. Voir aussi la section 
   <link linkend="tvout-mga-g400">Matrox TV-out</link>.
-  <emphasis role="bold">Si vous n'utilisez pas Linux</emphasis>, votre seule possibilité 
+  <emphasis role="bold">Si vous n'utilisez pas Linux</emphasis>, votre seule possibilité
   est le pilote VIDIX: lisez la section <link linkend="vidix">VIDIX</link>.
   </para></listitem>
 <listitem><para>

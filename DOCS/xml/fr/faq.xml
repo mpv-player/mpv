@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!--synced with 1.19 -->
+<!--synced with 1.21 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Foire Aux Questions</title>
 
@@ -281,8 +281,8 @@ s'appellent <filename>XFree86-devel*</filename> sous Red Hat, et
 <filename class="directory">/usr/include/X11</filename> existent (cela peut poser un
 problème sur les systèmes Mandrake). Ils peuvent être créés avec ces commandes:
 <screen>
-     $ ln -sf /usr/X11R6 /usr/X11
-     $ ln -sf /usr/X11R6/include/X11 /usr/include/X11
+     # ln -sf /usr/X11R6 /usr/X11
+     # ln -sf /usr/X11R6/include/X11 /usr/include/X11
 </screen>
 Votre distribution peut différer de la
 <ulink url="http://www.pathname.com/fhs/">Hiérarchie de système de Fichier Standard</ulink>.

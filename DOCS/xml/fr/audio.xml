@@ -924,6 +924,50 @@ ajouterait un décodage de son surround avec un décalage de 15ms pour le son des
 haut-parleurs arrière.
 </para>
 </sect4>
+
+<sect4 id="af_export">
+<title>Exporteurs Audio</title>
+<para>
+Ce filtre audio exporte le signal entrant vers un autre process en utilisant
+le mappage de mémoire <literal>mmap()</literal>). Les aires de mémoire mappées
+contiennent une entête:
+
+<programlisting>
+int nch                      /*nombre de canaux*/
+int size		     /*taille du tampon*/
+unsigned long long counter   /*Utilisé pour garder la synchro, mis à jour
+                               chaque fois que de nouvelles données sont
+			       exportées.*/
+</programlisting>
+
+Le reste est constitué de données 16bit (non-entrelacées).
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>fichier_mmappé</option></term>
+<listitem><para>
+Le fichier dans lequel vous voulez que le filtre exporte. Par défaut il mappe
+dans
+<filename>~/.mplayer/mplayer-af_export</filename>.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>nsamples</option></term>
+<listitem><para>
+Nombre d'échantillons par canal. La valeur par défaut est <literal>512</literal> échantillons.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Exemple:
+<screen>mplayer -af export=/tmp/mplayer-af_export:1024 media.avi</screen>
+exporterait 1024 échantillons par canal dans <filename>/tmp/mplayer-af_export</filename>.
+</para>
+</sect4>
+
 </sect3>
 
 <sect3 id="audio-plugins">

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.30 -->
+<!-- synced with 1.34 -->
 <sect2 id="video-dev">
 <title>Sorties vidéo</title>
 
@@ -12,7 +12,7 @@ important de performances.
 </para>
 
 <para>
-Faites un <command>/proc/mtrr</command>:
+Faites un <command>cat /proc/mtrr</command>:
 <screen>
 <prompt>--($:~)--</prompt> cat /proc/mtrr
 reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9
@@ -80,8 +80,9 @@ echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr
 
 <para>
 Tous les processeurs ne supportent pas les MTRR. Les anciens K6-2 par exemple
-[vers 266Mhz, stepping 0] ne sont pas compatibles avec les MTRR, mais les stepping 12
-le sont (tapez <command>cat /proc/cpuinfo</command> pour le vérifier).
+(vers 266Mhz, stepping 0) ne sont pas compatibles avec les MTRR, mais les stepping 12
+le sont
+(<command>cat /proc/cpuinfo</command> pour le vérifier).
 </para>
 </sect3>
 
@@ -92,8 +93,8 @@ le sont (tapez <command>cat /proc/cpuinfo</command> pour le vérifier).
 
 <para>
 Sous XFree86 4.0.2 ou plus récent, vous pouvez utiliser les routines YUV matérielles de
-votre carte en utilisant l'extension XVideo. Ceci peut être fait avec l'option
-<option>-vo xv</option>'. De plus, ce pilote supporte le réglage de luminosité/contraste/saturation/etc.
+votre carte en utilisant l'extension XVideo. C'est ce qu'utilise l'option
+'<option>-vo xv</option>'. De plus, ce pilote supporte le réglage de luminosité/contraste/saturation/etc.
 (à moins que vous n'utilisiez le vieux, lent codec Divx DirectShow, qui le supporte
 partout), voir la page de man.
 </para>
@@ -1581,7 +1582,7 @@ portage du code CRTC2 dans <emphasis role="bold">mga_vid</emphasis> est prévu.
 <title>Décodeurs MPEG</title>
 
 <sect4 id="dvb">
-<title>DVB</title>
+<title>sorties et entrées DVB</title>
 <para>
 <application>MPlayer</application> supporte les cartes équipées du chipset DVB Siemens
 des vendeurs tels que Siemens, Technotrend, Galaxis ou Hauppauge. Les derniers pilotes
@@ -1610,6 +1611,7 @@ Le décodage matériel (lecture de fichiers MPEG1/2 standards) peut être fait avec
 commande:
 </para>
 </formalpara>
+
 <para><screen>mplayer -ao mpegpes -vo mpegpes fichier.mpg|vob</screen></para>
 
 <para>
@@ -1678,6 +1680,92 @@ utilisez le nouveau filtre dvbscale:
 pour une TV 4:3:  -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
 pour une TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen></para>
+
+<formalpara>
+<title>Utilisez votre carte DVB pour regarder la TV numérique (module d'entrée DVB)</title>
+<para>
+  D'abord vous devez passer le paramètre <literal>dvb_shutdown_timeout=0</literal>
+  au module noyau <filename>dvb-core</filename>, ou MPlayer se terminera après
+  10 secondes.
+</para>
+</formalpara>
+
+<para>
+  Vous devriez également avoir les programmes <command>scan</command> et
+  <command>szap/tzap/czap</command> installés; ils sont inclus dans le paquet
+  de pilotes.
+</para>
+
+<para>
+  Vérifiez que vos pilotes fonctionnent correctement avec un programme tel que
+  <ulink url="http://www.sf.net/projects/dvbtools/"><command>dvbstream</command></ulink>
+  (c'est la base du module d'entrée DVB).
+</para>
+
+<para>
+  Maintenant vous devriez compiler un fichier
+  <filename>~/.mplayer/channels.conf</filename>, avec la syntaxe acceptée par
+  <command>szap/tzap/czap</command>, ou le faire compiler par
+  <command>scan</command>.
+</para>
+
+<para>
+  Assurez-vous de n'avoir <emphasis>que</emphasis> des canaux réellement
+  disponibles, ou MPlayer plantera sur les autres.
+</para>
+
+<para>
+  Pour afficher le premier des canaux présents dans votre liste, tapez
+</para>
+
+<screen>
+  mplayer dvb://
+</screen>
+
+<para>
+  Si vous voulez regarder un canal spécifique, tel que R1, tapez
+</para>
+
+<screen>
+  mplayer dvb://R1
+</screen>
+
+<para>
+  Pour changer de canal tapez sur les touches <keycap>h</keycap> (suivant) et
+  <keycap>k</keycap> (précédent), ou utilisez le menu OSD (requiert un
+  <link linkend="subosd">sous-système OSD</link> fonctionnel).
+</para>
+
+<para>
+  Si votre <filename>~/.mplayer/menu.conf</filename> contient une entrée
+  <literal>&lt;dvbsel&gt;</literal>, comme celle du fichier d'exemple
+  <filename>etc/dvb-menu.conf</filename> (que vous pouvez utiliser pour
+  outrepasser <filename>~/.mplayer/menu.conf</filename>), le menu principal
+  affichera un sous-menu qui vous permettra de choisir les canaux présents dans
+  votre <filename>channels.conf</filename>.
+</para>
+
+<para>
+  Si vous voulez sauvegarder un programme sur le disque vous pouvez utiliser
+</para>
+
+<screen>
+  mplayer -dumpfile r1.ts -dumpstream dvb://R1
+</screen>
+
+<para>
+  Si vous voulez l'enregistrer dans un format différent (le ré-enregistrer)
+  vous pouvez lancer une commande comme
+</para>
+
+<screen>
+  mencoder -o r1.avi -ovc xvid -xvidencopts bitrate=800 -oac mp3lame -lameopts cbr:br=128 -pp=ci dvb://R1
+</screen>
+
+<para>
+  Lisez la page de man pour avoir une liste des options que vous pouvez passer
+  au module d'entrée DVB.
+</para>
 
 <formalpara>
 <title>FUTUR</title>
@@ -1931,10 +2019,10 @@ Si vous voulez utiliser le filtre <option>crop</option>, vous feriez
 
 <para>
 Des occurrences supplémentaires de <option>-zrcrop</option> invoquent le mode
-<emphasis>cinerama</emphasis>, c-a-d que vous pouvez distribuer l'affichage sur
+<emphasis>cinerama</emphasis>, c-a-d. que vous pouvez distribuer l'affichage sur
 plusieurs TV ou moniteurs pour créer un écran plus large. Supposons que vous ayez deux
-moniteurs. Celui de gauche est connecté à votre Buz sur <systemitem>/dev/video1</systemitem>
-et celui de droite est connecté à votre DC10+ sur <systemitem>/dev/video0</systemitem>. The movie has a resolution
+moniteurs. Celui de gauche est connecté à votre Buz sur <filename>/dev/video1</filename>
+et celui de droite est connecté à votre DC10+ sur <filename>/dev/video0</filename>.
 Le film a une résolution de 704x288. Supposons maintenant que vous voulez le moniteur
 de droite en noir et blanc et que le moniteur de gauche ait des trames jpeg de qualité
 10, alors vous taperez la commande suivante
