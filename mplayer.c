@@ -2440,6 +2440,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       dvdnav_priv_t * dvdnav_priv = (dvdnav_priv_t*)(stream->priv);
       dvdnav_event_t * dvdnav_event = (dvdnav_event_t *)(cmd->args[0].v.v);
 
+      /* ignore these events if we're not in dvd_nav mode */
+      if (!dvd_nav) break;
+
       if (!dvdnav_event) {
         printf("DVDNAV Event NULL?!\n");
         break;
@@ -2592,6 +2595,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     }
     case MP_CMD_DVDNAV: {
       dvdnav_priv_t * dvdnav_priv=(dvdnav_priv_t*)stream->priv;
+
+      /* ignore these events if we're not in dvd_nav mode */
+      if (!dvd_nav) break;
 
       switch (cmd->args[0].v.i) {
         case MP_CMD_DVDNAV_UP:
