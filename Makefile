@@ -113,7 +113,7 @@ mplayerwithoutlink: $(MPLAYER_DEP)
 	@for a in $(PARTS); do $(MAKE) -C $$a all ; done
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) -rdynamic $(CFLAGS) -o $(PRG) mplayer.o -Llibmpdemux -lmpdemux $(OBJS) $(XMM_LIBS) $(LIRC_LIBS)  $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) -lm
+	$(CC) -rdynamic $(CFLAGS) -o $(PRG) mplayer.o -Llibmpdemux -lmpdemux $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(TERMCAP_LIB) -lm
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
