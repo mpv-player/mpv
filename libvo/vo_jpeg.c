@@ -80,18 +80,23 @@ static int framenum = 0;
 
 /* ------------------------------------------------------------------------- */
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
-                       uint32_t d_height, uint32_t fullscreen, char *title,
-                       uint32_t format)
-{
-    char buf[BUFLENGTH];
+/** \brief Create a directory.
+ *
+ *  This function creates a directory. If it already exists, it tests if
+ *  it's a directory and not something else, and if it is, it tests whether
+ *  the directory is writable or not.
+ *
+ * \param buf       Pointer to directory name.
+ * \param verbose   Verbose on success. If verbose is non-zero, it will print
+ *                  a message if it was successful in creating the directory.
+ *
+ * \return nothing  In case anything fails, the player will exit. If it
+ *                  returns, everything went well.
+ */
+
+void jpeg_mkdir(char *buf, int verbose) { 
     struct stat stat_p;
 
-    /* Create outdir.
-     * If it already exists, test if it's a writable directory */ 
-    
-    snprintf(buf, BUFLENGTH, "%s", jpeg_outdir);
- 
     if ( mkdir(buf, 0755) < 0 ) {
         switch (errno) { /* use switch in case other errors need to be caught
                             and handled in the future */
@@ -109,26 +114,42 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                     exit_player(MSGTR_Exit_error);
                 }
                 if ( !(stat_p.st_mode & S_IWUSR) ) {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name,
-                            MSGTR_VO_JPEG_DirExistsButNotWritable);
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
+                            buf, MSGTR_VO_JPEG_DirExistsButNotWritable);
                     exit_player(MSGTR_Exit_error);
                 }
                 
-                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                        MSGTR_VO_JPEG_DirExistsAndIsWritable);
+                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
+                        buf, MSGTR_VO_JPEG_DirExistsAndIsWritable);
                 break;
 
             default:
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name,
                         MSGTR_VO_JPEG_GenericError, strerror(errno) );
-                mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name,
-                        MSGTR_VO_JPEG_CantCreateDirectory);
+                mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
+                        buf, MSGTR_VO_JPEG_CantCreateDirectory);
                 exit_player(MSGTR_Exit_error);
         } /* end switch */
-    } else {  
-        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                MSGTR_VO_JPEG_DirectoryCreateSuccess);
+    } else if ( verbose ) {  
+        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
+                buf, MSGTR_VO_JPEG_DirectoryCreateSuccess);
     } /* end if */
+}
+
+/* ------------------------------------------------------------------------- */
+
+static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
+                       uint32_t d_height, uint32_t fullscreen, char *title,
+                       uint32_t format)
+{
+    char buf[BUFLENGTH];
+
+    /* Create outdir. */
+    
+    snprintf(buf, BUFLENGTH, "%s", jpeg_outdir);
+ 
+    jpeg_mkdir(buf, 1); /* This function only returns if creation was
+                           successful. If not, the player will exit. */
 
     image_height = height;
     image_width = width;
@@ -210,48 +231,9 @@ static uint32_t draw_frame(uint8_t *src[])
         snprintf(subdirname, BUFLENGTH, "%s%08d", jpeg_subdirs,
                                                             ++subdircounter);
         snprintf(buf, BUFLENGTH, "%s/%s", jpeg_outdir, subdirname);
-        if ( mkdir(buf, 0755) < 0 ) {
-            switch (errno) { /* use switch in case other errors need to be
-                                caught and handled in the future */
-                case EEXIST:
-                    if ( stat(buf, &stat_p) < 0 ) {
-                        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
-                                info.short_name, MSGTR_VO_JPEG_GenericError,
-                                strerror(errno) );
-                        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n",
-                                info.short_name, MSGTR_VO_JPEG_UnableToAccess,
-                                buf);
-                        exit_player(MSGTR_Exit_error);
-                    }
-                    if ( !S_ISDIR(stat_p.st_mode) ) {
-                        mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s %s\n",
-                                info.short_name, buf,
-                                MSGTR_VO_JPEG_ExistsButNoDirectory);
-                        exit_player(MSGTR_Exit_error);
-                    }
-                    if ( !(stat_p.st_mode & S_IWUSR) ) {
-                        mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s - %s\n",
-                                info.short_name, buf,
-                                MSGTR_VO_JPEG_DirExistsButNotWritable);
-                        exit_player(MSGTR_Exit_error);
-                    }
-                    
-                    mp_msg(MSGT_VO, MSGL_INFO, "\n%s: %s - %s\n",
-                            info.short_name, buf,
-                            MSGTR_VO_JPEG_DirExistsAndIsWritable);
-                    break;
-                    
-                default:
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name,
-                            MSGTR_VO_JPEG_GenericError, strerror(errno) );
-                    mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s - %s.\n",
-                            info.short_name, buf,
-                            MSGTR_VO_JPEG_CantCreateDirectory);
-                    exit_player(MSGTR_Exit_error);
-                    break;
-            }
-        } /* switch */
-    } /* if !framecounter && jpeg_subdirs */
+        jpeg_mkdir(buf, 0); /* This function only returns if creation was
+                               successful. If not, the player will exit. */
+    }
     
     framenum++;
 
