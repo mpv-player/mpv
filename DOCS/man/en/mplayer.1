@@ -450,7 +450,7 @@ Enforces a fixed video system for multiple files (one (un)initialisation for
 all files).
 Therefore only one window will be opened for all files.
 Currently the following drivers are fixed-vo compliant: gl2, mga, svga, x11,
-xmga, xv and xvidix.
+xmga, xv, xvidix and dfbmga.
 .TP
 .B \-framedrop (also see \-hardframedrop)
 Skip displaying some frames to maintain A/\:V sync on slow systems.
@@ -3691,8 +3691,6 @@ This filter works only correct with MEncoder and acts on the MPEG2 flags
 used for soft 3:2 pulldown (soft telecine).
 If you want to use the ivtc or detc filter on movies that are partly soft
 telecined, inserting this filter before them should make them more reliable.
-Currently only libmpeg2 exports the needed flags.
-If used on material that does not set them, the filter does nothing.
 .TP
 .B divtc[=options]
 Inverse telecine for deinterlaced video.
