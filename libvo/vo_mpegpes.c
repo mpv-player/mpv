@@ -161,9 +161,9 @@ if(format==IMGFMT_YV12){
     //params.coding="IPPPPP"; // seems to be buggy and eats more cpu
     params.coding="I";
     params.quality=QUALITY; // 100=best >=80 very good >=50 fast
-    params.bitrate=0; // bitrate, 0=VBR
+    params.bitrate=0; // 6*1000000  // bitrate (X bits/sec), 0=VBR
     params.slices_per_frame=1;
-    params.frames_per_sequence=0xffffffff;
+    params.frames_per_sequence=25; //0xffffffff;
     params.frame_rate_num=25;
     params.frame_rate_den=1;
     params.shape_quality=100;
