@@ -650,6 +650,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	vo_fs_oldheight = -1;
 	XSync(mDisplay, False);
     }
+    return VO_TRUE;
   }
   return VO_NOTIMPL;
 }

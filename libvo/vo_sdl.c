@@ -1327,7 +1327,7 @@ static uint32_t control(uint32_t request, void *data, ...)
       set_fullmode(priv->fullmode);
       if(verbose > 1) printf("SDL: Set fullscreen mode\n");
     }
-    //return VO_TRUE; // XXX what should VOCTRL_FULLSCREEN return?
+    return VO_TRUE;
   }
 
   return VO_NOTIMPL;
