@@ -16,7 +16,7 @@
 #include "swscale.h"
 #include "rgb2rgb.h"
 
-static SwsContext *swsContext=NULL;
+static struct SwsContext *swsContext=NULL;
 
 typedef struct
 {
@@ -134,12 +134,12 @@ int decode_jpeg(void* data,int len,char* dbuffer,int dwidth,int dheight, int dst
  jpeg_finish_decompress(&cinfo);
  jpeg_destroy_decompress(&cinfo);
 
- swsContext= getSwsContextFromCmdLine(width,height, in_fmt, 
+ swsContext= sws_getContextFromCmdLine(width,height, in_fmt, 
     				      dwidth,dheight, IMGFMT_BGR|dbpp);
 
- swsContext->swScale(swsContext,&img,&row_stride,0,height,&dbuffer, &dstride);
+ sws_scale(swsContext,&img,&row_stride,0,height,&dbuffer, &dstride);
  
- freeSwsContext(swsContext);
+ sws_freeContext(swsContext);
 
  free(img);
 
