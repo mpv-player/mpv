@@ -1,75 +1,88 @@
+========================================
 A documentation about MPlayer's man page
 ========================================
 
 
 About the documentation
 -----------------------
-Yes it's true: This is the documentation about the documentation (man page).
+
+Yes it's true: This is the documentation of the documentation (man page).
 This guide should be used as a reference for questions about the man page
 structure. It's not a strict guide but we recommend following it to get a
 uniform man page.
 
 
-What belongs to the man page?
+
+What belongs in the man page?
 -----------------------------
+
     - option descriptions (all)
     - usage (options, config files, controls, slave mode)
     - basic examples
 
 
-What doesn't belong to the man page?
+
+What doesn't belong in the man page?
 ------------------------------------
-    - instructions of a process (installation, encoding, etc)
-    - detailed valuations or hints
+
+    - instructions for installation, encoding and similar processes
+    - detailed evaluations or hints
     - tutorials, guides
+
 
 
 How should patches look like?
 -----------------------------
-Follow the rules in patches.txt, they apply to the man page too.
+
+Follow the rules in patches.txt, they apply to the man page, too.
 Exceptions are:
-    - Cosmetic patches are allowed but should be done seperately from the real
+
+    - Cosmetic patches are allowed but should be done separately from the real
       changes, be marked as cosmetic changes and shouldn't change the general
-      style without reasons/permissions
-    - The same applies for spellchecks
+      style without reasons/permissions.
+    - The same applies to spell checking.
 
 
-How do I create a html, text or other versions of the man page?
+
+How do I create an HTML, text or other version of the man page?
 ---------------------------------------------------------------
-The man pages was more or less designed for groff as it is the main tool for
-it. Therefore only groff produces acceptable results without changes.
-Additionaly, the SS variable should be set to either very low or very high
-values to produce a better groff html output (IMHO due to a bug off gro2html).
-A setting of 4 looks readable IMHO. Here's an overview again:
 
-    - groff:     Groff is the "official" tool to convert man pages afaik.
-                 To get good results you really need a recent version (1.18.2)
+The man page was more or less designed for groff as it is the main tool for
+it. Therefore only groff produces acceptable results without changes.
+Additionally, the SS variable should be set to either very low or very high
+values to produce a better groff HTML output (Due to a bug of groff2html?).
+A setting of 4 should look readable. Here's an overview again:
+
+    - groff:     Groff is the "official" tool to convert man pages.
+                 To get good results you need a recent version (1.18.2).
                  cat mplayer.1 | sed s/SS\ 20/SS\ 4/ | groff -man -Thtml - > manpage.html
                  groff -rLL=64n -m man -Tascii mplayer.1 | col -bx > manpage.txt
-                 Check -T for other output formats.
-    - man2html:  You can view it over your cgi script:
+                 The groff man page lists other output formats to use with -T.
+    - man2html:  You can view it through a CGI script:
                  http://localhost/cgi-bin/man2html?mplayer
-                 The output is unuseable as the script doesn't seem to
-                 support the macro definitions. Maybe a manual change of all
-                 leads to acceptable results.
+                 The output is unusable as the script doesn't seem to support
+                 the macro definitions. Maybe manually changing all leads to
+                 acceptable results.
     - rman:      rman -f html mplayer.1 > manpage.rman.html
                  The output is ugly as rman doesn't understand many of the
                  macros used.
     - troffcvt:  troff2html -man mplayer.1 > manpage.tcvt.html
-                 The (good) output is similar to groff but it simplified...
+                 The (good) output is similar to groff but simplified...
+
 
 
 The structure
 -------------
-The options are divided into the the layer they belong to. The only exception
-is the OSD/SUB section. Inside the section they're alphabetically ordered.
+
+The option descriptions are divided into sections. Inside a section options are
+alphabetically sorted. The sections are:
 
 (Header)
-    Not visible, copyright and author informations.
+    Not visible, copyright and author information.
 (Macro definitions)
-    Not visible, some macro defintions.
+    Not visible, some macro definitions.
 NAME
-    The manpage is used for both: mplayer and mencoder.
+    The man page is used for both mplayer and mencoder.
 SYNOPSIS
     A description of MPlayer's playtree.
 DESCRIPTION
@@ -78,25 +91,25 @@ GENERAL NOTES
     Some general notes about the options and a description of the config file
     format.
 PLAYER OPTIONS (MPLAYER ONLY)
-    Option descriptions about the user interface (mplayer only).
+    User interface option descriptions (MPlayer only).
 DEMUXER/STREAM OPTIONS
-    Option descriptions about the demuxer and stream layer.
+    Demuxer and stream layer option descriptions.
 OSD/SUB OPTIONS
-    This section is special: It contains all description about subtitles and
-    OSD. It is independent of the usual layer separation and was created
-    because of its size. The options may therefore come from any layer.
+    This section is special in that it contains all subtitle and OSD option
+    descriptions even if they might belong to one of the other sections. It was
+    created because of its size.
 AUDIO OUTPUT OPTIONS (MPLAYER ONLY)
-    Option descriptions about the audio output layer (ao) (mplayer only).
+    Audio output layer (ao) option descriptions (MPlayer only).
 VIDEO OUTPUT OPTIONS (MPLAYER ONLY)
-    Option descriptions about the video output layer (vo) (mplayer only).
+    Video output layer (vo) option descriptions (MPlayer only).
 DECODING/FILTERING OPTIONS
-    Options about the decoding and filter layer (ad,vd,vf,pl).
+    Decoding and filter layer options (ad, vd, vf, pl).
 ENCODING OPTIONS (MENCODER ONLY)
-    Encoding option descriptions (ve) (mencoder only).
+    Encoding option descriptions (ve) (MEncoder only).
 KEYBOARD CONTROL
     A description of MPlayer's input system and the default keyboard controls.
 SLAVE MODE PROTOCOL
-    A description about the slave mode protocol (-slave).
+    A description of the slave mode protocol (-slave).
 FILES
     A list and description of all installed/used files/directories.
 EXAMPLES
@@ -106,62 +119,74 @@ AUTHORS
 STANDARD DISCLAIMER
 
 
+
 The man page/groff format
 -------------------------
-Just read this and rtfs:
+
+Just read this and RTFS:
+
     http://www.tldp.org/HOWTO/mini/Man-Page.html
     man 7 man
     man 7 groff
 
 
-Directives for the internal "style"
------------------------------------
-It was kept simple but there are still certain directives/rules to get a
+
+"Style" guidelines
+------------------
+
+This section was kept simple but there are certain guidelines/rules to get a
 uniform man page. The best way is to read (and understand) the source.
 
+
 General:
-    - No line should contain more than 79 characters
+
+    - No line should contain more than 79 characters.
     - Used commands: .TH, .SH, .TP, .IP, .PP, .[R]B, .I, .br, .RS, .RE, .na,
                      .nh, .ad, .hy, macro definitions, comments and some more
     - Don't forget the quotation marks around expressions, the backslash
       before a '-' if it's needed, etc...
 
-Option description:
-    - Option and/or suboption parameters should be short and descriptive.
-    - If the option is between a certain range, it should be specified at the
-      beginning (eg. <0\-100> or <\-100 \- 100>)
-    - All optional things are between angular paranthesis ([])
+
+Option descriptions:
+
+    - Option and/or suboption parameters should be short, descriptive and put
+      in angular brackets (e.g. \-vo <driver>).
+    - If the option has a parameter in a certain range, specify it right after
+      the option (e.g. \-subpos <0\-100>).
+    - Optional things should be put in square brackets ([]).
     - Obsolete options are followed by (OBSOLETE), beta options by
-      (BETA CODE), etc
+      (BETA CODE), etc.
     - MPlayer only options in a section which isn't marked this way
-      are followed by (MPLAYER only)
-    - Add hints to other options if they belong to each other
-      eg. (\-vo zr only) or (see \-alang option too)
-    - If a non trivial default parameter exist, write it down
-      eg. (default: 24)
-    - Options inside a section are all alphabetically ordered
-    - Examples and notes at the end of the description (before sub options)
-    - The end of the suboptions _always_ has to be followed by a paragraphs
+      are followed by (MPLAYER only).
+    - Add references to other options if they belong to each other, e.g.
+      '(\-vo zr only)' or '(also see \-alang)' or are commonly used together.
+    - If a nontrivial default parameter exists, mention it, e.g. (default: 24).
+    - Put examples and notes at the end of the description (before suboptions).
+    - The end of the suboptions _always_ has to be followed by a paragraph
       (BUG).
 
+
 Macro definitions (see beginning of man page):
-    - SS      SS is the starting value of the suboption column
+
+    - SS      Starting value of the suboption column
     - .IPs    Add new suboption (we use .TP for normal options and .IP for
               the rest)
     - .RSs    Begin of suboptions, end with .RE
     - .RSss   Begin of suboptions in a suboption
     - .REss   End of suboptions in a suboption
 
-Options, sub options, examples structure:
+
+Options, suboptions, examples structure:
+
     - Normal options (note the '<' and '>'):
 
       [...]
       .TP
-      .B \-option <parameters>
+      .B \-option <parameter>
       description
       [...]
 
-    - Long sub options:
+    - Long suboptions:
 
       [...]
       description. Available options are:
@@ -178,7 +203,7 @@ Options, sub options, examples structure:
       .
       [...]
 
-    - Short sub options:
+    - Short suboptions:
 
       [...]
       description. Available options are:
@@ -197,8 +222,7 @@ Options, sub options, examples structure:
       .
       [...]
 
-
-    - Sub options in sub options:
+    - Suboptions in suboptions:
 
       [...]
       .IPs "subopt1=<value>"
