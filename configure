@@ -4867,13 +4867,13 @@ int main()
 EOF
     _enca=no
     cc_check -lenca && _enca=yes
+fi
     if test "$_enca" = yes ; then
 	_def_enca='#define HAVE_ENCA 1'
 	_ld_enca='-lenca'
     else
 	_def_enca='#undef HAVE_ENCA'
     fi
-fi
 echores "$_enca"
 
 
