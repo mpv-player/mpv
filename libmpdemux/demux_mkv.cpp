@@ -19,9 +19,6 @@ extern "C" {
 #include "../libvo/sub.h"
 }
 
-#include <iostream>
-#include <cassert>
-#include <typeinfo>
 #include <vector>
 
 #include <ebml/EbmlHead.h>
@@ -198,6 +195,8 @@ typedef struct mkv_demuxer {
   int num_indexes, cues_found, cues_searched;
   int64_t *cluster_positions;
   int num_cluster_pos;
+  vector<uint64_t> *parsed_seekheads;
+  vector<uint64_t> *parsed_cues;
 
   int64_t skip_to_timecode;
   bool v_skip_to_keyframe, a_skip_to_keyframe;
@@ -798,6 +797,16 @@ static void add_cluster_position(mkv_demuxer_t *mkv_d, int64_t position) {
     mkv_d->num_cluster_pos = 0;
 }
 
+static int find_in_vector(vector<uint64_t> &vec, uint64_t value) {
+  unsigned int i;
+
+  for (i = 0; i < vec.size(); i++)
+    if (vec[i] == value)
+      return 1;
+
+  return 0;
+}
+
 #define in_parent(p) (mkv_d->in->getFilePointer() < \
                       (p->GetElementPosition() + p->ElementSize()))
 #define FINDFIRST(p, c) (static_cast<c *> \
@@ -805,7 +814,7 @@ static void add_cluster_position(mkv_demuxer_t *mkv_d, int64_t position) {
 #define FINDNEXT(p, c, e) (static_cast<c *> \
   (((EbmlMaster *)p)->FindNextElt(*e, false)))
 
-static int parse_cues(mkv_demuxer_t *mkv_d) {
+static void parse_cues(mkv_demuxer_t *mkv_d, uint64_t pos) {
   EbmlElement *l2 = NULL;
   EbmlStream *es;
   KaxCues *cues;
@@ -820,6 +829,13 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
   uint32_t tnum = 0;
   mkv_index_entry_t *entry;
 
+  if (find_in_vector(*mkv_d->parsed_cues, pos))
+    return;
+
+  mkv_d->parsed_cues->push_back(pos);
+
+  mkv_d->in->setFilePointer(pos);
+
   es = mkv_d->es;
   tc_scale = mkv_d->tc_scale;
   upper_lvl_el = 0;
@@ -829,14 +845,14 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
   cues = (KaxCues *)es->FindNextElement(mkv_d->segment->Generic().Context,
                                         upper_lvl_el, 0xFFFFFFFFL, true, 1);
   if (cues == NULL)
-    return 0;
+    return;
 
   if (!(EbmlId(*cues) == KaxCues::ClassInfos.GlobalId)) {
-    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] No KaxCues element found but but %s.\n"
+    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] No KaxCues element found but %s.\n"
            "[mkv] \\---- [ parsing cues ] -----------\n",
            cues->Generic().DebugName);
     
-    return 0;
+    return;
   }
 
   mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ found cues\n");
@@ -907,7 +923,92 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
 
   mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] \\---- [ parsing cues ] -----------\n");
 
-  return 1;
+  mkv_d->cues_found = 1;
+}
+
+static void parse_seekhead(mkv_demuxer_t *mkv_d, uint64_t pos) {
+  EbmlElement *l2 = NULL;
+  EbmlStream *es;
+  KaxSeekHead *kseekhead;
+  KaxSeek *kseek;
+  KaxSeekID *ksid;
+  KaxSeekPosition *kspos;
+  int upper_lvl_el, i, k, s, id_found;
+  uint64_t seek_pos;
+  EbmlId *id;
+  EbmlElement *e;
+  binary *b;
+
+  if (find_in_vector(*mkv_d->parsed_seekheads, pos))
+    return;
+
+  mkv_d->parsed_seekheads->push_back(pos);
+
+  es = mkv_d->es;
+  upper_lvl_el = 0;
+
+  mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing seek head ] ---------\n");
+
+  mkv_d->in->setFilePointer(pos);
+
+  kseekhead =
+    (KaxSeekHead *)es->FindNextElement(mkv_d->segment->Generic().Context,
+                                       upper_lvl_el, 0xFFFFFFFFL, true, 1);
+  if (kseekhead == NULL)
+    return;
+
+  if (!(EbmlId(*kseekhead) == KaxSeekHead::ClassInfos.GlobalId)) {
+    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] No KaxSeekead element found but %s.\n"
+           "[mkv] \\---- [ parsing seek head ] ---------\n",
+           kseekhead->Generic().DebugName);
+    
+    return;
+  }
+
+  kseekhead->Read(*es, KaxSeekHead::ClassInfos.Context, upper_lvl_el, l2,
+                  true);
+
+  for (i = 0; i < (int)kseekhead->ListSize(); i++) {
+    kseek = (KaxSeek *)(*kseekhead)[i];
+    if (!(EbmlId(*kseek) == KaxSeek::ClassInfos.GlobalId))
+      continue;
+
+    seek_pos = 0;
+    id = NULL;
+
+    for (k = 0; k < (int)kseek->ListSize(); k++) {
+      e = (*kseek)[k];
+
+      if (EbmlId(*e) == KaxSeekID::ClassInfos.GlobalId) {
+        ksid = (KaxSeekID *)e;
+
+        b = ksid->GetBuffer();
+        s = ksid->GetSize();
+        if (id != NULL)
+          delete id;
+        id = new EbmlId(b, s);
+
+      } else if (EbmlId(*e) == KaxSeekPosition::ClassInfos.GlobalId) {
+        kspos = (KaxSeekPosition *)e;
+        seek_pos = mkv_d->segment->GetGlobalPosition(uint64(*kspos));
+
+      }
+    }
+
+    if ((seek_pos != 0) && (id != NULL)) {
+      if (*id == KaxSeekHead::ClassInfos.GlobalId)
+        parse_seekhead(mkv_d, seek_pos);
+      else if (*id == KaxCues::ClassInfos.GlobalId)
+        parse_cues(mkv_d, seek_pos);
+    }
+
+    if (id != NULL)
+      delete id;
+  }
+
+  delete kseekhead;
+
+  mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] \\---- [ parsing seek head ] ---------\n");
 }
 
 extern "C" void print_wave_header(WAVEFORMATEX *h);
@@ -924,8 +1025,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   mkv_track_t *track;
   sh_audio_t *sh_a;
   sh_video_t *sh_v;
-  uint64_t seek_pos, current_pos, cues_pos;
-  int seek_element_is_cue;
+  vector<uint64_t> seekheads_to_parse;
+  vector<uint64_t> cues_to_parse;
+  int64_t current_pos;
 
 #ifdef USE_ICONV
   subcp_open();
@@ -991,7 +1093,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     
     mkv_d->segment = (KaxSegment *)l0;
     mkv_d->tc_scale = MKVD_TIMECODESCALE;
-    cues_pos = 0;
+    mkv_d->parsed_seekheads = new vector<uint64_t>;
+    mkv_d->parsed_cues = new vector<uint64_t>;
 
     upper_lvl_el = 0;
     exit_loop = 0;
@@ -1225,77 +1328,14 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         l1->SkipData(*es, l1->Generic().Context);
 
       } else if (EbmlId(*l1) == KaxSeekHead::ClassInfos.GlobalId) {
-
-        KaxSeek *kseek;
-        KaxSeekID *ksid;
-        KaxSeekPosition *kspos;
-
-        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ found seek head\n");
-
-        l1->Read(*es, KaxSeekHead::ClassInfos.Context, upper_lvl_el, l2, true);
-
-        kseek = FINDFIRST(l1, KaxSeek);
-
-        while (kseek != NULL) {
-          mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] | + seek entry\n");
-
-          seek_element_is_cue = 0;
-          seek_pos = 0;
-
-          ksid = FINDFIRST(kseek, KaxSeekID);
-          if (ksid != NULL) {
-            binary *b;
-            int s;
-
-            b = ksid->GetBuffer();
-            s = ksid->GetSize();
-            EbmlId id(b, s);
-
-            if (id == KaxCues::ClassInfos.GlobalId)
-              seek_element_is_cue = 1;
-
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + seek ID: ");
-            for (i = 0; i < s; i++)
-              mp_msg(MSGT_DEMUX, MSGL_V, "0x%02x ",
-                     ((unsigned char *)b)[i]);
-            mp_msg(MSGT_DEMUX, MSGL_V, "(%s)\n",
-                   (id == KaxInfo::ClassInfos.GlobalId) ?
-                   "KaxInfo" :
-                   (id == KaxCluster::ClassInfos.GlobalId) ?
-                   "KaxCluster" :
-                   (id == KaxTracks::ClassInfos.GlobalId) ?
-                   "KaxTracks" :
-                   (id == KaxCues::ClassInfos.GlobalId) ?
-                   "KaxCues" :
-                   (id == KaxAttachments::ClassInfos.GlobalId) ?
-                   "KaxAttachments" :
-                   (id == KaxChapters::ClassInfos.GlobalId) ?
-                   "KaxChapters" :
-                   "unknown");
-          }
-
-          kspos = FINDFIRST(kseek, KaxSeekPosition);
-          if (kspos != NULL) {
-            seek_pos = uint64(*kspos);
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + seek position: %llu\n",
-                   seek_pos);
-          }
-
-          if (!mkv_d->cues_found && (kspos != NULL) &&
-              seek_element_is_cue && (s->end_pos != 0))
-              cues_pos = mkv_d->segment->GetGlobalPosition(seek_pos);
-
-          kseek = FINDNEXT(l1, KaxSeek, kseek);
-
-        } // while (kseek != NULL)
+        if (!find_in_vector(seekheads_to_parse, l1->GetElementPosition()))
+          seekheads_to_parse.push_back(l1->GetElementPosition());
+        l1->SkipData(*es, l1->Generic().Context);
 
       } else if ((EbmlId(*l1) == KaxCues::ClassInfos.GlobalId) &&
                  !mkv_d->cues_found) {
-        // If the cues are up front then by all means read them now!
-        current_pos = io.getFilePointer();
-        io.setFilePointer(l1->GetElementPosition());
-        mkv_d->cues_found = parse_cues(mkv_d);
-        stream_reset(s);
+        if (!find_in_vector(cues_to_parse, l1->GetElementPosition()))
+          cues_to_parse.push_back(l1->GetElementPosition());
         l1->SkipData(*es, l1->Generic().Context);
 
       } else if (EbmlId(*l1) == KaxCluster::ClassInfos.GlobalId) {
@@ -1344,6 +1384,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     }
 
     current_pos = io.getFilePointer();
+
     // Try to find the very first timecode (cluster timecode).
     l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                              0xFFFFFFFFL, true, 1);
@@ -1355,19 +1396,14 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       delete l2;
     } else
       mkv_d->first_tc = 0;
+
+    // Parse all cues and seek heads
+    for (i = 0; i < (int)cues_to_parse.size(); i++)
+      parse_cues(mkv_d, cues_to_parse[i]);
+    for (i = 0; i < (int)seekheads_to_parse.size(); i++)
+      parse_seekhead(mkv_d, seekheads_to_parse[i]);
+
     io.setFilePointer(current_pos);
-    
-    // If we have found an entry for the cues in the meta seek data but no
-    // cues at the front of the file then read them now. This way the
-    // timecode scale will have been initialized correctly.
-    if (cues_pos && !mkv_d->cues_found) {
-      current_pos = io.getFilePointer();
-      io.setFilePointer(cues_pos);
-      mkv_d->cues_found = parse_cues(mkv_d);
-      if (s->eof)
-        stream_reset(s);
-      io.setFilePointer(current_pos);
-    }
 
   } catch (exception &ex) {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] caught exception\n");
@@ -2134,9 +2170,8 @@ extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
         break;
 
       if (EbmlId(*l1) == KaxCues::ClassInfos.GlobalId) {
-        mkv_d->in->setFilePointer(l1->GetElementPosition());
+        parse_cues(mkv_d, l1->GetElementPosition());
         delete l1;
-        mkv_d->cues_found = parse_cues(mkv_d);
         break;
       } else {
         if (EbmlId(*l1) == KaxCluster::ClassInfos.GlobalId)
@@ -2240,7 +2275,7 @@ extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
              target_timecode, target_filepos);
       mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] seek found %p (%s).\n",
              mkv_d->saved_l1, mkv_d->saved_l1 == NULL ? "null" :
-             typeid(*mkv_d->saved_l1).name());
+             mkv_d->saved_l1->Generic().DebugName);
     }
 
     if (mkv_d->video != NULL)
