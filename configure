@@ -3559,11 +3559,16 @@ elif test -z "$CFLAGS" ; then
   else
     CFLAGS="-O4 $_march $_mcpu -ffast-math -fomit-frame-pointer"
   fi
+  # always compile with '-g' if .developer:
+  if test -f ".developer" ; then
+    CFLAGS="-g $CFLAGS"
+  fi
 else
   cat <<EOF
 
 MPlayer compilation will use CFLAGS set by you, but:
-             DO NOT BUGREPORT IF IT DOES NOT WORK
+
+    *** ***  DO NOT BUGREPORT IF IT DOES NOT COMPILE/WORK!  *** ***
 
 It is strongly recommended you let MPlayer choose the correct CFLAGS!
 To do so, execute 'CFLAGS= ./configure <options>'
