@@ -21,7 +21,7 @@ LIBVD_EXTERN(raw)
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     switch(cmd){
     case VDCTRL_QUERY_FORMAT:
-	if( (*((int*)arg)) == sh->bih->biCompression ) return CONTROL_TRUE;
+	if( (*((int*)arg)) == (sh->bih ? sh->bih->biCompression : sh->format) ) return CONTROL_TRUE;
 	return CONTROL_FALSE;
     }
     return CONTROL_UNKNOWN;
@@ -29,9 +29,8 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
-    if(!sh->bih) return 0; // bih is required
     // set format fourcc for raw RGB:
-    if(sh->bih->biCompression==0){	// set based on bit depth
+    if(sh->bih && sh->bih->biCompression==0){	// set based on bit depth
 	switch(sh->bih->biBitCount){
 	case 8:  sh->bih->biCompression=IMGFMT_BGR8; break;
 	case 15: sh->bih->biCompression=IMGFMT_BGR15; break;
@@ -43,7 +42,7 @@ static int init(sh_video_t *sh){
 	    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"RAW: depth %d not supported\n",sh->bih->biBitCount);
 	}
     }
-    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,sh->bih->biCompression);
+    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,sh->bih ? sh->bih->biCompression : sh->format);
 }
 
 // uninit driver
@@ -90,7 +89,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	if(sh->format==0 || sh->format==3) mpi->stride[0]=(mpi->stride[0]+3)&(~3);
 	if(mpi->imgfmt==IMGFMT_RGB8 || mpi->imgfmt==IMGFMT_BGR8){
 	    // export palette:
-	    mpi->planes[1]=((unsigned char*)&sh->bih)+40;
+	    mpi->planes[1]=sh->bih ? (((unsigned char*)&sh->bih)+40) : NULL;
 	}
     }
     
