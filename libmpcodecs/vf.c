@@ -272,7 +272,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	     mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8+
 	    				mpi->chroma_width*mpi->chroma_height);
 	     /* export delta table */
-	     mpi->planes[3]=mpi->planes[0]+(mpi->width*mpi->height)+(mpi->chroma_width*mpi->chroma_height);
+	     mpi->planes[3]=mpi->planes[0]+(mpi->width*mpi->height)+2*(mpi->chroma_width*mpi->chroma_height);
 	  }
 	  else
 	     mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8);
