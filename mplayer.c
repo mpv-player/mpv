@@ -21,10 +21,6 @@
 #include "version.h"
 #include "config.h"
 
-#ifdef __FreeBSD__
-#include <sys/cdrio.h>
-#endif
-
 #ifdef sun
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
 #else
@@ -964,7 +960,7 @@ char osd_text_buffer[64];
 int drop_frame=0;
 int drop_frame_cnt=0;
 // for auto-quality:
-float frame_correction=0; // average of A-V timestamp differences
+float AV_delay=0; // average of A-V timestamp differences
 double cvideo_base_vtime;
 double cvideo_base_vframe;
 double vdecode_time;
@@ -1295,13 +1291,16 @@ if(1)
           time_frame-=sh_audio->timer-(float)delay/(float)sh_audio->o_bps;
           // we are out of time... drop next frame!
 	  if(time_frame<-2*frame_time){
+	      static int drop_message=0;
 	      drop_frame=frame_dropping; // tricky!
 	      ++drop_frame_cnt;
-	      if(drop_frame_cnt==50 && frame_dropping<1)
+	      if(drop_frame_cnt>50 && AV_delay>0.5 && !drop_message){
+	          drop_message=1;
 	          printf("\n************************************************************************"
 		         "\n** Your system is too SLOW to play this! try with -framedrop or RTFM! **"
 			 "\n************************************************************************"
 			 "\n");
+	      }
 	      if (verbose>0) printf("\nframe drop %d, %.2f\n", drop_frame, time_frame);
 	  }
       } else {
@@ -1347,7 +1346,6 @@ if(1)
 
 #if 1
 /*================ A-V TIMESTAMP CORRECTION: =========================*/
-  frame_correction=0;
   if(sh_audio){
     float a_pts=0;
     float v_pts=0;
@@ -1371,7 +1369,7 @@ if(1)
       float bps_a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->wf->nAvgBytesPerSec;
       float bps_v_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
         printf("Initial PTS delay: %5.3f sec ->%5.3f (bps: %5.3f)  audio_delay=%5.3f\n",x,2*sh_video->frametime,bps_a_pts-bps_v_pts-(delay+audio_delay),audio_delay);
-	x=2*sh_video->frametime;
+	x=0; //2*sh_video->frametime;
 //	initial_pts_delay+=x; audio_delay+=x;
         delay_corrected=1;
         if(verbose)
@@ -1380,6 +1378,7 @@ if(1)
       }
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
       a_pts=d_audio->pts;
+      //printf("*** %5.3f ***\n",a_pts);
       a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
 //      v_pts=d_video->pts-frame_time;
       v_pts=d_video->pts;
@@ -1388,11 +1387,12 @@ if(1)
     if(verbose>1)printf("### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
 
       if(delay_corrected){
-        float x=frame_correction=(a_pts-delay-audio_delay)-v_pts;
+        float x;
+	AV_delay=(a_pts-delay-audio_delay)-v_pts;
 //        printf("A:%6.1f  V:%6.1f  A-V:%7.3f",a_pts-audio_delay-delay,v_pts,x);
         if(!quiet)
-	  printf("A:%6.1f (%6.1f)  V:%6.1f  A-V:%7.3f",a_pts,a_pts-audio_delay-delay,v_pts,x);
-        x*=0.1f;
+	  printf("A:%6.1f (%6.1f)  V:%6.1f  A-V:%7.3f",a_pts,a_pts-audio_delay-delay,v_pts,AV_delay);
+        x=AV_delay*0.1f;
         if(x<-max_pts_correction) x=-max_pts_correction; else
         if(x> max_pts_correction) x= max_pts_correction;
         if(default_max_pts_correction>=0)
