@@ -358,7 +358,7 @@ void MP3_Init(){
     printf( "mp3lib: Processor ID: %x\n",_CpuID );
     printf( "mp3lib: i586 processor %sdetected.\n",(_i586?"":"not ") );
 #ifdef HAVE_3DNOW
-    printf( "mp3lib: AMD 3dnow! extension %sdetected.\n",(a3dnow()?"":"not ") );
+    printf( "mp3lib: AMD 3dnow! extension %sdetected.\n",(_3dnow?"":"not ") );
 #endif
 
     make_decode_tables(outscale);
