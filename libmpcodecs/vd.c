@@ -86,7 +86,8 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 extern int vaa_use_dr;
 
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt){
-
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDec: vo config request - %d x %d, %s  \n",
+	w,h,vo_format_name(preferred_outfmt));
     return 1;
 }
 
