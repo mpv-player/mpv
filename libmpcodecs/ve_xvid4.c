@@ -674,7 +674,8 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 	 * The single pass plugin
 	 * ---------------------------------------------------------------- */
 
-	onepass->bitrate = xvidenc_bitrate;
+	if (xvidenc_bitrate > 16000) onepass->bitrate = xvidenc_bitrate;
+	else onepass->bitrate = xvidenc_bitrate*1000;
 	onepass->reaction_delay_factor = xvidenc_cbr_reaction_delay_factor;
 	onepass->averaging_period = xvidenc_cbr_averaging_period;
 	onepass->buffer = xvidenc_cbr_buffer;
@@ -949,7 +950,8 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 
 		/* There is not much left to initialize after dispatch settings */
 		onepass->version = XVID_VERSION;
-		onepass->bitrate = xvidenc_bitrate*1000;
+		if (xvidenc_bitrate > 16000) onepass->bitrate = xvidenc_bitrate;
+		else onepass->bitrate = xvidenc_bitrate*1000;
 
 		/* Quantizer mode uses the same plugin, we have only to define
 		 * a constant quantizer zone beginning at frame 0 */
@@ -972,7 +974,7 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 		} else {
 			mp_msg(MSGT_MENCODER, MSGL_INFO,
 			       "xvid: CBR Rate Control -- bitrate=%dkbit/s\n",
-			       xvidenc_bitrate);
+			       xvidenc_bitrate>16000?xvidenc_bitrate/1000:xvidenc_bitrate);
 		}
 
 		create->plugins[create->num_plugins].func  = xvid_plugin_single;
@@ -1008,10 +1010,11 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 		 * value is negative it is considered as being a total size
 		 * to reach (in kilobytes) */
 		if(xvidenc_bitrate > 0) {
-			pass2->bitrate  = xvidenc_bitrate*1000;
+			if(xvidenc_bitrate > 16000) pass2->bitrate = xvidenc_bitrate;
+			else pass2->bitrate = xvidenc_bitrate*1000;
 			mp_msg(MSGT_MENCODER, MSGL_INFO,
 			       "xvid: 2Pass Rate Control -- 2nd pass -- bitrate=%dkbit/s\n",
-			       xvidenc_bitrate);
+			       xvidenc_bitrate>16000?xvidenc_bitrate/1000:xvidenc_bitrate);
 		} else {
 			pass2->bitrate  = xvidenc_bitrate;
 			mp_msg(MSGT_MENCODER, MSGL_INFO,
