@@ -1,7 +1,8 @@
 
 mplayer (0.90)
 
-  rc3:
+  rc3:  "BugfixCounter"
+  
     DOCS:
     * english man page & HTML docs updates
     * audio filter documentation
@@ -17,12 +18,16 @@ mplayer (0.90)
     * libaf: big (audio filter layer) updates, floating point support, speedup
     * ffwma2 fixed (better error resilience)
     * SPU queueing - fixes missing or early disappearing DVD subtitles
+    * the misterious DVD audio delay (150-300ms) fixed
+    * extension-based fileformat detection fixed the .mp3 vs. mpeg-ps conflict
+    * cache2 keeps buffer for non-seekable media, fixes quicktime streaming
 
     Fixes:
     * mp3lib CPU detection part cleanup, 'decwin' linker problem fixed
     * various cddb:// fixes, support of netbsd-1.6
     * libmpdvdkit2: Fix DVD authentication on Solaris 9
     * libmpdvdkit2: libdvdcss upgraded to 1.2.4 (keeping the key cache patch)
+    * libmpdvdkit2: fixed decryption from multiple VOB files (hdd or darwin)
     * -ao arts, -ao oss: Fix 8-bit sound support
     * -vop expand + ffmpeg codecs conflicts solved, some other -vop bugs fixed
     * -ac ffmp2 with MPEG files (sig11) fixed
@@ -38,6 +43,11 @@ mplayer (0.90)
     * various Solaris compatibility fixes (should work out of the box)
     * mms:// port fixes, tries 1755 if 80 failed
     * libavcodec: various ME fixes, B frames fixes, WMV2 slice decoding fixes
+    * -ao alsa9 audio-file playback high cpu usage fixed
+    * libaf updates, 2-pass initialization to get better filter path
+    * better detection of playlists, support for [Reference]-style format
+    * handle quicktime reference media files as playlist
+    * cddb:// & cdda:// cdrom device name fixes on linux and *BSD
     
     Features:
     * -ao esd: new EsounD audio driver
@@ -57,22 +67,26 @@ mplayer (0.90)
     * Freetype & old-style RAW font support usable (compilable) at the same time
     * vo_directfb2, vo_dfbmga: DirectFB 0.9.16 support
     * libavcodec: motion estimation pre pass, qpel encoding, trellis quantization
-    * libavcodec: Altivec optimizations
+    * libavcodec, liba52, mp3lib: Altivec optimizations
     * keep window's aspect ratio at resizing (x11, xv), requires WM support
-    * -geometry option accepts X11 syntax too
+    * -geometry option, accepts X11 syntax too
     * real .bin+.cue (S)VCD images support (-vcd 2 -cuefile xxx.cue)
     * postprocess: YUV 411/422/444 support, stride fixes
+    * overlapping sub's umping fixed, sorting is automatical, iconv fixes
+    * mpeg2 telecine detection and automatic inverse telecine (mplayer only)
 
     Gui:
     * correct GTK widget destroy event handler
-    * sync with x11_common
+    * fullscreen switching fixed (sync with x11_common)
     * fix gtk submenu
     * new font render engine
-    * added persistant history patch from Pavel Rousar
-    * SDL Audio configure window from Filip Kalinski
+    * added persistant history patch
+    * SDL Audio configure window
     * add overlapping to preferences
     * add play bar for subwindow
     * add vertical potmeter for skin
+    * fixed 'single pixel bug'
+    * fixed some possible crashes
 
   rc2:
     General:
