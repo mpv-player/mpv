@@ -67,14 +67,19 @@ uint32_t num_frames;
 #define IMGFMT_I420 0x30323449
 #define IMGFMT_IYUV 0x56555949
 #define IMGFMT_CLPL 0x4C504C43
+#define IMGFMT_Y800 0x30303859
+#define IMGFMT_Y8   0x20203859
 
 /* Packed YUV Formats */
 
+#define IMGFMT_IUYV 0x56595549
+#define IMGFMT_IY41 0x31435949
 #define IMGFMT_IYU1 0x31555949
 #define IMGFMT_IYU2 0x32555949
 #define IMGFMT_UYVY 0x59565955
 #define IMGFMT_UYNV 0x564E5955
 #define IMGFMT_cyuv 0x76757963
+#define IMGFMT_Y422 0x32323459
 #define IMGFMT_YUY2 0x32595559
 #define IMGFMT_YUNV 0x564E5559
 #define IMGFMT_YVYU 0x55595659
@@ -88,10 +93,14 @@ uint32_t num_frames;
 #define IMGFMT_YUVP 0x50565559
 #define IMGFMT_UYVP 0x50565955
 
+/* Compressed Formats. Mplayer's extensions!!! */
+#define IMGFMT_MPEGPES (('M'<<24)|('P'<<16)|('E'<<8)|('S'))
+
+
 #define MGA_VID_CONFIG    _IOR('J', 1, mga_vid_config_t)
 #define MGA_VID_ON        _IO ('J', 2)
 #define MGA_VID_OFF       _IO ('J', 3)
-#define MGA_VID_FSEL _IOR('J', 4, int)
+#define MGA_VID_FSEL	  _IOR('J', 4, int)
 
 #define MGA_VID_VERSION 0x0201
 

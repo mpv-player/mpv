@@ -74,7 +74,11 @@
 
 
 MODULE_AUTHOR("Nick Kurshev <nickols_k@mail.ru>");
-MODULE_DESCRIPTION("Accelerated YUV BES driver for Rage128/Radeons. Version: "RADEON_VID_VERSION);
+#ifdef RAGE128
+MODULE_DESCRIPTION("Accelerated YUV BES driver for Rage128. Version: "RADEON_VID_VERSION);
+#else
+MODULE_DESCRIPTION("Accelerated YUV BES driver for Radeons. Version: "RADEON_VID_VERSION);
+#endif
 #ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
 #endif
@@ -85,6 +89,9 @@ MODULE_LICENSE("GPL");
 #else
 #define RVID_MSG "radeon_vid: "
 #define X_ADJUST 8
+#ifndef RADEON
+#define RADEON
+#endif
 #endif
 
 typedef struct bes_registers_s
@@ -211,11 +218,16 @@ static char *fourcc_format_name(int format)
 	case IMGFMT_I420: return("Planar I420");
 	case IMGFMT_IYUV: return("Planar IYUV");
 	case IMGFMT_CLPL: return("Planar CLPL");
+	case IMGFMT_Y800: return("Planar Y800");
+	case IMGFMT_Y8: return("Planar Y8");
+	case IMGFMT_IUYV: return("Packed IUYV");
+	case IMGFMT_IY41: return("Packed IY41");
 	case IMGFMT_IYU1: return("Packed IYU1");
 	case IMGFMT_IYU2: return("Packed IYU2");
 	case IMGFMT_UYVY: return("Packed UYVY");
 	case IMGFMT_UYNV: return("Packed UYNV");
 	case IMGFMT_cyuv: return("Packed CYUV");
+	case IMGFMT_Y422: return("Packed Y422");
 	case IMGFMT_YUY2: return("Packed YUY2");
 	case IMGFMT_YUNV: return("Packed YUNV");
 	case IMGFMT_YVYU: return("Packed YVYU");
@@ -228,7 +240,7 @@ static char *fourcc_format_name(int format)
 	case IMGFMT_CLJR: return("Packed CLJR");
 	case IMGFMT_YUVP: return("Packed YUVP");
 	case IMGFMT_UYVP: return("Packed UYVP");
-/*	case IMGFMT_MPEGPES: return("Mpeg PES");*/
+	case IMGFMT_MPEGPES: return("Mpeg PES");
     }
     return("Unknown");
 }
@@ -307,7 +319,7 @@ RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n
     OUTREG(OV0_P1_X_START_END,		besr.p1_x_start_end);
     OUTREG(OV0_P2_X_START_END,		besr.p2_x_start_end);
     OUTREG(OV0_P3_X_START_END,		besr.p3_x_start_end);
-#if 1
+#if 0
     OUTREG(OV0_BASE_ADDR,		besr.base_addr);
 #endif
     OUTREG(OV0_VID_BUF0_BASE_ADRS,	besr.vid_buf0_base_adrs);
@@ -326,6 +338,9 @@ RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n
                 SCALER_ADAPTIVE_DEINT |
                 SCALER_SMART_SWITCH |
                 SCALER_HORZ_PICK_NEAREST;
+#ifdef RAGE128
+    bes_flags |= SCALER_BURST_PER_PLANE;
+#endif
     switch(besr.fourcc)
     {
         case IMGFMT_RGB15:
@@ -482,7 +497,7 @@ RTRACE(RVID_MSG"usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) des
     else
     {
       besr.vid_buf0_base_adrs = radeon_overlay_off;
-      besr.vid_buf0_base_adrs += ((left & ~7) << 1)&0xfffffff0;
+      besr.vid_buf0_base_adrs += ((left & ~7) << 1)&VIF_BUF0_BASE_ADRS_MASK;
       besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs;
       besr.vid_buf2_base_adrs = besr.vid_buf0_base_adrs;
     }
@@ -587,7 +602,6 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 				return -EFAULT;
 			}
 
-                        /* FIXME: Fake of G400 ;) or would be better G200 ??? */
 			radeon_config.card_type = 0;
 			radeon_config.ram_size = radeon_ram_size;
 			radeon_overlay_off = radeon_ram_size*0x100000 - radeon_config.frame_size*radeon_config.num_frames;
@@ -694,12 +708,12 @@ const struct ati_card_id_s ati_card_ids[]=
  { PCI_DEVICE_ID_ATI_RAGE128_RN, "R128 RN" },
  { PCI_DEVICE_ID_ATI_RAGE128_RO, "R128 RO" },
 /* Rage128 M3 */
- { PCI_DEVICE_ID_ATI_RAGE128_LE, "R128 LE" },
- { PCI_DEVICE_ID_ATI_RAGE128_LF, "R128 LF" },
+ { PCI_DEVICE_ID_ATI_RAGE128_LE, "R128 M3 LE" },
+ { PCI_DEVICE_ID_ATI_RAGE128_LF, "R128 M3 LF" },
 /* Rage128 Pro Ultra */
- { PCI_DEVICE_ID_ATI_RAGE128_U1, "R128 U1" },
- { PCI_DEVICE_ID_ATI_RAGE128_U2, "R128 U2" },
- { PCI_DEVICE_ID_ATI_RAGE128_U3, "R128 U3" }
+ { PCI_DEVICE_ID_ATI_RAGE128_U1, "R128Pro U1" },
+ { PCI_DEVICE_ID_ATI_RAGE128_U2, "R128Pro U2" },
+ { PCI_DEVICE_ID_ATI_RAGE128_U3, "R128Pro U3" }
 #else
 /* Radeons (indeed: Rage 256 Pro ;) */
  { PCI_DEVICE_ID_RADEON_QD, "Radeon QD " },
