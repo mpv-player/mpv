@@ -66,7 +66,7 @@ Contents
 ~~~~~~~~~~~~~~~~
 
  DGA is used in two places with MPlayer: The SDL driver can be made to make
- use of it (-vo sdl -dga (or the like)) and within the DGA driver (-vo dga).
+ use of it (-vo sdl -sdl dga) and within the DGA driver (-vo dga).
  The above said is true for both; in the following sections I'll explain
  how the DGA driver for MPlayer works.
 
