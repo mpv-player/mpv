@@ -406,6 +406,8 @@ NoPause:
    case evPreferences: gtkShow( evPreferences,NULL );     break;
    case evEqualizer:   gtkShow( evEqualizer,NULL );       break;
 
+   case evForward10min:	    mplRelSeek( 600 ); break;
+   case evBackward10min:    mplRelSeek( -600 );break;
    case evForward1min:      mplRelSeek( 60 );  break;
    case evBackward1min:     mplRelSeek( -60 ); break;
    case evForward10sec:     mplRelSeek( 10 );  break;
