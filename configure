@@ -671,6 +671,7 @@ _tdfxfb=no
 _largefiles=no
 _vo2=no
 _language=en
+_shm=auto
 
 
 for ac_option do
@@ -767,6 +768,8 @@ for ac_option do
   --disable-largefiles)	_largefiles=no	;;
   --enable-vo2)		_vo2=yes	;;
   --disable-vo2)	_vo2=no		;;
+  --enable-shm)		_shm=yes	;;
+  --disable-shm)	_shm=no         ;;
 
   --enable-select)	_def_select='#define HAVE_AUDIO_SELECT'	;;
   --disable-select)	_def_select='#undef HAVE_AUDIO_SELECT'	;;
@@ -1080,6 +1083,7 @@ else
 fi
 echores "$_dl"
 
+
 echocheck "pthread"
 cat > $TMPC << EOF
 #include <pthread.h>
@@ -1129,6 +1133,20 @@ else
   _def_termcap='#undef USE_TERMCAP'
 fi
 echores "$_termcap"
+
+
+echocheck "shm"
+cat > $TMPC << EOF
+#include <sys/shm.h>
+int main(void) { shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0); return 0; }
+EOF
+cc_check && _shm=yes
+if test "$_shm" = yes ; then
+  _def_shm='#define HAVE_SHM 1'
+else
+  _def_shm='#undef HAVE_SHM'
+fi
+echores "$_shm"
 
 
 echocheck "3dfx"
@@ -2440,6 +2458,9 @@ $_def_kstat
 
 /* Define this if you have zlib */
 $_def_zlib
+
+/* Define this if you have shm support */
+$_def_shm
 
 /* Define this if your system has vsscanf */
 $_def_vsscanf
