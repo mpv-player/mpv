@@ -180,8 +180,8 @@ int vivo_check_file(demuxer_t* demuxer){
     buf[len]=0;
 //    printf("VIVO header: '%s'\n",buf);
 
-#if 0
-    vivo_parse_text_header(demuxer->priv, len);
+#if 1
+    vivo_parse_text_header(demuxer, len);
     if (priv->supported == 0)
 	return 0;
 #else
