@@ -39,8 +39,43 @@ static vf_info_t* filter_list[]={
 };
 
 //============================================================================
-
 // mpi stuff:
+
+void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h){
+    int y;
+    if(mpi->flags&MP_IMGFLAG_PLANAR){
+	if(x==0 && w==mpi->width){
+	    // full width clear:
+	    memset(mpi->planes[0]+mpi->stride[0]*y0,0,mpi->stride[0]*h);
+	    memset(mpi->planes[1]+mpi->stride[1]*(y0>>1),128,mpi->stride[1]*(h>>1));
+	    memset(mpi->planes[2]+mpi->stride[2]*(y0>>1),128,mpi->stride[2]*(h>>1));
+	    return;
+	}
+	for(y=y0;y<y0+h;y+=2){
+	    memset(mpi->planes[0]+x0+mpi->stride[0]*y,0,w);
+	    memset(mpi->planes[0]+x0+mpi->stride[0]*(y+1),0,w);
+	    memset(mpi->planes[1]+(x0>>1)+mpi->stride[1]*(y>>1),128,(w>>1));
+	    memset(mpi->planes[2]+(x0>>1)+mpi->stride[2]*(y>>1),128,(w>>1));
+	}
+    }
+    // packed:
+    for(y=y0;y<y0+h;y++){
+	unsigned char* dst=mpi->planes[0]+mpi->stride[0]*y+(mpi->bpp>>3)*x0;
+	if(mpi->flags&MP_IMGFLAG_YUV){
+	    unsigned int* p=dst;
+	    int size=(mpi->bpp>>3)*w/4;
+	    int i;
+	    if(mpi->flags&MP_IMGFLAG_SWAPPED){
+	        for(i=0;i<size;i+=4) p[i]=p[i+1]=p[i+2]=p[i+3]=0x00800080;
+		for(;i<size;i++) p[i]=0x00800080;
+	    } else {
+	        for(i=0;i<size;i+=4) p[i]=p[i+1]=p[i+2]=p[i+3]=0x80008000;
+		for(;i<size;i++) p[i]=0x80008000;
+	    }
+	} else
+	    memset(dst,0,(mpi->bpp>>3)*w);
+    }
+}
 
 mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype, int mp_imgflag, int w, int h){
   mp_image_t* mpi=NULL;
@@ -108,23 +143,10 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	          mpi->planes[2]=mpi->planes[0]+mpi->width*mpi->height;
 	          mpi->planes[1]=mpi->planes[2]+(mpi->width>>1)*(mpi->height>>1);
 	      }
-	      // clear!
-	      memset(mpi->planes[0],0,mpi->stride[0]*mpi->height);
-	      memset(mpi->planes[1],128,mpi->stride[1]*(mpi->height>>1));
-	      memset(mpi->planes[2],128,mpi->stride[2]*(mpi->height>>1));
 	  } else {
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
-	      if(mpi->flags&MP_IMGFLAG_YUV){
-		  int size=mpi->bpp*mpi->width*mpi->height/8/4;
-		  unsigned int* p=mpi->planes[0];
-		  int i;
-		  if(mpi->flags&MP_IMGFLAG_SWAPPED)
-		      for(i=0;i<size;i+=4) p[i]=p[i+1]=p[i+2]=p[i+3]=0x00800080;
-		  else
-		      for(i=0;i<size;i+=4) p[i]=p[i+1]=p[i+2]=p[i+3]=0x80008000;
-	      } else
-	          memset(mpi->planes[0],0,mpi->bpp*mpi->width*mpi->height/8);
 	  }
+	  vf_mpi_clear(mpi,mpi->width,mpi->height);
 	  mpi->flags|=MP_IMGFLAG_ALLOCATED;
         }
     }
