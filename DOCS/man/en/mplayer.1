@@ -3164,7 +3164,7 @@ debug:
 .br
 8: macroblock (MB) type
 .br
-16: quantizer parameter (QP)
+16: quantization parameter (QP)
 .br
 32: motion vector
 .br
@@ -3786,7 +3786,7 @@ simple postprocessing filter
 .IPs quality
 0\-6 (default: 3)
 .IPs qp\ \ \ 
-force quantization parameter (default: 0, use QP from video)
+Force quantization parameter (default: 0, use QP from video).
 .IPs mode\ \ \ 
 0: hard thresholding (default)
 .br
@@ -3795,7 +3795,7 @@ force quantization parameter (default: 0, use QP from video)
 .
 .TP
 .B qp=equation
-quantizer parameter (QP) change filter
+quantization parameter (QP) change filter
 .RSs
 .IPs equation
 some equation like "2+2*sin(PI*qp)"
@@ -6082,7 +6082,7 @@ the minimum of error and lambda*bits.
 .PD 0
 .RSs
 .IPs lambda
-quantizer parameter (QP) dependant constant
+quantization parameter (QP) dependant constant
 .IPs bits\ 
 amount of bits needed to encode the block
 .IPs error
@@ -6103,7 +6103,7 @@ This has no effect if mbd=0.
 .
 .TP
 .B qprd (mbd=2 only)
-rate distorted optimal quantizer parameter (QP) for the given
+rate distorted optimal quantization parameter (QP) for the given
 lambda of each macroblock
 .
 .TP
@@ -6813,7 +6813,7 @@ This selects the quantizer to use.
 20\-40 is a useful range (default: 26).
 Lower values result in better fidelity, but higher bitrates.
 Note that quantization in H.264 works differently from MPEG[124].
-H.264's quantizer parameter (QP) is on a logarithmic scale.
+H.264's quantization parameter (QP) is on a logarithmic scale.
 As an example, the bitrate difference between QP=20 and QP=40
 is about a factor of 10.
 Useful quantizers in H.264 tend to be very large compared to MPEG[124].
