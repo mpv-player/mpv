@@ -24,7 +24,7 @@
 #include <string.h>
 
 #include <unistd.h>
-#include <sys/mman.h>
+//#include <sys/mman.h>
 
 #include "config.h"
 #include "video_out.h"
