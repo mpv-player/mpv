@@ -37,7 +37,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 
 #define NAS_FRAG_SIZE 4096
 
@@ -312,22 +312,22 @@ static AuDeviceID nas_find_device(AuServer *aud, int nch)
 static unsigned int nas_aformat_to_auformat(unsigned int *format)
 {
 	switch (*format) {
-	case	AFMT_U8:
+	case	AF_FORMAT_U8:
 		return AuFormatLinearUnsigned8;
-	case	AFMT_S8:
+	case	AF_FORMAT_S8:
 		return AuFormatLinearSigned8;
-	case	AFMT_U16_LE:
+	case	AF_FORMAT_U16_LE:
 		return AuFormatLinearUnsigned16LSB;
-	case	AFMT_U16_BE:
+	case	AF_FORMAT_U16_BE:
 		return AuFormatLinearUnsigned16MSB;
-	case	AFMT_S16_LE:
+	case	AF_FORMAT_S16_LE:
 		return AuFormatLinearSigned16LSB;
-	case	AFMT_S16_BE:
+	case	AF_FORMAT_S16_BE:
 		return AuFormatLinearSigned16MSB;
-	case	AFMT_MU_LAW:
+	case	AF_FORMAT_MU_LAW:
 		return AuFormatULAW8;
 	default:
-		*format=AFMT_S16_NE;
+		*format=AF_FORMAT_S16_NE;
 		return nas_aformat_to_auformat(format);
 	}
 }

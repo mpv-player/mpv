@@ -61,7 +61,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = max(s->ch+1,((af_data_t*)arg)->nch);
-    af->data->format = AF_FORMAT_F | AF_FORMAT_NE;
+    af->data->format = AF_FORMAT_FLOAT_NE;
     af->data->bps    = 4;
 
     // Design low-pass filter

@@ -119,7 +119,7 @@ static int control(struct af_instance_s *af, int cmd, void* arg)
 	if(af->data->nch < 5) {
 	    af->data->nch = 5;
 	}
-	af->data->format = AF_FORMAT_SI | AF_FORMAT_NE;
+	af->data->format = AF_FORMAT_S16_NE;
 	af->data->bps    = 2;
 	return af_test_output(af, (af_data_t*)arg);
     case AF_CONTROL_COMMAND_LINE:

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#include "afmt.h"
+#include "libaf/af_format.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
 
@@ -55,7 +55,7 @@ static int init(int rate,int channels,int format,int flags){
     ao_data.samplerate=rate;
     ao_data.format=format;
     ao_data.bps=channels*rate;
-    if (format != AFMT_U8 && format != AFMT_S8)
+    if (format != AF_FORMAT_U8 && format != AF_FORMAT_S8)
 	ao_data.bps*=2; 
     buffer=0;
     gettimeofday(&last_tv, 0);

@@ -6,7 +6,6 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "ad_internal.h"
-#include "../libaf/af_format.h"
 
 static ad_info_t info = 
 {
@@ -35,26 +34,25 @@ static int init(sh_audio_t *sh)
 	}
 	switch ((h >> 6) & 3) {
 	  case 0:
-	    sh->sample_format = AFMT_S16_BE;
+	    sh->sample_format = AF_FORMAT_S16_BE;
 	    sh->samplesize = 2;
 	    break;
 	  case 1:
 	    mp_msg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_SamplesWanted);
 	    sh->i_bps = sh->channels * sh->samplerate * 5 / 2;
 	  case 2: 
-	    sh->sample_format = AFMT_AF_FLAGS | AF_FORMAT_I |
-	                         AF_FORMAT_BE | AF_FORMAT_SI;
+	    sh->sample_format = AF_FORMAT_S24_BE;
 	    sh->samplesize = 3;
 	    break;
 	  default:
-	    sh->sample_format = AFMT_S16_BE;
+	    sh->sample_format = AF_FORMAT_S16_BE;
 	    sh->samplesize = 2;
 	}
     } else {
 	// use defaults:
 	sh->channels=2;
 	sh->samplerate=48000;
-	sh->sample_format = AFMT_S16_BE;
+	sh->sample_format = AF_FORMAT_S16_BE;
 	sh->samplesize = 2;
     }
     if (!sh->i_bps)

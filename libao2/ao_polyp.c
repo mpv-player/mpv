@@ -6,7 +6,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 #include "config.h"
 #include "mp_msg.h"
 
@@ -91,16 +91,16 @@ static int init(int rate_hz, int channels, int format, int flags) {
     ss.rate = rate_hz;
 
     switch (format) {
-        case AFMT_U8:
+        case AF_FORMAT_U8:
             ss.format = PA_SAMPLE_U8;
             break;
-        case AFMT_S16_LE:
+        case AF_FORMAT_S16_LE:
             ss.format = PA_SAMPLE_S16LE;
             break;
-        case AFMT_S16_BE:
+        case AF_FORMAT_S16_BE:
             ss.format = PA_SAMPLE_S16BE;
             break;
-        case AFMT_FLOAT:
+        case AF_FORMAT_FLOAT_NE:
             ss.format = PA_SAMPLE_FLOAT32;
             break;
         default:

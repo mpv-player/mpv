@@ -13,7 +13,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -75,28 +75,28 @@ static int init(int rate_hz, int channels, int format, int flags)
     memset(&alsa_format, 0, sizeof(alsa_format));
     switch (format)
     {
-	case AFMT_S8:
+	case AF_FORMAT_S8:
 	    alsa_format.format = SND_PCM_SFMT_S8;
 	    break;
-	case AFMT_U8:
+	case AF_FORMAT_U8:
 	    alsa_format.format = SND_PCM_SFMT_U8;
 	    break;
-	case AFMT_U16_LE:
+	case AF_FORMAT_U16_LE:
 	    alsa_format.format = SND_PCM_SFMT_U16_LE;
 	    break;
-	case AFMT_U16_BE:
+	case AF_FORMAT_U16_BE:
 	    alsa_format.format = SND_PCM_SFMT_U16_BE;
 	    break;
 #ifndef WORDS_BIGENDIAN
-	case AFMT_AC3:
+	case AF_FORMAT_AC3:
 #endif
-	case AFMT_S16_LE:
+	case AF_FORMAT_S16_LE:
 	    alsa_format.format = SND_PCM_SFMT_S16_LE;
 	    break;
 #ifdef WORDS_BIGENDIAN
-	case AFMT_AC3:
+	case AF_FORMAT_AC3:
 #endif
-	case AFMT_S16_BE:
+	case AF_FORMAT_S16_BE:
 	    alsa_format.format = SND_PCM_SFMT_S16_BE;
 	    break;
 	default:

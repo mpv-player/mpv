@@ -44,7 +44,7 @@
 #include "audio_out.h"
 #include "audio_plugin.h"
 #include "audio_plugin_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 
 #include "remez.h"
 #include "firfilter.c"
@@ -108,8 +108,8 @@ static int init(){
     pl_surround.passthrough = 1;
     return 1;
   }
-  if (ao_plugin_data.format != AFMT_S16_NE) {
-    fprintf(stderr, "pl_surround: I'm dumb and can only handle AFMT_S16_NE audio format, using passthrough mode\n");
+  if (ao_plugin_data.format != AF_FORMAT_S16_NE) {
+    fprintf(stderr, "pl_surround: I'm dumb and can only handle AF_FORMAT_S16_NE audio format, using passthrough mode\n");
     pl_surround.passthrough = 1;
     return 1;
   }

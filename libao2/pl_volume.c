@@ -20,7 +20,7 @@
 #include "audio_out.h"
 #include "audio_plugin.h"
 #include "audio_plugin_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 
 static ao_info_t info =
 {
@@ -80,8 +80,8 @@ static int control(int cmd,void *arg){
 static int init(){
   // Sanity sheck this plugin supports AFMT_U8 and AFMT_S16_LE
   switch(ao_plugin_data.format){
-  case(AFMT_U8):
-  case(AFMT_S16_NE):
+  case(AF_FORMAT_U8):
+  case(AF_FORMAT_S16_NE):
     break;
   default: 
     fprintf(stderr,"[pl_volume] Audio format not yet suported \n");
@@ -117,7 +117,7 @@ static int play(){
   vol=(vol*vol*vol)>>12;
   // Change the volume.
   switch(pl_volume.format){
-  case(AFMT_U8):{
+  case(AF_FORMAT_U8):{
     register uint8_t* data=(uint8_t*)ao_plugin_data.data;
     register int x;
       for(i=0;i<ao_plugin_data.len;i++){
@@ -135,7 +135,7 @@ static int play(){
       }
       break;
   }
-  case(AFMT_S16_NE):{
+  case(AF_FORMAT_S16_NE):{
     register int len=ao_plugin_data.len>>1;
     register int16_t* data=(int16_t*)ao_plugin_data.data;
     register int x;

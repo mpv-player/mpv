@@ -43,7 +43,7 @@ static void float2int(void* in, void* out, int len, int bps);
 static void int2float(void* in, void* out, int len, int bps);
 
 // Convert from string to format
-static int str2fmt(char* str)
+int af_str2fmt(char* str)
 {
   int format=0;
   // Scan for endianess
@@ -87,16 +87,34 @@ static int str2fmt(char* str)
   return format;
 }
 
+inline int af_fmt2bits(int format)
+{
+    return (format & AF_FORMAT_BITS_MASK)+8;
+//    return (((format & AF_FORMAT_BITS_MASK)>>3)+1) * 8;
+#if 0
+    switch(format & AF_FORMAT_BITS_MASK)
+    {
+	case AF_FORMAT_8BIT: return 8;
+	case AF_FORMAT_16BIT: return 16;
+	case AF_FORMAT_24BIT: return 24;
+	case AF_FORMAT_32BIT: return 32;
+	case AF_FORMAT_48BIT: return 48;
+    }
+#endif
+    return -1;
+}
+
 /* Convert format to str input str is a buffer for the 
    converted string, size is the size of the buffer */
-char* fmt2str(int format, char* str, size_t size)
+char* af_fmt2str(int format, char* str, int size)
 {
   int i=0;
-  // Print endinaness
+
+  // Endianess
   if(AF_FORMAT_LE == (format & AF_FORMAT_END_MASK))
-    i+=snprintf(str,size,"little endian ");
+    i+=snprintf(str,size-i,"little endian ");
   else
-    i+=snprintf(str,size,"big endian ");
+    i+=snprintf(str,size-i,"big endian ");
   
   if(format & AF_FORMAT_SPECIAL_MASK){
     switch(format & AF_FORMAT_SPECIAL_MASK){
@@ -108,12 +126,17 @@ char* fmt2str(int format, char* str, size_t size)
       i+=snprintf(&str[i],size-i,"MPEG 2 "); break;
     case(AF_FORMAT_AC3): 
       i+=snprintf(&str[i],size-i,"AC3 "); break;
+    default:
+      printf("Unknown special\n");
     }
   }
   else{
+    // Bits
+    i+=snprintf(&str[i],size-i,"%d-bit ", af_fmt2bits(format));
+
     // Point
     if(AF_FORMAT_F == (format & AF_FORMAT_POINT_MASK))
-      i+=snprintf(&str[i],size,"float ");
+      i+=snprintf(&str[i],size-i,"float ");
     else{
       // Sign
       if(AF_FORMAT_US == (format & AF_FORMAT_SIGN_MASK))
@@ -121,7 +144,7 @@ char* fmt2str(int format, char* str, size_t size)
       else
 	i+=snprintf(&str[i],size-i,"signed ");
 
-      i+=snprintf(&str[i],size,"int ");
+      i+=snprintf(&str[i],size-i,"int ");
     }
   }
   return str;
@@ -148,7 +171,7 @@ static int check_format(int format)
   case(AF_FORMAT_MPEG2): 
   case(AF_FORMAT_AC3):
     af_msg(AF_MSG_ERROR,"[format] Sample format %s not yet supported \n",
-	 fmt2str(format,buf,255)); 
+	 af_fmt2str(format,buf,255)); 
     return AF_ERROR;
   }
   return AF_OK;
@@ -173,9 +196,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
        (AF_OK != check_format(af->data->format)))
       return AF_ERROR;
 
-    af_msg(AF_MSG_VERBOSE,"[format] Changing sample format from %ibit %sto %ibit %s \n",
-	   ((af_data_t*)arg)->bps*8,fmt2str(((af_data_t*)arg)->format,buf1,255),
-	   af->data->bps*8,fmt2str(af->data->format,buf2,255));
+    af_msg(AF_MSG_VERBOSE,"[format] Changing sample format from %sto %s \n",
+	   af_fmt2str(((af_data_t*)arg)->format,buf1,255),
+	   af_fmt2str(af->data->format,buf2,255));
 
     af->data->rate = ((af_data_t*)arg)->rate;
     af->data->nch  = ((af_data_t*)arg)->nch;
@@ -190,7 +213,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     str[0] = '\0';
     sscanf((char*)arg,"%i:%s",&bps,str);
     // Convert string to format
-    format = str2fmt(str);
+    format = af_str2fmt(str);
     
     // Automatic correction of errors
     switch(format & AF_FORMAT_SPECIAL_MASK){

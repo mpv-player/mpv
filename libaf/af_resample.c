@@ -135,29 +135,28 @@ static int set_types(struct af_instance_s* af, af_data_t* data)
   // Make sure this filter isn't redundant 
   if((af->data->rate == data->rate) || (af->data->rate == 0))
     return AF_DETACH;
-
   /* If sloppy and small resampling difference (2%) */
   rd = abs((float)af->data->rate - (float)data->rate)/(float)data->rate;
   if((((s->setup & FREQ_MASK) == FREQ_SLOPPY) && (rd < 0.02) && 
-      (data->format != (AF_FORMAT_NE | AF_FORMAT_F))) || 
+      (data->format != (AF_FORMAT_FLOAT_NE))) || 
      ((s->setup & RSMP_MASK) == RSMP_LIN)){
     s->setup = (s->setup & ~RSMP_MASK) | RSMP_LIN;
-    af->data->format = AF_FORMAT_NE | AF_FORMAT_SI;
+    af->data->format = AF_FORMAT_S16_NE;
     af->data->bps    = 2;
     af_msg(AF_MSG_VERBOSE,"[resample] Using linear interpolation. \n");
   }
   else{
     /* If the input format is float or if float is explicitly selected
        use float, otherwise use int */
-    if((data->format == (AF_FORMAT_NE | AF_FORMAT_F)) || 
+    if((data->format == (AF_FORMAT_FLOAT_NE)) || 
        ((s->setup & RSMP_MASK) == RSMP_FLOAT)){
       s->setup = (s->setup & ~RSMP_MASK) | RSMP_FLOAT;
-      af->data->format = AF_FORMAT_NE | AF_FORMAT_F;
+      af->data->format = AF_FORMAT_FLOAT_NE;
       af->data->bps    = 4;
     }
     else{
       s->setup = (s->setup & ~RSMP_MASK) | RSMP_INT;
-      af->data->format = AF_FORMAT_NE | AF_FORMAT_SI;
+      af->data->format = AF_FORMAT_S16_NE;
       af->data->bps    = 2;
     }
     af_msg(AF_MSG_VERBOSE,"[resample] Using %s processing and %s frequecy"

@@ -12,12 +12,12 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#define OBTAIN_BITRATE(a) (((a != AFMT_U8) && (a != AFMT_S8)) ? 16 : 8)
+#define OBTAIN_BITRATE(a) (((a != AF_FORMAT_U8) && (a != AF_FORMAT_S8)) ? 16 : 8)
 
 /* Feel free to experiment with the following values: */
 #define ARTS_PACKETS 10 /* Number of audio packets */
@@ -60,12 +60,12 @@ static int init(int rate_hz, int channels, int format, int flags)
 	 * using mplayer's audio filters.
 	 */
 	switch (format) {
-	case AFMT_U8:
-	case AFMT_S8:
-	    format = AFMT_U8;
+	case AF_FORMAT_U8:
+	case AF_FORMAT_S8:
+	    format = AF_FORMAT_U8;
 	    break;
 	default:
-	    format = AFMT_S16_LE;    /* artsd always expects little endian?*/
+	    format = AF_FORMAT_S16_LE;    /* artsd always expects little endian?*/
 	    break;
 	}
 
@@ -74,7 +74,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	ao_data.samplerate = rate_hz;
 	ao_data.bps = (rate_hz*channels);
 
-	if(format != AFMT_U8 && format != AFMT_S8)
+	if(format != AF_FORMAT_U8 && format != AF_FORMAT_S8)
 		ao_data.bps*=2;
 
 	stream=arts_play_stream(rate_hz, OBTAIN_BITRATE(format), channels, "MPlayer");

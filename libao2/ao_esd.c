@@ -32,7 +32,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -200,14 +200,14 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     /* EsounD can play 8bit unsigned and 16bit signed native */
     switch (format) {
-    case AFMT_S8:
-    case AFMT_U8:
+    case AF_FORMAT_S8:
+    case AF_FORMAT_U8:
 	esd_fmt |= ESD_BITS8;
-	ao_data.format = AFMT_U8;
+	ao_data.format = AF_FORMAT_U8;
 	break;
     default:
 	esd_fmt |= ESD_BITS16;
-	ao_data.format = AFMT_S16_NE;
+	ao_data.format = AF_FORMAT_S16_NE;
 	bytes_per_sample *= 2;
 	break;
     }

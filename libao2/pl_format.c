@@ -16,7 +16,7 @@
 #include "audio_out.h"
 #include "audio_plugin.h"
 #include "audio_plugin_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 
 static ao_info_t info =
 {
@@ -75,29 +75,30 @@ static int control(int cmd,void *arg){
 // open & setup audio device
 // return: 1=success 0=fail
 static int init(){
+  char buf1[128], buf2[128];
   // Sheck input format
   switch(ao_plugin_data.format){
-  case(AFMT_U8):
+  case(AF_FORMAT_U8):
     pl_format.in=LE|B08|US; break;
-  case(AFMT_S8):
+  case(AF_FORMAT_S8):
     pl_format.in=LE|B08|SI; break;
-  case(AFMT_S16_LE):
+  case(AF_FORMAT_S16_LE):
     pl_format.in=LE|B16|SI; break;
-  case(AFMT_S16_BE):
+  case(AF_FORMAT_S16_BE):
     pl_format.in=BE|B16|SI; break;
-  case(AFMT_U16_LE):	
+  case(AF_FORMAT_U16_LE):	
     pl_format.in=LE|B16|US; break;
-  case(AFMT_U16_BE):	
+  case(AF_FORMAT_U16_BE):	
     pl_format.in=BE|B16|US; break;
-  case(AFMT_S32_LE):
+  case(AF_FORMAT_S32_LE):
     pl_format.in=LE|B32|SI; break;
-  case(AFMT_S32_BE):	
+  case(AF_FORMAT_S32_BE):	
     pl_format.in=BE|B32|SI; break;
-  case(AFMT_IMA_ADPCM):		
-  case(AFMT_MU_LAW):
-  case(AFMT_A_LAW):
-  case(AFMT_MPEG):
-  case(AFMT_AC3):
+  case(AF_FORMAT_IMA_ADPCM):		
+  case(AF_FORMAT_MU_LAW):
+  case(AF_FORMAT_A_LAW):
+  case(AF_FORMAT_MPEG2):
+  case(AF_FORMAT_AC3):
     printf("[pl_format] Input audio format not yet suported \n");
     return 0;
   default: 
@@ -106,27 +107,27 @@ static int init(){
   }
   // Sheck output format
   switch(ao_plugin_cfg.pl_format_type){
-  case(AFMT_U8):
+  case(AF_FORMAT_U8):
     pl_format.out=LE|B08|US; break;
-  case(AFMT_S8):
+  case(AF_FORMAT_S8):
     pl_format.out=LE|B08|SI; break;
-  case(AFMT_S16_LE):
+  case(AF_FORMAT_S16_LE):
     pl_format.out=LE|B16|SI; break;
-  case(AFMT_S16_BE):
+  case(AF_FORMAT_S16_BE):
     pl_format.out=BE|B16|SI; break;
-  case(AFMT_U16_LE):	
+  case(AF_FORMAT_U16_LE):	
     pl_format.out=LE|B16|US; break;
-  case(AFMT_U16_BE):	
+  case(AF_FORMAT_U16_BE):	
     pl_format.out=BE|B16|US; break;
-  case(AFMT_S32_LE):
+  case(AF_FORMAT_S32_LE):
     pl_format.out=LE|B32|SI; break;
-  case(AFMT_S32_BE):	
+  case(AF_FORMAT_S32_BE):	
     pl_format.out=BE|B32|SI; break;
-  case(AFMT_IMA_ADPCM):		
-  case(AFMT_MU_LAW):
-  case(AFMT_A_LAW):
-  case(AFMT_MPEG):
-  case(AFMT_AC3):
+  case(AF_FORMAT_IMA_ADPCM):		
+  case(AF_FORMAT_MU_LAW):
+  case(AF_FORMAT_A_LAW):
+  case(AF_FORMAT_MPEG2):
+  case(AF_FORMAT_AC3):
     printf("[pl_format] Output audio format not yet suported \n");
     return 0;
   default:
@@ -136,8 +137,8 @@ static int init(){
 
   // Tell the world what we are up to
   printf("[pl_format] Input format: %s, output format: %s \n",
-	 audio_out_format_name(ao_plugin_data.format),
-	 audio_out_format_name(ao_plugin_cfg.pl_format_type));
+	 af_fmt2str(ao_plugin_data.format, &buf1, 128),
+	 af_fmt2str(ao_plugin_cfg.pl_format_type, &buf2, 128));
 
   // We are changing the format
   ao_plugin_data.format=ao_plugin_cfg.pl_format_type;

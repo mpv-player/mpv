@@ -9,14 +9,21 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
-//#include <sys/soundcard.h>
 
 #include "config.h"
 #include "mp_msg.h"
 #include "mixer.h"
 #include "help_mp.h"
 
-#include "afmt.h"
+#ifdef HAVE_SYS_SOUNDCARD_H
+#include <sys/soundcard.h>
+#else
+#ifdef HAVE_SOUNDCARD_H
+#include <soundcard.h>
+#endif
+#endif
+
+#include "../libaf/af_format.h"
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
@@ -32,6 +39,86 @@ static ao_info_t info =
 /* Support for >2 output channels added 2001-11-25 - Steve Davies <steve@daviesfam.org> */
 
 LIBAO_EXTERN(oss)
+
+static int format2oss(int format)
+{
+    switch(format)
+    {
+    case AF_FORMAT_U8: return AFMT_U8;
+    case AF_FORMAT_S8: return AFMT_S8;
+    case AF_FORMAT_U16_LE: return AFMT_U16_LE;
+    case AF_FORMAT_U16_BE: return AFMT_U16_BE;
+    case AF_FORMAT_S16_LE: return AFMT_S16_LE;
+    case AF_FORMAT_S16_BE: return AFMT_S16_BE;
+#ifdef AFMT_S24_LE
+    case AF_FORMAT_U24_LE: return AFMT_U24_LE;
+    case AF_FORMAT_U24_BE: return AFMT_U24_BE;
+    case AF_FORMAT_S24_LE: return AFMT_S24_LE;
+    case AF_FORMAT_S24_BE: return AFMT_S24_BE;
+#endif
+#ifdef AFMT_S32_LE
+    case AF_FORMAT_U32_LE: return AFMT_U32_LE;
+    case AF_FORMAT_U32_BE: return AFMT_U32_BE;
+    case AF_FORMAT_S32_LE: return AFMT_S32_LE;
+    case AF_FORMAT_S32_BE: return AFMT_S32_BE;
+#endif
+#ifdef AFMT_FLOAT
+    case AF_FORMAT_FLOAT_NE: return AFMT_FLOAT;
+#endif
+    // SPECIALS
+    case AF_FORMAT_MU_LAW: return AFMT_MU_LAW;
+    case AF_FORMAT_A_LAW: return AFMT_A_LAW;
+    case AF_FORMAT_IMA_ADPCM: return AFMT_IMA_ADPCM;
+#ifdef AFMT_MPEG
+    case AF_FORMAT_MPEG2: return AFMT_MPEG;
+#endif
+#ifdef AFMT_AC3
+    case AF_FORMAT_AC3: return AFMT_AC3;
+#endif
+    }
+    printf("Unknown format: %x\n", format);
+    return -1;
+}
+
+static int oss2format(int format)
+{
+    switch(format)
+    {
+    case AFMT_U8: return AF_FORMAT_U8;
+    case AFMT_S8: return AF_FORMAT_S8;
+    case AFMT_U16_LE: return AF_FORMAT_U16_LE;
+    case AFMT_U16_BE: return AF_FORMAT_U16_BE;
+    case AFMT_S16_LE: return AF_FORMAT_S16_LE;
+    case AFMT_S16_BE: return AF_FORMAT_S16_BE;
+#ifdef AFMT_S24_LE
+    case AFMT_U24_LE: return AF_FORMAT_U24_LE;
+    case AFMT_U24_BE: return AF_FORMAT_U24_BE;
+    case AFMT_S24_LE: return AF_FORMAT_S24_LE;
+    case AFMT_S24_BE: return AF_FORMAT_S24_BE;
+#endif
+#ifdef AFMT_S32_LE
+    case AFMT_U32_LE: return AF_FORMAT_U32_LE;
+    case AFMT_U32_BE: return AF_FORMAT_U32_BE;
+    case AFMT_S32_LE: return AF_FORMAT_S32_LE;
+    case AFMT_S32_BE: return AF_FORMAT_S32_BE;
+#endif
+#ifdef AFMT_FLOAT
+    case AFMT_FLOAT: return AF_FORMAT_FLOAT_NE;
+#endif
+    // SPECIALS
+    case AFMT_MU_LAW: return AF_FORMAT_MU_LAW;
+    case AFMT_A_LAW: return AF_FORMAT_A_LAW;
+    case AFMT_IMA_ADPCM: return AF_FORMAT_IMA_ADPCM;
+#ifdef AFMT_MPEG
+    case AFMT_MPEG: return AF_FORMAT_MPEG2;
+#endif
+#ifdef AFMT_AC3
+    case AFMT_AC3: return AF_FORMAT_AC3;
+#endif
+    }
+    printf("Unknown format: %x\n", format);
+    return -1;
+}
 
 static char *dsp=PATH_DEV_DSP;
 static audio_buf_info zz;
@@ -57,7 +144,7 @@ static int control(int cmd,void *arg){
 	    ao_control_vol_t *vol = (ao_control_vol_t *)arg;
 	    int fd, v, devs;
 
-	    if(ao_data.format == AFMT_AC3)
+	    if(ao_data.format == AF_FORMAT_AC3)
 		return CONTROL_TRUE;
     
 	    if ((fd = open(oss_mixer_device, O_RDONLY)) > 0)
@@ -95,9 +182,10 @@ static int control(int cmd,void *arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
   char *mixer_channels [SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
+  int oss_format;
 
-  mp_msg(MSGT_AO,MSGL_V,"ao2: %d Hz  %d chans  %s\n",rate,channels,
-    audio_out_format_name(format));
+//  mp_msg(MSGT_AO,MSGL_V,"ao2: %d Hz  %d chans  %s\n",rate,channels,
+//    audio_out_format_name(format));
 
   if (ao_subdevice)
     dsp = ao_subdevice;
@@ -160,32 +248,39 @@ static int init(int rate,int channels,int format,int flags){
   fcntl(audio_fd, F_SETFD, FD_CLOEXEC);
 #endif
   
-  if(format == AFMT_AC3) {
+  if(format == AF_FORMAT_AC3) {
     ao_data.samplerate=rate;
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
   }
 
 ac3_retry:  
   ao_data.format=format;
-  if( ioctl(audio_fd, SNDCTL_DSP_SETFMT, &ao_data.format)<0 ||
-      ao_data.format != format) if(format == AFMT_AC3){
+  oss_format=format2oss(format);
+  if (oss_format == -1) return 0;
+  if( ioctl(audio_fd, SNDCTL_DSP_SETFMT, &oss_format)<0 ||
+      oss_format != format2oss(format)) if(format == AF_FORMAT_AC3){
     mp_msg(MSGT_AO,MSGL_WARN, MSGTR_AO_OSS_CantSetAC3, dsp);
 #ifdef WORDS_BIGENDIAN
-    format=AFMT_S16_BE;
+    oss_format=AFMT_S16_BE;
+    format=AF_FORMAT_S16_BE;
 #else
-    format=AFMT_S16_LE;
+    oss_format=AFMT_S16_LE;
+    format=AF_FORMAT_S16_LE;
 #endif
     goto ac3_retry;
   }
-  mp_msg(MSGT_AO,MSGL_V,"audio_setup: sample format: %s (requested: %s)\n",
-    audio_out_format_name(ao_data.format), audio_out_format_name(format));
+//  mp_msg(MSGT_AO,MSGL_V,"audio_setup: sample format: %s (requested: %s)\n",
+//    audio_out_format_name(ao_data.format), audio_out_format_name(format));
 #if 0
-  if(ao_data.format!=format)
+  if(oss_format!=format2oss(format))
 	mp_msg(MSGT_AO,MSGL_WARN,"WARNING! Your soundcard does NOT support %s sample format! Broken audio or bad playback speed are possible! Try with '-aop list=format'\n",audio_out_format_name(format));
 #endif
+
+  ao_data.format = oss2format(oss_format);
+  if (ao_data.format == -1) return 0;
   
   ao_data.channels = channels;
-  if(format != AFMT_AC3) {
+  if(format != AF_FORMAT_AC3) {
     // We only use SNDCTL_DSP_CHANNELS for >2 channels, in case some drivers don't have it
     if (ao_data.channels > 2) {
       if ( ioctl(audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels) == -1 ||
@@ -253,7 +348,7 @@ ac3_retry:
   }
 
   ao_data.bps=ao_data.channels;
-  if(ao_data.format != AFMT_U8 && ao_data.format != AFMT_S8)
+  if(ao_data.format != AF_FORMAT_U8 && ao_data.format != AF_FORMAT_S8)
     ao_data.bps*=2;
 
   ao_data.outburst-=ao_data.outburst % ao_data.bps; // round down
@@ -280,6 +375,7 @@ static void uninit(int immed){
 
 // stop playing and empty buffers (for seeking/pause)
 static void reset(){
+  int oss_format;
     uninit(1);
     audio_fd=open(dsp, O_WRONLY);
     if(audio_fd < 0){
@@ -291,8 +387,9 @@ static void reset(){
   fcntl(audio_fd, F_SETFD, FD_CLOEXEC);
 #endif
 
-  ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_data.format);
-  if(ao_data.format != AFMT_AC3) {
+  oss_format = format2oss(ao_data.format);
+  ioctl (audio_fd, SNDCTL_DSP_SETFMT, &oss_format);
+  if(ao_data.format != AF_FORMAT_AC3) {
     if (ao_data.channels > 2)
       ioctl (audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels);
     else {

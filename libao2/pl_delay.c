@@ -12,7 +12,7 @@
 #include "audio_out.h"
 #include "audio_plugin.h"
 #include "audio_plugin_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 
 static ao_info_t info =
 {
@@ -65,7 +65,7 @@ static int init(){
 
   // Tell ao_plugin how much this plugin adds to the overall time delay
   time_delay=-1*(float)ao_plugin_cfg.pl_delay_len/((float)pl_delay.channels*(float)pl_delay.rate);
-  if(pl_delay.format != AFMT_U8 && pl_delay.format != AFMT_S8)
+  if(pl_delay.format != AF_FORMAT_U8 && pl_delay.format != AF_FORMAT_S8)
     time_delay/=2;
   ao_plugin_data.delay_fix+=time_delay;
 

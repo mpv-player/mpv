@@ -29,8 +29,7 @@ int tv_param_on = 0;
 #include "demuxer.h"
 #include "stheader.h"
 
-#include "../libao2/afmt.h"
-#include "../libao2/audio_out.h"
+#include "../libaf/af_format.h"
 #include "../libvo/img_format.h"
 #include "../libvo/fastmemcpy.h"
 
@@ -516,6 +515,7 @@ int demux_open_tv(demuxer_t *demuxer)
     {
 	int audio_format;
 	int sh_audio_format;
+	char buf[128];
 
 	/* yeah, audio is present */
 
@@ -527,24 +527,24 @@ int demux_open_tv(demuxer_t *demuxer)
 
 	switch(audio_format)
 	{
-	    case AFMT_U8:
-	    case AFMT_S8:
-	    case AFMT_U16_LE:
-	    case AFMT_U16_BE:
-	    case AFMT_S16_LE:
-	    case AFMT_S16_BE:
-	    case AFMT_S32_LE:
-	    case AFMT_S32_BE:
+	    case AF_FORMAT_U8:
+	    case AF_FORMAT_S8:
+	    case AF_FORMAT_U16_LE:
+	    case AF_FORMAT_U16_BE:
+	    case AF_FORMAT_S16_LE:
+	    case AF_FORMAT_S16_BE:
+	    case AF_FORMAT_S32_LE:
+	    case AF_FORMAT_S32_BE:
 		sh_audio_format = 0x1; /* PCM */
 		break;
-	    case AFMT_IMA_ADPCM:
-	    case AFMT_MU_LAW:
-	    case AFMT_A_LAW:
-	    case AFMT_MPEG:
-	    case AFMT_AC3:
+	    case AF_FORMAT_IMA_ADPCM:
+	    case AF_FORMAT_MU_LAW:
+	    case AF_FORMAT_A_LAW:
+	    case AF_FORMAT_MPEG2:
+	    case AF_FORMAT_AC3:
 	    default:
 		mp_msg(MSGT_TV, MSGL_ERR, "Audio type '%s (%x)' unsupported!\n",
-		    audio_out_format_name(audio_format), audio_format);
+		    af_fmt2str(audio_format, &buf, 128), audio_format);
 		goto no_audio;
 	}
 	

@@ -15,7 +15,7 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 
-#include "afmt.h"
+#include "libaf/af_format.h"
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -96,14 +96,14 @@ static int init(int rate,int channels,int format,int flags){
     ao_data.channels=2;
     ao_data.outburst=2000;
     switch(format){
-	case AFMT_S16_LE:
-	case AFMT_S16_BE:
-	case AFMT_MPEG:
-	case AFMT_AC3:
+	case AF_FORMAT_S16_LE:
+	case AF_FORMAT_S16_BE:
+	case AF_FORMAT_MPEG2:
+	case AF_FORMAT_AC3:
 	    ao_data.format=format;
 	    break;
 	default:
-	    ao_data.format=AFMT_S16_BE;
+	    ao_data.format=AF_FORMAT_S16_BE;
     }
     
 retry:
@@ -174,14 +174,14 @@ static int get_space(){
 // return: number of bytes played
 static int play(void* data,int len,int flags){
 //    printf("\nao_mpegpes: play(%d) freq=%d\n",len,freq_id);
-    if(ao_data.format==AFMT_MPEG)
+    if(ao_data.format==AF_FORMAT_MPEG2)
 	send_pes_packet(data,len,0x1C0,ao_data.pts);
     else {
 	int i;
 	unsigned short *s=data;
 //	if(len>2000) len=2000;
 //	printf("ao_mpegpes: len=%d  \n",len);
-	if(ao_data.format==AFMT_S16_LE || ao_data.format==AFMT_AC3)
+	if(ao_data.format==AF_FORMAT_S16_LE || ao_data.format==AF_FORMAT_AC3)
 	    for(i=0;i<len/2;i++) s[i]=(s[i]>>8)|(s[i]<<8); // le<->be
 	send_lpcm_packet(data,len,0xA0,ao_data.pts,freq_id);
     }

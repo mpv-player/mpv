@@ -23,7 +23,7 @@
 #include <windows.h>
 #include <mmsystem.h>
 
-#include "afmt.h"
+#include "libaf/af_format.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "mp_msg.h"
@@ -149,21 +149,21 @@ static int init(int rate,int channels,int format,int flags)
 	int i;
    
 	switch(format){
-		case AFMT_AC3:
-		case AFMT_S24_LE:
-		case AFMT_S16_LE:
-		case AFMT_S8:
+		case AF_FORMAT_AC3:
+		case AF_FORMAT_S24_LE:
+		case AF_FORMAT_S16_LE:
+		case AF_FORMAT_S8:
 			break;
 		default:
 			mp_msg(MSGT_AO, MSGL_V,"ao_win32: format %s not supported defaulting to Signed 16-bit Little-Endian\n",audio_out_format_name(format));
-			format=AFMT_S16_LE;
+			format=AF_FORMAT_S16_LE;
 	}   
 	//fill global ao_data 
 	ao_data.channels=channels;
 	ao_data.samplerate=rate;
 	ao_data.format=format;
 	ao_data.bps=channels*rate;
-	if(format != AFMT_U8 && format != AFMT_S8)
+	if(format != AF_FORMAT_U8 && format != AF_FORMAT_S8)
 	  ao_data.bps*=2;
 	if(ao_data.buffersize==-1)
 	{
@@ -179,7 +179,7 @@ static int init(int rate,int channels,int format,int flags)
     wformat.Format.cbSize          = (channels>2)?sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX):0;
     wformat.Format.nChannels       = channels;                
     wformat.Format.nSamplesPerSec  = rate;            
-    if(format == AFMT_AC3)
+    if(format == AF_FORMAT_AC3)
     {
         wformat.Format.wFormatTag      = WAVE_FORMAT_DOLBY_AC3_SPDIF;
         wformat.Format.wBitsPerSample  = 16;
@@ -208,7 +208,7 @@ static int init(int rate,int channels,int format,int flags)
 		mp_msg(MSGT_AO, MSGL_ERR,"ao_win32: format not supported switching to default\n");
         ao_data.channels = wformat.Format.nChannels = 2;
 	    ao_data.samplerate = wformat.Format.nSamplesPerSec = 44100;
-	    ao_data.format = AFMT_S16_LE;
+	    ao_data.format = AF_FORMAT_S16_LE;
 		ao_data.bps=ao_data.channels * ao_data.samplerate*2;
 	    wformat.Format.wBitsPerSample=16;
         wformat.Format.wFormatTag=WAVE_FORMAT_PCM;

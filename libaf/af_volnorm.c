@@ -79,11 +79,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = ((af_data_t*)arg)->nch;
     
-    if(((af_data_t*)arg)->format == (AF_FORMAT_SI | AF_FORMAT_NE)){
-      af->data->format = AF_FORMAT_SI | AF_FORMAT_NE;
+    if(((af_data_t*)arg)->format == (AF_FORMAT_S16_NE)){
+      af->data->format = AF_FORMAT_S16_NE;
       af->data->bps    = 2;
     }else{
-      af->data->format = AF_FORMAT_F | AF_FORMAT_NE;
+      af->data->format = AF_FORMAT_FLOAT_NE;
       af->data->bps    = 4;
     }
     return af_test_output(af,(af_data_t*)arg);
@@ -288,14 +288,14 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 {
   af_volnorm_t *s = af->setup;
 
-  if(af->data->format == (AF_FORMAT_SI | AF_FORMAT_NE))
+  if(af->data->format == (AF_FORMAT_S16_NE))
   {
     if (s->method)
 	method2_int16(s, data);
     else
 	method1_int16(s, data);
   }
-  else if(af->data->format == (AF_FORMAT_F | AF_FORMAT_NE))
+  else if(af->data->format == (AF_FORMAT_FLOAT_NE))
   { 
     if (s->method)
 	method2_float(s, data);

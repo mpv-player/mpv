@@ -942,7 +942,7 @@ static int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
   result =  init_audio_filters(sh_audio, new_srate,
            sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
            ao_data->samplerate, ao_data->channels, ao_data->format,
-           audio_out_format_bits(ao_data->format) / 8, /* ao_data.bps, */
+           af_fmt2bits(ao_data->format) / 8, /* ao_data.bps, */
            ao_data->outburst * 4, ao_data->buffersize);
   mixer.afilter = sh_audio->afilter;
   return result;
@@ -2094,12 +2094,13 @@ if(sh_audio){
 	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
 	// output:
 	&ao_data.samplerate, &ao_data.channels, &ao_data.format,
-	audio_out_format_bits(ao_data.format)/8)){
+	af_fmt2bits(ao_data.format)/8)){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_AudioFilterChainPreinitError);
   } else {
+    char buf[128];
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AF_pre: %dHz %dch %s\n",
       ao_data.samplerate, ao_data.channels,
-      audio_out_format_name(ao_data.format));
+      af_fmt2str(ao_data.format,&buf,128));
   }
 #endif  
   current_module="ao2_init";
@@ -2114,12 +2115,13 @@ if(sh_audio){
     sh_audio=d_audio->sh=NULL; // -> nosound
   } else {
     // SUCCESS:
+    char buf[128];
     inited_flags|=INITED_AO;
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bps)\n",
       audio_out->info->short_name,
       ao_data.samplerate, ao_data.channels,
-      audio_out_format_name(ao_data.format),
-      audio_out_format_bits(ao_data.format)/8 );
+      af_fmt2str(ao_data.format, &buf, 128),
+      af_fmt2bits(ao_data.format)/8 );
     mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
       audio_out->info->name, audio_out->info->author);
     if(strlen(audio_out->info->comment) > 0)

@@ -45,7 +45,7 @@ extern ao_plugin_cfg_t ao_plugin_cfg;
 // Configuration defaults
 #define CFG_DEFAULTS { \
  NULL, \
- AFMT_S16_LE, \
+ AF_FORMAT_S16_LE, \
  0, \
  48000, \
  101, \

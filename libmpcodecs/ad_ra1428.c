@@ -25,7 +25,7 @@ static int preinit(sh_audio_t *sh) {
   sh->samplerate=sh->wf->nSamplesPerSec;
   sh->samplesize=sh->wf->wBitsPerSample/8;
   sh->channels=sh->wf->nChannels;
-  sh->sample_format=AFMT_S16_LE;
+  sh->sample_format=AF_FORMAT_S16_LE;
 
 	switch (sh->format) {
 		case mmioFOURCC('1','4','_','4'):

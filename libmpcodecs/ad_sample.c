@@ -47,7 +47,7 @@ static int preinit(sh_audio_t *sh){
   sh->samplesize=2;              // bytes (not bits!) per sample per channel
   sh->channels=2;                // number of channels
   sh->samplerate=44100;          // samplerate
-  sh->sample_format=AFMT_S16_LE; // sample format, see libao2/afmt.h
+  sh->sample_format=AF_FORMAT_S16_LE; // sample format, see libao2/afmt.h
   
   sh->i_bps=64000/8; // input data rate (compressed bytes per second)
   // Note: if you have VBR or unknown input rate, set it to some common or

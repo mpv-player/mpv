@@ -28,7 +28,7 @@
 #define DIRECTSOUND_VERSION 0x0600
 #include <dsound.h>
 
-#include "afmt.h"
+#include "libaf/af_format.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "mp_msg.h"
@@ -265,7 +265,7 @@ static int write_buffer(unsigned char *data, int len)
   
   if (SUCCEEDED(res)) 
   {
-  	if( (ao_data.channels == 6) && (ao_data.format!=AFMT_AC3) ) {
+  	if( (ao_data.channels == 6) && (ao_data.format!=AF_FORMAT_AC3) ) {
   	    // reorder channels while writing to pointers.
   	    // it's this easy because buffer size and len are always
   	    // aligned to multiples of channels*bytespersample
@@ -366,14 +366,14 @@ static int init(int rate, int channels, int format, int flags)
 
 	//check if the format is supported in general
 	switch(format){
-		case AFMT_AC3:
-		case AFMT_S24_LE:
-		case AFMT_S16_LE:
-		case AFMT_S8:
+		case AF_FORMAT_AC3:
+		case AF_FORMAT_S24_LE:
+		case AF_FORMAT_S16_LE:
+		case AF_FORMAT_S8:
 			break;
 		default:
 			mp_msg(MSGT_AO, MSGL_V,"ao_dsound: format %s not supported defaulting to Signed 16-bit Little-Endian\n",audio_out_format_name(format));
-			format=AFMT_S16_LE;
+			format=AF_FORMAT_S16_LE;
 	}   	
 	//fill global ao_data
 	ao_data.channels = channels;
@@ -389,7 +389,7 @@ static int init(int rate, int channels, int format, int flags)
 	wformat.Format.cbSize          = (channels > 2) ? sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX) : 0;
 	wformat.Format.nChannels       = channels;
 	wformat.Format.nSamplesPerSec  = rate;
-	if (format == AFMT_AC3) {
+	if (format == AF_FORMAT_AC3) {
 		wformat.Format.wFormatTag      = WAVE_FORMAT_DOLBY_AC3_SPDIF;
 		wformat.Format.wBitsPerSample  = 16;
 		wformat.Format.nBlockAlign     = 4;

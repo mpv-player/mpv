@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "bswap.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "mp_msg.h"
@@ -89,12 +89,12 @@ static int init(int rate,int channels,int format,int flags){
 
 	bits=8;
 	switch(format){
-	case AFMT_S8:
-	    format=AFMT_U8;
-	case AFMT_U8:
+	case AF_FORMAT_S8:
+	    format=AF_FORMAT_U8;
+	case AF_FORMAT_U8:
 	    break;
 	default:
-	    format=AFMT_S16_LE;
+	    format=AF_FORMAT_S16_LE;
 	    bits=16;
 	    break;
 	}
@@ -114,9 +114,9 @@ static int init(int rate,int channels,int format,int flags){
 	wavhdr.data_length=le2me_32(0x7ffff000);
 	wavhdr.file_length = wavhdr.data_length + sizeof(wavhdr) - 8;
 
-	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_PCM_FileInfo, ao_outputfilename, 
-	       (ao_pcm_waveheader?"WAVE":"RAW PCM"), rate, 
-	       (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
+//	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_PCM_FileInfo, ao_outputfilename, 
+//	       (ao_pcm_waveheader?"WAVE":"RAW PCM"), rate, 
+//	       (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
 	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_PCM_HintInfo);
 
 	fp = fopen(ao_outputfilename, "wb");

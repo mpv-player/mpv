@@ -11,8 +11,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-
-#include "afmt.h"
+#include "libaf/af_format.h"
 
 
 static ao_info_t info =
@@ -158,9 +157,9 @@ static int get_space(){
 // return: number of bytes played
 static int play(void* data,int len,int flags){
   // MPEG and AC3 don't work :-(
-    if(ao_data.format==AFMT_MPEG)
+    if(ao_data.format==AF_FORMAT_MPEG2)
 	dxr2_send_packet(data,len,0xC0,ao_data.pts);
-    else if(ao_data.format==AFMT_AC3)
+    else if(ao_data.format==AF_FORMAT_AC3)
       	dxr2_send_packet(data,len,0x80,ao_data.pts);
     else {
 	int i;

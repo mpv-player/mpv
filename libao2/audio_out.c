@@ -4,7 +4,6 @@
 
 #include "config.h"
 #include "audio_out.h"
-#include "afmt.h"
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -187,6 +186,7 @@ ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int c
 	    audio_out_plugin.control(AOCONTROL_SET_PLUGIN_DRIVER,audio_out);
 	    audio_out=&audio_out_plugin;
 	}
+//	if(audio_out->control(AOCONTROL_QUERY_FORMAT, (int)format) == CONTROL_TRUE)
 	if(audio_out->init(rate,channels,format,flags))
 	    return audio_out; // success!
     }

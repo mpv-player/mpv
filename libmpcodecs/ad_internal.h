@@ -1,6 +1,6 @@
 
 #include "codec-cfg.h"
-#include "../libao2/afmt.h"
+#include "../libaf/af_format.h"
 
 #include "stream.h"
 #include "demuxer.h"

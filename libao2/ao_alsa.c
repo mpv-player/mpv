@@ -37,7 +37,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 
 static ao_info_t info = 
 {
@@ -125,7 +125,7 @@ static int control(int cmd, void *arg)
       }
       if(mixer_device) card = mixer_device;
 
-      if(ao_data.format == AFMT_AC3)
+      if(ao_data.format == AF_FORMAT_AC3)
 	return CONTROL_TRUE;
 
       //allocate simple id
@@ -275,42 +275,42 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     switch (format)
       {
-      case AFMT_S8:
+      case AF_FORMAT_S8:
 	alsa_format = SND_PCM_FORMAT_S8;
 	break;
-      case AFMT_U8:
+      case AF_FORMAT_U8:
 	alsa_format = SND_PCM_FORMAT_U8;
 	break;
-      case AFMT_U16_LE:
+      case AF_FORMAT_U16_LE:
 	alsa_format = SND_PCM_FORMAT_U16_LE;
 	break;
-      case AFMT_U16_BE:
+      case AF_FORMAT_U16_BE:
 	alsa_format = SND_PCM_FORMAT_U16_BE;
 	break;
 #ifndef WORDS_BIGENDIAN
-      case AFMT_AC3:
+      case AF_FORMAT_AC3:
 #endif
-      case AFMT_S16_LE:
+      case AF_FORMAT_S16_LE:
 	alsa_format = SND_PCM_FORMAT_S16_LE;
 	break;
 #ifdef WORDS_BIGENDIAN
-      case AFMT_AC3:
+      case AF_FORMAT_AC3:
 #endif
-      case AFMT_S16_BE:
+      case AF_FORMAT_S16_BE:
 	alsa_format = SND_PCM_FORMAT_S16_BE;
 	break;
-      case AFMT_S32_LE:
+      case AF_FORMAT_S32_LE:
 	alsa_format = SND_PCM_FORMAT_S32_LE;
 	break;
-      case AFMT_S32_BE:
+      case AF_FORMAT_S32_BE:
 	alsa_format = SND_PCM_FORMAT_S32_BE;
 	break;
-      case AFMT_FLOAT:
+      case AF_FORMAT_FLOAT_LE:
 	alsa_format = SND_PCM_FORMAT_FLOAT_LE;
 	break;
 
       default:
-	alsa_format = SND_PCM_FORMAT_MPEG; //? default should be -1
+	alsa_format = SND_PCM_FORMAT_MPEG2; //? default should be -1
 	break;
       }
     
@@ -412,7 +412,7 @@ static int init(int rate_hz, int channels, int format, int flags)
      * while opening the abstract alias for the spdif subdevice
      * 'iec958'
      */
-    if (format == AFMT_AC3) {
+    if (format == AF_FORMAT_AC3) {
       unsigned char s[4];
 
       switch (channels) {
@@ -590,7 +590,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 		"alsa-init: format %s are not supported by hardware, trying default\n", 
 		audio_out_format_name(format));
          alsa_format = SND_PCM_FORMAT_S16_LE;
-         ao_data.format = AFMT_S16_LE;
+         ao_data.format = AF_FORMAT_S16_LE;
          ao_data.bps = channels * rate_hz * 2;
       }
 

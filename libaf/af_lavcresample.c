@@ -52,7 +52,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
     af->data->nch    = data->nch;
     if (af->data->nch > CHANS) af->data->nch = CHANS;
-    af->data->format = AF_FORMAT_SI | AF_FORMAT_NE;
+    af->data->format = AF_FORMAT_S16_NE;
     af->data->bps    = 2;
     g= ff_gcd(af->data->rate, data->rate);
     af->mul.n = af->data->rate/g;

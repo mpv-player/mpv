@@ -2,7 +2,7 @@ include config.mak
 
 LIBNAME = libao2.a
 
-SRCS=afmt.c audio_out.c ao_mpegpes.c ao_null.c ao_pcm.c ao_plugin.c pl_delay.c pl_format.c pl_surround.c remez.c pl_resample.c pl_volume.c pl_extrastereo.c pl_volnorm.c pl_eq.c $(OPTIONAL_SRCS)
+SRCS=audio_out.c ao_mpegpes.c ao_null.c ao_pcm.c ao_plugin.c pl_delay.c pl_format.c pl_surround.c remez.c pl_resample.c pl_volume.c pl_extrastereo.c pl_volnorm.c pl_eq.c $(OPTIONAL_SRCS)
 
 OBJS=$(SRCS:.c=.o)
 

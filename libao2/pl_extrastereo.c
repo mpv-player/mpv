@@ -19,7 +19,7 @@
 #include "audio_out.h"
 #include "audio_plugin.h"
 #include "audio_plugin_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 
 static ao_info_t info = {
         "Extra stereo plugin",
@@ -57,7 +57,7 @@ static int control(int cmd,void *arg){
 // return: 1=success 0=fail
 static int init(){
   switch(ao_plugin_data.format){
-  case(AFMT_S16_NE):
+  case(AF_FORMAT_S16_NE):
     break;
   default:
     fprintf(stderr,"[pl_extrastereo] Audio format not yet suported \n");
@@ -87,7 +87,7 @@ static void reset(){
 static int play(){
 
   switch(pl_extrastereo.format){
-  case(AFMT_S16_NE): {
+  case(AF_FORMAT_S16_NE): {
 
     int16_t* data=(int16_t*)ao_plugin_data.data;
     int len=ao_plugin_data.len / 2; // 16 bits samples

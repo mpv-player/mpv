@@ -54,7 +54,7 @@
 
 #include "libvo/video_out.h"
 
-#include "libao2/afmt.h"
+#include "libaf/af_format.h"
 
 #include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/dec_audio.h"
@@ -809,7 +809,7 @@ case ACODEC_PCM:
         sh_audio->samplerate,
 	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
 	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
-	(mux_a->wf->wBitsPerSample==8)?	AFMT_U8:AFMT_S16_LE,
+	(mux_a->wf->wBitsPerSample==8)?	AF_FORMAT_U8:AF_FORMAT_S16_LE,
 	mux_a->wf->wBitsPerSample/8,
 	16384, mux_a->wf->nAvgBytesPerSec)){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
@@ -842,11 +842,7 @@ case ACODEC_VBRMP3:
         sh_audio->samplerate,
 	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
 	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
-#ifdef WORDS_BIGENDIAN
-	AFMT_S16_BE, 2,
-#else
-	AFMT_S16_LE, 2,
-#endif
+	AF_FORMAT_S16_NE, 2,
 	4608, mux_a->h.dwRate*mux_a->wf->nChannels*2)){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
     }
@@ -983,7 +979,7 @@ case ACODEC_LAVC:
 	sh_audio->samplerate, sh_audio->channels,
 	sh_audio->sample_format, sh_audio->samplesize,
 	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
-	AFMT_S16_NE, 2,
+	AF_FORMAT_S16_NE, 2,
 	mux_a->h.dwSuggestedBufferSize,
 	mux_a->h.dwSuggestedBufferSize*2)) {
 	mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_NoMatchingFilter);
@@ -1048,7 +1044,7 @@ case ACODEC_TOOLAME:
 	sh_audio->samplerate, sh_audio->channels,
 	sh_audio->sample_format, sh_audio->samplesize,
 	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
-	AFMT_S16_NE, 2,
+	AF_FORMAT_S16_NE, 2,
 	mux_a->h.dwSuggestedBufferSize,
 	mux_a->h.dwSuggestedBufferSize*2)) {
 	mp_msg(MSGT_CPLAYER, MSGL_ERR, "Couldn't find matching filter / ao format!\n");

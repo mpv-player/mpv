@@ -8,6 +8,8 @@
 //=============================================================================
 */
 
+#include "../config.h" // WORDS_BIGENDIAN
+
 // Number of channels
 #ifndef AF_NCH
 #define AF_NCH 6

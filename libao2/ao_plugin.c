@@ -6,7 +6,7 @@
 
 #include "mp_msg.h"
 #include "help_mp.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
 
@@ -140,7 +140,7 @@ static int init(int rate,int channels,int format,int flags){
 
   ao_plugin_local_data.format=format;
   ao_plugin_local_data.channels=channels;
-  ao_plugin_local_data.bpm=audio_out_format_bits(format);
+  ao_plugin_local_data.bpm=af_fmt2bits(format);
 
   ao_plugin_data.rate=rate;
   ao_plugin_data.channels=channels;
@@ -168,7 +168,7 @@ static int init(int rate,int channels,int format,int flags){
   // Calculate bps
   ao_plugin_local_data.bps=(float)(ao_plugin_data.rate * 
 				   ao_plugin_data.channels);
-  ao_plugin_local_data.bps*=audio_out_format_bits(ao_plugin_data.format)/8;
+  ao_plugin_local_data.bps*=af_fmt2bits(ao_plugin_data.format)/8;
 
   // This should never happen but check anyway 
   if(NULL==ao_plugin_local_data.driver)

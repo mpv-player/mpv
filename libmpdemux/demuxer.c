@@ -18,7 +18,7 @@
 #include "stheader.h"
 #include "mf.h"
 
-#include "../libao2/afmt.h"
+#include "../libaf/af_format.h"
 #include "../libvo/fastmemcpy.h"
 
 // Should be set to 1 by demux module if ids it passes to new_sh_audio and
@@ -91,7 +91,7 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
         sh = demuxer->a_streams[id];
         // set some defaults
         sh->samplesize=2;
-        sh->sample_format=AFMT_S16_NE;
+        sh->sample_format=AF_FORMAT_S16_NE;
         sh->audio_out_minsize=8192;/* default size, maybe not enough for Win32/ACM*/
         if (identify && !demux_aid_vid_mismatch)
           mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", id);

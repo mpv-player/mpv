@@ -87,7 +87,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = ((af_data_t*)arg)->nch;
-    af->data->format = AF_FORMAT_NE | AF_FORMAT_F;
+    af->data->format = AF_FORMAT_FLOAT_NE;
     af->data->bps    = 4;
     
     // Calculate number of active filters
@@ -173,7 +173,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     float* 	end = in + c->len/4; // Block loop end
 
     while(in < end){
-      register uint32_t	k  = 0;		// Frequency band index
+      register int	k  = 0;		// Frequency band index
       register float 	yt = *in; 	// Current input sample
       in+=nch;
       

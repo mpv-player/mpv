@@ -5,7 +5,6 @@
 #include "../config.h"
 #include "../mp_msg.h"
 #include "../cpudetect.h"
-#include "../libao2/afmt.h"
 
 /* Set the initialization type from mplayers cpudetect */
 #ifdef AF_INIT_TYPE
@@ -19,9 +18,5 @@
 #endif
 #define af_msg(lev, args... ) \
   mp_msg(MSGT_AFILTER,(((lev)<0)?((lev)+3):(((lev)==0)?MSGL_INFO:((lev)+5))), ##args )
-
-/* Decodes the format from mplayer format to libaf format */
-extern int af_format_decode(int format);
-extern int af_format_encode(void* fmt);
 
 #endif /* __af_mp_h__ */

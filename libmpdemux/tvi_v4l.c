@@ -41,7 +41,7 @@
 #endif
 
 #include "mp_msg.h"
-#include "../libao2/afmt.h"
+#include "../libaf/af_format.h"
 #include "../libvo/img_format.h"
 #include "../libvo/fastmemcpy.h"
 #include "../libvo/videodev_mjpeg.h"
@@ -1285,7 +1285,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	/* ========== AUDIO controls =========== */
 	case TVI_CONTROL_AUD_GET_FORMAT:
 	{
-	    *(int *)arg = AFMT_S16_LE;
+	    *(int *)arg = AF_FORMAT_S16_LE;
 	    return(TVI_CONTROL_TRUE);
 	}
 	case TVI_CONTROL_AUD_GET_CHANNELS:

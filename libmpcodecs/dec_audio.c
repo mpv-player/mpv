@@ -14,7 +14,7 @@
 
 #include "dec_audio.h"
 #include "ad.h"
-#include "../libao2/afmt.h"
+#include "../libaf/af_format.h"
 
 #include "../libaf/af.h"
 
@@ -267,13 +267,15 @@ int preinit_audio_filters(sh_audio_t *sh_audio,
   // input format: same as codec's output format:
   afs->input.rate   = in_samplerate;
   afs->input.nch    = in_channels;
-  afs->input.format = af_format_decode(in_format);
+//  afs->input.format = af_format_decode(in_format);
+  afs->input.format = in_format;
   afs->input.bps    = in_bps;
 
   // output format: same as ao driver's input format (if missing, fallback to input)
   afs->output.rate   = *out_samplerate ? *out_samplerate : afs->input.rate;
   afs->output.nch    = *out_channels ? *out_channels : afs->input.nch;
-  afs->output.format = *out_format ? af_format_decode(*out_format) : afs->input.format;
+//  afs->output.format = *out_format ? af_format_decode(*out_format) : afs->input.format;
+  afs->output.format = *out_format ? *out_format : afs->input.format;
   afs->output.bps    = out_bps ? out_bps : afs->input.bps;
 
   // filter config:  
@@ -291,11 +293,12 @@ int preinit_audio_filters(sh_audio_t *sh_audio,
   
   *out_samplerate=afs->output.rate;
   *out_channels=afs->output.nch;
-  *out_format=af_format_encode((void*)(&afs->output));
+//  *out_format=af_format_encode((void*)(&afs->output));
+  *out_format=afs->output.format;
   
   mp_msg(MSGT_DECAUDIO, MSGL_INFO, "AF_pre: af format: %d bps, %d ch, %d hz, %s\n",
       afs->output.bps, afs->output.nch, afs->output.rate,
-      fmt2str(afs->output.format,strbuf,200));
+      af_fmt2str(afs->output.format,strbuf,200));
   
   sh_audio->afilter=(void*)afs;
   return 1;
@@ -315,13 +318,15 @@ int init_audio_filters(sh_audio_t *sh_audio,
   // input format: same as codec's output format:
   afs->input.rate   = in_samplerate;
   afs->input.nch    = in_channels;
-  afs->input.format = af_format_decode(in_format);
+//  afs->input.format = af_format_decode(in_format);
+  afs->input.format = in_format;
   afs->input.bps    = in_bps;
 
   // output format: same as ao driver's input format (if missing, fallback to input)
   afs->output.rate   = out_samplerate ? out_samplerate : afs->input.rate;
   afs->output.nch    = out_channels ? out_channels : afs->input.nch;
-  afs->output.format = af_format_decode(out_format ? out_format : afs->input.format);
+//  afs->output.format = af_format_decode(out_format ? out_format : afs->input.format);
+  afs->output.format = out_format ? out_format : afs->input.format;
   afs->output.bps    = out_bps ? out_bps : afs->input.bps;
 
   // filter config:  
@@ -404,7 +409,8 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
   afd.len=declen;
   afd.rate=sh_audio->samplerate;
   afd.nch=sh_audio->channels;
-  afd.format=af_format_decode(sh_audio->sample_format);
+//  afd.format=af_format_decode(sh_audio->sample_format);
+  afd.format=sh_audio->sample_format;
   afd.bps=sh_audio->samplesize;
   //pafd=&afd;
 //  printf("\nAF: %d --> ",declen);

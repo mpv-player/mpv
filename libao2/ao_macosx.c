@@ -47,7 +47,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 
 static ao_info_t info =
   {
@@ -252,7 +252,7 @@ static int init(int rate,int channels,int format,int flags)
     if (ao->outputStreamBasicDescription.mFormatID == kAudioFormatLinearPCM) {
       uint32_t flags = ao->outputStreamBasicDescription.mFormatFlags;
       if (flags & kAudioFormatFlagIsFloat) {
-	ao_data.format = AFMT_FLOAT;
+	ao_data.format = AF_FORMAT_FLOAT_NE;
       } else {
 	ao_msg(MSGT_AO,MSGL_WARN, "Unsupported audio output "
 	       "format %d. Please report this to the developer\n",

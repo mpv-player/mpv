@@ -43,7 +43,7 @@ known issues:
 #include "videodev2.h"
 #include "../mp_msg.h"
 #include "../libvo/img_format.h"
-#include "../libao2/afmt.h"
+#include "../libaf/af_format.h"
 #include "tv.h"
 #include "audio_in.h"
 
@@ -731,7 +731,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	}
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_AUD_GET_FORMAT:
-	*(int *)arg = AFMT_S16_LE;
+	*(int *)arg = AF_FORMAT_S16_LE;
 	mp_msg(MSGT_TV, MSGL_V, "%s: get audio format: %d\n",
 	       info.short_name, *(int *)arg);
 	return TVI_CONTROL_TRUE;

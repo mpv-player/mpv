@@ -20,7 +20,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 #include <SDL.h>
 #include "osdep/timer.h"
 
@@ -181,7 +181,7 @@ static int init(int rate,int channels,int format,int flags){
 	/* Allocate ring-buffer memory */
 	buffer = (unsigned char *) malloc(BUFFSIZE);
 
-	mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_SDL_INFO, rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
+//	mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_SDL_INFO, rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
 
 	if(ao_subdevice) {
 		setenv("SDL_AUDIODRIVER", ao_subdevice, 1);
@@ -193,32 +193,32 @@ static int init(int rate,int channels,int format,int flags){
 	ao_data.format=format;
 
 	ao_data.bps=channels*rate;
-	if(format != AFMT_U8 && format != AFMT_S8)
+	if(format != AF_FORMAT_U8 && format != AF_FORMAT_S8)
 	  ao_data.bps*=2;
 	
 	/* The desired audio format (see SDL_AudioSpec) */
 	switch(format) {
-	    case AFMT_U8:
+	    case AF_FORMAT_U8:
 		aspec.format = AUDIO_U8;
 	    break;
-	    case AFMT_S16_LE:
+	    case AF_FORMAT_S16_LE:
 		aspec.format = AUDIO_S16LSB;
 	    break;
-	    case AFMT_S16_BE:
+	    case AF_FORMAT_S16_BE:
 		aspec.format = AUDIO_S16MSB;
 	    break;
-	    case AFMT_S8:
+	    case AF_FORMAT_S8:
 		aspec.format = AUDIO_S8;
 	    break;
-	    case AFMT_U16_LE:
+	    case AF_FORMAT_U16_LE:
 		aspec.format = AUDIO_U16LSB;
 	    break;
-	    case AFMT_U16_BE:
+	    case AF_FORMAT_U16_BE:
 		aspec.format = AUDIO_U16MSB;
 	    break;
 	    default:
                 aspec.format = AUDIO_S16LSB;
-                ao_data.format = AFMT_S16_LE;
+                ao_data.format = AF_FORMAT_S16_LE;
                 mp_msg(MSGT_AO,MSGL_WARN,MSGTR_AO_SDL_UnsupportedAudioFmt, format);
 	}
 
@@ -256,22 +256,22 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 
 	switch(obtained.format) {
 	    case AUDIO_U8 :
-		ao_data.format = AFMT_U8;
+		ao_data.format = AF_FORMAT_U8;
 	    break;
 	    case AUDIO_S16LSB :
-		ao_data.format = AFMT_S16_LE;
+		ao_data.format = AF_FORMAT_S16_LE;
 	    break;
 	    case AUDIO_S16MSB :
-		ao_data.format = AFMT_S16_BE;
+		ao_data.format = AF_FORMAT_S16_BE;
 	    break;
 	    case AUDIO_S8 :
-		ao_data.format = AFMT_S8;
+		ao_data.format = AF_FORMAT_S8;
 	    break;
 	    case AUDIO_U16LSB :
-		ao_data.format = AFMT_U16_LE;
+		ao_data.format = AF_FORMAT_U16_LE;
 	    break;
 	    case AUDIO_U16MSB :
-		ao_data.format = AFMT_U16_BE;
+		ao_data.format = AF_FORMAT_U16_BE;
 	    break;
 	    default:
                 mp_msg(MSGT_AO,MSGL_WARN,MSGTR_AO_SDL_UnsupportedAudioFmt, obtained.format);

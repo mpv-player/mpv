@@ -61,6 +61,7 @@
 #endif
 #endif
 
+#include "../libaf/af_format.h"
 #include "../libvo/img_format.h"
 #include "tv.h"
 
@@ -246,7 +247,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
     case TVI_CONTROL_AUD_GET_FORMAT:
         {
-        (int)*(void **)arg = AFMT_S16_LE;
+        (int)*(void **)arg = AF_FORMAT_S16_LE;
         return(TVI_CONTROL_TRUE);
         }
     case TVI_CONTROL_AUD_GET_CHANNELS:
