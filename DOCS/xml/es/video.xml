@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.25 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -765,7 +765,7 @@ muestreo en mi equipo, porque el sonido no funcionaba a 44kHz:
 </para></note>
 
 <para>
-Puede activar OSD y subtítulos solo con el filtro <systemitem>expand</systemitem>,
+Puede activar OSD y subtítulos solo con el filtro <option>expand</option>,
 vea la página de manual para los parámetros concretos.
 </para>
 </sect4>
@@ -1978,7 +1978,7 @@ escalador por software rápido bilineal. La línea de órdenes es
 </para>
 
 <para>
-Se puede recortar con el filtro <systemitem>crop</systemitem> y también
+Se puede recortar con el filtro <option>crop</option> y también
 por este controlador directamente. Supongamos que tenemos una película que
 es demasiado ancha para mostrarla en su Buz y que quiere usar <option>-zrcrop</option>
 para hacer la película menos ancha, entonces puede que le sea útil la siguiente

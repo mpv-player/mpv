@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.3 -->
+<!-- synced with 1.4 -->
 <appendix id="mailinglists">
 <title>Listas de correo</title>
 <para>
@@ -26,6 +26,12 @@ Esta lista es acerca del desarrollo de MPlayer! Hablar sobre cambios de interfas
 nuevas librerías, optimización de código, cambios en la configuración es preferible hacerlo aquí.
 Envíe parches pero no reporte de fallos, preguntas de usuario, requerimiento de nuevas funciones
 o peleas aquí para poder mantener el tráfico de la lista bajo.
+</para></listitem>
+<listitem><para>
+Lista de DOCS de MPlayer:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"/>
+Esta lista habla acerca de la documentación de MPlayer y discusiones sobre su traducción.
+Los historiales CVS sobre documentación y página web también son enviados ahí.
 </para></listitem>
 <listitem><para>
 Lista para usuarios de MPlayer:
