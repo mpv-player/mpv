@@ -260,13 +260,13 @@ return you to the command line prompt where you have to enter
 
 <H4><A NAME="core">B.4.6.2 How to extract meaningful information from a core dump</A></H4>
 
-<P>Please create the following command file:</P>
+<P>Create the following command file:</P>
 
 <P><CODE>bt<BR>
   disass $pc-32 $pc+32<BR>
   info all-registers</CODE></P>
 
-<P>Then simply execute the following on your command line:</P>
+<P>Then simply execute this command:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file &gt; mplayer.bug</CODE></P>
 

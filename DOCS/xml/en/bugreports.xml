@@ -292,13 +292,13 @@ info all-registers
 <sect3 id="bugreports_core">
 <title>How to extract meaningful information from a core dump</title>
 <para>
-Please create the following command file:
+Create the following command file:
 <screen>
 bt
 disass $pc-32 $pc+32
 info all-registers
 </screen>
-Then simply execute the following on your command line:
+Then simply execute this command:
 <screen>gdb mplayer --core=core -batch --command=<replaceable>command_file</replaceable> &gt; mplayer.bug</screen>
 </para>
 </sect3>
