@@ -821,6 +821,12 @@ void vo_x11_sizehint( int x, int y, int width, int height, int max )
    vo_hint.max_width=width; vo_hint.max_height=height;
    vo_hint.flags|=PMaxSize;
   } else { vo_hint.max_width=0; vo_hint.max_height=0; }
+
+ // set min height/width to 4 to avoid off by one errors
+ // and because mga_vid requires a minial size of 4 pixel
+ vo_hint.min_width = vo_hint.min_height = 4; 
+ vo_hint.flags |= PMinSize;
+
  vo_hint.win_gravity=StaticGravity;
  XSetWMNormalHints( mDisplay,vo_window,&vo_hint );
 }
