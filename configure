@@ -4057,26 +4057,26 @@ if test "$_alsaver" ; then
     _def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     echores "yes (using alsa 0.5.x and sys/asoundlib.h)"
   elif test "$_alsaver" = '0.9.x-sys' ; then
-    _aosrc="$_aosrc ao_alsa9.c"
-    _aomodules="alsa9 $_aomodules"
+    _aosrc="$_aosrc ao_alsa.c"
+    _aomodules="alsa $_aomodules"
     _def_alsa9='#define HAVE_ALSA9 1'
     _def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     echores "yes (using alsa 0.9.x and sys/asoundlib.h)"
   elif test "$_alsaver" = '0.9.x-alsa' ; then
-    _aosrc="$_aosrc ao_alsa9.c"
-    _aomodules="alsa9 $_aomodules"
+    _aosrc="$_aosrc ao_alsa.c"
+    _aomodules="alsa $_aomodules"
     _def_alsa9='#define HAVE_ALSA9 1'
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
     echores "yes (using alsa 0.9.x and alsa/asoundlib.h)"
   elif test "$_alsaver" = '1.0.x-sys' ; then
-    _aosrc="$_aosrc ao_alsa1x.c"
-    _aomodules="alsa1x $_aomodules"
+    _aosrc="$_aosrc ao_alsa.c"
+    _aomodules="alsa $_aomodules"
     _def_alsa1x="#define HAVE_ALSA1X 1"
     _def_alsa_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     echores "yes (using alsa 1.0.x and sys/asoundlib.h)"
   elif test "$_alsaver" = '1.0.x-alsa' ; then
-    _aosrc="$_aosrc ao_alsa1x.c"
-    _aomodules="alsa1x $_aomodules"
+    _aosrc="$_aosrc ao_alsa.c"
+    _aomodules="alsa $_aomodules"
     _def_alsa1x="#define HAVE_ALSA1X 1"
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
     echores "yes (using alsa 1.0.x and alsa/asoundlib.h)"
