@@ -14,8 +14,8 @@
 <LI> MPEG 1/2 System Stream (PS/PES/VOB) and Elementary Stream (ES) file
      formats
 <LI> RIFF AVI file format
-<LI> ASF 1.0 file format
-<LI> supports reading from file, stdin, DVD drive or network via HTTP
+<LI> ASF/WMV 1.0 file format
+<LI> supports reading from file, stdin, or network via HTTP
 </UL></P>
 
 <P>Note: about quicktime (.mov/.qt) and realmedia (.ra/.rm) support read the FAQ!</P>
@@ -24,24 +24,24 @@
 <P><B><A NAME=2.1.2>2.1.2. Supported audio &amp; video codecs</A></B></P>
 
 <P>See <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A> for the complete,
-daily updated list!!!</P>
+daily generated list!!!</P>
 
 <P>The most important video codecs:<BR>
 <UL>
 <LI>MPEG1 (VCD) and MPEG2 (DVD) video
-<LI>DivX, FFmpeg, OpenDivX and other MPEG4 variants
-<LI>Windows Media Video 7 (WMV1) and Windows Media Video 8 used in .wmv files
+<LI>DivX ;-), OpenDivX (DivX4) and other MPEG4 variants
+<LI>Windows Media Video 7 (WMV1) and 8 (WMV2) used in .wmv files
 <LI>Intel Indeo codecs (3.1,3.2,4.1,5.0)
 <LI>MJPEG, ASV2 and other hardware formats
 </UL></P>
 
 <P>The most important audio codecs:<BR>
 <UL>
-<LI>MPEG layer 2, and layer 3 (MP3) audio (native code, with 3dnow optimization)
-<LI>AC3 dolby audio (native code, with 3dnow optimization)
-<LI>Voxware audio
+<LI>MPEG layer 2, and layer 3 (MP3) audio (native code, with mmx/sse/3dnow optimization)
+<LI>AC3 dolby audio (native code, with sse/3dnow optimization)
+<LI>Ogg Vorbis audio codec (native lib)
+<LI>Voxware audio (using directshow DLL)
 <LI>alaw, msgsm, pcm and other simple old audio formats
-<LI>Ogg Vorbis audio codec
 </UL></P>
 
 <P>If you have a codec not listed here, and not supported yet, just read <A
@@ -74,6 +74,7 @@ ln -s /usr/local/lib/libdivxdecore.so.0 /usr/local/lib/libdivxdecore.so<BR>
 ldconfig<BR>
 cp decore.h /usr/local/include/</CODE></P>
 
+<P>Note: do NOT forget to add /usr/local/lib to your /etc/ld.so.conf !</P>
 
 <P><B>MPlayer</B> autodetects if DivX4 is (properly) installed, just compile
 as usual. If it doesn't detect it, you didn't install it exactly as above,
@@ -135,7 +136,7 @@ like this:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
 
-<P>Symlinking is NOT enough, you have to copy it.</P>
+<P>Symlinking is NOT enough, you have to copy/move it!!!</P>
 
 <P>./configure detects if it can be built. At the moment it doesn't support
 postprocessing, and is under optimization (it's faster than the DS/VfW DivX
@@ -183,7 +184,7 @@ with the MSACM prefix:</P>
 So, now we have all the info needed (fourcc, codec file, sample AVI), submit
 your codec support request in mail, and upload these files to the FTP:</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
 
 
 <P><B><A NAME=2.1.4.2>2.1.4.2. DirectShow codecs</A></B></P>
@@ -219,7 +220,7 @@ false hits, but maybe you'll have the right, too...</P>
 
 <P>So, now we have all the info needed (fourcc, GUID, codec file, sample AVI),
 submit your codec support request in mail, and upload these files to the FTP:<BR>
-ftp://mplayerhq.hu/MPlayer/incoming/[codecname]/</P>
+ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</P>
 
 </BODY>
 </HTML>
