@@ -34,7 +34,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 
   len=stream_read_word(demux->stream);
   if(verbose>=3)  printf("PACKET len=%d",len);
-  if(len==0 || len>STREAM_BUFFER_SIZE) return -2;  // invalid packet !!!!!!
+  if(len==0 || len>4096) return -2;  // invalid packet !!!!!!
 
   while(len>0){   // Skip stuFFing bytes
     c=stream_read_char(demux->stream);--len;
@@ -130,7 +130,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   }
   if(verbose>=3) printf(" => len=%d\n",len);
 
-  if(len<=0 || len>STREAM_BUFFER_SIZE) return -1;  // Invalid packet size
+  if(len<=0 || len>4096) return -1;  // Invalid packet size
   
   if(id>=0x1C0 && id<=0x1DF){
     // mpeg audio
@@ -176,7 +176,7 @@ int demux_mpg_es_fill_buffer(demuxer_t *demux){
   // Elementary video stream
   if(demux->stream->eof) return 0;
   demux->filepos=stream_tell(demux->stream);
-  ds_read_packet(demux->video,demux->stream,STREAM_BUFFER_SIZE,0,0);
+  ds_read_packet(demux->video,demux->stream,4096,0,0);
   return 1;
 }
 
