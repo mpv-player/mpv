@@ -236,6 +236,7 @@ struct rivatv_info {
     unsigned int d_width,d_height;  /*scaled width && height*/
     unsigned int wx,wy;                /*window x && y*/
     unsigned int screen_x;            /*screen width*/
+    unsigned int screen_y;            /*screen height*/
 	unsigned long buffer_size;		 /* size of the image buffer	       */
 	struct rivatv_chip chip;	 /* NV architecture structure		       */
 	void* video_base;		 /* virtual address of control region	       */
@@ -424,10 +425,6 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
 	case 32:
 		key = chromakey;
 		break;
-	default:
-		/* THINKME: Possible to pass a colour index for 8 bpp ? */
-		printf ("invalid color depth: %d bpp\n", info->depth);
-		break;
 	}
     switch (info->chip.arch) {
 	  case NV_ARCH_10:
@@ -446,10 +443,36 @@ static void nv_waitidle(struct rivatv_info *info ){
      while (info->chip.PGRAPH[0x1C0] & 1) {}
 }
 
+static void nv_getscreenproperties(struct rivatv_info *info){
+  uint32_t bpp=0;
+  info->chip.lock(&info->chip, 0);
+  /*get screen depth*/
+  VID_WR08(info->chip.PCIO, 0x03D4,0x28);
+  bpp = VID_RD08(info->chip.PCIO,0x03D5);
+  if(bpp==3)bpp=4;
+  if((bpp == 2) && (info->chip.PVIDEO[0x00000600/4] & 0x00001000) == 0x0)info->depth=15;           
+  else info->depth = bpp*8;
+  /*get screen width*/
+  VID_WR08(info->chip.PCIO, 0x03D4, 0x1);
+  info->screen_x = (1 + VID_RD08(info->chip.PCIO, 0x3D5)) * 8;
+  /*get screen height*/
+  /* get first 8 bits in VT_DISPLAY_END*/
+  VID_WR08(info->chip.PCIO, 0x03D4, 0x12);
+  info->screen_y = VID_RD08(info->chip.PCIO,0x03D5);
+  VID_WR08(info->chip.PCIO,0x03D4,0x07);
+  /* get 9th bit in CRTC_OVERFLOW*/
+  info->screen_y |= (VID_RD08(info->chip.PCIO,0x03D5) &0x02)<<7;
+  /* and the 10th in CRTC_OVERFLOW*/
+  info->screen_y |=(VID_RD08(info->chip.PCIO,0x03D5) &0x40)<<3;
+  ++info->screen_y;
+}
+
+
+
 
 /* Start overlay video. */
 void rivatv_overlay_start (struct rivatv_info *info,int bufno){
-    uint32_t base, size, offset, xscale, yscale, pan,bpp, pitch0=0;
+    uint32_t base, size, offset, xscale, yscale, pan;
 	int x=8, y=8;
 	int lwidth=info->d_width, lheight=info->d_height;
 	int bps;
@@ -458,29 +481,9 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 	base = info->picture_offset;
 	offset = bufno*size;
     /*update depth & dimensions here because it may change with vo vesa or vo fbdev*/
-    info->chip.lock (&info->chip, 0);
-    nv_waitidle(info);
-    switch (info->chip.arch) {
-	  case NV_ARCH_03:
-        pitch0 = info->chip.PGRAPH[0x00000650/4];
-        break;
-      case NV_ARCH_04:
-	  case NV_ARCH_10:
-	  case NV_ARCH_20:
-      case NV_ARCH_30:
-        pitch0 = info->chip.PGRAPH[0x00000670/4];
-        break;
-    }
-    VID_WR08(info->chip.PCIO, 0x03D4, 0x28);
-    bpp = VID_RD08(info->chip.PCIO,0x03D5);
-    if(bpp==3)bpp = 4; //fixme do nvidia cards support 24bpp?
-    if((bpp == 2) && (info->chip.PVIDEO[0x00000600/4] & 0x00001000) == 0x0)info->depth=15;           //0x00101100 for BGR16 
-    else info->depth = bpp*8;
-    if(!bpp)printf("[nvidia_vid] error invalid bpp\n");
-    else
-    {
-//	    printf("[nvidia_vid] video mode: %ux%u@%u\n",info->screen_x = pitch0/bpp,(pitch0/bpp*3)/4,info->depth);
-	    info->screen_x = pitch0/bpp;
+    nv_getscreenproperties(info);
+
+    if(info->depth){
         bps = info->screen_x * ((info->depth+1)/8);
     	/* get pan offset of the physical screen */
      	pan = rivatv_overlay_pan (info);
@@ -500,16 +503,7 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 //		offset += (-window->y * port->vld_height / window->height * port->org_width) << 1;
 	      y = 0;
 	    }
-
-
-
-
-
-
     }
-
-
-
 
 	switch (info->chip.arch) {
 	case NV_ARCH_10:
@@ -714,34 +708,14 @@ int vixInit(void){
   printf("[nvidia_vid] detected memory size %u MB\n",(uint32_t)(info->chip.fbsize /1024/1024));
 
   if ((mtrr = mtrr_set_type(pci_info.base1, info->chip.fbsize, MTRR_TYPE_WRCOMB))!= 0)
-	  printf("[nvidia_vid]: unable to setup MTRR: %s\n", strerror(mtrr));
+	  printf("[nvidia_vid] unable to setup MTRR: %s\n", strerror(mtrr));
   else
-	  printf("[nvidia_vid]: MTRR set up\n");
+	  printf("[nvidia_vid] MTRR set up\n");
   
-  /*get some info about the screen dimension and depth*/
-  {
-    uint32_t bpp=0,pitch0=0;
-    info->chip.lock (&info->chip, 0);
-    nv_waitidle(info);
-    switch (info->chip.arch) {
-	  case NV_ARCH_03:
-        pitch0 = info->chip.PGRAPH[0x00000650/4];
-        break;
-      case NV_ARCH_04:
-	  case NV_ARCH_10:
-	  case NV_ARCH_20:
-      case NV_ARCH_30:
-        pitch0 = info->chip.PGRAPH[0x00000670/4];
-        break;
-    }
-    VID_WR08(info->chip.PCIO, 0x03D4, 0x28);
-    bpp = VID_RD08(info->chip.PCIO,0x03D5);
-    if(bpp==3)bpp = 4; //fixme do nvidia cards support 24bpp?
-    if((bpp == 2) && (info->chip.PVIDEO[0x00000600/4] & 0x00001000) == 0x0)info->depth=15;           //0x00101100 for BGR16 
-    else info->depth = bpp*8;
-    if(!bpp)printf("[nvidia_vid] error invalid bpp\n");
-    else printf("[nvidia_vid] video mode: %ux%u@%u\n",info->screen_x = pitch0/bpp,(pitch0/bpp*3)/4,info->depth);
-  }
+  nv_getscreenproperties(info);
+  if(!info->depth)printf("[nvidia_vid] text mode: %ux%u\n",info->screen_x,info->screen_y);
+  else printf("[nvidia_vid] video mode: %ux%u@%u\n",info->screen_x,info->screen_y, info->depth);
+ 
    
   rivatv_enable_PMEDIA(info);
   info->next_frame = 0;
