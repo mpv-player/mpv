@@ -94,8 +94,15 @@ while(1){
 }
 }
 
-void shmem_free(void* p){
+void shmem_free(void* p,int size){
   switch(shmem_type){
+    case 0:
+    case 1:
+	    if(munmap(p,size)) {
+		mp_msg(MSGT_OSDEP, MSGL_ERR, "munmap failed on %p %d bytes: %s\n",
+		    p,size,strerror(errno));
+	    }
+      break;
     case 2:
 #ifdef HAVE_SHM
 	    if (shmdt(p) == -1)
