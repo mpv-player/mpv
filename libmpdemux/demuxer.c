@@ -909,8 +909,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
 #endif
 #if 1
     // fuzzy h264-es detection. do NOT enable without heavy testing of mpeg formats detection!
-    if(num_h264_slice>3 || (num_h264_dpa>3 && num_h264_dpb>3 && num_h264_dpc>3) && 
-       num_h264_sps>=1 && num_h264_pps>=1 /*&& num_h264_idr>=1*/ &&
+    if((num_h264_slice>3 || (num_h264_dpa>3 && num_h264_dpb>3 && num_h264_dpc>3)) && 
+       /* FIXME num_h264_sps>=1 && */ num_h264_pps>=1 && num_h264_idr>=1 &&
        num_elementary_packets1B6==0 && num_elementary_packetsPES==0 &&
        demuxer->synced<2){
       file_format=DEMUXER_TYPE_H264_ES;
