@@ -10,6 +10,11 @@ FOR THE NEXT PRE_RELEASE:
 - cleanup DMO interfaces
 - fix/remove -vop lavcdeint
 - remove -vop yuy2, yvu9
+- fix lowrate QDMC audio
+- fix -npp in manpage
+- fix ffmjpeg vs. -mf (Gabu's bugreport)
+- fix FindFIrst/NextFile for *.qtx
+
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -21,7 +26,7 @@ FOR THE v0.90 RELEASE:
 - fix locale problems (add common float parser / mp_sscanf())
 - NEWSTRUCT DVB driver support
 - apply the delayed patches
-
+- Update GUI code to support gtk 2.x (any volunteers??? we really need help here)
 
 FOR THE v1.00 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
