@@ -3419,6 +3419,7 @@ if test "$_dvb" = yes || test "$_dvbhead" = yes ; then
     _inputmodules="dvb $_inputmodules"
 else
     _dvbin=no
+    _noinputmodules="dvb $_noinputmodules"
 fi
 
 echocheck "PNG support"
