@@ -244,8 +244,6 @@ drawrenderedtext:
 }
 
 extern void exit_player(char* how);
-extern int audio_id;
-extern int dvdsub_id;
 extern char * dvd_device;
 extern int vcd_track;
 extern char * cdrom_device;
@@ -277,7 +275,14 @@ void mplEventHandling( int msg,float param )
 	if ( guiIntfStruct.StreamType == STREAMTYPE_DVD ) goto play;
 	guiIntfStruct.FilenameChanged=1;
 	break;
-	
+
+   case evSetVideo:
+        if ( !guiIntfStruct.demuxer ) break;
+        video_id=(int)param;
+        if ( guiIntfStruct.StreamType == STREAMTYPE_DVD ) goto play;
+        guiIntfStruct.FilenameChanged=1;
+        break;
+
 #ifdef HAVE_VCD
    case evSetVCDTrack:
         guiIntfStruct.Track=(int)param;
