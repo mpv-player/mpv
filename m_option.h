@@ -134,7 +134,7 @@ struct m_option {
   void *p; 
   m_option_type_t* type;
   unsigned int flags;
-  float min,max;
+  double min,max;
   // This used to be function pointer to hold a 'reverse to defaults' func.
   // Nom it can be used to pass any type of extra args.
   // Passing a 'default func' is still valid for all func based option types
