@@ -33,7 +33,7 @@ static int preinit(sh_audio_t *sh)
 {
   sh->audio_out_minsize=2048;
   sh->ds->ss_div = 1; // 1 samples/packet
-  sh->ds->ss_mul = 1; // 1 bytes/packet
+  sh->ds->ss_mul = sh->wf->nChannels; // bytes/packet
   return 1;
 }
 
