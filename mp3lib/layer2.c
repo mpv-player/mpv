@@ -235,7 +235,7 @@ static void II_step_two(unsigned int *bit_alloc,real fraction[2][4][SBLIMIT],int
 
 static void II_select_table(struct frame *fr)
 {
-  static int translate[8][2][16] =
+  static int translate[9][2][16] =
    { { { 0,2,2,2,2,2,2,0,0,0,1,1,1,1,1,0 } ,   /*44.1 stereo*/
        { 0,2,2,0,0,0,1,1,1,1,1,1,1,1,1,0 } } , /*44.1 mono*/
      { { 0,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0 } ,   /*48 stereo*/
