@@ -62,4 +62,6 @@ other:
 - mga_vid crtc2 fix
 - make mach64_vid
 - libvo2
+- display OSD and subtitles using DVB card's OSD
+
   
