@@ -99,6 +99,20 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 static int init(sh_video_t *sh){
     DEC_PARAM dec_param;
     DEC_SET dec_set;
+
+#ifndef NEW_DECORE
+    if(sh->format==mmioFOURCC('D','I','V','3')){
+	mp_msg(MSGT_DECVIDEO,MSGL_INFO,"DivX 3.x not supported by opendivx decore - it requires divx4linux\n");
+	return 0; // not supported
+    }
+#endif
+#ifndef DECORE_DIVX5
+    if(sh->format==mmioFOURCC('D','X','5','0')){
+	mp_msg(MSGT_DECVIDEO,MSGL_INFO,"DivX 5.00 not supported by divx4linux decore - it requires divx5linux\n");
+	return 0; // not supported
+    }
+#endif
+
     memset(&dec_param,0,sizeof(dec_param));
 #ifdef NEW_DECORE
     dec_param.output_format=DEC_USER;
