@@ -195,6 +195,11 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 			ptr->freq *=  1000UL;
 			ptr->srate *=  1000UL;
 			ptr->tone = -1;
+			ptr->inv = INVERSION_AUTO;
+			ptr->cr = FEC_AUTO;
+			if((ptr->diseqc > 4) || (ptr->diseqc < 1))
+			    continue;
+			ptr->diseqc--;
 			mp_msg(MSGT_DEMUX, MSGL_V,
 				"NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d, TONE: %d, VPID: %d, APID1: %d, APID2: %d, TPID: %d, PROGID: %d\n",
 				list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->diseqc, ptr->tone, ptr->vpid, ptr->apid1, ptr->apid2, ptr->tpid, ptr->progid);
@@ -294,7 +299,7 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 	int fd = stream->fd;
 	dvb_priv_t *priv  = (dvb_priv_t *) stream->priv;
 
-	mp_msg(MSGT_DEMUX, MSGL_V, "dvb_streaming_read(%d)\n", size);
+	mp_msg(MSGT_DEMUX, MSGL_DBG3, "dvb_streaming_read(%d)\n", size);
 
 	tries = priv->retry + 1;
 	
@@ -308,7 +313,7 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 	    	if((rk = read(fd, &buffer[pos], rk)) > 0)
 		{
 			pos += rk;
-			mp_msg(MSGT_DEMUX, MSGL_V, "ret (%d) bytes\n", pos);
+			mp_msg(MSGT_DEMUX, MSGL_DBG3, "ret (%d) bytes\n", pos);
 		}
 		else
 		{
