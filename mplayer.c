@@ -388,12 +388,16 @@ void exit_sighandler(int x){
   case SIGKILL:
       break;  // killed from keyboard (^C) or killed [-9]
   case SIGILL:
+#ifdef RUNTIME_CPUDETECT
+      mp_msg(MSGT_CPLAYER,MSGL_FATAL,"- MPlayer crashed by 'Illegal Instruction'. It may be a bug in our new runtime cpu-detection code... please read DOCS/bugreports.html\n");
+#else
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,"- MPlayer crashed by 'Illegal Instruction'. It usually happens when you run it on different CPU than it was compiled for. Verify this!\n");
+#endif
   case SIGFPE:
   case SIGSEGV:
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,"- MPlayer crashed by bad usage of CPU/FPU/RAM. Recompile MPlayer with --enable-debug and make a 'gdb' backtrace and disassembly. For details, see DOCS/bugreports.html section 5.b.\n");
   default:
-      mp_msg(MSGT_CPLAYER,MSGL_FATAL,"- MPlayer crashed. This shouldn't happen. It can be a bug in the MPlayer code _or_ in your drivers _or_ in your gcc version. If you think it's MPlayer's fault, read DOCS/bugreports.html and follow instructions there. We can't and won't help unless you provide these informations when reporting a possible bug.\n");
+      mp_msg(MSGT_CPLAYER,MSGL_FATAL,"- MPlayer crashed. This shouldn't happen. It can be a bug in the MPlayer code _or_ in your drivers _or_ in your gcc version. If you think it's MPlayer's fault, please read DOCS/bugreports.html and follow instructions there. We can't and won't help unless you provide these informations when reporting a possible bug.\n");
   }
   exit_player(NULL);
 }
