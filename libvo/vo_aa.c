@@ -277,7 +277,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width,
     }
 #endif
     /* say hello */
-    osdmessage(5, 1, "Welcome to ASCII ARTS MPlayer");  
+    osdmessage(5, 1, "Welcome to ASCII ART MPlayer");  
 
     mp_msg(MSGT_VO,MSGL_V,"VO: [aa] screendriver:   %s\n", c->driver->name);
     mp_msg(MSGT_VO,MSGL_V,"VO: [aa] keyboarddriver: %s\n", c->kbddriver->name);
@@ -624,13 +624,13 @@ vo_aa_parseoption(struct config * conf, char *opt, char *param){
 		    "Additional options vo_aa provides:\n"
 		    "  -aaosdcolor    set osd color\n"
 		    "  -aasubcolor    set subtitle color\n"
-		    "        the color params are:\n"
+		    "        the color parameters are:\n"
 		    "           0 : normal\n"
-		    "           1 : dark\n"
+		    "           1 : dim\n"
 		    "           2 : bold\n"
 		    "           3 : boldfont\n"
 		    "           4 : reverse\n"
-		    "           6 : special\n"
+		    "           5 : special\n"
 		    "\n\n"
 		    "           dT8  8Tb\n"
                     "          dT 8  8 Tb\n"
@@ -720,11 +720,11 @@ static uint32_t preinit(const char *arg)
     c = aa_autoinit(&aa_defparams);
 
     if (c == NULL) {
-	mp_msg(MSGT_VO,MSGL_ERR,"Can not intialize aalib\n");
+	mp_msg(MSGT_VO,MSGL_ERR,"Cannot initialize aalib\n");
 	return VO_ERROR;
     }   
     if (!aa_autoinitkbd(c,0)) {
-	mp_msg(MSGT_VO,MSGL_ERR,"Can not intialize keyboard\n");
+	mp_msg(MSGT_VO,MSGL_ERR,"Cannot initialize keyboard\n");
 	aa_close(c);
 	return VO_ERROR;
     }
