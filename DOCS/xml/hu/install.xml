@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.48 -->
+<!-- synced with 1.49 -->
 <sect1 id="install">
 <title>Telepítés</title>
 
@@ -98,7 +98,7 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">directfb</emphasis> - választható, elérhető itt:
-  <ulink url="http://www.directfb.org"/>
+  <ulink url="http://www.directfb.org"/>. Legalább 0.9.13-as szükséges.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - választható, szükséges a CDDA támogatáshoz
