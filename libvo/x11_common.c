@@ -164,10 +164,33 @@ void fstype_help(void)
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "none", "don't set fullscreen window layer");
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "layer", "use _WIN_LAYER hint with default layer");
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "layer=<0..15>", "use _WIN_LAYER hint with a given layer number");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "netwm", "force NETWM style");
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "above", "use _NETWM_STATE_ABOVE hint if available");
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "below", "use _NETWM_STATE_BELOW hint if available");
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "fullscreen", "use _NETWM_STATE_FULLSCREEN hint if availale");
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "stays_on_top", "use _NETWM_STATE_STAYS_ON_TOP hint if available");
+ mp_msg(MSGT_VO, MSGL_INFO, "You can also negate the settings with simply putting '-' in the beginning");
+}
+
+static void fstype_dump(int fstype)
+{
+    if (fstype)
+    {
+    mp_msg(MSGT_VO, MSGL_V, "[x11] Current fstype setting honours");
+    if (fstype & vo_wm_LAYER)
+	mp_msg(MSGT_VO, MSGL_V, " LAYER");
+    if (fstype & vo_wm_FULLSCREEN)
+	mp_msg(MSGT_VO, MSGL_V, " FULLSCREEN");
+    if (fstype & vo_wm_STAYS_ON_TOP)
+	mp_msg(MSGT_VO, MSGL_V, " STAYS_ON_TOP");
+    if (fstype & vo_wm_ABOVE)
+	mp_msg(MSGT_VO, MSGL_V, " ABOVE");
+    if (fstype & vo_wm_BELOW)
+	mp_msg(MSGT_VO, MSGL_V, " BELOW");
+    mp_msg(MSGT_VO, MSGL_V, " X atoms\n");	
+    }
+    else
+	mp_msg(MSGT_VO, MSGL_V, "[x11] Current fstype setting doesn't honour any X atoms\n");
 }
  
 static int net_wm_support_state_test(Atom atom)
@@ -230,6 +253,7 @@ static int vo_wm_detect(void)
    for (i = 0; i < nitems; i++)
      wm |= net_wm_support_state_test (args[i]);
    XFree( args );
+#if 0
    // ugly hack for broken OpenBox _NET_WM_STATE_FULLSCREEN support
    // (in their implementation it only changes internal state of window, nothing more!!!)
    if (wm & vo_wm_FULLSCREEN)
@@ -241,6 +265,7 @@ static int vo_wm_detect(void)
 	}
       XFree (args);
    }
+#endif
   }
 
  if ( wm == 0 ) mp_msg( MSGT_VO,MSGL_V,"[x11] Unknown wm type...\n" );
@@ -386,6 +411,8 @@ int vo_init( void )
  vo_wm_type=vo_wm_detect();
 
  vo_fs_type=vo_x11_get_fs_type(vo_wm_type);
+ 
+ fstype_dump(vo_fs_type);
 
  saver_off(mDisplay);
  return 1;
@@ -840,17 +867,24 @@ void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
 static int vo_x11_get_fs_type(int supported)
 {
   int i;
-  int type;
+  int type = supported;
   
   if (vo_fstype_list) {
     i = 0;
     for (i = 0; vo_fstype_list[i]; i++)
     {
-      type = supported;
-
-      if (strncmp(vo_fstype_list[i], "layer", 5) == 0)
+      int neg = 0;
+      char * arg = vo_fstype_list[i];
+      
+      if (vo_fstype_list[i][0] == '-')
       {
-        if (vo_fstype_list[i][5] == '=')
+        neg = 1;
+	arg = vo_fstype_list[i] + 1;
+      }
+
+      if (!strncmp(arg, "layer", 5))
+      {
+        if (!neg && (arg[5] == '='))
         {
           char *endptr = NULL;
           int layer = strtol(vo_fstype_list[i]+6, &endptr, 10);
@@ -858,21 +892,46 @@ static int vo_x11_get_fs_type(int supported)
           if (endptr && *endptr == '\0' && layer >= 0 && layer <= 15) 
             fs_layer = layer;
         }
-        type &= vo_wm_LAYER;
+	if (neg)
+    	    type &= ~vo_wm_LAYER;
+	else
+    	    type |= vo_wm_LAYER;
       }
-      else if (strcmp(vo_fstype_list[i], "above") == 0) type &= vo_wm_ABOVE;
-      else if (strcmp(vo_fstype_list[i], "fullscreen") == 0) type &= vo_wm_FULLSCREEN;
-      else if (strcmp(vo_fstype_list[i], "stays_on_top") == 0) type &= vo_wm_STAYS_ON_TOP;
-      else if (strcmp(vo_fstype_list[i], "below") == 0) type &= vo_wm_BELOW;
-      else if (strcmp(vo_fstype_list[i], "none") == 0) return 0;
-      else type = 0;
-      
-      if (type)
-        return type;
+      else if (!strcmp(arg, "above"))
+      {
+	if (neg)
+	    type &= ~vo_wm_ABOVE;
+	else
+	    type |= vo_wm_ABOVE;
+      } else if (!strcmp(arg, "fullscreen"))
+      {
+	if (neg)
+	    type &= ~vo_wm_FULLSCREEN;
+	else
+	    type |= vo_wm_FULLSCREEN;
+      } else if (!strcmp(arg, "stays_on_top"))
+      {
+	if (neg)
+	    type &= ~vo_wm_STAYS_ON_TOP;
+	else
+	    type |= vo_wm_STAYS_ON_TOP;
+      } else if (!strcmp(arg, "below"))
+      {
+	if (neg)
+	    type &= ~vo_wm_BELOW;
+	else
+	    type |= vo_wm_BELOW;
+      } else if (!strcmp(arg, "netwm"))
+      {
+	if (neg)
+	    type &= ~vo_wm_NETWM;
+	else
+	    type |= vo_wm_NETWM;
+      } else if (!strcmp(arg, "none")) return 0;
     }
   }
 
-  return supported;
+  return type;
 }
  
 void vo_x11_fullscreen( void )

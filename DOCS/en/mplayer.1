@@ -1609,11 +1609,37 @@ Try this option if you still experience fullscreen problems.
 .TP
 .B \-fstype <type1,type2,...>
 Specify a priority list of fullscreen layer setting modes to be
-used.
+used. The available types are:
 
+.DP0
+.RSs
+.IPs "above"
+use _NETWM_STATE_ABOVE hint if available
+.IPs "below"
+use _NETWM_STATE_BELOW hint if available
+.IPs "fullscreen"
+use _NETWM_STATE_FULLSCREEN hint if availale
+.IPs "layer"
+Use _WIN_LAYER hint with default layer
+.IPs "layer=<0..15>"
+Use _WIN_LAYER hint with layer number
+.IPs "netwm"
+force NETWM style
+.IPs "none"
+don't set fullscreen window layer
+.IPs "stays_on_top"
+use _NETWM_STATE_STAYS_ON_TOP hint if available
+.RE
+.DP 1
+
+It's possible to negate the modes by prefixing them with "\-"
+.br
 The default order is "layer,stays_on_top,above,fullscreen".
 It will be used as a fallback in case of specifying incorrect
 or unsupported modes.
+.br
+OpenBox 1.x users have to use \-fstype \-fullscreen
+to achive working fs switching.
 .br
 If you experience problems with fullscreen window being covered by other
 windows try using a different order.
