@@ -83,6 +83,8 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-bpp\ mélység ]
 .RB [ \-flip ]
 .RB [ \-playlist\ <file> ]
+.RB [ \-slave ]
+.RB [ \-loop\ <num> ]
 .I - vagy file vagy eszköz
 .PP
 .SH LEÍRÁS
@@ -263,7 +265,10 @@ programokkal való kommunikációját segíti elõ. A billentyûzet figyelése helyett
 a stdin-rõl jövõ parancsokra fog reagálni a lejátszó. Lásd a
 .B SLAVE MODE PROTOCOL
 fejezetet.
-.IP
+.TP
+.B -loop\ <num>
+Többszörös lejátszás. A 0-ás érték végtelenített lejátszást eredményez.
+.TP
 .SH "HALADÓSZINTÛ OPCIÓK"
 .TP
 .I MEGJEGYZÉS

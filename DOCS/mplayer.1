@@ -83,6 +83,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-flip ]
 .RB [ \-playlist\ <filename> ]
 .RB [ \-slave ]
+.RB [ \-loop\ <num>]
 .I - or file or device
 .PP
 .SH DESCRIPTION
@@ -261,6 +262,9 @@ events, MPlayer will read simplistic command lines from its stdin.
 See section
 .B SLAVE MODE PROTOCOL
 for the syntax.
+.TP
+.B \-loop\ <num>
+Loops movie playback <num> times. 0 means forever.
 .IP
 .SH "ADVANCED OPTIONS"
 .TP

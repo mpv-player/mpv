@@ -20,6 +20,7 @@ generált listához!!!</P>
 <LI>MJPEG, ASV2 és más hardware formátumok
 <LI>XAnim codec-ek
 <LI>VIVO</LI>
+<LI>FLI</LI>
 </UL></P>
 
 <P>Ha van olyan codeced, ami nincs felsorolva vagy támogatva, olvasd el a
@@ -163,7 +164,7 @@ lehetséges.</P>
 
 <P>Az <B>MPlayer</B> képes lejátszani Vivo (1.0 és 2.0) file-okat. Az 1.0-ás
 fileokra a legmegfelelõbb az FFmpeg-beli H263 codec, amit a <CODE>-vc ffh263</CODE>
-opcióval lehet használni (új libavcodec szükséges !). A 2.0-ás fileokhoz
+opcióval lehet használni (alapértelmezett) (új libavcodec szükséges !). A 2.0-ás fileokhoz
 szedd le az <CODE>ivvideo.dll</CODE> Win32 DLL file-t <A
 HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">innen</A>),
 és installáld a <CODE>/usr/lib/win32</CODE> könyvtárba, vagy ahol tárolod
@@ -209,6 +210,7 @@ a Win32 codeccel ami csak RGB-t tud.</P>
 <LI>Ogg Vorbis audio codec (natív)
 <LI>VoxWare audio (DirectShow-os DLL használatával)
 <LI>alaw, msgsm, pcm és más régi formátumok
+<LI>VIVO audio (g723, Vivo Siren)</LI>
 </UL></P>
 
 
@@ -259,8 +261,8 @@ audio dekóder. Ha nem tudod miért lenne szükséged rá, nincs szükséged rá.</P>
 
 <P>A VIVO file-okban használt audio codec milyensége attól függ hogy VIVO/1.0
 avagy VIVO/2.0 fileról beszélünk. Az 1.0-ás fileokban <B>g.723</B> audio van,
-a 2.0-ásokban pedig <B>Vivo Siren</B>. Jelenleg egyikük se támogatott,
-de a g.723 codec <A
+a 2.0-ásokban pedig <B>Vivo Siren</B>. Mindkettõ támogatott.
+A g.723/Siren codec <A
 HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">innen</A> letölthetõ.</P>
 
 
