@@ -276,8 +276,8 @@ Set EDL mark.
 .PD 1
 .PP
 (The following keys are valid only when using a hardware accelerated video
-output (xv, (x)vidix, (x)mga, etc), or the software equalizer filter
-(\-vf eq or \-vf eq2).
+output (xv, (x)vidix, (x)mga, etc), the software equalizer
+(\-vf eq or \-vf eq2) or hue filter (\-vf hue).
 .PP
 .PD 0
 .RSs
@@ -3775,7 +3775,7 @@ Adds a 50 pixel border to the bottom of the picture.
 .PD 1
 .IPs <x>,<y>
 position of original image on the expanded image (default: center)
-.IPs <o>
+.IPs <o>\ 
 OSD/\:subtitle rendering
 .RSss
 0: disable (default)
@@ -4209,10 +4209,17 @@ Parameters and usage are the same.
 Software equalizer with interactive controls just like the hardware
 equalizer, for cards/\:drivers that do not support brightness and
 contrast controls in hardware.
-Initial values in the range -100 \- 100 may be given on the command line.
 Might also be useful with MEncoder, either for fixing poorly captured
 movies, or for slightly reducing contrast to mask artifacts and get by
 with lower bitrates.
+.PD 0
+.RSs
+.IPs <-100\-100>
+initial brightness
+.IPs <-100\-100>
+initial contrast
+.RE
+.PD 1
 .
 .TP
 .B eq2[=gamma:contrast:brightness:saturation:rg:gg:bg:weight]
@@ -4224,34 +4231,44 @@ gamma values are 1.0.
 The parameters are given as floating point values.
 .PD 0
 .RSs
-.IPs <rg>
-gamma value for the red component
-.IPs <gg>
-gamma value for the green component
-.IPs <bg>
-gamma value for the blue component
-.REss
-.PD 1
-.RS
-Parameters rg, gg, bg are the independent gamma values for the red, green
-and blue components.
+.IPs <0.1\-10>
+initial gamma value (default: 1.0)
+.IPs <-2\-2>
+initial contrast, where negative values result in a
+negative image (default: 1.0)
+.IPs <-1\-1>
+initial brightness (default: 0.0)
+.IPs <0\-3>
+initial saturation (default: 1.0)
+.IPs <0.1\-10>
+gamma value for the red component (default: 1.0)
+.IPs <0.1\-10>
+gamma value for the green component (default: 1.0)
+.IPs <0.1\-10>
+gamma value for the blue component (default: 1.0)
+.IPs <0\-1>
 The weight parameter can be used to reduce the effect of a high gamma value on
 bright image areas, e.g.\& keep them from getting overamplified and just plain
 white.
 A value of 0.0 turns the gamma correction all the way down while 1.0 leaves it
-at its full strength.
-Defaults are gamma=1.0, contrast=1.0, brightness=0.0, saturation=1.0,
-weight=1.0.
-Value ranges are 0.1\-10 for gamma, -2\-2 for contrast (negative values result
-in a negative image), -1\-1 for brightness, 0\-3 for saturation and 0\-1 for
-weight.
+at its full strength (default: 1.0).
 .RE
+.PD 1
 .
 .TP
 .B hue[=hue:saturation]
-Defaults are hue=0.0, saturation=1.0.
-Value ranges are -180\-180 for hue, -2\-2 for saturation (negative values result
-in a negative chroma).
+Software equalizer with interactive controls just like the hardware
+equalizer, for cards/\:drivers that do not support hue and
+saturation controls in hardware.
+.PD 0
+.RSs
+.IPs <-180\-180>
+initial hue (default: 0.0)
+.IPs <-100\-100>
+initial saturation, where negative values result
+in a negative chroma (default: 1.0)
+.RE
+.PD 1
 .
 .TP
 .B halfpack[=f]
@@ -4261,10 +4278,18 @@ Useful for output to low-resolution display devices when hardware downscaling
 is poor quality or is not available.
 Can also be used as a primitive luma-only deinterlacer with very low CPU
 usage.
+.PD 0
+.RSs
+.IPs <f>\ 
 By default, halfpack averages pairs of lines when downsampling.
-The optional parameter f can be 0 to only use even lines, or 1 to only use
-odd lines.
-Any other value for f gives the default (averaging) behavior.
+Any value different from 0 or 1 gives the default (averaging) behavior.
+.RSss
+0: Only use even lines when downsampling.
+.br
+1: Only use odd lines when downsampling.
+.REss
+.RE
+.PD 1
 .
 .TP
 .B ilpack[=mode]
@@ -4274,9 +4299,17 @@ the chroma channels.
 This filter packs the planar 4:2:0 data into YUY2 (4:2:2) format with
 the chroma lines in their proper locations, so that in any given
 scanline, the luma and chroma data both come from the same field.
-The optional argument selects the sampling mode.
-By default, linear interpolation (mode 1) is used.
-Mode 0 uses nearest-neighbor sampling, which is fast but incorrect.
+.PD 0
+.RSs
+.IPs <mode>
+Select the sampling mode.
+.RSss
+0: nearest-neighbor sampling, fast but incorrect
+.br
+1: linear interpolation (default)
+.REss
+.RE
+.PD 1
 .
 .TP
 .B harddup
@@ -4303,26 +4336,39 @@ before any subsequent filters that are CPU-intensive.
 .B decimate[=max:hi:lo:frac]
 Drops frames that do not differ greatly from the previous frame in
 order to reduce framerate.
-The argument max (if positive) sets the maximum number of consecutive
-frames which can be dropped, or (if negative) the minimum interval
-between dropped frames.
-A frame is a candidate for dropping if no 8x8 region differs by more
-than a threshold of hi, and if not more than frac portion (1 meaning
-the whole image) differs by more than a threshold of lo.
-Values of hi and lo are for 8x8 pixel blocks and represent actual
-pixel value differences, so a threshold of 64 corresponds to 1 unit of
-difference for each pixel, or the same spread out differently over the
-block.
 The main use of this filter is for very-low-bitrate encoding (e.g.\&
 streaming over dialup modem), but it could in theory be used for
 fixing movies that were inverse-telecined incorrectly.
+.PD 0
+.RSs
+.IPs <max>
+Sets the maximum number of consecutive frames which can be
+dropped (if positive), or the minimum interval between
+dropped frames (if negative).
+.IPs <hi>,<lo>,<frac>
+A frame is a candidate for dropping if no 8x8 region differs by more
+than a threshold of <hi>, and if not more than <frac> portion (1
+meaning the whole image) differs by more than a threshold of <lo>.
+Values of <hi> and <lo> are for 8x8 pixel blocks and represent actual
+pixel value differences, so a threshold of 64 corresponds to 1 unit of
+difference for each pixel, or the same spread out differently over the
+block.
+.RE
+.PD 1
 .
 .TP
 .B dint[=sense:level]
-Detects and drops the first from a set of interlaced video frames.
-Values can be from 0.0 to 1.0 \- first (default 0.1) is relative difference
-between neighbor pixels, second (default 0.15) is what part of image has to
-be detected as interlaced to drop the frame.
+The drop-deinterlace (dint) filter detects and drops the first from a set
+of interlaced video frames.
+.PD 0
+.RSs
+.IPs <0.0\-1.0>
+relative difference between neighboring pixels (default: 0.1)
+.IPs <0.0\-1.0>
+What part of the image has to be detected as interlaced to
+drop the frame (default: 0.15).
+.RE
+.PD 1
 .
 .TP
 .B lavcdeint (OBSOLETE)
@@ -4334,16 +4380,32 @@ Donald Graft's adaptive kernel deinterlacer.
 Deinterlaces parts of a video if a configurable threshold is exceeded.
 .PD 0
 .RSs
-.IPs "<thresh> (0 \- 255)"
-Threshold (default 10).
-.IPs "<map> (0 or 1)"
-Paint pixels which exceed the threshold white (default: 0).
-.IPs "<order> (0 or 1)"
-Swap fields if 1 (default: 0).
-.IPs "<sharp> (0 or 1)"
-Enable additional sharpening (default: 0).
-.IPs "<twoway> (0 or 1)"
-Enable twoway sharpening (default: 0).
+.IPs <0\-255>
+threshold (default: 10)
+.IPs <map>
+.RSss
+0: Ignore pixels exceeding the threshold (default).
+.br
+1: Paint pixels exceeding the threshold white.
+.REss
+.IPs <order>
+.RSss
+0: Leave fields alone (default).
+.br
+1: Swap fields.
+.REss
+.IPs <sharp>
+.RSss
+0: Disable additional sharpening (default).
+.br
+1: Enable additional sharpening.
+.REss
+.IPs <twoway>
+.RSss
+0: Disable twoway sharpening (default).
+.br
+1: Enable twoway sharpening.
+.REss
 .RE
 .PD 1
 .
@@ -4436,18 +4498,24 @@ detc's behavior:
 .RSs
 .IPs <dr>\ 
 Set the frame dropping mode.
-0 (default) means don't drop frames to maintain fixed output framerate.
-1 means always drop a frame when there have been no drops or telecine
+.RSss
+0: Do not drop frames to maintain fixed output framerate (default).
+.br
+1: Always drop a frame when there have been no drops or telecine
 merges in the past 5 frames.
-2 means always maintain exact 5:4 input to output frame ratio.
+.br
+2: Always maintain exact 5:4 input to output frame ratio.
 .br
 .I NOTE:
 Use mode 1 or 2 with MEncoder.
+.REss
 .IPs <am>\ 
 Analysis mode.
-Available values are 0 (fixed pattern with initial frame number
-specified by fr=#) and 1 (agressive search for telecine pattern).
-Default is 1.
+.RSss
+0: Fixed pattern with initial frame number specified by <fr>.
+.br
+1: agressive search for telecine pattern (default)
+.REss
 .IPs <fr>\ 
 Set initial frame number in sequence.
 0\-2 are the three clean progressive frames; 3 and 4 are the two
