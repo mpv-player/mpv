@@ -95,7 +95,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     vf->priv->enc=dv_encoder_new(0,1,1); // FIXME, parse some options!
     if(!vf->priv->enc) return 0;
     
-    mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
+    mux_v->bih=calloc(1, sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
     mux_v->bih->biWidth=0;
     mux_v->bih->biHeight=0;

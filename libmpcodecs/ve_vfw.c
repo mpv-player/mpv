@@ -258,7 +258,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     memset(vf->priv,0,sizeof(struct vf_priv_s));
     vf->priv->mux=(muxer_stream_t*)args;
 
-    vfw_bih=malloc(sizeof(BITMAPINFOHEADER));
+    vfw_bih=calloc(1, sizeof(BITMAPINFOHEADER));
     vfw_bih->biSize=sizeof(BITMAPINFOHEADER);
     vfw_bih->biWidth=0; // FIXME ?
     vfw_bih->biHeight=0;

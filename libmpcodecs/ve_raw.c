@@ -133,7 +133,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
     vf->priv->mux = (muxer_stream_t*)args;
     
-    mux_v->bih = malloc(sizeof(BITMAPINFOHEADER));
+    mux_v->bih = calloc(1, sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize = sizeof(BITMAPINFOHEADER);
     mux_v->bih->biWidth = 0;
     mux_v->bih->biHeight = 0;
