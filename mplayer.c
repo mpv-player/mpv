@@ -20,7 +20,11 @@
 
 #include "version.h"
 #include "config.h"
+
 #include "mp_msg.h"
+
+#define HELP_MP_DEFINE_STATIC
+#include "help_mp.h"
 
 #include "cfgparser.h"
 #include "cfg-mplayer-def.h"
@@ -60,8 +64,6 @@
 #ifdef HAVE_LIRC
 #include "lirc_mp.h"
 #endif
-
-#include "help_mp.h"
 
 
 #define DEBUG if(0)

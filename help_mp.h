@@ -1,3 +1,4 @@
+#ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
 "MPlayer " VERSION "(C) 2000-2001 Arpad Gereoffy (see DOCS/AUTHORS)\n"
@@ -39,6 +40,7 @@ static char help_text[]=
 "\n"
 " * * * SEE MANPAGE FOR DETAILS, FURTHER OPTIONS AND KEYS ! * * *\n"
 "\n";
+#endif
 
 // mplayer.c: 
 
@@ -82,3 +84,35 @@ static char help_text[]=
 			    "\n** Your system is too SLOW to play this! try with -framedrop or RTFM! **"\
 			    "\n************************************************************************\n"
 //#define MSGTR_
+
+// open.c: 
+#define MSGTR_CdDevNotfound "CD-ROM Device '%s' not found!\n"
+#define MSGTR_ErrTrackSelect "Error selecting VCD track!"
+#define MSGTR_ReadSTDIN "Reading from stdin...\n"
+#define MSGTR_UnableOpenURL "Unable to open URL: %s\n"
+#define MSGTR_ConnToServer "Connected to server: %s\n"
+#define MSGTR_FileNotFound "File not found: '%s'\n"
+
+// demuxer.c:
+#define MSGTR_AudioStreamRedefined "Warning! Audio stream header %d redefined!\n"
+#define MSGTR_VideoStreamRedefined "Warning! video stream header %d redefined!\n"
+#define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Too many (%d in %d bytes) audio packets in the buffer!\n"
+#define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Too many (%d in %d bytes) video packets in the buffer!\n"
+#define MSGTR_MaybeNI "(maybe you play a non-interleaved stream/file or the codec failed)\n"
+#define MSGTR_DetectedAVIfile "Detected AVI file format!\n"
+#define MSGTR_DetectedASFfile "Detected ASF file format!\n"
+#define MSGTR_DetectedMPEGPESfile "Detected MPEG-PES file format!\n"
+#define MSGTR_DetectedMPEGPSfile "Detected MPEG-PS file format!\n"
+#define MSGTR_DetectedMPEGESfile "Detected MPEG-ES file format!\n"
+#define MSGTR_DetectedQTMOVfile "Detected QuickTime/MOV file format!\n"
+#define MSGTR_MissingMpegVideo "Missing MPEG video stream!? contact the author, it may be a bug :(\n"
+#define MSGTR_InvalidMPEGES "Invalid MPEG-ES stream??? contact the author, it may be a bug :(\n"
+#define MSGTR_FormatNotRecognized "============= Sorry, this file format not recognized/supported ===============\n"\
+				  "=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n"
+#define MSGTR_MissingASFvideo "ASF: no video stream found!\n"
+#define MSGTR_MissingASFaudio "ASF: No Audio stream found...  ->nosound\n"
+#define MSGTR_MissingMPEGaudio "MPEG: No Audio stream found...  ->nosound\n"
+
+//#define MSGTR_
+
+

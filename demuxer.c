@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -63,7 +64,7 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id){
 
 sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
     if(demuxer->a_streams[id]){
-        mp_msg(MSGT_DEMUXER,MSGL_WARN,"Warning! Audio stream header %d redefined!\n",id);
+        mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_AudioStreamRedefined,id);
     } else {
         mp_msg(MSGT_DEMUXER,MSGL_V,"==> Found audio stream: %d\n",id);
         demuxer->a_streams[id]=malloc(sizeof(sh_audio_t));
@@ -74,7 +75,7 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
 
 sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
     if(demuxer->v_streams[id]){
-        mp_msg(MSGT_DEMUXER,MSGL_WARN,"Warning! video stream header %d redefined!\n",id);
+        mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_VideoStreamRedefined,id);
     } else {
         mp_msg(MSGT_DEMUXER,MSGL_V,"==> Found video stream: %d\n",id);
         demuxer->v_streams[id]=malloc(sizeof(sh_video_t));
@@ -175,13 +176,13 @@ int ds_fill_buffer(demux_stream_t *ds){
       return 1; //ds->buffer_size;
     }
     if(demux->audio->packs>=MAX_PACKS || demux->audio->bytes>=MAX_PACK_BYTES){
-      mp_msg(MSGT_DEMUXER,MSGL_ERR,"\nDEMUXER: Too many (%d in %d bytes) audio packets in the buffer!\n",demux->audio->packs,demux->audio->bytes);
-      mp_msg(MSGT_DEMUXER,MSGL_HINT,"(maybe you play a non-interleaved stream/file or audio codec failed)\n");
+      mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_TooManyAudioInBuffer,demux->audio->packs,demux->audio->bytes);
+      mp_msg(MSGT_DEMUXER,MSGL_HINT,MSGTR_MaybeNI);
       break;
     }
     if(demux->video->packs>=MAX_PACKS || demux->video->bytes>=MAX_PACK_BYTES){
-      mp_msg(MSGT_DEMUXER,MSGL_ERR,"\nDEMUXER: Too many (%d in %d bytes) video packets in the buffer!\n",demux->video->packs,demux->video->bytes);
-      mp_msg(MSGT_DEMUXER,MSGL_HINT,"(maybe you play a non-interleaved stream/file or video codec failed)\n");
+      mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_TooManyVideoInBuffer,demux->video->packs,demux->video->bytes);
+      mp_msg(MSGT_DEMUXER,MSGL_HINT,MSGTR_MaybeNI);
       break;
     }
     if(!demux_fill_buffer(demux,ds)){
@@ -328,7 +329,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
       stream_read_dword_le(demuxer->stream); //filesize
       id=stream_read_dword_le(demuxer->stream); // "AVI "
       if(id==formtypeAVI){ 
-        mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected AVI file format!\n");
+        mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedAVIfile);
         file_format=DEMUXER_TYPE_AVI;
       }
     }
@@ -338,7 +339,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_ASF,audio_id,video_id,dvdsub_id);
   if(asf_check_header(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected ASF file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedASFfile);
       file_format=DEMUXER_TYPE_ASF;
   }
 }
@@ -350,9 +351,9 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
   if(!pes) demuxer->synced=1; // hack!
   if(ds_fill_buffer(demuxer->video)){
     if(!pes)
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected MPEG-PES file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGPESfile);
     else
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected MPEG-PS file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGPSfile);
     file_format=DEMUXER_TYPE_MPEG_PS;
   } else {
     // some hack to get meaningfull error messages to our unhappy users:
@@ -364,7 +365,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       file_format=DEMUXER_TYPE_MPEG_ES; //  <-- hack is here :)
     } else {
       if(demuxer->synced==2)
-        mp_msg(MSGT_DEMUXER,MSGL_ERR,"Missing MPEG video stream!? contact the author, it may be a bug :(\n");
+        mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_MissingMpegVideo);
       else
         mp_msg(MSGT_DEMUXER,MSGL_V,"Not MPEG System Stream format... (maybe Transport Stream?)\n");
     }
@@ -376,10 +377,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
 if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_ES,audio_id,video_id,dvdsub_id);
   if(!ds_fill_buffer(demuxer->video)){
-    mp_msg(MSGT_DEMUXER,MSGL_ERR,"Invalid MPEG-ES stream??? contact the author, it may be a bug :(\n");
+    mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_InvalidMPEGES);
     file_format=DEMUXER_TYPE_UNKNOWN;
   } else {
-    mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected MPEG-ES file format!\n");
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGESfile);
   }
 }
 //=============== Try to open as MOV file: =================
@@ -387,15 +388,14 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
   if(mov_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected QuickTime/MOV file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedQTMOVfile);
       file_format=DEMUXER_TYPE_MOV;
   }
 }
 #endif
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN){
-  mp_msg(MSGT_DEMUXER,MSGL_ERR,"============= Sorry, this file format not recognized/supported ===============\n");
-  mp_msg(MSGT_DEMUXER,MSGL_ERR,"=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n");
+  mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
   return NULL;
 //  GUI_MSG( mplUnknowFileType )
 //  exit(1);
@@ -424,7 +424,7 @@ switch(file_format){
 //  demuxer->idx_pos=0;
 //  demuxer->endpos=avi_header.movi_end;
   if(!ds_fill_buffer(d_video)){
-    mp_msg(MSGT_DEMUXER,MSGL_WARN,"ASF: no video stream found!\n");
+    mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_MissingASFvideo);
     sh_video=NULL;
     //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
     //GUI_MSG( mplASFErrorMissingVideoStream )
@@ -442,7 +442,7 @@ switch(file_format){
   if(audio_id!=-2){
     mp_msg(MSGT_DEMUXER,MSGL_V,"ASF: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"ASF: No Audio stream found...  ->nosound\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_MissingASFaudio);
       sh_audio=NULL;
     } else {
       sh_audio=d_audio->sh;sh_audio->ds=d_audio;
@@ -461,7 +461,7 @@ switch(file_format){
   sh_video=d_video->sh;sh_video->ds=d_video;
   if(audio_id!=-2) {
    if(!ds_fill_buffer(d_audio)){
-    mp_msg(MSGT_DEMUXER,MSGL_INFO,"MPEG: No Audio stream found...  ->nosound\n");
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_MissingMPEGaudio);
     sh_audio=NULL;
    } else {
     sh_audio=d_audio->sh;sh_audio->ds=d_audio;
