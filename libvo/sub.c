@@ -653,16 +653,23 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 
     y = obj->y;
     
+    obj->alignment = 0;
     switch(vo_sub->alignment) {
-	case SUB_ALIGNMENT_HLEFT:
+       case SUB_ALIGNMENT_BOTTOMLEFT:
+       case SUB_ALIGNMENT_MIDDLELEFT:
+       case SUB_ALIGNMENT_TOPLEFT:
 	    obj->alignment |= 0x1;
 	    break;
-	case SUB_ALIGNMENT_HCENTER:
-	    obj->alignment |= 0x0;
-	    break;
-	case SUB_ALIGNMENT_HRIGHT:
-	default:
+       case SUB_ALIGNMENT_BOTTOMRIGHT:
+       case SUB_ALIGNMENT_MIDDLERIGHT:
+       case SUB_ALIGNMENT_TOPRIGHT:
 	    obj->alignment |= 0x2;
+	    break;
+       case SUB_ALIGNMENT_BOTTOMCENTER:
+       case SUB_ALIGNMENT_MIDDLECENTER:
+       case SUB_ALIGNMENT_TOPCENTER:
+	default:
+	    obj->alignment |= 0x0;
     }
 
     i=j=0;

@@ -100,6 +100,7 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
     int state;
 
     current->lines = current->start = current->end = 0;
+    current->alignment = SUB_ALIGNMENT_BOTTOMCENTER;
     state = 0;
 
     /* read the first line */
@@ -173,7 +174,38 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 	    s = strchr (s, '>');
 	    if (s) { s++; state = 3; continue; }
 	    break;
-	case 5: /* get rid of {...} text */
+       case 5: /* get rid of {...} text, but read the alignment code */
+	    if ((*s == '\\') && (*(s + 1) == 'a') && !sub_no_text_pp) {
+               if (stristr(s, "\\a1") != NULL) {
+                   current->alignment = SUB_ALIGNMENT_BOTTOMLEFT;
+                   s = s + 3;
+               }
+               if (stristr(s, "\\a2") != NULL) {
+                   current->alignment = SUB_ALIGNMENT_BOTTOMCENTER;
+                   s = s + 3;
+               } else if (stristr(s, "\\a3") != NULL) {
+                   current->alignment = SUB_ALIGNMENT_BOTTOMRIGHT;
+                   s = s + 3;
+               } else if ((stristr(s, "\\a4") != NULL) || (stristr(s, "\\a5") != NULL) || (stristr(s, "\\a8") != NULL)) {
+                   current->alignment = SUB_ALIGNMENT_TOPLEFT;
+                   s = s + 3;
+               } else if (stristr(s, "\\a6") != NULL) {
+                   current->alignment = SUB_ALIGNMENT_TOPCENTER;
+                   s = s + 3;
+               } else if (stristr(s, "\\a7") != NULL) {
+                   current->alignment = SUB_ALIGNMENT_TOPRIGHT;
+                   s = s + 3;
+               } else if (stristr(s, "\\a9") != NULL) {
+                   current->alignment = SUB_ALIGNMENT_MIDDLELEFT;
+                   s = s + 3;
+               } else if (stristr(s, "\\a10") != NULL) {
+                   current->alignment = SUB_ALIGNMENT_MIDDLECENTER;
+                   s = s + 4;
+               } else if (stristr(s, "\\a11") != NULL) {
+                   current->alignment = SUB_ALIGNMENT_MIDDLERIGHT;
+                   s = s + 4;
+               }
+	    }
 	    if (*s == '}') state = 3;
 	    ++s;
 	    continue;
@@ -889,11 +921,11 @@ subtitle *sub_read_line_jacosub(FILE * fd, subtitle * current)
 		continue;
 	    }
 	    if (strstr(directive, "JL") != NULL) {
-		current->alignment = SUB_ALIGNMENT_HLEFT;
+		current->alignment = SUB_ALIGNMENT_BOTTOMLEFT;
 	    } else if (strstr(directive, "JR") != NULL) {
-		current->alignment = SUB_ALIGNMENT_HRIGHT;
+		current->alignment = SUB_ALIGNMENT_BOTTOMRIGHT;
 	    } else {
-		current->alignment = SUB_ALIGNMENT_HCENTER;
+		current->alignment = SUB_ALIGNMENT_BOTTOMCENTER;
 	    }
 	    strcpy(line2, line1);
 	    p = line2;
@@ -1635,7 +1667,7 @@ if ((suboverlap_enabled == 2) ||
 	    memset(&second[sub_num], '\0', sizeof(subtitle));
 	    second[sub_num].start = local_start;
 	    second[sub_num].end   = local_end;
-	    second[sub_num].alignment = SUB_ALIGNMENT_HCENTER;
+	    second[sub_num].alignment = first[sub_first].alignment;
 	    n_max = (lines_to_add < SUB_MAX_TEXT) ? lines_to_add : SUB_MAX_TEXT;
 	    for (i = 0, j = 0; j < n_max; ++j) {
 		if (placeholder[counter][j] != -1) {
