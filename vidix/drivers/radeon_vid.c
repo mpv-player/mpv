@@ -659,7 +659,7 @@ static void radeon_vid_make_default(void)
   besr.ckey_on=0;
   besr.graphics_key_msk=0;
   besr.graphics_key_clr=0;
-  besr.ckey_cntl = GRAPHIC_KEY_FN_NE;
+  besr.ckey_cntl = VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_TRUE|CMP_MIX_AND;
 }
 
 
@@ -888,7 +888,7 @@ int vixQueryFourcc(vidix_fourcc_t *to)
 		    VID_DEPTH_12BPP| VID_DEPTH_15BPP|
 		    VID_DEPTH_16BPP| VID_DEPTH_24BPP|
 		    VID_DEPTH_32BPP;
-	to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK/* | VID_CAP_COLORKEY*/;
+	to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK | VID_CAP_COLORKEY;
 	return 0;
     }
     else  to->depth = to->flags = 0;
@@ -1483,16 +1483,17 @@ static void set_gr_key( void )
 		besr.graphics_key_msk=0;
 		besr.graphics_key_clr=0;
 	}
-	besr.graphics_key_msk = 0xFF000000|besr.graphics_key_clr;
-	besr.ckey_cntl = 0x20;
+	besr.graphics_key_msk = besr.graphics_key_clr;
+	besr.ckey_cntl = VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_EQ|CMP_MIX_AND;
     }
     else
     {
 	besr.ckey_on=0;
 	besr.graphics_key_msk=0;
 	besr.graphics_key_clr=0;
-	besr.ckey_cntl = GRAPHIC_KEY_FN_NE;
+	besr.ckey_cntl = VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_TRUE|CMP_MIX_AND;
     }
+    radeon_fifo_wait(3);
     OUTREG(OV0_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
     OUTREG(OV0_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
     OUTREG(OV0_KEY_CNTL,besr.ckey_cntl);
