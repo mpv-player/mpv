@@ -22,13 +22,13 @@ static vd_info_t info = {
 LIBVD_EXTERN(realvid)
 
 
-unsigned long (*rvyuv_custom_message)(unsigned long*,void*);
-unsigned long (*rvyuv_free)(void*);
-unsigned long (*rvyuv_hive_message)(unsigned long,unsigned long);
-unsigned long (*rvyuv_init)(void*, void*); // initdata,context
-unsigned long (*rvyuv_transform)(char*, char*,unsigned long*,unsigned long*,void*);
+static unsigned long (*rvyuv_custom_message)(unsigned long*,void*);
+static unsigned long (*rvyuv_free)(void*);
+static unsigned long (*rvyuv_hive_message)(unsigned long,unsigned long);
+static unsigned long (*rvyuv_init)(void*, void*); // initdata,context
+static unsigned long (*rvyuv_transform)(char*, char*,unsigned long*,unsigned long*,void*);
 
-void *rv_handle=NULL;
+static void *rv_handle=NULL;
 
 void *__builtin_vec_new(unsigned long size) {
 	return malloc(size);
@@ -63,7 +63,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 }
 
 /* exits program when failure */
-int load_syms_linux(char *path) {
+static int load_syms_linux(char *path) {
 		void *handle;
 
 		mp_msg(MSGT_DECVIDEO,MSGL_INFO, "opening shared obj '%s'\n", path);
@@ -96,7 +96,7 @@ int load_syms_linux(char *path) {
 void* LoadLibraryA(char* name);
 void* GetProcAddress(void* handle,char* func);
 
-int load_syms_windows(char *path) {
+static int load_syms_windows(char *path) {
     void *handle;
     Setup_LDT_Keeper();
     rv_handle = handle = LoadLibraryA(path);
@@ -177,6 +177,7 @@ static int init(sh_video_t *sh){
 
 // uninit driver
 static void uninit(sh_video_t *sh){
+	if(rvyuv_free) rvyuv_free(sh->context);
 	if(rv_handle) dlclose(rv_handle);
 	rv_handle=NULL;
 }
