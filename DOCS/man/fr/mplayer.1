@@ -1,7 +1,8 @@
-.\" synced with 1.709
+.\" synced with 1.711
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
-.\" Traduction: Nicolas Le Gaillart < nicolas@legaillart.com >
+.\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
+.\" Traduction: Guillaume POIRIER < poirierg AT ifsic.univ-rennes1.fr >
 .
 .\" --------------------------------------------------------------------------
 .\" Définition des macros
@@ -2400,8 +2401,8 @@ Utilise le pilote DirectX en désactivant les fonctions d'accélération.
 .
 .sp 1
 FIXME: Documenter les sous-options de x11, xover, dga, sdl, vidix, xvidix,
-fbdev, fbdev2, vesa, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
-tdfxfb, dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
+fbdev, fbdev2, vesa, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
+tdfxfb, dxr2, dxr3, mpegpes, zr, zr2.
 .sp 1
 Les pilotes de sortie disponibles sont:
 .
@@ -2816,12 +2817,42 @@ Transforme le flux vidéo en une séquence d'images YUV 4:2:0 non compressées
 et les stocke dans un fichier nommé 'stream.yuv' dans le répertoire courant.
 Ce format est identique à celui employé par la suite mjpegtools, ce qui peut
 vous être utile pour retraiter cette vidéo avec cette suite.
+Ne gère les formats YV12, RGB (24 bits/pixel) et BGR (24 bits/pixel).
+.PD 0
+.RSs
+.IPs interlaced
+Entrelace les trames de sortie, en commençant par les champs du haut.
+.IPs interlaced_bf
+Entrelace les trames de sortie, en commençant par les champs du bas.
+.REss
+.PD 1
+.RS
+.br
+.I NOTE\ :
+Si vous ne définissez pas d'options, sortie sera "progressive"
+(c-à-d non entrelacée)
+.RE
 .
 .TP
 .B gif89a\ 
-Sépare chaque trame dans un fichier GIF du réperoire courant.
-Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
-des zéros.
+Écrit chaque trame dans un fichier GIF animé du réperoire courant.
+Ne gère que le format RGB avec 24 bits/pixel en entrée et est limité en
+sortie à 256 couleurs.
+.PD 0
+.RSs
+.IPs fps\ \ \ 
+Valeur flottante pour définir le nombre de trames/sec (framerate)
+(par défaut\ : 5.0).
+.IPs filename
+Définit le nom du fichier de sortie (par défaut\ : ./out.gif).
+.REss
+.PD 1
+.RS
+.br
+.I NOTE\ :
+Vous devez définir le framerate avant le nom du fichier de sortie pour que
+le framerate ne soit pas inclus dans le nom du fichier.
+.RE
 .
 .TP
 .B jpeg\ \ \ 
@@ -2861,18 +2892,40 @@ l'option subdirs est définie.
 sépare chaque trame dans un fichier PGM du réperoire courant.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
+Ne gère que le format YV12.
+Les images écrites sont (largeur) * (hauteur * 1.5) de l'image originale
+car les plans Y, U, V sont juxtaposés.
+Aux coordonnées (0,0) jusqu'à (largeur,hauteur) est le plan Y,
+aux coordonnées (0,hauteur) jusqu'à (largeur/2,hauteur/2) est le plan U et
+à (largeur/2,hauteur) jusqu'à (largeur/2,hauteur/2) est le plan V.
+Il n'y a pas de sous-options.
 .
 .TP
-.B png\ \ \ \ 
-sépare chaque trame dans un fichier PNG du réperoire courant.
+.B png (voir aussi \-z)
+Sépare chaque trame dans un fichier PNG du réperoire courant.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
+Ne gère que les formats RGB et BGR 24 bits/pixel.
+Il n'y a pas de sous-options.
 .
 .TP
 .B tga\ \ \ \ 
 sépare chaque trame dans un fichier Targa du réperoire courant.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
+L'intérêt de ce pilote de sortie vidéo est de pouvoir facilement extraire
+sans perte des images sans l'aide d'une librairie externe.
+Ne gère que les formats BGR[A] à 15, 24 ou 32 bits/pixel.
+Il n'y a pas de sous-options.
+Vous pouvez forcez un certain format avec le filtre vidéo format.
+.sp 1
+.I EXEMPLE\ :
+.PD 0
+.RSs
+.IPs "\-vf format=bgr15"
+Sauve les images avec deux octets par pixel.
+.RE
+.PD 1
 .
 .
 .SH "OPTIONS DE DÉCODAGE/\:FILTRAGE"
@@ -3498,7 +3551,7 @@ deux paramètres.
 .RSs
 .IPs l,h
 largeur et hauteur (par défaut\ : -1, largeur maximum où les limites sont
-toujours visibles.
+toujours visibles.)
 .IPs x,y
 position du coin supérieur gauche (par défaut\ : -1, le plus haut et le plus
 à gauche)
@@ -3512,7 +3565,7 @@ l'original non redimensionné aux coordonnées x y.
 Peut être utilisé pour placer les sous-titres /\:l'OSD dans les bandes noires.
 .RSs
 .IPs l,h
-largeur,hauteur étendues (par défaut\ : largeur, hauteur originales)
+Largeur,hauteur étendues (par défaut\ : largeur, hauteur originales).
 Des valeurs négatives pour l et h sont traitées en tant qu'offset de la taille
 originale.
 .sp 1
@@ -3520,7 +3573,7 @@ originale.
 .PD 0
 .RSs
 .IP expand=0:-50:0:0
-ajoute un bord de 50 pixels en bas de l'image
+Ajoute un bord de 50 pixels en bas de l'image.
 .RE
 .PD 1
 .IPs x,y
@@ -3577,13 +3630,13 @@ Bascule le redimmensionnement entrelacé.
 .IPs chr_drop
 saute le chroma
 .RSss
-0: utilise toutes les lignes d'entrée disponibles pour le chroma
+0: Utilise toutes les lignes d'entrée disponibles pour le chroma.
 .br
-1: n'utilise qu'une ligne d'entrée sur 2 pour le chroma
+1: N'utilise qu'une ligne d'entrée sur 2 pour le chroma.
 .br
-2: n'utilise qu'une ligne d'entrée sur 4 pour le chroma
+2: N'utilise qu'une ligne d'entrée sur 4 pour le chroma.
 .br
-3: n'utilise qu'une ligne d'entrée sur 8 pour le chroma
+3: N'utilise qu'une ligne d'entrée sur 8 pour le chroma.
 .REss
 .IPs param
 paramètres de redimensionnement (dépends de la méthode de redimensionnement
