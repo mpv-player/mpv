@@ -2919,7 +2919,9 @@ if(rel_seek_secs || abs_seek_pos){
 	} else {
 	  // get pos from file position / filesize
           int len=((demuxer->movi_end-demuxer->movi_start));
-	  int pos=(demuxer->file_format==DEMUXER_TYPE_AVI)?demuxer->filepos:d_video->pos;
+	  int pos;
+	  if ( demuxer->file_format==DEMUXER_TYPE_AUDIO ) pos=stream->pos;
+	   else pos=(demuxer->file_format==DEMUXER_TYPE_AVI)?demuxer->filepos:d_video->pos;
 	  guiIntfStruct.Position=(len<=0)?0:((float)(pos-demuxer->movi_start) / len * 100.0f);
 	}
 	if ( sh_video ) guiIntfStruct.TimeSec=d_video->pts;
