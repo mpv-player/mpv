@@ -153,9 +153,9 @@ static int mga_src_base = 0;	// YUV buffer position in video memory
 
 static uint32_t mga_ram_size = 0;	// how much megabytes videoram we have
 
-static int mga_force_memsize = 0;
+//static int mga_force_memsize = 0;
 
-MODULE_PARM(mga_force_memsize, "i");
+MODULE_PARM(mga_ram_size, "i");
 
 
 static struct pci_dev *pci_dev;
@@ -738,13 +738,11 @@ static int mga_vid_find_card(void)
 	printk(KERN_INFO "mga_vid: hard-coded RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
 
 #else
-	if (mga_force_memsize) {
-		printk(KERN_INFO "mga_vid: memsize forced to %d MB\n", mga_force_memsize);
-		/* we need the size in bytes */
-		mga_ram_size = ((unsigned long) mga_force_memsize);
+	if (mga_ram_size) {
+		printk(KERN_INFO "mga_vid: RAMSIZE forced to %d MB\n", mga_ram_size);
 	} else {
 
-	if (is_g400){
+	    if (is_g400){
 		switch((card_option>>10)&0x17){
 		    // SDRAM:
 		    case 0x00:
@@ -760,39 +758,28 @@ static int mga_vid_find_card(void)
 			mga_ram_size = 16;
 			printk(KERN_INFO "mga_vid: Couldn't detect RAMSIZE, assuming 16MB!");
 		}
-#if 0
-		switch((card_option>>10)&7){
-		    case 0:
-		    case 4:  mga_ram_size = ((card_option>>14)&1)? 32:16; break;
-		    case 1:
-		    case 2:  mga_ram_size = 16; break;	// SGRAM
-		    case 3:
-		    case 5:  mga_ram_size = 64; break;	// SDRAM
-//		    case 4:  mga_ram_size = 32; break;	// SGRAM
-		    default: mga_ram_size = 16;
-		}
-#endif
-	}else{
+	    }else{
 		switch((card_option>>11)&3){
 		    case 0:  mga_ram_size = 8; break;
 		    default: mga_ram_size = 16;
 		}
-	} }
+	    } 
 #if 0
-//	printk("List resources -----------\n");
-	for(temp=0;temp<DEVICE_COUNT_RESOURCE;temp++){
-	    struct resource *res=&pci_dev->resource[temp];
-	    if(res->flags){
-	      int size=(1+res->end-res->start)>>20;
-	      printk(KERN_DEBUG "res %d:  start: 0x%X   end: 0x%X  (%d MB) flags=0x%X\n",temp,res->start,res->end,size,res->flags);
-	      if(res->flags&(IORESOURCE_MEM|IORESOURCE_PREFETCH)){
-	          if(size>mga_ram_size && size<=64) mga_ram_size=size;
-	      }
+//	    printk("List resources -----------\n");
+	    for(temp=0;temp<DEVICE_COUNT_RESOURCE;temp++){
+	        struct resource *res=&pci_dev->resource[temp];
+	        if(res->flags){
+	          int size=(1+res->end-res->start)>>20;
+	          printk(KERN_DEBUG "res %d:  start: 0x%X   end: 0x%X  (%d MB) flags=0x%X\n",temp,res->start,res->end,size,res->flags);
+	          if(res->flags&(IORESOURCE_MEM|IORESOURCE_PREFETCH)){
+	              if(size>mga_ram_size && size<=64) mga_ram_size=size;
+	          }
+	        }
 	    }
-	}
 #endif
+	    printk(KERN_INFO "mga_vid: detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
+        }
 
-	printk(KERN_INFO "mga_vid: detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
 #endif
 
 #ifdef MGA_ALLOW_IRQ
@@ -914,10 +901,9 @@ static int mga_vid_initialize(void)
 //	printk(KERN_INFO "Matrox MGA G200/G400 YUV Video interface v0.01 (c) Aaron Holtzman \n");
 	printk(KERN_INFO "Matrox MGA G200/G400/G450 YUV Video interface v2.01 (c) Aaron Holtzman & A'rpi\n");
 
-	if (mga_force_memsize) {
-		if (mga_force_memsize != 16 && mga_force_memsize != 32 &&
-				mga_force_memsize != 64) {
-			printk(KERN_ERR "mga_vid: invalid memsize: %dMB\n", mga_force_memsize);
+	if (mga_ram_size) {
+		if (mga_ram_size<4 || mga_ram_size>64) {
+			printk(KERN_ERR "mga_vid: invalid RAMSIZE: %d MB\n", mga_ram_size);
 			return -EINVAL;
 		}
 	}
