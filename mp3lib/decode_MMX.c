@@ -47,10 +47,10 @@ unsigned long __attribute__((aligned(8))) costab_mmx[] =
 	1060439283,
 };
 
+static int temp; // buggy gcc 3.x fails if this is moved into the function :(
 void synth_1to1_MMX_s(real *bandPtr, int channel, short *samples,
                       short *buffs, int *bo)
 {
-int temp;
 
 __asm __volatile(
         "movl %1,%%ecx\n\t"
