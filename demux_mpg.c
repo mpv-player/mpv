@@ -351,15 +351,21 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
     sh_video_t *sh_video=d_video->sh;
 
   //================= seek in MPEG ==========================
-        off_t newpos;
-        if(!sh_video->i_bps) // unspecified?
-          newpos=demuxer->filepos+2324*75*rel_seek_secs; // 174.3 kbyte/sec
+    off_t newpos=(flags&1)?demuxer->movi_start:demuxer->filepos;
+	
+    if(flags&2){
+	// float seek 0..1
+	newpos+=(demuxer->movi_end-demuxer->movi_start)*rel_seek_secs;
+    } else {
+	// time seek (secs)
+        if(!sh_video->i_bps) // unspecified or VBR
+          newpos+=2324*75*rel_seek_secs; // 174.3 kbyte/sec
         else
-          newpos=demuxer->filepos+(sh_video->i_bps)*rel_seek_secs;
+          newpos+=sh_video->i_bps*rel_seek_secs;
+    }
 
-        if(newpos<demuxer->stream->start_pos 
-	 && demuxer->stream->type==STREAMTYPE_VCD)
-	     newpos=demuxer->stream->start_pos; // for VCD
+        if(newpos<demuxer->movi_start) newpos=demuxer->movi_start;
+
 #ifdef _LARGEFILE_SOURCE
         newpos&=~((long long)STREAM_BUFFER_SIZE-1);  /* sector boundary */
 #else
