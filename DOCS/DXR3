@@ -1,118 +1,58 @@
-DXR3/H+ video/audio output plugins manual by David Holm
-=======================================================
+How to use a Sigma Designs Hollywood Plus and/or a Creative DXR3 by David Holm
+==============================================================================
 
-2002-01-06: I've started working on config support.
-	    You can try -vo dxr3:swsync to disable hardware
-	    syncing and use mplayers software syncer instead.
-	    I'd like some feedback on which one works best
-	    on your particular machine =). (I recommend
-	    using em8300 0.10 or later)
-	    
-2001-12-28: There is a whole bunch of updates since the
-            last time. For one thing, digital audio now
-	    works thanks to Steven Brookes.
-	    This is the first version to exclusively
-	    use the dxr3's hardware sync. It seems as if
-	    there are some bugs in the driver, so bugreports
-	    will be appreciated.
-	    Also, you will need to get the em8300 drivers
-	    from cvs unless a version newer than 0.9.0 has
-	    been released.
-	    Note1: Seeking won't work with -vc mpegpes!
-	    Note2: You now MUST use -ao dxr3 for proper
-	    a/v sync!
-	    
-2001-12-04: Thanks to Inaki Garci'a Etxebarria of
-	    zapping.sourceforge.net we have now
-	    abandoned rte since it caused problems for
-	    users who didn't rtfm and compiled it with
-	    ffmpeg support. Instead we are now using
-	    libmp1e which is a modified version of mp1e.
-	    
-1. Introduction
-
-The DXR3 and Hollywood+ are two not too different mpeg-(1/2) and ac3
-hardware playback cards that came at about the same time as the first
-dvd-rom drives hit the market. At that time most computers weren't
-powerful enough for synced software dvd playback. And even the faster
-(intel-based) computers had troubles with artifacts.
-Sigma Designs came up with the great idea to create a hardware
-mpeg-(1/2), ac3 decoder. Sigma Designs are known for their realmagic
-hardware (or they bought the company who came up with the first
-realmagic boards, I don't know which).
-Later Creative Labs thought, hey, we also wan't this product, and to
-distribute it with our dvd-drives (the DVD Encore packages if I recall
-correctly). So they bought the designs for the Hollywood plus and
-replaced the circuit used to produce a proper video feed for tv's
-called adv7170 or adv7175a depending on which h+ board you own with
-a bt865. The reason for this is beyond my understanding as this seems
-complete illogical to me, but I have had great experiences with
-bt(brooktree) circuits in the past, so I don't mind.
-Well, nowadays most people have no use for a mpeg-(1/2) or ac3
-hardware decoder since most computers these days have no problem doing
-this in software and have cycles left for posprocessing (removing of
-artefacts and other garbage produced by compression).
-These days, you have two uses for this card:
-1. You have a slow computer which you use for vcd/dvd playback
-2. You discover what I have done with the implementation of this as
-   an audio/video output device for mplayer (read on and you'll find
-   out).
-
-
-
-2. Requirements
+1. Requirements
 
  * First of all you will need the DXR3/H+ drivers properly installed.
-   Version 0.9.0 or later
+   Version 0.10.0 or later. You can find it at
+   http://dxr3.sourceforge.net/
 
  * Run <mplayerdir>/configure and make sure that DXR3/H+ support = yes
+   if you want to play files other than mpeg libmp1e should be = yes as well
    
  From here on compilation (of at least my code ;) should go without any
  problems.
 
 
 
-3. Usage
+2. Usage
 
-After installation you will have two new outdevices in mplayer:
-    -vo dxr3	For video output
-    -ao dxr3	For audio output 
+    -vo dxr3:<devicenum>	For video output
+    -ao oss:<devicefile>	For audio output
+    -ac hwac3			For digital audio output instead of analog
+    -vc mpegpes			For mpeg playback
+    <devicenum>			Number of device to use for playback (if you
+				have more than one card.). This can usually
+				be left out (-vo dxr3).
+				Mandrake 8.1 uses devfs by default. If you are
+				running mandrake 8.1 please use -vo dxr3:0
+    <devicefile>		Normally /dev/em8300_ma or
+				/dev/em8300_ma-<devicenum>
+				(-ao dxr3:/dev/em8300_ma). If left out the
+				default oss device will be used (normally
+				soundcard).
 
 MPEG-1, MPEG-2, VCD and DVD Notes
-There are some notes to take into account here for optimum playback.
-When playing any mpeg-(1/2) file, this including usage of the "-dvd"
-and "-vcd" options you must either add the "-vc mpegpes" or edit
-codecs.conf and make sure videocodec mpegpes is listed above mpeg12.
-If you fail to do this you will only get software playback which kinda
-spoils most of the useful features of this card except for tv-out ;).
-Remember that if you edit the codecs.conf file and move the mpegpes
-section will have to specify "-vc mpeg12" if you want to playback
-any of these video types _without_ "-vo dxr3"!
-Use -ac hwac3 if you want AC3 audio to be handled by hardware (please
-send some feedback on this).
+There are some important notes to take into account here for optimum playback.
+MPlayer currently does not autodetect that the dxr3 can playback mpegs. So for
+mpeg files, dvd's and vcd's you have to add -vc mpegpes to tell mplayer that
+you are using a hardware accelerator. Otherwise mplayer will decode the movie
+in software, which is much slower.
+Note that you cannot use -vc mpegpes with movies that aren't mpeg 1 or 2 or
+you will get an error message saying "Can't find codec for video format...".
 
-DIVX Notes
-When playing divx's add "-vc odivx" for maximum performance.
-I've switched to mp1e from ffmpeg so it should be lightning fast now.
-libmp1e currently does not work on nonx86 processor and nonmmx processors.
-I'm in the process of fixing this.
-
-Other codecs:
-No "-vc <codec>" switches should be required as mplayer will autodetect.
-If you find an unsupported codec please contact me!
-
-* Avoid running mplayer as root or setuid root as rtc timing seems to
-  slow down playback on the dxr3 for some users. I will look into this
-  at a later point as this hardly qualifies as a severe bug *
+* If you run mplayer as root, or set userid root it will use your pc's internal
+  realtime clockgenerator for syncing. (If your kernel supports it (It's
+  located in character devices and called "Enhanced realtime clock support")).
+  Some people report that this has improved playback (which it should), but
+  others have had problems with it. You will have to experiment yourself with
+  this to find your optimum setup.
 
 
- 
-4. Contacting me
+
+3. Contacting me
 
 You can contact me either by e-mailing me, <dholm@iname.com> or by using
 icq: 798427
 Feedback, bugreports and general suggestions are appreciated (preferably
-by e-mail). My name is David Holm for those of you who are incapable of 
-reading a heading. ;)
-
-
+by e-mail).
