@@ -600,6 +600,24 @@ Ordnung bleibt.
 .PD 1
 .
 .TP
+.B \-key-fifo-size <2\-65000>
+Gibt die Größe des FIFO an, der Schlüsselevents zwischenspeichert (Standard:
+10).
+Ein FIFO der Größe n kann (n-1) Events zwischenspeichern.
+Wenn er zu klein ist, können manche Events verlorengehen (was zu
+"festgeklebten Mausbuttons" und ähnlichen Effekten führen kann).
+Ist er zu groß, kann es zu einem scheinbar aufgehängten MPlayer führen,
+während die zwischengespeicherten Events abgearbeitet werden.
+Um ein Verhalten wie vor der Einführung dieser Option zu erhalten, setze den
+Wert auf 2 für Linux oder 1024 für Windows.
+If it is too small some events may be lost
+(leading to "stuck mouse buttons" and similar effects).
+If it is too big, MPlayer may seem to hang while it
+processes the buffered events.
+To get the same behaviour as before this option was introduced,
+set it to 2 for Linux or 1024 for Windows.
+.
+.TP
 .B \-lircconf <Dateiname> (nur bei LIRC)
 Gibt eine Konfigurationsdatei für LIRC an (Standard: ~/\:.lircrc).
 .
@@ -720,6 +738,10 @@ Erhöht oder verringert die Abspielgeschwindigkeit abhängig vom angegebenen Fakto
 .B \-sstep <Sekunden>
 Zeigt einen Frame alle <Sekunden> Sekunden.
 Für Slideshows nützlich.
+Da MPlayer nur zum nächsten Keyframe springen kann, kann diese Option ungenau
+sein.
+Die meisten Formate haben einen Keyframe alle <Sekunden> und <Sekunden+20>
+Sekunden.
 .
 .
 .
@@ -1502,17 +1524,16 @@ benutzt Gaußsche Unschärfe des Softwareskalierers (sieht sehr gut aus)
 .
 .TP
 .B \-spualign <-1\-2> (nur bei OSD)
-Gibt an, wie SPU-Untertitel (DVD/\:VOBsub) positioniert werden
-sollen.
+Gibt an, wie SPU-Untertitel (DVD/\:VOBsub) positioniert werden sollen.
 .PD 0
 .RSs
-.IPs -1
+.IPs "-1"
 Originalposition
-.IPs 0
+.IPs " 0"
 oben positionieren (Standard)
-.IPs 1
+.IPs " 1"
 mittig positionieren
-.IPs 2
+.IPs " 2"
 unten positionieren
 .RE
 .PD 1
@@ -1760,25 +1781,25 @@ Wählt das Ausgabeformat der Filterschicht.
 Die Formatnummer entspricht den in libao2/\:afmt.h definierten Werten.
 .PD 0
 .RSs
-.IPs 1
+.IPs "   1"
 Mu-Law
-.IPs 2
+.IPs "   2"
 A-Law
-.IPs 4
+.IPs "   4"
 Ima-ADPCM
-.IPs 8
+.IPs "   8"
 unsigned 8-bit
-.IPs 16
+.IPs "  16"
 signed 16-bit (Little-Endian)
-.IPs 32
+.IPs "  32"
 signed 16-bit (Big-Endian)
-.IPs 64
+.IPs "  64"
 signed 8-bit
-.IPs 128
+.IPs " 128"
 unsigned  16-bit (Little-Endian)
-.IPs 256
+.IPs " 256"
 unsigned 16-bit (Big-Endian)
-.IPs 512
+.IPs " 512"
 MPEG (2) Audio
 .IPs 1024
 AC3
@@ -1873,16 +1894,6 @@ Setze diese Option nicht, wenn du hwac3-Ausgabe über S/PDIF wünschst, es sei
 denn, du weißt wirklich, wie sie gesetzt werden muß.
 .RE
 .PD 1
-.
-.TP
-.B alsa1x (VERALTET)
-ALSA 1.x Audioausgabetreiber.
-Überholt durch den generellen ALSA-Audioausgabetreiber.
-.
-.TP
-.B alsa9 (VERALTET)
-ALSA 0.9 Audioausgabetreiber.
-Überholt durch den generellen ALSA-Audioausgabetreiber.
 .
 .TP
 .B alsa5\ \ 
@@ -2262,7 +2273,7 @@ Siehe auch \-aspect, das das Verhältnis des Films angibt.
 .
 .TP
 .B \-nodouble
-Deaktiviert Double-Buffering.
+Deaktiviert Double-Buffering, hauptsächlich für Debugging-Zwecke.
 Double-Buffering vermeidet Flimmern dadurch, dass zwei Bilder im Speicher
 gehalten werden, von denen das eine angezeigt wird, während das andere noch
 decodiert wird.
@@ -2987,8 +2998,8 @@ Gibt den Ausgabe-Dateinamen an (Standard: ./md5sums).
 .TP
 .B yuv4mpeg
 Wandelt den Videostream in eine Abfolge von unkomprimierten YUV 4:2:0-Bildern
-um und speichert diese in einer Datei namens 'stream.yuv' im aktuellen
-Verzeichnis.
+um und speichert diese standardmäßig in einer Datei namens 'stream.yuv' im
+aktuellen Verzeichnis.
 Das Format ist das gleiche, das von den mjpegtools benutzt wird, daher ist
 diese Option nützlich, wenn du das Video mit den mjpegtools bearbeiten
 möchtest.
@@ -2999,6 +3010,8 @@ Es unterstützt das YV12-, RGB- (24 bpp) und BGR-Format (24 bpp).
 Schreibt die Ausgabe-Frames interlaced, obere Felder zuerst.
 .IPs interlaced_bf
 Schreibt die Ausgabe-Frames interlaced, untere Felder zuerst.
+.IPs file=<Dateiname>
+Schreibe die Ausgabe nach <Dateiname> anstatt in die Standarddatei stream.yuv.
 .REss
 .PD 1
 .RS
@@ -3076,15 +3089,15 @@ ASCII-Modus.
 Siehe auch pnm(5), ppm(5) and pgm(5).
 .PD 0
 .RSs
-.IPs ppm
+.IPs ppm\ \ 
 Schreibe PPM-Dateien (Standard).
-.IPs pgm
+.IPs pgm\ \ 
 Schreibe PGM-Dateien.
 .IPs pgmyuv
 Schreibe PGMYUV-Dateien.
 PGMYUV ist wie PGM, enthält jedoch zusätzlich eine U- und V-Ebene unten im
 Bild.
-.IPs raw
+.IPs raw\ \ 
 Schreibe PNM-Dateien im raw-Modus (Standard).
 .IPs ascii
 Schreibe PNM-Dateien im ASCII-Modus.
@@ -4213,15 +4226,14 @@ genommene Filme zu reparieren, und zum anderen, um Artifakte zu maskieren und
 niedrigere Bitraten benutzen zu können.
 .
 .TP
-.B
-eq2[=gamma:Kontrast:Helligkeit:Sättigung:rg:gg:bg:weight]
+.B eq2[=gamma:Kontrast:Helligkeit:Sättigung:rg:gg:bg:weight]
 Alternativer Softwareequalizer, der Lookup-Tabellen benutzt (sehr langsam).
 Er erlaubt neben simpler Anpassung der Helligkeit, des Kontrastes und der
 Sättigung auch eine Gammakorrektur.
-Beachte, dass er den gleichen MMX-optimierten Code benutzt wie der 
-eq-Filter, wenn alle Gammawerte 1.0
-betragen!
+Beachte, dass er den gleichen MMX-optimierten Code benutzt wie \-vf eq, wenn
+alle Gammawerte 1.0 betragen!
 Die Parameter werden als Fließkommazahlen angegeben.
+.PD 0
 .RSs
 .IPs rg
 Gammawert der roten Komponente
@@ -4229,6 +4241,8 @@ Gammawert der roten Komponente
 Gammawert der grünen Komponente
 .IPs bg
 Gammawert der blauen Komponente
+.REss
+.PD 1
 .RE
 Die Parameter rg, gg, bg sind unabhängige Gammawerte für die einzelnen
 Farbkomponenten Rot, Grün und Blau.
@@ -4242,6 +4256,7 @@ Sättigung=1.0 und weight=1.0.
 Die Wertebereiche betragen 0.1\-10 für gamma, -2\-2 für Kontrast (negative
 Werte invertieren das Bild), -1\-1 für die Helligkeit, 0\-3 für die
 Sättigung und 0\-1 für weight.
+.RE
 .
 .TP
 .B hue[=Farbton:Sättigung]
