@@ -391,11 +391,11 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
   }
 }
 //=============== Try to open as MOV file: =================
-#if 0
+#if 1
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
-//  stream_seek(demuxer->stream,seek_to_byte);
+  stream_seek(demuxer->stream,seek_to_byte);
   if(mov_check_file(demuxer)){
       printf("Detected QuickTime/MOV file format!\n");
       file_format=DEMUXER_TYPE_MOV;
@@ -418,6 +418,10 @@ d_video=demuxer->video;
 demuxer->file_format=file_format;
 
 switch(file_format){
+ case DEMUXER_TYPE_MOV: {
+  mov_read_header(demuxer);
+  break;
+ }
  case DEMUXER_TYPE_AVI: {
   return demux_open_avi(demuxer);
 //  break;
