@@ -139,7 +139,7 @@ static char help_text[]=
 #define MSGTR_MaybeNI "(non-interleaved 스트림/파일을 재생하고있거나 코덱이 잘못되었습니다.)\n"
 #define MSGTR_Detected_XXX_FileFormat "%s 파일 형식을 발견했습니다!\n"
 #define MSGTR_InvalidMPEGES "잘못된 MPEG-ES 스트림??? 저작자에게 문의하세요, 버그일지도 모릅니다. :(\n"
-#define MSGTR_FormatNotRecognized "============= 죄송합니다, 이 파일형식은 인식되지못했거나 지원되지않습니다 ===============\n"\
+#define MSGTR_FormatNotRecognized "============= 죄송합니다, 이 파일형식을 인식하지못했거나 지원하지않습니다 ===============\n"\
 				  "=== 만약 이 파일이 AVI, ASF 또는 MPEG 스트림이라면, 저작자에게 문의하세요! ===\n"
 #define MSGTR_MissingVideoStream "비디오 스트림을 찾지 못했습니다!\n"
 #define MSGTR_MissingAudioStream "오디오 스트림을 찾지 못했습니다...  ->소리없음\n"
@@ -277,7 +277,7 @@ static char help_text[]=
 #endif
 
 
-// --- the diffs between help_mp-ko and help_mp-en in MPlayer-0.98pre9.
+// --- the diffs between help_mp-ko and help_mp-en in MPlayer-0.90pre9.
 #define MSGTR_TryForceAudioFmtStr "오디오 코덱 드라이버 %s을(를) 강제로 시도합니다...\n"
 #define MSGTR_TryForceVideoFmtStr "비디오 코덱 드라이버 %s을(를) 강제로 시도합니다...\n"
 #define MSGTR_CompiledWithRuntimeDetection "런타임 CPU 감지가 가능하게 컴파일되었습니다. - 경고, 최적의 조건이 아닙니다!가장 좋은 성능을 얻기위해선, MPlayer를 --disable-runtime-cpudetection 옵션으로 다시 컴파일하세요.\n"
@@ -428,7 +428,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_AutoLoad "자동으로 자막 열지않기"
 #define MSGTR_PREFERENCES_SUB_Unicode "유니코드 자막"
 #define MSGTR_PREFERENCES_SUB_MPSUB "주어진 자막을 MPlayer용 자막 포맷으로 바꿉니다."
-#define MSGTR_PREFERENCES_SUB_SRT "주어진 자막을 SRT(시간 기반의 Sub뷰어) 포맷으로 바꿉니다."
+#define MSGTR_PREFERENCES_SUB_SRT "주어진 자막을 SRT 포맷으로 바꿉니다."
 #define MSGTR_PREFERENCES_Font "글꼴:"
 #define MSGTR_PREFERENCES_FontFactor "글꼴 팩터:"
 #define MSGTR_PREFERENCES_PostProcess "후행처리 사용"
@@ -497,4 +497,101 @@ static char help_text[]=
 #define MSGTR_MENU_AudioTrack "오디오 트랙"
 #define MSGTR_MENU_Track "트랙 %d"
 #define MSGTR_MENU_VideoTrack "비디오 트랙"
+
+
+// --- the diffs between help_mp-ko and help_mp-en in MPlayer-0.90rc2
+#define MSGTR_BuiltinCodecsConf "내장된 기본 codecs.conf 사용\n"
+
+// --- the diffs between help_mp-ko and help_mp-en in MPlayer-0.90rc3
+#define MSGTR_Exit_SIGILL_RTCpuSel \
+"- MPlayer가 '잘못된 연산'으로 종료되었습니다.\n"\
+"  런타임 CPU 감지 코드에 버그가 있을 지도 모릅니다...\n"\
+"  DOCS/bugreports.html을 참조하세요.\n"
+#define MSGTR_Exit_SIGILL \
+"- MPlayer가 '잘못된 연산'으로 종료되었습니다.\n"\
+"  컴파일/최적화된 CPU와 다른 모델에서 실행할 때\n"\
+"  종종 일어나는 현상입니다.\n  체크해 보세요!\n"
+#define MSGTR_Exit_SIGSEGV_SIGFPE \
+"- MPlayer가 잘못된 CPU/FPU/RAM의 사용으로 종료되었습니다.\n"\
+"  MPlayer를 --enable-debug 옵션으로 다시 컴파일하고, 'gdb' 백트레이스 및\n"\
+"  디스어셈블해보세요. 자세한 것은 DOCS/bugreports.html#crash.b를 참조하세요.\n"
+#define MSGTR_Exit_SIGCRASH \
+"- MPlayer가 알 수 없는 이유로 종료되었습니다.\n"\
+"  MPlayer 코드나 드라이버의 버그, 혹은 gcc버전의 문제일 수도 있습니다.\n"\
+"  MPlayer의 문제라고 생각한다면, DOCS/bugreports.html을 읽고 거기있는\n"\
+"  설명대로 하시기 바랍니다. 가능한 버그를 보고할 땐, 이 정보를 포함하세요.\n"\
+"  그렇지 않으면, 도와줄 방법이 없습니다.\n"
+#define MSGTR_MEncoderMP3LameHelp "\n\n"\
+" vbr=<0-4>     가변 비트레이트 방식\n"\
+"                0: cbr\n"\
+"                1: mt\n"\
+"                2: rh(기본값)\n"\
+"                3: abr\n"\
+"                4: mtrh\n"\
+"\n"\
+" abr           평균 비트레이트\n"\
+"\n"\
+" cbr           고정 비트레이트\n"\
+"               일련의 ABR 프리셋 모드들에서 CBR모드 강제 사용함.\n"\
+"\n"\
+" br=<0-1024>   비트레이트를 kBit단위로 지정 (CBR 및 ABR에서만)\n"\
+"\n"\
+" q=<0-9>       음질 (0-최고, 9-최저) (VBR에서만)\n"\
+"\n"\
+" aq=<0-9>      연산 음질 (0-최고/느림, 9-최저/빠름)\n"\
+"\n"\
+" ratio=<1-100> 압축률\n"\
+"\n"\
+" vol=<0-10>    오디오 입력 음량 조절\n"\
+"\n"\
+" mode=<0-3>    (기본값: 자동)\n"\
+"                0: 스테레오\n"\
+"                1: 조인트-스테레오\n"\
+"                2: 듀얼채널\n"\
+"                3: 모노\n"\
+"\n"\
+" padding=<0-2>\n"\
+"                0: 안함\n"\
+"                1: 모두\n"\
+"                2: 조정\n"\
+"\n"\
+" fast          일련의 VBR 프리셋 모드들에서 더 빠른 인코딩 사용,\n"\
+"               음질이 조금 저하되고 비트레이트가 조금 더 높아짐.\n"\
+"\n"\
+" preset=<value> 최적의 가능한 음질 세팅들.\n"\
+"                 medium: VBR  인코딩, 좋은 음질\n"\
+"                 (150-180 kbps 비트레이트 범위)\n"\
+"                 standard:  VBR 인코딩, 높은 음질\n"\
+"                 (170-210 kbps 비트레이트 범위)\n"\
+"                 extreme: VBR 인코딩, 매우 높은 음질\n"\
+"                 (200-240 kbps 비트레이트 범위)\n"\
+"                 insane:  CBR  인코딩, 가장 높은 음질\n"\
+"                 (320 kbps 비트레이트 고정)\n"\
+"                 <8-320>: 주어진 kbps 비트레이트의 평균치로 ABR 인코딩.\n\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Progressive 시퀀스 감지, 3:2 TELECINE 모드를 종료합니다.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE 감지. 역전된 telecine fx를 사용합니다. FPS가 %5.3f로 변함!\n"
+#define MSGTR_SDLPreferences "SDL 드라이버 설정"
+#define MSGTR_SKIN_WARNING3 "[스킨] 스킨 설정 파일의 %d 라인 경고: 이 섹션은 현재 위젯에서 지원되지 않습니다. (%s)"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "타이머, 퍼센트와 전체시간"
+#define MSGTR_PREFERENCES_SUB_Overlap "자막 겹침 켜기"
+#define MSGTR_PREFERENCES_Codecs "코덱 & 해석기"
+#define MSGTR_PREFERENCES_SDL_Driver "드라이버:"
+#define MSGTR_PREFERENCES_PlayBar "재생표시줄 사용"
+#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM 장치:"
+#define MSGTR_PREFERENCES_DVDDevice "DVD 장치:"
+
+// --- the diffs between help_mp-ko and help_mp-en in MPlayer-0.90rc4
+#define MSGTR_AvailableFsType "가능한 전체화면 레이어 변경 모드:\n"
+#define MSGTR_EQU_Channel1 "채널 1:"
+#define MSGTR_EQU_Channel2 "채널 2:"
+#define MSGTR_EQU_Channel3 "채널 3:"
+#define MSGTR_EQU_Channel4 "채널 4:"
+#define MSGTR_EQU_Channel5 "채널 5:"
+#define MSGTR_EQU_Channel6 "채널 6:"
+#define MSGTR_PREFERENCES_FPS "동영상 FPS:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "정지 중일 때 비디오 창 보이기"
+#define MSGTR_ABOUT_UHU "GUI 개발 지원 by UHU Linux\n"
+#define MSGTR_ABOUT_CoreTeam "   MPlayer 코어 팀:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   그 외의 코더:\n"
+#define MSGTR_ABOUT_MainTesters "   메인 테스터:\n"
 
