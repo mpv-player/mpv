@@ -55,23 +55,7 @@
   filmeket is! És ez még nem minden, SOKKAL gyorsabb mint a Win32-es DivX DLL
   (viszont a libavcodec még ENNÉL IS gyorsabb, így eme codec használata <B>NEM
   AJÁNLOTT</B> - kivéve enkódoláshoz). A beállítást lásd lent. A codec
-  egyetlen hátránya, hogy jelenleg zárt forráskódú. :(</P>
-
-<P>A következõ URL-rõl lehet letölteni:</P>
-
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://avifile.sourceforge.net">http://avifile.sourceforge.net</A><BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://divx.com">http://divx.com</A></P>
-
-<P>Tömörítsd ki, és futtasd a <CODE>./install.sh</CODE> scriptet.</P>
-
-<P>Megj: NE felejtsd el hozzáadni az <CODE>/usr/local/lib</CODE>-et az
-  <CODE>/etc/ld.so.conf</CODE> file végére, és futtatni az
-  <CODE>ldconfig</CODE>-ot!</P>
-
-<P>Az <B>MPlayer</B> automatikusan detektálja, ha a DivX4 (helyesen) van
-  installálva, fordítsd le a szokott módon. Ha nem veszi észre, akkor nem
-  követted pontosan a fent leírtakat és/vagy elcseszett konfigod van
-  (lásd az 5.1-es fejezet utolsó kérdését).</P>
+  egyetlen hátránya, hogy nem Open Source licenszu. :(</P>
 
 <P>Két lehetõség van a használatára:</P>
 
@@ -94,6 +78,56 @@
 
 <P>Megj: ha a -vo meghajtód támogat direct renderinget, a <CODE>-vc divx4</CODE>
   gyorsabb lehet!</P>
+
+<P>A codec az <A HREF="http://avifile.sourceforge.net">avifile</A> project
+  lapjarol toltheto le. Letoltes utan csomagold ki es root-kent futtasd le
+  az <CODE>install.sh</CODE> scriptet. Ne felejtsd el hozzaadni az
+  <CODE>/usr/local/lib</CODE> utvonalat az <CODE>/etc/ld.so.conf</CODE>
+  file vegere, majd futtasd az ldconfig-ot.</P>
+
+<P>A CVS verzio a kovetkezokepp toltheto le:</P>
+
+<OL>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot
+    login</CODE></LI>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot co
+    divxcore</CODE></LI>
+  <LI>A kod ket reszre van osztva, decore es encore neven. Ezeket kulon-kulon
+    kell leforditani. A decore resz forditasa igy tortenik:
+    <PRE>
+    cd divxcore/decore/build/linux
+    make
+    cp libdivxdecore.so /usr/local/lib
+    ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
+    cp ../../src/decore.h /usr/local/include
+    </PRE>
+    cd divxcore/decore/build/linux
+    make
+    cp libdivxdecore.so /usr/local/lib
+    ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
+    cp ../../src/decore.h /usr/local/include
+    </PRE>
+    </LI>
+  <LI>Az encore reszhez nincs linuxos Makefile, es az MMX optimalizalt resz
+    csak Windows-on fordul le. Viszont
+    <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">ezzel a
+    Makefile-lal</A> szepen lefordul Linux alatt is.
+    <PRE>
+    cd ../../../encore/build
+    mkdir linux
+    cd linux
+    cp path/Makefile .
+    make
+    cp libdivxencore.so /usr/local/lib
+    ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
+    cp ../../src/encore.h /usr/local/include
+    </PRE>
+    </LI>
+</OL>
+
+<P>Az MPlayer automatikusan detektalja a helyesen felinstallalt DivX4/5-ot,
+  a forditas a szokasos modon tortenik. Ha valami folytan megse jon ossze,
+  a <CODE>configure</CODE>-nak vannak opcioi erre a celra.</P>
 
 
 <H4><A NAME=libavcodec>2.2.1.2  ffmpeg DivX/libavcodec</A></H4>
