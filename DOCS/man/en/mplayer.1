@@ -3066,11 +3066,11 @@ REPEAT_FIRST_FIELD mpeg flag is assumed to be progressive, thus filter
 will not spend any time on soft-telecined MPEG-2 content.
 This is the only effect of this flag if MMX2 or 3DNow! is available.
 Without MMX2 and 3DNow, if n=0 or 1, the same calculations will be used
-as with MMX2.
+as with n=2 or 3.
 If n=2 or 3, the number of luma levels used to find the frame breaks is
 reduced from 256 to 128, which results in a faster filter without losing
 much accuracy.
-If n=4 or 5, a faster, but much less accurate metrics will be used to
+If n=4 or 5, a faster, but much less accurate metric will be used to
 find the frame breaks, which is more likely to misdetect high vertical
 detail as interlaced content.
 .IPs verbose=n
@@ -5053,10 +5053,11 @@ This is NOT the 2pass control file.
 (default=30, 2pass mode only)
 .RE
 .PP
-The following options are only available with the unstable (cvs -HEAD)
-version of XviD.
-Be warned that these options are experimental and may
-not work as intended.
+
+The following options are only available with the latest stable
+XviD 0.9.2 (api3) version and are marked as experimental and unstable.
+The newest development version of XviD 1.0 (api4) supports
+them fully.
 .TP
 .B packed\ 
 create a bitstream that can be decoded delay-free (default=off)
