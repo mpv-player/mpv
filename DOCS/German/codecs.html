@@ -121,6 +121,68 @@ zum Dekodieren von <B>DivX/DivX4</B> verwendet und libmpeg2 für MPEG1/2. Mit die
 Einstellungen und meiner Matrox G400 kann ich auch DivX/DivX4-Filme mit hoher
 Auflösung ohne Framedrop sehen.</P>
 
+<P><B><A NAME=2.2.1.3>2.2.1.3. XAnim codecs</A></B></P>
+
+<P>Vorwort: das Verwenden von (einigen) XAnim-Codecs mit anderen Programmen als
+XAnim ist <B><I>ILLEGAL</I></B>. Es ist <B>DEINE</B> Verantwortung die Lizenzbestimmungen
+zu lesen und danach zu handeln. Die Autoren von <B>MPlayer</B> kann nicht für die
+illegalen Handlungen des Anwenders verantwortlich gemacht werden,</P>
+
+<P>Also, <B>MPlayer</B> kann XAnims Codecs für das Dekodieren verwenden. Es
+ist sehr einfach dies einzuschalten:</P>
+
+<P>
+<UL>
+  <LI>Lade dir die Codecs dir dir will von der <A HREF="http://xanim.va.pubnix.com">XAnim Seite</A>
+  herunter. Den <B>3ivx</B> Codec kann man dort nicht finden, also lade ihn von der
+  <A HREF="http://www.3ivx.com">3ivx Seite</A>.</LI>
+      
+  <LI>verwend die <CODE>--with-xanimlibdir</CODE> Option um configure zu sagen, wo
+  es die XAnim-Codecs finden kann. Standardgemäß prüft es in <CODE>/</CODE> (...) .</LI>
+</UL>
+</P>
+  
+<P>Diese Codecs sind die Video Codec Family Nummer 10, also kannst du die <CODE>-vfm 10</CODE>
+Option verwenden um <B>MPlayer</B> zu sagen, dass er sie verwenden soll, wenn möglich.</P>
+	  
+<P>Getestete Codecs sind: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
+
+
+<P><B><A NAME=2.2.1.4>2.2.1.4. VIVO Video</A></B></P>
+
+<P><B>MPlayer</B> kann VIVO (1.0 und 2.0) Videos abspielen. Der beste Codec für
+1.0-Dateien ist FFmpegs H263 Dekoder, du kannst ihn mit der <CODE>-vc ffh263</CODE>
+Option aufrufen (du wirdst die neuesten libavcodecs benötigen !). Für 2.0-Dateien verwende
+verwende XAnims H263 Codec (er unterstützt schnelle YV12-Ausgabe). Du kann ihn mit
+der <CODE>-vc h263xa</CODE> Option aufrufen. Natürlich musst du dazu die Unterstützung
+für XAnim-Codes aktivieren, siehe <A HREF=#2.2.1.3>XAnim Videocodecs</A> für Details. Wenn
+es nicht funktioniert, besorge dir die <CODE>ivvideo.dll</CODE> DLL-Datei (von <A
+HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">hier</A>) und
+installiere sie unter <CODE>/usr/lib/win32</CODE> oder wo du deine Win32 Codecs speicherst.
+Der letztgenannte Codec unterstützt weder YV12 noch YUY2, nur BGR-Modie, was normalerweise
+nur mit X11 oder OpenGL Ausgabe funktioniert. Entmutigend.</P>
+
+
+<P><B><A NAME=2.2.1.5>2.2.1.5. MPEG 1/2 Video</A></B></P>
+
+<P>MPEG1 und MPEG2 werden von der eingebauten Bibliothek <B>libmpeg2</B> dekodiert.
+Der Sourcecode ist bei <B>MPlayer</B> enthalten und ist natürlich multiplatformfähig.
+Wir spielen fehlerhafte MPEG1/2 Videos durch das Checken der Signaturen die libmpeg2
+zurückgibt und wenn es mit sig11 (segmentation fault) abstützt initialisieren wir den
+Codec wieder schnell und setzen die Wiedergabe dort fort, wo der Fehler war. Kein
+Geschwindigkeitsverlust ist dabei messbar.</P>
+
+
+<P><B><A NAME=2.2.1.6>2.2.1.6. MS Video 1</A></B></P>
+
+<P>Dies ist dein sehr alter und sehr schlechter Codec von Microsoft. In der Vergangenheit
+wurde es mit dem <CODE>msvidc32.dll</CODE> Win32-Codec dekodiert, aber nun haben wir eine
+Open-Source-Codec (von <A HREF="mailto:melanson@pcisys.net">Mike Melanson</A>) eingebaut.</P>
+
+
+<P><B><A NAME=2.2.2>2.2.2. Audiocodecs</A></B></P>
+
+	  
 <P><B><A NAME=2.1.2.3>2.1.2.3.  Hardware AC3 decoding</A></B></P>
 
 <P>Du wird eine AC3-fähige Soundkarte brauchen mit Digital-Out (SP/DIF). Der
