@@ -70,6 +70,7 @@ gnu()     { issystem "GNU"     ; return "$?" ; }
 mingw32() { issystem "MINGW32" ; return "$?" ; }
 morphos() { issystem "MorphOS" ; return "$?" ; }
 win32()   { cygwin || mingw32  ; return "$?" ; }
+beos()    { issystem "BEOS"    ; return "$?" ; }
 
 # arch test boolean functions
 # x86/x86pc is used by QNX
@@ -414,7 +415,7 @@ if test -z "$_target" ; then
   # OS name
   system_name=`( uname -s ) 2>&1`
   case "$system_name" in
-  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin|GNU)
+  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin|GNU|BeOS)
     ;;
   IRIX*)
     system_name=IRIX
@@ -453,7 +454,7 @@ if test -z "$_target" ; then
 
       # x86/x86pc is used by QNX
       case "`( uname -m ) 2>&1`" in
-      i[3-9]86*|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686) host_arch=i386 ;;
+      i[3-9]86*|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686|BePC) host_arch=i386 ;;
       ia64) host_arch=ia64 ;;
       x86_64|amd64) host_arch=x86_64 ;;
       macppc|ppc) host_arch=ppc ;;
@@ -1986,6 +1987,7 @@ if test "$_vidix" = auto ; then
   alpha && linux && _vidix=yes
   qnx && _vidix=no
   sunos && _vidix=no
+  beos && _vidix=no
 fi
 
 echocheck "mplayer binary name"
@@ -2053,6 +2055,28 @@ else
   echores "none"
 fi
 
+echocheck "-lposix"
+cat > $TMPC <<EOF
+int main(void) { return 0; }
+EOF
+if cc_check -lposix ; then
+  _ld_arch="$_ld_arch -lposix"
+  echores "yes"
+else
+  echores "no"
+fi
+
+echocheck "-lm"
+cat > $TMPC <<EOF
+int main(void) { return 0; }
+EOF
+if cc_check -lm ; then
+  _ld_lm="-lm"
+  echores "yes"
+else
+  _ld_lm=""
+  echores "no"
+fi
 
 # Checking for localization ...
 # CSAK EGY MARADHAT - A HEGYLAKO
@@ -2140,9 +2164,9 @@ int main(void) {
 }
 EOF
   _iconv=no
-  if cc_check -lm ; then
+  if cc_check $_ld_lm ; then
     _iconv=yes
-  elif cc_check -lm -liconv ; then
+  elif cc_check $_ld_lm -liconv ; then
     _iconv=yes
     _ld_iconv='-liconv'
   fi
@@ -2270,7 +2294,7 @@ cat > $TMPC << EOF
 int main(void) { (void) lrintf(0.0); return 0; }
 EOF
 _lrintf=no
-cc_check -lm && _lrintf=yes
+cc_check $_ld_lm && _lrintf=yes
 if test "$_lrintf" = yes ; then
   _def_lrintf="#define HAVE_LRINTF 1"
 else
@@ -2297,6 +2321,7 @@ echores "$_nanosleep"
 
 echocheck "socklib"
 # for Solaris (socket stuff is in -lsocket, gethostbyname and friends in -lnsl):
+# for BeOS (socket stuff is in -lsocket, gethostbyname and friends in -lbind):
 cat > $TMPC << EOF
 #include <netdb.h>
 int main(void) { (void) gethostbyname(0); return 0; }
@@ -2305,6 +2330,7 @@ cc_check -lsocket && _ld_sock="-lsocket"
 cc_check -lnsl && _ld_sock="-lnsl"
 cc_check -lsocket -lnsl && _ld_sock="-lsocket -lnsl"
 cc_check -lsocket -ldnet && _ld_sock="-lsocket -ldnet"
+cc_check -lsocket -lbind && _ld_sock="-lsocket -lbind"
 if test $_winsock2 = auto && not cygwin ; then
   _winsock2=no
   cat > $TMPC << EOF
@@ -2940,6 +2966,20 @@ fi
 echores "$_vsscanf"
 
 
+echocheck "swab()"
+cat > $TMPC << EOF
+#include <unistd.h>
+int main(void) { swab(0, 0, 0); return 0; }
+EOF
+_swab=no
+cc_check && _swab=yes
+if test "$_swab" = yes ; then
+  _def_swab='#define HAVE_SWAB 1'
+else
+  _def_swab='#undef HAVE_SWAB'
+fi
+echores "$_swab"
+
 echocheck "posix select()"
 cat > $TMPC << EOF
 #include <stdio.h>
@@ -3468,10 +3508,10 @@ if (test "$_x11" = yes || win32) && test "$_gl" != no ; then
 int main(void) { return 0; }
 EOF
   _gl=no
-  if cc_check $_inc_x11 $_ld_x11 -lGL -lm ; then
+  if cc_check $_inc_x11 $_ld_x11 -lGL $_ld_lm ; then
     _gl=yes
     _ld_gl="-lGL"
-  elif cc_check $_inc_x11 $_ld_x11 -lGL -lm $_ld_pthread ; then
+  elif cc_check $_inc_x11 $_ld_x11 -lGL $_ld_lm $_ld_pthread ; then
     _gl=yes
     _ld_gl="-lGL $_ld_pthread"
   elif cc_check -lopengl32 ; then
@@ -3621,11 +3661,11 @@ if test "$_svga" = auto ; then
 int main(void) { return 0; }
 EOF
   _svga=no
-  cc_check  -lvgagl -lvga -lm && _svga=yes
+  cc_check  -lvgagl -lvga $_ld_lm && _svga=yes
 fi
 if test "$_svga" = yes ; then
   _def_svga='#define HAVE_SVGALIB 1'
-  _ld_svga='-lvgagl -lvga -lm'
+  _ld_svga="-lvgagl -lvga $_ld_lm"
   _vosrc="$_vosrc vo_svga.c"
   _vomodules="svga $_vomodules"
 else
@@ -3766,7 +3806,7 @@ int main(void) {
   return (strcmp(PNG_LIBPNG_VER_STRING, png_libpng_ver));
 }
 EOF
-    if cc_check -lpng -lz -lm ; then
+    if cc_check -lpng -lz $_ld_lm ; then
       if "$TMPO" >> "$TMPLOG" ; then
         _png=yes
         echores yes
@@ -3805,7 +3845,7 @@ int main(void) {
   return 0;
 }
 EOF
-    if cc_check -ljpeg -lm ; then
+    if cc_check -ljpeg $_ld_lm ; then
       if "$TMPO" >> "$TMPLOG" ; then
         _jpg=yes
       fi
@@ -4064,7 +4104,7 @@ if test "$_nas" = auto || test "$_nas" = yes ; then
 int main(void) { return 0; }
 EOF
   _nas=no
-  cc_check -laudio $_inc_x11 -lXt $_ld_x11 -lm && _nas=yes
+  cc_check -laudio $_inc_x11 -lXt $_ld_x11 $_ld_lm && _nas=yes
 fi
 if test "$_nas" = yes ; then
   _def_nas='#define HAVE_NAS 1'
@@ -4626,11 +4666,11 @@ if test "$_cdparanoia" = auto ; then
 int main(void) { return 1; }
 EOF
     _cdparanoia=no
-    if cc_check $_inc_cdparanoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia -lm ; then
+    if cc_check $_inc_cdparanoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia $_ld_lm ; then
         _cdparanoia=yes
     else
 	for I in /usr/include/cdda /usr/local/include/cdda ; do
-            if cc_check -I$I $_ld_cdparanoia -lcdda_interface -lcdda_paranoia -lm ; then
+            if cc_check -I$I $_ld_cdparanoia -lcdda_interface -lcdda_paranoia $_ld_lm ; then
 	        _cdparanoia=yes; _inc_cdparanoia="-I$I"; break
             fi
         done
@@ -4879,7 +4919,7 @@ EOF
   if test -n "$_toolamedir"; then
     _toolame_extraflags="-I$_toolamedir -L$_toolamedir"
   fi
-  cc_check $_toolame_extraflags $_toolame_lib -lm && _toolame=yes
+  cc_check $_toolame_extraflags $_toolame_lib $_ld_lm && _toolame=yes
 fi
 if test "$_toolame" = yes ; then
   _def_toolame='#define HAVE_TOOLAME 1'
@@ -4902,7 +4942,7 @@ if test "$_vorbis" = auto ; then
 #include <vorbis/codec.h>
 int main(void) { vorbis_packet_blocksize(0,0); return 0; }
 EOF
-  cc_check -lvorbis -logg -lm && _vorbis=yes
+  cc_check -lvorbis -logg $_ld_lm && _vorbis=yes
 fi
 if test "$_vorbis" = yes ; then
   _def_vorbis='#define HAVE_OGGVORBIS 1'
@@ -4962,7 +5002,7 @@ int main(void)
   return 0;
 }
 EOF
-  cc_check -ltheora -logg -lm && _theora=yes
+  cc_check -ltheora -logg $_ld_lm && _theora=yes
 fi
 if test "$_theora" = yes ; then
   _def_theora='#define HAVE_OGGTHEORA 1'
@@ -5002,11 +5042,11 @@ if test "$_libdts" = auto ; then
 #include <dts.h>
 int main(void) { dts_init (0); return 0; }
 EOF
-  cc_check $_inc_libdts $_ld_libdts -ldts -lm && _libdts=yes
+  cc_check $_inc_libdts $_ld_libdts -ldts $_ld_lm && _libdts=yes
 fi
 if test "$_libdts" = yes ; then
   _def_libdts='#define CONFIG_DTS 1'
-  _ld_libdts="$_ld_libdts -ldts -lm"
+  _ld_libdts="$_ld_libdts -ldts $_ld_lm"
   _codecmodules="libdts $_codecmodules"
 else
   _def_libdts='#undef CONFIG_DTS'
@@ -5072,7 +5112,7 @@ if test "$_faad_external" != no ; then
 #include <faad.h>
 int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); return 0; }
 EOF
-    cc_check $_inc_faad $_ld_faad -lm && _faad_external=yes
+    cc_check $_inc_faad $_ld_faad $_ld_lm && _faad_external=yes
   fi
   echores "$_faad_external"
 else
@@ -5095,7 +5135,7 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check -I- $_inc_faad $_ld_faad -lm && "$TMPO" >> "$TMPLOG" ; then
+  if cc_check -I- $_inc_faad $_ld_faad $_ld_lm && "$TMPO" >> "$TMPLOG" ; then
     _faad_version=`"$TMPO"`
     _faad_tempversion=`"$TMPO" | sed -e 's/^\([0-9]\{1,\}\)\.\([0-9]\{1,\}\).*/\1\2/'`
     _def_faad_version="#define FAADVERSION $_faad_tempversion"
@@ -5417,7 +5457,7 @@ int main(void) {
     return 0; 
 }
 EOF
-  if cc_check -lavcodec -lm ; then
+  if cc_check -lavcodec $_ld_lm ; then
     _libavcodecso=yes
     echores "yes (using libavcodec.so)"
   else
@@ -5464,7 +5504,7 @@ if test "$_libdv" = auto ; then
 #include <libdv/dv.h>
 int main(void) { dv_encoder_t* enc=dv_encoder_new(1,1,1); return 0; }
 EOF
-  cc_check -ldv -lm && _libdv=yes
+  cc_check -ldv $_ld_lm && _libdv=yes
 fi
 if test "$_libdv" = yes ; then
   _def_libdv='#define HAVE_LIBDV095 1'
@@ -5519,7 +5559,7 @@ cat > $TMPC << EOF
 #include <xvid.h>
 int main(void) { xvid_init(0, 0, 0, 0); return 0; }
 EOF
-_ld_xvid="$_ld_xvid -lxvidcore -lm"
+_ld_xvid="$_ld_xvid -lxvidcore $_ld_lm"
 if test "$_xvid" != no && cc_check $_inc_xvid $_ld_xvid ; then
   _xvid=yes
   _def_xvid3='#define HAVE_XVID3 1'
@@ -5554,7 +5594,7 @@ if test "$_xvid" = yes ; then
 #include <divx4.h>
 int main(void) { (void) decore(0, 0, 0, 0); return 0; }
 EOF
-  cc_check -lm "$_ld_xvid" && _xvidcompat=yes
+  cc_check $_ld_lm "$_ld_xvid" && _xvidcompat=yes
   echores "$_xvidcompat"
 fi
 
@@ -5565,7 +5605,7 @@ cat > $TMPC << EOF
 #include <x264.h>
 int main(void) { x264_encoder_open((void*)0); return 0; }
 EOF
-_ld_x264="$_ld_x264 -lx264 -lm"
+_ld_x264="$_ld_x264 -lx264 $_ld_lm"
 if test "$_x264" != no && cc_check $_inc_x264 $_ld_x264 ; then
   _x264=yes
   _def_x264='#define HAVE_X264 1'
@@ -5584,7 +5624,7 @@ cat > $TMPC << EOF
 #include <decore.h>
 int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_FRAME_311; }
 EOF
-if test "$_divx4linux" != no && cc_check -lm -ldivxdecore -lm ; then
+if test "$_divx4linux" != no && cc_check $_ld_lm -ldivxdecore ; then
   _opendivx=no
   _ld_decore='-ldivxdecore'
   _def_decore='#define NEW_DECORE 1'
@@ -5602,7 +5642,7 @@ cat > $TMPC << EOF
 #include <decore.h>
 int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_INIT; }
 EOF
-if test "$_divx4linux" != no && cc_check -lm -ldivxdecore -lm ; then
+if test "$_divx4linux" != no && cc_check $_ld_lm -ldivxdecore ; then
   _opendivx=no
 #  _ld_decore='-ldivxdecore opendivx/postprocess.o'
   _ld_decore='-ldivxdecore'
@@ -5657,7 +5697,7 @@ if test "$_mencoder" != no ; then
 int main(void) { lame_version_t lv; (void) lame_init(); get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor); return 0; }
 EOF
   # Note: libmp3lame usually depends on vorbis
-  cc_check -lmp3lame $_ld_vorbis -lm && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _mp3lame=yes
+  cc_check -lmp3lame $_ld_vorbis $_ld_lm && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _mp3lame=yes
   if test "$_mp3lame" = yes ; then
     _def_mp3lame="#define HAVE_MP3LAME `$TMPO`"
     _def_cfg_mp3lame="#define CONFIG_MP3LAME `$TMPO`"
@@ -5674,7 +5714,7 @@ EOF
 #include <encore2.h>
 int main(void) { (void) encore(0, 0, 0, 0); return 0; }
 EOF
-  if test "$_divx4linux" != no && cc_check -ldivxencore -lm ; then
+  if test "$_divx4linux" != no && cc_check -ldivxencore $_ld_lm ; then
     _def_encore='#define HAVE_DIVX4ENCORE 1'
     _ld_encore='-ldivxencore'
     echores "DivX4linux (with libdivxencore.so)"
@@ -5831,7 +5871,7 @@ fi
 echores "$_network"
 
 echocheck "ftp"
-if test "$_ftp" != no ; then
+if (not beos) && (test "$_ftp" != no) ; then
   _def_ftp='#define HAVE_FTP 1'
   _inputmodules="ftp $_inputmodules"
 else
@@ -6128,6 +6168,17 @@ if test "$_largefiles" = yes || freebsd ; then
   fi
 fi
 
+echocheck "compiler support for -fno-PIC"
+cat > $TMPC <<EOF
+int main(void) { return 0; }
+EOF
+if cc_check -fno-PIC ; then
+  CFLAGS="-fno-PIC $CFLAGS"
+  echores "yes"
+else
+  echores "no"
+fi
+
 echocheck "ftello()"
 # if we don't have ftello use the osdep/ compatibility module
 cat > $TMPC << EOF
@@ -6311,6 +6362,7 @@ WIN32_LIB = $_ld_win32libs
 STATIC_LIB = $_ld_static
 ENCA_LIB = $_ld_enca
 HAVE_PTHREADS = $_pthreads
+MATH_LIB = $_ld_lm
 
 X11_INC = $_inc_x11
 X11DIR = $_ld_x11
@@ -6658,6 +6710,9 @@ $_def_localtime_r
 
 /* Define this if your system has vsscanf */
 $_def_vsscanf
+
+/* Define this if your system has swab */
+$_def_swab
 
 /* Define this if your system has no posix select */
 $_def_no_posix_select

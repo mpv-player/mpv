@@ -20,6 +20,8 @@
 #include <sys/uio.h>
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
+#elif defined(__BEOS__)
+#include <mman.h>
 #endif
 #include <sys/socket.h>
 #include <fcntl.h>
