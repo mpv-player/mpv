@@ -252,8 +252,6 @@ void uninit_audio(sh_audio_t *sh_audio)
     sh_audio->a_buffer=NULL;
     if(sh_audio->a_in_buffer) free(sh_audio->a_in_buffer);
     sh_audio->a_in_buffer=NULL;
-    if(sh_audio->wf) free(sh_audio->wf);
-    sh_audio->wf=NULL;
 }
 
  /* Init audio filters */
