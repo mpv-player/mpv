@@ -24,6 +24,10 @@
 #include <dlfcn.h> /* GLIBC specific. Exists under cygwin too! */
 #include <dirent.h>
 
+#if defined(__OpenBSD__) && !defined(__ELF__)
+#define dlsym(h,s) dlsym(h, "_" s)
+#endif
+
 #include "vidixlib.h"
 #include "../bswap.h"
 
