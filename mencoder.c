@@ -310,6 +310,67 @@ static uint32_t draw_frame(uint8_t *src[]){
   return(0);
 }
 
+static int query_format(unsigned int out_fmt){
+// check for supported colorspace:
+switch(out_video_codec){
+case VCODEC_RAWRGB:
+    switch(out_fmt){
+    case IMGFMT_BGR32:
+    case IMGFMT_BGR24:
+    case IMGFMT_RGB32:
+    case IMGFMT_YV12:
+	return VO_TRUE;
+    }
+    break;
+case VCODEC_VFW:
+    if(out_fmt==IMGFMT_BGR24) return VO_TRUE;
+    break;
+case VCODEC_LIBAVCODEC:
+    switch(out_fmt){
+    case IMGFMT_YV12:
+    case IMGFMT_IYUV:
+    case IMGFMT_I420:
+	return VO_TRUE;
+    }
+    break;
+case VCODEC_DIVX4:
+    switch(out_fmt){
+    case IMGFMT_YV12:
+    case IMGFMT_IYUV:
+    case IMGFMT_I420:
+    case IMGFMT_YUY2:
+    case IMGFMT_UYVY:
+    case IMGFMT_RGB24:
+    case IMGFMT_BGR24:
+	return VO_TRUE;
+    }
+    break;
+default:
+    return VO_TRUE; // FIXME!
+}
+return VO_FALSE;
+}
+
+static uint32_t control(uint32_t request, void *data, ...){
+  switch (request) {
+  case VOCTRL_QUERY_FORMAT:
+    return query_format(*((uint32_t*)data));
+//  case VOCTRL_GET_IMAGE:
+//    return get_image(data);
+  }
+  return VO_NOTIMPL;
+}
+
+static unsigned int out_fmt=0;
+
+static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format,const vo_tune_info_t *info){
+  // we should do codec initialization here!
+  printf("vo.config(%d x %d, %s) called!\n",width,height,vo_format_name(format));
+  out_fmt=format;
+  return 0; // OK!
+}
+
+
 vo_functions_t video_out;
 
 //---------------------------------------------------------------------------
@@ -379,7 +440,6 @@ sh_audio_t *sh_audio=NULL;
 sh_video_t *sh_video=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 int i;
-unsigned int out_fmt;
 
 aviwrite_t* muxer=NULL;
 aviwrite_stream_t* mux_a=NULL;
@@ -532,78 +592,45 @@ sh_video=d_video->sh;
    sh_video->fps,sh_video->frametime
   );
   
+video_out.config=config;
+video_out.control=control;
+video_out.draw_slice=draw_slice;
+video_out.draw_frame=draw_frame;
 
+sh_video->video_out=&video_out;
 sh_video->codec=NULL;
 if(out_video_codec>1){
 
-if(video_family!=-1) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
-{ /* local vars */
-short bestprio=-1;
-struct codecs_st *bestcodec=NULL;
-while(1){
-  sh_video->codec=find_codec(sh_video->format,
-    sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
-  if(!sh_video->codec){
-    if(video_family!=-1) {
-      //sh_video->codec=NULL; /* re-search */
-      mp_msg(MSGT_MENCODER,MSGL_WARN,MSGTR_CantFindVfmtFallback);
-      video_family=-1;
-      continue;      
-    }
-    if(bestprio==-1 || !video_codec) {
-      mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
-      mp_msg(MSGT_MENCODER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-      mencoder_exit(1,NULL);
-    }
-  } else {
-    if(video_codec && strcmp(sh_video->codec->name,video_codec)) continue;
-    else if(video_family!=-1 && sh_video->codec->driver!=video_family) continue;
-    else if(video_family==-1 && !video_codec && sh_video->codec->priority) {
-	    if(sh_video->codec->priority > bestprio) {
-        //printf("\n\n!!! setting bestprio from %d to %d for %s!!!\n\n", bestprio, sh_video->codec->priority, sh_video->codec->name);
-        bestprio=sh_video->codec->priority;
-        bestcodec=sh_video->codec;
-      }
-      continue;
-    }
-  } /* sh_video->codec */
-  break;
-}
-if(bestprio!=-1) {
-  //printf("chose codec %s by priority.\n", bestcodec->name);
-  sh_video->codec=bestcodec;
-}
 
-} /* end local vars */
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
-mp_msg(MSGT_MENCODER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
-
-for(i=0;i<CODECS_MAX_OUTFMT;i++){
-    out_fmt=sh_video->codec->outfmt[i];
-    if(out_fmt==0xFFFFFFFF) continue;
-
-    if(IMGFMT_IS_RGB(out_fmt)) break;
-    if(out_fmt==IMGFMT_YV12) break;
-    
-    if(out_video_codec == VCODEC_RAWRGB) {
-        if(IMGFMT_IS_BGR(out_fmt) && IMGFMT_BGR_DEPTH(out_fmt) == 32) break;
-    } else
-    if(out_video_codec == VCODEC_VFW) {
-        if(IMGFMT_IS_BGR(out_fmt) && IMGFMT_BGR_DEPTH(out_fmt) == 24) break;
-    }
-    else {
-        if(IMGFMT_IS_BGR(out_fmt)) break;   
-    if(out_fmt==IMGFMT_I420) break;
-    if(out_fmt==IMGFMT_IYUV) break;
-    if(out_fmt==IMGFMT_YUY2) break;
-    if(out_fmt==IMGFMT_UYVY) break;
+// Go through the codec.conf and find the best codec...
+sh_video->inited=0;
+if(video_codec){
+    // forced codec by name:
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"Forced video codec: %s\n",video_codec);
+    init_video(sh_video,video_codec,-1,-1);
+} else {
+    int status;
+    // try in stability order: UNTESTED, WORKING, BUGGY, BROKEN
+    if(video_family>=0) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
+    for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status){
+	if(video_family>=0) // try first the preferred codec family:
+	    if(init_video(sh_video,NULL,video_family,status)) break;
+	if(init_video(sh_video,NULL,-1,status)) break;
     }
 }
-if(i>=CODECS_MAX_OUTFMT){
-    mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_VOincompCodec);
-    mencoder_exit(1,NULL); // exit_player(MSGTR_Exit_error);
+if(!sh_video->inited){
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
+    mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
+    mencoder_exit(1,NULL);
 }
-sh_video->outfmtidx=i;
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",
+    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+
+//sh_video->outfmtidx=i;    // FIXME!!!!!!!!!!!!!!!!!!!
+
 
 if((out_fmt==IMGFMT_YV12 || out_fmt==IMGFMT_IYUV || out_fmt==IMGFMT_I420) &&
     (vo_w!=0 || vo_h!=0))
@@ -630,12 +657,8 @@ if (IMGFMT_IS_BGR(out_fmt))
 if (IMGFMT_IS_RGB(out_fmt))
     vo_image_ptr = vo_image = malloc(vo_w*vo_h*IMGFMT_RGB_DEPTH(out_fmt)/8);
 
-if(!init_video(sh_video,NULL)){
-     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
-     mencoder_exit(1,NULL);
-}
-
 } // if(out_video_codec)
+
 
 if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
   // Go through the codec.conf and find the best codec...
@@ -677,8 +700,6 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
 
 // set up video encoder:
 SwScale_Init();
-video_out.draw_slice=draw_slice;
-video_out.draw_frame=draw_frame;
 
 #ifdef USE_DVDREAD
 vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
@@ -871,7 +892,7 @@ case VCODEC_LIBAVCODEC:
         }
         else if (!strcasecmp(vcodec, "mpeg4"))
         {
-	    mux_v->bih->biCompression = mmioFOURCC('M', 'P', '4', 'S');
+	    mux_v->bih->biCompression = mmioFOURCC('D', 'I', 'V', 'X');
         }
         else if (!strcasecmp(vcodec, "msmpeg4"))
         {
