@@ -11,20 +11,18 @@ FOR THE LAST RC-RELEASE:
 - fix the known bugs: (Gabucino's list)
    - new-conf prints meaningless error messages of bad options (actually none)
      (see also: Dec 17: [BUG] mencoder prints meaningless message)
-   - menu.conf not searched in system-wide directories - DONE? (saw on cvslog)
    - supporting Noir.rm? Garbled image now. Maybe codec scales?
-   - Nov 12: [BUG] bug (misfeature) in key caching part of mpdvdkit - FIXED?
+   - Nov 12: [BUG] bug (misfeature) in key caching part of mpdvdkit
    - Nov 13: [BUG] sig11 while moving xmga window in Xinerama mode - FIXED?
    - Nov 23: [BUG] panscan doesn't work properly with -fixed-vo (Xv)
-   - Nov 25: [BUG] Re: [MPlayer-dev-eng] [PATCH] debian/ dir revisited
-     (-vo x11,xmga,xv doesn't work because MPlayer dies if can't find X) - HEH?
    - Dec 19: [BUG] mencoder+mp3lame creates desynced AVI (<=22Khz support missing)
    - Dec 28: [BUG] nice little bug somewhere (config/playtree)
      (It's in new-conf. I can provide shell access...:)
    - Dec 28: Re: [Mplayer-cvslog] CVS: main/libvo vo_svga.c,1.55,1.56
      (vo_svga is unusably broken. On my Cirrus, and Geforce2, confirmed)
-   - Dec 31: [BUG] sig11 in subreader.c - FIXED!
-   - Jan 5:  [BUG] surround audio plugin broken
+   - Jan 06: Diego says: mplayer -vo sdl,mga movie.avi on the console it still
+     fails.
+     (however "xmga,mga" is fixed)
    - VERY old bug: DVD stream playing broken on some systems (like mine):
      audio is delayed, even after -dumpstream and play the dumped stream
      (-audio -0.25 fixes)
