@@ -80,6 +80,7 @@ static void set_window(int force_update,const vo_tune_info_t *info)
     XTranslateCoordinates(mDisplay, vo_window, mRoot, 0, 0,
 	&drwcX, &drwcY, &mRoot);
 
+    aspect(&dwidth,&dheight,A_NOZOOM);
     if (!vo_fs)
 	mp_msg(MSGT_VO, MSGL_V, "[xvidix] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",
 	    drwcX, drwcY, drwX, drwY, drwWidth, drwHeight);
@@ -88,6 +89,7 @@ static void set_window(int force_update,const vo_tune_info_t *info)
 #if X11_FULLSCREEN
     if (vo_fs)
     {
+        aspect(&dwidth,&dheight,A_ZOOM);
 	drwX = (vo_screenwidth - (dwidth > vo_screenwidth ? vo_screenwidth : dwidth)) / 2;
 	drwcX += drwX;
 	drwY = (vo_screenheight - (dheight > vo_screenheight ? vo_screenheight : dheight)) / 2;
