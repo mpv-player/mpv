@@ -872,7 +872,7 @@ EOF
     _optimizing=''
     ;;
 
-  x86_64)
+  x86_64|amd64)
     _def_arch='#define ARCH_X86_64 1'
     _target_arch='TARGET_ARCH_X86_64 = yes'
     iproc='x86_64'
