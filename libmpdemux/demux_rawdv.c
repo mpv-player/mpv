@@ -75,8 +75,14 @@ int rawdv_check_file(demuxer_t *demuxer)
       return 0;
 
    td=dv_decoder_new(TRUE,TRUE,FALSE);
+   if (!td)
+      return 0;
+
    td->quality=DV_QUALITY_BEST;
-   dv_parse_header(td, tmp_buffer);
+   result=dv_parse_header(td, tmp_buffer);
+   if (result)
+      return 0;
+
    if ((( td->num_dif_seqs==10) || (td->num_dif_seqs==12))
        && (td->width==720)
        && ((td->height==576) || (td->height==480)))
