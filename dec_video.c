@@ -157,13 +157,15 @@ void decode_cyuv(
   int height,
   int bit_per_pixel);
 
+int qt_init_decode_smc(void);
+
 void qt_decode_smc(
   unsigned char *encoded,
   int encoded_size,
   unsigned char *decoded,
   int width,
   int height,
-  int encoded_bpp,
+  unsigned char *palette_map,
   int bytes_per_pixel);
 
 //**************************************************************************//
@@ -602,7 +604,6 @@ switch(sh_video->codec->driver){
  case VFM_MSVIDC:
  case VFM_FLI:
  case VFM_QTRLE:
- case VFM_QTSMC:
    {
 #ifdef USE_MP_IMAGE
     sh_video->image->type=MP_IMGTYPE_STATIC;
@@ -618,6 +619,19 @@ if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
     "    this Quicktime file to the MPlayer FTP, the team could look at it.\n",
     sh_video->bih->biBitCount);
 
+   break;
+   }
+ case VFM_QTSMC:
+   {
+   if (qt_init_decode_smc() != 0)
+     mp_msg(MSGT_DECVIDEO, MSGL_ERR, "SMC decoder could not allocate enough memory");
+#ifdef USE_MP_IMAGE
+    sh_video->image->type=MP_IMGTYPE_STATIC;
+#else
+   int bpp=((out_fmt&255)+7)/8; // RGB only
+   sh_video->our_out_buffer = 
+     (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+#endif
    break;
    }
  case VFM_NUV:
@@ -959,7 +973,7 @@ if(verbose>1){
     qt_decode_smc(
         start, in_size, sh_video->our_out_buffer,
         sh_video->disp_w, sh_video->disp_h,
-        sh_video->bih->biBitCount,
+        (unsigned char *)sh_video->bih+40,
         ((out_fmt&255)+7)/8);
     blit_frame = 3;
     break;
