@@ -205,9 +205,16 @@
 
 <H4><A NAME="xv_trident">2.3.1.2.1.6 Trident cards</A></H4>
 
-<P>If you want to use xv with a trident card, provided that it doesn't work
+<P>If you want to use Xv with a Trident card, provided that it doesn't work
   with 4.1.0, install XFree 4.2.0. 4.2.0 adds support for fullscreen xv
   support with the Cyberblade XP card.</P>
+
+
+<H4><A NAME="xv_powervr">2.3.1.2.1.7 Kyro/PowerVR cards</A></H4>
+
+<P>If you want to use Xv with a Kyro based card (for example Hercules Prophet
+  4000XT), you should download the drivers from the
+  <A HREF="http://www.powervr.com/">PowerVR site</A>.</P>
 
 
 <H4><A NAME="dga">2.3.1.2.2 DGA</A></H4>
@@ -394,14 +401,6 @@
     case the DGA driver will crash telling you about a nonsense mode of
     100000x100000 or the like ...</LI>
    <LI>OSD only works with doublebuffering enabled.</LI>
-</UL>
-
-
-<H4><A NAME="dga_future">2.3.1.2.2.9 Future work</A></H4>
-
-<UL>
-  <LI>use of the new X11 render interface for OSD</LI>
-  <LI>where is my TODO list ???? :-(((</LI>
 </UL>
 
 
@@ -594,8 +593,8 @@
   it has hardware VSYNC support with triple buffering. It works on both
   framebuffer console and under X.</P>
 
-<P><B>WARNING</B>: on non-Linux systems, use <A HREF="#vidix">VIDIX</A> for
-  mga_vid!</P>
+<P><B>NOTE</B>: This is Linux only! On non-Linux (tested on FreeBSD) systems,
+  you can use <A HREF="#vidix">VIDIX</A> instead!</P>
 
 <P><B>Installation:</B></P>
 <OL>
@@ -919,13 +918,57 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   porting (mainly libdha) it. But there is a hope, that it will work on those
   systems where X11 does.</P>
 
-<BLOCKQUOTE>
-  <B>Warning: security risk</B><BR>
-  Unfortunately you <B>must</B> have <B>root</B> privileges to use VIDIX
-  due to direct hardware access. At least the <B>SUID</B> bit on the
-  MPlayer executable must be set.
-</BLOCKQUOTE>
+<P>Since VIDIX requires direct hardware access you can either run it as root or
+  set the SUID bit on the MPlayer binary (<B>Warning: This is a security
+  risk!</B>). Alternatively, you can use a special kernel module, like this:</P>
 
+<OL>
+  <LI>Download the
+    <A HREF="http://www.arava.co.il/matan/svgalib/">development version</A>
+    of svgalib (for example 1.9.17).</LI>
+  <LI>Move the <CODE>svgalib-1.9.17/kernel/svgalib_helper</CODE> directory to
+    <CODE>mplayer/main/libdha/svgalib_helper</CODE>.</LI>
+  <LI>Compile the module in the <CODE> svgalib_helper</CODE> directory and
+    insmod it.</LI>
+  <LI>Recompile and install libdha.</LI>
+</OL>
+
+
+<H4><A NAME="vidix_ati">2.3.1.2.12.1 ATI cards</A></H4>
+
+<P>Currently most ATI cards are supported natively, from Mach64 to the newest
+  Radeons.</P>
+
+<P>There are two compiled binaries: <CODE>radeon_vid</CODE> for Radeon and
+  <CODE>rage128_vid</CODE> for Rage 128 cards. You may force one or let the
+  VIDIX system autoprobe all available drivers.</P>
+
+
+<H4><A NAME="vidix_matrox">2.3.1.2.12.2 Matrox cards</A></H4>
+
+<P>Matrox G200,G400,G450 and G550 have been reported to work.</P>
+
+<P>The driver supports video equalizers and should be nearly as fast as the
+  <A HREF="#mga_vid">Matrox framebuffer</A>.</P>
+
+
+<H4><A NAME="vidix_trident">2.3.1.12.3 Trident cards</A></H4>
+
+<P>There is a driver available for the Trident Cyberblade/i1 chipset, which
+  can be found on VIA Epia motherboards.</P>
+
+<P>The driver was written and is maintained by Alastair M. Robinson, who offers
+  the very latest driver versions for download from his
+  <A HREF="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">homepage</A>.
+  The drivers are added to MPlayer with only a short delay, so CVS should always
+  be up to date.</P>
+
+
+<H4><A NAME="vidix_3dlabs">2.3.1.2.12.4 3DLabs cards</A></H4>
+
+<P>Although there is a driver for the 3DLabs GLINT R3 and Permedia3 chips,
+  no one has tested it, so reports are welcome.</P>
+  
 
 <H4><A NAME="directfb">2.3.1.2.13 DirectFB</A></H4>
 
