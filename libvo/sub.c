@@ -622,8 +622,6 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		pmt = pmt->next;
 	    }
 	    free(pmt);
-	} else {
-		mp_msg(MSGT_OSD, MSGL_WARN, "\nSubtitles requested but not found.\n");
 	}
 	
     }
