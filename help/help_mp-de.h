@@ -523,7 +523,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ExtraStereo "Extra Stereo verwenden"
 #define MSGTR_PREFERENCES_Coefficient "Koeffizient:"
 #define MSGTR_PREFERENCES_AudioDelay "Audio-Verzögerung"
-#define MSGTR_PREFERENCES_DoubleBuffer "Double-Buffering verwenden"
+#define MSGTR_PREFERENCES_DoubleBuffer "Doublebuffering verwenden"
 #define MSGTR_PREFERENCES_DirectRender "Direct-Rendering verwenden"
 #define MSGTR_PREFERENCES_FrameDrop "Frame-Dropping aktivieren"
 #define MSGTR_PREFERENCES_HFrameDrop "HARTES Frame-Dropping aktivieren (gefährlich)"
