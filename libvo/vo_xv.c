@@ -94,10 +94,6 @@ static Window                 mRoot;
 static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
 static uint32_t               drwcX,drwcY,dwidth,dheight;
 
-#ifdef HAVE_NEW_GUI
- static uint32_t               mdwidth,mdheight;
-#endif
-
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 
 static void draw_alpha_yv12(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
@@ -337,11 +333,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  image_width = width;
  image_format=format;
 
-#ifdef HAVE_NEW_GUI
- mdwidth=width;
- mdheight=height;
-#endif
-
  vo_fs=flags&1;
  if ( vo_fs )
   { vo_old_width=d_width; vo_old_height=d_height; }
@@ -501,17 +492,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
      current_buf=0;
 
-#ifdef HAVE_NEW_GUI
-      if ( vo_window != None )
-       {
-        dwidth=mdwidth; dheight=mdheight;
-        if ( vo_fs )
-         {
-          dwidth=vo_screenwidth;
-          dheight=vo_screenwidth * mdheight / mdwidth;
-         }
-       }
-#endif
      set_gamma_correction();
 
      XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
@@ -582,15 +562,6 @@ static void check_events(void)
    drwX=0; drwY=0;
    XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
    printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
-
-   #ifdef HAVE_NEW_GUI
-    dwidth=mdwidth; dheight=mdheight;
-    if ( vo_fs )
-     {
-      dwidth=vo_screenwidth;
-      dheight=vo_screenwidth * mdheight / mdwidth;
-     }
-   #endif
 
    aspect(&dwidth,&dheight,A_NOZOOM);
    if ( vo_fs )

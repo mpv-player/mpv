@@ -397,9 +397,16 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
   {
    memset( &vo_MotifWmHints,0,sizeof( MotifWmHints ) );
    vo_MotifWmHints.flags=MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS;
-   vo_MotifWmHints.functions=MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE;
-   if ( d ) d=MWM_DECOR_ALL;
+   if ( d )
+    {
+     vo_MotifWmHints.functions=MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE;
+     d=MWM_DECOR_ALL;
+    }
+#if 0
    vo_MotifWmHints.decorations=d|((vo_fsmode&2)?0:MWM_DECOR_MENU);
+#else
+   vo_MotifWmHints.decorations=d|((vo_fsmode&2)?MWM_DECOR_MENU:0);
+#endif
    XChangeProperty( vo_Display,w,vo_MotifHints,vo_MotifHints,32,
                     PropModeReplace,(unsigned char *)&vo_MotifWmHints,(vo_fsmode&4)?4:5 );
   }
@@ -412,8 +419,9 @@ void vo_x11_classhint( Display * display,Window window,char *name ){
 	    XSetClassHint(display,window,&wmClass);
 }
 
-Window    vo_window = None;
-GC        vo_gc;
+Window     vo_window = None;
+GC         vo_gc;
+XSizeHints vo_hint;
 
 #ifdef HAVE_NEW_GUI
  void vo_setwindow( Window w,GC g ) {
@@ -509,6 +517,14 @@ int vo_x11_check_events(Display *mydisplay){
   return ret;
 }
 
+void vo_x11_sizehint( int x, int y, int width, int height )
+{
+ vo_hint.flags=PPosition | PSize | PWinGravity;
+ vo_hint.x=x; vo_hint.y=y; vo_hint.width=width; vo_hint.height=height;
+ vo_hint.win_gravity=StaticGravity;
+ XSetWMNormalHints( mDisplay,vo_window,&vo_hint );
+}
+
 void vo_x11_fullscreen( void )
 {
  XUnmapWindow( mDisplay,vo_window );
@@ -516,6 +532,11 @@ void vo_x11_fullscreen( void )
   {
    vo_fs=VO_TRUE;
    vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth;   vo_old_height=vo_dheight;
+   {
+    Window root; int foo, foo2;
+//    XGetGeometry( mDisplay,vo_window,&root,&vo_old_x,&vo_old_y,&vo_old_width,vo_old_height,&foo,&foo2 );
+//    XTranslateCoordinates( mDisplay,vo_window,root,0,0,&vo_old_x,&vo_old_y,(Window *)&foo);
+   }
    vo_dx=0;        vo_dy=0;        vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight;
    vo_x11_decoration( mDisplay,vo_window,0 );
   }
@@ -525,9 +546,10 @@ void vo_x11_fullscreen( void )
     vo_dx=vo_old_x; vo_dy=vo_old_y; vo_dwidth=vo_old_width; vo_dheight=vo_old_height;
     vo_x11_decoration( mDisplay,vo_window,1 );
    }
- XMapWindow( mDisplay,vo_window );
+ vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight );
  XMoveResizeWindow( mDisplay,vo_window,vo_dx,vo_dy,vo_dwidth,vo_dheight );
- return;
+ XMapWindow( mDisplay,vo_window );
+ XSync( mDisplay,False );
 }
 
 void saver_on(Display *mDisplay) {

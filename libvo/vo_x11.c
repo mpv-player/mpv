@@ -584,6 +584,8 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_FULLSCREEN:
+    vo_x11_fullscreen();
+/*
     if ((vo_fs_oldwidth == -1) && (vo_fs_oldheight == -1))
     {
 	int foo;
@@ -605,7 +607,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	mp_msg(MSGT_VO,MSGL_V,"X11 Fullscreen: saved old place: %dx%d-%dx%d\n",
 	    vo_fs_oldx, vo_fs_oldy, vo_fs_oldwidth, vo_fs_oldheight);
 	
-	/* resize */
+	// resize 
 	vo_dwidth = vo_screenwidth;
 	vo_dheight = vo_screenheight;
 	vo_x11_decoration( mDisplay,vo_window,0 );
@@ -621,16 +623,17 @@ static uint32_t control(uint32_t request, void *data, ...)
 	
 
 #ifdef LOCAL_LOOKUP
-	/* restore */
+	// restore 
 	vo_dwidth = vo_fs_oldwidth;
 	vo_dheight = vo_fs_oldheight;
 #endif
 	
-	/* clean */
+	// clean
 	vo_fs_oldwidth = -1;
 	vo_fs_oldheight = -1;
 	XSync(mDisplay, False);
     }
+*/
     return VO_TRUE;
   }
   return VO_NOTIMPL;

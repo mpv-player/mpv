@@ -61,7 +61,7 @@ static unsigned int timerd=0;
 
 static vo_info_t vo_info =
 {
- "X11 (Matrox G200/G400 overlay in window using /dev/mga_vid)",
+ "X11 (Matrox G200/G4x0/G550 overlay in window using /dev/mga_vid)",
  "xmga",
  "Zoltan Ponekker <pontscho@makacs.poliod.hu>",
  ""
@@ -90,10 +90,6 @@ static Window                 mRoot;
 static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
 static uint32_t               drwcX,drwcY,dwidth,dheight;
 
-//#ifdef HAVE_NEW_GUI
- static uint32_t               mdwidth,mdheight;
-//#endif
-
 static XSetWindowAttributes   xWAttribs;
 
 #define VO_XMGA
@@ -111,14 +107,8 @@ static void mDrawColorKey( void )
 
 static void set_window(){
 
-         dwidth=mdwidth; dheight=mdheight;
-         if ( vo_fs )
-	  {
-	   dwidth=vo_screenwidth;
-	   dheight=vo_screenwidth * mdheight / mdwidth;
-	  }
-
          XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
+         fprintf( stderr,"[xmga] x: %d y: %d w: %d h: %d\n",drwX,drwY,drwWidth,drwHeight );
          drwX=0; drwY=0; // drwWidth=wndWidth; drwHeight=wndHeight;
          XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
          fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
@@ -273,7 +263,6 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
   aspect(&d_width,&d_height,A_NOZOOM);
 #ifdef HAVE_NEW_GUI
- mdwidth=width; mdheight=height;
  if ( vo_window == None )
   {
 #endif
@@ -311,15 +300,10 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
      vinfo.visual,xswamask,&xWAttribs );
    vo_x11_classhint( mDisplay,vo_window,"xmga" );
    vo_hidecursor(mDisplay,vo_window);
+   vo_x11_sizehint( wndX,wndY,wndWidth,wndHeight );
 
    if ( vo_fs ) vo_x11_decoration( mDisplay,vo_window,0 );
 
-   XGetNormalHints( mDisplay,vo_window,&hint );
-   hint.x=wndX; hint.y=wndY;
-   hint.width=wndWidth; hint.height=wndHeight;
-   hint.base_width=wndWidth; hint.base_height=wndHeight;
-   hint.flags=USPosition | USSize;
-   XSetNormalHints( mDisplay,vo_window,&hint );
    XStoreName( mDisplay,vo_window,mTitle );
    XMapWindow( mDisplay,vo_window );
 		   

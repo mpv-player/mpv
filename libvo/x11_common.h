@@ -4,6 +4,9 @@
 
 #ifdef X11_FULLSCREEN
 
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
 extern int vo_depthonscreen;
 extern int vo_screenwidth;
 extern int vo_screenheight;
@@ -22,12 +25,14 @@ int vo_init( void );
 int vo_hidecursor ( Display* , Window );
 void vo_x11_decoration( Display * vo_Display,Window w,int d );
 void vo_x11_classhint( Display * display,Window window,char *name );
+void vo_x11_sizehint( int x, int y, int width, int height );
 int vo_x11_check_events(Display *mydisplay);
 void vo_x11_fullscreen( void );
 #endif
 
-extern Window    vo_window;
-extern GC        vo_gc;
+extern Window     vo_window;
+extern GC         vo_gc;
+extern XSizeHints vo_hint;
 
 #ifdef HAVE_NEW_GUI
  extern void vo_setwindow( Window w,GC g );
