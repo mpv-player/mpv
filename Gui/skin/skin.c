@@ -148,7 +148,7 @@ int __base( char * in )
         else { tmp=tmp >> 1; buf[i]=0; }
        if ( b++ == 7 ) { defList->main.Mask.Image[c++]=tmp; tmp=0; b=0; }
       }
-     defList->main.Mask.Image[c++]=tmp;
+     if (b) defList->main.Mask.Image[c++]=tmp;
     }
     #ifdef DEBUG
      dbprintf( 3,"[skin]  mask: %dX%d\n",defList->main.Mask.Width,defList->main.Mask.Height );
