@@ -41,13 +41,13 @@ while(1){
   case 0:  // ========= MAP_ANON|MAP_SHARED ==========
     p=mmap(0,size,PROT_READ|PROT_WRITE,MAP_ANON|MAP_SHARED,-1,0);
     if(p==MAP_FAILED) break; // failed
-    printf("shmem: %d bytes allocated using mmap anon (%X)\n",size,p);
+//    printf("shmem: %d bytes allocated using mmap anon (%X)\n",size,p);
     return p;
   case 1:  // ========= MAP_SHARED + /dev/zero ==========
 	  if ((devzero = open("/dev/zero", O_RDWR, 0)) == -1) break;
     p=mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,devzero,0);
     if(p==MAP_FAILED) break; // failed
-    printf("shmem: %d bytes allocated using mmap /dev/zero (%X)\n",size,p);
+//    printf("shmem: %d bytes allocated using mmap /dev/zero (%X)\n",size,p);
     return p;
   case 2: { // ========= shmget() ==========
     struct shmid_ds shmemds;
@@ -63,7 +63,7 @@ while(1){
       if (shmdt(p) == -1) perror ("shmdt()");
       break;
     }
-    printf("shmem: %d bytes allocated using shmget() & shmat() (%X)\n",size,p);
+//    printf("shmem: %d bytes allocated using shmget() & shmat() (%X)\n",size,p);
     return p;
 	}
   default:
