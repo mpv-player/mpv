@@ -550,6 +550,13 @@ static void asmrp_assignment (asmrp_t *p) {
   printf ("assignment\n");
 #endif
 
+  if (p->sym == ASMRP_SYM_COMMA || p->sym == ASMRP_SYM_SEMICOLON) {
+#ifdef LOG
+    printf ("empty assignment\n");
+#endif
+    return;
+  }
+
   if (p->sym != ASMRP_SYM_ID) {
     printf ("error: identifier expected\n");
     abort ();
