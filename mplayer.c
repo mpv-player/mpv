@@ -684,15 +684,16 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #ifdef HAVE_RTC
   if(!nortc)
   {
+    // seteuid(0); /* Can't hurt to try to get root here */
     if ((rtc_fd = open("/dev/rtc", O_RDONLY)) < 0)
-	mp_msg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC init error: %s\n", strerror(errno));
-    else {
-	unsigned long irqp;
+	mp_msg(MSGT_CPLAYER, MSGL_WARN, "Failed to open /dev/rtc: %s (mplayer should be setuid root or /dev/rtc should be readable by the user.)\n", strerror(errno));
+     else {
+	unsigned long irqp = 1024; /* 512 seemed OK. 128 is jerky. */
 
-	/* if (ioctl(rtc_fd, RTC_IRQP_SET, _) < 0) { */
-	if (ioctl(rtc_fd, RTC_IRQP_READ, &irqp) < 0) {
-    	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC init error in ioctl (rtc_irqp_read): %s\n", strerror(errno));
-    	    close (rtc_fd);
+	if (ioctl(rtc_fd, RTC_IRQP_SET, irqp) < 0) {
+    	    mp_msg(MSGT_CPLAYER, MSGL_WARN, "Linux RTC init error in ioctl (rtc_irqp_set %lu): %s\n", irqp, strerror(errno));
+	    mp_msg(MSGT_CPLAYER, MSGL_HINT, "Try adding \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" to your system startup scripts.\n", irqp);
+   	    close (rtc_fd);
     	    rtc_fd = -1;
 	} else if (ioctl(rtc_fd, RTC_PIE_ON, 0) < 0) {
 	    /* variable only by the root */
@@ -1688,7 +1689,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	// -------- RTC -----------
 	current_module="sleep_rtc";
         while (time_frame > 0.000) {
-	    unsigned long long rtc_ts;
+	    unsigned long rtc_ts;
 	    if (read (rtc_fd, &rtc_ts, sizeof(rtc_ts)) <= 0)
 		    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC read error: %s\n", strerror(errno));
     	    time_frame-=GetRelativeTime();
