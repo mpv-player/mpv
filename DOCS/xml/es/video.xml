@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.25 -->
+<!-- synced with 1.34 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -13,7 +13,7 @@ aumento considerable de rendimiento.
 </para>
 
 <para>
-Haga <command>/proc/mtrr</command>:
+Haga <command>cat /proc/mtrr</command>:
 <screen>
 <prompt>--($:~)--</prompt> cat /proc/mtrr
 reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9
@@ -83,7 +83,8 @@ echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr
 <para>
 No todas las CPUs soportan MTRRs. Por ejemplo K6-2's antiguos (alrededor
 de 266MHz, stepping 0) no soportan MTRR, pero stepping 12's lo
-soportan (<command>cat /proc/cpuinfo</command> para comprobarlo).
+soportan
+(<command>cat /proc/cpuinfo</command> para comprobarlo).
 </para>
 </sect3>
 
@@ -1640,7 +1641,7 @@ De todos modos se está trabajando para portar el código de CRTC2 a
 <title>Decodificadores MPEG</title>
 
 <sect4 id="dvb">
-<title>DVB</title>
+<title>DVB salida y entrada</title>
 <para>
 <application>MPlayer</application> soporta tarjetas con el chipset Siemens DVB
 de vendedores como Siemens, Technotrend, Galaxis o Hauppauge. Los últimos
@@ -1670,6 +1671,7 @@ Decodificación por hardware (reproducción de archivos estándar MPEG1/2) puede ha
 con esta órden:
 </para>
 </formalpara>
+
 <para><screen>mplayer -ao mpegpes -vo mpegpes file.mpg|vob</screen></para>
 
 <para>
@@ -1740,6 +1742,93 @@ use el filtro dvbscale:
 para una TV 4:3: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
 para una TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen></para>
+
+<formalpara>
+<title>Usando su tarjeta DVB para ver TV Digital (módulo de entrada DVB)</title>
+<para>
+  Primero necesita pasar el parámetro <literal>dvb_shutdown_timeout=0</literal>
+  al módulo del núcleo <filename>dvb-core</filename>, o MPlayer morirá después
+  de 10 segundos.
+</para>
+</formalpara>
+
+<para>
+  También tiene que tener los programas <command>scan</command> y
+  <command>szap/tzap/czap</command> intalados; estos están incluidos
+  en el paquete de controladores.
+</para>
+
+<para>
+  Verifique que sus controladores están funcionando correctamente con un
+  programa como
+  <ulink url="http://www.sf.net/projects/dvbtools/"><command>dvbstream</command></ulink>
+  (que es la base del módulo de entrada DVB).
+</para>
+
+<para>
+  Ahora debe compilar un archivo <filename>~/.mplayer/channels.conf</filename>,
+  con la sintaxis aceptada por <command>szap/tzap/czap</command>, o tener
+  <command>scan</command> compilado por usted mismo.
+</para>
+
+<para>
+  Asegúrese de que tiene <emphasis>solo</emphasis> canales Free to Air en su
+  archivo <filename>channels.conf</filename>, o <application>MPlayer</application>
+  se colgará en los otros.
+</para>
+
+<para>
+  Para mostrar el primero de los canales presentes en su lista, ejecute
+</para>
+
+<screen>
+  mplayer dvb://
+</screen>
+
+<para>
+  Si quiere ver un canal específico, tal como R1, ejecute
+</para>
+
+<screen>
+  mplayer dvb://R1
+</screen>
+
+<para>
+  Para cambiar canales pulse la teclas <keycap>h</keycap> (siguiente) y
+  <keycap>k</keycap> (previo), o use el menú OSD (requiere un
+  <link linkend="subosd">subsistema OSD</link> funcionando).
+</para>
+
+<para>
+  Si su <filename>~/.mplayer/menu.conf</filename> contiene una entrada
+  <literal>&lt;dvbsel&gt;</literal>, como una del archivo de ejemplo
+  <filename>etc/dvb-menu.conf</filename> (el cual puede usar para
+  sobreescribir <filename>~/.mplayer/menu.conf</filename>),el menú
+  principal mostrará una entrada de un submenú que le permitirá elegir
+  uno de los canales presentes en su <filename>channels.conf</filename>.
+</para>
+
+<para>
+  Si quiere grabar un programa en disco puede usar
+</para>
+
+<screen>
+  mplayer -dumpfile r1.ts -dumpstream dvb://R1
+</screen>
+
+<para>
+  si quiere grabar en un formato diferente (re-codificando) en su lugar
+  puede usar una órden como
+</para>
+
+<screen>
+  mencoder -o r1.avi -ovc xvid -xvidencopts bitrate=800 -oac mp3lame -lameopts cbr:br=128 -pp=ci dvb://R1
+</screen>
+
+<para>
+  Lea la página de manual para una lista de opciones que puede pasar al módulo
+  de entrada de DVB.
+</para>
 
 <formalpara>
 <title>FUTURO</title>
@@ -1995,8 +2084,8 @@ si quiere usar el filtro <option>crop</option>, puede que desee hacer
 Si aparece <option>-zrcrop</option> más veces invoca el modo
 <emphasis>cinerama</emphasis>, p.e. si quiere distribuir la película en varias
 TV's o proyectores para crear una pantalla más grande. Supongamos que tiene
-dos proyectores. Uno lo conecta a su Buz en <systemitem>/dev/video1</systemitem>
-y el otro lo conecta a su DC10+ en <systemitem>/dev/video0</systemitem>. La película
+dos proyectores. Uno lo conecta a su Buz en <filename>/dev/video1</filename>
+y el otro lo conecta a su DC10+ en <filename>/dev/video0</filename>. La película
 tiene una resolución de 704x288. Supongamos también que que quiere el proyector de
 la derecha en blanco y negro y el otro debe tener imágenes JPEG con calidad 10, para
 todo esto deberá usar la siguiente órden
@@ -2298,6 +2387,26 @@ EndSection
 
 <para>
 Por supuesto lo importante es la parte del TwinView.
+</para>
+</sect4>
+
+<sect4 id="tvout-neomagic">
+<title>Neomagic</title>
+<para>
+Probado en un Toshiba Tecra 8000. Su chip de salida de TV es una cagada miserable.
+Evítelo si es posible.
+</para>
+<para>
+Debe usar <option>-vo vesa</option>. El chip probado tiene capacidad solo para
+una relación de aspecto 1.333333, por lo que debe asegurarse de que usa
+las opciones <option>-x</option>, <option>-y</option> y/o los filtros
+<option>-vf scale,crop,expand</option> si la imagen no le deja habilitar 
+la salida de TV. La resolución máxima es 720*576 a 16bpp.
+</para>
+<para>
+Problemas conocidos: solo-VESA, limitación 1.33333, la imagen no está siempre
+centrada, la película aparece en 4bpp cada 10 minutos, y se queda de esa forma.
+Cuelgues frecuentes de hardware, problemas de representación en pantalla LCD.
 </para>
 </sect4>
 </sect3>

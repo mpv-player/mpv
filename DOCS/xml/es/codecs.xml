@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.28 -->
 <sect1 id="codecs">
 <title>Codecs soportados</title>
 
@@ -7,7 +7,7 @@
 <title>Codecs de video</title>
 
 <para>
-Vea la <ulink url="http://www.mplayerhq.hu/DOCS/codecs-status.html">tabla de estado de codec</ulink>
+Vea la <ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">tabla de estado de codec</ulink>
 para una lista completa, generada a diario. Hay unos pocos codecs disponibles
 para descarga desde nuestra página principal. Cójalos de nuestra
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">página de codecs</ulink>.
@@ -550,15 +550,12 @@ video Sorenson con los siguientes decodificadores:
 <itemizedlist>
 <title>Los codecs de audio más importantes por encima de todo:</title>
 <listitem><simpara>
-  audio MPEG layer 2 (MP2), y layer 3 (MP3) (código <emphasis role="bold">nativo</emphasis>,
+  Audio MPEG layer 1/2/3 (MP1/2/3) (código <emphasis role="bold">nativo</emphasis>
   con optimización MMX/SSE/3DNow!)
   </simpara></listitem>
 <listitem><simpara>
-  audio MPEG layer 1 (código <emphasis role="bold">nativo</emphasis>, con libavcodec)
-  </simpara></listitem>
-<listitem><simpara>
-  Windows Media Audio v1, v2 (código <emphasis role="bold">nativo</emphasis>, con
-  libavcodec)
+  Windows Media Audio 7 y 8 (aka WMAv1 y WMAv2) (código <emphasis role="bold">nativo</emphasis>,
+  con <link linkend="ffmpeg">libavcodec</link>)
   </simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 9 (WMAv3) (usando DMO DLL)
@@ -569,6 +566,9 @@ video Sorenson con los siguientes decodificadores:
   </simpara></listitem>
 <listitem><simpara>
   AC3 pasando a través de hardware de tarjeta de sonido
+  </simpara></listitem>
+<listitem><simpara>
+  AAC
   </simpara></listitem>
 <listitem><simpara>
   codec de audio Ogg Vorbis (biblioteca <emphasis role="bold">nativa</emphasis>)
@@ -587,9 +587,6 @@ video Sorenson con los siguientes decodificadores:
   </simpara></listitem>
 <listitem><simpara>
   alaw y ulaw, varios formatos gsm, adpcm y pcm y otros codecs de audio simples viejos
-  </simpara></listitem>
-<listitem><simpara>
-  AAC
   </simpara></listitem>
 </itemizedlist>
 
@@ -652,8 +649,11 @@ y tarjetas decodificadoras MPEG DXR3/Hollywood+.
 
 <para>
 <ulink url="http://mad.sourceforge.net">libmad</ulink> es una biblioteca
-de decodificación de audio MPEG multiplataforma. No maneja archivos en mal
-estado muy bien, y algunas veces tiene problemas en las búsquedas.
+de decodificación de audio MPEG solo de enteros (internamente PCM de 24bit)
+multiplataforma. No maneja archivos en mal
+estado muy bien, y algunas veces tiene problemas en las búsquedas, pero puede
+tener más rendimiento en máquinas sin FPU (tales como <link linkend="arm">ARM</link>)
+que la mp3lib.
 </para>
 
 <para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.8 -->
+<!-- synced with 1.10 -->
 <sect2 id="audio-dev">
 <title>Dispositivos de salida de audio</title>
 <sect3 id="sync">
@@ -967,6 +967,49 @@ añadirá decodificación de sonido surround con 15ms de retardo para el
 sonido de los altavoces traseros.
 </para>
 </sect4>
+
+<sect4 id="af_export">
+<title>Exportador de audio</title>
+<para>
+Este filtro de audio exporta la señal entrante de otro proceso usando mapeado
+de memoria (<literal>mmap()</literal>). Las zonas de memoria mapeada contienen
+una cabecera:
+
+<programlisting>
+int nch		/* número de canales */
+int size	/* tamaño del buffer */
+unsigned long long counter	/* Usado para mantener la sincronización, es
+				   actualizado cada vez que se exportan nuevos
+				   datos */
+</programlisting>
+
+El resto son datos de 16bit de carga (no-interpolados).
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>mmapped_file</option></term>
+<listitem><para>
+El archivo que quiere que este filtro exporte. Por defecto se mapea a
+<filename>~/.mplayer/mplayer-af_export</filename>.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>nsamples</option></term>
+<listitem><para>
+Número de muestras por canal. Por defecto es <literal>512</literal> muestras.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Ejemplo:
+<screen>mplayer -af export=/tmp/mplayer-af_export:1024 medio.avi</screen>
+debe exportar 1024 muestras por canal a <filename>/tmp/mplayer-af_export</filename>.
+</para>
+</sect4>
+
 </sect3>
 
 <sect3 id="audio-plugins">

@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.13 -->
 <sect1 id="install">
 <title>Instalación</title>
+
+<para>
+Una guía de instalación rápida puede encontrarse en el archivo
+<filename>README</filename>. Por favor, léala primero y luego vuelva
+aquí para obtener el resto de detalles sanguinolientos.
+</para>
 
 <para>
 En esta sección trataré de guiarlo a través del proceso de compilación y 

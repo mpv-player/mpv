@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.15 -->
+<!-- synced with 1.23 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portaciones</title>
 
@@ -109,10 +109,17 @@ está el primero en tu <envar>$PATH</envar> y haz <command>gmake -k</command>, de
 asegúrate de que la versión nativa es la que se usa y haz <command>gmake</command>.
 </para>
 </sect2>
+
+<sect2 id="darwin">
+<title>Darwin</title>
+<para>
+Vea la sección <link linkend="macos">Mac OS</link>.
+</para>
+</sect2>
 </sect1>
 
 <sect1 id="solaris">
-<title>Solaris</title>
+<title>Sun Solaris</title>
 <para>
 <application>MPlayer</application> debería funcionar en Solaris 2.6 o posterior.
 </para>
@@ -222,8 +229,8 @@ video.
 </para>
 </sect1>
 
-<sect1 id="sgi">
-<title>Silicon Graphics / Irix</title>
+<sect1 id="irix">
+<title>Silicon Graphics Irix</title>
 <para>
 Puede probar a instalar el programa de instalación GNU, y (si no lo tiene
 en su ruta global) apuntar a donde esté con:
@@ -288,13 +295,15 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">los archivos de cabecera de DirectX 7</ulink>
   para compilar el controlador de salida de video de DirectX.</para>
 
-<para>Los codecs Win32, las DLLs de QuickTime y los codecs Win32 de Real (los Real
-  de Linux no) también funcionan. Ponga los codecs en algún lugar de su ruta/path o
+<para>PUede usar codecs Win32 y Real Win32 (los Real de Linux no) si lo desea. Ponga
+  los codecs en algún lugar de su ruta/path o
   pase la opción <option>--with-codecsdir=c:/ruta/a/sus/codecs</option> (alternativamente
   <option>--with-codecsdir=/ruta/a/sus/codecs</option> solo en Cygwin) a
   <filename>configure</filename>. Tenemos informes de que las DLLs de Real deben tener
   permisos de escritura para el usuario que usa MPlayer, pero solo en algunos sistemas.
-  Pruebe ha dar permisos de escritura si tiene problemas.</para>
+  Pruebe ha dar permisos de escritura si tiene problemas. Las DLLs de QuickTime también
+  funcionan, pero debe colocarlas en su directorio de sistema de Windows
+  (<filename class="directory">C:\Windows\system\</filename> o similar).</para>
 
 <para>La consola de Cygwin/MinGW es extrañamente lenta. Redirigir la salida o usar
   la opción <option>-quiet</option> se ha informado que mejora el rendimiento en algunos
@@ -315,9 +324,10 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 <title>Cygwin</title>
 
 <para>Versiones de Cygwin anteriores a la 1.5.0 no incluyen <filename>inttypes.h</filename>.
-  Debe copiar o crear un enlace simbólico a <filename>etc/cygwin_inttypes.h</filename>
-  desde el directorio de fuentes de MPlayer a <filename>/usr/include/inttypes.h</filename>
-  para hacer que MPlayer compile.</para>
+  Ponga esto
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
+  en <filename class="directory">/usr/include/</filename> para hacer que
+  <application>MPlayer</application> compile.</para>
 
 <para>Los archivos de cabecera de DirectX han de ser extraidos a
   <filename class="directory">/usr/include/</filename> o a
@@ -370,6 +380,27 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 
 </sect2>
 
+</sect1>
+
+<sect1 id="macos">
+<title>Mac OS</title>
+<para>
+Solo Mac OS X 10.2 y superiores están soportados por el código en crudo
+de <application>MPlayer</application>. ¡Siéntase libre para añadir soporte
+para versiones más antiguas de Mac OS y envíe parches!
+</para>
+
+<para>
+El GCC 3.x modificado por Apple es el preferido para compilar
+<application>MPlayer</application> especialmente usando libavcodec ya que
+el GCC 2.95.x modificado por Apple no soporta bien la sintaxis C99.
+</para>
+
+<para>
+Solo puede obtener un GUI Aqua para <application>MPlayer</application> junto con los
+binarios compilados de <application>MPlayer</application> para Mac OS X desde el
+proyecto <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>.
+</para>
 
 </sect1>
 

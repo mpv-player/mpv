@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.9 -->
 <appendix id="users-vs-dev">
 <title>Lloriqueos de desarrolladores</title>
 
@@ -31,9 +31,8 @@ El equipo GCC renuncian cualquier vinculación con GCC 2.96 y publican una
 sobre GCC 2.96. Algunos desarrolladores alrededor del mundo comienzan a tener
 problemas con GCC 2.96, y empiezan a recomendar otros compiladores. Ejemplos son
 <ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>,
-<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>
 y
-<ulink url="http://www.winehq.com/news/?view=92#RH 7.1 gcc fixes compiler bug">Wine</ulink>.
+<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>.
 Otros enlaces interesantes son
 <ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
 noticias instantáneas acerca del kernel de Linux 2.4.17</ulink>
@@ -48,8 +47,6 @@ algunos arreglos pueden implicar pérdidas de rendimiento.
 </formalpara>
 
 <para>
-Puede leer el otro lado de la historia
-<ulink url="http://www.bero.org/gcc296.html">en este sitio</ulink>.
 GCC 2.96 no permite caracteres <literal>|</literal> (tuberías) en comentarios
 en ensamblador porque esto lo hace Intel igual que la sintaxis de AT&amp;T y
 el caracter <literal>|</literal> es un símbolo en la variante Intel. El problema
@@ -76,8 +73,8 @@ más que suficiente de las guerras con GCC 2.96. Por favor, déjenos contarle el r
 <para>
 Si tiene problemas con GCC 2.96, puede obtener los paquetes 2.96-85 del
 <ulink url="ftp://updates.redhat.com">servidor ftp</ulink> de Red Hat, o
-vaya directamente a por los <ulink url="ftp://people.redhat.com/jakub/gcc/3.2-10/">
-paquetes gcc-3.2-10</ulink> (no oficiales, pero funcionan bien) y puede instalarlos junto
+vaya directamente a por los <ulink url="ftp://people.redhat.com/jakub/gcc/3.2.3-11/">
+paquetes gcc-3.2.3-11</ulink> (no oficiales, pero funcionan bien) y puede instalarlos junto
 con gcc-2.96 si ya lo tiene. MPlayer detectará y usará 3.2 en lugar de 2.96. Si no desea
 o no puede usar los paquetes binarios, aquí tiene cómo compilar GCC 3 desde el código
 fuente:
@@ -137,10 +134,10 @@ como usted quiera ajustarlo.
 <para>
 Otro impedimento para la distribución binaria es por optimizaciones en tiempo
 de compilación para la arquitectura de la CPU. <application>MPlayer</application>
-ahora soporta detección de CPU en tiempo de ejecución (especificando la
-opción <option>--enable-runtime-cpudetection</option> durante la compilación).
+ahora soporta detección de CPU en tiempo de ejecución (pase
+<option>--enable-runtime-cpudetection</option> a <command>configure</command>).
 Está desactivado por defecto porque implica un pequeño sacrificio de velocidad,
-ahora es posible crear binarios que corran en diferentes miembros de la familia
+pero ahora es posible crear binarios que corran en diferentes miembros de la familia
 de CPU's Intel.
 </para>
 </sect1>
@@ -156,8 +153,6 @@ Tenemos muchos informes en
 <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
 acerca de problemas relacionados con estos controladores de código-cerrado
 y de su pobre calidad, inestabilidad y pobre soporte a usuarios y expertos.
-Aquí hay un ejemplo en el
-<ulink url="http://www.nvnews.net/forum/showthread.php?s=fda5725bc2151e29453b2da3bd5d2930&amp;threadid=14306">Foro de Linux de nVidia</ulink>.
 Muchos de estos problemas/informes aparecen repetidamente.
 Hemos contactado con nVideia, y nos dicen que esos errores no existen, que la
 inestabilidad es causada por circuitos AGP malos, y que ellos no reciben informes
@@ -175,22 +170,18 @@ porque tenemos muy poca información a respecto.
 <title>Joe Barr</title>
 
 <para>
-Joe Barr se ha hecho infame por escribir un
-<ulink url="http://www.linuxworld.com/site-stories/2001/1214.mplayer.html">
-artículo sobre <application>MPlayer</application></ulink> muy poco favorable.
-Él encuentra <application>MPlayer</application> dificil de instalar, pero tampoco 
-le tiene afecto a
-<ulink url="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">
-leer documentación</ulink>.
-También ha llegado a la conclusión de que los desarrolladores son poco amistosos
-y la documentación es incompleta e insultante.
-Juzgue usted mismo.
-Él hace mención de <application>MPlayer</application> de manera negativa en su
-<ulink url="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">10 predicciones sobre Linux para el 2002</ulink>.
-En un nuevo artículo
-<ulink url="http://www.linuxworld.com/site-stories/2002/0125.xine.html">review of xine</ulink>
-sigue aumentando la controversia. Irónicamente al final del artículo
-cita su intercambio con Günter Bartsch, el autor original de <application>xine</application>,
+Joe Barr se hizo infame en diciembre de 2001 por escribir un más que desfavorable
+artículo sobre <application>MPlayer</application> llamado
+<ulink url="http://www.linuxworld.com/story/32880.htm">MPlayer: El proyecto del infierno</ulink>.
+Él encuentra <application>MPlayer</application> dificil de instalar, y concluye que
+los desarrolladores son poco amistosos y la documentación está incompleta y es insultante.
+Juzgue usted mismo sobre ese asunto. También menciona a Arpi de manera negativa en su
+<ulink url="http://www.linuxworld.com/story/32887.htm">10 predicciones sobre Linux para 2002</ulink>.
+En un reportaje sobre xine llamado
+<ulink url="http://www.linuxworld.com/story/32716.htm">Un reproductor de medios para el
+resto de nosotros</ulink> con lo que siguió aumentando la controversia.
+Irónicamente al final del artículo cita su intercambio con Günter Bartsch,
+el autor original de <application>xine</application>,
 que resume perfectamente la situación por completo:
 
 <blockquote><para>
@@ -199,45 +190,33 @@ Sin embargo, también ha dicho que se "sorprendió" por mi columna acerca de
 es un proyecto de software libre. "Si no te gusta hazlo tú," dice Bartsch, "eres libre de no
 usarlo".
 </para></blockquote>
-</para>
 
-<para>
-Él no contesta a nuestros correos. Su editor no responde a nuestros correos.
-Aquí algunas citas de personas diferentes acerca de Joe Barr, para que pueda usted
-formarse su propia opinión:
-</para>
-
-<para>
-Marc Rassbach tiene 
-<ulink url="http://daily.daemonnews.org/view_story.php3?story_id=2102">algo que decir</ulink>
-sobre este hombre.
+Casi dos años después en octubre de 2003 escribe otro artículo llamado
+<ulink url="http://www.newsforge.com/article.pl?sid=03/10/02/0343200">MPlayer revisitado</ulink>.
+En este llega a las siguientes conclusiónes:
 
 <blockquote><para>
-Usted puede recordar el LinuxWorld 2000, donde él aclamaba a Linux T diciendo
-que 'FreeBSD es solo un puñado de programadores'. Linus no dice NADA de esto.
-Cuando a Joe se le dijo que había dicho esto, su reacción fue llamar a los
-sustentadores de BSD idiotas y burros.
+Me gustaría decir que han hecho mejoras en gran cantidad de características, en
+rendimiento, y en documentación. Sigue si ser el más facil de instalar en el mundo,
+especialmente para novatos, pero es un poco mejor de los que he usado.
 </para></blockquote>
-</para>
 
-<para>
-Una <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-December/009118.html">cita</ulink>
-de Robert Munro en la lista de correo
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>:
+y
 
-<blockquote>
-<para>
-Él es interesante, pero no es bueno evitarlo, um... controversia. Joe Barr
-se usa regularmente en el foro Will Zachmann's Canopus en Compuserve, desde
-hace años. Es un abogado de OS/2 (yo soy un fan de OS/2 también).
-</para>
+<blockquote><para>
+Pero lo más importante, no he notado ningún cambio reciente en los comentarios acerca
+del abuso de usuario. Creo que tengo derecho a algún crédito por ello, incluso si
+lo digo por mi mismo. Arpi y el resto del equipo del proyecto deben sentirse libres
+también de ese modo, porque tienen una sección especial sobre mí para recordarme dentro
+del paquete de documentación. Como decía al principio, algunas cosas no han cambiado
+del todo.
+</para></blockquote>
 
-<para>
-Él lo usa para estar-por-encima, peleándose con la gente, y sospecho que ha
-pasado duros momentos, por ello. Ha madurado algo, a juzgar por sus columnas recientes.
-Moderadamente tiene un sutil humor que no tenía en días anteriores, de todos modos.
-</para>
-</blockquote>
+No podemos resumir nuestros sentimientos sobre Joe Barr mejor:
+&quot;Sigue sin ser el mejor artículo de investigación o el más justo del mundo,
+pero es un poco mejor de los que he usado.&quot; Con suerte la próxima vez conseguiremos
+que sus espectativas sean otras. Sin embargo, el crédito de madurez solo lo obtenemos
+con la edad, y quizá comience otra vez a aburrirnos y amenazarnos.
 </para>
 
 </sect1>
