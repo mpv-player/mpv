@@ -173,7 +173,7 @@ static int play(){
   void* in_data=ao_plugin_data.data;
   void* out_data=pl_format.data;
   int len=(ao_plugin_data.len)>>(pl_format.in&NBITS_MASK);
-  ao_plugin_data.len=(int)(((double)ao_plugin_data.len)*=pl_format.sz_mult);
+  ao_plugin_data.len=(int)(((double)ao_plugin_data.len)*pl_format.sz_mult);
   
   // Change to little endian (Is this true for sun ?)
   if((pl_format.in&END_MASK)!=LE){
