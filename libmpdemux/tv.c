@@ -226,7 +226,7 @@ no_audio:
     funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tv_param_input);
 
     /* we need to set frequency */
-    if (tv_param_freq)
+    if (tv_param_freq && (funcs->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) == TVI_CONTROL_TRUE))
     {
 	unsigned long freq = atof(tv_param_freq)*16;
 
