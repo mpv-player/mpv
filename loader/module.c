@@ -619,6 +619,10 @@ FARPROC WINAPI GetProcAddress( HMODULE hModule, LPCSTR function )
 
 #ifdef DEBUG_QTX_API
 
+/* 
+http://lists.apple.com/archives/quicktime-api/2003/Jan/msg00278.html
+*/
+
 struct ComponentParameters {
     unsigned char                   flags;                      /* call modifiers: sync/async, deferred, immed, etc */
     unsigned char                   paramSize;                  /* size in bytes of actual parameters passed to this call */
@@ -628,6 +632,7 @@ struct ComponentParameters {
 typedef struct ComponentParameters      ComponentParameters;
 
 static char* component_func(int what){
+if (what < 0) // Range 0: Standard Component Calls
 switch(what){
 case -1: return "kComponentOpenSelect";
 case -2: return "kComponentCloseSelect";
@@ -637,23 +642,39 @@ case -5: return "kComponentRegisterSelect";
 case -6: return "kComponentTargetSelect";
 case -7: return "kComponentUnregisterSelect";
 }
-return "???";
-}
 
-static char* component_func_type(int type,int what){
-if(type==1) switch(what){
+if (what >= 0 && what <= 0xff) // Range 1: Generic codecs
+switch(what & 0xff){
 case 0: return "kImageCodecGetCodecInfoSelect";
 case 1: return "kImageCodecGetCompressionTimeSelect";
+case 2: return "kImageCodecGetMaxCompressionSizeSelect";
+case 3: return "kImageCodecPreCompressSelect";
+case 4: return "kImageCodecBandCompressSelect";
 case 5: return "kImageCodecPreDecompressSelect";
 case 6: return "kImageCodecBandDecompressSelect";
-case 0x12: return "kImageCodecDisposeMemorySelect";
+case 7: return "kImageCodecBusySelect";
+// finish this list from the above URL
 case 0x10: return "kImageCodecIsImageDescriptionEquivalentSelect";
+case 0x12: return "kImageCodecDisposeMemorySelect";
 case 0x14: return "kImageCodecNewImageBufferMemorySelect";
 case 0x28: return "kImageCodecRequestGammaLevelSelect";
 }
-return "???";
+
+//if (what >= 0x100 && what <= 0x1ff) // Range 2: Specific to QT Photo JPEG codecs
+
+if (what >= 0x200 && what <= 0x2ff) // Range 3: Base Decompressor
+switch(what & 0xff){
+case 0: return "Preflight";
+case 1: return "Initialize";
+case 2: return "BeginBand";
+case 3: return "DrawBand";
+case 4: return "EndBand";
+case 5: return "QueueStarting";
+case 6: return "QueueStopping";
 }
 
+return "???";
+}
 
 static int c_level=0;
 
@@ -661,10 +682,7 @@ static int dump_component(char* name,int type,void* _orig, ComponentParameters *
     int ( *orig)(ComponentParameters *params, void** glob) = _orig;
     int ret,i;
 
-    if(params->what<0)
-	fprintf(stderr,"%*sComponentCall: %s  flags=0x%X  size=%d  what=%d %s\n",3*c_level,"",name,params->flags, params->paramSize, params->what, component_func(params->what));
-    else
-	fprintf(stderr,"%*sComponentCall: %s  flags=0x%X  size=%d  what=0x%X %s\n",3*c_level,"",name,params->flags, params->paramSize, params->what, component_func_type(type,params->what));
+    fprintf(stderr,"%*sComponentCall: %s  flags=0x%X  size=%d  what=0x%X %s\n",3*c_level,"",name,params->flags, params->paramSize, params->what, component_func(params->what));
 
     for(i=0;i<params->paramSize/4;i++)
 	fprintf(stderr,"%*s param[%d] = 0x%X\n",3*c_level,"",i,params->params[i]);
