@@ -571,7 +571,7 @@ http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 int
 autodetectProtocol(streaming_ctrl_t *streaming_ctrl, int *fd_out, int *file_format) {
 	HTTP_header_t *http_hdr;
-	unsigned int i, j;
+	unsigned int i;
 	int fd=-1;
 	int redirect;
 	int auth_retry=0;
@@ -628,29 +628,15 @@ extension=NULL;
 		if( !strcasecmp(url->protocol, "rtsp") ) {
 			// Checking for Real rtsp://
 			// Extension based detection, should be replaced with something based on server answer
-			extension = NULL;
-			if( url->file!=NULL ) {
-				j = strlen(url->file);
-				for( i=j; i>0 ; i-- ) {
-					if( url->file[i]=='?' )
-						j = i;
-					if( url->file[i]=='.' ) {
-						extension = calloc(j-i, 1);
-						for ( i++; i < j; i++)
-							extension[strlen(extension)]=url->file[i];
-						extension[strlen(extension)]=0;
-						break;
+			if( url->file!= NULL ) {
+				char *p;
+				for( p = url->file; p[0]; p++ ) {
+					if( p[0] == '.' && tolower(p[1]) == 'r' && (tolower(p[2]) == 'm' || tolower(p[2]) == 'a') && (!p[3] || p[3] == '?' || p[3] == '&') ) {
+						*file_format = DEMUXER_TYPE_REAL;
+						return 0;
 					}
 				}
 			}
-			if (extension != NULL && (!strcasecmp(extension, "rm")
-			    || !strcasecmp(extension, "ra"))) {
-				*file_format = DEMUXER_TYPE_REAL;
-				free(extension);
-				return 0;
-			}
-			if (extension != NULL)
-				free(extension);
 			mp_msg(MSGT_NETWORK,MSGL_INFO,"Not a Realmedia rtsp url. Trying standard rtsp protocol.\n");
 #ifdef STREAMING_LIVE_DOT_COM
 			*file_format = DEMUXER_TYPE_RTP;
