@@ -554,7 +554,9 @@ HRESULT DS_VideoDecoder::SetValue(const char* name, int value)
 	if (m_State != START)
 	    return VFW_E_NOT_RUNNING;
 
-	printf("DS_VideoDecoder::SetValue(%s,%d)\n",name,value);
+    	/* This printf is annoying with autoquality, *
+     	 * should be moved into players code - atmos */
+	//printf("DS_VideoDecoder::SetValue(%s,%d)\n",name,value);
 
 	//cout << "set value " << name << "  " << value << endl;
 // brightness 87

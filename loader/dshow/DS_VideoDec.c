@@ -78,7 +78,9 @@ extern "C" int DS_VideoDecoder_SetDestFmt(int bits, int csp){
 
 extern "C" int DS_SetValue_DivX(char* name, int value){
     DS_VideoDecoder* dec=(DS_VideoDecoder*) _handle;
-    printf("DS_SetValue_DivX(%s),%d)\n",name,value);
+    /* This printf is annoying with autoquality, *
+     * should be moved into players code - atmos */
+    //printf("DS_SetValue_DivX(%s),%d)\n",name,value);
     return (int) dec->SetValue(name,value);
 }
 
