@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.57 -->
+<!-- synced to 1.58 -->
 <sect1 id="codecs">
 <title>Támogatott codec-ek</title>
 
@@ -714,8 +714,8 @@ A telepítési útmutatóhoz olvasd el a
 Az AAC (Advanced Audio Coding) egy audió codec, amit néha MOV és MP4 fájlokban
 található. Egy FAAD nevű, nyílt forráskódú dekódoló elérhető a
 <ulink url="http://www.audiocoding.com"/> címen.
-Az <application>MPlayer</application> tartalmazza a libfaad 2.0RC1-et, nem szükséges
-külön beszerezni.
+Az <application>MPlayer</application> tartalmazza a libfaad 2.1 béta CVS kódját,
+nem szükséges külön beszerezni.
 </para>
 
 <para>
