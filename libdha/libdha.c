@@ -50,6 +50,10 @@
 #  endif
 # endif /* SVR4 */
 
+#if defined(__OpenBSD__)
+#define DEV_APERTURE "/dev/xf86"
+#endif
+
 /* Generic version */
 #include <sys/mman.h>
 
@@ -117,6 +121,20 @@ dha_helper_way:
 #endif
 
 dev_mem_way:
+#ifdef DEV_APERTURE
+  if ((mem_fd = open(DEV_APERTURE, O_RDWR)) == -1)
+	perror("libdha: opening aperture failed");
+  else {
+	void *p = mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem_fd,base);
+
+	if (p == MAP_FAILED) {
+	    perror("libdha: mapping aperture failed");
+	    close(mem_fd);
+	} else
+	    return p;
+  }
+#endif
+
   if ( (mem_fd = open(DEV_MEM,O_RDWR)) == -1)
   {
     perror("libdha: opening /dev/mem failed");
