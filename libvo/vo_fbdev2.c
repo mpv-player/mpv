@@ -13,6 +13,7 @@
 
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include "kerneltwosix.h"
 #include <linux/fb.h>
 
 #include "config.h"
