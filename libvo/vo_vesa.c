@@ -527,6 +527,7 @@ unsigned fillMultiBuffer( unsigned long vsize, unsigned nbuffs )
   return i;
 }
 
+
 static int set_refresh(unsigned x, unsigned y, unsigned mode,struct VesaCRTCInfoBlock *crtc_pass)
 {
     unsigned pixclk;
@@ -552,11 +553,12 @@ static int set_refresh(unsigned x, unsigned y, unsigned mode,struct VesaCRTCInfo
     
     do
     {
-    H_freq -= 0.1;
+    H_freq -= 0.01;
     GTF_calcTimings(x,y,H_freq,GTF_HF,0, 0,crtc_pass);		      
 //    printf("PixelCLK %d\n",(unsigned)crtc_pass->PixelClock);    
     }
-    while (!in_range(monitor_vfreq,crtc_pass->RefreshRate/100));
+    while ( (!in_range(monitor_vfreq,crtc_pass->RefreshRate/100)||
+	    !in_range(monitor_hfreq,H_freq*1000))&&(H_freq>0));
     
     pixclk = crtc_pass->PixelClock;
 //    printf("PIXclk before %d\n",pixclk);
@@ -575,8 +577,17 @@ static int set_refresh(unsigned x, unsigned y, unsigned mode,struct VesaCRTCInfo
     
     printf("RR %d\n",crtc_pass->RefreshRate);
     printf("PixelCLK %d\n",(unsigned)crtc_pass->PixelClock);*/
+    
+    if (!in_range(monitor_vfreq,crtc_pass->RefreshRate/100)||
+	!in_range(monitor_hfreq,H_freq*1000)) {
+        printf( "vo_vesa: Unable to fit the mode into monitor's limitation."
+		" Not changing refresh rate.\n");
+	return 0;
+    }
+
     return 1;
 }
+
 /* fullscreen:
  * bit 0 (0x01) means fullscreen (-fs)
  * bit 1 (0x02) means mode switching (-vm)
@@ -886,11 +897,13 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			PRINT_VBE_ERR("vbeSaveState",err);
 			return -1;
 		}
-		/* TODO: check for VBE 3, monitor limitation
-		         user might pass refresh value
+		
+		/* TODO: 
+		         user might pass refresh value,
 			 GTF constants might be read from monitor
-			 for best results
+			 for best results, I don't have a spec (RM)
 		*/
+		
 		if (((int)(vib.VESAVersion >> 8) & 0xff) > 2) {
 		
 		if (set_refresh(dstW,dstH,video_mode,&crtc_pass))
