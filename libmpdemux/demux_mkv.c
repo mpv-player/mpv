@@ -2704,8 +2704,15 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
   clear_subtitles(demuxer, tc, 0);
 
   for (i=0; i<mkv_d->num_tracks; i++)
-    if (mkv_d->tracks[i]->tnum == num)
+    if (mkv_d->tracks[i]->tnum == num) {
       track = mkv_d->tracks[i];
+      break;
+    }
+  if (track == NULL)
+    {
+      free(lace_size);
+      return 1;
+    }
   if (num == demuxer->audio->id)
     {
       ds = demuxer->audio;
