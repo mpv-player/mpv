@@ -668,7 +668,7 @@ static int config(struct vf_instance_s* vf,
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
             return 0;
 	}
-	if(lavc_param_turbo) {
+	if(lavc_param_turbo && (lavc_param_vpass == 1)) {
 	  /* uses SAD comparison functions instead of other hungrier */
 	  lavc_venc_context->me_pre_cmp = 0;
 	  lavc_venc_context->me_cmp = 0;
