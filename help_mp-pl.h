@@ -91,7 +91,7 @@ static char help_text[]=
 #define MSGTR_CouldntInitAudioCodec "Nie moge zainicjowaæ sterownika audio! -> nosound\n"
 #define MSGTR_TryForceVideoFmt "Wymuszam zastosowanie kodeka video z rodziny %d ...\n"
 #define MSGTR_CantFindVfmtFallback "Nie mogê znale¼æ kodeka video dla wymuszonej rodziny, wracam do standardowych..\n"
-#define MSGTR_CantFindVideoCodec "Nie mogê znale¼æ kodeka dla formatu video 0x%X !\n"
+#define MSGTR_CantFindVideoCodec "Nie mogê znale¼æ kodeka dla wybranego -vo i formatu video 0x%X !\n"
 #define MSGTR_VOincompCodec "Przepraszam, wybrany sterownik video_out jest niekompatybilny z tym kodekiem.\n"
 #define MSGTR_CouldntInitVideoCodec "FATAL: Nie mogê zainicjowaæ kodeka video :(\n"
 #define MSGTR_EncodeFileExists "Plik ju¿ istnieje: %s (nie nadpisz swojego ulubionego AVI!)\n"
