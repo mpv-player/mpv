@@ -31,16 +31,23 @@ int fakemono=0;
 #include "loader/DirectShow/DS_AudioDec.h"
 
 
-static sh_audio_t* ac3_audio_sh=NULL;
+static sh_audio_t* dec_audio_sh=NULL;
 
 // AC3 decoder buffer callback:
 static void ac3_fill_buffer(uint8_t **start,uint8_t **end){
-    int len=ds_get_packet(ac3_audio_sh->ds,start);
+    int len=ds_get_packet(dec_audio_sh->ds,start);
     //printf("<ac3:%d>\n",len);
     if(len<0)
           *start = *end = NULL;
     else
           *end = *start + len;
+}
+
+// MP3 decoder buffer callback:
+int mplayer_audio_read(char *buf,int size){
+  int len;
+  len=demux_read_data(dec_audio_sh->ds,buf,size);
+  return len;
 }
 
 
@@ -177,7 +184,7 @@ case 8: {
 }
 case 3: {
   // Dolby AC3 audio:
-  ac3_audio_sh=sh_audio; // save sh_audio for the callback:
+  dec_audio_sh=sh_audio; // save sh_audio for the callback:
   ac3_config.fill_buffer_callback = ac3_fill_buffer;
   ac3_config.num_output_ch = 2;
   ac3_config.flags = 0;
@@ -221,6 +228,7 @@ case 6: {
 }
 case 1: {
   // MPEG Audio:
+  dec_audio_sh=sh_audio; // save sh_audio for the callback:
 #ifdef USE_FAKE_MONO
   MP3_Init(fakemono);
 #else

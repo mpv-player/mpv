@@ -165,7 +165,7 @@ if(verbose){
       stream_read(demuxer->stream,(char*) buffer,streamh.type_size);
       switch(*((unsigned int*)&streamh.type)){
       case 0xF8699E40: { // guid_audio_stream
-        sh_audio_t* sh_audio=new_sh_audio(streamh.stream_no & 0x7F);
+        sh_audio_t* sh_audio=new_sh_audio(demuxer,streamh.stream_no & 0x7F);
         sh_audio->wf=calloc((streamh.type_size<sizeof(WAVEFORMATEX))?sizeof(WAVEFORMATEX):streamh.type_size,1);
         memcpy(sh_audio->wf,buffer,streamh.type_size);
         if(verbose>=1) print_wave_header(sh_audio->wf);
@@ -183,7 +183,7 @@ if(verbose){
         break;
         }
       case 0xBC19EFC0: { // guid_video_stream
-        sh_video_t* sh_video=new_sh_video(streamh.stream_no & 0x7F);
+        sh_video_t* sh_video=new_sh_video(demuxer,streamh.stream_no & 0x7F);
         int len=streamh.type_size-(4+4+1+2);
 //        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
         sh_video->bih=calloc((len<sizeof(BITMAPINFOHEADER))?sizeof(BITMAPINFOHEADER):len,1);

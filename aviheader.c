@@ -70,11 +70,11 @@ while(1){
       chunksize-=MIN(size2,sizeof(h));
       ++stream_id;
       if(h.fccType==streamtypeVIDEO){
-        sh_video=new_sh_video(stream_id);
+        sh_video=new_sh_video(demuxer,stream_id);
         memcpy(&sh_video->video,&h,sizeof(h));
       } else
       if(h.fccType==streamtypeAUDIO){
-        sh_audio=new_sh_audio(stream_id);
+        sh_audio=new_sh_audio(demuxer,stream_id);
         memcpy(&sh_audio->audio,&h,sizeof(h));
       }
       last_fccType=h.fccType;

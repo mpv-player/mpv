@@ -60,6 +60,6 @@ typedef struct {
   HIC hic;  // handle
 } sh_video_t;
 
-sh_audio_t* new_sh_audio(int id);
-sh_video_t* new_sh_video(int id);
+sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id);
+sh_video_t* new_sh_video(demuxer_t *demuxer,int id);
 

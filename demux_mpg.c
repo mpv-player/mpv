@@ -36,8 +36,8 @@ static unsigned int read_mpeg_timestamp(stream_t *s,int c){
 //static char dvdaudio_table[256];
 //static unsigned int packet_start_pos=0;
 
-extern void *new_sh_audio(int id);
-extern void *new_sh_video(int id);
+extern void *new_sh_audio(demuxer_t *demux,int id);
+extern void *new_sh_video(demuxer_t *demux,int id);
 
 static int demux_mpg_read_packet(demuxer_t *demux,int id){
   int d;
@@ -157,7 +157,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 //        aid=128+(aid&0x7F);
         // aid=0x80..0xBF
 
-        if(!demux->a_streams[aid]) new_sh_audio(aid);
+        if(!demux->a_streams[aid]) new_sh_audio(demux,aid);
         if(demux->audio->id==-1) demux->audio->id=aid;
 
       if(demux->audio->id==aid){
@@ -210,7 +210,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   if(id>=0x1C0 && id<=0x1DF){
     // mpeg audio
     int aid=id-0x1C0;
-    if(!demux->a_streams[aid]) new_sh_audio(aid);
+    if(!demux->a_streams[aid]) new_sh_audio(demux,aid);
     if(demux->audio->id==-1) demux->audio->id=aid;
     if(demux->audio->id==aid){
       ds=demux->audio;
@@ -221,7 +221,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   if(id>=0x1E0 && id<=0x1EF){
     // mpeg video
     int aid=id-0x1E0;
-    if(!demux->v_streams[aid]) new_sh_video(aid);
+    if(!demux->v_streams[aid]) new_sh_video(demux,aid);
     if(demux->video->id==-1) demux->video->id=aid;
     if(demux->video->id==aid){
       ds=demux->video;

@@ -20,15 +20,15 @@
 #include "version.h"
 #include "config.h"
 
-#if	defined(sun)
-#define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
-#elif defined(__FreeBSD__)
-#define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
+#ifdef __FreeBSD__
 #include <sys/cdrio.h>
-#else
-#define	DEFAULT_CDROM_DEVICE	"/dev/cdrom"
 #endif
 
+#ifdef sun
+#define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
+#else
+#define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
+#endif
 
 #ifndef MAX_OUTBURST
 #error "============================================="
@@ -74,14 +74,9 @@
 
 #include "opendivx/decore.h"
 
-
-#ifdef X11_FULLSCREEN
-extern int vo_screenwidth;
-#endif
-
 extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
 
-extern int errno;
+// extern int errno;
 
 #include "linux/getch2.h"
 #include "linux/keycodes.h"
@@ -109,7 +104,6 @@ int verbose=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
 
-static subtitle* subtitles=NULL;
 void find_sub(subtitle* subtitles,int key);
 
 static int
@@ -160,27 +154,24 @@ char *get_path(char *filename){
 	return buff;
 }
 
-static int max_framesize=0;
-
-//static int show_packets=0;
-
 //**************************************************************************//
 //**************************************************************************//
 //             Input media streaming & demultiplexer:
 //**************************************************************************//
+
+static int max_framesize=0;
+//static int show_packets=0;
 
 #include "stream.h"
 #include "demuxer.h"
 
 #include "stheader.h"
 
-int avi_bitrate=0;
-
-demuxer_t *demuxer=NULL;
+static int avi_bitrate=0;
 
 //#include "aviprint.c"
 
-sh_audio_t* new_sh_audio(int id){
+sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
     if(demuxer->a_streams[id]){
         printf("Warning! Audio stream header %d redefined!\n",id);
     } else {
@@ -191,7 +182,7 @@ sh_audio_t* new_sh_audio(int id){
     return demuxer->a_streams[id];
 }
 
-sh_video_t* new_sh_video(int id){
+sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
     if(demuxer->v_streams[id]){
         printf("Warning! video stream header %d redefined!\n",id);
     } else {
@@ -201,13 +192,6 @@ sh_video_t* new_sh_video(int id){
     }
     return demuxer->v_streams[id];
 }
-
-demux_stream_t *d_audio=NULL;
-demux_stream_t *d_video=NULL;
-demux_stream_t *d_dvdsub=NULL;
-
-sh_audio_t *sh_audio=NULL;
-sh_video_t *sh_video=NULL;
 
 char* encode_name=NULL;
 char* encode_index_name=NULL;
@@ -243,22 +227,10 @@ static const int frameratecode2framerate[16] = {
 };
 
 //**************************************************************************//
-//             Audio codecs:
-//**************************************************************************//
-
-// MP3 decoder buffer callback:
-int mplayer_audio_read(char *buf,int size){
-  int len;
-  len=demux_read_data(sh_audio->ds,buf,size);
-  return len;
-}
-
-//#include "dec_audio.c"
-
-#ifndef NEW_DECORE
-//**************************************************************************//
 //             The OpenDivX stuff:
 //**************************************************************************//
+
+#ifndef NEW_DECORE
 
 unsigned char *opendivx_src[3];
 int opendivx_stride[3];
@@ -289,13 +261,13 @@ void convert_linux(unsigned char *puc_y, int stride_y,
 //**************************************************************************//
 
 static vo_functions_t *video_out=NULL;
-ao_functions_t *audio_out=NULL;
+static ao_functions_t *audio_out=NULL;
 
-double video_time_usage=0;
-double vout_time_usage=0;
-double audio_time_usage=0;
-int total_time_usage_start=0;
-int benchmark=0;
+static double video_time_usage=0;
+static double vout_time_usage=0;
+static double audio_time_usage=0;
+static int total_time_usage_start=0;
+static int benchmark=0;
 
 static int play_in_bg=0;
 
@@ -495,6 +467,17 @@ if ((conffile = get_path("")) == NULL) {
 #else
  int mplayer(int argc,char* argv[], char *envp[]){
 #endif
+
+static subtitle* subtitles=NULL;
+
+static demuxer_t *demuxer=NULL;
+
+static demux_stream_t *d_audio=NULL;
+static demux_stream_t *d_video=NULL;
+static demux_stream_t *d_dvdsub=NULL;
+
+static sh_audio_t *sh_audio=NULL;
+static sh_video_t *sh_video=NULL;
 
 char* filename=NULL; //"MI2-Trailer.avi";
 stream_t* stream=NULL;
@@ -816,7 +799,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
 //  stream_seek(demuxer->stream,seek_to_byte);
   if(mov_check_file(demuxer)){
-      printf("Detected MOV file format!\n");
+      printf("Detected QuickTime/MOV file format!\n");
       file_format=DEMUXER_TYPE_MOV;
   }
 }
@@ -832,10 +815,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
 d_audio=demuxer->audio;
 d_video=demuxer->video;
 d_dvdsub=demuxer->sub;
-//d_audio->sh=sh_audio; 
-//d_video->sh=sh_video; 
-//sh_audio=d_audio->sh;sh_audio->ds=d_audio;
-//sh_video=d_video->sh;sh_video->ds=d_video;
 
 sh_audio=NULL;
 sh_video=NULL;
@@ -973,7 +952,7 @@ switch(file_format){
  case DEMUXER_TYPE_MPEG_ES: {
    d_audio->type=0;
    has_audio=0;sh_audio=NULL;   // ES streams has no audio channel
-   d_video->sh=new_sh_video(0); // create dummy video stream header, id=0
+   d_video->sh=new_sh_video(demuxer,0); // create dummy video stream header, id=0
    break;
  }
  case DEMUXER_TYPE_MPEG_PS: {
