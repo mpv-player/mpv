@@ -92,20 +92,20 @@
 <H4>DVD structure</H4>
 
 <P>DVD disks use all 2048 b/s sectors with ecc/crc. They usually have an UDF
-filesystem on a single track, containing various files (small .IFO and .BUK
-files and big (1GB) .VOB files). They are real files and can be copied/played
-from a mounted file system of an unencrypted DVD.</P>
+  filesystem on a single track, containing various files (small .IFO and .BUK
+  files and big (1GB) .VOB files). They are real files and can be copied/played
+  from a mounted file system of an unencrypted DVD.</P>
 
 <P>The .IFO files contain the movie navigation informations (chapter/title/angle
-map, language table, etc) and is needed to read and interpret the .VOB content
-(movie). The .BUK files are backups of them. They use <B>sectors</B> everywhere,
-so you need to use raw addressing of sectors of the disc to implement DVD
-navigation. It's also needed to decrypt the content.</P>
+  map, language table, etc) and is needed to read and interpret the .VOB content
+  (movie). The .BUK files are backups of them. They use <B>sectors</B> everywhere,
+  so you need to use raw addressing of sectors of the disc to implement DVD
+  navigation. It's also needed to decrypt the content.</P>
 
 <P>The whole old-style DVD support with libcss needs therefore a mounted DVD
-filesystem and a raw sector-based access to the device. Unfortunately you must
-be root (under Linux) to get the sector address of a file. You got the
-following choices:</P>
+  filesystem and a raw sector-based access to the device. Unfortunately you must
+  be root (under Linux) to get the sector address of a file. You got the
+  following choices:</P>
 
 <UL>
   <LI>Force the user to be root or use a suid-root mplayer binary.</LI>
@@ -119,17 +119,17 @@ following choices:</P>
 </UL>
 
 <P>Sometimes /dev/dvd can't be read by users, so the libdvdread authors
-implemented an emulation layer which transfers sector addresses to
-filenames+offsets, to emulate raw access on the top of a mounted filesystem
-or even on a hard disk.</P>
+  implemented an emulation layer which transfers sector addresses to
+  filenames+offsets, to emulate raw access on the top of a mounted filesystem
+  or even on a hard disk.</P>
 
 <P>libdvdread even accepts the mountpoint instead of the device name for raw
-access and checks in <CODE>/proc/mounts</CODE> to get the device name. It was
-developed for Solaris, where device names are dynamically allocated.</P>
+  access and checks in <CODE>/proc/mounts</CODE> to get the device name. It was
+  developed for Solaris, where device names are dynamically allocated.</P>
 
 <P>The default DVD device is <CODE>/dev/dvd</CODE>. If your setup differs,
-make a symlink, or specify the correct device on the command line with the
-<CODE>-dvd-device</CODE> option.</P>
+  make a symlink, or specify the correct device on the command line with the
+  <CODE>-dvd-device</CODE> option.</P>
 
 <H4>DVD authentication</H4>
 
@@ -146,22 +146,22 @@ make a symlink, or specify the correct device on the command line with the
     of ioctls and various key exchanges, crypto stuff) and is used to encrypt
     the title and disk keys before sending them over the unprotected bus
     (to prevent eavesdropping). The bus key is needed to get and predecrypt the
-    crypted disk key.
+    crypted disk key.</LI>
   <LI><B>cached key:</B> MPlayer looks for eventually already cracked
     title keys which are stored in the <CODE>~/.mplayer/DVDKeys</CODE> directory
     (fast ;).</LI>
   <LI><B>key:</B> If no cached key is available, MPlayer tries to
-    decrypt the disk key with a set of included player keys.
+    decrypt the disk key with a set of included player keys.</LI>
   <LI><B>disk:</B> If the key method fails (e.g. no included player keys),
     MPlayer will crack the disk key using a brute force algorithm.
     This process is CPU intensive and requires 64 MB of memory (16M 32bit
     entries hash table) to store temporary data. This method should always
     work (slow).</LI>
-  <LI><B>title request:</B>With the disk key MPlayer requests the crypted title
+  <LI><B>title request:</B> With the disk key MPlayer requests the crypted title
     keys, which are inside <I>hidden sectors</I> using <CODE>ioctl()</CODE>.
     The region protection of RPC-2 drives is performed in this step and may
     fail on such drives. If it succeeds, the title keys will be decrypted with
-    the bus and disk key.
+    the bus and disk key.</LI>
   <LI><B>title:</B> This method is used if the title request failed and does
     not rely on any key exchange with the DVD drive. It uses a crypto attack to
     guess the title key directly (by finding a repeating pattern in the
@@ -189,9 +189,9 @@ make a symlink, or specify the correct device on the command line with the
 <H2><A NAME="vcd">4.3 VCD playback</A></H2>
 
 <P>For the complete list of available options, please read the man page.
-The Syntax for a standard Video CD (VCD) is as followed:
-<CODE>mplayer -vcd &lt;track&gt; [-cdrom-device &lt;device&gt;]</CODE>.<BR>
-Example: <CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE></P>
+  The Syntax for a standard Video CD (VCD) is as followed:
+  <CODE>mplayer -vcd &lt;track&gt; [-cdrom-device &lt;device&gt;]</CODE>.<BR>
+  Example: <CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE></P>
 
 <H4>VCD structure</H4>
 
@@ -214,23 +214,23 @@ Example: <CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE></P>
 <P>About .DAT files:</P>
 
 <P>The ~600 MB file visible on the first track of the mounted vcd isn't a real
-file! It's a so called iso gateway, created to allow Windows to handle such
-tracks (Windows doesn't allow raw device access to applications at all).
-Under linux, you cannot copy or play such files (they contain garbage).
-Under Windows it is possible as its iso9660 driver emulates the raw reading of
-tracks in this file. To play a .DAT file you need a kernel driver which can be
-found in the Linux version of PowerDVD. It has a modified iso9660 filesystem
-(vcdfs/isofs-2.4.X.o) driver, which is able to emulate the
-raw tracks through this shadow .DAT file. If you mount the disc using their
-driver, you can copy and even play .DAT files with mplayer. But it <B>won't
-work</B> with the standard iso9660 driver of the kernel! It is recommended to
-use the <CODE>-vcd</CODE> option instead. Alternate options for VCD copy are
-the new cdfs kernel driver (shows CD <I>sessions</I> as image files) and
-cdrdao (a bit-to-bit cd grabber/copier application).</P>
+  file! It's a so called iso gateway, created to allow Windows to handle such
+  tracks (Windows doesn't allow raw device access to applications at all).
+  Under linux, you cannot copy or play such files (they contain garbage).
+  Under Windows it is possible as its iso9660 driver emulates the raw reading of
+  tracks in this file. To play a .DAT file you need a kernel driver which can be
+  found in the Linux version of PowerDVD. It has a modified iso9660 filesystem
+  (vcdfs/isofs-2.4.X.o) driver, which is able to emulate the
+  raw tracks through this shadow .DAT file. If you mount the disc using their
+  driver, you can copy and even play .DAT files with mplayer. But it <B>won't
+  work</B> with the standard iso9660 driver of the kernel! It is recommended to
+  use the <CODE>-vcd</CODE> option instead. Alternate options for VCD copy are
+  the new cdfs kernel driver (shows CD <I>sessions</I> as image files) and
+  cdrdao (a bit-to-bit cd grabber/copier application).</P>
 
 <P>The default VCD device is <CODE>/dev/cdrom</CODE>. If your setup differs,
-make a symlink, or specify the correct device on the command line with the
-<CODE>-cdrom-device</CODE> option.</P>
+  make a symlink, or specify the correct device on the command line with the
+  <CODE>-cdrom-device</CODE> option.</P>
 
 </BODY>
 </HTML>
