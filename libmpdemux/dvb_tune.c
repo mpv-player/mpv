@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <error.h>
+#include <time.h>
 #include <errno.h>
 #include "config.h"
 
@@ -332,14 +333,9 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 {
 	int32_t strength;
 	fe_status_t festatus;
-	struct dvb_frontend_event event;
 	struct pollfd pfd[1];
-
-	while(1) 
-	{
-	    if (ioctl(fd_frontend, FE_GET_EVENT, &event) < 0)	//EMPTY THE EVENT QUEUE
-	    	break;
-	}
+	int ok=0, locks=0;
+	time_t tm1, tm2;
 
 	if (ioctl(fd_frontend,FE_SET_FRONTEND,feparams) < 0)
 	{
@@ -350,45 +346,49 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 	pfd[0].fd = fd_frontend;
 	pfd[0].events = POLLPRI;
 
-	event.status=0;
-	while (((event.status & FE_TIMEDOUT)==0) && ((event.status & FE_HAS_LOCK)==0))
+	mp_msg(MSGT_DEMUX, MSGL_V, "Getting frontend status\n");
+	tm1 = tm2 = time((time_t*) NULL);
+	while(!ok)
 	{
-		mp_msg(MSGT_DEMUX, MSGL_V, "polling....\n");
-		if(poll(pfd,1,10000) > 0)
+		festatus = 0;
+		if(poll(pfd,1,3000) > 0)
 		{
 			if (pfd[0].revents & POLLPRI)
 			{
-				mp_msg(MSGT_DEMUX, MSGL_V, "Getting frontend event\n");
-				if ( ioctl(fd_frontend, FE_GET_EVENT, &event) < 0)
-				{
-					mp_msg(MSGT_DEMUX, MSGL_ERR, "FE_GET_EVENT");
-					return -1;
-				}
+				if(ioctl(fd_frontend, FE_READ_STATUS, &festatus) >= 0)
+					if(festatus & FE_HAS_LOCK)
+						locks++;
 			}
-			print_status(event.status);
 		}
+		usleep(10000);
+		tm2 = time((time_t*) NULL);
+		if((festatus & FE_TIMEDOUT) || (locks >= 2) || (tm2 - tm1 >= 3))
+			ok = 1;
 	}
 
-	if(event.status & FE_HAS_LOCK)
+	if(festatus & FE_HAS_LOCK)
 	{
+		if(ioctl(fd_frontend,FE_GET_FRONTEND,feparams) >= 0)
+		{
 		switch(tuner_type)
 		{
 			case FE_OFDM:
-			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",event.parameters.frequency);
+			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",feparams->frequency);
 			break;
 			case FE_QPSK:
-			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",(unsigned int)((event.parameters.frequency)+base));
-			mp_msg(MSGT_DEMUX, MSGL_V, "        SymbolRate: %d\n",event.parameters.u.qpsk.symbol_rate);
-			mp_msg(MSGT_DEMUX, MSGL_V, "        FEC_inner:  %d\n",event.parameters.u.qpsk.fec_inner);
+			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",(unsigned int)((feparams->frequency)+base));
+			mp_msg(MSGT_DEMUX, MSGL_V, "        SymbolRate: %d\n",feparams->u.qpsk.symbol_rate);
+			mp_msg(MSGT_DEMUX, MSGL_V, "        FEC_inner:  %d\n",feparams->u.qpsk.fec_inner);
 			mp_msg(MSGT_DEMUX, MSGL_V, "\n");
 			break;
 			case FE_QAM:
-			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",event.parameters.frequency);
-			mp_msg(MSGT_DEMUX, MSGL_V, "        SymbolRate: %d\n",event.parameters.u.qpsk.symbol_rate);
-			mp_msg(MSGT_DEMUX, MSGL_V, "        FEC_inner:  %d\n",event.parameters.u.qpsk.fec_inner);
+			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",feparams->frequency);
+			mp_msg(MSGT_DEMUX, MSGL_V, "        SymbolRate: %d\n",feparams->u.qpsk.symbol_rate);
+			mp_msg(MSGT_DEMUX, MSGL_V, "        FEC_inner:  %d\n",feparams->u.qpsk.fec_inner);
 			break;
 			default:
 			break;
+		}
 		}
 
 		strength=0;
@@ -403,8 +403,10 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 		if(ioctl(fd_frontend,FE_READ_SNR,&strength) >= 0)
 		mp_msg(MSGT_DEMUX, MSGL_V, "SNR: %d\n",strength);
 
-		festatus=0;
-		if(ioctl(fd_frontend,FE_READ_STATUS,&festatus) >= 0)
+		strength=0;
+		if(ioctl(fd_frontend,FE_READ_UNCORRECTED_BLOCKS,&strength) >= 0)
+		mp_msg(MSGT_DEMUX, MSGL_V, "UNC: %d\n",strength);
+		
 		print_status(festatus);
 	}
 	else
@@ -680,7 +682,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       feparams.u.ofdm.guardInterval=guardInterval;
       feparams.u.ofdm.HierarchyInformation=hier;
 #endif
-      mp_msg(MSGT_DEMUX, MSGL_V, "tuning DVB-T (%s) to %d Hz, bandwidth: %d\n",DVB_T_LOCATION,freq, bandwidth);
+      mp_msg(MSGT_DEMUX, MSGL_V, "tuning DVB-T to %d Hz, bandwidth: %d\n",freq, bandwidth);
       break;
     case FE_QPSK:
       if (freq > 2200000)
