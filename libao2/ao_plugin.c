@@ -186,8 +186,10 @@ static void uninit(){
     plugin(i++)->uninit();
   if(ao_plugin_local_data.plugins)
     free(ao_plugin_local_data.plugins);
+  ao_plugin_local_data.plugins=NULL;
   if(ao_plugin_local_data.buf)
     free(ao_plugin_local_data.buf);
+  ao_plugin_local_data.buf=NULL;
 }
 
 // stop playing and empty buffers (for seeking/pause)
