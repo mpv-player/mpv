@@ -110,14 +110,14 @@ static uint32_t image_height;
 static uint32_t image_format;
 
 static void check_events(){
-  int e=vo_x11_check_events(mDisplay);
+  vo_x11_check_events(mDisplay);
 }
 
 static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d_height,uint32_t flags,char *title,uint32_t format )
 {
- int screen;
+// int screen;
  int fullscreen=0;
- int interval, prefer_blank, allow_exp, nothing;
+// int interval, prefer_blank, allow_exp, nothing;
  unsigned int fg,bg;
  char *hello=( title == NULL ) ? "X11 render" : title;
 // char *name=":0.0";
@@ -148,7 +148,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  if (fullscreen) {
     unsigned int modeline_width, modeline_height, vm_event, vm_error;
     unsigned int vm_ver, vm_rev;
-    int i,j,k,have_vm=0,X,Y;
+    int i,j,have_vm=0,X,Y;
 
     int modecount;
 
@@ -419,7 +419,6 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 void rgb15to16_mmx( char* s0,char* d0,int count );
 
 static uint32_t draw_frame( uint8_t *src[] ){
-    int i;
     int sbpp=( ( image_format&0xFF )+7 )/8;
     int dbpp=( bpp+7 )/8;
     char *d=ImageData;

@@ -595,7 +595,6 @@ static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 //static int sdl_setup (int width, int height)
 {
-	int ret;
 	struct sdl_priv_s *priv = &sdl_priv;
         unsigned int sdl_format;
 	SDL_Rect res;
@@ -1052,6 +1051,9 @@ static void check_events (void)
 				case SDLK_SLASH:
 				case SDLK_KP_DIVIDE:
                                 case SDLK_s: mplayer_put_key('/');break;
+				default:
+					mplayer_put_key(keypressed);
+					break;
 				}
 			break;
 			case SDL_KEYUP:
