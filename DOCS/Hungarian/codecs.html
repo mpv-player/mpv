@@ -100,9 +100,18 @@ talán a használt bpp-tol függõen változhat.</P>
 DivX codec-et, amely kompatibilis a hagyományossal. Az <B>MPlayer</B>
 támogatja ezt a codec-et, lehetõvé téve hogy <B>DivX/DivX4 filmeket nézzünk nem-x86
 platformokon</B>, méghozzá sokkal gyorsabb dekódolással mint amit a Win32
-codec-ek, és az eredeti DivX4 lehetõvé tesz!<BR>
-Az <B>MPlayer</B> fa nem tartalmazza, le kell töltened az <B>FFmpeg</B>
-fát:</P>
+codec-ek, és az eredeti DivX4 lehetõvé tesz!</P>
+
+<P>Ezekenkívül még tartalmaz jónéhány más érdekes codec-et, pl: RealVideo 1.0,
+MJPEG, h263, h263+, stb.</P>
+
+<P>Milyen <B>MPlayer</B>-ed van?
+
+<UL>
+  <LI>release : ebben az esetben semmit nem kell tenned, a libavcodec-et
+    ilyenkor mindig mellékeljük.</LI>
+  <LI>CVS : ebben az esetben le kell töltened az <B>FFmpeg</B>
+    CVS fát:
 
 <P><CODE>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
@@ -117,6 +126,10 @@ fát:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
 
 <P>Link létrehozása NEM elég, másolni vagy mozgatni kell.</P>
+
+  </LI>
+</UL>
+</P>
 
 <P>Ezután fordítsd le az <B>MPlayer-t</B>. A configure detektálja, ha minden
 rendben. Támogat <B>postprocess-t</B>!</P>

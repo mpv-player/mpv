@@ -97,9 +97,18 @@ differ according to the current bpp.</P>
 which is compatible with the traditional DivX. <B>MPlayer</B> supports this codec,
 and this makes it possible to <B>watch DivX/DivX4 movies on non-x86 platforms</B>,
 and gain much faster <B>DivX/DivX4</B> decoding speed than the Win32 codecs and
-the original DivX4 library has!<BR>
-It was removed from <B>MPlayer</B>'s cvs tree, you have to download it
-manually directly from <B>FFmpeg</B>'s tree:</P>
+the original DivX4 library has!</P>
+
+<P>It also contains lots of nice codecs, such as RealVideo 1.0, MJPEG, h263,
+h263+, etc.</P>
+
+<P>If you use MPlayer
+
+<UL>
+  <LI>from release : then you have libavcodec right in the package, just
+    build <B>MPlayer</B> as usual.</LI>
+  <LI>from CVS : you have to download it manually directly from <B>FFmpeg</B>'s
+    tree:
 
 <P><CODE>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
@@ -108,7 +117,6 @@ manually directly from <B>FFmpeg</B>'s tree:</P>
 
 <P>Note: <I>if you copy with CVS subdirs, next time it's enough to do
 'cvs update'.</I></P>
-
 <P>Now, move the newly downloaded ffmpeg source's <B>libavcodec</B> directory,
 (with all it's subdirectories) to <B>MPlayer</B>'s tree, so it will look
 like this:</P>
@@ -116,6 +124,10 @@ like this:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
 
 <P>Symlinking is NOT enough, you have to copy/move it!!!</P>
+
+  </LI>
+</UL>
+</P>
 
 <P>Then compile. configure detects if it's alright, and can be compiled. The
 codec also <B>supports postprocessing!</B></P>
