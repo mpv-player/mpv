@@ -5365,15 +5365,16 @@ Maximum quantizer (pass\ 1/\:2), 10\-31 should be a sane range (default: 31).
 .
 .TP
 .B mbqmin=<1\-31>
-minimum macroblock quantizer (pass\ 1/\:2) (default: 2)
+obsolete, use vqmin
 .
 .TP
 .B mbqmax=<1\-31>
-maximum macroblock quantizer (pass\ 1/\:2) (default: 31)
+obsolete, use vqmax
 .
 .TP
 .B vqdiff=<1\-31>
-maximum quantizer difference between I- or P-frames (pass\ 1/\:2) (default: 3)
+maximum quantizer difference between consecutive I- or P-frames
+(pass\ 1/\:2) (default: 3)
 .
 .TP
 .B vmax_b_frames=<0\-4>
@@ -5462,9 +5463,10 @@ Does absolutely nothing at the moment.
 .B keyint=<0\-300>
 maximum interval between keyframes in frames (default: 250 or one
 keyframe every ten seconds in a 25fps movie).
-Keyframes are needed for seeking as seeking is only possible to a keyframe but
-keyframes need more space than other frames so larger numbers here mean
-slightly smaller files, but less precise seeking, 0 means no keyframes.
+Keyframes are needed for seeking as seeking is only possible to a keyframe, but
+keyframes need more space than other frames, so larger numbers here mean
+slightly smaller files but less precise seeking.
+0 is equivalent to 1, which makes every frame a keyframe.
 Values >300 are not recommended as the quality might be bad depending upon
 decoder, encoder and luck.
 For a strict MPEG1/\:2/\:4 compliance this would have to be <=132.
@@ -5479,14 +5481,13 @@ no scene changes are detected (default 0).
 .
 .TP
 .B vb_strategy=<0\-1>
-strategy to choose between I/\:P/\:B-frames (pass\ 2):
+strategy to choose between I/\:P/\:B-frames (pass\ 1):
 .PD 0
 .RSs
 .IPs 0
 Always use the maximum number of B-frames (default).
 .IPs 1
 Avoid B-frames in high motion scenes.
-This will cause bitrate misprediction.
 .RE
 .PD 1
 .
@@ -5513,7 +5514,7 @@ mode does.
 In two pass mode, the second pass (vpass=2) reads the stats file and
 bases ratecontrol decisions on it.
 .br
-In three pass mode, the second pass (vpass=3, that is not a typo )
+In three pass mode, the second pass (vpass=3, that is not a typo)
 does both: It first reads the stats, then overwrites them.
 You might want to backup divx2pass.log before doing this if there is
 any possibility that you will have to cancel MEncoder.
