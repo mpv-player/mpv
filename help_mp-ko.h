@@ -69,7 +69,8 @@ static char help_text[]=
 #define MSGTR_Exit_quit "종료"
 #define MSGTR_Exit_eof "파일의 끝"
 #define MSGTR_Exit_error "치명적 오류"
-#define MSGTR_IntBySignal "\nMPlayer가 %s모듈에서 %d신호로 인터럽트되었습니다.\n"
+// FIXME: %d must be before %s !!!
+// #define MSGTR_IntBySignal "\nMPlayer가 %s모듈에서 %d신호로 인터럽트되었습니다.\n"
 #define MSGTR_NoHomeDir "홈디렉토리를 찾을 수 없습니다.\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") 문제 발생\n"
 #define MSGTR_CreatingCfgFile "설정파일 %s를 만듭니다.\n"
