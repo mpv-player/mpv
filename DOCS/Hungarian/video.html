@@ -2,111 +2,112 @@
 
 <BODY>
 
-<PRE>
+<P><B><A NAME=2.2.1>2.2.1.  Video kimeneti eszközök</A></B></P>
 
-  <A NAME=2.2.1>2.2.1.  Video kimeneti eszközök</A>
+<TABLE BORDER=0>
 
-  Általános:
-  - x11:  X11, opcionálisan az SHM kiterjesztéssel
-  - xv:   X11 az XVideo kiterjesztés overlay-eivel (hardware támogatás)
-  - gl:   OpenGL renderelõ, egyelõre csak ezekkel megy:
-          - bármely kártyával, Utah-GLX-szel
-          - Matrox kártyák + X/DRI >=4.0.3  
-          - Radeon + X/DRI CVS
-  - dga:  X11 a DGA kiterjesztéssel
-  - fbdev:Megjelenítés általános framebuffereken
-  - svga: Megjelenítés SVGAlib-bel
-  - sdl:  1.1.7 : software scaling
-          1.1.8 : támogatja a hardware-es gyorsítást XVideo-n keresztül
-          1.2.0 : aalib támogatás (használd inkább a -vo aa opciót!)
-  - ggi:  SDL-hez hasonló
-  - aa:   szöveges módú megjelenítés AAlib-bel
+<TD COLSPAN=4><P><B>Általános:</B></P></TD><TR>
 
-  Kártyaspecifikus:
-  - mga:  Matrox G200/G400 hardware-es YUV overlay az mga_vid-en keresztül
-  - xmga: Matrox G200/G400 overlay (mga_vid) X11 ablakban
-          (Xv emuláció 3.3.x-es X-szel!)
-  - syncfb: Matrox G400 YUV támogatás framebufferen (régi, használj mga/xmga-t)
-  - 3dfx: Voodoo2/3 hardware YUV (/dev/3dfx) támogatás (nincs tesztelve!)
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>x11</TD><TD>&nbsp;&nbsp;</TD><TD>X11, opcionálisan az SHM kiterjesztéssel</TD><TR>
+<TD></TD><TD VALIGN=top>xv</TD><TD></TD><TD>X11 az XVideo kiterjesztés overlay-eivel (hardware támogatás)</TD><TR>
+<TD></TD><TD VALIGN=top>gl</TD><TD></TD><TD>OpenGL renderelõ, egyelõre csak ezekkel megy:
+<UL><LI>bármely kártyával, Utah-GLX-szel
+<LI>Matrox kártyák + X/DRI >=4.0.3
+<LI>Radeon + X/DRI CVS</UL></TD><TR>
+<TD></TD><TD VALIGN=top>dga</TD><TD></TD><TD>X11 a DGA kiterjesztéssel</TD><TR>
+<TD></TD><TD VALIGN=top>fbdev</TD><TD></TD><TD>Megjelenítés általános framebuffereken</TD><TR>
+<TD></TD><TD VALIGN=top>svga</TD><TD></TD><TD>Megjelenítés SVGAlib-bel</TD><TR>
+<TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>
+&nbsp;&nbsp;<CODE>1.1.7:</CODE> software-es skalazas<BR>
+&nbsp;&nbsp;<CODE>1.1.8:</CODE> támogatja a hardware-es gyorsítást XVideo-n keresztül<BR>
+&nbsp;&nbsp;<CODE>1.2.0:</CODE> aalib támogatás (használd inkább a -vo aa opciót!)</TD><TR>
+<TD></TD><TD VALIGN=top>ggi</TD><TD></TD><TD>SDL-hez hasonló</TD><TR>
+<TD></TD><TD VALIGN=top>aa</TD><TD></TD><TD>szöveges módú megjelenítés AAlib-bel</TD><TR>
 
-  Egyéb:
-  - png:  kimenet PNG file-okba (-z kapcsoló a tömörítés mértékét állítja)
-  - pgm:  kimenet PGM file-okba (tesztelésre, vagy ffmpeg enkódoláshoz)
-  - md5:  MD5sum támogatás (MPEG konformancia tesztekhez)
-  - odivx:OpenDivX AVI file output (-br a bitrate-et állítja)
-  - null: kimenet a nagy semmibe (sebességtesztekhez)
+<TD COLSPAN=4><P><B>Kártyaspecifikus:</B></P></TD><TR>
+
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>mga</TD><TD>&nbsp;&nbsp;</TD><TD>Matrox G200/G400 hardware-es YUV overlay az mga_vid-en keresztül</TD><TR>
+<TD></TD><TD VALIGN=top>xmga</TD><TD></TD><TD>Matrox G200/G400 overlay (mga_vid) X11 ablakban<BR>
+(<I>(Xv emuláció 3.3.x-es X-szel!)</I>)</TD><TR>
+<TD></TD><TD VALIGN=top>syncfb</TD><TD></TD><TD>Matrox G400 YUV támogatás framebufferen (régi, használj mga/xmga-t)</TD><TR>
+<TD></TD><TD VALIGN=top>3dfx</TD><TD></TD><TD>Voodoo2/3 hardware YUV (/dev/3dfx) támogatás (nincs tesztelve!)</TD><TR>
+
+<TD COLSPAN=4><P><B>Egyéb:</B></P></TD><TR>
+
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>png</TD><TD>&nbsp;&nbsp;</TD><TD>kimenet PNG file-okba (-z kapcsoló a tömörítés mértékét állítja)</TD><TR>
+<TD></TD><TD VALIGN=top>pgm</TD><TD></TD><TD>kimenet PGM file-okba (tesztelésre, vagy ffmpeg enkódoláshoz)</TD><TR>
+<TD></TD><TD VALIGN=top>md5</TD><TD></TD><TD>MD5sum támogatás (MPEG konformancia tesztekhez)</TD><TR>
+<TD></TD><TD VALIGN=top>odivx</TD><TD></TD><TD>OpenDivX AVI file output (-br a bitrate-et állítja)</TD><TR>
+<TD></TD><TD VALIGN=top>null</TD><TD></TD><TD>kimenet a nagy semmibe (sebességtesztekhez)</TD><TR>
+</TABLE>
 
 
-  <A NAME=2.2.1.1>2.2.1.1.  MTRR</A>
+<P><B><A NAME=2.2.1.1>2.2.1.1.  MTRR</A></B></P>
 
-  Nagyon ajánlott az MTRR helyes beállítása, mert minden esetben
+<P>Nagyon ajánlott az MTRR helyes beállítása, mert minden esetben
   sebességnövekedést eredményez. Elõször a báziscímet kell megkeresni.
-  Erre van 3 módszer :
+  Erre van 3 módszer :</P>
 
-  - az X11 induló üzeneteibõl, például :
+<P><UL>
+<LI>az X11 induló üzeneteibõl, például :
+<P><CODE>(--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000<BR>
+(--) SVGA: Linear framebuffer at 0xD8000000</CODE></P>
+<LI>a /proc/pci-bõl (használd az lspci -v parancsot):
+<P><TABLE>
+<TD VALIGN=top><CODE>01:00.0</CODE></TD><TD><CODE>VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525</CODE></TD><TR>
+<TD></TD><TD><CODE>Memory at d8000000 (32-bit, prefetchable)</CODE></TD><TR>   
+</TABLE></P></CODE>
+<LI>from mga_vid kernel driver messages (use dmesg):
+<P><CODE>mga_mem_base = d8000000</CODE></P>
+</UL></P>
 
-  (--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
-  (--) SVGA: Linear framebuffer at 0xD8000000
+<P>Ezután kell a memória mérete is. Csak át kell konvertálni a video ram
+  méretét hexadecimálisba, pl így :</P>
 
-  - a /proc/pci-bõl (használd az lspci -v parancsot):
-
-  01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
-          Memory at d8000000 (32-bit, prefetchable)
-
-  - az mga_vid kernel meghajtó üzeneteibõl (dmesg parancs):
-
-  mga_mem_base = d8000000
-
-  Ezután kell a memória mérete is. Csak át kell konvertálni a video ram
-  méretét hexadecimálisba, pl így :
+<TABLE BORDER=0>
+<TD>&nbsp;&nbsp;</TD><TD>1 MB</TD><TD WIDTH=10%></TD><TD>0x100000</TD><TR>
+<TD></TD><TD>2 MB</TD><TD></TD><TD>0x200000</TD><TR>
+<TD></TD><TD>4 MB</TD><TD></TD><TD>0x400000</TD><TR>
+<TD></TD><TD>8 MB</TD><TD></TD><TD>0x800000</TD><TR>
+<TD></TD><TD>16 MB</TD><TD></TD><TD>0x1000000</TD><TR>
+<TD></TD><TD>32 MB</TD><TD></TD><TD>0x2000000</TD><TR>
+</TABLE>
 
 
-		1 MB    0x100000
-		2 MB    0x200000
-		4 MB    0x400000
-		8 MB    0x800000
-		16 MB   0x1000000
-		32 MB   0x2000000
-
-
-  Már tudjuk a címet és a méretet, már csak a beállítás hiányzik!
+<P>Már tudjuk a címet és a méretet, már csak a beállítás hiányzik!
   Például a fenti Matrox kártyához (base=0xd8000000), 32mega memóriával
-  (size=0x2000000) ezt kell beírni:
+  (size=0x2000000) ezt kell beírni:</P>
 
 
-      echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr
+<P><CODE>echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr</CODE></P>
 
 
-  Nem minden CPU támogatja az MTRR-eket. Például régebbi K6/2-k (266Mhz
-  körül, stepping 0) nem, de stepping 12-esek igen (cat /proc/cpuinfo
-  megadja a stepping értékét).
+<P>Nem minden CPU támogatja az MTRR-eket. Például régebbi K6/2-k (266Mhz
+  körül, stepping 0) nem, de stepping 12-esek igen (<CODE>cat /proc/cpuinfo
+  megadja a stepping értékét</CODE>).</P>
 
 
-  <A NAME=2.2.1.2>2.2.1.2.  Xv</A>
+<P><B><A NAME=2.2.1.2>2.2.1.2.  Xv</A></B></P>
 
-  XFree86 4.0.2 vagy újabb alatt használhatod a kártyád hardware-es YUV
+<P>XFree86 4.0.2 vagy újabb alatt használhatod a kártyád hardware-es YUV
   rutinjait, az XVideo kiterjesztéssel. Ezt használja a '-vo xv' opció.
-  Hogy mûködjön, a következõ feltételeknek kell teljesülniük :
-   - XFree86 4.0.2 vagy újabb kell (elõzõ verziókban nincs XVideo)
-   - A kártyádnak tudnia kell hardware-es gyorsítást (a mai kártyák tudják)
-   - Az X-nek be kell töltenie az XVideo kiterjesztést, valahogy így néz ki:
+  Hogy mûködjön, a következõ feltételeknek kell teljesülniük :</P>
+<P><UL>
+<LI>XFree86 4.0.2 vagy újabb kell (elõzõ verziókban nincs XVideo)
+<LI>A kártyádnak tudnia kell hardware-es gyorsítást (a mai kártyák tudják)
+<LI>Az X-nek be kell töltenie az XVideo kiterjesztést, valahogy így néz ki:
 
+<P><CODE>&nbsp;&nbsp;(II) Loading extension XVideo</CODE></P>
+<P>a /var/log/XFree86.0.log file-ban.</P>
 
-	(II) Loading extension XVideo
-
-
-     a /var/log/XFree86.0.log file-ban.
-
-
-     MEGJ : ez csak az XFree86 kiterjesztését tölti be. Egy rendes installban
+<P>MEGJ : ez csak az XFree86 kiterjesztését tölti be. Egy rendes installban
 	    ez az alap, és nem azt jelenti, hogy a _kártyád_ XVideo támogatása
-	    töltõdött be!
+	    töltõdött be!</P>
 
-   - A kártyád Linuxos drivere támogatja-e az Xv-t. Ezt az 'xvinfo'-val lehet
+<LI>A kártyád Linuxos drivere támogatja-e az Xv-t. Ezt az 'xvinfo'-val lehet
      megnezni, ez pedig az XFree86 disztribúció része. Egy hosszú szöveget
      kell hogy kiírjon, hasonlót ehhez:
-
-
+<PRE>
 	X-Video Extension version 2.2
 	screen #0
 	  Adaptor #0: "Savage Streams Engine"
@@ -129,147 +130,141 @@
 	        bits per pixel: 12
 	        number of planes: 3
 	        type: YUV (planar)
-	(...etc...)
+	(...stb...)
+</PRE>
 
+<P>Támogatnia kell a YUY2 packed, YV12 planar pixelformátumokat, hogy
+     használható legyen az <B>MPlayer</B>-rel.</P>
 
-     Támogatnia kell a YUY2 packed, YV12 planar pixelformátumokat, hogy
-     használható legyen az <B>MPlayer</B>-rel.
-
-   - És végül, hogy az <B>MPlayer</B> tartalmazza-e az 'xv' támogatást.
+<LI>És végül, hogy az <B>MPlayer</B> tartalmazza-e az 'xv' támogatást.
      ./configure kiírja.
 
+</UL></P>
 
-  <A NAME=2.2.1.2.1>2.2.1.2.1.  3dfx kártyák</A>
+<P><B><A NAME=2.2.1.2.1>2.2.1.2.1.  3dfx kártyák</A></B></P>
 
-  Régebbi 3dfx meghajtóknak problémái vannak az XVideo gyorsítással,
+<P>Régebbi 3dfx meghajtóknak problémái vannak az XVideo gyorsítással,
   nem támogatták a YUY2-t vagy YV12-t, ésígytovább. Ellenõrizd hogy az
   XFree86-od verziója 4.1.0 vagy újabb-e, azok már jók.
   Ha furcsa effekteket észlelsz -vo xv-vel, próbáld ki az SDL meghajtót
   (annak is van XVideo támogatása), az segíthet. Nézd meg a <A HREF="#2.2.1.4">2.2.1.4-es</A>
-  fejezetet a részletekhez.
+  fejezetet a részletekhez.</P>
 
 
-  <A NAME=2.2.1.2.2>2.2.1.2.2.  S3 kártyák</A>
+<P><B><A NAME=2.2.1.2.2>2.2.1.2.2.  S3 kártyák</A></B></P>
 
-  S3 Savage3D-knek mûködniük kell, de Savage4-hez 4.0.3-as de inkább újabb
-  XFree86 kell. S3 Virge-re vonatkozólag.. add el.
+<P>S3 Savage3D-knek mûködniük kell, de Savage4-hez 4.0.3-as de inkább újabb
+  XFree86 kell. S3 Virge-re vonatkozólag.. add el.</P>
 
+<P><B><A NAME=2.2.1.2.3>2.2.1.2.3.  nVidia kártyák</A></B></P>
 
-  <A NAME=2.2.1.2.3>2.2.1.2.3.  nVidia kártyák</A>
-
-  nVidia nem túl jó választás Linux alá.. A bináris nVidia meghajtót kell
+<P>nVidia nem túl jó választás Linux alá.. A bináris nVidia meghajtót kell
   használnod, ami az nVidia honlapjáról tölthetõ le. A szabvány X
   meghajtó nem tartalmaz XVideo támogatást ezekhez a kártyákhoz, mivel
-  az nVidia nem adja ki a specifikációikat.
+  az nVidia nem adja ki a specifikációikat.</P>
 
-   - Riva128-as kártyáknak még az nVidia meghajtóval se lesz XVideo-juk :(
-     Panaszkodj az nVidiának.
+<P><UL><LI>Riva128-as kártyáknak még az nVidia meghajtóval se lesz XVideo-juk :(
+     Panaszkodj az nVidiának.</UL></P>
 
 
-  <A NAME=2.2.1.2.4>2.2.1.2.4.  ATI kártyák</A>
+<P><B><A NAME=2.2.1.2.4>2.2.1.2.4.  ATI kártyák</A></B></P>
 
-  A GATOS meghajtó alapállapotban bekapcsolt VSYNC-et tartalmaz. Ez azt
+<P>A GATOS meghajtó alapállapotban bekapcsolt VSYNC-et tartalmaz. Ez azt
   jelenti, hogy a dekódolási sebesség (!) hozzá van szinkronizálva a monitor
   frissítési frekvenciájához. Ha a lejátszás lassúnak tûnik, próbáld meg
   valahogy kikapcsolni a VSYNC-et, vagy állítsd a képfrissítést n*(a film
-  fps-e) Hz-re.
+  fps-e) Hz-re.</P>
 
 
-  <A NAME=2.2.1.3>2.2.1.3.  DGA</A>
+<P><B><A NAME=2.2.1.3>2.2.1.3.  DGA</A></B></P>
 
-  <A NAME=2.2.1.3.1>2.2.1.3.1.  Elõszó</A>
+<P><B><A NAME=2.2.1.3.1>2.2.1.3.1.  Elõszó</A></B></P>
 
-  Ez a dokumentum néhány szóban elmagyarázza, hogy általában véve mi is az a
-  DGA, és mit tud az MPlayerben (és mit nem).
+<P>Ez a dokumentum néhány szóban elmagyarázza, hogy általában véve mi is az a
+  DGA, és mit tud az MPlayerben (és mit nem).</P>
 
 
-  <A NAME=2.2.1.3.2>2.2.1.3.2.  Mi az a DGA ?</A>
+<P><B><A NAME=2.2.1.3.2>2.2.1.3.2.  Mi az a DGA ?</A></B></P>
 
-  A DGA szó a Direct Graphics Access rövidítése, és egy olyan módszert takar,
+<P>A DGA szó a Direct Graphics Access rövidítése, és egy olyan módszert takar,
   amivel a program az X szerver kikerülésével közvetlenül írhat a framebuffer
   memóriába. Szaknyelven szólva ez a framebuffer memóriának a processz
   területére történõ lapozásával történik. Ezt a kernel csak root jogosultsággal
   engedi. Ez történhet root-ként történõ bejelentkezéssel, vagy a suid bit
-  beállításával az mplayer programon (NEM ajánlott!).
+  beállításával az mplayer programon (NEM ajánlott!).</P>
 
-  A DGA-nak két verziója van: a DGA1-et az XFree 3.X.X használja, a DGA2
-  pedig az XFree 4.0.1 óta létezik.
+<P>A DGA-nak két verziója van: a DGA1-et az XFree 3.X.X használja, a DGA2
+  pedig az XFree 4.0.1 óta létezik.</P>
 
-  A DGA1 csak a fent leírt közvetlen hozzáférést nyújtja. A felbontásváltáshoz
-  itt szükség van az XVidMode kiterjesztésre.
+<P>A DGA1 csak a fent leírt közvetlen hozzáférést nyújtja. A felbontásváltáshoz
+  itt szükség van az XVidMode kiterjesztésre.</P>
 
-  A DGA2 tartalmazza az XVidMode tudását, továbbá engedélyezi a színmélység  
+<P>A DGA2 tartalmazza az XVidMode tudását, továbbá engedélyezi a színmélység  
   megváltoztatását. Így lehetséges, hogy egy 32 bites mélységû X szervert
-  átváltsunk 15 bitesbe, vagy fordítva.
+  átváltsunk 15 bitesbe, vagy fordítva.</P>
 
-  A DGA-nak van néhány hátránya. Valamelyest függ a grafikus chiptõl és ennek
-  X-es driverétõl, ezért nem minden rendszeren mûködik ...
-
-
-<A NAME=2.2.1.3.3>2.2.1.3.3.  DGA támogatás telepítése <B>MPlayer</B>-be</A>
-
-  Elõször bizonyosodj meg arról, hogy az X betölti-e a DGA kiterjesztést, lásd
-  /var/log/XFree86.0.log :
+<P>A DGA-nak van néhány hátránya. Valamelyest függ a grafikus chiptõl és ennek
+  X-es driverétõl, ezért nem minden rendszeren mûködik ...</P>
 
 
-		(II) Loading extension XFree86-DGA
+<P><B><A NAME=2.2.1.3.3>2.2.1.3.3.  DGA támogatás telepítése <B>MPlayer</B>-be</A></B></P>
 
+<P>Elõször bizonyosodj meg arról, hogy az X betölti-e a DGA kiterjesztést, lásd
+  /var/log/XFree86.0.log :</P>
 
-  Amint látod, XFree86 4.0.x vagy újabb, NAGYON AJÁNLOTT!
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>(II) Loading extension XFree86-DGA</CODE></P>
+
+<P>Amint látod, XFree86 4.0.x vagy újabb, NAGYON AJÁNLOTT!
   Az <B>MPlayer</B> DGA meghajtója ./configure közben automatikusan
-  detektálódik, de az --enable-dga opcióval megerõsítheted.
+  detektálódik, de az --enable-dga opcióval megerõsítheted.</P>
 
-  Ha a meghajtó nem tud kisebb felbontásba váltani, próbálkozz a -vm, -fs
+<P>Ha a meghajtó nem tud kisebb felbontásba váltani, próbálkozz a -vm, -fs
   -bpp, -zoom opciókkal, hogy találj egy olyan videomódot amibe belefér a
-  film. Jelenleg nincs konverter.. :(
+  film. Jelenleg nincs konverter.. :(</P>
 
-  Legyél ROOT. A DGA-n root jogok kellenek hogy közvetlenül írjon a video
+<P>Legyél ROOT. A DGA-n root jogok kellenek hogy közvetlenül írjon a video
   memóriába. Ha egyszerû felhasználóként akarod futtatni, az <B>MPlayer</B>-t
-  SUID root-ként kell installálnod :
+  SUID root-ként kell installálnod :</P>
+
+<P><CODE>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>chown root /usr/local/bin/mplayer<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;chmod 750 /usr/local/bin/mplayer<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;chmod +s /usr/local/bin/mplayer</CODE></P>
+
+<P>Így már felhasználóként is mûködik.</P>
 
 
-		chown root /usr/local/bin/mplayer
-		chmod 750 /usr/local/bin/mplayer 
-		chmod +s /usr/local/bin/mplayer
-
-
-  Így már felhasználóként is mûködik.
-
-
-                                 !!!! JÓL FIGYELJ !!!!
+<P><B>!!!! JÓL FIGYELJ !!!!</B><BR>
      Ez egy ÓRIÁSI biztonsági lyuk! Soha ne csináld ezt egy szerveren, vagy
      egy olyan gépen, amit több ember is elér, mert így root jogokat szerezhetn
-     a suid MPlayer-en keresztül.
-                           !!!! ÉN FIGYELMEZTETTELEK ... !!!!
+     a suid MPlayer-en keresztül.<BR>
+<B>!!!! ÉN FIGYELMEZTETTELEK ... !!!!</B></P>
 
-
-  Most használd a '-vo dga' opciót, és már megy is! (remélhetõleg:)
+<P>Most használd a '-vo dga' opciót, és már megy is! (remélhetõleg:)
   Ajánlatos kipróbálni továbbá a '-vo sdl:dga' opciót is, ha mûködik.
-  Sokkal gyorsabb!!!
+  Sokkal gyorsabb!!!</P>
 
+<P><B><A NAME=2.2.1.3.4>2.2.1.3.4.  Felbontásváltás</A></B></P>
 
-  <A NAME=2.2.1.3.4>2.2.1.3.4.  Felbontásváltás</A>
-
-  A DGA driver képes felbontásváltásra. Ezzel kikerülhetõ a (lassú) szoftveres
+<P>A DGA driver képes felbontásváltásra. Ezzel kikerülhetõ a (lassú) szoftveres
   scale, ugyanakkor teljesképernyõs lesz a lejátszás. Ideális esetben pontosan
   egyezõ felbontást választ, de csak azon videomódok közül tud választani,   
-  ami az /etc/X11/XF86Config fileban szerepel. Ezeket úgynevezett modeline-okkal
+  ami az <CODE>/etc/X11/XF86Config</CODE> fileban szerepel. Ezeket úgynevezett modeline-okkal
   definiáljuk, és a videokártya képességeitõl függenek. Az X szerver ezt
   a config file-t nézi át induláskor, és kikapcsolja mindazokat, amiket a
   kártya nem tud. A fennmaradó módok az X11 log-jában találhatóak:
-  /var/log/XFree86.0.log
-  Az A függelékben néhány modeline példa található.
+  <CODE>/var/log/XFree86.0.log</CODE>
+  Az A függelékben néhány modeline példa található.</P>
 
 
-  <A NAME=2.2.1.3.5>2.2.1.3.5.  DGA és <B>MPlayer</B></A>
+<P><B><A NAME=2.2.1.3.5>2.2.1.3.5.  DGA és <B>MPlayer</B></A></B></P>
 
-  Az <B>MPlayer</B>-ben két helyen lehet DGA-t használni: az SDL driverben
+<P>Az <B>MPlayer</B>-ben két helyen lehet DGA-t használni: az SDL driverben
   (-vo sdl:dga), valamint a DGA driverben (-vo dga). A fentiek mindkettõre
   igazak; a következõ néhány részben elmagyarazom, hogy is mûködik az <B>MPlayer</B>
-  DGA drivere.
+  DGA drivere.</P>
 
-
-  <A NAME=2.2.1.3.6>2.2.1.3.6.  A DGA meghajtó képességei</A>
+<P><B><A NAME=2.2.1.3.6>2.2.1.3.6.  A DGA meghajtó képességei</A></B></P>
 
   A DGA driver meghívása a -vo dga parancssori opció megadásával történik.
   Az alapértelmezett magatartás szerint a video méretéhez legközelebb esõ
@@ -283,73 +278,74 @@
   file-od által elérhetõ felbontásokat.
   DGA2-vel megadhatod a használandó színmélységet is a -bpp opcióval.
   A megadott szám lehet: 15, 16, 24 és 32. A hardware-edtõl függ, hogy ezek  
-  közül melyeket használhatod, valamint, hogy (lassú) konverzió lehetséges-e.
+  közül melyeket használhatod, valamint, hogy (lassú) konverzió kell-e.</P>
 
-  Ha szerencséd van és van még elég memóriád hogy a kép mégegyszer elférjen,
+<P>Ha szerencséd van és van még elég memóriád hogy a kép mégegyszer elférjen,
   akkor a DGA driver doublebuffering-et fog alkalmazni, ami sokkal folyamatosabb
-  lejátszást eredményez.
+  lejátszást eredményez.</P>
 
-  A doublebuffering azt jelenti, hogy a video következõ képkockájának kirajzolás
+<P>A doublebuffering azt jelenti, hogy a video következõ képkockájának kirajzolás
   a videomemórián kívül történik, amíg az elõzõ képkocka kirajzolódik. Amint
   elkészül, a grafikus kártya megkapja ennek a memóriaterületnek a címét, és azt
-  jeleníti meg, ami ott van. Mindeközben a másik memóriaterület újra feltöltõdik
+  jeleníti meg, ami ott van. Mindeközben a másik memóriaterület újra feltöltõdik.</P>
 
-  A doublebuffering a -double opcióval kapcsolható be és a -nodouble opcióval ki
+<P>A doublebuffering a -double opcióval kapcsolható be és a -nodouble opcióval ki
   Jelenleg alapállapotban ki van kapcsolva. Ha a DGA drivert használod, csak 
   doublebuffering esetén lesz OSD-d. Viszont, ha bekapcsolod az nagy
   teljesítménycsökkenéssel járhat (a K6-II+ 525 gépemen plusz 20% CPU idõ!),
-  függõen a videokártyád DGA driverértõl.
- 
+  függõen a videokártyád DGA driverértõl.</P>
 
-  <A NAME=2.2.1.3.7>2.2.1.3.7.  Sebesség</A>
 
-  A DGA framebuffer használatával legalább olyan gyors képet kapunk mint X11-el,
+<P><B><A NAME=2.2.1.3.7>2.2.1.3.7.  Sebesség</A></B></P>
+
+<P>A DGA framebuffer használatával legalább olyan gyors képet kapunk mint X11-el,
   plusz teljeskepérnyõs módot. A százalékos CPU használati értekeket, amiket az 
   MPlayer kiír óvatosan kezeljuk, mert pl. az X11 drivernél nem tartalmazzák    
   az X szerver által a megjelenítéshez használt idõt. Kapcsolj egy terminált    
-  a soros portodra és indíts egy top-ot, hogy lásd valójában mi történik.       
+  a soros portodra és indíts egy top-ot, hogy lásd valójában mi történik.</P>
 
-  Általánosan szólva a DGA sebességnövekedése az X11-hez képest erõsen függ
-  a videokártyádtól és annak driverétõl.
+<P>Általánosan szólva a DGA sebességnövekedése az X11-hez képest erõsen függ
+  a videokártyádtól és annak driverétõl.</P>
 
-  Ha lassú a rendszered, jobb, ha 15 vagy 16bpp-s színmélységet használsz,
-  mivel ezek a 32bites mód memóriasávszélességének csak a felét igénylik. 
+<P>Ha lassú a rendszered, jobb, ha 15 vagy 16bpp-s színmélységet használsz,
+  mivel ezek a 32bites mód memóriasávszélességének csak a felét igénylik.</P>
 
-  A 24bites mélység használata akkor jó, ha a kártyád csak 32bites módot
+<P>A 24bites mélység használata akkor jó, ha a kártyád csak 32bites módot
   támogat, mivel így 25%-al kevesebb adatnak kell átjutnia, a 32/32bites
-  módhoz képest.
+  módhoz képest.</P>
 
-  Már láttam (divx) AVI file-okat lejátszódni Pentium MMX 266-on. AMD K6/2 CPU-k
-  400Mhz-en vagy afölött már jók.
+<P>Már láttam (divx) AVI file-okat lejátszódni Pentium MMX 266-on. AMD K6/2 CPU-k
+  400Mhz-en vagy afölött már jók.</P>
 
+<P><B><A NAME=2.2.1.3.8>2.2.1.3.8.  Ismert hibák</A></B></P>
 
-  <A NAME=2.2.1.3.8>2.2.1.3.8.  Ismert hibák</A>
+<P>Nos, néhány XFree fejlesztõ szerint a DGA nagy szörnyûség. Szerintük nem
+  érdemes használni. Az implementációja nem minden driverben tökeletes.</P>
 
-  Nos, néhány XFree fejlesztõ szerint a DGA nagy szörnyûség. Szerintük nem
-  érdemes használni. Az implementációja nem minden driverben tökeletes.
-
-  o XFree 4.0.3-mal és nv.o driverrel van egy bug, ami furcsa színeket eredménye
-  o az ATI driverrel egynél többször kell módot váltani, miután a DGA használat
+<P><UL>
+<LI>XFree 4.0.3-mal és nv.o driverrel van egy bug, ami furcsa színeket eredménye
+<LI>az ATI driverrel egynél többször kell módot váltani, miután a DGA használat
     befejezõdott
-  o némely driverek egyszerûen nem tudnak visszaváltani a normális felbontásba  
+<LI>némely driverek egyszerûen nem tudnak visszaváltani a normális felbontásba  
     (használd a Ctrl-Alt-Keypad +, - billentyûket)
-  o néhány driver furcsa színeket jelenít meg
-  o mások hazudnak arról, hogy mennyi memóriát map-elnek be, így vo_dga
+<LI>néhány driver furcsa színeket jelenít meg
+<LI>mások hazudnak arról, hogy mennyi memóriát map-elnek be, így vo_dga
     nem fog doublebuffering-et használni (SIS?)
-  o megint mások nem adnak vissza egyetlen videomódot se. Ebben az esetben
+<LI>megint mások nem adnak vissza egyetlen videomódot se. Ebben az esetben
     a DGA driver leáll valami nonszensz üzenettel mint pl 100000x100000 vagy
     ilyesmi ...
-  o az OSD csak doublebuffering-el mûködik
+<LI>az OSD csak doublebuffering-el mûködik
+</UL></P>
+
+<P><B><A NAME=2.2.1.3.9>2.2.1.3.9.  Beépítendõ dolgok</A></B></P>
+
+<P><UL><LI>az új X11 render interface használata OSD-hez 
+<LI>hol van a TODO listám ???? :-((((</UL></P>
 
 
-  <A NAME=2.2.1.3.9>2.2.1.3.9.  Beépítendõ dolgok</A>
+<P><B><A NAME=2.2.1.3.A>2.2.1.3.A.  Néhány modeline</A></B></P>
 
-  o az új X11 render interface használata OSD-hez 
-  o hol van a TODO listám ???? :-((((
-
-
-  <A NAME=2.2.1.3.A>2.2.1.3.A.  Néhány modeline</A>
-
+<PRE>
   Section "Modes"
     Identifier    "Modes[0]"
     Modeline	"800x600"  40     800 840 968 1056  600 601 605 628 
@@ -360,251 +356,240 @@
     Modeline	"352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
     Modeline	"320x240"  12.588 320 336 384 400   240 245 246 262 Doublescan
   EndSection
+</PRE>
+
+<P>Ezek a bejegyzések mûködnek az én Riva128-asomon, az nv.o driverrel.</P>
 
 
-  Ezek a bejegyzések mûködnek az én Riva128-asomon, az nv.o driverrel.
+<P><B><A NAME=2.2.1.3.B>2.2.1.3.B.  Bug Reports</A></B></P>
 
-
-  <A NAME=2.2.1.3.B>2.2.1.3.B.  Bug Reports</A>
-
-  If you experience troubles with the DGA driver please feel free to file 
+<P>If you experience troubles with the DGA driver please feel free to file 
   a bug report to me (e-mail address below). Please start mplayer with the 
-  -v option and include all lines in the bug report that start with vo_dga:
+  -v option and include all lines in the bug report that start with vo_dga:</P>
  
-  Please do also include the version of X11 you are using, the graphics card 
+<P>Please do also include the version of X11 you are using, the graphics card 
   and your CPU type. The X11 driver module (defined in XF86-Config) might 
-  also help. Thanks!
+  also help. Thanks!</P>
 
  
-  Acki (acki@acki-netz.de, www.acki-netz.de)
+<P><I>Acki (acki@acki-netz.de, www.acki-netz.de)</I></P>
 
 
-  <A NAME=2.2.1.4>2.2.1.4.  SDL</A>
+<P><B><A NAME=2.2.1.4>2.2.1.4.  SDL</A></B></P>
 
-  Néhány megjegyzés az <B>MPlayer</B>-nen található SDL meghajtóhoz:
+<P>Néhány megjegyzés az <B>MPlayer</B>-nen található SDL meghajtóhoz:</P>
 
-  Van néhány parancssori opciója:
+<P><TABLE BORDER=0>
+<TD COLSPAN=4><P><B>Van néhány parancssori opciója:</B></P></TD></TR>
+<TD>&nbsp;&nbsp;</TD><TD>-vo sdl:név</TD><TD>&nbsp;&nbsp;</TD><TD>
+megadható hogy melyik video SDL meghajtót használja (pl. aalib, dga, x11)</TD><TR>   
+<TD></TD><TD>-ao sdl:név</TD><TD></TD><TD>megadható hogy melyik audio SDL meghajtót használja (pl. dsp,
+esd, arts)</TD><TR>
+<TD></TD><TD>-noxv</TD><TD></TD><TD>kikapcsolja az XVideo hardware-es gyorsítást</TD><TR>
+<TD></TD><TD>-forcexv</TD><TD></TD><TD>megerõsíti a hardware-es gyorsítás használatát</TD><TR>
 
-		-vo sdl:név	megadható hogy melyik video SDL meghajtót
-				használja (pl. aalib, dga, x11)
-		-ao sdl:név	megadható hogy melyik audio SDL meghajtót
-				használja (pl. dsp, esd, arts)
-		-noxv		kikapcsolja az XVideo hardware-es gyorsítást
-		-forcexv	megerõsíti a hardware-es gyorsítás
-				használatát
+<TD COLSPAN=4><P><B>SDL billentyûk:</B></P></TD><TR>
 
-  SDL billentyûk:
+<TD></TD><TD>F</TD><TD></TD><TD>teljesképernyõs/ablakos mód között vált</TD><TR>
+<TD></TD><TD>C</TD><TD></TD><TD>a rendelkezésre álló videomódok között vált</TD><TR>
+<TD></TD><TD>W/S</TD><TD></TD><TD>a * és / alteregói (hangerõ)</TD><TR>
 
-		F		teljesképernyõs/ablakos mód között vált
-		C		a rendelkezésre álló videomódok között vált
-		W/S		a * és / alteregói (hangerõ)
+</TABLE></P>
 
-  Ismert hibák:
-  - az sdl:aalib-nél a lenyomott gombok örökké ismétlõdnek. (használj
+<P><B>Ismert hibák:</B></P>
+<P><UL><LI>az sdl:aalib-nél a lenyomott gombok örökké ismétlõdnek. (használj
     -vo aa-t!) Ez SDL hiba, nem változtathatok rajta (SDL 1.2.1-el tesztelve)
+</UL></P>
 
+<P><B><A NAME=2.2.1.5>2.2.1.5.  SVGAlib</A></B></P>
 
-  <A NAME=2.2.1.5>2.2.1.5.  SVGAlib</A>
-
-  Ha nincs X-ed, használd az SVGAlib meghajtót! Bizonyosodj meg róla, hogy nem
+<P>Ha nincs X-ed, használd az SVGAlib meghajtót! Bizonyosodj meg róla, hogy nem
   használod a -fs kapcsolót, mert ez itt a software-es scaler-t kapcsolja be,
   és ez LASSÚÚÚÚ egyelõre, hacsak nincs egy igazán gyors procid (és/vagy
-  MTRR?). :(
+  MTRR?). :(</P>
 
-  Természetesen fel kell installálnod az svgalib-et, és a fejlesztõi
+<P>Természetesen fel kell installálnod az svgalib-et, és a fejlesztõi
   környezetét, hogy az <B>MPlayer</B> le tudja fordítani az SVGAlib meghajtót
   (automatikusan detektálja, de lehet kényszeríteni is), és ne felejtsd el
   átszerkeszteni az /etc/vga/libvga.config-ot, hogy tükrözze a kártyád és a
-  monitorod tulajdonságait.
+  monitorod tulajdonságait.</P>
 
 
-  <A NAME=2.2.1.6>2.2.1.6.  Framebuffer meghajtó (FBdev)</A>
+<P><B><A NAME=2.2.1.6>2.2.1.6.  Framebuffer meghajtó (FBdev)</A></B></P>
 
-  Annak eldöntése, hogy legyen-e framebuffer meghajtó, a ./configure alatt dõl
+<P>Annak eldöntése, hogy legyen-e framebuffer meghajtó, a ./configure alatt dõl
   el. Olvasd el a kernelforrásban található framebuffer dokumentációt
-  (Documentation/fb/*), ami leírja, hogy hogy kapcsold be stb. !
+  (Documentation/fb/*), ami leírja, hogy hogy kapcsold be stb. !</P>
 
-  Ha a kártyád nem támogatja a VBE 2.0 szabványt (régebbi ISA/PCI kártyák,
+<P>Ha a kártyád nem támogatja a VBE 2.0 szabványt (régebbi ISA/PCI kártyák,
   például az S3 Trio64), csak a VBE 1.2-et (vagy régebbit?) : Nos, VESAfb még
   mindig használható, de a Linux bootolása elõtt be kell töltened a SciTech
   Display Doctor-t (régebben UniVBE). Használj DOS bootlemezt, vagy valami! És
-  ne felejtsd regisztrálni az UniVBE-det ;))
+  ne felejtsd regisztrálni az UniVBE-det ;))</P>
 
-  Az FBdev meghajtónak van néhány saját opciója is :
-	-fb		a framebuffer egység megadása (/dev/fb0)
-	-fbmode		a használni kívánt videomód neve (/etc/fb.modes
-			szerint)
-	-fbmodeconfig	módkonfigurációs file (alapban /etc/fb.modes)
-	monitor_hfreq
-	monitor_vfreq		FONTOS ! lásd example.conf
-	monitor_dotclock
+<P>Az FBdev meghajtónak van néhány saját opciója is :</P>
 
-  Ha egy specifikus videomódba akarsz váltani, azt így teheted :
+<P><TABLE BORDER=0>
+<TD>&nbsp;&nbsp;</TD><TD>-fb</TD><TD>&nbsp;&nbsp;</TD><TD>
+a framebuffer egység megadása (/dev/fb0)</TD><TR> 
+<TD></TD><TD>-fbmode</TD><TD></TD><TD>a használni kívánt videomód neve (/etc/fb.modes szerint)</TD><TR>
+<TD></TD><TD>-fbmodeconfig</TD><TD></TD><TD>módkonfigurációs file (alapban /etc/fb.modes)</TD><TR>
+<TD></TD><TD>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3>FONTOS ! lásd example.conf</TD><TR>
+<TD></TD><TD>-monitor_vfreq</TD><TD></TD><TR>           
+<TD></TD><TD>-monitor_dotclock</TD><TD></TD><TR>        
+</TABLE></P>
 
-	mplayer -vm -fbmode (A mód neve) filenév
+<P>Ha egy specifikus videomódba akarsz váltani, azt így teheted :</P>
 
-  -vm egymaga kiválasztja a leginkább ideillõ módot az /etc/fb.modes fileból.
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -vm -fbmode (A mód neve) filenév</CODE></P>
+
+<P><UL><LI><B>-vm</B> egymaga kiválasztja a leginkább ideillõ módot az /etc/fb.modes fileból.
   Használható az -x és -y opciókkal együtt is. A -flip opció csak akkor
   támogatott, ha a film pixelformátuma megegyezik a videomód formátumával.
   Figyelj a bpp értékére is, az fbdev meghajtó a jelenlegit próbálja
   használni, vagy ha a -bpp opciót használod, akkor azt.
-  A -zoom opció nem támogatott (a software-es nagyítás nagyon lassú).
+<LI><B>-zoom</B> opció nem támogatott (a software-es nagyítás nagyon lassú).
   Az -fs opciónak nincs jelentõsége. Továbbá nem használhatsz 8 vagy kisebb
-  bpp-s módokat.
+  bpp-s módokat.</UL></P>
 
-  Megj: az FBdev módváltás _NEM_ mûködik a VESA framebufferrel, és ne is
-	kérdezd miért, mert nem <B>MPlayer</B> hiba.
+<P>Megj: az FBdev módváltás _NEM_ mûködik a VESA framebufferrel, és ne is
+	kérdezd miért, mert nem <B>MPlayer</B> hiba.</P>
 
+<P><B><A NAME=2.2.1.7>2.2.1.7.  Matrox framebuffer (mga_vid)</A></B></P>
 
-  <A NAME=2.2.1.7>2.2.1.7.  Matrox framebuffer (mga_vid)</A>
-
-  Ez a rész a Matrox G200/G400/G450 BES (Back-End Scaler) támogatásról szól,
+<P>Ez a rész a Matrox G200/G400/G450 BES (Back-End Scaler) támogatásról szól,
   azaz az mga_vid kernel meghajtóról. Hardware-es VSYNC támogatást tartalmaz,
-  tripla buffereléssel. Framebufferes konzolon is, és X alatt is mûködik.
+  tripla buffereléssel. Framebufferes konzolon is, és X alatt is mûködik.</P>
 
-  A használatához elõszöris le kell fordítani :
+<P>A használatához elõszöris le kell fordítani :</P>
 
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;cd drivers<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
 
-		cd drivers
-		make
+<P>Aztán létrehozni a /dev/mga_vid egységet :</P>
 
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mknod /dev/mga_vid c 178 0</CODE></P>
 
-  Aztán létrehozni a /dev/mga_vid egységet :
+<P>betölteni a meghajtót :</P>
 
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;insmod mga_vid.o</CODE></P>
 
-		mknod /dev/mga_vid c 178 0
+<P>Ellenõrizd hogy jól detektálta-e a memória méretét, a 'dmesg' paranccsal.
+  Ha rosszul, akkor használd az mga_ram_size opciót (elõtte rmmod mga_vid) :</P>
 
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;insmod mga_vid.o mga_ram_size=16</CODE></P>
 
-  betölteni a meghajtót :
+<P>Hogy mindez automatikus legyen, a következõ sor kell az /etc/modules.conf
+  végére :</P>
 
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;alias char-major-178 mga_vid</CODE></P>
 
-		insmod mga_vid.o
+<P>És futtasd le a depmod-ot :</P>
 
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;depmod -a</CODE></P>
 
-  Ellenõrizd hogy jól detektálta-e a memória méretét, a 'dmesg' paranccsal.
-  Ha rosszul, akkor használd az mga_ram_size opciót (elõtte rmmod mga_vid) :
-
-
-		insmod mga_vid.o mga_ram_size=16
-
-
-  Hogy mindez automatikus legyen, a következõ sor kell az /etc/modules.conf
-  végére :
-
-
-		alias char-major-178 mga_vid
-
-
-  És futtasd le a depmod-ot :
-
-
-		depmod -a
-
-
-  Most (újra) le kell fordítanod az <B>MPlayer</B>-t, a ./configure detektálja
+<P>Most (újra) le kell fordítanod az <B>MPlayer</B>-t, a ./configure detektálja
   a /dev/mga_vid létezését, és lefordítja az 'mga' meghajtót. Az
   <B>MPlayer</B>-bõl a használata a '-vo mga' opcióval történik ha
-  framebufferes konzolról vagy, és '-vo xmga' ha X-bõl.
+  framebufferes konzolról vagy, és '-vo xmga' ha X-bõl.</P>
 
-  Megj: '-vo xmga' mûködik XFree86 4.x.x-ben is, de ütközik az Xv meghajtóval,
+<P>Megj: '-vo xmga' mûködik XFree86 4.x.x-ben is, de ütközik az Xv meghajtóval,
   igyhát kerüld a kettõ együttes használatát. Ha az Xv mégis elromlik,
-  futtasd az <B>MPlayer</B>-t egyszer a '-vo mga' opcióval. Ez kijavítja.
-  
+  futtasd az <B>MPlayer</B>-t egyszer a '-vo mga' opcióval. Ez kijavítja.</P>
 
-  <A NAME=2.2.1.8>2.2.1.8.  SiS 6326 framebuffer (sis_vid)</A>
 
-  SiS 6326 YUV Framebuffer meghajtó -> sis_vid kernel meghajtó
+<P><B><A NAME=2.2.1.8>2.2.1.8.  SiS 6326 framebuffer (sis_vid)</A></B></P>
 
-  A felülete elvileg kompatibilis az mga_vid-del, de ebbe nem kerültek
+<P>SiS 6326 YUV Framebuffer meghajtó -> sis_vid kernel meghajtó</P>
+
+<P>A felülete elvileg kompatibilis az mga_vid-del, de ebbe nem kerültek
   bele az mga_vid-es változtatások, úgyhogy valószínûleg nem mûködik.
-  Jelentkezõk kellenek tesztelésre, javításra.
+  Jelentkezõk kellenek tesztelésre, javításra.</P>
 
 
-  <A NAME=2.2.1.9>2.2.1.9.  3dfx YUV támogatás</A>
+<P><B><A NAME=2.2.1.9>2.2.1.9.  3dfx YUV támogatás</A></B></P>
 
-  3dfx (mely kártyák?) YUV+scaler támogatás, a /dev/3dfx-el (tdfx.o driver?)
+<P>3dfx (mely kártyák?) YUV+scaler támogatás, a /dev/3dfx-el (tdfx.o driver?)
   A /dev/3dfx kernel driver csak a 2.2.x kernelekhez létezik, és a Glide-dal
   használatos. Nincs letesztelve <B>MPlayer</B>-rel, ezért nem támogatott.
-  Jelentkezõk kellenek tesztelésre, javításra.
+  Jelentkezõk kellenek tesztelésre, javításra.</P>
 
+<P><B><A NAME=2.2.1.10>2.2.1.10.  OpenGL kimenet</A></B></P>
 
-  <A NAME=2.2.1.10>2.2.1.10.  OpenGL kimenet</A>
-
-  Az <B>MPlayer</B> támogatja filmek lejátszását OpenGL-en keresztül. Sajnos,
+<P>Az <B>MPlayer</B> támogatja filmek lejátszását OpenGL-en keresztül. Sajnos,
   nem minden meghajtónak van meg ez a képessége. Például az Utah-GLX
   (3-as X-hez) meghajtók mindegyike tudja ezt, minden támogatott kártyával.
-  Lásd a <A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A> címen.
+  Lásd a <A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A> címen.</P>
 
-  XFree86(DRI) >= 4.0.3 csak Matrox, és Radeon kártyákkal támogatja.
-  Lásd a <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> címen.
+<P>XFree86(DRI) >= 4.0.3 csak Matrox, és Radeon kártyákkal támogatja.
+  Lásd a <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> címen.</P>
 
+<P><B><A NAME=2.2.1.11>2.2.1.11.  AAlib - szöveges módú megjelenítés</A></B></P>
 
-  <A NAME=2.2.1.11>2.2.1.11.  AAlib - szöveges módú megjelenítés</A>
-
-  Az <B>AAlib</B> könyvtár grafikák szöveges módban történõ megjelenítésére
+<P>Az <B>AAlib</B> könyvtár grafikák szöveges módban történõ megjelenítésére
   szolgál. Nagyon sok program támogatja, mint például a Doom vagy a Quake, stb.
   Az <B>MPlayer</B> egy nagyon jó drivert tartalmaz hozzá.
   Ha a ./configure úgy detektálta hogy fent van az aalib, lefordul az aalib
-  meghajtó.
+  meghajtó.</P>
 
-  Az AA ablakban használhatsz néhány extra billentyût :
-        1 : kontraszt csökkentése
-        2 : kontraszt növelése
-        3 : fényerõ csökkentése
-        4 : fényerõ növelése
-	5 : gyors megjelenítés be/ki
-        6 : ditherelési módok (nincs, error distribution, floyd steinberg)
-        7 : kép invertálása
-	a : AA és MPlayer billentyûk között vált
+<P><TABLE BORDER=0>
+<TD COLSPAN=4><P><B>Az AA ablakban használhatsz néhány extra billentyût:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>1</TD><TD>&nbsp;&nbsp;</TD><TD>kontraszt csökkentése</TD><TR>
+<TD></TD><TD>2</TD><TD></TD><TD>kontraszt növelése</TD><TR>
+<TD></TD><TD>3</TD><TD></TD><TD>fényerõ csökkentése</TD><TR>
+<TD></TD><TD>4</TD><TD></TD><TD>fényerõ növelése</TD><TR>
+<TD></TD><TD>5</TD><TD></TD><TD>gyors megjelenítés be/ki</TD><TR>
+<TD></TD><TD>6</TD><TD></TD><TD>ditherelési módok (nincs, error distribution, floyd steinberg)</TD><TR>
+<TD></TD><TD>7</TD><TD></TD><TD>kép invertálása</TD><TR>
+<TD></TD><TD>a</TD><TD></TD><TD>AA és MPlayer billentyûk között vált)</TD><TR>
 
+<TD COLSPAN=4><P><B>A következõ parancssori opciók állnak rendelkezésre:</B></P></TD
 
-  A következõ parancssori opciók állnak rendelkezésre :
-	-aaosdcolor=V : OSD szín megváltoztatása
-	-aasubcolor=V : feliratok színének megváltoztatása
-              ahol a V lehet: (0/normál, 1/sötét, 2/bold, 3/boldfont, 4/reverz,
-			       5/speciális)
+<TD></TD><TD>-aaosdcolor=V</TD><TD></TD><TD>OSD szín megváltoztatása</TD><TR>
+<TD></TD><TD>-aasubcolor=V</TD><TD></TD><TD>feliratok színének megváltoztatása</TD><TR>
+<TD COLSPAN=3></TD><TD><P><I>ahol a V lehet: (0/normál, 1/sötét, 2/bold, 3/boldfont, 4/reverz, 5/special)</P></TD></TR>
 
-	Az AAlib maga igen sok opciót kezel.
-	A legfontosabbak :
-	-aadriver     : aa meghajtó beállítása (X11, curses, linux)
-	-aaextended   : az összes 256 karakter használata
-	-aaeight      : 8 bites ascii használata
-	-aahelp       : az összes aalib opció kiírása
-	
+<TD COLSPAN=4><P><B>AAlib itselves provides a large sum of options.
+Here are some important:</P></B></TD><TR>
 
-  Megj: a renderelés nagyon CPU igényes, különösen ha AA-on-X-et
+<TD></TD><TD>-aadriver</TD><TD></TD><TD>aa meghajtó beállítása (X11, curses, linux)</TD><TR>
+<TD></TD><TD>-aaextended</TD><TD></TD><TD>az összes 256 karakter használata</TD><TR>
+<TD></TD><TD>-aaeight</TD><TD></TD><TD>8 bites ascii használata</TD><TR>
+<TD></TD><TD>-aahelp</TD><TD></TD><TD>az összes aalib opció kiírása</TD><TR>
+</TABLE></P>
+
+<P>Megj: a renderelés nagyon CPU igényes, különösen ha AA-on-X-et
 	(X alatti aalib) használsz, és a legkevésbe CPU igényes, ha síma,
 	nem-framebufferes konzolon futtatod. Használd az SVGATextMode-t
-	hogy legyen szép nagy szöveges módod, és mehet!
+	hogy legyen szép nagy szöveges módod, és mehet!</P>
 
-	Használd a -framedrop opciót ha a géped nem elég gyors.
+<P>Használd a -framedrop opciót ha a géped nem elég gyors.</P>
 
-	Ha konzolon játszol le, jobb sebességet érhetsz el ha a 'linux'
+<P>Ha konzolon játszol le, jobb sebességet érhetsz el ha a 'linux'
 	meghajtót használod, nem a 'curses'-t (-aadriver linux). De így
 	írási hozzáférés kell a /dev/vcsa*-hoz! vo_aa megpróbálja a legjobb
 	módot megtalálni.
 	Lásd a http://aa-project.sourceforge.net/tune/ címet további
-	részletekért.
+	részletekért.</P>
 
+<P><B><A NAME=2.2.1.A>2.2.1.A.  TV kimenet</A></B></P>
 
-  <A NAME=2.2.1.A>2.2.1.A.  TV kimenet</A>
+<P><B><A NAME=2.2.1.A.1>2.2.1.A.1.  Matrox kártyák</A></B></P>
 
-
-  <A NAME=2.2.1.A.1>2.2.1.A.1.  Matrox kártyák</A>
-
-  <I> Nagyon szeretném, ha az MPlayer tudná azt, amit a windows-os gépem. Amikor
+<P><I> Nagyon szeretném, ha az MPlayer tudná azt, amit a windows-os gépem. Amikor
    elindítok egy lejátszást a windows-ban (ablakos vagy teljesképernyõs)
    a film megjelenik a tv-kimeneten is. Imádom ezt, és azon gondolkoztam, milyen
-   nehéz lenne ezt beépíteni mplayer-be.</I>
+   nehéz lenne ezt beépíteni mplayer-be.</I></P>
 
-  Ez a driver korlátja. BES (Back-End Scaler, ez az overlay generator, és YUV
+<P.Ez a driver korlátja. BES (Back-End Scaler, ez az overlay generator, és YUV
   scaler a G200/G400/G450 kártyákon) csak a CRTC1-en mûködik. Normális esetben,
   CRTC1 (szöveges mód, minden bpp, BES) az 1-es head-re kerül, és CRTC2
-  (csak 16/32bpp, csak grafika) a 2-esre (TV-kimenet).
+  (csak 16/32bpp, csak grafika) a 2-esre (TV-kimenet).</P>
 
-  Linux alatt, 2 lehetõseg van ennek mûködésre bírására:
+<P>Linux alatt, 2 lehetõseg van ennek mûködésre bírására:</P>
 
-  1. 4.0.x-es X használatával, valamint a HAL driverrel a Matrox-tól, így
+<P><UL>
+<LI>4.0.x-es X használatával, valamint a HAL driverrel a Matrox-tól, így
      lesz dualhead támogatás, és át lehet irányítani TV-re. Sajnos ez
      bekapcsolt Macrovision kódolással van ellátva, így csak közvetlenül
      TV-re mûködik, videomagnón keresztül nem. (**dehonnem, régi vidi rulez**)
@@ -612,51 +597,51 @@
      (nem tudom, hogy a Windows hogy oldja meg, talán megcseréli a CRTC-ket, 
      vagy valami trükkel használja a YUV framebuffer-t a második DAC-en)
 
-  2. Matroxfb használatával, és dual-head támogatással (2.4.x kernelek).
+<LI>Matroxfb használatával, és dual-head támogatással (2.4.x kernelek).
      Lesz egy framebufferes konzolod (CRTC2-vel, úgyhogy lassú), és
      TV-kimenet (CRTC1-gyel, BES támogatással).
      Ilyenkor elfelejtheted az X-et! :(
+</UL></P>
 
-  -  Fordíts minden matrox-féle cuccot modulba a kernelfordításkor.
+<P><UL>
+<LI>Fordíts minden matrox-féle cuccot modulba a kernelfordításkor.
      (ez SZÜKSÉGES, legalábbis én máshogy még nem tudtam mûködésre bírni)
      [indítsd az új kernelt és installáld a modulokat, de még ne töltsd be
      õket!]
 
-     cd TVout  
-     ./compile.sh
+<P><CODE>
+&nbsp;&nbsp;cd TVout<BR>
+&nbsp;&nbsp;./compile.sh</CODE></P>
 
-  -  Futtasd a 'modules' script-et a TV-out könyvtárból.
+<LI>Futtasd a 'modules' script-et a TV-out könyvtárból.
      Át fogja kapcsolni a konzolodat framebuffer-be.
      Válts át tty1-re (ALT+F1)!
      Most futtasd az 'independent' scriptet, ami így fogja beállítani a tty-ket:
-       tty 1,2:      fb konzol, CRTC2-n, 1-es headen (monitor)
-       tty 3,4,5:..: framebuffer+BES, CRTC1-en, 2-es headen (TV-kimenet)
+<P>tty 1,2:      fb konzol, CRTC2-n, 1-es headen (monitor)<BR>
+       tty 3,4,5:..: framebuffer+BES, CRTC1-en, 2-es headen (TV-kimenet)</P>
      Futtasd a TV-* és Mon-* scripteket, hogy beállítsd a felbontásokat:
-       válts tty1-re (ALT+F1), és futtasd: Mon-* (csak az egyiket)
-       válts tty3-ra (ALT+F3), és most vissza tty1-re (ALT+F1)
-         (ez kiválasztja a tty3-at a /dev/fb1-en - trükkös)   
-     Futtasd: TV-* (csak az egyiket)
+<P>válts tty1-re (ALT+F1), és futtasd: Mon-* (csak az egyiket)<BR>
+       válts tty3-ra (ALT+F3), és most vissza tty1-re (ALT+F1)</P>
+         (ez kiválasztja a tty3-at a /dev/fb1-en - trükkös)   <BR>
+<P>Futtasd: TV-* (csak az egyiket)</P>
         (most egy konzolod lesz a PAL TV-n - nem tudni NTSC-vel mi van)
 
-     Ha most elindítod az <B>MPlayer</B>-t (tty1-en), a kép tty3-on jön elõ, azaz
-     a TV-den, vagy a második monitorodon.
+<P>Ha most elindítod az <B>MPlayer</B>-t (tty1-en), a kép tty3-on jön elõ, azaz
+     a TV-den, vagy a második monitorodon.</P>
+</UL></P>
 
-  Igen, egy csöppet gány. Jelenleg a marvel project elkészülésére várok,
-  remélem ez normális TV-out drivereket eredményez.
+<P>Igen, egy csöppet gány. Jelenleg a marvel project elkészülésére várok,
+  remélem ez normális TV-out drivereket eredményez.</P>
 
-  Jelenlegi problémám, hogy a BES csak a CRTC1-en mûködik. Ezért a kép
+<P>Jelenlegi problémám, hogy a BES csak a CRTC1-en mûködik. Ezért a kép
   mindig azon a head-en jön elõ, amelyik a CRTC1-hez van irányítva
   (általában a monitor), így hát meg kell cserélni a CRTC-ket, viszont így
   a konzolod framebufferes lesz (mert a CRTC2 nem tud szöveges módot) és  
-  egy kicsit lassú. :(
+  egy kicsit lassú. :(</P>
 
-
-  <I> egyébként csak fekete-fehér kimenet sikerült a tv-n ...</I>
+<P><I> egyébként csak fekete-fehér kimenet sikerült a tv-n ...</I>
   Nem lehet hogy NTSC TV-d van? Vagy csak nem futtattad le a TV-*
-  scriptet.
-
-
-</PRE>
+  scriptet.</P>
 
 </BODY>
 

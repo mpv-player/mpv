@@ -86,7 +86,7 @@ ram (size=0x2000000) just execute:</P>
 
 <P>Not all CPUs support MTRRs. For example older K6-2's [around 266Mhz,
 stepping 0] doesn't support MTRR, but stepping 12's do ('<CODE>cat /proc/cpuinfo</CODE>'
-to check it).</P>
+to check it</CODE>').</P>
 
 <P><B><A NAME=2.2.1.2>2.2.1.2. Xv</A></B></P>
 
@@ -228,8 +228,8 @@ If you want to run it as user, then install <B>MPlayer</B> SUID root:</P>
 
 <P><CODE>
 &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chown root /usr/local/bin/mplayer<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod 750 /usr/local/bin/mplayer<BR> 
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod +s /usr/local/bin/mplayer<BR></CODE></P>
+&nbsp;&nbsp;&nbsp;&nbsp;chmod 750 /usr/local/bin/mplayer<BR> 
+&nbsp;&nbsp;&nbsp;&nbsp;chmod +s /usr/local/bin/mplayer</CODE></P>
 
 
 <P>Now it works as a simple user, too.</P>
@@ -251,7 +251,7 @@ faster!!!</P>
 This avoids the need for doing (slow) software scaling and at the same
 time provides a fullscreen image. Ideally it would switch to the exact
 resolution (except for honouring aspect ratio) of the video data, but the
-XServer only allows switching to resolutions predefined in 
+XServer only allows switching to resolutions predefined in
 <CODE>/etc/X11/XF86Config</CODE> (<CODE>/etc/X11/XF86Config-4</CODE> for XFree 4.0.X respectively).
 Those are defined by so-called modelines and depend on the capabilites
 of your video hardware. The XServer scans this config file on startup and
@@ -651,9 +651,6 @@ so i have to swap CRTC's, but this way your console will framebuffer
 
 <P><I>Anyway i also just get monochrome output on the tv ...</I>
 Maybe you have NTSC TV? Or just didn't run one of TV-* scripts.</P>
-
-<BR>
-<HR>MPlayer documentation project
 
 </BODY>
 </HTML>
