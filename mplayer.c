@@ -445,7 +445,7 @@ extern int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 
 char* filename=NULL; //"MI2-Trailer.avi";
 int i;
-int seek_to_sec=0;
+char *seek_to_sec=NULL;
 int seek_to_byte=0;
 int f; // filedes
 stream_t* stream=NULL;
@@ -513,7 +513,7 @@ int osd_visible=100;
 int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
 
-int rel_seek_secs=0;
+float rel_seek_secs=0;
 
 #include "mixer.h"
 #include "cfg-mplayer.h"
@@ -2155,9 +2155,18 @@ switch(sh_video->codec->driver){
       break;
   }
   if (seek_to_sec) {
-     rel_seek_secs += seek_to_sec;
-     seek_to_sec = 0;
+    int a,b; float d;
+    
+    if (sscanf(seek_to_sec, "%d:%d:%f", &a,&b,&d)==3)
+	rel_seek_secs += 3600*a +60*b +d ;
+    else if (sscanf(seek_to_sec, "%d:%f", &a, &d)==2)
+	rel_seek_secs += 60*a +d;
+    else if (sscanf(seek_to_sec, "%f", &d)==1)
+	rel_seek_secs += d;
+
+     seek_to_sec = NULL;
   }
+  
   if(rel_seek_secs)
   if(file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){
     printf("Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n");

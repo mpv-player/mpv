@@ -6,7 +6,7 @@ extern int divx_quality;
 
 extern char* filename;
 extern int i;
-extern int seek_to_sec;
+extern char *seek_to_sec;
 extern int seek_to_byte;
 extern int f; // filedes
 extern int stream_type;
@@ -70,7 +70,7 @@ extern int verbose;
 extern int osd_level;
 extern int nogui;
 
-extern int rel_seek_secs;
+extern float rel_seek_secs;
 
 extern int osd_visible;
 extern int osd_function;
