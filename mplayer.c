@@ -319,6 +319,8 @@ static vo_functions_t *video_out=NULL;
 
 static int play_in_bg=0;
 
+extern void avi_fixate();
+
 void exit_player(char* how){
   if(how) printf("\nExiting... (%s)\n",how);
   if(verbose) printf("max framesize was %d bytes\n",max_framesize);
@@ -357,6 +359,14 @@ void exit_sighandler(int x){
 }
 
 int divx_quality=0;
+
+extern int vcd_get_track_end(int fd,int track);
+extern int init_audio(sh_audio_t *sh_audio);
+extern int init_video_codec(sh_video_t *sh_video);
+extern void mpeg2_allocate_image_buffers(picture_t * picture);
+extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
+extern int vo_init(void);
+extern int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int maxlen);
 
 int main(int argc,char* argv[], char *envp[]){
 char* filename=NULL; //"MI2-Trailer.avi";
@@ -723,8 +733,8 @@ switch(file_format){
   if(sh_audio) avi_bitrate-=sh_audio->audio.dwLength;
   if(verbose) printf("AVI video length=%d\n",avi_bitrate);
   avi_bitrate=((float)avi_bitrate/(float)sh_video->video.dwLength)*sh_video->fps;
-  printf("VIDEO:  [%.4s]  %dx%d  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    &sh_video->bih->biCompression,
+  printf("VIDEO:  [%.4s]  %ldx%ld  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
+    (char *)&sh_video->bih->biCompression,
     sh_video->bih->biWidth,
     sh_video->bih->biHeight,
     sh_video->bih->biBitCount,
@@ -757,8 +767,8 @@ switch(file_format){
     }
   }
   sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
-  printf("VIDEO:  [%.4s]  %dx%d  %dbpp\n",
-    &sh_video->bih->biCompression,
+  printf("VIDEO:  [%.4s]  %ldx%ld  %dbpp\n",
+    (char *)&sh_video->bih->biCompression,
     sh_video->bih->biWidth,
     sh_video->bih->biHeight,
     sh_video->bih->biBitCount);
@@ -771,7 +781,7 @@ switch(file_format){
    break;
  }
  case DEMUXER_TYPE_MPEG_PS: {
-  if(has_audio)
+  if(has_audio) {
   if(!ds_fill_buffer(d_audio)){
     printf("MPEG: No Audio stream found...  ->nosound\n");
     has_audio=0;sh_audio=NULL;
@@ -784,6 +794,7 @@ switch(file_format){
       case 3: sh_audio->format=0x2000;break; // ac3
       default: has_audio=0; // unknown type
     }
+  }
   }
   break;
  }
@@ -1422,7 +1433,7 @@ switch(sh_video->codec->driver){
       ret = ICDecompress(sh_video->hic, ICDECOMPRESS_NOTKEYFRAME, 
                          sh_video->bih,   start,
                         &sh_video->o_bih, sh_video->our_out_buffer);
-      if(ret){ printf("Error decompressing frame, err=%d\n",ret);break; }
+      if(ret){ printf("Error decompressing frame, err=%d\n",(int)ret);break; }
     }
     current_module="draw_frame";
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
