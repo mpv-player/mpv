@@ -90,21 +90,21 @@ static uint32_t               dwidth,dheight;
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 
 static void draw_alpha_yv12(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   x0+=(vo_panscan_x>>2);
+   x0+=image_width*(vo_panscan_x>>1)/(vo_dwidth+vo_panscan_x);
    vo_draw_alpha_yv12(w,h,src,srca,stride,
        xvimage[current_buf]->data+xvimage[current_buf]->offsets[0]+
        xvimage[current_buf]->pitches[0]*y0+x0,xvimage[current_buf]->pitches[0]);
 }
 
 static void draw_alpha_yuy2(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   x0+=(vo_panscan_x>>2);
+   x0+=image_width*(vo_panscan_x>>1)/(vo_dwidth+vo_panscan_x);
    vo_draw_alpha_yuy2(w,h,src,srca,stride,
        xvimage[current_buf]->data+xvimage[current_buf]->offsets[0]+
        xvimage[current_buf]->pitches[0]*y0+2*x0,xvimage[current_buf]->pitches[0]);
 }
 
 static void draw_alpha_uyvy(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   x0+=(vo_panscan_x>>2);
+   x0+=image_width*(vo_panscan_x>>1)/(vo_dwidth+vo_panscan_x);
    vo_draw_alpha_yuy2(w,h,src,srca,stride,
        xvimage[current_buf]->data+xvimage[current_buf]->offsets[0]+
        xvimage[current_buf]->pitches[0]*y0+2*x0+1,xvimage[current_buf]->pitches[0]);
@@ -553,7 +553,7 @@ static void check_events(void)
 }
 
 static void draw_osd(void)
-{ vo_draw_text(image_width-(vo_panscan_x>>1),image_height,draw_alpha_fnc);}
+{ vo_draw_text(image_width-image_width*vo_panscan_x/(vo_dwidth+vo_panscan_x),image_height,draw_alpha_fnc);}
 
 static void flip_page(void)
 {
