@@ -88,6 +88,7 @@ static float qblur = 0.5;
 static float complexity_blur = 20;
 static char *rc_eq = "blurCplx^(1-qComp)";
 static int subq = 5;
+static int level_idc = 40;
 static int psnr = 0;
 static int log_level = 2;
 
@@ -127,6 +128,7 @@ m_option_t x264encopts_conf[] = {
     {"qblur", &qblur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
     {"cplx_blur", &complexity_blur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 999, NULL},
     {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 1, 5, NULL},
+    {"level_idc", &level_idc, CONF_TYPE_INT, CONF_RANGE, 10, 51, NULL},
     {"psnr", &psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nopsnr", &psnr, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"log", &log_level, CONF_TYPE_INT, CONF_RANGE, -1, 3, NULL},
@@ -218,6 +220,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.i_height = height;
     mod->param.i_fps_num = mod->mux->h.dwRate;
     mod->param.i_fps_den = mod->mux->h.dwScale;
+    mod->param.i_level_idc = level_idc;
     mod->param.analyse.b_psnr = psnr;
     mod->param.i_log_level = log_level;
     mod->param.vui.i_sar_width = d_width*height;

@@ -7523,6 +7523,14 @@ In the above, "all candidates" doesn't exactly mean all enabled types:
 4x4, 4x8, 8x4 are tried only if 8x8 is better than 16x16.
 .
 .TP
+.B level_idc=<10\-51>
+Set the bitstream's Level as defined by Annex A of the H.264 standard.
+This is used for telling the decoder what capabilities it needs to
+support. Use this parameter only if you know what it means, and you
+have a need to set it.
+Default: 40 (Level 4.0)
+.
+.TP
 .B log=<-1\-3>
 Adjust the amount of logging info printed to the screen.
 .RSs
