@@ -1723,6 +1723,7 @@ if(sh_audio && !demuxer2){
 } // while(!at_eof)
 
 if (!interrupted && filelist[++curfile].name != 0) {
+	if (sh_video && sh_video->vfilter) {
         // Before uniniting sh_video and the filter chain, break apart the VE.
  	vf_instance_t * ve; // this will be the filter right before the ve.
 	for (ve = sh_video->vfilter; ve->next && ve->next->next; ve = ve->next);
@@ -1730,6 +1731,7 @@ if (!interrupted && filelist[++curfile].name != 0) {
 		ve->next = NULL; // I'm telling the last filter, before the VE, there is nothing after it
 	else // There is no chain except the VE.
 		sh_video->vfilter = NULL;
+	}
 
 	if(sh_video){ uninit_video(sh_video);sh_video=NULL; }
 	if(demuxer) free_demuxer(demuxer);
