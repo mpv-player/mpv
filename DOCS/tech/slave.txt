@@ -9,6 +9,10 @@ Have a look at the man page for more detailed descriptions.
 If the -slave option is given, playback is controlled by a line-based protocol.
 Each line must contain one of the following commands:
 
+All commands can be prefixed with "pausing ", causing MPlayer to get into
+paused mode as soon as possible after processing the command.
+Please note that this can be before the command is fully executed.
+
 seek <value> [<type>]
     Seek to some place in the movie.
         0 is a relative seek of +/- <value> seconds (default).
@@ -246,8 +250,3 @@ hide
 
 run <value>
     Run <value> as shell command.
-
-All commands can be prefixed with "pausing ", causing MPlayer to get into
-paused mode as soon as possible after processing the command.
-Please note that this can be before the command is fully executed.
-
