@@ -9,3 +9,4 @@ Full list of supported OS'es see in libdha.h
 
 Note: This library requires ROOT privileges or SUID'ed executable
 file (same as XServer).
+(Or use newly developed libdha kernel helper. Look at kernelhelper/dhahelper.c)
