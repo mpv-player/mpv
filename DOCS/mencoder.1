@@ -1,191 +1,158 @@
 .\" MEncoder (C) 2000-2002 Arpad Gereoffy <sendmail@to.mplayer-users>
 .\" This manpage was/is done by Gabucino
 .\"
-.TH MEncoder 1
+.TH "MEncoder" "1" "2002-05-03"
+
 .SH NAME
 mencoder \- Movie Encoder for Linux
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .B mencoder
-.RB [ \-vcd\ <track\ number> ]
-.RB [ \-dvd\ <titleid> ]
-.RB [ \-chapter\ <chapterid> ]
-.RB [ \-dvdangle\ <angleid> ]
-.RB [ \-dvdkey\ <key> ]
-.RB [ \-nobps ]
-.RB [ \-aid\ <id> ]
-.RB [ \-vid\ <id> ]
-.RB [ \-pp\ <quality> ]
-.RB [ \-vc\ <video\ codec\ name> ]
-.RB [ \-ac\ <audio\ codec\ name> ]
-.RB [ \-vfm\ <video\ codec\ family> ]
-.RB [ \-afm\ <audio\ codec\ family> ]
-.RB [ \-include\ <configfile> ]
-.RB [ \-mc\ seconds/5f ]
-.RB [ \-v ]
-.RB [ \-mp3file\ <filename> ]
-.RB [ \-ac3file\ <filename> ]
-.RB [ \-ovc\ <video\ codec\ name> ]
-.RB [ \-oac\ <audio\ codec\ name> ]
-.RB [ \-nosound ]
-.RB [ \-mf\ <multifile\ options> ]
-.RB [ \-divx4opts\ <codec\ options> ]
-.RB [ \-lavcopts\ <codec\ options> ]
-.RB [ \-lameopts\ <codec\ options> ]
-.RB [ \-pass\ <1/2> ]
-.RB [ \-passlogfile\ <filename> ]
-.RB [ \-ofps\ <fps> ]
-.RB [ \-o\ <filename> ]
-.RB [ \-frames\ <number> ]
-.RB [ \-sws\ <0-2> ]
-.RB [ \-ffourcc\ fourcc ]
-.RB [ \-ss\ <time> ]
-.RB [ \-endpos\ <time> ]
-.RB [ \-audiofile\ <file\ name> ]
-.RB [ \-sub\ <subtitle\ file\ name> ]
-.I - or file or files specified with escaped wildcard or device
-.PP
+.RB [options]\ [\fIfile\fP\ |\ \fIURL\fP\ |\ \fIplaylist\fP\ |\ \-\ ]\ [\-o\ file]
+.BR
+.B mencoder
+.RB [global\ options]\ \fIfile1\fP\ [specific\ options]\ [file2]\ [specific\ options]\ [\-o\ file]
+.BR
+.B mencoder
+.RB [global\ options]\ {\fIgroup\ of\ files\ and\ options\fP}\ [group\ specific\ options]\ [\-o\ file]
+.BR
+.B mencoder
+.RB [dvd|vcd|tv]://[title]\ [options]\ [\-o\ file]
+.BR
+.B mencoder
+.RB [mms|http]://URL[:port]\ [options]\ [\-o\ file]
+
 .SH DESCRIPTION
-.I mencoder
+.B mencoder
 MEncoder (MPlayer's Movie Encoder) is a simple movie encoder, designed to
-encode MPlayer-playable movies (AVI/DVD/VCD/VOB/MPG/MOV/VIV/NET) to other
-MPlayer-playable formats (see below). Currently it and encodes to divx4/xvid
-(using divx4linux/xvid core), libavcodec formats (including divx3 and mpeg4),
-raw uncompressed rgb (usable with virtualdub etc), PCM/MP3/VBRMP3 audio.
-Also has stream copying abilities. 
-You can use MPlayer's video filters, so scale, crop, expand, flip, etc.
-.LP
-.SH "GENERAL OPTIONS"
-.TP
+encode MPlayer-playable movies (AVI/DVD/VCD/VOB/MPG/MOV/VIV/VIV/FLI/RM/NUV/NET)
+to other MPlayer-playable formats (see below).  It encodes to DivX4 
+(1, 2 or 3 passes), xvid, codecs of libavcodec, PCM/MP3/VBRMP3 audio. 
+Also has stream copying abilities, a powerfull plugin system
+(crop, expand, flip, postprocess, rotate, scale, rgb/yuv conversion) and more.
+
+.SH "OPTIONS"
 .I NOTE
 Every "flag" option has "noflag" pair, e.g. -flag opposite is -noflag
-.TP
+.BR
 .I NOTE
-CHECK THE HTML DOCUMENTATION TOO !
-.TP
+CHECK THE HTML DOCUMENTATION TOO!
+.BR
 .I NOTE
 As MEncoder uses the same 'libmpdemux' as MPlayer, their options are
-_sometimes the same_ ! So although for example the -sid option isn't
+_sometimes the same_! So although for example the -sid option isn't
 mentioned here, you can use it in MEncoder too! (for encoding DVD with
 subtitles)
 .TP
-.B \-vcd <track number>
-Encode the specified VCD track.
-.TP
-.B \-dvd <title number>
-Encode the specified DVD title.
-.TP
-.B \-chapter <chapter id>
-Use with -dvd option (see above). Start encoding at the specified chapter.
-.TP
-.B \-dvdangle <angle id>
-Use with -dvd option (see above), and if the DVD disc has multiple angles.
-It will encode the angle specified here.
-.TP
-.B \-dvdkey <key>
-Used to decrypt CSS-encrypted streams on hard disk (with given CSS decrypt
-key).
-.TP
-.B \-nobps
-Used only for AVIs. Doesn't use the bps value in the AVI header, instead
-calculates it.
-.TP
-.B \-aid <audio stream id>
-If the source media contains multiple audio streams (for example DVDs), encode
-the specified one.
-.TP
-.B \-vid <video stream id>
-If the source media contains multiple video streams, encode the specified one.
-.TP
-.B \-pp <value>
-See man mplayer.
-.TP
-.B \-vc <codec name>
-Use specified codec (according to codecs.conf) for decoding input video
-stream.
+.B \-ac3file <filename>
 .TP
 .B \-ac <codec name>
 Use specified codec (according to codecs.conf) for decoding input audio
 stream.
 .TP
-.B \-vfm <video codec family>
+.B \-afm <codec family>
 Force decoding by using a specific codec FAMILY, and FALLBACK to default
 if failed.  For examples see MPlayer manpage.
 .TP
-.B \-afm <audio codec family>
-Force decoding by using a specific codec FAMILY, and FALLBACK to default
-if failed.  For examples see MPlayer manpage.
+.B \-aid <stream id>
+If the source media contains multiple audio streams (for example DVDs), encode
+the specified one.
 .TP
-.B \-include
-specify config file to be parsed after the default
-.TP
-.B \-mc\ seconds/frame
-maximum sync correction per frame (in seconds).
-Use -mc 0 to disable input A/V sync.
-.TP
-.B \-v
-Increase verbosity.
-.TP
-.B \-ovc <codecname>
-Encode with the given codec (codec names are from codecs.conf).
-Examples:
-
-  -ovc help      get help
-  -ovc copy      no encoding, just streamcopy
-  -ovc divx4     encode to DivX4/DivX5 or XviD
-  -ovc rawrgb    encode to uncompressed RGB24
-  -ovc lavc      encode with a libavcodec codec
-.TP
-.B \-oac <codecname>
-Encode with the given codec (codec names are from codecs.conf).
-Examples:
-
-  -oac help      get help
-  -oac copy      no encoding, just streamcopy
-  -oac pcm       encode to uncompressed PCM
-  -oac mp3lame   encode to MP3 (using Lame)
-.TP
-.B \-nosound
-Encode only video, no audio stream.
-.TP
-.B \-audiofile <file name>
+.B \-audiofile <filename>
 Copy audio from external file.
 .TP
-.B \-mf <multifile options>
-Used when encoding from multiple JPEG files.
-Its sub-options are:
-
-  on             turns on multifile support
-  w=<value>      width of the output file [autodetected]
-  h=<value>      height of the output file [autodetected]
-  fps=<value>    fps of the output file [default: 25fps]
-  type=<value>   type of input files (jpeg, png)
+.B \-chapter <chapter id>
+Use with -dvd option (see above). Start encoding at the specified chapter.
 .TP
-.B \-divx4opts
+.B \-divx4opts <options>
 If encoding to DivX4, you can specify its parameters here, like:
 
   -divx4opts br=1800:deinterlace:key=250
 
 Available options:
 
-  help           get help
-  br=XXX         specify bitrate in
-                 kbit <4-16000> or
-                 bit  <16001-24000000>
-  key=XXX        maximum keyframe interval
-                 (in frames)
-  deinterlace    enable deinterlacing
-                 (don't use, DivX4 is buggy!)
-  q=XXXX         quality (1-fastest, 5-best)
-  min_quant=XXX  minimum quantizer (0-32)
-  max_quant=XXX  maximum quantizer (0-32)
-  rc_period=XXX  rate control period
-  rc_reaction_period=XXX rate control
-                         reaction period
-  rc_reaction_ratio=XXX  rate control
-                         reaction ratio
-
+  help              get help
+  br=<value>        specify bitrate in
+                    kbit <4\-16000> or
+                    bit  <16001\-24000000>
+  key=<value>       maximum keyframe interval
+                    (in frames)
+  deinterlace       enable deinterlacing
+                    (don't use, DivX4 is buggy!)
+  q=<value>         quality (1\-fastest, 5\-best)
+  min_quant=<value> minimum quantizer (0\-32)
+  max_quant=<value> maximum quantizer (0\-32)
+  rc_period=<value> rate control period
+  rc_reaction_period=<value> 
+                    rate control reaction period
+  rc_reaction_ratio=<value> 
+                    rate control reaction ratio
+  crispness=<value> (0\-100)
 .TP
-.B \-lavcopts
+.B \-dvd <title id>
+Encode the specified DVD title.
+.TP
+.B \-dvdangle <angle id>
+Use with -dvd option (see above), and if the DVD disc has multiple angles.
+It will encode the angle specified here.
+.TP
+.B \-dvdkey <CSS key>
+Used to decrypt CSS-encrypted streams on hard disk (with given CSS decrypt
+key).
+.TP
+.B \-endpos <time>
+Stop encoding at given time. Can be specified in many was :
+
+    -endpos 56       encode only 56 seconds
+    -endpos 01:10:00 encode only 1 hours
+
+Can be used in conjuction with -ss!
+.TP
+.B \-ffourcc fourcc
+Can be used to force the video fourcc of the output file. For example -ffourcc
+div3 will have the output file contain "div3" as video fourcc.
+.TP
+.B \-frames <number>
+Encode only given number of frames.
+.TP
+.B \-include
+Specify config file to be parsed after the default
+.TP
+.B \-lameopts <options>
+If encoding to MP3 with libmp3lame, you can specify its parameters here, like:
+
+  -lameopts br=192:cbr
+
+Available options:
+
+    help            get help
+    vbr=<value>     variable bitrate method
+                      0=cbr
+                      1=mt
+                      2=rh(default)
+                      3=abr
+                      4=mtrh
+    abr             average bitrate
+    cbr             constant bitrate
+    br=<value>      specify bitrate in
+                    kbit <0-1024>
+                    (only for CBR and ABR)
+    q=<value>       Quality
+                    (0-highest, 9-low)
+                    (for VBR)
+    aq=<value>      ?
+    ratio=<value>   compression ratio <1-100>
+    vol=<value>     set audio input gain <0-10>
+    mode=<value>    0=stereo
+                    1=joint-stereo
+                    2=dualchannel
+                    3=mono
+                    (default: auto)
+    padding=<value> 0=no
+                    1=all
+                    2=adjust
+.TP
+.B \-lavcopts <options>
 If encoding with a codec from libavcodec, you can specify its parameters here,
 like:
 
@@ -193,114 +160,117 @@ like:
 
 Available options:
 
-  help           get help
+  help             get help
 
-  vcodec=XXX     use the specified codec :
-                   mjpeg - Motion JPEG
-                   h263 - H263
-                   h263p - H263 Plus
-                   mpeg4 - DivX 4/5
-                   msmpeg4 - DivX 3
-                   rv10 - an old RealVideo codec
-                   mpeg1video - MPEG1 video :)
-                 There's no default, you must
-                 specify it.
+  vcodec=<value>   use the specified codec :
+                     mjpeg - Motion JPEG
+                     h263 - H263
+                     h263p - H263 Plus
+                     mpeg4 - DivX 4/5
+                     msmpeg4 - DivX 3
+                     rv10 - an old RealVideo codec
+                     mpeg1video - MPEG1 video :)
+                   There's no default, you must
+                   specify it.
 
-  vbitrate=XXX   specify bitrate in
-                 kbit <4-16000> or
-                 bit  <16001-24000000>
-                 (warning: 1kbit = 1000 bits)
-                 default = 800k
+  vbitrate=<value> specify bitrate in
+                   kbit <4-16000> or
+                   bit  <16001-24000000>
+                   (warning: 1kbit = 1000 bits)
+                   default = 800k
 
-  vratetol=XXX   approximated *filesize* tolerance
-                 in kbits.
-                 (warning: 1kbit = 1000 bits)
-                 default = 1024*8 kbits = 1MByte
+  vratetol=<value> approximated *filesize* tolerance
+                   in kbits.
+                   (warning: 1kbit = 1000 bits)
+                   default = 1024*8 kbits = 1MByte
 
-  keyint=XXX     interval between keyframes
-                 (specify in frames, >300 are not
-                 recommended)
-                 default = 250 (one key frame every
-                 ten seconds in a 25fps movie)
+  keyint=<value>    interval between keyframes
+                   (specify in frames, >300 are not
+                   recommended)
+                   default = 250 (one key frame every
+                   ten seconds in a 25fps movie)
 
-  vhq            high quality mode, macro blocks
-                 will be encoded multiple times and
-                 the smallest will be used.
-                 default = HQ disabled
+  vhq              high quality mode, macro blocks
+                   will be encoded multiple times and
+                   the smallest will be used.
+                   default = HQ disabled
 
-  vme=XXX        [0..5] motion estimation method :
-                   0 - no ME at all
-                   1 - ME_FULL
-                   2 - ME_LOG
-                   3 - ME_PHODS
-                   4 - ME_EPZS
-                   5 - ME_X1
-                 EPZS usually gives best results,
-                 but you can try X1 too. FULL is
-                 very slow and the others are
-                 experimental.
-                 default = EPZS
+  vme=<value>      [0..5] motion estimation method :
+                     0 - no ME at all
+                     1 - ME_FULL
+                     2 - ME_LOG
+                     3 - ME_PHODS
+                     4 - ME_EPZS
+                     5 - ME_X1
+                   EPZS usually gives best results,
+                   but you can try X1 too. FULL is
+                   very slow and the others are
+                   experimental.
+                   default = EPZS
 
-  vqcomp=XXX     if the value is set to 1.0, the
-                 quantizer will stay nearly
-                 constant (high motion scenes will
-                 look bad). If it's 0.0, the
-                 quantizer will be changed
-                 to make all frames approximately
-                 equally sized (low motion scenes
-                 will look bad).
-                 default = 0.5
+  vqcomp=<value>   if the value is set to 1.0, the
+                   quantizer will stay nearly
+                   constant (high motion scenes will
+                   look bad). If it's 0.0, the
+                   quantizer will be changed
+                   to make all frames approximately
+                   equally sized (low motion scenes
+                   will look bad).
+                   default = 0.5
 
-  vqblur=XXX     blurs the quantizer graph over
-                 time.
-                    0.0 : no blur
-                    1.0 : average all past
-                          quantizers
-                 default = 0.5
+  vqblur=<value>   blurs the quantizer graph over
+                   time.
+                      0.0 : no blur
+                      1.0 : average all past
+                            quantizers
+                   default = 0.5
 
-  vqscale=XXX    [2..31] gives each frame the same
-                 quantizer (selects fixed quantizer
-                 mode).
-                 default = 0 (fixed quantizer mode
-                 disabled)
+  vqscale=<value>  [2..31] gives each frame the same
+                   quantizer (selects fixed quantizer
+                   mode).
+                   default = 0 (fixed quantizer mode
+                   disabled)
 
-  vrc_strategy=X [0..2] different strategies to
-                 decide which frames should get
-                 which quantizer.
-                 default = 2
+  vrc_strategy=<value>
+                   [0..2] different strategies to
+                   decide which frames should get
+                   which quantizer.
+                   default = 2
 
-  v4mv           4 motion vectors per macroblock,
-                 may gives you slightly better
-                 quality, can only be used in HQ
-                 mode and is buggy with B frames
-                 currently.
-                 default = disabled
+  v4mv             4 motion vectors per macroblock,
+                   may gives you slightly better
+                   quality, can only be used in HQ
+                   mode and is buggy with B frames
+                   currently.
+                   default = disabled
 
-  vpass=X        [1,2] select internal first pass
-                 or second pass of 2-pass mode.
-                 default = 0 (1-pass mode)
+  vpass=<value>    [1,2] select internal first pass
+                   or second pass of 2-pass mode.
+                   default = 0 (1-pass mode)
 
 The next 3 options apply only to I & P frames :
 
-  vqmin=XX       [1..31] minimum quantizer,
-                 default = 3
+  vqmin=<value>    [1..31] minimum quantizer,
+                   default = 3
 
-  vqmax=XX       [1..31] maximum quantizer
-                 default = 15
+  vqmax=<value>    [1..31] maximum quantizer
+                   default = 15
 
-  vqdiff=XX      [1..31] quantizer difference.
-                 Limits the maximum quantizer
-                 difference between frames.
-                 default = 3
+  vqdiff=<value>   [1..31] quantizer difference.
+                   Limits the maximum quantizer
+                   difference between frames.
+                   default = 3
 
 The following options apply only to B frames :
 
-  vmax_b_frames=X  [0..4] maximum number of frames
+  vmax_b_frames=<value>
+                   [0..4] maximum number of frames
                    between each I/P frame.
                    default = 0 (B-frames generation
                    disabled)
 
-  vb_strategy=X    strategy to choose between
+  vb_strategy=<value>
+                   strategy to choose between
                    I/P/B frames :
                      0 allways use max B
                      1 avoid B frames in high
@@ -324,41 +294,54 @@ You can use the following options only in pass 2 of 2-pass mode :
   vrc_strategy, vb_strategy
 
 All other options can be used in all modes.
-
 .TP
-.B \-lameopts
-If encoding to MP3 with libmp3lame, you can specify its parameters here, like:
+.B \-mc\ <seconds/frame>
+Maximum sync correction per frame (in seconds).
+Use -mc 0 to disable input A/V sync.
+.TP
+.B \-mf <multifile options>
+Used when encoding from multiple JPEG files.
+Its sub-options are:
 
-  -lameopts br=192:cbr
+  on             turns on multifile support
+  w=<value>      width of the output file [autodetected]
+  h=<value>      height of the output file [autodetected]
+  fps=<value>    fps of the output file [default: 25fps]
+  type=<value>   type of input files (jpeg, png)
+.TP
+.B \-nobps
+Used only for AVIs. Doesn't use the bps value in the AVI header, instead
+calculates it.
+.TP
+.B \-nosound
+Encode only video, no audio stream.
+.TP
+.B \-o <filename>
+Outputs to the given filename, instead of the default 'test.avi'.
+.TP
+.B \-oac <codec name>
+Encode with the given codec (codec names are from codecs.conf,
+use -ovc help to get a list of available codecs).
+Examples:
 
-Available options:
+  -oac copy      no encoding, just streamcopy
+  -oac pcm       encode to uncompressed PCM
+  -oac mp3lame   encode to MP3 (using Lame)
+.TP
+.B \-ofps <fps>
+The output file will have different frame/sec than the source.
+You MUST set it for variable fps (asf, some mov) and progressive
+(29.97fps telecined mpeg) files.
+.TP
+.B \-ovc <codec name>
+Encode with the given codec (codec names are from codecs.conf, 
+use -ovc help to get a list of available codecs).
+Examples:
 
-    help         get help
-    vbr=XXX      variable bitrate method
-                   0=cbr
-                   1=mt
-                   2=rh(default)
-                   3=abr
-                   4=mtrh
-    abr          average bitrate
-    cbr          constant bitrate
-    br=XXX       specify bitrate in
-                 kbit <0-1024>
-                 (only for CBR and ABR)
-    q=XXX        Quality
-                 (0-highest, 9-low)
-                 (for VBR)
-    ratio=XXX    compression ratio <1-100>
-    vol=XXX      set audio input gain <0-10>
-    mode=XXX     0=stereo
-                 1=joint-stereo
-                 2=dualchannel
-                 3=mono
-                 (default: auto)
-    padding=XXX  0=no
-                 1=all
-                 2=adjust
-
+  -ovc copy      no encoding, just streamcopy
+  -ovc divx4     encode to DivX4/DivX5 or XviD
+  -ovc rawrgb    encode to uncompressed RGB24
+  -ovc lavc      encode with a libavcodec codec
 .TP
 .B \-pass <1/2>
 With this you can encode 2pass DivX4 files. First encode with -pass 1, then
@@ -367,52 +350,50 @@ NOTE: for libavcodec 2-pass use -lavcopts vpass=1/2 instead of -pass 1/2
 .TP
 .B \-passlogfile <filename>
 When encoding in 2pass mode, MEncoder dumps first pass' informations
-to the given file instead of the default divx2pass.log .
+to the given file instead of the default divx2pass.log.
 .TP
-.B \-ofps <fps>
-The output file will have different frame/sec than the source.
-You MUST set it for variable fps (asf, some mov) and progressive
-(29.97fps telecined mpeg) files.
-.TP
-.B \-o <filename>
-Outputs to the given filename, instead of the default 'test.avi' .
-.TP
-.B \-frames <number>
-Encode only given number of frames.
+.B \-pp <value>
+See man mplayer.
 .TP
 .B \-ss <time>
-seek to given time position. For example :
+Seek to given time position. For example:
 
     -ss 56         seeks to 56 seconds
     -ss 01:10:00   seeks to 1 hour 10 min
 
-Can start only from keyframes !
+Can start only from keyframes!
 .TP
-.B \-sub <subtitle file name>
-given VOBsub/text subtitle will be encoded INTO the output file. Text
+.B \-sub <filename>
+Given VOBsub/text subtitle will be encoded INTO the output file. Text
 subtitles need fonts properly installed.
 .TP
-.B \-endpos <time>
-stop encoding at given time. Can be specified in many was :
-
-    -endpos 56       encode only 56 seconds
-    -endpos 01:10:00 encode only 1 hours
-
-Can be used in conjuction with -ss !
-.TP
-.B \-sws <0-2>
+.B \-sws <software scaler type>
 Type of scaling method (use with -vop scale=w:h)
 
-    0            fast bilinear (default)
-    1            bilinear
-    2            bicubic (best quality)
+    0   fast bilinear (default)
+    1   bilinear
+    2   bicubic (best quality)
+    3   ?
+    4   nearest neighbor (bad quality)
+    5   area averageing scaling support
 .TP
-.B \-ffourcc fourcc
-Can be used to force the video fourcc of the output file. For example -ffourcc
-div3 will have the output file contain "div3" as video fourcc.
-.IP
-.SH FILES AND DIRECTORIES
-.IP
+.B \-v, \-\-verbose
+Increase verbosity.
+.TP
+.B \-vc <codec name>
+Use specified codec (according to codecs.conf) for decoding input video
+stream.
+.TP
+.B \-vcd <track>
+Encode the specified VCD track.
+.TP
+.B \-vfm <codec family>
+Force decoding by using a specific codec FAMILY, and FALLBACK to default
+if failed.  For examples see MPlayer manpage.
+.TP
+.B \-vid <stream id>
+If the source media contains multiple video streams, encode the specified one.
+
 .SH "EXAMPLES"
 .B Encoding DVD title #2
 mencoder -dvd 2 -o title2.avi
@@ -423,33 +404,37 @@ mencoder -dvd 2 -chapter 10-15 -o title2.avi
 .B The same, but with libavcodec family, MJPEG compression
 mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg
 .TP
+.B Encoding all *.jpg files in the current dir
+mencoder \*.jpg -mf on:w=800:h=600:fps=25 -o output.avi
+.TP
 .B Encoding from HTTP
 mencoder http://mplayer.hq/example.avi -o example.avi
+.TP
+.B Encoding from tuner (see documentation!)
+mencoder -tv on:driver=v4l:width=640:height=480 -o tv.avi
 .TP
 .B Encoding from a pipe
 rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -
 .TP
 .B Encoding multiple *.vob files
 cat *.vob | mencoder <options> -
-.IP
+  
 .SH BUGS
-Probably. Check the documentation.
+Probably. PLEASE, double-check the documentation (especially bugreports.html),
+the FAQ and the mail archive before!
 
-Bugreports should be addressed to the MPlayer-users mailing list
-(mplayer-users@mplayerhq.hu) ! If you want to submit a bugreport
-(which we love to receive!), please double-check the bugreports.html, and
-tell us all that we need to know to identify your problem.
+Send your complete bugreports to the MPlayer-users mailing list at
+<mplayer-users@mplayerhq.hu>. We love complete bugreports :)
 
-.LP
 .SH AUTHORS
-Check documentation !
+Check documentation!
 
-MPlayer is (C) 2000-2002
+MPlayer is (C) 2000\-2002
 .I Arpad Gereoffy <sendmail@to.mplayer-users>
 
 This manpage is written and maintained by
-.I Gabucino .
-.LP
+.I Gabucino <sendmail@to.mplayer\-users>.
+
 .SH STANDARD DISCLAIMER
 Use only at your own risk! There may be errors and inaccuracies that could 
 be damaging to your system or your eye. Proceed with caution, and although
