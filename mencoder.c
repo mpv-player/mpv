@@ -716,7 +716,7 @@ case ACODEC_VBRMP3:
     if(sizeof(MPEGLAYER3WAVEFORMAT)!=30) mp_msg(MSGT_MENCODER,MSGL_WARN,"sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, maybe broken C compiler?\n",sizeof(MPEGLAYER3WAVEFORMAT));
     mux_a->wf=malloc(sizeof(MPEGLAYER3WAVEFORMAT)); // should be 30
     mux_a->wf->wFormatTag=0x55; // MP3
-    mux_a->wf->nChannels=(lame_param_mode == 3) ? 1 : sh_audio->channels;
+    mux_a->wf->nChannels= sh_audio->channels;
     mux_a->wf->nSamplesPerSec=force_srate?force_srate:sh_audio->samplerate;
     mux_a->wf->nAvgBytesPerSec=192000/8; // FIXME!
     mux_a->wf->nBlockAlign=(mux_a->h.dwRate<32000)?576:1152; // required for l3codeca.acm + WMP 6.4
@@ -854,7 +854,7 @@ if(sh_audio){
 		  /* mono encoding, a bit tricky */
 		  if (mux_a->wf->nChannels == 1)
 		  {
-		    len = lame_encode_buffer(lame, tmp, tmp, len/4,
+		    len = lame_encode_buffer(lame, tmp, tmp, len/2,
 			mux_a->buffer+mux_a->buffer_len, mux_a->buffer_size-mux_a->buffer_len);
 		  }
 		  else
@@ -875,9 +875,18 @@ if(sh_audio){
 		  unsigned char tmp[2304];
 		  int len=dec_audio(sh_audio,tmp,2304);
 		  if(len<=0) break; // eof
-		  len=lame_encode_buffer_interleaved(lame,
+		  /* mono encoding, a bit tricky */
+		  if (mux_a->wf->nChannels == 1)
+		  {
+		    len = lame_encode_buffer(lame, tmp, tmp, len/2,
+			mux_a->buffer+mux_a->buffer_len, mux_a->buffer_size-mux_a->buffer_len);
+		  }
+		  else
+		  {
+		    len=lame_encode_buffer_interleaved(lame,
 		      tmp,len/4,
 		      mux_a->buffer+mux_a->buffer_len,mux_a->buffer_size-mux_a->buffer_len);
+		  }
 		  if(len<0) break; // error
 		  mux_a->buffer_len+=len;
 		}
