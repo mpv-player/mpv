@@ -239,9 +239,9 @@ config(struct vf_instance_s* vf,
 	fp->nb_frames = 0;
 	xvid_error[0] = xvid_error[1] = xvid_error[2] = 0;
     }
-#endif
     if (xvidenc_greyscale)
 	enc_param.global |= XVID_GREYSCALE;
+#endif
     enc_param.rc_reaction_delay_factor = xvidenc_rc_reaction_delay_factor;
     enc_param.rc_averaging_period = xvidenc_rc_averaging_period;
     enc_param.rc_buffer = xvidenc_rc_buffer;
@@ -269,11 +269,11 @@ config(struct vf_instance_s* vf,
     fp->enc_frame.general = XVID_HALFPEL | (xvidenc_mpeg_quant ? XVID_MPEGQUANT : XVID_H263QUANT);
     if (xvidenc_4mv)
 	fp->enc_frame.general |= XVID_INTER4V;
-    if (xvidenc_lumi_mask)
-	fp->enc_frame.general |= XVID_LUMIMASKING;
     if (xvidenc_interlacing)
 	fp->enc_frame.general |= XVID_INTERLACING;
 #ifdef XVID_API_UNSTABLE
+    if (xvidenc_lumi_mask)
+	fp->enc_frame.general |= XVID_LUMIMASKING;
     if (xvidenc_qpel) {
 	fp->enc_frame.general |= XVID_QUARTERPEL;
 	fp->enc_frame.motion |= PMV_QUARTERPELREFINE16 | PMV_QUARTERPELREFINE8;
@@ -303,6 +303,9 @@ config(struct vf_instance_s* vf,
 	fp->enc_frame.general |= XVID_HQACPRED;
     if (xvidenc_chroma_opt)
 	fp->enc_frame.general |= XVID_CHROMAOPT;
+#else
+    if (xvidenc_greyscale)
+	fp->enc_frame.general |= XVID_GREYSCALE;
 #endif
 
     switch (outfmt) {
