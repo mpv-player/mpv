@@ -3417,7 +3417,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         if (vo_spudec != NULL)
           spudec_free(vo_spudec);
         vo_spudec =
-          spudec_new_scaled_vobsub(mkv_sh_sub->palette, mkv_sh_sub->colors,
+          spudec_new_scaled_vobsub(mkv_sh_sub->has_palette ? mkv_sh_sub->palette : NULL, mkv_sh_sub->colors,
                                    mkv_sh_sub->custom_colors,
                                    mkv_sh_sub->width,
                                    mkv_sh_sub->height);

@@ -59,6 +59,7 @@
 
 typedef struct {
   char type;                    // t = text, v = VobSub
+  int has_palette;              // If we have a valid palette
   unsigned int palette[16];     // for VobSubs
   int width, height;            // for VobSubs
   int custom_colors;

@@ -373,6 +373,7 @@ vobsub_parse_palette (mkv_track_t *t, const char *start)
              t->sh_sub.palette[11], t->sh_sub.palette[12],
              t->sh_sub.palette[13], t->sh_sub.palette[14],
              t->sh_sub.palette[15]);
+      t->sh_sub.has_palette = 1;
       return 2;
     }
   return 0;
@@ -480,6 +481,7 @@ demux_mkv_parse_idx (mkv_track_t *t)
   memcpy(buf, t->private_data, t->private_size);
   buf[t->private_size] = 0;
   t->sh_sub.type = 'v';
+  t->sh_sub.has_palette = 0;
 
   pos = buf;
   start = buf;
