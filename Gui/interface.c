@@ -214,6 +214,8 @@ void guiGetEvent( int type,char * arg )
 	 btnModify( evSetBalance,guiIntfStruct.Balance );
 	}
 
+#if 0
+#warning video equalizer support disabled 
 	if ( gtkEnableVideoEqualizer )
 	 {
 	  gtkSet( gtkSetContrast,gtkContrast,NULL );
@@ -221,6 +223,7 @@ void guiGetEvent( int type,char * arg )
 	  gtkSet( gtkSetHue,gtkHue,NULL );
 	  gtkSet( gtkSetSaturation,gtkSaturation,NULL );
 	 }
+#endif
 	if ( gtkEnableAudioEqualizer )
 	 {
 	  equalizer_t eq;
@@ -291,13 +294,94 @@ float gtkSaturation = 0.0f;
 
 float gtkEquChannels[6][10];
 
-void gtkSet( int cmd,float fparam, void * vparam )
+plItem * plCurrent = NULL;
+plItem * plList = NULL;
+plItem * plLastPlayed = NULL;
+
+#if defined( MP_DEBUG ) && 0
+void list( void )
 {
- mp_cmd_t * mp_cmd = (mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
+ plItem * next = plList;
+ printf( "--- list ---\n" );
+ while( next || next->next )
+  {
+   printf( "item: %s/%s\n",next->path,next->name );
+   if ( next->next ) next=next->next; else break;
+  }
+ printf( "--- end of list ---\n" );
+}
+#else
+#define list();
+#endif
+
+void * gtkSet( int cmd,float fparam, void * vparam )
+{
+ mp_cmd_t    * mp_cmd = (mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
  equalizer_t * eq = (equalizer_t *)vparam;
+ plItem      * item = (plItem *)vparam;
  
  switch ( cmd )
   {
+// --- handle playlist
+   case gtkAddPlItem: // add item to platlist
+	if ( plList )
+	 {
+	  plItem * next = plList;
+	  while ( next->next ) { /*printf( "%s\n",next->name );*/ next=next->next; }
+	  next->next=item; item->prev=next;
+	 }
+	 else { item->prev=item->next=NULL; plCurrent=plList=item; }
+        list();
+        return NULL;
+   case gtkGetNextPlItem: // get current item from playlist
+	if ( plCurrent )
+	 {
+	  plCurrent=plCurrent->next;
+	  if ( !plCurrent && plList ) 
+	   {
+	    plItem * next = plList;
+	    while ( next->next ) { if ( !next->next ) break; next=next->next; }
+	    plCurrent=next;
+	   }
+	  return plCurrent;
+	 }
+        return NULL;
+   case gtkGetPrevPlItem:
+	if ( plCurrent )
+	 {
+	  plCurrent=plCurrent->prev;
+	  if ( !plCurrent && plList ) plCurrent=plList;
+	  return plCurrent;
+	 }
+	break;
+   case gtkGetCurrPlItem: // get current item
+        return plCurrent;
+   case gtkDelPl: // delete list
+        {
+	 plItem * curr = plList;
+	 plItem * next;
+	 if ( !plList ) return NULL;
+	 if ( !curr->next )
+	  {
+	   if ( curr->path ) free( curr->path );
+	   if ( curr->name ) free( curr->name );
+	   free( curr ); 
+	  }
+	  else
+	   {
+	    while ( curr->next )
+	     {
+	      next=curr->next;
+	      if ( curr->path ) free( curr->path );
+	      if ( curr->name ) free( curr->name );
+	      free( curr ); 
+	      curr=next;
+	     }
+	   }
+	  plList=NULL; plCurrent=NULL;
+	}
+        return NULL;
+// --- set equalizers
    case gtkSetContrast:
 	mp_cmd->id=MP_CMD_CONTRAST;   mp_cmd->name=strdup( "contrast" );
 	gtkContrast=fparam;
@@ -328,10 +412,11 @@ void gtkSet( int cmd,float fparam, void * vparam )
 	    for ( j=0;j<10;j++ )
 	     { tmp.channel=i; tmp.band=j; audio_plugin_eq.control( AOCONTROL_PLUGIN_EQ_SET_GAIN,(int)&tmp ); }
 	  }
-	return;
-   default: free( mp_cmd ); return;
+	return NULL;
+   default: free( mp_cmd ); return NULL;
   }
  mp_cmd->args[0].v.i=(int)fparam;
  mp_cmd->args[1].v.i=1;
  mp_input_queue_cmd( mp_cmd );
+ return NULL;
 }

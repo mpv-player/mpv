@@ -27,6 +27,8 @@
 extern float rel_seek_secs;
 extern int abs_seek_pos;
 
+static int mplGotoTheNext = 1;
+
 void mplFullScreen( void )
 {
  static int sx,sy;
@@ -83,13 +85,30 @@ void mplFullScreen( void )
 
 extern int mplSubRender;
 
-void mplStop()
+void mplEnd( void )
+{
+ plItem * next;
+
+ if ( !mplGotoTheNext ) { mplGotoTheNext=1; return; }
+
+ if ( (next=gtkSet( gtkGetNextPlItem,0,NULL )) && plLastPlayed != next )
+  {
+   plLastPlayed=next;
+   guiSetDF( guiIntfStruct.Filename,next->path,next->name );
+   guiIntfStruct.StreamType=STREAMTYPE_FILE;
+   guiIntfStruct.FilenameChanged=1;
+   if ( guiIntfStruct.AudioFile ) free( guiIntfStruct.AudioFile );
+   guiIntfStruct.AudioFile=NULL;
+  } else mplStop();
+}
+
+void mplStop( void )
 {
  guiIntfStruct.Playing=0;
  guiIntfStruct.TimeSec=0;
  guiIntfStruct.Position=0;
  guiIntfStruct.AudioType=0;
-// if ( !guiIntfStruct.Playing ) return;
+
  if ( !appMPlayer.subWindow.isFullScreen )
   {
    wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
@@ -229,7 +248,8 @@ void mplSetFileName( char * fname )
 
 void mplPrev( void )
 {
- int stop = 0;
+ plItem * prev;
+ int      stop = 0;
  
  if ( guiIntfStruct.Playing == 2 ) return;
  switch ( guiIntfStruct.StreamType )
@@ -249,7 +269,14 @@ void mplPrev( void )
 	if ( --guiIntfStruct.Track == 0 ) { guiIntfStruct.Track=1; stop=1; }
 	break;
 #endif
-   default: return;
+   default: 
+	if ( (prev=gtkSet( gtkGetPrevPlItem,0,NULL)) ) { mplGotoTheNext=0; break; }
+//	 {
+//	  guiSetDF( guiIntfStruct.Filename,prev->path,prev->name );
+//	  guiIntfStruct.FilenameChanged=1;
+//	  break;
+//	 }
+	return;
   }
  if ( stop ) mplEventHandling( evStop,0 );
  if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evPlay,0 );
@@ -257,7 +284,8 @@ void mplPrev( void )
 
 void mplNext( void )
 {
- int stop = 0;
+ int      stop = 0;
+ plItem * next;
 
  if ( guiIntfStruct.Playing == 2 ) return;
  switch ( guiIntfStruct.StreamType )
@@ -277,7 +305,14 @@ void mplNext( void )
 	if ( ++guiIntfStruct.Track > guiIntfStruct.VCDTracks ) { guiIntfStruct.Track=guiIntfStruct.VCDTracks; stop=1; }
 	break;
 #endif
-   default: return;
+   default:
+	if ( (next=gtkSet( gtkGetNextPlItem,0,NULL)) ) { mplGotoTheNext=0; break; }
+//	 {
+//	  guiSetDF( guiIntfStruct.Filename,next->path,next->name );
+//	  guiIntfStruct.FilenameChanged=1;
+//	  break;
+//	 }
+	return;
   }
  if ( stop ) mplEventHandling( evStop,0 );
  if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evPlay,0 );

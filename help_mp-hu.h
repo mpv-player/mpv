@@ -325,6 +325,12 @@ static char help_text[]=
 #define MSGTR_EQU_Bass "Basszus"
 #define MSGTR_EQU_All "Mindegyik"
 
+// --- playlist
+#define MSGTR_PLAYLIST_Path "Utvonal"
+#define MSGTR_PLAYLIST_Selected "Kiv'lasztott filr - ok"
+#define MSGTR_PLAYLIST_Files "File - ok"
+#define MSGTR_PLAYLIST_DirectoryTree "Könyvtár lista"
+
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "végzetes hiba ..."
 #define MSGTR_MSGBOX_LABEL_Error "hiba ..."

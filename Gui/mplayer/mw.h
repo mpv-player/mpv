@@ -254,11 +254,23 @@ play_dvd_2:
    case evPlay:
    case evPlaySwitchToPause:
 play:
+
         mplMainAutoPlay=0;
         if ( ( msg == evPlaySwitchToPause )&&( guiIntfStruct.Playing == 1 ) ) goto NoPause;
 
 	vcd_track=0;
 	dvd_title=0;
+
+	if ( gtkSet( gtkGetCurrPlItem,0,NULL ) )
+	 {
+	  plItem * next = gtkSet( gtkGetCurrPlItem,0,NULL );
+	  plLastPlayed=next;
+	  guiSetDF( guiIntfStruct.Filename,next->path,next->name );
+	  guiIntfStruct.StreamType=STREAMTYPE_FILE;
+	  guiIntfStruct.FilenameChanged=1;
+	  if ( guiIntfStruct.AudioFile ) free( guiIntfStruct.AudioFile );
+	  guiIntfStruct.AudioFile=NULL;
+	 }
 
         switch ( guiIntfStruct.StreamType )
          {
@@ -345,6 +357,7 @@ NoPause:
 //	guiIntfStruct.StreamType=STREAMTYPE_FILE;
    case evLoad:
         mplMainRender=1;
+	gtkSet( gtkDelPl,0,NULL );
         gtkShow( evLoad,NULL );
         break;
    case evLoadSubtitle:
@@ -363,15 +376,11 @@ NoPause:
         mplMainRender=1;
         break;
 
-   case evPlayList:
-        mplMainRender=1;
-        gtkShow( evPlayList,NULL );
-        break;
-
+   case evPlayList:    gtkShow( evPlayList,NULL );        break;
    case evSkinBrowser: gtkShow( evSkinBrowser,skinName ); break;
-   case evAbout:       gtkShow( evAbout,NULL ); break;
-   case evPreferences: gtkShow( evPreferences,NULL ); break;
-   case evEqualizer:   gtkShow( evEqualizer,NULL ); break;
+   case evAbout:       gtkShow( evAbout,NULL );           break;
+   case evPreferences: gtkShow( evPreferences,NULL );     break;
+   case evEqualizer:   gtkShow( evEqualizer,NULL );       break;
 
    case evForward1min:      mplRelSeek( 60 );  break;
    case evBackward1min:     mplRelSeek( -60 ); break;

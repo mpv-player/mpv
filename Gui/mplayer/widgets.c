@@ -30,7 +30,6 @@
 #include "../../config.h"
 #include "../../help_mp.h"
 
-GtkWidget     * PlayList;
 GtkWidget     * Options;
 GtkWidget     * PopUpMenu = NULL;
 
@@ -192,10 +191,9 @@ void gtkShow( int type,char * param )
 //	gtkSetLayer( Options );
         break;
    case evPlayList:
-        gtkMessageBox( GTK_MB_WARNING,"Sorry, this feature is under development ..." );
-//	PlayList=create_PlayList();
-//        gtk_widget_show( PlayList );
-//	gtkSetLayer( PlayList );
+//	gtkMessageBox( GTK_MB_WARNING,"Sorry, this feature is under development ..." );
+        ShowPlayList();
+	gtkSetLayer( PlayList );
         break;
    case evLoad:
         ShowFileSelect( fsVideoSelector,0 );

@@ -419,7 +419,7 @@ void fs_fsFNameList_select_row( GtkWidget * widget,gint row,gint column,GdkEvent
  gtk_clist_get_text( GTK_CLIST(widget ),row,1,&fsSelectedFile );
  fsPressed=1;
  if( !bevent ) return;
- if( bevent->type == GDK_2BUTTON_PRESS ) gtk_button_released( GTK_BUTTON( fsOk ) );
+ if( bevent->type == GDK_BUTTON_PRESS )  gtk_button_released( GTK_BUTTON( fsOk ) );
 }
 
 gboolean on_FileSelect_key_release_event( GtkWidget * widget,GdkEventKey * event,gpointer user_data )

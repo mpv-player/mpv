@@ -2895,7 +2895,7 @@ if(rel_seek_secs || abs_seek_pos){
 	guiGetEvent( guiReDraw,NULL );
 	if(guiIntfStruct.Playing==0) break; // STOP
 	if(guiIntfStruct.Playing==2) osd_function=OSD_PAUSE;
-        if ( guiIntfStruct.DiskChanged ) goto goto_next_file;
+        if ( guiIntfStruct.DiskChanged || guiIntfStruct.FilenameChanged ) goto goto_next_file;
 #ifdef USE_DVDREAD
         if ( stream->type == STREAMTYPE_DVD )
 	 {
@@ -3077,7 +3077,7 @@ while(playtree_iter != NULL) {
 #ifdef USE_DVDREAD
    if ( !guiIntfStruct.DiskChanged ) 
 #endif
-   mplStop();
+   mplEnd();
   }	
 #endif
 

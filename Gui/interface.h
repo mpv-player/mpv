@@ -130,11 +130,28 @@ extern void guiDone( void );
 extern void guiGetEvent( int type,char * arg );
 extern void guiEventHandling( void );
 
+typedef struct _plItem 
+{
+ struct _plItem * prev,* next;
+ int       played;
+ char    * path;
+ char    * name;
+} plItem;
+
+extern plItem * plList;
+extern plItem * plCurrent;
+extern plItem * plLastPlayed;
+
 #define gtkSetContrast   0
 #define gtkSetBrightness 1
 #define gtkSetHue	 2
 #define gtkSetSaturation 3
 #define gtkSetEqualizer  4
+#define gtkAddPlItem     5
+#define gtkGetNextPlItem 6
+#define gtkGetPrevPlItem 7
+#define gtkGetCurrPlItem 8
+#define gtkDelPl         9
 
 extern float gtkContrast;
 extern float gtkBrightness;
@@ -143,7 +160,7 @@ extern float gtkSaturation;
 
 extern float gtkEquChannels[6][10];
 
-extern void gtkSet( int cmd,float param, void * vparam );
+extern void * gtkSet( int cmd,float param, void * vparam );
 
 #define gstrdup( s,ss ) { s=malloc( strlen( ss ) + 3 ); strcpy( s,ss ); }
 
