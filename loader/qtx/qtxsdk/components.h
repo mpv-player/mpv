@@ -1,26 +1,23 @@
 typedef long ComponentResult;
 typedef unsigned char UInt8;
 
-struct ComponentParameters
-{
+typedef struct {
     UInt8	flags;
     UInt8	paramSize;
     short	what;
     long	params[1];
-};
+} ComponentParameters;
 
-struct ComponentInstace
-{
+typedef struct {
     long	data[1];
-};
+} ComponentInstace;
 
 typedef int OSType;
 
-struct ComponentDescription
-{
+typedef struct {
     OSType	componentType;
     OSType	componentSubType;
     OSType	componentManufacturer;
     unsigned long componentFlags;
     unsigned long componentFlagsMask;
-};
+} ComponentDescription;
