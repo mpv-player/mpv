@@ -293,7 +293,8 @@ void AVI_Decode_Video1_8(
       // check if it's an 8-color block
       else if (byte_b >= 0x90)
       {
-        // 8-color encoding
+        flags = (byte_b << 8) | byte_a;
+
         quad[0][0].c1 = (unsigned char)encoded[stream_ptr++];
         quad[0][0].c2 = (unsigned char)encoded[stream_ptr++];
         quad[1][0].c1 = (unsigned char)encoded[stream_ptr++];
