@@ -71,6 +71,7 @@ static XWindowAttributes attribs;
 //static int vo_dwidth,vo_dheight;
 
 static int Flip_Flag;
+static int zoomFlag;
 
 #ifdef HAVE_SHM
 
@@ -264,6 +265,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if( flags&0x03 ) fullscreen = 1;
  if( flags&0x02 ) vm = 1;
  if( flags&0x08 ) Flip_Flag = 1;
+ zoomFlag = flags&0x04;
+ if(!fullscreen) zoomFlag=1; //it makes no sense to avoid zooming on windowd mode
  
 //printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
 
@@ -273,13 +276,11 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
  XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
- if(fullscreen){
-         image_width=vo_screenwidth;
-         image_height=vo_screenheight;
- } else {
-         image_width=d_width;
-         image_height=d_height;
- }
+ /* set image size, if zoom is on it will be changed during draw_slice anyway 
+    so we dont dupplicate the aspect code here */
+ image_width=d_width;
+ image_height=d_height;
+
  aspect= ((1<<16)*d_width + d_height/2)/d_height;
 
 #ifdef HAVE_NEW_GUI
@@ -471,7 +472,7 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
   static int old_vo_dwidth=-1;
   static int old_vo_dheight=-1;
   
-  if((old_vo_dwidth != vo_dwidth || old_vo_dheight != vo_dheight) && y==0)
+  if((old_vo_dwidth != vo_dwidth || old_vo_dheight != vo_dheight) && y==0 && zoomFlag)
   {
     int newW= vo_dwidth;
     int newH= vo_dheight;
