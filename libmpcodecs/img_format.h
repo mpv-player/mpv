@@ -37,6 +37,7 @@
 #define IMGFMT_CLPL 0x4C504C43
 #define IMGFMT_Y800 0x30303859
 #define IMGFMT_Y8   0x20203859
+#define IMGFMT_NV12 0x3231564E
 
 /* Packed YUV Formats */
 

@@ -22,6 +22,7 @@ char *vo_format_name(int format)
 	case IMGFMT_CLPL: return("Planar CLPL");
 	case IMGFMT_Y800: return("Planar Y800");
 	case IMGFMT_Y8: return("Planar Y8");
+	case IMGFMT_NV12: return("Planar NV12");
 	case IMGFMT_IUYV: return("Packed IUYV");
 	case IMGFMT_IY41: return("Packed IY41");
 	case IMGFMT_IYU1: return("Packed IYU1");
