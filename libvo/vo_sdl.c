@@ -670,6 +670,14 @@ static void set_video_mode(int width, int height, int bpp, uint32_t sdlflags)
 	struct sdl_priv_s *priv = &sdl_priv;
     SDL_Surface* newsurface;    
 
+    if(priv->rgbsurface)
+	SDL_FreeSurface(priv->rgbsurface);
+    else if(priv->overlay)
+	SDL_FreeYUVOverlay(priv->overlay);
+ 
+    priv->rgbsurface = NULL;
+    priv->overlay = NULL;
+ 
     newsurface = SDL_SetVideoMode(width, height, bpp, sdlflags);
 
     if(newsurface) {
@@ -693,6 +701,14 @@ static void set_fullmode (int mode) {
 	SDL_Surface *newsurface = NULL;
  	int screen_surface_w, screen_surface_h;
 	
+ 	if(priv->rgbsurface)
+	        SDL_FreeSurface(priv->rgbsurface);
+ 	else if(priv->overlay)
+	        SDL_FreeYUVOverlay(priv->overlay);
+ 
+ 	priv->rgbsurface = NULL;
+ 	priv->overlay = NULL;
+ 
 	/* if we haven't set a fullmode yet, default to the lowest res fullmode first */
 	/* But select a mode where the full video enter */
 	if(priv->X && priv->fulltype & FS) {
