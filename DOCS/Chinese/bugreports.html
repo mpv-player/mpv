@@ -137,7 +137,14 @@ HREF="http://expita.com/nomime.html">写的不错的文档</A>。它解释了所有细节和关掉H
 </UL>
 
 
-<H3><A NAME="compilation">B.4.3 编译问题</A></H3>
+<H3><A NAME="configure">B.4.3  配置问题</A></H3>
+
+<P>如果你在运行<CODE>./configure</CODE>时有问题，或者什么东西的自动检测失败，检查<CODE>configure.log</CODE>。你可能会在那里找到
+答案，比如你的机器上存在同一个库的多个版本混合存在的问题。或者你忘记安装开发包(那些-dev后缀的)。如果你认为有bug，在你的bug报告
+中附上<CODE>configure.log</CODE>。</P>
+
+
+<H3><A NAME="compilation">B.4.4 编译问题</A></H3>
 
 请附上下列文件：
 
@@ -153,10 +160,6 @@ HREF="http://expita.com/nomime.html">写的不错的文档</A>。它解释了所有细节和关掉H
   <LI><CODE>libvo/config.mak</CODE></LI>
   <LI><CODE>libao2/config.mak</CODE></LI>
 </UL>
-
-<H3><A NAME="configure">B.4.4 配置问题</A></H3>
-
-附上<CODE>configure.log</CODE>.
 
 <H3><A NAME="playback">B.4.5 播放的问题</A></H3>
 
@@ -211,7 +214,8 @@ HREF="http://expita.com/nomime.html">写的不错的文档</A>。它解释了所有细节和关掉H
 
 <P>请建立下面的命令文件：</P>
 
-<P><CODE>disass $pc-32 $pc+32<BR>
+<P><CODE>bt<BR>
+  disass $pc-32 $pc+32<BR>
   info all-registers</CODE></P>
 
 <P>然后直接在你的命令行下执行下列命令：</P>

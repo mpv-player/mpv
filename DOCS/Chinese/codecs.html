@@ -15,16 +15,19 @@
 
 <H3><A NAME="video_codecs">2.2.1 ÊÓÆµ±à½âÂëÆ÷</A></H3>
 
-<P>²éÔÄ<A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">±à½âÂëÆ÷×´Ì¬±í</A>À´ÁË½âÍêÕûµÄ£¬Ã¿ÈÕ¸üÐÂµÄÁÐ±í¡£</P>
+<P>¼ì²é<A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">codec status table</A>À´»ñµÃÍêÕûµÄ£¬Ã¿ÈÕ¸üÐÂµÄ
+ÁÐ±í¡£´ó²¿·ÖµÄ±à½âÂëÆ÷¿ÉÒÔ´ÓÎÒÃÇµÄÖ÷Ò³ÏÂÔØ£¬ÔÚÎÒÃÇµÄ<A
+HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">±à½âÂëÆ÷Ò³</A>¿ÉÒÔÕÒµ½ËûÃÇ¡£</P>
+ 
 
 <P>ËùÓÐÖ®ÖÐ×îÖØÒªµÄ£º</P>
 <UL>
   <LI>MPEG1(VCD)ºÍMPEG2(DVD)ÊÓÆµ</LI>
   <LI>DivXµÄ±¾µØµÄ½âÂëÆ÷;-)£¬OpenDivX£¬DivX4£¬DivX5£¬M$ MPEG4 v1£¬v2ºÍÆäËüµÄMPEG4±äÖÖ</LI>
-  <LI>Windows Media Video 7(WMV1)µÄ±¾µØµÄ½âÂëÆ÷£¬ºÍWindows Media Video 8(WMV2)µÄWin32 DLL½âÂëÆ÷£¬ËüÃÇÁ½¸ö¶¼ÓÃÓÚ.wmvÎÄ¼þ</LI>
+  <LI>Windows Media Video 7/8(WMV1/WMV2)µÄ±¾µØµÄ½âÂëÆ÷£¬ºÍWindows Media Video 9(WMV3)µÄWin32 DLL½âÂëÆ÷£¬ËüÃÇ¶¼ÓÃÓÚ.wmvÎÄ¼þ</LI>
   <LI><B>±¾µØµÄSorenson(SVQ1)½âÂëÆ÷</B></LI>
   <LI><B>Win32/QT Sorenson 3 (SVQ3) decoder</B></LI>
-  <LI>3ivx½âÂëÆ÷</LI>
+  <LI>3ivx v1, v2½âÂëÆ÷</LI>
   <LI>CinepakºÍIntel Indeo½âÂëÆ÷(3.1,3.2,4.1,5.0)</LI>
   <LI>MJPEG£¬AVID£¬VCR2£¬ASV2ºÍÆäËüÓ²¼þ¸ñÊ½</LI>
   <LI>VIVO 1.0£¬2.0£¬I263ºÍÆäËüh263(+)µÄ±äÖÖ</LI>
@@ -61,10 +64,11 @@ OpenDivX 4.0 alpha 47ºÍ48¡£ ¶ÔËüÃÇµÄÖ§³ÖÒÔÇ°°üÀ¨ÔÚMPlayerÖÐ£¬²¢ÇÒÊÇÄ¬ÈÏ±àÒëµÄ¡£ 
 
 <P><B>×¢Òâ£º</B>Èç¹ûÄãµÄ<CODE>-vo</CODE>Çý¶¯Ö§³ÖÖ±½ÓäÖÈ¾£¬ÄÇÃ´<CODE>-vc divx4</CODE>¿ÉÒÔÊÇºÜ¿ìÉõÖÁ×î¿ìµÄ½â¾ö·½°¸¡£</P>
 
-<P>Õâ¸ö±à½âÂëÆ÷¿ÉÒÔÔÚ<A HREF="http://avifile.sourceforge.net">avifile</A>ÏÂÔØ£¬½âÑ¹Ö®ºó£¬ÒÔrootÈ¨ÏÞÔËÐÐ<CODE>./install.sh</CODE>£¬
+<P>Divx4/5µÄ¶þ½øÖÆ±à½âÂëÆ÷¿â¿ÉÒÔ´Ó<A HREF="http://avifile.sourceforge.net">avifile</A>»òÕß<A
+HREF="http://www.divx.com">divx.com</A>ÏÂÔØ£¬½âÑ¹Ö®ºó£¬ÒÔrootÈ¨ÏÞÔËÐÐ<CODE>./install.sh</CODE>£¬
 ÁíÍâ±ðÍüÁË°Ñ<CODE>/usr/local/lib</CODE>Ìí¼Óµ½ÄãµÄ<CODE>/etc/ld.so.conf</CODE>ÖÐÈ»ºóÔËÐÐ<CODE>ldconfig</CODE>¡£</P>
 
-<P>ÏëµÃµ½ºËÐÄ¿âµÄCVS°æ±¾¿ÉÒÔÕâÑù×ö£º</P>
+<P>ÏëµÃµ½ÀÏµÄOpenDivxµÄºËÐÄ¿âµÄCVS°æ±¾¿ÉÒÔÕâÑù×ö£º</P>
 
 <OL>
   <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</CODE></LI>
@@ -97,7 +101,7 @@ HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</A>À´±àÒ
 <H4><A NAME="libavcodec">2.2.1.2 FFmpeg DivX/libavcodec</A></H4>
 
 <P><A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A>°üÀ¨Ò»×é<B>¿ª·ÅÔ´ÂëµÄ</B>½âÂëÆ÷°ü£¬ÄÜ¹»ÒÔ¼æÈÝ·½Ê½½âÂëÒÔ
-H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1±àÂë¸ñÊ½±àÂëµÄÊÓÆµÁ÷¡£Ëü²»½öÄÜ¶ÔÆäÖÐÒ»Ð©½øÐÐ±àÂë£¬
+H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV±àÂë¸ñÊ½±àÂëµÄÊÓÆµÁ÷¡£Ëü²»½öÄÜ¶ÔÆäÖÐÒ»Ð©½øÐÐ±àÂë£¬
 Í¬Ê±Ìá¹©±ÈWin32½âÂëÆ÷»òDivX.comµÄDivX4/5¿â¸ü¸ßµÄËÙ¶È£¡</P>
 
 <P>Ëü°üº¬ºÜ¶à²»´íµÄ½âÂëÆ÷£¬ÓÈÆäÖØÒªµÄÊÇMPEG4µÄ¼¸¸ö±äÖÖ£ºDivX 3£¬DivX 4£¬DivX 5£¬Windows Media Video 7(WMV1)¡£ÁíÍâÒ»¸öÓÐÈ¤µÄ¶«Î÷ÊÇWMA½âÂëÆ÷¡£</P>
@@ -137,7 +141,7 @@ HREF="http://www.3ivx.com">3ivxµÄÕ¾µã</A>¡£</LI>
   <LI>¸øÎÄ¼þ¸ÄÃû/×ö·ûºÅÁ´½Ó£¬È¥µô´ú±íÆ½Ì¨¹¹¼ÜÖ®ÀàµÄ¶«Î÷£¬ÈÃËûÃÇ¿´ÆðÀ´ÏñÕâÑù£º<CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>¡£</LI>
 </OL>
 
-<P>XAnimµÄÊÓÆµ½âÂëÆ÷×åºÅÂëÊÇ10£¬Òò´ËÄã¿ÉÒÔÊ¹ÓÃ<CODE>-vfm 10</CODE>Ñ¡ÏîÈÃMPlayer¾¡¿ÉÄÜµÄÊ¹ÓÃËûÃÇ¡£</P>
+<P>XAnimÊôÓÚÊÓÆµ±à½âÂëÆ÷×å<I>xanim</I>£¬ËùÒÔÄã¿ÉÄÜÐèÒªÊ¹ÓÃ<CODE>-vfm xanim</CODE>¡£</P>
 
 <P>²âÊÔ¹ýµÄ½âÂëÆ÷°üÀ¨£º<B>Indeo 3.2</B>£¬<B>4.1</B>£¬<B>5.0</B>£¬<B>CVID</B>£¬<B>3ivX</B>£¬<B>h263</B>¡£</P>
 
@@ -225,7 +229,7 @@ MPlayerµÄÅäÖÃ½Å±¾Ó¦¸Ã»áÔÚÒ»¸öÍêÈ«°²×°µÄRealPlayerµÄ±ê×¼Î»ÖÃÕÒµ½ËüµÄ¿â¡£Èç¹ûËüÃ»Õ
   <LI>Sorenson 1(fourcc <I>SVQ1</I>) - ÓÉ<B>±¾µØ±à½âÂëÆ÷</B>½âÂë¡£<BR>
     Êµ¼ÊÉÏÓÐÁ½¸öSVQ1µÄ(¼¸ºõµÈ¼ÛµÄ)½âÂëÆ÷£ºÒ»¸öÔÚMPlayerÖÐ£¬»¹ÓÐÒ»¸öÔÚlibavcodec¡£Äã¿ÉÒÔÍ¨¹ý<CODE>-vc svq1</CODE>
 ºÍ<CODE>-vc ffsvq1</CODE>Ñ¡Ïîµ÷ÓÃËüÃÇÖÐµÄÈÎÒâÒ»¸ö¡£ÓÐÐ©ÎÄ¼þ¿ÉÄÜÖ»ÄÜÔÚÆäÖÐÒ»¸öÉÏ¹¤×÷£¬¶øÁíÒ»¸ö¾ÍÐÐ£¬ËùÒÔ
-Á½¸ö½âÂëÆ÷¶¼ÊÔÊÔ¡£</LI>
+Á½¸ö½âÂëÆ÷¶¼ÊÔÊÔ¡£Õâ¸ö½âÂëÆ÷ÊÇÓÉ<A HREF="http://www.xinehq.de">xine</A>µÄ×÷Õß±àÐ´(Íê³É·´Ïò¹¤³Ì)µÄ¡£</LI></LI>
   <LI>Sorenson 3(fourcc <I>SVQ3</I>) - ÓÉ<B>Win32µÄQuickTime¿â</B>½âÂë¡£</LI>
 </UL>
 
@@ -370,7 +374,7 @@ MPlayerÖ§³Ö½âÂë¼¸ºõËùÓÐ°æ±¾µÄRealAudio£º
 </OL>
 
 <P><B>×¢Òâ£º</B>Èç¹ûÃ»ÓÐ<CODE>Filename</CODE>Ïî¶ø<CODE>DisplayName</CODE>ÖÐ°üº¬ÀàËÆ<CODE>device:dmo</CODE>µÄ¶«Î÷£¬
-ÄÇÃ´ÕâÊÇÒ»¸öDMO-Codec£¬MPlayerÄ¿Ç°²»Ö§³Ö</P>
+ÄÇÃ´ÕâÊÇÒ»¸öDMO-Codec¡£</P>
 <P><B>ÀÏ·½·¨£º</B>×ö¸öÉîºôÎüÈ»ºó¿ªÊ¼ËÑË÷×¢²á±í...</P>
 
 <OL>

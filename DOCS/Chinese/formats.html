@@ -166,6 +166,23 @@ CBR或者VBR。要想播放它，你需要在编译MPlayer之前安装<CODE>libogg</CODE>和<CODE>li
 <P>PVA规格的描述可以在下面地址下载<A
 HREF="http://www.technotrend.de/download/av_format_v1.pdf">http://www.technotrend.de/download/av_format_v1.pdf</A></P>
 
+<H4><A NAME="gif">2.1.1.15 GIF files</A></H4>
+
+<P><B>GIF</B>格式是网页图象的普遍格式，有两种版本的GIF规格，GIF87a和GIF89a。主要的区别在于GIF89a允许动画。MPlayer通过
+使用libungif库或者另一个libgif-compatible的库支持这两种规格。非动画的GIF显示为单帧的视频。(使
+用<CODE>-loop</CODE>和<CODE>-fixed-vo</CODE>选项来显示更长的时间。)</P>
+
+<P>MPlayer目前不支持在GIF文件中搜索。GIF文件并不一定有一个固定的帧大小，或者帧速率。而且，每一帧都有独立的大小并且
+应该被放在一个固定的地方并且有固定的尺寸。帧速率是通过使用每一帧前面的一个控制块以百分之一秒为单位控制这一帧显示
+的时间长短来实现的。</P>
+
+<P>标准的GIF文件包含24-bit的RGB帧和最多8-bit的索引调色板。这些帧大多以LZW格式压缩，但有些GIF编码器生成未压缩的
+帧以避免LZW压缩的专利问题。</P>
+  
+<P>如果你的发行版没有包含libungif，可以从<A HREF="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">libungif主页</A>
+下载。技术细节你可以参考<A HREF="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF89a规格</A>.</P>
+
+
 
 <H3><A NAME="audio_formats">2.1.2 音频格式</A></H3>
 

@@ -21,7 +21,7 @@
   <DD>OSS(ioctl)驱动(支持硬件AC3输出)</DD>
 
   <DT>sdl</DT>
-  <DD>SDL驱动(支持<B>ESD</B>，<B>ARTS</B>等等)</DD>
+  <DD>SDL驱动(支持<B>ESD</B>，<B>ARTS</B>之类的音频守护进程)</DD>
 
   <DT>nas</DT>
   <DD>NAS(Network Audio System)驱动</DD>
@@ -42,14 +42,14 @@
   <DD>本地的ESD驱动(主要针对GNOME用户)</DD>
 </DL>
 
-<P>事实上，Linux声卡驱动有兼容问题。这是因为MPlayer使用一个正常编码的声卡驱动实现的特性来实现音频/视频同步。遗憾的是有些驱动的作者
+<P>Linux下的声卡驱动有兼容问题。这是因为MPlayer使用一个<EM>正确</EM>编码的声卡驱动内建的特性来实现音频/视频同步。遗憾的是有些驱动的作者
 不在乎这个功能，它在播放MP3和实现声音效果时并不需要。</P>
 
-<P>别的媒体播放器比如aviplay或者xine可能在这些驱动上工作没有问题因为他们使用内部计时器的“简单”方法。注意：时间表明他们的方法没有
-MPlayer的方法有效率。</P>
+<P>别的媒体播放器比如<A HREF="http://avifile.sourceforge.net">aviplay</A>或者<A
+HREF="http://xine.sourceforge.net">xine</A>可能在这些驱动上工作没有问题因为他们使用内部计时器的“简单”方法。
+测试表明他们的方法没有MPlayer的方法有效率。</P>
 
-<P>使用一个正确编制的音频驱动的时候MPlayer将永远不会产生音频相关的A/V不同步，除非你的文件完全损坏。有些用来绕过这些问题的选项
-在man page里面有描述)。</P>
+<P>使用一个正确编制的音频驱动的时候MPlayer将永远不会产生音频相关的A/V不同步，除非你的文件制作的相当糟糕。(man page里面有解决的办法)。</P>
 
 <P>如果你碰巧遇到一个不好的音频驱动，尝试使用<CODE>-autosync</CODE>选项，它应该可以解决你的问题。详细的信息参见man page。</P>
 
@@ -57,90 +57,187 @@ MPlayer的方法有效率。</P>
 
 <UL>
   <LI>如果你有OSS驱动，先尝试<CODE>-ao oss</CODE>(这是默认的)。如果你遇到毛刺，停止或者任何不正常的事情，
-尝试<CODE>-ao sdl</CODE>(注意：你需要安装SDL库和头文件)。许多情况下SDL的音频驱动都会有帮助，也支持ESD，
-ARTS，和升/降采样率。(ESD是GNOME的音频守护进程，ARTS是KDE的)。</LI>
+尝试<CODE>-ao sdl</CODE>(注意：你需要安装SDL库和头文件)。许多情况下SDL的音频驱动都会有帮助，也支持ESD(GNOME)，ARTS(KDE)。</LI>
   <LI>如果你使用ALSA 0.5的版本，那么你几乎总是不得不使用<CODE>-ao alsa5</CODE>，因为ALSA 0.5的OSS仿真很buggy，
 会导致<B>MPlayer崩溃</B>并出现这样的信息：<BR>
     <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
+  <LI>在Solaris上，用<CODE>-ao sun</CODE>选项选择使用SUN的音频驱动，否则视频音频都无法工作。</LI>
+  <LI>如果从CD-ROM上播放时声音跳跃，打开IRQ unmasking，也就是使用命令<CODE>hdparm -u1 /dev/cdrom</CODE>(<CODE>man hdparm</CODE>)。这
+一般来说时有益的，进一步的描述在<A HREF="cd-dvd.html#drives">CD-ROM部分</A>。</LI>
 </UL>
-
-<P>在<B>Solaris</B>上，必须用<CODE>-ao sun</CODE>选项，否则视频音频都无法工作。</P>
 
 
 <H4><A NAME="experiences">2.3.2.2 声卡体验，推荐</A></H4>
 
-<TABLE BORDER=0 WIDTH="100%">
-  <TR><TD COLSPAN=3><B>VIA板载芯片(via82cxxx)只能48kHz</B></TD></TR>
-  <TR><TD></TD><TD>驱动：</TD><TD>在<A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">sourceforge.net</A></TD></TR>
+<P>Linux下的声卡驱动主要是自由版本的OSS。这些驱动在2.5的开发树中已经被<A HREF="http://www.alsa-project.org">ALSA</A>(Advanced
+  Linux Sound Architecture)取代，如果你的发行版中还没有使用ALSA，而你的声卡又有问题你可能应该试试。ALSA的驱动一般来说，在
+兼容性，表现和特性方面都比OSS要好，但也有些声卡只有<A HREF="http://www.opensound.com/">4Front Technologies</A>的商业版本的
+OSS驱动才支持，他们也支持一些非Linux系统。</P>
+  
+<TABLE BORDER="1" WIDTH="100%">
 
-  <TR><TD COLSPAN=3><B>Aureal Vortex 2 </B></TD></TR>
-  <TR><TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS：</TD><TD>没有驱动</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro：</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA：</TD><TD>没有驱动</TD></TR>
-  <TR><TD></TD><TD>Max kHz：</TD><TD>48</TD></TR>
-  <TR><TD></TD><TD>驱动：</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net </A></TD></TR>
-  <TR><TD></TD><TD>驱动2：</TD><TD>在<A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">Pontscho的主页</A><BR>
-    (<I>缓冲大小增加到32k</I>)</TD></TR>
+  <TR>
+    <TH ROWSPAN="2"><B>声卡</B></TH>
+    <TH COLSPAN="4"><B>驱动</B></TH>
+    <TH ROWSPAN="2"><B>最大kHz</B></TH>
+    <TH ROWSPAN="2"><B>最大声道数</B></TH>
+    <TH ROWSPAN="2"><B>最大打开数</B></TH>
+  </TR>
 
-  <TR><TD COLSPAN=3><B>GUS PnP</B></TD></TR>
-  <TR><TD></TD><TD>OSS：</TD><TD>没有驱动</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro：</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA：</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>Max kHz：</TD><TD>48</TD></TR>
+  <TR>
+    <TH><B>OSS/Free</B></TH>
+    <TH><B>ALSA</B></TH>
+    <TH><B>OSS/Pro</B></TH>
+    <TH><B>其他</B></TH>
+  </TR>
 
-  <TR><TD COLSPAN=3><B>SB Live!</B></TD></TR>
-  <TR><TD></TD><TD>OSS：</TD><TD>模拟方式很好，SP与DIF不能工作</TD></TR>
-  <TR><TD></TD><TD>ALSA：</TD><TD>两个都很好</TD></TR>
-  <TR><TD></TD><TD>Max kHz：</TD><TD>192</TD></TR>
+  <TR>
+    <TD><B>VIA板载芯片(via82cxxx)只能48kHz</B></TD>
+	<TD><A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</A></TD>
+	<TD>snd-via82xx</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>4-48 kHz或者只能使用48 kHz，取决于芯片</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
 
-  <TR><TD COLSPAN=3><B>SB AWE 64</B></TD></TR>
-  <TR><TD></TD><TD>OSS：</TD><TD>max 44kHz</TD></TR>
-  <TR><TD></TD><TD>ALSA：</TD><TD>48kHz听起来很糟</TD></TR>
-  <TR><TD></TD><TD>Max kHz：</TD><TD>48</TD></TR>
+  <TR>
+    <TD><B>Aureal Vortex 2</B></TD>
+    <TD>没有</TD>
+	<TD>没有</TD>
+	<TD>OK</TD>
+	<TD><A HREF="http://aureal.sourceforge.net">Linux Aureal Drivers</A><BR>
+	<A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">缓冲大小增加到32k</A></TD>
+	<TD>48</TD>
+	<TD>4.1</TD>
+	<TD>5+</TD>
+  </TR>
 
-  <TR><TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD></TR>
-  <TR><TD></TD><TD>OSS：</TD><TD>不是很好</TD></TR>
-  <TR><TD></TD><TD>ALSA：</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>Max kHz：</TD><TD>44</TD></TR>
+  <TR>
+    <TD><B>SB Live!</B></TD>
+    <TD>模拟方式OK，SP与DIF不能工作</TD>
+    <TD>都OK</TD>
+	<TD>都OK</TD>
+	<TD><A HREF="http://opensource.creative.com">Creative的OSS驱动(支持SP/DIF)</A></TD>
+    <TD>192</TD>
+	<TD>4.0/5.1</TD>
+    <TD>32</TD>
+  </TR>
 
-  <TR><TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD></TR>
-  <TR><TD></TD><TD>OSS：</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA：</TD><TD>OK(？)</TD></TR>
-  <TR><TD></TD><TD>Max kHz：</TD><TD>48</TD></TR>
+  <TR>
+    <TD><B>SB 128 PCI(es1371)</B></TD>
+    <TD>OK</TD>
+    <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>立体声</TD>
+    <TD>2</TD>
+  </TR>
 
-  <TR><TD COLSPAN=3><B>ESS 688</B></TD></TR>
-  <TR><TD></TD><TD>OSS：</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA：</TD><TD>OK(？)</TD></TR>
-  <TR><TD></TD><TD>Max kHz：</TD><TD>48</TD></TR>
+  <TR>
+    <TD><B>SB AWE 64</B></TD>
+    <TD>最大44kHz</TD>
+    <TD>48kHz听起来很糟</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
 
-  <TR><TD COLSPAN=3><B>C-Media声卡(那种？)</B></TD></TR>
-  <TR><TD></TD><TD>OSS：</TD><TD>不是很好(有嘶嘶声) (？)</TD></TR>
-  <TR><TD></TD><TD>ALSA：</TD><TD>OK(？)</TD></TR>
-  <TR><TD></TD><TD>Max kHz：</TD><TD>？</TD></TR>
+  <TR>
+    <TD><B>GUS PnP</B></TD>
+    <TD>没有</TD>
+    <TD>OK</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Gravis UltraSound ACE</B></TD>
+    <TD>不OK</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>44</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Gravis UltraSound MAX</B></TD>
+    <TD>OK</TD>
+    <TD>OK (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>ESS 688</B></TD>
+    <TD>OK</TD>
+    <TD>OK(?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
 
-  <TR><TD COLSPAN=3><B>Yamaha声卡(*ymf*) </B></TD></TR>
-  <TR><TD></TD><TD>OSS：</TD><TD>不是很好(？)(<CODE>-ao sdl</CODE>)</TD></TR>
-  <TR><TD></TD><TD>ALSA：</TD><TD>仅在使用ALSA 0.5的OSS仿真<B>和</B><CODE>-ao sdl</CODE>(！)(？)时很好</TD></TR>
-  <TR><TD></TD><TD>Max kHz：</TD><TD>？</TD></TR>
+  <TR>
+    <TD><B>C-Media声卡(哪一种？)</B></TD>
+    <TD>不OK(有咝咝声)(?)</TD>
+    <TD>OK(?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Yamaha声卡(*ymf*)</B></TD>
+    <TD>不OK(?)(可能应该用<CODE>-ao sdl</CODE>)</TD>
+    <TD>只有使用ALSA 0.5的OSS模拟<B>并使用</B><CODE>-ao sdl</CODE>(!)(?)时OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>使用envy24芯片的声卡(比如Terratec EWS88MT)</B></TD>
+    <TD>?</TD>
+    <TD>?</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
 
-  <TR><TD COLSPAN=3><B>使用envy24芯片(Terratec EWS88MT之类)的声卡</B></TD></TR>
-  <TR><TD></TD><TD>OSS：</TD><TD>？</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro：</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA：</TD><TD>？</TD></TR>
-  <TR><TD></TD><TD>Max kHz：</TD><TD>？</TD></TR>
+  <TR>
+    <TD><B>PC扬声器或者DAC</B></TD>
+    <TD>OK (使用SDL驱动：<CODE>-ao sdl</CODE>)</TD>
+    <TD>none</TD>
+    <TD>&nbsp;</TD>
+    <TD><A HREF="http://www.geocities.com/stssppnn/pcsp.html">Linux PC扬声器的OSS驱动</a></TD>
+    <TD>驱动可以模拟到44.1，可能更高。</TD>
+    <TD>单声道</TD>
+    <TD>1</TD>
+  </TR>
 
-  <TR><TD COLSPAN=3><B>PC Speaker或者DAC</B></TD></TR>
-  <TR><TD></TD><TD>OSS：</TD><TD>OK(使用SDL驱动：<CODE>-ao sdl</CODE>)</TD></TR>
-  <TR><TD></TD><TD>ALSA：</TD><TD>没有驱动</TD></TR>
-  <TR><TD></TD><TD>Max kHz：</TD><TD>驱动模拟44.1，也许更高。</TD></TR>
-  <TR><TD></TD><TD>驱动：</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD></TR>
 </TABLE>
 
-<P>在Linux上，高度推荐2.4.x的内核。2.2的内核没有经过测试。</P>
-
-<P>如果从CD-ROM播放时声音跳跃，开启IRQ unmasking，例如。<CODE>hdparm -u1 /dev/cdrom</CODE>(<CODE>man hdparm</CODE>)。
-这在大多数情况下有好处，更详细的描述在<A HREF="cd-dvd.html#drives">CD-ROM部分</A>。</P>
-
+ 
 <P>对这个文件的反馈是受欢迎的。请告诉我们你的声卡是如何与MPlayer共同工作的。</P>
 
 <H4><A NAME="af">2.3.2.3 Audio filters</A></H4>
@@ -154,15 +251,15 @@ ARTS，和升/降采样率。(ESD是GNOME的音频守护进程，ARTS是KDE的)。</LI>
 
 <P>声音将先通过resample滤镜然后通过pan滤镜。注意列表中不能包含任何空格，否则它将会失败。</P>
 
-<P>滤镜通常有开关用来改变他们的行为。这些开关在下面的章节会详细的解释。当开关被省略是滤镜将执行默认的设置。这里是一个
-使用带相应开关的滤镜的例子：</P>
+<P>滤镜通常有选项用来改变他们的行为。这些选项在下面的章节会详细的解释。当选项被省略是滤镜将执行默认的设置。这里是一个
+使用带相应选项的滤镜的例子：</P>
 
 <P>&nbsp;&nbsp;<CODE>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1
   -srate 11025 media.avi</CODE></P>
 
 <P>将resample滤镜的输出频率设置为11025Hz并使用pan滤镜把音频混合到一个声道。</P>
 
-<P>这个滤镜层的运行由<CODE>-af-adv</CODE>开关控制。这个开关有两个子选项：</P>
+<P>这个滤镜层的运行由<CODE>-af-adv</CODE>选项控制。这个选项有两个子选项：</P>
 
 <DL>
   <DT><CODE>force</CODE><DT>
@@ -190,22 +287,22 @@ ARTS，和升/降采样率。(ESD是GNOME的音频守护进程，ARTS是KDE的)。</LI>
   </DD>
 
   <DT><CODE>list</CODE></DT>
-  <DD>是-af开关的别名。</DD>
+  <DD>是-af选项的别名。</DD>
 </DL>
 
-<P>滤镜层同样会影响下面的一般开关：
+<P>滤镜层同样会影响下面的一般选项：
 
 <DL>
   <DT><CODE>-v</CODE></DT>
   <DD>增加冗余级别使大部分滤镜显示处附加的状态信息。</DD>
   <DT><CODE>-channels</CODE></DT>
-  <DD>这个选项设置你的声卡使用的输出声道数。它同样会影响从媒体解码处的声道数。如果媒体包含的声道数少于要求的声道数
+  <DD>这个选项设置你想让你的声卡使用的输出声道数。它同样会影响从媒体解码处的声道数。如果媒体包含的声道数少于要求的声道数
 channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
   <DT><CODE>-srate</CODE></DT>
-  <DD>这个选项选择你的声卡的采样率，如果你的声卡的采样率与当前媒体不同，resample插件(见下面)将插入到音频滤镜层中
+  <DD>这个选项选择你想让你的声卡使用的采样率，如果你的声卡的采样率与当前媒体不同，resample插件(见下面)将插入到音频滤镜层中
 来补偿这个差别。</DD>
   <DT><CODE>-format</CODE><DT>
-  <DD>这个选项设置声卡和音频滤镜层的采样格式，如果你的声卡要求的采样格式域当前媒体不同，一个format插件(见下面)将自动插入
+  <DD>这个选项设置声卡和音频滤镜层之间使用的采样格式，如果你的声卡要求的采样格式域当前媒体不同，一个format滤镜(见下面)将自动插入
 来进行调整。</DD>
 </DL>
 
@@ -213,15 +310,15 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 <H5><A NAME="af_resample">2.3.2.3.1 升/降采样率</A></H5>
 
 <P>MPlayer完全支持使用<CODE>resample</CODE>插件进行声音的升/降采样率。当你使用固定采样率的声卡或者被只兼容
-最大44.1kHz的老声卡郁闷时可以使用它。这个滤镜会在需要时自动开启，但它也可以用命令行显式的开启。他有三个开关：</P>
+最大44.1kHz的老声卡郁闷时可以使用它。这个滤镜会在需要时自动开启，但它也可以用命令行显式的开启。他有三个选项：</P>
 
 <DL>
   <DT><CODE>srate &lt;8000-192000&gt;</CODE></DT>
-  <DD>是一个整数用来设置输出的采样频率，以Hz为单位。有效范围从8kHz到192kHz。如果输入输出的采样频率相同或者这个参数
+  <DD>是一个整数用来设置输出的采样频率，以Hz为单位。有效范围从8kHz到192kHz。如果输入输出的采样频率相同或者这个选项
 被省略滤镜降自动卸载。高的采样频率通常会提高声音的质量，特别是跟别的滤镜一起使用的时候。</DD>
 
   <DT><CODE>sloppy</CODE></DT>
-  <DD>是一个可选的二进制参数使输出频率可以与<CODE>srate</CODE>给定的频率稍有不同。这个开关用于开始播放的过程非常慢的情况。
+  <DD>是一个可选的二进制选项使输出频率可以与<CODE>srate</CODE>给定的频率稍有不同。这个选项用于开始播放的过程非常慢的情况。
 它是默认打开的。</DD>
 
   <DT><CODE>type &lt;0-2&gt;</CODE><DT>
@@ -240,14 +337,14 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 <H5><A NAME="af_channels">2.3.2.3.2 改变声道数</A></H5>
 
 <P><CODE>channels</CODE>滤镜用来添加和去除声道，它也可以用来实现声道的定向与复制。当音频滤镜层的输出与输入层不同
-或者当别的滤镜需要它是它将自动开启。当不需要是这个滤镜会自行卸载。开关的数目是可变的：</P>
+或者当别的滤镜需要它是它将自动开启。当不需要是这个滤镜会自行卸载。选项的数目是可变的：</P>
 
 <DL>
   <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
-  <DD>是<CODE>1</CODE>到<CODE>6</CODE>间的整数用来设定输出的声道数。这个开关的必须的，不设置会导致运行时错误。</DD>
+  <DD>是<CODE>1</CODE>到<CODE>6</CODE>间的整数用来设定输出的声道数。这个选项的必须的，不设置会导致运行时错误。</DD>
 
   <DT><CODE>nr &lt;1-6&gt;</CODE></DT>
-  <DD>是<CODE>1</CODE>到<CODE>6</CODE>之间的整数用来指定定向的数量，这个参数是可选的，如果省略将使用默认的定向。</DD>
+  <DD>是<CODE>1</CODE>到<CODE>6</CODE>之间的整数用来指定定向的数量，这个选项是可选的，如果省略将使用默认的定向。</DD>
 
   <DT><CODE>from1:to1:from2:to2:from3:to3...</CODE></DT>
   <DD>是<CODE>0</CODE>到<CODE>5</CODE>之间的一对数定义每个声道被定向到哪里。</DD>
@@ -275,13 +372,13 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 
 <DL>
   <DT><CODE>bps &lt;number&gt;</CODE></DT>
-  <DD>可以是<CODE>1</CODE>, <CODE>2</CODE>或者<CODE>4</CODE>代表样本的字节数。这个开关是必须的，不设置会
+  <DD>可以是<CODE>1</CODE>, <CODE>2</CODE>或者<CODE>4</CODE>代表样本的字节数。这个选项是必须的，不设置会
 导致运行时错误。</DD>
 
   <DT><CODE>f &lt;format&gt;</CODE></DT>
   <DD>是描述样本格式的字符串。字符串应该是下面这些东西的组合：<CODE>alaw</CODE>, <CODE>mulaw</CODE>或者<CODE>imaadpcm</CODE>, 
   <CODE>float</CODE>或者<CODE>int</CODE>, <CODE>unsigned</CODE>或者<CODE>signed</CODE>, <CODE>le</CODE>或者<CODE>be</CODE>
-(低位优先或高位优先)。这个开关是必须的，不设置会导致运行时错误。</DD>
+(低位优先或高位优先)。这个选项是必须的，不设置会导致运行时错误。</DD>
 </DL>
 
 <P>示例：<BR>
@@ -293,7 +390,7 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 <H5><A NAME="af_delay">2.3.2.3.4 延迟</A></H5>
 
 <P><CODE>delay</CODE>滤镜延迟声音到达扬声器的时间使得不同的声道能同时到达听众的位置。这个功能只当你有两个以上的扬声器
-才有用，这个滤镜的参数的数目是可变的：</P>
+才有用，这个滤镜的选项的数目是可变的：</P>
 
 <DL>
   <DT><CODE>d1:d2:d3...</CODE></DT>
@@ -320,9 +417,9 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 <H5><A NAME="af_volume">2.3.2.3.5 软件音量控制</A></H5>
 
 <P>软件音量控制通过<CODE>volume</CODE>音频滤镜实现，小心使用这个滤镜因为他会降低声音的信噪比。在大多数情况下最好是
-把PCM音量开到最大，不使用这个滤镜而是通过混音器的主音量控制来控制你的扬声器的输出级别。如果你的电脑连有外部放大器。
-(这几乎是普遍现象)，可以通过调节主音量和放大器上的音量旋钮直到背景的咝咝声消失来使噪音级别达到最小。
-这个滤镜有两个开关：</P>
+把PCM音量开到最大，不使用这个滤镜而是通过混音器的主音量控制来控制你的扬声器的输出级别。如果你的声卡使用数字PCM混音器而不是
+模拟的，而你又听到有扭曲现象，就改用主混音器。如果你的电脑连有外部放大器。(这几乎是普遍现象)，可以通过调节主音量和放大器
+上的音量旋钮直到背景的咝咝声消失来使噪音级别达到最小。这个滤镜有两个选项：</P>
 
 <DL>
   <DT><CODE>v &lt;-200 - +60&gt;</CODE></DT>
@@ -330,7 +427,7 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 
   <DT><CODE>c</CODE></DT>
   <DD>二进制控制项用来打开和关闭软修饰。软修饰可以在使用很高音量的时候使声音变得更加平滑。如果扬声器的动态区域很低
-可以打开这个开关。但你必须明白这个特性会造成扭曲而且应该使作为最终手段。</DD>
+可以打开这个选项。但你必须明白这个特性会造成扭曲而且应该使作为最终手段。</DD>
 </DL>
 
 <P>示例：<BR>
@@ -365,7 +462,7 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 最高频带的中心频率的时候，最高频带的特性不是对称的。这个问题可以通过使用resample滤镜在声音到达本滤镜之前
 升高样本频率来解决。</P>
 
-<P>这个滤镜有10个参数：</P>
+<P>这个滤镜有10个选项：</P>
 
 <DL>
   <DT><CODE>g1:g2:g3...g10</CODE></DT>
@@ -388,11 +485,11 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
   <LI>在一个环绕音效系统中改变中央扬声器的“宽度”。</LI>
 </OL>
 
-<P>这个滤镜很难使用，而且在获得想要的效果之前需要动些脑筋。这个滤镜的开关数取决于输出的声道数：</P>
+<P>这个滤镜很难使用，而且在获得想要的效果之前需要动些脑筋。这个滤镜的选项数取决于输出的声道数：</P>
 
 <DL>
   <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
-  <DD>是<CODE>1</CODE>到<CODE>6</CODE>之间的整数，用来设置输出的声道数。这个开关是必须的，如果省略将导致
+  <DD>是<CODE>1</CODE>到<CODE>6</CODE>之间的整数，用来设置输出的声道数。这个选项是必须的，如果省略将导致
 运行时错误。</DD>
 
   <DT><CODE>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</CODE></DT>
@@ -414,7 +511,7 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 
 <P><CODE>sub</CODE>插件给音频增加一个副低音声道。用来产生副低音声道的数据是0声道和1声道音频数据的平均混合。
 混合后的声音进过4阶Butterworth滤波器低通过滤，默认去掉60Hz以上的声音，然后添加到音频流的一个单独声道中。
-警告：当你播放5.1杜比数字音效的DVD时禁用这个滤镜，否则它使副低音的声音发生混乱。这个滤镜有两个参数：</P>
+警告：当你播放5.1杜比数字音效的DVD时禁用这个滤镜，否则它使副低音的声音发生混乱。这个滤镜有两个选项：</P>
 
 <DL>
   <DT><CODE>fc &lt;20-300&gt;</CODE></DT>
@@ -434,7 +531,7 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 <H5><A NAME="af_surround">2.3.2.3.9 环绕音效解码</A></H5>
 
 <P>矩阵编码的环绕音效可以通过<CODE>surround</CODE>滤镜解码。杜比环绕就是矩阵编码格式的一个例子。很多两声道的音频
-实际上包含了矩阵编码。为了使用这个特性你需要一个至少支持4声道的声卡。这个滤镜有1个参数：</P>
+实际上包含了矩阵编码。为了使用这个特性你需要一个至少支持4声道的声卡。这个滤镜有1个选项：</P>
 
 <DL>
   <DT><CODE>d &lt;0-1000&gt;</CODE></DT>
@@ -454,15 +551,15 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 <H2><STRONG>注意：音频插件已经被音频滤镜取代，很快会被删去。</STRONG></H2>
 <H4><A NAME="插件s">2.3.2.4 音频滤镜(已过时)</A></H4>
 
-<P>MPlayer支持音频插件。音频插件s用于在声音到达声卡之前改变音频数据的属性。他们用<CODE>-aop</CODE>开关加上
-<CODE>list=插件1,插件2,...</CODE>参数打开。必须有<CODE>list</CODE>参数用来确定应该使用哪些插件，以及他们执行的顺序。例如：</P>
+<P>MPlayer支持音频插件。音频插件s用于在声音到达声卡之前改变音频数据的属性。他们用<CODE>-aop</CODE>选项加上
+<CODE>list=插件1,插件2,...</CODE>选项打开。必须有<CODE>list</CODE>选项用来确定应该使用哪些插件，以及他们执行的顺序。例如：</P>
 
 <P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample,format</CODE></P>
 
 <P>将让声音先通过resample插件然后再经过format插件。</P>
 
-<P>插件也有改变他们行为的开关。这些开关在下面将详细地解释。如果开关被省略，插件将按照默认设置运行。
-这是一个关于如何组合使用指定参数的插件的例子：</P>
+<P>插件也有改变他们行为的选项。这些选项在下面将详细地解释。如果选项被省略，插件将按照默认设置运行。
+这是一个关于如何组合使用指定选项的插件的例子：</P>
 
 <P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop
   list=resample,format:fout=44100:format=0x8</CODE></P>
@@ -475,8 +572,8 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 <H5><A NAME="resample">2.3.2.4.1 升/降采样率</A></H5>
 
 <P>MPlayer完全支持对声音升/降采样率。如果你使用固定采样率的声卡或者如果你被只兼容
-最大44.1kHz的老声卡郁闷时可以使用这个插件。是否使用这个插件是<B>自动检测的</B>
-这个插件有一个参数：<CODE>fout</CODE>用于设置期望的输出的采样率。默认是48kHz，单位是&lt;Hz&gt;。</P>
+最大44.1kHz的老声卡郁闷时可以使用这个插件。是否使用这个插件是<EM>自动检测的</EM>
+这个插件有一个选项：<CODE>fout</CODE>用于设置期望的输出的采样率。单位是&lt;Hz&gt;，默认是48kHz。</P>
 
 <P>用法：<BR>
    &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;required
@@ -497,7 +594,7 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 <H5><A NAME="format">2.3.2.4.3 采样格式转换</A></H5>
 
 <P>如果你的声卡驱动不支持带符号的16位<CODE>int</CODE>数据类型，这个插件能被用来把它转换为一个你的
-声卡能理解的格式。它有一个参数，<CODE>format</CODE>，可以设置为你在<CODE>libao2/afmt.h</CODE>中找到的数字。
+声卡能理解的格式。它有一个选项，<CODE>format</CODE>，可以设置为你在<CODE>libao2/afmt.h</CODE>中找到的数字。
 这个插件几乎很少会用到而且是面向高级用户的。记住这个插件仅仅改变采样格式而不改变采样频率或者声道数。</P>
 
 <P>用法：<BR>
@@ -510,15 +607,16 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
 <P>这个插件将声音延迟，被计划当做如何开发新的插件的例子。它不能用于任何以用户观点来说有用的东西，
 在这里被提到只是为了完整的缘故。不要使用这个插件除非你是开发者。</P>
 
+<P>如果你有一个文件总是A/V同步失败，使用<CODE>+/-</CODE>实时调整就可以，建议使用OSD，调节更加方便。</P>
 
 <H5><A NAME="volume">2.3.2.4.5 软件音量控制</A></H5>
 
-<P>这个插件是音量控制功能的软件替代，用于哪些使用蹩脚的混音设备的机器。如果你想要改变MPlayer
-的输出音量而不改变混音器中PCM音量的设置也可以使用这个插件。它有一个<CODE>volume</CODE>参数初始的音量水平。
+<P>这个插件是音量控制功能的软件替代，用于哪些使用蹩脚的混音设备的机器。如果你想要改变MPlayer的输
+出音量而不改变混音器中PCM音量的设置也可以使用这个插件。它有一个<CODE>volume</CODE>选项设置初始的音量水平。
 初始音量水平能取0到255之间的值，默认值是101相当于放大0分贝。谨慎使用这个插件因为它会降低声音的信噪比。
-在大多数情况下最好是把PCM音量设为最大是，放弃这个插件并且通过混音器的主音量控制来控制你的扬声器输出水平。
-如果有连接到计算机的外部功放(这几乎是普遍情况)，噪音水平能通过调整在主音量级别和功放上的旋钮而最大限度的减少，
-直到去除嘶嘶的背景噪音。</P>
+在大多数情况下最好是把PCM音量设为最大值，放弃这个插件并且通过混音器的主音量控制来控制你的扬声器输出水平。如果你的声卡使用
+数字PCM混音器而不是模拟的，而你又听到有扭曲现象，就改用主混音器。如果有连接到计算机的外部功放(这几乎是普遍情况)，噪音水平
+能通过调整在主音量级别和功放上的旋钮而最大限度的减少，直到去除嘶嘶的背景噪音。</P>
 
 <P>用法:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop
@@ -541,7 +639,7 @@ channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo</CODE><BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo:mul=3.45</CODE></P>
 
-<P>默认参数(<CODE>mul</CODE>)是默认值为2.5的浮点数。如果你把它设置到0.0，你将获得单声道(两个声道的平均值)。
+<P>默认选项(<CODE>mul</CODE>)是默认值为2.5的浮点数。如果你把它设置到0.0，你将获得单声道(两个声道的平均值)。
 如果你把它设置到1.0，声音不变，如果你把它设置为-1.0，左右声道将被交换。</P>
 
 

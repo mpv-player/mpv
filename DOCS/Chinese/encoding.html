@@ -61,8 +61,22 @@ MEncoderÔÚÕâ¸öpass½áÊøÖ®ºó£¬½«¶ÔÓÚ650Mb£¬700Mb£¬ºÍ800MbµÄÄ¿±ê´óÐ¡´òÓ¡ÍÆ¼öµÄ±ÈÌØÂ
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
     -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
+<H2><A NAME="mpeg">7.2 ±àÂëÎªMPEG¸ñÊ½</A></H2>
 
-<H2><A NAME="rescaling">7.2 µçÓ°ÔÙËõ·Å</A></H2>
+<P>MEncoder¿ÉÒÔÉú³ÉMPEG(MPEG-PS)¸ñÊ½µÄÊä³öÎÄ¼þ¡£ËüÃÇ¿ÉÄÜÖ»ÄÜÓÃÓÚlibavcodecµÄ<I>mpeg1video</I>±à½âÂëÆ÷£¬ÒòÎªÒ»°ã²¥·ÅÆ÷ -
+- ³ýÁËMPlayer -- ÈÏÎªMPEGÎÄ¼þÖÐ°üº¬µÄÊÇMPEG1ÊÓÆµÁ÷ºÍMPEG1 layer 2(MP2)ÒôÆµÁ÷¡£</P>
+  
+<P>Õâ¸öÌØÐÔÄ¿Ç°À´ËµÃ»ÓÐÊ²Ã´ÓÃ´¦£¬¶øÇÒ¿ÉÄÜ»¹ÓÐºÜ¶àbug£¬ÆäÖØÒªÐÔÔÚÓÚÄ¿Ç°MEncoderÎÞ·¨±àÂëMPEG1 layer 2 (MP2)µÄÒôÆµ£¬¶øËüÕýÊÇ±ðµÄ²¥·Å
+Æ÷ÈÏÎªMPEGÎÄ¼þÖÐÓ¦¸ÃÓÐµÄ¡£</P>
+  
+<P>Òª¸Ä±äMEncoderµÄÊä³öÎÄ¼þ¸ñÊ½£¬¿ÉÒÔÊ¹ÓÃ<CODE>-of mpeg</CODE>Ñ¡Ïî¡£</P>
+
+<P>Ê¾Àý£º<BR>
+  &nbsp;&nbsp;<CODE>mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video
+  -oac copy &lt;other options&gt; media.avi -o output.mpg</CODE></P>
+
+
+<H2><A NAME="rescaling">7.3 µçÓ°ÔÙËõ·Å</A></H2>
 
 <P>°ÑµçÓ°Í¼ÏóµÄ³ß´çÖØÐÂÉèÖÃµÄÐèÒª¾­³£³öÏÖ¡£Ô­Òò¿ÉÄÜºÜ¶à£¬ÀýÈç¼õÐ¡Êä³öÎÄ¼þµÄ´óÐ¡£¬ÍøÂç´ø¿íµÈµÈ£¬ºÜ¶àÈËÉõÖÁÔÙ°ÑDVD»òSVCD±àÂëÎªµ½DivX
 µÄAVIµÄÊ±ºòÒ²ÖØÐÂËõ·Å£¬<B>ÕâÊÇ´íÎóµÄ</B>¡£ÔÚÕâÃ´×öÖ®Ç°£¬ÇëÏÈÔÄ¶Á<A HREF="#aspect">±£³ÖÆÁÄ»¸ß¿í±È</A>²¿·Ö¡£</P>
@@ -76,7 +90,7 @@ MEncoder½«Ê¹ÓÃ0£º¿ìËÙ¶þ´ÎÏßÐÔËõ·Å¡£</P>
     output.avi</CODE></P>
 
 
-<H2><A NAME="copying">7.3 Á÷¸´ÖÆ</A></H2>
+<H2><A NAME="copying">7.4 Á÷¸´ÖÆ</A></H2>
 
 <P>MEncoderÄÜÓÃÁ½ÖÖ·½Ê½´¦ÀíÊäÈëÁ÷£º<B>±àÂë</B>»òÕß<B>¸´ÖÆ</B>ËûÃÇ¡£Õâ²¿·ÖÊÇ¹ØÓÚ<B>¸´ÖÆ</B>µÄ¡£</P>
 
@@ -90,7 +104,7 @@ MEncoder½«Ê¹ÓÃ0£º¿ìËÙ¶þ´ÎÏßÐÔËõ·Å¡£</P>
 </UL>
 
 
-<H2><A NAME="fixing">7.4 ÐÞ¸´Ë÷Òý»òÕß½»´íËð»µµÄAVI </A></H2>
+<H2><A NAME="fixing">7.5 ÐÞ¸´Ë÷Òý»òÕß½»´íËð»µµÄAVI </A></H2>
 
 <P>×îÈÝÒ×µÄÊÂÇé¡£ÎÒÃÇ¼òµ¥µØ¸´ÖÆÊÓÆµºÍÒôÆµÁ÷£¬²¢ÓÃMEncoder²úÉúË÷Òý¡£µ±È»Õâ²»ÄÜÐÞ¸´ÊÓÆµºÍ/»òÕßÒôÆµÁ÷ÖÐ¿ÉÄÜµÄ´íÎó¡£
 ÕâÍ¬ÑùÒ²¿ÉÒÔÐÞ¸´½»´íËð»µµÄÎÄ¼þ£¬
@@ -98,8 +112,17 @@ MEncoder½«Ê¹ÓÃ0£º¿ìËÙ¶þ´ÎÏßÐÔËõ·Å¡£</P>
 
 <P>ÃüÁî£º<CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
+<H3><A NAME="appending">7.5.1 ºÏ²¢¶à¸öAVIÎÄ¼þ</A></H3>
 
-<H2><A NAME="libavcodec">7.5 ÓÃlibavcodec±à½âÂëÆ÷×å±àÂë</A></H2>
+<P>×÷ÎªÐÞ¸´Ëð»µµÄAVIÎÄ¼þµÄ¸±²úÎï£¬MEncoder¿ÉÒÔÓÃÀ´ÐÞ¸´Á½¸ö»ò¶à¸öAVIÎÄ¼þºÏ²¢Éú³ÉµÄÎÄ¼þ£º</P>
+
+<P>ÃüÁî£º<CODE>cat 1.avi 2.avi | mencoder -noidx -ovc copy -oac copy -o output.avi -</CODE></P>
+
+<P><B>×¢Òâ£º</B>ÕâÒªÇó1.aviºÍ2.aviÊ¹ÓÃÍ¬ÑùµÄ±à½âÂëÆ÷£¬·Ö±æÂÊ£¬Á÷ËÙÂÊµÈµÈ£¬²¢ÇÒÖÁÉÙ1.avi²»ÊÇËð»µµÄ¡£Äã¿ÉÄÜÐèÒªÏÈÐÞ¸´ÄãµÄ
+AVIÊäÈëÎÄ¼þ£¬°´ÕÕ<A HREF="#fixing">ÉÏÃæ</A>ËùËµµÄ·½·¨¡£</P>
+
+
+<H2><A NAME="libavcodec">7.6 ÓÃlibavcodec±à½âÂëÆ÷×å±àÂë</A></H2>
 
 <P><A HREF="codecs.html#libavcodec">libavcodec</A>Ìá¹©¼òµ¥±àÂëÐí¶àÓÐÈ¤µÄÊÓÆµºÍÒôÆµ¸ñÊ½(Ä¿Ç°ÆäÒôÆµ±àÂëÆ÷»¹²»Ö§³Ö)µÄ·½·¨¡£
 ÄãÄÜ±àÂëÏÂÁÐµÄ±àÂë¸ñÊ½£º</P>
@@ -122,7 +145,7 @@ MEncoder½«Ê¹ÓÃ0£º¿ìËÙ¶þ´ÎÏßÐÔËõ·Å¡£</P>
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
-<H2><A NAME="image_files">7.6 ÓÃÊäÈëµÄ¶à·ùÍ¼ÏóÎÄ¼þ(JPEG£¬PNG»òTGA)½øÐÐ±àÂë</A></H2>
+<H2><A NAME="image_files">7.7 ÓÃÊäÈëµÄ¶à·ùÍ¼ÏóÎÄ¼þ(JPEG£¬PNG»òTGA)½øÐÐ±àÂë</A></H2>
 
 <P>MEncoder¾ßÓÐ´ÓÒ»¸ö»ò¶à¸öJPEG£¬PNG»òTGAÎÄ¼þ´´½¨µçÓ°µÄÄÜÁ¦¡£Í¨¹ý¼òµ¥µÄframecopyËüÄÜ´´½¨MJPEG(Motion JPEG)£¬
 MPNG(Motion PNG )»òMTGA(Motion TGA)ÎÄ¼þ¡£</P>
@@ -144,27 +167,24 @@ MPNG(Motion PNG )»òMTGA(Motion TGA)ÎÄ¼þ¡£</P>
   output.avi</CODE></P></P>
 
 <P><I>ÓÃµ±Ç°Ä¿Â¼ÖÐµÄÒ»Ð©JPEGÎÄ¼þ´´½¨DivX4ÎÄ¼þ£º</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
-  output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o output.avi \*.jpg</CODE></P>
 
 <P><I>ÓÃµ±Ç°Ä¿Â¼ÖÐµÄËùÓÐJPEGÎÄ¼þ´´½¨Motion JPEG(MJPEG)ÎÄ¼þ£º</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
-  -o output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc copy -o output.avi \*.jpg</CODE></P>
 
 <P><I>ÓÃµ±Ç°Ä¿Â¼ÖÐµÄËùÓÐPNGÎÄ¼þ´´½¨Ò»¸ö·ÇÑ¹ËõµÄÎÄ¼þ£º</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw -o
-  output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc rawrgb -o output.avi \*.png</CODE></P>
+
+<P><B>×¢Òâ£º</B>¿í¶È±ØÐëÊÇ4µÄÕûÊý±¶£¬ÕâÊÇRAW RGB AVI¸ñÊ½µÄÒ»¸öÏÞÖÆ¡£</P>
 
 <P><I>ÓÃµ±Ç°Ä¿Â¼ÖÐµÄËùÓÐPNGÎÄ¼þ´´½¨Motion PNG(MPNG)ÎÄ¼þ£º</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
-  -o output.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy -o output.avi \*.png</CODE></P>
 
 <P><I>ÓÃµ±Ç°Ä¿Â¼ÖÐµÄËùÓÐTGAÎÄ¼þ´´½¨Motion TGA(MTGA)ÎÄ¼þ£º</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy
-  -o output.avi</CODE></P>
+&nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy -o output.avi \*.tga</CODE></P>
 
 
-<H2><A NAME="vobsub">7.7 ½«DVD×ÖÄ»ÌáÈ¡ÎªVobsubÎÄ¼þ</A></H4>
+<H2><A NAME="vobsub">7.8 ½«DVD×ÖÄ»ÌáÈ¡ÎªVobsubÎÄ¼þ</A></H4>
 
 <P>MEncoderÓÐ°ÑDVD×ÖÄ»ÌáÈ¡µ½Vobsub¸ñÊ½µÄÎÄ¼þµÄÄÜÁ¦¡£°üÀ¨ÒÔ<CODE>.idx</CODE>ºÍ<CODE>.sub</CODE>½áÎ²µÄÒ»¶Ô
 ÎÄ¼þ¶øÇÒÍ¨³£´ò°üÔÚÒ»¸öµ¥Ò»µÄ<CODE>.rar</CODE>ÎÄµµÖÐ¡£MPlayerÄÜÊ¹ÓÃ<CODE>-vobsub</CODE>ºÍ<CODE>-vobsubid</CODE>
@@ -195,7 +215,7 @@ MPNG(Motion PNG )»òMTGA(Motion TGA)ÎÄ¼þ¡£</P>
   &nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles
     -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
-<H2><A NAME="aspect">7.8 ±£³ÖÆÁÄ»¸ß¿í±È</A></H2>
+<H2><A NAME="aspect">7.9 ±£³ÖÆÁÄ»¸ß¿í±È</A></H2>
 
 <P>DVDºÍSVCD(Ò²¾ÍÊÇMPEG1/2)ÎÄ¼þÍ¨³£°üº¬ÆÁÄ»¸ß¿í±ÈµÄÖµ£¬ËüÃèÊö²¥·ÅÆ÷ÈçºÎÕýÈ·Ëõ·ÅÊÓÆµÁ÷£¬±£Ö¤ÈË²»»á³¤¼¦µ°ÄÔ´ü
 (ex.: 480x480 + 4:3 = 640x480)¡£µ«µ±±àÂë³ÉAVI(DivX)ÎÄ¼þÊ±£¬Äã±ØÐëÇåÐÑµÄÈÏÊ¶µ½AVIµÄÎÄ¼þÍ·ÖÐÃ»ÓÐ´¢´æÕâ¸öÊý¾Ý¡£ÖØÐÂËõ·ÅµçÓ°

@@ -65,6 +65,7 @@
               <LI><A HREF="formats.html#ogg">2.1.1.12 OGG/OGMÎÄ¼þ</A></LI>
 			  <LI><A HREF="formats.html#sdp">2.1.1.13 SDPÎÄ¼þ</A></LI>
               <LI><A HREF="formats.html#pva">2.1.1.14 PVAÎÄ¼þ</A></LI>
+			  <LI><A HREF="formats.html#gif">2.1.1.15 GIFÎÄ¼þ</A></LI>
             </UL>
           </LI>
           <LI><A HREF="formats.html#audio_formats">2.1.2 ÒôÆµ¸ñÊ½</A>
@@ -130,6 +131,7 @@
                       <LI><A HREF="video.html#xv_ati">2.3.1.2.1.4 ATIÏÔ¿¨</A></LI>
                       <LI><A HREF="video.html#xv_neomagic">2.3.1.2.1.5 NeoMagicÏÔ¿¨</A></LI>
                       <LI><A HREF="video.html#xv_trident">2.3.1.2.1.6 TridentÏÔ¿¨</A></LI>
+					  <LI><A HREF="video.html#xv_trident">2.3.1.2.1.7 Kyro/PowerVRÏÔ¿¨</A></LI>
                     </UL>
                 </LI>
                 <LI><A HREF="video.html#dga">2.3.1.2.2 DGA</A></LI>
@@ -142,7 +144,14 @@
                 <LI><A HREF="video.html#aalib">2.3.1.2.9 AAlib -- ÎÄ±¾·½Ê½ÏÔÊ¾</A></LI>
                 <LI><A HREF="video.html#vesa">2.3.1.2.10 VESA -- VESA BIOSµÄÊä³ö</A></LI>
                 <LI><A HREF="video.html#x11">2.3.1.2.11 X11</A></LI>
-                <LI><A HREF="video.html#vidix">2.3.1.2.12 VIDIX</A></LI>
+                <LI><A HREF="video.html#vidix">2.3.1.2.12 VIDIX</A>
+				  <UL>
+		            <LI><A HREF="video.html#vidix_ati"> 2.3.1.2.12.1 ATI cards</A></LI>
+		            <LI><A HREF="video.html#vidix_matrox"> 2.3.1.2.12.2 Matrox cards</A></LI>
+		            <LI><A HREF="video.html#vidix_trident"> 2.3.1.2.12.3 Trident cards</A></LI>
+		            <LI><A HREF="video.html#vidix_3dlabs"> 2.3.1.2.12.4 3DLabs cards</A></LI>
+    	          </UL>
+		        </LI>
                 <LI><A HREF="video.html#directfb">2.3.1.2.13 DirectFB</A></LI>
                 <LI><A HREF="video.html#dfbmga">2.3.1.2.14 DirectFB/Matrox(dfbmga)</A></LI>
               </UL>
@@ -277,39 +286,21 @@
   <LI><A HREF="encoding.html">7. ÓÃMEncoder±àÂë</A>
     <UL>
       <LI><A HREF="encoding.html#2pass">7.1 2»ò3-passµÄMPEG-4("DIVX")±àÂë</A></LI>
-      <LI><A HREF="encoding.html#rescaling">7.2 µçÓ°ÔÙËõ·Å</A></LI>
-      <LI><A HREF="encoding.html#copying">7.3 Á÷¸´ÖÆ</A></LI>
-      <LI><A HREF="encoding.html#fixing">7.4 ÐÞ¸´Ë÷ÒýËð»µµÄAVIÎÄ¼þ</A></LI>
-      <LI><A HREF="encoding.html#libavcodec">7.5 ÓÃlibavcodec±à½âÂëÆ÷×å½øÐÐ±àÂë</A></LI>
-      <LI><A HREF="encoding.html#image_files">7.6 ÓÃÊäÈëµÄ¶à·ùÍ¼ÏñÎÄ¼þ(JPEGs»òÕßPNGs)½øÐÐ±àÂë</A></LI>
-      <LI><A HREF="encoding.html#vobsub">7.7 ½«DVD×ÖÄ»ÌáÈ¡ÎªVobsubÎÄ¼þ</A></LI>
-      <LI><A HREF="encoding.html#aspect">7.8 ±£³ÖÆÁÄ»¸ß¿í±È</A></LI>
+	  <LI><A HREF="encoding.html#mpeg">7.2 ±àÂëÎªMPEG¸ñÊ½</A></LI>
+      <LI><A HREF="encoding.html#rescaling">7.3 µçÓ°ÔÙËõ·Å</A></LI>
+      <LI><A HREF="encoding.html#copying">7.4 Á÷¸´ÖÆ</A></LI>
+      <LI><A HREF="encoding.html#fixing">7.5 ÐÞ¸´Ë÷ÒýËð»µµÄAVIÎÄ¼þ</A></LI>
+	  <UL>
+          <LI><A HREF="encoding.html#appending">7.5.1 ºÏ²¢¶à¸öAVIÎÄ¼þ</A></LI>
+	  </UL>
+      <LI><A HREF="encoding.html#libavcodec">7.6 ÓÃlibavcodec±à½âÂëÆ÷×å½øÐÐ±àÂë</A></LI>
+      <LI><A HREF="encoding.html#image_files">7.7 ÓÃÊäÈëµÄ¶à·ùÍ¼ÏñÎÄ¼þ(JPEGs»òÕßPNGs)½øÐÐ±àÂë</A></LI>
+      <LI><A HREF="encoding.html#vobsub">7.8 ½«DVD×ÖÄ»ÌáÈ¡ÎªVobsubÎÄ¼þ</A></LI>
+      <LI><A HREF="encoding.html#aspect">7.9 ±£³ÖÆÁÄ»¸ß¿í±È</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#mailing_lists">¸½Â¼A -- ÓÊ¼þÁÐ±í</A></LI>
-  <LI><A HREF="bugreports.html">Appendix B -- ÈçºÎ±¨¸æbugs</A>
-    <UL>
-      <LI><A HREF="bugreports.html#fix">B.1 ÈçºÎÐÞ¸´bugs</A></LI>
-      <LI><A HREF="bugreports.html#report">B.2 ÈçºÎ±¨¸æbugs</A></LI>
-      <LI><A HREF="bugreports.html#where">B.3 ÏòÄÄÀï±¨¸æbugs</A></LI>
-      <LI><A HREF="bugreports.html#what">B.4 ±¨¸æÊ²Ã´</A>
-        <UL>
-          <LI><A HREF="bugreports.html#system">B.4.1 ÏµÍ³ÐÅÏ¢</A></LI>
-          <LI><A HREF="bugreports.html#hardware">B.4.2Ó²¼þºÍÇý¶¯</A></LI>
-          <LI><A HREF="bugreports.html#compilation">B.4.3 ±àÒëÎÊÌâ</A></LI>
-          <LI><A HREF="bugreports.html#configure">B.4.4 ÅäÖÃÎÊÌâ</A></LI>
-          <LI><A HREF="bugreports.html#playback">B.4.5 ²¥·ÅÎÊÌâ</A></LI>
-          <LI><A HREF="bugreports.html#crash">B.4.6 ±ÀÀ£</A>
-            <UL>
-              <LI><A HREF="bugreports.html#debug">B.4.6.1 ÈçºÎ±£´æÒ»¸ö¿ÉÖØ¸´µÄ±ÀÀ£µÄÐÅÏ¢</A></LI>
-              <LI><A HREF="bugreports.html#core">B.4.6.2 ÈçºÎ´ÓÒ»¸öcore dumpÖÐÌáÈ¡ÓÐÒâÒåµÄÐÅÏ¢</A></LI>
-            </UL>
-          </LI>
-        </UL>
-      </LI>
-      <LI><A HREF="bugreports.html#advusers">B.5 ÎÒÖªµÀÎÒÕýÔÚ¸ÉÊ²Ã´...</A></LI>
-    </UL>
-  </LI>
+  <LI><A HREF="bugreports.html">¸½Â¼B -- ÈçºÎ±¨¸æbugs</A></LI>
   <LI><A HREF="#known_bugs">¸½Â¼C -- ÒÑÖªbug</A></LI>
   <LI><A HREF="skin.html">¸½Â¼D - MPlayer skinµÄ¸ñÊ½</A>
     <UL>
@@ -401,8 +392,7 @@ OpenGL£¬SVGAlib£¬fbdev£¬AAlib£¬DirectFBÏÂ¹¤×÷£¬¶øÇÒÄãÒ²ÄÜÊ¹ÓÃGGIºÍSDL(ÓÉ´Ë¿ÉÒÔÊ¹
   <LI>±àÂë/¶àÂ·´«Êä³É¾ßÓÐÊÊµ±Ë÷ÒýµÄ½»´íµÄAVIÎÄ¼þ</LI>
   <LI>´ÓÍâ²¿ÒôÆµÁ÷´´½¨ÎÄ¼þ</LI>
   <LI>1, 2»ò3 pass±àÂë</LI>
-  <LI><B>VBR</B>µÄMP3ÒôÆµ - <B>ÖØÒªÌáÊ¾:</B> VBR MP3ÒôÆµ²»×ÜÊÇÄÜ±»WindowsµÄ²¥·ÅÆ÷Õý³£µÄ²¥·Å£¡ÁíÒ»·½Ãæ£¬Ä¿Ç°MEncoderµÄ
-  CBR±àÂëÎÄ¼þÔÚWin32²¥·ÅÆ÷ÉÏÍêÈ«ÎÞ·¨²¥·Å:)</LI>
+  <LI><B>VBR</B>µÄMP3ÒôÆµ - <B>ÖØÒªÌáÊ¾:</B> VBR MP3ÒôÆµ²»×ÜÊÇÄÜ±»WindowsµÄ²¥·ÅÆ÷Õý³£µÄ²¥·Å£¡</LI>
   <LI>PCMÒôÆµ</LI>
   <LI>Á÷¸´ÖÆ</LI>
   <LI>ÊäÈëµÄ×Ô¶¯A/VÍ¬²½(»ùÓÚPTS£¬Ê¹ÓÃ-mc 0Ñ¡ÏîÀ´½ûÓÃ)</LI>
@@ -471,7 +461,7 @@ OpenGL£¬SVGAlib£¬fbdev£¬AAlib£¬DirectFBÏÂ¹¤×÷£¬¶øÇÒÄãÒ²ÄÜÊ¹ÓÃGGIºÍSDL(ÓÉ´Ë¿ÉÒÔÊ¹
 
 <UL>
   <LI><B>binutils</B> -- ½¨Òé°æ±¾<B>2.11.x</B>¡£Õâ¸ö³ÌÐò¸ºÔðÉú³ÉMMX/3DNow!/etcÖ¸Áî£¬Òò´ËÊ®·ÖÖØÒª¡£</LI>
-  <LI><B>gcc</B> -- ½¨Òé°æ±¾ÊÇ£º<B>2.95.3</B>£¬<B>2.95.4</B>ºÍ<B>3.1</B>¡£<B>ÓÀÔ¶²»Òª</B>Ê¹ÓÃ2.96»òÕß3.0.x£¡
+  <LI><B>gcc</B> -- ½¨Òé°æ±¾ÊÇ£º<B>2.95.3</B>(»òÕß<B>2.95.4</B>)ºÍ<B>3.2+</B>¡£<B>ÓÀÔ¶²»Òª</B>Ê¹ÓÃ2.96»òÕß3.0.x£¡
 ËûÃÇ²úÉú´íÎóµÄMPlayerµÄ´úÂë¡£Èç¹ûÄã¾ö¶¨¸ü»»2.96µÄgcc£¬ÄÇÃ´²»ÒªÖ»ÊÇÒòÎªÐÂ¶ø¾ö¶¨²ÉÓÃ3.0.x£¡3.0.xµÄÔçÆÚ°æ±¾ÉõÖÁ±È2.96¸übuggy¡£
 Òò´Ë²»Èç½µ¼¶µ½2.95.x(Ò²°Ñlibstdc++½µ¼¶£¬ÆäËü³ÌÐò¿ÉÄÜÐèÒªËü)»òÕß¸ù±¾²»Éý/½µ¼¶(µ«ÕâÖÖÇé¿öÏÂÇë¶ÔÔËÐÐÊ±µÄÎÊÌâ×÷ºÃ×¼±¸)¡£
 Èç¹ûÄãÒ»¶¨ÒªÊ¹ÓÃ3.x.xÇëÊ¹ÓÃ×îÐÂµÄ°æ±¾£¬ÔçÏÈµÄ·¢ÐÐ°æ±¾ÓÐ¸÷ÖÖ¸÷ÑùµÄ´íÎó£¬È·ÐÅÄãÊ¹ÓÃµÄÖÁÉÙÊÇ3.1£¬ËüÍ¨¹ý²âÊÔÇÒ¹¤×÷Õý³£¡£
@@ -655,7 +645,7 @@ HREF="codecs.html#software_ac3">Èí¼þAC3½âÂë</A>Ò»½Ú¡£¶ÔÓÚÓ²¼þAC3Êä³öÄã±ØÐëÊ¹ÓÃAL
 
 <H2><A NAME="gui">1.3 GUIÓÐÂð£¿</A></H2>
 
-<P>GUIÐèÒªGTK(Ëü²»ÊÇGTKµÄ£¬µ«ÊÇÃæ°åÊÇµÄ)¡£skin±»±£´æÎªPNG¸ñÊ½£¬Òò´ËÄãÐèÒª°²×°gtk£¬libpng(ºÍËûÃÇµÄdevel°ü)¡£
+<P>GUIÐèÒªGTK 1.2.x(Ëü²»ÊÇGTKµÄ£¬µ«ÊÇÃæ°åÊÇµÄ)¡£skin±»±£´æÎªPNG¸ñÊ½£¬Òò´ËÄãÐèÒª°²×°gtk£¬libpng(ºÍËûÃÇµÄdevel°ü£¬Ò»°ãÊÇgtk-devºÍlibpng-dev)¡£
 Äã±ØÐëÔÚÔËÐÐ<CODE>./configure</CODE>Ê±Ê¹ÓÃ<CODE>--enable-gui</CODE>À´±àÒëËüµÄ´úÂë¡£È»ºó£¬Äã¿ÉÒÔÓÃÏÂÁÐ·½·¨Ö®Ò»´ò¿ªGUI·½Ê½</P>
 <UL>
   <LI>ÔÚÄãµÄconfigÎÄ¼þÖÐÌí¼Ó<CODE>gui=yes</CODE></LI>
@@ -675,6 +665,8 @@ MPlayerÔÚÄ¬ÈÏÇé¿öÏÂ»áÔÚÕâÐ©µÄÄ¿Â¼ÀïÑ°ÕÒÒ»¸ö½Ð<I>default</I>µÄÄ¿Â¼£¬
   MPlayerÄÜÔÚ²¥·ÅµçÓ°µÄÍ¬Ê±ÏÔÊ¾×ÖÄ»¡£Ä¿Ç°Ö§³ÖÏÂÁÐ¸ñÊ½£º</P>
 <UL>
   <LI>VobSub</LI>
+  <LI>OGM</LI>
+  <LI>CC (closed caption)</LI>
   <LI>Microdvd</LI>
   <LI>SubRip</LI>
   <LI>SubViewer</LI>
@@ -687,7 +679,7 @@ MPlayerÔÚÄ¬ÈÏÇé¿öÏÂ»áÔÚÕâÐ©µÄÄ¿Â¼ÀïÑ°ÕÒÒ»¸ö½Ð<I>default</I>µÄÄ¿Â¼£¬
   <LI>JACOsub</LI>
 </UL>
 
-<P>MPlaye¿ÉÒÔ°ÑÉÏÃæÁÐ³öµÄ×ÖÄ»¸ñÊ½×ª»»³ÉÏÂÁÐµÄ¸ñÊ½£¬Ê¹ÓÃÏÂÁÐÑ¡Ïî£º</P>
+<P>MPlaye¿ÉÒÔ°ÑÉÏÃæÁÐ³öµÄ×ÖÄ»¸ñÊ½(³ýÁËÇ°Èý¸ö)×ª»»³ÉÏÂÁÐµÄ¸ñÊ½£¬Ê¹ÓÃÏÂÁÐÑ¡Ïî£º</P>
 
 <UL>
   <LI>MPsub: <CODE>-dumpmpsub</CODE></LI>
@@ -737,7 +729,7 @@ MPlayer½«³¢ÊÔÊ¹ÓÃ<CODE>-slang</CODE>ÖÐÖ¸¶¨µÄÓïÑÔ£¬Èç¹ûÃ»ÓÐÕÒµ½½«Ê¹ÓÃ.idxÎÄ¼þÖÐµÄ
 
 <H3><A NAME="mpsub">1.4.1 MPlayer×Ô¼ºµÄ×ÖÄ»¸ñÊ½(MPsub)</A></H3>
 
-<P>MPlayerÒýÈëÒ»ÖÖ³ÆÎª<B>MPsub</B>µÄÐÂµÄ×ÖÄ»¸ñÊ½¡£ËüÊÇÎÒ(Gabucino)Éè¼Æ¡£»ù±¾ÉÏ£¬ÆäÖ÷ÒªµÄÌØÐÔÊÇ»ùÓÚ<I>¶¯Ì¬</I>Ê±¼ä
+<P>MPlayerÒýÈëÒ»ÖÖ³ÆÎª<B>MPsub</B>µÄÐÂµÄ×ÖÄ»¸ñÊ½¡£ËüÓÉGabucinoÉè¼Æ¡£»ù±¾ÉÏ£¬ÆäÖ÷ÒªµÄÌØÐÔÊÇ»ùÓÚ<I>¶¯Ì¬</I>Ê±¼ä
 (ËäÈ»ËüÓÐ»ùÓÚÖ¡µÄÄ£Ê½)¡£ÀýÈç(Òý×Ô<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>)£º</P>
 
 <P><CODE><I># first number  : wait this much after previous subtitle disappeared<BR>
@@ -806,12 +798,14 @@ konwert(Debian)»òÕßiconv(Red Hat)³ÌÐòÍê³É¡£<BR>
 
 <H3><A NAME="menu">1.4.3 OSD²Ëµ¥</A></H3>
 
-<P>MPlayerÓÐÒ»¸öÍêÕûµÄÓÃ»§¿É¶¨ÒåµÄOSD²Ëµ¥½Ó¿Ú¡£</P>
+<P>MPlayerÓÐÒ»¸öÍêÈ«ÓÃ»§×Ô¶¨ÒåµÄOSD²Ëµ¥½Ó¿Ú¡£</P>
+
+<P><B>×¢Òâ£º</B>Preferences²Ëµ¥Ä¿Ç°²»ÄÜÊ¹ÓÃ!</P>
 
 <H4>°²×°</H4>
 
 <OL>
-  <LI>±àÒëMPlayerÊ±ÔÚ<CODE>./configure</CODE>Ê±¼ÓÉÏ<CODE>--enable-new-conf  --enable-menu</CODE>²ÎÊý</LI>
+  <LI>±àÒëMPlayerÊ±ÔÚ<CODE>./configure</CODE>Ê±¼ÓÉÏ<CODE>--enable-menu</CODE>²ÎÊý</LI>
   <LI>È·±£Äã°²×°ÁËOSD×ÖÌå</LI>
   <LI>°Ñ<CODE>etc/menu.conf</CODE>¸´ÖÆµ½ÄãµÄ<CODE>.mplayer</CODE>Ä¿Â¼</LI>
   <LI>°Ñ<CODE>etc/input.conf</CODE>¸´ÖÆµ½ÄãµÄ<CODE>.mplayer</CODE>Ä¿Â¼£¬»òÕßÏµÍ³Í¨ÓÃµÄMPlayerÅäÖÃÄ¿Â¼(Ä¬ÈÏÎª£º<CODE>/usr/local/etc/mplayer</CODE>)</LI>
@@ -1361,7 +1355,7 @@ HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>¡£</P>
 <P>mediaLibµÄVIS¼ÓËÙ¹¦ÄÜÓÃÓÚmpeg2ÊÓÆµ½âÂëºÍÊÓÆµÊä³öÇý¶¯µÄÑÕÉ«×ª»»¡£</P>
 
 
-<H2><A NAME="sgi">6.5 Silicon Graphics / IRIX</A></H2>
+<H2><A NAME="sgi">6.4 Silicon Graphics / IRIX</A></H2>
 
 <P>Äã¿ÉÒÔ°²×°GNUµÄinstall³ÌÐò£¬²¢ÇÒ(Èç¹ûÄãÃ»ÓÐ°ÑËü·ÅÔÚÄãµÄÏµÍ³Â·¾¶ÖÐ)Ö¸¶¨ËüµÄÎ»ÖÃ£º</P>
 
@@ -1394,7 +1388,7 @@ HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>¡£</P>
 <P>È»ºó¼ÌÐø±àÒëºÍ°²×°¡£</P>
 
 
-<H2><A NAME="qnx">6.6 QNX</A></H2>
+<H2><A NAME="qnx">6.5 QNX</A></H2>
 
 <P>ÄÜ¹¤×÷¡£ÄãÐèÒªÏÂÔØSDL for QNX²¢°²×°Ëü¡£È»ºóÊ¹ÓÃ<CODE>-vo sdl:photon</CODE>ºÍ<CODE>-ao sdl:nto</CODE>
 Ñ¡ÏîÔËÐÐMPlayer£¬ËÙ¶ÈÓ¦¸ÃºÜ¿ì¡£</P>
@@ -1402,7 +1396,7 @@ HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>¡£</P>
 <P><CODE>-vo x11</CODE>Êä³ö½«±ÈLinux¸ü¼Ó»ºÂý£¬ÒòÎªQNXÖ»ÓÐÒ»¸öÊ®·Ö»ºÂýµÄµÄX<I>·ÂÕæ</I>¡£Ê¹ÓÃSDL¡£</P>
 
 
-<H2><A NAME="cygwin"></A>6.7 Cygwin</H2>
+<H2><A NAME="cygwin"></A>6.6 Cygwin</H2>
 
 <P>CygwinµÄÒÆÖ²ÈÔÈ»ºÜ²»³ÉÊì¡£Ä¿Ç°»¹²»Ö§³ÖWin32 DLLsºÍOpenGL¡£SDL¾ÝËµ»áÅ¤ÇúÉùÒôºÍÍ¼Ïñ»òÕßÔÚÄ³Ð©ÏµÍ³ÉÏµ¼ÖÂ±ÀÀ£¡£<A
 HREF="tech/patches.txt">²¹¶¡</A>×ÜÊÇ»¶Ó­µÄ¡£×îºÃµÄÐ§¹ûÊÇÊ¹ÓÃ±¾µØµÄDirectXÊÓÆµÊä³öÇý¶¯(<CODE>-vo directx</CODE>)
@@ -1426,7 +1420,7 @@ HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7Í·ÎÄ¼þ</A>£¬°ÑËüÃÇ½âÑ
 
 <P>DVDÍ¬Ñù¿ÉÒÔ£¬ÓÃÏÂÃæµÄÃüÁîDVDÉè±¸ÉèÖÃ³ÉÄãµÄCD-ROMÇý¶¯Æ÷£º</P>
 
-<P><CODE>mplayer -dvd &lt;title&gt; -dvd-device d:</CODE></P>
+<P><CODE>mplayer -dvd &lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
 
 <P>QuickTime DLL¾ÝËµÒ²ÄÜ¹¤×÷¡£ÓÃ<CODE>--enable-qtx-codecs</CODE>±àÒë²¢°Ñ±à½âÂëÆ÷·Åµ½Ä¬ÈÏµÄWindows DLLÎ»
 ÖÃ£¬<CODE>C:\WINNT\system32</CODE>»òÕß<CODE>C:\Windows\system</CODE>È¡¾öÓÚÄãµÄWindowsµÄ°æ±¾¡£</P>

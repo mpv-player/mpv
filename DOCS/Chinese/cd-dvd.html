@@ -54,7 +54,14 @@ HREF="http://das.ist.org/~georg/">Plextor的SCSI驱动器</A>。</P>
 
 <H2><A NAME="dvd">4.2 DVD播放</A></H2>
 
-<P>可用选项的完整列表请查阅man page。</P>
+<P>可用选项的完整列表参见man page。播放标准的数字多功能碟片(DVD)的语法如下：</P>
+
+<P><CODE>mplayer -dvd &lt;track&gt; [-dvd-device &lt;device&gt;]</CODE></P>
+
+<P>示例：<CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+
+<P>默认的DVD设备是<CODE>/dev/dvd</CODE>。如果你的设置不同，作一个符号链接，或者在命令行中用<CODE>-dvd-device</CODE>选项
+指定一个正确的设备。</P>
 
 <H4>新式的DVD支持(mpdvdkit2)</H4>
 
@@ -146,6 +153,10 @@ DVD驱动器的地区(在Linux下)。<B>警告：</B> 你只有5次设置地区的机会。</P>
 
 <P><B>注意：</B>至少对于Plextor和一些Toshiba的SCSI CD-ROM驱动器在读取VCD的时候慢的恐怖。这是因为CDROMREADRAW ioctl在这些
 驱动器上没有完全实现。如果你有SCSI编程方面的支持，请<A HREF="tech/patches.txt">帮助我们</A>实现普遍的SCSI设备的VCD支持。</P>
+
+<P>此外你还可以使用<A HREF="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">readvcd</A>提取VCD中的数据，并用
+MPlayer播放获得的文件。</P>
+
 
 <H4>VCD结构</H4>
 
