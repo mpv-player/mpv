@@ -54,7 +54,7 @@ char * fsVideoFilterNames[][2] =
 	   { "Wave files (*.wav)",					"*.wav" },
 	   { "WMA files (*.wma)",					"*.wma" },
 	   { "Audio files (*.wav,*.mp2,*.mp3,*.wma)",			"*.wav,*.mp2,*.mp3,*.wma" },
-	   { "All video files", 					"*.mpg,*.mpeg,*.vob,*.avi,*.divx,*.mov,*.asf,*.viv,*.wmv" },
+	   { "All video files", 					"*.mpg,*.mpeg,*.vob,*.avi,*.divx,*.mov,*.asf,*.viv,*.rm,*.wmv" },
            { "All files (*)",      					"*" },
 	   { NULL,NULL }
 	 };
