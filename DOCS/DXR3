@@ -20,7 +20,18 @@ harddisk.
 
 2. Usage
 
-    -vo dxr3:<devicenum>		For video output
+    -vo dxr3:<devicenum>		For video output :<devicenum> is not needed unless
+					you have more than one em8300 device in your computer
+    -vo dxr3:noprebuf			Turn of prebuffering. This is only needed if you are
+					having sync issues with normal playback, this will
+					make playback appear less smooth and will not use all
+					available cpu power when playing non-mpeg content.
+					Note: With prebuffering A-V: should be negative, if
+					      it's nonnegative your computer is too slow to
+					      properly play the video and you should disble
+					      prebuffering if you have sync issues.
+					      Without prebuffering this value should stay as
+					      close to 0 at all times.
     -ao oss:<devicefile>		For audio output
     -ac hwac3				For digital audio output instead of
 					analog
