@@ -23,10 +23,11 @@ extern float  sub_fps;
 
 void step_sub(sub_data *subd, float pts, int movement) {
     subtitle *subs; 
-    int key = (pts+sub_delay) * (subd->sub_uses_time ? 100 : sub_fps);
+    int key;
 
     if (subd == NULL) return;
     subs = subd->subtitles;
+    key = (pts+sub_delay) * (subd->sub_uses_time ? 100 : sub_fps);
 
     /* Tell the OSD subsystem that the OSD contents will change soon */
     vo_osd_changed(OSDTYPE_SUBTITLE);
