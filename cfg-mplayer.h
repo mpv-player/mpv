@@ -344,7 +344,7 @@ static config_t mplayer_opts[]={
 
 //---------------------- mplayer-only options ------------------------
 
-	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 2 , NULL},
+	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 #ifdef HAVE_MENU
 	{"menu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nomenu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
