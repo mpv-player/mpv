@@ -588,7 +588,21 @@ case AFM_VORBIS: {
 	 printf(__FILE__ ":%d:mad: frame decoding failed\n", __LINE__);
        }
      
-     sh_audio->channels=2; // hack
+     switch (mad_frame.header.mode)
+     {
+        case MAD_MODE_SINGLE_CHANNEL:
+	    sh_audio->channels=1;
+	    break;
+	case MAD_MODE_DUAL_CHANNEL:
+	case MAD_MODE_JOINT_STEREO:
+	case MAD_MODE_STEREO:
+	    sh_audio->channels=2;
+	    break;
+	default:
+	    mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "mad: unknown number of channels\n");
+     }
+     mp_msg(MSGT_DECAUDIO, MSGL_HINT, "mad: channels: %d (mad channel mode: %d)\n",
+        sh_audio->channels, mad_frame.header.mode);
 /* var. name changed in 0.13.0 (beta) (libmad/CHANGES) -- alex */
 #if (MAD_VERSION_MAJOR >= 0) && (MAD_VERSION_MINOR >= 13)
      sh_audio->samplerate=mad_frame.header.samplerate;
