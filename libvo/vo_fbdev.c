@@ -785,10 +785,16 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		printf(FBDEV "Can't put VSCREENINFO: %s\n", strerror(errno));
 		return 1;
 	}
+	if (ioctl(fb_dev_fd, FBIOGET_FSCREENINFO, &fb_finfo)) {
+		printf(FBDEV "Can't get FSCREENINFO: %s\n", strerror(errno));
+		return 1;
+	}
+#if 0
 	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
 		printf(FBDEV "Can't get VSCREENINFO: %s\n", strerror(errno));
 		return 1;
 	}
+#endif
 
 	if (verbose > 0) {
 		printf(FBDEV "var info:\n");
@@ -833,33 +839,24 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 			printf(FBDEV "sync: %u\n", fb_vinfo.sync);
 			printf(FBDEV "vmode: %u\n", fb_vinfo.vmode);
 		}
-	}
-	if (ioctl(fb_dev_fd, FBIOGET_FSCREENINFO, &fb_finfo)) {
-		printf(FBDEV "Can't get FSCREENINFO: %s\n", strerror(errno));
-		return 1;
-	}
-	if (verbose > 0) {
 		printf(FBDEV "fix info:\n");
-		if (verbose > 1) {
-			printf(FBDEV "id: %.16s\n", fb_finfo.id);
-			printf(FBDEV "smem_start: %p\n", (void *) fb_finfo.smem_start);
-		}
 		printf(FBDEV "framebuffer size: %d bytes\n", fb_finfo.smem_len);
 		printf(FBDEV "type: %lu\n", (unsigned long) fb_finfo.type);
 		printf(FBDEV "type_aux: %lu\n", (unsigned long) fb_finfo.type_aux);
 		printf(FBDEV "visual: %lu\n", (unsigned long) fb_finfo.visual);
+		printf(FBDEV "line_length: %lu bytes\n", (unsigned long) fb_finfo.line_length);
 		if (verbose > 1) {
+			printf(FBDEV "id: %.16s\n", fb_finfo.id);
+			printf(FBDEV "smem_start: %p\n", (void *) fb_finfo.smem_start);
 			printf(FBDEV "xpanstep: %u\n", fb_finfo.xpanstep);
 			printf(FBDEV "ypanstep: %u\n", fb_finfo.ypanstep);
 			printf(FBDEV "ywrapstep: %u\n", fb_finfo.ywrapstep);
-		}
-		printf(FBDEV "line_length: %lu bytes\n", (unsigned long) fb_finfo.line_length);
-		if (verbose > 1) {
 			printf(FBDEV "mmio_start: %p\n", (void *) fb_finfo.mmio_start);
 			printf(FBDEV "mmio_len: %u bytes\n", fb_finfo.mmio_len);
 			printf(FBDEV "accel: %u\n", fb_finfo.accel);
 		}
 	}
+
 	switch (fb_finfo.type) {
 		case FB_TYPE_VGA_PLANES:
 			printf(FBDEV "FB_TYPE_VGA_PLANES not supported.\n");
@@ -884,6 +881,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 			printf(FBDEV "unknown FB_TYPE: %d\n", fb_finfo.type);
 			return 1;
 	}
+
 	switch (fb_finfo.visual) {
 		case FB_VISUAL_TRUECOLOR:
 			break;
@@ -917,6 +915,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 					fb_finfo.visual);
 			return 1;
 	}
+
 	if (FS || (d_width && VM)) {
 		out_width = fb_vinfo.xres;
 		out_height = fb_vinfo.yres;
