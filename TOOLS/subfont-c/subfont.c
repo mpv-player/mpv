@@ -503,9 +503,10 @@ void outline(
 	unsigned char *t,
 	int width,
 	int height,
-	int *m,
+	unsigned char *m,
 	int r,
-	int mwidth) {
+	int mwidth,
+	int msize) {
 
     int x, y;
 #if 1
@@ -525,7 +526,8 @@ void outline(
 		const int x2=(x+r>=width ) ? r+width -x : 2*r+1;
 		const int y2=(y+r>=height) ? r+height-y : 2*r+1;
 		register unsigned char *dstp= t + (y1+y-r)* width + x-r;
-		register int *mp  = m +  y1     *mwidth;
+		//register int *mp  = m +  y1     *mwidth;
+		register unsigned char *mp= m + msize*src + y1*mwidth;
 		int my;
 
 		for(my= y1; my<y2; my++){
@@ -533,8 +535,9 @@ void outline(
 //		    int *mp  = m +  my     *mwidth;
 		    register int mx;
 		    for(mx= x1; mx<x2; mx++){
-			const int tmp= (src*mp[mx] + 128)>>8;
-			if(dstp[mx] < tmp) dstp[mx]= tmp;
+//			const int tmp= (src*mp[mx] + 128)>>8;
+//			if(dstp[mx] < tmp) dstp[mx]= tmp;
+			if(dstp[mx] < mp[mx]) dstp[mx]= mp[mx];
 		    }
 		    dstp+=width;
 		    mp+=mwidth;
@@ -681,6 +684,7 @@ void alpha() {
     int const o_r = ceil(thickness);
     int const g_w = 2*g_r+1;		// matrix size
     int const o_w = 2*o_r+1;		// matrix size
+    int const o_size = o_w * o_w;
     double const A = log(1.0/base)/(radius*radius*2);
 
     int mx, my, i;
@@ -688,7 +692,10 @@ void alpha() {
 
     unsigned *g = (unsigned*)malloc(g_w * sizeof(unsigned));
     unsigned *om = (unsigned*)malloc(o_w*o_w * sizeof(unsigned));
-    if (g==NULL || om==NULL) ERROR("malloc failed.");
+    unsigned char *omt = malloc(o_size*256);
+    unsigned char *omtp = omt;
+
+    if (g==NULL || om==NULL || omt==NULL) ERROR("malloc failed.");
 
     // gaussian curve
     for (i = 0; i<g_w; ++i) {
@@ -711,12 +718,16 @@ void alpha() {
     }
     if (DEBUG) eprintf("\n");
 
+    // outline table:
+    for(i=0;i<256;i++){
+	for(mx=0;mx<o_size;mx++) *(omtp++) = (i*om[mx] + (base/2))/base;
+    }
 
     ttime=GetTimer();
     if(thickness==1.0)
       outline1(bbuffer, abuffer, width, height);	// FAST solid 1 pixel outline
     else
-      outline(bbuffer, abuffer, width, height, om, o_r, o_w);	// solid outline
+      outline(bbuffer, abuffer, width, height, omt, o_r, o_w, o_size);	// solid outline
     //outline(bbuffer, abuffer, width, height, gm, g_r, g_w);	// Gaussian outline
     ttime=GetTimer()-ttime;
     printf("outline: %7d us\n",ttime);
