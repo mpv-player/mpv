@@ -817,7 +817,7 @@ Further, MPlayer won't prevent you from loading an index file generated
 from a different AVI, but this is sure to cause unfavorable results.
 .br
 .I NOTE:
-This option will be obsoleted once AVI gets ODML support!
+This option is obsolete, because MPlayer has OpenDML support.
 .TP
 .B \-mc <seconds/frame>
 Maximum A-V sync correction per frame (in seconds).
@@ -926,20 +926,9 @@ not pass incoming UDP packets (see http://www.live.com/mplayer/).
 Force rebuilding of INDEX and output to a separate file specified by the
 argument filename.
 Currently this only works with AVI files.
-Although you can use MEncoder to fix files without indexes, the AVI
-container format is limited to indexing files up to 2GB in size.
-It is however possible to store the index in a separate file and use it later
-with \-loadidx, which is faster than rebuilding the index (with \-idx or
-\-forceidx) each time the movie is opened.
-(This is a limitation of the AVI format, and although there exists an
-extension to index beyond 2GB, MPlayer doesn't yet support this extension.)
-After the index file is created, MPlayer will begin to play the video.
-If you want to automate index file generation (after encoding a large file
-off a TV capture card, for example), you can specify \-frames 0 to
-prevent MPlayer from playing the video after generating the index.
 .br
 .I NOTE:
-This option will be obsoleted once AVI gets ODML support!
+This option is obsolete, because MPlayer has OpenDML support.
 .TP
 .B \-sb <byte\ position> (see \-ss option too)
 Seek to byte position.

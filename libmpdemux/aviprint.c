@@ -13,6 +13,8 @@
 #include "wine/avifmt.h"
 #include "wine/vfw.h"
 
+#include "aviheader.h"
+
 //#include "codec-cfg.h"
 //#include "stheader.h"
 
@@ -105,6 +107,31 @@ void print_video_header(BITMAPINFOHEADER *h){
   printf("===========================\n");
 }
 
+void print_vprp(VideoPropHeader *vprp){
+  int i;
+  printf("======= Video Properties Header =======\n");
+  printf("Format: %d  VideoStandard: %d\n",
+         vprp->VideoFormatToken,vprp->VideoStandard);
+  printf("VRefresh: %d  HTotal: %d  VTotal: %d\n",
+         vprp->dwVerticalRefreshRate, vprp->dwHTotalInT, vprp->dwVTotalInLines);
+  printf("FrameAspect: %d:%d  Framewidth: %d  Frameheight: %d\n",
+         vprp->dwFrameAspectRatio >> 16, vprp->dwFrameAspectRatio & 0xffff,
+         vprp->dwFrameWidthInPixels, vprp->dwFrameHeightInLines);
+  printf("Fields: %d\n", vprp->nbFieldPerFrame);
+  for (i=0; i<vprp->nbFieldPerFrame; i++) {
+    VIDEO_FIELD_DESC *vfd = &vprp->FieldInfo[i];
+    printf("  == Field %d description ==\n", i);
+    printf("  CompressedBMHeight: %d  CompressedBMWidth: %d\n",
+           vfd->CompressedBMHeight, vfd->CompressedBMWidth);
+    printf("  ValidBMHeight: %d  ValidBMWidth: %d\n",
+           vfd->ValidBMHeight, vfd->ValidBMWidth);
+    printf("  ValidBMXOffset: %d  ValidBMYOffset: %d\n",
+           vfd->ValidBMXOffset, vfd->ValidBMYOffset);
+    printf("  VideoXOffsetInT: %d  VideoYValidStartLine: %d\n",
+           vfd->VideoXOffsetInT, vfd->VideoYValidStartLine);
+  }
+  printf("=======================================\n");
+}
 
 void print_index(AVIINDEXENTRY *idx,int idx_size){
   int i;
@@ -114,10 +141,10 @@ void print_index(AVIINDEXENTRY *idx,int idx_size){
   for(i=0;i<idx_size;i++){
     int id=avi_stream_id(idx[i].ckid);
     if(id<0 || id>255) id=255;
-    printf("%5d:  %.4s  %4X  %08X  len:%6ld  pos:%7d->%7.3f %7d->%7.3f\n",i,
+    printf("%5d:  %.4s  %4X  %016llX  len:%6ld  pos:%7d->%7.3f %7d->%7.3f\n",i,
       (char *)&idx[i].ckid,
-      (unsigned int)idx[i].dwFlags,
-      (unsigned int)idx[i].dwChunkOffset,
+      (unsigned int)idx[i].dwFlags&0xffff,
+      (uint64_t)AVI_IDX_OFFSET(&idx[i]),
 //      idx[i].dwChunkOffset+demuxer->movi_start,
       idx[i].dwChunkLength,
       pos[id],(float)pos[id]/18747.0f,
@@ -128,4 +155,21 @@ void print_index(AVIINDEXENTRY *idx,int idx_size){
   }
 }
 
+void print_avistdindex_chunk(avistdindex_chunk *h){
+    mp_msg (MSGT_HEADER, MSGL_V, "====== AVI Standard Index Header ========\n");
+    mp_msg (MSGT_HEADER, MSGL_V, "  FCC (%.4s) dwSize (%d) wLongsPerEntry(%d)\n", h->fcc, h->dwSize, h->wLongsPerEntry);
+    mp_msg (MSGT_HEADER, MSGL_V, "  bIndexSubType (%d) bIndexType (%d)\n", h->bIndexSubType, h->bIndexType);
+    mp_msg (MSGT_HEADER, MSGL_V, "  nEntriesInUse (%d) dwChunkId (%.4s)\n", h->nEntriesInUse, h->dwChunkId);
+    mp_msg (MSGT_HEADER, MSGL_V, "  qwBaseOffset (0x%llX) dwReserved3 (%d)\n", h->qwBaseOffset, h->dwReserved3);
+    mp_msg (MSGT_HEADER, MSGL_V, "===========================\n");
+}
+void print_avisuperindex_chunk(avisuperindex_chunk *h){
+    mp_msg (MSGT_HEADER, MSGL_V, "====== AVI Super Index Header ========\n");
+    mp_msg (MSGT_HEADER, MSGL_V, "  FCC (%.4s) dwSize (%d) wLongsPerEntry(%d)\n", h->fcc, h->dwSize, h->wLongsPerEntry);
+    mp_msg (MSGT_HEADER, MSGL_V, "  bIndexSubType (%d) bIndexType (%d)\n", h->bIndexSubType, h->bIndexType);
+    mp_msg (MSGT_HEADER, MSGL_V, "  nEntriesInUse (%d) dwChunkId (%.4s)\n", h->nEntriesInUse, h->dwChunkId);
+    mp_msg (MSGT_HEADER, MSGL_V, "  dwReserved[0] (%d) dwReserved[1] (%d) dwReserved[2] (%d)\n", 
+	    h->dwReserved[0], h->dwReserved[1], h->dwReserved[2]);
+    mp_msg (MSGT_HEADER, MSGL_V, "===========================\n");
+}
 

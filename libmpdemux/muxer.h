@@ -48,9 +48,9 @@ typedef struct {
 typedef struct muxer_t{
   // encoding:
   MainAVIHeader avih;
-  unsigned int movi_start;
-  unsigned int movi_end;
-  unsigned int file_end; // for MPEG it's system timestamp in 1/90000 s
+  off_t movi_start;
+  off_t movi_end;
+  off_t file_end; // for MPEG it's system timestamp in 1/90000 s
   // index:
   AVIINDEXENTRY *idx;
   int idx_pos;

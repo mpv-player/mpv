@@ -4,6 +4,89 @@
 //#include "config.h"	/* get correct definition WORDS_BIGENDIAN */
 #include "bswap.h"
 
+typedef struct _avisuperindex_entry {
+    uint64_t qwOffset;           // absolute file offset
+    uint32_t dwSize;             // size of index chunk at this offset
+    uint32_t dwDuration;         // time span in stream ticks
+} avisuperindex_entry;
+
+typedef struct _avistdindex_entry {
+    uint32_t dwOffset;           // qwBaseOffset + this is absolute file offset
+    uint32_t dwSize;             // bit 31 is set if this is NOT a keyframe
+} avistdindex_entry;
+
+// Standard index 
+typedef struct _avistdindex_chunk {
+    char           fcc[4];       // ix##
+    uint32_t  dwSize;            // size of this chunk
+    uint16_t wLongsPerEntry;     // must be sizeof(aIndex[0])/sizeof(DWORD)
+    uint8_t  bIndexSubType;      // must be 0
+    uint8_t  bIndexType;         // must be AVI_INDEX_OF_CHUNKS
+    uint32_t  nEntriesInUse;     // first unused entry
+    char           dwChunkId[4]; // '##dc' or '##db' or '##wb' etc..
+    uint64_t qwBaseOffset;       // all dwOffsets in aIndex array are relative to this
+    uint32_t  dwReserved3;       // must be 0
+    avistdindex_entry *aIndex;   // the actual frames
+} avistdindex_chunk;
+    
+
+// Base Index Form 'indx'
+typedef struct _avisuperindex_chunk {
+    char           fcc[4];
+    uint32_t  dwSize;                // size of this chunk
+    uint16_t wLongsPerEntry;         // size of each entry in aIndex array (must be 4*4 for us)
+    uint8_t  bIndexSubType;          // future use. must be 0
+    uint8_t  bIndexType;             // one of AVI_INDEX_* codes
+    uint32_t  nEntriesInUse;         // index of first unused member in aIndex array
+    char       dwChunkId[4];         // fcc of what is indexed
+    uint32_t  dwReserved[3];         // meaning differs for each index type/subtype.
+                                     // 0 if unused
+    avisuperindex_entry *aIndex;     // position of ix## chunks
+    avistdindex_chunk *stdidx;       // the actual std indices
+} avisuperindex_chunk;
+
+typedef struct {
+	uint32_t CompressedBMHeight;
+	uint32_t CompressedBMWidth;
+	uint32_t ValidBMHeight;
+	uint32_t ValidBMWidth;
+	uint32_t ValidBMXOffset;
+	uint32_t ValidBMYOffset;
+	uint32_t VideoXOffsetInT;
+	uint32_t VideoYValidStartLine;
+} VIDEO_FIELD_DESC;
+
+typedef struct {
+	uint32_t VideoFormatToken;
+	uint32_t VideoStandard;
+	uint32_t dwVerticalRefreshRate;
+	uint32_t dwHTotalInT;
+	uint32_t dwVTotalInLines;
+	uint32_t dwFrameAspectRatio;
+	uint32_t dwFrameWidthInPixels;
+	uint32_t dwFrameHeightInLines;
+	uint32_t nbFieldPerFrame;
+	VIDEO_FIELD_DESC FieldInfo[2];
+} VideoPropHeader;
+
+enum {
+	FORMAT_UNKNOWN,
+	FORMAT_PAL_SQUARE,
+	FORMAT_PAL_CCIR_601,
+	FORMAT_NTSC_SQUARE,
+	FORMAT_NTSC_CCIR_601,
+} VIDEO_FORMAT;
+
+enum {
+	STANDARD_UNKNOWN,
+	STANDARD_PAL,
+	STANDARD_NTSC,
+	STANDARD_SECAM
+} VIDEO_STANDARD;
+
+#define MAKE_AVI_ASPECT(a, b) (((a)<<16)|(b))
+#define GET_AVI_ASPECT(a) ((float)((a)>>16)/(float)((a)&0xffff))
+
 /*
  * Some macros to swap little endian structures read from an AVI file
  * into machine endian format
@@ -72,6 +155,44 @@
     (h)->dwChunkOffset = le2me_32((h)->dwChunkOffset);			\
     (h)->dwChunkLength = le2me_32((h)->dwChunkLength);			\
 }
+#define le2me_AVISTDIDXCHUNK(h) {\
+    char c; \
+    c = (h)->fcc[0]; (h)->fcc[0] = (h)->fcc[3]; (h)->fcc[3] = c;  \
+    c = (h)->fcc[1]; (h)->fcc[1] = (h)->fcc[2]; (h)->fcc[2] = c;  \
+    (h)->dwSize = le2me_32((h)->dwSize);  \
+    (h)->wLongsPerEntry = le2me_16((h)->wLongsPerEntry);  \
+    (h)->nEntriesInUse = le2me_32((h)->nEntriesInUse);  \
+    c = (h)->dwChunkId[0]; (h)->dwChunkId[0] = (h)->dwChunkId[3]; (h)->dwChunkId[3] = c;  \
+    c = (h)->dwChunkId[1]; (h)->dwChunkId[1] = (h)->dwChunkId[2]; (h)->dwChunkId[2] = c;  \
+    (h)->qwBaseOffset = le2me_64((h)->qwBaseOffset);  \
+    (h)->dwReserved3 = le2me_32((h)->dwReserved3);  \
+}
+#define le2me_AVISTDIDXENTRY(h)  {\
+    (h)->dwOffset = le2me_32((h)->dwOffset);  \
+    (h)->dwSize = le2me_32((h)->dwSize);  \
+}
+#define le2me_VideoPropHeader(h) {					\
+    (h)->VideoFormatToken = le2me_32((h)->VideoFormatToke)		\
+    (h)->VideoStandrad = le2me_32((h)->VideoStandard)			\
+    (h)->dwVerticalRefreshRate = le2me_32((h)->dwVerticalRefreshRate)	\
+    (h)->dwHTotalInT = le2me_32((h)->dwHTotalInT)			\
+    (h)->dwVTotalInLines = le2me_32((h)->dwVTotalInLines)		\
+    (h)->dwFrameAspectRatio = le2me_32((h)->dwFrameAspectRatio)		\
+    (h)->dwFrameWidthInPixels = le2me_32((h)->dwFrameWidthInPixels)	\
+    (h)->dwFrameHeightInLines = le2me_32((h)->dwFrameHeightInLines)	\
+    (h)->nbFieldPerFrame = le2me_32((h)->nbFieldPerFrame)		\
+}
+#define le2me_VIDEO_FIELD_DESC(h) {					\
+    (h)->CompressedBMHeight = le2me_32((h)->CompressedBMHeight)		\
+    (h)->CompressedBMWidth = le2me_32((h)->CompressedBMWidth)		\
+    (h)->ValidBMHeight = le2me_32((h)->ValidBMHeight)			\
+    (h)->ValidBMWidth = le2me_32((h)->ValidBMWidth)			\
+    (h)->ValidBMXOffset = le2me_32((h)->ValidXOffset)			\
+    (h)->ValidBMYOffset = le2me_32((h)->ValidYOffset)			\
+    (h)->VideoXOffsetInT = le2me_32((h)->VideoXOffsetInT)		\
+    (h)->VideoYValidStartLine = le2me_32((h)->VideoYValidStartLine)	\
+}
+
 #else
 #define	le2me_MainAVIHeader(h)	    /**/
 #define le2me_AVIStreamHeader(h)    /**/
@@ -79,11 +200,11 @@
 #define le2me_BITMAPINFOHEADER(h)   /**/
 #define le2me_WAVEFORMATEX(h)	    /**/
 #define le2me_AVIINDEXENTRY(h)	    /**/
+#define le2me_AVISTDIDXCHUNK(h)     /**/
+#define le2me_AVISTDIDXENTRY(h)     /**/
+#define le2me_VideoPropHeader(h)    /**/
+#define le2me_VIDEO_FIELD_DESC(h)   /**/
 #endif
-
-
-#endif
-
 
 typedef struct {
   // index stuff:
@@ -107,6 +228,13 @@ typedef struct {
   unsigned char pts_corrected;
   unsigned char pts_has_video;
   unsigned int numberofframes;
+  avisuperindex_chunk *suidx;
+  int suidx_size;
+  int isodml;
 } avi_priv_t;
 
 #define AVI_PRIV ((avi_priv_t*)(demuxer->priv))
+
+#define AVI_IDX_OFFSET(x) ((((uint64_t)(x)->dwFlags&0xffff0000)<<16)+(x)->dwChunkOffset)
+
+#endif /* _aviheader_h */

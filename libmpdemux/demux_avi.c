@@ -213,7 +213,7 @@ do{
       continue; // skip this chunk
     }
 
-    pos = priv->idx_offset + (unsigned long)idx->dwChunkOffset;
+    pos = (off_t)priv->idx_offset+AVI_IDX_OFFSET(idx);
     if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start) && (demux->stream->flags & STREAM_SEEK)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!   idx=0x%X  \n",pos);
       continue;
@@ -325,7 +325,7 @@ do{
       continue; // skip this chunk
     }
 
-    pos = priv->idx_offset+(unsigned long)idx->dwChunkOffset;
+    pos = priv->idx_offset+AVI_IDX_OFFSET(idx);
     if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!  current=0x%X  idx=0x%X  \n",demux->filepos,pos);
       continue;
@@ -446,6 +446,10 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   priv->video_pack_no=0;
   priv->audio_block_no=0;
   priv->audio_block_size=0;
+  priv->isodml = 0;
+  priv->suidx_size = 0;
+  priv->suidx = NULL;
+
   demuxer->priv=(void*)priv;
 
   //---- AVI header:
@@ -468,13 +472,13 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   if(priv->idx_size>1){
     // decide index format:
 #if 1
-    if((unsigned long)((AVIINDEXENTRY *)priv->idx)[0].dwChunkOffset<demuxer->movi_start ||
-       (unsigned long)((AVIINDEXENTRY *)priv->idx)[1].dwChunkOffset<demuxer->movi_start)
+    if((AVI_IDX_OFFSET(&((AVIINDEXENTRY *)priv->idx)[0])<demuxer->movi_start ||
+        AVI_IDX_OFFSET(&((AVIINDEXENTRY *)priv->idx)[1])<demuxer->movi_start )&& !priv->isodml)
       priv->idx_offset=demuxer->movi_start-4;
     else
       priv->idx_offset=0;
 #else
-    if((unsigned long)((AVIINDEXENTRY *)priv->idx)[0].dwChunkOffset<demuxer->movi_start)
+    if(AVI_IDX_OFFSET(&((AVIINDEXENTRY *)priv->idx)[0])<demuxer->movi_start)
       priv->idx_offset=demuxer->movi_start-4;
     else
       priv->idx_offset=0;
@@ -494,7 +498,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
       for(i=0;i<priv->idx_size;i++){
         AVIINDEXENTRY* idx=&((AVIINDEXENTRY *)priv->idx)[i];
         demux_stream_t* ds=demux_avi_select_stream(demuxer,idx->ckid);
-        off_t pos = priv->idx_offset + (unsigned long)idx->dwChunkOffset;
+        off_t pos = priv->idx_offset + AVI_IDX_OFFSET(idx);
         if(a_pos==-1 && ds==demuxer->audio){
           a_pos=pos;
           if(v_pos!=-1) break;

@@ -260,6 +260,7 @@ Tobias Diedrich <ranma@gmx.at>
     * DXR2 driver
     * softpulldown video filter
     * ported Donald Graft's kerndeint video filter
+    * AVI OpenDML write support
 
 Kilian A. Foth <foth@informatik.uni-hamburg.de>
     * -slave mode
@@ -622,6 +623,9 @@ Jake Janovetz
 
 Vivien Chappelier, Damien Vincent
     * libFAME authors [fast mpeg-1 encoder, used by -vo mpegpes/-vo dxr3]
+
+Tilmann Bitterberg
+    * AVI OpenDML read support
 
 _____________________________________________________
 Their code is not used in the current player version,
