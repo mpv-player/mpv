@@ -58,7 +58,20 @@ const uint8_t  __attribute__((aligned(8))) dither[8][8]={
 { 42,  26,  38,  22,  41,  25,  37,  21, },
 };
 
-const uint8_t offset[64][2]= {
+const uint8_t offset[127][2]= {
+{0,0},
+{0,0}, {4,4},
+{0,0}, {2,2}, {6,4}, {4,6},
+{0,0}, {5,1}, {2,2}, {7,3}, {4,4}, {1,5}, {6,6}, {3,7}, 
+
+{0,0}, {4,0}, {1,1}, {5,1}, {3,2}, {7,2}, {2,3}, {6,3}, 
+{0,4}, {4,4}, {1,5}, {5,5}, {3,6}, {7,6}, {2,7}, {6,7}, 
+
+{0,0}, {0,2}, {0,4}, {0,6}, {1,1}, {1,3}, {1,5}, {1,7}, 
+{2,0}, {2,2}, {2,4}, {2,6}, {3,1}, {3,3}, {3,5}, {3,7}, 
+{4,0}, {4,2}, {4,4}, {4,6}, {5,1}, {5,3}, {5,5}, {5,7}, 
+{6,0}, {6,2}, {6,4}, {6,6}, {7,1}, {7,3}, {7,5}, {7,7}, 
+
 {0,0}, {4,4}, {0,4}, {4,0}, {2,2}, {6,6}, {2,6}, {6,2}, 
 {0,2}, {4,6}, {0,6}, {4,2}, {2,0}, {6,4}, {2,4}, {6,0}, 
 {1,1}, {5,5}, {1,5}, {5,1}, {3,3}, {7,7}, {3,7}, {7,3}, 
@@ -151,8 +164,8 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 				if(p->mpeg2) qp>>=1;
 			}
 			for(i=0; i<count; i++){
-				const int x1= x + offset[i][0];
-				const int y1= y + offset[i][1];
+				const int x1= x + offset[i+count-1][0];
+				const int y1= y + offset[i+count-1][1];
 				const int index= x1 + y1*stride;
 				p->dsp.get_pixels(block, p->src + index, stride);
 				p->dsp.fdct(block);
@@ -162,7 +175,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 			}
 		}
 	}
-
+        
 #define STORE(pos) \
 	temp= ((p->temp[index + pos]<<log2_scale) + d[pos])>>6;\
 	if(temp & 0x100) temp= ~(temp>>31);\
