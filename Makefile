@@ -96,11 +96,15 @@ COMMON_DEPS += libmpdvdkit2/libmpdvdkit.a
 endif
 endif
 
+ifeq ($(SHARED_PP),yes)
+COMMON_DEPS += libavcodec/libpostproc/libpostproc.so
+COMMON_LIBS += libavcodec/libpostproc/libpostproc.so
+endif
+
 ifeq ($(GUI),yes)
 COMMON_DEPS += Gui/libgui.a
 GUI_LIBS = Gui/libgui.a
 endif
-
 
 .SUFFIXES: .cc .c .o
 
@@ -176,6 +180,9 @@ input/libinput.a:
 
 libmenu/libmenu.a:
 	$(MAKE) -C libmenu
+
+libavcodec/libpostproc/libpostproc.so:
+	$(MAKE) -C libavcodec/libpostproc
 
 MPLAYER_DEP = $(OBJS_MPLAYER) $(COMMON_DEPS)
 
