@@ -997,7 +997,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <emphasis role="bold">qns</emphasis>: very slow, especially when combined
   with qprd.
   This option will make the encoder minimize noise due to compression
-  artifacts instead making the encoded video strictly match the source.
+  artifacts instead of making the encoded video strictly match the source.
   Don't use this unless you've already tweaked everything else as far as it
   will go and the results still aren't good enough.
 </para></listitem>
