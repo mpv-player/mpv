@@ -2,7 +2,7 @@
 char *get_path(char *filename){
 	char *homedir;
 	char *buff;
-#if defined(__MINGW32__)||defined(__CYGWIN__)
+#if defined(__MINGW32__)
     static char *config_dir = "/mplayer";
 #else
 	static char *config_dir = "/.mplayer";
