@@ -8,6 +8,8 @@
 
 #include "../config.h"
 
+#ifdef USE_STREAM_CACHE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -105,3 +107,5 @@ void shmem_free(void* p){
       break;
   }
 }
+
+#endif
