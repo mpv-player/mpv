@@ -27,8 +27,8 @@
 #define IMGFMT_IS_RGB(fmt) (((fmt)&IMGFMT_RGB_MASK)==IMGFMT_RGB)
 #define IMGFMT_IS_BGR(fmt) (((fmt)&IMGFMT_BGR_MASK)==IMGFMT_BGR)
 
-#define IMGFMT_RGB_DEPTH(fmt) ((fmt)&~IMGFMT_RGB)
-#define IMGFMT_BGR_DEPTH(fmt) ((fmt)&~IMGFMT_BGR)
+#define IMGFMT_RGB_DEPTH(fmt) ((fmt)&~IMGFMT_RGB_MASK)
+#define IMGFMT_BGR_DEPTH(fmt) ((fmt)&~IMGFMT_BGR_MASK)
 
 
 /* Planar YUV Formats */
