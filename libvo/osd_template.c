@@ -218,30 +218,30 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
 	    asm volatile(
 		"movzbl (%0), %%ecx\n\t"
 		"movzbl 1(%0), %%eax\n\t"
-		"movzbl 2(%0), %%edx\n\t"
 
 		"imull %1, %%ecx\n\t"
 		"imull %1, %%eax\n\t"
-		"imull %1, %%edx\n\t"
 
- 		"addl %2, %%ecx\n\t"
+		"addl %2, %%ecx\n\t"
 		"addl %2, %%eax\n\t"
-		"addl %2, %%edx\n\t"
 
 		"movb %%ch, (%0)\n\t"
 		"movb %%ah, 1(%0)\n\t"
-		"movb %%dh, 2(%0)\n\t"
-
+		
+                "movzbl 2(%0), %%eax\n\t"
+		"imull %1, %%eax\n\t"
+		"addl %2, %%eax\n\t"
+		"movb %%ah, 2(%0)\n\t"
 		:
 		:"r" (dst),
 		 "r" ((unsigned)srca[x]),
 		 "r" (((unsigned)src[x])<<8)
-		:"%eax", "%ecx", "%edx"
+		:"%eax", "%ecx"
 		);
             }
 	    dst += 3;
         }
-#endif /* HAVE_MMX */
+#endif /* !HAVE_MMX */
 #else /*non x86 arch*/
         for(x=0;x<w;x++){
             if(srca[x]){
