@@ -57,7 +57,6 @@ mplayer \- Movie Player for Linux
 .RB [ \-dumpstream ]
 .RB [ \-noframedrop ]
 .RB [ \-framedrop ]
-.RB [ \-nodouble ]
 .RB [ \-double ]
 .RB [ \-stereo\ <mode> ]
 .RB [ \-channels\ <n> ]
@@ -601,9 +600,10 @@ sync (default)
 .B \-framedrop
 frame dropping : decode all frames, video may skip
 .TP
-.B \-nodouble
-disables doublebuffering.
-With the DGA driver this also disables OSD support but yields some speed gain.
+.B \-double
+enables doublebuffering. Fixes flicker by storing two frames in memory, and
+displaying one while decoding another. Can effect OSD. Needs twice the memory
+than a single buffer, so it won't work on cards with very few video memory.
 .TP
 .B \-dvdkey key
 key to decrypt stream encrypted with CSS. For example : -dvdkey F169072699

@@ -55,7 +55,6 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-dumpstream ]
 .RB [ \-noframedrop ]
 .RB [ \-framedrop ]
-.RB [ \-nodouble ]
 .RB [ \-double ]
 .RB [ \-stereo\ <mód> ]
 .RB [ \-channels\ <n> ]
@@ -535,9 +534,11 @@ audio és video szinkron elcsúszhat (alapértelmezés)
 .B \-framedrop
 képkockaeldobás : minden képkocka dekódolása, a kép ugorhat
 .TP
-.B \-nodouble
-duplánbufferelés kikapcsolása.
-A DGA meghajtónál ez kikapcsolja az OSD-t is, de gyorsabb lesz a lejátszás.
+.B \-double
+duplánbufferelés bekapcsolása. Megszünteti a villódzást, mert két képkockát
+tárol a memóriában, így amíg az egyik látszik addik a másikon dolgozik.
+Hatással lehet az OSD-re. Kétszer annyi memóriát igényel mint egy buffer, így
+nagyon kevés memóriával rendelkezõ kártyákon nem biztos hogy menni fog.
 .TP
 .B \-dvdkey kulcs
 kulcs, a CSS-el kódolt fileokhoz szükséges. Például : -dvdkey F169072699
