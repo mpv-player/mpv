@@ -627,29 +627,36 @@ GtkWidget * AddFrame( char * title,int type,GtkWidget * parent,int add )
  return frame;
 }
 
+GtkWidget * AddLabel( char * title,GtkWidget * parent )
+{
+ GtkWidget * label;
+ label=gtk_label_new( title );
+ gtk_widget_set_name( label,"label" );
+ gtk_widget_show( label );
+ if ( parent ) gtk_box_pack_start( GTK_BOX( parent ),label,FALSE,FALSE,0 );
+ gtk_misc_set_alignment( GTK_MISC( label ),0,0.5 );
+ gtk_misc_set_padding( GTK_MISC( label ),4,0 );
+ return label;
+}
+
 GtkWidget * create_Preferences( void )
 {
+  GtkWidget * label;
   GtkWidget * vbox1;
   GtkWidget * notebook1;
   GtkWidget * hbox1;
   GtkWidget * vbox2;
   GtkWidget * scrolledwindow3;
-  GtkWidget * label8;
   GtkWidget * hbuttonbox2;
   GtkWidget * vbox3;
   GtkWidget * hseparator2;
   GtkWidget * hbox8;
-  GtkWidget * label17;
-  GtkWidget * label1;
   GtkWidget * hbox2;
   GtkWidget * vbox4;
   GtkWidget * scrolledwindow2;
-  GtkWidget * label7;
   GtkWidget * hbuttonbox3;
   GtkWidget * vbox5;
   GtkWidget * hbox3;
-  GtkWidget * label9;
-  GtkWidget * label2;
   GtkWidget * vbox6;
   GtkWidget * vbox600;
   GSList    * OSD_group = NULL;
@@ -658,24 +665,16 @@ GtkWidget * create_Preferences( void )
   GtkWidget * vbox7;
   GtkWidget * vbox8;
   GtkWidget * table1;
-  GtkWidget * label11;
-  GtkWidget * label12;
-  GtkWidget * label13;
   GtkWidget * vbox9;
   GtkWidget * vbox603;
   GtkWidget * hbox6;
-  GtkWidget * label15;
   GtkWidget * hbuttonbox5;
 #ifndef HAVE_FREETYPE
   GtkWidget * hbox7;
 #endif
-  GtkWidget * label16;
-  GtkWidget * label3;
   GtkWidget * vbox601;
   GtkWidget * vbox602;
   GtkWidget * hbox5;
-  GtkWidget * label14;
-  GtkWidget * label4;
   GtkWidget * hseparator1;
   GtkWidget * hbuttonbox1;
   GtkWidget * frame;
@@ -750,14 +749,8 @@ GtkWidget * create_Preferences( void )
   gtk_clist_set_shadow_type( GTK_CLIST( CLADrivers ),GTK_SHADOW_NONE );
   gtk_widget_set_usize( CLADrivers,200,-2 );
 
-  label8=gtk_label_new( MSGTR_PREFERENCES_AvailableDrivers );
-  gtk_widget_set_name( label8,"label8" );
-  gtk_widget_ref( label8 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label8",label8,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label8 );
-  gtk_clist_set_column_widget( GTK_CLIST( CLADrivers ),0,label8 );
-  gtk_misc_set_alignment( GTK_MISC( label8 ),0,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label8 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_AvailableDrivers,NULL );
+    gtk_clist_set_column_widget( GTK_CLIST( CLADrivers ),0,label );
 
   hbuttonbox2=gtk_hbutton_box_new();
   gtk_widget_set_name( hbuttonbox2,"hbuttonbox2" );
@@ -837,14 +830,8 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( hbox8 );
   gtk_box_pack_start( GTK_BOX( vbox3 ),hbox8,FALSE,FALSE,0 );
 
-  label17=gtk_label_new( MSGTR_PREFERENCES_Coefficient );
-  gtk_widget_set_name( label17,"label17" );
-  gtk_widget_ref( label17 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label17",label17,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label17 );
-  gtk_box_pack_start( GTK_BOX( hbox8 ),label17,FALSE,FALSE,0 );
-  gtk_misc_set_alignment( GTK_MISC( label17 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label17 ),20,0 );
+  label=AddLabel( MSGTR_PREFERENCES_Coefficient,hbox8 );
+    gtk_misc_set_padding( GTK_MISC( label ),20,0 );
 
   HSExtraStereoMuladj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-10,10,0.1,0,0 ) );
   HSExtraStereoMul=gtk_hscale_new( HSExtraStereoMuladj );
@@ -863,14 +850,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( hbox8 );
   gtk_box_pack_start( GTK_BOX( vbox3 ),hbox8,FALSE,FALSE,0 );
 
-  label17=gtk_label_new( MSGTR_PREFERENCES_AudioDelay );
-  gtk_widget_set_name( label17,"label17" );
-  gtk_widget_ref( label17 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label17",label17,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label17 );
-  gtk_box_pack_start( GTK_BOX( hbox8 ),label17,FALSE,FALSE,0 );
-  gtk_misc_set_alignment( GTK_MISC( label17 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label17 ),4,0 );
+  AddLabel( MSGTR_PREFERENCES_AudioDelay,hbox8 );
 
   HSAudioDelayadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-100,100,0.01,0,0 ) );
   HSAudioDelay=gtk_hscale_new( HSAudioDelayadj );
@@ -882,12 +862,8 @@ GtkWidget * create_Preferences( void )
   gtk_scale_set_value_pos( GTK_SCALE( HSAudioDelay ),GTK_POS_RIGHT );
   gtk_scale_set_digits( GTK_SCALE( HSAudioDelay ),2 );
 
-  label1=gtk_label_new( MSGTR_PREFERENCES_Audio );
-  gtk_widget_set_name( label1,"label1" );
-  gtk_widget_ref( label1 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label1",label1,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label1 );
-  gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),0 ),label1 );
+  label=AddLabel( MSGTR_PREFERENCES_Audio,NULL );
+    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),0 ),label );
 
   hbox2=gtk_hbox_new( FALSE,0 );
   gtk_widget_set_name( hbox2,"hbox2" );
@@ -925,14 +901,8 @@ GtkWidget * create_Preferences( void )
   gtk_clist_set_shadow_type( GTK_CLIST( CLVDrivers ),GTK_SHADOW_NONE );
   gtk_widget_set_usize( CLVDrivers,200,-2 );
 
-  label7=gtk_label_new( MSGTR_PREFERENCES_AvailableDrivers );
-  gtk_widget_set_name( label7,"label7" );
-  gtk_widget_ref( label7 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label7",label7,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label7 );
-  gtk_clist_set_column_widget( GTK_CLIST( CLVDrivers ),0,label7 );
-  gtk_misc_set_alignment( GTK_MISC( label7 ),0,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label7 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_AvailableDrivers,NULL );
+    gtk_clist_set_column_widget( GTK_CLIST( CLVDrivers ),0,label );
 
   hbuttonbox3=gtk_hbutton_box_new();
   gtk_widget_set_name( hbuttonbox3,"hbuttonbox3" );
@@ -1004,14 +974,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( hbox3 );
   gtk_box_pack_start( GTK_BOX( vbox5 ),hbox3,FALSE,FALSE,0 );
 
-  label9=gtk_label_new( MSGTR_PREFERENCES_Panscan );
-  gtk_widget_set_name( label9,"label9" );
-  gtk_widget_ref( label9 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label9",label9,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label9 );
-  gtk_box_pack_start( GTK_BOX( hbox3 ),label9,FALSE,FALSE,0 );
-  gtk_misc_set_alignment( GTK_MISC( label9 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label9 ),4,0 );
+  AddLabel( MSGTR_PREFERENCES_Panscan,hbox3 );
 
   HSPanscanadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,1,0.001,0,0 ) );
   HSPanscan=gtk_hscale_new( HSPanscanadj );
@@ -1022,12 +985,8 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( hbox3 ),HSPanscan,TRUE,TRUE,0 );
   gtk_scale_set_value_pos( GTK_SCALE( HSPanscan ),GTK_POS_RIGHT );
 
-  label2=gtk_label_new( MSGTR_PREFERENCES_Video );
-  gtk_widget_set_name( label2,"label2" );
-  gtk_widget_ref( label2 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label2",label2,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label2 );
-  gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),1 ),label2 );
+  label=AddLabel( MSGTR_PREFERENCES_Video,NULL );
+  gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),1 ),label );
 
   vbox6=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox6,"vbox6" );
@@ -1135,23 +1094,11 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( table1 );
   gtk_box_pack_start( GTK_BOX( vbox8 ),table1,FALSE,FALSE,0 );
 
-  label11=gtk_label_new( MSGTR_PREFERENCES_SUB_Delay );
-  gtk_widget_set_name( label11,"label11" );
-  gtk_widget_ref( label11 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label11",label11,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label11 );
-  gtk_table_attach( GTK_TABLE( table1 ),label11,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  gtk_misc_set_alignment( GTK_MISC( label11 ),0,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label11 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_SUB_Delay,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
-  label12=gtk_label_new( MSGTR_PREFERENCES_SUB_FPS );
-  gtk_widget_set_name( label12,"label12" );
-  gtk_widget_ref( label12 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label12",label12,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label12 );
-  gtk_table_attach( GTK_TABLE( table1 ),label12,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  gtk_misc_set_alignment( GTK_MISC( label12 ),0,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label12 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_SUB_FPS,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   HSSubDelayadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-10.0,10,0.01,0,0 ) );
   HSSubDelay=gtk_hscale_new( HSSubDelayadj );
@@ -1162,14 +1109,8 @@ GtkWidget * create_Preferences( void )
   gtk_table_attach( GTK_TABLE( table1 ),HSSubDelay,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
   gtk_scale_set_value_pos( GTK_SCALE( HSSubDelay ),GTK_POS_RIGHT );
 
-  label13=gtk_label_new( MSGTR_PREFERENCES_SUB_POS );
-  gtk_widget_set_name( label13,"label13" );
-  gtk_widget_ref( label13 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label13",label13,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label13 );
-  gtk_table_attach( GTK_TABLE( table1 ),label13,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  gtk_misc_set_alignment( GTK_MISC( label13 ),0,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label13 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_SUB_POS,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );    
 
   HSSubPositionadj=GTK_ADJUSTMENT( gtk_adjustment_new( 100,0,100,1,0,0 ) );
   HSSubPosition=gtk_hscale_new( HSSubPositionadj );
@@ -1242,14 +1183,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( hbox6 );
   gtk_box_pack_start( GTK_BOX( vbox603 ),hbox6,FALSE,FALSE,0 );
 
-  label15=gtk_label_new( MSGTR_PREFERENCES_Font );
-  gtk_widget_set_name( label15,"label15" );
-  gtk_widget_ref( label15 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label15",label15,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label15 );
-  gtk_box_pack_start( GTK_BOX( hbox6 ),label15,FALSE,FALSE,0 );
-  gtk_misc_set_alignment( GTK_MISC( label15 ),0,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label15 ),4,0 );
+  AddLabel( MSGTR_PREFERENCES_Font,hbox6 );
 
   prEFontName=gtk_entry_new();
   gtk_widget_set_name( prEFontName,"prEFontName" );
@@ -1285,14 +1219,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( hbox7 );
   gtk_box_pack_start( GTK_BOX( vbox603 ),hbox7,FALSE,FALSE,0 );
 
-  label16=gtk_label_new( MSGTR_PREFERENCES_FontFactor );
-  gtk_widget_set_name( label16,"label16" );
-  gtk_widget_ref( label16 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label16 );
-  gtk_box_pack_start( GTK_BOX( hbox7 ),label16,FALSE,FALSE,0 );
-  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+  AddLabel( MSGTR_PREFERENCES_FontFactor,hbox7 );
 
   HSFontFactoradj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,10,0.05,0,0 ) );
   HSFontFactor=gtk_hscale_new( HSFontFactoradj );
@@ -1345,14 +1272,8 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( table1 );
   gtk_box_pack_start( GTK_BOX( vbox603 ),table1,FALSE,FALSE,0 );
 
-  label16=gtk_label_new( MSGTR_PREFERENCES_FontEncoding );
-  gtk_widget_set_name( label16,"label16" );
-  gtk_widget_ref( label16 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label16 );
-  gtk_table_attach( GTK_TABLE( table1 ),label16,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_FontEncoding,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
   
   CBFontEncoding=gtk_combo_new();
   gtk_widget_set_name( CBFontEncoding,"CBFontEncoding" );
@@ -1373,14 +1294,8 @@ GtkWidget * create_Preferences( void )
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"EFontEncoding",EFontEncoding,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( EFontEncoding );
 
-  label16=gtk_label_new( MSGTR_PREFERENCES_FontBlur );
-  gtk_widget_set_name( label16,"label16" );
-  gtk_widget_ref( label16 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label16 );
-  gtk_table_attach( GTK_TABLE( table1 ),label16,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_FontBlur,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   HSFontBluradj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0.1,0,0 ) );
   HSFontBlur=gtk_hscale_new( HSFontBluradj );
@@ -1392,14 +1307,8 @@ GtkWidget * create_Preferences( void )
   gtk_scale_set_value_pos( GTK_SCALE( HSFontBlur ),GTK_POS_RIGHT );
   gtk_scale_set_digits( GTK_SCALE( HSFontBlur ),2 );
 
-  label16=gtk_label_new( MSGTR_PREFERENCES_FontOutLine );
-  gtk_widget_set_name( label16,"label16" );
-  gtk_widget_ref( label16 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label16 );
-  gtk_table_attach( GTK_TABLE( table1 ),label16,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_FontOutLine,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   HSFontOutLineadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0.1,0,0 ) );
   HSFontOutLine=gtk_hscale_new( HSFontOutLineadj );
@@ -1411,14 +1320,8 @@ GtkWidget * create_Preferences( void )
   gtk_scale_set_value_pos( GTK_SCALE( HSFontOutLine ),GTK_POS_RIGHT );
   gtk_scale_set_digits( GTK_SCALE( HSFontOutLine ),2 );
 
-  label16=gtk_label_new( MSGTR_PREFERENCES_FontTextScale );
-  gtk_widget_set_name( label16,"label16" );
-  gtk_widget_ref( label16 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label16 );
-  gtk_table_attach( GTK_TABLE( table1 ),label16,0,1,3,4,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_FontTextScale,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,3,4,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   HSFontTextScaleadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0.1,0,0 ) );
   HSFontTextScale=gtk_hscale_new( HSFontTextScaleadj );
@@ -1430,14 +1333,8 @@ GtkWidget * create_Preferences( void )
   gtk_scale_set_value_pos( GTK_SCALE( HSFontTextScale ),GTK_POS_RIGHT );
   gtk_scale_set_digits( GTK_SCALE( HSFontTextScale ),2 );
 
-  label16=gtk_label_new( MSGTR_PREFERENCES_FontOSDScale );
-  gtk_widget_set_name( label16,"label16" );
-  gtk_widget_ref( label16 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label16 );
-  gtk_table_attach( GTK_TABLE( table1 ),label16,0,1,4,5,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_FontOSDScale,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,4,5,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   HSFontOSDScaleadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0.1,0,0 ) );
   HSFontOSDScale=gtk_hscale_new( HSFontOSDScaleadj );
@@ -1451,12 +1348,8 @@ GtkWidget * create_Preferences( void )
 
 #endif
 
-  label3=gtk_label_new( MSGTR_PREFERENCES_SubtitleOSD );
-  gtk_widget_set_name( label3,"label3" );
-  gtk_widget_ref( label3 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label3",label3,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label3 );
-  gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),2 ),label3 );
+  label=AddLabel( MSGTR_PREFERENCES_SubtitleOSD,NULL );
+    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),2 ),label );
 
   vbox601=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox601,"vbox601" );
@@ -1489,14 +1382,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( hbox5 );
   gtk_box_pack_start( GTK_BOX( vbox602 ),hbox5,FALSE,FALSE,0 );
 
-  label14=gtk_label_new( MSGTR_PREFERENCES_AutoQuality );
-  gtk_widget_set_name( label14,"label14" );
-  gtk_widget_ref( label14 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label14",label14,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label14 );
-  gtk_box_pack_start( GTK_BOX( hbox5 ),label14,FALSE,FALSE,0 );
-  gtk_misc_set_alignment( GTK_MISC( label14 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label14 ),4,0 );
+  AddLabel( MSGTR_PREFERENCES_AutoQuality,hbox5 );
 
   if ( guiIntfStruct.sh_video && guiIntfStruct.Playing ) HSPPQualityadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,get_video_quality_max( guiIntfStruct.sh_video ),0,0,0 ) );
    else HSPPQualityadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0,0,0 ) );
@@ -1540,14 +1426,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( hbox5 );
   gtk_box_pack_start( GTK_BOX( vbox602 ),hbox5,FALSE,FALSE,0 );
 
-  label16=gtk_label_new( MSGTR_PREFERENCES_VideoCodecFamily );
-  gtk_widget_set_name( label16,"label16" );
-  gtk_widget_ref( label16 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label16 );
-  gtk_box_pack_start( GTK_BOX( hbox5 ),label16,FALSE,FALSE,0 );
-  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+  AddLabel( MSGTR_PREFERENCES_VideoCodecFamily,hbox5 );
 
   CBVFM=gtk_combo_new();
   gtk_widget_set_name( CBVFM,"CBVFM" );
@@ -1569,14 +1448,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( hbox5 );
   gtk_box_pack_start( GTK_BOX( vbox602 ),hbox5,FALSE,FALSE,0 );
 
-  label16=gtk_label_new( MSGTR_PREFERENCES_AudioCodecFamily );
-  gtk_widget_set_name( label16,"label16" );
-  gtk_widget_ref( label16 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label16 );
-  gtk_box_pack_start( GTK_BOX( hbox5 ),label16,FALSE,FALSE,0 );
-  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+  AddLabel( MSGTR_PREFERENCES_AudioCodecFamily,hbox5 );
 
   CBAFM=gtk_combo_new();
   gtk_widget_set_name( CBAFM,"CBAFM" );
@@ -1615,14 +1487,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( hbox5 );
   gtk_box_pack_start( GTK_BOX( vbox602 ),hbox5,FALSE,FALSE,0 );
 
-  label4=gtk_label_new( "Cache size: " );
-  gtk_widget_set_name( label4,"label4" );
-  gtk_widget_ref( label4 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label4",label4,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label4 );
-  gtk_box_pack_start( GTK_BOX( hbox5 ),label4,FALSE,FALSE,0 );
-  gtk_misc_set_alignment( GTK_MISC( label4 ),7.45058e-09,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label4 ),4,0 );
+  AddLabel( MSGTR_PREFERENCES_CacheSize,hbox5 );
 
   SBCacheadj=GTK_ADJUSTMENT( gtk_adjustment_new( 2048,4,65535,1,10,10 ) );
   SBCache=gtk_spin_button_new( GTK_ADJUSTMENT( SBCacheadj ),1,0 );
@@ -1648,12 +1513,8 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( CBLoadFullscreen );
   gtk_box_pack_start( GTK_BOX( vbox602 ),CBLoadFullscreen,FALSE,FALSE,0 );
 
-  label4=gtk_label_new( "Misc" );
-  gtk_widget_set_name( label4,"label4" );
-  gtk_widget_ref( label4 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label4",label4,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label4 );
-  gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),3 ),label4 );
+  label=AddLabel( MSGTR_PREFERENCES_Misc,NULL );
+    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),3 ),label );
 
   hseparator1=gtk_hseparator_new();
   gtk_widget_set_name( hseparator1,"hseparator1" );
@@ -1800,14 +1661,10 @@ GtkWidget * create_OSSConfig( void )
 {
   GList 	* CBOssDevice_items=NULL;
   GList 	* CBOssMixer_items=NULL;
-  GtkWidget * frame13;
-  GtkWidget * frame14;
-  GtkWidget * frame15;
-  GtkWidget * frame16;
+  GtkWidget * frame;
   GtkWidget * vbox604;
   GtkWidget * table2;
-  GtkWidget * label18;
-  GtkWidget * label19;
+  GtkWidget * label;
   GtkWidget * hseparator3;
   GtkWidget * hbuttonbox6;
   GtkAccelGroup * accel_group;
@@ -1825,47 +1682,19 @@ GtkWidget * create_OSSConfig( void )
 
   gtk_widget_realize( OSSConfig );
   gtkAddIcon( OSSConfig );
-    
-  frame13=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame13,"frame13" );
-  gtk_widget_ref( frame13 );
-  gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"frame13",frame13,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame13 );
-  gtk_container_add( GTK_CONTAINER( OSSConfig ),frame13 );
-  gtk_container_set_border_width( GTK_CONTAINER( frame13 ),1 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame13 ),GTK_SHADOW_IN );
 
-  frame14=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame14,"frame14" );
-  gtk_widget_ref( frame14 );
-  gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"frame14",frame14,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame14 );
-  gtk_container_add( GTK_CONTAINER( frame13 ),frame14 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame14 ),GTK_SHADOW_NONE );
-
-  frame15=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame15,"frame15" );
-  gtk_widget_ref( frame15 );
-  gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"frame15",frame15,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame15 );
-  gtk_container_add( GTK_CONTAINER( frame14 ),frame15 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame15 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame16=gtk_frame_new( NULL );
-  gtk_widget_set_name( frame16,"frame16" );
-  gtk_widget_ref( frame16 );
-  gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"frame16",frame16,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame16 );
-  gtk_container_add( GTK_CONTAINER( frame15 ),frame16 );
-  gtk_widget_set_usize( frame16,384,256 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame16 ),GTK_SHADOW_NONE );
+  frame=AddFrame( NULL,GTK_SHADOW_IN,OSSConfig,1 );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),1 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
+  frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,frame,1 );
+  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
   vbox604=gtk_vbox_new( FALSE,0 );
   gtk_widget_set_name( vbox604,"vbox604" );
   gtk_widget_ref( vbox604 );
   gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"vbox604",vbox604,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( vbox604 );
-  gtk_container_add( GTK_CONTAINER( frame16 ),vbox604 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox604 );
 
   table2=gtk_table_new( 2,2,FALSE );
   gtk_widget_set_name( table2,"table2" );
@@ -1874,23 +1703,11 @@ GtkWidget * create_OSSConfig( void )
   gtk_widget_show( table2 );
   gtk_box_pack_start( GTK_BOX( vbox604 ),table2,TRUE,TRUE,0 );
 
-  label18=gtk_label_new( MSGTR_PREFERENCES_OSS_Device );
-  gtk_widget_set_name( label18,"label18" );
-  gtk_widget_ref( label18 );
-  gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"label18",label18,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label18 );
-  gtk_table_attach( GTK_TABLE( table2 ),label18,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  gtk_misc_set_alignment( GTK_MISC( label18 ),0,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label18 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_OSS_Device,NULL );
+    gtk_table_attach( GTK_TABLE( table2 ),label,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
-  label19=gtk_label_new( MSGTR_PREFERENCES_OSS_Mixer );
-  gtk_widget_set_name( label19,"label19" );
-  gtk_widget_ref( label19 );
-  gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"label19",label19,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label19 );
-  gtk_table_attach( GTK_TABLE( table2 ),label19,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  gtk_misc_set_alignment( GTK_MISC( label19 ),0,0.5 );
-  gtk_misc_set_padding( GTK_MISC( label19 ),4,0 );
+  label=AddLabel( MSGTR_PREFERENCES_OSS_Mixer,NULL );
+    gtk_table_attach( GTK_TABLE( table2 ),label,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   CBOssDevice=gtk_combo_new();
   gtk_widget_set_name( CBOssDevice,"CBOssDevice" );
@@ -2066,18 +1883,13 @@ static void dxr3Button( GtkButton * button,gpointer user_data )
 
 GtkWidget * create_DXR3Config( void )
 {
- GtkWidget * frame1;
- GtkWidget * frame2;
- GtkWidget * frame3;
- GtkWidget * frame4;
+ GtkWidget * frame;
  GtkWidget * vbox1;
  GtkWidget * vbox2;
  GtkWidget * hbox1;
- GtkWidget * label1;
  GList     * CBDevice_items = NULL;
  GtkWidget * hseparator2;
  GtkWidget * vbox3;
- GtkWidget * label2;
  GSList    * VEncoder_group = NULL;
  GtkWidget * hseparator1;
  GtkWidget * hbuttonbox1;
@@ -2099,45 +1911,18 @@ GtkWidget * create_DXR3Config( void )
  gtk_widget_realize( DXR3Config );
  gtkAddIcon( DXR3Config );
 
- frame1=gtk_frame_new( NULL );
- gtk_widget_set_name( frame1,"frame1" );
- gtk_widget_ref( frame1 );
- gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"frame1",frame1,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( frame1 );
- gtk_container_add( GTK_CONTAINER( DXR3Config ),frame1 );
- gtk_container_set_border_width( GTK_CONTAINER( frame1 ),1 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame1 ),GTK_SHADOW_IN );
-
- frame2=gtk_frame_new( NULL );
- gtk_widget_set_name( frame2,"frame2" );
- gtk_widget_ref( frame2 );
- gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"frame2",frame2,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( frame2 );
- gtk_container_add( GTK_CONTAINER( frame1 ),frame2 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame2 ),GTK_SHADOW_NONE );
-
- frame3=gtk_frame_new( NULL );
- gtk_widget_set_name( frame3,"frame3" );
- gtk_widget_ref( frame3 );
- gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"frame3",frame3,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( frame3 );
- gtk_container_add( GTK_CONTAINER( frame2 ),frame3 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame3 ),GTK_SHADOW_ETCHED_OUT );
-
- frame4=gtk_frame_new( NULL );
- gtk_widget_set_name( frame4,"frame4" );
- gtk_widget_ref( frame4 );
- gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"frame4",frame4,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( frame4 );
- gtk_container_add( GTK_CONTAINER( frame3 ),frame4 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame4 ),GTK_SHADOW_NONE );
+ frame=AddFrame( NULL,GTK_SHADOW_IN,DXR3Config,1 );
+ gtk_container_set_border_width( GTK_CONTAINER( frame ),1 );
+ frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
+ frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,frame,1 );
+ frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
  vbox1=gtk_vbox_new( FALSE,0 );
  gtk_widget_set_name( vbox1,"vbox1" );
  gtk_widget_ref( vbox1 );
  gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"vbox1",vbox1,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( vbox1 );
- gtk_container_add( GTK_CONTAINER( frame4 ),vbox1 );
+ gtk_container_add( GTK_CONTAINER( frame ),vbox1 );
 
  vbox2=gtk_vbox_new( FALSE,0 );
  gtk_widget_set_name( vbox2,"vbox2" );
@@ -2153,14 +1938,7 @@ GtkWidget * create_DXR3Config( void )
  gtk_widget_show( hbox1 );
  gtk_box_pack_start( GTK_BOX( vbox2 ),hbox1,FALSE,FALSE,0 );
 
- label1=gtk_label_new( MSGTR_PREFERENCES_OSS_Device );
- gtk_widget_set_name( label1,"label1" );
- gtk_widget_ref( label1 );
- gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"label1",label1,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( label1 );
- gtk_box_pack_start( GTK_BOX( hbox1 ),label1,FALSE,FALSE,0 );
- gtk_misc_set_alignment( GTK_MISC( label1 ),7.45058e-09,0.5 );
- gtk_misc_set_padding( GTK_MISC( label1 ),4,0 );
+ AddLabel( MSGTR_PREFERENCES_OSS_Device,hbox1 );
 
  CBDevice=gtk_combo_new();
  gtk_widget_set_name( CBDevice,"CBDevice" );
@@ -2199,14 +1977,7 @@ GtkWidget * create_DXR3Config( void )
  gtk_widget_show( vbox3 );
  gtk_box_pack_start( GTK_BOX( vbox2 ),vbox3,TRUE,TRUE,0 );
 
- label2=gtk_label_new( MSGTR_PREFERENCES_DXR3_VENC );
- gtk_widget_set_name( label2,"label2" );
- gtk_widget_ref( label2 );
- gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"label2",label2,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( label2 );
- gtk_box_pack_start( GTK_BOX( vbox3 ),label2,FALSE,FALSE,0 );
- gtk_misc_set_alignment( GTK_MISC( label2 ),7.45058e-09,0.5 );
- gtk_misc_set_padding( GTK_MISC( label2 ),4,0 );
+ AddLabel( MSGTR_PREFERENCES_DXR3_VENC,vbox3 );
 
  RBVNone=gtk_radio_button_new_with_label( VEncoder_group,MSGTR_PREFERENCES_None );
  VEncoder_group=gtk_radio_button_group( GTK_RADIO_BUTTON( RBVNone ) );

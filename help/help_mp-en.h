@@ -408,6 +408,11 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Directory tree"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Audio "Audio"
+#define MSGTR_PREFERENCES_Video "Video"
+#define MSGTR_PREFERENCES_SubtitleOSD "Subtitle & OSD"
+#define MSGTR_PREFERENCES_Misc "Misc"
+
 #define MSGTR_PREFERENCES_None "None"
 #define MSGTR_PREFERENCES_AvailableDrivers "Available drivers:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Do not play sound"
@@ -416,14 +421,12 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ExtraStereo "Enable extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Audio delay"
-#define MSGTR_PREFERENCES_Audio "Audio"
 #define MSGTR_PREFERENCES_DoubleBuffer "Enable double buffering"
 #define MSGTR_PREFERENCES_DirectRender "Enable direct rendering"
 #define MSGTR_PREFERENCES_FrameDrop "Enable frame dropping"
 #define MSGTR_PREFERENCES_HFrameDrop "Enable HARD frame dropping (dangerous)"
 #define MSGTR_PREFERENCES_Flip "Flip image upside down"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
-#define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_OSDTimer "Timer and indicators"
 #define MSGTR_PREFERENCES_OSDProgress "Progressbars only"
 #define MSGTR_PREFERENCES_Subtitle "Subtitle:"
@@ -485,9 +488,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOutLine "Outline:"
 #define MSGTR_PREFERENCES_FontTextScale "Text scale:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSD scale:"
-#define MSGTR_PREFERENCES_SubtitleOSD "Subtitle & OSD"
 #define MSGTR_PREFERENCES_Cache "Cache on/off"
 #define MSGTR_PREFERENCES_LoadFullscreen "Start in fullscreen"
+#define MSGTR_PREFERENCES_CacheSize "Cache size: "
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatal error!"
