@@ -28,6 +28,7 @@ LOADER_DEP = loader/libloader.a $(DS_DEP)
 LIB_LOADER = -Lloader -lloader $(DS_LIB)
 else
 LOADER_DEP =
+LIB_LOADER =
 endif
 
 
@@ -74,10 +75,12 @@ encore/libencore.a:
 	$(MAKE) -C encore
 
 
-mplayerwithoutlink:	version.h mplayer.o $(OBJS) $(LOADER_DEP) $(AV_DEP) libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
+MPLAYER_DEP = mplayer.o $(OBJS) $(LOADER_DEP) $(AV_DEP) libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
+
+mplayerwithoutlink: $(MPLAYER_DEP)	
 	@for a in mp3lib libac3 libmpeg2 libvo opendivx libavcodec encore loader/DirectShow ; do $(MAKE) -C $$a all ; done
 
-$(PRG):	version.h mplayer.o $(OBJS) $(LOADER_DEP) $(AV_DEP) libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
+$(PRG):	$(MPLAYER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(ARCH_LIBS)
 
 $(PRG_FIBMAP): fibmap_mplayer.o
@@ -91,6 +94,13 @@ $(PRG_FIBMAP): fibmap_mplayer.o
 
 # $(PRG_TV):	depfile tvision.o $(OBJS) $(COMMONLIBS)
 # 	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
+
+# Every mplayer dependancy depends on version.h, to force building version.h
+# first (in serial mode) before any other of the dependancies for a parallel make
+# run.  This is necessary, because the make rule for version.h removes objects
+# in a recursive "make distclean" and we must wait for this "make distclean" to
+# finish before be can start builing new object files.
+$(MPLAYER_DEP): version.h
 
 $(PRG_CFG):        version.h codec-cfg.c codec-cfg.h
 	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML
