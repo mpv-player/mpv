@@ -170,6 +170,7 @@ int vo_init( void )
  XImage  * mXImage = NULL;
 // Window    mRootWin;
  XWindowAttributes attribs;
+ char* dispName;
 
  if(vo_depthonscreen) return 1; // already called
 
@@ -180,16 +181,16 @@ int vo_init( void )
    if (!(mDisplayName=getenv("DISPLAY")))
      mDisplayName=strdup(":0.0");
 #else
- mDisplayName = XDisplayName(mDisplayName);
+  dispName = XDisplayName(mDisplayName);
 #endif
 
  if (verbose)
-    printf("X11 opening display: %s\n", mDisplayName);
+    printf("X11 opening display: %s\n", dispName);
 
- mDisplay=XOpenDisplay(mDisplayName);
+ mDisplay=XOpenDisplay(dispName);
  if ( !mDisplay )
   {
-   printf( "vo: couldn't open the X11 display (%s)!\n",mDisplayName );
+   printf( "vo: couldn't open the X11 display (%s)!\n",dispName );
    return 0;
   }
  mScreen=DefaultScreen( mDisplay );     // Screen ID.
@@ -264,15 +265,15 @@ int vo_init( void )
  }
 // XCloseDisplay( mDisplay );
 /* slightly improved local display detection AST */
- if ( strncmp(mDisplayName, "unix:", 5) == 0)
-		mDisplayName += 4;
- else if ( strncmp(mDisplayName, "localhost:", 10) == 0)
-		mDisplayName += 9;
- if (*mDisplayName==':') mLocalDisplay=1; else mLocalDisplay=0;
+ if ( strncmp(dispName, "unix:", 5) == 0)
+		dispName += 4;
+ else if ( strncmp(dispName, "localhost:", 10) == 0)
+		dispName += 9;
+ if (*dispName==':') mLocalDisplay=1; else mLocalDisplay=0;
  printf("vo: X11 running at %dx%d with depth %d and %d bits/pixel (\"%s\" => %s display)\n",
 	vo_screenwidth,vo_screenheight,
 	depth, vo_depthonscreen,
-	mDisplayName,mLocalDisplay?"local":"remote");
+	dispName,mLocalDisplay?"local":"remote");
  
  return 1;
 }
@@ -425,6 +426,7 @@ int vo_x11_uninit(Display *display, Window window)
 	if (!(WinID > 0))
 	    XDestroyWindow(display, window);
 	XCloseDisplay(display);
+	vo_depthonscreen = 0;
     }
     return(1);
 }

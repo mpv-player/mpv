@@ -243,6 +243,12 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  static uint32_t vm_height;
 #endif
 
+#ifdef HAVE_NEW_GUI
+ if ( vo_window == None )
+#endif   
+    if( !vo_init() ) return 0; // Can't open X11
+
+
  if (!title)
     title = strdup("MPlayer X11 (XImage/Shm) render");
 
@@ -276,8 +282,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if ( vo_window == None )
 #endif   
    {
-    if( !vo_init() ) return 0; // Can't open X11
-
     hint.x=0;
     hint.y=0;
     if(zoomFlag){
@@ -524,7 +528,7 @@ static uint32_t draw_frame( uint8_t *src[] ){
 
 static uint32_t query_format( uint32_t format )
 {
- if( !vo_init() ) return 0; // Can't open X11
+  //if( !vo_init() ) return 0; // Can't open X11
 
  switch( format )
   {

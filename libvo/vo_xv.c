@@ -765,17 +765,11 @@ static void uninit(void)
 {
  int i;
  saver_on(mDisplay); // screen saver back on
-#ifdef HAVE_NEW_GUI
- if ( vo_window == None )
-#endif
- {
-  XDestroyWindow( mDisplay,vo_window );
- }
  for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
 #ifdef HAVE_XF86VM
  vo_vm_close(mDisplay);
 #endif
-
+ vo_x11_uninit(mDisplay, vo_window);
 }
 
 static uint32_t preinit(const char *arg)
