@@ -57,7 +57,7 @@ static pl_format_t pl_format={NULL,0,0,0,1};
 #define SIGN_MASK	(1<<3)
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
+static int control(int cmd,void *arg){
   switch(cmd){
   case AOCONTROL_PLUGIN_SET_LEN:
     if(pl_format.data) 

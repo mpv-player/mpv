@@ -18,7 +18,7 @@ typedef struct ao_info_s
 typedef struct ao_functions_s
 {
 	ao_info_t *info;
-        int (*control)(int cmd,int arg);
+        int (*control)(int cmd,void *arg);
         int (*init)(int rate,int channels,int format,int flags);
         void (*uninit)();
         void (*reset)();

@@ -41,7 +41,7 @@ static void drain(){
 }
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
+static int control(int cmd,void *arg){
     return -1;
 }
 

@@ -5,7 +5,7 @@
 typedef struct ao_plugin_functions_s
 {
 	ao_info_t *info;
-        int (*control)(int cmd,int arg);
+        int (*control)(int cmd, void *arg);
         int (*init)(); 
         void (*uninit)();
         void (*reset)();

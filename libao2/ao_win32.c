@@ -64,7 +64,7 @@ static void CALLBACK waveOutProc(HWAVEOUT hWaveOut,UINT uMsg,DWORD dwInstance,
 }
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg)
+static int control(int cmd,void *arg)
 {
 	DWORD volume;
 	switch (cmd)

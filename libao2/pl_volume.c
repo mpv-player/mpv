@@ -43,7 +43,7 @@ typedef struct pl_volume_s
 static pl_volume_t pl_volume={0,0,0};
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
+static int control(int cmd,void *arg){
   switch(cmd){
   case AOCONTROL_PLUGIN_SET_LEN:
     return CONTROL_OK;

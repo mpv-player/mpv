@@ -79,7 +79,7 @@ typedef struct pl_surround_s
 static pl_surround_t pl_surround={0,20,NULL,NULL,NULL,0,0,NULL,0,0,0};
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
+static int control(int cmd,void *arg){
   switch(cmd){
   case AOCONTROL_PLUGIN_SET_LEN:
     if (pl_surround.passthrough) return CONTROL_OK;

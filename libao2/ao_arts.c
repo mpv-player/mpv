@@ -34,7 +34,7 @@ static ao_info_t info =
 
 LIBAO_EXTERN(arts)
 
-static int control(int cmd, int arg)
+static int control(int cmd, void *arg)
 {
 	return(CONTROL_UNKNOWN);
 }

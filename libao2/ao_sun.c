@@ -376,7 +376,7 @@ static void setup_device_paths()
 }
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
+static int control(int cmd,void *arg){
     switch(cmd){
     case AOCONTROL_SET_DEVICE:
 	audio_dev=(char*)arg;

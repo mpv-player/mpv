@@ -27,7 +27,7 @@ static ALconfig	ao_config;
 static ALport	ao_port;
 
 // to set/get/query special features/parameters
-static int control(int cmd, int arg){
+static int control(int cmd, void *arg){
   
   printf("ao_sgi, control\n");
   

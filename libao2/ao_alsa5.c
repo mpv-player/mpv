@@ -32,7 +32,7 @@ static snd_pcm_format_t alsa_format;
 static int alsa_rate = SND_PCM_RATE_CONTINUOUS;
 
 /* to set/get/query special features/parameters */
-static int control(int cmd, int arg)
+static int control(int cmd, void *arg)
 {
     return(CONTROL_UNKNOWN);
 }

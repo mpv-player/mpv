@@ -79,7 +79,7 @@ static int set_block_mode;
 
 
 /* to set/get/query special features/parameters */
-static int control(int cmd, int arg)
+static int control(int cmd, void *arg)
 {
   switch(cmd) {
   case AOCONTROL_QUERY_FORMAT:

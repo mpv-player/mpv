@@ -333,7 +333,7 @@ static unsigned int nas_aformat_to_auformat(unsigned int *format)
 }
 
 // to set/get/query special features/parameters
-static int control(int cmd, int arg)
+static int control(int cmd, void *arg)
 {
 	AuDeviceAttributes *dattr;
 	AuFixedPoint fpgain;

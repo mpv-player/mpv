@@ -49,7 +49,7 @@ LIBAO_EXTERN(mpegpes)
 
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
+static int control(int cmd,void *arg){
 #ifdef HAVE_DVB
     switch(cmd){
 	case AOCONTROL_GET_VOLUME:

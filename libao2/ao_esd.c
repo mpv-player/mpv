@@ -74,7 +74,7 @@ static struct timeval esd_play_start;
 /*
  * to set/get/query special features/parameters
  */
-static int control(int cmd, int arg)
+static int control(int cmd, void *arg)
 {
     esd_player_info_t *esd_pi;
     esd_info_t        *esd_i;

@@ -38,7 +38,7 @@ typedef struct pl_delay_s
 static pl_delay_t pl_delay={NULL,NULL,0,0,0,0};
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
+static int control(int cmd,void *arg){
   switch(cmd){
   case AOCONTROL_PLUGIN_SET_LEN:
     if(pl_delay.data) 

@@ -39,7 +39,7 @@ static int audio_fd=-1;
 char *oss_mixer_device = PATH_DEV_MIXER;
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
+static int control(int cmd,void *arg){
     switch(cmd){
 	case AOCONTROL_SET_DEVICE:
 	    dsp=(char*)arg;

@@ -93,7 +93,7 @@ typedef struct pl_resample_s
 static pl_resample_t 	pl_resample	= {NULL,NULL,1,1,1,0,W};
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
+static int control(int cmd,void *arg){
   switch(cmd){
   case AOCONTROL_PLUGIN_SET_LEN:
     if(pl_resample.data) 

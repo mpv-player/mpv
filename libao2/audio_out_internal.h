@@ -1,7 +1,7 @@
 
 // prototypes:
 //static ao_info_t info;
-static int control(int cmd,int arg);
+static int control(int cmd, void *arg);
 static int init(int rate,int channels,int format,int flags);
 static void uninit();
 static void reset();

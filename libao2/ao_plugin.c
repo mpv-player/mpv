@@ -44,10 +44,10 @@ volatile ao_plugin_data_t ao_plugin_data;             // Data used by the plugin
 ao_plugin_cfg_t  ao_plugin_cfg=CFG_DEFAULTS; // Set in cfg-mplayer.h
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
+static int control(int cmd,void *arg){
   switch(cmd){
   case AOCONTROL_SET_PLUGIN_DRIVER:
-    ao_plugin_local_data.driver=(ao_functions_t*)arg;
+    ao_plugin_local_data.driver=arg;
     return CONTROL_OK;
   case AOCONTROL_GET_VOLUME:
   case AOCONTROL_SET_VOLUME:

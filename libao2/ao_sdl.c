@@ -113,7 +113,7 @@ static void setenv(const char *name, const char *val, int _xx)
 
 
 // to set/get/query special features/parameters
-static int control(int cmd,int arg){
+static int control(int cmd,void *arg){
 	switch (cmd) {
 		case AOCONTROL_GET_VOLUME:
 		{

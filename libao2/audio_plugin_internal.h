@@ -1,5 +1,5 @@
 // prototypes:
-static int control(int cmd,int arg);
+static int control(int cmd, void *arg);
 static int init();
 static void uninit();
 static void reset();
