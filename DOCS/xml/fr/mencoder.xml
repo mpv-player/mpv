@@ -20,9 +20,9 @@ les discussions à propos de tous les aspects et problèmes relatif à l'encodage a
 
 <para>
 le nom vient du fait que cette méthode encode le fichier <emphasis>deux fois</emphasis>.
-Le premier encodage (passe doublée) créé quelques fichiers temporaires (<filename>*.log</filename>)
+Le premier encodage (du mode deux passes) créé quelques fichiers temporaires (<filename>*.log</filename>)
 avec une taille de quelques méga-octets, ne les détruisez pas tout de suite (vous pouvez
-effacer l'AVI). Dans la seconde passe, la fichier de sortie 2-passes est créé, en
+effacer l'AVI). Lors de la seconde passe, la fichier de sortie 2-passes est créé, en
 utilisant les données bitrate des fichiers temporaires. Le fichier résultant aura une
 image de bien meilleur qualité. Si c'est la première fois que vous entendez parler de
 ça, vous devriez consulter les guides disponibles sur le Net.
@@ -64,7 +64,7 @@ de <systemitem class="library">libavcodec</systemitem>, car les lecteurs - excep
 
 <para>
 Cette fonction n'est pas vraiment utile actuellement, car elle a probablement de
-nombreux bogues, mais plus important encore parce qu'actuellement <application>MEncoder</application> ne peut pas
+nombreux bogues, mais, plus important encore, parce qu'actuellement <application>MEncoder</application> ne peut pas
 encoder l'audio MPEG-1 layer 2 (MP2), qui est attendu par tous les autres lecteurs dans
 les fichiers MPEG.
 </para>
@@ -91,8 +91,8 @@ mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>a
 Souvent le besoin de redimensionner les images d'un film se fait sentir. Les raisons
 peuvent être multiples: diminuer la taille du fichier, la bande passante du réseau, etc.
 La plupart des gens redimensionnement même en convertissant des DVDs ou SVCDs en AVI
-DivX. Si vous désirez redimmensionner, lisez la
-section <link linkend="aspect">Préserver l'aspect ratio</link>.
+DivX. Si vous désirez redimensionner, lisez la
+section <link linkend="aspect">Préserver le ratio d'aspect</link>.
 </para>
 
 <para>
@@ -402,34 +402,34 @@ mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replace
 </sect1>
 
 <sect1 id="aspect">
-<title>Préserver l'aspect ratio</title>
+<title>Préserver le ratio d'aspect</title>
 <para>
-Les fichiers des DVDs et des SVCDs (c-a-d MPEG1/2) contiennent une valeur d'aspect
-ratio, qui décrit comment le lecteur devrait dimensionner le flux vidéo, pour que les
-humains n'aient pas des "têtes d'oeuf" (ex. 480x480 + 4:3 = 640x480). De toute façon,
+Les fichiers des DVDs et des SVCDs (c-a-d MPEG1/2) contiennent une valeur de ratio
+d'aspect, qui décrit comment le lecteur devrait dimensionner le flux vidéo, pour que les
+personnages n'aient pas des "têtes d'oeuf" (ex. 480x480 + 4:3 = 640x480). De toute façon,
 quand vous encodez un fichier AVI (DivX), vous devez être conscients que les entêtes
-AVI ne stockent pas cette valeur. Redimensionner le film est dégoutant et coûteux en
+AVI ne stockent pas cette valeur. Redimensionner le film est assez infâme et coûteux en
 temps, il doit y avoir une meilleur solution !
 </para>
 
 <para>Il y en a une.</para>
 
 <para>
-MPEG-4 a une fonction unique: le flux vidéo peut contenir l'aspect ratio requis. Oui,
+MPEG-4 a une fonction spécifique: le flux vidéo peut contenir le ratio d'aspect requis. Oui,
 tout comme les fichiers MPEG-1/2 (DVD, SVCD) et H.263. Malheureusement, il n'y a
-<emphasis role="bold">aucun</emphasis> lecteur vidéo qui supportent cet
+<emphasis role="bold">aucun</emphasis> lecteur vidéo qui supporte cet
 attribut. Excepté <application>MPlayer</application>.
 </para>
 
 <para>
 Cette fonction ne peut être utilisé qu'avec le codec <systemitem>mpeg4</systemitem> de
-<emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>. Gardez à l'esprit: bien que
-<application>MPlayer</application> lise correctement le fichier créé, les autres lecteurs
-utiliseront un mauvais aspect ratio.
+<emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>.
+Gardez bien à l'esprit que même si <application>MPlayer</application> lit correctement
+le fichier créé, les autres lecteurs utiliseront un mauvais ratio d'aspect.
 </para>
 
 <para>
-Vous devriez sérieusement couper les bandes noires au dessus et en dessous de l'image.
+Vous devriez vraiment couper les bandes noires au dessus et en dessous de l'image.
 Voir la page de man pour l'utilisation des filtres <systemitem>cropdetect</systemitem>
 et <systemitem>crop</systemitem>.
 </para>
@@ -444,15 +444,15 @@ crop=714:548:0:14 -oac copy -o <replaceable>sortie.avi</replaceable></screen>
 <sect1 id="custommatrices"><title>Inter/intra matrices personnalisées</title>
 
 <para>
-Avec cette fonction de <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> vous pouvez
-initialiser des matrices personnalisées inter (I-frames/trames-clé) et intra
-(P-frames/trames prévues). Elle est supportée par de nombreux codecs:
+Avec cette fonction de <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+vous pouvez utiliser des matrices personnalisées inter (trames-I/trames-clé) et intra
+(trames-P/trames prévues). Elle est supportée par de nombreux codecs:
 <systemitem>mpeg1video</systemitem> et <systemitem>mpeg2video</systemitem>
 fonctionnent.
 </para>
 
 <para>
-Une utilisation typique de cette fonction est d'initialiser les matrices
+Une utilisation typique de cette fonction est d'utiliser les matrices
 recommandées par les spécifications <ulink url="http://www.kvcd.net/">KVCD</ulink>.
 </para>
 
@@ -517,33 +517,33 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  Cette question est peut être au moins mal posée. Après tout, si vous ne vous
-  souciez pas de la taille de fichier, pourquoi ne pas simplement copier le
+  Cette question est peut être un peu mal posée. Après tout, si vous ne vous
+  souciez pas de la taille du fichier, pourquoi ne pas simplement copier le
   flux MPEG-2 du DVD entier ? Bien sûr, votre AVI finira par faire 5Go, mais
-  si vous voulez la meilleur qualité et ne vous souciez pas de la taille,
-  cette certainement la meilleur option.
+  si vous voulez la meilleure qualité et ne vous souciez pas de la taille,
+  ceci est probablement votre meilleure option.
 </para>
 
 <para>
   En fait, la raison pour laquelle vous voulez convertir un DVD en MPEG-4
   est que vous tenez <emphasis role="bold">réellement</emphasis> compte
-  de la taille de fichier.
+  de la taille du fichier.
 </para>
 
 <para>
   Il est difficile de proposer une recette sur la façon de créer des rips DVD
   de très haute qualité. Il y a de nombreux facteurs à prendre en compte, et vous
-  devriez comprendre ces détails ou vous serez décus par les résultats. Ci-dessous
+  devriez comprendre ces détails, ou vous serez déçus par les résultats. Ci-dessous
   nous allons examiner quelques-uns de ces problèmes, et voir un exemple. Nous
   supposerons que vous utilisez 
   <systemitem class="library">libavcodec</systemitem> pour encoder la vidéo, bien
-  que cette théorie s'applique également à d'autres codecs.
+  que cette exemple théorique s'applique également à d'autres codecs.
 </para>
 
 <para>
-  La supposition principale de ce guide est que vous n'avez pas de contraintes
-  de taille particulières et que perdre des octets en échange d'une meilleur qualité
-  ne vous dérange pas. Bien que la plupart des informations présentées ici soit 
+  L'hypothèse principale de ce guide est que vous n'avez pas de contraintes
+  de taille particulières et que perdre des octets en échange d'une meilleure qualitée
+  ne vous dérange pas. Bien que la plupart des informations présentées ici soient 
   utile dans la plupart des cas, une partie peut vous poser problème si vous
   prévoyez une certaine taille, pour faire tenir une vidéo sur un CD par exemple.
 </para>
