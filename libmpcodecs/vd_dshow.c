@@ -39,7 +39,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	va_start(ap, arg);
 	value=va_arg(ap, int);
 	va_end(ap);
-	if(DS_VideoDecoder_SetValue(sh->context,arg,value)==0)
+	if(DS_VideoDecoder_SetValue(sh->context,arg,50+value/2)==0)
 	    return CONTROL_OK;
 	return CONTROL_FALSE;
     }
