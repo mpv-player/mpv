@@ -1,0 +1,1 @@
+?package(mplayer):command=/usr/bin/mplayer section="Apps/Viewers" needs=text title=mplayer
