@@ -1172,7 +1172,7 @@ signal(SIGTERM,exit_sighandler); // kill
 timer_start=GetTimerMS();
 } // if (!curfile) // if this was the first file.
 else if (sh_audio) {
-	int out_format, out_bps, out_minsize, out_maxsize;
+	int out_format = 0, out_minsize = 0, out_maxsize = 0;
 	int do_init_filters = 1;
 	switch(mux_a->codec){
 		case ACODEC_COPY:
@@ -1209,7 +1209,6 @@ else if (sh_audio) {
 		case ACODEC_PCM:
 			mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_CBRPCMAudioSelected);
 			out_format = (mux_a->wf->wBitsPerSample==8) ? AF_FORMAT_U8 : AF_FORMAT_S16_LE;
-			out_bps = mux_a->wf->wBitsPerSample/8;
 			out_minsize = 16384;
 			out_maxsize = mux_a->wf->nAvgBytesPerSec;
 			break;
@@ -1217,7 +1216,6 @@ else if (sh_audio) {
 		case ACODEC_VBRMP3:
 			mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_MP3AudioSelected);
 			out_format = AF_FORMAT_S16_NE;
-			out_bps = 2;
 			out_minsize = 4608;
 			out_maxsize = mux_a->h.dwRate*mux_a->wf->nChannels*2;
 			break;
@@ -1225,7 +1223,6 @@ else if (sh_audio) {
 #ifdef USE_LIBAVCODEC
 		case ACODEC_LAVC:
 			out_format = AF_FORMAT_S16_NE;
-			out_bps = 2;
 			out_minsize = mux_a->h.dwSuggestedBufferSize;
 			out_maxsize = mux_a->h.dwSuggestedBufferSize*2;
 			mp_msg(MSGT_MENCODER, MSGL_V, "FRAME_SIZE: %d, BUFFER_SIZE: %d, TAG: 0x%x\n",
@@ -1235,7 +1232,6 @@ else if (sh_audio) {
 #ifdef HAVE_TOOLAME
 		case ACODEC_TOOLAME:
 			out_format = AF_FORMAT_S16_NE;
-			out_bps = 2;
 			out_minsize = mux_a->h.dwSuggestedBufferSize;
 			out_maxsize = mux_a->h.dwSuggestedBufferSize*2;
 			break;
@@ -1247,9 +1243,9 @@ else if (sh_audio) {
 	    sh_audio->sample_format,
 	    mux_a->wf->nSamplesPerSec,
 	    mux_a->wf->nChannels,
-	    AF_FORMAT_S16_NE,
-	    4608,
-	    mux_a->h.dwRate*mux_a->wf->nChannels*2))
+	    out_format,
+	    out_minsize,
+	    out_maxsize))
 	{
 		mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_NoMatchingFilter);
 		exit(1);
