@@ -298,7 +298,7 @@ VCDs. It works like this (adjust for the drive letter of your CD-ROM):
 <para>
 DVDs also work, just set the DVD device correctly to whatever your CD-ROM
 device is:
-<screen>mplayer -dvd &lt;title&gt; -dvd-device '\\.\d:'</screen>
+<screen>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</screen>
 </para>
 
 <para>

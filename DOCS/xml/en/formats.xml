@@ -48,8 +48,8 @@ MPEG files come in different guises:
   DAT: This is the very same format as MPG with a different extension. It
   is used on <emphasis role="bold">Video CDs</emphasis>. Due to the way VCDs
   are created and Linux is designed, the DAT files cannot be played nor copied
-  from VCDs as regular files. You have to use the <option>-vcd</option> option
-  to play the Video CD.
+  from VCDs as regular files. You have to use <option>vcd://</option>
+  to play a Video CD.
   </simpara></listitem>
 <listitem><simpara>
   VOB: This is the MPEG file format on <emphasis role="bold">DVDs</emphasis>.

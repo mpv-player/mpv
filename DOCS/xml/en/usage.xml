@@ -51,7 +51,7 @@ Playing more files:
 Playing VCD:
 <synopsis>
 <command>mplayer</command> [<replaceable>options</replaceable>]<!--
---> -vcd <replaceable>trackno</replaceable><!--
+--> vcd://<replaceable>trackno</replaceable><!--
 --> [-cdrom-device <replaceable>/dev/cdrom</replaceable>]
 </synopsis>
 </para>
@@ -60,7 +60,7 @@ Playing VCD:
 Playing DVD:
 <synopsis>
 <command>mplayer</command> [<replaceable>options</replaceable>]<!--
---> -dvd <replaceable>titleno</replaceable><!--
+--> dvd://<replaceable>titleno</replaceable><!--
 --> [-dvd-device <replaceable>/dev/dvd</replaceable>]
 </synopsis>
 </para>
@@ -94,9 +94,9 @@ or
 Examples:
 <screen>
 mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-mplayer -vcd 2
+mplayer vcd://2 -cd-rom-device /dev/hdc
 mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-mplayer -dvd 1 -dvd-device /dev/hdc
+mplayer dvd://1 -dvd-device /dev/hdc
 mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi<!--
 --></screen>
 </para>
