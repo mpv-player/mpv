@@ -146,6 +146,9 @@ static int init(sh_video_t *sh){
 #if LIBAVCODEC_BUILD > 4615
     if(lavc_codec->capabilities&CODEC_CAP_DR1)
 	ctx->do_dr1=1;
+    //XXX:FIXME:HACK:UGLY 422P with direct rendering is buggy cuz of that chroma stride trick ...
+    if(sh->format == mmioFOURCC('H','F','Y','U'))
+        ctx->do_dr1=0;
 #endif
 
 #if LIBAVCODEC_BUILD >= 4624
