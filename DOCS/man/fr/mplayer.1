@@ -1,4 +1,4 @@
-.\" synced with 1.923
+.\" synced with 1.925
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "28 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "12 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -291,6 +291,8 @@ Réduit/\:augmente le volume.
 Réduit/\:augmente le volume.
 .IPs m\ \ \ \ 
 Coupe le son (mute).
+.IPs "#" (MPEG uniquement)
+Alterne entre les pistes audio disponible.
 .IPs f\ \ \ \ 
 Bascule en plein-écran.
 .IPs T\ \ \ \ 
@@ -455,6 +457,20 @@ Avec cette option, la ligne d'état (c-a-d A:   0.7 V:   0.6 A-V:  0.068 ...) ne
 sera pas affichée.
 Cela est particulièrement utile sur les terminaux lents ou endommagés qui ne
 gèrent pas les retours chariot (c-a-d \\r).
+.
+.TP
+.B \-priority <prio> (Windows uniquement)
+Défini le niveau de priorité de MPlayer suivant les priorités prédéfinies
+de Windows
+.sp 1
+Valeurs possibles de <prio>\ :
+.RSs
+idle|belownormal|normal|abovenormal|high|realtime
+.sp 1
+.I Attention\ :
+.br
+L'utilisation de la priorité realtime (temps-réel) peut figer le système.
+.RE
 .
 .TP
 .B \-v, \-verbose
