@@ -129,24 +129,28 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	if (!strcmp(opt, "Title"))
 	{
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Title: %s\n", param);
+	    demux_info_add(demux, "name", param);
 	    priv->title = malloc(strlen(param));
 	    strcpy(priv->title, param);
 	}
 	if (!strcmp(opt, "Author"))
 	{
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Author: %s\n", param);
+	    demux_info_add(demux, "author", param);
 	    priv->author = malloc(strlen(param));
 	    strcpy(priv->author, param);
 	}
 	if (!strcmp(opt, "Copyright"))
 	{
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", param);
+	    demux_info_add(demux, "copyright", param);
 	    priv->copyright = malloc(strlen(param));
 	    strcpy(priv->copyright, param);
 	}
 	if (!strcmp(opt, "Producer"))
 	{
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Producer: %s\n", param);
+	    demux_info_add(demux, "software", param);
 	    priv->producer = malloc(strlen(param));
 	    strcpy(priv->producer, param);
 	}
@@ -267,12 +271,12 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
       len=stream_read_char(demux->stream);
       ds=demux->video;
       break;
-  case 0x30:  // audio ?
-      len=0x28;
+  case 0x30:  // audio packet
+      len=40;	/* 40kbps */
       ds=demux->audio;
       break;
   case 0x40:  // audio packet
-      len=24;
+      len=24;	/* 24kbps */
       ds=demux->audio;
       break;
   default:
@@ -522,6 +526,9 @@ if(demuxer->audio->id>=-1){
 {		sh_audio_t* sh=new_sh_audio(demuxer,1);
 
 		sh->format=0x111; // 0x112
+//		if (sh->format == 0x111) /* G.723 */
+//		sh->samplesize = demuxer->audio->buffer_size;
+//		printf("samplesize: %d\n", sh->samplesize);
 		// Emulate WAVEFORMATEX struct:
 		sh->wf=malloc(sizeof(WAVEFORMATEX));
 		memset(sh->wf,0,sizeof(WAVEFORMATEX));
