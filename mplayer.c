@@ -16,6 +16,8 @@
 #include <time.h>
 #include <fcntl.h>
 
+#include <errno.h>
+
 #include "version.h"
 #include "config.h"
 
@@ -577,7 +579,7 @@ int gui_no_filename=0;
 #endif
 
     if(video_driver && strcmp(video_driver,"help")==0){
-      printf("Available video output drivers:\n");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Available video output drivers:\n");
       i=0;
       while (video_out_drivers[i]) {
         const vo_info_t *info = video_out_drivers[i++]->get_info ();
@@ -588,7 +590,7 @@ int gui_no_filename=0;
     }
 
     if(audio_driver && strcmp(audio_driver,"help")==0){
-      printf("Available audio output drivers:\n");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Available audio output drivers:\n");
       i=0;
       while (audio_out_drivers[i]) {
         const ao_info_t *info = audio_out_drivers[i++]->info;
@@ -611,13 +613,13 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 }
 
     if(audio_codec && strcmp(audio_codec,"help")==0){
-      printf("Available audio codecs:\n");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Available audio codecs:\n");
       list_codecs(1);
       printf("\n");
       exit(0);
     }
     if(video_codec && strcmp(video_codec,"help")==0){
-      printf("Available video codecs:\n");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Available video codecs:\n");
       list_codecs(0);
       printf("\n");
       exit(0);
@@ -627,14 +629,14 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     if(!filename && !vcd_track && !dvd_title && !tv_param_on){
       if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
-	printf("%s",help_text);
+	mp_msg(MSGT_CPLAYER, MSGL_INFO, help_text);
 	exit(0);
       } else gui_no_filename=1;
     }
 
     // Many users forget to include command line in bugreports...
     if(verbose){
-      printf("CommandLine:");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, "CommandLine:");
       for(i=1;i<argc;i++)printf(" '%s'",argv[i]);
       printf("\n");
     }
@@ -666,22 +668,22 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(!nortc)
   {
     if ((rtc_fd = open("/dev/rtc", O_RDONLY)) < 0)
-	perror ("Linux RTC init: open");
+	mp_msg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC init error: %s\n", strerror(errno));
     else {
 	unsigned long irqp;
 
 	/* if (ioctl(rtc_fd, RTC_IRQP_SET, _) < 0) { */
 	if (ioctl(rtc_fd, RTC_IRQP_READ, &irqp) < 0) {
-    	    perror ("Linux RTC init: ioctl (rtc_irqp_read)");
+    	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC init error in ioctl (rtc_irqp_read): %s\n", strerror(errno));
     	    close (rtc_fd);
     	    rtc_fd = -1;
 	} else if (ioctl(rtc_fd, RTC_PIE_ON, 0) < 0) {
 	    /* variable only by the root */
-    	    perror ("Linux RTC init: ioctl (rtc_pie_on)");
+    	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC init error in ioctl (rtc_pie_on): %s\n", strerror(errno));
     	    close (rtc_fd);
 	    rtc_fd = -1;
 	} else
-	    printf("Using Linux's hardware RTC timing (%ldHz)\n", irqp);
+	    mp_msg(MSGT_CPLAYER, MSGL_INFO, "Using Linux's hardware RTC timing (%ldHz)\n", irqp);
     }
   }
 #ifdef HAVE_NEW_GUI
@@ -691,7 +693,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #endif
     if(rtc_fd<0)
 #endif
-	printf("Using %s timing\n",softsleep?"software":"usleep()");
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "Using %s timing\n",softsleep?"software":"usleep()");
 
 #ifdef USE_TERMCAP
   if ( !use_gui ) load_termcap(NULL); // load key-codes
@@ -1656,7 +1658,7 @@ if(!dapsync){
 	    	      drop_message=1;
 	    	      mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
 	         }
-		printf ("A-V SYNC: FRAMEDROP (SH_AV_delay=%.3f)!\n", SH_AV_delay);
+		mp_msg(MSGT_AVSYNC,MSGL_INFO,"A-V SYNC: FRAMEDROP (SH_AV_delay=%.3f)!\n", SH_AV_delay);
 	        mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nframe drop %d, %.2f\n", drop_frame, time_frame);
 	        /* go into unlimited-TF cycle */
     		time_frame = SH_AV_delay;
@@ -1675,7 +1677,7 @@ if(!dapsync){
 	        else {
 		    if (SH_AV_delay - time_frame > (frame_time + time_frame_corr_avg) * UNEXP_CORR_WARN ||
 		        SH_AV_delay - time_frame < (frame_time + time_frame_corr_avg) * -UNEXP_CORR_WARN)
-		        printf ("WARNING: A-V SYNC LAG TOO LARGE: %.3f {%.3f - %.3f} (too little UNEXP_CORR_MAX?)\n",
+		        mp_msg(MSGT_AVSYNC, MSGL_WARN, "WARNING: A-V SYNC LAG TOO LARGE: %.3f {%.3f - %.3f} (too little UNEXP_CORR_MAX?)\n",
 		  	    SH_AV_delay - time_frame, SH_AV_delay, time_frame);
 		        time_frame += (frame_time + time_frame_corr_avg) * ((SH_AV_delay > time_frame) ?
 		    		      UNEXP_CORR_MAX : -UNEXP_CORR_MAX);
@@ -1707,7 +1709,7 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
         while (time_frame > 0.000) {
 	    unsigned long long rtc_ts;
 	    if (read (rtc_fd, &rtc_ts, sizeof(rtc_ts)) <= 0)
-		    perror ("read (rtc_fd)");
+		    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC read error: %s\n", strerror(errno));
     	    time_frame-=GetRelativeTime();
 	}
     } else
@@ -1723,7 +1725,7 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
           time_frame-=GetRelativeTime();
         }
 	if(softsleep){
-	    if(time_frame<0) printf("Warning! softsleep underflow!\n");
+	    if(time_frame<0) mp_msg(MSGT_AVSYNC, MSGL_WARN, "Warning! Softsleep underflow!\n");
 	    while(time_frame>0) time_frame-=GetRelativeTime(); // burn the CPU
 	}
     }
@@ -2157,7 +2159,7 @@ if(step_sec>0) {
     case '8':
 	rel_seek_secs=0.99*(float)(c-'1')/7.0;
 	abs_seek_pos=3;
-	printf("ABS seek to %5.3f   \n",rel_seek_secs);
+	printf ("ABS seek to %5.3f   \n",rel_seek_secs);
 	break;
 #else
     /* User wants to have screen shot */
@@ -2532,7 +2534,7 @@ if(step_sec>0) {
       if ( ( use_gui )&&( cmd->id > MP_CMD_GUI_EVENTS ) ) guiGetEvent( guiIEvent,(char *)cmd->id );
        else
 #endif
-      printf("Received unknow cmd %s\n",cmd->name);
+      mp_msg(MSGT_CPLAYER, MSGL_V, "Received unknow cmd %s\n",cmd->name);
     }
     }
     mp_cmd_free(cmd);
