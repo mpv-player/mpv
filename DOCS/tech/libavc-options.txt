@@ -282,18 +282,21 @@ qpel	use quarter pel motion compensation
 precmp	comparission function for motion estimation pre pass
 cmp	comparission function for full pel motion estimation
 subcmp	comparission function for sub pel motion estimation
+mbcmp	comparission function for macroblock decission
 	0 SAD (sum of absolute differences) (default)
         1 SSE (sum of squared errors)
         2 SATD (sum of absolute hadamard transformed differences)
         3 DCT (sum of absolute dct transformed differences)
-        4 PSNR (sum of the squared quantization errors)
+        4 PSNR (sum of the squared quantization errors) (dont use, low quality)
         5 BIT (number of bits needed for the block)
         6 RD (rate distoration optimal, slow)
         7 ZERO (0)
-        +256 (use chroma too, doesnt work with b frames currently)
-        Tip: SAD is fast, SATD is good
-        Tip2: when using SATD for full pel search u should use a larger diamond
-              something like dia=2 or dia=4
+        +256 (use chroma too, doesnt work (correctly) with b frames currently)
+        Tip: SAD is fast, SATD is good, SSE is something in between
+        Tip2: when using SATD/DCT/BIT/RD for full pel search then a 
+              larger diamond something like dia=2 or dia=4 might improve
+              quality, but only for some videos
+        Note: mbcmp is only used if hq mode is disabled
 
 predia	(-99 - 6) diamond type & size for motion estimation pre pass
 dia	(-99 - 6) diamond type & size for motion estimation
