@@ -445,8 +445,9 @@ static int sdl_open (void *plugin, void *name)
 	/* other default values */
 	#ifdef SDL_NOHWSURFACE
 		if(verbose) printf("SDL: using software-surface\n");
-		priv->sdlflags = SDL_SWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT|SDL_ANYFORMAT;
-		priv->sdlfullflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_ANYFORMAT;
+		priv->sdlflags = SDL_SWSURFACE|SDL_RESIZABLE|SDL_ANYFORMAT;
+		priv->sdlfullflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_ANYFORMAT;
+		// XXX:FIXME: ASYNCBLIT should be enabled for SMP systems
 	#else	
 		/*if((strcmp(priv->driver, "dga") == 0) && (priv->mode)) {
 			if(verbose) printf("SDL: using software-surface\n");
@@ -455,8 +456,9 @@ static int sdl_open (void *plugin, void *name)
 		}	
 		else {	*/
 			if(verbose) printf("SDL: using hardware-surface\n");
-			priv->sdlflags = SDL_HWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT/*|SDL_ANYFORMAT*/;
-			priv->sdlfullflags = SDL_HWSURFACE|SDL_FULLSCREEN|SDL_ASYNCBLIT/*|SDL_ANYFORMAT*/;
+			priv->sdlflags = SDL_HWSURFACE|SDL_RESIZABLE/*|SDL_ANYFORMAT*/;
+			priv->sdlfullflags = SDL_HWSURFACE|SDL_FULLSCREEN/*|SDL_ANYFORMAT*/;
+			// XXX:FIXME: ASYNCBLIT should be enabled for SMP systems
 		//}	
 	#endif	
 
