@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.157 (2005. 01. 31.)
+// Sync'ed with help_mp-en.h 1.158 (2005. 02. 15.)
 
 // ========================= MPlayer help ===========================
 
@@ -734,6 +734,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DoNotPlaySound "Hang nélkül"
 #define MSGTR_PREFERENCES_NormalizeSound "Hang normalizálása"
 #define MSGTR_PREFERENCES_EnEqualizer "Audio equalizer"
+#define MSGTR_PREFERENCES_SoftwareMixer "Szoftveres keverés"
 #define MSGTR_PREFERENCES_ExtraStereo "Extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Együttható:"
 #define MSGTR_PREFERENCES_AudioDelay "Hang késleltetés"
