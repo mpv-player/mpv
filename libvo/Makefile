@@ -8,6 +8,9 @@ OBJS=$(SRCS:.c=.o)
 
 ifeq ($(TARGET_ARCH_X86),yes)
 SRCS += rgb15to16mmx.c yuv2rgb_mmx.c
+ifeq ($(TARGET_OS),Linux)
+SRCS += vo_vesa.c ../linux/lrmi.c ../linux/vbelib.c
+endif
 endif
 
 CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(MLIB_INC) -DMPG12PLAY #-Wall

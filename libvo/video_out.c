@@ -70,7 +70,9 @@ extern vo_functions_t video_out_png;
 extern vo_functions_t video_out_ggi;
 extern vo_functions_t video_out_aa;
 extern vo_functions_t video_out_mpegpes;
-
+#ifdef TARGET_LINUX
+extern vo_functions_t video_out_vesa;
+#endif
 vo_functions_t* video_out_drivers[] =
 {
 #ifdef HAVE_XMGA
@@ -126,6 +128,9 @@ vo_functions_t* video_out_drivers[] =
         &video_out_pgm,
         &video_out_md5,
 	&video_out_mpegpes,
+#if defined( ARCH_X86 ) && defined( TARGET_LINUX )
+	&video_out_vesa,
+#endif
         NULL
 };
 
