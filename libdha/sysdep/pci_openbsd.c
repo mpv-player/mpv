@@ -4,6 +4,8 @@
    Modified for readability by Nick Kurshev
 */
 
+#ifdef __i386__
+
 #include <errno.h>
 #include <sys/types.h>
 #include <machine/sysarch.h>
@@ -22,3 +24,4 @@ static __inline__ int disable_os_io(void)
  /* Nothing to do */
     return(0);
 }
+#endif
