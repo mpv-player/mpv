@@ -28,8 +28,6 @@
 #include "../pixmaps/skin.xpm"
 #include "../pixmaps/sound.xpm"
 #include "../pixmaps/open.xpm"
-#include "../pixmaps/dvd.xpm"
-#include "../pixmaps/vcd.xpm"
 #include "../pixmaps/play.xpm"
 #include "../pixmaps/stop2.xpm"
 #include "../pixmaps/pause.xpm"
@@ -40,20 +38,26 @@
 #include "../pixmaps/a169.xpm"
 #include "../pixmaps/a235.xpm"
 #include "../pixmaps/a43.xpm"
-#include "../pixmaps/playdvd.xpm"
-#include "../pixmaps/playvcd.xpm"
 #include "../pixmaps/file2.xpm"
 #include "../pixmaps/url.xpm"
 #include "../pixmaps/sub.xpm"
 #include "../pixmaps/delsub.xpm"
 #include "../pixmaps/empty.xpm"
-#include "../pixmaps/empty1px.xpm"
-#include "../pixmaps/tongue.xpm"
-#include "../pixmaps/tonguebla.xpm"
-#include "../pixmaps/dolby.xpm"
 #include "../pixmaps/loadeaf.xpm"
 #include "../pixmaps/title.xpm"
+#ifdef USE_DVDREAD
+#include "../pixmaps/dvd.xpm"
+#include "../pixmaps/playdvd.xpm"
 #include "../pixmaps/chapter.xpm"
+#include "../pixmaps/dolby.xpm"
+#include "../pixmaps/tongue.xpm"
+#include "../pixmaps/tonguebla.xpm"
+#include "../pixmaps/empty1px.xpm"
+#endif
+#ifdef HAVE_VCD
+#include "../pixmaps/vcd.xpm"
+#include "../pixmaps/playvcd.xpm"
+#endif
 
 extern mixer_t mixer; // mixer from mplayer.c
 
@@ -357,10 +361,12 @@ static Languages_t Languages[] =
          };
 #undef lng
 
+#ifdef USE_DVDREAD
 static char * ChannelTypes[] =
 	{ "Dolby Digital","","Mpeg1","Mpeg2","PCM","","Digital Theatre System" };
 static char * ChannelNumbers[] =
 	{ "","Stereo","","","","5.1" };
+#endif
 
 char * GetLanguage( int language )
 {
