@@ -340,10 +340,10 @@ void decode_fli_frame(
 
   if (update_whole_frame)
   {
-    pixel_ptr = 0;
+    pixel_ptr = ghost_pixel_ptr = 0;
     while (pixel_ptr < (width * height * bytes_per_pixel))
     {
-      palette_ptr1 = fli_ghost_image[pixel_ptr/bytes_per_pixel];
+      palette_ptr1 = fli_ghost_image[ghost_pixel_ptr++];
       decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
       decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
       decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
