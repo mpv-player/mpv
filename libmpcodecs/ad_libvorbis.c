@@ -148,6 +148,7 @@ static int init(sh_audio_t *sh)
   // Setup the decoder
   sh->channels=ov->vi.channels; 
   sh->samplerate=ov->vi.rate;
+  sh->samplesize=2;
   // assume 128kbit if bitrate not specified in the header
   sh->i_bps=((ov->vi.bitrate_nominal>0) ? ov->vi.bitrate_nominal : 128000)/8;
   sh->context = ov;
