@@ -1,42 +1,47 @@
-/* Copyright (C) Mark Zealey, 2002, <mark@zealos.org>
+/* Comment this line out so you can watch a move and work on the console at the
+ * same time */
+#define BLANK_SCREEN
+
+/* Copyright (C) Mark Zealey, 2002, <mark@zealos.org>. Released under the terms
+ * and conditions of the GPL.
  *
  * 30/03/02: An almost total rewrite, added DR support and support for modes
  * other than 16bpp. Fixed the crash when playing multiple files
  * 07/04/02: Fixed DR support, added YUY2 support, fixed OSD stuff.
  * 08/04/02: Fixed a wierd sound corruption problem caused by some optomizations
  * I made.
+ * 09/04/02: Fixed a problem with changing the variables passed to draw_slice().
+ * Fixed DR support for YV12 et al. Added BGR support. Removed lots of dud code.
+ * 10/04/02: Changed the memcpy functions to mem2agpcpy.. should be a tad
+ * faster.
+ * 11/04/02: Added a compile option so you can watch the film with the console
+ * as the background, or not.
  *
- * TODO:
- * - Add DR support (for stuff other than YUY2)
- * - Add UYVY support
- * - Add zoom support
- * - Remove some of the old dud code
+ * Hints and tricks:
+ * - Use -dr to get direct rendering
+ * - Use -vop yuy2 to get yuy2 rendering, *MUCH* faster than yv12
  */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <errno.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <linux/fb.h>
 
 #include "config.h"
+#include "fastmemcpy.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "mp_image.h"
+#include "drivers/3dfx.h"
 
 LIBVO_EXTERN(tdfxfb)
 
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-
-#include <linux/fb.h>
-
-#include "drivers/3dfx.h"
-
 static vo_info_t vo_info =
 {
-	"tdfxfb (/dev/fb?)",
+	"3Dfx Banshee/Voodoo3/Voodoo5",
 	"tdfxfb",
 	"Mark Zealey <mark@zealos.org>"
 	""
@@ -55,69 +60,51 @@ struct YUV_plane {
   char V[0x0100000];
 };
 
-/* XXX: Get rid of most of these vars... */
 extern int verbose;
 
 static int fd;
 static struct fb_fix_screeninfo fb_finfo;
 static struct fb_var_screeninfo fb_vinfo;
-
-static uint32_t in_width, in_height, in_format, in_depth, in_banshee_format,
+static uint32_t in_width, in_height, in_format, in_depth, in_voodoo_format,
 	screenwidth, screenheight, screendepth, vidwidth, vidheight, vidx, vidy,
-	vid_banshee_format, *vidpage, *inpage, vidpageoffset,
-	inpageoffset, *memBase0, *memBase1;
-
+	vid_voodoo_format, *vidpage, *inpage, vidpageoffset,
+	inpageoffset, *memBase0, *memBase1, fs;
 static volatile voodoo_io_reg *reg_IO;
 static voodoo_2d_reg *reg_2d;
 static voodoo_yuv_reg *reg_YUV;
 static struct YUV_plane *YUV;
+static void (*alpha_func)();
 
 static uint32_t preinit(const char *arg)
 {
 	char *name;
 
-	if(verbose) printf("tdfxfb: Open\n");
-
 	if(!(name = getenv("FRAMEBUFFER")))
 		name = "/dev/fb0";
 
-	if (verbose)
-		printf("tdfxfb: Opening %s\n", name);
-
-	if ((fd = open(name, O_RDWR)) == -1) {
+	if((fd = open(name, O_RDWR)) == -1) {
 		printf("tdfxfb: can't open %s: %s\n", name, strerror(errno));
 		return -1;
 	}
 
-	if (ioctl(fd, FBIOGET_FSCREENINFO, &fb_finfo)) {
+	if(ioctl(fd, FBIOGET_FSCREENINFO, &fb_finfo)) {
 		printf("tdfxfb: problem with FBITGET_FSCREENINFO ioctl: %s\n",
 				strerror(errno));
 		return -1;
 	}
 
-	if (ioctl(fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
+	if(ioctl(fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
 		printf("tdfxfb: problem with FBITGET_VSCREENINFO ioctl: %s\n",
 				strerror(errno));
 		return -1;
 	}
 
-	if (verbose) {
-		printf("fb_finfo:\n");
-		printf("  id: %s\n", fb_finfo.id);
-		printf("  frame bufer at %x len %x (%d)\n", fb_finfo.smem_start,
-				fb_finfo.smem_len, fb_finfo.smem_len);
-		printf("  mem io      at %x len %x\n", fb_finfo.mmio_start,
-				fb_finfo.mmio_len);
-
-		printf("fb_vinfo:\n");
-		printf("  resolution:  %dx%d\n", fb_vinfo.xres, fb_vinfo.yres);
-		printf("  virtual res: %dx%d\n", fb_vinfo.xres_virtual,
-				fb_vinfo.yres_virtual);
-		printf("  virt offset: %dx%d\n", fb_vinfo.xoffset, fb_vinfo.yoffset);
+	/* BANSHEE means any of the series aparently */
+	if (fb_finfo.accel != FB_ACCEL_3DFX_BANSHEE) {
+		printf("tdfxfb: This driver is only supports the 3Dfx Banshee,"
+				" Voodoo3 and Voodoo 5\n");
+		return -1;
 	}
-
-	if (fb_finfo.accel != FB_ACCEL_3DFX_BANSHEE)
-		printf("tdfxfb: This driver is only known to support the banshee!\n");
 
 	/* Open up a window to the hardware */
 	memBase1 = mmap(0, fb_finfo.smem_len, PROT_READ | PROT_WRITE,
@@ -131,8 +118,8 @@ static uint32_t preinit(const char *arg)
 	}
 
 	/* Set up global pointers to the voodoo's regs */
-	reg_IO  = (void *)memBase0 + VOODOO_IO_REG_OFFSET;
-	reg_2d  = (void *)memBase0 + VOODOO_2D_REG_OFFSET;
+	reg_IO = (void *)memBase0 + VOODOO_IO_REG_OFFSET;
+	reg_2d = (void *)memBase0 + VOODOO_2D_REG_OFFSET;
 	reg_YUV = (void *)memBase0 + VOODOO_YUV_REG_OFFSET;
 	YUV = (void *)memBase0 + VOODOO_YUV_PLANE_OFFSET;
 
@@ -141,8 +128,6 @@ static uint32_t preinit(const char *arg)
 
 static void uninit(void)
 {
-	if(verbose) printf("tdfxfb: Close\n");
-
 	if(reg_IO) {
 		/* Restore the screen (Linux lives at 0) */
 		reg_IO->vidDesktopStartAddr = 0;
@@ -166,82 +151,30 @@ static void uninit(void)
 	}
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height,
-		uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
+static void clear_screen()
 {
-	if(verbose) printf("tdfxfb: Config\n");
+#ifdef BLANK_SCREEN
+	memset(vidpage, 0, screenwidth * screenheight * screendepth);
+#endif /* BLANK_SCREEN */
+}
 
-	screenwidth = fb_vinfo.xres;
-	screenheight = fb_vinfo.yres;
+/* Setup output screen dimensions etc */
+static uint32_t setup_screen(uint32_t full)
+{
+	double ratio = (double)in_width / in_height;
 
-	in_width = width;
-	in_height = height;
-	in_format = format;
-
-	/* Setup the screen for rendering to */
-	switch(fb_vinfo.bits_per_pixel) {
-	case 16:
-		screendepth = 2;
-		vid_banshee_format = VOODOO_BLT_FORMAT_16;
-		break;
-
-	case 24:
-		screendepth = 3;
-		vid_banshee_format = VOODOO_BLT_FORMAT_24;
-		break;
-
-	case 32:
-		screendepth = 4;
-		vid_banshee_format = VOODOO_BLT_FORMAT_32;
-		break;
-
-	default:
-		printf("tdfxfb: %d bpp output is not supported\n", fb_vinfo.bits_per_pixel);
-		return -1;
-	}
-
-	vid_banshee_format |= screenwidth * screendepth;
-
-	in_banshee_format = VOODOO_BLT_FORMAT_YUYV;
-	/* Arpi says we don't need to support RGB */
-	switch(in_format) {
-	case IMGFMT_YV12:
-	case IMGFMT_I420:
-	case IMGFMT_IYUV:
-		in_depth = 4;
-		break;
-
-	case IMGFMT_YUY2:
-		in_depth = 2;
-		break;
-
-	default:
-		printf("tdfxfb: Eik! Something's wrong with control().\n");
-		return -1;
-	}
-
-	in_banshee_format |= in_width * in_depth;
-
-	if (fullscreen) {
-		double exrat;
-
+	if(full) {				/* Full screen */
 		vidwidth = screenwidth;
 		vidheight = screenheight;
 
-		exrat = (double)in_width / in_height;
-
-		if(screenwidth / exrat <= screenheight)
-			vidheight = (double)screenwidth / exrat;
+		if(screenwidth / ratio <= screenheight)
+			vidheight = (double)screenwidth / ratio;
 		else
-			vidwidth = (double)screenheight * exrat;
+			vidwidth = (double)screenheight * ratio;
 
 		vidx = (screenwidth - vidwidth) / 2;
 		vidy = (screenheight - vidheight) / 2;
-
-		if(verbose)
-			printf("vidwidth = %d, vidheight = %d, vidx = %d, vidy = %d\n",
-					vidwidth, vidheight, vidx, vidy);
-	} else {
+	} else {					/* Reset to normal size */
 		if (in_width > screenwidth || in_height > screenheight) {
 			printf("tdfxfb: your resolution is too small to play the movie...\n");
 			return -1;
@@ -253,8 +186,89 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		vidy = 0;
 	}
 
+	clear_screen();
+
+	fs = full;
+
+	return 0;
+}
+
+static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height,
+		uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
+{
+	screenwidth = fb_vinfo.xres;
+	screenheight = fb_vinfo.yres;
+
+	in_width = width;
+	in_height = height;
+	in_format = format;
+
+	/* Setup the screen for rendering to */
+	switch(fb_vinfo.bits_per_pixel) {
+	case 16:
+		screendepth = 2;
+		vid_voodoo_format = VOODOO_BLT_FORMAT_16;
+		break;
+
+	case 24:
+		screendepth = 3;
+		vid_voodoo_format = VOODOO_BLT_FORMAT_24;
+		break;
+
+	case 32:
+		screendepth = 4;
+		vid_voodoo_format = VOODOO_BLT_FORMAT_32;
+		break;
+
+	default:
+		printf("tdfxfb: %d bpp output is not supported\n", fb_vinfo.bits_per_pixel);
+		return -1;
+	}
+
+	vid_voodoo_format |= screenwidth * screendepth;
+
+	/* Some defaults here */
+	in_voodoo_format = VOODOO_BLT_FORMAT_YUYV;
+	alpha_func = vo_draw_alpha_yuy2;
+	in_depth = 2;
+
+	switch(in_format) {
+	case IMGFMT_YV12:
+	case IMGFMT_I420:
+	case IMGFMT_IYUV:
+	case IMGFMT_YUY2:
+		break;
+
+	case IMGFMT_BGR16:
+		in_voodoo_format = VOODOO_BLT_FORMAT_16;
+		alpha_func = vo_draw_alpha_rgb16;
+		break;
+
+	case IMGFMT_BGR24:
+		in_depth = 3;
+		in_voodoo_format = VOODOO_BLT_FORMAT_24;
+		alpha_func = vo_draw_alpha_rgb24;
+		break;
+
+	case IMGFMT_BGR32:
+		in_depth = 4;
+		in_voodoo_format = VOODOO_BLT_FORMAT_32;
+		alpha_func = vo_draw_alpha_rgb32;
+		break;
+
+	default:
+		printf("tdfxfb: Eik! Something's wrong with control().\n");
+		return -1;
+	}
+
+	in_voodoo_format |= in_width * in_depth;
+
 	/* Linux lives in the first frame */
+#ifdef BLANK_SCREEN
 	vidpageoffset = screenwidth * screenheight * screendepth;
+#else /* BLANK_SCREEN */
+	vidpageoffset = 0;
+#endif /* BLANK_SCREEN */
 	inpageoffset = vidpageoffset + screenwidth * screenheight * screendepth;
 
 	if(inpageoffset + in_width * in_depth * in_height > fb_finfo.smem_len) {
@@ -265,7 +279,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	vidpage = (void *)memBase1 + (unsigned long)vidpageoffset;
 	inpage = (void *)memBase1 + (unsigned long)inpageoffset;
 
-	memset(vidpage, 0, screenwidth * screenheight * screendepth);
+	if(setup_screen(fullscreen) == -1)
+		return -1;
+
 	memset(inpage, 0, in_width * in_height * in_depth);
 
 	printf("tdfxfb: screen is %dx%d at %d bpp, in is %dx%d at %d bpp (%p/%p)\n",
@@ -274,11 +290,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			memBase0, memBase1);
 
 	return 0;
-}
-
-static const vo_info_t* get_info(void)
-{
-	return &vo_info;
 }
 
 /* Render onto the screen */
@@ -293,12 +304,12 @@ static void flip_page(void)
 
 	reg_2d->srcBaseAddr = inpageoffset;
 	reg_2d->srcXY = 0;
-	reg_2d->srcFormat = in_banshee_format;
+	reg_2d->srcFormat = in_voodoo_format;
 	reg_2d->srcSize = XYREG(in_width, in_height);
 
 	reg_2d->dstBaseAddr = vidpageoffset;
 	reg_2d->dstXY = XYREG(vidx, vidy);
-	reg_2d->dstFormat = vid_banshee_format;
+	reg_2d->dstFormat = vid_voodoo_format;
 	reg_2d->dstSize = XYREG(vidwidth, vidheight);
 	reg_2d->command = S2S_STRECH_BLT | S2S_IMMED | S2S_ROP;
 
@@ -313,8 +324,7 @@ static void flip_page(void)
 		if(!(reg_IO->status & STATUS_BUSY))
 			i++;
 
-	/* Reset the banshee to point at the video page if it got knocked off it
-	 */
+	/* Reset the card to point at the video page if it got knocked off it */
 	reg_IO->vidDesktopStartAddr = vidpageoffset;
 
 	/* Restore the old regs now */
@@ -337,42 +347,23 @@ static void flip_page(void)
 
 static uint32_t draw_frame(uint8_t *src[])
 {
-	switch(in_format) {
-	case IMGFMT_YUY2:
-		memcpy(inpage, src[0], in_width * in_depth * in_height);
-		break;
-	}
+	mem2agpcpy(inpage, src[0], in_width * in_depth * in_height);
 
 	return 0;
 }
 
 static uint32_t draw_slice(uint8_t *i[], int s[], int w, int h, int x, int y)
 {
-	switch(in_format) {
-	case IMGFMT_YV12:		/* The normal case */
-	case IMGFMT_I420:
-	case IMGFMT_IYUV: {
-		int j;
-		char *base;
+	/* We want to render to the YUV to the input page + the location
+	 * of the stripes we're doing */
+	reg_YUV->yuvBaseAddr = inpageoffset + in_width * in_depth * y + x;
+	reg_YUV->yuvStride = in_width * in_depth;
 
-		/* We want to render to the YUV to the input page + the location
-		 * of the stripes we're doing */
-		reg_YUV->yuvBaseAddr = inpageoffset + in_width * in_depth * y + x;
-		reg_YUV->yuvStride = in_width * in_depth;
-
-		/* Put the YUV channels into the banshees internal combiner unit
-		 * thingie */
-		for(base = YUV->Y, j = 0; j < h; j++, base += YUV_STRIDE, i[0] += s[0])
-			memcpy(base, i[0], s[0]);
-		for(base = YUV->U, j = 0; j < h / 2; j++, base += YUV_STRIDE, i[1] += s[1])
-			memcpy(base, i[1], s[1]);
-		for(base = YUV->V, j = 0; j < h / 2; j++, base += YUV_STRIDE, i[2] += s[2])
-			memcpy(base, i[2], s[2]);
-		break;
-	}
-
-	/* No need for a default case, config would have handled it */
-	}
+	/* Put the YUV channels into the voodoos internal combiner unit
+	 * thingie */
+	mem2agpcpy_pic(YUV->Y, i[0], s[0], h    , YUV_STRIDE, s[0]);
+	mem2agpcpy_pic(YUV->U, i[1], s[1], h / 2, YUV_STRIDE, s[1]);
+	mem2agpcpy_pic(YUV->V, i[2], s[2], h / 2, YUV_STRIDE, s[2]);
 
 	return 0;
 }
@@ -380,9 +371,8 @@ static uint32_t draw_slice(uint8_t *i[], int s[], int w, int h, int x, int y)
 static void draw_alpha(int x, int y, int w, int h, unsigned char *src,
 		unsigned char *srca, int stride)
 {
-	/* 2... WTF... */
-	char *dst = (char *)inpage + (y * in_width + x) * 2;
-	vo_draw_alpha_yuy2(w, h, src, srca, stride, dst, in_width * in_depth);
+	char *dst = (char *)inpage + (y * in_width + x) * in_depth;
+	alpha_func(w, h, src, srca, stride, dst, in_width * in_depth);
 }
 
 static void draw_osd(void)
@@ -399,26 +389,36 @@ static uint32_t get_image(mp_image_t *mpi)
 		if(mpi->flags & MP_IMGFLAG_READABLE)	/* slow video ram */
 			return VO_FALSE;
 
-		switch(in_format) {
-		case IMGFMT_YUY2:
-			mpi->planes[0] = (char *)inpage;
-			mpi->stride[0] = in_width * in_depth;
-			break;
+		/* More one-time only checks go here */
+	}
 
-		default:
-#if 0
+	switch(in_format) {
+	case IMGFMT_YUY2:
+	case IMGFMT_BGR16:
+	case IMGFMT_BGR24:
+	case IMGFMT_BGR32:
+		mpi->planes[0] = (char *)inpage;
+		mpi->stride[0] = in_width * in_depth;
+		break;
+
+	case IMGFMT_YV12:
+	case IMGFMT_I420:
+	case IMGFMT_IYUV:
+		if(!enabled)
 			if(!(mpi->flags & MP_IMGFLAG_ACCEPT_STRIDE))
 				return VO_FALSE;
 
-			mpi->planes[0] = YUV->Y;
-			mpi->planes[1] = YUV->U;
-			mpi->planes[2] = YUV->V;
-			mpi->stride[0] = mpi->stride[1] = mpi->stride[2] = YUV_STRIDE;
-#else /* 0 */
-			return VO_FALSE;
-#endif /* 0 */
-		}
+		mpi->planes[0] = YUV->Y;
+		mpi->planes[1] = YUV->U;
+		mpi->planes[2] = YUV->V;
+		mpi->stride[0] = mpi->stride[1] = mpi->stride[2] = YUV_STRIDE;
+		break;
 
+	default:
+		return VO_FALSE;
+	}
+
+	if(!enabled) {
 		printf("tdfxfb: get_image() SUCCESS -> Direct Rendering ENABLED\n");
 
 		enabled = 1;
@@ -442,10 +442,16 @@ static uint32_t control(uint32_t request, void *data, ...)
 		case IMGFMT_I420:
 		case IMGFMT_IYUV:
 		case IMGFMT_YUY2:
+		case IMGFMT_BGR16:
+		case IMGFMT_BGR24:
+		case IMGFMT_BGR32:
 			return 7;	/* Supported without conversion, supports OSD */
 		}
 
 		return 0;		/* Not supported */
+
+	case VOCTRL_FULLSCREEN:
+		return setup_screen(!fs);
 	}
 
 	return VO_NOTIMPL;
@@ -453,3 +459,5 @@ static uint32_t control(uint32_t request, void *data, ...)
 
 /* Dummy funcs */
 static void check_events(void) { }
+static const vo_info_t* get_info(void) { return &vo_info; }
+
