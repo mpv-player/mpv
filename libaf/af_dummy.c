@@ -12,7 +12,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   switch(cmd){
   case AF_CONTROL_REINIT:
     memcpy(af->data,(af_data_t*)arg,sizeof(af_data_t));
-    af_msg(AF_MSG_VERBOSE,"[dummy] Was reinitialized, rate=%iHz, nch = %i, format = 0x%08X and bps = %i\n",af->data->rate,af->data->nch,af->data->format,af->data->bps);
+    af_msg(AF_MSG_VERBOSE,"[dummy] Was reinitialized: %iHz/%ich/%s\n",
+	af->data->rate,af->data->nch,af_fmt2str_short(af->data->format));
     return AF_OK;
   }
   return AF_UNKNOWN;
