@@ -1,0 +1,58 @@
+all audio codecs (cook,atrk,14_4,28_8,dnet,sipr) have the same interface,
+but i have only analyzed the cook codec
+
+
+audio properties
+
+00 short text/description of the format (bitrate, when to use)
+01 avg. bytes/sec output
+02 ulong: ?
+   ulong: samples per second
+   ushort: bits/sample
+   ushort: number of channels
+03 constant 2
+04 long description
+05 constant 1 (always?)
+06 ulong: block align (input frame for RADecode)
+07 string: minimum player version
+08 n/a
+09 n/a
+0A n/a
+0B n/a
+0C n/a
+0D ?
+0E ?
+0F ?
+10 ?
+11 ?
+12 ?
+13 min. output buffer size? max. number of samples?
+14 ?
+
+
+
+
+functions:
+
+ulong result=RAOpenCodec2(ra_main_t *raMain);
+
+ulong result=RAInitDecoder(ra_main_t *raMain, p2);
+p2=?
+
+
+void *GetRAFlavorProperty(ra_main_t *raMain, ulong flavor, ulong property,
+	short *property_length_in_bytes);
+returns property data for a specific data
+
+ulong RADecode(ra_main_t *raMain, char *input_buffer,
+	ulong input_buffer_size, char *output_buffer,
+	ulong *decoded_bytes, ulong p6=-1);
+
+RAFreeDecoder(ra_main_t *);
+
+RACloseCodec(ra_main_t *);
+
+
+ulong RASetFlavor(ra_main_t *ra_main, ulong flavor);
+a flavor is an entry in the list of available format variations like
+bitrate, number of channels, decoding algorithm, and so on

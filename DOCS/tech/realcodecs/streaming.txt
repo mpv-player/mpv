@@ -1,0 +1,55 @@
+In the RV30 format, another encapsulated data layer for the video stream
+has been introduced. In lack of a name I'll call them sub packets, the
+normal packets which exist in RV10 I'll call - well - packets. The stream
+of bytes which is put in one memory block is named block.
+
+The format extension has been * by wild guessing and comparing the
+received data between the original viewer and the demuxer.
+
+
+
+Every packet may contain one or more sub packets, and one block may
+be contained inside one or more adjacent (sub) packets.
+A sub packet starts with a small header (two letters are one byte):
+
+
+aa(bb)[ccccdddd{eeee}ff]
+
+aa:   indicates the type of header
+      the 2MSB indicate the header type (mask C0)
+      C0:      the [] part exists, but not ()
+      00, 80:  the data block is encapsulated inside multiple packets.
+               bb contains the sequence number, beginning with 1.
+               80 indicates the last sub packet containing data for the
+               current block. no C0 or 40 sub packet follows until
+               the block has been finished with a 80 sub packet.
+               No packet with another stream than the current video stream
+               is inside the sub packet chain, at least I haven't seen
+               such case - the demuxer will shout in this case.
+      40:      [] does not exist, the meaning of bb is unknown to me
+               data follows to the end of the packet
+      mask 3F: unknown
+bb:   unknown
+cccc: mask 3FFF: length of data
+      mask C000: unknown, seems to be always 4000
+dddd: when it's 0, {} exists (only in this case)
+      mask 3FFF: I thought it would have been the offset inside the
+                 block, is not correct in every case. Just appending the
+                 data works better, ignoring it.
+      mask C000: like cccc, except the first case
+eeee: only exists when dddd exists and is zero. contains the data
+      dddd should contain in the second case. don't know what the developers
+      had in mind.
+ff:   sequence number for the data blocks, beginning with 0
+
+
+
+packet header:
+
+ushort unknown
+ulong  blocksize
+ushort streamid
+uchar  reserved
+uchar  flags 1=reliable, 2=keyframe
+
+
