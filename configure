@@ -113,7 +113,8 @@ Optional features:
   --enable-termcap       use termcap database for key codes [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
   --enable-gui           enable GUI [disable]
-  --enable-tv            enable TV Interface (tv/dvb grabbers) [disable]
+  --disable-tv           disable TV Interface (tv/dvb grabbers) [enable]
+  --disable-tv-v4l	 disable Video 4 Linux TV Interface support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable DirectShow support (if no C++ compiler and
                          libs are available or find the dshow codecs slower
@@ -670,7 +671,8 @@ _fastmemcpy=yes
 _win32=auto
 _dshow=auto
 _select=yes
-_tv=no
+_tv=yes
+_tv_v4l=auto
 _streaming=no
 _divx4linux=auto
 _lirc=auto
@@ -759,6 +761,8 @@ for ac_option do
   --disable-alsa)	_alsa=no	;;
   --enable-tv)		_tv=yes		;;
   --disable-tv)		_tv=no		;;
+  --enable-tv-v4l)	_tv_v4l=yes	;;
+  --disable-tv-v4l)	_tv_v4l=no	;;
   --enable-fastmemcpy)	_fastmemcpy=yes	;;
   --disable-fastmemcpy)	_fastmemcpy=no	;;
   --enable-streaming)	_streaming=yes	;;
@@ -1738,6 +1742,7 @@ else
 fi
 echores "$_sdl (with $_sdlconfig)"
 
+
 echocheck "DXR3/H+"
 if test "$_dxr3" = auto ; then
   cat > $TMPC << EOF
@@ -2313,7 +2318,6 @@ echores "$_fastmemcpy"
 
 
 echocheck "TV interface"
-# FIXME tv check
 if test "$_tv" = yes ; then
   _def_tv='#define USE_TV 1'
   _inputmodules="tv $_inputmodules"
@@ -2321,6 +2325,27 @@ else
   _def_tv='#undef USE_TV'
 fi
 echores "$_tv"
+
+echocheck "Video 4 Linux TV interface"
+if test "$_tv_v4l" = auto && test "$_tv" = yes && linux ; then
+  _tv_v4l=no
+  if test -c /dev/video0 ; then
+    cat > $TMPC <<EOF
+#include <linux/videodev.h>
+int main(void) { return 0; }
+EOF
+    cc_check && _tv_v4l=yes
+  fi
+else
+  _tv_v4l=no
+fi
+if test "$_tv_v4l" = yes ; then
+  _def_tv_v4l='#define HAVE_TV_V4L 1'
+  _inputmodules="tv-v4l $_inputmodules"
+else
+  _def_tv_v4l='#undef HAVE_TV_V4L'
+fi
+echores "$_tv_v4l"
 
 
 echocheck "select"
@@ -2743,6 +2768,9 @@ $_def_sgiaudio
 
 /* Enable TV Interface support */
 $_def_tv
+
+/* Enable Video 4 Linux TV interface support */
+$_def_tv_v4l
 
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
