@@ -10,7 +10,8 @@
 	MPlayer Mac OSX Quartz video out module.
 	
 	todo:	-screen overlay output
-			-Add sub-option to select fullscreen resolution
+			-clear window background after live resize
+			-fit osd in black bar when available
 			-RGB32 lost HW accel in fullscreen
 			-(add sugestion here)
  */
@@ -350,7 +351,6 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 					}
 						
 					SizeWindow(theWindow, (d_width/2), ((d_width/movie_aspect)/2)+border, 1);
-					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
 
@@ -361,7 +361,6 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 					}
 						
 					SizeWindow(theWindow, d_width, (d_width/movie_aspect)+border, 1);
-					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
 
@@ -372,7 +371,6 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 					}
 						
 					SizeWindow(theWindow, (d_width*2), ((d_width/movie_aspect)*2)+border, 1);
-					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
 
@@ -628,9 +626,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  	}
 	
 	//Show window
-	RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+	RepositionWindow(theWindow, NULL, kWindowCenterOnMainScreen);
 	ShowWindow (theWindow);
-	SetPort(GetWindowPort(theWindow));
 	
 	switch (image_format) 
 	{
@@ -1190,8 +1187,7 @@ void window_resized()
 	//Clear Background
 	tmpBounds = CGRectMake( 0, border, winRect.right, winRect.bottom);
 	CreateCGContextForPort(GetWindowPort(theWindow),&context);
-	CGContextSetRGBFillColor(context, 0.0, 0.0, 0.0, 1.0);
-	CGContextFillRect(context, tmpBounds);
+	CGContextClearRect(context, tmpBounds);
 	
 	switch (image_format)
 	{
@@ -1262,6 +1258,7 @@ void window_fullscreen()
 	static Ptr restoreState = NULL;
 	RGBColor black={0,0,0};
 	GDHandle deviceHdl;
+	static Rect oldWinBounds;
 
 	//go fullscreen
 	if(vo_fs)
@@ -1286,7 +1283,10 @@ void window_fullscreen()
 
 		//save old window size
  		if (!vo_quartz_fs)
+		{
 			GetWindowPortBounds(theWindow, &oldWinRect);
+			GetWindowBounds(theWindow, kWindowContentRgn, &oldWinBounds);
+		}
 		
 		//go fullscreen
 		border = 0;
@@ -1319,7 +1319,7 @@ void window_fullscreen()
 		border = 20;
 		ChangeWindowAttributes(theWindow, kWindowResizableAttribute, 0);
 		SizeWindow(theWindow, oldWinRect.right, oldWinRect.bottom,1);
-		RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+		MoveWindow(theWindow, oldWinBounds.left, oldWinBounds.top, 1);
 
  		vo_quartz_fs = 0;
 	}
