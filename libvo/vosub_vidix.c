@@ -1,3 +1,4 @@
+
 /*
  *  vosub_vidix.c
  *
@@ -123,6 +124,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	}
 	image_width = src_width;
 	image_height = src_height;
+	src_format = format;
 	memset(&vidix_play,0,sizeof(vidix_playback_t));
 	vidix_play.fourcc = format;
 	vidix_play.capability = vidix_cap.flags; /* every ;) */
@@ -167,10 +169,10 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
 {
     uint8_t *src;
     uint8_t *dest;
-    unsigned bespitch;
+    unsigned bespitch,apitch;
     int i;
-
-    bespitch = (vidix_play.dest.w + (vidix_play.dest.pitch.y-1)) & ~(vidix_play.dest.pitch.y-1);
+    apitch = vidix_play.dest.pitch.y-1;
+    bespitch = (w + apitch) & ~apitch;
 
     dest = vidix_mem + frames[next_frame] + vidix_play.offset.y;
     dest += bespitch*y + x;
@@ -181,28 +183,26 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
         dest += bespitch;
     }
 
-    w/=2;h/=2;x/=2;y/=2;
-
-    bespitch = (vidix_play.dest.w + (vidix_play.dest.pitch.u-1)) & ~(vidix_play.dest.pitch.u-1);
+    apitch = vidix_play.dest.pitch.v-1;
+    bespitch = (w + apitch) & ~apitch;
+    dest = vidix_mem + frames[next_frame] + vidix_play.offset.v;
+    dest += (bespitch*y + x)/2;
+    src = image[1];
+    for(i=0;i<h/2;i++){
+        memcpy(dest,src,w/2);
+        src+=stride[1];
+        dest+=bespitch/2;
+    }
+    apitch = vidix_play.dest.pitch.u-1;
+    bespitch = (w + apitch) & ~apitch;
 
     dest = vidix_mem + frames[next_frame] + vidix_play.offset.u;
-    dest += bespitch*y + x;
-    src = image[1];
-    for(i=0;i<h;i++){
-        memcpy(dest,src,w);
-        src+=stride[1];
-        dest+=bespitch;
-    }
-
-    bespitch = (vidix_play.dest.w + (vidix_play.dest.pitch.v-1)) & ~(vidix_play.dest.pitch.v-1);
-
-    dest = vidix_mem + frames[next_frame] + vidix_play.offset.v;
-    dest += bespitch*y + x;
+    dest += (bespitch*y + x)/2;
     src = image[2];
-    for(i=0;i<h;i++){
-        memcpy(dest,src,w);
+    for(i=0;i<h/2;i++){
+        memcpy(dest,src,w/2);
         src+=stride[2];
-        dest += bespitch;
+        dest += bespitch/2;
     }
     return 0;
 }
@@ -211,11 +211,10 @@ uint32_t vidix_draw_slice_422(uint8_t *image[], int stride[], int w,int h,int x,
 {
     uint8_t *src;
     uint8_t *dest;
-    unsigned bespitch;
+    unsigned bespitch,apitch;
     int i;
-
-    bespitch = (vidix_play.dest.w + (vidix_play.dest.pitch.y-1)) & ~(vidix_play.dest.pitch.y-1);
-
+    apitch = vidix_play.dest.pitch.y-1;
+    bespitch = (w*2 + apitch) & ~apitch;
     dest = vidix_mem + frames[next_frame] + vidix_play.offset.y;
     dest += bespitch*y + x;
     src = image[0];
