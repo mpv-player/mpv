@@ -1,0 +1,63 @@
+Written by Ville Syrjälä <syrjala@sci.fi>, original can be found at
+http://www.sci.fi/~syrjala/directfb/readme.txt
+For more information see also http://www.directfb.org
+--------------------------------------------------------------------------------
+DirectFB includes TV out support for Matrox G400 cards.
+If you've used the Windows drivers you most likely know about
+DVDMax... DirectFB provides the same functionality. Now you can get
+excellent quality video playback on your TV.
+
+DirectFB TV output features:
+- interlaced picture
+- 720x576 50Hz PAL and 720x486 60Hz NTSC
+- RGB15, RGB16, RGB32, ARGB, YUY2, UYVY, I420, YV12 pixel formats
+- hardware blended sub-picure in I420 and YV12 modes
+- brightness, contrast, hue, saturation adjustments
+- no more tweaking sessions with fbset to get the image centered :)
+
+I recommend you use DirectFB 0.9.15 or later since some vsync problems
+were fixed in that release.
+
+Linux kernel setup:
+
+1. Patch your kernel with matroxfb-vsync-c2vline-irq-patch-2.4.19.bz2
+It's distributed with DirectFB sources in the patches subdirectory.
+This patch enables IRQ based vblank waiting. Make sure your card has
+an IRQ assigned to it. You may have an option in the BIOS setup for
+this.
+
+2. Add "#define FBIO_WAITFORVSYNC _IOW('F', 0x20, int)" to
+   /usr/include/linux/fb.h
+
+3. Build and install the kernel. Set the following options:
+ CONFIG_I2C
+ CONFIG_I2C_ALGOBIT
+ CONFIG_I2C_CHARDEV
+ CONFIG_I2C_PROC
+ CONFIG_FB_MATROX
+ CONFIG_FB_MATROX_G100
+ CONFIG_FB_MATROX_I2C
+DirectFB doesn't require kernel support for the second head. In fact it may
+interfere with the TV out.
+
+4. Make sure you have the proper /dev/i2c-N device file in place.
+   After loading i2c-matroxfb module you should see MAVEN in
+   /proc/bus/i2c. You must have the corresponding device file. To
+   create these files use:
+   'mknod /dev/i2c-N c 89 N' where N is 0,1,2...
+   The number might change depending on the order you load i2c modules
+   so you may want to create some extra files.
+
+DirectFB setup:
+
+1. Build and install DirectFB
+
+2. Use the following DirectFB options:
+ matrox-crtc2
+ matrox-tv-standard=pal or ntsc
+You can store them in /etc/directfbrc or ~/.directfbrc so that the will be
+used every time.
+
+That's pretty much it. Well you do need some applications. mplayer has
+a special video out plugin 'dfbmga' for this stuff. You need a recent
+version of mplayer to use it.
