@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!--synced with 1.21 -->
+<!--synced with 1.22 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Foire Aux Questions</title>
 
@@ -385,7 +385,7 @@ Quand je démarre la lecture, j'obtiens ce message mais tout semble se dérouler n
 </para></question>
 <answer><para>
 Vous avez besoin des droits root ou un noyau configuré spécialement pour utiliser le nouveau
-code de timing. Pour les détails voir la <link linkend="rtc">section RTC</link> de la documentation.
+code de timing. Pour les détails voir la section <link linkend="rtc">RTC</link> de la documentation.
 </para></answer>
 </qandaentry>
 
@@ -540,7 +540,7 @@ Vous utilisez le pilote vo avec un cache simple (x11,xv). Avec xv, utilisez l'op
 libavcodec, c'est quoi exactement ?
 </para></question>
 <answer><para>
-Voir la <link linkend="ffmpeg">section libavcodec</link>.
+Voir la section <link linkend="ffmpeg">libavcodec</link>.
 </para></answer>
 </qandaentry>
 
@@ -550,7 +550,7 @@ Mais configure me dit &quot;Checking for libavcodec ... no&quot; !
 </para></question>
 <answer><para>
 Vous avez besoin d'obtenir libavcodec depuis le CVS de FFmpeg. Lisez les
-instructions dans la <link linkend="ffmpeg">section libavcodec</link>.
+instructions dans la section <link linkend="ffmpeg">libavcodec</link>.
 </para></answer>
 </qandaentry>
 
@@ -752,7 +752,7 @@ Si c'est un AVI, peut-être qu'il a un mauvais entrelacement. Essayez l'option
 </para></listitem>
 <listitem><para>
 Votre pilote son est boggué, ou vous utilisez ALSA 0.5 avec <option>-ao oss</option>.
-Voir la <link linkend="audio-dev">section cartes sons</link>.
+Voir la section <link linkend="audio-dev">cartes sons</link>.
 </para></listitem>
 <listitem><para>
 L'AVI a un mauvais entête, essayez l'option <option>-nobps</option>, et/ou <option>-mc 0</option>.

@@ -1,4 +1,4 @@
-.\" synced with 1.483
+.\" synced with 1.490
 .\" MPlayer (C) 2000-2003 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
@@ -355,12 +355,12 @@ change la liste des canaux
 
 .SH "OPTIONS DU LECTEUR (MPLAYER UNIQUEMENT)"
 .TP
-.B \-autoq <qualité> (utiliser avec \-vf pp)
+.B \-autoq <qualité> (utiliser avec \-vf [s]pp)
 Change dynamiquement le niveau de postprocessing en fonction de la charge
 processeur.
 Le nombre à indiquer est le niveau maximum utilisé.
 Normalement vous pouvez utiliser un nombre important.
-Vous devez indiquer \-vf pp sans paramètres pour l'utiliser.
+Vous devez indiquer \-vf [s]pp sans paramètres pour l'utiliser.
 .TP
 .B \-autosync <facteur>
 Ajuste graduellement la synchro A/\:V en fonction de la mesure du décalage
@@ -526,10 +526,10 @@ Cette option est considérée comme une entrée donc les options trouvées à la
 suite s'appliqueront uniquement aux éléments de la liste de lecture.
 .TP
 .B \-quiet
-N'affiche pas les messages d'état. Avec cette option la ligne d'état (c-a-d
- A:   0.7 V:   0.6 A-V:  0.068 ...) ne sera pas affichée. Cela est
-particulièrement utile quand votre terminal ne comprends pas les retours chariot
-(c-a-d \\r) comme celui d'XEmacs.
+Avec cette option, la ligne d'état (c-a-d A:   0.7 V:   0.6 A-V:  0.068 ...) ne
+sera pas affichée.
+Cela est particulièrement utile sur les terminaux lents ou endommagés qui ne
+gèrent pas les retours chariot (c-a-d \\r).
 .TP
 .B \-really-quiet
 Affiche encore moins de messages.
@@ -537,7 +537,7 @@ Affiche encore moins de messages.
 .B \-shuffle \ \
 Joue les fichiers en ordre aléatoire.
 .TP
-.B \-skin <répertoire\ des\ skin> (CODE BETA)
+.B \-skin <répertoire\ des\ skin>
 Charge les skins depuis le répertoire spécifié (SANS chemin).
 
 .I EXEMPLE:
@@ -1045,9 +1045,9 @@ en commençant à 1.
 Exemple: utilisez tv://1, tv://2, tv://TV1, tv_set_channel 1, tv_set_channel 2,
 tv_set_channel TV1, etc.
 .IPs [brightness|contrast|hue|saturation]=<-100\-100>
-fixe les paramètres de couleur de la carte graphique.
+Initialise les paramètres de couleur de la carte
 .IPs audiorate=<valeur>
-Fixe la fréquence de capture audio
+Initialise la fréquence de capture audio
 .IPs forceaudio
 capture l'audio même si il n'y a pas de sources audio signalées par v4l
 .IPs alsa
@@ -1319,7 +1319,7 @@ La valeur 255 signifie blanc et 0 noir.
 Force le type de demuxer de sous-titres pour \-subfile.
 Donne l'ID du demuxer tel que defini dans subreader.h.
 .TP
-.B \-sub-fuzziness
+.B \-sub-fuzziness <mode>
 Ajuste l'exactitude de recherche des sous-titres:
 .PD 0
 .RSs
@@ -4398,8 +4398,20 @@ somme des erreurs au carré de la quantisation
 .RE
 .PD 1
 .TP
+.B cbp\ \ \ \
+Motif de bloc codé optimal pour débit instable
+sélectionnera le motif de bloc codé qui minimise distortion + lambda*débit
+ceci ne peut être utilisé qu'avec la quantisation trellis
+.TP
+.B mv0\ \ \ \
+essaie d'encoder chaque MB avec MV=<0,0> et choisis le meilleur
+cela n'a pas d'effets si mbd=0
+.TP
+.B qprd\ \ \
+QP optimal avec flux instable pour le lambda donné de chaque macrobloc
+.TP
 .B last_pred=<0\-99>
-Montant des prédicateurs de mouvement à partir de la trame précédente
+Quantité de prédicateurs de mouvement à partir de la trame précédente
 .PD 0
 .RSs
 .IPs 0

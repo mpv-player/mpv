@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.4 -->
+<!-- synced with 1.5 -->
 <appendix id="skin">
 <title>Format de skins MPlayer</title>
 <para>
@@ -309,8 +309,8 @@ MPlayer essaie de charger les fichiers <filename>main</filename>,
 <title>Fenêtre principale et barre de lecture</title>
 <para>
 Vous trouverez ci-dessous la liste des objets utilisables dans les blocs
-'<literal>window = main</literal>' .&nbsp;.&nbsp;. '<literal>end</literal>',
-et '<literal>window = playbar</literal>' .&nbsp;.&nbsp;. '<literal>end</literal>'.
+'<literal>window = main</literal>' ... '<literal>end</literal>',
+et '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
 </para>
 
 <variablelist>

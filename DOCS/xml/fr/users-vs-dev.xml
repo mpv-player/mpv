@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.9 -->
+<!-- synced with 1.10 -->
 <appendix id="users-vs-dev">
 <title>Lamentations du développeur</title>
 
@@ -134,7 +134,7 @@ pour l'architecture binaire. <application>MPlayer</application> supporte mainten
 la détection CPU (passez l'option <option>--enable-runtime-cpudetection</option>
 à <command>configure</command>). Elle est désactivée par défaut parce quelle implique un petit
 sacrifice de vitesse, mais il est maintenant possible de créer des binaires qui
-fonctionneront sur les différents membres de la famille de CPU Intel.
+fonctionneront sur les différents membres de la famille des CPUs compatibles Intel.
 </para>
 </sect1>
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.6 -->
+<!-- synced with 1.8 -->
 <sect1 id="formats">
 <title>Formats supportés</title>
 
@@ -59,7 +59,7 @@ Les fichiers MPEG peuvent avoir des apparences différentes:
   C'est le même que MPG, plus la capacité de contenir des sous-titres et de
   l'audio non-MPEG (AC3). Il contient de la vidéo encodé en MPEG2 et généralement
   de l'audio AC3, mais DTS, MP2 et LPCM non-compressé sont également autorisés.
-  Lisez la <link linkend="dvd">section DVD</link>!
+  Lisez la section <link linkend="dvd">DVD</link>!
   </simpara></listitem>
 </itemizedlist>
 

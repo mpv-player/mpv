@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.8 -->
+<!-- synced with 1.11 -->
 <sect2 id="audio-dev">
 <title>Périphériques de sortie audio</title>
 <sect3 id="sync">
@@ -103,8 +103,8 @@ DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!<!--
 <listitem><para>
   Si le son émet des cliquètements lors d'une lecture depuis le CD-ROM, activez l'IRQ
   unmasking, ex. <command>hdparm -u1 /dev/cdrom</command> (<command>man hdparm</command>).
-  Ceci est généralement bénéfique et décrit plus en détail dans la
-  <link linkend="drives">section CD-ROM</link>.
+  Ceci est généralement bénéfique et décrit plus en détail dans la section
+  <link linkend="drives">CD-ROM</link>.
  </para></listitem>
 </itemizedlist>
 </sect3>
