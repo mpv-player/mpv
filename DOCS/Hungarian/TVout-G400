@@ -30,7 +30,7 @@ Linux alatt, 2 lehetõseg van ennek mûködésre bírására:
    Hogy kell bekapcsolni?
 
 -  Fordíts minden matrox-féle cuccot modulba a kernelfordításkor.
-   (ez SZÜKSÉGES, legalábbis én máshogy még nem bírtam mûködésre bírni)
+   (ez SZÜKSÉGES, legalábbis én máshogy még nem tudtam mûködésre bírni)
    [indítsd az új kernelt és installáld a modulokat, de még ne töltsd be õket!]
 
 -  Futtasd a 'modules' script-et a TV-out könyvtárból.
