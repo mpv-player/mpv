@@ -555,6 +555,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Koreaanse karakterset (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thaise karakterset (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cyrillisch Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Slavische/Centraal Europese Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Geen automatische scalering"
 #define MSGTR_PREFERENCES_FontPropWidth "Proportioneel met de filmbreedte"
 #define MSGTR_PREFERENCES_FontPropHeight "Proportioneel met de filmhoogte"

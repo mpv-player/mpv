@@ -570,7 +570,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Znaki koreañskie (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Znaki tajskie (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cyrylica Windows (CP1251)"
-#define MSGTR_PREFERENCES_FontEncoding22 "Jêzyki s³owiañskie i ¶rodkowoeuropejskie Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Jêzyki s³owiañskie i ¶rodkowoeuropejskie Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Bez autoskalowania"
 #define MSGTR_PREFERENCES_FontPropWidth "Proporcjonalnie do szeroko¶ci filmu"
 #define MSGTR_PREFERENCES_FontPropHeight "Proporcjonalnie do wysoko¶ci filmu"

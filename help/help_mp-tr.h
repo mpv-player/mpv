@@ -474,6 +474,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Korece karakter seti (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thaice karakter seti (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Slavca/Orta avrupa Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Otomatik Dereceleme Yapma"
 #define MSGTR_PREFERENCES_FontPropWidth "Geniþliði orantýla"
 #define MSGTR_PREFERENCES_FontPropHeight "Yüksekligi orantýla"

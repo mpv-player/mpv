@@ -575,6 +575,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Caracteres Coreanos (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Caracteres Tailandeses (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Windows Cirílico (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Européias Eslávicas/Centrais Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Sem auto redimensionamento"
 #define MSGTR_PREFERENCES_FontPropWidth "Proporcional a largura do filme"
 #define MSGTR_PREFERENCES_FontPropHeight "Proporcional a altura do filme"
