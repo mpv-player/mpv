@@ -86,7 +86,6 @@ static char help_text[]=
 #define MSGTR_CouldntInitAudioCodec "Could not initialize audio codec -> no sound.\n"
 #define MSGTR_TryForceVideoFmtStr "Trying to force video codec driver family %s...\n"
 #define MSGTR_CantFindVideoCodec "Cannot find codec matching selected -vo and video format 0x%X.\n"
-#define MSGTR_VOincompCodec "The selected video_out device is incompatible with this codec.\n"
 #define MSGTR_CannotInitVO "FATAL: Cannot initialize video driver.\n"
 #define MSGTR_CannotInitAO "Could not open/initialize audio device -> no sound.\n"
 #define MSGTR_StartPlaying "Starting playback...\n"
@@ -746,3 +745,17 @@ static char help_text[]=
 #define MSGTR_MSGBOX_LABEL_Warning "Warning!"
 
 #endif
+
+// ======================= VO Video Output drivers ========================
+
+#define MSGTR_VOincompCodec "The selected video_out device is incompatible with this codec.\n"
+
+// vo_jpeg.c
+#define MSGTR_VO_JPEG_GenericError "This error has occurred"
+#define MSGTR_VO_JPEG_UnableToAccess "Unable to access"
+#define MSGTR_VO_JPEG_ExistsButNoDirectory "already exists, but is not a directory."
+#define MSGTR_VO_JPEG_DirExistsButNotWritable "Output directory already exists, but is not writable."
+#define MSGTR_VO_JPEG_DirExistsAndIsWritable "Output directory already exists and is writable."
+#define MSGTR_VO_JPEG_CantCreateDirectory "Unable to create ouput directory."
+#define MSGTR_VO_JPEG_DirectoryCreateSuccess "Output directory successfully created."
+

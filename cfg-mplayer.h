@@ -36,6 +36,8 @@ extern int jpeg_optimize;
 extern int jpeg_smooth;
 extern int jpeg_quality;
 extern char * jpeg_outdir;
+extern char * jpeg_subdirs;
+extern int jpeg_maxfiles;
 #endif
 #ifdef HAVE_SDL
 //extern char *sdl_driver;
@@ -152,6 +154,8 @@ m_option_t jpeg_conf[]={
 	{"smooth", &jpeg_smooth, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 	{"quality", &jpeg_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 	{"outdir", &jpeg_outdir, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"subdirs", &jpeg_subdirs, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"maxfiles", &jpeg_maxfiles, CONF_TYPE_INT, CONF_MIN, 1, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif

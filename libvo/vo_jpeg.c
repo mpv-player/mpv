@@ -3,6 +3,7 @@
  *
  * Copyright 2002 by Pontscho (pontscho@makacs.poliod.hu)
  * 25/04/2003: Spring cleanup -- alex
+ * 04/08/2004: Added multiple subdirectory support -- ivop@euronet.nl
  *
  */
 
@@ -14,8 +15,18 @@
 #include <jpeglib.h>
 
 #include "config.h"
+#include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "mplayer.h"			/* for exit_player() */
+#include "help_mp.h"
+
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+/* Used for temporary buffers to store file- and pathnames */
+#define BUFLENGTH 512
 
 static vo_info_t info=
 {
@@ -36,13 +47,51 @@ int jpeg_optimize = 100;
 int jpeg_smooth = 0;
 int jpeg_quality = 75;
 char * jpeg_outdir = ".";
+char * jpeg_subdirs = NULL;
+int jpeg_maxfiles=1000;
 
 static int framenum=0;
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
-     image_height=height;
-     image_width=width;
+ char buf[BUFLENGTH];
+ struct stat stat_p;
+
+/* Create outdir. If it already exists, test if it's a writable directory */
+
+ snprintf (buf, BUFLENGTH, "%s", jpeg_outdir);
+ 
+ if (mkdir (buf, 0755)<0) {
+  switch (errno) { /* use switch in case other errors need to be caught and handled in the future */
+   case EEXIST:
+    if ( stat(buf, &stat_p) < 0 ) {
+     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name, MSGTR_VO_JPEG_GenericError, strerror(errno) );
+     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name, MSGTR_VO_JPEG_UnableToAccess,buf);
+     exit_player(MSGTR_Exit_error);
+    }
+    if ( !S_ISDIR(stat_p.st_mode) ) {
+     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name, buf, MSGTR_VO_JPEG_ExistsButNoDirectory);
+     exit_player(MSGTR_Exit_error);
+    }
+    if ( !(stat_p.st_mode & S_IWUSR) ) {
+     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name, MSGTR_VO_JPEG_DirExistsButNotWritable);
+     exit_player(MSGTR_Exit_error);
+    }
+
+    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name, MSGTR_VO_JPEG_DirExistsAndIsWritable);
+    break;
+
+   default:
+    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name, MSGTR_VO_JPEG_GenericError, strerror(errno) );
+    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name, MSGTR_VO_JPEG_CantCreateDirectory);
+    exit_player(MSGTR_Exit_error);
+  } /* end switch */
+ } else {  
+  mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name, MSGTR_VO_JPEG_DirectoryCreateSuccess);
+ } /* end if */
+
+ image_height=height;
+ image_width=width;
     
  return 0;
 }
@@ -91,10 +140,59 @@ static uint32_t jpeg_write( uint8_t * name,uint8_t * buffer )
 
 static uint32_t draw_frame(uint8_t * src[])
 {
- char buf[256];
+ static uint32_t framecounter=0, subdircounter=0;
+ char buf[BUFLENGTH];
  uint8_t *dst= src[0];
-    
- snprintf (buf, 256, "%s/%08d.jpg", jpeg_outdir, ++framenum);
+ static char subdirname[BUFLENGTH] = "";
+ struct stat stat_p;
+
+/* Start writing to new subdirectory after a certain amount of frames */
+ if ( framecounter == jpeg_maxfiles ) {
+  framecounter = 0;
+ }
+
+/* If framecounter is zero (or reset to zero), increment subdirectory number
+ * and create the subdirectory.
+ * If jpeg_subdirs is not set, do nothing and resort to old behaviour. */
+ if ( !framecounter && jpeg_subdirs ) {
+  snprintf (subdirname, BUFLENGTH, "%s%08d", jpeg_subdirs, ++subdircounter);
+  snprintf (buf, BUFLENGTH, "%s/%s", jpeg_outdir, subdirname);
+  if (mkdir (buf, 0755)<0) {
+   switch (errno) { /* use switch in case other errors need to be caught and handled in the future */
+    case EEXIST:
+     if ( stat(buf, &stat_p) < 0 ) {
+      mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name, MSGTR_VO_JPEG_GenericError, strerror(errno) );
+      mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name, MSGTR_VO_JPEG_UnableToAccess, buf);
+      exit_player(MSGTR_Exit_error);
+     }
+     if ( !S_ISDIR(stat_p.st_mode) ) {
+      mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s %s\n", info.short_name, buf, MSGTR_VO_JPEG_ExistsButNoDirectory);
+      exit_player(MSGTR_Exit_error);
+     }
+     if ( !(stat_p.st_mode & S_IWUSR) ) {
+      mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s - %s\n", info.short_name, buf, MSGTR_VO_JPEG_DirExistsButNotWritable);
+      exit_player(MSGTR_Exit_error);
+     }
+
+     mp_msg(MSGT_VO, MSGL_INFO, "\n%s: %s - %s\n", info.short_name, buf, MSGTR_VO_JPEG_DirExistsAndIsWritable);
+     break;
+
+    default:
+     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name, MSGTR_VO_JPEG_GenericError, strerror(errno) );
+     mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s - %s.\n", info.short_name, buf, MSGTR_VO_JPEG_CantCreateDirectory);
+     exit_player(MSGTR_Exit_error);
+     break;
+   }
+  } /* switch */
+ } /* if !framecounter && jpeg_subdirs */
+
+
+ framenum++;
+
+/* snprintf the full pathname of the outputfile */
+ snprintf (buf, BUFLENGTH, "%s/%s/%08d.jpg", jpeg_outdir, subdirname, framenum);
+
+ framecounter++;
 
  return jpeg_write( buf,src[0] );
 }
@@ -142,3 +240,6 @@ static uint32_t control(uint32_t request, void *data, ...)
   }
  return VO_NOTIMPL;
 }
+
+#undef BUFLENGTH
+
