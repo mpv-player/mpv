@@ -1962,6 +1962,10 @@ $_mmx      // only define if you have MMX (newer x86 chips, not P54C/PPro)
 $_mmx2     // only define if you have MMX2 (Athlon/PIII/4/CelII)
 $_ssem     // only define if you have SSE (Intel Pentium III/4 or Celeron II)
 
+#ifdef HAVE_MMX
+#define USE_MMX_IDCT
+#endif
+
 /* libvo options */
 #define SCREEN_SIZE_X $_x
 #define SCREEN_SIZE_Y $_y
