@@ -2916,7 +2916,7 @@ error concealment:
 .RSss
 1: Use strong deblock filter for damaged MBs.
 .br
-2: iterative MV search (slow)
+2: iterative motion vector (MV) search (slow)
 .br
 3: all (default)
 .REss
@@ -2946,15 +2946,15 @@ debug:
 .br
 4: bitstream
 .br
-8: MB type
+8: macroblock (MB) type
 .br
-16: QP
+16: quantizer parameter (QP)
 .br
-32: Motion vector
+32: motion vector
 .br
 0x0040: motion vector visualization (use \-noslices)
 .br
-0x0080: MB skip
+0x0080: macroblock (MB) skip
 .br
 0x0100: startcode
 .br
@@ -3568,7 +3568,7 @@ force quantization parameter (default: 0, use QP from video)
 .
 .TP
 .B qp=equation
-QP change filter
+quantizer parameter (QP) change filter
 .RSs
 .IPs equation
 some equation like "2+2*sin(PI*qp)"
@@ -5288,7 +5288,7 @@ Bits used for motion vectors
 .IPs fCode
 maximum length of motion vector in log2 scale
 .IPs iCount
-number of intra macro blocks / number of macro blocks
+number of intra macroblocks / number of macroblocks
 .IPs var\ \ 
 spatial complexity
 .IPs mcVar
@@ -5529,7 +5529,7 @@ decoding.
 .br
 .I HINT:
 Crop any black borders completely as they will reduce the quality
-of the macro blocks (also applies without scplx_mask).
+of the macroblocks (also applies without scplx_mask).
 .RSs
 .IPs 0.0
 disabled (default)
@@ -5750,7 +5750,7 @@ the minimum of error and lambda*bits.
 .PD 0
 .RSs
 .IPs lambda
-QP dependant constant
+quantizer parameter (QP) dependant constant
 .IPs bits\ 
 amount of bits needed to encode the block
 .IPs error
@@ -5770,9 +5770,9 @@ Try to encode each MB with MV=<0,0> and choose the better one.
 This has no effect if mbd=0.
 .
 .TP
-.B qprd\ \ \ 
-rate distorted optimal QP for the given lambda of each macroblock, note this
-needs mbd=2
+.B qprd (mbd=2 only)
+rate distorted optimal quantizer parameter (QP) for the given
+lambda of each macroblock
 .
 .TP
 .B last_pred=<0\-99>
@@ -5782,7 +5782,7 @@ Amount of motion predictors from the previous frame
 .IPs 0
 (default)
 .IPs a
-will use 2a+1 x 2a+1 macro block square of motion vector predictors from the
+will use 2a+1 x 2a+1 macroblock square of motion vector predictors from the
 previous frame
 .RE
 .PD 1
@@ -5981,7 +5981,7 @@ Encode the fields of interlaced video material.
 Turn this option on for interlaced content.
 .br
 .I NOTE:
-Should you rescale the video, you would need a interlace-aware resizer,
+Should you rescale the video, you would need an interlace-aware resizer,
 which you can activate with -vf scale=<width>:<height>:1.
 .
 .TP
@@ -6306,7 +6306,7 @@ This selects the quantizer to use.
 20-40 is a useful range (default: 26).
 Lower values result in better fidelity, but higher bitrates.
 Note that quantization in H.264 works differently from MPEG[124].
-H.264's QP is on a logarithmic scale.
+H.264's quantizer parameter (QP) is on a logarithmic scale.
 As an example, the bitrate difference between QP=20 and QP=40
 is about a factor of 10.
 Useful quantizers in H.264 tend to be very large compared to MPEG[124].
