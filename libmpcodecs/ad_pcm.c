@@ -57,6 +57,10 @@ static int init(sh_audio_t *sh_audio)
        sh_audio->ds->ss_mul= sh_audio->samplesize * sh_audio->channels;
 #endif
        break;
+    case 0x32336c66: // 'fl32', bigendian float32
+       sh_audio->sample_format=AFMT_AF_FLAGS | AF_FORMAT_BE | AF_FORMAT_F;
+       sh_audio->samplesize=4;
+       break;
     default: if(sh_audio->samplesize!=2) sh_audio->sample_format=AFMT_U8;
   }
   return 1;
