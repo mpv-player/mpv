@@ -72,7 +72,6 @@ http_is_header_entire( HTTP_header_t *http_hdr ) {
 
 	if( strstr(http_hdr->buffer, "\r\n\r\n")==NULL &&
 	    strstr(http_hdr->buffer, "\n\n")==NULL ) return 0;
-	}
 	return 1;
 }
 
