@@ -232,9 +232,12 @@ it's faster", it's not sure. Try.</P>
 <P><B><A NAME=2.3.1.2.3>2.3.1.2.3. nVidia cards</A></B></P>
 
 <P>nVidia isn't a very good choice under Linux.. You'll have to use the
-binary nVidia driver, available at nVidia's website. The standard X
+binary closed-source nVidia driver, available at nVidia's website. The standard XFree86
 driver doesn't support XVideo for these cards, due to nVidia's closed
 sources/specifications.</P>
+
+<P>As far as I know the latest XFree86 driver contains XVideo support for
+Geforce 2 and 3.</P>
 
 <P><UL><LI>Riva128 cards don't have XVideo support even with the nvidia driver :(
 Complain to NVidia.</UL></P>
@@ -780,6 +783,20 @@ hardware acceleration on the second head/TV. In those cases, you see green/blue
 coloured window instead of the movie. This is where this driver comes in
 handy, but you need powerful CPU to use software scaling. Don't use the
 SDL driver's software output+scaler, it has worse image quality !</P>
+
+<P>Software scaling is very slow, you better try changing video modes instead.
+It's very simple. See the <A HREF=#2.3.1.3.A>DGA section's modelines</A>, and
+insert them into your XF86Config.
+<UL>
+  <LI>If you have XFree86 4.x.x - use the <CODE>-vm</CODE> option. It will
+    change to a resolution your movie fits in. If it doesn't :</LI>
+  <LI>With XFree86 3.x.x - you have to cycle through available resolutions
+    with the <B>CTRL-ALT-plus</B> and <B>minus</B> keys.</LI>
+</UL>
+
+If you can't find the modes you inserted, browse XFree86's output. Some
+drivers can't use low pixelclocks that are needed for low resolution
+video modes.</P>
 
 
 <P><B><A NAME=2.3.1.14>2.3.1.14. Rage128 (Pro) / Radeon video overlay (radeon_vid)</A></B></P>

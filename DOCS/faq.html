@@ -11,6 +11,14 @@
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+configure ends with this text, and MPlayer won't compile !<BR>
+<CODE>Your gcc does not support even i386 for '-march' and '-mcpu'.</CODE>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Your gcc isn't installed correctly, check <CODE>config.log</CODE> file
+for details.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 What does "No such file or directory" means ?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Probably there is no such file or directory.
@@ -528,6 +536,15 @@ only sound! It prints:<BR>
 <CODE>Detected video codec: [null] drv:0 (NULL codec (no decoding))</CODE>
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Update your <CODE>codecs.conf</CODE>
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+I'm using the GUI. During startup, MPlayer prints :<BR>
+<PRE><CODE>Gtk-WARNING **: This process is currently running setuid or setgid.
+This is not a supported use of GTK+. You must create a helper
+program instead. For further details, see...</CODE></PRE>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+You can't use GTK in a suid-root binary, as pointed out in the GUI section.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
