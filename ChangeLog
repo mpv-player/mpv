@@ -39,7 +39,7 @@ MPlayer (1.0)
     Demuxers:
     * Matroska containing RealVideo works better
     * fixed random segfaults in VIVO
-    * endianess fixes in CDDA
+    * endianness fixes in CDDA
     * UYVY support in tvi/v4l2
     * tvi/bsdbt848 now working under FreeBSD 5.2-CURRENT
     * tvi/bsdbt848 audio part working under NetBSD
@@ -70,7 +70,7 @@ MPlayer (1.0)
       vd/8bps, vd/msrle, vd/msvideo1, vd/rpza, vd/smc
     * workaround for buggy codecs in ad/acm (support for Sharp G.726)
     * fixed chroma-swapping in Hauppauge Macroblock decoder
-    * AltiVec optimized resampler in liba52
+    * AltiVec-optimized resampler in liba52
     * support for VP5 and VP6 DLL decoders
     * support for Alparysoft lossless video codec (through DLLs)
     * support for Lead MCMW wavelet video codec (through DLLs)
@@ -89,7 +89,7 @@ MPlayer (1.0)
     * vf_rgbtest: rgb test pattern generator for developers
     * vf_qp: qp change filter
     * vf_noformat: the same as vf_format but with reversed meaning
-    * AltiVec optimized SWScaler
+    * AltiVec-optimized SWScaler
     * vf_phase: phase shift fields
     * vf_divtc: duplicate frame removal from deinterlaced telecined video
 
@@ -126,9 +126,9 @@ MPlayer (1.0)
     * fixed never-before-tested embedded string decoder in SVQ1
     * optimized quantization (including the trellis way)
     * Sierra VMD video decoder
-    * MMX and SSE2 optimized H.263 denoiser
+    * MMX- and SSE2-optimized H.263 denoiser
     * better SVCD compliance (encoder side)
-    * MMX and MMX2 optimized interlaced DCT decision
+    * MMX- and MMX2-optimized interlaced DCT decision
     * various cleanup, memleak and segfault fixes
     * optimized (2x faster) the MPEG layer 3 decoder
     * grayscale coded MJPEG decoding support
@@ -136,14 +136,14 @@ MPlayer (1.0)
     * "packed" XviD decoding
     * fixed some bugs in RV20 B-frames decoding
     * closed GOP encoding
-    * SSE2 optimized FDCT
+    * SSE2-optimized FDCT
     * support for quantizer noise shaping
     * support for EA ADPCM and SMJPEG IMA ADPCM
     * QT RLE decoder
     * OBMC fixes
     * FLAC decoder
     * better support for DivX5
-    * MMX and SSE2 optimized VP3/Theora decoding
+    * MMX and SSE2-optimized VP3/Theora decoding
     * support for Theora alpha3
     * many H.264 improvements
     * more robust MJPEG startcode search mechanism
@@ -207,8 +207,7 @@ MPlayer (1.0)
     * fixed the MPEG muxer
     * fixed tons of bugs in MMS streaming
     * user settable HTTP user-agent field
-    * improved (now working) seeking with support for growing files in
-      Realmedia format
+    * improved (now working) seeking with support for growing RealMedia files
     * saveable and loadable index files (workaround for formats not
       supporting files over 2GB)
     * Ultimotion VfW decoder
@@ -235,7 +234,7 @@ MPlayer (1.0)
     * alternative postprocessing filter (spp)
     * big scale filter updates
     * zrmjpeg filter, a kick-ass MJPEG encoder using FFmpeg/libavcodec
-    * filmdint: new inverse telecine filter, heavily MMX and 3DNow! optimized
+    * filmdint: new inverse telecine filter, heavily MMX- and 3DNow!-optimized
 
     FFmpeg/libavcodec:
     * Lagrange multipliers instead of qscale, encoding quality much improved
@@ -264,11 +263,11 @@ MPlayer (1.0)
     * dynamically alloc big data fields (lower memory usage in most cases!)
     * fixed stereo IMA-ADPCM encoding
     * inline vs always_inline - some speedups
-    * MMX2 optimized FDCT
+    * MMX2-optimized FDCT
     * accurate 2-4-8 DCT
     * much faster DV encoding (beats libdv)
     * support Cinepak files with funky (not divisible by 4) resolutions
-    * AltiVec optimized FDCT
+    * AltiVec-optimized FDCT
     * XvMC speedups
     * initial ZyGoVideo decoding
     * RGB support in FFV1
@@ -281,7 +280,7 @@ MPlayer (1.0)
     * 16x8 MV visualisation support
     * H.263 overlapped block motion compensation (OBMC), 4MV support
     * H.263 alternative inter vlc support
-    * H.263 deblocking filter (MMX optimized)
+    * H.263 deblocking filter (MMX-optimized)
     * H.263 modified quantization support
     * H.263 slice structured mode support
     * Real RV20 decoder (with B-frame support)
@@ -308,7 +307,7 @@ MPlayer (1.0)
     SWScaler:
     * updated MLib (Sun VIS) support
     * more accurate filters (rounding fixes)
-    * MMX optimized UYVY output
+    * MMX-optimized UYVY output
     * eliminated chroma scaling bugs
 
     Others:
@@ -464,10 +463,10 @@ MPlayer (1.0)
     Codecs/demuxers support:
     * RealAudio Win32 DLLs support
     * various RealAudio/RealVideo fixes, including WxH bugs, Sipr, etc
-    * various realmedia a-v sync fixes
+    * various RealMedia a-v sync fixes
     * RealAudio V4 demuxer
     * RealAudio 14_4 and 28_8 codecs support (both binary DLLs and native code)
-    * realmedia rtsp:// support (independent from the live.com RTSP stuff!)
+    * RealMedia rtsp:// support (independent from the live.com RTSP stuff!)
     * Matroska demuxer (C++ version)
     * demuxer: enabling MPEG4-ES autodetection, H.264-ES support
     * WAV extradata parsing (for truespeech, atrac3, etc)
@@ -475,7 +474,7 @@ MPlayer (1.0)
     * DVB (Digital Video Broadcasting) input driver
     * hwac3: DTS passthru support
     * new filters: down3dright, detc, telecine, tfields, ilpack, ivtc, dsize,
-      tinterlace, pullup (MMX optimized!), framestep, tile
+      tinterlace, pullup (MMX-optimized!), framestep, tile
     * vf layer: slices support (crop, expand, swscale only)
     * vf scale aspect fixes
     * swscaler: cleanup & API change, yv12 -> yuy2 in alpha asm,
@@ -520,7 +519,7 @@ MPlayer (1.0)
     * lossless MJPEG en/decoding, pegasus "pseudo yuv" (=RCT) decoding
     * ATI VCR1 and VCR2 decoding
     * full featured SH4 optimizations
-    * ARM optimized simple_idct
+    * ARM-optimized simple_idct
     * MPEG2 encoding
     * PSX MDEC decoder
     * user settable quantization matrices
@@ -637,7 +636,7 @@ MPlayer (0.90)
     * ffwma2 fixed (better error resilience)
     * SPU queueing - fixes missing or early disappearing DVD subtitles
     * the mysterious DVD audio delay (150-300ms) fixed
-    * extension-based fileformat detection fixed the MP3 vs. MPEG-PS conflict
+    * extension-based file format detection fixed the MP3 vs. MPEG-PS conflict
     * cache2 keeps buffer for non-seekable media, fixes QuickTime streaming
 
     Fixes:
@@ -737,7 +736,7 @@ MPlayer (0.90)
     * CDDA seeking fixed
     * Win32/RealPlayer codecs DLL & 64bit Alpha Linux RealPlayer codecs support
     * XMMS Input plugins (demuxer & codec) support
-    * Fixed a bug in MMX optimized mp3lib (triggered by OpenBSD).
+    * Fixed a bug in MMX-optimized mp3lib (triggered by OpenBSD).
 
 
   rc1:  "CodecCounter" Dec 7, 2002
@@ -788,7 +787,7 @@ MPlayer (0.90)
     * LIRC error message (Error while reading cmd fd X : Success) fixed
     * playback of some (streamed?) DivX files starting with non-I frames fixed
     * -vo png fixed (removed builtin YV12 support, removed OSD)
-    * some .MP3 playback/seek segfaults fixed
+    * some MP3 playback/seek segfaults fixed
     * VIDIX Mach64 colorkey on PPC fixed
     * -ao sdl now handles "featureless" soundcards
     * -vo zr fixes
@@ -801,7 +800,7 @@ MPlayer (0.90)
     * cleanup of AVI pts (timestamp) handling - no more BPS hack in mplayer.c
     * small cleanup of A-V sync code - using relative instead of absolute timers
     * GUI code cleanup, obsolete files/dirs removed
-    * various small bug fixes, endianess fixes
+    * various small bug fixes, endianness fixes
     * MEncoder: -pass option removed, use -divx4opts pass=N / -lavcopts vpass=N
     * MEncoder: "ff_rate_estimate_qscale: Assertion `q>0.0' failed" fixed!
     * MEncoder: -ovc xvid fixes, cleanup, enhancements
@@ -826,7 +825,7 @@ MPlayer (0.90)
     * now auto-inserting -vop lavc for MPEG-only vo's
     * video filter API documented :)
     * better deblocking filter (-vop pp), pp/npp syntax changed!
-    * -vop 2xsai - 2x scaler for drawn images (low color cartoon animations)
+    * -vop 2xsai - 2x scaler for drawn images (low-color cartoon animations)
     * -vop unsharp - a sharp/blur filter, nice, but very slow
     * -vop il - (de)interleave fields
     * -vop swapuv - guess what :)
@@ -990,7 +989,7 @@ MPlayer (0.90)
     * dithered 1/4/8 bpp support with -vo svga (EGA rulez:))
     * alsa9 fixes/improvements
     * native ARTS driver
-    * various endianess and 64-bit fixes (including MEncoder and -ao pcm)
+    * various endianness and 64-bit fixes (including MEncoder and -ao pcm)
     * many small compatibility/portability fixes (better Cygwin, Darwin support)
     * GUI fixes (playlist, audio/video equalizer, preferences)
     * Skins (fixed many small glitches, a few new skins)
@@ -1055,7 +1054,7 @@ MPlayer (0.90)
     * image distortions when seeking in some MPEG files fixed
     * libmpdvdkit + gcc 3.x issue solved (our CFLAGS triggered a gcc3 bug...)
     * GUI aspect ratio and fullscreen switch fixes, cleanups
-    * low FPS WMV playback fixed
+    * low-PS WMV playback fixed
     * Mac OS X (Darwin) port?
     * buggy v4l audio grabbing disabled, we cannot fix, but patches are welcomed!
     * various MJPEG improvements in libavcodec
@@ -1072,7 +1071,7 @@ MPlayer (0.90)
     * runtime cpudetect disabled by default
     * support for many new Win32 codecs, including mss1, tm20, ucod, truespeech
     * DivX audio dll sig11 with glibc 2.1.(2|3) fixed
-    * includes libmpdvdkit - patched kit of DVD libs (enabled for Linux+FreeBSD)
+    * libmpdvdkit - patched kit of DVD libraries (enabled for Linux+FreeBSD)
     * man pages updated
     * 'f' (fullscreen switch) fixed for some WMs, still has problems
     * various FreeBSD and OpenBSD portability patches
@@ -1094,7 +1093,7 @@ MPlayer (0.90)
     * greatly enhanced MPEG4 encoder (libavcodec)
     * audio-only (WAV/MP3/WMA/Ogg) file playback (console only)
     * playing/encoding audio from separate WAV/MP3 file
-    * support for more fileformats, including the new and very popular Ogg
+    * support for more file formats, including the new and very popular Ogg
     * multiple file playback from console, including various playlist formats
     * and of course, faster than ever... :)
 
@@ -1102,7 +1101,7 @@ MPlayer (0.90)
 MPlayer (0.60) "The RTFMCounter": Jan 2, 2002
 
   release:
-    * minor bug fixes for realmedia/nuppelvideo demuxers
+    * minor bug fixes for RealMedia/nuppelvideo demuxers
     * docs updates
     * help file translation updates
 
@@ -1193,7 +1192,7 @@ MPlayer v0.17 "IdegCounter": Apr 27, 2001
 
 * jumped to 0.17 * (why 17? oh. chass just got a new 17" monitor :))
 
-  - faster memcpy() routine (MMX/3DNow!/SSE optimized)
+  - faster memcpy() routine (MMX/3DNow!/SSE-optimized)
   - new stream selection code (autodetected)
   - pre-devel-alpha DVD code (libcss)
   - subtitle code 100% (perfected timing code)
