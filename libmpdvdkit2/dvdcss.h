@@ -10,6 +10,9 @@
 
 /*
  * Copyright (C) 1998-2002 VideoLAN
+ *
+ * Modified for use with MPlayer, changes contained in libdvdcss_changes.diff.
+ * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
  * $Id$
  *
  * This program is free software; you can redistribute it and/or modify

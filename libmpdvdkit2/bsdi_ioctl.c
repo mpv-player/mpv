@@ -4,6 +4,10 @@
  * Hacked version of the linux cdrom.c kernel module - everything except the
  * DVD handling ripped out and the rest rewritten to use raw SCSI commands
  * on BSD/OS 4.2 (but should work with earlier versions as well).
+ *
+ * Modified for use with MPlayer, changes contained in libdvdcss_changes.diff.
+ * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
 */
 
 #include <sys/types.h>
