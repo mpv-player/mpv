@@ -225,6 +225,8 @@ void* my_mreq(int size, int to_zero)
     printf("Allocated %d bytes of memory: sys %d, user %d-%d\n", size, heap_counter-8, heap_counter, heap_counter+size);
     if(to_zero)
     	memset(heap+heap_counter, 0, size);	    
+    else
+      memset(heap+heap_counter, 0xcc, size);
     heap_counter+=size;
     return heap+heap_counter-size;	
 }
@@ -2508,6 +2510,57 @@ LONG WINAPI expInterlockedExchange(long *dest, long l)
 	return retval;
 }
 
+int WINAPI expUnknownMFC42_1176() /* exact number of arguments unknown */
+{
+    dbgprintf("MFC42:1176\n");
+    return 0;
+}
+
+int WINAPI expUnknownMFC42_1243() /* exact number of arguments unknown */
+{
+    dbgprintf("MFC42:1243\n");
+    return 0;
+}
+
+int UnregisterComClass(GUID* clsid, GETCLASSOBJECT gcs)
+{
+    int found = 0;
+    int i = 0;
+    if(!clsid || !gcs)
+	return -1;
+
+    if (com_object_table == 0)
+	printf("Warning: UnregisterComClass() called without any registered class\n");
+    while (i < com_object_size)
+    {
+	if (found && i > 0)
+	{
+	    memcpy(&com_object_table[i - 1].clsid,
+		   &com_object_table[i].clsid, sizeof(GUID));
+	    com_object_table[i - 1].GetClassObject =
+		com_object_table[i].GetClassObject;
+	}
+	else if (memcmp(&com_object_table[i].clsid, clsid, sizeof(GUID)) == 0
+		 && com_object_table[i].GetClassObject == gcs)
+	{
+            found++;
+	}
+	i++;
+    }
+    if (found)
+    {
+	if (--com_object_size == 0)
+	{
+	    free(com_object_table);
+            com_object_table = 0;
+	}
+    }
+    return 0;
+}
+
+
+
+
 struct exports
 {
     char name[64];
@@ -2698,6 +2751,10 @@ FF(CoTaskMemFree, -1)
 FF(CoCreateInstance, -1)
 FF(StringFromGUID2, -1)
 };
+struct exports exp_mfc42[]={
+FF(UnknownMFC42_1176, 1176)
+FF(UnknownMFC42_1243, 1243)
+};
 struct exports exp_crtdll[]={
 FF(memcpy, -1)
 };
@@ -2714,6 +2771,7 @@ LL(advapi32)
 LL(gdi32)
 LL(version)
 LL(ole32)
+LL(mfc42)
 LL(crtdll)
 };
 
