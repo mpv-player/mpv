@@ -1532,6 +1532,7 @@ extern int demux_avi_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_xmms_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_audio_control(demuxer_t *demuxer, int cmd, void *arg);
+extern int demux_ogg_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_real_control(demuxer_t *demuxer, int cmd, void *arg);
 
 int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
@@ -1552,6 +1553,10 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
 	    return demux_avi_control(demuxer,cmd,arg);
 	case DEMUXER_TYPE_AUDIO:
 	    return demux_audio_control(demuxer,cmd,arg);
+#ifdef HAVE_OGGVORBIS
+	case DEMUXER_TYPE_OGG:
+	    return demux_ogg_control(demuxer,cmd,arg);
+#endif
 #ifdef HAVE_XMMS
 	case DEMUXER_TYPE_XMMS:
 	    return demux_xmms_control(demuxer,cmd,arg);

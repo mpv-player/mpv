@@ -126,6 +126,7 @@ typedef struct ogg_demuxer {
   ogg_syncpoint_t* syncpoints;
   int num_syncpoint;
   off_t pos, last_size;
+  int64_t final_granulepos;
 } ogg_demuxer_t;
 
 #define NUM_VORBIS_HDR_PACKETS 3
@@ -442,7 +443,7 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* 
 }
 
 /// Build a table of all syncpoints to make seeking easier
-void demux_ogg_build_syncpoints_table(demuxer_t* demuxer) {
+void demux_ogg_scan_stream(demuxer_t* demuxer) {
   ogg_demuxer_t* ogg_d = demuxer->priv;
   stream_t *s = demuxer->stream;
   ogg_sync_state* sync = &ogg_d->sync;
@@ -456,7 +457,12 @@ void demux_ogg_build_syncpoints_table(demuxer_t* demuxer) {
   pos = last_pos = demuxer->movi_start;
 
   // Reset the stream
+  if(index_mode == 2) {
   stream_seek(s,demuxer->movi_start);
+  }
+  else {
+    stream_seek(s,demuxer->movi_end-20*BLOCK_SIZE);
+  }
   ogg_sync_reset(sync);
 
   // Get the serial number of the stream we use
@@ -478,7 +484,7 @@ void demux_ogg_build_syncpoints_table(demuxer_t* demuxer) {
   while(1) {
     np = ogg_sync_pageseek(sync,page);
     if(np < 0) { // We had to skip some bytes
-      mp_msg(MSGT_DEMUX,MSGL_ERR,"Bad page sync while building syncpoints table (%d)\n",-np);
+      if(index_mode == 2) mp_msg(MSGT_DEMUX,MSGL_ERR,"Bad page sync while building syncpoints table (%d)\n",-np);
       pos += -np;
       continue;
     }
@@ -507,21 +513,25 @@ void demux_ogg_build_syncpoints_table(demuxer_t* demuxer) {
       int flags;
       demux_ogg_read_packet(os,&op,context,&pts,&flags);
       if(flags || (os->vorbis && op.granulepos >= 0)) {
+        if(index_mode == 2) {
 	ogg_d->syncpoints = (ogg_syncpoint_t*)realloc(ogg_d->syncpoints,(ogg_d->num_syncpoint+1)*sizeof(ogg_syncpoint_t));
 	ogg_d->syncpoints[ogg_d->num_syncpoint].granulepos = op.granulepos;
 	ogg_d->syncpoints[ogg_d->num_syncpoint].page_pos = (ogg_page_continued(page) && p == 0) ? last_pos : pos;
 	ogg_d->num_syncpoint++;
+      }
+        ogg_d->final_granulepos = op.granulepos;
       }
       p++;
     }
     if(p > 1 || (p == 1 && ! ogg_page_continued(page)))
       last_pos = pos;
     pos += np;
-    mp_msg(MSGT_DEMUX,MSGL_INFO,"Building syncpoint table %d%%\r",(int)(pos*100/s->end_pos));
+    if(index_mode == 2) mp_msg(MSGT_DEMUX,MSGL_INFO,"Building syncpoint table %d%%\r",(int)(pos*100/s->end_pos));
   }
-  mp_msg(MSGT_DEMUX,MSGL_INFO,"\n");
+  if(index_mode == 2) mp_msg(MSGT_DEMUX,MSGL_INFO,"\n");
 
-  mp_msg(MSGT_DEMUX,MSGL_V,"Ogg syncpoints table builed: %d syncpoints\n",ogg_d->num_syncpoint);
+  if(index_mode == 2) mp_msg(MSGT_DEMUX,MSGL_V,"Ogg syncpoints table builed: %d syncpoints\n",ogg_d->num_syncpoint);
+  mp_msg(MSGT_DEMUX,MSGL_V,"Ogg stream length: %d\n",ogg_d->final_granulepos);
 
   stream_reset(s);
   stream_seek(s,demuxer->movi_start);
@@ -835,7 +845,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	}
       }
       /// Add the header packets if the stream isn't seekable
-      if(ds && (!s->end_pos || index_mode != 2)) {
+      if(ds && !s->end_pos) {
 	/// Finish the page, otherwise packets will be lost
 	do {
 	  demux_ogg_add_packet(ds,&ogg_d->subs[ogg_d->num_sub],&pack);
@@ -855,14 +865,14 @@ int demux_ogg_open(demuxer_t* demuxer) {
   if(!n_text)
     demuxer->sub->id = -2;
 
+  ogg_d->final_granulepos=0;
   if(!s->end_pos)
     demuxer->seekable = 0;
   else {
     demuxer->movi_start = s->start_pos; // Needed for XCD (Ogg written in MODE2)
     demuxer->movi_end = s->end_pos;
     demuxer->seekable = 1;
-    if(index_mode == 2)
-      demux_ogg_build_syncpoints_table(demuxer);
+    demux_ogg_scan_stream(demuxer);
   }
 
   mp_msg(MSGT_DEMUX,MSGL_V,"OGG demuxer : found %d audio stream%s, %d video stream%s and %d text stream%s\n",n_audio,n_audio>1?"s":"",n_video,n_video>1?"s":"",n_text,n_text>1?"s":"");
@@ -1197,6 +1207,36 @@ void demux_close_ogg(demuxer_t* demuxer) {
   if(ogg_d->syncpoints)
     free(ogg_d->syncpoints);
   free(ogg_d);
+}
+
+int demux_ogg_control(demuxer_t *demuxer,int cmd, void *arg){
+  ogg_demuxer_t* ogg_d = demuxer->priv;
+  ogg_stream_t* os;
+  float rate;
+  if(demuxer->video->id >= 0) {
+    os = &ogg_d->subs[demuxer->video->id];
+    rate = os->samplerate;
+  } else {
+    os = &ogg_d->subs[demuxer->audio->id];
+    rate = (float)((ov_struct_t*)((sh_audio_t*)demuxer->audio->sh)->context)->vi.rate;
+  }
+
+
+    switch(cmd) {
+	case DEMUXER_CTRL_GET_TIME_LENGTH:
+	    if (ogg_d->final_granulepos<=0) return DEMUXER_CTRL_DONTKNOW;
+        unsigned long length = ogg_d->final_granulepos / rate;
+	    *((unsigned long *)arg)=length;
+	    return DEMUXER_CTRL_GUESS;
+
+	case DEMUXER_CTRL_GET_PERCENT_POS:
+	    if (ogg_d->final_granulepos<=0) return DEMUXER_CTRL_DONTKNOW;
+	    *((int *)arg)=(int)( (os->lastpos*100) / ogg_d->final_granulepos);
+	    return DEMUXER_CTRL_OK;
+
+	default:
+	    return DEMUXER_CTRL_NOTIMPL;
+    }
 }
 
 #endif
