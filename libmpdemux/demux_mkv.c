@@ -811,7 +811,8 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
           track->codec_id = ebml_read_ascii (s, &l);
           if (track->codec_id == NULL)
             return 0;
-          if (!strcmp (track->codec_id, MKV_V_MSCOMP))
+          if (!strcmp (track->codec_id, MKV_V_MSCOMP) ||
+              !strcmp (track->codec_id, MKV_A_ACM))
             track->ms_compat = 1;
           else if (!strcmp (track->codec_id, MKV_S_VOBSUB))
             track->subtitle_type = MATROSKA_SUBTYPE_VOBSUB;
@@ -1479,16 +1480,25 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
 
   sh_a->ds = demuxer->audio;
   sh_a->wf = (WAVEFORMATEX *) malloc (sizeof (WAVEFORMATEX));
-  if (track->ms_compat)
+  if (track->ms_compat && (track->private_size >= sizeof(WAVEFORMATEX)))
     {
-      memcpy(sh_a->wf, track->private_data, track->private_size);
+      WAVEFORMATEX *wf = (WAVEFORMATEX *)track->private_data;
+      sh_a->wf = (WAVEFORMATEX *) realloc(sh_a->wf, track->private_size);
+      sh_a->wf->wFormatTag = le2me_16 (wf->wFormatTag);
+      sh_a->wf->nChannels = le2me_16 (wf->nChannels);
+      sh_a->wf->nSamplesPerSec = le2me_32 (wf->nSamplesPerSec);
+      sh_a->wf->nAvgBytesPerSec = le2me_32 (wf->nAvgBytesPerSec);
+      sh_a->wf->nBlockAlign = le2me_16 (wf->nBlockAlign);
+      sh_a->wf->wBitsPerSample = le2me_16 (wf->wBitsPerSample);
+      sh_a->wf->cbSize = track->private_size - sizeof(WAVEFORMATEX);
+      memcpy(sh_a->wf + 1, wf + 1, track->private_size - sizeof(WAVEFORMATEX));
       if (track->a_sfreq == 0.0)
-        track->a_sfreq = le2me_32 (sh_a->wf->nSamplesPerSec);
+        track->a_sfreq = sh_a->wf->nSamplesPerSec;
       if (track->a_channels == 0)
-        track->a_channels = le2me_16 (sh_a->wf->nChannels);
+        track->a_channels = sh_a->wf->nChannels;
       if (track->a_bps == 0)
-        track->a_bps = le2me_16 (sh_a->wf->wBitsPerSample);
-      track->a_formattag = le2me_16 (sh_a->wf->wFormatTag);
+        track->a_bps = sh_a->wf->wBitsPerSample;
+      track->a_formattag = sh_a->wf->wFormatTag;
     }
   else
     {
@@ -1774,7 +1784,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
       dp->flags = 0;
       ds_add_packet (demuxer->audio, dp);
     }
-  else
+  else if (!track->ms_compat || (track->private_size < sizeof(WAVEFORMATEX)))
     {
       free_sh_audio (sh_a);
       return 1;
