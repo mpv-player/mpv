@@ -61,8 +61,10 @@
 
 <P>Un guide excellent et bien écrit pour poser des questions sur les forums
   publiques est <A HREF="http://www.linux-france.org/article/these/smart-questions/smart-questions-fr.html">
-  Comment Poser Les Questions De Manière Intelligente</A> par Eric S. Raymond. 
-  Si vous suivez ces règles cela devrait aller. Mais merci de comprendre que nous
+  Comment Poser Les Questions De Manière Intelligente</A> par Eric S. Raymond. Il y en
+  a un autre (en anglais) appelé <A HREF="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report Bugs Effectively</A>
+  par <A HREF="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</A>.
+  Si vous suivez ces règles vous devriez pouvoir obtenir de l'aide. Mais merci de comprendre que nous
   suivons tous les listes de diffusion volontairement sur notre temps libre. Nous 
   sommes très occupés et ne pouvons garantir que vous aurez une solution à votre 
   problème ou même une réponse.</P>
@@ -91,7 +93,7 @@
 <H4>System Information:</H4>
 
 <UL>
-  <LI>Votre distribution Linux ou système d'exploitation ex.:
+  <LI>Votre distribution Linux ou système d'exploitation et version ex.:
     <UL>
       <LI>Red Hat 7.1</LI>
       <LI>Slackware 7.0 + paquetages de développement de la 7.1 ...</LI>
@@ -160,12 +162,22 @@
 Veuillez inclure ces fichiers:
 
 <UL>
-  <LI>configure.log</LI>
-  <LI>config.h</LI>
-  <LI>config.mak</LI>
-  <LI>libvo/config.mak</LI>
+  <LI><CODE>config.h</CODE></LI>
+  <LI><CODE>config.mak</CODE></LI>
 </UL>
 
+Uniquement si la compilation échoue à partir d'un de ces répertoires, incluez ces fichiers:
+
+<UL>
+  <LI><CODE>Gui/config.mak</CODE></LI>
+  <LI><CODE>libvo/config.mak</CODE></LI>
+  <LI><CODE>libao2/config.mak</CODE></LI>
+</UL>
+
+
+<H4>Pour les problème de configure</H4>
+
+Incluez <CODE>configure.log</CODE>.
 
 <H4>Pour les problèmes de lecture</H4>
 
@@ -199,21 +211,9 @@ Veuillez inclure ces fichiers:
 
 <H4>Pour les plantages</H4>
 
-<P>Si vous avez un "coredump" du plantage, continuez de lire le prochain paragraphe,
-  sinon sautez-le.</P>
-
-
-<H4>Comment extraire les informations significatives d'un core dump</H4>
-
-<P>créez le fichier de commande suivant:</P>
-
-<P><CODE>disass $pc-32 $pc+32<BR>
-  info all-registers</CODE></P>
-
-<P>puis exécutez simplement la ligne de commande suivante:</P>
-
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file &gt; mplayer.bug</CODE></P>
-
+<P>Vous devez lancer MPlayer à l'intérieur de <CODE>gdb</CODE> et nous envoyer le résultat
+  complet ou si vous avez un core dump du plantage vous pouvez extraire des informations
+  utiles du fichier <CODE>Core</CODE>. Voici comment:</P>
 
 <H4>Comment conserver les informations avec un plantage reproduisible</H4>
 
@@ -236,7 +236,17 @@ renvoyer à la ligne de commande où vous devrez entrer
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;disass $pc-32 $pc+32</CODE></P>
 
-et nous envoyer le résultat complet.
+
+<H4>Comment extraire les informations significatives d'un core dump</H4>
+
+<P>créez le fichier de commande suivant:</P>
+
+<P><CODE>disass $pc-32 $pc+32<BR>
+  info all-registers</CODE></P>
+
+<P>puis exécutez simplement la ligne de commande suivante:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=fichier_de_commande &gt; mplayer.bug</CODE></P>
 
 
 <H3>Note générale</H3>
