@@ -22,8 +22,6 @@ Error resistant
 	headers & index can be repeated
 	audio packet reshuffle
 	checksums to allow quick redownloading of damaged parts
-	gurantees that no mpeg startcode prefixes occur in the headers with the
-	exception of codec specific headers (really?)
 
 
         
@@ -51,10 +49,6 @@ sz (zero terminated string)
 		string[i]			u(8)
 	}
 	zero_byte				f(8)
-Note: the string MUST not be 0 bytes long (only a zero byte coded), instead
-	{'?', 0} should be used instead, this is done to avoid emulating 
-	startcode prefixes (if we allow 0 then there could be 0,0,1 which 
-	is a startcode prefix in mpeg)
 
 f(x)	n fixed bits
 u(x)	unsigned number encoded in x bits in MSB first order
@@ -262,7 +256,6 @@ shuffle_type
 
 checksum
 	crc32 checksum using the generator polynomial=0x04c11db7 (same as ogg)
-	bit 23 is forced to 1 to avoid MPEG startcode emulation
 
 checksum_flag
 	indicates that the frame_checksum is coded
