@@ -289,7 +289,7 @@ extern int vo_flags;
 // sub:
 char *font_name=NULL;
 #ifdef HAVE_FONTCONFIG
-int font_fontconfig=0;
+extern int font_fontconfig;
 #endif
 float font_factor=0.75;
 char **sub_name=NULL;

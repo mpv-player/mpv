@@ -56,6 +56,7 @@ int vo_image_height = 0;
 int force_load_font;
 
 int using_freetype = 0;
+int font_fontconfig = 0;
 
 //// constants
 static unsigned int const colors = 256;
