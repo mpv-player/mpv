@@ -4622,6 +4622,8 @@ fi
 if darwin ; then
   # use gnu style cpp on Darwin
   CFLAGS="$CFLAGS -no-cpp-precomp -DSYS_DARWIN"
+  # libavcodec (from ffmpeg) requires CONFIG_DARWIN to enable AltiVec on Darwin/MacOSX
+  test "$_altivec" = yes && CFLAGS="$CFLAGS -DCONFIG_DARWIN"
 fi
 if hpux ; then
   # use flag for HPUX missing setenv()
