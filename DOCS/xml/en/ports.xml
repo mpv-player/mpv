@@ -269,6 +269,127 @@ and then go on with building and installing.
 </para>
 </sect1>
 
+
+<sect1 id="hp-ux">
+<title>HP-UX</title>
+<para>
+Joe Page hosts a detailed HP-UX <application>MPlayer</application>
+<ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">HOWTO</ulink>
+by Martin Gansser on his homepage. With these instructions the build should
+work out of the box. The following information is taken from this HOWTO.
+</para>
+
+<para>
+You need GCC 3.4.0 or later, GNU make 3.80 or later and SDL 1.2.7 or later.
+HP cc will not produce a working program, prior GCC versions are buggy.
+For OpenGL functionality you need to install Mesa and the gl and gl2 video
+output drivers should work, speed may be very bad, depending on the CPU speed,
+though. A good replacement for the rather poor native HP-UX sound system is
+GNU esound.
+</para>
+
+<para>
+Create the DVD device
+scan the SCSI bus with:
+</para>
+
+<screen>
+# ioscan -fn
+
+Class          I            H/W   Path          Driver    S/W State    H/W Type        Description
+...
+ext_bus 1    8/16/5      c720  CLAIMED INTERFACE  Built-in SCSI
+target  3    8/16/5.2    tgt   CLAIMED DEVICE
+disk    4    8/16/5.<emphasis role="bold">2</emphasis>.<emphasis role="bold">0</emphasis>  sdisk CLAIMED DEVICE     <emphasis role="bold">PIONEER DVD-ROM DVD-305</emphasis>
+                         /dev/dsk/c1t2d0 <emphasis role="bold">/dev/rdsk/c1t2d0</emphasis>
+target  4    8/16/5.7    tgt   CLAIMED DEVICE
+ctl     <emphasis role="bold">1</emphasis>    8/16/5.7.0  sctl  CLAIMED DEVICE     Initiator
+                         /dev/rscsi/c1t7d0 /dev/rscsi/c1t7l0 /dev/scsi/c1t7l0
+...
+</screen>
+
+<para>
+The screen output shows a Pioneer DVD-ROM at SCSI address 2.
+The card instance for hardware path 8/16 is 1.
+</para>
+
+<para>
+Create a link from the raw device to the DVD device.
+</para>
+
+<screen>
+# ln -s /dev/rdsk/c<replaceable>&lt;SCSI bus instance&gt;</replaceable>t<replaceable>&lt;SCSI target ID&gt;</replaceable>d<replaceable>&lt;LUN&gt;</replaceable> /dev/<replaceable>&lt;device&lt;</replaceable>
+</screen>
+
+<para>
+Example:
+</para>
+
+<screen>
+# ln -s /dev/rdsk/c1t2d0 /dev/dvd
+</screen>
+
+<para>
+Below are solutions for some common problems:
+</para>
+
+<itemizedlist>
+<listitem>
+<para>
+Crash at Start with the following error message:
+<screen>
+/usr/lib/dld.sl: Unresolved symbol: finite (code) from /usr/local/lib/gcc-lib/hppa2.0n-hp-hpux11.00/3.2/../../../libGL.sl
+</screen>
+</para>
+
+<para>
+This means that the function <systemitem>.finite().</systemitem> is not
+available in the standard HP-UX math library.
+Instead there is <systemitem>.isfinite().</systemitem>.
+Solution: Use the latest Mesa depot file.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Crash at playback with the following error message:
+<screen>
+/usr/lib/dld.sl: Unresolved symbol: sem_init (code) from /usr/local/lib/libSDL-1.2.sl.0
+</screen>
+</para>
+
+<para>
+Solution: Use the extralib option of configure
+<option>--with-extralibdir="/usr/lib -lrt"</option>
+</para>
+</listitem>
+
+<listitem>
+<para>
+MPlayer segfaults with a message like this:
+<screen>
+Pid 10166 received a SIGSEGV for stack growth failure.
+Possible causes: insufficient memory or swap space, or stack size exceeded maxssiz.
+Segmentation fault
+</screen>
+</para>
+
+<para>
+Solution:
+The HP-UX kernel has a default stack size of 8MB(?) per process.(11.0 and
+newer 10.20 patches let you increase <systemitem>maxssiz</systemitem> up to
+350MB for 32-bit programs). You need to extend <systemitem>maxssiz</systemitem>
+and recompile the kernel (and reboot). You can use SAM to do this. (While at
+it, check out the <systemitem>maxdsiz</systemitem> parameter for the maximum
+amount of data a program can use. It depends on your applications, if the
+default of 64MB is enough or not.)
+</para>
+</listitem>
+</itemizedlist>
+
+</sect1>
+
+
 <sect1 id="qnx">
 <title>QNX</title>
 <para>
@@ -438,16 +559,6 @@ modified GCC 2.95.x doesn't support C99 syntax well.
 One can get an Aqua GUI for <application>MPlayer</application> together with
 compiled <application>MPlayer</application> binaries for Mac OS X from the
 <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> project.
-</para>
-</sect1>
-
-<sect1 id="hp-ux">
-<title>HP-UX</title>
-<para>
-Joe Page hosts a HP-UX <application>MPlayer</application>
-<ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">HOWTO</ulink>
-by Martin Gansser on his homepage. With these instructions the build should
-work out of the box.
 </para>
 </sect1>
 
