@@ -466,7 +466,7 @@ static int config(struct vf_instance_s* vf,
     }
     else if (lavc_param_autoaspect)
 #if LIBAVCODEC_BUILD >= 4687
-	lavc_venc_context->sample_aspect_ratio = av_d2q((float)d_width/d_height*height / width, 30000);
+	lavc_venc_context->sample_aspect_ratio = av_d2q((float)d_width/d_height*height / width, 255);
 #else
 	lavc_venc_context->aspect_ratio = (float)d_width/d_height;
 #endif
