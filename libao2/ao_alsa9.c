@@ -41,10 +41,10 @@ static snd_pcm_format_t alsa_format;
 static snd_pcm_hw_params_t *alsa_hwparams;
 static snd_pcm_sw_params_t *alsa_swparams;
 static char *alsa_device;
-#define ALSA_DEVICE_SIZE 48
+#define ALSA_DEVICE_SIZE 48 /* war 48 */
 
-static int alsa_fragsize = 8192; /* 4096 */
-static int alsa_fragcount = 8;
+static int alsa_fragsize = 8192; /* 4096 war 8192*/
+static int alsa_fragcount = 8; /* war 8 */
 
 /* to set/get/query special features/parameters */
 static int control(int cmd, int arg)
@@ -69,12 +69,12 @@ static int control(int cmd, int arg)
     return(CONTROL_UNKNOWN);
 }
 
-#undef start
-#define buffersize
-#undef buffertime
+#undef start /* war undef */
+#define buffersize 
+#undef buffertime /* war undef? */
 #define set_period
-#undef sw_params
-#undef set_start_mode
+#define sw_params /* war undef */
+#undef set_start_mode /* war undef */
 
 /*
     open & setup audio device
@@ -86,7 +86,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     int cards = -1;
     snd_pcm_info_t *alsa_info;
     
-    printf("alsa-init: Don't use this buggy driver, ALSA-0.9.x emulates OSS very well...\n");
+    printf("alsa-init: Don't use this buggy driver, ALSA-0.9.x emulates OSS very well... modified by me\n");
 
     printf("alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
 	channels, audio_out_format_name(format));
@@ -94,8 +94,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     alsa_handler = NULL;
 
     if (verbose)
-	printf("alsa-init: compiled for ALSA-%s (%d)\n", SND_LIB_VERSION_STR,
-	    SND_LIB_VERSION);
+	printf("alsa-init: compiled for ALSA-%s\n", SND_LIB_VERSION_STR);
 
     if ((err = snd_card_next(&cards)) < 0 || cards < 0)
     {
@@ -103,8 +102,9 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
-    ao_samplerate = rate_hz;
+    ao_samplerate = rate_hz; /*war rate_hz */
     ao_bps = channels; /* really this is bytes per frame so bad varname */
+    /* ao_bps = channels */
     ao_format = format;
     ao_channels = channels;
     ao_outburst = OUTBURST;
@@ -217,13 +217,14 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
-    if ((err = snd_pcm_hw_params_set_rate(alsa_handler, alsa_hwparams,
-	ao_samplerate, 0)) < 0)
-    {
-	printf("alsa-init: unable to set samplerate: %s\n",
-	    snd_strerror(err));
-	return(0);
-    }
+        if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams, ao_samplerate, 0)) < 0) 
+/* war nur snd_pcm_hw_params_set_rate */ 
+        {
+    	printf("alsa-init: unable to set samplerate-2: %s\n",
+    	    snd_strerror(err));
+	//snd_pcm_hw_params_dump(alsa_hwparams, errlog);
+    	return(0);
+        }
 
 #ifdef set_period
     {
@@ -257,10 +258,9 @@ static int init(int rate_hz, int channels, int format, int flags)
 
 #ifdef buffertime
     {
-	int alsa_buffer_time = 60;
+      int alsa_buffer_time = 60; /* war 60 */
 
-	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams,
-	    alsa_buffer_time, 0)) < 0)
+	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams, alsa_buffer_time, 0)) < 0)
 	{
 	    printf("alsa-init: unable to set buffer time near: %s\n",
 		snd_strerror(err));
@@ -268,8 +268,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	} else
 	    alsa_buffer_time = err;
 
-	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams,
-	    alsa_buffer_time/ao_bps, 0)) < 0)
+	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams, alsa_buffer_time/ao_bps, 0)) < 0)
+	  /* war alsa_buffer_time/ao_bps */
 	{
 	    printf("alsa-init: unable to set period time: %s\n",
 		snd_strerror(err));
@@ -451,8 +451,10 @@ static int play(void* data, int len, int flags)
 {
     int got_len;
 
-    if ((got_len = snd_pcm_writei(alsa_handler, data, (len/ao_bps))) != (len/ao_bps))
-    {
+    got_len = snd_pcm_writei(alsa_handler, data, len / 4);
+    
+      // war: if ((got_len = snd_pcm_writei(alsa_handler, data, (len/ao_bps))) != (len/ao_bps)) {     
+      
 	if (got_len == -EPIPE) /* underrun? */
 	{
 	    printf("alsa-play: alsa underrun, resetting stream\n");
@@ -468,7 +470,6 @@ static int play(void* data, int len, int flags)
 		return(0);
 	    }
 	    return(len); /* 2nd write was ok */
-	}
     }
     return(len);
 }
