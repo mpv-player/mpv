@@ -40,7 +40,6 @@
 #endif
 
 #include "../postproc/swscale.h"
-//#include "../postproc/rgb2rgb.h"
 
 LIBVO_EXTERN(vesa)
 extern int verbose;
@@ -92,7 +91,6 @@ static unsigned video_mode; /* selected video mode for playback */
 static struct VesaModeInfoBlock video_mode_info;
 static int flip_trigger = 0;
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
-static void (*rgb2rgb_fnc)(const uint8_t *src,uint8_t *dst,uint32_t src_size);
 
 /* multibuffering */
 uint8_t*  video_base; /* should be never changed */
@@ -410,7 +408,6 @@ static uint32_t draw_frame(uint8_t *src[])
 	sws->swScale(sws,src,srcStride,0,srcH,dst,dstStride);
 	flip_trigger=1;
     }
-    else if(!HAS_DGA()) __vbeCopyData(src[0]);
     return 0;
 }
 
@@ -532,11 +529,10 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   uint32_t w,h;
   unsigned short *mode_ptr,win_seg;
   unsigned bpp,best_x = UINT_MAX,best_y=UINT_MAX,best_mode_idx = UINT_MAX;
-  int err,fs_mode,yuv_fmt,use_scaler=0;
-	dstW = width;
-	dstH = height;
+  int err,fs_mode,use_scaler=0;
+	srcW = dstW = width;
+	srcH = dstH = height;
 	fs_mode = 0;
-	rgb2rgb_fnc = NULL;
         if(subdev_flags == 0xFFFFFFFEUL)
 	{
 	  printf("vo_vesa: detected internal fatal error: init is called before preinit\n");
@@ -586,7 +582,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	num_modes = 0;
 	mode_ptr = vib.VideoModePtr;
 	while(*mode_ptr++ != 0xffff) num_modes++;
-	yuv_fmt = 0;
 	switch(format)
 	{
 		case IMGFMT_BGR8:
@@ -599,7 +594,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		case IMGFMT_RGB24: bpp = 24; break;
 		case IMGFMT_BGR32:
 		case IMGFMT_RGB32: bpp = 32; break;
-		default:	   bpp = 16; yuv_fmt = 1; break;
+		default:	   bpp = 16; break;
 	}
 	srcBpp = bpp;
 	srcFourcc = format;
@@ -622,7 +617,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		   dstFourcc = IMGFMT_BGR16;
 		   break;
 	}
-	if(srcFourcc != dstFourcc) yuv_fmt=1;
 	if(verbose)
 	{
 	  printf("vo_vesa: Requested mode: %ux%u@%u (%s)\n",width,height,bpp,vo_format_name(format));
@@ -639,7 +633,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	if(use_scaler)
 	{
 	    dstW = d_width;
-	    dstH= d_height;
+	    dstH = d_height;
 	}
 	if(vo_screenwidth) w = vo_screenwidth;
 	else w = max(dstW,width);
@@ -702,7 +696,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			,video_mode_info.YResolution,dstBpp);
 		dstBpp = video_mode_info.BitsPerPixel;
 		if(subdev_flags & SUBDEV_NODGA) video_mode_info.PhysBasePtr = 0;
-		if(use_scaler || fs_mode || yuv_fmt)
+		if(use_scaler || fs_mode)
 		{
 		      /* software scale */
 		      if(use_scaler > 1)
@@ -718,23 +712,21 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			dstW = video_mode_info.XResolution;
 			dstH = video_mode_info.YResolution;
 		      }
-		      srcW=width;
-	    	      srcH=height;
 		      use_scaler = 1;
-		      if(!lvo_name
+		}
+		if(!lvo_name
 #ifdef CONFIG_VIDIX
-		       && !vidix_name
+		&& !vidix_name
 #endif
-		       ) 
-		       {
-		         sws = getSwsContextFromCmdLine(srcW,srcH,srcFourcc,dstW,dstH,dstFourcc);
-			 if(!sws)
-		         {
-			    printf("vo_vesa: Can't initialize SwScaler\n");
-			    return -1;
-			 }
-		         else if(verbose) printf("vo_vesa: Using SW Scaler-YUV convertor\n");
-		       }
+		) 
+		{
+		    sws = getSwsContextFromCmdLine(srcW,srcH,srcFourcc,dstW,dstH,dstFourcc);
+		    if(!sws)
+		    {
+			printf("vo_vesa: Can't initialize SwScaler\n");
+			return -1;
+		    }
+		    else if(verbose) printf("vo_vesa: Using SW BES emulator\n");
 		}
 		if((video_mode_info.WinAAttributes & FRAME_MODE) == FRAME_MODE)
 		   win.idx = 0; /* frame A */
@@ -810,11 +802,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		else
 		{
 		  cpy_blk_fnc = __vbeCopyBlock;
-		  if((yuv_fmt || rgb2rgb_fnc) && !lvo_name
+		  if(!lvo_name
 #ifdef CONFIG_VIDIX
 		   && !vidix_name
 #endif
-		   )
+		  )
 		  {
 		    if(!(dga_buffer = memalign(64,video_mode_info.XResolution*video_mode_info.YResolution*dstBpp)))
 		    {
