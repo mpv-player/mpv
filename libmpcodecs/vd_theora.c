@@ -41,6 +41,7 @@ static int init(sh_video_t *sh){
     int failed = 1;
     int errorCode = 0;
     ogg_packet op;
+//    theora_comment tc;
 
     /* check whether video output format is supported */
     switch(sh->codec->outfmt[sh->outfmtidx])
@@ -69,6 +70,27 @@ static int init(sh_video_t *sh){
 	  break;
        }
 
+       /* decode comment packet */
+       op.bytes = ds_get_packet (sh->ds,&op.packet);
+       op.b_o_s  = 1;
+#if 0
+       if((errorCode = theora_decode_comment (&tc, &op))) {
+	  mp_msg(MSGT_DECVIDEO,MSGL_ERR, 
+		 "Broken Theora comment; erroroCode=%i!\n", errorCode);
+	  break;
+       }
+#endif
+
+       /* decode tables packet */
+       op.bytes = ds_get_packet (sh->ds,&op.packet);
+       op.b_o_s  = 1;
+       if((errorCode = theora_decode_tables (&context->inf, &op))) {
+	  mp_msg(MSGT_DECVIDEO,MSGL_ERR, 
+		 "Broken Theora comment; erroroCode=%i!\n", errorCode);
+	  break;
+       }
+
+       /* now init codec */
        errorCode = theora_decode_init (&context->st, &context->inf);
        if (errorCode)
        {
