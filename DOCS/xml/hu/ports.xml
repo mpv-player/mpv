@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.55 -->
+<!-- synced with 1.57 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -272,6 +272,127 @@ ezután símán fordíts és telepíts.
 </para>
 </sect1>
 
+
+<sect1 id="hp-ux">
+<title>HP-UX</title>
+<para>
+Joe Page ad helyet egy részletes HP-UX <application>MPlayer</application>
+<ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">HOGYAN</ulink>-nak
+a weboldalán, amit Martin Gansser írt. Ezekkel az utasításokkal a fordítás után
+egyből kész programot kapsz. A következő információk a HOGYAN-ból lettek átvéve.
+</para>
+
+<para>
+GCC 3.4.0 vagy későbbire lesz szükséged, GNU make 3.80 vagy újabb és SDL 1.2.7 vagy
+újabb. A HP cc nem tud működő programot fordítani, a korábbi GCC verziók pedig hibásak.
+Az OpenGL funkcionalításhoz telepítened kel a Mesa-t és így a gl és gl2 videó kimeneti
+vezérlőknek működniük kell, bár nagyon lassúak is lehetnek a CPU sebességétől függően.
+
+A meglehetősen gyenge natív HP-UX hangrendszer helyett inkább használd a GNU esound-ot.
+</para>
+
+<para>
+Hozd létre a DVD eszközt
+nézd végig a SCSI buszt:
+</para>
+
+<screen>
+# ioscan -fn
+
+Class          I            H/W   Path          Driver    S/W State    H/W Type        Description
+...
+ext_bus 1    8/16/5      c720  CLAIMED INTERFACE  Built-in SCSI
+target  3    8/16/5.2    tgt   CLAIMED DEVICE
+disk    4    8/16/5.<emphasis role="bold">2</emphasis>.<emphasis role="bold">0</emphasis>  sdisk CLAIMED DEVICE     <emphasis role="bold">PIONEER DVD-ROM DVD-305</emphasis>
+                         /dev/dsk/c1t2d0 <emphasis role="bold">/dev/rdsk/c1t2d0</emphasis>
+target  4    8/16/5.7    tgt   CLAIMED DEVICE
+ctl     <emphasis role="bold">1</emphasis>    8/16/5.7.0  sctl  CLAIMED DEVICE     Initiator
+                         /dev/rscsi/c1t7d0 /dev/rscsi/c1t7l0 /dev/scsi/c1t7l0
+...
+</screen>
+
+<para>
+A képernyőn a kimenetben egy Pioneer DVD-ROM látszik a 2. SCSI címen.
+A kártya a 8/16-os hardver útra az 1-essel hivatkozik.
+</para>
+
+<para>
+Készíts egy linket a nyers eszközről a DVD eszközre.
+</para>
+
+<screen>
+# ln -s /dev/rdsk/c<replaceable>&lt;SCSI busz hivatkozás&gt;</replaceable>t<replaceable>&lt;SCSI cél ID&gt;</replaceable>d<replaceable>&lt;LUN&gt;</replaceable> /dev/<replaceable>&lt;eszköz&lt;</replaceable>
+</screen>
+
+<para>
+Például:
+</para>
+
+<screen>
+# ln -s /dev/rdsk/c1t2d0 /dev/dvd
+</screen>
+
+<para>
+Itt van pár gyakori probléma megoldása:
+</para>
+
+<itemizedlist>
+<listitem>
+<para>
+A rendzser összeomlik indításkor a következő hibaüzenettel:
+<screen>
+/usr/lib/dld.sl: Unresolved symbol: finite (code) from /usr/local/lib/gcc-lib/hppa2.0n-hp-hpux11.00/3.2/../../../libGL.sl
+</screen>
+</para>
+
+<para>
+Ez azt jelenti, hogy a <systemitem>.finite().</systemitem> függvény
+nincs benne a szabványos HP-UX math függvénykönyvtárban.
+Ekkor <systemitem>.isfinite().</systemitem> van helyette.
+Megoldás: Használd a legújabb Mesa depot fájlt.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Összeomlás lejátszáskor a következő hibaüzenettel:
+<screen>
+/usr/lib/dld.sl: Unresolved symbol: sem_init (code) from /usr/local/lib/libSDL-1.2.sl.0
+</screen>
+</para>
+
+<para>
+Megoldás: Használd a configure extralib opcióját
+<option>--with-extralibdir="/usr/lib -lrt"</option>
+</para>
+</listitem>
+
+<listitem>
+<para>
+Az MPlayer segfault-ol egy ilyesmi üzenettel:
+<screen>
+Pid 10166 received a SIGSEGV for stack growth failure.
+Possible causes: insufficient memory or swap space, or stack size exceeded maxssiz.
+Segmentation fault
+</screen>
+</para>
+
+<para>
+Megoldás:
+A HP-UX kernel alapértelmezésként 8MB-os(?) méretű vermet használ processzenként.(11.0 és
+az újabb 10.20 foltok engedik növelni a <systemitem>maxssiz</systemitem>-t egészen
+350MB-ig a 32-bit-es programokhoz). Növelned kell a <systemitem>maxssiz</systemitem>-t
+és újrafordítani a kernelt (majd reboot-olni). Ehhez használhatod a SAM-ot. (Ha már itt
+tartunk, nézd meg a <systemitem>maxdsiz</systemitem> paramétert is az egy program által
+használható maximum adatmennyiséghez. Az alkalmazásaidon múlik, hogy az alapértelmezett
+64MB elég vagy sem.)
+</para>
+</listitem>
+</itemizedlist>
+
+</sect1>
+
+
 <sect1 id="qnx">
 <title>QNX</title>
 <para>
@@ -449,15 +570,6 @@ melyet egy előre lefordított lejátszó binárissal együtt tölthetünk le az
 </para>
 </sect1>
 
-<sect1 id="hpux">
-<title>HP UX</title>
-<para>
-Joe Page ad helyet a weboldalán a Martin Gansser által készített HP-UX <application>MPlayer</application>
-<ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">HOGYAN</ulink>-nak.
-Ezen leírás alapján a fordítást elvileg vígan el tudod intézni.
-</para>
-</sect1>
-
 <sect1 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
@@ -477,7 +589,7 @@ Letölthető a <ulink url="http://www.morphzone.org/">MorphZone</ulink>-ról:
 <application>MPlayer</application> 0.91 forrás</ulink>
 </para></listitem>
 <listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=912">
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=92">
 <application>MEncoder</application> 0.91 bináris</ulink>
 </para></listitem>
 </itemizedlist>
