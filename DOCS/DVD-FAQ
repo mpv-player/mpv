@@ -25,7 +25,7 @@ Q: DVD support in MPlayer is a piece of shit!
 A: You're probably right :) However please contact us if you can improve it!
 
 Q: Where can I get libcss package from?
-A: Maybe from the source of OMS (www.livid.org).
+A: Maybe from the source of OMS (www.linuxvideo.org).
 
 Q: How can I ... (insert some expectable DVD player feature here)
 A: The current implementation is only for viewing VOB files from DVD.
@@ -35,7 +35,7 @@ Q: How can I set the region code of my DVD-Drive ? I don't have windows!
 A: Use the 'regionset' tool :
    http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz
 
-Q: MPlayer complains about something renamed option?1
+Q: MPlayer complains about some renamed option?
 A: For future development, old '-dvd' option was replaced by '-dvdauth'.
    Option '-dvd' *WILL* do the 'full disk movie' mplaying mode.
    But until that, '-dvd' does nothing only prints error message.
