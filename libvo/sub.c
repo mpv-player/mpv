@@ -443,6 +443,7 @@ void vo_remove_text(int dxs,int dys,void (*remove)(int x0,int y0, int w,int h)){
 	  }
 //	  obj->flags&=~OSDFLAG_OLD_BBOX;
       }
+      obj=obj->next;
     }
 }
 
@@ -493,3 +494,19 @@ int vo_osd_changed(int new_value)
     return ret;
 }
 
+//      BBBBBBBBBBBB   AAAAAAAAAAAAA  BBBBBBBBBBB
+//              BBBBBBBBBBBB  BBBBBBBBBBBBB
+//                        BBBBBBB
+
+// return TRUE if we have osd in the specified rectangular area:
+int vo_osd_check_range_update(int x1,int y1,int x2,int y2){
+    mp_osd_obj_t* obj=vo_osd_list;
+    while(obj){
+	if(obj->flags&OSDFLAG_VISIBLE){
+	    if(	(obj->bbox.x1<=x2 && obj->bbox.x2>=x1) &&
+		(obj->bbox.y1<=y2 && obj->bbox.y2>=y1) ) return 1;
+	}
+	obj=obj->next;
+    }
+    return 0;
+}
