@@ -172,25 +172,25 @@ enum {
     (h)->dwSize = le2me_32((h)->dwSize);  \
 }
 #define le2me_VideoPropHeader(h) {					\
-    (h)->VideoFormatToken = le2me_32((h)->VideoFormatToke)		\
-    (h)->VideoStandrad = le2me_32((h)->VideoStandard)			\
-    (h)->dwVerticalRefreshRate = le2me_32((h)->dwVerticalRefreshRate)	\
-    (h)->dwHTotalInT = le2me_32((h)->dwHTotalInT)			\
-    (h)->dwVTotalInLines = le2me_32((h)->dwVTotalInLines)		\
-    (h)->dwFrameAspectRatio = le2me_32((h)->dwFrameAspectRatio)		\
-    (h)->dwFrameWidthInPixels = le2me_32((h)->dwFrameWidthInPixels)	\
-    (h)->dwFrameHeightInLines = le2me_32((h)->dwFrameHeightInLines)	\
-    (h)->nbFieldPerFrame = le2me_32((h)->nbFieldPerFrame)		\
+    (h)->VideoFormatToken = le2me_32((h)->VideoFormatToken);		\
+    (h)->VideoStandard = le2me_32((h)->VideoStandard);			\
+    (h)->dwVerticalRefreshRate = le2me_32((h)->dwVerticalRefreshRate);	\
+    (h)->dwHTotalInT = le2me_32((h)->dwHTotalInT);			\
+    (h)->dwVTotalInLines = le2me_32((h)->dwVTotalInLines);		\
+    (h)->dwFrameAspectRatio = le2me_32((h)->dwFrameAspectRatio);	\
+    (h)->dwFrameWidthInPixels = le2me_32((h)->dwFrameWidthInPixels);	\
+    (h)->dwFrameHeightInLines = le2me_32((h)->dwFrameHeightInLines);	\
+    (h)->nbFieldPerFrame = le2me_32((h)->nbFieldPerFrame);		\
 }
 #define le2me_VIDEO_FIELD_DESC(h) {					\
-    (h)->CompressedBMHeight = le2me_32((h)->CompressedBMHeight)		\
-    (h)->CompressedBMWidth = le2me_32((h)->CompressedBMWidth)		\
-    (h)->ValidBMHeight = le2me_32((h)->ValidBMHeight)			\
-    (h)->ValidBMWidth = le2me_32((h)->ValidBMWidth)			\
-    (h)->ValidBMXOffset = le2me_32((h)->ValidXOffset)			\
-    (h)->ValidBMYOffset = le2me_32((h)->ValidYOffset)			\
-    (h)->VideoXOffsetInT = le2me_32((h)->VideoXOffsetInT)		\
-    (h)->VideoYValidStartLine = le2me_32((h)->VideoYValidStartLine)	\
+    (h)->CompressedBMHeight = le2me_32((h)->CompressedBMHeight);	\
+    (h)->CompressedBMWidth = le2me_32((h)->CompressedBMWidth);		\
+    (h)->ValidBMHeight = le2me_32((h)->ValidBMHeight);			\
+    (h)->ValidBMWidth = le2me_32((h)->ValidBMWidth);			\
+    (h)->ValidBMXOffset = le2me_32((h)->ValidBMXOffset);		\
+    (h)->ValidBMYOffset = le2me_32((h)->ValidBMYOffset);		\
+    (h)->VideoXOffsetInT = le2me_32((h)->VideoXOffsetInT);		\
+    (h)->VideoYValidStartLine = le2me_32((h)->VideoYValidStartLine);	\
 }
 
 #else
