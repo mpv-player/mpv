@@ -610,10 +610,8 @@ divx4_param.rc_reaction_ratio  = 20;
 
 #ifdef USE_DVDREAD
 if(stream->type==STREAMTYPE_DVD){
-  current_module="dvd lang->id";
   if(audio_lang && audio_id==-1) audio_id=dvd_aid_from_lang(stream,audio_lang);
   if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
-  current_module=NULL;
 }
 #endif
 
