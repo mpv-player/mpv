@@ -243,7 +243,7 @@ void releaseGlContext(int *vinfo, HGLRC *context) {
 }
 #else
 /**
- * Returns the XVisualInfo associated with Window win.
+ * \brief Returns the XVisualInfo associated with Window win.
  * \param win Window whose XVisualInfo is returne.
  * \return XVisualInfo of the window. Caller must use XFree to free it.
  */

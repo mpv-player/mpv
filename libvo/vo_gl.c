@@ -47,12 +47,17 @@ static int                  wsGLXAttrib[] = { GLX_RGBA,
 
 static int use_osd;
 static int scaled_osd;
+//! How many parts the OSD may consist of at most
 #define MAX_OSD_PARTS 20
+//! Textures for OSD
 static GLuint osdtex[MAX_OSD_PARTS];
 #ifndef FAST_OSD
+//! Alpha textures for OSD
 static GLuint osdatex[MAX_OSD_PARTS];
 #endif
+//! Display lists that draw the OSD parts
 static GLuint osdDispList[MAX_OSD_PARTS];
+//! How many parts the OSD currently consists of
 static int osdtexCnt = 0;
 
 static int use_aspect;
