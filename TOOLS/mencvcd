@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Version:          0.1.3
+# Version:          0.1.4
 #
 # Licence:          GPL
 #
@@ -28,7 +28,10 @@
 #                     - new option "-vbr"
 #                     - removes mpg file after mastering cd image
 #                       (mplayer can read bin images!)
-#                     - bug fixes
+#                     - bugfixes
+# 2002/04/22        v0.1.4
+#                     - bugfixes / changes
+#                     - more options
 #
 ################################################################################
 #
@@ -43,6 +46,8 @@ CDDEV="--device 0,1,0" # or comment out and create link /dev/cdrecorder to your 
 ################################################################################
 AUDIO="audiodump.wav"
 VIDEO="stream.yuv"
+VCDMODE=2
+SVCDMODE=5
 ################################################################################
 
 function usage() {
@@ -62,6 +67,8 @@ function usage() {
    echo "-mp3          outputs audio in mp3 instead of mp2 format"
    echo "-mpg          don't encode from source, multiplex/burn"
    echo "              only the encoded mpg stream"
+   echo "-ratio <s>    output ratio size of frames, see yuvscaler (1)"
+   echo "-size  <XxY>  sets output size of frames"
    echo "-svcdout      encode to SVCD format [VCD default]"
    echo "-vbr <n>      output video bitrate in kbs [VCD:1152, SVCD:2500]"
    echo
@@ -84,6 +91,9 @@ rm -f $AUDIO
 mkfifo -m 660 $VIDEO
 
 # some inits
+sub=""
+size=""
+ratio=""
 params=""
 wide=""
 blank=0
@@ -98,9 +108,9 @@ vbr=1152
 vbrset=0
 denoise="cat -"
 norm="VCD"
-mplexnorm="-f 2 -m 1 -V"
+mplexnorm="-f $VCDMODE -m 1 -V -b 46"
 max=646
-mpegnorm="-f 2 -b $vbr -B 260"
+mpegnorm="-f $VCDMODE -b $vbr -B 260 -V 46"
 imaget="-t vcd2"
 
 while [ "$1"x != "x" ]; do
@@ -144,6 +154,18 @@ while [ "$1"x != "x" ]; do
       -denoise)
         denoise="yuvdenoise"
         ;;
+      -ratio)
+        ratio=$2
+        shift 1
+        ;;
+      -sid) # mplayer option: have to set vop expand, too!!!
+        sub="-vop pp,expand=-1:-1:-1:-1:1 -sid $2"
+        shift 1
+        ;;
+      -size)
+        size=$2
+        shift 1
+        ;;
       -svcdout)
         norm="SVCD"
 	;;
@@ -162,10 +184,19 @@ done
 # some configs
 if [ "$norm" == "SVCD" ]; then
    [ $vbrset -eq 0 ] && vbr=2500
-   mplexnorm="-f 5 -m 2 -V"
-   mpegnorm="-f 5 -b $vbr -B 260 -a 2"
+   mplexnorm="-f $SVCDMODE -m 2 -V -b 230"
+   if [ -n "$wide" ]; then
+     wide=""
+     mpegnorm="-f $SVCDMODE -b $vbr -B 260 -V 230 -a 3"
+   else
+     mpegnorm="-f $SVCDMODE -b $vbr -B 260 -V 230 -a 2"
+   fi
    imaget="-t svcd"
 fi
+
+# ratio overwrites wide sizing, size overwrites default frame size
+[ -n "$ratio" ] && wide="-M $ratio"
+[ -n "$size" ] && size="-O SIZE_$size"
 
 # with mp3 audio set the default audio bitrate to 128 kbs
 [ $mp3 -eq 1 -a $abrset -eq 0 ] && abr=128
@@ -177,17 +208,19 @@ fi
 [ $b -le 99 ] && b="0$b00"
 kasr="$a.$b"
 
+# start de-/encoding
 if [ $burnonly -eq 0 ]; then
    # encode streams
    if [ $mkstream -eq 1 ]; then
       # start mplayer
       mplayer -noframedrop -vo yuv4mpeg -ao pcm -waveheader \
-              -osdlevel 0 $params &
+              -v -osdlevel 0 $sub $params &
 
       # mjpegtools
       ($denoise < $VIDEO | \
-         yuvscaler -v 0 $wide -O $norm | \
-         mpeg2enc -v 0 -s $mpegnorm -S $max -g 6 -G 15 -r 16 -o $NAME.mpv) &
+         yuvscaler -v 0 $wide -O $norm $size | \
+         mpeg2enc -v 0 -s $mpegnorm -S $max -g 6 -G 15 -r 16 \
+	          -4 2 -2 1 -o $NAME.mpv) &
    
       # wait for finishing the subprocesses
       wait
