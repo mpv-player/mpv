@@ -358,14 +358,6 @@ select
 
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
 .TP
-.B \-use-stdin
-The standard input (aka. stdin) will be used to read data instead of key
-events. If you open /dev/stdin (or the equivalent on your system), use stdin
-in a playlist or intend to read from stdin later on via the openfile or
-openlist commands you
-.B need
-this option.
-.TP
 .B \-autoq <quality> (use with \-vf pp)
 Dynamically changes the level of postprocessing depending on available spare
 CPU time.
@@ -555,6 +547,14 @@ Set playback speed rate.
 .B \-sstep <sec>
 Specifies seconds between displayed frames.
 Useful for slideshows.
+.TP
+.B \-use-stdin
+The standard input (aka. stdin) will be used to read data instead of key
+events. If you open /dev/stdin (or the equivalent on your system), use stdin
+in a playlist or intend to read from stdin later on via the openfile or
+openlist commands you
+.B need
+this option.
 
 
 .SH "DEMUXER/STREAM OPTIONS"
