@@ -6,6 +6,7 @@
 
 #include "../config.h"
 #include "../mp_msg.h"
+#include "../cpudetect.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -97,7 +98,6 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		    &vf->priv->ppMode[ vf->priv->pp ], vf->priv->context,
 		    mpi->pict_type);
     }
-    
     return vf_next_put_image(vf,vf->priv->dmpi);
 }
 
@@ -131,6 +131,12 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
     if(!vf->priv->outfmt) return 0; // no csp match :(
     
+    pp_init(
+          (gCpuCaps.hasMMX   ? PP_CPU_CAPS_MMX   : 0)
+	| (gCpuCaps.hasMMX2  ? PP_CPU_CAPS_MMX2  : 0)
+	| (gCpuCaps.has3DNow ? PP_CPU_CAPS_3DNOW : 0)
+    );
+    
     if(args){
 	if(!strcmp("help", args)){
 		printf("%s", pp_help);
@@ -145,7 +151,7 @@ static int open(vf_instance_t *vf, char* args){
     }else{
         name="de";
     }
-    
+
     if(name){
         for(i=0; i<=GET_PP_QUALITY_MAX; i++){
             vf->priv->ppMode[i]= pp_get_mode_by_name_and_quality(name, i);
