@@ -13,7 +13,11 @@
 #include <sys/cdio.h>
 #include <sys/cdrio.h>
 #else
+#ifdef __sun
+#include <sys/cdio.h>
+#else
 #include <linux/cdrom.h>
+#endif
 #endif
 
 #include "stream.h"

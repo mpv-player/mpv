@@ -7,7 +7,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifdef __sun
+#include <sys/audioio.h>
+#else
 #include <sys/soundcard.h>
+#endif
 
 #include "../config.h"
 
@@ -32,9 +36,14 @@ LIBAO_EXTERN(oss)
 // ao_outburst
 // ao_buffersize
 
-static char* dsp="/dev/dsp";
-static int audio_fd=-1;
+#ifdef __sun
+static char *dsp="/dev/audio";
+static int queued_bursts = 0;
+#else
+static char *dsp="/dev/dsp";
 static audio_buf_info zz;
+#endif
+static int audio_fd=-1;
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
@@ -60,6 +69,22 @@ static int init(int rate,int channels,int format,int flags){
     return 0;
   }
 
+#ifdef __sun
+  {
+    audio_info_t info;
+    ioctl(audio_fd, AUDIO_GETINFO, &info);
+    ioctl(audio_fd, AUDIO_DRAIN, 0);
+    info.play.encoding = ao_format = format;
+    info.play.precision = (format==AUDIO_ENCODING_LINEAR? AUDIO_PRECISION_16:AUDIO_PRECISION_8);
+    info.play.channels = ao_channels = channels;
+    --ao_channels;
+    info.play.sample_rate = ao_samplerate = rate;
+    if(ioctl (audio_fd, AUDIO_SETINFO, &info)<0)
+      printf("audio_setup: your card doesn't support %d Hz samplerate\n",rate);
+    ao_outburst=8192;
+    queued_bursts = 0;
+  }
+#else
   ao_format=format;
   ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_format);
   printf("audio_setup: sample format: 0x%X  (requested: 0x%X)\n",ao_format,format);
@@ -87,6 +112,7 @@ static int init(int rate,int channels,int format,int flags){
       if(ao_buffersize==-1) ao_buffersize=zz.bytes;
       ao_outburst=zz.fragsize;
   }
+#endif
 
   if(ao_buffersize==-1){
     // Measuring buffer size:
@@ -109,6 +135,9 @@ static int init(int rate,int channels,int format,int flags){
           printf("Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n");
         return 0;
     }
+#ifdef __sun
+    ioctl(audio_fd, AUDIO_DRAIN, 0);
+#endif
 #endif
   }
 
@@ -117,7 +146,9 @@ static int init(int rate,int channels,int format,int flags){
 
 // close audio device
 static void uninit(){
+#ifdef SNDCTL_DSP_RESET
     ioctl(audio_fd, SNDCTL_DSP_RESET, NULL);
+#endif
     close(audio_fd);
 }
 
@@ -130,9 +161,23 @@ static void reset(){
 	return;
     }
 
+#ifdef __sun
+  {
+    audio_info_t info;
+    ioctl(audio_fd, AUDIO_GETINFO, &info);
+    ioctl(audio_fd, AUDIO_DRAIN, 0);
+    info.play.encoding = ao_format;
+    info.play.precision = (ao_format==AUDIO_ENCODING_LINEAR? AUDIO_PRECISION_16:AUDIO_PRECISION_8);
+    info.play.channels = ao_channels+1;
+    info.play.sample_rate = ao_samplerate;
+    ioctl (audio_fd, AUDIO_SETINFO, &info);
+    queued_bursts = 0;
+  }
+#else
   ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_format);
   ioctl (audio_fd, SNDCTL_DSP_STEREO, &ao_channels);
   ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_samplerate);
+#endif
 
 }
 
@@ -140,10 +185,12 @@ static void reset(){
 static int get_space(){
   int playsize=ao_outburst;
 
+#ifdef SNDCTL_DSP_GETOSPACE
   if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)!=-1){
       // calculate exact buffer space:
       return zz.fragments*zz.fragsize;
   }
+#endif
 
     // check buffer
 #ifdef HAVE_AUDIO_SELECT
@@ -157,7 +204,15 @@ static int get_space(){
     }
 #endif
 
-    return ao_outburst;
+#ifdef __sun
+  {
+    audio_info_t info;
+    ioctl(audio_fd, AUDIO_GETINFO, &info);
+    if(queued_bursts - info.play.eof > 2)
+      return 0;
+  }
+#endif
+  return ao_outburst;
 }
 
 // plays 'len' bytes of 'data'
@@ -166,6 +221,12 @@ static int get_space(){
 static int play(void* data,int len,int flags){
     len/=ao_outburst;
     len=write(audio_fd,data,len*ao_outburst);
+#ifdef __sun
+    if(len>0) {
+      queued_bursts ++;
+      write(audio_fd,data,0);
+    }
+#endif
     return len;
 }
 
@@ -173,6 +234,14 @@ static int audio_delay_method=2;
 
 // return: how many unplayed bytes are in the buffer
 static int get_delay(){
+#ifdef __sun
+ {
+   int q;
+    audio_info_t info;
+    ioctl(audio_fd, AUDIO_GETINFO, &info);
+    return (queued_bursts - info.play.eof) * ao_outburst;
+ }
+#else
   if(audio_delay_method==2){
       // 
       int r=0;
@@ -187,5 +256,6 @@ static int get_delay(){
       audio_delay_method=0; // fallback if not supported
   }
   return ao_buffersize;
+#endif
 }
 

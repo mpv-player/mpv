@@ -176,6 +176,7 @@ void Setup_LDT_Keeper(){
 #endif  /* __NetBSD__ || __FreeBSD__ || __OpenBSD__ */
 
 #if defined(__svr4__)
+ {
     struct ssd ssd;
     ssd.sel = TEB_SEL;
     ssd.bo = array.base_addr;
@@ -188,6 +189,7 @@ void Setup_LDT_Keeper(){
 	perror("sysi86(SI86DSCR)");
 	printf("Couldn't install fs segment, expect segfault\n");
     }
+ }
 #endif
 
     setup_FS_Segment();

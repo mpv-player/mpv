@@ -16,7 +16,11 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifdef __sun
+#include <sys/audioio.h>
+#else
 #include <sys/soundcard.h>
+#endif
 
 #include "version.h"
 #include "config.h"
@@ -501,7 +505,11 @@ int f; // filedes
 #endif
 
 if(!filename){
+#ifdef __sun
+  if(vcd_track) filename="/vol/dev/aliases/cdrom0"; 
+#else
   if(vcd_track) filename="/dev/cdrom"; 
+#endif
   else {
     printf("%s",help_text); exit(0);
   }

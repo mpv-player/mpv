@@ -149,11 +149,11 @@ TMPC="mplayer-conf-${RANDOM}-$$-${RANDOM}.c"
 TMPO="mplayer-conf-${RANDOM}-$$-${RANDOM}.o"
 TMPS="mplayer-conf-${RANDOM}-$$-${RANDOM}.S"
 
-if [ ! -z $TMPDIR ]; then
+if [ ! -z "$TMPDIR" ]; then
 	TMPC="${TMPDIR}/${TMPC}"
 	TMPO="${TMPDIR}/${TMPO}"
 	TMPS="${TMPDIR}/${TMPS}"
-elif [ ! -z $TEMPDIR ]; then
+elif [ ! -z "$TEMPDIR" ]; then
 	TMPC="${TEMPDIR}/${TMPC}"
 	TMPO="${TEMPDIR}/${TMPO}"
 	TMPS="${TEMPDIR}/${TMPS}"
@@ -175,10 +175,10 @@ _cc=gcc
 _x11=auto
 
 _x11libdir=
-if [ -e /usr/X11R6 ]; then
+if [ -d /usr/X11R6 ]; then
  _x11libdir=-L/usr/X11R6/lib
 else
- if [ -e /usr/X11 ]; then
+ if [ -d /usr/X11 ]; then
   _x11libdir=-L/usr/X11/lib
  fi
 fi
@@ -327,10 +327,10 @@ done
 
 
 _win32libdirnotify=no
-if [ -e /usr/lib/win32 ]; then
+if [ -d /usr/lib/win32 ]; then
  _win32libdir=/usr/lib/win32
 else
- if [ -e /usr/local/lib/win32 ]; then
+ if [ -d /usr/local/lib/win32 ]; then
   _win32libdir=/usr/local/lib/win32
  else
 # This is our default:
@@ -340,7 +340,7 @@ else
 fi
 
 
-if [ -e /dev/mga_vid ]; then
+if [ -c /dev/mga_vid ]; then
  _mga=yes
  _syncfb=yes
 fi
@@ -487,8 +487,9 @@ $_cc $TMPC -o $TMPO -lpthread &> /dev/null || \
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
 _sdl=no
 if $_cc $TMPC -o $TMPO `$_sdlconfig --libs` &> /dev/null ; then
-	if test `$_sdlconfig --version | sed s/[=[:punct:]=]//g` -gt 116 ; then
-		if test `$_sdlconfig --version | sed s/[=[:punct:]=]//g` -lt 121 ; then
+	if test `$_sdlconfig --version | sed s/[^0-9]//g` -gt 116 ; then
+		if test `$_sdlconfig --version | sed s/[^0-9]//g` -lt 121 ; then
+
 			_sdlbuggy='#define BUGGY_SDL'
 		else	
 			_sdlbuggy='#undef BUGGY_SDL'
@@ -521,7 +522,7 @@ _termcap=no
 $_cc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
 
 _png=no
-$_cc $TMPC -o $TMPO -lpng -lz&> /dev/null && _png=yes
+$_cc $TMPC -o $TMPO -lpng -lz -lm &> /dev/null && _png=yes
 
 _binutils=no
 as libac3/downmix/downmix_i386.S -o $TMPO &> /dev/null && _binutils=yes
@@ -530,24 +531,28 @@ as libac3/downmix/downmix_i386.S -o $TMPO &> /dev/null && _binutils=yes
 
 # ----------- Check X11 and related libs (GL, Xxf86vm, Xv, DGA) --------------
 
+# for Solaris:
+_socklib=
+$_cc $TMPC -o $TMPO -lsocket >/dev/null 2>&1 && _socklib=-lsocket
+
 if [ $_x11 = auto ]; then
   _x11=no
-  $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext &> /dev/null && _x11=yes
+  $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext $_socklib &> /dev/null && _x11=yes
 fi
 
 if [ $_x11 = yes ]; then
 
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms &> /dev/null && _xdpms=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv &> /dev/null && _xv=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm &> /dev/null && _vm=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib &> /dev/null && _xdpms=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv $_socklib &> /dev/null && _xv=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib &> /dev/null && _vm=yes
 
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL &> /dev/null && _gl=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL $_socklib &> /dev/null && _gl=yes
 
 cat > $TMPC << EOF
 #include <GL/gl.h>
 int main( void ) { return 0; }
 EOF
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL &> /dev/null || \
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL $_socklib &> /dev/null || \
  { _gl=no; echo "GL includes not found!";}
 
 cat > $TMPC << EOF
@@ -557,7 +562,7 @@ cat > $TMPC << EOF
 int main (void) { return 0;}
 EOF
 
-$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm &> /dev/null && _dga=yes
+$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib &> /dev/null && _dga=yes
 # Note: the -lXxf86vm library is the VideoMode extension and though it's
 # not needed for DGA, AFAIK every distribution packages together with DGA
 # stuffs named 'X extensions' or something similar. This check can be usefull
@@ -573,7 +578,7 @@ int main (void) { XDGAMode mode; XDGADevice device; return 0;}
 EOF
 
 _dga2=no
-$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm &> /dev/null && _dga2=yes
+$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib &> /dev/null && _dga2=yes
 
 fi
 
@@ -904,13 +909,13 @@ if [ $_gl = yes ]; then
 fi
 
 if [ $_css = yes ]; then
-   if [ ! -z $_csslibdir ]; then
+   if [ ! -z "$_csslibdir" ]; then
      _csslib="-L${_csslibdir} -lcss"
    else
      _csslib='-lcss'
    fi
    _css='#define HAVE_LIBCSS'
-   if [ ! -z $_cssincdir ]; then
+   if [ ! -z "$_cssincdir" ]; then
      _cssinc="-I${_cssincdir}"
    else
      _cssinc=""
@@ -1012,7 +1017,7 @@ X11DIR=$_x11libdir
 # OPTFLAGS=-O4 $_profile $_debug -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=$CFLAGS
 # LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
-X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng
+X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
 LIRC_LIBS = $_lirclibs

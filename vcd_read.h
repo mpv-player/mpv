@@ -68,8 +68,17 @@ void vcd_read_toc(int fd){
 static char vcd_buf[VCD_SECTOR_SIZE];
 
 static int vcd_read(int fd,char *mem){
+#ifdef __sun
+      struct cdrom_cdxa xa;
+      xa.cdxa_addr = vcd_get_msf();
+      xa.cdxa_length = CDROM_BLK_2352;
+      xa.cdxa_data = vcd_buf;
+      xa.cdxa_format = CDROM_XA_SECTOR_DATA;
+      if(ioctl(fd,CDROMCDXA,&xa)==-1) return 0; // EOF?
+#else
       memcpy(vcd_buf,&vcd_entry.cdte_addr.msf,sizeof(struct cdrom_msf));
       if(ioctl(fd,CDROMREADRAW,vcd_buf)==-1) return 0; // EOF?
+#endif
 
       vcd_entry.cdte_addr.msf.frame++;
       if (vcd_entry.cdte_addr.msf.frame==75){

@@ -1,14 +1,22 @@
 
 #include <string.h>
 #include <sys/ioctl.h>
+#ifdef __sun
+#include <sys/audioio.h>
+#else
 #include <sys/soundcard.h>
+#endif
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
 
 #include "mixer.h"
 
+#ifdef __sun
+char * mixer_device="/dev/audioctl";
+#else
 char * mixer_device="/dev/mixer";
+#endif
 int    mixer_usemaster=0;
 
 void mixer_getvolume( int *l,int *r )
@@ -18,6 +26,11 @@ void mixer_getvolume( int *l,int *r )
  fd=open( mixer_device,O_RDONLY );
  if ( fd != -1 )
   {
+#ifdef __sun
+   audio_info_t info;
+   ioctl( fd,AUDIO_GETINFO,&info );
+   *r=*l=(info.play.gain * 100 + (AUDIO_MAX_GAIN-1))/AUDIO_MAX_GAIN;
+#else
    ioctl( fd,SOUND_MIXER_READ_DEVMASK,&devs );
    if ( ( devs & SOUND_MASK_PCM ) && ( mixer_usemaster==0 ) ) cmd=SOUND_MIXER_READ_PCM;
      else
@@ -30,6 +43,7 @@ void mixer_getvolume( int *l,int *r )
    ioctl( fd,cmd,&v );
    *r=( v & 0xFF00 ) >> 8;
    *l=( v & 0x00FF );
+#endif
    close( fd );
   }
 }
@@ -41,6 +55,12 @@ void mixer_setvolume( int l,int r )
  fd=open( mixer_device,O_RDONLY );
  if ( fd != -1 )
   {
+#ifdef __sun
+   audio_info_t info;
+   ioctl( fd,AUDIO_GETINFO,&info );
+   info.play.gain = ((l+r)*AUDIO_MAX_GAIN+199)/200;
+   ioctl( fd,AUDIO_SETINFO,&info );
+#else
    ioctl( fd,SOUND_MIXER_READ_DEVMASK,&devs );
    if ( ( devs & SOUND_MASK_PCM ) && ( mixer_usemaster==0 ) ) cmd=SOUND_MIXER_WRITE_PCM;
      else
@@ -52,6 +72,7 @@ void mixer_setvolume( int l,int r )
            }
    v=( r << 8 ) | l;
    ioctl( fd,cmd,&v );
+#endif
    close( fd );
   }
 }

@@ -2,7 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __sun
+#include <sys/audioio.h>
+#define AFMT_MU_LAW     AUDIO_ENCODING_ULAW
+#define AFMT_A_LAW      AUDIO_ENCODING_ALAW
+#define AFMT_S16_LE     AUDIO_ENCODING_LINEAR
+#define AFMT_IMA_ADPCM  AUDIO_ENCODING_DVI
+#define AFMT_U8         AUDIO_ENCODING_LINEAR8
+#else
 #include <sys/soundcard.h>
+#endif
 
 #include "config.h"
 
@@ -161,7 +170,9 @@ case 2: {
     case 0x6:  sh_audio->sample_format=AFMT_A_LAW;break;
     case 0x7:  sh_audio->sample_format=AFMT_MU_LAW;break;
     case 0x11: sh_audio->sample_format=AFMT_IMA_ADPCM;break;
+#ifndef __sun
     case 0x50: sh_audio->sample_format=AFMT_MPEG;break;
+#endif
 //    case 0x2000: sh_audio->sample_format=AFMT_AC3;
     default: sh_audio->sample_format=(sh_audio->samplesize==2)?AFMT_S16_LE:AFMT_U8;
     }
