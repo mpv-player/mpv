@@ -1779,7 +1779,7 @@ Available audio output drivers are:
 .
 .TP
 .B alsa\ \ \ 
-ALSA 0.9/\:1.x audio output driver.
+ALSA 0.9/\:1.x audio output driver
 .PD 0
 .RSs
 .IPs mmap\ \ \ 
@@ -1796,7 +1796,7 @@ you really know how to set it correctly.
 .
 .TP
 .B alsa5\ \ 
-ALSA 0.5 audio output driver.
+ALSA 0.5 audio output driver
 .
 .TP
 .B oss\ \ \ \ 
@@ -1810,8 +1810,8 @@ Sets the audio-output device (default: /dev/\:dsp).
 .
 .TP
 .B sdl\ \ \ \ 
-Highly platform independent SDL (Simple Directmedia Layer) library
-audio output driver.
+highly platform independent SDL (Simple Directmedia Layer) library
+audio output driver
 .PD 0
 .RSs
 .IPs <driver>
@@ -1821,11 +1821,11 @@ Explicitly choose the SDL audio driver to use (default: let SDL choose).
 .
 .TP
 .B arts\ \ \ 
-Audio output through the Arts daemon.
+audio output through the Arts daemon
 .
 .TP
 .B esd\ \ \ \ 
-Audio output through the ESD daemon.
+audio output through the ESD daemon
 .PD 0
 .RSs
 .IPs <server>
@@ -1835,23 +1835,23 @@ Explicitly choose the ESD server to use (default: localhost).
 .
 .TP
 .B jack\ \ \ \ 
-Audio output through JACK (Jack Audio Connection Kit).
+audio output through JACK (Jack Audio Connection Kit)
 .
 .TP
 .B nas\ \ \ \ 
-Audio output through NAS.
+audio output through NAS
 .
 .TP
 .B macosx (Mac OS X only)
-Native Mac OS X audio output driver.
+native Mac OS X audio output driver
 .
 .TP
 .B sgi (SGI only)
-Native SGI audio output driver.
+native SGI audio output driver
 .
 .TP
 .B sun (Sun only)
-Native Sun audio output driver.
+native Sun audio output driver
 .PD 0
 .RSs
 .IPs <device>
@@ -1861,11 +1861,11 @@ Explicitly choose the audio device to use (default: /dev/\:audio).
 .
 .TP
 .B win32 (Windows only)
-Native Windows waveout audio output driver.
+native Windows waveout audio output driver
 .
 .TP
 .B dsound (Windows only)
-Directx DirectSound audio output driver.
+DirectX DirectSound audio output driver
 .PD 0
 .RSs
 .IPs device=<devicenum>
@@ -1876,11 +1876,11 @@ Playing a file with -v will show a list of available devices.
 .
 .TP
 .B dxr2 (also see \-dxr2) (DXR2 only)
-Creative DXR2 specific output driver.
+Creative DXR2 specific output driver
 .
 .TP
 .B mpegpes (DVB only)
-DVB specific output driver.
+DVB specific output driver
 .
 .TP
 .B null\ \ \ 
@@ -1889,7 +1889,7 @@ Use \-nosound for benchmarking.
 .
 .TP
 .B pcm
-Raw PCM/\:wave file writer audio output.
+raw PCM/wave file writer audio output
 .PD 0
 .RSs
 .IPs (no)waveheader
@@ -1904,7 +1904,7 @@ If nowaveheader is specified, the default is audiodump.pcm.
 .
 .TP
 .B plugin\ \ 
-Plugin audio output driver.
+plugin audio output driver
 .
 .
 .
@@ -3069,7 +3069,7 @@ Try Win32 codecs first.
 .PD 1
 .
 .TP
-.B \-aspect <ratio>
+.B \-aspect <ratio> (also see \-zoom)
 Override movie aspect ratio.
 It is autodetected for MPEG files, but it cannot be done for most AVI files.
 .sp 1
@@ -3400,7 +3400,7 @@ Try XAnim codecs first.
 .PD 1
 .
 .TP
-.B \-x <x> (MPlayer only)
+.B \-x <x> (also see \-zoom) (MPlayer only)
 Scale image to width <x> (if software/\:hardware scaling is available).
 Disables aspect calculations.
 .
@@ -3441,7 +3441,7 @@ Deactivate direct rendering method 2.
 .PD 1
 .
 .TP
-.B \-xy <value>
+.B \-xy <value> (also see \-zoom)
 .PD 0
 .RSs
 .IPs value<=8
@@ -3452,18 +3452,16 @@ Set width to value and calculate height to keep correct aspect ratio.
 .PD 1
 .
 .TP
-.B \-y <y> (MPlayer only)
+.B \-y <y> (also see \-zoom) (MPlayer only)
 Scale image to height <y> (if software/\:hardware scaling is available).
 Disables aspect calculations.
 .
 .TP
 .B \-zoom\ \ 
 Allow software scaling, where available.
-Can be used to force scaling with \-vf scale.
-.br
-.I NOTE:
-\-vf scale will ignore \-x / \-y / \-xy / \-fs / \-aspect without
-\-zoom.
+This will allow scaling with output drivers (like x11, fbdev) that
+do not support hardware scaling where MPlayer disables scaling by
+default for performance reasons.
 .
 .
 .
@@ -3797,7 +3795,7 @@ For values between 4\-7 rotation is only done if the movie geometry is
 portrait and not landscape.
 .RSs
 .IPs 0
-Rotate by 90 degrees clockwise and flip.
+Rotate by 90 degrees clockwise and flip (default).
 .IPs 1
 Rotate by 90 degrees clockwise.
 .IPs 2
@@ -3882,7 +3880,7 @@ spal:    768x576 (square pixel PAL)
 .RE
 .
 .TP
-.B dsize=[aspect|w:h]
+.B dsize[=aspect|w:h]
 Changes the intended display size/\:aspect at an arbitrary point in the
 filter chain.
 Aspect can be given as a fraction (4/\:3) or floating point number
@@ -4253,7 +4251,7 @@ Enable twoway sharpening (default: 0).
 .PD 1
 .
 .TP
-.B unsharp=l|cWxH:amount[:l|cWxH:amount]
+.B unsharp[=l|cWxH:amount[:l|cWxH:amount]]
 unsharp mask / gaussian blur
 .RSs
 .IPs l\ \ \ \ 
@@ -4278,7 +4276,7 @@ Relative amount of sharpness/\:blur to add to the image
 Swap U & V plane.
 .
 .TP
-.B il=[d|i][s][:[d|i][s]]
+.B il[=d|i][s][:[d|i][s]]
 (De)interleaves lines.
 The goal of this filter is to add the ability to process interlaced images
 pre-field without deinterlacing them.
@@ -4300,7 +4298,7 @@ swap fields (exchange even & odd lines)
 .PD 1
 .
 .TP
-.B fil=[i|d]
+.B fil[=i|d]
 (De)interleaves lines.
 This filter is very similar to the il filter but much faster, the main
 disadvantage is that it does not always work.
@@ -4563,7 +4561,7 @@ Specify this option for pass-2, it makes no difference on pass-1.
 .RE
 .
 .TP
-.B phase=[t|b|p|a|u|T|B|A|U][:v]
+.B phase[=t|b|p|a|u|T|B|A|U][:v]
 Delay interlaced video by one field time so that the field order
 changes.
 The intended use is to fix PAL movies that have been captured with the
@@ -7542,4 +7540,5 @@ MPlayer is (C) 2000\-2005 The MPlayer Team
 This man page was written mainly by Gabucino, Jonas Jermann and Diego Biurrun.
 It is maintained by Diego Biurrun.
 Please send mails about it to the MPlayer-DOCS mailing list.
+Translation specific mails belong on the MPlayer-translations mailing list.
 .\" end of file
