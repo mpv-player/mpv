@@ -5728,6 +5728,12 @@ else
   _confmingw32='TARGET_MINGW32 = no'
 fi
 
+if mingw32 || cygwin ; then
+  _confwin32='TARGET_WIN32 = yes'
+else
+  _confwin32='TARGET_WIN32 = no'
+fi
+
 # Dynamic linking flags 
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
 _ld_dl_dynamic=''
@@ -5961,6 +5967,7 @@ MPFLAC = $_mpflac
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
+$_confwin32
 $_confcygwin
 $_confmingw32
 TARGET_CPU=$iproc

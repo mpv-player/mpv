@@ -32,7 +32,7 @@
 #endif
 #include <unistd.h>
 
-#if defined(_WIN32)
+#if defined(WIN32)
 #include "sysdep/libdha_win32.c"
 #elif defined (__EMX__)
 #include "sysdep/libdha_os2.c"

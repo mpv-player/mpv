@@ -15,7 +15,7 @@ SONAME_FLAGS = -Wl,-soname,$(SHORTNAME)
 #SHORTNAME = libdha.so
 VSHORTNAME = libdha.so
 endif
-ifeq ($(TARGET_MINGW32),yes)
+ifeq ($(TARGET_WIN32),yes)
 LIBNAME = libdha.a
 SHORTNAME = libdha.a
 else
@@ -48,7 +48,7 @@ endif
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(LIBNAME):     $(OBJS)
-ifeq ($(TARGET_MINGW32),yes)
+ifeq ($(TARGET_WIN32),yes)
 	$(AR) r $(LIBNAME) $(OBJS)
 else
 	#$(CC) -shared $(SONAME_FLAGS) -o $(LIBNAME) $(OBJS) $(LIBS)
