@@ -297,11 +297,11 @@ static int interp_header (uint8_t *header, int header_len)
 
     i += 8;
 
-    if ( (guid_1 == 0x6cce6200aa00d9a6) && (guid_2 == 0x11cf668e75b22630) ) {
+    if ( (guid_1 == 0x6cce6200aa00d9a6ULL) && (guid_2 == 0x11cf668e75b22630ULL) ) {
       printf ("header object\n");
-    } else if ((guid_1 == 0x6cce6200aa00d9a6) && (guid_2 == 0x11cf668e75b22636)) {
+    } else if ((guid_1 == 0x6cce6200aa00d9a6ULL) && (guid_2 == 0x11cf668e75b22636ULL)) {
       printf ("data object\n");
-    } else if ((guid_1 == 0x6553200cc000e48e) && (guid_2 == 0x11cfa9478cabdca1)) {
+    } else if ((guid_1 == 0x6553200cc000e48eULL) && (guid_2 == 0x11cfa9478cabdca1ULL)) {
 
       packet_length = get_32(header, i+92-24);
 
@@ -309,7 +309,7 @@ static int interp_header (uint8_t *header, int header_len)
 	      packet_length, get_32(header, i+96-24));
 
 
-    } else if ((guid_1 == 0x6553200cc000e68e) && (guid_2 == 0x11cfa9b7b7dc0791)) {
+    } else if ((guid_1 == 0x6553200cc000e68eULL) && (guid_2 == 0x11cfa9b7b7dc0791ULL)) {
 
       int stream_id = header[i+48] | header[i+49] << 8;
 
