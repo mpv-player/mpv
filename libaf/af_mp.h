@@ -22,5 +22,6 @@
 
 /* Decodes the format from mplayer format to libaf format */
 extern int af_format_decode(int format);
+extern int af_format_encode(void* fmt);
 
 #endif /* __af_mp_h__ */
