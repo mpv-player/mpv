@@ -44,7 +44,7 @@ struct config lameopts_conf[]={
 #endif
 
 struct config ovc_conf[]={
-	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, 0},
+	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_COPY},
 	{"frameno", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_FRAMENO},
 	{"divx4", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_DIVX4},
 	{"help", "\nAvailable codecs:\n   copy\n   frameno\n   divx4\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},

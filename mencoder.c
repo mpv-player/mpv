@@ -1,4 +1,4 @@
-
+#define VCODEC_COPY 0
 #define VCODEC_FRAMENO 1
 #define VCODEC_DIVX4 2
 
@@ -503,8 +503,24 @@ mux_v->h.dwRate=mux_v->h.dwScale*(force_ofps?force_ofps:sh_video->fps);
 mux_v->codec=out_video_codec;
 
 switch(mux_v->codec){
-case 0:
-    mux_v->bih=sh_video->bih;
+case VCODEC_COPY:
+    printf("sh_video->bih: %x\n", sh_video->bih);
+    if (sh_video->bih)
+	mux_v->bih=sh_video->bih;
+    else
+    {
+	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
+	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
+	mux_v->bih->biWidth=sh_video->disp_w;
+	mux_v->bih->biHeight=sh_video->disp_h;
+	mux_v->bih->biCompression=sh_video->format;
+	mux_v->bih->biPlanes=1;
+	mux_v->bih->biBitCount=24; // FIXME!!!
+	mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
+    }
+    printf("videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n",
+	mux_v->bih->biWidth, mux_v->bih->biHeight,
+	mux_v->bih->biBitCount, mux_v->bih->biCompression);
     break;
 case VCODEC_FRAMENO:
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
@@ -591,7 +607,7 @@ printf("Writing AVI header...\n");
 aviwrite_write_header(muxer,muxer_f);
 
 switch(mux_v->codec){
-case 0:
+case VCODEC_COPY:
     break;
 case VCODEC_FRAMENO:
     decoded_frameno=0;
@@ -792,7 +808,7 @@ if( (v_pts_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag<0)
 
 
 switch(mux_v->codec){
-case 0:
+case VCODEC_COPY:
     mux_v->buffer=start;
     if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
     break;
