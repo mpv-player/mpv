@@ -1,4 +1,4 @@
-.\" synced with 1.688
+.\" synced with 1.692
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -362,9 +362,8 @@ w ~/.mplayer lub w tym samym katalogu, co film.
 .SH "OPCJE OGÓLNE"
 .
 .TP
-.B \-codecs-file <plik>
+.B \-codecs-file <plik> (zobacz równie¿ opcje \-afm, \-ac, \-vfm and \-vc)
 U¿ywa podanego pliku zamiast dostêpnego w systemie lub wbudowanego codecs.conf.
-Zobacz równie¿ opcje \-afm, \-ac, \-vfm and \-vc.
 .
 .TP
 .B \-include <plik\ konfiguracyjny>
@@ -2169,7 +2168,8 @@ Wy³±cza u¿ywanie XVideo poprzez sterownik wyj¶cia video sdl.
 .TP
 .B \-ontop
 Sprawia, ¿e okno zostaje nad innymi oknami.
-Obs³ugiwane przez sterowniki u¿ywaj±ce X11, poza SDL, oraz directx i gl2 pod Windows.
+Obs³ugiwane przez sterowniki wyj¶cia video u¿ywaj±ce X11, poza SDL
+oraz directx i gl2 pod Windows.
 .
 .TP
 .B \-panscan <0.0\-1.0>
@@ -2792,7 +2792,7 @@ Wymusza kodek MP3 l3codeca.acm.
 .IPs "\-ac mad,"
 Próbuje najpierw libmad, pó¼niej pozosta³e.
 .IPs "\-ac hwac3,a52,"
-W³±cza sprzêtowe AC3, pó¼niej programowy kodek AC3, potem pozosta³e.
+W³±cza sprzêtowe AC3, programowy kodek AC3, potem pozosta³e.
 .IPs "\-ac -ffmp3,"
 Pomija kodek MP3 FFmpeg.
 .RE
@@ -2801,11 +2801,12 @@ Pomija kodek MP3 FFmpeg.
 .TP
 .B \-af <filtr1[=opcja1:opcja2:...],filtr2,...>
 Podaje listê oddzielanych przecinkami filtrów audio i ich opcji.
+Przeczytaj równie¿ rozdzia³ dokumentacji o filtrach audio.
 .sp 1
 Dostêpne s± filtry:
 .RSs
 .IPs resample[=czprób[:sloppy][:type]]
-Zmienia czêstotliwo¶æ próbkowania strumienia audio na podan± (w Hz) liczbê.
+Zmienia czêstotliwo¶æ próbkowania strumienia audio na podan± w Hz liczbê.
 Obs³uguje tylko format 16-bit little-endian.
 .IPs channels[=il]
 Zmienia ilo¶æ kana³ów wyj¶cia na il.
@@ -2815,7 +2816,7 @@ jest powtarzany w obu kana³ach wyj¶ciowych).
 Je¶li liczba kana³ów wyj¶ciowych jest mniejsza ni¿ liczba kana³ów wej¶ciowych
 to dodatkowe kana³y s± obcinane.
 .IPs format[=bps:f]
-Ustawia format (f) i ilo¶æ bajtów na próbkê (bps) u¿ywane przy wyj¶ciu z
+Ustawia ilo¶æ bajtów na próbkê i format u¿ywane przy wyj¶ciu z
 warstwy filtruj±cej.
 Opcja bps to liczba ca³kowita oznaczaj±ca Bytes per sample (bajtów na próbkê).
 Format f to ci±g sk³adaj±cy siê z:
@@ -2832,16 +2833,16 @@ le be (little- lub big-endian)
 Wybiera g³o¶no¶æ wyj¶cia.
 Ten filtr mo¿e byæ w³±czony tylko raz na ka¿dy strumieñ audio.
 .RSss
-v: ¿±danie wzmocnienia w dB dla wszystkich kana³ów w strumieniu.
-Wzmocnienie przybiera warto¶ci z zakresu -200dB do +60dB (gdzie -200dB
-oznacza ca³kowite wyciszenie a +60dB 1000-krotne wzmocnienie).
+v: Ustawia wzmocnienie w dB dla wszystkich kana³ów w strumieniu od
+warto¶ci -200dB do +60dB (gdzie -200dB oznacza ca³kowite wyciszenie
+a +60dB 1000-krotne wzmocnienie).
 .br
-sc: w³±cza miêkkie obcinanie (soft-clipping).
+sc: W³±cza miêkkie obcinanie (soft-clipping).
 .REss
 .IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
 Dowolnie miksuje kana³y, szczegó³y w DOCS/\:HTML/\:pl/\:devices.html#audio-dev
 .RSss
-n: liczba kana³ów wyj¶ciowych (1\-6).
+n: liczba kana³ów wyj¶ciowych (1\-6)
 .br
 lij: Jak du¿o z kana³u wej¶ciowego j jest miksowane w kana³ wyj¶ciowy i.
 .REss
@@ -2851,7 +2852,7 @@ Dodaje kana³ subwoofera.
 fc: Czêstotliwo¶æ graniczna filtra dolnoprzepustowego (20Hz do 300Hz)
 (domy¶lnie: 60Hz).
 .br
-ch: numer kana³u subwoofera.
+ch: numer kana³u subwoofera
 .REss
 .IPs surround[=d]
 Dekoder macierzowo zakodowanego d¼wiêku przestrzennego, dzia³a na wiêkszo¶ci
@@ -2867,7 +2868,7 @@ rzeczywista miêdzy 0 a 1000).
 Eksportuje przychodz±cy sygna³ do innych procesów u¿ywaj±c mapowania pamiêci
 (mmap()).
 .RSss
-mmapowany_zbiór: Zbiór na który nale¿y mapowaæ dane
+mmapowany_zbiór: Zbiór, na który nale¿y mapowaæ dane
 (domy¶lnie: ~/.mplayer/\:mplayer-af_export).
 .br
 npróbek: ilo¶æ próbek na kana³ (domy¶lnie 512)
@@ -2881,13 +2882,13 @@ Podaje zaawansowane opcje filtrów audio:
 .IPs force=<0\-3>
 Wymusza jeden z trybów wstawiania filtrów audio:
 .RSss
-0: Ca³kowicie automatyczne wstawianie filtrów (domy¶lnie)
+0: ca³kowicie automatyczne wstawianie filtrów (domy¶lnie)
 .br
 1: Optymalizuje pod wzglêdem dok³adno¶ci.
 .br
 2: Optymalizuje pod wzglêdem szybko¶ci.
 .br
-3: Wy³±cza automaty.
+3: Wy³±cza automatyczne wstawianie filtrów.
 .REss
 .IPs list=<filtry>
 Tak samo jak \-af.
@@ -2900,23 +2901,23 @@ w codecs.conf.
 Powraca do domy¶lnego, je¿eli ¿aden z podanych kodeków nie bêdzie dzia³a³.
 .br
 .I INFORMACJA:
-Mo¿esz pobraæ listê dostêpnych sterowników poprzez \-afm help.
+Mo¿esz pobraæ listê dostêpnych rodzin kodeków poprzez \-afm help.
 .sp 1
 .I PRZYK£AD:
 .PD 0
 .RSs
 .IPs "\-afm ffmpeg"
-U¿ywa najpierw kodeków FFmpeg z libavcodec (mp1/\:2/\:3).
+U¿ywa najpierw kodeków FFmpeg z libavcodec.
 .IPs "\-afm acm,dshow"
-próbuje najpierw kodeki Win32
+Próbuje najpierw kodeki Win32.
 .RE
 .PD 1
 .
 .TP
 .B \-aspect <stosunek>
-Zmienia proporcje filmu.
-Proporcje s± automatycznie wykrywane w MPEG, ale nie mog± byæ wykryte
-w wiêkszo¶ci zbiorów AVI.
+Zmienia proporcjê filmu.
+Proporcje s± automatycznie wykrywane w MPEG, ale nie stosuje siê to
+do wiêkszo¶ci zbiorów AVI.
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -2936,8 +2937,8 @@ Wy³±cza automatyczne wyrównywanie proporcji filmu.
 Odwraca obraz do góry nogami.
 .
 .TP
-.B \-lavdopts <opcja1:opcja2:...> (KOD DEBUGOWANY)
-Je¿eli dekodujesz kodekiem z libavcodec, mo¿esz tutaj okre¶liæ jego parametery.
+.B \-lavdopts <opcja1:opcja2:...> (KOD DEBUGOWY)
+Okre¶la parametry dekodowania z libavcodec.
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -2947,16 +2948,13 @@ Je¿eli dekodujesz kodekiem z libavcodec, mo¿esz tutaj okre¶liæ jego parametery.
 .PD 1
 .sp 1
 .RS
-.I INFORMACJA:
-Po prostu dodaj warto¶ci rzeczy, które chcesz w³±czyæ.
-.sp 1
 Dostêpne s± opcje:
 .RE
 .RSs
 .IPs ec\ \ \ 
 ukrywanie b³êdów:
 .RSss
-1: u¿yj silnego filtru deblokuj±cego dla uszkodzonych MB-ów
+1: U¿ywa silnego filtru deblokuj±cego (deblock) dla uszkodzonych MB-ów.
 .br
 2: iteracyjne szukanie MV (wolne)
 .br
@@ -2968,12 +2966,12 @@ odporno¶æ na b³êdy:
 .br
 0: wy³±czona
 .br
-1: ostro¿na (powinno pracowaæ z zepsutymi koderami)
+1: ostro¿na (Powinno pracowaæ z zepsutymi koderami.)
 .br
-2: normalna (domy¶lne) (pracuje ze zgodnymi koderami)
+2: normalna (domy¶lne) (Pracuje ze zgodnymi koderami.)
 .br
-3: agresywna (wiêcej sprawdza ale mo¿e powodowaæ problemy nawet z poprawnymi
-strumieniami)
+3: agresywna (Wiêcej sprawdza, ale mo¿e powodowaæ problemy nawet z poprawnymi
+strumieniami.)
 .br
 4: bardzo agresywna
 .REss
@@ -2995,7 +2993,7 @@ informacje debugowania:
 .br
 32: Wektor ruchu
 .br
-0x0040: Wizualizacja wektora ruchu (u¿yj \-noslices)
+0x0040: wizualizacja wektora ruchu (u¿yj \-noslices)
 .br
 0x0080: przeskakiwanie MB
 .br
@@ -3022,7 +3020,7 @@ vismv:
 4: wizualizacja przewidywanych do ty³u wektorów ruchu ramek B
 .REss
 .IPs bug=<warto¶æ>
-rêczne omijanie b³êdów kodera:
+Rêczne pomijanie b³êdów kodera:
 .RSss
 0: nic
 .br
@@ -3031,7 +3029,7 @@ rêczne omijanie b³êdów kodera:
 2 (msmpeg4v3):  niektóre generowane przez stare lavc zbiory msmpeg4v3
 (bez autodetekcji)
 .br
-4 (mpeg4): b³±d przeplatania xvid (autodetekcja je¶li fourcc==XVIX)
+4 (mpeg4): b³±d przeplatania XviD (autodetekcja je¶li fourcc==XVIX)
 .br
 8 (mpeg4): UMP4 (autodetekcja je¶li fourcc==UMP4)
 .br
@@ -3039,15 +3037,15 @@ rêczne omijanie b³êdów kodera:
 .br
 32 (mpeg4): b³±d w niepoprawnym vlc (autodetekcja zale¿na od fourcc)
 .br
-64 (mpeg4): b³±d w XVID i DIVX qpel (autodetekcja zale¿na od fourcc/\:ver)
+64 (mpeg4): b³±d w XviD i DivX qpel (autodetekcja zale¿na od fourcc/\:version)
 .br
-128 (mpeg4): stary standardowy qpel (autodetekcja zale¿na od fourcc/\:ver)
+128 (mpeg4): stary standardowy qpel (autodetekcja zale¿na od fourcc/\:version)
 .br
-256 (mpeg4): jeszcze jeden b³±d qpel (autodetekcja zale¿na od fourcc/\:ver)
+256 (mpeg4): jeszcze jeden b³±d qpel (autodetekcja zale¿na od fourcc/\:version)
 .br
-512 (mpeg4): b³±d direct-qpel-blocksize (autodetekcja zale¿na od fourcc/\:ver)
+512 (mpeg4): b³±d direct-qpel-blocksize (autodetekcja zale¿na od fourcc/\:version)
 .br
-1024 (mpeg4): b³±d wyrównania krawêdzi (autodetekcja zalezna od fourcc/\:ver)
+1024 (mpeg4): b³±d wyrównania krawêdzi (autodetekcja zalezna od fourcc/\:version)
 .REss
 .IPs idct=<0\-99> (zobacz tak¿e \-lavcopts)
 ¯eby osi±gn±æ najlepsz± jako¶æ dekodowania, u¿ywaj tego samego algorytmu
@@ -3084,18 +3082,16 @@ Nie koduje/\:odtwarza video.
 U¿ywa kodu postprocessingu z opendivx zamiast wbudowanego.
 Zast±piony przez \-pp, wewnêtrzny postprocessing daje lepsz± jako¶æ i jest
 szybszy.
-.
-Prawid³owy zakres warto¶ci \-oldpp zale¿y od kodeka, najczê¶ciej
-0\-6, gdzie 0=wy³±czony 6=powolny/\:najlepszy.
+Prawid³owy zakres warto¶ci \-oldpp zale¿y od kodeka, najczê¶ciej jest to
+0\-6, gdzie 0=wy³±czony, 6=powolny/\:najlepszy.
 .
 .TP
 .B \-pp <jako¶æ> (sprawd¼ tak¿e opcjê \-vf pp)
-Ustawia poziom postprocessingu dla DLL.
-Ta opcja NIE DZIA£A JU¯ z filtrami postprocessingu MPlayera,
-ale tylko z Win32 DirectShow DLL które maj± wewnêtrzny postprocessing.
-.
-Poprawny zakres dla warto¶ci \-pp zale¿y od kodeka, najczê¶ciej
-0\-6, gdzie 0=wy³±czony 6=powolny/\:najlepszy.
+Ustawia poziom postprocessingu DLL.
+Ta opcja nie jest u¿yteczna z \-vf pp.
+Dzia³a tylko z Win32 DirectShow DLL, które maj± wewnêtrzny postprocessing.
+Poprawny zakres dla warto¶ci \-pp zale¿y od kodeka, najczê¶ciej jest to
+0\-6, gdzie 0=wy³±czony, 6=powolny/\:najlepszy.
 .
 .TP
 .B \-pphelp (sprawd¼ tak¿e opcjê \-vf pp)
@@ -3134,25 +3130,20 @@ Wybiera typ wyj¶cia stereo MP2/\:MP3.
 .PD 0
 .RSs
 .IPs 0
-Stereo
+stereo
 .IPs 1
-Lewy kana³
+lewy kana³
 .IPs 2
-Prawy kana³
+prawy kana³
 .RE
 .PD 1
 .
 .TP
-.B \-sws <typ\ programowego\ skalowania> (zobacz tak¿ê opcjê \-vf scale)
-Ta opcja okre¶la jako¶æ (i odpowiednio prêdko¶æ) skalowania programowego
-poprzez opcjê \-zoom.
-Na przyk³ad dla x11 lub dla innego wyj¶cia bez sprzêtowej akceleracji.
+.B \-sws <typ\ programowego\ skalowania> (zobacz tak¿e \-vf scale i \-zoom)
+Okre¶la algorytm skalowania programowego dla opcji \-zoom.
+Ma to wp³yw na sterowniki wyj¶ciowe video bez sprzêtowej akceleracji, np.\& x11.
+.sp 1
 Mo¿liwe s± ustawienia:
-.br
-.I INFORMACJA:
-Dla \-sws\ 2 i 7 ostro¶æ mo¿e byæ ustawiona parametrem skalowania (p)
-\-vf scale (0 (miêkko) \- 100 (ostro)), dla \-sws 9, okre¶la d³ugo¶æ
-filtru (1 \- 10).
 .sp 1
 .PD 0
 .RSs
@@ -3180,6 +3171,14 @@ lanczos
 dwusze¶cienna krzywa sklejana
 .RE
 .PD 1
+.sp 1
+.RS
+.I INFORMACJA:
+Dla \-sws\ 2 i 7 ostro¶æ mo¿e byæ ustawiona parametrem skalowania (p)
+przez \-vf scale (0 (miêkko) \- 100 (ostro)), dla \-sws 9, okre¶la ona
+d³ugo¶æ filtru (1 \- 10).
+.sp 1
+.RE
 .
 .TP
 .B \-vc <[-]kodek1,[-]kodek2,...[,]>
@@ -3200,7 +3199,7 @@ Wymusza kodek Win32/\:VFW DivX.
 .IPs "\-vc divx4,"
 Próbuj najpierw kodek divx4linux, pó¼niej pozosta³e.
 .IPs "\-vc -divxds,-divx,"
-Próbuj wszystkie kodeki poza Win32 DivX.
+Pomija kodek Win32 DivX.
 .IPs "\-vc ffmpeg12,mpeg12,"
 Próbuj kodeki libavcodec MPEG1/\:2, pó¼niej libmpeg2, potem inne.
 .RE
@@ -3213,7 +3212,7 @@ w codecs.conf.
 Powraca do domy¶lnych, je¶li ¿adna z podanych rodzin kodeków nie dzia³a.
 .br
 .I INFORMACJA:
-Mo¿esz pobraæ listê dostêpnych sterowników poprzez \-vfm help.
+Mo¿esz pobraæ listê dostêpnych rodzin kodeków poprzez \-vfm help.
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -3228,7 +3227,7 @@ Najpierw próbuje kodek XAnim.
 .
 .TP
 .B \-x <x> (tylko MPlayer)
-Skaluje obraz do szeroko¶ci x (je¶li jest dostêpne skalowanie sprzêtowe lub
+Skaluje obraz do szeroko¶ci <x> (je¶li jest dostêpne skalowanie sprzêtowe lub
 programowe).
 Wy³±cza przeliczania proporcji.
 .
@@ -3269,17 +3268,17 @@ proporcje.
 .
 .TP
 .B \-y <y> (tylko MPlayer)
-Skaluje obraz do wysoko¶ci y (je¶li jest dostêpne skalowanie sprzêtowe lub
+Skaluje obraz do wysoko¶ci <y> (je¶li jest dostêpne skalowanie sprzêtowe lub
 programowe)
 Wy³±cza przeliczenia proporcji.
 .
 .TP
-.B \-zoom \ 
+.B \-zoom\ \ 
 Umo¿liwia skalowanie programowe, je¶li jest dostêpne.
 Mo¿e byæ u¿yte do wymuszenia skalowania z \-vf scale.
 .br
 .I INFORMACJA:
-\-vf scale IGNORUJE opcje \-x / \-y / \-xy / \-fs / \-aspect bez \-zoom.
+\-vf scale zignoruje \-x / \-y / \-xy / \-fs / \-aspect bez \-zoom.
 .
 .
 .
@@ -3355,11 +3354,22 @@ Pozycja wycinanego obrazu, domy¶lnie ¶rodek.
 .PD 1
 .
 .TP
-.B cropdetect[=0\-255]
+.B cropdetect[=limit:round]
 Oblicza niezbêdne parametry przycinania i wy¶wietla propozycje na standardowe
 wyj¶cie.
-Próg obcinania mo¿e byæ podany od niczego (0) do wszystkiego (255).
-(domy¶lnie: 24)
+.PD 0
+.RSs
+.IPs limit
+Próg, który mo¿e byæ opcjonalnie podany od niczego (0) do wszystkiego (255)
+(domy¶lnie: 24).
+.br
+.IPs round
+Warto¶æ, przez któr± szeroko¶æ/wysoko¶æ powinny byæ podzielne (domy¶lnie: 16).
+Offset jest automatycznie dopasowywany tak, aby wycentrowaæ film.
+U¿yj 2, aby otrzymaæ równe wymiary (wymagane przez film 4:2:2).
+16 to najlepsza warto¶æ przy kodowaniu do wiêkszo¶ci kodeków.
+.RE
+.PD 1
 .
 .TP
 .B rectangle[=w:h:x:y]
@@ -4936,6 +4946,7 @@ Nie korzystaj z tego parametru, chyba ¿e wiesz co robisz.
 .TP
 .B threads=<1\-8>
 Maksymalna liczba u¿ytych w±tków (domy¶lnie: 1).
+Mo¿e mieæ delikatnie negatywny wp³yw na przewidywanie ruchu.
 .RE
 .
 .TP
