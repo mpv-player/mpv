@@ -210,6 +210,7 @@ static uint32_t vidix_draw_slice_422(uint8_t *image[], int stride[], int w,int h
         src+=stride[0];
         dest += bespitch;
     }
+printf("\nw = %u apitch=%u stride[0] = %u bespitch=%u\n",w,apitch,stride[0],bespitch);
 
     return 0;
 }
@@ -479,7 +480,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		   unsigned vid_w,unsigned vid_h,const void *info)
 {
   size_t i,awidth;
-  int err;
+  int err,is_422_planes_eq;
   if(verbose > 1)
      printf("vosub_vidix: vidix_init() was called\n"
     	    "src_w=%u src_h=%u dest_x_y_w_h = %u %u %u %u\n"
@@ -607,23 +608,26 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	    memset(vidix_mem + vidix_play.offsets[i], 0x80,
 		vidix_play.frame_size);
         /* tune some info here */
+	is_422_planes_eq = vidix_play.src.pitch.y == vidix_play.dest.pitch.y &&
+		       src_width*2 == (src_width*2+(vidix_play.dest.pitch.y-1))&~
+		       (vidix_play.dest.pitch.y-1);
         if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
 		vo_server->draw_slice = vidix_draw_slice_420;
 	else
 	if(src_format == IMGFMT_RGB32 || src_format == IMGFMT_BGR32)
 		vo_server->draw_slice =
-			vidix_play.src.pitch.y == vidix_play.dest.pitch.y ?
+			is_422_planes_eq ?
 			vidix_draw_slice_32_fast:
 			vidix_draw_slice_32;
 	else
 	if(src_format == IMGFMT_RGB24 || src_format == IMGFMT_BGR24)
 		vo_server->draw_slice =
-			vidix_play.src.pitch.y == vidix_play.dest.pitch.y ?
+			is_422_planes_eq ?
 			vidix_draw_slice_24_fast:
 			vidix_draw_slice_24;
 	else
 		vo_server->draw_slice =
-			vidix_play.src.pitch.y == vidix_play.dest.pitch.y ?
+			is_422_planes_eq ?
 			vidix_draw_slice_422_fast:
 			vidix_draw_slice_422;
 	return 0;

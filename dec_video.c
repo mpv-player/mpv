@@ -779,14 +779,15 @@ if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
 
 extern int vaa_use_dr;
 
-static int use_dr=0;
+static int use_dr=0,use_dr_422=0;
 static bes_da_t bda;
-void init_video_vaa( void )
+void init_video_vaa( unsigned width )
 {
   memset(&bda,0,sizeof(bes_da_t));
   if(vo_vaa.query_bes_da)
     use_dr = vo_vaa.query_bes_da(&bda) ? 0 : 1;
   if(!vaa_use_dr) use_dr = 0;
+  use_dr_422 = use_dr && bda.dest.pitch.y == 16 && (width*2+15)&~15 == width*2;
 }
 
 #ifdef USE_LIBVO2
@@ -939,7 +940,7 @@ switch(sh_video->codec->driver){
     {
 	/* FIXME: WILL WORK ONLY FOR PACKED FOURCC. BUT WHAT ABOUT PLANAR? */
         vmem = 0;
-	if(use_dr && bda.dest.pitch.y == 16)
+	if(use_dr_422)
 	{
 	    vmem = bda.dga_addr + bda.offsets[0] + bda.offset.y;
 	    if(vo_doublebuffering && bda.num_frames>1)
@@ -1054,7 +1055,7 @@ if(verbose>1){
     if(!in_size) break;
 	/* FIXME: WILL WORK ONLY FOR PACKED FOURCC. BUT WHAT ABOUT PLANAR? */
         vmem = 0;
-	if(use_dr && bda.dest.pitch.y == 16)
+	if(use_dr_422)
 	{
 	    vmem = bda.dga_addr + bda.offsets[0] + bda.offset.y;
 	    if(vo_doublebuffering && bda.num_frames>1)

@@ -1400,7 +1400,7 @@ current_module="init_libvo";
 	    */
 	}
    }
-   init_video_vaa();
+   init_video_vaa(sh_video->disp_w);
    fflush(stdout);
 
 //================== MAIN: ==========================
