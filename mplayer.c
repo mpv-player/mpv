@@ -1152,6 +1152,7 @@ if (vo_spudec==NULL && stream->type==STREAMTYPE_DVD) {
 if (vo_spudec==NULL) {
   current_module="spudec_init_normal";
   vo_spudec=spudec_new_scaled(NULL, sh_video->disp_w, sh_video->disp_h);
+  spudec_set_font_factor(font_factor);
 }
 
 if (vo_spudec!=NULL)

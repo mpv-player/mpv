@@ -65,6 +65,11 @@ typedef struct {
   unsigned char *scaled_aimage;
 } spudec_handle_t;
 
+/* 1 if we lack a palette and must use an heuristic. */
+static int auto_palette = 0;
+/* Darkest value used for the computed font */
+static int font_start_level = 0;
+
 static inline unsigned int get_be16(const unsigned char *p)
 {
   return (p[0] << 8) + p[1];
@@ -191,6 +196,43 @@ static void spudec_process_data(spudec_handle_t *this)
   }
 }
 
+
+/*
+  This function tries to create a usable palette.
+  Is searchs how many non-transparent colors are used and assigns different
+gray scale values to each color.
+  I tested it with four streams and even got something readable. Half of the
+times I got black characters with white around and half the reverse.
+*/
+static void compute_palette(spudec_handle_t *this)
+{
+  int used[16],i,cused,start,step,color;
+
+  memset(used, 0, sizeof(used));
+  for (i=0; i<4; i++)
+    if (this->alpha[i]) /* !Transparent? */
+       used[this->palette[i]] = 1;
+  for (cused=0, i=0; i<16; i++)
+    if (used[i]) cused++;
+  if (!cused) return;
+  if (cused == 1) {
+    start = 0x80;
+    step = 0;
+  } else {
+    start = font_start_level;
+    step = (0xF0-font_start_level)/(cused-1);
+  }
+  memset(used, 0, sizeof(used));
+  for (i=0; i<4; i++) {
+    color = this->palette[i];
+    if (this->alpha[i] && !used[color]) { /* not assigned? */
+       used[color] = 1;
+       this->global_palette[color] = start<<16;
+       start += step;
+    }
+  }
+}
+
 static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
 {
   int a,b; /* Temporary vars */
@@ -244,6 +286,7 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
 	this->alpha[1] = this->packet[off] & 0xf;
 	this->alpha[2] = this->packet[off + 1] >> 4;
 	this->alpha[3] = this->packet[off + 1] & 0xf;
+	if (auto_palette) compute_palette(this);
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Alpha %d, %d, %d, %d\n",
 	       this->alpha[0], this->alpha[1], this->alpha[2], this->alpha[3]);
 	off+=2;
@@ -682,12 +725,23 @@ void spudec_update_palette(void * this, unsigned int *palette)
     memcpy(spu->global_palette, palette, sizeof(spu->global_palette));
 }
 
+void spudec_set_font_factor(double factor)
+{
+  font_start_level = (int)(0xF0-(0xE0*factor));
+}
+
 void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigned int frame_height)
 {
   spudec_handle_t *this = calloc(1, sizeof(spudec_handle_t));
   if (this) {
-    if (palette)
+    if (palette) {
       memcpy(this->global_palette, palette, sizeof(this->global_palette));
+      auto_palette = 0;
+    }
+    else {
+      /* No palette, compute one */
+      auto_palette = 1;
+    }
     this->packet = NULL;
     this->image = NULL;
     this->scaled_image = NULL;
@@ -704,10 +758,6 @@ void *spudec_new_scaled_vobsub(unsigned int *palette, unsigned int *cuspal, unsi
 {
   spudec_handle_t *this = calloc(1, sizeof(spudec_handle_t));
   if (this){
-    if (palette){
-      memcpy(this->global_palette, palette, sizeof(this->global_palette));
-      memcpy(this->cuspal, cuspal, sizeof(this->cuspal));
-    }
     //(fprintf(stderr,"VobSub Custom Palette: %d,%d,%d,%d", this->cuspal[0], this->cuspal[1], this->cuspal[2],this->cuspal[3]);
     this->packet = NULL;
     this->image = NULL;
@@ -715,11 +765,23 @@ void *spudec_new_scaled_vobsub(unsigned int *palette, unsigned int *cuspal, unsi
     this->orig_frame_width = frame_width;
     this->orig_frame_height = frame_height;
     this->custom = custom;
+    // set up palette:
+    auto_palette = 1;
+    if (palette){
+      memcpy(this->global_palette, palette, sizeof(this->global_palette));
+      auto_palette = 0;
+    }
+    this->custom = custom;
+    if (custom && cuspal) {
+      memcpy(this->cuspal, cuspal, sizeof(this->cuspal));
+      auto_palette = 0;
+    }
   }
   else
     perror("FATAL: spudec_init: calloc");
   return this;
 }
+
 void *spudec_new(unsigned int *palette)
 {
     return spudec_new_scaled(palette, 0, 0);
