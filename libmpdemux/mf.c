@@ -5,12 +5,15 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <glob.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include "config.h"
+
+#ifdef HAVE_GLOB
+#include <glob.h>
+#endif
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -24,6 +27,7 @@ float  mf_fps = 25.0;
 char * mf_type = NULL; //"jpg";
 
 mf_t* open_mf(char * filename){
+#ifdef HAVE_GLOB
  glob_t        gg;
  struct stat   fs;
  int           i;
@@ -110,5 +114,9 @@ mf_t* open_mf(char * filename){
 exit_mf:
  free( fname );
  return mf;
+#else
+ mp_msg(MSGT_STREAM,MSGL_FATAL,"[mf] mf support is disabled on your os\n");
+ return 0;
+#endif
 }
 
