@@ -174,10 +174,6 @@ Q: Mikor XVideo-t használok, nem tudok lejátszani DivX avi-kat a
     ...
 A: Lásd az elõzõ választ.
 
-Q: Letöltöttem egy ASF-et az asfrecorderrel, de az MPlayer nem tudja
-   lejátszani !
-A: Az asfrecorder, és maga az ASF formátum egy nagy szar. Ne írj nekünk.
-
 Q: Ooo, mi az az "IdegCounter" ?
 A: Az "Ideg" magyar szó, és a "Counter" (számláló) angol szó keveréke.
    Elõször A'rpi idegességét volt hivatott mérni, miután egy kis CVS kód
