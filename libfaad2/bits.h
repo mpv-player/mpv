@@ -56,9 +56,9 @@ typedef struct _bitfile
 } bitfile;
 
 
-#if defined (_WIN32) && !defined(_WIN32_WCE)
+#if defined (_WIN32) && !defined(_WIN32_WCE) && !defined(__GNUC__)
 #define BSWAP(a) __asm mov eax,a __asm bswap eax __asm mov a, eax
-#elif defined(LINUX) || defined(DJGPP)
+#elif defined(ARCH_X86) && (defined(DJGPP) || defined(__GNUC__))
 #define BSWAP(a) __asm__ ( "bswapl %0\n" : "=r" (a) : "0" (a) )
 #else
 #define BSWAP(a) \

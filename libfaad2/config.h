@@ -1,3 +1,9 @@
+#include "../config.h"
+
+#ifdef WORDS_BIGENDIAN
+#define ARCH_IS_BIG_ENDIAN 1
+#endif
+
 /* config.h.  Generated automatically by configure.  */
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
