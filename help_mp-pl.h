@@ -182,8 +182,9 @@ static char help_text[]=
 #define MSGTR_NoACMSupport "Kodek audio Win32/ACM wy³±czony lub niedostêpny dla nie-x86 CPU -> wymuszam brak d¼wiêku :(\n"
 #define MSGTR_NoDShowAudio "Skompilowane bez obs³ugi DirectShow -> wymuszam brak d¼wiêku :(\n"
 #define MSGTR_NoOggVorbis "Kodek audio OggVorbis wy³±czony -> wymuszam brak d¼wiêku :(\n"
+#define MSGTR_NoXAnimSupport "MPlayer skompilowany BEZ obs³ugi XAnim!\n"
 
-#define MSGTR_MpegPPhint "UWAGA! Za¿±da³e¶ u¿ycie filtra wyg³adzaj±cego dla video MPEG 1/2,\n" \
+#define MSGTR_MpegPPhint "UWAGA! Za¿±da³e¶ u¿ycia filtra wyg³adzaj±cego dla video MPEG 1/2,\n" \
 			 "       ale skompilowa³e¶ MPlayera bez obs³ugi wyg³adzania dla MPEG 1/2!\n" \
 			 "       #define MPEG12_POSTPROC w config.h, i przekompiluj libmpeg2!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF podczas przeszukiwania nag³ówka sekwencji\n"
