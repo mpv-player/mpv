@@ -224,7 +224,7 @@ static int flip=-1;
 static int screen_size_x=0;//SCREEN_SIZE_X;
 static int screen_size_y=0;//SCREEN_SIZE_Y;
 static int screen_size_xy=0;
-static float movie_aspect=0.0;
+static float movie_aspect=-1.0;
 
 char* playlist_file;
 
@@ -1042,7 +1042,7 @@ current_module="init_libvo";
    }
 #endif
   // Set default VGA 1:1 aspect as fallback ::atmos
-  if(movie_aspect) sh_video->aspect = movie_aspect; // cmdline overrides autodetect
+  if(movie_aspect>-1.0) sh_video->aspect = movie_aspect; // cmdline overrides autodetect
 //  if(!sh_video->aspect) sh_video->aspect=1.0;
 
   if(screen_size_xy||screen_size_x||screen_size_y){
