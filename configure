@@ -178,6 +178,7 @@ Video output:
   --enable-sdl           build with SDL render support [autodetect]
   --enable-aa            build with AAlib render support [autodetect]
   --enable-ggi           build with GGI render support [autodetect]
+  --enable-directx       build with Directx support [autodetect]
   --enable-dxr2          build with DXR2 render support [autodetect]
   --enable-dxr3          build with DXR3/H+ render support [autodetect]
   --enable-dvb           build with support for output via DVB-Card [autodetect]
@@ -929,6 +930,7 @@ _x11=auto
 _dga=auto	# 1 2 no auto
 _xv=auto
 _sdl=auto
+_directx=auto
 _nas=auto
 _png=auto
 _jpg=auto
@@ -1028,6 +1030,8 @@ for ac_option do
   --disable-xv)		_xv=no		;;
   --enable-sdl)		_sdl=yes	;;
   --disable-sdl)	_sdl=no		;;
+  --enable-directx)     _directx=yes    ;;
+  --disable-directx)    _directx=no     ;;
   --enable-nas)		_nas=yes	;;
   --disable-nas)	_nas=no		;;
   --enable-png)		_png=yes	;;
@@ -2799,6 +2803,27 @@ else
   echores "no"
 fi
 
+echocheck "Directx"
+if test "$_directx" = auto ; then
+  cat > $TMPC << EOF
+#include <windows.h>
+#include <ddraw.h>
+int main(void) { return 0; }
+EOF
+  _directx=no
+  cc_check -mwindows && _directx=yes
+fi
+if test "$_directx" = yes ; then
+  _def_directx='#define HAVE_DIRECTX 1'
+  _ld_directx='-mcygwin'
+  _vosrc="$_vosrc vo_directx.c"
+  _vomodules="directx $_vomodules"
+else
+  _def_directx='#undef HAVE_DIRECTX'
+  _novomodules="directx $_novomodules"
+fi
+echores "$_directx"
+
 echocheck "NAS"
 if test "$_nas" = auto || test "$_nas" = yes ; then
   cat > $TMPC << EOF
@@ -4382,6 +4407,7 @@ PNG_LIB = $_ld_png
 JPEG_LIB = $_ld_jpg
 GIF_LIB = $_ld_gif
 SDL_LIB = $_ld_sdl
+DIRECTX_LIB = $_ld_directx
 SVGA_LIB = $_ld_svga
 AA_LIB = $_ld_aa
 
@@ -4825,6 +4851,7 @@ $_def_dga2
 $_def_sdl
 /* defined for SDLlib with keyrepeat bugs (before 1.2.1) */
 $_def_sdlbuggy
+$_def_directx
 $_def_ggi
 $_def_3dfx
 $_def_tdfxfb

@@ -70,6 +70,9 @@ extern vo_functions_t video_out_ggi;
 extern vo_functions_t video_out_aa;
 extern vo_functions_t video_out_mpegpes;
 extern vo_functions_t video_out_yuv4mpeg;
+#ifdef HAVE_DIRECTX
+extern vo_functions_t video_out_directx;
+#endif
 #ifdef HAVE_DXR2
 extern vo_functions_t video_out_dxr2;
 #endif
@@ -121,6 +124,9 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_SDL
         &video_out_sdl,
+#endif
+#ifdef HAVE_DIRECTX
+        &video_out_directx,
 #endif
 #ifdef HAVE_GGI
 	&video_out_ggi,
