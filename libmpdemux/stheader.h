@@ -79,6 +79,7 @@ typedef struct {
   HIC hic;  // handle
   void* video_out;
   void* vfilter;
+  int vf_inited;
 } sh_video_t;
 
 sh_audio_t* get_sh_audio(demuxer_t *demuxer,int id);
