@@ -1,19 +1,24 @@
 Source: mplayer
-Section: unknown
+Section: misc
 Priority: optional
-Maintainer: * TeLeNiEkO * <telenieko@telenieko.com>
+Maintainer: Dariush Pietrzak <eyck@ghost.anime.pl>
 Standards-Version: 3.2.1
+Build-Depends: xlibs-dev, libpng2-dev, libz-dev, debhelper (>= 2), nasm
 
 Package: mplayer
 Architecture: any
 Depends: ${shlibs:Depends},debconf,libconfhelper-perl
-Description: The Ultimate Movie Player For Linux
-  MPlayer is a movie player for LINUX. It plays most MPEG, AVI and ASF files,
-  supported by many native and Win32 DLL codecs. You can watch VCD, DVD and even
-  DivX movies too. The another big feature of mplayer is the wide range of
-  supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
-  but you can use SDL (and this way all drivers of SDL, for example AAlib) and
-  some lowlevel card-specific drivers (for Matrox) too! Most of them supports
-  software or hardware scaling, so you can enjoy movies in fullscreen. And what
-  about the nice big antialiased shaded subtitles (7 supported types!!!) with
-  hungarian, english, cyrillic, czech, korean fonts, and OSD?
+Description: The Ultimate Movie Player 
+ MPlayer is a movie player for Un*x. It plays most MPEG, AVI and ASF files,
+ supported by many native and Win32 DLL codecs. You can watch VCD, DVD and even
+ DivX movies with MPlayer.
+ .
+ MPlayer supports a wide range of output drivers: X11, Xv, DGA, OpenGL,
+ SVGAlib, fbdev, AAlib, GGI, SDL . You can use SDL and thus all the SDL 
+ drivers. Same goes for GGI.
+ There are some low-level card-specific drivers (e.g. Matrox).  Most of the
+ drivers support either software or hardware scaling, so you can enjoy
+ movies in full screen mode.
+ .
+ MPlayer has nice, big antialiased shaded subtitles (7 supported types!)
+ with Hungarian, English, Cyrillic, Czech and Korean fonts, and OSD.

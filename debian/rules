@@ -23,9 +23,8 @@ build-stamp:
 	# Add here commands to compile the package.
 	#$(MAKE)
 	#/usr/bin/docbook-to-man debian/etherconf.sgml > etherconf.1
-	make dep
-	make mplayer
-
+	${MAKE} dep
+	${MAKE} mplayer
 
 	touch build-stamp
 
@@ -53,7 +52,7 @@ install: build
 
 	# Add here commands to install the package into debian/<packagename>
 #	$(MAKE) prefix=`pwd`/debian/`dh_listpackages`/usr install
-	$(MAKE) install prefix=`pwd`/debian/tmp/usr
+	$(MAKE) install prefix=$(CURDIR)/debian/tmp/usr
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -65,7 +64,7 @@ binary-arch: build install
 	dh_testdir
 	dh_testroot
 	dh_installdebconf	
-	dh_installdocs
+	dh_installdocs DOCS/*
 	dh_installexamples
 	dh_installmenu
 #	dh_installlogrotate

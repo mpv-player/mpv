@@ -1,3 +1,9 @@
+mplayer (0.18-4) unstable; urgency=low
+
+  * Changes to debian packaging suggested Josip Rodin 
+
+ -- Dariush Pietrzak <eyck@ghost.forumakad.pl>  Wed, 22 Aug 2001 22:40:58 +0200
+
 mplayer (0.18-3) unstable; urgency=low
 
   * fixed templates. 

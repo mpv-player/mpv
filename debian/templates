@@ -34,10 +34,12 @@ Description: MPlayer Video Output
  	   this driver can work without X and display video on secondary head of matrox cards
  	 * xv - XVideo extensions of X 4.x ( hardware scaling, bilinear filtering )
  	 * sdl - SDL library, it can also use hardware scaling, filtering etc 
+ 	 * ggi - GGI library, it can also use hardware scaling, filtering etc 
  	 * dga, fsdga - DGA extension.
  	 * fsbdev - framebuffer device ( watching movies on text console )
  	 * x11 - simple x11 output.
- Please choose carefully because it has tramendous effect on speed.
+ .	 
+ Please choose carefully because this will have a tremendous effect on speed.
 
 Template: mplayer/cfgnote
 Type: note
