@@ -301,7 +301,10 @@ static void uninit_player(unsigned int mask){
   if(mask&INITED_DEMUXER){
     inited_flags&=~INITED_DEMUXER;
     current_module="free_demuxer";
-    if(demuxer) free_demuxer(demuxer);
+    if(demuxer){
+	stream=demuxer->stream;
+	free_demuxer(demuxer);
+    }
     demuxer=NULL;
   }
 
