@@ -308,7 +308,7 @@ if(!codec_inited){
     decpar.capabilities=&codeccap;
 //    decpar.accuracy = 0x1680000; //codecNormalQuality;
     decpar.accuracy = codecNormalQuality;
-    decpar.port = OutBufferGWorld;
+//    decpar.port = OutBufferGWorld;
 //    decpar.preferredOffscreenPixelSize=17207;
     
 //    decpar.sequenceID=malloc(1000);
