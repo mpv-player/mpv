@@ -148,6 +148,7 @@ void * fast_memcpy(void * to, const void * from, size_t len)
 	return to;
 }
 
+#undef	mem2agpcpy
 void * mem2agpcpy(void * to, const void * from, size_t len)
 {
 #ifdef RUNTIME_CPUDETECT
