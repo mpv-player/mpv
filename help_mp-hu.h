@@ -9,11 +9,7 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"Indítás:   mplayer [-gui] [opciók] [url|útvonal/]filenév\n"
-#else
 "Indítás:   mplayer [opciók] [url|útvonal/]filenév\n"
-#endif
 "\n"
 "Alapvetõ opciók: (az összes opció listájához lásd a man lapot!)\n"
 " -vo <drv[:dev]> videomeghajtó és -alegység kiválasztása (lista: '-vo help')\n"
