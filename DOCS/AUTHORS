@@ -9,9 +9,8 @@
 - getch2  [keyboard handler]
 - some changes in libmpeg2 code (progressive frames, bitrate & fps support)
 - libvo improvements: adding OpenGL support, bugfix in mga driver...
-- YUY2 support into mga_vid driver (for DivX/MPEG4)
-- YUY2, RGB/BGR 15/16/24/32 support into libvo drivers (for AVI codecs)
-- scripts in the TVout directory (allows using TVout on Matrox G400 DH on fb)
+- triple buffering & YUY2 support (for DivX/MPEG4) into mga_vid driver 
+- scripts in the TVout directory (TVout on Matrox G400DH, read DOCS/TVout-G400)
 - hacking DivX/Mpeg4 VfW codecs to get YUV output
 - opendivx decoder speed optimizations (see opendivx/ChangeLog)
 - OSD & SUB display code
@@ -23,14 +22,14 @@ Zoltán Ponekker (Pontscho/Fresh!):  <pontscho@makacs.poliod.hu>
 - 3DNow! support into mp3lib
 - 3DNow! support into fastmemcpy.h
 - various X11 driver changes (keyboard handling, fullscreen, bpp detect, etc)
-- libvo: adding xmga driver (similar to Xv but works under X3.3.x)
-- mixer support
+- libvo: adding xmga driver, and fullscreen support to xv
+- audio mixer (volume) support
 
 Gábor Lénárt (LGB): <lgb@lgb.hu>
-- testing and some improvements in mpeg player's user interface (options)
 - ./configure script improvements
 - Makefile improvements
 - prelimenary DVD support
+- another GUI code (coming soon or later :)
 
 Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - documentation maintainer, hun-eng translator
@@ -48,7 +47,7 @@ László Megyer (Lez, Laaz): <lez@sch.bme.hu>
 - screensaver+DPMS disable for libvo
 
 Gyula László (Chass, Tégla): <chass-@freemail.hu>
-- fonts
+- first fonts (mp_font1.zip)
 - new homepage design&gfx
 
 Zoltán Márk Vicián (Se7en): <se7en@sch.bme.hu>
@@ -59,9 +58,9 @@ Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 - DGA support in libvo
 
 Felix Bünemann: <Felix.Buenemann@gmx.de>
-- SDL driver fixes
+- SDL driver maintainer
 - Additional YUV formats fixes
-- New font (coming soon!?)
+- New font (mp_font2.zip)
 - PNG file output support in libvo
 
 TeLeNiEkO: <telenieko@telenieko.com>
@@ -77,17 +76,21 @@ Jens Hoffmann: <hoffmajs@gmx.de>
 - found the big BITMAPINFOHEADER problem -> solved ASV2 pixelization
 
 Nick Kurshev: <nickols_k@mail.ru>
-- memcpy optimizations for AMD K7 and Intel Pentium III
+- memcpy optimizations for AMD K7 and Intel Pentium III  (fastmemcpy.h)
 - CDROM tune info
+
+German Gomez Garcia: <german@piraos.com>
+- DVD .ifo parser and chapter selection [not yet in the main trunk]
+- SPDIF AC3 output for SBLive!  [not yet in the main trunk]
 
 Main testers:
   Tibor Balázs (Tibcu)
   Péter Sasi (SaPe)
   Christoph H. Lampert
-  Dirk Vornheder
   Attila Kinali
+  Dirk Vornheder
 
-========================== The Codecs: ===================================
+========================== The codecs, libs: =================================
 
 Aaron Holtzman:  <aholtzma@engr.uvic.ca>
 - ac3dec (and libac3) author  [AC3 audio decoder]
@@ -100,6 +103,10 @@ Michel Lespinasse:  <walken@zoy.org>
 Eugene Kuznetsov:  <divx@euro.ru>
 - avifile author  [AVI player library for linux, using Win32 VfW/ACM codecs]
 - technical help about AVI and ASF formats, and how to get YUV using VfW...
+
+Zdenek Kabelac:  <kabi@informatics.muni.cz>
+- current avifile maintainer(?)
+- some technical help about the win32 stuff and timers
 
 Project Mayo:  [http://www.projectmayo.com]
 - the OpenDivX codec authors
