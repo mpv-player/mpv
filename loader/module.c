@@ -5,7 +5,7 @@
  */
 
 // define for quicktime calls debugging and/or MacOS-level emulation:
-//#define EMU_QTX_API
+#define EMU_QTX_API
 
 // define for quicktime debugging (verbose logging):
 //#define DEBUG_QTX_API
@@ -326,6 +326,29 @@ static WINE_MODREF *MODULE_LoadLibraryExA( LPCSTR libname, HFILE hfile, DWORD fl
 		    for(i=0;i<28;i++) ((char*)0x6299e86d)[i]=0x90;
 		    for(i=0;i<5;i++) ((char*)0x6299e898)[i]=0x90;
 		    for(i=0;i<9;i++) ((char*)0x6299e8ac)[i]=0x90;
+		    /* remove threads */
+#if 1
+		    for (i=0;i<0x6a;i++) ((char*)0x62a61b10)[i]=0x90;
+#else
+		    /* callers */
+		    for (i=0;i<5;i++) ((char*)0x629487c5)[i]=0x90;
+		    for (i=0;i<5;i++) ((char*)0x6294b275)[i]=0x90;
+		    for (i=0;i<5;i++) ((char*)0x629a24b1)[i]=0x90;
+		    for (i=0;i<5;i++) ((char*)0x629afc5a)[i]=0x90;
+		    for (i=0;i<5;i++) ((char*)0x62af799c)[i]=0x90;
+		    for (i=0;i<5;i++) ((char*)0x62af7efe)[i]=0x90;
+		    for (i=0;i<5;i++) ((char*)0x62afa33e)[i]=0x90;
+#endif
+		    /* load fonts */
+//		    for (i=0;i<5;i++) ((char*)0x6288dd77)[i]=0x90;
+		    /* terminateqtml fix */
+#if 0
+		    for (i=0;i<2;i++) ((char*)0x629a13c7)[i]=0x90;
+		    for (i=0;i<5;i++) ((char*)0x629a13cb)[i]=0x90;
+		    for (i=0;i<5;i++) ((char*)0x62890337)[i]=0x90;
+//		    for (i=0;i<5;i++) ((char*)0x629a13d5)[i]=0x90;
+//		    for (i=0;i<5;i++) ((char*)0x6299fe14)[i]=0x90;
+#endif
 #ifdef EMU_QTX_API
 		    report_entry = report_func;
 		    report_ret   = report_func_ret;
