@@ -245,7 +245,7 @@ $(MPLAYER_DEP): version.h
 $(MENCODER_DEP): version.h
 
 $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
-	$(CC) $(CFLAGS) -g codec-cfg.c mp_msg.c -o $(PRG_CFG) -DCODECS2HTML $(I18NLIBS)
+	$(CC) $(CFLAGS) -g codec-cfg.c mp_msg.c -o $(PRG_CFG) -DCODECS2HTML $(EXTRA_LIB) $(I18NLIBS)
 
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
