@@ -266,7 +266,7 @@ tvi_handle_t *tvi_init_v4l(char *device, char *adevice)
 
     /* set video device name */
     if (!device)
-	priv->video_device = strdup("/dev/video");
+	priv->video_device = strdup("/dev/video0");
     else
 	priv->video_device = strdup(device);
 
