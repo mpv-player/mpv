@@ -6,8 +6,8 @@
 mplayer \- Movie Player for Linux
 .SH SYNOPSIS
 .B mplayer
-.RB [ \-vo\ <driver>[:<subdriver>]\ ]
-.RB [ \-ao\ <driver>[:<subdriver>]\ ]
+.RB [ \-vo\ <driver>[:<device>]\ ]
+.RB [ \-ao\ <driver>[:<device>]\ ]
 .RB [ \-vcd\ track\ number ]
 .RB [ \-sb\ byte\ position ]
 .RB [ \-nosound\ ]
@@ -75,8 +75,8 @@ any options.
 .I NOTE
 Every "flag" option has "noflag" pair, e.g. -fs opposite is -nofs
 .TP
-.B \-vo\ <driver>[:<subdriver>]
-select video output driver. "subdriver" is valid only when you specify
+.B \-vo\ <driver>[:<device>]
+select video output driver. "device" is valid only when you specify
 a driver like SDL or GGI, which use alternative means to produce video.
 Like: -vo sdl:aalib (or dga, fbdev, svga, x11, ggi)
 
@@ -84,8 +84,8 @@ you can get the list of available drivers executing
 .I mplayer -vo help
 
 .TP
-.B \-ao\ <driver>[:<subdriver>]
-select audio output driver. "subdriver" is valid only when you specify
+.B \-ao\ <driver>[:<device>]
+select audio output driver. "device" is valid only when you specify
 SDL as driver, which uses alternative means to produce audio.
 Like: -ao sdl:esd (or arts)
 
