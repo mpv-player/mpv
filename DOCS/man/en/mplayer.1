@@ -2736,11 +2736,13 @@ Parameters rg, gg, bg are the independent gamma values for the Red, Green
 and Blue components.
 The weight parameter can be used to reduce the effect of a high gamma value on
 bright image areas, e.g. keep them from getting overamplified and just plain
-white. A value of 0.0 turns the gamma correction all the way down while 1.0 
+white. A value of 0.0 turns the gamma correction all the way down while 1.0
 leaves it at its full strength.
-Defaults are gamma=1.0, contrast=1.0, brightness=0.0, saturation=1.0, weight=1.0.
+Defaults are gamma=1.0, contrast=1.0, brightness=0.0, saturation=1.0,
+weight=1.0.
 Value ranges are 0.1\-10 for gamma, -2\-2 for contrast (negative values result
-in a negative image), -1\-1 for brightness, 0\-3 for saturation and 0\-1 for weight.
+in a negative image), -1\-1 for brightness, 0\-3 for saturation and 0\-1 for
+weight.
 .TP
 .B hue[=hue:saturation]
 Defaults are hue=0.0, saturation=1.0.
@@ -4136,7 +4138,7 @@ sane range
 .B p_mask=<0.0\-1.0>
 inter MB masking (default: 0.0 (disabled))
 .TP
-.B naq\ \ \ \ 
+.B naq\ \ \ \
 Normalize adaptive quantization (experimental).
 When using adaptive quantization (*_mask), the average per-MB quantizer may no
 longer match the requested frame-level quantizer.
