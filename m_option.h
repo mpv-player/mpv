@@ -5,7 +5,7 @@
 
 typedef struct m_option_type m_option_type_t;
 typedef struct m_option m_option_t;
-struct m_struct;
+struct m_struct_st;
 
 ///////////////////////////// Options types declarations ////////////////////////////
 
