@@ -1834,6 +1834,11 @@ else
  _decorelibs='-Lopendivx -ldecore'
 fi
 
+if [ "$_debug" != "" ]; then
+ _debugdef='#define MP_DEBUG'
+else
+ _debugdef='#undef MP_DEBUG'
+fi
 
 echo
 echo "Creating $MCONF"
@@ -1891,6 +1896,8 @@ cat > $CCONF << EOF
 
 #define USE_OSD
 #define USE_SUB
+
+$_debugdef
 
 /* Common data directory (for fonts, etc) */
 #define DATADIR "$_datadir"
