@@ -33,12 +33,17 @@ note: this formule doesn't contain the +128 offsets of U,V values!
 Conclusion:
 Y = luminance, the weighted average of R G B components. (0=black 255=white)
 U = Cb = blue component (0=green 128=grey 255=blue)
-V = Cv = red component  (0=green 128=grey 255=red)
+V = Cr = red component  (0=green 128=grey 255=red)
 
 MPlayer side:
 =============
 In MPlayer, we usually have 3 pointers to the Y, U and V planes, so it
-doesn't matter what is they order in memory.
+doesn't matter what is they order in memory:
+    for mp_image_t and libvo's draw_slice():
+	planes[0] = Y = luminance
+	planes[1] = U = Cb = blue
+	planes[2] = V = Cr = red
+
 But there are some codecs (vfw, dshow) and vo drivers (xv) ignoring the 2nd
 and 3rd pointer, and use only a single pointer to the planar yuv image. In
 this case we must know the right order and alignment of planes in the memory!
