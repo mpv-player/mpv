@@ -36,6 +36,7 @@ int mp_mp3_get_lsf(unsigned char* hbuf){
  */
 int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate){
     int stereo,ssize,lsf,framesize,padding,bitrate_index,sampling_frequency;
+    int layer, mult[3] = { 12000, 144000, 144000 };
     unsigned long newhead = 
       hbuf[0] << 24 |
       hbuf[1] << 16 |
@@ -52,8 +53,9 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate){
     }
 #endif
 
-    if((4-((newhead>>17)&3))!=3){ 
-      mp_msg(MSGT_DEMUXER,MSGL_DBG2,"not layer-3\n"); 
+    layer = 4-((newhead>>17)&3);
+    if(layer==4){ 
+      mp_msg(MSGT_DEMUXER,MSGL_DBG2,"not layer-1/2/3\n"); 
       return -1;
     }
 
@@ -97,15 +99,20 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate){
       ssize = (stereo == 1) ? 17 : 32;
     if(!((newhead>>16)&0x1)) ssize += 2; // CRC
 
-    framesize = tabsel_123[lsf][2][bitrate_index] * 144000;
+    framesize = tabsel_123[lsf][layer-1][bitrate_index] * mult[layer-1];
 
+    mp_msg(MSGT_DEMUXER,MSGL_DBG2,"FRAMESIZE: %d, layer: %d, bitrate: %d, mult: %d\n", 
+    	framesize, layer, tabsel_123[lsf][layer-1][bitrate_index], mult[layer-1]);
     if(!framesize){
 	mp_msg(MSGT_DEMUXER,MSGL_DBG2,"invalid framesize/bitrate_index\n");
 	return -1;
     }
 
     framesize /= freqs[sampling_frequency]<<lsf;
-    framesize += padding;
+    if(layer==1)
+      framesize = (framesize+padding)*4;
+    else
+      framesize += padding;
 
 //    if(framesize<=0 || framesize>MAXFRAMESIZE) return FALSE;
     if(srate) *srate = freqs[sampling_frequency];
