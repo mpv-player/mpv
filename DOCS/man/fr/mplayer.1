@@ -1,4 +1,4 @@
-.\" synced with 1.868
+.\" synced with 1.869
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -244,7 +244,7 @@ sortie vidéo.
 .B contrôle général
 .PD 0
 .RSs
-.IPs "<\- et \->"
+.IPs "\<\- et \->"
 Recule/\:avance de 10 secondes.
 .IPs "haut et bas"
 Recule/\:avance d'1 minute.
@@ -3923,9 +3923,9 @@ Découpe la partie donnée de l'image et jette le reste.
 Utile pour enlever les bandes noires d'un film en cinémascope.
 .PD 0
 .RSs
-.IPs l,h
+.IPs <l>,<h>
 Largeur et hauteur coupées, par défaut les largeurs et hauteurs originales.
-.IPs x,y
+.IPs <x>,<y>
 Position de l'image coupée, par défaut au centre.
 .RE
 .PD 1
@@ -3935,11 +3935,11 @@ Position de l'image coupée, par défaut au centre.
 Calcule les paramètres nécessaires de découpage et les affiche sur stdout.
 .PD 0
 .RSs
-.IPs limit
+.IPs <limite>
 Le seuil qui peut éventuellement être défini de rien (0) à tout (255)
 (par défaut\ : 24).
 .br
-.IPs round
+.IPs <arrondi>
 Valeur dont la hauteur/\:largeur doit être multiple (par défaut\ : 16).
 L'offset est ajusté automatiquement pour que la vidéo soit au centre.
 Prenez 2 pour avoir des dimensions paires (obligatoire pour les vidéos
@@ -3954,10 +3954,10 @@ Ce plugin répond à la directive 'change_rectangle' de input.conf qui prend
 deux paramètres.
 .PD 0
 .RSs
-.IPs l,h
+.IPs <l>,<h>
 largeur et hauteur (par défaut\ : -1, largeur maximum où les limites sont
 toujours visibles.)
-.IPs x,y
+.IPs <x>,<y>
 position du coin supérieur gauche (par défaut\ : -1, le plus haut et le plus
 à gauche)
 .RE
@@ -3969,7 +3969,7 @@ position du coin supérieur gauche (par défaut\ : -1, le plus haut et le plus
 l'original non redimensionné aux coordonnées x y.
 Peut être utilisé pour placer les sous-titres /\:l'OSD dans les bandes noires.
 .RSs
-.IPs l,h
+.IPs <l>,<h>
 Largeur,hauteur étendues (par défaut\ : largeur, hauteur originales).
 Des valeurs négatives pour l et h sont traitées en tant qu'offset de la taille
 originale.
@@ -3981,9 +3981,9 @@ originale.
 Ajoute un bord de 50 pixels en bas de l'image.
 .RE
 .PD 1
-.IPs x,y
+.IPs <x>,<y>
 position de l'image originale sur l'image étendue (par défaut\ : centrée)
-.IPs o
+.IPs <o>
 rendu OSD/\:sous-titres
 .RSss
 0: désactivé (par défaut)
@@ -4149,7 +4149,7 @@ Utilisez-le avec le filtre scale pour faire une véritable conversion.
 Pour avoir une liste des formats disponibles, voir format=fmt=help.
 .PD 0
 .RSs
-.IPs fourcc
+.IPs <fourcc>
 nom de format comme rgb15, bgr24, yv12, etc (par défaut\ : yuy2)
 .RE
 .PD 1
@@ -4165,7 +4165,7 @@ celui que vous donnez.
 Pour une liste des différents formats disponibles, voyez noformat=fmt=help.
 .PD 0
 .RSs
-.IPs fourcc
+.IPs <fourcc>
 nom du format comme rgb15, bgr24, yv12, etc. (par défaut: yv12)
 .RE
 .PD 1
@@ -4296,12 +4296,9 @@ combinaison de filtres pp rapides (h1:a,v1:a,dr:a)
 .RSs
 .IPs "\-vf pp=hb/vb/dr/al"
 Déblocage horizontal et vertical, "deringing" et luminosité/\:contraste auto
-.IPs "\-vf pp=hb/vb/dr/al/lb"
-Déblocage horizontal et vertical, "deringing" et luminosité/\:contraste auto
-et désentrelacement "linear blend"
 .IPs "\-vf pp=de/-al"
 Filtres par défaut sans correction de luminosité/\:contraste
-.IPs "\-vf pp=de/tn:1:2:3"
+.IPs "\-vf pp=default/tmpnoise:1:2:3"
 Active les filtres par défaut ainsi que le débruiteur temporel.
 .IPs "\-vf pp=hb:y/vb:a"
 Débloque la luminance horizontale uniquement, et active ou désactive
@@ -4314,12 +4311,12 @@ processeur disponible.
 .B spp[=qualité[:qp[:mode]]]
 filtre de postprocessing simple
 .RSs
-.IPs qualité
+.IPs <qualité>
 0\-6 (par défaut\ : 3)
-.IPs qp\ \ \ 
+.IPs <qp>\ 
 Force le paramètre de quantification (par défaut\ : 0, utilise le QP de
 la video).
-.IPs mode\ \ \ 
+.IPs <mode>
 0: fort seuillage (hard thresholding) (par défaut)
 .br
 1: faible seuillage (soft thresholding) (meilleure élimination des parasites,
@@ -4330,7 +4327,7 @@ mais image plus floue)
 .B qp=equation
 filtre de changement des paramètres de quantification (QP)
 .RSs
-.IPs equation
+.IPs <equation>
 une équation comme "2+2*sin(PI*qp)"
 .RE
 .
@@ -4349,13 +4346,13 @@ Conversion logicielle rapide YV12 vers MPEG-1 avec libavcodec pour utilisation
 avec DVB/\:DXR3.
 Plus rapide et de meilleure qualité que \-vf fame.
 .RSs
-.IPs qualité
+.IPs <qualité>
 .RSss
 1\-31: qscale fixe
 .br
 32\-: débit binaire fixe en kBits
 .REss
-.IPs fps\ \ 
+.IPs <fps>
 force le nombre de trames par seconde en sortie (nombre flottant)
 (par défaut\ : 0, autodétection basée sur la hauteur)
 .RE
@@ -4373,7 +4370,7 @@ logicielle pour conserver le rapport hauteur/\:largeur.
 Utile uniquement quand il est combiné avec expand et scale
 (\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
 .RSs
-.IPs aspect
+.IPs <aspect>
 contrôle le rapport hauteur/\:largeur (aspect ratio), calculé comme ceci\ :
 DVB_HAUTEUR*ASPECTRATIO (par défaut\ : 576*4/\:3=768, fixez-le à
 576*(16/\:9)=1024 pour une télé 16:9).
@@ -4417,11 +4414,11 @@ Ce filtre est destiné à réduire le bruit de l'image pour que les plans fixes
 soient vraiment fixes (cela devrait améliorer la compressibilité.).
 .PD 0
 .RSs
-.IPs luma\ 
+.IPs <luma>
 force spatiale du luma (par défaut\ : 4)
-.IPs chroma
+.IPs <chroma>
 force spatiale du chroma (par défaut\ : 3)
-.IPs time\ 
+.IPs <time>
 force temporelle (par défaut\ : 6)
 .RE
 .PD 1
@@ -4443,7 +4440,7 @@ capturés, soit pour réduire légèrement le contraste pour masquer des
 artefacts et s'accomoder de débits plus bas.
 .
 .TP
-.Bs eq2[=gamma:contraste:luminosité:saturation:rg:vg:bg:poids]
+.Bs eq2[=gamma:contraste:luminosité:saturation:gr:gv:gb:poids]
 Égaliseur logiciel alternatif qui utilise des tables de lookup (très lent),
 autorisant une correction du gamma en plus d'un simple ajustement de
 luminosité et de contraste.
@@ -4452,11 +4449,11 @@ valeurs gamma sont 1.0.
 Les paramètres sont donnés en nombres flottants.
 .PD 0
 .RSs
-.IPs rg
+.IPs <gr>
 valeur gamma pour la composante rouge
-.IPs gg
+.IPs <gv>
 valeur gamma pour la composante verte
-.IPs bg
+.IPs <gb>
 valeur gamma pour la composante bleue
 .REss
 .PD 1
@@ -4570,15 +4567,15 @@ désentrelaceur noyau adaptatif de Donald Graft.
 Désentrelace des parties de la vidéo si un seuil configurable est dépassé.
 .PD 0
 .RSs
-.IPs "seuil (0 \- 255)"
+.IPs "<seuil> (0 \- 255)"
 Seuil (par défaut\ : 10).
-.IPs "carte (0 ou 1)"
+.IPs "<carte> (0 ou 1)"
 Affiche en blanc les pixels qui dépassent le seuil (par défaut\ : 0).
-.IPs "ordre (0 ou 1)"
+.IPs "<ordre> (0 ou 1)"
 Échange les champs si à 1 (par défaut\ : 0).
-.IPs "netteté (0 ou 1)"
+.IPs "<netteté> (0 ou 1)"
 Améliore davantage la netteté (sharpening) (par défaut\ : 0).
-.IPs "deuxsens (0 ou 1)"
+.IPs "<deuxsens> (0 ou 1)"
 Autorise l'augmentation de la netteté (sharpening) dans les deux sens
 (par défaut\ : 0).
 .RE
@@ -4671,7 +4668,7 @@ remplissent mieux ce rôle.
 Les arguments suivants (voir leur syntaxe plus haut) peuvent être utilisés
 pour contrôler son comportement:
 .RSs
-.IPs dr\ \ \ 
+.IPs <dr>\ 
 Définit le mode saut de trames.
 0 (par défaut) signifie ne pas sauter de trames pour maintenir le débit de
 sortie.
@@ -4681,19 +4678,19 @@ telecine dans les 5 dernières trames.
 .br
 .I NOTE\ :
 Utilisez le mode 1 avec MEncoder.
-.IPs am\ \ \ 
+.IPs <am>\ 
 Type d'analyse.
 Les valeurs disponibles sont 0 (motif fixé avec numéro de trame initiale
 définit par fr=#) et 1 (recherche agressive du motif telecine).
 La valeur par défaut est 1.
-.IPs fr\ \ \ 
+.IPs <fr>\ 
 Définit le numéro de trame initiale de la séquence.
 0\-2 sont les trois trames progressives propres; 3 et 4 sont les deux trames
 entrelaçées.
 La valeur par défaut, -1, signifie "pas dans la séquence telecine".
 Le nombre spécifié ici est le type de la précédente trame imaginaire avant le
 début du film.
-.IPs "<t0>, <t1>, <t2>, <t3>"
+.IPs "<tr0>, <tr1>, <tr2>, <tr3>"
 Valeurs seuils à utiliser dans certains types.
 .RE
 .
@@ -4769,28 +4766,28 @@ pendant la lecture, mais il sera généralement meilleur qu'en utilisant
 pp=lb ou pas de désentrelacement du tout.
 Les options multiples doivent être séparées par /.
 .RSs
-.IPs crop=l:h:x:y
+.IPs crop=<l>:<h>:<x>:<y>
 Exactement comme le filtre crop, mais plus rapide, et fonctionne également
 avec des films teleciné hard et soft mélangés, du moment que y soit un
 multiple de 4.
 Si x ou y nécessitaient de couper des fractions de pixels du plan chroma,
 l'aire coupée serait étendue.
 Ceci signifie généralement que x et y doivent être pairs.
-.IPs io=ifps:ofps
+.IPs io=<ifps>:<ofps>
 Pour chaque ifps trames d'entrées le filtre sortira ofps trames.
 Le rapport ifps/\:ofps devrait correspondre au rapport \-fps/\-ofps.
 Ceci peut être utilisé pour filtrer des films qui sont diffusés à la TV à
 un débit différent de celui d'origine.
-.IPs luma_only=n
+.IPs luma_only=<n>
 Si n est non-nul, le plan chroma est copié tel quel.
 C'est utile pour la TV échantillonnée en YV12, qui annule un des champ chroma.
-.IPs mmx2=n
+.IPs mmx2=<n>
 Sur x86, si n=1, utilise les fonctions optimisées pour MMX2, si n=2, utilise
 les fonctions optimisées pour 3DNow!, sinon, utilise juste du C.
 Si cette option n'est pas précisée, MMX2 et 3DNow! sont détectés
 automatiquement, utilisez cette option pour outrepasser la détection
 automatique.
-.IPs fast=n
+.IPs fast=<n>
 Une valeur de n plus grande accélère le filtre au détriment de l'exactitude.
 La valeur par défaut est n=3.
 Si n est impair, une trame suivant immédiatement une trame marquée par le flag
@@ -4805,19 +4802,19 @@ trop d'exactitude.
 Si n=4 ou 5, des métriques plus rapides, mais bien moins exactes sont
 utilisés pour trouver les changements de trames, mais risque de prendre les
 détails verticaux pour une vidéo entrelacé.
-.IPs verbose=n
+.IPs verbose=<n>
 Si n est non-nul, affiche les métriques détaillés pour chaque trame.
 Utile pour débogage.
-.IPs dint_thres=n
+.IPs dint_thres=<n>
 Seuil de désentrelacement.
 Utilisé pour désentrelacer les trames sans correspondance.
 Une valeur plus grande signifie moins de désentrelacement, utilisez n=256
 pour désactiver complètement le désentrelacement (par défaut\ : 8).
-.IPs comb_thres=n
+.IPs comb_thres=<n>
 Seuil pour comparer les champs haut et bas (par défaut\ : 128).
-.IPs diff_thres=n
+.IPs diff_thres=<n>
 Seuil pour détecter les changements temporels d'un champ (par défaut\ : 128).
-.IPs sad_thres=n
+.IPs sad_thres=<n>
 Seuil de la Somme des Différences Absolues (par défaut\ : 64).
 .RE
 .
@@ -4853,14 +4850,14 @@ Si vous voulez utiliser le mode 2-passes de divtc lors d'un encodage vidéo,
 il vous faut réaliser 3 passes\ : d'abord la passe 1 de divtc et la passe 1
 de l'encodeur, puis la passe 2 de divtc et la passe 1 de l'encodeur, et enfin
 la passe 2 de divtc avec la passe 2 de l'encodeur.
-.IPs file=nom_fichier
+.IPs file=<nom_fichier>
 Définit le nom du fichier journal (par défaut\ : "framediff.log").
-.IPs threshold=valeur
+.IPs threshold=<valeur>
 Définit la force minimum que le motif telecine doit avoir pour que le filtre
 le voit (par défaut\ : 0.5).
 Ceci est utilisé pour éviter de reconnaître des motifs erronés lors des
 moments vraiment sombres ou statiques.
-.IPs window=nombre_trames
+.IPs window=<nombre_trames>
 Définit le nombre de trames précédents à considérer lors que la recherche
 de motif (par défaut\ : 30).
 Une fenêtre (window) plus grande améliore la fiabilité de la recherche de
@@ -4879,7 +4876,7 @@ mais cette option peut vous aider à vous débarasser des saccades du début.
 La première passe du mode 2-passes utilise aussi cette option, donc si
 vous enregistrez la sortie de la première passe, vous aurez un fichier où
 la phase est constante.
-.IPs deghost=valeur
+.IPs deghost=<valeur>
 Définit le seuil "deghosting" (0\-255 pour le mode à passe unique,
 -255\-255 pour celui 2-passes, par défaut 0).
 Si non-nul, le mode deghosting est utilisé.
@@ -5059,10 +5056,10 @@ bords (-30\-0)
 Corrige la perspective des vidéos non filmées perpendiculairement à l'écran.
 .PD 0
 .RSs
-.IPs x0,y0,...
+.IPs <x0>,<y0>,...
 coordonnées des coins supérieur-gauche, supérieur-droit, inférieur-gauche
 et inférieur-droit
-.IPs t\ \ \ \ 
+.IPs <t>\ \ 
 ré-échantillonnage linéaire (0) ou cubique (1)
 .RE
 .PD 1
@@ -5082,7 +5079,7 @@ Extrait les deux champs et les place côte à côte, les redimmensionnant pour
 garder le rapport hauteur/\:largeur du film.
 .PD 0
 .RSs
-.IPs lignes
+.IPs <lignes>
 nombre de lignes à sélectionner à partir du milieu de l'image (par défault: 12)
 .RE
 .PD 1
@@ -5138,11 +5135,11 @@ Les arguments sont\ :
 .RE
 .PD 0
 .RSs
-.IPs "largeur, hauteur"
+.IPs "<largeur>, <hauteur>"
 taille de l'image/\:surface
-.IPs "xpos, ypos"
+.IPs "<xpos>, <ypos>"
 Démarre le blitting à la position x/\:y.
-.IPs alpha
+.IPs <alpha>
 Fixe la différence alpha.
 Si vous le fixez à \-255 vous pouvez envoyer une séquence de commandes
 ALPHA pour mettre la surface à \-225, \-200, \-175 etc pour un joli effet
@@ -5154,7 +5151,7 @@ de fondu ! ;)
 .br
 -255: Rends tout transparent.
 .REss
-.IPs clear
+.IPs <clear>
 Efface le framebuffer avant 'blitting'.
 .RSss
 0: l'image sera simplement 'blittée' par dessus l'ancienne, donc vous
@@ -5231,11 +5228,11 @@ disparaître (vous risquez aussi de voir quelque chose de pire apparaître \-
 ça dépend des cas).
 .PD 0
 .RSs
-.IPs x,y
+.IPs <x>,<y>
 position du coin supérieur gauche du logo
-.IPs l,h
+.IPs <l>,<h>
 largeur et hauteur du rectangle nettoyé
-.IPs t
+.IPs <t>
 Épaisseur des bords du rectangle (ajouté à l et h).
 Quand il est égal à -1, un rectangle vert est dessiné sur l'écran pour
 simplifier la recherche des paramètres x,y,l,h.
@@ -5247,7 +5244,7 @@ simplifier la recherche des paramètres x,y,l,h.
 Encodeur logiciel YV12 vers MJPEG pour utilisation avec le périphérique de
 sortie vidéo zr2.
 .RSs
-.IPs maxheight=h|maxwidth=l
+.IPs maxheight=<h>|maxwidth=<l>
 Ces options initialisent la largeur et la hauteur maximum que la carte zr peut
 gérer (la couche de filtres de MPlayer ne peut actuellement pas les deviner).
 .IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
@@ -7552,6 +7549,15 @@ différence près qu'elle dispose des stats de la deuxième passe pour mieux
 travailler.
 Vous pouvez utiliser toutes les options d'encodage, même les plus
 gourmandes.
+.br
+La première passe peut être effectuée à un débit binaire constant ou à
+quanta constant.
+À quanta constant, le résultat est souvent meilleur, mais requiert
+que vous deviniez un qp_constant qui serait proche du débit binaire souhaité.
+(Mieux vaut se tromper en sous-estimant qp_constant, c-à-d un débit binaire
+plus haut.)
+Les passes suivantes sont ABR (débit binaire moyen), et vous devez définir
+un débit binaire.
 .br
 .I
 NOTE\ :
