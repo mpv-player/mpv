@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!--synced with 1.28 -->
+<!--synced with 1.30 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Foire Aux Questions</title>
 
@@ -1144,7 +1144,7 @@ Comment puis-je joindre deux fichiers vidéo ?
 </para></question>
 <answer><para>
 Cela à été l'objet d'une discussion sans fin sur mplayer-users. Allez chercher dans les
-<ulink url="http://mplayerhq.hu/cgi-bin/htsearch?restrict=/mplayer-users/">archives</ulink>
+<ulink url="http://mplayerhq.hu/cgi-bin/s-arch.cgi?sbm=mplayer-users">archives</ulink>
 pour une réponse complète. C'est un sujet compliqué et votre résultat pourra beaucoup
 varier suivant le type de fichiers que vous voulez lier. Les MPEGs peuvent être
 concaténés dans un fichier unique avec un peu de chance. Pour les AVIs il y a deux outils

@@ -540,8 +540,8 @@ dans votre fichier de configuration pour utiliser la skin dans le répertoire <fi
 <title>Sous-titres et OSD</title>
 
 <para>
-MPlayer peut afficher des sous-titres durant le film. les formats suivants
-sont supportés:
+ <application>MPlayer</application> peut afficher des sous-titres durant le film. 
+ Les formats suivants sont supportés:
 <itemizedlist>
 <listitem><para>VobSub</para></listitem>
 <listitem><para>OGM</para></listitem>

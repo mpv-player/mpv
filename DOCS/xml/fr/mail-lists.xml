@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.8 -->
 <appendix id="mailinglists">
 <title>Listes de diffusion</title>
 <para>
@@ -114,7 +114,7 @@ Liste pour les discussions sur les Weekly News.
 </itemizedlist>
 <note><para>
 Vous pouvez obtenir les archives avec recherche possible à l'adresse
-<ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch"/>.
+<ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi"/>.
 </para></note>
 </para>
 </appendix>

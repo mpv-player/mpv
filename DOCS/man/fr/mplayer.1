@@ -1,4 +1,4 @@
-.\" synced with 1.524
+.\" synced with 1.532
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas@legaillart.com >
@@ -34,7 +34,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "25 Janvier 2004" "The MPlayer Project" "Le Lecteur Vidéo Pour Linux"
+.TH MPlayer 1 "2 Février 2004" "The MPlayer Project" "Le Lecteur Vidéo Pour Linux"
 .
 .SH NAME
 mplayer  \- Lecteur Vidéo pour Linux
@@ -166,9 +166,9 @@ MPlayer possède un affichage sur écran (OnScreenDisplay) pour les
 informations, de belles et grandes polices lissées et des effets
 visuels pour confirmer les contrôles au clavier. Les polices
 européennes/\:ISO 8859-1,2 (Hongroise, Anglaise, Tchèque, etc),
-Cyrillique et Coréenne sont supportées ainsi que 9 formats de
-sous-titres(MicroDVD, SubRip, SubViewer, Sami, VPlayer, RT,
-SSA, AQTitle et le nôtre: MPsub) et les sous-titres
+Cyrillique et Coréenne sont supportées ainsi que 11 formats de
+sous-titres (MicroDVD, SubRip, SubViewer, Sami, VPlayer, RT,
+SSA, AQTitle, JACOsub, PJS et le nôtre: MPsub) et les sous-titres
 DVD (SPU streams, VobSub et Closed Captions).
 .PP
 .B mencoder
@@ -943,8 +943,8 @@ Se place à la position donnée par 'octet'.
 Utile pour la lecture d'images CDROM / fichiers .VOB avec des saletés au début.
 .TP
 .B \-srate <Hz>
-Force la fréquence d'échantillonage audio, en modifiant la vitesse 
-de la vidéo pour garder la synchro A-V.
+Sélectionne  la fréquence d'échantillonage audio, en ré-échantillonant si 
+nécessaire.
 MEncoder passe cette valeur à lame pour le ré-échantillonnage.
 .TP
 .B \-ss <temps> (voir l'option \-sb également)
@@ -2588,13 +2588,13 @@ Tourne et (éventuellement) inverse l'image de +/\:- 90 degrés. Pour les
 paramètres entre 4\-7 la rotation n'est faite que si la géométrie du film
 est en mode portrait et non en paysage.
 .TP
-.B scale[=l:h[:i[:c[:p]]]]
+.B scale[=l:h[:interlaced[:chr_drop[:param[:presize]]]]]
 Redimensionne l'image avec le zoom logiciel (lent) et applique une conversion
 de palette YUV<\->RGB (voir également l'option \-sws).
 .RSs
-.IPs l,h
-nouvelles largeur/hauteur après redimensionnement (par défaut: largeur,hauteur
-originales)
+.IPs l,h\ \
+largeur/hauteur redimensionnées (par défaut: largeur,hauteur originales)
+.br
 .I NOTE:
 Si \-zoom est utilisée, et que les filtres sous-jacents (y compris libvo)
 ne sont pas capable de redimmensionner, alors les valeurs par défaut seront
@@ -2609,9 +2609,9 @@ redimensionné.
 .br
 -3: Calcule l/\:h en utilisant l'autre dimension et l'aspect ratio original.
 .REss
-.IPs i
-flag d'entrelacement
-.IPs c
+.IPs interlaced
+Bascule le redimmensionnement entrelacé.
+.IPs chr_drop
 saut de chroma
 .RSss
 0: utilise toutes les lignes disponibles pour le chroma
@@ -2622,7 +2622,7 @@ saut de chroma
 .br
 3: n'utilise qu'une ligne sur 8 pour le chroma
 .REss
-.IPs p
+.IPs param
 paramètres de redimensionnement (dépends de la méthode de redimensionnement
 utilisée)
 .RSss
@@ -2631,6 +2631,21 @@ utilisée)
 -sws 7 (gaussien) est la duretée (0 (doux) \- 100 (dur))
 .br
 -sws 9 (lanczos)  est la longueur du filtre (1\-10)
+.REss
+IPs presize
+Scale to preset sizes.
+.RSss
+qntsc:   352x240 (NTSC quart d'écran)
+.br
+qpal:    352x288 (PAL quart d'écran)
+.br
+ntsc:    720x480 (NTSC standard)
+.br
+pal:     720x576 (PAL standard)
+.br
+sntsc:   640x480 (NTSC à pixels carrés)
+.br
+spal:    768x576 (PAL à pixels carrés)
 .REss
 .RE
 .TP
@@ -2733,8 +2748,12 @@ filtre de postprocessing simple
 paramètre pour forcer la quantisation
 .RE
 .TP
-.B test
+.B test\ \ \
 Génère divers motifs de test.
+.TP
+.B rgbtest
+Génère un motif de test RGB utile pour détecter les problèmes RGB contre BGR.
+Vous devriez voir une frise rouge, verte et bleue du haut vers le bas.
 .TP
 .B lavc[=qualité:fps]
 Conversion logicielle YV12 vers MPEG1 rapide avec libavcodec pour utilisation
@@ -2895,6 +2914,24 @@ partie de l'image qui devra être détectée comme entrelacée pour sauter la trame.
 .B lavcdeint
 Utilise le filtre de desentrelacement de libavcodec.
 .TP
+.B kerndeint[=carte[:ordre[:seuil[:dureté[:deuxsens]]]]]
+désentrelaceur noyau de Donald Graft.
+Désentrelace des parties de la vidéo si un seuil configurable est dépassé.
+.PD 0
+.RSs
+.IPs "carte (0 ou 1)"
+Paint en blanc les pixels qui dépassent le seui (par défaut: 0).
+.IPs "ordre (0 ou 1)"
+Échange les champs si 1 (par défaut: 0).
+.IPs "seuil (0 - 255)"
+Seuil (par défaut 10).
+.IPs "dureté (0 ou 1)"
+Autorise plus de dureté (sharpening) (par défaut: 0).
+.IPs "deuxsens (0 ou 1)"
+Autorise la dureté (sharpening) dans les deux sens (par défaut: 0).
+.RE
+.PD 1
+.TP
 .B "unsharp=l|cLxH:montant[:l|cLxH:montant]"
 Masque unsharp / flou gaussien.
 .RSs
@@ -3005,7 +3042,7 @@ et devrait être utilisé avec MEncoder mais pas avec MPlayer.
 Comme pour detc, vous devez spécifier le débit de sortie correct (\-ofps 23.976)
 en utilisant MEncoder.
 .TP
-.B pullup
+.B pullup\
 Filtre d'inversion de pulldown (telecine inversé) de troisième génération,
 capable de gérer du contenu composé de hard-telecine, 24 fps progressif, et
 30 fps progressif.
@@ -4010,9 +4047,21 @@ ajuste
 .RE
 .PD 1
 .TP
-.B fast
+.B fast\ \ \
 passe au mode VBR pré-sélectionné suivant, plus rapide que l'actuel, qualité
 légèrement inférieure et bitrates plus hauts.
+.TP
+.B highpassfreq=<fréq>
+Fixe la fréquence du filtre passe-haut en Hz.
+Les fréquences en dessous de celle spécifiée seront coupées.
+Une valeur de -1 désactivera le filtrage, une valeur de 'auto'
+laissera lame choisir la valeur automatiquement.
+.TP
+.B lowpassfreq=<fréq>
+Fixe la fréquence du filtre passe-bas en Hz.
+Les fréquences au dessus de celle spécifiée seront coupées.
+Une valeur de -1 désactivera le filtrage, une valeur de 'auto'
+laissera lame choisir la valeur automatiquement.
 .TP
 .B preset=<valeur>
 valeurs de preset
@@ -4951,6 +5000,25 @@ améliorer le PSNR
 .TP
 .B nr=<0\-100000>
 réduction du  bruit, 0 pour désactivé
+.TP
+.B qns=<0\-3>
+quantizer noise shaping, réduit les artéfacts, de plus grandes valeurs sont plus
+lentes mais donnent une meilleur qualité.
+Ceci peut et doit être utilisé avec la quantisation par treillis, dans ce cas la quantisation
+par treillis (optimale pour un poids constant) sera utilisée comme point de départ pour
+la recherche itérative.
+.PD 0
+.RSs
+.IPs 0
+désactivé (par défaut)
+.IPs 1
+baisse uniquemement la valeur absolue des coefficients
+.IPs 2
+change uniquement les coefficients avant le coefficient non null + 1
+.IPs 3
+essaie tout
+.RE
+.PD 1
 .TP
 .B inter_matrix=<matrice séparée par des virgules>
 Utilise une matrice inter personnalisée. Cela requiert une chaine de 64 entiers

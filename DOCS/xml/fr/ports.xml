@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.36 -->
+<!-- synced with 1.37 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
@@ -307,7 +307,7 @@ X qui est TRÈS lente. Utilisez SDL.
 <para>Sascha Sommer fait des versions officielles pour Windows de temps en temps,
   Joey Parrish fait des paquets non-officiels pour Windows complets avec installeur.
   Ils sont dans la section Windows de la
-  <ulink url="http://www.mplayerhq.hu/homepage/projects.html">page de nos projets</ulink>.</para>
+  <ulink url="http://www.mplayerhq.hu/homepage/projects.html#windows">page de nos projets</ulink>.</para>
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>

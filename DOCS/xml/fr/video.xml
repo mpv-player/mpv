@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.47 -->
+<!-- synced with 1.49 -->
 <sect2 id="video-dev">
 <title>Sorties vidéo</title>
 
@@ -1692,12 +1692,8 @@ pour une TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen></para>
 
 <formalpara>
-<title>Utilisez votre carte DVB pour regarder la TV numérique (module d'entrée DVB)</title>
-<para>
-  D'abord vous devez passer le paramètre <literal>dvb_shutdown_timeout=0</literal>
-  au module noyau <filename>dvb-core</filename>, ou MPlayer se terminera après
-  10 secondes.
-</para>
+<title>TV numérique (module d'entrée DVB)</title>
+<para>Vous pouvez utiliser votre carte DVB pour regarder la TV numérique.</para>
 </formalpara>
 
 <para>
