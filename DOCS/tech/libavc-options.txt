@@ -137,6 +137,8 @@ bug	manual workaround encoder bugs
 	0 (default)
 	1 (workaround for some old lavc generated msmpeg4v3 files)
 
+gray	grayscale only decoding (a bit faster than with color ...)
+
 
 Notes:	1. lavc will strictly follow the quantizer limits vqmin, vqmax, vqdiff
            even if it violates the bitrate / bitrate tolerance
