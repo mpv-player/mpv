@@ -207,7 +207,7 @@ void ds_free_packs(demux_stream_t *ds){
   if(ds->buffer) free(ds->buffer);
   ds->buffer=NULL;
   ds->buffer_pos=ds->buffer_size;
-  ds->pts=0;
+  ds->pts=0; ds->pts_bytes=0;
 }
 
 int ds_get_packet(demux_stream_t *ds,unsigned char **start){
