@@ -1247,7 +1247,9 @@ while(1){
 		if(bestprio==-1 || !video_codec) {
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
     mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-    sh_video = d_video->sh = NULL; 
+    if(!sh_audio)
+      goto goto_next_file;
+    sh_video = d_video->sh = NULL;
     goto main; // exit_player(MSGTR_Exit_error);
     }
   } else {
