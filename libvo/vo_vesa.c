@@ -76,7 +76,7 @@ static float aspect_factor;
 
 
 static uint32_t image_width, image_height; /* source image dimension */
-static uint32_t x_offset,y_offset; /* to center image on screen */
+static int32_t x_offset,y_offset; /* to center image on screen */
 static unsigned init_mode; /* mode before run of mplayer */
 static void *init_state = NULL; /* state before run of mplayer */
 static struct win_frame win; /* real-mode window to video memory */
@@ -350,7 +350,7 @@ static void vesa_aspect(uint32_t width,uint32_t height,
   {
     *image_height = yres;
     *image_width = yres * aspect_factor;
-    if(verbose) printf("vo_vesa: Y > X tehrefore *image=%ux%u\n",*image_width,*image_height);
+    if(verbose) printf("vo_vesa: Y > X therefore *image=%ux%u\n",*image_width,*image_height);
   }
 }
 
@@ -379,21 +379,23 @@ static char *model2str(unsigned char type)
  * bit 3 (0x08) enables flipping (-flip)
  */
 static uint32_t
-init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
+init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
   struct VbeInfoBlock vib;
   struct VesaModeInfoBlock vmib;
   size_t i,num_modes;
+  uint32_t w,h;
   unsigned short *mode_ptr,win_seg;
   unsigned bpp,best_x = UINT_MAX,best_y=UINT_MAX,best_mode_idx = UINT_MAX;
   int err;
 	image_width = width;
 	image_height = height;
-	if(fullscreen & (0x1|0x8))
+	if(flags & 0x8)
 	{
-	  printf("vo_vesa: switches: -fs, -flip are not supported\n");
+	  printf("vo_vesa: switch -flip is not supported\n");
 	}
-	if(fullscreen & 0x04) vesa_zoom = 1;
+	if(flags & 0x04) vesa_zoom = 1;
+	if(flags & 0x01) vesa_zoom = 2;
 	if((err=vbeInit()) != VBE_OK) { PRINT_VBE_ERR("vbeInit",err); return -1; }
 	memcpy(vib.VESASignature,"VBE2",4);
 	if((err=vbeGetControllerInfo(&vib)) != VBE_OK)
@@ -427,6 +429,13 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	num_modes = 0;
 	mode_ptr = vib.VideoModePtr;
 	while(*mode_ptr++ != 0xffff) num_modes++;
+	if(vo_dbpp)
+	{
+	  bpp = vo_dbpp;
+	  if(format == IMGFMT_YV12 || format == IMGFMT_I420 || format == IMGFMT_IYUV)
+			yuv2rgb_init(bpp, MODE_RGB);
+	}
+	else
 	switch(format)
 	{
 		case IMGFMT_BGR8:
@@ -458,6 +467,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	  printf("\nvo_vesa: Modes in detail:\n");
 	}
 	mode_ptr = vib.VideoModePtr;
+	w = d_width ? d_width : width;
+	h = d_height ? d_height : height;
         for(i=0;i < num_modes;i++)
 	{
 		if((err=vbeGetModeInfo(mode_ptr[i],&vmib)) != VBE_OK)
@@ -465,8 +476,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 			PRINT_VBE_ERR("vbeGetModeInfo",err);
 			return -1;
 		}
-		if(vmib.XResolution >= image_width &&
-		   vmib.YResolution >= image_height &&
+		if(vmib.XResolution >= w &&
+		   vmib.YResolution >= h &&
 		   (vmib.ModeAttributes & MOVIE_MODE) == MOVIE_MODE &&
 		   vmib.BitsPerPixel == bpp &&
 		   vmib.MemoryModel == memRGB)
@@ -498,7 +509,6 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if(best_mode_idx != UINT_MAX)
 	{
 		video_mode = vib.VideoModePtr[best_mode_idx];
-		printf("vo_vesa: Using VESA mode (%u) = %x\n",best_mode_idx,video_mode);
 		fflush(stdout);
 		if((err=vbeGetMode(&init_mode)) != VBE_OK)
 		{
@@ -511,21 +521,23 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 			PRINT_VBE_ERR("vbeGetModeInfo",err);
 			return -1;
 		}
-		if(!(yuv_buffer = malloc(video_mode_info.XResolution*video_mode_info.YResolution*4)))
-		{
-		  printf("vo_vesa: Can't allocate temporary buffer\n");
-		  return -1;
-		}
+		printf("vo_vesa: Using VESA mode (%u) = %x [%ux%u@%u]\n"
+			,best_mode_idx,video_mode,video_mode_info.XResolution
+			,video_mode_info.YResolution,video_mode_info.BitsPerPixel);
 		if( vesa_zoom )
 		{
 		  if( format==IMGFMT_YV12 )
 		  {
 		      /* software scale */
+		      if(vesa_zoom > 1)
+		      {
+			image_width = video_mode_info.XResolution;
+			image_height = video_mode_info.YResolution;
+		      }
+		      else
 		      vesa_aspect(width,height,  
 		    		  video_mode_info.XResolution,video_mode_info.YResolution,
 				  &image_width,&image_height);
-/*		      image_width = video_mode_info.XResolution;
-		      image_height = video_mode_info.YResolution; */
 		      scale_xinc=(width << 16) / image_width - 2;  /* needed for proper rounding */
 	    	      scale_yinc=(height << 16) / image_height + 2;
 		      SwScale_Init();
@@ -553,13 +565,22 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		win.ptr = PhysToVirtSO(win_seg,0);
 		win.low = 0L;
 		win.high= video_mode_info.WinSize*1024;
-		x_offset = (video_mode_info.XResolution - image_width) / 2;
-		y_offset = (video_mode_info.YResolution - image_height) / 2;
+		if(video_mode_info.XResolution > image_width)
+		    x_offset = (video_mode_info.XResolution - image_width) / 2;
+		else x_offset = 0;
+		if(video_mode_info.YResolution > image_height)
+		    y_offset = (video_mode_info.YResolution - image_height) / 2;
+		else y_offset = 0;
 		if(verbose)
 		  printf("vo_vesa: image: %ux%u screen = %ux%u x_offset = %u y_offset = %u\n"
 			,image_width,image_height
 			,video_mode_info.XResolution,video_mode_info.YResolution
 			,x_offset,y_offset);
+		if(!(yuv_buffer = malloc(image_width*image_height*bpp)))
+		{
+		  printf("vo_vesa: Can't allocate temporary buffer\n");
+		  return -1;
+		}
 		if((err=vbeSaveState(&init_state)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeSaveState",err);
