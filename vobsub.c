@@ -1224,7 +1224,7 @@ vobsub_set_from_lang(void *vobhandle, unsigned char * lang)
 	  }
       lang+=2;while (lang[0]==',' || lang[0]==' ') ++lang;
     }
-    mp_msg(MSGT_VOBSUB, MSGL_WARN, "No matching VOBSUB languge found!\n");
+    mp_msg(MSGT_VOBSUB, MSGL_WARN, "No matching VOBSUB language found!\n");
     return -1;
 }
     
