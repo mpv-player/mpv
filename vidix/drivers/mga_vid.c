@@ -1238,7 +1238,7 @@ int vixProbe(int verbose,int force)
 
 	if (is_g400 == -1)
 	{
-		printf("[mga] No supported cards found\n");
+		if (verbose) printf("[mga] Can't find chip\n");
 		return(ENXIO);
 	}
 
