@@ -29,7 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <stdint.h>
 
 #include "../config.h"
 #include "../mp_msg.h"
