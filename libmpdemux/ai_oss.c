@@ -113,7 +113,6 @@ int ai_oss_init(audio_in_t *ai)
     if (err < 0) {
 	mp_msg(MSGT_TV, MSGL_ERR, "Unable to set trigger: %d\n",
 	       PCM_ENABLE_INPUT);
-	return -1;
     }
 
     ai->blocksize = 0;
