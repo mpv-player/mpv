@@ -12,11 +12,7 @@
 
 static int speed = -1;
 static int paranoia_mode = 1;
-#if defined(__NetBSD__)
-static char* generic_dev = "/dev/cdrom";
-#else
 static char* generic_dev = NULL;
-#endif
 static int sector_size = 0;
 static int search_overlap = -1;
 static int toc_bias = 0;
@@ -72,7 +68,11 @@ stream_t* open_cdda(char* dev,char* track) {
   if(generic_dev)
     cdd = cdda_identify_scsi(generic_dev,dev,0,NULL);
   else
+#if defined(__NetBSD__)
+    cdd = cdda_identify_scsi(dev,dev,0,NULL);
+#else
     cdd = cdda_identify(dev,0,NULL);
+#endif
 
   if(!cdd) {
     mp_msg(MSGT_OPEN,MSGL_ERR,"Can't open cdda device\n");
