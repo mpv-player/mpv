@@ -18,10 +18,22 @@ int af_format_decode(int ifmt)
     ofmt = AF_FORMAT_LE|AF_FORMAT_US; break;
   case(AFMT_U16_BE):	
     ofmt = AF_FORMAT_BE|AF_FORMAT_US; break;
+  case(AFMT_S24_LE):
+    ofmt = AF_FORMAT_LE|AF_FORMAT_SI; break;
+  case(AFMT_S24_BE):	
+    ofmt = AF_FORMAT_BE|AF_FORMAT_SI; break;
+  case(AFMT_U24_LE):
+    ofmt = AF_FORMAT_LE|AF_FORMAT_US; break;
+  case(AFMT_U24_BE):	
+    ofmt = AF_FORMAT_BE|AF_FORMAT_US; break;
   case(AFMT_S32_LE):
     ofmt = AF_FORMAT_LE|AF_FORMAT_SI; break;
   case(AFMT_S32_BE):	
     ofmt = AF_FORMAT_BE|AF_FORMAT_SI; break;
+  case(AFMT_U32_LE):
+    ofmt = AF_FORMAT_LE|AF_FORMAT_US; break;
+  case(AFMT_U32_BE):	
+    ofmt = AF_FORMAT_BE|AF_FORMAT_US; break;
   case(AFMT_IMA_ADPCM):
     ofmt = AF_FORMAT_IMA_ADPCM; break;
   case(AFMT_MU_LAW):
@@ -58,6 +70,7 @@ int af_format_encode(void* fmtp)
         switch(fmt->bps){
           case 1: return AFMT_S8;
           case 2: return (fmt->format&AF_FORMAT_LE) ? AFMT_S16_LE : AFMT_S16_BE;
+          case 3: return (fmt->format&AF_FORMAT_LE) ? AFMT_S24_LE : AFMT_S24_BE;
           case 4: return (fmt->format&AF_FORMAT_LE) ? AFMT_S32_LE : AFMT_S32_BE;
 	}
       } else {
@@ -65,7 +78,8 @@ int af_format_encode(void* fmtp)
         switch(fmt->bps){
           case 1: return AFMT_U8;
           case 2: return (fmt->format&AF_FORMAT_LE) ? AFMT_U16_LE : AFMT_U16_BE;
-//          case 4: return (fmt->format&AF_FORMAT_LE) ? AFMT_U32_LE : AFMT_U32_BE;
+          case 3: return (fmt->format&AF_FORMAT_LE) ? AFMT_U24_LE : AFMT_U24_BE;
+          case 4: return (fmt->format&AF_FORMAT_LE) ? AFMT_U32_LE : AFMT_U32_BE;
 	}
       }
     } else {
