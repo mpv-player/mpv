@@ -149,6 +149,7 @@ Video:
   --enable-xinerama      build with Xinerama support for X11 [autodetect]
   --enable-x11           build with X11 render support [autodetect]
   --enable-fbdev         build with FBDev render support [autodetect]
+  --enable-fbdev=nocopy   yuv12 converts directly into framebuffer
   --enable-mlib          build with MLIB support (Solaris only) [autodetect]
   --enable-3dfx          build with 3dfx support [disable]
   --enable-tdfxfb        build with tdfxfb support [disable]
@@ -678,6 +679,7 @@ _ggi=auto
 _aa=auto
 _svga=auto
 _fbdev=auto
+_fbdev_nocopy=no
 _dvb=auto
 _dxr3=auto
 _iconv=auto
@@ -753,6 +755,7 @@ for ac_option do
   --enable-svga)	_svga=yes	;;
   --disable-svga)	_svga=no	;;
   --enable-fbdev)	_fbdev=yes	;;
+  --enable-fbdev=nocopy) _fbdev=yes; _fbdev_nocopy=yes	;;
   --disable-fbdev)	_fbdev=no	;;
   --enable-dvb)		_dvb=yes	;;
   --disable-dvb)        _dvb=no		;;
@@ -1264,7 +1267,18 @@ elif ( cc_check -lpthread && $TMPO ) ; then
 elif ( cc_check -pthread && $TMPO ) ; then
   _ld_pthread='-pthread'
 else
-  die "Lib pthread not found. (needed by windows and networking stuff)"
+  if test "$_ld_static" ; then
+    # for crosscompilation, we cannot execute the program, be happy if we can link statically
+    if ( cc_check -lpthread ) ; then
+      _ld_pthread='-lpthread'
+    elif ( cc_check -pthread ) ; then
+     _ld_pthread='-pthread'
+    else
+      die "Static lib pthread not found. (needed by windows and networking stuff)"
+    fi
+  else
+    die "Lib pthread not found. (needed by windows and networking stuff)"
+  fi
 fi
 echores "yes (using $_ld_pthread)"
 
@@ -1785,10 +1799,16 @@ if test "$_fbdev" = yes ; then
   _def_fbdev='#define HAVE_FBDEV 1'
   _vosrc="$_vosrc vo_fbdev.c"
   _vomodules="fbdev $_vomodules"
+
+  if test "$_fbdev_nocopy" = yes ; then
+    _def_fbdev_nocopy='#define USE_CONVERT2FB 1'
+  fi
 else
   _def_fbdev='#undef HAVE_FBDEV'
+  _def_fbdev_nocopy='#undef USE_CONVERT2FB'
 fi
 echores "$_fbdev"
+
 
 
 echocheck "DVB"
@@ -3124,6 +3144,7 @@ $_def_mga
 $_def_xmga
 $_def_syncfb
 $_def_fbdev
+$_def_fbdev_nocopy
 $_def_dxr3
 $_def_dvb
 $_def_svga
