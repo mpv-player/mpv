@@ -13,6 +13,7 @@ extern char *monitor_dotclock_str;
 #ifdef HAVE_PNG
 extern int z_compression;
 #endif
+extern int vo_dbpp;
 
 struct config conf[]={
 	/* name, pointer, type, flags, min, max */
