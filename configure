@@ -2074,7 +2074,7 @@ fi
 echocheck "DVD support (libcss - old style)"
 if test "$_css" = auto ; then
   cat > $TMPC <<EOF
-#include <types.h>
+#include <sys/types.h>
 #include <css.h>
 int main(void) { (void) CSSisEncrypted(0); return 0; }
 EOF
