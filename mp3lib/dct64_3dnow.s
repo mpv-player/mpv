@@ -543,11 +543,10 @@ dct64_MMX_3dnow:
 	movq	%mm2, 72(%edx)
 
 	movd   48(%ecx), %mm3
-	pfsub  52(%ecx), %mm3
-	pfmul 120(%ebx), %mm3
-
 	movd   60(%ecx), %mm2
+	pfsub  52(%ecx), %mm3
 	pfsub  56(%ecx), %mm2
+	pfmul 120(%ebx), %mm3
 	pfmul 120(%ebx), %mm2
 	movq	%mm2, %mm1
 
@@ -583,8 +582,8 @@ dct64_MMX_3dnow:
 	pfmul 120(%ebx), %mm0
 	pfadd  %mm0, %mm1
 	pfadd  92(%edx), %mm0
-	movd   %mm0, 84(%edx)
-	movd   %mm1, 88(%edx)
+	punpckldq %mm1, %mm0
+	movq   %mm0, 84(%edx)
 
 	movq	96(%ecx), %mm0
 	movq	%mm0, %mm1
@@ -618,8 +617,8 @@ dct64_MMX_3dnow:
 	pfmul 120(%ebx), %mm0
 	pfadd %mm0,%mm1
 	pfadd 124(%edx), %mm0
-	movd  %mm0, 116(%edx)
-	movd  %mm1, 120(%edx)
+	punpckldq %mm1, %mm0
+	movq  %mm0, 116(%edx)
 
 	jnz .L01
 	
@@ -919,6 +918,4 @@ dct64_MMX_3dnow:
 	popl %edi
 	popl %esi
 	popl %ebx
-	ret	$12
-
-
+	ret  $12
