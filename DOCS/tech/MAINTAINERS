@@ -56,7 +56,6 @@ MPlayer code:
     * TV input/capture: Jindrich Makovicka
     * DVD support (experimental - dvdnav): None
     * DVD support (new - dvdread/dvdcss): None
-    * DVD support (old - libcss): None
     * network streaming: Bertrand Baudet
     * DVD/VOB subtitles: Kim Minh Kaplan
     * config files & commandline parser: Alban Bedel, Alex Beregszaszi
@@ -65,7 +64,7 @@ MPlayer code:
     * DVB support: Nico Sabbi
     * GUI: Zoltan Ponekker
     * GUI skins: Diego Biurrun
-    * filters: Richard Felker, Michael Niedermayer
+    * audio filters: None
 
 Imported libs/projects:
     * libavcodec, libavformat: Michael Niedermayer
@@ -88,7 +87,8 @@ demuxers:
     * demux_realaud.c - Roberto Togni
     * demux_rtp* - Ross Finlayson
 
-filters:
+video filters:
+    * general: Richard Felker, Michael Niedermayer
     *	vf_filmdint.c	- Zoltan Hidvegi
 
 libvo drivers:
@@ -118,7 +118,7 @@ libvo drivers:
     * vo_png.c - Felix Bünemann
     * vo_quartz.c - Nicolas Plourde
     * vo_sdl.c - Felix Bünemann
-    * vo_svga.c - None
+    * vo_svga.c - Ivan Kalvachev
     * vo_tdfxfb.c - Alban Bedel
     * vo_tga.c - Daniele Forghieri
     * vo_vesa.c - None
@@ -129,14 +129,14 @@ libvo drivers:
     * vo_xv.c - Attila Kinali
     * vo_xvidix.c - Attila Kinali
     * vo_xvmc.c - Ivan Kalvachev
-    * vo_yuv4mpeg.c - None
+    * vo_yuv4mpeg.c - Robert Kesterson
     * vo_zr.c - Rik Snel
 
 VIDIX drivers:
     * mach64_vid - None
     * mga_vid - None
     * nvidia_vid - Sascha Sommer
-    * radeon_vid - None
+    * radeon_vid - Sascha Sommer
     * rage128_vid - None
     * sis_vid - Jake Page
 
