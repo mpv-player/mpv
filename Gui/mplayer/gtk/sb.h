@@ -16,9 +16,6 @@ char      * sbSelectedSkin=NULL;
 char      * sbMPlayerDirInHome=NULL;
 char      * sbMPlayerPrefixDir=NULL;
 
-GtkWidget * sbItemsList[3];
-int         sbItemsListCounter = 0;
-
 void HideSkinBrowser( void )
 {
  gtk_widget_hide( SkinBrowser );
@@ -86,42 +83,12 @@ void on_SkinList_select_row( GtkCList * clist,gint row,gint column,GdkEvent * be
  if( bevent->type == GDK_2BUTTON_PRESS ) HideSkinBrowser();
 }
 
-int sbShift = False;
-
 gboolean on_SkinBrowser_key_release_event( GtkWidget * widget,GdkEventKey * event,gpointer user_data )
 {
  switch ( event->keyval )
   {
-   case GDK_Escape:
-        if ( !sbShift ) on_SkinBrowser_Cancel( NULL,0 );
-        break;
-   case GDK_Return:
-        if ( !sbShift ) HideSkinBrowser();
-        break;
-   case GDK_Tab:
-        if ( sbShift )
-         { if ( (--sbItemsListCounter) < 0 ) sbItemsListCounter=2; }
-         else
-          { if ( (++sbItemsListCounter) > 2 ) sbItemsListCounter=0; }
-        gtk_widget_grab_focus( sbItemsList[sbItemsListCounter] );
-        break;
-   case GDK_Shift_L:
-   case GDK_Shift_R:
-        sbShift=False;
-        break;
-  }
-// if ( ( event->keyval == GDK_Escape )|| ( event->keyval == GDK_Return ) ) HideSkinBrowser();
- return FALSE;
-}
-
-gboolean on_SkinBrowser_key_press_event( GtkWidget * widget,GdkEventKey * event,gpointer user_data )
-{
- switch ( event->keyval )
-  {
-   case GDK_Shift_L:
-   case GDK_Shift_R:
-        sbShift=True;
-        break;
+   case GDK_Escape: on_SkinBrowser_Cancel( NULL,0 ); break;
+   case GDK_Return: HideSkinBrowser(); break;
   }
  return FALSE;
 }
@@ -147,7 +114,7 @@ GtkWidget * create_SkinBrowser( void )
  gtk_object_set_data( GTK_OBJECT( SkinBrowser ),MSGTR_SkinBrowser,SkinBrowser );
  gtk_widget_set_usize( SkinBrowser,256,320 );
  gtk_container_set_border_width( GTK_CONTAINER( SkinBrowser ),1 );
- GTK_WIDGET_SET_FLAGS( SkinBrowser,GTK_CAN_FOCUS );
+// GTK_WIDGET_SET_FLAGS( SkinBrowser,GTK_CAN_FOCUS );
  GTK_WIDGET_SET_FLAGS( SkinBrowser,GTK_CAN_DEFAULT );
  gtk_widget_set_events( SkinBrowser,GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK | GDK_PROPERTY_CHANGE_MASK | GDK_VISIBILITY_NOTIFY_MASK );
  gtk_window_set_title( GTK_WINDOW( SkinBrowser ),MSGTR_SkinBrowser );
@@ -293,9 +260,6 @@ GtkWidget * create_SkinBrowser( void )
  gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"key_release_event",
                      GTK_SIGNAL_FUNC( on_SkinBrowser_key_release_event ),
                      NULL );
- gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"key_press_event",
-                     GTK_SIGNAL_FUNC( on_SkinBrowser_key_press_event ),
-                     NULL );
  gtk_signal_connect( GTK_OBJECT( SkinList ),"select_row",
                      GTK_SIGNAL_FUNC( on_SkinList_select_row ),
                      NULL );
@@ -312,10 +276,6 @@ GtkWidget * create_SkinBrowser( void )
   { strcpy( sbMPlayerPrefixDir,skinMPlayerDir ); strcat( sbMPlayerPrefixDir,"/*" ); }
 
  gtk_widget_grab_focus( SkinList );
-
- sbItemsList[0]=SkinList;
- sbItemsList[1]=sbOk;
- sbItemsList[2]=Cancel;
 
  return SkinBrowser;
 }

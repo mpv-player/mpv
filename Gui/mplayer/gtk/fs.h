@@ -40,9 +40,6 @@ GtkWidget   * fsComboEntry2;
 GList       * fsList_items = NULL;
 GList       * fsTopList_items = NULL;
 
-GtkWidget   * fsItemList[6];
-int           fsItemListCounter = 0;
-
 void CheckDir( GtkWidget * list,unsigned char * directory )
 {
  struct stat     fs;
@@ -286,49 +283,18 @@ void fs_fsFNameList_select_row( GtkWidget * widget,gint row,gint column,GdkEvent
  if( bevent->type == GDK_2BUTTON_PRESS ) gtk_button_released( GTK_BUTTON( fsOk ) );
 }
 
-int fsShift = False;
-
 gboolean on_FileSelect_key_release_event( GtkWidget * widget,GdkEventKey * event,gpointer user_data )
 {
  switch ( event->keyval )
   {
    case GDK_Escape:
-        if ( !fsShift ) gtk_button_released( GTK_BUTTON( fsCancel ) );
+        gtk_button_released( GTK_BUTTON( fsCancel ) );
         break;
    case GDK_Return:
-        if ( !fsShift ) gtk_button_released( GTK_BUTTON( fsOk ) );
+        gtk_button_released( GTK_BUTTON( fsOk ) );
         break;
    case GDK_BackSpace:
-        if ( !fsShift ) gtk_button_released( GTK_BUTTON( fsUp ) );
-        break;
-   case GDK_Tab:
-        if ( fsShift )
-         {
-          fsItemListCounter--;
-          if ( fsItemListCounter < 0 ) fsItemListCounter=5;
-         }
-         else
-          {
-           fsItemListCounter++;
-           if ( fsItemListCounter > 5 ) fsItemListCounter=0;
-          }
-        gtk_widget_grab_focus( fsItemList[fsItemListCounter] );
-        break;
-   case GDK_Shift_L:
-   case GDK_Shift_R:
-        fsShift=False;
-        break;
-  }
- return FALSE;
-}
-
-gboolean on_FileSelect_key_press_event( GtkWidget * widget,GdkEventKey * event,gpointer user_data )
-{
- switch ( event->keyval )
-  {
-   case GDK_Shift_L:
-   case GDK_Shift_R:
-        fsShift=True;
+        gtk_button_released( GTK_BUTTON( fsUp ) );
         break;
   }
  return FALSE;
@@ -375,7 +341,6 @@ GtkWidget * create_FileSelect( void )
  gtk_widget_set_name( fsFileSelect,"fsFileSelect" );
  gtk_object_set_data( GTK_OBJECT( fsFileSelect ),"fsFileSelect",fsFileSelect );
  gtk_widget_set_usize( fsFileSelect,416,256 );
- GTK_WIDGET_SET_FLAGS( fsFileSelect,GTK_CAN_FOCUS );
  GTK_WIDGET_SET_FLAGS( fsFileSelect,GTK_CAN_DEFAULT );
  gtk_widget_set_events( fsFileSelect,GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK | GDK_PROPERTY_CHANGE_MASK | GDK_VISIBILITY_NOTIFY_MASK );
  gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_FileSelect );
@@ -618,9 +583,6 @@ GtkWidget * create_FileSelect( void )
  gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"key_release_event",
                      GTK_SIGNAL_FUNC( on_FileSelect_key_release_event ),
                      NULL );
- gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"key_press_event",
-                     GTK_SIGNAL_FUNC( on_FileSelect_key_press_event ),
-                     NULL );
  gtk_signal_connect( GTK_OBJECT( combo_entry1 ),"changed",
                      GTK_SIGNAL_FUNC( fs_combo_entry1_changed ),
                      combo_entry1 );
@@ -648,13 +610,6 @@ GtkWidget * create_FileSelect( void )
                      NULL );
 
  gtk_widget_grab_focus( fsFNameList );
-
- fsItemList[0]=fsFNameList;
- fsItemList[1]=combo_entry1;
- fsItemList[2]=fsOk;
- fsItemList[3]=fsCancel;
- fsItemList[4]=fsUp;
- fsItemList[5]=fsComboEntry2;
 
  return fsFileSelect;
 }
