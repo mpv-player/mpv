@@ -280,12 +280,7 @@ void exit_player(char* how){
  total_time_usage_start=GetTimer()-total_time_usage_start;
 
   // restore terminal:
-#ifdef HAVE_NEW_GUI
-   if ( !use_gui ) getch2_disable();
-#else
    getch2_disable();
-#endif
-     
 
 #ifdef USE_LIBVO2
   if(video_out) vo2_close(video_out);
@@ -1808,11 +1803,7 @@ if(curr_filename+1<num_filenames){
     // partial uninit:
 
   // restore terminal:
-#ifdef HAVE_NEW_GUI
-   if ( !use_gui ) getch2_disable();
-#else
    getch2_disable();
-#endif
 
   current_module="uninit_vo";
 
