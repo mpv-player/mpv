@@ -13,6 +13,7 @@
         0x61: DK4 ADPCM found in certain AVI files on Sega Saturn CD-ROMs;
               note that this is a 'rogue' format number in that it was
               never officially registered with Microsoft
+    0x1100736d: IMA ADPCM coded like in MS AVI/ASF/WAV found in QT files
 */
 
 #include <stdio.h>
@@ -86,7 +87,8 @@ static int preinit(sh_audio_t *sh_audio)
   // if format is "ima4", assume the audio is coming from a QT file which
   // indicates constant block size, whereas an AVI/ASF/WAV file will fill
   // in this field with 0x11
-  if ((sh_audio->format == 0x11) || (sh_audio->format == 0x61))
+  if ((sh_audio->format == 0x11) || (sh_audio->format == 0x61) ||
+      (sh_audio->format == 0x1100736d))
   {
     sh_audio->ds->ss_div = (sh_audio->wf->nBlockAlign - 
       (MS_IMA_ADPCM_PREAMBLE_SIZE * sh_audio->wf->nChannels)) * 2;
@@ -352,7 +354,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     sh_audio->ds->ss_mul) 
     return -1;
 
-  if (sh_audio->format == 0x11)
+  if ((sh_audio->format == 0x11) || (sh_audio->format == 0x1100736d))
   {
     return 2 * ms_ima_adpcm_decode_block(
       (unsigned short*)buf, sh_audio->a_in_buffer, sh_audio->wf->nChannels,
