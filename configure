@@ -1351,6 +1351,21 @@ fi
 echores "$_inttypes"
 
 
+echocheck "stddef.h"
+cat > $TMPC << EOF
+#include <stddef.h>
+int main(void) { return 0; }
+EOF
+_stddef=no
+cc_check && _stddef=yes
+if test "$_stddef" = yes ; then
+  _def_stddef='#define HAVE_STDDEF_H 1'
+else
+  _def_stddef='#undef HAVE_STDDEF_H'
+fi
+echores "$_stddef"
+
+
 echocheck "malloc.h"
 cat > $TMPC << EOF
 #include <malloc.h>
@@ -1493,6 +1508,99 @@ else
   _def_sys_soundcard='#undef HAVE_SYS_SOUNDCARD_H'
 fi
 echores "$_sys_soundcard"
+
+
+echocheck "sys/dvdio.h"
+cat > $TMPC << EOF
+#include <sys/dvdio.h>
+int main(void) { return 0; }
+EOF
+_dvdio=no
+cc_check && _dvdio=yes
+if test "$_dvdio" = yes ; then
+  _def_dvdio='#define DVD_STRUCT_IN_SYS_DVDIO_H 1'
+else
+  _def_dvdio='#undef DVD_STRUCT_IN_SYS_DVDIO_H'
+fi
+echores "$_dvdio"
+
+
+echocheck "sys/cdio.h"
+cat > $TMPC << EOF
+#include <sys/cdio.h>
+int main(void) { return 0; }
+EOF
+_cdio=no
+cc_check && _cdio=yes
+if test "$_cdio" = yes ; then
+  _def_cdio='#define DVD_STRUCT_IN_SYS_CDIO_H 1'
+else
+  _def_cdio='#undef DVD_STRUCT_IN_SYS_CDIO_H'
+fi
+echores "$_cdio"
+
+
+echocheck "linux/cdrom.h"
+cat > $TMPC << EOF
+#include <linux/cdrom.h>
+int main(void) { return 0; }
+EOF
+_cdrom=no
+cc_check && _cdrom=yes
+if test "$_cdrom" = yes ; then
+  _def_cdrom='#define DVD_STRUCT_IN_LINUX_CDROM_H 1'
+else
+  _def_cdrom='#undef DVD_STRUCT_IN_LINUX_CDROM_H'
+fi
+echores "$_cdrom"
+
+
+echocheck "dvd.h"
+cat > $TMPC << EOF
+#include <dvd.h>
+int main(void) { return 0; }
+EOF
+_dvd=no
+cc_check && _dvd=yes
+if test "$_dvd" = yes ; then
+  _def_dvd='#define DVD_STRUCT_IN_DVD_H 1'
+else
+  _def_dvd='#undef DVD_STRUCT_IN_DVD_H'
+fi
+echores "$_dvd"
+
+
+echocheck "extras/BSDI_dvdioctl/dvd.h"
+cat > $TMPC << EOF
+#include <extras/BSDI_dvdioctl/dvd.h>
+int main(void) { return 0; }
+EOF
+_bsdi_dvd=no
+cc_check && _bsdi_dvd=yes
+if test "$_bsdi_dvd" = yes ; then
+  _def_bsdi_dvd='#define DVD_STRUCT_IN_BSDI_DVDIOCTL_DVD_H 1'
+else
+  _def_bsdi_dvd='#undef DVD_STRUCT_IN_BSDI_DVDIOCTL_DVD_H'
+fi
+echores "$_bsdi_dvd"
+
+
+echocheck "Have userspace SCSI headers on Solaris"
+cat > $TMPC << EOF
+#   include <unistd.h>
+#   include <stropts.h>
+#   include <sys/scsi/scsi_types.h>
+#   include <sys/scsi/impl/uscsi.h>
+int main(void) { return 0; }
+EOF
+_sol_scsi_h=no
+cc_check && _sol_scsi_h=yes
+if test "$_sol_scsi_h" = yes ; then
+  _def_sol_scsi_h='#define SOLARIS_USCSI 1'
+else
+  _def_sol_scsi_h='#undef SOLARIS_USCSI'
+fi
+echores "$_sol_scsi_h"
 
 
 echocheck "termcap"
@@ -2454,13 +2562,20 @@ if test "$_dvdkit" = auto ; then
  test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
 fi
 if test "$_dvdkit" = yes ; then
-  echores "yes"
-  _inputmodules="mpdvdkit $_inputmodules"
-  _dvdread=included
+  test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bdsi_dvd" = yes && _dvdkit=yes
+  if test "$_dvdkit" = yes ; then
+    _inputmodules="mpdvdkit $_inputmodules"
+    _dvdread=included
+  fi
+  if bsd ; then
+   _def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
+  else
+   _def_dvd_bsd='#undef HAVE_BSD_DVD_STRUCT'
+  fi
 else
-  echores "no"
   _noinputmodules="mpdvdkit $_noinputmodules"
 fi
+echores "$_dvdkit"
 
 echocheck "DVD support (libcss - old style)"
 if test "$_css" = auto ; then
@@ -3497,6 +3612,16 @@ $_def_debug
 
 /* Indicates is Ogle's libdvdread is available for DVD playback */
 $_def_dvdread
+
+/* Additional options for libmpdvdkit*/
+$_def_dvd
+$_def_cdrom
+$_def_cdio
+$_def_dvdio
+$_def_bsdi_dvd
+$_def_dvd_bsd
+$_def_sol_scsi_h
+$_def_stddef
 
 /* Common data directory (for fonts, etc) */
 #define DATADIR "$_datadir"
