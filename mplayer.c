@@ -92,7 +92,13 @@ int quiet=0;
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
 
 #ifdef HAVE_RTC
+#ifdef __linux__
 #include <linux/rtc.h>
+#else
+#include <rtc.h>
+#define RTC_IRQP_SET RTCIO_IRQP_SET
+#define RTC_PIE_ON   RTCIO_PIE_ON
+#endif
 #endif
 
 #ifdef USE_TV

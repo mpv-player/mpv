@@ -5024,8 +5024,13 @@ if linux ; then
   if test "$_rtc" = auto ; then
     cat > $TMPC << EOF
 #include <sys/ioctl.h>
+#ifdef __linux__
 #include <linux/rtc.h>
-int main(void) { return RTC_IRQP_READ; }
+#else
+#include <rtc.h>
+#define RTC_PIE_ON RTCIO_PIE_ON
+#endif
+int main(void) { return RTC_PIE_ON; }
 EOF
     _rtc=no
     cc_check && _rtc=yes
@@ -5033,7 +5038,7 @@ EOF
   echores "$_rtc"
 else
   _rtc=no
-  echores "no (Linux specific feature)"
+  echores "no"
 fi
 if test "$_rtc" = yes ; then
   _def_rtc='#define HAVE_RTC 1'
@@ -6959,7 +6964,7 @@ $_def_iconv
 /* define this to use nl_langinfo function */
 $_def_langinfo
 
-/* define this to use RTC (/dev/rtc) for video timers (LINUX only) */
+/* define this to use RTC (/dev/rtc) for video timers */
 $_def_rtc
 
 /* set up max. outburst. use 65536 for ALSA 0.5, for others 16384 is enough */
