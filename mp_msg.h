@@ -72,6 +72,12 @@ extern int verbose; // defined in mplayer.c
 
 #define MSGT_NETWORK 31
 
+#define MSGT_CPUDETECT 32
+
+#define MSGT_CODECCFG 33
+
+#define MSGT_SWS 34
+
 #define MSGT_MAX 64
 
 void mp_msg_init();
