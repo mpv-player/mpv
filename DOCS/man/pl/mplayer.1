@@ -1,4 +1,4 @@
-.\" synced with 1.765
+.\" synced with 1.770
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -2547,17 +2547,20 @@ U¿ywa svga z VIDIX.
 .TP
 .B gl\ \ \ \ \ 
 Sterownik wyj¶cia video OpenGL.
-Bardzo prosta wersja, nie obs³uguje OSD i obraz musi byæ mniejszy ni¿
-maksymalny rozmiar tekstury dostêpny w Twojej implementacji OpenGL.
-Zamiarem by³o dzia³anie na nawet najprostszych implementacjach OpenGL.
+Prosta wersja, obraz musi byæ mniejszy ni¿ maksymalny rozmiar tekstury
+dostêpny w Twojej implementacji OpenGL. Zamiarem by³o dzia³anie na nawet
+najprostszych implementacjach OpenGL.
 .PD 0
 .RSs
 .IPs (no)manyfmts
 W³±cza obs³ugê wiêkszej ilo¶ci formatów kolorów (RGB i BGR).
-Wymaga wersji OpenGL >= 1.2, JESZCZE NIE DZIA£A poprawnie.
+Wymaga wersji OpenGL >= 1.2.
 .IPs slice-height=<0\-...>
 Ilo¶æ lini kopiowana do tekstury w jednym kawa³ku (domy¶lnie: 4).
 0 oznacza ca³y obraz.
+.IPs (no)osd
+W³±cza lub wy³±cza obs³ugê renderowania OSD przez OpenGL (domy¶lnie: w³±czona). 
+Przeznaczone g³ównie do testów, powiniene¶ skorzystaæ z \-osdlevel 0, aby wy³±czyæ OSD.
 .RE
 .PD 1
 .
@@ -3065,6 +3068,14 @@ mmapowany_zbiór: Zbiór, na który nale¿y mapowaæ dane
 .br
 npróbek: ilo¶æ próbek na kana³ (domy¶lnie 512)
 .REss
+.IPs extrastereo[=mul]
+Zwiêksza ró¿nicê miêdzy lewym a prawym kana³em, aby dodaæ efekt "przekazu na ¿ywo" do
+odtwarzania.
+.RSss
+mul: wspó³czynnik ró¿nicy (domy¶lnie: 2.5)
+.REss
+.IPs volnorm
+Maksymalnie zwiêksza g³o¶no¶æ, nie wprowadzaj±c przy tym szumów do d¼wiêku.
 .RE
 .
 .TP
@@ -6067,24 +6078,8 @@ U¿ywa kompensacji ruchu quarter pel (wzajemnie wykluczaj±cy siê z ilme).
 Wskazówka: Przydatne tylko dla kodowanie z wysokim bitrate.
 .
 .TP
-.B ildctcmp=<0\-2000>
-funkcja porównawcza przy podejmowaniu decyzji dla przeplatanego dct
-.
-.TP
-.B precmp=<0\-2000>
-funkcja porównawcza dla wstêpnego przej¶cia przewidywania ruchu
-.
-.TP
-.B cmp=<0\-2000>
-funkcja porównawcza dla przewidywania ruchu full pel
-.
-.TP
-.B subcmp=<0\-2000>
-funkcja porównawcza dla przewidywania ruchu sub pel
-.
-.TP
 .B mbcmp=<0\-2000>
-funkcja porównawcza przy podejmowaniu decyzji dla makrobloku,
+Ustawia funkcjê porównawcz± przy podejmowaniu decyzji dla makrobloku,
 wykorzystywana tylko, je¿eli mbd=0
 .PD 0
 .RSs
@@ -6114,6 +6109,26 @@ suma kwadratów ró¿nic zachowuj±ca szumy
 wykorzystuje te¿ barwê, obecnie nie dzia³a (prawid³owo) z klatkami typu B
 .RE
 .PD 1
+.
+.TP
+.B ildctcmp=<0\-2000>
+Ustawia funkcjê porównawcz± przy podejmowaniu decyzji dla przeplatanego dct
+(sprawd¼ opcjê mbcmp dla listy dostêpnych funkcji porównawczych).
+.
+.TP
+.B precmp=<0\-2000>
+Ustawia funkcjê porównawcz± dla wstêpnego przej¶cia przewidywania ruchu
+(sprawd¼ opcjê mbcmp dla listy dostêpnych funkcji porównawczych) (domy¶lnie: 0).
+.
+.TP
+.B cmp=<0\-2000>
+Ustawia funkcjê porównawcz± dla przewidywania ruchu full pel
+(sprawd¼ opcjê mbcmp dla listy dostêpnych funkcji porównawczych) (domy¶lnie: 0).
+.
+.TP
+.B subcmp=<0\-2000>
+Ustawia funkcjê porównawcz± dla przewidywania ruchu sub pel
+(sprawd¼ opcjê mbcmp dla listy dostêpnych funkcji porównawczych) (domy¶lnie: 0).
 .
 .TP
 .B nssew=<0\-100>
@@ -6861,6 +6876,18 @@ Ramki IDR ograniczaj± odnoszenie siê klatki P do jakiejkolwiek ramki
 poprzedzaj±cej klatkê IDR.
 .
 .TP
+.B scenecut=<-1\-100>
+Kontroluje agresywno¶æ wstawiania klatek I (domy¶lnie: 40).
+Ma³e warto¶ci powoduj±, ¿e kodek czêsto musi wymuszaæ klatkê I, je¶li
+przekroczy warto¶æ keyint. Poprawne warto¶ci mog± odszukaæ lepsze miejsca
+dla klatek I, wy¿sze powoduj± utratê bitów.
+-1 wy³±cza wykrywanie obciêæ scen (scenecut), wiêc klatki I s± wstawiane tylko
+raz po ka¿dych innych klatkach keyint, nawet je¶li takie obciêcie zdarzy siê
+wcze¶niej. Nie jest to zalecane i marnuje bitrate, jako ¿e obciêcia scen
+(scenecut) s± kodowane jako klatki P, które s± tak du¿e jak klatki I, ale nie
+resetuj± "licznika keyint".
+.
+.TP
 .B frameref=<1\-15>
 Ilo¶æ poprzednich klatek wykorzystanych do przewidywania w klatkach P
 (domy¶lnie: 1).
@@ -7022,7 +7049,7 @@ wy¿sze zmuszaj± go do delikatniejszych zmian.
 .TP
 .B fullinter | nofullinter
 Wykorzystuje wszystkie dostêpne makrobloki inter-klatek
-(i16x16, i4x4, p16x16-4x4)
+(i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, pskip).
 Idea polega na tym, aby odnale¼æ typ i rozmiar, który najlepiej opisuje
 okre¶lony obszar obrazu, np.\& bardzo dore rezultaty dla Anime, które zazwyczaj
 zawieraj± du¿e obszary tego samego koloru (domy¶lnie: i16x16, i2x4, p16x16-8x8).
