@@ -638,6 +638,9 @@ extern int lavf_check_file(demuxer_t *demuxer);
 extern int demux_open_lavf(demuxer_t* demuxer);
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
+#ifdef STREAMING_LIVE_DOT_COM
+extern demuxer_t* demux_open_rtp(demuxer_t* demuxer);
+#endif
 
 int extension_parsing=1; // 0=off 1=mixed (used only for unstable formats)
 
