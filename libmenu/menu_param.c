@@ -103,19 +103,19 @@ static void free_entry(list_entry_t* entry) {
   free(entry);
 }
 
-static void close(menu_t* menu) {
+static void closeMenu(menu_t* menu) {
   menu_list_uninit(menu,free_entry);
   if(mpriv->edit)
     free(mpriv->edit);
 }
 
-static int open(menu_t* menu, char* args) {
+static int openMenu(menu_t* menu, char* args) {
   list_entry_t* e;
 
   menu->draw = menu_list_draw;
   menu->read_cmd = menu_list_read_cmd;
   menu->read_key = read_key;
-  menu->close = close;
+  menu->close = closeMenu;
 
 
   if(!args) {
@@ -155,5 +155,5 @@ const menu_info_t menu_info_pref = {
     &cfg_dflt,
     cfg_fields
   },
-  open
+  openMenu
 };

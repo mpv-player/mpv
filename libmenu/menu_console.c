@@ -7,7 +7,9 @@
 #include <ctype.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#ifndef __MINGW32__
 #include <sys/wait.h>
+#endif
 #include <unistd.h>
 #include <errno.h>
 
@@ -223,6 +225,7 @@ static void read_cmd(menu_t* menu,int cmd) {
 }
 
 static void check_child(menu_t* menu) {
+#ifndef __MINGW32__
   fd_set rfd;
   struct timeval tv;
   int max_fd = mpriv->child_fd[2] > mpriv->child_fd[1] ? mpriv->child_fd[2] :
@@ -268,12 +271,14 @@ static void check_child(menu_t* menu) {
       w = 1;
     }
   }
+#endif
 
 }
 
 #define close_pipe(pipe) close(pipe[0]); close(pipe[1])
 
 static int run_shell_cmd(menu_t* menu, char* cmd) {
+#ifndef __MINGW32__
   int in[2],out[2],err[2];
 
   printf("Console run %s ...\n",cmd);
@@ -311,6 +316,7 @@ static int run_shell_cmd(menu_t* menu, char* cmd) {
   mpriv->child_fd[2] = err[0];
   mpriv->prompt = mpriv->child_prompt;
   //add_line(mpriv,"Child process started");
+#endif
   return 1;
 }
 
@@ -439,7 +445,7 @@ static void read_key(menu_t* menu,int c) {
 }
 
 
-static int open(menu_t* menu, char* args) {
+static int openMenu(menu_t* menu, char* args) {
 
 
   menu->draw = draw;
@@ -469,5 +475,5 @@ const menu_info_t menu_info_console = {
     &cfg_dflt,
     cfg_fields
   },
-  open,
+  openMenu,
 };
