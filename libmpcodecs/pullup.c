@@ -218,16 +218,16 @@ static void alloc_buffer(struct pullup_context *c, struct pullup_buffer *b)
 struct pullup_buffer *pullup_lock_buffer(struct pullup_buffer *b, int parity)
 {
 	if (!b) return 0;
-	if (parity+1 & 1) b->lock[0]++;
-	if (parity+1 & 2) b->lock[1]++;
+	if ((parity+1) & 1) b->lock[0]++;
+	if ((parity+1) & 2) b->lock[1]++;
 	return b;
 }
 
 void pullup_release_buffer(struct pullup_buffer *b, int parity)
 {
 	if (!b) return;
-	if (parity+1 & 1) b->lock[0]--;
-	if (parity+1 & 2) b->lock[1]--;
+	if ((parity+1) & 1) b->lock[0]--;
+	if ((parity+1) & 2) b->lock[1]--;
 }
 
 struct pullup_buffer *pullup_get_buffer(struct pullup_context *c, int parity)
@@ -253,8 +253,8 @@ struct pullup_buffer *pullup_get_buffer(struct pullup_context *c, int parity)
 	
 	/* Search for any half-free buffer */
 	for (i = 0; i < c->nbuffers; i++) {
-		if (parity+1 & 1 && c->buffers[i].lock[0]) continue;
-		if (parity+1 & 2 && c->buffers[i].lock[1]) continue;
+		if (((parity+1) & 1) && c->buffers[i].lock[0]) continue;
+		if (((parity+1) & 2) && c->buffers[i].lock[1]) continue;
 		alloc_buffer(c, &c->buffers[i]);
 		return pullup_lock_buffer(&c->buffers[i], parity);
 	}
