@@ -425,7 +425,7 @@ itself. In this case, the decoding percentage contains the display percentage, t
 
 <qandaentry>
 <question><para>
-There are error messages about file not found <filename>/usr/lib/win32/</filename> ...
+There are error messages about file not found <filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
 Download the Win32 codecs from our

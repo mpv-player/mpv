@@ -525,7 +525,7 @@ decoders:
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
 <step><para>extract QuickTime DLL pack to your Win32 codecs directory
-(default: <filename class="directory">/usr/lib/win32</filename>)
+(default: <filename class="directory">/usr/local/lib/codecs</filename>)
 </para></step>
 </procedure>
 

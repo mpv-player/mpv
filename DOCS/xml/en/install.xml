@@ -137,7 +137,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   <application>MPlayer</application> on x86 architecture, you will possibly need
   them. Download the Win32 codecs from our
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codecs page</ulink>
-  and install them to <filename class="directory">/usr/lib/win32</filename>
+  and install them to <filename class="directory">/usr/local/lib/codecs</filename>
   <emphasis role="bold">BEFORE</emphasis> compiling <application>MPlayer</application>,
   otherwise no Win32 support will be compiled!
   <note><para>The avifile project has similar codecs package, but it
