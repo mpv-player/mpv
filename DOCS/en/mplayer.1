@@ -2742,6 +2742,26 @@ Both fps options are essential!
 The optional start parameter tells the filter where in the telecine
 pattern to start (0-3).
 .TP
+.B "tinterlace[=mode]"
+Temporal field interlacing -- merge pairs of frames into an interlaced
+frame, halving the framerate. Even frames are moved into the upper
+field, odd frames to the lower field. This can be used to fully reverse
+the effect of the tfields filter (in mode 0). Available modes are:
+.PD 0
+.RSs
+.IPs 0
+odd frames into upper field, even to lower, generating a full-height
+frame at half the framerate
+.IPs 1
+only output odd frames, even frames are dropped, height unchanged
+.IPs 2
+only output even frames, odd frames are dropped, height unchanged
+.IPs 3
+expand each frame to full height, but pad alternate lines with black,
+framerate unchanged
+.RE
+.PD 1
+.TP
 .B "tfields[=mode]"
 Temporal field separation -- split fields into frames, doubling the
 output framerate.

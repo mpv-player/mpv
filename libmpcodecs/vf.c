@@ -64,6 +64,7 @@ extern vf_info_t vf_info_denoise3d;
 extern vf_info_t vf_info_hqdn3d;
 extern vf_info_t vf_info_detc;
 extern vf_info_t vf_info_telecine;
+extern vf_info_t vf_info_tinterlace;
 extern vf_info_t vf_info_tfields;
 extern vf_info_t vf_info_ivtc;
 extern vf_info_t vf_info_ilpack;
@@ -123,6 +124,7 @@ static vf_info_t* filter_list[]={
     &vf_info_hqdn3d,
     &vf_info_detc,
     &vf_info_telecine,
+    &vf_info_tinterlace,
     &vf_info_tfields,
     &vf_info_ivtc,
     &vf_info_ilpack,

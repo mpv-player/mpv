@@ -1,0 +1,181 @@
+/*
+    Copyright (C) 2003 Michael Zucchi <notzed@ximian.com>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "../config.h"
+#include "../mp_msg.h"
+
+#include "img_format.h"
+#include "mp_image.h"
+#include "vf.h"
+
+#include "../libvo/fastmemcpy.h"
+
+struct vf_priv_s {
+	int mode;
+	int frame;
+	mp_image_t *dmpi;
+};
+
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+{
+	int ret = 0;
+	mp_image_t *dmpi;
+
+	switch (vf->priv->mode) {
+	case 0:
+		dmpi = vf->priv->dmpi;
+		if (dmpi == NULL) {
+			dmpi = vf_get_image(vf->next, mpi->imgfmt,
+					    MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
+					    MP_IMGFLAG_PRESERVE | MP_IMGFLAG_READABLE,
+					    mpi->width, mpi->height*2);
+
+			vf->priv->dmpi = dmpi;
+
+			memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h,
+				   dmpi->stride[0]*2, mpi->stride[0]);
+			if (mpi->flags & MP_IMGFLAG_PLANAR) {
+				memcpy_pic(dmpi->planes[1], mpi->planes[1],
+					   mpi->chroma_width, mpi->chroma_height,
+					   dmpi->stride[1]*2, mpi->stride[1]);
+				memcpy_pic(dmpi->planes[2], mpi->planes[2],
+					   mpi->chroma_width, mpi->chroma_height,
+					   dmpi->stride[2]*2, mpi->stride[2]);
+			}
+		} else {
+			vf->priv->dmpi = NULL;
+
+			memcpy_pic(dmpi->planes[0]+dmpi->stride[0], mpi->planes[0], mpi->w, mpi->h,
+				   dmpi->stride[0]*2, mpi->stride[0]);
+			if (mpi->flags & MP_IMGFLAG_PLANAR) {
+				memcpy_pic(dmpi->planes[1]+dmpi->stride[1], mpi->planes[1],
+					   mpi->chroma_width, mpi->chroma_height,
+					   dmpi->stride[1]*2, mpi->stride[1]);
+				memcpy_pic(dmpi->planes[2]+dmpi->stride[2], mpi->planes[2],
+					   mpi->chroma_width, mpi->chroma_height,
+					   dmpi->stride[2]*2, mpi->stride[2]);
+			}
+			ret = vf_next_put_image(vf, dmpi);
+		}
+		break;
+	case 1:
+		if (vf->priv->frame & 1)
+			ret = vf_next_put_image(vf, mpi);
+		break;
+	case 2:
+		if ((vf->priv->frame & 1) == 0)
+			ret = vf_next_put_image(vf, mpi);
+		break;
+	case 3:
+		dmpi = vf_get_image(vf->next, mpi->imgfmt,
+				    MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+				    mpi->width, mpi->height*2);
+		/* fixme, just clear alternate lines */
+		vf_mpi_clear(dmpi, 0, 0, dmpi->w, dmpi->h);
+		if ((vf->priv->frame & 1) == 0) {
+			memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h,
+				   dmpi->stride[0]*2, mpi->stride[0]);
+			if (mpi->flags & MP_IMGFLAG_PLANAR) {
+				memcpy_pic(dmpi->planes[1], mpi->planes[1],
+					   mpi->chroma_width, mpi->chroma_height,
+					   dmpi->stride[1]*2, mpi->stride[1]);
+				memcpy_pic(dmpi->planes[2], mpi->planes[2],
+					   mpi->chroma_width, mpi->chroma_height,
+					   dmpi->stride[2]*2, mpi->stride[2]);
+			}
+		} else {
+			memcpy_pic(dmpi->planes[0]+dmpi->stride[0], mpi->planes[0], mpi->w, mpi->h,
+				   dmpi->stride[0]*2, mpi->stride[0]);
+			if (mpi->flags & MP_IMGFLAG_PLANAR) {
+				memcpy_pic(dmpi->planes[1]+dmpi->stride[1], mpi->planes[1],
+					   mpi->chroma_width, mpi->chroma_height,
+					   dmpi->stride[1]*2, mpi->stride[1]);
+				memcpy_pic(dmpi->planes[2]+dmpi->stride[2], mpi->planes[2],
+					   mpi->chroma_width, mpi->chroma_height,
+					   dmpi->stride[2]*2, mpi->stride[2]);
+			}
+		}
+		ret = vf_next_put_image(vf, dmpi);
+		break;
+	}
+
+	vf->priv->frame++;
+
+	return ret;
+}
+
+static int query_format(struct vf_instance_s* vf, unsigned int fmt)
+{
+	/* FIXME - figure out which other formats work */
+	switch (fmt) {
+	case IMGFMT_YV12:
+	case IMGFMT_IYUV:
+	case IMGFMT_I420:
+		return vf_next_query_format(vf, fmt);
+	}
+	return 0;
+}
+
+static int config(struct vf_instance_s* vf,
+        int width, int height, int d_width, int d_height,
+	unsigned int flags, unsigned int outfmt)
+{
+	switch (vf->priv->mode) {
+	case 0:
+	case 3:
+		return vf_next_config(vf,width,height*2,d_width,d_height*2,flags,outfmt);
+	case 1:			/* odd frames */
+	case 2:			/* even frames */
+		return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
+	}
+	return 0;
+}
+
+static void uninit(struct vf_instance_s* vf)
+{
+	free(vf->priv);
+}
+
+static int open(vf_instance_t *vf, char* args)
+{
+	struct vf_priv_s *p;
+	vf->config = config;
+	vf->put_image = put_image;
+	vf->query_format = query_format;
+	vf->uninit = uninit;
+	vf->default_reqs = VFCAP_ACCEPT_STRIDE;
+	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
+	vf->priv->mode = 0;
+	if (args)
+	  sscanf(args, "%d", &vf->priv->mode);
+	vf->priv->frame = 0;
+	return 1;
+}
+
+vf_info_t vf_info_tinterlace = {
+	"temporal field interlacing",
+	"tinterlace",
+	"Michael Zucchi",
+	"",
+	open,
+	NULL
+};
