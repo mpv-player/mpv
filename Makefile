@@ -93,7 +93,7 @@ distclean:
 
 dep:	depend
 
-depend: .depend
+depend: version.h config.h .depend
 	@for a in mp3lib libac3 libmpeg2 libvo opendivx encore loader/DirectShow ; do $(MAKE) -C $$a dep ; done
 
 .depend: Makefile config.mak config.h
