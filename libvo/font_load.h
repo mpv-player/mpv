@@ -16,6 +16,9 @@ typedef struct {
 } raw_file;
 
 typedef struct {
+#ifdef HAVE_FREETYPE
+    int dynamic;
+#endif
     char *name;
     char *fpath;
     int spacewidth;
@@ -47,7 +50,6 @@ typedef struct {
 	unsigned volume;
 
 	unsigned *g;
-	unsigned *gt;
 	unsigned *gt2;
 	unsigned *om;
 	unsigned char *omt;
@@ -76,7 +78,7 @@ extern int force_load_font;
 int init_freetype();
 int done_freetype();
 
-font_desc_t* read_font_desc(char* fname,float factor,int movie_width, int movie_height);
+font_desc_t* read_font_desc(char* fname,int movie_width, int movie_height);
 void free_font_desc(font_desc_t *desc);
 
 void render_one_glyph(font_desc_t *desc, int c);
@@ -89,16 +91,16 @@ void load_font(int width, int height);
 raw_file* load_raw(char *name,int verbose);
 font_desc_t* read_font_desc(char* fname,float factor,int verbose);
 
-static void inline render_one_glyph(font_desc_t *desc, int c) 
+extern void inline render_one_glyph(font_desc_t *desc, int c) 
 {
 }
 
-static int inline kerning(font_desc_t *desc, int prevc, int c) 
+extern int inline kerning(font_desc_t *desc, int prevc, int c) 
 {
     return 0;
 }
 
-static void inline load_font(int width, int height)
+extern void inline load_font(int width, int height)
 {
 }
 

@@ -256,6 +256,10 @@ config(uint32_t width, uint32_t height, uint32_t d_width,
       vo_font->pic_a[0]=malloc(sizeof(raw_file));
       vo_font->pic_b[0]=malloc(sizeof(raw_file));
 
+#ifdef HAVE_FREETYPE
+      vo_font->dynamic = 0;
+#endif
+
       vo_font->spacewidth=1;
       vo_font->charspace=0;
       vo_font->height=1;
@@ -530,10 +534,15 @@ uninit(void) {
 
 #ifdef USE_OSD
 static void draw_alpha(int x,int y, int w,int h, unsigned char* src, unsigned char *srca, int stride){
- 
-    c->textbuffer[x + y*aa_scrwidth(c)] = src[0];
-    c->attrbuffer[x + y*aa_scrwidth(c)] = aaopt_subcolor;
-
+    int i,j;
+    for (i = 0; i < h; i++) {
+	for (j = 0; j < w; j++) {
+	    if (src[i*stride+j] > 0) {
+		c->textbuffer[x + j + (y+i)*aa_scrwidth(c)] = src[i*stride+j];
+		c->attrbuffer[x + j + (y+i)*aa_scrwidth(c)] = aaopt_subcolor;
+	    }
+	}
+    }
 }
 
 static void clear_alpha(int x0,int y0, int w,int h) {

@@ -51,8 +51,8 @@ int vo_image_height = 0;
 int force_load_font;
 
 //// constants
-static int const colors = 256;
-static int const maxcolor = 255;
+static unsigned int const colors = 256;
+static unsigned int const maxcolor = 255;
 static unsigned const	base = 256;
 static unsigned const first_char = 33;
 #define MAX_CHARSET_SIZE 60000
@@ -111,11 +111,13 @@ static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
     FT_Face face = desc->faces[pic_idx];
     int	const	load_flags = FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING;
     int		ymin = INT_MAX, ymax = INT_MIN;
-    int		baseline, space_advance = 20;
+    int		space_advance = 20;
     int         width, height;
     unsigned char *bbuffer;
     int i, uni_charmap = 1;
     
+    error = FT_Select_Charmap(face, ft_encoding_unicode);
+//    fprintf(stderr, "select unicode charmap: %d\n", error);
 
     if (face->charmap==NULL || face->charmap->encoding!=ft_encoding_unicode) {
 	WARNING("Unicode charmap not available for this font. Very bad!");
@@ -188,12 +190,22 @@ static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
     width = ALIGN(width);
     desc->pic_b[pic_idx]->charwidth = width;
 
+    if (width <= 0) {
+	mp_msg(MSGT_OSD, MSGL_ERR, "Wrong bounding box, width <= 0 !\n");
+	return -1;
+    }
+
     if (ymax<=ymin) {
 	mp_msg(MSGT_OSD, MSGL_ERR, "Something went wrong. Use the source!\n");
 	return -1;
     }
     
     height = ymax - ymin + 2*padding;
+    if (height <= 0) {
+	mp_msg(MSGT_OSD, MSGL_ERR, "Wrong bounding box, height <= 0 !\n");
+	return -1;
+    }
+
     if (desc->max_height < height) desc->max_height = height;
     desc->pic_b[pic_idx]->charheight = height;
     
@@ -264,7 +276,7 @@ void outline1(
 	int height,
 	int stride) {
 
-    int x, y, mx, my;
+    int x, y;
     int skip = stride-width;
 
     for (x = 0; x<width; ++x, ++s, ++t) *t = *s;
@@ -294,6 +306,20 @@ void outline1(
     for (x = 0; x<width; ++x, ++s, ++t) *t = *s;
 }
 
+// "0 pixel outline"
+void outline0(
+	unsigned char *s,
+	unsigned char *t,
+	int width,
+	int height,
+	int stride) {
+    int y;
+    for (y = 0; y<height; ++y) {
+	memcpy(t, s, width);
+	s += stride;
+	t += stride;
+    }
+}
 
 // gaussian blur
 void blur(
@@ -302,11 +328,9 @@ void blur(
 	int width,
 	int height,
 	int stride,
-	int *m,
 	int *m2,
 	int r,
-	int mwidth,
-	unsigned volume) {
+	int mwidth) {
 
     int x, y;
 
@@ -345,7 +369,6 @@ void blur(
 		register unsigned short *dstp= t + x-r;
 		int mx;
 		const int x2= r+width -x;
-		const int off= src*mwidth;
 		unsigned *m3= m2 + src*mwidth;
 		for(mx=0; mx<x2; mx++){
 		    dstp[mx]+= m3[mx];
@@ -460,9 +483,7 @@ static void resample_alpha(unsigned char *abuf, unsigned char *bbuf, int width, 
 void render_one_glyph(font_desc_t *desc, int c)
 {
     FT_GlyphSlot	slot;
-    FT_ULong	character, code;
     FT_UInt		glyph_index;
-    FT_BBox		bbox;
     FT_BitmapGlyph glyph;
     int width, height, stride, maxw, off;
     unsigned char *abuffer, *bbuffer;
@@ -474,6 +495,7 @@ void render_one_glyph(font_desc_t *desc, int c)
     
 //    fprintf(stderr, "render_one_glyph %d\n", c);
 
+    if (!desc->dynamic) return;
     if (desc->width[c] != -1) return;
     if (desc->font[c] == -1) return;
 
@@ -482,7 +504,7 @@ void render_one_glyph(font_desc_t *desc, int c)
     // load glyph
     error = FT_Load_Glyph(desc->faces[font], glyph_index, load_flags);
     if (error) {
-	WARNING("FT_Load_Glyph 0x%02x (char 0x%02x|U+%04X) failed.", glyph_index, code, character);
+	WARNING("FT_Load_Glyph 0x%02x (char 0x%04x) failed.", glyph_index, c);
 	desc->font[c] = -1;
 	return;
     }
@@ -492,7 +514,7 @@ void render_one_glyph(font_desc_t *desc, int c)
     if (slot->format != ft_glyph_format_bitmap) {
 	error = FT_Render_Glyph(slot, ft_render_mode_normal);
 	if (error) {
-	    WARNING("FT_Render_Glyph 0x%04x (char 0x%02x|U+%04X) failed.", glyph_index, code, character);
+	    WARNING("FT_Render_Glyph 0x%04x (char 0x%04x) failed.", glyph_index, c);
 	    desc->font[c] = -1;
 	    return;
 	}
@@ -501,7 +523,7 @@ void render_one_glyph(font_desc_t *desc, int c)
     // extract glyph image
     error = FT_Get_Glyph(slot, (FT_Glyph*)&glyph);
     if (error) {
-	WARNING("FT_Get_Glyph 0x%04x (char 0x%02x|U+%04X) failed.", glyph_index, code, character);
+	WARNING("FT_Get_Glyph 0x%04x (char 0x%04x) failed.", glyph_index, c);
 	desc->font[c] = -1;
 	return;
     }
@@ -515,13 +537,13 @@ void render_one_glyph(font_desc_t *desc, int c)
     }
 
     // allocate new memory, if needed
+//    fprintf(stderr, "\n%d %d %d\n", desc->pic_b[font]->charwidth, desc->pic_b[font]->charheight, desc->pic_b[font]->current_alloc);
     if (desc->pic_b[font]->current_count >= desc->pic_b[font]->current_alloc) {
 	int newsize = desc->pic_b[font]->charwidth*desc->pic_b[font]->charheight*(desc->pic_b[font]->current_alloc+ALLOC_INCR);
 	int increment = desc->pic_b[font]->charwidth*desc->pic_b[font]->charheight*ALLOC_INCR;
-	
-	printf("\nincr=%d  w=%d  h=%d  \n",increment,desc->pic_b[font]->charwidth,desc->pic_b[font]->charheight);
-	
 	desc->pic_b[font]->current_alloc += ALLOC_INCR;
+
+//	fprintf(stderr, "\nns = %d inc = %d\n", newsize, increment);
 
 	desc->pic_b[font]->bmp = realloc(desc->pic_b[font]->bmp, newsize);
 	desc->pic_a[font]->bmp = realloc(desc->pic_a[font]->bmp, newsize);
@@ -555,7 +577,9 @@ void render_one_glyph(font_desc_t *desc, int c)
     height = desc->pic_b[font]->charheight;
     stride = desc->pic_b[font]->w;
 
-    if (desc->tables.o_r <= 1) {
+    if (desc->tables.o_r == 0) {
+	outline0(bbuffer+off, abuffer+off, width, height, stride);
+    } else if (desc->tables.o_r == 1) {
 	outline1(bbuffer+off, abuffer+off, width, height, stride);
     } else {
 	outline(bbuffer+off, abuffer+off, width, height, stride,
@@ -566,8 +590,8 @@ void render_one_glyph(font_desc_t *desc, int c)
     
     if (desc->tables.g_r) {
 	blur(abuffer+off, desc->tables.tmp, width, height, stride,
-	     desc->tables.gt, desc->tables.gt2, desc->tables.g_r,
-	     desc->tables.g_w, desc->tables.volume);
+	     desc->tables.gt2, desc->tables.g_r,
+	     desc->tables.g_w);
 //	fprintf(stderr, "fg: blur t = %lf\n", GetTimer()-t);
     }
 
@@ -624,14 +648,11 @@ static int prepare_font(font_desc_t *desc, FT_Face face, float ppem, int pic_idx
 
 int generate_tables(font_desc_t *desc, double thickness, double radius)
 {
-    int err;
-
     int width = desc->max_height;
     int height = desc->max_width;
     
     double A = log(1.0/base)/(radius*radius*2);
     int mx, my, i;
-    unsigned volume2 = 0;		// volume under Gaussian area is exactly -pi*base/A
     double volume_diff, volume_factor = 0;
     unsigned char *omtp;
     
@@ -641,44 +662,50 @@ int generate_tables(font_desc_t *desc, double thickness, double radius)
     desc->tables.o_w = 2*desc->tables.o_r+1;
     desc->tables.o_size = desc->tables.o_w * desc->tables.o_w;
 
-    desc->tables.g = (unsigned*)malloc(desc->tables.g_w * sizeof(unsigned));
-    desc->tables.gt = (unsigned*)malloc(256 * desc->tables.g_w * sizeof(unsigned));
-    desc->tables.gt2 = (unsigned*)malloc(256 * desc->tables.g_w * sizeof(unsigned));
+//    fprintf(stderr, "o_r = %d\n", desc->tables.o_r);
+
+    if (desc->tables.g_r) {
+	desc->tables.g = (unsigned*)malloc(desc->tables.g_w * sizeof(unsigned));
+	desc->tables.gt2 = (unsigned*)malloc(256 * desc->tables.g_w * sizeof(unsigned));
+	if (desc->tables.g==NULL || desc->tables.gt2==NULL) {
+	    return -1;
+	}
+    }
     desc->tables.om = (unsigned*)malloc(desc->tables.o_w*desc->tables.o_w * sizeof(unsigned));
     desc->tables.omt = malloc(desc->tables.o_size*256);
 
     omtp = desc->tables.omt;
     desc->tables.tmp = malloc((width+1)*height*sizeof(short));
     
-    if (desc->tables.g==NULL || desc->tables.gt==NULL || desc->tables.gt2==NULL
-	|| desc->tables.om==NULL || desc->tables.omt==NULL) {
+    if (desc->tables.om==NULL || desc->tables.omt==NULL || desc->tables.tmp==NULL) {
 	return -1;
     };
 
-    // gaussian curve with volume = 256
-    for (volume_diff=10000000; volume_diff>0.0000001; volume_diff*=0.5){
-	volume_factor+= volume_diff;
+    if (desc->tables.g_r) {
+	// gaussian curve with volume = 256
+	for (volume_diff=10000000; volume_diff>0.0000001; volume_diff*=0.5){
+	    volume_factor+= volume_diff;
+	    desc->tables.volume=0;
+	    for (i = 0; i<desc->tables.g_w; ++i) {
+		desc->tables.g[i] = (unsigned)(exp(A * (i-desc->tables.g_r)*(i-desc->tables.g_r)) * volume_factor + .5);
+		desc->tables.volume+= desc->tables.g[i];
+	    }
+	    if(desc->tables.volume>256) volume_factor-= volume_diff;
+	}
 	desc->tables.volume=0;
 	for (i = 0; i<desc->tables.g_w; ++i) {
 	    desc->tables.g[i] = (unsigned)(exp(A * (i-desc->tables.g_r)*(i-desc->tables.g_r)) * volume_factor + .5);
 	    desc->tables.volume+= desc->tables.g[i];
 	}
-	if(desc->tables.volume>256) volume_factor-= volume_diff;
-    }
-    desc->tables.volume=0;
-    for (i = 0; i<desc->tables.g_w; ++i) {
-	desc->tables.g[i] = (unsigned)(exp(A * (i-desc->tables.g_r)*(i-desc->tables.g_r)) * volume_factor + .5);
-	desc->tables.volume+= desc->tables.g[i];
-    }
 
-    // gauss table:
-    for(mx=0;mx<desc->tables.g_w;mx++){
-	for(i=0;i<256;i++){
-	    desc->tables.gt[256*mx+i] = (i*desc->tables.g[mx]*65536+(desc->tables.volume/2))/desc->tables.volume;
-	    desc->tables.gt2[mx+i*desc->tables.g_w] = i*desc->tables.g[mx];
+	// gauss table:
+	for(mx=0;mx<desc->tables.g_w;mx++){
+	    for(i=0;i<256;i++){
+		desc->tables.gt2[mx+i*desc->tables.g_w] = i*desc->tables.g[mx];
+	    }
 	}
     }
-
+    
     /* outline matrix */
     for (my = 0; my<desc->tables.o_w; ++my) {
 	for (mx = 0; mx<desc->tables.o_w; ++mx) {
@@ -757,20 +784,19 @@ static int prepare_charset(char *charmap, char *encoding, FT_ULong *charset, FT_
     return charset_size;
 }
 
-#ifdef HAVE_FREETYPE21
 static int prepare_charset_unicode(FT_Face face, FT_ULong *charset, FT_ULong *charcodes) {
     FT_ULong  charcode;
     FT_UInt   gindex;
-    int i;
+    int i,j;
 
     if (face->charmap==NULL || face->charmap->encoding!=ft_encoding_unicode) {
 	WARNING("Unicode charmap not available for this font. Very bad!");
 	return -1;
     }
-
+#ifdef HAVE_FREETYPE21
     i = 0;
     charcode = FT_Get_First_Char( face, &gindex );
-    while ( gindex != 0 ) {
+    while (gindex != 0) {
 	if (charcode < 65536 && charcode >= 33) { // sanity check
 	    charset[i] = charcode;
 	    charcodes[i] = 0;
@@ -778,12 +804,22 @@ static int prepare_charset_unicode(FT_Face face, FT_ULong *charset, FT_ULong *ch
 	}
 	charcode = FT_Get_Next_Char( face, charcode, &gindex );
     }
-
+#else
+    // for FT < 2.1 we have to use brute force enumeration
+    i = 0;
+    for (j = 33; j < 65536; j++) {
+	gindex = FT_Get_Char_Index(face, j);
+	if (gindex > 0) {
+	    charset[i] = j;
+	    charcodes[i] = 0;
+	    i++;
+	}
+    }
+#endif
     mp_msg(MSGT_OSD, MSGL_V, "Unicode font: %d glyphs.\n", i);
 
     return i;
 }
-#endif
 
 static font_desc_t* init_font_desc()
 {
@@ -794,6 +830,8 @@ static font_desc_t* init_font_desc()
     if(!desc) return NULL;
     memset(desc,0,sizeof(font_desc_t));
 
+    desc->dynamic = 1;
+    
     /* setup sane defaults */
     desc->name = NULL;
     desc->fpath = NULL;
@@ -806,7 +844,6 @@ static font_desc_t* init_font_desc()
     desc->max_height = 0;
 
     desc->tables.g = NULL;
-    desc->tables.gt = NULL;
     desc->tables.gt2 = NULL;
     desc->tables.om = NULL;
     desc->tables.omt = NULL;
@@ -841,7 +878,6 @@ void free_font_desc(font_desc_t *desc)
     }
 
     if (desc->tables.g) free(desc->tables.g);
-    if (desc->tables.gt) free(desc->tables.gt);
     if (desc->tables.gt2) free(desc->tables.gt2);
     if (desc->tables.om) free(desc->tables.om);
     if (desc->tables.omt) free(desc->tables.omt);
@@ -886,6 +922,7 @@ int kerning(font_desc_t *desc, int prevc, int c)
 {
     FT_Vector kern;
     
+    if (!vo_font->dynamic) return 0;
     if (prevc < 0 || c < 0) return 0;
     if (desc->font[prevc] != desc->font[c]) return 0;
     if (desc->font[prevc] == -1 || desc->font[c] == -1) return 0;
@@ -898,7 +935,7 @@ int kerning(font_desc_t *desc, int prevc, int c)
     return f266ToInt(kern.x);
 }
 
-font_desc_t* read_font_desc(char *fname, float factor, int movie_width, int movie_height)
+font_desc_t* read_font_desc(char *fname, int movie_width, int movie_height)
 {
     font_desc_t *desc;
 
@@ -919,9 +956,6 @@ font_desc_t* read_font_desc(char *fname, float factor, int movie_width, int movi
     float osd_font_ppem;
 
     switch (subtitle_autoscale) {
-    case 0:
-	movie_size = 100;
-	break;
     case 1:
 	movie_size = movie_height;
 	break;
@@ -931,6 +965,9 @@ font_desc_t* read_font_desc(char *fname, float factor, int movie_width, int movi
     case 3:
 	movie_size = sqrt(movie_height*movie_height+movie_width*movie_width);
 	break;
+    default:
+	movie_size = 100;
+	break;
     }
 
     subtitle_font_ppem = movie_size*text_font_scale_factor/100.0;
@@ -939,16 +976,15 @@ font_desc_t* read_font_desc(char *fname, float factor, int movie_width, int movi
     if (subtitle_font_ppem < 5) subtitle_font_ppem = 5;
     if (osd_font_ppem < 5) osd_font_ppem = 5;
 
-#ifdef HAVE_FREETYPE21
+    if (subtitle_font_ppem > 128) subtitle_font_ppem = 128;
+    if (osd_font_ppem > 128) osd_font_ppem = 128;
+
     if ((subtitle_font_encoding == NULL)
 	|| (strcasecmp(subtitle_font_encoding, "unicode") == 0)) {
 	unicode = 1;
     } else {
 	unicode = 0;
     }
-#else
-    unicode = 0;
-#endif
 
     desc = init_font_desc();
     if(!desc) return NULL;
@@ -961,8 +997,8 @@ font_desc_t* read_font_desc(char *fname, float factor, int movie_width, int movi
 	mp_msg(MSGT_OSD, MSGL_WARN, "subtitle font: load_sub_face failed.\n");
 	goto gen_osd;
     }
+    desc->face_cnt++;
 
-#ifdef HAVE_FREETYPE21
     if (unicode) {
 	charset_size = prepare_charset_unicode(face, my_charset, my_charcodes);
     } else {
@@ -972,13 +1008,6 @@ font_desc_t* read_font_desc(char *fname, float factor, int movie_width, int movi
 	    charset_size = prepare_charset(charmap, "iso-8859-1", my_charset, my_charcodes);
 	}
     }
-#else
-    if (subtitle_font_encoding) {
-	charset_size = prepare_charset(charmap, subtitle_font_encoding, my_charset, my_charcodes);
-    } else {
-	charset_size = prepare_charset(charmap, "iso-8859-1", my_charset, my_charcodes);
-    }
-#endif
 
     if (charset_size < 0) {
 	mp_msg(MSGT_OSD, MSGL_ERR, "subtitle font: prepare_charset failed.\n");
@@ -988,7 +1017,7 @@ font_desc_t* read_font_desc(char *fname, float factor, int movie_width, int movi
 
 //    fprintf(stderr, "fg: prepare t = %lf\n", GetTimer()-t);
 
-    err = prepare_font(desc, face, subtitle_font_ppem, desc->face_cnt,
+    err = prepare_font(desc, face, subtitle_font_ppem, desc->face_cnt-1,
 		       charset_size, my_charset, my_charcodes, unicode,
 		       subtitle_font_thickness, subtitle_font_radius);
 
@@ -997,7 +1026,6 @@ font_desc_t* read_font_desc(char *fname, float factor, int movie_width, int movi
 	free_font_desc(desc);
 	return NULL;
     }
-    desc->face_cnt++;
 
 gen_osd:
 
@@ -1007,7 +1035,9 @@ gen_osd:
 	free_font_desc(desc);
 	return NULL;
     }
-    err = prepare_font(desc, face, osd_font_ppem, desc->face_cnt,
+    desc->face_cnt++;
+
+    err = prepare_font(desc, face, osd_font_ppem, desc->face_cnt-1,
 		       OSD_CHARSET_SIZE, osd_charset, osd_charcodes, 0,
 		       subtitle_font_thickness, subtitle_font_radius);
     
@@ -1016,7 +1046,6 @@ gen_osd:
 	free_font_desc(desc);
 	return NULL;
     }
-    desc->face_cnt++;
 
     err = generate_tables(desc, subtitle_font_thickness, subtitle_font_radius);
     
@@ -1076,10 +1105,13 @@ void load_font(int width, int height)
     vo_image_width = width;
     vo_image_height = height;
 
+    // protection against vo_aa font hacks
+    if (vo_font && !vo_font->dynamic) return;
+
     if (vo_font) free_font_desc(vo_font);
 
 #ifdef USE_OSD
-    vo_font=read_font_desc(font_name, font_factor, width, height);
+    vo_font=read_font_desc(font_name, width, height);
 #endif
 }
 
