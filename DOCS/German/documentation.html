@@ -610,7 +610,7 @@ TV-Tuner ermöglicht</B>.</P>
 <P>
 <UL>
     <LI>Als erstes musst du neu kompilieren. <CODE>./configure</CODE> erkennt automatisch die Kernel-Header von 
-    bttv und ob die /dev/video* Einträge existieren. Wenn sie existieren wird die TV Unterstützung eingebaut.
+    v4l und ob die /dev/video* Einträge existieren. Wenn sie existieren wird die TV Unterstützung eingebaut.
     (siehe Ausgabe von configure !).</LI>
     <LI>stelle sicher, dass dein Tuner mit anderer TV-Software unter Linux funktioniert,
     zum Beispiel xawtv.</LI>
@@ -1558,6 +1558,11 @@ Problem: du hast MPlayer auf einem anderem Computer kompiliert, als auf dem du
 abspielst (z.B. kompiliert auf einem P3 und wiedergabe auf eine Celeron)<BR>
 Endlösung: kompiliere MPlayer auf dem Rechner, wie du abspielst<BR>
 Abhilfe: ./configure --disable-sse usw.</LI> 
+
+<LI>"Internal buffer inconsistency" wird während der Verwendung von MEncoder:<BR>
+Problem: bekannter gcc 2.96 Bug, wurde noch nicht gelöst. Wenn du gcc 2.95 nimmst,
+hast du eine libmp3lame Bibliothek dir mit gcc 2.96 kompiliert wurde (möglichweise aus
+einem deb/rpm Paket?). Prüfe welche Bibliothek MEncoder findet: ldd mencoder.</LI>
 
 </UL>
 
