@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#ifndef WITH_NO_ANTIALIASING
+#if ANTIALIASING_ALGORITHM == 2
 #include <math.h>
 #endif
 #include "spudec.h"
@@ -55,7 +55,7 @@ typedef struct {
   size_t image_size;		/* Size of the image buffer */
   unsigned char *image;		/* Grayscale value */
   unsigned char *aimage;	/* Alpha value */
-  int scaled;			/* flag if the image has already been scaled */
+  unsigned int scaled_frame_width, scaled_frame_height;
   unsigned int scaled_start_col, scaled_start_row;
   unsigned int scaled_width, scaled_height, scaled_stride;
   size_t scaled_image_size;
@@ -116,7 +116,8 @@ static void spudec_process_data(spudec_handle_t *this)
   unsigned int cmap[4], alpha[4];
   unsigned int i, x, y;
 
-  this->scaled = 0;
+  this->scaled_frame_width = 0;
+  this->scaled_frame_height = 0;
   for (i = 0; i < 4; ++i) {
     alpha[i] = mkalpha(this->alpha[i]);
     if (alpha[i] == 0)
@@ -389,8 +390,7 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 		   spu->image, spu->aimage, spu->stride);
     }
     else {
-      if (!spu->scaled ||
-          spu->orig_frame_width != dxs || spu->orig_frame_height != dys) {	/* Resizing is needed */
+      if (spu->scaled_frame_width != dxs || spu->scaled_frame_height != dys) {	/* Resizing is needed */
 	/* scaled_x = scalex * x / 0x100
 	   scaled_y = scaley * y / 0x100
 	   order of operations is important because of rounding. */
@@ -642,7 +642,8 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	    }
 	  }
 #endif
-	  spu->scaled = 1;
+	  spu->scaled_frame_width = dxs;
+	  spu->scaled_frame_height = dys;
 	}
       }
       if (spu->scaled_image)

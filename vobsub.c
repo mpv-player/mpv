@@ -270,7 +270,20 @@ mpeg_run(mpeg_t *mpeg)
 	    return -1;
 	break;
     default:
-	return -1;
+	if (0xc0 <= buf[3] && buf[3] < 0xf0) {
+	    /* MPEG audio or video */
+	    if (stream_read(mpeg->stream, buf, 2) != 2)
+		return -1;
+	    len = buf[0] << 8 | buf[1];
+	    if (len > 0 && !stream_skip(mpeg->stream, len))
+		return -1;
+		
+	}
+	else {
+	    fprintf(stderr, "unknown header 0x%02X%02X%02X%02X\n",
+		    buf[0], buf[1], buf[2], buf[3]);
+	    return -1;
+	}
     }
     return 0;
 }
@@ -396,6 +409,7 @@ packet_queue_insert(packet_queue_t *queue)
 typedef struct {
     void *spudec;
     unsigned int palette[16];
+    unsigned int orig_frame_width, orig_frame_height;
     /* index */
     packet_queue_t *spu_streams;
     unsigned int spu_streams_size;
@@ -557,6 +571,48 @@ vobsub_parse_timestamp(vobsub_t *vob, const char *line)
 }
 
 static int
+vobsub_parse_size(vobsub_t *vob, const char *line)
+{
+    // size: WWWxHHH
+    char *p;
+    while (isspace(*line))
+	++line;
+    if (!isdigit(*line))
+	return -1;
+    vob->orig_frame_width = strtoul(line, &p, 10);
+    if (*p != 'x')
+	return -1;
+    ++p;
+    vob->orig_frame_height = strtoul(p, NULL, 10);
+    return 0;
+}
+
+static int
+vobsub_parse_palette(vobsub_t *vob, const char *line)
+{
+    // palette: XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX
+    unsigned int n;
+    n = 0;
+    while (1) {
+	const char *p;
+	while (isspace(*line))
+	    ++line;
+	p = line;
+	while (isxdigit(*p))
+	    ++p;
+	if (p - line != 6)
+	    return -1;
+	vob->palette[n++] = strtoul(line, NULL, 16);
+	if (n == 16)
+	    break;
+	if (*p == ',')
+	    ++p;
+	line = p;
+    }
+    return 0;
+}
+
+static int
 vobsub_parse_one_line(vobsub_t *vob, FILE *fd)
 {
     ssize_t line_size;
@@ -574,6 +630,10 @@ vobsub_parse_one_line(vobsub_t *vob, FILE *fd)
 	    continue;
 	else if (strncmp("id:", line, 3) == 0)
 	    res = vobsub_parse_id(vob, line + 3);
+	else if (strncmp("palette:", line, 8) == 0)
+	    res = vobsub_parse_palette(vob, line + 8);
+	else if (strncmp("size:", line, 5) == 0)
+	    res = vobsub_parse_size(vob, line + 5);
 	else if (strncmp("timestamp:", line, 10) == 0)
 	    res = vobsub_parse_timestamp(vob, line + 10);
 	else {
@@ -588,6 +648,65 @@ vobsub_parse_one_line(vobsub_t *vob, FILE *fd)
     return res;
 }
 
+int
+vobsub_parse_ifo(const char *const name, unsigned int *palette, unsigned int *width, unsigned int *height, int force)
+{
+    int res = -1;
+    FILE *fd = fopen(name, "rb");
+    if (fd == NULL)
+	perror("Can't open IFO file");
+    else {
+	// parse IFO header
+	unsigned char block[0x800];
+	const char *const ifo_magic = "DVDVIDEO-VTS";
+	if (fread(block, sizeof(block), 1, fd) != 1) {
+	    if (force)
+		perror("Can't read IFO header");
+	} else if (memcmp(block, ifo_magic, strlen(ifo_magic) + 1))
+	    fprintf(stderr, "Bad magic in IFO header\n");
+	else {
+	    unsigned long pgci_sector = block[0xcc] << 24 | block[0xcd] << 16
+		| block[0xce] << 8 | block[0xcf];
+	    int standard = (block[0x200] & 0x30) >> 4;
+	    int resolution = (block[0x201] & 0x0c) >> 2;
+	    *height = standard ? 576 : 480;
+	    *width = 0;
+	    switch (resolution) {
+	    case 0x0:
+		*width = 720;
+		break;
+	    case 0x1:
+		*width = 704;
+		break;
+	    case 0x2:
+		*width = 352;
+		break;
+	    case 0x3:
+		*width = 352;
+		*height /= 2;
+		break;
+	    default:
+		fprintf(stderr, "Unknown resolution %d \n", resolution);
+	    }
+	    if (fseek(fd, pgci_sector * sizeof(block), SEEK_SET)
+		|| fread(block, sizeof(block), 1, fd) != 1)
+		perror("Can't read IFO PGCI");
+	    else {
+		unsigned long idx;
+		unsigned long pgc_offset = block[0xc] << 24 | block[0xd] << 16
+		    | block[0xe] << 8 | block[0xf];
+		for (idx = 0; idx < 16; ++idx) {
+		    unsigned char *p = block + pgc_offset + 0xa4 + 4 * idx;
+		    palette[idx] = p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3];
+		}
+		res = 0;
+	    }
+	}
+	fclose(fd);
+    }
+    return res;
+}
+
 void *
 vobsub_open(const char *const name, const int force)
 {
@@ -595,6 +714,8 @@ vobsub_open(const char *const name, const int force)
     if (vob) {
 	char *buf;
 	vob->spudec = NULL;
+	vob->orig_frame_width = 0;
+	vob->orig_frame_height = 0;
 	vob->spu_streams = NULL;
 	vob->spu_streams_size = 0;
 	vob->spu_streams_current = 0;
@@ -602,61 +723,10 @@ vobsub_open(const char *const name, const int force)
 	if (buf) {
 	    FILE *fd;
 	    mpeg_t *mpg;
+	    /* read in the info file */
 	    strcpy(buf, name);
 	    strcat(buf, ".ifo");
-	    fd = fopen(buf, "rb");
-	    if (fd == NULL) {
-		if(force)
-                    perror("VobSub: Can't open IFO file");
-	    } else {
-		// parse IFO header
-		unsigned char block[0x800];
-		const char *const ifo_magic = "DVDVIDEO-VTS";
-		if (fread(block, sizeof(block), 1, fd) != 1)
-		    perror("Can't read IFO header");
-		else if (memcmp(block, ifo_magic, strlen(ifo_magic) + 1))
-		    fprintf(stderr, "Bad magic in IFO header\n");
-		else {
-		    unsigned long pgci_sector = block[0xcc] << 24 | block[0xcd] << 16
-			| block[0xce] << 8 | block[0xcf];
-		    int standard = (block[0x200] & 0x30) >> 4;
-		    int resolution = (block[0x201] & 0x0c) >> 2;
-		    unsigned int orig_frame_y = standard ? 576 : 480;
-		    unsigned int orig_frame_x = 0;
-		    switch (resolution) {
-		    case 0x0:
-			orig_frame_x = 720;
-			break;
-		    case 0x1:
-			orig_frame_x = 704;
-			break;
-		    case 0x2:
-			orig_frame_x = 352;
-			break;
-		    case 0x3:
-			orig_frame_x = 352;
-			orig_frame_y /= 2;
-			break;
-		    default:
-			fprintf(stderr, "Unknown resolution %d \n", resolution);
-		    }
-		    if (fseek(fd, pgci_sector * sizeof(block), SEEK_SET)
-			|| fread(block, sizeof(block), 1, fd) != 1)
-			perror("Can't read IFO PGCI");
-		    else {
-			unsigned long idx;
-			unsigned long pgc_offset = block[0xc] << 24 | block[0xd] << 16
-			    | block[0xe] << 8 | block[0xf];
-			for (idx = 0; idx < 16; ++idx) {
-			    unsigned char *p = block + pgc_offset + 0xa4 + 4 * idx;
-			    vob->palette[idx] = p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3];
-			}
-		    }
-		    vob->spudec = spudec_new_scaled(vob->palette, orig_frame_x, orig_frame_y);
-		}
-		fclose(fd);
-	    }
-
+	    vobsub_parse_ifo(buf, vob->palette, &vob->orig_frame_width, &vob->orig_frame_height, force);
 	    /* read in the index */
 	    strcpy(buf, name);
 	    strcat(buf, ".idx");
@@ -671,6 +741,8 @@ vobsub_open(const char *const name, const int force)
 		    /* NOOP */ ;
 		fclose(fd);
 	    }
+	    if (vob->orig_frame_width && vob->orig_frame_height)
+		vob->spudec = spudec_new_scaled(vob->palette, vob->orig_frame_width, vob->orig_frame_height);
 
 	    /* read the indexed mpeg_stream */
 	    strcpy(buf, name);

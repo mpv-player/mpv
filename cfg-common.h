@@ -50,6 +50,7 @@
 	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
 	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
 	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
+	{"ifo", &spudec_ifo, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 // ------------------------- a-v sync options --------------------
 

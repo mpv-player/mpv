@@ -123,6 +123,8 @@ int vcd_track=0;
 int audio_id=-1;
 int video_id=-1;
 int dvdsub_id=-1;
+int vobsub_id=-1;
+static char* spudec_ifo=NULL;
 
 static int has_audio=1;
 char *audio_codec=NULL; // override audio codec
@@ -239,6 +241,7 @@ static int bits_per_pixel(uint32_t fmt);
 #ifdef USE_DVDREAD
 #include "spudec.h"
 #endif
+#include "vobsub.h"
 
 /* FIXME */
 void mencoder_exit(int level, char *how)
@@ -270,8 +273,10 @@ void parse_cfgfiles( m_config_t* conf )
 static unsigned char* vo_image=NULL;
 static unsigned char* vo_image_ptr=NULL;
 
-static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h, int x0,int y0){
+static uint32_t draw_slice(const uint8_t *src0[], int stride[], int w,int h, int x0,int y0){
   int y;
+  uint8_t *src[3];
+  memcpy(src, src0, sizeof(src));
 //  printf("draw_slice %dx%d %d;%d\n",w,h,x0,y0);
 
   if(y0 + h < crop_y0)
@@ -769,9 +774,16 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
 
 // set up video encoder:
 
+if (spudec_ifo) {
+  unsigned int palette[16], width, height;
+  if (vobsub_parse_ifo(spudec_ifo, palette, &width, &height, 1) >= 0)
+    vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
+}
+if (vo_spudec==NULL) {
 #ifdef USE_DVDREAD
 vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
 			    sh_video->disp_w, sh_video->disp_h);
+}
 #endif
 
 // set up output file:

@@ -205,6 +205,7 @@ int dvdsub_id=-1;
 int vobsub_id=-1;
 char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
+static char* spudec_ifo=NULL;
 static int vcd_track=0;
 
 // cache2:
@@ -1107,10 +1108,19 @@ demux_info_print(demuxer);
 //================== Read SUBTITLES (DVD & TEXT) ==========================
 if(sh_video){
 
+current_module="spudec";
+if (spudec_ifo) {
+  unsigned int palette[16], width, height;
+  if (vobsub_parse_ifo(spudec_ifo, palette, &width, &height, 1) >= 0)
+    vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
+}
+
 #ifdef USE_DVDREAD
+if (vo_spudec==NULL) {
 current_module="spudec_init";
 vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
 			    sh_video->disp_w, sh_video->disp_h);
+}
 if (vo_spudec!=NULL)
   inited_flags|=INITED_SPUDEC;
 #endif
