@@ -1,9 +1,6 @@
-// MASTER FILE. Use this file as base for translation!
+/* Translated by:  Nick Kurshev <nickols_k@mail.ru>
 
-// Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming
-// and send a notify message to mplayer-dev-eng maillist.
-
-// ========================= MPlayer help ===========================
+ ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
