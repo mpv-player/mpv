@@ -1627,6 +1627,11 @@ static double grab_audio_frame(priv_t *priv, char *buffer, int len)
     mp_dbg(MSGT_TV, MSGL_DBG2, "grab_audio_frame(priv=%p, buffer=%p, len=%d)\n",
 	priv, buffer, len);
 
+    if (priv->first) {
+        pthread_create(&priv->video_grabber_thread, NULL, video_grabber, priv);
+        priv->first = 0;
+    }
+
     // compensate for dropped audio frames
     if (priv->audio_drop && (priv->audio_head == priv->audio_tail)) {
 	priv->audio_drop--;
