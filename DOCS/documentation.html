@@ -247,7 +247,7 @@ of them supports software or hardware scaling, so you can enjoy movies in
 fullscreen. <B>MPlayer</B> supports displaying through some hardware MPEG
 decoder boards, such as the <B><A HREF="DVB">DVB</A></B> and <B> <A
 HREF="DXR3">DXR3/Hollywood+</A></B> ! And what about the nice big antialiased
-shaded subtitles (<B>9 supported types!!!</B>) with european/ISO 8859-1,2
+shaded subtitles (<B>10 supported types!!!</B>) with european/ISO 8859-1,2
 (hungarian, english, czech, etc), cyrillic, korean fonts, and OSD?</P>
 
 <P><B>MPlayer</B> is basically GPL, but contains some non-GPL code which is not
@@ -584,8 +584,16 @@ directive to use the skin in <CODE>*/Skin/newskin</CODE> directory.</P>
 <P><B><A NAME=1.5>1.5. Subtitles and OSD</A></B></P>
 
 <P>Yes, <B>MPlayer</B> also supports many kinds of subtitles. Currently
-8 kinds of subtitle can be used by the subreader code. To see what are
+10 kinds of subtitle can be used by the subreader code. To see what are
 these subtitle formats, see subreader.c, line ~30.</P>
+
+<P><B>MPlayer</B> supports VobSub subtitles. VobSub subtitles consist of
+a big (some megabytes) .SUB file, an .IDX file, and/or an .IFO file.
+Usage : if you have files like <CODE>sample.sub</CODE>, <CODE>sample.ifo</CODE>,
+<CODE>sample.idx</CODE> - you have to pass the <CODE>-vobsub sample -vobsubid
+0</CODE> options (optionally with pathname, of course). The
+<CODE>-vobsubid</CODE> option is like <CODE>-sid</CODE> for DVDs, you can
+choose between subtitle tracks (languages) with it.</P>
 
 <P>About DVD subtitles, read the <A HREF="cd-dvd.html#4.2">DVD section</A>.</P>
 
@@ -1426,7 +1434,7 @@ No closer info yet.</P>
 
 <LI><B><A HREF="mailto:kmkaplan@selfoffice.com">Kim Minh Kaplan</A></B>
 <UL>
-  <LI>DVD subtitles display support</LI>
+  <LI>DVD and VobSub subtitles display support</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:bkuschak@yahoo.com">Brian Kuschak</A></B>

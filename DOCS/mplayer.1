@@ -37,6 +37,8 @@ mplayer \- Movie Player for Linux
 .RB [ \-sub\ <filename> ]
 .RB [ \-subfps\ <rate> ]
 .RB [ \-subdelay\ <seconds> ]
+.RB [ \-vobsub\ <vobsub\ file\ without\ extention> ]
+.RB [ \-vobsubid\ <vobsub\ subtitle\ id> ]
 .RB [ \-z\ <0-9> ]
 .RB [ \-idx ]
 .RB [ \-forceidx ]
@@ -258,6 +260,14 @@ specify frame/sec rate of subtitle file (float number)
 .TP
 .B \-subdelay\ <sec>
 delays subtitles by <sec> seconds. Can be negative.
+.TP
+.B \-vobsub\ <vobsub\ file\ without\ extention>
+specify the VobSub files that are to be used for subtitle.  This is
+the full pathname without extensions, i.e. without the ".idx", ".ifo"
+or ".sub".
+.TP
+.B \-vobsubid\ <vobsub\ subtitle\ id>
+specify the VobSub subtitle id.  Valid values range from 0 to 31.
 .TP
 .B \-osdlevel\ <level>
 specifies which mode the OSD should start in (0 : none, 1 : seek, 2: seek+timer)
@@ -739,8 +749,8 @@ Fonts are searched in $HOME/.mplayer/font. There must be a font.desc
 file, and files with .RAW extension.
 .TP
 .I SUBTITLE FILES
-MPlayer currently supports 9 subtitle formats : MicroDVD, SubRip, unnamed,
-SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha), AQT, and our own: MPsub.
+MPlayer currently supports 10 subtitle formats : MicroDVD, SubRip, unnamed,
+SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha), AQT, VobSub, and our own: MPsub.
 Sub files are searched in this priority : (for example /mnt/cdrom/movie.avi)
     /mnt/cdrom/movie.sub
      (utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)

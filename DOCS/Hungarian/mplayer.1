@@ -36,6 +36,8 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-sub\ <file> ]
 .RB [ \-subfps\ <ráta> ]
 .RB [ \-subdelay\ <másodperc> ]
+.RB [ \-vobsub\ <vobsub\ file\ kiterjesztés\ nélkül> ]
+.RB [ \-vobsubid\ <vobsub\ felirat\ id> ]
 .RB [ \-z\ <0-8> ]
 .RB [ \-idx ]
 .RB [ \-forceidx ]
@@ -263,6 +265,14 @@ fileoknál lehetséges!) Alapállapot: a film kk/mp értéke.
 .B \-subdelay\ <másodperc>
 a feliratok kezdõidejének késleltetése a megadott idõtartammal. Lehet
 negatív is.
+.TP
+.B \-vobsub\ <vobsub\ file\ kiterjesztés\ nélkül>
+vobsub tipusú felirat használata esetén itt adandók meg a feliratot tartalmazó
+file-ok. Kiterjesztések (.idx, .ifo, .sub) nélkül kell megadni !
+.TP
+.B \-vobsub\ <vobsub\ felirat\ id>
+amennyiben a vobsub-ban több felirat is van, itt lehet kiválasztani hogy
+melyik legyen használva (0-31).
 .TP
 .B \-osdlevel\ <fokozat>
 megadja hogy az OSD milyen módban induljon (0 : nincs, 1 : keresõ, 2: keresõ+timer)
@@ -669,8 +679,8 @@ Kell lennie ott egy font.desc file-nak, és .RAW kiterjesztésû
 betûtipusoknak.
 .TP
 .I FELIRATFILEOK
-Az MPlayer jelenleg 9 fajtát támogat : MicroDVD, SubRip, unnamed,
-SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha), AQT, MPsub.
+Az MPlayer jelenleg 10 fajtát támogat : MicroDVD, SubRip, unnamed,
+SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha), AQT, VobSub, MPsub.
 A fileokat ebben a sorrendben keresi : (például /mnt/cdrom/movie.avi)
     /mnt/cdrom/movie.sub
      (utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)
