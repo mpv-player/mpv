@@ -194,7 +194,7 @@ parse_textplain(play_tree_parser_t* p) {
 	
       }
       else {
-	if(r > 0 && p->buffer[r-1] == '\r') r--;
+	if(*(end-1) == '\r') end--;
 	file = (char*)malloc((end-(&p->buffer[r])+1)*sizeof(char));
 	if(file == NULL) {
 	  mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",p->buffer_size*sizeof(char));
