@@ -385,7 +385,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	}
 	if(verbose)
 	{
-	  printf("vo_vesa: Requested mode: %ux%u@%x bpp=%u\n",width,height,format,bpp);
+	  printf("vo_vesa: Requested mode: %ux%u@%u (%s)\n",width,height,bpp,vo_format_name(format));
 	  printf("vo_vesa: Total modes found: %u\n",num_modes);
 	  mode_ptr = vib.VideoModePtr;
 	  printf("vo_vesa: Mode list:");
@@ -454,20 +454,23 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		  printf("vo_vesa: Can't allocate temporary buffer\n");
 		  return -1;
 		}
-		if( vesa_zoom && format==IMGFMT_YV12 )
+		if( vesa_zoom )
 		{
-		  /* software scale */
-		  image_width = video_mode_info.XResolution;
-		  image_height = video_mode_info.YResolution;
-		  scale_xinc=(width << 16) / image_width - 2;  /* needed for proper rounding */
-		  scale_yinc=(height << 16) / image_height + 2;
-		  SwScale_Init();
-		  if(verbose) printf("vo_vesa: Using SCALE\n");
-		}
-    		else
-		{
-		  printf("vo_vesa: Can't apply zooming to non YV12 formats\n");
-		  return -1;
+		  if( format==IMGFMT_YV12 )
+		  {
+		      /* software scale */
+		      image_width = video_mode_info.XResolution;
+		      image_height = video_mode_info.YResolution;
+		      scale_xinc=(width << 16) / image_width - 2;  /* needed for proper rounding */
+	    	      scale_yinc=(height << 16) / image_height + 2;
+		      SwScale_Init();
+		      if(verbose) printf("vo_vesa: Using SCALE\n");
+		  }      
+    		  else
+		  {
+		      printf("vo_vesa: Can't apply zooming to non YV12 formats\n");
+		      return -1;
+		  }
 		}
 		if((video_mode_info.WinAAttributes & FRAME_MODE) == FRAME_MODE)
 		   win.idx = 0; /* frame A */
