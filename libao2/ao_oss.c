@@ -17,7 +17,7 @@
 static ao_info_t info = 
 {
 	"OSS/ioctl audio output",
-	"null",
+	"oss",
 	"A'rpi",
 	""
 };

@@ -36,6 +36,7 @@ struct config conf[]={
 	{"o", "Option -o has been renamed to -vo (video-out), use -vo !\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0},
+	{"ao", &audio_driver, CONF_TYPE_STRING, 0, 0, 0},
 	{"dsp", &dsp, CONF_TYPE_STRING, 0, 0, 0},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0},
 #ifdef HAVE_X11

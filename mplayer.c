@@ -434,6 +434,7 @@ int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
 char* title="MPlayer";
 // screen info:
 char* video_driver=NULL; //"mga"; // default
+char* audio_driver=NULL;
 int fullscreen=0;
 int vidmode=0;
 int softzoom=0;
@@ -521,7 +522,17 @@ if ((conffile = get_path("")) == NULL) {
       }
       printf("\n");
       exit(0);
-     }
+    }
+    if(audio_driver && strcmp(audio_driver,"help")==0){
+      printf("Available audio output drivers:\n");
+      i=0;
+      while (audio_out_drivers[i]) {
+        const ao_info_t *info = audio_out_drivers[i++]->info;
+	printf("\t%s\t%s\n", info->short_name, info->name);
+      }
+      printf("\n");
+      exit(0);
+    }
 #ifdef HAVE_GUI
    }
 #endif
@@ -544,12 +555,27 @@ if(!filename){
     }
   }
   if(!video_out){
-    printf("Invalid video output driver name: %s\n",video_driver);
+    printf("Invalid video output driver name: %s\nUse '-vo help' to get a list of available video drivers.\n",video_driver);
+    return 0;
+  }
+  
+// check audio_out driver name:
+  if(!audio_driver)
+    audio_out=audio_out_drivers[0];
+  else
+  for (i=0; audio_out_drivers[i] != NULL; i++){
+    const ao_info_t *info = audio_out_drivers[i]->info;
+    if(strcmp(info->short_name,audio_driver) == 0){
+      audio_out = audio_out_drivers[i];break;
+    }
+  }
+  if (!audio_out){
+    printf("Invalid audio output driver name: %s\nUse '-ao help' to get a list of available audio drivers.\n",audio_driver);
     return 0;
   }
 
 // check audio_out
-audio_out=audio_out_drivers[0];
+//audio_out=audio_out_drivers[0];
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
