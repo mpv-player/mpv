@@ -906,8 +906,10 @@ void imdct_init (uint32_t mm_accel)
 	}
 #endif // arch_x86
 
+	imdct_512 = imdct_do_512;
+#ifdef ARCH_X86
 	if(gCpuCaps.hasSSE)	imdct_512 = imdct_do_512_sse;
-	else			imdct_512 = imdct_do_512;
+#endif // arch_x86
 	imdct_256 = imdct_do_256;
     }
 }
