@@ -6,6 +6,7 @@
 
 #include "config.h"
 #include "osd.h"
+#include "../mmx_defs.h"
 
 void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
@@ -79,12 +80,13 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
     int y;
     for(y=0;y<h;y++){
         register int x;
-//	printf("%d, %d, %d\n", (int)src&31, (int)srca%31, (int)dstbase&31);
-#ifdef HAVE_MMXFIXME
-/*	asm(
+#ifdef ARCH_X86
+#if 0 /*def HAVE_MMX2*/
+	asm volatile(
 		"pxor %%mm7, %%mm7		\n\t"
 		"xorl %%eax, %%eax		\n\t"
 		"pcmpeqb %%mm6, %%mm6		\n\t" // F..F
+		".align 16\n\t"
 		"1:				\n\t"
 		"movq (%0, %%eax, 4), %%mm0	\n\t" // dstbase
 		"movq %%mm0, %%mm1		\n\t"
@@ -106,18 +108,20 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 		"punpcklbw %%mm2, %%mm2		\n\t" // src AABBCCDD
 		"punpcklbw %%mm2, %%mm2		\n\t" // src AAAABBBB
 		"paddb %%mm2, %%mm0		\n\t"
-		"movq %%mm0, (%0, %%eax, 4)	\n\t"
+		MOVNTQ" %%mm0, (%0, %%eax, 4)	\n\t"
 		"addl $2, %%eax			\n\t"
 		"cmpl %3, %%eax			\n\t"
 		" jb 1b				\n\t"
 
 		:: "r" (dstbase), "r" (srca), "r" (src), "r" (w)
 		: "%eax"
-		);*/
-	asm(
+		);
+#else /* 0 HAVE_MMX2*/
+	asm volatile(
 		"xorl %%eax, %%eax		\n\t"
 		"xorl %%ebx, %%ebx		\n\t"
 		"xorl %%edx, %%edx		\n\t"
+		".align 16\n\t"
 		"1:				\n\t"
 		"movb (%1, %%eax), %%bl		\n\t"
 		"cmpb $0, %%bl			\n\t"
@@ -148,7 +152,8 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 		:: "r" (dstbase), "r" (srca), "r" (src), "m" (w)
 		: "%eax", "%ebx", "%ecx", "%edx"
 		);
-#else //HAVE_MMX
+#endif /* 0 HAVE_MMX*/
+#else /*non x86 arch*/
         for(x=0;x<w;x++){
             if(srca[x]){
 #ifdef FAST_OSD
@@ -160,17 +165,15 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 #endif
             }
         }
-#endif // !HAVE_MMX
+#endif /* arch_x86 */
         src+=srcstride;
         srca+=srcstride;
         dstbase+=dststride;
     }
-#ifdef HAVE_3DNOW
-	asm("femms\n\t");
-#elif defined (HAVE_MMX)
-	asm("emms\n\t");
+#if 0 /*def HAVE_MMX2*/
+	asm volatile(SFENCE:::"memory");
+	asm volatile(EMMS:::"memory");
 #endif
-
     return;
 }
 
