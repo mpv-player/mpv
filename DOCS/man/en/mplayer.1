@@ -2749,6 +2749,12 @@ For best decoding quality use the same idct algorithm for decoding and encoding.
 This may come at a price in accuracy, though.
 .IPs gray\ 
 grayscale only decoding (a bit faster than with color)
+.IPs "sb=<number> (MPEG2 only)"
+Skip the given number of macroblock rows at the bottom.
+.IPs "st=<number> (MPEG2 only)"
+Skip the given number of macroblock rows at the top.
+.IPs vstats
+Prints some statistics and stores them in ./vstats_*.log.
 .RE
 .
 .TP
@@ -5402,15 +5408,6 @@ If you specify vcodec=mpeg2video this value can be 8, 9, 10 or 11.
 .B cgop\ \ \ 
 Close all GOPs.
 Currently it doesn't work (yet).
-.TP
-.B sb=<number>
-Skip the given number of macroblock rows at the bottom (MPEG2 only).
-.TP
-.B st=<number>
-Skip the given number of macroblock rows at the top (MPEG2 only).
-.TP
-.B vstats\ 
-Prints some statistics and stores them in ./vstats_*.log.
 .
 .SS nuv (\-nuvopts)
 .
