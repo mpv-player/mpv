@@ -50,10 +50,19 @@ static int control(int cmd, int arg)
     switch(cmd)
     {
 	case AOCONTROL_GET_DEVICE:
-	    return(char *)alsa_device; /* egy kicsit brutalis, dehat :) */
+	    return((char *)alsa_device); /* egy kicsit brutalis, dehat :) */
 	case AOCONTROL_SET_DEVICE:
+	{
+	    int ret;
+
 	    strncpy(alsa_device, (char *)arg, ALSA_DEVICE_SIZE);
-	    break;
+	    uninit();
+	    ret = init(ao_samplerate, ao_channels, ao_format, 0);
+	    if (ret == 0)
+		return(CONTROL_ERROR);
+	    else
+		return(CONTROL_OK);
+	}
     }
     return(CONTROL_UNKNOWN);
 }
@@ -142,17 +151,20 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
-    if ((alsa_device = malloc(ALSA_DEVICE_SIZE)) == NULL)
+    if (alsa_device == NULL)
     {
-	printf("alsa-init: memory allocation error: %s\n", strerror(errno));
-	return(0);
+	if ((alsa_device = malloc(ALSA_DEVICE_SIZE)) == NULL)
+	{
+	    printf("alsa-init: memory allocation error: %s\n", strerror(errno));
+	    return(0);
+	}
+
+	snprintf(alsa_device, ALSA_DEVICE_SIZE, "hw:%d,%d",
+	    snd_pcm_info_get_device(alsa_info),
+	    snd_pcm_info_get_subdevice(alsa_info));
+
+	snd_pcm_info_free(alsa_info);
     }
-
-    snprintf(alsa_device, ALSA_DEVICE_SIZE, "hw:%d,%d",
-	snd_pcm_info_get_device(alsa_info),
-	snd_pcm_info_get_subdevice(alsa_info));
-
-    snd_pcm_info_free(alsa_info);
 
     printf("alsa-init: %d soundcard%s found, using: %s\n", cards+1,
 	(cards >= 0) ? "" : "s", alsa_device);
@@ -230,8 +242,9 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     } else
     {
-        printf("alsa-init: got buffersize %i\n", err);
 	ao_buffersize = err;
+        if (verbose)
+	    printf("alsa-init: got buffersize %i\n", ao_buffersize);
     }
 #endif
 
