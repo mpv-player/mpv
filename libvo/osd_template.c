@@ -12,7 +12,7 @@
 #include "../my_profile.h"
 #include <inttypes.h>
 
-#ifndef HAVE_3DNOW
+#ifdef HAVE_MMX
 static const uint64_t bFF  __attribute__((aligned(8))) = 0xFFFFFFFFFFFFFFFFULL;
 #endif
 
