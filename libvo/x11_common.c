@@ -108,6 +108,8 @@ void vo_hidecursor ( Display *disp , Window win )
 	no_ptr=XCreatePixmapCursor(disp, bm_no, bm_no,&black, &black,0, 0);									          
 	XDefineCursor(disp,win,no_ptr);
 	XFreeCursor( disp,no_ptr );
+	if (bm_no != None)
+		XFreePixmap(disp, bm_no);
 }
 
 void vo_showcursor( Display *disp, Window win )
