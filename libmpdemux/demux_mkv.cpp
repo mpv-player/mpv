@@ -493,7 +493,8 @@ static int check_track_information(mkv_demuxer_t *d) {
             t->headers[1] = &c[offset + t->header_sizes[0]];
             t->headers[2] = &c[offset + t->header_sizes[0] +
                                t->header_sizes[1]];
-            t->header_sizes[2] = t->private_size - offset;
+            t->header_sizes[2] = t->private_size - offset -
+              t->header_sizes[0] - t->header_sizes[1];
 
             t->a_formattag = 0xFFFE;
           } else {
