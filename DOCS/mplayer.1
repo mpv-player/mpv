@@ -1497,20 +1497,15 @@ everything (255). (default: 24)
 .IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
 Adds noise
 .RSss
-.IPs <0\-100>
-luma noise
-.IPs <0\-100>
-chroma noise
-.IPs u
-uniform noise
-.IPs t
-temporal noise
-.IPs a
-averaged temporal noise
-.IPs h
-high quality
-.IPs p
-mix with pattern
+<0\-100>: luma noise
+.br
+<0\-100>: chroma noise
+.br
+u: uniform noise
+t: temporal noise
+a: averaged temporal noise
+h: high quality
+p: mix with pattern
 .REss
 .IPs eq[=bright:cont]
 Activates the software equalizer with interactive controls like the hardware
@@ -1722,20 +1717,19 @@ get help
 .IPs vcodec=<value>
 use the specified codec (there is no default, you must specify it):
 .RSss
-.IPs mjpeg
-Motion JPEG
-.IPs h263
-H263
-.IPs h263p
-H263 Plus
-.IPs mpeg4
-DivX 4/5
-.IPs msmpeg4
-DivX 3
-.IPs rv10
-an old RealVideo codec
-.IPs mpeg1video
-MPEG1 video :)
+mjpeg: Motion JPEG
+.br
+h263: H263
+.br
+h263p: H263 Plus
+.br
+mpeg4: DivX 4/5
+.br
+msmpeg4: DivX 3
+.br
+rv10: an old RealVideo codec
+.br
+mpeg1video: MPEG1 video :)
 .REss
 .IPs vbitrate=<value>
 specify bitrate in
@@ -1761,18 +1755,17 @@ smallest will be used. (default: HQ disabled)
 motion estimation method (EPZS usually gives best results, but you can try X1,
 too. FULL is very slow and the others are experimental):
 .RSss
-.IPs 0
-no ME at all
-.IPs 1
-ME_FULL
-.IPs 2
-ME_LOG
-.IPs 3
-ME_PHODS
-.IPs 4
-ME_EPZS (default)
-.IPs 5
-ME_X1
+0: no ME at all
+.br
+1: ME_FULL
+.br
+2: ME_LOG
+.br
+3: ME_PHODS
+.br
+4: ME_EPZS (default)
+.br
+5: ME_X1
 .REss
 .IPs vqcomp=<value>
 If the value is set to 1.0, the quantizer will stay nearly constant (high
