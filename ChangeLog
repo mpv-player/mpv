@@ -22,6 +22,9 @@ mplayer (1.0)
     * more 64 bit fixes
     * a lot of Mac OS X fixes
     * prefer TOOLS/cpuinfo over linuxemu's /proc/cpuinfo under FreeBSD/x86
+    * Darwin XMMS libs supported
+    * support newer Darwin versions in Altivec detection code
+    * support for newer Apple GCCs
 
     Codecs and demuxers:
     * better support for (buggy) MEncoder created streams in libmpeg2
@@ -29,7 +32,8 @@ mplayer (1.0)
     * fixed the MPEG muxer
     * fixed tons of bugs in MMS streaming
     * user settable http user-agent field
-    * improved (now working) seeking in realmedia format
+    * improved (now working) seeking with support for growing files in
+      Realmedia format
     * saveable and loadable index files (workaround for formats not
       supporting files over 2GB)
     * Ultimotion VfW decoder
@@ -37,12 +41,16 @@ mplayer (1.0)
     * big DVB demuxer update
     * fixed MOV demuxer to always read ImageDesc (fixes ffsvq3 bugs)
     * fixed an old bug in AVI/Waveformatex size calculation
-    * XviD API-4 support
+    * XviD API-4 (1.0 beta2) support
     * improved FLAC-in-Ogg support
     * Matroska: better AC3 detection
     * Matroska: VobSubs, MP2, FLAC, AAC and HE-AAC support
     * improved detection of Real RTSP through URL analysis
     * fixed stereo 16 bit TWOS
+    * fixed MPNG when using BGR24 images
+    * control functions in OGG demuxer
+    * http cookies support
+    * LML-M4 MPEG4 capture card raw stream format support
     
     Filters:
     * some fixes in the delogo filter
@@ -58,7 +66,7 @@ mplayer (1.0)
     * fixed an old bug in MPlayer's support code
     * support wider range of VOLs in H263
     * direct rendering support in MJPEG
-    * massive MLib optimization support
+    * massive MLib optimizations
     * more VQA files supported
     * Theora support
     * Sunplus JPEG (SP5X) support
@@ -103,7 +111,7 @@ mplayer (1.0)
     * Real RV20 decoder (with B-frame support)
     
     Drivers:
-    * VIDIX equalizer support in fbdev
+    * VIDIX equalizer support in fbdev, svga and vesa
     * VIDIX colorkeying support in fbdev, svga and vesa
     * obsoleted option: -fb
     * new SiS 650/651/740/etc VIDIX driver
@@ -119,6 +127,7 @@ mplayer (1.0)
     * new vo_zr2 driver, which uses the advantages of the filter layer
     * fixed vesa when used together with pthread
     * runtime stay-on-top functionality (in almost all output drivers)
+    * ALSA 1.x support
     
     SWScaler:
     * updated MLib (Sun VIS) support
@@ -127,19 +136,21 @@ mplayer (1.0)
     * eliminated chroma scaling bugs
 
     Others:
-    * Darwin XMMS libs supported
-    * support newer Darwin versions in Altivec detection code
     * fixed aspect and geometry
     * fixed compilation when libavcodec is missing (although it's a bad idea)
-    * support for newer Apple GCCs
     * MTRR detection added to TOOLS/cpuinfo
     * FAAD detection in configure fixed/improved
     * improved FLAC configure detection
+    * GUI file selector updated for newer formats
+    * Fontconfig support
+    * proper VobSub seeking support
+    * removed oldskool libcss support (nobody uses it and has drawbacks)
 
     MEncoder:
     * FFmpeg/libavcodec audio encoding support
     * exit if there's no video stream (avoids unexpected segfaults)
     * huge bug fixed (missing InitTimer call), screwed up timers in some cases
+    * rawyuv (i420) 'encoder'
 
 
   pre2:
