@@ -1176,53 +1176,68 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   decompression).</P>
 
 
-<H4><A NAME="dxr3">2.3.1.17 DXR3</A></H4>
+<H4><A NAME="dxr3">2.3.1.17 DXR3/Hollywood+</A></H4>
 
 <P><B>MPlayer</B> supports hardware accelerated playback with the Creative DXR3
-  and Sigma Designs Hollywood Plus cards.</P>
+  and Sigma Designs Hollywood Plus cards. These cards both use the em8300 MPEG
+  decoder chip from Sigma Designs.</P>
 
 <P>First of all you will need properly installed DXR3/H+ drivers, version
   0.12.0 or later. You can find the drivers and installation instructions at
   the <A HREF="http://dxr3.sourceforge.net/">DXR3 &amp; Hollywood Plus for
   Linux</A> site. Configure should detect your card automatically, compilation
-  should go without any problems.</P>
+  should go without problems.</P>
 
 <H4>Usage:</H4>
 <DL>
-  <DT><CODE>-vo dxr3:&lt;noprebuf&gt;:&lt;codec&gt;:&lt;device&gt;</CODE></DT>
-  <DD>Where <CODE>&lt;noprebuf&gt;</CODE> specifies turning off prebuffering.
-    This is done automatically on Athlons. If playback is out of sync try
-    disabling prebuffering. If noprebuf is left out prebuffering is enabled
-    (except on Athlons).
-    <BR>
-    <CODE>&lt;codec&gt;</CODE> = fame/avcodec, avcodec produces better quality
-    output, but fame is faster for those of you with slow machines. The default is
-    to use libavcodec. Note that you need libavcodec properly installed (read
-    DOCS/codecs.html).
-    <BR>
+  <DT><CODE>-vo dxr3:noprebuf:&lt;device&gt;</CODE></DT>
+  <DD><CODE>noprebuf</CODE> turns off prebuffering. Prebuffering is a feature
+    of the em8300 chip that enables it to hold more than one frame of video at
+    a time. This means that when you are running with prebuffering (default)
+    <B>MPlayer</B> will try to keep the video buffer filled with data at all
+    times. If you are on a slow machine <B>MPlayer</B> will probably use close
+    to, or precisely 100% of CPU. This is especially common if you play pure MPEG
+    streams (like DVDs, SVCDs a.s.o.) since <B>MPlayer</B> will not have to
+    reencode it to MPEG it will fill the buffer very fast.<BR>
+    With prebuffering video playback is <B>much</B> less sensitive to other
+    programs hogging the CPU, it will not drop frames unless applications hog
+    the CPU for a long time.<BR>
+    Prebuffering does not work on all machines (especially Athlons where it is
+    turned off automatically). If you experience problems with video/audio sync
+    use <CODE>noprebuf</CODE>. When running without prebuffering the em8300 is
+    much more sensitive to CPU load, so it is highly suggested that you turn on
+    <B>MPlayer's</B> <CODE>-framedrop</CODE> option to avoid further loss of
+    sync.<BR>
     <CODE>&lt;device&gt;</CODE> = device number to use if you have more than one
     em8300 card.
     <BR>
     Any of these options may be left out, but they must be specified in this
-    order, i.e. <CODE>dxr3:fame</CODE> works, <CODE>dxr3:1</CODE> works, but
-    <CODE>dxr3:1:avcodec</CODE> will not.</DD>
+    exact order, i.e. <CODE>dxr3:noprebuf</CODE> works, <CODE>dxr3:1</CODE>
+    works, but <CODE>dxr3:1:noprebuf</CODE> will not.</DD>
 
   <DT><CODE>-ao oss:/dev/em8300_ma-X</CODE></DT>
   <DD>For audio output, where <CODE>X</CODE> is the device number
     (0 if one card).</DD>
 
-  <DT><CODE>-ac hwac3</CODE></DT>
-  <DD>For digital instead of analog audio output.</DD>
-
-  <DT><CODE>-vc mpegpes</CODE></DT>
-  <DD>Force hardware acceleration, only works with MPEG1/2.</DD>
-
   <DT><CODE>-aop list=resample:fout=xxxxx</CODE></DT>
-  <DD>If sample rate is below 44100Hz, select either 44100Hz or 48000Hz
-    depending on which one matches closest. I.e. if the movie uses 22050Hz use
-    44100Hz as 44100 / 2 = 22050, if it is 24000Hz use 48000Hz as 48000 / 2 = 24000
-    and so on. This does not work with digital audio output
-    (<CODE>-ac hwac3</CODE>).</DD>
+  <DD>The em8300 cannot play back samplerates lower than 44100Hz. If the sample
+    rate is below 44100Hz select either 44100Hz or 48000Hz depending on which
+    one matches closest. I.e. if the movie uses 22050Hz use 44100Hz as
+    44100 / 2 = 22050, if it is 24000Hz use 48000Hz as 48000 / 2 = 24000 and so
+    on. This does not work with digital audio output (<CODE>-ac hwac3</CODE>).</DD>
+
+  <DT><CODE>-vop lavc/fame</CODE></DT>
+  <DD>To watch non-MPEG content on the em8300 (i.e. DivX or RealVideo) you have
+    to specify an MPEG1 video filter such as libavcodec (lavc) or libfame
+    (fame). At the moment lavc is both faster and gives better image quality, it
+    is suggested that you use that unless you have problems with it. See the man
+    page for further info about <CODE>-vop lavc/fame</CODE>.</DD>
+  
+  <DT><CODE>-ac hwac3</CODE></DT>
+  <DD>The em8300 supports playing back AC3 audio (surround sound) through the
+    digital audio output of the card. Read
+    <A HREF="codecs.html#hardware_ac3">hardware AC3</A> section for further
+    information on AC3.</DD>
 </DL>
 
 <H4>Overlay</H4>
@@ -1236,14 +1251,16 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 <P>MPEG1/2 content should now automatically be detected by <B>MPlayer</B> and
   it will use the hardware acceleration of the DXR3 to play it. If not, you can
   force it to hardware acceleration with <CODE>-vc mpegpes</CODE>. Also, if you
-  plan to use any postprocessing filters you must use <CODE>-vc
-  mpeg12</CODE>.</P>
+  plan to use postprocessing filters you must use <CODE>-vc mpeg12</CODE>.</P>
 
 <P>In some instances, subtitles may not appear properly in sync with the A/V
   stream when using hardware decoding (<CODE>-vc mpegpes</CODE>). This is a
   known bug. The em8300 will also improperly handle subtitles that are too big,
   and may hang for a second or two. At this time, the only workaround is to use
-  <CODE>-vc mpeg12</CODE> when viewing DVDs with subtitles.</P>
+  <CODE>-vc mpeg12</CODE> when viewing DVDs with subtitles. When running with
+  <CODE>-vc mpeg12</CODE> <B>MPlayer</B> will reencode video to MPEG (even if it
+  already is MPEG). This means that it will need more CPU power, and you might
+  loose some picture quality.</P>
 
 
 <H4><A NAME="tv-out">2.3.1.A TV-out support</A></H4>
