@@ -51,7 +51,7 @@
 #define XMIN(a,b) ((a) < (b) ? (a) : (b))
 
 //===========================================================================//
-const uint8_t  __attribute__((aligned(8))) dither[8][8]={
+static const uint8_t  __attribute__((aligned(8))) dither[8][8]={
 {  0,  48,  12,  60,   3,  51,  15,  63, },
 { 32,  16,  44,  28,  35,  19,  47,  31, },
 {  8,  56,   4,  52,  11,  59,   7,  55, },
@@ -62,7 +62,7 @@ const uint8_t  __attribute__((aligned(8))) dither[8][8]={
 { 42,  26,  38,  22,  41,  25,  37,  21, },
 };
 
-const uint8_t offset[127][2]= {
+static const uint8_t offset[127][2]= {
 {0,0},
 {0,0}, {4,4},
 {0,0}, {2,2}, {6,4}, {4,6},
@@ -379,6 +379,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		filter(vf->priv, dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, mpi->qscale, mpi->qstride, 1);
 		filter(vf->priv, dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, mpi->qscale, mpi->qstride, 0);
 		filter(vf->priv, dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, mpi->qscale, mpi->qstride, 0);
+	    }else{
+		memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h, dmpi->stride[0], mpi->stride[0]);
+		memcpy_pic(dmpi->planes[1], mpi->planes[1], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, dmpi->stride[1], mpi->stride[1]);
+		memcpy_pic(dmpi->planes[2], mpi->planes[2], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, dmpi->stride[2], mpi->stride[2]);
 	    }
 	}
         vf_clone_mpi_attributes(dmpi, mpi);
