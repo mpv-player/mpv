@@ -4357,9 +4357,8 @@ EOF
 
 if test "$_vidix" = no ; then
 cat <<EOF
-You've disabled VIDIX. Although it would be better to PORT it instead,
-if you've got an ATI or Matrox card. Currently ATI Radeons, Rage128 and
-Matrox G200/400 are supported.
+You've disabled VIDIX. Although it would be better to PORT it instead.
+Have a look at the documentation for supported cards!
 
 EOF
 fi
