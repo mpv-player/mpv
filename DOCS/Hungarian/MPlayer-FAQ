@@ -214,3 +214,13 @@ A: Ezeknek a file-oknak valoszinuleg 48Khz-es audiojuk van, es a
    hangkartyad/drivered nem tamogatja rendesen ezt. Az audio downsampling
    (meg) nincs benne MPlayer-ben.
 
+Q: Szeretnem hasznalni/atirni az MPlayer-t a(z) <kepzeld ide a kedvenc
+   architekturad> a(z) <kepzeld ide a kedvenc oprendszered>-re. Lehetseges?
+A: Nem.
+
+Q: De...!
+A: Nem.
+
+Q: Es ha megelegszek az MPEG-gel?
+A: Talan. De jobban jarsz ha mar letezo MPEG lejatszot keresel arra a
+   bizonyos platformra.

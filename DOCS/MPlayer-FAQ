@@ -205,3 +205,14 @@ Q: My computer plays M$ DivX AVIs with resolutions ~ 640x300 and stereo mp3
    sound too slow. When I use -nosound switch, everything is ok (but quiet).
 A: Those files probably have 48Khz audio, and your soundcard/driver can't play
    it correctly. Audio downsampling isn't implemented in MPlayer (yet).
+
+Q: I'd like to use/port MPlayer on/to my <insert your favourite architecture
+   here> on <insert your favourite OS here> . Is it possible?
+A: No.
+
+Q: But...!
+A: No.
+
+Q: And if MPEG is sufficient?
+A: Maybe. But you better look for already existant MPEG players on that
+   platform.
