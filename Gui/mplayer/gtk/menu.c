@@ -14,6 +14,7 @@
 #include "../widgets.h"
 #include "../app.h"
 
+#include "../../../libmpdemux/stream.h"
 #include "../../../libmpdemux/demuxer.h"
 
 void ActivateMenuItem( int Item )
@@ -414,7 +415,7 @@ GtkWidget * create_PopUpMenu( void )
        }
 #endif
 
-  if ( guiIntfStruct.Playing )
+//  if ( guiIntfStruct.Playing )
    {
     AspectMenu=AddSubMenu( Menu,MSGTR_MENU_AspectRatio );
     AddMenuItem( AspectMenu,MSGTR_MENU_Original,( 1 << 16 ) + evSetAspect );
@@ -423,18 +424,39 @@ GtkWidget * create_PopUpMenu( void )
     AddMenuItem( AspectMenu,"2.35",( 4 << 16 ) + evSetAspect );
    }
 
-  if ( guiIntfStruct.demuxer )
+  if ( guiIntfStruct.demuxer && guiIntfStruct.StreamType != STREAMTYPE_DVD )
    {
     int i,c = 0;
-    
+
     for ( i=0;i < MAX_A_STREAMS;i++ )
-     if ( ((demuxer_t *)guiIntfStruct.demuxer)->a_streams[i] )
-      {
-       char tmp[32];
-       snprintf( tmp,32,"Track %d",i );
-       if ( !c ) { SubMenu=AddSubMenu( Menu, "Audio track" ); c=1; }
-       AddMenuItem( SubMenu,tmp,( i << 16 ) + evSetAudio );
-      }
+     if ( ((demuxer_t *)guiIntfStruct.demuxer)->a_streams[i] ) c++;
+    
+    if ( c > 1 )
+     {
+      SubMenu=AddSubMenu( Menu,MSGTR_MENU_AudioTrack );
+      for ( i=0;i < MAX_A_STREAMS;i++ )
+       if ( ((demuxer_t *)guiIntfStruct.demuxer)->a_streams[i] )
+        {
+         char tmp[32];
+         snprintf( tmp,32,MSGTR_MENU_Track,i );
+         AddMenuItem( SubMenu,tmp,( i << 16 ) + evSetAudio );
+        }
+     }
+
+    for ( c=0,i=0;i < MAX_V_STREAMS;i++ )
+     if ( ((demuxer_t *)guiIntfStruct.demuxer)->v_streams[i] ) c++;
+    
+    if ( c > 1 )
+     {
+      SubMenu=AddSubMenu( Menu,MSGTR_MENU_VideoTrack );
+      for ( i=0;i < MAX_V_STREAMS;i++ )
+       if ( ((demuxer_t *)guiIntfStruct.demuxer)->v_streams[i] )
+        {
+         char tmp[32];
+         snprintf( tmp,32,MSGTR_MENU_Track,i );
+         AddMenuItem( SubMenu,tmp,( i << 16 ) + evSetVideo );
+        }
+     }
    }
 
   AddSeparator( Menu );

@@ -223,9 +223,10 @@ static void plButtonReleased( GtkButton * button,gpointer user_data )
 	 }
 	if ( plCurrent )
 	 {
-	  guiSetDF( guiIntfStruct.Filename,plCurrent->path,plCurrent->name );
-	  guiIntfStruct.FilenameChanged=1;
-	  guiIntfStruct.StreamType=STREAMTYPE_FILE;
+	  mplSetFileName( plCurrent->path,plCurrent->name,STREAMTYPE_FILE );
+//	  guiSetDF( guiIntfStruct.Filename,plCurrent->path,plCurrent->name );
+//	  guiIntfStruct.FilenameChanged=1;
+//	  guiIntfStruct.StreamType=STREAMTYPE_FILE;
 	 }
        }
   case 0: // cancel
