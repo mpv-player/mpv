@@ -888,7 +888,11 @@ rtp_open_socket( URL_t *url ) {
 		}
 		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
 	} else {
+#ifdef USE_ATON
+		inet_aton(url->hostname, &server_address.sin_addr);
+#else
 		inet_pton(AF_INET, url->hostname, &server_address.sin_addr);
+#endif
 	}
 	server_address.sin_family=AF_INET;
 	server_address.sin_port=htons(url->port);

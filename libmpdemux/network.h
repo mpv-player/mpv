@@ -54,18 +54,4 @@ HTTP_header_t *http_read_response(int fd);
 
 int http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry);
 
-/* 
- * Joey Parrish <joey@yunamusic.com>:
- *
- * This define is to allow systems without inet_pton() to fallback on
- * inet_aton().  The difference between the two is that inet_aton() is
- * strictly for IPv4 networking, while inet_pton() is for IPv4 and IPv6
- * both.  Slightly limited network functionality seems better than no
- * network functionality to me, and as all systems (Cygwin) start to
- * implement inet_pton(), configure will decide not to use this code.
- */
-#ifdef USE_ATON
-# define inet_pton(a, b, c) inet_aton(b, c)
-#endif
-
 #endif
