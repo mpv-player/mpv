@@ -1,7 +1,8 @@
 // Translated by:  Kuba "Qba" Misiorny <jim85@wp.pl>
+// MPlayer-pl translation team, mplayer-pl.emdej.com
 // Wszelkie uwagi i poprawki mile widziane :)
 //
-// Synced with help_mp-en.h 1.140
+// Synced with help_mp-en.h 1.156
 
 // ========================= MPlayer help ===========================
 
@@ -46,6 +47,7 @@ static char help_text[]=
 " * * * DOK£ADNY SPIS WSZYSTKICH OPCJI ZNAJDUJE SIÊ NA STRONIE MAN * * *\n"
 "\n";
 #endif
+#define MSGTR_SamplesWanted "Aby poprawiæ obs³ugê tego formatu, potrzebne s± próbki. Proszê siê skontaktowaæ z deweloperami.\n"
 
 // ========================= MPlayer messages ===========================
 
@@ -84,7 +86,7 @@ static char help_text[]=
 "           ************************************************\n\n"\
 "Prawdopodobne przyczyny, rozwi±zania:\n"\
 "- Najbardziej powszechne: wadliwe/b³êdne _sterowniki_audio_\n"\
-"  - Spróbuj u¿yæ -ao sdl, u¿yj ALSA 0.5 lub emulacji OSS w ALSA 0.9\n"\
+"  - Spróbuj u¿yæ -ao sdl lub emulacji OSS w ALSA\n"\
 "  - Poeksperymentuj z ró¿nymi warto¶ciami -autosync, \"30\" na dobry pocz±tek.\n"\
 "- Za wolny sterownik wyj¶ciowy:\n"\
 "  - Spróbuj innego sterownika -vo (lista: -vo help) albo -framedrop!\n"\
@@ -95,9 +97,9 @@ static char help_text[]=
 "- Za wolne ¼ród³o (zamontowane NFS/SMB, DVD, VCD itd.)\n"\
 "  - Spróbuj: -cache 8192.\n"\
 "- Czy u¿ywasz pamiêci podrêcznej do odtwarzania plików bez przeplotu? Spróbuj -nocache\n"\
-"Przeczytaj DOCS/HTML/pl/video.html gdzie znajdziesz wskazówki\n"\
+"Przeczytaj DOCS/HTML/pl/video.html, gdzie znajdziesz wskazówki\n"\
 "jak przy¶pieszyæ dzia³anie MPlayera\n"\
-"Je¶li nic nie pomaga przeczytaj DOCS/HTML/pl/bugreports.html.\n\n"
+"Je¶li nic nie pomaga, przeczytaj DOCS/HTML/pl/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer zosta³ skompilowany BEZ obs³ugi GUI.\n"
 #define MSGTR_GuiNeedsX "GUI MPlayera potrzebuje X11.\n"
@@ -142,6 +144,45 @@ static char help_text[]=
 "  lub z³ej wersji gcc. Je¶li uwa¿asz, ¿e to wina MPlayera, przeczytaj\n"\
 "  DOCS/HTML/pl/bugreports.html. Nie mo¿emy i nie pomo¿emy, je¶li nie przedstawisz tych informacji\n"\
 "  zg³aszaj±c mo¿liwy b³±d.\n"
+
+#define MSGTR_LoadingConfig "£adujê konfiguracjê '%s'\n"
+#define MSGTR_AddedSubtitleFile "SUB: plik z napisami (%d): %s dodany\n"
+#define MSGTR_ErrorOpeningOutputFile "B³±d przy otwieraniu pliku [%s] do zapisu!\n"
+#define MSGTR_CommandLine "WierszPoleceñ:"
+#define MSGTR_RTCDeviceNotOpenable "B³±d przy otwieraniu %s: %s (u¿ytkownik pownien móc go odczytaæ.)\n"
+#define MSGTR_LinuxRTCInitErrorIrqpSet "B³±d RTC Linuksa w ioctl (rtc_irqp_set %lu): %s\n"
+#define MSGTR_IncreaseRTCMaxUserFreq "Spróbuj dodaæ \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" do skryptów startowych.\n"
+#define MSGTR_LinuxRTCInitErrorPieOn "B³±d RTC Linuksa w ioctl (rtc_pie_on): %s\n"
+#define MSGTR_UsingTimingType "U¿ywam synchronizacji %s.\n"
+#define MSGTR_MenuInitialized "Menu zainicjalizowane: %s\n"
+#define MSGTR_MenuInitFailed "B³±d inicjalizacji menu.\n"
+#define MSGTR_Getch2InitializedTwice "UWAGA: getch2_init zosta³ wywo³any dwukrotnie!\n"
+#define MSGTR_DumpstreamFdUnavailable "Nie mogê zrzuciæ tego strumienia - brak dostêpnych uchwytów plików.\n"
+#define MSGTR_FallingBackOnPlaylist "Próbujê zinterpretowaæ jako listê odtwarzania %s...\n" 
+#define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Nie mogê otworzyæ filtru video libmenu z g³ównym menu %s.\n"
+#define MSGTR_AudioFilterChainPreinitError "B³±d w preinicjalizacji ³añcucha filtrów audio!\n"
+#define MSGTR_LinuxRTCReadError "B³±d odczytu RTC Linuksa: %s\n"
+#define MSGTR_SoftsleepUnderflow "Uwaga! Niedomiar softsleep!\n"
+#define MSGTR_AnsSubVisibility "ANS_SUB_VISIBILITY=%ld\n"
+#define MSGTR_AnsLength "ANS_LENGTH=%ld\n"
+#define MSGTR_AnsVoFullscreen "ANS_VO_FULLSCREEN=%ld\n"
+#define MSGTR_AnsPercentPos "ANS_PERCENT_POSITION=%ld\n"
+#define MSGTR_DvdnavNullEvent "zdarzenie DVDNAV NULL?!\n"
+#define MSGTR_DvdnavHighlightEventBroken "zdarzenie DVDNAV: Zdarzenie pod¶wietlenia jest zepsute\n"
+#define MSGTR_DvdnavEvent "zdarzenie DVDNAV: %s\n"
+#define MSGTR_DvdnavHighlightHide "zdarzenie DVDNAV: Ukrycie pod¶wietlenia\n"
+#define MSGTR_DvdnavStillFrame "######################################## zdarzenie DVDNAV: Sta³a Ramka: %d sek\n"
+#define MSGTR_DvdnavNavStop "zdarzenie DVDNAV: Nav Stop\n"
+#define MSGTR_DvdnavNavNOP "zdarzenie DVDNAV: Nav NOP\n"
+//tego nopa -> no operation,  tlumaczyc? 
+#define MSGTR_DvdnavNavSpuStreamChangeVerbose "Zdarzenie DVDNAV: Zmiana Strumienia Nav SPU: fiz: %d/%d/%d logiczny: %d\n"
+#define MSGTR_DvdnavNavSpuStreamChange "Zdarzenie DVDNAV: Zmiana Strumienia Nav SPU: fiz: %d logiczny: %d\n"
+#define MSGTR_DvdnavNavAudioStreamChange "Zdarzenie DVDNAV: Zmiana Strumienia Audio Nav: fiz: %d logiczny: %d\n"
+#define MSGTR_DvdnavNavVTSChange "Zdarzenie DVDNAV: Zmiana Nav VTS\n"
+#define MSGTR_DvdnavNavCellChange "Zdarzenie DVDNAV: Zmiana Komórki Nav\n"
+#define MSGTR_DvdnavNavSpuClutChange "Zdarzenie DVDNAV: Zmiana Nav SPU CLUT\n"
+#define MSGTR_DvdnavNavSeekDone "Zdarzenie DVDNAV: Przeszukiwanie Nav Zrobione\n"
+#define MSGTR_MenuCall "Wywo³anie menu\n"
 
 #define MSGTR_EdlCantUseBothModes "Nie mo¿na uzywaæ -edl i -edlout w tym samym czasie.\n"
 #define MSGTR_EdlOutOfMem "Nie mogê zaalokowaæ wystarczaj±co du¿o pamiêci dla danych EDL.\n"
@@ -290,8 +331,8 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
-#define MSGTR_ConfigfileError "b³±ð pliku konfiguracyjnego"
-#define MSGTR_ErrorParsingCommandLine "b³±ð przy przetwarzaniu lini komend"
+#define MSGTR_ConfigfileError "b³±d pliku konfiguracyjnego"
+#define MSGTR_ErrorParsingCommandLine "b³±d przy przetwarzaniu wiersza poleceñ"
 #define MSGTR_VideoStreamRequired "Strumieñ video jest wymagany!\n"
 #define MSGTR_ForcingInputFPS "wej¶ciowa warto¶æ fps bêdzie zinterpretowana jako %5.2f\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Format wyj¶ciowy RAWVIDEO nie wspiera audio - wy³±czam audio\n"
@@ -303,6 +344,7 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC - nie mogê znale¼æ kodeka dla %s\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC - nie mogê zaalokowaæ tre¶ci!\n"
 #define MSGTR_CouldntOpenCodec "Nie mogê otworzyæ kodeka %s, br=%d\n"
+
 // cfg-mencoder.h:
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
@@ -352,6 +394,56 @@ static char help_text[]=
 "                 insane:  kodowanie CBR, najwy¿sza jako¶æ\n"\
 "                 (bitrate: 320 kb/s)\n"\
 "                 <8-320>: kodowanie ABR przy podanym ¶rednim bitrate.\n\n"
+
+//codec-cfg.c:
+#define MSGTR_DuplicateFourcc "zduplikowane FourCC"
+#define MSGTR_TooManyFourccs "za du¿o FourCC/formatów..."
+#define MSGTR_ParseError "b³±d parsowania"
+//again parse error
+#define MSGTR_ParseErrorFIDNotNumber "b³±d parsowania (ID formatu nie jest liczb±?)"
+#define MSGTR_ParseErrorFIDAliasNotNumber "b³±d parsowania (alias ID formatu nie jest liczb±?)"
+#define MSGTR_DuplicateFID "zduplikowane ID formatu"
+#define MSGTR_TooManyOut "za du¿o out..."
+// Rany, co to jest? Ale po angielsku równie du¿o rozumiem.
+#define MSGTR_InvalidCodecName "\nkodek(%s) nazwa nieprawid³owa!\n"
+#define MSGTR_CodecLacksFourcc "\nkodek(%s) nie ma FourCC/formatu!\n"
+#define MSGTR_CodecLacksDriver "\nkodek(%s) nie ma sterownika!\n"
+#define MSGTR_CodecNeedsDLL "\nkodek(%s) potrzebuje 'dll'!\n"
+#define MSGTR_CodecNeedsOutfmt "\nkodek(%s) potrzebuje 'outfmt'!\n"
+#define MSGTR_CantAllocateComment "Nie mogê zaalokowaæ pamiêci na komentarz. "
+#define MSGTR_GetTokenMaxNotLessThanMAX_NR_TOKEN "get_token(): max >= MAX_MR_TOKEN!"
+#define MSGTR_ReadingFile "Czytam %s: "
+#define MSGTR_CantOpenFileError "Nie mogê otworzyæ '%s': %s\n"
+#define MSGTR_CantGetMemoryForLine "Nie mogê dostaæ pamiêci na 'line': %s\n"
+#define MSGTR_CantReallocCodecsp "Nie mogê ponownie zaalokowaæ '*codecsp': %s\n"
+#define MSGTR_CodecNameNotUnique "Nazwa kodeka '%s' nie jest unikalna."
+#define MSGTR_CantStrdupName "Nie mogê strdup -> 'name': %s\n"
+#define MSGTR_CantStrdupInfo "Nie mogê strdup -> 'info': %s\n"
+#define MSGTR_CantStrdupDriver "Nie mogê strdup -> 'driver': %s\n"
+#define MSGTR_CantStrdupDLL "Nie mogê strdup -> 'dll': %s"
+// Na moje wyczucie to w '' to nazwy pól => nie t³umaczyæ. Ale mo¿e siê mylê.
+#define MSGTR_AudioVideoCodecTotals "Kodeki audio %d i video %d\n"
+#define MSGTR_CodecDefinitionIncorrect "Kodek nie jest poprawnie zdefiniowany."
+#define MSGTR_OutdatedCodecsConf "Ten codecs.conf jest za stary i nie kompatybilny z tym wydaniem MPlayera!"
+
+// divx4_vbr.c:
+#define MSGTR_OutOfMemory "brak pamiêci"
+#define MSGTR_OverridingTooLowBitrate "Okre¶lony bitrate jest za niski dla tego klipu.\n"\
+"Minimalny mo¿liwy bitrate dla tego klipu to %.0f kbps. Nadpisuje\n"\
+"warto¶æ podan± przez u¿ytkownika.\n"
+
+// fifo.c
+#define MSGTR_CannotMakePipe "Nie mogê utworzyæ PIPEa!\n"
+
+// m_config.c
+#define MSGTR_SaveSlotTooOld "Znaleziony slot z lvl %d jest za stary: %d !!!\n"
+#define MSGTR_InvalidCfgfileOption "Opcja %s nie mo¿e byæ u¿ywana w pliku konfiguracyjnym.\n"
+#define MSGTR_InvalidCmdlineOption "Opcja %s nie mo¿e byæ u¿ywana w wierszu poleceñ.\n"
+#define MSGTR_InvalidSuboption "B³±d: opcja '%s' nie ma podopcji '%s'.\n"
+#define MSGTR_MissingSuboptionParameter "B³±d: podopcja '%s' opcji '%s' musi mieæ paramter!\n"
+#define MSGTR_MissingOptionParameter "B³±d: opcja '%s' musi mieæ parametr!\n"
+#define MSGTR_OptionListHeader "\n Nazwa                Typ             Min        Max      GlobalnaCL    Cfg\n\n"
+#define MSGTR_TotalOptions "\nW sumie: %d opcji\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Nie znaleziono urz±dzenia CD-ROM '%s'\n"
@@ -531,12 +623,14 @@ static char help_text[]=
 #define MSGTR_NEMFMR "Przykro mi, za ma³o pamiêci do wyrenderowania menu."
 #define MSGTR_IDFGCVD "Przykro mi, nie znalaz³em kompatybilnego z GUI sterownika video."
 #define MSGTR_NEEDLAVCFAME "Przykro mi, nie mo¿esz odtwarzaæ plików innych ni¿ MPEG za pomoc± urz±dzenia DXR3/H+ bez przekodowania.\nW³±cz lavc albo fame w konfiguracji DXR3/H+"
+#define MSGTR_UNKNOWNWINDOWTYPE "Znaleziono okno nieznanego typu..."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[skin] b³±d w pliku konfiguracyjnym skórki, w linii %d: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] ostrze¿enie w pliku konfiguracyjnym w linii %d:\nznaleziono znacznik widget (%s) ale nie ma przed nim \"section\""
-#define MSGTR_SKIN_WARNING2 "[skin] ostrze¿enie w pliku konfiguracyjnym w linii %d:\nznaleziono znacznik widget (%s) ale nie ma przednim \"subsection\""
-#define MSGTR_SKIN_WARNING3 "[skin] ostrze¿enie w pliku konfiguracyjnym w linii %d::\nta podsekcja nie jest obs³ugiwana przez widget (%s)"
+#define MSGTR_SKIN_ERRORMESSAGE "[skin] b³±d w pliku konfiguracyjnym skórki, w wierszu %d: %s"
+#define MSGTR_SKIN_WARNING1 "[skin] ostrze¿enie w pliku konfiguracyjnym w wierszu %d:\nznaleziono znacznik widget (%s) ale nie ma przed nim \"section\""
+#define MSGTR_SKIN_WARNING2 "[skin] ostrze¿enie w pliku konfiguracyjnym w wierszu %d:\nznaleziono znacznik widget (%s) ale nie ma przed nim \"subsection\""
+#define MSGTR_SKIN_WARNING3 "[skin] ostrze¿enie w pliku konfiguracyjnym w wierszu %d::\nta podsekcja nie jest obs³ugiwana przez widget (%s)"
+#define MSGTR_SKIN_SkinFileNotFound "[skin] nie znaleziono pliku ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_16bit  "Bitmapy 16 bitowe lub mniejsze nie s± obs³ugiwane (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "nie znaleziono pliku (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "b³±d odczytu bmp (%s)\n"
@@ -553,6 +647,7 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "nieistniej±cy identyfikator czcionki (%s)\n"
 #define MSGTR_SKIN_UnknownParameter "nieznany parametr (%s)\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "nie znalaz³em skórki (%s)\n"
+#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "Nie znalaz³em wybranej skórki ( %s ) u¿ywam 'default'...\n"
 #define MSGTR_SKIN_SKINCFG_SkinCfgReadError "B³±d odczytu pliku konfiguracyjnego skórki (%s).\n"
 #define MSGTR_SKIN_LABEL "Skórki:"
 
@@ -735,6 +830,47 @@ static char help_text[]=
 #define MSGTR_MSGBOX_LABEL_Error "B³±d!" 
 #define MSGTR_MSGBOX_LABEL_Warning "Ostrze¿enie!"
 
+// bitmap.c
+
+#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] za ma³o pamiêci na obraz\n"
+#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] za ma³o pamiêci na obraz\n"
+
+// cfg.c
+
+#define MSGTR_ConfigFileReadError "[cfg] b³±d odczytu pliku konfiguracyjnego...\n"
+#define MSGTR_UnableToSaveOption "[cfg] Nie mogê zapisaæ opcji '%s'.\n"
+
+// interface.c
+
+#define MSGTR_DeletingSubtitles "[GUI] Usuwam napisy.\n"
+#define MSGTR_LoadingSubtitles "[GUI] £aduje napisy: %s\n"
+#define MSGTR_AddingVideoFilter "[GUI] Dodaje filtr obrazu: %s\n"
+#define MSGTR_RemovingVideoFilter "[GUI] Usuwam filtr obrazu: %s\n"
+// mw.c
+
+#define MSGTR_NotAFile "%s nie wygl±da na plik!\n"
+
+// ws.c
+
+#define MSGTR_WS_CouldNotOpenDisplay "[ws] Nie mog³em otworzyæ ekranu.\n"
+#define MSGTR_WS_RemoteDisplay "[ws] Zdalny ekran, wy³±czam XMITSHM.\n"
+#define MSGTR_WS_NoXshm "[ws] Przykro mi, Twój system nie obs³uguje rozszerzenia dzielonej pamiêci X.\n"
+#define MSGTR_WS_NoXshape "[ws] Przykro mi, Twój system nie obs³uguje rozszerzenia XShape.\n"
+#define MSGTR_WS_ColorDepthTooLow "[ws] Przykro mi, za niskie ustwienie g³êbii kolorów.\n"
+
+// czy MPlayerowi moze byc przykro ?
+
+#define MSGTR_WS_TooManyOpenWindows "[ws] Za du¿o otwartych okien.\n"
+#define MSGTR_WS_ShmError "[ws] b³±d rozszerzenia dzielonej pamiêci\n"
+#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] Przykro mi, za ma³o pamiêci na bufor.\n"
+#define MSGTR_WS_DpmsUnavailable "Czy DPMS jest dostêpny?\n"
+#define MSGTR_WS_DpmsNotEnabled "Nie mogê uruchomiæ DPMS.\n"
+
+// wsxdnd.c
+
+#define MSGTR_WS_NotAFile "To nie wygl±da na plik...\n"
+#define MSGTR_WS_DDNothing "D&D: Nothing returned!\n"
+
 #endif
 
 
@@ -776,7 +912,7 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Wej¶cie nie jest w formacie RGB, nie mogê oddzieliæ jasno¶ci przez pola."
 #define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "Szeroko¶æ obrazka musi byæ podzielna przez 2."
 #define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Za ma³o pamiêci aby zaalokowaæ bufor ramek RGB."
-#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Nie mogê dostaæ pamiêci lub pliku aby zapisaæ \"stream.yuv\"!"
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Nie mogê dostaæ pamiêci lub pliku aby zapisaæ \%s\"!"
 #define MSGTR_VO_YUV4MPEG_OutFileWriteError "B³±d przy zapisie pliku do wyj¶cia!"
 #define MSGTR_VO_YUV4MPEG_UnknownSubDev "Nieznane podurz±dzenie: %s"
 #define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "U¿ywam wyj¶cia w trybie przeplotu, najwy¿sze pola najpierw."
@@ -793,6 +929,9 @@ static char help_text[]=
 
 // libao2 
 
+// audio_out.c
+#define MSGTR_AO_ALSA9_1x_Removed "audio_out: modu³y alsa9 i alsa1x zosta³y usuniête, zamiast nich uzywaj -ao alsa.\n"
+
 // ao_oss.c
 #define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Nie mogê otworzyæ miksera %s: %s\n"
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Mikser karty d¼wiêkowej nie ma kana³u '%s', u¿ywam domy¶lnego.\n"
@@ -801,7 +940,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Nie mogê ustawiæ urz±dzenia audio %s na wyj¶cie AC3, próbujê S16...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Nie mogê ustawiæ urz±dzenia audio na %d kana³ów.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: sterownik nie obs³uguje SNDCTL_DSP_GETOSPACE :-(\n"
-#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Twój sterownik d¼wiêku NIE obs³uguje select()  ***\n Przekompiluj mplayera z #undef HAVE_AUDIO_SELECT w config.h !\n\n"
+#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Twój sterownik d¼wiêku NIE obs³uguje select()  ***\n Przekompiluj MPlayera z #undef HAVE_AUDIO_SELECT w config.h !\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nB³±d krytyczny: *** NIE MO¯NA PONOWNIE OTWORZYÆ / ZRESETOWAÆ URZ¡DZENIA AUDIO *** %s\n"
 
 // ao_arts.c
@@ -829,7 +968,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Plik: %s (%s)\nPCM: Czêstotliwo¶æ próbkowamia: %iHz Kana³y: %s Format %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: najszybsze zrzucanie jest osi±gane poprzez -vc dummy -vo null\nPCM: Info: aby zapisaæ plik WAVE u¿yj -waveheader (default)."
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: najszybsze zrzucanie jest osi±gane poprzez -vc dummy -vo null\nPCM: Info: aby zapisaæ plik WAVE u¿yj -waveheader (domy¶lny).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Nie powiod³o siê otwarcie %s do zapisu!\n"
 
 // ao_sdl.c
@@ -859,7 +998,7 @@ static char help_text[]=
 #define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: zapis nie powiód³ siê."
 #define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Nie mo¿na otworzyæ urz±dzenia audio %s, %s  -> brak d¼wiêku.\n"
 #define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: Twoja karta nie obs³uguje %d kana³ul, %s, %d Hz samplerate.\n"
-#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Twój sterownik d¼wiêku NIE obs³uguje select()  ***\n Przekompiluj mplayera z #undef HAVE_AUDIO_SELECT w config.h !\n\n"
+#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Twój sterownik d¼wiêku NIE obs³uguje select()  ***\n Przekompiluj MPlayera z #undef HAVE_AUDIO_SELECT w config.h !\n\n"
 #define MSGTR_AO_SUN_CantReopenReset "[AO OSS]\nB³±d krytyczny: *** NIE MO¯NA PONOWNIE OTWORZYÆ / ZRESETOWAÆ URZ¡DZENIA AUDIO *** %s\n"
 
 // ao_alsa5.c
@@ -885,10 +1024,31 @@ static char help_text[]=
 #define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume: b³±d przy przygotowywaniu kana³u: %s\n"
 #define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: b³±d alsa, resetujê strumieñ.\n"
 #define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: b³±d przy przytowywaniu odtwarzania: %s\n"
-#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: b³±ð zapisu po resecie: %s - poddaje siê.\n"
+#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: b³±d zapisu po resecie: %s - poddajê siê.\n"
 #define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: b³±d wyj¶cia: %s\n"
 
 
 // ao_plugin.c
 
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] nieprawid³owa wtyczka: %s\n"
+
+// ======================= AF Audio Filters ================================
+
+// libaf 
+
+// af_ladspa.c
+
+#define MSGTR_AF_LADSPA_AvailableLabels "dostêpne etykiety w"
+#define MSGTR_AF_LADSPA_WarnNoInputs "UWAGA! Ta wtyczka LADSPA nie ma wej¶cia audio.\n Przychodz±cy sygna³ audio bêdzie stracony."
+#define MSGTR_AF_LADSPA_ErrMultiChannel "Wielo-kana³owe (>2) wtyczki nie s± obs³ugiwane (jeszcze).\n  U¿ywaj tylko mono i stereofonicznych wtyczek."
+#define MSGTR_AF_LADSPA_ErrNoOutputs "Ta wtyczka LADSPA nie ma ¿adnego wyj¶cia audio."
+#define MSGTR_AF_LADSPA_ErrInOutDiff "Liczba wej¶æ i wyj¶æ audio wtyczki LADSPA ró¼ni siê."
+#define MSGTR_AF_LADSPA_ErrFailedToLoad "nie uda³o siê za³adowaæ"
+#define MSGTR_AF_LADSPA_ErrNoDescriptor "Nie mo¿na znale¼æ funkcji ladspa_descriptor() w podanej bibliotece."
+#define MSGTR_AF_LADSPA_ErrLabelNotFound "Nie mo¿na znale¼æ etytkiety w bibliotece wtyczek."
+#define MSGTR_AF_LADSPA_ErrNoSuboptions "¯adne podopcje nie zosta³y podane"
+#define MSGTR_AF_LADSPA_ErrNoLibFile "¯adna biblioteka nie zosta³a podana"
+#define MSGTR_AF_LADSPA_ErrNoLabel "¯adna etykieta filtru nie zosta³a podana"
+#define MSGTR_AF_LADSPA_ErrNotEnoughControls "Nie wystarczaj±ca ilo¶æ opcji zosta³a podana w linii poleceñ"
+#define MSGTR_AF_LADSPA_ErrControlBelow "%s: Kontrola wej¶cia #%d jest poni¿ej dolnej granicy wynosz±cej %0.4f.\n"
+#define MSGTR_AF_LADSPA_ErrControlAbove "%s: Kontrola wej¶cia #%d jest powy¿ej górnej granicy wynosz±cej %0.4f.\n"
