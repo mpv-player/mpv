@@ -70,6 +70,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		printf("vo_mga aspect(): resized to %dx%d\n",d_width,d_height);
 	}
 
+	vo_dwidth=d_width; vo_dheight=d_height;
 	mga_vid_config.dest_width = d_width;
 	mga_vid_config.dest_height= d_height;
 	mga_vid_config.x_org= 0; // (720-mga_vid_config.dest_width)/2;
