@@ -535,6 +535,8 @@ if ((conffile = get_path("")) == NULL) {
 
   printf("%s",banner_text);
 
+  parse_cfgfiles();
+
 #ifdef HAVE_GUI
   if ( nogui )
    {
