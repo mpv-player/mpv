@@ -9,6 +9,10 @@
 #include <stdlib.h>
 #include <string.h> /* strerror */
 
+#include "config.h"
+
+#ifdef USE_XANIM
+
 #ifdef __FreeBSD__
 #include <unistd.h>
 #endif
@@ -16,8 +20,6 @@
 #include <dlfcn.h> /* dlsym, dlopen, dlclose */
 #include <stdarg.h> /* va_alist, va_start, va_end */
 #include <errno.h> /* strerror, errno */
-
-#include "config.h"
 
 #include "mp_msg.h"
 #include "bswap.h"
@@ -36,8 +38,6 @@
 #include "xacodec.h"
 
 #include "fastmemcpy.h"
-
-#ifdef USE_XANIM
 
 #if 0
 typedef char xaBYTE;
