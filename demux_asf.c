@@ -239,6 +239,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
                  break;
               default:
                  printf("Warning! unknown segtype == 0x%2X  \n",segtype);
+		 x=0;
               }
 
               type=p[0]; p++;        // 0x01: grouping  0x08: single

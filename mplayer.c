@@ -30,12 +30,6 @@
 #define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
 #endif
 
-#ifndef MAX_OUTBURST
-#error "============================================="
-#error "Please re-run ./configure and then try again!"
-#error "============================================="
-#endif
-
 #include "cfgparser.h"
 #include "cfg-mplayer-def.h"
 
@@ -46,9 +40,6 @@
 
 #include "libao2/audio_out.h"
 
-// CODECS:
-#include "mp3lib/mp3.h"
-#include "libac3/ac3.h"
 #include "libmpeg2/mpeg2.h"
 #include "libmpeg2/mpeg2_internal.h"
 
@@ -60,16 +51,7 @@
 #include "dvdauth.h"
 #include "spudec.h"
 
-#ifdef USE_DIRECTSHOW
-//#include "DirectShow/DS_VideoDec.h"
-//#include "DirectShow/DS_AudioDec.h"
-#endif
-
-//#include "opendivx/decore.h"
-
 extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
-
-// extern int errno;
 
 #include "linux/getch2.h"
 #include "linux/keycodes.h"
@@ -153,7 +135,6 @@ char *get_path(char *filename){
 //**************************************************************************//
 
 static int max_framesize=0;
-//static int show_packets=0;
 
 #include "stream.h"
 #include "demuxer.h"
@@ -161,8 +142,6 @@ static int max_framesize=0;
 #include "stheader.h"
 
 static int avi_bitrate=0;
-
-//#include "aviprint.c"
 
 sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
     if(demuxer->a_streams[id]){
@@ -261,6 +240,7 @@ int video_family=-1;     // override video codec family
 
 // IMHO this stuff is no longer of use, or is there a special
 // reason why dshow should be completely disabled? - atmos ::
+// yes, people without working c++ compiler can disable it - A'rpi
 #ifdef USE_DIRECTSHOW
 int allow_dshow=1;
 #else
@@ -395,13 +375,19 @@ void exit_sighandler(int x){
 }
 
 extern int vcd_get_track_end(int fd,int track);
-extern int init_audio(sh_audio_t *sh_audio);
 extern int init_video_codec(sh_video_t *sh_video);
-extern void mpeg2_allocate_image_buffers(picture_t * picture);
+//extern void mpeg2_allocate_image_buffers(picture_t * picture);
 extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
-extern int vo_init(void);
-extern int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
 
+// dec_audio.c:
+extern int init_audio(sh_audio_t *sh_audio);
+extern int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
+extern void resync_audio_stream(sh_audio_t *sh_audio);
+extern void skip_audio_frame(sh_audio_t *sh_audio);
+
+// dec_video.c:
+extern int init_video(sh_video_t *sh_video);
+extern int decode_video(vo_functions_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame);
 
 #include "mixer.h"
 #include "cfg-mplayer.h"
@@ -1517,7 +1503,6 @@ if(1)
 
   if(file_format==DEMUXER_TYPE_MPEG_ES || file_format==DEMUXER_TYPE_MPEG_PS){
         int in_frame=0;
-        int t=0;
         float newfps;
         videobuf_len=0;
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
@@ -2106,24 +2091,7 @@ switch(file_format){
         }
         
         current_module="resync_audio";
-
-        switch(sh_audio->codec->driver){
-        case 1:
-          MP3_DecodeFrame(NULL,-2); // resync
-          MP3_DecodeFrame(NULL,-2); // resync
-          MP3_DecodeFrame(NULL,-2); // resync
-          break;
-        case 3:
-          ac3_bitstream_reset();    // reset AC3 bitstream buffer
-    //      if(verbose){ printf("Resyncing AC3 audio...");fflush(stdout);}
-          sh_audio->ac3_frame=ac3_decode_frame(); // resync
-    //      if(verbose) printf(" OK!\n");
-          break;
-        case 4:
-        case 7:
-          sh_audio->a_in_buffer_len=0;        // reset ACM/DShow audio buffer
-          break;
-        }
+	resync_audio_stream(sh_audio);
 
         // re-sync PTS (MPEG-PS only!!!)
         if(file_format==DEMUXER_TYPE_MPEG_PS)
@@ -2132,11 +2100,7 @@ switch(file_format){
           
           } else {
             while(d_video->pts > d_audio->pts){
-              switch(sh_audio->codec->driver){
-                case 1: MP3_DecodeFrame(NULL,-2);break; // skip MPEG frame
-                case 3: sh_audio->ac3_frame=ac3_decode_frame();break; // skip AC3 frame
-                default: ds_fill_buffer(d_audio);  // skip PCM frame
-              }
+	      skip_audio_frame(sh_audio);
             }
           }
         }

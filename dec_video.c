@@ -10,6 +10,8 @@ extern int divx_quality;
 extern double video_time_usage;
 extern double vout_time_usage;
 
+#include "linux/timer.h"
+
 #include "stream.h"
 #include "demuxer.h"
 
@@ -383,9 +385,7 @@ else
     break;
 #endif
   case 1: {
-        int in_frame=0;
         int t=0;
-        float newfps;
 
         t-=GetTimer();
           mpeg2_decode_data(video_out, start, start+in_size,drop_frame);

@@ -32,6 +32,10 @@ int fakemono=0;
 #include "loader/DirectShow/DS_AudioDec.h"
 #endif
 
+extern int init_acm_audio_codec(sh_audio_t *sh_audio);
+extern int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen);
+
+
 static sh_audio_t* dec_audio_sh=NULL;
 
 // AC3 decoder buffer callback:
@@ -51,14 +55,8 @@ int mplayer_audio_read(char *buf,int size){
   return len;
 }
 
-
 int init_audio(sh_audio_t *sh_audio){
-
 int driver=sh_audio->codec->driver;
-
-extern int init_acm_audio_codec(sh_audio_t *sh_audio);
-//extern int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len);
-extern int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen);
 
 sh_audio->samplesize=2;
 #if WORDS_BIGENDIAN
@@ -344,8 +342,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 
 #ifdef USE_DIRECTSHOW
       case 7: // DirectShow
-      { int ret;
-        int size_in=0;
+      { int size_in=0;
         int size_out=0;
         int srcsize=DS_AudioDecoder_GetSrcSize(maxlen);
         if(verbose>2)printf("DShow says: srcsize=%d  (buffsize=%d)  out_size=%d\n",srcsize,sh_audio->a_in_buffer_size,maxlen);
@@ -373,4 +370,30 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
     return len;
 }
 
+void resync_audio_stream(sh_audio_t *sh_audio){
+        switch(sh_audio->codec->driver){
+        case 1:
+          MP3_DecodeFrame(NULL,-2); // resync
+          MP3_DecodeFrame(NULL,-2); // resync
+          MP3_DecodeFrame(NULL,-2); // resync
+          break;
+        case 3:
+          ac3_bitstream_reset();    // reset AC3 bitstream buffer
+    //      if(verbose){ printf("Resyncing AC3 audio...");fflush(stdout);}
+          sh_audio->ac3_frame=ac3_decode_frame(); // resync
+    //      if(verbose) printf(" OK!\n");
+          break;
+        case 4:
+        case 7:
+          sh_audio->a_in_buffer_len=0;        // reset ACM/DShow audio buffer
+          break;
+        }
+}
 
+void skip_audio_frame(sh_audio_t *sh_audio){
+              switch(sh_audio->codec->driver){
+                case 1: MP3_DecodeFrame(NULL,-2);break; // skip MPEG frame
+                case 3: sh_audio->ac3_frame=ac3_decode_frame();break; // skip AC3 frame
+                default: ds_fill_buffer(sh_audio->ds);  // skip PCM frame
+              }
+}
