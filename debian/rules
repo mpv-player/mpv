@@ -60,6 +60,7 @@ binary-arch: build
 
 	dh_installdebconf	
 	dh_installdocs DOCS/*
+	dh_installman DOCS/mplayer.1 DOCS/mencoder.1
 	dh_installexamples etc/example.conf
 	dh_installmenu
 #	dh_installmime
