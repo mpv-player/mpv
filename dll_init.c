@@ -332,7 +332,7 @@ printf("\n");
       ICDecompressBegin(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
     mp_msg(MSGT_WIN32,MSGL_ERR,"ICDecompressBegin failed: Error %d\n", (int)ret);
-    return 0;
+//    return 0;
   }
 
   sh_video->our_out_buffer = (char*)memalign(64,sh_video->o_bih.biSizeImage);
