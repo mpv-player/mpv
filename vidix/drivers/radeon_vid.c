@@ -1316,6 +1316,7 @@ static void radeon_vid_stop_video( void )
 static void radeon_vid_display_video( void )
 {
     int bes_flags;
+    /** workaround for Xorg-6.8 not saving the surface registers on bigendian architectures */
 #ifdef WORDS_BIGENDIAN
 #if defined(RAGE128) 
     /* code from gatos */
