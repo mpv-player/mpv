@@ -211,7 +211,7 @@ extern char * audio_stream;
 #ifdef USE_DVDREAD
 
 #ifdef USE_MPDVDKIT
-#if USE_MPDVDKIT==2
+#if (USE_MPDVDKIT == 2)
 #include "../libmpdvdkit2/dvd_reader.h"
 #include "../libmpdvdkit2/ifo_types.h"
 #include "../libmpdvdkit2/ifo_read.h"
