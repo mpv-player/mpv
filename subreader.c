@@ -34,6 +34,7 @@ static float mpsub_position=0;
 int sub_uses_time=0;
 int sub_errs=0;
 int sub_num=0;          // number of subtitle structs
+int sub_slacktime=2000; // 20 seconds
 
 /* Use the SUB_* constant defined in the header file */
 int sub_format=SUB_INVALID;
@@ -52,7 +53,7 @@ static inline void trail_space(char *s) {
 
 subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
     static char line[LINE_LEN+1];
-    static char *s = NULL;
+    static char *s = NULL, *slacktime_s;
     char text[LINE_LEN+1], *p, *q;
     int state;
 
@@ -66,7 +67,10 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
     do {
 	switch (state) {
 
-	case 0: /* find "START=" */
+	case 0: /* find "START=" or "Slacktime:" */
+	    slacktime_s = strstr (s, "Slacktime:");
+	    if (slacktime_s) sub_slacktime = strtol (slacktime_s + 10, NULL, 0) / 10;
+
 	    s = strstr (s, "Start=");
 	    if (s) {
 		current->start = strtol (s + 6, &s, 0) / 10;
@@ -83,7 +87,7 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 	    break;
  
 	case 3: /* get all text until '<' appears */
-	    if (*s == '\0') { break; }
+	    if (*s == '\0') break;
 	    else if (!strncasecmp (s, "<br>", 4)) {
 		*p = '\0'; p = text; trail_space (text);
 		if (text[0] != '\0')
@@ -117,10 +121,20 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 	}
 
 	/* read next line */
-	if (state != 99 && !(s = fgets (line, LINE_LEN, fd))) return 0;
-
+	if (state != 99 && !(s = fgets (line, LINE_LEN, fd)))
+	    if (current->start > 0) break; // if it is the last subtitle
+	    else return 0;
+	    
     } while (state != 99);
 
+    // For the last subtitle
+    if (current->end <= 0) {
+        current->end = current->start + sub_slacktime;
+	*p = '\0'; trail_space (text);
+	if (text[0] != '\0')
+	    current->text[current->lines++] = strdup (text);
+    }
+    
     return current;
 }
 
