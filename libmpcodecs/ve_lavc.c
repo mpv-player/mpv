@@ -153,6 +153,7 @@ static int lavc_param_nssew= 8;
 static int lavc_param_closed_gop = 0;
 static int lavc_param_dc_precision = 8;
 static int lavc_param_threads= 1;
+static int lavc_param_turbo = 0;
 
 
 char *lavc_param_acodec = "mp2";
@@ -302,6 +303,7 @@ m_option_t lavcopts_conf[]={
         {"qns", &lavc_param_qns, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
         {"nssew", &lavc_param_nssew, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
 	{"threads", &lavc_param_threads, CONF_TYPE_INT, CONF_RANGE, 1, 8, NULL},
+	{"turbo", &lavc_param_turbo, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -665,6 +667,30 @@ static int config(struct vf_instance_s* vf,
 	if(stats_file==NULL){
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
             return 0;
+	}
+	if(lavc_param_turbo) {
+	  /* uses SAD comparison functions instead of other hungrier */
+	  lavc_venc_context->me_pre_cmp = 0;
+	  lavc_venc_context->me_cmp = 0;
+	  lavc_venc_context->me_sub_cmp = 0;
+	  lavc_venc_context->mb_cmp = 2;
+
+	  /* Disables diamond motion estimation */
+	  lavc_venc_context->pre_dia_size = 0;
+	  lavc_venc_context->dia_size = 0;
+
+	  lavc_venc_context->quantizer_noise_shaping = 0; // qns=0
+	  lavc_venc_context->noise_reduction = 0; // nr=0
+
+	  if (lavc_param_mb_decision) {
+	    lavc_venc_context->mb_decision = 1; // mbd=0 ("realtime" encoding)
+	  }
+	  lavc_venc_context->flags &= ~CODEC_FLAG_QPEL;
+	  lavc_venc_context->flags &= ~CODEC_FLAG_4MV;
+	  lavc_venc_context->flags &= ~CODEC_FLAG_TRELLIS_QUANT;
+	  lavc_venc_context->flags &= ~CODEC_FLAG_CBP_RD;
+	  lavc_venc_context->flags &= ~CODEC_FLAG_QP_RD;
+	  lavc_venc_context->flags &= ~CODEC_FLAG_MV0;
 	}
 	break;
     }

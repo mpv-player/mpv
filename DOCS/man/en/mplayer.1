@@ -5327,6 +5327,13 @@ from the first pass.
 .PD 1
 .
 .TP
+.B turbo (2-pass only)
+Dramatically speeds up pass 1 using faster algorithms and disabling
+CPU-intensive options.
+This will probably reduce global PSNR a little bit (around 0.01dB) and
+change individual frame type and PSNR little bit more (up to 0.03dB).
+.
+.TP
 .B aspect=<x/\:y>
 Store movie aspect internally, just like MPEG files.
 Much nicer solution than rescaling, because quality isn't decreased.

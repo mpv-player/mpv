@@ -1,4 +1,4 @@
-.\" synced with 1.722
+.\" synced with 1.723
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -5566,6 +5566,13 @@ Sauve les statistiques.
 Encode avec une table Huffman optimisée d'après les statistiques de la passe 1.
 .RE
 .PD 1
+.
+.TP
+.B turbo (2-pass uniquement)
+Accélère énormément la première passe en utilisant des algorithmes plus
+rapides et en désactivant des options gourmandes en temps processeur.
+Cela va sans doute diminuer le PSNR global (d'environ 0.01dB) et changer
+un peu plus le type et le PSNR des trames générées (jusqu'à 0.03dB).
 .
 .TP
 .B aspect=<x/\:y>
