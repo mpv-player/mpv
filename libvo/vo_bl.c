@@ -11,6 +11,11 @@
  * any later version")
  * 
  * Other stuff: Copyright (C) Rik Snel 2002, License GNU GPL v2
+ *
+ * patch from Stefan Schuermans <1stein@schuermans.info>:
+ *   - correction of "maxval" in Blinkenlights UDP protcol
+ *   - new scheme for new HDL
+ *   - new scheme for grayscale in arbitrary size
  */
 
 #include <stdio.h>
@@ -189,21 +194,55 @@ static void udp_close(bl_host_t *h) {
 	closesocket(h->fd);
 }
 
-#define NO_BLS 2
+#define NO_BLS 3
 
-/* currently only arcade is supported, hdl can be supported
- * in principle and future projects can be supported if their
- * parameters become known */
 static bl_properties_t bls[NO_BLS] = {
-	{ "hdl", IMGFMT_BGR1, 1, 18, 8, 1,
-	NULL, NULL, NULL, NULL, NULL, NULL },
+	{ "hdl", IMGFMT_YV12, 1, 18, 8, 8,
+	&bml_init, &bml_write_frame, &bml_close,
+	&udp_init, &udp_send, &udp_close },
 	{ "arcade", IMGFMT_YV12, 1, 26, 20, 8,
+	&bml_init, &bml_write_frame, &bml_close,
+	&udp_init, &udp_send, &udp_close },
+	{ "grayscale", IMGFMT_YV12, 1, -1, -1, 8, /* use width and height of movie */
 	&bml_init, &bml_write_frame, &bml_close,
 	&udp_init, &udp_send, &udp_close } };
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, 
 	uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
+	void * ptr;
+
+	/* adapt size of Blinkenlights UDP stream to size of movie */
+	if (bl->width < 0 || bl->height < 0) {
+		if (bl->width < 0) /* use width of movie */
+			bl->width = width;
+		if (bl->height < 0) /* use height of movie */
+			bl->height = height;
+		/* check for maximum size of UDP packet */
+		if (12 + bl->width*bl->height*bl->channels > 65507) {
+			mp_msg(MSGT_VO, MSGL_ERR, "bl: %dx%d-%d does not fit into an UDP packet\n",
+					bl->width, bl->height, bl->channels);
+			return 1;
+		}
+		/* resize frame and tmp buffers */
+		bl_size = 12 + bl->width*bl->height*bl->channels;
+		ptr = realloc(bl_packet, 12 + bl->width*bl->height*3); /* space for header and image data */
+		if (ptr)
+			bl_packet = (bl_packet_t*)ptr;
+		else {
+			mp_msg(MSGT_VO, MSGL_ERR, "bl: out of memory error\n");
+			return 1;
+		}
+		image = ((unsigned char*)bl_packet + 12); /* pointer to image data */
+		ptr = realloc(tmp, bl->width*bl->height*3); /* space for image data only */
+		if (ptr)
+			tmp = (unsigned char*)ptr;
+		else {
+			mp_msg(MSGT_VO, MSGL_ERR, "bl: out of memory error\n");
+			return 1;
+		}
+	}
+
 	framenum = 0;
 	if (format != IMGFMT_YV12) {
 		mp_msg(MSGT_VO, MSGL_ERR, "vo_bl called with wrong format");
@@ -245,20 +284,6 @@ static void flip_page (void) {
 }
 
 static uint32_t draw_frame(uint8_t * src[]) {
-	int i, j;
-	char *source, *dest;
-	//printf("draw frame called\n");
-#if 0
-		zr_info_t *zr = &zr_info[j];
-		geo_t *g = &zr->g;
-		source = src[0] + 2*g->yoff*zr->vdec*zr->stride + 2*g->xoff;
-		dest = zr->image + 2*zr->off_y;
-		for (i = 0; i < g->height/zr->vdec; i++) {
-			memcpy(dest, source, zr->image_width*2);
-			dest += 2*zr->image_width;
-			source += zr->vdec*zr->stride;
-		}
-#endif 
 	return 0;
 }
 
@@ -307,8 +332,9 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[],
 static uint32_t preinit(const char *arg) {
 	char *p, *q;
 	int end = 0, i;
+	char txt[256];
 	if (!arg || strlen(arg) == 0) {
-		mp_msg(MSGT_VO, MSGL_ERR, "bl: subdevice must be given, example: -vo bl:arcade:host=localhost\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "bl: subdevice must be given, example: -vo bl:arcade:host=localhost:2323\n");
 		return 1;
 	}
 	
@@ -320,12 +346,21 @@ static uint32_t preinit(const char *arg) {
 	p = bl_subdevice;
 	strcpy(p, arg);
 	mp_msg(MSGT_VO, MSGL_V, "bl: preinit called with %s\n", arg);
-	if (strncmp(p, "arcade", 6)) {
-		mp_msg(MSGT_VO, MSGL_ERR, "bl: subdevice must start with arcade, this is the only supported output format\nat the moment, i.e. -vo bl:arcade:host=localhost\n");
+	for (i = 0; i < NO_BLS; i++) {
+		if (!strncmp(p, bls[i].name, strlen(bls[i].name)))
+			break;
+	}
+	if (i >= NO_BLS) {
+		txt[0] = 0;
+		for (i = 0; i < NO_BLS; i++)
+			if (strlen( txt ) + 4 + strlen( bls[i].name ) + 1 < sizeof(txt))
+				sprintf( txt + strlen( txt ), "%s%s",
+					 txt[0] == 0 ? "" : i == NO_BLS - 1 ? " or " : ", ", bls[i].name );
+		mp_msg(MSGT_VO, MSGL_ERR, "bl: subdevice must start with %s\nbl: i.e. -vo bl:arcade:host=localhost:2323\n", txt);
 		return 1;
 	}
-	bl = &bls[1];
-	p += 6;
+	bl = &bls[i];
+	p += strlen(bls[i].name);
 	if (*p == '\0') {
 		no_bl_hosts = 1;
 		bl_hosts[0].name = "localhost";
@@ -342,7 +377,7 @@ static uint32_t preinit(const char *arg) {
 		q = p + 5;
 		if (!strncmp(p, "file=", 5)) {
 			if (no_bl_files == BL_MAX_FILES) {
-				mp_msg(MSGT_VO, MSGL_ERR, "bl: maximum number of hosts reached (%d)\n", BL_MAX_FILES);
+				mp_msg(MSGT_VO, MSGL_ERR, "bl: maximum number of files reached (%d)\n", BL_MAX_FILES);
 				return 1;
 			}
 			p += 5;
@@ -385,11 +420,18 @@ static uint32_t preinit(const char *arg) {
 		p = ++q;
 	}
 
-	bl_size = bl->width*bl->height*bl->channels + 12;
-	/* enough space for RGB 24 bit + header */
-	bl_packet = malloc(bl->width*bl->height*3+12); 
-	image = ((unsigned char*)bl_packet + 12);
-	tmp = malloc(bl->width*bl->height*bl->channels);
+	if (bl->width >= 0 && bl->height >= 0) { /* size already known */
+		bl_size = 12 + bl->width*bl->height*bl->channels;
+		bl_packet = malloc(12 + bl->width*bl->height*3); /* space for header and image data */
+		image = ((unsigned char*)bl_packet + 12); /* pointer to image data */
+		tmp = malloc(bl->width*bl->height*3); /* space for image data only */
+	}
+	else { /* size unknown yet */
+		bl_size = 12;
+		bl_packet = malloc(12 + 3); /* space for header and a pixel */
+		image = ((unsigned char*)bl_packet + 12); /* pointer to image data */
+		tmp = malloc(3); /* space for a pixel only */
+	}
 	
 	if (!bl_packet || !tmp) {
 		mp_msg(MSGT_VO, MSGL_ERR, "bl: out of memory error\n");
@@ -399,7 +441,7 @@ static uint32_t preinit(const char *arg) {
 	bl_packet->width = htons(bl->width);
 	bl_packet->height = htons(bl->height);
 	bl_packet->channels = htons(bl->channels);
-	bl_packet->maxval = htons(2<<bl->bpc - 1);
+	bl_packet->maxval = htons((1 << bl->bpc) - 1);
 
 	/* open all files */
 	for (i = 0; i < no_bl_files; i++) 
