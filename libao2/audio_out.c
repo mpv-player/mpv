@@ -12,6 +12,9 @@ char *ao_subdevice = NULL;
 #ifdef USE_OSS_AUDIO
 extern ao_functions_t audio_out_oss;
 #endif
+#ifdef USE_ARTS
+extern ao_functions_t audio_out_arts;
+#endif
 extern ao_functions_t audio_out_null;
 #ifdef HAVE_ALSA5
  extern ao_functions_t audio_out_alsa5;
@@ -46,6 +49,9 @@ ao_functions_t* audio_out_drivers[] =
 {
 #ifdef USE_OSS_AUDIO
         &audio_out_oss,
+#endif
+#ifdef USE_ARTS
+        &audio_out_arts,
 #endif
 #ifdef USE_SUN_AUDIO
         &audio_out_sun,

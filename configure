@@ -185,6 +185,7 @@ Video:
 
 Audio:
   --disable-ossaudio     disable OSS sound support [autodetect]
+  --disable-arts         disable aRts sound support [autodetect]
   --disable-alsa         disable alsa sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
   --disable-mad          disable mad audio support [autodetect]
@@ -838,6 +839,7 @@ _dxr3=auto
 _iconv=auto
 _rtc=auto
 _ossaudio=auto
+_arts=auto
 _mad=auto
 _vorbis=auto
 _faad=auto
@@ -948,6 +950,8 @@ for ac_option do
   --disable-libdv)	_libdv=no	;;
   --enable-ossaudio)	_ossaudio=yes	;;
   --disable-ossaudio)	_ossaudio=no	;;
+  --enable-arts)	_arts=yes	;;
+  --disable-arts)	_arts=no	;;
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
   --enable-vorbis)	_vorbis=yes	;;
@@ -2672,6 +2676,24 @@ fi
 echores "$_ossaudio"
 
 
+echocheck "aRts"
+if test "$_arts" = auto ; then
+  _arts=no
+  if ( artsc-config --version >> /dev/null ) ; then
+  _arts=yes
+  fi
+fi
+
+if test "$_arts" = yes ; then
+  _def_arts='#define USE_ARTS 1'
+  _aosrc="$_aosrc ao_arts.c"
+  _aomodules="arts $_aomodules"
+  _ld_arts=`artsc-config --libs`
+  _inc_arts=`artsc-config --cflags`
+fi
+echores "$_arts"
+
+
 echocheck "ALSA audio"
 if test "$_alsa" != no ; then
   _alsa=no
@@ -3808,6 +3830,8 @@ AA_LIB = $_ld_aa
 ALSA_LIB = $_ld_alsa
 NAS_LIB = $_ld_nas
 MAD_LIB = $_ld_mad
+ARTS_LIB = $_ld_arts
+ARTS_INC = $_inc_arts
 VORBIS_LIB = $_ld_vorbis
 FAAD_LIB = $_ld_faad
 SGIAUDIO_LIB = $_ld_sgiaudio
@@ -4066,6 +4090,7 @@ $_def_ossaudio_devdsp
 $_def_ossaudio_devmixer
 $_def_alsa5
 $_def_alsa9
+$_def_arts
 $_def_sys_asoundlib_h
 $_def_alsa_asoundlib_h
 $_def_sunaudio
