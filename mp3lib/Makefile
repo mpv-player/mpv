@@ -47,15 +47,6 @@ decode_i586.o: decode_i586.c
 
 libMP3.a:	$(OBJS)
 	$(AR) r libMP3.a $(OBJS)
-ifeq ($(TARGET_OS),CYGWIN)
-	./mp3lib_objfix.sh
-endif
-ifeq ($(TARGET_MINGW32),yes)
-	./mp3lib_objfix.sh
-endif
-ifeq ($(TARGET_OS),OpenBSD)
-	./mp3lib_objfix.sh
-endif
 test1:	libMP3.a test.c
 	$(CC) $(CFLAGS) test.c ../libvo/aclib.c -o test1 -I.. ./libMP3.a ../mp_msg-mencoder.o ../cpudetect.o -lm
 
