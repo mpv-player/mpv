@@ -1614,7 +1614,7 @@ current_module="main";
 // If there is no video OSD has to be disabled.
 // In case of playing a playtree we have to restore the
 // old OSD level after playing one or more audio-only files.
-if(!sh_video && osd_level > 0) { // save OSD level only once
+if(!sh_video && osd_level >= 0) { // save OSD level only once
     osd_level_saved = osd_level;
     osd_level = 0;
 } else if (osd_level_saved > -1) { // if there is a saved OSD level, restore it
