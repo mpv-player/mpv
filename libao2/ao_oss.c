@@ -28,14 +28,6 @@ static ao_info_t info =
 
 LIBAO_EXTERN(oss)
 
-// there are some globals:
-// ao_samplerate
-// ao_channels
-// ao_format
-// ao_bps
-// ao_outburst
-// ao_buffersize
-
 static char *dsp="/dev/dsp";
 static audio_buf_info zz;
 static int audio_fd=-1;
@@ -57,7 +49,7 @@ static int control(int cmd,int arg){
 	    ao_control_vol_t *vol = (ao_control_vol_t *)arg;
 	    int fd, v, mcmd, devs;
 
-	    if(ao_format == AFMT_AC3)
+	    if(ao_data.format == AFMT_AC3)
 		return CONTROL_TRUE;
     
 	    if ((fd = open("/dev/mixer", O_RDONLY)) > 0)
@@ -118,58 +110,62 @@ static int init(int rate,int channels,int format,int flags){
     return 0;
   }
 
-  ao_format=format;
-  ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_format);
-  if(format == AFMT_AC3 && ao_format != AFMT_AC3) {
+  ao_data.bps=(channels+1)*rate;
+  if(format != AFMT_U8 && format != AFMT_S8)
+    ao_data.bps*=2;
+
+  ao_data.format=format;
+  ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_data.format);
+  if(format == AFMT_AC3 && ao_data.format != AFMT_AC3) {
       printf("Can't set audio device %s to AC3 output\n", dsp);
       return 0;
   }
   printf("audio_setup: sample format: %s (requested: %s)\n",
-    audio_out_format_name(ao_format), audio_out_format_name(format));
+    audio_out_format_name(ao_data.format), audio_out_format_name(format));
   
   if(format != AFMT_AC3) {
-  ao_channels=channels-1;
-  ioctl (audio_fd, SNDCTL_DSP_STEREO, &ao_channels);
+  ao_data.channels=channels-1;
+  ioctl (audio_fd, SNDCTL_DSP_STEREO, &ao_data.channels);
   
   // set rate
-  ao_samplerate=rate;
-  ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_samplerate);
-  printf("audio_setup: using %d Hz samplerate (requested: %d)\n",ao_samplerate,rate);
+  ao_data.samplerate=rate;
+  ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
+  printf("audio_setup: using %d Hz samplerate (requested: %d)\n",ao_data.samplerate,rate);
   }
 
   if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)==-1){
       int r=0;
       printf("audio_setup: driver doesn't support SNDCTL_DSP_GETOSPACE :-(\n");
       if(ioctl(audio_fd, SNDCTL_DSP_GETBLKSIZE, &r)==-1){
-          printf("audio_setup: %d bytes/frag (config.h)\n",ao_outburst);
+          printf("audio_setup: %d bytes/frag (config.h)\n",ao_data.outburst);
       } else {
-          ao_outburst=r;
-          printf("audio_setup: %d bytes/frag (GETBLKSIZE)\n",ao_outburst);
+          ao_data.outburst=r;
+          printf("audio_setup: %d bytes/frag (GETBLKSIZE)\n",ao_data.outburst);
       }
   } else {
       printf("audio_setup: frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
           zz.fragments, zz.fragstotal, zz.fragsize, zz.bytes);
-      if(ao_buffersize==-1) ao_buffersize=zz.bytes;
-      ao_outburst=zz.fragsize;
+      if(ao_data.buffersize==-1) ao_data.buffersize=zz.bytes;
+      ao_data.outburst=zz.fragsize;
   }
 
-  if(ao_buffersize==-1){
+  if(ao_data.buffersize==-1){
     // Measuring buffer size:
     void* data;
-    ao_buffersize=0;
+    ao_data.buffersize=0;
 #ifdef HAVE_AUDIO_SELECT
-    data=malloc(ao_outburst); memset(data,0,ao_outburst);
-    while(ao_buffersize<0x40000){
+    data=malloc(ao_data.outburst); memset(data,0,ao_data.outburst);
+    while(ao_data.buffersize<0x40000){
       fd_set rfds;
       struct timeval tv;
       FD_ZERO(&rfds); FD_SET(audio_fd,&rfds);
       tv.tv_sec=0; tv.tv_usec = 0;
       if(!select(audio_fd+1, NULL, &rfds, NULL, &tv)) break;
-      write(audio_fd,data,ao_outburst);
-      ao_buffersize+=ao_outburst;
+      write(audio_fd,data,ao_data.outburst);
+      ao_data.buffersize+=ao_data.outburst;
     }
     free(data);
-    if(ao_buffersize==0){
+    if(ao_data.buffersize==0){
         printf("\n   ***  Your audio driver DOES NOT support select()  ***\n");
           printf("Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n");
         return 0;
@@ -197,10 +193,10 @@ static void reset(){
 	return;
     }
 
-  ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_format);
-  if(ao_format != AFMT_AC3) {
-  ioctl (audio_fd, SNDCTL_DSP_STEREO, &ao_channels);
-  ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_samplerate);
+  ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_data.format);
+  if(ao_data.format != AFMT_AC3) {
+  ioctl (audio_fd, SNDCTL_DSP_STEREO, &ao_data.channels);
+  ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
   }
 }
 
@@ -219,7 +215,7 @@ static void audio_resume()
 
 // return: how many bytes can be played without blocking
 static int get_space(){
-  int playsize=ao_outburst;
+  int playsize=ao_data.outburst;
 
 #ifdef SNDCTL_DSP_GETOSPACE
   if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)!=-1){
@@ -240,35 +236,38 @@ static int get_space(){
     }
 #endif
 
-  return ao_outburst;
+  return ao_data.outburst;
 }
 
 // plays 'len' bytes of 'data'
 // it should round it down to outburst*n
 // return: number of bytes played
 static int play(void* data,int len,int flags){
-    len/=ao_outburst;
-    len=write(audio_fd,data,len*ao_outburst);
+    len/=ao_data.outburst;
+    len=write(audio_fd,data,len*ao_data.outburst);
     return len;
 }
 
 static int audio_delay_method=2;
 
-// return: how many unplayed bytes are in the buffer
-static int get_delay(){
+// return: delay in seconds between first and last sample in buffer
+static float get_delay(){
+  /* Calculate how many bytes/second is sent out */
   if(audio_delay_method==2){
-      // 
       int r=0;
       if(ioctl(audio_fd, SNDCTL_DSP_GETODELAY, &r)!=-1)
-         return r;
+         return ((float)r)/(float)ao_data.bps;
       audio_delay_method=1; // fallback if not supported
   }
   if(audio_delay_method==1){
       // SNDCTL_DSP_GETOSPACE
       if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)!=-1)
-         return ao_buffersize-zz.bytes;
+         return ((float)(ao_data.buffersize-zz.bytes))/(float)ao_data.bps;
       audio_delay_method=0; // fallback if not supported
   }
-  return ao_buffersize;
+  return ((float)ao_data.buffersize)/(float)ao_data.bps;
 }
+
+
+
 

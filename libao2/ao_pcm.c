@@ -14,14 +14,6 @@ static ao_info_t info =
 
 LIBAO_EXTERN(pcm)
 
-// there are some globals:
-// ao_samplerate
-// ao_channels
-// ao_format
-// ao_bps
-// ao_outburst
-// ao_buffersize
-
 char *ao_outputfilename = NULL;
 int ao_pcm_waveheader = 1;
 
@@ -90,7 +82,7 @@ static int init(int rate,int channels,int format,int flags){
 	printf("PCM: Info - to write WAVE files use -waveheader (default), for RAW PCM -nowaveheader.\n");
 	fp = fopen(ao_outputfilename, "wb");
 
-	ao_outburst = 4096;
+	ao_data.outburst = 4096;
 
 
 	if(fp) {
@@ -134,7 +126,7 @@ static void audio_resume()
 // return: how many bytes can be played without blocking
 static int get_space(){
 
-    return ao_outburst;
+    return ao_data.outburst;
 }
 
 // plays 'len' bytes of 'data'
@@ -151,10 +143,10 @@ static int play(void* data,int len,int flags){
 	return len;
 }
 
-// return: how many unplayed bytes are in the buffer
-static int get_delay(){
+// return: delay in seconds between first and last sample in buffer
+static float get_delay(){
 
-    return 0;
+    return 0.0;
 }
 
 

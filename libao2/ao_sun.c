@@ -42,18 +42,11 @@ LIBAO_EXTERN(sun)
 #endif
 
 
-// there are some globals:
-// ao_samplerate
-// ao_channels
-// ao_format
-// ao_bps
-// ao_outburst
-// ao_buffersize
-
 static char *audio_dev = "/dev/audio";
 static int queued_bursts = 0;
 static int queued_samples = 0;
 static int bytes_per_sample = 0;
+static int byte_per_sec = 0;
 static int convert_u8_s8;
 static int audio_fd = -1;
 static enum {
@@ -230,7 +223,6 @@ static int control(int cmd,int arg){
 static int init(int rate,int channels,int format,int flags){
 
     audio_info_t info;
-    int byte_per_sec;
     int ok;
 
     if (ao_subdevice) audio_dev = ao_subdevice;
@@ -252,13 +244,13 @@ static int init(int rate,int channels,int format,int flags){
     ioctl(audio_fd, AUDIO_DRAIN, 0);
 
     AUDIO_INITINFO(&info);
-    info.play.encoding = oss2sunfmt(ao_format = format);
+    info.play.encoding = oss2sunfmt(ao_data.format = format);
     info.play.precision =
 	(format==AFMT_S16_LE || format==AFMT_S16_BE
 	 ? AUDIO_PRECISION_16
 	 : AUDIO_PRECISION_8);
-    info.play.channels = ao_channels = channels;
-    info.play.sample_rate = ao_samplerate = rate;
+    info.play.channels = ao_data.channels = channels;
+    info.play.sample_rate = ao_data.samplerate = rate;
     convert_u8_s8 = 0;
     ok = ioctl(audio_fd, AUDIO_SETINFO, &info) >= 0;
     if (!ok && info.play.encoding == AUDIO_ENCODING_LINEAR8) {
@@ -278,37 +270,37 @@ static int init(int rate,int channels,int format,int flags){
 
     bytes_per_sample = channels * info.play.precision / 8;
     byte_per_sec = bytes_per_sample * rate;
-    ao_outburst = byte_per_sec > 100000 ? 16384 : 8192;
+    ao_data.outburst = byte_per_sec > 100000 ? 16384 : 8192;
 
 #ifdef	__not_used__
     /*
-     * hmm, ao_buffersize is currently not used in this driver, do there's
+     * hmm, ao_data.buffersize is currently not used in this driver, do there's
      * no need to measure it
      */
-    if(ao_buffersize==-1){
+    if(ao_data.buffersize==-1){
 	// Measuring buffer size:
 	void* data;
-	ao_buffersize=0;
+	ao_data.buffersize=0;
 #ifdef HAVE_AUDIO_SELECT
-	data = malloc(ao_outburst);
-	memset(data, format==AFMT_U8 ? 0x80 : 0, ao_outburst);
-	while(ao_buffersize<0x40000){
+	data = malloc(ao_data.outburst);
+	memset(data, format==AFMT_U8 ? 0x80 : 0, ao_data.outburst);
+	while(ao_data.buffersize<0x40000){
 	    fd_set rfds;
 	    struct timeval tv;
 	    FD_ZERO(&rfds); FD_SET(audio_fd,&rfds);
 	    tv.tv_sec=0; tv.tv_usec = 0;
 	    if(!select(audio_fd+1, NULL, &rfds, NULL, &tv)) break;
-	    write(audio_fd,data,ao_outburst);
-	    ao_buffersize+=ao_outburst;
+	    write(audio_fd,data,ao_data.outburst);
+	    ao_data.buffersize+=ao_data.outburst;
 	}
 	free(data);
-	if(ao_buffersize==0){
+	if(ao_data.buffersize==0){
 	    printf("\n   ***  Your audio driver DOES NOT support select()  ***\n");
 	    printf("Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n");
 	    return 0;
 	}
 #ifdef	__svr4__
-	// remove the 0 bytes from the above ao_buffersize measurement from the
+	// remove the 0 bytes from the above ao_data.buffersize measurement from the
 	// audio driver's STREAMS queue
 	ioctl(audio_fd, I_FLUSH, FLUSHW);
 #endif
@@ -352,13 +344,13 @@ static void reset(){
     ioctl(audio_fd, AUDIO_DRAIN, 0);
 
     AUDIO_INITINFO(&info);
-    info.play.encoding = oss2sunfmt(ao_format);
+    info.play.encoding = oss2sunfmt(ao_data.format);
     info.play.precision =
-	(ao_format==AFMT_S16_LE || ao_format==AFMT_S16_BE 
+	(ao_data.format==AFMT_S16_LE || ao_data.format==AFMT_S16_BE 
 	 ? AUDIO_PRECISION_16
 	 : AUDIO_PRECISION_8);
-    info.play.channels = ao_channels;
-    info.play.sample_rate = ao_samplerate;
+    info.play.channels = ao_data.channels;
+    info.play.sample_rate = ao_data.samplerate;
     info.play.samples = 0;
     info.play.eof = 0;
     info.play.error = 0;
@@ -388,7 +380,7 @@ static void audio_resume()
 
 // return: how many bytes can be played without blocking
 static int get_space(){
-    int playsize = ao_outburst;
+    int playsize = ao_data.outburst;
     audio_info_t info;
 
     // check buffer
@@ -408,7 +400,7 @@ static int get_space(){
     if (queued_bursts - info.play.eof > 2)
 	return 0;
 
-    return ao_outburst;
+    return ao_data.outburst;
 }
 
 // plays 'len' bytes of 'data'
@@ -421,13 +413,13 @@ static int play(void* data,int len,int flags){
     int native_endian = AFMT_S16_LE;
 #endif
 
-    if (len < ao_outburst) return 0;
-    len /= ao_outburst;
-    len *= ao_outburst;
+    if (len < ao_data.outburst) return 0;
+    len /= ao_data.outburst;
+    len *= ao_data.outburst;
 
     /* 16-bit format using the 'wrong' byteorder?  swap words */
-    if ((ao_format == AFMT_S16_LE || ao_format == AFMT_S16_BE)
-	&& ao_format != native_endian) {
+    if ((ao_data.format == AFMT_S16_LE || ao_data.format == AFMT_S16_BE)
+	&& ao_data.format != native_endian) {
 	static void *swab_buf;
 	static int swab_len;
 	if (len > swab_len) {
@@ -440,7 +432,7 @@ static int play(void* data,int len,int flags){
 	}
 	swab(data, swab_buf, len);
 	data = swab_buf;
-    } else if (ao_format == AFMT_U8 && convert_u8_s8) {
+    } else if (ao_data.format == AFMT_U8 && convert_u8_s8) {
 	int i;
 	unsigned char *p = data;
 
@@ -460,13 +452,13 @@ static int play(void* data,int len,int flags){
 }
 
 
-// return: how many unplayed bytes are in the buffer
-static int get_delay(){
+// return: delay in seconds between first and last sample in buffer
+static float get_delay(){
     audio_info_t info;
     ioctl(audio_fd, AUDIO_GETINFO, &info);
     if (info.play.samples && enable_sample_timing == RTSC_ENABLED)
-	return (queued_samples - info.play.samples) * bytes_per_sample;
+	return (float)(queued_samples - info.play.samples) / (float)byte_per_sec;
     else
-	return (queued_bursts - info.play.eof) * ao_outburst;
+	return (flaot)((queued_bursts - info.play.eof) * ao_data.outburst) / (float)byte_per_sec;
 }
 

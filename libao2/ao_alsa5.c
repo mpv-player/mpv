@@ -27,15 +27,6 @@ static ao_info_t info =
 
 LIBAO_EXTERN(alsa5)
 
-/* global variables:
-    ao_samplerate
-    ao_channels
-    ao_format
-    ao_bps
-    ao_outburst
-    ao_buffersize
-*/
-
 static snd_pcm_t *alsa_handler;
 static snd_pcm_format_t alsa_format;
 static int alsa_rate = SND_PCM_RATE_CONTINUOUS;
@@ -74,12 +65,12 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
-    ao_format = format;
-    ao_channels = channels - 1;
-    ao_samplerate = rate_hz;
-    ao_bps = ao_samplerate*(ao_channels+1);
-    ao_outburst = OUTBURST;
-    ao_buffersize = 16384;
+    ao_data.format = format;
+    ao_data.channels = channels - 1;
+    ao_data.samplerate = rate_hz;
+    ao_data.bps = ao_data.samplerate*(ao_data.channels+1);
+    ao_data.outburst = OUTBURST;
+    ao_data.buffersize = 16384;
 
     memset(&alsa_format, 0, sizeof(alsa_format));
     switch (format)
@@ -111,7 +102,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     {
 	case SND_PCM_SFMT_S16_LE:
 	case SND_PCM_SFMT_U16_LE:
-	    ao_bps *= 2;
+	    ao_data.bps *= 2;
 	    break;
 	case -1:
 	    printf("alsa-init: invalid format (%s) requested - output disabled\n",
@@ -161,8 +152,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    break;
     }
 
-    alsa_format.rate = ao_samplerate;
-    alsa_format.voices = ao_channels*2;
+    alsa_format.rate = ao_data.samplerate;
+    alsa_format.voices = ao_data.channels*2;
     alsa_format.interleave = 1;
 
     if ((err = snd_pcm_open(&alsa_handler, 0, 0, SND_PCM_OPEN_PLAYBACK)) < 0)
@@ -189,13 +180,15 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    printf("alsa-init: pcm channel info error: %s\n", snd_strerror(err));
 	    return(0);
 	}
+
 #ifndef __QNX__
 	if (chninfo.buffer_size)
-	    ao_buffersize = chninfo.buffer_size;
+	    ao_data.buffersize = chninfo.buffer_size;
 #endif
+
 	if (verbose)
 	    printf("alsa-init: setting preferred buffer size from driver: %d bytes\n",
-		ao_buffersize);
+		ao_data.buffersize);
     }
 
     memset(&params, 0, sizeof(params));
@@ -204,7 +197,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     params.format = alsa_format;
     params.start_mode = SND_PCM_START_DATA;
     params.stop_mode = SND_PCM_STOP_ROLLOVER;
-    params.buf.stream.queue_size = ao_buffersize;
+    params.buf.stream.queue_size = ao_data.buffersize;
     params.buf.stream.fill = SND_PCM_FILL_NONE;
 
     if ((err = snd_pcm_channel_params(alsa_handler, &params)) < 0)
@@ -217,8 +210,8 @@ static int init(int rate_hz, int channels, int format, int flags)
     setup.channel = SND_PCM_CHANNEL_PLAYBACK;
     setup.mode = SND_PCM_MODE_STREAM;
     setup.format = alsa_format;
-    setup.buf.stream.queue_size = ao_buffersize;
-    setup.msbits_per_sample = ao_bps;
+    setup.buf.stream.queue_size = ao_data.buffersize;
+    setup.msbits_per_sample = ao_data.bps;
     
     if ((err = snd_pcm_channel_setup(alsa_handler, &setup)) < 0)
     {
@@ -233,7 +226,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
 
     printf("AUDIO: %d Hz/%d channels/%d bps/%d bytes buffer/%s\n",
-	ao_samplerate, ao_channels+1, ao_bps, ao_buffersize,
+	ao_data.samplerate, ao_data.channels+1, ao_data.bps, ao_data.buffersize,
 	snd_pcm_get_format_name(alsa_format.format));
     return(1);
 }
@@ -357,15 +350,15 @@ static int get_space()
 	return(ch_stat.free);
 }
 
-/* how many unplayed bytes are in the buffer */
-static int get_delay()
+/* delay in seconds between first and last sample in buffer */
+static float get_delay()
 {
     snd_pcm_channel_status_t ch_stat;
     
     ch_stat.channel = SND_PCM_CHANNEL_PLAYBACK;
     
     if (snd_pcm_channel_status(alsa_handler, &ch_stat) < 0)
-	return(ao_buffersize); /* error occured */
+	return((float)ao_data.buffersize/(float)ao_data.bps); /* error occured */
     else
-	return(ch_stat.count);
+	return((float)ch_stat.count/(float)ao_data.bps);
 }

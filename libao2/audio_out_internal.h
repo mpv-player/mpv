@@ -7,7 +7,7 @@ static void uninit();
 static void reset();
 static int get_space();
 static int play(void* data,int len,int flags);
-static int get_delay();
+static float get_delay();
 static void audio_pause();
 static void audio_resume();
 

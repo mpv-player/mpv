@@ -14,13 +14,6 @@ static ao_info_t info =
 
 LIBAO_EXTERN(null)
 
-// there are some globals:
-// ao_samplerate
-// ao_channels
-// ao_format
-// ao_bps
-// ao_outburst
-// ao_buffersize
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
@@ -31,7 +24,7 @@ static int control(int cmd,int arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
-    ao_outburst=4096;
+    ao_data.outburst=4096;
 
     return 0;
 }
@@ -61,7 +54,7 @@ static void audio_resume()
 // return: how many bytes can be played without blocking
 static int get_space(){
 
-    return ao_outburst;
+    return ao_data.outburst;
 }
 
 // plays 'len' bytes of 'data'
@@ -72,10 +65,10 @@ static int play(void* data,int len,int flags){
     return len;
 }
 
-// return: how many unplayed bytes are in the buffer
-static int get_delay(){
+// return: delay in seconds between first and last sample in buffer
+static float get_delay(){
 
-    return 0;
+    return 0.0;
 }
 
 

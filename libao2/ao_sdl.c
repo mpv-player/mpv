@@ -29,13 +29,6 @@ static ao_info_t info =
 
 LIBAO_EXTERN(sdl)
 
-// there are some globals:
-// ao_samplerate
-// ao_channels
-// ao_format
-// ao_bps
-// ao_outburst
-// ao_buffersize
 
 extern int verbose;
 
@@ -150,6 +143,10 @@ static int init(int rate,int channels,int format,int flags){
 		setenv("SDL_AUDIODRIVER", ao_subdevice, 1);
 		printf("SDL: using %s audio driver\n", ao_subdevice);
 	}
+
+	ao_data.bps=(channels+1)*rate;
+	if(format != AFMT_U8 && format != AFMT_S8)
+	  ao_data.bps*=2;
 	
 	/* The desired audio format (see SDL_AudioSpec) */
 	switch(format) {
@@ -205,7 +202,7 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 	} 
 	
 	if(verbose) printf("SDL: buf size = %d\n",aspec.size);
-	if(ao_buffersize==-1) ao_buffersize=aspec.size;
+	if(ao_data.buffersize==-1) ao_data.buffersize=aspec.size;
 	
 	/* unsilence audio, if callback is ready */
 	SDL_PauseAudio(0);
@@ -278,9 +275,9 @@ static int play(void* data,int len,int flags){
 #endif
 }
 
-// return: how many unplayed bytes are in the buffer
-static int get_delay(){
-    return buffered_bytes + ao_buffersize;
+// return: delay in seconds between first and last sample in buffer
+static float get_delay(){
+    return (float)(buffered_bytes + ao_data.buffersize)/(float)ao_data.bps;
 }
 
 

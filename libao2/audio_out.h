@@ -10,6 +10,7 @@ typedef struct ao_info_s
         const char *comment;
 } ao_info_t;
 
+/* interface towards mplayer and */
 typedef struct ao_functions_s
 {
 	ao_info_t *info;
@@ -19,10 +20,25 @@ typedef struct ao_functions_s
         void (*reset)();
         int (*get_space)();
         int (*play)(void* data,int len,int flags);
-        int (*get_delay)();
+        float (*get_delay)();
         void (*pause)();
         void (*resume)();
 } ao_functions_t;
+
+/* global data used by mplayer and plugins */
+typedef struct ao_data_s
+{
+  int samplerate;
+  int channels;
+  int format;
+  int bps;
+  int outburst; 	  
+  int buffersize;         
+  int pts;
+} ao_data_t;
+
+extern char *ao_subdevice;
+extern ao_data_t ao_data;
 
 // prototypes
 extern char *audio_out_format_name(int format);
@@ -30,14 +46,6 @@ extern char *audio_out_format_name(int format);
 // NULL terminated array of all drivers
 extern ao_functions_t* audio_out_drivers[];
 
-extern int ao_samplerate;
-extern int ao_channels;
-extern int ao_format;
-extern int ao_bps;
-extern int ao_outburst;
-extern int ao_buffersize;
-extern int ao_pts;
-extern char *ao_subdevice;
 
 #define CONTROL_OK 1
 #define CONTROL_TRUE 1
