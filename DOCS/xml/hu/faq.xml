@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.60 -->
+<!-- synced with 1.61 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -77,6 +77,18 @@ Vannak bináris (RPM/deb) csomagok az <application>MPlayer</application>ből?
 <answer><para>
 Nézd meg a <link linkend="debian">Debian</link> és az <link linkend="rpm">RPM</link>
 részt bővebb infókért!
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Hogyan fordíthatok 32 bites <application>MPlayer</application>t 64 bites Athlon-on?
+</para></question>
+<answer><para>
+Próbáld meg a következő configure kapcsolókkal:
+<screen>
+./configure --target=athlon_xp --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
+</screen>
 </para></answer>
 </qandaentry>
 
