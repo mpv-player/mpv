@@ -33,7 +33,7 @@ tvi_handle_t *tvi_init_dummy(char *device)
 }
 
 /* initialisation */
-static int init(priv_t *priv, tvi_param_t *params)
+static int init(priv_t *priv)
 {
     priv->width = 320;
     priv->height = 200;
@@ -48,6 +48,7 @@ static int start(priv_t *priv)
 
 static int uninit(priv_t *priv)
 {
+    return(1);
 }
 
 static int control(priv_t *priv, int cmd, void *arg)
@@ -88,6 +89,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 static int grab_video_frame(priv_t *priv, char *buffer, int len)
 {
     memset(buffer, 0x42, len);
+    return(1);
 }
 
 static int get_video_framesize(priv_t *priv)
@@ -99,6 +101,7 @@ static int get_video_framesize(priv_t *priv)
 static int grab_audio_frame(priv_t *priv, char *buffer, int len)
 {
     memset(buffer, 0x42, len);
+    return(1);
 }
 
 static int get_audio_framesize(priv_t *priv)

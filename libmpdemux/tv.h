@@ -41,16 +41,10 @@ typedef struct tvi_functions_s
     int (*get_audio_framesize)();
 } tvi_functions_t;
 
-typedef struct tvi_param_s {
-    const char	*opt;
-    void 	*value;
-} tvi_param_t;
-
 typedef struct tvi_handle_s {
     tvi_info_t		*info;
     tvi_functions_t	*functions;
     void		*priv;
-    tvi_param_t		*params;
     int 		seq;
 
     /* specific */

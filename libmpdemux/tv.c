@@ -113,6 +113,8 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
 	picture_format = IMGFMT_I420;
     else if (!strcasecmp(tv_param_outfmt, "uyvy"))
 	picture_format = IMGFMT_UYVY;
+//    else if (!strcasecmp(tv_param_outfmt, "yuy2"))
+//	picture_format = IMGFMT_YUY2;
     else if (!strcasecmp(tv_param_outfmt, "rgb32"))
 	picture_format = IMGFMT_RGB32;
     else if (!strcasecmp(tv_param_outfmt, "rgb24"))
@@ -258,6 +260,8 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	sh_video->fps = tv_param_fps;
     sh_video->frametime = 1.0f/sh_video->fps;
 
+    printf("fps: %f, frametime: %f\n", sh_video->fps, sh_video->frametime);
+
     /* set width */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &sh_video->disp_w);
 
@@ -285,6 +289,8 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	/* yeah, audio is present */
 	if (funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_FORMAT, &audio_format) != TVI_CONTROL_TRUE)
 	    goto no_audio;
+	sh_audio->sample_format = audio_format;
+	sh_audio->wf->wBitsPerSample = 16;
 	switch(audio_format)
 	{
 	    case AFMT_U8:
@@ -336,21 +342,13 @@ tvi_handle_t *tv_begin(void)
 
 int tv_init(tvi_handle_t *tvh)
 {
-    tvi_param_t *params;
-
     mp_msg(MSGT_TV, MSGL_INFO, "Selected driver: %s\n", tvh->info->short_name);
     mp_msg(MSGT_TV, MSGL_INFO, " name: %s\n", tvh->info->name);
     mp_msg(MSGT_TV, MSGL_INFO, " author: %s\n", tvh->info->author);
     if (tvh->info->comment)
 	mp_msg(MSGT_TV, MSGL_INFO, " comment: %s\n", tvh->info->comment);
 
-    params = malloc(sizeof(tvi_param_t)*2);
-    params[0].opt = strdup("input");
-    params[0].value = malloc(sizeof(int));
-    (int)*(void **)params[0].value = tv_param_input;
-    params[1].opt = params[1].value = NULL;
-
-    return(tvh->functions->init(tvh->priv, params));
+    return(tvh->functions->init(tvh->priv));
 }
 
 int tv_uninit(tvi_handle_t *tvh)

@@ -1,4 +1,6 @@
-static int init(priv_t *priv, tvi_param_t *params);
+#include <stdlib.h> /* malloc */
+
+static int init(priv_t *priv);
 static int uninit(priv_t *priv);
 static int control(priv_t *priv, int cmd, void *arg);
 static int start(priv_t *priv);
@@ -34,7 +36,6 @@ static tvi_handle_t *new_handle()
     memset(h->priv, 0, sizeof(priv_t));
     h->info = &info;
     h->functions = &functions;
-    h->params = NULL;
     h->seq = 0;
     h->chanlist = -1;
     h->chanlist_s = NULL;
