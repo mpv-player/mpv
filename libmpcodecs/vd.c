@@ -62,6 +62,8 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 	NULL
 };
 
+#include "libvo/video_out.h"
+
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt){
 
     return 1;
@@ -109,8 +111,8 @@ mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, i
   }
   if(mpi){
     mpi->type=mp_imgtype;
-    mpi->flags&=~(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE);
-    mpi->flags|=mp_imgflag&(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE);
+    mpi->flags&=~(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE|MP_IMGFLAG_DIRECT);
+    mpi->flags|=mp_imgflag&(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE|MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH|MP_IMGFLAG_ALIGNED_STRIDE|MP_IMGFLAG_DRAW_CALLBACK);
     if((mpi->width!=w2 || mpi->height!=h) && !(mpi->flags&MP_IMGFLAG_DIRECT)){
 	mpi->width=w2;
 	mpi->height=h;
@@ -120,16 +122,15 @@ mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, i
 	    mpi->flags&=~MP_IMGFLAG_ALLOCATED;
 	}
     }
-    if(!mpi->bpp){
-      mp_image_setfmt(mpi,sh->codec->outfmt[sh->outfmtidx]);
-      if(!(mpi->flags&(MP_IMGFLAG_ALLOCATED|MP_IMGFLAG_DIRECT)) 
-         && mpi->type>MP_IMGTYPE_EXPORT){
+    if(!mpi->bpp) mp_image_setfmt(mpi,sh->codec->outfmt[sh->outfmtidx]);
+    if(!(mpi->flags&MP_IMGFLAG_ALLOCATED) && mpi->type>MP_IMGTYPE_EXPORT){
+
+	// check libvo first!
+	vo_functions_t* vo=sh->video_out;
+	if(vo) vo->control(VOCTRL_GET_IMAGE,mpi);
+	
+        if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
           // non-direct and not yet allocaed image. allocate it!
-	  printf("*** Allocating mp_image_t, %dx%dx%dbpp %s %s, %d bytes\n",
-	          mpi->width,mpi->height,mpi->bpp,
-		  (mpi->flags&MP_IMGFLAG_YUV)?"YUV":"RGB",
-		  (mpi->flags&MP_IMGFLAG_PLANAR)?"planar":"packed",
-	          mpi->bpp*mpi->width*mpi->height/8);
 	  mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*mpi->height/8);
 	  if(mpi->flags&MP_IMGFLAG_PLANAR){
 	      // YV12/I420. feel free to add other planar formats here...
@@ -141,7 +142,17 @@ mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, i
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
 	  }
 	  mpi->flags|=MP_IMGFLAG_ALLOCATED;
-      }
+        }
+	if(!(mpi->flags&MP_IMGFLAG_TYPE_DISPLAYED)){
+	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"*** %s mp_image_t, %dx%dx%dbpp %s %s, %d bytes\n",
+	          (mpi->flags&MP_IMGFLAG_DIRECT)?"Direct Rendering":"Allocating",
+	          mpi->width,mpi->height,mpi->bpp,
+		  (mpi->flags&MP_IMGFLAG_YUV)?"YUV":"RGB",
+		  (mpi->flags&MP_IMGFLAG_PLANAR)?"planar":"packed",
+	          mpi->bpp*mpi->width*mpi->height/8);
+	    mpi->flags|=MP_IMGFLAG_TYPE_DISPLAYED;
+	}
+	
     }
   }
   return mpi;

@@ -1,6 +1,7 @@
 
 #include "fastmemcpy.h"
 #include "../mmx_defs.h"
+#include "../mp_image.h"
 
 // mga_vid drawing functions
 
@@ -172,7 +173,6 @@ write_frame_yuy2(uint8_t *y)
 	mem2agpcpy_pic(vid_data, y, len, mga_vid_config.src_height, 2*bespitch, len);
 }
 
-
 static uint32_t
 draw_frame(uint8_t *src[])
 {
@@ -182,6 +182,36 @@ draw_frame(uint8_t *src[])
         write_frame_yuy2(src[0]);break;
     }
     return 0;
+}
+
+static uint32_t
+get_image(mp_image_t *mpi){
+    uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
+    uint32_t bespitch2 = bespitch/2;
+//    printf("mga: get_image() called\n");
+    if(mpi->type==MP_IMGTYPE_STATIC) return VO_FALSE; // it is not static
+    if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
+//    printf("width=%d vs. bespitch=%d, flags=0x%X  \n",mpi->width,bespitch,mpi->flags);
+    if((mpi->width==bespitch) ||
+       (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH))){
+       // we're lucky or codec accepts stride => ok, let's go!
+       if(mpi->flags&MP_IMGFLAG_PLANAR){
+	   mpi->planes[0]=vid_data;
+	   mpi->planes[1]=vid_data + bespitch*mga_vid_config.src_height;
+	   mpi->planes[2]=vid_data + bespitch*mga_vid_config.src_height
+                    + bespitch*mga_vid_config.src_height / 4;
+	   mpi->width=mpi->stride[0]=bespitch;
+	   mpi->stride[1]=mpi->stride[2]=bespitch2;
+       } else {
+           mpi->planes[0]=vid_data;
+	   mpi->width=bespitch;
+	   mpi->stride[0]=mpi->width*(mpi->bpp/8);
+       }
+       mpi->flags|=MP_IMGFLAG_DIRECT;
+//	printf("mga: get_image() SUCCESS -> Direct Rendering ENABLED\n");
+       return VO_TRUE;
+    }
+    return VO_FALSE;
 }
 
 static uint32_t
@@ -205,6 +235,8 @@ static uint32_t control(uint32_t request, void *data, ...)
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_GET_IMAGE:
+    return get_image(data);
   }
   return VO_NOTIMPL;
 }

@@ -189,6 +189,7 @@ unsigned int t=GetTimer();
 unsigned int t2;
 double tt;
 
+sh_video->video_out=video_out;
 mpi=mpvdec->decode(sh_video, start, in_size, drop_frame);
 
 //------------------------ frame decoded. --------------------
@@ -215,7 +216,7 @@ if(benchmark)
     cur_video_time_usage=tt;
 }
 
-if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALBACK))){
+if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))){
     // blit frame:
     if(mpi->flags&MP_IMGFLAG_PLANAR)
         video_out->draw_slice(mpi->planes,mpi->stride,sh_video->disp_w,sh_video->disp_h,0,0);

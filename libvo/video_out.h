@@ -36,6 +36,8 @@
 #define VOCTRL_PAUSE 7
 /* start/resume playback */
 #define VOCTRL_RESUME 8
+/* libmpcodecs direct rendering: */
+#define VOCTRL_GET_IMAGE 9
 
 #define VO_TRUE		1
 #define VO_FALSE	0
