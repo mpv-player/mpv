@@ -417,6 +417,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
    vo_x11_classhint( mDisplay,vo_window,"xv" );
    vo_hidecursor(mDisplay,vo_window);
 
+   if(WinID!=0)
    XSelectInput(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PointerMotionMask
 #ifdef HAVE_NEW_INPUT
 		| ButtonPressMask | ButtonReleaseMask
