@@ -1573,6 +1573,14 @@ if(sh_audio && !demuxer2){
 
 } // while(!at_eof)
 
+/* Emit the remaining frames in the video system */
+/*TODO emit frmaes delayed by decoder lag*/
+    if(sh_video && sh_video->vfilter){ 
+        mp_msg(MSGT_FIXME, MSGL_FIXME, "\nFlushing video frames\n");
+        ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
+                                                    VFCTRL_FLUSH_FRAMES, 0);
+    }
+
 #ifdef HAVE_MP3LAME
 // fixup CBR mp3 audio header:
 if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
