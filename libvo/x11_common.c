@@ -737,7 +737,7 @@ void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
     xev.data.l[0] = layer?ice_layer:orig_layer; // if not fullscreen, stay on default layer
     xev.data.l[1] = CurrentTime;
     mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Layered style stay on top ( layer %d ).\n",xev.data.l[0] );
-    printf( "[x11] Layered style stay on top ( layer %d ).\n",xev.data.l[0] );
+    printf( "[x11] Layered style stay on top ( layer %d ).\n",(int)xev.data.l[0] );
     XSendEvent(mDisplay, mRootWin, False, SubstructureNotifyMask, (XEvent *) &xev);
     break;
   }

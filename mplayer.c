@@ -1507,7 +1507,7 @@ inited_flags|=INITED_VO;
 
 current_module="init_video_filters";
 
-sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",video_out);
+sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",(char *)video_out);
 #ifdef HAVE_MENU
 if(use_menu) {
   vf_menu = vf_open_plugin(libmenu_vfs,sh_video->vfilter,"menu",menu_root);

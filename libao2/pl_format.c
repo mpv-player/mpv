@@ -228,7 +228,7 @@ static int play(){
       switch(pl_format.in&SIGN_MASK){
       case(US):
 	for(i=0;i<len;i++)
-	((int32_t*)in_data)[i]=(int32_t)(-(1<<31-1)+((uint32_t*)in_data)[i]);
+	((int32_t*)in_data)[i]=(int32_t)(((uint32_t*)in_data)[i]-0x80000000);
 	break;
       case(SI):
 	for(i=0;i<len;i++)

@@ -12,6 +12,10 @@
 #include "../mp_msg.h"
 #include "../bswap.h"
 
+#ifdef USE_WIN32DLL 
+#include "ldt_keeper.h" 
+#endif 
+
 #ifdef USE_QTX_CODECS
 #include "../loader/qtx/qtxsdk/components.h"
 #include "wine/windef.h"

@@ -11,6 +11,7 @@
 /* Design and implementation of different types of digital filters
 
 */
+#include <string.h>
 #include <math.h>
 #include "dsp.h"
 
