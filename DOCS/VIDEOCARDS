@@ -7,7 +7,7 @@ Videocards with hardware acceleration:
   "Hardware acceleration" usually means hardware YUV conversion, scaling,
 bilinear filtering. Under Linux, there are several ways to access it:
 
-I.   The Xv (XVideo) extension of XFree86 4.0.x
+I.   The Xv (XVideo) extension of XFree86 4.0.2
 II.  OpenGL drivers with glTexSubImage() support (currently the Utah-GLX
      drivers)
 III. Native card-specific drivers, using special abilities of some cards
@@ -94,7 +94,7 @@ There is 3 native drivers for Linux:
   Use the 'mga' vo driver on framebuffer console (matroxfb): -vo mga
   and use the xmga driver for X 3.3.x: -vo xmga
 
-  Note: it works under X 4.0.x too, but it conflicts with the Xv driver,
+  Note: it works under X 4.0.2 too, but it conflicts with the Xv driver,
   so avoid using both. Usually X restart or reboot needs to get Xv usable
   again :(
 
