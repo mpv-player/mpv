@@ -1,4 +1,4 @@
-.\" synced with 1.801
+.\" synced with 1.805
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "7 Novembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "14 Novembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -1843,6 +1843,19 @@ Les canaux du mixeur ALSA suivis par un nombre doivent être donnés au format
 .BR PCM,1 .
 .
 .TP
+.B \-softvol
+Force l'utilisation du mixeur logiciel à la place de celui de la carte son.
+.
+.TP
+.B \-softvol-max <10.0\-10000.0>
+Définit le niveau maximal d'amplification en pourcents (par défault\ : 0).
+Une valeur de 200 vous permet d'ajuster le volume, au maximum, jusqu'au double
+du niveau courant.
+Avec une valeur inférieure à 100, le niveau de départ (qui est 100%) sera
+au-delà du niveau maximum\ ; par conséquent l'OSD ne l'affichera pas
+correctement.
+.
+.TP
 .B \-nowaveheader (\-ao pcm uniquement)
 Ne pas inclure l'entête wave.
 Utilisé avec PCM brut (raw).
@@ -2574,7 +2587,7 @@ Pilote de sortie vidéo très rapide sur les cartes le gérant.
 Choisi explicitement le sous-périphérique à utiliser.
 Les pilotes de sous-périphérique existant sont cyberblade_vid,
 mach64_vid, mga_crtc2_vid, mga_vid, nvidia_vid, pm3_vid, radeon_vid,
-rage128_vid et sis_vid.
+rage128_vid, sis_vid et unichrome_vid.
 .RE
 .PD 1
 .
@@ -5613,16 +5626,16 @@ raisonnable (par défaut\ : 31).
 .
 .TP
 .B mbqmin=<1\-31>
-quantificateur minimum de macro-bloc (passe\ 1/\:2) (par défaut\ : 2)
+obsolète, utilisez vqmin
 .
 .TP
 .B mbqmax=<1\-31>
-quantificateur maximum de macro-bloc (passe\ 1/\:2) (par défaut\ : 31)
+obsolète, utilisez vqmax
 .
 .TP
 .B vqdiff=<1\-31>
-différence maximale de quantificateur entre les trames-I ou -P (passe\ 1/\:2)
-(par défaut\ : 3)
+différence maximale de quantificateur entre chaque trames-I ou -P
+consécutive (passe\ 1/\:2) (par défaut\ : 3)
 .
 .TP
 .B vmax_b_frames=<0\-4>
@@ -5718,8 +5731,8 @@ Les trames-clé sont indispensables pour les déplacements puisque celui-ci n'est
 possible que d'une trame-clé vers une autre, mais celles-ci prennent plus
 de place que les autres trames.
 Un espacement plus important des trames-clé signifie donc des fichiers
-légèrement plus petits, mais un déplacement moins précis, 0 signifie pas de
-trame-clé.
+légèrement plus petits, mais un déplacement moins précis.
+0 est équivalent à 1, ce qui rend chaque trame une trame-clé.
 Les valeurs >300 ne sont pas recommandées car la qualité peut être
 mauvaise suivant le décodeur, l'encodeur et votre horoscope ;-).
 Pour une conformité stricte MPEG1/\:2/\:4 cela devrait être <=132.
@@ -5734,14 +5747,13 @@ signifie qu'aucun changement de scène ne sera détecté (par défaut\ : 0).
 .
 .TP
 .B vb_strategy=<0\-1>
-stratégie à choisir entre les trames-I/\:P/\:B (passe\ 2)\ :
+stratégie à choisir entre les trames-I/\:P/\:B (passe\ 1)\ :
 .PD 0
 .RSs
 .IPs 0
 Toujours utiliser le nombre maximum de trames-B (par défaut).
 .IPs 1
 Éviter les trames-B dans les scènes avec beaucoup de mouvement.
-Le débit binaire sera mal prédit/\:non respecté.
 .RE
 .PD 1
 .
@@ -5769,7 +5781,7 @@ En mode deux passes, la seconde passe (vpass=2) se base sur le fichier de
 stats pour allouer le bon nombre de bits aux trames (ratecontrol).
 .br
 En mode trois passes, la seconde passe (vpass=3, non ce n'est pas une
-erreur ;-) ) fait les deux\ : elle lit le fichier de stats, puis ré-écrit
+erreur) fait les deux\ : elle lit le fichier de stats, puis ré-écrit
 par dessus.
 (Peut-être que vous devriez sauver le fichier divx2pass.log avant si
 MEncoder peut être interrompu dans son cours).
