@@ -3,7 +3,7 @@ include ../config.mak
 
 LIBNAME = libosdep.a
 
-SRCS=getch2.c shmem.c strsep.c vsscanf.c scandir.c # timer.c
+SRCS= shmem.c strsep.c vsscanf.c scandir.c gettimeofday.c # timer.c
 
 ifeq ($(TARGET_ARCH_X86),yes)
 ifeq ($(TARGET_OS),Linux)
@@ -11,11 +11,20 @@ SRCS += lrmi.c vbelib.c
 endif
 endif
 
+getch = getch2.c
+timer = timer-lx.c
 ifeq ($(MACOSX),yes)
-SRCS += timer-macosx.c
-else
-SRCS += timer-lx.c
+timer = timer-macosx.c
 endif
+ifeq ($(TARGET_CYGWIN),yes)
+timer = timer-win.c
+endif
+ifeq ($(TARGET_MINGW32),yes)
+timer = timer-win.c
+getch = getch2-win.c
+endif
+SRCS += $(timer)
+SRCS += $(getch)
 
 OBJS=$(SRCS:.c=.o)
 
