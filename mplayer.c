@@ -364,7 +364,6 @@ int i;
 int seek_to_sec=0;
 int seek_to_byte=0;
 int f; // filedes
-int stream_type;
 stream_t* stream=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 int has_audio=1;
@@ -518,22 +517,32 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 
 if(vcd_track){
 //============ Open VideoCD track ==============
-  int ret;
+  int ret,ret2;
   f=open(filename,O_RDONLY);
   if(f<0){ printf("CD-ROM Device '%s' not found!\n",filename);return 1; }
   vcd_read_toc(f);
+  ret2=vcd_get_track_end(f,vcd_track);
+  if(ret2<0){ printf("Error selecting VCD track!\n");return 1;}
   ret=vcd_seek_to_track(f,vcd_track);
   if(ret<0){ printf("Error selecting VCD track!\n");return 1;}
   seek_to_byte+=ret;
-  if(verbose) printf("VCD start byte position: 0x%X\n",seek_to_byte);
-  stream_type=STREAMTYPE_VCD;
+  if(verbose) printf("VCD start byte position: 0x%X  end: 0x%X\n",seek_to_byte,ret2);
 #ifdef VCD_CACHE
   vcd_cache_init(vcd_cache_size);
 #endif
+  stream=new_stream(f,STREAMTYPE_VCD);
+  stream->start_pos=ret;
+  stream->end_pos=ret2;
 } else {
 //============ Open plain FILE ============
+  int len;
   f=open(filename,O_RDONLY);
   if(f<0){ printf("File not found: '%s'\n",filename);return 1; }
+  len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
+  stream=new_stream(f,STREAMTYPE_FILE);
+  stream->end_pos=len;
+}
+
 #ifdef HAVE_LIBCSS
   if (dvdimportkey) {
     if (dvd_import_key(dvdimportkey)) {
@@ -547,10 +556,7 @@ if(vcd_track){
     printf("DVD auth sequence seems to be OK.\n");
   }
 #endif
-  stream_type=STREAMTYPE_FILE;
-}
 
-stream=new_stream(f,stream_type);
 //============ Open & Sync stream and detect file format ===============
 
 if(!has_audio) audio_id=-2; // do NOT read audio packets...
@@ -1896,7 +1902,7 @@ switch(file_format){
         if(len>0){
           osd_visible=sh_video->fps; // 1 sec
           vo_osd_progbar_type=0;
-          vo_osd_progbar_value=(demuxer->filepos)/len;
+          vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
         }
         //printf("avi filepos = %d  \n",vo_osd_progbar_value);
   //      printf("avi filepos = %d  (len=%d)  \n",demuxer->filepos,(demuxer->movi_end-demuxer->movi_start));

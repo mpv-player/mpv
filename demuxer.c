@@ -35,6 +35,8 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id){
   demuxer_t *d=malloc(sizeof(demuxer_t));
   memset(d,0,sizeof(demuxer_t));
   d->stream=stream;
+  d->movi_start=stream->start_pos;
+  d->movi_end=stream->end_pos;
   d->synced=0;
   d->filepos=0;
   d->audio=new_demuxer_stream(d,a_id);

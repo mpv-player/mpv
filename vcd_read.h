@@ -25,6 +25,19 @@ int vcd_seek_to_track(int fd,int track){
   return VCD_SECTOR_DATA*vcd_get_msf();
 }
 
+int vcd_get_track_end(int fd,int track){
+  struct cdrom_tochdr tochdr;
+  if (ioctl(fd,CDROMREADTOCHDR,&tochdr)==-1)
+    { perror("read CDROM toc header: "); return -1; }
+  vcd_entry.cdte_format = CDROM_MSF;
+  vcd_entry.cdte_track  = track<tochdr.cdth_trk1?(track+1):CDROM_LEADOUT;
+  if (ioctl(fd, CDROMREADTOCENTRY, &vcd_entry)) {
+    perror("ioctl dif2");
+    return -1;
+  }
+  return VCD_SECTOR_DATA*vcd_get_msf();
+}
+
 void vcd_read_toc(int fd){
   struct cdrom_tochdr tochdr;
   int i;

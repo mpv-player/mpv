@@ -105,6 +105,7 @@ stream_t* new_stream(int fd,int type){
   s->fd=fd;
   s->type=type;
   s->buf_pos=s->buf_len=0;
+  s->start_pos=s->end_pos=0;
   stream_reset(s);
   return s;
 }
