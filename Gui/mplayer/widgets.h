@@ -80,6 +80,5 @@ extern int  gtkFillSkinList( gchar * dir );
 extern void gtkClearList( GtkWidget * list );
 extern void gtkSetDefaultToCList( GtkWidget * list,char * item );
 extern int  gtkFindCList( GtkWidget * list,char * item );
-extern void gtkExit( void );
 
 #endif

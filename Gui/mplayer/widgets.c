@@ -4,6 +4,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
@@ -80,7 +81,7 @@ static void gtkThreadProc( int argc,char * argv[] )
  gtkSendMessage( evGtkIsOk );
 
  gtk_main();
- dbprintf( 6,"[gtk] exit.\n" );
+ printf( "[gtk] exit.\n" );
  exit( 0 );
 }
 
@@ -93,10 +94,12 @@ void gtkInit( int argc,char* argv[], char *envp[] )
  if ( ( gtkChildPID = fork() ) == 0 ) gtkThreadProc( argc,argv );
 }
 
-void gtkDone( void )
-{
+void gtkDone( void ){
+ int status;
+ gtkSendMessage(evExit);
+ usleep(50000); // 50ms should be enough!
+ printf("gtk killed...\n");
  kill( gtkChildPID,SIGKILL );
- usleep( 1000 );
 }
 
 void gtkMessageBox( gchar * str )
@@ -135,5 +138,3 @@ void gtkSetDefaultToCList( GtkWidget * list,char * item )
  if ( ( i=gtkFindCList( list,item ) ) > -1 ) gtk_clist_select_row( GTK_CLIST( list ),i,0 );
 }
 
-void gtkExit( void )
-{ gtk_main_quit(); }

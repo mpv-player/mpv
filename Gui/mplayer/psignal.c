@@ -147,7 +147,7 @@ void gtkSigHandler( int s )
         gtkVisibleAboutBox=1;
         break;
    case evExit:
-        gtkExit();
+	gtk_main_quit();
         break;
   }
  gtkShMem->message=0;
