@@ -682,6 +682,7 @@ if(verbose>1){
 //	if(!drop_frame){
 	  if(planar){
 #ifdef FF_POSTPROCESS
+#ifdef MBC
 	    if(lavc_pp){
 		// postprocess
 		int w=(sh_video->disp_w+15)&(~15);
@@ -702,6 +703,7 @@ if(verbose>1){
 			    sh_video->disp_w,sh_video->disp_h,
 			    &quant_store[0][0],MBC+1,lavc_pp);
 	    } else
+#endif
 #endif
 	    {
 		planes=lavc_picture.data;
