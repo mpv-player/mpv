@@ -81,7 +81,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_YV12:
     case IMGFMT_I420:
     case IMGFMT_IYUV:
-	return (vf_next_query_format(vf,fmt) & (~(VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_ACCEPT_STRIDE)));
+	return (vf_next_query_format(vf,IMGFMT_MPEGPES) & (~(VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_ACCEPT_STRIDE)));
     }
     return 0;
 }
@@ -91,6 +91,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->put_image=put_image;
     vf->query_format=query_format;
     vf->priv=malloc(sizeof(struct vf_priv_s));
+    vf->default_caps=0;
     memset(vf->priv,0,sizeof(struct vf_priv_s));
 
     vf->priv->ctx=fame_open();
