@@ -338,11 +338,7 @@ static void flip_page(void)
     if(!HAS_DGA()) __vbeCopyData(dga_buffer);
     flip_trigger = 0;
   }
-  if(vo_doublebuffering && multi_size > 1 && !lvo_name
-#ifdef CONFIG_VIDIX
-   && !vidix_name
-#endif
-   )
+  if(vo_doublebuffering && multi_size > 1)
   {
     int err;
     if((err=vbeSetDisplayStart(multi_buff[multi_idx],1)) != VBE_OK)
@@ -400,11 +396,7 @@ static uint32_t draw_frame(uint8_t *src[])
       if(verbose > 2)
           printf("vo_vesa: rgb2rgb_fnc was called\n");
     } 
-    if((!rgb2rgb_fnc || !HAS_DGA()) && !lvo_name
-#ifdef CONFIG_VIDIX
-     && !vidix_name
-#endif
-     ) __vbeCopyData(data);
+    if(!rgb2rgb_fnc || !HAS_DGA()) __vbeCopyData(data);
     return 0;
 }
 

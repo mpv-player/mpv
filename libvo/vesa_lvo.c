@@ -47,8 +47,16 @@ extern int verbose;
 
 extern vo_functions_t video_out_vesa;
 
+static void vlvo_query_vaa(vo_vaa_t *vaa)
+{
+  memset(vaa,0,sizeof(vo_vaa_t));
+}
+
 int vlvo_preinit(const char *drvname)
 {
+  printf("vesa_lvo: This branch is no longer supported.\n"
+	 "vesa_lvo: Please use -vo vesa:vidix instead\n");
+  return -1;
   if(verbose > 1) printf("vesa_lvo: vlvo_preinit(%s) was called\n",drvname);
 	lvo_handler = open(drvname,O_RDWR);
 	if(lvo_handler == -1)
@@ -62,6 +70,7 @@ int vlvo_preinit(const char *drvname)
 	video_out_vesa.flip_page=vlvo_flip_page;
 	video_out_vesa.draw_osd=vlvo_draw_osd;
 	video_out_vesa.query_format=vlvo_query_info;
+	video_out_vesa.query_vaa=vlvo_query_vaa;
 	return 0;
 }
 
@@ -70,6 +79,9 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
 		   unsigned dst_height,unsigned format,unsigned dest_bpp)
 {
   size_t i,awidth;
+  printf("vesa_lvo: This branch is no longer supported.\n"
+	 "vesa_lvo: Please use -vo vesa:vidix instead\n");
+  return -1;
   if(verbose > 1) printf("vesa_lvo: vlvo_init() was called\n");
 	image_width = src_width;
 	image_height = src_height;
