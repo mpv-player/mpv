@@ -58,6 +58,8 @@ printf("%%%%%% STOP  \n");
    wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
    wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
   }
+ mplSubRender=1;
+ wsPostRedisplay( &appMPlayer.subWindow );
 }
 
 void mplPlay( void )

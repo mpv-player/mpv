@@ -1840,9 +1840,6 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 
 }
 
-#ifdef HAVE_NEW_GUI
-      if(use_gui) mplShMem->Playing=0;
-#endif
 
 if(curr_filename+1<num_filenames || use_gui){
     // partial uninit:
@@ -1858,15 +1855,19 @@ if(curr_filename+1<num_filenames || use_gui){
   if(video_out) video_out->uninit();
 #endif
 
-#ifdef HAVE_NEW_GUI
-  mplSubRender=1;
-  wsPostRedisplay( &appMPlayer.subWindow );
-#endif
-
   current_module="uninit_ao";
   if(audio_out) audio_out->uninit();
 //  if(encode_name) avi_fixate();
 }
+
+#ifdef HAVE_NEW_GUI
+      if(use_gui) 
+       {
+        mplStop();
+        mplSubRender=1;
+        wsPostRedisplay( &appMPlayer.subWindow );
+       }	
+#endif
 
 goto_next_file:  // don't jump here after ao/vo/getch initialization!
 if(use_gui || ++curr_filename<num_filenames){
