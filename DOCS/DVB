@@ -22,7 +22,11 @@ How to enable?
    (after the #endif line) at libavcodec/utils.c:361 :
        register_avcodec(&mpeg1video_encoder);
    
-3. Compile mplayer
+3. Compile mplayer:
+    run ./configure with the option:
+	--with-extraincdir=<your DVB source dir>/ost/include
+    make
+    make install
 
 How to use?
 ~~~~~~~~~~~
