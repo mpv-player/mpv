@@ -199,7 +199,7 @@ static void parse_device (char *dest, char *src, int len)
   strncpy (dest, src, len);
   while ((tmp = strrchr(dest, '.')))
     tmp[0] = ',';
-  while ((tmp = strrchr(dest, '#')))
+  while ((tmp = strrchr(dest, '=')))
     tmp[0] = ':';
 }
 
@@ -207,7 +207,7 @@ static void print_help ()
 {
   mp_msg (MSGT_AO, MSGL_FATAL,
            "\n-ao alsa commandline help:\n"
-           "Example: mplayer -ao alsa:mmap:device=hw#0.3\n"
+           "Example: mplayer -ao alsa:mmap:device=hw=0.3\n"
            "  sets mmap-mode and first card fourth device\n"
            "\nOptions:\n"
            "  mmap\n"
@@ -215,7 +215,7 @@ static void print_help ()
            "  noblock\n"
            "    Sets non-blocking mode\n"
            "  device=<device-name>\n"
-           "    Sets device (change , to . and : to #)\n");
+           "    Sets device (change , to . and : to =)\n");
 }
 
 /*
