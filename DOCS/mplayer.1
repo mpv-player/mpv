@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino <sendmail@to.mplayer-users>
 .\" (Patches done by Jonas Jermann <sendmail@to.mplayer-users>)
 .\" 
-.TH "MPlayer" "1" "2002-06-24"
+.TH "MPlayer" "1" "2002-08-28"
 
 .SH "NAME"
 mplayer  \- Movie Player for Linux
@@ -23,7 +23,7 @@ mencoder \- Movie Encoder for Linux
 .RB [dvd|vcd|cdda|cddb|tv]://[title]\ [options]
 .br
 .B mplayer
-.RB [mms|mmst|http|http_proxy|rtp]://[user:pass@]URL[:port]\ [options]
+.RB [mms|mmst|http|http_proxy|rtp|rtsp]://[user:passwd@]URL[:port]\ [options]
 .br
 .B mencoder
 .RB [options]\ [\fIfile\fP\ |\ \fIURL\fP\ |\ \-\ ]\ [\-o\ file]
@@ -74,7 +74,8 @@ option is \-nofs.
 .br
 You can put all of the options in a config file which will be read every time
 .B mplayer
-is run. The system-wide config file is '/etc/mplayer.conf', the user specific
+is run. The system-wide config file 'mplayer.conf' is in your configuration
+directory (e.g. /etc/mplayer or /usr/local/etc/mplayer), the user specific
 one is '~/.mplayer/config'. User specific options override system-wide options
 and options given on the command line override either. The syntax of the config
 files is 'option=<value>', everything after a '#' is considered a comment.
@@ -91,10 +92,11 @@ vo=xmga
 .br
 flip=yes
 
+
 .SH "DEMUXER/STREAM OPTIONS"
 .TP
 .B \-aid <id> (also see \-alang option)
-Select audio channel [MPG: 0\-31 AVI: 1\-99 ASF: 0\-127 VOB: 128\-...]
+Select audio channel [MPG/SUB: 0\-31 AVI/OGM: 1\-99 ASF/RM: 0\-127 VOB: 128\-159 LPCM: 160\-191]
 .TP
 .B \-alang <two letter\ country\ code> (also see \-aid option)
 Works only for DVD playback! Selects DVD audio language. It always tries
@@ -317,7 +319,7 @@ Available options are:
     audioid=<value>   choose an audio output
                       of the capture card, if it
                       has more of them
-.TP
+
 .I NOTE:
 Mplayer doesn't accept colons so type dots instead in the device ID,
 eg. hw.0,0 instead of hw:0,0)
@@ -326,6 +328,9 @@ Be advised that although you can select any samplerate when using ALSA,
 the LAME audio codec is able to encode only the "standard" samplerates.
 You'll get an .avi file with no sound when you choose an odd
 samplerate and use this codec.
+.TP
+.B \-user <user name> (see \-passwd option too!)
+Specify user name for http authentication.
 .TP
 .B \-vcd <track>
 Play video CD track from device instead of plain file.
@@ -474,10 +479,7 @@ Select type of MP2/MP3 stereo output.
     Left channel   1
     Right channel  2
 .TP
-.B \-sws <software\ scaler\ type>
-.I NOTE:
-Also see DOCS/tech/swscaler_*.txt.
-.br
+.B \-sws <software\ scaler\ type> (see \-vop scale option too!)
 This option sets the quality (and speed, respectively) of the software scaler,
 with the \-zoom option. For example with x11 or other outputs which lack
 hardware acceleration. Possible settings are:
@@ -485,7 +487,7 @@ hardware acceleration. Possible settings are:
     0  fast bilinear (default)
     1  bilinear
     2  bicubic (good quality)
-    3  experimental (?)
+    3  experimental
     4  nearest neighbour (bad quality)
     5  area
     6  luma bicubic / chroma bilinear
@@ -494,6 +496,10 @@ hardware acceleration. Possible settings are:
     9  lanczos
    10  bicubic spline
 
+.I NOTE:
+For \-sws 2 and 7, the sharpness can be set with the scaling parameter (p)
+of \-vop scale (0 (soft) \- 100 (sharp)), for \-sws 9, it specifies the filter
+length (1 \- 10).
 .TP
 .B \-vc <codec name>
 Force usage of a specific video codec, according to its name in codecs.conf,
@@ -526,31 +532,93 @@ just the same DivX4 codec, but different APIs to reach it. For difference
 between them and when to use which, check the DivX4 section in the
 documentation.
 .TP
-.B \-vop <plugin3[=options],plugin2,plugin1,...>
-Activate comma separated list of video filters (see documentation).
+.B \-vop <...,plugin3[=options],plugin2,plugin1>
+Activate a comma separated list of video filters.
 Available plugins are:
 
-  crop[=w:h:x:y]       cropping
-  rectangle[=w:h:x:y]  shows cropping boundaries
-  expand[=w:h:x:y:o]   expanding and OSD
-  flip                 vertical mirroring
-  mirror               horizontal mirroring
-  rotate[=<0-3>]       rotate image +- 90 degrees
-  scale[=w:h]          software scaling
-  yuy2                 YV12/I420 \-> YUY2
+  crop[=w:h:x:y]       Crops the given part of the
+                       image and discards the rest.
+                       Useful for removing black
+                       bands from widescreen movies.
+
+  rectangle[=w:h:x:y]  Draws a white rectangle of the
+                       requested width and height at
+                       the designated coordinates over
+                       the image (used to test crop).
+                       (default: maximum w/h, upper
+                       left x/y position)
+
+  expand[=w:h:x:y:o]   Expands (not scales) movie
+                       resolution to the given value
+                       and places the unscaled
+                       original at coordinates x y.
+                       Can be used for placing
+                       subtitles/OSD in the resulting
+                       black bands. (default: original
+                       w/h, centered x/y)
+                       parameter (de)activates OSD
+                       rendering. (default: 0)
+
+  flip                 Flips the image upside down.
+
+  mirror               Flips the image on Y axis.
+
+  rotate[=<0-3>]       Rotates and flips the image
+                       +/\- 90 degrees.
+
+  scale[=w:h[:c[:p]]]  Scales the image with the
+                       software scaler (slow) and
+                       performs a YUV<\->RGB
+                       colorspace conversion
+                       (see \-sws option too!).
+                       The value 0 is used for scaled
+                       (aspect) destination w/h.
+                       (default: original w/h,
+                       destination w/h with \-zoom)
+                       Optionaly chroma skipping
+                       (c from 0\-3) and scaling
+                       parameters can be specified.
+                       (see \-sws option for details)
+                       
+  yuy2                 Forces software YV12/I420 to
+                       YUY2 conversion.
+
   rgb2bgr[=swap]       RGB 24/32 <\-> BGR 24/32
+                       colorspace conversion with
+                       optional R <\-> B swapping.
+
   palette              RGB/BGR 8 \-> 15/16/24/32bpp
-  format[=fourcc]      restrict colorspace
-  pp[=flags]           postprocessing (see \-pp)
-  lavc[=quality:fps]   YV12\->MPEG1 (libavcodec)
-  fame                 YV12\->MPEG1 (libfame)
-  dvbscale[=aspect]    optimal scaling for DVB
-                       cards (aspect=
-                       DVB_HEIGHT*ASPECTRATIO)
-  cropdetect[=limit]   black border detection
-                       (print crop values)
-  noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]
-                       add noise
+                       colorspace conversion using
+                       palette.
+
+  format[=fourcc]      Restricts the colorspace for
+                       next filter. It does not do
+                       any conversion! Use the scale
+                       filter for a real conversion.
+
+  pp[=flags]           Activates the internal
+                       postprocessing filter.
+                       (see \-pp option for details!)
+
+  lavc[=quality:fps]   Realtime MPEG1 encoder for use
+                       with DVB/DXR3 (libavcodec)
+
+  fame                 Realtime MPEG1 encoder for use
+                       with DVB/DXR3 (libfame)
+
+  dvbscale[=aspect]    Set up optimal scaling for DVB
+                       cards.
+                       (aspect=DVB_HEIGHT*ASPECTRATIO)
+
+  cropdetect[=0-255]   Calculates necessary cropping
+                       parameters and prints the
+                       recommended parameters to stdout.
+                       The threshold can be optionally
+                       specified from nothing (0) to
+                       everything (255). (default: 24)
+
+  noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
+                       Adds noise
                          <0-100>  luma noise
                          <0-100>  chroma noise
                          u        uniform noise
@@ -559,26 +627,19 @@ Available plugins are:
                                   temporal noise
                          h        high quality
                          p        mix with pattern
-  eq[=bright:cont]     soft equalizer w/interactive
-                       controls like hardware eq
 
-.I parameters:
-.br
-    w,h  destination width/height
-           value   w/h = value
-           \-1      w/h = original (default)
-           0       w/h = scaled (aspect) w/h
-           \-value  w/h = original+value
-    x,y  x/y position of the subimage
-           value   x/y = value
-           \-1      x/y = center image (default)
-    o    enable/disable OSD/SUB rendering
-           0       disabled (default)
-           1       enabled
+  eq[=bright:cont]     Activates the software equalizer
+                       with interactive controls like
+                       the hardware eq controls.
+                       The values can be from -100 to
+                       100.
+
+.I NOTE:
+The parameters are optional and if omitted, some of them are set to default values.
+Use -1 to keep the default value.
 
 You can get the list of available plugins executing
 .I mplayer \-vop help
-
 .TP
 .B \-x <x> (MPLAYER only)
 Scale image to x width (if sw/hw scaling available). Disables aspect calcs.
@@ -777,9 +838,6 @@ Don't include wave header. Used for RAW PCM.
 Used for \-vo aa. You can get a list and an explanation of available options executing
 .I mplayer \-aahelp
 .TP
-.B \-blue_intensity <\-1000\ \-\ 1000>
-Adjust intensity of blue component of video signal (default 0).
-.TP
 .B \-bpp <depth>
 Use different color depth than autodetect. Not all \-vo drivers support
 it (fbdev, dga2, svga, vesa).
@@ -850,9 +908,6 @@ outputs support it).
 .B \-fsmode-dontuse <0-31> (OBSOLETE) (use -fs option)
 Try this option if you still experience fullscreen problems.
 .TP
-.B \-green_intensity <\-1000\ \-\ 1000>
-Adjust intensity of green component of video signal (default 0).
-.TP
 .B \-hue <\-100\ \-\ 100>
 Adjust hue of video signal (default 0). You can get colored negative
 of image with this option.
@@ -902,9 +957,6 @@ drivers.
 
 The range varies between 0.0 and 1.0 and controls how much of the image is
 cropped.
-.TP
-.B \-red_intensity <\-1000\ \-\ 1000>
-Adjust intensity of red component of video signal (default 0).
 .TP
 .B \-saturation <\-100\ \-\ 100>
 Adjust saturation of video output (default 0). You can get grayscale output 
@@ -973,9 +1025,6 @@ Use alternative A/V sync method.
 .B \-framedrop (see \-hardframedrop option too!)
 Frame dropping: decode all (except B) frames, video may skip.
 Useful for playback on slow VGA card/bus.
-.TP
-.B \-gui (BETA CODE)
-Start MPlayer in GUI mode.
 .TP
 .B \-h, \-\-help
 Show short summary of options.
@@ -1471,9 +1520,8 @@ S               select
 
 .SH "SLAVE MODE PROTOCOL"
 If the \-slave switch is given, playback is controlled by a 
-line\-based protocol. If the new input is enabled (default)
-each line must contain one command otherwise one of the 
-following tokens:
+line\-based protocol. Each line must contain one command
+otherwise one of the following tokens:
 .TP
 .B Commands
 .br
@@ -1556,7 +1604,7 @@ gui_stop
 
 .SH FILES
 .TP
-/etc/mplayer.conf
+/etc/mplayer/mplayer.conf
 system\-wide settings
 .TP
 ~/.mplayer/config
@@ -1564,6 +1612,12 @@ user settings
 .TP
 ~/.mplayer/input.conf
 input bindings (see '\-input keylist' for full keylist)
+.TP
+~/.mplayer/gui.conf
+GUI configuration file
+.TP
+~/.mplayer/gui.pl
+GUI playlist
 .TP
 ~/.mplayer/font/
 font directory (There must be a font.desc file and files with .RAW extension.)
@@ -1585,6 +1639,9 @@ are searched for in this priority (for example /mnt/movie/movie.avi):
 .TP
 .B Quickstart DVD playing
 mplayer \-dvd 1
+.TP
+.B Play in japanese with english subtitles
+mplayer \-dvd 1 \-alang ja \-slang en 
 .TP
 .B Play only chapters 5, 6, 7
 mplayer \-dvd 1 \-chapter 5\-7
@@ -1618,6 +1675,9 @@ mencoder -dvd 2 -vop scale -zoom -xy 512 -o title2.avi -oac copy -ovc divx4
 .TP
 .B The same, but with libavcodec family, MPEG4 (Divx5) compression
 mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=1800 -oac copy
+.TP
+.B The same, but with libavcodec family, MJPEG compression
+mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts vcodec=mjpeg:vhq:vbitrate=1800 -oac copy
 .TP
 .B Encoding all *.jpg files in the current dir
 mencoder \\*.jpg -mf on:fps=25 -o output.avi -ovc divx4
