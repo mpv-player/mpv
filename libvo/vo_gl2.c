@@ -1136,7 +1136,9 @@ static void
 uninit(void)
 {
   if ( !vo_config_count ) return;
+#ifndef GL_WIN32
   releaseGlContext(&gl_vinfo, &gl_context);
+#endif
   if (texgrid) {
     free(texgrid);
     texgrid = NULL;
