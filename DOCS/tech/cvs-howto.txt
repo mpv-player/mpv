@@ -38,6 +38,7 @@ I. TECH SIDE:
 
   rm filename
   cvs remove filename
+  cvs commit -m "reason of removing this file" filename
   
 6. Check changes:
   
@@ -52,11 +53,19 @@ I. TECH SIDE:
 
   cvs -z3 log filename(s)
   
-8. Rename/move files:
+8. Rename/move files or content of files:
 
   you can NOT do that. ask CVS server admin (A'rpi) to do it!
   do NOT remove & re-add file - it will kill changelog!!!!
 
+  don't do big cut'n'paste from one file to another without very big
+  and already discussed and allowed (-dev-eng list) reason!
+  it will make those changes untrackable!
+
+  such actions are useless and treated as cosmetics in 99% of cases,
+  so try to avoid these.
+  
+  
 If you have any tech problems with cvs server, contact me:
 A'rpi <arpi@thot.banki.hu>
 
@@ -78,6 +87,7 @@ II. POLICY / RULES:
 
 4. Do not change behaviour of the program (renaming options etc)
    without discussing first at the MPlayer-dev-eng list.
+   Do not decrease/remove functionality of code. Just improve!
 
 5. Source indenting and other cosmetical changes are refused.
    I'll remove those commits...
@@ -85,15 +95,20 @@ II. POLICY / RULES:
    change it. Of course if you (re)write something then you can
    use your own style...
    (Many projects forces a given indenting style - we don't)
+   
+   Note: if you had to put if(){ .. } over big (> 5 lines) code,
+   do NOT change the indent of the inner part (move it right) !
 
 6. Always fill out the comment at commiting (-m switch of cvs, or
    in the editor if you left -m).
    It shouldn't be such lines: "fixed!" or "Changed it."
    Describe in a few lines (usually 1 line is enough) what did
-   you changed and why did you that. You can refer mails if bugfix.
+   you changed and why did you do that. You can refer mails if bugfix.
 
 7. If you apply patch by someone else, include his name and email
-   in the cvs comment!
+   address in the cvs comment! Do NOT commit patches for other
+   developer's code (code not maintained by you) without his
+   permission! If he didn't commited - he probably has the reason!
 
 8. I've developed something called CVS-Backup. It archives CVS
    repository after each commit - so I can reverse your commits
@@ -104,8 +119,10 @@ II. POLICY / RULES:
 9. You won't have write access to DOCS/. (you have to its subdirs).
    It was changed to avoid breaking docs or getting translations
    or homepage desynced. Send your DOCS patch to Gabucino, he'll
-   review, and commit.
+   review, and commit (or not. probably not. never...).
    
+Also read patches.txt !!!!
+
 I think our rules aren't too hard. If you have comments, contact me.
 
 III. Beginners Guide	by David Holm
