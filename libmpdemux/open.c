@@ -417,15 +417,6 @@ tv_err:
 
     return(stream);
   }
-
-//============ Open STDIN ============
-  if(!strcmp(filename,"-")){
-      // read from stdin
-      mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ReadSTDIN);
-      f=0; // 0=stdin
-      stream=new_stream(f,STREAMTYPE_STREAM);
-      return stream;
-  }
   
 #ifdef STREAMING
   url = url_new(filename);
@@ -442,13 +433,20 @@ tv_err:
   }
 #endif
 
-//============ Open plain FILE ============
+//============ Open STDIN or plain FILE ============
+    if(!strcmp(filename,"-")){
+	// read from stdin
+	mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ReadSTDIN);
+	f=0; // 0=stdin
+    } else {
        f=open(filename,O_RDONLY);
        if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);return NULL; }
+    }
+
        len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
        if (len == -1)
-	 perror("Error: lseek failed to obtain video file size");
-       else
+           return new_stream(f,STREAMTYPE_STREAM); // open as stream
+
 #ifdef _LARGEFILE_SOURCE
 	 mp_msg(MSGT_OPEN,MSGL_V,"File size is %lld bytes\n", (long long)len);
 #else
@@ -457,7 +455,6 @@ tv_err:
        stream=new_stream(f,STREAMTYPE_FILE);
        stream->end_pos=len;
        return stream;
-
 }
 
 int dvd_parse_chapter_range(struct config *conf, const char *range){
