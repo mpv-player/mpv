@@ -4829,7 +4829,6 @@ INSTALL = $_install
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS = $CFLAGS
 EXTRA_INC = $_inc_extra $_inc_gtk
-WIN32_PATH = -DWIN32_PATH=\\"$_win32libdir\\"
 STRIPBINARIES = $_stripbinaries
 
 $_live_libs_def
@@ -5144,6 +5143,7 @@ $_def_odivx_postprocess
 
 /* Win32 DLL support */
 $_def_win32
+#define WIN32_PATH "$_win32libdir"
 
 /* DirectShow support */
 $_def_dshow

@@ -1,7 +1,7 @@
 include ../config.mak
 
 # Generated automatically from Makefile.in by configure.
-DEFINES=$(WIN32_PATH) -DMPLAYER -D__WINE__ -Ddbg_printf=__vprintf \
+DEFINES=-DMPLAYER -D__WINE__ -Ddbg_printf=__vprintf \
 	-DTRACE=__vprintf # -DDETAILED_OUT
 
 LIB_OBJECTS= ldt_keeper.o pe_image.o module.o \
