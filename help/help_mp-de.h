@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.144
+// In synch with rev 1.146
 
 // ========================= MPlayer help ===========================
 
@@ -89,7 +89,7 @@ static char help_text[]=
 "         ***************************************************\n"\
 "Mögliche Gründe, Probleme, Workarounds: \n"\
 "- Häufigste Ursache: defekter/fehlerhafter _Audio_treiber.\n"\
-"  - Versuche -ao sdl, verwende ALSA 0.5 oder die OSS Emulation von ALSA 0.9.\n"\
+"  - Versuche -ao sdl oder die OSS-Emulation von ALSA.\n"\
 "  - Experimentiere mit verschiedenen Werten für -autosync, 30 ist ein guter Startwert."\
 "- Langsame Videoausgabe\n"\
 "  - Versuche einen anderen -vo Treiber (-vo help für eine Liste)\n"\
@@ -371,6 +371,34 @@ static char help_text[]=
 "                 (320 kbps Bitrate)\n"\
 "                 <8-320>: ABR-Enkodierung mit der angegebenen durchschnittlichen\n"\
 "                          Bitrate\n\n"
+
+//codec-cfg.c:
+#define MSGTR_DuplicateFourcc "doppeltes FourCC"
+#define MSGTR_TooManyFourccs "zu viele FourCCs/Formate..."
+#define MSGTR_ParseError "Fehler beim Parsen"
+#define MSGTR_ParseErrorFIDNotNumber "Fehler beim Parsen (Format-ID keine Nummer?)"
+#define MSGTR_ParseErrorFIDAliasNotNumber "Fehler beim Parsen (Alias der Format-ID keine Nummer?)"
+#define MSGTR_DuplicateFID "doppelte Format-ID"
+#define MSGTR_TooManyOut "zu viele aus..."
+#define MSGTR_InvalidCodecName "\nCodecname(%s) ist ungültig!\n"
+#define MSGTR_CodecLacksFourcc "\nCodec(%s) hat kein FourCC/Format!\n"
+#define MSGTR_CodecLacksDriver "\nCodec(%s) hat keinen Treiber!\n"
+#define MSGTR_CodecNeedsDLL "\nCodec(%s) braucht eine 'dll'!\n"
+#define MSGTR_CodecNeedsOutfmt "\nCodec(%s) braucht ein 'outfmt'!\n"
+#define MSGTR_CantAllocateComment "Kann Speicher für Kommentar nicht allozieren. "
+#define MSGTR_GetTokenMaxNotLessThanMAX_NR_TOKEN "get_token(): max >= MAX_MR_TOKEN!"
+#define MSGTR_ReadingFile "Lese %s: "
+#define MSGTR_CantOpenFileError "Kann '%s' nicht öffnen: %s\n"
+#define MSGTR_CantGetMemoryForLine "Bekomme keinen Speicher für 'line': %s\n"
+#define MSGTR_CantReallocCodecsp "Kann '*codecsp' nicht erneut allozieren: %s\n"
+#define MSGTR_CodecNameNotUnique "Codecname '%s' ist nicht eindeutig."
+#define MSGTR_CantStrdupName "Kann strdup nicht ausführen -> 'name': %s\n"
+#define MSGTR_CantStrdupInfo "Kann strdup nicht ausführen -> 'info': %s\n"
+#define MSGTR_CantStrdupDriver "Kann strdup nicht ausführen -> 'driver': %s\n"
+#define MSGTR_CantStrdupDLL "Kann strdup nicht ausführen -> 'dll': %s"
+#define MSGTR_AudioVideoCodecTotals "%d Audio- & %d Videocodecs\n"
+#define MSGTR_CodecDefinitionIncorrect "Codec ist nicht korrekt definiert."
+#define MSGTR_OutdatedCodecsConf "Diese codecs.conf ist zu alt und nicht kompatibel mit dieser Version von Mplayer!"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM-Laufwerk '%s' nicht gefunden.\n"
@@ -817,7 +845,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Kann Audiogerät %s nicht auf AC3-Ausgabe setzen, versuche S16...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Audiogerät auf %d Kanäle zu setzen ist fehlgeschlagen.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: Treiber unterstützt SNDCTL_DSP_GETOSPACE nicht :-(\n"
-#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   *** Dein Audiotreiber unterstützt select() NICHT ***\nKompiliere mplayer mit #undef HAVE_AUDIO_SELECT in der Datei config.h !\n\n"
+#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   *** Dein Audiotreiber unterstützt select() NICHT ***\nKompiliere Mplayer mit #undef HAVE_AUDIO_SELECT in der Datei config.h !\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nKritischer Fehler: *** KANN AUDIO-GERÄT NICHT ERNEUT ÖFFNEN / ZURÜCKSETZEN *** %s\n"
 
 // ao_arts.c
@@ -845,7 +873,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Datei: %s (%s)\nPCM: Samplerate: %iHz Kanäle: %s Format %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Das Anlegen von Dump-Dateien wird am schnellsten mit -vc dummy -vo null erreicht.\nPCM: Info: Um WAVE-Dateien zu schreiben, benutze -waveheader (Standard).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Das Anlegen von Dump-Dateien wird am Schnellsten mit -vc dummy -vo null erreicht.\nPCM: Info: Um WAVE-Dateien zu schreiben, benutze -waveheader (Standard).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Öffnen von %s zum Schreiben fehlgeschlagen!\n"
 
 // ao_sdl.c
@@ -875,7 +903,7 @@ static char help_text[]=
 #define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: Schreiben fehlgeschlagen."
 #define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Kann Audiogerät %s nicht öffnen, %s  -> nosound.\n"
 #define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: Deine Karte unterstützt %d Kanäle nicht, %s, %d Hz Samplerate.\n"
-#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   *** Dein Audiotreiber unterstützt select() NICHT ***\nKompiliere mplayer mit #undef HAVE_AUDIO_SELECT in der Datei config.h !\n\n"
+#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   *** Dein Audiotreiber unterstützt select() NICHT ***\nKompiliere Mplayer mit #undef HAVE_AUDIO_SELECT in der Datei config.h !\n\n"
 #define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nKritischer Fehler: *** KANN AUDIO-GERÄT NICHT ERNEUT ÖFFNEN / ZURÜCKSETZEN *** %s\n"
 
 // ao_alsa5.c
