@@ -1184,7 +1184,7 @@ fi
 
 # Checking for CFLAGS
 if [ "$_profile" != "" ] || [ "$_debug" != "" ]; then
- CFLAGS="-O2 -march=$proc -mcpu=$proc $_debug $_profile"
+ CFLAGS="-W -Wall -O2 -march=$proc -mcpu=$proc $_debug $_profile"
 else
 if test -z "$CFLAGS"; then
  CFLAGS="-O4 -march=$proc -mcpu=$proc -pipe -ffast-math -fomit-frame-pointer"
