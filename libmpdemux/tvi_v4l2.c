@@ -175,6 +175,7 @@ static int fcc_mp2vl(int fcc)
     case IMGFMT_I420:	return V4L2_PIX_FMT_YUV420;
     case IMGFMT_YUY2:	return V4L2_PIX_FMT_YUYV;
     case IMGFMT_YV12:	return V4L2_PIX_FMT_YUV420;
+    case IMGFMT_UYVY:   return V4L2_PIX_FMT_UYVY;
     }
     return fcc;
 }
@@ -196,6 +197,7 @@ static int fcc_vl2mp(int fcc)
     case V4L2_PIX_FMT_YUV410:	return IMGFMT_IF09;
     case V4L2_PIX_FMT_YUV420:	return IMGFMT_I420;
     case V4L2_PIX_FMT_YUYV:		return IMGFMT_YUY2;
+    case V4L2_PIX_FMT_UYVY:     return IMGFMT_UYVY;
     }
     return fcc;
 }
