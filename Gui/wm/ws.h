@@ -12,7 +12,9 @@
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/XShm.h>
+#ifdef HAVE_XDPMS
 #include <X11/extensions/dpms.h>
+#endif
 
 #define  wsKeyReleased   0
 #define  wsKeyPressed    1
