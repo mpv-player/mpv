@@ -472,13 +472,13 @@ nop_streaming_start( stream_t *stream ) {
 	stream->streaming_ctrl->buffering = 1;
 //	stream->streaming_ctrl->buffering = 0;
 	stream->streaming_ctrl->status = streaming_playing_e;
-	return fd;
+	return 0;
 }
 
 // Start listening on a UDP port. If multicast, join the group.
 int
 rtp_open_socket( URL_t *url ) {
-	int socket_server_fd;
+	int socket_server_fd, rxsockbufsz;
 	int err, err_len;
 	fd_set set;
 	struct sockaddr_in server_address;
@@ -513,6 +513,13 @@ rtp_open_socket( URL_t *url ) {
 			return -1;
 		}
 	}
+
+	// Increase the socket rx buffer size to maximum -- this is UDP
+	rxsockbufsz = 240 * 1024;
+	if( setsockopt( socket_server_fd, SOL_SOCKET, SO_RCVBUF, &rxsockbufsz, sizeof(rxsockbufsz))) {
+		perror("Couldn't set receive socket buffer size");
+	}
+
 	if((ntohl(server_address.sin_addr.s_addr) >> 28) == 0xe) {
 		mcast.imr_multiaddr.s_addr = server_address.sin_addr.s_addr;
 		//mcast.imr_interface.s_addr = inet_addr("10.1.1.2");
@@ -558,17 +565,18 @@ rtp_streaming_start( stream_t *stream ) {
 	if( fd<0 ) {
 		fd = rtp_open_socket( (streaming_ctrl->url) ); 
 		if( fd<0 ) return -1;
+		stream->fd = fd;
 	}
 
 	streaming_ctrl->streaming_read = rtp_streaming_read;
+	streaming_ctrl->streaming_seek = nop_streaming_seek;
 	streaming_ctrl->prebuffer_size = 180000;
 	streaming_ctrl->buffering = 0; //1;
 	streaming_ctrl->status = streaming_playing_e;
-	return fd;
+	return 0;
 }
 
 int
-//streaming_start(stream_t *stream, URL_t *url, int demuxer_type) {
 streaming_start(stream_t *stream, int demuxer_type) {
 	int ret=-1;
 	if( stream==NULL ) return -1;
@@ -580,7 +588,7 @@ streaming_start(stream_t *stream, int demuxer_type) {
 				printf("streaming_start : Closing socket %d failed %s\n",stream->fd,strerror(errno));
 		}
 		stream->fd = -1;
-		stream->fd = rtp_streaming_start( stream );
+		ret = rtp_streaming_start( stream );
 	} else
 	// For connection-oriented streams, we can usually determine the streaming type.
 	switch( demuxer_type ) {
