@@ -263,7 +263,9 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
        drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
        printf( "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
       }
-
+#ifdef HAVE_NEW_GUI
+     if ( vo_window == None )
+#endif
      saver_off(mDisplay);  // turning off screen saver
      return 0;
     }
@@ -294,6 +296,15 @@ static void allocate_xvimage(int foo)
  XSync(mDisplay, False);
  shmctl(Shminfo[foo].shmid, IPC_RMID, 0);
  memset(xvimage[foo]->data,128,xvimage[foo]->data_size);
+ return;
+}
+
+static void deallocate_xvimage(int foo)
+{
+ XShmDetach( mDisplay,&Shminfo[foo] );
+ shmdt( Shminfo[foo].shmaddr );
+ XFlush( mDisplay );
+ XSync(mDisplay, False);
  return;
 }
 
@@ -451,7 +462,13 @@ static uint32_t query_format(uint32_t format)
 }
 
 static void uninit(void) {
-    saver_on(mDisplay); // screen saver back on
+int i;
+#ifdef HAVE_NEW_GUI
+     if ( vo_window == None )
+#endif
+      saver_on(mDisplay); // screen saver back on
+for( i=0;i<num_buffers;i++ )
+ deallocate_xvimage( i );
 }
 
 
