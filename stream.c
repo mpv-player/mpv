@@ -20,6 +20,11 @@ extern int verbose; // defined in mplayer.c
 #include "vcd_read.c"
 #endif
 
+#ifdef USE_DVDREAD
+int dvd_read_sector(void* d,void* p2);
+void dvd_seek(void* d,off_t pos);
+#endif
+
 //=================== STREAMER =========================
 
 int stream_fill_buffer(stream_t *s){
@@ -34,6 +39,16 @@ int stream_fill_buffer(stream_t *s){
     len=vcd_cache_read(s->fd,s->buffer);break;
 #else
     len=vcd_read(s->fd,s->buffer);break;
+#endif
+#ifdef USE_DVDREAD
+  case STREAMTYPE_DVD: {
+    off_t pos=dvd_read_sector(s->priv,s->buffer);
+    if(pos>=0){
+	len=2048; // full sector
+	s->pos=2048*pos-len;
+    } else len=-1; // error
+    break;
+  }
 #endif
   default: len=0;
   }
@@ -72,6 +87,8 @@ if(verbose>=3){
 #endif
   case STREAMTYPE_VCD:
     newpos=(pos/VCD_SECTOR_DATA)*VCD_SECTOR_DATA;break;
+  case STREAMTYPE_DVD:
+    newpos=pos/2048; newpos*=2048; break;
   }
 
   pos-=newpos;
@@ -90,6 +107,12 @@ if(newpos==0 || newpos!=s->pos){
     vcd_set_msf(s->pos/VCD_SECTOR_DATA);
 #endif
     break;
+#ifdef USE_DVDREAD
+  case STREAMTYPE_DVD:
+    s->pos=newpos; // real seek
+    dvd_seek(s->priv,s->pos/2048);
+    break;
+#endif
   case STREAMTYPE_STREAM:
     //s->pos=newpos; // real seek
     if(newpos<s->pos){
