@@ -1609,7 +1609,7 @@ fi
 echores "$_bsdi_dvd"
 
 
-echocheck "Have userspace SCSI headers on Solaris"
+echocheck "userspace SCSI headers (Solaris)"
 cat > $TMPC << EOF
 #   include <unistd.h>
 #   include <stropts.h>
@@ -2196,20 +2196,15 @@ EOF
         _dvb=yes
         echores "yes"
     else
-	if cc_check -I/usr/src/DVB/ost/include ; then
-    	    _dvb=yes
-    	    echores "yes (using source from /usr/src/DVB/ost/include)"
-	    _inc_dvb="-I/usr/src/DVB/ost/include"
-	else
-	    if cc_check $_inc_extra/ost/include ; then
-		_dvb=yes
-		echores "yes (using source from $_inc_extra/ost/include)"
-		_inc_dvb="$_inc_extra/ost/include"
-	    else
-		_dvb=no
-		echores "no (driver source not in /usr/src/DVB/ost/include, please add path with --with-extraincdir=DIR)"
-	    fi
-	fi
+      for I in "-I/usr/src/DVB/ost/include" "$_inc_extra/ost/include" ; do
+        if cc_check "$I" ; then
+          _dvb=yes
+          _inc_dvb="$I"
+          echores "yes (using $_inc_dvb)"
+          break
+        fi
+      done
+      test "$_dvb" = no && echores "no (specify path to DVB/ost/include with --with-extraincdir=DIR)"
     fi
 else
     echores "no"
@@ -2466,7 +2461,7 @@ echores "$_ossaudio"
 
 
 echocheck "ALSA audio"
-if test "$_alsa" = auto || test "$_alsa" = yes; then
+if test "$_alsa" != no ; then
   _alsa=no
   cat > $TMPC << EOF
 #include <sys/asoundlib.h>
@@ -2478,31 +2473,41 @@ EOF
 #include <sys/asoundlib.h>
 int main(void) { return (!(SND_LIB_MAJOR==0 && SND_LIB_MINOR==9)); }
 EOF
-  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.9.x'
-  if test "$_alsaver" ; then
-    _alsa=yes
-    echores "yes (using alsa $_alsaver)"
-  else
-    echores "no"
-  fi
-else
-  echores "no"
+  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.9.x-sys'
+  cat > $TMPC << EOF
+#include <alsa/asoundlib.h>
+int main(void) { return (!(SND_LIB_MAJOR==0 && SND_LIB_MINOR==9)); }
+EOF
+  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.9.x-alsa'
 fi
 _def_alsa5='#undef HAVE_ALSA5'
 _def_alsa9='#undef HAVE_ALSA9'
-if test "$_alsa" = yes ; then
+_def_sys_asoundlib_h='#undef HAVE_SYS_ASOUNDLIB_H'
+_def_alsa_asoundlib_h='#undef HAVE_ALSA_ASOUNDLIB_H'
+if test "$_alsaver" ; then
   if test "$_alsaver" = '0.5.x' ; then
     _aosrc="$_aosrc ao_alsa5.c"
     _aomodules="alsa5 $_aomodules"
     _def_alsa5='#define HAVE_ALSA5 1'
-  elif test "$_alsaver" = '0.9.x' ; then
+    _def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
+    echores "yes (using alsa 0.5.x and sys/asoundlib.h)"
+  elif test "$_alsaver" = '0.9.x-sys' ; then
     _aosrc="$_aosrc ao_alsa9.c"
     _aomodules="alsa9 $_aomodules"
     _def_alsa9='#define HAVE_ALSA9 1'
+    _def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
+    echores "yes (using alsa 0.9.x and sys/asoundlib.h)"
+  elif test "$_alsaver" = '0.9.x-alsa' ; then
+    _aosrc="$_aosrc ao_alsa9.c"
+    _aomodules="alsa9 $_aomodules"
+    _def_alsa9='#define HAVE_ALSA9 1'
+    _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
+    echores "yes (using alsa 0.9.x and alsa/asoundlib.h)"
   fi
-  _ld_alsa='-lasound'
+  _ld_alsa="-lasound $_ld_dl $_ld_pthread"
 else
   _noaomodules="alsa $_noaomodules"
+  echores "no"
 fi
 
 
@@ -2547,7 +2552,7 @@ fi
 echores "$_mlib"
 
 
-echocheck "SGI Audio"
+echocheck "SGI audio"
 if test "$_sgiaudio" = auto ; then
   # check for SGI audio
   cat > $TMPC << EOF
@@ -3288,7 +3293,7 @@ fi
 echores "$_tv_v4l"
 
 
-echocheck "select"
+echocheck "audio select()"
 if test "$_select" = no ; then
   _def_select='#undef HAVE_AUDIO_SELECT'
 elif test  "$_select" = yes ; then
@@ -3844,6 +3849,8 @@ $_def_ossaudio_devdsp
 $_def_ossaudio_devmixer
 $_def_alsa5
 $_def_alsa9
+$_def_sys_asoundlib_h
+$_def_alsa_asoundlib_h
 $_def_sunaudio
 $_def_sgiaudio
 $_def_nas

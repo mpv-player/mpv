@@ -12,7 +12,14 @@
 */
 
 #include <errno.h>
+
+#if HAVE_SYS_ASOUNDLIB_H
 #include <sys/asoundlib.h>
+#elif HAVE_ALSA_ASOUNDLIB_H
+#include <alsa/asoundlib.h>
+#else
+#error "asoundlib.h is not in sys/ or alsa/ - please bugreport"
+#endif
 
 #include "../config.h"
 
