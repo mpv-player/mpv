@@ -463,6 +463,9 @@ if test "$_skip_cc_check" != yes ; then
       cc_verc_fail=yes
       ;;
     2.95.[2-9]|2.95.[2-9][-.]*|3.[0-9]|3.[0-9].[0-9])
+      _cc_major=`echo $cc_version | cut -d '.' -f 1`
+      _cc_minor=`echo $cc_version | cut -d '.' -f 2`
+      _cc_mini=`echo $cc_version | cut -d '.' -f 3`
       cc_version="$cc_version, ok"
       cc_verc_fail=no
       ;;
@@ -4743,6 +4746,9 @@ fi
 _stripbinaries=yes
 if test "$_profile" != "" || test "$_debug" != "" ; then
   CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
+  if test "$_cc_major" -ge "3" ; then
+    CFLAGS=`echo "$CFLAGS" | sed -e 's/\(-Wall\)/\1 -Wno-unused-parameter/'`
+  fi
   _stripbinaries=no
 elif test -z "$CFLAGS" ; then
   if test "$host_arch" != "mips" ; then
