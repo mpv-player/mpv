@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.40 -->
+<!-- synced with 1.41 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -350,6 +350,17 @@ wolna. Używaj SDL.
   w katalogu systemowym Windows
   (<filename class="directory"><replaceable>C:\Windows\system\</replaceable></filename>).</para>
 
+<para>Możesz odtwarzać VCD, odtwarzając pliki <filename>.DAT</filename> lub <filename>.MPG</filename>,
+  które Windows pokazuje na VCD. To działa mniej więcej tak (dopasuj literę dysku do Twojego
+  CD-ROMu):</para>
+
+<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
+
+<para>DVD również działa, podaj literę Twojego DVD-ROMu przez 
+  opcję <option>-dvd-device</option>:</para>
+
+<screen>mplayer dvd://<replaceable>&lt;tytuł&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
+
 <para>Konsola <application>Cygwin</application>/<application>MinGW</application>
   jest raczej wolna. Przekierowywanie wyjścia albo używanie
   opcji <option>-quiet</option> zgłoszono jako poprawiające wydajność na
@@ -383,22 +394,6 @@ zawiera <filename>inttypes.h</filename>. Umieść plik
   są dostępne na 
   <ulink url="http://www.libsdl.org/extras/win32/cygwin/">stronie libsdl</ulink>.</para>
 
-<para>Możesz odtwarzać VCD, odtwarzając pliki <filename>.DAT</filename> lub <filename>.MPG</filename>,
-  które Windows pokazuje na VCD. To działa mniej więcej tak (dopasuj literę dysku do Twojego
-  CD-ROMu):</para>
-
-<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
-
-<screen>mplayer <replaceable>/cygdrive/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
-
-<para>DVD również działa, podaj literę Twojego DVD-ROMu przez 
-  opcję <option>-dvd-device</option>:</para>
-
-
-<screen>mplayer dvd://<replaceable>&lt;tytuł&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
-
-<screen>mplayer dvd://<replaceable>&lt;tytuł&gt;</replaceable> -dvd-device '\\.\<replaceable>d</replaceable>:'</screen>
-
 </sect2>
 
 <sect2 id="mingw">
@@ -416,20 +411,7 @@ zawiera <filename>inttypes.h</filename>. Umieść plik
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><filename>types.h</filename></ulink>.
 </para>
 
-
 <para>Rozpakuj pliki nagłówkowe DirectX do <filename class="directory">/mingw/include/</filename>.</para>
-
-<para>VCD i DVD działają prawie tak, jak w <application>Cygwinie</application>
-   (dopasuj literę dysku do Twojego  
-   CD-ROMu/DVD-ROMu):</para>
-
-<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
-
-<screen>mplayer <replaceable>/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
-
-<screen>mplayer dvd://<replaceable>&lt;tytuł&gt;</replaceable> -dvd-device /<replaceable>d</replaceable>/</screen>
-
-<screen>mplayer dvd://<replaceable>&lt;tytuł&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:\\</screen>
 
 </sect2>
 
