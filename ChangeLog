@@ -170,6 +170,7 @@ MPlayer (1.0)
     * VIDIX I420 support for Cyberblade and mga
     * VIDIX Radeon support on big-endian systems, other Radeon fixes
     * CLE266 VIDIX driver
+    * experimental SAVAGE VIDIX driver
     * -jpeg removed in favor of -vo jpeg suboptions
     * FriBiDi fixes for comma handling in Hebrew subtitles
     * -crash-debug option to attach gdb automatically after crashes
