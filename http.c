@@ -40,7 +40,7 @@ http_free( HTTP_header_t *http_hdr ) {
 int
 http_response_append( HTTP_header_t *http_hdr, char *response, int length ) {
 	char *ptr = NULL;
-	if( http_hdr==NULL || response==NULL ) return -1;
+	if( http_hdr==NULL || response==NULL || length<0 ) return -1;
 	ptr = (char*)malloc( http_hdr->buffer_size+length );
 	if( ptr==NULL ) {
 		printf("Memory allocation failed\n");
