@@ -1,4 +1,4 @@
-.\" synced with 1.869
+.\" synced with 1.877
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "15 Février 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "27 Février 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -121,7 +121,7 @@ mencoder \- Encodeur vidéo
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p | ftp ] ://
+.RI [ mms[t] | http | http_proxy | rt[s]p | ftp | udp] ://
 [utilisateur:mdp@]\fIURL\fP[:port] [options]
 .
 .br
@@ -244,7 +244,7 @@ sortie vidéo.
 .B contrôle général
 .PD 0
 .RSs
-.IPs "\<\- et \->"
+.IPs "<\- et \->"
 Recule/\:avance de 10 secondes.
 .IPs "haut et bas"
 Recule/\:avance d'1 minute.
@@ -311,8 +311,8 @@ Créé une marque EDL.
 .PD 1
 .PP
 (Les touches suivantes ne sont valides qu'en utilisant une sortie vidéo
-accélérée matériellement (xv, (x)vidix, (x)mga, etc) ou le filtre égaliseur
-logiciel (\-vf eq ou \-vf eq2).
+accélérée matériellement (xv, (x)vidix, (x)mga, etc), l'égaliseur
+logiciel (\-vf eq ou \-vf eq2) ou le filtre de teinte (\-vf hue).
 .PP
 .PD 0
 .RSs
@@ -3756,14 +3756,22 @@ Active le découpage logiciel.
 .
 .TP
 .B pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
-Mixe les canaux arbitrairement, voir DOCS/\:HTML/\:fr/\:audio.html
-pour les détails.
+Mixe les canaux arbitrairement.
+Il s'agit d'une combinaison du filtre volume et channels pouvant être
+utilisé pour mixer plusieurs canaux dans seulement quelques-uns, par
+ex.\& stéréo vers mono ou varier la "largeur" du haut-parleur central
+d'un équipement "home theater".
+Ce filtre est difficile à utiliser, et vous demandera quelques
+tâtonnements avant d'obtenir le résultat désiré.
+Le nombre d'options de ce filtre dépend du nombre de canaux de sortie.
+Un exemple de mixage de six canaux vers deux à l'aide de ce filtre peut
+être trouvé dans la section des exemples, vers la fin de ce document.
 .PD 0
 .RSs
-.IPs n
+.IPs <n>\ \ 
 nombre de canaux d'entrée (1\-6)
-.IPs lij
-Combien du canal j est mixé dans le canal de sortie i.
+.IPs <lij>
+Combien du canal j est mixé dans le canal de sortie i (0\-1).
 .RE
 .PD 1
 .
@@ -3782,14 +3790,13 @@ numéro de canal pour le sous-canal
 .
 .TP
 .REss
-.B surround[=d]
+.B surround[=retard]
 Décodeur pour le son surround encodé en matrice, fonctionne sur de nombreux
 fichiers à deux canaux.
 .PD 0
 .RSs
-.IPs d
-décalage en ms pour les hauts-parleurs arrière (0ms à 1000ms)
-(par défaut\ : 15ms).
+.IPs <retard>
+décalage en ms pour les hauts-parleurs arrière (0 à 1000) (par défaut\ : 15).
 .RE
 .PD 1
 .
@@ -3983,7 +3990,7 @@ Ajoute un bord de 50 pixels en bas de l'image.
 .PD 1
 .IPs <x>,<y>
 position de l'image originale sur l'image étendue (par défaut\ : centrée)
-.IPs <o>
+.IPs <o>\ 
 rendu OSD/\:sous-titres
 .RSss
 0: désactivé (par défaut)
@@ -4433,11 +4440,18 @@ Les paramètres et le comportement sont les mêmes.
 Égaliseur logiciel avec contrôles interactifs tout comme les égaliseurs
 matériels, pour les cartes/\:pilotes qui ne permettent pas de contrôler
 la luminosité et le contraste de façon matérielle.
-Les valeurs initiales dans l'intervalle -100\-100 peuvent être fournies en
-ligne de commande.
 Peut également être utile avec MEncoder, soit pour réparer des films mal
 capturés, soit pour réduire légèrement le contraste pour masquer des
 artefacts et s'accomoder de débits plus bas.
+.PD 0
+.RSs
+.IPs <-100\-100>
+luminosité initiale
+initial brightness
+.IPs <-100\-100>
+contraste initial
+.RE
+.PD 1
 .
 .TP
 .Bs eq2[=gamma:contraste:luminosité:saturation:gr:gv:gb:poids]
@@ -4449,34 +4463,44 @@ valeurs gamma sont 1.0.
 Les paramètres sont donnés en nombres flottants.
 .PD 0
 .RSs
-.IPs <gr>
-valeur gamma pour la composante rouge
-.IPs <gv>
-valeur gamma pour la composante verte
-.IPs <gb>
-valeur gamma pour la composante bleue
-.REss
-.PD 1
-.RS
-Les paramètres rg, vg, bg sont les valeurs gamma indépendantes pour les
-composantes rouges, vertes et bleues.
+.IPs <0.1\-10>
+valeur gamma initiale (par défaut\ : 1.0)
+.IPs <-2\-2>
+contraste initial, où une valeur négative produit une image en négatif
+(par défaut\ : 1.0)
+.IPs <-1\-1>
+luminosité initiale (par défaut\ : 0.0)
+.IPs <0\-3>
+saturation initiale (par défaut\ : 1.0)
+.IPs <0.1\-10>
+valeur gamma pour la composante rouge (par défaut\ : 1.0)
+.IPs <0.1\-10>
+valeur gamma pour la composante verte (par défaut\ : 1.0)
+.IPs <0.1\-10>
+valeur gamma pour la composante bleue (par défaut\ : 1.0)
+.IPs <0\-1>
 Le paramètre poids peut être utilisé pour réduire l'effet d'un gamma trop
 grand sur les parties claires de l'image, c-à-d.\& les empécher d'être
 sur-amplifiées et de devenir complètement blanches.
 Une valeur de 0.0 désactive complètement la correction gamma tandis que 1.0
-lui laisse toute sa force.
-Les valeurs par défaut sont gamma=1.0, contraste=0.0, luminosité=0.0,
-saturation=1.0, poids=1.0.
-Les intervalles de valeur sont 0.1\-10 pour les gamma, -2\-2 pour le contraste
-(les valeurs négatives produisent une image négative), -1\-1 pour la
-luminosité, 0\-3 pour la saturation et 0\-1 pour le poids.
+lui laisse toute sa force (par défaut\ : 1.0).
 .RE
+.PD 1
 .
 .TP
 .B hue[=couleur:saturation]
-Les valeurs par défaut sont couleur=0.0, saturation=1.0.
-Les intervalles pour la couleur sont -180\-180, et -2\-2 pour la saturation
-(des valeurs négatives impliquent un chroma négatif).
+Égaliseur logiciel à l'ajustement interactif, tout comme les égaliseurs
+matériels, pour les cartes/\:pilotes qui ne gèrent pas le l'ajustement
+de la teinte et de la saturation en matériel.
+.PD 0
+.RSs
+.IPs <-180\-180>
+teinte initiale (par défaut\ : 0.0)
+.IPs <-100\-100>
+saturation initiale, où une valeur négative produit une image en négatif
+(par défaut\ : 1.0)
+.RE
+.PD 1
 .
 .TP
 .B halfpack[=f]
@@ -4487,11 +4511,20 @@ les fonctions matérielles de mise à l'échelle sont de mauvaise qualité ou
 n'existent pas.
 Peut également être utilisé comme désentrelaceur primitif pour luma
 uniquement avec une très faible utilisation du processeur.
+.PD 0
+.RSs
+.IPs <f>\ \ 
 Par défaut, halfpack fait une moyenne des lignes deux à deux pour
 sous-échantillonner.
-Le paramètre optionnel f peut valoir 0 pour n'utiliser que les lignes paires,
-ou 1 pour n'utiliser que les lignes impaires.
-Tout autre valeur de f renvoie au comportement par défaut (moyenne).
+Tout valeur de f différente de 0 ou 1 renvoie au comportement par défaut
+(moyenne).
+.RSss
+0: Utilise seulement les lignes paires lors du sous-échantillonnage.
+.br
+1: Utilise seulement les lignes impaires lors du sous-échantillonnage.
+.REss
+.RE
+.PD 1
 .
 .TP
 .B ilpack[=mode]
@@ -4502,10 +4535,18 @@ Ce filtre convertit les données 4:2:0 planaires au format YUY2 (4:2:2)
 avec les lignes chroma à leur bon emplacement, de façon à ce que à chaque
 ligne de balayage (scanline), les données luma et chroma proviennent toutes
 deux du même champ.
-L'argument optionnel sélectionne le mode d'échantillonnage.
-Par défaut, l'interpolation linéaire (mode 1) est utilisé.
-Le mode 0 utilise un échantillonnage du 'plus proche voisin' (nearest-neighbor),
-qui est rapide mais incorrect.
+.PD 0
+.RSs
+.IPs <mode>
+Sélectionne le mode d'échantillons.
+.RSss
+0: échantillonnage du 'plus proche voisin' (nearest-neighbor),
+rapide mais incorrect
+.br
+1: interpolation linéaire (par défaut)
+.REss
+.RE
+.PD 1
 .
 .TP
 .B harddup
@@ -4534,28 +4575,38 @@ les trames et avant tout filtre gourmand en temps de calcul.
 .B decimate[=max:haut:bas:frac]
 Saute les trames qui ne différent pas beaucoup de la trame précédente de
 façon à réduire le débit.
-L'argument max (si positif) définit le nombre maximum de trames consécutives
-qui peuvent être sautées, ou (si négatif) l'interval minimum entre les trames
-sautées.
+L'usage de ce filtre est destiné aux encodages à très bas débit (par ex.\&
+une transmission sur ligne RTC), mais peut être en théorie utilisé pour
+corriger des films dont l'inverse-teleciné aurait été mal fait.
+.PD 0
+.RSs
+.IPs <max>
+Définit le nombre maximum de trames consécutives qui peuvent être sautées
+(si positif), ou l'interval minimum entre les trames sautées (si négatif).
+.IPs <haut>,<bas>,<frac>
 Une trame peut être sautée si aucun bloc 8x8 ne différe de plus que
-la limite "haut", et si pas plus de "frac" portions (1 signifiant l'image
-entière) ne diffèrent de plus que la limite "bas".
-Les valeurs de haut et bas sont pour des blocs de 8x8 pixels et représentent
-les différences effectives de pixels, donc une limite de 64 corespond à
-1 unité de différence pour chaque pixel, ou la même chose répartie
-différemment sur le bloc.
-L'utilisation principale de ce filtre est l'encodage à très bas débit
-(par ex.\& le streaming par modem bas-débit), mais il peut en théorie être
-utilisé pour réparer les films qui n'auraient pas été "inverse-telecined"
-correctement.
+la limite <haut>, et si pas plus de <frac> portions (1 signifiant l'image
+entière) ne diffèrent de plus que la limite <bas>.
+Les valeurs de <haut> et <bas> sont pour des blocs de 8x8 pixels et
+représentent les différences effectives de pixels, donc une limite de 64
+corespond à 1 unité de différence pour chaque pixel, ou la même chose
+répartie différemment sur le bloc.
+.RE
+.PD 1
 .
 .TP
 .B dint[=sens:niveau]
-Détecte et saute la première trame d'un groupe de trames entrelacées.
-Les valeurs peuvent aller de 0.0 à 1.0 \- la première (par défaut\ : 0.15)
-est la différence entre les pixels voisins, la seconde (par défaut\ : 0.15)
-est la partie de l'image qui devra être détectée comme entrelacée pour sauter
-la trame.
+Le filtre désentrelace-et-saute détecte et saute la première trame d'un
+groupe de trames entrelacées.
+.PD 0
+.RSs
+.IPs <0.0\-1.0>
+différence relative entre les pixels voisins (par défaut\ : 0.1)
+.IPs <0.0\-1.0>
+Quelle partie de l'image qui devra être détectée comme entrelacée pour
+sauter la trame (par défaut\ : 0.15).
+.RE
+.PD 1
 .
 .TP
 .B lavcdeint (OBSOLÈTE)
@@ -4567,17 +4618,32 @@ désentrelaceur noyau adaptatif de Donald Graft.
 Désentrelace des parties de la vidéo si un seuil configurable est dépassé.
 .PD 0
 .RSs
-.IPs "<seuil> (0 \- 255)"
+.IPs <0\-255>
 Seuil (par défaut\ : 10).
-.IPs "<carte> (0 ou 1)"
-Affiche en blanc les pixels qui dépassent le seuil (par défaut\ : 0).
-.IPs "<ordre> (0 ou 1)"
-Échange les champs si à 1 (par défaut\ : 0).
-.IPs "<netteté> (0 ou 1)"
-Améliore davantage la netteté (sharpening) (par défaut\ : 0).
-.IPs "<deuxsens> (0 ou 1)"
-Autorise l'augmentation de la netteté (sharpening) dans les deux sens
-(par défaut\ : 0).
+.IPs <carte>
+.RSss
+0: Ignore les pixels dépassant le seuil (par défaut).
+.br
+1: Peint en blanc les pixels dépassant le seuil.
+.REss
+.IPs <ordre>
+0: Ne touche pas aux champs (par défaut).
+.br
+1: Échange les champs.
+.REss
+.IPs <netteté>
+.RSss
+0: Désactive l'amélioration de la netteté (sharpening) (par défaut).
+.br
+1: Améliore davantage la netteté.
+.REss
+.IPs <deuxsens>
+.RSss
+0: Désactive l'augmentation de la netteté (sharpening) dans les deux sens
+(par défaut).
+.br
+1: Active l'augmentation de la netteté dans les deux sens.
+.REss
 .RE
 .PD 1
 .
@@ -4669,15 +4735,20 @@ Les arguments suivants (voir leur syntaxe plus haut) peuvent être utilisés
 pour contrôler son comportement:
 .RSs
 .IPs <dr>\ 
-Définit le mode saut de trames.
-0 (par défaut) signifie ne pas sauter de trames pour maintenir le débit de
+Définit le mode de saut de trames.
+.RSss
+0: Ne pas sauter de trames pour maintenir le débit de trame de sortie
+(par défaut).
+.br
+1: Toujours sauter une trame si il n'y a pas eu de sauts ou d'assemblage
+téléciné parmi les 5 dernières trames.
+.br
+2: Toujours maintenir le rapport exact 5:4 entre les trames d'entrée et de
 sortie.
-1 signifie toujours sauter la trame si il n'y a pas eu de sauts ou d'assemblage
-telecine dans les 5 dernières trames.
-2 signifie toujours maintenir le rapport exact 5:4 entre l'entrée et la sortie.
 .br
 .I NOTE\ :
 Utilisez le mode 1 avec MEncoder.
+.REss
 .IPs <am>\ 
 Type d'analyse.
 Les valeurs disponibles sont 0 (motif fixé avec numéro de trame initiale
@@ -4690,7 +4761,7 @@ entrelaçées.
 La valeur par défaut, -1, signifie "pas dans la séquence telecine".
 Le nombre spécifié ici est le type de la précédente trame imaginaire avant le
 début du film.
-.IPs "<tr0>, <tr1>, <tr2>, <tr3>"
+.IPs "<t0>, <t1>, <t2>, <t3>"
 Valeurs seuils à utiliser dans certains types.
 .RE
 .
@@ -7827,6 +7898,15 @@ types possibles\ : 4x4, 4x8 et 8x4 ne sont essayés que si 8x8 est meilleur que
 16x16.
 .
 .TP
+.B level_idc=<10\-51>
+Définit le Niveau (Level) du flux comme définit dans l'Annexe A du standard
+H.264 (par défaut\ : 40 - Niveau 4.0).
+Ceci est utilisé pour indiquer au décodeur quelles options du codec il
+doit gérer.
+N'utilisez ce paramètre que si vous saisissez bien ce qu'il signifie,
+et qu'il vous faut le modifier.
+.
+.TP
 .B log=<-1\-3>
 Ajuste la quantité d'informations de log à afficher à l'écran.
 .RSs
@@ -7970,7 +8050,9 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
 .TP
 .B Joue un fichier AAC 6 canaux avec seulement deux enceintes\ :
-mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
+mplayer \-rawaudio on:format=0xff \-af pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
+Peut-être vous aurez à ajuster un peu la valeur de pan (par c-à-d la
+multiplier par une valeur) pour augementer le volume ou éviter l'écrêtage
 .
 .SH EXEMPLES D'UTILISATIONS DE MENCODER
 .
