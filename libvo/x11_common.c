@@ -152,7 +152,7 @@ static int x11_errorhandler(Display *display, XErrorEvent *event)
 
 int net_wm_support_state_test( Atom atom )
 {
-#define NET_WM_STATE_TEST(x) { if (atom == XA_NET_WM_STATE_##x) { mp_dbg( MSGT_VO,MSGL_STATUS, "[x11] Detected wm supports" #x "state.\n" ); return SUPPORT_##x; } }
+#define NET_WM_STATE_TEST(x) { if (atom == XA_NET_WM_STATE_##x) { mp_dbg( MSGT_VO,MSGL_STATUS, "[x11] Detected wm supports " #x " state.\n" ); return SUPPORT_##x; } }
  
  NET_WM_STATE_TEST(FULLSCREEN);
  NET_WM_STATE_TEST(ABOVE);
@@ -172,13 +172,11 @@ int x11_get_property(Atom type, Atom **args, unsigned long *nitems)
 
 int vo_wm_detect( void )
 {
- XEvent          xev;
  int             i;
  int             wm = vo_wm_Unknown;
  unsigned long   nitems;
  Atom          * args = NULL;
  int             metacity_hack = 0;
- char          * name;
  
  if ( WinID >= 0 ) return vo_wm_Unknown;
  
@@ -698,12 +696,6 @@ void vo_x11_sizehint( int x, int y, int width, int height, int max )
 
 void vo_x11_setlayer( int layer )
 {
- Atom            type,arg1,arg2;
- int             format;
- unsigned long   nitems, bytesafter;
- Atom *          args = NULL;
- int i;
- 
  if ( WinID >= 0 ) return;
  
  switch ( vo_wm_type )
