@@ -28,8 +28,9 @@ int fakemono=0;
 
 #include "xa/xa_gsm.h"
 
+#ifdef USE_DIRECTSHOW
 #include "loader/DirectShow/DS_AudioDec.h"
-
+#endif
 
 static sh_audio_t* dec_audio_sh=NULL;
 

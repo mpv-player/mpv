@@ -56,7 +56,6 @@ int mpeg2_decode_data (vo_functions_t *, uint8_t * data_start, uint8_t * data_en
 //void mpeg2_drop (int flag);
 
 
-
 /* initialize mpegdec with a opaque user pointer */
 //void mpeg2_init (mpeg2dec_t * mpeg2dec, uint32_t mm_accel
 //		 ,vo_instance_t * output

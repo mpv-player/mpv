@@ -16,7 +16,7 @@ PRG_CFG = codec-cfg
 #prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
-SRCS = find_sub.c aviprint.c dll_init.c dec_audio.c aviwrite.c aviheader.c asfheader.c demux_avi.c demux_asf.c demux_mpg.c demuxer.c stream.c codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c mixer.c dvdauth.c spudec.c $(STREAM_SRCS)
+SRCS = find_sub.c aviprint.c dll_init.c dec_audio.c dec_video.c aviwrite.c aviheader.c asfheader.c demux_avi.c demux_asf.c demux_mpg.c demuxer.c stream.c codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c mixer.c dvdauth.c spudec.c $(STREAM_SRCS)
 OBJS = $(SRCS:.c=.o)
 CFLAGS = $(OPTFLAGS) -Iloader -Ilibvo $(CSS_INC) $(EXTRA_INC) # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB)
