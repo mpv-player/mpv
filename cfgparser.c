@@ -522,7 +522,7 @@ int parse_command_line(struct config *conf, int argc, char **argv, char **envp, 
 	for (i = 1; i < argc; i++) {
 next:
 		opt = argv[i];
-		/* check for -- (no more options id.) except --help ! */
+		/* check for -- (no more options id.) except --help! */
 		if ((*opt == '-') && (*(opt+1) == '-') && (*(opt+2) != 'h'))
 		{
 			no_more_opts = 1;
@@ -535,7 +535,7 @@ next:
 			goto next;
 		}
 			
-		if ((no_more_opts == 0) && (*opt == '-')) /* option */
+		if ((no_more_opts == 0) && (*opt == '-') && (*(opt+1) != 0)) /* option */
 		{
 		    /* remove trailing '-' */
 		    opt++;
