@@ -34,18 +34,20 @@ Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - IRC channel #MPlayer operator
 
 Szabolcs Berecz: <szabi@inf.elte.hu>
-- codecs file, config file and command line parser
+- codecs.conf file, config file and command line parser
 - mga_vid fixes, module option stc.
 - fbdev support in libvo
 
 László Megyer (Lez, Laaz): <lez@sch.bme.hu>
 - SUB reader
+- screensaver+DPMS disable for libvo
 
 Gyula László (Chass, Tégla): <chass-@freemail.hu>
 - fonts
+- new homepage design&gfx (coming soon)
 
 Zoltán Márk Vicián (Se7en): <se7en@sch.bme.hu>
-- SVGA support in libvo
+- SVGAlib support in libvo
 
 Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 - LIRC support (see DOCS/LIRC)
@@ -53,6 +55,8 @@ Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 
 Felix Bünemann: <Felix.Buenemann@gmx.de>
 - SDL driver fixes
+- Additional YUV formats fixes
+- New font (coming soon!?)
 
 TeLeNiEkO: <telenieko@telenieko.com>
 - debian packaging support (see debian/* and DOCS/DEBIAN)
@@ -61,6 +65,10 @@ TeLeNiEkO: <telenieko@telenieko.com>
 Michael Graffam: <mgraffam@idsi.net>
 - XF86VidMode support to vo_x11 and vo_dga
 - Video mode switching code to vo_dga
+
+Jens Hoffmann: <hoffmajs@gmx.de>
+- Additional YUV formats support
+- found the big BITMAPINFOHEADER problem -> solved ASV2 pixelization
 
 Main testers:
   Tibor Balázs (Tibcu)
