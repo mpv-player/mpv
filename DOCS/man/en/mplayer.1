@@ -2854,7 +2854,7 @@ optimization factor (default: 100)
 smooth factor (default: 0)
 .IPs quality=<0\-100>
 quality factor (default: 75)
-.IPs outdir=<value>
+.IPs outdir=<dirname>
 Specify the directory to save the JPEG files to.
 If not specified, all JPEG files are written to the current directory.
 .IPs subdirs=<value>
@@ -2893,17 +2893,14 @@ bottom of the picture.
 Write PNM files in raw mode (default).
 .IPs ascii
 Write PNM files in ASCII mode.
-.IPs outdir=<value>
-Specify the directory to save the PNM files to.
-If not specified, all PNM files are written to the current directory.
+.IPs outdir=<dirname>
+Specify the directory to save the PNM files to (default: ./).
 .IPs subdirs=<value>
-If specified, MPlayer will create numbered subdirectories with the
-specified prefix.
-If it's not specified, no subdirectories are created
-and all PNM files are written to the same directory.
-.IPs maxfiles=<value>
-Maximum number of PNM files to be saved per subdirectory in case subdirs
-is specified.
+Will create numbered subdirectories with the specified prefix.
+By default, no subdirectories are created and all PNM files are
+written to the same directory.
+.IPs maxfiles=<value> (subdir only)
+Maximum number of PNM files to be saved per subdirectory.
 Must be equal to or larger than 1 (default: 1000).
 .RE
 .PD 1
