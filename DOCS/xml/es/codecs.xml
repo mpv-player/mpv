@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.28 -->
+<!-- synced with 1.30 -->
 <sect1 id="codecs">
 <title>Codecs soportados</title>
 
@@ -386,11 +386,11 @@ versiones de RealVideo:
 
 <itemizedlist>
 <listitem><simpara>
-  RealVideo 1.0 (fourcc RV10) - codificación/decodificación soportada por
+  RealVideo 1.0, 2.0 (fourcc RV10, RV20) - cod/decodificación soportada por
   <systemitem class="library">libavcodec</systemitem>
   </simpara></listitem>
 <listitem><simpara>
-  RealVideo 2.0, 3.0, 4.0 (fourcc RV20, RV30, RV40) - decodificación soportada por
+  RealVideo 3.0, 4.0 (fourcc RV30, RV40) - decodificación soportada por
   <emphasis role="bold">bibliotecas de RealPlayer</emphasis>
   </simpara></listitem>
 </itemizedlist>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.25 -->
+<!-- synced with 1.29 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portaciones</title>
 
@@ -288,10 +288,9 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 <para>Se obtienen mejores resultados con el controlador de salida DirectX nativo
   (<option>-vo directx</option>) y el controlador nativo de salida de audio de
   Windows (<option>-ao win32</option>) ya que OpenGL no funciona y SDL se sabe que
-  distorsiona el sonido y la imagen o bloquea algunos sistemas. Puede hacer que
-  la ventana de la película se mantenga siempre encima con
-  <option>-vo directx:ontop</option>. Si la imagen se ve distorsionada, pruebe a
-  desactivar la aceleración por hardware con <option>-vo directx:noaccel</option>.
+  distorsiona el sonido y la imagen o bloquea algunos sistemas. Si la imagen se ve
+  distorsionada, pruebe a desactivar la aceleración por hardware con
+  <option>-vo directx:noaccel</option>.
   Descargue
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">los archivos de cabecera de DirectX 7</ulink>
   para compilar el controlador de salida de video de DirectX.</para>
@@ -314,18 +313,17 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
   <option>-autosync 100</option>. Si alguna de estas opciones le ayuda, puede que
   desee ponerlas en su archivo de configuración.</para>
 
-<para>Hay versiones binarias precompiladas hechas por Sascha Sommer disponibles para
-  descarga desde
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/">su web personal</ulink>.
-  Joey Parrish ha creado
-  <ulink url="http://joey.nicewarrior.org/cygmp/">paquetes no-oficiales para Windows</ulink>
-  completos y con instalador.</para>
+<para>Sascha Sommer libera binarios oficiales para Windows de vez en
+  cuando, Joey Parrish hace paquetes completos para Windows no oficiales
+  con instalador. Búsquelos en la sección de Windows de
+  <ulink url="http://www.mplayerhq.hu/homepage/projects.html">nuestra
+  página de proyectos</ulink>.</para>
 
 <sect2 id="cygwin">
 <title>Cygwin</title>
 
-<para>Versiones de Cygwin anteriores a la 1.5.0 no incluyen <filename>inttypes.h</filename>.
-  Ponga esto
+<para>Versiones de <application>Cygwin</application> anteriores a la
+  1.5.0 no incluyen <filename>inttypes.h</filename>. Ponga esto
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
   en <filename class="directory">/usr/include/</filename> para hacer que
   <application>MPlayer</application> compile.</para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.12 -->
+<!-- synced with 1.14 -->
 <chapter id="usage">
 <title>Uso</title>
 
@@ -298,6 +298,11 @@ Puede obtener una lista completa de órdenes ejecutando
 <listitem><para><literal>vo_fullscreen</literal></para>
   <para>
   Cambia el modo de pantalla completa.
+  </para></listitem>
+<listitem><para><literal>vo_ontop</literal></para>
+  <para>
+  Cambia siempre-visible. Soportado por controladores que usen X11,
+  excepto SDL, así como directx y gl2 bajo Windows.
   </para></listitem>
 <listitem><para><literal>tv_step_channel</literal> (int) dir</para>
   <para>

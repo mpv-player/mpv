@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.22 -->
+<!-- synced with 1.23 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Preguntas de Usuario Frecuentes</title>
 
@@ -239,24 +239,26 @@ decide usar esas versiones que no funcionan, haga lo que le de la gana.
 <qandaentry>
 <question><para>
 Sigo teniendo problemas compilando con soporte para SDL, gcc dice algo
-acerca de &quot;referencia no definida a `SDL_EnableKeyRepeat'&quot;. ¿Ahora qué?
+acerca de <screen>referencia no definida a `SDL_EnableKeyRepeat'</screen>. ¿Ahora qué?
 </para></question>
 <answer><para>
 ¿Dónde ha instalado la biblioteca SDL? Si la ha instalado en
 <filename class="directory">/usr/local</filename> (por defecto) entonces edite
 el archivo de primer nivel <filename>config.mak</filename> y añada
-&quot;-L/usr/local/lib&quot; después de &quot;X_LIBS=&quot;.
+<systemitem>-L/usr/local/lib</systemitem> después de <systemitem>X_LIBS=</systemitem>.
 Ahora escriba <command>make</command>. ¡Ya lo tiene!
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-No se compila, y se salta uint64_t inttypes.h y cosas parecidas ...
+No se compila, y se salta <systemitem>uint64_t</systemitem>,
+<filename>inttypes.h</filename> y cosas parecidas...
 </para></question>
 <answer><para>
-Copia <filename>etc/inttypes.h</filename> al fichero MPlayer
-(<command>cp etc/inttypes.h .</command>) y intentalo de nuevo ...
+Copia <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h"> este <filename>inttypes.h</filename></ulink>
+a <filename class="directory">/usr/local/include/</filename> o un lugar
+equivalente e inténtelo de nuevo...
 </para></answer>
 </qandaentry>
 
@@ -570,7 +572,7 @@ Consulte la sección <link linkend="ffmpeg">libavcodec</link>.
 
 <qandaentry>
 <question><para>
-¡Pero configure me dice &quot;Checking for libavcodec ... no&quot;!
+¡Pero configure me dice <screen>Checking for libavcodec ... no</screen>!
 </para></question>
 <answer><para>
 Necesita obtener libavcodec del CVS de FFmpeg. Lea las instrucciones en la
@@ -598,7 +600,8 @@ acceder a ningún objeto del menú!
 ¿Está usando FVWM? Intente la siguiente:
 <orderedlist>
 <listitem><para>Start -> Settings -> Configuration -> Base Configuration</para></listitem>
-<listitem><para>Cambie &quot;Use Applications position hints&quot; a &quot;Yes&quot;</para></listitem>
+<listitem><para>Cambie <systemitem>Use Applications position hints</systemitem>
+a <systemitem>Yes</systemitem></para></listitem>
 </orderedlist>
 </para></answer>
 </qandaentry>
@@ -687,8 +690,8 @@ documentación de la misma para ver si hay forma de mejorar el rendimiento.
 
 <qandaentry>
 <question><para>
-<application>MPlayer</application> falla con &quot;MPlayer interrupted by
-signal 4 in module: decode_video&quot;.
+<application>MPlayer</application> falla con <screen>MPlayer interrupted by
+signal 4 in module: decode_video</screen>.
 </para></question>
 <answer><para>
 Intente ejecutar Mplayer en la máquina en la que fue compilado. O recompile con detección
@@ -941,8 +944,9 @@ X Error of failed request: BadAccess (attempt to access private resource denied)
 </screen>
 </para></question>
 <answer><para>
-El controlador &quot;tdfx&quot; en XFree86 4.0.2/4.0.3 tiene este error. Está arreglado
-por <ulink url="http://www.xfree86.org/cvs/changes_4_1.html">bugfix #621
+El controlador <systemitem>tdfx</systemitem> en XFree86 4.0.2/4.0.3 tiene este error.
+Está arreglado en
+<ulink url="http://www.xfree86.org/cvs/changes_4_1.html">bugfix #621
 del CVS log XFree86 4.1.0 CVS</ulink>. Osea que actualice a XFree86 4.1.0 o posterior.
 Otras opciones son, descargar (por lo menos) DRI version 0.6 de la
 <ulink url="http://dri.sourceforge.net">pagina DRI</ulink>, o usar CVS DRI.
@@ -997,7 +1001,7 @@ pero no <systemitem>xv</systemitem>!
 Pruebe <systemitem>x11</systemitem> otra vez. Ahora pruebe <option>-vo x11
 -fs -zoom</option>. ¿Ve la diferencia? No?! Vale, aquí viene la aclaración:
 La salida <systemitem>x11</systemitem> de SDL usa xv cuando lo puede conseguir, no se tiene
-que precupar de ello ... Nota: puede forzar/inhabilitar Xv via SDL usando
+que precupar de ello ... Nota: Con SDL puede forzar/desactivar Xv usando
 <option>-forcexv</option> y <option>-noxv</option>
 </para></answer>
 </qandaentry>
