@@ -897,6 +897,16 @@ static char help_text[]=
 #define MSGTR_VO_NoValueSpecified "No value specified."
 #define MSGTR_VO_UnknownSuboptions "Unknown suboption(s)"
 
+// vo_aa.c
+
+#define MSGTR_VO_AA_HelpHeader "\n\nHere are the aalib vo_aa suboptions:\n"
+#define MSGTR_VO_AA_AdditionalOptions "Additional options vo_aa provides:\n" \
+"  help        print this help message\n" \
+"  osdcolor    set osd color\n  subcolor    set subtitle color\n" \
+"        the color parameters are:\n           0 : normal\n" \
+"           1 : dim\n           2 : bold\n           3 : boldfont\n" \
+"           4 : reverse\n           5 : special\n\n\n"
+
 // vo_jpeg.c
 #define MSGTR_VO_JPEG_ProgressiveJPEG "Progressive JPEG enabled."
 #define MSGTR_VO_JPEG_NoProgressiveJPEG "Progressive JPEG disabled."

@@ -73,11 +73,6 @@ extern int WinID;
 extern int menu_startup;
 #endif
 
-#ifdef HAVE_AA
-extern int vo_aa_parseoption(m_option_t* conf, char *opt, char * param);
-extern void vo_aa_revertoption(m_option_t* opt,char* param);
-#endif
-
 #ifdef HAVE_ZR
 extern int vo_zr_parseoption(m_option_t* conf, char *opt, char * param);
 extern void vo_zr_revertoption(m_option_t* opt,char* pram);
@@ -284,7 +279,7 @@ m_option_t mplayer_opts[]={
 
 #ifdef HAVE_AA
 	// -vo aa
-	{"aa*",	vo_aa_parseoption,  CONF_TYPE_FUNC_FULL, 0, 0, 0 , &vo_aa_revertoption},
+	{"aa*", "-aa* is deprecated. Use -vo aa:suboption instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 
 #ifdef HAVE_ZR

@@ -1912,11 +1912,6 @@ plugin audio output driver
 .SH "VIDEO OUTPUT OPTIONS (MPLAYER ONLY)"
 .
 .TP
-.B \-aa* (\-vo aa only)
-You can get a list and an explanation of available options executing
-.I mplayer \-aahelp
-.
-.TP
 .B \-adapter <value>
 Set the graphics card that will receive the image.
 Needs the \-vm option to work.
@@ -2637,8 +2632,10 @@ Produces no video output.
 Useful for benchmarking.
 .
 .TP
-.B aa (also see \-aa*)
+.B aa\ \ \ \ \ 
 ASCII art video output driver that works on a text console.
+You can get a list and an explanation of available suboptions executing
+.I mplayer \-vo aa:help
 .
 .TP
 .B caca\ \ \ 

@@ -34,7 +34,8 @@
 
 #include "osdep/keycodes.h"
 #include <aalib.h>
-#include "m_option.h"
+#include "subopt-helper.h"
+#include "help_mp.h"
 #include "mp_msg.h"
 
 
@@ -288,11 +289,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width,
 
     mp_msg(MSGT_VO,MSGL_INFO,
 		"\n"
-		"Important Options\n"
-		"\t-aaextended  use use all 256 characters\n"
-		"\t-aaeight     use eight bit ascii\n"
-		"\t-aadriver    set recommended aalib driver (X11,curses,linux)\n"
-		"\t-aahelp      to see all options provided by aalib\n"
+		"Important suboptions\n"
+		"\textended  use use all 256 characters\n"
+		"\teight     use eight bit ascii\n"
+		"\tdriver    set recommended aalib driver (X11,curses,linux)\n"
+		"\thelp      to see all options provided by aalib\n"
 		"\n"
 		"AA-MPlayer Keys\n"
 		"\t1 : contrast -\n"
@@ -588,94 +589,94 @@ getcolor(char * s){
     else return -1;
 }
 
-int
-vo_aa_parseoption(m_option_t * conf, char *opt, char *param){
-    /* got an option starting with aa */
-    char *pseudoargv[4];
-    int pseudoargc;
-    char * x, *help;
-    int i;
-    /* do WE need it ? */
-    if (!strcasecmp(opt, "aaosdcolor")){
-	if (param==NULL) return M_OPT_MISSING_PARAM;
-	if ((i=getcolor(param))==-1) return M_OPT_OUT_OF_RANGE;
-	aaopt_osdcolor=i;
-	return 1;
-    }else if (!strcasecmp(opt, "aasubcolor")){
-	if ((i=getcolor(param))==-1) return M_OPT_OUT_OF_RANGE;
-	aaopt_subcolor=i;
-	return 1;
-    }else if (!strcasecmp(opt, "aahelp")){
-	printf("Here are the aalib options:\n");
-	help=strdup(aa_help); /* aa_help is const :( */
-	x=strtok(help,"-");
-	printf(x);
-	while ((x=strtok(NULL, "-"))){
-	    if (*(x-2)==' ') printf("-aa");
-	      else printf("-");
-	    printf("%s", x);
-	}
-	printf(
-		    "\n"
-		    "\n"
-		    "Additional options vo_aa provides:\n"
-		    "  -aaosdcolor    set osd color\n"
-		    "  -aasubcolor    set subtitle color\n"
-		    "        the color parameters are:\n"
-		    "           0 : normal\n"
-		    "           1 : dim\n"
-		    "           2 : bold\n"
-		    "           3 : boldfont\n"
-		    "           4 : reverse\n"
-		    "           5 : special\n"
-		    "\n\n"
-		    "           dT8  8Tb\n"
-                    "          dT 8  8 Tb\n"
-                    "         dT  8  8  Tb\n"
-                    "      <PROJECT><PROJECT>\n"
-                    "       dT    8  8    Tb\n"
-                    "      dT     8  8     Tb\n"
-		    "\n"
+static int parse_suboptions(const char *arg) {
+    char *pseudoargv[4], *osdcolor = NULL, *subcolor = NULL, **strings,
+         *helpmsg = NULL;
+    int pseudoargc, displayhelp = 0, *booleans;
+    opt_t extra_opts[] = {
+            {"osdcolor", OPT_ARG_MSTRZ, &osdcolor,    NULL, 0},
+            {"subcolor", OPT_ARG_MSTRZ, &subcolor,    NULL, 0},
+            {"help",     OPT_ARG_BOOL,  &displayhelp, NULL, 0} };
+    opt_t *subopts = NULL, *p;
+    char *strings_list[] = {"-driver", "-kbddriver", "-mousedriver", "-font",
+        "-width", "-height", "-minwidth", "-minheight", "-maxwidth",
+        "-maxheight", "-recwidth", "-recheight", "-bright",  "-contrast",
+        "-gamma",  "-dimmul", "-boldmul", "-random" };
+    char *booleans_list[] = {"-dim", "-bold", "-reverse", "-normal",
+        "-boldfont", "-inverse", "-extended", "-eight", "-dither",
+        "-floyd_steinberg", "-error_distribution"};
+    char *nobooleans_list[] = {"-nodim", "-nobold", "-noreverse", "-nonormal",
+        "-noboldfont", "-noinverse", "-noextended", "-noeight", "-nodither",
+        "-nofloyd_steinberg", "-noerror_distribution"};
+    const int nstrings = sizeof(strings_list) / sizeof(char*);
+    const int nbooleans = sizeof(booleans_list) / sizeof(int);
+    const int nextra_opts = sizeof(extra_opts) / sizeof(opt_t);
+    const int nsubopts = nstrings + nbooleans + nextra_opts;
+    int i, retval = 0;
 
-	      );
-	exit(0);
-		
-    }else{
-	/* parse param to aalib */
-	pseudoargv[1]=malloc(strlen(opt));
-	pseudoargv[3]=NULL;
-	sprintf(pseudoargv[1], "-%s", opt+2);
-	if (param!=NULL){
-	    pseudoargv[2]=param;
-	    pseudoargc=3;
-	}else{
-	    pseudoargv[2]=NULL;
-	    pseudoargc=2;
-	}
-	fprintf(stderr,"VO: [aa] ");
-	i=aa_parseoptions(&aa_defparams, &aa_defrenderparams, &pseudoargc, pseudoargv);
-	if (i!=1){
-	    return M_OPT_MISSING_PARAM;
-	}
-	if (pseudoargv[1]!=NULL){
-	    /* aalib has given param back */
-	    fprintf(stderr," Parameter -%s accepted\n", opt);
-	    return 0; /* param could be the filename */
-	}
-	fprintf(stderr," Parameter -%s %s accepted\n", opt, ((param==NULL) ? "" : param) );
-	return 1; /* all opt & params accepted */
+    subopts = calloc(nsubopts + 1, sizeof(opt_t));
+    strings = calloc(nstrings, sizeof(char*));
+    booleans = calloc(nbooleans, sizeof(int));
 
+    p = subopts;
+    for (i=0; i<nstrings; i++, p++) {
+        p->name = strings_list[i] + 1; // skip '-'
+        p->type = OPT_ARG_MSTRZ;
+        p->valp = &strings[i];
     }
-    return M_OPT_UNKNOWN;
-		
-}
+    for (i=0; i<nbooleans; i++, p++) {
+        p->name = booleans_list[i] + 1;
+        p->type = OPT_ARG_BOOL;
+        p->valp = &booleans[i];
+    }
+    memcpy(p, extra_opts, sizeof(extra_opts));
 
-void
-vo_aa_revertoption(m_option_t* opt,char* param) {
-  if (!strcasecmp(param, "aaosdcolor"))
-    aaopt_osdcolor= AA_SPECIAL;
-  else if (!strcasecmp(param, "aasubcolor"))
-    aaopt_subcolor= AA_SPECIAL;
+    retval = subopt_parse(arg, subopts);
+
+    if (retval == 0 && displayhelp) {
+        helpmsg = strdup(aa_help);
+        for (i=0; i<(signed)strlen(helpmsg); i++)
+            if (helpmsg[i] == '-') helpmsg[i] = ' ';
+        mp_msg(MSGT_VO, MSGL_INFO, MSGTR_VO_AA_HelpHeader);
+        mp_msg(MSGT_VO, MSGL_INFO, "%s\n\n", helpmsg);
+        mp_msg(MSGT_VO, MSGL_INFO, MSGTR_VO_AA_AdditionalOptions);
+        retval = -1;
+    }
+    if (retval == 0) {
+        pseudoargv[3] = NULL;
+        for (i=0; i<nstrings; i++) {
+            pseudoargc = 3;         // inside loop because aalib changes it
+            if (strings[i] != NULL) {
+                pseudoargv[1] = strings_list[i];
+                pseudoargv[2] = strings[i];
+                aa_parseoptions(&aa_defparams, &aa_defrenderparams,
+                                                &pseudoargc, pseudoargv) != 1;
+            }
+        }
+        pseudoargv[2] = NULL;
+        for (i=0; i<nbooleans; i++) {
+            pseudoargc = 2;
+            if (booleans[i]) pseudoargv[1] = booleans_list[i];
+            else pseudoargv[1] = nobooleans_list[i];
+            aa_parseoptions(&aa_defparams, &aa_defrenderparams,
+                                                &pseudoargc, pseudoargv) != 1;
+        }
+        if (osdcolor) aaopt_osdcolor = getcolor(osdcolor);
+        if (subcolor) aaopt_subcolor = getcolor(subcolor);
+    }
+
+    if (subopts) free(subopts);
+    if (booleans) free(booleans);
+    if (strings) {
+        for (i=0; i<nstrings; i++)
+            if (strings[i])
+                free(strings[i]);
+        free(strings);
+    }
+    if (osdcolor) free(osdcolor);
+    if (subcolor) free(subcolor);
+    if (helpmsg) free(helpmsg);
+    return retval;
 }
 
 static uint32_t preinit(const char *arg)
@@ -689,7 +690,7 @@ static uint32_t preinit(const char *arg)
 
     if(arg) 
     {
-	mp_msg(MSGT_VO,MSGL_ERR,"vo_aa: Unknown subdevice: %s\n",arg);
+        if (parse_suboptions(arg) != 0)
 	return ENOSYS;
     }
 
