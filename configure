@@ -182,6 +182,7 @@ Video:
   --enable-sdl           build with SDL render support [autodetect]
   --enable-aa            build with AAlib render support [autodetect]
   --enable-ggi           build with GGI render support [autodetect]
+  --enable-dxr3		 build with DXR3/H+ render support [autodetect]
   --enable-mga           build with mga_vid support 
                          (check for /dev/mga_vid) [autodetect]
   --enable-xmga          build with mga_vid X Window support
@@ -560,6 +561,7 @@ _dga=no
 _dga2=no
 _svga=no
 _fbdev=no
+_dxr3=no
 linux && _fbdev=yes
 _lirc=no
 _css=no
@@ -584,6 +586,7 @@ _xvlib=
 _x11lib=
 _xineramalib=
 _iconvlib=
+_dxr3lib=
 
 _select='#define HAVE_AUDIO_SELECT'
 
@@ -905,6 +908,9 @@ done
 
 _aa=no
 cc_check $_extraincdir $_extralibdir -laa && _aa=yes
+
+_dxr3=no
+cc_check $_extraincdir $_extralibdir -ldxr3 && _dxr3=yes
 
 _divx4linux=no
 cc_check $_extraincdir $_extralibdir -ldivxdecore -lm && _divx4linux=yes
@@ -1346,6 +1352,9 @@ for ac_option do
   --enable-fbdev)
   	_fbdev=yes
 	;;
+  --enable-dxr3)
+	_dxr3=yes
+	;;
   --enable-iconv)
   	_iconv=yes
 	;;
@@ -1461,6 +1470,9 @@ for ac_option do
         ;;
   --disable-fbdev)
   	_fbdev=no
+	;;
+  --disable-dxr3)
+	_dxr3=no
 	;;
   --disable-iconv)
   	_iconv=no
@@ -1713,6 +1725,7 @@ echo "Checking for DGA 2.0 .. $_dga2"
 echo "Checking for Xf86VM ... $_vm"
 echo "Checking for SVGAlib ... $_svga"
 echo "Checking for FBDev ... $_fbdev"
+echo "Checking for DXR3/H+ ... $_dxr3"
 echo "Checking for OSS Audio ... $_oss_audio"
 echo "Checking for ALSA Audio ... $_alsaver"
 echo "Checking for ESD Audio ... $_esd"
@@ -2362,6 +2375,15 @@ else
  _fbdev='#undef HAVE_FBDEV'
 fi
 
+if test "$_dxr3" = yes ; then
+ _dxr3='#define HAVE_DXR3'
+ _dxr3lib='-ldxr3'
+ _vosrc=$_vosrc' vo_dxr3.c'
+ _aosrc=$_aosrc' ao_dxr3.c'
+else
+ _dxr3='#undef HAVE_DXR3'
+fi
+
 if test "$_gui" = yes ; then
  _gui_def='#define HAVE_NEW_GUI'
  _gui_lib='-LGui -lgui $(GTKLIB) $(GLIBLIB)'
@@ -2407,7 +2429,7 @@ WIN32_PATH=-DWIN32_PATH=\\"$_win32libdir\\"
 
 X11_INC=$_x11incdir
 X11DIR=$_x11libdir
-X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis $_xineramalib $_libmad $_zlib
+X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_dxr3lib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis $_xineramalib $_libmad $_zlib
 
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
@@ -2674,6 +2696,7 @@ $_mga
 $_xmga
 $_syncfb
 $_fbdev
+$_dxr3
 $_svga
 $_have_xdpms
 $_aa
