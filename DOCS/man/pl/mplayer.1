@@ -1,4 +1,4 @@
-.\" synced with 1.754
+.\" synced with 1.758
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -868,6 +868,10 @@ Twojej karty) lub w ostateczno¶ci ~/.mplayer/\:channels.conf.
 .TP
 .B \-dvd-device <¶cie¿ka\ do\ urz±dzenia> (tylko DVD)
 Podaje ¶cie¿kê do urz±dzenia DVD (domy¶lnie: /dev/\:dvd).
+Mo¿esz równie¿ okre¶liæ katalog z plikami uprzednio skopiowanymi prosto z
+DVD (np. przez vobcopy).
+\-dumpstream jest lepsz± drog± na kopiowanie tytu³ów DVD
+(zobacz przyk³ady).
 .
 .TP
 .B \-dvdangle <ID\ ujêcia> (tylko DVD)
@@ -2810,18 +2814,6 @@ W³±cza prebuforowanie, jeszcze nie obs³ugiwane.
 .PD 1
 .
 .TP
-.B md5\ \ \ \ 
-Generuje dla ka¿dej ramki obraz przy pomocy \-vo pgm i zapisuje ich sumy MD5 do
-zbioru.
-Przydatne przy debugowaniu.
-.PD 0
-.RSs
-.IPs nazwa\ pliku
-Pozwala podaæ nazwê zbioru wyj¶ciowego (domy¶lnie ./md5)
-.RE
-.PD 1
-.
-.TP
 .B md5sum\ 
 Oblicza sumy MD5 ka¿dej klatki i zapisuje je do pliku.
 Obs³uguje przestrzenie kolorów RGB24 i YV12.
@@ -2938,16 +2930,6 @@ Maksymalna liczba plików zapisywanych do ka¿dego podkatalogu.
 Warto¶æ musi byæ wiêksza lub równa 1 (domy¶lnie: 1000).
 .RE
 .PD 1
-.
-.TP
-.B pgm\ \ \ \ 
-Zapisuje ka¿d± ramkê do pliku PGM w bie¿±cym katalogu.
-Ka¿dy plik dostaje jako nazwê numer ramki poprzedzony zerami.
-Obs³uguje tylko format YV12.
-Wynikowy obraz ma wymiary (szeroko¶æ) x (wysoko¶æ * 1.5) oryginalnego obrazu.
-Od wspó³rzêdnych 0,0 dla wysoko¶ci,szeroko¶ci zaczyna siê p³aszczyzna Y, od
-wspó³rzêdnych 0,wysoko¶æ przez wysoko¶æ/2,szeroko¶æ/2 jesp p³aszczyzna U za¶ od
-wyskoko¶æ/2,szeroko¶æ przez wysoko¶æ/2,szeroko¶æ/2 jest p³aszczyzna V.
 .
 .TP
 .B png (patrz te¿ \-z)
@@ -4495,19 +4477,19 @@ Przesunie pola o 1/4 piksela z wykorzystaniem filtru 4tap (wysoka jako¶æ).
 rozmycie pude³kowe
 .PD 0
 .RSs
-.IPs promieñ
-rozmiar filtru
-.IPs moc\ \ 
-Jak czêsto filtr powinien byæ wykorzystywany.
+.IPs <promieñ>
+si³a filtru rozmycia (blur)
+.IPs <moc>
+ilo¶æ aplikacji filtru
 .RE
 .PD 1
 .
 .TP
-.B sab=pro:pf:ró¿nKol[:pro:pf:Ro¿nKol]
+.B sab=promieñ:pf:ró¿nKol[:pro:pf:Ro¿nKol]
 adaptatywne rozmycie figur
 .PD 0
 .RSs
-.IPs <pro>
+.IPs <promieñ>
 si³a filtru rozmycia (~0.1\-4.0) (wolniejsze je¿eli wiêksze)
 .IPs <pf>\
 si³a prefiltru (~0.1\-2.0)
@@ -4567,7 +4549,7 @@ ilo¶æ linii wybierana ze ¶rodka obrazu (domy¶lnie: 12)
 .
 .TP
 .B bmovl=ukryty:nieprzezroczysty:kolejka
-Odczytuje bitmapy z FIFO i wy¶wietla je w górnej czê¶ci filmu,
+Filtr overlay bitmapy czyta je z FIFO i wy¶wietla je w górnej czê¶ci filmu,
 pozwalaj±c na tranformacje na obrazie.
 TOOLS/bmovl-test.c jest ma³ym programem do testowania bmovl.
 .PD 0
@@ -7118,6 +7100,14 @@ mplayer dvd://1 \-dvdangle 2
 .TP
 .B Odtwarza z innego urz±dzenia DVD:
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
+.
+.TP
+.B Odtwarza DVD z katalogu zawieraj±cego pliki VOB:
+mplayer dvd://1 \-dvd-device /¶cie¿ka/\:do/\:katalogu/
+.
+.TP
+.B Kopiuje tytu³ DVD na twardy dysk, zapisuj±c go to "title1.vob":
+mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
 .
 .TP
 .B Strumieñ z HTTP:
