@@ -147,7 +147,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     if(len<=0) return NULL; // skipped frame
     
-    if(ctx->vo_inited && !ctx->convert){
+    avctx->draw_horiz_band=NULL;
+    if(ctx->vo_inited && !ctx->convert && !(flags&3)){
 	mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE |
 	    (ctx->do_slices?MP_IMGFLAG_DRAW_CALLBACK:0),
 	    sh->disp_w, sh->disp_h);
@@ -155,8 +156,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    // vd core likes slices!
 	    avctx->draw_horiz_band=draw_slice;
 	    avctx->opaque=sh->video_out;
-	} else
-	    avctx->draw_horiz_band=NULL;
+	}
     }
     
     ret = avcodec_decode_video(avctx, &lavc_picture,

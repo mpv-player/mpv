@@ -154,7 +154,7 @@ static mp_image_t* parse_chunk (sh_video_t* sh, int code, uint8_t * buffer, int 
 		mp_image_t* mpi;
 		int flags;
 		if (picture->picture_coding_type == B_TYPE){
-		    flags=vd_use_slices?MP_IMGFLAG_DRAW_CALLBACK:0;
+		    flags=(!framedrop && vd_use_slices)?MP_IMGFLAG_DRAW_CALLBACK:0;
 		    picture->display_frame=
 		    picture->current_frame = picture->temp_frame;
 		} else {
