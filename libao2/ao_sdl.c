@@ -38,8 +38,6 @@ LIBAO_EXTERN(sdl)
 // ao_buffersize
 
 extern int verbose;
-/* audio driver to be used by SDLlib */
-char *sdl_adriver;
 
 // Samplesize used by the SDLlib AudioSpec struct
 #define SAMPLESIZE 1024
@@ -152,11 +150,10 @@ static int init(int rate,int channels,int format,int flags){
 
 	printf("SDL: Samplerate: %iHz Channels: %s Format %s\n", rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
 
-	if(sdl_adriver) {
-		setenv("SDL_AUDIODRIVER", sdl_adriver, 1);
-		printf("SDL: using %s audio driver\n", sdl_adriver);
-	}	
-	
+	if(ao_subdevice) {
+		setenv("SDL_AUDIODRIVER", ao_subdevice, 1);
+		printf("SDL: using %s audio driver\n", ao_subdevice);
+	}
 	
 	/* The desired audio format (see SDL_AudioSpec) */
 	switch(format) {
