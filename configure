@@ -5545,10 +5545,10 @@ linux && _def_linux='#define TARGET_LINUX 1'
 _def_vidix='#define CONFIG_VIDIX 1'
 test "$_vidix" = no && _def_vidix='#undef CONFIG_VIDIX'
 if test "$_vidix" = yes; then
-  _vosrc="$_vosrc vo_consolevidix.c"
-  _vomodules="consolevidix $_vomodules"
+  _vosrc="$_vosrc vo_cvidix.c"
+  _vomodules="cvidix $_vomodules"
 else
-  _novomodules="consolevidix $_novomodules"
+  _novomodules="cvidix $_novomodules"
 fi
 if test "$_vidix" = yes && (cygwin || mingw32); then
   _vosrc="$_vosrc vo_winvidix.c"

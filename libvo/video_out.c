@@ -105,7 +105,7 @@ extern vo_functions_t video_out_dfbmga;
 #ifdef CONFIG_VIDIX
 extern vo_functions_t video_out_xvidix;
 extern vo_functions_t video_out_winvidix;
-extern vo_functions_t video_out_consolevidix;
+extern vo_functions_t video_out_cvidix;
 #endif
 #ifdef HAVE_TDFX_VID
 extern vo_functions_t video_out_tdfx_vid;
@@ -217,7 +217,7 @@ vo_functions_t* video_out_drivers[] =
 #ifdef WIN32
     &video_out_winvidix,
 #endif
-    &video_out_consolevidix,
+    &video_out_cvidix,
 #endif
 #ifdef HAVE_TGA
         &video_out_tga,

@@ -26,12 +26,12 @@
 
 static vo_info_t info = {
     "VIDIX",
-    "consolevidix",
+    "cvidix",
     "Sascha Sommer",
     ""
 };
 
-LIBVO_EXTERN(consolevidix)
+LIBVO_EXTERN(cvidix)
 
 #define UNUSED(x) ((void)(x)) /* Removes warning about unused arguments */
 
