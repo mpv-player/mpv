@@ -265,7 +265,17 @@ switch(fr->lay){
     MP3_framesize=fr->framesize;
     fr->framesize += fr->padding - 4;
     break;
+  case 1:
+//    fr->jsbound = (fr->mode == MPG_MD_JOINT_STEREO) ? (fr->mode_ext<<2)+4 : 32;
+    MP3_bitrate=tabsel_123[fr->lsf][0][fr->bitrate_index];
+    MP3_samplerate=freqs[fr->sampling_frequency];
+    fr->framesize  = (long) MP3_bitrate * 12000;
+    fr->framesize /= MP3_samplerate;
+    MP3_framesize  = fr->framesize;
+    fr->framesize  = ((fr->framesize+fr->padding)<<2)-4;
+    break;
   default:
+    MP3_framesize=fr->framesize=0;
 //    fprintf(stderr,"Sorry, unsupported layer type.\n");
     return 0;
 }
@@ -539,6 +549,9 @@ int MP3_DecodeFrame(unsigned char *hova,short single){
    switch(fr.lay){
      case 2: do_layer2(&fr,single);break;
      case 3: do_layer3(&fr,single);break;
+     case 1:
+         printf("mp3lib: layer-1 audio not yet supported!\n");
+	 return 4608;
      default:
          return 0;	// unsupported
    }
