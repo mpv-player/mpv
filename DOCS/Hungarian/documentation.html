@@ -23,7 +23,7 @@
   <UL>
     <LI><A HREF="#1.1">1.1 Röviden</A></LI>
     <LI><A HREF="#1.2">1.2 Történelem</A></LI>
-    <LI><A HREF="#1.3">1.3 Telepítés</A></LI>
+    <LI><A HREF="#1.3">1.3 Installálás</A></LI>
     <LI><A HREF="#1.4">1.4 És a grafikus felület?</A></LI>
     <LI><A HREF="#1.5">1.5 Feliratok és OSD</A></LI>
   </UL>
@@ -169,23 +169,23 @@
 <P><B><A NAME=1.1>1.1.  Röviden</A></B></P>
 
 <P>Az <B>MPlayer</B> egy LINUXON mûködõ videolejátszó (fut sok más Unix-on és
-akár nem-x86 processzorokon is. Lásd a <A HREF="#6">6-os fejezetet</A>).
-  Le tudja játszani a legtöbb MPEG, VOB, AVI, VIVO, ASF/WMV, QT/MOV file-t,
-  és ezekhez felsorakoztat jónéhány natív, XAnim, és Win32 codecet.  Nézhetsz vele
-  <B>VideoCD</B>-t, <B>SVCD</B>-t, <B>DVD</B>-t, <B>3ivx</B>-et, és még <B>DivX</B>-et is
-  (ezutóbbihoz egyáltalán nincs szükség az avifile csomagra!). A másik óriási
-  tulajdonsága az MPlayernek a megjelenítési módok széles választéka. Mûködik
-  X11, Xv, DGA, OpenGL, SVGAlib, fbdev, aalib, sõt SDL-lel is (beleértve
-  ezáltal az SDL drivereit is), és néhány alacsonyszintû kártyaspecifikus
-  driver (Matrox/3dfx/SiS) is használható! Legtöbbjük támogat szoftveres vagy
-  hardveres skálázást, így a teljesképernyõs mód is elérhetõ. Az <B>MPlayer</B>
-  támogat továbbá hardveres MPEG kártyákkal történõ dekódolást/megjelenítést,
-  így például a<B><A HREF="http://www.mplayerhq.hu/DOCS/DVB">DVB</A></B> és
-  <B><A HREF="http://www.mplayerhq.hu/DOCS/DXR3">DXR3/Hollywood+</A></B>
-  kártyákon ! És még nem is szóltam a szép, élsímított, árnyékolt
-  feliratozásról (<B>9 támogatott típus!!!</B>), ami támogat európai/ISO
-  8859-1,2 (magyar, angol, cseh, stb), cirill és koreai fontokat, valamint
-  OSD-t!</P>
+  akár nem-x86 processzorokon is. Lásd a <A HREF="#6">6-os fejezetet</A>).  Le
+  tudja játszani a legtöbb MPEG, VOB, AVI, VIVO, ASF/WMV, QT/MOV, FLI file-t,
+  és ezekhez felsorakoztat jónéhány natív, XAnim, és Win32 codecet.  Nézhetsz
+  vele <B>VideoCD</B>-t, <B>SVCD</B>-t, <B>DVD</B>-t, <B>3ivx</B>-et, és még
+  <B>DivX</B>-et is (ezutóbbihoz egyáltalán nincs szükség az avifile
+  csomagra!). A másik óriási tulajdonsága az MPlayernek a megjelenítési módok
+  széles választéka. Mûködik X11, Xv, DGA, OpenGL, SVGAlib, fbdev, aalib,
+  DirectFb, sõt SDL-lel vagy GGI-vel is (beleértve ezáltal az SDL/GGI drivereit
+  is), és néhány alacsonyszintû kártyaspecifikus driver (Matrox/3dfx/SiS) is
+  használható! Legtöbbjük támogat szoftveres vagy hardveres skálázást, így a
+  teljesképernyõs mód is elérhetõ.  Az <B>MPlayer</B> támogat továbbá hardveres
+  MPEG kártyákkal történõ dekódolást/megjelenítést, így például a<B><A
+  HREF="http://www.mplayerhq.hu/DOCS/DVB">DVB</A></B> és <B><A
+  HREF="http://www.mplayerhq.hu/DOCS/DXR3">DXR3/Hollywood+</A></B> kártyákon ! 
+  És még nem is szóltam a szép, élsímított, árnyékolt feliratozásról (<B>9
+  támogatott típus!!!</B>), ami támogat európai/ISO 8859-1,2 (magyar, angol,
+  cseh, stb), cirill és koreai fontokat, valamint OSD-t!</P>
 
 <P>Az <B>MPlayer</B> alapjában véve GPL, de tartalmaz néhány nem-GPL kódot is,
   amit NEM lehet bináris formában terjeszteni, továbbá tartalmazza az OpenDivX
@@ -253,31 +253,48 @@ akár nem-x86 processzorokon is. Lásd a <A HREF="#6">6-os fejezetet</A>).
 
 <P><B><A NAME=1.3>1.3. Installálás</A></B></P>
 
+<P>Ez a fejezet arra szolgál hogy segítsen véghezvinni az <B>MPlayer</B> fordítását
+és konfigurálását. Nem könnyû, de nem is szükségszerûen nehéz. Ha a leírtaktól
+eltérõ viselkedést tapasztalsz, nézd át a dokumentációt és bizonyos hogy
+megtalálod a választ. A linkek azért vannak hogy alaposan elolvasd ahova
+mutatnak. Idõigényes lesz, de megéri.</P>
+
+<P>Újabb keletû rendszer ajánlott. Linuxon a 2.4.x-es számú kernelek
+ajánlottak, de 2.4.10-zel és afölött problémák adódhatnak (licenszelés,
+kernel bugok, stb).</P>
+
 <P><B><I>SZÜKSÉGES CSOMAGOK</I></B></P>
 
 <P>A következõ (és leírt verziójú) csomagokra lesz szükséged ha nem akarsz
 problémákba ütközni:<BR>
 <UL>
   <LI><B>binutils</B> - <B>2.11.x</B> ajánlott. Ez a program felelõs az
-  MMX/3DNow!/stb utasításokért, ezért igen fontos.</LI>
+    MMX/3DNow!/stb utasításokért, ezért igen fontos.</LI>
   <LI><B>gcc</B> - <B>2.95.2</B>-tõl <B>2.95.4</B> verziók ajánlottak.
-  <B>SOHA</B> ne használj 2.96-ot vagy 3.x.x-et !!! Hibás kódot generálnak.</LI>
+    <B>SOHA</B> ne használj 2.96-ot vagy 3.x.x-et !!! Hibás kódot generálnak.
+    Ha úgy döntesz hogy 2.96 helyett mást használsz, NE a 3.0 mellett
+    dönts, csak azért mert újabb! Sok tekintetben bugosabb is mint a 2.96.
+    Ígyhát ha váltani akarsz, marad a 2.95.x (2.95-ös libstdc++ is szükséges!),
+    vagy maradj a 2.96-nál (ebben az esetben viszont készülj fel a hibákra
+    a futás közben). A 2.96 "érdekességeirõl"
+    <A HREF="../users_against_developers.html">itt</A> vagy a <A HREF="faq.html">FAQ-ban</A></I></B>
+    találsz infot.</LI>
   <LI><B>XFree86</B> - <B>mindig a legújabb (4.1.0)</B> ajánlott. Normális
-  esetben ez mindenképpen szükséges. Ha nem tudod miért, akkor <B>tényleg</B>
-  muszáj. Bizonyosodj meg róla hogy fennvan a <B>devel</B> csomagja is !</LI>
+    esetben ez mindenképpen szükséges, tekintve hogy az újabb videokártyákban
+    jelenlevõ hardveres YUV gyorsítás csak a 4.0.2-es verzió óta elérhetõ,
+    a benne levõ <A HREF="video.html#2.3.1.2">XVideo</A> kiterjesztés révén 
+    (<B>Xv</B>-ként is fogok majd hivatkozni rá). <A HREF="video.html#2.3.1.2">Részletes
+    információ.</A><BR>
+    Bizonyosodj meg róla hogy fennvan a <B>devel</B> csomagja is !<BR>
+    Néhány kártyához az <B>MPlayer</B> különleges meghajtókat tartalmaz
+    amik XFree86 nélkül is hardveresen gyorsított lejátszást tesznek
+    lehetõvé. Listát lásd lejjebb.</LI>
   <LI><B>make</B> - <B>mindig a legújabb</B> ajánlott (legalább 3.79.x).
-  Bár általában erre nem kell figyelj.</LI>
+    Bár általában erre nem kell figyelj.</LI>
   <LI><B>SDL</B> - nem kötelezõ, de néhány esetben segíthet. Ajánlott mindig
-  a legújabbat használni.</LI>
+    a legújabbat használni.</LI>
 </UL>
 </P>
-
-<P>Mielõtt sietnél fordítani, olvasd el a következõket is :</P>
-
-<UL>
-<LI>Ha 2.96-os GCC-d van (pl. RedHat 7.1, Mandrake 8), <B><I>olvasd el
-  <A HREF="../users_against_developers.html">ezt</A> vagy a <A HREF="faq.html">FAQ-t!</A></I></B></LI>
-</UL>
 
 <P><B><I>CODECEK</I></B></P>
 
@@ -304,25 +321,52 @@ problémákba ütközni:<BR>
   </UL>
 </LI>
 
-<LI><B>DivX4</B> : ha használni akarod a ProjectMayo <B>DivX4</B> codec-ét, nézd meg a
-  <A HREF="codecs.html#2.2.1.1">2.2.1.1</A>-es fejezetet még fordítás elõtt.
-  Ez a codec sokkal gyorsabban játssza le a régi <B>DivX</B> filmeket mint a
-  Win32-es codec. Ha az új <B>DivX4</B> codec-û filmeket is le akarod játszani,
-  ajánlott ennek a könyvtárnak a használata a w32codecs.zip-ben található
-  DivX.dll helyett. A codec maga zárt forráskódú, és egyelõre csak x86-os
-  gépeken futtatható. <I>Ez a codec szükséges a <B>MEncoder</B>-hez is,
-  lásd lent !</I></LI>
+<LI><B>DivX4</B> : errõl a codecrõl a
+  <A HREF="codecs.html#2.2.1.1">2.2.1.1</A>-es fejezetben található információ.
+  Ha nem akarsz <B>MEncoder-t</B> használni, ez a codec szükségtelen, tekintve
+  hogy a <B>libavcodec</B> (lásd fent) sokkal gyorsabb nála.<BR>
+  A DivX4 tulajdonságai :
+  <UL>
+    <LI>gyorsabban játszik le <B>DivX3</B> filmeket mint a Win32-es DLL-ek,
+      de lassabban mint a <B>libavcodec</B> !</LI>
+    <LI>A codec maga zárt forráskódú, és egyelõre csak x86-os
+      gépeken futtatható.</LI>
+    <LI><I>Ez a codec szükséges a <B>MEncoder</B>-hez is,
+      lásd lent !</I></LI>
+  </UL>
+</LI>
 
 <LI>Ha <B>3ivx</B> filmeket is le akarsz játszani, olvasd el az
   <A HREF=codecs.html#2.1.2.4>XAnim codecek</A> fejezetet.</LI>
+
+<LI>Az <A HREF=codecs.html#2.1.2.4>XAnim codecek</A> a legjobbak a régebbi
+  codec-û filmek (mint pl Indeo 3/4/5 vagy Cinepak) lejátszására (teljes
+  képernyõ, hardveres YUV támogatás). Fõleg hogy mivel több platformon
+  hozzáférhetõk, ez az egyetlen lehetõség Indeo (stb) filmek lejátszására
+  nem-x86-os gépeken (mármint az Xanim használatán kívûl persze;).</LI>
+
 </UL>
 
 <P><B><I>VIDEOKÁRTYÁK</I></B></P>
 
+<P>Itt kétféle videokártyát különböztetünk meg. Az egyik fajta (az újabbak)
+rendelkezik <B>hardveres YUV gyorsítással</B>, a másik pedig nem.</P>
+
+<P>
+<B><I>YUV kártyák</I></B></P>
+
+<P>
+<B>Kevés CPU idõ felhasználásával</B> tudják
+megjeleníteni vagy nagyítani a képet. Itt a nagyítás <B>ugyanannyi</B>
+CPU idõt használ mint a síma megjelenítés, tekintve hogy a videokártya
+végzi. Így a teljes képernyõs lejátszás szép és gyors lesz.
+
 <UL>
-<LI><B>Matrox G200/G400/G450/G550 kártyák</B> : nézd meg a
-  <A HREF="video.html#2.3.1.7">2.3.1.7</A>-es fejezetet, és nagy gyorsulást érhetsz el. Ezeket a lépéseket
-  fordítás <I>elõtt</I> kell megcsinálni, különben nem épül be Matrox támogatás az
+<LI><B>Matrox G200/G400/G450/G550 kártyák</B> : a speciális <B>mga_vid</B>
+  meghajtó lehetõvé teszi az Xv-nél sokkal gyorsabb megjelenítést, TV
+  kimenetet G400-on, mindezt akár XFree86 nélkül. Lásd a
+  <A HREF="video.html#2.3.1.7">2.3.1.7</A>-es fejezetet. Ezeket a lépéseket
+  fordítás <I>elõtt</I> kell megtenni, különben nem épül be Matrox támogatás az
   <B>MPlayer</B>-be. Olvasd el továbbá a <A HREF="video.html#2.3.1.A.1">Matrox
   TV kimenet</A> fejezetet.</LI>
 
@@ -337,28 +381,83 @@ problémákba ütközni:<BR>
   fordítás <I>elõtt</I> kell megcsinálni, különben nem épül be 3Dfx támogatás
   az <B>MPlayer</B>-be. Nézd meg a <A HREF="video.html#2.3.1.A.3">3dfx TV
   kimenet</A> fejezetet is.</LI>
+
+<LI><B>S3 kártyák</B> : a Savage chip-ek és az XFree86 meghajtó hozzájuk
+  támogatja a hardveres gyorsítást. A lehetõ legújabb XFree86 ajánlott, a
+  régebbi meghajtók hibásak. A Savage kártyáknak problémáik vannak az YV12
+  megjelenítéssel. Lásd az <A HREF="video.html#2.3.1.2.2">S3 Xv fejezetet</A>.
+  Régi, nem-Savage chip-es kártyáknak nincs, vagy lassú a hardveres
+  támogatásuk.</LI>
+
+<LI><B>Nvidia kártyák</B> : nagyon rossz választás videolejátszásra. Ezek
+  a kártyák olcsó távolkeleti alkatrészekbõl készülnek, amik rossz képminõséget
+  adnak más kártyákhoz képest. Továbbá az <U>XFree86-ban található Nvidia
+  meghajtó nem tartalmaz hardveres YUV gyorsítást!</U> Ehhez le kell töltened
+  az Nvidia zárt forráskódú meghajtóját az nvidia.com-rõl. Részleteket
+  lásd az <A HREF="video.html#2.3.1.2.3">Nvidia Xv meghajtó</A> fejezetben.</LI>
+
+<LI><B>más kártyák</B> : a fentiek közül egyik se?
+  <UL>
+    <LI>Próbáld ki hátha a kártyád, és az XFree86 drivere támogatja a
+      hardveres gyorsítást. Lásd az <A HREF="video#2.3.1.2">Xv fejezetet</A>
+      a részletekért.</LI>
+    <LI>Ha nem, a kártyád a következõ csoportba tartozik :</LI>
+  </UL>
+</LI>
+
 </UL>
+</P>
+
+<P>
+<B><I>YUV gyorsítással nem rendelkezõ kártyák</I></B></P>
+
+<P>
+Ezeknél vagy szoftveresen kell
+nagyítani a képet (ez nagyon lassú), vagy le kell váltani egy kisebb
+videomódba hogy pont akkora legyen a kép (pl 352x288). Ha nincs YUV
+gyorsításod, az utóbbi módszer a célravezetõbb. Az <B>MPlayerben</B>
+<U>ez a <CODE>-vm</CODE> opcióval kapcsolható be</U>. A következõ
+meghajtókat érdemes kipróbálni :
+<UL>
+  <LI>XFree86 <B>használatával</B> : lásd a
+   <A HREF="video.html#2.3.1.3">DGA</A> és az
+   <A HREF="video.html#2.3.1.13">X11</A> meghajtók fejezeteit. A DGA
+   használata ajánlott!</LI>
+  <LI>XFree86 <B>nélkül</B> : próbáld ki ezeket a meghajtókat, ebben a
+    sorrendben :
+    <A HREF="video.html#2.3.1.12">vesa</A>,
+    <A HREF="video.html#2.3.1.6">fbdev</A>,
+    <A HREF="video.html#2.3.1.5">svgalib</A>,
+    <A HREF="video.html#2.3.1.11">aalib</A>.</LI>
+</UL>
+</P> 
 
 <P><B><I>HANGKÁRTYÁK</I></B></P>
 
 <UL>
-<LI><B>Soundblaster Live</B> : ezekkel a kártyákkal lehetõséged van az
+
+<LI><B>Soundblaster Live!</B> : ezzel a kártyával lehetõséged van az
   alapértelmezett 2 helyett 4 vagy 6 (<B>5.1</B>) csatornás AC3 kimenetre.
   Olvasd el a <A HREF="codecs.html#2.2.2.1">Szoftveres AC3 dekódolás</A>
   fejezetet.</LI>
+
+<LI><B>más kártyák</B> speciális funkcióihoz az <B>MPlayer</B> nem tartalmaz
+  támogatást. <U>Ajánlott a <A HREF="sound.html#2.3.2">hangkártyák fejezetének</A>
+  elolvasása !</U>
 </UL>
 
 <P><B><I>EGYÉB FUNKCIÓK</I></B></P>
 
 <UL>
-<LI>A DVD támogatáshoz le kell fordítanod a libdvdread-et és a libdvdcss-t.
+<LI>A DVD támogatáshoz le kell fordítanod a libdvdcss-t és a libdvdread-et,
+  méghozzá ilyen sorrendben!
   Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
 
 <LI>Kell grafikus felület? Ha igen, olvasd el az <A HREF=#1.4>1.4-es fejezetet</A>
   mielõtt még belekezdenél a fordításba.</LI>
 
 <LI>Ha fel akar installálni a nagyszerû <B>MEncodert</B> is, nézd meg a
-  <A HREF=encoding.html#2.4">MEncoder fejezet</A>et is.</LI>
+  <A HREF=encoding.html#2.4">MEncoder fejezetet</A> is.</LI>
 
 <LI>Ha van V4L kompatibilis <B>TV tunered</B>, nézd meg a <A HREF=#2.5>TV bemenet</A>
   fejezetet.</LI>
@@ -414,6 +513,10 @@ bekapcsolásához :
   <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE> ,
   és a <CODE>gmplayer</CODE> file-t indítsd.
 </UL>
+
+<P>Mivel a GTK nem fut <B>setuid root</B> binárisból, nem lehet egyszerre
+használni a GUI-t és az <B>új idõzítõ kódot</B> egyszerre (kivéve persze
+ha root-ként futtatod az <B>MPlayer</B>-t).</P>
 
 <P>Mivel az <B>MPlayer</B> alapban nem tartalmaz skineket, ezeket külön kell
 letöltened. Lásd <A HREF="http://www.mplayerhq.hu/homepage/dload.html">itt</A>.

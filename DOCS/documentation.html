@@ -171,19 +171,19 @@
 
 <P><B>MPlayer</B> is a movie player for LINUX (runs on many other Unices, and
 <B>non-x86</B> CPUs, see <A HREF="#6">section 6</A>). It plays most MPEG, VOB,
-AVI, VIVO, ASF/WMV, QT/MOV files, supported by many native, XAnim, and Win32
-DLL codecs. You can watch <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>, <B>3ivx</B>,
-and even <B>DivX</B> movies too (and you don't need the avifile library at
-all!). The another big feature of mplayer is the wide range of supported output
-drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, but you can
-use SDL (and this way all drivers of SDL) and some lowlevel card-specific
-drivers (for Matrox, 3Dfx and Radeon) too! Most of them supports software or
-hardware scaling, so you can enjoy movies in fullscreen. <B>MPlayer</B>
-supports displaying through some hardware MPEG decoder boards, such as the
-<B><A HREF="DVB">DVB</A></B> and <B> <A HREF="DXR3">DXR3/Hollywood+</A></B> !
-And what about the nice big antialiased shaded subtitles (<B>9 supported
-types!!!</B>) with european/ISO 8859-1,2 (hungarian, english, czech, etc),
-cyrillic, korean fonts, and OSD?</P>
+AVI, VIVO, ASF/WMV, QT/MOV, FLI files, supported by many native, XAnim, and
+Win32 DLL codecs. You can watch <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
+<B>3ivx</B>, and even <B>DivX</B> movies too (and you don't need the avifile
+library at all!). The another big feature of mplayer is the wide range of
+supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
+AAlib, DirectFB, but you can use GGI and SDL (and this way all their drivers)
+and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon) too! Most
+of them supports software or hardware scaling, so you can enjoy movies in
+fullscreen. <B>MPlayer</B> supports displaying through some hardware MPEG
+decoder boards, such as the <B><A HREF="DVB">DVB</A></B> and <B> <A
+HREF="DXR3">DXR3/Hollywood+</A></B> ! And what about the nice big antialiased
+shaded subtitles (<B>9 supported types!!!</B>) with european/ISO 8859-1,2
+(hungarian, english, czech, etc), cyrillic, korean fonts, and OSD?</P>
 
 <P><B>MPlayer</B> is basically GPL, but contains some non-GPL code which is not
 allowed to be distributed in binary form, and also contains the OpenDivX
@@ -250,28 +250,44 @@ too. So I've decided to write/modify one...</P>
 
 <P><B><A NAME=1.3>1.3. Installation</A></B></P>
 
-<P><B><I>REQUIREMENTS</I></B><BR>
+<P>In this chapter I'll try to guide you through the compiling and
+configuring process of <B>MPlayer</B>. It's not easy, but it won't neccessarily
+be hard. If you experience a different behaviour than what I explain, please
+search through this documentation and you'll find your answers. If you
+see links, please follow them and read carefully what they contain. It
+will take some time, but it DOES worth it.</P>
+
+<P>You need a fairly recent system. On Linux, 2.4.x kernels are required, but
+with 2.4.10 and above you'll ocassionally experience problems (licensing,
+kernel bugs, etc) so they are discouraged.</P>
+
+<P><B><I>SOFTWARE REQUIREMENTS</I></B><BR>
 
 <UL>
   <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
-  responsible for generating MMX/3DNow!/etc instructions, thus very important.</LI>
+    responsible for generating MMX/3DNow!/etc instructions, thus very important.</LI>
   <LI><B>gcc</B> - suggested version is from <B>2.95.2</B> to <B>2.95.4</B>.
-  <B>NEVER</B> use 2.96 or 3.x.x !!! They generate faulty code.</LI>
-  <LI><B>XFree86</B> - suggested version is <B>always the newest (4.1.0)</B>. Normally
-  everyone wants this. If you don't know why, you <B>do</B> need it. Make
-  sure its <B>development package</B> is installed too !</LI>
+    <B>NEVER</B> use 2.96 or 3.x.x !!! They generate faulty code. If you decide
+    to change gcc from 2.96, then don't decide in favor of 3.0 juts because
+    it's newer! In some ways it's even worse than 2.96. So downgrade to
+    2.95.x (downgrade libstdc++ too!) or don't up/downgrade at all (but in
+    this case, be prepared for runtime problems).
+    Detailed information about gcc 2.96's bugs can be found
+    <A HREF="users_against_developers.html"><B><I>here</I></B></A> and in the
+    <A HREF="faq.html">FAQ</A> !</I></B></LI>
+  <LI><B>XFree86</B> - suggested version is <B>always the newest (4.1.0)</B>.
+    Normally everyone wants this, as starting from XFree86 4.0.2, it contains
+    the <A HREF="video.html#2.3.1.2">XVideo</A> extension (somewhere referred
+    as <B>Xv</B>) which is needed to enable the hardware YUV acceleration (fast
+    image display) on cards that support it. <A HREF="video.html#2.3.1.2">More
+    information available.</A><BR>
+    Make sure its <B>development package</B> is installed too otherwise
+    it won't work.<BR>
+    For some videocards you don't need XFree86. See list below.</LI>
   <LI><B>make</B> - suggested version is <B>always the newest</B> (at least 3.79.x). This
-  usually isn't important.</LI>
+    usually isn't important.</LI>
   <LI><B>SDL</B> - it's not mandatory, but can help in some cases. Always
-  use the newest (beginning from 1.2.x).</LI>
-</UL>
-</P>
-
-<P>Read the following before trying to compile <B>MPlayer</B>:</P>
-
-<UL>
-<LI>If you have <B>gcc 2.96</B> on your system, <A HREF="users_against_developers.html"><B><I>READ
-THIS</A> and the <A HREF="faq.html">FAQ</A> !</I></B></LI>
+    use the newest (beginning from 1.2.x).</LI>
 </UL>
 
 <P><B><I>CODECS</I></B></P>
@@ -282,7 +298,7 @@ THIS</A> and the <A HREF="faq.html">FAQ</A> !</I></B></LI>
 <UL>
   <LI>you can <B>gain <I>DivX/DivX4</I> playing on non-x86 machines</B></LI>
   <LI>this codec has the <B>greatest decoding speed</B> for DivX and DivX4
-movies (even faster than the original DivX4 library itself) !</LI>
+movies (even faster than the original DivX4 library itself) ! Recommended!</LI>
 </UL>
 </LI>
 
@@ -303,7 +319,8 @@ package! However, you can use our codecs package with avifile. Features :<BR>
 <B>MEncoder</B>, you possibly don't want this codec as <B>libavcodec</B> (see
 above) is much faster than this.<BR>
 Features :<UL>
-  <LI>can play old <B>DivX3</B> movies much faster than the Win32 DLL</LI>
+  <LI>can play old <B>DivX3</B> movies much faster than the Win32 DLL but
+    slower than <B>libavcodec</B> !</LI>
   <LI>it's closed-source, and only an x86 version is available.</LI>
   <LI><I>You also need this codec for <B>MEncoder</B>, see below !</I></LI>
 </UL>
@@ -311,10 +328,28 @@ Features :<UL>
 
 <LI>If you want to play <B>3ivx</B> movies, check the <A HREF=codecs.html#2.2.1.3>
 XAnim codecs section</A>.</LI>
+
+<LI>The <A HREF=codecs.html#2.2.1.3>XAnim codecs</A> are the best (full screen,
+hardware YUV zoom) for decoding old videos like Indeo 3/4/5, Cinepak, and some
+others. And they are multiplatform, so this is the only way to play Indeo on
+non-x86 platforms (well, apart from using XAnim:).</LI>
+
 </UL>
 
 <P><B><I>VIDEOCARDS</I></B></P>
 
+<P>There are generally two kind of videocards. One kind (the newer cards) has
+<B>hardware YUV acceleration</B> support, the other cards don't.</P>
+
+<P>
+<B><I>YUV cards</I></B></P>
+
+<P>
+They can display and scale (zoom) the picture to any size that fits in
+their memory, with <B>small CPU usage</B> (zooming doesn't increase it!), thus
+you get a nice and very fast fullscreen playing.</P>
+
+<P>
 <UL>
 <LI><B>Matrox G200/G400/G450/G550 cards</B> : please see the <A HREF="video.html#2.3.1.7">mga_vid</A>
 section in order to gain big speedup. It is important to do these steps
@@ -333,20 +368,73 @@ section</A> of the TV-out documentation, to know what features of your card is
 supported under Linux/MPlayer. If you have a <B>Radeon</B> or <B>Rage128</B> card, we have a
 <B>XXX_vid</B> driver for you, with TV out ! Check <A
 HREF="video.html#2.3.1.14">this</A> section !</LI>
+
+<LI><B>S3 cards</B> : the Savage chips have hardware acceleration. Use as
+new XFree86 version as possible, older drivers are buggy. Savage chips
+have problems with YV12 display, see <A HREF="video.html#2.3.1.2.2">S3 Xv
+section</A> for details. Older, non-Savage cards have no, or slow hardware
+support.</LI>
+
+<LI><B>Nvidia cards</B> : very bad choice for video playing. Nvidia's
+cards are manufactured on the far-east, and have very cheap and bad
+quality chips. Moreover, <U>the built-in Nvidia driver in XFree86 doesn't
+contain support for hardware YUV acceleration!</U> You have to download
+Nvidia's closed-source drivers from nvidia.com . See details in <A
+HREF="video.html#2.3.1.2.3">Nvidia Xv driver</A> section.</LI>
+
+<LI><B>other cards</B> : none of the above?
+  <UL>
+    <LI>Try if the XFree86 driver (and your card) supports hardware
+      acceleration. See the <A HREF="video.html#2.3.1.2">Xv section</A> for
+      details.</LI>
+    <LI>If it doesn't, your card is one of the :</LI>
+  </UL>
+</LI>
+
 </UL>
+</P>
+
+<P>
+<B><I>Non-YUV cards</I></B></P>
+
+<P>
+Fullscreen playing can be achieved by either zooming
+(<B>by software</B>, this is slooow), or changing to a smaller videomode, for
+example to 352x288. If you don't have YUV accel, this latter method is
+the recommended one. Throughout <B>MPlayer</B>, <U>this behaviour can
+be switched on by using the <CODE>-vm</CODE> option</U> and with
+the following drivers :
+<UL>
+  <LI><B>using</B> XFree86 : see details in
+    <A HREF="video.html#2.3.1.3">DGA driver</A> and
+    <A HREF="video.html#2.3.1.13">X11 driver</A> sections. DGA is
+    recommended!</LI>
+  <LI><B>not using</B> XFree86 : try the drivers in the following order :
+    <A HREF="video.html#2.3.1.12">vesa</A>,
+    <A HREF="video.html#2.3.1.6">fbdev</A>,
+    <A HREF="video.html#2.3.1.5">svgalib</A>,
+    <A HREF="video.html#2.3.1.11">aalib</A>.</LI>
+</UL>
+</P>
 
 <P><B><I>SOUNDCARDS</I></B></P>
 
 <UL>
+
 <LI><B>Soundblaster Live!</B> : with this card you can use 4 or 6 (<B>5.1</B>)
 channels AC3 decoding instead of 2. Read the
 <A HREF="codecs.html#2.2.2.1">Software AC3 decoding</A> section.</LI>
+
+<LI><B>other cards'</B> features aren't supported by <B>MPlayer</B>.
+  <U>It's very recommended to read the <A HREF="sound.html#2.3.2">soundcards
+  section</A> !</U>
 </UL>
 
 <P><B><I>FEATURES</I></B></P>
 
 <UL>
-<LI>For DVD support, you'll have to compile libdvdread and libdvdcss.
+<LI>For DVD support, you'll have to compile libdvdcss and libdvdread, and
+in this order!
 See <A HREF="cd-dvd.html#4.2">section 4.2</A> for more information.</LI>
 
 <LI>Decide if you need GUI. If you do, see the <A HREF=#1.4>1.4 section</A>
@@ -409,6 +497,10 @@ Then, to turn on GUI mode, you either
   and call <CODE>gmplayer</CODE> instead.
 </UL>
 </P>
+
+<P>Since GTK doesn't run from a <B>setuid root</B> binary, you can't use
+the GUI and the <B>new timer code</B> (mentioned above) together (unless
+you run <B>MPlayer</B> as root, of course).</P>
 
 <P>As <B>MPlayer</B> doesn't have a skin included, you have to download them
 if you want to use the GUI. See the <A HREF="http://www.mplayerhq.hu/homepage/dload.html">download page</A>.
