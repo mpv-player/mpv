@@ -56,7 +56,9 @@ other interesting stuff.</P>
     <LI>encoding from <B>V4L compatible TV tuners</B></LI>
     <LI>encoding/multiplexing to interleaved AVI files with proper index</LI>
     <LI>1 or 2 pass <B>DivX4</B> video</LI>
-    <LI><B>VBR</B> MP3 audio</LI>
+    <LI><B>VBR</B> MP3 audio - <B>IMPORTANT NOTE</B> : VBR MP3 audio doesn't
+      always play nicely on windows players! If you intend to encode AVIs
+      mainly for windows, encode with CBR!</LI>
     <LI>PCM audio</LI>
     <LI>stream copying (CBR audio only)</LI>
     <LI>input A/V synchronizing (PTS-based, can be disabled with -mc 0 option)</LI>
@@ -141,9 +143,9 @@ the video and/or audio streams.</P>
 
 <P><B><A NAME=2.4.3.5>2.4.3.5.  Encoding with the <I>libavcodec</I> codec family</B></P>
 
-<P><A HREF="codecs.html#2.2.1.2">libavcodec</A> also provides simple encoding
-to a lot of interesting video and audio formats (currently its audio codecs are
-unsupported by us). Currently you can encode to the following codecs :</P>
+<P><A HREF="codecs.html#2.2.1.2">libavcodec</A> provides simple encoding to a
+lot of interesting video and audio formats (currently its audio codecs are
+unsupported). You can encode to the following codecs :</P>
 
 <P>
 <UL>
