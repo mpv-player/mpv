@@ -292,6 +292,8 @@ static unsigned int ar_delay = 100, ar_rate = 8, last_ar = 0;
 static int use_joystick = 1, use_lirc = 1;
 static char* config_file = "input.conf";
 
+static char* js_dev = NULL;
+
 static int mp_input_print_key_list(config_t* cfg);
 static int mp_input_print_cmd_list(config_t* cfg);
 
@@ -302,6 +304,7 @@ static config_t input_conf[] = {
   { "ar-rate", &ar_rate, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
   { "keylist", mp_input_print_key_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
   { "cmdlist", mp_input_print_cmd_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
+  { "js-dev", &js_dev, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
   { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -1235,7 +1238,7 @@ mp_input_init(void) {
 
 #ifdef HAVE_JOYSTICK
   if(use_joystick) {
-    int fd = mp_input_joystick_init(NULL);
+    int fd = mp_input_joystick_init(js_dev);
     if(fd < 0)
       mp_msg(MSGT_INPUT,MSGL_ERR,"Can't init input joystick\n");
     else
