@@ -88,6 +88,7 @@ int vbeInit( void )
 {
    unsigned short iopl_port;
    size_t i;
+   int retval;
    if(!LRMI_init()) return VBE_VM86_FAIL;
    /*
     Allow read/write to ALL io ports
@@ -99,9 +100,11 @@ int vbeInit( void )
    ioperm(0, 1024, 1);
    iopl(3);
    memset(&vbe_pm_info,0,sizeof(struct VesaProtModeInterface));
-   vbeGetProtModeInfo(&vbe_pm_info);
+   retval = vbeGetProtModeInfo(&vbe_pm_info);
+   if(retval != VBE_OK) return retval;
    i = 0;
-   while((iopl_port=vbe_pm_info.iopl_ports[i++]) != 0xFFFF) ioperm(iopl_port,1,1);
+   while((iopl_port=vbe_pm_info.iopl_ports[i]) != 0xFFFF
+	 && vbe_pm_info.iopl_ports[i++] > 1023) ioperm(iopl_port,1,1);
    iopl(3);
    return VBE_OK;
 }
@@ -451,14 +454,17 @@ int vbeGetProtModeInfo(struct VesaProtModeInterface *pm_info)
     if((r.es >> 12) != hh_int_10_seg) retval = VBE_BROKEN_BIOS;
     rm_info = PhysToVirtSO(r.es,info_offset);
     pm_info->SetWindowCall   = PhysToVirtSO(r.es,info_offset+rm_info->SetWindowCall);
+    if(!is_addr_valid(pm_info->SetWindowCall)) retval = VBE_BROKEN_BIOS;
 #ifdef HAVE_VERBOSE_VAR
     if(verbose > 1) printf("vbelib:  SetWindowCall=%04X:%04X => %p\n",r.es,info_offset+rm_info->SetWindowCall,pm_info->SetWindowCall);
 #endif
     pm_info->SetDisplayStart = PhysToVirtSO(r.es,info_offset+rm_info->SetDisplayStart);
+    if(!is_addr_valid(pm_info->SetDisplayStart)) retval = VBE_BROKEN_BIOS;
 #ifdef HAVE_VERBOSE_VAR
     if(verbose > 1) printf("vbelib:  SetDisplayStart=%04X:%04X => %p\n",r.es,info_offset+rm_info->SetDisplayStart,pm_info->SetDisplayStart);
 #endif
     pm_info->SetPaletteData  = PhysToVirtSO(r.es,info_offset+rm_info->SetPaletteData);
+    if(!is_addr_valid(pm_info->SetPaletteData)) retval = VBE_BROKEN_BIOS;
 #ifdef HAVE_VERBOSE_VAR
     if(verbose > 1) printf("vbelib:  SetPaletteData=%04X:%04X => %p\n",r.es,info_offset+rm_info->SetPaletteData,pm_info->SetPaletteData);
 #endif
