@@ -34,6 +34,12 @@
 <row><entry>sun</entry><entry>
   SUN audio driver (<filename>/dev/audio</filename>) for BSD and Solaris8 users
   </entry></row>
+<row><entry>macosx</entry><entry>
+  native MacOSX driver
+  </entry></row>
+<row><entry>win32</entry><entry>
+  native Win32 driver
+  </entry></row>
 <row><entry>arts</entry><entry>
   native ARTS driver (mostly for KDE users)
   </entry></row>

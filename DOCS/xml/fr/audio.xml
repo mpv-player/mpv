@@ -34,6 +34,12 @@ L'interface audio de <application>MPlayer</application> se nomme
 <row><entry>sun</entry><entry>
    pilote audio SUN (<filename>/dev/audio</filename>) pour les utilisateurs BSD et Solaris8
   </entry></row>
+<row><entry>macosx</entry><entry>
+  pilote MacOS X natif
+  </entry></row>
+<row><entry>win32</entry><entry>
+  pilote Win32 natif
+  </entry></row>
 <row><entry>arts</entry><entry>
   pilote ARTS natif (principalement pour les utilisateurs KDE)
   </entry></row>
