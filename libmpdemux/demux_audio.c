@@ -373,6 +373,7 @@ void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   priv = demuxer->priv;
 
   if(priv->frmt == MP3 && hr_mp3_seek && !(flags & 2)) {
+    if(isinf(priv->last_pts)) priv->last_pts=0;
     len = (flags & 1) ? rel_seek_secs - priv->last_pts : rel_seek_secs;
     if(len < 0) {
       stream_seek(s,demuxer->movi_start);
