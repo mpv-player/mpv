@@ -601,7 +601,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    unsigned int fourcc=stream_read_dword_le(demuxer->stream);
 		    if(len<8) break; // error
 		    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*s desc #%d: %.4s  (%d bytes)\n",level,"",i,&fourcc,len-16);
-		    if(!i){
+		    if(fourcc!=trak->fourcc && i)
+			mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVvariableFourCC);
+//		    if(!i)
+		    {
 			trak->fourcc=fourcc;
 			// read type specific (audio/video/time/text etc) header
 			// NOTE: trak type is not yet known at this point :(((
@@ -609,8 +612,6 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			trak->stdata=malloc(trak->stdata_len);
 			stream_read(demuxer->stream,trak->stdata,trak->stdata_len);
 		    }
-		    if(fourcc!=trak->fourcc && i)
-			mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVvariableFourCC);
 		    if(!stream_seek(demuxer->stream,pos+len)) break;
 		}
 		break;
