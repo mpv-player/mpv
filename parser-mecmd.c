@@ -101,7 +101,7 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	mp_opt = m_config_get_option(config,opt);
 	if(!mp_opt) {
 	  tmp = M_OPT_UNKNOW;
-	  mp_msg(MSGT_CFGPARSER, MSGL_ERR, "%s in not an MEncoder option\n",opt);
+	  mp_msg(MSGT_CFGPARSER, MSGL_ERR, "%s is not an MEncoder option\n",opt);
 	  goto err_out;
 	}
 	// Hack for the -vcd ... options
