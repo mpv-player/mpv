@@ -3342,6 +3342,24 @@ can upscale the resulting MJPEG images to the original size.
 The option fd instructs the filter to always perform the requested
 decimation (ugly).
 .RE
+.PD 1
+.TP
+.B kerndeint[=map[:order[:thresh[:sharp[:twoway]]]]]
+Donald Graft's adaptive kernel deinterlacer.
+Deinterlaces parts of video if a configurable threshold is exceeded.
+.PD 0
+.RSs
+.IPs map (0 or 1)
+Paint pixels which exceed the threshold white (default 0).
+.IPs order (0 or 1)
+Swap fields if 1 (default 0).
+.IPs thresh (0 - 255)
+Threshold (default 10).
+.IPs sharp (0 or 1)
+Enable additional sharping (default 0).
+.IPs twoway (0 or 1)
+Enable twoway sharping (default 0).
+.RE
 .
 .
 .SH "VIDEO OUTPUT DRIVERS (MPLAYER ONLY)"
