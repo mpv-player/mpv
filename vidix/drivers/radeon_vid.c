@@ -782,7 +782,7 @@ static void radeon_vid_display_video( void )
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
 
-    OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
+    if(besr.deinterlace_on) OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
 #ifdef RAGE128
     OUTREG(OV0_COLOUR_CNTL, (besr.brightness & 0x7f) |
 			    (besr.saturation << 8) |
@@ -1223,3 +1223,51 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
   return 0;
 }
 
+int 	vixPlaybackSetDeint( const vidix_deinterlace_t * info)
+{
+  unsigned sflg;
+  switch(info->flags)
+  {
+    default:
+    case CFG_NON_INTERLACED:
+			    besr.deinterlace_on = 0;
+			    break;
+    case CFG_EVEN_ODD_INTERLACING:
+    case CFG_INTERLACED:
+			    besr.deinterlace_on = 1;
+			    besr.deinterlace_pattern = 0x900AAAAA;
+			    break;
+    case CFG_ODD_EVEN_INTERLACING:
+			    besr.deinterlace_on = 1;
+			    besr.deinterlace_pattern = 0x00055555;
+			    break;
+    case CFG_UNIQUE_INTERLACING:
+			    besr.deinterlace_on = 1;
+			    besr.deinterlace_pattern = info->deinterlace_pattern;
+			    break;
+  }
+  OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
+  radeon_engine_idle();
+  while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
+  radeon_fifo_wait(15);
+  sflg = INREG(OV0_SCALE_CNTL);
+  if(besr.deinterlace_on)
+  {
+    OUTREG(OV0_SCALE_CNTL,sflg | SCALER_ADAPTIVE_DEINT);
+    OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
+  }
+  else OUTREG(OV0_SCALE_CNTL,sflg & (~SCALER_ADAPTIVE_DEINT));
+  OUTREG(OV0_REG_LOAD_CNTL,		0);
+  return 0;  
+}
+
+int 	vixPlaybackGetDeint( vidix_deinterlace_t * info)
+{
+  if(!besr.deinterlace_on) info->flags = CFG_NON_INTERLACED;
+  else
+  {
+    info->flags = CFG_UNIQUE_INTERLACING;
+    info->deinterlace_pattern = besr.deinterlace_pattern;
+  }
+  return 0;
+}
