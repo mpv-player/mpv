@@ -60,6 +60,7 @@ static tvi_info_t info = {
 #define MAX_AUDIO_CHANNELS	10
 
 #define VID_BUF_SIZE_IMMEDIATE 2
+#define VIDEO_AVG_BUFFER_SIZE 300
 
 typedef struct {
     /* general */
@@ -111,6 +112,9 @@ typedef struct {
     volatile int                video_buffer_size_current;
     unsigned char		**video_ringbuffer;
     long long                   *video_timebuffer;
+    long long                   *video_avg_buffer;
+    int		                video_avg_ptr;
+    int		                video_interval_sum;
     volatile int		video_head;
     volatile int		video_tail;
     volatile int		video_cnt;
@@ -404,6 +408,7 @@ static int init(priv_t *priv)
     
     priv->video_ringbuffer = NULL;
     priv->video_timebuffer = NULL;
+    priv->video_avg_buffer = NULL;
     priv->audio_ringbuffer = NULL;
     priv->audio_skew_buffer = NULL;
 
@@ -582,6 +587,8 @@ static int uninit(priv_t *priv)
     
     if (priv->video_timebuffer)
 	free(priv->video_timebuffer);
+    if (priv->video_avg_buffer)
+	free(priv->video_avg_buffer);
     if (!tv_param_noaudio) {
 	if (priv->audio_ringbuffer)
 	    free(priv->audio_ringbuffer);
@@ -762,6 +769,18 @@ static int start(priv_t *priv)
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate time buffer: %s\n", strerror(errno));
 	return 0;
     }
+    priv->video_avg_buffer = (long long*)malloc(sizeof(long long) * VIDEO_AVG_BUFFER_SIZE);
+    if (!priv->video_avg_buffer) {
+	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate period buffer: %s\n", strerror(errno));
+	return 0;
+    }
+    priv->video_interval_sum = (1e6/priv->fps)*VIDEO_AVG_BUFFER_SIZE;
+    for (i = 0; i < VIDEO_AVG_BUFFER_SIZE; i++) {
+	priv->video_avg_buffer[i] = 1e6/priv->fps;
+    }
+
+    priv->video_avg_ptr = 0;
+    
     priv->video_head = 0;
     priv->video_tail = 0;
     priv->video_cnt = 0;
@@ -1243,6 +1262,7 @@ static void *video_grabber(void *data)
     int i;
     int first = 1;
     int framecount;
+    int tolerance;
 
     /* start the capture process */
 
@@ -1255,6 +1275,8 @@ static void *video_grabber(void *data)
 
     prev_interval = 0;
     prev_skew = 0;
+
+    tolerance = priv->nbuf*2;
 
     for (framecount = 0; !priv->shutdown;)
     {
@@ -1302,6 +1324,25 @@ static void *video_grabber(void *data)
 			mp_msg(MSGT_TV, MSGL_V, "\nvideo capture thread: frame delta ~ %.1lf fps\n",
 			       (double)1e6/(interval - prev_interval));
 		    }
+
+		    // correct the rate fluctuations on a small scale
+		    if ((interval - prev_interval < (long long)0.95e6/priv->fps)
+			|| (interval - prev_interval > (long long)1.05e6/priv->fps) ) {
+			if (tolerance > 0) {
+			    mp_msg(MSGT_TV, MSGL_DBG3, "correcting timestamp\n");
+			    interval = prev_interval + priv->video_interval_sum/VIDEO_AVG_BUFFER_SIZE;
+			    tolerance--;
+			} else {
+			    mp_msg(MSGT_TV, MSGL_DBG3, "bad - frames were dropped\n");
+			    tolerance = priv->nbuf*2;
+			}
+		    } else {
+			if (tolerance < priv->nbuf*2) {
+			    mp_msg(MSGT_TV, MSGL_DBG3, "fluctuation overcome\n");
+			}
+			tolerance = priv->nbuf*2;
+		    }
+		    
 		}
 
 		// interpolate the skew in time
@@ -1323,9 +1364,14 @@ static void *video_grabber(void *data)
 		   (double)1e-6*interval, (double)1e-6*xskew, (double)1e-6*skew);
 	    mp_msg(MSGT_TV, MSGL_DBG3, "vcnt = %d, acnt = %d\n", priv->video_cnt, priv->audio_cnt);
 
+	    priv->video_interval_sum -= priv->video_avg_buffer[priv->video_avg_ptr];
+	    priv->video_avg_buffer[priv->video_avg_ptr++] = interval-prev_interval;
+	    priv->video_interval_sum += interval-prev_interval;
+	    if (priv->video_avg_ptr >= VIDEO_AVG_BUFFER_SIZE) priv->video_avg_ptr = 0;
+	    
 	    prev_skew = skew;
 	    prev_interval = interval;
-	    
+
 	    /* allocate a new buffer, if needed */
 	    pthread_mutex_lock(&priv->video_buffer_mutex);
 	    if (priv->video_buffer_size_current < priv->video_buffer_size_max) {
