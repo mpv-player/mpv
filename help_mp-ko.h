@@ -12,11 +12,7 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"사용법:   mplayer [-gui] [선택사항] [경로/]파일명\n"
-#else
 "사용법:   mplayer [선택사항] [경로/]파일명\n"
-#endif
 "\n"
 "선택사항들:\n"
 " -vo <drv[:dev]>  비디오 출력 드라이버 및 장치 선택 (목록보기는 '-vo help')\n"

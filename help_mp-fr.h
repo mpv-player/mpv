@@ -10,11 +10,7 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"Utilisation:   mplayer [-gui] [options] [répertoire/]fichier\n"
-#else
 "Utilisation:   mplayer [options] [répertoire/]fichier\n"
-#endif
 "\n"
 "Options de base (voir la page man pour TOUTES les autres options):\n"
 " -vo <pil[:pér]>  Sél. le pil. et le périph. vidéo ('-vo help' pour la liste)\n"

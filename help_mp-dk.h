@@ -9,11 +9,7 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"Benyt:   mplayer [-gui] [indstilling] [url|sti/]filnavn\n"
-#else
 "Benyt:   mplayer [instilling] [url|sti/]filnavn\n"
-#endif
 "\n"
 "Basale indstillinger (se mansiden for en komplet liste):\n"
 " -vo <drv[:dev]> vælg video driver og enhed (se '-vo help' for en komplet liste)\n"

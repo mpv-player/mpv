@@ -10,11 +10,7 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"Bruk:    mplayer [-gui] [valg] [sti/]filnavn\n"
-#else
 "Bruk:    mplayer [valg] [sti/]filnavn\n"
-#endif
 "\n"
 "Valg:\n"
 " -vo <drv[:dev]> velg video-ut driver og enhet (se '-vo help' for liste)\n"

@@ -10,11 +10,7 @@ static char* banner_text=
 // Preklad do slovenèiny 
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"Pou¾itie:   mplayer [-gui] [prepínaèe] [cesta/]menosúboru\n"
-#else
 "Pou¾itie:   mplayer [prepínaèe] [cesta/]menosúboru\n"
-#endif
 "\n"
 "Prepínaèe:\n"
 " -vo <drv[:dev]> výber výstup. video ovládaèa&zariadenia (-vo help pre zoznam)\n"

@@ -9,11 +9,7 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"Pou¾ití:   mplayer [-gui] [pøepínaèe] [cesta/]jmenosouboru\n"
-#else
 "Pou¾ití:   mplayer [pøepínaèe] [cesta/]jmenosouboru\n"
-#endif
 "\n"
 "Pøepínaèe:\n"
 " -vo <drv[:dev]> výbìr výstupního video ovladaèe&zaøízení (-vo help pro seznam)\n"

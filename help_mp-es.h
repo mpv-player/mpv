@@ -10,11 +10,7 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"Uso:   mplayer [-gui] [opciones] [ruta/]archivo\n"
-#else
 "Uso:   mplayer [opciones] [ruta/]archivo\n"
-#endif
 "\n"
 "Opciones:\n"
 " -vo <drv[:dev]> selecciona el driver de salida de video y el dispositivo ('-vo help' para obtener una lista)\n"

@@ -9,11 +9,7 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"Folosire:   mplayer [-gui] [opþiuni] [cale/]fiºier\n"
-#else
 "Folosire:   mplayer [opþiuni] [cale/]fiºier\n"
-#endif
 "\n"
 "Opþiuni:\n"
 " -vo <drv[:disp]> Ieºirea video: driver&dispozitiv ('-vo help' pentru o listã)\n"

@@ -7,11 +7,7 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"用法:   mplayer [-gui] [options] [url|path/]filename\n"
-#else
 "用法:   mplayer [options] [url|path/]filename\n"
-#endif
 "\n"
 "基本选项: (包括所有选项的详细列表参见manpage!)\n"
 " -vo <drv[:dev]> 选择视频输出模式和设备(用'-vo help'查看列表)\n"

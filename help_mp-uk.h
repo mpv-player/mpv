@@ -9,11 +9,7 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"Запуск:   mplayer [-gui] [опц╕╖] [path/]filename\n"
-#else
 "Запуск:   mplayer [опц╕╖] [path/]filename\n"
-#endif
 "\n"
 "Опц╕╖:\n"
 " -vo <drv[:dev]> виб╕р драйвера ╕ пристрою в╕део виводу (список див. з '-vo help')\n"
