@@ -1,7 +1,9 @@
 /*
- TV subsystem for libMPDemux by Alex
+ TV Interface for MPlayer
  
- API idea based on libvo2's
+ (C) Alex Beregszaszi <alex@naxine.org>
+ 
+ API idea based on libvo2
 
  UNDER HEAVY DEVELOPEMENT, NO FEATURE REQUESTS PLEASE! :)
 */
@@ -33,7 +35,7 @@ int tv_param_on = 0;
 
 /* some default values */
 char *tv_param_freq = NULL;
-char *tv_param_channel = "26"; /* hungarian national tv channel 1 */
+char *tv_param_channel = NULL;
 char *tv_param_norm = "pal";
 char *tv_param_chanlist = "europe-east";
 char *tv_param_device = NULL;
@@ -152,19 +154,6 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
     /* set some params got from cmdline */
     funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tv_param_input);
 
-    /* we need to set frequency */
-    if (tv_param_freq && (funcs->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) == TVI_CONTROL_TRUE))
-    {
-	unsigned long freq = atof(tv_param_freq)*16;
-
-        /* set freq in MHz */
-	funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
-
-	funcs->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &freq);
-	mp_msg(MSGT_TV, MSGL_INFO, "Current frequency: %lu (%.3f)\n",
-	    freq, (float)freq/16);
-    }
-
     /* select video norm */
     if (!strcasecmp(tv_param_norm, "pal"))
 	tvh->norm = TV_NORM_PAL;
@@ -174,6 +163,12 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
 	tvh->norm = TV_NORM_SECAM;
 
     mp_msg(MSGT_TV, MSGL_INFO, "Selected norm: %s\n", tv_param_norm);
+
+    if (funcs->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) != TVI_CONTROL_TRUE)
+    {
+	mp_msg(MSGT_TV, MSGL_WARN, "Selected input hasn't got a tuner!\n");	
+	goto start_device;
+    }
 
     /* select channel list */
     for (i = 0; chanlists[i].name != NULL; i++)
@@ -189,16 +184,34 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
     if (tvh->chanlist == -1)
 	mp_msg(MSGT_TV, MSGL_WARN, "Unable to find selected channel list! (%s)\n",
 	    tv_param_chanlist);
-
-    mp_msg(MSGT_TV, MSGL_INFO, "Selected channel list: %s (including %d channels)\n",
-	chanlists[tvh->chanlist].name, chanlists[tvh->chanlist].count);
+    else
+	mp_msg(MSGT_TV, MSGL_INFO, "Selected channel list: %s (including %d channels)\n",
+	    chanlists[tvh->chanlist].name, chanlists[tvh->chanlist].count);
 
     if (tv_param_freq && tv_param_channel)
-	mp_msg(MSGT_TV, MSGL_HINT, "You can't set frequency and channel simultanly!\n");
+    {
+	mp_msg(MSGT_TV, MSGL_WARN, "You can't set frequency and channel simultanly!\n");
+	goto start_device;
+    }
 
-    if (!tv_param_freq && tv_param_channel)
+    /* we need to set frequency */
+    if (tv_param_freq)
+    {
+	unsigned long freq = atof(tv_param_freq)*16;
+
+        /* set freq in MHz */
+	funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
+
+	funcs->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &freq);
+	mp_msg(MSGT_TV, MSGL_INFO, "Selected frequency: %lu (%.3f)\n",
+	    freq, (float)freq/16);
+    }
+
+    if (tv_param_channel)
     {
 	struct CHANLIST cl;
+
+	mp_msg(MSGT_TV, MSGL_V, "Requested channel: %s\n", tv_param_channel);
 	for (i = 0; i < chanlists[tvh->chanlist].count; i++)
 	{
 	    cl = tvh->chanlist_s[i];
@@ -214,7 +227,8 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
 	    }
 	}
     }
-    
+
+start_device:    
     /* also start device! */
     return(funcs->start(tvh->priv));	
 }

@@ -1,5 +1,5 @@
 /*
-  v4l interface for libmpemux/tvi
+  Video 4 Linux input
 
   (C) Alex Beregszaszi <alex@naxine.org>
   
@@ -62,7 +62,8 @@ typedef struct {
     int				queue;
 
     /* audio */
-    struct video_audio		audio;
+    struct video_audio		*audio;
+    int				act_audio;
 } priv_t;
 
 #include "tvi_def.h"
@@ -261,16 +262,6 @@ static int init(priv_t *priv, tvi_param_t *params)
     }
 
     fcntl(priv->fd, F_SETFD, FD_CLOEXEC);
-//    siginit();
-
-#if 0
-    for (i=0; params[i].opt; i++)
-    {
-	if (!strcmp(params[i].opt, "input"))
-	    priv->input = (int)*(void **)params[i].value;
-    }
-    printf("priv->input: %d\n", priv->input);
-#endif
 
     mp_msg(MSGT_TV, MSGL_INFO, "Selected device: %s\n", priv->capability.name);
     mp_msg(MSGT_TV, MSGL_INFO, " Capabilites: ");
@@ -309,24 +300,31 @@ static int init(priv_t *priv, tvi_param_t *params)
     if (priv->capability.audios)
     {
 	mp_msg(MSGT_TV, MSGL_INFO, " Audio devices: %d\n", priv->capability.audios);
+	
+	priv->act_audio = 0;
 
 	for (i = 0; i < priv->capability.audios; i++)
 	{
-	    priv->audio.audio = i;
-	    if (ioctl(priv->fd, VIDIOCGAUDIO, &priv->audio) == -1)
+	    priv->audio = realloc(priv->audio, sizeof(struct video_audio)*(i+1));
+	    priv->audio[i].audio = i;
+	    if (ioctl(priv->fd, VIDIOCGAUDIO, &priv->audio[i]) == -1)
 	    {
 		mp_msg(MSGT_TV, MSGL_ERR, "ioctl get audio failed: %s\n", strerror(errno));
 		break;
 	    }
 	    
-	    mp_msg(MSGT_TV, MSGL_V, "  %d: %s: ", priv->audio.audio,
-		priv->audio.name);
-	    if (priv->audio.flags & VIDEO_AUDIO_MUTABLE)
+	    mp_msg(MSGT_TV, MSGL_V, "  %d: %s: ", priv->audio[i].audio,
+		priv->audio[i].name);
+	    if (priv->audio[i].flags & VIDEO_AUDIO_MUTABLE)
 		mp_msg(MSGT_TV, MSGL_V, "muted=%s ",
-		    (priv->audio.flags & VIDEO_AUDIO_MUTE) ? "yes" : "no");
+		    (priv->audio[i].flags & VIDEO_AUDIO_MUTE) ? "yes" : "no");
 	    mp_msg(MSGT_TV, MSGL_V, "volume=%d bass=%d treble=%d balance=%d mode=%s\n",
-		priv->audio.volume, priv->audio.bass, priv->audio.treble,
-		priv->audio.balance, audio_mode2name[priv->audio.mode]);
+		priv->audio[i].volume, priv->audio[i].bass, priv->audio[i].treble,
+		priv->audio[i].balance, audio_mode2name[priv->audio[i].mode]);
+		
+	    /* un-mute channels */
+	    priv->audio[i].flags &= ~VIDEO_AUDIO_MUTE;
+	    ioctl(priv->fd, VIDIOCGAUDIO, &priv->audio[i]);
 	}
     }
 
@@ -738,7 +736,7 @@ static int grab_video_frame(priv_t *priv, char *buffer, int len)
     int frame = priv->queue % priv->nbuf;
     int nextframe = (priv->queue+1) % priv->nbuf;
 
-    mp_dbg(MSGT_TV, MSGL_DBG2, "grab_video_frame(priv=%p, buffer=%p, len=%d\n",
+    mp_dbg(MSGT_TV, MSGL_DBG2, "grab_video_frame(priv=%p, buffer=%p, len=%d)\n",
 	priv, buffer, len);
 
     mp_dbg(MSGT_TV, MSGL_DBG3, "buf: %p + frame: %d => %p\n",
