@@ -15,6 +15,7 @@
 
 
 #include "input.h"
+#include "mouse.h"
 #ifdef MP_DEBUG
 #include <assert.h>
 #endif
@@ -59,7 +60,7 @@ static mp_cmd_t mp_cmds[] = {
   { 0, NULL, 0, {} }
 };
 
-static mp_cmd_bind_t key_names[] = {
+static mp_key_name_t key_names[] = {
   { ' ', "SPACE" },
   { KEY_ENTER, "ENTER" },
   { KEY_TAB, "TAB" },
@@ -76,6 +77,16 @@ static mp_cmd_bind_t key_names[] = {
   { KEY_LEFT, "LEFT" },
   { KEY_DOWN, "DOWN" },
   { KEY_UP, "UP" },
+  { MOUSE_BTN0, "MOUSE_BTN0" },
+  { MOUSE_BTN1, "MOUSE_BTN1" },
+  { MOUSE_BTN2, "MOUSE_BTN2" },
+  { MOUSE_BTN3, "MOUSE_BTN3" },
+  { MOUSE_BTN4, "MOUSE_BTN4" },
+  { MOUSE_BTN5, "MOUSE_BTN5" },
+  { MOUSE_BTN6, "MOUSE_BTN6" },
+  { MOUSE_BTN7, "MOUSE_BTN7" },
+  { MOUSE_BTN8, "MOUSE_BTN8" },
+  { MOUSE_BTN9, "MOUSE_BTN9" },
 #ifdef HAVE_JOYSTICK
   { JOY_AXIS1_MINUS, "JOY_UP" },
   { JOY_AXIS1_PLUS, "JOY_DOWN" },
@@ -120,58 +131,58 @@ static mp_cmd_bind_t key_names[] = {
 // This is the default binding we use when no config file is here
 
 static mp_cmd_bind_t def_cmd_binds[] = {
-  { KEY_RIGHT, "seek 10" },
-  { KEY_LEFT, "seek -10" },
-  { KEY_UP, "seek 60" },
-  { KEY_DOWN, "seek -60" },
-  { KEY_PAGE_UP, "seek 600" },
-  { KEY_PAGE_DOWN, "seek -600" },
-  { '+', "audio_delay 0.100" },
-  { '-', "audio_delay -0.100" },
-  { 'q', "quit" },
-  { KEY_ESC, "quit" },
-  { 'p', "pause" },
-  { ' ', "pause" },
-  { KEY_HOME, "pt_up_step 1" },
-  { KEY_END, "pt_up_step -1" },
-  { '>', "pt_step 1" },
-  { '<', "pt_step -1" },
-  { KEY_INS, "alt_src_step 1" },
-  { KEY_DEL, "alt_src_step -1" },
-  { 'o', "osd" },
-  { 'z', "sub_delay -0.1" },
-  { 'x', "sub_delay +0.1" },
-  { '9', "volume -1" },
-  { '/', "volume -1" },
-  { '0', "volume 1" },
-  { '*', "volume 1" },
-  { 'm', "use_master" },
-  { '1', "contrast -1" },
-  { '2', "contrast 1" },
-  { '3', "brightness -1" },
-  { '4', "brightness 1" },
-  { '5', "hue -1" },
-  { '6', "hue 1" },
-  { '7', "saturation -1" },
-  { '8', "saturation 1" },
-  { 'd', "frame_drop" },
+  { { KEY_RIGHT, 0 }, "seek 10" },
+  { {  KEY_LEFT, 0 }, "seek -10" },
+  { {  KEY_UP, 0 }, "seek 60" },
+  { {  KEY_DOWN, 0 }, "seek -60" },
+  { {  KEY_PAGE_UP, 0 }, "seek 600" },
+  { { KEY_PAGE_DOWN, 0 }, "seek -600" },
+  { { '+', 0 }, "audio_delay 0.100" },
+  { { '-', 0 }, "audio_delay -0.100" },
+  { { 'q', 0 }, "quit" },
+  { { KEY_ESC, 0 }, "quit" },
+  { { 'p', 0 }, "pause" },
+  { { ' ', 0 }, "pause" },
+  { { KEY_HOME, 0 }, "pt_up_step 1" },
+  { { KEY_END, 0 }, "pt_up_step -1" },
+  { { '>', 0 }, "pt_step 1" },
+  { { '<', 0 }, "pt_step -1" },
+  { { KEY_INS, 0 }, "alt_src_step 1" },
+  { { KEY_DEL, 0 }, "alt_src_step -1" },
+  { { 'o', 0 }, "osd" },
+  { { 'z', 0 }, "sub_delay -0.1" },
+  { { 'x', 0 }, "sub_delay +0.1" },
+  { { '9', 0 }, "volume -1" },
+  { { '/', 0 }, "volume -1" },
+  { { '0', 0 }, "volume 1" },
+  { { '*', 0 }, "volume 1" },
+  { { 'm', 0 }, "use_master" },
+  { { '1', 0 }, "contrast -1" },
+  { { '2', 0 }, "contrast 1" },
+  { { '3', 0 }, "brightness -1" },
+  { { '4', 0 }, "brightness 1" },
+  { { '5', 0 }, "hue -1" },
+  { { '6', 0 }, "hue 1" },
+  { { '7', 0 }, "saturation -1" },
+  { { '8', 0 }, "saturation 1" },
+  { { 'd', 0 }, "frame_drop" },
 #ifdef USE_TV
-  { 'h', "tv_step_channel 1" },
-  { 'l', "tv_step_channel -1" },
-  { 'n', "tv_step_norm" },
-  { 'b', "tv_step_chanlist" },
+  { { 'h', 0 }, "tv_step_channel 1" },
+  { { 'l', 0 }, "tv_step_channel -1" },
+  { { 'n', 0 }, "tv_step_norm" },
+  { { 'b', 0 }, "tv_step_chanlist" },
 #endif
 #ifdef HAVE_JOYSTICK
-  { JOY_AXIS0_PLUS, "seek 10" },
-  { JOY_AXIS0_MINUS, "seek -10" },
-  { JOY_AXIS1_MINUS, "seek 60" },
-  { JOY_AXIS1_PLUS, "seek -60" },
-  { JOY_BTN0, "pause" },
-  { JOY_BTN1, "osd" },
-  { JOY_BTN2, "volume 1"},
-  { JOY_BTN3, "volume -1"},
+  { { JOY_AXIS0_PLUS, 0 }, "seek 10" },
+  { { JOY_AXIS0_MINUS, 0 }, "seek -10" },
+  { { JOY_AXIS1_MINUS, 0 }, "seek 60" },
+  { { JOY_AXIS1_PLUS, 0 }, "seek -60" },
+  { { JOY_BTN0, 0 }, "pause" },
+  { { JOY_BTN1, 0 }, "osd" },
+  { { JOY_BTN2, 0 }, "volume 1"},
+  { { JOY_BTN3, 0 }, "volume -1"},
 #endif
-  { 0, NULL }
+  { { 0 }, NULL }
 };
 
 #ifndef MP_MAX_KEY_FD
@@ -207,6 +218,11 @@ static mp_input_fd_t cmd_fds[MP_MAX_CMD_FD];
 static unsigned int num_cmd_fd = 0;
 
 static int key_max_fd = -1, cmd_max_fd = -1;
+
+// this is the key currently down
+static int key_down[MP_MAX_KEY_DOWN];
+static unsigned int num_key_down = 0;
+static short last_key_down = 0,key_was_down = 0;
 
 static int
 mp_input_default_key_func(int fd);
@@ -499,7 +515,8 @@ mp_input_read_keys(int time,int paused) {
   }
     
   for(i = last_loop + 1 ; i != last_loop ; i++) {
-    int code = -1,j;
+    int code = -1;
+    unsigned int j;
 
     if((unsigned int)i >= num_key_fd) {
       i = -1;
@@ -515,8 +532,7 @@ mp_input_read_keys(int time,int paused) {
     }
     else
       code = ((mp_key_func_t)key_fds[i].read_func)(key_fds[i].fd);
-
-    if(code < 0) {
+    if((code & ~MP_KEY_DOWN)  < 0) {
       if(code == MP_INPUT_ERROR)
 	printf("Error on key input fd %d\n",key_fds[i].fd);
       else if(code == MP_INPUT_DEAD) {
@@ -525,14 +541,60 @@ mp_input_read_keys(int time,int paused) {
       }
       continue;
     }
+    if(code & MP_KEY_DOWN) { // key pushed
+      if(num_key_down > MP_MAX_KEY_DOWN) {
+	printf("Too much key down at the same time\n");
+	continue;
+      }
+      code &= ~MP_KEY_DOWN;
+      key_down[num_key_down] = code;
+      num_key_down++;
+      last_key_down = 1;
+      continue;
+    }
+    key_was_down = 0;
+    if(num_key_down > 0) { // key released
+      for(j = 0; j < num_key_down; j++) { 
+	if(key_down[j] == code) { // Remove the key from the current combination
+	  if(j+1 < num_key_down)
+	    memmove(&key_down[j],&key_down[j+1],(num_key_down-(j+1))*sizeof(int));
+	  num_key_down--;
+	  key_was_down = 1;
+	  break;
+	}
+      }
+      if(key_was_down && !last_key_down) // Ignore relaesing key part of the combination
+	continue;
+      last_key_down = 0;
+    }
     if(paused)
       return mp_input_parse_cmd("pause");
     for(j = 0; cmd_binds[j].cmd != NULL; j++) {
-      if(cmd_binds[j].input == code)
-	break;
+      if(num_key_down > 0) {
+	unsigned int found = 1,s;
+	for(s = 0; cmd_binds[j].input[s+1] != 0; s++) {
+	  if(cmd_binds[j].input[s] != key_down[s]) {
+	    found = 0;
+	    break;
+	  }
+	}
+	if(found && s == num_key_down && cmd_binds[j].input[s] == code && cmd_binds[j].input[s+1] == 0)
+	  break;
+	continue;
+      } else {
+	if(cmd_binds[j].input[0] == code && cmd_binds[j].input[1] == 0)
+	  break;
+      }
     }
     if(cmd_binds[j].cmd == NULL) {
-      printf("No bind found for key %d\n",code);
+      printf("No bind found for key %d",num_key_down > 0 ? key_down[0] : code);
+      if(num_key_down > 0) {
+	unsigned int s;
+	for(s=1; s < num_key_down; s++)
+	  printf("-%d",key_down[s]);
+	printf("-%d",code);
+      }
+      printf("                         \n");
       continue;
     }
     last_loop = i;
@@ -648,18 +710,44 @@ mp_cmd_free(mp_cmd_t* cmd) {
 static int
 mp_input_get_key_from_name(char* name) {
   int i,ret = 0;
-
   if(strlen(name) == 1) { // Direct key code
     (char)ret = name[0];
     return ret;
   }
 
-  for(i = 0; key_names[i].cmd != NULL; i++) {
-    if(strcasecmp(key_names[i].cmd,name) == 0)
-      return key_names[i].input;
+  for(i = 0; key_names[i].name != NULL; i++) {
+    if(strcasecmp(key_names[i].name,name) == 0)
+      return key_names[i].key;
   }
 
   return -1;
+}
+
+static int
+mp_input_get_input_from_name(char* name,int* keys) {
+  char *end,*ptr;
+  int n=0;
+
+  ptr = name;
+  n = 0;
+  for(end = strchr(ptr,'-') ; ptr != NULL ; end = strchr(ptr,'-')) {
+    if(end && end[1] != '\0') {
+      if(end[1] == '-')
+	end = &end[1];
+      end[0] = '\0';
+    }
+    keys[n] = mp_input_get_key_from_name(ptr);
+    if(keys[n] < 0) {
+      return 0;
+    }
+    n++;
+    if(end && end[1] != '\0' && n < MP_MAX_KEY_DOWN)
+      ptr = &end[1];
+    else
+      break;
+  }
+  keys[n] = 0;
+  return 1;
 }
 
 static void
@@ -682,11 +770,11 @@ mp_input_free_binds(mp_cmd_bind_t* binds) {
 
 static int
 mp_input_parse_config(char *file) {
-  int fd,code=-1;
+  int fd;
   int bs = 0,r,eof = 0;
   char *iter,*end;
   char buffer[BS_MAX];
-  int n_binds = 0;
+  int n_binds = 0, keys[MP_MAX_KEY_DOWN+1] = { 0 };
   mp_cmd_bind_t* binds = NULL;
 
   fd = open(file,O_RDONLY);
@@ -726,7 +814,7 @@ mp_input_parse_config(char *file) {
     iter = buffer;
 
     // Find the wanted key
-    if(code < 0) {
+    if(keys[0] == 0) {
       // Jump beginnig space
       for(  ; iter[0] != '\0' && strchr(SPACE_CHAR,iter[0]) != NULL ; iter++)
 	/* NOTHING */;
@@ -754,8 +842,7 @@ mp_input_parse_config(char *file) {
 	char name[end-iter+1];
 	strncpy(name,iter,end-iter);
 	name[end-iter] = '\0';
-	code = mp_input_get_key_from_name(name);
-	if(code < 0) {
+	if(! mp_input_get_input_from_name(name,keys)) {
 	  printf("Unknow key %s\n",name);
 	  mp_input_free_binds(binds);
 	  return 0;
@@ -770,7 +857,7 @@ mp_input_parse_config(char *file) {
       // Found new line
       if(iter[0] == '\n' || iter[0] == '\r') {
 	printf("No command found for key (TODO)\n" /*mp_input_get_key_name(code)*/);
-	code = -1;
+	keys[0] = 0;
 	if(iter > buffer) {
 	  memmove(buffer,iter,bs- (iter-buffer));
 	  bs -= (iter-buffer);
@@ -795,12 +882,12 @@ mp_input_parse_config(char *file) {
 	cmd[end-iter] = '\0';
 	//printf("Set bind %d => %s\n",code,cmd);
 	binds = (mp_cmd_bind_t*)realloc(binds,(n_binds+2)*sizeof(mp_cmd_bind_t));
-	binds[n_binds].input = code;
+	memcpy(&binds[n_binds].input,keys,MP_MAX_KEY_DOWN+1);
 	binds[n_binds].cmd = strdup(cmd);
 	n_binds++;
 	memset(&binds[n_binds],0,sizeof(mp_cmd_bind_t));
       }
-      code = -1;
+      keys[0] = 0;
       if(bs > (end-buffer))
 	memmove(buffer,end,bs-(end-buffer));
       bs -= (end-buffer);

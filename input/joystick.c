@@ -27,6 +27,9 @@
 
 #include <linux/joystick.h>
 
+int axis[10];
+int btns = 0;
+
 int mp_input_joystick_init(char* dev) {
   int fd,l=0;
   int inited = 0;
@@ -62,6 +65,11 @@ int mp_input_joystick_init(char* dev) {
 	printf("Joystick : we loose %d bytes of data\n",l);
       break;
     }
+    ev.type &= ~JS_EVENT_INIT;
+    if(ev.type == JS_EVENT_BUTTON)
+      btns |= (ev.value << ev.number);
+    if(ev.type == JS_EVENT_AXIS)
+      axis[ev.number] = ev.value;
   }
 	
   return fd;
@@ -95,17 +103,41 @@ int mp_input_joystick_read(int fd) {
 
   if(ev.type & JS_EVENT_INIT) {
     printf("Joystick : warning init event, we have lost sync with driver\n");
-    return mp_input_joystick_read(fd);
+    ev.type &= ~JS_EVENT_INIT;
+    if(ev.type == JS_EVENT_BUTTON) {
+      int s = (btns >> ev.number) & 1;
+      if(s == ev.value) // State is the same : ignore
+	return MP_INPUT_NOTHING;
+    }
+    if(ev.type == JS_EVENT_AXIS) {
+      if( ( axis[ev.number] == 1 && ev.value > JOY_AXIS_DELTA) ||
+	  (axis[ev.number] == -1 && ev.value < -JOY_AXIS_DELTA) ||
+	  (axis[ev.number] == 0 && ev.value >= -JOY_AXIS_DELTA && ev.value <= JOY_AXIS_DELTA)
+	  ) // State is the same : ignore
+	return MP_INPUT_NOTHING;
+    }	
   }
   
   if(ev.type & JS_EVENT_BUTTON) {
+    btns &= ~(1 << ev.number);
+    btns |= (ev.value << ev.number);
     if(ev.value == 1)
-      return JOY_BTN0+ev.number;      
+      return ((JOY_BTN0+ev.number) | MP_KEY_DOWN);
+    else
+      return (JOY_BTN0+ev.number); 
   } else if(ev.type & JS_EVENT_AXIS) {
-    if(-ev.value > JOY_AXIS_DELTA)
-      return JOY_AXIS0_MINUS+(2*ev.number);
-    else if(ev.value > JOY_AXIS_DELTA)
-      return JOY_AXIS0_PLUS+(2*ev.number);
+    if(ev.value < -JOY_AXIS_DELTA && axis[ev.number] != -1) {
+      axis[ev.number] = -1;
+      return (JOY_AXIS0_MINUS+(2*ev.number)) | MP_KEY_DOWN;
+    } else if(ev.value > JOY_AXIS_DELTA && axis[ev.number] != 1) {
+      axis[ev.number] = 1;
+      return (JOY_AXIS0_PLUS+(2*ev.number)) | MP_KEY_DOWN;
+    } else if(ev.value <= JOY_AXIS_DELTA && ev.value >= -JOY_AXIS_DELTA && axis[ev.number] != 0) {
+      int r = axis[ev.number] == 1 ? JOY_AXIS0_PLUS+(2*ev.number) : JOY_AXIS0_MINUS+(2*ev.number);
+      axis[ev.number] = 0;
+      return r;
+    } else
+      return MP_INPUT_NOTHING;
   } else {
     printf("Joystick warning unknow event type %d\n",ev.type);
     return MP_INPUT_ERROR;

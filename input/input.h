@@ -32,6 +32,13 @@
 #define MP_INPUT_DEAD -2
 #define MP_INPUT_NOTHING -3
 
+#define MP_KEY_DOWN (1<<30)
+// Key up is the default
+
+#ifndef MP_MAX_KEY_DOWN
+#define MP_MAX_KEY_DOWN 32
+#endif
+
 typedef union mp_cmd_arg_value {
   int i;
   float f;
@@ -52,9 +59,14 @@ typedef struct mp_cmd {
 
 
 typedef struct mp_cmd_bind {
-  int input;
+  int input[MP_MAX_KEY_DOWN+1];
   char* cmd;
 } mp_cmd_bind_t;
+
+typedef struct mp_key_name {
+  int key;
+  char* name;
+} mp_key_name_t;
 
 typedef int (*mp_key_func_t)(int fd);
 typedef int (*mp_cmd_func_t)(int fd,char* dest,int size);
