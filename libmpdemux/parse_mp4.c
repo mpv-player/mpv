@@ -12,6 +12,8 @@
 #include "mp_msg.h"
 #include "stream.h"
 
+//#define MP4_DUMPATOM
+
 #define MP4_DL MSGL_V
 #define freereturn(a,b) free(a); return b
 
@@ -26,6 +28,7 @@ int mp4_read_descr_len(stream_t *s) {
     length = (length << 7) | (b & 0x7F);
   } while ((b & 0x80) && numBytes < 4);
 
+  //printf("MP4 read desc len: %d\n", length);
   return length;
 }
 
@@ -34,6 +37,14 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
   /* create memory stream from data */
   stream_t *s = new_memory_stream(data, datalen);
   uint8_t len;
+#ifdef MP4_DUMPATOM
+  {int i;
+  printf("ESDS Dump (%dbyte):\n", datalen);  
+  for(i = 0; i < datalen; i++)
+    printf("%02X ", data[i]);
+  printf("\nESDS Dumped\n");}
+#endif  
+  memset(esds, 0, sizeof(esds_t));
 
   esds->version = stream_read_char(s);
   esds->flags = stream_read_int24(s);
@@ -44,24 +55,25 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
   /* get and verify ES_DescrTag */
   if (stream_read_char(s) == MP4ESDescrTag) {
     /* read length */
-    if ((len = mp4_read_descr_len(s)) < 5 + 15) {
-      freereturn(s,1);
-    }
+    len = mp4_read_descr_len(s);
+
     esds->ESId = stream_read_word(s);
     esds->streamPriority = stream_read_char(s);
+    mp_msg(MSGT_DEMUX, MP4_DL,
+      	"ESDS MPEG4 ES Descriptor (%dBytes):\n"
+	" -> ESId: %d\n"
+	" -> streamPriority: %d\n",
+	len, esds->ESId, esds->streamPriority);
+
+    if (len < (5 + 15)) {
+      freereturn(s,1);
+    }
   } else {
-#if 1 /* 1 == guessed */
     esds->ESId = stream_read_word(s);
-#else    
-    /* skip 2 bytes */
-    stream_skip(s, 2);
-#endif
+    mp_msg(MSGT_DEMUX, MP4_DL,
+      	"ESDS MPEG4 ES Descriptor (%dBytes):\n"
+	" -> ESId: %d\n", 2, esds->ESId);
   }
-  mp_msg(MSGT_DEMUX, MP4_DL,
-      "ESDS MPEG4 ES Descriptor (%dBytes):\n"
-      " -> ESId: %d\n"
-      " -> streamPriority: %d\n",
-      len, esds->ESId, esds->streamPriority);
 
   /* get and verify DecoderConfigDescrTab */
   if (stream_read_char(s) != MP4DecConfigDescrTag) {
@@ -69,9 +81,7 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
   }
 
   /* read length */
-  if ((len = mp4_read_descr_len(s)) < 15) {
-    freereturn(s,1);
-  }
+  len = mp4_read_descr_len(s);
 
   esds->objectTypeId = stream_read_char(s);
   esds->streamType = stream_read_char(s);
@@ -88,6 +98,10 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
       len, esds->objectTypeId, esds->streamType,
       esds->bufferSizeDB, esds->maxBitrate/1000.0,
       esds->avgBitrate/1000.0);
+
+  if (len < 15) {
+    freereturn(s,1);
+  }
 
   /* get and verify DecSpecificInfoTag */
   if (stream_read_char(s) != MP4DecSpecificDescrTag) {
@@ -111,11 +125,7 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
     freereturn(s,1);
   }
 
-  if((len = mp4_read_descr_len(s)) < 1) {
-    freereturn(s,1);
-  }
-
-  /* Note: SLConfig is usually constant value 2 size 1Byte */
+  /* Note: SLConfig is usually constant value 2, size 1Byte */
   esds->SLConfigLen = len;
   esds->SLConfig = malloc(esds->SLConfigLen);
   if (esds->SLConfig) {
@@ -134,9 +144,9 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
 
 /* cleanup all mem occupied by mp4_parse_esds */
 void mp4_free_esds(esds_t *esds) {
-  if(esds->decoderConfig)
+  if(esds->decoderConfigLen)
     free(esds->decoderConfig);
-  if(esds->SLConfig)
+  if(esds->SLConfigLen)
     free(esds->SLConfig);
 }
 
