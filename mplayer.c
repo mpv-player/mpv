@@ -243,6 +243,7 @@ char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
 char* filename=NULL; //"MI2-Trailer.avi";
+int forced_subs_only=0;
 
 // cache2:
        int stream_cache_size=-1;
@@ -1256,6 +1257,8 @@ if(!use_stdin && !slave_mode){
       sub_auto=0; // don't do autosub for textsubs if vobsub found
       inited_flags|=INITED_VOBSUB;
       vobsub_set_from_lang(vo_vobsub, dvdsub_lang);
+      // check if vobsub requested only to display forced subtitles
+      forced_subs_only=vobsub_get_forced_subs_flag(vo_vobsub);
     }
 
 //============ Open & Sync STREAM --- fork cache2 ====================
@@ -1596,6 +1599,10 @@ if (vo_spudec!=NULL)
   inited_flags|=INITED_SPUDEC;
 
 }
+
+// Apply current settings for forced subs
+if (vo_spudec!=NULL)
+  spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
 
 #ifdef USE_SUB
 if(sh_video) {
@@ -3063,6 +3070,12 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     }
 #endif
         break;
+    case MP_CMD_SUB_FORCED_ONLY:
+      if (vo_spudec) {
+	forced_subs_only = forced_subs_only ? 0 : ~0; // toggle state
+	spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
+      }    
+      break;
     case MP_CMD_SCREENSHOT :
       if(vo_config_count) video_out->control(VOCTRL_SCREENSHOT, NULL);
       break;

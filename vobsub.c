@@ -576,6 +576,7 @@ typedef struct {
     unsigned int have_palette;
     unsigned int orig_frame_width, orig_frame_height;
     unsigned int origin_x, origin_y;
+    unsigned int forced_subs;
     /* index */
     packet_queue_t *spu_streams;
     unsigned int spu_streams_size;
@@ -888,6 +889,26 @@ vobsub_set_lang(const char *line)
 }
 
 static int
+vobsub_parse_forced_subs(vobsub_t *vob, const char *line)
+{
+    const char *p;
+
+    p  = line;
+    while (isspace(*p))
+	++p;
+
+    if (strncasecmp("on",p,2) == 0){
+	    vob->forced_subs=~0;
+	    return 0;
+    } else if (strncasecmp("off",p,3) == 0){
+	    vob->forced_subs=0;
+	    return 0;
+    }
+	
+    return -1;
+}
+
+static int
 vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
 {
     ssize_t line_size;
@@ -920,6 +941,8 @@ vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
 	else if (strncmp("custom colors:", line, 14) == 0)
 	    //custom colors: ON/OFF, tridx: XXXX, colors: XXXXXX, XXXXXX, XXXXXX,XXXXXX
 	    res = vobsub_parse_cuspal(vob, line) + vobsub_parse_tridx(line) + vobsub_parse_custom(vob, line);
+	else if (strncmp("forced subs:", line, 12) == 0)
+		res = vobsub_parse_forced_subs(vob, line + 12);
 	else {
 	    mp_msg(MSGT_VOBSUB,MSGL_V, "vobsub: ignoring %s", line);
 	    continue;
@@ -1017,6 +1040,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 	vob->spu_streams_size = 0;
 	vob->spu_streams_current = 0;
 	vob->delay = 0;
+	vob->forced_subs=0;
 	buf = malloc((strlen(name) + 5) * sizeof(char));
 	if (buf) {
 	    rar_stream_t *fd;
@@ -1149,6 +1173,15 @@ vobsub_get_id(void *vobhandle, unsigned int index)
     return (index < vob->spu_streams_size) ? vob->spu_streams[index].id : NULL;
 }
 
+unsigned int 
+vobsub_get_forced_subs_flag(void const * const vobhandle)
+{
+  if (vobhandle)
+    return ((vobsub_t*) vobhandle)->forced_subs;
+  else
+    return 0;
+}
+
 int
 vobsub_set_from_lang(void *vobhandle, unsigned char * lang)
 {
@@ -1256,6 +1289,9 @@ create_idx(vobsub_out_t *me, const unsigned int *palette, unsigned int orig_widt
 	}
 	putc('\n', me->fidx);
     }
+
+    fprintf(me->fidx,"# ON: displays only forced subtitles, OFF: shows everything\n"
+	    "forced subs: OFF\n");
 }
 
 void *

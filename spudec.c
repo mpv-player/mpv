@@ -89,6 +89,8 @@ typedef struct {
   int font_start_level;  /* Darkest value used for the computed font */
   vo_functions_t *hw_spu;
   int spu_changed;
+  unsigned int forced_subs_only;     /* flag: 0=display all subtitle, !0 display only forced subtitles */
+  unsigned int is_forced_sub;         /* true if current subtitle is a forced subtitle */
 } spudec_handle_t;
 
 static void spudec_queue_packet(spudec_handle_t *this, packet_t *packet)
@@ -371,8 +373,10 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
 	/* Menu ID, 1 byte */
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Menu ID\n");
         /* shouldn't a Menu ID type force display start? */
-	//this->start_pts = pts100 + date;
-	//this->end_pts = UINT_MAX;
+	start_pts = pts100 + date;
+	end_pts = UINT_MAX;
+	display = 1;
+	this->is_forced_sub=~0; // current subtitle is forced
 	break;
       case 0x01:
 	/* Start display */
@@ -380,6 +384,7 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
 	start_pts = pts100 + date;
 	end_pts = UINT_MAX;
 	display = 1;
+	this->is_forced_sub=0;
 	break;
       case 0x02:
 	/* Stop display */
@@ -604,6 +609,14 @@ int spudec_visible(void *this){
     return ret;
 }
 
+void spudec_set_forced_subs_only(void * const this, const unsigned int flag)
+{
+  if(this){
+      ((spudec_handle_t *)this)->forced_subs_only=flag;
+      mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPU: Display only forced subs now %s\n", flag ? "enabled": "disabled");
+  }
+}
+
 void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
 {
     spudec_handle_t *spu = (spudec_handle_t *)this;
@@ -752,7 +765,14 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
   spudec_handle_t *spu = (spudec_handle_t *)me;
   scale_pixel *table_x;
   scale_pixel *table_y;
+
   if (spu->start_pts <= spu->now_pts && spu->now_pts < spu->end_pts) {
+
+    // check if only forced subtitles are requested 
+    if( (spu->forced_subs_only) && !(spu->is_forced_sub) ){ 
+	return;
+    }
+
     if (!(spu_aamode&16) && (spu->orig_frame_width == 0 || spu->orig_frame_height == 0
 	|| (spu->orig_frame_width == dxs && spu->orig_frame_height == dys))) {
       if (spu->image)
@@ -1125,6 +1145,9 @@ void *spudec_new_scaled_vobsub(unsigned int *palette, unsigned int *cuspal, unsi
       memcpy(this->cuspal, cuspal, sizeof(this->cuspal));
       this->auto_palette = 0;
     }
+    // forced subtitles default: show all subtitles
+    this->forced_subs_only=0;
+    this->is_forced_sub=0;
   }
   else
     mp_msg(MSGT_SPUDEC,MSGL_FATAL, "FATAL: spudec_init: calloc");

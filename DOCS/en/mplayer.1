@@ -287,6 +287,8 @@ toggle frame dropping
 toggle subtitle visibility
 .IPs j\ \ \ \ 
 switch subtitle language
+.IP F\ \ \ \ 
+toggle display of "forced subtitles"
 .IPs a\ \ \ \ 
 toggle subtitle aligment: top/middle/bottom
 .IPs "z and x"
@@ -1120,6 +1122,10 @@ The \-subfont-* options are available only with FreeType support compiled in.
 .RE
 .PD 1
 .
+.TP
+.B \-forcedsubsonly
+Display only "forced subtitles" for the DVD subtitle stream selected by e.g.
+\-slang.
 .TP
 .B \-fribidi_charset <charset\ name>
 Specifies the charset that will be passed to FriBiDi when decoding a non-utf8

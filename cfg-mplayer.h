@@ -347,6 +347,7 @@ m_option_t mplayer_opts[]={
 	// these should be moved to -common, and suppot in mencoder too
 	{"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
+        {"forcedsubsonly", &forced_subs_only,CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
 	{"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 

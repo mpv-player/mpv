@@ -93,6 +93,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_TV_SET_HUE, "tv_set_hue", 1,  { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} }},
   { MP_CMD_TV_SET_SATURATION, "tv_set_saturation", 1,  { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} }},
 #endif
+  { MP_CMD_SUB_FORCED_ONLY, "forced_subs_only",  0, { {-1,{0}} } },
 #ifdef HAS_DVBIN_SUPPORT
   { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", 1, { { MP_CMD_ARG_INT, {0}}, {-1,{0}}  }},
 #endif
@@ -300,6 +301,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'a', 0 }, "sub_alignment" },
   { { 'v', 0 }, "sub_visibility" },
   { { 'j', 0 }, "vobsub_lang" },
+  { { 'F', 0 }, "forced_subs_only" },
 #ifdef USE_EDL
   { { 'i', 0 }, "edl_mark" },
 #endif
