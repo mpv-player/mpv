@@ -126,10 +126,6 @@ static int init(int rate,int channels,int format,int flags){
   fcntl(audio_fd, F_SETFD, FD_CLOEXEC);
 #endif
   
-  ao_data.bps=channels;
-  if(format != AFMT_U8 && format != AFMT_S8)
-    ao_data.bps*=2;
-
   if(format == AFMT_AC3) {
     ao_data.samplerate=rate;
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
@@ -223,8 +219,12 @@ ac3_retry:
 #endif
   }
 
+  ao_data.bps=ao_data.channels;
+  if(ao_data.format != AFMT_U8 && ao_data.format != AFMT_S8)
+    ao_data.bps*=2;
+
   ao_data.outburst-=ao_data.outburst % ao_data.bps; // round down
-  ao_data.bps*=rate;
+  ao_data.bps*=ao_data.samplerate;
 
     return 1;
 }
