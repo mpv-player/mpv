@@ -60,7 +60,7 @@ extern vo_functions_t video_out_sdl;
 extern vo_functions_t video_out_3dfx;
 extern vo_functions_t video_out_tdfxfb;
 extern vo_functions_t video_out_null;
-extern vo_functions_t video_out_odivx;
+//extern vo_functions_t video_out_odivx;
 extern vo_functions_t video_out_pgm;
 extern vo_functions_t video_out_md5;
 extern vo_functions_t video_out_syncfb;
@@ -124,7 +124,7 @@ vo_functions_t* video_out_drivers[] =
 	&video_out_png,
 #endif	
         &video_out_null,
-        &video_out_odivx,
+//        &video_out_odivx,
         &video_out_pgm,
         &video_out_md5,
 	&video_out_mpegpes,

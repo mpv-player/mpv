@@ -29,7 +29,7 @@ OSDEP_LIBS = -Llinux -losdep
 PP_LIBS = -Lpostproc -lpostproc
 XA_LIBS = -Lxa -lxa
 
-PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb linux postproc xa
+PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec libvo libao2 drivers drivers/syncfb linux postproc xa
 
 ifeq ($(GUI),yes)
 PARTS += Gui
@@ -58,7 +58,7 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMONLIBS = libmpdemux/libmpdemux.a libvo/libvo.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a encore/libencore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+COMMONLIBS = libmpdemux/libmpdemux.a libvo/libvo.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
 
 loader/libloader.a:
 	$(MAKE) -C loader
@@ -90,8 +90,8 @@ mp3lib/libMP3.a:
 opendivx/libdecore.a:
 	$(MAKE) -C opendivx
 
-encore/libencore.a:
-	$(MAKE) -C encore
+# encore/libencore.a:
+# 	$(MAKE) -C encore
 
 Gui/libgui.a:
 	$(MAKE) -C Gui
@@ -113,7 +113,7 @@ mplayerwithoutlink: $(MPLAYER_DEP)
 	@for a in $(PARTS); do $(MAKE) -C $$a all ; done
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) -rdynamic $(CFLAGS) -o $(PRG) mplayer.o -Llibmpdemux -lmpdemux $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(TERMCAP_LIB) -lm
+	$(CC) -rdynamic $(CFLAGS) -o $(PRG) mplayer.o -Llibmpdemux -lmpdemux $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(TERMCAP_LIB) -lm
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
