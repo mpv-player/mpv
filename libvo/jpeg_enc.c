@@ -293,12 +293,12 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 			w, h, y_psize, y_rsize, u_psize, 
 			u_rsize, v_psize, v_rsize);
 
-	j = malloc(sizeof(jpeg_enc_t));
+	j = av_malloc(sizeof(jpeg_enc_t));
 	if (j == NULL) return NULL;
 
-	j->s = malloc(sizeof(MpegEncContext));
+	j->s = av_malloc(sizeof(MpegEncContext));
 	if (j->s == NULL) {
-		free(j);
+		av_free(j);
 		return NULL;
 	}
 
@@ -343,8 +343,8 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	}
 
 	if (mjpeg_init(j->s) < 0) {
-		free(j->s);
-		free(j);
+		av_free(j->s);
+		av_free(j);
 		return NULL;
 	}
 
@@ -352,8 +352,8 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	j->s->avctx = calloc(sizeof(*j->s->avctx), 1);
 
 	if (MPV_common_init(j->s) < 0) {
-		free(j->s);
-		free(j);
+		av_free(j->s);
+		av_free(j);
 		return NULL;
 	}
 
@@ -496,8 +496,8 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 
 void jpeg_enc_uninit(jpeg_enc_t *j) {
 	mjpeg_close(j->s);
-	free(j->s);
-	free(j);
+	av_free(j->s);
+	av_free(j);
 }
 
 #if 0
