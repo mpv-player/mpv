@@ -9,6 +9,7 @@ void mplSubDraw( wsParamDisplay )
  if ( appMPlayer.subWindow.State == wsWindowClosed ) exit_player( MSGTR_Exit_quit );
  
  if ( appMPlayer.subWindow.State == wsWindowFocusIn ) SubVisible++;
+ if ( appMPlayer.subWindow.State == wsWindowFocusOut && wsWMType != wsWMKDE && wsWMType != wsWMIceWM ) SubVisible--;
 
  if ( !appMPlayer.subWindow.Mapped ||
       appMPlayer.subWindow.Visible == wsWindowNotVisible ) return;
@@ -64,8 +65,8 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
           if ( ( !mplSubMoved )&&( appMPlayer.subWindow.isFullScreen ) )
            {
             if( SubVisible++%2 ) wsMoveTopWindow( wsDisplay,appMPlayer.mainWindow.WindowID );
-             else wsMoveTopWindow( wsDisplay,appMPlayer.subWindow.WindowID );
-	   }
+             else if ( wsWMType != wsWMNetWM && wsWMType != wsWMKDE ) wsMoveTopWindow( wsDisplay,appMPlayer.subWindow.WindowID );
+    }
           msButton=0;
           mplSubMoved=0;
           break;

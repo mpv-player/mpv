@@ -163,15 +163,15 @@ void gtkShow( int type,char * param )
 //	gtkSetLayer( PlayList );
         break;
    case evLoad:
-        ShowFileSelect( fsVideoSelector );
+        ShowFileSelect( fsVideoSelector,0 );
 	gtkSetLayer( fsFileSelect );
         break;
    case evFirstLoad:
-        ShowFileSelect( fsVideoSelector );
+        ShowFileSelect( fsVideoSelector,0 );
 	gtkSetLayer( fsFileSelect );
         break;
    case evLoadSubtitle:
-        ShowFileSelect( fsSubtitleSelector );
+        ShowFileSelect( fsSubtitleSelector,0 );
 	gtkSetLayer( fsFileSelect );
         break;
    case evAbout:

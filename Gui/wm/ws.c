@@ -662,16 +662,16 @@ buttonreleased:
 	 if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
 	  {
 	   wsWMType=wsWMIceWM;
-	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is IceWM.\n" );
+//	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is IceWM.\n" );
 	  }
 	 if ( !strncmp( name,"_KDE_",5 ) )
 	  {
-	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is KDE.\n" );
+//	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is KDE.\n" );
 	   wsWMType=wsWMKDE;
 	  }
 	 if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
 	  {
-	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is WindowMaker style.\n" );
+//	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is WindowMaker style.\n" );
 	   wsWMType=wsWMWMaker;
 	  }
 	      

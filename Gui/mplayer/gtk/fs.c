@@ -185,7 +185,7 @@ void CheckDir( GtkWidget * list,char * directory )
 
 static int FirstInit = 1;
 
-void ShowFileSelect( int type )
+void ShowFileSelect( int type,int modal )
 {
  int i;
 
@@ -235,6 +235,9 @@ void ShowFileSelect( int type )
         gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsOtherFilterNames[fsNumberOfOtherFilterNames][0] );
         break;
   }
+ 
+ gtk_window_set_modal( GTK_WINDOW( fsFileSelect ),modal );
+
  gtk_widget_show( fsFileSelect );
 }
 

@@ -10,7 +10,7 @@
 extern GtkWidget   * fsFileSelect;
 
 extern void HideFileSelect( void );
-extern void ShowFileSelect( int type );
+extern void ShowFileSelect( int type, int modal );
 
 extern GtkWidget * create_FileSelect( void );
 
