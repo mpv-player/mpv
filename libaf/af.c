@@ -156,7 +156,9 @@ void af_remove(af_stream_t* s, af_instance_t* af)
   free(af);
 }
 
-/* Reinitializes all filters downstream from the filter given in the argument */
+/* Reinitializes all filters downstream from the filter given in the
+   argument the return value is AF_OK if success and AF_ERROR if
+   failure */
 int af_reinit(af_stream_t* s, af_instance_t* af)
 {
   if(!af)
@@ -364,6 +366,31 @@ int af_init(af_stream_t* s)
   return 0;
 }
 
+/* Add filter during execution. This function adds the filter "name"
+   to the stream s. The filter will be inserted somewhere nice in the
+   list of filters. The return value is a pointer to the new filter,
+   If the filter couldn't be added the return value is NULL. */
+af_instance_t* af_add(af_stream_t* s, char* name){
+  af_instance_t* new;
+  // Sanity check
+  if(!s || !s->first || !name)
+    return NULL;
+  // Insert the filter somwhere nice
+  if(!strcmp(s->first->info->name,"format"))
+    new = af_append(s, s->first, name);
+  else
+    new = af_prepend(s, s->first, name);
+  if(!new)
+    return NULL;
+
+  // Reinitalize the filter list
+  if(AF_OK != af_reinit(s, s->first)){
+    free(new);
+    return NULL;
+  }
+  return new;
+}
+
 // Filter data chunk through the filters in the list
 af_data_t* af_play(af_stream_t* s, af_data_t* data)
 {
@@ -450,9 +477,6 @@ int af_calc_insize_constrained(af_stream_t* s, int len,
     if( (t * (((in/t)*mul.n))/mul.d) >= len) return in;
     in+=t;
   }
-  
-//  printf("Could no meet constraint nr 3.  in=%d out=%d len=%d max_in=%d max_out=%d",
-//      in,out,len,max_insize,max_outsize);
   
   // Could no meet constraint nr 3.
   while(out > max_outsize || in > max_insize){

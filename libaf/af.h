@@ -138,19 +138,37 @@ typedef struct af_stream_s
    stream will be reinitialized. The return value is 0 if sucess and
    -1 if failure */
 int af_init(af_stream_t* s);
+
 // Uninit and remove all filters
 void af_uninit(af_stream_t* s);
+
+/* Add filter during execution. This function adds the filter "name"
+   to the stream s. The filter will be inserted somewhere nice in the
+   list of filters. The return value is a pointer to the new filter,
+   If the filter couldn't be added the return value is NULL. */
+af_instance_t* af_add(af_stream_t* s, char* name);
+
+// Uninit and remove the filter "af"
+void af_remove(af_stream_t* s, af_instance_t* af);
+
+/* Find filter in the dynamic filter list using it's name This
+   function is used for finding already initialized filters */
+af_instance_t* af_get(af_stream_t* s, char* name);
+
 // Filter data chunk through the filters in the list
 af_data_t* af_play(af_stream_t* s, af_data_t* data);
+
 /* Calculate how long the output from the filters will be given the
    input length "len". The calculated length is >= the actual
    length */
 int af_outputlen(af_stream_t* s, int len);
+
 /* Calculate how long the input to the filters should be to produce a
    certain output length, i.e. the return value of this function is
    the input length required to produce the output length "len". The
    calculated length is <= the actual length */
 int af_inputlen(af_stream_t* s, int len);
+
 /* Calculate how long the input IN to the filters should be to produce
    a certain output length OUT but with the following three constraints:
    1. IN <= max_insize, where max_insize is the maximum possible input
