@@ -800,9 +800,9 @@ The FBdev output takes some additional parameters above the others:
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
-  <term><option>-monitor_hfreq</option></term>
-  <term><option>-monitor_vfreq</option></term>
-  <term><option>-monitor_dotclock</option></term>
+  <term><option>-monitor-hfreq</option></term>
+  <term><option>-monitor-vfreq</option></term>
+  <term><option>-monitor-dotclock</option></term>
   <listitem><simpara>
     <emphasis role="bold">important</emphasis> values, see
     <filename>example.conf</filename>
@@ -1172,7 +1172,7 @@ at least.)
   </simpara></listitem>
 <listitem><simpara>
   If you have VESA VBE 3.0+, and you had specified
-  <systemitem>monitor_hfreq, monitor_vfreq, monitor_dotclock</systemitem> somewhere
+  <option>monitor-hfreq, monitor-vfreq, monitor-dotclock</option> somewhere
   (config file, or commandline) you will get the highest possible refresh rate.
   (Using General Timing Formula). To enable this feature you have to specify
   <emphasis role="bold">all</emphasis> your monitor options.
