@@ -19,11 +19,14 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-ac\ <audio\ codec\ name> ]
 .RB [ \-vfm\ <video\ codec\ family> ]
 .RB [ \-afm\ <audio\ codec\ family> ]
+.RB [ \-include\ <heh?> ]
 .RB [ \-v ]
 .RB [ \-mp3file\ <filename> ]
 .RB [ \-ac3file\ <filename> ]
 .RB [ \-ovc\ <video\ codec\ name> ]
 .RB [ \-oac\ <audio\ codec\ name> ]
+.RB [ \-divx4opts\ <codec\ options> ]
+.RB [ \-lameopts\ <codec\ options> ]
 .RB [ \-videobr\ <video\ bitrate> ]
 .RB [ \-audiobr\ <audio\ bitrate> ]
 .RB [ \-pass\ <1/2> ]
@@ -89,6 +92,47 @@ stream.
 .TP
 .B \-afm <audio family>
 (useful?)
+.TP
+.B \-include
+Include what?
+.TP
+.B \-v
+Increase verbosity.
+.TP
+.B \-divx4opts
+If encoding to DivX4, you can specify its parameters here, like:
+
+  -divx4opts br=1800:key=250
+
+Available options:
+
+  help               get help
+  br=XXX             specify bitrate in kbr <1-24000000>
+  key=XXX            maximum keyframe interval
+  deinterlace        toggle deinterlacing
+  q=XXXX             quality (1 is best?, 5 is fast?)
+  min_quant=XXX      minimum quantizer (0-32)
+  max_quant=XXX      maximum quantizer (0-32)
+  rc_period=XXX      hmm
+  rc_reaction_period hmm
+  rc_reaction_ratio  hmm
+
+.TP
+.B \-lameopts
+If encoding to MP3 with libmp3lame, you can specify its parameters here, like:
+
+  -lameopts vbr=192
+
+Available options:
+
+  help               get help
+  br=XXX             specify bitrate in kbr <1-1024?>
+  vbr=XXX            variable bitrate <?>
+  cbr                constant bitrate
+  mode=XXX           ? <?>
+  padding=XXX        ? <?>
+  ratio=XXX          ? <1-100>
+
 .TP
 .B \-OTHERS
 TODO
