@@ -241,8 +241,9 @@ static uint32_t preinit(const char *arg) {
 			normstring(p->zp.norm));
 
 	/* changing the norm in the zoran_params and MJPIOC_S_PARAMS
-	 * does noting, so bail out if the norm is not correct */
-	if (p->zp.norm != norm) {
+	 * does nothing the last time I tried, so bail out if the norm 
+	 * is not correct */
+	if (norm != VIDEO_MODE_AUTO &&  p->zp.norm != norm) {
 		ERROR("mplayer currently can't change the video norm, "
 				"change it with (eg.) XawTV and retry.\n");
 		uninit();
