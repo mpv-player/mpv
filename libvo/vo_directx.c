@@ -1160,16 +1160,16 @@ static uint32_t put_image(mp_image_t *mpi){
 static uint32_t
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t options, char *title, uint32_t format)
 {
+    RECT rd;
 	vo_screenwidth = GetSystemMetrics(SM_CXSCREEN);
 	vo_screenheight = GetSystemMetrics(SM_CYSCREEN);
     vo_fs = options & 0x01;
-    RECT rd;
 	image_format =  format;
 	image_width = width;
 	image_height = height;
 	d_image_width = d_width;
 	d_image_height = d_height;
-    nooverlay = 0;
+    if(format != primary_image_format)nooverlay = 0;
     aspect_save_orig(image_width,image_height);
     aspect_save_prescale(d_image_width,d_image_height);
     if(vidmode){
