@@ -185,6 +185,8 @@ static void flip_page(void){
    vo_mga_flip_page();
 }
 
+static int inited=0;
+
 static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t* info)
 {
  char                 * frame_mem;
@@ -265,6 +267,8 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
    case 15: fgColor=0x7c1fL; break;
    default: printf( "Sorry, this (%d) color depth not supported.\n",vo_depthonscreen ); return -1;
   }
+
+  inited=1;
 
   aspect(&d_width,&d_height,A_NOZOOM);
 #ifdef HAVE_NEW_GUI
@@ -349,14 +353,11 @@ static const vo_info_t* get_info( void )
 static void
 uninit(void)
 {
- saver_on(mDisplay);
-#ifdef HAVE_NEW_GUI
- if ( vo_window == None )
-#endif
- {
-  XDestroyWindow( mDisplay,vo_window );
- }
+ if(!inited) return;
+ inited=0;
  mga_uninit();
+ saver_on(mDisplay);
+ vo_x11_uninit(mDisplay, vo_window);
  printf("vo: uninit!\n");
 }
 
