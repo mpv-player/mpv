@@ -1,4 +1,4 @@
-// Sync'ed on 2003-06-29 with help_mp-en.h 1.100
+// Sync'ed on 2003-07-26 with help_mp-en.h 1.105
 // Translated by Kenneth Chan <chantk@ctk.sytes.net>
 // With reference from help_mp-zh.h
 
@@ -133,7 +133,7 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: 說明: %s\n"
 #define MSGTR_Video_NoVideo "視訊: 沒有影像\n"
 #define MSGTR_NotInitializeVOPorVO "\n致命錯誤: 無法初始化影像過濾器 (-vop) 或 影像輸出 (-vo)。\n"
-#define MSGTR_Paused "\n================== 暫停 ==================\r"
+#define MSGTR_Paused "\n  ====== 暫停 ======\r"
 #define MSGTR_PlaylistLoadUnable "\n無法載入播放列 %s。\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- '非法指令'導致 MPlayer 當了。\n"\
@@ -149,10 +149,10 @@ static char help_text[]=
 "  disassembly。具體細節請參閱 DOCS/zh/bugreports.html#crash.b。\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer 當了。 這是不應該發生的。\n"\
-"  這可能是在 MPlayer 程式碼 _或者_ 你的驅動程式 _或者_ 你的 gcc 版本\n"\
-"  中有臭蟲 version。假如你認為是 MPlayer 的毛病，請參閱 \n"\
-"  DOCS/zh/bugreports.html 並跟從其步驟。除非你在報告懷疑是臭蟲時能提供這\n"\
-"  些資料，否則我們將無法及不會幫忙。\n"
+"  這可能是在 MPlayer 程式碼 _或_ 你的驅動程式 _或_ 你的 gcc 版本\n"\
+"  中有臭蟲。假如你認為是 MPlayer 的毛病，請參閱 \n"\
+"  DOCS/zh/bugreports.html 並跟從其步驟。除非你在報告懷疑是臭蟲時\n"\
+"  能提供這些資料，否則我們將無法及不會幫忙。\n"
 
 
 // mencoder.c:
