@@ -36,7 +36,7 @@
 
         {"dvdauth", "libcss is obsolete. Try libdvdread instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"dvdkey", "libcss is obsolete. Try libdvdread instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{"csslib", "libcss support is obsolete. Try libdvdread instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"csslib", "libcss is obsolete. Try libdvdread instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 
 #ifdef MPLAYER_NETWORK
 	{"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -82,7 +82,7 @@
 	{"saveidx", &index_file_save, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"loadidx", &index_file_load, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
-	// select audio/video subtitle stream
+	// select audio/video/subtitle stream
 	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 8190, NULL},
 	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 8190, NULL},
 	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 8190, NULL},
@@ -189,7 +189,7 @@
 
         {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1, NULL},
         {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0, NULL},
-	{"tsfastparse", "-tsfastparse is not a valid option anymore.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL
+	{"tsfastparse", "-tsfastparse is no longer a valid option.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL
 },
 	{"tsprog", &ts_prog, CONF_TYPE_INT, CONF_RANGE, 0, 65534, NULL},
 #define TS_MAX_PROBE_SIZE 2000000 /* don't forget to change this in libmpdemux/demux_ts.c too */
@@ -288,7 +288,7 @@ extern int divx_quality;
 /* defined in codec-cfg.c */
 extern char * codecs_file;
 
-/* from dec_audio, currently used for AC3 surround decoder only */
+/* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;
 
 #ifdef MPLAYER_NETWORK

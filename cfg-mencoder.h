@@ -169,8 +169,8 @@ m_option_t mencoder_opts[]={
 
 	{"endpos", parse_end_at, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
 
-	// set output framerate - recommended for variable fps (ASF etc) files
-	// and for 29.97fps progressive MPEG2 streams
+	// set output framerate - recommended for variable-FPS (ASF etc) files
+	// and for 29.97FPS progressive MPEG2 streams
 	{"ofps", &force_ofps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
 	{"o", &out_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
