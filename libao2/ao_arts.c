@@ -76,7 +76,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	if(format != AFMT_U8 && format != AFMT_S8)
 		ao_data.bps*=2;
 
-	stream=arts_play_stream(rate_hz, OBTAIN_BITRATE(format), channels, "Mplayer");
+	stream=arts_play_stream(rate_hz, OBTAIN_BITRATE(format), channels, "MPlayer");
 
 	if(stream == NULL) {
 		mp_msg(MSGT_AO, MSGL_ERR, "AO: [arts] Unable to open a stream\n");
