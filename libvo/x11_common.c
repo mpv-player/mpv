@@ -672,16 +672,27 @@ void vo_vm_switch(uint32_t X, uint32_t Y, int* modeline_width, int* modeline_hei
 void vo_vm_close(Display *dpy)
 {
  #ifdef HAVE_NEW_GUI
-        if ((vidmodes!=NULL)&&( vo_window == None ) )
+        if (vidmodes!=NULL && vo_window != None)
  #else
         if (vidmodes!=NULL)
  #endif
-        {
-          int screen; screen=DefaultScreen( dpy );
-          XF86VidModeSwitchToMode(dpy,screen,vidmodes[0]);
-          XF86VidModeSwitchToMode(dpy,screen,vidmodes[0]);
-          free(vidmodes);
-        }
+         {
+           int i, modecount;
+           int screen; screen=DefaultScreen( dpy );
+
+           free(vidmodes); vidmodes=NULL;
+           XF86VidModeGetAllModeLines(mDisplay,mScreen,&modecount,&vidmodes);
+           for (i=0; i<modecount; i++)
+             if ((vidmodes[i]->hdisplay == vo_screenwidth) && (vidmodes[i]->vdisplay == vo_screenheight)) 
+               { 
+                 printf("\nReturning to original mode %dx%d\n", vo_screenwidth, vo_screenheight);
+                 break;
+               }
+
+           XF86VidModeSwitchToMode(dpy,screen,vidmodes[i]);
+           XF86VidModeSwitchToMode(dpy,screen,vidmodes[i]);
+           free(vidmodes);
+         }
 }
 #endif
 
