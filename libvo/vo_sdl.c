@@ -933,6 +933,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		if((strcmp(priv->driver, "x11") == 0)
 		||(strcmp(priv->driver, "windib") == 0)
 		||(strcmp(priv->driver, "directx") == 0)
+		||(strcmp(priv->driver, "Quartz") == 0)
 		||((strcmp(priv->driver, "aalib") == 0)
 		&& priv->X)) {
 			if(verbose) printf("SDL: setting windowed mode\n");
