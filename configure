@@ -343,7 +343,7 @@ fi
 # out which assembler is used by the $_cc compiler
 if [ "$_as" = auto ]; then
   _as=`$_cc -print-prog-name=as`
-  if [ "_$as" = "" ]; then
+  if [ "$_as" = "" ]; then
     _as=as
   fi
 fi
