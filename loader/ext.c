@@ -1,5 +1,5 @@
 /********************************************************
- * 
+ *
  *
  *      Stub functions for Wine module
  *
@@ -23,25 +23,37 @@
 #include <wine/heap.h>
 #include "ext.h"
 
+#if 0
+//REMOVE SIMPLIFY
+static void* mymalloc(unsigned int size)
+{
+    printf("malloc %d\n", size);
+    return malloc(size);
+}
+
+#undef malloc
+#define malloc mymalloc
+#endif
+
 int dbg_header_err( const char *dbg_channel, const char *func )
 {
-    return 0; 
+    return 0;
 }
 int dbg_header_warn( const char *dbg_channel, const char *func )
 {
-    return 0; 
+    return 0;
 }
 int dbg_header_fixme( const char *dbg_channel, const char *func )
 {
-    return 0; 
+    return 0;
 }
 int dbg_header_trace( const char *dbg_channel, const char *func )
 {
-    return 0; 
+    return 0;
 }
 int dbg_vprintf( const char *format, va_list args )
 {
-    return 0; 
+    return 0;
 }
 int __vprintf( const char *format, ... )
 {
@@ -51,9 +63,9 @@ int __vprintf( const char *format, ... )
     vprintf(format, va);
     va_end(va);
 #endif
-    return 0; 
+    return 0;
 }
-    
+
 HANDLE WINAPI GetProcessHeap(void)
 {
     return 1;
@@ -61,17 +73,22 @@ HANDLE WINAPI GetProcessHeap(void)
 
 LPVOID WINAPI HeapAlloc(HANDLE heap, DWORD flags, DWORD size)
 {
-    if(flags & 0x8)
-	return calloc(size, 1);
-	else
-	return malloc(size);
+    static int i = 5;
+    void* m = (flags & 0x8) ? calloc(size, 1) : malloc(size);
+    //printf("HeapAlloc %p  %d  (%d)\n", m, size, flags);
+    //if (--i == 0)
+    //    abort();
+    return m;
 }
 
 WIN_BOOL WINAPI HeapFree(HANDLE heap, DWORD flags, LPVOID mem)
 {
     if (mem) free(mem);
+    //printf("HeapFree  %p\n", mem);
+    //if (!mem)
+    //    abort();
     return 1;
-}     	
+}
 
 static int last_error;
 
@@ -81,15 +98,15 @@ DWORD WINAPI GetLastError(void)
 }
 
 VOID WINAPI SetLastError(DWORD error)
-{ 
+{
     last_error=error;
-}    
+}
 
 WIN_BOOL WINAPI ReadFile(HANDLE handle, LPVOID mem, DWORD size, LPDWORD result, LPOVERLAPPED flags)
 {
     *result=read(handle, mem, size);
     return *result;
-}    
+}
 INT WINAPI lstrcmpiA(LPCSTR c1, LPCSTR c2)
 {
     return strcasecmp(c1,c2);
@@ -101,7 +118,7 @@ LPSTR WINAPI lstrcpynA(LPSTR dest, LPCSTR src, INT num)
 INT WINAPI lstrlenA(LPCSTR s)
 {
     return strlen(s);
-}   
+}
 INT WINAPI lstrlenW(LPCWSTR s)
 {
     int l;
@@ -152,9 +169,8 @@ int wcsnicmp(const unsigned short* s1, const unsigned short* s2, int n)
     n--;
     }
     return 0;
-}			
-		
-		
+}
+
 WIN_BOOL WINAPI IsBadReadPtr(LPCVOID data, UINT size)
 {
     if(size==0)
@@ -162,7 +178,7 @@ WIN_BOOL WINAPI IsBadReadPtr(LPCVOID data, UINT size)
     if(data==NULL)
         return 1;
     return 0;
-}   
+}
 LPSTR HEAP_strdupA(HANDLE heap, DWORD flags, LPCSTR string)
 {
 //    return strdup(string);
@@ -177,10 +193,10 @@ LPWSTR HEAP_strdupAtoW(HANDLE heap, DWORD flags, LPCSTR string)
     if(string==0)
 	return 0;
     size=strlen(string);
-    answer=malloc(size+size+2);
+    answer=malloc(2 * (size + 1));
     for(i=0; i<=size; i++)
 	answer[i]=(short)string[i];
-    return answer;	
+    return answer;
 }
 LPSTR HEAP_strdupWtoA(HANDLE heap, DWORD flags, LPCWSTR string)
 {
@@ -194,7 +210,7 @@ LPSTR HEAP_strdupWtoA(HANDLE heap, DWORD flags, LPCWSTR string)
     answer=malloc(size+2);
     for(i=0; i<=size; i++)
 	answer[i]=(char)string[i];
-    return answer;	
+    return answer;
 }
 
 /***********************************************************************
@@ -250,9 +266,9 @@ LPVOID FILE_dommap( int unix_handle, LPVOID start,
                      MAP_PRIVATE | MAP_FIXED, fd, offset_low )) != (LPVOID)-1)
     {
 //	    printf("address %08x\n", *(int*)ret);
-//	printf("%x\n", ret);		     
+//	printf("%x\n", ret);
 	    return ret;
-    }		
+    }
 
 //    printf("mmap %d\n", errno);
 
@@ -346,9 +362,9 @@ HANDLE WINAPI CreateFileMappingA(HANDLE handle, LPSECURITY_ATTRIBUTES lpAttr,
 	hFile=open("/dev/zero", O_RDWR);
 	if(hFile<0)
 	    return 0;
-    }	    
+    }
     if(!anon)
-    {	
+    {
         len=lseek(hFile, 0, SEEK_END);
 	lseek(hFile, 0, SEEK_SET);
     }
@@ -358,8 +374,8 @@ HANDLE WINAPI CreateFileMappingA(HANDLE handle, LPSECURITY_ATTRIBUTES lpAttr,
 	mmap_access |=PROT_READ;
     else
 	mmap_access |=PROT_READ|PROT_WRITE;
-	
-    answer=mmap(NULL, len, mmap_access, MAP_PRIVATE, hFile, 0);    
+
+    answer=mmap(NULL, len, mmap_access, MAP_PRIVATE, hFile, 0);
     if(anon)
         close(hFile);
     if(answer!=(LPVOID)-1)
@@ -368,30 +384,30 @@ HANDLE WINAPI CreateFileMappingA(HANDLE handle, LPSECURITY_ATTRIBUTES lpAttr,
 	{
 	    fm=malloc(sizeof(file_mapping));
 	    fm->prev=NULL;
-	}    
+	}
 	else
 	{
 	    fm->next=malloc(sizeof(file_mapping));
 	    fm->next->prev=fm;
 	    fm=fm->next;
 	}
-	fm->next=NULL;    
+	fm->next=NULL;
 	fm->handle=answer;
 	if(name)
 	{
 	    fm->name=malloc(strlen(name)+1);
 	    strcpy(fm->name, name);
-	}    
+	}
 	else
 	    fm->name=NULL;
 	fm->mapping_size=len;
-	
+
 	if(anon)
 	    close(hFile);
 	return (HANDLE)answer;
     }
     return (HANDLE)0;
-}        
+}
 WIN_BOOL WINAPI UnmapViewOfFile(LPVOID handle)
 {
     file_mapping* p;
@@ -411,10 +427,10 @@ WIN_BOOL WINAPI UnmapViewOfFile(LPVOID handle)
 		fm=p->prev;
 	    free(p);
 	    return result;
-	}        
+	}
     }
-    return 0;	
-}    
+    return 0;
+}
 //static int va_size=0;
 struct virt_alloc_s;
 typedef struct virt_alloc_s
@@ -437,7 +453,7 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
 //    printf("VirtualAlloc(0x%08X, %d)\n", address
     if(address!=0)
     {
-    //check whether we can allow to allocate this 
+    //check whether we can allow to allocate this
         virt_alloc* str=vm;
         while(str)
         {
@@ -445,7 +461,7 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
 	    {
 		str=str->prev;
 		continue;
-	    }	
+	    }
 	    if((unsigned)address+size<(unsigned)str->address)
 	    {
 		str=str->prev;
@@ -459,16 +475,16 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
 		    close(fd);
 		    return address; //returning previously reserved memory
 		}
-		return NULL;    
+		return NULL;
 	    }
 	    close(fd);
 	    return NULL;
 	}
-	answer=mmap(address, size, PROT_READ | PROT_WRITE | PROT_EXEC, 
+	answer=mmap(address, size, PROT_READ | PROT_WRITE | PROT_EXEC,
 	    MAP_FIXED | MAP_PRIVATE, fd, 0);
-    }	    
+    }
     else
-    answer=mmap(address, size, PROT_READ | PROT_WRITE | PROT_EXEC, 
+    answer=mmap(address, size, PROT_READ | PROT_WRITE | PROT_EXEC,
 	 MAP_PRIVATE, fd, 0);
 //    answer=FILE_dommap(-1, address, 0, size, 0, 0,
 //	PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE);
@@ -494,28 +510,28 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
     	vm=new_vm;
 	vm->next=0;
 //	if(va_size!=0)
-//	    printf("Multiple VirtualAlloc!\n");	    
+//	    printf("Multiple VirtualAlloc!\n");
 //	printf("answer=0x%08x\n", answer);
         return answer;
-    }	
-}    	
+    }
+}
 WIN_BOOL WINAPI VirtualFree(LPVOID  address, DWORD t1, DWORD t2)//not sure
 {
     virt_alloc* str=vm;
     int answer;
     while(str)
     {
-    if(address!=str->address)
-    {
-	str=str->prev;
-	continue;
-    }	
-    answer=munmap(str->address, str->mapping_size);
-    if(str->next)str->next->prev=str->prev;
-    if(str->prev)str->prev->next=str->next;
-    if(vm==str)vm=0;
-    free(str);
-    return 0;
+	if(address!=str->address)
+	{
+	    str=str->prev;
+	    continue;
+	}
+	answer=munmap(str->address, str->mapping_size);
+	if(str->next)str->next->prev=str->prev;
+	if(str->prev)str->prev->next=str->next;
+	if(vm==str)vm=0;
+	free(str);
+	return 0;
     }
     return -1;
 }
@@ -530,7 +546,7 @@ INT WINAPI WideCharToMultiByte(UINT codepage, DWORD flags, LPCWSTR src,
     if(srclen==-1){srclen=0; while(src[srclen++]);}
 //    for(i=0; i<srclen; i++)
 //	printf("%c", src[i]);
-//    printf("\n");		
+//    printf("\n");
     if(dest==0)
     {
     for(i=0; i<srclen; i++)
@@ -539,10 +555,10 @@ INT WINAPI WideCharToMultiByte(UINT codepage, DWORD flags, LPCWSTR src,
     	if(*src==0)
 	    return i+1;
     }
-	return srclen+1;	    
-    }	
+	return srclen+1;
+    }
     if(used_defch)
-	*used_defch=0;	
+	*used_defch=0;
     for(i=0; i<min(srclen, destlen); i++)
     {
 	*dest=(char)*src;
@@ -550,7 +566,7 @@ INT WINAPI WideCharToMultiByte(UINT codepage, DWORD flags, LPCWSTR src,
 	src++;
 	if(*src==0)
 	    return i+1;
-    }	    
+    }
     return min(srclen, destlen);
 }
 INT WINAPI MultiByteToWideChar(UINT codepage,DWORD flags, LPCSTR src, INT srclen,
@@ -572,5 +588,5 @@ HANDLE WINAPI OpenFileMappingA(DWORD access, WIN_BOOL prot, LPCSTR name)
 	if(strcmp(p->name, name)==0)
 	    return (HANDLE)p->handle;
     }
-    return 0;	
+    return 0;
 }

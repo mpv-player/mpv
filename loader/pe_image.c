@@ -303,13 +303,11 @@ static DWORD fixup_imports( WINE_MODREF *wm )
 
 //		    TRACE("--- Ordinal %s,%d\n", name, ordinal);
 		    
-		    thunk_list->u1.Function=LookupExternal(
-		      name, ordinal);
+		    thunk_list->u1.Function=LookupExternal(name, ordinal);
 		} else {		
 		    pe_name = (PIMAGE_IMPORT_BY_NAME)RVA(import_list->u1.AddressOfData);
 //		    TRACE("--- %s %s.%d\n", pe_name->Name, name, pe_name->Hint);
-		    thunk_list->u1.Function=LookupExternalByName(
-		      name, pe_name->Name);
+		    thunk_list->u1.Function=LookupExternalByName(name, pe_name->Name);
 		}
 		import_list++;
 		thunk_list++;
@@ -335,8 +333,6 @@ static DWORD fixup_imports( WINE_MODREF *wm )
 		thunk_list++;
 	    }
 	}
-
-
     }
     return 0;
 }
@@ -857,6 +853,7 @@ WINE_MODREF *PE_LoadLibraryExA (LPCSTR name, DWORD flags)
 		return NULL;
 	}
 	close(hFile);
+	//printf("^^^^^^^^^^^^^^^^Alloc VM1  %p\n", wm);
 	return wm;
 }
 
@@ -870,10 +867,14 @@ void PE_UnloadLibrary(WINE_MODREF *wm)
 {
     TRACE(" unloading %s\n", wm->filename);
 
-    HeapFree( GetProcessHeap(), 0, wm->filename );
-    HeapFree( GetProcessHeap(), 0, wm->short_filename );
+    if (wm->filename)
+	free(wm->filename);
+    if (wm->short_filename)
+	free(wm->short_filename);
+    HeapFree( GetProcessHeap(), 0, wm->deps );
     VirtualFree( (LPVOID)wm->module, 0, MEM_RELEASE );
     HeapFree( GetProcessHeap(), 0, wm );
+    //printf("^^^^^^^^^^^^^^^^Free VM1  %p\n", wm);
 }
 
 /*****************************************************************************

@@ -52,6 +52,10 @@ struct modify_ldt_ldt_s {
 #include <wine/elfdll.h>
 #endif
 #include "win32.h"
+//#include "driver.h"
+
+//#undef TRACE
+//#define TRACE printf
 
 struct modref_list_t;
 
@@ -60,13 +64,12 @@ typedef struct modref_list_t
     WINE_MODREF* wm;
     struct modref_list_t *next;
     struct modref_list_t *prev;
-}
-modref_list;
+} modref_list;
 
 //WINE_MODREF *local_wm=NULL;
 modref_list* local_wm=NULL;
 
-//HANDLE SegptrHeap;  // unused?
+HANDLE SegptrHeap;
 
 WINE_MODREF *MODULE_FindModule(LPCSTR m)
 {
@@ -113,6 +116,7 @@ static void MODULE_RemoveFromList(WINE_MODREF *mod)
 	    return;
 	}
     }
+
 }
 
 WINE_MODREF *MODULE32_LookupHMODULE(HMODULE m)
@@ -274,9 +278,17 @@ WIN_BOOL MODULE_DllProcessAttach( WINE_MODREF *wm, LPVOID lpReserved )
  */
 void MODULE_DllProcessDetach( WINE_MODREF* wm, WIN_BOOL bForceDetach, LPVOID lpReserved )
 {
-//    WINE_MODREF *wm=local_wm;
+    //    WINE_MODREF *wm=local_wm;
+    modref_list* l = local_wm;
     wm->flags &= ~WINE_MODREF_PROCESS_ATTACHED;
     MODULE_InitDll( wm, DLL_PROCESS_DETACH, lpReserved );
+/*    while (l)
+    {
+	modref_list* f = l;
+	l = l->next;
+	free(f);
+    }
+    local_wm = 0;*/
 }
 
 
@@ -298,11 +310,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 		SetLastError(ERROR_INVALID_PARAMETER);
 		return 0;
 	}
-
 	printf("Loading DLL: '%s'\n", libname);
-	
-//	if(fs_installed==0)
-//	    install_fs();
 
 	while (wm == 0 && listpath[++i])
 	{
@@ -310,7 +318,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 	    {
 		if (i == 0)
 		    /* check just original file name */
-		    strncpy(path, libname, 511); 
+		    strncpy(path, libname, 511);
                 else
 		    /* check default user path */
 		    strncpy(path, def_path, 300);
@@ -539,3 +547,27 @@ FARPROC MODULE_GetProcAddress(
     }
 }
 
+static int acounter = 0;
+void CodecAlloc(void)
+{
+    acounter++;
+}
+
+void CodecRelease(void)
+{
+    acounter--;
+    if (acounter == 0)
+    {
+	for (;;)
+	{
+	    modref_list* list = local_wm;
+	    if (!local_wm)
+		break;
+	    //printf("CODECRELEASE %p\n", list);
+            MODULE_FreeLibrary(list->wm);
+	    MODULE_RemoveFromList(list->wm);
+            if (local_wm == NULL)
+		my_garbagecollection();
+	}
+    }
+}
