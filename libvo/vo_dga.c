@@ -23,6 +23,11 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.14  2001/04/17 22:28:09  acki2
+ * - now also supports OSD for YV12 (big speed penalty by having to build image
+ *   in offscreen memory and then copying;
+ * - OSD still works just with doublebuffering enabled :-(
+ *
  * Revision 1.13  2001/04/17 20:51:58  acki2
  * - query_format() now uses new return value concept
  * - now support for OSD :-))) for RGB modes
@@ -212,6 +217,7 @@ static XF86VidModeModeInfo **vo_dga_vidmodes=NULL;
 extern int       verbose;          
 extern int       vo_dbpp;
 
+static int       vo_dga_src_format;
 static int       vo_dga_width;           // bytes per line in framebuffer
 static int       vo_dga_vp_width;        // visible pixels per line in 
                                          // framebuffer
@@ -240,6 +246,7 @@ static int
                  vo_dga_dbf_current;     // current buffer (0 or 1)
 
 static unsigned char     *vo_dga_base;
+static unsigned char     *vo_dga_yv12_base = NULL;
 static Display  *vo_dga_dpy;
 
 //---------------------------------------------------------
@@ -264,25 +271,28 @@ void vd_printf( int level, const char *str, ...){
 static void draw_alpha( int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride ){
 
   char *d;
-  unsigned int offset = (y0*vo_dga_width+x0);
+  unsigned int offset;
+  unsigned int buffer_stride;
 
+  offset = vo_dga_width * y0 +x0;
+  buffer_stride = vo_dga_width;
   d = (&((char *)vo_dga_base)[vo_dga_vp_offset + vo_dga_dbf_current * vo_dga_dbf_mem_offset]);
      
+  switch( HW_MODE.vdm_mplayer_depth ){
 
-    switch( HW_MODE.vdm_mplayer_depth ){
-        case 24: 
-          vo_draw_alpha_rgb24(w,h,src,srca,stride, d+3*offset , 3*vo_dga_width);
-          break;
-        case 32: 
-          vo_draw_alpha_rgb32(w,h,src,srca,stride, d+4*offset , 4*vo_dga_width); 
-          break;
-        case 15:
-          vo_draw_alpha_rgb15(w,h,src,srca,stride, d+2*offset , 2*vo_dga_width);
-          break;
-        case 16:        
-          vo_draw_alpha_rgb16(w,h,src,srca,stride, d+2*offset , 2*vo_dga_width);
-          break;
-    }
+  case 32: 
+    vo_draw_alpha_rgb32(w,h,src,srca,stride, d+4*offset , 4*buffer_stride); 
+    break;
+  case 24: 
+    vo_draw_alpha_rgb24(w,h,src,srca,stride, d+3*offset , 3*buffer_stride);
+    break;
+  case 15:
+    vo_draw_alpha_rgb15(w,h,src,srca,stride, d+2*offset , 2*buffer_stride);
+    break;
+  case 16:        
+    vo_draw_alpha_rgb16(w,h,src,srca,stride, d+2*offset , 2*buffer_stride);
+    break;
+  }
 }
 
 
@@ -301,14 +311,14 @@ static void draw_alpha( int x0,int y0, int w,int h, unsigned char* src, unsigned
 #define rep_movsl(dest, src, numwords, d_add, count) \
 __asm__ __volatile__( \
 " \
-xfer:                     \n\t\
+1:                     \n\t\
                   movl %%edx, %%ecx \n\t \
                   cld\n\t \
                   rep\n\t \
                   movsl \n\t\
                   add %%eax, %%edi \n\t\
                   dec %%ebx \n\t\
-                  jnz xfer \n\t\
+                  jnz 1b \n\t\
 " \
                   : \
                   : "a" (d_add), "b" (count), "S" (src), "D" (dest), \
@@ -344,6 +354,10 @@ static void check_events(void)
 
 static void flip_page( void ){
 
+  if(vo_dga_src_format ==IMGFMT_YV12 ){
+       draw_frame( &vo_dga_yv12_base);
+  }
+
   vo_draw_text(vo_dga_src_width,vo_dga_src_height,draw_alpha);
   
   if(vo_dga_dbf_mem_offset != 0){
@@ -366,11 +380,19 @@ static void flip_page( void ){
 static uint32_t draw_slice( uint8_t *src[],int stride[],
                             int w,int h,int x,int y )
 {
-  yuv2rgb( vo_dga_base + vo_dga_vp_offset + 
-          (vo_dga_width * y +x) * BYTESPP,
-           src[0], src[1], src[2],
-           w,h, vo_dga_width * BYTESPP,
-           stride[0],stride[1] );
+
+  // for osd, we need a separate buffer here ... :-()
+
+    yuv2rgb( vo_dga_yv12_base + (vo_dga_src_width * y +x) * BYTESPP,
+         src[0], src[1], src[2],
+         w,h, vo_dga_src_width * BYTESPP,
+         stride[0],stride[1] );
+
+  //  yuv2rgb( vo_dga_base + vo_dga_vp_offset + 
+  //        (vo_dga_width * y +x) * BYTESPP,
+  //         src[0], src[1], src[2],
+  //         w,h, vo_dga_width * BYTESPP,
+  //         stride[0],stride[1] );
   return 0;
 };
 
@@ -461,7 +483,7 @@ static uint32_t query_format( uint32_t format )
    }
  }
 
- if( format==IMGFMT_YV12 ) return 1;
+ if( format==IMGFMT_YV12 ) return 7;
  
  if( (format&IMGFMT_BGR_MASK) == IMGFMT_BGR && 
      vd_ModeValid(format&0xff)) return 7;
@@ -480,6 +502,8 @@ uninit(void)
 #endif
 
   if(vo_dga_is_running){	
+    if(vo_dga_yv12_base)free(vo_dga_yv12_base);
+    vo_dga_yv12_base = NULL;
     vo_dga_is_running = 0;
     vd_printf( VD_DBG, "vo_dga: in uninit\n");
     XUngrabPointer (vo_dga_dpy, CurrentTime);
@@ -605,7 +629,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
 #endif
 
   if( vo_dga_is_running )return -1;
-  
+  vo_dga_src_format = format;  
   wanted_width = d_width;
   wanted_height = d_height;
 
@@ -637,6 +661,15 @@ static uint32_t init( uint32_t width,  uint32_t height,
     vd_printf (VD_ERR, "vo_dga: Can't open display\n");
     return 1;
   } 
+
+  if(format ==IMGFMT_YV12 ){
+    vo_dga_yv12_base = malloc(wanted_width * wanted_height * BYTESPP);
+    if(vo_dga_yv12_base== NULL){
+      vd_printf(VD_ERR, "vo_dga: Not enough memory for offscreen YV12 buffer!\n");
+      return 1;
+    }
+  }
+
 
   vo_dga_vp_width = DisplayWidth( vo_dga_dpy, DefaultScreen(vo_dga_dpy));
   vo_dga_vp_height = DisplayHeight( vo_dga_dpy, DefaultScreen(vo_dga_dpy));
@@ -761,6 +794,10 @@ static uint32_t init( uint32_t width,  uint32_t height,
      }
 #endif
 #endif
+     if(vo_dga_yv12_base){
+       free(vo_dga_yv12_base);
+       vo_dga_yv12_base = NULL;
+     }
      return 1;
   }
 		         
@@ -848,7 +885,8 @@ static uint32_t init( uint32_t width,  uint32_t height,
   vo_dga_dbf_mem_offset = vo_dga_width * BYTESPP *  vo_dga_dbf_y_offset;
   vo_dga_dbf_current = 0;
   
-  if(format ==IMGFMT_YV12 )vo_dga_dbf_mem_offset = 0;
+  // if(format ==IMGFMT_YV12 )
+  //vo_dga_dbf_mem_offset = 0;
   // disable doublebuffering for YV12
 
 #ifdef HAVE_DGA2
