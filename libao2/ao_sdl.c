@@ -157,7 +157,7 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 	} 
 	
 	printf("SDL buf size = %d\n",aspec.size);
-	if(ao_buffersize==-1) ao_buffersize=16*aspec.size;
+	if(ao_buffersize==-1) ao_buffersize=aspec.size;
 	
 	/* unsilence audio, if callback is ready */
 	SDL_PauseAudio(0);
