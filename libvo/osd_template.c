@@ -59,7 +59,7 @@ PROFILE_START();
 		"pand %%mm4, %%mm0\n\t" 	//0Y0Y0Y0Y
 		"psrlw $8, %%mm1\n\t"		//0Y0Y0Y0Y
 		"movq	%1, %%mm2\n\t" 		//srca HGFEDCBA
-		"paddb	bFF, %%mm2\n\t"
+		"paddb	"MANGLE(bFF)", %%mm2\n\t"
 		"movq %%mm2, %%mm3\n\t"
 		"pand %%mm4, %%mm2\n\t" 	//0G0E0C0A
 		"psrlw $8, %%mm3\n\t"		//0H0F0D0B
@@ -126,7 +126,7 @@ PROFILE_START();
 		"movq	%%mm0, %%mm1\n\t"
 		"pand %%mm4, %%mm0\n\t" 	//0Y0Y0Y0Y
 		"movd	%%eax, %%mm2\n\t"	//srca 0000DCBA
-		"paddb	bFF, %%mm2\n\t"
+		"paddb	"MANGLE(bFF)", %%mm2\n\t"
 		"punpcklbw %%mm7, %%mm2\n\t"	//srca 0D0C0B0A
 		"pmullw	%%mm2, %%mm0\n\t"
 		"psrlw	$8, %%mm0\n\t"
@@ -334,7 +334,7 @@ PROFILE_START();
 		"pand %%mm4, %%mm0\n\t" 	//0R0B0R0B
 		"psrlw $8, %%mm1\n\t"		//0?0G0?0G
 		"movd	%%eax, %%mm2\n\t" 	//srca 0000DCBA
-		"paddb	bFF, %%mm2\n\t"
+		"paddb	"MANGLE(bFF)", %%mm2\n\t"
 		"punpcklbw %%mm2, %%mm2\n\t"	//srca DDCCBBAA
 		"movq %%mm2, %%mm3\n\t"
 		"punpcklbw %%mm7, %%mm2\n\t"	//srca 0B0B0A0A
