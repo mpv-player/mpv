@@ -1,4 +1,4 @@
-mplayer (g1)
+mplayer (1.0)
   pre1:  "Stalled"
     # Stalled becouse the development slowed down a lot -- all the devs
       are on summer holiday, or dunno.
@@ -85,7 +85,8 @@ mplayer (g1)
     * ARM optimized simple_idct
     
     Drivers:
-    * vo/x11: fix detection of metacity
+    * x11_common: fix detection of metacity
+    * x11_common: 10l fix in original layer detection code
     * tdfx_vid driver (3dfx cards overlay with AGP support)
     * vo_xover: general x11 ovelay driver, currently onl tdfx_vid uses it
     * mga_vid: various fixes, 16MB G400 detection, support for multiple cards
@@ -105,6 +106,8 @@ mplayer (g1)
     * crashing on broken config files finally fixed!
     * GUI PPC (reverse byteorder) fixes
     * mp3lib: moved the assembly sources into gcc inline assembly (c)
+    * mp3lib: sync with mpg123 0.59s-pre
+    * mp3lib: final layer-1 support
     * TOOLS/plotpsnr.pl: PSNR plotting tool using gnuplot 
     * DOCS/tech/mpcf.txt: MPCF/NUT draft/specification
     * TVout/matroxtv: various improvements
