@@ -28,26 +28,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(__FreeBSD__) || defined(__bsdi__)
-	#define SYS_BSD 1
-#endif
-
-#if defined(__NetBSD__)
-	#define SYS_NBSD 1
-#endif
-
-#if defined(__OpenBSD__)
-	#define SYS_OBSD 1
-#endif
-
 #if defined(__linux__)
 	#include <linux/cdrom.h>
-#elif defined(SYS_BSD)
-	#include <sys/cdio.h>
-#elif defined(SYS_NBSD)
-	#include <sys/cdio.h>
-#elif defined(SYS_OBSD)
-	#include <util.h>
+#elif defined(__FreeBSD__) || defined(__bsdi__) || defined(__NetBSD__) || defined(__OpenBSD__)
 	#include <sys/cdio.h>
 #endif
 
@@ -65,12 +48,17 @@ static cd_toc_t cdtoc[100];
 
 #if defined(__linux__)
 int 
-read_toc(void) {
-	int drive = open("/dev/cdrom", O_RDONLY | O_NONBLOCK);
+read_toc(const char *dev) {
+	int drive;
 	struct cdrom_tochdr tochdr;
 	struct cdrom_tocentry tocentry;
 	int i;
 
+	drive = open(dev, O_RDONLY | O_NONBLOCK);
+	if( drive<0 ) {
+		return drive;
+	}
+	
 	ioctl(drive, CDROMREADTOCHDR, &tochdr);
 	for (i = tochdr.cdth_trk0; i <= tochdr.cdth_trk1; i++) {
 		tocentry.cdte_track = i;
@@ -94,13 +82,18 @@ read_toc(void) {
 	return tochdr.cdth_trk1;
 }
 
-#elif defined(SYS_BSD)
+#elif defined(__FreeBSD__) || defined(__bsdi__)
 int 
-read_toc(void) {
-	int drive = open("/dev/acd0c", O_RDONLY | O_NONBLOCK);
+read_toc(const char *dev) {
+	int drive;
 	struct ioc_toc_header tochdr;
 	struct ioc_read_toc_single_entry tocentry;
 	int i;
+
+	drive = open(dev, O_RDONLY | O_NONBLOCK);
+	if( drive<0 ) {
+		return drive;
+	}
 
 	ioctl(drive, CDIOREADTOCHEADER, &tochdr);
 	for (i = tochdr.starting_track; i <= tochdr.ending_track; i++) {
@@ -125,61 +118,19 @@ read_toc(void) {
 	return tochdr.ending_track;
 }
 
-#elif defined(SYS_NBSD)
+#elif defined(__NetBSD__) || defined(__OpenBSD__)
 int
-read_toc(void) {
+read_toc(const char *dev) {
 	int drive;
 	struct ioc_toc_header tochdr;
 	struct ioc_read_toc_entry tocentry;
 	int i;
 	struct cd_toc_entry toc_buffer;
 
-	drive = open("/dev/cdrom", O_RDONLY | O_NONBLOCK);
-	if (!drive)
-		return -1;
-
-	ioctl(drive, CDIOREADTOCHEADER, &tochdr);
-	for (i = tochdr.starting_track; i <= tochdr.ending_track; i++) {
-		tocentry.starting_track = i;
-		tocentry.address_format = CD_MSF_FORMAT;
-		tocentry.data = &toc_buffer;
-		tocentry.data_len = sizeof(toc_buffer);
-		ioctl(drive, CDIOREADTOCENTRYS, &tocentry);
-		cdtoc[i-1].min = toc_buffer.addr.msf.minute;
-		cdtoc[i-1].sec = toc_buffer.addr.msf.second;
-		cdtoc[i-1].frame = toc_buffer.addr.msf.frame;
-		cdtoc[i-1].frame += cdtoc[i-1].min*60*75;
-		cdtoc[i-1].frame += cdtoc[i-1].sec*75;
+	drive = open(dev, O_RDONLY | O_NONBLOCK);
+	if( drive<0 ) {
+		return drive;
 	}
-	tocentry.starting_track = 0xAA;
-	tocentry.address_format = CD_MSF_FORMAT;
-	ioctl(drive, CDIOREADTOCENTRYS, &tocentry);
-	cdtoc[tochdr.ending_track].min = toc_buffer.addr.msf.minute;
-	cdtoc[tochdr.ending_track].sec = toc_buffer.addr.msf.second;
-	cdtoc[tochdr.ending_track].frame = toc_buffer.addr.msf.frame;
-	cdtoc[tochdr.ending_track].frame += cdtoc[tochdr.ending_track].min*60*75;
-	cdtoc[tochdr.ending_track].frame += cdtoc[tochdr.ending_track].sec*75;
-	close(drive);
-	return tochdr.ending_track;
-}
-
-#elif defined(SYS_OBSD)
-int 
-read_toc(void) {
-	int drive;
-	struct ioc_toc_header tochdr;
-	struct ioc_read_toc_entry tocentry;
-	int i;
-	char *drivename;
-	char *realdev;
-	struct cd_toc_entry toc_buffer;
-
-	drivename = getenv("CDROM");
-	if (!drivename)
-		drivename = "cd0";
-	drive = opendev(drivename, O_RDONLY, OPENDEV_PART, &realdev);
-	if (!drive)
-		return -1;
 
 	ioctl(drive, CDIOREADTOCHEADER, &tochdr);
 	for (i = tochdr.starting_track; i <= tochdr.ending_track; i++) {
@@ -529,6 +480,9 @@ blues c711930d Santana / Supernatural
 			// Found inexact matches, list follows
 			cddb_parse_matches_list(http_hdr, cddb_data);
 			return cddb_request_titles(cddb_data);
+		case 500:
+			printf("Server returns: Command syntax error\n");
+			break;
 		default:
 			printf("Unhandled code\n");
 	}
@@ -660,18 +614,24 @@ cddb_retrieve(cddb_data_t *cddb_data) {
 }
 
 int
-cddb_resolve(char **xmcd_file) {
+cddb_resolve(const char *dev, char **xmcd_file) {
 	char cddb_cache_dir[] = DEFAULT_CACHE_DIR;
 	char *home_dir = NULL;
 	cddb_data_t cddb_data;
+	int ret;
 
-	cddb_data.tracks = read_toc();
+	ret = read_toc(dev);
+	if( ret<0 ) {
+		printf("Failed to open %s device.\n", dev);
+		return -1;
+	}
+	cddb_data.tracks = ret;
 	cddb_data.disc_id = cddb_discid(cddb_data.tracks);
 	cddb_data.anonymous = 1;	// Don't send user info by default
 
 	// Check if there is a CD in the drive
 	// FIXME: That's not really a good way to check
-	if( cddb_data.disc_id==8256 ) {
+	if( cddb_data.disc_id==0 ) {
 		printf("No CD in the drive\n");
 		return -1;
 	}
@@ -818,13 +778,13 @@ cddb_parse_xmcd(char *xmcd_file) {
 
 stream_t* 
 cddb_open(char *dev, char *track) {
-	stream_t *stream;
+	stream_t *stream = NULL;
 	cd_info_t *cd_info = NULL;
 	cdda_priv *priv;
 	char *xmcd_file = NULL;
 	int ret;
 	
-	ret = cddb_resolve(&xmcd_file);
+	ret = cddb_resolve(dev, &xmcd_file);
 //	if( ret<0 ) {
 //		return NULL;
 //	}
@@ -832,7 +792,11 @@ cddb_open(char *dev, char *track) {
 		cd_info = cddb_parse_xmcd(xmcd_file);
 		free(xmcd_file);
 	}
+
 	stream = open_cdda(dev, track);
+	if( stream==NULL ) {
+		return NULL;
+	}
 
 	priv = ((cdda_priv*)(stream->priv));
 	if( cd_info!=NULL ) { 
