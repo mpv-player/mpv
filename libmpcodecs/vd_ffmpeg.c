@@ -98,6 +98,7 @@ static int lavc_param_gray=0;
 static int lavc_param_vstats=0;
 static int lavc_param_idct_algo=0;
 static int lavc_param_debug=0;
+static int lavc_param_vismv=0;
 
 m_option_t lavc_decode_opts_conf[]={
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
@@ -106,9 +107,8 @@ m_option_t lavc_decode_opts_conf[]={
 	{"idct", &lavc_param_idct_algo, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
 	{"ec", &lavc_param_error_concealment, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
 	{"vstats", &lavc_param_vstats, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#if LIBAVCODEC_BUILD >= 4642
 	{"debug", &lavc_param_debug, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
-#endif
+	{"vismv", &lavc_param_vismv, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -224,6 +224,9 @@ static int init(sh_video_t *sh){
     avctx->error_concealment= lavc_param_error_concealment;
 #if LIBAVCODEC_BUILD >= 4642
     avctx->debug= lavc_param_debug;
+#endif    
+#if LIBAVCODEC_BUILD >= 4698
+    avctx->debug_mv= lavc_param_vismv;
 #endif    
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     /* AVRn stores huffman table in AVI header */

@@ -2162,6 +2162,18 @@ debug:
 .br
 0x1000: bugs
 .REss
+.IPs vismv=<value>
+vismv:
+.RSss
+.br
+0: disabled
+.br
+1: visualize forward predicted MVs of P frames
+.br
+2: visualize forward predicted MVs of B frames
+.br
+4: visualize backward predicted MVs of B frames
+.REss
 .IPs bug=<value>
 manually work around encoder bugs:
 .RSss
@@ -4278,6 +4290,12 @@ average.
 .TP
 .B ildct\ \ 
 use interlaced dct
+.TP
+.B ilme\ \ \ 
+use interlaced motion estimation
+.TP
+.B alt\ \ \ \ 
+use alternative scantable
 .TP
 .B top=<-1\-1>\ \ \ 
 .RSs

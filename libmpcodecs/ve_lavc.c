@@ -142,6 +142,8 @@ static int lavc_param_inter_threshold= 0;
 static int lavc_param_sc_threshold= 0;
 static int lavc_param_ss= 0;
 static int lavc_param_top= -1;
+static int lavc_param_alt= 0;
+static int lavc_param_ilme= 0;
 
 
 char *lavc_param_acodec = "mp2";
@@ -268,6 +270,12 @@ m_option_t lavcopts_conf[]={
 #endif
 #ifdef CODEC_FLAG_H263P_SLICE_STRUCT
 	{"ss", &lavc_param_ss, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_H263P_SLICE_STRUCT, NULL},
+#endif
+#ifdef CODEC_FLAG_ALT_SCAN
+	{"alt", &lavc_param_alt, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_ALT_SCAN, NULL},
+#endif
+#ifdef CODEC_FLAG_INTERLACED_ME
+	{"ilme", &lavc_param_ilme, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_INTERLACED_ME, NULL},
 #endif
 	{"inter_threshold", &lavc_param_inter_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
 	{"sc_threshold", &lavc_param_sc_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
@@ -549,6 +557,8 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->flags|= lavc_param_mv0;
     lavc_venc_context->flags|= lavc_param_qp_rd;
     lavc_venc_context->flags|= lavc_param_ss;
+    lavc_venc_context->flags|= lavc_param_alt;
+    lavc_venc_context->flags|= lavc_param_ilme;
     if(lavc_param_gray) lavc_venc_context->flags|= CODEC_FLAG_GRAY;
 
     if(lavc_param_normalize_aqp) lavc_venc_context->flags|= CODEC_FLAG_NORMALIZE_AQP;
