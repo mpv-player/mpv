@@ -301,7 +301,7 @@ static int run_shell_cmd(menu_t* menu, char* cmd) {
     dup2(in[0],0);
     dup2(out[1],1);
     dup2(err[1],2);
-    execl("/bin/sh","sh","-c",cmd,NULL);
+    execl("/bin/sh","sh","-c",cmd,(void*)NULL);
     fprintf(errf,"exec failed : %s\n",strerror(errno));
     exit(1);
   }
