@@ -47,7 +47,7 @@ static char* banner_text=
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
 #include "libmpdemux/mp3_hdr.h"
-#include "libmpdemux/aviwrite.h"
+#include "libmpdemux/muxer.h"
 
 
 #include "libvo/video_out.h"
@@ -107,6 +107,8 @@ static char** video_fm_list=NULL;     // override video codec family
 
 static int out_audio_codec=-1;
 static int out_video_codec=-1;
+
+int out_file_format=MUXER_TYPE_AVI;	// default to AVI
 
 // audio stream skip/resync functions requires only for seeking.
 // (they should be implemented in the audio codec layer)
@@ -301,12 +303,12 @@ static void exit_sighandler(int x){
     interrupted=1;
 }
 
-static aviwrite_t* muxer=NULL;
+static muxer_t* muxer=NULL;
 static FILE* muxer_f=NULL;
 
 // callback for ve_*.c:
-void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags){
-    aviwrite_write_chunk(muxer,s,muxer_f,len,flags);
+void mencoder_write_chunk(muxer_stream_t *s,int len,unsigned int flags){
+    muxer_write_chunk(muxer,s,muxer_f,len,flags);
 }
 
 extern void print_wave_header(WAVEFORMATEX *h);
@@ -335,8 +337,8 @@ uint32_t skippedframes=0;
 uint32_t duplicatedframes=0;
 uint32_t badframes=0;
 
-aviwrite_stream_t* mux_a=NULL;
-aviwrite_stream_t* mux_v=NULL;
+muxer_stream_t* mux_a=NULL;
+muxer_stream_t* mux_v=NULL;
 off_t muxer_f_size=0;
 
 #ifdef HAVE_MP3LAME
@@ -600,11 +602,11 @@ if(!muxer_f) {
   mencoder_exit(1,NULL);
 }
 
-muxer=aviwrite_new_muxer();
+muxer=muxer_new_muxer(out_file_format);
 
 // ============= VIDEO ===============
 
-mux_v=aviwrite_new_stream(muxer,AVIWRITE_TYPE_VIDEO);
+mux_v=muxer_new_stream(muxer,MUXER_TYPE_VIDEO);
 
 mux_v->buffer_size=0x200000; // 2MB
 mux_v->buffer=malloc(mux_v->buffer_size);
@@ -698,7 +700,7 @@ if ((force_fourcc != NULL) && (strlen(force_fourcc) >= 4))
 // ============= AUDIO ===============
 if(sh_audio){
 
-mux_a=aviwrite_new_stream(muxer,AVIWRITE_TYPE_AUDIO);
+mux_a=muxer_new_stream(muxer,MUXER_TYPE_AUDIO);
 
 mux_a->buffer_size=0x100000; //16384;
 mux_a->buffer=malloc(mux_a->buffer_size);
@@ -809,7 +811,7 @@ if(audio_delay!=0.0){
 } // if(sh_audio)
 
 printf(MSGTR_WritingAVIHeader);
-aviwrite_write_header(muxer,muxer_f);
+muxer_write_header(muxer,muxer_f);
 
 decoded_frameno=0;
 
@@ -876,6 +878,18 @@ if (seek_to_sec) {
 //  this line enables behaviour 1. (and kills 2. at the same time):
 //    if(demuxer2) demux_seek(demuxer2, d, 1);
 }
+
+if (out_file_format == MUXER_TYPE_MPEG)
+	{
+	if (audio_preload > 0.4) {
+	  fprintf(stderr,"Limiting audio preload to 0.4s\n");
+	  audio_preload = 0.4;
+	}
+	if (audio_density < 4) {
+	  fprintf(stderr,"Increasing audio density to 4\n");
+	  audio_preload = 4;
+	}
+	}
 
 if(tv_param_on == 1) 
 	{
@@ -983,7 +997,7 @@ if(sh_audio){
 	    }
 	}
 	if(len<=0) break; // EOF?
-	aviwrite_write_chunk(muxer,mux_a,muxer_f,len,0x10);
+	muxer_write_chunk(muxer,mux_a,muxer_f,len,0x10);
 	if(!mux_a->h.dwSampleSize && mux_a->timer>0)
 	    mux_a->wf->nAvgBytesPerSec=0.5f+(double)mux_a->size/mux_a->timer; // avg bps (VBR)
 	if(mux_a->buffer_len>=len){
@@ -1063,11 +1077,11 @@ ptimer_start = GetTimerMS();
 switch(mux_v->codec){
 case VCODEC_COPY:
     mux_v->buffer=start;
-    if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
+    if(skip_flag<=0) muxer_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
     break;
 case VCODEC_FRAMENO:
     mux_v->buffer=(unsigned char *)&decoded_frameno; // tricky
-    if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,sizeof(int),0x10);
+    if(skip_flag<=0) muxer_write_chunk(muxer,mux_v,muxer_f,sizeof(int),0x10);
     break;
 default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
@@ -1078,7 +1092,7 @@ default:
 	// unwanted skipping of a frame, what to do?
 	if(skip_limit==0){
 	    // skipping not allowed -> write empty frame:
-	    aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
+	    muxer_write_chunk(muxer,mux_v,muxer_f,0,0);
 	} else {
 	    // skipping allowed -> skip it and distriubute timer error:
 	    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
@@ -1095,7 +1109,7 @@ if(skip_flag<0){
 	if(!tv_param_on && !verbose) printf(MSGTR_DuplicateFrames,-skip_flag);
     while(skip_flag<0){
 	duplicatedframes++;
-	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
+	muxer_write_chunk(muxer,mux_v,muxer_f,0,0);
 	++skip_flag;
     }
 } else
@@ -1254,11 +1268,11 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
 #endif
 
 printf(MSGTR_WritingAVIIndex);
-aviwrite_write_index(muxer,muxer_f);
+muxer_write_index(muxer,muxer_f);
 muxer_f_size=ftello(muxer_f);
 printf(MSGTR_FixupAVIHeader);
 fseek(muxer_f,0,SEEK_SET);
-aviwrite_write_header(muxer,muxer_f); // update header
+muxer_write_header(muxer,muxer_f); // update header
 if(ferror(muxer_f) || fclose(muxer_f) != 0) {
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile, out_filename);
     mencoder_exit(1, NULL);

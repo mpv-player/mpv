@@ -10,18 +10,18 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-#include "aviwrite.h"
+#include "muxer.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 
-extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags);
+extern void mencoder_write_chunk(muxer_stream_t *s,int len,unsigned int flags);
 
 //===========================================================================//
 
 struct vf_priv_s {
-    aviwrite_stream_t* mux;
+    muxer_stream_t* mux;
 };
 #define mux_v (vf->priv->mux)
 
@@ -61,7 +61,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     vf->put_image=put_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv,0,sizeof(struct vf_priv_s));
-    vf->priv->mux=(aviwrite_stream_t*)args;
+    vf->priv->mux=(muxer_stream_t*)args;
     
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);

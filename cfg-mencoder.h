@@ -129,6 +129,16 @@ struct config info_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
+struct config of_conf[]={
+	{"avi", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_AVI, NULL},
+	{"mpeg", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_MPEG, NULL},
+	{"help", "\nAvailable output formats:\n"
+	"   avi      - Microsoft Audio/Video Interleaved\n"
+	"   mpeg     - MPEG-1 system stream format\n"
+	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{NULL, NULL, 0, 0, 0, 0, NULL}
+};
+
 static config_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL}, /* this must be the first!!! */
@@ -155,6 +165,9 @@ static config_t mencoder_opts[]={
 	// output audio/video codec selection
 	{"oac", oac_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{"ovc", ovc_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+
+	// output file format
+	{"of", of_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
 	// override FOURCC in output file
 	{"ffourcc", &force_fourcc, CONF_TYPE_STRING, 0, 4, 4, NULL},

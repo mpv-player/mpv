@@ -13,7 +13,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-#include "aviwrite.h"
+#include "muxer.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -65,7 +65,7 @@ static int const motion_presets[7] = {
 };
 
 extern char* passtmpfile;
-extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags);
+extern void mencoder_write_chunk(muxer_stream_t *s,int len,unsigned int flags);
 
 static int xvidenc_pass = 0;
 static int xvidenc_quality = 4;
@@ -132,7 +132,7 @@ struct config xvidencopts_conf[] = {
 };
 
 struct vf_priv_s {
-    aviwrite_stream_t* mux;
+    muxer_stream_t* mux;
     XVID_ENC_FRAME enc_frame;
     void* enc_handle;
     vbr_control_t vbr_state;
@@ -487,7 +487,7 @@ vf_open(vf_instance_t *vf, char* args)
     vf->put_image = put_image;
     vf->priv = malloc(sizeof(struct vf_priv_s));
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
-    vf->priv->mux = (aviwrite_stream_t*)args;
+    vf->priv->mux = (muxer_stream_t*)args;
 
     vf->priv->mux->bih = malloc(sizeof(BITMAPINFOHEADER));
     vf->priv->mux->bih->biSize = sizeof(BITMAPINFOHEADER);

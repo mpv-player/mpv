@@ -6,7 +6,7 @@
 #include "wine/avifmt.h"
 #include "wine/vfw.h"
 
-#include "aviwrite.h"
+#include "muxer.h"
 
 static const short h263_format[8][2] = {
     { 0, 0 },
@@ -149,8 +149,8 @@ int pos=0;
 int frames=0;
 FILE *f=fopen("paulvandykforanangel.viv","rb");
 FILE *f2=fopen("GB1.avi","wb");
-aviwrite_t* avi=aviwrite_new_muxer();
-aviwrite_stream_t* mux=aviwrite_new_stream(avi,AVIWRITE_TYPE_VIDEO);
+muxer_t* avi=muxer_new_muxer(MUXER_TYPE_AVI);
+muxer_stream_t* mux=muxer_new_stream(avi,MUXER_TYPE_VIDEO);
 //unsigned char* buffer=malloc(0x200000);
 int i,len;
 int v_id=0;
@@ -169,7 +169,7 @@ mux->bih->biSize=sizeof(BITMAPINFOHEADER);
 mux->bih->biPlanes=1;
 mux->bih->biBitCount=24;
 mux->bih->biCompression=0x6f766976;//      7669766f;
-aviwrite_write_header(avi,f2);
+muxer_write_header(avi,f2);
 
 /*
 c=fgetc(f); if(c) printf("error! not vivo file?\n");
@@ -222,7 +222,7 @@ while((c=fgetc(f))>=0){
 	// end of frame:
 	printf("Frame size: %d\n",mux->buffer_len);
 	h263_decode_picture_header(mux->buffer);
-	aviwrite_write_chunk(avi,mux,f2,mux->buffer_len,0x10);
+	muxer_write_chunk(avi,mux,f2,mux->buffer_len,0x10);
 	mux->buffer_len=0;
 	
 	if((v_id&0xF0)==0x10) fprintf(stderr,"hmm. last video packet %02X\n",v_id);
@@ -258,8 +258,8 @@ mux->bih->biWidth=width;
 mux->bih->biHeight=height;
 mux->bih->biSizeImage=3*width*height;
 
-aviwrite_write_index(avi,f2);
+muxer_write_index(avi,f2);
 fseek(f2,0,SEEK_SET);
-aviwrite_write_header(avi,f2);
+muxer_write_header(avi,f2);
 
 }

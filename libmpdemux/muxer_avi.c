@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
+#include <inttypes.h>
 
 #include "config.h"
 #include "../version.h"
@@ -16,7 +16,7 @@
 #include "wine/vfw.h"
 #include "bswap.h"
 
-#include "aviwrite.h"
+#include "muxer.h"
 #include "aviheader.h"
 
 extern char *info_name;
@@ -27,14 +27,14 @@ extern char *info_copyright;
 extern char *info_sourceform;
 extern char *info_comment;
 
-aviwrite_stream_t* aviwrite_new_stream(aviwrite_t *muxer,int type){
-    aviwrite_stream_t* s;
-    if(muxer->avih.dwStreams>=AVIWRITE_MAX_STREAMS){
-	printf("Too many streams! increase AVIWRITE_MAX_STREAMS !\n");
+static muxer_stream_t* avifile_new_stream(muxer_t *muxer,int type){
+    muxer_stream_t* s;
+    if(muxer->avih.dwStreams>=MUXER_MAX_STREAMS){
+	printf("Too many streams! increase MUXER_MAX_STREAMS !\n");
 	return NULL;
     }
-    s=malloc(sizeof(aviwrite_stream_t));
-    memset(s,0,sizeof(aviwrite_stream_t));
+    s=malloc(sizeof(muxer_stream_t));
+    memset(s,0,sizeof(muxer_stream_t));
     if(!s) return NULL; // no mem!?
     muxer->streams[muxer->avih.dwStreams]=s;
     s->type=type;
@@ -42,12 +42,12 @@ aviwrite_stream_t* aviwrite_new_stream(aviwrite_t *muxer,int type){
     s->timer=0.0;
     s->size=0;
     switch(type){
-    case AVIWRITE_TYPE_VIDEO:
+    case MUXER_TYPE_VIDEO:
       s->ckid=mmioFOURCC(('0'+s->id/10),('0'+(s->id%10)),'d','c');
       s->h.fccType=streamtypeVIDEO;
       if(!muxer->def_v) muxer->def_v=s;
       break;
-    case AVIWRITE_TYPE_AUDIO:
+    case MUXER_TYPE_AUDIO:
       s->ckid=mmioFOURCC(('0'+s->id/10),('0'+(s->id%10)),'w','b');
       s->h.fccType=streamtypeAUDIO;
       break;
@@ -57,12 +57,6 @@ aviwrite_stream_t* aviwrite_new_stream(aviwrite_t *muxer,int type){
     }
     muxer->avih.dwStreams++;
     return s;
-}
-
-aviwrite_t* aviwrite_new_muxer(){
-    aviwrite_t* muxer=malloc(sizeof(aviwrite_t));
-    memset(muxer,0,sizeof(aviwrite_t));
-    return muxer;
 }
 
 static void write_avi_chunk(FILE *f,unsigned int id,int len,void* data){
@@ -93,7 +87,7 @@ if(len>0){
 }
 }
 
-void aviwrite_write_chunk(aviwrite_t *muxer,aviwrite_stream_t *s, FILE *f,int len,unsigned int flags){
+static void avifile_write_chunk(muxer_t *muxer,muxer_stream_t *s, FILE *f,size_t len,unsigned int flags){
 
     // add to the index:
     if(muxer->idx_pos>=muxer->idx_size){
@@ -120,7 +114,7 @@ void aviwrite_write_chunk(aviwrite_t *muxer,aviwrite_stream_t *s, FILE *f,int le
     }
     s->timer=(double)s->h.dwLength*s->h.dwScale/s->h.dwRate;
     s->size+=len;
-    if(len>s->h.dwSuggestedBufferSize) s->h.dwSuggestedBufferSize=len;
+    if((unsigned int)len>s->h.dwSuggestedBufferSize) s->h.dwSuggestedBufferSize=len;
 
 }
 
@@ -140,11 +134,11 @@ static void write_avi_list(FILE *f,unsigned int id,int len){
 // muxer->streams[i]->wf->cbSize
 #define WFSIZE(wf) (sizeof(WAVEFORMATEX)+(((wf)->cbSize)?((wf)->cbSize-2):0))
 
-void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
-  unsigned int riff[3];
-  int i;
+static void avifile_write_header(muxer_t *muxer,FILE *f){
+  uint32_t riff[3];
+  unsigned int i;
   unsigned int hdrsize;
-  aviwrite_info_t info[16];
+  muxer_info_t info[16];
 
   // RIFF header:
   riff[0]=mmioFOURCC('R','I','F','F');
@@ -173,10 +167,10 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
       hdrsize+=12; // LIST
       hdrsize+=sizeof(muxer->streams[i]->h)+8; // strh
       switch(muxer->streams[i]->type){
-      case AVIWRITE_TYPE_VIDEO:
+      case MUXER_TYPE_VIDEO:
           hdrsize+=muxer->streams[i]->bih->biSize+8; // strf
 	  break;
-      case AVIWRITE_TYPE_AUDIO:
+      case MUXER_TYPE_AUDIO:
           hdrsize+=WFSIZE(muxer->streams[i]->wf)+8; // strf
 	  break;
       }
@@ -191,10 +185,10 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
   for(i=0;i<muxer->avih.dwStreams;i++){
       hdrsize=sizeof(muxer->streams[i]->h)+8; // strh
       switch(muxer->streams[i]->type){
-      case AVIWRITE_TYPE_VIDEO:
+      case MUXER_TYPE_VIDEO:
           hdrsize+=muxer->streams[i]->bih->biSize+8; // strf
 	  break;
-      case AVIWRITE_TYPE_AUDIO:
+      case MUXER_TYPE_AUDIO:
           hdrsize+=WFSIZE(muxer->streams[i]->wf)+8; // strf
 	  break;
       }
@@ -204,7 +198,7 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
       le2me_AVIStreamHeader(&muxer->streams[i]->h);
 
       switch(muxer->streams[i]->type){
-      case AVIWRITE_TYPE_VIDEO:
+      case MUXER_TYPE_VIDEO:
 {
           int biSize=muxer->streams[i]->bih->biSize;
           le2me_BITMAPINFOHEADER(muxer->streams[i]->bih);
@@ -212,7 +206,7 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
           le2me_BITMAPINFOHEADER(muxer->streams[i]->bih);
 }
 	  break;
-      case AVIWRITE_TYPE_AUDIO:
+      case MUXER_TYPE_AUDIO:
 {
           int wfsize = WFSIZE(muxer->streams[i]->wf);
           le2me_WAVEFORMATEX(muxer->streams[i]->wf);
@@ -280,7 +274,7 @@ info[i].id=0;
   muxer->movi_start=ftell(f);
 }
 
-void aviwrite_write_index(aviwrite_t *muxer,FILE *f){
+static void avifile_write_index(muxer_t *muxer,FILE *f){
   muxer->movi_end=ftell(f);
   if(muxer->idx && muxer->idx_pos>0){
       int i;
@@ -295,3 +289,9 @@ void aviwrite_write_index(aviwrite_t *muxer,FILE *f){
   muxer->file_end=ftell(f);
 }
 
+void muxer_init_muxer_avi(muxer_t *muxer){
+  muxer->cont_new_stream = &avifile_new_stream;
+  muxer->cont_write_chunk = &avifile_write_chunk;
+  muxer->cont_write_header = &avifile_write_header;
+  muxer->cont_write_index = &avifile_write_index;
+}

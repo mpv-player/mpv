@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "../config.h"
 #ifdef USE_WIN32DLL
@@ -18,13 +19,13 @@
 #include "wine/vfw.h"
 #include "wine/avifmt.h"
 
-#include "aviwrite.h"
-
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 
-extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags);
+#include "muxer.h"
+
+extern void mencoder_write_chunk(muxer_stream_t *s,int len,unsigned int flags);
 
 //===========================================================================//
 
@@ -38,7 +39,7 @@ struct config vfwopts_conf[]={
 };
 
 struct vf_priv_s {
-    aviwrite_stream_t* mux;
+    muxer_stream_t* mux;
     BITMAPINFOHEADER* bih;
 };
 
@@ -256,7 +257,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     vf->put_image=put_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv,0,sizeof(struct vf_priv_s));
-    vf->priv->mux=(aviwrite_stream_t*)args;
+    vf->priv->mux=(muxer_stream_t*)args;
 
     vfw_bih=malloc(sizeof(BITMAPINFOHEADER));
     vfw_bih->biSize=sizeof(BITMAPINFOHEADER);
