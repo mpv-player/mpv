@@ -1,11 +1,12 @@
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
   <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
-<BODY BGCOLOR=white>
+<BODY>
 
 
 <P><B><A NAME=4.1>4.1. CD-ROM drives</A></B></P>
@@ -62,7 +63,7 @@ It's recommended that you tuneup your CDROM drive also with hdparm:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (cdrom device)</CODE></P>
 
 <P>to enable using DMA access, readahead, and IRQ unmasking.
-(if you don't understand these, *read the hdparm manpage*)</P>
+(if you don't understand these, *read the hdparm man page*)</P>
 
 <P>Please refer to "<CODE>/proc/ide/[cdrom device]/settings</CODE>" for fine-tuning your
 CDROM.</P>
@@ -80,13 +81,13 @@ CDROM.</P>
 
 <P>Support for <CODE>dvdnav</CODE> is being added (not usable now).</P>
 
-<LI><P><B>Old-style DVD support - <I>OPTIONAL</I></B></P>
+<P><B>Old-style DVD support - <I>OPTIONAL</I></B></P>
 
-<P><I>Useful if you want to play encoded VOB's from hard disk. Compile and
+<P>Useful if you want to play encoded VOB's from hard disk. Compile and
   install <B>libcss</B> 0.0.1 (not newer) (if <B>MPlayer</B> can't detect
-  it, use the <CODE>-csslib /path/to/libcss.so</CODE> option).</P></LI>
+  it, use the <CODE>-csslib /path/to/libcss.so</CODE> option).</P>
 
-<LI><P><B>Compile MPlayer.</B></P>
+<P><B>Compile MPlayer.</B></P>
 
 <P>Run <CODE>./configure</CODE>. If you didn't delete
   <CODE>libmpdvdkit</CODE> subdirectory from MPlayer tree, ./configure should
@@ -106,7 +107,7 @@ CDROM.</P>
 <P><B>Using MPlayer to play DVDs:</B></P>
 
 
-<TABLE BORDER=0 WIDTH=100%>
+<TABLE BORDER=0 WIDTH="100%"><TR>
 <TD VALIGN=top>-dvd &lt;title_id&gt;&nbsp;</TD>
 <TD>Enables DVD support and selects title.</TD><TR>
 <TD VALIGN=top>-chapter &lt;chapter_id&gt;&nbsp;</TD>
@@ -120,7 +121,7 @@ CDROM.</P>
   your DVD options, and browse the output.<BR>
   For example :<BR>
   &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - first tries to find hungarian
-  audio, and if not found, decode english audio.</TD></TR>
+  audio, and if not found, decode english audio.</TD><TR>
 <TD VALIGN=top>-slang &lt;country code&gt;&nbsp;</TD>
 <TD>  Turns on DVD subtitles. The <CODE>country code</CODE> tells <B>MPlayer</B>
   which language(s) to prefer.
@@ -128,23 +129,23 @@ CDROM.</P>
   your DVD options, and browse the output.<BR>
   For example :<BR>
   &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - first tries to display hungarian
-  subtitles, and if not found, display english subtitles.</TD></TR>
+  subtitles, and if not found, display english subtitles.</TD><TR>
 <TD VALIGN=top>-sid &lt;subtitle_id&gt;&nbsp;</TD>
 <TD>  Displays a subtitle channel with the given <CODE>id</CODE> (values can be
   0-31). Useful for example with badly mastered DVDs where country code
-  selects the wrong channel.</TD></TR>
+  selects the wrong channel.</TD><TR>
 <TD VALIGN=top>-csslib &lt;path/filename&gt;</TD>
 <TD>  (old-style DVD option) This option is used to override the default location
   of <CODE>libcss.so</CODE>
-  </TD></TR>
+  </TD><TR>
 <TD VALIGN=top>-dvdauth &lt;DVD device&gt;&nbsp;</TD>
 <TD>  (old-style DVD option) Turns on DVD authentication using the given device.
-  </TD></TR>
+  </TD><TR>
 <TD VALIGN=top>-dvdkey &lt;CSS key&gt;</TD>
 <TD>  (old-style DVD option) When decoding from non-DVD, this option gives the
   CSS key needed to crack the DVD (the key is printed when authenticating
   with DVD).
-  </TD></TR>
+  </TD>
 </TABLE>
 
 <P>Default device is <CODE>/dev/dvd</CODE>, you can change it in config.h
