@@ -114,7 +114,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 			vo_draw_alpha_yv12(w,h,src,srca,stride, ((char*)P) + P->componentInfoY.offset + x0 + y0 * imgRect.right, imgRect.right);
 			break;
 		case IMGFMT_UYVY:
-			//vo_draw_alpha_uyvy(w,h,src,srca,stride,((char*)P) + (x0 + y0 * imgRect.right) * 2,imgRect.right*2);
+			vo_draw_alpha_uyvy(w,h,src,srca,stride,((char*)P) + (x0 + y0 * imgRect.right) * 2,imgRect.right*2);
 			break;
 		case IMGFMT_YUY2:
 			vo_draw_alpha_yuy2(w,h,src,srca,stride,((char*)P) + (x0 + y0 * imgRect.right) * 2,imgRect.right*2);
