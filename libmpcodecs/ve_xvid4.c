@@ -993,8 +993,8 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 
 			create->zones[create->num_zones].mode      = XVID_ZONE_QUANT;
 			create->zones[create->num_zones].frame     = 0;
-			create->zones[create->num_zones].base      = squant.num;
-			create->zones[create->num_zones].increment = squant.den;
+			create->zones[create->num_zones].increment = squant.num;
+			create->zones[create->num_zones].base      = squant.den;
 			create->num_zones++;
 
 			mp_msg(MSGT_MENCODER, MSGL_INFO,
