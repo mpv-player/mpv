@@ -440,8 +440,10 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 				goto parse_error_out;
 			if (get_token(1, 1) < 0)
 				goto parse_error_out;
-#warning FIXME flags meg nincs implementalva...
-			printf("\n\nUssetek!!!\n\n");
+			if (!strcmp(token[0], "seekable"))
+				codec->flags |= CODECS_FLAG_SEEKABLE;
+			else
+				goto parse_error_out;
 		} else if (!strcmp(token[0], "status")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
