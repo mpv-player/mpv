@@ -75,6 +75,7 @@ static int conf_init_adelay = 0;
 static int conf_drop = 0;
 static int conf_skip_padding = 0;
 static int conf_reorder = 0;
+static int conf_telecine = 0;
 
 enum FRAME_TYPE {
 	I_FRAME = 1,
@@ -149,7 +150,9 @@ typedef struct {
 	uint16_t max_pl_size;
 	int32_t last_tr;
 	uint32_t max_tr;
-	uint8_t id, reorder, is_mpeg12;
+	uint8_t id, reorder, is_mpeg12, telecine;
+	uint64_t vframes;
+	uint8_t rff, tff;
 	mp_mpeg_header_t picture;
 } muxer_headers_t;
 
@@ -173,6 +176,8 @@ m_option_t mpegopts_conf[] = {
 	{"skip_padding", &conf_skip_padding, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"reorder", &conf_reorder, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noreorder", &conf_reorder, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+	{"telecine", &conf_telecine, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"telecine2", &conf_telecine, CONF_TYPE_FLAG, 0, 0, 2, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -391,6 +396,7 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
     else if(priv->is_xsvcd)
       spriv->min_pes_hlen = 22;
     spriv->reorder = conf_reorder;
+    spriv->telecine = conf_telecine;
     mp_msg (MSGT_MUXER, MSGL_DBG2, "Added video stream %d, ckid=%X\n", muxer->num_videos, s->ckid);
   } else { // MUXER_TYPE_AUDIO
     spriv->type = 0;
@@ -1799,9 +1805,64 @@ static uint64_t parse_fps(int fps)
 	}
 }
 
+static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_ptr, uint8_t *pce_ptr)
+{
+	uint8_t fps; 
+	
+	if(fps_ptr != NULL)
+	{
+		fps = *fps_ptr & 0x0f;
+		if(fps > FRAMERATE_24)
+		{
+			mp_msg(MSGT_MUXER, MSGL_ERR, "\nERROR! FRAMERATE IS INVALID: %d, disabling telecining\n", (int) fps);
+			vpriv->telecine = 0;
+			return 0;
+		}
+		*fps_ptr = (*fps_ptr & 0xf0) | (fps + 3);
+	}
+
+	if(se_ptr && (vpriv->telecine==2))
+		se_ptr[1] &= 0xf7;
+	
+	if(! pce_ptr)
+		return 0;
+		
+	//in pce_ptr starting from bit 0 bit 24 is tff, bit 30 is rff, 
+	if(pce_ptr[3] & 0x2)
+	{
+		mp_msg(MSGT_MUXER, MSGL_ERR, "\nERROR! RFF bit is already set, disabling telecining\n");
+		vpriv->telecine = 0;
+		return 0;
+	}
+	
+	if(! vpriv->vframes)	//initial value of tff
+		vpriv->tff = (pce_ptr[3] & 0x80) >> 7;
+
+	//sets curent tff/rff bits
+	mp_msg(MSGT_MUXER, MSGL_V, "\nTFF: %d, RFF: %d\n", vpriv->tff, vpriv->rff);
+	pce_ptr[3] = (pce_ptr[3] & 0xfd) | ((vpriv->tff << 7) & 0x80) | ((vpriv->rff << 1) & 0x2);
+	
+	if(! vpriv->vframes)
+		mp_msg(MSGT_MUXER, MSGL_INFO, "\nENABLED SOFT TELECINING, FPS=%s, INITIAL PATTERN IS TFF:%d, RFF:%d\n", 
+		framerates[fps+3], vpriv->tff, vpriv->rff);
+	
+	if(vpriv->rff)
+	{
+		vpriv->rff = 0;
+		vpriv->tff = !vpriv->tff;
+	}
+	else
+		vpriv->rff = 1;
+	
+	return 1;
+}
+
 static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_headers_t *spriv, float fps, size_t len)
 {
 	size_t ptr = 0, sz = 0, tmp = 0;
+	uint8_t *fps_ptr = NULL;	//pointer to the fps byte in the sequence header
+	uint8_t *se_ptr = NULL;		//pointer to sequence extension
+	uint8_t *pce_ptr = NULL;	//pointer to picture coding extension
 	
 	mp_msg(MSGT_MUXER, MSGL_V,"parse_mpeg12_video, len=%u\n", (uint32_t) len);
 	if(s->buffer[0] != 0 || s->buffer[1] != 0 || s->buffer[2] != 1 || len<6) 
@@ -1818,6 +1879,7 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 		if(s->buffer[3] == 0xb3) //sequence
 		{
 			//uint8_t fps = s->buffer[7] & 0x0f;
+			fps_ptr = &(s->buffer[7]);
 			mp_header_process_sequence_header(&(spriv->picture), &(s->buffer[4]));
 			spriv->delta_pts = spriv->nom_delta_pts = parse_fps(spriv->picture.fps);
 			
@@ -1833,8 +1895,11 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 			if(s->buffer[tmp-1] & 1)
 				tmp += 64;
 			
-			if(s->buffer[tmp] == 0 && s->buffer[tmp+1] == 0 && s->buffer[tmp+2] == 1 && s->buffer[tmp+3] == 0xb5) 
+			if(s->buffer[tmp] == 0 && s->buffer[tmp+1] == 0 && s->buffer[tmp+2] == 1 && s->buffer[tmp+3] == 0xb5)
+			{
+				se_ptr = &(s->buffer[tmp+4]);
 				mp_header_process_extension(&(spriv->picture), &(s->buffer[tmp+4]));
+			}
 		}
 		
 		
@@ -1879,6 +1944,7 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 						ptr++;
 				if(ptr < len-5) 
 				{
+					pce_ptr = &(s->buffer[ptr+4]);
 					mp_header_process_extension(&(spriv->picture), &(s->buffer[ptr+4]));
 					if(spriv->picture.display_time >= 50 && spriv->picture.display_time <= 300) 
 						spriv->delta_pts = (spriv->nom_delta_pts * spriv->picture.display_time) / 100;
@@ -1913,6 +1979,10 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 			  sz = len; // no extra buffer for it...
 		}
 
+		if(spriv->telecine)
+			soft_telecine(spriv, fps_ptr, se_ptr, pce_ptr);
+
+		spriv->vframes++;
 		reorder_frame(spriv, s->buffer, len, pt, temp_ref, spriv->delta_pts);
 	}
 	
@@ -2088,6 +2158,7 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
     {
       spriv->is_mpeg12 = 0;
       spriv->reorder = 0;
+      spriv->telecine = 0;
       if(spriv->size == 0)
         priv->use_psm = 1;
       if(len)
