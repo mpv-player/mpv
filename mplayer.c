@@ -868,7 +868,8 @@ if(has_audio){
 //================== Init VIDEO (codec & libvo) ==========================
 
 // Go through the codec.conf and find the best codec...
-sh_video->codec=find_codec(sh_video->format,(unsigned int*) &sh_video->bih->biCompression,NULL,0);
+sh_video->codec=find_codec(sh_video->format,
+    sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,NULL,0);
 if(!sh_video->codec){
     printf("Can't find codec for video format 0x%X !\n",sh_video->format);
     exit(1);
