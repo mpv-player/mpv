@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.84
+// Updated to help_mp-en.h v1.89
 
 // Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming
 // and send a notify message to mplayer-dev-eng maillist.
@@ -125,6 +125,7 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "Codec video disponibili:\n"
 #define MSGTR_AvailableAudioFm "\nFamiglie/driver di codec audio disponibili (compilati):\n"
 #define MSGTR_AvailableVideoFm "\nFamiglie/driver di codec video disponibili (compilati):\n"
+#define MSGTR_AvailableFsType "Modi disponibili a schermo pieno:\n"
 #define MSGTR_UsingRTCTiming "Sto utilizzando la temporizzazione hardware RTC di Linux (%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "Video: impossibile leggere le proprietà\n"
 #define MSGTR_NoStreamFound "Nessun flusso trovato\n"
@@ -480,6 +481,12 @@ static char help_text[]=
 #define MSGTR_EQU_Center "Centro"
 #define MSGTR_EQU_Bass "Bassi"
 #define MSGTR_EQU_All "Tutti"
+#define MSGTR_EQU_Channel1 "Canale 1:"
+#define MSGTR_EQU_Channel2 "Canale 2:"
+#define MSGTR_EQU_Channel3 "Canale 3:"
+#define MSGTR_EQU_Channel4 "Canale 4:"
+#define MSGTR_EQU_Channel5 "Canale 5:"
+#define MSGTR_EQU_Channel6 "Canale 6:"
 
 // --- playlist
 #define MSGTR_PLAYLIST_Path "Percorso"
@@ -581,6 +588,12 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_CDROMDevice "Dispositivo CD-ROM:"
 #define MSGTR_PREFERENCES_DVDDevice "Dispositivo DVD:"
 #define MSGTR_PREFERENCES_FPS "FPS del filmato:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Mostra la finestra video anche quando non è attiva"
+
+#define MSGTR_ABOUT_UHU "Lo sviluppo della GUI è sponsorizzato da UHU Linux\n"
+#define MSGTR_ABOUT_CoreTeam "   Team sviluppo MPlayer:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   Altri programmatori:\n"
+#define MSGTR_ABOUT_MainTesters "   Tester principali:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Errore fatale!"
