@@ -233,6 +233,35 @@
   <A HREF="http://www.technotrend.de/download/av_format_v1.pdf">http://www.technotrend.de/download/av_format_v1.pdf</A></P>
 
 
+<H4><A NAME=gif>2.1.1.15. GIF file-ok</A></H4>
+
+<P>A <B>GIF</B> egy, a weben elterjedt képformátum, melynek két verziója ismert,
+  a GIF87a, és a GIF89a. A legfõbb eltérés a kettõ között, hogy a GIF89a
+  engedélyezi az animációt is. Az MPlayer mindkét formátumot támogatja a
+  libungif, vagy egyéb libgif-kompatibilis könyvtár segítségével. A nem
+  animált GIF-ek ugyanúgy jelenítõdnek meg mint az egy képkockát tartalmazó
+  videók, azaz megtekintésükhöz szükség van a <CODE>-fixed-vo</CODE> és
+  <CODE>-loop 0</CODE> opciók megadására.</P>
+
+<P>Az MPlayer jelenleg nem támogatja a GIF file-okban történõ tekerést. A
+  GIF file-ok nem szükségszerûen fix képméretûek, hanem több, egymástól
+  független képbõl állnak, melyeket egy fix méretû mezõn kell elhelyezni.
+  A framerátát az egyes képkockák elõtti opcionális blokk vezérli, mely
+  megadja a késleltetést a következõ képkockáig.</P>
+
+<P>A szabvány GIF file-ok 24bit-es RGB képkockákból állnak melyekhez egy
+  maximum 8bpp-s paletta tartozik. Ezek a képkockák általában LZW
+  algoritmussal tömörítettek, de néhány GIF készítõ program tömörítetlen
+  GIF-et hoz létre, hogy elkerülje az LZW licenszével történõ ütközést.</P>
+
+<P>Bár a legtöbb disztribúció tartalmazza a libungif-et, ha akarok letöltheted
+  a következõ címrõl is:
+  <A HREF="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">http://prt+r-13.ucsc.edu/~badger/software/libungif/index.shtml</A></P>
+
+<P>A GIF specifikáció a következõ címen lelhetõ fel:
+  <A HREF="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">http://www.w3.org/Graphic+s/GIF/spec-gif89a.txt</A></P>
+
+
 <H3><A NAME=audio_formats>2.1.2. Audio formátumok</A></H3>
 
 <P>Az <B>MPlayer</B> egy <B>Movie</B> (film) és nem

@@ -63,6 +63,7 @@
         <LI><A HREF="formats.html#ogg">2.1.1.12 OGG/OGM file-ok</A></LI>
         <LI><A HREF="formats.html#sdp">2.1.1.13 SDP file-ok</A></LI>
         <LI><A HREF="formats.html#pva">2.1.1.14 PVA file-ok</A></LI>
+        <LI><A HREF="formats.html#gif">2.1.1.15 GIF file-ok</A></LI>
       </UL>
       <LI><A HREF="formats.html#audio_formats">2.1.2 Audio</A></LI>
       <UL>
@@ -1199,13 +1200,55 @@ Szabványos V4L-rõl bemenet<BR>
 
 <H2><A NAME="edl">2.6 Edit Decision Lists (EDL)</A></H2>
 
-<P>TODO</P>
+<P>Az edit decision list (EDL) rendszer segítségével lehetõvé válik a film
+  megadott idõintervallumainak automatikus átugrása, vagy a hang
+  kikapcsolása.</P>
+
+<P>Ennek hasznossága akkor mutatkozik meg amikor egy filmet "családbarát"
+  módban akarsz megtekinteni: kivágható az erõszak, az illetlen beszéd,
+  Jar-Jar Binks, stb. Valamint reklámok átugrására is használható.</P>
+
+<P>Az EDL fileformátum eléggé puritán. Amint az EDL rendszer megérik,
+  valószínûleg egy XML-féle formátum lesz implementálva (a régi formátummal
+  kompatibilisen).</P>
+  
+<P>Jelenleg maximum 1000 bejegyzést lehet használni, ha ez nem elég, az
+  <CODE>edl.h</CODE> file-ban a <CODE>#define MAX_EDL_ENTRIES</CODE> értékét
+  kell megnövelni.</P>
 
 
-<H3><A NAME="edl_using">2.6.1 Using an EDL file</A></H3>
+<H3><A NAME="edl_using">2.6.1 Egy EDL file használata</A></H3>
+
+<P>Az MPlayer indításakor add meg az <CODE>-edl &lt;filenév&gt;</CODE>
+  parancsot, a filmhez használandó EDL file nevét behelyettesítve.</P>
 
 
-<H3><A NAME="edl_making">2.6.2 Making an EDL file</A></H3>
+<H3><A NAME="edl_making">2.6.2 Egy EDL file elkészítése</A></H3>
+
+<P>A jelenlegi EDL formátum így épül fel:</P>
+
+<CODE>[kezdõ másodperc] [vége másodperc] [cselekmény]</CODE>
+
+<P>A másodpercek helyére lebegõpontos számokat kell írni, a cselekmény pedig
+  vagy <CODE>0</CODE> az átugráshoz, vagy <CODE>1</CODE> a hang elnémításához.
+  Például:</P>
+
+<PRE>
+5.3   7.1    0
+15    16.7   1
+420   422    0
+</PRE>
+
+<P>Ez a video 5.3-adik másodpercénél átugrik a 7.1-ikre, aztán 15 másodpercnél
+  kikapcsolja a hangot egészen a 16.7-ig, 420 másodpercnél pedig 2 másodpercet
+  ugrik. Ezek a cselekmények akkor hajtódnak végre ha a timer a megadott
+  idõhöz ért.</P>
+
+<P>Egy EDL file elkészítéséhez használd az <CODE>-edlout &lt;filenév&gt;</CODE>
+  parancsot, és lejátszás közben mikor azt akarod hogy az elõzõ két
+  másodperc legyen átugorva, nyomd meg az <CODE>i</CODE> billentyût. Egy ennek
+  megfelelõ parancs íródik a megadott nevû EDL file-ba. Kilépés után
+  tetszõlegesen finomhangolható a file.</P>
 
 
 <H1><A NAME=usage>3.  Használat</A></H1>
