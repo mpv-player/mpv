@@ -116,9 +116,9 @@ static void spudec_process_data(spudec_handle_t *this)
     if (alpha[i] == 0)
       cmap[i] = 0;
     else {
-      cmap[i] = ((this->global_palette[this->palette[i]] >> 16) & 0xff) - alpha[i];
-      if (cmap[i] < 0)
-	cmap[i] = 0;
+      cmap[i] = ((this->global_palette[this->palette[i]] >> 16) & 0xff);
+      if (cmap[i] + alpha[i] > 255)
+	cmap[i] = 256 - alpha[i];
     }
   }
 
