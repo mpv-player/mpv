@@ -1,11 +1,18 @@
-//  QuickTime MOV file parser
-//  based on TOOLS/movinfo.c by A'rpi & Al3x
+//  QuickTime MOV file parser by A'rpi
+//  based on TOOLS/movinfo.c by me & Al3x
+//  compressed header support from moov.c of the openquicktime lib.
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 #include "config.h"
+
+#ifdef HAVE_PNG
+// should be detected by ./configure...
+#define HAVE_ZLIB
+#endif
+
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -18,6 +25,10 @@
 
 #include "codec-cfg.h"
 #include "stheader.h"
+
+#ifdef HAVE_ZLIB
+#include <zlib.h>
+#endif
 
 typedef struct {
     unsigned int pts; // duration
@@ -178,6 +189,11 @@ int mov_check_file(demuxer_t* demuxer){
 	}
 	if(!stream_skip(demuxer->stream,len-8)) break;
     }
+    
+    if(flags==1)
+	mp_msg(MSGT_DEMUX,MSGL_WARN,"MOV: missing data (mdat) chunk! Maybe broken file...\n");
+    else if(flags==2)
+	mp_msg(MSGT_DEMUX,MSGL_WARN,"MOV: missing header (moov/cmov) chunk! Maybe broken file...\n");
 
 return (flags==3);
 }
@@ -190,8 +206,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	unsigned int id;
 	//
 	pos=stream_tell(demuxer->stream);
+//	printf("stream_tell==%d\n",pos);
 	if(pos>=endpos) return; // END
 	len=stream_read_dword(demuxer->stream);
+//	printf("len==%d\n",len);
 	if(len<8) return; // error
 	len-=8;
 	id=stream_read_dword(demuxer->stream);
@@ -419,10 +437,73 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    priv->track_db++;
 	    trak=NULL;
 	} else
+#ifndef HAVE_ZLIB
 	if(id==MOV_FOURCC('c','m','o','v')){
 	    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVcomprhdr);
 	    return;
 	}
+#else
+	if(id==MOV_FOURCC('c','m','o','v')){
+//	    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVcomprhdr);
+	    lschunks(demuxer,level+1,pos+len,NULL);
+	} else
+	if(id==MOV_FOURCC('d','c','o','m')){
+//	    int temp=stream_read_dword(demuxer->stream);
+	    unsigned int len=stream_read_dword(demuxer->stream);
+	    printf("Compressed header uses %.4s algo!\n",&len);
+	} else
+	if(id==MOV_FOURCC('c','m','v','d')){
+//	    int temp=stream_read_dword(demuxer->stream);
+	    unsigned int moov_sz=stream_read_dword(demuxer->stream);
+	    unsigned int cmov_sz=len-4;
+	    unsigned char* cmov_buf=malloc(cmov_sz);
+	    unsigned char* moov_buf=malloc(moov_sz+16);
+	    int zret;
+	    z_stream zstrm;
+	    stream_t* backup;
+
+	    printf("Compressed header size: %d / %d\n",cmov_sz,moov_sz);
+
+	    stream_read(demuxer->stream,cmov_buf,cmov_sz);
+
+	      zstrm.zalloc          = (alloc_func)0;
+	      zstrm.zfree           = (free_func)0;
+	      zstrm.opaque          = (voidpf)0;
+	      zstrm.next_in         = cmov_buf;
+	      zstrm.avail_in        = cmov_sz;
+	      zstrm.next_out        = moov_buf;
+	      zstrm.avail_out       = moov_sz;
+	    
+	      zret = inflateInit(&zstrm);
+	      if (zret != Z_OK)
+		{ fprintf(stderr,"QT cmov: inflateInit err %d\n",zret);
+		return;
+		}
+	      zret = inflate(&zstrm, Z_NO_FLUSH);
+	      if ((zret != Z_OK) && (zret != Z_STREAM_END))
+		{ fprintf(stderr,"QT cmov inflate: ERR %d\n",zret);
+		return;
+		}
+#if 0
+	      else {
+		FILE *DecOut;
+		DecOut = fopen("Out.bin", "w");
+		fwrite(moov_buf, 1, moov_sz, DecOut);
+		fclose(DecOut);
+	      }
+#endif
+	      if(moov_sz != zstrm.total_out) printf("Warning! moov size differs cmov: %d  zlib: %d\n",moov_sz,zstrm.total_out);
+	      zret = inflateEnd(&zstrm);
+	      
+	      backup=demuxer->stream;
+	       demuxer->stream=new_memory_stream(moov_buf,moov_sz);
+	       stream_skip(demuxer->stream,8);
+	       lschunks(demuxer,level+1,moov_sz,NULL); // parse uncompr. 'moov'
+	       //free_stream(demuxer->stream);
+	      demuxer->stream=backup;
+	    
+	}
+#endif
 	
 	pos+=len+8;
 	if(pos>=endpos) break;
