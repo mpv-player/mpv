@@ -257,7 +257,14 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
 static void draw_slice(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
 //    printf("draw_slice() called %d at %d\n",h,y);
+    if(vf->priv->exp_y>0 && y == 0)
+	vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
+			   vf->dmpi->w,vf->priv->exp_y,0,0);
     vf_next_draw_slice(vf,src,stride,w,h,x+vf->priv->exp_x,y+vf->priv->exp_y);
+    if(vf->priv->exp_y+vf->h<vf->dmpi->h && y+h == vf->h)
+	vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
+			   vf->dmpi->w,vf->dmpi->h-(vf->priv->exp_y+vf->h),
+			   0,vf->priv->exp_y+vf->h);
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
@@ -265,15 +272,6 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	vf->dmpi=mpi->priv;
 	if(!vf->dmpi) { printf("Why do we get NULL \n"); return 0; }
 	mpi->priv=NULL;
-	if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
-	    if(vf->priv->exp_y>0)
-		vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
-		vf->dmpi->w,vf->priv->exp_y,0,0);
-	    if(vf->priv->exp_y+mpi->h<vf->dmpi->h)
-		vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
-		vf->dmpi->w,vf->dmpi->h-(vf->priv->exp_y+mpi->h),
-		0,vf->priv->exp_y+mpi->h);
-	}
 #ifdef OSD_SUPPORT
 	if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
 #endif
