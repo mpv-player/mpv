@@ -37,10 +37,38 @@ static float telecine_cnt=-2.5;
 int video_read_properties(sh_video_t *sh_video){
 demux_stream_t *d_video=sh_video->ds;
 
+enum {
+	VIDEO_MPEG12,
+	VIDEO_MPEG4,
+	VIDEO_H264,
+	VIDEO_OTHER
+} video_codec;
+
+if((d_video->demuxer->file_format == DEMUXER_TYPE_PVA) ||
+   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_ES) ||
+   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS) ||
+   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TY) ||
+   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
+#ifdef STREAMING_LIVE_DOT_COM
+  || ((d_video->demuxer->file_format == DEMUXER_TYPE_RTP) && demux_is_mpeg_rtp_stream(d_video->demuxer))
+#endif
+  )
+    video_codec = VIDEO_MPEG12;
+  else if((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG4_ES) ||
+    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000004))
+  )
+    video_codec = VIDEO_MPEG4;
+  else if((d_video->demuxer->file_format == DEMUXER_TYPE_H264_ES) ||
+    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000005))
+  )
+    video_codec = VIDEO_H264;
+  else
+    video_codec = VIDEO_OTHER;
+    
 // Determine image properties:
-switch(d_video->demuxer->file_format){
- case DEMUXER_TYPE_AVI:
- case DEMUXER_TYPE_ASF: {
+switch(video_codec){
+ case VIDEO_OTHER: {
+ if((d_video->demuxer->file_format == DEMUXER_TYPE_ASF) || (d_video->demuxer->file_format == DEMUXER_TYPE_AVI)) {
   // display info: 
   
 #if 0
@@ -84,10 +112,10 @@ switch(d_video->demuxer->file_format){
 //	goto mpeg_header_parser;
     }
 #endif
+  }
   break;
  }
- case DEMUXER_TYPE_MPEG4_ES: 
- case DEMUXER_TYPE_MPEG4_IN_TS: {
+ case VIDEO_MPEG4: {
    videobuf_len=0; videobuf_code_len=0;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for Video Object Start code... ");fflush(stdout);
    while(1){
@@ -107,7 +135,7 @@ switch(d_video->demuxer->file_format){
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for Video Object Layer Start code... ");fflush(stdout);
    while(1){
       int i=sync_video_packet(d_video);
-      printf("0x%X\n",i);
+      mp_msg(MSGT_DECVIDEO,MSGL_V,"M4V: 0x%X\n",i);
       if(i>=0x120 && i<=0x12F) break; // found it!
       if(!i || !read_video_packet(d_video)){
         mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
@@ -127,7 +155,7 @@ switch(d_video->demuxer->file_format){
    sh_video->format=0x10000004;
    break;
  }
- case DEMUXER_TYPE_H264_ES: {
+ case VIDEO_H264: {
    videobuf_len=0; videobuf_code_len=0;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for sequence parameter set... ");fflush(stdout);
    while(1){
@@ -147,7 +175,7 @@ switch(d_video->demuxer->file_format){
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for picture parameter set... ");fflush(stdout);
    while(1){
       int i=sync_video_packet(d_video);
-      printf("0x%X\n",i);
+      mp_msg(MSGT_DECVIDEO,MSGL_V,"H264: 0x%X\n",i);
       if((i&~0x60) == 0x108 && i != 0x108) break; // found it!
       if(!i || !read_video_packet(d_video)){
         mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
@@ -167,18 +195,7 @@ switch(d_video->demuxer->file_format){
    sh_video->format=0x10000005;
    break;
  }
-#ifdef STREAMING_LIVE_DOT_COM
- case DEMUXER_TYPE_RTP:
-   // If the RTP stream is a MPEG stream, then we use this code to check
-   // for MPEG headers:
-   if (!demux_is_mpeg_rtp_stream(d_video->demuxer)) break;
-   // otherwise fall through to...
-#endif
- case DEMUXER_TYPE_PVA:
- case DEMUXER_TYPE_MPEG_TS:
- case DEMUXER_TYPE_MPEG_ES:
- case DEMUXER_TYPE_MPEG_TY:
- case DEMUXER_TYPE_MPEG_PS: {
+ case VIDEO_MPEG12: {
 //mpeg_header_parser:
    // Find sequence_header first:
    videobuf_len=0; videobuf_code_len=0;
@@ -244,7 +261,7 @@ switch(d_video->demuxer->file_format){
        sh_video->aspect=0.0;
      break;
      default:
-       fprintf(stderr,"Detected unknown aspect_ratio_information in mpeg sequence header.\n"
+       mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Detected unknown aspect_ratio_information in mpeg sequence header.\n"
                "Please report the aspect value (%i) along with the movie type (VGA,PAL,NTSC,"
                "SECAM) and the movie resolution (720x576,352x240,480x480,...) to the MPlayer"
                " developers, so that we can add support for it!\nAssuming 1:1 aspect for now.\n",
@@ -322,7 +339,8 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     *start=NULL;
 
   if(demuxer->file_format==DEMUXER_TYPE_MPEG_ES || demuxer->file_format==DEMUXER_TYPE_MPEG_PS
-		  || demuxer->file_format==DEMUXER_TYPE_PVA || demuxer->file_format==DEMUXER_TYPE_MPEG_TS
+		  || demuxer->file_format==DEMUXER_TYPE_PVA || 
+		  ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
 		  || demuxer->file_format==DEMUXER_TYPE_MPEG_TY
 #ifdef STREAMING_LIVE_DOT_COM
     || (demuxer->file_format==DEMUXER_TYPE_RTP && demux_is_mpeg_rtp_stream(demuxer))
@@ -413,7 +431,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	    telecine=1;
 	}
 
-  } else if((demuxer->file_format==DEMUXER_TYPE_MPEG4_ES) || (demuxer->file_format==DEMUXER_TYPE_MPEG4_IN_TS)){
+  } else if((demuxer->file_format==DEMUXER_TYPE_MPEG4_ES) || ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000004))){
       //
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
@@ -423,7 +441,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	*start=videobuffer; in_size=videobuf_len;
 	videobuf_len=0;
 
-  } else if(demuxer->file_format==DEMUXER_TYPE_H264_ES){
+  } else if(demuxer->file_format==DEMUXER_TYPE_H264_ES || ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000005))){
       //
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
@@ -494,7 +512,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     }
     
     if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS ||
-       demuxer->file_format==DEMUXER_TYPE_MPEG_TS ||
+       ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002))) ||
        demuxer->file_format==DEMUXER_TYPE_MPEG_ES ||
        demuxer->file_format==DEMUXER_TYPE_MPEG_TY){
 

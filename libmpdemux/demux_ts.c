@@ -61,6 +61,7 @@ typedef enum
 	VIDEO_MPEG1 	= 0x10000001,
 	VIDEO_MPEG2 	= 0x10000002,
 	VIDEO_MPEG4 	= 0x10000004,
+	VIDEO_H264 	= 0x10000005,
 	AUDIO_MP2   	= 0x50,
 	AUDIO_A52   	= 0x2000,
 	AUDIO_LPCM_BE  	= 0x10001,
@@ -500,7 +501,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 			}
 			
 			is_audio = ((es.type == AUDIO_MP2) || (es.type == AUDIO_A52) || (es.type == AUDIO_LPCM_BE) || (es.type == AUDIO_AAC));
-			is_video = ((es.type == VIDEO_MPEG1) || (es.type == VIDEO_MPEG2) || (es.type == VIDEO_MPEG4));
+			is_video = ((es.type == VIDEO_MPEG1) || (es.type == VIDEO_MPEG2) || (es.type == VIDEO_MPEG4) || (es.type == VIDEO_H264));
 			is_sub   = ((es.type == SPU_DVD) || (es.type == SPU_DVB));
 
 
@@ -650,7 +651,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 	}
 						
 	if(video_found)
-		mp_msg(MSGT_DEMUXER, MSGL_INFO, "VIDEO MPEG%d(pid=%d)...", (param->vtype == VIDEO_MPEG1 ? 1 : (param->vtype == VIDEO_MPEG2 ? 2 : 4)), param->vpid);
+		mp_msg(MSGT_DEMUXER, MSGL_INFO, "VIDEO %s(pid=%d)...", (param->vtype == VIDEO_MPEG1 ? "MPEG1" : (param->vtype == VIDEO_MPEG2 ? "MPEG2" : (param->vtype == VIDEO_MPEG4 ? "MPEG4" : "H264"))), param->vpid);
 	else
 	{
 		video_found = 0;
@@ -790,9 +791,6 @@ demuxer_t *demux_open_ts(demuxer_t * demuxer)
 
 	if(params.vtype != UNKNOWN)
 	{
-		if(params.vtype == VIDEO_MPEG4)
-			demuxer->file_format= DEMUXER_TYPE_MPEG4_IN_TS;
-
 		sh_video = new_sh_video(demuxer, 0);
 		sh_video->ds = demuxer->video;
 		sh_video->format = params.vtype;
@@ -1573,6 +1571,9 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 				break;
 			*/
 
+			case 0x1b:
+				pmt->es[idx].type = VIDEO_H264;
+				break;
 			case 0x81:
 				pmt->es[idx].type = AUDIO_A52;
 				break;
@@ -1845,7 +1846,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 		priv->last_pid = pid;
 
-		is_video = ((tss->type == VIDEO_MPEG1) || (tss->type == VIDEO_MPEG2) || (tss->type == VIDEO_MPEG4));
+		is_video = ((tss->type == VIDEO_MPEG1) || (tss->type == VIDEO_MPEG2) || (tss->type == VIDEO_MPEG4) || (tss->type == VIDEO_H264));
 		is_audio = ((tss->type == AUDIO_MP2) || (tss->type == AUDIO_A52) || (tss->type == AUDIO_LPCM_BE) ||  (tss->type == AUDIO_AAC) 
 			|| (tss->type == PES_PRIVATE1));
 		is_sub	= ((tss->type == SPU_DVD) || (tss->type == SPU_DVB));
@@ -2263,9 +2264,13 @@ void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, int flags)
 		{
 			if(i==0x1B3 || i==0x1B8) break; // found it!
 		}
-		else //MPEG4
+		else if(sh_video->format == VIDEO_MPEG4)
 		{
 			if(i==0x1B6) break; // found it!
+		}
+		else	//H264
+		{
+			if((i & ~0x60) == 0x101 || (i & ~0x60) == 0x102 || (i & ~0x60) == 0x105) break;
 		}
 
 		if(!i || !skip_video_packet(d_video)) break; // EOF?

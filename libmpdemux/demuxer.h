@@ -55,10 +55,6 @@
 // A virtual demuxer type for the network code
 #define DEMUXER_TYPE_PLAYLIST (2<<16)
 
-//This one is needed only to identify mpeg4 in mpeg2-ts, shouldn't be used explicitly,
-// rather use ths usual _TYPE_TS
-#define DEMUXER_TYPE_MPEG4_IN_TS (3<<16)
-
 
 #define DEMUXER_TIME_NONE 0
 #define DEMUXER_TIME_PTS 1
