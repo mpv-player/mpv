@@ -5,6 +5,9 @@
 #include "edl.h"
 #include "help_mp.h"
 
+char *edl_filename; // file to extract EDL entries from (-edl)
+char *edl_output_filename; // file to put EDL entries in (-edlout)
+
 #ifdef USE_EDL
 
 /**

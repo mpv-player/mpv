@@ -78,6 +78,9 @@ int tv_param_brightness = 0;
 int tv_param_contrast = 0;
 int tv_param_hue = 0;
 int tv_param_saturation = 0;
+tv_channels_t *tv_channel_list;
+tv_channels_t *tv_channel_current, *tv_channel_last;
+char *tv_channel_last_real;
 
 /* ================== DEMUX_TV ===================== */
 /*

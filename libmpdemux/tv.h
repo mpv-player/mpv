@@ -95,9 +95,9 @@ typedef struct tv_channels_s {
     struct tv_channels_s *prev;
 } tv_channels_t;
 
-tv_channels_t *tv_channel_list;
-tv_channels_t *tv_channel_current, *tv_channel_last;
-char *tv_channel_last_real;
+extern tv_channels_t *tv_channel_list;
+extern tv_channels_t *tv_channel_current, *tv_channel_last;
+extern char *tv_channel_last_real;
 
 #define TVI_CONTROL_FALSE		0
 #define TVI_CONTROL_TRUE		1

@@ -23,8 +23,8 @@ struct edl_record {
 
 typedef struct edl_record* edl_record_ptr;
 
-char *edl_filename; // file to extract EDL entries from (-edl)
-char *edl_output_filename; // file to put EDL entries in (-edlout)
+extern char *edl_filename; // file to extract EDL entries from (-edl)
+extern char *edl_output_filename; // file to put EDL entries in (-edlout)
 
 int edl_check_mode(void); // we cannot do -edl and -edlout at the same time
 int edl_count_entries(void); // returns total number of entries needed

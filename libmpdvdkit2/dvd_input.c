@@ -34,6 +34,12 @@ int           (*DVDcss_title) (dvdcss_handle, int);
 int           (*DVDcss_read)  (dvdcss_handle, void *, int, int);
 char *        (*DVDcss_error) (dvdcss_handle);
 
+dvd_input_t (*DVDinput_open)  (const char *);
+int         (*DVDinput_close) (dvd_input_t);
+int         (*DVDinput_seek)  (dvd_input_t, int, int);
+int         (*DVDinput_title) (dvd_input_t, int); 
+int         (*DVDinput_read)  (dvd_input_t, void *, int, int);
+char *      (*DVDinput_error) (dvd_input_t);
 
 /* The DVDinput handle, add stuff here for new input methods. */
 struct dvd_input_s {
