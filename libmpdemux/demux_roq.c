@@ -26,8 +26,6 @@
 #define CHUNK_TYPE_AUDIO 0
 #define CHUNK_TYPE_VIDEO 1
 
-#define RoQ_FPS 30
-
 typedef struct roq_chunk_t
 {
   int chunk_type;
@@ -49,14 +47,14 @@ typedef struct roq_data_t
 
 // Check if a stream qualifies as a RoQ file based on the magic numbers
 // at the start of the file:
-//  84 10 FF FF FF FF 1E 00
+//  84 10 FF FF FF FF xx xx
 int roq_check_file(demuxer_t *demuxer)
 {
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream, 0);
 
   if ((stream_read_dword(demuxer->stream) == 0x8410FFFF) &&
-      (stream_read_dword(demuxer->stream) == 0xFFFF1E00))
+      ((stream_read_dword(demuxer->stream) & 0xFFFF0000) == 0xFFFF0000))
     return 1;
   else
     return 0;
@@ -103,6 +101,7 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
   int chunk_arg;
   int last_chunk_id = 0;
   int largest_audio_chunk = 0;
+  int fps;
 
   roq_data->total_chunks = 0;
   roq_data->current_chunk = 0;
@@ -110,7 +109,8 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
   roq_data->chunks = NULL;
 
   // position the stream and start traversing
-  stream_seek(demuxer->stream, 8);
+  stream_seek(demuxer->stream, 6);
+  fps = stream_read_word_le(demuxer->stream);
   while (!stream_eof(demuxer->stream))
   {
     chunk_id = stream_read_word_le(demuxer->stream);
@@ -144,7 +144,7 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
         sh_video->format = mmioFOURCC('R', 'o', 'Q', 'V');
 
         // constant frame rate
-        sh_video->fps = 1000 / RoQ_FPS;
+        sh_video->fps = fps;
         sh_video->frametime = 1 / sh_video->fps;
       }
     }
@@ -239,8 +239,6 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
   demuxer->priv = roq_data;
 
   stream_reset(demuxer->stream);
-
-sh_audio = NULL;
 
   return demuxer;
 }
