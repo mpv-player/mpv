@@ -477,7 +477,7 @@ static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timesta
     if(pict_type<=1){
       // I frame, sync timestamps:
       priv->kf_base=timestamp-kf;
-      mp_msg(MSGT_DEMUX, MSGL_V,"\nTS: base=%08X\n",priv->kf_base);
+      mp_msg(MSGT_DEMUX, MSGL_DBG2,"\nTS: base=%08X\n",priv->kf_base);
       kf=timestamp;
     } else {
       // P/B frame, merge timestamps:
@@ -493,7 +493,7 @@ static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timesta
 	priv->kf_pts=tmp;
 //	if(kf<=tmp) kf=0;
     }
-    mp_msg(MSGT_DEMUX, MSGL_V,"\nTS: %08X -> %08X (%04X) %d %02X %02X %02X %02X %5d\n",timestamp,kf,orig_kf,pict_type,s[0],s[1],s[2],s[3],kf-(int)(1000.0*priv->v_pts));
+    mp_msg(MSGT_DEMUX, MSGL_DBG2,"\nTS: %08X -> %08X (%04X) %d %02X %02X %02X %02X %5d\n",timestamp,kf,orig_kf,pict_type,s[0],s[1],s[2],s[3],kf-(int)(1000.0*priv->v_pts));
   }
 #endif
     v_pts=kf*0.001f;
@@ -1720,7 +1720,7 @@ header_end:
 
     if(demuxer->video->sh){
 	sh_video_t *sh=demuxer->video->sh;
-	mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  %.4s [%08X,%08X]  %dx%d  (aspect %4.2f)  %4.2f fps\n",
+	mp_msg(MSGT_DEMUX,MSGL_V,"VIDEO:  %.4s [%08X,%08X]  %dx%d  (aspect %4.2f)  %4.2f fps\n",
 	    &sh->format,((unsigned int*)(sh->bih+1))[1],((unsigned int*)(sh->bih+1))[0],
 	    sh->disp_w,sh->disp_h,sh->aspect,sh->fps);
     }
