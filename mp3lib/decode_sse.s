@@ -90,8 +90,7 @@ synth_1to1_sse:
 .L74:
         pushl %eax
         call  dct64
-        addl  $12,%esp
-	emms
+	addl  $12, %esp
         movl  16(%esp),%edx
         leal  0(,%edx,4),%edx
         movl  $decwin+64,%eax
@@ -100,24 +99,26 @@ synth_1to1_sse:
         movl  $16,%ebp
 
 .L55:
-	movups	(%ecx), %xmm4
-	mulps	(%ebx), %xmm4
-	movups	16(%ecx), %xmm0
-	mulps	16(%ebx), %xmm0
-	addps	%xmm0, %xmm4
-	movups	32(%ecx), %xmm1
-	mulps	32(%ebx), %xmm1
-	addps	%xmm1, %xmm4
-	movups	48(%ecx), %xmm0
-	mulps	48(%ebx), %xmm0
-	addps	%xmm0, %xmm4
-	movhlps	%xmm4, %xmm1 /* fake of pfacc */
-	addps	%xmm1, %xmm4
-	shufps	$0x55, %xmm4, %xmm1 /* fake of pfnacc. 1|1|1|1 */
-	subps	%xmm1, %xmm4
-	cvtss2si %xmm4, %eax
+	movups (%ecx), %xmm0
+	mulps  (%ebx), %xmm0
+	movups 16(%ecx), %xmm1
+	mulps  16(%ebx), %xmm1
+	addps  %xmm1, %xmm0
+	movups 32(%ecx), %xmm1
+	mulps  32(%ebx), %xmm1
+	addps  %xmm1, %xmm0
+	movups 48(%ecx), %xmm1
+	mulps  48(%ebx), %xmm1
+	addps  %xmm1, %xmm0
+	movhlps %xmm0, %xmm1
+	addps   %xmm1, %xmm0
+	movaps  %xmm0, %xmm1
+	shufps  $0x55, %xmm1, %xmm1 /* fake of pfnacc. 1|1|1|1 */
+	subss	%xmm1, %xmm0
+	cvttss2si %xmm0, %eax
 
-        movw	%ax,(%esi)
+/        sar   $16,%eax
+        movw  %ax,(%esi)
 
         addl  $64,%ebx
         subl  $-128,%ecx
@@ -127,23 +128,24 @@ synth_1to1_sse:
 
 / --- end of  loop 1 ---
 
-	movups	(%ecx), %xmm4
-	mulps	(%ebx), %xmm4
-	movups	16(%ecx), %xmm0
-	mulps	16(%ebx), %xmm0
-	addps	%xmm0, %xmm4
-	movups	32(%ecx), %xmm1
-	mulps	32(%ebx), %xmm1
-	addps	%xmm1, %xmm4
-	movups	48(%ecx), %xmm0
-	mulps	48(%ebx), %xmm0
-	addps	%xmm0, %xmm4
-	movhlps	%xmm4, %xmm1 /* 3|2|3|2 */
-	addps	%xmm1, %xmm4
-	cvtss2si %xmm4, %eax
+	movups (%ecx), %xmm0
+	mulps  (%ebx), %xmm0
+	movups 16(%ecx), %xmm1
+	mulps  16(%ebx), %xmm1
+	addps  %xmm1, %xmm0
+	movups 32(%ecx), %xmm1
+	mulps  32(%ebx), %xmm1
+	addps  %xmm1, %xmm0
+	movups 48(%ecx), %xmm1
+	mulps  48(%ebx), %xmm1
+	addps  %xmm1, %xmm0
+	movhlps %xmm0, %xmm1	
+	addss	%xmm1, %xmm0
+	cvttss2si %xmm0, %eax
 
+/        sar   $16,%eax
 
-        movw	%ax,(%esi)
+        movw  %ax,(%esi)
 
         addl  $-64,%ebx
         addl  $4,%esi
@@ -151,32 +153,29 @@ synth_1to1_sse:
         movl  $15,%ebp
 
 .L68:
-	xorps  %xmm0, %xmm0
+	xorps %xmm0, %xmm0
+	movups (%ecx), %xmm1
+	mulps  (%ebx), %xmm1
+	subps  %xmm1, %xmm0
+	movups 16(%ecx), %xmm1
+	mulps  16(%ebx), %xmm1
+	subps  %xmm1, %xmm0
+	movups 32(%ecx), %xmm1
+	mulps  32(%ebx), %xmm1
+	subps  %xmm1, %xmm0
+	movups 48(%ecx), %xmm1
+	mulps  48(%ebx), %xmm1
+	subps  %xmm1, %xmm0
+	movhlps %xmm0, %xmm1
+	subps	%xmm1, %xmm0
+	movaps	%xmm0, %xmm1
+	shufps $0x55, %xmm1, %xmm1 /* fake of pfacc 1|1|1|1 */
+	addss  %xmm1, %xmm0
+	cvttss2si %xmm0, %eax
 
-        movups (%ecx),%xmm2
-        mulps  (%ebx),%xmm2
-        subps %xmm2,%xmm0
+/        sar   $16,%eax
 
-        movups 16(%ecx),%xmm2
-        mulps  16(%ebx),%xmm2
-        subps  %xmm2,%xmm0
-
-        movups 32(%ecx),%xmm2
-        mulps  32(%ebx),%xmm2
-        subps  %xmm2,%xmm0
-
-        movups 48(%ecx),%xmm2
-        mulps  48(%ebx),%xmm2
-        subps  %xmm2,%xmm0
-
-	movhlps	%xmm0, %xmm1 /* 3|2|3|2 */
-	addps	%xmm1, %xmm0
-	shufps	$0x55, %xmm0, %xmm1 /* fake of pfacc 1|1|1|1 */
-	addps	%xmm1, %xmm0
-	cvtss2si %xmm0, %eax
-
-
-        movw	%ax,(%esi)
+        movw  %ax,(%esi)
 
         addl  $-64,%ebx
         subl  $-128,%ecx
@@ -185,8 +184,6 @@ synth_1to1_sse:
         jnz   .L68
 
 / --- end of loop 2
-
-        emms
 
         movl  %edi,%eax
         popl  %ebx
