@@ -166,7 +166,7 @@ static int init(int rate,int channels,int format,int flags)
 	
 	//fill waveformatex
     ZeroMemory( &wformat, sizeof(WAVEFORMATEXTENSIBLE));
-    wformat.Format.cbSize          = (channels>2)?sizeof(WAVEFORMATEXTENSIBLE):0;
+    wformat.Format.cbSize          = (channels>2)?sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX):0;
     wformat.Format.nChannels       = channels;                
     wformat.Format.nSamplesPerSec  = rate;            
     if(format == AFMT_AC3)
@@ -222,6 +222,10 @@ static int init(int rate,int channels,int format,int flags)
         waveBlocks[i].lpData = buffer;
         buffer += BUFFER_SIZE;
     }
+    buf_write=0;
+    buf_write_pos=0;
+    full_buffers=0;
+    buffered_bytes=0;
 
     return 1;
 }
