@@ -118,8 +118,8 @@ char* get_vids_codec_name(){
 	case mmioFOURCC('M', 'J', 'P', 'G'):
 	  printf("Video in MJPEG format\n");
           avi_header.yuv_supported=1;
-		    return "M3JPEG32.dll";
-//          return "mcmjpg32.dll";
+//		    return "M3JPEG32.dll";
+          return "mcmjpg32.dll";
 //          return "m3jpeg32.dll";
 //          return "libavi_mjpeg.so";
   }
