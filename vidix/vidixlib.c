@@ -84,7 +84,7 @@ static int vdl_fill_driver(VDL_HANDLE stream)
 	t_vdl(stream)->config_playback && t_vdl(stream)->playback_on &&
 	t_vdl(stream)->playback_off))
   {
-    printf("vidixlib: Incomplete driver: some features are missed in it.\n");
+    printf("vidixlib: Incomplete driver: some of essential features are missed in it.\n");
     return 0;
   }
   return 1;
@@ -101,7 +101,7 @@ static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,
   if(verbose) printf("vidixlib: PROBING: %s\n",drv_name);
   if(!(t_vdl(stream)->handle = dlopen(drv_name,RTLD_LAZY|RTLD_GLOBAL)))
   {
-    if(verbose) printf("vidixlib: %s not driver: %s\n",drv_name,strerror(errno));
+    if(verbose) printf("vidixlib: %s not driver: %s\n",drv_name,dlerror());
     return 0;
   }
   _ver = dlsym(t_vdl(stream)->handle,"vixGetVersion");
@@ -172,6 +172,8 @@ VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap,int verbose)
     strcat(drv_name,name);
     if(!(t_vdl(stream)->handle = dlopen(drv_name,RTLD_NOW|RTLD_GLOBAL)))
     {
+      if (verbose)
+	printf("vidixlib: dlopen error: %s\n", dlerror());
       err:
       free(stream);
       return NULL;
