@@ -1,4 +1,4 @@
-.\" synced with 1.921
+.\" synced with 1.923
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -5203,7 +5203,8 @@ Interpoluje brakuj±ce linie. (Stosowany algorytm mo¿e nie byæ zbyt dobry.)
 Przesunie pola o 1/4 piksela z wykorzystaniem interpolacji liniowej
 (bez przeskoków).
 .IPs 4
-Przesunie pola o 1/4 piksela z wykorzystaniem filtru 4tap (wysoka jako¶æ).
+Przesunie pola o 1/4 piksela z wykorzystaniem filtru 4tap (wysoka jako¶æ)
+(domy¶lnie).
 .RE
 .PD 1
 .
@@ -6361,8 +6362,16 @@ Rozmycie gaussowe kwantyzatora (domy¶lnie: 0.5),
 wiêksze warto¶ci u¶redni± kwantyzator w czasie (wolniejsze zmiany).
 .
 .TP
-.B vqcomp=<warto¶æ>
-Kompresja kwantyzatora, zale¿y od vrc_eq (przebieg\ 1/\:2) (domy¶lnie: 0.5).
+.B vqcomp=<0.0\-1.0>
+Kompresja kwantyzatora, vrc_eq zale¿y od niej (przebieg\ 1/\:2) (domy¶lnie: 0.5).
+Dla przyk³adu, zak³adaj±c ¿e jest u¿ywane domy¶lne równanie kontroli tempa,
+przy vqcomp=1.0, kontrola tempa przydziela ka¿dej ramce ilo¶æ bitów potrzebn±
+do zakodowania ich przy takim samym kwantyzatorze.
+Przy vqcomp=0.0, kontrola tempa przydziela ka¿dej ramce tak± sam± ilo¶æ bitów,
+czyli ¶cis³e CBR.
+.I INFORMACJA:
+To s± ekstremalne ustawienia i nie powinny byæ u¿ywane.
+Postrzegana optymalna jako¶æ bêdzie gdzie¶ miêdzy tymi dwoma ekstremami.
 .
 .TP
 .B vrc_eq=<equation>
