@@ -1,4 +1,4 @@
-.\" synced with 1.534
+.\" synced with 1.549
 .\" MPlayer (C) 2000-2004 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun,
 .\" Jonas Jermann y traducida al español por Juan Martín López.
@@ -35,7 +35,7 @@
 .\" Título
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-01-19" "Proyecto MPlayer" "El Reproductor de Películas para Linux"
+.TH MPlayer 1 "2004-04-05" "Proyecto MPlayer" "El Reproductor de Películas para Linux"
 .
 .SH NOMBRE
 mplayer  \- Reproductor de películas para Linux
@@ -177,55 +177,8 @@ conversión rgb/\:yuv) y más.
 .B gmplayer
 es MPlayer con una interfaz gráfica para el usuario.
 Tiene las mismas opciones que MPlayer.
-.
-.
-.\" --------------------------------------------------------------------------
-.\" Opciones
-.\" --------------------------------------------------------------------------
-.
-.SH "NOTAS GENERALES"
-.B ¡Consulte también la documentación HTML!
 .PP
-Cada opción 'etiqueta' tiene su contrapartida 'noetiqueta', es decir, \& el
-opuesto a la opción \-fs es \-nofs.
-.PP
-Puede escribir todas sus opciones en un archivo de configuración que será
-leído cada vez que se ejecute MPlayer.
-El archivo de configuración del sistema global 'mplayer.conf' está en su
-directorio de configueración (p.e.\& /etc/\:mplayer o /usr/\:local/\:etc/\:mplayer),
-el específico de usuario es '~/\:.mplayer/\:config'.
-Las opciones específicas de usuario sobreescriben a las del sistema y a su vez las
-que se pasan por línea de comandos sustituyen a estas.
-La sintaxis del archivo de configuración es 'opción=<valor>', todo lo que haya
-después de un '#' es considerado un comentario.
-Las opciones que funcionan sin valores pueden ser habilitadas estableciendo su valor
-a 'si' o '1' y deshabilitadas estableciendo su valor a 'no' o '0'. Incluso las
-subopciones pueden se especificadas de este modo.
-.PP
-.I EJEMPLO:
-.br
-# Usar controlador de Matrox por defecto.
-.br
-vo=xmga
-.br
-# Me encanta practicar manualidades mientras veo videos.
-.br
-flip=si
-.br
-# Decodificar/\:codificar múltiples archivos desde png,
-.br
-# empezando con mf://mascaradearchivo
-.br
-mf=type=png:fps=25
-.br
-# Las imágenes en negativo son extrañamente bonitas.
-.br
-vf=eq2=1.0:-0.8
-.PP
-También puede escribir archivos de configuración para archivos específicos.
-Si dispone de un archivo de configuración para un archivo llamado 'pelicula.avi',
-cree otro archivo llamado 'pelicula.avi.conf' con las opciones específicas y
-colóquelo en ~/.mplayer o en el mismo directorio que el archivo.
+.B ¡Vea también la documentación HTML!
 .
 .
 .\" --------------------------------------------------------------------------
@@ -233,8 +186,6 @@ colóquelo en ~/.mplayer o en el mismo directorio que el archivo.
 .\" --------------------------------------------------------------------------
 .
 .SH "CONTROL POR TECLADO"
-.I NOTA:
-.br
 MPlayer tiene una capa de control totalmente configurable, dada por
 órdenes, que le permite controlar MPlayer usando el teclado, el ratón,
 la palanca de juegos o el mando a distancia (usando lirc).
@@ -287,6 +238,8 @@ decrementa/\:incrementa el rango de panscan
 cambia entre los estados de OSD: nada / posicionado / posición+tiempo
 .IPs d\ \ \ \ 
 cambia el saltarse imágenes
+cambia entre los estados del salto de imágenes: nada / saltar el mostrar
+en pantalla / saltar decodificación (vea \-framedrop y \-hardframedrop)
 .IPs v\ \ \ \ 
 cambia la visibilidad de los subtítulos
 .IPs j\ \ \ \ 
@@ -351,6 +304,91 @@ cambia la norma
 cambia la lista de canales
 .RE
 .PD 1
+.
+.
+.\" --------------------------------------------------------------------------
+.\" Opciones
+.\" --------------------------------------------------------------------------
+.
+.SH "USO"
+Cada opción 'etiqueta' tiene su contrapartida 'noetiqueta', es decir, \& el
+opuesto a la opción \-fs es \-nofs.
+.PP
+Puede escribir todas sus opciones en un archivo de configuración que será
+leído cada vez que se ejecute MPlayer.
+El archivo de configuración del sistema global 'mplayer.conf' está en su
+directorio de configueración (p.e.\& /etc/\:mplayer o /usr/\:local/\:etc/\:mplayer),
+el específico de usuario es '~/\:.mplayer/\:config'.
+Las opciones específicas de usuario sobreescriben a las del sistema y a su vez las
+que se pasan por línea de comandos sustituyen a estas.
+La sintaxis del archivo de configuración es 'opción=<valor>', todo lo que haya
+después de un '#' es considerado un comentario.
+Las opciones que funcionan sin valores pueden ser habilitadas estableciendo su valor
+a 'si' o '1' y deshabilitadas estableciendo su valor a 'no' o '0'. Incluso las
+subopciones pueden se especificadas de este modo.
+.PP
+.I EJEMPLO:
+.br
+# Usar controlador de Matrox por defecto.
+.br
+vo=xmga
+.br
+# Me encanta practicar manualidades mientras veo videos.
+.br
+flip=si
+.br
+# Decodificar/\:codificar múltiples archivos desde png,
+.br
+# empezando con mf://mascaradearchivo
+.br
+mf=type=png:fps=25
+.br
+# Las imágenes en negativo son extrañamente bonitas.
+.br
+vf=eq2=1.0:-0.8
+.PP
+También puede escribir archivos de configuración para archivos específicos.
+Si dispone de un archivo de configuración para un archivo llamado 'pelicula.avi',
+cree otro archivo llamado 'pelicula.avi.conf' con las opciones específicas y
+colóquelo en ~/.mplayer o en el mismo directorio que el archivo.
+.
+.
+.SH "OPCIONES GENERALES"
+.TP
+.B \-codecs-file <nombrearchivo>
+Usa el archivo codecs.conf especificado en lugar del instalado por sistema o el
+interno .
+Vea también \-afm, \-ac, \-vfm y \-vc.
+.TP
+.B \-include <archivo\ de\ configuración>
+Archivo de configuración específico que se consultará después del que haya por
+defecto.
+.TP
+.B \-quiet\ \ 
+Con esta opción la línea de estado (i.e. A:  0.7 V:  0.6 A-V: 0.068 ...)
+no será mostrada.
+Es particularmente útil en terminales lentos o donde no funciona bien el manejo
+del retorno de carro (i.e. \\r).
+.TP
+.B \-v, \-verbose
+Aumenta el nivel de prolijo (más \-v significa más prolijo).
+.
+.PD 0
+.RSs
+.IPs 0
+solo alguna salida para informar (por defecto)
+.IPs 1
+alguna información de depuración básica, cabecera avi, valores de funciones
+(depuración inicial)
+.IPs 2
+muestra índices avi, entradas de trozos de video, más información de depuración
+(depuración del reproductor)
+.IPs 3
+muestra todo lo relacionado con los elementos que analizan la entrada
+(depuración del analizador)
+.RE
+.PD 1
+.
 .
 .
 .SH "OPCIONES DEL REPRODUCTOR (SOLO MPLAYER)"
@@ -516,12 +554,6 @@ Winamp o ASX).
 .I NOTA:
 Esta opción es considerada una entrada como entrada par alas opciones que después
 se aplican solo a los elementos de esta lista de reproducción.
-.TP
-.B \-quiet \ \ 
-Con esta opción la línea de estado (i.e. A:  0.7 V:  0.6 A-V:  0.068 ...)
-no será mostrada.
-Particularmente útil en terminales lentos o estropeados en los que no funciona
-como debiera el retorno de carro (i.e. \\r).
 .TP
 .B \-really-quiet
 Muestra todavía menos salida y mensajes de estado.
@@ -1532,7 +1564,7 @@ Signed 32-bit (Big-Endian)
 Esta opción le dice a MPlayer que use un dispositivo diferente para
 mezclar en lugar de /dev/\:mixer.
 .TP
-.B \-mixer-channel <mixer line> (solo para -ao oss)
+.B \-mixer-channel <mixer line> (solo para \-ao oss)
 Esta opción le dice a MPlayer que use un canal diferente al PCM por
 defecto para controlar el volumen.
 Las opciones incluyen
@@ -2108,11 +2140,6 @@ mayoría de los archivos AVI.
 .PD 1
 .
 .TP
-.B \-codecs-file <nombrearchivo>
-Usa el archivo especificado en lugar del instalado en el sistema o
-compilado internamente.
-Vea también \-afm, \-ac, \-vfm y \-vc.
-.TP
 .B \-flip \ 
 Voltea la imagen arriba-abajo.
 .TP
@@ -2417,10 +2444,21 @@ Especifica parámetros adicionales cuando se decodifica con XviD.
 .
 .PD 0
 .RSs
+.IPs deblock-chroma
+Activa el filtro de postprocesado interno de xvid: filtro de debloque de croma.
+Vea también \-vf pp, que es más rápido que el propio filtro de XviD.
+.IPs deblock-luma
+Activa el filtro de postprocesado interno de xvid: filtro de debloque de luminancia.
+Vea también \-vf pp, que es más rápido que el propio filtro de XviD.
 .IPs dr2\ \ 
 Activa el método 2 de renderizado directo.
 .IPs nodr2
 Desactiva el método 2 de renderizado directo.
+.IPs filmeffect
+Activa el efecto de grano de película interno de XviD.
+Añade grano de película artificial al video.
+Puede incrementar la calidad percibida, mientras que disminuye un poco la calidad real.
+Vea también \-vf noise.
 .RE
 .PD 1
 .
@@ -2679,6 +2717,20 @@ nombre del formato como rgb15, bgr24, yv12, etc (por defecto: yuy2)
 .RE
 .PD 1
 .TP
+.B noformat[=fourcc]
+Restringe el espacio de color para el siguiente filtro sin hacer
+ninguna conversión. A diferencia del filtro format, este pemite
+cualquier espacio de color
+.B excepto
+el que especifique.
+Para obtener una lista de los formatos disponibles vea noformat=fmt=help.
+.PD 0
+.RSs
+.IPs fourcc
+nombres de formato son rgb15, bgr24, yv12, etc (por defecto: yv12)
+.RE
+.PD 1
+.TP
 .B pp[=filter1[:opción1[:opción2...]]/[-]filtro2...] (vea también \-pphelp)
 Esta opción habilita el uso del filtro de postprocesado interno de
 MPlayer, y también proporciona una interfaz para que pueda pasarle opciones
@@ -2731,6 +2783,13 @@ filtro de postprocesado simple
 0\-6
 .OPs qp\ \ \ 
 parámetro para forzar la cuantización
+.RE
+.TP
+.B qp=ecuación
+filtro de cambio qp
+.RSs
+.IPs ecuación
+una ecualización como "2+2*sen(PI*qp)"
 .RE
 .TP
 .B test\ \ \ 
@@ -3083,7 +3142,7 @@ Si n es impar, el marco inmediatamente siguiente al marco marcado con la
 etiqueta mpeg REPEAT_FIRST_FIELD se asume que es progresivo, por eso el
 filtro no pierde ningún tiempo en contenido MPEG-2 soft-telecine.
 Este es el único efecto de esta etiqueta si MMX2 o 3DNow! están disponibles.
-Sin MMX2 y 3DNow!, si n=0 o 1, los mismos cálculos se usan como con MMX2.
+Sin MMX2 y 3DNow!, si n=0 o 1, los mismos cálculos se usan como con n=2 o n=3.
 Si n=2 o 3, el número de niveles de luma usados para encontrar la rotura de marco
 es reducido de 256 a 128, que resulta en un filtro rápido sin perder mucha
 precisión.
@@ -3557,6 +3616,43 @@ Controlador específico de salida para Matrox G400/G450/G550 que usa
 la biblioteca DirectFB.
 Activa CRTC2 (segundo monitor), mostrando el video independientemente
 del primer monitor.
+.PD 0
+.RSs
+.IPs (no)bes
+Activa el uso de Matrox BES (backend scaler) (por defecto: desactivado).
+Obtiene resultados muy buenos en lo que concierne a velocidad y calidad
+de la salida como procesado interpolado de la imagen hecho mediante hardware.
+Funciona solo en el monitor primario.
+.IPs (no)spic
+Hace uso de la capa sub imagen de Matrox para mostrar el OSD (por defecto: activado).
+.IPs (no)crtc2
+Activa la salida TV en el segundo monitor (por defecto: activado).
+La calidad de la salida es muy buena y es una imagen completamente
+entrelazada con sincronización correcta en cada campo par/impar.
+.IPs (no)input
+Usa el código de teclado de DirectFB en lugar del código de teclado normal de
+MPlayer (por defecto: desactivado).
+.IPs buffermode=single|double|triple
+Doble y triple buffer da mejores resultados si quiere evitar problemas de desgarramiento.
+Triple buffer es más eficiente que el doble buffer ya que no bloquea MPlayer
+mientras se espera al refresco vertical.
+El buffer simple debe evitarse (por defecto: triple).
+.IPs fieldparity=top|bottom
+Controla el orden de salida de los marcos entrelazados (por defecto: desactivado).
+Los valores válidos son top = primero los campos superiores,
+bottom = primero los campos inferiores. Esta
+opción no tiene ningún efecto en material de película progresivo como lo son
+las películas MPEG. Necesitará habilitar esta opción si tiene problemas de desgarros de
+imagen/movimiento no suave mientras ve material entrelazado. (Buenos ejemplos para
+material de película entrelazado en DVD son Star Trek Enterprise y Star Trek DS9)
+.IPs tvnorm=pal|ntsc|auto
+Establece la norma TV de la tarjeta Matrox sin la necesidad de modificar
+/etc/\:directfbrc (por defecto: desactivado).
+Normas válidas son pal = PAL, ntsc = NTSC. Una norma especial
+es auto (auto-ajusta el uso de PAL/NTSC) porque decide qué norma se usa mirando
+la tasa de marcos de imagen de la película.
+.RE
+.PD 1
 .TP
 .B mga (solamente Linux)
 Controlador de salida específico de Matrox que hace uso del backend
@@ -3846,9 +3942,6 @@ se tendrá un archivo de salida conteniendo 'div3' como fourcc de video.
 .PD 1
 .
 .TP
-.B \-include <archivo\ de\ configuración>
-Especifica un archivo de configuración que se leerá después del de por defecto.
-.TP
 .B \-info <opción1:opción2:...> (AVI solamente)
 Especifica la información de cabecera del archivo AVI resultante.
 .br
@@ -3937,10 +4030,8 @@ Use \-ovc help para obtener una lista de los codecs disponibles.
 no codifica, solo copia el flujo
 .IPs "\-ovc divx4"
 codifica a DivX4/\:DivX5
-.IPs "\-ovc rawrgb"
-codifica a RGB24 sin comprimir
-.IPs "\-ovc rawyuv"
-codifica a YUV (I420) sin comprimir
+.IPs "\-ovc raw"
+codifica a un formato arbitrario sin comprimir (use \-vf format para seleccionarlo)
 .IPs "\-ovc lavc"
 codifica con codecs libavcodec
 .RE
@@ -3954,25 +4045,6 @@ la priemra pasada al archivo dado en lugar del divx2pass.log por defecto.
 .B \-skiplimit <valor>
 Número máximo de imágenes que se pueden saltar después de una sin saltar
 (\-noskiplimit para un número ilimitado).
-.TP
-.B \-v, \-verbose
-Incrementa el nivel de prolijo (más \-v significa más prolijo aún).
-.
-.PD 0
-.RSs
-.IPs 0
-solo alguna salida informal (por defecto)
-.IPs 1
-alguna información básica de depuración, cabecera avi, valores de funciones
-(depuración inicial)
-.IPs 2
-imprime índices avi, entrazas de trozos de video, más información de depuración
-(depuración del reproductor)
-.IPs 3
-imprime todo lo relacionado con los parseadores de entrada (depuración del parser)
-.RE
-.PD 1
-.
 .TP
 .B \-vobsubout <nombrebase>
 Especifica el nombrebase del archivo de salida .idx y .sub.
@@ -4219,6 +4291,14 @@ Tasa de bits de audio en kBit (por defecto 224).
 .TP
 .B atag=<valor>
 Usa la etiqueta de formato de audio de Windows especificada (e.g.\& atag=0x55).
+.TP
+.B bit_exact
+Usa solo algoritmos de bit exacto (excepto (i)dct).
+Adicionalmente bit_exact desactiva varias optimizaciones y por
+eso solo debe usarse para test de regresión que necesiten archivos
+binarios idénticos incluso si cambia la versión del codificador.
+También suprime el encabezado user_data en flujos MPEG-4.
+No use esta opción a menos que sepa exactamente lo que está haciendo.
 .TP
 .B vcodec=<valor>
 usa el codec especificado (por defecto: mpeg4):
@@ -5174,9 +5254,10 @@ esto NO es el archivo de control de 2pasadas
 (por defecto=10, solamente modo 2pasadas)
 .RE
 .PP
-Las siguientes opciones solo están disponibles con la versión
-inestable (cvs -HEAD) de XviD. Está avisado de que estas opciones son
-experimentales y pueden no funcionar como debieran.
+Las siguientes opciones solo están disponibles en la última versión
+estable de XviD 0.9.2 (api3) y están marcadas como experimentales e
+inestables.
+La nueva versión de desarrollo de XviD 1.0 (api4) tiene soporte completo.
 .TP
 .B packed\ 
 crea un flujo de bits que pueden ser decodificados libres-de-retardo
@@ -5367,13 +5448,10 @@ mencoder dvd://2 \-o titulo2.avi \-ovc lavc
 mencoder "mf://*.jpg" \-mf fps=25 \-o salida.avi \-ovc divx4
 .TP
 .B Codificación desde el sintonizador
-mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc rawrgb
+mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .TP
 .B Codificación desde una tubería
 rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24 \-
-.TP
-.B Codificación de múltiples archivos *.vob
-cat *.vob | mencoder <opciones> \-
 .
 .
 .\" --------------------------------------------------------------------------

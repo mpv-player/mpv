@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.49 -->
+<!-- synced with 1.51 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -1637,6 +1637,66 @@ y un
 en su página web que explica cómo sacar salida de TV con DirectFB en tarjetas
 Matrox.
 </para>
+
+<variablelist>
+
+<title>USO</title>
+
+<varlistentry>
+<term><option>(no)bes</option></term>
+<listitem><para>activa el uso de Matrox BES (backend scaler).
+Da resultados muy buenos en cuanto a velocidad y calidad de salida como procesado
+de imágenes interpoladas por hardware. Funciona solo en la salida primaria.
+Por defecto: desactivado</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>(no)spic</option></term>
+<listitem><para>hace uso de la capa de sub imagen para mostrar el OSD de MPlayer.
+Por defecto: activado</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>(no)crtc2</option></term>
+<listitem><para>activa la salida TV en la segunda salida. La calidad de la salida
+es sorprendente ya que da una imagen completamente entrelazada con sincronización
+correcta en cada campo par/impar. Por defecto: activada</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>(no)input</option></term>
+<listitem><para>usa el código de teclado de DirectFB en lugar del código de teclado
+normal de MPlayer. Por defecto: desactivado</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>buffermode=single|double|triple</option></term>
+<listitem><para>Doble y triple buffer da mejores resultados si quiere evitar problemas
+de desgarramientos de imagen. Triple buffer es más eficiente que el doble buffer ya que no
+bloquea <application>MPlayer</application> mientras que espera al refresco vertical.
+El buffer simple debe evitarse. Por defecto: triple</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>fieldparity=top|bottom</option></term>
+<listitem><para>controla el orden de salida de los marcos de imagen entrelazados.
+Valores válidos son top = campos superiores primero, bottom = campos inferiores primero.
+Esta opción no tiene efecto en material de película progresivo como lo son las
+películas MPEG. Necesitará activar esta opción si tiene problema de desgarros de imagen
+o movimiento no suave mientras ve material entrelazado. (Buenos ejemplos de material
+filmográfico entrelazado en DVD son Star Trek Enterprise y Star Trek DS9)
+Por defecto: desactivado (no establecido)</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>tvnorm=pal|ntsc|auto</option></term>
+<listitem><para>establece la norma de TV en las tarjetas Matrox sin la necesidad
+de modificar /etc/directfbrc. Normas válidas son pal = PAL, ntsc = NTSC.
+Una norma especial es auto (auto-ajuste usando PAL/NTSC) porque decide
+qué norma usar mirando la tasa de imágenes por segundo de la película.
+Por defecto: desactivado (no establecido)</para></listitem>
+</varlistentry>
+</variablelist>
 
 <note><para>
 La primera versión de DirectFB que hace que esto funcione fue 0.9.17 (tiene fallos,
