@@ -2618,6 +2618,19 @@ else
 fi
 echores "$_mman"
 
+cat > $TMPC << EOF
+#include <sys/types.h>
+#include <sys/mman.h>
+int main(void) { void *p = MAP_FAILED; return 0; }
+EOF
+_mman_has_map_failed=no
+cc_check && _mman_has_map_failed=yes
+if test "$_mman_has_map_failed" = yes ; then
+  _def_mman_has_map_failed=''
+else
+  _def_mman_has_map_failed='#define MAP_FAILED ((void *) -1)'
+fi
+
 echocheck "dynamic loader"
 cat > $TMPC << EOF
 #include <dlfcn.h>
@@ -6806,11 +6819,6 @@ cat > config.h << EOF
 /* use GNU internationalization */
 $_def_i18n
 
-/* missing mmap function on libc5 systems */
-#ifndef MAP_FAILED
-# define MAP_FAILED     ((void *) -1)
-#endif
-
 /* Runtime CPU detection */
 $_def_runtime_cpudetection
 
@@ -6977,6 +6985,7 @@ $_def_alloca
 
 /* Define this if your system has the "sys/mman.h" header file */
 $_def_mman
+$_def_mman_has_map_failed
 
 /* Define this if you have the elf dynamic linker -ldl library */
 $_def_dl
