@@ -261,10 +261,12 @@ if(dvd_title){
           return NULL;
         }
         f=streaming_start( &url, f, *file_format );
+//printf("streaming_start(%d) returned %d\n",*file_format,f);
         if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, url->url); return NULL; }
         mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ConnToServer, url->hostname );
         stream=new_stream(f,STREAMTYPE_STREAM);
-	return NULL;
+//	return NULL;
+	return stream;
   }
 #endif
 
