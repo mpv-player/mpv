@@ -12,6 +12,9 @@
 #include "mp3lib/mp3.h"
 #include "config.h"
 
+#include "../cpudetect.h"
+extern CpuCaps gCpuCaps;
+
 static inline unsigned int GetTimer(){
   struct timeval tv;
   struct timezone tz;
@@ -42,6 +45,8 @@ int main(int argc,char* argv[]){
   
   mp3file=fopen((argc>1)?argv[1]:"test.mp3","rb");
   if(!mp3file){  printf("file not found\n");  exit(1); }
+  
+  GetCpuCaps(&gCpuCaps);
 
   // MPEG Audio:
 #ifdef USE_FAKE_MONO
@@ -64,7 +69,7 @@ int main(int argc,char* argv[]){
   length=(float)total/(float)(MP3_samplerate*MP3_channels*2);
   printf("\nDecoding time: %8.6f\n",(float)time1*0.000001f);
   printf("Uncompressed size: %d bytes  (%8.3f secs)\n",total,length);
-  printf("CPU usage at normal playback: %5.2f %\n",time1*0.0001f/length);
+  printf("CPU usage at normal playback: %5.2f %%\n",time1*0.0001f/length);
   
   fclose(mp3file);
   
