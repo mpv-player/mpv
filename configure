@@ -153,9 +153,7 @@ Optional features:
   --enable-largefiles    enable support for files > 2 GBytes [disable]
   --enable-linux-devfs   set default devices to devfs ones [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
-  --with-termcaplib=NAME name of library with termcap functionality
-                         name shuld be given without leading "lib"
-                         checks for "termcap" and "tinfo"
+  --enable-termios       use termios database for key codes [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-setlocale    disable setlocale using in mplayer [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
@@ -251,18 +249,20 @@ Video output:
   --disable-tga          disable targa output support [enable]
   
 Audio output:
+  --disable-alsa         disable ALSA sound support [autodetect]
   --disable-ossaudio     disable OSS sound support [autodetect]
   --disable-arts         disable aRts sound support [autodetect]
   --disable-esd          disable esd sound support [autodetect]
-  --disable-alsa         disable alsa sound support [autodetect]
-  --disable-sunaudio     disable Sun sound support [autodetect]
   --disable-nas          disable NAS sound support [autodetect]
+  --disable-sgiaudio     disable SGI sound support [autodetect]
+  --disable-sunaudio     disable Sun sound support [autodetect]
   --disable-win32waveout disable Windows waveout sound support [autodetect]
   --disable-select       disable using select() on audio device [enable]
 
 Miscellaneous options:
   --enable-runtime-cpudetection    Enable runtime CPU detection [disable]
   --cc=COMPILER          use this C compiler to build MPlayer [gcc]
+  --as=ASSEMBLER         use this assembler to build MPlayer [as]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary. Set further linking
                          options with --enable-static="-lslang -lncurses"
@@ -287,6 +287,7 @@ Advanced options:
   --enable-3dnowex       build with extended 3DNow! support [autodetect]
   --enable-sse           build with SSE support [autodetect]
   --enable-sse2          build with SSE2 support [autodetect]
+  --enable-shm           build with shm support [autodetect]
   --enable-altivec       build with Altivec support (PowerPC) [autodetect]
   --disable-fastmemcpy   disable 3DNow!/SSE/MMX optimized memcpy() [enable]
   --enable-big-endian    Force byte order to big endian [autodetect]
@@ -315,20 +316,22 @@ Use these options if autodetection fails:
   --with-xvmclib=PATH      path to adapter specific XvMCxxxxx.so (e.g. NVIDIA)
   --with-xvidlibdir=DIR    libxvidcore (XviD) in DIR 
   --with-xvidincdir=DIR    XviD header in DIR
-  
-  --with-sdl-config=PATH   path to sdl*-config (e.g. /opt/bin/sdl-config)
-  --with-freetype-config=PATH  path to freetype-config
-                               (e.g. /opt/bin/freetype-config)
-  --with-gtk-config=PATH   path to gtk*-config (e.g. /opt/bin/gtk-config)
-  --with-glib-config=PATH  path to glib*-config (e.g. /opt/bin/glib-config)
   --with-livelibdir=DIR    path to LIVE.COM Streaming Media libraries
   --with-xmmsplugindir=DIR path to XMMS plugins
   --with-xmmslibdir=DIR    path to libxmms.so.1
   --with-cdparanoiaincdir=DIR  cdparanoia headers in DIR
   --with-cdparanoialibdir=DIR  cdparanoia libraries (libcdda_*) in DIR
+  --with-termcaplib=NAME   name of library with termcap functionality
+                           name should be given without leading "lib"
+                           checks for "termcap" and "tinfo"
+  
+  --with-freetype-config=PATH path to freetype-config
+                              (e.g. /opt/bin/freetype-config)
   --with-fribidi-config=PATH  path to fribidi-config
                               (e.g. /opt/bin/fribidi-config)
-
+  --with-glib-config=PATH  path to glib*-config (e.g. /opt/bin/glib-config)
+  --with-gtk-config=PATH   path to gtk*-config (e.g. /opt/bin/gtk-config)
+  --with-sdl-config=PATH   path to sdl*-config (e.g. /opt/bin/sdl-config)
 EOF
     exit 0
   fi
