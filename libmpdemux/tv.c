@@ -5,13 +5,16 @@
  
  API idea based on libvo2
 
- UNDER HEAVY DEVELOPEMENT, NO FEATURE REQUESTS PLEASE! :)
+ Feb 19, 2002: Significant rewrites by Charles R. Henrich (henrich@msu.edu)
+	       try to fix audio support, and bktr *BSD support.
+
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/time.h>
 
 #include "config.h"
 
@@ -34,6 +37,7 @@ int tv_param_on = 0;
 #include "frequencies.h"
 
 /* some default values */
+int tv_param_noaudio = 0;
 char *tv_param_freq = NULL;
 char *tv_param_channel = NULL;
 char *tv_param_norm = "pal";
@@ -53,44 +57,58 @@ float tv_param_fps = -1.0;
     1 = successfully read a packet
 */
 /* fill demux->video and demux->audio */
+
 int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh)
 {
-    int seq = tvh->seq++;
     demux_packet_t* dp;
-    int len;
+
     sh_video_t *sh_video = demux->video->sh;
+    u_int len;
+    u_int cframe;
+    int aframeswaiting;
 
-    mp_dbg(MSGT_DEMUX, MSGL_DBG2, "demux_tv_fill_buffer(sequence:%d) called!\n", seq);
-
-//    demux->filepos = -1;
-
-//    seq++;
-//    tvh->seq++;
-
-    /* ================== ADD VIDEO PACKET =================== */
-    len = tvh->functions->get_video_framesize(tvh->priv);
-
-    dp=new_demux_packet(len);
-    tvh->functions->grab_video_frame(tvh->priv, dp->buffer, len);
-    dp->pts=seq/sh_video->fps; //(float)pts/90000.0f;
-    //dp->pos=pos;
-    //dp->flags=flags;
-    // append packet to DS stream:
-    ds_add_packet(demux->video,dp);
+    len = cframe = -1;
 
     /* ================== ADD AUDIO PACKET =================== */
-    if (tvh->functions->control(tvh->priv, TVI_CONTROL_IS_AUDIO, 0) != TVI_CONTROL_TRUE)
-	return 1; /* no audio, only video */
 
-    len = tvh->functions->get_audio_framesize(tvh->priv);
+    if (tv_param_noaudio == 0 && 
+        tvh->functions->control(tvh->priv, 
+                                TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
+        {
+        len = tvh->functions->get_audio_framesize(tvh->priv);
 
-    dp=new_demux_packet(len);
-    tvh->functions->grab_audio_frame(tvh->priv, dp->buffer, len);
-    //dp->pts=pts; //(float)pts/90000.0f;
-    //dp->pos=pos;
-    //dp->flags=flags;
-    // append packet to DS stream:
-    ds_add_packet(demux->audio,dp);
+        do {
+            dp=new_demux_packet(len);
+            aframeswaiting=tvh->functions->grab_audio_frame(tvh->priv,
+                                                            dp->buffer,len);
+            dp->pts=tvh->seq/sh_video->fps;
+            dp->pos=tvh->seq*len;
+            ds_add_packet(demux->audio,dp);
+
+            tvh->seq++;
+
+           } while (aframeswaiting > 0);
+        }
+
+    /* ================== ADD VIDEO PACKET =================== */
+
+    if (tvh->functions->control(tvh->priv, 
+                            TVI_CONTROL_IS_VIDEO, 0) == TVI_CONTROL_TRUE)
+        {
+        len = tvh->functions->get_video_framesize(tvh->priv);
+
+        dp=new_demux_packet(len);
+
+        cframe=tvh->functions->grab_video_frame(tvh->priv, dp->buffer, 
+                                                len);
+
+        if(tv_param_noaudio == 1) tvh->seq = cframe;
+
+        dp->pos=tvh->seq*len;
+        dp->pts=tvh->seq/sh_video->fps;
+
+        ds_add_packet(demux->video,dp);
+        }
 
     return 1;
 }
@@ -167,6 +185,7 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
 	tvh->norm = TV_NORM_SECAM;
 
     mp_msg(MSGT_TV, MSGL_INFO, "Selected norm: %s\n", tv_param_norm);
+    funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm);
 
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) != TVI_CONTROL_TRUE)
     {
@@ -251,13 +270,18 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 //	sh_video->format = 0x0;
 
     /* set FPS and FRAMETIME */
+
     if(!sh_video->fps)
     {
-	if (funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FPS, &sh_video->fps) != TVI_CONTROL_TRUE)
-	    sh_video->fps = 25.0f; /* on PAL */
-    }    
+        int tmp;
+        if (funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FPS, &tmp) != TVI_CONTROL_TRUE)
+             sh_video->fps = 25.0f; /* on PAL */
+        else sh_video->fps = tmp;
+    }
+
     if (tv_param_fps != -1.0f)
-	sh_video->fps = tv_param_fps;
+        sh_video->fps = tv_param_fps;
+
     sh_video->frametime = 1.0f/sh_video->fps;
 
     printf("fps: %f, frametime: %f\n", sh_video->fps, sh_video->frametime);
@@ -277,20 +301,16 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 //    demuxer->seekable = 0;
 
     /* here comes audio init */
-    if (funcs->control(tvh->priv, TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
+
+    if (tv_param_noaudio == 0 && funcs->control(tvh->priv, TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
     {
 	int audio_format;
+	int sh_audio_format;
 
-	sh_audio = new_sh_audio(demuxer, 0);
-	
-	sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
-	memset(sh_audio->wf, 0, sizeof(WAVEFORMATEX));
-	
 	/* yeah, audio is present */
 	if (funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_FORMAT, &audio_format) != TVI_CONTROL_TRUE)
 	    goto no_audio;
-	sh_audio->sample_format = audio_format;
-	sh_audio->wf->wBitsPerSample = 16;
+
 	switch(audio_format)
 	{
 	    case AFMT_U8:
@@ -301,7 +321,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	    case AFMT_S16_BE:
 	    case AFMT_S32_LE:
 	    case AFMT_S32_BE:
-		sh_audio->format = 0x1; /* PCM */
+		sh_audio_format = 0x1; /* PCM */
 		break;
 	    case AFMT_IMA_ADPCM:
 	    case AFMT_MU_LAW:
@@ -313,9 +333,47 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 		goto no_audio;
 	}
 	
-	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_CHANNELS, &sh_audio->wf->nChannels);
-	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLERATE, &sh_audio->wf->nSamplesPerSec);
-	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLESIZE, &sh_audio->wf->nAvgBytesPerSec);
+	sh_audio = new_sh_audio(demuxer, 0);
+	sh_audio->wf = (WAVEFORMATEX *)malloc(sizeof(WAVEFORMATEX));
+
+	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLERATE, 
+                   &sh_audio->samplerate);
+	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLESIZE, 
+                   &sh_audio->samplesize);
+	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_CHANNELS, 
+                   &sh_audio->channels);
+
+	sh_audio->format = sh_audio_format;
+	sh_audio->sample_format = audio_format;
+
+	sh_audio->i_bps = sh_audio->o_bps =
+	    sh_audio->samplerate * sh_audio->samplesize/8 * 
+	    sh_audio->channels;
+
+	sh_audio->wf->wFormatTag = sh_audio->format;
+	sh_audio->wf->nChannels = sh_audio->channels;
+	switch(audio_format)
+	{
+	    case AFMT_U8:
+	    case AFMT_S8:
+		sh_audio->wf->wBitsPerSample = 8;
+		break;
+	    case AFMT_U16_LE:
+	    case AFMT_U16_BE:
+	    case AFMT_S16_LE:
+	    case AFMT_S16_BE:
+		sh_audio->wf->wBitsPerSample = 16;
+		break;
+	    case AFMT_S32_LE:
+	    case AFMT_S32_BE:
+		sh_audio->wf->wBitsPerSample = 32;
+		break;
+	}
+	sh_audio->wf->nSamplesPerSec = sh_audio->samplerate;
+	sh_audio->wf->nBlockAlign = sh_audio->wf->nAvgBytesPerSec;
+	sh_audio->wf->nAvgBytesPerSec = sh_audio->wf->nChannels * 
+                                    sh_audio->samplesize/8 * 
+                                    sh_audio->samplerate;
 
 	demuxer->audio->sh = sh_audio;
 	sh_audio->ds = demuxer->audio;
@@ -334,6 +392,10 @@ tvi_handle_t *tv_begin(void)
 #ifdef HAVE_TV_V4L
     if (!strcmp(tv_param_driver, "v4l"))
 	return (tvi_handle_t *)tvi_init_v4l(tv_param_device);
+#endif
+#ifdef HAVE_TV_BSDBT848
+    if (!strcmp(tv_param_driver, "bsdbt848"))
+	return (tvi_handle_t *)tvi_init_bsdbt848(tv_param_device);
 #endif
 
     mp_msg(MSGT_TV, MSGL_ERR, "No such driver: %s\n", tv_param_driver); 
