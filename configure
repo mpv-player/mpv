@@ -130,12 +130,31 @@ MCONF='config.mak'
 # ---  Check for C compiler:
 
 _cc=gcc
+_x11=auto
+
+_x11libdir=
+if [ -e /usr/X11R6 ]; then
+ _x11libdir=-L/usr/X11R6/lib
+else
+ if [ -e /usr/X11 ]; then
+  _x11libdir=-L/usr/X11/lib
+ fi
+fi
 
 for ac_option
 do
  case "$ac_option" in
   --cc=*)
         _cc=`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --with-x11libdir=*)
+        _x11libdir=-L`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --enable-x11)
+        _x11=yes
+        ;;
+  --disable-x11)
+        _x11=no
         ;;
  esac
 done
@@ -163,7 +182,6 @@ _gl=no
 _sdl=no
 _xv=no
 _vm=no
-_x11=no
 _3dfx=no
 _syncfb=no
 _mlib=no
@@ -172,7 +190,7 @@ _xmga=no
 _dga=no
 _dga2=no
 _svga=no
-_fbdev=no
+_fbdev=yes
 _lirc=no
 _xdpms=no
 
@@ -181,9 +199,8 @@ _y=1
 
 _gllib=
 _sdllib=
-_x11lib=
 _xvlib=
-_xlibdir=
+_x11lib=
 
 for i in `echo $pparam`; do
 
@@ -220,13 +237,6 @@ for i in `echo $pparam`; do
 
 done
 
-if [ -e /usr/X11R6 ]; then
- _x11libdir=-L/usr/X11R6/lib
-else
- if [ -e /usr/X11 ]; then
-  _x11libdir=-L/usr/X11/lib
- fi
-fi
 
 _win32libdirnotify=no
 if [ -e /usr/lib/win32 ]; then
@@ -366,21 +376,15 @@ fi
 #echo "DONE (${proc})."
 
 
-# check GL & X11 & Xext & Xv & SDL & termcap libs
-
-$_cc $TMPC -o $TMPO $_x11libdir/ -lGL &> /dev/null && _gl=yes
-$_cc $TMPC -o $TMPO $_x11libdir/ -lXxf86vm &> /dev/null && _vm=yes
 $_cc $TMPC -o $TMPO -lvgagl -lvga &> /dev/null && _svga=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext &> /dev/null && _x11=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms &> /dev/null && _xdpms=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lXv &> /dev/null && _xv=yes
-$_cc $TMPC -o $TMPO $_x11libdir -L/usr/local/lib/ -lpthread &> /dev/null || \
+
+$_cc $TMPC -o $TMPO -lpthread &> /dev/null || \
  { echo "Lib pthread not found."; rm -f $TMPC $TMPO ; exit 1; }
 
 # SDL disabled by default (0.11pre22-) because of the compilation problems
 # this is very buggy & experimental code, use it only if you really need it!!
 _have_sdl=no
-$_cc $TMPC -o $TMPO $_x11libdir -L/usr/local/lib/ -lSDL -lpthread &> /dev/null && _have_sdl=yes
+$_cc $TMPC -o $TMPO -L/usr/local/lib/ -lSDL -lpthread &> /dev/null && _have_sdl=yes
 
 _termcap=no
 $_cc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
@@ -388,7 +392,28 @@ $_cc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
 _binutils=no
 as libac3/downmix/downmix_i386.S -o $TMPO &> /dev/null && _binutils=yes
 
-# LGB: Check DGA
+# ----------- Check X11 and related libs (GL, Xxf86vm, Xv, DGA) --------------
+
+if [ $_x11 = auto ]; then
+  _x11=no
+  $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext &> /dev/null && _x11=yes
+fi
+
+if [ $_x11 = yes ]; then
+
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms &> /dev/null && _xdpms=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lXv &> /dev/null && _xv=yes
+
+$_cc $TMPC -o $TMPO $_x11libdir -lGL &> /dev/null && _gl=yes
+
+cat > $TMPC << EOF
+#include <GL/gl.h>
+int main( void ) { return 0; }
+EOF
+$_cc $TMPC -o $TMPO $_x11libdir -lGL &> /dev/null || \
+ { _gl=no; echo "GL includes not found!";}
+
+$_cc $TMPC -o $TMPO $_x11libdir -lXxf86vm &> /dev/null && _vm=yes
 
 cat > $TMPC << EOF
 #include <stdio.h>
@@ -397,15 +422,12 @@ cat > $TMPC << EOF
 int main (void) { return 0;}
 EOF
 
-_dga=no
 $_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm &> /dev/null && _dga=yes
 # Note: the -lXxf86vm library is the VideoMode extension and though it's
 # not needed for DGA, AFAIK every distribution packages together with DGA
 # stuffs named 'X extensions' or something similar. This check can be usefull
 # for further mplayer versions to set resolution by mplayer itself.
 # If you run into problems, remove '-lXxf86vm'.
-
-# ---
 
 # Check if DGA is 2.0 or greater
 cat > $TMPC << EOF
@@ -418,23 +440,9 @@ EOF
 _dga2=no
 $_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm &> /dev/null && _dga2=yes
 
-
-cat > $TMPC << EOF
-#include <GL/gl.h>
-int main( void ) { return 0; }
-EOF
-
-$_cc $TMPC -o $TMPO $_x11libdir/ -lGL &> /dev/null || \
- { _gl=no; echo "GL includes not found!";}
+fi
 
 rm -f $TMPC $TMPO
-
-
-if [ $_x11 = 'yes' ]; then
- if [ $_mga = 'yes' ]; then
-  _xmga=yes
- fi
-fi
 
 # ---
 
@@ -484,9 +492,6 @@ do
         ;;
   --enable-vm)
         _vm=yes
-        ;;
-  --enable-x11)
-        _x11=yes
         ;;
   --enable-3dfx)
         _3dfx=yes
@@ -540,9 +545,6 @@ do
   --disable-vm)
         _vm=no
         ;;
-  --disable-x11)
-        _x11=no
-        ;;
   --disable-mlib)
 	_mlib=no
 	;;
@@ -561,9 +563,6 @@ do
   --disable-termcap)
 	_termcap=no
 	;;
-  --with-x11libdir=*)
-        _x11libdir=-L`echo $ac_option | cut -d '=' -f 2`
-        ;;
   --with-win32libdir=*)
         _win32libdir=`echo $ac_option | cut -d '=' -f 2`
 	_win32libdirnotify=no
@@ -574,10 +573,18 @@ do
   --size-y=*)
 	_y=`echo $ac_option | cut -d '=' -f 2`
 	;;
+  --with-x11libdir=*)
+        ;;
   --cc=*)
 	;;
  esac
 done
+
+if [ $_x11 = 'yes' ]; then
+ if [ $_mga = 'yes' ]; then
+  _xmga=yes
+ fi
+fi
 
 # to screen.
 echo "Using C compiler: $_cc"
