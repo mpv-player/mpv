@@ -40,7 +40,7 @@ inline static unsigned int ByteSwap32(unsigned int x)
 inline static unsigned long long int ByteSwap64(unsigned long long int x)
 {
   register union { __extension__ unsigned long long int __ll;
-          unsigned long int __l[2]; } __x;
+          unsigned int __l[2]; } __x;
   asm("xchgl	%0,%1":
       "=r"(__x.__l[0]),"=r"(__x.__l[1]):
       "0"(bswap_32((unsigned long)x)),"1"(bswap_32((unsigned long)(x>>32))));
@@ -61,7 +61,7 @@ inline static unsigned long long int ByteSwap64(unsigned long long int x)
 #define bswap_64(x) \
      (__extension__						\
       ({ union { __extension__ unsigned long long int __ll;	\
-                 unsigned long int __l[2]; } __w, __r;		\
+                 unsigned int __l[2]; } __w, __r;		\
          __w.__ll = (x);					\
          __r.__l[0] = bswap_32 (__w.__l[1]);			\
          __r.__l[1] = bswap_32 (__w.__l[0]);			\
