@@ -200,19 +200,21 @@ static int init(sh_video_t *sh){
 #endif
     if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
        || sh->format == mmioFOURCC('R', 'V', '1', '3')){
-        unsigned int* extrahdr=(unsigned int*)(sh->bih+1);
         avctx->extradata_size= 8;
         avctx->extradata = malloc(avctx->extradata_size);
-        if(sh->ds->demuxer->type != DEMUXER_TYPE_REAL){
-            /* not .rm container -> only 1 packet per frame & sub_id from fourcc */
-            if (sh->format == mmioFOURCC('R', 'V', '1', '3'))
-	        extrahdr[1] = 0x10003001;
-            else
-	        extrahdr[1] = 0x10000000;
-        }
-        ((uint32_t*)avctx->extradata)[0] = extrahdr[0];
-        ((uint32_t*)avctx->extradata)[1] = extrahdr[1];
-        avctx->sub_id= extrahdr[1];
+        if(sh->bih->biSize!=sizeof(*sh->bih)+8){
+            /* only 1 packet per frame & sub_id from fourcc */
+	    ((uint32_t*)avctx->extradata)[0] = 0;
+	    avctx->sub_id=
+	    ((uint32_t*)avctx->extradata)[1] =
+        	(sh->format == mmioFOURCC('R', 'V', '1', '3')) ? 0x10003001 : 0x10000000;
+        } else {
+	    /* has extra slice header (demux_rm or rm->avi streamcopy) */
+	    unsigned int* extrahdr=(unsigned int*)(sh->bih+1);
+	    ((uint32_t*)avctx->extradata)[0] = extrahdr[0];
+	    avctx->sub_id=
+	    ((uint32_t*)avctx->extradata)[1] = extrahdr[1];
+	}
 
 //        printf("%X %X %d %d\n", extrahdr[0], extrahdr[1]);
     }
@@ -473,7 +475,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 #endif
 
 #if LIBAVCODEC_BUILD >= 4630
-    if(sh->ds->demuxer->type == DEMUXER_TYPE_REAL){
+//    if(sh->ds->demuxer->type == DEMUXER_TYPE_REAL){
+    if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
+       || sh->format == mmioFOURCC('R', 'V', '1', '3'))
+    if(sh->bih->biSize==sizeof(*sh->bih)+8){
         int i;
         dp_hdr_t *hdr= (dp_hdr_t*)data;
 
