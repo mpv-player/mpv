@@ -501,7 +501,7 @@ Melanson, Mike (tmmm) <melanson@pcisys.net>
 von Merkatz, Arwed <v.merkatz@gmx.net>
     * fontconfig font lookup support
 
-Merritt, Loren <lorenm@u.washington.edu>
+Merritt, Loren (pengvado) <lorenm@u.washington.edu>
     * x264 encoding support
     * x264 documentation
     * some libavcodec documentation
@@ -846,7 +846,7 @@ Foucault, Charles <charlesay.foucault@free.fr>
 funkydrummer@postmaster.co.uk
     * Dushku
 
-ghostman_2k@hotmail.com
+ghostman <ghostman_2k@hotmail.com>
     * sessene
 
 Gyimesi, Attila (JiM) <jim@ond.vein.hu>
@@ -880,7 +880,7 @@ michaell@uni.de
     * hayraphon
 
 Naumov, Dan (Jago) <dan.naumov@ofw.fi>
-    * MoonPhase
+    * moonphase
 
 Northam, Ryan
     * OSX-Brushed
