@@ -213,6 +213,8 @@ static short get_driver(char *s,int audioflag)
 		"ffmpeg",
 		"libmad",
 		"ima4",
+		"liba52",
+		"g72x",
 		NULL
 	};
 	static char *videodrv[] = {

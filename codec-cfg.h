@@ -31,6 +31,8 @@
 #define AFM_FFMPEG 11
 #define AFM_MAD 12
 #define AFM_IMA4 13
+#define AFM_A52 14
+#define AFM_G72X 15
 
 #define VFM_MPEG 1
 #define VFM_VFW 2
