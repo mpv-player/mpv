@@ -285,10 +285,12 @@ static int play(void* data,int len,int flags);
   hanem azt kell visszaadnia, mennyit használt fel (másolt a bufferbe).
 
 static int get_delay();
-  Vissza kell adja, hogy hány byte várakozik az audio bufferben. lehetõleg
-  minél pontosabban, mert ettõl függ az egész idõzítés!
-  Legrosszabb esetben adja vissza a buffer méretét!
+  Visszaadja meddig fog tartani az éppen az audio bufferben levõ adat
+  lejátszása. Lehetõleg minél pontosabban, mert ettõl függ az egész idõzítés! 
+  Legrosszabb esetben adja vissza a maximális idõzítést.
 
 !!! Mivel a kép a hanghoz (hangkártyához) van szinkronizálva, így nagyon fontos,
 !!! hogy a get_space ill. get_delay függvények korrektül legyenek megírva!
 
+6.a Audio plugin-ek
+  Remélem tudsz angolul.
