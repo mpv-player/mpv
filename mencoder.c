@@ -27,18 +27,22 @@
 
 #include <encore2.h>
 
-#include "get_path.c"
-
 #include <lame/lame.h>
 
 //--------------------------
 
 // cache2:
+static int stream_cache_size=0;
 #ifdef USE_STREAM_CACHE
 extern int cache_fill_status;
 #else
 #define cache_fill_status 0
 #endif
+
+int vcd_track=0;
+int audio_id=-1;
+int video_id=-1;
+int dvdsub_id=-1;
 
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
@@ -50,7 +54,7 @@ int video_family=-1;     // override video codec family
 //void skip_audio_frame(sh_audio_t *sh_audio){}
 //void resync_audio_stream(sh_audio_t *sh_audio){}
 
-int verbose=1; // must be global!
+int verbose=0; // must be global!
 
 double video_time_usage=0;
 double vout_time_usage=0;
@@ -67,8 +71,25 @@ static float c_total=0;
 float force_fps=0;
 float force_ofps=0; // set to 24 for inverse telecine
 
+int force_srate=0;
+
 //#include "libmpeg2/mpeg2.h"
 //#include "libmpeg2/mpeg2_internal.h"
+
+//-------------------------- config stuff:
+
+#include "cfgparser.h"
+
+static int cfg_inc_verbose(struct config *conf){ ++verbose; return 0;}
+
+static int cfg_include(struct config *conf, char *filename){
+	return parse_config_file(conf, filename);
+}
+
+#include "get_path.c"
+
+#include "cfg-mplayer-def.h"
+#include "cfg-mencoder.h"
 
 //---------------------------------------------------------------------------
 
@@ -146,7 +167,7 @@ static void exit_sighandler(int x){
     eof=1;
 }
 
-int main(int argc,char* argv[]){
+int main(int argc,char* argv[], char *envp[]){
 
 stream_t* stream=NULL;
 demuxer_t* demuxer=NULL;
@@ -176,10 +197,21 @@ float audio_preload=0.3;
 double v_pts_corr=0;
 double v_timer_corr=0;
 
+char** filenames=NULL;
+char* filename=NULL;
+int num_filenames;
+
 //int out_buffer_size=0x200000;
 //unsigned char* out_buffer=malloc(out_buffer_size);
 
   mp_msg_init(verbose+MSGL_STATUS);
+
+  num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
+  if(num_filenames<0) exit(1); // error parsing cmdline
+  if(!num_filenames && !vcd_track && !dvd_title){
+	printf("\nMissing filename!\n\n");
+	exit(1);
+  }
 
   // check codec.conf
   if(!parse_codec_cfg("etc/codecs.conf")){
@@ -189,13 +221,8 @@ double v_timer_corr=0;
 
 //  dvd_title=2;
 
-  if(argc>1)
-    stream=open_stream(argv[1],0,&file_format);
-  else
-//    stream=open_stream("/1/!ize/dinosaur.dvdrip.svcd-emb.mpg",0,&file_format);
-    stream=open_stream("/3d/abcug/Weird AL - Amish Paradise (MUSIC VIDEO).mpeg",0,&file_format);
-//    stream=open_stream("/3d/divx/405divx_sm_v2[1].avi",0,&file_format);
-//    stream=open_stream("/dev/cdrom",2,&file_format); // VCD track 2
+  filename=(num_filenames>0)?filenames[0]:NULL;
+  stream=open_stream(filename,vcd_track,&file_format);
 
   if(!stream){
 	printf("Cannot open file/device\n");
@@ -204,9 +231,9 @@ double v_timer_corr=0;
 
   printf("success: format: %d  data: 0x%X - 0x%X\n",file_format, (int)(stream->start_pos),(int)(stream->end_pos));
 
-  stream_enable_cache(stream,2048*1024);
+  if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024);
 
-  demuxer=demux_open(stream,file_format,-1,-1,-1);
+  demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
   if(!demuxer){
 	printf("Cannot open demuxer\n");
 	exit(1);
@@ -680,5 +707,7 @@ aviwrite_write_index(muxer,muxer_f);
 fseek(muxer_f,0,SEEK_SET);
 aviwrite_write_header(muxer,muxer_f); // update header
 fclose(muxer_f);
+
+if(stream) free_stream(stream); // kill cache thread
 
 }
