@@ -601,409 +601,6 @@ if(!restore){
 #endif	
 }
 
-#if 0
-static int mga_vid_set_config(mga_vid_config_t *config)
-{
-	int x, y, sw, sh, dw, dh;
-	int besleft, bestop, ifactor, ofsleft, ofstop, baseadrofs, weight, weights;
-	int frame_size=config->frame_size;
-#ifdef CRTC2
-#define right_margin 0
-#define left_margin 18
-#define hsync_len 46
-#define lower_margin 10
-#define vsync_len 4
-#define upper_margin 39
-
-	unsigned int hdispend = (config->src_width + 31) & ~31;
-	unsigned int hsyncstart = hdispend + (right_margin & ~7);
-	unsigned int hsyncend = hsyncstart + (hsync_len & ~7);
-	unsigned int htotal = hsyncend + (left_margin & ~7);
-	unsigned int vdispend = config->src_height;
-	unsigned int vsyncstart = vdispend + lower_margin;
-	unsigned int vsyncend = vsyncstart + vsync_len;
-	unsigned int vtotal = vsyncend + upper_margin;
-#endif 
-    x = config->dest.x;
-    y = config->dest.y;
-    sw = config->src.width;
-    sh = config->src.height;
-    dw = config->dest.width;
-    dh = config->dest.height;
-
-    printf("[mga] Setting up a %dx%d+%d+%d video window (src %dx%d) format %X\n",
-       dw, dh, x, y, sw, sh, config->fourcc);
-
-    if((sw < 4) || (sh < 4) || (dw < 4) || (dh < 4))
-    {
-        printf("[mga] Invalid src/dest dimenstions\n");
-        return(EINVAL);
-    }
-
-    //FIXME check that window is valid and inside desktop
-	
-    //FIXME figure out a better way to allocate memory on card
-    //allocate 2 megs
-    //mga_src_base = mga_mem_base + (MGA_VIDMEM_SIZE-2) * 0x100000;
-    //mga_src_base = (MGA_VIDMEM_SIZE-3) * 0x100000;
-
-    //Setup the BES registers for a three plane 4:2:0 video source 
-
-    regs.besglobctl = 0;
-
-switch(config->fourcc){
-    case IMGFMT_YV12:	
-    case IMGFMT_I420:	
-    case IMGFMT_IYUV:	
-	regs.besctl = 1         // BES enabled
-                    + (0<<6)    // even start polarity
-                    + (1<<10)   // x filtering enabled
-                    + (1<<11)   // y filtering enabled
-                    + (1<<16)   // chroma upsampling
-                    + (1<<17)   // 4:2:0 mode
-                    + (1<<18);  // dither enabled
-#if 0
-	if(is_g400)
-	{
-		//zoom disabled, zoom filter disabled, 420 3 plane format, proc amp
-		//disabled, rgb mode disabled 
-		regs.besglobctl = (1<<5);
-	}
-	else
-	{
-		//zoom disabled, zoom filter disabled, Cb samples in 0246, Cr
-		//in 1357, BES register update on besvcnt
-	        regs.besglobctl = 0;
-	}
-#endif
-        break;
-
-    case IMGFMT_YUY2:	
-	regs.besctl = 1         // BES enabled
-                    + (0<<6)    // even start polarity
-                    + (1<<10)   // x filtering enabled
-                    + (1<<11)   // y filtering enabled
-                    + (1<<16)   // chroma upsampling
-                    + (0<<17)   // 4:2:2 mode
-                    + (1<<18);  // dither enabled
-
-	regs.besglobctl = 0;        // YUY2 format selected
-        break;
-
-    case IMGFMT_UYVY:	
-	regs.besctl = 1         // BES enabled
-                    + (0<<6)    // even start polarity
-                    + (1<<10)   // x filtering enabled
-                    + (1<<11)   // y filtering enabled
-                    + (1<<16)   // chroma upsampling
-                    + (0<<17)   // 4:2:2 mode
-                    + (1<<18);  // dither enabled
-
-	regs.besglobctl = 1<<6;        // UYVY format selected
-        break;
-
-    default:
-	printf("[mga] Unsupported pixel format: %x\n",config->fourcc);
-	return(ENOTSUP);
-}
-
-
-	//Disable contrast and brightness control
-	regs.besglobctl |= (1<<5) + (1<<7);
-	regs.beslumactl = (0x7f << 16) + (0x80<<0);
-	regs.beslumactl = 0x80<<0;
-
-	//Setup destination window boundaries
-	besleft = x > 0 ? x : 0;
-	bestop = y > 0 ? y : 0;
-	regs.beshcoord = (besleft<<16) + (x + dw-1);
-	regs.besvcoord = (bestop<<16) + (y + dh-1);
-	
-	//Setup source dimensions
-	regs.beshsrclst  = (sw - 1) << 16;
-	regs.bespitch = (sw + 31) & ~31 ; 
-	
-	//Setup horizontal scaling
-	ifactor = ((sw-1)<<14)/(dw-1);
-	ofsleft = besleft - x;
-		
-	regs.beshiscal = ifactor<<2;
-	regs.beshsrcst = (ofsleft*ifactor)<<2;
-	regs.beshsrcend = regs.beshsrcst + (((dw - ofsleft - 1) * ifactor) << 2);
-	
-	//Setup vertical scaling
-	ifactor = ((sh-1)<<14)/(dh-1);
-	ofstop = bestop - y;
-
-	regs.besviscal = ifactor<<2;
-
-	baseadrofs = ((ofstop*regs.besviscal)>>16)*regs.bespitch;
-	//frame_size = ((sw + 31) & ~31) * sh + (((sw + 31) & ~31) * sh) / 2;
-	regs.besa1org = (uint32_t) mga_src_base + baseadrofs;
-	regs.besa2org = (uint32_t) mga_src_base + baseadrofs + 1*frame_size;
-	regs.besb1org = (uint32_t) mga_src_base + baseadrofs + 2*frame_size;
-	regs.besb2org = (uint32_t) mga_src_base + baseadrofs + 3*frame_size;
-
-if(config->format==MGA_VID_FORMAT_YV12
- ||config->format==MGA_VID_FORMAT_IYUV
- ||config->format==MGA_VID_FORMAT_I420
- ){
-        // planar YUV frames:
-	if (is_g400) 
-		baseadrofs = (((ofstop*regs.besviscal)/4)>>16)*regs.bespitch;
-	else 
-		baseadrofs = (((ofstop*regs.besviscal)/2)>>16)*regs.bespitch;
-
-    if(config->format==MGA_VID_FORMAT_YV12){
-	regs.besa1corg = (uint32_t) mga_src_base + baseadrofs + regs.bespitch * sh ;
-	regs.besa2corg = (uint32_t) mga_src_base + baseadrofs + 1*frame_size + regs.bespitch * sh;
-	regs.besb1corg = (uint32_t) mga_src_base + baseadrofs + 2*frame_size + regs.bespitch * sh;
-	regs.besb2corg = (uint32_t) mga_src_base + baseadrofs + 3*frame_size + regs.bespitch * sh;
-	regs.besa1c3org = regs.besa1corg + ((regs.bespitch * sh) / 4);
-	regs.besa2c3org = regs.besa2corg + ((regs.bespitch * sh) / 4);
-	regs.besb1c3org = regs.besb1corg + ((regs.bespitch * sh) / 4);
-	regs.besb2c3org = regs.besb2corg + ((regs.bespitch * sh) / 4);
-    } else {
-	regs.besa1c3org = (uint32_t) mga_src_base + baseadrofs + regs.bespitch * sh ;
-	regs.besa2c3org = (uint32_t) mga_src_base + baseadrofs + 1*frame_size + regs.bespitch * sh;
-	regs.besb1c3org = (uint32_t) mga_src_base + baseadrofs + 2*frame_size + regs.bespitch * sh;
-	regs.besb2c3org = (uint32_t) mga_src_base + baseadrofs + 3*frame_size + regs.bespitch * sh;
-	regs.besa1corg = regs.besa1c3org + ((regs.bespitch * sh) / 4);
-	regs.besa2corg = regs.besa2c3org + ((regs.bespitch * sh) / 4);
-	regs.besb1corg = regs.besb1c3org + ((regs.bespitch * sh) / 4);
-	regs.besb2corg = regs.besb2c3org + ((regs.bespitch * sh) / 4);
-    }
-
-}
-
-	weight = ofstop * (regs.besviscal >> 2);
-	weights = weight < 0 ? 1 : 0;
-	regs.besv2wght = regs.besv1wght = (weights << 16) + ((weight & 0x3FFF) << 2);
-	regs.besv2srclst = regs.besv1srclst = sh - 1 - (((ofstop * regs.besviscal) >> 16) & 0x03FF);
-
-#ifdef CRTC2
-	// pridat hlavni registry - tj. casovani ...
-
-
-switch(config->format){
-    case MGA_VID_FORMAT_YV12:	
-    case MGA_VID_FORMAT_I420:	
-    case MGA_VID_FORMAT_IYUV:	
-	cregs.c2ctl = 1         // CRTC2 enabled
-		    + (1<<1)	// external clock
-		    + (0<<2)	// external clock
-		    + (1<<3)	// pixel clock enable - not needed ???
-		    + (0<<4)	// high prioryty req
-		    + (1<<5)	// high prioryty req
-		    + (0<<6)	// high prioryty req
-		    + (1<<8)	// high prioryty req max
-		    + (0<<9)	// high prioryty req max
-		    + (0<<10)	// high prioryty req max
-                    + (0<<20)   // CRTC1 to DAC
-                    + (1<<21)   // 420 mode
-                    + (1<<22)   // 420 mode
-                    + (1<<23)   // 420 mode
-                    + (0<<24)   // single chroma line for 420 mode - need to be corrected
-                    + (0<<25)   /*/ interlace mode - need to be corrected*/
-                    + (0<<26)   // field legth polariry
-                    + (0<<27)   // field identification polariry
-                    + (1<<28)   // VIDRST detection mode
-                    + (0<<29)   // VIDRST detection mode
-                    + (1<<30)   // Horizontal counter preload
-                    + (1<<31)   // Vertical counter preload
-		    ;
-	cregs.c2datactl = 1         // disable dither - propably not needed, we are already in YUV mode
-		    + (1<<1)	// Y filter enable
-		    + (1<<2)	// CbCr filter enable
-		    + (0<<3)	// subpicture enable (disabled)
-		    + (0<<4)	// NTSC enable (disabled - PAL)
-		    + (0<<5)	// C2 static subpicture enable (disabled)
-		    + (0<<6)	// C2 subpicture offset division (disabled)
-		    + (0<<7)	// 422 subformat selection !
-/*		    + (0<<8)	// 15 bpp high alpha
-		    + (0<<9)	// 15 bpp high alpha
-		    + (0<<10)	// 15 bpp high alpha
-		    + (0<<11)	// 15 bpp high alpha
-		    + (0<<12)	// 15 bpp high alpha
-		    + (0<<13)	// 15 bpp high alpha
-		    + (0<<14)	// 15 bpp high alpha
-		    + (0<<15)	// 15 bpp high alpha
-		    + (0<<16)	// 15 bpp low alpha
-		    + (0<<17)	// 15 bpp low alpha
-		    + (0<<18)	// 15 bpp low alpha
-		    + (0<<19)	// 15 bpp low alpha
-		    + (0<<20)	// 15 bpp low alpha
-		    + (0<<21)	// 15 bpp low alpha
-		    + (0<<22)	// 15 bpp low alpha
-		    + (0<<23)	// 15 bpp low alpha
-		    + (0<<24)	// static subpicture key
-		    + (0<<25)	// static subpicture key
-		    + (0<<26)	// static subpicture key
-		    + (0<<27)	// static subpicture key
-		    + (0<<28)	// static subpicture key
-*/		    ;
-        break;
-
-    case MGA_VID_FORMAT_YUY2:	
-	cregs.c2ctl = 1         // CRTC2 enabled
-		    + (1<<1)	// external clock
-		    + (0<<2)	// external clock
-		    + (1<<3)	// pixel clock enable - not needed ???
-		    + (0<<4)	// high prioryty req - acc to spec
-		    + (1<<5)	// high prioryty req
-		    + (0<<6)	// high prioryty req
-				// 7 reserved
-		    + (1<<8)	// high prioryty req max
-		    + (0<<9)	// high prioryty req max
-		    + (0<<10)	// high prioryty req max
-				// 11-19 reserved
-                    + (0<<20)   // CRTC1 to DAC
-                    + (1<<21)   // 422 mode
-                    + (0<<22)   // 422 mode
-                    + (1<<23)   // 422 mode
-                    + (0<<24)   // single chroma line for 420 mode - need to be corrected
-                    + (0<<25)   /*/ interlace mode - need to be corrected*/
-                    + (0<<26)   // field legth polariry
-                    + (0<<27)   // field identification polariry
-                    + (1<<28)   // VIDRST detection mode
-                    + (0<<29)   // VIDRST detection mode
-                    + (1<<30)   // Horizontal counter preload
-                    + (1<<31)   // Vertical counter preload
-		    ;
-	cregs.c2datactl = 1         // disable dither - propably not needed, we are already in YUV mode
-		    + (1<<1)	// Y filter enable
-		    + (1<<2)	// CbCr filter enable
-		    + (0<<3)	// subpicture enable (disabled)
-		    + (0<<4)	// NTSC enable (disabled - PAL)
-		    + (0<<5)	// C2 static subpicture enable (disabled)
-		    + (0<<6)	// C2 subpicture offset division (disabled)
-		    + (0<<7)	// 422 subformat selection !
-/*		    + (0<<8)	// 15 bpp high alpha
-		    + (0<<9)	// 15 bpp high alpha
-		    + (0<<10)	// 15 bpp high alpha
-		    + (0<<11)	// 15 bpp high alpha
-		    + (0<<12)	// 15 bpp high alpha
-		    + (0<<13)	// 15 bpp high alpha
-		    + (0<<14)	// 15 bpp high alpha
-		    + (0<<15)	// 15 bpp high alpha
-		    + (0<<16)	// 15 bpp low alpha
-		    + (0<<17)	// 15 bpp low alpha
-		    + (0<<18)	// 15 bpp low alpha
-		    + (0<<19)	// 15 bpp low alpha
-		    + (0<<20)	// 15 bpp low alpha
-		    + (0<<21)	// 15 bpp low alpha
-		    + (0<<22)	// 15 bpp low alpha
-		    + (0<<23)	// 15 bpp low alpha
-		    + (0<<24)	// static subpicture key
-		    + (0<<25)	// static subpicture key
-		    + (0<<26)	// static subpicture key
-		    + (0<<27)	// static subpicture key
-		    + (0<<28)	// static subpicture key
-*/			;
-          break;
-
-    case MGA_VID_FORMAT_UYVY:	
-	cregs.c2ctl = 1         // CRTC2 enabled
-		    + (1<<1)	// external clock
-		    + (0<<2)	// external clock
-		    + (1<<3)	// pixel clock enable - not needed ???
-		    + (0<<4)	// high prioryty req
-		    + (1<<5)	// high prioryty req
-		    + (0<<6)	// high prioryty req
-		    + (1<<8)	// high prioryty req max
-		    + (0<<9)	// high prioryty req max
-		    + (0<<10)	// high prioryty req max
-                    + (0<<20)   // CRTC1 to DAC
-                    + (1<<21)   // 422 mode
-                    + (0<<22)   // 422 mode
-                    + (1<<23)   // 422 mode
-                    + (1<<24)   // single chroma line for 420 mode - need to be corrected
-                    + (1<<25)   /*/ interlace mode - need to be corrected*/
-                    + (0<<26)   // field legth polariry
-                    + (0<<27)   // field identification polariry
-                    + (1<<28)   // VIDRST detection mode
-                    + (0<<29)   // VIDRST detection mode
-                    + (1<<30)   // Horizontal counter preload
-                    + (1<<31)   // Vertical counter preload
-		    ;
-	cregs.c2datactl = 0         // enable dither - propably not needed, we are already in YUV mode
-		    + (1<<1)	// Y filter enable
-		    + (1<<2)	// CbCr filter enable
-		    + (0<<3)	// subpicture enable (disabled)
-		    + (0<<4)	// NTSC enable (disabled - PAL)
-		    + (0<<5)	// C2 static subpicture enable (disabled)
-		    + (0<<6)	// C2 subpicture offset division (disabled)
-		    + (1<<7)	// 422 subformat selection !
-/*		    + (0<<8)	// 15 bpp high alpha
-		    + (0<<9)	// 15 bpp high alpha
-		    + (0<<10)	// 15 bpp high alpha
-		    + (0<<11)	// 15 bpp high alpha
-		    + (0<<12)	// 15 bpp high alpha
-		    + (0<<13)	// 15 bpp high alpha
-		    + (0<<14)	// 15 bpp high alpha
-		    + (0<<15)	// 15 bpp high alpha
-		    + (0<<16)	// 15 bpp low alpha
-		    + (0<<17)	// 15 bpp low alpha
-		    + (0<<18)	// 15 bpp low alpha
-		    + (0<<19)	// 15 bpp low alpha
-		    + (0<<20)	// 15 bpp low alpha
-		    + (0<<21)	// 15 bpp low alpha
-		    + (0<<22)	// 15 bpp low alpha
-		    + (0<<23)	// 15 bpp low alpha
-		    + (0<<24)	// static subpicture key
-		    + (0<<25)	// static subpicture key
-		    + (0<<26)	// static subpicture key
-		    + (0<<27)	// static subpicture key
-		    + (0<<28)	// static subpicture key
-*/		    ;
-        break;
-
-    default:
-	printf("[mga] Unsupported pixel format: 0x%X\n",config->format);
-	return -1;
-    }
-
-	cregs.c2hparam=((hdispend - 8) << 16) | (htotal - 8);
-	cregs.c2hsync=((hsyncend - 8) << 16) | (hsyncstart - 8);
-	
-	cregs.c2misc=0	// CRTCV2 656 togg f0
-		    +(0<<1) // CRTCV2 656 togg f0
-		    +(0<<2) // CRTCV2 656 togg f0
-		    +(0<<4) // CRTCV2 656 togg f1
-		    +(0<<5) // CRTCV2 656 togg f1
-		    +(0<<6) // CRTCV2 656 togg f1
-		    +(0<<8) // Hsync active high
-		    +(0<<9) // Vsync active high
-		    // 16-27 c2vlinecomp - nevim co tam dat
-		    ;
-	cregs.c2offset=(regs.bespitch << 1);
-
-	cregs.c2pl2startadd0=regs.besa1corg;
-//	cregs.c2pl2startadd1=regs.besa2corg;
-	cregs.c2pl3startadd0=regs.besa1c3org;
-//	cregs.c2pl3startadd1=regs.besa2c3org;
-		    
-	cregs.c2preload=(vsyncstart << 16) | (hsyncstart); // from 
-	
-	cregs.c2spicstartadd0=0; // not used
-//	cregs.c2spicstartadd1=0; // not used
-	
-	cregs.c2startadd0=regs.besa1org;
-//	cregs.c2startadd1=regs.besa2org;
-	
-	cregs.c2subpiclut=0; //not used
-	
-	cregs.c2vparam=((vdispend - 1) << 16) | (vtotal - 1);
-	cregs.c2vsync=((vsyncend - 1) << 16) | (vsyncstart - 1);
-
-	
-#endif
-
-	mga_vid_write_regs(0);
-	return 0;
-}
-#endif
-
 #ifdef MGA_ALLOW_IRQ
 
 static void enable_irq(){
@@ -1155,6 +752,8 @@ int vixConfigPlayback(vidix_playback_t *config)
 	config->num_frames = 2;
 //        return(EINVAL);
     }
+    
+    config->num_frames = 2; /* let it be for now */
 
     x = config->dest.x;
     y = config->dest.y;
@@ -1199,6 +798,9 @@ int vixConfigPlayback(vidix_playback_t *config)
 
     frame_size = config->frame_size;
     
+    config->offsets[0] = 0;
+    config->offsets[1] = config->frame_size; /* ?? */
+    
     config->offset.y=0;
     config->offset.v=((sw + 31) & ~31) * sh;
     config->offset.u=config->offset.v+((sw + 31) & ~31) * sh /4;
@@ -1213,6 +815,10 @@ int vixConfigPlayback(vidix_playback_t *config)
     printf("[mga] YUV buffer base: %p\n", mga_src_base);
 
     config->dga_addr = mga_mem_base + mga_src_base;
+
+//    config->offset.y = config->dga_addr;
+//    config->offset.u = config->offset.y+config->frame_size;
+//    config->offset.v = config->offset.u+2*config->frame_size;
 	
     if (is_g400) 
       mga_config.card_type = MGA_G400;
@@ -1730,7 +1336,7 @@ int vixInit(void)
 /* from linux/pci.h */
 #define PCI_DEVFN(slot, func) ((((slot) & 0x1f) << 3) | ((func) & 0x07))
 
-    pciconfig_read(pci_info.bus, PCI_DEVFN(pci_info.card, pci_info.func),
+    pci_config_read(pci_info.bus, PCI_DEVFN(pci_info.card, pci_info.func),
         0x40, 4, &card_option);
 //    pci_read_config_dword(dev,  0x40, &card_option);
     printf("[mga] OPTION word: 0x%08X  mem: 0x%02X  %s\n", card_option,
