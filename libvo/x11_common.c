@@ -667,7 +667,8 @@ void vo_x11_setlayer( int layer )
    e.xclient.window=vo_window;
    e.xclient.format=32;
    e.xclient.data.l[0]=layer;
-   e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
+//   e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
+   e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False );
    XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,&e );
 								   
    XFree( args );
@@ -723,7 +724,8 @@ void vo_x11_fullscreen( void )
  vo_x11_sizehint( x,y,w,h,0 );
  vo_x11_setlayer( vo_fs );
  if(vo_wm_type==vo_wm_Unknown && !(vo_fsmode&16))
-     XUnmapWindow( mDisplay,vo_window );  // required for MWM
+//     XUnmapWindow( mDisplay,vo_window );  // required for MWM
+    XWithdrawWindow(mDisplay,vo_window,mScreen);
  XMoveResizeWindow( mDisplay,vo_window,x,y,w,h );
 #ifdef HAVE_XINERAMA
  vo_x11_xinerama_move(mDisplay,vo_window);
