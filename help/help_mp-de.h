@@ -31,7 +31,7 @@ static char help_text[]=
 " -fs -vm -zoom    Vollbildoptionen (Vollbild, Videomodus, Softwareskalierung)\n"
 " -x <x> -y <y>    Setze Bildschirmauflösung (für Vidmode-Wechsel oder SW-Skalierung)\n"
 " -sub <datei>     Benutze Untertitel-Datei (siehe auch -subfps, -subdelay)\n"
-" -playlist <datei> Benutze Playlist-Datei\n"
+" -playlist <datei> Lese Abspielliste aus Datei\n"
 " -vid x -aid y    Spiele Videostream (x) und Audiostream (y)\n"
 " -fps x -srate y  Benutze Videoframerate (x fps) und Audiosamplingrate (y Hz)\n"
 " -pp <Qualität>   Aktiviere Nachbearbeitungsfilter (siehe Manpage für Details)\n"
@@ -41,7 +41,7 @@ static char help_text[]=
 " <- oder ->       Springe zehn Sekunden vor/zurück\n"
 " Cursor hoch/runter Springe eine Minute vor/zurück\n"
 " Bild hoch/runter Springe 10 Minuten vor/zurück\n"
-" < oder >         Springe in der Playlist vor/zurück\n"
+" < oder >         Springe in der Abspieliste vor/zurück\n"
 " p oder LEER      Pause (beliebige Taste zum Fortsetzen)\n"
 " q oder ESC       Abspielen stoppen und Programm beenden\n"
 " + oder -         Audioverzögerung um +/- 0.1 Sekunde verändern\n"
@@ -137,7 +137,7 @@ static char help_text[]=
 #define MSGTR_Video_NoVideo "Video: kein Video\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Konnte Videofilter (-vop) oder Videoausgabetreiber (-vo) nicht initialisieren.\n"
 #define MSGTR_Paused "\n------ PAUSE -------\r"
-#define MSGTR_PlaylistLoadUnable "\nKann Playlist %s nicht laden.\n"
+#define MSGTR_PlaylistLoadUnable "\nKann Abspielliste %s nicht laden.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer stürzte wegen einer 'illegalen Anweisung' ab.\n"\
 "  Es kann sich um einen Fehler im neuen Code für die CPU-Erkennung zur\n"\
@@ -373,7 +373,7 @@ static char help_text[]=
 #define MSGTR_OtherSelect "Wähle ..."
 #define MSGTR_AudioFileSelect "Wähle externen Audiokanal ..."
 #define MSGTR_FontSelect "Wähle Schrift ..."
-#define MSGTR_PlayList "Playlist"
+#define MSGTR_PlayList "Abspielliste"
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Skin-Browser"
 #define MSGTR_Network "Netzwerk-Streaming ..."
@@ -458,7 +458,7 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Kapitel %2d"
 #define MSGTR_MENU_AudioLanguages "Audio-Sprachen"
 #define MSGTR_MENU_SubtitleLanguages "Untertitel-Sprachen"
-#define MSGTR_MENU_PlayList "Playlist"
+#define MSGTR_MENU_PlayList "Abspielliste"
 #define MSGTR_MENU_SkinBrowser "Skinbrowser"
 #define MSGTR_MENU_Preferences "Einstellungen"
 #define MSGTR_MENU_Exit "Beenden ..."
@@ -483,6 +483,12 @@ static char help_text[]=
 #define MSGTR_EQU_Center "Mitte"
 #define MSGTR_EQU_Bass "Tiefton" // LFE
 #define MSGTR_EQU_All "Alle"
+#define MSGTR_EQU_Channel1 "Kanal 1:"
+#define MSGTR_EQU_Channel2 "Kanal 2:"
+#define MSGTR_EQU_Channel3 "Kanal 3:"
+#define MSGTR_EQU_Channel4 "Kanal 4:"
+#define MSGTR_EQU_Channel5 "Kanal 5:"
+#define MSGTR_EQU_Channel6 "Kanal 6:"
 
 // --- playlist
 #define MSGTR_PLAYLIST_Path "Pfad"
@@ -495,6 +501,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_SubtitleOSD "Untertitel & OSD"
 #define MSGTR_PREFERENCES_Misc "Sonstiges"
+#define MSGTR_PREFERENCES_Codecs "Codecs & Demuxer"
 
 #define MSGTR_PREFERENCES_None "Nichts"
 #define MSGTR_PREFERENCES_AvailableDrivers "Verfügbare Treiber:"
@@ -523,7 +530,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_SRT "Konvertiere Untertitel in's zeitbasierende SubViewer-Untertitelformat (SRT)"
 #define MSGTR_PREFERENCES_SUB_Overlap "Schalte Untertitelüberlappung ein/aus"
 #define MSGTR_PREFERENCES_Font "Schrift:"
-#define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_FontFactor "Schriftfaktor:"
 #define MSGTR_PREFERENCES_PostProcess "Nachbearbeitung aktivieren:"
 #define MSGTR_PREFERENCES_AutoQuality "Auto-Qualität: "
@@ -576,14 +582,21 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontTextScale "Textskalierung:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSD-Skalierung:"
 #define MSGTR_PREFERENCES_Cache "Cache ein/aus"
-#define MSGTR_PREFERENCES_LoadFullscreen "im Vollbildmodus starten"
 #define MSGTR_PREFERENCES_CacheSize "Cachegröße: "
+#define MSGTR_PREFERENCES_LoadFullscreen "im Vollbildmodus starten"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Deaktiviere XScreenSaver"
 #define MSGTR_PREFERENCES_PlayBar "Aktiviere die Playbar"
 #define MSGTR_PREFERENCES_AutoSync "AutoSync ein/aus"
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosyncwert: "
 #define MSGTR_PREFERENCES_CDROMDevice "CD-ROM-Gerät:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD-Gerät:"
+#define MSGTR_PREFERENCES_FPS "FPS des Films:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Zeige Videofenster an, wenn inaktiv"
+
+#define MSGTR_ABOUT_UHU "GUI-Entwicklugn wurde von UHU Linux gesponsort.\n"
+#define MSGTR_ABOUT_CoreTeam "   MPlayer-Kernteam:\n"
+#define MSGTR_ABOUT_AdditionalCoders " Weitere Programmierer:\n"
+#define MSGTR_ABOUT_MainTesters "     Haupttester:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fataler Fehler ..."
