@@ -409,7 +409,6 @@ case AFM_VORBIS: {
     }
   }
   mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Pageout: successfull.\n");
-  /* commenting out pagein to leave data (hopefully) to the decoder - atmos */
   ogg_stream_pagein(&sh_audio->ov->os,&sh_audio->ov->og); /* we can ignore any errors here
   					 as they'll also become apparent
   					 at packetout */
@@ -666,6 +665,13 @@ void resync_audio_stream(sh_audio_t *sh_audio){
           MP3_DecodeFrame(NULL,-2); // resync
           MP3_DecodeFrame(NULL,-2); // resync
           break;
+#ifdef HAVE_OGGVORBIS
+        case AFM_VORBIS:
+          //printf("OggVorbis: resetting stream.\n");
+          ogg_sync_reset(&sh_audio->ov->oy);
+          ogg_stream_reset(&sh_audio->ov->os);
+          break;
+#endif
         case AFM_AC3:
           ac3_bitstream_reset();    // reset AC3 bitstream buffer
     //      if(verbose){ printf("Resyncing AC3 audio...");fflush(stdout);}
