@@ -71,6 +71,7 @@ extern int vo_rootwin;
 extern int vo_ontop;
 extern int vo_fs; // user want fullscreen
 static int vo_quartz_fs; // we are in fullscreen
+extern float monitor_aspect;
 
 static int winLevel = 1;
 int levelList[] =
@@ -502,6 +503,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	device_width = deviceRect.right-deviceRect.left;
 	device_height = deviceRect.bottom-deviceRect.top;
 	
+	monitor_aspect = (float)device_width/(float)device_height;
+
 	//misc mplayer setup/////////////////////////////////////////////////////
 	SetRect(&imgRect, 0, 0, width, height);
 	switch (image_format) 
