@@ -2,40 +2,40 @@
 CDROM tuning
 ~~~~~~~~~~~~
 
-Bevezeto
+Bevezetõ
 ~~~~~~~~
->A Linux dokumentaciojabol:
+>A Linux dokumentációjából:
 
-Nehany CDROM meghajto kepes szabalyozni az olvasas sebesseget. Jonehany okunk
-lehet arra hogy ezt kihasznaljuk. Peldaul rosszul keszitett CDROMoknak elonyere
-valik a lassabb fejmozgas. A mai meghajtok nagyon magas fordulatszamon
-porognek, es ilyen nagy sebessegnel bizony elofordulnak olvasasi hibak, amik
-a sebesseg csokkentesevel kikuszobolhetok. Nem elhanyagolhato a sebesseggel
-aranyos zajszint se.
+Néhány CDROM meghajtó képes szabályozni az olvasás sebességét. Jónéhány okunk
+lehet arra, hogy ezt kihasználjuk. Például rosszul készített CDROM-oknak elõnyére
+válik a lassabb fejmozgás. A mai meghajtók nagyon magas fordulatszámon
+pörögnek, és ilyen nagy sebességnél bizony elõfordulnak olvasási hibák, amik
+a sebesseg csökkentésével kiküszöbölhetõk. Nem elhanyagolható a sebességgel
+arányos zajszint sem.
 
 Hogyan
 ~~~~~~
-Ajanlott a 'setcd' nevu programot hasznalni. Eleg regi, de konnyen fellelheto
+Ajánlott a 'setcd' nevû programot használni. Elég régi, de könnyen fellelhetõ
 a Neten.
-Hasznalata :
-	setcd -x <sebesseg> <meghajto>
+Használata :
+	setcd -x <sebesség> <meghajtó>
 
-Masik modszer :
-	echo current_speed:4 >/proc/ide/<meghajto>/settings
-de ehhez rendszergazdai jogosultsag szukseges.
+Másik módszer :
+	echo current_speed:4 >/proc/ide/<meghajtó>/settings
+de ehhez rendszergazdai jogosultság szükséges.
 
-A kovetkezo parancsot is hasznalom :
-	echo file_readahead:2000000 >/proc/ide/<meghajto>/settings
-Ez 2Mb-ot olvas elore olvasaskor (karcos CDROMoknal hasznos).
+A következõ parancsot is használom :
+	echo file_readahead:2000000 >/proc/ide/<meghajtó>/settings
+Ez 2Mb-ot olvas elõre olvasáskor (karcos CDROM-oknál hasznos).
 
-Ajanlott tovabba a 'hdparm' program hasznalata :
-	hdparm -d1 -a8 -u1 <meghajto>
-Ez bekapcsolja a DMA hozzaferest, eloreolvasast, IRQ unmaskingot.
-(ha ezeket nem erted, *olvasd el a hdparm man-jat*)
+Ajánlott továbbá a 'hdparm' program használata :
+	hdparm -d1 -a8 -u1 <meghajtó>
+Ez bekapcsolja a DMA hozzáférést, elõreolvasást, IRQ unmaskingot.
+(ha ezeket nem érted, *olvasd el a hdparm man-ját*)
 
-Vegszo
+Végszó
 ~~~~~~
-Kiserletezz a /proc/ide/<meghajto>/settings file-al tovabbi tuning celjabol.
+Kísérletezz a /proc/ide/<meghajtó>/settings file-lal további tuning céljából.
 
 	Nick Kurshev & Gabucino
 	  <nickols_k@mail.ru>

@@ -1,31 +1,31 @@
-Q: Lenne nehany gondom ami nincs benne ebben a file-ban...
+Q: Lenne néhány gondom, ami nincs benne ebben a file-ban...
 A: Olvasd el a 'DVD' file-t is.
 
-Q: Hogy tudok DVD-ket nezni az MPlayer-rel?
-A: Ehh. Olvasd vegig ezt a file-t, es a 'DVD'-t is. (installalj libcss-t)
+Q: Hogy tudok DVD-ket nézni az MPlayer-rel?
+A: Ehh. Olvasd végig ezt a file-t, és a 'DVD'-t is. (installálj libcss-t)
 
-Q: Szoval az MPlayer tud DVD lejatszast? Akkor biztos DeCSS-t hasznal!
-   Bunosek vagytok a kovetkezo vadpontokban : XYZ#$--
-A: Anyad. Nincs DeCSS kod az MPlayer-ben. libcss-hez linkeli magat.
+Q: Szóval az MPlayer tud DVD lejátszást? Akkor biztos DeCSS-t használ!
+   Bûnösek vagytok a következõ vádpontokban : XYZ#$--
+A: Anyád. Nincs DeCSS kód az MPlayer-ben. libcss-hez linkeli magát.
 
-Q: Mukodni latszik, de nincs hang.
-A: Hasznald az '-aid 128' opciot (128,129,...)
+Q: Mûködni látszik, de nincs hang.
+A: Használd az '-aid 128' opciót (128,129,...)
 
 Q: Spanyol hang van angol helyett (vagy ilyesmi) !
-A: Lasd az utolso kerdest/valaszt.
+A: Lásd az elõzõ kérdést/választ.
 
-Q: MPlayer valami FIBMAP-rol zagyval.
-A: Futtasd root-kent.
+Q: MPlayer valami FIBMAP-ról zagyvál.
+A: Futtasd root-ként.
 
-Q: Furcsa effekt (interlace-szeru valami) kulonosen gyors jeleneteknel
-A: Ismert problema, majd megoldjuk
+Q: Furcsa effekt (interlace-szerû valami), különösen gyors jeleneteknél.
+A: Ismert probléma, majd megoldjuk.
 
-Q: A DVD tamogatas MPlayer-ben loszar!
-A: Igazad van :) Ha tudsz rajta javitani lepj velunk kapcsolatba!
+Q: A DVD támogatás MPlayer-ben lószar!
+A: Igazad van :) Ha tudsz rajta javítani, lépj velünk kapcsolatba!
 
-Q: Honnan tudom letolteni a libcss-t?
-A: Talan az OMS forrasabol (www.livid.org).
+Q: Honnan tudom letölteni a libcss-t?
+A: Talán az OMS forrásából (www.livid.org).
 
-Q: Hogy lehet ... (kepzeld ide azt ami leginkabb kellene neked DVD-hez)
-A: Jelenleg csak lejatszani lehet DVD-rol. Semmi tobb.
+Q: Hogy lehet... (képzeld ide azt, ami leginkább kellene neked DVD-hez)
+A: Jelenleg csak lejátszani lehet DVD-rõl. Semmi több.
 

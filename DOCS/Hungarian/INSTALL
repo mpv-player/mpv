@@ -1,17 +1,17 @@
     =======================================================================
-     *     HOGYAN FORDITSD LE AZ MPLAYER-T * (C) 2000. A'rpi/ESP-team    *
+     *     HOGYAN FORDÍTSD LE AZ MPLAYER-T * (C) 2000. A'rpi/ESP-team    *
     =======================================================================
 
-Pontscho/Fresh! csinalt nehany scriptet es makefile-t, igy a forditas
-nagyon konnyu.
+Pontscho/Fresh! csinált néhány scriptet és makefile-t, így a fordítás
+nagyon könnyû.
 
-1. A Lejatszo: (mplayer)
+1. A Lejátszó: (mplayer)
 ~~~~~~~~~~~~~~
   ./configure
-[* nezd at a config.h es config.mak file-okat! *]
+[* nézd át a config.h és config.mak file-okat! *]
   make
   make install
-[* ha DGA-t akarsz hasznalni olvasd el a VIDEOCARDS file-t! *]
+[* ha DGA-t akarsz használni, olvasd el a VIDEOCARDS file-t! *]
 
 2. Driverek: (mga_vid.o)
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -27,7 +27,7 @@ nagyon konnyu.
 
 4. Fontok:
 ~~~~~~~~~
-  Toltsd le a neked tetszo .zip file-t
+  Töltsd le a neked tetszõ .zip file-t honlapunkról!
   cd ~/.mplayer
   mkdir font
   cd font

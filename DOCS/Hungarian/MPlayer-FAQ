@@ -1,232 +1,227 @@
 Igen, ez lenne az MPlayer-FAQ.
 ==============================
 
-Bevezeto:
+Bevezetõ:
 ~~~~~~~~~
-Sokan kerdeztek ugyanazokat a kerdeseket, ugyhogy megirtam ezt az izet.
-Tudom hogy soha senki nem fogja elolvasni, de legalabb megprobaltam
-lejjebb szoritani az emlitett levelek szamat.
-Raadasul mostmar mondhatom hogy "olvasd el a kibaszott FAQ-t!" :-)
+Sokan tették fel ugyanazokat a kérdéseket, úgyhogy megírtam ezt az izét.
+Tudom, hogy soha senki nem fogja elolvasni, de legalább megpróbáltam
+lejjebb szorítani az említett levelek számát.
+Ráadásul most már mondhatom, hogy "olvasd el a kibaszott FAQ-t!" :-)
 
-Lassuk!
+Lássuk!
 ~~~~~~~
-Q: Es mi lesz a DVD lejatszassal?
-A: Olvasd el a 'DVD' es 'DVD-FAQ' file-okat.
+Q: És mi lesz a DVD lejátszással?
+A: Olvasd el a 'DVD' és 'DVD-FAQ' file-okat.
 
-Q: Az SDL kimenet nem mukodik/fordul. A baj ....
-A: A legujabb SDL-lel tesztelunk (valoszinuleg fut 1.1.7-en vagy ujabb
-   verziokon is). NEM FUT 1.1.6, 1.1.5, 1.1.4, 1.1.3, 1.0.4-en stb, ne is
-   kerdezd.
+Q: Az SDL output nem mûködik/fordul. A baj ....
+A: A legújabb SDL-lel tesztelünk (valószínûleg fut 1.1.7-en vagy újabb
+   verziókon is). NEM FUT 1.1.6, 1.1.5, 1.1.4, 1.1.3, 1.0.4-en stb, ne is
+   kérdezd.
 
-Q: Meg mindig van valami bajom az SDL tamogatassal. gcc gagyog valami
-   "undefined reference to `SDL_EnableKeyRepet'"-rol. Most mivan?
-A: Hova installaltad az SDL-t? Ha /usr/local-ba (alapbeallitas) akkor
-   szerkeszd at a config.mak file-t es ird az "X_LIBS=" utan, hogy
-   "-L/usr/local/lib ". Most ird be hogy 'make'. Ennyi!
+Q: Még mindig van valami bajom az SDL támogatással. gcc gagyog valami
+   "undefined reference to `SDL_EnableKeyRepet'"-rõl. Most mi van?
+A: Hova installáltad az SDL-t? Ha /usr/local-ba (alapbeállítás), akkor
+   szerkesztd át a config.mak file-t, és írd az "X_LIBS=" után, hogy
+   "-L/usr/local/lib ". Most írd be, hogy 'make'. Ennyi!
 
-Q: Van ... problemam az SDL driverrel.
-A: Kiserleti es hibas kod, ezenkivul NEM TAMOGATOTT altalunk.
-   Ne irjatok bugokrol, vagy kerjetek valamit az SDL-hez.
-   Ha javitani tudod, kuldj patch-eket!
+Q: Nem fordul, hiányol valami uint64_t inttypes.h és hasonló dolgokat...
+A: Másold a DOCS/inttypes.h-t az MPlayer könyvtárába (cp DOCS/inttypes.h .)
+   Próbáld újra... ha nem megy, írj!
 
-Q: Nem fordul, hianyol valami uint64_t inttypes.h es hasonlo dolgokat...
-A: Masold a DOCS/inttypes.h-t az MPlayer konyvtaraba (cp DOCS/inttypes.h .)
-   Probald ujra... ha nem megy, irj.
+Q: Pentium III-am van, de a ./configure nem veszi észre az SSE-t.
+A: Csak a 2.4.x kernelek támogatják az SSE-t (vagy próbáld ki a 2.2.19-et,
+   vagy újabbat, viszont elképzelhetõ, hogy gondok lesznek)
 
-Q: Pentium III-am van, de a ./configure nem veszi eszre az SSE-t.
-A: Csak a 2.4.x kernelek tamogatjak az SSE-t (vagy probald ki a 2.2.19-et,
-   vagy ujabbat, viszont elkepzelheto hogy gondok lesznek)
+Q: Az -xy opció nem mûkodik az x11 outputtal (-vo x11)
+A: Az x11 output nem támogatja a scalinget, de már van hozzá XF86VidMode
+   támogatás: használd a -vm és a -fs opciókat, és már meg is vagy!
+   Bizonyosodj meg róla, hogy a megfelelõ Modeline-ok benne vannak az
+   XF86Config file-ban, és próbáld ki, hátha a DGA driver (és az SDL
+   DGA drivere, lásd VIDEOCARDS) mûködik nálad. Sokkal gyorsabb. Ha
+   az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!
 
-Q: Az -xy opcio nem mukodik az x11 kimenettel (-vo x11)
-A: Az x11 kimenet nem tamogatja a scaling-et, de mar van hozza XF86VidMode
-   tamogatas: hasznald a -vm es az -fs opciokat, es mar meg is vagy.
-   Bizonyosodj meg rola hogy a megfelelo Modeline-k benne vannak az
-   XF86Config file-ban, es probald ki hatha a DGA driver (es az SDL
-   DGA drivere, lasd VIDEOCARDS) mukodik nalad. Sokkal gyorsabb. Ha
-   az SDL DGA-ja is mukodik, hasznald azt, az MEG gyorsabb!
+Q: A hang nincs szinkronban egy .avi file lejátszásakor
+A: Probáld a -bps vagy -nobps opciókat.
+   Ha még mindig nem megy, küldd el nekem (FTP-re) a file-t, megnézem!
 
-Q: A hang nincs szinkronban egy .avi file lejatszasakor
-A: Probald a -bps vagy -nobps opciokat.
-   Ha meg mindig nem megy, kuldd el nekem (FTP-re) a file-t, megnezem.
-
-Q: Mit jelentenek azok a szamok a status sorban?
-A: see:
+Q: Mit jelentenek azok a számok a status sorban?
+A: lássuk:
      A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0
-   - A: audio pozicio masodpercben
-   - V: video pozicio masodpercben
-   - A-V: audio-video elteres masodpercben (keses)
-   - ct: eddigi A-V javitasok szama
-   - eddig lejatszott kepkockak (legutobbi tekeres ota)
-   - video codec cpu hasznalat szazalekban (mpeg-nel a videokimenet is
+   - A: audio pozíció másodpercben
+   - V: video pozíció másodpercben
+   - A-V: audio-video eltérés másodpercben (késés)
+   - ct: eddigi A-V javítások száma
+   - eddig lejátszott képkockák (legutóbbi seek óta)
+   - video codec cpu használat százalékban (mpeg-nél a video output is
      benne van!)
-   - video kimenet cpu hasznalat AVI-nal, MPEG-nel 0 (lasd fent)
-   - audio codec cpu hasznalat szazalekban
-   - kihagyott hibas kepkockak (MPEG-nel)
-   Legtobbjuk hibakeresesi celokat szolgal, es hamarosan megszunik.
+   - video output cpu használat AVI-nál, MPEG-nél 0 (lásd fent)
+   - audio codec cpu használat százalékban
+   - kihagyott hibás képkockák (MPEG-nél)
+   Legtöbbjük hibakeresési célokat szolgál, és hamarosan megszûnik.
 
-Q: A video kimenet CPU hasznalata miert 0% MPEG file-oknal?
-A: Nem nulla, de bele van epitve a codec-be, igy nem merheto kulon. Probald
-   ki hogy -vo null jatszod le a file-t, es nezed a ketto kulonbseget...
+Q: A video output CPU használata miért 0% MPEG file-oknál?
+A: Nem nulla, de bele van építve a codecbe, így nem mérhetõ külön. Próbáld
+   ki, hogy -vo null játszod le a file-t, és nézed a kettõ különbségét...
 
-Q: Az OpenGL (-vo gl) kimenet nem mukodik.
-A: Az OpenGL drivered nem tamogatja a dinamikus texturavaltast
+Q: Az OpenGL (-vo gl) output nem mûködik.
+A: Az OpenGL drivered nem támogatja a dinamikus textúraváltást
    (glTexSubImage).
-   Ismert, hogy nem mukodik 4.0.x DRI-vel, es az nVidia binaris szarjaival.
-   Ismert, hogy mukodik Utah-GLX es Matrox G400-zal.
-   Nem fog mukodni 3dfx kartyakkal, mivel ezeknek maximum 256x256-os
-   texturaik lehetnek.
+   Ismert, hogy nem mûködik 4.0.x DRI-vel, és az nVidia bináris szarjaival.
+   Ismert, hogy mûködik Utah-GLX és Matrox G400-zal.
+   Nem fog mûködni 3dfx kártyákkal, mivel ezeknek maximum 256x256-os
+   textúráik lehetnek.
 
-Q: G200/G400-am van, hogy forditsam/hasznaljam az mga_vid drivert?
+Q: G200/G400-am van, hogy fordítsam/használjam az mga_vid drivert?
 A: Olvasd el a VIDEOCARDS, INSTALL, README file-okat.
 
-Q: Mi az az XMMP? (nem lehet hogy XMMS vagy XMPS csak rosszul irva?)
-A: Uj project, lasd http://frozenproductions.com .
+Q: Mi az az XMMP? (nem lehet hogy XMMS vagy XMPS csak rosszul írva?)
+A: Új project, lásd http://frozenproductions.com .
 
-Q: Valami hibauzenet van hogy nem talalja a /usr/lib/win32/... file-t.
-A: A *mi* FTP-nkrol toltsd le a w32codec.zip csomagot.
-   (az avifile csomagja kulonbozik)
+Q: Valami hibaüzenet van, hogy nem találja a /usr/lib/win32/... file-t.
+A: A *mi* FTP-nkrõl töltsd le a w32codec.zip csomagot.
+   (az avifile csomagja különbözik)
 
-Q: ...... mukodik avifile/aviplay-jel, de nem az MPlayer-rel!
+Q: ...... mûködik avifile/aviplay-jel, de nem az MPlayer-rel!
 A: MPlayer != avifile
-   Az egyetlen kozos dolog a kettoben az a Win32 DLL loader. A codec
-   csomag, szinkronizacio, demultiplexeles, stb teljesen kulonbozik, es
-   nem osszehasonlithato.
-   Ha valami mukodik aviplay-jel az nem jelenti azt hogy MPlayer-rel is
-   kellene, es forditva. Irj nekem, kijavitom a hibat!
+   Az egyetlen közös dolog a kettõben az a Win32 DLL loader. A codec
+   csomag, szinkronizáció, demultiplexelés, stb. teljesen különbözik és
+   nem összehasonlítható.
+   Ha valami mûködik aviplay-jel az nem jelenti azt, hogy MPlayer-rel is
+   kellene, és fordítva. Írj nekem, kijavítom a hibát!
 
 Q: Indeo 3.x/4.x filmek fejjel lefele vannak!!!?
-A: Ismert hiba (tulajdonkepp a codec hibaja/korlatja)
+A: Ismert hiba (tulajdonképp a codec hibája/korlátja)
 
-Q: Indeo 3.x/4.x filmek nem mukodnek 32bpp felbontasokban (16,24bpp rendben)
-A: Ismert hiba (tulajdonkepp a codec hibaja/korlatja)
+Q: Indeo 3.x/4.x filmek nem mûködnek 32bpp felbontásokban (16,24bpp rendben)
+A: Ismert hiba (tulajdonképp a codec hibája/korlátja)
 
-Q: Azt irja ki hogy 'MPlayer interrupted by signal 11'
-A: Igen valoszinutlen, miota ujrairtuk az mp3lib-et. Irj nekunk, egy bug
-   lehet. Valoszinuleg hibas a file, probald az '-afm 4' opciot.
+Q: Azt írja ki, hogy 'MPlayer interrupted by signal 11'
+A: Igen valószínûtlen, mióta újraírtuk az mp3lib-et. Írj nekünk, egy bug
+   lehet. Valószínûleg hibás a file, próbáld a '-afm 4' opciót.
 
-Q: Vannak rpm/deb/... csomagok az MPlayer-bol?
-A: Csinalhatsz magadnak .deb csomagot, lasd DOCS/DEBIAN .
-   _ROPPANTUL_ ellene vagyunk az eloreforditott MPlayer csomagok
-   hasznalatanak, mivel (jelenleg) _erosen_ fugg a forditaskor
-   hasznalt opcioktol es optimalizacioktol!
-   Eloreforditott csomagokhoz az MPlayer team SEMMILYEN tamogatast nem nyujt!
+Q: Vannak rpm/deb/... csomagok az MPlayer-bõl?
+A: Csinálhatsz magadnak .deb csomagot, lásd DOCS/DEBIAN .
+   _ROPPANTUL_ ellene vagyunk az elõrefordított MPlayer csomagok
+   használatának, mivel (jelenleg) _erõsen_ függ a fordításkor
+   használt opcióktól és optimalizációktól!
+   Elõrefordított csomagokhoz az MPlayer team SEMMILYEN támogatást nem nyújt!
 
-Q: Vannak MPlayer levelezesi listak?
-A: Igen! Lasd README a feliratkozashoz!
+Q: Vannak MPlayer levelezési listák?
+A: Igen! Lásd README a feliratkozáshoz!
 
-Q: Talaltam egy durva hibat amikor a kedvenc filmemet neztem!!
-   Kinek irjak?
-A: Lasd a BUGREPORTS file-t.
+Q: Találtam egy durva hibát, amikor a kedvenc filmemet néztem!!
+   Kinek írjak?
+A: Lásd a BUGREPORTS file-t.
 
-Q: 'make' kozben MPlayer az X11 file-jaira panaszkodik. Nem ertem miert,
-   hiszen nalam fent van az X !?
-A: ...igen, de nincs fent az X fejlesztoi csomag. Vagy nem helyesen.
-   RedHat alatt XFree86-devel* a neve, Debian alatt xlib6g-dev . Nezd meg,
-   hogy az /usr/X11 symlink letezik-e (Mandrake rendszereken lehet problema).
-   Letrehozasa a kovetkezo paranccsal tortenik:
+Q: 'make' közben MPlayer az X11 file-jaira panaszkodik. Nem értem miért,
+   hiszen nálam fent van az X !?
+A: ...igen, de nincs fent az X fejlesztõi csomag. Vagy nem helyesen.
+   RedHat alatt XFree86-devel* a neve, Debian alatt xlib6g-dev . Nézd meg,
+   hogy az /usr/X11 symlink létezik-e (Mandrake rendszereken lehet probléma).
+   Létrehozása a következõ paranccsal történik:
 	$ ln -sf /usr/X11R6 /usr/X11
-   Nezd meg, hogy megvan-e az /usr/include/X11 link :
+   Nézd meg, hogy megvan-e az /usr/include/X11 link :
 	$ ln -sf /usr/X11R6/include/X11 /usr/include/X11
-   Elkepzelheto hogy a disztribuciod elter a Linux Filesystem Standard-tol.
+   Elképzelhetõ, hogy a disztribúciód eltér a Linux Filesystem Standard-tõl.
 
-Q: Problemaim vannak a(z) ... codec-kel. Hasznalhatom?
-A: Nezd meg itt: http://mplayer.sourceforge.net/DOCS/codecs.html ,
-   es ha nincs benne a te codec-ed, olvasd el a
-   http://mplayer.sourceforge.net/DOCS/CODECS file-t, es irj nekunk.
+Q: Problémáim vannak a(z) ... codeckel. Használhatom?
+A: Nézd meg itt: http://mplayer.sourceforge.net/DOCS/codecs.html ,
+   és ha nincs benne a te codeced, olvasd el a
+   http://mplayer.sourceforge.net/DOCS/CODECS file-t, és írj nekünk!
 
-Q: Es mi lesz a DGA driverrel? Nem talalom!!!
-A: ./configure automatikusan detektalja hogy van-e DGA-d. Ha a '-vo help'
-   opcio nem mutat DGA-t, akkor nincs jol felinstallalva az X-ed.
-   Probald igy: ./configure --enable-dga (es olvasd el a VIDEOCARDS file-t)
-   Esetleg probald az SDL DGA driveret, a '-vo sdl -sdl dga' opciokkal.
+Q: És mi lesz a DGA driverrel? Nem találom!!!
+A: ./configure automatikusan detektálja hogy van-e DGA-d. Ha a '-vo help'
+   opció nem mutat DGA-t, akkor nincs jól felinstallálva az X-ed.
+   Próbáld így: ./configure --enable-dga (és olvasd el a VIDEOCARDS file-t)
+   Esetleg próbáld az SDL DGA driverét, a '-vo sdl -sdl dga' opciókkal!
 
-Q: Oke, -vo help mutatja a DGA drivert, de valami "permissions"-rol beszel!
-   Segits!
-A: Csak akkor mukodik ha root jogaid vannak! Ez egy DGA korlatozas.
-   Legyel root (su -), es probald ujra.
+Q: Oké, -vo help mutatja a DGA drivert, de valami "permissions"-rõl beszél!
+   Segíts!
+A: Csak akkor mûködik, ha root jogaid vannak! Ez egy DGA korlátozás.
+   Legyél root (su -), és próbáld újra.
 
-   Masik megoldas hogy az mplayer-t SUID root allitod be, de ELLENJAVALLT!
+   Másik megoldás, hogy az mplayer-t SUID root állítod be, de ELLENJAVALLT!
 	'chown root /usr/local/bin/mplayer'
 	'chmod 750 /usr/local/bin/mplayer' 
 	'chmod +s /usr/local/bin/mplayer' 
-   Igy most menni fog user-kent is.
-   !!!! JOL FIGYELJ !!!!
-   Ez egy ORIASI biztonsagi lyuk! Soha ne csinald ezt egy szerveren, vagy
-   egy olyan gepen amit tobb ember is eler, mert igy root jogokat szerezhetnek
-   a suid MPlayer-en keresztul.
-   !!!! EN FIGYELMEZTETTELEK ... !!!!
+   Így most menni fog user-ként is.
+   !!!! JÓL FIGYELJ !!!!
+   Ez egy ÓRIÁSI biztonsági lyuk! Soha ne csináld ezt egy szerveren, vagy
+   egy olyan gépen, amit több ember is elér, mert így root jogokat szerezhetnek
+   a suid MPlayer-en keresztül.
+   !!!! ÉN FIGYELMEZTETTELEK ... !!!!
 
-Q: Az fsdga driver nem mukodik az xyz.avi file-ommal. Miert?
-   Mert (egyenlore) csak MPEG-gel megy.
+Q: Az fsdga driver nem mûködik az xyz.avi file-ommal. Miért?
+   Mert (egyenlõre) csak MPEG-gel megy.
 
-Q: Mikor XVideo-t akarok hasznalni, a Voodoo 3/Banshee-m azt mondja:
+Q: Mikor XVideo-t akarok használni, a Voodoo 3/Banshee-m azt mondja:
    X Error of failed request:  BadAccess (attempt to access private resource
    denied)
     Major opcode of failed request:  147 (MIT-SHM)
     Minor opcode of failed request:  1 (X_ShmAttach)
     Serial number of failed request:  26
     Current serial number in output stream:27 
-A: Regi a drivered, frissitsd. Vagy a DRI (legalabb) 0.6-os verziojat hasznald
-   (http://dri.sourceforge.net), vagy a DRI cvs-t forditsd le.
+A: Régi a drivered, frissítsd! Vagy a DRI (legalább) 0.6-os verzióját használd
+   (http://dri.sourceforge.net), vagy a DRI cvs-t fordítsd le!
 
-Q: Mikor XVideo-t hasznalok, nem tudok lejatszani DivX avi-kat a
+Q: Mikor XVideo-t használok, nem tudok lejátszani DivX avi-kat a
    Voodoo 3/Banshee-mmel !
    Azt mondja:
     ...
     Xvideo image format: 0x32315659 (YV12) planar
     Xvideo image format: 0x30323449 (I420) planar
     ...
-A: Lasd az elozo valaszt.
+A: Lásd az elõzõ választ.
 
-Q: Letoltottem egy ASF-et az asfrecorderrel, de az MPlayer nem tudja
-   lejatszani !
-A: Az asfrecorder, es maga az ASF formatum egy nagy szar. Ne irj nekunk,
-   menj a jo francba.
+Q: Letöltöttem egy ASF-et az asfrecorderrel, de az MPlayer nem tudja
+   lejátszani !
+A: Az asfrecorder, és maga az ASF formátum egy nagy szar. Ne írj nekünk,
+   menj a jó francba!
 
 Q: Ooo, mi az az "IdegCounter" ?
-A: Az "Ideg" magyar szo, es a "Counter" (szamlalo) angol szo kevereke.
-   Eloszor A'rpi idegesseget volt hivatott merni, miutan egy kis CVS kod
-   (ooo) "rejtelyesen" eltunt ;)
+A: Az "Ideg" magyar szó, és a "Counter" (számláló) angol szó keveréke.
+   Elõször A'rpi idegességét volt hivatott mérni, miután egy kis CVS kód
+   (ooo) "rejtelyesen" eltûnt ;)
 
-Q: Nem tudom leforditani az SVGAlib-et.. 2.3/2.4-es kernel hasznalok.
-A: Szerkezd at az SVGAlib Makefile.cfg-jet, es vedd ki a "BACKGROUND = y"-t.
+Q: Nem tudom lefordítani az SVGAlib-et... 2.3/2.4-es kernelt használok.
+A: Szerkesztd át az SVGAlib Makefile.cfg-jét, és vedd ki a "BACKGROUND = y"-t.
 
-Q: A LIRC nem mukodik, mert ...
-A: Biztos "mplayer_lirc"-et hasznalsz "mplayer" helyett ?
+Q: A LIRC nem mûködik, mert ...
+A: Biztos "mplayer_lirc"-et használsz "mplayer" helyett ?
 
-Q: MPlayer valami hibauzenettel lep ki amikor l3codeca.acm-et hasznalok.
-A: Nezd meg hogy mit ir ki az 'ldd /usr/local/bin/mplayer' . Ha ilyet
+Q: MPlayer valami hibaüzenettel lép ki, amikor l3codeca.acm-et használok.
+A: Nézd meg, hogy mit ír ki az 'ldd /usr/local/bin/mplayer' . Ha ilyet
    tartalmaz:
         libc.so.6 => /lib/libc.so.6 (0x4???????)
-   ahol "?" barmilyen szam, akkor rendben, a hiba nem itt van. De ha ez:
+   ahol "?" bármilyen szám, akkor rendben, a hiba nem itt van. De ha ez:
 	libc.so.6 => /lib/libc.so.6 (0x00??????)
-   Akkor a baj a kerneledben/libc-dben van. Valoszinuleg valamilyen
-   biztonsagi patch-et hasznalsz (peldaul Solar Designer's OpenWall) ami
-   alacsony cimekre tolti be a file-t.
-   Mivel az l3codeca.acm egy "non-relocatable" DLL, muszaly
-   0x00400000-ra tolteni, ezen nem tudunk valtoztatni. Ne hasznalj
-   patchelt kernelt, vagy probald '-afm 1' opcioval, hogy kikapcsold az
-   l3codeca.acm-et.
+   Akkor a baj a kerneledben/libc-dben van. Valószínûleg valamilyen
+   biztonsági patch-et használsz (például Solar Designer's OpenWall), ami
+   alacsony címekre tölti be a file-t.
+   Mivel az l3codeca.acm egy "non-relocatable" DLL, muszáj
+   0x00400000-ra tölteni, ezen nem tudunk változtatni. Ne használj
+   patchelt kernelt, vagy próbáld '-afm 1' opcióval, hogy kikapcsold az
+   l3codeca.acm-et!
 
-Q: A gepem ~640x300-as felbontasu M$ DivX AVI-kat, amiknek stereo mp3-juk
-   van, lassan jatsza le. Ha -nosound opcioval probalom, minden ok (csak
-   nema).
-A: Ezeknek a file-oknak valoszinuleg 48Khz-es audiojuk van, es a
-   hangkartyad/drivered nem tamogatja rendesen ezt. Az audio downsampling
-   (meg) nincs benne MPlayer-ben.
+Q: A gépem ~640x300-as felbontású M$ DivX AVI-kat, amiknek stereo mp3-juk
+   van, lassan játssza le. Ha -nosound opcióval próbálom, minden ok (csak
+   néma).
+A: Ezeknek a file-oknak valószínûleg 48Khz-es audiojuk van, és a
+   hangkártyád/drivered nem támogatja rendesen ezt. Az audio downsampling
+   (még) nincs benne MPlayer-ben.
 
-Q: Szeretnem hasznalni/atirni az MPlayer-t a(z) <kepzeld ide a kedvenc
-   architekturad> a(z) <kepzeld ide a kedvenc oprendszered>-re. Lehetseges?
+Q: Szeretném használni/átírni az MPlayer-t a(z) <képzeld ide a kedvenc
+   architektúrád> a(z) <képzeld ide a kedvenc oprendszered>-re. Lehetséges?
 A: Nem.
 
 Q: De...!
 A: Nem.
 
-Q: Es ha megelegszek az MPEG-gel?
-A: Talan. De jobban jarsz ha mar letezo MPEG lejatszot keresel arra a
+Q: És ha megelégszem az MPEG-gel?
+A: Talán. De jobban jársz, ha már létezõ MPEG lejátszót keresel arra a
    bizonyos platformra.
 
 Q: Az MPlayer "MPlayer interrupted by signal 4 in module: decode_video"
-   uzenettel leall.
-A: Azon a gepen futtasd az MPlayert amin leforditottad. Vagy forditsd ujra.
-   Semmikepp se hasznald masik processzoron, mint amin leforditottad.
+   üzenettel leáll.
+A: Azon a gépen futtasd az MPlayer-t, amin lefordítottad! Vagy fordítsd újra!
+   Semmiképp se használd másik processzoron, mint amin lefordítottad!

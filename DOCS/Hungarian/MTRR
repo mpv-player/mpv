@@ -1,25 +1,25 @@
-MTRR beallitasa X11 es/vagy mga_vid-hez:
+MTRR beállítása X11 és/vagy mga_vid-hez:
 ========================================
 
-1. baziscim megkeresese
+1. báziscím megkeresése
 ~~~~~~~~~~~~~~~~~~~~~~~
-3 modszer is van ra:
+3 módszer is van rá:
 
-- az X11 uzeneteibol, peldaul:
+- az X11 üzeneteibõl, például:
 (--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
 (--) SVGA: Linear framebuffer at 0xD8000000
 
-- /proc/pci-bol (hasznald az 'lspci -v' parancsot):
+- /proc/pci-ból (használd az 'lspci -v' parancsot):
 01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
         Memory at d8000000 (32-bit, prefetchable)
         
-- az mga_vid uzeneteibol (pl. 'dmesg' parancs):
+- az mga_vid üzeneteibõl (pl. 'dmesg' parancs):
 mga_mem_base = d8000000
 
-2. memoria merete
+2. memória mérete
 ~~~~~~~~~~~~~~~~~
-Nagyon konnyu, csak at kell konvertalni a videomemoria meretet
-hexadecimalisba, vagy hasznald ezt a tablazatot:
+Nagyon könnyû, csak át kell konvertálni a videomemória méretét
+hexadecimálisba, vagy használd ezt a táblázatot:
    1 MB    0x100000
    2 MB    0x200000
    4 MB    0x400000
@@ -27,13 +27,13 @@ hexadecimalisba, vagy hasznald ezt a tablazatot:
   16 MB   0x1000000
   32 MB   0x2000000
 
-3. MTRR beallitasa
+3. MTRR beállítása
 ~~~~~~~~~~~~~~~~~~
-Most hogy megvan a baziscim es a meret, allitsuk be a regisztereket!
+Most, hogy megvan a báziscím és a méret, állítsuk be a regisztereket!
 
-  Peldaul, a fenti Matrox kartyahoz (base=0xd8000000) 32Mb rammal
-  (size=0x2000000) a kovetkezot kell beirni:
+  Például, a fenti Matrox kártyához (base=0xd8000000) 32Mb rammal
+  (size=0x2000000) a következõt kell beírni:
 echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr
 
- - Regebbi K6/2-k [a 266Mhz-koruliek, stepping 0] nem tamogatjak az MTRR-t,
-   mig a stepping 12-k ('cat /proc/cpuinfo' kiirja) igen.
+ - Régebbi K6/2-k [a 266Mhz-körüliek, stepping 0] nem támogatják az MTRR-t,
+   míg a stepping 12-k ('cat /proc/cpuinfo' kiírja) igen.

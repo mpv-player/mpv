@@ -1,40 +1,40 @@
 
-LIRC tamogatas MPlayer-ben
- irta : Andreas Ackermann 2/2001
+LIRC támogatás MPlayer-ben
+ írta : Andreas Ackermann 2/2001
  contact: acki@acki-netz.de
 
 o Mi az a LIRC?
 
- Linux Infrared Remote Control - hasznalj egy otthon is konnyen elkeszitheto
- infravoros taviranyitot, hogy iranyitsd vele a geped!
- Reszletek a www.lirc.org cimen.
+ Linux Infrared Remote Control - használj egy otthon is könnyen elkészíthetõ
+ infravörös távirányítót, hogy irányítsd vele a géped!
+ Részletek a www.lirc.org címen.
 
-o MPlayer es a LIRC
+o MPlayer és a LIRC
 
- Ha felinstallaltad a lirc csomagot, igy forditsd az MPlayer-t :
+ Ha felinstalláltad a lirc csomagot, így fordítsd az MPlayer-t :
 	./configure --enable-lirc
 
- Ha sikerult, az MPlayer ezt fogja kiirni indulaskor:
+ Ha sikerült, az MPlayer ezt fogja kiírni induláskor:
    LIRC init was successful.
- Ha hibat talal, azt is kiirja. Ha semmi LIRC-szerut nem mond, akkor
- nincs beleforditva.
+ Ha hibát talál, azt is kiírja. Ha semmi LIRC-szerût nem mond, akkor
+ nincs belefordítva.
 
- A megadando programnev - mily' csoda - mplayer_lirc.
- A kovetkezo parancsokat erti:
+ A megadandó programnév - mily' csoda - mplayer_lirc.
+ A következõ parancsokat érti:
 
- PAUSE  - lejatszas megallitasa. Barmely masik billentyu ujrainditja.
- QUIT   - kilepes
- RWND   - 10 masodperccel vissza
- FRWND  - 60 masodperccel vissza
- FWD    - 10 masodperccel elore
- FFWD   - 60 masodperccel elore
- INCVOL - hangero novelese 1 szazalekkal
- DECVOL - hangero csokkentese 1 szazalekkal
- MASTER - 'master' mixer csatorna hasznalata
- PCM    - 'pcm' mixer csatorna hasznalata
+ PAUSE  - lejátszás megállítása. Bármely másik billentyû újraindítja.
+ QUIT   - kilépés
+ RWND   - 10 másodperccel vissza
+ FRWND  - 60 másodperccel vissza
+ FWD    - 10 másodperccel elõre
+ FFWD   - 60 másodperccel elõre
+ INCVOL - hangerõ növelése 1 százalékkal
+ DECVOL - hangerõ csökkentése 1 százalékkal
+ MASTER - 'master' mixer csatorna használata
+ PCM    - 'pcm' mixer csatorna használata
 
- Ne felejtsd bekapcsolni a repeat flag-ot a RWND/FWD-hez a .lricrc-ben.
- Itt egy pelda az enyembol:
+ Ne felejtsd bekapcsolni a repeat flag-et a RWND/FWD-hez a .lircrc-ben.
+ Itt egy példa az enyémbõl:
 
  begin
   remote = CU-SX070
@@ -51,7 +51,7 @@ o MPlayer es a LIRC
   config = QUIT
  end
 	      
- Orvendezz,
+ Örvendezz,
 
  -Andreas
  

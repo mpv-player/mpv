@@ -1,65 +1,65 @@
-MPlayer TV kimenet G400-as kartyaval
+MPlayer TV output G400-as kártyával
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-(ez egy valasz volt az mplayer-matrox listara)
+(ez egy válasz volt az mplayer-matrox listára)
 
-> Nagyon szeretnem ha az MPlayer tudna azt, amit a windows-os gepem. Amikor
-> elinditok egy lejatszast a windows-ban (ablakos vagy teljeskepernyos)
-> a film megjelenik a tv-kimeneten is. Imadom ezt, es azon gondolkoztam milyen
-> nehez lenne ezt beepiteni mplayer-be.
+> Nagyon szeretném, ha az MPlayer tudná azt, amit a windows-os gépem. Amikor
+> elindítok egy lejátszást a windows-ban (ablakos vagy teljesképernyõs)
+> a film megjelenik a tv-kimeneten is. Imádom ezt, és azon gondolkoztam, milyen
+> nehéz lenne ezt beépíteni mplayer-be.
 
-Ez a driver korlatja. BES (Back-End Scaler, ez az overlay generator, es YUV
-scaler a G200/G400/G450 kartyakon) csak a CRTC1-en mukodik. Normalis esetben,
-CRTC1 (szoveges mod, minden bpp, BES) az 1-es head-re kerul, es CRTC2
+Ez a driver korlátja. BES (Back-End Scaler, ez az overlay generator, és YUV
+scaler a G200/G400/G450 kártyákon) csak a CRTC1-en mûködik. Normális esetben,
+CRTC1 (szöveges mód, minden bpp, BES) az 1-es head-re kerül, és CRTC2
 (csak 16/32bpp, csak grafika) a 2-esre (TV-kimenet).
 
-Linux alatt, 2 lehetoseg van ennek mukodesre birasara:
+Linux alatt, 2 lehetõseg van ennek mûködésre bírására:
 
-1. 4.0.x-es X hasznalataval, valamint a HAL driverrel a Matrox-tol, igy
-   lesz dualhead tamogatas, es at lehet iranyitani TV-re. Sajnos ez
-   bekapcsolt Macrovision kodolassal van ellatva, igy csak kozvetlenul
-   TV-re mukodik, videomagnon keresztul nem.
-   A masik gond az, hogy az Xv nem mukodik a masodik head-en.
-   (nem tudom hogy a Windows hogy oldja meg, talan megcsereli a CRTC-ket,
-   vagy valami trukkel hasznalja a YUV framebuffer-t a masodik DAC-en)
+1. 4.0.x-es X használatával, valamint a HAL driverrel a Matrox-tól, így
+   lesz dualhead támogatás, és át lehet irányítani TV-re. Sajnos ez
+   bekapcsolt Macrovision kódolással van ellátva, így csak közvetlenül
+   TV-re mûködik, videomagnón keresztül nem. (**dehonnem, régi vidi rulez**)
+   A másik gond az, hogy az Xv nem mûködik a második head-en.
+   (nem tudom, hogy a Windows hogy oldja meg, talán megcseréli a CRTC-ket,
+   vagy valami trükkel használja a YUV framebuffer-t a második DAC-en)
 
-2. Matroxfb hasznalataval, es dual-head tamogatassal (2.4.x kernelek).
-   Lesz egy framebufferes konzolod (CRTC2-vel, ugyhogy lassu), es
-   TV-kimenet (CRTC1-gyel, BES tamogatassal).
+2. Matroxfb használatával, és dual-head támogatással (2.4.x kernelek).
+   Lesz egy framebufferes konzolod (CRTC2-vel, úgyhogy lassú), és
+   TV-kimenet (CRTC1-gyel, BES támogatással).
    Ilyenkor elfelejtheted az X-et! :(
 
    Hogy kell bekapcsolni?
 
--  Fordits minden matrox-fele cuccot modulba a kernelforditaskor.
-   (ez SZUKSEGES, legalabbis en mashogy meg nem birtam mukodesre birni)
-   [inditsd az uj kernelt es installald a modulokat, de meg ne toltsd be oket!]
+-  Fordíts minden matrox-féle cuccot modulba a kernelfordításkor.
+   (ez SZÜKSÉGES, legalábbis én máshogy még nem bírtam mûködésre bírni)
+   [indítsd az új kernelt és installáld a modulokat, de még ne töltsd be õket!]
 
--  Futtasd a 'modules' script-et a TV-out konyvtarbol.
-   At fogja kapcsolni a konzolodat framebuffer-be.
-   Valts at tty1-re (ALT+F1)!
-   Most futtasd az 'independent' scriptet, ami igy fogja beallitani a tty-ket:
+-  Futtasd a 'modules' script-et a TV-out könyvtárból.
+   Át fogja kapcsolni a konzolodat framebuffer-be.
+   Válts át tty1-re (ALT+F1)!
+   Most futtasd az 'independent' scriptet, ami így fogja beállítani a tty-ket:
      tty 1,2:      fb konzol, CRTC2-n, 1-es headen (monitor)
      tty 3,4,5:..: framebuffer+BES, CRTC1-en, 2-es headen (TV-kimenet)
-   Futtasd a TV-* es Mon-* scripteket hogy beallitsd a felbontasokat:
-     valts tty1-re (ALT+F1), es futtasd: Mon-* (csak az egyiket)
-     valts tty3-ra (ALT+F3), es most vissza tty1-re (ALT+F1)
-       (ez kivalasztja a tty3-at a /dev/fb1-en - trukkos)
+   Futtasd a TV-* és Mon-* scripteket, hogy beállítsd a felbontásokat:
+     válts tty1-re (ALT+F1), és futtasd: Mon-* (csak az egyiket)
+     válts tty3-ra (ALT+F3), és most vissza tty1-re (ALT+F1)
+       (ez kiválasztja a tty3-at a /dev/fb1-en - trükkös)
    Futtasd: TV-* (csak az egyiket)
-      (most egy konzolod lesz a PAL TV-n - nem tudni NTSC-vel mivan)
+      (most egy konzolod lesz a PAL TV-n - nem tudni NTSC-vel mi van)
 
-   Ha most elinditod MPlayer-t (tty1-en), a kep tty3-on jon elo, azaz
-   a TV-den, vagy a masodik monitorodon.
+   Ha most elindítod MPlayer-t (tty1-en), a kép tty3-on jön elõ, azaz
+   a TV-den, vagy a második monitorodon.
 
-Igen, egy csoppet ganyos. Jelenleg a marvel project elkeszulesere varok,
-remelem ez normalis TV-out drivereket eredmenyez.
+Igen, egy csöppet gányos. Jelenleg a marvel project elkészülésére várok,
+remélem ez normális TV-out drivereket eredményez.
 
-Jelenlegi problemam hogy a BES csak a CRTC1-en mukodik. Ezert a kep
-mindig azon a head-en jon elo, amelyik a CRTC1-hez van iranyitva
-(altalaban a monitor), igyhat meg kell cserelni a CRTC-ket viszont igy
-a konzolod framebufferes lesz (mert a CRTC2 nem tud szoveges modot) es
-egy kicsit lassu. :(
+Jelenlegi problámám, hogy a BES csak a CRTC1-en mûködik. Ezért a kép
+mindig azon a head-en jön elõ, amelyik a CRTC1-hez van irányítva
+(általában a monitor), így hát meg kell cserélni a CRTC-ket, viszont így
+a konzolod framebufferes lesz (mert a CRTC2 nem tud szöveges módot) és
+egy kicsit lassú. :(
 
 
-> egyebkent csak fekete-feher kimenet sikerult a tv-n ...
+> egyébként csak fekete-fehér kimenet sikerült a tv-n ...
 Nem lehet hogy NTSC TV-d van? Vagy csak nem futtattad le a TV-*
 scriptet.
 

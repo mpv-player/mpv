@@ -1,127 +1,127 @@
-DVD tamogatas az MPlayer-ben!
+DVD támogatás az MPlayer-ben!
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Olvasd el a 'DVD-FAQ' file-t is (es keruld el az ottlevo atiranyitast:).
+Olvasd el a 'DVD-FAQ' file-t is (és kerüld el az ott lévõ átirányítást:).
 
-FONTOS: _NE_ kerj semmi funkciot a DVD visszajatszashoz. Ez egy roppantul
-kiserleti gany dolog. Talan nem is fog mukodni nalad. Ha tudsz segiteni, most
-tedd meg! Eloszor a letezo problemakat szeretnenk fixalni, es csak utana
-gondolkozni a tovabbi DVD funkciok beepitesen.
+FONTOS: _NE_ kérj semmi funkciót a DVD visszajátszáshoz. Ez egy roppantul
+kíserleti gány dolog. Talán nem is fog mûködni nálad. Ha tudsz segíteni, most
+tedd meg! Elõször a létezõ problémákat szeretnénk fixálni, és csak utána
+gondolkozni a további DVD funkciók beépítésén.
 
-Ez egyben azt is jelenti hogy a jelenleg letezo DVD funkciok a fejlesztoknek,
-es nem a felhasznaloknak vannak szanva!
+Ez egyben azt is jelenti, hogy a jelenleg létezõ DVD funkciók a fejlesztõknek,
+és nem a felhasználóknak vannak szánva!
 
-MPlayer forditasa libcss tamogatassal
+MPlayer fordítása libcss támogatással
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Eloszor forditsd le es installald a libcss-t.
-Utana forditsd ujra az MPlayer-t ezekkel az opciokkal:
+Elõször fordítsd le és installáld a libcss-t.
+Utána fordítsd újra az MPlayer-t ezekkel az opciókkal:
 
 ./configure --enable-css --withcsslibdir=/usr/local/lib --withcssincidr=/usr/local/include
 
-(termeszetesen beirhatod a sajat opcioidat is)
+(természetesen beírhatod a saját opcióidat is)
 
 --withcsslibdir=/usr/local/lib
-	Ez a konyvtar tartalmazza a libcss.so-t. Jo ha bennevan az
+	Ez a könyvtár tartalmazza a libcss.so-t. Jó, ha benne van az
 	/etc/ld.so.conf-ban is.
 	
 --withcssindfir=/usr/local/include
 	Ez tartalmazza a 'css.h' header file-t.
 
-MEGJ.: Jelenleg nincs automatikus detektalas a libcss-hez! Ezeket az opciokat
-  MUSZAJ megadnod.
+MEGJ.: Jelenleg nincs automatikus detektálás a libcss-hez! Ezeket az opciókat
+  MUSZÁJ megadnod.
 
-VOB file-ok lejatszasa kozvetlenul DVD-rol
+VOB file-ok lejátszása közvetlenül DVD-rõl
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 mplayer -dvd /dev/dvd /mnt/cdrom/video_ts/vts_01_1.vob
 
 ahol,
 
-	'-dvd /dev/dvd' megmondja MPlayer-nek hogy hol keresse a DVD meghajtot.
-	A lemez autentikaciojanal hasznalatos.
+	'-dvd /dev/dvd' megmondja MPlayer-nek, hogy hol keresse a DVD meghajtót.
+	A lemez autentikációjánál használatos.
 
-	A filenev egyszeruen a VOB file neve a lemezen.
+	A filenév egyszerûen a VOB file neve a lemezen.
 
-Ugy vettem eszre, hogy az autentikalas root jogosultsagot kivan meg,
-ugyhogy muszaj lesz root-kent futtatni az MPlayer-t! (lasd 'Problemak' resz).
+Úgy vettem észre, hogy az autentikálás root jogosultságot kíván meg,
+úgyhogy muszáj lesz root-ként futtatni az MPlayer-t! (lásd 'Problémák' rész).
 
-MEGJEGYZES a hangrol:
-	Ugy tunik hogy az MPlayer neha nem talalja meg az elso audio folyamot.
-	Megadhatod peldaul az '-aid 128' opcioval. Kiserletezz 128,129 es
-	hasonlo ertekekkel is. Lasd 'Problemak' resz.
+MEGJEGYZÉS a hangról:
+	Úgy tûnik, hogy az MPlayer néha nem találja meg az elsõ audio streamet.
+	Megadhatod például az '-aid 128' opcióval. Kísérletezz 128,129 és
+	hasonló értékekkel is. Lásd 'Problémák' rész.
 
 
-Uj file-k a forrasban
+Új file-ok a forrásban
 ~~~~~~~~~~~~~~~~~~~~~
 dvdauth.c
-	Ez vegzi a DVD autentikaciot, es kitolti a key_disc es key_title-t.
+	Ez végzi a DVD autentikációt, és kitölti a key_disc és key_title-t.
 
 dvdauth.h
 	header file
 
-Ezek a file-ok '#ifdef ... #endif' blokkon belul vannak, igy ha a libcss
-tamogatas ki van kapcsolva, semmi hatasuk nincs, es az MPlayer se lesz
+Ezek a file-ok '#ifdef ... #endif' blokkon belül vannak, így, ha a libcss
+támogatás ki van kapcsolva, semmi hatásuk nincs, és az MPlayer se lesz
 libcss-hez linkelve.
 
 
-Modositasok a forrasban
+Módosítások a forrásban
 ~~~~~~~~~~~~~~~~~~~~~~~
-* (stream.c) STREAM_BUFFER_SIZE atallitva 2048-ra
-* (demux_mpg.c) az eddigi 'encrypted VOB file is not supported' uzenet
-  most egy flag-ot allit 1-re. A fejlec elemzese utan, ha ez a flag be van
-  allitva, meghivjuk a libcss descramble funkciojat.
-* (stream.c) nehany helyen ahol az eddigi 4096 hosszusagu STREAM_BUFFER_SIZE
-  hardcoded volt a forrasba, most 'STREAM_BUFFER_SIZE' van
-* (mplayer.c) dvd autentikacio, seekeles meghivasa
+* (stream.c) STREAM_BUFFER_SIZE átállítva 2048-ra
+* (demux_mpg.c) az eddigi 'encrypted VOB file is not supported' üzenet
+  most egy flag-et állít 1-re. A fejléc elemzése után, ha ez a flag be van
+  állítva, meghívjuk a libcss descramble funkcióját.
+* (stream.c) néhány helyen, ahol az eddigi 4096 hosszúságú STREAM_BUFFER_SIZE
+  hardcoded volt a forrásba, most 'STREAM_BUFFER_SIZE' van
+* (mplayer.c) dvd autentikáció, seekelés meghívása
 
 
-Teljesitmeny
+Teljesítmény
 ~~~~~~~~~~~~
-Az en AMD K6/2-mon, a G400-am hardware-es skalazasaval es colorspace
-konverziojaval 70%-osan terheli a lejatszas a CPU-t, ha '-nosound'.
-Sajnos hanggal egyutt mar nem eleg a gepem :( Talan meg lehet ezen
-javitani ...
-Azthiszem, nem olyan rossz a helyzet ... Nehany baratom szerint a xine
-80-90% CPU-t hasznal DVD lejatszasnal sokkal erosebb gepeken, mint
-peldaul 1Ghz-es Athlon-on (ugy tudom Windows alatt a minimalis konfiguracio
-DVD-hez 300Mhz-es celeron kornyeken van).
+Az én AMD K6/2-mön, a G400-am hardveres skálázásával és colorspace
+konverziójával 70%-osan terheli a lejátszás a CPU-t, ha '-nosound'.
+Sajnos hanggal együtt már nem elég a gépem :( Talán még lehet ezen
+javítani ...
+Azt hiszem, nem olyan rossz a helyzet... Néhány barátom szerint a xine
+80-90% CPU-t használ DVD lejátszásnál sokkal erõsebb gépeken, mint
+példaul 1Ghz-es Athlon-on (úgy tudom Windows alatt a minimális konfiguráció
+DVD-hez 300Mhz-es Celeron környékén van).
 
-Tipp: kikapcsoltam a libac3 downmix funkcioit (persze igy nincs hang) es
-az audio dekodolashoz szukseges CPU hasznalat rogton visszaesett 24-rol
-11%-ra. Jol latszik hogy optimalizalni kell a downmix-et (KNI kod nemszamit
+Tipp: kikapcsoltam a libac3 downmix funkcióit (persze így nincs hang) és
+az audio dekódoláshoz szükséges CPU használat rögtön visszaesett 24-rõl
+11%-ra. Jól látszik, hogy optimalizálni kell a downmix-et (KNI kód nem számít
 K6/2-n).
 
 
-Problemak (TODO)
+Problémák (TODO)
 ~~~~~~~~~~~~~~~~
-* az autentikacionak root jogok kellenek. Ez azert furcsa mert az OMS
-  kepes erre user-kent is.
+* az autentikációnak root jogok kellenek. Ez azért furcsa, mert az OMS
+  képes erre user-ként is.
 * hang. Egyetlen DVD lemezem van (Matrix), ennyivel tesztelem az MPlayer-t.
-  Nehany VOB file-nak angol hangja van, nehanynak spanyol, es van aminek
-  egyaltalan nincs is.
-  Ugy _tunik_ hogy ha megadom az '-aid 128' opciot, mindnek angol nyelve
+  Néhány VOB file-nak angol hangja van, néhánynak spanyol, és van aminek
+  egyáltalán nincs is.
+  Úgy _tûnik_, hogy ha megadom a '-aid 128' opciót, mindnek angol nyelve
   lesz ...
-* furcsa effektek, de csak NEHANY VOB file-lal (ugy nez ki mint valami
-  interlace effekt, azaz minden 2. vonal az elozo kepkockabol van).
+* furcsa effektek, de csak NÉHÁNY VOB file-lal (úgy néz ki, mint valami
+  interlace effekt, azaz minden 2. vonal az elõzõ képkockából van).
 
 
-Beepitendo funkciok
+Beépítendõ funkciók
 ~~~~~~~~~~~~~~~~~~~
 * chapter scanner
-* audio folyam scanner, es futas kozbeni valtas lehetosege
-  (eloszoris indulaskor kellene valasztasi lehetoseg, lasd 'Problemak')
-* DVD menu
-  Megtalaltam (legalabbis a 'Matrix'-on) a menu VOB-ot, de nem tudom
-  hogyan kell hasznalni.
-  (egy kis szemnyuzo OMS nezegetes utan ugytunik hogy az .ifo file-okat
+* audio stream scanner, és futás közbeni váltás lehetõsége
+  (elõször is induláskor kellene választási lehetõség, lásd 'Problémák')
+* DVD menü
+  Megtaláltam (legalábbis a 'Matrix'-en) a menü VOB-ot, de nem tudom
+  hogyan kell használni.
+  (egy kis szemnyúzó OMS nézegetés után úgy tûnik, hogy az .ifo file-okat
   kellene beolvasni)
-* subtitle support
-* OSD/GUI (?) support for select chapter, subtitle and audio stream
-* getting some documentation on DVD format, eg: which is the 'root' VOB
-  file on the disc in video_ts directory, which is the menu and so on.
-* improve performance (see 'Performance' above)
+* subtitle támogatás
+* OSD/GUI (?) támogatás chapter, subtitle és audio stream váltásokhoz
+* némi dokis a DVD formátumról, pl.: melyik a 'root' VOB
+  file a lemezen a video_ts könytárban, melyik a menü és így tovább...
+* teljesítmény javítása (lásd 'Teljesítmény'-t felntebb)
 
 
-No sound problem (from Matrix DVD, the menu VOB)
+Nincs hang probléma (Matrix DVD, VOB menü)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 End of packet while searching for PCM header
 
@@ -129,4 +129,4 @@ DEMUXER: Too many (2048 in 4131540 bytes) video packets in the buffer!
 (maybe you play a non-interleaved stream/file or video codec failed)
 MPEG: No Audio stream found...  ->nosound
 
-However this does not occur if you specify '-aid 128'.
+Persze ez nem fordul elõ, ha megadod a '-aid 128' opciót.

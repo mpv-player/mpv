@@ -1,18 +1,18 @@
 
-OpenDivX tamogatas MPlayer-ben
+OpenDivX támogatás MPlayer-ben
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Az OpenDivX codec reszleteirol a http://www.projectmayo.com cimen olvashatsz.
-Ez egy nyilt-forraskodu utodja a DivX codecnek (valojaban az MPEG-4 szabvany
-tovabbfejlesztese), tobb platformon letezik. A mi Decore-nk MMX-re
-optimalizalt. Az MPlayer jelenleg az OpenDivX 4.0alpha48 verziojat
-tamogatja.
+Az OpenDivX codec részleteirõl a http://www.projectmayo.com címen olvashatsz.
+Ez egy nyílt-forráskódú utódja a DivX codecnek (valójában az MPEG-4 szabvány
+továbbfejlesztése), több platformon létezik. A mi Decore-unk MMX-re
+optimalizált. Az MPlayer jelenleg az OpenDivX 4.0alpha48 verzióját
+támogatja.
 
-Dekoder:
+Dekóder:
 ~~~~~~~~
-'dvx1' fourcc-vel ellatott AVI fileoknal hasznalt.
-A minoseget a '-pp' opcioval allithatod.
-Kombinald (add ossze) a flagokat amiket hasznalni akarsz:
+'dvx1' fourcc-vel ellátott AVI file-oknál használt.
+A minõséget a '-pp' opcióval állíthatod.
+Kombináld (add össze) a flageket, amiket használni akarsz:
 
 1   Y  horizontal deblocking
 2   Y  vertical deblocking
@@ -21,14 +21,14 @@ Kombinald (add ossze) a flagokat amiket hasznalni akarsz:
 16  Y dering
 32  C dering
 
-Peldaul, ha horiz+vert chroma deblocking-et akarsz, hasznald ezt:
+Például, ha horiz+vert chroma deblocking-et akarsz, használd ezt:
   -pp 12    (4+8=12)
 
-Megj.: a C filterek csak n*16 pixel magassagu filmeknel hasznalhatoak
+Megj.: a C filterek csak n*16 pixel magasságú filmeknél használhatóak
 
-Enkoder:
+Enkóder:
 ~~~~~~~~
-Az OpenDivX-be konvertalas egy nagyon kezdetleges hack. A hang automatikusan
-kikapcsolodik. Valaszd az 'odivx'-et kimenetkent:
+Az OpenDivX-be konvertálás egy nagyon kezdetleges hack. A hang automatikusan
+kikapcsolódik. Választd az 'odivx'-et outputként:
   mplayer input.mpg -vo odivx -encode output.avi
-Igen, tudom hogy meg hasznalhatatlan, csak tesztelesi celokat szolgal.
+Igen, tudom, hogy még használhatatlan, csak tesztelési célokat szolgál.
