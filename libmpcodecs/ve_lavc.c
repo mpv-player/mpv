@@ -114,6 +114,7 @@ static int lavc_param_dia_size= 0;
 static int lavc_param_qpel= 0;
 static int lavc_param_trell= 0;
 static int lavc_param_last_pred= 0;
+static int lavc_param_pre_me= 1;
 
 #include "cfgparser.h"
 
@@ -186,6 +187,7 @@ struct config lavcopts_conf[]={
 	{"trell", &lavc_param_trell, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_TRELLIS_QUANT, NULL},
 #endif
 	{"last_pred", &lavc_param_last_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+	{"preme", &lavc_param_pre_me, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -261,6 +263,9 @@ static int config(struct vf_instance_s* vf,
 #endif    
 #if LIBAVCODEC_BUILD >= 4649
     lavc_venc_context->last_predictor_count= lavc_param_last_pred;
+#endif
+#if LIBAVCODEC_BUILD >= 4650
+    lavc_venc_context->pre_me= lavc_param_pre_me;
 #endif
     
     p= lavc_param_rc_override_string;
