@@ -1180,12 +1180,10 @@ sub_data* sub_read_file (char *filename, float fps) {
 	    int l,k;
 	    k = -1;
 	    if ((l=strlen(filename))>4){
-		    int k;
 		    char *exts[] = {".utf", ".utf8", ".utf-8" };
 		    for (k=3;--k>=0;)
 			if (!strcasecmp(filename+(l - strlen(exts[k])), exts[k])){
 			    sub_utf8 = 1;
-			    fprintf(stderr,"UTF-8 detected\n");
 			    break;
 			}
 	    }
