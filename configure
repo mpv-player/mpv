@@ -3020,6 +3020,8 @@ if test "$_dvdkit" = yes ; then
    if test -f "./libmpdvdkit2/Makefile" ; then
     _inputmodules="mpdvdkit2 $_inputmodules"
     _dvdread=libmpdvdkit2
+    _dvdkit2=yes
+    _dvdkit=no
    else
     _inputmodules="mpdvdkit $_inputmodules"
     _dvdread=libmpdvdkit
@@ -3039,7 +3041,11 @@ if test "$_dvdkit" = yes ; then
 else
   _noinputmodules="mpdvdkit $_noinputmodules"
 fi
-echores "$_dvdkit"
+if test "$_dvdkit" = yes || test "$_dvdkit2" = yes; then
+  echores "yes"
+else
+  echores "no"
+fi  
 
 echocheck "DVD support (libcss - old style)"
 if test "$_css" = auto ; then
@@ -4242,6 +4248,7 @@ LIRC_LIB = $_ld_lirc
 CSS_USE = $_css
 CSS_LIB = $_ld_css
 DVDKIT = $_dvdkit
+DVDKIT2 = $_dvdkit2
 DVDKIT_SHARED = no
 SDL_INC = $_inc_sdl
 W32_DEP = $_dep_win32

@@ -117,6 +117,13 @@ else
 COMMON_DEPS += libmpdvdkit/libmpdvdkit.a
 endif
 endif
+ifeq ($(DVDKIT2),yes)
+ifeq ($(DVDKIT_SHARED),yes)
+COMMON_DEPS += libmpdvdkit2/libmpdvdkit.so
+else
+COMMON_DEPS += libmpdvdkit2/libmpdvdkit.a
+endif
+endif
 
 libmpdvdkit/libmpdvdkit.a:
 	$(MAKE) -C libmpdvdkit
@@ -124,6 +131,12 @@ libmpdvdkit/libmpdvdkit.a:
 libmpdvdkit/libmpdvdkit.so:
 	$(MAKE) -C libmpdvdkit libmpdvdkit.so
 
+libmpdvdkit2/libmpdvdkit.a:
+	$(MAKE) -C libmpdvdkit2
+		
+libmpdvdkit2/libmpdvdkit.so:
+	$(MAKE) -C libmpdvdkit2 libmpdvdkit.so
+			
 loader/libloader.a:
 	$(MAKE) -C loader
 
