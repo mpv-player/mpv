@@ -490,8 +490,18 @@ void exit_player(char* how){
 static void exit_sighandler(int x){
   static int sig_count=0;
   ++sig_count;
-  if(sig_count==5 || (inited_flags==0 && sig_count>1)) exit(1);
-  if(sig_count>5){
+  if(inited_flags==0 && sig_count>1) exit(1);
+  if(sig_count==5)
+    {
+      /* We're crashing bad and can't uninit cleanly :( 
+       * by popular request, we make one last (dirty) 
+       * effort to restore the user's 
+       * terminal. */
+      getch2_disable();
+      exit(1);
+    }
+  if(sig_count==6) exit(1);
+  if(sig_count>6){
     // can't stop :(
 #ifndef __MINGW32__
     kill(getpid(),SIGKILL);
