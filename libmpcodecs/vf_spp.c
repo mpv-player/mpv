@@ -371,9 +371,11 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
         
         vf->priv->mpeg2= mpi->qscale_type;
 	if(vf->priv->log2_count || !(mpi->flags&MP_IMGFLAG_DIRECT)){
+	    if(mpi->qscale || vf->priv->qp){
 		filter(vf->priv, dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, mpi->qscale, mpi->qstride, 1);
 		filter(vf->priv, dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, mpi->qscale, mpi->qstride, 0);
 		filter(vf->priv, dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, mpi->qscale, mpi->qstride, 0);
+	    }
 	}
         vf_clone_mpi_attributes(dmpi, mpi);
 
