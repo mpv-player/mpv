@@ -56,6 +56,7 @@ extern void* mDisplay; // Display* mDisplay;
 #ifdef USE_DVDREAD
 #include "spudec.h"
 #endif
+#include "vobsub.h"
 
 #include "linux/getch2.h"
 #include "linux/keycodes.h"
@@ -195,6 +196,7 @@ int allow_dshow=0;
 int audio_id=-1;
 int video_id=-1;
 int dvdsub_id=-1;
+int vobsub_id=-1;
 char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
 static int vcd_track=0;
@@ -246,6 +248,7 @@ char *sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
 int   sub_auto = 1;
+char *vobsub_name=NULL;
 /*DSP!!char *dsp=NULL;*/
 
 extern char *vo_subdevice;
@@ -753,6 +756,13 @@ play_dvd:
   if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, fps);
 #endif
 
+  current_module="vobsub";
+  if (vobsub_name){
+    vo_vobsub=vobsub_open(vobsub_name);
+    if(vo_vobsub==NULL)
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,vobsub_name);
+  }
+
     stream=NULL;
     demuxer=NULL;
     d_audio=NULL;
@@ -896,7 +906,7 @@ if(stream_dump_type==5){
   if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
 
   current_module="spudec";
-  vo_spudec=spudec_new(stream->priv);
+  vo_spudec=spudec_new(stream->priv?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL);
   if (vo_spudec!=NULL)
     inited_flags|=INITED_SPUDEC;
 #endif
@@ -2177,6 +2187,9 @@ if(rel_seek_secs || abs_seek_pos){
   current_module="seek";
   if(demux_seek(demuxer,rel_seek_secs,abs_seek_pos)){
       // success:
+      /* FIXME there should be real seeking for vobsub */
+      if (vo_vobsub)
+	vobsub_reset(vo_vobsub);
 
       if(sh_audio){
 	if(verbose){
@@ -2300,6 +2313,13 @@ if(rel_seek_secs || abs_seek_pos){
   }
 #endif
   
+
+  // VobSub subtitles
+  if(vo_vobsub){
+    current_module="vobsub";
+    vobsub_process(vo_vobsub,d_video->pts);
+    current_module=NULL;
+  }
 
 #ifdef USE_DVDREAD
   // DVD sub:
