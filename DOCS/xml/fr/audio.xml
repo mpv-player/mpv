@@ -807,13 +807,13 @@ annulant presque complètement autour de 1kHz.
 <title>Filtre panoramique</title>
 <para>
 Utilisez le filtre <option>pan</option> pour mixer les canaux arbitrairement.
-Fondamentalement c'est une combinaison des filtres volume control et channels. Il y a
-deux utilisations principales pour ce filtre:
+Fondamentalement, c'est une combinaison des filtres volume control et channels. Il y a
+deux utilisations principales de ce filtre:
 </para>
 
 <orderedlist>
 <listitem><para>
-Down-mixage de plusieurs canaux vers seulement quelques uns, stéréo vers mono par exemple.
+Fusion de plusieurs canaux vers seulement quelques uns, stéréo vers mono par exemple.
 </para></listitem>
 <listitem><para>
 Faire varier la &quot;largeur&quot; du haut parleur central dans un système de son surround.
@@ -864,9 +864,9 @@ par exemple).
 <title>Sub-woofer</title>
 <para>
 Le filtre <option>sub</option> ajoute un canal de sub woofer au flux audio. Les données
-audio utilisées pour créer le canal sub-woofer sont une moyenne des canaux 0 et 1. Le
-fréquences basses sont ensuite filtrées par un filtre Butterworth de 4ème ordre avec
-une fréquence de cut-off par défaut de 60Hz et ajoutées à un canal séparé du flux
+audio utilisées pour créer le canal sub-woofer sont une moyenne des canaux 0 et 1. Les
+fréquences basses sont ensuite filtrées par un filtre Butterworth du 4ème ordre avec
+par défaut une fréquence de coupure de 60Hz et ajoutées à un canal séparé du flux
 audio. Attention: Désactivez ce filtre quand vous lisez des DVDs en son Dolby Digital
 5.1, sinon ce filtre empêchera l'envoi du son au sub-woofer. Ce filtre a deux
 paramètres:
@@ -876,10 +876,10 @@ paramètres:
 <varlistentry>
 <term><option>fc &lt;20-300&gt;</option></term>
 <listitem><para>
-    est un nombre à virgule optionnel utilisé pour définir la fréquence de cut-off du
-    filtre en Hz. L'intervalle valide est de 20Hz à 300Hz. Pour les meilleurs résultats
-    essayez de fixer la fréquence de cut-off le plus bas possible. Cela améliorera la
-    stéréo ou le son surround. La fréquence de cut-off par défaut est 60Hz.
+    est un nombre à virgule optionnel utilisé pour définir la fréquence de coupure du
+    filtre en Hz. L'intervalle valide est de 20Hz à 300Hz. Pour de meilleurs résultats
+    essayez de fixer la fréquence de coupure le plus bas possible. Cela améliorera la
+    stéréo ou le son surround. La fréquence de coupure par défaut est 60Hz.
 </para></listitem>
 </varlistentry>
 
@@ -904,9 +904,9 @@ ajouterait un canal sub-woofer avec une fréquence de cut-off de 100Hz au canal d
 <sect3 id="af_surround">
 <title>Décodeur de son surround</title>
 <para>
-Le son surround encodé en matrice peut être décodé par le filtre <option>surround</option>. Dolby
-Surround est un exemple de format encodé en matrice. Beaucoup de fichiers avec deux
-canaux audio contiennent actuellement du son surround matricé. Pour utiliser cette
+Le son surround encodé en matrice peut être décodé par le filtre <option>surround</option>.
+Dolby Surround est un exemple de format encodé en matrice. Beaucoup de fichiers avec deux
+canaux audio contiennent actuellement du son surround en matrice. Pour utiliser cette
 fonction vous avez besoin d'une carte son supportant au moins 4 canaux. Ce filtre a un
 paramètre:
 </para>
@@ -928,7 +928,7 @@ haut-parleurs de derrière, alors le décalage d peut être fixé à 15ms si d1 &lt;=
 <para>
 Exemple:
 <screen>mplayer -af surround=15 -channels 4 <replaceable>media.avi</replaceable></screen>
-ajouterait un décodage de son surround avec un décalage de 15ms pour le son des
+ajouterait un décodage de son surround avec un retard de 15ms pour le son des
 haut-parleurs arrière.
 </para>
 </sect3>
@@ -936,7 +936,7 @@ haut-parleurs arrière.
 <sect3 id="af_export">
 <title>Exporteurs Audio</title>
 <para>
-Ce filtre audio exporte le signal entrant vers un autre process en utilisant
+Ce filtre audio exporte le signal entrant vers un autre processus en utilisant
 le mappage de mémoire <literal>mmap()</literal>). Les aires de mémoire mappées
 contiennent une entête:
 
@@ -993,7 +993,7 @@ est le coefficient de différence, un nombre à virgule optionnel dont la valeur p
 défaut est <literal>2.5</literal>. Si vous le fixez à <literal>0.0</literal>, vous 
 obtiendrez un son mono (moyenne des deux cannaux). Si vous le fixez à 
 <literal>1.0</literal>, le son sera inchangé, si vous le fixez à 
-<literal>-1.0</literal>, les cannaux gauche et droit seront inversés.
+<literal>-1.0</literal>, les canaux gauche et droit seront inversés.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -1043,8 +1043,8 @@ passerait le son au travers du plugin resampling suivi du plugin format.
 <para>
 Ces plugins on également des options qui changent leur comportement. Ces options sont
 expliquées en détail dans les sections ci-dessous. Un plugin s'exécutera avec des
-paramètres par défaut si ses options sont omises. Voici un exemple de comment utiliser
-les plugins en combinaison avec des options spécifiques au plugin:
+paramètres par défaut si ses options sont omises. Voici un exemple d'utilisation
+des plugins en combinaison avec des options spécifiques au plugin:
 
 <screen>mplayer media.avi -aop list=resample,format:fout=44100:format=0x8</screen>
 
@@ -1053,7 +1053,7 @@ plugin format à AFMT_U8.
 </para>
 
 <para>
-Actuellement les plugins audio ne peuvent pas être utilisés dans
+Les plugins audio ne peuvent actuellement pas être utilisés dans
 <application>MEncoder</application>.
 </para>
 
@@ -1062,9 +1062,9 @@ Actuellement les plugins audio ne peuvent pas être utilisés dans
 <title>Up/Downsampling</title>
 
 <para>
-<application>MPlayer</application> supporte pleinement l'up/downsampling du son.
+<application>MPlayer</application> gère complètement le sur/sous-échantillonnage du son.
 Ce plugin peut être utilisé si vous avez une carte son à fréquence fixe ou que vous
-vous battez avec une vieille carte son qui n'est capable que de sampler à 44.1kHz maxi.
+vous battez avec une vieille carte son qui n'est capable que d'échantillonner à 44.1kHz maxi.
 Ce plugin à une option: <option>fout</option> qui peut être utilisé pour fixer la
 fréquence de sortie désirée. Elle est donnée en Hz, et est par défaut de 48kHz.
 </para>
@@ -1082,7 +1082,7 @@ où <literal><replaceable>freq</replaceable></literal> est la fréquence en Hz, pa
 <note>
 <para>
 Notez que la fréquence de sortie ne devrait pas être augmentée au dessus de sa valeur
-par défaut. Le dépassement provoquera la lecture des flux audio et vidéo en slow motion
+par défaut. Le dépassement provoquera la lecture des flux audio et vidéo au ralentit
 assortie d'une distortion audio.
 </para>
 </note>
@@ -1111,8 +1111,8 @@ Usage:
 
 <para>
 Si votre carte son ne supporte pas le format de données int 16bit signé, ce plugin peut
-être utilisé pour le changer dans un format que votre carte son comprends. Il a une
-option, <option>format</option>, qui peut être initialisée avec les nombres trouvés
+être utilisé pour le changer dans un format que votre carte son comprend. Il a une
+option, <option>format</option>, qui peut être initialisé avec les nombres trouvés
 dans <filename>libao2/afmt.h</filename>. Ce plugin est très rarement utilisé et est
 réservée aux utilisateurs avancés. Gardez à l'esprit que ce plugin ne change que le
 format de sample et pas sa fréquence ou le nombre de canaux.
@@ -1132,7 +1132,7 @@ où <literal><replaceable>outfmt</replaceable></literal> est le format de sortie 
 <sect3 id="audio-delay">
 <title>Décalage</title>
 <para>
-Ce plugin décale le son est n'est là que comme exemple pour démontrer comment
+Ce plugin décale le son est n'est là que comme exemple pour illustrer comment
 développer de nouveaux plugins. Il ne peut être utilisé pour rien d'utile d'un point
 de vue utilisateur et n'est mentionné ici que par soucis d'exhaustivité.
 N'utilisez pas ce plugin à moins que vous soyez un développeur.
@@ -1150,9 +1150,9 @@ utilisé si on veut changer le volume de sortie de <application>MPlayer</applicat
 sans changer le volume PCM du mixeur. Il a une option <option>volume</option> qui est
 utilisée en fixant une valeur entre 0 et 255, 101 étant la valeur par défaut qui
 équivaut à une amplification de 0dB. Utilisez ce plugin avec précaution car il peut
-réduire le signal jusqu'au bruit. Dans la plupart des cas il vaut mieux régler le
+dégrader le rapport signal sur bruit. Dans la plupart des cas il vaut mieux régler le
 volume MASTER au maximum, laisser ce plugin, et contrôler le niveau de sortie sur vos
-haut-parleurs avec le bouton principal du mixeur. Au cas où votre carte son ait un
+haut-parleurs avec le bouton principal du mixeur. Au cas où votre carte son a un
 mixeur numérique au lieu d'un analogique, utilisez le contrôle mixeur MASTER à la place.
 Si il y a un ampli externe connecté à votre ordinateur (c'est la plupart du temps le
 cas), le niveau de bruit peut être minimisé en ajustant le niveau principal et la
