@@ -38,6 +38,7 @@
 #include "cfg-mplayer-def.h"
 
 #include "libvo/video_out.h"
+#include "libvo/sub.h"
 
 // CODECS:
 #include "mp3lib/mp3.h"
@@ -464,6 +465,9 @@ if(video_driver && strcmp(video_driver,"help")==0){
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor);
        if(!vo_font) printf("Can't load font: %s\n",font_name);
+  } else {
+      // try default:
+       vo_font=read_font_desc(get_path("font/font.desc"),font_factor);
   }
 
 // check video_out driver name:
@@ -1143,6 +1147,8 @@ double vout_time_usage=0;
 double audio_time_usage=0;
 int grab_frames=0;
 char osd_text_buffer[64];
+int osd_visible=100;
+int osd_function=OSD_PLAY;
 
 #ifdef HAVE_LIRC
   lirc_mp_setup();
@@ -1831,7 +1837,10 @@ switch(has_video){
     current_module=NULL;
 
     if(eof) break;
-    if(force_redraw) --force_redraw;
+    if(force_redraw){
+      --force_redraw;
+      if(!force_redraw) osd_function=OSD_PLAY;
+    }
 
 //    printf("A:%6.1f  V:%6.1f  A-V:%7.3f  frame=%5.2f   \r",d_audio->pts,d_video->pts,d_audio->pts-d_video->pts,a_frame);
 //    fflush(stdout);
@@ -1918,13 +1927,13 @@ switch(has_video){
   ++frame_corr_num;
 #endif
 
+  if(osd_visible){
+    --osd_visible;
+    if(!osd_visible) vo_osd_progbar_type=-1; // disable
+  }
+
   } //  while(v_frame<a_frame || force_redraw)
 
-
-//================= Update OSD ====================
-
-sprintf(osd_text_buffer,"%02d:%02d:%02d",(int)v_pts/3600,((int)v_pts/60)%60,((int)v_pts)%60);
-vo_osd_text=osd_text_buffer;
 
 //================= Keyboard events, SEEKing ====================
 
@@ -1937,21 +1946,25 @@ vo_osd_text=osd_text_buffer;
       (c=getch2(0))>0 || (c=mplayer_get_key())>0) switch(c){
     // seek 10 sec
     case KEY_RIGHT:
+      osd_function=OSD_FFW;
       rel_seek_secs+=10;break;
     case KEY_LEFT:
+      osd_function=OSD_REW;
       rel_seek_secs-=10;break;
     // seek 1 min
     case KEY_UP:
+      osd_function=OSD_FFW;
       rel_seek_secs+=60;break;
     case KEY_DOWN:
+      osd_function=OSD_REW;
       rel_seek_secs-=60;break;
     // delay correction:
     case '+':
-      buffer_delay+=0.1;  // increase audio buffer size
+      buffer_delay+=0.1;  // increase audio buffer delay
       a_frame-=0.1;
       break;
     case '-':
-      buffer_delay-=0.1;  // decrease audio buffer size
+      buffer_delay-=0.1;  // decrease audio buffer delay
       a_frame+=0.1;
       break;
     // quit
@@ -1967,6 +1980,7 @@ vo_osd_text=osd_text_buffer;
     // pause
     case 'p':
     case ' ':
+      osd_function=OSD_PAUSE;
       printf("\n------ PAUSED -------\r");fflush(stdout);
       while(
 #ifdef HAVE_LIRC
@@ -1975,6 +1989,7 @@ vo_osd_text=osd_text_buffer;
           getch2(20)<=0 && mplayer_get_key()<=0){
 	  video_out->check_events();
       }
+      osd_function=OSD_PLAY;
       break;
   }
   if(rel_seek_secs)
@@ -2140,6 +2155,13 @@ switch(file_format){
         avi_header.idx_pos,audio_chunk_pos,video_chunk_pos,
         skip_video_frames,skip_audio_bytes,skip_audio_secs);
 
+        // Set OSD:
+      osd_visible=default_fps;
+      vo_osd_progbar_type=0;
+      vo_osd_progbar_value=(demuxer->filepos)/((avi_header.movi_end-avi_header.movi_start)>>8);
+      printf("avi filepos = %d  \n",vo_osd_progbar_value);
+//      printf("avi filepos = %d  (len=%d)  \n",demuxer->filepos,(avi_header.movi_end-avi_header.movi_start));
+
   }
   break;
 
@@ -2247,7 +2269,12 @@ switch(file_format){
   }
 } // keyboard event handler
 
-
+//================= Update OSD ====================
+{ int i;
+  sprintf(osd_text_buffer,"%c %02d:%02d:%02d",osd_function,(int)v_pts/3600,((int)v_pts/60)%60,((int)v_pts)%60);
+//  for(i=1;i<=11;i++) osd_text_buffer[10+i]=i;osd_text_buffer[10+i]=0;
+  vo_osd_text=osd_text_buffer;
+}
 
 } // while(!eof)
 
