@@ -178,7 +178,7 @@ First please read all the docs in this package, most of the problems are
 described somewhere. At least read DOCS/BUGS !  We don't like answering
 questions which are already answered in this readme or other docs.
 
-Read the FAQ. Most common problems are answered there!
+Read the DOCS/MPlayer-FAQ. Most common problems are answered there!
 
 You should try the latest development version (from CVS) too, maybe your
 bug is already fixed, but the new version hasn't been released.
