@@ -1101,7 +1101,7 @@ void xscreensaver_heartbeat(float time)
 {
     XEvent ev;
 
-    if (xs_windowid &&
+    if (mDisplay && xs_windowid &&
 	((time - time_last)>30 ||
 	 (time - time_last)<0)) {
 	time_last = time;
