@@ -22,7 +22,7 @@ struct vf_priv_s {
 	int frame;
 	int drop, lastdrop;
 	struct metrics pm;
-	int thres[4];
+	int thres[5];
 	int inframes, outframes;
 	int mode;
 	int (*analyze)(struct vf_priv_s *, mp_image_t *, mp_image_t *);
@@ -92,11 +92,11 @@ static void block_diffs(struct metrics *m, unsigned char *old, unsigned char *ne
 	int x, y, even=0, odd=0, noise, temp;
 	unsigned char *oldp, *newp;
 	m->noise = m->temp = 0;
-	for (x = 15; x; x--) {
+	for (x = 8; x; x--) {
 		oldp = old++;
 		newp = new++;
 		noise = temp = 0;
-		for (y = 8; y; y--) {
+		for (y = 4; y; y--) {
 			even += abs(newp[0]-oldp[0]);
 			odd += abs(newp[ns]-oldp[os]);
 			noise += newp[ns]-newp[0];
@@ -115,8 +115,8 @@ static void diff_planes(struct metrics *m, unsigned char *old, unsigned char *ne
 {
 	int x, y, me=0, mo=0, mn=0, mt=0;
 	struct metrics l;
-	for (y = 0; y < h-15; y += 16) {
-		for (x = 0; x < w-15; x += 16) {
+	for (y = 0; y < h-7; y += 8) {
+		for (x = 0; x < w-7; x += 8) {
 			block_diffs(&l, old+x+y*os, new+x+y*ns, os, ns);
 			if (l.even > me) me = l.even;
 			if (l.odd > mo) mo = l.odd;
@@ -190,8 +190,9 @@ static int analyze_aggressive(struct vf_priv_s *p, mp_image_t *new, mp_image_t *
 	p->pm = m;
 
 	if (p->frame == 4) {
-		if (2*m.noise > m.temp) {
-			if (VERYCLOSE(m.even, pm.odd)) {
+		/* Thres. is to compensate for quantization errors when noise is low */
+		if (m.noise - m.temp > -p->thres[4]) {
+			if (COMPARABLE(m.even, pm.odd)) {
 				//mp_msg(MSGT_VFILTER, MSGL_V, "confirmed field match!\n");
 				return TC_IL2;
 			} else if ((m.even < p->thres[0]) && (m.odd < p->thres[0]) && VERYCLOSE(m.even, m.odd)
@@ -207,9 +208,7 @@ static int analyze_aggressive(struct vf_priv_s *p, mp_image_t *new, mp_image_t *
 		}
 	}
 
-	if (((2*m.even < m.odd) && (5*m.temp < 4*m.noise))
-		|| ((5*m.even < 4*m.odd) && (2*m.temp < m.noise))
-		|| (m.even*m.temp < 2*m.odd*m.noise/5) /* ok? */ ) {
+	if (2*m.even*m.temp < m.odd*m.noise) {
 		mp_msg(MSGT_VFILTER, MSGL_V, "caught telecine sync!\n");
 		p->frame = 3;
 		return TC_IL1;
@@ -239,7 +238,7 @@ static int analyze_aggressive(struct vf_priv_s *p, mp_image_t *new, mp_image_t *
 	case 2:
 		return TC_PROG;
 	case 3:
-		if ((m.even > p->thres[1]) && (5*m.even > 4*m.odd) && (5*m.temp > 4*m.noise)) {
+		if ((m.even > p->thres[1]) && (m.even > m.odd) && (m.temp > m.noise)) {
 			mp_msg(MSGT_VFILTER, MSGL_V, "lost telecine tracking!\n");
 			p->frame = -1;
 			return TC_PROG;
@@ -415,6 +414,7 @@ static void parse_var(struct vf_priv_s *p, char *var)
 	GETVAR(var, "t1", p->thres[1], atoi);
 	GETVAR(var, "t2", p->thres[2], atoi);
 	GETVAR(var, "t3", p->thres[3], atoi);
+	GETVAR(var, "t4", p->thres[4], atoi);
 	GETVAR(var, "fr", p->frame, atoi);
 	GETVAR(var, "am", p->mode, atoi);
 }
@@ -440,10 +440,11 @@ static int open(vf_instance_t *vf, char* args)
 	vf->default_reqs = VFCAP_ACCEPT_STRIDE;
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
 	p->frame = -1;
-	p->thres[0] = 1760;
-	p->thres[1] = 2880;
-	p->thres[2] = 10000;
-	p->thres[3] = 10000;
+	p->thres[0] = 440;
+	p->thres[1] = 720;
+	p->thres[2] = 2500;
+	p->thres[3] = 2500;
+	p->thres[4] = 800;
 	p->drop = 0;
 	p->mode = 1;
 	if (args) parse_args(p, args);
