@@ -244,7 +244,7 @@ uniquement)
 Met le film en pause (n'importe quelle touche pour redémarrer).
 .IPs "."
 Avance d'une trame.
-Le premier appuis mettra le film en pause, et chaque appuis suivant jouera
+Le premier appui mettra le film en pause, et chaque appuis suivant jouera
 juste une trame et remettra le film en pause (toute autre touche arrête la
 pause).
 .IPs "q / ESC"
@@ -415,7 +415,8 @@ quelques infos basiques de débogage, entête avi, valeurs des fonctions
 affiche les indexes avi, entrées de tronquage, plus d'infos de débogage
 (débogage du lecteur)
 .IPs 3
-affiche tout ce qui est relatif aux parseurs d'entrée (déboguage des parsers)
+affiche tout ce qui est relatif aux parseurs d'entrée (pour le déboguage des
+parsers)
 .RE
 .PD 1
 .
@@ -448,7 +449,7 @@ audio qui ne possèdent pas une mesure de décalage audio parfaite.
 Avec cette valeur, si de larges écarts de synchro A/\:V se produisent, il ne
 mettront qu'une seconde ou deux pour disparaître.
 Ce temps de réaction devrait être le seul effet de bord si cette option est
-activé, pour tous les drivers audio.
+activée, pour tous les drivers audio.
 .
 .TP
 .B \-benchmark
@@ -763,7 +764,7 @@ Outrepasse le nom par défaut du lecteur de CDROM (/dev/\:cdrom).
 .B \-cache <Koctets>
 Cette option indique combien de mémoire (en Ko) utiliser pour mettre un
 fichier ou une URL en cache.
-Particulièrement utile sur des média lents.
+Particulièrement utile sur des médias lents.
 .
 .TP
 .B \-cache-min <pourcentage>
@@ -1050,7 +1051,7 @@ utilise le démultiplexeur audio brut
 .IPs channels=<valeur>
 nombre de canaux
 .IPs rate=<valeur>
-taux d'échantillonage par seconde
+taux d'échantillonnage par seconde
 .IPs samplesize=<valeur>
 taille des échantillons en octets
 .IPs format=<valeur>
@@ -5255,7 +5256,7 @@ bitrate moyen (ou plutôt, moyenné)
 .
 .TP
 .B cbr\ \ \ \ 
-bitrate constant.
+bitrate constant
 Force également l'encodage en mode CBR sur les modes ABR sélectionnés suivant.
 .
 .TP
@@ -6285,7 +6286,7 @@ Astuce\ : Cela ne semble utile que pour les encodages à haut débit.
 .TP
 .B mbcmp=<0\-2000>
 Choisit la fonction de comparaison pour décider du meilleur du macroblock
-à coder, utilisé uniquement si mbd=0
+à coder, utilisé uniquement si mbd=0.
 .PD 0
 .RSs
 .IPs "0 (SAD)"
