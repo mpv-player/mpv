@@ -153,7 +153,6 @@ Optional features:
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
   --enable-new-conf      Enable new config stuff [disabled]
   --enable-menu          Enable osd menu support (need new config) [disabled]
-  --enable-qtx-codecs	 Enable Quicktime codecs [disabled]
   --disable-sortsub      Disable subtitles sorting [enabled]
 
 Codecs:
@@ -163,6 +162,7 @@ Codecs:
   --enable-liblzo	 enable external liblzo support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable Win32/DirectShow support [autodetect]
+  --enable-qtx-codecs    Enable Quicktime codecs [disabled]
   --disable-xanim        disable XAnim DLL support [autodetect]
   --disable-real         disable RealPlayer DLL support [autodetect]
   --disable-xvid         disable XviD codec [autodetect]
