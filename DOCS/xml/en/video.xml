@@ -1570,7 +1570,7 @@ mplayer -ao mpegpes -vo mpegpes -vf expand yourfile.ext
 
 <para>
 Note that DVB cards only support heights 288 and 576 for PAL or 240 and 480 for
-NTSC. You <emphasis role="bold">must</emphasis> escale for other heights by adding
+NTSC. You <emphasis role="bold">must</emphasis> rescale for other heights by adding
 <option>scale=width:height</option> with the width and height you want to the
 <option>-vf</option> option. DVB cards accept various widths, like 720, 704,
 640, 512, 480, 352 etc and do hardware scaling in horizontal direction, so you
