@@ -12,40 +12,38 @@
 
 <FONT CLASS="text">
 
-<P><B><A NAME=C>C függelék - Hogyan jelents be hibát</A></B></P>
+<P><B><A NAME=C>C függelék - Hogyan jelezd a hibákat</A></B></P>
 
-<P><B>Hogyan küldj bugreportot?</B></P>
+<P><B>Hogyan küldj bugreport-ot?</B></P>
 
-<P>Legelõször is nézd meg a CVS verziót, lehet hogy az általad talált hibát
-már kijavítottuk. A CVS letöltésére vonatkozó utasításokat a homepage-ünkön
+<P>Elõször is nézd meg a CVS verziót, mert lehet hogy az általad talált hibát
+már kijavítottuk. A CVS letöltésére vonatkozó utasításokat a honlapunkon, a ``download" szekcióban
 találhatod meg.</P>
 
-<P>Ha nem segített: olvasd el a <A HREF="../documentation.html#D">D fejezetet</A>, és amit még találsz. Ha a
-problémád nem ismert, vagy a mi tanácsaink alapján nem oldódik
-meg, akkor jelentsd be:</P>
+<P>Ha ez nem segített a probléma megoldásában, akkor olvasd el a <A HREF="../documentation.html#D">D fejezetet</A>, és a dokumentáció többi részét. Ha a
+problémád nem ismert, vagy a mi tanácsaink alapján nem oldódik meg, akkor jelentsd be:</P>
 
-<P><B>Hol?</B></P>
+<P><B>Hol jelentheted be?</B></P>
 
-<P>Iratkozz fel az mplayer-users levelezési listára:<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
-és küldd a bugreportot a<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer-users@mplayerhq.hu</CODE><BR>
-címre. Nem fogunk CC-zni, szóval légy szíves feliratkozni!!!</P>
+<P>Iratkozz fel az mplayer-users levelezési listára:<BR><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR><BR>
+és küldd a bugreportot a<BR><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer-users@mplayerhq.hu</CODE><BR><BR>
+címre. Nem fogunk CC-zni, légy szíves iratkozz fel a listára!!!</P>
 
-<P>Ne küldj bugreportot egyenesen valamelyik készítõnek!!!
-Együtt dolgozunk a kódon, ezért mindenkit érdekelhet.  
-Elõfordulhat, hogy más felhasználók már tudják a megoldást
-(konfigurációs probléma, rossz driver stb.), még ha mi azt hinnénk is,
-hogy a kód bugos.</P>
+<P>Ne küldj bugreportot közvetlenül valamelyik készítõnek!!!
+Együtt dolgozunk a kódon, ezért mindenkit érdekelhet a hiba.  
+Elõfordulhat, hogy más felhasználók már tudják a megoldást a problémádra,
+(konfigurációs hiba, rossz driver stb.). Ha a levelezési listára írsz hamarabb juthatsz segítséghez, hiszen azt több ember olvassa.</P>
 
-<P>Légy szíves részletesen leírni a problémát, példákkal stb., és ne
+<P>Kérlek részletesen írd le a problémádat, példákkal, magyarázatokkal, stb., és ne
 felejtsd el ezeket se mellékelni:</P>
 
-<P><B>Mit?</B></P>
+<P><B>Mit tartalmazzon a bugreport?</B></P>
 
-<P><B><I>1. Mindenképp küldj infót a rendszeredrõl:</I></B></P>
+<P><B><I>1. Mindenképpen küldj _részletes_ adatokat a rendszeredrõl:</I></B></P>
 <UL>
-<LI>disztribúció<BR>
+<LI>milyen disztribúciót használsz?<BR>
 például:<UL>
         <LI>RedHat 7.1
         <LI>Slackware 7.0 + csomagok 7.1-bõl ...</UL>
@@ -62,10 +60,10 @@ például:<UL>
   <CODE>as --version</CODE>
 </UL>
 
-<P><B><I>2. Hardware &amp; driverek:</I></B></P>
+<P><B><I>2. Hardver adatok és eszközmeghajtók:</I></B></P>
 
 <UL>
-<LI>CPU infó:<BR>
+<LI>CPU típusa:<BR>
   <CODE>cat /proc/cpuinfo</CODE>
 <LI>video kártya: gyártó és típus<BR>
   például:<BR><UL>
@@ -82,12 +80,12 @@ például:<UL>
     <LI>Creative SBLive! Gold az oss.creative.com-ról való driverrel
     <LI>Creative SB16 a kernel OSS driverével
     <LI>GUS PnP az ALSA OSS emulációjával</UL>
-<LI>ha nem vagy biztos a dolgodban, csatold az 'lspci -v' eredményét
+<LI>ha nem vagy biztos a dolgodban, csatold az 'lspci -v' kimenetét
 </UL></UL>
 
-<P><B>Fordítási problémákhoz/hibákhoz:</B></P>
+<P><B>Fordítási problémákhoz, hibákhoz:</B></P>
 
-<P><B><I>3. ezeket a file-okat:</I></B></P>
+<P><B><I>3. Kérlek küldd el az alábbi file-okat:</I></B></P>
 <UL><LI>configure.log
 <LI>config.h
 <LI>config.mak
@@ -99,17 +97,17 @@ például:<UL>
 <P><B><I>3. Az MPlayer outputot 1-es debug szinten (-v)</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [options] filenév &amp;&gt; mplayer.log</CODE></P>
 
-<P><B><I>4. Ha a probléma csak egy vagy néhány file-nál jelentkezik,
-  töltsd fel a file-t ide:</I></B></P>
+<P><B><I>4. Ha a probléma csak egy, vagy néhány file-nál jelentkezik,
+  töltsd fel a file-t (file-okat) ide:</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
-  Tölts fel egy (a fileoddal azonos nevû) kis .txt fájlt, amiben leírod hogy
-  mi a baj, plusz egy mplayer -v kimenet, és az emailcímed!<BR>
-  Általában az elsõ 1-5 Mb elég, hogy reprodulkáljuk a
+  Tölts fel egy (a fájloddal azonos nevû) kis .txt fájlt, amiben leírod hogy
+  mi a baj, plusz egy mplayer -v kimenet, és az email címed!<BR>
+  Általában az elsõ 1-5 MB elég, hogy reprodulkáljuk a
   problémát, de elõször probáld ki:
 <P><CODE>&nbsp;&nbsp;&nbsp;dd if=a_file of=kis_file bs=1024k count=5</CODE></P>
-  (ez az 'a_file' elsõ 5 Mb-ját elmenti 'kis_file' néven')
-  Ekkor probáld lejátszani a keletkezõ file-t, és ha a bug elõjön,
-  akkor elég lesz csak ennyit feltölteni.<BR>
+  (ez az 'a_file' elsõ 5 MB-ját elmenti 'kis_file' néven')
+  Ekkor probáld lejátszani a keletkezõ file-t, és ha a bug jelentkezik,
+  akkor elég lesz csak ennyit feltölteni.<BR><BR>
   SOHA ne küldj file-t levélben! Töltsd fel, és csak a file nevét
   küldd el!
   Ha a file a neten hozzaférhetõ, akkor a _pontos_ URL elküldése
@@ -139,7 +137,7 @@ printf "esi=%08lX\n",$esi<BR>
 <P>&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=parancs_file >mplayer.bug</CODE></P>
 
 <P><B><I>5.b.: futtasd <B>MPlayert</B> gdb-n keresztül:</I></B></P>
-<P>Fordítsd újra az <B>MPlayer</B>-t a hibakeresõ kóddal:<BR>
+<P>Fordítsd újra az <B>MPlayer</B>-t engedélyezve a hibakeresõ módot:<BR>
 ./configure --enable-debug=3<BR>
 make
 </P>
@@ -153,10 +151,10 @@ make
 A fenti parancsok teljes kimenetét küldd el nekünk!
 </P>
 
-<P><B>Általában véve:</B></P>
+<P><B>Általánosan:</B></P>
 
-<P>Ha valami nagy (log-ok stb.), akkor jobb ha FTP-re töltöd (gzip-pel),
-  és csak a file nevét írod le a bugreportban!</P>
+<P>Ha valami nagy reportot akarsz küldeni (pl.: log-ok, stb.), akkor jobb ha FTP-re töltöd fel (gzip -9 ..),
+  és csak a file nevét, elérhetõségét írod bele a bugreportba!</P>
 
 </BODY>
 </HTML>
