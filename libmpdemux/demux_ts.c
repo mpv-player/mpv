@@ -89,6 +89,7 @@ typedef struct {
 	int pid;
 	char lang[4];
 	int last_cc;				// last cc code (-1 if first packet)
+	int is_synced;
 	ts_section_t section;
 	struct {
 		uint8_t au_start, au_end, last_au_end;
@@ -777,6 +778,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 			priv->ts.pids[i]->payload_size = 0;
 			priv->ts.pids[i]->pts = priv->ts.pids[i]->last_pts = 0;
 			priv->ts.pids[i]->last_cc = -1;
+			priv->ts.pids[i]->is_synced = 0;
 		}
 	}
 
@@ -956,7 +958,7 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 	int deg_flag = 0;
 	mp4_es_descr_t *es = NULL;
 	mp4_sl_config_t *sl = NULL;
-	uint8_t au_start = 0, au_end = 0, ocr_flag = 0, random_accesspoint = 0, random_accesspoint_only = 0,
+	uint8_t au_start = 0, au_end = 0, rap_flag = 0, ocr_flag = 0, random_accesspoint = 0, random_accesspoint_only = 0,
 		padding = 0,  padding_bits = 0, use_ts = 0, idle = 0, duration = 0;
 	
 	if(! pmt || ! is_aligned || !packet_len)	//FIXME
@@ -1016,7 +1018,7 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 	
 	if(idle || (padding && !padding_bits))
 	{
-		//pes_es->payload_size = 0;
+		pes_es->payload_size = 0;
 		return -1;
 	}
 	
@@ -1043,7 +1045,11 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 		uint64_t dts, cts;
 		
 		if(sl->random_accesspoint)
-			n++;
+			rap_flag = getbits(buf, n++, 1);
+		
+		if((rap_flag || sl->random_accesspoint_only) || (!sl->random_accesspoint && !sl->random_accesspoint_only))
+			pes_es->is_synced = 1;
+		
 		n += sl->au_seqnum_len;
 		if(packet_len * 8 <= n+8)
 			return -1;
@@ -1106,10 +1112,11 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 	pes_es->payload_size -= min(m, pes_es->payload_size);
 	if(0 < pl_size && pl_size < pes_es->payload_size)
 		pes_es->payload_size = pl_size;
-	//pes_es->sl.size = pes_es->payload_size;
 	
-	mp_msg(MSGT_DEMUXER,MSGL_DBG2, "mp4_parse_sl_packet, final n=%d, m=%d, size from pes hdr: %u, size from sl hdr: %d\n", 
-		n, m, pes_es->payload_size, pl_size);
+	if(pes_es->sl.au_start && pes_es->payload_size)
+		mp_msg(MSGT_DEMUXER,MSGL_DBG2, "4bytes of payload (%d bytes) %02x %02x %02x %02x \n", pes_es->payload_size, buf[m], buf[m+1], buf[m+2], buf[m+3]);
+	mp_msg(MSGT_DEMUXER,MSGL_DBG2, "mp4_parse_sl_packet, final n=%d, m=%d, RAP_FLAG: %d, RAP_ALWAYS: %d, size from pes hdr: %u, size from sl hdr: %d\n", 
+		n, m, rap_flag, sl->random_accesspoint_only, pes_es->payload_size, pl_size);
 	
 	return m;
 }
@@ -1914,6 +1921,7 @@ static ES_stream_t *new_pid(ts_priv_t *priv, int pid)
 	tss->last_cc = -1;
 	tss->type = UNKNOWN;
 	tss->subtype = UNKNOWN;
+	tss->is_synced = 0;
 	priv->ts.pids[pid] = tss;
 	
 	return tss;
@@ -2644,6 +2652,15 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 			len = pes_parse2(p, buf_size, es, pid_type, pmt, pid);
 			es->pid = tss->pid;
+			tss->is_synced = es->is_synced;
+			
+			if(es->type==SL_PES_STREAM && !tss->is_synced)
+			{
+				if(probe)
+					return 0;
+				else
+					continue;
+			}
 					
 			if(probe)
 			{
@@ -2734,7 +2751,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		{
 			uint16_t sz;
 
-			if(tss->type == UNKNOWN)
+			if((tss->type == UNKNOWN) || (tss->type==SL_PES_STREAM && !tss->is_synced))
 			{
 				stream_skip(stream, buf_size+junk);
 				if(probe)
@@ -2911,6 +2928,9 @@ void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, int flags)
 #endif
 
 	stream_seek(demuxer->stream, newpos);
+	for(i = 0; i < 8192; i++)
+		if(priv->ts.pids[i] != NULL)
+			priv->ts.pids[i]->is_synced = 0;
 
 	videobuf_code_len = 0;
 
