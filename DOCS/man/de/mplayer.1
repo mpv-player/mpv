@@ -812,7 +812,8 @@ Besonders bei langsamen Medien sinnvoll.
 .
 .TP
 .B \-cache-min <Prozent>
-Die Wiedergabe startet, wenn der Cache bis zu diesem Grenzwert gefüllt ist.
+Die Wiedergabe startet, wenn der Cache bis zu <Prozent> des Gesamten gefüllt
+ist.
 .TP
 .
 .B \-cache-prefill <Prozent> (noch nicht implementiert)
@@ -3199,9 +3200,9 @@ Probiert zuerst die Win32-Codecs.
 .
 .TP
 .B \-aspect <Verhältnis>
-Überschreibt das Höhen-/\:Breitenverhältnis des Films.
-Bei MPEG-Dateien wird das Verhältnis automatisch erkannt, bei den
-meisten AVI-Dateien ist dies nicht möglich.
+Überschreibt das Höhen-/\:Breitenverhältnis des Films in dem Falle, dass die in
+der wiedergegeben Datei gespeicherten Informationen fehlerhaft sind oder ganz
+fehlen.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -4412,7 +4413,7 @@ interlaced erkannt werden muss, damit das Bild verworfen wird.
 .
 .TP
 .B lavcdeint (VERALTET)
-Deinterlace-Filter von libavcodec, gleichbedeutend mit \-vf pp=fd
+FFmpeg-Deinterlace-Filter, gleichbedeutend mit \-vf pp=fd
 .
 .TP
 .B kerndeint[=thresh[:map[:order[:sharp[:twoway]]]]]
@@ -7512,7 +7513,7 @@ sucht MPlayer nach Untertiteldateien in folgender Reihenfolge:
 .\" Beispiele
 .\" --------------------------------------------------------------------------
 .
-.SH BEISPIELE
+.SH BEISPIELE ZUM GEBRAUCH VON MPLAYER
 .
 .TP
 .B Schnellstart für das Abspielen einer DVD:
@@ -7577,6 +7578,11 @@ mplayer \-vo zr \-vf scale=352:288 Datei.avi
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg Datei.avi
 .
 .TP
+.B Spiele eine 6-kanalige AAC-Datei mit nur zwei Lautsprechern ab:
+mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1
+adts_he-aac160_51.aac
+.
+.TP
 .B Encodiere Titel Nr. 2 der DVD, aber nur ausgewählte Kapitel:
 mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc
 lavc \-lavcopts vcodec=mpeg4
@@ -7614,11 +7620,6 @@ mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .B Encodiere aus einer Pipe:
 rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts
 vcodec=mpeg4:vbitrate=800 \-ofps 24 -
-.
-.TP
-.B Spiele eine 6-kanalige AAC-Datei mit nur zwei Lautsprechern ab:
-mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1
-adts_he-aac160_51.aac
 .
 .
 .\" --------------------------------------------------------------------------
