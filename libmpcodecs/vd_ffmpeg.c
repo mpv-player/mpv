@@ -23,9 +23,6 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(ffmpeg)
 
-#include "../postproc/rgb2rgb.h"
-
-
 #ifdef USE_LIBAVCODEC_SO
 #include <ffmpeg/avcodec.h>
 #else
@@ -120,13 +117,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	    if(avctx->pix_fmt==PIX_FMT_YUV420P) return CONTROL_TRUE;// u/v swap
 	    if(avctx->pix_fmt==PIX_FMT_YUV422P) return CONTROL_TRUE;// half stride
 	    break;
-#if 1
-        case IMGFMT_YUY2:
-	    // converted using yuv422ptoyuy2()
-	    if(avctx->pix_fmt==PIX_FMT_YUV422P) return CONTROL_TRUE;
-	    break;
 	}
-#endif
         return CONTROL_FALSE;
     }
     return CONTROL_UNKNOWN;
@@ -374,8 +365,6 @@ static int init_vo(sh_video_t *sh){
 	}
     	if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h, ctx->best_csp))
     		return -1;
-	ctx->convert=(sh->codec->outfmt[sh->outfmtidx]==IMGFMT_YUY2
-	    && ctx->best_csp!=IMGFMT_YUY2); // yuv422p->yuy2 conversion
     }
     return 0;
 }
@@ -541,7 +530,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     avctx->draw_horiz_band=NULL;
     avctx->opaque=sh;
-    if(ctx->vo_inited && !ctx->convert && !(flags&3) && !dr1){
+    if(ctx->vo_inited && !(flags&3) && !dr1){
 	mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE |
 	    (ctx->do_slices?MP_IMGFLAG_DRAW_CALLBACK:0),
 	    sh->disp_w, sh->disp_h);
@@ -661,17 +650,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         mpi= (mp_image_t*)pic->opaque;
     }
         
-    if(!mpi && ctx->convert){
-	// do yuv422p -> yuy2 conversion:
-        mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-	    avctx->width, avctx->height);
-	if(!mpi) return NULL;
-	yuv422ptoyuy2(pic->data[0],pic->data[1],pic->data[2],
-	    mpi->planes[0],avctx->width,avctx->height,
-	    pic->linesize[0],pic->linesize[1],mpi->stride[0]);
-	return mpi;
-    }
-    
     if(!mpi)
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE,
 	avctx->width, avctx->height);
@@ -707,4 +685,3 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 }
 
 #endif
-
