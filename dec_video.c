@@ -808,6 +808,7 @@ if(verbose>1){
 } // switch
 //------------------------ frame decoded. --------------------
 
+#ifdef ARCH_X86
 	// some codecs is broken, and doesn't restore MMX state :(
 	// it happens usually with broken/damaged files.
 if(gCpuCaps.has3DNow){
@@ -816,6 +817,7 @@ if(gCpuCaps.has3DNow){
 else if(gCpuCaps.hasMMX){
 	__asm __volatile ("emms\n\t":::"memory");
 }
+#endif
 
 t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
 
