@@ -10,12 +10,15 @@ demuxer:
 - test and cleanup FLI/FLC support (and implement seek)
 
 decoders:
+- getting -ss working perfect with MPEG-PES and also seeking (real 1 Minute etc)
 - getting vivo audio DLL codec working...
 - getting mss1 (Windows Screen Video) DLL codec working...
 - getting PIM1 codec working...
 - optimize (or port optimized code from libac3) liba52 (imdct.c, resample.c)
 
 mencoder:
+- add some kind of "-ss" option, to start at e.g. 1:0:0 at the video
+- add a endpoint for encoding, like above
 - finish 3-pass encoding (audio, video1, video2)
 - add ffmpeg encoders support
 - add win32 encoders support
