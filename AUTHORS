@@ -576,6 +576,9 @@ Translation from scratch:
 Reimar Döffinger <reimar.doeffinger@stud.uni-karlsruhe.de>
     * GL code fixes
 
+adland <adland123@yahoo.com>
+    * Various Win dll codec support (LCW2, ASLC)
+
 NOTE: If you think you are missing here, feel free to send a patch.
 =====
 
