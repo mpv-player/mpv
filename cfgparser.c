@@ -230,6 +230,7 @@ int parse_config_file(struct config *conf, char *conffile)
 	char *line;
 	char opt[MAX_OPT_LEN];
 	char param[MAX_PARAM_LEN];
+	char c;		/* for the "" and '' check */
 	int tmp;
 	int line_num = 0;
 	int line_pos;	/* line pos */
@@ -316,14 +317,29 @@ int parse_config_file(struct config *conf, char *conffile)
 			++line_pos;
 
 		/* read the parameter */
-		for (param_pos = 0; isprint(line[line_pos]) && !isspace(line[line_pos])
-				&& line[line_pos] != '#'; /* NOTHING */) {
-			param[param_pos++] = line[line_pos++];
-			if (param_pos >= MAX_PARAM_LEN) {
-				PRINT_LINENUM;
-				printf("too long parameter\n");
-				ret = -1;
-				continue;
+		if (line[line_pos] == '"' || line[line_pos] == '\'') {
+			c = line[line_pos];
+			++line_pos;
+			for (param_pos = 0; line[line_pos] != c; /* NOTHING */) {
+				param[param_pos++] = line[line_pos++];
+				if (param_pos >= MAX_PARAM_LEN) {
+					PRINT_LINENUM;
+					printf("too long parameter\n");
+					ret = -1;
+					continue;
+				}
+			}
+			line_pos++;	/* skip the closing " or ' */
+		} else {
+			for (param_pos = 0; isprint(line[line_pos]) && !isspace(line[line_pos])
+					&& line[line_pos] != '#'; /* NOTHING */) {
+				param[param_pos++] = line[line_pos++];
+				if (param_pos >= MAX_PARAM_LEN) {
+					PRINT_LINENUM;
+					printf("too long parameter\n");
+					ret = -1;
+					continue;
+				}
 			}
 		}
 		param[param_pos] = '\0';
