@@ -37,6 +37,8 @@
 #define MP_CMD_GUI_FULLSCREEN   5008
 #define MP_CMD_GUI_SKINBROWSER  5009
 
+#define MP_CMD_DVDNAV_EVENT     6000
+
 #define MP_CMD_DVDNAV_UP        1
 #define MP_CMD_DVDNAV_DOWN      2
 #define MP_CMD_DVDNAV_LEFT      3
@@ -48,6 +50,7 @@
 #define MP_CMD_ARG_INT 0
 #define MP_CMD_ARG_FLOAT 1
 #define MP_CMD_ARG_STRING 2
+#define MP_CMD_ARG_VOID 3
 
 #ifndef MP_CMD_MAX_ARGS
 #define MP_CMD_MAX_ARGS 10
@@ -77,6 +80,7 @@ typedef union mp_cmd_arg_value {
   int i;
   float f;
   char* s;
+  void* v;
 } mp_cmd_arg_value_t;
 
 typedef struct mp_cmd_arg {

@@ -78,6 +78,7 @@ static mp_cmd_t mp_cmds[] = {
 
 #ifdef USE_DVDNAV
   { MP_CMD_DVDNAV, "dvdnav", 1, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_DVDNAV_EVENT, "dvdnav_event", 1, { { MP_CMD_ARG_VOID, {0}}, {-1, {0}} } },
 #endif
   
   { 0, NULL, 0, {} }
@@ -257,7 +258,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
 #define MP_FD_GOT_CMD (1<<3)
 #define MP_FD_NO_SELECT (1<<4)
 
-#define CMD_QUEUE_SIZE 10
+#define CMD_QUEUE_SIZE 100
 
 typedef struct mp_input_fd {
   int fd;
