@@ -3195,7 +3195,7 @@ fi
 
 echocheck "X11 libs presence"
 if test -z "$_ld_x11" ; then
-  for I in /usr/X11R6/lib /usr/lib/X11R6 /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 ; do
+  for I in /usr/X11R6/lib /usr/lib/X11R6 /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 /usr/lib ; do
     if test -d "$I" && ( test -f "$I/libX11.so" || test -f "$I/libX11.a" || test -f "$I/libX11.dll.a" ) ; then
       _ld_x11="-L$I"
       echores "yes (using $I)"
