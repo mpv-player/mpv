@@ -1063,7 +1063,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_add_accelerator( BOk,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
   gtk_widget_add_accelerator( BCancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
-  gtk_signal_connect( GTK_OBJECT( Preferences ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&Preferences );
+  gtk_signal_connect( GTK_OBJECT( Preferences ),"destroy",GTK_SIGNAL_FUNC( WidgetDestroy ),&Preferences );
   
   gtk_signal_connect( GTK_OBJECT( AConfig ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void*)bAConfig );
   gtk_signal_connect( GTK_OBJECT( BOk ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void*)bOk );
@@ -1238,7 +1238,7 @@ GtkWidget * create_OSSConfig( void )
   BOssOk=AddButton( MSGTR_Ok,hbuttonbox6 );
   BOssCancel=AddButton( MSGTR_Cancel,hbuttonbox6 );
 
-  gtk_signal_connect( GTK_OBJECT( OSSConfig ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&OSSConfig );
+  gtk_signal_connect( GTK_OBJECT( OSSConfig ),"destroy",GTK_SIGNAL_FUNC( WidgetDestroy ),&OSSConfig );
   
   gtk_signal_connect( GTK_OBJECT( BOssOk ),"clicked",GTK_SIGNAL_FUNC( ossButton ),(void*)1 );
   gtk_signal_connect( GTK_OBJECT( BOssCancel ),"clicked",GTK_SIGNAL_FUNC( ossButton ),(void*)0 );
@@ -1349,7 +1349,7 @@ GtkWidget * create_SDLConfig( void )
   BSDLOk=AddButton( MSGTR_Ok,hbuttonbox6 );
   BSDLCancel=AddButton( MSGTR_Cancel,hbuttonbox6 );
 
-  gtk_signal_connect( GTK_OBJECT( SDLConfig ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&SDLConfig );
+  gtk_signal_connect( GTK_OBJECT( SDLConfig ),"destroy",GTK_SIGNAL_FUNC( WidgetDestroy ),&SDLConfig );
   
   gtk_signal_connect( GTK_OBJECT( BSDLOk ),"clicked",GTK_SIGNAL_FUNC( sdlButton ),(void*)1 );
   gtk_signal_connect( GTK_OBJECT( BSDLCancel ),"clicked",GTK_SIGNAL_FUNC( sdlButton ),(void*)0 );
@@ -1497,7 +1497,7 @@ GtkWidget * create_DXR3Config( void )
  gtk_widget_add_accelerator( dxr3BOk,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
  gtk_widget_add_accelerator( dxr3BCancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
- gtk_signal_connect( GTK_OBJECT( DXR3Config ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&DXR3Config );
+ gtk_signal_connect( GTK_OBJECT( DXR3Config ),"destroy",GTK_SIGNAL_FUNC( WidgetDestroy ),&DXR3Config );
  
  gtk_signal_connect( GTK_OBJECT( dxr3BOk ),"clicked",GTK_SIGNAL_FUNC( dxr3Button ),(void *)0 );
  gtk_signal_connect( GTK_OBJECT( dxr3BCancel ),"clicked",GTK_SIGNAL_FUNC( dxr3Button ),(void *)1 );

@@ -18,5 +18,6 @@ extern GtkWidget * AddHButtonBox( GtkWidget * parent );
 extern GtkWidget * AddHScaler( GtkAdjustment * adj,GtkWidget * parent,int digit );
 extern GtkWidget * AddVScaler( GtkAdjustment * adj,GtkWidget * parent,int digit );
 extern GtkWidget * AddComboBox( GtkWidget * parent );
+extern void WidgetDestroy( GtkWidget * widget,GtkWidget ** widget_pointer );
 
 #endif

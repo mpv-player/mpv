@@ -702,7 +702,7 @@ GtkWidget * create_FileSelect( void )
  fsOk=AddButton( MSGTR_Ok,hbuttonbox3 );
  fsCancel=AddButton( MSGTR_Cancel,hbuttonbox3 );
 
- gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&fsFileSelect );
+ gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"destroy",GTK_SIGNAL_FUNC( WidgetDestroy ),&fsFileSelect );
  gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"key_release_event",GTK_SIGNAL_FUNC( on_FileSelect_key_release_event ),NULL );
 
  gtk_signal_connect( GTK_OBJECT( fsFilterCombo ),"changed",GTK_SIGNAL_FUNC( fs_fsFilterCombo_changed ),fsFilterCombo );

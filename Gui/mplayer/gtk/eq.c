@@ -443,7 +443,7 @@ GtkWidget * create_Equalizer( void )
   gtk_widget_add_accelerator( Ok,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
   gtk_widget_add_accelerator( Ok,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
 
-  gtk_signal_connect( GTK_OBJECT( Equalizer ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&Equalizer );
+  gtk_signal_connect( GTK_OBJECT( Equalizer ),"destroy",GTK_SIGNAL_FUNC( WidgetDestroy ),&Equalizer );
   gtk_signal_connect( GTK_OBJECT( Equalizer ),"focus_in_event",GTK_SIGNAL_FUNC( eqFocus ),(void *)2 );
 
   gtk_signal_connect( GTK_OBJECT( ChannelsList ),"select_row",GTK_SIGNAL_FUNC( eqSelectChannelsListRow ),NULL );
@@ -661,7 +661,7 @@ GtkWidget * create_EquConfig( void )
   gtk_widget_add_accelerator( ecOk,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
   gtk_widget_add_accelerator( ecCancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
-  gtk_signal_connect( GTK_OBJECT( EquConfig ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&EquConfig );
+  gtk_signal_connect( GTK_OBJECT( EquConfig ),"destroy",GTK_SIGNAL_FUNC( WidgetDestroy ),&EquConfig );
   
   gtk_signal_connect( GTK_OBJECT( ecOk ),"clicked",GTK_SIGNAL_FUNC( ecButtonReleased ),(void *)1 );
   gtk_signal_connect( GTK_OBJECT( ecCancel ),"clicked",GTK_SIGNAL_FUNC( ecButtonReleased ),(void *)0 );

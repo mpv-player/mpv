@@ -17,6 +17,9 @@ void ShowAboutBox( void )
  gtk_widget_show( About );
 }
 
+void abWidgetDestroy( GtkWidget * widget,GtkWidget ** widget_pointer )
+{ WidgetDestroy( NULL,&About ); }
+
 GtkWidget * create_About( void )
 {
   GtkWidget     * vbox;
@@ -144,8 +147,8 @@ GtkWidget * create_About( void )
   AddHSeparator( vbox );
   Ok=AddButton( MSGTR_Ok,AddHButtonBox( vbox ) );
 
-  gtk_signal_connect( GTK_OBJECT( About ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&About );
-  gtk_signal_connect_object( GTK_OBJECT( Ok ),"clicked",GTK_SIGNAL_FUNC( gtk_widget_destroy ),GTK_OBJECT( About ) );
+  gtk_signal_connect( GTK_OBJECT( About ),"destroy",GTK_SIGNAL_FUNC( WidgetDestroy ),&About );
+  gtk_signal_connect_object( GTK_OBJECT( Ok ),"clicked",GTK_SIGNAL_FUNC( abWidgetDestroy ),NULL );
 
   gtk_widget_add_accelerator( Ok,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
   gtk_widget_add_accelerator( Ok,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
