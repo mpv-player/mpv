@@ -2,7 +2,7 @@
  * ao_sdl.c - libao2 SDLlib Audio Output Driver for MPlayer
  *
  * This driver is under the same license as MPlayer.
- * (http://mplayer.sf.net)
+ * (http://www.mplayerhq.hu)
  *
  * Copyleft 2001 by Felix Bünemann (atmosfear@users.sf.net)
  *
