@@ -6,7 +6,7 @@ LIBNAME2 = libmpencoders.a
 
 AUDIO_SRCS_LIB=ad_liba52.c ad_hwac3.c ad_mp3lib.c
 AUDIO_SRCS_NAT=ad_alaw.c ad_dk3adpcm.c ad_pcm.c ad_dvdpcm.c ad_imaadpcm.c ad_msadpcm.c ad_msgsm.c ad_roqaudio.c
-AUDIO_SRCS_OPT=ad_acm.c ad_dshow.c ad_qtaudio.c ad_ffmpeg.c ad_faad.c ad_libvorbis.c ad_libmad.c ad_realaud.c ad_libdv.c
+AUDIO_SRCS_OPT=ad_acm.c ad_dshow.c ad_dmo.c ad_qtaudio.c ad_ffmpeg.c ad_faad.c ad_libvorbis.c ad_libmad.c ad_realaud.c ad_libdv.c
 AUDIO_SRCS=dec_audio.c ad.c $(AUDIO_SRCS_LIB) $(AUDIO_SRCS_NAT) $(AUDIO_SRCS_OPT)
 
 VIDEO_SRCS_LIB=vd_libmpeg2.c vd_nuv.c vd_lzo.c
