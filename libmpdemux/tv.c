@@ -44,7 +44,7 @@ int tv_param_width = -1;
 int tv_param_height = -1;
 int tv_param_input = 0; /* used in v4l and bttv */
 char *tv_param_outfmt = "yv12";
-
+float tv_param_fps = -1.0;
 
 /* ================== DEMUX_TV ===================== */
 /*
@@ -251,7 +251,9 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
     {
 	if (funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FPS, &sh_video->fps) != TVI_CONTROL_TRUE)
 	    sh_video->fps = 25.0f; /* on PAL */
-    }
+    }    
+    if (tv_param_fps != -1.0f)
+	sh_video->fps = tv_param_fps;
     sh_video->frametime = 1.0f/sh_video->fps;
 
     /* set width */

@@ -109,6 +109,7 @@ struct config tvopts_conf[]={
 	{"height", &tv_param_height, CONF_TYPE_INT, 0, 0, 4096},
 	{"input", &tv_param_input, CONF_TYPE_INT, 0, 0, 20},
 	{"outfmt", &tv_param_outfmt, CONF_TYPE_STRING, 0, 0, 0},
+	{"fps", &tv_param_fps, CONF_TYPE_FLOAT, 0, 0, 100.0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
 #endif
