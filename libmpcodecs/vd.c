@@ -97,13 +97,17 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 	&mpcodecs_vd_ijpg,
 #endif
 	&mpcodecs_vd_mtga,
+#ifdef USE_LIBMPEG2
         &mpcodecs_vd_libmpeg2,
+#endif
         &mpcodecs_vd_huffyuv,
         &mpcodecs_vd_mpegpes,
 #ifdef USE_REALCODECS
 	&mpcodecs_vd_realvid,
 #endif
+#ifdef USE_SVQ1
 	&mpcodecs_vd_svq1,
+#endif
 #ifdef HAVE_XVID
 	&mpcodecs_vd_xvid,
 #endif

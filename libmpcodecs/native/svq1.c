@@ -26,6 +26,9 @@
 #include <unistd.h>
 
 #include "../../config.h"
+
+#ifdef USE_SVQ1
+
 #include "bswap.h"
 
 /* variable length (bit) code */
@@ -793,3 +796,4 @@ void svq1_free (svq1_t *svq1){
   }
 }
 
+#endif

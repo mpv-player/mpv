@@ -41,9 +41,13 @@ extern ad_functions_t mpcodecs_ad_qtaudio;
 ad_functions_t* mpcodecs_ad_drivers[] =
 {
 //  &mpcodecs_ad_null,
+#ifdef USE_MP3LIB
   &mpcodecs_ad_mp3lib,
+#endif
+#ifdef USE_LIBA52
   &mpcodecs_ad_liba52,
   &mpcodecs_ad_hwac3,
+#endif
 #ifdef USE_LIBAVCODEC
   &mpcodecs_ad_ffmpeg,
 #endif

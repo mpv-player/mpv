@@ -3,6 +3,8 @@
 #include <unistd.h>
 
 #include "config.h"
+#ifdef USE_LIBA52
+
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -189,3 +191,4 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 	}
   return len;
 }
+#endif

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include "config.h"
+#ifdef USE_LIBMPEG2
+
 #include "mp_msg.h"
 
 #include "vd_internal.h"
@@ -303,3 +305,4 @@ while(current<end){
 
     return mpi;
 }
+#endif
