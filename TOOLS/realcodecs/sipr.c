@@ -433,12 +433,17 @@ ulong RASetFlavor(ulong p1,ulong p2,ulong p3) {
 	return result;
 }
 
-void  SetDLLAccessPath(ulong p1) {
+void  SetDLLAccessPath(ulong p1,ulong p2) {
 //	loadSyms();
-	fprintf(stderr, "SetDLLAccessPath(ulong p1=0x%0x(%d))\n", p1, p1);
-	hexdump((void*)p1, 44);
+	char* ize=p1;
+	fprintf(stderr, "SetDLLAccessPath(ulong p1=0x%0x(%d) p2=%p)\n", p1, p1,p2);
+	while(*ize){
+	    fprintf(stderr,"%s\n",ize);
+	    ize+=strlen(ize)+1;
+	}
+	//hexdump((void*)p1, 244);
 	(*raSetDLLAccessPath)(p1);
-	hexdump((void*)p1, 44);
+//	hexdump((void*)p1, 44);
 	fprintf(stderr, "--> void\n\n\n");
 }
 
