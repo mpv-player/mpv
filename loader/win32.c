@@ -1577,7 +1577,6 @@ int WINAPI expLoadLibraryA(char* name)
 {
     char qq[256];
     int result;
-    printf("They want library [%s] %s\n", def_path, name);
     if(strncmp(name, "c:\\windows\\", 11)==0)name+=11;
     if(name[0]!='/')
     {
@@ -1588,9 +1587,10 @@ int WINAPI expLoadLibraryA(char* name)
 	else
 	    strcat(qq, name);
     }
-    printf("Entering LoadLibraryA(%s)\n", name);
+    printf("Loading DLL: %s\n", qq);
+//    printf("Entering LoadLibraryA(%s)\n", name);
     result=LoadLibraryA(qq);
-    printf("Returned LoadLibraryA(0x%x='%s'), def_path=%s => 0x%x\n", name, name, def_path, result);
+//    printf("Returned LoadLibraryA(0x%x='%s'), def_path=%s => 0x%x\n", name, name, def_path, result);
     return result;
 }      
 int WINAPI expFreeLibrary(int module)
@@ -2345,8 +2345,8 @@ WIN_BOOL
                              LPDWORD reserved, LPDWORD type, LPBYTE data, LPDWORD count )
 {
  
- printf("RegEnumValueA(%x,%ld,%p,%p,%p,%p,%p,%p)\n",
-   hkey, index, value, val_count, reserved, type, data, count );
+// printf("RegEnumValueA(%x,%ld,%p,%p,%p,%p,%p,%p)\n",
+//   hkey, index, value, val_count, reserved, type, data, count );
 
  return -1;
 }

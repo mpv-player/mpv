@@ -1,5 +1,5 @@
 static char* banner_text=
-"\n"
+"\n\n"
 "MPlayer " VERSION "       (C) 2000-2001 Arpad Gereoffy <arpi@esp-team.scene.hu>\n"
 "\n";
 

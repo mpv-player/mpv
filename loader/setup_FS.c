@@ -56,11 +56,15 @@ struct modify_ldt_ldt_s {
 
 void setup_FS_Segment()
 {
+#ifdef DETAILED_OUT
     printf("Setup FS...");fflush(stdout);
+#endif
     __asm__ __volatile__(
 	"movl %0,%%eax; movw %%ax, %%fs" : : "i" (TEB_SEL)
     );
+#ifdef DETAILED_OUT
     printf("OK!\n");
+#endif
 }
 
 

@@ -242,7 +242,7 @@ for(i=0;i<512;i++)
 desc->font[' ']=-1;
 desc->width[' ']=desc->spacewidth;
 
-printf("font: Font %s loaded successfully! (%d chars)\n",fname,chardb);
+printf("Font %s loaded successfully! (%d chars)\n",fname,chardb);
 
 return desc;
 }

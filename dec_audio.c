@@ -29,7 +29,7 @@ if(driver==7){
   driver=0;
 #else
   // Win32 DShow audio codec:
-  printf("DShow_audio: channs=%d  rate=%d\n",sh_audio->channels,sh_audio->samplerate);
+//  printf("DShow_audio: channs=%d  rate=%d\n",sh_audio->channels,sh_audio->samplerate);
 
   if(DS_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,&sh_audio->wf)){
     printf("ERROR: Could not load/initialize Win32/DirctShow AUDIO codec: %s\n",sh_audio->codec->dll);

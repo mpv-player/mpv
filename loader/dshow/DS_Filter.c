@@ -54,13 +54,13 @@ void DS_Filter::Create(string dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM
 
              setup_FS_Segment();
 
-            printf("Calling factory->vt->CreateInstance()\n");
+//            printf("Calling factory->vt->CreateInstance()\n");
             result=factory->vt->CreateInstance(factory, 0, &IID_IUnknown, (void**)&object);
-            printf("Calling factory->vt->Release()\n");
+//            printf("Calling factory->vt->Release()\n");
 	
 //	result=factory->vt->CreateInstance(factory, 0, &IID_IUnknown, (void**)&object);
 
-        printf("CreateInstance ok %x\n",result);
+//        printf("CreateInstance ok %x\n",result);
 
 	factory->vt->Release((IUnknown*)factory);
 	if(result || (!object)) throw FATAL("Class factory failure");
@@ -77,7 +77,7 @@ void DS_Filter::Create(string dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM
 	ULONG fetched;
 	enum_pins->vt->Reset(enum_pins);
 	result=enum_pins->vt->Next(enum_pins, (ULONG)256, (IPin**)array, &fetched);
-	printf("Pins enumeration returned %d pins, error is %x\n", fetched, result);
+//	printf("Pins enumeration returned %d pins, error is %x\n", fetched, result);
 	
 	for(int i=0; i<fetched; i++)
 	{

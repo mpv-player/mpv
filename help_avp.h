@@ -1,5 +1,5 @@
 static char* banner_text=
-"\n"
+"\n\n"
 "MPlayer v0.10 [AVI parser]  (C) 2000. Arpad Gereoffy <arpi@esp-team.scene.hu>\n"
 "\n";
 

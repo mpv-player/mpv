@@ -105,7 +105,7 @@ int read_asf_header(){
   unsigned char buffer[512];
   
 #if 1
-  printf("ASF file! (subchunks: %d)\n",asfh.cno);
+  //printf("ASF file! (subchunks: %d)\n",asfh.cno);
 while(!stream_eof(demuxer->stream)){
   int pos,endpos;
   pos=stream_tell(demuxer->stream);
@@ -113,15 +113,17 @@ while(!stream_eof(demuxer->stream)){
   if(stream_eof(demuxer->stream)) break; // EOF
   endpos=pos+objh.size;
 //  for(i=0;i<16;i++) printf("%02X ",objh.guid[i]);
-  printf("0x%08X  [%s] %d\n",pos, asf_chunk_type(objh.guid),(int) objh.size);
+  //printf("0x%08X  [%s] %d\n",pos, asf_chunk_type(objh.guid),(int) objh.size);
   switch(*((unsigned int*)&objh.guid)){
     case 0xB7DC0791: // guid_stream_header
       stream_read(demuxer->stream,(char*) &streamh,sizeof(streamh));
+if(verbose){
       printf("stream type: %s\n",asf_chunk_type(streamh.type));
       printf("stream concealment: %s\n",asf_chunk_type(streamh.concealment));
       printf("type: %d bytes,  stream: %d bytes  ID: %d\n",(int)streamh.type_size,(int)streamh.stream_size,(int)streamh.stream_no);
       printf("unk1: %lX  unk2: %X\n",streamh.unk1,streamh.unk2);
       printf("FILEPOS=0x%X\n",stream_tell(demuxer->stream));
+}
       // type-specific data:
       stream_read(demuxer->stream,(char*) buffer,streamh.type_size);
       switch(*((unsigned int*)&streamh.type)){
@@ -138,7 +140,7 @@ while(!stream_eof(demuxer->stream)){
 	} else {
 	  asf_scrambling_b=asf_scrambling_h=asf_scrambling_w=1;
 	}
-	printf("ASF audio scrambling: %d x %d x %d\n",asf_scrambling_h,asf_scrambling_w,asf_scrambling_b);
+	printf("ASF: audio scrambling: %d x %d x %d\n",asf_scrambling_h,asf_scrambling_w,asf_scrambling_b);
 	if(demuxer->audio->id==-1) demuxer->audio->id=streamh.stream_no & 0x7F;
         break;
         }
@@ -159,7 +161,7 @@ while(!stream_eof(demuxer->stream)){
 //    case 0xD6E229D1: return "guid_header_2_0";
     case 0x8CABDCA1: // guid_file_header
       stream_read(demuxer->stream,(char*) &fileh,sizeof(fileh));
-      printf("packets: %d  flags: %d  pack_size: %d  frame_size: %d\n",(int)fileh.packets,(int)fileh.flags,(int)fileh.packetsize,(int)fileh.frame_size);
+      if(verbose) printf("ASF: packets: %d  flags: %d  pack_size: %d  frame_size: %d\n",(int)fileh.packets,(int)fileh.flags,(int)fileh.packetsize,(int)fileh.frame_size);
       asf_packet=malloc(fileh.packetsize); // !!!
       break;
     case 0x75b22636: // guid_data_chunk

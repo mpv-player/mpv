@@ -265,7 +265,9 @@ struct reg_value* insert_reg_value(int handle, const char* name, int type, const
 
 static void init_registry()
 {
+#ifdef DETAILED_OUT
 	printf("Initializing registry\n");
+#endif
 	open_registry();
 	insert_handle(HKEY_LOCAL_MACHINE, "HKLM");
 	insert_handle(HKEY_CURRENT_USER, "HKCU");

@@ -323,7 +323,7 @@ static int play_in_bg=0;
 
 void exit_player(char* how){
   if(how) printf("\nExiting... (%s)\n",how);
-  printf("max framesize was %d bytes\n",max_framesize);
+  if(verbose) printf("max framesize was %d bytes\n",max_framesize);
   // restore terminal:
   getch2_disable();
 #ifdef HAVE_CODECCTRL
@@ -789,7 +789,7 @@ if(has_audio){
     printf("Can't find codec for audio format 0x%X !\n",sh_audio->format);
     has_audio=0;
   } else {
-    printf("Found audio codec: %s drv=%d (%s)\n",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
+    printf("Found audio codec: [%s] drv:%d (%s)\n",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
     has_audio=sh_audio->codec->driver;
   }
 }
@@ -800,7 +800,7 @@ if(has_audio){
   if(!has_audio){
     printf("Couldn't initialize audio codec! -> nosound\n");
   } else {
-    printf("AUDIO: samplerate=%d  channels=%d  bps=%d\n",has_audio,sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize);
+    printf("AUDIO: samplerate=%d  channels=%d  bps=%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize);
   }
 }
 
@@ -814,7 +814,7 @@ if(!sh_video->codec){
 }
 has_video=sh_video->codec->driver;
 
-printf("Found video codec: %s drv=%d (%s)\n",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
+printf("Found video codec: [%s] drv:%d (%s)\n",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
 
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
     out_fmt=sh_video->codec->outfmt[i];
@@ -1036,8 +1036,25 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
      if(screen_size_y<=8) screen_size_y*=movie_size_y;
    }
 
-   if(verbose) printf("Destination size: %d x %d  out_fmt=%0X\n",
-                      screen_size_x,screen_size_y,out_fmt);
+   { const vo_info_t *info = video_out->get_info();
+     printf("VO: [%s] %dx%d => %dx%d %s%s%s ",info->short_name,
+         movie_size_x,movie_size_y,
+         screen_size_x,screen_size_y,
+         fullscreen?"fs ":"",
+         vidmode?"vm ":"",
+         softzoom?"zoom ":""
+//         fullscreen|(vidmode<<1)|(softzoom<<2)
+     );
+     if((out_fmt&IMGFMT_BGR_MASK)==IMGFMT_BGR)
+       printf("BGR%d\n",out_fmt&255); else
+     if((out_fmt&IMGFMT_BGR_MASK)==IMGFMT_RGB)
+       printf("RGB%d\n",out_fmt&255); else
+     if(out_fmt==IMGFMT_YUY2) printf("YUY2\n"); else
+     if(out_fmt==IMGFMT_YV12) printf("YV12\n");
+   }
+
+//   if(verbose) printf("Destination size: %d x %d  out_fmt=%0X\n",
+//                      screen_size_x,screen_size_y,out_fmt);
 
    if(verbose) printf("video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
                       movie_size_x,movie_size_y,
@@ -1193,9 +1210,7 @@ if(has_audio){
 }
 
 
-if(has_audio){
-  printf("Audio: type: %d  samplerate: %d  channels: %d  bps: %d\n",has_audio,sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize);
-} else {
+if(!has_audio){
   printf("Audio: no sound\n");
   if(verbose) printf("Freeing %d unused audio chunks\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
@@ -1216,10 +1231,12 @@ if(file_format==DEMUXER_TYPE_AVI){
   a_pts=d_audio->pts-(buffer_delay+audio_delay);
   audio_delay-=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)/default_fps;
 //  audio_delay-=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)/default_fps;
-  printf("AVI Initial frame delay: %5.3f\n",(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)/default_fps);
-  printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a_pts=%5.3f  a_frame=%5.3f\n",
-           audio_delay,buffer_delay,a_pts,a_frame);
-  printf("START:  a_pts=%5.3f  v_pts=%5.3f  \n",d_audio->pts,d_video->pts);
+  if(verbose){
+    printf("AVI Initial frame delay: %5.3f\n",(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)/default_fps);
+    printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a_pts=%5.3f  a_frame=%5.3f\n",
+             audio_delay,buffer_delay,a_pts,a_frame);
+    printf("START:  a_pts=%5.3f  v_pts=%5.3f  \n",d_audio->pts,d_video->pts);
+  }
   delay_corrected=0; // has to correct PTS diffs
   d_video->pts=0;d_audio->pts=0; // PTS is outdated now!
 }
@@ -1616,6 +1633,7 @@ switch(has_video){
         audio_delay+=x;
         //a_pts-=x;
         delay_corrected=1;
+        if(verbose)
         printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a.pts=%5.3f  v.pts=%5.3f\n",
                audio_delay,buffer_delay,d_audio->pts,d_video->pts);
       }

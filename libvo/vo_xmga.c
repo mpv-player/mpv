@@ -103,7 +103,7 @@ static void set_window(){
          XGetGeometry( mDisplay,mWindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
          drwX=0; drwY=0; // drwWidth=wndWidth; drwHeight=wndHeight;
          XTranslateCoordinates( mDisplay,mWindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-         fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+         //fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
          if ( mFullscreen )
           {
@@ -113,7 +113,7 @@ static void set_window(){
            drwcY+=drwY;
            drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
            drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
-           fprintf( stderr,"[xmga-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+           //fprintf( stderr,"[xmga-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
           }
 
          mDrawColorKey();
@@ -133,7 +133,7 @@ static void check_events(void)
          set_window();
          if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
           {
-           fprintf( stderr,"Error in mga_vid_config ioctl" );
+           fprintf( stderr,"Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 //           exit( 0 );
           }
 
@@ -200,7 +200,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  mDisplay=XOpenDisplay(name);
  if ( mDisplay == NULL )
   {
-   fprintf( stderr,"Can not open display\n" );
+   fprintf( stderr,"Can not open X11 display\n" );
    return -1;
   }
 

@@ -174,7 +174,7 @@ DrvOpen(LPARAM lParam2)
             GUID* id=&CLSID_Voxware;
             
             result=func(id, &IID_IClassFactory, (void**)&factory);
-            if(result || (!factory)) printf("No such class object\n");
+            if(result || (!factory)) printf("No such class object (wrong/missing GUID?)\n");
 
             printf("Calling factory->vt->CreateInstance()\n");
             printf("addr = %X\n",(unsigned int)factory->vt->CreateInstance);
@@ -221,7 +221,7 @@ DrvOpen(LPARAM lParam2)
          hDriver = (HDRVR) 0;
      }
      
-     printf("Successfully loaded codec %s\n",win32_codec_name);
+//     printf("Successfully loaded codec %s\n",win32_codec_name);
      
      return (hDriver);
 }
