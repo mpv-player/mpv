@@ -1,4 +1,4 @@
-.\" synced with 1.877
+.\" synced with 1.878
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "27 Février 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "01 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -3719,20 +3719,24 @@ Si le nombre de canaux de sortie est plus petit que le nombre de canaux
 d'entrée les canaux en trop seront tronqués.
 .
 .TP
-.B format[=bps:f]
-Sélectionne le nombre d'octets par échantillon et le format utilisé pour la
-sortie depuis la couche filtre.
-L'option bps est un entier et s'exprime en Octets par échantillon.
-Le format f est une chaine contenant un mix concaténé de:
-.br
-alaw, mulaw ou imaadpcm
-.br
-float ou int (resp.\& flottant ou entier)
-.br
-unsigned ou signed (resp.\& non signé ou signé)
-.br
-le ou be (little- ou big-endian)
-.br
+.B format[=format] (voir aussi \-format)
+Convertit entre différents formats d'échantillons.
+Activé automatiquement lorsque la carte son ou un autre filtre le nécessite.
+.PD 0
+.RSs
+.IPs <format>
+Définit le format souhaité.
+Sa forme générale est 'sbe', où 's' indique le signe (soit 's' pour signé
+ou 'u' pour non signé (unsigned)), 'b' indique le nombre de bits par
+échantillon (16, 24 ou 32), et 'e' indique le boutisme (endianness)
+('le' pour petit-boutiste (little-endian), 'be' pour gros-boutiste
+(big-endian), et 'ne' pour le boutisme de l'ordinateur sur lequel MPlayer
+tourne).
+Des valeurs valides sont (parmi d'autres)\ : 's16le', 'u32be' et 'u24ne'.
+Quelques spécificateurs valides de formats font exception à cette règle: u8,
+s8, floatle, floatbe, floatne, mulaw, alaw, mpeg2, ac3 et imaadpcm.
+.RE
+.PD 1
 .
 .TP
 .B volume[=v:sc]
