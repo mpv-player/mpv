@@ -57,7 +57,7 @@ static uint32_t vm = 0;                             //exclusive mode, allows res
 static uint32_t fs = 0;                             //display in window or fullscreen 
 static uint32_t dstride;                            //surface stride
 static uint32_t swap = 1;                           //swap u<->v planes set to 1 if you experience bluish faces 
-static uint32_t nooverlay = 1;                      //NonOverlay mode
+static uint32_t nooverlay = 0;                      //NonOverlay mode
 static DWORD    destcolorkey;                       //colorkey for our surface
 static COLORREF windowcolor = RGB(0,0,16);          //windowcolor == colorkey
 
@@ -324,7 +324,8 @@ static void uninit(void)
 		mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>overlay surface released\n");
 	}
 	if (g_lpddsPrimary != NULL) g_lpddsPrimary->lpVtbl->Release(g_lpddsPrimary);
-    mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>primary released\n");
+    g_lpddsPrimary = NULL;
+	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>primary released\n");
 	if(hWnd != NULL)DestroyWindow(hWnd);
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>window destroyed\n");
 	if (g_lpdd != NULL) g_lpdd->lpVtbl->Release(g_lpdd);
@@ -968,9 +969,22 @@ static uint32_t Directx_CreateWindow()
 
 static uint32_t preinit(const char *arg)
 {
+	if(arg)
+	{
+		if(!strcmp(arg,"noaccel"))
+		{
+			mp_msg(MSGT_VO,MSGL_V,"<vo_directx><INFO>disabled overlay\n");
+		    nooverlay = 1;
+		}
+        else
+		{
+			mp_msg(MSGT_VO,MSGL_ERR,"<vo_directx><ERROR>unknown subdevice: %s\n",arg);
+	        return ENOSYS;
+		}
+	}
 	if (Directx_InitDirectDraw()!= 0)return 1;          //init DirectDraw
     if (Directx_CheckPrimaryPixelformat()!=0)return 1;
-	if (Directx_CheckOverlayPixelformats() == 0)        //check for supported hardware
+	if (!nooverlay && Directx_CheckOverlayPixelformats() == 0)        //check for supported hardware
 	{
 		mp_msg(MSGT_VO, MSGL_V ,"<vo_directx><INFO>hardware supports overlay\n");
 		nooverlay = 0;
@@ -1173,7 +1187,18 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	image_height = height;
 	//printf("<vo_directx><INFO>config entered\n");
 	//printf("width:%i\nheight:%i\nd_width:%i\nd_height%i\n",width,height,d_width,d_height);
-    if(vm)
+    SetWindowText(hWnd,"");
+	if (g_lpddsBack != NULL) g_lpddsBack->lpVtbl->Release(g_lpddsBack);
+	g_lpddsBack = NULL;
+	if(vo_doublebuffering)
+	{
+		if (g_lpddsOverlay != NULL)g_lpddsOverlay->lpVtbl->Release(g_lpddsOverlay);
+	}
+    g_lpddsOverlay = NULL;
+	if (g_lpddsPrimary != NULL) g_lpddsPrimary->lpVtbl->Release(g_lpddsPrimary);
+    g_lpddsPrimary = NULL;
+	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>overlay surfaces released\n");
+	if(vm)
 	{      //exclusive mode
 	  if (g_lpdd->lpVtbl->SetCooperativeLevel(g_lpdd, hWnd, DDSCL_EXCLUSIVE|DDSCL_FULLSCREEN) != DD_OK)
 	  {
