@@ -541,7 +541,7 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 			if(asf_http_ctrl->n_video > 0) {
 				for( i=0; i<asf_http_ctrl->n_video ; i++ ) {
 					stream_id = asf_http_ctrl->video_streams[i];
-					if(stream_id == asf_http_ctrl->video_id) {
+					if(stream_id == asf_http_ctrl->video_id || !asf_http_ctrl->video_id) {
 						enable = 0;
 					} else {
 						enable = 2;
