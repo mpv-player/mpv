@@ -1407,7 +1407,7 @@ jusqu'aux nouvelles Radeons.
 
 <para>
 Il y a deux binaires compilés: <filename>radeon_vid</filename> pour les cartes Radeon et
-<filename>rage128_vid</filename> pour les Rage 128. Vous pouvez en forcer une ou laisser
+<filename>rage128_vid</filename> pour les Rage 128. Vous pouvez en forcer un ou laisser
 le système VIDIX le détecter parmis les pilotes disponibles.
 </para>
 </sect5>
@@ -1415,7 +1415,7 @@ le système VIDIX le détecter parmis les pilotes disponibles.
 <sect5 id="vidix-mga">
 <title>Cartes Matrox</title>
 <para>
-Les Matrox G200,G400,G450 and G550 doivent normalement fonctionner.
+Les Matrox G200,G400,G450 et G550 doivent normalement fonctionner.
 </para>
 
 <para>
@@ -1427,8 +1427,8 @@ Le pilote supporte les égaliseurs vidéo et devrait être presque aussi rapide que
 <sect5 id="vidix-trident">
 <title>Cartes Trident</title>
 <para>
-Il y a un pilote disponible pour les chipsets Trident Cyberblade/i1, qui peut être
-trouvé sur les cartes-mère VIA Epia.
+Il y a un pilote disponible pour les chipsets Trident Cyberblade/i1, qui peuvent être
+trouvés sur les cartes-mère VIA Epia.
 </para>
 
 <para>

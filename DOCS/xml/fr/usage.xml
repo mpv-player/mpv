@@ -417,7 +417,7 @@ utilisant les protocoles HTTP, MMS ou RTSP/RTP.
 La lecture se fait juste en ajoutant l'URL à la ligne de commande.
 <application>MPlayer</application> utilise également la variable d'environnement
 <envar>http_proxy</envar>, et utilise le proxy si disponible. L'utilisation du Proxy
-peut aussi être forcé:
+peut aussi être forcée:
 <screen>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</screen>
 </para>
 
