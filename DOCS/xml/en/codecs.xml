@@ -654,7 +654,7 @@ MPEG decoder cards.
 integer (internally 24bit PCM) only
 MPEG audio decoding library. It does not handle broken files well, and it
 sometimes has problems with seeking, but it may perform better on FPU-less
-(such as <link linked="arm">ARM</link>) platform than mp3lib.
+(such as <link linkend="arm">ARM</link>) platform than mp3lib.
 </para>
 
 <para>
