@@ -17,6 +17,8 @@ PRG = mplayer
 PRG_HQ = mplayerHQ
 PRG_AVIP = aviparse
 PRG_TV = tvision
+PRG_CFG = codec-cfg
+
 prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
@@ -30,7 +32,7 @@ VO_LIBS = -Llibvo -lvo $(X_LIBS)
 
 # .PHONY: all clean
 
-all:	$(PRG)
+all:	$(PRG) $(PRG_CFG)
 # $(PRG_AVIP)
 
 .c.o:
@@ -73,6 +75,9 @@ $(PRG_AVIP):	.depend aviparse.o $(OBJS) loader/libloader.a $(COMMONLIBS)
 
 $(PRG_TV):	.depend tvision.o $(OBJS) $(COMMONLIBS)
 	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
+
+$(PRG_CFG):        codec-cfg.c codec-cfg.h
+	$(CC) $(CFLAGS) codec-cfg.c -o $(PRG_CFG) -DTESTING
 
 install: $(PRG)
 	install -g $(GROUP) -o $(OWNER) -m $(PERM) -s $(PRG) $(BINDIR)
