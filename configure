@@ -2918,11 +2918,11 @@ elif test "$_divx4linux" != no && cc_check -lm -ldivxdecore -lm ; then
   _xvid=no
   _divx4linux=yes
   _opendivx=no
-  _ld_decore='-ldivxdecore opendivx/postprocess.o'
+  _ld_decore='-ldivxdecore'
   _def_decore='#define NEW_DECORE 1'
   _def_divx='#define USE_DIVX'
   _def_divx5='#undef DECORE_DIVX5'
-  _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
+  _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
   _codecmodules="divx4linux $_codecmodules"
   _nocodecmodules="xvid $_nocodecmodules"
   echores "DivX4linux (with libdivxdecore.so)"
