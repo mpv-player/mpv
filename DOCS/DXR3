@@ -40,14 +40,6 @@ harddisk.
     -ac hwac3				For digital audio output instead of
 					analog
     -vc mpegpes				For mpeg playback
-    -scalefactor <float>		Set the scale factor for libavcodec.
-					1.0 = Normal res
-					2.0 = Double res
-					0.5 = Half res
-					You get the drift, anyway, this is useful for those of you
-					on slower machines who would want to watch that brand new
-					divx file, just set this to a value as close to 1.0 as
-					possible where you still get decent playback speed.
     -aop list=resample:fout=48000	If samplerate is below 44100Hz
  					This does not work with digital audio output
  					(-ac hwac3)
