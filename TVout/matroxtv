@@ -50,6 +50,15 @@ function SetTVstandard {
 	matroxset 1		# PAL
 	# matroxset 2		# NTSC
 }
+
+function SetMonitorMode {
+	matroxset 128
+}
+
+function nomapping {
+       con2fb /dev/fb0 /dev/tty1
+       con2fb /dev/fb0 /dev/tty2
+}
 	
 echo
 echo "Please read MPlayer's TV-out documentation, and install 'matroxset' and 'fbset'."
@@ -65,7 +74,16 @@ echo " [ 0 ]    Clear & blank screen"
 echo " [ 1 ]    Monitor only"
 echo "                          /---> Monitor"
 echo " [ 2 ]    DualHead - CRTC1"
+echo " [ 2 ]    Cloning - CRTC1" 
 echo "                          \\---> TV"
+echo
+echo "                          /---> Monitor"
+echo " [ 3 ]    Cloning - CRTC1"
+echo "                          \\---> Monitor"
+echo
+echo "                     CRTC1 ---> Monitor"
+echo " [ 4 ]    DualHead -"
+echo "                     CRTC2 ---> Monitor"
 
 echo
 
@@ -86,6 +104,7 @@ case "$ABC" in
 	;;
 
 	1)
+	nomapping
 	matroxset -f /dev/fb1 -m 0
 	matroxset -f /dev/fb0 -m 1
 	defaultmode
@@ -93,10 +112,29 @@ case "$ABC" in
 	;;
 
 	2)
+	nomapping
 	matroxset -f /dev/fb1 -m 0
 	matroxset -f /dev/fb0 -m 3
 	SetTVstandard
 	TVdefaultmode
+	;;
+
+	3)
+	nomapping
+	matroxset -f /dev/fb1 -m 0
+	matroxset -f /dev/fb0 -m 3
+	SetMonitorMode
+	defaultmode
+	;;
+
+	4)
+	nomapping
+	matroxset -f /dev/fb0 -m 2
+	matroxset -f /dev/fb1 -m 1
+	SetMonitorMode
+	defaultmode
+	con2fb /dev/fb1 /dev/tty1
+	con2fb /dev/fb1 /dev/tty2
 	;;
 
 	a)
