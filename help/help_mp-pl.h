@@ -96,7 +96,7 @@ static char help_text[]=
 "- Najczêstsza przyczyna: uszkodzony/obarczony b³edami sterownik _audio_.\n"\
 "  Rozwi±zanie: spróbuj -ao sdl lub u¿yj ALSA 0.5 lub emulacjê OSS w ALSA 0.9\n"\
 "  Przeczytaj DOCS/sound.html!\n"\
-"  Mo¿esz tak¿e eksperymentowaæ z -autosync 30 (lub innymi warto¶ciami)\n"
+"  Mo¿esz tak¿e eksperymentowaæ z -autosync 30 (lub innymi warto¶ciami)\n"\
 "- Wolny sterownik video. Spróbuj z inny sterownikiem -vo (lista: -vo help)\n"\
 "  lub odtwarzaj z opcj± -framedrop ! Przeczytaj DOCS/video.html!\n"\
 "- Wolny procesor. Nie odtwarzaj du¿ych dvd/divx na wolnych procesorach!\n"\
