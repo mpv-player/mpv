@@ -247,7 +247,9 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
     }
     else
     {
-	yuv2rgb(yuv_buffer, image[0], image[1], image[2], w, h,
+	uint8_t *yuv_slice;
+	yuv_slice=yuv_buffer+(image_width*y+x)*(video_mode_info.BitsPerPixel+7)/8;
+	yuv2rgb(yuv_slice, image[0], image[1], image[2], w, h,
 		image_width * ((video_mode_info.BitsPerPixel+7)/8),
 		stride[0], stride[1]);
     }
@@ -353,6 +355,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
   int err;
 	image_width = width;
 	image_height = height;
+printf("subdevice: %s\n",vo_subdevice);
 	if(fullscreen & (0x1|0x8))
 	{
 	  printf("vo_vesa: switches: -fs, -flip are not supported\n");
