@@ -176,7 +176,7 @@ VESA (mit jeder VESA\-kompatiblen Grafikkarte, auch ohne X11),
 einige Kartenspezifischen Low\-Level\-Treiber (für Matrox, 3Dfx und ATI)
 und einige Hardware\-MPEG\-Decoderkarten wie sie Siemens DVB, DXR2 und
 DXR3/\:Hollywood+ benutzen.
-Die meisten von ihnen unterstützen Software\- oder Hardwareskalierung,
+Die meisten von ihnen unterstützen Software- oder Hardwareskalierung,
 so dass die Vollbildwiedergabe kein Problem ist.
 .PP
 MPlayer verfügt über ein On-Screen-Display (OSD) für Statusinformationen,
@@ -399,7 +399,7 @@ nur einige Informationsausgaben (standard)
 .IPs 1
 einige Debug-Informationen, avi-Header, Funktionswerte (init-Debug)
 .IPs 2
-gibt avi-Indizes, Dateiblock-Inputs und weitere Debug-Informationen aus
+gibt AVI-Indizes, Dateiblock-Inputs und weitere Debug-Informationen aus
 (Player-Debug)
 .IPs 3
 gibt alles aus, was mit dem Input-Parser zu tun hat (Parser-Debug)
@@ -2372,9 +2372,8 @@ Benutzt den directx-Treiber mit abgeschalteten Beschleunigungs-Features.
 .PD 1
 .sp 1
 FIXME: Dokumentiere die Unteroptionen für x11, xover, dga, sdl, vidix, xvidix,
-fbdev, fbdev2, vesa, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx,
-tdfx_vid, tdfxfb, dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm,
-png, tga.
+fbdev, fbdev2, vesa, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid, tdfxfb,
+dxr2, dxr3, mpegpes, zr, zr2.
 .sp 1
 Folgende Videoausgabetreiber sind verfügbar:
 .
@@ -2793,14 +2792,45 @@ Wandelt den Videostream in eine Abfolge von unkomprimierten YUV 4:2:0-Bildern
 um und speichert diese in einer Datei namens 'stream.yuv' im aktuellen
 Verzeichnis.
 Das Format ist das gleiche, das von den mjpegtools benutzt wird, daher ist
-diese Option
-nützlich, wenn du das Video mit den mjpegtools bearbeiten möchtest.
+diese Option nützlich, wenn du das Video mit den mjpegtools bearbeiten
+möchtest.
+Es unterstützt das YV12-, RGB- (24 bpp) und BGR-Format (24 bpp).
+.PD 0
+.RSs
+.IPs interlaced
+Schreibt die Ausgabe-Frames interlaced, obere Felder zuerst.
+.IPs interlaced_bf
+Schreibt die Ausgabe-Frames interlaced, untere Felder zuerst.
+.REss
+.PD 1
+.RS
+.br
+.I ANMERKUNG:
+Bei Weglassen dieser Optionen ist die Ausgabe 'progressive' (d.h.\& nicht
+interlaced).
+.RE
 .
 .TP
 .B gif89a\ 
 Gibt jeden Frame in eine GIF-Datei im aktuellen Verzeichnis aus.
 Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
+Es unterstützt nur das RGB-Format (24 bpp), und die Ausgabe wird zu 256 Farben
+konvertiert.
+.PD 0
+.RSs
+.IPs fps\ \ \ 
+Fließkommawert, der die Framerate angibt (Standard: 5.0).
+.IPs filename
+Gibt den Ausgabedateinamen an (Standard: ./out.gif).
+.REss
+.PD 1
+.RS
+.br
+.I ANMERKUNG:
+Du musst die Framerate for dem Dateinamen angeben, sonst wird die Framerate
+Teil des Dateinamens.
+.RE
 .
 .TP
 .B jpeg\ \ \ 
@@ -2840,18 +2870,42 @@ Muss größer oder gleich 1 sein (Standard: 1000).
 Gibt jeden Frame in eine PGM-Datei im aktuellen Verzeichnis aus.
 Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
+Unterstützt nur das YV12-Format.
+Das resultierende Bild ist (Breite) * (Höhe * 1.5) des Originalbildes groß.
+An den Koordinaten 0,0 für Breite,Höhe ist die Y-Ebene, an den
+Koordinaten 0,Höhe bei Breite/2,Höhe/2 ist die U-Ebene und an den Koordinaten
+Breite/2,Höhe bei Breite/2,Höhe/2 ist die V-Ebene.
+Es gibt keine Unteroptionen.
 .
 .TP
 .B png\ \ \ \ 
 Gibt jeden Frame in eine PNG-Datei im aktuellen Verzeichnis aus.
 Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
+Unterstützt die RGB- und BGR-Formate mit 24 bpp.
+Es gibt zwar keine Unteroptionen, du kannst die Kompressionsstufe jedoch mit
+der Option \-z angeben, die Werte von 0 (keine Kompression) bis 9 (maximale
+Kompression) entgegennimmt.
 .
 .TP
 .B tga\ \ \ \ 
 Gibt jeden Frame in eine TGA-Datei im aktuellen Verzeichnis aus.
 Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
+Der Zweck dieses Videoausgabetreibers ist das Schreiben von verlustfreien
+Bildern, die mit jeder externen Bibliothek verwendet werden können.
+Unterstützt werden BGR[A]-Farbformate mit 15, 24 und 32 bpp.
+Es gibt keine Unteroptionen.
+Ein bestimmtes Format kann erzwungen werden durch Benutzung des
+format-Videofilters.
+.sp 1
+.I BEISPIEL:
+.PD 0
+.RSs
+.IPs "\-vf format=bgr15"
+Speichert Bilder mit 2 Bytes pro Pixel.
+.RE
+.PD 1
 .
 .
 .
@@ -3403,7 +3457,7 @@ Die Syntax ist folgender:
 .
 .TP
 .B \-vf <Filter1[=Parameter1:Parameter2:...],Filter2,...>
-Aktiviert eine Kette von Videofiltern zusammen mit ihren Optionen.
+Aktiviert eine Videofilterkette zusammen mit ihren Optionen.
 .
 .TP
 .B \-vop <...,Filter2[=Parameter1:Parameter2:...],Filter1> (OBSOLET)
@@ -3485,7 +3539,7 @@ Schwellwert, der optional angegeben werden kann als nichts (0) bis hin zu allem
 Wert, durch den die Breite/\:Höhe teilbar sein sollte (Standard: 16).
 Der Offset wird automatisch angepasst, um das Video zu zentrieren.
 Benutze 2, um gerade Dimensionen zu bekommen (wird für 4:2:2-Video gebraucht).
-16 ist beim Encodieren zu den meisten Videocodecs die beste Wahl.
+16 ist beim Encodieren für die meisten Videocodecs die beste Wahl.
 .RE
 .PD 1
 .
