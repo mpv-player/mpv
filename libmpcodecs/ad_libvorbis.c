@@ -2,9 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdarg.h>
+#include <math.h>
 
 #include "config.h"
 #include "ad_internal.h"
+
+#ifdef USE_SETLOCALE
+#include <locale.h>
+#endif
 
 #ifdef HAVE_OGGVORBIS
 
@@ -28,7 +34,26 @@ typedef struct ov_struct_st {
   vorbis_comment   vc; /* struct that stores all the bitstream user comments */
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
   vorbis_block     vb; /* local working space for packet->PCM decode */
+  float            rg_scale; /* replaygain scale */
 } ov_struct_t;
+
+static int read_vorbis_comment( char* ptr, char* comment, char* format, ... ) {
+  va_list va;
+  int clen, ret;
+
+  va_start( va, format );
+  clen = strlen( comment );
+#ifdef USE_SETLOCALE
+  setlocale( LC_NUMERIC, "C" );
+#endif
+  ret = strncasecmp( ptr, comment, clen) == 0 ? vsscanf( ptr+clen, format, va ) : 0;
+#ifdef USE_SETLOCALE
+  setlocale( LC_NUMERIC, "" );
+#endif
+  va_end( va );
+
+  return ret;
+}
 
 static int preinit(sh_audio_t *sh)
 {
@@ -71,13 +96,39 @@ static int init(sh_audio_t *sh)
     mp_msg(MSGT_DECAUDIO,MSGL_WARN,"OggVorbis: codebook header broken!\n");
     ERROR();
   } else { /// Print the infos
+    float rg_gain=0.f, rg_peak=0.f;
     char **ptr=vc.user_comments;
     while(*ptr){
       mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbisComment: %s\n",*ptr);
+      /* replaygain */
+      read_vorbis_comment( *ptr, "replaygain_album_gain=", "%f", &rg_gain );
+      read_vorbis_comment( *ptr, "rg_audiophile=", "%f", &rg_gain );
+      if( !rg_gain ) {
+	read_vorbis_comment( *ptr, "replaygain_track_gain=", "%f", &rg_gain );
+	read_vorbis_comment( *ptr, "rg_radio=", "%f", &rg_gain );
+      }
+      read_vorbis_comment( *ptr, "replaygain_album_peak=", "%f", &rg_peak );
+      if( !rg_peak ) {
+	read_vorbis_comment( *ptr, "replaygain_track_peak=", "%f", &rg_peak );
+	read_vorbis_comment( *ptr, "rg_peak=", "%f", &rg_peak );
+      }
       ++ptr;
     }
-    mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Bitstream is %d channel, %dHz, %dbit/s %cBR\n",(int)ov->vi.channels,(int)ov->vi.rate,(int)ov->vi.bitrate_nominal,
+    /* replaygain: scale */
+    if(!rg_gain)
+      ov->rg_scale = 1.f; /* just in case pow() isn't standard-conformant */
+    else
+      ov->rg_scale = pow(10.f, rg_gain/20);
+    /* replaygain: anticlip */
+    if(ov->rg_scale * rg_peak > 1.f)
+      ov->rg_scale = 1.f / rg_peak;
+    /* replaygain: security */
+    if(ov->rg_scale > 15.) 
+      ov->rg_scale = 15.;
+    mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Bitstream is %d channel%s, %dHz, %dbit/s %cBR\n",(int)ov->vi.channels,ov->vi.channels>1?"s":"",(int)ov->vi.rate,(int)ov->vi.bitrate_nominal,
 	(ov->vi.bitrate_lower!=ov->vi.bitrate_nominal)||(ov->vi.bitrate_upper!=ov->vi.bitrate_nominal)?'V':'C');
+    if(rg_gain || rg_peak)
+      mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Gain = %+.2f dB, Peak = %.4f, Scale = %.2f\n", rg_gain, rg_peak, ov->rg_scale);
     mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Encoded by: %s\n",vc.vendor);
   }
   vorbis_comment_clear(&vc);
@@ -151,9 +202,9 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 	      float  *mono=pcm[i];
 	      for(j=0;j<bout;j++){
 #if 1
-		int val=mono[j]*32767.f;
+		int val=mono[j]*32767.f*ov->rg_scale;
 #else /* optional dither */
-		int val=mono[j]*32767.f+drand48()-0.5f;
+		int val=mono[j]*32767.f*ov->rg_scale+drand48()-0.5f;
 #endif
 		/* might as well guard against clipping */
 		if(val>32767){
