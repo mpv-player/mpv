@@ -669,13 +669,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	xswa.colormap         = XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone);
 	xswamask = CWBackPixel | CWBorderPixel | CWColormap;
 
-  vo_window = XCreateWindow(mDisplay, RootWindow(mDisplay,mScreen),
-    hint.x, hint.y, hint.width, hint.height, 4, vinfo->depth,CopyFromParent,vinfo->visual,xswamask,&xswa);
-
-  vo_x11_classhint( mDisplay,vo_window,"gl2" );
-  vo_hidecursor(mDisplay,vo_window);
-
-  wsGLXContext=glXCreateContext( mDisplay,vinfo,NULL,True );
+  if ( vo_window == None ) 
+   {
+    vo_window = XCreateWindow(mDisplay, RootWindow(mDisplay,mScreen), hint.x, hint.y, hint.width, hint.height, 4, vinfo->depth,CopyFromParent,vinfo->visual,xswamask,&xswa);
 
   if ( flags&0x01 ) vo_x11_decoration( mDisplay,vo_window,0 );
 
@@ -686,7 +682,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
 
 	/* Map window. */
-
 	XMapWindow(mDisplay, vo_window);
 #ifdef HAVE_XINERAMA
 	vo_x11_xinerama_move(mDisplay,vo_window);
@@ -702,7 +697,17 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	XSelectInput(mDisplay, vo_window, NoEventMask);
 
-  glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
+   }
+   else if ( !(flags&1) ) XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
+
+  vo_x11_classhint( mDisplay,vo_window,"gl2" );
+  vo_hidecursor(mDisplay,vo_window);
+  
+  if ( vo_config_count ) glXDestroyContext( mDisplay,wsGLXContext );
+
+  wsGLXContext=glXCreateContext( mDisplay,vinfo,NULL,True );
+
+        glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
 
 	XFlush(mDisplay);
 	XSync(mDisplay, False);
