@@ -6,6 +6,7 @@ Special system/cpu-specific bugs/problems:
 1. SIGILL (signal 4) in draw_frame, on P3 (mostly with 2.2.x kernels):
   Problem: movups is crashing in libvo/fastmemcpy.h
   Workaround:  ./configure --disable-fastmemcpy
+  SOLVED: disabled SSE code in fastmemcpy.h ;(
 
 2. No image (black image) in RGB 16bpp (x11,dga,fbdev,svga) playing
   MPEG files on SMP machine:
@@ -13,8 +14,9 @@ Special system/cpu-specific bugs/problems:
   Workaround: ./configure --disable-mmx
 
 3. SIGILL or other fault at loading l3codeca.acm:
-  Problem: shared libs are loaded to 0x00100000 instead of 0x40000000
+  Problem: shared libs are loaded to 0x00xxxxxx instead of 0x40xxxxxx
   Workaround: mplayer -afm 1 ...
+  SOLVED: you are using some security kernel patch, like OpenWall etc.
 
 Please contact me if you experienced any of the above problems. We need
 people to test fixes and send us as many system details information as
