@@ -168,6 +168,35 @@ static void copy_slice (vo_frame_t * frame, uint8_t ** src){
 
     ++picture->slice;
 }
+void draw_frame(vo_functions_t * output)
+{
+int stride[3];
+    
+    stride[0]=picture->coded_picture_width;
+    stride[1]=stride[2]=stride[0]/2;
+#ifdef MPEG12_POSTPROC
+    if( picture->pp_options ) 
+    {// apply postprocess filter
+	postprocess((picture->picture_coding_type == B_TYPE) ?
+			picture->current_frame->base :
+			picture->forward_reference_frame->base,
+			stride[0], frames[3].base, stride[0],
+                        picture->coded_picture_width, picture->coded_picture_height,
+                        &quant_store[1][1], (MBC+1), picture->pp_options);
+	output->draw_slice (frames[3].base, stride, 
+                        picture->display_picture_width,
+                        picture->display_picture_height, 0, 0);
+    }else
+#endif	    
+    {
+        output->draw_slice ((picture->picture_coding_type == B_TYPE) ?
+			picture->current_frame->base :
+			picture->forward_reference_frame->base,
+	    		stride, 
+                        picture->display_picture_width,
+                        picture->display_picture_height, 0, 0);
+    }
+}
 
 static int in_slice_flag=0;
 
@@ -186,36 +215,15 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer, int
 	    if(picture->picture_structure == FRAME_PICTURE) 
 	    {
 #ifdef MPEG12_POSTPROC
-	       if( (picture->pp_options) && (!framedrop) ){
-                    // apply postprocess filter
-            	    int stride[3];
-            	    stride[0]=picture->coded_picture_width;
-            	    stride[1]=stride[2]=stride[0]/2;
-                    postprocess((picture->picture_coding_type == B_TYPE) ?
-			    picture->current_frame->base :
-			    picture->forward_reference_frame->base,
-			stride[0], frames[3].base, stride[0],
-                        picture->coded_picture_width, picture->coded_picture_height,
-                        &quant_store[1][1], (MBC+1), picture->pp_options);
-		    output->draw_slice (frames[3].base, stride, 
-                        picture->display_picture_width,
-                        picture->display_picture_height, 0, 0);
-	       } 
+		if( (picture->pp_options) && (!framedrop) )
+		    draw_frame(output);
 #endif	    
-	    }else{
-	       if( (picture->second_field) && (!framedrop) )
-	       {
-            	    int stride[3];
-            	    stride[0]=picture->coded_picture_width;
-            	    stride[1]=stride[2]=stride[0]/2;
-		    output->draw_slice ((picture->picture_coding_type == B_TYPE) ?
-			    picture->current_frame->base :
-			    picture->forward_reference_frame->base,
-			stride, 
-                        picture->display_picture_width,
-                        picture->display_picture_height, 0, 0);
-                }else
-		is_frame_done=0;// we don't draw top fields
+	    }else
+	    {
+		if( (picture->second_field) && (!framedrop) )
+	    	    draw_frame(output);
+    		else
+		    is_frame_done=0;// we don't draw first fields
     	    }
 #ifdef ARCH_X86
 	if (config.flags & MM_ACCEL_X86_MMX) emms();
