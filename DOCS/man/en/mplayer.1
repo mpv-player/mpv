@@ -5780,8 +5780,8 @@ Avoid B-frames in high motion scenes.
 .
 .TP
 .B vpass=<1\-3>
-Activates internal two (or three) pass mode, only specify if you wish to
-use two (or three) pass encoding.
+Activates internal two (or more) pass mode, only specify if you wish to
+use two (or more) pass encoding.
 .PD 0
 .RSs
 .IPs 1
@@ -5789,7 +5789,7 @@ first pass (also see turbo)
 .IPs 2
 second pass
 .IPs 3
-Nth pass (second and third passes of three pass encoding)
+Nth pass (second and subsequent passes of N-pass encoding)
 .RE
 .RS
 Here is how it works, and how to use it:
@@ -5801,15 +5801,21 @@ mode does.
 In two pass mode, the second pass (vpass=2) reads the stats file and
 bases ratecontrol decisions on it.
 .br
-In three pass mode, the second pass (vpass=3, that is not a typo)
+In N-pass mode, the second pass (vpass=3, that is not a typo)
 does both: It first reads the stats, then overwrites them.
 You might want to backup divx2pass.log before doing this if there is
 any possibility that you will have to cancel MEncoder.
 You can use all encoding options, except very CPU-hungry options like "qns".
 .br
-The third pass (vpass=3) is the same as the second pass, except that it has
-the second pass's stats to work from.
-You can use all encoding options, including CPU-hungry ones.
+You can run this same pass over and over to refine the encode.
+Each subsequent pass will use the stats from the previous pass to improve.
+The final pass can include any CPU-hungry encoding options.
+.br
+If you want a 2 pass encode, use first vpass=1, and then vpass=2.
+.br
+If you want a 3 or more pass encode, use vpass=1 for the first pass
+and then vpass=3 and then vpass=3 again and again until you are
+satisfied with the encode.
 .RE
 .PD 1
 .sp 1
