@@ -75,7 +75,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     }
     return af_test_output(af,(af_data_t*)arg);
   case AF_CONTROL_COMMAND_LINE:{
-    float v=-10.0;
+    float v=0.0;
     float vol[AF_NCH];
     int   i;
     sscanf((char*)arg,"%f:%i", &v, &s->soft);
