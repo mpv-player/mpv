@@ -27,10 +27,6 @@
 #define GII_BUGGY_KEYCODES
 #define GGI_OSD
 
-#ifdef GGI_OSD
-#warning "GGI_OSD is bugging!"
-#endif
-
 LIBVO_EXTERN (ggi)
 
 static vo_info_t vo_info = 
@@ -293,50 +289,49 @@ static uint32_t draw_frame(uint8_t *src[])
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
     unsigned char *srca, int stride)
 {
-#warning "draw_alpha needs to be fixed!"
     switch(ggi_format)
     {
 	case IMGFMT_YV12:
 	case IMGFMT_I420:
 	case IMGFMT_IYUV:
 	    vo_draw_alpha_yv12(w, h, src, srca, stride,
-		((uint8_t *) ggi_buffer->write)+(virt_width*y0+x0)*ggi_bppmul,
-		virt_width*ggi_bppmul);
+		ggi_buffer->write+(virt_width*y0+x0),
+		virt_width);
 	    break;
 	case IMGFMT_YUY2:
 	case IMGFMT_YVYU:
 	    vo_draw_alpha_yuy2(w, h, src, srca, stride,
-		((uint8_t *) ggi_buffer->write)+2*(virt_width*y0+x0)*ggi_bppmul,
-		2*virt_width*ggi_bppmul);
+		ggi_buffer->write+2*(virt_width*y0+x0),
+		2*virt_width);
 	    break;
 	case IMGFMT_UYVY:
 	    vo_draw_alpha_yuy2(w, h, src, srca, stride,
-		((uint8_t *) ggi_buffer->write)+2*(virt_width*y0+x0)*ggi_bppmul+1,
-		2*virt_width*ggi_bppmul);
+		ggi_buffer->write+2*(virt_width*y0+x0)+1,
+		2*virt_width);
 	    break;
 	case IMGFMT_RGB15:
         case IMGFMT_BGR15:
             vo_draw_alpha_rgb15(w, h, src, srca, stride, 
-		((uint8_t *) ggi_buffer->write)+2*(virt_width*y0+x0)*ggi_bppmul,
-		2*virt_width*ggi_bppmul);
+		ggi_buffer->write+2*(virt_width*y0+x0),
+		2*virt_width);
             break;
         case IMGFMT_RGB16:
         case IMGFMT_BGR16:
             vo_draw_alpha_rgb16(w, h, src, srca, stride, 
-		((uint8_t *) ggi_buffer->write)+2*(virt_width*y0+x0)*ggi_bppmul,
-		2*virt_width*ggi_bppmul);
+		ggi_buffer->write+2*(virt_width*y0+x0),
+		2*virt_width);
             break;
         case IMGFMT_RGB24:
         case IMGFMT_BGR24:
             vo_draw_alpha_rgb24(w, h, src, srca, stride, 
-		((uint8_t *) ggi_buffer->write)+3*(virt_width*y0+x0)*ggi_bppmul,
-		3*virt_width*ggi_bppmul);
+		ggi_buffer->write+3*(virt_width*y0+x0),
+		3*virt_width);
             break;
         case IMGFMT_RGB32:
         case IMGFMT_BGR32:
             vo_draw_alpha_rgb32(w, h, src, srca, stride, 
-		((uint8_t *) ggi_buffer->write)+4*(virt_width*y0+x0)*ggi_bppmul,
-		4*virt_width*ggi_bppmul);
+		ggi_buffer->write+4*(virt_width*y0+x0),
+		4*virt_width);
 	    break;
     }
 }
