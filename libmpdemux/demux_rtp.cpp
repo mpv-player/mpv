@@ -112,6 +112,9 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
     RTSPClient* rtspClient = NULL;
     unsigned flags = 0;
 
+    if (demuxer == NULL || demuxer->stream == NULL) break;  // shouldn't happen
+    demuxer->stream->eof = 0; // just in case 
+
     // Look at the stream's 'priv' field to see if we were initiated
     // via a SDP description:
     char* sdpDescription = (char*)(demuxer->stream->priv);

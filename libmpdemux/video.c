@@ -25,6 +25,10 @@
 /* biCompression constant */
 #define BI_RGB        0L
 
+#ifdef STREAMING_LIVE_DOT_COM
+#include "demux_rtp.h"
+#endif
+
 static mp_mpeg_header_t picture;
 
 static int telecine=0;
@@ -82,13 +86,6 @@ switch(d_video->demuxer->file_format){
 #endif
   break;
  }
-#ifdef STREAMING_LIVE_DOT_COM
- case DEMUXER_TYPE_RTP:
-   // If the RTP stream is a MPEG stream, then we use this code to check
-   // for MPEG headers:
-   if (!demux_is_mpeg_rtp_stream(d_video->demuxer)) break;
-   // otherwise fall through to...
-#endif
  case DEMUXER_TYPE_MPEG4_ES: {
    videobuf_len=0; videobuf_code_len=0;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for Video Object Start code... ");fflush(stdout);
@@ -129,6 +126,13 @@ switch(d_video->demuxer->file_format){
    sh_video->format=0x10000004;
    break;
  }
+#ifdef STREAMING_LIVE_DOT_COM
+ case DEMUXER_TYPE_RTP:
+   // If the RTP stream is a MPEG stream, then we use this code to check
+   // for MPEG headers:
+   if (!demux_is_mpeg_rtp_stream(d_video->demuxer)) break;
+   // otherwise fall through to...
+#endif
  case DEMUXER_TYPE_PVA:
  case DEMUXER_TYPE_MPEG_ES:
  case DEMUXER_TYPE_MPEG_PS: {
