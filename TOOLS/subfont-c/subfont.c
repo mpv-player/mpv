@@ -629,7 +629,7 @@ void blur(
     unsigned char  *s = buffer;
     unsigned short *t = tmp2+1;
     for(y=0; y<height; y++){
-	memset(t, 0, (width+1)*sizeof(short));
+	memset(t-1, 0, (width+1)*sizeof(short));
 //	for(x=0; x<width+1; x++)
 //	    t[x]= 128;
 
