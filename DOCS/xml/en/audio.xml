@@ -6,61 +6,6 @@
 <title>Audio/Video synchronization</title>
 
 <para>
-<application>MPlayer</application>'s audio interface is called
-<emphasis>libao2</emphasis>. It currently contains these drivers:
-</para>
-
-<informaltable>
-<tgroup cols="2">
-<thead>
-  <row><entry>Driver</entry><entry>Comment</entry></row>
-</thead>
-<tbody>
-<row><entry>oss</entry><entry>
-  OSS (ioctl) driver (supports hardware AC3 passthrough)
-  </entry></row>
-<row><entry>sdl</entry><entry>
-  SDL driver (supports sound daemons like <emphasis role="bold">ESD</emphasis>
-  and <emphasis role="bold">ARTS</emphasis>)
-  </entry></row>
-<row><entry>nas</entry><entry>
-  NAS (Network Audio System) driver
-  </entry></row>
-<row><entry>alsa5</entry><entry>
-  native ALSA 0.5 driver
-  </entry></row>
-<row><entry>alsa</entry><entry>
-  native ALSA 0.9/1.0 driver (supports hardware AC3 passthrough)
-  </entry></row>
-<row><entry>sun</entry><entry>
-  SUN audio driver (<filename>/dev/audio</filename>) for BSD and Solaris8 users
-  </entry></row>
-<row><entry>macosx</entry><entry>
-  native Mac OS X driver
-  </entry></row>
-<row><entry>win32</entry><entry>
-  native Win32 driver
-  </entry></row>
-<row><entry>dsound</entry><entry>
-  DirectX DirectSound driver
-  </entry></row>
-<row><entry>arts</entry><entry>
-  native ARTS driver (mostly for KDE users)
-  </entry></row>
-<row><entry>esd</entry><entry>
-  native ESD driver (mostly for GNOME users)
-  </entry></row>
-<row><entry>jack</entry><entry>
-  JACK (Jack Audio Connection Kit) driver
-  </entry></row>
-<row><entry>polyp</entry><entry>
-  polypaudio driver
-  </entry></row>
-</tbody>
-</tgroup>
-</informaltable>
-
-<para>
 Linux sound card drivers have compatibility problems. This is because
 <application>MPlayer</application> relies on an in-built feature of
 <emphasis>properly</emphasis> coded sound drivers that enable them to
