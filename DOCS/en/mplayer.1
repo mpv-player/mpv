@@ -2064,7 +2064,7 @@ try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others
 .
 .TP
 .B \-vf <filter1[=options],filter2,...>
-Activate a comma separated list of video filters and their options.
+Setup a chain of video filters.
 
 .I NOTE:
 .br
@@ -2576,6 +2576,10 @@ try XAnim codecs first
 .RE
 .PD 1
 .
+.TP
+.B \-vop <...,filter3[=options],filter2,filter1> (OBSOLETE)
+Setup a chain of video filters, to be applied in reverse order.
+Deprecated in favor of \-vf.
 .TP
 .B \-x <x> (MPLAYER only)
 Scale image to x width (if sw/\:hw scaling available).
