@@ -78,7 +78,7 @@ struct config conf[]={
 
 	{"framedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 1},
 	{"hardframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 2},
-	{"no framedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 1, 0},
+	{"noframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 1, 0},
 	
 	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 256},
 	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 256},
