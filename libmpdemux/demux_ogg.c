@@ -128,6 +128,10 @@ typedef struct ogg_demuxer {
   int num_syncpoint;
   off_t pos, last_size;
   int64_t final_granulepos;
+
+  /* Used for subtitle switching. */
+  int n_text;
+  int *text_ids;
 } ogg_demuxer_t;
 
 #define NUM_VORBIS_HDR_PACKETS 3
@@ -655,11 +659,29 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
 extern void print_wave_header(WAVEFORMATEX *h);
 extern void print_video_header(BITMAPINFOHEADER *h);
 
-static int n_text = 0;
-static int *text_ids = NULL;
+/** \brief Return the number of subtitle tracks in the file.
 
-int demux_ogg_num_subs() { return n_text; }
-int demux_ogg_sub_id(int index) { return (index < 0) ? index : text_ids[index]; }
+  \param demuxer The demuxer for which the number of subtitle tracks
+  should be returned.
+*/
+int demux_ogg_num_subs(demuxer_t *demuxer) {
+  ogg_demuxer_t *ogg_d = (ogg_demuxer_t *)demuxer->priv;
+  return ogg_d->n_text;
+}
+
+/** \brief Change the current subtitle stream and return its ID.
+
+  \param demuxer The demuxer whose subtitle stream will be changed.
+  \param new_num The number of the new subtitle track. The number must be
+  between 0 and ogg_d->n_text - 1.
+
+  \returns The Ogg stream number ( = page serial number) of the newly selected
+  track.
+*/
+int demux_ogg_sub_id(demuxer_t *demuxer, int index) {
+  ogg_demuxer_t *ogg_d = (ogg_demuxer_t *)demuxer->priv;
+  return (index < 0) ? index : (index >= ogg_d->n_text) ? -1 : ogg_d->text_ids[index];
+}
 
 /// Open an ogg physical stream
 int demux_ogg_open(demuxer_t* demuxer) {
@@ -905,11 +927,11 @@ int demux_ogg_open(demuxer_t* demuxer) {
           mp_msg(MSGT_DEMUX, MSGL_V, "Ogg stream %d is text\n", ogg_d->num_sub);
 	  ogg_d->subs[ogg_d->num_sub].samplerate= get_uint64(&st->time_unit)/10;
 	  ogg_d->subs[ogg_d->num_sub].text = 1;
-          if (demuxer->sub->id == n_text)
+          if (demuxer->sub->id == ogg_d->n_text)
             text_id = ogg_d->num_sub;
-          n_text++;
-          text_ids = (int *)realloc(text_ids, sizeof(int) * n_text);
-          text_ids[n_text - 1] = ogg_d->num_sub;
+          ogg_d->n_text++;
+          ogg_d->text_ids = (int *)realloc(ogg_d->text_ids, sizeof(int) * ogg_d->n_text);
+          ogg_d->text_ids[ogg_d->n_text - 1] = ogg_d->num_sub;
           demux_ogg_init_sub();
 	//// Unknown header type
       } else
@@ -977,7 +999,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
   /* Disable the subs only if there are no text streams at all.
      Otherwise the stream to display might be chosen later when the comment
      packet is encountered and the user used -slang instead of -sid. */
-  if(!n_text)
+  if(!ogg_d->n_text)
     demuxer->sub->id = -2;
   else if (text_id >= 0) {
     demuxer->sub->id = text_id;
@@ -994,7 +1016,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
     demux_ogg_scan_stream(demuxer);
   }
 
-  mp_msg(MSGT_DEMUX,MSGL_V,"Ogg demuxer : found %d audio stream%s, %d video stream%s and %d text stream%s\n",n_audio,n_audio>1?"s":"",n_video,n_video>1?"s":"",n_text,n_text>1?"s":"");
+  mp_msg(MSGT_DEMUX,MSGL_V,"Ogg demuxer : found %d audio stream%s, %d video stream%s and %d text stream%s\n",n_audio,n_audio>1?"s":"",n_video,n_video>1?"s":"",ogg_d->n_text,ogg_d->n_text>1?"s":"");
  
   return 1;
 }
@@ -1370,6 +1392,8 @@ void demux_close_ogg(demuxer_t* demuxer) {
     free(ogg_d->subs);
   if(ogg_d->syncpoints)
     free(ogg_d->syncpoints);
+  if (ogg_d->text_ids)
+    free(ogg_d->text_ids);
   free(ogg_d);
 }
 

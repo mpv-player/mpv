@@ -3170,12 +3170,12 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	int new_id = dvdsub_id + 1;
 	if (dvdsub_id < 0)
 	    new_id = 0;
-	if ((unsigned int) new_id >= demux_ogg_num_subs())
+	if ((unsigned int) new_id >= demux_ogg_num_subs(demuxer))
 	    new_id = -1;
 	if (new_id != dvdsub_id)
 	    osd_show_vobsub_changed = sh_video->fps;
 	dvdsub_id = new_id;
-	d_dvdsub->id = demux_ogg_sub_id(new_id);
+	d_dvdsub->id = demux_ogg_sub_id(demuxer, new_id);
     }
 #endif
 #ifdef HAVE_MATROSKA

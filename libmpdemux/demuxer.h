@@ -278,6 +278,12 @@ char* demux_info_get(demuxer_t *demuxer, char *opt);
 int demux_info_print(demuxer_t *demuxer);
 int demux_control(demuxer_t *demuxer, int cmd, void *arg);
 
+#ifdef HAVE_OGGVORBIS
+/* Found in demux_ogg.c */
+int demux_ogg_num_subs(demuxer_t *demuxer);
+int demux_ogg_sub_id(demuxer_t *demuxer, int index);
+#endif
+
 #endif
 
 extern unsigned long demuxer_get_time_length(demuxer_t *demuxer);
