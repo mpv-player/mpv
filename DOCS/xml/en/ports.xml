@@ -464,18 +464,17 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   will keep it from being used. Add this to your config file to permanently
   keep it from being used.</para>
 
-<para>You can use Win32 codecs and Real Win32 codecs (not Real Linux codecs)
-  if you want to. Put the codecs somewhere in your path or pass
-  <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option> (alternatively
-  <option>--with-codecsdir=<replaceable>/path/to/your/codecs</replaceable></option> only on
-  <application>Cygwin</application>) to <filename>configure</filename>. We
-  have had some reports that Real DLLs need to be writable by the user running
-  <application>MPlayer</application>, but only on some systems. Try making
-  them writable if you have problems. QuickTime DLLs also work, but you will
-  have to put them in your Windows system directory
-  (<filename class="directory"><replaceable>C:\Windows\system\</replaceable></filename>
-  or similar). As a last resort, try putting them in the same directory as
-  <application>MPlayer</application>.</para>
+<para>There are special codec packages for Windows available on our
+  <ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">codecs page</ulink>
+  to allow playing formats for which there is no native support yet.
+  Put the codecs somewhere in your path or pass
+  <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
+  (alternatively
+  <option>--with-codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>
+  only on <application>Cygwin</application>) to <filename>configure</filename>.
+  We have had some reports that Real DLLs need to be writable by the user
+  running <application>MPlayer</application>, but only on some systems (NT4).
+  Try making them writable if you have problems.</para>
 
 <para>You can play VCDs by playing the <filename>.DAT</filename> or <filename>.MPG</filename> files
   that Windows exposes on VCDs. It works like this (adjust for the drive letter
