@@ -167,10 +167,8 @@ m_option_t mplayer_opts[]={
 	{"noalsa", "-noalsa has been removed. Remove it from your config file.\n",
             CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #ifdef USE_EDL
-	{"edl", &edl_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 	{"edlout", &edl_output_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 #else
-	{"edl", "MPlayer was compiled without EDL support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"edlout", "MPlayer was compiled without EDL support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 

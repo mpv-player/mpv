@@ -271,6 +271,20 @@ static char * end_at_string=0;
 
 #include "get_path.c"
 
+#ifdef USE_EDL
+#include "edl.h"
+static edl_record_ptr edl_records = NULL; ///< EDL entries memory area
+static edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
+static short edl_muted; ///< Stores whether EDL is currently in muted mode.
+static short edl_seeking; ///< When non-zero, stream is seekable.
+static short edl_seek_type; ///< When non-zero, frames are discarded instead of seeking.
+static short edl_skip; ///< -1 OR the value of in_size of an already read frame.
+/** \brief Seeks for EDL
+    \return 1 for success, 0 for failure, 2 for EOF.
+*/
+int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t *d_audio, muxer_stream_t* mux_a, float * frame_time, unsigned char ** start, int framecopy);
+#endif
+
 #include "cfg-mplayer-def.h"
 #include "cfg-mencoder.h"
 
@@ -1315,6 +1329,16 @@ if(file_format == DEMUXER_TYPE_TV)
 play_n_frames=play_n_frames_mf;
 if (curfile && end_at_type == END_AT_TIME) end_at += mux_v->timer;
 
+#ifdef USE_EDL
+if (edl_filename) {
+    if (edl_records) free_edl(edl_records);
+    next_edl_record = edl_records = edl_parse_file();
+    edl_muted = 0;
+    edl_seeking = 1;
+    edl_skip = -1;
+}
+#endif
+
 while(!at_eof){
 
     float frame_time=0;
@@ -1333,6 +1357,47 @@ while(!at_eof){
       --play_n_frames;
       if(play_n_frames<0) break;
     }
+
+#ifdef USE_EDL
+goto_redo_edl:
+    if (next_edl_record && sh_video && sh_video->pts >= next_edl_record->start_sec) {
+        if (next_edl_record->action == EDL_SKIP && edl_seeking) {
+            float last_pos = d_video->pts;
+            int result;
+            mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_SKIP: start [%f], stop [%f], length [%f]\n",
+                   next_edl_record->start_sec, next_edl_record->stop_sec, next_edl_record->length_sec);
+
+            result = edl_seek(next_edl_record, demuxer, d_audio, mux_a, &frame_time, &start, mux_v->codec==VCODEC_COPY);
+
+            if (result == 2) break; // EOF
+            else if (result == 0) edl_seeking = 0; // no seeking
+            else { // sucess
+                edl_muted = 0;
+                if (last_pos >= sh_video->pts) {
+                    // backwards seek detected!! Forget about this EDL skip altogether.
+                    next_edl_record = next_edl_record->next;
+                }
+                else for (next_edl_record = edl_records; next_edl_record; next_edl_record = next_edl_record->next) {
+                    /* note the use of stop_sec,
+                       meaning if by some magical way we landed in the MIDDLE of a censored area,
+                       in the next loop it will jump out of it.
+                    */
+                    if (next_edl_record->stop_sec > sh_video->pts) break; // we got to the right place.
+                    if (next_edl_record->action == EDL_MUTE) edl_muted = !edl_muted; // toggle mute each time.
+                }
+
+                /* for a pedantic EDL, that doesn't show even a single
+                   frame from the "censored" area, uncomment next line. */
+                goto goto_redo_edl;
+            }
+        } else if (next_edl_record->action == EDL_MUTE) {
+            edl_muted = !edl_muted;  // This variable does nothing for now.
+            mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_MUTE: [%f]\n", next_edl_record->start_sec );
+            next_edl_record=next_edl_record->next;
+        }
+    }
+#endif
+
 
 if(sh_audio){
     // get audio:
@@ -1490,6 +1555,10 @@ if(sh_audio){
 
     // get video frame!
 
+#ifdef USE_EDL
+    if (edl_skip != -1) { in_size = edl_skip; edl_skip = -1; }
+    else
+#endif
     in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
     if(in_size<0){ at_eof=1; break; }
     sh_video->timer+=frame_time; ++decoded_frameno;
@@ -2050,9 +2119,89 @@ static uint32_t lavc_find_atag(char *codec)
 #endif
 
 static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v) {
-	// demuxer is for future support for EDL
 	float timeleft = -1;
 	if (play_n_frames >= 0) timeleft = mux_v->timer + play_n_frames * (double)(mux_v->h.dwScale) / mux_v->h.dwRate;
 	if (end_at_type == END_AT_TIME && (timeleft > end_at || timeleft == -1)) timeleft = end_at;
+#ifdef USE_EDL
+	if (next_edl_record && demuxer && demuxer->video) { // everything is OK to be checked
+		float tmp = mux_v->timer + next_edl_record->start_sec - demuxer->video->pts;
+		if (timeleft == -1 || timeleft > tmp) {
+			// There's less time in EDL than what we already know
+			if (next_edl_record->action == EDL_SKIP && edl_seeking) {
+				timeleft = tmp;
+			} else if (next_edl_record->action == EDL_MUTE) {
+				//timeleft = next_edl_record->start_sec - demuxer->video->pts;
+				// For the moment (and probably forever) EDL mute doesn't work in MEncoder
+			}
+		}
+	}
+#endif
 	return timeleft;
 }
+
+#ifdef USE_EDL
+int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t *d_audio, muxer_stream_t* mux_a, float * frame_time, unsigned char ** start, int framecopy) {
+    sh_audio_t * sh_audio = d_audio->sh;
+    sh_video_t * sh_video = demuxer->video ? demuxer->video->sh : NULL;
+    vf_instance_t * vfilter = sh_video ? sh_video->vfilter : NULL;
+
+    if (!sh_video) return 0;
+    if (sh_video->pts >= next_edl_record->stop_sec) return 1; // nothing to do...
+
+    if (!edl_seek_type) {
+        if(demux_seek(demuxer, next_edl_record->stop_sec - sh_video->pts, 0)){
+            sh_video->pts = demuxer->video->pts;
+            //if (vo_vobsub) vobsub_seek(vo_vobsub,sh_video->pts);
+            resync_video_stream(sh_video);
+            //if(vo_spudec) spudec_reset(vo_spudec);
+            return 1;
+        }
+        // non-seekable stream.
+        return 0;
+    }
+
+    // slow seek, read every frame.
+
+    while (!interrupted) {
+        float a_pts = 0.;
+        int in_size;
+
+        in_size = video_read_frame(sh_video, frame_time, start, force_fps);
+        if(in_size<0) return 2;
+        sh_video->timer += *frame_time;
+
+        if (sh_audio) {
+            a_pts = d_audio->pts + (ds_tell_pts(d_audio) - sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+            while (sh_video->pts > a_pts) {
+                if (mux_a->h.dwSampleSize) {
+                    int len;
+                    len = mux_a->wf->nAvgBytesPerSec * (sh_video->pts - a_pts);
+                    len/= mux_a->h.dwSampleSize; if(len<1) len=1;
+                    len*= mux_a->h.dwSampleSize;
+                    demux_read_data(sh_audio->ds,mux_a->buffer,len);
+                } else {
+                    ds_get_packet(sh_audio->ds,(unsigned char**) &mux_a->buffer);
+                }
+                a_pts = d_audio->pts + (ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+            }
+        }
+
+        if (sh_video->pts >= next_edl_record->stop_sec) {
+            edl_skip = in_size;
+            if (!framecopy || (sh_video->ds->flags & 1)) return 1;
+        }
+
+        if (vfilter) {
+            int softskip = (vfilter->control(vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) == CONTROL_TRUE);
+            decode_video(sh_video, *start, in_size, !softskip);
+        }
+
+        mp_msg(MSGT_MENCODER, MSGL_STATUS,
+               "EDL SKIP: Start: %.2f  End: %.2lf   Current: V: %.2f  A: %.2f     \r",
+               next_edl_record->start_sec, next_edl_record->stop_sec,
+               sh_video->pts, a_pts);
+    }
+    if (interrupted) return 2;
+    return 1;
+}
+#endif
