@@ -747,6 +747,15 @@ static uint32_t draw_frame(uint8_t *src[])
   return 0;
 }
 
+static uint32_t draw_image(mp_image_t *mpi){
+    if(mpi->flags&MP_IMGFLAG_DIRECT){
+	// direct rendering:
+	current_buf=(int)(mpi->priv);	// hack!
+	return VO_TRUE;
+    }
+    return VO_FALSE; // not (yet) supported
+}
+
 static uint32_t get_image(mp_image_t *mpi){
     int buf=current_buf; // we shouldn't change current_buf unless we do DR!
     if(mpi->type==MP_IMGTYPE_STATIC && num_buffers>1) return VO_FALSE; // it is not static
@@ -786,6 +795,7 @@ static uint32_t get_image(mp_image_t *mpi){
 	    }
 	}
        mpi->flags|=MP_IMGFLAG_DIRECT;
+       mpi->priv=(void*)current_buf;
 //	printf("mga: get_image() SUCCESS -> Direct Rendering ENABLED\n");
        return VO_TRUE;
     }
@@ -888,6 +898,8 @@ static uint32_t control(uint32_t request, void *data, ...)
     return query_format(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
     return get_image(data);
+  case VOCTRL_DRAW_IMAGE:
+    return draw_image(data);
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_GET_PANSCAN:
