@@ -73,15 +73,16 @@
 
 <P>DivX4Linux works in two modes:</P>
 
-<TABLE BORDER=0>
-  <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><CODE>-vc&nbsp;odivx</CODE></TD><TD>&nbsp;&nbsp;</TD>
-    <TD>Uses the codec in OpenDivX fashion. In this case it
+<DL>
+  <DT><CODE>-vc odivx</CODE></DT>
+  <DD>Uses the codec in OpenDivX fashion. In this case it
     produces YV12 images in its own buffer, and <B>MPlayer</B> does colorspace
-    conversion via libvo. (<B>Fast, recommended!</B>)</TD></TR>
-  <TR><TD></TD><TD VALIGN=top><CODE>-vc&nbsp;divx4</CODE></TD><TD></TD>
-    <TD>Uses the colorspace conversion of the codec.
-    In this mode you can use YUY2/UYVY, too. (<B>SLOW</B>)</TD></TR>
-</TABLE>
+    conversion via libvo. (<B>Fast, recommended!</B>)</DD>
+
+  <DT><CODE>-vc divx4</CODE></DT>
+  <DD>Uses the colorspace conversion of the codec.
+    In this mode you can use YUY2/UYVY, too. (<B>SLOW</B>)</DD>
+</DL>
 
 <P>The <CODE>-vc odivx</CODE> method is usually faster, due to the fact that it
   transfers image data in YV12 (planar YUV 4:2:0) format, thus requiring much
@@ -142,7 +143,7 @@
 <P><B>MPlayer</B> is capable of employing the XAnim codecs for decoding. Follow
   the instructions to enable them:</P>
 
-<UL>
+<OL>
   <LI>Download the codecs you wish to use from the
     <A HREF="http://xanim.va.pubnix.com">XAnim site</A>. The <B>3ivx</B> codec
     is not there, but at the <A HREF="http://www.3ivx.com">3ivx site</A>.</LI>
@@ -153,7 +154,7 @@
     the directory of the XAnim codecs.</LI>
   <LI>Rename/symlink the files, cutting out the architecture stuff, so they will
     have filenames like these: <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>.</LI>
-</UL>
+</OL>
 
 <P>XAnim is video codec family number 10, so you may want to use the <CODE>-vfm 10</CODE>
   option to tell <B>MPlayer</B> to use them if possible.</P>
@@ -250,9 +251,7 @@
   <LI>under development</LI>
 </UL>
 
-<H4>Installation:</H4>
-
-<P>It is currently available only from CVS. Here are the
+<P>XViD is currently available only from CVS. Here are the
   download and installation instructions:</P>
 
 <OL>
@@ -284,9 +283,7 @@
   <LI>SVQ3 is still not reverse engineered.</LI>
 </UL>
 
-<H4>Installation:</H4>
-
-<P>It's compiled and usable per default.</P>
+<P>The Sorenson decoder is compiled and usable per default.</P>
 
 
 <H3><A NAME="audio_codecs">2.2.2  Audio codecs</A></H3>
@@ -422,7 +419,7 @@
 
 <P>Take a deep breath and start searching the registry...</P>
 
-<UL>
+<OL>
   <LI>Start <CODE>regedit</CODE>.
   <LI>Press <CODE>Ctrl-f</CODE>, disable the first two checkboxes, and enable
     the third. Type in the fourcc of the codec (e.g. TM20).
@@ -435,7 +432,7 @@
     If not, you are out of luck. Try guessing (e.g. search for TrueMotion).
   <LI>If the GUID is found you should see a FriendlyName and a CLSID
     field. Write down the 16 byte CLSID, this is the GUID we need.
-</UL>
+</OL>
 
 <P><B>Note:</B> If searching fails, try enabling all the checkboxes. You may have
   false hits, but you may get lucky...</P>

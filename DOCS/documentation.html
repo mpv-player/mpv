@@ -35,6 +35,10 @@
       <LI><A HREF="#installation">1.2 Installation</A></LI>
       <LI><A HREF="#gui">1.3 What about the GUI?</A></LI>
       <LI><A HREF="#subtitles_osd">1.4 Subtitles and OSD</A></LI>
+        <UL>
+          <LI><A HREF="#mpsub">1.4.1 MPlayer's own subtitle format (MPsub)</A></LI>
+          <LI><A HREF="#install_osd">1.4.2 Installing OSD and subtitles</A></LI>
+	</UL>
       <LI><A HREF="#rtc">1.5 RTC</A></LI>
     </UL>
   </LI>
@@ -280,17 +284,14 @@
     </UL>
   </LI>
   <LI><A HREF="#known_bugs">Appendix D - Known bugs</A></LI>
-  <LI><A HREF="skin-en.html">Appendix X - MPlayer skin format</A></LI>
-</UL>
-
-<HR>
-Developer Cries
-<HR>
-
-<UL>
-  <LI><A HREF="users_against_developers.html#gcc">1. GCC 2.96</A></LI>
-  <LI><A HREF="users_against_developers.html#nvidia">2. NVidia opinions</A></LI>
-  <LI><A HREF="users_against_developers.html#barr">3. About Joe Barr</A></LI>
+  <LI><A HREF="skin-en.html">Appendix E - MPlayer skin format</A></LI>
+  <LI><A HREF="users_against_developers.html">Appendix F - Developer Cries</A></LI>
+    <UL>
+      <LI><A HREF="users_against_developers.html#gcc">GCC 2.96</A></LI>
+      <LI><A HREF="users_against_developers.html#binary">Binary distribution</A></LI>
+      <LI><A HREF="users_against_developers.html#nvidia">nVidia</A></LI>
+      <LI><A HREF="users_against_developers.html#barr">Joe Barr</A></LI>
+   </UL>
 </UL>
 
 <HR>
@@ -422,7 +423,7 @@ Developer Cries
 
 <P>You need a fairly recent system. On Linux, 2.4.x kernels are recommended.</P>
 
-<H4>SOFTWARE REQUIREMENTS</H4>
+<H4>Software requirements:</H4>
 
 <UL>
   <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
@@ -462,7 +463,7 @@ Developer Cries
   <LI><B>libvorbis</B> - optional, needed for playing OGG Vorbis audio.</LI>
 </UL>
 
-<H4>CODECS</H4>
+<H4>Codecs:</H4>
 
 <UL>
   <LI><B>libavcodec</B>: This codec package is capable of decoding
@@ -533,7 +534,7 @@ Developer Cries
     installation instructions and more information.</LI>
 </UL>
 
-<H4>VIDEO CARDS</H4>
+<H4>Video Cards</H4>
 
 <P>There are generally two kind of video cards. One kind (the newer cards) has
   <B>hardware scaling and YUV acceleration</B> support, the other cards don't.</P>
@@ -647,7 +648,7 @@ Developer Cries
 </UL>
 
 
-<H4>SOUND CARDS</H4>
+<H4>Sound cards:</H4>
 
 <UL>
   <LI><B>Soundblaster Live!</B>: with this card you can use 4 or 6 (<B>5.1</B>)
@@ -662,7 +663,7 @@ Developer Cries
     section</A>!</U></LI>
 </UL>
 
-<H4>FEATURES</H4>
+<H4>Features:</H4>
 
 <UL>
   <LI>Decide if you need GUI. If you do, see the <A HREF="#gui">GUI section</A>
@@ -768,8 +769,9 @@ Developer Cries
 
 The command line options differ slightly for the different formats:
 
-<P><B>VobSub subtitles</B><BR> 
-  VobSub subtitles consist of a big (some megabytes) .SUB file, and optional 
+<H4>VobSub subtitles</H4>
+
+<P>VobSub subtitles consist of a big (some megabytes) .SUB file, and optional
   .IDX and/or .IFO files.<BR>
   Usage: if you have files like <CODE>sample.sub</CODE>,
   <CODE>sample.ifo</CODE>, <CODE>sample.idx</CODE> - you have to pass the
@@ -778,18 +780,25 @@ The command line options differ slightly for the different formats:
   <CODE>-vobsubid</CODE> option is like <CODE>-sid</CODE> for DVDs, you can
   choose between subtitle tracks (languages) with it.</P>
 
-<P><B>Other subtitles</B><BR>
-  The other formats consist of a single text file containing timing, placement
-  and text information.<BR>
+<H4>Other subtitles</H4>
+
+<P>The other formats consist of a single text file containing timing,
+  placement and text information.<BR>
   Usage: if you have a file like <CODE>sample.txt</CODE>, you have to pass the
   option <CODE>-sub sample.txt</CODE> (optionally with pathname, of course).</P>
 
-<P><B>Adjusting subtitle timing and placement</B><BR>
-  <CODE>-subdelay &lt;sec&gt;</CODE>: Delays subtitles by &lt;sec&gt; seconds.
-    Can be negative.<BR>
-  <CODE>-subfps &lt;rate&gt;</CODE>: Specify frame/sec rate of subtitle file
-    (float number)<BR>
-  <CODE>-subpos &lt;0 - 100&gt;</CODE>: Specify the position of subtitles.</P>
+<H4>Adjusting subtitle timing and placement:</H4>
+
+<DL>
+  <DT><CODE>-subdelay &lt;sec&gt;</CODE></DT>
+  <DD>Delays subtitles by &lt;sec&gt; seconds. Can be negative.</DD>
+
+  <DT><CODE>-subfps &lt;rate&gt;</CODE></DT>
+  <DD>Specify frame/sec rate of subtitle file (float number)</DD>
+
+  <DT><CODE>-subpos &lt;0 - 100&gt;</CODE></DT>
+  <DD>Specify the position of subtitles.</DD>
+</DL>
 
 <P>If you experience a growing delay between the movie and the subtitles when
   using a MicroDVD subtitle file, most likely the frame rate of the movie and
@@ -802,6 +811,9 @@ The command line options differ slightly for the different formats:
   for you.</P>
 
 <P>About DVD subtitles, read the <A HREF="cd-dvd.html#dvd">DVD section</A>.</P>
+
+
+<H3><A NAME="mpsub">1.4.1 MPlayer's own subtitle format (MPsub)</A></H3>
 
 <P><B>MPlayer</B> introduces a new subtitle format called <B>MPsub</B>. It was
   designed by me (Gabucino). Basically its main feature is being
@@ -833,7 +845,7 @@ The command line options differ slightly for the different formats:
   Display</B>.  OSD is used to display current time, volume bar, seek bar
   etc.</P>
 
-<H4>INSTALLING OSD and SUB</H4>
+<H3><A NAME="install_osd">1.4.2 Installing OSD and subtitles</A></H3>
 
 <P>You need an <B>MPlayer</B> font package to be able to use OSD/SUB feature.
   There are many ways to get it:</P>
@@ -958,105 +970,71 @@ TV tuner</B>.</P>
 
 <H3><A NAME="tv_compilation">2.5.1  Compilation</A></H3>
 
-<UL>
+<OL>
   <LI>First, you have to recompile. <CODE>./configure</CODE> will autodetect
     kernel headers of v4l stuff and the existence of <CODE>/dev/video*</CODE>
     entries. If they exist, TV support will be built (see the output of
     <CODE>./configure</CODE>).</LI>
   <LI>Make sure your tuner works with another TV software in Linux, for example
     xawtv.</LI>
-</UL>
+</OL>
 
-<P><B>Hint:</B> Are the colors messed up? Then your tuner cannot display
+<BLOCKQUOTE>
+  <B>Hint</B><BR>
+  Are the colors messed up? Then your tuner cannot display
   in YV12 colorspace. Try I420 (<CODE>-vc rawi420</CODE>) or YUY2, UYVY, RGB32
   (<CODE>-vo sdl</CODE>) colorspaces.
-  You can specify these with the <CODE>outfmt=YV12</CODE> option, see below.</P>
+  You can specify these with the <CODE>outfmt=YV12</CODE> option, see below.
+</BLOCKQUOTE>
 
 
 <H3><A NAME="tv_options">2.5.2  Available options</A></H3>
 
-<TABLE BORDER=0>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>on</CODE></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>Use TV input.</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>noaudio</CODE></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>No sound, thanks.</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>driver</CODE></TD>
-  <TD></TD>
-  <TD>    <B>dummy</B> - NULL TV input :) Used for testing only, generates dummy
+<DL>
+  <DT><CODE>on</CODE></DT>
+  <DD>Use TV input.</DD>
+
+  <DT><CODE>noaudio</CODE></DT>
+  <DD>No sound, thanks.</DD>
+
+  <DT><CODE>driver</CODE></DT>
+  <DD><B>dummy</B> - NULL TV input :) Used for testing only, generates dummy
     input.<BR>
     <B>v4l</B> - Captures images from standard V4L interface (default
-    <CODE>/dev/video0</CODE>).</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>device</CODE></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>Specify a device other than the default <CODE>/dev/video0</CODE>.</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>input</CODE></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>Specify from which input of the TV tuner you wish to grab
+    <CODE>/dev/video0</CODE>).</DD>
+
+  <DT><CODE>device</CODE></DT>
+  <DD>Specify a device other than the default <CODE>/dev/video0</CODE>.</DD>
+
+  <DT><CODE>input</CODE></DT>
+  <DD>Specify from which input of the TV tuner you wish to grab
     (e.g. <B>television</B>, <B>s-video</B>, <B>composite</B>, ...)<BR>
-    Prints the available ones during init.</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>freq</CODE></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>Specify the frequency to set the tuner to (e.g. <B>511.250</B>).</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>outfmt</CODE></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>Specify the output format the tuner should use to transport images to us
+    Prints the available ones during init.</DD>
+
+  <DT><CODE>freq</CODE></DT>
+  <DD>Specify the frequency to set the tuner to (e.g. <B>511.250</B>).</DD>
+
+  <DT><CODE>outfmt</CODE></DT>
+  <DD>Specify the output format the tuner should use to transport images to us
     (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, <B>i420</B> (for i420
     you have to pass the <CODE>-vc rawi420</CODE> option, because of a fourcc
-    conflict)).</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>width</CODE></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>width of the output window in pixels</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>height</CODE></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>height of the output window in pixels</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>norm</CODE></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>available: PAL, SECAM, NTSC</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>channel</CODE></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>Set the tuner to the given channel.</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD VALIGN="top"><CODE>chanlist</CODE></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>available: <CODE>us-bcast, us-cable, europe-west, europe-east, etc</CODE></TD>
-</TR>
-</TABLE>
+    conflict)).</DD>
+
+  <DT><CODE>width</CODE></DT>
+  <DD>width of the output window in pixels</DD>
+
+  <DT><CODE>height</CODE></DT>
+  <DD>height of the output window in pixels</DD>
+
+  <DT><CODE>norm</CODE></DT>
+  <DD>available: PAL, SECAM, NTSC</DD>
+
+  <DT><CODE>channel</CODE></DT>
+  <DD>Set the tuner to the given channel.</DD>
+
+  <DT><CODE>chanlist</CODE></DT>
+  <DD>available: <CODE>us-bcast, us-cable, europe-west, europe-east, etc</CODE></DD>
+</DL>
 
 
 <H3><A NAME="tv_keyboard">2.5.3  Keyboard control</A></H3>
@@ -1353,7 +1331,7 @@ TV tuner</B>.</P>
 
 <H3><A NAME="default_controls">3.2.1 Default controls</A></H3>
 
-<H4>Keyboard</H4>
+<H4>Keyboard controls from terminal:</H4>
 
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD>&lt;-  or  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>seek backward/forward  10 seconds</TD></TR>
@@ -1377,7 +1355,7 @@ TV tuner</B>.</P>
   <TR><TD></TD><TD>7 or 8</TD><TD></TD><TD>adjust saturation</TD></TR>
 </TABLE>
 
-<H4>GUI</H4>
+<H4>GUI keyboard controls:</H4>
 
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD>, and .</TD><TD>&nbsp;&nbsp;</TD><TD>previous / next file</TD></TR>
@@ -1394,7 +1372,7 @@ TV tuner</B>.</P>
   <TR><TD></TD><TD>m</TD><TD></TD><TD>toggle mute</TD></TR>
 </TABLE>
 
-<H4>TV</H4>
+<H4>Keyboard controls for TV input:</H4>
 
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD>select previous/next channel</TD></TR>
@@ -1434,7 +1412,7 @@ ENTER pt_step 1 1
 
 <P>You can have a full list by running <CODE>mplayer -input keylist</CODE></P>
 
-<H4>Keyboard</H4>
+<H4>Keyboard:</H4>
 
 <UL>
   <LI>Any printable character</LI>
@@ -1456,9 +1434,7 @@ ENTER pt_step 1 1
   <LI>DOWN</LI>
 </UL>
 
-<H4>Mouse</H4>
-
-<P>Note: mouse is only supported under X</P>
+<H4>Mouse (only supported under X):</H4>
 
 <UL>
   <LI>MOUSE_BTN0 (Left button)</LI>
@@ -1470,9 +1446,7 @@ ENTER pt_step 1 1
   <LI>MOUSE_BTN9</LI>
 </UL>
 
-<H4>Joystick</H4>
-
-<P>Note: joystick support must be enabled at compile time</P>
+<H4>Joystick (support must be enabled at compile time):</H4>
 
 <UL>
   <LI>JOY_RIGHT or JOY_AXIS0_PLUS</LI>
@@ -1481,7 +1455,7 @@ ENTER pt_step 1 1
   <LI>JOY_DOWN or JOY_AXIS1_PLUS</LI>
   <LI>JOY_AXIS2_PLUS</LI>
   <LI>JOY_AXIS2_MINUS</LI>
-  <LI>....</LI>
+  <LI>...</LI>
   <LI>JOY_AXIS9_PLUS</LI>
   <LI>JOY_AXIS9_MINUS</LI>
 </UL>

@@ -114,36 +114,30 @@
   estimation of recommended video bitrate in order to fit on a CD. Also, the
   audio is encoded only once, unlike in 2-pass mode. The schematics:</P>
 
-<TABLE>
-  <TR>
-    <TD><CODE>rm frameno.avi</CODE></TD>
-    <TD><B>remove conflicting temporary file</B></TD>
-  </TR>
-  <TR>
-    <TD><CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o
-      frameno.avi</CODE></TD>
-    <TD><B><U>First pass:</U> an audio-only avi file will be created, containing
-      ONLY the requested audio stream. Don't forget <CODE>-lameopts</CODE>, if
-      you need to set it. If you were encoding a long movie, MEncoder prints
-      the recommended bitrate values for 650Mb, 700Mb, and 800Mb destination
-      sizes, after this pass finishes.</B></TD>
-  </TR>
-  <TR>
-    <TD><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
-      -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><B><U>Second pass:</U> alias the first pass of DivX4 video encoding. 
-      Optionally specify the video bitrate MEncoder printed at the end of the
-      previous pass.</B></TD>
-  </TR>
-  <TR>
-    <TD><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
-      -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><B><U>Third pass:</U> alias the second pass of DivX4 video encoding. 
-      Optionally specify the video bitrate MEncoder printed at the end of the
-      previous pass. In this pass, audio from <CODE>frameno.avi</CODE> will be
-      inserted into the destination file.. and it's all ready!</B></TD>
-  </TR>
-</TABLE>
+<OL>
+  <LI>Remove conflicting temporary file:
+    <P><CODE>rm frameno.avi</CODE></P></LI>
+  <LI>First pass:
+    <P><CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o frameno.avi</CODE></P>
+    <P>An audio-only avi file will be created, containing
+      <B>only</B> the requested audio stream. Don't forget <CODE>-lameopts</CODE>,
+      if you need to set it. If you were encoding a long movie, <B>MEncoder</B>
+      prints the recommended bitrate values for 650Mb, 700Mb, and 800Mb
+      destination sizes, after this pass finishes.</P></LI>
+  <LI>Second pass:
+    <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
+      -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></P>
+    <P>Alias the first pass of DivX4 video encoding. 
+      Optionally specify the video bitrate <B>MEncoder</B> printed at the end of
+      the previous pass.</P></LI>
+  <LI>Third pass:
+    <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
+      -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></P>
+    <P>Alias the second pass of DivX4 video encoding. 
+      Optionally specify the video bitrate <B>MEncoder</B> printed at the end of
+      the previous pass. In this pass, audio from <CODE>frameno.avi</CODE> will
+      be inserted into the destination file.. and it's all ready!</P></LI>
+</OL>
 
 <H4>Example for 3-pass encoding:</H4>
 
@@ -264,15 +258,17 @@
   files. With simple framecopy it can create MJPEG (Motion JPEG) or MPNG
   (Motion PNG) files.</P>
 
-<H4>Explanation of the process</H4>
+Explanation of the process:
 
-<P><B>MEncoder</B> <I>decodes</I> the input image(s) with <CODE>libjpeg</CODE>
-  (when decoding PNGs, it will use <B>libpng</B>).</P>
+<OL>
+  <LI><B>MEncoder</B> <I>decodes</I> the input image(s) with <CODE>libjpeg</CODE>
+  (when decoding PNGs, it will use <B>libpng</B>).</LI>
 
-<P><B>MEncoder</B> then feeds the decoded image to the chosen video compressor
-  (DivX4, Xvid, ffmpeg msmpeg4, etc...). Watch for the PNG decoder, as
-  currently it can output only to RGB formats, thus can't be used with codecs
-  that require YUV as input, like DivX4 or ffmpeg's msmpeg4.</P>
+  <LI><B>MEncoder</B> then feeds the decoded image to the chosen video compressor
+    (DivX4, Xvid, ffmpeg msmpeg4, etc...). Watch for the PNG decoder, as
+    currently it can output only to RGB formats, thus can't be used with codecs
+    that require YUV as input, like DivX4 or ffmpeg's msmpeg4.</LI>
+</OL>
 
 <H4>Examples</H4>
 

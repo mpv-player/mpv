@@ -40,7 +40,7 @@
     <CODE>01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525</CODE>
     <CODE>Memory at d8000000 (32-bit, prefetchable)</CODE>
     </P></LI>
-  <LI>from mga_vid kernel driver messages (use dmesg):
+  <LI>from mga_vid kernel driver messages (use <CODE>dmesg</CODE):
     <P><CODE>mga_mem_base = d8000000</CODE></P></LI>
 </UL>
 
@@ -462,24 +462,29 @@
 <P>SDL video output supports displaying subtitles under the movie, on the (if
   present) black bar.</P>
 
-<P>Here are some notes about SDL out in <B>MPlayer</B>.</P>
+<P><B>There are several command line switches for SDL:</B></P>
+<DL>
+  <DT><CODE>-vo sdl:name</CODE></DT>
+  <DD>specifies sdl video driver to use (i.e.. aalib, dga, x11)</DD>
+
+  <DT><CODE>-ao sdl:name</CODE></DT>
+  <DD>specifies sdl audio driver to use (i.e. dsp, esd, arts)</DD>
+
+  <DT><CODE>-noxv</CODE></DT>
+  <DD>disables XVideo hardware acceleration</DD>
+
+  <DT><CODE>-forcexv</CODE></DT>
+  <DD>tries to force XVideo acceleration</DD>
+</DL>
 
 <TABLE BORDER=0>
-  <TR><TD COLSPAN=4><P><B>There are several command line switches for SDL:</B></P></TD></TR>
-  <TR><TD>&nbsp;&nbsp;</TD><TD><CODE>-vo sdl:name</CODE></TD><TD>&nbsp;&nbsp;</TD><TD>
-  specifies sdl video driver to use (i.e.. aalib, dga, x11)</TD></TR>
-  <TR><TD></TD><TD><CODE>-ao sdl:name</CODE></TD><TD></TD><TD>specifies sdl audio driver to use (i.e.. dsp,
-  esd, arts)</TD></TR>
-  <TR><TD></TD><TD><CODE>-noxv</CODE></TD><TD></TD><TD>disables XVideo hardware acceleration</TD></TR>
-  <TR><TD></TD><TD><CODE>-forcexv</CODE></TD><TD></TD><TD>tries to force XVideo acceleration</TD></TR>
-
   <TR><TD COLSPAN=4><P><B>SDL Keys:</B></P></TD></TR>
   <TR><TD></TD><TD><CODE>F</CODE></TD><TD></TD><TD>toggles fullscreen/windowed mode</TD></TR>
   <TR><TD></TD><TD><CODE>C</CODE></TD><TD></TD><TD>cycles available fullscreen modes</TD></TR>
   <TR><TD></TD><TD><CODE>W/S</CODE></TD><TD></TD><TD>mappings for * and / (mixer control)</TD></TR>
 </TABLE>
 
-<H4>KNOWN BUGS:</H4>
+<H4>Known bugs:</H4>
 
 <UL>
   <LI>Keys pressed under sdl:aalib console driver repeat forever. (use -vo aa!)
@@ -537,15 +542,21 @@
 
 <P>The FBdev output takes some additional parameters above the others:</P>
 
-<TABLE BORDER=0>
-  <TR><TD>&nbsp;&nbsp;</TD><TD><CODE>-fb</CODE></TD><TD>&nbsp;&nbsp;</TD><TD>
-    specify the framebuffer device to use (/dev/fb0)</TD></TR>
-  <TR><TD></TD><TD><CODE>-fbmode</CODE></TD><TD></TD><TD>mode name to use (according to /etc/fb.modes)</TD></TR>
-  <TR><TD></TD><TD><CODE>-fbmodeconfig</CODE></TD><TD></TD><TD>	config file of modes (default /etc/fb.modes)</TD></TR>
-  <TR><TD></TD><TD><CODE>-monitor_hfreq</CODE></TD><TD></TD><TD ROWSPAN=3>IMPORTANT values, see example.conf</TD></TR>
-  <TR><TD></TD><TD><CODE>-monitor_vfreq</CODE></TD><TD></TD></TR>
-  <TR><TD></TD><TD><CODE>-monitor_dotclock</CODE></TD><TD></TD></TR>
-</TABLE>
+<DL>
+  <DT><CODE>-fb</CODE></DT>
+  <DD>specify the framebuffer device to use (/dev/fb0)</DD>
+
+  <DT><CODE>-fbmode</CODE></DT>
+  <DD>mode name to use (according to /etc/fb.modes)</DD>
+
+  <DT><CODE>-fbmodeconfig</CODE></DT>
+  <DD>config file of modes (default /etc/fb.modes)</DD>
+
+  <DT><CODE>-monitor_hfreq</CODE></DT>
+  <DT><CODE>-monitor_vfreq</CODE></DT>
+  <DT><CODE>-monitor_dotclock</CODE></DT>
+  <DD><STRONG>Important</STRONG> values, see <CODE>example.conf</CODE></DD>
+</DL>
 
 <P>If you want to change to a specific mode, then use</P>
 
@@ -580,40 +591,31 @@
 <P><B>WARNING</B>: on non-Linux systems, use <A HREF="#vidix">VIDIX</A> for
   mga_vid!</P>
 
-<P>To use it, you first have to compile mga_vid.o:</P>
-
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;cd drivers<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
-
-<P>Then create /dev/mga_vid device:</P>
-
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mknod /dev/mga_vid c 178 0</CODE></P>
-
-<P>and load the driver with</P>
-
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;insmod mga_vid.o</CODE></P>
-
-<P>You should verify the memory size detection using the 'dmesg' command. If
-  it's bad, use the mga_ram_size option (rmmod mga_vid first), specify card's
-  memory size in MB:</P>
-
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;insmod mga_vid.o mga_ram_size=16</CODE></P>
-
-<P>To make it load/unload automatically when needed, first insert the following line
-  at the end of /etc/modules.conf:</P>
-
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;alias char-major-178 mga_vid</CODE></P>
-
-<P>Then copy the <CODE>mga_vid.o</CODE> module to the appropriate place under
-  <CODE>/lib/modules/&lt;kernel version&gt;/somewhere</CODE>.</P>
-
-<P>Then run</P>
-
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;depmod -a</CODE></P>
-
-<P>Now you have to (re)compile <B>MPlayer</B>, ./configure will detect /dev/mga_vid
-  and build the 'mga' driver. Using it from <B>MPlayer</B> goes by '-vo mga' if
-  you have matroxfb console, or '-vo xmga' under XFree86 3.x.x or 4.x.x.</P>
+<P><B>Installation:</B></P>
+<OL>
+  <LI>To use it, you first have to compile mga_vid.o:
+    <P><CODE>cd drivers<BR>
+      make</CODE></P></LI>
+  <LI>Then create the <CODE>/dev/mga_vid</CODE> device:
+    <P><CODE>mknod /dev/mga_vid c 178 0</CODE></P>
+    <P>and load the driver with</P>
+    <P><CODE>insmod mga_vid.o</CODE></P></LI>
+  <LI>You should verify the memory size detection using the <CODE>dmesg</CODE>
+    command. If it's bad, use the <CODE>mga_ram_size</CODE> option
+    (<CODE>rmmod mga_vid</CODE> first), specify card's memory size in MB:
+    <P><CODE>insmod mga_vid.o mga_ram_size=16</CODE></P></LI>
+  <LI>To make it load/unload automatically when needed, first insert the
+    following line at the end of <CODE>/etc/modules.conf</CODE>:
+    <P><CODE>alias char-major-178 mga_vid</CODE></P>
+    <P>Then copy the <CODE>mga_vid.o</CODE> module to the appropriate place
+      under <CODE>/lib/modules/&lt;kernel version&gt;/somewhere</CODE>.</P>
+    <P>Then run</P>
+    <P><CODE>depmod -a</CODE></P></LI>
+  <LI>Now you have to (re)compile <B>MPlayer</B>, <CODE>configure</CODE> will
+    detect <CODE>/dev/mga_vid</CODE> and build the 'mga' driver. Using it from
+    <B>MPlayer</B> goes by <CODE>-vo mga</CODE> if you have matroxfb console,
+    or <CODE>-vo xmga</CODE> under XFree86 3.x.x or 4.x.x.</LI>
+</OL>
 
 <P>The mga_vid driver cooperates with Xv.</P>
 
@@ -674,19 +676,34 @@
   <TR><TD></TD><TD><CODE>6</CODE></TD><TD></TD><TD>set dithering mode (none, error distribution, Floyd Steinberg)</TD></TR>
   <TR><TD></TD><TD><CODE>7</CODE></TD><TD></TD><TD>invert image</TD></TR>
   <TR><TD></TD><TD><CODE>a</CODE></TD><TD></TD><TD>toggles between aa and <B>MPlayer</B> control)</TD></TR>
-
-  <TR><TD COLSPAN=4><P><B>The following command line options can be used:</B></P></TD></TR>
-  <TR><TD></TD><TD><CODE>-aaosdcolor=V</CODE></TD><TD></TD><TD>change OSD color</TD></TR>
-  <TR><TD></TD><TD><CODE>-aasubcolor=V</CODE></TD><TD></TD><TD>change subtitle color</TD></TR>
-  <TR><TD COLSPAN=3></TD><TD><P><I>where V can be: (0/normal, 1/dark, 2/bold,
-   3/bold font, 4/reverse, 5/special)</I></P></TD></TR>
-  <TR><TD COLSPAN=4><P><B>AAlib itself provides a large sum of options.
-    Here are some important:</B></P></TD></TR>
-  <TR><TD></TD><TD><CODE>-aadriver</CODE></TD><TD></TD><TD>set recommended aa driver (X11, curses, Linux)</TD></TR>
-  <TR><TD></TD><TD><CODE>-aaextended</CODE></TD><TD></TD><TD>use all 256 characters</TD></TR>
-  <TR><TD></TD><TD><CODE>-aaeight</CODE></TD><TD></TD><TD>use eight bit ASCII</TD></TR>
-  <TR><TD></TD><TD><CODE>-aahelp</CODE></TD><TD></TD><TD>prints out all aalib options</TD></TR>
 </TABLE>
+
+<P><B>The following command line options can be used:</B></P>
+<DL>
+  <DT><CODE>-aaosdcolor=V</CODE></DT>
+  <DD>change OSD color</DD>
+  
+  <DT><CODE>-aasubcolor=V</CODE></DT>
+  <DD>change subtitle color
+    <P><I>where V can be: (0/normal, 1/dark, 2/bold, 3/bold font, 4/reverse,
+    5/special)</I></P></DD>
+</DL>
+
+<P><B>AAlib itself provides a large sum of options.
+    Here are some important:</B></P>
+<DL>
+  <DT><CODE>-aadriver</CODE></DT>
+  <DD>set recommended aa driver (X11, curses, Linux)</DD>
+
+  <DT><CODE>-aaextended</CODE></DT>
+  <DD>use all 256 characters</DD>
+
+  <DT><CODE>-aaeight</CODE></DT>
+  <DD>use eight bit ASCII</DD>
+
+  <DT><CODE>-aahelp</CODE></DT>
+  <DD>prints out all aalib options</DD>
+</DL>
 
 <P>NOTE: the rendering is very CPU intensive, especially when using AA-on-X
   (using aalib on X), and it's least CPU intensive on standard,
@@ -759,22 +776,33 @@
 
 <P>Don't use this driver with <B>GCC 2.96</B>! It won't work!</P>
 
-<TABLE BORDER=0>
-  <TR><TD COLSPAN=4><P><B>These switches of command line currently are available for VESA:</B></P></TD></TR>
-  <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN="top"><CODE>-vo vesa:opts</CODE></TD><TD></TD>
-    <TD>currently recognized: <B>dga</B> to force dga mode and <B>nodga</B> to
+<P><B>Command line options available for VESA:</B></P>
+<DL>
+  <DT><CODE>-vo vesa:opts</CODE></DT>
+  <DD>currently recognized: <B>dga</B> to force dga mode and <B>nodga</B> to
     disable dga mode. Note: you may omit these parameters to enable <B>autodetect</B>
     of dga mode. (In the future also will specify mode parameters such as refresh
-    rate, interlacing, doublescan and so on. Samples: i43, 85, d100)</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-screenw, -screenh, -bpp</CODE></TD><TD></TD><TD>force userdefined mode</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-x, -y</CODE></TD><TD></TD><TD>set userdefined prescaling</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-zoom</CODE></TD><TD></TD><TD>enables userdefined prescaling</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-fs</CODE></TD><TD></TD><TD>scales image to fullscreen</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-fs -zoom</CODE></TD><TD></TD><TD>scales userdefined prescaling to fullscreen</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-double</CODE></TD><TD></TD><TD>enables
-    double buffering mode. (Available only in DGA mode). Should be slower of
-    single buffering, but has no flickering effects.</TD></TR>
-</TABLE>
+    rate, interlacing, doublescan and so on. Samples: i43, 85, d100)</DD>
+
+  <DT><CODE>-screenw, -screenh, -bpp</CODE></DT>
+  <DD>force userdefined mode</DD>
+
+  <DT><CODE>-x, -y</CODE></DT>
+  <DD>set userdefined prescaling</DD>
+
+  <DT><CODE>-zoom</CODE></DT>
+  <DD>enables userdefined prescaling</DD>
+
+  <DT><CODE>-fs</CODE></DT>
+  <DD>scales image to fullscreen</DD>
+
+  <DT><CODE>-fs -zoom</CODE></DT>
+  <DD>scales userdefined prescaling to fullscreen</DD>
+
+  <DT><CODE>-double</CODE></DT>
+  <DD>enables double buffering mode. (Available only in DGA mode). Should be
+    slower of single buffering, but has no flickering effects.</DD>
+</DL>
 
 <H4>Known problems and workaround:</H4>
 
@@ -829,8 +857,6 @@
 
 
 <H4><A NAME="vidix">2.3.1.14 VIDIX</A></H4>
-
-<H4>WHAT IS VIDIX?</H4>
 
 <P>VIDIX is the abbreviation for <B>VID</B>eo <B>I</B>nterface for
   *ni<B>X</B>.<BR>
@@ -920,27 +946,33 @@ recognize <CODE>:vidix</CODE> subdevice.
   by command line arguments. <B>MPlayer</B> recognizes the
   following options:</P>
 
-<TABLE>
-  <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN="top"><CODE>-brightness</CODE></TD><TD>&nbsp;&nbsp;</TD>
-    <TD>Adjust <B>BRIGHTNESS</B> of video output. It's not equal to brightness
+<DL>
+  <DT><CODE>-brightness</CODE></DT>
+  <DD>Adjust <B>BRIGHTNESS</B> of video output. It's not equal to brightness
     adjusting on monitor panel or on TV. It changes intensity of RGB components of
-    video signal from black to white screen.</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-contrast</CODE></TD><TD></TD>
-    <TD>Adjust <B>CONTRAST</B> of video output. Works in similar manner as
-    brightness.</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-saturation</CODE></TD>
-    <TD></TD><TD>Adjust <B>SATURATION</B> of video output.  You can get grayscale
-    output with this option.</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-hue</CODE></TD>
-    <TD></TD><TD>Adjust <B>HUE</B> of video signal.  You can get colored negative
-    of image with this option.</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-red_intensity</CODE></TD>
-    <TD></TD><TD>Adjust intensity of <B>RED</B> component of video signal.</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-green_intensity</CODE></TD>
-    <TD></TD><TD>Adjust intensity of <B>GREEN</B> component of video signal.</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-blue_intensity</CODE></TD>
-    <TD></TD><TD>Adjust intensity of <B>BLUE</B> component of video signal.</TD></TR>
-</TABLE>
+    video signal from black to white screen.</DD>
+
+  <DT><CODE>-contrast</CODE></DT>
+  <DD>Adjust <B>CONTRAST</B> of video output. Works in similar manner as
+    brightness.</DD>
+
+  <DT><CODE>-saturation</CODE></DT>
+  <DD>Adjust <B>SATURATION</B> of video output.  You can get grayscale
+    output with this option.</DD>
+
+  <DT><CODE>-hue</CODE></DT>
+  <DD>Adjust <B>HUE</B> of video signal.  You can get colored negative
+    of image with this option.</DD>
+
+  <DT><CODE>-red_intensity</CODE></DT>
+  <DD>Adjust intensity of <B>RED</B> component of video signal.</DD>
+
+  <DT><CODE>-green_intensity</CODE></DT>
+  <DD>Adjust intensity of <B>GREEN</B> component of video signal.</DD>
+
+  <DT><CODE>-blue_intensity</CODE></DT>
+  <DD>Adjust intensity of <B>BLUE</B> component of video signal.</DD>
+</DL>
 
 <P>Each parameter can accept values from <B>-1000</B> to <B>+1000</B>.<BR>
   Default value for each parameter is <B>0</B>.</P>
@@ -1104,11 +1136,10 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   Linux</A> site. Configure should detect your card automatically, compilation
   should go without any problems.</P>
 
-<H4>USAGE</H4>
-
-<TABLE>
-  <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN="top"><CODE>-vo dxr3:&lt;noprebuf&gt;:&lt;codec&gt;:&lt;device&gt;</CODE></TD><TD>&nbsp;&nbsp;</TD>
-    <TD>Where <CODE>&lt;noprebuf&gt;</CODE> specifies turning off prebuffering.
+<H4>Usage:</H4>
+<DL>
+  <DT><CODE>-vo dxr3:&lt;noprebuf&gt;:&lt;codec&gt;:&lt;device&gt;</CODE></DT>
+  <DD>Where <CODE>&lt;noprebuf&gt;</CODE> specifies turning off prebuffering.
     This is done automatically on Athlons. If playback is out of sync try
     disabling prebuffering. If noprebuf is left out prebuffering is enabled
     (except on Athlons).
@@ -1123,21 +1154,25 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     <BR>
     Any of these options may be left out, but they must be specified in this
     order, i.e. <CODE>dxr3:fame</CODE> works, <CODE>dxr3:1</CODE> works, but
-    <CODE>dxr3:1:avcodec</CODE> will not.</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-ao oss:/dev/em8300_ma-X</CODE></TD>
-    <TD></TD><TD>For audio output, where <CODE>X</CODE> is the device number
-    (0 if one card).</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-ac hwac3</CODE></TD>
-    <TD></TD><TD>For digital instead of analog audio output.</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-vc mpegpes</CODE></TD>
-    <TD></TD><TD>Force hardware acceleration, only works with MPEG1/2.</TD></TR>
-  <TR><TD></TD><TD VALIGN="top"><CODE>-aop list=resample:fout=xxxxx</CODE></TD>
-    <TD></TD><TD>If sample rate is below 44100Hz, select either 44100Hz or 48000Hz
+    <CODE>dxr3:1:avcodec</CODE> will not.</DD>
+
+  <DT><CODE>-ao oss:/dev/em8300_ma-X</CODE></DT>
+  <DD>For audio output, where <CODE>X</CODE> is the device number
+    (0 if one card).</DD>
+
+  <DT><CODE>-ac hwac3</CODE></DT>
+  <DD>For digital instead of analog audio output.</DD>
+
+  <DT><CODE>-vc mpegpes</CODE></DT>
+  <DD>Force hardware acceleration, only works with MPEG1/2.</DD>
+
+  <DT><CODE>-aop list=resample:fout=xxxxx</CODE></DT>
+  <DD>If sample rate is below 44100Hz, select either 44100Hz or 48000Hz
     depending on which one matches closest. I.e. if the movie uses 22050Hz use
     44100Hz as 44100 / 2 = 22050, if it is 24000Hz use 48000Hz as 48000 / 2 = 24000
     and so on. This does not work with digital audio output
-    (<CODE>-ac hwac3</CODE>).</TD></TR>
-</TABLE>
+    (<CODE>-ac hwac3</CODE>).</DD>
+</DL>
 
 <H4>Overlay</H4>
 
@@ -1187,7 +1222,7 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     You have to enable ALL matroxfb-specific feature during compilation (except
     MultiHead), and compile them into <B>modules</B>! You'll also need I2C
     enabled.
-    <UL>
+    <OL>
       <LI>
 	Enter <CODE>TVout/matroxset</CODE> and type <CODE>make</CODE>. Install
         <CODE>matroxset</CODE> into somewhere in your PATH.</LI>
@@ -1206,7 +1241,7 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 	the TV (PAL) picture has some weird stripes on it, the script wasn't able to
 	set the resolution correctly (to 640x512 by default). Use other menu
 	items randomly and it'll be OK :)</LI>
-    </UL>
+    </OL>
 
     <P>Yoh. Next task is to make the cursor on tty1 (or whatever) to disappear,
     and turn off screen blanking. Execute the following commands:</P>

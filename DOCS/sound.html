@@ -119,20 +119,21 @@
   <TR><TD></TD><TD>Driver:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD></TR>
 </TABLE>
 
-<UL>
-  <LI>On Linux, a 2.4.x kernel is highly recommended. Kernel 2.2 is not tested.</LI>
-  <LI>If sound clicks when playing from CD-ROM, turn on IRQ unmasking, e.g. 
-    <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). This is
-    generally beneficial and described more detailed in the <A
-    HREF="cd-dvd.html#drives">CD-ROM section</A>.</LI>
-  <LI>Sharing your sound card with another application like XMMS is <B>strongly
-    discouraged</B>!  If the other sound application is using ESD, start
-    <B>MPlayer</B> with the <CODE>-vo sdl:esd</CODE> option to combine both
-    sound streams. In fact, the option <CODE>-vo sdl:esd</CODE> could be used
-    with ESD even when playing <B>Mplayer</B> alone.</LI>
-  <LI>Feedback to this document is welcome. Please tell us how <B>MPlayer</B>
-    and your sound card(s) worked together.</LI>
-</UL>
+<P>On Linux, a 2.4.x kernel is highly recommended. Kernel 2.2 is not tested.</P>
+
+<P>If sound clicks when playing from CD-ROM, turn on IRQ unmasking, e.g. 
+  <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). This is
+  generally beneficial and described more detailed in the <A
+  HREF="cd-dvd.html#drives">CD-ROM section</A>.</P>
+
+<P>Sharing your sound card with another application like XMMS is <B>strongly
+  discouraged</B>!  If the other sound application is using ESD, start
+  <B>MPlayer</B> with the <CODE>-vo sdl:esd</CODE> option to combine both
+  sound streams. In fact, the option <CODE>-vo sdl:esd</CODE> could be used
+  with ESD even when playing <B>Mplayer</B> alone.</P>
+
+<P>Feedback to this document is welcome. Please tell us how <B>MPlayer</B>
+  and your sound card(s) worked together.</P>
 
 
 <H4><A NAME="plugins">2.3.2.2 Audio plugins</A></H4>
