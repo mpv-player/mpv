@@ -1516,10 +1516,15 @@ header_end:
 
 void demux_close_real(demuxer_t *demuxer)
 {
+    int i;
     real_priv_t* priv = demuxer->priv;
  
-    if (priv)
+    if (priv){
+    	for(i=0; i<MAX_STREAMS; i++)
+	    if(priv->index_table[i])
+	        free(priv->index_table[i]);
 	free(priv);
+    }
 
     return;
 }
