@@ -173,7 +173,7 @@ Wenn du eigenartige Effekte beim Verwenden von -vo xv siehst, versuche SDL (es
 unterstützt auch XVideo) und schaue ob es funkioniert. Siehe <A HREF="#2.2.1.4">SDL Sektion</A>
 für Details.</P>
 
-<P><B>Oder</B> versuch den NEUEN -vo tdfxfb -Treiber! Siehe <A HREF="#2.2.1.9">Sektion
+<P><B>Oder</B> versuche den NEUEN -vo tdfxfb -Treiber! Siehe <A HREF="#2.2.1.9">Sektion
 2.2.1.9</A>!</P>
 
 <P><B><A NAME=2.2.1.2.2>2.2.1.2.2. S3 Karten</A></B></P>
@@ -713,6 +713,60 @@ Beschleunigung). :(</P>
 <P><I>Irgendwie bekomme ich nur eine Schwarz-Weiss Ausgabe am Fernseher ...</I>
 Hast du vielleicht einen NTSC Fernseher? Oder hast du vielleicht nicht einen der
 TV-* Scripts laufen lassen?</P>
+
+<P><B><A NAME=2.2.1.A.2>2.2.1.A.2. ATI Karten</A></B></P>
+
+<P>
+<B>Einige Worte über ATI's TV-Out:</B><BR>
+Zur Zeit will ATI keine Unterstützt für TV-Out Chipsets unter Linux. Hier ist die
+offzielle Antwort von ATI Inc.:
+
+<P>
+<CODE>
+<I>
+<BR>&gt; Hallo!
+<BR>&gt;
+<BR>&gt; Auf eurer Seite steht, dass ihr Linux-Entwickler unterstützt.
+<BR>&gt; Zur Zeit beteilige ich mich am MPlayer Projekt (www.mplayerhq.hu).
+<BR>&gt; Ich bin interessiert am Einschalten des TV-Outs bei Radeon VE-Chips während
+<BR>&gt; Video-Wiedergabe. Ich würde dieses Feature dem radeonfb-Treiber hinzufügen
+<BR>&gt; (kann man im CVS-Tree vom MPlayer-Projekt unter main/drivers/radeon finden).
+<BR>&gt; Ich hab eine Chance eine offizielle Dokumentation zu erhalten?
+</I>
+<BR>Wir können aufgrund des Macrovision-Konzern keine Dokumente im Bezug auf TV-Out
+<BR>hergeben. Auf das MPEG2-Decoding ist etwas das wir MÖGLICHWEISE in der Zukunft
+<BR>erwägen, aber nicht zur Zeit. Dies ist ebenfall aufgrund einen Eigentümer und einer
+<BR>3. Partei.
+</CODE>
+</P>
+
+<P>Bemitleidenswert, nicht?</P>
+
+<P>
+<CODE>
+<B>Q:Was ist Macrovision?</B><BR>
+A:Es ist ein Kopierschutz-Mechanismus.</CODE>
+</P>
+
+<P>Dies bedeutet, wenn sie die TV-Out anbelangenden Informationen veröffentlichen, dass
+Hacker es ermöglicht werden könnte, den Kopierschutz ihrer Chips zu umgehen. Deshalb gibt
+es keine Möglichkeit den TV-Out bei ATI-Karten zu aktivieren.</P>
+
+<P>Wie ist der Status von ATI TV-Out-Chips unter Linux:
+<LI><B>ATI Mach64</B> verwendet <I>ImpacTV</I>, welcher von Gatos unterstützt wird.
+<LI><B>ASIC Radeon VIVO</B> verwendet <I>Rage Theatre</I>, welcher von Gatos unterstützt wird.
+<LI><B>Radeon VE</B> und <B>Rage PRO LT</B> verwenden <I>ImpacTV2+</I>, welcher unter Linux nicht
+unterstützt wird.</P>
+
+<P>
+Von anderen Seite gesehen können wir eine Change haben den TV-Out Support durch die
+<B>VESA-Treiber</B> auf x86 Systemen zu aktivieren, habe seit Linux auch <I>vm86 syscall</I>
+beschränkt hat, ist praktisch unerreichbar. Nun bildet ein Zugriff auf einen IO-Raum eine
+Ausnahme und der Treiber versucht VESA-Befehle zu emulieren anstatt die als normale int_10h
+zu verwenden.
+</P>
+
+</P>
 
 </BODY>
 </HTML>
