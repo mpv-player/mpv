@@ -139,7 +139,7 @@ runtime CPU detection (pass the
 <option>--enable-runtime-cpudetection</option> to <command>configure</command>).
 It is disabled by default because it implies a small speed sacrifice, but it is
 now possible to create binaries that run on different members of the Intel
-CPU family.
+compatible CPU family.
 </para>
 </sect1>
 
