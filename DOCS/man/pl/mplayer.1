@@ -1,4 +1,4 @@
-.\" synced with 1.678
+.\" synced with 1.681
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -328,24 +328,17 @@ Opcje dzia³aj±ce bez warto¶ci mog± byæ w³±czone przez ustawienie "yes", "1" lub
 Równie¿ podopcje mog± byæ okre¶lane w ten sposób.
 .PP
 .I PRZYK£AD:
-.br
+.nf
 # U¿ywa sterownika Matrox jako domy¶lnego.
-.br
 vo=xmga
-.br
 # Uwielbiam staæ na rêkach gdy ogl±dam filmy.
-.br
 flip=yes
-.br
 # Dekoduje/\:koduje wielokrotne zbiory png,
-.br
 # zaczynaj od mf://maskazbiorów
-.br
 mf=type=png:fps=25
-.br
 # Dziwne negatywy s± fajne
-.br
 vf=eq2=1.0:-0.8
+.fi
 .PP
 Mo¿esz te¿ napisaæ zbiór konfiguracyjny dla konkretnego pliku.
 Je¶li zamierzasz mieæ zbiór konfiguracyjny dla pliku o nazwie "film.avi",
@@ -1262,13 +1255,9 @@ W³±cza wy¶wietlanie napisów DVD w jêzyku podanym przez <ID> (0\-31).
 MPlayer wy¶wietli dostêpne jêzyki, je¶li jest uruchomiony w trybie
 gadatliwym (\-v).
 .TP
-.B \-slang <dwuliterowy\ kod\ kraju> (patrz te¿ opcjê \-sid)
-Wybiera jêzyk napisów DVD.
-MPlayer wy¶wietli dostêpne jêzyki, je¶li jest uruchomiony w trybie
-gadatliwym (\-v).
-.br
-W przeciwnej sytuacji ustala opcjonalny przyrostek napisów który dostaje wy¿szy
-priorytet przy szukaniu napisów.
+.B \-slang <kod\ kraju[,kod\ kraju,...]> (sprawd¼ te¼ opcjê \-sid)
+Okre¶la priorytetow± listê jêzyków napisów DVD do u¿ycia.
+Jêzyki musz± byæ podane jako dwuliterowe kody krajów.
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -1946,17 +1935,27 @@ Dostêpne s± opcje:
 .PD 0
 .RSs
 .IPs [no]progressive
-Wybiera miêdzy standardowym lub progresywnym JPEG.
+Wybiera miêdzy standardowym lub progresywnym JPEG (domy¶lnie: noprogressive).
 .IPs [no]baseline
-Wybiera, czy ma u¿ywaæ baseline czy nie.
+Wybiera, czy ma u¿ywaæ baseline czy nie (domy¶lnie: baseline).
 .IPs optimize=<0\-100>
-wspó³czynnik optymalizacji
+wspó³czynnik optymalizacji (domy¶lnie: 100)
 .IPs smooth=<0\-100>
-wspó³czynnik wyg³adzania
+wspó³czynnik wyg³adzania (domy¶lnie: 0)
 .IPs quality=<0\-100>
-wspó³czynnik jako¶ci
+wspó³czynnik jako¶ci (domy¶lnie: 75)
 .IPs outdir=<warto¶æ>
-katalog, gdzie zapisywane bêd± zbiory JPEG
+Okre¶la katalog, w którym bêd± zapisywane pliki JPEG.
+Je¿eli nie podano ¿adnej warto¶ci, wszystkie pliki bêd± zapisane
+w bie¿±cym katalogu.
+.IPs subdirs=<warto¶æ>
+Je¶li podane, MPlayer stworzy poszeregowane podkatalogi z okre¶lnonym prefiksem.
+Je¿eli opcja nie jest podana, ¿adne podkatalogi nie bêd± stworzone i wszystkie
+pliki JPEG bêd± zapisane do tego samego katalogu.
+.IPs maxfiles=<warto¶æ>
+Maksymalna ilo¶æ zapisanych w podkatalogach plików JPEG (je¿eli podana
+jest opcja subdirs).
+Warto¶æ musi byæ wiêksza lub równa ni¿ 1 (domy¶lnie: 1000).
 .RE
 .PD 1
 .
