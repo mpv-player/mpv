@@ -19,7 +19,7 @@
 
 <P>A legfontosabb video codecek:</P>
 <UL>
-  <LI>MPEG1 (VCD) és MPEG2 (DVD) video
+  <LI>MPEG1 (VCD) és MPEG2 (DVD) video</LI>
   <LI>natív dekóderek DivX ;-), OpenDivX, DivX4, DivX5, M$ MPEG4 v1, v2
     és más MPEG4 variánsokhoz</LI>
   <LI>natív dekóder Windows Media Video 7-hez (WMV1), és Win32 dekóder a
@@ -74,15 +74,15 @@
 
 <P>Két lehetõség van a használatára:</P>
 
-<TABLE BORDER=0>
-  <TD>&nbsp;&nbsp;</TD><TD VALIGN=top>-vc odivx</TD><TD>&nbsp;&nbsp;</TD>
-  <TD>a codec használata, mint az OpenDivX új verziója.
+<DL>
+  <DT><CODE>-vc odivx</CODE></DT>
+  <DD>a codec használata, mint az OpenDivX új verziója.
     Ebben az esetben YV12 képeket produkál a saját bufferében,
-    és az <B>MPlayer</B> (libvo) konverziót végez.</TD><TR>
-  <TD></TD><TD VALIGN=top>-vc&nbsp;divx4</TD><TD></TD>
-  <TD>a codec csinál konverziót. Ebben az esetben használhatsz YUY2/UYVY
-    módokat is (LASSÚ).</TD></TR>
-</TABLE>
+    és az <B>MPlayer</B> (libvo) konverziót végez.</DD>
+  <DT><CODE>-vc divx4</CODE></DT>
+  <DD>a codec csinál konverziót. Ebben az esetben használhatsz YUY2/UYVY
+    módokat is (LASSÚ).</DD>
+</DL>
 
 <P>Az <CODE>-vc odivx</CODE> módszer általában gyorsabb, amiatt hogy a
   képadatokat YV12
@@ -132,7 +132,7 @@
   meg lehet nézni képkockavesztés nélkül, egy régi K6/2 500-ason.</P>
 
 
-<H4><A NAME=xanim>2.2.1.3  XAnim codec-ek</B></P>
+<H4><A NAME=xanim>2.2.1.3  XAnim codec-ek</A></H4>
 
 <P>Elõszó:<BR>
   A bináris XAnim codec-ek mellé van csomagolva egy-egy kis szöveges file
@@ -218,7 +218,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   configure-nak a helyet a <CODE>--with-reallibdir</CODE> opcióval.</P
 
 <P><B>Megj.:</B> a RealPlayer könyvtárak jelenleg csak <B>Linux, FreeBSD,
-  NetBSD és Cygwin rendszereken mûködnek, x86 platformon.</P>
+  NetBSD és Cygwin rendszereken mûködnek, x86 platformon.</B></P>
 
 <P><B>Megj2.:</B> mi nem tudjuk terjeszteni a RealPlayer könyvtárakat,
   mivel a licenszük megtiltja.</P>
@@ -256,15 +256,15 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 
 <OL>
   <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</CODE></LI>
-  <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</CODE><BR>
+  <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</CODE></LI>
   <LI><CODE>cd xvidcore/build/generic</CODE></LI>
-  <LI><CODE>Szerkeszd át a Makefile.linux-ot a gépednek megfelelõen</CODE></LI>
+  <LI>Szerkeszd át a <CODE>Makefile.linux</CODE>-ot a gépednek megfelelõen</LI>
   <LI><CODE>make -f Makefile.linux</CODE></LI>
-  <LI><CODE>fogod a DivX4linux csomagot és az encore2.h illetve
-    decore.h file-okat átmásolod belõlük a <CODE>/usr/local/include/</CODE>
-    könyvtárba</LI>
-  <LI><CODE>fordítsd újra az <B>MPlayer</B>-t a következõ opcióval:
-    --with-xvidcore=/útvonal/libcore.a</CODE></LI>
+  <LI>fogod a DivX4linux csomagot és az <CODE>encore2.h</CODE> illetve
+    <CODE>decore.h</CODE> file-okat átmásolod belõlük a
+    <CODE>/usr/local/include/</CODE> könyvtárba</LI>
+  <LI>fordítsd újra az <B>MPlayer</B>-t a következõ opcióval:
+    <CODE>--with-xvidcore=/útvonal/libcore.a</CODE></LI>
 </OL>
 
 
@@ -304,7 +304,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 </UL>
 
 
-<H4><A NAME=software_ac3>2.2.2.1  Szoftveres AC3 dekódolás</B></P>
+<H4><A NAME=software_ac3>2.2.2.1  Szoftveres AC3 dekódolás</A></H4>
 
 <P>Ez az alapértelmezett AC3 audio dekóder.</P>
 
@@ -330,7 +330,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   legújabb ALSA CVS-ben is van hozzá támogatás).</P>
 
 
-<H4><A NAME=hardware_ac3>2.2.2.2  Hardveres AC3 dekódolás</B></P>
+<H4><A NAME=hardware_ac3>2.2.2.2  Hardveres AC3 dekódolás</A></H4>
 
 <P>Kell egy AC3 képes hangkártya, digitális kimenettel (SP/DIF). A kártya
   meghajtójának megfelelõen támogatnia kell az AFMT_AC3 formátumot (ilyenek
@@ -421,7 +421,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 
 <OL>
   <LI>Töltsd le a GraphEdit-et vagy a DirectX SDK-bõl, vagy a
-    <A HREF="http://doom9.org">Doom9</A>-rõl</LI>
+    <A HREF="http://doom9.org">Doom9</A>-rõl</LI>
   <LI>Indítsd el a <CODE>graphedit.exe-t</CODE></LI>
   <LI>A menûbõl válaszd ki a Graph -&gt; Insert Filters menûpontot</LI>
   <LI>Bontsd ki a <CODE>DirectShow Filters</CODE> ágat</LI>

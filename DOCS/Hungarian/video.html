@@ -44,12 +44,12 @@
   méretét hexadecimálisba, pl így:</P>
 
 <TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>1 MB</TD><TD WIDTH=10%></TD><TD>0x100000</TD><TR>
-<TD></TD><TD>2 MB</TD><TD></TD><TD>0x200000</TD><TR>
-<TD></TD><TD>4 MB</TD><TD></TD><TD>0x400000</TD><TR>
-<TD></TD><TD>8 MB</TD><TD></TD><TD>0x800000</TD><TR>
-<TD></TD><TD>16 MB</TD><TD></TD><TD>0x1000000</TD><TR>
-<TD></TD><TD>32 MB</TD><TD></TD><TD>0x2000000</TD><TR>
+  <TR><TD>&nbsp;&nbsp;</TD><TD>1 MB</TD><TD WIDTH=10%></TD><TD>0x100000</TD></TR>
+  <TR><TD></TD><TD>2 MB</TD><TD></TD><TD>0x200000</TD></TR>
+  <TR><TD></TD><TD>4 MB</TD><TD></TD><TD>0x400000</TD></TR>
+  <TR><TD></TD><TD>8 MB</TD><TD></TD><TD>0x800000</TD></TR>
+  <TR><TD></TD><TD>16 MB</TD><TD></TD><TD>0x1000000</TD></TR>
+  <TR><TD></TD><TD>32 MB</TD><TD></TD><TD>0x2000000</TD></TR>
 </TABLE>
 
 
@@ -58,7 +58,7 @@
   (size=0x2000000) ezt kell beírni:</P>
 
 
-<P><CODE>echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr</CODE></P>
+<P><CODE>echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr</CODE></P>
 
 
 <P>Nem minden CPU támogatja az MTRR-eket. Például régebbi K6/2-k (266Mhz
@@ -596,7 +596,7 @@ a framebuffer egység megadása (/dev/fb0)</TD><TR>
 
 <P>A <CODE>/dev/mga_vid</CODE> filebõl kiolvasható néhány info (pl cat-tal),
   és meg lehet változtatni a fényerõt is rajta keresztül :
-  <CODE>echo "brightness=120" > /dev/mga_vid</CODE></P>
+  <CODE>echo "brightness=120" &gt; /dev/mga_vid</CODE></P>
 
 
 <H4><A NAME=tdfxfb>2.3.1.8.  3dfx YUV támogatás</A></H4>
@@ -613,7 +613,7 @@ a framebuffer egység megadása (/dev/fb0)</TD><TR>
   (3-as X-hez) meghajtók mindegyike tudja ezt, minden támogatott kártyával.
   Lásd a <A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A> címen.</P>
 
-<P>XFree86(DRI) >= 4.0.3 csak Matrox, és Radeon kártyákkal támogatja.
+<P>XFree86(DRI) &gt;= 4.0.3 csak Matrox, és Radeon kártyákkal támogatja.
   Lásd a <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> címen.</P>
 
 <H4><A NAME=aalib>2.3.1.10.  AAlib - szöveges módú megjelenítés</A></H4>
@@ -665,7 +665,7 @@ Here are some important:</P></B></TD><TR>
 	részletekért.</P>
 
 
-<H4><A NAME=vesa>2.3.1.11.  VESA - megjelenítés a VESA BIOS segítségével</B></P>
+<H4><A NAME=vesa>2.3.1.11.  VESA - megjelenítés a VESA BIOS segítségével</A></H4>
 
 <P>Ez egy <B>általános meghajtó</B> minden olyan kártyára, melynek VESA VBE 2.0+
   kompatibilis BIOS-a van. Ezen kívül még egy oka van ezen meghajtó
@@ -742,7 +742,7 @@ Here are some important:</P></B></TD><TR>
 </UL>
 
 
-<H4><A NAME=x11>2.3.1.12.  X11</B></P>
+<H4><A NAME=x11>2.3.1.12.  X11</A></H4>
 
 <P>Kerülendõ. Szabványos X11 kimenet (megosztott memóriával - mitshm),
   és abszolut nélkülözi a hardveres gyorsítást. Támogat (MMX/3DNow/SSE
@@ -981,7 +981,6 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
     <B>És igen, élvezd az Xv-nél és windoznál szebb, jobb, gyorsabb Matrox TV kimenetet!</B>
     </P>
   </LI>
-</LI>
 </UL>
 
 <H5><A NAME=tv-out_matrox_g450>2.3.1.A.2. Matrox G450/G550 kártyák</A></H5>

@@ -8,7 +8,7 @@
 
 <BODY>
 
-<H1 ALIGN="center"><B>MPlayer - Movie Player for LINUX</H1>
+<H1 ALIGN="center">MPlayer - Movie Player for LINUX</H1>
 
 <H2 ALIGN="center">&copy; 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)<BR>
   <A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A></H2>
@@ -474,7 +474,7 @@
   </UL>
 </LI>
 
-<LI>Az <A HREF=codecs.html#2.1.2.4>XAnim codecek</A> használhatóak a régebbi
+<LI>Az <A HREF="codecs.html#2.1.2.4">XAnim codecek</A> használhatóak a régebbi
   codec-û (mint pl Indeo 3/4/5), valamint <B>3ivx</B> filmek lejátszására
   (teljes képernyõ, hardveres YUV támogatás). Fõleg hogy mivel több platformon
   hozzáférhetõk, ez az egyetlen lehetõség Indeo (stb) filmek lejátszására
@@ -546,7 +546,7 @@
   az Nvidia zárt forráskódú meghajtóját az nvidia.com-rõl. Részleteket
   lásd az <A HREF="video.html#xv_nvidia">Nvidia Xv meghajtó</A> fejezetben.</LI>
 
-<LI><B>3DLabs GLINT R3 és Permedia3: egy VIDIX driver áll rendelkezésre
+<LI><B>3DLabs GLINT R3 és Permedia3</B>: egy VIDIX driver áll rendelkezésre
   (pm3_vid). Lásd <A HREF="video.html#vidix">itt</A>.</LI>
 
 <LI><B>más kártyák</B>: a fentiek közül egyik se?
@@ -639,11 +639,11 @@
 <H4>EGYÉB FUNKCIÓK</H4>
 
 <UL>
-  <LI>Kell grafikus felület? Ha igen, olvasd el az <A HREF=#1.4>1.4-es fejezetet</A>
+  <LI>Kell grafikus felület? Ha igen, olvasd el az <A HREF=#gui>GUI fejezetet</A>
     mielõtt még belekezdenél a fordításba.</LI>
   <LI>Ha fel akar installálni a nagyszerû <B>MEncodert</B> is, nézd meg a
-    <A HREF=encoding.html#2.4">MEncoder fejezetet</A> is.</LI>
-  <LI>Ha van V4L kompatibilis <B>TV tunered</B>, nézd meg a <A HREF=#2.5>TV bemenet</A>
+    <A HREF="encoding.html#mencoder">MEncoder fejezetet</A> is.</LI>
+  <LI>Ha van V4L kompatibilis <B>TV tunered</B>, nézd meg a <A HREF=#tv>TV bemenet</A>
     fejezetet.</LI>
 </UL>
 
@@ -675,7 +675,7 @@
 <P>Bár nem kötelezõ, jobb ha felteszed a fontokat is, mert így kapsz OSD-t, és
   feliratok megjelenítésének képességét. Töltsd le az mp-arial-iso-8859-2.zip-et
   (és/vagy opcionálisan nyelvi kiegészítõket). Részletekért olvasd el az
-  <A HREF=#1.5>1.5-ös</A> fejezetet.</P>
+  <A HREF=#subtitles_osd>OSD</A> fejezetet.</P>
 
 <PRE>	mkdir ~/.mplayer
 	cd ~/.mplayer
@@ -696,9 +696,8 @@
   mód bekapcsolásához:</P>
 
 <UL>
-  <LI>írd be a <CODE>gui=yes</CODE> sort a konfigurációs file-ba</LI>
-    vagy
-  <LI><CODE>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</CODE> ,
+  <LI>írd be a <CODE>gui=yes</CODE> sort a konfigurációs file-ba, vagy</LI>
+  <LI><CODE>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</CODE>,
     és a <CODE>gmplayer</CODE> file-t indítsd.</LI>
 </UL>
 
@@ -854,7 +853,7 @@ Naboo was under an attack.<BR>
   konfigurációs file-ban.</P>
 
 
-<H2><A NAME="rtc">1.5 RTC</H2>
+<H2><A NAME="rtc">1.5 RTC</A></H2>
 
 Három idõzítõ kód van az <B>MPlayerben</B>.
 
@@ -870,7 +869,7 @@ Három idõzítõ kód van az <B>MPlayerben</B>.
     filerendszeren belül beállíthatod a felhasználók számára elérhetõ
     legmagasabb RTC frekvenciát:
     <P>
-      <CODE>echo 1024 > /proc/sys/dev/rtc/max-user-freq</CODE>
+      <CODE>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</CODE>
     </P>
     Ha nincs ilyen új kerneled, a kernel forrásában található
     <CODE>drivers/char/rtc.c</CODE> file átírásával is megoldható a
@@ -879,7 +878,7 @@ Három idõzítõ kód van az <B>MPlayerben</B>.
        * We don't really want Joe User enabling more
        * than 64Hz of interrupts on a multi-user machine.
        */
-      if ((rtc_freq > 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
+      if ((rtc_freq &gt; 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
     </PRE>
     és írd át a 64-et 1024-re. Azért jó ha tudod hogy mit csinálsz.<BR>
     Az új idõzítõ kód hatékonysága szépen látszik a státuszsorban.<BR>
@@ -896,28 +895,28 @@ Három idõzítõ kód van az <B>MPlayerben</B>.
     sajnos több CPU-t igényel.</LI>
 </UL>
 
-<B>Megj.:</B> <B>SOHA ne installálj setuid MPlayer binárist többfelhasználós
-  gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</LI>
+<P><B>Megj.:</B> <B>SOHA ne installálj setuid MPlayer binárist többfelhasználós
+  gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</P>
 
 
 
 <H1><A NAME=features>2.  Funkciók</A></H1>
 
 
-<P><A NAME=2.1>2.1. <A HREF="formats.html">Támogatott formátumok</A></P>
+<P><A NAME=2.1>2.1.</A> <A HREF="formats.html">Támogatott formátumok</A></P>
 
 
-<P><A NAME=2.2>2.2. <A HREF="codecs.html">Támogatott codec-ek</A></P>
+<P><A NAME=2.2>2.2.</A> <A HREF="codecs.html">Támogatott codec-ek</A></P>
 
 
-<P><A NAME=output>2.3. <A HREF="video.html">Video</A> és <A HREF="sound.html">audio</A>
+<P><A NAME=output>2.3.</A> <A HREF="video.html">Video</A> és <A HREF="sound.html">audio</A>
 kimeneti eszközök</P>
 
 
-<P><A NAME=2.4>2.4. <A HREF="encoding.html">MEncoder</A></P>
+<P><A NAME=2.4>2.4.</A> <A HREF="encoding.html">MEncoder</A></P>
 
 
-<H2><A NAME=tv>2.5. TV bemenet</H2>
+<H2><A NAME=tv>2.5.</A> TV bemenet</H2>
 
 
 <P>Ez a fejezet elmagyarázza hogy tudsz <B>nézni/grabbelni egy V4L kompatibilis
@@ -929,7 +928,7 @@ kimeneti eszközök</P>
   kísérletezés nélkül majd hirtelen menni fog!</P>
 
 
-<H3><A NAME=tv_compilation>2.5.1 Fordítás</H3>
+<H3><A NAME=tv_compilation>2.5.1 Fordítás</A></H3>
 
 <UL>
   <LI>elõszöris, újra kell fordítanod az <B>MPlayer</B>-t. A <CODE>configure</CODE>
@@ -946,7 +945,7 @@ kimeneti eszközök</P>
   colorspace-eket (ezutóbbit <CODE>-vo sdl</CODE>-el). Ezeket a
   <CODE>outfmt=YV12</CODE> opcióval lehet megadni, lásd lent.</P>
 
-<H3><A NAME=tv_examples>2.5.2 Példák</H3>
+<H3><A NAME=tv_examples>2.5.2 Példák</A></H3>
 
 <P>
 Teszt kimenet, AAlib-re :)<BR>
@@ -967,16 +966,16 @@ Szabványos V4L-rõl bemenet<BR>
   vonatkoztatva olyan opciókat amelyek ezeket felülbírálják (az elõbbi
   példát folytatva: <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).
   Lehet csoportokat is kialakítani a { és } karakterekkel. Ez a -loop opcióval
-  hasznos: <CODE>>mplayer { 1.avi -loop 2 2.avi } -loop 3</CODE> ebben a
+  hasznos: <CODE>mplayer { 1.avi -loop 2 2.avi } -loop 3</CODE> ebben a
   sorrendben fog lejátszani: 1 1 2 1 1 2 1 1 2
 </P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [opciók] [útvonal/]filenév</CODE></TD><TR>
-<TD></TD><TD>file-ok</TD><TD></TD><TD><CODE>mplayer [opciók] [útvonal/]filenév1 [filenév1 opciói] filenév2 [filenév2 opciói] ...</CODE></TD><TR>
-<TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [opciók] -vcd trackszám [-cdrom-device /dev/cdrom]</CODE></TD><TR>
-<TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [opciók] -dvd titleno [-dvd device /dev/dvd]</CODE></TD><TR>
-<TD></TD><TD>net</TD><TD></TD><TD><CODE>mplayer [opciók] http://site.com/file.[mpg|avi|asf] (lejátszási listák is használhatóak)</CODE></TD><TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [opciók] [útvonal/]filenév</CODE></TD></TR>
+<TR><TD></TD><TD>file-ok</TD><TD></TD><TD><CODE>mplayer [opciók] [útvonal/]filenév1 [filenév1 opciói] filenév2 [filenév2 opciói] ...</CODE></TD></TR>
+<TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [opciók] -vcd trackszám [-cdrom-device /dev/cdrom]</CODE></TD></TR>
+<TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [opciók] -dvd titleno [-dvd device /dev/dvd]</CODE></TD></TR>
+<TR><TD></TD><TD>net</TD><TD></TD><TD><CODE>mplayer [opciók] http://site.com/file.[mpg|avi|asf] (lejátszási listák is használhatóak)</CODE></TD></TR>
 </TABLE></P>
 
 <P>Az <B>MPlayer</B> új verzióinak URL stílusban is meg lehet adni a VCD
@@ -1020,8 +1019,8 @@ LEFT seek -10
 - audio_delay 0.100
 + audio_delay -0.100
 q quit
-> pt_step 1
-< pt_step -1
+&gt; pt_step 1
+&lt; pt_step -1
 ENTER pt_step 1 1
 </PRE>
 
@@ -1176,9 +1175,9 @@ end
 
 
 
-<H1><A NAME=4>4.  <A HREF="faq.html">FAQ fejezet</A></A></H1>
+<H1><A NAME=4>4.</A> <A HREF="faq.html">FAQ fejezet</A></H1>
 
-<H1><A NAME=5>5.  <A HREF="cd-dvd.html">CD/DVD fejezet</A></A></H1>
+<H1><A NAME=5>5.</A> <A HREF="cd-dvd.html">CD/DVD fejezet</A></H1>
 
 <H1><A NAME=ports>6.  Különbözõ operációs rendszerek</A></H1>
 
@@ -1291,13 +1290,13 @@ end
   ha annak kapacitása nagyobb mint 4 GB:</P>
 
 <P><UL><LI>The sd(7D) driver on solaris 8 x86 driver has bug when accessing a
-     disk block >4GB on a device using a logical blocksize != DEV_BSIZE
+     disk block &gt;4GB on a device using a logical blocksize != DEV_BSIZE
      (i.e. CDROM and DVD media). Due to a 32bit int overflow, a disk
      address modulo 4GB is accessed.
      (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
 
 <LI>The similar bug is present in the hsfs(7FS) filesystem code (aka
-     ISO9660), hsfs currently does not support partitions/disks >4GB,
+     ISO9660), hsfs currently does not support partitions/disks &gt;4GB,
      all data is accessed modulo 4GB
      (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)
 </UL></P>

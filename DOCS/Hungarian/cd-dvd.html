@@ -30,15 +30,15 @@
 
 <P>Másik módszer :</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 >/proc/ide/[meghajtó]/settings</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 &gt;/proc/ide/[meghajtó]/settings</CODE></P>
 
 <P>de ehhez rendszergazdai jogosultság szükséges. A következõ parancs is
   hasznos lehet:</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 >/proc/ide/[meghajtó]/settings</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 &gt;/proc/ide/[meghajtó]/settings</CODE></P>
 
 <P>Ez 2Mb-ot olvas elõre olvasáskor (karcos CDROM-oknál hasznos).
-  Ajánlott továbbá a 'hdparm' program használata :<P>
+  Ajánlott továbbá a 'hdparm' program használata:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (meghajtó)</CODE></P>
 
@@ -81,7 +81,7 @@
 
 <P><B>Régi tipusú DVD támogatás - <I>OPCIONÁLIS</I></B></P>
 
-<P><I>Ez akkor hasznos ha pl <B>merevlemezrõl</B> akarsz kódolt VOB-ot lejátszani.
+<P>Ez akkor hasznos ha pl <B>merevlemezrõl</B> akarsz kódolt VOB-ot lejátszani.
   Fordítsd le és installáld a <B>libcss</B> 0.0.1-et (és ne újabbat).
   Ha az <B>MPlayer</B> nem találja, használd a <CODE>-csslib /útvonal/libcss.so</CODE>
   opciót. Root jogokkal, vagy egy suid root binárissal kell rendelkezned a

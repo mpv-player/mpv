@@ -301,7 +301,7 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
   <DD>&nbsp;</DD>
 
   <DT>  Q:   Hogy lehet az MPlayer-t háttérben futtatni?</DT>
-  <DD>  A:   Így : <CODE>mplayer &lt;opciók&gt; &lt;filenév&gt; &lt; /dev/null &</DD>
+  <DD>  A:   Így : <CODE>mplayer &lt;opciók&gt; &lt;filenév&gt; &lt; /dev/null &</CODE></DD>
   <DD>&nbsp;</DD>
 
 </DL>
@@ -327,9 +327,9 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
   <DT>Q:  MPlayer valami hibaüzenettel lép ki, amikor l3codeca.acm-et használok.</DT>
   <DD>A:  Nézd meg, hogy mit ír ki az 'ldd /usr/local/bin/mplayer' . Ha ilyet   
      tartalmaz:
-        libc.so.6 => /lib/libc.so.6 (0x4???????)
+        libc.so.6 =&gt; /lib/libc.so.6 (0x4???????)
      ahol "?" bármilyen szám, akkor rendben, a hiba nem itt van. De ha ez:
-        libc.so.6 => /lib/libc.so.6 (0x00??????)
+        libc.so.6 =&gt; /lib/libc.so.6 (0x00??????)
      Akkor a baj a kerneledben/libc-dben van. Valószínûleg valamilyen
      biztonsági patch-et használsz (például Solar Designer's OpenWall), ami
      alacsony címekre tölti be a file-t.
@@ -388,11 +388,13 @@ fileodban.</DD>
   <DT>Q: Itt van ez a film, de amikor lejátszom, elmegy a kép-hang szinkron, és/vagy az MPlayer a következõ üzenettel lép ki :<BR>
 <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></DT>
   <DD>A: Ennek több oka is lehet.<BR>
-  <LI>a CPU-d <B>és/vagy</B> a videokártyád <B>és/vagy</B> a rendszerbuszod túl LASSÚ. Az <B>MPlayer</B>
-  kiír egy üzenetet ha így van. (és az eldobott képkockák számlálója pörög felfele)</LI>
-  <LI>ha AVI-ról van szó, lehet hogy rosszul van interleave-elve. Próbáld meg a <I>-ni</I> opciót.</LI>
-  <LI>a hangkártyád meghajtója rossz, vagy ALSA 0.5-öt használsz <I>-ao oss</I>-sel. Lásd a <A HREF="sound.html">hangkártyák</A> fejezetet.</LI>
-  <LI>az AVI-nak rossz fejléce van, próbáld meg a <I>-nobps</I> és/vagy az <I>-mc 0</I> opcióval .</LI></DD>
+  <UL>
+    <LI>a CPU-d <B>és/vagy</B> a videokártyád <B>és/vagy</B> a rendszerbuszod túl LASSÚ. Az <B>MPlayer</B>
+      kiír egy üzenetet ha így van. (és az eldobott képkockák számlálója pörög felfele)</LI>
+    <LI>ha AVI-ról van szó, lehet hogy rosszul van interleave-elve. Próbáld meg a <I>-ni</I> opciót.</LI>
+    <LI>a hangkártyád meghajtója rossz, vagy ALSA 0.5-öt használsz <I>-ao oss</I>-sel. Lásd a <A HREF="sound.html">hangkártyák</A> fejezetet.</LI>
+    <LI>az AVI-nak rossz fejléce van, próbáld meg a <I>-nobps</I> és/vagy az <I>-mc 0</I> opcióval .</LI>
+  </UL></DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Van egy MJPEG file-om ami mûködik más lejátszókban, de az MPlayer csak
@@ -516,7 +518,7 @@ igenis használ xv-t, ha támogatva van. Nem kell külön írni semmit hozzá..</DD>
 
   <DT>Q: DVD lejátszás elõtt/helyett/közben ezt a hibaüzenetet kapom :<BR>
 <CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion     nfo_length /
-sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE></DT>
+sizeof(cell_adr_t) &gt;= c_adt-&gt;nr_of_vobs' failed.</CODE></DT>
   <DD>A: Ismert libdvdread 0.9.1 bug, a 0.9.2-ben és a libmpdvdkit-ben már javítva van,
 miért nem ezutóbbi használod?</DD>
   <DD>&nbsp;</DD>   
@@ -545,7 +547,7 @@ jogosultságok a DVD egységhez (pl /dev/dvd).</DD>
 
   <DT>Q: Hol lehet letölteni a libdvdread-et és a libdvdcss-t?</DT>
   <DD>A: Innen:
-<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</DD>
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A></DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Lehetséges csak bizonyos fejezeteket lejátszani/enkódolni ?</DT>
