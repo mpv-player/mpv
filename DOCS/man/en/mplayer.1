@@ -3215,6 +3215,21 @@ grayscale only decoding (a bit faster than with color)
 .IPs "idct=<0\-99> (see \-lavcopts)"
 For best decoding quality use the same idct algorithm for decoding and encoding.
 This may come at a price in accuracy, though.
+.IPs lowres=<number> 
+Low resolution decode
+.RSss
+.br
+0: disabled
+.br
+1: 1/2 resolution
+.br
+2: 1/4 resolution
+.br
+3: 1/8 resolution
+.REss
+Low resolution decode isnt supported by all codecs, and it will often result in
+ugly artefacts, this is not a bug but a sideeffect of not decoding at the full
+resolution.
 .IPs "sb=<number> (MPEG2 only)"
 Skip the given number of macroblock rows at the bottom.
 .IPs "st=<number> (MPEG2 only)"
