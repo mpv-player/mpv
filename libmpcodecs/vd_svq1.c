@@ -59,7 +59,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     
     if(len<=0) return NULL; // skipped frame
     
-    ret=svq1_decode_frame(svq1,data);
+    ret=svq1_decode_frame(svq1,data,len);
     
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE, 
 	sh->disp_w, sh->disp_h);

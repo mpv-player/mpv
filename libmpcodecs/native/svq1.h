@@ -34,5 +34,5 @@ typedef struct svq1_s {
   int		 height;
 } svq1_t;
 
-int svq1_decode_frame (svq1_t *svq1, uint8_t *buffer);
+int svq1_decode_frame (svq1_t *svq1, uint8_t *buffer, int buffer_size);
 void svq1_free (svq1_t *svq1);

@@ -34,7 +34,9 @@ typedef struct vlc_code_s {
 		 length	:6;
 } vlc_code_t;
 
-#define VIDEOBUFSIZE	128 * 1024
+#define VIDEOBUFSIZE	1280 * 1024
+
+//char temp_buf[VIDEOBUFSIZE];
 
 #define MEDIAN(a,b,c)	((a < b != b >= c) ? b : ((a < c != c > b) ? c : a))
 
@@ -45,7 +47,19 @@ typedef struct vlc_code_s {
 typedef void (*op_pixels_func)(unsigned char *block, const unsigned char *pixels, int line_size, int h);
 extern op_pixels_func put_pixels_tab[4];
 extern op_pixels_func put_no_rnd_pixels_tab[4];
+//#define HAVE_AV_CONFIG_H
 #endif
+
+#ifdef HAVE_AV_CONFIG_H
+// use libavcodec's get_bits():
+//#define ALT_BITSTREAM_READER
+//#define ALIGNED_BITSTREAM
+#include "../../libavcodec/common.h"
+#define bit_buffer_t GetBitContext
+#define get_bit_cache(buf) (show_bits(buf,24)<<8)
+//#define get_bit_cache(buf) show_bits(buf,32)
+#else
+// use built-in version:
 
 /* memory bit stream */
 typedef struct bit_buffer_s {
@@ -53,14 +67,17 @@ typedef struct bit_buffer_s {
   uint32_t	 bitpos;
 } bit_buffer_t;
 
-/* standard video sizes */
-static struct { int width; int height; } frame_size_table[8] = {
-  { 160, 120 }, { 128,  96 }, { 176, 144 }, { 352, 288 },
-  { 704, 576 }, { 240, 180 }, { 320, 240 }, {  -1,  -1 }
-};
+static inline void skip_bits(bit_buffer_t *bitbuf, int n){
+  bitbuf->bitpos+=n;
+}
 
+static void init_get_bits(bit_buffer_t *bitbuf, 
+                   unsigned char *buffer, int buffer_size){
+  bitbuf->buffer=buffer;
+  bitbuf->bitpos=0;
+}
 
-static uint32_t get_bits (bit_buffer_t *bitbuf, int count) {
+static inline uint32_t get_bits (bit_buffer_t *bitbuf, int count) {
   uint32_t result;
 
   /* load 32 bits of data (byte-aligned) */
@@ -79,7 +96,7 @@ static uint32_t get_bits (bit_buffer_t *bitbuf, int count) {
 /*
  * Return next 32 bits (left aligned).
  */
-static uint32_t get_bit_cache(bit_buffer_t *bitbuf) {
+static inline uint32_t get_bit_cache(bit_buffer_t *bitbuf) {
   uint32_t result;
 
   /* load 32 bits of data (byte-aligned) */
@@ -90,6 +107,8 @@ static uint32_t get_bit_cache(bit_buffer_t *bitbuf) {
 
   return result;
 }
+
+#endif
 
 static int decode_svq1_block (bit_buffer_t *bitbuf, uint8_t *pixels, int pitch, int intra) {
   uint32_t    bit_cache;
@@ -142,7 +161,7 @@ static int decode_svq1_block (bit_buffer_t *bitbuf, uint8_t *pixels, int pitch, 
 
     /* flush bits */
     stages	    = vlc->value;
-    bitbuf->bitpos += vlc->length;
+    skip_bits(bitbuf,vlc->length);
 
     if (stages == -1) {
       if (intra) {
@@ -186,7 +205,7 @@ static int decode_svq1_block (bit_buffer_t *bitbuf, uint8_t *pixels, int pitch, 
 
     /* flush bits */
     mean	    = vlc->value;
-    bitbuf->bitpos += vlc->length;
+    skip_bits(bitbuf,vlc->length);
 
     if (intra && stages == 0) {
       for (y=0; y < height; y++) {
@@ -269,7 +288,7 @@ static int decode_motion_vector (bit_buffer_t *bitbuf, svq1_pmv_t *mv, svq1_pmv_
       diff = 0;
 
       /* flush bit */
-      bitbuf->bitpos++;
+      skip_bits(bitbuf,1);
 
     } else {
       if (bit_cache >= 0x06000000) {
@@ -283,7 +302,7 @@ static int decode_motion_vector (bit_buffer_t *bitbuf, svq1_pmv_t *mv, svq1_pmv_
       diff = (vlc->value ^ sign) - sign;
 
       /* flush bits */
-      bitbuf->bitpos += vlc->length;
+      skip_bits(bitbuf,vlc->length);
     }
 
     /* add median of motion vector predictors and clip result */
@@ -518,7 +537,7 @@ static int decode_delta_block (bit_buffer_t *bitbuf,
 
   bit_cache	>>= (32 - 3);
   block_type	  = block_type_table[bit_cache].value;
-  bitbuf->bitpos += block_type_table[bit_cache].length;
+  skip_bits(bitbuf,block_type_table[bit_cache].length);
 
   /* reset motion vectors */
   if (block_type == SVQ1_BLOCK_SKIP || block_type == SVQ1_BLOCK_INTRA) {
@@ -561,6 +580,12 @@ static int decode_delta_block (bit_buffer_t *bitbuf,
   return result;
 }
 
+/* standard video sizes */
+static struct { int width; int height; } frame_size_table[8] = {
+  { 160, 120 }, { 128,  96 }, { 176, 144 }, { 352, 288 },
+  { 704, 576 }, { 240, 180 }, { 320, 240 }, {  -1,  -1 }
+};
+
 static int decode_frame_header (bit_buffer_t *bitbuf, svq1_t *svq1) {
   int frame_size_code;
 
@@ -581,7 +606,7 @@ static int decode_frame_header (bit_buffer_t *bitbuf, svq1_t *svq1) {
     }
 
     if ((svq1->frame_code ^ 0x10) >= 0x50) {
-      bitbuf->bitpos += 8*get_bits (bitbuf, 8);
+      skip_bits(bitbuf,8*get_bits (bitbuf, 8));
     }
 
     get_bits (bitbuf, 2);
@@ -628,15 +653,16 @@ static int decode_frame_header (bit_buffer_t *bitbuf, svq1_t *svq1) {
   return 0;
 }
 
-int svq1_decode_frame (svq1_t *svq1, uint8_t *buffer) {
+int svq1_decode_frame (svq1_t *svq1, uint8_t *buffer,int buffer_len) {
   bit_buffer_t	bitbuf;
   uint8_t      *current, *previous;
   int		result, i, x, y, width, height;
   int		luma_size, chroma_size;
 
+//  memcpy(temp_buf,buffer,buffer_len); buffer=temp_buf;
+  
   /* initialize bit buffer */
-  bitbuf.buffer	= buffer;
-  bitbuf.bitpos	= 0;
+  init_get_bits(&bitbuf,buffer,buffer_len);
 
   /* decode frame header */
   svq1->frame_code = get_bits (&bitbuf, 22);
