@@ -124,6 +124,7 @@ enum radeon_chips {
 	RADEON_LZ,
 	RADEON_LW,
 	R200_QL,
+	R200_BB,
 	RV200_QW
 };
 
@@ -148,6 +149,7 @@ static struct pci_device_id radeonfb_pci_table[] __devinitdata = {
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_LZ, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_LZ},
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_LW, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_LW},
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_R200_QL, PCI_ANY_ID, PCI_ANY_ID, 0, 0, R200_QL},
+	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_R200_BB, PCI_ANY_ID, PCI_ANY_ID, 0, 0, R200_BB},
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RV200_QW, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RV200_QW},
 	{ 0, }
 };
@@ -1080,6 +1082,11 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 			rinfo->hasCRTC2 = 1;
 			rinfo->isR200 = 1;
 			strcpy(rinfo->name, "Radeon2 8500 QL ");
+			break;
+		case PCI_DEVICE_ID_R200_BB:
+			rinfo->hasCRTC2 = 1;
+			rinfo->isR200 = 1;
+			strcpy(rinfo->name, "Radeon2 8500 AIW");
 			break;
 		case PCI_DEVICE_ID_RV200_QW:
 			rinfo->hasCRTC2 = 1;

@@ -17,7 +17,7 @@
  * Rage128(pro) stuff of this driver.
  */
 
-#define RADEON_VID_VERSION "1.2.0"
+#define RADEON_VID_VERSION "1.2.1"
 
 /*
   It's entirely possible this major conflicts with something else
@@ -38,7 +38,6 @@
   ...........................................................
   BUGS and LACKS:
     Color and video keys don't work
-    Contrast and brightness are unconfigurable on radeons
 */
 
 #include <linux/config.h>
@@ -110,12 +109,35 @@ static int swap_fourcc __initdata = 0;
 #define RTRACE(...)	((void)0)
 #endif
 
+#ifndef RAGE128
+#if defined(__i386__)
+/* Ugly but only way */
+#undef AVOID_FPU
+static double inline __FastSin(double x) 
+{
+   register double res;
+   __asm __volatile("fsin":"=t"(res):"0"(x));
+   return res;
+}
+#undef sin
+#define sin(x) __FastSin(x)
+
+static double inline __FastCos(double x) 
+{
+   register double res;
+   __asm __volatile("fcos":"=t"(res):"0"(x));
+   return res;
+}
+#undef cos
+#define cos(x) __FastCos(x)
+#else
+#define AVOID_FPU
+#warning You have non x86 system. Please port MATH support.
+#endif /*__386__*/
+#endif /*RAGE128*/
+
 #if !defined( RAGE128 ) && !defined( AVOID_FPU )
 #define RADEON_FPU 1
-#endif
-
-#ifdef RADEON_FPU
-#include <math.h>
 #endif
 
 typedef struct bes_registers_s
@@ -1167,6 +1189,7 @@ const struct ati_card_id_s ati_card_ids[]=
  { PCI_DEVICE_ID_RADEON_LZ, "Radeon M6 LZ " },
  { PCI_DEVICE_ID_RADEON_LW, "Radeon M7 LW " },
  { PCI_DEVICE_ID_R200_QL,   "Radeon2 8500 QL " },
+ { PCI_DEVICE_ID_R200_BB,   "Radeon2 8500 AIW" },
  { PCI_DEVICE_ID_RV200_QW,  "Radeon2 7500 QW " }
 #endif
 };
@@ -1203,6 +1226,7 @@ static int __init radeon_vid_config_card(void)
 	printk(RVID_MSG"Found %s (%uMb memory)\n",ati_card_ids[i].name,radeon_ram_size);
 #ifndef RAGE128	
 	if(ati_card_ids[i].id == PCI_DEVICE_ID_R200_QL || 
+	   ati_card_ids[i].id == PCI_DEVICE_ID_R200_BB || 
 	   ati_card_ids[i].id == PCI_DEVICE_ID_RV200_QW) IsR200 = 1;
 #endif
 	return TRUE;
@@ -1276,6 +1300,10 @@ static ssize_t radeon_vid_read(struct file *file, char *buf, size_t count, loff_
 #define RTFBrightness(a)   (((a)*1.0)/2000.0)
 #define RTFContrast(a)   (1.0 + ((a)*1.0)/1000.0)
 #define RTFHue(a)   (((a)*3.1416)/1000.0)
+#define RadeonSetParm(a,b,c,d) if((b)>=(c)&&(b)<=(d)) { (a)=(b);\
+	radeon_set_transform(RTFBrightness(ovBrightness),RTFContrast(ovContrast)\
+			    ,RTFSaturation(ovSaturation),RTFHue(ovHue),ov_trans_idx); }
+
 
 static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count, loff_t *ppos)
 {
@@ -1307,30 +1335,30 @@ static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count
 #ifdef RADEON_FPU
     if(memcmp(buf,PARAM_BRIGHTNESS,min(count,strlen(PARAM_BRIGHTNESS))) == 0)
     {
-      ovBrightness=simple_strtol(&buf[strlen(PARAM_BRIGHTNESS)],NULL,10);
-      radeon_set_transform(RTFBrightness(ovBrightness),RTFContrast(ovContrast)
-			   ,RTFSaturation(ovSaturation),RTFHue(ovHue),ov_trans_idx);
+      int tmp;
+      tmp=simple_strtol(&buf[strlen(PARAM_BRIGHTNESS)],NULL,10);
+      RadeonSetParm(ovBrightness,tmp,-1000,1000);
     }
     else
     if(memcmp(buf,PARAM_SATURATION,min(count,strlen(PARAM_SATURATION))) == 0)
     {
-      ovSaturation=simple_strtol(&buf[strlen(PARAM_SATURATION)],NULL,10);
-      radeon_set_transform(RTFBrightness(ovBrightness),RTFContrast(ovContrast)
-			   ,RTFSaturation(ovSaturation),RTFHue(ovHue),ov_trans_idx);
+      int tmp;
+      tmp=simple_strtol(&buf[strlen(PARAM_SATURATION)],NULL,10);
+      RadeonSetParm(ovSaturation,tmp,-1000,1000);
     }
     else
     if(memcmp(buf,PARAM_CONTRAST,min(count,strlen(PARAM_CONTRAST))) == 0)
     {
-      ovContrast=simple_strtol(&buf[strlen(PARAM_CONTRAST)],NULL,10);
-      radeon_set_transform(RTFBrightness(ovBrightness),RTFContrast(ovContrast)
-			   ,RTFSaturation(ovSaturation),RTFHue(ovHue),ov_trans_idx);
+      int tmp;
+      tmp=simple_strtol(&buf[strlen(PARAM_CONTRAST)],NULL,10);
+      RadeonSetParm(ovContrast,tmp,-1000,1000);
     }
     else
     if(memcmp(buf,PARAM_HUE,min(count,strlen(PARAM_HUE))) == 0)
     {
-      ovHue=simple_strtol(&buf[strlen(PARAM_HUE)],NULL,10);
-      radeon_set_transform(RTFBrightness(ovBrightness),RTFContrast(ovContrast)
-			   ,RTFSaturation(ovSaturation),RTFHue(ovHue),ov_trans_idx);
+      int tmp;
+      tmp=simple_strtol(&buf[strlen(PARAM_HUE)],NULL,10);
+      RadeonSetParm(ovHue,tmp,-1000,1000);
     }
     else
 #endif
