@@ -32,6 +32,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-sub\ file ]
 .RB [ \-subfps\ rate ]
 .RB [ \-subdelay\ sec ]
+.RB [ \-dvd\ device ]
 .I file
 .PP
 .SH DESCRIPTION
@@ -57,10 +58,14 @@ you can get the list of available drivers executing
 .I mplayer -vo help
 
 .TP
-.BI \-vcd\ track
+.B \-vcd\ track
 play video cd track from device instead of plain file
 .TP
-.BI \-nosound
+.B \-dvd\ device
+specify DVD-ROM drive to use for MPEG2 decoding.
+(use *_only_* when playing from DVD!)
+.TP
+.B \-nosound
 don't play sound
 .TP
 .B \-fs
@@ -132,10 +137,10 @@ With DivX AVIs with MP3 audio, you can choose whether to use MP3LIB (option 1),
 or Win32 DLL l3codeca.acm (option 4) (default). On CPUs with the 3DNow!
 instruction set, the first gives more performance. Your mileage may vary.
 .TP
-.BI \-sb\ position
+.B \-sb\ position
 seek to byte position
 .TP
-.BI \-abs\ bytes
+.B \-abs\ bytes
 audio buffer size (in bytes, default: measuring)
 .TP
 .B \-delay\ secs
@@ -197,7 +202,7 @@ q or ESC        stop playing and quit program
 
 / or *          decrease/increase volume
 
-o               toggle OSD:  none / seek / seek+timer
+o               toggle OSD: none / seek / seek+timer
 
 m               toggle using master/pcm volume
 .IP
