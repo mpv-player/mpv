@@ -37,6 +37,7 @@
 #include "config.h"
 
 #include "cfgparser.h"
+#include "cfg-mplayer-def.h"
 
 #include "libvo/video_out.h"
 
@@ -317,16 +318,6 @@ void exit_sighandler(int x){
   exit_player(NULL);
 }
 
-void usage(void){
-  printf("%s",help_text);
-  exit(0);
-}
-
-void missing_param(char *s){
-  printf("Missing parameter: %s\n", s);
-  exit(1);
-}
-
 int divx_quality=0;
 
 int main(int argc,char* argv[], char *envp[]){
@@ -380,6 +371,8 @@ char *dsp="/dev/dsp";
 int force_ni=0;
 char *homedir;
 char conffile[100];
+char confdir[100];
+int conffile_fd;
 #include "cfg-mplayer.h"
 
   printf("%s",banner_text);
@@ -389,7 +382,13 @@ if (parse_config_file(conf, "/etc/mplayer.conf") < 0)
 if ((homedir = getenv("HOME")) == NULL) {
   printf("Can't find HOME dir\n");
 } else {
-  snprintf(conffile, 100, "%s/.mplayerrc", homedir);
+  snprintf(confdir, 100, "%s/.mplayer", homedir);
+  mkdir(confdir, 0777);
+  snprintf(conffile, 100, "%s/config", confdir);
+  if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY, 0644)) != -1) {
+    write(conffile_fd, default_config, strlen(default_config));
+    close(conffile_fd);
+  }
   if (parse_config_file(conf, conffile) < 0)
     exit(1);
 }
@@ -432,9 +431,9 @@ if(video_driver && strcmp(video_driver,"help")==0){
 
 if(!filename){
   if(vcd_track) filename="/dev/cdrom"; 
-  else
-  //filename="MI2-Trailer.avi";
-  usage();
+  else {
+    printf("%s",help_text); exit(0);
+  }
 }
 
 
