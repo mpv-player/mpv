@@ -1971,6 +1971,8 @@ switch(sh_video->codec->driver){
 //      a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
       a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->wf->nAvgBytesPerSec;
       delay_corrected=1; // hack
+      v_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+      if(verbose)printf("%5.3f|",v_pts-d_video->pts);
     } else {
       if(!delay_corrected && d_audio->pts){
         float x=d_audio->pts-d_video->pts-(delay+audio_delay);
@@ -1985,9 +1987,8 @@ switch(sh_video->codec->driver){
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
       a_pts=d_audio->pts;
       a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+      v_pts=d_video->pts-frame_time;
     }
-
-    v_pts=d_video->pts-frame_time;
 
     if(verbose)printf("### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
 
@@ -2181,8 +2182,10 @@ switch(file_format){
       // SEEK streams
 //      if(d_video->pts) avi_video_pts=d_video->pts;
       avi_audio_pts=0;
-      d_video->pts=0;
-      d_audio->pts=0;
+      
+      // Done by ds_free_packs():
+      //d_video->pts=0;
+      //d_audio->pts=0;
 
       // find video chunk pos:
       if(rel_seek_frames>0){
@@ -2210,20 +2213,18 @@ switch(file_format){
           --video_chunk_pos;
         }
       }
-      demuxer->idx_pos_a=demuxer->idx_pos_v=
-      demuxer->idx_pos=video_chunk_pos;
+      demuxer->idx_pos_a=demuxer->idx_pos_v=demuxer->idx_pos=video_chunk_pos;
 //      printf("%d frames skipped\n",skip_audio_bytes);
 
 #if 1
       // re-calc video pts:
-      avi_video_pts=0;
+      d_video->pack_no=0;
       for(i=0;i<video_chunk_pos;i++){
           int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
-//          if(LOWORD(id)==aviTWOCC('0','0')){ // video frame
-          if(avi_stream_id(id)==d_video->id){  // video frame
-            avi_video_pts+=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-          }
+          if(avi_stream_id(id)==d_video->id) ++d_video->pack_no;
       }
+      avi_video_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+
       //printf("v-pts recalc! %5.3f -> %5.3f  \n",v_pts,avi_video_pts);
       //v_pts=avi_video_pts;
 //#else
@@ -2252,10 +2253,7 @@ switch(file_format){
         // find audio chunk pos:
           for(i=0;i<video_chunk_pos;i++){
             int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
-            //if(TWOCCFromFOURCC(id)==cktypeWAVEbytes){
             if(avi_stream_id(id)==d_audio->id){
-              int aid=StreamFromFOURCC(id);
-              if(d_audio->id==aid || d_audio->id==-1){
                 len=((AVIINDEXENTRY *)demuxer->idx)[i].dwChunkLength;
                 last=i;
                 if(apos<=curr_audio_pos && curr_audio_pos<(apos+len)){
@@ -2263,7 +2261,6 @@ switch(file_format){
                   break;
                 }
                 apos+=len;
-              }
             }
           }
           if(verbose)printf("XXX i=%d  last=%d  apos=%d  curr_audio_pos=%d  \n",
@@ -2275,8 +2272,7 @@ switch(file_format){
           // update stream position:
           d_audio->pos=audio_chunk_pos;
           d_audio->dpos=apos;
-          demuxer->idx_pos_a=demuxer->idx_pos_v=
-          demuxer->idx_pos=audio_chunk_pos;
+          demuxer->idx_pos_a=demuxer->idx_pos_v=demuxer->idx_pos=audio_chunk_pos;
 
           if(!(sh_audio->codec->flags&CODECS_FLAG_SEEKABLE)){
 #if 0
@@ -2298,17 +2294,12 @@ switch(file_format){
           
           // calc skip_video_frames & adjust video pts counter:
 //          i=last;
-          i=demuxer->idx_pos;
-          while(i<video_chunk_pos){
+	  for(i=demuxer->idx_pos;i<video_chunk_pos;i++){
             int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
-//            if(LOWORD(id)==aviTWOCC('0','0')){ // video frame
-            if(avi_stream_id(id)==d_video->id){  // video frame
-              ++skip_video_frames;
-              // requires for correct audio pts calculation (demuxer):
-              avi_video_pts-=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-            }
-            ++i;
+            if(avi_stream_id(id)==d_video->id) ++skip_video_frames;
           }
+          // requires for correct audio pts calculation (demuxer):
+          avi_video_pts-=skip_video_frames*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
           
       }
 
@@ -2375,7 +2366,7 @@ switch(file_format){
 
         if(skip_audio_bytes){
           demux_read_data(d_audio,NULL,skip_audio_bytes);
-          d_audio->pts=0; // PTS is outdated because of the raw data skipping
+          //d_audio->pts=0; // PTS is outdated because of the raw data skipping
         }
         
         current_module="resync_audio";
@@ -2414,9 +2405,9 @@ switch(file_format){
           }
         }
 
-        RESET_AUDIO(audio_fd);
-
         current_module=NULL;
+
+        RESET_AUDIO(audio_fd);
 
         c_total=0; // kell ez?
         printf("A:%6.1f  V:%6.1f  A-V:%7.3f",d_audio->pts,d_video->pts,0.0f);
@@ -2426,7 +2417,8 @@ switch(file_format){
       }
 
       max_pts_correction=0.1;
-      frame_corr_num=-5; frame_correction=0;
+      frame_corr_num=0; // -5
+      frame_correction=0;
       force_redraw=5;
       a_frame=-skip_audio_secs;
 //      a_frame=-audio_delay-buffer_delay-skip_audio_secs;

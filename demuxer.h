@@ -33,6 +33,7 @@ typedef struct {
   int eof;                 // end of demuxed stream? (true if all buffer empty)
   int pos;                 // position in the input stream (file)
   int dpos;                // position in the demuxed stream
+  int pack_no;		   // serial number of packet
 //---------------
   int packs;              // number of packets in buffer
   int bytes;              // total bytes of packets in buffer

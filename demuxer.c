@@ -17,6 +17,7 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
   ds->eof=0;
   ds->pos=0;
   ds->dpos=0;
+  ds->pack_no=0;
 //---------------
   ds->packs=0;
   ds->bytes=0;
@@ -121,6 +122,7 @@ int ds_fill_buffer(demux_stream_t *ds){
       ds->buffer_size=p->len;
       ds->pos=p->pos;
       ds->dpos+=p->len; // !!!
+      ++ds->pack_no;
       if(p->pts){
         ds->pts=p->pts;
         ds->pts_bytes=0;
