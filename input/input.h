@@ -81,4 +81,7 @@ mp_cmd_free(mp_cmd_t* cmd);
 void
 mp_input_init(void);
 
+void
+mp_input_uninit(void);
+
 #endif /* HAVE_NEW_INPUT */

@@ -292,6 +292,7 @@ static unsigned int inited_flags=0;
 #define INITED_LIRC 16
 #define INITED_SPUDEC 32
 #define INITED_STREAM 64
+#define INITED_INPUT    128
 #define INITED_ALL 0xFFFF
 
 void uninit_player(unsigned int mask){
@@ -346,6 +347,14 @@ void uninit_player(unsigned int mask){
     inited_flags&=~INITED_LIRC;
     current_module="uninit_lirc";
     lirc_mp_cleanup();
+  }
+#endif
+
+#ifdef HAVE_NEW_INPUT
+  if(mask&INITED_INPUT){
+    inited_flags&=INITED_INPUT;
+    current_module="uninit_input";
+    mp_input_uninit();
   }
 #endif
 
@@ -634,7 +643,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 #endif
 
-#ifdef HAVE_LIRC
+#if defined(HAVE_LIRC) && ! defined(HAVE_NEW_INPUT)
   lirc_mp_setup();
   inited_flags|=INITED_LIRC;
 #endif
@@ -684,6 +693,7 @@ if(slave_mode)
    mp_input_add_cmd_fd(0,1,NULL,NULL);
 else
   mp_input_add_key_fd(0,1,NULL,NULL);
+inited_flags|=INITED_INPUT;
 current_module = NULL;
 #endif
 
@@ -868,7 +878,7 @@ play_dvd:
   current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
   if(!stream) { // error...
-    uninit_player(inited_flags-(INITED_GUI+INITED_LIRC));
+    uninit_player(inited_flags-(INITED_GUI+INITED_LIRC+INITED_INPUT));
     goto goto_next_file_src;
   }
   inited_flags|=INITED_STREAM;
@@ -886,7 +896,7 @@ play_dvd:
 	  goto goto_next_file;
       }
       play_tree_remove(entry,1,1);
-      uninit_player(inited_flags-(INITED_GUI+INITED_LIRC));
+      uninit_player(inited_flags-(INITED_GUI+INITED_LIRC+INITED_INPUT));
       goto goto_next_file_src;
     }
     play_tree_insert_entry(playtree_iter->tree,entry);
@@ -894,7 +904,7 @@ play_dvd:
     if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY)
       goto goto_next_file;
     play_tree_remove(entry,1,1);
-    uninit_player(inited_flags-(INITED_GUI+INITED_LIRC));
+    uninit_player(inited_flags-(INITED_GUI+INITED_LIRC+INITED_INPUT));
     goto goto_next_file_src;
   }
   stream->start_pos+=seek_to_byte;
@@ -2697,7 +2707,7 @@ if(benchmark){
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
   eof = eof == PT_NEXT_ENTRY ? 1 : -1;
   if(play_tree_iter_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
-    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC));
+    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
     eof = 1;
   } else {
     play_tree_iter_free(playtree_iter);
@@ -2706,14 +2716,14 @@ if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
 } else if (eof == PT_UP_NEXT || eof == PT_UP_PREV) {
   eof = eof == PT_UP_NEXT ? 1 : -1;
   if(play_tree_iter_up_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
-    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC));
+    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
     eof = 1;
   } else {
     play_tree_iter_free(playtree_iter);
     playtree_iter = NULL;
   }
 }else { // NEXT PREV SRC
-     uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC));
+     uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
      eof = eof == PT_PREV_SRC ? -1 : 1;
 }
 
