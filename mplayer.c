@@ -20,6 +20,7 @@
 
 #include "version.h"
 #include "config.h"
+#include "mp_msg.h"
 
 #include "cfgparser.h"
 #include "cfg-mplayer-def.h"
@@ -453,6 +454,8 @@ int use_stdin=0; //int f; // filedes
 #endif
     parse_cfgfiles();
     if (parse_command_line(conf, argc, argv, envp, &filename) < 0) exit(1);
+    
+    mp_msg_init(verbose+MSGL_STATUS);
 
     // Many users forget to include command line in bugreports...
     if(verbose){
