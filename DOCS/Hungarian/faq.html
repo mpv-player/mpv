@@ -17,7 +17,7 @@
      disztribúciókban található meg) és HIBÁS gcc-je. A gcc 2.96 TELJESEN
      használhatatlan az MPlayer-rel, mert egyszerûen ÁTUGORJA a 3DNow
      utasításokat, nem fordítja le õket. Fontos: ez NEM MPlayer-specifikus   
-     probléma, számos más project (DRI, avifile, stb..) szenved ebbõl fakadó
+     probléma, számos más project (DRI, avifile, Wine, stb..) szenved ebbõl fakadó
      problémáktól.<BR>
 <B><I>NE HASZNÁLD a gcc 2.96-ot !!!</I></B><BR>
 De ha valamilyen okból kifolyólag emésztõ vágy gyötör ezirányban, mindig
@@ -134,25 +134,38 @@ el akarom indítani, ezt írja ki :
 <CODE>&gt; error while loading shared libraries: lib*.so.0: cannot load shared object file: No such file or directory</CODE><BR>
 Megnéztem a file-t, és ott van az /usr/local/lib-ben.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Mit keresel te Linuxon? Nem tudsz feltenni egy könyvtárat? Miért
-     kapunk ilyen kérdéseket? Egyáltalán nem <B>MPlayer</B> specifikus!
-     Add hozzá az /usr/local/lib-et a <B>/etc/ld.so.conf</B>-hoz, és
-     futtasd az <B>ldconfig</B>-ot . Vagy installálj /usr/lib-be, mert
-     ha nem tudod magadtól megoldani ezt a problémát, biztos hajlamos vagy
-     más ilyen ostobaságokra is.
+Mit keresel te Linuxon? Nem tudsz feltenni egy könyvtárat? Miért
+kapunk ilyen kérdéseket? Egyáltalán nem <B>MPlayer</B> specifikus!
+Add hozzá az /usr/local/lib-et a <B>/etc/ld.so.conf</B>-hoz, és
+futtasd az <B>ldconfig</B>-ot . Vagy installálj /usr/lib-be, mert
+ha nem tudod magadtól megoldani ezt a problémát, biztos hajlamos vagy
+más ilyen ostobaságokra is.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
+  sans-serif" size="2">
+  Az MPlayer nem találja a libcss-emet. Mit csinálok rosszul ?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica,
+  sans-serif" size="2">
+  Ez nooormális. Egy ideje az <B>MPlayer</B> már nem libcss-t használ a DVD
+  lejátszáshoz. Helyette a <B>libdvdread-et</B> és a <B>libdvdcss</B>-t
+  kell feltenned. A libcss jelenleg pl kódolt VOB file-ok HDD-rõl történõ
+  lejátszására használható (nem az átlagos felhasználónak).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Na ez érdekes. Mikor töltöm be az mga_vid.o kernelmodult, ilyet kapok a logba:<BR>
 <CODE>Warning: loading mga_vid.o will taint the kernel: no license</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, san
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Hát ez jó kérdés, talán próbálj régebbi kernelt (az újabbakban ilyen licenszelõs
 marhaság van), frissíts MPlayer CVS-bõl, vagy valami.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Mikor fordítanám a <B>MEncoder</B>-t, segmentation fault-tal elszáll linkelésnél.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, san
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Frissítsd a binutils csomagodat, az remélhetõleg segít.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -291,6 +304,20 @@ Lásd a <A HREF="codecs.html#2.1.2.2">2.1.2.2-es fejezetet</A>.
 A GUI használhatatlan icewm-el, mert valami panel mindig a film fölött van!!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Tudjuk. Az icewm szar. Megoldhatatlan.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
+  sans-serif" size="2">
+  Nem tudok hozzáférni a GUI menûhoz. Amikor megnyomom a jobb gombot,
+  nem tudok kiválasztani egy menupontot sem !
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica,
+  sans-serif" size="2">
+  FVWM-et használsz ? Próbáld ki a következõt :<BR>
+  Start -&gt; Settings -&gt; Configuration -&gt; Base Configuration<BR>
+  <BR>
+  Állítsd a "Use Applications position hints" opciót Yes-re.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
@@ -538,6 +565,17 @@ Le akarok játszani MP3 file-okat MPlayerrel !
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Nem fogsz tudni. Vannak sokkal alkalmasabb lejátszók erre a célra (mpg123,
 3pm, xmms), használd azokat.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
+  sans-serif" size="2">
+  Szeretnék pluszminusz 1 képkockánként tekerni.
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica,
+  sans-serif" size="2">
+  Ez nem lesz megcsinálva. Amikor megvolt, elrontotta az A/V szinkront.
+  Ha tudod, implementáld és küldj patch-et.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 </TABLE>

@@ -16,7 +16,7 @@
 <LI><A HREF="#2.1.1.3">ASF/WMV</A> 1.0 formátum
 <LI><A HREF="#2.1.1.4">QT/MOV</A> formátum
 <LI><A HREF="#2.1.1.5">VIVO</A> formátum (.viv fileok)
-<LI><A HREF="documentation.html#3.3">file olvasása standard bemenetrõl</A>, hálózatról HTTP-n keresztül
+<LI>file olvasása <A HREF="documentation.html#3.3">standard bemenetrõl</A>, hálózatról HTTP-n keresztül
 </UL></P>
 
 <P>Megjegyzés: realmedia-val (.ra/.rm) kapcsolatban lásd a FAQ-t!</P>
@@ -33,7 +33,7 @@ A video <B>codec-ek</B> például a következõk: MPEG1, MPEG2, DivX, Indeo5, 3ivx.<
 </P>
 
 <P>Elméletben nyugodt szívvel beletehetsz OpenDivX videot és MP3 audiot
-egy <B>.MPG</B> formátumú file-ba. Annyi a probléma hogy a legtöbb lejátsz
+egy <B>.MPG</B> formátumú file-ba. Annyi a probléma hogy a legtöbb lejátszó
 nem fogja lejátszani, mert MPEG1 videot és MP2 audiot várnak (az <B>.MPG</B>-ben
 nem lehet megadni hogy milyen formátumban van benne a video és audio, mint
 például az <B>.AVI</B>-ban). Van tegyél MPEG1 videot .AVI-ba. Például az
@@ -47,67 +47,129 @@ jelenti.</P>
 <P><B><A NAME=2.1.1>2.1.1. Video formátumok</A></B></P>
 
 
-<P><B><A NAME=2.1.1.1>2.1.1.1. MPG, VOB, DAT file-ok</A></B></P>
+<P><B><A NAME=2.1.1.1>2.1.1.1. MPEG file-ok</A></B></P>
 
 <P>
-<LI>MPG : this is the most <B>basic</B> form of MPEG file formats. Contains
-MPEG1 video, and MP2 audio.</LI>
-<LI>VOB : this is the MPEG file format on <B>DVD</B>s. Contains optionally
-encoded MPEG2 video, and usually AC3 audio.<BR>
-<B>Read the <A HREF="cd-dvd.html#4.2">DVD section</A> !</B></LI>
-<LI>DAT : this is the MPEG file format on <B>Video CD</B>s. It's the same
-as the MPG, but due to the nature VCDs are created and Linux is designed,
-the DAT files can't be played nor copied from VCDs. You have to use the
-<CODE>-vcd</CODE> option to play the VideoCD.</LI>
+<LI>MPG : ez a <B>legelterjedtebb</B> formája az MPEG fileoknak. MPEG1-es
+videot és MP2-es (MPEG-1 layer 2) audiot - vagy ritkábban MP1-et - tartalmaz.</LI>
+<LI>DAT : ez teljesen egyezik az MPG-gel, csak más a kiterjesztése. <B>Video
+CD-ken</B> használatos. Linux alatt nem tudsz .DAT fileokat megnézni vagy
+lemásolni a VCD-rõl, csak a <CODE>-vcd</CODE> opcióval lejátszani.</LI>
+<LI>VOB : ez a <B>DVD</B>-ken található MPEG formátum. Egyezik az MPG-gel,
+de tud feliratot vagy nem-MPEG (AC3) hangot tárolni. MPEG videot és általában
+AC3 hangot tartalmaz (ritkábban MP2-t).<BR>
+<B>Olvasd el a <A HREF="cd-dvd.html#4.2">DVD fejezetet</A> !</B></LI>
 </P>
 
-<P>One important feature for MPGs is that they have a field to describe
-the aspect ratio of the video stream within. For example SVCDs have
-480x480 resolution video, and in the header that field is set to 4:3, so
-it's played at 640x480. AVI files don't have this field, so one has to
-scale it during encoding.</P>
+<P>Az MPEG fileokban néhány frame-bõl álló csoportok vannak, melyek
+teljesen függetlenek egymástól. Ez annyit tesz hogy akár egy normális
+file-kezelõvel szétvághatsz vagy összeilleszthetsz MPEG fileokat, melyek
+utána teljesen mûködõképesek maradnak.</P>
+
+<P>Az MPEG fileok egyik tulajdonsága hogy van bennük egy mezõ a video
+képarányának (aspect ratio) leírására. Például az SVCD-ken 480x480-as
+felbontású video van, és a lejátszóprogramok az elõbb említett
+fejlécbõl (ami itt 4:3-at tartalmaz) tudják hogy hogyan kell
+megjeleníteni (itt 640x480-as felbontásban). Az AVI fileoknak nincs ilyen
+mezõjük, így MPEG-bõl AVI-ba kódolásnál át kell méretezni a képet.</P>
 
 
 <P><B><A NAME=2.1.1.2>2.1.1.2. AVI file-ok</A></B></P>
 
-<P>Designed by Micro$oft, the <B>AVI (Audio Video Interleaved)</B> is a
-widespread multipurpose format, currently used mostly for DivX and DivX4
-videos. Has many known drawbacks, and inabilities (for example in streaming).
-Has support for one video stream, and 99 audio streams. Can be as big as
-2Gb. There exists an extension for it to be bigger, called <B>OpenDMS</B>.
-M$ currently strongly discourages its use and propagates ASF/WMV. Not if
-anybody cares.<BR>
-<B>NOTE</B> : DV cameras can create two types of AVI format, one is the usual and
-playable, the other is neither.</P>
+<P>A Micro$oft <B>AVI (Audio Video Interleaved)</B> formátuma egy széles
+körben elterjedt és használt formátum, jelenleg többnyire DivX és DivX4
+codec-kel ellátott videokhoz használják. Több ismert hátránya, inkompatibilitása
+van (például streaming-nél). Egy darab video, és 99 audio streamet támogat
+egy fileban. 2Gb-ig terjedhet, bár az <B>OpenDMS</B> kiterjesztés
+többek között ezt a korlátot is kitágítja. Az M$ jelenleg erõsen ellenzi
+a használatát, az ASF/WMV javára. Persze nem mintha bárkit is érdekelne.<BR>
+<B>Megj</B>.: a DV kamerák két fajta AVI formátumot hozhatnak létre. Az egyik a
+szabványos és lejátszható, a másik nélkülözi mind a kettõ elõbb felsorolt
+tulajdonságot.</P>
+
+<P>Két fajta AVI file fajta ismert:
+<UL>
+  <LI><B>Interleaved</B> : a benne lévõ audio és video streamek interleavedek.
+    Ez az AVI fileok szabványos felhasználási módja. Ajánlott, és legtöbbször
+    használt is. Némely programok rossz szinkronú interleaved AVI-t készítenek.
+    Az <B>MPlayer</B> az ilyen fileokat interleaved-ként próbálja lejátszani,
+    amely hosszútávon az A/V szinkron elvesztéséhez vezet, többnyire
+    tekerésnél. Az ilyen fileokat non-interleaved-ként kell lejátszani
+    (a <CODE>-ni</CODE> opcióval).</LI>
+  <LI><B>Non-interleaved</B> : helytelen. Elõször jön a teljes video stream,
+    és utána az audio stream, ebbõl következõen rengeteg tekergetéssel
+    jár a lejátszása. Nagyon egészségtelen például hálózatról vagy CD-rõl.</LI>
+</UL>
+</P>
+
+<P>Az <B>MPlayer</B> kétféle idõzítést ismer AVI file-ok esetén :
+<UL>
+  <LI><B>bps alapú</B> : ez a fejléc bitráta/mintavételezési ráta értékén
+    alapul. Ezt a módszert használja a legtöbb lejátszó, beleértve az
+    avifile-t és a windows media playert is. A rossz feljéccel ellátott
+    fileok valamint a VBR audiot nem tudó enkóderekkel létrehozott VBR audiot
+    tartalmazó fileok ezzel a módszerrel lejátszva elvesztik az A/V szikront
+    (többnyire tekerésnél).</LI>
+  <LI><B>interleaving alapú</B> : nem használja a fejléc fenti értékét,
+    ehelyett relatív pozíciót számol az interleaved audio és video csomagokból.
+    Néhány rosszul/VBR audioval enkódolt file-t lejátszhatóvá tesz.</LI>
+</UL>
+</P>
+
+<P>Bármilyen audio és video codec használható, de megjegyzendõ hogy a VBR
+audio támogatása igencsak gyenge a legtöbb lejátszóban. Maga a fileformátum
+lehetõvé teszi a VBR audiot, de a lejátszók CBR audiot várnak. A VBR új,
+és a Microsoft AVI specifikációi csak CBR audiot irnak le. Ráadásul a
+legtöbb enkóder/multiplexer hibás fileokat generál VBR audio használata
+esetén. Két kivételt ismerek: NanDub, és <A HREF="encoding.html">MEncoder</A>.</P>
 
 
 <P><B><A NAME=2.1.1.3>2.1.1.3. ASF/WMV file-ok</A></B></P>
 
-<P>ASF is a new very undocumented fileformat from M$, and WMV is its
-successor. They are very commercial, and anyone who writes an opensource
-parser for them, soon meets certain doom. While creating the parser, it
-was obvious to see how bulky, shit, and unusable they are. Not if anybody
-would expect something else from M$.
+<P>ASF (active streaming format) a Microsofttól jön. Az ASF két variánsát
+fejlesztették ki, v1.0 és v2.0. A v1.0-át a média szerkesztõik (windows
+media player és windows media encoder) használják, és teljesen titkos. A
+v2.0 pedig publikus és bejegyzett :). Természetesen különböznek, abszolut
+semmi kompatibilitás nem áll fent, ez csak egy újabb jogi játék. Az <B>MPlayer</B>
+csak a v1.0-át támogatja, mivel v2.0-át még senki nem látott :) . Megjegyzendõ
+hogy manapság az ASF fileok .WMA vagy .WMV kiterjesztéssel jönnek.</P>
 
 
-<P><B><A NAME=2.1.1.4>2.1.1.4. QT/MOV file-ok</A></B></P>
+<P><B><A NAME=2.1.1.4>2.1.1.4. QuickTime/MOV file-ok</A></B></P>
 
-<P>They are Apple's formats. Not much to say, basically well designed,
-multipurpose, streamable, many features etc. Kinda hard to find documentation,
-but we think the parser is perfect.
+<P>Ezek Macintosh-ról származnak. Általában .QT vagy .MOV kiterjesztésûek,
+valamint mivel az MPEG4 Group a QuickTime-t választotta ajánlott
+fileformátumnak az MPEG4-hez, az õ .MOV filejaik .MPG vagy .MP4 kiterjesztésûek
+(érdekesség hogy ezekben a fileokban a video stream egy az egyben egy .MPG
+file. A <CODE>-dumpvideo</CODE> opcióval ki is lehet szedni.).</P>
+
+<P><B>Codec-ek</B> : bármilyen codec engedélyezett, mind CBR vagy VBR. A
+legtöbb új MOV file <B>Sorenson</B> videoval és QDesign Music Audioval
+van ellátva. Ez a formátumok teljesen titkosan, és csak az Apple quicktime
+lejátszója képes õket lejátszani (és csak win/mac-en).</P>
+
 
 <P><B><A NAME=2.1.1.5>2.1.1.5. VIV file-ok</A></B></P>
 
-<P>Hey this is new code in <B>MPlayer</B>, be gentle! Seeking is
-currently nonexistent, audio too. TODO : complete this section.</P>
+<P>Az <B>MPlayer</B> teljesen természetesen játszik VIVO fileokat. A formátum
+nagy hátránya hogy nincs benne index blokk, se fix csomagméret vagy sync
+byte, és a legtöbb fileban keyframe sincs így a tekerést el lehet felejteni.</P>
+
+<P>A VIVO/1.0 fileok video codec-e szabványos <B>h.263</B> . A VIVO/2.0
+fileok video codec-e egy módosított, nem szabványos <B>h.263</B> . Az audioval
+ugyanez a helyzet, <B>g.723</B> (szabvány), vagy <B>Vivo Siren</B>.</P>
+
+<P>Lásd a <A HREF=codecs.html#2.2.1.4>VIVO video codec</A>
+és <A HREF=codecs.html#2.2.2.3>VIVO audio codec</A> fejezeteket az installálási
+útmutatóhoz.</P>
 
 
 <P><B><A NAME=2.1.2>2.1.2. Audio formátumok</A></B></P>
 
-<P>Currently <B>MPlayer</B> is still a <B>Movie</B> and not a <B>Media</B>
-player, thus the pure audio formats (for example MP3, WAV, audio ASF) are
-unplayable. Use <A HREF="http://www.xmms.org">xmms</A>, <A HREF="http://www.mpg123.de">mpg123</A>
-or whatever.</P>
+<P>Jelenleg az <B>MPlayer</B> még mindig egy <B>Movie</B> (film) és nem
+<B>Média</B> lejátszó, így a teljesen audio formátumok (például MP3, WAV, audio
+ASF) lejátszhatatlanok. Használd ilyen célra az <A HREF="http://www.xmms.org">xmms-t</A>, <A HREF="http://www.mpg123.de">mpg123-at</A>
+vagy akármit.</P>
 
 </BODY>
 </HTML>

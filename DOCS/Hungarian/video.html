@@ -4,48 +4,95 @@
 
 <FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 
-<P><B><A NAME=2.2.1>2.2.1.  Video kimeneti eszközök</A></B></P>
+<P><B><A NAME=2.3.1>2.3.1.  Video kimeneti eszközök</A></B></P>
 
 <TABLE BORDER=0>
 
-<TD COLSPAN=4><P><B>Általános:</B></P></TD><TR>
+<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Általános:</B></P></TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>x11</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>X11, opcionálisan az SHM kiterjesztéssel</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>xv</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>X11 az XVideo kiterjesztés overlay-eivel (hardveres támogatás)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>gl</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OpenGL renderelõ, egyelõre csak ezekkel megy:
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2><A HREF=#2.3.1.13>x11</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>X11, opcionálisan az SHM kiterjesztéssel</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.2>xv</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>X11 az XVideo kiterjesztés overlay-eivel (hardveres támogatás)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.10>gl</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>OpenGL renderelõ, egyelõre csak ezekkel megy:
 <UL><LI>bármely kártyával, Utah-GLX-szel
 <LI>Matrox kártyák + X/DRI >=4.0.3
 <LI>Radeon + X/DRI CVS</UL></TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>dga</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>X11 a DGA kiterjesztéssel</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>fbdev</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Megjelenítés általános framebuffereken</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>svga</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Megjelenítés SVGAlib-bel</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sdl</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.3>dga</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>X11 a DGA kiterjesztéssel</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.6>fbdev</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>Megjelenítés általános framebuffereken</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.5>svga</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>Megjelenítés SVGAlib-bel</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.4>sdl</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>
 &nbsp;&nbsp;<CODE>1.1.7:</CODE> szoftveres skálázás<BR>
 &nbsp;&nbsp;<CODE>1.1.8:</CODE> támogatja a hardveres gyorsítást XVideo-n keresztül<BR>
 &nbsp;&nbsp;<CODE>1.2.0:</CODE> aalib támogatás (használd inkább a -vo aa opciót!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ggi</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SDL-hez hasonló</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>aa</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>szöveges módú megjelenítés AAlib-bel</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.14-TODO>ggi</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>SDL-hez hasonló</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.11>aa</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>szöveges módú megjelenítés AAlib-bel</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><a href=#2.3.1.12>vesa</a></TD><TD></TD><TD><FONT face="Verdana, Arial
+  Helvetica, sans-serif" size=2>Kimenet VESA BIOS-ok segítségével.</TD><TR>
 
-<TD COLSPAN=4><P><B>Kártyaspecifikus:</B></P></TD><TR>
+<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kártyaspecifikus:</B></P></TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mga</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G200/G400 hardveres YUV overlay az mga_vid-en keresztül</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>xmga</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G200/G400 overlay (mga_vid) X11 ablakban<BR>
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2><A HREF=#2.3.1.7>mga</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>Matrox G200/G400 hardveres YUV overlay az
+  mga_vid-en keresztül</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.7>xmga</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>Matrox G200/G400 overlay (mga_vid) X11 ablakban<BR>
 (<I>(Xv emuláció 3.3.x-es X-szel!)</I>)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G400 YUV támogatás framebufferen (régi, használj mga/xmga-t)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo3/Banshee hardware YUV (/dev/3dfx) támogatás (nincs tesztelve!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>tdfxfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo3/Banshee hardware YUV támogatás tdfx framebufferen (mûködik!)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>Matrox G400 YUV támogatás framebufferen (régi, használj
+  mga/xmga-t)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>Voodoo3/Banshee hardware YUV (/dev/3dfx) támogatás (nincs
+  tesztelve!)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.9>tdfxfb</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>Voodoo3/Banshee hardware YUV támogatás tdfx framebufferen
+  (mûködik!)</TD><TR>
 
-<TD COLSPAN=4><P><B>Egyéb:</B></P></TD><TR>
+<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Egyéb:</B></P></TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>png</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kimenet PNG file-okba (-z kapcsoló a tömörítés mértékét állítja)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pgm</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kimenet PGM file-okba (tesztelésre, vagy ffmpeg enkódoláshoz)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>md5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>MD5sum támogatás (MPEG konformancia tesztekhez)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>odivx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OpenDivX AVI file output (-br a bitrate-et állítja) (NEM TUDSZ vele hangot tömöríteni!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>null</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kimenet a nagy semmibe (sebességtesztekhez)</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>png</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>kimenet PNG file-okba (-z kapcsoló a tömörítés
+  mértékét állítja)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>pgm</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>kimenet PGM file-okba (tesztelésre, vagy ffmpeg enkódoláshoz)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>md5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>MD5sum támogatás (MPEG konformancia tesztekhez)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>odivx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>OpenDivX AVI file output (-br a bitrate-et állítja) (NEM
+  TUDSZ vele hangot tömöríteni!)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>null</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>kimenet a nagy semmibe (sebességtesztekhez)</TD><TR>
 </TABLE>
 
 
-<P><B><A NAME=2.2.1.1>2.2.1.1.  MTRR</A></B></P>
+<P><B><A NAME=2.3.1.1>2.3.1.1.  MTRR</A></B></P>
 
 <P>Nagyon ajánlott az MTRR helyes beállítása, mert minden esetben
   sebességnövekedést eredményez.</P>
@@ -65,16 +112,18 @@ Ha nálad nem sikerül neki, kézzel kell beállítani. Elõször a báziscímet kell
 megkeresni. Erre van 3 módszer :</P>
 
 <P><UL>
+
 <LI>az X11 induló üzeneteibõl, például :
 <P><CODE>(--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000<BR>
-(--) SVGA: Linear framebuffer at 0xD8000000</CODE></P>
+(--) SVGA: Linear framebuffer at 0xD8000000</CODE></P></LI>
+
 <LI>a /proc/pci-bõl (használd az lspci -v parancsot):
 
 <P><CODE>01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525</CODE><BR>
 <CODE>Memory at d8000000 (32-bit, prefetchable)</CODE></P>
 
 <LI>from mga_vid kernel driver messages (use dmesg):
-<P><CODE>mga_mem_base = d8000000</CODE></P>
+<P><CODE>mga_mem_base = d8000000</CODE></P></LI>
 </UL></P>
 
 <P>Ezután kell a memória mérete is. Csak át kell konvertálni a video ram
@@ -103,7 +152,7 @@ megkeresni. Erre van 3 módszer :</P>
   megadja a stepping értékét</CODE>).</P>
 
 
-<P><B><A NAME=2.2.1.2>2.2.1.2.  Xv</A></B></P>
+<P><B><A NAME=2.3.1.2>2.3.1.2.  Xv</A></B></P>
 
 <P>XFree86 4.0.2 vagy újabb alatt használhatod a kártyád hardveres YUV
   rutinjait, az XVideo kiterjesztéssel. Ezt használja a '-vo xv' opció.
@@ -157,24 +206,30 @@ megkeresni. Erre van 3 módszer :</P>
 
 </UL></P>
 
-<P><B><A NAME=2.2.1.2.1>2.2.1.2.1.  3dfx kártyák</A></B></P>
+<P><B><A NAME=2.3.1.2.1>2.3.1.2.1.  3dfx kártyák</A></B></P>
 
 <P>Régebbi 3dfx meghajtóknak problémái vannak az XVideo gyorsítással,
   nem támogatták a YUY2-t vagy YV12-t, ésígytovább. Ellenõrizd hogy az
   XFree86-od verziója 4.1.0 vagy újabb-e, azok már jók.
   Ha furcsa effekteket észlelsz -vo xv-vel, próbáld ki az SDL meghajtót
-  (annak is van XVideo támogatása), az segíthet. Nézd meg a <A HREF="#2.2.1.4">2.2.1.4-es</A>
+  (annak is van XVideo támogatása), az segíthet. Nézd meg a <A HREF="#2.3.1.4">2.3.1.4-es</A>
   fejezetet a részletekhez.</P>
 
 <P><B>VAGY</B> inkább használd az ÚJ -vo tdfxfb meghajtót! Lásd <A
-HREF=#2.2.1.9>2.2.1.9-es</A> fejezet.</P>
+HREF=#2.3.1.9>2.3.1.9-es</A> fejezet.</P>
 
-<P><B><A NAME=2.2.1.2.2>2.2.1.2.2.  S3 kártyák</A></B></P>
+
+<P><B><A NAME=2.3.1.2.2>2.3.1.2.2.  S3 kártyák</A></B></P>
 
 <P>S3 Savage3D-knek mûködniük kell, de Savage4-hez 4.0.3-as de inkább újabb
   XFree86 kell (ha bajok vannak a képpel, próbáld meg 16bpp-n). S3 Virge-re vonatkozólag.. add el.</P>
+<P><B>Megj</B>.: a Savage kártyáknak lassú az YV12 megjelenítési képessége
+  (YV12-YUY2 konverziót csinál a meghajtója mert a Savage hardver képtelen
+  YV12-t megjeleníteni). Így amikor ezen dokumentáció azt mondja hogy
+  "itt az YV12 kimenetet használd mert az gyorsabb", az nem biztos.</P>
 
-<P><B><A NAME=2.2.1.2.3>2.2.1.2.3.  nVidia kártyák</A></B></P>
+
+<P><B><A NAME=2.3.1.2.3>2.3.1.2.3.  nVidia kártyák</A></B></P>
 
 <P>nVidia nem túl jó választás Linux alá.. A bináris nVidia meghajtót kell
   használnod, ami az nVidia honlapjáról tölthetõ le. A szabvány X
@@ -185,7 +240,7 @@ HREF=#2.2.1.9>2.2.1.9-es</A> fejezet.</P>
      Panaszkodj az nVidiának.</UL></P>
 
 
-<P><B><A NAME=2.2.1.2.4>2.2.1.2.4.  ATI kártyák</A></B></P>
+<P><B><A NAME=2.3.1.2.4>2.3.1.2.4.  ATI kártyák</A></B></P>
 
 <P>
 <LI>A GATOS meghajtó alapállapotban bekapcsolt VSYNC-et tartalmaz. Ez azt
@@ -195,11 +250,15 @@ HREF=#2.2.1.9>2.2.1.9-es</A> fejezet.</P>
   fps-e) Hz-re.</LI>
 
 <LI>Radeon VE - ehhez a kártyához jelenleg csak az XFree86 CVS-ében van
-meghajtó. Még nincs támogatva a TV kimenet.</LI>
+meghajtó, TV kimenet nélkül. Természetesen az <B>MPlayer</B>-rel teljeskörû
+<B>hardveres gyorsítást</B> és <B>TV kimenetet</B> kapsz, és semmilyen könyvtár
+vagy X nem kell. Olvasd el a <a href=#2.3.1.12>VESA meghajtó</a> és <A
+HREF=#2.3.1.14>Radeon video overlay</A> fejezeteket.</LI>
+</LI>
 </P>
 
 
-<P><B><A NAME=2.2.1.2.5>2.2.1.2.5. NeoMagic kártyák</A></B></P>
+<P><B><A NAME=2.3.1.2.5>2.3.1.2.5. NeoMagic kártyák</A></B></P>
 
 <P>
 Ezek a kártyák sok laptopban megtalálhatók. Linux alatt a teljesítményük
@@ -210,15 +269,15 @@ meghajtót innen :
 </P>
 
 
-<P><B><A NAME=2.2.1.3>2.2.1.3.  DGA</A></B></P>
+<P><B><A NAME=2.3.1.3>2.3.1.3.  DGA</A></B></P>
 
-<P><B><A NAME=2.2.1.3.1>2.2.1.3.1.  Elõszó</A></B></P>
+<P><B><A NAME=2.3.1.3.1>2.3.1.3.1.  Elõszó</A></B></P>
 
 <P>Ez a dokumentum néhány szóban elmagyarázza, hogy általában véve mi is az a
   DGA, és mit tud az MPlayerben (és mit nem).</P>
 
 
-<P><B><A NAME=2.2.1.3.2>2.2.1.3.2.  Mi az a DGA ?</A></B></P>
+<P><B><A NAME=2.3.1.3.2>2.3.1.3.2.  Mi az a DGA ?</A></B></P>
 
 <P>A DGA szó a Direct Graphics Access rövidítése, és egy olyan módszert takar,
   amivel a program az X szerver kikerülésével közvetlenül írhat a framebuffer
@@ -241,7 +300,7 @@ meghajtót innen :
   X-es driverétõl, ezért nem minden rendszeren mûködik ...</P>
 
 
-<P><B><A NAME=2.2.1.3.3>2.2.1.3.3.  DGA támogatás telepítése <B>MPlayer</B>-be</A></B></P>
+<P><B><A NAME=2.3.1.3.3>2.3.1.3.3.  DGA támogatás telepítése <B>MPlayer</B>-be</A></B></P>
 
 <P>Elõször bizonyosodj meg arról, hogy az X betölti-e a DGA kiterjesztést, lásd
   /var/log/XFree86.0.log :</P>
@@ -278,7 +337,7 @@ meghajtót innen :
   Ajánlatos kipróbálni továbbá a '-vo sdl:dga' opciót is, ha mûködik.
   Sokkal gyorsabb!!!</P>
 
-<P><B><A NAME=2.2.1.3.4>2.2.1.3.4.  Felbontásváltás</A></B></P>
+<P><B><A NAME=2.3.1.3.4>2.3.1.3.4.  Felbontásváltás</A></B></P>
 
 <P>A DGA driver képes felbontásváltásra. Ezzel kikerülhetõ a (lassú) szoftveres
   scale, ugyanakkor teljesképernyõs lesz a lejátszás. Ideális esetben pontosan
@@ -291,14 +350,14 @@ meghajtót innen :
   Az A függelékben néhány modeline példa található.</P>
 
 
-<P><B><A NAME=2.2.1.3.5>2.2.1.3.5.  DGA és <B>MPlayer</B></A></B></P>
+<P><B><A NAME=2.3.1.3.5>2.3.1.3.5.  DGA és <B>MPlayer</B></A></B></P>
 
 <P>Az <B>MPlayer</B>-ben két helyen lehet DGA-t használni: az SDL driverben
   (-vo sdl:dga), valamint a DGA driverben (-vo dga). A fentiek mindkettõre
   igazak; a következõ néhány részben elmagyarazom, hogy is mûködik az <B>MPlayer</B>
   DGA drivere.</P>
 
-<P><B><A NAME=2.2.1.3.6>2.2.1.3.6.  A DGA meghajtó képességei</A></B></P>
+<P><B><A NAME=2.3.1.3.6>2.3.1.3.6.  A DGA meghajtó képességei</A></B></P>
 
   A DGA driver meghívása a -vo dga parancssori opció megadásával történik.
   Az alapértelmezett magatartás szerint a video méretéhez legközelebb esõ
@@ -330,7 +389,7 @@ meghajtót innen :
   függõen a videokártyád DGA driverértõl.</P>
 
 
-<P><B><A NAME=2.2.1.3.7>2.2.1.3.7.  Sebesség</A></B></P>
+<P><B><A NAME=2.3.1.3.7>2.3.1.3.7.  Sebesség</A></B></P>
 
 <P>A DGA framebuffer használatával legalább olyan gyors képet kapunk mint X11-el,
   plusz teljeskepérnyõs módot. A százalékos CPU használati értekeket, amiket az 
@@ -351,7 +410,7 @@ meghajtót innen :
 <P>Már láttam (divx) AVI file-okat lejátszódni Pentium MMX 266-on. AMD K6/2 CPU-k
   400Mhz-en vagy afölött már jók.</P>
 
-<P><B><A NAME=2.2.1.3.8>2.2.1.3.8.  Ismert hibák</A></B></P>
+<P><B><A NAME=2.3.1.3.8>2.3.1.3.8.  Ismert hibák</A></B></P>
 
 <P>Nos, néhány XFree fejlesztõ szerint a DGA nagy szörnyûség. Szerintük nem
   érdemes használni. Az implementációja nem minden driverben tökeletes.</P>
@@ -371,13 +430,13 @@ meghajtót innen :
 <LI>az OSD csak doublebuffering-el mûködik
 </UL></P>
 
-<P><B><A NAME=2.2.1.3.9>2.2.1.3.9.  Beépítendõ dolgok</A></B></P>
+<P><B><A NAME=2.3.1.3.9>2.3.1.3.9.  Beépítendõ dolgok</A></B></P>
 
 <P><UL><LI>az új X11 render interface használata OSD-hez 
 <LI>hol van a TODO listám ???? :-((((</UL></P>
 
 
-<P><B><A NAME=2.2.1.3.A>2.2.1.3.A.  Néhány modeline</A></B></P>
+<P><B><A NAME=2.3.1.3.A>2.3.1.3.A.  Néhány modeline</A></B></P>
 
 <PRE>
   Section "Modes"
@@ -395,7 +454,7 @@ meghajtót innen :
 <P>Ezek a bejegyzések mûködnek az én Riva128-asomon, az nv.o driverrel.</P>
 
 
-<P><B><A NAME=2.2.1.3.B>2.2.1.3.B.  Bug Reports</A></B></P>
+<P><B><A NAME=2.3.1.3.B>2.3.1.3.B.  Bug Reports</A></B></P>
 
 <P>If you experience troubles with the DGA driver please feel free to file 
   a bug report to me (e-mail address below). Please start mplayer with the 
@@ -409,7 +468,7 @@ meghajtót innen :
 <P><I>Acki (acki@acki-netz.de, www.acki-netz.de)</I></P>
 
 
-<P><B><A NAME=2.2.1.4>2.2.1.4.  SDL</A></B></P>
+<P><B><A NAME=2.3.1.4>2.3.1.4.  SDL</A></B></P>
 
 <P>Néhány megjegyzés az <B>MPlayer</B>-nen található SDL meghajtóhoz:</P>
 
@@ -435,7 +494,7 @@ esd, arts)</TD><TR>
     -vo aa-t!) Ez SDL hiba, nem változtathatok rajta (SDL 1.2.1-el tesztelve)
 </UL></P>
 
-<P><B><A NAME=2.2.1.5>2.2.1.5.  SVGAlib</A></B></P>
+<P><B><A NAME=2.3.1.5>2.3.1.5.  SVGAlib</A></B></P>
 
 <P>Ha nincs X-ed, használd az SVGAlib meghajtót! Bizonyosodj meg róla, hogy nem
   használod a -fs kapcsolót, mert ez itt a szoftveres scaler-t kapcsolja be,
@@ -449,7 +508,7 @@ esd, arts)</TD><TR>
   monitorod tulajdonságait.</P>
 
 
-<P><B><A NAME=2.2.1.6>2.2.1.6.  Framebuffer meghajtó (FBdev)</A></B></P>
+<P><B><A NAME=2.3.1.6>2.3.1.6.  Framebuffer meghajtó (FBdev)</A></B></P>
 
 <P>Annak eldöntése, hogy legyen-e framebuffer meghajtó, a ./configure alatt dõl
   el. Olvasd el a kernelforrásban található framebuffer dokumentációt
@@ -489,7 +548,7 @@ esd, arts)</TD><TR>
 <P>Megj: az FBdev módváltás _NEM_ mûködik a VESA framebufferrel, és ne is
 	kérdezd miért, mert nem <B>MPlayer</B> hiba.</P>
 
-<P><B><A NAME=2.2.1.7>2.2.1.7.  Matrox framebuffer (mga_vid)</A></B></P>
+<P><B><A NAME=2.3.1.7>2.3.1.7.  Matrox framebuffer (mga_vid)</A></B></P>
 
 <P>Ez a rész a Matrox G200/G400/G450/G550 BES (Back-End Scaler) támogatásról szól,
   azaz az mga_vid kernel meghajtóról. Hardveres VSYNC támogatást tartalmaz,
@@ -530,7 +589,7 @@ esd, arts)</TD><TR>
 <P>Az mga_vid meghajtó probléma nélkül együttmûködik az Xv-vel.</P>
 
 
-<P><B><A NAME=2.2.1.8>2.2.1.8.  SiS 6326 framebuffer (sis_vid)</A></B></P>
+<P><B><A NAME=2.3.1.8>2.3.1.8.  SiS 6326 framebuffer (sis_vid)</A></B></P>
 
 <P>SiS 6326 YUV Framebuffer meghajtó -> sis_vid kernel meghajtó</P>
 
@@ -539,13 +598,13 @@ esd, arts)</TD><TR>
   Jelentkezõk kellenek tesztelésre, javításra.</P>
 
 
-<P><B><A NAME=2.2.1.9>2.2.1.9.  3dfx YUV támogatás</A></B></P>
+<P><B><A NAME=2.3.1.9>2.3.1.9.  3dfx YUV támogatás</A></B></P>
 
 <P>Ez a meghajtó a kernel tdfx framebufferét használva jelenít meg filmeket
 hardveres gyorsítással. tdfxfb kell a kernelbe, és a következõképp kell
 újrafordítani az <B>MPlayer</B>-t : <CODE>./configure --enable-tdfxfb</CODE></P>
 
-<P><B><A NAME=2.2.1.10>2.2.1.10.  OpenGL kimenet</A></B></P>
+<P><B><A NAME=2.3.1.10>2.3.1.10.  OpenGL kimenet</A></B></P>
 
 <P>Az <B>MPlayer</B> támogatja filmek lejátszását OpenGL-en keresztül. Sajnos,
   nem minden meghajtónak van meg ez a képessége. Például az Utah-GLX
@@ -555,7 +614,7 @@ hardveres gyorsítással. tdfxfb kell a kernelbe, és a következõképp kell
 <P>XFree86(DRI) >= 4.0.3 csak Matrox, és Radeon kártyákkal támogatja.
   Lásd a <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> címen.</P>
 
-<P><B><A NAME=2.2.1.11>2.2.1.11.  AAlib - szöveges módú megjelenítés</A></B></P>
+<P><B><A NAME=2.3.1.11>2.3.1.11.  AAlib - szöveges módú megjelenítés</A></B></P>
 
 <P>Az <B>AAlib</B> könyvtár grafikák szöveges módban történõ megjelenítésére
   szolgál. Nagyon sok program támogatja, mint például a Doom vagy a Quake, stb.
@@ -604,7 +663,7 @@ Here are some important:</P></B></TD><TR>
 	részletekért.</P>
 
 
-<P><B><A NAME=2.2.1.12>2.2.1.12.  VESA - megjelenítés a VESA BIOS segítségével</B></P>
+<P><B><A NAME=2.3.1.12>2.3.1.12.  VESA - megjelenítés a VESA BIOS segítségével</B></P>
 <P>
 Ez egy <B>általános meghajtó</B> minden olyan kártyára, melynek VESA VBE 2.0
 kompatibilis BIOS-a van. Ezen kívül még egy oka van ezen meghajtó
@@ -649,6 +708,9 @@ a magasabb módokhoz.<BR>
 <P>
 <b>Hátrányok:</b><BR>
  - Csak <B>x86 rendszereken</B> mûködik.<BR>
+   (De csak akkor ha a kártyád nem támogatja a <B>DGA módot</B> - ha igen,
+   akkor ez a meghajtó hasonló sebességet nyújt mint a <B>-vo dga</B> és a
+   <B>-vo fbdev</B>.<BR>
  - Ez a <B>leglassabb</B> meghajtó az <B>MPlayer</B> meghajtói közül.<BR>
  - Csak <B>ROOT</B> használhatja.<BR>
  - Csak <B>Linux</B>on elérhetõ.<BR>
@@ -659,13 +721,23 @@ overlay, vagy hardveres skálázás)<BR>
 <P>
 <TABLE BORDER=0>
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Jelenleg a következõ opciókat veszi figyelembe:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo vesa:opciók</TD><TD>&nbsp;&nbsp;</TD><TD>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>-vo vesa:opciók</TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>jelenleg a következõk: <b>dga</b> a DGA módot
+  kényszeríti, a <b>nodga</b> pedig megtiltja. Megj.: a paraméterek elhagyása a
+  DGA mód autodetektálását eredményezi. (A közeljövõben lehetséges lesz itt
+  megadni a mód paramétereit mint például képfrissítés, váltottsor, doublescan,
+  stb)</TD><TR>
 <FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hamarosan implementálva lesz (Will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43,  85,  d100)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>felhasználó által megadott videomód használata</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-x, -y</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>megadott skálázás használata</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>skálázás bekapcsolása</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>teljesképernyõs módra nagyítás</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs -zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>megadott skálázás teljesképernyõs módra</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>-double</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>dupla bufferelés bekapcsolása. (Csak DGA módban). Lassabb
+  mint a síma bufferelés, de kizárja a villogást.</TD><TR>
 </TABLE>
 </P>
 
@@ -681,9 +753,74 @@ másik konzolra, és vissza.<BR>
 mivel a BIOS csak akkor inicializálja magát.
 </P>
 
-<P><B><A NAME=2.2.1.A>2.2.1.A.  TV kimenet</A></B></P>
 
-<P><B><A NAME=2.2.1.A.1>2.2.1.A.1.  Matrox kártyák</A></B></P>
+<P><B><A NAME=2.3.1.13>2.3.1.13.  X11</B></P>
+
+<P>Kerülendõ. Szabványos X11 kimenet (megosztott memóriával - mitshm),
+és abszolut nélkülözi a hardveres gyorsítást. Támogat (MMX/3DNow/SSE
+optimalizált, de még mindig lassú) szoftveres nagyítást, az <CODE>-fs -zoom</CODE>
+opciók használata esetén. A legtöbb mai kártyának van hardveres támogatása,
+nekik a <CODE>-vo xv</CODE> opció kell, vagy Matroxokhoz <CODE>-vo xmga</CODE>.</P>
+
+<P>A baj ott van hogy a legtöbb kártya meghajtója nem támogatja a hardveres
+gyorsítást a második fejen vagy TV kimeneten. Ezekben az esetekben zöld/kék
+színû ablak látszik a film helyett. Itt lesz hasznos ez a meghajtó, de
+a szoftveres nagyításhoz erõs CPU is szükségeltetik. Ne használd az SDL
+meghajtó szoftveres kimenetét+nagyítását mert annak sokkal rosszabb képminõsége
+van !</P>
+
+
+<P><B><A NAME=2.3.1.14>2.3.1.14. Radeon video overlay (radeon_vid)</A></B></P>
+<P>
+A <B>radeon_vid</B> támogatást nyújt az ATI <B>Radeon</B> kártyákon található
+<B>BackEnd Scaler</B>-hez. A mûködési elve ugyanaz mint az
+<A HREF="video.html#2.3.1.7">mga_vid</A> meghajtónak, és hasonlóképp is
+használható!<BR>
+De ezen meghajtó fõ célja a <A HREF="video.html#2.3.1.12">VESA</A> meghajtóval
+együtt történõ használat. Mégpedig azért mert a VESA meghajtó bekapcsolja az
+ATI kártyákon a TV kimenetet, és a váltás után a Backend Scaler jeleníti
+meg a képet, azaz hardveres gyorsítás lép életbe. Ez az implementáció
+mindkét kimeneten egyszerre jeleníti meg a képet (egy kis minõségromlás
+érzékelhetõ, de a semminél azért jobb).
+Sajnos semmilyen ezzel kapcsolatos információ nincs az ATI lapjain,
+de azért elég könnyen ment az implementálás, a Radeon portjait olvasva/írva.<BR>
+<B>Megj</B>.: az XXX_VID technológia teljességgel dokumentálatlan, és
+lehetséges hogy a jövõben teljesen újra lesz írva. Ez az elsõ publikus
+kiadása a meghajtónak.</P>
+
+<P><B>Installálás</B></P>
+
+<P>
+<UL>
+  <LI>
+    <CODE>cd drivers/radeon/radeon<BR>
+    make</CODE><BR></LI>
+  <LI>másold a <CODE>radeon_vid.o</CODE> modult a kernelmoduljaidhoz a megfelelõ helyre</LI>
+  <LI>írd be a következõt : <CODE>mknod /dev/radeon_vid c 178 0</CODE></LI>
+  <LI>írd a következõt az <CODE>/etc/modules.conf</CODE> file végére :<BR>
+    <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE>
+  <LI>futtasd : <CODE>depmod -a</CODE></LI>
+</UL>
+</P>
+
+<P>
+<br><b>Használat:</b><BR>
+&nbsp;&nbsp;<CODE>mplayer -vo vesa:lvo:/dev/radeon_vid &lt;opcióid&gt; filenév</CODE>
+</P>
+
+<P><B>Megj</B>.: ne használj semmilyen framebuffert és ezt a meghajtót
+egyidõben ! Csak szöveges konzolról futtasd !</P>
+
+<P><b>Korlátok:</b> Jelenleg csak <B>YUY2</B> formátummal mûködik, így
+a DirectShow codec családot kell használnod vele. Legalább 32Mb video memória
+szükséges.<BR>
+<B>Konklúzió:</B> tudom hogy sok a hiány és a hiba. Ha tudod õket javítani,
+küldj patchet.</P>
+
+
+<P><B><A NAME=2.3.1.A>2.3.1.A.  TV kimenet</A></B></P>
+
+<P><B><A NAME=2.3.1.A.1>2.3.1.A.1.  Matrox kártyák</A></B></P>
 
 <P><I>Nagyon szeretném, ha az MPlayer tudná azt, amit a windows-os gépem. Amikor
    elindítok egy lejátszást a windows-ban (ablakos vagy teljesképernyõs)
@@ -753,7 +890,7 @@ mivel a BIOS csak akkor inicializálja magát.
   scriptet.</P>
 
 
-<P><B><A NAME=2.2.1.A.1a>2.2.1.A.1a. Matrox kártyák - második módszer (Az XFree Megközelítés)</A></B></P>
+<P><B><A NAME=2.3.1.A.1a>2.3.1.A.1a. Matrox kártyák - második módszer (Az XFree Megközelítés)</A></B></P>
 
 <P>A fent ismertetett módszer nem túl megfelelõ az X-et használók számára,
 ugyanis vagy le kell állítaniuk, vagy az egész teljesen zavaros lesz. Ez
@@ -777,7 +914,7 @@ ilyen sorrendben), válts tty1-re (ctrl-alt-f1-gyel), és kapcsold ki a monitort.
 </P>
 
 
-<P><B><A NAME=2.2.1.A.2>2.2.1.A.2. ATI kártyák</A></B></P>
+<P><B><A NAME=2.3.1.A.2>2.3.1.A.2. ATI kártyák</A></B></P>
 
 <P>
 <b>Néhány szó az ATI kártyák TV kimenetérõl:</b><BR>
@@ -816,11 +953,14 @@ a másolásvédelmet a chipjeiken. Ígyhát nincs esélyünk TV kimenetre.</P>
 <P>Az ATI TV kimenetek jelenlegi támogatottsága :
 <LI><b>ATI Mach64</b> : <i>ImpacTV</i> van rajta, amit a gatos támogat.
 <LI><b>ASIC Radeon VIVO</b> : <i>Rage Theatre</i>, ami szintén támogatott a gatos által.
-<LI><b>Radeon VE</b> és <b>Rage PRO LT</b> : <i>ImpacTV2+</i> ami jelenleg nem támogatott Linux alatt.</P>
+<LI><b>Radeon VE</b> és <b>Rage PRO LT</b> : <i>ImpacTV2+</i> ami jelenleg nem támogatott Linux alatt.
+Viszont <B>MPlayer</B>-rel teljeskörû <B>hardveres gyorsítást</B> és
+<B>TV kimenetet</B> kapsz Radeonokhoz ! Lásd a <a href=#2.3.1.12>VESA meghajtó</a> és
+<A HREF=#2.3.1.14>Radeon video overlay</A> fejezeteket.</P>
 
 <P>
 Szerencsére ha elég gyors processzorod van (Duron, Celeron2 vagy jobb),
-<B>használhatod a TV kimenetet</B> a <A HREF=#2.2.1.12>VESA meghajtón</A>
+<B>használhatod a TV kimenetet</B> a <A HREF=#2.3.1.12>VESA meghajtón</A>
 keresztül.
 </P>
 
@@ -831,16 +971,19 @@ keresztül konfigurálható. Az ATI kártyák elég gyors memóriával rendelkeznek,
 így az itt elveszített sebesség minimális. Más kártyákkal ellentétben
 itt nincs meghatározva a TV-n használható módok száma, így <B>320x200</B>-tól
 <B>1024x768</B>-ig bármilyen módot használhatsz.<BR>
+Van <B>DGA</B> mód (legalábbis a Radeonoknál biztosan), ami automatikusan
+detektálódik, és így hasonló teljesítményt kapsz mint a <B>-vo dga</B> és
+<B>-vo fbdev</B> módokban.<BR>
 Egy dologra kell figyelned : a PC bekapcsolásakor <B>legyen bedugva a TV
 kábele</B>, mert a BIOS csak bootolásnál inicializálja magát.
 </P>
 
 <P>
-A részleteket lásd a <A HREF=#2.2.1.12>VESA meghajtó</A> leírásánál.
+A részleteket lásd a <A HREF=#2.3.1.12>VESA meghajtó</A> leírásánál.
 </P>
 
 
-<P><B><A NAME=2.2.1.A.3>2.2.1.A.3. Voodoo 3</A></B></P>
+<P><B><A NAME=2.3.1.A.3>2.3.1.A.3. Voodoo 3</A></B></P>
 
 <P>
 Nézd meg <A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">ezt az URL-t</A>.

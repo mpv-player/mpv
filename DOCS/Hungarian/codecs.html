@@ -3,26 +3,10 @@
 
 <FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 
-<P><B><A NAME=2.1>2.1.  Video formátumok, audio és video codecek</A></B></P>
-
-<P><B><A NAME=2.1.1>2.1.1.  Támogatott formátumok</A></B></P>
-
-<P><B>MPlayer</B> közvetlenül tudja olvasni/lejátszani a következõket:<BR>
-<Ul>
-<LI> VCD (Video CD) közvetlen a CD-ROM-ról, vagy image file-ból
-<LI> DVD, közvetlen a lemezrõl, libdvdread-et használva dekódoláshoz
-<LI> MPEG 1/2 System Stream (PS/PES/VOB) és Elementary Stream (ES) formátumok
-<LI> RIFF AVI formátum
-<LI> ASF/WMV 1.0 formátum
-<LI> file olvasása, stdin-rõl is, továbbá hálózatról, HTTP-n keresztül
-<LI> QT/MOV file-ok olvasása, tömörített/len fejlécekkel is
-<LI> VIVO formátum (.viv file-ok)
-</UL></P>
-
-<P>Megj.: realmediával kapcsolatban lásd a FAQ-t !</P>
+<P><B><A NAME=2.2>2.2.  Támogatott codec-ek</A></B></P>
 
 
-<P><B><A NAME=2.1.2>2.1.2.  Támogatott audio és video codec-ek</A></B></P>
+<P><B><A NAME=2.2.1>2.2.1.  Video codec-ek</A></B></P>
 
 <P>Lásd <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A> a teljes, naponta
 generált listához!!!</P>
@@ -35,24 +19,15 @@ generált listához!!!</P>
 <LI>Intel Indeo codecek (3.1, 3.2, 4.1, 5.0)
 <LI>MJPEG, ASV2 és más hardware formátumok
 <LI>XAnim codec-ek
-</UL></P>
-
-<P>A legfontosabb audio codecek:<BR>
-<UL>
-<LI>MPEG layer 2, és layer 3 (MP3) audio (nativ kód, MMX/SSE/3DNow! optimalizációval)
-<LI>AC3 dolby audio (natív kód, SSE/3DNow! optimalizációval)
-<LI>AC3 dekódolás a hangkártya dekóderével
-<LI>Ogg Vorbis audio codec (natív)
-<LI>VoxWare audio (DirectShow-os DLL használatával)
-<LI>alaw, msgsm, pcm és más régi formátumok
+<LI>VIVO</LI>
 </UL></P>
 
 <P>Ha van olyan codeced, ami nincs felsorolva vagy támogatva, olvasd el a
-<A HREF="codecs.html#2.1.3">2.1.3-es fejezetet</A> amiben le van írva, mit kell
+<A HREF="codecs.html#2.2.3">codec importálás</A> fejezetet, amiben le van írva mit kell
 tenned, hogy támogassuk a codeced!</P>
 
 
-<P><B><A NAME=2.1.2.1>2.1.2.1.  DivX4</A></B></P>
+<P><B><A NAME=2.2.1.1>2.2.1.1.  DivX4</A></B></P>
 
 <P>Ez a fejezet a <A HREF="http://www.projectmayo.com">ProjectMayo</A> DivX4 codec-érõl tartalmaz információkat.
 Az elsõ hozzáférhetõ alfa verzió az OpenDivX alpha 47 és 48 volt. A
@@ -113,7 +88,7 @@ talán a használt bpp-tol függõen változhat.</P>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hard prostprocessing, sok CPU-t eszik (mint a 4-es)</TD>
 </TABLE></P>
 
-<P><B><A NAME=2.1.2.2>2.1.2.2.  ffmpeg DivX/libavcodec</A></B></P>
+<P><B><A NAME=2.2.1.2>2.2.1.2.  ffmpeg DivX/libavcodec</A></B></P>
 
 <P>A 0.4.2-es verzióval kezdve az <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> tartalmaz egy <B>nyitott forráskódú</B>
 DivX codec-et, amely kompatibilis a hagyományossal. Az <B>MPlayer</B>
@@ -151,15 +126,7 @@ Ezzel és egy Matrox G400-zal még a legnagyobb felbontású DivX/DivX4 filmeket
 is meg lehet nézni képkockavesztés nélkül, egy régi K6/2 500-ason.</P>
 
 
-<P><B><A NAME=2.1.2.3>2.1.2.3.  Hardveres AC3 dekódolás</B></P>
-
-<P>Kell egy AC3 képes hangkártya, digitális kimenettel (SP/DIF). A kártya
-meghajtójának támogatnia kell az AFMT_AC3 formátumot (ilyen például az
-SB Live!). Kapcsold rá a hardveres AC3 dekódered az SP/DIF kimenetre,
-és használd az -ac hwac3 opciót. Akár mûködhet is. De nem fog. Tényleg. :)</P>
-
-
-<P><B><A NAME=2.1.2.4>2.1.2.4.  XAnim codec-ek</B></P>
+<P><B><A NAME=2.2.1.3>2.2.1.3.  XAnim codec-ek</B></P>
 
 <P>Elõszó: (néhány) XAnim codec nem XAnim-mal történõ használata <B><I>ILLEGÁLIS</I></B>.
 A <B>TE</B> felelõsséged a licensz elolvasása, és betartása. Az <B>MPlayer</B>
@@ -175,8 +142,8 @@ Nagyon könnyû bekapcsolni õket:</P>
   <A HREF="http://www.3ivx.com">3ivx honlapjáról</A>.</LI>
 
   <LI>a <CODE>--with-xanimlibdir</CODE> opcióval mondd meg a configure-nak hogy
-  hol vannak az xanim codec-ek. Alapállapotban az <CODE>/usr/lib/xanim/mods</CODE>
-  könyvtárban keresi õket.</LI>
+  hol vannak az xanim codec-ek. Alapállapotban a <CODE>/</CODE>
+  könyvtárban keresi õket (...) .</LI>
 </UL>
 </P>
 
@@ -187,7 +154,64 @@ lehetséges.</P>
 <P>Az eddig tesztelt codec-ek a következõk: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
 
 
-<P><B><A NAME=2.1.2.5>2.1.2.5.  libmad támogatás</A></B></P>
+<P><B><A NAME=2.2.1.4>2.2.1.4.  VIVO video</A></B></P>
+
+<P>Az <B>MPlayer</B> képes lejátszani Vivo (1.0 és 2.0) file-okat. Az 1.0-ás
+fileokra a legmegfelelõbb az FFmpeg-beli H263 codec, amit a <CODE>-vc ffh263</CODE>
+opcióval lehet használni (új libavcodec szükséges !). A 2.0-ás fileokhoz
+az XAnim H263 dekódere jó (támogat gyors YV12 kimenetet). A <CODE>-vc h263xa</CODE>
+opcióval lehet használatba venni. Természetesen be kell fordítanod
+az XAnim codec-ek támogatását, lásd az <A HREF=#2.2.1.3>XAnim video
+codec-ek</A> fejezetet. Ha ez nem mûködik, szedd le az <CODE>ivvideo.dll</CODE>
+file-t <A
+HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">innen</A>),
+és installáld a <CODE>/usr/lib/win32</CODE> könyvtárba, vagy ahol tárolod
+a Win32-es codeceket. Ezutóbbi codec nem támogat se YV12 se YUY2 kimenetet,
+csak BGR-t, ezért kizárólag X11 és OpenGL kimenetekkel mûködik. Ne használd.</P>
+
+<P>Olvasd el a <A HREF=#2.2.2.3>VIVO audio codec</A> fejezetet is!</P>
+
+
+<P><B><A NAME=2.2.1.5>2.2.1.5.  MPEG 1/2 video</A></B></P>
+
+<P>Az MPEG1 és MPEG2 a natív <B>libmpeg2</B>-vel dekódoljuk. A forrása benne
+van az <B>MPlayer</B>-ben, és természetesen több platformon is használható.
+A hibás MPEG1/2 fileokat úgy játszuk le hogy figyeljük a libmpeg2 mit
+ad vissza, és hiba esetén gyorsan ujraindítjuk a codecet pontosan onnan ahol
+a hiba volt. Nincs sebességvesztés.</P>
+
+
+<P><B><A NAME=2.2.1.6>2.2.1.6.  MS Video1</A></B></P>
+
+<P>Ez egy nagyon régi és nagyon rossz codec a Microsoft-tól. Régebben
+ennek dekódolásához az <CODE>msvidc32.dll</CODE> nevû Win32-es codecet
+használtuk, de mostmár van nyitott forrású implementációnk,
+<A HREF="mailto:melanson@pcisys.net">Mike
+Melanson</A>-tól.</P>
+
+
+<P><B><A NAME=2.2.2>2.2.2.  Audio codec-ek</A></B></P>
+
+<P>A legfontosabb audio codecek:<BR>
+<UL>
+<LI>MPEG layer 2, és layer 3 (MP3) audio (nativ kód, MMX/SSE/3DNow! optimalizációval)
+<LI>AC3 dolby audio (natív kód, SSE/3DNow! optimalizációval)
+<LI>AC3 dekódolás a hangkártya dekóderével
+<LI>Ogg Vorbis audio codec (natív)
+<LI>VoxWare audio (DirectShow-os DLL használatával)
+<LI>alaw, msgsm, pcm és más régi formátumok
+</UL></P>
+
+
+<P><B><A NAME=2.2.2.1>2.2.2.1.  Hardveres AC3 dekódolás</B></P>
+
+<P>Kell egy AC3 képes hangkártya, digitális kimenettel (SP/DIF). A kártya
+meghajtójának támogatnia kell az AFMT_AC3 formátumot (ilyen például az
+SB Live!). Kapcsold rá a hardveres AC3 dekódered az SP/DIF kimenetre,
+és használd az -ac hwac3 opciót. Akár mûködhet is. De nem fog. Tényleg. :)</P>
+
+
+<P><B><A NAME=2.2.2.2>2.2.2.2.  libmad támogatás</A></B></P>
 
 <P>A <A HREF="http://mad.sourceforge.net">libmad</A> egy többplatformos MPEG
 audio dekóder. Ha nem tudod miért lenne szükséged rá, nincs szükséged rá.</P>
@@ -195,9 +219,18 @@ audio dekóder. Ha nem tudod miért lenne szükséged rá, nincs szükséged rá.</P>
 <P>A támogatást az <CODE>--enable-mad</CODE> configure opcióval lehet bekapcsolni.</P>
 
 
-<P><B><A NAME=2.1.3>2.1.3.  Hogyan használj ismeretlen Win32 codec-et</A></B></P>
+<P><B><A NAME=2.2.2.3>2.2.2.3. VIVO audio</A></B></P>
 
-<P><B><A NAME=2.1.3.1>2.1.3.1.  VfW</A></B></P>
+<P>A VIVO file-okban használt audio codec milyensége attól függ hogy VIVO/1.0
+avagy VIVO/2.0 fileról beszélünk. Az 1.0-ás fileokban <B>g.723</B> audio van,
+a 2.0-ásokban pedig <B>Vivo Siren</B>. Jelenleg egyikük se támogatott,
+de a g.723 codec <A
+HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">innen</A> letölthetõ.</P>
+
+
+<P><B><A NAME=2.2.3>2.2.3.  Hogyan használj ismeretlen Win32 codec-et</A></B></P>
+
+<P><B><A NAME=2.2.3.1>2.2.3.1.  VfW</A></B></P>
 
 <P>VfW (Video for Windows) a régi Video API Windowshoz. A codec-jei .DLL vagy
 (ritkábban) .DRV kiterjesztést kapnak.
@@ -224,7 +257,7 @@ küldd el kérésed levélben, és töltsd fel eme file-okat FTP-re:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
 
 
-<P><B><A NAME=2.1.3.2>2.1.3.2.  DirectShow</A></B></P>
+<P><B><A NAME=2.2.3.2>2.2.3.2.  DirectShow</A></B></P>
 
 <P>DirectShow az újabb Video API, ami történetesen sokkal rosszabb, mint az
   elõdje. Nehezebb dolgod lesz a DirectShow-val, mivel
