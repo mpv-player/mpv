@@ -175,7 +175,7 @@ int makeclientsocket(char *szAddr,unsigned short port,int TTL,struct sockaddr_in
   sin.sin_family=AF_INET;
   sin.sin_port=htons(port);
   sin.sin_addr.s_addr=inet_addr(szAddr);
-  if (bind(socket,&sin,sizeof(sin))) {
+  if (bind(socket,(struct sockaddr *) &sin,sizeof(sin))) {
     perror("bind failed");
     exit(1);
   }
