@@ -13,65 +13,66 @@
 <P><B>In medias res</B></P>
 
 <P>There are two major topics which always cause huge dispute and flame on the
-<A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>
-mailing list. Number one is the topic of the</P>
+  <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>
+  mailing list. Number one is the topic of the</P>
 
-<P><A NAME=gcc><B>GCC 2.96 series</B></A></P>
+
+<P><A NAME="gcc"><B>GCC 2.96 series</B></A></P>
 
 <P><B>The background:</B> The GCC <B>2.95</B> series is an official GNU release
-and version 2.95.3 of GCC is the most bug-free in that series.
-We have never noticed compilation problems that we could trace to gcc-2.95.3. 
-Starting with Red Hat Linux 7.0, <B>Red Hat</B> included a heavily
-patched CVS version of GCC in their distribution and named it <B>2.96</B>. Red
-Hat included this version in the distribution because GCC 3.0 was not finished at
-the time, and they needed a compiler that worked well on all of their supported
-platforms, including IA64 and s390. The Linux distributor <B>Mandrake</B>
-also followed Red Hat's example and started shipping GCC 2.96 with their
-Linux-Mandrake 8.0 series. </P>
+  and version 2.95.3 of GCC is the most bug-free in that series.
+  We have never noticed compilation problems that we could trace to gcc-2.95.3. 
+  Starting with Red Hat Linux 7.0, <B>Red Hat</B> included a heavily
+  patched CVS version of GCC in their distribution and named it <B>2.96</B>. Red
+  Hat included this version in the distribution because GCC 3.0 was not finished
+  at the time, and they needed a compiler that worked well on all of their
+  supported platforms, including IA64 and s390. The Linux distributor
+  <B>Mandrake</B> also followed Red Hat's example and started shipping GCC 2.96
+  with their Linux-Mandrake 8.0 series.</P>
 
-<P><B>The statements:</B> The GCC team disclaimed any link with GCC 2.96 and issued an
-<A HREF="http://gcc.gnu.org/gcc-2.96.html">official response</A> to GCC 2.96.
-Many developers around the world began having problems with GCC 2.96, and
-started recommending other compilers. Examples are
-<A HREF="http://www.apachelabs.org/apr-mbox/200106.mbox/%3c20010623194228.C25512@ebuilt.com%3e">Apache</A>,
-<A HREF="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</A>,
-<A HREF="http://avifile.sourceforge.net/news-old1.htm">avifile</A> and
-<A HREF="http://www.winehq.com/news/?view=92#RH 7.1 gcc fixes compiler bug">Wine</A>.
-Other interesting links are 
-<A HREF="http://www.realtimelinux.org/archives/rtai/20017/0144.html">Real time Linux</A>,
-<A HREF="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
-Linux kernel news flash about kernel 2.4.17</A> and
-<A HREF="http://www.voy.com/3516/572.html">Voy Forum</A>.
-<B>MPlayer</B> also suffered from intermittent problems that were all solved by
-switching to a different version of GCC. Several projects started implementing
-workarounds for some of the 2.96 issues, but we refused to fix other people's
-bugs, especially since some workarounds may imply a performance penalty.</P>
+<P><B>The statements:</B> The GCC team disclaimed any link with GCC 2.96 and
+  issued an <A HREF="http://gcc.gnu.org/gcc-2.96.html">official response</A> to
+  GCC 2.96. Many developers around the world began having problems with GCC 2.96,
+  and started recommending other compilers. Examples are
+  <A HREF="http://www.apachelabs.org/apr-mbox/200106.mbox/%3c20010623194228.C25512@ebuilt.com%3e">Apache</A>,
+  <A HREF="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</A>,
+  <A HREF="http://avifile.sourceforge.net/news-old1.htm">avifile</A> and
+  <A HREF="http://www.winehq.com/news/?view=92#RH 7.1 gcc fixes compiler bug">Wine</A>.
+  Other interesting links are 
+  <A HREF="http://www.realtimelinux.org/archives/rtai/20017/0144.html">Real time Linux</A>,
+  <A HREF="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
+  Linux kernel news flash about kernel 2.4.17</A> and
+  <A HREF="http://www.voy.com/3516/572.html">Voy Forum</A>.
+  <B>MPlayer</B> also suffered from intermittent problems that were all solved by
+  switching to a different version of GCC. Several projects started implementing
+  workarounds for some of the 2.96 issues, but we refused to fix other people's
+  bugs, especially since some workarounds may imply a performance penalty.</P>
 
 <P>You can read about the other side of the story
-<A HREF="http://www.bero.org/gcc296.html">here</A>.
-GCC 2.96 does not allow | (pipe) characters in assembler comments
-because it supports Intel as well as AT&amp;T Syntax and the | character is a
-symbol in the Intel variant. The problem is that it <B>silently</B> ignores the
-whole assembler block. This is supposedly fixed now, GCC prints a warning instead
-of skipping the block.</P>
+  <A HREF="http://www.bero.org/gcc296.html">here</A>.
+  GCC 2.96 does not allow | (pipe) characters in assembler comments
+  because it supports Intel as well as AT&amp;T Syntax and the | character is a
+  symbol in the Intel variant. The problem is that it <B>silently</B> ignores the
+  whole assembler block. This is supposedly fixed now, GCC prints a warning instead
+  of skipping the block.</P>
 
 <P><B>The present:</B> Red Hat says that GCC 2.96-85 and above is fixed. The 
-situation has indeed improved, yet we still see problem reports on our
-mailing lists that disappear with a different compiler. In any case it does not
-matter any longer. Hopefully a maturing GCC 3.x will solve the issue for good.
-If you want to compile with 2.96 give the <CODE>--disable-gcc-checking</CODE>
-flag to configure. Remember that you are on your own and <B>do not report any
-bugs</B>. If you do, you will only get banned from our mailing list because
-we have had more than enough flame wars over GCC 2.96. Please let the matter rest.</P>
+  situation has indeed improved, yet we still see problem reports on our
+  mailing lists that disappear with a different compiler. In any case it does not
+  matter any longer. Hopefully a maturing GCC 3.x will solve the issue for good.
+  If you want to compile with 2.96 give the <CODE>--disable-gcc-checking</CODE>
+  flag to configure. Remember that you are on your own and <B>do not report any
+  bugs</B>. If you do, you will only get banned from our mailing list because
+  we have had more than enough flame wars over GCC 2.96. Please let the matter rest.</P>
 
 <P>If you have problems with GCC 2.96, you can get 2.96-85 packages from the
-Red Hat <A HREF="ftp://updates.redhat.com">ftp server</A>, or just go for the
-3.0.4 packages offered for version 7.2 and later. You can also get gcc-3.1
-packages (unofficial, but working fine)
-<A HREF="ftp://people.redhat.com/jakub/gcc3/3.1-1/">here</A> and you can
-install them along the gcc-2.96 you already have. MPlayer will detect it and
-use 3.1 instead of 2.96. If you do not want to or cannot use the binary
-packages, here is how you can compile GCC 3.1 from source:</P>
+  Red Hat <A HREF="ftp://updates.redhat.com">ftp server</A>, or just go for the
+  3.0.4 packages offered for version 7.2 and later. You can also get gcc-3.1
+  packages (unofficial, but working fine)
+  <A HREF="ftp://people.redhat.com/jakub/gcc3/3.1-1/">here</A> and you can
+  install them along the gcc-2.96 you already have. MPlayer will detect it and
+  use 3.1 instead of 2.96. If you do not want to or cannot use the binary
+  packages, here is how you can compile GCC 3.1 from source:</P>
 
 <UL>
   <LI>Go to the <A HREF="http://gcc.gnu.org/mirrors.html">GCC mirrors page</A>
@@ -95,92 +96,94 @@ packages, here is how you can compile GCC 3.1 from source:</P>
     <CODE>make install</CODE></LI>
 </UL>
 
-<P><A NAME=binary><B>Binary distribution of MPlayer</B></A></P>
+
+<P><A NAME="binary"><B>Binary distribution of MPlayer</B></A></P>
 
 <P>This was the second big problem but has been solved as of version
-0.90-pre1. <B>MPlayer</B> previously contained source from the OpenDivX project,
-which disallows binary redistribution. This code has been removed and you are now
-welcome to create binary packages as you see fit.</P>
+  0.90-pre1. <B>MPlayer</B> previously contained source from the OpenDivX project,
+  which disallows binary redistribution. This code has been removed and you are now
+  welcome to create binary packages as you see fit.</P>
 
 <P>Another impediment to binary redistribution was compiletime optimizations
-for CPU architecture.  <B>MPlayer</B> now supports runtime CPU detection
-(specify the <CODE>--enable-runtime-cpudetection</CODE> option when
-compiling). It is disabled by default because it implies a small speed
-sacrifice, it is now possible to create binaries that run on different
-members of the Intel CPU family.</P>
+  for CPU architecture.  <B>MPlayer</B> now supports runtime CPU detection
+  (specify the <CODE>--enable-runtime-cpudetection</CODE> option when
+  compiling). It is disabled by default because it implies a small speed
+  sacrifice, it is now possible to create binaries that run on different
+  members of the Intel CPU family.</P>
 
-<P><A NAME=nvidia><B>nVidia</B></A></P>
+
+<P><A NAME="nvidia"><B>nVidia</B></A></P>
 
 <P>We dislike the fact that <A HREF="http://www.nvidia.com">nVidia</A>
- only provides binary drivers (for use with XFree86), which are often buggy. 
-We have had many reports on
-<A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>
-about problems related to these closed-source drivers
-and their poor quality, instability and poor user and expert support.
-Here is an example from the
-<A HREF="http://www.nvnews.net/forum/showthread.php?s=fda5725bc2151e29453b2da3bd5d2930&amp;threadid=14306">
-nVidia Linux Forum</A>.
-Many of these problems/issues keep appearing repeatedly.
-We have been contacted by nVidia lately, and they said these bugs
-do not exist, instability is caused by bad AGP chips, and they received
-no reports of driver bugs (like the purple line). So if you have a
-problem with your nVidia card, you are advised to update the nVidia driver 
-and/or buy a new motherboard or ask nVidia to supply open-source drivers. 
-In any case, if you are using the nVidia binary drivers and facing driver related problems,
-please be aware that you will receive very little help from our side because we have 
-little power to help in this matter.</P>
+  only provides binary drivers (for use with XFree86), which are often buggy. 
+  We have had many reports on
+  <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>
+  about problems related to these closed-source drivers
+  and their poor quality, instability and poor user and expert support.
+  Here is an example from the
+  <A HREF="http://www.nvnews.net/forum/showthread.php?s=fda5725bc2151e29453b2da3bd5d2930&amp;threadid=14306">
+  nVidia Linux Forum</A>.
+  Many of these problems/issues keep appearing repeatedly.
+  We have been contacted by nVidia lately, and they said these bugs
+  do not exist, instability is caused by bad AGP chips, and they received
+  no reports of driver bugs (like the purple line). So if you have a
+  problem with your nVidia card, you are advised to update the nVidia driver 
+  and/or buy a new motherboard or ask nVidia to supply open-source drivers. 
+  In any case, if you are using the nVidia binary drivers and facing driver related problems,
+  please be aware that you will receive very little help from our side because we have 
+  little power to help in this matter.</P>
+
 
 <P><A NAME="barr"><B>Joe Barr</B></A></P>
 
 <P>Joe Barr became infamous by writing a less than favorable
-<A HREF="http://www.linuxworld.com/site-stories/2001/1214.mplayer.html">
-<B>MPlayer</B> review</A>. He found <B>MPlayer</B> hard to install, but then
-again he is not very fond of
-<A HREF="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">reading documentation</A>.
-He also concluded that the developers were unfriendly and the documentation
-incomplete and insulting. You be the judge.
-He went on to mention <B>MPlayer</B> negatively in his
-<A HREF="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">10 Linux predictions for 2002</A>
-In a followup
-<A HREF="http://www.linuxworld.com/site-stories/2002/0125.xine.html">review of xine</A>
-he continued stirring up controversy. Ironically at the end of that article he
-quotes his exchange with Günter Bartsch, the original author of xine, that
-perfectly summarizes the whole situation:</P>
+  <A HREF="http://www.linuxworld.com/site-stories/2001/1214.mplayer.html">
+  <B>MPlayer</B> review</A>. He found <B>MPlayer</B> hard to install, but then
+  again he is not very fond of
+  <A HREF="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">reading documentation</A>.
+  He also concluded that the developers were unfriendly and the documentation
+  incomplete and insulting. You be the judge.
+  He went on to mention <B>MPlayer</B> negatively in his
+  <A HREF="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">10 Linux predictions for 2002</A>
+  In a followup
+  <A HREF="http://www.linuxworld.com/site-stories/2002/0125.xine.html">review of xine</A>
+  he continued stirring up controversy. Ironically at the end of that article he
+  quotes his exchange with Günter Bartsch, the original author of xine, that
+  perfectly summarizes the whole situation:</P>
 
 <BLOCKQUOTE>
-However, he also went on to say that he was "surprised" by my column about
-Mplayer and thought it was unfair, reminding me that it is a free software
-project. "If you don't like it," Bartsch said, "you're free not to use it." 
+  However, he also went on to say that he was "surprised" by my column about
+  Mplayer and thought it was unfair, reminding me that it is a free software
+  project. "If you don't like it," Bartsch said, "you're free not to use it." 
 </BLOCKQUOTE>
 
 <P>He does not reply to our mails. His editor does not reply to our mails.
-Here are some quotes from different people about Joe Barr, so you can form your
-own opinion:</P>
+  Here are some quotes from different people about Joe Barr, so you can form your
+  own opinion:</P>
 
 <P>Marc Rassbach has <A HREF="http://daily.daemonnews.org/view_story.php3?story_id=2102">something to say</A>
-about the man
-</P>
+  about the man.</P>
 
 <BLOCKQUOTE>
-You may all remember the LinuxWorld 2000, when he claimed that Linus T said
-that 'FreeBSD is just a handful of programmers'. Linus said NOTHING of the
-sort. When Joe was called on this, his reaction was to call BSD supporters
-assholes and jerks.
+  You may all remember the LinuxWorld 2000, when he claimed that Linus T said
+  that 'FreeBSD is just a handful of programmers'. Linus said NOTHING of the
+  sort. When Joe was called on this, his reaction was to call BSD supporters
+  assholes and jerks.
 </BLOCKQUOTE>
 
 <P>A <A HREF="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-December/009118.html">quote</A>
-from Robert Munro on the
-<A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>
-mailing list:</P>
+  from Robert Munro on the
+  <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>
+  mailing list:</P>
 
 <BLOCKQUOTE>
-<P>He's interesting, but not good at avoiding, um... controversy.  Joe Barr
-used to be one of the regulars on Will Zachmann's Canopus forum on Compuserve,
-years ago.  He was an OS/2 advocate then (I was an OS/2 fan too).<P>
+  <P>He's interesting, but not good at avoiding, um... controversy.  Joe Barr
+    used to be one of the regulars on Will Zachmann's Canopus forum on Compuserve,
+    years ago.  He was an OS/2 advocate then (I was an OS/2 fan too).<P>
 
-<P>He used to go over-the-top, flaming people, and I suspect he had some hard
-times, then. He's mellowed some, judging by his columns recently.  Moderately
-subtle humor was not his mode in those earlier days, not at all.</P>
+  <P>He used to go over-the-top, flaming people, and I suspect he had some hard
+    times, then. He's mellowed some, judging by his columns recently.  Moderately
+    subtle humor was not his mode in those earlier days, not at all.</P>
 </BLOCKQUOTE>
 
 </HTML>

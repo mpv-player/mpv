@@ -13,24 +13,21 @@
 <P><B><A NAME="audio">2.3.2 Audio output devices</A></B></P>
 
 <P><B>MPlayer</B>'s audio interface is called <I>libao2</I>. It currently
-contains these drivers:</P>
+  contains these drivers:</P>
 
 <TABLE BORDER=0>
-
-<TR><TD COLSPAN=4><P><B>General:</B></P></TD></TR>
-
-<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS (ioctl) driver (supports hardware AC3 passthrough)</TD></TR>
-<TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL driver (supports up/downsampling, <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
-<TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS (Network Audio System) driver</TD></TR>
-<TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>native ALSA 0.5 driver</TD></TR>
-<TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>native ALSA 0.9 driver (supports hardware AC3 passthrough)</TD></TR>
-<TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>SUN audio driver (<CODE>/dev/audio</CODE>) for BSD and Solaris8 users</TD></TR>
-<TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>native ARTS driver (mostly for KDE users)</TD></TR>
-
+  <TR><TD COLSPAN=4><P><B>General:</B></P></TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS (ioctl) driver (supports hardware AC3 passthrough)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL driver (supports up/downsampling, <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS (Network Audio System) driver</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>native ALSA 0.5 driver</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>native ALSA 0.9 driver (supports hardware AC3 passthrough)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>SUN audio driver (<CODE>/dev/audio</CODE>) for BSD and Solaris8 users</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>native ARTS driver (mostly for KDE users)</TD></TR>
 </TABLE>
 
 <P>Fact is, Linux sound card drivers have compatibility problems.
-It <B>may</B> take a while to find your optimal settings.</P>
+  It <B>may</B> take a while to find your optimal settings.</P>
 
 <UL>
   <LI>If you have an OSS driver, first try <CODE>-ao oss</CODE> (this is the
@@ -55,70 +52,70 @@ It <B>may</B> take a while to find your optimal settings.</P>
 <P><B><A NAME="experiences">2.3.2.1 Sound Card experiences, recommendations</A></B></P>
 
 <TABLE BORDER=0 WIDTH="100%">
-<TR><TD COLSPAN=3><B>VIA onboard chipset (via82cxxx) 48kHz only</B></TD><TR>
-<TD></TD><TD>Driver:</TD><TD> from <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">here</A></TD><TR>
+  <TR><TD COLSPAN=3><B>VIA onboard chipset (via82cxxx) 48kHz only</B></TD><TR>
+  <TD></TD><TD>Driver:</TD><TD> from <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">here</A></TD><TR>
 
-<TD COLSPAN=3><B>Aureal Vortex 2</B></TD><TR>
-<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS:</TD><TD>no driver</TD><TR>
-<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>no driver</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
-<TD></TD><TD>Driver:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
-<TD></TD><TD>Driver2:</TD><TD> from <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">here</A><BR>
-(<I>buffer size increased to 32k</I>)</TD><TR>
+  <TD COLSPAN=3><B>Aureal Vortex 2</B></TD><TR>
+  <TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS:</TD><TD>no driver</TD><TR>
+  <TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
+  <TD></TD><TD>ALSA:</TD><TD>no driver</TD><TR>
+  <TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+  <TD></TD><TD>Driver:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
+  <TD></TD><TD>Driver2:</TD><TD> from <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">here</A><BR>
+  (<I>buffer size increased to 32k</I>)</TD><TR>
 
-<TD COLSPAN=3><B>GUS PnP</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>no driver</TD><TR>
-<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+  <TD COLSPAN=3><B>GUS PnP</B></TD><TR>
+  <TD></TD><TD>OSS:</TD><TD>no driver</TD><TR>
+  <TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
+  <TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+  <TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B>SB Live!</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>Analog OK, SP/DIF not working</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>Both OK</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>192</TD><TR>
+  <TD COLSPAN=3><B>SB Live!</B></TD><TR>
+  <TD></TD><TD>OSS:</TD><TD>Analog OK, SP/DIF not working</TD><TR>
+  <TD></TD><TD>ALSA:</TD><TD>Both OK</TD><TR>
+  <TD></TD><TD>Max kHz:</TD><TD>192</TD><TR>
 
-<TD COLSPAN=3><B>SB AWE 64</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>max 44kHz</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>48kHz sounds bad</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+  <TD COLSPAN=3><B>SB AWE 64</B></TD><TR>
+  <TD></TD><TD>OSS:</TD><TD>max 44kHz</TD><TR>
+  <TD></TD><TD>ALSA:</TD><TD>48kHz sounds bad</TD><TR>
+  <TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>not OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>44</TD><TR>
+  <TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD><TR>
+  <TD></TD><TD>OSS:</TD><TD>not OK</TD><TR>
+  <TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+  <TD></TD><TD>Max kHz:</TD><TD>44</TD><TR>
 
-<TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+  <TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD><TR>
+  <TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+  <TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+  <TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B>ESS 688</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+  <TD COLSPAN=3><B>ESS 688</B></TD><TR>
+  <TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+  <TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+  <TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B>C-Media cards (which ones?)</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>not OK (hissing) (?)</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
+  <TD COLSPAN=3><B>C-Media cards (which ones?)</B></TD><TR>
+  <TD></TD><TD>OSS:</TD><TD>not OK (hissing) (?)</TD><TR>
+  <TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+  <TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B>Yamaha cards (*ymf*)</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>not OK (?) (maybe <CODE>-ao sdl</CODE>)</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK only with ALSA 0.5 with OSS emulation <B>AND</B> <CODE>-ao sdl</CODE> (!) (?)</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
+  <TD COLSPAN=3><B>Yamaha cards (*ymf*)</B></TD><TR>
+  <TD></TD><TD>OSS:</TD><TD>not OK (?) (maybe <CODE>-ao sdl</CODE>)</TD><TR>
+  <TD></TD><TD>ALSA:</TD><TD>OK only with ALSA 0.5 with OSS emulation <B>AND</B> <CODE>-ao sdl</CODE> (!) (?)</TD><TR>
+  <TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B>Cards with envy24 chips (like Terratec EWS88MT)</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>?</TD><TR>
-<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>?</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
+  <TD COLSPAN=3><B>Cards with envy24 chips (like Terratec EWS88MT)</B></TD><TR>
+  <TD></TD><TD>OSS:</TD><TD>?</TD><TR>
+  <TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
+  <TD></TD><TD>ALSA:</TD><TD>?</TD><TR>
+  <TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B>PC Speaker or DAC</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>OK (Use the SDL driver: <CODE>-ao sdl</CODE>)</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>no driver</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>The driver emulates 44.1, maybe more.</TD><TR>
-<TD></TD><TD>Driver:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD>
+  <TD COLSPAN=3><B>PC Speaker or DAC</B></TD><TR>
+  <TD></TD><TD>OSS:</TD><TD>OK (Use the SDL driver: <CODE>-ao sdl</CODE>)</TD><TR>
+  <TD></TD><TD>ALSA:</TD><TD>no driver</TD><TR>
+  <TD></TD><TD>Max kHz:</TD><TD>The driver emulates 44.1, maybe more.</TD><TR>
+  <TD></TD><TD>Driver:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD>
 </TABLE>
 
 <UL>
@@ -144,28 +141,23 @@ It <B>may</B> take a while to find your optimal settings.</P>
   card. They are enabled using the <CODE>-aop</CODE> switch which takes a
   <CODE>list=plugin1,plugin2,...</CODE> argument. The <CODE>list</CODE> argument
   is required and determines which plugins should be used and in which order they
-  should be executed. Example:
-</P>
+  should be executed. Example:</P>
 
 <P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample,format</CODE></P>
 
 <P>would run the sound through the resampling plugin followed by the format
-  plugin.
-</P>
+  plugin.</P>
 
 <P>The plugins can also have switches that change their behavior. These
   switches are explained in detail in the sections below. A plugin will execute
   using default settings if its switches are omitted.  Here is an example of how
-  to use plugins in combination with plugin specific switches:
-</P>
+  to use plugins in combination with plugin specific switches:</P>
 
 <P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop
-  list=resample,format:fout=44100:format=0x8</CODE>
-</P>
+  list=resample,format:fout=44100:format=0x8</CODE></P>
 
 <P>would set the output frequency of the resample plugin to 44100Hz and the
-  output format of the format plugin to AFMT_U8.
-</P>                         
+  output format of the format plugin to AFMT_U8.</P>                         
 
 <P>Currently audio plugins can not be used in <B>MEncoder</B>.</P>
 
@@ -179,26 +171,26 @@ It <B>may</B> take a while to find your optimal settings.</P>
   the sample frequency explicitly. This plugin has one switch:
   <CODE>fout</CODE> which is used for setting the desired output sample
   frequency. It defaults to 48kHz, and is given in
-  &lt;Hz&gt;.
-</P>
+  &lt;Hz&gt;.</P>
 
 <P>Usage:<BR>
-&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;required
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;required
   frequency in Hz, like 44100&gt;</CODE></P>
 
 <P>Note that the output frequency should not be scaled up from the default value.
   Scaling up will cause the audio and video streams to be played in slow motion
   in addition to audio distortion.</P>
 
+
 <P><B><A NAME="surround_decoding">2.3.2.2.2 Surround Sound decoding</A></B></P>
 
 <P><B>MPlayer</B> has an audio plugin that can decode matrix encoded
-surround sound. Dolby Surround is an example of a matrix encoded format.
-Many files with 2 channel audio actually contain matrixed surround sound.
-To use this feature you need a sound card supporting at least 4 channels.</P>
+  surround sound. Dolby Surround is an example of a matrix encoded format.
+  Many files with 2 channel audio actually contain matrixed surround sound.
+  To use this feature you need a sound card supporting at least 4 channels.</P>
 
 <P>Usage:<BR>
-&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
 
 
 <P><B><A NAME="format">2.3.2.2.3 Sample format converter</A></B></P>
@@ -209,13 +201,11 @@ To use this feature you need a sound card supporting at least 4 channels.</P>
   has one switch, <CODE>format</CODE>, which can be set to one of the numbers
   found in <CODE>libao2/afmt.h</CODE>. This plugin is hardly ever needed and is
   intended for advanced users. Keep in mind that this plugin only changes the
-  sample format and not the sample frequency or the number of channels.
-</P>
+  sample format and not the sample frequency or the number of channels.</P>
 
 <P>Usage:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop
-  list=format:format=&lt;required output format&gt;</CODE>
-</P>
+  list=format:format=&lt;required output format&gt;</CODE></P>
 
 
 <P><B><A NAME="delay">2.3.2.2.4 Delay</A></B></P>
@@ -241,33 +231,28 @@ To use this feature you need a sound card supporting at least 4 channels.</P>
   external amplifier connected to the computer (this is almost always
   the case), the noise level can be minimized by adjusting the master
   level and the volume knob on the amplifier until the hissing noise
-  in the background is gone.
-</P>
+  in the background is gone.</P>
 
 <P>Usage:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop
-  list=volume:volume=&lt;0-255&gt;</CODE>
-</P>
+  list=volume:volume=&lt;0-255&gt;</CODE></P>
 
 <P>This plugin also has compressor or "soft-clipping" capabilities.
   Compression can be used if the dynamic range of the sound is very
   high or if the dynamic range of the loudspeakers is very
   low. Be aware that this feature creates distortion and should be
-  considered a last resort.
-</P>
+  considered a last resort.</P>
 
 <P>Usage:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop
-  list=volume:softclip</CODE>
-</P>
+  list=volume:softclip</CODE></P>
 
 
 <P><B><A NAME="extrastereo">2.3.2.2.6 Extrastereo</A></B></P>
 
 <P>This plugin (linearly) increases the difference between left and right
   channels (like the XMMS extrastereo plugin) which gives some sort of "live"
-  effect to playback.
-</P>
+  effect to playback.</P>
 
 <P>Usage:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo</CODE><BR>
