@@ -3,10 +3,11 @@ Ajánlott beállítások különféle hangkártyákhoz
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Aureal Vortex 2:
-                        OSS     : nincs
+                        OSS/Free: nincs
+			OSS	: OK
                         ALSA    : nincs
                         Max kHz : 48
-			Driver	: aureal.sourceforge.net
+			Driver	: aureal.sourceforge.net (nem jo)
 
 GUS PnP:
                         OSS/Free: nincs
