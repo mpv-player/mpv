@@ -585,6 +585,8 @@ static int libmpdemux_was_interrupted(int eof) {
   return eof;
 }
 
+#define mp_basename(s) (strrchr(s,'/')==NULL?(char*)s:(strrchr(s,'/')+1))
+
 int playtree_add_playlist(play_tree_t* entry)
 {
   if(!entry) {      
@@ -1226,6 +1228,60 @@ if(stream_cache_size>0){
 current_module="demux_open";
 
 demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
+
+// HACK to get MOV Reference Files working
+
+if (demuxer && demuxer->type==DEMUXER_TYPE_PLAYLIST)
+{ 
+  unsigned char* playlist_entry;
+  play_tree_t *list = NULL, *entry = NULL;
+
+  current_module="handle_demux_playlist";
+  while (ds_get_packet(demuxer->video,&playlist_entry)>0)
+  {	 
+    char *temp, *bname;
+    
+    mp_msg(MSGT_CPLAYER,MSGL_V,"Adding file %s to element entry\n",playlist_entry);
+
+    bname=mp_basename(playlist_entry);
+    if ((strlen(bname)>10) && !strncmp(bname,"qt",2) && !strncmp(bname+3,"gateQT",6))
+        continue;
+
+    entry = play_tree_new();
+    
+    if (filename && !strcmp(mp_basename(playlist_entry),playlist_entry)) // add reference path of current file
+    {
+      temp=malloc((strlen(filename)-strlen(mp_basename(filename))+strlen(playlist_entry)+1)*sizeof(char));
+      if (temp)
+      {
+	strncpy(temp, filename, strlen(filename)-strlen(mp_basename(filename)));
+	temp[strlen(filename)-strlen(mp_basename(filename))]='\0';
+	strcat(temp, playlist_entry);
+	play_tree_add_file(entry,temp);
+	mp_msg(MSGT_CPLAYER,MSGL_V,"Resolving reference to %s\n",temp);
+	free(temp);
+      }
+    }
+    else
+      play_tree_add_file(entry,playlist_entry);
+    
+    if(!list)
+      list = entry;
+    else
+      play_tree_append_entry(list,entry);
+  }
+  free_demuxer(demuxer);
+  demuxer = NULL;
+
+  if (list)
+  {
+    entry = play_tree_new();
+    play_tree_set_child(entry,list);
+    eof=playtree_add_playlist(entry);
+    goto goto_next_file;
+  }
+}
+
 if(!demuxer) 
 {
   play_tree_t* entry;

@@ -356,6 +356,8 @@ int mov_check_file(demuxer_t* demuxer){
 	      int ref=0;
 	      skipped+=i;
 	      mp_msg(MSGT_DEMUX,MSGL_INFO,"MOV: Reference Media file!!!\n");
+	      //set demuxer type to playlist ...
+	      demuxer->type=DEMUXER_TYPE_PLAYLIST;
 	      while(i>0){
 	          int len=stream_read_dword(demuxer->stream)-8;
 		  int fcc=stream_read_dword(demuxer->stream);
@@ -369,10 +371,21 @@ int mov_check_file(demuxer_t* demuxer){
 		      int tmp=stream_read_dword(demuxer->stream);
 		      int type=stream_read_dword_le(demuxer->stream);
 	              int slen=stream_read_dword(demuxer->stream);
-		      char* s=malloc(slen+1);
-		      stream_read(demuxer->stream,s,slen);
-		      s[slen]=0;
-		      mp_msg(MSGT_DEMUX,MSGL_INFO,"REF: [%.4s] %s\n",&type,s);
+		      //char* s=malloc(slen+1);
+		      //stream_read(demuxer->stream,s,slen);
+		      
+		      //FIXME: also store type & data_rate ?
+		      ds_read_packet(demuxer->video, 
+			demuxer->stream,
+			slen,
+			0,
+			stream_tell(demuxer->stream),
+			0 // no flags 
+		      );
+		      flags|=4;
+		      mp_msg(MSGT_DEMUX,MSGL_V,"Added reference to playlist\n");
+		      //s[slen]=0;
+		      //mp_msg(MSGT_DEMUX,MSGL_INFO,"REF: [%.4s] %s\n",&type,s);
 		      len-=12+slen;i-=12+slen; break;
 		    }
 		  case MOV_FOURCC('r','m','d','r'): {
@@ -433,6 +446,9 @@ skip_chunk:
 	return 1;
     }
     free(priv);
+
+    if (flags==5) // reference & header sent
+        return 1;
 
     if(flags==1)
 	mp_msg(MSGT_DEMUX,MSGL_WARN,"MOV: missing data (mdat) chunk! Maybe broken file...\n");

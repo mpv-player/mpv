@@ -650,7 +650,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
   if(mov_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"QuickTime/MOV");
-      file_format=DEMUXER_TYPE_MOV;
+      file_format=demuxer->type;
   } else {
       free_demuxer(demuxer);
       demuxer = NULL;
