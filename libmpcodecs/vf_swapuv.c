@@ -37,34 +37,44 @@
 
 //===========================================================================//
 
+static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
+    mp_image_t *dmpi= vf_get_image(vf->next, mpi->imgfmt, 
+	mpi->type, mpi->flags, mpi->w, mpi->h);
 
-struct vf_priv_s {
-};
+    mpi->planes[0]=dmpi->planes[0];
+    mpi->planes[1]=dmpi->planes[2];
+    mpi->planes[2]=dmpi->planes[1];
+    mpi->stride[0]=dmpi->stride[0];
+    mpi->stride[1]=dmpi->stride[2];
+    mpi->stride[2]=dmpi->stride[1];
+    mpi->width=dmpi->width;
 
-
-/***************************************************************************/
-
-
-static int config(struct vf_instance_s* vf,
-        int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt){
-
-	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
+    mpi->flags|=MP_IMGFLAG_DIRECT;
+    mpi->priv=(void*)dmpi;
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
-	mp_image_t *dmpi= vf_get_image(vf->next, mpi->imgfmt, MP_IMGTYPE_EXPORT, 0, mpi->w, mpi->h);
-	
+    mp_image_t *dmpi;
+    
+    if(mpi->flags&MP_IMGFLAG_DIRECT){
+	dmpi=(mp_image_t*)mpi->priv;
+    } else {
+	dmpi=vf_get_image(vf->next, mpi->imgfmt, MP_IMGTYPE_EXPORT, 0, mpi->w, mpi->h);
 	assert(mpi->flags&MP_IMGFLAG_PLANAR);
-	
 	dmpi->planes[0]=mpi->planes[0];
 	dmpi->planes[1]=mpi->planes[2];
 	dmpi->planes[2]=mpi->planes[1];
 	dmpi->stride[0]=mpi->stride[0];
 	dmpi->stride[1]=mpi->stride[2];
 	dmpi->stride[2]=mpi->stride[1];
+	dmpi->width=mpi->width;
+    }
     
-	return vf_next_put_image(vf,dmpi);
+    dmpi->qscale=mpi->qscale;
+    dmpi->qstride=mpi->qstride;
+    dmpi->pict_type=mpi->pict_type;
+
+    return vf_next_put_image(vf,dmpi);
 }
 
 //===========================================================================//
@@ -85,13 +95,9 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 }
 
 static int open(vf_instance_t *vf, char* args){
-    vf->config=config;
     vf->put_image=put_image;
-//    vf->get_image=get_image;
+    vf->get_image=get_image;
     vf->query_format=query_format;
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-    memset(vf->priv, 0, sizeof(struct vf_priv_s));
-
     return 1;
 }
 
