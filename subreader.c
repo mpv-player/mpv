@@ -517,6 +517,9 @@ int sub_utf8=0;
 extern int sub_utf8;
 #endif
 
+extern float sub_delay;
+extern float sub_fps;
+
 #ifdef USE_ICONV
 static iconv_t icdsc;
 
@@ -788,7 +791,8 @@ void dump_mpsub(subtitle* subs, float fps){
 	FILE *fd;
 	float a,b;
 
-	mpsub_position=0.0;
+	mpsub_position=sub_uses_time?(sub_delay*100):(sub_delay*fps);
+	if (sub_fps==0) sub_fps=fps;
 
 	fd=fopen ("dump.mpsub", "w");
 	if (!fd) {
@@ -815,8 +819,8 @@ void dump_mpsub(subtitle* subs, float fps){
 			else
 			fprintf (fd, " %.2f\n",b);
 		} else {
-			fprintf (fd, "%ld %ld\n", (egysub->start)-((long)mpsub_position),
-					(egysub->end)-(egysub->start));
+			fprintf (fd, "%ld %ld\n", (long)((egysub->start*(fps/sub_fps))-((mpsub_position*(fps/sub_fps)))),
+					(long)(((egysub->end)-(egysub->start))*(fps/sub_fps)));
 		}
 
 		mpsub_position = egysub->end;
@@ -856,7 +860,7 @@ int main(int argc, char **argv) {  // for testing
     sub_cp = argv[2]; 
     subs=sub_read_file(argv[1]);
     if(!subs){
-        printf("Couldn't load file... let's write a bugreport :)\n");
+        printf("Couldn't load file.\n");
         exit(1);
     }
     
