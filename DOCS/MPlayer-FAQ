@@ -206,14 +206,7 @@ A: Try running MPlayer on the machine you compiled on. Or recompile. Don't
 
 Q: I have problems with <your window manager> and fullscreen xv/xmga/sdl/x11
    modes..
-A: Yes, it's a bug. But not only our bug. We couldn't yet develop any
-   windowmanager-independent method to make window really fullscreen.
-   There was some version, but there are always users with problems.
-   I think the only solution is adding a new switch, for example -fsmode
-   to select which method should be used.
-   Unfortunately most common window managers aren't compatible with standards
-   or Motif wm. So standard ways to enable fullscreen doesn't work with them.
-   And non-standard modes not work for standard-compliant wm's.
+A1: Use the -fsmode switch. See example.conf or manpage.
 
 Q: But it works with avifile !
 A: So what?

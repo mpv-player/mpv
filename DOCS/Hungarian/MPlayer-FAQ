@@ -213,15 +213,7 @@ A: Azon a gépen futtasd az MPlayer-t, amin lefordítottad! Vagy fordítsd újra!
 
 Q: Gondjaim vannak a kedvenc ablakkezelõm esetén a teljesképernyõs xv/xmga/..
    móddal..
-A: Igen, ez egy bug. De nem(csak) a miénk. Eddig nem találtunk olyan
-   fullscreen módszert, ami minden ablakkezelõvel mûködik.
-   Volt néhány próbálkozás, de valamivel mindig bugzott. Valószínûleg a
-   megoldás egy új opció lesz, például -fsmode , a kívánt módszerek közti
-   választásara.
-   Sajnos a legtöbb elterjedt ablakkezelõ nem kompatibilis a szabványokkal,
-   vagy Motif-fal, így a teljesképernyõs mód bekapcsolására irányuló
-   szabványos módszerek nem mûködnek velük. A nem szabványos módszerek pedig
-   a szabványos ablakkezelõkkel nem mûködnek.
+A: Használd az -fsmode opciót. Bõvebben: lásd example.conf vagy a manpage-t.
 
 Q: Dehát aviplay-jel mûködik !
 A: És?
