@@ -1211,12 +1211,12 @@ compressor / 'soft\-clipping' opciók (csak a volume pluginnel)
 .RE
 .
 .TP
-.B \-delay <sec>
-Audio delay in seconds (may be +/\:\- float value).
+.B \-delay <mp>
+Audio késleltetése (lehet +/\:\- lebegõpontos szám is)
 .TP
 .B \-format <0\-8192>
-Select the format used for output from the filter layer (according to the
-defines in libao2/afmt.h):
+A szûrõ réteg kimeneti formátumát adja meg (a libao2/afmt.h-ban definiáltak
+szerint):
 
 .PD 0
 .RSs
@@ -1250,42 +1250,39 @@ Signed 32-bit (Big-Endian)
 .PD 1
 .
 .TP
-.B \-mixer <device>
-This option will tell MPlayer to use a different device for mixing than
-/dev/\:mixer.
+.B \-mixer <egység>
+/dev/\:mixer helyett más egység használata.
 .TP
-.B \-nowaveheader (-ao pcm only)
-Don't include wave header.
-Used for RAW PCM.
+.B \-nowaveheader (csak -ao pcm)
+Ne írjon wave fejlécet.
+Csak RAW PCM-hez.
 
 
-.SH "VIDEO OUTPUT OPTIONS (MPLAYER ONLY)"
+.SH "VIDEO KIMENETI OPCIÓK (CSAK MPLAYER)"
 .TP
-.B \-aa* (\-vo aa only)
-You can get a list and an explanation of available options executing
+.B \-aa* (csak \-vo aa)
+A rendelkezésre álló opciók listája a következõ paranccsal kérhetõ le:
 .I mplayer \-aahelp
 .TP
-.B \-bpp <depth>
-Use different color depth than autodetect.
-Not all \-vo drivers support it (fbdev, dga2, svga, vesa).
+.B \-bpp <mélység>
+Az autodetektálttól eltérõ színmélység használata.
+Nem minden \-vo meghajtó támogatja (fbdev, dga2, svga, vesa).
 .TP
 .B \-brightness <\-100\-100>
-Adjust brightness of video output (default 0).
-It changes intensity of RGB components of video signal from black to white
-screen.
+Video kimenet fényerejének állítása (alapban 0).
+Az RGB komponenseket állítja.
 .TP
 .B \-contrast <\-100\-100>
-Adjust contrast of video output (default 0).
-Works in similar manner as brightness.
+Video kimenet kontrasztjának állítása (alapban 0).
+Ugyanúgy mûködik mint a fényerõ.
 .TP
-.B \-dfbopts <value> (\-vo directfb2 only)
-Specify a parameter list for the directfb driver.
+.B \-dfbopts <érték> (csak \-vo directfb2)
+Paraméterek átadása a directfb meghajtónak.
 .TP
-.B \-display <name>
-Specify the hostname and display number of the X server you want to display
-on.
+.B \-display <név>
+A használandó X szerver címe és portja.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 \-display xtest.localdomain:0
@@ -1294,62 +1291,60 @@ on.
 .
 .TP
 .B \-double
-Enables doublebuffering.
-Fixes flicker by storing two frames in memory, and displaying one while
-decoding another.
-Can affect OSD.
-Needs twice the memory of a single buffer, so it won't work on cards with
-very little video memory.
+Doublebufferelés használata.
+Két képkocka eltárolása a memóriában, a villódzás elkerülése végett.
+Hatással lehet az OSD-re.
+Duplaannyi memóriát igényel mint az egy bufferes változat, így kevés
+memóriával rendelkezõ kártyákon nem biztos hogy mûködik.
 .TP
 .B \-dr \ \ \ 
-Turns on direct rendering (not supported by all codecs and video outputs)
-(default is off).
-Warning: may cause OSD/\:SUB corruption!
+Direct render bekapcsolása (nem minden codec és video kimenet támogatja)
+(alapban ki van kapcsolva).
+Vigyázat: OSD/\:SUB széteséséhez vezethet!
 .TP
-.B \-dxr2 <option1:option2:...>
-This option is used to control the dxr2 driver.
-Note: The lavc filter is now auto inserted if you try to play a non MPEG1/2
-format so all formats supported by MPlayer should play out of the box (if
-you have the CPU power needed to encode on the fly).
-The overlay chipset used on the dxr2 is of pretty bad quality but the default
-settings should work for everybody.
-The OSD may be usable with the overlay (not on TV) by drawing it in the
-colorkey.
-With the default colorkey settings you may get variable results, usually you
-will see the colorkey around the characters or some other funny effect.
-But if you properly adjust the colorkey settings you should be able to get
-acceptable results.
+.B \-dxr2 <opció1:opció2:...>
+Ezzel az opcióval a dxr2 kimenetet lehet paraméterezni.
+Megjegyzés: nem MPEG1/2 formátum lejátszása esetén a lavc szûrõ
+automatikusan beillesztésre kerül, így az összes MPlayer által támogatott
+formátum out-of-the-box mûködik (ha elég gyors a CPU-d a menet közbeni
+átkódoláshoz).
+A DXR2-n használt overlay chipset elég rossz minõségû, de az alap
+beállítások elvileg mindenkinél mûködnek.
+Az OSD-t az overlay-on lehet használni (nem TV-n).
+Az alap colorkey beállítás érdekes effekteket is eredményezhet, valószínûleg
+a karakterek körül lesznek rajzolva a colorkey színével, stb. Ha állítgatsz
+rajta egy kicsit akkor javulni fog.
 .
 .RSs
-.IPs ar-mode=<value>
-aspect ratio mode (0 = normal, 1 = pan scan, 2 = letterbox (default))
+.IPs ar-mode=<érték>
+aspect ratio (0 = normál, 1 = pan scan, 2 = letterbox (alap))
 .IPs iec958\-encoded/\:decoded
-iec958 output mode
+iec958 kimenet mód
 .IPs mute
-mute sound output
-.IPs ucode=<value>
-path to the microcode
+hangkimenet elnémítása
+.IPs ucode=<érték>
+útvonal a mikrokódhoz
 .RE
 .RS
 
-.I TV Out
+.I TV Kimenet
 .RE
 .RSs
 .IPs 75ire
-enable 7.5 IRE
+7.5 IRE bekapcsolása
 .IPs bw\ \ \ 
-b/\:w TV output
+fekete fehér TV kimenet
 .IPs color
-color TV output
+színes TV kimenet
 .IPs interlaced
-interlaced TV output
-.IPs macrovision=<value>
-macrovision mode (0 = off (default), 1 = agc, 2 = agc 2 colorstripe,
+váltottsoros TV kimenet
+.IPs macrovision=<érték>
+macrovision mód (0 = ki (alap), 1 = agc, 2 = agc 2 colorstripe,
 3 = agc 4 colorstripe)
-.IPs norm=<value>
-TV norm (ntsc (default), pal,pal60,palm,paln,palnc)
+.IPs norm=<érték>
+TV norma (ntsc (alap), pal,pal60,palm,paln,palnc)
 .IPs square/\:ccir601\-pixel
-TV pixel mode
+TV pixel mód
 .RE
 .RS
 
@@ -1357,100 +1352,96 @@ TV pixel mode
 .RE
 .RSs
 .IPs cr-[left|right|top|bot]=<\-20\-20>
-adjust the overlay cropping
+overlay vágás állítása
 .IPs ck-[rgb]min=<0\-255>
-minimum value for the color key
+a colorkey minimum értéke
 .IPs ck-[rgb]max=<0\-255>
-maximum value for the color key
+a colorkey maximum értéke
 .IPs ck-[rgb]=<0\-255>
-color key values
+color key értékei
 .IPs ignore\-cache
-do not use the VGA cache
+ne használja a VGA cache-t
 .IPs ol-osd
-enable the osd hack on the overlay
-.IPs ol[hwxy]\-cor=<value>
-adjust the overlay size and position in case it doesn't match the window
-perfectly
+osd hack bekapcsolása az overlayon
+.IPs ol[hwxy]\-cor=<érték>
+overlay méretének és pozíciójának állítása, ha nem tökéletesen érintkezik
+az ablakkal
 .IPs overlay
-enable the overlay
+overlay bekapcsolása
 .IPs overlay-ratio=<1\-2500>
-tune the overlay (default 1000)
+overlay hangolása (alapban 1000)
 .IPs update\-cache
-recreate the VGA cache
+VGA cache újrakreálása
 .RE
 .
 .TP
-.B \-fb <device> (fbdev or DirectFB only)
-Specifies the framebuffer device to use.
-By default it uses /dev/\:fb0.
+.B \-fb <egység> (csak fbdev vagy DirectFB)
+A használandó framebuffer egység megadása.
+Alapban /dev/\:fb0.
 .TP
-.B \-fbmode <modename> (fbdev only)
-Change video mode to the one that is labelled as <modename> in
-/etc/\:fb.modes.
+.B \-fbmode <módnév> (csak fbdev)
+Videomód megváltoztatása az /etc/\:fb.modes-ban <módnév> néven szereplõre.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-VESA framebuffer doesn't support mode changing.
+A VESA framebuffer nem támogatja a módváltást.
 .TP
-.B \-fbmodeconfig <filename> (fbdev only)
-Use this configuration file instead of the default /etc/\:fb.modes.
-Only valid for the fbdev driver.
+.B \-fbmodeconfig <filenév> (csak fbdev)
+A megadott konfigurációs file használata az alap /etc/\:fb.modes helyett.
+Csak az fbdev meghajtóval használható.
 .TP
-.B \-forcexv (SDL only)
-Force using XVideo.
+.B \-forcexv (csak SDL)
+XVideo használatának kényszerítése.
 .TP
 .B \-fs \ \ \ 
-Fullscreen playing (centers movie, and makes black
-bands around it).
-Toggle it with the 'f' key (not all video outputs support it).
-See also \-zoom.
+Teljesképernyõs lejátszás (filmet középre, köré fekete keret).
+'f' billentyûvel ki/bekapcsolható (nem minden video kimenet támogatja).
+Lásd még \-zoom.
 .TP
-.B \-fsmode-dontuse <0-31> (OBSOLETE) (use \-fs option)
-Try this option if you still experience fullscreen problems.
+.B \-fsmode-dontuse <0-31> (RÉGI) (használd az \-fs opciót)
+Használd ezt az opciót teljesképernyõs üzemmódnál jelentkezõ
+problémák esetén.
 .TP
-.B \-geometry x[%][:y[%]] or [WxH][+x+y]
-Adjust where the output is on the screen initially.
-The x and y specifications are in pixels measured from the top-right of the
-screen to the top-right of the image being displayed, however if a percentage
-sign is given after the argument it turns the value into a percentage of the
-screen size in that direction.
-It also supports the standard option format to the standard X \-geometry
-option.
-The values given must be integers.
+.B \-geometry x[%][:y[%]] vagy [WxH][+x+y]
+Annak beállítása hogy kezdéskor hova lesz kirakva a video.
+Az x és y érték a képernyõ jobb felsõ sarkától a megjelenítendõ ablak
+jobb felsõ sarkáig mért távolság pixelben. Ha százalék jelet írsz a megadott
+érték mögé, akkor százalékban lesz számítva.
+Támogatja továbbá a szabványos X \-geometry formátumot is.
+A megadott értékeknek egész számoknak kell lenniük.
 
-Note: This option is only supported by a few vo's, including tdfxfb, fbdev and
-xv.
+Megjegyzés: ezt az opciót csak néhány video kimenet támogatja (tdfxfb, fbdev és
+xv)
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs 50:40
-Places the window at x=50, y=40
+Ablak elhelyezése x=50, y=40 koordinátákra
 .IPs 50%:50%
-Places the window in the middle of the screen
+Ablak elhelyezése a képernyõ közepére
 .IPs 100%
-Places the window at the top left corner of the screen
+Ablak elhelyezése a képernyõ bal felsõ sarkába
 .IPs 100%:100%
-Places the window at the bottom left corner of the screen
+Ablak elhelyezése a képernyõ bal alsó sarkába
 .RE
 .PD 1
 .
 .TP
 .B \-hue <\-100\-100>
-Adjust hue of video signal (default: 0).
-You can get colored negative of image with this option.
+Video jel "hue" értékének megváltoztatása (alapban: 0).
 .TP
-.B \-icelayer <0\-15> (icewm only)
-Sets the layer of the fullscreen window of mplayer for icewm.
+.B \-icelayer <0\-15> (csak icewm)
+Teljesképernyõs ablak "rétegének" megváltoztatása icewm ablakkezelõvel.
 
 .PD 0
 .RSs
 .IPs 0
 Desktop
 .IPs 2
-Below
+Alul
 .IPs 4
-Normal
+Normál
 .IPs 6
 OnTop
 .IPs 8
@@ -1458,246 +1449,241 @@ Dock
 .IPs 10
 AboveDock
 .IPs 12
-Menu (default)
+Menu (alap)
 .RE
 .PD 1
 .
 .TP
-.B \-jpeg <option1:option2:...> (\-vo jpeg only)
-Specify options for the JPEG output.
+.B \-jpeg <opció1:opció2:...> (csak \-vo jpeg)
+JPEG kimenet opcióinak megadása.
 .br
-Available options are: [no]progressive, [no]baseline, optimize, smooth, quality
-and outdir.
+A használható opciók: [no]progressive, [no]baseline, optimize, smooth, quality
+és outdir.
 .TP
-.B \-monitor_dotclock <dotclock\ (or\ pixelclock) range> (fbdev and vesa only)
-Look into etc/\:example.conf for further information and in DOCS/\:video.html.
+.B \-monitor_dotclock <dotclock\ (vagy\ pixelclock) tartomány> (csak fbdev és vesa)
+Lásd az etc/\:example.conf és DOCS/\:video.html file-okat.
 .TP
-.B \-monitor_hfreq <horizontal frequency range> (fbdev and vesa only)
+.B \-monitor_hfreq <horizontális frekvenciatartomány> (csak fbdev és vesa)
 .TP
-.B \-monitor_vfreq <vertical frequency range> (fbdev and vesa only)
+.B \-monitor_vfreq <vertikális frekvenciatartomány> (csak fbdev és vesa)
 .TP
 .B \-monitoraspect <ratio>
-Set aspect ratio of your monitor or TV screen.
-See also \-aspect for movie aspect.
+Monitor vagy TV képarányának megadása.
+Lásd még az \-aspect opciót.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
-\-monitoraspect 4:3  or 1.3333
+\-monitoraspect 4:3  vagy 1.3333
 .br
-\-monitoraspect 16:9 or 1.7777
+\-monitoraspect 16:9 vagy 1.7777
 .RE
 .PD 1
 .
 .TP
 .B \-nograbpointer
-Do not grab mouse pointer after VidMode change (\-vm), useful for multihead
-setup.
+Ne fogja meg az egérpointert VidMode váltás után (\-vm), többkártyás
+kimenetnél hasznos.
 
 .TP
 .B \-nokeepaspect
-Do not keep window aspect ratio when resizing X11 windows (Works currently only
-with \-vo x11, xv, xmga and xvidix and your window manager needs to understand
-window aspect hints.).
+Ne tartsa meg az ablak képarányát X11 ablakok átméretezésekor (jelenleg csak a
+\-vo x11, xv, xmga és xvidix kimenetekkel mûködik, az ablakkezelõdnek pedig
+támogatnia kell.).
 
 .TP
 .B \-noslices
-Disable drawing video by 16-pixel height slices/\:bands, instead draws the
-whole frame in a single run.
-May be faster or slower, depending on card/\:cache.
-It has effect only with libmpeg2 and libavcodec codecs.
+Video ablak 16 pixel magas slice/\:band-onkénti kirajzolásának kikapcsolása,
+képkocka kirajzolása egy menetben.
+Gyorsulhat vagy lassulhat, a kártya/\:cache függvényében.
+Csak libmpeg2 és libavcodec codec-eknél van hatása.
 .TP
 .B \-panscan <0.0\-1.0>
-Enables Pan & Scan functionality, i.e.\& in order to display a 16:9 movie
-on a 4:3 display, the sides of the movie are cropped to get a 4:3 image
-which fits the screen.
-This function works only with the xv, xmga, mga and xvidix video out drivers.
+Pan & Scan funkció bekapcsolása, ami annyit tesz, hogy egy 16:9 képarányú
+filmet nézhetõvé tesz egy 4:3-as kijelzõn is, mivel a széleket megadott
+mértékben levágja.
+Ez a funkció csak az xv, xmga, mga és xvidix video kimeneti meghajtókkal
+mûködik.
 .br
-The range controls how much of the image is cropped.
+A megadott tartomány határozza meg a vágás mértékét.
 .TP
 .B \-rootwin
-Play movie in the root window (desktop background) instead of opening
-a new one.
-Works only with x11, xv, xmga and xvidix drivers.
+A film root ablakban (asztal hátterében) történõ lejátszása, új ablak
+nyitása helyett.
+Csak az x11, xv, xmga és xvidix meghajtókkal.
 .TP
 .B \-saturation <\-100\-100>
-Adjust saturation of video output (default: 0).
-You can get grayscale output with this option.
+Video kimenet szaturációjának beállítása (alap: 0).
+Fekete fehér képet is elõ lehet állítani vele.
 .TP
-.B \-screenw <pixels> \-screenh <pixels>
-If you use an output driver which can't know the resolution of the screen
-(fbdev/\:x11 and/\:or TVout) this is where you can specify the horizontal and
-vertical resolution.
+.B \-screenw <pixel> \-screenh <pixel>
+Ha olyan video kimenetet használsz amely nem tudja a képernyõ méreteit
+(fbdev/\:x11 és/\:vagy TV kimenet), itt lehet megadni annak horizontális
+és vertikális méreteit.
 .TP
 .B \-stop_xscreensaver
-Turns off xscreensaver at startup and turns it on again on exit.
+xscreensaver kikapcsolása a lejátszás indításakor, kilépéskor újraindítás.
 .TP
 .B \-vm \ \ \ 
-Try to change to a better video mode.
-dga, x11/\:xv (XF86VidMode) and sdl output drivers support it.
+Megpróbál átváltani egy megfelelõbb videómódba. A
+dga, x11/\:xv (XF86VidMode) és sdl meghajtók támogatják.
 .TP
-.B \-vo <driver1[:device],driver2,...[,]>
-Specify a priority list of video output drivers (optionally with device) to be
-used.
-\'device' is valid with SDL and GGI, too, it means subdriver then.
+.B \-vo <meghajtó1[:almeghajtó],meghajtó2,...[,]>
+Itt lehet megadni a használandó video kimenetek prioritizált listáját.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-See \-vo help for a full list of available drivers.
+Lásd a \-vo help opciót a rendelkezésre álló meghajtók listájához.
 .br
-If the list has a trailing ',' it will fallback to drivers not listed.
+Ha a lista végén szerepel egy vesszõ, akkor a nem listázott meghajtókat
+is megpróbálja sikertelenség esetén.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "\-vo xmga,xv,"
-Try Matrox kernel driver, then Xv driver, then others
+Sorrendben a Matrox kernel meghajtó, az Xv, majd egyéb kimenetek kipróbálása.
 .br
 .IPs "\-vo sdl:aalib"
-specify the SDL subdriver
+az SDL egyik almeghajtójának használata
 .RE
 .PD 1
 .
 .TP
 .B \-vsync \ \ 
-Enables VBI for vesa.
+VBI bekapcsolása vesa-hoz.
 .TP
 .B \-wid <window\ id>
-This tells MPlayer to use a X11 window, which is useful to embed MPlayer in a
-browser (with the plugger extension for instance).
+Ez megadja az MPlayer-nek hogy egy már létezõ X11 ablakban játsszon le,
+hasznos ha browser-be akarod integrálni az MPlayer-t.
 .TP
 .B \-xineramascreen <0\-...>
-In Xinerama configurations (i.e.\& a single desktop that spans across multiple
-displays) this option tells MPlayer which screen to display movie on.
+Xinerama konfigurációkban (tehát amikor egy desktop több kijelzõn át
+nyúlik), ezzel az opcióval adható meg hogy melyik kijelzõn történjen a
+lejátszás.
 .TP
 .B \-z <0\-9>
-Specifies compression level for PNG output (-vo png)
+PNG kimenet tömörítési szintjének megadása (-vo png)
 
 .PD 0
 .RSs
 .IPs 0
-no compression
+nincs tömörítés
 .IPs 9
-max compression
+maximális tömörítés
 .RE
 .PD 1
 .
 .TP
-.B \-zrbw (\-vo zr only)
-Display in black and white (for optimal performance, this option can be
-combined with the 'decode only in black and white' option for codecs
-belonging to the FFmpeg family).
+.B \-zrbw (csak \-vo zr)
+Fekete fehér lejátszás (optimális teljesítmény eléréséhez az FFmpeg
+codec-eknél be lehet kapcsolni a fekete fehér dekódolást is).
 .TP
-.B \-zrcrop <[width]x[height]+[x offset]+[y offset]> (\-vo zr only)
-Select a part of the input image for display, multiple occurences of this
-option switch on cinerama mode.
-In cinerama mode the movie is distributed over more than one TV (or beamer) to
-create a larger screen.
-Options appearing after the n\-th \-zrcrop apply to the n\-th MJPEG card, each
-card should at least have a \-zrdev in addition to the \-zrcrop.
-For examples, see the output of \-zrhelp and the Zr section of the
-documentation.
+.B \-zrcrop <[szélesség]x[magasság]+[x offset]+[y offset]> (csak \-vo zr)
+Csak a bemeneti kép kiválasztott részének megjelenítése, valamint
+többszöri használatával kapcsolható be a cinerama mód is.
+Cinerama módban a film több mint egy TV-n lesz megjelenítve.
+Az n\-edik -zrcrop opció utáni opciók az n\-edig MJPEG kártyára vonatkoznak.
+Mindegyik kártyához meg kell adni a megfelelõ \-zrdev opciót is.
+Lásd a dokumentáció Zr fejezetét.
 .TP
-.B \-zrdev <device> (\-vo zr only)
-Specify the device special file that belongs to your MJPEG card, by default
-this driver takes the first v4l device it can find.
+.B \-zrdev <egység> (csak \-vo zr)
+Itt lehet megadni az MJPEG kártya egységnevét, alapban a legelsõ
+v4l egységet feltételezi annak.
 .TP
-.B \-zrfd (\-vo zr only)
-Force decimation: Decimation, as specified by \-zrhdec and \-zrvdec, only
-happens if the hardware scaler can stretch the image to its original size.
-Use this option to force decimation.
+.B \-zrfd (csak \-vo zr)
+Decimation kényszerítése: alapban csak akkor történik ha a hardveres
+scaler szét tudja húzni a képet az eredeti méretére.
 .TP
-.B \-zrhelp (\-vo zr only)
-Display a list of all \-zr* options, their default values and an example of
-cinerama mode.
+.B \-zrhelp (csak \-vo zr)
+Az összes \-zr* opció és alapértékeik kilistázása.
 .TP
-.B \-zrnorm <norm> (\-vo zr only)
-Specify norm PAL/\:NTSC, the default is 'no change'.
+.B \-zrnorm <norm> (csak \-vo zr)
+PAL/\:NTSC norma váltás, alapállapotban nem vált.
 .TP
-.B \-zrquality <1\-20> (\-vo zr only)
-A number from 1 to 20 representing the jpeg encoding quality.
-1 gives the best quality and 20 gives very bad quality.
+.B \-zrquality <1\-20> (csak \-vo zr)
+1-tõl 20-ig a JPEG minõségét adja meg.
+1 a legjobb, 20 a legrosszabb.
 .TP
-.B \-zrvdec <1,2,4> \-zrhdec <1,2,4> (\-vo zr only)
-Vertical/\:horizontal decimation: Ask the driver to send only every 2nd or 4th
-line/\:pixel of the input image to the MJPEG card and use the scaler of the
-MJPEG card to strech the image to its original size.
+.B \-zrvdec <1,2,4> \-zrhdec <1,2,4> (csak \-vo zr)
+Vertikális és horizontális vágás: minden 2. vagy 4. sor/\:pixel
+megjelenítése.
 .TP
-.B \-zrxdoff <x display offset>, \-zrydoff <y display offset> (\-vo zr only)
-If the movie is smaller than the TV screen, these options control the position
-of the movie relative to the upper left corner of the screen.
-The movie is centered by default.
+.B \-zrxdoff <x megjenelítési offset>, \-zrydoff <y megjelenítése offset> (csak \-vo zr)
+Ha a film kisebb mint a TV képernyõ, ezek az opciók határozzák meg a film
+pozícióját a képernyõ bal felsõ részéhez képest.
+Alapállapotban középre van helyezve.
 
 
-.SH "DECODING/FILTERING OPTIONS"
+.SH "DEKÓDOLÓ/SZÛRÕ OPCIÓK"
 .TP
 .B \-ac <[-]codec1,[-]codec2,...[,]>
-Specify a priority list of audio codecs to be used, according to their codec
-name in codecs.conf.
-Use a '-' before the codec name to omit it.
+Használandó audio codec-ek listája. A név elé rakott '-' jel kikapcsolja
+az adott codec használatát.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-See \-ac help for a full list of available codecs.
+Lásd az \-ac help opciót az összes codec listájához.
 .br
-If the list has a trailing ',' it will fallback to codecs not listed.
+Ha a lista végén van egy vesszõ, akkor sikertelenség esetén megpróbálja a
+fel nem sorolt codec-eket is.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "\-ac mp3acm"
-force l3codeca.acm MP3 codec
+l3codeca.acm MP3 codec kényszerítése
 .IPs "\-ac mad,"
-try libmad first, then fallback to others
+elsõsorban libmad, aztán mások használata
 .IPs "\-ac hwac3,a52,"
-try hardware AC3 passthrough, then software AC3 codec, then others
+elõször hardveres AC3 átengedés, majd szoftveres AC3 codec, végül a többi
 .IPs "\-ac -ffmp3,"
-try other codecs except FFmpeg's MP3 decoder
+az összes codec, kivéve az FFmpeg MP3 dekóderét
 .RE
 .PD 1
 .
 .TP
-.B \-afm <driver1,driver2,...>
-Specify a priority list of audio drivers to be used, according to their driver
-name in codecs.conf.
-It falls back to default if none is ok.
+.B \-afm <meghajtó1,meghajtó2,...>
+Használandó audio meghajtók listája. Az alapértelmezett sorrendet fogja
+használni, ha az itt megadottal nem sikerül.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-See \-afm help for a full list of available drivers.
+Lásd az \-afm help opciót a rendelkezésre álló meghajtók listájához.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "\-afm ffmpeg"
-try FFmpeg's libavcodec (mp1/\:2/\:3) codecs first
+elõször az FFmpeg libavcodec (mp1/\:2/\:3) codec-einek haszálata
 .IPs "\-afm acm,dshow"
-try Win32 codecs first
+elõször Win32 codec-ek használata
 .RE
 .PD 1
 .
 .TP
-.B \-aspect <ratio>
-Override aspect ratio of movies.
-It's autodetected on MPEG files, but can't be autodetected on most AVI files.
+.B \-aspect <arány>
+Filmek képarányának felülbírálása.
+MPEG file-okon automatikusan detektált, a legtöbb AVI file-on ez nem
+lehetséges.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
-\-aspect 4:3  or \-aspect 1.3333
+\-aspect 4:3  vagy \-aspect 1.3333
 .br
-\-aspect 16:9 or \-aspect 1.7777
+\-aspect 16:9 vagy \-aspect 1.7777
 .RE
 .PD 1
 .
 .TP
 .B \-flip \ 
-Flip image upside\-down.
+Kép fejjel lefele fordítása.
 .TP
-.B \-lavdopts <option1:option2:...> (DEBUG CODE)
-If decoding with a codec from libavcodec, you can specify its parameters here.
+.B \-lavdopts <opció1:opció2:...> (DEBUG KÓD)
+Ha egy libavcodec codec-kel dekódolsz, itt megadhatod a paramétereit.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 \-lavdopts bug=1
@@ -1705,43 +1691,43 @@ If decoding with a codec from libavcodec, you can specify its parameters here.
 .PD 1
 
 .RS
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-Just add the values of the things you want to enable.
+Csak add meg a bekapcsolandó dolgok értékeit.
 .br
-Available options are:
+A rendelkezésre álló opciók:
 .RE
 .
 .RSs
 .IPs ec\ \ \ 
-error concealment:
+hiba elrejtés
 .RSss
-1: use strong deblock filter for damaged MBs
+1: erõs deblock szûrõ haszálata hibás MB-khez
 .br
-2: iterative MV search (slow)
+2: iteratív MV keresés (lassú)
 .br
-3: all (default)
+3: mind (alap)
 .REss
-.IPs er=<value>
-error resilience:
+.IPs er=<érték>
+hibaérzékenység
 .RSss
 .br
-0: disabled
+0: kikapcsolás
 .br
-1: careful (should work with broken encoders)
+1: óvatos (idióta enkóderekkel is mûködik)
 .br
-2: normal (default) (works with compliant encoders)
+2: normál (alap) (normális enkóderekkel mûködik)
 .br
-3: agressive (more checks but might cause problems even for valid bitstreams)
+3: agresszív (több ellenõrzés, de hibát okozhat hibátlan stream-eknél is)
 .br
-4: very agressive
+4: nagyon agresszív
 .REss
-.IPs bug=<value>
-manually work around encoder bugs:
+.IPs bug=<érték>
+enkóderek hibáinak manuális detektáltatása:
 .RSss
-0: nothing
+0: nincs
 .br
-1: autodetect bugs (default)
+1: hibák autodetektálása (alap)
 .br
 2 (msmpeg4v3): some old lavc generated msmpeg4v3 files (no autodetect)
 .br
