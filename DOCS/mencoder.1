@@ -19,7 +19,7 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-ac\ <audio\ codec\ name> ]
 .RB [ \-vfm\ <video\ codec\ family> ]
 .RB [ \-afm\ <audio\ codec\ family> ]
-.RB [ \-include\ <heh?> ]
+.RB [ \-include\ <configfile> ]
 .RB [ \-v ]
 .RB [ \-mp3file\ <filename> ]
 .RB [ \-ac3file\ <filename> ]
@@ -27,13 +27,7 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-oac\ <audio\ codec\ name> ]
 .RB [ \-divx4opts\ <codec\ options> ]
 .RB [ \-lameopts\ <codec\ options> ]
-.RB [ \-videobr\ <video\ bitrate> ]
-.RB [ \-audiobr\ <audio\ bitrate> ]
 .RB [ \-pass\ <1/2> ]
-.RB [ \-passtmpfile\ <filename> ]
-.RB [ \-vbrmode\ <0-5> ]
-.RB [ \-vquality\ <0-9> ]
-.RB [ \-aquality\ <0-9> ]
 .RB [ \-ofps\ <fps> ]
 .RB [ \-o\ <filename> ]
 .I - or file or device
@@ -87,14 +81,14 @@ Use specified codec (according to codecs.conf) for decoding input audio
 stream.
 .TP
 .B \-vfm <video family>
-(useful?)
+(useful?) (yes!)
 .TP
 .TP
 .B \-afm <audio family>
-(useful?)
+(useful?) (yes!)
 .TP
 .B \-include
-Include what?
+Include what? Configfile.
 .TP
 .B \-v
 Increase verbosity.
@@ -102,20 +96,20 @@ Increase verbosity.
 .B \-divx4opts
 If encoding to DivX4, you can specify its parameters here, like:
 
-  -divx4opts br=1800:key=250
+  -divx4opts br=1800:deinterlace:key=250
 
 Available options:
 
-  help               get help
-  br=XXX             specify bitrate in kbr <1-24000000>
-  key=XXX            maximum keyframe interval
-  deinterlace        toggle deinterlacing
-  q=XXXX             quality (1 is best?, 5 is fast?)
+  help               get help (TODO!)
+  br=XXX             specify bitrate in kbit <4-16000> or bit <16001-24000000>
+  key=XXX            maximum keyframe interval (in frames)
+  deinterlace        enable deinterlacing
+  q=XXXX             quality ( 1 - fastest, 5 - best )
   min_quant=XXX      minimum quantizer (0-32)
   max_quant=XXX      maximum quantizer (0-32)
-  rc_period=XXX      hmm
-  rc_reaction_period hmm
-  rc_reaction_ratio  hmm
+  rc_period=XXX      rate control period
+  rc_reaction_period=XXX rate control reaction period
+  rc_reaction_ratio=XXX  rate control reaction ratio
 
 .TP
 .B \-lameopts
@@ -125,13 +119,13 @@ If encoding to MP3 with libmp3lame, you can specify its parameters here, like:
 
 Available options:
 
-  help               get help
-  br=XXX             specify bitrate in kbr <1-1024?>
-  vbr=XXX            variable bitrate <?>
+  help               get help (TODO!)
+  br=XXX             specify bitrate in kbit <0-1024>
+  vbr=XXX            variable bitrate method 0=cbr 1=mt 2=rh(default) 3=abr 4=mtrh
   cbr                constant bitrate
-  mode=XXX           ? <?>
-  padding=XXX        ? <?>
-  ratio=XXX          ? <1-100>
+  mode=XXX           0=stereo 1=joint-stereo 2=dualchannel 3=mono (dafeult: auto)
+  padding=XXX        0=no 1=all 2=adjust
+  ratio=XXX          compression ratio <1-100>
 
 .TP
 .B \-OTHERS
