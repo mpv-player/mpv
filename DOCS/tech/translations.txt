@@ -56,4 +56,5 @@ Translations are for documentation what porting is for code. Many more eyes
 see it and get to find mistakes. If you stumble over mistakes, inaccuracies,
 clumsy wording, spelling/grammar errors or if you notice that something is
 incomplete, please let us know, we'll fix it. Patches are more than welcome,
-of course.
+of course. Do not, however, change the translation first, please get your
+update into the English version first.
