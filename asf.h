@@ -3,6 +3,8 @@
 
 #include <inttypes.h>
 
+#include "url.h"
+
 #ifndef MIN
 #define MIN(a,b) ((a<b)?a:b)
 #endif
@@ -110,5 +112,9 @@ typedef enum {
 	ASF_Prerecorded_e,
 	ASF_Redirector_e
 } ASF_StreamType_e;
+
+
+int asf_http_streaming_type(char *content_type, char *features);
+int asf_http_streaming_start( URL_t **url_ref );
 
 #endif
