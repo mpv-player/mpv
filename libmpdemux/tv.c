@@ -138,7 +138,7 @@ static int norm_from_string(char* norm)
     else if (!strcasecmp(norm, "ntscjp"))
 	return TV_NORM_NTSCJP;
     else {
-	mp_msg(MSGT_TV, MSGL_V, "tv.c : norm_from_string(%s): Bogus norm parameter, setting PAL.\n", norm);
+	mp_msg(MSGT_TV, MSGL_V, "tv.c: norm_from_string(%s): Bogus norm parameter, setting PAL.\n", norm);
 	return TV_NORM_PAL;
     }
 }
@@ -150,7 +150,7 @@ static int open_tv(tvi_handle_t *tvh)
 
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_VIDEO, 0) != TVI_CONTROL_TRUE)
     {
-	mp_msg(MSGT_TV, MSGL_ERR, "Error: no video input present!\n");
+	mp_msg(MSGT_TV, MSGL_ERR, "Error: No video input present!\n");
 	return 0;
     }
 
@@ -166,12 +166,12 @@ static int open_tv(tvi_handle_t *tvh)
 	case IMGFMT_RGB15:
 	    break;
 	default:
-	    mp_msg(MSGT_TV, MSGL_ERR, "=================================================================\n");
-	    mp_msg(MSGT_TV, MSGL_ERR, " WARNING: UNTESTED OR UNKNOWN OUTPUT IMAGE FORMAT REQUIRED (0x%x)\n", tv_param_outfmt);
-	    mp_msg(MSGT_TV, MSGL_ERR, " This may cause buggy playback or program crash! Bugreports will\n");
+	    mp_msg(MSGT_TV, MSGL_ERR, "==================================================================\n");
+	    mp_msg(MSGT_TV, MSGL_ERR, " WARNING: UNTESTED OR UNKNOWN OUTPUT IMAGE FORMAT REQUESTED (0x%x)\n", tv_param_outfmt);
+	    mp_msg(MSGT_TV, MSGL_ERR, " This may cause buggy playback or program crash! Bug reports will\n");
 	    mp_msg(MSGT_TV, MSGL_ERR, " be ignored! You should try again with YV12 (which is the default\n");
 	    mp_msg(MSGT_TV, MSGL_ERR, " colorspace) and read the documentation!\n");
-	    mp_msg(MSGT_TV, MSGL_ERR, "=================================================================\n");
+	    mp_msg(MSGT_TV, MSGL_ERR, "==================================================================\n");
     }
     funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &tv_param_outfmt);
 
@@ -186,7 +186,7 @@ static int open_tv(tvi_handle_t *tvh)
 
     mp_msg(MSGT_TV, MSGL_V, "Selected norm: %s\n", tv_param_norm);
     if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Error: cannot set norm!\n");
+	mp_msg(MSGT_TV, MSGL_ERR, "Error: Cannot set norm!\n");
 	return 0;
     }
 #ifdef HAVE_TV_V4L2
@@ -194,7 +194,7 @@ static int open_tv(tvi_handle_t *tvh)
 	if (tv_param_normid >= 0) {
 	    mp_msg(MSGT_TV, MSGL_V, "Selected norm id: %d\n", tv_param_normid);
 	    if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tv_param_normid) != TVI_CONTROL_TRUE) {
-		mp_msg(MSGT_TV, MSGL_ERR, "Error: cannot set norm!\n");
+		mp_msg(MSGT_TV, MSGL_ERR, "Error: Cannot set norm!\n");
 		return 0;
 	    }
 	}
@@ -229,7 +229,7 @@ static int open_tv(tvi_handle_t *tvh)
 	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_WIDTH, &tv_param_width);
 	else
 	{
-	    mp_msg(MSGT_TV, MSGL_ERR, "Unable set requested width: %d\n", tv_param_width);
+	    mp_msg(MSGT_TV, MSGL_ERR, "Unable to set requested width: %d\n", tv_param_width);
 	    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &tv_param_width);
 	}    
     }
@@ -241,7 +241,7 @@ static int open_tv(tvi_handle_t *tvh)
 	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_HEIGHT, &tv_param_height);
 	else
 	{
-	    mp_msg(MSGT_TV, MSGL_ERR, "Unable set requested height: %d\n", tv_param_height);
+	    mp_msg(MSGT_TV, MSGL_ERR, "Unable to set requested height: %d\n", tv_param_height);
 	    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &tv_param_height);
 	}    
     }
@@ -272,14 +272,14 @@ static int open_tv(tvi_handle_t *tvh)
 
     if (tv_param_freq && tv_param_channel)
     {
-	mp_msg(MSGT_TV, MSGL_WARN, "You can't set frequency and channel simultanly!\n");
+	mp_msg(MSGT_TV, MSGL_WARN, "You can't set frequency and channel simultaneously!\n");
 	goto done;
     }
 
-    /* Handle channels names */
+    /* Handle channel names */
     if (tv_param_channels) {
 	char** channels = tv_param_channels;
-	mp_msg(MSGT_TV, MSGL_INFO, "TV Channels names detected.\n");
+	mp_msg(MSGT_TV, MSGL_INFO, "TV channel names detected.\n");
 	tv_channel_list = malloc(sizeof(tv_channels_t));
 	tv_channel_list->index=1;
 	tv_channel_list->next=NULL;
@@ -828,7 +828,7 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
 
     mp_msg(MSGT_TV, MSGL_V, "Selected norm: %s\n", tv_param_norm);
     if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Error: cannot set norm!\n");
+	mp_msg(MSGT_TV, MSGL_ERR, "Error: Cannot set norm!\n");
 	return 0;
     }
     return(1);
