@@ -13,10 +13,10 @@ To compile MPlayer with X11 support, you need to have the XFree86 development
 packages installed, for the GUI you also need the GTK development packages.
 
 Before you start...
-Unless you know what are you doing, consult DOCS/video.html to see which
-driver you should get for your video card to have the best quality and video
-performance. Most cards require special drivers not included with standard X11,
-to drive the 2-D video acceleration features of your card!
+Unless you know what are you doing, consult DOCS/video.html to see which driver
+to use with your video card to get the best video quality and performance.
+Most cards require special drivers not included with standard X11, to drive
+the 2-D video acceleration features (YUV, scaling etc) of your card!
 
 A quick and incomplete list of recommendations:
 - ATI cards: get the GATOS drivers for X11/Xv or use vidix
@@ -57,8 +57,8 @@ STEP2: Installing Win32 Codecs
 While MPlayer and libavcodec has built-in support for the most common audio
 and video formats, some others are playable only with the Win32 DLLs
 or the XAnim binary plugins. Few examples: WMV video, Divx/WMA audio, Indeo.
-This step is not mandatory, but recommended for getting MPlayer to play 
-play more different file types!
+This step is not mandatory, but recommended for getting MPlayer to play more
+different file types!
 
 Grab the win32 codecs package from the download page
 
