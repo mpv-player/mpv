@@ -33,7 +33,6 @@ mp_input_lirc_process(int mp_fd);
 
 int 
 mp_input_lirc_init(void) {
-  int lirc_flags;
   int lirc_sock;
   int p[2];
 
@@ -42,19 +41,6 @@ mp_input_lirc_init(void) {
     mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCopenfailed MSGTR_LIRCdisabled);
     return -1;
   }
-
-#if 0
-  fcntl(lirc_sock,F_SETOWN,getpid());
-  lirc_flags=fcntl(lirc_sock,F_GETFL,0);
-  if(lirc_flags!=-1) {
-    fcntl(lirc_sock,F_SETFL,lirc_flags|O_NONBLOCK);
-  } else {
-    lirc_deinit();
-    mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCsocketerr MSGTR_LIRCdisabled,strerror(errno));
-    return -1;
-  }
-#endif
-
 
   if(lirc_readconfig( lirc_configfile,&lirc_config,NULL )!=0 ){
     mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCcfgerr MSGTR_LIRCdisabled,
@@ -137,6 +123,8 @@ mp_input_lirc_process(int mp_fd) {
 
 void
 mp_input_lirc_uninit(void) {
+  if(child_pid <= 0)
+    return;
   if( kill(child_pid,SIGQUIT) != 0) {
     mp_msg(MSGT_LIRC,MSGL_V,"LIRC can't kill subprocess %d : %s\n",
 	   child_pid,strerror(errno));
