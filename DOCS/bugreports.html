@@ -1,7 +1,8 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
-<STYLE>
+<STYLE TYPE="text/css">
 	.text
 		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
 		font-size	:	14px;}
@@ -45,7 +46,7 @@ and do not forget to include this valuable information:</P>
 
 <P><B>What to report?</B></P>
 
-<P><B><I>System Information</I></B></P>
+<P><B>System Information</B></P>
 
 <UL>
 <LI>Your Linux distribution or operating system e.g.:
@@ -80,7 +81,7 @@ and do not forget to include this valuable information:</P>
 </LI>
 </UL>
 
-<P><B><I>Hardware &amp; drivers</I></B></P>
+<P><B>Hardware &amp; drivers</B></P>
 
 <UL>
 <LI>CPU info (this works on Linux only):<BR>
@@ -111,7 +112,7 @@ and do not forget to include this valuable information:</P>
 
 <P><B>For compilation problems/errors</B></P>
 
-<P><B><I>Please include these files:</I></B></P>
+<P><B>Please include these files:</B></P>
 <UL>
   <LI>configure.log</LI>
   <LI>config.h</LI>
@@ -121,8 +122,12 @@ and do not forget to include this valuable information:</P>
 
 <P><B>For playback problems</B></P>
 
-<P><B><I>Please include the output of mplayer at verbosity level 1</I></B></P>
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [options] filename &amp;&gt; mplayer.log</CODE></P>
+<P>Please include the output of mplayer at verbosity level 1, but remember to
+<B>not cut the output</B> when you paste it into your mail. The developers need
+all of the messages to properly diagnose a problem. You can direct the output
+into a file like this:</P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [options] [filename] &amp;&gt; mplayer.log</CODE></P>
 
 <P>If your problem is specific to one or more files, then please upload the
 offender(s) to:</P>
@@ -146,11 +151,11 @@ and send only the path/filename of the file on the FTP-server.<BR>
 If the file is accessible on the net, then sending the
 <STRONG>exact</STRONG> URL is sufficient.</P>
 
-<P><B><I>For crashes</I></B></P>
+<P><B>For crashes</B></P>
 
-<P><I>If you have a core dump of the crash continue reading the next paragraph, otherwise skip it.</I></P>
+<P>If you have a core dump of the crash continue reading the next paragraph, otherwise skip it.</P>
 
-<P><B><I>How to extract meaningful information from a core dump</I></B></P>
+<P><B>How to extract meaningful information from a core dump</B></P>
 
 <P>Please create following command file:</P>
 
@@ -168,7 +173,7 @@ printf "esi=%08lX\n",$esi<BR>
 <P>Then simply execute the following on your command line:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file &gt; mplayer.bug</CODE></P>
 
-<P><B><I>How to conserve information about a reproducible crash</I></B></P>
+<P><B>How to conserve information about a reproducible crash</B></P>
 <P>Re-compile mplayer with debugging code enabled:</P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
@@ -186,7 +191,7 @@ and send the complete output to us.
 <P><B>General note</B></P>
 
 <P>If something is quite big (logs for instance) then it is better to upload
-it to the FTP-server in a compressed format (gzip and bzip preferred) and
+it to the FTP server in a compressed format (gzip and bzip preferred) and
 include only the path and filename in your bug report.</P>
 
 <P><B>I know what I am doing...</B></P>
