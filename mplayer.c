@@ -233,6 +233,8 @@ static int vcd_track=0;
 static char *stream_dump_name=NULL;
 static int stream_dump_type=0;
 
+extern int dvd_title;
+
 int index_mode=-1;  // -1=untouched  0=don't use index  1=use (geneate) index
 int force_ni=0;
 
@@ -495,8 +497,7 @@ int use_stdin=0; //int f; // filedes
 #endif
 
 if(!filename){
-  if(vcd_track) filename=DEFAULT_CDROM_DEVICE;
-  else {
+  if(!vcd_track && !dvd_title){
     printf("%s",help_text); exit(0);
   }
 }
@@ -591,7 +592,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
        subtitles=sub_read_file(sub_name);
        if(!subtitles) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
   } else {
-      if(sub_auto)  // auto load sub file ...
+      if(sub_auto && filename)  // auto load sub file ...
          subtitles=sub_read_file( sub_filename( get_path("sub/"), filename ) );
       if(!subtitles) subtitles=sub_read_file(get_path("default.sub")); // try default
   }
@@ -599,7 +600,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 
   stream=open_stream(filename,vcd_track,&file_format);
   if(!stream) return 1; // error...
-  use_stdin=(!strcmp(filename,"-"));
+  use_stdin=filename && (!strcmp(filename,"-"));
   stream->start_pos+=seek_to_byte;
 
 #ifdef HAVE_LIBCSS

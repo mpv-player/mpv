@@ -54,6 +54,12 @@ extern char *mDisplayName;
 extern int vo_aa_parseoption(struct config * conf, char *opt, char * param);
 #endif
 
+#ifdef USE_DVDREAD
+extern int dvd_title;
+extern int dvd_chapter;
+extern int dvd_angle;
+#endif
+
 /*
  * CONF_TYPE_FUNC_FULL :
  * allows own implemtations for passing the params
@@ -85,10 +91,10 @@ struct config conf[]={
 #ifdef HAVE_LIBCSS
         {"dvdauth", &dvd_auth_device, CONF_TYPE_STRING, 0, 0, 0},
         {"dvdkey", &dvdimportkey, CONF_TYPE_STRING, 0, 0, 0},
-	{"dvd", "Option -dvd will be \"full disk\" mode, old meaning has been renamed to -dvdauth.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+//	{"dvd", "Option -dvd will be \"full disk\" mode, old meaning has been renamed to -dvdauth.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 #else
-        {"dvd", "DVD support was not compiled in. See file DOCS/DVD.\n",
-            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
+//        {"dvd", "DVD support was not compiled in. See file DOCS/DVD.\n",
+//            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
         {"dvdkey", "DVD support was not compiled in. See file DOCS/DVD.\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
         {"dvdauth", "DVD support was not compiled in. See file DOCS/DVD.\n",
@@ -174,6 +180,13 @@ struct config conf[]={
 	{"dshow", &allow_dshow, CONF_TYPE_FLAG, 0, 0, 1}, // Is this still needed? atmos ::
 	{"nodshow", &allow_dshow, CONF_TYPE_FLAG, 0, 1, 0},
 	{"vcd", &vcd_track, CONF_TYPE_INT, CONF_RANGE, 1, 99},
+#ifdef USE_DVDREAD
+	{"dvd", &dvd_title, CONF_TYPE_INT, CONF_RANGE, 1, 99},
+	{"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99},
+	{"chapter", &dvd_chapter, CONF_TYPE_INT, CONF_RANGE, 1, 99},
+#else
+	{"dvd", "MPlayer was compiled WITHOUT libdvdread support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+#endif
 	{"divxq", "Option -divxq has been renamed to -pp (postprocessing), use -pp !\n",
             CONF_TYPE_PRINT, 0, 0, 0},
 	{"pp", &divx_quality, CONF_TYPE_INT, CONF_RANGE, 0, 63},

@@ -457,6 +457,7 @@ _fbdev=no
 [ "$system_name" = Linux ] && _fbdev=yes
 _lirc=no
 _css=no
+_dvdread=no
 _win32dll=yes _dshow=yes
 [ "$host_arch" != i386 ] && _dshow=no _win32dll=no
 _fastmemcpy=yes
@@ -871,6 +872,17 @@ int main( void ) { return DEC_OPT_FRAME_311; }
 EOF
 $_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -ldivxdecore > /dev/null 2>&1 || \
  { _divx4linux=no; echo "DivX4Linux includes (decore.h) not found!";}
+
+cat > $TMPC << EOF
+#include <dvdread/dvd_reader.h>
+#include <dvdread/ifo_types.h>
+#include <dvdread/ifo_read.h>
+#include <dvdread/dvd_udf.h>
+#include <dvdread/nav_read.h>
+int main( void ) { return 0; }
+EOF
+$_cc $_extraincdir $_extralibdir -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE $TMPC -o $TMPO -ldvdread > /dev/null 2>&1 && \
+ { _dvdread=yes;_largefiles=yes; }
 
 rm -f $TMPC $TMPO
 
@@ -1412,6 +1424,7 @@ echo "Checking for ALSA Audio ... $_alsaver"
 echo "Checking for ESD Audio ... $_esd"
 echo "Checking for Sun Audio ... $_sun_audio"
 echo "Checking for DeCSS support ... $_css"
+echo "Checking for DVDread support ... $_dvdread"
 echo "Checking for PNG support ... $_png"
 echo "Checking for Win32 DLL support ... $_win32dll"
 echo "Checking for DirectShow ... $_dshow"
@@ -1442,6 +1455,16 @@ if [ $_gl = yes ]; then
    fi
 fi
 
+_css='#undef HAVE_LIBCSS'
+_csslib=''
+_cssinc=''
+
+if [ $_dvdread = yes ]; then
+   _csslib='-ldvdread'
+   _dvdreaddef='#define USE_DVDREAD'
+else
+   _dvdreaddef='#undef USE_DVDREAD'
+
 if [ $_css = yes ]; then
    if [ ! -z "$_csslibdir" ]; then
      _csslib="-L${_csslibdir} -lcss"
@@ -1454,10 +1477,8 @@ if [ $_css = yes ]; then
    else
      _cssinc=""
    fi
-else
-   _css='#undef HAVE_LIBCSS'
-   _csslib=''
-   _cssinc=''
+fi
+
 fi
 
 
@@ -1641,6 +1662,10 @@ fi
 # 64 bit file offsets?
 if [ "$_largefiles" = "yes" -o "$system_name" = "FreeBSD" ]; then
 CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+  if [ "$_dvdread" = "yes" ]; then
+  # dvdread support requires this (for off64_t)
+  CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
+  fi
 fi
 
 # echo 'CFLAGS=$(OPTFLAGS) -Wall -DMPG12PLAY' >> config.mak
@@ -1899,6 +1924,8 @@ cat > $CCONF << EOF
 
 $_debugdef
 
+$_dvdreaddef
+
 /* Common data directory (for fonts, etc) */
 #define DATADIR "$_datadir"
 
@@ -2018,6 +2045,8 @@ $_confwin32
 #else
 #define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
 #endif
+
+#define DEFAULT_DVD_DEVICE "/dev/dvd"
 
 /*----------------------------------------------------------------------------
 **
