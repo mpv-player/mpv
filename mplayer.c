@@ -1566,7 +1566,6 @@ if(!sh_video) {
 /*========================== PLAY VIDEO ============================*/
 
   float frame_time=next_frame_time;
-  float delay=0; //audio_out->get_delay()*0.5;
 
   vo_pts=sh_video->timer*90000.0;
   vo_fps=sh_video->fps;
