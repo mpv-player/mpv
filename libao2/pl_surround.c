@@ -51,7 +51,7 @@ typedef struct pl_surround_s
   int passthrough;      // Just be a "NO-OP"
   int msecs;            // Rear channel delay in milliseconds
   int16_t* databuf;     // Output audio buffer
-  int16_t* delaybuf;    // circular buffer to be used for delaying audio signal
+  int16_t* delaybuf;    // circular buffer to be used for delaying Ls and Rs audio
   int delaybuf_len;     // local buffer length in samples
   int delaybuf_ptr;     // offset in buffer where we are reading/writing
   int rate;             // input data rate
@@ -109,11 +109,11 @@ static int init(){
   ao_plugin_data.sz_mult    /= 2;
 
   // Figure out buffer space needed for the 15msec delay
-  pl_surround.delaybuf_len = pl_surround.rate * pl_surround.msecs / 1000;
+  pl_surround.delaybuf_len = 2 * (pl_surround.rate * pl_surround.msecs / 1000);
   // Allocate delay buffer
   pl_surround.delaybuf=(void*)calloc(pl_surround.delaybuf_len,sizeof(int16_t));
-  fprintf(stderr, "pl_surround: %dmsec surround delay, rate %d - buffer is %d samples\n",
-	  pl_surround.msecs,pl_surround.rate,  pl_surround.delaybuf_len);
+  fprintf(stderr, "pl_surround: %dmsec surround delay, rate %d - buffer is %d bytes\n",
+	  pl_surround.msecs,pl_surround.rate,  pl_surround.delaybuf_len*sizeof(int16_t));
   pl_surround.delaybuf_ptr = 0;
 
   return 1;
@@ -149,7 +149,7 @@ static int play(){
 
   if (pl_surround.passthrough) return 1;
 
-  //  fprintf(stderr, "pl_surround: play %d bytes, %d samples\n", ao_plugin_data.len, samples);
+  // fprintf(stderr, "pl_surround: play %d bytes, %d samples\n", ao_plugin_data.len, samples);
 
   samples  = ao_plugin_data.len / sizeof(int16_t) / pl_surround.input_channels;
 
@@ -159,23 +159,24 @@ static int play(){
     // About volume balancing...
     //   Surround encoding does the following:
     //       Lt=L+.707*C+.707*S, Rt=R+.707*C-.707*S
-    //   So S should to be extracted as:
-    //       .707*(Lt-Rt)
+    //   So S should be extracted as:
+    //       (Lt-Rt)
     //   But we are splitting the S to two output channels, so we
-    //   must take another 3dB off as we split it:
-    //       Ls=Rs=.707*.707*(Lt-Rt)
-    //            = .5*(Lt-Rt)
-    //   This result is handy as it is also sure not to clip, even
-    //   though L could be full scale +ve, R full scale -ve
+    //   must take 3dB off as we split it:
+    //       Ls=Rs=.707*(Lt-Rt)
+    //   Trouble is, Lt could be +32767, Rt -32768, so possibility that S will
+    //   clip.  So to compensate, we cut L/R by 3dB (*.707), and S by 6dB (/2).
 
-    // front left and right
-    out[0] = in[0];
-    out[1] = in[1];
-    // surround - from 15msec ago
+    // output front left and right
+    out[0] = in[0]*.707;
+    out[1] = in[1]*.707;
+    // output Ls and Rs - from 15msec ago
     out[2] = pl_surround.delaybuf[pl_surround.delaybuf_ptr];
-    out[3] = -out[2];
+    out[3] = pl_surround.delaybuf[pl_surround.delaybuf_ptr+1];
     // calculate and save surround for 15msecs time
-    pl_surround.delaybuf[pl_surround.delaybuf_ptr++] = (in[0]/2 - in[1]/2);
+    surround = (in[0]/2 - in[1]/2);
+    pl_surround.delaybuf[pl_surround.delaybuf_ptr++] = surround;
+    pl_surround.delaybuf[pl_surround.delaybuf_ptr++] = - surround;
     pl_surround.delaybuf_ptr %= pl_surround.delaybuf_len;
     // next samples...
     in = &in[pl_surround.input_channels];  out = &out[4];
