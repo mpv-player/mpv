@@ -4833,6 +4833,66 @@ Gibt den ausgewählten Modus für jeden Frame sowie die gemittelte quadrierte
 Differenz der Felder für die Auswahlen von t, b und p aus.
 .RE
 .
+.TP
+.B telecine[=Start]
+Wende 3:2 'telecine'-Prozess an, um die Framerate um 20% zu erhöhen.
+Dies funktioniert mit MPlayer vermutlich nicht korrekt, kann jedoch in
+Verbindung mit 'mencoder \-fps 29.97 \-ofps 29.97 \-vf telecine' benutzt
+werden.
+Beide fps-Optionen müssen angegeben werden!
+(A/\:V-Synchronisation wird verlorengehen, wenn sie falsch sind.)
+Der optionale Parameter Start bestimmt, wo im telecine-Muster zu beginnen ist
+(0\-3).
+.
+.TP
+.B tinterlace[=Modus]
+Temporäres Interlacing der Felder \- verschmelze Paare von Frames in einen
+Frame, halbiere dabei die Framerate.
+Geradzahlige Frames werden in das obere Feld verschoben, ungerade in das
+untere Feld.
+Dies kann benutzt werden, um den Effekt des Filters tfields (im Modus 0)
+komplett umzukehren.
+Verfügbare Modi sind:
+.PD 0
+.RSs
+.IPs 0
+Verschiebe ungerade Frames in das obere Feld, geradzahlige in das untere.
+Dies generiert einen Frame voller Höhe bei halbierter Framerate.
+.IPs 1
+Gib nur ungerade Frames aus, geradzahlige werden weggelassen; die Höhe bleibt
+unverändert.
+.IPs 2
+Gib nur geradzahlige Frames aus, ungerade werden weggelassen; die Höhe bleibt
+unverändert.
+.IPs 3
+Expandiere jeden Frame zu voller Höhe, aber fülle alternierende Zeilen
+schwarz; die Framerate bleibt unverändert.
+.RE
+.PD 1
+.
+.TP
+.B tfields[=Modus]
+Temporäre Auftrennung der Felder \- trenne die Felder in ganze Frames auf;
+dies verdoppelt die Framerate.
+Genau wie beim Filter telecine wird tfields nur bei MEncoder korrekt arbeiten,
+und nur dann, wenn sowohl \-fps als auch \-ofps mit der gewünschten (doppelten)
+Framerate angegeben werden!
+Verfügbare Modi sind:
+.PD 0
+.RSs
+.IPs 0
+Lasse die Felder unangetastet.
+(Dies wird zu Sprüngen/\:Flackern führen.)
+.IPs 1
+Interpoliere fehlende Zeilen.
+(Der benutzte Algorithmus könnte nicht allzu gut sein.)
+.IPs 2
+Wandle Felder mit linearer Interpolation zu 1/4 Pixel um (kein Sprung).
+.IPs 4
+Wandle Felder mit dem 4tap-Filter zu 1/4 Pixel um (höhere Qualität).
+.RE
+.PD 1
+.
 .\" manpage is synced from top down to this option.
 .TP
 .B "boxblur=Radius:Stärke[:Radius:Stärke]"
