@@ -48,10 +48,10 @@
 
 <P>Nagyon ajánlott az MTRR helyes beállítása, mert minden esetben
   sebességnövekedést eredményez. Elõször a báziscímet kell megkeresni.
-  Erre van 3 módszer :</P>
+  Erre van 3 módszer :</P>
 
 <P><UL>
-<LI>az X11 induló üzeneteibõl, például :
+<LI>az X11 induló üzeneteibõl, például :
 <P><CODE>(--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000<BR>
 (--) SVGA: Linear framebuffer at 0xD8000000</CODE></P>
 <LI>a /proc/pci-bõl (használd az lspci -v parancsot):
@@ -156,7 +156,7 @@
 <P><B><A NAME=2.2.1.2.2>2.2.1.2.2.  S3 kártyák</A></B></P>
 
 <P>S3 Savage3D-knek mûködniük kell, de Savage4-hez 4.0.3-as de inkább újabb
-  XFree86 kell. S3 Virge-re vonatkozólag.. add el.</P>
+  XFree86 kell. S3 Virge-re vonatkozólag.. add el.</P>
 
 <P><B><A NAME=2.2.1.2.3>2.2.1.2.3.  nVidia kártyák</A></B></P>
 
@@ -186,7 +186,7 @@
   DGA, és mit tud az MPlayerben (és mit nem).</P>
 
 
-<P><B><A NAME=2.2.1.3.2>2.2.1.3.2.  Mi az a DGA ?</A></B></P>
+<P><B><A NAME=2.2.1.3.2>2.2.1.3.2.  Mi az a DGA ?</A></B></P>
 
 <P>A DGA szó a Direct Graphics Access rövidítése, és egy olyan módszert takar,
   amivel a program az X szerver kikerülésével közvetlenül írhat a framebuffer
@@ -224,7 +224,7 @@
   -bpp, -zoom opciókkal, hogy találj egy olyan videomódot amibe belefér a
   film. Jelenleg nincs konverter.. :(</P>
 
-<P>Legyél ROOT. A DGA-n root jogok kellenek hogy közvetlenül írjon a video
+<P>Legyél ROOT. A DGA-n root jogok kellenek hogy közvetlenül írjon a video
   memóriába. Ha egyszerû felhasználóként akarod futtatni, az <B>MPlayer</B>-t
   SUID root-ként kell installálnod :</P>
 
@@ -266,7 +266,7 @@
   igazak; a következõ néhány részben elmagyarazom, hogy is mûködik az <B>MPlayer</B>
   DGA drivere.</P>
 
-<P><B><A NAME=2.2.1.3.6>2.2.1.3.6.  A DGA meghajtó képességei</A></B></P>
+<P><B><A NAME=2.2.1.3.6>2.2.1.3.6.  A DGA meghajtó képességei</A></B></P>
 
   A DGA driver meghívása a -vo dga parancssori opció megadásával történik.
   Az alapértelmezett magatartás szerint a video méretéhez legközelebb esõ
@@ -436,7 +436,7 @@ esd, arts)</TD><TR>
 a framebuffer egység megadása (/dev/fb0)</TD><TR> 
 <TD></TD><TD>-fbmode</TD><TD></TD><TD>a használni kívánt videomód neve (/etc/fb.modes szerint)</TD><TR>
 <TD></TD><TD>-fbmodeconfig</TD><TD></TD><TD>módkonfigurációs file (alapban /etc/fb.modes)</TD><TR>
-<TD></TD><TD>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3>FONTOS ! lásd example.conf</TD><TR>
+<TD></TD><TD>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3>FONTOS ! lásd example.conf</TD><TR>
 <TD></TD><TD>-monitor_vfreq</TD><TD></TD><TR>           
 <TD></TD><TD>-monitor_dotclock</TD><TD></TD><TR>        
 </TABLE></P>
@@ -454,12 +454,12 @@ a framebuffer egység megadása (/dev/fb0)</TD><TR>
   Az -fs opciónak nincs jelentõsége. Továbbá nem használhatsz 8 vagy kisebb
   bpp-s módokat.</UL></P>
 
-<P>Megj: az FBdev módváltás _NEM_ mûködik a VESA framebufferrel, és ne is
+<P>Megj: az FBdev módváltás _NEM_ mûködik a VESA framebufferrel, és ne is
 	kérdezd miért, mert nem <B>MPlayer</B> hiba.</P>
 
 <P><B><A NAME=2.2.1.7>2.2.1.7.  Matrox framebuffer (mga_vid)</A></B></P>
 
-<P>Ez a rész a Matrox G200/G400/G450 BES (Back-End Scaler) támogatásról szól,
+<P>Ez a rész a Matrox G200/G400/G450 BES (Back-End Scaler) támogatásról szól,
   azaz az mga_vid kernel meghajtóról. Hardveres VSYNC támogatást tartalmaz,
   tripla buffereléssel. Framebufferes konzolon is, és X alatt is mûködik.</P>
 
@@ -641,7 +641,7 @@ Here are some important:</P></B></TD><TR>
   a konzolod framebufferes lesz (mert a CRTC2 nem tud szöveges módot) és  
   egy kicsit lassú. :(</P>
 
-<P><I> egyébként csak fekete-fehér kimenet sikerült a tv-n ...</I>
+<P><I> egyébként csak fekete-fehér kimenet sikerült a tv-n ...</I>
   Nem lehet hogy NTSC TV-d van? Vagy csak nem futtattad le a TV-*
   scriptet.</P>
 

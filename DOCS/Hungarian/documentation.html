@@ -48,7 +48,7 @@
 		    </LI><LI><A HREF="video.html#2.2.1.3.3">2.2.1.3.3 DGA támogatás telepítése MPlayer-be</A>
 		    </LI><LI><A HREF="video.html#2.2.1.3.4">2.2.1.3.4 Felbontásváltás</A>
 		    </LI><LI><A HREF="video.html#2.2.1.3.5">2.2.1.3.5 DGA és MPlayer</A>
-		    </LI><LI><A HREF="video.html#2.2.1.3.6">2.2.1.3.6 A DGA driver képességei</A>
+		    </LI><LI><A HREF="video.html#2.2.1.3.6">2.2.1.3.6 A DGA driver képességei</A>
 		    </LI><LI><A HREF="video.html#2.2.1.3.7">2.2.1.3.7 Sebesség</A>
 		    </LI><LI><A HREF="video.html#2.2.1.3.8">2.2.1.3.8 Ismert hibák</A>
 		    </LI><LI><A HREF="video.html#2.2.1.3.9">2.2.1.3.9 Beépítendõ dolgok</A>
@@ -215,7 +215,7 @@ Szükséged lesz erre a codecre ha nem-x86 gépen akarsz lejátszani, vagy
 nagyobb sebességet akarsz mint amennyit a Win32-es codec tud.</LI>
 
 <LI>A DVD támogatáshoz le kell fordítanod a libdvdread-ot és a libcss-t.
-Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
+Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
 </UL>
 
 <P>Ezután fordítsd le az <B>MPlayer</B>-t:</P>
@@ -296,7 +296,7 @@ Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
 
 <P>Linux Infrared Remote Control - használj egy otthon is könnyen elkészíthetõ
   infravörös távirányítót, hogy irányítsd vele a géped!
-  Részletek a <A HREF="www.lirc.org">www.lirc.org</A> címen.</P>
+  Részletek a <A HREF="www.lirc.org">www.lirc.org</A> címen.</P>
 
 <P>Ha felinstalláltad a lirc csomagot, így fordítsd az <B>MPlayer</B>-t :
   ./configure --enable-lirc</P>
@@ -434,11 +434,11 @@ is.</P>
   az MMX, SSE és 3DNOW! utasításokra, amiket a Solaris standard assemblere
   (<CODE>/usr/ccs/bin/as</CODE>) nem támogat.</P>
 
-<P>A configure script megpróbálja megkeresni hogy a "gcc" parancsod
+<P>A configure script megpróbálja megkeresni hogy a "gcc" parancsod
   melyik assemblert indítja (ha nem sikerül neki, használd a
   "--as=/ahova/installáltad/gnu-as" parancsot).</P>
 
-<P>GNU assembler nélküli GCC ilyet ír ki Solaris x86-on :</P>
+<P>GNU assembler nélküli GCC ilyet ír ki Solaris x86-on :</P>
 
 <P><PRE>   % configure
    ...
@@ -458,11 +458,11 @@ is.</P>
    "(stdin)", line 3567 : Syntax error
    ... more "Illegal mnemonic" and "Syntax error" errors ...</PRE></P>
 
-<P>DVD támogatáshoz patchelt libcss szükséges. Patch :
-  <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A></P>
+<P>DVD támogatáshoz patchelt libcss szükséges. Patch :
+  <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A></P>
 
 <P>2 hiba miatt nem tudsz megbízhatóan DVD-t lejátszani Solaris 8 x86-on,
-  ha annak kapacitása nagyobb mint 4 GB :</P>
+  ha annak kapacitása nagyobb mint 4 GB :</P>
 
 <P><UL><LI>The sd(7D) driver on solaris 8 x86 driver has bug when accessing a
      disk block >4GB on a device using a logical blocksize != DEV_BSIZE
@@ -503,21 +503,21 @@ is.</P>
 
 <P><UL>
 <LI>MPlayer belsõ/magyar fejlesztõk listája:<BR>
-<A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-devel">http://mp.dev.hu/mailman/listinfo/mplayer-devel</A>
+<A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-devel">http://mp.dev.hu/mailman/listinfo/mplayer-devel</A>
 <P>Nemtom, talán magyar nyelvû FLAME lista :)
 Továbbá a core csapattagok magánügyei, pl. mplayer parti, szponzorok, stb.</P>
 
 </LI><LI>MPlayer fejlesztõk listája:<BR>
-<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng">http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng</A>
+<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng">http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng</A>
 <P>Ez az MPlayer fejlesztõi lista! Témák: interface/API változások, új
 library-k, optimalizáció, ./configure, és IDE kell küldeni patch-eket.
 NE küldj ide bugreportot, kérdést!
 Ne növeljük a lista forgalmát.</P>
 
 </LI><LI>MPlayer felhasználók listája:<BR>
-<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-users">http://lists.sourceforge.net/lists/listinfo/mplayer-users</A>
+<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-users">http://lists.sourceforge.net/lists/listinfo/mplayer-users</A>
 <P><UL>
-<LI>ide küldj bugreport-ot (miután elolvastad Appendix <A HREF="bugreports.html">C</A>-t)</LI>
+<LI>ide küldj bugreport-ot (miután elolvastad Appendix <A HREF="bugreports.html">C</A>-t)</LI>
 <LI>feature kérést (miután elolvastad DOCS/TODO)</LI>
 <LI>felhasználói kérdéseket (miután elolvastad ezt az egész dokumentációt.)</LI>
 </UL></P>
@@ -530,12 +530,12 @@ Ne növeljük a lista forgalmát.</P>
 <LI>matroxfb-TVout</LI></UL></P>
 
 </LI><LI>MPlayer bejelentések:<BR>
-<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-announce">http://lists.sourceforge.net/lists/listinfo/mplayer-announce</A>
+<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-announce">http://lists.sourceforge.net/lists/listinfo/mplayer-announce</A>
 <P>Alacsony forgalmú lista :)
 És read-only. Ide írok vmit, ha kész az új verzió.</P>
 
 </LI><LI>MPlayer CVS-log:     
-<A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-cvslog">http://mp.dev.hu/mailman/listinfo/mplayer-cvslog</A>
+<A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-cvslog">http://mp.dev.hu/mailman/listinfo/mplayer-cvslog</A>
 <P>CVS-beli változásokról kérdéseket ide küldj.
 (ha nem érted, mire kell egy változtatás, vagy jobb fixet tudsz)
 Bizonyosodj meg róla, hogy a kívánt fejlesztõ is olvassa a listát!</P>
