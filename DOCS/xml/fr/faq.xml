@@ -103,7 +103,7 @@ Configure se termine par ce texte, et MPlayer ne compile pas !
 <screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
 </para></question>
 <answer><para>
-Votre gcc n'est pas installé correctement, voir le fichier <filename>config.log</filename>
+Votre gcc n'est pas installé correctement, voir le fichier <filename>configure.log</filename>
 pour plus de détails.
 </para></answer>
 </qandaentry>

@@ -132,7 +132,7 @@ Konfiguracja kończy się takim komunikatem i <application>MPlayer</application>
 (Twój gcc nie obsługuje nawet i386 dla '-march' oraz '-mcpu')
 </para></question>
 <answer><para>
-Twój gcc nie jest poprawnie zainstalowany. Sprawdź <filename>config.log</filename>
+Twój gcc nie jest poprawnie zainstalowany. Sprawdź <filename>configure.log</filename>
 aby uzyskać szczegóły.
 </para></answer>
 </qandaentry>
