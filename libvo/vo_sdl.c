@@ -921,7 +921,7 @@ static int setup_surfaces(void)
     /* Place the image in the middle of the screen */
     priv->y = (surfheight - priv->height) / 2;
     priv->y_screen_top = priv->y * v_scale;
-    priv->y_screen_bottom = (priv->y + priv->dstheight) * v_scale;
+    priv->y_screen_bottom = priv->y_screen_top + priv->dstheight;
 
     priv->dirty_off_frame[0].x = -1;
     priv->dirty_off_frame[0].y = -1;
@@ -1033,22 +1033,7 @@ static uint32_t draw_frame(uint8_t *src[])
 	int i;
 	uint8_t *mysrc = src[0];
 
-        switch(priv->format){
-        case IMGFMT_YV12:
-        case IMGFMT_I420:
-        case IMGFMT_IYUV:
-        SDL_OVR_LOCK(-1)
-            
-        dst = priv->overlay->pixels[0] + priv->y*priv->overlay->pitches[0];
-        memcpy(dst, src[0], priv->overlay->pitches[0]*priv->overlay->h);
-        dst = priv->overlay->pixels[1] + priv->y*priv->overlay->pitches[1]/2;
-        memcpy(dst, src[1], priv->overlay->pitches[1]*priv->overlay->h/2);
-        dst = priv->overlay->pixels[2] + priv->y*priv->overlay->pitches[2]/2;
-        memcpy(dst, src[2], priv->overlay->pitches[2]*priv->overlay->h/2);
-        
-	    SDL_OVR_UNLOCK
-            break;
-
+    switch(priv->format){
         case IMGFMT_YUY2:
         case IMGFMT_UYVY:
         case IMGFMT_YVYU:
