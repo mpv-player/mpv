@@ -47,6 +47,9 @@ TeLeNiEkO: <telenieko@telenieko.com>
 - debian packaging support (see debian/* and DOCS/DEBIAN)
 - spanish translations (see DOCS/Spanish/*)
 
+Michael Graffam: (mgraffam@idsi.net)
+- XF86VidMode support to vo_x11
+
 Main testers:
   Balazs Tibor (Tibcu)
   Sasi Peter (SaPe)
