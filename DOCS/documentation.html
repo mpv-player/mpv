@@ -282,6 +282,9 @@
       <LI><A HREF="encoding.html#rescaling">7.3 Rescaling movies</A></LI>
       <LI><A HREF="encoding.html#copying">7.4 Stream copying</A></LI>
       <LI><A HREF="encoding.html#fixing">7.5 Fixing AVIs with broken index</A></LI>
+	<UL>
+          <LI><A HREF="encoding.html#appending">7.5.1 Appending multiple AVI files</A></LI>
+	</UL>
       <LI><A HREF="encoding.html#libavcodec">7.6 Encoding with the libavcodec codec family</A></LI>
       <LI><A HREF="encoding.html#image_files">7.7 Encoding from multiple input image files (JPEGs or PNGs)</A></LI>
       <LI><A HREF="encoding.html#vobsub">7.8 Extracting DVD subtitles to a Vobsub file</A></LI>
@@ -818,8 +821,9 @@
 
 <H2><A NAME="gui">1.3 What about the GUI?</A></H2>
 
-<P>The GUI needs GTK 1.2.x (it isn't fully GTK, but the panels are). The skins are stored
-  in PNG format, so gtk, libpng (and their devel stuff, usually called gtk-dev and libpng-dev) has to be installed. 
+<P>The GUI needs GTK 1.2.x (it isn't fully GTK, but the panels are). The skins
+  are stored in PNG format, so gtk, libpng (and their devel stuff, usually
+  called gtk-dev and libpng-dev) has to be installed. 
   You can build it by specifying <CODE>--enable-gui</CODE> during
   <CODE>./configure</CODE>. Then, to turn on GUI mode, you either</P>
   <UL>
