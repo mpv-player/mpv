@@ -24,8 +24,8 @@
 #endif
 
 #include "sub.h"
+#include "../postproc/rgb2rgb.h"
 
-extern void rgb15to16_mmx(char* s0,char* d0,int count);
 extern int vo_dbpp;
 extern int verbose;
 
@@ -470,19 +470,7 @@ static uint32_t draw_frame(uint8_t *src[]) {
 	}
       } break;
       case 16: {
-#ifdef HAVE_MMX
-        rgb15to16_mmx(src[0],bppbuf,maxw * maxh * 2);
-#else
-        uint16_t *source = (uint16_t *) src[0];
-        uint16_t *dest = (uint16_t *) bppbuf;
-	register uint32_t i = 0;
-	register uint16_t srcdata;
-	
-	while (i < (maxw * maxh)) {
-	  srcdata = source[i];
-	  dest[i++] = (srcdata & 0x1f) | ((srcdata & 0x7fe0) << 1);
-	}
-#endif
+        rgb15to16(src[0],bppbuf,maxw * maxh * 2);
       } break;
     }
     src[0] = bppbuf;

@@ -23,8 +23,8 @@
  * - works only on x86 architectures
  *
  * $Log$
- * Revision 1.30  2001/08/13 11:08:18  atlka
- * changes according to -utf8 option, draw_osd() function added
+ * Revision 1.31  2001/10/30 17:04:31  nick
+ * Using new stuff of rgb15to16
  *
  * Revision 1.29  2001/07/16 18:41:52  jkeil
  * vo_dga doesn't compile on non-x86 architecture due to x86 asm usage.
@@ -151,10 +151,8 @@ LIBVO_EXTERN( dga )
 
 
 #include "x11_common.h"
-
+#include "../postproc/rgb2rgb.h"
 #include "fastmemcpy.h"
-
-extern void rgb15to16_mmx(char* s0,char* d0,int count);
 
 static vo_info_t vo_info =
 {
@@ -479,18 +477,9 @@ static uint32_t draw_frame( uint8_t *src[] ){
 	  int i;
 	  char *e;
 	  for(i=0; i< vo_dga_lines; i++){
-#ifdef HAVE_MMX		  
-            rgb15to16_mmx( s, d, vo_dga_bytes_per_line);
+            rgb15to16( s, d, vo_dga_bytes_per_line);
 	    d+=vo_dga_bytes_per_line;
 	    s+=vo_dga_bytes_per_line;
-#else
-            e = s+vo_dga_bytes_per_line;
-	    while( s< e ){
-               register uint16_t x =  *(((uint16_t *)s)++);
-	        *(((uint16_t *)d)++)=( x&0x001F )|( ( x&0x7FE0 )<<1 );
-	    }
-
-#endif  
             d+= vo_dga_vp_skip;
 	  }
 	}

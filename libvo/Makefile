@@ -7,7 +7,7 @@ SRCS=aspect.c aclib.c osd.c font_load.c yuv2rgb.c video_out.c vo_null.c vo_pgm.c
 OBJS=$(SRCS:.c=.o)
 
 ifeq ($(TARGET_ARCH_X86),yes)
-SRCS += rgb15to16mmx.c yuv2rgb_mmx.c
+SRCS += yuv2rgb_mmx.c
 ifeq ($(TARGET_OS),Linux)
 SRCS += vo_vesa.c
 endif

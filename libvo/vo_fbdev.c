@@ -28,6 +28,7 @@
 #include "fastmemcpy.h"
 #include "sub.h"
 #include "yuv2rgb.h"
+#include "../postproc/rgb2rgb.h"
 
 LIBVO_EXTERN(fbdev)
 
@@ -38,7 +39,6 @@ static vo_info_t vo_info = {
 	""
 };
 
-extern void rgb15to16_mmx(char *s0, char *d0, int count);
 extern int verbose;
 
 /******************************
@@ -1146,20 +1146,10 @@ static uint32_t draw_frame(uint8_t *src[])
 		char *d = next_frame;
 		char *s = src[0];
 		if (sbpp == fb_pixel_size) {
-			if (fb_real_bpp == 16 && pixel_format == (IMGFMT_BGR|15)) {
-#ifdef HAVE_MMX
-				rgb15to16_mmx(s, d, 2 * in_width * in_height);
-#else
-				unsigned short *s1 = (unsigned short *) s;
-				unsigned short *d1 = (unsigned short *) d;
-				unsigned short *e = s1 + in_width * in_height;
-				while (s1<e) {
-					register x = *(s1++);
-					*(d1++) = (x&0x001f)|((x&0x7fe0)<<1);
-				}
-#endif
-			} else
-				memcpy(d, s, sbpp * in_width * in_height);
+		    if (fb_real_bpp == 16 && pixel_format == (IMGFMT_BGR|15))
+			rgb15to16(s, d, 2 * in_width * in_height);
+		    else
+			memcpy(d, s, sbpp * in_width * in_height);
 		}
 	}
 	return 0;

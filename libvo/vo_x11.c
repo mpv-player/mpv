@@ -40,6 +40,7 @@ LIBVO_EXTERN( x11 )
 #include "sub.h"
 
 #include "../postproc/swscale.h"
+#include "../postproc/rgb2rgb.h"
 
 static vo_info_t vo_info =
 {
@@ -495,8 +496,6 @@ if(scale_xinc){
  return 0;
 }
 
-void rgb15to16_mmx( char* s0,char* d0,int count );
-
 static uint32_t draw_frame( uint8_t *src[] ){
     int sbpp=( ( image_format&0xFF )+7 )/8;
     int dbpp=( bpp+7 )/8;
@@ -512,26 +511,9 @@ static uint32_t draw_frame( uint8_t *src[] ){
     for( i=0;i<image_height;i++ ) {
       s-=sbpp*image_width;
       if( sbpp==dbpp ) {
-        if( depth==16 && image_format==( IMGFMT_BGR|15 ) ){
-
-       // do 15bpp->16bpp
-#ifdef HAVE_MMX
-       rgb15to16_mmx( s,d,2*image_width );
-#else
-       unsigned short *s1=( unsigned short * )s;
-       unsigned short *d1=( unsigned short * )d;
-       unsigned short *e=s1+image_width;
-       while( s1<e ){
-         register int x=*( s1++ );
-         // rrrrrggggggbbbbb
-         // 0rrrrrgggggbbbbb
-         // 0111 1111 1110 0000=0x7FE0
-         // 00000000000001 1111=0x001F
-         *( d1++ )=( x&0x001F )|( ( x&0x7FE0 )<<1 );
-       }
-#endif
-
-        } else
+        if( depth==16 && image_format==( IMGFMT_BGR|15 ) )
+	  rgb15to16(s,d,2*image_width );
+        else
           memcpy( d,s,sbpp*image_width );
       } else {
          // sbpp!=dbpp
@@ -549,24 +531,9 @@ static uint32_t draw_frame( uint8_t *src[] ){
     }
   } else {
     if( sbpp==dbpp ) {
-      if( depth==16 && image_format==( IMGFMT_BGR|15 ) ){
-       // do 15bpp->16bpp
-#ifdef HAVE_MMX
-       rgb15to16_mmx( s,d,2*image_width*image_height );
-#else
-       unsigned short *s1=( unsigned short * )s;
-       unsigned short *d1=( unsigned short * )d;
-       unsigned short *e=s1+image_width*image_height;
-       while( s1<e ){
-         register int x=*( s1++ );
-         // rrrrrggggggbbbbb
-         // 0rrrrrgggggbbbbb
-         // 0111 1111 1110 0000=0x7FE0
-         // 00000000000001 1111=0x001F
-         *( d1++ )=( x&0x001F )|( ( x&0x7FE0 )<<1 );
-       }
-#endif
-      } else
+      if( depth==16 && image_format==( IMGFMT_BGR|15 ) )
+        rgb15to16( s,d,2*image_width*image_height );
+      else
         memcpy( d,s,sbpp*image_width*image_height );
     } else {
         // sbpp!=dbpp
