@@ -3965,7 +3965,8 @@ if test "$_real" = auto ; then
     if test "$_real" = yes ; then
       if test -z "$_reallibdir" ; then
 	for I in $_libdir/real /usr/lib/real /usr/lib/RealPlayer*/Codecs \
-          /usr/local/RealPlayer*/Codecs /usr/local/lib/RealPlayer*/Codecs; do
+          /usr/local/RealPlayer*/Codecs /usr/local/lib/RealPlayer*/Codecs \
+          /opt/RealPlayer*/Codecs; do
           if test -d "$I" ; then
             _reallibdir="$I"
             break;
