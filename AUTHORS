@@ -133,7 +133,7 @@ Nick Kurshev <nickols_k@mail.ru>
 German Gomez Garcia <german@piraos.com>
     * SPDIF AC3 output for SBLive!
 
-Dariusz Pietrzak (Eyck) <eyck@incubus.ar.lublin.pl>
+Dariusz Pietrzak (Eyck) <eyck@ghost.anime.pl>
     * Debian packaging support (see debian/* and the documentation)
     * support for vplayer subtitle format
     * preliminary support for .RT subtitle format
