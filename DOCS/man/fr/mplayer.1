@@ -1,4 +1,4 @@
-.\" synced with 1.532
+.\" synced with 1.539
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas@legaillart.com >
@@ -34,7 +34,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2 Février 2004" "The MPlayer Project" "Le Lecteur Vidéo Pour Linux"
+.TH MPlayer 1 "9 Février 2004" "The MPlayer Project" "Le Lecteur Vidéo Pour Linux"
 .
 .SH NAME
 mplayer  \- Lecteur Vidéo pour Linux
@@ -1551,7 +1551,7 @@ AC3
 Cette option indique à MPlayer d'utiliser un autre périphérique de mixage que
 /dev/\:mixer.
 .TP
-.B \-mixer-channel <mixer line> (-ao oss uniquement)
+.B \-mixer-channel <mixer line> (\-ao oss uniquement)
 Cette option dit à MPlayer d'utiliser un canal différent du PCM par défaut pour 
 controller le volume. 
 Les options incluent
@@ -4054,13 +4054,13 @@ légèrement inférieure et bitrates plus hauts.
 .B highpassfreq=<fréq>
 Fixe la fréquence du filtre passe-haut en Hz.
 Les fréquences en dessous de celle spécifiée seront coupées.
-Une valeur de -1 désactivera le filtrage, une valeur de 'auto'
+Une valeur de -1 désactivera le filtrage, une valeur de 0
 laissera lame choisir la valeur automatiquement.
 .TP
 .B lowpassfreq=<fréq>
 Fixe la fréquence du filtre passe-bas en Hz.
 Les fréquences au dessus de celle spécifiée seront coupées.
-Une valeur de -1 désactivera le filtrage, une valeur de 'auto'
+Une valeur de -1 désactivera le filtrage, une valeur de 0
 laissera lame choisir la valeur automatiquement.
 .TP
 .B preset=<valeur>
@@ -5203,7 +5203,20 @@ recherche large
 .RE
 .PD 1
 .TP
-.B psnr
+.B aspect=<x/y | f (valeur à virgure)>
+Stoque l'aspect du film en interne, tout comme les fichiers MPEG.
+C'est une meilleur solution que le redimmensionnement, parce que la qualité
+n'est pas diminué.
+MPlayer et quelques autres lecteurs liront ces fichiers correctement, les 
+autres l'afficheront avec le mauvais aspect.
+Le paramètre aspect peut être donné en ratio ou en nombre à virgule.
+.TP
+.B autoaspect
+Même chose que l'option aspect, mais calcule automatiquement l'aspect, en
+prenant en compte les ajustements (découpage/expension/redimensionnement/etc.)
+faits par la chaine de filtres.
+.TP
+.B psnr\ \ \
 affiche le psnr (peak signal to noise ratio, rapport du signal crête sur bruit)
 pour l'ensemble de la vidéo après encodage et stocke le psnr par trame dans un
 fichier portant un nom tel que  'psnr_hhmmss.log'.
