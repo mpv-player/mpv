@@ -255,7 +255,7 @@ int mc_ver,mc_rev;
    }
    xv_port = 0;
    number_of_surfaces = 0;
-   keycolor_handling = 1;//!!fixme
+   keycolor_handling = 3;//!!fixme
    surface_render=NULL;
    
    return 0;
@@ -458,7 +458,7 @@ static uint32_t vm_height;
          vo_x11_classhint( mDisplay,vo_window,"xvmc" );
          vo_hidecursor(mDisplay,vo_window);
 
-         vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PropertyChangeMask |
+         vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PropertyChangeMask | ExposureMask |
 	      ((WinID==0) ? 0 : (PointerMotionMask
 		| ButtonPressMask | ButtonReleaseMask)) );
          XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
@@ -594,11 +594,8 @@ uint32_t drwBorderWidth,drwDepth;
 int e=vo_x11_check_events(mDisplay);
    if(e&VO_EVENT_RESIZE)
    {
-      if (vo_fs) {
-        e |= VO_EVENT_EXPOSE;
-        XClearWindow(mDisplay, vo_window);
-        XFlush(mDisplay);
-      }
+      e |= VO_EVENT_EXPOSE;
+      
       XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&vo_dwidth,&vo_dheight,
                    &drwBorderWidth,&drwDepth );
       drwX = drwY = 0;
@@ -619,6 +616,7 @@ int e=vo_x11_check_events(mDisplay);
    if ( e & VO_EVENT_EXPOSE )
    {
       mDrawColorKey(drwX,drwY,vo_dwidth,vo_dheight);     
+     if(p_render_surface_visible != NULL)
       XvMCPutSurface(mDisplay, p_render_surface_visible->p_surface,vo_window,
                      0, 0, image_width, image_height,
                      drwX,drwY,vo_dwidth,vo_dheight,
