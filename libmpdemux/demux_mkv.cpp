@@ -1243,7 +1243,6 @@ static void parse_cues(mkv_demuxer_t *mkv_d, uint64_t pos) {
   KaxCueClusterPosition *ccpos;
   KaxCueTrack *ctrack;
   KaxCueTrackPositions *ctrackpos;
-  KaxCueReference *cref;
   int upper_lvl_el, i, k;
   uint64_t tc_scale, filepos = 0, timecode = 0;
   uint32_t tnum = 0;
@@ -1317,9 +1316,7 @@ static void parse_cues(mkv_demuxer_t *mkv_d, uint64_t pos) {
       mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] |   + found cue cluster "
              "position: %llu\n", filepos);
 
-      cref = FINDFIRST(ctrackpos, KaxCueReference);
-      add_index_entry(mkv_d, tnum, filepos, timecode,
-                      cref == NULL ? 1 : 0);
+      add_index_entry(mkv_d, tnum, filepos, timecode, 1);
      
       ctrackpos = FINDNEXT(cpoint, KaxCueTrackPositions, ctrackpos);
     }
