@@ -521,6 +521,39 @@ if ((conffile = get_path("")) == NULL) {
 }
 }
 
+void load_per_file_config (m_config_t* conf, const char *const file)
+{
+    char *confpath;
+    char cfg[PATH_MAX];
+    struct stat st;
+    char *name;
+
+    sprintf (cfg, "%s.conf", file);
+    
+    if (!stat (cfg, &st))
+    {
+	mp_msg(MSGT_CPLAYER,MSGL_INFO,"Loading config '%s'\n", cfg);
+	m_config_parse_config_file (conf, cfg);
+	return;
+    }
+
+    if ((name = strrchr (cfg, '/')) == NULL)
+	name = cfg;
+    else
+	name++;
+
+    if ((confpath = get_path (name)) != NULL)
+    {
+	if (!stat (confpath, &st))
+	{
+	    mp_msg(MSGT_CPLAYER,MSGL_INFO,"Loading config '%s'\n", confpath);
+	    m_config_parse_config_file (conf, confpath);
+	}
+
+	free (confpath);
+    }
+}
+
 // When libmpdemux perform a blocking operation (network connection or cache filling)
 // if the operation fail we use this function to check if it was interrupted by the user.
 // The function return a new value for eof.
@@ -970,6 +1003,8 @@ current_module = NULL;
 // ******************* Now, let's see the per-file stuff ********************
 
 play_next_file:
+
+  if (filename) load_per_file_config (mconfig, filename);
 
 // We must enable getch2 here to be able to interrupt network connection
 // or cache filling
