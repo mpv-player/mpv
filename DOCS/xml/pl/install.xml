@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.37 -->
+<!-- synced with 1.38 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -238,7 +238,8 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   </para></listitem>
 <listitem><para>
   <application>MPlayer</application> może korzystać z bibliotek RealPlayer 8
-  lub RealONE, żeby odtworzyć pliki z obrazem w formacie <emphasis role="bold">RealVideo 2.0-4.0</emphasis>
+  lub RealONE, żeby odtworzyć pliki z obrazem w formacie
+  <emphasis role="bold">RealVideo 3.0 i 4.0</emphasis>
   i dźwiękiem w Sipro/Cook. Zobacz rozdział 
   <link linkend="realmedia">format pliku RealMedia</link>,
   znajdziesz tam instrukcje i kilka informacji.
