@@ -40,7 +40,7 @@ static int sub_slacktime = 20000; //20 sec
 int sub_no_text_pp=0;   // 1 => do not apply text post-processing
                         // like {\...} elimination in SSA format.
 
-int subfuzzy_enabled=0; // be _really_ fuzzy when looking for subtitles
+int sub_match_fuzziness=0; // level of sub name matching fuzziness
 
 /* Use the SUB_* constant defined in the header file */
 int sub_format=SUB_INVALID;
@@ -1574,7 +1574,10 @@ typedef struct _subfn
 
 static int compare_sub_priority(const void *a, const void *b)
 {
-    return ((subfn*)a)->priority < ((subfn*)b)->priority;
+    int ret;
+    ret = ((subfn*)a)->priority < ((subfn*)b)->priority;
+    if (ret != 0) return ret;
+    return strcoll(((subfn*)a)->fname, ((subfn*)b)->fname);
 }
 
 char** sub_filenames(char* path, char *fname)
@@ -1663,9 +1666,17 @@ char** sub_filenames(char* path, char *fname)
  
 		// we have a (likely) subtitle file
 		if (found) {
-		    // does it contain the movie name?
-		    tmp = strstr(tmp_fname_trim, f_fname_trim);
-		    if (tmp) {
+		    if (strcmp(tmp_fname_trim, f_fname_trim) == 0) {
+			// matches the movie name?
+			sprintf(tmpresult, "%s%s", f_dir, de->d_name);
+			if ((f = fopen(tmpresult, "rt"))) {
+			    fclose(f);
+			    result[subcnt].priority = 4;
+			    result[subcnt].fname = strdup(tmpresult);
+			    subcnt++;
+			}
+		    } else if ((tmp = strstr(tmp_fname_trim, f_fname_trim)) && (sub_match_fuzziness >= 1)) {
+			// does it contain the movie name?
 			tmp += strlen(f_fname_trim);
 			if (tmp_sub_id && strstr(tmp, tmp_sub_id)) {
 			    // with sub_id specified prefer localized subtitles
@@ -1698,7 +1709,7 @@ char** sub_filenames(char* path, char *fname)
 		    } else {
 			// doesn't contain the movie name
 			// don't try in the mplayer subtitle directory
-			if ((j == 0) && subfuzzy_enabled) {
+			if ((j == 0) && (sub_match_fuzziness >= 2)) {
 			    sprintf(tmpresult, "%s%s", f_dir, de->d_name);
 			    if ((f = fopen(tmpresult, "rt"))) {
 				fclose(f);

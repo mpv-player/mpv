@@ -1081,9 +1081,19 @@ Tells MPlayer to handle the subtitle file as UTF8.
 Disables any kind of text post processing done after loading the subtitles.
 Used for debug purposes.
 .TP
-.B \-subfuzzy
-Relax when trying to find matching subtitles. Loads all subtitles in
-the current directory, allowing to select the right ones during playing.
+.B \-sub-fuzziness
+Adjust matching fuzziness when searching for subtitles:
+.PD 0
+.RSs
+.IPs 0
+exact match
+.IPs 1
+load all subs containing movie name
+.IPs 2
+load all subs in the current directory
+.RE
+.PD 1
+.
 .TP
 .B \-vobsub <vobsub\ file\ without\ extension>
 Specify the VobSub files that are to be used for subtitle.
