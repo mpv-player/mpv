@@ -332,6 +332,8 @@ Jacobs, Aurelien <aurel@gnuage.org>
 
 Jelveh, Reza (timebomb) <reza.jelveh@tu-harburg.de>
     * NSV demuxer
+    * seeking in Real files without index
+    * miscellaneous small fixes and improvements
 
 Jermann, Jonas (g0th) <jjermann@gmx.net>
     * man page rewrite
