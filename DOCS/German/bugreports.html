@@ -2,55 +2,80 @@
 <HTML>
 
 <HEAD>
-  <TITLE>Fehlerbehebung - MPlayer - The Movie Player for Linux</TITLE>
+  <TITLE>Fehler berichten - MPlayer - The Movie Player for Linux</TITLE>
   <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
 <BODY>
 
-<H1><A NAME=C>Anhang C - Wie man einen Fehler berichtet</A></H1>
+<H1><A NAME=C>Anhang B - Wie man einen Fehler berichtet</A></H1>
+
+<P>Gute Fehlerberichte sind bei jedem Softwareprojekt sehr wertvolle
+Beitr&auml;ge f&uuml;r die Entwicklung. Aber genauso, wie es beim Schreiben
+guter Software ist, so verh&auml;lt es sich auch mit guten Fehlerberichten: sie
+erfordern Arbeit. Bitte denk daran, dass die meisten Entwickler sehr
+besch&auml;ftigt sind und t&auml;glich einen unglaublichen Berg Mail erhalten.
+Auch wenn deine R&uuml;ckmeldungen f&uuml;r die Entwicklung von MPlayer von
+entscheidender Bedeutung ist, so verstehe bitte, dass du wirklich <B>alle</B>
+hier verlangten Informationen zur Verf&uuml;gung stellen und den Anweisungen
+dieses Dokumentes folgen musst, damit wir dir helfen k&ouml;nnen.</P>
 
 <H4>Wie sollen Fehler behoben werden?</H4>
 
-<P>Wenn man geschickt genugt ist, kann man versuchen den Fehler selber zu beheben,
-was äusserst positiv aufgenommen wird. Falls dies schon getan ist, sollte
-<A HREF="../tech/patches.txt">dieses kurze Dokument</A> gelesen werden um zu erfahren,
-wie der Code in <B>MPlayer</B> integriert werden kann. Die Leute auf der
+<P>Wenn man geschickt genugt ist, kann man versuchen, den Fehler selber zu
+beheben, was &auml;u&szlig;erst positiv aufgenommen wird. Falls du das schon
+getan hast, solltest du <A HREF="../tech/patches.txt">dieses kurze Dokument</A>
+lesen, um zu erfahren, wie der Code in <B>MPlayer</B> integriert werden kann.
+Die Leute auf der
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
-Mailingliste können ansonsten bei Fragen helfen.</P>
+Mailingliste k&ouml;nnen ansonsten bei Fragen helfen.</P>
 
 <H4>Wie sollen Fehler berichtet werden?</H4>
 
-<P>Probiere es als allererstes die letzte CVS-Version, da dein Problem möglicherweise
-schon gelöst ist. CVS-Anweisungen können am unteren Ende
+<P>Probiere es als allererstes die aktuelle CVS-Version, da dein Problem
+m&ouml;glicherweise schon gel&ouml;st ist. Die Entwicklung geht extrem
+schnell voran. Die meisten Probleme in offiziellen <B>MPlayer</B>-Versionen
+werden innerhalb von Tagen oder sogar Stunden den Entwicklern mitgeteilt.
+Deswegen berichte Fehler nur dann, wenn sie in der <B>aktuellen CVS-Version</B>
+auch noch vorliegen. CVS-Anweisungen k&ouml;nnen am unteren Ende
 <A HREF="http://www.mplayerhq.hu/homepage/dload.html">dieser Seite</A> oder im
 README gefunden werden. Wenn dies nicht hilft, sollte in der
-<A HREF="documentation.html#known_bugs">Liste der bekannten Fehler</A> und dem Rest der Dokumentationen
-nachgesehen werden. Wenn dein Problem nicht bekannt ist oder durch unsere
-Anweisungen nicht gelöst werden kann, dann berichte über den Fehler:</P>
+<A HREF="documentation.html#known_bugs">Liste der bekannten Fehler</A> und dem
+Rest der Dokumentationen nachgesehen werden. Wenn dein Problem nicht bekannt
+ist oder durch unsere Anweisungen nicht gelst werden kann, dann berichte
+&uuml;ber den Fehler.</P>
 
-<P>Sende auf keinen Fall Fehlerberichte an individuelle Entwickler. <B>MPlayer</B> ist Gemeinschaftsarbeit,
-also wird es vielleicht mehrere interessierte Leute geben. Es kommt auch teilweise vor,
-dass derselbe Fehler von anderen Benutzern erlebt wurde, die bereits eine Lösung
-zur Umgehung des Problems haben (sogar bei einem Fehler im <B>MPlayer</B> Code).</P>
+<P>Sende auf keinen Fall Fehlerberichte an individuelle Entwickler.
+<B>MPlayer</B> ist Gemeinschaftsarbeit, also wird es vielleicht mehrere
+interessierte Leute geben. Es kommt auch teilweise vor, dass derselbe Fehler
+von anderen Benutzern gefunden wurde, die bereits eine L&ouml;sung
+zur Umgehung des Problems haben (sogar bei einem Fehler im
+<B>MPlayer</B>-Code).</P>
 
-<P>Bitte beschreibe dein Problem so detailiert wie möglich.
-Dazu gehört eine kleine Detektivarbeit um die Umstände unter denen das Problem auftritt
-einzuengen. Tritt der Fehler nur in bestimmten Situationen auf? Ist er abhängig von
-der Datei oder dem Dateityp? Tritt er nur mit einem Codec oder mit allen auf?
-Tritt er mit allen Ausgabetreibern auf? Je mehr Information zur Verfügung gestellt werden,
-um so besser stehen die Chance, dass das Problem gelöst werden wird. Es sollte nicht vergessen
-werden, auch die wertvollen unten angeforderten Informationen miteinzubeziehen, ansonsten
-ist es wahrscheinlich unmöglich eine Diagnose des Fehlers zu erstellen.</P>
+<P>Bitte beschreibe dein Problem so detailiert wie m&ouml;glich. Dazu
+geh&ouml;rt ein klein wenig Detektivarbeit, um die Umst&auml;nde einzuengen,
+unter denen das Problem auftritt. Tritt der Fehler nur in bestimmten
+Situationen auf? Ist er abh&auml;ngig von der Datei oder dem Dateityp? Tritt er
+nur mit einem Codec oder mit allen auf? Tritt er mit allen Ausgabetreibern auf?
+Je mehr Information zur Verf&uuml;gung gestellt werden, um so besser stehen die
+Chance, dass das Problem gel&ouml;st werden wird. Es sollte nicht vergessen
+werden, auch die wertvollen unten angeforderten Informationen miteinzubeziehen.
+Ansonsten ist es wahrscheinlich unm&ouml;glich, eine Diagnose des Fehlers zu
+erstellen.</P>
 
-<P>Ein exzellenter und gut geschriebener Führer, wie Fragen in öffentlichen Foren
-beantwortet werden sollen ist 
-<A HREF="http://www.tuxedo.org/~esr/faqs/smart-questions.html">How To Ask
-Questions The Smart Way</A> von Eric S. Raymond. Falls diesen Richtlinien gefolgt wird,
-sollte alles gut gehen. Bitte versteht, dass wir alle den Mailinglisten freiwillig in
-unserer Freizeit folgen. Wir sind sehr beschäftigt und können nicht garantieren,
-dass eine Lösung oder bloss eine Antwort zum beschriebenen Problem kommen wird.</P>
+<P>Ein exzellenter und gut geschriebener F&uuml;hrer, wie Fragen in
+&ouml;ffentlichen Foren gestellt werden sollen, ist  <A
+HREF="http://www.tuxedo.org/~esr/faqs/smart-questions.html">How To Ask
+Questions The Smart Way</A> von Eric S. Raymond. Es gibt auch einen zweiten
+F&uuml;hrer namens
+<A HREF="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report
+Bugs Effectively</A> von
+<A HREF="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</A>. Falls
+du diesen Richtlinien folgst, sollte alles gut gehen. Bitte verstehe, dass wir
+alle den Mailinglisten freiwillig in unserer Freizeit folgen. Wir sind sehr
+besch&auml;ftigt und k&ouml;nnen nicht garantieren, dass eine L&ouml;sung oder
+blo&szlig; eine Antwort zum beschriebenen Problem kommen wird.</P>
 
 <H4>Wo sollen Fehler berichtet werden?</H4>
 
@@ -59,158 +84,208 @@ dass eine Lösung oder bloss eine Antwort zum beschriebenen Problem kommen wird.<
 und sende deinen Fehlerbericht an:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="mailto:mplayer-users@mplayerhq.hu">mplayer-users@mplayerhq.hu</A></P>
 
-<P>Die Sprache der Liste ist <B>Englisch</B>. Es wird gebeten den <A HREF="http://www.ietf.org/rfc/rfc1855.txt">Netiquette Richtlinien</A>
-zu folgen und <B>keine HTML Mails</B> zu irgendeiner unserer Listen zu senden.
-Man wird dabei bloss ignoriert oder von der Liste verstossen. Es sei auch darauf hingewiesen,
-keine individuellen Kopien (CC) versandt werden. Es ist also eine gute Idee sich anzumelden,
-wenn man auch seine Antwort erhalten will.</P>
+<P>Die Sprache der Liste ist <B>Englisch</B>. Es wird gebeten, den <A
+HREF="http://www.ietf.org/rfc/rfc1855.txt">Netiquette-Richtlinien</A> zu folgen
+und <B>keine HTML-Mails</B> zu irgendeiner unserer Listen zu senden. Man wird
+dabei bloss ignoriert oder von der Liste versto&szlig;en. Falls du nicht
+wei&szlig;t, was eine HTML-Mail ist, oder warum sie b&ouml;se ist, dann lies <A
+HREF="http://expita.com/nomime.html">dieses gute Dokument</A>. Es erkl&auml;rt
+alle Details und enth&auml;lt Anweisungen, wie man HTML f&uuml;r Mails
+ausschaltet. Bitte denk auch daran,  keine individuellen Kopien (CC) an
+einzelne Personen zu versenden. Es ist also eine gute Idee, sich an der Liste
+anzumelden, wenn man auch seine Antwort erhalten will.</P>
 
 <H4>Was soll berichtet werden?</H4>
 
 <P><B>Systeminformationen:</B></P>
 
 <UL>
-  <LI>Deine Linux Distribution oder Betriebssystem:<BR>
+  <LI>Deine Linux-Distribution oder Betriebssystem und die Versionsnummer:
     <UL>
       <LI>RedHat 7.1</LI>
-      <LI>Slackware 7.0 + Development Pakete von 7.1 ...</LI>
-    </UL></LI>
-  <LI>Kernel Version:<BR>
+      <LI>Slackware 7.0 + Development-Pakete von 7.1 ...</LI>
+    </UL>
+  </LI>
+  <LI>Kernelversion:<BR>
     <CODE>uname -a</CODE></LI>
-  <LI>libc Version:<BR>
+  <LI>libc-Version:<BR>
     <CODE>ls -l /lib/libc[.-]*</CODE></LI>
-  <LI>X Version:<BR>
+  <LI>X-Version:<BR>
     <CODE>X -version</CODE></LI>
-  <LI>gcc und ld Versionen:<BR>
+  <LI>gcc- und ld-Versionen:<BR>
     <CODE>gcc -v<BR>
     ld -v</CODE></LI>
-  <LI>binutils Version:<BR>
+  <LI>binutils-Version:<BR>
     <CODE>as --version</CODE></LI>
+  <LI>Wenn du Pobleme mit dem Vollbildmodus hast:
+    <UL>
+      <LI>Window-manager-Typ und -Version</LI>
+    </UL>
+  </LI>
+  <LI>Falls nur das GUI einen Fehler enth&auml;lt:
+    <UL>
+      <LI>GTK-Version</LI>
+      <LI>GLIB-Version</LI>
+      <LI>libpng-Version</LI>
+      <LI>Zustand des GUIs, in dem der Fehler auftritt</LI>
+    </UL>
+  </LI>
 </UL>
 
 <P><B>Hardware &amp; Treiber:</B></P>
 
 <UL>
-  <LI>CPU Infos (dies funktioniert nur mit Linux):<BR>
+  <LI>CPU-Infos (dies funktioniert nur mit Linux):<BR>
     <CODE>cat /proc/cpuinfo</CODE></LI>
-  <LI>Grafikkartenhersteller und Modell:<BR>
+  <LI>Grafikkartenhersteller und Modell:
     <UL>
-      <LI>ASUS V3800U, Chipset: nVidia TNT2 Ultra Pro 32MB SDRAM
-      <LI>Matrox G400 DH 32MB SGRAM
-    </UL></LI>
-  <LI>Grafikkartentreiber-Typ &amp; Version:<BR>
+      <LI>ASUS V3800U, Chipset: nVidia TNT2 Ultra Pro 32MB SDRAM</LI>
+      <LI>Matrox G400 DH 32MB SGRAM</LI>
+    </UL>
+  </LI>
+  <LI>Grafikkartentreiber-Typ &amp; -Version:
     <UL>
-      <LI>X eigener Treiber
-      <LI>nvidia 0.9.623
-      <LI>Utah-GLX CVS 2001-02-17
-      <LI>DRI von X 4.0.3
-    </UL></LI>
-  <LI>Soundkartentyp und Treiber:<BR>
+      <LI>X eigener Treiber</LI>
+      <LI>nVidia 0.9.623</LI>
+      <LI>Utah-GLX CVS 2001-02-17</LI>
+      <LI>DRI von X 4.0.3</LI>
+    </UL>
+  </LI>
+  <LI>Soundkartentyp und -Treiber:
     <UL>
-      <LI>Creative SBLive! Gold mit OSS Treiber von oss.creative.com
-      <LI>Creative SB16 mit OSS Treiber des Kernels
-      <LI>GUS PnP mit ALSA OSS Emulation
-    </UL></LI>
-  <LI>Wenn man sich unsicher ist, sollte die Ausgabe von <CODE>lspci -vv</CODE>
-    mitgeschickt werden (auf Linux Systemen)</LI>
+      <LI>Creative SBLive! Gold mit OSS-Treiber von oss.creative.com</LI>
+      <LI>Creative SB16 mit OSS-Treiber des Kernels</LI>
+      <LI>GUS PnP mit ALSA-OSS-Emulation</LI>
+    </UL>
+  </LI>
+  <LI>Wenn du unsicher bist, solltest du die Ausgabe von <CODE>lspci -vv</CODE>
+    mitschicken (auf Linux-Systemen).</LI>
 </UL>
 
-<P><B>Bei Kompilierungsfehlern/-problemen:</B></P>
+<H4>Bei Problemen/Fehlern w&auml;hrend des &Uuml;bersetzens</H4>
 
-<P><B>Bitte schicke diese Dateien mit:</B></P>
+Bitte schicke diese Dateien mit:
 
 <UL>
-  <LI>configure.log</LI>
-  <LI>config.h</LI>
-  <LI>config.mak</LI>
-  <LI>libvo/config.mak</LI>
+  <LI><CODE>config.h</CODE></LI>
+  <LI><CODE>config.mak</CODE></LI>
 </UL>
 
-<P><B>Bei Wiedergabeproblemen:</B></P>
+Nur wenn die Compilierung in einem der unten genannten Verzeichnisse
+fehlschl&auml;gt, f&uuml;ge diese Datein an:
+<UL>
+  <LI><CODE>Gui/config.mak</CODE></LI>
+  <LI><CODE>libvo/config.mak</CODE></LI>
+  <LI><CODE>libao2/config.mak</CODE></LI>
+</UL>
 
-<P>Bitte gib die Ausgabe von <B>MPlayer</B> in Ausführlichkeits-Stufe 1, aber denk daran
-<B>die Ausgabe nicht zu kürzen</B> wenn diese dem Mail eingefügt wird. Die Entwickler
-benötigen alle Meldungen, um eine geignete Diagnose des Problems durchführen zu können.
-Die Ausgabe kann mit folgendem Befehl in eine Datei geschrieben werden:</P>
 
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [Optionen] [Dateiname] &amp;&gt; mplayer.log</CODE></P>
+<H4>Bei Problemen mit configure</H4>
+
+F&uuml;ge <CODE>configure.log</CODE> hinzu.
+
+<H4>Bei Wiedergabeproblemen</H4>
+
+<P>Bitte f&uuml;ge die Ausgabe von <B>MPlayer</B> in Ausführlichkeits-Stufe 1
+bei, aber denk daran <B>die Ausgabe nicht zu kürzen</B>, wenn diese der Mail
+eingef&uuml;gt wird. Die Entwickler ben&ouml;tigen alle Meldungen, um eine
+geignete Diagnose des Problems durchf&uuml;hren zu k&ouml;nnen. Die Ausgabe
+kann mit folgendem Befehl in eine Datei geschrieben werden:</P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [Optionen] [Dateiname]
+&gt; mplayer.log 2&gt;&amp;1</CODE></P>
   
-<P>Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
-lade die Datei bitte auf <A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">ftp://mplayerhq.hu/MPlayer/incoming/</A></P>
+<P>Wenn das Problem nur bei einer oder einigen wenigen Dateien auftritt, dann
+lade die Datei bitte auf
+<A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">
+ftp://mplayerhq.hu/MPlayer/incoming/</A></P> hoch.</P>
 
-<P>Uploade auch eine kleine .txt-Datei mit dem selben Namen wie die Datei 
-(+ .txt Endung), die eine Problembeschreibung zur jeweiligen Datei, die 
-detaillierte Ausgabe (-v) von <B>MPlayer</B> und deine Email-Adresse enthält!
-Normalerweise reichen die ersten 1-5MB der Datei aus um das Problem zu
-reproduzieren, aber als erstes solltest du folgendes ausprobieren:</P>
+<P>Uploade auch eine kleine .txt-Datei mit dem selben Namen wie die Datei  (+
+.txt Endung), die eine Problembeschreibung zur jeweiligen Datei, die 
+detaillierte Ausgabe (-v) von <B>MPlayer</B> und deine Email-Adresse
+enth&auml;lt. Normalerweise reichen die ersten 1-5MB der Datei aus, um das
+Problem zu reproduzieren, aber als erstes solltest du folgendes
+ausprobieren:</P>
 
-<P><CODE>&nbsp;&nbsp;&nbsp;dd if=deinedatei of=kleinedatei bs=1024k count=5</CODE><BR>
-(kopiert die ersten 5 MB von 'deinedatei' in die Datei 'kleinedatei'.)
-Nun versuche es nochmals mit dieser kleinen Datei, wenn der Fehler
-immer noch auftritt reicht es die kleine Datei hochzuladen.<BR>
-Sende <STRONG>NIE</STRONG> solche Dateien via Mail! Lade es herauf und schicke nur den Pfad/
-Dateinamen der Datei auf den FTP Server.<BR>
-Wenn die Datei im Internet bereits verfügbar ist reicht die <STRONG>exakte</STRONG> URL
-aus!</P>
+<P><CODE>&nbsp;&nbsp;&nbsp;dd if=deinedatei of=kleinedatei bs=1024k
+count=5</CODE></P>
 
-<P><B>Bei Abstürzen:</B></P>
+<P>Das kopiert die ersten 5 MB von <STRONG>'deinedatei'</STRONG> in die Datei
+<STRONG>'kleinedatei'</STRONG>. Nun versuche es nochmals mit dieser kleinen
+Datei. Wenn der Fehler immer noch auftritt, dann reicht es, die kleine Datei
+hochzuladen.<BR> Sende <STRONG>NIE</STRONG> solche Dateien via Mail! Lade sie
+herauf und schicke nur den Pfad/Dateinamen der Datei auf dem FTP Server. Wenn
+die Datei im Internet bereits verf&uuml;gbar ist, so reicht die
+<STRONG>exakte</STRONG> URL aus.</P>
 
-<P>Wenn du ein Speicherabbild (core dump) vom Absturz besitzt, lies beim nächsten
-Paragraph weiter, ansonsten lass ihn aus.</P>
+<H4>Bei Abst&uuml;rzen</H4>
 
-<P><B>Wie brauchbare Informationen von einem core dump extrahiert werden können:</B></P>
+<P>Du musst <B>MPlayer</B> aus <CODE>gdb</CODE> heraus aufrufen und uns
+die vollst&auml;ndige Ausgabe schicken. Wenn du einen core dump hast, dann
+kannst du auch aus der <CODE>core</CODE>-Datei n&uuml;tzliche Informationen
+extrahieren. So geht's:</P>
+
+<H4>Wie man Informationen bei einem reproduzierbaren Absturz bewahrt</H4>
+
+Kompiliere <B>MPlayer</B> mit eingeschaltetem Debugging:
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
+
+Starte nun gdb mit <B>MPlayer</B>:
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb ./mplayer</CODE></P>
+
+Du bist nun in gdb. Gib folgendes ein:
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;run -v [options-to-mplayer]
+filename</code></P>
+
+und reproduziere deinen Absturz. Sobald er auftritt, wird gdb zur
+Eingabeaufforderung zur&uuml;ckkehren, bei der du
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;disass $pc-32 $pc+32</CODE></P>
+
+eingibst.
+
+
+<H4>Wie man brauchbare Informationen von einem core dump extrahiert</H4>
 
 <P>Bitte erzeuge die folgende Befehlsdatei (Command File):</P>
 
-<P><CODE>disass $eip-32 $eip+32<BR>
-printf "eax=%08lX\n",$eax<BR>
-printf "ebx=%08lX\n",$ebx<BR>
-printf "ecx=%08lX\n",$ecx<BR>
-printf "edx=%08lX\n",$edx<BR>
-printf "esp=%08lX\n",$esp<BR>
-printf "ebp=%08lX\n",$ebp<BR>
-printf "edi=%08lX\n",$edi<BR>
-printf "esi=%08lX\n",$esi<BR>
-</CODE></P>
+<P><CODE>disass $pc-32 $pc+32<BR>
+  info all-registers</CODE></P>
 
-<P>Dann führe einfach den folgenden Befehl auf der Konsole aus:</P>
+<P>Dann f&uuml;hre einfach den folgenden Befehl auf der Konsole aus:</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=Kommandodatei &gt; mplayer.bug</CODE></P>
-
-<P><B>Wie Informationen eines reproduzierbaren Absturzes bewahrt werden können:</B></P>
-
-<P>Kompiliere <B>MPlayer</B> mit eingeschaltetem Debugging mit:<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;make</CODE><BR>
-Lass dann <B>MPlayer</B> mit gdb laufen:<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb mplayer</CODE></P>
-
-<P>Du benutzt nun gdb. Gib folgendes ein:<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;run -v [Optionen von mplayer] dateiname</CODE><BR>
-und reproduziere deinen Absturz. Sobald du dies getan hast, wird gdb zur Eingabeaufforderung
-zurückkehren, wo folgendes einzugeben hast:<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;disass $eip-32 $eip+32</CODE><BR>
-Sende uns die gesamte Ausgabe obiger Dinge!</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch
+--command=command_file &gt; mplayer.bug</CODE></P>
 
 <H4>Allgemeine Hinweise</H4>
 
-<P>Wenn etwas sehr groß ist (Log-Dateien z.B.) ist es besser diese gezippt
-auf den FTP hochzuladen und nur den Pfad-/Dateinamen im Fehlerbericht
-anzugebeben.</P>
+<P>Wenn etwas sehr gro&szlig; ist (Log-Dateien z.B.), so ist es besser, diese
+komprimiert (gzip und bzip2 werden bevorzugt) auf den FTP hochzuladen und nur
+den Pfad/Dateinamen im Fehlerbericht anzugebeben. Unsere Maillisten haben eine
+Beschr&auml;ankung der Mailgr&ouml;&szlig;e auf 80k. Wenn du etwas
+gr&ouml;&szlig;eres hast, dann komprimier es oder uploade es auf den
+FTP-Server.</P>
 
-<H4>Ich weiss was ich mache...</H4>
+<H4>Ich wei&szlig;, was ich mache...</H4>
 
-<P>Wenn du einen Fehlerbericht wie oben beschrieben geschreiben hast und du dir sicher bist
-das ein Bug in <B>MPlayer</B>, nicht ein Problem mit dem Kompiler oder eine defekte Datei ist kannst
-du auch der mplayer-advusers - Mailingliste beitreten und dort posten wenn du alle
-Dokumentation gelesen hast und dein Soundtreiber ok ist. Du wirst schnellere und besser
-Antworten erhalten.<BR><BR>
-Aber sei gewarnt: Wenn du Newbiefragen oder Fragen welche hier beantwortet werden schickst, 
-wirst du sofort gebannt anstatt eine Antwort zu erhalten.<BR>
-Also ärgere uns nicht und trette der -advusers-Liste nur bei, wenn du weisst was du machst und 
-du dich wie ein erfahrener MPlayer Benutzer oder Entwickler fühlst. Wenn du wirklich ein erfahrener Benutzer 
-bist sollte es kein Problem für dich sein dich anzumelden...</P>
+<P>Wenn du einen Fehlerbericht wie oben beschrieben geschreiben hast und du dir
+sicher bist, dass es ein Bug in <B>MPlayer</B> und nicht ein Problem mit dem
+Compiler oder eine defekte Datei ist, dann kannst du auch der
+mplayer-advusers-Mailingliste beitreten und dort posten, wenn du alle
+Dokumentation gelesen hast und dein Soundtreiber ok ist. Du wirst dort
+schnellere und besser Antworten erhalten.<BR><BR> Aber sei gewarnt: Wenn du
+Newbiefragen oder Fragen stellst, die in dieser Anleitung bereits beantwortet
+werden, wirst du ignoriert oder angemeckert,  anstatt eine Antwort zu
+erhalten.<BR> Also &auml;rgere uns nicht und trette der -advusers-Liste nur
+bei, wenn du wei&szlig;t, was du machst und  du dich wie ein erfahrener
+<B>MPlayer</B>-Benutzer oder -Entwickler f&uuml;hlst. Wenn du wirklich ein
+erfahrener Benutzer  bist sollte es kein Problem f&uuml;r dich sein, dich
+anzumelden...</P>
 
 </BODY>
 </HTML>
