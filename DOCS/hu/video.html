@@ -957,7 +957,7 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 
 <H4><A NAME=mpegdec>2.3.1.3 MPEG dekóderek kártyák</A></H4>
 
-<H4><A NAME=dvb>2.3.1.3.1 DVB</A></H4>
+<H4><A NAME=dvb>2.3.1.3.1 DVB ki-, és bemenet</A></H4>
 
 <P>Az MPlayer támogatja a Siemens, Technotrend, Galaxis, Hauppage és hasonló
   gyártóktól származó Siemens DVB chipsetet. A legújabb DVB meghajtók a
@@ -1051,6 +1051,70 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
  4:3-es TV-hez: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
 16:9-es TV-hez: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </PRE>
+
+<H4>A DVB kártya használata digitális TV vételére (DVB bemeneti modul)</H4>
+
+<P>Legelõszöris mindenképpen add meg a <CODE>dvb_shutdown_timeout=0</CODE>
+  paramétert a <CODE>dvb-core</CODE> kernelmodulnak, különben az MPlayer
+  10 másodperc múlva leáll.</P>
+
+<P>Installálva kell lennie a <CODE>scan</CODE> és <CODE>szap/tzap/czap</CODE>
+  programoknak. Ezek mindegyike megtalálható a meghajtó csomagjában.</P>
+
+<P>A <A HREF="http://www.sf.net/projects/dvbtools/"><CODE>dvbstream</CODE></A>
+  nevû programmal ellenõrizd hogy a meghajtó rendesen mûködik-e. Ez a program
+  a DVB bemeneti modul alapja.</P>
+
+<P>Állíts össze egy <CODE>~/.mplayer/channels.conf</CODE> file-t, mégpedig
+  olyan szintaxissal amit a <CODE>szap/tzap/czap</CODE> programok megértenek.
+  Alternatív megoldásként használható a <CODE>scan</CODE> program, mely
+  automatikusan összeállítja ezt.</P>
+
+<P>Bizonyosodj meg arról, hogy <B>csak</B> "Free to Air" (ingyen sugározható)
+  csatornák vannak a <CODE>channels.conf</CODE> file-odban, mivel az MPlayer
+  más csatornákkal kiakad.</P>
+
+<P>A listában szereplõ elsõ csatornára váltás:</P>
+
+<PRE>
+  mplayer dvb://
+</PRE>
+
+<P>Ha egy adott csatorára szeretnél váltani, mint például az <CODE>R1</CODE>,
+  az MPlayert a következõképpen indítsd:</P>
+
+<PRE>
+  mplayer dvb://R1
+</PRE>
+
+<P>Csatornaváltásra a <CODE>'h'</CODE> (következõ) és a <CODE>'k'</CODE>
+  (elõzõ) gombok használhatóak, vagy használhatod az <CODE>OSD</CODE> menût
+  (utóbbi megfelelõen konfigurált <A HREF="documentation.html#subtitles_osd">OSD
+  alrendszert</A> is igényel</A>).</P>
+
+<P>Ha az <CODE>~/.mplayer/menu.conf</CODE> file tartalmazza a
+  <B>&lt;dvbsel&gt;</b> bejegyzést, amelyet például az
+  <CODE>etc/dvb-menu.conf</CODE> file tartalmaz (ezzel a file-al egyébként
+  felül lehet írni a <CODE>~/.mplayer/menu.conf</CODE> file-t), akkor a
+  fõmenû tartalmazni fog egy olyan almenût, melyben kiválaszhatóak a
+  <CODE>channels.conf</CODE> file-ban megadott csatornák.</P>
+
+<P>Ha egy mûsort lemezre akarsz menteni, arra a következõ parancs szolgál:</P>
+
+<PRE>
+  mplayer -dumpfile r1.ts -dumpstream dvb://R1
+</PRE>
+
+<P>Ha át szeretnéd kódolni:</P>
+
+<PRE>
+  mencoder -o r1.avi -ovc xvid -xvidenctopts bitrate=800 -oac mp3lame -lameopts
+cbr:br=128 -vf ci dvb://R1
+</PRE>
+
+<P>Olvasd el a man lapot, amiben fel vannak sorolva a DVB bemeneti modulnak
+  átadható opciók.</P>
+
 
 <H4>A JÖVÕ</H4>
 

@@ -145,7 +145,7 @@
         </UL>
 	<LI><A HREF="video.html#mpegdec">2.3.1.3 MPEG dekóder kártyák</A></LI>
         <UL>
-	  <LI><A HREF="video.html#dvb">2.3.1.3.1 DVB</A></LI>
+	  <LI><A HREF="video.html#dvb">2.3.1.3.1 DVB ki-, és bemenet</A></LI>
 	  <LI><A HREF="video.html#dxr2">2.3.1.3.2 DXR2</A></LI>
 	  <LI><A HREF="video.html#dxr3">2.3.1.3.3 DXR3/Hollywood+</A></LI>
         </UL>
@@ -1463,8 +1463,8 @@ end
 
 <H2><A NAME=streaming>3.3 Lejátszás hálózatról, vagy pipe-on keresztül</A></H2>
 
-<P>Az <B>MPlayer</B> a HTTP vagy MMS protokollal tud lejátszani hálózaton
-  keresztül.</P>
+<P>Az <B>MPlayer</B> a HTTP, FTP, RTP, RTSP, vagy MMS protokollal tud
+  lejátszani hálózaton keresztül.</P>
 
 <P>A lejátszás maga egyszerûen az URL megadásával történik. Az <B>MPlayer</B>
   automatikusan kezelni tudja továbbá a http_proxy környezeti változót.
@@ -1720,11 +1720,14 @@ end
   <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7
   fejléceket</A>.</P>
 
-<P>Mûködnek a QuickTime és Real DLL-ek is. Ehhez a fordítást a
-  <CODE>--enable-qtx</CODE> és <CODE>--enable-real</CODE> opciókkal kell
-  végezni, a codec-eket pedig az alapértelmezett Windows DLL keresési útvonalba
-  kell helyezni, ami Windows verziótól függõen <CODE>C:\WINNT\system32</CODE>
-  vagy <CODE>C:\Windows\system</CODE>.</P>
+<P>Mûködnek a Win32-es, a QuickTime, és a Real DLL-ek is. Tedd a codec-eket
+  valahova az parancsútvonalba (path), vagy fordításnál add meg a
+  <CODE>--with-codecsdir=c:/path/to/your/codecs</CODE> opciót (vagy Cygwin-en
+  használható még a
+  <CODE>--with-codecsdir=/path/to/your/codecs</CODE> forma is). Néhány
+  visszajelzés arra mutat, hogy egyes rendszereken a Real codec-eknek
+  írhatóaknak kell lenniük a felhasználó számára. Probléma esetén tehát ezt az
+  eljárást érdemes követni.</P>
 
 <P>Letölthetõek Sascha Sommer által készített elõre lefordított binárisok is a
   <A HREF="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/">honlapunkról</A>.

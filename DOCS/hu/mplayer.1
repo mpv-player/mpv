@@ -72,14 +72,62 @@ mencoder \- Filmenkóder Linux alá
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ dvd | vcd | cdda | cddb | tv ] ://sáv
+.RI [ mms[t] | http | http_proxy | rt[s]p | ftp ] ://
+[felh.név:jelszó@]\fIURL\fP[:port] [opciók]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I dvd://title
 [opciók]
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p ] ://
-[felh.név:jelszó@]\fIURL\fP[:port] [opciók]
+.I vcd://sáv[/eszköznév]
+[opciók]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I tv://[csatorna]
+[opciók]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I mf://filemaszk
+[opciók]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I [cdda|cddb]://sáv[:sebesség][/eszköznév]
+[opciók]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I cue://file[:sáv]
+[opciók]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I sdp://file
+[opciók]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I mpst://gépnév[:port]/URL
+[opciók]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I dvb://csatorna
+[opciók]
 .br
 .in
 .B mencoder
@@ -508,6 +556,24 @@ Hasznos DVD rippeléshez, vagy hálozati lejátszáshoz.
 Nyers, tömörítetlen video stream kiírása a ./\:stream.dump file-ba
 (nem túl hasznos)
 .TP
+.B \-dvbin <opciók>
+Átadja a következõ paramétereket a DVB modulnak, így felülírhatók az
+alapértelmezett beállítások:
+
+.PD 0
+.RSs
+.IPs card=<1\-4>
+Megadható a használandó kártya száma 1\-4\-ig. (alap: 1).
+.IPs file=<file>
+Megmondja az MPlayer-nek, hogy a csatornalistát a <file> nevû file-ból
+olvassa.
+.IPs type=<SAT|TER|CBL>
+Azt adja meg, hogy a kártya típusa SAT (szatelit), TER (földi), vagy CBL
+(kábel). Ha nincs megadva, autodetektálásra kerül sor.
+.RE
+.PD 1
+.
+.TP
 .B \dvd://<cím\ id>
 Megadja az MPlayernek hogy mely ID-vel ellátott filmeket játssza le.
 Például néha az '1'-es egy elõzetes, és a '2'-es az igazi film.
@@ -828,10 +894,6 @@ A jelenlegi könyvtárban hoz létre egy dumpsub.smi file-t.
 VOB stream-ekbõl a felirat stream kimentése.
 Lásd még -dump*sub és -vobsubout* opciókat is.
 .TP
-.B \-ifo <vobsub\ ifo\ file>
-Itt adható meg hogy a VOBSUB feliratfile paletta és frame adatai melyik
-file-ban tárolódnak.
-.TP
 .B \-ffactor <szám>
 Font alphamap-jának megadása.
 Lehetséges:
@@ -849,6 +911,9 @@ vastag fekete körvonal
 .RE
 .PD 1
 .
+.TP
+.B \-flip_hebrew
+Feliratok megfordítása FriBiDi-vel.
 .TP
 .B \-font <útvonal\ a\ font.desc\ filehoz>
 Az OSD/\:SUB betûtipusok megadott könyvtárban történõ keresése
@@ -870,6 +935,14 @@ A \-subfont-* opciók csak FreeType támogatással használhatóak.
 .RE
 .PD 1
 .
+.TP
+.B \-fribidi_charset <karakterkészlet\ neve>
+Nem UTF8 felirat esetén itt adható meg a FriBiDi-nek adandó karakterkészlet
+neve. Alapértelmezésben "ISO8859-8".
+.TP
+.B \-ifo <vobsub\ ifo\ file>
+Itt adható meg hogy a VOBSUB feliratfile paletta és frame adatai melyik
+file-ban tárolódnak.
 .TP
 .B \-noautosub
 Automatikus feliratkeresés és betöltés kikapcsolása.
@@ -1870,20 +1943,90 @@ a használata
 .PD 1
 .
 .TP
-.B \-vf <szûrõ1[=opciók],szûrõ2,...>
-Vesszõvel elválasztott lista a használandó video szûrõkrõl, és opcióikról.
+.B \-vfm <meghajtó1,meghajtó2,...>
+Megadható egy prioritási lista a használandó video codec-ekrõl, a codecs.conf
+file-ban szereplõ nevük alapján.
+Ha egyik megadott codec sem használható, az alapértelmezett sorrend lép
+életbe.
+
+.br
+A teljes listához lásd a \-vfm help opciót.
+
+.I PÉLDA:
+.PD 0
+.RSs
+.IPs "\-vfm ffmpeg,dshow,vfw"
+elõször a libavcodec, majd a DirectShow, végül a VFW codec-ek használata,
+hiba esetén alapértelmezés
+.IPs "\-vfm xanim"
+elõször XAnim codec-ek használata
+.RE
+.PD 1
+.
+.TP
+.B \-x <x> (csak MPLAYER)
+Kép nagyítása x szélességûre (ha van sw/\:hw nagyítás).
+Kikapcsolja a képarány kiszámolását.
+.TP
+.B \-xvidopts <opció1:opció2:...>
+XviD-del történõ dekódolásnál annak paramétereit itt lehet átállítani.
+
+.PD 0
+.RSs
+.IPs dr2\ \ 
+2-es Direct Rendering bekapcsolása.
+.IPs nodr2
+2-es Direct Rendering kikapcsolása.
+.RE
+.PD 1
+.
+.TP
+.B \-xy <x>
+.PD 0
+.RSs
+.IPs "x<=8"
+Kép nagyítása <x>-szeresre.
+.IPs "x>8\ "
+Szélesség beállítása <x>-re, majd a képarány kiszámítása.
+.RE
+.PD 1
+.
+.TP
+.B \-y <y> (csak MPLAYER)
+Kép nagyítása y magasságra (ha van sw/\:hw nagyítás).
+Kikapcsolja a képarány kiszámítását.
+.TP
+.B \-zoom \ 
+Szoftveres nagyítás használata, ha rendelkezésre áll.
+Használható a nagyítás kikényszerítésére \-vf scale szûrõ használatával.
 
 .I MEGJEGYZÉS:
 .br
+A \-vf scale figyelmen kívül hagyja az \-x / \-y / \-xy / \-fs / \-aspect
+opciókat a \-zoom opció megadása nélkül.
+
+
+.SH "VIDEO SZÛRÕK"
+A video szûrõk a video stream módosítására szolgáló pluginek. A szintaxis:
+.TP
+.B \-vf <szûrõ1[=opciók],szûrõ2,...>
+Vesszõvel elválasztott lista a használandó video szûrõkkel, és opcióikkal.
+.TP
+.B \-vop <...,szûrõ3[=opciók],szûrõ2,szûrõ1> (RÉGI)
+Vesszõvel elválasztott lista a használandó video szûrõkkel (
+.B fordított
+sorrend!), és opcióikkal. A \-vf opció újabb, mindenképpen azt érdemes
+használni.
+.RE
+
 A paraméterek opciónálisak, és elhagyásuk esetén beállnak egy alap értékre.
 A -1 érték az alapértelmezés megtartását jelenti.
 A w:h paraméter jelentése szélesség x magasság (pixelben), x:y a kép bal felsõ
 sarkától számított távolság.
-.br
 A rendelkezésre álló szûrõk listája a \-vf help opcióval kérhetõ le.
-.br
+
 A szûrõk:
-.
+
 .RSs
 .IPs crop[=w:h:x:y]
 A kép megadott részének kivágása, és a többi eldobása.
@@ -2186,69 +2329,7 @@ Az 1 jelenti a törlést, a 0-nál a kép csak rá lesz illesztve a régire,
 a képernyõnek csak egy része frissül.
 .REss
 .RE
-.
-.TP
-.B \-vfm <meghajtó1,meghajtó2,...>
-Megadható egy prioritási lista a használandó video codec-ekrõl, a codecs.conf
-file-ban szereplõ nevük alapján.
-Ha egyik megadott codec sem használható, az alapértelmezett sorrend lép
-életbe.
-
-.br
-A teljes listához lásd a \-vfm help opciót.
-
-.I PÉLDA:
-.PD 0
-.RSs
-.IPs "\-vfm ffmpeg,dshow,vfw"
-elõször a libavcodec, majd a DirectShow, végül a VFW codec-ek használata,
-hiba esetén alapértelmezés
-.IPs "\-vfm xanim"
-elõször XAnim codec-ek használata
-.RE
 .PD 1
-.
-.TP
-.B \-x <x> (csak MPLAYER)
-Kép nagyítása x szélességûre (ha van sw/\:hw nagyítás).
-Kikapcsolja a képarány kiszámolását.
-.TP
-.B \-xvidopts <opció1:opció2:...>
-XviD-del történõ dekódolásnál annak paramétereit itt lehet átállítani.
-
-.PD 0
-.RSs
-.IPs dr2\ \ 
-2-es Direct Rendering bekapcsolása.
-.IPs nodr2
-2-es Direct Rendering kikapcsolása.
-.RE
-.PD 1
-.
-.TP
-.B \-xy <x>
-.PD 0
-.RSs
-.IPs "x<=8"
-Kép nagyítása <x>-szeresre.
-.IPs "x>8\ "
-Szélesség beállítása <x>-re, majd a képarány kiszámítása.
-.RE
-.PD 1
-.
-.TP
-.B \-y <y> (csak MPLAYER)
-Kép nagyítása y magasságra (ha van sw/\:hw nagyítás).
-Kikapcsolja a képarány kiszámítását.
-.TP
-.B \-zoom \ 
-Szoftveres nagyítás használata, ha rendelkezésre áll.
-Használható a nagyítás kikényszerítésére \-vf scale szûrõ használatával.
-
-.I MEGJEGYZÉS:
-.br
-A \-vf scale figyelmen kívül hagyja az \-x / \-y / \-xy / \-fs / \-aspect
-opciókat a \-zoom opció megadása nélkül.
 
 
 .SH "AZ ENKÓDOLÁS OPCIÓI (CSAK MENCODER)"
