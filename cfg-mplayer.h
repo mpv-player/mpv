@@ -77,6 +77,11 @@ extern int osd_level;
 extern char *ao_outputfilename;
 extern int ao_pcm_waveheader;
 
+#ifdef HAVE_DIRECTX
+extern int adapter_num;
+extern int refresh_rate;
+#endif
+
 #ifdef HAVE_X11
 extern char *mDisplayName;
 extern int WinID;
@@ -286,7 +291,11 @@ m_option_t mplayer_opts[]={
 
 	{"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nograbpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-
+	
+#ifdef HAVE_DIRECTX
+    {"adapter", &adapter_num, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
+    {"refreshrate",&refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
+#endif
 #ifdef HAVE_X11
 	// x11,xv,xmga,xvidix
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},
