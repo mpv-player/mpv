@@ -120,6 +120,9 @@ static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 		{"IYUV",  IMGFMT_IYUV},
 		{"YVU9",  IMGFMT_YVU9},
 		{"IF09",  IMGFMT_IF09},
+		{"444P",  IMGFMT_444P},
+		{"422P",  IMGFMT_422P},
+		{"411P",  IMGFMT_411P},
 
 		{"YUY2",  IMGFMT_YUY2},
 		{"UYVY",  IMGFMT_UYVY},
@@ -268,7 +271,7 @@ static short get_driver(char *s,int audioflag)
 	};
         char **drv=audioflag?audiodrv:videodrv;
         int i;
-        
+
         for(i=0;drv[i];i++) if(!strcmp(s,drv[i])) return i;
 
 	return -1;

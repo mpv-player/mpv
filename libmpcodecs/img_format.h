@@ -43,6 +43,11 @@
 #define IMGFMT_Y8   0x20203859
 #define IMGFMT_NV12 0x3231564E
 
+/* unofficial Planar Formats, FIXME if official 4CC exists */
+#define IMGFMT_444P 0x50343434
+#define IMGFMT_422P 0x50323234
+#define IMGFMT_411P 0x50313134
+
 /* Packed YUV Formats */
 
 #define IMGFMT_IUYV 0x56595549

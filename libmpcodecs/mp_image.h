@@ -112,6 +112,30 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->chroma_x_shift=2;
 	mpi->chroma_y_shift=2;
 	return;
+    case IMGFMT_444P:
+	mpi->flags|=MP_IMGFLAG_PLANAR;
+	mpi->bpp=24;
+	mpi->chroma_width=(mpi->width);
+	mpi->chroma_height=(mpi->height);
+	mpi->chroma_x_shift=0;
+	mpi->chroma_y_shift=0;
+	return;
+    case IMGFMT_422P:
+	mpi->flags|=MP_IMGFLAG_PLANAR;
+	mpi->bpp=16;
+	mpi->chroma_width=(mpi->width>>1);
+	mpi->chroma_height=(mpi->height);
+	mpi->chroma_x_shift=1;
+	mpi->chroma_y_shift=0;
+	return;
+    case IMGFMT_411P:
+	mpi->flags|=MP_IMGFLAG_PLANAR;
+	mpi->bpp=12;
+	mpi->chroma_width=(mpi->width>>2);
+	mpi->chroma_height=(mpi->height);
+	mpi->chroma_x_shift=2;
+	mpi->chroma_y_shift=0;
+	return;
     case IMGFMT_Y800:
     case IMGFMT_Y8:
 	/* they're planar ones, but for easier handling use them as packed */
