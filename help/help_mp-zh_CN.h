@@ -1,5 +1,5 @@
 // Translated by Lu Ran <hephooey@fastmail.fm>
-// Synced with help_mp-en.h 1.100
+// Synced with help_mp-en.h 1.105
 
 // ========================= MPlayer help ===========================
 
@@ -132,7 +132,7 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: 备注: %s\n"
 #define MSGTR_Video_NoVideo "视频: no video\n"
 #define MSGTR_NotInitializeVOPorVO "\n致命错误: 无法初始化视频插件(-vop)或视频输出(-vo) !\n"
-#define MSGTR_Paused "\n================= 暂停 =================\r"
+#define MSGTR_Paused "\n  =====  暂停  =====\r"
 #define MSGTR_PlaylistLoadUnable "\n无法装载播放列表 %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- “非法指令”导致MPlayer崩溃。\n"\
