@@ -17,6 +17,7 @@
 
 #include "video_out.h"
 #include "aspect.h"
+#include "geometry.h"
 #include "help_mp.h"
 #include "../osdep/timer.h"
 
@@ -1313,7 +1314,7 @@ void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask)
 #ifdef HAVE_XINERAMA
 void vo_x11_xinerama_move(Display *dsp, Window w)
 {
-	if(XineramaIsActive(dsp))
+	if(XineramaIsActive(dsp) && ! geometry_xy_changed)
 	{
 		 /* printf("XXXX Xinerama screen: x: %hd y: %hd\n",xinerama_x,xinerama_y); */
 		XMoveWindow(dsp,w,xinerama_x,xinerama_y);
