@@ -77,8 +77,8 @@ mencoder \- Movie Encoder for Linux
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p ] :// [user:passwd@] URL
-[:port] [options]
+.RI [ mms[t] | http | http_proxy | rt[s]p ] ://
+[user:passwd@]\fIURL\fP[:port] [options]
 .br
 .in
 .B mencoder
@@ -292,8 +292,10 @@ Load skin from the given directory (WITHOUT path name).
 .PD 0
 .RSs
 .IPs "\-skin fittyfene"
-tries /usr/\:local/\:share/\:mplayer/\:Skin/\:fittyfene first and
-~/.mplayer/\:Skin/\:fittyfene afterwards
+tries Skin/fittyfene.
+It first checks
+/usr/local/share/mplayer/
+and afterwards ~/.mplayer/.
 .RE
 .PD 1
 .
@@ -1016,7 +1018,7 @@ volume (volume plugin only)
 .IPs mul=<value>
 stereo coefficient (default: 2.5) (extrastereo plugin only)
 .IPs softclip
-compressor/\:'soft\-clipping' capabilities (volume plugin only)
+compressor / 'soft\-clipping' capabilities (volume plugin only)
 .RE
 .
 .TP
@@ -1792,7 +1794,7 @@ Realtime MPEG1 encoder for use with DVB/\:DXR3 (libavcodec)
 Realtime MPEG1 encoder for use with DVB/\:DXR3 (libfame)
 .IPs dvbscale[=aspect]
 Set up optimal scaling for DVB cards.
-(aspect=DVB_HEIGHT*ASPECTRATIO, default: 768)
+(aspect = DVB_HEIGHT*ASPECTRATIO, default: 768)
 .IPs cropdetect[=0\-255]
 Calculates necessary cropping parameters and prints the recommended parameters
 to stdout.
@@ -2309,7 +2311,7 @@ lt(a,b): is 1 if a<b, 0 otherwise
 .br
 eq(a,b): is 1 if a==b,0 otherwise
 .br
-sin,cos,tan,sinh,cosh,tanh,exp,log,abs
+sin, cos, tan, sinh, cosh, tanh, exp, log, abs
 .
 .IPs vrc_override=<options>
 User specified quality for specific parts (pass\ 1/\:2).
