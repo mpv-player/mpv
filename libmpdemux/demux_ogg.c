@@ -652,6 +652,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
   stream_t *s;
   char* buf;
   int np,s_no, n_audio = 0, n_video = 0, n_text = 0;
+  int audio_id = -1, video_id = -1, text_id = -1;
   ogg_sync_state* sync;
   ogg_page* page;
   ogg_packet pack;
@@ -889,6 +890,8 @@ int demux_ogg_open(demuxer_t* demuxer) {
           mp_msg(MSGT_DEMUX, MSGL_V, "OGG stream %d is text\n", ogg_d->num_sub);
 	  ogg_d->subs[ogg_d->num_sub].samplerate= get_uint64(&st->time_unit)/10;
 	  ogg_d->subs[ogg_d->num_sub].text = 1;
+          if (demuxer->sub->id == n_text)
+            text_id = ogg_d->num_sub;
           n_text++;
           demux_ogg_init_sub();
 	//// Unknown header type
@@ -903,26 +906,28 @@ int demux_ogg_open(demuxer_t* demuxer) {
       if(sh_a) {
 	// If the audio stream is not defined we took the first one
 	if(demuxer->audio->id == -1) {
-	  demuxer->audio->id = ogg_d->num_sub;
+	  demuxer->audio->id = n_audio - 1;
 //	  if(sh_a->wf) print_wave_header(sh_a->wf);
 	}
 	/// Is it the stream we want
-	if(demuxer->audio->id == ogg_d->num_sub) {
+	if(demuxer->audio->id == (n_audio - 1)) {
 	  demuxer->audio->sh = sh_a;
 	  sh_a->ds = demuxer->audio;
 	  ds = demuxer->audio;
+          audio_id = ogg_d->num_sub;
 	}
       }
       if(sh_v) {
 	/// Also for video
 	if(demuxer->video->id == -1) {
-	  demuxer->video->id = ogg_d->num_sub;
+	  demuxer->video->id = n_video - 1;
 //	  if(sh_v->bih) print_video_header(sh_v->bih);
 	}
-	if(demuxer->video->id == ogg_d->num_sub) {
+	if(demuxer->video->id == (n_video - 1)) {
 	  demuxer->video->sh = sh_v;
 	  sh_v->ds = demuxer->video;
 	  ds = demuxer->video;
+          video_id = ogg_d->num_sub;
 	}
       }
       /// Add the header packets if the stream isn't seekable
@@ -939,12 +944,18 @@ int demux_ogg_open(demuxer_t* demuxer) {
   /// Finish to setup the demuxer
   demuxer->priv = ogg_d;
 
-  if(!n_video)
+  if(!n_video || (video_id < 0))
     demuxer->video->id = -2;
-  if(!n_audio)
+  else
+    demuxer->video->id = video_id;
+  if(!n_audio || (audio_id < 0))
     demuxer->audio->id = -2;
-  if(!n_text)
+  else
+    demuxer->audio->id = audio_id;
+  if(!n_text || (text_id < 0))
     demuxer->sub->id = -2;
+  else
+    demuxer->sub->id = text_id;
 
   ogg_d->final_granulepos=0;
   if(!s->end_pos)
