@@ -35,6 +35,7 @@
 #include <linux/errno.h>
 #include <linux/malloc.h>
 #include <linux/pci.h>
+#include <linux/ioport.h>
 #include <linux/init.h>
 
 #include "mga_vid.h"
@@ -482,7 +483,7 @@ static void enable_irq(){
 	long int cc;
 
 	cc = readl(mga_mmio_base + IEN);
-	printk(KERN_ALERT "*** !!! IRQREG = %d\n", (int)(cc&0xff));
+//	printk(KERN_ALERT "*** !!! IRQREG = %d\n", (int)(cc&0xff));
 
 	writeb( 0x11, mga_mmio_base + CRTCX);
 	
@@ -671,17 +672,17 @@ static int mga_vid_find_card(void)
 	if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G400, NULL)))
 	{
 		is_g400 = 1;
-		printk(KERN_DEBUG "mga_vid: Found MGA G400\n");
+		printk(KERN_INFO "mga_vid: Found MGA G400\n");
 	}
 	else if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G200_AGP, NULL)))
 	{
 		is_g400 = 0;
-		printk(KERN_DEBUG "mga_vid: Found MGA G200 AGP\n");
+		printk(KERN_INFO "mga_vid: Found MGA G200 AGP\n");
 	}
 	else if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G200_PCI, NULL)))
 	{
 		is_g400 = 0;
-		printk(KERN_DEBUG "mga_vid: Found MGA G200 PCI\n");
+		printk(KERN_INFO "mga_vid: Found MGA G200 PCI\n");
 	}
 	else
 	{
@@ -700,18 +701,17 @@ static int mga_vid_find_card(void)
 	mga_mmio_base = ioremap_nocache(dev->base_address[1] & PCI_BASE_ADDRESS_MEM_MASK,0x4000);
 	mga_mem_base =  dev->base_address[0] & PCI_BASE_ADDRESS_MEM_MASK;
 #endif
-//	printk("mga_vid: MMIO at 0x%p\n", mga_mmio_base);
-	printk(KERN_DEBUG "syncfb (mga): MMIO at 0x%p IRQ: %d\n", mga_mmio_base, mga_irq);
-	printk(KERN_DEBUG "mga_vid: Frame Buffer at 0x%08lX\n", mga_mem_base);
+	printk(KERN_INFO "mga_vid: MMIO at 0x%p IRQ: %d  framebuffer: 0x%08lX\n", mga_mmio_base, mga_irq, mga_mem_base);
 
 	pci_read_config_dword(dev,  0x40, &card_option);
 	printk(KERN_DEBUG "OPTION word: 0x%08x\n", card_option);
+	printk(KERN_DEBUG "  memory: %d   %s\n", (card_option>>10)&7, ((card_option>>14)&1)?"SGRAM":"SDRAM");
 
 //	temp = (card_option >> 10) & 0x17;
 
 #ifdef MGA_MEMORY_SIZE
 	mga_ram_size = MGA_MEMORY_SIZE;
-	printk(KERN_DEBUG "mga_vid: hard-coded RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
+	printk(KERN_INFO "mga_vid: hard-coded RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
 
 #else
 	if (is_g400){
@@ -732,7 +732,7 @@ static int mga_vid_find_card(void)
 	    }
 	}
 
-	printk(KERN_DEBUG "mga_vid: detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
+	printk(KERN_INFO "mga_vid: detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
 #endif
 
 	if ( mga_irq != -1 ) {
@@ -770,7 +770,7 @@ static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 	if(remap_page_range(vma->vm_start, mga_mem_base + mga_src_base,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 	{
-		printk(KERN_INFO "mga_vid: error mapping video memory\n");
+		printk(KERN_ERR "mga_vid: error mapping video memory\n");
 		return(-EAGAIN);
 	}
 
@@ -848,7 +848,7 @@ static int mga_vid_initialize(void)
 {
 	mga_vid_in_use = 0;
 
-	printk(KERN_DEBUG "Matrox MGA G200/G400 YUV Video interface v0.01 (c) Aaron Holtzman \n");
+	printk(KERN_INFO "Matrox MGA G200/G400 YUV Video interface v0.01 (c) Aaron Holtzman \n");
 	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
 	{
 		printk(KERN_ERR "mga_vid: unable to get major: %d\n", MGA_VID_MAJOR);
@@ -880,7 +880,7 @@ void cleanup_module(void)
 		iounmap(mga_mmio_base);
 
 	//FIXME turn off BES
-	printk(KERN_DEBUG "mga_vid: Cleaning up module\n");
+	printk(KERN_INFO "mga_vid: Cleaning up module\n");
 	unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 }
 
