@@ -32,9 +32,9 @@
     can come from a previous 3-pass encoding (it interferes with current
     one)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
-    vcodec=mpeg4:vpass=1:more_options -oac copy -o movie.avi<BR>
+    vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
-    vcodec=mpeg4:vpass=2:more_options -oac copy -o movie.avi</CODE></P>
+    vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 <P><U><B>3-pass encoding:</B></U> this is an extension of 2-pass encoding,
   where the audio encoding takes place in a separate pass. This method enables
@@ -45,7 +45,7 @@
   <LI>Remove conflicting temporary file:
     <P><CODE>rm frameno.avi</CODE></P></LI>
   <LI>First pass:
-    <P><CODE>mencoder &lt;file/DVD&gt; -ovc frameno -oac mp3lame -lameopts vbr=3:more_options -o frameno.avi</CODE></P>
+    <P><CODE>mencoder &lt;file/DVD&gt; -ovc frameno -oac mp3lame -lameopts vbr=3 -o frameno.avi</CODE></P>
     <P>An audio-only avi file will be created, containing
       <B>only</B> the requested audio stream. Don't forget <CODE>-lameopts</CODE>,
       if you need to set it. If you were encoding a long movie, MEncoder
@@ -72,11 +72,11 @@
   which can come from a previous 3-pass encoding (it interferes with current
   one)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
-    -o frameno.avi -oac mp3lame -lameopts vbr=3:more_options<BR>
+    -o frameno.avi -oac mp3lame -lameopts vbr=3<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
-    -lavcopts vcodec=mpeg4:vpass=1:more_options -oac copy -o movie.avi<BR>
+    -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
-    -lavcopts vcodec=mpeg4:vpass=2:more_options -oac copy -o movie.avi</CODE></P>
+    -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 <H3><A NAME="rescaling">2.4.2 Rescaling movies</A></H3>
 
@@ -94,7 +94,7 @@
 <H5>Usage:</H5>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder input.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4:more_options -vop scale=640:480 -oac copy -o
+  vcodec=mpeg4 -vop scale=640:480 -oac copy -o
   output.avi</CODE></P>
 
 
