@@ -12,8 +12,18 @@
 #include <divx4.h>
 #include <xvid.h>
 
-#ifndef PMV_EARLYSTOP16
-  #define XVID_DEV
+
+#ifdef XVID_API_UNSTABLE
+#warning *******************************************************************
+#warning **                                                               **
+#warning **  Y O U '' R E   U S I N G   U N S T A B L E   S O F T W A R E  **
+#warning **                                                               **
+#warning ** There are bugs, this code could crash, could blow up your PC  **
+#warning ** or the whole building and do many other nasty things !        **
+#warning **                                                               **
+#warning ** If you want stable code use stable XViD releases (0.9.x).     **
+#warning **                                                               **
+#warning *******************************************************************
 #endif
 
 static vd_info_t info = 
@@ -53,6 +63,22 @@ static int init(sh_video_t *sh){
   XVID_DEC_PARAM dec_p;
   priv_t* p;
   int cs;
+
+#ifdef XVID_API_UNSTABLE
+    mp_msg (MSGT_DECVIDEO, MSGL_WARN,
+	    "\n"
+	    "*******************************************************************\n"
+	    "**                                                               **\n"
+	    "**  Y O U ' R E   U S I N G   U N S T A B L E   S O F T W A R E  **\n"
+	    "**                                                               **\n"
+            "** There are bugs, this code could crash, could blow up your PC  **\n"
+	    "** or the whole building and do many other nasty things !        **\n"
+	    "**                                                               **\n"
+	    "** If you want stable code use stable XViD releases (0.9.x).     **\n"
+	    "**                                                               **\n"
+	    "*******************************************************************\n"
+	    "\n");
+#endif
 
   memset(&ini,0,sizeof(XVID_INIT_PARAM));
   memset(&dec_p,0,sizeof(XVID_DEC_PARAM));
@@ -169,7 +195,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
   dec.bitstream = data;
   dec.length = len;
-#ifdef XVID_DEV
+#ifdef XVID_API_UNSTABLE
   dec.general |= XVID_DEC_LOWDELAY;
   dec.general |= XVID_DEC_DEBLOCKY;
   dec.general |= XVID_DEC_DEBLOCKUV;

@@ -22,16 +22,28 @@
 #include <xvid.h>
 #include "xvid_vbr.h"
 
-#ifndef PMV_EARLYSTOP16
-  #define XVID_DEV
-#endif
-
 #include "cfgparser.h"
+
+
+#ifdef XVID_API_UNSTABLE
+#warning *******************************************************************
+#warning **                                                               **
+#warning **  Y O U '' R E   U S I N G   U N S T A B L E   S O F T W A R E  **
+#warning **                                                               **
+#warning ** Streams produced by this version aren''nt probably compatible  **
+#warning ** with anything else, even the xvid decoder itself. There are   **
+#warning ** bugs, this code could crash, could blow up your PC or the     **
+#warning ** whole building !                                              **
+#warning ** If you want stable code and compatible streams, use stable    **
+#warning ** XViD releases (currently 0.9.x).                              **
+#warning **                                                               **
+#warning *******************************************************************
+#endif
 
 /**********************************************************************/
 /* motion estimation quality presets */
 static int const motion_presets[7] = {
-#ifdef XVID_DEV
+#ifdef XVID_API_UNSTABLE
 	0,
 	PMV_QUICKSTOP16,
 	0,
@@ -75,7 +87,7 @@ static int xvidenc_fixed_quant = 0;
 static int xvidenc_debug = 0;
 static int xvidenc_hintedme = 0;
 static char* xvidenc_hintfile = "xvid_hint_me.dat";
-#ifdef XVID_DEV
+#ifdef XVID_API_UNSTABLE
 static int xvidenc_qpel = 0;
 static int xvidenc_max_bframes = 0;
 static int xvidenc_bquant_ratio = 125;
@@ -107,7 +119,7 @@ struct config xvidencopts_conf[] = {
     { "debug", &xvidenc_debug, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "hintedme", &xvidenc_hintedme, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "hintfile", &xvidenc_hintfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#ifdef XVID_DEV
+#ifdef XVID_API_UNSTABLE
     { "qpel", &xvidenc_qpel, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "max_bframes", &xvidenc_max_bframes, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
     { "bquant_ratio", &xvidenc_bquant_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 1000, NULL},
@@ -158,6 +170,24 @@ config(struct vf_instance_s* vf,
 	return -1;
     }
 
+#ifdef XVID_API_UNSTABLE
+    mp_msg (MSGT_MENCODER, MSGL_WARN,
+	    "\n"
+	    "*******************************************************************\n"
+	    "**                                                               **\n"
+	    "**  Y O U ' R E   U S I N G   U N S T A B L E   S O F T W A R E  **\n"
+	    "**                                                               **\n"
+	    "** Streams produced by this version aren'nt probably compatible  **\n"
+	    "** with anything else, even the xvid decoder itself. There are   **\n"
+	    "** bugs, this code could crash, could blow up your PC or the     **\n"
+	    "** whole building !                                              **\n"
+	    "** If you want stable code and compatible streams, use stable    **\n"
+	    "** XViD releases (currently 0.9.x).                              **\n"
+	    "**                                                               **\n"
+	    "*******************************************************************\n"
+	    "\n");
+#endif
+
     // initialize XViD core parameters
     // ===============================
     memset(&enc_param, 0, sizeof(enc_param));
@@ -171,7 +201,7 @@ config(struct vf_instance_s* vf,
 	enc_param.rc_bitrate = xvidenc_bitrate * 1000;
     else
 	enc_param.rc_bitrate = -1;
-#ifdef XVID_DEV
+#ifdef XVID_API_UNSTABLE
     if (xvidenc_max_bframes >= 1 && xvidenc_pass >= 1) {
 	mp_msg(MSGT_MENCODER,MSGL_WARN, "xvid: cannot use bframes with 2-pass, disabling bframes\n");
 	xvidenc_max_bframes = 0;
@@ -211,7 +241,7 @@ config(struct vf_instance_s* vf,
 	fp->enc_frame.general |= XVID_INTER4V;
     if (xvidenc_lumi_mask)
 	fp->enc_frame.general |= XVID_LUMIMASKING;
-#ifdef XVID_DEV
+#ifdef XVID_API_UNSTABLE
     if (xvidenc_qpel) {
 	fp->enc_frame.general |= XVID_QUARTERPEL;
 	fp->enc_frame.motion |= PMV_QUARTERPELREFINE16 | PMV_QUARTERPELREFINE8;
@@ -354,7 +384,7 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
     fp->enc_frame.image = mpi->planes[0];
 
     // get quantizers & I/P decision from the VBR engine
-#ifdef XVID_DEV
+#ifdef XVID_API_UNSTABLE
     if (xvidenc_max_bframes >= 1) {
 	if (!xvidenc_fixed_quant) {
 	    // hack, the internal VBR engine isn't fixed-quant aware
