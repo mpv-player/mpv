@@ -23,6 +23,8 @@ static ad_info_t info =  {
 
 LIBAD_EXTERN(real)
 
+typedef unsigned long ulong;
+
 static void *handle=NULL;
 
 void *__builtin_new(unsigned long size) {
