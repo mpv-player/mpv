@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 
+#include "../config.h"
+
 #include "audio_out.h"
 #include "audio_out_internal.h"
 
@@ -42,8 +44,8 @@ static int control(int cmd,int arg){
 	  return CONTROL_ERROR;
 	case AOCONTROL_SET_VOLUME:
 	  if(vo_mpegpes_fd2>=0){
-	    dvb_mixer.volume_left=((ao_control_vol_t)(arg)).left*2.56;
-	    dvb_mixer.volume_right=((ao_control_vol_t)(arg)).right*2.56;
+	    dvb_mixer.volume_left=((ao_control_vol_t*)(arg))->left*2.56;
+	    dvb_mixer.volume_right=((ao_control_vol_t*)(arg))->right*2.56;
 	    if(dvb_mixer.volume_left>255) dvb_mixer.volume_left=255;
 	    if(dvb_mixer.volume_right>255) dvb_mixer.volume_right=255;
 	    //	 printf("Setting DVB volume: %d ; %d  \n",dvb_mixer.volume_left,dvb_mixer.volume_right);
