@@ -18,6 +18,7 @@
 #include "stheader.h"
 #include "mf.h"
 
+#include "../libao2/afmt.h"
 #include "../libvo/fastmemcpy.h"
 
 void free_demuxer_stream(demux_stream_t *ds){
@@ -79,9 +80,15 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
     if(demuxer->a_streams[id]){
         mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_AudioStreamRedefined,id);
     } else {
+        sh_audio_t *sh;
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundAudioStream,id);
         demuxer->a_streams[id]=malloc(sizeof(sh_audio_t));
         memset(demuxer->a_streams[id],0,sizeof(sh_audio_t));
+        sh = demuxer->a_streams[id];
+        // set some defaults
+        sh->samplesize=2;
+        sh->sample_format=AFMT_S16_NE;
+        sh->audio_out_minsize=8192;/* default size, maybe not enough for Win32/ACM*/
     }
     return demuxer->a_streams[id];
 }

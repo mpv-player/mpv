@@ -49,25 +49,6 @@ void afm_help(){
 
 int init_audio_codec(sh_audio_t *sh_audio)
 {
-
-  // reset in/out buffer size/pointer:
-  sh_audio->a_buffer_size=0;
-  sh_audio->a_buffer=NULL;
-  sh_audio->a_in_buffer_size=0;
-  sh_audio->a_in_buffer=NULL;
-
-  // Set up some common usefull defaults. ad->preinit() can override these:
-  
-  sh_audio->samplesize=2;
-  sh_audio->sample_format=AFMT_S16_NE;
-  sh_audio->samplerate=0;
-  sh_audio->channels=0;
-  sh_audio->i_bps=0;  // input rate (bytes/sec)
-  sh_audio->o_bps=0;  // output rate (bytes/sec)
-
-  sh_audio->audio_out_minsize=8192;/* default size, maybe not enough for Win32/ACM*/
-  sh_audio->audio_in_minsize=0;
-  
   if(!mpadec->preinit(sh_audio))
   {
       mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_ADecoderPreinitFailed);
