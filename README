@@ -180,7 +180,7 @@ and OSD menu support you would use:
 You can also pass some variables to the Makefile. For example, if you want
 to compile with gcc 3.4 even if it's not the default compiler:
 
-  CC=gcc-3.4 DEB_BUILD_OPTIONS="--enable-gui" fakeroot debian/rules clean
+  CC=gcc-3.4 DEB_BUILD_OPTIONS="--enable-gui" fakeroot debian/rules binary
 
 To clean up the source tree run the following command:
 
