@@ -136,6 +136,9 @@ int length=0;
 int flags=0;
 int sample_rate=0;
 int bit_rate=0;
+
+    sh_audio->a_in_buffer_len=0;
+    // sync frame:
 while(1){
     while(sh_audio->a_in_buffer_len<7){
 	int c=demux_getc(sh_audio->ds);
@@ -143,22 +146,16 @@ while(1){
         sh_audio->a_in_buffer[sh_audio->a_in_buffer_len++]=c;
     }
     length = a52_syncinfo (sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
-    if(!length){
-	// bad file => resync
-	memcpy(sh_audio->a_in_buffer,sh_audio->a_in_buffer+1,6);
-	--sh_audio->a_in_buffer_len;
-	continue;
-    }
+    if(length>=7 && length<=3840) break; // we're done.
+    // bad file => resync
+    memcpy(sh_audio->a_in_buffer,sh_audio->a_in_buffer+1,6);
+    --sh_audio->a_in_buffer_len;
+}
     mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"a52: len=%d  flags=0x%X  %d Hz %d bit/s\n",length,flags,sample_rate,bit_rate);
-    if(length<7 || length>3840){
-	 mp_msg(MSGT_DECAUDIO,MSGL_ERR,"a52: invalid frame length: %d\n",length);
-	 continue;
-    }
     sh_audio->samplerate=sample_rate;
     sh_audio->i_bps=bit_rate/8;
     demux_read_data(sh_audio->ds,sh_audio->a_in_buffer+7,length-7);
     return length;
-}
 }
 
 int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
@@ -974,6 +971,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	sample_t level=1, bias=384;
         if(!sh_audio->a_in_buffer_len) 
 	    if(a52_fillbuff(sh_audio)<0) break; // EOF
+	    
 	switch(sh_audio->channels){
 	    case 1: flags=A52_MONO; break;
 //	    case 2: flags=A52_STEREO; break;
