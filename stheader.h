@@ -44,6 +44,8 @@ typedef struct {
   // output format:
   float fps;
   float frametime;  // 1/fps
+  int disp_w,disp_h;   // display size (filled by fileformat parser)
+//  int coded_w,coded_h; // coded size (filled by video codec)
   unsigned int outfmtidx;
 //  unsigned int bitrate;
   // buffers:
