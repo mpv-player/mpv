@@ -35,6 +35,7 @@ static int open(vf_instance_t *vf, char* args){
 	if(!strcasecmp(args,"bgr24")) vf->priv->fmt=IMGFMT_BGR24; else
 	if(!strcasecmp(args,"bgr32")) vf->priv->fmt=IMGFMT_BGR32; else
 	if(!strcasecmp(args,"bgr16")) vf->priv->fmt=IMGFMT_BGR16; else
+	if(!strcasecmp(args,"bgr15")) vf->priv->fmt=IMGFMT_BGR15; else
 	{ printf("Unknown format name: '%s'\n",args);return 0;}
     } else
         vf->priv->fmt=IMGFMT_YUY2;
@@ -46,7 +47,7 @@ vf_info_t vf_info_format = {
     "force output format",
     "format",
     "A'rpi",
-    "",
+    "FIXME! get_image()/put_image()",
     open
 };
 

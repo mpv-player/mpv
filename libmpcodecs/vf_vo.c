@@ -47,7 +47,12 @@ static int control(struct vf_instance_s* vf,
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
-    return video_out->control(VOCTRL_QUERY_FORMAT,&fmt);
+    int flags=video_out->control(VOCTRL_QUERY_FORMAT,&fmt);
+    // draw_slice() accepts stride, draw_frame() doesn't:
+    if(flags)
+	if(fmt==IMGFMT_YV12 || fmt==IMGFMT_I420 || fmt==IMGFMT_IYUV)
+	    flags|=VFCAP_ACCEPT_STRIDE;
+    return flags;
 }
 
 static void get_image(struct vf_instance_s* vf,

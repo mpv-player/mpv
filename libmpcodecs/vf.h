@@ -34,6 +34,9 @@ typedef struct vf_instance_s {
     void (*draw_slice)(struct vf_instance_s* vf,
         unsigned char* src, int* stride, int w,int h, int x, int y);
     void (*uninit)(struct vf_instance_s* vf);
+    // caps:
+    unsigned int default_caps; // used by default query_format()
+    unsigned int default_reqs; // used by default config()
     // data:
     vf_image_context_t imgctx;
     struct vf_instance_s* next;
@@ -47,29 +50,7 @@ typedef struct vf_instance_s {
 #define VFCTRL_SET_PP_LEVEL 5 /* set postprocessing level */
 #define VFCTRL_SET_EQUALIZER 6 /* set color options (brightness,contrast etc) */
 
-// VFCAP_* values: they are flags, returned by query_format():
-
-// set, if the given colorspace is supported (with or without conversion)
-#define VFCAP_CSP_SUPPORTED 0x1
-// set, if the given colorspace is supported _without_ conversion
-#define VFCAP_CSP_SUPPORTED_BY_HW 0x2
-// set if the driver/filter can draw OSD
-#define VFCAP_OSD 0x4
-// set if the driver/filter can handle compressed SPU stream
-#define VFCAP_SPU 0x8
-// scaling up/down by hardware, or software:
-#define VFCAP_HWSCALE_UP 0x10
-#define VFCAP_HWSCALE_DOWN 0x20
-#define VFCAP_SWSCALE 0x40
-// driver/filter can do vertical flip (upside-down)
-#define VFCAP_FLIP 0x80
-
-// driver/hardware handles timing (blocking)
-#define VFCAP_TIMER 0x100
-// driver _always_ flip image upside-down (for ve_vfw)
-#define VFCAP_FLIPPED 0x200
-// driver accept stride: (put_image/draw_frame)
-#define VFCAP_ACCEPT_STRIDE 0x400
+#include "vfcap.h"
 
 // functions:
 mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype, int mp_imgflag, int w, int h);
@@ -77,6 +58,8 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char *name, char *args);
 vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args);
 vf_instance_t* vf_open_encoder(vf_instance_t* next, char *name, char *args);
+
+unsigned int vf_match_csp(vf_instance_t** vfp,unsigned int* list,unsigned int preferred);
 
 // default wrappers:
 int vf_next_config(struct vf_instance_s* vf,

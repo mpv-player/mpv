@@ -112,6 +112,7 @@ int vo_flags=0;
 int vd_use_slices=1;
 
 extern vd_functions_t* mpvdec; // FIXME!
+extern int divx_quality;
 
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt){
     int i,j;
@@ -120,6 +121,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     int screen_size_y=0;//SCREEN_SIZE_Y;
 //    vo_functions_t* video_out=sh->video_out;
     vf_instance_t* vf=sh->vfilter;
+    unsigned int fmtlist[CODECS_MAX_OUTFMT+1];
 
 #if 1
     if(!(sh->disp_w && sh->disp_h))
@@ -137,28 +139,40 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
 	w,h,vo_format_name(preferred_outfmt));
 
     if(!vf) return 1; // temp hack
+    
+    if(get_video_quality_max(sh)<=0 && divx_quality){
+	// user wants postprocess but no pp filter yet:
+	sh->vfilter=vf=vf_open_filter(vf,"pp",NULL);
+    }
 
     // check if libvo and codec has common outfmt (no conversion):
+csp_again:
     j=-1;
     for(i=0;i<CODECS_MAX_OUTFMT;i++){
+	int flags;
 	out_fmt=sh->codec->outfmt[i];
 	if(out_fmt==(signed int)0xFFFFFFFF) continue;
-	vo_flags=vf->query_format(vf,out_fmt);
-	mp_msg(MSGT_CPLAYER,MSGL_V,"vo_debug: query(%s) returned 0x%X (i=%d) \n",vo_format_name(out_fmt),vo_flags,i);
-	if((vo_flags&2) || (vo_flags && j<0)){
+	flags=vf->query_format(vf,out_fmt);
+	mp_msg(MSGT_CPLAYER,MSGL_V,"vo_debug: query(%s) returned 0x%X (i=%d) \n",vo_format_name(out_fmt),flags,i);
+	if((flags&2) || (flags && j<0)){
 	    // check (query) if codec really support this outfmt...
 	    if(mpvdec->control(sh,VDCTRL_QUERY_FORMAT,&out_fmt)==CONTROL_FALSE)
 		continue;
-	    j=i; if(vo_flags&2) break;
+	    j=i; vo_flags=flags; if(flags&2) break;
 	}
     }
     if(j<0){
 	// TODO: no match - we should use conversion...
+	if(strcmp(vf->info->name,"scale")){	
+	    vf=vf_open_filter(vf,"scale",NULL);
+	    goto csp_again;
+	}
 	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VOincompCodec);
 	return 0;	// failed
     }
     out_fmt=sh->codec->outfmt[j];
     sh->outfmtidx=j;
+    sh->vfilter=vf;
 
     // autodetect flipping
     if(flip==-1){
@@ -166,6 +180,11 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
 	if(sh->codec->outflags[j]&CODECS_FLAG_FLIP)
 	    if(!(sh->codec->outflags[j]&CODECS_FLAG_NOFLIP))
 		flip=1;
+    }
+    if(vo_flags&VFCAP_FLIPPED) flip^=1;
+    if(flip && !(vo_flags&VFCAP_FLIP)){
+	// we need to flip, but no flipping filter avail.
+	sh->vfilter=vf=vf_open_filter(vf,"flip",NULL);
     }
 
     // time to do aspect ratio corrections...

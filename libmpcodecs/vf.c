@@ -162,6 +162,8 @@ vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char
     vf->control=vf_next_control;
     vf->query_format=vf_next_query_format;
     vf->put_image=vf_next_put_image;
+    vf->default_caps=VFCAP_ACCEPT_STRIDE;
+    vf->default_reqs=0;
     if(vf->info->open(vf,args)>0) return vf; // Success!
     free(vf);
     mp_msg(MSGT_VFILTER,MSGL_ERR,"Couldn't open video filter '%s'\n",name);
@@ -174,10 +176,66 @@ vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args){
 
 //============================================================================
 
+unsigned int vf_match_csp(vf_instance_t** vfp,unsigned int* list,unsigned int preferred){
+    vf_instance_t* vf=*vfp;
+    unsigned int* p;
+    unsigned int best=0;
+    int ret;
+    if((p=list)) while(*p){
+	ret=vf->query_format(vf,*p);
+	mp_msg(MSGT_VFILTER,MSGL_V,"[%s] query(%s) -> %d\n",vf->info->name,vo_format_name(*p),ret&3);
+	if(ret&2){ best=*p; break;} // no conversion -> bingo!
+	if(ret&1 && !best) best=*p; // best with conversion
+	++p;
+    }
+    if(best) return best; // bingo, they have common csp!
+    // ok, then try with scale:
+    if(vf->info == &vf_info_scale) return 0; // avoid infinite recursion!
+    vf=vf_open_filter(vf,"scale",NULL);
+    if(!vf) return 0; // failed to init "scale"
+    // try the preferred csp first:
+    if(preferred && vf->query_format(vf,preferred)) best=preferred; else
+    // try the list again, now with "scaler" :
+    if((p=list)) while(*p){
+	ret=vf->query_format(vf,*p);
+	mp_msg(MSGT_VFILTER,MSGL_V,"[%s] query(%s) -> %d\n",vf->info->name,vo_format_name(*p),ret&3);
+	if(ret&2){ best=*p; break;} // no conversion -> bingo!
+	if(ret&1 && !best) best=*p; // best with conversion
+	++p;
+    }
+    if(best) *vfp=vf; // else uninit vf  !FIXME!
+    return best;
+}
+
 int vf_next_config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt){
-    return vf->next->config(vf->next,width,height,d_width,d_height,flags,outfmt);
+	unsigned int voflags, unsigned int outfmt){
+    int miss;
+    int flags=vf->next->query_format(vf->next,outfmt);
+    if(!flags){
+	// hmm. colorspace mismatch!!!
+	// let's insert the 'scale' filter, it does the job for us:
+	vf_instance_t* vf2;
+	if(vf->next->info==&vf_info_scale) return 0; // scale->scale
+	vf2=vf_open_filter(vf->next,"scale",NULL);
+	if(!vf2) return 0; // shouldn't happen!
+	vf->next=vf2;
+	flags=vf->next->query_format(vf->next,outfmt);
+	if(!flags){
+	    mp_msg(MSGT_VFILTER,MSGL_ERR,"Cannot find common colorspace, even by inserting 'scale' :(\n");
+	    return 0; // FAIL
+	}
+    }
+    printf("REQ: flags=0x%X  req=0x%X  \n",flags,vf->default_reqs);
+    miss=vf->default_reqs - (flags&vf->default_reqs);
+    if(miss&VFCAP_ACCEPT_STRIDE){
+	// vf requires stride support but vf->next doesn't support it!
+	// let's insert the 'expand' filter, it does the job for us:
+	vf_instance_t* vf2=vf_open_filter(vf->next,"expand",NULL);
+	if(!vf2) return 0; // shouldn't happen!
+	vf->next=vf2;
+    }
+    return vf->next->config(vf->next,width,height,d_width,d_height,voflags,outfmt);
 }
 
 int vf_next_control(struct vf_instance_s* vf, int request, void* data){
@@ -185,7 +243,9 @@ int vf_next_control(struct vf_instance_s* vf, int request, void* data){
 }
 
 int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt){
-    return vf->next->query_format(vf->next,fmt);
+    int flags=vf->next->query_format(vf->next,fmt);
+    if(flags) flags|=vf->default_caps;
+    return flags;
 }
 
 void vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi){

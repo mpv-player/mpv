@@ -61,6 +61,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->put_image=put_image;
+    vf->default_reqs=VFCAP_ACCEPT_STRIDE;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     // TODO: parse args ->
     vf->priv->crop_x=

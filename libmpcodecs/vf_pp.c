@@ -14,16 +14,23 @@
 struct vf_priv_s {
     unsigned int pp;
     mp_image_t *dmpi;
+    unsigned int outfmt;
 };
 
 //===========================================================================//
+
+static int config(struct vf_instance_s* vf,
+        int width, int height, int d_width, int d_height,
+	unsigned int voflags, unsigned int outfmt){
+    return vf_next_config(vf,width,height,d_width,d_height,voflags,vf->priv->outfmt);
+}
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     switch(fmt){
     case IMGFMT_YV12:
     case IMGFMT_I420:
     case IMGFMT_IYUV:
-	return vf_next_query_format(vf,fmt);
+	return vf_next_query_format(vf,vf->priv->outfmt);
     }
     return 0;
 }
@@ -43,6 +50,8 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(vf->priv->pp&0xFFFF) return; // non-local filters enabled
     if((mpi->type==MP_IMGTYPE_IPB || vf->priv->pp) && 
 	mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
+    if(!(mpi->flags&MP_IMGFLAG_ACCEPT_STRIDE) && mpi->imgfmt!=vf->priv->outfmt)
+	return; // colorspace differ
     // ok, we can do pp in-place (or pp disabled):
     vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
         mpi->type, mpi->flags, mpi->w, mpi->h);
@@ -61,7 +70,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// no DR, so get a new image! hope we'll get DR buffer:
-	vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+	vf->priv->dmpi=vf_get_image(vf->next,vf->priv->outfmt,
 	    MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ALIGNED_STRIDE,
 	    mpi->w,mpi->h);
     }
@@ -82,13 +91,27 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 extern int divx_quality;
 
+static unsigned int fmt_list[]={
+    IMGFMT_YV12,
+    IMGFMT_I420,
+    IMGFMT_IYUV,
+    NULL
+};
+
 static int open(vf_instance_t *vf, char* args){
     char *endptr;
     vf->query_format=query_format;
     vf->control=control;
+    vf->config=config;
     vf->get_image=get_image;
     vf->put_image=put_image;
+    vf->default_caps=VFCAP_ACCEPT_STRIDE|VFCAP_POSTPROC;
     vf->priv=malloc(sizeof(struct vf_priv_s));
+
+    // check csp:
+    vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
+    if(!vf->priv->outfmt) return 0; // no csp match :(
+    
     if(args){
 	vf->priv->pp=strtol(args, &endptr, 0);
 	if(!(*endptr)) return 1;

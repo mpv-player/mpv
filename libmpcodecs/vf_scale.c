@@ -32,12 +32,9 @@ static unsigned int outfmt_list[]={
     NULL
 };
 
-static int config(struct vf_instance_s* vf,
-        int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt){
-    unsigned int* p=outfmt_list;
+static unsigned int find_best_out(vf_instance_t *vf){
     unsigned int best=0;
-    
+    unsigned int* p=outfmt_list;
     // find the best outfmt:
     while(*p){
 	int ret=vf_next_query_format(vf,*p);
@@ -46,9 +43,42 @@ static int config(struct vf_instance_s* vf,
 	if(ret&1 && !best) best=*p; // best with conversion
 	++p;
     }
+    return best;
+}
+
+static int config(struct vf_instance_s* vf,
+        int width, int height, int d_width, int d_height,
+	unsigned int flags, unsigned int outfmt){
+    unsigned int best=find_best_out(vf);
+    int vo_flags;
+    
     if(!best){
 	printf("SwScale: no supported outfmt found :(\n");
 	return 0;
+    }
+    
+    vo_flags=vf->next->query_format(vf->next,best);
+    
+    // scaling to dwidth*d_height, if all these TRUE:
+    // - option -zoom
+    // - no other sw/hw up/down scaling avail.
+    // - we're after postproc
+    // - user didn't set w:h
+    if(!(vo_flags&VFCAP_POSTPROC) && (flags&4) && 
+	    vf->priv->w<0 && vf->priv->h<0){	// -zoom
+	int x=(vo_flags&VFCAP_SWSCALE) ? 0 : 1;
+	if(d_width<width || d_height<height){
+	    // downscale!
+	    if(vo_flags&VFCAP_HWSCALE_DOWN) x=0;
+	} else {
+	    // upscale:
+	    if(vo_flags&VFCAP_HWSCALE_UP) x=0;
+	}
+	if(x){
+	    // user wants sw scaling! (-zoom)
+	    vf->priv->w=d_width;
+	    vf->priv->h=d_height;
+	}
     }
 
     // calculate the missing parameters:
@@ -110,10 +140,19 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_BGR15:
     case IMGFMT_RGB32:
     case IMGFMT_RGB24:
-    case IMGFMT_Y800:
-	return 3; //vf_next_query_format(vf,fmt);
+    case IMGFMT_Y800: {
+	unsigned int best=find_best_out(vf);
+	int flags;
+	if(!best) return 0;	 // no matching out-fmt
+	flags=vf_next_query_format(vf,best);
+	if(!(flags&3)) return 0; // huh?
+	if(fmt!=best) flags&=~VFCAP_CSP_SUPPORTED_BY_HW;
+	// do not allow scaling, if we are before the PP fliter!
+	if(!(flags&VFCAP_POSTPROC)) flags|=VFCAP_SWSCALE;
+	return flags;
+      }
     }
-    return 0;
+    return 0;	// nomatching in-fmt
 }
 
 static int open(vf_instance_t *vf, char* args){

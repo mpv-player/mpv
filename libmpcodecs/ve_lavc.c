@@ -178,7 +178,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
     case IMGFMT_I420:
-	return 1;
+	return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
     }
     return 0;
 }
