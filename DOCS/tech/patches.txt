@@ -6,6 +6,10 @@ maintaining a big and complex software project is even harder, so please
 accept our rules. We cannot afford to spend our time fixing buggy, broken or
 outdated patches.
 
+0. Do not send complete files. These need to be diffed by hand to see the
+   changes, which makes reviews harder and less likely to occur. Besides as
+   soon as one of the files changes, your version becomes obsolete.
+
 1. Always make patches for the CVS version. The README describes how to check
    out CVS and daily CVS snapshots are available from our download page.
    We do not accept patches for releases or outdated CVS versions.
