@@ -616,8 +616,12 @@ int af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
 
 void af_help (void) {
   int i = 0;
+  af_msg(AF_MSG_INFO, "Available audio filters:\n");
   while (filter_list[i]) {
-    af_msg(AF_MSG_INFO, "  %-15s: %s\n", filter_list[i]->name, filter_list[i]->info);
+    if (filter_list[i]->comment && filter_list[i]->comment[0])
+      af_msg(AF_MSG_INFO, "  %-15s: %s (%s)\n", filter_list[i]->name, filter_list[i]->info, filter_list[i]->comment);
+    else
+      af_msg(AF_MSG_INFO, "  %-15s: %s\n", filter_list[i]->name, filter_list[i]->info);
     i++;
   }
 }
