@@ -1856,7 +1856,7 @@ around the characters or some other funny effect. But if you properly adjust
 the colorkey settings you should be able to get acceptable results.
 </para>
 
-<para>Please see the manpage for available options.</para>
+<para>Please see the man page for available options.</para>
 </sect4>
 
 <sect4 id="dxr3">

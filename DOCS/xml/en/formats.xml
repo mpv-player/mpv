@@ -390,7 +390,7 @@ You may have problems playing certain MP3 files that
 incorrectly or not at all. This cannot be fixed without dropping support
 for certain broken MPEG files and thus will remain like this for the
 foreseeable future. The <option>-demuxer</option> flag described in the
-manpage may help you in these cases.
+man page may help you in these cases.
 </para>
 </sect3>
 
