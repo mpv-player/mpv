@@ -366,6 +366,10 @@ int mov_check_file(demuxer_t* demuxer){
 	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: free space (len: %d)\n", len);
 	  /* unused, if you edit a mov, you can use space provided by free atoms (redefining it) */
 	  break;
+	case MOV_FOURCC('p','n','o','t'):
+	case MOV_FOURCC('P','I','C','T'):
+	  /* dunno what, but we shoudl ignore it */
+	  break;
 	default:
 	  if(no==0) return 0; // first chunk is bad!
 	  id = be2me_32(id);
