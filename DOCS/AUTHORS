@@ -25,9 +25,11 @@ Zoltán Ponekker (Pontscho/Fresh!):  <pontscho@makacs.poliod.hu>
 - libvo: adding xmga driver (similar to Xv but works under X3.3.x)
 - mixer support
 
-Gábor Lénárt (LGB): <lgb@supervisor.hu>
+Gábor Lénárt (LGB): <lgb@lgb.hu>
 - testing and some improvements in mpeg player's user interface (options)
 - ./configure script improvements
+- Makefile improvements
+- preliminary DVD support
 
 Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - documentation maintainer, hun-eng translator
