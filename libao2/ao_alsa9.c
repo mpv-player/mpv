@@ -198,7 +198,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
-    if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams,
+    if ((err = snd_pcm_hw_params_set_rate(alsa_handler, alsa_hwparams,
 	ao_samplerate, 0)) < 0)
     {
 	printf("alsa-init: unable to set samplerate: %s\n",
@@ -336,11 +336,13 @@ static void uninit()
 	return;
     }
 
+#ifdef start
     if ((err = snd_pcm_reset(alsa_handler)) < 0)
     {
 	printf("alsa-uninit: pcm reset error: %s\n", snd_strerror(err));
 	return;
     }
+#endif
 
     if ((err = snd_pcm_close(alsa_handler)) < 0)
     {
@@ -359,11 +361,13 @@ static void audio_pause()
 	return;
     }
 
+#ifdef reset
     if ((err = snd_pcm_reset(alsa_handler)) < 0)
     {
 	printf("alsa-pause: pcm reset error: %s\n", snd_strerror(err));
 	return;
     }
+#endif
 }
 
 static void audio_resume()
@@ -376,11 +380,13 @@ static void audio_resume()
 	return;
     }
 
+#ifdef start
     if ((err = snd_pcm_start(alsa_handler)) < 0)
     {
 	printf("alsa-resume: pcm start error: %s\n", snd_strerror(err));
 	return;
     }
+#endif
 }
 
 /* stop playing and empty buffers (for seeking/pause) */
@@ -394,11 +400,13 @@ static void reset()
 	return;
     }
 
+#ifdef start
     if ((err = snd_pcm_reset(alsa_handler)) < 0)
     {
 	printf("alsa-reset: pcm reset error: %s\n", snd_strerror(err));
 	return;
     }
+#endif
 
     if ((err = snd_pcm_prepare(alsa_handler)) < 0)
     {
@@ -406,11 +414,13 @@ static void reset()
 	return;
     }
 
+#ifdef start
     if ((err = snd_pcm_start(alsa_handler)) < 0)
     {
 	printf("alsa-reset: pcm start error: %s\n", snd_strerror(err));
 	return;
     }
+#endif
 }
 
 /*
@@ -473,6 +483,9 @@ static int get_space()
     }
     
     snd_pcm_status_free(status);
+    
+    if (ret < 0)
+	ret = 0;
     return(ret);
 }
 
@@ -506,6 +519,8 @@ static int get_delay()
     }
     
     snd_pcm_status_free(status);
+
+    if (ret < 0)
+	ret = 0;
     return(ret);
 }
-
