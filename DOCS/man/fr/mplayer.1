@@ -1,4 +1,4 @@
-.\" synced with 1.855
+.\" synced with 1.858
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "13 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "14 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -3233,8 +3233,8 @@ Essaie les codecs Win32 en premier.
 .TP
 .B \-aspect <ratio> (voir aussi \-zoom)
 Force le rapport hauteur/\:largeur des films.
-Autodétecté dans les fichiers MPEG, mais ne peut l'être avec la plupart
-des fichiers AVI.
+Le rapport d'aspect des fichiers MPEG est autodétecté, mais ne peut l'être
+avec la plupart des fichiers AVI.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -7381,12 +7381,10 @@ Définit le quantum à utiliser.
 Une valeur comprise dans l'intervalle 20-40 semble convenir
 (par défaut\ : 26).
 Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
-Notez que la quantification dans H.264 fonctionne différemment de MPEG-1/2/4.
-L'échelle des paramètres de quantification (QP) de H.264 est logarithmique.
-Ainsi, la différence de débit binaire entre QP=20 et QP=40 est d'environ un
-facteur 10.
-Les quantum utiles ont tendance à être bien plus grands avec H.264,
-comparés à MPEG-1/2/4.
+Notez que la quantification dans H.264 fonctionne différemment de MPEG-1/2/4\ :
+l'échelle des paramètres de quantification (QP) de H.264 est logarithmique.
+L'équivalence est approximativement H264QP = 12 + 6*log2(MPEGQP).
+Par exemple, MPEG à QP=2 est équivalent à H.264 à QP=18.
 .
 .TP
 .B pass=<1\-2>
