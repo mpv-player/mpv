@@ -23,13 +23,11 @@ static vd_info_t info = {
 LIBVD_EXTERN(real)
 
 
-typedef unsigned long ulong;
-
-ulong (*rvyuv_custom_message)(ulong,ulong);
-ulong (*rvyuv_free)(ulong);
-ulong (*rvyuv_hive_message)(ulong,ulong);
-ulong (*rvyuv_init)(ulong,ulong);
-ulong (*rvyuv_transform)(ulong,ulong,ulong,ulong,ulong);
+unsigned long (*rvyuv_custom_message)(unsigned long,unsigned long);
+unsigned long (*rvyuv_free)(unsigned long);
+unsigned long (*rvyuv_hive_message)(unsigned long,unsigned long);
+unsigned long (*rvyuv_init)(unsigned long,unsigned long);
+unsigned long (*rvyuv_transform)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long);
 
 void *rv_handle=NULL;
 
@@ -166,8 +164,8 @@ static int init(sh_video_t *sh){
 	}
 	// setup rv30 codec (codec sub-type and image dimensions):
 	if(extrahdr[1]>=0x30000000){
-	    ulong cmsg24[4]={sh->disp_w,sh->disp_h,sh->disp_w,sh->disp_h};
-	    ulong cmsg_data[3]={0x24,1+((extrahdr[0]>>16)&7),&cmsg24};
+	    unsigned long cmsg24[4]={sh->disp_w,sh->disp_h,sh->disp_w,sh->disp_h};
+	    unsigned long cmsg_data[3]={0x24,1+((extrahdr[0]>>16)&7),&cmsg24};
 	    (*rvyuv_custom_message)(cmsg_data,sh->context);
 	}
 	mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: RealVideo codec init OK!\n");
@@ -183,10 +181,10 @@ static void uninit(sh_video_t *sh){
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	mp_image_t* mpi;
-	ulong result;
+	unsigned long result;
 	int *buff=(unsigned int *)((char*)data+len);
-	ulong transform_out[5];
-	ulong transform_in[6]={
+	unsigned long transform_out[5];
+	unsigned long transform_in[6]={
 		len,		// length of the packet (sub-packets appended)
 		0,		// unknown, seems to be unused
 		buff[0],	// number of sub-packets - 1

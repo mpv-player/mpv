@@ -23,8 +23,6 @@ static ad_info_t info =  {
 
 LIBAD_EXTERN(real)
 
-typedef unsigned long ulong;
-
 static void *handle=NULL;
 
 void *__builtin_new(unsigned long size) {
@@ -35,16 +33,16 @@ void *__builtin_new(unsigned long size) {
 void *__ctype_b=NULL;
 #endif
 
-static ulong (*raCloseCodec)(ulong);
-static ulong (*raDecode)(ulong,ulong,ulong,ulong,ulong,ulong);
-static ulong (*raFlush)(ulong,ulong,ulong);
-static ulong (*raFreeDecoder)(ulong);
-static ulong (*raGetFlavorProperty)(ulong,ulong,ulong,ulong);
-//static ulong (*raGetNumberOfFlavors2)(void);
-static ulong (*raInitDecoder)(ulong,ulong);
-static ulong (*raOpenCodec2)(ulong);
-static ulong (*raSetFlavor)(ulong,ulong);
-static void  (*raSetDLLAccessPath)(ulong);
+static unsigned long (*raCloseCodec)(unsigned long);
+static unsigned long (*raDecode)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long);
+static unsigned long (*raFlush)(unsigned long,unsigned long,unsigned long);
+static unsigned long (*raFreeDecoder)(unsigned long);
+static unsigned long (*raGetFlavorProperty)(unsigned long,unsigned long,unsigned long,unsigned long);
+//static unsigned long (*raGetNumberOfFlavors2)(void);
+static unsigned long (*raInitDecoder)(unsigned long,unsigned long);
+static unsigned long (*raOpenCodec2)(unsigned long);
+static unsigned long (*raSetFlavor)(unsigned long,unsigned long);
+static void  (*raSetDLLAccessPath)(unsigned long);
 
 typedef struct {
     int samplerate;
