@@ -1,4 +1,4 @@
-.\" synced with 1.861
+.\" synced with 1.863
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "22 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "24 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -760,10 +760,11 @@ Cette option ne fonctionne uniquement si le flux AC3 comporte ce genre
 d'information de contrôle.
 .
 .TP
-.B \-aid <ID> (voir aussi l'option \-alang)
+.B \-aid <ID> (voir aussi \-alang)
 Sélectionne le canal audio (MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190).
-MPlayer affiche les IDs disponibles quand il est lancé en mode verbeux (-v).
+MPlayer affiche les IDs audios disponibles quand il est lancé en mode
+bavard (-v).
 Pour jouer des flux MPEG-TS, MPlayer/\:MEncoder utilisera le premier programme
 (si présent) avec le flux audio choisi.
 .
@@ -774,8 +775,8 @@ Chaque format de conteneur utilise des codes de pays différents.
 Les DVDs utilisent les codes à deux lettres ISO 639-1, Matroska et NUT
 les codes à trois lettres ISO 639-2, tandis que OGM utilise des
 identifiants à forme libre.
-MPlayer affiche la liste des sous-titres disponibles, quand il est lancé en
-mode bavard (\-v).
+MPlayer affiche les langues disponibles quand il est lancé en mode bavard
+(\-v).
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -1518,8 +1519,8 @@ Chaque format de conteneur utilise des codes de pays différents.
 Les DVDs utilisent les codes à deux lettres ISO 639-1, Matroska
 les codes à trois lettres ISO 639-2, tandis que OGM utilise des
 identifiants à forme libre.
-MPlayer affiche la liste des sous-titres disponibles, quand il est lancé en
-mode bavard (\-v).
+MPlayer affiche les langues disponibles quand il est lancé en mode bavard
+(\-v).
 .sp 1
 .I EXEMPLE:
 .PD 0
