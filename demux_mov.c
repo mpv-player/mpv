@@ -20,14 +20,74 @@
 #include "stheader.h"
 
 typedef struct {
+    unsigned int pts; // duration
+    unsigned int size;
+    off_t pos;
+} mov_sample_t;
+
+typedef struct {
+    unsigned int size; // samples/chunk
+    int desc;          // for multiple codecs mode - not used
+    off_t pos;
+} mov_chunk_t;
+
+typedef struct {
+    unsigned int first;
+    unsigned int spc;
+    unsigned int sdid;
+} mov_chunkmap_t;
+
+typedef struct {
     int id;
     int type;
     int timescale;
+    unsigned int length;
     int width,height; // for video
     unsigned int fourcc;
     int data_len;
     unsigned char* data;
+    int samples_size;
+    mov_sample_t* samples;
+    int chunks_size;
+    mov_chunk_t* chunks;
+    int chunkmap_size;
+    mov_chunkmap_t* chunkmap;
 } mov_track_t;
+
+void mov_build_index(mov_track_t* trak){
+    int i,j,s;
+    int last=trak->chunks_size;
+    printf("MOV track: %d chunks, %d samples\n",trak->chunks_size,trak->samples_size);
+    printf("pts=%d  scale=%d  time=%5.3f\n",trak->length,trak->timescale,(float)trak->length/(float)trak->timescale);
+    // process chunkmap:
+    i=trak->chunkmap_size;
+    while(i>0){
+	--i;
+	for(j=trak->chunkmap[i].first;j<last;j++){
+	    trak->chunks[j].desc=trak->chunkmap[i].sdid;
+	    trak->chunks[j].size=trak->chunkmap[i].spc;
+	}
+	last=trak->chunkmap[i].first;
+    }
+    
+    // calc sample offsets
+    s=0;
+    for(j=0;j<trak->chunks_size;j++){
+	off_t pos=trak->chunks[j].pos;
+	for(i=0;i<trak->chunks[j].size;i++){
+	    trak->samples[s].pos=pos;
+#if 0
+	    printf("Sample %5d: pts=%8d  off=0x%08X  size=%d\n",s,
+		trak->samples[s].pts,
+		(int)trak->samples[s].pos,
+		trak->samples[s].size);
+#endif
+	    pos+=trak->samples[s].size;
+	    ++s;
+	}
+    }
+
+}
 
 #define MOV_MAX_TRACKS 256
 
@@ -106,8 +166,27 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		break;
 	    }
 	    case MOV_FOURCC('m','d','h','d'): {
+		unsigned int tmp;
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sMedia header!\n",level,"");
+#if 0
+		tmp=stream_read_dword(demuxer->stream);
+		printf("dword1: 0x%08X (%d)\n",tmp,tmp);
+		tmp=stream_read_dword(demuxer->stream);
+		printf("dword2: 0x%08X (%d)\n",tmp,tmp);
+		tmp=stream_read_dword(demuxer->stream);
+		printf("dword3: 0x%08X (%d)\n",tmp,tmp);
+		tmp=stream_read_dword(demuxer->stream);
+		printf("dword4: 0x%08X (%d)\n",tmp,tmp);
+		tmp=stream_read_dword(demuxer->stream);
+		printf("dword5: 0x%08X (%d)\n",tmp,tmp);
+		tmp=stream_read_dword(demuxer->stream);
+		printf("dword6: 0x%08X (%d)\n",tmp,tmp);
+#endif
+		stream_skip(demuxer->stream,12);
 		// read timescale
+		trak->timescale=stream_read_dword(demuxer->stream);
+		// read length
+		trak->length=stream_read_dword(demuxer->stream);
 		break;
 	    }
 	    case MOV_FOURCC('v','m','h','d'): {
@@ -149,6 +228,78 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		}
 		break;
 	    }
+	    case MOV_FOURCC('s','t','t','s'): {
+		int temp=stream_read_dword(demuxer->stream);
+		int len=stream_read_dword(demuxer->stream);
+		int i;
+		int x=0;
+		unsigned int pts=0;
+		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample duration table! (%d blocks)\n",level,"",len);
+		for(i=0;i<len;i++){
+		    unsigned int num=stream_read_dword(demuxer->stream);
+		    unsigned int dur=stream_read_dword(demuxer->stream);
+		    printf("num=%d  dur=%d  [%d] (%d)\n",num,dur,trak->samples_size,x);
+		    num+=x;
+		    // extend array if needed:
+		    if(num>trak->samples_size){
+			trak->samples=realloc(trak->samples,sizeof(mov_sample_t)*num);
+			trak->samples_size=num;
+		    }
+		    // fill array:
+		    while(x<num){
+			trak->samples[x].pts=pts;
+			pts+=dur;
+			++x;
+		    }
+		}
+		if(trak->length!=pts) printf("Warning! pts=%d  length=%d\n",pts,trak->length);
+		break;
+	    }
+	    case MOV_FOURCC('s','t','s','c'): {
+		int temp=stream_read_dword(demuxer->stream);
+		int len=stream_read_dword(demuxer->stream);
+		int i;
+		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample->Chunk mapping table!  (%d blocks)\n",level,"",len);
+		// read data:
+		trak->chunkmap_size=len;
+		trak->chunkmap=malloc(sizeof(mov_chunkmap_t)*len);
+		for(i=0;i<len;i++){
+		    trak->chunkmap[i].first=stream_read_dword(demuxer->stream);
+		    trak->chunkmap[i].spc=stream_read_dword(demuxer->stream);
+		    trak->chunkmap[i].sdid=stream_read_dword(demuxer->stream);
+		}
+		break;
+	    }
+	    case MOV_FOURCC('s','t','s','z'): {
+		int temp=stream_read_dword(demuxer->stream);
+		int ss=stream_read_dword(demuxer->stream);
+		int len=stream_read_dword(demuxer->stream);
+		int i;
+		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample size table!  len=%d  ss=%d\n",level,"",len,ss);
+		// extend array if needed:
+		if(len>trak->samples_size){
+		    trak->samples=realloc(trak->samples,sizeof(mov_sample_t)*len);
+		    trak->samples_size=len;
+		}
+		for(i=0;i<len;i++){
+		    trak->samples[i].size=ss?ss:stream_read_dword(demuxer->stream);
+		}
+		break;
+	    }
+	    case MOV_FOURCC('s','t','c','o'): {
+		int temp=stream_read_dword(demuxer->stream);
+		int len=stream_read_dword(demuxer->stream);
+		int i;
+		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sChunk offset table! (%d chunks)\n",level,"",len);
+		// extend array if needed:
+		if(len>trak->chunks_size){
+		    trak->chunks=realloc(trak->chunks,sizeof(mov_chunk_t)*len);
+		    trak->chunks_size=len;
+		}
+		// read elements:
+		for(i=0;i<len;i++) trak->chunks[i].pos=stream_read_dword(demuxer->stream);
+		break;
+	    }
 	    case MOV_FOURCC('m','d','i','a'): {
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sMedia stream!\n",level,"");
 		lschunks(demuxer,level+1,pos+len,trak);
@@ -176,8 +327,26 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    memset(trak,0,sizeof(mov_track_t));
 	    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Track #%d:\n",priv->track_db);
 	    trak->id=priv->track_db;
-	    priv->tracks[priv->track_db++]=trak;
+	    priv->tracks[priv->track_db]=trak;
 	    lschunks(demuxer,level+1,pos+len,trak);
+	    mov_build_index(trak);
+	    switch(trak->type){
+	    case MOV_TRAK_AUDIO: {
+		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
+		sh->format=trak->fourcc;
+		sh->samplerate=trak->timescale;
+		break;
+	    }
+	    case MOV_TRAK_VIDEO: {
+		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
+		sh->format=trak->fourcc;
+		sh->fps=trak->timescale;
+		sh->frametime=1.0f/sh->fps;
+		break;
+	    }
+	    }
+	    printf("--------------\n");
+	    priv->track_db++;
 	    trak=NULL;
 	} else
 	if(id==MOV_FOURCC('c','m','o','v')){
@@ -194,9 +363,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 int mov_read_header(demuxer_t* demuxer){
     mov_priv_t* priv=demuxer->priv;
     
-//    printf("mov_read_header!\n");
+    printf("mov_read_header!\n");
 
     // Parse header:    
+    stream_reset(demuxer->stream);
     if(!stream_seek(demuxer->stream,priv->moov_start)) return 0; // ???
     lschunks(demuxer, 0, priv->moov_end, NULL);
 
