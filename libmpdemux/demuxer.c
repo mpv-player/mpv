@@ -405,6 +405,14 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
       file_format=DEMUXER_TYPE_ASF;
   }
 }
+//=============== Try to open as MOV file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
+  if(mov_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedQTMOVfile);
+      file_format=DEMUXER_TYPE_MOV;
+  }
+}
 //=============== Try to open as MPEG-PS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  int pes=1;
@@ -448,14 +456,6 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
     file_format=DEMUXER_TYPE_UNKNOWN;
   } else {
     mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGESfile);
-  }
-}
-//=============== Try to open as MOV file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
-  if(mov_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedQTMOVfile);
-      file_format=DEMUXER_TYPE_MOV;
   }
 }
 //=============== Try to open as VIVO file: =================
