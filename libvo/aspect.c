@@ -1,5 +1,7 @@
 /* Stuff for correct aspect scaling. */
-//#define ASPECT_DEBUG
+#include "aspect.h"
+
+#define ASPECT_DEBUG
 
 #ifdef ASPECT_DEBUG
 #include <stdio.h>
@@ -7,39 +9,69 @@
 
 float monitor_aspect=4.0/3.0;
 
+static struct {
+  int orgw; // real width
+  int orgh; // real height
+  int prew; // prescaled width
+  int preh; // prescaled height
+  int scrw; // horizontal resolution
+  int scrh; // vertical resolution
+} aspdat;
+
+void aspect_save_orig(int orgw, int orgh){
+  aspdat.orgw = orgw;
+  aspdat.orgh = orgh;
+}
+
+void aspect_save_prescale(int prew, int preh){
+  aspdat.prew = prew;
+  aspdat.preh = preh;
+}
+
+void aspect_save_screenres(int scrw, int scrh){
+  aspdat.scrw = scrw;
+  aspdat.scrh = scrh;
+}
+
 /* aspect is called with the source resolution and the
  * resolution, that the scaled image should fit into
  */
 
-void aspect(int *srcw, int *srch, int fitinw, int fitinh){
-  int srcwcp, srchcp, tmp;
-  srcwcp=*srcw; srchcp=*srch;
-  srcwcp=fitinw;
+void aspect(int *srcw, int *srch, int zoom){
+  int tmpw;
+
 #ifdef ASPECT_DEBUG
-  printf("aspect(0) fitin: %dx%d \n",fitinw,fitinh);
-  printf("aspect(1) wh: %dx%d (org: %dx%d)\n",srcwcp,srchcp,*srcw,*srch);
+  printf("aspect(0) fitin: %dx%d zoom: %d \n",aspdat.scrw,aspdat.scrh,zoom);
+  printf("aspect(1) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat.prew,aspdat.preh);
 #endif
-  srchcp=(int)(((float)fitinw / (float)*srcw * (float)*srch)
-            * ((float)fitinh / ((float)fitinw / monitor_aspect)));
-  srchcp+=srchcp%2; // round
+  if(zoom){
+    *srcw = aspdat.scrw;
+    *srch = (int)(((float)aspdat.scrw / (float)aspdat.prew * (float)aspdat.preh)
+               * ((float)aspdat.scrh / ((float)aspdat.scrw / monitor_aspect)));
+  }else{
+    *srcw = aspdat.prew;
+    *srch = (int)((float)aspdat.preh
+               * ((float)aspdat.scrh / ((float)aspdat.scrw / monitor_aspect)));
+  }
+  *srch+= *srch%2; // round
 #ifdef ASPECT_DEBUG
-  printf("aspect(2) wh: %dx%d (org: %dx%d)\n",srcwcp,srchcp,*srcw,*srch);
+  printf("aspect(2) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat.prew,aspdat.preh);
 #endif
-  if(srchcp>fitinh || srchcp<*srch){
-    tmp=(int)(((float)fitinh / (float)*srch * (float)*srcw)
-           * ((float)fitinw / ((float)fitinh / (1/monitor_aspect))));
-    if(srcwcp>fitinw){
-      srchcp=fitinh;
-      srcwcp=tmp;
-      srcwcp+=srcwcp%2; // round
+  if(*srch>aspdat.scrh || *srch<aspdat.orgh){
+    if(zoom)
+      tmpw = (int)(((float)aspdat.scrh / (float)aspdat.preh * (float)aspdat.prew)
+                * ((float)aspdat.scrw / ((float)aspdat.scrh / (1.0/monitor_aspect))));
+    else
+      tmpw = (int)((float)aspdat.prew
+                * ((float)aspdat.scrw / ((float)aspdat.scrh / (1.0/monitor_aspect))));
+    if(tmpw<=aspdat.scrw && tmpw>=aspdat.orgw){
+      *srch = zoom?aspdat.scrh:aspdat.preh;
+      *srcw = tmpw;
+      *srcw+= *srcw%2; // round
     }
   }
 #ifdef ASPECT_DEBUG
-  printf("aspect(3) wh: %dx%d (org: %dx%d)\n",srcwcp,srchcp,*srcw,*srch);
-#endif
-  *srcw=srcwcp; *srch=srchcp;
-#ifdef ASPECT_DEBUG
-  printf("aspect(4) wh: %dx%d (org: %dx%d)\n",srcwcp,srchcp,*srcw,*srch);
+  printf("aspect(3) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat.prew,aspdat.preh);
 #endif
 }
 

@@ -395,7 +395,6 @@ static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 //	int screen;
-        int dwidth,dheight;
 	unsigned int fg, bg;
 	char *hello = (title == NULL) ? "OpenGL rulez" : title;
 //	char *name = ":0.0";
@@ -414,13 +413,16 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if (X_already_started) return -1;
 	if(!vo_init()) return -1;
 
+	aspect_save_orig(width,height);
+	aspect_save_prescale(d_width,d_height);
+	aspect_save_screenres(vo_screenwidth,vo_screenheight);
+
 	X_already_started++;
 
-        dwidth=d_width; dheight=d_height;
+	aspect(&d_width,&d_height,A_NOZOOM);
 #ifdef X11_FULLSCREEN
         if( flags&0x01 ){ // (-fs)
-          aspect(&d_width,&d_height,vo_screenwidth,vo_screenheight);
-          dwidth=d_width; dheight=d_height;
+          aspect(&d_width,&d_height,A_ZOOM);
         }
 #endif
 	hint.x = 0;

@@ -230,11 +230,14 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
 
  if (!vo_init()) return -1;
 
+ aspect_save_orig(width,height);
+ aspect_save_prescale(d_width,d_height);
+ aspect_save_screenres(vo_screenwidth,vo_screenheight);
+
  mvWidth=width; mvHeight=height;
 
  wndX=0; wndY=0;
  wndWidth=d_width; wndHeight=d_height;
- dwidth=d_width; dheight=d_height;
  #ifdef HAVE_NEW_GUI
 //  mdwidth=d_width; mdheight=d_height;
   mdwidth=width; mdheight=height;
@@ -250,6 +253,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
    default: printf( "Sorry, this (%d) color depth not supported.\n",vo_depthonscreen ); return -1;
   }
 
+  aspect(&d_width,&d_height,A_NOZOOM);
 #ifdef HAVE_NEW_GUI
  if ( vo_window == None )
   {
@@ -259,10 +263,10 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
      wndWidth=vo_screenwidth;
      wndHeight=vo_screenheight;
 #ifdef X11_FULLSCREEN
-     aspect(&d_width,&d_height,vo_screenwidth,vo_screenheight);
-     dwidth=d_width; dheight=d_height;
+     aspect(&d_width,&d_height,A_ZOOM);
 #endif
     }
+   dwidth=d_width; dheight=d_height;
 
    XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
    mDepth=attribs.depth;

@@ -132,6 +132,9 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
  XSetWindowAttributes xswa;
  unsigned long xswamask;
 
+ aspect_save_orig(width,height);
+ aspect_save_prescale(d_width,d_height);
+
  image_height = height;
  image_width = width;
  image_format=format;
@@ -142,10 +145,11 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 #endif
 
  mFullscreen=flags&1;
- dwidth=d_width; dheight=d_height;
  num_buffers=vo_doublebuffering?NUM_BUFFERS:1;
  
  if (!vo_init()) return -1;
+
+ aspect_save_screenres(vo_screenwidth,vo_screenheight);
 
 #ifdef HAVE_NEW_GUI
  if ( vo_window == None )
@@ -155,6 +159,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
    hint.y = 0;
    hint.width = d_width;
    hint.height = d_height;
+   aspect(&d_width,&d_height,A_NOZOOM);
+
    if ( mFullscreen )
     {
      hint.width=vo_screenwidth;
@@ -167,13 +173,11 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
       * irritated for now (and send lots o' mails ;) ::atmos
       */
 
-     {
-       aspect(&d_width,&d_height,vo_screenwidth,vo_screenheight);
-       dwidth=d_width; dheight=d_height;
-     }
+     aspect(&d_width,&d_height,A_ZOOM);
 #endif
 
     }
+   dwidth=d_width; dheight=d_height; //XXX: what are the copy vars used for?
    hint.flags = PPosition | PSize;
    XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
    depth=attribs.depth;

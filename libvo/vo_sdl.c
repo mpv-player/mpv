@@ -555,35 +555,26 @@ static void set_fullmode (int mode)
 static void set_fullmode (int mode) {
 	struct sdl_priv_s *priv = &sdl_priv;
 	SDL_Surface *newsurface = NULL;
-	int newwidth = priv->dstwidth,
-	    newheight= priv->dstheight;
 	
 	/* if we haven't set a fullmode yet, default to the lowest res fullmode first */
 	if(mode < 0) 
 		mode = priv->fullmode = findArrayEnd(priv->fullmodes) - 1;
 	
+	aspect_save_screenres(priv->fullmodes[mode]->w, priv->fullmodes[mode]->h);
+
 	/* calculate new video size/aspect */
 	if(!priv->mode) {
 	if(priv->fulltype&FS) {
 #ifdef HAVE_X11		
-		aspect(&newwidth, &newheight, priv->XWidth ? priv->XWidth : priv->dstwidth, priv->XHeight ? priv->XHeight : priv->dstheight);
-#else		
-		aspect(&newwidth, &newheight, priv->dstwidth, priv->dstheight);
+		aspect_save_screenres(priv->XWidth, priv->XHeight);
 #endif		
-	} else
-	if(priv->fulltype&VM) {	
-#ifdef HAVE_X11		
-		aspect(&newwidth, &newheight, priv->dstwidth, (int)((float)priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth)));
-#else		
-		aspect(&newwidth, &newheight, priv->dstwidth, priv->dstheight);
-#endif		
-	} else {
-		aspect(&newwidth, &newheight, priv->fullmodes[mode]->w, priv->fullmodes[mode]->h);
 	}
+	aspect(&priv->dstwidth, &priv->dstheight, A_ZOOM);
+
 	}
 
 	/* try to change to given fullscreenmode */
-	newsurface = SDL_SetVideoMode(newwidth, newheight, priv->bpp, priv->sdlfullflags);
+	newsurface = SDL_SetVideoMode(priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlfullflags);
 	
 	/* if creation of new surface was successfull, save it and hide mouse cursor */
 	if(newsurface) {
@@ -615,7 +606,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	static Display *XDisplay;
 	static int XScreen;
 #endif
-	int newwidth, newheight;
+	aspect_save_orig(width,height);
+	aspect_save_prescale(d_width,d_height);
 
 	sdl_format = format;
         switch(format){
@@ -701,17 +693,16 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	priv->height = height;
 	priv->dstwidth  = d_width ? d_width : width;
 	priv->dstheight = d_height ? d_height : height;
-	newwidth  = priv->dstwidth;
-	newheight = priv->dstheight;
 
 	/*priv->width  = res.w;
 	priv->height = res.h;*/
         priv->format = format;
 #ifdef HAVE_X11
-	aspect(&newwidth, &newheight, priv->dstwidth, (int)((float)priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth)));
+	aspect_save_screenres(priv->XWidth,priv->XHeight);
+	aspect(&priv->dstwidth,&priv->dstheight,A_NOZOOM);
 #endif
-	priv->windowsize.w = newwidth;
-  	priv->windowsize.h = newheight;
+	priv->windowsize.w = priv->dstwidth;
+  	priv->windowsize.h = priv->dstheight;
         
 	/* bit 0 (0x01) means fullscreen (-fs)
 	 * bit 1 (0x02) means mode switching (-vm)
@@ -726,15 +717,14 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	}
 	if(flags&FS) {
 	  	if(verbose) printf("SDL: setting zoomed fullscreen without modeswitching\n");
-		printf("SDL: Info - please use -vm (unscaled) or -zoom (scaled) for best fullscreen experience\n");
+		printf("SDL: Info - please use -vm or -zoom to switch to best resolution.\n");
 		priv->fulltype = FS;
 		set_fullmode(priv->fullmode);
           	/*if((priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags)))
 			SDL_ShowCursor(0);*/
 	} else	
 	if(flags&VM) {
-	 	if(verbose) printf("SDL: setting nonzoomed fullscreen with modeswitching\n");
-		printf("SDL: Info - please use -zoom switch to scale video\n");
+	 	if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
 		priv->fulltype = VM;
 		set_fullmode(priv->fullmode);
           	/*if((priv->surface = SDL_SetVideoMode (d_width ? d_width : width, d_height ? d_height : height, priv->bpp, priv->sdlfullflags)))
@@ -742,18 +732,16 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	} else
 	if(flags&ZOOM) {
 	 	if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
-		printf("SDL: Info - please use -vm switch instead if you don't want scaled video\n");
 		priv->fulltype = ZOOM;
 		set_fullmode(priv->fullmode);
 	} 
         else {
 		if((strcmp(priv->driver, "x11") == 0) || ((strcmp(priv->driver, "aalib") == 0) && priv->X)) {
 			if(verbose) printf("SDL: setting windowed mode\n");
-          	priv->surface = SDL_SetVideoMode (newwidth, newheight, priv->bpp, priv->sdlflags);
+          	priv->surface = SDL_SetVideoMode (priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlflags);
 		}
 		else {
 			if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
-			printf("SDL: Info - please use -vm switch instead if you don't want scaled video\n");
 			priv->fulltype = ZOOM;
 			set_fullmode(priv->fullmode);
 		}	
@@ -1092,20 +1080,17 @@ static void check_events (void)
 				}
 
 				else if ( keypressed == SDLK_n ) {
-					int newwidth = priv->dstwidth, newheight = priv->dstheight;
 #ifdef HAVE_X11					
-					aspect(&newwidth, &newheight, priv->dstwidth, (int)((float)priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth)));
-#else
-					aspect(&newwidth, &newheight, priv->dstwidth, priv->dstheight);
+					aspect(&priv->dstwidth, &priv->dstheight,A_NOZOOM);
 #endif					
-					if (priv->surface->w != newwidth || priv->surface->h != newheight) {
-						priv->surface = SDL_SetVideoMode(newwidth, newheight, priv->bpp, priv->sdlflags);
+					if (priv->surface->w != priv->dstwidth || priv->surface->h != priv->dstheight) {
+						priv->surface = SDL_SetVideoMode(priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlflags);
 					    	priv->windowsize.w = priv->surface->w;
 						priv->windowsize.h = priv->surface->h;
 						if(verbose > 1) printf("SDL: Normal size\n");
 					} else
-					if (priv->surface->w != newwidth * 2 || priv->surface->h != newheight * 2) {
-						priv->surface = SDL_SetVideoMode(newwidth * 2, newheight * 2, priv->bpp, priv->sdlflags);
+					if (priv->surface->w != priv->dstwidth * 2 || priv->surface->h != priv->dstheight * 2) {
+						priv->surface = SDL_SetVideoMode(priv->dstwidth * 2, priv->dstheight * 2, priv->bpp, priv->sdlflags);
 					    	priv->windowsize.w = priv->surface->w;
 						priv->windowsize.h = priv->surface->h;
 						if(verbose > 1) printf("SDL: Double size\n");
