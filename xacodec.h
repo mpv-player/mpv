@@ -29,15 +29,15 @@ typedef struct
 typedef struct
 {
   void			*anim_hdr;
-  unsigned long		compression;
-  unsigned long		x, y;
-  unsigned long		depth;
+  unsigned int		compression;
+  unsigned int		x, y;
+  unsigned int		depth;
   void			*extra;
-  unsigned long		xapi_rev;
-  unsigned long		(*decoder)();
+  unsigned int		xapi_rev;
+  unsigned int		(*decoder)();
   char			*description;
-  unsigned long		avi_ctab_flag;
-  unsigned long		(*avi_read_ext)();
+  unsigned int		avi_ctab_flag;
+  unsigned int		(*avi_read_ext)();
 } XA_CODEC_HDR;
 
 #define CODEC_SUPPORTED 1
