@@ -257,7 +257,7 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 			i += 50; /* for rounding */
 			snprintf(cpuspeed,15, " %d.%d MHz", i/1000, (i/100)%10);
 		} else {
-			i += 500; /* for rounding */
+			//i += 500; /* for rounding */
 			snprintf(cpuspeed,15, " %d MHz", i/1000);
 		}
 	} else { /* No TSC Support */
