@@ -84,9 +84,9 @@ static void draw_slice (void * _sh, uint8_t ** src, unsigned int y){
     stride[1]=stride[2]=mpeg2dec->decoder.uv_stride;
 
     mpcodecs_draw_slice(sh, (uint8_t **)src,
-		stride, info->sequence->display_width,
-		(y+16<=info->sequence->display_height) ? 16 :
-		    info->sequence->display_height-y,
+		stride, info->sequence->picture_width,
+		(y+16<=info->sequence->picture_height) ? 16 :
+		    info->sequence->picture_height-y,
 		0, y);
 }
 
