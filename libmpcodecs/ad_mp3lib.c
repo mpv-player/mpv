@@ -50,6 +50,7 @@ static int init(sh_audio_t *sh)
   sh->a_buffer_len=MP3_DecodeFrame(sh->a_buffer,-1);
   if(!sh->a_buffer_len) return 0; // unsupported layer/format
   sh->channels=2; // hack
+  sh->samplesize=2;
   sh->samplerate=MP3_samplerate;
   sh->i_bps=MP3_bitrate*(1000/8);
   MP3_PrintHeader();

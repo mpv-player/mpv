@@ -67,6 +67,7 @@ while(1){
     mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"a52: len=%d  flags=0x%X  %d Hz %d bit/s\n",length,flags,sample_rate,bit_rate);
     sh_audio->samplerate=sample_rate;
     sh_audio->i_bps=bit_rate/8;
+    sh_audio->samplesize=2;
     demux_read_data(sh_audio->ds,sh_audio->a_in_buffer+8,length-8);
     if(sh_audio->format!=0x2000)
 	swab(sh_audio->a_in_buffer+8,sh_audio->a_in_buffer+8,length-8);

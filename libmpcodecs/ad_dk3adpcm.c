@@ -84,6 +84,7 @@ static int init(sh_audio_t *sh_audio)
   sh_audio->samplerate = sh_audio->wf->nSamplesPerSec;
   sh_audio->i_bps =
     (sh_audio->ds->ss_mul * sh_audio->samplerate) / sh_audio->ds->ss_div;
+  sh_audio->samplesize=2;
   return 1;
 }
 

@@ -25,6 +25,7 @@ static int init(sh_audio_t *sh_audio)
   GSM_Init();
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
+  sh_audio->samplesize=2;
   // decodes 65 byte -> 320 short
   // 1 sec: sh_audio->channels*sh_audio->samplerate  samples
   // 1 frame: 320 samples

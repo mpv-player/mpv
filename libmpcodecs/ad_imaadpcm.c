@@ -111,6 +111,7 @@ static int init(sh_audio_t *sh_audio)
   /* decodes 34 byte -> 64 short*/
   sh_audio->i_bps = 
     (sh_audio->ds->ss_mul * sh_audio->samplerate) / sh_audio->ds->ss_div;
+  sh_audio->samplesize=2;
 
   return 1;
 }

@@ -127,6 +127,7 @@ static int preinit(sh_audio_t *sh_audio)
     sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
     sh_audio->channels=priv->o_wf->nChannels;
     sh_audio->samplerate=priv->o_wf->nSamplesPerSec;
+    sh_audio->samplesize=2;
 
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32/ACM audio codec init OK!\n");
     return 1;

@@ -110,6 +110,7 @@ static int init(sh_audio_t *sh_audio)
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
   sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
 #endif
+  sh_audio->samplesize=2;
   return 1;
 }
 
