@@ -235,10 +235,11 @@ RPC2 drive (slow).
 RPC-1 DVD drives only protect region settings through software. RPC-2 drives
 have a hardware protection that allows 5 changes only. It might be
 needed/recommended to upgrade the firmware to RPC-1 if you have a RPC-2 DVD
-drive. Firmware upgrades can be found on this
-<ulink url="http://www.firmware-flash.com">firmware page</ulink>. If there is
-no firmware upgrade available for your device, use the
-<ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset tool</ulink>
+drive. You can try finding firmware upgrades for your drive on the internet,
+<ulink url="http://forum.rpc-1.com/dl_all.php">this firmware forum</ulink>
+may be a good starting point for your search.
+If there is no firmware upgrade available for your device, use the
+<ulink url="http://linvdr.org/projects/regionset/">regionset tool</ulink>
 to set the region code of your DVD drive (under Linux).
 <emphasis role="bold">Warning</emphasis>: You can only set the region 5 times.
 </para>
@@ -267,7 +268,7 @@ implement generic SCSI support for VCDs.
 
 <para>
 In the meantime you can extract data from VCDs with
-<ulink url="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
+<ulink url="http://miketeo.net/links/readvcd-0.3.tgz">readvcd</ulink>
 and play the resulting file with <application>MPlayer</application>.
 </para>
 
@@ -314,7 +315,7 @@ work with the standard iso9660 driver of the Linux kernel! Use
 <option>vcd://</option> instead. Alternatives for VCD copying are the
 new <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink> kernel
 driver (not part of the official kernel) that shows CD sessions as image files and
-<ulink url="http://cdrdao.sourceforge.net/">cdrdao</ulink>, a bit-by-bit
+<ulink url="http://cdrdao.sf.net/">cdrdao</ulink>, a bit-by-bit
 CD grabbing/copying application.
 </para>
 </formalpara>
