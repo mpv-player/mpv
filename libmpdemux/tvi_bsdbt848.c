@@ -39,8 +39,12 @@
 #include <signal.h>
 #include <string.h>
 
+#include <sys/param.h>
 #ifdef __NetBSD__
 #include <dev/ic/bt8xx.h>
+#elif __FreeBSD_version >= 502100
+#include <dev/bktr/ioctl_meteor.h>
+#include <dev/bktr/ioctl_bt848.h>
 #else
 #include <machine/ioctl_meteor.h>
 #include <machine/ioctl_bt848.h>
