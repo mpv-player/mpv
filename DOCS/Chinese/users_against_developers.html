@@ -2,20 +2,20 @@
 <HTML>
 
 <HEAD>
-  <TITLE>开发者的痛楚 -- MPlayer -- Linux的电影播放器</TITLE>
+  <TITLE>开发者的眼泪 -- MPlayer -- Linux下的电影播放器</TITLE>
   <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gb_2312-80">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gbk">
 </HEAD>
 
 <BODY>
 
 
-<H1>附录 E -- 开发者的痛楚</H1>
+<H1>附录 E -- 开发者的眼泪</H1>
 
 <P>总在<A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>邮件列表上引起巨大争吵和怒火的主题主要有两个。第一个主题是关于</P>
 
 
-<H2><A NAME="gcc">GCC 2.96</A></H2>
+<H2><A NAME="gcc">E.1 GCC 2.96</A></H2>
 
 <P><B>背景：</B>GCC<B>2.95</B>系列是GNU官方发行版而GCC的2.95.3版本是这个系列中bug最少的。我们从来没有遇到过可以归罪于GCC 2.95.3的编译问题。
 从RedHat Linux 7.0开始，<B>Red Hat</B>在他们的发行版里包括了一个打满补丁的CVS版本的GCC，命名为<B>2.96</B>。Red Hat在他的发行版中包括这个版本是因为
@@ -23,16 +23,15 @@
 在他们的Linux-Mandrake 8.0系列中搭载GCC 2.96。</P>
 
 <P><B>声明：</B>GCC小组否认于GCC 2.96有任何联系并对GCC 2.96发表了一份<A HREF="http://gcc.gnu.org/gcc-2.96.html">官方回应</A>。世界各地的开发者
-开始遇到GCC 2.96的问题，并开始推荐其他的编译程序。
-<A HREF="http://www.apachelabs.org/apr-mbox/200106.mbox/%3c20010623194228.C25512@ebuilt.com%3e">Apache</A>，
-<A HREF="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</A>，<A HREF="http://avifile.sourceforge.net/news-old1.htm">avifile</A>和
-<A HREF="http://www.winehq.com/news/?view=92#RH%207.1%20gcc%20fixes%20compiler%20bug">Wine</A>。
-其他你会感兴趣的链接有：
-<A HREF="http://www.realtimelinux.org/archives/rtai/20017/0144.html">Real time Linux</A>，
-<A HREF="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">Linux kernel news flash about kernel 2.4.17</A>和
-<A HREF="http://www.voy.com/3516/572.html">Voy Forum</A>。
-<B>MPlayer</B>同样经受这些时有时无的只要换个不同版本的GCC就可以全部解决的问题。有些项目开始为一些2.96的问题实现绕过的方法，但是我们拒绝修正别人的bug，
-尤其是其中一些绕过的方法意味着降低性能。</P>
+开始遇到GCC 2.96的问题，并开始推荐其他的编译程序。<A
+HREF="http://www.apachelabs.org/apr-mbox/200106.mbox/%3c20010623194228.C25512@ebuilt.com%3e">Apache</A>，<A
+HREF="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</A>，<A
+HREF="http://avifile.sourceforge.net/news-old1.htm">avifile</A>和<A
+HREF="http://www.winehq.com/news/?view=92#RH%207.1%20gcc%20fixes%20compiler%20bug">Wine</A>。其他你会感兴趣的链接有：<A
+HREF="http://www.realtimelinux.org/archives/rtai/20017/0144.html">Real time Linux</A>，<A
+HREF="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">Linux kernel news flash about kernel 2.4.17</A>和<A
+HREF="http://www.voy.com/3516/572.html">Voy Forum</A>。MPlayer同样经受这些时有时无的只要换个不同版本的GCC就可以全部解决的问题。
+有些项目开始为一些2.96的问题实现绕过的方法，但是我们拒绝修正别人的bug，尤其是其中一些绕过的方法意味着降低性能。</P>
 
 <P>你能<A HREF="http://www.bero.org/gcc296.html">在这个站点</A>的读到故事的另一面。GCC 2.96不允许在汇编程序中出现|(管道)字符因为它同时支持
 Intel和AT&amp;T的语法而|字符在Intel版本中是个符号。问题是它<B>一声不吭</B>的忽略了整个汇编程序块。这个问题现在应该被修正了，GCC会显示一个警告
@@ -43,19 +42,19 @@ Intel和AT&amp;T的语法而|字符在Intel版本中是个符号。问题是它<B>一声不吭</B>的忽略
 标记。记住你要自己负责而且<B>不要报告任何bug</B>。如果你报告，你只会被我们的邮件列表封掉，因为对于GCC 2.96我们已经有够多的争吵了。请让它平息下来。</P>
 
 <P>如果你的GCC 2.96有问题，你能从Red Hat的<A HREF="ftp://updates.redhat.com">ftp服务器</A>得到2.96-85的包，或者直接去找7.2或更高版本里面提供的
-3.0.4的包。你也能用<A HREF="ftp://people.redhat.com/jakub/gcc3/3.1-1/">gcc-3.1的包</A>(非官方的，但是工作地不错)和你能把他们跟你已经有的2.96
-装在一起。MPlayer检测到它并且使用3.1取代2.96。如果你不想要或者无法使用二进制包，下面教你怎么从源代码编译GCC 3.1：</P>
+3.0.4的包。你也能用<A HREF="ftp://people.redhat.com/jakub/gcc/3.2-10/">gcc-3.2-10的包</A>(非官方的，但是工作地不错)和你能把他们跟你已经有的2.96
+装在一起。MPlayer检测到它并用3.2-10代替2.96。如果你不想要或者无法使用二进制包，下面教你怎么从源代码编译最新的GCC：</P>
 
 <OL>
-  <LI>去<A HREF="http://gcc.gnu.org/mirrors.html">GCC mirrors page</A>网页并下载<CODE>gcc-core-3.1.tar.gz</CODE>。这包括了完整的C编译程序，
-对<B>MPlayer</B>是足够了。如果你也想要C++，Java或其它一些GCC的高级特性<CODE>gcc-3.1.tar.gz </CODE>可能更适合你。</LI>
+  <LI>去<A HREF="http://gcc.gnu.org/mirrors.html">GCC镜像页</A>网页并下载<CODE>gcc-core-XXX.tar.gz</CODE>。<CODE>XXX</CODE>是版本号。里面包括了完整的C编译器程序，
+对MPlayer是足够了。如果你也想要C++，Java或其它一些GCC的高级特性<CODE>gcc-XXX.tar.gz</CODE>可能更适合你。</LI>
   <LI>用下列命令解开文档<BR>
-    <CODE>tar -xvzf gcc-core-3.1.tar.gz</CODE></LI>
+    <CODE>tar -xvzf gcc-core-XXX.tar.gz</CODE></LI>
   <LI>GCC不像大多数程序一样的在自己的源码目录内编译，而是需要一个源码目录之外的编译目录。所以你需要这样创建这个目录<BR>
     <CODE>mkdir gcc-build</CODE></LI>
   <LI>然后，你能继续在GCC编译目录中配置GCC，但你需要源码目录中的configure：<BR>
     <CODE>cd gcc-build<BR>
-    ../gcc-3.1/configure</CODE></LI>
+    ../gcc-XXX/configure</CODE></LI>
   <LI>在编译目录中运行下列命令来编译GCC：<BR>
     <CODE>做依靠自己力量</CODE></LI>
   <LI>现在你可以运行下列命令安装GCC(以root身份)<BR>
@@ -63,32 +62,34 @@ Intel和AT&amp;T的语法而|字符在Intel版本中是个符号。问题是它<B>一声不吭</B>的忽略
 </OL>
 
 
-<H2><A NAME="binary">二进制发行版</A></H2>
+<H2><A NAME="binary">E.2 二进制发行版</A></H2>
 
-<P>这以前是第二大的问题从0.90-pre1之后已经解决。<B>MPlayer</B>以前包含来自OpenDivX工程的源代码，那是不能以二进制形式再分发的。这个代码已经被去掉，
-现在如果你觉得合适的话欢迎你制作二进制的包。</P>
+<P>MPlayer以前包含来自OpenDivX工程的源代码，那是不能以二进制形式再分发的。这个代码已经在0.90-pre1中去掉了，剩下的来自OpenDivX源码
+的<CODE>divx_vbr.c</CODE>在0.90-pre9的时候由它的作者按GPL协议发布。现在如果你觉得合适的话欢迎你制作二进制的包。</P>
 
-<P>二进制分发的另一个阻碍是针对CPU结构的编译优化。 <B>MPlayer</B>运行时CPU检测(在编译时指定<CODE>--enable-runtime-cpudetection</CODE>)。
+<P>二进制分发的另一个阻碍是针对CPU结构的编译优化。 MPlayer运行时CPU检测(在编译时指定<CODE>--enable-runtime-cpudetection</CODE>)。
 它默认是禁用的因为它意味着小小的速度牺牲，现在可以创建在能在Intel CPU家族的不同的成员上运行的二进制文件了。</P>
 
 
-<H2><A NAME="nvidia">nVidia</A></H2>
+<H2><A NAME="nvidia">E.3 nVidia</A></H2>
 
-<P>我们讨厌<A HREF="http://www.nvidia.com">nVidia</A>仅仅提供二进制的驱动(用于XFree86)的作法，他们通常都很buggy。我们在
-<A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>上已有许多关于这些封闭源代码的驱动和他们的低质量，不稳定以及糟糕的用户和专家
-支持的报告。这里有一个来自<A HREF="http://www.nvnews.net/forum/showthread.php?s=fda5725bc2151e29453b2da3bd5d2930&amp;threadid=14306">
-nVidia的Linux论坛</A>的例子。许多这样的问题与异常持续不断重复的出现。我们最近跟nVidia接触过，而他们说这些错误不存在，不稳定是由于质量不好的AGP芯片造成的
+<P>我们讨厌<A HREF="http://www.nvidia.com">nVidia</A>仅仅提供二进制的驱动(用于XFree86)的作法，他们通常都很buggy。我们在<A
+HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>上已有许多关于这些封闭源代码的驱动和他们的低质量，不稳定以及糟糕的用户和专家
+支持的报告。这里有一个来自<A
+HREF="http://www.nvnews.net/forum/showthread.php?s=fda5725bc2151e29453b2da3bd5d2930&amp;threadid=14306">nVidia的Linux论坛</A>
+的例子。许多这样的问题与异常持续不断重复的出现。我们最近跟nVidia接触过，而他们说这些错误不存在，不稳定是由于质量不好的AGP芯片造成的
 ，而他们没有收到驱动bug(例如紫色条纹)的报告。因此如果你的nVidia显卡有问题，建议你升级nVidia驱动和/或者购买新的主板或者要求nVidia提供开源的驱动。
 在任何情况下，如果你使用nVidia的二进制的驱动并遇到驱动相关的问题，请你明白你几乎不能从我们这里得到帮助，因为我们在这个问题上无能为力。</P>
 
 
-<H2><A NAME="barr">Joe Barr</A></H2>
+<H2><A NAME="barr">E.4 Joe Barr</A></H2>
 
-<P>Joe Barr因为写了一篇一点都不讨人喜欢的<A HREF="http://www.linuxworld.com/site-stories/2001/1214.mplayer.html"><B>MPlayer</B>评论</A>而变得
-声名狼籍。他发现<B>MPlayer</B>难以安装，但是然而他由不太喜欢<A HREF="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">阅读文档</A>
-。他同样得出结论认为开发者是不友好的，文件是不完整和侮辱性的。你自己判断吧。他继续在他的
-<A HREF="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">2002年的Linux十大预言</A>中否定mplayer，接下来在
-<A HREF="http://www.linuxworld.com/site-stories/2002/0125.xine.html">xine的评论</A>中他继续扇风点火。富有讽刺意味的是在那篇文章结束时他引用的
+<P>Joe Barr因为写了一篇一点都不讨人喜欢的<A HREF="http://www.linuxworld.com/site-stories/2001/1214.mplayer.html">MPlayer评论</A>而变得
+声名狼籍。他发现MPlayer难以安装，但是然而他由不太喜欢<A
+HREF="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">阅读文档</A>。他同样得出结论认为开发者是不友好的，
+文件是不完整和侮辱性的。你自己判断吧。他继续在他的<A
+HREF="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">2002年的Linux十大预言</A>中否定mplayer，接下来在<A
+HREF="http://www.linuxworld.com/site-stories/2002/0125.xine.html">xine的评论</A>中他继续扇风点火。富有讽刺意味的是在那篇文章结束时他引用的
 他与xine原作者的G黱ter Bartsch的争论，完美地总结整个情况：</P>
 
 <BLOCKQUOTE>
@@ -104,8 +105,8 @@ nVidia的Linux论坛</A>的例子。许多这样的问题与异常持续不断重复的出现。我们最近跟n
 他的反应是说BSD的支持者是白痴和蠢才。
 </BLOCKQUOTE>
 
-<P>一段来自<A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>邮件列表上的Robert Munro的
-<A HREF="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-December/009118.html">引文</A>：</P>
+<P>一段来自<A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>邮件列表上的Robert Munro的<A
+HREF="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-December/009118.html">引文</A>：</P>
 
 <BLOCKQUOTE>
   <P>他挺有意思，但不善于避免，um ...争论。 Joe Barr以前是Compuserve上的Will Zachmann上的Canopus论坛的常客。他那时是OS/2的拥护者(我也是OS/2迷)。</P>

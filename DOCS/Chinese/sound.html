@@ -2,9 +2,9 @@
 <HTML>
 
 <HEAD>
-  <TITLE>声音-- MPlayer -- Linux的电影表演者</TITLE>
+  <TITLE>声音 -- MPlayer -- Linux下的电影播放器</TITLE>
   <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gb_2312-80">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gbk">
 </HEAD>
 
 <BODY>
@@ -12,20 +12,48 @@
 
 <H3><A NAME="audio">2.3.2 音频输出设备</A></H3>
 
-<P><B>MPlayer</B>的音频接口称为<I>libao2</I>。它目前包含这些驱动：</P>
+<H4><A NAME="sync">2.3.2.1 音频/视频同步</A></H4>
 
-<TABLE BORDER=0>
-  <TR><TD COLSPAN=4><P><B>一般：</B></P></TD></TR>
-  <TR><TD>&nbsp; &nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS(ioctl)驱动(支持硬件AC3中转)</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL驱动(支持升/降采样率，<B>ESD</B>，<B>ARTS</B>等等)</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS(Network Audio System)驱动</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>本地的ALSA 0.5驱动</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>本地的ALSA 0.9驱动(支持硬件AC3中转)</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>BSD和Solaris8用户的SUN音频驱动(<CODE>/dev/audio</CODE>)</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>本地的ARTS驱动(主要针对KDE用户)</TD></TR>
-</TABLE>
+<P>MPlayer的音频接口称为<I>libao2</I>。它目前包含这些驱动：</P>
 
-<P>事实上，Linux声卡驱动有兼容问题。<B>可能</B>需要一定时间找到你最理想的设置。</P>
+<DL>
+  <DT>oss</DT>
+  <DD>OSS(ioctl)驱动(支持硬件AC3输出)</DD>
+
+  <DT>sdl</DT>
+  <DD>SDL驱动(支持<B>ESD</B>，<B>ARTS</B>等等)</DD>
+
+  <DT>nas</DT>
+  <DD>NAS(Network Audio System)驱动</DD>
+
+  <DT>alsa5</DT>
+  <DD>本地的ALSA 0.5驱动</DD>
+
+  <DT>alsa9</DT>
+  <DD>本地的ALSA 0.9驱动(支持硬件AC3输出)</DD>
+
+  <DT>sun</DT>
+  <DD>BSD和Solaris8用户的SUN音频驱动(<CODE>/dev/audio</CODE>)</DD>
+
+  <DT>arts</DT>
+  <DD>本地的ARTS驱动(主要针对KDE用户)</DD>
+
+  <DT>esd</DT>
+  <DD>本地的ESD驱动(主要针对GNOME用户)</DD>
+</DL>
+
+<P>事实上，Linux声卡驱动有兼容问题。这是因为MPlayer使用一个正常编码的声卡驱动实现的特性来实现音频/视频同步。遗憾的是有些驱动的作者
+不在乎这个功能，它在播放MP3和实现声音效果时并不需要。</P>
+
+<P>别的媒体播放器比如aviplay或者xine可能在这些驱动上工作没有问题因为他们使用内部计时器的“简单”方法。注意：时间表明他们的方法没有
+MPlayer的方法有效率。</P>
+
+<P>使用一个正确编制的音频驱动的时候MPlayer将永远不会产生音频相关的A/V不同步，除非你的文件完全损坏。有些用来绕过这些问题的选项
+在man page里面有描述)。</P>
+
+<P>如果你碰巧遇到一个不好的音频驱动，尝试使用<CODE>-autosync</CODE>选项，它应该可以解决你的问题。详细的信息参见man page。</P>
+
+<P>一些提示：</P>
 
 <UL>
   <LI>如果你有OSS驱动，先尝试<CODE>-ao oss</CODE>(这是默认的)。如果你遇到毛刺，停止或者任何不正常的事情，
@@ -34,14 +62,12 @@ ARTS，和升/降采样率。(ESD是GNOME的音频守护进程，ARTS是KDE的)。</LI>
   <LI>如果你使用ALSA 0.5的版本，那么你几乎总是不得不使用<CODE>-ao alsa5</CODE>，因为ALSA 0.5的OSS仿真很buggy，
 会导致<B>MPlayer崩溃</B>并出现这样的信息：<BR>
     <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
-  <LI>如果你使用ALSA 0.9的版本，你能在<CODE>-ao oss</CODE>和<CODE>-ao sdl</CODE>之间选择。你也能使用<CODE>-ao alsa9 </CODE>。它能工作，
-但是可能出现不同步或者声音消失之类的问题。</LI>
 </UL>
 
-<P>在<B>Solaris和FreeBSD</B>系统上，用<CODE>-ao sun</CODE>选项使用SUN的音频驱动，否则视频音频都无法工作。</P>
+<P>在<B>Solaris</B>上，必须用<CODE>-ao sun</CODE>选项，否则视频音频都无法工作。</P>
 
 
-<H4><A NAME="experiences">2.3.2.1 声卡体验，推荐</A></H4>
+<H4><A NAME="experiences">2.3.2.2 声卡体验，推荐</A></H4>
 
 <TABLE BORDER=0 WIDTH="100%">
   <TR><TD COLSPAN=3><B>VIA板载芯片(via82cxxx)只能48kHz</B></TD></TR>
@@ -115,20 +141,325 @@ ARTS，和升/降采样率。(ESD是GNOME的音频守护进程，ARTS是KDE的)。</LI>
 <P>如果从CD-ROM播放时声音跳跃，开启IRQ unmasking，例如。<CODE>hdparm -u1 /dev/cdrom</CODE>(<CODE>man hdparm</CODE>)。
 这在大多数情况下有好处，更详细的描述在<A HREF="cd-dvd.html#drives">CD-ROM部分</A>。</P>
 
-<P>与另一个像XMMS一样的程序共享你的声卡是<B>强烈不推荐的</B>！如果其它音频程序使用ESD，用<CODE>-vo sdl:esd</CODE>选项
-启动<B>MPlayer</B>可以把两个音频流混合起来。事实上，选项<CODE>-vo sdl:esd</CODE>甚至在单独播放<B>Mplayer</B>时也可以对ESD使用。</P>
+<P>对这个文件的反馈是受欢迎的。请告诉我们你的声卡是如何与MPlayer共同工作的。</P>
 
-<P>对这个文件的反馈是受欢迎的。请告诉我们你的声卡是如何与<B>MPlayer</B>共同工作的。</P>
+<H4><A NAME="af">2.3.2.3 Audio filters</A></H4>
+
+<P>老的音频插件被新的音频滤镜层取代了。音频滤镜用来在声音到达声卡之前改变声音数据的属性。激活和关闭滤镜通常是自动的但也可以强制。
+当音频数据的属性与声卡要求的不同时就会激活滤镜，不需要时就会关闭。<CODE>-af filter1,filter2,...</CODE>选项用来取代滤镜的默认行为
+或者插入不能自动插入的滤镜。滤镜将按照它们在逗号分隔的列表中出现的顺序运行。</P>
+
+<P>例如:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af resample,pan movie.avi </CODE></P>
+
+<P>声音将先通过resample滤镜然后通过pan滤镜。注意列表中不能包含任何空格，否则它将会失败。</P>
+
+<P>滤镜通常有开关用来改变他们的行为。这些开关在下面的章节会详细的解释。当开关被省略是滤镜将执行默认的设置。这里是一个
+使用带相应开关的滤镜的例子：</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1
+  -srate 11025 media.avi</CODE></P>
+
+<P>将resample滤镜的输出频率设置为11025Hz并使用pan滤镜把音频混合到一个声道。</P>
+
+<P>这个滤镜层的运行由<CODE>-af-adv</CODE>开关控制。这个开关有两个子选项：</P>
+
+<DL>
+  <DT><CODE>force</CODE><DT>
+  <DD>是一个比特域用来控制滤镜如何插入以及它们使用怎样的速度/精确度优化：
+    <DL>
+      <DT><CODE>0</CODE></DT>
+      <DD>使用滤镜的自动插入并根据CPU的速度优化。</DD>
+      <DT><CODE>1</CODE></DT>
+      <DD>使用滤镜的自动插入并为最高速度优化。<BR>
+        <EM>警告：</EM>音频插件的有些特性将会失效，声音质量将会下降。</DD>
+      <DT><CODE>2</CODE></DT>
+      <DD>使用自动插入并为质量优化。</DD>
+      <DT><CODE>3</CODE></DT>
+      <DD>不使用自动插入也不进行优化。<BR>
+        <I>警告：</I>这个设置可能会导致MPlayer崩溃。</DD>
+      <DT><CODE>4</CODE></DT>
+      <DD>按照上面0选项自动插入滤镜，但尽可能的使用浮点处理。</DD>
+      <DT><CODE>5</CODE></DT>
+      <DD>按照上面1选项自动插入滤镜，但尽可能的使用浮点处理。</DD>
+      <DT><CODE>6</CODE></DT>
+      <DD>按照上面2选项自动插入滤镜，但尽可能的使用浮点处理。</DD>
+      <DT><CODE>7</CODE></DT>
+      <DD>按照上面3选项自动插入滤镜，但尽可能的使用浮点处理。</DD>
+    </DL>
+  </DD>
+
+  <DT><CODE>list</CODE></DT>
+  <DD>是-af开关的别名。</DD>
+</DL>
+
+<P>滤镜层同样会影响下面的一般开关：
+
+<DL>
+  <DT><CODE>-v</CODE></DT>
+  <DD>增加冗余级别使大部分滤镜显示处附加的状态信息。</DD>
+  <DT><CODE>-channels</CODE></DT>
+  <DD>这个选项设置你的声卡使用的输出声道数。它同样会影响从媒体解码处的声道数。如果媒体包含的声道数少于要求的声道数
+channels插件(见下面)将自动插入。定向将使用channels滤镜的默认定向。</DD>
+  <DT><CODE>-srate</CODE></DT>
+  <DD>这个选项选择你的声卡的采样率，如果你的声卡的采样率与当前媒体不同，resample插件(见下面)将插入到音频滤镜层中
+来补偿这个差别。</DD>
+  <DT><CODE>-format</CODE><DT>
+  <DD>这个选项设置声卡和音频滤镜层的采样格式，如果你的声卡要求的采样格式域当前媒体不同，一个format插件(见下面)将自动插入
+来进行调整。</DD>
+</DL>
 
 
-<H4><A NAME="插件s">2.3.2.2 音频插件</A></H4>
+<H5><A NAME="af_resample">2.3.2.3.1 升/降采样率</A></H5>
 
-<P><B>MPlayer</B>支持音频插件。音频插件s用于在声音到达声卡之前改变音频数据的属性。他们用<CODE>-aop</CODE>开关加上
+<P>MPlayer完全支持使用<CODE>resample</CODE>插件进行声音的升/降采样率。当你使用固定采样率的声卡或者被只兼容
+最大44.1kHz的老声卡郁闷时可以使用它。这个滤镜会在需要时自动开启，但它也可以用命令行显式的开启。他有三个开关：</P>
+
+<DL>
+  <DT><CODE>srate &lt;8000-192000&gt;</CODE></DT>
+  <DD>是一个整数用来设置输出的采样频率，以Hz为单位。有效范围从8kHz到192kHz。如果输入输出的采样频率相同或者这个参数
+被省略滤镜降自动卸载。高的采样频率通常会提高声音的质量，特别是跟别的滤镜一起使用的时候。</DD>
+
+  <DT><CODE>sloppy</CODE></DT>
+  <DD>是一个可选的二进制参数使输出频率可以与<CODE>srate</CODE>给定的频率稍有不同。这个开关用于开始播放的过程非常慢的情况。
+它是默认打开的。</DD>
+
+  <DT><CODE>type &lt;0-2&gt;</CODE><DT>
+  <DD>是可选的在<CODE>0</CODE>到<CODE>2</CODE>之间的整数用来决定使用那种重新采样的方式。<CODE>0</CODE>重新采样方式为
+代表线性插值算法，<CODE>1</CODE>代表使用多相filter-bank和整数处理过程，<CODE>2</CODE>代表使用多相filter-bank和浮点处理
+过程。线性插值非常的会，但是声音质量很差特别是在升高采样率时。质量最好的时<CODE>2</CODE>代表的重新采样方法，但CPU的
+消耗最大。</DD>
+</DL>
+
+<P>示例:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af resample=44100:0:0</CODE></P>
+
+<P>将resample滤镜的输出频率设定为44100Hz使用精确的输出频率缩放和线性插值算法。</P>
+
+
+<H5><A NAME="af_channels">2.3.2.3.2 改变声道数</A></H5>
+
+<P><CODE>channels</CODE>滤镜用来添加和去除声道，它也可以用来实现声道的定向与复制。当音频滤镜层的输出与输入层不同
+或者当别的滤镜需要它是它将自动开启。当不需要是这个滤镜会自行卸载。开关的数目是可变的：</P>
+
+<DL>
+  <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
+  <DD>是<CODE>1</CODE>到<CODE>6</CODE>间的整数用来设定输出的声道数。这个开关的必须的，不设置会导致运行时错误。</DD>
+
+  <DT><CODE>nr &lt;1-6&gt;</CODE></DT>
+  <DD>是<CODE>1</CODE>到<CODE>6</CODE>之间的整数用来指定定向的数量，这个参数是可选的，如果省略将使用默认的定向。</DD>
+
+  <DT><CODE>from1:to1:from2:to2:from3:to3...</CODE></DT>
+  <DD>是<CODE>0</CODE>到<CODE>5</CODE>之间的一对数定义每个声道被定向到哪里。</DD>
+</DL>
+
+<P>如果只给定<CODE>nch</CODE>将使用默认的定向，它是这样工作的：如果输出声道的数量大于输入声道的数量就插入空
+声道(除了把单声道混合为立体声，此时单声道会输出到两个输出声道)。如果输出声道的数量比输入声道的数量少，多余
+的声道将被删去。</P>
+
+<P>示例1:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi </CODE></P>
+
+<P>将输出声道设为4，并设定4个定向，把0声道和1声道互换，2，3声道保持原状。注意如果播放只有两个声道的媒体
+2，3声道将没有声音，但0，1声道仍然会互换。</P>
+
+<P>示例2:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi </CODE></P>
+
+<P>将把声道数设为6，并设置4个定向，把0声道复制到0到3声道，4，5声道仍然没有声音。</P>
+
+
+<H5><A NAME="af_format">2.3.2.3.3 采样格式转换</A></H5>
+
+<P><CODE>format</CODE>滤镜在不同的采样格式之间转换，当声卡或其他滤镜需要是它会自动开启。</P>
+
+<DL>
+  <DT><CODE>bps &lt;number&gt;</CODE></DT>
+  <DD>可以是<CODE>1</CODE>, <CODE>2</CODE>或者<CODE>4</CODE>代表样本的字节数。这个开关是必须的，不设置会
+导致运行时错误。</DD>
+
+  <DT><CODE>f &lt;format&gt;</CODE></DT>
+  <DD>是描述样本格式的字符串。字符串应该是下面这些东西的组合：<CODE>alaw</CODE>, <CODE>mulaw</CODE>或者<CODE>imaadpcm</CODE>, 
+  <CODE>float</CODE>或者<CODE>int</CODE>, <CODE>unsigned</CODE>或者<CODE>signed</CODE>, <CODE>le</CODE>或者<CODE>be</CODE>
+(低位优先或高位优先)。这个开关是必须的，不设置会导致运行时错误。</DD>
+</DL>
+
+<P>示例：<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af format=4:float media.avi</CODE></P>
+
+<P>将把输出格式设置为每个样本4字节的浮点数据。</P>
+
+
+<H5><A NAME="af_delay">2.3.2.3.4 延迟</A></H5>
+
+<P><CODE>delay</CODE>滤镜延迟声音到达扬声器的时间使得不同的声道能同时到达听众的位置。这个功能只当你有两个以上的扬声器
+才有用，这个滤镜的参数的数目是可变的：</P>
+
+<DL>
+  <DT><CODE>d1:d2:d3...</CODE></DT>
+  <DD>代表添加给不同声道的延迟时间的浮点数，以ms为单位。最小延迟是0ms，最大是1000ms。</DD>
+</DL>
+
+<P>计算不同声道需要的延迟的方法如下：</P>
+
+<OL>
+  <LI>测量扬声器到你听的位置的距离，以米为单位，设那些距离为s1到s5(对于5.1系统)。没有补偿副低音的必要(你怎么也听不出
+差别的)。</LI>
+  <LI>用最大的距离依次减去s1到s5的距离，就是<BR>
+    s[i] = max(s) - s[i]; i = 1...5</LI>
+  <LI>按下面计算需要的延迟时间<BR>
+    d[i] = 1000*s[i]/342; i = 1...5 </LI>
+</OL>
+
+<P>示例:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af delay=10.5:10.5:0:0:7:0 media.avi</CODE></P>
+
+<P>将左前和右前声道延迟10.5ms, 两个后声道和副声道不延迟，中间声道延迟7ms。</P>
+
+
+<H5><A NAME="af_volume">2.3.2.3.5 软件音量控制</A></H5>
+
+<P>软件音量控制通过<CODE>volume</CODE>音频滤镜实现，小心使用这个滤镜因为他会降低声音的信噪比。在大多数情况下最好是
+把PCM音量开到最大，不使用这个滤镜而是通过混音器的主音量控制来控制你的扬声器的输出级别。如果你的电脑连有外部放大器。
+(这几乎是普遍现象)，可以通过调节主音量和放大器上的音量旋钮直到背景的咝咝声消失来使噪音级别达到最小。
+这个滤镜有两个开关：</P>
+
+<DL>
+  <DT><CODE>v &lt;-200 - +60&gt;</CODE></DT>
+  <DD>在<CODE>-200</CODE>到<CODE>+60</CODE>之间的浮点数，代表音量大小，以分贝为单位，默认值是0分贝。</DD>
+
+  <DT><CODE>c</CODE></DT>
+  <DD>二进制控制项用来打开和关闭软修饰。软修饰可以在使用很高音量的时候使声音变得更加平滑。如果扬声器的动态区域很低
+可以打开这个开关。但你必须明白这个特性会造成扭曲而且应该使作为最终手段。</DD>
+</DL>
+
+<P>示例：<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af volume=10.1:0 media.avi</CODE></P>
+
+<P>将音量增加10.1分贝并在音量太高的时候进行硬修饰。</P>
+
+<P>这个滤镜还有另一个特性：它检测总的最大音量并且会在MPlayer退出的时候显示出来。这个音量估计可以用来设定MEncoder
+中的音量以利用最大的动态范围。</P>
+
+
+<H5><A NAME="af_equalizer">2.3.2.3.6 均衡器</A></H5>
+
+<P><CODE>equalizer</CODE>滤镜描述一个有10个倍频带的图形均衡器，通过使用10个IIR通频带滤镜实现。这表示不管播放什么
+样的音频它都会工作。10个带的中央频率分别为：</P>
+
+<TABLE BORDER="0" WIDTH="100%">
+  <TR><TD>频带号</TD><TD>中央频率</TD></TR>
+  <TR><TD>0</TD><TD>31.25 Hz</TD></TR>
+  <TR><TD>1</TD><TD>62.50 Hz</TD></TR>
+  <TR><TD>2</TD><TD>125.0 Hz</TD></TR>
+  <TR><TD>3</TD><TD>250.0 Hz</TD></TR>
+  <TR><TD>4</TD><TD>500.0 Hz</TD></TR>
+  <TR><TD>5</TD><TD>1.000 kHz</TD></TR>
+  <TR><TD>6</TD><TD>2.000 kHz</TD></TR>
+  <TR><TD>7</TD><TD>4.000 kHz</TD></TR>
+  <TR><TD>8</TD><TD>8.000 kHz</TD></TR>
+  <TR><TD>9</TD><TD>16.00 kHz</TD></TR>
+</TABLE>
+
+<P>如果播放的样本的频率比一个频带的中心频率低，那个带就被禁用。这个滤镜的一个已知的bug是当样本频率接近
+最高频带的中心频率的时候，最高频带的特性不是对称的。这个问题可以通过使用resample滤镜在声音到达本滤镜之前
+升高样本频率来解决。</P>
+
+<P>这个滤镜有10个参数：</P>
+
+<DL>
+  <DT><CODE>g1:g2:g3...g10</CODE></DT>
+  <DD>是<CODE>-12</CODE> and <CODE>+12</CODE>之间的浮点数表示每个频带音量的改变，以分贝为单位。</DD>
+</DL>
+
+<P>Example:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi</CODE></P>
+
+<P>将升高高频和低频区域的声音而几乎完全消去1kHz附近的声音。</P>
+
+
+<H5><A NAME="af_panning">2.3.2.3.7 摇动滤镜</A></H5>
+
+<P>使用<CODE>pan</CODE>滤镜可以把声道任意混合。它基本上是volunme滤镜和channels滤镜的组合。这个滤镜主要有
+两个用途：</P>
+
+<OL>
+  <LI>把许多声道混合到较少的声道，比如把立体声变为单声道。</LI>
+  <LI>在一个环绕音效系统中改变中央扬声器的“宽度”。</LI>
+</OL>
+
+<P>这个滤镜很难使用，而且在获得想要的效果之前需要动些脑筋。这个滤镜的开关数取决于输出的声道数：</P>
+
+<DL>
+  <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
+  <DD>是<CODE>1</CODE>到<CODE>6</CODE>之间的整数，用来设置输出的声道数。这个开关是必须的，如果省略将导致
+运行时错误。</DD>
+
+  <DT><CODE>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</CODE></DT>
+  <DD>是<CODE>0</CODE>到<CODE>1</CODE>之间的浮点数。<CODE>l[i][j]</CODE>决定把输入声道j的多少成分混合到输出声道i。</DD>
+</DL>
+
+<P>示例1：<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af pan=1:0.5:0.5 -channels 1 media.avi</CODE></P>
+
+<P>把立体声混合成单声道。</P>
+
+<P>示例2：<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi</CODE></P>
+
+<P>将输出3个声道，0声道和1声道保持不变，再把0声道和1声道混合输出到2声道(然后可以把这个声道输出到副低音)。</P>
+
+
+<H5><A NAME="af_sub">2.3.2.3.8 副低音</A></H5>
+
+<P><CODE>sub</CODE>插件给音频增加一个副低音声道。用来产生副低音声道的数据是0声道和1声道音频数据的平均混合。
+混合后的声音进过4阶Butterworth滤波器低通过滤，默认去掉60Hz以上的声音，然后添加到音频流的一个单独声道中。
+警告：当你播放5.1杜比数字音效的DVD时禁用这个滤镜，否则它使副低音的声音发生混乱。这个滤镜有两个参数：</P>
+
+<DL>
+  <DT><CODE>fc &lt;20-300&gt;</CODE></DT>
+  <DD>是可选的浮点数用来设定滤波器剪除声音的频率，以Hz为单位。有效值从20Hz到300Hz。想获得最好的结果应该尝试
+设置剪除频率越低越好。这样会改进立体声或者环绕音效的体验。默认的剪除频率是60Hz。</DD>
+
+  <DT><CODE>ch &lt;0-5&gt;</CODE></DT>
+  <DD>是可选的在<CODE>0</CODE>到<CODE>5</CODE>之间的整数，决定插入副声道的声道编号，默认的声道号是<CODE>5</CODE>。
+注意如果需要总的声道数会自动增加到<CODE>ch</CODE>个。</DD>
+</DL>
+
+<P>示例：<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af sub=100:4 -channels 5 media.avi</CODE></P>
+
+<P>将增加一个剪除频率为100Hz的副低音声道到输出声道4。</P>
+
+<H5><A NAME="af_surround">2.3.2.3.9 环绕音效解码</A></H5>
+
+<P>矩阵编码的环绕音效可以通过<CODE>surround</CODE>滤镜解码。杜比环绕就是矩阵编码格式的一个例子。很多两声道的音频
+实际上包含了矩阵编码。为了使用这个特性你需要一个至少支持4声道的声卡。这个滤镜有1个参数：</P>
+
+<DL>
+  <DT><CODE>d &lt;0-1000&gt;</CODE></DT>
+  <DD>可选的<CODE>0</CODE>到<CODE>1000</CODE>之间的浮点数用来设定后部扬声器的延迟时间，以ms为单位。这个延迟应该
+这样设定：如果d1是从听众位置到前扬声器的距离而d2是从听众位置到后扬声器的距离，如果d1 &lt;= d2，那么延迟<CODE>d</CODE>
+应该设置为15ms，如果d1 &gt; d2，那么设置为15 + 5*(d1-d2)，<CODE>d</CODE>的默认值是20ms。</DD>
+</DL>
+
+<P>示例:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af surround=15 -channels 4 media.avi</CODE></P>
+
+<P>将使用环绕音效解码并给后部扬声器增加15ms的延迟。</P>
+
+
+
+
+<H2><STRONG>注意：音频插件已经被音频滤镜取代，很快会被删去。</STRONG></H2>
+<H4><A NAME="插件s">2.3.2.4 音频滤镜(已过时)</A></H4>
+
+<P>MPlayer支持音频插件。音频插件s用于在声音到达声卡之前改变音频数据的属性。他们用<CODE>-aop</CODE>开关加上
 <CODE>list=插件1,插件2,...</CODE>参数打开。必须有<CODE>list</CODE>参数用来确定应该使用哪些插件，以及他们执行的顺序。例如：</P>
 
 <P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample,format</CODE></P>
 
-<P>将让声音先通过重新采样插件然后再经过格式化插件。</P>
+<P>将让声音先通过resample插件然后再经过format插件。</P>
 
 <P>插件也有改变他们行为的开关。这些开关在下面将详细地解释。如果开关被省略，插件将按照默认设置运行。
 这是一个关于如何组合使用指定参数的插件的例子：</P>
@@ -136,15 +467,15 @@ ARTS，和升/降采样率。(ESD是GNOME的音频守护进程，ARTS是KDE的)。</LI>
 <P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop
   list=resample,format:fout=44100:format=0x8</CODE></P>
 
-<P>这将会将重新采样插件的输出频率设为44100Hz格式化插件的输出格式设置为AFMT-U8。</P>                         
+<P>这将会将resample插件的输出频率设为44100Hz，format插件的输出格式设置为AFMT-U8。</P>                         
 
-<P>目前音频插件不能用于<B>MEncoder</B>。</P>
+<P>目前音频插件不能用于MEncoder。</P>
 
 
-<H5><A NAME="resample">2.3.2.2.1 升/降采样率</A></H5>
+<H5><A NAME="resample">2.3.2.4.1 升/降采样率</A></H5>
 
-<P><B>MPlayer</B>完全支持对声音升/降采样率。如果你使用固定采样率的声卡或者如果你被只兼容
-最大44.1kHz的老声卡郁闷时可以使用这个插件。你硬件的限制是不能自动检测的，因此你必须明确地规定采样频率。
+<P>MPlayer完全支持对声音升/降采样率。如果你使用固定采样率的声卡或者如果你被只兼容
+最大44.1kHz的老声卡郁闷时可以使用这个插件。是否使用这个插件是<B>自动检测的</B>
 这个插件有一个参数：<CODE>fout</CODE>用于设置期望的输出的采样率。默认是48kHz，单位是&lt;Hz&gt;。</P>
 
 <P>用法：<BR>
@@ -154,17 +485,17 @@ ARTS，和升/降采样率。(ESD是GNOME的音频守护进程，ARTS是KDE的)。</LI>
 <P>注意输出频率不能从默认值升高。因为升高会导致音频和视频流播放缓慢而且音频也会扭曲。</P>
 
 
-<H5><A NAME="surround_decoding">2.3.2.2.2 环绕音效解码</A></H5>
+<H5><A NAME="surround_decoding">2.3.2.4.2 环绕音效解码</A></H5>
 
-<P><B>MPlayer</B>有一个能解码矩阵编码的环绕音效的音频插件。杜比环绕是矩阵编码格式的一个例子。
+<P>MPlayer有一个能解码矩阵编码的环绕音效的音频插件。杜比环绕是矩阵编码格式的一个例子。
 大多数2通道音频的文件实际上包含了矩阵编码的环绕音效。为使用这个特性你需要至少支持4个声道的声卡。</P>
 
 <P>用法：<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
 
 
-<H5><A NAME="format">2.3.2.2.3 采样格式转换</A></H5>
-                                                                               
+<H5><A NAME="format">2.3.2.4.3 采样格式转换</A></H5>
+
 <P>如果你的声卡驱动不支持带符号的16位<CODE>int</CODE>数据类型，这个插件能被用来把它转换为一个你的
 声卡能理解的格式。它有一个参数，<CODE>format</CODE>，可以设置为你在<CODE>libao2/afmt.h</CODE>中找到的数字。
 这个插件几乎很少会用到而且是面向高级用户的。记住这个插件仅仅改变采样格式而不改变采样频率或者声道数。</P>
@@ -174,26 +505,26 @@ ARTS，和升/降采样率。(ESD是GNOME的音频守护进程，ARTS是KDE的)。</LI>
   list=format:format=&lt;required output format&gt;</CODE></P>
 
 
-<H5><A NAME="delay">2.3.2.2.4 延迟</A></H5>
+<H5><A NAME="delay">2.3.2.4.4 延迟</A></H5>
 
 <P>这个插件将声音延迟，被计划当做如何开发新的插件的例子。它不能用于任何以用户观点来说有用的东西，
 在这里被提到只是为了完整的缘故。不要使用这个插件除非你是开发者。</P>
 
 
-<H5><A NAME="volume">2.3.2.2.5 软件音量控制</A></H5>
+<H5><A NAME="volume">2.3.2.4.5 软件音量控制</A></H5>
 
-<P>这个插件是音量控制功能的软件替代，用于哪些使用蹩脚的混音设备的机器。如果你想要改变<B>MPlayer</B>
+<P>这个插件是音量控制功能的软件替代，用于哪些使用蹩脚的混音设备的机器。如果你想要改变MPlayer
 的输出音量而不改变混音器中PCM音量的设置也可以使用这个插件。它有一个<CODE>volume</CODE>参数初始的音量水平。
 初始音量水平能取0到255之间的值，默认值是101相当于放大0分贝。谨慎使用这个插件因为它会降低声音的信噪比。
 在大多数情况下最好是把PCM音量设为最大是，放弃这个插件并且通过混音器的主音量控制来控制你的扬声器输出水平。
 如果有连接到计算机的外部功放(这几乎是普遍情况)，噪音水平能通过调整在主音量级别和功放上的旋钮而最大限度的减少，
 直到去除嘶嘶的背景噪音。</P>
 
-<P>Usage:<BR>
+<P>用法:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop
   list=volume:volume=&lt;0-255&gt;</CODE></P>
 
-<P>这插件也有压缩器或称为“软控制”的功能。
+<P>这插件也有压缩器或称为“软修饰”的功能。
   压缩用于声音的动态范围十分高或者如果扬声器的动态范围十分低的的情况。注意这个特性将造成扭曲并且应该
 是最后一种被考虑的手段。</P>
 
@@ -202,11 +533,11 @@ ARTS，和升/降采样率。(ESD是GNOME的音频守护进程，ARTS是KDE的)。</LI>
   list=volume:softclip</CODE></P>
 
 
-<H5><A NAME="extrastereo">2.3.2.2.6 加强立体声</A></H5>
+<H5><A NAME="extrastereo">2.3.2.4.6 加强立体声</A></H5>
 
 <P>这个插件(线性地)增加左右声道的差别(像XMMS的extrastereo插件一样)使回放产生某种“现场”效果。</P>
 
-<P>Usage:<BR>
+<P>用法:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo</CODE><BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo:mul=3.45</CODE></P>
 
@@ -214,17 +545,12 @@ ARTS，和升/降采样率。(ESD是GNOME的音频守护进程，ARTS是KDE的)。</LI>
 如果你把它设置到1.0，声音不变，如果你把它设置为-1.0，左右声道将被交换。</P>
 
 
-<H5><A NAME="normalizer">2.3.2.2.7 音量正则化</A></H5>
+<H5><A NAME="normalizer">2.3.2.4.7 音量正则化</A></H5>
 
 <P>这个插件能没有变形的最大化音量。</P>
 
 <P>用法：<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=volnorm</CODE><BR>
-
-
-<H5><A NAME="surround">2.3.2.2.8 环绕</A></H5>
-
-<P>谁应该在什么时候写点什么。</P>
 
 </BODY>
 </HTML>

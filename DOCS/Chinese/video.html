@@ -2,9 +2,9 @@
 <HTML>
 
 <HEAD>
-  <TITLE>ÊÓÆµ -- MPlayer -- LinuxµÄµçÓ°²¥·ÅÆ÷</TITLE>
+  <TITLE>ÊÓÆµ -- MPlayer -- LinuxÏÂµÄµçÓ°²¥·ÅÆ÷</TITLE>
   <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gb_2312-80">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gbk">
 </HEAD>
 
 <BODY>
@@ -53,7 +53,7 @@
 </TABLE>
 
 
-<P>ÄãÖªµÀÁË»ùµØÖ·ºÍÏÔ´æ´óÐ¡£¬ÏÂÃæÈÃÎÒÃÇ½øÐÐMTRR×¢²á£¡ÀýÈç£¬¶ÔÓÚÉÏÊö32MBÏÔ´æ( size=0x2000000 )µÄMatroxÏÔ¿¨(base=0xd8000000)¾ÍÖ´ÐÐ£º</P>
+<P>ÄãÖªµÀÁË»ùµØÖ·ºÍÏÔ´æ´óÐ¡£¬ÏÂÃæÈÃÎÒÃÇ½øÐÐMTRR×¢²á£¡ÀýÈç£¬¶ÔÓÚÉÏÊö32MBÏÔ´æ( size=0x2000000 )µÄMatroxÏÔ¿¨(base=0xd8000000)¾ÍÔËÐÐ£º</P>
 
 
 <P><CODE>&nbsp;&nbsp;echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr</CODE></P>
@@ -61,8 +61,9 @@
 
 <P>²¢·ÇËùÓÐCPU¶¼Ö§³ÖMTRR¡£±ÈÈç½ÏÀÏµÄK6-2[266MHz×óÓÒ£¬²½½øÖµ0]²»Ö§³ÖMTRR£¬µ«ÊÇ²½½øÖµ12µÄ¾ÍÖ§³Ö(ÓÃ'<CODE>cat /proc/cpuinfo</CODE>'ÃüÁî¼ì²é)¡£</P>
 
+<H4><A NAME="normal">2.3.1.2 ´«Í³ÏÔ¿¨µÄÊÓÆµÊä³ö</A></H4>
 
-<H4><A NAME="xv">2.3.1.2 Xv</A></H4>
+<H4><A NAME="xv">2.3.1.2.1 Xv</A></H4>
 
 <P>ÔÚXFree86 4.0.2»òÕß¸üÐÂµÄ°æ±¾ÏÂ£¬ÄãÄÜÊ¹ÓÃXVideoÀ©Õ¹À´Ê¹ÓÃÄãµÄÏÔ¿¨µÄÓ²¼þYUVÀý³Ì¡£ÕâÊÇ¾ÍÊÇ'-vo xv'ËùÊ¹ÓÃµÄ¡£Í¬Ê±£¬
 ÕâÊÇÖ§³Öµ÷½ÚÁÁ¶È/¶Ô±È¶È/É«Ïà/µÈµÈµÄÇý¶¯(³ý·ÇÄãÊ¹ÓÃ¾ÉµÄ£¬»ºÂýµÄDirectShow DivX½âÂëÆ÷£¬Ê²Ã´Çý¶¯Ëü¶¼Ö§³Ö)£¬²Î¼ûman page¡£</P>
@@ -106,34 +107,30 @@
 	        type: YUV (planar)
 	(...etc...)
   </PRE>
-    <P>Ëü±ØÐëÖ§³ÖYUY2 packedºÍYV12 planarÏóËØ¸ñÊ½£¬<B>MPlayer</B>²ÅÄÜÀûÓÃËü¡£</P>
+    <P>Ëü±ØÐëÖ§³ÖYUY2 packedºÍYV12 planarÏóËØ¸ñÊ½£¬MPlayer²ÅÄÜÊ¹ÓÃËü¡£</P>
   </LI>
-  <LI>×îºó£¬¼ì²é<B>MPlayer</B>ÊÇ·ñ±àÒëÁË'xv'Ö§³Ö¡£
-    ./configure¿ÉÒÔÏÔÊ¾³öÀ´¡£</LI>
+  <LI>×îºó£¬¼ì²éMPlayerÊÇ·ñ±àÒëÁË'xv'Ö§³Ö¡£./configure¿ÉÒÔÏÔÊ¾³öÀ´¡£</LI>
 </UL>
 
 
-<H5><A NAME="xv_3dfx">2.3.1.2.1 3dfxÏÔ¿¨</A></H5>
+<H4><A NAME="xv_3dfx">2.3.1.2.1.1 3dfxÏÔ¿¨</A></H4>
 
-<P>ÀÏµÄµÄ3dfxÇý¶¯´æÔÚXVideo¼ÓËÙµÄÎÊÌâ£¬Ëü²»Ö§³ÖYUY2»òÕßYV12£¬ÖîÈç´ËÀà¡£È·¶¨ÄãµÄXFree86°æ±¾ÔÚ4.2.0ÒÔÉÏ£¬
+<P>ÀÏµÄµÄ3dfxÇý¶¯´æÔÚXVideo¼ÓËÙµÄÎÊÌâ£¬Ëü²»Ö§³ÖYUY2»òÕßYV12Ö®ÀàµÄ¸ñÊ½¡£È·¶¨ÄãµÄXFree86°æ±¾ÔÚ4.2.0ÒÔÉÏ£¬
 ËüÔÚYV12ºÍYUY2Ä£Ê½ÏÂ¹¤×÷ºÜºÃ¡£ÒÔÇ°µÄ°æ±¾£¬°üÀ¨4.1.0£¬<B>»áÔÚYV12ÏÂ±ÀÀ£</B>¡£Èç¹ûÄãÊ¹ÓÃ-vo xvÊ±Óöµ½Ææ¹ÖµÄÎÊÌâ£¬
-³¢ÊÔÊ¹ÓÃSDL(ËüÒ²ÓÐXVideo)¿´ÊÇ·ñÓÐ°ïÖú¡£Ï¸½ÚÇë²ì¿´<A HREF="#sdl">SDL</A>²¿·Ö¡£</P>
+³¢ÊÔÊ¹ÓÃSDL(ËüÒ²ÓÐXVideo)¿´ÊÇ·ñÓÐ°ïÖú¡£Ï¸½ÚÇë²ì¿´<A HREF="#sdl">SDL²¿·Ö</A>¡£</P>
 
 <P><B>»òÕß</B>£¬ÊÔÊÔÐÂµÄ-vo tdfxfbÇý¶¯£¡ ²Î¼û<A HREF="#tdfxfb">tdfxfb</A>²¿·Ö¡£</P>
 
 
-<H5><A NAME="xv_s3">2.3.1.2.2 S3ÏÔ¿¨</A></H5>
+<H4><A NAME="xv_s3">2.3.1.2.1.2 S3ÏÔ¿¨</A></H4>
 
 <P>S3 Savage3DÓ¦¸ÃÄÜÕý³£¹¤×÷£¬²»¹ý¶ÔÓÚSavage4£¬ÇëÊ¹ÓÃXFree86 4.0.3»ò¸üÐÂµÄ°æ±¾(Èç¹ûÍ¼ÏóÓÐÎÊÌâ£¬ÊÔÊÔ16bpp)¡£
-ÖÁÓÚS3 Virge£¬ËäÈ»ÓÐxvÖ§³Ö£¬µ«ÊÇÕâÖÖÏÔ¿¨ÊµÔÚÌ«Âý£¬Òò´ËÄã×îºÃÂòÁËËü¡£</P>
+ÖÁÓÚS3 Virge£¬ËäÈ»ÓÐxvÖ§³Ö£¬µ«ÊÇÕâÖÖÏÔ¿¨ÊµÔÚÌ«Âý£¬Òò´ËÄã×îºÃÂôÁËËü¡£</P>
 
-<P><B>×¢Òâ</B>£ºSavageÏÔ¿¨ÄÜÏÔÊ¾YV12Í¼Ïñµ«ÊÇËÙ¶ÈºÜÂý(ËüÐèÒª×öYV12->YUY2×ª»¯£¬ÒòÎªSavageµÄÓ²¼þ²»ÄÜÏÔÊ¾YV12)¡£
-Òò´Ëµ±Õâ¸öÎÄµµÔÚÊ²Ã´µØ·½Ëµ¡°Õâ¸öÓÐYV12Êä³ö£¬ÓÃÕâ¸ö£¬Ëü¿ì¡±µÄÊ±ºò£¬²¢²»ÍêÈ«ÊÇÕâÑù¡£ÊÔÊÔ
-<A HREF="http://www.mplayerhq.hu/MPlayer/contrib/Savage-driver/savage_drv.o.mmx2.bz2">Õâ¸öÇý¶¯</A>£¬
-ËüÊ¹ÓÃMMX2Íê³ÉÕâ¸öÈÎÎñ£¬±ÈX×Ô¼ºµÄÇý¶¯¿ì¡£</P>
+<P><B>×¢Òâ</B>£ºÄ¿Ç°²»Çå³þSavage½á¹¹µÄÄÇ¸ö²¿·ÖÈ±ÉÙYV12Ö§³Ö£¬¶øÊÇÓÃÇý¶¯½øÐÐ×ª»»µÄ(ºÜÂý)¡£Èç¹ûÄã»³ÒÉÄãµÄÏÔ¿¨£¬ÕÒÒ»¸öÐÂµÄÇý¶¯£¬»òÕßÔÚmplayer-usersµÄÓÊ¼þÁÐ±íÉÏÀñÃ²µÄÑ¯ÎÊÖ§³ÖMMX/3DNowµÄÇý¶¯¡£</P>
 
 
-<H5><A NAME="xv_nvidia">2.3.1.2.3 nVidiaÏÔ¿¨</A></H5>
+<H4><A NAME="xv_nvidia">2.3.1.2.1.3 nVidiaÏÔ¿¨</A></H4>
 
 <P>nVidiaÔÚLinuxÏÂ²»ÊÇºÜºÃµÄÑ¡Ôñ(nVidiaÈÏÎª£¬Õâ<A HREF="users_against_developers.html#nvidia">²¢·ÇÕæÊµÇé¿ö</A>)..
 Äã½«²»µÃ²»Ê¹ÓÃ¶þ½øÖÆµÄ·Ç¿ªÔ´µÄnVidiaÇý¶¯£¬nVidiaµÄÍøÕ¾¿ÉÒÔÕÒµ½¡£±ê×¼XFree86Çý¶¯Ã»ÓÐÕâÐ©ÏÔ¿¨µÄXVideoÖ§³Ö£¬
@@ -144,23 +141,23 @@
 <P>Riva128ÏÔ¿¨¼´Ê¹ÓÃnVidiaµÄÇý¶¯Ò²Ã»ÓÐXVideoÖ§³Ö:(ÏònVidia±§Ô¹È¥°É¡£</P>
 
 
-<H5><A NAME="xv_ati">2.3.1.2.4 ATIÏÔ¿¨</A></H5>
+<H4><A NAME="xv_ati">2.3.1.2.1.4 ATIÏÔ¿¨</A></H4>
 
 <UL>
   <LI><A HREF="http://www.linuxvideo.org/gatos">GATOSÇý¶¯</A>(³ý·ÇÄãÓÐRage128»òÕßRadeon£¬·ñÔòÄãÓ¦¸ÃÊ¹ÓÃËü)È±Ê¡´ò¿ªVSYNC¡£
 ÕâÒâÎ¶×Å½âÂëËÙ¶È(£¡)ÓëÏÔÊ¾Æ÷µÄË¢ÐÂÂÊÊÇÍ¬²½µÄ¡£Èç¹û¾õµÃ²¥·ÅËÙ¶È»ºÂý£¬ÒÔÄ³ÖÖ·½Ê½½ûÓÃVSYNC£¬»òÕß°ÑË¢ÐÂÂÊµ÷µ½µ½n*(µçÓ°µÄfps)Hz¡£</LI>
   <LI>Radeon VE -- Ä¿Ç°Ö»ÓÐXFree86µÄCVSÀïÓÐÕâÖÖÏÔ¿¨µÄÇý¶¯£¬4.1.0°æÃ»ÓÐ¡£Í¬Ê±Ã»ÓÐµçÊÓÖ§³Ö¡£µ±È»£¬
-Ê¹ÓÃ<B>MPlayer</B>ÄãÄÜÐÒ¸£µØµÃµ½<B>¼ÓËÙ</B>ÏÔÊ¾£¬ÓÐ»òÃ»ÓÐ<B>µçÊÓÊä³ö</B>£¬¶øÇÒ²»ÐèÒªÈÎºÎ¿â»òÕßX¡£ÔÄ¶Á<A HREF="#vidix">Vidix</A>Ò»½Ú¡£</LI>
+Ê¹ÓÃMPlayerÄãÄÜÐÒ¸£µØµÃµ½<B>¼ÓËÙ</B>ÏÔÊ¾£¬ÓÐ»òÃ»ÓÐ<B>µçÊÓÊä³ö</B>£¬¶øÇÒ²»ÐèÒªÈÎºÎ¿â»òÕßX¡£ÔÄ¶Á<A HREF="#vidix">Vidix</A>Ò»½Ú¡£</LI>
 </UL>
 
 
-<H5><A NAME="xv_neomagic">2.3.1.2.5 NeoMagicÏÔ¿¨</A></H5>
+<H4><A NAME="xv_neomagic">2.3.1.2.1.5 NeoMagicÏÔ¿¨</A></H4>
 
-<P>ÕâÐ©ÏÔ¿¨ÄÜÔÚÐí¶à±Ê¼Ç±¾µçÄÔÀïÕÒµ½¡£²»ÐÒµÄÊÇ£¬X 4.2.0µÄÇý¶¯²»ÄÜÊ¹ÓÃXv£¬µ«ÊÇÎÒÃÇÎªÄã×¼±¸ÁËÒ»¸ö¾­¹ýÐÞ¸Ä£¬ÄÜ¹»Ê¹ÓÃXvµÄÇý¶¯¡£
-<A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">µ½ÕâÀïÏÂÔØ</A>¡£
+<P>ÕâÐ©ÏÔ¿¨ÄÜÔÚÐí¶à±Ê¼Ç±¾µçÄÔÀïÕÒµ½¡£²»ÐÒµÄÊÇ£¬X 4.2.0µÄÇý¶¯²»ÄÜÊ¹ÓÃXv£¬µ«ÊÇÎÒÃÇÎªÄã×¼±¸ÁËÒ»¸ö¾­¹ýÐÞ¸Ä£¬ÄÜ¹»Ê¹ÓÃXv
+µÄÇý¶¯¡£<A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">µ½ÕâÀïÏÂÔØ</A>¡£
 Õâ¸öÇý¶¯ÊÇÓÉStefan SeyfriedÌá¹©µÄ¡£</P>
 
-<P>ÏñÕâÑùÐÞ¸ÄÄãµÄXF86ConfigÊ¹Ö®ÄÜ½øÐÐDVD´óÐ¡µÄÄÚÈÝµÄ»Ø·Å£º</P>
+<P>ÏñÕâÑùÐÞ¸ÄÄãµÄXF86ConfigÊ¹Ö®ÄÜ½øÐÐDVD´óÐ¡µÄÄÚÈÝµÄ²¥·Å£º</P>
 
 <P>Section "Device"<BR>
   &nbsp; &nbsp; <I>[...]</I><BR>
@@ -170,23 +167,22 @@
   EndSection</P>
 
 
-<H5><A NAME="xv_trident">2.3.1.2.6 TridentÏÔ¿¨</A></H5>
+<H4><A NAME="xv_trident">2.3.1.2.1.6 TridentÏÔ¿¨</A></H4>
 
 <P>Èç¹ûÄãÏëÒªÔÚTridentÏÔ¿¨ÉÏÊ¹ÓÃxv£¬ËüÔÚ4.1.0ÏÂ²»¹¤×÷£¬³¢ÊÔXFree×îÐÂµÄCVS»òÕßµÈºòXFree 4.2.0¡£×îÐÂµÄCVS¼ÓÈëÁËCyberblade XPÏÔ¿¨µÄÈ«ÆÁxvÖ§³Ö¡£</P>
 
 
-<H4><A NAME="dga">2.3.1.3 DGA</A></H4>
+<H4><A NAME="dga">2.3.1.2.2 DGA</A></H4>
+
+<H4><A NAME="dga_summary">2.3.1.2.2.1 ×ÜÂÛ</A></H4>
+
+<P>Õâ²¿·ÖÎÄµµÊÔÍ¼»¨Ð©Æª·ùÀ´½âÊÍDGA´ó¸ÅÊÇÊ²Ã´ÒÔ¼°MPlayerµÄDGAÊÓÆµÊä³öÇý¶¯ÄÜ¸ÉÊ²Ã´(ºÍ²»ÄÜ¸ÉÊ²Ã´)¡£</P>
 
 
-<H5><A NAME="dga_summary">2.3.1.3.1 ×ÜÂÛ</A></H5>
-
-<P>ÕâÆªÎÄ¼þÊÔÍ¼»¨Ð©Æª·ùÀ´½âÊÍDGA´ó¸ÅÊÇÊ²Ã´ÒÔ¼°<B>MPlayer</B>µÄDGAÊÓÆµÊä³öÇý¶¯ÄÜ×öÊ²Ã´(ÒÔ¼°²»ÄÜ×öÊ²Ã´)¡£</P>
-
-
-<H5><A NAME="dga_whatis">2.3.1.3.2 DGAÊÇÊ²Ã´</A></H5>
+<H4><A NAME="dga_summary">2.3.1.2.2.2 DGAÊÇÊ²Ã´</A></H4>
 
 <P>DGAÊÇDirect Graphics AccessµÄ¼ò³Æ£¬ÊÇÒ»ÖÖÊ¹³ÌÐòÈÆ¹ýX-·þÎñÆ÷Ö±½ÓÐÞ¸ÄÖ¡»º³åÏÔ´æµÄ·½·¨¡£´Ó¼¼Êõ½Ç¶ÈËµÕâÊÇÍ¨¹ý°ÑÖ¡»º³åÏÔ´æÓ³Éäµ½ÄãµÄ´¦ÀíÆ÷µÄÄÚ´æ·¶Î§Ö®ÄÚ¡£
-Ö»ÓÐÄãÓÐ³¬¼¶ÓÃ»§È¨ÏÞµÄÊ±ºòÄÚºË²ÅÔÊÐíÕâÖÖ²Ù×÷¡£ÓÃrootµÇÂ¼»òÕß¸ø<B>MPlayer</B>µÄÖ´ÐÐÎÄ¼þÉèÖÃSUIDÎ»(ÍÆ¼öÊ¹ÓÃ£¡)¿ÉÒÔ×öµ½ÕâÒ»µã¡£</P>
+Ö»ÓÐÄãÓÐ³¬¼¶ÓÃ»§È¨ÏÞµÄÊ±ºòÄÚºË²ÅÔÊÐíÕâÖÖ²Ù×÷¡£ÓÃrootµÇÂ¼»òÕß¸øMPlayerµÄÖ´ÐÐÎÄ¼þÉèÖÃSUIDÎ»(ÍÆ¼öÊ¹ÓÃ£¡)¿ÉÒÔ×öµ½ÕâÒ»µã¡£</P>
 
 <P>DGAÓÐÁ½ÖÖ°æ±¾£º DGA1ÓÃÓÚXFree 3.x.xºÍDGA2´ÓXFree 4.0.1¿ªÊ¼ÒýÈë¡£</P>
 
@@ -197,17 +193,17 @@
 <P>È»¶øDGAÒ²ÓÐÒ»Ð©±×¶Ë¡£ËüËÆºõÓÐÐ©ÒÀÀµÓÚÄãÊ¹ÓÃµÄÍ¼ÐÎÐ¾Æ¬ºÍX·þÎñÆ÷ÖÐ¿ØÖÆ¸ÃÐ¾Æ¬µÄÊÓÆµÇý¶¯¡£Òò´Ë£¬Ëü²¢²»ÊÇ¶ÔËùÓÐµÄÏµÍ³¶¼Æð×÷ÓÃ...</P>
 
 
-<H5><A NAME="dga_installation">2.3.1.3.3 ÎªMPlayer°²×°DGAÖ§³Ö</A></H5>
+<H4><A NAME="dga_installation">2.3.1.2.2.3 ÎªMPlayer°²×°DGAÖ§³Ö</A></H4>
 
 <P>Ê×ÏÈÈ·±£X×°ÔØÁËDGAÀ©Õ¹£¬²ì¿´/var/log/XFree86.0.log:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>(II) Loading extension XFree86-DGA</CODE></P>
 
-<P>¿É¼û£¬Ç¿ÁÒÍÆ¼öXFree86 4.0.x»ò¸ü¸ß°æ±¾£¬<B>MPlayer</B>µÄDGAÇý¶¯ÔÚ./configureÊ±»á×Ô¶¯¼ì²âµ½£¬·ñÔòÄã¿ÉÒÔÓÃ--enable-dgaÇ¿ÐÐ±àÒëËü¡£</P>
+<P>¿É¼û£¬Ç¿ÁÒÍÆ¼öXFree86 4.0.x»ò¸ü¸ß°æ±¾£¬MPlayerµÄDGAÇý¶¯ÔÚ./configureÊ±»á×Ô¶¯¼ì²âµ½£¬·ñÔòÄã¿ÉÒÔÓÃ--enable-dgaÇ¿ÐÐ±àÒëËü¡£</P>
 
-<P>Èç¹ûÄãµÄÇý¶¯²»ÄÜÇÐ»»µ½Ò»¸ö½ÏÐ¡µÄ·Ö±æÂÊ£¬³¢ÊÔÊ¹ÓÃÑ¡Ïî-vm(Ö»ÓÃÓÚX 3.3.x)£¬-fs£¬-bpp£¬-zoomÕÒÒ»¸öÄãµÄµçÓ°ÊÊºÏµÄÊÓÆµÄ£Ê½¡£Ä¿Ç°Ã»ÓÐ×ª»»¹¦ÄÜ:(</P>
+<P>Èç¹ûÄãµÄÇý¶¯²»ÄÜÇÐ»»µ½Ò»¸ö½ÏÐ¡µÄ·Ö±æÂÊ£¬³¢ÊÔÊ¹ÓÃÑ¡Ïî-vm(Ö»ÓÃÓÚX 3.3.x)£¬-fs£¬-bpp£¬-zoomÕÒÒ»¸öÊÊºÏÄãµÄµçÓ°µÄÊÓÆµÄ£Ê½¡£Ä¿Ç°Ã»ÓÐ×ª»»¹¦ÄÜ:(</P>
 
-<P>³ÉÎªroot¡£DGAÐèÒªrootÈ¨ÏÞÀ´Ö±½ÓÐ´ÏÔ´æ¡£Èç¹ûÄãÏëÓÃÆÕÍ¨ÓÃ»§ÔËÐÐËü£¬¸ø<B>MPlayer</B>ÉèÖÃSUID rootÈ¨ÏÞ£º</P>
+<P>³ÉÎªroot¡£DGAÐèÒªrootÈ¨ÏÞÀ´Ö±½ÓÐ´ÏÔ´æ¡£Èç¹ûÄãÏëÓÃÆÕÍ¨ÓÃ»§ÔËÐÐËü£¬¸øMPlayerÉèÖÃSUID rootÈ¨ÏÞ£º</P>
 
 <P><CODE>
   &nbsp;&nbsp;&nbsp;&nbsp;chown root /usr/local/bin/mplayer<BR>
@@ -218,14 +214,14 @@
 
 <BLOCKQUOTE>
   <B>¾¯¸æ£º°²È«·çÏÕ</B><BR>
-  ÕâÊÇÒ»¸ö<B>ºÜ´óµÄ</B>°²È«·çÏÕ£¡ÓÀÔ¶²»ÒªÔÚ³ýÁËÄãÖ®Íâ»¹ÓÐÈË¿ÉÒÔÊ¹ÓÃµÄ·þÎñÆ÷ÉÏÕâÑù×ö£¬ÒòÎªËûÃÇÄÜÍ¨¹ýSUID rootµÄ<B>MPlayer</B>»ñµÃrootÈ¨ÏÞ¡£
+  ÕâÊÇÒ»¸ö<B>ºÜ´óµÄ</B>°²È«·çÏÕ£¡<B>ÓÀÔ¶</B>²»ÒªÔÚ³ýÁËÄãÖ®Íâ»¹ÓÐÈË¿ÉÒÔÊ¹ÓÃµÄ·þÎñÆ÷ÉÏÕâÑù×ö£¬ÒòÎªËûÃÇÄÜÍ¨¹ýSUID rootµÄMPlayer»ñµÃrootÈ¨ÏÞ¡£
 </BLOCKQUOTE>
 
 <P>ÏÖÔÚÊ¹ÓÃ<CODE>-vo dga</CODE>Ñ¡Ïî£¬¿ªÊ¼Ê¹ÓÃ(Èç´ËÏ£Íû:))£¡
   ÄãÒ²Ó¦¸Ã³¢ÊÔ¿´¿´<CODE>-vo sdl:dga</CODE>Ñ¡ÏîÄÜ·ñÕý³£¹¤×÷¡£Ëü¿ìµÃ¶à¡£</P>
 
 
-<H5><A NAME="dga_resolution">2.3.1.3.4 ÇÐ»»·Ö±æÂÊ</A></H5>
+<H4><A NAME="dga_resolution">2.3.1.2.2.4 ÇÐ»»·Ö±æÂÊ</A></H4>
 
 <P>DGAÇý¶¯ÔÊÐíÇÐ»»Êä³öÐÅºÅµÄ·Ö±æÂÊ¡£ÕâÑùÄÜ±ÜÃâÊ¹ÓÃ(»ºÂýµÄ)Èí¼þËõ·ÅÍ¬Ê±ÓÖÌá¹©È«ÆÁÍ¼Ïó¡£ÀíÏëÇé¿öÏÂ£¬Ëü½«¾«È·ÇÐ»»³ÉÊÓÆµÊý¾ÝµÄ·Ö±æÂÊ(³ýÁËÎªÁË±£³Ö³¤¿í±È)£¬
 µ«ÊÇX·þÎñÆ÷½öÔÊÐíÇÐ»»µ½<CODE>/etc/X11/XF86Config</CODE>(XFree 4.0.XÊ¹ÓÃ<CODE>/etc/X11/XF86Config-4</CODE>ÓÃÓÚÇø±ð)ÖÐÔ¤¶¨ÒåµÄ·Ö±æÂÊ¡£
@@ -236,13 +232,13 @@
 <P>modeline¶¨Òå·Ö±æÂÊµÄÒ»Ð©Àý×Ó²Î¼û¸½Â¼A¡£</P>
 
 
-<H5><A NAME="dga_mplayer">2.3.1.3.5 DGA &amp; MPlayer</A></H5>
+<H4><A NAME="dga_mplayer">2.3.1.2.2.5 DGA &amp; MPlayer</A></H4>
 
-<P><B>MPlayer</B>ÔÚÁ½¸öµØ·½Ê¹ÓÃDGA£ºSDLÇý¶¯ÄÜÊ¹ÓÃËü(-vo sdl:dga)ÒÔ¼°ÔÚDGAÇý¶¯(-vo dga)ÖÐÊ¹ÓÃ¡£ÉÏÃæËµµÄÄÚÈÝ¶ÔÁ½Õß¶¼ÓÐÐ§£»
-ÔÚÏÂÁÐµÄ¼¸¶ÎÖÐÎÒ½«½âÊÍ<B>MPlayer</B>ÖÐDGAÇý¶¯ÊÇÈçºÎ¹¤×÷µÄ¡£</P>
+<P>MPlayerÔÚÓÐÁ½ÖÖ·½·¨Ê¹ÓÃDGA£ºSDLÇý¶¯ÄÜÊ¹ÓÃËü(-vo sdl:dga)£¬DGAÇý¶¯(-vo dga)Ò³Ê¹ÓÃËü¡£ÉÏÃæËµµÄÄÚÈÝ¶ÔÁ½Õß¶¼ÓÐÐ§£»
+ÔÚÏÂÁÐµÄ¼¸¶ÎÖÐÎÒ½«½âÊÍMPlayerÖÐDGAÇý¶¯ÊÇÈçºÎ¹¤×÷µÄ¡£</P>
 
 
-<H5><A NAME="dga_features">2.3.1.3.6 DGAÇý¶¯µÄÌØÐÔ</A></H5>
+<H4><A NAME="dga_features">2.3.1.2.2.6 DGAÇý¶¯µÄÌØÐÔ</A></H4>
 
 <P>DGAÇý¶¯Í¨¹ýÃüÁîÐÐÖÐµÄ-vo dgaÑ¡Ïîµ÷ÓÃ¡£Ä¬ÈÏ²Ù×÷ÊÇ×ª»»³ÉÓëÔ­À´µÄÊÓÆµ¾¡¿ÉÄÜ½Ó½üµÄ·Ö±æÂÊ¡£Ëü½«ºöÂÔ-vmºÍ-fsÑ¡Ïî(¿ªÆôÊÓÆµÄ£Ê½ÇÐ»»ºÍÈ«ÆÁ·½Ê½) 
 -- Ëü×ÜÊÔÍ¼Í¨¹ýÇÐ»»ÏÔÊ¾Ä£Ê½¾¡¿ÉÄÜ¶àµÄ¸²¸ÇÄãµÄÆÁÄ»£¬ÕâÑù×è°­ÄãµÄCPUÊ¹ÓÃÒ»¸öµ¥Ò»µÄ¸½¼ÓµÄÖÜÆÚÀ´·Å´óÍ¼Ïñ¡£
@@ -260,9 +256,9 @@
 È»¶ø£¬Ê¹ÓÃË«ÖØ»º³å¿ÉÄÜµ¼ÖÂ½Ï´óµÄËÙ¶ÈÏÂ½µ(ÔÚÎÒµÄK6-II+ 525ÉÏËü¶àÕ¼ÓÃ20%µÄCPUÊ±¼ä£¡)£¬ÏÂ½µ³Ì¶ÈÈ¡¾öÓÚDGA²Ù×÷ÄãµÄÓ²¼þµÄ·½·¨¡£</P>
 
 
-<H5><A NAME="dga_speed">2.3.1.3.7 ËÙ¶ÈÎÊÌâ</A></H5>
+<H4><A NAME="dga_speed">2.3.1.2.2.7 ËÙ¶ÈÎÊÌâ</A></H4>
 
-<P>Ò»°ãÀ´Ëµ£¬DGAÖ¡»º³åÖÁÉÙÓ¦¸Ã¸úX11Çý¶¯Ò»Ñù¿ìÍ¬Ê±»¹ÓÐÈ«ÆÁÍ¼ÏóµÄ¸½¼ÓºÃ´¦¡£¶Ô<B>MPlayer</B>´òÓ¡³öµÄ°Ù·Ö±ÈËÙ¶ÈµÄÆÀ¼ÛÓ¦¸ÃÐ¡ÐÄ£¬
+<P>Ò»°ãÀ´Ëµ£¬DGAÖ¡»º³åÖÁÉÙÓ¦¸Ã¸úX11Çý¶¯Ò»Ñù¿ìÍ¬Ê±»¹ÓÐÈ«ÆÁÍ¼ÏóµÄ¸½¼ÓºÃ´¦¡£¶ÔMPlayer´òÓ¡³öµÄ°Ù·Ö±ÈËÙ¶ÈµÄÆÀ¼ÛÓ¦¸ÃÐ¡ÐÄ£¬
 ±ÈÈçX11Çý¶¯ËüÃÇ²¢²»°üÀ¨X-·þÎñÆ÷ÕæÕý»æÖÆËùÓÃµÄÊ±¼ä¡£¿ªÒ»¸öÖÕ¶ËÁ¬µ½ÄãµÄ»úÆ÷µÄ´®¿ÚÉÏÔËÐÐtopÃüÁî¿´¿´ÄãµÄ»úÆ÷ÕæÕýÔÚ¸ÉÊ²Ã´...</P>
 
 <P>Ò»°ãÀ´Ëµ£¬Ê¹ÓÃDGAÏà¶Ô¡°ÆÕÍ¨µÄ¡±Ê¹ÓÃX11Ëù²úÉúµÄËÙ¶ÈÌá¸ß¸ß¶ÈÒÀÀµÓÚÄãµÄÏÔ¿¨£¬ÒÔ¼°X-·þÎñÆ÷ÖÐËüµÄÄ£¿é×öÁË¶àÉÙÓÅ»¯¡£</P>
@@ -274,7 +270,7 @@
 <P>ÎÒÔø¼û¹ýÒ»Ð©AVIÎÄ¼þÄÜÔÚPentium MMX 266ÉÏ²¥·Å¡£AMD K6-2 CPUÔÚ400 MHZÒÔÉÏµÄÓ¦¸Ã¿ÉÒÔ¹¤×÷¡£</P>
 
 
-<H5><A NAME="dga_bugs">2.3.1.3.8 ÒÑÖªµÄbug</A></H5>
+<H4><A NAME="dga_bugs">2.3.1.2.2.8 ÒÑÖªµÄbugs</A></H4>
 
 <P>àÅ£¬¾ÝÒ»Ð©XFreeµÄ¿ª·¢ÕßËµ£¬DGAÏñÍ·Ò°ÊÞ¡£ËûÃÇ¸æËßÄã²»ÒªÊ¹ÓÃËü¡£²¢·Ç¶ÔÈÎºÎÐ¾Æ¬µÄÇý¶¯ËüµÄ²Ù×÷¶¼ÊÇÃ»ÓÐè¦´ÃµÄ¡£</P>
 
@@ -289,7 +285,7 @@
 </UL>
 
 
-<H5><A NAME="dga_future">2.3.1.3.9 Î´À´µÄ¹¤×÷</A></H5>
+<H4><A NAME="dga_future">2.3.1.2.2.9 Î´À´µÄ¹¤×÷</A></H4>
 
 <UL>
   <LI>ÎªOSDÌá¹©ÐÂµÄX11µÄäÖÈ¾½Ó¿Ú</LI>
@@ -297,7 +293,7 @@
 </UL>
 
 
-<H5><A NAME="dga_modelines">2.3.1.3.A Ò»Ð©modelines </A></H5>
+<H4><A NAME="dga_modelines">2.3.1.2.2.A Ò»Ð©modelines</A></H4>
 
 <PRE>
   Section "Modes"
@@ -315,21 +311,21 @@
 <P>ÕâÐ©ÌõÄ¿ÔÚÎÒµÄRiva128Ð¾Æ¬ÉÏ¹¤×÷µÄºÜºÃ£¬Ê¹ÓÃnv.oµÄX·þÎñÆ÷Çý¶¯Ä£¿é¡£</P>
 
 
-<H5><A NAME="dga_bug_reports">2.3.1.3.B ±¨¸æbug</A></H5>
+<H4><A NAME="dga_bug_reports">2.3.1.2.2.B ±¨¸æbug</A></H4>
 
-<P>Èç¹ûÄãÔÚÊ¹ÓÃDGAÇý¶¯Ê±Óöµ½Âé·³Çë±ð½éÒâ£¬·¢Ò»¸öbug±¨¸æ¸øÎÒ(e-mailµØÖ·ÔÚÏÂÃæ)¡£ÇëÓÃ-vÑ¡ÏîÆô¶¯<B>MPlayer</B>²¢ÇÒÔÚbug±¨¸æÖÐ°üÀ¨ËùÓÐÒÔvo-dga¿ªÊ¼µÄÊä³öÐÐ£º</P>
+<P>Èç¹ûÄãÔÚÊ¹ÓÃDGAÇý¶¯Ê±Óöµ½Âé·³£¬·¢ËÍÒ»¸öbug±¨¸æ¸øÎÒ(e-mailµØÖ·ÔÚÏÂÃæ)¡£ÇëÓÃ-vÑ¡ÏîÆô¶¯MPlayer²¢ÇÒÔÚbug±¨¸æÖÐ°üÀ¨ËùÓÐÒÔvo_dga¿ªÊ¼µÄÊä³öÐÐ£º</P>
 
 <P>ÇëÒ»²¢¸½´øÄãÊ¹ÓÃµÄX11µÄ°æ±¾£¬ÏÔ¿¨ºÍÄãµÄCPUÀàÐÍ¡£X11Çý¶¯Ä£¿é(ÔÚXF86-ConfigÖÐ¶¨Òå)Ò²¿ÉÄÜÓÐ°ïÖú¡£Ð»Ð»£¡</P>
 
 <P><I>Acki (acki@acki-netz.de£¬www.acki-netz.de)</I></P>
 
 
-<H4><A NAME="sdl">2.3.1.4 SDL</A></H4>
+<H4><A NAME="sdl">2.3.1.2.3 SDL</A></H4>
 
 <P>SDL(Simple Directmedia Layer)»ù±¾ÉÏÊÇÒ»ÖÖÍ³Ò»µÄÊÓÆµ/ÒôÆµ½Ó¿Ú¡£Ê¹ÓÃËüµÄ³ÌÐòÖ»ÒªÖªµÀSDL£¬¶ø²»ÐèÒªÁË½âSDLÊµ¼ÊÉÏÊ¹ÓÃµÄÊÓÆµ»òÒôÆµÇý¶¯¡£
 ÀýÈçÊ¹ÓÃSDLµÄDoomÒÆÖ²ÄÜÔÚsvgalib£¬aalib£¬X£¬fbdev£¬ºÍÆäËû¶«Î÷ÉÏÊ¹ÓÃ£¬Äã½öÐèÒªÓÃ»·¾³±äÁ¿SDL_VIDEODRIVER¹æ¶¨(ÀýÈç)Ê¹ÓÃµÄÊÓÆµÇý¶¯¡£àÅ£¬ÖÁÉÙÔÚÀíÂÛÉÏ¡£</P>
 
-<P>ÔÚ<B>MPlayer</B>ÖÐ£¬ÎÒÃÇÊ¹ÓÃËüµÄX11Çý¶¯µÄÈí¼þËõ·Å¹¦ÄÜ£¬ÓÃÓÚ²»Ö§³ÖXVideoµÄÐ¾Æ¬/ÏÔ¿¨£¬Ö±µ½ÎÒÃÇ×ö³öÎÒÃÇ×Ô¼ºµÄ(¸ü¿ì£¬¸üºÃ)µÄÈí¼þËõ·Å´úÂë¡£
+<P>ÔÚMPlayerÖÐ£¬ÎÒÃÇÊ¹ÓÃËüµÄX11Çý¶¯µÄÈí¼þËõ·Å¹¦ÄÜ£¬ÓÃÓÚ²»Ö§³ÖXVideoµÄÐ¾Æ¬/ÏÔ¿¨£¬Ö±µ½ÎÒÃÇ×ö³öÎÒÃÇ×Ô¼ºµÄ(¸ü¿ì£¬¸üºÃ)µÄÈí¼þËõ·Å´úÂë¡£
 Í¬Ê±ÎÒÃÇÊ¹ÓÃËüµÄaalibÊä³ö£¬µ«ÊÇÏÖÔÚÎÒÃÇ×Ô¼ºµÄ¸üºÏÊÊµÄÁË¡£ËüµÄDGAÄ£Ê½±ÈÎÒÃÇµÄºÃ£¬Ö±µ½×î½ü¡£ÏÖÔÚÃ÷°×ÁË£¿ :)</P>
 
 <P>Ëü¶ÔÒ»Ð©buggyµÄÇý¶¯/ÏÔ¿¨Ò²ÓÐ°ïÖú£¬ÀýÈçÊÓÆµÌøÔ¾(²»ÊÇÏµÍ³»ºÂýµÄÎÊÌâ)£¬»òÕßÒôÆµÑÓ³Ù¡£</P>
@@ -364,13 +360,14 @@
 
 <UL>
   <LI>ÔÚsdl:aalib¿ØÖÆÌ¨Çý¶¯ÏÂ°´ÏÂµÄ¼ü½«ÓÀÔ¶ÖØ¸´¡£(Ê¹ÓÃ-vo aa£¡)ËüÊÇSDLÖÐµÄbug£¬ÎÒÎÞ·¨¸Ä±äËü(ÓÃSDL 1.2.1²âÊÔ)¡£</LI>
+  <LI>²»ÒªÔÚGUIÖÐÊ¹ÓÃSDL£¡Ëü²»»áÏñÔ¤ÏëµÄÄÇÑù¹¤×÷¡£</LI>
 </UL>
 
 
-<H4><A NAME="svgalib">2.3.1.5 SVGAlib</A></H4>
+<H4><A NAME="svgalib">2.3.1.2.4 SVGAlib</A></H4>
 
 <H4>°²×°</H4>
-<P>Äã±ØÐë°²×°svgalibºÍËüµÄ¿ª·¢°üÀ´Ê¹<B>MPlayer</B>±àÒëËüµÄSVGAlibÇý¶¯(×Ô¶¯¼ì²â£¬µ«ÊÇÒ²ÄÜÇ¿ÖÆÊ¹ÓÃ)£¬
+<P>Äã±ØÐë°²×°svgalibºÍËüµÄ¿ª·¢°üÀ´Ê¹MPlayer±àÒëËüµÄSVGAlibÇý¶¯(×Ô¶¯¼ì²â£¬µ«ÊÇÒ²ÄÜÇ¿ÖÆÊ¹ÓÃ)£¬
 ±ðÍüÁË±à¼­/etc/vga/libvga.configÀ´ÅäºÏÄãµÄÏÔ¿¨&amp;¼àÊÓÆ÷¡£</P>
 
 <H4>×¢Òâ</H4>
@@ -378,7 +375,8 @@
 ÖÊÁ¿»áÓÐµã²î£¬µ«ÊÇÎÞÂÛÈçºÎËü¸ü¿ì¡£</P>
 
 <H4>EGA(4bpp)Ö§³Ö</H4>
-<P>SVGAlib½áºÏÁËEGAlib£¬Ê¹µÃ<B>MPlayer</B>ÓÐ¿ÉÄÜÓÃ16ÖÖÑÕÉ«²¥·ÅÈÎºÎµçÓ°£¬ÏÂÁÐµÄÅäÖÆÖÐ¿ÉÒÔÊ¹ÓÃ£º</P>
+
+<P>SVGAlib½áºÏÁËEGAlib£¬Ê¹µÃMPlayerÓÐ¿ÉÄÜÓÃ16ÖÖÑÕÉ«²¥·ÅÈÎºÎµçÓ°£¬ÏÂÁÐµÄÅäÖÆÖÐ¿ÉÒÔÊ¹ÓÃ£º</P>
 
 <UL>
   <LI>EGAÏÔ¿¨ºÍEGAÏÔÊ¾Æ÷£º 320x200x4bpp£¬640x200x4bpp£¬640x350x4bpp</LI>
@@ -396,7 +394,7 @@
   &nbsp; &nbsp;<CODE>-noaspect</CODE></P>
 
 
-<H4><A NAME="fbdev">2.3.1.6 Ö¡»º³åÊä³ö(FBdev)</A></H4>
+<H4><A NAME="fbdev">2.3.1.2.5 Ö¡»º³åÊä³ö(FBdev)</A></H4>
 
 <P>ÊÇ·ñ±àÒëFBdevÄ¿±êÊÇÔÚ./configureÆÚ¼ä×Ô¶¯¼ì²âµÄ¡£ÔÄ¶ÁÄÚºËÔ´ÂëÖÐµÄÖ¡»º³åµÄÎÄµµ(Documentation/fb/*)À´ÁË½â¸ü¶àÐÅÏ¢¡£</P>
 
@@ -419,7 +417,7 @@
   <DT><CODE>-monitor_hfreq</CODE></DT>
   <DT><CODE>-monitor_vfreq</CODE></DT>
   <DT><CODE>-monitor_dotclock</CODE></DT>
-  <DD><STRONG>ÖØÒªµÄ</STRONG>²ÎÊý£¬²Î¼û<CODE>example.conf<CODE></DD>
+  <DD><STRONG>ÖØÒªµÄ</STRONG>²ÎÊý£¬²Î¼û<CODE>example.conf</CODE></DD>
 </DL>
 
 <P>Èç¹ûÄãÏëÒªÇÐ»»µ½Ä³¸ö¾ßÌåÄ£Ê½£¬ÄÇÃ´Ê¹ÓÃ</P>
@@ -435,15 +433,15 @@
     ÒªÖØÐÂ¿ªÆô¹â±ê£º<CODE>echo -e '\033[?25h'</CODE>»ò<CODE>setterm -cursor on</CODE></LI>
 </UL>
 
-<P>×¢Òâ£ºÊ¹ÓÃVESA Ö¡»º³åÊ±FBdevÊÓÆµ·½Ê½²»ÄÜ¸Ä±ä£¬Ò²²»ÒªÒªÇóÕâ¸ö¹¦ÄÜ£¬ÒòÎªËü²»ÊÇÓÉÓÚ<B>MPlayer</B>×ÔÉíµÄÏÞÖÆ¡£</P>
+<P>×¢Òâ£ºÊ¹ÓÃVESA Ö¡»º³åÊ±FBdevÊÓÆµ·½Ê½²»ÄÜ¸Ä±ä£¬Ò²²»ÒªÒªÇóÕâ¸ö¹¦ÄÜ£¬ÒòÎªËü²»ÊÇÓÉÓÚMPlayer×ÔÉíµÄÏÞÖÆ¡£</P>
 
 
-<P><B><A NAME="mga_vid">2.3.1.7 Matrox Ö¡»º³å(mga_vid)</A></B></P>
+<H4><A NAME="mga_vid">2.3.1.2.6 MatroxÖ¡»º³å(mga_vid)</A></H4>
 
 <P>ÕâÒ»¶ÎÊÇ¹ØÓÚMatrox G200/G400/G450/G550 BES (Back-End Scaler)µÄÖ§³Ö£¬mga_vidÄÚºËÇý¶¯¡£ËüÏÖÔÚÊÇÓÉÎÒ(A'rpi)¿ª·¢µÄ£¬
 ËüÓÐÈýÖØ»º³åµÄÓ²¼þVSYNCÖ§³Ö¡£ËüÔÚÖ¡»º³å¿ØÖÆÌ¨ÏÂºÍXÏÂ¶¼¿ÉÒÔ¹¤×÷¡£</P>
 
-<P><B>¾¯¸æ</B>£ºÔÚ·ÇLinuxÏµÍ³ÉÏ£¬Ê¹ÓÃ<A HREF="#vidix">VIDIX </A>ÊµÏÖmga_vid£¡</P>
+<P><B>¾¯¸æ</B>£ºÔÚ·ÇLinuxÏµÍ³ÉÏ£¬ÒªÊ¹ÓÃ<A HREF="#vidix">VIDIX</A>ÊµÏÖmga_vid£¡</P>
 
 
 <P><B>°²×°:</B></P>
@@ -451,49 +449,49 @@
   <LI>ÎªÁËÊ¹ÓÃËü£¬ÄãÊ×ÏÈ±ØÐë±àÒëmga_vid.o£º</P>
     <P><CODE>cd drivers<BR>
       make</CODE></P></LI>
-  <LI>È»ºó´´½¨/dev/mga_vidÉè±¸£º
-    <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mknod /dev/mga_vid c 178 0</CODE></P>
+  <LI>È»ºó´´½¨<CODE>/dev/mga_vid</CODE>Éè±¸£º
+    <P><CODE>mknod /dev/mga_vid c 178 0</CODE></P>
     <P>È»ºóÕâÑù¼ÓÔØÇý¶¯</P>
     <P><CODE>insmod mga_vid.o</CODE></P></LI>
-  <LI>ÄãÓ¦¸ÃÊ¹ÓÃ'dmesg'ÃüÁî¼ì²éÏÔ´æ´óÐ¡µÄ¼ì²â½á¹û¡£Èç¹û²»¶Ô£¬ÄÇÃ´Ê¹ÓÃmga_ram_sizeÑ¡Ïî(ÏÈrmmod mga_vid)£¬ÒÔMBÎªµ¥Î»Ö¸¶¨ÏÔ¿¨µÄÏÔ´æ´óÐ¡£º
-    <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;insmod mga_vid.o mga_ram_size=16</CODE></P></LI>
+  <LI>ÄãÓ¦¸ÃÊ¹ÓÃ<CODE>dmesg</CODE>ÃüÁî¼ì²éÏÔ´æ´óÐ¡µÄ¼ì²â½á¹û¡£Èç¹û²»¶Ô£¬ÄÇÃ´Ê¹ÓÃmga_ram_sizeÑ¡Ïî(ÏÈ<CODE>rmmod mga_vid</CODE>)£¬ÒÔMBÎªµ¥Î»Ö¸¶¨ÏÔ¿¨µÄÏÔ´æ´óÐ¡£º
+    <P><CODE>insmod mga_vid.o mga_ram_size=16</CODE></P></LI>
   <LI>ÎªÁËÊ¹ËüÔÚÐèÒªÊ±×Ô¶¯µØ¼ÓÔØ/Ð¶ÔØ£¬Ê×ÏÈÔÚ<CODE>/etc/modules.conf</CODE>µÄÄ©Î²¼ÓÉÏÏÂÃæÕâÒ»ÐÐ£º
-    <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;alias char-major-178 mga_vid</CODE></P>
+    <P><CODE>alias char-major-178 mga_vid</CODE></P>
     <P>È»ºó°Ñ<CODE>mga_vid.o</CODE>Ä£¿é¸´ÖÆµ½<CODE>/lib/modules/&lt;kernel version&gt;/somewhere</CODE>ÏÂµÄÊÊµ±Î»ÖÃ¡£</P>
     <P>È»ºóÔËÐÐ</P>
     <P><CODE>depmod -a</CODE></P></LI>
-  <LI>ÄãÏÖÔÚÐèÒª(ÖØÐÂ)±àÒë<B>MPlayer</B>£¬./configure½«·¢ÏÖ/dev/mga_vid²¢ÇÒ±àÒë'mga'Çý¶¯¡£Èç¹ûÄãÊ¹ÓÃmatroxfb¿ØÖÆÌ¨£¬
-  ÔÚ<B>MPlayer</B>ÖÐÓÃ'-vo mga'Ê¹ÓÃËü£¬»òÕßÔÚXFree86 3.x.x»òÕß4.x.xÏÂµÄÊ¹ÓÃ'-vo xmga'¡£</P>
+  <LI>ÄãÏÖÔÚÐèÒª(ÖØÐÂ)±àÒëMPlayer£¬<CODE>configure</CODE>½«¼ì²âµ½<CODE>/dev/mga_vid</CODE>²¢ÇÒ±àÒë'mga'Çý¶¯¡£Èç¹ûÄãÊ¹ÓÃmatroxfb¿ØÖÆÌ¨£¬
+  ÔÚMPlayerÖÐÓÃ<CODE>-vo mga</CODE>Ê¹ÓÃËü£¬»òÕßÔÚXFree86 3.x.x»òÕß4.x.xÏÂµÄÊ¹ÓÃ<CODE>-vo xmga</CODE>¡£</P>
 </OL>
 
 <P>mga_vidÇý¶¯ÄÜÓëXvÐ­Í¬¹¤×÷¡£</P>
 
 <P>¿ÉÒÔÔÄ¶Á<CODE>/dev/mga_vid</CODE>Éè±¸ÎÄ¼þ(ÀýÈç<CODE>cat /dev/mga_vid</CODE>)À´²éÕÒÒ»Ð©ÐÅÏ¢£¬
-Ò²¿ÉÒÔÍ¨¹ýÐ´ËüÀ´µ÷ÕûÁÁ¶È£º<CODE>echo "brightness=120" > /dev/mga_vid</CODE></P>
+Ò²¿ÉÒÔÍ¨¹ýÐ´ËüÀ´µ÷ÕûÁÁ¶È£º<CODE>echo "brightness=120" &gt; /dev/mga_vid</CODE></P>
 
 
-<H4><A NAME="tdfxfb">2.3.1.8 3dfx YUVÖ§³Ö(tdfxfb)</A></H4>
+<H4><A NAME="tdfxfb">2.3.1.2.7 3dfx YUVÖ§³Ö(tdfxfb)</A></H4>
 
 <P>Õâ¸öÇý¶¯Ê¹ÓÃÄÚºËµÄtdfxÖ¡»º³åÇý¶¯À´ÀûÓÃYUV¼ÓËÙ²¥·ÅµçÓ°¡£ÄãÐèÒªÒ»¸öÖ§³ÖtdfxfbµÄÄÚºË£¬
 È»ºóÓÃ<CODE>./configure --enable-tdfxfb</CODE>ÖØÐÂ±àÒë</P>
 
 
-<H4><A NAME="opengl">2.3.1.9 OpenGLÊä³ö</A></H4>
+<H4><A NAME="opengl">2.3.1.2.8 OpenGLÊä³ö</A></H4>
 
-<P><B>MPlayer</B>Ö§³ÖÊ¹ÓÃOpenGLÏÔÊ¾µçÓ°£¬µ«ÊÇÈç¹ûÄãµÄÆ½Ì¨/Çý¶¯Ö§³Öxv£¬¾ÍÏóÊ¹ÓÃlinuxµÄPC»úÄÇÑù£¬¾ÍÊ¹ÓÃxv£¬OpenGLµÄÐ§¹ûÓëËüÏà±ÈÏàµ±»µ¡£
+<P>MPlayerÖ§³ÖÊ¹ÓÃOpenGLÏÔÊ¾µçÓ°£¬µ«ÊÇÈç¹ûÄãµÄÆ½Ì¨/Çý¶¯Ö§³Öxv£¬¾ÍÏóÊ¹ÓÃlinuxµÄPC»úÄÇÑù£¬¾ÍÊ¹ÓÃxv£¬OpenGLµÄÐ§¹ûÓëËüÏà±ÈÏàµ±»µ¡£
 Èç¹ûÄãÖ»ÓÐÃ»ÓÐxvÖ§³ÖµÄX11³ÌÐò£¬OpenGLÊÇ¿ÉÓÃµÄÑ¡Ôñ¡£</P>
 
-<P>²»ÐÒµÄÊÇ²¢·ÇËùÓÐÇý¶¯¶¼Ö§³ÖÕâ¸öÌØÐÔ¡£Utah-GLXÇý¶¯(Õë¶ÔXFree86 3.3.6)¶ÔËùÓÐÏÔ¿¨¶¼Ö§³ÖËü¡£·ÃÎÊ
-<A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A>ÁË½â°²×°ËüµÄÏ¸½ÚÎÊÌâ¡£</P>
+<P>²»ÐÒµÄÊÇ²¢·ÇËùÓÐÇý¶¯¶¼Ö§³ÖÕâ¸öÌØÐÔ¡£Utah-GLXÇý¶¯(Õë¶ÔXFree86 3.3.6)¶ÔËùÓÐÏÔ¿¨¶¼Ö§³ÖËü¡£·ÃÎÊ<A
+HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A>ÁË½â°²×°ËüµÄÏ¸½ÚÎÊÌâ¡£</P>
 
-<P>XFree86(DRI)>= 4.0.3Ö§³ÖMatroxºÍRadeonÏÔ¿¨µÄOpenGL£¬4.2.0»ò¸üÐÂ°æ±¾Ö§³ÖRage128¡£
+<P>XFree86(DRI) 4.0.3ÒÔÉÏÖ§³ÖMatroxºÍRadeonÏÔ¿¨µÄOpenGL£¬4.2.0»ò¸üÐÂ°æ±¾Ö§³ÖRage128¡£
 ·ÃÎÊ<A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A>ÒÔÑ°ÕÒÏÂÔØºÍ°²×°Ö¸µ¼¡£</P>
 
 
-<H4><A NAME="aalib">2.3.1.11 AAlib -- ÎÄ±¾·½Ê½ÏÔÊ¾</A></H4>
+<H4><A NAME="aalib">2.3.1.2.9 AAlib -- ÎÄ±¾·½Ê½ÏÔÊ¾</A></H4>
 
 <P><B>AAlib </B>ÊÇÒ»¸öÓÃÓÚÔÚÎÄ±¾Ä£Ê½ÏÂÏÔÊ¾Í¼ÐÎµÄ¿â£¬ËüÊ¹ÓÃÇ¿´óµÄASCIIäÖÈ¾Æ÷¡£ÓÐÐí¶à³ÌÐòÌá¹©¶ÔËüµÄÖ§³Ö£¬ÏñDoom£¬QuakeµÈµÈ¡£
-<B>MPlayer</B>°üº¬Ò»¸öÕë¶ÔËüµÄÊµÓÃµÄÇý¶¯¡£Èç¹û./configure·¢ÏÖ°²×°ÁËaalib£¬aalibµÄlibvoÇý¶¯½«±»±àÒë¡£</P>
+MPlayer°üº¬Ò»¸öÕë¶ÔËüµÄÊµÓÃµÄÇý¶¯¡£Èç¹û./configure·¢ÏÖ°²×°ÁËaalib£¬aalibµÄlibvoÇý¶¯½«±»±àÒë¡£</P>
 
 <TABLE BORDER=0>
   <TR><TD COLSPAN=4><P><B>ÄãÄÜÔÚAA´°¿ÚÖÐÊ¹ÓÃÒ»Ð©¿ØÖÆ¼üÀ´¸Ä±ääÖÈ¾²ÎÊý£º</B></P></TD></TR>
@@ -504,7 +502,7 @@
   <TR><TD></TD><TD><CODE>5</CODE></TD><TD></TD><TD>´ò¿ª/¹Ø±Õ¿ìËÙäÖÈ¾</TD></TR>
   <TR><TD></TD><TD><CODE>6</CODE></TD><TD></TD><TD>ÉèÖÃ¶¶¶¯·½Ê½(²»¶¶¶¯, Îó²î·Ö²¼Ëã·¨, Floyd SteinbergËã·¨)</TD></TR>
   <TR><TD></TD><TD><CODE>7</CODE></TD><TD></TD><TD>·´×ªÍ¼Ïó</TD></TR>
-  <TR><TD></TD><TD><CODE>a</CODE></TD><TD></TD><TD>×ª»»aaºÍ<B>MPlayer</B>µÄ¿ØÖÆ¼ü</TD></TR>
+  <TR><TD></TD><TD><CODE>a</CODE></TD><TD></TD><TD>×ª»»aaºÍMPlayerµÄ¿ØÖÆ¼ü</TD></TR>
 </TABLE>
 
 <P><B>ÏÂÁÐµÄÃüÁîÐÐÑ¡ÏîÄÜ¹»Ê¹ÓÃ£º</B></P>
@@ -543,7 +541,7 @@
 ½øÒ»²½µÄµ÷½ÚÎÊÌâ²Î¼û<A HREF="http://aa-project.sourceforge.net/tune/">http://aa-project.sourceforge.net/tune/</A>¡£</P>
 
 
-<H4><A NAME="vesa">2.3.1.12 VESA -- Êä³öµ½VESA BIOS</A></H4>
+<H4><A NAME="vesa">2.3.1.2.10 VESA -- Êä³öµ½VESA BIOS</A></H4>
 
 <P>Õâ¸öÇý¶¯±»Éè¼Æ²¢ÒýÈë×÷ÎªÒ»¸ö<B>Í¨ÓÃµÄÇý¶¯</B>ÓÃÓÚÈÎºÎÓÐVESA VBE 2.0¼æÈÝµÄBIOSµÄÏÔ¿¨¡£ÕâÇý¶¯µÄÁíÒ»¸öÓÅµãÊÇÄÜÊÔÍ¼ÆÈÊ¹ÔÚÆäÉÏ½øÐÐµçÊÓÊä³ö¡£<BR>
   <B>VESA BIOS EXTENSION(VBE)3.0°æ ÈÕÆÚ£º1998Äê¾ÅÔÂ16ÈÕ</B>(µÚ70Ò³)Ëµ£º</P>
@@ -566,6 +564,9 @@
   <LI>ÄãÓÐ»ú»á»ñµÃ<B>¿ÉÓÃµÄµçÊÓÊä³ö</B>¡£(ÖÁÉÙÒÑÖªATIµÄÏÔ¿¨¿ÉÒÔ)¡£</LI>
   <LI>Õâ¸öÇý¶¯µ÷ÓÃ<B>int 10h</B>ÖÐ¶ÏÒò´ËËü²»ÊÇÄ£ÄâÆ÷ -- Ëü<B>ÊµÊ±</B>µ÷ÓÃ<B>ÕæÕýµÄ</B>BIOSÖÐµÄ<B>ÕæÕýµÄ</B>¹¦ÄÜ¡£(Ð§¹û²»´í -- °´vm86·½Ê½)¡£</LI>
   <LI>Äã¿ÉÒÔ¶ÔËüÊ¹ÓÃVidix£¬ÕâÑùÄÜ¼ÓËÙÊÓÆµÏÔÊ¾<B>Í¬Ê±</B>Ò²¼Ó¿ìµçÊÓÊä³ö£¡(ATIÏÔ¿¨ÍÆ¼ö)</LI>
+  <LI>Èç¹ûÄãÓÐVESA VBE 3.0+£¬¶øÇÒÔÚÊ²Ã´µØ·½(ÅäÖÃÎÄ¼þ£¬»òÕßÃüÁîÐÐ)ÉèÖÃÁË<CODE>monitor_hfreq</CODE>,
+  <CODE>monitor_vfreq</CODE>, <CODE>monitor_dotclock</CODE>Äã½«»ñµÃ¿ÉÄÜµÄ×î¸ßµÄË¢ÐÂÂÊ¡£
+  (Ê¹ÓÃÒ»°ãµÄ¼ÆÊ±¹«Ê½)¡£ÒªÆôÓÃÕâ¸öÌØÐÔÄã±ØÐëÉè¶¨ÄãµÄÏÔÊ¾Æ÷µÄ<B>ËùÓÐ</B>Ñ¡Ïî¡£</LI>
 </UL>
 
 <H4>È±µã£º</H4>
@@ -573,41 +574,22 @@
 <UL>
   <LI>ËüÖ»ÄÜÔÚ<B>x86ÏµÍ³</B>ÉÏ¹¤×÷¡£</LI>
   <LI>ËüÖ»ÄÜÓÉ<B>root</B>Ê¹ÓÃ¡£</LI>
-  <LI>ËüÄ¿Ç°Ö»ÓÐ<B>Linux</B>¿ÉÓÃ¡£</LI>
+  <LI>ËüÄ¿Ç°Ö»ÄÜÓÃÔÚ<B>Linux</B>ÉÏ¡£</LI>
 </UL>
 
-<P>Ê¹ÓÃ<B>GCC 2.96</B>¾Í²»ÒªÊ¹ÓÃÕâ¸öÇý¶¯£¡Ëü½«²»ÄÜ¹¤×÷£¡</P>
+<P>Ê¹ÓÃ<B>GCC 2.96</B>¾Í²»ÒªÊ¹ÓÃÕâ¸öÇý¶¯£¡Ëü²»ÄÜ¹¤×÷£¡</P>
 
 <P><B>ÕâÐ©ÃüÁîÐÐµÄÑ¡ÏîÄ¿Ç°¿ÉÓÃÓÚVESA£º</B></P>
 <DL>
   <DT><CODE>-vo vesa:opts</CODE></DT>
-  <DD>µ±Ç°ÄÜÊ¶±ðµÄ£º <B>dga</B>Ç¿ÆÈdga·½Ê½£¬<B>nodga</B>½ûÓÃdga·½Ê½¡£×¢Òâ£ºÄãÄÜÊ¡ÂÔÕâÐ©²ÎÊýÀ´¿ªÆô<B>×Ô¶¯¼ì²â</B>dga·½Ê½¡£
-  (ÔÚÎ´À´Ò²½«Éè¶¨ÖîÈçË¢ÐÂÂÊ£¬½»´íÊ½£¬Ë«ÖØÉ¨ÃèÊ½ÖîÈç´ËÀàµÄÄ£Ê½²ÎÊý¡£ÀýÈç£º i43£¬85£¬d100)</DD>
-  
-  <DT><CODE>-screenw, -screenh, -bpp</CODE></DT>
-  <DD>Ç¿ÖÆÊ¹ÓÃÓÃ»§×Ô¶¨ÒåµÄÄ£Ê½</DD>
-  
-  <DT><CODE>-x, -y</CODE></DT>
-  <DD>ÉèÖÃÓÃ»§×Ô¶¨ÒåÄ£Ê½µÄÔ¤²ÉÊý</DT>
-  
-  <DT><CODE>-zoom</CODE></DT>
-  <DD>Ê¹ÓÃÓÃ»§×Ô¶¨ÒåÄ£Ê½µÄÔ¤²ÉÊý</DD>
-  
-  <DT><CODE>-fs</CODE></DT>
-  <DD>°ÑÍ¼ÏñËõ·Åµ½È«ÆÁÄ»</DD>
-  
-  <DT><CODE>-fs -zoom</CODE></DT>
-  <DD>½«ÓÃ»§×Ô¶¨ÒåµÄÔ¤²ÉÊýËõ·Åµ½È«ÆÁÄ»</DD>
-  
-  <DT><CODE>-double</CODE></DT>
-  <DD>Ê¹ÓÃË«ÖØ»º³å¡£(Ö»ÓÃÓÚDGA·½Ê½)¡£»á±Èµ¥Ò»»º³åÂý£¬µ«Ã»ÓÐÉÁË¸¡£</DD>
+  <DD>µ±Ç°ÄÜÊ¶±ðµÄ£º <B>dga</B>Ç¿ÆÈdga·½Ê½£¬<B>nodga</B>½ûÓÃdga·½Ê½¡£ÔÚdgaÄ£Ê½ÏÂÄã¿ÉÒÔÍ¨¹ýÊ¹ÓÃ<CODE>-double</CODE>Ñ¡ÏîÀ´Ê¹ÓÃË«ÖØ»º³å¡£×¢Òâ£ºÄãÄÜÊ¡ÂÔÕâÐ©²ÎÊýÀ´¿ªÆô<B>×Ô¶¯¼ì²â</B>dga·½Ê½¡£</DD>
 </DL>
 
 <H4>ÒÑÖªµÄÎÊÌâºÍÈÆ¹ý°ì·¨£º</H4>
 
 <UL>
-  <LI>Èç¹ûÄãÔÚÄãµÄLinux»úÆ÷ÉÏ°²×°ÁË<B>NLS</B>²¢ÇÒ´ÓÎÄ±¾·½Ê½ÔËÐÐVESAÇý¶¯£¬ÄÇÃ´<B>MPlayer</B>ÖÕÖ¹ºóÄã½«¿´µ½<B>ROM×ÖÌå</B>
-¶ø²»ÊÇ±¾µØµÄ×ÖÌå¡£Äã¿ÉÒÔÖØÐÂ¼ÓÔØ±¾µØµÄ×ÖÌåÀýÈçÔÚMandrakeÖÐÊ¹ÓÃ<B><I>setsysfont</I></B>¡£</BR>
+  <LI>Èç¹ûÄãÔÚÄãµÄLinux»úÆ÷ÉÏ°²×°ÁË<B>NLS</B>²¢ÇÒ´ÓÎÄ±¾·½Ê½ÔËÐÐVESAÇý¶¯£¬ÄÇÃ´MPlayerÖÕÖ¹ºóÄã½«¿´µ½<B>ROM×ÖÌå</B>¶ø²»ÊÇ±¾µØµÄ×ÖÌå¡£
+Äã¿ÉÒÔÖØÐÂ¼ÓÔØ±¾µØµÄ×ÖÌåÀýÈçÔÚMandrakeÖÐÊ¹ÓÃ<B><I>setsysfont</I></B>¡£</BR>
     (<B>ÌáÊ¾£º</B>ÏàÍ¬µÄ¹¤¾ßÒ²ÓÃÓÚfbdevµÄµØ·½»¯)¡£</LI>
   <LI>Ò»Ð©<B>LinuxÏÔ¿¨Çý¶¯</B>²»¸üÐÂÔÚDOSÄÚ´æÖÐµÄ»î¶¯µÄ<B>BIOSÄ£Ê½</B>¡£Òò´ËÈç¹ûÄãÓÐÕâÑùÎÊÌâ -- ×ÜÊÇÖ»´Ó<B>ÎÄ±¾·½Ê½</B>Ê¹ÓÃVESAÇý¶¯¡£
 ·ñÔò£¬ÎÄ±¾·½Ê½(#03)×ÜÒª±»¼¤»î½Ó×ÅÄã½«ÐèÒªÖØÆðÄãµÄ¼ÆËã»ú¡£</LI>
@@ -617,39 +599,41 @@
 </UL>
 
 
-<P><B><A NAME="x11">2.3.1.13 X11</A></B></P>
+<H4><A NAME="x11">2.3.1.2.11 X11</A></H4>
 
 <P>¾¡Á¿±ÜÃâÊ¹ÓÃËü¡£Êä³öµ½X11(Ê¹ÓÃ¹²ÏíÄÚ´æÀ©Õ¹)£¬ÍêÈ«Ã»ÓÐÓ²¼þ¼ÓËÙ¡£Ö§³Ö(MMX/3DNowÓëSSE¼ÓËÙ£¬µ«ÊÇÈÔÈ»»ºÂýµÄ)Èí¼þËõ·Å£¬
 Ê¹ÓÃÑ¡Ïî<CODE>-fs -zoom</CODE>¡£´ó¶àÊýÏÔ¿¨ÓÐÓ²¼þËõ·ÅÖ§³Ö£¬Ê¹ÓÃ<CODE>-vo xv</CODE>¶ÔËûÃÇÊä³ö£¬»òÕß¶ÔÓÚMatroxesÊ¹ÓÃ<CODE>-vo xmga</CODE>¡£</P>
 
 <P>ÎÊÌâÔÚÓÚ´ó¶àÊýÏÔ¿¨µÄÇý¶¯ÔÚµÚ¶þ¸ö½Ó¿Ú/µçÊÓ½Ó¿ÚÉÏ²»Ö§³ÖÓ²¼þ¼ÓËÙ¡£ÔÚÄÇÐ©Çé¿öÏÂ£¬Äã½«¿´µ½ÂÌÉ«ºÍÀ¶É«µÄ²ÊÉ«´°¿Ú¶ø²»ÊÇµçÓ°¡£
-ÕâÊÇÕâ¸öÇý¶¯·½±ãÀûÓÃµÄµØ·½£¬µ«ÊÇÄãÐèÒªÇ¿´óµÄCPUÀ´Ê¹ÓÃÈí¼þËõ·Å¡£²»ÒªÊ¹ÓÃSDLÇý¶¯µÄÈí¼þÊä³ö+Ëõ·Å£¬ËüµÄÍ¼ÏóÖÊÁ¿Ì«²î£¡</P>
+ÕâÊÇÕâ¸öÇý¶¯Æð×÷ÓÃµÄµØ·½£¬µ«ÊÇÄãÐèÒªÇ¿´óµÄCPUÀ´Ê¹ÓÃÈí¼þËõ·Å¡£²»ÒªÊ¹ÓÃSDLÇý¶¯µÄÈí¼þÊä³ö+Ëõ·Å£¬ËüµÄÍ¼ÏóÖÊÁ¿±È½Ï²î£¡</P>
 
 <P>Èí¼þËõ·ÅÊÇÊ®·Ö»ºÂýµÄ£¬Äã×îºÃ³¢ÊÔÓÃ¸Ä±äÊÓÆµÄ£Ê½µÄ·½·¨´úÌæËü¡£ËüÊ®·Ö¼òµ¥¡£²Î¼û<A HREF="#dga_modelines">DGAÒ»½ÚµÄmodelines</A>£¬
 ²¢ÇÒ½«ËûÃÇ²åÈëµ½ÄãµÄXF86Config¡£</P>
 
 <UL>
   <LI>Èç¹ûÄãÓÐXFree86 4.x.x -- Ê¹ÓÃ<CODE>-vm</CODE>Ñ¡Ôñ¡£Ëü½«ÇÐ»»µ½ÊÊºÏÄãµÄµçÓ°µÄ·Ö±æÂÊ¡£Èç¹ûÄãµÄXFree86²»ÊÇ£º</LI>
-  <LI>Ê¹ÓÃXFree86 3.x.x -- Äã±ØÐëÊ¹ÓÃ<B>CTRL-ALT-+</B>ºÍ<B>-</B>¿ØÖÆ¼üÑ­»·¿ÉÓÃµÄ·Ö±æÂÊ¡£</LI>
+  <LI>Ê¹ÓÃXFree86 3.x.x -- Äã±ØÐëÊ¹ÓÃ<B>CTRL-ALT-plus</B>ºÍ<B>minus</B>¿ØÖÆ¼üÑ­»·¿ÉÓÃµÄ·Ö±æÂÊ¡£</LI>
 </UL>
 
 <P>Èç¹ûÄãµ÷Õû²»µ½ÄãÉè¶¨µÄÄ£Ê½£¬¼ì²éXFree86µÄÊä³ö¡£ÓÐÐ©Çý¶¯²»ÄÜÊ¹ÓÃµÍ·Ö±æÂÊÊÓÆµ·½Ê½ËùÐèÒªµÄµÍµÄÏñËØÆµÂÊ¡£</P>
 
 
-<P><B><A NAME="vidix">2.3.1.14 VIDIX</A></B></P>
+<H4><A NAME="vidix">2.3.1.2.12 VIDIX</A></H4>
 
 <P>VIDIXÊÇ<B>VID</B>eo <B>I</B>nterface for *ni<B>X</B>µÄËõÐ´¡£<BR>
   VIDIX±»Éè¼ÆºÍÒýÈë×÷Îª¿ìËÙµÄÓÃ»§¿Õ¼äÇý¶¯µÄ½Ó¿ÚÌá¹©ÀàËÆmga_vidÎªÁËMatroxÏÔ¿¨Ìá¹©µÄÕâÑùÊÓÆµÐÔÄÜµÄ¡£ËüÒ²Ê®·ÖÒ×ÓÚÒÆÖ²¡£</P>
 
 <P>Õâ¸ö½Ó¿Ú±»Éè¼ÆÀ´×÷ÎªÒ»¸ö½«´æÔÚµÄÊÓÆµ¼ÓËÙ½Ó¿Ú(¾ÍÊÇmga_vid£¬rage128_vid£¬radeon_vid£¬pm3_vid )Í³Ò»µ½Ò»¸ö¹Ì¶¨µÄÏµÍ³µÄ³¢ÊÔ¡£
 Ëü¸øÐ¾Æ¬Ìá¹©BES(BackEnd  scalers)»òOV(Video Overlays)Ö®ÀàµÄ¸ß²ã½Ó¿Ú¡£Ëü²»ÎªÄÇÐ©Í¼Ïñ·þÎñÆ÷¸Ã×öµÄÊÂÇéÌá¹©µ×²ã½Ó¿Ú¡£
-(ÎÒ²»Ïë¸úX11¿ª·¢×éÔÚÇÐ»»Í¼ÏñÄ£Ê½ÉÏ¾ºÕù)¡£¼´Õâ½Ó¿ÚµÄÖ÷ÒªÄ¿µÄÊÇ³ä·ÖÌá¸ßÊÓÆµ»Ø·ÅµÄËÙ¶È¡£</P>
+(ÎÒ²»Ïë¸úX11¿ª·¢×éÔÚÇÐ»»Í¼ÏñÄ£Ê½ÉÏ¾ºÕù)¡£¼´Õâ½Ó¿ÚµÄÖ÷ÒªÄ¿µÄÊÇ³ä·ÖÌá¸ßÊÓÆµ²¥·ÅµÄËÙ¶È¡£</P>
 
 <H4>ÓÃ·¨</H4>
 
 <UL>
   <LI>ÄãÄÜÊ¹ÓÃ¶ÀÁ¢µÄÊÓÆµÊä³öÇý¶¯£º<CODE>-vo xvidix</CODE><BR>
-    Õâ¸öÇý¶¯±»Éè¼ÆÎªÊ¹ÓÃVIDIX¼¼ÊõµÄX11µÄÇ°¶Ë¡£ËüÒªÇóX·þÎñÆ÷¶øÇÒ½ö½öÖ»ÄÜÔÚX·þÎñÆ÷ÏÂ¹¤×÷¡£</LI>
+    Õâ¸öÇý¶¯±»Éè¼ÆÎªÊ¹ÓÃVIDIX¼¼ÊõµÄX11µÄÇ°¶Ë¡£ËüÒªÇóX·þÎñÆ÷¶øÇÒ½ö½öÖ»ÄÜÔÚX·þÎñÆ÷ÏÂ¹¤×÷¡£×¢Òâ£¬ÓÉÓÚËüÈÆ¹ýXµÄÇý¶¯Ö±½Ó
+·ÃÎÊÓ²¼þ£¬ÏÔ´æÖÐµÄÔÝ´æµÄÍ¼Ïñ¿ÉÄÜ±»ÆÆ»µ¡£Äã¿ÉÒÔÍ¨¹ýÉèÖÃXF86ConfigÖÐµÄdevice²¿·ÖµÄ"VideoRam"Ñ¡ÏîÏÞÖÆXÊ¹ÓÃµÄÏÔ´æ´óÐ¡
+À´±ÜÃâÕâÖÖÇé¿ö¡£ÄãÓ¦¸ÃÉèÖÃÎªÄãµÄÏÔ¿¨ÉÏÏÔ´æ´óÐ¡¼õÈ¥4MB¡£Èç¹ûÄãµÄÏÔ´æÐ¡ÓÚ8MB£¬Äã¿ÉÒÔÉèÖÃscreen²¿·ÖµÄ"XaaNoPixmapCache"Ñ¡Ïî¡£</LI>
   <LI>ÄãÄÜÔÚÈô¸ÉÊÓÆµµÄÊä³öÇý¶¯ÖÐÊ¹ÓÃVIDIX¸±Çý¶¯£¬ÖîÈç£º<BR>
     <CODE>-vo vesa:vidix</CODE>(<B>Ö»ÓÃÓÚLinux</B>)ºÍ<CODE>-vo fbdev:vidix</CODE></LI>
 </UL>
@@ -661,15 +645,13 @@
 <UL>
   <LI>ÊÓÆµÏÔ¿¨Ó¦¸Ã¹¤×÷ÓÚÍ¼ÐÎ·½Ê½(ÎÒËùÒÔÐ´<B>Ó¦¸Ã</B>Ö»ÊÇÒòÎªÎÒÔÚÎÄ±¾·½Ê½ÏÂ²âÊÔÁËËü -- ËüÄÜ¹¤×÷µ«ÊÇÊä³öÐ§¹ûºÜ¿ÉÅÂ ;) ¶ÔËü»¹ÊÇÊ¹ÓÃAAlib)¡£<BR>
     <I>×¢Òâ£ºÃ¿¸öÈËÄÜÍ¨¹ý×¢ÊÍµôvo_vesaÇý¶¯µÄÄ£Ê½ÇÐ»»²¿·ÖµÄ·½Ê½³¢ÊÔÕâ¸ö¼¼ÇÉ¡£</I></LI>
-  <LI><B>MPlayer</B>µÄÊÓÆµÊä³öÇý¶¯Ó¦¸ÃÖªµÀ»î¶¯µÄÊÓÆµ·½Ê½ºÍÄÜ¹»¸æËß´ïµ½VIDIX¸±Çý¶¯·þÎñÆ÷µÄÒ»Ð©ÊÓÆµÌØÐÔ¡£</LI>
+  <LI>MPlayerµÄÊÓÆµÊä³öÇý¶¯Ó¦¸ÃÖªµÀ»î¶¯µÄÊÓÆµ·½Ê½ºÍÄÜ¹»¸æËß´ïµ½VIDIX¸±Çý¶¯·þÎñÆ÷µÄÒ»Ð©ÊÓÆµÌØÐÔ¡£</LI>
 </UL>
-
-ÎÒÏ£Íû¿ÉÄÜ<B>MPlayer</B>ËùÓÐµÄÊÓÆµÊä³öÇý¶¯¶¼ÄÜÊ¶±ð<CODE>:vidix</CODE>¸±Çý¶¯¡£
 
 <H4>Ê¹ÓÃ·½Ê½</H4>
 
 <P>µ±VIDIX±»ÓÃ×÷<B>¸±Çý¶¯</B>Ê±(<CODE>-vo vesa:vidix</CODE>)ÊÓÆµ·½Ê½µÄÅäÖÃÓÉÊÓÆµÊä³öÉè±¸Ö´ÐÐ(¼òµ¥À´Ëµ¾ÍÊÇ<B>vo_server</B>)¡£
-Òò´Ë£¬ÄãÄÜ¶Ô<B>MPlayer</B>Ê¹ÓÃÓëvo_serverÍ¬ÑùµÄÃüÁîÐÐÖ¸Áî¡£´ËÍâ£¬ËüÄÜÊ¹ÓÃ<CODE>-double</CODE>×÷ÎªÈ«¾ÖµÄ²ÎÊý¡£
+Òò´Ë£¬ÄãÄÜ¶ÔMPlayerÊ¹ÓÃÓëvo_serverÍ¬ÑùµÄÃüÁîÐÐÖ¸Áî¡£´ËÍâ£¬ËüÄÜÊ¹ÓÃ<CODE>-double</CODE>×÷ÎªÈ«¾ÖµÄ²ÎÊý¡£
 (ÎÒ½¨ÒéÖÁÉÙÔÚÊ¹ÓÃATIÏÔ¿¨Ê±¶ÔVIDIXÊ¹ÓÃÕâ¸ö²ÎÊý)¡£<BR>
    ÖÁÓÚ<CODE>-vo xvidix</CODE>£ºÄ¿Ç°ËüÄÜÊ¶±ðÏÂÁÐµÄÑ¡Ïî£º <CODE>-fs -zoom -x -y -double</CODE>¡£</P>
 
@@ -682,7 +664,7 @@
     32 file.avi</code><BR>
   <BR>
   µ«ÕâÓÐµãÎ£ÏÕ£¬ËùÒÔÄã²»Ó¦¸ÃÕâÃ´×ö¡£ÔÚÕâÖÖÇé¿öÏÂ£¬±»Ö¸¶¨µÄÇý¶¯»á±»Ç¿ÖÆÊ¹ÓÃ¶øÆä½á¹ûÊÇÎÞ·¨Ô¤¼ÆµÄ(Ëü¿ÉÒÔ°ÑÄãµÄ¼ÆËã»ú<B>ËøËÀ</B>)¡£
-Ö»ÓÐÔÚÄã¾ø¶ÔÈ·ÐÅËüÄÜ¹¤×÷£¬¶ø<B>MPlayer</B>Ã»ÓÐ×Ô¶¯Ñ¡ÔñËüÊ±£¬Äã²ÅÄÜÕâÃ´×ö¡£Çë°ÑÇé¿ö±¨¸æ¸ø¿ª·¢Õß¡£
+Ö»ÓÐÔÚÄã¾ø¶ÔÈ·ÐÅËüÄÜ¹¤×÷£¬¶øMPlayerÃ»ÓÐ×Ô¶¯Ñ¡ÔñËüÊ±£¬Äã²ÅÄÜÕâÃ´×ö¡£Çë°ÑÇé¿ö±¨¸æ¸ø¿ª·¢Õß¡£
 ÕýÈ·µÄÊ¹ÓÃ·½·¨ÊÇÊ¹ÓÃÃ»ÓÐ²ÎÊýµÄVIDIXÀ´Ê¹ÓÃÇý¶¯µÄ×Ô¶¯¼ì²â¡£</P>
 
 <P>VIDIXÊÇÊ®·ÖÐÂµÄ¼¼ÊõËùÒÔÔÚÄãµÄÏµÍ³(OS=abc CPU=xyz)ÉÏËü¼«ÓÐ¿ÉÄÜ²»ÄÜÕý³£¹¤×÷¡£ÔÚÕâÖÖÇé¿öÏÂ£¬ÄãÎ¨Ò»µÄ½â¾ö°ì·¨ÊÇÒÆÖ²Ëü(Ö÷Òªlibdha)¡£
@@ -690,56 +672,193 @@
 
 <BLOCKQUOTE>
   <B>¾¯¸æ£º°²È«·çÏÕ</B><BR>
-  ²»ÐÒµÄÊÇÄã<B>±ØÐë</B>ÓÐ<B>ROOT</B>È¨ÏÞ²ÅÄÜÊ¹ÓÃVIDIXÒòÎªÐèÒªÖ±½ÓÓ²¼þÐ´Èë¡£ÖÁÉÙ¸ø<B>MPlayer</B>µÄ¿ÉÖ´ÐÐÎÄ¼þÉèÖÃ<B>SUID</B>Î»¡£</P>
+  ²»ÐÒµÄÊÇÄã<B>±ØÐë</B>ÓÐ<B>ROOT</B>È¨ÏÞ²ÅÄÜÊ¹ÓÃVIDIXÒòÎªÐèÒªÖ±½ÓÓ²¼þÐ´Èë¡£ÖÁÉÙ¸øMPlayerµÄ¿ÉÖ´ÐÐÎÄ¼þÉèÖÃ<B>SUID</B>Î»¡£</P>
 </BLOCKQUOTE>
 
-<H4>ÊÓÆµ¾ùºâÆ÷</H4>
+<H4><A NAME="directfb">2.3.1.2.13 DirectFB</A></H4>
 
-<P>ÕâÊÇÌØ±ðÎªÁËVIDIXÖ²ÈëµÄÊÓÆµ¾ùºâÆ÷¡£ÄãÄÜÍ¨¹ýman pageÀïÃèÊöµÄ<B>1-8</B>Êý×Ö¼ü»òÕßÃüÁîÐÐ²ÎÊýÀ´Ê¹ÓÃËü¡£<B>MPlayer</B>ÄÜÊ¶±ðÏÂÁÐµÄÑ¡Ïî£º</P>
+<P><I>"DirectFBÊÇÉè¼ÆÓÃÓÚÇ¶ÈëÏµÍ³µÄÍ¼ÐÎ¿â¡£ËüÄÜÀûÓÃ×îÐ¡µÄ×ÊÔ´¿ªÏúÌá¹©×î´óµÄÓ²¼þ¼ÓËÙÐ§¹û¡£"</I> -- Òý×Ô<A
+HREF="http://www.directfb.org">http://www.directfb.org</A>.</P>
+
+<P>ÎÒÔÚÕâÒ»²¿·ÖÖÐ½«ÂÔÈ¥DirectFBµÄÌØÐÔ¡£</P>
+
+<P>¾¡¹ÜMPlayer²»ÊÇDirectFBÖ§³ÖµÄ"video provider"£¬Õâ¸öÊä³öÇý¶¯½«¿ªÆôÊ¹ÓÃDirectFBµÄÊÓÆµ²¥·Å¡£Õâ½« --
+µ±È» -- ÊµÏÖ¼ÓËÙ£¬ÔÚÎÒµÄMatrox G400ÉÏDirectFBµÄËÙ¶È¸úXVideoÒ»Ñù¡£</P>
+
+<P>×ÜÊÇ¾¡Á¿Ê¹ÓÃ×îÐÂµÄDirectFB¡£Äã¿ÉÒÔÔÚÃüÁîÐÐÖÐÍ¨¹ýÊ¹ÓÃ<CODE>-dfbopts</CODE>Ñ¡ÏîÉèÖÃDirectFBµÄÑ¡Ïî¡£
+²ãÑ¡Ôñ¿ÉÒÔÍ¨¹ý¸±Çý¶¯Ä£Ê½ÊµÏÖ£¬ÀýÈç£º<CODE>-vo
+  directfb:2</CODE>(Ä¬ÈÏÊ¹ÓÃlayer -1£º×Ô¶¯Ñ¡Ôñ)</P>
+
+
+<H4><A NAME="dfbmga">2.3.1.2.14 DirectFB/Matrox(dfbmga)</A></H4>
+
+<P>ÇëÔÄ¶Á<A HREF="#directfb">DirectFBµÄÒ»°ã½éÉÜ²¿·Ö</A>À´ÁË½â¸ÅÒªÐÅÏ¢¡£</P>
+
+<P>Õâ¸öÊÓÆµÊä³öÇý¶¯½«¿ªÆôMatrox G400ÏÔ¿¨ÉÏµÄCRTC2(µÚ¶þ¸ö½Ó¿Ú)£¬ÏÔÊ¾<B>¶ÀÁ¢ÓÚ</B>µÚÒ»¸ö½Ó¿ÚµÄÊÓÆµ¡£</P>
+
+<P>Ê¹Æä¹¤×÷µÄ·½·¨¿ÉÒÔÔÚ<A HREF="tech/directfb.txt">¼¼Êõ²¿·Ö</A>ºÍÖ±½Ó´ÓVille SyrjalaµÄ<A
+HREF="http://www.sci.fi/~syrjala/directfb/readme.txt">Ö÷Ò³</A>»ñµÃ¡£</P>
+
+<P>×¢Òâ£ºÎÒÃÇÃ»ÄÜÈÃËü¹¤×÷£¬µ«ÊÇÓÐÈË×öµ½ÁË¡£²»¹ÜÔõÑù£¬½«CRTC2´úÂëÒÆÖ²µ½<B>mga_vid</B>µÄ¹¤×÷ÕýÔÚ½øÐÐÖÐ¡£</P>
+
+<H4><A NAME="mpegdec">2.3.1.3 MPEG½âÂëÆ÷</A></H4>
+
+<H4><A NAME="dvb">2.3.1.3.1 DVB</A></H4>
+
+<P>MPlayerÖ§³ÖSiemens£¬Technotrend£¬Galaxis»òHauppaugeÌá¹©µÄÊ¹ÓÃSiemens DVBÐ¾Æ¬µÄÏÔ¿¨¡£
+×îÐÂµÄDVBÇý¶¯ÔÚ<A HREF="http://www.linuxtv.org">Linux TV site</A>¡£Èç¹ûÄãÏëÒªÈí¼þ½âÂëÄãÐèÒªÒ»¸öÖÁÉÙ1GHzµÄCPU¡£</P>
+
+<P>ConfigureÓ¦¸ÃÄÜ¼ì²âµ½ÄãµÄDVBÏÔ¿¨¡£Èç¹ûËüÃ»ÓÐ£¬Ê¹ÓÃÏÂÁÐÃüÁîÇ¿ÖÆÊ¹ÓÃ
+
+<PRE>
+  ./configure --enable-dvb
+</PRE>
+
+<P>Èç¹ûÄãÔÚ·Ç±ê×¼µÄÂ·¾¶ÏÂÓÐostÍ·ÎÄ¼þ£¬Ê¹ÓÃÏÂÁÐÃüÁîÉèÖÃÂ·¾¶</P>
+
+<PRE>
+  ./configure --with-extraincdir=&lt;DVB source directory&gt;/ost/include
+</PRE>
+
+<P>È»ºó¾Í¿ÉÒÔÕý³£±àÒë°²×°¡£</P>
+
+<H4>Ê¹ÓÃ·½·¨</H4>
+
+<P>Ó²¼þ½âÂë(²¥·Å±ê×¼µÄMPEG1/2ÎÄ¼þ)Ê¹ÓÃÏÂÁÐÃüÁî£º</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes file.mpg|vob
+</PRE>
+
+<P>MPEG1µÄÈí¼þ½âÂë»ò×ª»¯ÎªÆäËû¸ñÊ½Ê¹ÓÃÏÂÁÐÃüÁî£º</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc yourfile.ext
+  mplayer -ao mpegpes -vo mpegpes -vop fame,expand yourfile.ext
+</PRE>
+
+<P>×¢Òâµ½£¬DVBÏÔ¿¨Ö»Ö§³Ö¸ß¶ÈÎª288»ò576µÄPAL¸ñÊ½»òÕß240»ò480µÄNTSC¸ñÊ½¡£Äã<B>±ØÐë</B>¶ÔÆäËüµÄ¸ß¶È½øÐÐÖØÐÂËõ·Å£¬
+Í¨¹ýÔÚ<CODE>-vop</CODE>Ñ¡ÏîÖÐÊ¹ÓÃ<CODE>scale=width:height</CODE>Ö¸¶¨ÄãÏëÒª¿í¶ÈºÍ¸ß¶È¡£DVBÏÔ¿¨¿ÉÒÔ½ÓÊÜ¶àÖÖ¿í¶È£¬
+Ïñ720£¬704£¬640£¬512£¬480£¬352µÈµÈ£¬¶øÇÒÔÚË®Æ½·½ÏòÉÏ¿ÉÒÔÓ²¼þËõ·Å£¬ËùÒÔ´ó¶àÊýÇé¿öÏÂÄã²»ÐèÒª×÷Ë®Æ½Ëõ·Å¡£
+ÀýÈç¶ÔÓÚ512x384(¿í¸ß±È4:3)µÄDivXÊ¹ÓÃÏÂÁÐÃüÁî£º</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=512:576
+</PRE>
+
+<P>Èç¹ûÄãÊ¹ÓÃ¿íÒøÄ»µçÓ°¶øÄã°ÑËü·Å´óµ½Õû¸öÆÁÄ»µÄ¸ß¶È£¬Äã¿ÉÒÔÊ¹ÓÃ<CODE>expand=w:h</CODE>²å¼þÀ´Ôö¼ÓºÚ´ø¡£
+ÎªÁË¿´640x384·Ö±æÂÊµÄDivX£¬Ê¹ÓÃÏÂÁÐÃüÁî£º</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,expand=640:576 file.avi
+</PRE>
+
+<P>Èç¹ûÄãµÄCPU¶ÔÓÚ²¥·Å720x576µÄDivXÌ«Âý£¬³¢ÊÔºáÏòËõ·Å£º</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 file.avi
+</PRE>
+
+<P>Èç¹ûËÙ¶ÈÃ»ÓÐÌá¸ß£¬³¢ÊÔÊúÖ±Ëõ·Å£º</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi
+</PRE>
+
+<P>ÒòÎªOSDºÍ×ÖÄ»Ê¹ÓÃOSD²å¼þµÄÀ©Õ¹ÌØÐÔ¡£Òò´Ë£¬²»ÒªÊ¹ÓÃ<CODE>expand=w:h</CODE>»òÕß<CODE>expand=w:h:x:y</CODE>£¬
+Ê¹ÓÃ<CODE>expand=w:h:x:y:1</CODE>(µÚ5¸ö²ÎÊý<CODE>:1</CODE>½«¿ªÆôOSDäÖÈ¾)¡£ÄãÒ²ÐíÏëÒª°ÑÍ¼ÏóÏòÉÏÒÆ¶¯Ò»µãÀ´¸ø
+×ÖÄ»¸ü´óµÄºÚÉ«ÇøÓò¡£Èç¹ûÄãÒ²ÏëÒªÒÆ¶¯×ÖÄ»£¬ÒòÎªËûÃÇ¿ÉÄÜÔÚÄãµçÊÓÆÁÄ»µÄÍâÃæ£¬Ê¹ÓÃ<CODE>-subpos &lt;0-100&gt;</CODE>À´
+µ÷ÕûËü(<CODE>-subpos 80</CODE>ÊÇ¸ö²»´íµÄÑ¡Ôñ)¡£</P>
+
+<P>ÎªÁËÔÚPALµçÊÓÉÏ²¥·Å·Ç25fpsµÄµçÓ°»òÕßÒòÎªCPUÌ«Âý£¬¼ÓÉÏ<CODE>-framedrop</CODE>Ñ¡Ïî¡£</P>
+
+<P>ÎªÁË±£³ÖDivXÎÄ¼þµÄ¿í¸ß±È²¢»ñµÃ×îÀíÏëµÄËõ·Å²ÎÊý(Ó²¼þË®Æ½Ëõ·ÅºÍÈí¼þ´¹Ö±Ëõ·Å²¢ÇÒ±£³ÖÕýÈ·¿í¸ß±È)£¬Ê¹ÓÃ×îÐÂµÄdvbscale²å¼þ£º</P>
+
+<PRE>
+for  3:4 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
+for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+</PRE>
+
+<H4>½«À´</H4>
+
+<P>Èç¹ûÄãÓÐÊ¹ÓÃÎÊÌâ»òÏëÒªÁË½âÌØÐÔÍ¨¸æ»òÕß²Î¼ÓÕâ¸öÎÊÌâµÄÌÖÂÛ£¬¼ÓÈëÎÒÃÇµÄ<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</A>µÄÓÊ¼þÁÐ±í¡£
+Çë¼Ç×¡ÁÐ±íµÄÓïÑÔÊÇÓ¢Óï¡£</P>
+
+<P>ÔÚÎ´À´Äã¿ÉÒÔÆÚ´ýÊ¹ÓÃDVBÏÔ¿¨µÄ×Ô´øOSDÌØÐÔÏÔÊ¾OSDºÍ×ÖÄ»£¬»¹ÓÐ¸üÁ÷³©µÄ·Ç25fpsµçÓ°²¥·ÅºÍÊµÊ±µÄMPEG2ºÍMPEG4×ª»»(²¿·ÖµÄ½âÑ¹)¡£</P>
+
+<H4><A NAME="dxr2">2.3.1.3.2 DXR2</A></H4>
+
+<P>TODO: Ê²Ã´ÈËÓ¦¸ÃÔÚÕâÀïÌí¼ÓÒ»Ð©ÐÅÏ¢¡£</P>
+
+<H4><A NAME="dxr3">2.3.1.3.3 DXR3/Hollywood+</A></H4>
+
+<P>MPlayerÖ§³ÖCreative DXR3ºÍSigma Designs Hollywood Plus¿¨µÄÓ²¼þ¼ÓËÙ²¥·Å¡£ÕâÐ©¿¨¶¼Ê¹ÓÃSigmaDesignsµÄ
+em8300 MPEG½âÂëÐ¾Æ¬</P>
+
+<P>Ê×ÏÈ£¬Äã½«ÐèÒªÕýÈ·µØ°²×°DXR3/H+µÄÇý¶¯£¬°æ±¾ÖÁÉÙ0.12.0»òÕß¸üÐÂµÄ¡£ÄãÄÜÔÚ<A 
+HREF="http://dxr3.sourceforge.net/">DXR3 &amp; Hollywood Plus for Linux</A>µÄÕ¾µãÕÒµ½Çý¶¯ºÍ°²×°Ö¸µ¼¡£ConfigureÓ¦¸Ã×Ô¶¯¼ì²âµ½ÄãµÄÏÔ¿¨£¬
+±àÒëÓ¦¸ÃÃ»ÓÐÈÎºÎÎÊÌâ¡£</P>
+
+<H4>ÓÃ·¨£º</H4>
 
 <DL>
-  <DT><CODE>-brightness</CODE></DT>
-  <DD>µ÷ÕûÊÓÆµÊä³öµÄ<B>ÁÁ¶È</B>¡£Ëü²»µÈÍ¬ÓÚÔÚÏÔÊ¾Æ÷Ãæ°åÉÏ»òµçÊÓÉÏµÄÁÁ¶Èµ÷Õû¡£Ëü°Ñ°×ÆÁµÄÊÓÆµÐÅºÅµÄRGB³É·ÖÖð½¥¸Ä±äµ½ºÚÆÁ</DD>
-  
-  <DT><CODE>-contrast</CODE></DT>
-  <DD>µ÷ÕûÊÓÆµÊä³öµÄ<B>¶Ô±È¶È</B>¡£¹¤×÷·½Ê½¸úµ÷ÕûÁÁ¶È²î²»¶à</DD>
-  
-  <DT><CODE>-saturation</CODE></DT>
-  <DD>µ÷ÕûÊÓÆµÊä³öµÄ<B>±¥ºÍ¶È</B>¡£Í¨¹ýÊ¹ÓÃÕâ¸öÑ¡ÏîÄã¿ÉÒÔ»ñµÃ»Ò¶ÈÊä³ö¡£</DD>
-  
-  <DT><CODE>-hue</CODE></DT>
-  <DD>µ÷ÕûÊÓÆµÊä³öµÄ<B>É«Ïà</B>¡£Í¨¹ýÊ¹ÓÃÕâ¸öÑ¡ÏîÄã¿ÉÒÔ»ñµÃÍ¼ÏñµÄ²ÊÉ«¸ºÆ¬¡£</DD>
-  
-  <DT><CODE>-red_intensity</CODE></DT>
-  <DD>µ÷ÕûÊÓÆµÐÅºÅµÄ<B>ºìÉ«</B>²¿·ÖµÄÇ¿¶È¡£</DD>
-  
-  <DT><CODE>-green_intensity</CODE></DT>
-  <DD>µ÷ÕûÊÓÆµÐÅºÅµÄ<B>ÂÌÉ«</B>²¿·ÖµÄÇ¿¶È¡£</DD>
-  <DT><CODE>-blue_intensity</CODE></DT>
-  <DD>µ÷ÕûÊÓÆµÐÅºÅµÄ<B>À¶É«</B>²¿·ÖµÄÇ¿¶È¡£</DD>
+  <DT><CODE>-vo dxr3:prebuf:sync:norm=x:&lt;device&gt;</CODE></DT>
+  <DD><CODE>overlay</CODE>¼¤»îoverlay¶ø²»ÊÇµçÊÓÊä³ö¡£Äã±ØÐëÓÐÒ»¸öÕýÈ·ÅäÖÃµÄµÄoverlayÉèÖÃÀ´Õý³£¹¤×÷¡£×î¼òµ¥µÄÅäÖÃoverlay
+µÄ·½·¨ÊÇÏÈÔËÐÐautocal¡£È»ºóÔËÐÐmplayerÊ¹ÓÃdxr3Êä³ö¶ø²»´ò¿ªoverlay£¬ÔËÐÐdxr3view¡£ÔÚdxr3viewÖÐÄã¿ÉÒÔµ÷ÕûoverlayÉèÖÃ
+²¢ÊµÊ±¿´µ½Ð§¹û£¬¿ÉÄÜÕâ¸öÌØÐÔÔÚ½«À´»á±»MPlayerµÄGUIÖ§³Ö¡£µ±ÕýÈ·ÉèÖÃÁËoverlayÖ®ºóÄã¾Í²»ÔÙÐèÒªdxr3viewÁË¡£<BR>
+    <CODE>prebuf</CODE>´ò¿ªÔ¤»º³å¡£Ô¤»º³åÊÇem8300µÄÒ»¸öÌØÐÔ£¬ÊÇËü¿ÉÒÔÍ¬Ê±´¦ÀíÒ»Ö¡ÒÔÉÏµÄÊÓÆµ¡£Õâ±íÊ¾µ±Äã¿ªÆô
+Ô¤»º³å(Ä¬ÈÏµÄ)ÔËÐÐÊ±£¬MPlayer½«ÊÔÍ¼±£³ÖÊÓÆµ»º³åÇøÀïÃæ×ÜÊÇÌîÂúÊý¾ÝµÄ¡£Èç¹ûÄãÊÇÓÃµÄÒ»Ì¨±È½ÏÂýµÄ»úÆ÷MPlayer
+´ó¸Å»áÕ¼ÓÃ½Ó½ü100%µÄCPU¡£ÕâÔÚÄã²¥·Å´¿MPEGÁ÷(ÀýÈçDVD£¬SVCDÖ®Àà)µÄÊ±ºòÓÈÆäÃ÷ÏÔ£¬ÒòÎªMPlayer²»ÐèÒª°ÑËüÖØÐÂ±àÂë³É
+MPEGËùÒÔËû»áÒÔºÜ¸ßµÄËÙ¶ÈÌî³ä»º³åÇø¡£<BR>
+    µ±²»ÓÃÔ¤»º³åÔËÐÐÊ±em8300¶ÔCPUµÄÕ¼ÓÃÂÊÊ®·ÖÃô¸Ð£¬ËùÒÔ½¨ÒéÄã´ò¿ªMPlayerµÄ<CODE>-framedrop</CODE>Ñ¡ÏîÀ´·ÀÖ¹½øÒ»²½
+µÄ²»Í¬²½<BR>
+    <CODE>sync</CODE>½«´ò¿ªÐÂµÄÍ¬²½»úÖÆ¡£Õâ¸öÄ¿Ç°ÊÇÒ»¸öÊÔÑéÐÔµÄÌØÐÔ¡£´ò¿ªÕâ¸öÍ¬²½ÌØÐÔºóem8300µÄÄÚ²¿Ê±ÖÓ½«Ê±ÖÓ±»¼àÊÓ£¬
+Èç¹ûËü¿ªÊ¼Æ«ÀëMPlayerµÄÊ±ÖÓËü½«±»ÖØÐÂÉèÖÃ´Ó¶øµ¼ÖÂ¶ªµôÈÎºÎÖÍºóµÄÖ¡¡£<BR>
+    <CODE>norm=x</CODE>ÓÃÀ´ÉèÖÃDXR3¿¨µÄµçÊÓÖÆÊ½¶ø±ÜÃâÊ¹ÓÃem8300setupÖ®ÀàµÄÍâ²¿¹¤¾ß¡£¿ÉÓÃµÄÖÆÊ½ÓÐ5 = NTSC£¬4 = PAL-60£¬
+3 = PAL¡£ÌØ±ðµÄÖÆÊ½ÊÇ2(×Ô¶¯Ñ¡ÔñÊ¹ÓÃPAL/PAL-60)ºÍ1(×Ô¶¯Ñ¡ÔñÊ¹ÓÃPAL/NTSC)ÒòÎªËûÃÇÍ¨¹ý²âÊÔµçÓ°µÄÖ¡ËÙÂÊÀ´¾ö¶¨ÊÇÄÄ¸öÖÆÊ½¡£
+norm = 0(Ä¬ÈÏµÄ)²»¸Ä±äÏÖÔÚµÄÖÆÊ½¡£<BR>
+    <CODE>&lt;device&gt;</CODE> = Ê¹ÓÃµÄÉè±¸ºÅÈç¹ûÄãÓÐ³¬¹ýÒ»¿éem8300ÏÔ¿¨¡£
+    <BR>
+    ÈÎºÎÕâÐ©Ñ¡Ôñ¶¼¿ÉÒÔ±»Ê¡ÂÔ<BR>
+    <CODE>:prebuf:sync</CODE>ÔÚ²¥·ÅDivXµçÓ°Ê±ËÆºõ¹¤×÷µÄºÜºÃ¡£ÓÐÈË±¨¸æ¹ýÔÚ²¥·ÅMPEG1/2ÎÄ¼þÊ±ÓÃ<CODE>prebuf</CODE>Ñ¡ÏîÓÐÎÊÌâ¡£
+Äã¿ÉÄÜ»áÏÈ³¢ÊÔ²»¼ÓÈÎºÎ²ÎÊý£¬Èç¹ûÄãÓöµ½Í¬²½µÄÎÊÌâ£¬»òÕßDVD×ÖÄ»µÄÎÊÌâ£¬ÊÔÊÔ<CODE>:sync</CODE>¡£</DD>
+
+  <DT><CODE>-ao oss:/dev/em8300_ma-X</CODE></DT>
+  <DD>ÒôÆµÊä³ö£¬ÔÚÆäÖÐ<CODE>X</CODE>ÊÇÉè±¸ºÅ(Îª0Èç¹ûÖ»ÓÐÒ»¿éÏÔ¿¨)¡£</DD>
+
+  <DT><CODE>-aop list=resample:fout=xxxxx</CODE></DT>
+  <DD>em8300²»ÄÜ¹¤×÷ÔÚ²ÉÑùÂÊµÍÓÚ44100HzµÄÇé¿ö¡£Èç¹û²ÉÑùÂÊÔÚ44100HzÖ®ÏÂ£¬ÔÚ44100HzºÍ48000HzÖÐÑ¡Ôñ×î½Ó½üµÄÒ»¸ö¡£
+ÀýÈç¶ÔÊ¹ÓÃ22050HzµÄµçÓ°£¬ÒòÎª44100Hz/2 = 22050£¬ËùÒÔÊ¹ÓÃ44100Hz£¬Èç¹ûÊÇ24000Hz¾ÍÊ¹ÓÃ48000Hz£¬ÒòÎª48000Hz/2 = 24000Èç´ËµÈµÈ¡£
+Õâ¶ÔÓÚÊý×ÖÒôÆµÊä³ö²»Æð×÷ÓÃ(<CODE>-ac hwac3</CODE>)¡£</DD>
+
+  <DT><CODE>-vop lace/fame</CODE></DT>
+  <DD>ÒªÔÚem8300ÉÏ¹Û¿´·ÇMPEGµÄÄÚÈÝ(ÀýÈçDivX»òÕßRealVideo)Äã±ØÐëÉèÖÃÒ»¸ölibavcodec(lavc)»òÕßlibfame(fame)Ö®ÀàµÄMPEG1ÊÓÆµÂË¾µ
+Ä¿Ç°lavcÓÐ¸üºÃµÄËÙ¶È»¹ÓÐ¸ü¸ßµÄÍ¼ÏñÖÊÁ¿£¬³ý·ÇÄãÊ¹ÓÃÊ±Óöµ½ÎÊÌâ£¬½¨ÒéÄãÊ¹ÓÃËû¡£<CODE>-vop lavc/fame</CODE>µÄ½øÒ»²½µÄÐÅÏ¢¿ÉÒÔ
+²Î¿¼man page¡£<BR>
+    Ç¿ÁÒÍÆ¼öÊ¹ÓÃlavc¡£Ä¿Ç°Ã»ÓÐ°ì·¨ÉèÖÃem8300µÄfps£¬Õâ±íÊ¾Ëü½«¹Ì¶¨ÔÚ29.97fps¡£ÒòÎªÕâ¸öÇ¿ÁÒÍÆ¼öÄãÊ¹ÓÃ<CODE>-vop 
+lavc=&lt;quality&gt;:25</CODE>£¬ÌØ±ðÊÇµ±ÄãÊ¹ÓÃprebufferingµÄÊ±ºò¡£ÄÇÃ´ÎªÊ²Ã´ÊÇ25¶ø²»ÊÇ29.97£¿àÅ£¬Ô­ÒòÊÇµ±Ê¹ÓÃ29.97
+µÄÊ±ºòÍ¼ÏñÓÐÒ»Ð©ÌøÔ¾¡£Ä¿Ç°ÎÒÃÇ»¹²»ÖªµÀÔ­Òò¡£Èç¹ûÄã°ÑËüÉèÖÃ³É25µ½27Ö®¼äµÄÖµÊÇÍ¼Ïñ¾ÍÎÈ¶¨ÁË¡£Ä¿Ç°ÎÒÃÇÄÜ×öµÄ¾ÍÊÇ½ÓÊÜÕâ¸öÊÂÊµ¡£</DD>
+
+  <DT><CODE>-vop lavc,expand=-1:-1:-1:-1:1</CODE></DT>
+  <DD>¾¡¹ÜDXR3µÄÇý¶¯ÄÜ°ÑÒ»Ð©OSD·Åµ½MPEG1/2/4µÄÊÓÆµÉÏ£¬Ëü±ÈMPlayerµÄ´«Í³µÄOSDµÄÖÊÁ¿²îµÄ¶à£¬²¢ÇÒ»¹ÓÐÒ»Ð©Ë¢ÐÂµÄÎÊÌâ¡£
+ÉÏÃæµÄÃüÁîÐÐ½«ÏÈ°ÑÊäÈëµÄÊÓÆµ×ª»»³ÉMPEG4(ÕâÊÇ±ØÐëµÄ£¬¶Ô²»Æð)£¬È»ºóÊ¹ÓÃÒ»¸öÀ©Õ¹ÂË¾µ£¬²»½øÐÐÈÎºÎËõ·Å(-1£ºÄ¬ÈÏÖµ)£¬Ö»ÊÇ°ÑÕý³£µÄOSD
+·Åµ½Í¼ÏñÉÏ(×îºóµÄÄÇ¸ö"1"µÄ×÷ÓÃ)¡£</DD>
+
+  <DT><CODE>-ac hwac3</CODE></DT>
+  <DD>em8300Ö§³ÖÊ¹ÓÃÐ¾Æ¬µÄÊý×ÖÒôÁ¿Êä³öÀ´²¥·ÅAC3ÒôÆµ(»·ÈÆÒôÐ§)¡£ÔÄ¶Á<A HREF="codecs.html#hardware_ac3">Ó²¼þAC3</A>À´ÁË½âAC3µÄ
+¸ü½øÒ»²½µÄÐÅÏ¢</DD>
 </DL>
 
-<P>Ã¿Ò»²ÎÊýµÄÈ¡Öµ¿ÉÒÔ´Ó<B>-1000</B>µ½<B>+1000</B>¡£<BR>
-  Ã¿Ò»²ÎÊýµÄÄ¬ÈÏÖµ<B>0</B>¡£</P>
 
-<P><B>×¢Òâ£º</B>²¢·ÇËùÓÐÇý¶¯¶¼Ö§³ÖËùÓÐÕâÐ©²ÎÊý¡£Ä¿Ç°Ö»ÓÐ<B>radeon_vid.so</B>ÍêÈ«Ö§³ÖÊÓÆµ¾ùºâÆ÷¡£
-  ÆäËüÇý¶¯²¿·ÖµØ½ö½ö²¿·ÖµØÖ§³ÖÕâÐ©Ñ¡Ôñ¡£</P>
+<H4><A NAME="other">2.3.1.4 ÆäËû¿ÉÊÓÓ²¼þ</A></H4>
 
-<P><B>Àý×Ó£º</B><BR>
-  <CODE>mplayer -vo vesa:vidix -brightness -300 -contrast 200
-  filename.avi</CODE><BR>
-  or<BR>
-  <CODE>mplayer -vo xvidix -red_intensity -50 -saturation 400 -hue 300
-  filename.vob</CODE></P>
+<H4><A NAME="zr">2.3.1.4.1 Zr</A></H4>
 
-
-<P><B><A NAME="zr">2.3.1.15 Zr</A></B></P>
-
-<P>ÕâÊÇÓÃÓÚÄÇÐ©MJPEGÊÓÆµ²¶×½/»Ø·ÅÏÔ¿¨(¾­¹ýDC10+ºÍBuzµÄ²âÊÔ£¬¶ÔLML33£¬DC10Ó¦¸ÃÒ²ÄÜ¹¤×÷)µÄÏÔÊ¾Çý¶¯(<CODE>-vo zr</CODE>)¡£
+<P>ÕâÊÇÓÃÓÚÄÇÐ©MJPEGÊÓÆµ²¶×½/²¥·Å¿¨(¾­¹ýDC10+ºÍBuzµÄ²âÊÔ£¬¶ÔLML33£¬DC10Ó¦¸ÃÒ²ÄÜ¹¤×÷)µÄÏÔÊ¾Çý¶¯(<CODE>-vo zr</CODE>)¡£
 Çý¶¯Í¨¹ý°ÑÃ¿Ö¡Í¼Ïñ±àÂë³ÉÎªjpeg¸ñÊ½ºÍÈ»ºó°ÑËü·¢ËÍµ½ÏÔ¿¨À´¹¤×÷¡£ÔÚjpeg±àÂëÊ±ÒªÊ¹ÓÃ<B>libavcodec</B>£¬¶øÇÒ±ØÐëÊ¹ÓÃ¡£</P>
 ÓÃÌØÊâµÄ<I>cinerama</I>Ä£Ê½£¬Äã¿ÉÒÔÍ¨¹ýÁ½¸öÍ¶Ó°ÒÇºÍÁ½¿éMJPEG¿¨ÓÃÕæÕýµÄ¿íÒøÄ»·½Ê½¹Û¿´µçÓ°¡£¸ù¾Ý·Ö±æÂÊºÍÖÊÁ¿µÄÉèÖÃ£¬Õâ¸ö
 Çý¶¯¿ÉÄÜÒªÇó¼«Ç¿µÄCPU´¦ÀíÄÜÁ¦£¬Èç¹ûÄãµÄ»úÆ÷Ì«ÂýµÄ»°¼Ç×¡Ê¹ÓÃ<CODE>-framedrop</CODE>£¬×¢Òâ£ºÎÒµÄAMD K6-2 350MHz(¼ÓÉÏ
-<CODE>-framedrop</CODE>Ñ¡Ïî)×ã¹»¿´VCD³ß´çµÄ¶«Î÷ºÍ¾­¹ýËõÐ¡µÄµçÓ°
+<CODE>-framedrop</CODE>Ñ¡Ïî)×ã¹»¿´VCD³ß´çµÄ¶«Î÷ºÍ¾­¹ýËõÐ¡µÄµçÓ°¡£
 
 <P>Õâ¸öÇý¶¯ÐèÒªÒ»¸öÄÚºËÇý¶¯£¬¿ÉÒÔÔÚ<A HREF="http://mjpeg.sourceforge.net">http://mjpeg.sourceforge.net</A>ÕÒµ½£¬
 Äã±ØÐëÏÈÈÃËü¹¤×÷¡£MJPEG¿¨µÄ´æÔÚÄÜ±»configure½Å±¾×Ô¶¯¼ì²âµ½£¬Èç¹û×Ô¶¯¼ì²âÊ§°Ü£¬ÓÃÕâ¸öÃüÁîÇ¿ÖÆ¼ì²â
@@ -790,163 +909,25 @@
 <P>Äã·¢ÏÖÔÚµÚ¶þ¸ö<CODE>-zrcrop</CODE>Ö®Ç°³öÏÖµÄÑ¡ÏîÖ»×÷ÓÃÓÚDC10+£¬¶øµÚ¶þ¸ö<CODE>-zrcrop</CODE>Ö®ºóµÄÑ¡Ïî×÷ÓÃÓÚÄãµÄ»úÆ÷¡£
 ÔÚ<I>cinerama</I>ÖÐÄÜÊ¹ÓÃµÄMJPEG¿¨×î¶àÎª4¿é£¬ËùÒÔÄã¿ÉÒÔÖÆ×÷Ò»Æ¬<CODE>2x2</CODE>µÄÊÓÆµÇ½</P>
 
-<P>×îºó»¹ÓÐÒ»¸öÖØÒªµÄ×¢ÒâÊÂÏî£º²»ÒªÔÚ»Ø·ÅÆÚ¼äÔÚ»Ø·ÅÉè±¸ÉÏÆô¶¯»òÍ£Ö¹XawTV£¬Ëü½«µ¼ÖÂÄãµÄ¼ÆËã»ú±ÀÀ£¡£È»¶ø£¬<B>Ê×ÏÈ</B>Æô¶¯XawTV£¬
-<B>È»ºó</B>Æô¶¯<B>MPlayer</B>£¬µÈ<B>MPlayer</B>²¥·Å½áÊø£¬<B>È»ºó</B>Í£Ö¹XawTVÊÇÃ»ÓÐÎÊÌâµÄ¡£</P>
+<P>×îºó»¹ÓÐÒ»¸öÖØÒªµÄ×¢ÒâÊÂÏî£º²»ÒªÔÚ²¥·ÅÆÚ¼äÔÚ²¥·ÅÉè±¸ÉÏÆô¶¯»òÍ£Ö¹XawTV£¬Ëü½«µ¼ÖÂÄãµÄ¼ÆËã»ú±ÀÀ£¡£È»¶ø£¬<B>Ê×ÏÈ</B>Æô¶¯XawTV£¬
+<B>È»ºó</B>Æô¶¯MPlayer£¬µÈMPlayer²¥·Å½áÊø£¬<B>È»ºó</B>Í£Ö¹XawTVÊÇÃ»ÓÐÎÊÌâµÄ¡£</P>
+
+<H4><A NAME="blinken">2.3.1.4.2 Blinkenlights</A></H4>
+
+<P>Õâ¸öÇý¶¯¿ÉÒÔÊ¹ÓÃBlinkenlights UPD¼æÈÝÐ­Òé²¥·Å¡£Èç¹ûÄã²»ÖªµÀBlinkenlightsÊÇÊ²Ã´£¬Äã¾Í²»ÐèÒªÕâ¸öÇý¶¯¡£</P>
+
+<H4><A NAME="tv-out">2.3.1.5 µçÊÓÊä³öÖ§³Ö</A></H4>
 
 
-<H4><A NAME="dvb">2.3.1.16 DVB</A></H4>
-
-<P><B>MPlayer</B>Ö§³ÖSiemens£¬Technotrend£¬Galaxis»òHauppaugeÌá¹©µÄÊ¹ÓÃSiemens DVBÐ¾Æ¬µÄÏÔ¿¨¡£
-×îÐÂµÄDVBÇý¶¯ÔÚ<A HREF="http://www.linuxtv.org">Linux TV site</A>¡£Èç¹ûÄãÏëÒªÈí¼þ½âÂëÄãÐèÒªÒ»¸öÖÁÉÙ1GHzµÄCPU¡£</P>
-
-<P>ConfigureÓ¦¸ÃÄÜ¼ì²âµ½ÄãµÄDVBÏÔ¿¨¡£Èç¹ûËüÃ»ÓÐ£¬Ê¹ÓÃÏÂÁÐÃüÁîÇ¿ÖÆÊ¹ÓÃ
-
-<PRE>
-  ./configure --enable-dvb
-</PRE>
-
-<P>Èç¹ûÄãÔÚ·Ç±ê×¼µÄÂ·¾¶ÏÂÓÐostÍ·ÎÄ¼þ£¬Ê¹ÓÃÏÂÁÐÃüÁîÉèÖÃÂ·¾¶</P>
-
-<PRE>
-  ./configure --with-extraincdir=&lt;DVB source directory&gt;/ost/include
-</PRE>
-
-<P>È»ºó¾Í¿ÉÒÔ°´Õý³£³ÌÐò±àÒë°²×°¡£</P>
-
-<H4>Ê¹ÓÃ·½·¨</H4>
-
-<P>Ó²¼þ½âÂë(²¥·Å±ê×¼µÄMPEG1/2ÎÄ¼þ)Ê¹ÓÃÏÂÁÐÃüÁî£º</P>
-
-<PRE>
-  mplayer -ao mpegpes -vo mpegpes file.mpg|vob
-</PRE>
-
-<P>MPEG1µÄÈí¼þ½âÂë»ò×ª»¯ÎªÆäËû¸ñÊ½Ê¹ÓÃÏÂÁÐÃüÁî£º</P>
-
-<PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc yourfile.ext
-  mplayer -ao mpegpes -vo mpegpes -vop fame,expand yourfile.ext
-</PRE>
-
-<P>×¢Òâµ½£¬DVBÏÔ¿¨Ö»Ö§³Ö¸ß¶ÈÎª288»ò576µÄPAL¸ñÊ½»òÕß240»ò480µÄNTSC¸ñÊ½¡£Äã<B>±ØÐë</B>¶ÔÆäËüµÄ¸ß¶È½øÐÐÖØÐÂËõ·Å£¬
-Í¨¹ýÔÚ<CODE>-vop</CODE>Ñ¡ÏîÖÐÊ¹ÓÃ<CODE>scale=width:height</CODE>Ö¸¶¨ÄãÏëÒª¿í¶ÈºÍ¸ß¶È¡£DVBÏÔ¿¨¿ÉÒÔ½ÓÊÜ¶àÖÖ¿í¶È£¬
-Ïñ720£¬704£¬640£¬512£¬480£¬352µÈµÈ£¬¶øÇÒÔÚË®Æ½·½ÏòÉÏ¿ÉÒÔÓ²¼þËõ·Å£¬ËùÒÔ´ó¶àÊýÇé¿öÏÂÄã²»ÐèÒª×÷Ë®Æ½Ëõ·Å¡£
-ÀýÈç¶ÔÓÚ512x384(¿í¸ß±È4:3)µÄDivXÊ¹ÓÃÏÂÁÐÃüÁî£º</P>
-
-<PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=512:576
-</PRE>
-
-<P>Èç¹ûÄãÊ¹ÓÃ¿íÒøÄ»µçÓ°¶øÄã°ÑËü·Å´óµ½Õû¸öÆÁÄ»µÄ¸ß¶È£¬Äã¿ÉÒÔÊ¹ÓÃ<CODE>expand=w:h</CODE>²å¼þÀ´Ôö¼ÓºÚ´ø¡£
-ÎªÁË¿´640x384·Ö±æÂÊµÄDivX£¬Ê¹ÓÃÏÂÁÐÃüÁî£º</P>
-
-<PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,expand=640:576 file.avi
-</PRE>
-
-<P>Èç¹ûÄãµÄCPU¶ÔÓÚ²¥·Å720x576µÄDivXÌ«Âý£¬³¢ÊÔºáÏòËõ·Å£º</P>
-
-<PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 file.avi
-</PRE>
-
-<P>Èç¹ûËÙ¶ÈÃ»ÓÐÌá¸ß£¬³¢ÊÔÊúÖ±Ëõ·Å£º</P>
-
-<PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi
-</PRE>
-
-<P>ÒòÎªOSDºÍ×ÖÄ»Ê¹ÓÃOSD²å¼þµÄÀ©Õ¹ÌØÐÔ¡£Òò´Ë£¬²»ÒªÊ¹ÓÃ<CODE>expand=w:h</CODE>»òÕß<CODE>expand=w:h:x:y</CODE>£¬
-Ê¹ÓÃ<CODE>expand=w:h:x:y:1</CODE>(µÚ5¸ö²ÎÊý<CODE>:1</CODE>½«¿ªÆôOSDäÖÈ¾)¡£ÄãÒ²ÐíÏëÒª°ÑÍ¼ÏóÏòÉÏÒÆ¶¯Ò»µãÀ´¸ø
-×ÖÄ»¸ü´óµÄºÚÉ«ÇøÓò¡£Èç¹ûÄãÒ²ÏëÒªÒÆ¶¯×ÖÄ»£¬ÒòÎªËûÃÇ¿ÉÄÜÔÚÄãµçÊÓÆÁÄ»µÄÍâÃæ£¬Ê¹ÓÃ<CODE>-subpos <0-100></CODE>À´
-µ÷ÕûËü(<CODE>-subpos 80</CODE>ÊÇ¸ö²»´íµÄÑ¡Ôñ)¡£</P>
-
-<P>ÎªÁËÔÚPALµçÊÓÉÏ²¥·Å·Ç25fpsµÄµçÓ°»òÕßÒòÎªCPUÌ«Âý£¬¼ÓÉÏ<CODE>-framedrop</CODE>Ñ¡Ïî¡£</P>
-
-<P>ÎªÁË±£³ÖDivXÎÄ¼þµÄ¿í¸ß±È²¢»ñµÃ×îÀíÏëµÄËõ·Å²ÎÊý(Ó²¼þË®Æ½Ëõ·ÅºÍÈí¼þ´¹Ö±Ëõ·Å²¢ÇÒ±£³ÖÕýÈ·¿í¸ß±È)£¬Ê¹ÓÃ×îÐÂµÄdvbscale²å¼þ£º</P>
-
-<PRE>
-for  3:4 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
-</PRE>
-
-<H4>½«À´</H4>
-
-<P>Èç¹ûÄãÓÐÊ¹ÓÃÎÊÌâ»òÏëÒªÁË½âÌØÐÔÍ¨¸æ»òÕß²Î¼ÓÕâ¸öÎÊÌâµÄÌÖÂÛ£¬¼ÓÈëÎÒÃÇµÄ<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</A>µÄÓÊ¼þÁÐ±í¡£
-Çë¼Ç×¡ÁÐ±íµÄÓïÑÔÊÇÓ¢Óï¡£</P>
-
-<P>ÔÚÎ´À´Äã¿ÉÒÔÆÚ´ýÊ¹ÓÃDVBÏÔ¿¨µÄ×Ô´øOSDÌØÐÔÏÔÊ¾OSDºÍ×ÖÄ»£¬»¹ÓÐ¸üÁ÷³©µÄ·Ç25fpsµçÓ°»Ø·ÅºÍÊµÊ±µÄMPEG2ºÍMPEG4×ª»»(²¿·ÖµÄ½âÑ¹)¡£</P>
-
-
-<H4><A NAME="dxr3">2.3.1.17 DXR3</A></H4>
-
-<P><B>MPlayer</B>Ö§³ÖCreative DXR3ºÍSigma Designs Hollywood Plus¿¨µÄÓ²¼þ¼ÓËÙ»Ø·Å¡£ÕâÐ©¿¨¶¼Ê¹ÓÃSigmaDesignsµÄ
-em8300 MPEG½âÂëÐ¾Æ¬</P>
-
-<P>Ê×ÏÈ£¬Äã½«ÐèÒªÕýÈ·µØ°²×°DXR3/H+µÄÇý¶¯£¬°æ±¾ÖÁÉÙ0.12.0»òÕß¸üÐÂµÄ¡£ÄãÄÜÔÚ<A HREF="http://dxr3.sourceforge.net/">
-DXR3 &amp; Hollywood Plus for Linux</A>µÄÕ¾µãÕÒµ½Çý¶¯ºÍ°²×°Ö¸µ¼¡£ConfigureÓ¦¸Ã×Ô¶¯¼ì²âµ½ÄãµÄÏÔ¿¨£¬±àÒëÓ¦¸ÃÃ»ÓÐÈÎºÎÎÊÌâ¡£</P>
-
-<H4>ÓÃ·¨</H4>
-
-<DL>
-  <DT><CODE>-vo dxr3:noprebuf:&lt;device&gt;</CODE></DT>
-  <DD><CODE>noprebuf</CODE>Éè¶¨¹Ø±ÕÔ¤»º³å¡£Ô¤»º³åÊÇem8300µÄÒ»¸öÌØÐÔ£¬ÊÇËü¿ÉÒÔÍ¬Ê±´¦ÀíÒ»Ö¡ÒÔÉÏµÄÊÓÆµ¡£Õâ±íÊ¾µ±Äã¿ªÆô
-Ô¤»º³å(Ä¬ÈÏµÄ)ÔËÐÐÊ±£¬<B>MPlayer</B>½«ÊÔÍ¼±£³ÖÊÓÆµ»º³åÇøÀïÃæ×ÜÊÇÌîÂúÊý¾ÝµÄ¡£Èç¹ûÄãÊÇÓÃµÄÒ»Ì¨±È½ÏÂýµÄ»úÆ÷<B>MPlayer</B>
-´ó¸Å»áÕ¼ÓÃ½Ó½ü100%µÄCPU¡£ÕâÔÚÄã²¥·Å´¿MPEGÁ÷(ÀýÈçDVD£¬SVCDÖ®Àà)µÄÊ±ºòÓÈÆäÃ÷ÏÔ£¬ÒòÎª<B>MPlayer</B>²»ÐèÒª°ÑËüÖØÐÂ±àÂë³É
-MPEGËùÒÔËû»áÒÔºÜ¸ßµÄËÙ¶ÈÌî³ä»º³åÇø¡£<BR>
-    Ô¤»º³å²»ÊÇÔÚËùÓÐµÄ»úÆ÷ÉÏ¶¼ÄÜ¹»¹¤×÷(ÌØ±ðÊÇÔÚAthlonµÄ»úÆ÷ÉÏËü»á±»×Ô¶¯¹Ø±Õ)¡£Èç¹ûÄãÓöµ½ÊÓÆµ/ÒôÆµÍ¬²½µÄÎÊÌâ¾ÍÊ¹ÓÃ<CODE>noprebuf</CODE>
-µ±²»ÓÃÔ¤»º³åÔËÐÐÊ±em8300¶ÔCPUµÄÕ¼ÓÃÂÊÊ®·ÖÃô¸Ð£¬ËùÒÔ½¨ÒéÄã´ò¿ª<B>MPlayer</B>µÄ<CODE>-framedrop</CODE>Ñ¡ÏîÀ´·ÀÖ¹½øÒ»²½
-µÄ²»Í¬²½<BR>
-    <CODE>&lt;device&gt;</CODE> = Ê¹ÓÃµÄÉè±¸ºÅÈç¹ûÄãÓÐ³¬¹ýÒ»¿éem8300ÏÔ¿¨¡£
-    <BR>
-    ÈÎºÎÕâÐ©Ñ¡Ôñ¶¼¿ÉÒÔ±»Ê¡ÂÔ£¬µ«ÊÇËûÃÇ±ØÐë°´Ë³ÐòÖ¸¶¨£¬ÀýÈç<CODE>dxr3:fame</CODE>ÄÜÕý³£¹¤×÷£¬<CODE>dxr3:1</CODE>ÄÜÕý³£¹¤×÷£¬
-µ«ÊÇ<CODE>dxr3:1:avcodec</CODE>½«ÎÞ·¨¹¤×÷¡£</DD>
-
-  <DT><CODE>-ao oss:/dev/em8300_ma-X</CODE></DT>
-  <DD>ÒôÆµÊä³ö£¬ÔÚÆäÖÐ<CODE>X</CODE>ÊÇÉè±¸ºÅ(Îª0Èç¹ûÖ»ÓÐÒ»¿éÏÔ¿¨)¡£</DD>
-
-  <DT><CODE>-aop list=resample:fout=xxxxx</CODE></DT>
-  <DD>em8300²»ÄÜ¹¤×÷ÔÚ²ÉÑùÂÊµÍÓÚ44100HzµÄÇé¿ö¡£Èç¹û²ÉÑùÂÊÔÚ44100HzÖ®ÏÂ£¬ÔÚ44100HzºÍ48000HzÖÐÑ¡Ôñ×î½Ó½üµÄÒ»¸ö¡£
-ÀýÈç¶ÔÊ¹ÓÃ22050HzµÄµçÓ°£¬ÒòÎª44100Hz/2 = 22050£¬ËùÒÔÊ¹ÓÃ44100Hz£¬Èç¹ûÊÇ24000Hz¾ÍÊ¹ÓÃ48000Hz£¬ÒòÎª48000Hz/2 = 24000Èç´ËµÈµÈ¡£
-Õâ¶ÔÓÚÊý×ÖÒôÆµÊä³ö²»Æð×÷ÓÃ(<CODE>-ac hwac3</CODE>)¡£</TD></TR>
-
-  <DT><CODE>-vop lace/fame</CODE></DT>
-  <DD>ÒªÔÚem8300ÉÏ¹Û¿´·ÇMPEGµÄÄÚÈÝ(ÀýÈçDivX»òÕßRealVideo)Äã±ØÐëÉèÖÃÒ»¸ölibavcodec(lavc)»òÕßlibfame(fame)Ö®ÀàµÄMPEG1ÊÓÆµÂË¾µ
-Ä¿Ç°lavcÓÐ¸üºÃµÄËÙ¶È»¹ÓÐ¸ü¸ßµÄÍ¼ÏñÖÊÁ¿£¬³ý·ÇÄãÊ¹ÓÃÊ±Óöµ½ÎÊÌâ£¬½¨ÒéÄãÊ¹ÓÃËû¡£<CODE>-vop lavc/fame</CODE>µÄ½øÒ»²½µÄÐÅÏ¢¿ÉÒÔ
-²Î¿¼man page¡£
-
-  <DT><CODE>-ac hwac3</CODE></DT>
-  <DD>em8300Ö§³ÖÊ¹ÓÃÐ¾Æ¬µÄÊý×ÖÒôÁ¿Êä³öÀ´²¥·ÅAC3ÒôÆµ(»·ÈÆÒôÐ§)¡£ÔÄ¶Á<A HREF="codecs.html#hardware_ac3">Ó²¼þAC3</A>À´ÁË½âAC3µÄ
-¸ü½øÒ»²½µÄÐÅÏ¢</DD>
-</DL>
-
-<H4>Overlay</H4>
-
-<P>ÎªÁËÊ¹ÓÃoverlayÇëÔÚÆô¶¯<B>MPlayer</B>Ö®Ç°ÏÈÔËÐÐem8300°üÖÐµÄdxr3view¡£µ±Êó±ê¹â±êÔÚ´°¿ÚÉÏÊ±ÄãÄÜÍ¨¹ý°´<CODE>T</CODE>¼üÀ´ÉèÖÃ
-dxr3viewÖÐµÄ¸÷ÖÖÑ¡Ïî¡£</P>
-
-<H4>MPEG1£¬MPEG2£¬VCDºÍDVD×¢ÒâÊÂÏî</H4>
-
-<P>MPEG1/2¸ñÊ½Ó¦¸ÃÄÜ±»<B>MPlayer</B>×Ô¶¯·¢ÏÖ¶øÇÒËü½«Ê¹ÓÃDXR3µÄÓ²¼þ¼ÓËÙÀ´²¥·ÅËü¡£·ñÔòÃ»ÓÐ£¬Äã¿ÉÒÔÊ¹ÓÃ<CODE>-vc mpegpes</CODE>Ç¿ÖÆÓ²¼þ¼ÓËÙ¡£
-Í¬Ê±£¬Èç¹ûÄã¼Æ»®Ê¹ÓÃÈÎºÎºó´¦ÀíÄã±ØÐëÊ¹ÓÃÂË¾µ<CODE>-vc mpeg12</CODE>¡£</P>
-
-<P>ÔÚÒ»Ð©Çé¿öÏÂ£¬Ê¹ÓÃÓ²¼þ½âÂë(<CODE>-vc mpegpes</CODE>)Ê±×ÖÄ»¿ÉÄÜÓëA/VÁ÷²»Í¬²½¡£ÕâÊÇ¸öÒÑÖªµÄbug¡£em8300Ò²²»ÊÊÓÚ´¦Àí±È½Ï´óµÄ×ÖÄ»£¬
-¿ÉÄÜ»áÓÐ1µ½2ÃëµÄÍ£¶Ù£¬ÔÚÕâÖÖÇé¿öÏÂ£¬Î¨Ò»µÄ´¦Àí·½·¨ÊÇÊ¹ÓÃ<CODE>-vc mpeg12</CODE>À´²¥·Å´øÓÐ×ÖÄ»µÄDVD¡£µ±ÓÃ<CODE>-vc mpeg12</CODE>
-Ñ¡ÏîÔËÐÐÊ±<B>MPlayer</B>»á°ÑÊÓÆµÖØÐÂ±àÂë³ÉMPEG(¼´Ê¹ËüÒÑ¾­ÊÇMPEGEÁË)¡£Õâ±íÊ¾ËüÐèÒª¸ü¶àµÄCPU,Í¬Ê±Äã¿ÉÄÜ»áËðÊ§Ò»Ð©»­ÃæÖÊÁ¿¡£</P>
-
-
-<H4><A NAME="tv-out">2.3.1.A µçÊÓÊä³öÖ§³Ö</A></H4>
-
-
-<H5><A NAME="tv-out_matrox">2.3.1.A.1 Matrox G400ÏÔ¿¨</A></H5>
+<H4><A NAME="tv-out_matrox">2.3.1.5.1 Matrox G400ÏÔ¿¨</A></H4>
 
 <P>ÔÚLinuxÏÂÄãÓÐ2ÖÖ·½·¨Ê¹G400µÄµçÊÓÊä³ö¹¤×÷£º</P>
 
-<P><B>×¢Òâ£º</B>¶ÔÓÚMatrox G450/G550µÄµçÊÓÊä³ö·½·¨¿´ÏÂÒ»½Ú£¡
+<P><B>ÖØÒªÌáÊ¾£º</B>¶ÔÓÚMatrox G450/G550µÄµçÊÓÊä³ö·½·¨¿´ÏÂÒ»½Ú£¡
 
 <UL>
   <LI><B>XFree86</B>£ºÊ¹ÓÃÄÜÔÚ<A HREF="http://www.matrox.com">MatroxµÄÕ¾µã</A>»ñµÃµÄÇý¶¯ºÍHALÄ£¿é¡£Õâ½«ÔÚµçÊÓÉÏÊµÏÖX¡£
-<BR><B>ÕâÖÖ·½·¨²»¸øÄã¼ÓËÙ»Ø·Å</B>£¬²»ÏñWindoze£¡ µÚ¶þ¸öÊä³öÍ·Ö»ÓÐYUVÖ¡»º³å£¬<I>BES</I>(Back End Scaler£¬ÔÚG200ÓëG400ÓëG450Óë
+<BR><B>ÕâÖÖ·½·¨²»¸øÄã¼ÓËÙ²¥·Å</B>£¬²»ÏñWindoze£¡ µÚ¶þ¸öÊä³öÍ·Ö»ÓÐYUVÖ¡»º³å£¬<I>BES</I>(Back End Scaler£¬ÔÚG200ÓëG400ÓëG450Óë
 G550ÏÔ¿¨ÉÏµÄYUVËõ·Å)ÎÞ·¨ÓÃÓÚËü£¡windowsµÄÇý¶¯ÒÔÄ³ÖÖ·½Ê½½â¾öÁËÕâ¸öÎÊÌâ£¬ÓÐ¿ÉÄÜÊÇÍ¨¹ýÊ¹ÓÃ3DÒýÇæÀ´Ëõ·Å£¬²¢ÓÃYUVÖ¡»º³åÏÔÊ¾Í¼Ïñ¡£
 Èç¹ûÄãÈ·ÊµÏëÒªÊ¹ÓÃX£¬Ê¹ÓÃ<CODE>-vo x11 -fs -zoom</CODE>Ñ¡Ïî£¬µ«Õâ½«<B>Ê®·Ö»ºÂý</B>£¬¶øÇÒ»á¿ªÆô<B>Macrovision</B>°æÈ¨±£»¤
 (ÄãÄÜÊ¹ÓÃ<A HREF="http://avifile.sourceforge.net/mgamacro.pl">Õâ¸ö</A>perl½Å±¾ÈÆ¹ýMacrovision¡£</LI>
@@ -958,7 +939,7 @@ G550ÏÔ¿¨ÉÏµÄYUVËõ·Å)ÎÞ·¨ÓÃÓÚËü£¡windowsµÄÇý¶¯ÒÔÄ³ÖÖ·½Ê½½â¾öÁËÕâ¸öÎÊÌâ£¬ÓÐ¿ÉÄÜÊÇÍ
       <LI>
 	Èç¹ûÄãÃ»ÓÐ×°<CODE>fbset</CODE>£¬½øÈë<CODE>TVout/fbset</CODE>È»ºóÔËÐÐ<CODE>make</CODE>¡£°Ñ<CODE>fbset</CODE>°²×°µ½ÄãµÄPATHÖÐµÄÄ³¸öµØ·½¡£</LI>
       <LI>
-        È»ºó½øÈëµ½<B>MPlayer</B>Ô´ÂëÄ¿Â¼ÖÐµÄ<CODE>TVout/</CODE>×ÓÄ¿Â¼£¬ÒÔrootÖ´ÐÐ<CODE>./modules</CODE>¡£
+        È»ºó½øÈëµ½MPlayerÔ´ÂëÄ¿Â¼ÖÐµÄ<CODE>TVout/</CODE>×ÓÄ¿Â¼£¬ÒÔrootÖ´ÐÐ<CODE>./modules</CODE>¡£
 ÄãµÄÎÄ±¾Ä£Ê½µÄ¿ØÖÆÌ¨½«½øÈëµ½Ö¡»º³åÄ£Ê½(Ã»ÓÐ·½·¨¸Ä»ØÀ´£¡)¡£</LI>
       <LI>ÏÂÒ»²½£¬ÐÞ¸Ä²¢ÔËÐÐ<CODE>./matroxtv</CODE>½Å±¾¡£Õâ½«¸øÄãÌá¹©Ò»¸öÊ®·Ö¼òµ¥µÄ²Ëµ¥¡£°´<B>2</B>ºÍ<B>ENTER</B>¡£ÏÖÔÚÄãµÄÏÔÊ¾Æ÷ºÍµçÊÓÉÏÓ¦¸ÃÓÐÒ»ÑùµÄÍ¼Ïñ¡£
 Èç¹ûµçÊÓ(Ä¬ÈÏPAL)Í¼»­ÓÐÐ©Ææ¹ÖµÄÌõÎÆ£¬½Å±¾²»ÄÜ¹»ÕýÈ·µØÉèÖÃ·Ö±æÂÊ(Ê¹ÓÃÈ±Ê¡µÄ640x512)¡£ÊÔÊÔ²Ëµ¥ÀïµÄÆäËû·Ö±æÂÊ»òÕß/ºÍÊÔÊÔfbset¡£</LI>
@@ -977,40 +958,78 @@ G550ÏÔ¿¨ÉÏµÄYUVËõ·Å)ÎÞ·¨ÓÃÓÚËü£¡windowsµÄÇý¶¯ÒÔÄ³ÖÖ·½Ê½½â¾öÁËÕâ¸öÎÊÌâ£¬ÓÐ¿ÉÄÜÊÇÍ
   </LI>
 </UL>
 
-<H5><A NAME="tv-out_matrox_g450">2.3.1.A.2 Matrox G450/G550 cards</A></H5>
+<H4>ÖÆ×÷Ò»¸öMatroxµçÊÓÊä³öÏß</H4>
+
+<P><B>G400µÄµçÀÂÏß</B>£ºCRTC2Á¬½ÓÆ÷µÄµÚ4¸ùÕëÊÇ¸´ºÏÊÓÆµÐÅºÅ. »ùÏßÊÇµÚ6£¬µÚ7ºÍµÚ8¸ùÕë¡£(Balázs RáczÌá¹©ÐÅÏ¢)</P>
+
+<P><B>G400µÄµçÀÂÏß</B>£ºCRTC2Á¬½ÓÆ÷µÄµÚ1¸ùÕëÊÇ¸´ºÏÊÓÆµÐÅºÅ. »ùÏßÊÇµÚ5£¬µÚ6£¬µÚ7ºÍµÚ15¸ùÕë¡£(Balázs RáczÌá¹©ÐÅÏ¢)</P>
+
+<H4><A NAME="tv-out_matrox_g450">2.3.1.5.2 Matrox G450/G550ÏÔ¿¨</A></H4>
 
 <P>ÕâÐ©ÏÔ¿¨µÄµçÊÓÊä³öÖ§³Ö×î½ü¸Õ±»ÒýÈë£¬¶øÇÒ»¹Ã»ÓÐ½øÈëÄÚºËµÄÖ÷Á÷¡£¾ÝÎÒËùÖªÄ¿Ç°²»ÄÜÊ¹ÓÃ<B>mga_vid</B>
 ÒòÎªG450/G550µÄÇý¶¯Ö»ÄÜ¹¤×÷ÔÚÒ»ÖÖÅäÖÃÏÂÃæ£ºµÚÒ»¸öCRTCÐ¾Æ¬(ÓÐ¸ü¶àÌØÐÔ)½ÓµÚÒ»¸ödisplay(ÏÔÊ¾Æ÷)£¬µÚ¶þ¸ö
-CRTC(Ã»ÓÐ<B>BES</B> -- BESµÄ½âÊÍ¿´ÉÏÃæG400µÄ²¿·Ö)½ÓµçÊÓÉÏ£¬ËùÒÔÄãÄ¿Ç°Ö»ÄÜÊ¹ÓÃ<B>MPlayer</B>µÄ
+CRTC(Ã»ÓÐ<B>BES</B> -- BESµÄ½âÊÍ¿´ÉÏÃæG400µÄ²¿·Ö)½ÓµçÊÓÉÏ£¬ËùÒÔÄãÄ¿Ç°Ö»ÄÜÊ¹ÓÃMPlayerµÄ
 <I>fbdev</I>µÄÊä³öÉè±¸¡£</P>
 
 <P>Ä¿Ç°µÚÒ»¸öCRTC²»ÄÜ´«ËÍµ½µÚ¶þ¸öÍ·¡£ÄÚºËµÄmatroxfbÇý¶¯µÄ×÷Õß -- Petr Vandrovec -- ¿ÉÄÜÕýÔÚÅ¬Á¦Ö§³Ö
 Ëü£¬Ê¹ÓÃ°ÑµÚÒ»¸öCRTCµÄÊä³öÍ¬Ê±ÏÔÊ¾ÔÚÁ½¸öÍ·ÉÏµÄ·½·¨£¬ÏñÄ¿Ç°G400ÍÆ¼öµÄÒ»Ñù£¬¿´ÉÏÃæµÄ²¿·Ö¡£</P>
 
-<P>ÐèÒªµÄÄÚºË²¹¶¡ºÍhowtoµÄÏ¸½Ú¿ÉÒÔ´Ó<A HREF="http://www3.sympatico.ca/dan.eriksen/matrox_tvout">
-http://www3.sympatico.ca/dan.eriksen/matrox_tvout</A>ÏÂÔØ¡£</P>
+<P>ÐèÒªµÄÄÚºË²¹¶¡ºÍhowtoµÄÏ¸½Ú¿ÉÒÔ´Ó<A 
+HREF="http://www3.sympatico.ca/dan.eriksen/matrox_tvout">http://www3.sympatico.ca/dan.eriksen/matrox_tvout</A>ÏÂÔØ¡£</P>
 
-<H5><A NAME="tv-out_ati">2.3.1.A.2 ATIÏÔ¿¨</A></H5>
+<H5><A NAME="tv-out_ati">2.3.1.5.3 ATIÏÔ¿¨</A></H5>
 
 <H5>ÒýÑÔ</H5>
-<P>ATIÄ¿Ç°²»Ïë¶ÔËûµÄÈÎºÎÒ»ÖÖµçÊÓÊä³öÐ¾Æ¬Ìá¹©LinuxÏÂµÄÖ§³Ö£¬Ö÷ÒªÊÇÓÉÓÚËûÃÇµÄÊÚÈ¨µÄMacrovision¼¼Êõ¡£</P>
+<P>ATIÄ¿Ç°²»Ïë¶ÔËûµÄÈÎºÎÒ»ÖÖµçÊÓÊä³öÐ¾Æ¬Ìá¹©LinuxÏÂµÄÖ§³Ö£¬ÓÉÓÚËûÃÇÊÚÈ¨µÄMacrovision¼¼Êõ¡£</P>
 
 <H5>ATIÏÔ¿¨ÔÚLinuxÉÏµçÊÓÊä³öµÄÖ§³ÖÇé¿ö</H5>
 
 <UL>
   <LI><B>ATI Mach64 </B>£º<A HREF="http://gatos.sf.net">gatos</A>Ö§³Ö¡£</LI>
   <LI><B>ASIC Radeon VIVO </B>£º<A HREF="http://gatos.sf.net">gatos</A>Ö§³Ö¡£</LI>
-  <LI><B>Radeon</B>ºÍ<B>Rage128</B>£º<B>MPlayer</B>Ö§³Ö£¡²éÔÄ<a href="#vesa">VESAÇý¶¯</a>ºÍ<A HREF="#vidix">VIDIX</A>Á½½Ú¡£</LI>
+  <LI><B>Radeon</B>ºÍ<B>Rage128</B>£ºMPlayerÖ§³Ö£¡²éÔÄ<a href="#vesa">VESAÇý¶¯</a>ºÍ<A HREF="#vidix">VIDIX</A>Á½½Ú¡£</LI>
+  <LI><B>Rage Mobility P/M, Radeon, Rage 128, Mobility M3/M4</B>£º<A
+  HREF="http://www.stud.uni-hamburg.de/users/lennart/projects/atitvout/">atitvout</A>Ö§³Ö¡£
 </UL>
 
-<P>ÔÚÆäËüÏÔ¿¨ÉÏ£¬Ö»ÄÜÊ¹ÓÃ<a href="#vesa">VESAÇý¶¯</a>£¬Ã»ÓÐVIDIX¿ÉÓÃ¡£ÐèÒªÇ¿´óµÄCPU¡£</P>
+<P>ÔÚÆäËüÏÔ¿¨ÉÏ£¬Ö»ÄÜÊ¹ÓÃ<a href="#vesa">VESAÇý¶¯</a>£¬Ã»ÓÐVIDIX¿ÉÓÃ¡£µ«ÐèÒªÇ¿´óµÄCPU¡£</P>
 
 <P>ÄãÎ¨Ò»ÐèÒª×öµÄÊÂÇé -- <B>ÔÚÆô¶¯ÄãµÄµçÄÔÖ®Ç°²åÉÏµçÊÓÁ¬½ÓÆ÷µÄ²åÍ·</B>ÒòÎªÊÓÆµBIOSÖ»ÔÚ×Ô¾ÙÆÚ¼ä³õÊ¼»¯Ò»´Î¡£</P>
 
 
-<H5><A NAME="tv-out_voodoo">2.3.1.A.3 Voodoo 3</A></H5>
+<H5><A NAME="tv-out_voodoo">2.3.1.5.4 Voodoo 3</A></H5>
 
 <P>²éÔÄ<A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">Õâ¸öÍøÖ·</A>¡£</P>
+
+<H4><A NAME="tv-out_nvidia">2.3.1.5.5 nVidia</A></H4>
+
+<P>Ê×ÏÈ£¬Äã±ØÐë´Ó<A HREF="http://nvidia.com">http://nvidia.com</A>ÏÂÔØ·â±ÕÔ´ÂëµÄÇý¶¯£¬ÎÒ²»»áÃèÊö°²×°ºÍÅäÖÃµÄ¹ý³ÌÒòÎª
+Ëü²»ÊôÓÚÕâÆªÎÄµµµÄ·¶Î§¡£</P>
+
+<P>µ±XFree86, XVideo, ºÍ3D¼ÓËÙ¶¼Õý³£¹¤×÷Ö®ºó£¬¸ù¾ÝÏÂÃæµÄÀý×Ó(¸ÄÐ´³ÉÊÊºÏÄãµÄÏÔ¿¨/µçÊÓ)±à¼­ÄãµÄ<CODE>XF86Config</CODE>
+ÖÐÄãµÄÏÔ¿¨µÄDevice²¿·Ö:</P>
+
+<PRE>
+Section "Device"
+        Identifier      "GeForce"
+        VendorName      "ASUS"   
+        BoardName       "nVidia GeForce2/MX 400"
+        Driver          "nvidia"
+        #Option         "NvAGP" "1"
+        Option          "NoLogo"   
+        Option          "CursorShadow"  "on"
+
+        Option          "TwinView"
+        Option          "TwinViewOrientation" "Clone"
+        Option          "MetaModes" "1024x768,640x480"
+        Option          "ConnectedMonitor" "CRT, TV"  
+        Option          "TVStandard" "PAL-B"
+        Option          "TVOutFormat" "Composite"
+
+EndSection
+</PRE>
+
+<P>µ±È»¹Ø¼üÊÇTwinView²¿·Ö¡£</P>
 
 </BODY>
 </HTML>

@@ -2,14 +2,14 @@
 <HTML>
 
 <HEAD>
-  <TITLE>文档 - MPlayer - Linux的电影播放器</TITLE>
+  <TITLE>文档 - MPlayer - Linux下的电影播放器</TITLE>
   <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gb_2312-80">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gbk">
 </HEAD>
 
 <BODY>
 
-<H1 ALIGN="center">MPlayer - Linux的电影播放器</H1>
+<H1 ALIGN="center">MPlayer - Linux下的电影播放器</H1>
 
 <H2 ALIGN="center">&copy; 2000-2003 Arpad Gereoffy (A'rpi/ESP-team)<BR>
   <A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A></H2>
@@ -29,7 +29,7 @@
 <HR>
 
 <UL>
-  <LI><A HREF="#reading">0. 如何读取这种文件</A></LI>
+  <LI><A HREF="#reading">0. 如何阅读本文档</A></LI>
   <LI><A HREF="#introduction">1. 介绍</A>
     <UL>
       <LI><A HREF="#history">1.1 历史</A></LI>
@@ -39,17 +39,18 @@
         <UL>
           <LI><A HREF="#mpsub">1.4.1 MPlayer自己的字幕格式(MPsub)</A></LI>
           <LI><A HREF="#install_osd">1.4.2 安装OSD和字幕</A></LI>
-	</UL>
+		  <LI><A HREF="#menu">1.4.3 OSD菜单</A></LI>
+	    </UL>
       </LI>
       <LI><A HREF="#rtc">1.5 RTC</A></LI>
     </UL>
   </LI>
-  <LI><A HREF="#features">2. 特色</A>
+  <LI><A HREF="#features">2. 特性</A>
     <UL>
       <LI><A HREF="formats.html">2.1 支持的格式</A>
         <UL>
           <LI><A HREF="formats.html#video_formats">2.1.1 视频格式</A>
-	    <UL>
+	        <UL>
               <LI><A HREF="formats.html#mpeg">2.1.1.1 MPEG文件</A></LI>
               <LI><A HREF="formats.html#avi">2.1.1.2 AVI文件</A></LI>
               <LI><A HREF="formats.html#asf">2.1.1.3 ASF与WMV文件</A></LI>
@@ -61,29 +62,33 @@
               <LI><A HREF="formats.html#yuv4mpeg">2.1.1.9 yuv4mpeg文件</A></LI>
               <LI><A HREF="formats.html#film">2.1.1.10 FILM文件</A></LI>
               <LI><A HREF="formats.html#roq">2.1.1.11 RoQ文件</A></LI>
-              <LI><A HREF="formats.html#ogg">2.1.1.12 OGG文件</A></LI>
+              <LI><A HREF="formats.html#ogg">2.1.1.12 OGG/OGM文件</A></LI>
+			  <LI><A HREF="formats.html#sdp">2.1.1.13 SDP文件</A></LI>
+              <LI><A HREF="formats.html#pva">2.1.1.14 PVA文件</A></LI>
             </UL>
           </LI>
           <LI><A HREF="formats.html#audio_formats">2.1.2 音频格式</A>
 	    <UL>
               <LI><A HREF="formats.html#mp3">2.1.2.1 MP3文件</A></LI>
               <LI><A HREF="formats.html#wav">2.1.2.2 WAV文件</A></LI>
-              <LI><A HREF="formats.html#ogg_vorbis">2.1.2.3 OGG文件(Vorbis) </A></LI>
+              <LI><A HREF="formats.html#ogg_vorbis">2.1.2.3 OGG/OGM文件(Vorbis)</A></LI>
               <LI><A HREF="formats.html#wma">2.1.2.4 WMA与ASF文件</A></LI>
               <LI><A HREF="formats.html#mp4">2.1.2.5 MP4文件</A></LI>
+			  <LI><A HREF="formats.html#cdda">2.1.2.6 CD音频</A></LI>
+              <LI><A HREF="formats.html#xmms">2.1.2.7 XMMS</A></LI>
             </UL>
           </LI>
         </UL>
       </LI>
-      <LI><A HREF="codecs.html"">2.2 支持的编码格式</A>
+      <LI><A HREF="codecs.html"">2.2 支持的编解码器</A>
         <UL>
-          <LI><A HREF="codecs.html#video_codecs">2.2.1 视频编码格式</A>
+          <LI><A HREF="codecs.html#video_codecs">2.2.1 视频编解码器</A>
 	    <UL>
-              <LI><A HREF="codecs.html#divx">2.2.1.1 DivX4与DivX5</A></LI>
-              <LI><A HREF="codecs.html#libavcodec">2.2.1.2 FFmpeg DivX / libavcodec</A></LI>
-              <LI><A HREF="codecs.html#xanim">2.2.1.3 XAnim codecs</A></LI>
+              <LI><A HREF="codecs.html#divx">2.2.1.1 DivX4/DivX5</A></LI>
+              <LI><A HREF="codecs.html#libavcodec">2.2.1.2 FFmpeg DivX/libavcodec</A></LI>
+              <LI><A HREF="codecs.html#xanim">2.2.1.3 XAnim编解码器</A></LI>
               <LI><A HREF="codecs.html#vivo_video">2.2.1.4 VIVO视频</A></LI>
-              <LI><A HREF="codecs.html#mpeg">2.2.1.5 MPEG 1/2种视频</A></LI>
+              <LI><A HREF="codecs.html#mpeg">2.2.1.5 MPEG 1/2视频</A></LI>
               <LI><A HREF="codecs.html#ms_video1">2.2.1.6 MS Video1</A></LI>
               <LI><A HREF="codecs.html#cinepak">2.2.1.7 Cinepak CVID</A></LI>
               <LI><A HREF="codecs.html#realvideo">2.2.1.8 RealVideo</A></LI>
@@ -91,19 +96,21 @@
               <LI><A HREF="codecs.html#sorenson">2.2.1.10 Sorenson</A></LI>
             </UL>
           </LI>
-          <LI><A HREF="codecs.html#audio_codecs">2.2.2音频编码格式</A>
+          <LI><A HREF="codecs.html#audio_codecs">2.2.2 音频编解码器</A>
 	    <UL>
               <LI><A HREF="codecs.html#software_ac3">2.2.2.1软件AC3解码</A></LI>
               <LI><A HREF="codecs.html#hardware_ac3">2.2.2.2硬件AC3解码</A></LI>
               <LI><A HREF="codecs.html#libmad">2.2.2.3 libmad支持</A></LI>
               <LI><A HREF="codecs.html#vivo_audio">2.2.2.4 VIVO音频</A></LI>
               <LI><A HREF="codecs.html#realaudio">2.2.2.5 RealAudio</A></LI>
+			  <LI><A HREF="codecs.html#qdesign">2.2.2.6 QDesign编解码器</A></LI>
+              <LI><A HREF="codecs.html#qclp">2.2.2.7 Qualcomm编解码器</A></LI>
             </UL>
           </LI>
-          <LI><A HREF="codecs.html#importing">2.2.3 Win32 codec导入HOWTO</A>
+          <LI><A HREF="codecs.html#importing">2.2.3 Win32编解码器导入HOWTO</A>
 	    <UL>
-              <LI><A HREF="codecs.html#importing_vfw">2.2.3.1 VFW codecs</A></LI>
-              <LI><A HREF="codecs.html#importing_directshow">2.2.3.2 DirectShow codecs</A></LI>
+              <LI><A HREF="codecs.html#importing_vfw">2.2.3.1 VFW编解码器</A></LI>
+              <LI><A HREF="codecs.html#importing_directshow">2.2.3.2 DirectShow编解码器</A></LI>
             </UL>
           </LI>
         </UL>
@@ -112,97 +119,100 @@
         <UL>
           <LI><A HREF="video.html">2.3.1 视频输出设备</A>
 	    <UL>
-              <LI><A HREF="video.html#mtrr">MTRR的2.3.1.1设置</A></LI>
-              <LI><A HREF="video.html#xv">2.3.1.2 Xv </A>
-	        <UL>
-                  <LI><A HREF="video.html#xv_3dfx">2.3.1.2.1 3dfx卡</A></LI>
-                  <LI><A HREF="video.html#xv_s3">2.3.1.2.2 S3卡</A></LI>
-                  <LI><A HREF="video.html#xv_nvidia">2.3.1.2.3 nVidia卡</A></LI>
-                  <LI><A HREF="video.html#xv_ati">2.3.1.2.4 ATI卡</A></LI>
-                  <LI><A HREF="video.html#xv_neomagic">2.3.1.2.5 NeoMagic卡</A></LI>
-                  <LI><A HREF="video.html#xv_trident">2.3.1.2.6 Trident卡</A></LI>
+              <LI><A HREF="video.html#mtrr">2.3.1.1 MTRR的设置</A></LI>
+			  <LI><A HREF="video.html#normal">2.3.1.2 传统显卡的视频输出</A>
+			    <UL>
+                  <LI><A HREF="video.html#xv">2.3.1.2.1 Xv</A>
+	                <UL>
+                      <LI><A HREF="video.html#xv_3dfx">2.3.1.2.1.1 3dfx显卡</A></LI>
+                      <LI><A HREF="video.html#xv_s3">2.3.1.2.1.2 S3显卡</A></LI>
+                      <LI><A HREF="video.html#xv_nvidia">2.3.1.2.1.3 nVidia显卡</A></LI>
+                      <LI><A HREF="video.html#xv_ati">2.3.1.2.1.4 ATI显卡</A></LI>
+                      <LI><A HREF="video.html#xv_neomagic">2.3.1.2.1.5 NeoMagic显卡</A></LI>
+                      <LI><A HREF="video.html#xv_trident">2.3.1.2.1.6 Trident显卡</A></LI>
+                    </UL>
+                </LI>
+                <LI><A HREF="video.html#dga">2.3.1.2.2 DGA</A></LI>
+                <LI><A HREF="video.html#sdl">2.3.1.2.3 SDL</A></LI>
+                <LI><A HREF="video.html#svgalib">2.3.1.2.4 SVGAlib</A></LI>
+                <LI><A HREF="video.html#fbdev">2.3.1.2.5 Framebuffer输出(FBdev)</A></LI>
+                <LI><A HREF="video.html#mga_vid">2.3.1.2.6 Matrox framebuffer(mga-vid)</A></LI>
+                <LI><A HREF="video.html#tdfxfb">2.3.1.2.7 3dfx YUV支持(tdfxfb)</A></LI>
+                <LI><A HREF="video.html#opengl">2.3.1.2.8 OpenGL输出</A></LI>
+                <LI><A HREF="video.html#aalib">2.3.1.2.9 AAlib -- 文本方式显示</A></LI>
+                <LI><A HREF="video.html#vesa">2.3.1.2.10 VESA -- VESA BIOS的输出</A></LI>
+                <LI><A HREF="video.html#x11">2.3.1.2.11 X11</A></LI>
+                <LI><A HREF="video.html#vidix">2.3.1.2.12 VIDIX</A></LI>
+                <LI><A HREF="video.html#directfb">2.3.1.2.13 DirectFB</A></LI>
+                <LI><A HREF="video.html#dfbmga">2.3.1.2.14 DirectFB/Matrox(dfbmga)</A></LI>
+              </UL>
+            </LI>
+			<LI><A HREF="video.html#mpegdec">2.3.1.3 MPEG解码器</A>
+                <UL>
+                  <LI><A HREF="video.html#dvb">2.3.1.3.1 DVB</A></LI>
+                  <LI><A HREF="video.html#dxr2">2.3.1.3.2 DXR2</A></LI>
+                  <LI><A HREF="video.html#dxr3">2.3.1.3.3 DXR3/Hollywood+</A></LI>
                 </UL>
               </LI>
-              <LI><A HREF="video.html#dga">2.3.1.3 DGA </A>
-	        <UL>
-                  <LI><A HREF="video.html#dga_summary">2.3.1.3.1总结</A></LI>
-                  <LI><A HREF="video.html#dga_whatis">2.3.1.3.2 DGA是什么</A></LI>
-                  <LI><A HREF="video.html#dga_installation">2.3.1.3.3 MPlayer的DGA支持的安装</A></LI>
-                  <LI><A HREF="video.html#dga_resolution">2.3.1.3.4 切换分辨率</A></LI>
-                  <LI><A HREF="video.html#dga_mplayer">2.3.1.3.5 DGA与MPlayer</A></LI>
-                  <LI><A HREF="video.html#dga_features">2.3.1.3.6 DGA驱动模式的特性</A></LI>
-                  <LI><A HREF="video.html#dga_speed">2.3.1.3.7 速度问题</A></LI>
-                  <LI><A HREF="video.html#dga_bugs">2.3.1.3.8 已知的bug</A></LI>
-                  <LI><A HREF="video.html#dga_future">2.3.1.3.9 未来工作</A></LI>
-                  <LI><A HREF="video.html#dga_modelines">2.3.1.3.A 一些modelines</A></LI>
-                  <LI><A HREF="video.html#dga_bug_reports">2.3.1.3.B 错误报告</A></LI>
+              <LI><A HREF="video.html#other">2.3.1.4 其他可视硬件</A>
+                <UL>
+                  <LI><A HREF="video.html#zr">2.3.1.4.1 Zoran JPEG解码器</A></LI>
+                  <LI><A HREF="video.html#blinken">2.3.1.4.2 Blinkenlights</A></LI>
                 </UL>
               </LI>
-              <LI><A HREF="video.html#sdl">2.3.1.4 SDL</A></LI>
-              <LI><A HREF="video.html#svgalib">2.3.1.5 SVGAlib</A></LI>
-              <LI><A HREF="video.html#fbdev">2.3.1.6 Framebuffer输出(FBdev)</A></LI>
-              <LI><A HREF="video.html#mga_vid">2.3.1.7 Matrox framebuffer(mga-vid)</A></LI>
-              <LI><A HREF="video.html#sis_vid">2.3.1.8 SiS 6326 framebuffer(sis-vid)</A></LI>
-              <LI><A HREF="video.html#tdfxfb">2.3.1.9 3dfx YUV支持(tdfxfb)</A></LI>
-              <LI><A HREF="video.html#opengl">2.3.1.10 OpenGL输出</A></LI>
-              <LI><A HREF="video.html#aalib">2.3.1.11 AAlib -- 文本方式显示</A></LI>
-              <LI><A HREF="video.html#vesa">2.3.1.12 VESA -- VESA BIOS的输出</A></LI>
-              <LI><A HREF="video.html#x11">2.3.1.13 X11</A></LI>
-              <LI><A HREF="video.html#vidix">2.3.1.14 VIDIX</A></LI>
-              <LI><A HREF="video.html#zr">2.3.1.15 Zr</A></LI>
-              <LI><A HREF="video.html#dvb">2.3.1.16 DVB</A></LI>
-              <LI><A HREF="video.html#dxr3">2.3.1.17 DXR3</A></LI>
-              <LI><A HREF="video.html#tv-out">2.3.1.A 电视支持</A>
-	        <UL>
-                  <LI><A HREF="video.html#tv-out_matrox">2.3.1.A.1 Matrox G400显卡</A></LI>
-                  <LI><A HREF="video.html#tv-out_matrox_g450">2.3.1.A.2 Matrox G450/G550显卡</A></LI>
-		  <LI><A HREF="video.html#tv-out_ati">2.3.1.A.3 ATI显卡</A></LI>
-                  <LI><A HREF="video.html#tv-out_voodoo">2.3.1.A.4 Voodoo 3显卡</A></LI>
+              <LI><A HREF="video.html#tv-out">2.3.1.5 TV输出支持</A>
+                <UL>
+                  <LI><A HREF="video.html#tv-out_matrox">2.3.1.5.1 Matrox G400显卡</A></LI>
+                  <LI><A HREF="video.html#tv-out_matrox_g450">2.3.1.5.2 Matrox G450/G550显卡</A></LI>
+                  <LI><A HREF="video.html#tv-out_ati">2.3.1.5.3 ATI显卡</A></LI>
+                  <LI><A HREF="video.html#tv-out_voodoo">2.3.1.5.4 Voodoo 3</A></LI>
+                  <LI><A HREF="video.html#tv-out_nvidia">2.3.1.5.5 nVidia</A></LI>
                 </UL>
               </LI>
             </UL>
           <LI><A HREF="sound.html">2.3.2 音频输出设备</A>
-	    <UL>
-              <LI><A HREF="sound.html#experiences">2.3.2.1 声卡经验推荐</A></LI>
-              <LI><A HREF="sound.html#plugins">2.3.2.2 音频插件 </A>
 	        <UL>
-                  <LI><A HREF="sound.html#resample">2.3.2.2.1 升/降采样率</A></LI>
-                  <LI><A HREF="sound.html#surround_decoding">2.3.2.2.2 环绕音效解码</A></LI>
-                  <LI><A HREF="sound.html#format">2.3.2.2.3 采样格式转换</A></LI>
-                  <LI><A HREF="sound.html#delay">2.3.2.2.4 延迟</A></LI>
-                  <LI><A HREF="sound.html#volume">2.3.2.2.5 软件音量控制</A></LI>
-                  <LI><A HREF="sound.html#extrastereo">2.3.2.2.6 立体声加强</A></LI>
-                  <LI><A HREF="sound.html#normalizer">2.3.2.2.7 音量正则话</A></LI>
-                  <LI><A HREF="sound.html#surround">2.3.2.2.8 环绕</A></LI>
+			  <LI><A HREF="sound.html#sync">2.3.2.1 音频/视频同步</A></LI>
+              <LI><A HREF="sound.html#experiences">2.3.2.2 声卡体验，推荐</A></LI>
+			  <LI><A HREF="sound.html#af">2.3.2.3 音频滤镜</A>
+                <UL>
+                  <LI><A HREF="sound.html#af_resample">2.3.2.3.1 升/降采样率</A></LI>
+                  <LI><A HREF="sound.html#af_channels">2.3.2.3.2 改变声道数</A></LI>
+                  <LI><A HREF="sound.html#af_format">2.3.2.3.3 采样格式转换</A></LI>
+                  <LI><A HREF="sound.html#af_delay">2.3.2.3.4 延迟</A></LI>
+                  <LI><A HREF="sound.html#af_volume">2.3.2.3.5 软件音量控制</A></LI>
+                  <LI><A HREF="sound.html#af_equalizer">2.3.2.3.6 均衡器</A></LI>
+                  <LI><A HREF="sound.html#af_panning">2.3.2.3.7 摇动滤镜</A></LI>
+                  <LI><A HREF="sound.html#af_sub">2.3.2.3.8 副低音</A></LI>
+                  <LI><A HREF="sound.html#af_surround">2.3.2.3.9 环绕音效解码</A></LI>
+                </UL>
+              </LI>
+              <LI><A HREF="sound.html#plugins">2.3.2.4 音频插件(已过时)</A>
+	        <UL>
+                  <LI><A HREF="sound.html#resample">2.3.2.4.1 升/降采样率</A></LI>
+                  <LI><A HREF="sound.html#surround_decoding">2.3.2.4.2 环绕音效解码</A></LI>
+                  <LI><A HREF="sound.html#format">2.3.2.4.3 采样格式转换</A></LI>
+                  <LI><A HREF="sound.html#delay">2.3.2.4.4 延迟</A></LI>
+                  <LI><A HREF="sound.html#volume">2.3.2.4.5 软件音量控制</A></LI>
+                  <LI><A HREF="sound.html#extrastereo">2.3.2.4.6 立体声加强</A></LI>
+                  <LI><A HREF="sound.html#normalizer">2.3.2.4.7 音量正规化</A></LI>
                 </UL>
               </LI>
             </UL>
           </LI>
         </UL>
       </LI>
-      <LI><A HREF="encoding.html">2.4 用MEncoder编码</A>
+	  <LI><A HREF="#tv">2.4 电视输入</A>
         <UL>
-          <LI><A HREF="encoding.html#compilation">2.4.1 编译</A></LI>
-          <LI><A HREF="encoding.html#features">2.4.2 MEncoder特性</A>
-	    <UL>
-              <LI><A HREF="encoding.html#2pass">2.4.2.1 编码2或者3-pass的DivX4</A></LI>
-              <LI><A HREF="encoding.html#rescaling">2.4.2.2 重新缩放电影</A></LI>
-              <LI><A HREF="encoding.html#copying">2.4.2.3 流复制</A></LI>
-              <LI><A HREF="encoding.html#fixing">2.4.2.4 修复索引损坏的AVI文件 </A></LI>
-              <LI><A HREF="encoding.html#libavcodec">2.4.2.5 用libavcodec codec编码器族编码</A></LI>
-              <LI><A HREF="encoding.html#image_files">2.4.2.6 从多个图象文件(JPEG，PNG或TGA)的输入编码</A></LI>
-              <LI><A HREF="encoding.html#vobsub">2.4.2.7 DVD字幕提取为Vobsub文件</A></LI>
-            </UL>
-          </LI>
-          <LI><A HREF="encoding.html#options">2.4.3 可用的选项</A></LI>
+          <LI><A HREF="#tv_compilation">2.4.1 编译</A></LI>
+          <LI><A HREF="#tv_tips">2.4.2 使用技巧</A></LI>
+          <LI><A HREF="#tv_examples">2.4.3 示例</A></LI>
         </UL>
       </LI>
-      <LI><A HREF="#tv">2.5 电视输入</A>
+      <LI><A HREF="#edl">2.5 编辑决定列表(EDL)</A>
         <UL>
-          <LI><A HREF="#tv_compilation">2.5.1 编缉</A></LI>
-          <LI><A HREF="#tv_options">2.5.2 可用的选项</A></LI>
-          <LI><A HREF="#tv_keyboard">2.5.3 键盘控制</A></LI>
-          <LI><A HREF="#tv_examples">2.5.4 例子</A></LI>
+          <LI><A HREF="#edl_using">2.5.1 使用一个EDL文件</A></LI>
+          <LI><A HREF="#edl_making">2.5.2 制作一个EDL文件</A></LI>
         </UL>
       </LI>
     </UL>
@@ -212,11 +222,10 @@
       <LI><A HREF="#command_line">3.1 命令行</A></LI>
       <LI><A HREF="#control">3.2 控制</A>
         <UL>
-          <LI><A HREF="#default_controls">3.2.1 缺省控制</A></LI>
-          <LI><A HREF="#controls_configuration">3.2.2 控制配置</A>
-	    <UL>
-              <LI><A HREF="#key_names">3.2.2.1 键名</A></LI>
-              <LI><A HREF="#commands">3.2.2.2 命令</A></LI>
+          <LI><A HREF="#controls_configuration">3.2.1 控制配置</A>
+	        <UL>
+              <LI><A HREF="#key_names">3.2.1.1 键名</A></LI>
+              <LI><A HREF="#commands">3.2.1.2 命令</A></LI>
             </UL>
           </LI>
           <LI><A HREF="#lirc">3.2.3 LIRC控制</A></LI>
@@ -226,50 +235,113 @@
       <LI><A HREF="#streaming">3.3 网络或管道的流媒体</A></LI>
     </UL>
   </LI>
-  <LI><A HREF="cd-dvd.html">4. CD与DVD部分</A>
+  <LI><A HREF="cd-dvd.html">4. CD/DVD部分</A>
     <UL>
-      <LI><A HREF="cd-dvd.html#drives">4.1 CD与DVD驱动器</A></LI>
-      <LI><A HREF="cd-dvd.html#dvd">4.2 DVD回放</A></LI>
-      <LI><A HREF="cd-dvd.html#vcd">4.3 VCD回放</A></LI>
+      <LI><A HREF="cd-dvd.html#drives">4.1 CD/DVD驱动器</A></LI>
+      <LI><A HREF="cd-dvd.html#dvd">4.2 DVD播放</A></LI>
+      <LI><A HREF="cd-dvd.html#vcd">4.3 VCD播放</A></LI>
     </UL>
   </LI>
   <LI><A HREF="faq.html">5. FAQ部分</A>
     <UL>
       <LI><A HREF="faq.html#compilation">5.1 编译</A></LI>
       <LI><A HREF="faq.html#general">5.2 一般问题</A></LI>
-      <LI><A HREF="faq.html#playback">5.3 回放问题</A></LI>
-      <LI><A HREF="faq.html#driver">5.4 视频与音频驱动问题(vo/ao)</A></LI>
-      <LI><A HREF="faq.html#dvd">5.5 DVD回放</A></LI>
+      <LI><A HREF="faq.html#playback">5.3 播放问题</A></LI>
+      <LI><A HREF="faq.html#driver">5.4 视频/音频驱动问题(vo/ao)</A></LI>
+      <LI><A HREF="faq.html#dvd">5.5 DVD播放</A></LI>
       <LI><A HREF="faq.html#features">5.6 特性要求</A></LI>
       <LI><A HREF="faq.html#encoding">5.7 编码</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#ports">6. 移植</A>
     <UL>
-      <LI><A HREF="#debian">6.1 Debian安装包的制作</A></LI>
-      <LI><A HREF="#freebsd">6.2 FreeBSD</A></LI>
+	  <LI><A HREF="#linux">6.1 Linux</A>
+	    <UL>
+          <LI><A HREF="#debian">6.1.1 Debian安装包的制作</A></LI>
+          <LI><A HREF="#rpm">6.1.2 RPM安装包的制作</A></LI>
+		  <LI><A HREF="#arm">6.1.3 ARM</A></LI>
+		</UL>
+	  </LI>
+	  <LI><A HREF="#bsd">6.2 *BSD</A>
+        <UL>
+          <LI><A HREF="#freebsd">6.2.1 FreeBSD</A></LI>
+          <LI><A HREF="#openbsd">6.2.2 OpenBSD</A></LI>
+		</UL>
+      </LI>
       <LI><A HREF="#solaris">6.3 Solaris</A></LI>
-      <LI><A HREF="#strongarm">6.4 StrongARM</A></LI>
-      <LI><A HREF="#sgi">6.5 Silicon Graphics/Irix</A></LI>
-      <LI><A HREF="#qnx">6.6 QNX</A></LI>
-      <LI><A HREF="#openbsd">6.7 OpenBSD</A></LI>
-      <LI><A HREF="#cygwin">6.8 Cygwin</A></LI>
+      <LI><A HREF="#sgi">6.4 Silicon Graphics/Irix</A></LI>
+      <LI><A HREF="#qnx">6.5 QNX</A></LI>
+      <LI><A HREF="#cygwin">6.6 Cygwin</A></LI>
+    </UL>
+  </LI>
+  <LI><A HREF="encoding.html">7. 用MEncoder编码</A>
+    <UL>
+      <LI><A HREF="encoding.html#2pass">7.1 2或3-pass的MPEG-4("DIVX")编码</A></LI>
+      <LI><A HREF="encoding.html#rescaling">7.2 电影再缩放</A></LI>
+      <LI><A HREF="encoding.html#copying">7.3 流复制</A></LI>
+      <LI><A HREF="encoding.html#fixing">7.4 修复索引损坏的AVI文件</A></LI>
+      <LI><A HREF="encoding.html#libavcodec">7.5 用libavcodec编解码器族进行编码</A></LI>
+      <LI><A HREF="encoding.html#image_files">7.6 用输入的多幅图像文件(JPEGs或者PNGs)进行编码</A></LI>
+      <LI><A HREF="encoding.html#vobsub">7.7 将DVD字幕提取为Vobsub文件</A></LI>
+      <LI><A HREF="encoding.html#aspect">7.8 保持屏幕高宽比</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#mailing_lists">附录A -- 邮件列表</A></LI>
-  <LI><A HREF="bugreports.html">附录B -- 如何报告bug</A>
+  <LI><A HREF="bugreports.html">Appendix B -- 如何报告bugs</A>
     <UL>
-      <LI><A HREF="../tech/patches.txt">附录B2 -- 如何发送补丁</A></LI>
+      <LI><A HREF="bugreports.html#fix">B.1 如何修复bugs</A></LI>
+      <LI><A HREF="bugreports.html#report">B.2 如何报告bugs</A></LI>
+      <LI><A HREF="bugreports.html#where">B.3 向哪里报告bugs</A></LI>
+      <LI><A HREF="bugreports.html#what">B.4 报告什么</A>
+        <UL>
+          <LI><A HREF="bugreports.html#system">B.4.1 系统信息</A></LI>
+          <LI><A HREF="bugreports.html#hardware">B.4.2硬件和驱动</A></LI>
+          <LI><A HREF="bugreports.html#compilation">B.4.3 编译问题</A></LI>
+          <LI><A HREF="bugreports.html#configure">B.4.4 配置问题</A></LI>
+          <LI><A HREF="bugreports.html#playback">B.4.5 播放问题</A></LI>
+          <LI><A HREF="bugreports.html#crash">B.4.6 崩溃</A>
+            <UL>
+              <LI><A HREF="bugreports.html#debug">B.4.6.1 如何保存一个可重复的崩溃的信息</A></LI>
+              <LI><A HREF="bugreports.html#core">B.4.6.2 如何从一个core dump中提取有意义的信息</A></LI>
+            </UL>
+          </LI>
+        </UL>
+      </LI>
+      <LI><A HREF="bugreports.html#advusers">B.5 我知道我正在干什么...</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#known_bugs">附录C -- 已知bug</A></LI>
-  <LI><A HREF="skin-zh.html">附录D -- MPlayer skin的格式！</A></LI>
-  <LI><A HREF="users_against_developers.html">附录E -- 开发者的痛楚</A>
+  <LI><A HREF="skin-zh.html">附录D - MPlayer skin的格式</A>
     <UL>
-      <LI><A HREF="users_against_developers.html#gcc">GCC 2.96 </A></LI>
+      <LI><A HREF="skin-zh.html#overview">D.1 综述</A>
+        <UL>
+          <LI><A HREF="skin-zh.html#directories">D.1.1 目录</A></LI>
+          <LI><A HREF="skin-zh.html#images">D.1.2 图像</A></LI>
+          <LI><A HREF="skin-zh.html#components">D.1.3 Skin组件</A></LI>
+          <LI><A HREF="skin-zh.html#files">D.1.4 文件</A></LI>
+        </UL>
+      </LI>
+      <LI><A HREF="skin-zh.html#skinfile">D.2 Skin的文件</A>
+        <UL>
+          <LI><A HREF="skin-zh.html#mainwindow">D.2.1 主窗口和播放条</A></LI>
+          <LI><A HREF="skin-zh.html#subwindow">D.2.2 副窗口</A></LI>
+          <LI><A HREF="skin-zh.html#skinmenu">D.2.3 Skin菜单</A></LI>
+        </UL>
+      </LI>
+      <LI><A HREF="skin-zh.html#fonts">D.3 字体</A>
+        <UL>
+          <LI><A HREF="skin-zh.html#symbols">D.3.1 符号</A></LI>
+        </UL>
+      </LI>
+      <LI><A HREF="skin-zh.html#guimessages">D.4 GUI消息</A></LI>
+    </UL>
+  </LI>
+  <LI><A HREF="users_against_developers.html">附录E -- 开发者的眼泪</A>
+    <UL>
+      <LI><A HREF="users_against_developers.html#gcc">GCC 2.96</A></LI>
       <LI><A HREF="users_against_developers.html#binary">二进制发行版</A></LI>
       <LI><A HREF="users_against_developers.html#nvidia">nVidia</A></LI>
-      <LI><A HREF="users_against_developers.html#barr">Joe Barr </A></LI>
+      <LI><A HREF="users_against_developers.html#barr">Joe Barr</A></LI>
     </UL>
   </LI>
 </UL>
@@ -280,40 +352,74 @@
 
 <H1><A NAME="reading">0. 如何阅读本文档</A></H1>
 
-<P>如果你是首次安装：请一定要阅读从这里到安装部分末端的每件事，并且追踪你将遇到的链接。
-如果你有任何其它问题，返回到目录并搜索主题，读取<A HREF="faq.html">FAQ</A>，或者试图grepping整个文件。</P>
+<P>如果你是首次安装：请一定要阅读从这里到安装部分结束的所有内容，并且追踪你所遇到的链接。
+如果你有任何其它问题，返回到目录并搜索主题，读取<A HREF="faq.html">FAQ</A>，或者尝试用grep搜索整个文件。</P>
 
-<P>这个文件的主要原则：如果一个功能没有被编入文档，那么它<U>不存在</U>。如果我不说你能
-用电视选台器音频编码，你一定不能。不过健康程度的综合能力还是受欢迎的。祝你好运。你将需要它的：)，
+<P>这个文件的主要原则：如果一个功能没有被编入文档，那么它<U>不存在</U>。如果我没有说你能
+用电视选台器音频编码，你就不能。不过健康程度的综合能力还是受欢迎的。祝你好运。你将需要它的：)，
 让我引用<A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>邮件列表中
 Chris Phillips的话作为另一个好的建议：</P>
 
-<P><I>“我以前说过新手和白痴之间的区别在于：无论，你实际上对一个系统(Linux，汽车，女孩:D)
-了解多少，你应该总能够退一步想想并且保持客观，否则，你是公认的白痴IMHO。跟我住在一起的女孩认定吸
+<BLOCKQUOTE>
+“我以前说过新手和白痴之间的区别在于：无论，你实际上对一个系统(Linux，汽车，女孩:D)
+了解多少，你应该总能够退一步想想并且保持客观，否则，恕我直言你是公认的白痴。跟我住在一起的女孩认定吸
 尘器坏了因为它不吸进东西，而从不想更换袋子，因为她以前从来没有做过...那就是愚蠢，而不仅仅是不
 知道做什么...仅仅因为不是那么熟悉你的环境不是你的a)懒惰和b)忽视的借口。如此多人们似乎看到“error”
-就停止...极少数似乎真正上读取了在冒号的另一边的东西”。</I></P>
+就停止...只有极少数真正读取了冒号另一边的东西”。
+</BLOCKQUOTE>
 
 
 <H1><A NAME="introduction">1. 介绍</A></H1>
 
-<P><B>MPlayer</B>是Linux 上的电影播放器(也能跑在许多其它Unices上，甚至<B>non-x86</B>CPU上，
-参见<A HREF="#ports">移植部分</A>)。它能使用众多的本地的，XAnim，RealPlayer，和Win32 DLL codecs，
+<P>MPlayer是Linux 上的电影播放器(也能跑在许多其它Unices上，甚至<B>非x86</B>CPU上，
+参见<A HREF="#ports">移植部分</A>)。它能使用众多的本地的，XAnim，RealPlayer，和Win32 DLL编解码器，
 播放大多数MPEG，VOB，AVI，OGG，VIVO，ASF/WMV，QT/MOV，FLI，RM，NuppelVideo，yuv4mpeg，FILM，RoQ文件。
 你还能观看<B>VideoCD</B>，<B>SVCD</B>，<B>DVD</B>，<B>3ivx</B>，<B>RealMedia</B>，和<B>DivX</B>格式
 的电影(你根本不需要avifile库)。mplayer的另一个大的特色是广泛的输出设备支持。它可以在X11，Xv，DGA，
 OpenGL，SVGAlib，fbdev，AAlib，DirectFB下工作，而且你也能使用GGI和SDL(由此可以使用他们支持的各种驱动模式)
 和一些低级的硬件相关的驱动模式(比如Matrox，3Dfx和Radeon，Mach64，Permedia3)！他们大多数支持软件或者硬件缩放，
-因此你能在全屏下享受电影。<B>MPlayer</B>还支持通过硬件MPEG解码卡显示，诸如<B><A HREF="video.html#dvb">DVB</A></B>
-和<B><A HREF="video.html#dxr3">DXR3与Hollywood+</A></B>。可以使用european/ISO 8859-1,2(匈牙利语，英语，捷克语等等)，
-Cyrillic，朝鲜字体的清晰放大并且反锯齿的字幕(<B>支持10种格式</B>)，和on screen display(OSD)你又觉得如何？</P>
-
-<P><B>MPlayer</B>以GPL v2许可证发行。</P>
+因此你能在全屏下观赏电影。MPlayer还支持通过硬件MPEG解码卡显示，诸如<B><A HREF="video.html#dvb">DVB</A></B>
+和<B><A HREF="video.html#dxr3">DXR3与Hollywood+</A></B>。可以使用European/ISO 8859-1,2(匈牙利语，英语，捷克语等等)，
+西里尔语，韩语的字体的清晰放大并且反锯齿的字幕(<B>支持10种格式</B>)，和on screen display(OSD)你又觉得如何？</P>
 
 <P>这个播放器能够稳如泰山的播放被破坏的MPEG文件(对一些VCD有用)，而它能播放著名的windows media player
 都打不开的的坏的AVI文件。甚至，没有索引部分的AVI文件可播放，你能暂时由重建他们的索引<CODE>-idx</CODE>选择，
-或者用<B>MEncoder</B>永久重建，使你能够seek！如你所见，稳定和质量是最重要的事情，而且他的速度是也惊人的。</P>
+或者用MEncoder永久重建，使你能够在影片中搜索！如你所见，稳定和质量是最重要的事情，而且他的速度是也惊人的。</P>
 
+<P>MEncoder(MPlayer's Movie Encoder)是一个简单的电影编码器，设计用来把MPlayer可以播放的电影
+(<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</B>)编码成别的MPlayer可以播放的格式(具体列表见下面)。
+它可以使用各种编解码器进行编码，例如
+<B>DivX4</B>(1或2 passes)，libavcodec，
+<B>PCM</B>/<B>MP3</B>/<B>VBR MP3</B>音频。同时也有强大的插件系统用于控制视频。</P>
+
+<H4>MEncoder的特性</H4>
+
+<UL>
+  <LI>从MPlayer支持的广泛的文件格式和解码器的输入进行编码</LI>
+  <LI>编码到ffmpeg的<A HREF="codecs.html#libavcodec">libavcodec</A>的所有编解码器</LI>
+  <LI>从<B>V4L兼容的电视选台器</B>输入编码</LI>
+  <LI>编码/多路传输成具有适当索引的交错的AVI文件</LI>
+  <LI>从外部音频流创建文件</LI>
+  <LI>1, 2或3 pass编码</LI>
+  <LI><B>VBR</B>的MP3音频 - <B>重要提示:</B> VBR MP3音频不总是能被Windows的播放器正常的播放！另一方面，目前MEncoder的
+  CBR编码文件在Win32播放器上完全无法播放:)</LI>
+  <LI>PCM音频</LI>
+  <LI>流复制</LI>
+  <LI>输入的自动A/V同步(基于PTS，使用-mc 0选项来禁用)</LI>
+  <LI>使用<CODE>-ofps</CODE>选项进行FPS修正(当把29.97fps的VOB编码成24fps的AVI的时候有用)</LI>
+  <LI>使用我们强大的插件系统(crop, expand, flip, postprocess,
+    rotate, scale, rgb/yuv conversion)</LI>
+  <LI>可以把DVD/VOB字幕<B>和</B>文本字幕编码到输出文件中</LI>
+  <LI>可以把DVD字幕提取为Vobsub格式</LI>
+</UL>
+
+<H4>计划中的特性</H4>
+
+<UL>
+  <LI>更加广泛的编/解码格式/编解码器 (用DivX4/Indeo5/VIVO流创建VOB文件:)</LI>
+</UL>
+
+<P>MPlayer和MEncoder按照GNU General Public License Version 2发布。</P>
 
 <H2><A NAME="history">1.1 历史</A></H2>
 
@@ -323,33 +429,39 @@ Cyrillic，朝鲜字体的清晰放大并且反锯齿的字幕(<B>支持10种格式</B>)，和on screen d
 许多播放器也有图象质量或者速度的问题。因此，我已决定自己写/修改一个...</P>
 
 <UL>
-<LI><B>mpg12play v0.1-v0.3：</B>2000年9月22-25日<BR>
+  <LI><B>mpg12play v0.1-v0.3：</B>2000年9月22-25日<BR>
     第一次尝试，总共只用了半小时来hack！到版本0.3我都使用www.heroinewarrior.com的libmpeg3，但是它有图象质量和速度的问题。</LI>
-<LI><B>mpg12play v0.5-v0.87：</B>2000年9月28日 - 10月20日<BR>
+  <LI><B>mpg12play v0.5-v0.87：</B>2000年9月28日-10月20日<BR>
     用Dirk Farin的DVDview替换了原来的Mpeg codec，它是一个很不错的东东，但是它很慢并且使用写成C++(我讨厌C++!!!)</LI>
-<LI><B>mpg12play v0.9-v0.95pre5：</B>2000年十月21日 - 11月2日<BR>
+  <LI><B>mpg12play v0.9-v0.95pre5：</B>2000年10月21日-11月2日<BR>
     Mpeg codec改用Aaron Holtzman与的Michel Lespinasse的libmpeg2(mpeg2dec)。它十分出色，优化过的十分快速的C代码和完美的图象质量以及100%的MPEG标准的一致性。</LI>
-<LI><B>MPlayer v0.3-v0.9：</B>2000年11月18日 - 12月4日<BR>
+  <LI><B>MPlayer v0.01:</B> 2000年11月11日<BR>
+    第一个MPlayer。</LI>
+  <LI><B>MPlayer v0.3-v0.9：</B>2000年11月18日-12月4日<BR>
     它包含两个程序： mpg12play v0.95pre6和我的新的简单的基于avifile的Win32 DLL Loader的AVI播放器'avip'。</LI>
-<LI><B>MPlayer v0.10：</B>2001年1月1日<BR>
+  <LI><B>MPlayer v0.10：</B>2001年1月1日<BR>
     MPEG和AVI播放器做成了一个二进制文件！</LI>
-<LI><B>MPlayer v0.11pre系列：</B><BR>
-    一些新的开发者加入了，从0.11开始mplayer项目成为一个team-work！增加了.ASF文件支持，和OpenDivX(见www.projectmayo.com)编/解码。</LI>
-<LI><B>MPlayer v0.17a“IdegCounter”</B>2001年4月27日<BR>
+  <LI><B>MPlayer v0.11pre系列：</B><BR>
+    一些新的开发者加入了，从0.11开始mplayer项目成为一个team-work！增加了.ASF文件支持，和OpenDivX(见www.projectmayo.com)编/解码支持。</LI>
+  <LI><B>MPlayer v0.17a“IdegCounter”</B>2001年4月27日<BR>
     在艰苦发展了4个月的0.11pre之后的正式版本！试试看，然后等着被震撼！成千上万的新的特性添加...当然同时旧的代码也被改进，移去了一些bug</LI>
-<LI><B>MPlayer 0.18“BugCounter”</B>2001年7月9日<BR>
-    自从0.17以来的2个月后的新的正式版。完全的ASF支持，更多字幕格式，引入libao(类似于libvo但是针对音频)，比以往任何时候更加稳定，如此等等。这肯定是个必需品！</LI>
-<LI><B>MPlayer 0.50“Faszom(C)ounter”</B>2001年10月8日<BR>
+  <LI><B>MPlayer 0.18“BugCounter”</B>2001年7月9日<BR>
+    0.17发布2个月后的新的正式版。完全的ASF支持，更多字幕格式，引入libao(类似于libvo但是针对音频)，比以往任何时候更加稳定，如此等等。这肯定是个必需品！</LI>
+  <LI><B>MPlayer 0.50“Faszom(C)ounter”</B>2001年10月8日<BR>
     Hmm。又一次新版本。众多新的特性，Beta版的GUI，bug修正，新的vo和ao驱动模式，许多系统的移植，包括opensource DivX codecs和更多得多的改进。尝试一下！</LI>
-<LI><B>MPlayer 0.60“RTFMCounter”</B>2002年1月3日<BR>
-    支持MOV/VIVO/RM/FLI/NUV文件格式，本地的CRAM，Cinepak，ADPCM codecs，支持XAnim的二进制的codecs；DVD字幕支持，首此发布MEncoder，电视截取，cache，liba52，无数的修正。</LI>
-<LI><B>MPlayer 0.90“？”</B>8月??日，2002<BR>
-    </LI>
+  <LI><B>MPlayer 0.60“RTFMCounter”</B>2002年1月3日<BR>
+    支持MOV/VIVO/RM/FLI/NUV文件格式，本地的CRAM，Cinepak，ADPCM 编解码器，支持XAnim的二进制的编解码器；DVD字幕支持，首此发布MEncoder，电视截取，缓存，liba52，无数的修正。</LI>
+  <LI><B>MPlayer 0.90pre10 "The BirthdayCounter"</B> 2002年11月11日<BR>
+    尽管这不是一个正式发行版，但我决定提到它因为它诞生在MPlayer v0.01发布的两年之后。生日快乐，MPlayer！</LI>
+  <LI><B>MPlayer 0.90rc1 "The CodecCounter"</B> Dec 7, 2002<BR>
+    同样不是一个正式发行版，但在添加了Sorenson 3(QuickTime)和Windows
+    Media 9的支持之后, MPlayer成为世界上第一个支持所有已知视频格式的电影播放器！</LI>
+  <LI><B>MPlayer 0.90“？”</B>日期未知</LI>
 </UL>
 
 <H2><A NAME="installation">1.2 安装</A></H2>
 
-<P>在这章中我将试图指引你通过编译和配置<B>MPlayer</B>的过程，它不大容易的，不过也见得一定很难的。
+<P>在这章中我将试图指引你通过编译和配置MPlayer的过程，它不大容易的，不过也见得一定很难的。
 如果你遇到不同于我所解释的现象，请的通过搜索这篇文件来查找你的回答。如果你遇到链接，请跟踪他们并且细心读取他们包含的内容。
 它将花费一些时间，但是它确实是值得的。</P>
 
@@ -358,76 +470,78 @@ Cyrillic，朝鲜字体的清晰放大并且反锯齿的字幕(<B>支持10种格式</B>)，和on screen d
 <H4>软件要求：</H4>
 
 <UL>
-  <LI><B>binutils </B>-- 建议版本<B>2.11.x</B>。这个程序这样十分重要,负责产生MMX/3DNow!/etc指令。</LI>
-  <LI><B>gcc </B>-- 建议版本是：<B>2.95.3</B>，<B>2.95.4</B>和<B>3.1</B>。<B>永远不要</B>使用2.96或者3.0.x！
+  <LI><B>binutils</B> -- 建议版本<B>2.11.x</B>。这个程序负责生成MMX/3DNow!/etc指令，因此十分重要。</LI>
+  <LI><B>gcc</B> -- 建议版本是：<B>2.95.3</B>，<B>2.95.4</B>和<B>3.1</B>。<B>永远不要</B>使用2.96或者3.0.x！
 他们产生错误的MPlayer的代码。如果你决定更换2.96的gcc，那么不要只是因为新而决定采用3.0.x！3.0.x的早期版本甚至比2.96更buggy。
-因此不如降级到2.95.x(也使libstdc++降级，其它程序可能需要它)或者根本(但这种情况下请对运行时的问题作好准备)不升/降级。
+因此不如降级到2.95.x(也把libstdc++降级，其它程序可能需要它)或者根本不升/降级(但这种情况下请对运行时的问题作好准备)。
 如果你一定要使用3.x.x请使用最新的版本，早先的发行版本有各种各样的错误，确信你使用的至少是3.1，它通过测试且工作正常。
-关于gcc 2.96的bug的(仍然没有修正，他们在<B>MPlayer</B>中不断出现！)详细信息能在<A HREF="users_against_developers.html">
-这里</A>和<A HREF="faq.html">FAQ</A>中找到。</LI>
-  <LI><B>XFree86 </B>-- 建议<B>总使用最新版本(4.2.0)</B>。正常来说，每个人会这样做，因为XFree86从4.0.2开始，
+关于gcc 2.96的bug(仍然没有修正，他们在MPlayer中被绕过！)的详细信息能在<A
+HREF="users_against_developers.html">这里</A>和<A HREF="faq.html">FAQ</A>中找到。</LI>
+  <LI><B>XFree86</B> -- 建议<B>总使用最新版本(4.2.1)</B>。正常来说，每个人会这样做，因为XFree86从4.0.2开始，
 它包含了用来使其能够在它支持的卡片上使用硬件YUV加速(快速的图象显示)的<A HREF="video.html#xv">XVideo</A>扩展(在某些地方被称作<B>Xv</B>)。<BR>
 确保也安装了<B>开发包</B>，否则它将不工作。<BR>
 对于一些视频卡你不需要XFree86。参见下面的列表。</LI>
-  <LI><B>make </B>-- 建议<B>总使用最新版本</B>(至少3.79.x)。这通常不太重要。</LI>
-  <LI><B>SDL </B>-- 它不是强制要求的，但是在某些情况下(坏的音频，在xv驱动模式下奇怪地延迟的视频卡)能帮助。总使用最新(从1.2.x开始支持)的。</LI>
-  <LI><B>libjpeg </B>-- 可选的JPEG译码器，用于-mf参数和一些QT MOV文件。如果你计划做jpeg文件的工作<B>MPlayer</B>和<B>MEncoder</B>都需要它。</LI>
-  <LI><B>libpng </B>-- 推荐也是缺省( M)PNG译码器。GUI需要。对<B>MPlayer</B>和<B>MEncoder</B>也有用。</LI>
-  <LI><B>lame </B>-- 推荐，MEncoder需要用它把音频做MP3编码，建议<B>总使用最新版本</B>(至少3.90)。</LI>
-  <LI><B>libogg </B>-- 可选，播放OGG文件格式需要。</LI>
-  <LI><B>libvorbis </B>-- 可选，播放OGG Vorbis音频需要。</LI>
+  <LI><B>make</B> -- 建议<B>总使用最新版本</B>(至少3.79.x)。这通常不太重要。</LI>
+  <LI><B>SDL</B> -- 它不是必须的，但是在某些情况下(损坏的音频，在xv驱动模式下奇怪地延迟的显卡)能帮助。总使用最新(1.2.x或以上)的。</LI>
+  <LI><B>libjpeg</B> -- 可选的JPEG解码器，用于-mf参数和一些QT MOV文件。如果你计划做jpeg文件的工作那么MPlayer和MEncoder都需要它。</LI>
+  <LI><B>libpng</B> -- 推荐也是默认的( M)PNG译码器。GUI需要它。对MPlayer和MEncoder也有用。</LI>
+  <LI><B>lame</B> -- 推荐，MEncoder需要用它把音频做MP3编码，建议<B>总使用最新版本</B>(3.90或以上)。</LI>
+  <LI><B>libogg</B> -- 可选，用于播放OGG文件格式。</LI>
+  <LI><B>libvorbis</B> -- 可选，用于播放OGG Vorbis音频。</LI>
+  <LI><B><A HREF="http://www.live.com/mplayer/">LIVE.COM Streaming Media</A></B>
+    -- 可选，用于播放RTSP/RTP流。</LI>
+  <LI><B>directfb</B> -- 可选，从<A HREF="http://www.directfb.org">http://www.directfb.org</A>获得</LI>
+  <LI><B>cdparanoia</B> -- 可选，用于CDDA支持</LI>
+  <LI><B>libfreetype</B> -- 可选，用于TTF字体支持。至少需要2.0.9以上版本。</LI>
+  <LI><B>libxmms</B> -- 可选, 用于XMMS输入插件的支持。要求至少1.2.7以上版本。</LI>
 </UL>
 
-<H4>解码器：</H4>
+<H4>编解码器：</H4>
 
 <UL>
-  <LI><B>libavcodec</B>：这个解码器包可以在多重平台上对H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1编码格式的视频流进行解码。
-详细情况请看<A HREF="codecs.html#libavcodec">这里</A>。特色<BR>：
+  <LI><B>libavcodec</B>：这个编解码器包可以在多重平台上对H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1编码格式的视频流和
+WMA(Windows Media Audio)v1/v2的音频流进行解码，它同时也是已知完成这些任务最快的解码器。详细情况请看<A HREF="codecs.html#libavcodec">libavcodec</A>部分。特性<BR>：
     <UL>
-      <LI>在non-x86机器上的对上述的各种编码格式解码。</LI>
+      <LI>在非x86机器上的对上述的各种编码格式解码。</LI>
       <LI>以上述大多数编码格式编码。</LI>
-      <LI>这是<B>可用的最快的</B>DivX/3/4/5和其它MPEG4类型的解码器，因此高度推荐。</LI>
+      <LI>这是<B>可用的最快的</B>DivX/3/4/5和其它MPEG4类型的解码器，高度推荐。</LI>
     </UL>
   </LI>
-  <LI><B>Win32 codecs：</B>如果你计划在x86构架的机器上使用<B>MPlayer</B>，你将有可能需要他们。在开始<B>MPlayer</B>的编译<B>之前</B>
-下载并用unzip解压缩w32codecs.zip到/usr/lib/win32，否则将不会编译Win32支持代码！<BR>
-注： avifile项目有类似的codecs包，但是它不同于我们的，如此如果你想要使用所有支持的codecs，那么使用我们的包！ 然而，
-你能在avifile中使用我们的codecs包。特色：<BR>
+  <LI><B>Win32编解码器</B>：如果你计划在x86构架的机器上使用MPlayer，你将有可能需要他们。在开始MPlayer的编译<B>之前</B>下载
+并用unzip解压缩w32codecs.zip到/usr/lib/win32，否则将不会编译Win32支持代码！<BR>
+<B>注意</B>： avifile项目有类似的codecs包，但是它不同于我们的，如此如果你想使用所有支持的编解码器，安装我们的包(别担心，
+avifile使用它不会有任何问题).特性：<BR>
     <UL>
-      <LI>如果你想要播放或者编码例如以各种各样的硬件压缩器记录的电影，像调音器卡，数码相机(例如：DV，ATI VCR，MJPEG)，你将需要它</LI>
-      <LI>如果你想要播放<B>WMV8格式的电影</B>那就需要它。播放老的以MP41或者MP42视频的ASF(尽管这些文件的音频常常是VoxWare -- 它是通过Win32 codec解码的)，或者WMV7是不需要它的。</LI>
+      <LI>如果你想要播放或者编码例如以各种各样的硬件压缩器记录的电影，像选台器卡，数码相机(例如：DV，ATI VCR，MJPEG)，你将需要它</LI>
+      <LI>如果你想要播放<B>WMV8，WMV9/WMA9格式的电影</B>那就需要它。播放老的以MP41或者MP42视频的ASF(尽管这些文件的音频常常是VoxWare -- 它是通过Win32编解码器解码的)，或者WMV7是不需要它的。</LI>
     </UL>
   </LI>
-
+  <LI><B>QuickTime编解码器</B>：在x86平台上这些编解码器可以用来解码Sorenson v1/v3, RPZA, 和其他QuickTime视频，和QDesign音频流。
+  安装方法可以在<A HREF="codecs.html#sorenson">Sorenson视频编解码器</A>部分找到。</LI>
   <LI><B>DivX4与DivX5：</B>关于这编码格式的信息可从<A HREF="codecs.html#divx">DivX4与DivX5</A>节得到。如果你不想用它来编码，
 你有可能不会想要这个解码器，因为<B>libavcodec</B>(见上面)比它快得多。<BR>
-  特色：
+  特性：
     <UL>
       <LI>用<A HREF="encoding.html">MEncoder</A>进行1 pass或2 pass编码。</LI>
       <LI>播放老的<B>DivX3</B>格式的电影比Win32 DLL快得多但是比<B>libavcodec</B>慢！</LI>
       <LI>它封闭源码的，而且仅仅有一个x86平台的版本。</LI>
     </UL>
   </LI>
-
   <LI><B>XviD：</B>开源的Divx4Linux的编码替代品<BR>
   特色：
     <UL>
       <LI>用<A HREF="encoding.html">MEncoder</A>进行1 pass或2 pass编码。</LI>
-      <LI>这是开源的，如此不仅只有x86一种版本可用。</LI>
-      <LI>它的编码速度比divx4快2倍-- 在几乎相同的质量的情况下</LI>
+      <LI>这是开源的，所以是多平台的。</LI>
+      <LI>它的编码速度比divx4快2倍 -- 在几乎相同的质量的情况下</LI>
     </UL>
   </LI>
-
-  <LI><A HREF="codecs.html#xanim">XAnim codecs</A>对解码<B>3ivx</B>和Indeo 3/4/5格式，和一些旧的格式的电影效果是最好
-(全屏幕，硬件YUV缩放)。同时，他们是多平台的，因此这是在非x86平台上播放Indeo的唯一的方法(当然，除了直接使用XAnim之外:)。
-但是例如Cinepak电影<B>MPlayer</B>自己的Cinepak解码器播放才有最好的效果！</LI>
-
+  <LI><A HREF="codecs.html#xanim">XAnim codecs</A>对解码<B>3ivx</B>和Indeo 3/4/5格式，和一些旧的格式的电影效果是最好(全
+屏幕，硬件YUV缩放)。同时，他们是多平台的，因此这是在非x86平台上播放Indeo的唯一的方法(当然，除了直接使用XAnim之外:)。
+但是例如Cinepak电影MPlayer自己的Cinepak解码器播放才有最好的效果！</LI>
   <LI>对于<B>Ogg Vorbis</B>音频解码你需要正确地安装<CODE>libvorbis</CODE>。如果可能的话尽量使用deb/rpm包装，
 或者用<A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">源代码</A>编译(这是Vorbis CVS的每天最新的tarball)。</LI>
-
-  <LI><B>MPlayer</B>能使用RealPlayer 8或RealONE的库来播放包括<B>RealVideo 2.0和3.0</B>格式的视频和Sipro/Cook格式的音频的文件。
-安装方法以及关于它的更多信息参见<A HREF="formats.html#real">RealMedia文件格式</A>节！</LI>
-
+  <LI>MPlayer能使用RealPlayer 8或RealONE的库来播放包括<B>RealVideo 2.0 - 4.0</B>格式的视频和Sipro/Cook格式的音频的文件。
+安装方法以及关于它的更多信息参见<A HREF="formats.html#real">RealMedia文件格式</A>部分！</LI>
 </UL>
 
 <H4>显卡</H4>
@@ -436,48 +550,39 @@ Cyrillic，朝鲜字体的清晰放大并且反锯齿的字幕(<B>支持10种格式</B>)，和on screen d
 
 <H4>YUV显卡</H4>
 
-<P>他们能在他们显存可以的范围中用任何分辨率显示和缩放(zoom)图像，只有<B>很小CPU使用量</B>(缩放不会使它增加!)，所以你能得到清晰快速的全屏播放。</P>
+<P>他们能在他们显存可以的范围中用任何分辨率显示和缩放(zoom)图像，只<B>占用很少的CPU</B>(即使在放大的时候)，所以你能得到清晰而且飞快的全屏播放。</P>
 
 <UL>
-  <LI><B>Matrox G200与G400与G450与G550卡片：</B>虽然提供了一个<A HREF="video.html#vidix">VIDIX模式的驱动</A>，
-但还是推荐使用旧的mga-vid内核模块，因为它工作起来好得多。关于其安装和用法请参见<A HREF="video.html#mga_vid">mga-vid</A>部分。
-在编译<B>MPlayer</B><I>之前</I>进行这些步骤这一点很重要，否则不会编译mga-vid的支持代码。同时也请查看<A HREF="video.html#tv-out_matrox">Matrox电视输出</A>部分。
-<U><B>如果你是非Linux用户</B></U>，你的唯一的选择是Vidix驱动器： 请看<A HREF="video.html#vidix">VIDIX</A>的相关文件！</LI>
-
-  <LI><B>3Dfx Voodoo3与Banshee卡片：</B>请参见<A HREF="video.html#tdfxfb">tdfxfb</A>部分以了解如何获得大的速度提升。
-在编译<B>MPlayer</B><B>之前</B>进行这些步骤这一点很重要，否则不会编译3Dfx的支持代码。也请参考<A HREF="video.html#tv-out_voodoo">3dfx电视输出</A>部分。
-如果你使用X，至少使用4.2.0版本，因为4.1.0和更早释放的版本的3dfx Xv驱动是坏的！</LI>
-
-  <LI><B>ATI卡片：</B>下列的显卡提供了<A HREF="video.html#vidix">VIDIX驱动</A>：<B>Radeon</B>，<B>Rage128</B>，
+  <LI><B>Matrox G200与G400与G450与G550显卡</B>：虽然提供了一个<A HREF="video.html#vidix">Vidix驱动</A>，
+但还是推荐使用旧的mga_vid内核模块，因为它工作起来好得多。关于其安装和使用参见<A HREF="video.html#mga_vid">mga-vid</A>部分。
+在编译MPlayer<I>之前</I>进行这些步骤这一点很重要，否则不会编译mga_vid的支持代码。同时也请查看<A HREF="video.html#tv-out_matrox">Matrox的电视输出</A>部分。
+<U><B>如果你是非Linux用户</B></U>，你的唯一的选择是VIDIX驱动：请看<A HREF="video.html#vidix">VIDIX</A>部分！</LI>
+  <LI><B>3Dfx Voodoo3与Banshee显卡</B>：请参见<A HREF="video.html#tdfxfb">tdfxfb</A>部分以了解如何获得大幅的速度提升。
+在编译MPlayer<B>之前</B>进行这些步骤这一点很重要，否则不会编译3Dfx的支持代码。也请参考<A HREF="video.html#tv-out_voodoo">3dfx电视输出</A>部分。
+如果你使用X，至少使用4.2.0版本，因为4.1.0和更早发行版本的3dfx的Xv驱动是坏的！</LI>
+  <LI><B>ATI显卡</B>：下列的显卡提供了<A HREF="video.html#vidix">Vidix驱动</A>：<B>Radeon</B>，<B>Rage128</B>，
 <B>Mach64</B>(Rage XL/Mobility，Xpert98)。也请参考电视输出文档中的<A HREF="video.html#tv-out_ati">ATI电视输出</A>部分，
 看看Linux与MPlayer是否支持你的显卡的电视输出。</LI>
-
-  <LI><B>S3卡片：</B>Savage和Virge/DX芯片有硬件加速功能。尽可能使用最新的XFree86版本，老的的驱动很buggy。
+  <LI><B>S3显卡</B>：Savage和Virge/DX芯片有硬件加速功能。尽可能使用最新的XFree86版本，老的的驱动很buggy。
 Savage的芯片的YV12显示有问题，具体细节请看<A HREF="video.html#xv_s3">S3 Xv</A>部分。更老的，Trio显卡没有，或只有很慢的硬件加速功能。</LI>
-
-  <LI><B>nVidia卡片：</B>对视频播放来说是十分糟糕的选择(nVidia<A HREF="users_against_developers.html#nvidia">不这么认为</A>！)。
-nVidia的显卡使用十分低廉和质量低劣的芯片。此外，<B>XFree86自带的nVidia驱动器对所有nVidia显卡都不支持硬件YUV加速！</B>
-你将不得不从nVidia.com下载nVidia的封闭源码的驱动。细节参见<A HREF="video.html#xv_nvidia">nVidia Xv驱动器</A>部分。</LI>
-
-<LI><B>3DLabs GLINT R3和Permedia3</B>：提供VIDIX驱动(pm3-vid)。细节参见<A HREF="video.html#vidix">VIDIX</A>部分。</LI>
-
-<LI><B>其它卡片：</B>不是上述的任何一个？
-  <UL>
-    <LI>试试XFree86的驱动(和你的显卡)是否支持硬件加速。细节参见<A HREF="video.html#xv">Xv</A>部分。</LI>
-    <LI>如果不是，那么你的操作系统不支持你显卡的视频特性:(，<BR>
+  <LI><B>nVidia显卡</B>：可能是也可能不是视频播放的好的选择。如果你没有一个GeForce2(或更新的)显卡，你不太可能在运行中不遇到bugs。
+    <B>XFree86中内建的nVidia驱动不支持所有nVidia显卡(GeForce2以下)的硬件YUV加速。</B>你必须从nVidia.com下载nVidia的封闭源码的驱动。细节参见<A HREF="video.html#xv_nvidia">nVidia Xv驱动</A>部分。同时也查看<A HREF="video.html#tv-out_nvidia">nVidia电视输出部分</A>如果你希望使用一个电视。</LI>
+  <LI><B>3DLabs GLINT R3和Permedia3</B>：提供VIDIX驱动(pm3-vid)。细节参见<A HREF="video.html#vidix">VIDIX</A>部分。</LI>
+  <LI><B>其它卡片：</B>不是上述的任何一个？
+    <UL>
+      <LI>试试XFree86的驱动(和你的显卡)是否支持硬件加速。细节参见<A HREF="video.html#xv">Xv部分</A>。</LI>
+      <LI>如果不是，那么你的操作系统不支持你显卡的视频特性:(<BR>
 如果它在Windows下能够使用硬件缩放，那并不不意味着在Linux或者其它OS下做同样的事情，它依赖于驱动！
 大多数制造厂不做Linux驱动也不公布芯片标准 -- 所以，使用他们的显卡你很不走运。看‘非YUV显卡’：
-    </LI>
-  </UL>
-</LI>
-
+      </LI>
+    </UL>
+  </LI>
 </UL>
 
 <H4>非YUV卡片</H4>
 
-<P>播放Fullscreen能被任一个可以使用<B>软件缩放</B>(使用<CODE>-zoom</CODE>或者<CODE>-vop scale</CODE>参数，但是我先警告你：
-这会非常非常慢!)，或者切换成较小的的分辨率，例如352x288。如果你没有YUV加速，我们推荐使用后一种方法。在<B>MPlayer</B>中，
-这种方法通过<CODE>-vm</CODE>参数打开，它能用于下列驱动：</P>
+<P>可以通过使用<B>软件缩放</B>(使用<CODE>-zoom</CODE>或者<CODE>-vop scale</CODE>参数，但是我先警告你：
+这会比较慢)，或者通过切换成较小的的分辨率来实现全屏播放，例如352x288。如果你没有YUV加速，我们推荐使用后一种方法。视频模式切换通过<CODE>-vm</CODE>选项打开，它能用于下列驱动：</P>
 
 <UL>
   <LI><B>使用</B>XFree86：细节参见<A HREF="video.html#x11"">X11驱动</A>和<A HREF="video.html#dga">DGA驱动</A>部分。推荐使用DGA！
@@ -496,7 +601,7 @@ nVidia的显卡使用十分低廉和质量低劣的芯片。此外，<B>XFree86自带的nVidia驱动器对所
           <LI>XFree86 3：能使用8/16bpp模式。然而，这个驱动在800x600@16bpp下狂慢而且buggy<B>推荐: 640x480@16bpp</B></LI>
           <LI>XFree86 4: 如果不仅用加速Xserver会在启动后不久失去响应，但这样之后就比XFree86 3慢了。没有XVideo</LI>
           <LI>FBdev: 这个显卡只兼容VBE 1.2，所以VESA帧缓冲用不了，当尝试用UniVBE来绕过时, 帧缓冲显示的全是碎片根本用不了。</LI>
-          <LI>VESA: 这个显卡只兼容VBE 1.2，所以VESA输出用不了。无法用UniVBE绕过</LI>
+          <LI>VESA: 这个显卡只兼容VBE 1.2，所以VESA输出用不了。无法通过使用UniVBE解决</LI>
           <LI>SVGAlib: 检测成更老的Cirrus芯片. 用<CODE>-bpp 8</CODE>可以使用但很慢</LI>
         </UL>
       </LI>
@@ -507,12 +612,10 @@ nVidia的显卡使用十分低廉和质量低劣的芯片。此外，<B>XFree86自带的nVidia驱动器对所
 <H4>声卡</H4>
 
 <UL>
-  <LI><B>Soundblaster Live!：</B>通过这种声卡你能使用4或者6(<B>5.1</B>)声道AC3解码而不只是2声道。请看<A HREF="codecs.html#software_ac3">
-软件AC3解码</A>一节。对于硬件AC3中转你必须使用ALSA 0.9的oss仿真！</LI>
-
-  <LI><B>C-Media的SP/DIF输出：这些声卡可以使用</B>硬件AC3中转，参见<A HREF="codecs.html#hardware_ac3">硬件AC3解码</A>一节。</LI>
-
-  <LI><B>其它声卡</B>的特性<B>MPlayer</B>是不支持的。
+  <LI><B>Soundblaster Live!</B>：通过这种声卡你能使用4或者6(<B>5.1</B>)声道AC3解码而不只是2声道。请看<A
+HREF="codecs.html#software_ac3">软件AC3解码</A>一节。对于硬件AC3输出你必须使用ALSA 0.9的oss仿真！</LI>
+  <LI><B>C-Media的SP/DIF输出</B>：这些声卡可以使用硬件AC3输出，参见<A HREF="codecs.html#hardware_ac3">硬件AC3解码</A>一节。</LI>
+  <LI><B>其它声卡</B>的特性MPlayer是不支持的。
   <U>强烈建议阅读<A HREF="sound.html">声卡</A>部分！</U>
 </UL>
 
@@ -520,14 +623,12 @@ nVidia的显卡使用十分低廉和质量低劣的芯片。此外，<B>XFree86自带的nVidia驱动器对所
 
 <UL>
   <LI>考虑一下你是否需要GUI。如果需要，在进行编译之前，请看<A HREF="#gui">GUI</A>部分。</LI>
-
-  <LI>如果你想要安装<B>MEncoder</B>(我们的强大的全功能编码器)，请看<A HREF="encoding.html">MEncoder</A>一节。</LI>
-
-
-  <LI>如果你有一张V4L兼容的<B>电视选台器</B>卡，而希望用<B>MPlayer</B>观看/截取并且录制电影，请看<A HREF="#tv">电视输入</A>一节。</LI>
+  <LI>如果你想要安装MEncoder(我们的强大的全功能编码器)，请看<A HREF="encoding.html">MEncoder部分</A>。</LI>
+  <LI>如果你有一张V4L兼容的<B>电视选台器</B>的卡，并且希望用MPlayer观看/截取并且录制电影，请看<A HREF="#tv">电视输入</A>一节。</LI>
+  <LI>有一个精致的<B>OSD菜单</B>可供使用。查看<A HREF="#menu">OSD菜单</A>部分。</LI>
 </UL>
 
-<P>接着编译<B>MPlayer</B>：</P>
+<P>接着编译MPlayer：</P>
 
 <PRE>
     ./configure
@@ -535,54 +636,43 @@ nVidia的显卡使用十分低廉和质量低劣的芯片。此外，<B>XFree86自带的nVidia驱动器对所
     make install
 </PRE>
 
-<P>到此为止，<B>MPlayer</B>就可以使用了。<CODE>$PREFIX/share/mplayer</CODE>目录下包含了<CODE>codecs.conf</CODE>文件，
-程序通过它来了解所拥有的codecs和他们的能解的码。该文件应该与主程序一起更新！<BR>
+<P>到此为止，MPlayer就可以使用了。<CODE>$PREFIX/share/mplayer</CODE>目录下包含了<CODE>codecs.conf</CODE>文件，
+程序通过它来了解所有的编解码器和他们的能兼容的格式。该文件应该与主程序一起更新！<BR>
 检查在你的home目录(~/.mplayer/codecs.conf)中是否有旧的MPlayer版本留下的codecs.conf，如果有就删掉它！</P>
 
-<P><B>Debian的用户</B>能自己制作.deb安装包，这十分简单。直接在<B>MPlayer</B>的根目录执行<CODE>fakeroot debian/rules binary</CODE>。
-详尽的步骤请看<A HREF="documentation.html#debian">这里</A>。</P>
+<P><B>Debian的用户</B>能自己制作<CODE>.deb</CODE>安装包，这十分简单。直接在MPlayer的根目录下执行<CODE>fakeroot debian/rules binary</CODE>。
+详尽的步骤请看<A HREF="documentation.html#debian">Debian安装包的制作</A>。</P>
 
-<P><CODE>./configure</CODE><B>的输出请务必一定阅读</B>，还有<CODE>configure.log</CODE>文件，其中的信息会告诉你将什么将被编译，什么不编译。
+<P><CODE>./configure</CODE><B>的输出请务必一定阅读</B>，还有<CODE>configure.log</CODE>文件，其中的信息会告诉你将什么将被编译，什么将不编译。
 你也可能需要查看<CODE>config.h</CODE>和<CODE>config.mak</CODE>文件。<BR>
 如果你已经安装一些库文件，却没有被<CODE>./configure</CODE>发现，那么检查你是否也安装了正确的头文件(通常在-dev包中)以及他们的版本符合要求。
-<CODE>configure.log </CODE>通常会告诉你缺了什么。</P>
+<CODE>configure.log</CODE>通常会告诉你缺什么。</P>
 
-<P>尽管并非必需，你确实应该安装字体以使用OSD和字幕功能。下载<CODE>mp-arial-iso-8859-*.zip</CODE>和/或者可选(如果存在的话)的其他语言的更新。
+<P>尽管并非必需，你确实应该安装字体以使用OSD和字幕功能。推荐的方法是安装一个TTF字体文件并让MPlayer使用它。
 阅读<A HREF="#subtitles_osd">字幕和OSD</A>一节来了解其细节。</P>
 
-<PRE>
-    mkdir ~/.mplayer/font
-    cd ~/.mplayer/font
-    unzip mp-arial-iso-8859-1.zip
-    ln -s ~/.mplayer/font/arial-24 font
-</PRE>
+
 
 <H2><A NAME="gui">1.3 GUI有吗？</A></H2>
 
-<P>GUI需要GTK(它不是GTK写成的，但是面板是的)。skin被保存为PNG格式，因此你需要安装gtk，libpng(和他们的devel包)。
+<P>GUI需要GTK(它不是GTK的，但是面板是的)。skin被保存为PNG格式，因此你需要安装gtk，libpng(和他们的devel包)。
 你必须在运行<CODE>./configure</CODE>时使用<CODE>--enable-gui</CODE>来编译它的代码。然后，你可以用下列方法之一打开GUI方式</P>
 <UL>
-  <LI>使用<CODE>-gui</CODE>选项</LI>
   <LI>在你的config文件中添加<CODE>gui=yes</CODE></LI>
   <LI><CODE>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</CODE>，然后运行<CODE>gmplayer</CODE>。
 </UL>
 
-<P>由于技术原因，目前你不能在命令行下使用<CODE>-gui</CODE>选项。</P>
+<P>目前由于技术原因，目前你不能在命令行下使用<CODE>-gui</CODE>选项。</P>
 
-<BLOCKQUOTE>
-  <B>提示</B><Br>
-  使用鼠标的中间键(2键鼠标则同时按下左右两键)，会弹出一个有DVD播放选项的GTK菜单！
-</BLOCKQUOTE> 
-  
-<P>因为<B>MPlayer</B>不自带skin，所以如果你想要使用GUI，你必须自己下载他们。参见<A HREF="http://www.mplayerhq.hu/homepage/dload.html">下载页</A>。
+<P>因为MPlayer不自带skin，所以如果你想要使用GUI，你必须自己下载它们。参见<A HREF="http://www.mplayerhq.hu/homepage/dload.html">下载页</A>。
 他们应该被解压到系统通用的目录(<CODE>$PREFIX/share/mplayer/Skin</CODE>)，或者解压到<CODE>$HOME/.mplayer/Skin</CODE>。
-<B>MPlayer</B>在默认情况下会在这些的目录里寻找一个叫<I>default</I>的目录，
-但是你能使用<CODE>-skin newskin</CODE>选项或在config文件中添加<CODE>skin=newskin</CODE>来强制使用<CODE>*/Skin/newskin</CODE>下的skin。</P>
+MPlayer在默认情况下会在这些的目录里寻找一个叫<I>default</I>的目录，
+但是你能使用<CODE>-skin newskin</CODE>选项或在config文件中添加<CODE>skin=newskin</CODE>来强制使用<CODE>*/Skin/newskin</CODE>目录下的skin。</P>
 
 <H2><A NAME="subtitles_osd">1.4 字幕和OSD</A></H2>
 
 <P>
-  <B>MPlayer</B>能在播放电影的同时显示字幕。目前支持下列格式：</P>
+  MPlayer能在播放电影的同时显示字幕。目前支持下列格式：</P>
 <UL>
   <LI>VobSub</LI>
   <LI>Microdvd</LI>
@@ -594,20 +684,34 @@ nVidia的显卡使用十分低廉和质量低劣的芯片。此外，<B>XFree86自带的nVidia驱动器对所
   <LI>SSA</LI>
   <LI>MPsub</LI>
   <LI>AQTitle</LI>
+  <LI>JACOsub</LI>
 </UL>
 
-使用不同格式的命令行选项稍有不同：
+<P>MPlaye可以把上面列出的字幕格式转换成下列的格式，使用下列选项：</P>
+
+<UL>
+  <LI>MPsub: <CODE>-dumpmpsub</CODE></LI>
+  <LI>SubRip: <CODE>-dumpsrtsub</CODE></LI>
+  <LI>Microdvd: <CODE>-dumpmicrodvdsub</CODE></LI>
+  <LI>JACOsub: <CODE>-dumpjacosub</CODE></LI>
+  <LI>Sami: <CODE>-dumpsami</CODE></LI>
+</UL>
+
+<P>使用不同格式的命令行选项稍有不同：</P>
 
 <H4>VobSub字幕</H4>
+
 <P>VobSub字幕包括一个大的(几兆).sub文件，和可选的.idx和/或者.ifo文件。<BR>
 用法： 如果你有类似<CODE>sample.sub</CODE>，<CODE>sample.ifo</CODE>，<CODE>sample.idx</CODE>之类的文件
- -- 你必需使用<CODE>-vobsub sample -vobsubid &lt;id&gt;</CODE>的参数(当然必要时加上路径)。
- <CODE>-vobsubid </CODE>选择类似于播放DVD时的<CODE>-sid</CODE>，用它你可以选择不同的字幕轨道(语言)。</P>
+-- 你必需使用<CODE>-vobsub sample -vobsubid &lt;id&gt;</CODE>的参数(当然必要时加上路径)。
+<CODE>-vobsubid </CODE>选择类似于播放DVD时的<CODE>-sid</CODE>，用它你可以选择不同的字幕轨道(语言)。当省略<CODE>-vobsubid</CODE>选项时，
+MPlayer将尝试使用<CODE>-slang</CODE>中指定的语言，如果没有找到将使用.idx文件中的<CODE>langidx</CODE>项指定的语言，如果这些尝试都失败了，
+那就将没有字幕显示。</P>
 
 <H4>其它字幕</H4>
 <P>其它格式由一个单一的包含时间，位置和正文信息的文本文件组成。<BR>
 用法： 如果你有类似<CODE>sample.txt</CODE>之类的文件，你必须使用<CODE>-sub sample.txt</CODE>
-(当然必要时加上路径)。</P>
+(可以加上完整路径)。</P>
 
 <H4>调整字幕的时间和位置</H4>
 
@@ -623,14 +727,17 @@ nVidia的显卡使用十分低廉和质量低劣的芯片。此外，<B>XFree86自带的nVidia驱动器对所
 </DL>
 
 <P>如果你使用MicroDVD字幕文件时遇到电影和字幕之间的延迟不断增加的问题，很有可能你的电影文件和字幕文件的帧速度不同。<BR>
-请注意，MicroDVD字幕格式用绝对帧数来计时，因此<CODE>-subfps</CODE>选项不能用于这种格式。因为<B>MPlayer</B>没法猜测
+请注意，MicroDVD字幕格式用绝对帧数来计时，因此<CODE>-subfps</CODE>选项不能用于这种格式。因为MPlayer没法猜测
 字幕文件的帧速度，你必须手工修改它。在MPlayer的FTP站点的<CODE>contrib</CODE>目录中有一个小的perl脚本可以替你做这种转化。</P>
+
+<P>当你播放一个电影时MPlayer将尝试猜测你想要使用的字幕文件，在大多数情况下，字幕文件和电影文件在同一个目录下，并且有相同的名字，
+你不需要设置有关字幕的选项，只要正常播放电影就可以了，MPlayer会自动播放字幕。
 
 <P>关于DVD字幕，请看<A HREF="cd-dvd.html#dvd">DVD</A>一节。</P>
 
 <H3><A NAME="mpsub">1.4.1 MPlayer自己的字幕格式(MPsub)</A></H3>
 
-<P><B>MPlayer</B>引入一种称为<B>MPsub</B>的新的字幕格式。它是我(Gabucino)设计。基本上，其主要的特性是基于<I>动态</I>时间
+<P>MPlayer引入一种称为<B>MPsub</B>的新的字幕格式。它是我(Gabucino)设计。基本上，其主要的特性是基于<I>动态</I>时间
 (虽然它有基于帧的模式)。例如(引自<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>)：</P>
 
 <P><CODE><I># first number  : wait this much after previous subtitle disappeared<BR>
@@ -655,77 +762,99 @@ nVidia的显卡使用十分低廉和质量低劣的芯片。此外，<B>XFree86自带的nVidia驱动器对所
 
 <H3><A NAME="install_osd">1.4.2 安装OSD和字幕</A></H3>
 
-<P>你需要一个<B>MPlayer</B>字体包来使用OSD和字幕功能。有许多方法获得它：</P>
+<P>你需要一个MPlayer字体包来使用OSD和字幕功能。有许多方法获得它：</P>
 
 <UL>
 
-  <LI>从<B>MPlayer</B>站点下载准备好的字体包。
-注：当前可用的字体限仅限于iso 8859-1/2的支持，但在FTP占的contrib/font部分有其它一些(包括朝鲜语，俄语，8859-8等等)用户制作的字体。
+  <LI>从MPlayer站点下载准备好的字体包。
+注意：当前可用的字体限仅限于iso 8859-1/2的支持，但在FTP占的contrib/font部分有其它一些(包括朝鲜语，俄语，8859-8等等)用户制作的字体。<BR>
 
-字体应该有正确的font.desc文件用来unicode格式的字符位置映射到字幕文件实际使用的内码页。另一种解决方法是把字幕用utf8格式编码
-然后使用-utf8选项或者将字幕文件命名为&lt;video_name&gt;.utf放在与视频文件相同的目录中。将不同的内码转换到utf8编码可以通过使用
+字体应该有正确的font.desc文件用来把unicode中字符位置映射到字幕文件实际使用的编码页。另一种解决方法是把字幕用utf8格式编码
+然后使用-utf8选项或者将字幕文件命名为&lt;video_name&gt;.utf放在与视频文件相同的目录中。将不同的编码页转换到utf8编码可以通过使用
 konwert(Debian)或者iconv(Red Hat)程序完成。<BR>
 一些URL：
     <UL>
       <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> -- ISO字体</LI>
       <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> -- 用户制作的各种各样的字体</LI>
-      <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> -- 朝鲜字体与RAW的插件</LI>
+      <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer/</A> -- 朝鲜字体 &amp; RAW的插件</LI>
     </UL>
   </LI>
-
-  <LI>使用TOOLS/subfont-c下的字体制作工具，它是一个能将TTF/Type1等字体转换到mplayer字体pkg的一个完整的工具。
+  <LI>使用TOOLS/subfont-c下的字体制作工具，它是一个能将TTF/Type1等字体转换成mplayer字体包的一个完整的工具。
 (详细情况请看TOOLS/subfont-c/README)</LI>
-
   <LI>使用TOOLS/subfont-GIMP下的GIMP字体生成插件(注：你同时也必须有HSI RAW插件，见下面的URL)</LI>
+  <LI>使用TrueType(TTF)字体，通过<B>freetype</B>库。必须使用2.0.9或更高的版本！然后你有两种方法：
+    <UL>
+      <LI>使用<CODE>-font /path/to/arial.ttf</CODE>选项来在每次播放时指定一个TrueType字体文件/LI>
+      <LI>创建一个符号链接：<CODE>ln -s /path/to/arial.ttf ~/.mplayer/subfont.ttf</CODE></LI>
+    </UL>
+  </LI>
 </UL>
 
-<P>下载字体之后，把你下载的文件UNZIP到<CODE>~/.mplayer</CODE>或者<CODE>$PREFIX/share/mplayer</CODE>。
+<P>如果你使用非TTF字体，把你下载的文件UNZIP到<CODE>~/.mplayer</CODE>或者<CODE>$PREFIX/share/mplayer</CODE>。
 然后将其中之一改名或者符合链接为<CODE>font</CODE>(例如：<CODE>ln -s ~/.mplayer/arial-24 ~/.mplayer/font</CODE>)。
 你现在应该在电影的左上角看见一个计时器(用"o"键可以关上它)。</P>
 
-<P>OSD有3种状态：(用'o'键切换)</P>
+<P>OSD有4种状态：(用'o'键切换)</P>
 <UL>
-  <LI>计时器+音量条+进度条+字幕(默认)</LI>
-  <LI>音量条+进度条+字幕</LI>
+  <LI>音量条+进度条(默认)
+  <LI>音量条+进度条+计时器+搜索中显示文件位置百分比</LI>
+  <LI>音量条+进度条+计时器+媒体总时间</LI>
   <LI>只有字幕</LI>
 </UL>
 
-<P>你能通过在config文件中设置变量<CODE>osdlevel=</CODE>来改变默认行为。</P>
+<P>你能通过在config文件中设置<CODE>osdlevel=</CODE>变量，或者用命令行选项<CODE>-osdlevel</CODE>来改变默认行为。</P>
+
+<H3><A NAME="menu">1.4.3 OSD菜单</A></H3>
+
+<P>MPlayer有一个完整的用户可定义的OSD菜单接口。</P>
+
+<H4>安装</H4>
+
+<OL>
+  <LI>编译MPlayer时在<CODE>./configure</CODE>时加上<CODE>--enable-new-conf  --enable-menu</CODE>参数</LI>
+  <LI>确保你安装了OSD字体</LI>
+  <LI>把<CODE>etc/menu.conf</CODE>复制到你的<CODE>.mplayer</CODE>目录</LI>
+  <LI>把<CODE>etc/input.conf</CODE>复制到你的<CODE>.mplayer</CODE>目录，或者系统通用的MPlayer配置目录(默认为：<CODE>/usr/local/etc/mplayer</CODE>)</LI>
+  <LI>检查并编辑<CODE>input.conf</CODE>来启用菜单控制键(在那里有描述).</LI>
+  <LI>像下面的例子这样启动MPlayer：<BR>
+    <CODE>$ mplayer -menu file.avi</CODE></LI>
+  <LI>按你所定义的菜单键</LI>
+</OL>
 
 
 <H2><A NAME="rtc">1.5 RTC</A></H2>
 
-在<B>MPlayer</B>中有三种计时方法。
+在MPlayer中有三种计时方法。
 <UL>
-  <LI><B>使用老方法</B>，你不必做任何事情。它使用<CODE>usleep()</CODE>调节A/V同步，达到+/-10ms的准确性。
- 虽然有时同步应该调整的更好。</LI>
-  <LI><B>新的定时器</B>代码使用PC的RTC(实时钟)完成这个任务，因为它有精确到1ms的计时器。当可用时它将自动起动，
-但要求root权限，或<I>setuid root</I>的<B>MPlayer</B>或者一个适当配置的内核。
+  <LI><B>使用老方法</B>，你不必做任何事情。它使用<CODE>usleep()</CODE>调整A/V同步，达到+/-10ms的准确性。
+但有些情况下同步应该调整的更精确。</LI>
+  <LI><B>新的定时器</B>代码使用PC的RTC(Real Time Clock)完成这个任务，因为它有精确到1ms的计时器。当它可用时会自动使用它，
+但需要root权限，或一个<I>setuid root</I>的二进制的MPlayer或者一个适当配置的内核。
       <BR>
-      如果你使用2.4.19pre8或者其后的内核你能通过<CODE>/proc</CODE>文件系统为普通用户调整最大RTC频率。使用下列命令来允许普通用户使用RTC：
+      如果你使用2.4.19pre8或以上的内核你能通过<CODE>/proc</CODE>文件系统来调整普通用户的最大RTC频率。使用下列命令来允许普通用户使用RTC：
       <P>
-        <CODE>echo 1024 > /proc/sys/dev/rtc/max-user-freq</CODE>
+        <CODE>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</CODE>
       </P>
       如果你没有这么新的内核，你也可以修改<CODE>drivers/char/rtc.c</CODE>中的一行并且重新编译你的内核。找到下面这一段
       <PRE>
 	 * We don't really want Joe User enabling more
 	 * than 64Hz of interrupts on a multi-user machine.
 	 */
-	if ((rtc_freq > 64) && (!capable(CAP_SYS_RESOURCE)))
+	if ((rtc_freq &gt; 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
       </PRE>
       把64改成1024。当然你应该确实明白你做了什么。
       <BR>
-      你能在状态栏上看到新的计时器的效果。
+      你能在状态行上看到新的计时器的效果。
       <BR>
       一些使用speedstep功能CPU的笔记本的BIOS的电源管理不能很好的与RTC协同工作。音频和视频可能会不同步。在给你的笔记本加电之前将外部电源接上似乎会有帮助。
-你总能用<CODE>-nortc</CODE>选项关闭RTC支持。一些硬件连接器(在ALi1541主板上使用非DMA的DVD光驱上可以证明)RTC定时器的使用会造成跳跃的playback。
-在这些情况下，推荐使用下列的方法。</LI>
+你总能用<CODE>-nortc</CODE>选项关闭RTC支持。一些硬件连接器(在ALi1541主板上使用非DMA的DVD光驱上)RTC定时器的使用会造成跳跃的播放。
+在这些情况下，推荐使用下面的方法。</LI>
     <LI><B>第三个定时器代码</B>可以用<CODE>-softsleep</CODE>选项打开。它有RTC的效果，但是它不使用RTC。另一方面，它要使用更多的CPU。</LI>
   </UL>
 </LI>
 </UL>
 
-注意：<B>永远不要将setuid root的MPlayer安装在多用户系统上！</B>这显然会让任何人得到root权限。
+<B>注意：</B><B>永远不要将setuid root的MPlayer安装在多用户系统上！</B>这显然会让任何人得到root权限。
 
 
 <H1><A NAME="features">2. 特性</A></H1>
@@ -734,106 +863,130 @@ konwert(Debian)或者iconv(Red Hat)程序完成。<BR>
 <H2><A NAME="formats">2.1</A> <A HREF="formats.html">支持格式</A></H2>
 
 
-<H2><A NAME="codecs">2.2</A> <A HREF="codecs.html">支持的codecs</A></H2>
+<H2><A NAME="codecs">2.2</A> <A HREF="codecs.html">支持的编解码器</A></H2>
 
 
-<H2><A NAME="output">2.3</A > <A HREF="video.html">视频</A>与<A HREF="sound.html">音频</A>输出模式</H2>
+<H2><A NAME="output">2.3</A > <A HREF="video.html">视频</A> &amp; <A HREF="sound.html">音频</A>输出模式</H2>
 
 
-<H2><A NAME="encoding">2.4</A> <A HREF="encoding.html">MEncoder -- 全功能编码器</A></H2>
+<H2><A NAME="tv"><B>2.4 电视输入</B></A></H2>
 
 
-<H2><A NAME="tv"><B>2.5 电视输入</B></A></H2>
+<P>这段将要如何能够<B>使用V4L兼容的电视选台器观看与截取</B>。电视相关的选项和键盘控制的描述请看man page。</P>
 
-
-<P>这段将要如何能够<B>使用V4L兼容的电视选台器观看与截取</B>。</P>
-
-<P><B>这些代码目前没有继续开发！不要指望它不经过修改或实验就能正常工作！</B></P>
-
-
-<H3><A NAME="tv_compilation">2.5.1 编译</A></H3>
+<H3><A NAME="tv_compilation">2.4.1 编译</A></H3>
 
 <OL>
   <LI>首先，你必须重新编译。<CODE>./configure</CODE>将自动检测v4l的内核头文件和<CODE>/dev/video*</CODE>
-  输入的存在。如果他们存在，电视支持将被编译(查看<CODE>./configure</CODE>的输出)。</LI>
-  <LI>用另一个Linux中的电视软件确保你的调音器工作，例如xawtv。</LI>
+  输入的存在。如果他们存在，电视支持将被编译(检查<CODE>./configure</CODE>的输出)。</LI>
+  <LI>确保你的选台器能被别的Linux中的电视软件使用，例如xawtv。</LI>
 </OL>
 
-<BLOCKQUOTE>
-  <B>提示</B><BR>
-  颜色是混乱的吗？那么，你的选台器不能在YV12颜色格式中显示。尝试一下I420(<CODE>-vc rawi420</CODE>)或者YUY2，
-UYVY，RGB32 (<CODE>-vo sdl</CODE>)颜色格式。你可以用<CODE>outfmt=YV12</CODE>选项来指定它，参见下面。</P>
-</BLOCKQUOTE>
+<H3><A NAME="tv_tips">2.4.2 使用技巧</A></H3>
 
+可用选项的完整列表在manual page中。这里只是一些使用技巧：
 
-<H3><A NAME="tv_options">2.5.2 可用的选项</A></H3>
+<UL>
+  <LI>使用<CODE>channels</CODE>选项。例如:<BR>
+    <CODE>-tv on:channels=26-MTV1,23-TV2</CODE><BR>
+    解释：使用这个选项，只有26和23频道可以使用，当频道切换时会有一个显示频道名的精致的OSD文字。频道名中的空格必须用"_"代替。</LI>
+  <LI>选择完整的图像分辨率。输出图像的分辨率必须能够被16整除。</LI>
+  <LI>如果你截取视频的垂直分辨率比完整分辨率的一半还高(PAL制是288，NTSC是240)，确保你打开非交错选项，否则你得到的电影将在
+高速运动的场景中发生扭曲，而且由于交错模式产生大量的细节消耗很多带宽，比特率控制器很可能无法获得指定的比特率。你能使用<CODE>-vop pp=DEINT_TYPE</CODE>打开非交错选项。一般来说<CODE>pp=lb</CODE>工作的不错，但这可能取决于个人的设定。查看manual中的别的
+非交错算法，都尝试一下。</LI>
+  <LI>切割到无用的空间。当你截取视频时，边界区域通常时黑的或者包含一些噪音。这同样不必要的消耗了很多带宽。更精确的说不是那些黑的
+区域本身而是在黑的和更亮的视频图像之间的形状变换消耗带宽，但现在这并不重要。在你开始截取之前，调整<CODE>crop</CODE>选项的参数
+使所有边缘的废物都被切割掉。同时，别忘了保持完整的输出图像的分辨率。</LI>
+  <LI>注意CPU的工作量。它在大多数时间不应该超过90%的界限。如果你有一个大的截取的缓冲区，MEncoder可以忍受几秒钟的过载但不能再多了
+最好把3D的OpenGL屏保和类似的东西关掉。</LI>
+  <LI>不要搞乱系统时钟。MEncoder使用系统时钟进行A/V同步。如果你调试系统时钟(特别是把时间往后调)，MEncoder会产生混乱而你将会丢失帧。
+这将是一个重要的问题如果你挂在一个网络上并且运行着某种时间同步软件比如NTP，如果你希望可靠的截取，那么在你截取的过程中你必须把NTP关掉。</LI>
+  <LI>不要改变<CODE>outfmt</CODE>除非你知道你在干什么或者你的芯片/驱动确实不支持默认值(YV12色彩空间)。在老版本的MPlayer/MEncoder
+中必须指定输出格式。这个问题在现在的发行版中应该被修正而不再需要指定<CODE>outfmt</CODE>，默认值适合大多数应用目的。例如，你用libavcodec把
+截取的内容编码成DivX并指定<CODE>outfmt=RGB24</CODE>希望提高截取图像的质量， 所截取的图像在其后的过程中将重新转换回YV12，所以你获得的唯一
+效果就是消耗了大量的CPU。
+     </LI>
+  <LI>要指定I420色彩空间(<CODE>outfmt=i420</CODE>)，由于与Intel Indeo video编解码器的fourcc冲突，你必须增加一个选项<CODE>-vc rawi420</CODE></LI>
+  <LI>有很多方法可以截取音频。你可以通过用外部电缆线将显卡和声卡的line-in连接起来，用声卡截取音频，或者使用bt878芯片内建的ADC。在后一种情况下，
+你需要装载<B>btaudio</B>驱动。阅读<CODE>linux/Documentation/sound/btaudio</CODE>文件(在内核的源码树中，不是MPlayer的)来了解使用
+这个驱动的方法。</LI>
+  <LI>如果MEncoder无法打开音频设备，确保它们真的可用。可能是声音服务器比如arts(KDE)或者esd(GNOME)的问题。如果你有一块全双工的声卡(现在几乎
+任何像样的声卡都支持它)，而你又在使用KDE，检查声音服务器设置菜单中的"全双工"选项。</LI>
+</UL>
 
-<DL>
-  <DT><CODE>on</CODE></DT>
-  <DD>使用电视输入。</DD>
-
-  <DT><CODE>noaudio</CODE></DT>
-  <DD>没有声音，谢谢。</DD>
-
-  <DT><CODE>driver</CODE></DT>
-  <DD><B>dummy</B> -- 空电视输入:)仅仅用于测试，产生伪输入。<BR>
-    <B>v4l</B> -- 用标准的V4L接口(缺省为<CODE>/dev/video0</CODE>)捕捉图象。</DD>
-  
-  <DT><CODE>device</CODE></DT>
-  <DD>指定缺省的<CODE>/dev/video0</CODE>之外的设备。</DD>
-
-  <DT><CODE>input</CODE></DT>
-  <DD>指定电视选台器输入中你希望截取的输入(比如<B>电视</B>，<B>s-video</B>，<B>composite</B>，...)<BR>
-    在初始化时会显示可用的选项。</DD>
-
-  <DT><CODE>freq</CODE></DT>
-  <DD>把选台器设置到指定的频率(例如<B>511.250</B>)。</DD>
-
-  <DT><CODE>outfmt</CODE></DT>
-  <DD>规定选台器把图象传送到我们时应该使用的输出格式(<B>rgb32</B>，<B>rgb24</B>，<B>yv12</B>，<B>uyvy</B>，
-<B>i420</B>(对于i420你必须使用<CODE>-vc rawi420</CODE>参数，否则会有fourcc冲突))。</DD>
-  
-  <DT><CODE>width</CODE></DT>
-  <DD>输出窗口的宽度，以象素为单位</DD>
-
-  <DT><CODE>height</CODE></DT>
-  <DD>输出窗口的高度，以象素为单位的</DD>
-
-  <DT><CODE>norm</CODE></DT>
-  <DD>可用选项：PAL，SECAM，NTSC</DD>
-
-  <DT><CODE>channel</CODE></DT>
-  <DD>把选台器设置到指定的频道。</DD>
-
-  <DT><CODE>chanlist</CODE></DT>
-  <DD>可用选项：<CODE>us-bcast, us-cable, europe-west, europe-east, 等等</CODE></DD>
-</DL>
-
-<H3><A NAME="tv_keyboard">2.5.3 键盘控制</A></H3>
-
-<TABLE BORDER=0>
-  <TR><TD>&nbsp;&nbsp;</TD><TD>h/k</TD><TD>&nbsp;&nbsp;</TD><TD>选择前一个/下一个频道</TD></TR>
-  <TR><TD></TD><TD>n</TD><TD></TD><TD>切换制式</TD></TR>
-  <TR><TD></TD><TD>b</TD><TD></TD><TD>切换chanlist</TD></TR>
-</TABLE>
-
-<H3><A NAME="tv_examples"><B>2.5.4 例子</B></A></H3>
+<H3><A NAME="tv_examples"><B>2.4.3 示例</B></A></H3>
 
 <P>伪输出，到AAlib：)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
   <BR>
   从标准的V4L输入<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
+  <BR>
 
-<P><B>注：</B><BR>
-  如果你的电视卡有一个有外部音频设备而只出现黑屏，但xawtv或类似的东西对输入的信号却工作正常，那么试试<CODE>-noaudio</CODE>选项。对于上述的例子命令是：<BR>
+  一个更复杂的例子。它使用MEncoder截取完整的PAL图像，切掉边缘的空白，输出非交错图像使用线性混合算法。音频使用LAME编解码器按固定比特率
+64kbps压缩。这个设置适合用来截取电影。<BR> 
+  <CODE> 
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=768:height=576 \<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;-oac  mp3lame -lameopts cbr:br=64 \<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;-vop pp=lb,crop=720:544:24:16 -o output.avi
+  </CODE><BR>
+
+  <BR>
+  这个加上了重新缩放图像到384x288并把视频用高质量模式压缩到350kbps的比特率。vqmax选项放宽量化器从而允许视频压缩器在牺牲质量的前提下达到
+如此低的比特率。这可以用来截取长的电视连续剧，在那种用途下视频质量并不非常重要。<BR>
+  <CODE>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=768:height=576 \<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;-oac mp3lame -lameopts cbr:br=48 \<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;-vop scale=384:288,pp=tn/lb,crop=720:540:24:18 -sws 1 -o output.avi
+  </CODE><BR>
+
+  也可以在<CODE>-tv</CODE>选项中设置一个较小的分辨率而忽略软件缩放选项但是上面的方法使用最大的可用信息而且对噪音更有抵抗力。bt8x8芯片
+由于硬件的限制只能在水平方向上作点平均。</P>
+
+
+<H2><A NAME="edl">2.5 编辑决定列表(EDL)</A></H2>
+
+<P>编辑决定列表(EDL)系统允许你在播放的时候自动在视频的一部分跳过或者静音，基于一个电影相关的EDL配置文件。</P>
+
+<P>这对那些想用"家庭友好"模式观赏电影的人有用。你可以根据你个人的设定从一部电影里切掉任何暴力，亵渎，Jar-Jar Binks ..的内容。
+除了这之外，它还有别的用途，比如自动跳过你正在观看的视频文件中的广告。</P>
+
+<P>EDL文件的格式相当简陋。当EDL达到一定的成熟度的时候，可能会使用一个基于XML的文件格式(保持对原来的EDL格式的向下兼容)。</P>
+  
+<P>在目前的EDL实现中最大的EDL输入限制为1000。如果你碰巧需要更多，修改<CODE>edl.h</CODE>文件中的<CODE>#define MAX_EDL_ENTRIES</CODE>。</P>
+  
+<H3><A NAME="edl_using">2.5.1 使用EDL文件</A></H3>
+
+<P>在你运行MPlayer的时候加上<CODE>-edl &lt;filename&gt;</CODE>参数，filename是你希望应用在视频上的EDL文件的文件名。</P>
+
+<H3><A NAME="edl_making">2.5.2 制作EDL文件</A></H3>
+
+<P>目前EDL文件的格式为：</P>
+
+<CODE>[begin second] [end second] [action]</CODE>
+
+<P>seconds是浮点数而action可以是<CODE>0</CODE>代表跳过或者<CODE>1</CODE>代表静音。例如：</P>
+
+<PRE>
+5.3   7.1    0
+15    16.7   1
+420   422    0
+</PRE>
+
+<P>这将跳过视频的5.3秒到7.1秒的部分，然后在15秒时静音，在16.7秒处取消静音跳过视频的从420秒到422秒的部分。这些动作将在播放计时器达到
+文件中指定的时间时被执行。</P>
+  
+<P>要创建一个用来工作的EDL文件，使用<CODE>-edlout &lt;filename&gt;</CODE>选项，在播放过程中，当你想标记将前两秒跳过时，按<CODE>i</CODE>。
+一个相应的输入将写入文件。你可以回头调整生成的EDL文件。</P>
 
 <P><B><A NAME="usage">3. 用法</A></B></P>
 
 <P><B><A NAME="command_line">3.1 命令行</A></B></P>
 
-<P><B>MPlayer</B>使用一个复杂playtree格式。它包括写在最前面作为全局设置的选项(例如<CODE>mplayer -vfm 5</CODE>)，和写在文件名之后，
-仅仅作用于给定的文件名或URL或whatever的选项(例如<CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>)。<BR>
+<P>MPlayer使用一个复杂playtree格式。它包括写在最前面作为全局设置的选项(例如<CODE>mplayer -vfm 5</CODE>)，和写在文件名之后，
+仅仅作用于给定的文件名或者URL或者随便什么的选项(例如<CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>)。<BR>
 你能使用{和}给文件名与URL分组。它对-loop选项很有用：<CODE>mplayer { 1.avi -loop 2 2.avi } -loop 3</CODE>命令将按以下顺序播放文件：
 1 1 2 1 1 2 1 1 2<BR>
 </P>
@@ -843,11 +996,12 @@ UYVY，RGB32 (<CODE>-vo sdl</CODE>)颜色格式。你可以用<CODE>outfmt=YV12</CODE>选项
   <TR><TD></TD><TD>多个文件</TD><TD></TD><TD><CODE>mplayer [default options] [path/]filename1 [options for filename1] filename2 [options for filename2] ...</CODE></TD></TR>
   <TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [options] -vcd trackno [-cdrom-device /dev/cdrom]</CODE></TD></TR>
   <TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [options] -dvd titleno [-dvd-device /dev/dvd]</CODE></TD></TR>
-  <TR><TD></TD><TD>网址</TD><TD></TD><TD><CODE>mplayer [options] http://site.com/file.asf (也可以使用playlist)</CODE></TD></TR>
+  <TR><TD></TD><TD>WWW</TD><TD></TD><TD><CODE>mplayer [options] http://site.com/file.asf(也可以使用playlist)</CODE></TD></TR>
+  <TR><TD></TD><TD>RTSP</TD><TD></TD><TD><CODE>mplayer [options] rtsp://server.example.com/streamName</CODE></TD></TR>
 </TABLE>
 
 <P>
-  最新版本的MPlayer也可以象Xine一样接受URL风格的VCD和DVD轨道，就做： <CODE>mplayer dvd://1</CODE>或者<CODE>mplayer vcd://1</CODE></P>
+  最新版本的MPlayer也可以象Xine一样接受URL风格的VCD和DVD轨道： <CODE>mplayer dvd://1</CODE>或者<CODE>mplayer vcd://1</CODE></P>
 
 <PRE>
   mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
@@ -859,62 +1013,11 @@ UYVY，RGB32 (<CODE>-vo sdl</CODE>)颜色格式。你可以用<CODE>outfmt=YV12</CODE>选项
 
 <H2><A NAME="control">3.2 控制</A></H2>
 
-<P><B>MPlayer</B>有一个完全可配置的，命令驱动的控制层使你可以键盘，鼠标，游戏杆或遥控器(使用LIRC)控制<B>MPlayer</B>。</P>
+<P>MPlayer有一个完全可配置的，命令驱动的控制层使你可以键盘，鼠标，游戏杆或遥控器(使用LIRC)控制MPlayer。完整的键盘控制列表参见man page。</P>
 
-<H3><A NAME="default_controls">3.2.1 默认控制方法</A></H3>
+<H3><A NAME="controls_configuration">3.2.1 控制键的配置方法</A></H3>
 
-<H4>从终端的键盘控制</H4>
-
-<TABLE BORDER=0>
-  <TR><TD>&nbsp;&nbsp;</TD><TD>&lt;-  or  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>快进/后退10秒</TD></TR>
-  <TR><TD></TD><TD>up or down</TD><TD></TD><TD>快进/后退1分钟</TD></TR>
-  <TR><TD></TD><TD>pgup/pgdown</TD><TD></TD><TD>快进/后退10分钟</TD></TR>
-  <TR><TD></TD><TD>&lt; or &gt;</TD><TD></TD><TD>在播放列表中选下一个/上一个</TD></TR>
-  <TR><TD></TD><TD>p or SPACE</TD><TD></TD><TD>暂停(按任意键)</TD></TR>
-  <TR><TD></TD><TD>q or ESC</TD><TD></TD><TD>停止播放并退出</TD></TR>
-  <TR><TD></TD><TD>+ or -</TD><TD></TD><TD>调整音频延迟+/-0.1秒</TD></TR>
-  <TR><TD></TD><TD>/ or *</TD><TD></TD><TD>减少/增加音量</TD></TR>
-  <TR><TD></TD><TD>f</TD><TD></TD><TD>切换全屏</TD></TR>
-  <TR><TD></TD><TD>o</TD><TD></TD><TD>切换OSD: none/seek/seek+timer</TD></TR>
-  <TR><TD></TD><TD>z or x</TD><TD></TD><TD>调整字幕延迟+/-0.1秒</TD></TR>
-  <TR><TD></TD><TD>r or t</TD><TD></TD><TD>调整字幕位置</TD></TR>
-  <TR><TD></TD><TD>HOME or END</TD><TD></TD><TD>选择上一级列表中的下一个/上一个playtree命令</TD></TR>
-  <TR><TD></TD><TD>INSERT or DELETE</TD><TD></TD><TD>下一个/上一个替代source(只用于asx播放列表)</TD></TR>
-  <TR><TD COLSPAN=4><P><I>(下列的控制键只有当使用<CODE>-vo xv</CODE>时是有效的)</I></P></TD></TR>
-  <TR><TD></TD><TD>1 or 2</TD><TD></TD><TD>调整对比</TD></TR>
-  <TR><TD></TD><TD>3 or 4</TD><TD></TD><TD>调整亮度</TD></TR>
-  <TR><TD></TD><TD>5 or 6</TD><TD></TD><TD>调整hue</TD></TR>
-  <TR><TD></TD><TD>7 or 8</TD><TD></TD><TD>调整饱和</TD></TR>
-</TABLE>
-
-<H4>GUI键盘控制</H4>
-
-<TABLE BORDER=0>
-  <TR><TD>&nbsp;&nbsp;</TD><TD>, and .</TD><TD>&nbsp;&nbsp;</TD><TD>上一个/下一个文件</TD></TR>
-  <TR><TD></TD><TD>gray - or +</TD><TD></TD><TD>减少/增加音量</TD></TR>
-  <TR><TD></TD><TD>enter</TD><TD></TD><TD>开始播放</TD></TR>
-  <TR><TD></TD><TD>space</TD><TD></TD><TD>暂停</TD></TR>
-  <TR><TD></TD><TD>s</TD><TD></TD><TD>停止</TD></TR>
-  <TR><TD></TD><TD>a</TD><TD></TD><TD>about</TD></TR>
-  <TR><TD></TD><TD>l</TD><TD></TD><TD>打开文件</TD></TR>
-  <TR><TD></TD><TD>b</TD><TD></TD><TD>skin browser</TD></TR>
-  <TR><TD></TD><TD>e</TD><TD></TD><TD>equalizer对话框</TD></TR>
-  <TR><TD></TD><TD>p</TD><TD></TD><TD>playlist对话框</TD></TR>
-  <TR><TD></TD><TD>f</TD><TD></TD><TD>切换全屏</TD></TR>
-  <TR><TD></TD><TD>m</TD><TD></TD><TD>切换静音</TD>
-</TABLE>
-
-<H4>TV输入的键盘控制</H4>
-
-<TABLE BORDER=0>
-  <TR><TD>&nbsp;&nbsp;</TD><TD>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD>选择上一个/下一个频道</TD></TR>
-  <TR><TD></TD><TD>n</TD><TD></TD><TD>切换制式</TD></TR>
-  <TR><TD></TD><TD>b</TD><TD></TD><TD>切换频道列表</TD></TR>
-</TABLE>
-
-<H3><A NAME="controls_configuration">3.2.2 配置控制方法</A></H3>
-
-<P><B>MPlayer</B>允许你使用一个简单的config文件把任何键或按钮绑定为任何一个<B>MPlayer</B>控制命令。
+<P>MPlayer允许你使用一个简单的config文件把任何键或按钮绑定为任何一个MPlayer控制命令。
 句法是键名后加命令。缺省config文件是<CODE>$HOME/.mplayer/input.conf</CODE>但是<CODE>-input</CODE> conf
 选项可以重新指定(相对路径是相对于<CODE>$HOME/.mplayer</CODE>的)。
 
@@ -999,7 +1102,7 @@ ENTER pt_step 1 1
   <LI><B>audio_delay</B> (float) val
     <P>音频延迟val秒</P></LI>
   <LI><B>quit</B>
-    <P>退出<B>MPlayer</B></P></LI>
+    <P>退出MPlayer</P></LI>
   <LI><B>pause</B>
     <P>暂停/继续playback</P></LI>
   <LI><B>grap_frames</B>
@@ -1024,8 +1127,12 @@ ENTER pt_step 1 1
     <P>设置/调整视频参数。Val范围从-100到100。</P></LI>
   <LI><B>frame_drop</B> [(int) type=-1]
     <P>切换/设置frame dropping模式。</P></LI>
+   <LI><B>sub_visibility</B>
+    <P>切换字幕是否可见。</P></LI>
   <LI><B>sub_pos</B> (int) val
     <P>调整字幕位置。</P></LI>
+  <LI><B>vobsub_lang</B>
+    <P>改变VobSub字幕的语言。</P></LI>
   <LI><B>vo_fullscreen</B>
     <P>切换到全屏</P></LI>
   <LI><B>tv_step_channel</B> (int) dir
@@ -1042,7 +1149,7 @@ ENTER pt_step 1 1
   <LI><B>gui_playlist</B></LI>
   <LI><B>gui_preferences</B></LI>
   <LI><B>gui_skinbrowser</B>
-    <P>GUI的功能</P></LI>
+    <P>GUI的行为</P></LI>
 </UL>
 
 <H3><A NAME="lirc">3.2.3 用LIRC控制</A></H3>
@@ -1050,10 +1157,10 @@ ENTER pt_step 1 1
 <P>Linux红外遥控 -- 使用一个容易制作的home-brewn红外线接收器，(几乎)任意一个的遥控器然后就可以用它来控制你的Linux box了！
 更多内容见<A HREF="http://www.lirc.org">www.lirc.org</A>。</P>
 
-<P>如果你已安装了lirc-package，configure将自动检测到它。如果一切顺利，<B>MPlayer</B>在启动时将显示
+<P>如果你已安装了lirc-package，configure将自动检测到它。如果一切顺利，MPlayer在启动时将显示
 "Setting up lirc support..."之类的信息。如果发生错误它将会显示。如果它不显示关于LIRC的任何信息则对LIRC的支持没有编译。就是这样:-)</P>
 
-<P><B>MPlayer</B>的程序名是 -- 嗯，让我想想看 -- 'mplayer'。你能使用任何mplayer命令甚至传递超过一种命令只要用\n分开他们。
+<P>MPlayer的程序名是 -- 嗯，让我想想看 -- 'mplayer'。你能使用任何mplayer命令甚至传递超过一种命令只要用\n分开他们。
 不要忘记当有意义的时候(搜索，音量等等)，在.lircrc中开启repeat标记。这是我的.lircrc的摘录：</P>
 
 <PRE>
@@ -1089,23 +1196,23 @@ end
 
 <H3><A NAME="slave">3.2.4 Slave方式</A></H3>
 
-<P>Slave方式把允许你为<B>MPlayer</B>建立简单的frontend。当它开启(用<CODE>-slave</CODE>选项)时<B>MPlayer</B>
+<P>Slave方式把允许你为MPlayer建立简单的frontend。当它开启(用<CODE>-slave</CODE>选项)时MPlayer
 将从stdin读取用new line(\n)分开的命令。</P>
 
 
 <H3><A NAME="streaming">3.3 网络或管道的流媒体</A></H3>
 
-<P><B>MPlayer</B>支持通过HTTP或者MMS协议播放网络上的文件。</P>
+<P>MPlayer支持通过HTTP, MMS或者RTSP/RTP协议播放网络上的文件。</P>
 
-<P>只要直接把URL地址加到命令行中就可以进行播放。<B>MPlayer</B>也支持http_proxy环境变量，
+<P>只要直接把URL地址加到命令行中就可以进行播放。MPlayer也支持http_proxy环境变量，
 并且在可能的情况下使用代理。也可以强行指定使用代理：</P>
 
 <P><CODE>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
-<P><B>MPlayer</B>能从stdin(不称为管道)输入。例如这样能从FTP上播放：</P>
+<P>MPlayer能从stdin(不称为管道)输入。例如这样能从FTP上播放：</P>
 <P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
 
-<P>注：当使用网络播放功能时推荐打开cache功能：</P>
+<P>注意：当使用网络播放功能时推荐打开cache功能：</P>
 
 <P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</CODE></P>
 
@@ -1119,57 +1226,73 @@ end
 <H1><A NAME="ports">6. 移植</A></H1>
 
 
-<H2><A NAME="debian">6.1 Debian安装包的制作</A></H2>
+<H2><A NAME="linux">6.1 Linux</A></H2>
 
-<P>为了制作安装包，下载cvs版本，或者.tgz和并把它解压缩，然后进入程序的目录：</P>
+<P>主要的开发平台时x86上的Linux，尽管MPlayer可以移植到很多别的Linux上。</P>
+
+<H3><A NAME="debian">6.1.1 Debian安装包的制作</A></H3>
+
+<P>为了制作Debian安装包，在MPlayer的代码的目录下面运行下列命令：</P>
 
 <PRE>
-    cd main
     fakeroot debian/rules binary
 </PRE>
 
-<P>(... mplayer检测软硬件, 编译自己然后.. )
-  dpkg-deb: building package 'mplayer' in '../mplayer_0.90-1_i386.deb'.</P>
-
-<P>现在，成为root，然后：</P>
+<P>成为root后你可以像正常情况下一样安装<CODE>.deb</CODE>包：</P>
 
 <PRE>
     dpkg -i ../mplayer_0.90-1_i386.deb as root.
 </PRE>
 
-<P>你将会看到下面这样的信息：</P>
+<P>Christian Marillat一直在制作非官方的Debian MPlayer, MEncoder和字体的安装包，你可以从他的<A
+HREF="http://marillat.free.fr/">主页</A>(apt-get)获得。这些包是相当非官方的，然而，因为Christian是在MPlayer还没有完全GPL化之前<A HREF="users_against_developers.html#binary">二进制发行版</A>还不允许的时候制作并发布了这些安装包。Christian没有理睬要求他停止发布
+他的安装包的要求，这导致了MPlayer开发者的憎恨。二进制发布现在已经不再是问题了，但我们<B>不支持</B>这些安装包！</P>
 
-<PRE>
-	eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.90-1_i386.deb
-	Password:
-	(Reading database ... 26946 files and directories currently installed.)
-	Preparing to replace mplayer 0.50-1 (using ../mplayer_0.90-1_i386.deb)
-	Unpacking replacement mplayer ...
-	Setting up mplayer (0.90-1) ...
-</PRE>
+<H3><A NAME="rpm">6.1.2 RPM安装包的制作</A></H3>
+
+<P>Dominik Mierzejewski制作并维护MPlayer的官方的Red Hat RPM安装包。它们可以从他的<A
+HREF="http://www.piorunek.pl/~dominik/linux/pkgs/mplayer/">主页</A>获得。请阅读那里的安装方法并把问题报告给他，而不是我们。</P> 
+
+<P>也有别的MPlayer的RPM版本(SuSE现在在他们的官方发行版中包括了MPlayer，Mandrake的安装包可以在<A HREF="http://plf.zarb.org/">P.L.F</A>获得)
+但他们都没有官方支持。</P>
 
 
-<H2><A NAME="freebsd">6.2 FreeBSD </A></H2>
+<H3><A NAME="arm">6.1.3 ARM</A></H3>
 
-<P>为编译它你需要GNU make(gmake，/usr/ports/devel/gmake)，本地的BSD make不能正常工作。</P>
+<P>MPlayer可以工作在使用ARM CPU的PDAs例如Sharp Zaurus, Compaq Ipaq上。最简单的获得MPlayer的方法从<A 
+HREF="http://www.openzaurus.org">Openzaurus</A>的安装包服务器下载。如果你像自己编译它，你应该查看OpenZaurus发行版的buildroot下的<A 
+HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</A>
+目录和<A
+HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</A>。
+那里总有最新的用来编译一个代libavcodec的CVS的MPlayer的Makfile和补丁。
+  <BR>如果你需要一个GUI前端，你可以使用xmms-embedded。</P>
 
-<P>为了运行<B>MPlayer</B>你将需要打开"options USER_LDT"重新编译内核(除非你使用-CURRENT，这一项在其中是默认的)。
-如果你有支持SSE的CPU也用"options CPU_ENABLE_SSE"选项来使用它(需要FreeBSD-STABLE，或者使用内核补丁)。</P>
+<H2><A NAME="bsd">6.2 *BSD</A></H2>
 
-<P>如果<B>MPlayer</B>报告"CD-ROM Device '/dev/cdrom' not found!"，那么请做一个符号链接：
-<CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE></P>
+<P>MPlayer可以运行在FreeBSD, OpenBSD, NetBSD, BSD/OS和Darwin上。有ports/pkgsrc/fink等版本的MPlayer可供使用，比直接使用我们的
+源代码要容易。</P>
 
-<P>目前对FreeBSD没有DVD支持。</P>
+<P>编译MPlayer你需要GNU make(gmake - 本地的BSD的make不能正常工作)和一个比较新的binutils。</P>
+
+<P>如果MPlayer报告找不到<CODE>/dev/cdrom</CODE>或者<CODE>/dev/dvd</CODE>，创建一个适当的符号链接：<BR>
+  <CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE>.</P>
+
+<P>要在MPlayer中使用Win32 DLLs你需要使用"<CODE>option USER_LDT</CODE>"重新编译内核(除非你用的是FreeBSD -CURRENT，其中这一项是默认的)。</P>
+
+<H3><A NAME="freebsd">6.2.1 FreeBSD </A></H3>
+
+如果你的CPU有SSE，使用"options CPU_ENABLE_SSE"选项重新编译内核来使用它(需要FreeBSD-STABLE，或者使用内核补丁)。</P>
+
+<H3><A NAME="openbsd">6.2.2 OpenBSD</A></H3>
+
+<P>因为gas的版本不同(relocation vs mmx)的限制，你需要分两步编译： 首先确保non-native的汇编程序当前在PATH中并运行<CODE>gmake -k</CODE>，
+然后在确保使用native版本情况下运行<CODE>gmake</CODE>。</P>
 
 <H2><A NAME="solaris">6.3 Solaris</A></H2>
 
 <P>MPlayer在Solaris 2.6或者更新的系统上应该能够正常运行。</P>
 
-<P>AVI文件的回放在Solaris x86上的效果最好，因为在x86平台上你可以选择使用win32 codecs，或者使用MMX/MMX2/3DNow等指令集
-来播放MP3/DivX/DVD或者其他什么。在Solaris SPARC上，你将发现许多AVI文件的视频和/或者音频playback无法正常播放，
-因为它们的视频与音频codecs使用Win32 DLL的不可用的。然而，<B>DivX/OpenDivX</B>电影应该可以使用libavcodec播放。</P>
-
-<P>在<B>UltraSPARC</B>上，<B>MPlayer</B>利用他们的<B>VIS</B>扩展(相当于MMX)的优势，目前只应用于<I>libmpeg2</I>，
+<P>在<B>UltraSPARC</B>上，MPlayer利用他们的<B>VIS</B>扩展(相当于MMX)的优势，目前只应用于<I>libmpeg2</I>，
 <I>libvo</I>以及<I>libavcodec </I>，但mp3lib没有。你能在400MHz CPU上观看VOB文件。你需要安装<A
 HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>。</P>
 
@@ -1186,7 +1309,7 @@ HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>。</P>
 指令集，使用Sun的汇编程序<CODE>/usr/ccs/bin/as</CODE>不能编译通过。</P>
 
 <P>configure脚本将试图查找你的"gcc"命令使用的汇编程序(如果自动检测失败，使用"--as=/whereever/you/have/installed/gnu-as"
-选项告诉configure脚本你的系统的GNU的"as"在哪里)。</P>
+选项告诉configure脚本你的系统中GNU的"as"在哪里)。</P>
 
 <P>在Solaris x86系统上使用没有GNU汇编程序的GCC时configure的出错信息为：</P>
 
@@ -1212,9 +1335,6 @@ HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>。</P>
    ... more "Illegal mnemonic" and "Syntax error" errors ...
 </PRE>
 
-<P>关于DVD支持你必须安装打过补丁的libcss。补丁在：
-<A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A>。</P>
-
 <P>因为Solaris8 x86的两个bug，不能可靠地播放容量>4GB的DVD：</P>
 
 <UL>
@@ -1228,6 +1348,10 @@ HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>。</P>
     ISO9660), hsfs currently does not support partitions/disks >4GB,
     all data is accessed modulo 4GB
     (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)
+	<P>
+      The hsfs problem can be fixed by installing patch 109764-04 (sparc) /
+      109765-04 (x86).
+    </P>
   </LI>
 </UL>
 
@@ -1237,103 +1361,147 @@ HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>。</P>
 <P>mediaLib的VIS加速功能用于mpeg2视频解码和视频输出驱动的颜色转换。</P>
 
 
-<H2><A NAME="strongarm">6.4 StrongARM</A></H2>
-
-<P>据报告<B>MPlayer</B>可以在StrongARM上编译。使用下列命令：</P>
-
-<PRE>
-  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
-	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking
-</PRE>
-
-
 <H2><A NAME="sgi">6.5 Silicon Graphics / IRIX</A></H2>
 
-<P>据称可以工作正常。你可能必须使用<I>SGI</I>ao驱动。谁有较确切的信息？</P>
+<P>你可以安装GNU的install程序，并且(如果你没有把它放在你的系统路径中)指定它的位置：</P>
+
+<PRE>
+  ./configure --install-path=PATH
+</PRE>
+
+<P>或者你可以使用默认的IRIX 6.5提供的install，那你就必须手动修改Makefile文件，把下面两行：</P>
+
+<PRE>
+  $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
+
+  $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
+</PRE>
+
+<P>改成：</P>
+
+<PRE>
+  $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
+
+  $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
+</PRE>
+
+<P>然后运行(在MPlayer的源代码目录中)：</P>
+
+<PRE>
+  cp DOCS/mplayer.1 . ; cp etc/codecs.conf .
+</PRE>
+
+<P>然后继续编译和安装。</P>
 
 
 <H2><A NAME="qnx">6.6 QNX</A></H2>
 
 <P>能工作。你需要下载SDL for QNX并安装它。然后使用<CODE>-vo sdl:photon</CODE>和<CODE>-ao sdl:nto</CODE>
-选项运行<B>MPlayer</B>，速度应该很快。</P>
+选项运行MPlayer，速度应该很快。</P>
 
 <P><CODE>-vo x11</CODE>输出将比Linux更加缓慢，因为QNX只有一个十分缓慢的的X<I>仿真</I>。使用SDL。</P>
 
 
-<H2><A NAME="openbsd">6.7 OpenBSD</A></H2>
+<H2><A NAME="cygwin"></A>6.7 Cygwin</H2>
 
-<P>为编译它你需要GNU make(gmake，/usr/port/devel/gmake)，native的BSD make不能正常工作，还要一个最近的binutils(包括objcopy)。</P>
+<P>Cygwin的移植仍然很不成熟。目前还不支持Win32 DLLs和OpenGL。SDL据说会扭曲声音和图像或者在某些系统上导致崩溃。<A
+HREF="tech/patches.txt">补丁</A>总是欢迎的。最好的效果是使用本地的DirectX视频输出驱动(<CODE>-vo directx</CODE>)
+和本地的Windows waveout音频驱动(<CODE>-ao win32</CODE>)。你应该查阅<A 
+HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</A>邮件列表来获得帮助和最新信息。</P>
 
-<P>因为gas的版本不同(relocation vs mmx)的限制，你需要分两步编译： 首先确保non-native的汇编程序当前在PATH中并运行<CODE>gmake -k</CODE>，
-然后在确保使用native版本情况下运行<CODE>gmake</CODE>。</P>
+<P>你必须到MPlayer的目录下，拷贝或者symlink<CODE>etc/cygwin-inttypes.h</CODE>到<CODE>/usr/include/inttypes.h</CODE>来使MPlayer顺利编译。</P>
 
-<P>要想<B>MPlayer</B>使用Win32 DLL你要用"<CODE>option USER_LDT</CODE>"重新编译内核。</P>
+<P>为了获得本地的DirectX视频，下载<A
+HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7头文件</A>，把它们解压到<CODE>/usr/include/</CODE>
+或者<CODE>/usr/local/include/</CODE>下然后重新编译。如果图像发生扭曲，用<CODE>-vo directx:noaccel</CODE>
+把硬件加速关掉试试。</P>
 
-<P>如果<B>MPlayer</B>报告找不到'/dev/cdrom'或'/dev/dvd'，请做一个符号链接，例如<CODE>ln -s /dev/rcd0c /dev/dvd</CODE></P>
+<P>让SDL在Cygwin下工作的方法和文件可以在<A HREF="http://www.libsdl.org/extras/win32/cygwin/">libsdl的站点</A>找到。</P>
+<P>你可以通过播放Windows显示的VCD上的<CODE>.DAT</CODE>或者<CODE>.MPG</CODE>文件来播放VCD，这样使他工作(改成你
+的CD-ROM驱动器的盘符):</P>
 
-<P>我们中不那么hardcore的黑客可以想要使用移植版本(/usr/port/x11/mplayer)。</P>
+<P><CODE>mplayer d:/mpegav/avseq01.dat</CODE></P>
 
-<H2><A NAME="cygwin"></A>6.8 Cygwin<H2>
+<P><CODE>mplayer /cydrive/d/MPEG2/AVSEQ01.MPG</CODE></P>
 
-<P>你必须到<B>MPlayer</B>的目录下，拷贝或者symlink<CODE>etc/cygwin-inttypes.h</CODE>到<CODE>/usr/include/inttypes.h</CODE>来使
-<B>MPlayer</B>顺利编译。否则，它将报告找不到<CODE>intypes.h</CODE>。</P>
+<P>DVD同样可以，用下面的命令DVD设备设置成你的CD-ROM驱动器：</P>
+
+<P><CODE>mplayer -dvd &lt;title&gt; -dvd-device d:</CODE></P>
+
+<P>QuickTime DLL据说也能工作。用<CODE>--enable-qtx-codecs</CODE>编译并把编解码器放到默认的Windows DLL位
+置，<CODE>C:\WINNT\system32</CODE>或者<CODE>C:\Windows\system</CODE>取决于你的Windows的版本。</P>
+
+<H1><A NAME="encoding">7.</A> <A HREF="encoding.html">用MEncoder编码</A></H1>
 
 
 <H1><A NAME="mailing_lists">附录A -- 邮件列表</A></H1>
 
-<P>有一些关于<B>MPlayer</B>的公开的邮件列表。用户能在下列的地址完成订阅：</P>
+<P>MPlayer有一些公开的邮件列表。除非特别说明否则这些列表的语言是<B>英语</B>。请不要用别的语言或者HTML邮件格式发送
+消息！一条消息的大小限制是80k。如果你有更大的东西把它放在可以下载的地方。点击链接就可以订阅。在邮件列表上使用与
+与usenet上相同的书写和引用规则。请遵守他们，它使阅读你的邮件的人的生活轻松的多。如果你不知道请阅读<A
+HREF="http://learn.to/edit_messages">编辑消息HOWTO</A>或者(如果你很着急)<A
+HREF="http://www.xs4all.nl/~hanb/documents/quotingguide.html">引用HOWTO</A>。</P>
 
 <UL>
-  <LI>MPlayer开发者列表：
-    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A><BR>
+  <LI>MPlayer通告列表：<A
+    HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-announce">http://mplayerhq.hu/mailman/listinfo/mplayer-announce</A><BR>
+    MPlayer发布通告的邮件列表。如果你想获得新特性的通告在此订阅。</LI>
+  <LI>MPlayer开发者列表：<A
+    HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A><BR>
 <P>这个列表是关于mplayer开发的！ 谈论接口与API的变化，新的库，代码优化，configure修改，另外补丁也应发送到这里。不要在这里发送bug报告，
-用户问题，特性要求，吵架！这张列表应该保持低交通流量。</P></LI>
-  <LI>MPlayer用户列表：
-    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A>
+用户问题，特性要求，吵架！这张列表应该保持低流量。</P></LI>
+  <LI>MPlayer用户列表：<A
+    HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
     <UL>
-      <LI>在这里发送bug报告，(在阅读了<A HREF="#known_bugs">已知bug</A>一节和<A HREF="bugreports.html">报告bug部分</A>之后)</LI>
+      <LI>在这里发送bug报告，(在阅读了<A HREF="#known_bugs">已知Bugs</A>一节和<A HREF="bugreports.html">报告bug部分</A>之后)</LI>
       <LI>在这里发送特性要求(在阅读整个文件之后)</LI>
       <LI>在这里发送用户问题(在阅读整个文件之后)</LI>
     </UL>
   </LI>
-  <LI>MPlayer匈牙利用户列表：
-    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok">http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok</A>
+  <LI>MPlayer匈牙利用户列表：<A
+    HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok">http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok</A><BR>
     <UL>
       <LI>匈牙利语的列表</LI>
-      <LI>主题？让我们看看...迄今为止主要是吵架和RTFM问题：(</LI>
+      <LI>主题？让我们看看...迄今为止主要是吵架和RTFM问题:(</LI>
     </UL>
   </LI>
-  <LI>MPlayer &amp; Matrox G200/G400/G450/G550用户：<BR>
-    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox">http://mplayerhq.hu/mailman/listinfo/mplayer-matrox</A>
+  <LI>MPlayer &amp; Matrox G200/G400/G450/G550用户：<A
+    HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox">http://mplayerhq.hu/mailman/listinfo/mplayer-matrox</A><BR>
     在这里发送Matrox相关的问题
     <UL>
-      <LI>关于mga-vid的事情</LI>
+      <LI>关于mga_vid的事情</LI>
       <LI>Matrox的官方的beta版驱动(对于X 4.x.x )</LI>
-      <LI>还有关于matroxfb-TVout的东东。</LI>
+      <LI>还有关于matroxfb电视输出的东东。</LI>
     </UL>
   </LI>
-  <LI>MPlayer &amp; DVB卡用户：
-    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A><BR>
+  <LI>MPlayer &amp; DVB卡用户：<A
+    HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A><BR>
     与被称为DVB的硬件译码器卡有关的事情。(不是DXR3！)</P>
   </LI>
-  <LI>MPlayer CVS-log：
-    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A><BR>
+  <LI>MPlayer CVS-log：<A
+    HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A><BR>
     <P>在这里只能询问CVS的变化。(如果你不理解为什么要做这样的改动或者你有更好的修正或者你注意到在已经提交的补丁中可能存在的bug或问题)确定你要找的开发者阅读这张列表！</P>
   </LI>
-  <LI>MPlayer Cygwin-porting list:
-    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin">http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin</A><BR>
+  <LI>MPlayer Cygwin移植邮件列表：<A
+    HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin">http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin</A><BR>
     讨论MPlayer的Cygwin移植的邮件列表。
   </LI>
+  <LI>MPlayer OS/2移植邮件列表：<A
+    HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-os2">http://mplayerhq.hu/mailman/listinfo/mplayer-os2</A><BR>
+    讨论MPlayer的OS/2移植的邮件列表。
+  </LI>
+  <LI>MPlayer Weekly News的编辑和翻译的列表：<A
+    HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn">http://mplayerhq.hu/mailman/listinfo/mplayer-mwn</A><BR>
+    讨论Weekly News发布的邮件列表。.
+  </LI>
 </UL>
-
-<P><B>注意：</B>在列表上的语言必须是<B>英语</B>，除非另有明确说明。请不要使用其它语言发送信息！</P>
 
 <P><B>注意：</B><A HREF="http://www.mplayerhq.hu/cgi-bin/htsearch">http://www.mplayerhq.hu/cgi-bin/htsearch</A>有可供检索的邮件列表文档。
 
 
 <H1><A NAME="bug_reports">附录B</A> -- <A HREF="bugreports.html">如何报告bug</A></H1>
 
-<H1><A NAME="known_bugs">附录C -- 已知bug</A></H1>
+<H1><A NAME="known_bugs">附录C -- 已知Bugs</A></H1>
 
 <P>特殊的系统或CPU相关的bug或问题：</P>
 <UL>
@@ -1416,18 +1584,20 @@ HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>。</P>
 只有少数驱动支持缩放，对x11或dga不要指望这个。</P>
 
 <P>OSD与字幕闪烁：<BR>
--- x11驱动器： 抱歉，它现在不能被修正<BR>
--- xv驱动器： 使用-double选项</P>
+  -- x11驱动器： 抱歉，它现在不能被修正<BR>
+  -- xv驱动器： 使用-double选项</P>
 
 <P>使用mga_vid时的绿色图象(-vo mga/-vo xmga)：<BR>
--- mga-vid没有正确检测你的显卡的显存大小，使用mga_ram_size选项重新载入</P>
+  -- mga-vid没有正确检测你的显卡的显存大小，使用mga_ram_size选项重新载入</P>
 
 
 <H1><A NAME="skin">附录D</A> - <A HREF="skin-zh.html">MPlayer skin的格式</A></H1>
 
 
 
-<H1><A NAME="flame_wars">附录E</A> - <A HREF="users_against_developers.html">开发者的痛楚</A></H1>
+<H1><A NAME="flame_wars">附录E</A> - <A HREF="users_against_developers.html">开发者的眼泪</A></H1>
+
+<H1><A NAME="patches">附录F</A> - <A HREF="tech/patches.txt">如何发送补丁</A></H1>
 
 </BODY>
 </HTML>

@@ -2,9 +2,9 @@
 <HTML>
 
 <HEAD>
-  <TITLE>格式 -- MPlayer -- Linux的电影播放器</TITLE>
+  <TITLE>格式 -- MPlayer -- Linux下的电影播放器</TITLE>
   <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
-  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gb_2312-80">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=gbk">
 </HEAD>
 
 <BODY>
@@ -21,8 +21,8 @@
 
 <P>在理论上，你能把OpenDivX视频和MP3音频放到<B>MPG</B>格式的文件中。然而，大多数播放器将无法播放它，
 由于他们期待的是MPEG1视频和MP2音频(不同于<B>AVI</B>格式，<B>MPG</B>没有必要的区域来描述其视频和音频流)。
-或者你可以把MPEG1视频放到AVI文件中。<A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A>和
-<A HREF="encoding.html">MEncoder</A>就能建立这样的文件。</P>
+或者你可以把MPEG1视频放到AVI文件中。<A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A>和<A
+HREF="encoding.html">MEncoder</A>就能制作这样的文件。</P>
 
 
 
@@ -36,7 +36,7 @@
 <UL>
   <LI>MPG：这是MPEG文件格式的最<B>基本</B>形式。它包含MPEG1视频和MP2(MPEG-1 layer 2)或者极少数是MP1音频。</LI>
   <LI>DAT：这是与MPG完全相同的格式，只是换了扩展名。它在<B>Video CD</B>上使用。因为制作VCD的方法和Linux的设计，
-DAT文件不能直接播放也不能作为普通的文件从VCD上复制下来。你必须使用<CODE>-vcd</CODE>选项来播放VCD。</LI>
+DAT文件不能直接播放也不能作为普通的文件从VCD上复制下来。你必须使用<CODE>-vcd</CODE>选项来播放Video CD。</LI>
   <LI>VOB：这是用在<B>DVD</B>上的MPEG文件格式。它与MPG一样，加上能包含字幕或者非MPEG(AC3)音频的能力。
 它包含编码的MPEG2视频和通常是AC3的音频，但是，MP2和非压缩的LPCM DTS音频也被允许使用。<BR>
     <B>参见<A HREF="cd-dvd.html#dvd">DVD</A>一节！</B></LI>
@@ -53,84 +53,83 @@ DAT文件不能直接播放也不能作为普通的文件从VCD上复制下来。你必须使用<CODE>-vcd</CO
 
 <P>由微软设计，<B>AVI(Audio Video Interleaved)</B>是一种普遍的多用途格式，目前被大多数DivX和DivX4视频所使用。
 它有许多已知的弊端和缺点(比如在流播放时)。它支持1个视频流和0到99个音频流。文件大小限制是2GB，但是现在存在一种扩展格式
-称为<B>OpenDMS</B>允许更大的文件。微软目前强烈反对使用它并鼓励使用ASF与WMV。不过没有什么人在乎。</P>
+称为<B>OpenDMS</B>允许更大的文件。微软目前强烈反对使用它并鼓励使用ASF与WMV。不是所有人都在乎这一点。</P>
 
-<P>有一个hack允许AVI文件包含Ogg Vorbis音频流的，但这使他们与标准的AVI不兼容。<B>MPlayer</B>支持播放这种文件。
-搜索功能也被植入，但由于编码糟糕的文件的混乱的文件头使这项功能被严重限制了。遗憾地是，目前唯一能建立这种文件的编码器，
+<P>有一个hack允许AVI文件包含Ogg Vorbis音频流的，但这使他们与标准的AVI不兼容。MPlayer支持播放这种文件。
+搜索功能也被植入，但由于编码低劣的文件的混乱的文件头使这项功能被严重限制了。遗憾地是，目前唯一能建立这种文件的编码器，
 NanDub，就存在这个问题。</P>
 
 <P><B>注意：</B>DV照相机建立的未经加工的DV流被DV grabbing utilities转换成两种不同类型的AVI文件。所以AVI将或者包含
-<B>MPlayer</B>可以播放的分离的音频与视频流，或者是未经加工的DV流，它的支持正在开发中的。</P>
+MPlayer可以播放的分离的音频与视频流，或者是未经加工的DV流，它的支持正在开发中的。</P>
 
 <P>有两种类型的AVI文件：</P>
 <UL>
   <LI><B>交错的：</B>音频和视频内容是交错的。这是标准使用方法。被推荐且多半都使用。一些工具以错误的同步方式建立交错的AVI。
-<B>MPlayer</B>认为这些文件是交错的，这会导致A/V不同步，在搜索时最为明显。这些文件应该被当作非交错的文件来播放
+MPlayer认为这些文件是交错的，这会导致A/V不同步，在搜索时最为明显。这些文件应该被当作非交错的文件来播放
 (使用<CODE>-ni</CODE>选项)。</LI>
   <LI><B>非交错的：</B>首先是整个视频流，然后是整个音频流。因此这需要大量的搜索，使用网络或者CD-ROM播放变的困难。</LI>
 </UL>
 
-<P><B>MPlayer</B>支持两种AVI文件的计时方式：</P>
+<P>MPlayer支持两种AVI文件的计时方式：</P>
 <UL>
-  <LI><B>基于bps</B>： 它基于视频与音频河流的比特率/采样率。这种方法被大多数播放器使用，包括
-<A HREF="http://avifile.sourceforge.net">avifile</A>和Windows媒体播放器。这种方法对于文件头损坏的文件，
-以及文件创建时使用VBR音频却没有使用VBR兼容的编码器的情况将导致A/V不同步(多半在搜索时)。</LI>
-  <LI><B>基于交错方式</B>： 它不使用文件头的比特率，而是使用交错的音频和视频块的相关位置，使VBR音频的编码糟糕的文件可以播放。</LI>
+  <LI><B>基于bps</B>： 它基于视频与音频流的比特率/采样率。这种方法被大多数播放器使用，包括<A
+HREF="http://avifile.sourceforge.net">avifile</A>和Windows的媒体播放器。这种方法在遇到文件头损坏的文件，
+以及文件创建时使用VBR音频却没有使用VBR兼容的编码器的情况时将导致A/V不同步(多半在搜索时)。</LI>
+  <LI><B>基于交错方式</B>： 它不使用文件头的比特率，而是使用交错的音频和视频块的相关位置，使VBR音频的编码低劣的文件可以播放。</LI>
 </UL>
 
 <P>任何视频和音频的编码格式都允许使用，但注意大多数播放器对VBR音频的支持都不好。文件格式允许使用VBR音频，但是大多数播放器期待CBR音频，
-这样它们无法播放VBR。VBR是常见而且和微软AVI说明仅描述CBR音频。大多数AVI编码器/多路复用器在使用VBR音频时会创建坏的文件。目前已知的
+这样它们无法播放VBR。VBR是不常见的而且微软的AVI规格仅描述了CBR音频。大多数AVI编码器/多路编排器在使用VBR音频时会创建坏的文件。目前已知的
 只有两个例外：NanDub和<A HREF="encoding.html">MEncoder</A>。</P>
 
-
-<H4><A NAME="asf">2.1.1.3 ASF与WMV文件</A></H4>
+<H4><A NAME="asf">2.1.1.3 ASF/WMV文件</A></H4>
 
 <P>ASF(active streaming format)格式来自微软。他们开发了ASF的两个变种，v1.0和v2.0. v1.0被他们的媒体工具(Windows媒体播放器和
-Windows媒体编码器)使用并且是保密的. v2.0被公开并申请专利:)。当然，他们是不同的，完全没有任何兼容性(那只是另一个法律游戏)。
-<B>MPlayer</B>只支持v1.0格式因为没有任何人见过v2.0格式的文件:)。注意，ASF文件现在常以.WMA或者.WMV的扩展名出现。</P>
+Windows媒体编码器)使用并且是保密的. v2.0被公开并申请专利:)。当然，他们是不同的，完全没有任何兼容性(这只是又一个法律游戏)。
+MPlayer>只支持v1.0格式因为没有任何人见过v2.0格式的文件:)。注意，ASF文件现在常以.WMA或者.WMV的扩展名出现。</P>
 
 
-<H4><A NAME="mov">2.1.1.4 QuickTime与MOV文件</A></H4>
+<H4><A NAME="mov">2.1.1.4 QuickTime/MOV文件</A></H4>
 
 <P>这些格式是由苹果设计的，能包含任何编码格式，CBR或者VBR。他们通常使用.QT或者.MOV的扩展名。自从MPEG4组织选择QuickTime作为
 MPEG4的推荐文件格式后，他们的MOV文件以.MPG或.MP4的扩展名(有趣的是这些文件的视频和音频流是真正的MPG和AAC文件。你甚至能用
 <CODE>-dumpvideo</CODE>和<CODE>-dumpaudio</CODE>选项提取他们。)。</P>
 
-<P><B>注意：</B>大多数新的QuickTime文件使用<B>Sorenson</B>视频和QDesign Music音频。参见我们的<A HREF="codecs.html#sorenson">
-Sorenson</A>编码格式一节。QDesign Music音频目前不能播放。</P>
+<P><B>注意：</B>大多数新的QuickTime文件使用<B>Sorenson</B>的视频和QDesign Music的音频。参见我们的<A
+HREF="codecs.html#sorenson">Sorenson</A>编解码器部分。</P>
 
 
 <H4><A NAME="vivo">2.1.1.5 VIVO文件</A></H4>
 
-<P><B>MPlayer</B>乐于解码VIVO文件格式。这个格式的最大缺陷在于它没有索引块，也没有一个固定的包大小或者同步字节和大多数文件
+<P>MPlayer乐于解码VIVO文件格式。这个格式的最大缺陷在于它没有索引块，也没有一个固定的包大小或者同步字节和大多数文件
 甚至缺乏关键帧，所以别想着搜索了！</P>
 
 <P>VIVO/1.0文件的视频编码格式是标准的<B>h.263</B>。VIVO/2.0文件的视频编码格式是一个经过修改的，非标准的<B>h.263v2</B>。
 音频也使一样，它可以是<B>g.723</B>(标准的)，或<B>Vivo Siren</B>。</P>
 
-<P>关于安装指导参见<A HREF="codecs.html#vivo_video">VIVO视频编码格式</A>和<A HREF="codecs.html#vivo_audio">
-VIVO音频编码格式</A>两节。</P>
+<P>关于安装指导参见<A HREF="codecs.html#vivo_video">VIVO视频编码格式</A>和<A
+HREF="codecs.html#vivo_audio">VIVO音频编码格式</A>部分。</P>
 
 
 <H4><A NAME="fli">2.1.1.6 FLI文件</A></H4>
 
-<P><B>FLI</B>被Autodesk Animator使用的一种很老的文件格式，但是它是网上小动画普遍使用的一种文件格式。<B>MPlayer</B>
+<P><B>FLI</B>被Autodesk Animator使用的一种很老的文件格式，但是它是网上小动画普遍使用的一种文件格式。MPlayer
 能读取并解码FLI电影寻求在它们中搜索(当使用<CODE>-loop</CODE>选项循环播放时有用)。FLI文件没有关键帧，
 因此图画在搜索后短时间内将是混乱的。</P>
 
 
 <H4><A NAME="real">2.1.1.7 RealMedia(RM)文件</A></H4>
 
-<P>是的，<B>MPlayer</B>能读取(demux)RealMedia(.rm)文件。搜索功能能工作，但是你必须明确地指定<CODE>-forceidx</CODE>选项
-(这种格式支持关键帧)。这里是被支持的<A HREF="codecs.html#realvideo">RealVideo</A>和<A HREF="codecs.html#realaudio">
-RealAudio</A>编码格式的列表。</P>
+<P>是的，MPlayer能读取(demux)RealMedia(.rm)文件。搜索功能能工作，但是你必须明确地指定<CODE>-forceidx</CODE>选项
+(这种格式支持关键帧)。这里是被支持的<A HREF="codecs.html#realvideo">RealVideo</A>和<A
+HREF="codecs.html#realaudio">RealAudio</A>编解码器的列表。</P>
 
 
 <H4><A NAME="nuppelvideo">2.1.1.8 NuppelVideo文件</A></H4>
 
-<P><A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A>是电视截取工具(据我所知:)。<B>MPlayer</B>
+<P><A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A>是电视截取工具(据我所知:)。MPlayer
 能读取它的.NUV文件(只能是NuppelVideo 5.0)。那些文件能包含未压缩的YV12，压缩的YV12+RTJpeg，压缩的YV12+lzo和压缩的YV12 RTJpeg+lzo帧。
-<B>MPlayer</B>能解码所有这些格式(并且用<B>MEncoder</B>把它们<B>编码</B>成DivX/etc!)。搜索功能能工作。</P>
+MPlayer能解码所有这些格式(并且用MPlayer把它们<B>编码</B>成DivX/etc!)。搜索功能能工作。</P>
 
 
 <H4><A NAME="yuv4mpeg">2.1.1.9 yuv4mpeg文件</A></H4>
@@ -141,7 +140,7 @@ RealAudio</A>编码格式的列表。</P>
 
 <H4><A NAME="film">2.1.1.10 FILM文件</A></H4>
 
-<P>这种格式用于老的世嘉土星CD-ROM游戏。</P>
+<P>这种格式用于老的世嘉土星CD-Rom游戏。</P>
 
 
 <H4><A NAME="roq">2.1.1.11 RoQ文件</A></H4>
@@ -149,29 +148,42 @@ RealAudio</A>编码格式的列表。</P>
 <P>RoQ文件是用于ID的一些游戏例如Quake III和Return to Castle Wolfenstein的多媒体文件。</P>
 
 
-<H4><A NAME="ogg">2.1.1.12 OGG文件</A></H4>
+<H4><A NAME="ogg">2.1.1.12 OGG/OGM文件</A></H4>
 
 <P>这是<A HREF="http://www.xiph.org">Xiphophorus</A>的一个新的文件格式。它能包含任何视频或者音频编码格式，
-CBR或者VBR。要想播放它，你需要在编译<B>MPlayer</B>之前安装<CODE>libogg</CODE>和<CODE>libvorbis</CODE>。</P>
+CBR或者VBR。要想播放它，你需要在编译MPlayer之前安装<CODE>libogg</CODE>和<CODE>libvorbis</CODE>。</P>
+
+<H4><A NAME="sdp">2.1.1.13 SDP文件</A></H4>
+
+<P><A HREF="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</A>是一个IETF标准格式，用来描述视频和/或者音频的RTP流。
+(需要"<A HREF="http://www.live.com/mplayer/">LIVE.COM Streaming Media</A>"库)。</P>
+
+
+<H4><A NAME="pva">2.1.1.14 PVA文件</A></H4>
+
+<P>PVA是DVB电视附带的Windows下面的软件(比如：MultiDec，WinTV)使用的类似MPEG的格式。</P>
+
+<P>PVA规格的描述可以在下面地址下载<A
+HREF="http://www.technotrend.de/download/av_format_v1.pdf">http://www.technotrend.de/download/av_format_v1.pdf</A></P>
 
 
 <H3><A NAME="audio_formats">2.1.2 音频格式</A></H3>
 
-<P><B>MPlayer</B>是一个<B>电影</B>播放器而不是<B>媒体</B>播放器，虽然它能播放一些音频文件(他们将在下面的
-部分中列出)。不推荐这种使用<B>MPlayer</B>的方法，你最好使用<A HREF="http://www.xmms.org">xmms</A>。</P>
+<P>MPlayer是一个<B>电影</B>播放器而不是<B>媒体</B>播放器，虽然它能播放一些音频文件(他们将在下面的
+部分中列出)。不推荐这种使用MPlayer的方法，你最好使用<A HREF="http://www.xmms.org">xmms</A>。</P>
 
 
 <H4><A NAME="mp3">2.1.2.1 MP3文件</A></H4>
 
-<P>你可能在播放有些MP3文件时遇到问题，<B>MPlayer</B>将它们错误的检测为MPEG文件并且不能正常播放或者完全不能播放。
-如果要修正这个问题就必须放弃对有些被破坏的MPEG文件的支持，所以在可以预见的将来仍然会是这样。manpage中描述的
+<P>你可能在播放有些MP3文件时遇到问题，MPlayer将它们错误的检测为MPEG文件并且不能正常播放或者完全不能播放。
+如果要修正这个问题就必须放弃对有些被破坏的MPEG文件的支持，所以在可以预见的将来仍然会是这样。man page中描述的
 <CODE>-demuxer</CODE>标签在这些情况下可能会帮助你。</P>
 
 
 <H4><A NAME="wav">2.1.2.2 WAV文件</A></H4>
 
 
-<H4><A NAME="ogg_vorbis">2.1.2.3 OGG文件(Vorbis)</A></H4>
+<H4><A NAME="ogg_vorbis">2.1.2.3 OGG/OGM文件(Vorbis)</A></H4>
 
 <P>要求正确的安装<CODE>libogg</CODE>和<CODE>libvorbis</CODE>。</P>
 
@@ -180,6 +192,23 @@ CBR或者VBR。要想播放它，你需要在编译<B>MPlayer</B>之前安装<CODE>libogg</CODE>和<
 
 
 <H4><A NAME="mp4">2.1.2.5 MP4文件</A></H4>
+
+<H4><A NAME="cdda">2.1.2.6 CD音频</A></H4>
+
+<P>MPlayer可以使用<B>cdparanoia</B>(的库)播放CDDA(音频CD)。在这部分没有包含cdparanoia的特性的列表。</P>
+
+<P>看man page了解如何通过<CODE>-cdda</CODE>选项向cdparanoia传递参数。</P>
+
+
+<H4><A NAME="xmms">2.1.2.7 XMMS</A></H4>
+
+<P>MPlayer可以使用XMMS的输入插件来播放各种格式。现在有用于SNES game tunes, SID tunes(from Commodore 64), 很多Amiga
+格式, .xm, .it, VQF, musepack, Bonk, shorten和大量别的插件。你可以在<A
+HREF="http://www.xmms.org/plugins_input.html">XMMS的输入插件页</A>找到它们。</P>
+
+<P>要使用这个特性你必须安装了XMMS并在编译MPlayer的时候使用<CODE>./configure --enable-xmms</CODE>。
+如果这样不起作用，你可能需要用<CODE>--with-xmmsplugindir</CODE>和<CODE>--withxmmslibdir</CODE>
+开关显式指定XMMS的插件和库的路径。</P>
 
 </BODY>
 </HTML>
