@@ -6,6 +6,7 @@
 
 extern GtkWidget * gtkMessageBoxText;
 extern GtkWidget * MessageBox;
+extern int         gtkVMessageBox;
 
 extern GtkWidget * create_MessageBox( int type );
 extern void ShowMessageBox( char * msg );

@@ -1,7 +1,7 @@
 
 // sub window
 
-int             mplSubRender = 1;
+int             mplSubRender = 0;
 int             SubVisible = 0;
 
 void mplSubDraw( wsParamDisplay )
@@ -16,7 +16,7 @@ void mplSubDraw( wsParamDisplay )
 
  if ( guiIntfStruct.Playing ) mplSubRender=0;
 
- if ( mplSubRender )
+ if ( mplSubRender && appMPlayer.subWindow.State == wsWindowExpose )
   {
    if ( appMPlayer.sub.Bitmap.Image ) wsPutImage( &appMPlayer.subWindow );
   }

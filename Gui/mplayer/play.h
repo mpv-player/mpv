@@ -7,7 +7,6 @@
 #include "./mplayer.h"
 
 extern void mplEnd( void );
-extern void mplStop( void );
 extern void mplFullScreen( void );
 extern void mplPlay( void );
 extern void mplPause( void );
@@ -29,6 +28,6 @@ extern void mplPlayerThread( void );
 extern void ChangeSkin( char * name );
 extern void EventHandling( void );
 
-extern void mplSetFileName( char * fname );
+extern void mplSetFileName( char * dir,char * name );
 
 #endif

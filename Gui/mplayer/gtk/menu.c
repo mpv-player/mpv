@@ -321,7 +321,7 @@ GtkWidget * create_PopUpMenu( void )
 #ifdef USE_DVDREAD
    DVDSubMenu=AddSubMenu( Menu,MSGTR_MENU_DVD );
     AddMenuItem( DVDSubMenu,MSGTR_MENU_PlayDisc"    ", evPlayDVD );
-    AddMenuItem( DVDSubMenu,MSGTR_MENU_ShowDVDMenu, evNone );
+//    AddMenuItem( DVDSubMenu,MSGTR_MENU_ShowDVDMenu, evNone );
     AddSeparator( DVDSubMenu );
     DVDTitleMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_Titles );
      if ( guiIntfStruct.DVD.titles )

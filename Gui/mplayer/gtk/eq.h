@@ -6,9 +6,6 @@
 
 extern GtkWidget * Equalizer;
 
-extern int gtkEnableAudioEqualizer;
-extern int gtkEnableVideoEqualizer;
-
 extern GtkWidget * create_Equalizer( void );
 extern void ShowEqualizer( void );
 

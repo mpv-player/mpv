@@ -30,7 +30,6 @@
 #include "../../config.h"
 #include "../../help_mp.h"
 
-GtkWidget     * Options;
 GtkWidget     * PopUpMenu = NULL;
 
 GtkWidget     * WarningPixmap;
@@ -148,6 +147,9 @@ void gtkMessageBox( int type,gchar * str )
          break;
   }
  gtk_widget_show( MessageBox );
+ gtkSetLayer( MessageBox );
+ if ( type == GTK_MB_FATAL )
+  while ( gtkVMessageBox ) gtk_main_iteration_do( 0 );
 }
 
 void gtkSetLayer( GtkWidget * wdg )
@@ -187,13 +189,9 @@ void gtkShow( int type,char * param )
 	  }
         break;
    case evPreferences:
-        gtkMessageBox( GTK_MB_WARNING,"Sorry, this feature is under development ..." );
-//	Options=create_Options();
-//        gtk_widget_show( Options );
-//	gtkSetLayer( Options );
+        ShowPreferences();
         break;
    case evPlayList:
-//	gtkMessageBox( GTK_MB_WARNING,"Sorry, this feature is under development ..." );
         ShowPlayList();
 	gtkSetLayer( PlayList );
         break;
@@ -226,7 +224,7 @@ void gtkShow( int type,char * param )
 	gtkVisible++;
         break;
    case evHidePopUpMenu:
-        if ( PopUpMenu ) { gtk_widget_hide_on_delete( PopUpMenu ); gtkVisible--; PopUpMenu=NULL; }
+        if ( PopUpMenu ) { gtk_widget_hide_on_delete( PopUpMenu ); /*gtkVisible--;*/ PopUpMenu=NULL; }
         break;
    case evPlayNetwork:
 	ShowURLDialogBox();

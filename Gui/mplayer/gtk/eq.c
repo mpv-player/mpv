@@ -10,6 +10,7 @@
 #include <gtk/gtk.h>
 
 #include "../../events.h"
+#include "../../cfg.h"
 #include "../../help_mp.h"
 #include "../../../config.h"
 #include "../../../help_mp.h"
@@ -20,6 +21,8 @@
 #include "../mplayer.h"
 
 #include "eq.h"
+
+#define eqRange 5
 
 GtkWidget * Equalizer;
 
@@ -36,9 +39,6 @@ static int gtkVEqualizer = 0;
 static int gtkVEquConfig = 0;
 
 // ---
-
-int gtkEnableAudioEqualizer = 1;
-int gtkEnableVideoEqualizer = 1;
 
 char * gtkEquChannel1 = NULL;
 char * gtkEquChannel2 = NULL;
@@ -116,16 +116,16 @@ void ShowEqualizer( void )
  VHueadj->value=(float)vo_gamma_hue;
  VSaturationadj->value=(float)vo_gamma_saturation;
 
- if ( !guiIntfStruct.Playing && gtkEnableVideoEqualizer )
+ if ( !guiIntfStruct.Playing || !gtkEnableVideoEqualizer )
   {
    gtk_widget_set_sensitive( VContrast,FALSE );
    gtk_widget_set_sensitive( VBrightness,FALSE );
    gtk_widget_set_sensitive( VHue,FALSE );
    gtk_widget_set_sensitive( VSaturation,FALSE );
   }
- Channel=0;
+ Channel=-1;
  eqSetBands( 0 );
- if ( !guiIntfStruct.Playing && gtkEnableAudioEqualizer )
+ if ( !guiIntfStruct.Playing || !gtkEnableAudioEqualizer )
   {
    gtk_widget_set_sensitive( ChannelsList,FALSE );
    gtk_widget_set_sensitive( A3125,FALSE );
@@ -205,7 +205,7 @@ static void eqButtonReleased( GtkButton * button,gpointer user_data )
    case 1: 
 	if ( gtk_notebook_get_current_page( GTK_NOTEBOOK( Notebook ) ) == 0 )
 	 { 
-	  if ( !guiIntfStruct.Playing && !gtkEnableAudioEqualizer ) break;
+	  if ( !guiIntfStruct.Playing || !gtkEnableAudioEqualizer ) break;
 	  gtkSet( gtkSetEqualizer,0,NULL ); 
 	  eqSetBands( Channel ); 
 	 }
@@ -381,7 +381,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_set_row_spacings( GTK_TABLE( table1 ),4 );
   gtk_table_set_col_spacings( GTK_TABLE( table1 ),9 );
 
-  A3125adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
+  A3125adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A3125=gtk_vscale_new( A3125adj );
   gtk_widget_set_name( A3125,"A3125" );
   gtk_widget_ref( A3125 );
@@ -390,7 +390,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A3125,0,1,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A3125 ),FALSE );
 
-  A6250adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
+  A6250adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A6250=gtk_vscale_new( A6250adj );
   gtk_widget_set_name( A6250,"A6250" );
   gtk_widget_ref( A6250 );
@@ -399,7 +399,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A6250,1,2,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A6250 ),FALSE );
 
-  A125adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
+  A125adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A125=gtk_vscale_new( A125adj );
   gtk_widget_set_name( A125,"A125" );
   gtk_widget_ref( A125 );
@@ -408,7 +408,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A125,2,3,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A125 ),FALSE );
 
-  A250adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
+  A250adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A250=gtk_vscale_new( A250adj );
   gtk_widget_set_name( A250,"A250" );
   gtk_widget_ref( A250 );
@@ -417,7 +417,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A250,3,4,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A250 ),FALSE );
 
-  A500adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
+  A500adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A500=gtk_vscale_new( A500adj );
   gtk_widget_set_name( A500,"A500" );
   gtk_widget_ref( A500 );
@@ -426,7 +426,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A500,4,5,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A500 ),FALSE );
 
-  A1000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
+  A1000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A1000=gtk_vscale_new( A1000adj );
   gtk_widget_set_name( A1000,"A1000" );
   gtk_widget_ref( A1000 );
@@ -435,7 +435,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A1000,5,6,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A1000 ),FALSE );
 
-  A2000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
+  A2000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A2000=gtk_vscale_new( A2000adj );
   gtk_widget_set_name( A2000,"A2000" );
   gtk_widget_ref( A2000 );
@@ -444,7 +444,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A2000,6,7,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A2000 ),FALSE );
 
-  A4000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
+  A4000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A4000=gtk_vscale_new( A4000adj );
   gtk_widget_set_name( A4000,"A4000" );
   gtk_widget_ref( A4000 );
@@ -453,7 +453,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A4000,7,8,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A4000 ),FALSE );
 
-  A8000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
+  A8000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A8000=gtk_vscale_new( A8000adj );
   gtk_widget_set_name( A8000,"A8000" );
   gtk_widget_ref( A8000 );
@@ -462,7 +462,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),A8000,8,9,0,1,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( GTK_EXPAND | GTK_FILL ),0,0 );
   gtk_scale_set_draw_value( GTK_SCALE( A8000 ),FALSE );
 
-  A16000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-3,3,0.5,0,0 ) );
+  A16000adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A16000=gtk_vscale_new( A16000adj );
   gtk_widget_set_name( A16000,"A16000" );
   gtk_widget_ref( A16000 );

@@ -91,7 +91,7 @@ void mplEnd( void )
 
  if ( !mplGotoTheNext ) { mplGotoTheNext=1; return; }
 
- if ( (next=gtkSet( gtkGetNextPlItem,0,NULL )) && plLastPlayed != next )
+ if ( guiIntfStruct.Playing && (next=gtkSet( gtkGetNextPlItem,0,NULL )) && plLastPlayed != next )
   {
    plLastPlayed=next;
    guiSetDF( guiIntfStruct.Filename,next->path,next->name );
@@ -99,26 +99,24 @@ void mplEnd( void )
    guiIntfStruct.FilenameChanged=1;
    if ( guiIntfStruct.AudioFile ) free( guiIntfStruct.AudioFile );
    guiIntfStruct.AudioFile=NULL;
-  } else mplStop();
-}
+  } 
+  else
+    {
+     guiIntfStruct.TimeSec=0;
+     guiIntfStruct.Position=0;
+     guiIntfStruct.AudioType=0;
 
-void mplStop( void )
-{
- guiIntfStruct.Playing=0;
- guiIntfStruct.TimeSec=0;
- guiIntfStruct.Position=0;
- guiIntfStruct.AudioType=0;
-
- if ( !appMPlayer.subWindow.isFullScreen )
-  {
-   wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
-   wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
-  }
- guiGetEvent( guiCEvent,guiSetStop );
- mplSubRender=1;
- wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
- wsClearWindow( appMPlayer.subWindow );
- wsPostRedisplay( &appMPlayer.subWindow );
+     if ( !appMPlayer.subWindow.isFullScreen )
+      {
+       wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
+       wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
+      }
+     guiGetEvent( guiCEvent,guiSetStop );
+     mplSubRender=1;
+     wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+     wsClearWindow( appMPlayer.subWindow );
+     wsPostRedisplay( &appMPlayer.subWindow );
+    }
 }
 
 void mplPlay( void )
@@ -127,20 +125,22 @@ void mplPlay( void )
       ( guiIntfStruct.Filename[0] == 0 )||
       ( guiIntfStruct.Playing == 1 ) ) return;
  if ( guiIntfStruct.Playing == 2 ) { mplPause(); return; }
- guiGetEvent( guiCEvent,guiSetPlay );
+ guiGetEvent( guiCEvent,(void *)guiSetPlay );
  mplSubRender=0;
  wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
  wsClearWindow( appMPlayer.subWindow );
-// wsPostRedisplay( &appMPlayer.subWindow );
 }
 
 void mplPause( void )
 {
- mp_cmd_t * cmd = (mp_cmd_t *)calloc( 1,sizeof( *cmd ) );
- cmd->id=MP_CMD_PAUSE;
- cmd->name=strdup("pause");
- mp_input_queue_cmd(cmd);
- mplSubRender=0;
+ if ( !guiIntfStruct.Playing ) return;
+ if ( guiIntfStruct.Playing == 1 )
+  {
+   mp_cmd_t * cmd = (mp_cmd_t *)calloc( 1,sizeof( *cmd ) );
+   cmd->id=MP_CMD_PAUSE;
+   cmd->name=strdup("pause");
+   mp_input_queue_cmd(cmd);
+  } else guiIntfStruct.Playing=1;
 }
 
 void mplState( void )
@@ -239,11 +239,14 @@ void ChangeSkin( char * name )
  btnModify( evFullScreen,!appMPlayer.subWindow.isFullScreen );
 }
 
-void mplSetFileName( char * fname )
+void mplSetFileName( char * dir,char * name )
 {
- if ( !fname ) return;
- if ( guiIntfStruct.Filename ) free( guiIntfStruct.Filename );
- guiIntfStruct.Filename=strdup( fname );
+ if ( !name || !dir ) return;
+ guiSetDF( guiIntfStruct.Filename,dir,name );
+ guiIntfStruct.StreamType=STREAMTYPE_FILE;
+ guiIntfStruct.FilenameChanged=1;
+ gfree( (void **)&guiIntfStruct.AudioFile );
+ gfree( (void **)&guiIntfStruct.Subtitlename );
 }
 
 void mplPrev( void )
@@ -270,12 +273,12 @@ void mplPrev( void )
 	break;
 #endif
    default: 
-	if ( (prev=gtkSet( gtkGetPrevPlItem,0,NULL)) ) { mplGotoTheNext=0; break; }
-//	 {
-//	  guiSetDF( guiIntfStruct.Filename,prev->path,prev->name );
-//	  guiIntfStruct.FilenameChanged=1;
-//	  break;
-//	 }
+	if ( (prev=gtkSet( gtkGetPrevPlItem,0,NULL)) )
+	 {
+	  mplSetFileName( prev->path,prev->name );
+	  mplGotoTheNext=0;
+	  break;
+	 }
 	return;
   }
  if ( stop ) mplEventHandling( evStop,0 );
@@ -306,12 +309,12 @@ void mplNext( void )
 	break;
 #endif
    default:
-	if ( (next=gtkSet( gtkGetNextPlItem,0,NULL)) ) { mplGotoTheNext=0; break; }
-//	 {
-//	  guiSetDF( guiIntfStruct.Filename,next->path,next->name );
-//	  guiIntfStruct.FilenameChanged=1;
-//	  break;
-//	 }
+	if ( (next=gtkSet( gtkGetNextPlItem,0,NULL)) ) 
+	 { 
+	  mplSetFileName( next->path,next->name );
+	  mplGotoTheNext=0;
+	  break;
+	 }
 	return;
   }
  if ( stop ) mplEventHandling( evStop,0 );

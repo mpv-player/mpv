@@ -224,7 +224,7 @@ extern void wsMoveTopWindow( Display * wsDisplay,Window win );
 extern void wsSetBackground( wsTWindow * win,int color );
 extern void wsSetForegroundRGB( wsTWindow * win,int r,int g,int b );
 extern void wsSetBackgroundRGB( wsTWindow * win,int r,int g,int b );
-#define wsClearWindow( win ); XClearWindow( wsDisplay,win.WindowID );
+#define wsClearWindow( win ) XClearWindow( wsDisplay,win.WindowID )
 extern void wsSetTitle( wsTWindow * win,char * name );
 extern void wsVisibleWindow( wsTWindow * win,int show );
 extern void wsWindowDecoration( wsTWindow * win,long d );

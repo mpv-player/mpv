@@ -46,7 +46,7 @@ int    gtkSubUnicode = 0; //
 int    gtkSubDumpMPSub = 0;
 int    gtkSubDumpSrt = 0;
 float  gtkSubDelay = 0.0f;
-float  gtkSubFPS = -1.0f;
+float  gtkSubFPS = 0.0f;
 int    gtkSubPos = 100; //
 float  gtkSubFFactor = 0.75;
 
@@ -72,7 +72,7 @@ static config_t gui_opts[] =
  { "v_flip",&gtkVFlip,CONF_TYPE_FLAG,0,0,1,NULL },
  { "v_ni",&gtkVNIAVI,CONF_TYPE_FLAG,0,0,1,NULL },
  { "v_idx",&gtkVIndex,CONF_TYPE_FLAG,0,0,1,NULL },
- { "v_vfm",&gtkVVFM,CONF_TYPE_INT,CONF_RANGE,0,10,NULL },
+ { "v_vfm",&gtkVVFM,CONF_TYPE_INT,CONF_RANGE,-1,10,NULL },
  { "vf_pp",&gtkVPP,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vf_autoq",&gtkVAutoq,CONF_TYPE_INT,CONF_RANGE,0,100,NULL },
 
@@ -169,7 +169,12 @@ int cfg_write( void )
        case CONF_TYPE_INT:
        case CONF_TYPE_FLAG:   fprintf( f,"%s = %d\n",gui_opts[i].name,*( (int *)gui_opts[i].p ) );   				      break;
        case CONF_TYPE_FLOAT:  fprintf( f,"%s = %f\n",gui_opts[i].name,*( (float *)gui_opts[i].p ) ); 				      break;
-       case CONF_TYPE_STRING: if ( *( (char **)gui_opts[i].p ) ) fprintf( f,"%s = \"%s\"\n",gui_opts[i].name,*( (char **)gui_opts[i].p ) ); break;
+       case CONF_TYPE_STRING: 
+            {
+	     char * tmp = *( (char **)gui_opts[i].p );
+	     if ( tmp && tmp[0] ) fprintf( f,"%s = \"%s\"\n",gui_opts[i].name,tmp );
+	     break;
+	    }
       }
     }
    fclose( f );

@@ -273,7 +273,7 @@ GtkWidget * create_SkinBrowser( void )
  gtk_widget_add_accelerator( Cancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
  gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"destroy",GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),0 );
- gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"show",GTK_SIGNAL_FUNC( on_SkinBrowser_show ),1 );
+ gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"show",GTK_SIGNAL_FUNC( on_SkinBrowser_show ),(void *)1 );
  gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"hide",GTK_SIGNAL_FUNC( on_SkinBrowser_show ),0 );
  
  gtk_signal_connect( GTK_OBJECT( SkinList ),"select_row",GTK_SIGNAL_FUNC( on_SkinList_select_row ),NULL );

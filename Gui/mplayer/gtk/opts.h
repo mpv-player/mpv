@@ -1,9 +1,17 @@
-#ifndef _GUI_OPTS_H
-#define _GUI_OPTS_H
+
+#ifndef __PREFERENCES_H
+#define __PREFERENCES_H
 
 #include <gtk/gtk.h>
 
-void HideOptions( void );
-GtkWidget * create_Options( void );
+extern GtkWidget * OSSConfig;
+extern GtkWidget * Preferences;
+extern int    	   gtkVPreferences;
+extern GtkWidget * prEFontName;
+
+extern GtkWidget * create_Preferences( void );
+extern GtkWidget * create_OSSConfig( void );
+
+extern void ShowPreferences( void );
 
 #endif

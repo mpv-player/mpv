@@ -88,6 +88,8 @@ typedef struct
 
    char * Subtitlename;
    int    SubtitleChanged;
+   
+   char * Fontname;
 
    char * Othername;
    int    OtherChanged;
@@ -110,10 +112,9 @@ extern guiInterface_t guiIntfStruct;
 #define guiReDrawSubWindow  7
 #define guiSetShVideo       8
 #define guiSetStream        9
-#define guiClearStruct      10
-#define guiReDraw	    11
-#define guiSetVolume        12
-#define guiSetDefaults	    13
+#define guiReDraw	    10
+#define guiSetVolume        11
+#define guiSetDefaults	    12
 
 #define guiSetStop  0
 #define guiSetPlay  1
@@ -121,6 +122,7 @@ extern guiInterface_t guiIntfStruct;
 
 #define guiDVD      	1
 #define guiVCD		2
+#define guiFilenames	4
 #define guiALL		0xffffffff
 
 extern char *get_path(char *filename); 
@@ -129,6 +131,7 @@ extern void guiInit( void );
 extern void guiDone( void );
 extern void guiGetEvent( int type,char * arg );
 extern void guiEventHandling( void );
+extern void guiLoadFont( void );
 
 typedef struct _plItem 
 {
@@ -142,28 +145,40 @@ extern plItem * plList;
 extern plItem * plCurrent;
 extern plItem * plLastPlayed;
 
-#define gtkSetContrast   0
-#define gtkSetBrightness 1
-#define gtkSetHue	 2
-#define gtkSetSaturation 3
-#define gtkSetEqualizer  4
-#define gtkAddPlItem     5
-#define gtkGetNextPlItem 6
-#define gtkGetPrevPlItem 7
-#define gtkGetCurrPlItem 8
-#define gtkDelPl         9
+#define gtkSetContrast     0
+#define gtkSetBrightness   1
+#define gtkSetHue	   2
+#define gtkSetSaturation   3
+#define gtkSetEqualizer    4
+#define gtkAddPlItem       5
+#define gtkGetNextPlItem   6
+#define gtkGetPrevPlItem   7
+#define gtkGetCurrPlItem   8
+#define gtkDelPl           9
+#define gtkSetExtraStereo 10
+#define gtkSetAudioDelay  11
+#define gtkSetPanscan     12
+#define gtkSetSubDelay    13
+#define gtkSetSubFPS      14
+#define gtkSetSubPos      15
+#define gtkSetSubAuto     16
+#define gtkSetFontFactor  17
+#define gtkSetAutoq       18
+#define gtkClearStruct    19
 
 extern float gtkEquChannels[6][10];
 
 extern void * gtkSet( int cmd,float param, void * vparam );
 
-#define gstrdup( s,ss ) { s=malloc( strlen( ss ) + 3 ); strcpy( s,ss ); }
+extern char * gstrdup( char * str );
+extern int    gstrcmp( char * a,char * b );
+extern void   gfree( void ** p );
 
-#define guiSetFilename( s,n ) { if ( s ) free( s ); s=strdup( n ); }
+#define guiSetFilename( s,n ) { gfree( (void **)&s ); s=gstrdup( n ); }
 
 #define guiSetDF( s,d,n )                       \
  {                                              \
-  if ( s ) free( s ); s=NULL;                   \
+  gfree( (void **)&s );                          \
   s=malloc( strlen( d ) + strlen( n ) + 5 );    \
   sprintf( s,"%s/%s",d,n );                     \
  }

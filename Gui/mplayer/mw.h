@@ -170,7 +170,7 @@ void mplMainDraw( wsParamDisplay )
  btnModify( evSetMoviePosition,guiIntfStruct.Position );
  btnModify( evSetVolume,guiIntfStruct.Volume );
 
- if ( mplMainRender )
+ if ( mplMainRender && appMPlayer.mainWindow.State == wsWindowExpose )
   {
    memcpy( mplDrawBuffer,appMPlayer.main.Bitmap.Image,appMPlayer.main.Bitmap.ImageSize );
    for( i=0;i < appMPlayer.NumberOfItems + 1;i++ )
@@ -234,6 +234,8 @@ void mplEventHandling( int msg,float param )
         break;
 
    case evPlayNetwork:
+        if ( guiIntfStruct.Subtitlename ) { free( guiIntfStruct.Subtitlename ); guiIntfStruct.Subtitlename=NULL; }
+	if ( guiIntfStruct.AudioFile ) { free( guiIntfStruct.AudioFile ); guiIntfStruct.AudioFile=NULL; }
 	guiIntfStruct.StreamType=STREAMTYPE_STREAM;
         goto play;
    case evSetURL:
@@ -244,6 +246,7 @@ void mplEventHandling( int msg,float param )
    case evSetVCDTrack:
         guiIntfStruct.Track=(int)param;
    case evPlayVCD:
+ 	gtkSet( gtkClearStruct,guiALL,NULL );
 	guiIntfStruct.StreamType=STREAMTYPE_VCD;
 	goto play;
 #endif
@@ -253,6 +256,7 @@ void mplEventHandling( int msg,float param )
         guiIntfStruct.DVD.current_chapter=1;
         guiIntfStruct.DVD.current_angle=1;
 play_dvd_2:
+ 	gtkSet( gtkClearStruct,guiALL - guiDVD,NULL );
         guiIntfStruct.StreamType=STREAMTYPE_DVD;
 #endif
    case evPlay:
@@ -260,7 +264,7 @@ play_dvd_2:
 play:
 
         mplMainAutoPlay=0;
-        if ( ( msg == evPlaySwitchToPause )&&( guiIntfStruct.Playing == 1 ) ) goto NoPause;
+        if ( ( msg == evPlaySwitchToPause )&&( guiIntfStruct.Playing == 2 ) ) goto NoPause;
 
 	vcd_track=0;
 	dvd_title=0;
@@ -272,19 +276,19 @@ play:
 	  guiSetDF( guiIntfStruct.Filename,next->path,next->name );
 	  guiIntfStruct.StreamType=STREAMTYPE_FILE;
 	  guiIntfStruct.FilenameChanged=1;
-	  if ( guiIntfStruct.AudioFile ) free( guiIntfStruct.AudioFile );
-	  guiIntfStruct.AudioFile=NULL;
+	  gfree( (void **)&guiIntfStruct.AudioFile );
+	  gfree( (void **)&guiIntfStruct.Subtitlename );
 	 }
 
         switch ( guiIntfStruct.StreamType )
          {
 	  case STREAMTYPE_STREAM:
 	  case STREAMTYPE_FILE:
-	       guiGetEvent( guiClearStruct,(char *)guiALL );
+	       gtkSet( gtkClearStruct,guiALL - guiFilenames,NULL );
 	       break;
 #ifdef HAVE_VCD
           case STREAMTYPE_VCD:
-	       guiGetEvent( guiClearStruct,(char *)(guiALL - guiVCD ) );
+	       gtkSet( gtkClearStruct,guiALL - guiVCD - guiFilenames,NULL );
 	       if ( !cdrom_device )
 	        {
 		 cdrom_device=DEFAULT_CDROM_DEVICE;
@@ -304,11 +308,11 @@ play:
 #endif
 #ifdef USE_DVDREAD
           case STREAMTYPE_DVD:
-	       guiGetEvent( guiClearStruct,(char *)(guiALL - guiDVD ) );
+	       gtkSet( gtkClearStruct,guiALL - guiDVD - guiFilenames,NULL );
 	       if ( !dvd_device ) 
 	        {
 	         dvd_device=DEFAULT_DVD_DEVICE;
-                 guiSetFilename( guiIntfStruct.Filename,dvd_device );
+                 guiSetFilename( guiIntfStruct.Filename,dvd_device )
 		} 
 	       if ( guiIntfStruct.Playing != 2 )
 	        {
@@ -321,7 +325,6 @@ play:
 #endif
          }
         mplPlay();
-        mplMainRender=1;
         break;
 #ifdef USE_DVDREAD
    case evSetDVDSubtitle:
@@ -348,37 +351,21 @@ play:
    case evPauseSwitchToPlay:
 NoPause:
         mplPause();
-        mplMainRender=1;
         break;
 
-   case evStop:
-        mplStop();
-        mplMainRender=1;
-        break;
+   case evStop: guiIntfStruct.Playing=guiSetStop; break;
 
    case evLoadPlay:
         mplMainAutoPlay=1;
 //	guiIntfStruct.StreamType=STREAMTYPE_FILE;
    case evLoad:
-        mplMainRender=1;
 	gtkSet( gtkDelPl,0,NULL );
         gtkShow( evLoad,NULL );
         break;
-   case evLoadSubtitle:
-        mplMainRender=1;
-        gtkShow( evLoadSubtitle,NULL );
-        break;
-   case evLoadAudioFile:
-	gtkShow( evLoadAudioFile,NULL );
-	break;
-   case evPrev:
-	mplPrev();
-        mplMainRender=1;
-        break;
-   case evNext:
-	mplNext();
-        mplMainRender=1;
-        break;
+   case evLoadSubtitle:  gtkShow( evLoadSubtitle,NULL );  break;
+   case evLoadAudioFile: gtkShow( evLoadAudioFile,NULL ); break;
+   case evPrev: mplPrev(); break;
+   case evNext: mplNext(); break;
 
    case evPlayList:    gtkShow( evPlayList,NULL );        break;
    case evSkinBrowser: gtkShow( evSkinBrowser,skinName ); break;
@@ -461,7 +448,6 @@ set_volume:
            }
          }
         mplFullScreen();
-        mplMainRender=1;
         break;
 
 // --- timer events
@@ -516,7 +502,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
           sx=X; sy=Y; boxMoved=1; itemtype=itPLMButton; // if move the main window
           SelectedItem=currentselected;
           if ( SelectedItem == -1 ) break; // yeees, i'm move the fucking window
-          boxMoved=0; mplMainRender=1; // No, not move the window, i'm pressed one button
+          boxMoved=0; //mplMainRender=1; // No, not move the window, i'm pressed one button
           item=&appMPlayer.Items[SelectedItem];
           itemtype=item->type;
           item->pressed=btnPressed;
@@ -547,7 +533,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
                  break;
            }
           mplEventHandling( item->msg,value );
-          mplMainRender=1;
+//          mplMainRender=1;
           itemtype=0;
           break;
 
@@ -565,7 +551,6 @@ rollerhandled:
             item->value+=value;
             btnModify( item->msg,item->value );
             mplEventHandling( item->msg,item->value );
-            mplMainRender=1;
            }
           break;
 

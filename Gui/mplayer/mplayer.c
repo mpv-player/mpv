@@ -7,6 +7,7 @@
 #include "./mplayer.h"
 #include "../events.h"
 #include "../app.h"
+#include "../cfg.h"
 #include "../interface.h"
 #include "../skin/skin.h"
 #include "../skin/font.h"
@@ -98,9 +99,6 @@ void mplInit( void * disp )
  wsClearWindow( appMPlayer.subWindow );
  if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
 
- wsPostRedisplay( &appMPlayer.mainWindow );
- wsPostRedisplay( &appMPlayer.subWindow );
-
  btnModify( evSetVolume,guiIntfStruct.Volume );
  btnModify( evSetBalance,guiIntfStruct.Balance );
  btnModify( evSetMoviePosition,guiIntfStruct.Position );
@@ -108,17 +106,25 @@ void mplInit( void * disp )
  wsSetIcon( wsDisplay,appMPlayer.mainWindow.WindowID,guiIcon,guiIconMask );
  wsSetIcon( wsDisplay,appMPlayer.subWindow.WindowID,guiIcon,guiIconMask );
  
- if ( fullscreen )
-  {
-   btnModify( evFullScreen,btnPressed );
-   mplFullScreen();
-  }
-
  guiIntfStruct.Playing=0;
 
  if ( !appMPlayer.mainDecoration ) wsWindowDecoration( &appMPlayer.mainWindow,0 );
  
  wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
  wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
+
+ {
+  XEvent xev;
+  do { XNextEvent( wsDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != appMPlayer.subWindow.WindowID );
+  appMPlayer.subWindow.Mapped=wsMapped;
+ }
+
+ if ( fullscreen )
+  {
+   mplFullScreen();
+   btnModify( evFullScreen,btnPressed );
+  }
+
+ mplSubRender=1;
 }
 

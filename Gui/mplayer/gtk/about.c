@@ -231,7 +231,7 @@ GtkWidget * create_About( void )
   gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Ok );
 
   gtk_signal_connect( GTK_OBJECT( About ),"destroy",GTK_SIGNAL_FUNC( ab_Ok_released ),0 );
-  gtk_signal_connect( GTK_OBJECT( About ),"show",GTK_SIGNAL_FUNC( ab_AboutBox_show ),1 );
+  gtk_signal_connect( GTK_OBJECT( About ),"show",GTK_SIGNAL_FUNC( ab_AboutBox_show ),(void *)1 );
   gtk_signal_connect( GTK_OBJECT( About ),"hide",GTK_SIGNAL_FUNC( ab_AboutBox_show ),0 );
   gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( ab_Ok_released ),0 );
 

@@ -18,6 +18,7 @@ void ShowMessageBox( char * msg )
 {
  if ( gtkVMessageBox ) gtkActive( MessageBox );
    else MessageBox=create_MessageBox( 0 );
+ gtkSetLayer( MessageBox );
  if ( strlen( msg ) < 20 ) gtk_widget_set_usize( MessageBox,196,-1 );
  gtkVisible++;
 }
@@ -164,7 +165,7 @@ GtkWidget * create_MessageBox( int type )
  gtk_widget_add_accelerator( Ok,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
  gtk_signal_connect( GTK_OBJECT( MessageBox ),"destroy_event",GTK_SIGNAL_FUNC( on_Ok_released ),NULL );
- gtk_signal_connect( GTK_OBJECT( MessageBox ),"show",GTK_SIGNAL_FUNC( on_MessageBox_show ),1 );
+ gtk_signal_connect( GTK_OBJECT( MessageBox ),"show",GTK_SIGNAL_FUNC( on_MessageBox_show ),(void *)1 );
  gtk_signal_connect( GTK_OBJECT( MessageBox ),"hide",GTK_SIGNAL_FUNC( on_MessageBox_show ),0 );
  gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( on_Ok_released ),NULL );
 

@@ -293,7 +293,7 @@ if(mDisplay){
   {
    case wsRGB32:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to rgb32\n" );
-     wsConvFunc=BGR8880_to_RGB8880_c;
+     wsConvFunc=(void *)BGR8880_to_RGB8880_c;
      break;
    case wsBGR32:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr32\n" );
@@ -305,7 +305,7 @@ if(mDisplay){
      break;
    case wsBGR24:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr24\n" );
-     wsConvFunc=BGR8880_to_BGR888_c;
+     wsConvFunc=(void *)BGR8880_to_BGR888_c;
      break;
    case wsRGB16:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to rgb16\n" );
@@ -313,7 +313,7 @@ if(mDisplay){
      break;
    case wsBGR16:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr16\n" );
-     wsConvFunc=BGR8880_to_BGR565_c;
+     wsConvFunc=(void *)BGR8880_to_BGR565_c;
      break;
    case wsRGB15:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to rgb15\n" );
@@ -321,7 +321,7 @@ if(mDisplay){
      break;
    case wsBGR15:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr15\n" );
-     wsConvFunc=BGR8880_to_BGR555_c;
+     wsConvFunc=(void *)BGR8880_to_BGR555_c;
      break;
   }
  XSetErrorHandler( wsErrorHandler );
@@ -874,6 +874,7 @@ void wsPostRedisplay( wsTWindow * win )
 {
  if ( win->ReDraw )
   {
+   win->State=wsWindowExpose;
    win->ReDraw( wsDisplay,win->WindowID );
    XFlush( wsDisplay );
   }
