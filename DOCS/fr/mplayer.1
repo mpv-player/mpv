@@ -2288,7 +2288,7 @@ logicielle pour conserver l'aspect.
 aspect= contrôle l'aspect ratio, calculé comme ceci: DVB_HAUTEUR*ASPECTRATIO,
 par défaut: 576*4/3=768, fixez-le à 576*(16/9)=1024 pour une télé 16:9.
 .REss
-.IPs
+.TP
 Utile uniquement avec expand+scale:
 \-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc
 .IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
@@ -2959,7 +2959,7 @@ méthode d'estimation du mouvement:
 Note: 0\-3 pour l'instant ignorent le montant de Bits utilisés, donc la qualité
 peut être mauvaise.
 .REss
-.IPs vhq\ \
+.IPs vhq
 mode haute qualité, encode chaque bloc macro dans tous les modes et choisi le
 meilleur. C'est lent mais donne de meilleurs qualité et taille de fichier.
 (par défaut: désactivé)
@@ -3009,7 +3009,7 @@ Stocke l'aspect du film en interne, tout comme les fichiers MPEG.
 Bien meilleur solution que le redimensionnement, car la qualité
 n'en est pas diminuée.
 Seul MPlayer sera capable de relire ces fichiers correctement, les autres 
-lecteurs l'afficheront avec un mauvais aspect. 
+lecteurs l'afficheront avec un mauvais aspect.
 Le paramètre d'aspect peut être donné en tant que ratio ou nombre à virgule.
 Exemple:
 .RSss
@@ -3055,12 +3055,11 @@ I/\:quantizer Trame-B = quantizer Trame-P * v{b|i}_qfactor + v{b|i}_qoffset
 sinon
 .br
 procède à un contrôle de débit normal (ne verrouille pas le prochain quantizer
-trame P) et initialise
-q= -q * v{b|i}_qfactor + v{b|i}_qoffset
+trame P) et initialise q= -q * v{b|i}_qfactor + v{b|i}_qoffset
 .IPs
 Astuce: Pour faire de l'encodage avec quantizer constant avec des quantizers
 différents pour les trames I/P et B vous pouvez utiliser:
-vqmin=<ip_quant>:vqmax=<ip_quant>:vb_qfactor=<b_quant/ip_quant>
+vqmin= <ip_quant>:vqmax= <ip_quant>:vb_qfactor= <b_quant/ip_quant>
 .IPs vqblur=<0.0\-1.0>
 flou quantizer (passe1) Des valeurs plus importantes provoqueront plus de
 moyennes dans le temps (variations plus basses).
