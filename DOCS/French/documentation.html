@@ -309,7 +309,31 @@
     </UL>
   </LI>
   <LI><A HREF="#known_bugs">Appendice C - Bogues connus</A></LI>
-  <LI><A HREF="skin-fr.html">Appendice D - Format de skin de MPlayer</A></LI>
+    <LI><A HREF="skin-fr.html">Appendix D - Format de skin de MPlayer</A>
+    <UL>
+      <LI><A HREF="skin-fr.html#overview">D.1 Aperçu</A>
+        <UL>
+          <LI><A HREF="skin-fr.html#directories">D.1.1 Répertoires</A></LI>
+          <LI><A HREF="skin-fr.html#images">D.1.2 Format d'images</A></LI>
+          <LI><A HREF="skin-fr.html#components">D.1.3 Composants d'une skin</A></LI>
+          <LI><A HREF="skin-fr.html#files">D.1.4 Fichiers</A></LI>
+        </UL>
+      </LI>
+      <LI><A HREF="skin-fr.html#skinfile">D.2 Le fichier skin</A>
+        <UL>
+          <LI><A HREF="skin-fr.html#mainwindow">D.2.1 Fenêtre principale et barre de lecture</A></LI>
+          <LI><A HREF="skin-fr.html#subwindow">D.2.2 Sous-fenêtre</A></LI>
+          <LI><A HREF="skin-fr.html#skinmenu">D.2.3 Menu</A></LI>
+        </UL>
+      </LI>
+      <LI><A HREF="skin-fr.html#fonts">D.3 Polices</A>
+        <UL>
+          <LI><A HREF="skin-fr.html#symbols">D.3.1 Symboles</A></LI>
+        </UL>
+      </LI>
+      <LI><A HREF="skin-fr.html#guimessages">D.4 Messages de la GUI</A></LI>
+    </UL>
+  </LI>
   <LI><A HREF="users_against_developers.html">Appendice E - Lamentations du Développeur</A>
     <UL>
       <LI><A HREF="users_against_developers.html#gcc">E.1 GCC 2.96</A></LI>
@@ -1008,11 +1032,13 @@ par moi (Gabucino). Son principal avantage est de se baser
 
 <P>MPlayer possède une interface de menu OSD complètement modulable.</P>
 
+<P><B>NOTE:</B> le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant !</P>
+
 <H4>Installation</H4>
 
 <OL>
-  <LI>compilez MPlayer en passant les paramètres <CODE>--enable-new-conf
-    --enable-menu</CODE> à <CODE>./configure</CODE></LI>
+  <LI>compilez MPlayer en passant le paramètre <CODE>--enable-menu</CODE> à 
+    <CODE>./configure</CODE></LI>
   <LI>assurez-vous que les polices OSD sont installées</LI>
   <LI>copiez <CODE>etc/menu.conf</CODE> dans votre répertoire <CODE>.mplayer</CODE></LI>
   <LI>copiez <CODE>etc/input.conf</CODE> dans votre répertoire <CODE>.mplayer</CODE>, 
