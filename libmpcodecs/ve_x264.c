@@ -209,6 +209,8 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.i_fps_den = mod->mux->h.dwScale;
     mod->param.analyse.b_psnr = psnr;
     mod->param.i_log_level = log_level;
+    mod->param.vui.i_sar_width = d_width*height;
+    mod->param.vui.i_sar_height = d_height*width;
 
     switch(outfmt) {
     case IMGFMT_I420:
