@@ -394,7 +394,13 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
                 | (ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK : 0);
     }
 
-    if(init_vo(sh)<0 || ctx->b_count>1 || ctx->ip_count>2){
+    if(init_vo(sh)<0){
+        avctx->release_buffer= avcodec_default_release_buffer;
+        avctx->get_buffer= avcodec_default_get_buffer;
+        return avctx->get_buffer(avctx, pic);
+    }
+    
+    if(ctx->b_count>1 || ctx->ip_count>2){
         printf("DR1 failure\n");
 
         ctx->do_dr1=0; //FIXME
