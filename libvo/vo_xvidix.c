@@ -359,8 +359,6 @@ else
     panscan_calc();
 
     saver_off(mDisplay); /* turning off screen saver */
-    
-    vo_config_count++;
 
     return(0);
 }

@@ -349,8 +349,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   panscan_calc();
 
   saver_off(mDisplay); /* turning off screen saver */
-    
-  vo_config_count++;
 
   return(0);
 }
