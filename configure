@@ -1328,6 +1328,7 @@ for ac_option do
   --enable-external-faad)	_faad_external=yes	_faad_internal=no	;;
   --disable-external-faad)	_faad_external=no	;;
   --enable-xmms)	_xmms=yes	;;
+  --disable-xmms)	_xmms=no	;;
   --enable-flac)	_flac=yes	;;
   --disable-flac)	_flac=no	;;
   --enable-external-flac)	_external_flac=yes	;;
