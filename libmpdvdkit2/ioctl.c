@@ -38,6 +38,7 @@
 #include <sys/types.h>
 
 #if defined( WIN32 )
+#   undef DATADIR /* clashes with /usr/include/w32api/objidl.h */
 #   include <windows.h>
 #   include <winioctl.h>
 #elif defined ( SYS_OS2 )
