@@ -76,7 +76,7 @@ binary-arch: build install
 #	dh_installmime
 #	dh_installinit
 #	dh_installcron
-	dh_installmanpages TVout/fbset/fb.modes.5
+	dh_installmanpages TVout/fbset/fb.modes.5 TVout/fbset/fbset.8
 	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs
