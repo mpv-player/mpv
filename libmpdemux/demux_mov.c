@@ -1459,26 +1459,36 @@ int mov_read_header(demuxer_t* demuxer){
     for(t_no=0;t_no<priv->track_db;t_no++){
         mov_track_t* trak=priv->tracks[t_no];
 	int len=(trak->samplesize) ? trak->chunks_size : trak->samples_size;
-	if(demuxer->audio->id==-1 && demuxer->a_streams[t_no]){ // need audio
+	if(demuxer->a_streams[t_no]){ // need audio
 	    if(len>best_a_len){	best_a_len=len; best_a_id=t_no; }
 	}
-	if(demuxer->video->id==-1 && demuxer->v_streams[t_no]){ // need video
+	if(demuxer->v_streams[t_no]){ // need video
 	    if(len>best_v_len){	best_v_len=len; best_v_id=t_no; }
 	}
     }
-    mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: best streams: A: #%d (%d samples)  V: #%d (%d samples)\n",
+    mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: longest streams: A: #%d (%d samples)  V: #%d (%d samples)\n",
 	best_a_id,best_a_len,best_v_id,best_v_len);
-    if(best_a_id>=0) demuxer->audio->id=best_a_id;
-    if(best_v_id>=0) demuxer->video->id=best_v_id;
+    if(demuxer->audio->id==-1 && best_a_id>=0) demuxer->audio->id=best_a_id;
+    if(demuxer->video->id==-1 && best_v_id>=0) demuxer->video->id=best_v_id;
     
     // setup sh pointers:
     if(demuxer->audio->id>=0){
 	sh_audio_t* sh=demuxer->a_streams[demuxer->audio->id];
-	demuxer->audio->sh=sh; sh->ds=demuxer->audio;
+	if(sh){
+	    demuxer->audio->sh=sh; sh->ds=demuxer->audio;
+	} else {
+	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected audio stream (%d) does not exists\n",demuxer->audio->id);
+	    demuxer->audio->id=-2;
+	}
     }
     if(demuxer->video->id>=0){
 	sh_video_t* sh=demuxer->v_streams[demuxer->video->id];
-	demuxer->video->sh=sh; sh->ds=demuxer->video;
+	if(sh){
+	    demuxer->video->sh=sh; sh->ds=demuxer->video;
+	} else {
+	    mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: selected video stream (%d) does not exists\n",demuxer->video->id);
+	    demuxer->video->id=-2;
+	}
     }
 
 #if 1
