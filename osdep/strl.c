@@ -7,7 +7,7 @@
 #include "../config.h"
 
 #ifndef HAVE_STRLCPY
-unsigned int strlcpy (char *dest, char *src, unsigned int size)
+unsigned int strlcpy (char *dest, const char *src, unsigned int size)
 {
 	register unsigned int i;
 
@@ -21,7 +21,7 @@ unsigned int strlcpy (char *dest, char *src, unsigned int size)
 #endif
 
 #ifndef HAVE_STRLCAT
-unsigned int strlcat (char *dest, char *src, unsigned int size)
+unsigned int strlcat (char *dest, const char *src, unsigned int size)
 {
 #if 0
 	register unsigned int i, j;
@@ -33,7 +33,8 @@ unsigned int strlcat (char *dest, char *src, unsigned int size)
 	dest[i] = '\0';
 	return i;
 #else
-	register char *d = dest, *s = src;
+	register char *d = dest;
+	register const char *s = src;
 
 	for (; size > 0 && *d != '\0'; size--, d++);
 	for (; size > 0 && *s != '\0'; size--, d++, s++)

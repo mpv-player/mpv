@@ -18,6 +18,10 @@
 #include "../m_option.h"
 #include "avformat.h"
 
+extern unsigned int codec_get_wav_tag(int id);
+extern enum CodecID codec_get_bmp_id(unsigned int tag);
+extern enum CodecID codec_get_wav_id(unsigned int tag);
+
 typedef struct {
 	//AVInputFormat *avif;
 	AVFormatContext *oc;
@@ -145,7 +149,7 @@ static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 }
 
 
-static void fix_parameters(muxer_stream_t *stream, void *sh)
+static void fix_parameters(muxer_stream_t *stream)
 {
 	muxer_stream_priv_t *spriv = (muxer_stream_priv_t *) stream->priv;
 	AVCodecContext *ctx;

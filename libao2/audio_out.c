@@ -7,6 +7,7 @@
 
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "mplayer.h" /* for exit_player() */
 
 // there are some globals:
 ao_data_t ao_data={0,0,0,0,OUTBURST,-1,0};

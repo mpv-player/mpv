@@ -7058,13 +7058,13 @@ $_def_strsep
 /* Define this if your system has strlcpy */
 $_def_strlcpy
 #ifndef HAVE_STRLCPY
-unsigned int strlcpy (char *dest, char *src, unsigned int size);
+unsigned int strlcpy (char *dest, const char *src, unsigned int size);
 #endif
 
 /* Define this if your system has strlcat */
 $_def_strlcat
 #ifndef HAVE_STRLCAT
-unsigned int strlcat (char *dest, char *src, unsigned int size);
+unsigned int strlcat (char *dest, const char *src, unsigned int size);
 #endif
 
 /* Define this if your system has fseeko */
