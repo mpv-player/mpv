@@ -98,6 +98,7 @@ static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
 	int screen;
+        int dwidth,dheight;
 	unsigned int fg, bg;
 	char *hello = (title == NULL) ? "OpenGL rulez" : title;
 	char *name = ":0.0";
@@ -126,7 +127,23 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	}
 
 	screen = DefaultScreen(mydisplay);
+        vo_screenwidth = DisplayWidth(mydisplay, myscreen);
+	vo_screenheight = DisplayHeight(mydisplay, myscreen);
 
+        dwidth=d_width; dheight=d_height;
+#ifdef X11_FULLSCREEN
+        if(fullscreen){ // handle flags correct
+          d_height=(int)((float)vo_screenwidth/(float)dwidth*(float)dheight);
+          d_height+=d_height%2; // round
+          d_width=vo_screenwidth;
+          if(dheight>vo_screenheight){
+            d_width=(int)((float)vo_screenheight/(float)dheight*(float)dwidth);
+            d_width+=d_width%2; // round
+            d_height=vo_screenheight;
+          }
+          dwidth=d_width; dheight=d_height;
+        }
+#endif
 	hint.x = 0;
 	hint.y = 0;
 	hint.width = d_width;
