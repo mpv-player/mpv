@@ -1900,7 +1900,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   if (track) {
     if (strcmp(track->codec_id, MKV_S_TEXTASCII) &&
         strcmp(track->codec_id, MKV_S_TEXTUTF8) && 
-        strcmp(track->codec_id, MKV_S_TEXTSSA))
+        strcmp(track->codec_id, MKV_S_TEXTSSA) &&
+        strcmp(track->codec_id, "S_SSA"))
       mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Subtitle type '%s' is not "
              "supported. Track will not be displayed.\n", track->codec_id);
     else {
@@ -1913,7 +1914,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 
         if (!strcmp(track->codec_id, MKV_S_TEXTUTF8))
           sub_utf8 = 1;       // Force UTF-8 conversion.
-        if (!strcmp(track->codec_id, MKV_S_TEXTSSA)) {
+        if (!strcmp(track->codec_id, MKV_S_TEXTSSA) ||
+            !strcmp(track->codec_id, "S_SSA")) {
           mkv_d->subtitle_type = MKV_SUBTYPE_SSA;
           sub_utf8 = 1;
         } else
