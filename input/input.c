@@ -527,6 +527,7 @@ mp_input_find_bind_for_key(mp_cmd_bind_t* binds, int n,int* keys) {
 static mp_cmd_t*
 mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
   char* cmd = NULL;
+  mp_cmd_t* ret;
   // In pause mode we return pause for the first key wich come
   if(paused)
     return mp_input_parse_cmd("pause");
@@ -546,7 +547,17 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
     printf("                         \n");
     return NULL;
   }
-  return  mp_input_parse_cmd(cmd);
+  ret =  mp_input_parse_cmd(cmd);
+  if(!ret) {
+    printf("Invalid command for binded key %s",mp_input_get_key_name(key_down[0]));
+    if(  num_key_down > 1) {
+      unsigned int s;
+      for(s=1; s < num_key_down; s++)
+	printf("-%s",mp_input_get_key_name(key_down[s]));
+    }
+    printf(" : %s             \n",cmd);
+  }
+  return ret;
 }
 
 static mp_cmd_t*
@@ -660,15 +671,6 @@ mp_input_read_keys(int time,int paused) {
     } 
     // We ignore key from last combination
     ret = last_key_down ? mp_input_get_cmd_from_keys(num_key_down,key_down,paused) : NULL;
-    if(last_key_down && !ret) {     
-      printf("Invalid command for binded key %s",mp_input_get_key_name(key_down[0]));
-      if(  num_key_down > 1) {
-	unsigned int s;
-	for(s=1; s < num_key_down; s++)
-	  printf("-%s",mp_input_get_key_name(key_down[s]));
-      }
-      printf("             \n");
-    }
     // Remove the key
     if(j+1 < num_key_down)
       memmove(&key_down[j],&key_down[j+1],(num_key_down-(j+1))*sizeof(int));
@@ -954,7 +956,7 @@ mp_input_bind_keys(int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
   if(bind->cmd)
     free(bind->cmd);
   bind->cmd = strdup(cmd);
-  memcpy(bind->input,keys,MP_MAX_KEY_DOWN+1);
+  memcpy(bind->input,keys,(MP_MAX_KEY_DOWN+1)*sizeof(int));
 }
 
 
