@@ -1,4 +1,4 @@
-.\" synced with 1.465
+.\" synced with 1.467
 .\" MPlayer (C) 2000-2003 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun, Jonas Jermann
 .\" y traducida al español por Juan Martín López <nauj27@teleline.es>
@@ -785,6 +785,14 @@ posicionamiento (p.e. no con stdin, pipe, etc).
 Se salta el proxy para direcciones IPv6.
 Sigue siendo usado para conexiones IPv4.
 .TP
+.B \-loadidx <nombrearchivo>
+El nombre del archivo desde el que se leerán los datos INDEX del video.
+MPlayer leerá el índice desde nombrearchivo y usará estos datos para las
+búsquedas. Estos datos pueden usarse en lugar del índice contenido dentro
+del AVI. Es más, MPlayer no le avisará si carga un archivo índice generado
+desde un AVI diferente, pero seguramente obtendrá resultados poco favorables.
+NOTA: ¡esta opción estará obsoleta una vez que AVI tiene soporte ODML!
+.TP
 .B \-mc <segundos/marco>
 Máxima sincronización A-V por marco (en segundos).
 .TP
@@ -892,6 +900,20 @@ Usado con URLs 'rtsp://' para especificar que los paquetes entrantes RTP y
 RTCP serán enviados a través de TCP (usando la misma conexión TCP como RTSP).
 Esta opción puede ser útil si dispone de una mala conexión a Internet que
 no acepta paquetes UDP entrantes (vea http://www.live.com/mplayer/).
+.TP
+.B \-saveidx <archivo>
+Fuerza la reconstrucción del INDEX y da la salida en un archivo especificado
+en el nombre de archivo que tiene como argumento. Actualmente solo funciona
+con archivos AVI. Aunque puede usar MEncoder para arreglar archivos sin
+índice, MPlayer no soporta búsquedas en archivos mayores que 2GB.
+(Esta es una limitación del formato AVI, y aunque existen extensiones para
+indexar más allá de 2GB, MPlayer no tiene aún soporte para esas extensiones.)
+Después que el archivo de índice ha sido creado, MPlayer comienza la reproducción
+del video. Si quiere automatizar la generación de archivos de índice (después de
+codificar un archivo grande desde una tarjeta de captura de TV, por ejemplo), puede
+especificar \-frames 0 para prevenir que MPlayer reproduzca el video después de
+generar el índice.
+NOTA: ¡esta opción será OBSOLETA una ves que AVI soporte ODML!
 .TP
 .B \-sb <posición\ del\ byte> (vea también la opción \-ss)
 Se posiciona en el byte indicado.
@@ -2793,6 +2815,16 @@ entrelaza
 intercambia campos (cambia entre líneas par e impar)
 .RE
 .PD 1
+.TP
+.B "fil=[i|d]"
+(des)interpolación de líneas.
+fil=d desinterpola los campos y los coloca izquierdo-derecho
+fil=i los interpola de nuevo (invierte el efecto de fil=d)
+este filtro es similar al filtro il pero mucho más rápido, la principal
+desventaja es que no siempre funciona. Especialmente si se combina
+con otros filtros puede producir imágenes aleatoriamente mezcladas, por ello
+alégrese si funciona pero no venga con quejas si no lo hace para su combinación
+de filtros.
 .TP
 .B "field[=n]"
 Extrae un campo simple de una imagen entrelazada usando aritmética a saltos
