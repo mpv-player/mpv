@@ -98,8 +98,16 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	          mpi->planes[2]=mpi->planes[0]+mpi->width*mpi->height;
 	          mpi->planes[1]=mpi->planes[2]+(mpi->width>>1)*(mpi->height>>1);
 	      }
+	      // clear!
+	      memset(mpi->planes[0],0,mpi->stride[0]*mpi->height);
+	      memset(mpi->planes[1],128,mpi->stride[1]*(mpi->height>>1));
+	      memset(mpi->planes[2],128,mpi->stride[2]*(mpi->height>>1));
 	  } else {
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
+	      if(mpi->flags&MP_IMGFLAG_YUV){
+	          // TODO: clear packed yuv plane
+	      } else
+	          memset(mpi->planes[0],0,mpi->bpp*mpi->width*mpi->height/8);
 	  }
 	  mpi->flags|=MP_IMGFLAG_ALLOCATED;
         }
