@@ -369,8 +369,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	{
 		ScaleMatrix(&matrix, FixDiv(Long2Fix(d_width),Long2Fix(width)), FixDiv(Long2Fix(d_height),Long2Fix(height)), 0, 0);
 	}
-
-
+	
 	switch (image_format) 
 	{
 		case IMGFMT_RGB32:
@@ -593,69 +592,69 @@ static void flip_page(void)
 		}
 		break;
 
-  case IMGFMT_YV12:
-  case IMGFMT_IYUV:
-  case IMGFMT_I420:
-  case IMGFMT_UYVY:
-  case IMGFMT_YUY2:
-    if (EnterMoviesDone) {
-      OSErr qterr;
-      CodecFlags flags = 0;
-      qterr = DecompressSequenceFrameWhen(seqId,
-					  (char *)P,
-					  image_buffer_size,
-					  0, //codecFlagUseImageBuffer,
-					  &flags,
-					  NULL,
-					  NULL);
-      if (qterr) {
-	mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: DecompressSequenceFrameWhen in flip_page (%d) flags:0x%08x\n", qterr, flags);
-      }
-    }
-    break;
-  }
+		case IMGFMT_YV12:
+		case IMGFMT_IYUV:
+		case IMGFMT_I420:
+		case IMGFMT_UYVY:
+		case IMGFMT_YUY2:
+			if (EnterMoviesDone)
+			{
+				OSErr qterr;
+				CodecFlags flags = 0;
+				qterr = DecompressSequenceFrameWhen(seqId,
+													(char *)P,
+													image_buffer_size,
+													0, //codecFlagUseImageBuffer,
+													&flags,
+													NULL,
+													NULL);
+				if (qterr)
+				{
+					mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: DecompressSequenceFrameWhen in flip_page (%d) flags:0x%08x\n", qterr, flags);
+				}
+			}
+		break;
+	}
 }
 
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
-  switch (image_format) {
-  case IMGFMT_YV12:
-  case IMGFMT_I420:
-    memcpy_pic(((char*)P) + P->componentInfoY.offset + x + image_width * y, src[0],
-	       w, h, image_width, stride[0]);
-    x=x/2;y=y/2;w=w/2;h=h/2;
-    memcpy_pic(((char*)P) + P->componentInfoCb.offset + x + image_width / 2 * y, src[1],
-	       w, h, image_width / 2, stride[1]);
-    memcpy_pic(((char*)P) + P->componentInfoCr.offset + x + image_width / 2 * y, src[2],
-	       w, h, image_width / 2, stride[2]);
-    return 0;
+	switch (image_format)
+	{
+		case IMGFMT_YV12:
+		case IMGFMT_I420:
+			memcpy_pic(((char*)P) + P->componentInfoY.offset + x + image_width * y, src[0], w, h, image_width, stride[0]);
+			x=x/2;y=y/2;w=w/2;h=h/2;
     
-  case IMGFMT_IYUV:
-    memcpy_pic(((char*)P) + P->componentInfoY.offset + x + image_width * y, src[0],
-	       w, h, image_width, stride[0]);
-    x=x/2;y=y/2;w=w/2;h=h/2;
-    memcpy_pic(((char*)P) + P->componentInfoCr.offset + x + image_width / 2 * y, src[1],
-	       w, h, image_width / 2, stride[1]);
-    memcpy_pic(((char*)P) + P->componentInfoCb.offset + x + image_width / 2 * y, src[2],
-	       w, h, image_width / 2, stride[2]);
-    return 0;
-  }
+			memcpy_pic(((char*)P) + P->componentInfoCb.offset + x + image_width / 2 * y, src[1], w, h, image_width / 2, stride[1]);
+			memcpy_pic(((char*)P) + P->componentInfoCr.offset + x + image_width / 2 * y, src[2], w, h, image_width / 2, stride[2]);
+			return 0;
+    
+		case IMGFMT_IYUV:
+			memcpy_pic(((char*)P) + P->componentInfoY.offset + x + image_width * y, src[0], w, h, image_width, stride[0]);
+			x=x/2;y=y/2;w=w/2;h=h/2;
+			
+			memcpy_pic(((char*)P) + P->componentInfoCr.offset + x + image_width / 2 * y, src[1], w, h, image_width / 2, stride[1]);
+			memcpy_pic(((char*)P) + P->componentInfoCb.offset + x + image_width / 2 * y, src[2], w, h, image_width / 2, stride[2]);
+			return 0;
+	}
 	return -1;
 }
 
 static uint32_t draw_frame(uint8_t *src[])
 {
-  switch (image_format) {
-  case IMGFMT_RGB32:
-	image_data = src[0];
-	return 0;
+	switch (image_format)
+	{
+		case IMGFMT_RGB32:
+			image_data = src[0];
+			return 0;
 
-  case IMGFMT_UYVY:
-  case IMGFMT_YUY2:
-    memcpy_pic(((char*)P), src[0], image_width * 2, image_height, image_width * 2, image_width * 2);
-    return 0;
-  }
-  return -1;
+		case IMGFMT_UYVY:
+		case IMGFMT_YUY2:
+			memcpy_pic(((char*)P), src[0], image_width * 2, image_height, image_width * 2, image_width * 2);
+			return 0;
+	}
+	return -1;
 }
 
 static uint32_t query_format(uint32_t format)
@@ -757,7 +756,8 @@ static uint32_t get_yuv_image(mp_image_t *mpi)
 		return VO_TRUE;
 	}
 	else 
-	{ // doesn't work yet
+	{ 
+		// doesn't work yet
 		if (mpi->num_planes != 1)
 		{
 			mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: only 1 plane allowed in get_yuv_image for packed (%d) \n", mpi->num_planes);
@@ -788,8 +788,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 				case IMGFMT_YV12:
 				case IMGFMT_IYUV:
 				case IMGFMT_I420:
-				//case IMGFMT_UYVY:
-				//case IMGFMT_YUY2:
 					return get_yuv_image(data);
 					break;
 			}
@@ -799,8 +797,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 				case IMGFMT_YV12:
 				case IMGFMT_IYUV:
 				case IMGFMT_I420:
-				//case IMGFMT_UYVY:
-				//case IMGFMT_YUY2:
 					return draw_yuv_image(data);
 					break;
 			}
