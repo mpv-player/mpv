@@ -225,8 +225,8 @@ static void read_cmd(menu_t* menu,int cmd) {
 static void check_child(menu_t* menu) {
   fd_set rfd;
   struct timeval tv;
-  int max_fd = mpriv->child_fd[2] > mpriv->child_fd[3] ? mpriv->child_fd[2] :
-    mpriv->child_fd[3];
+  int max_fd = mpriv->child_fd[2] > mpriv->child_fd[1] ? mpriv->child_fd[2] :
+    mpriv->child_fd[1];
   int i,r,child_status,w;
   char buffer[256];
 
