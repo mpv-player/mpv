@@ -2696,7 +2696,8 @@ Write the output as interlaced frames, bottom field first.
 .RS
 .br
 .I NOTE:
-If you don't specify any option the output is progressive (ie.\& no interlace).
+If you don't specify any option the output is progressive
+(i.e.\& not interlaced).
 .RE
 .
 .TP
@@ -2757,11 +2758,9 @@ Each file takes the frame number padded with leading zeros as name.
 Only supports the YV12 format.
 The resulting image is (width) * (height * 1.5) of the original
 image.
-At coordinates 0,0 for width,height you have the Y plane, at coordinates
-0,height 
-for width/2,height/2 you have the U plane and at width/2,height for
-width/2,height/2 you have the V plane.
-There are no suboptions.
+At coordinates 0,0 for width,height you have the Y plane, at
+coordinates 0,height for width/2,height/2 you have the U plane
+and at width/2,height for width/2,height/2 you have the V plane.
 .
 .TP
 .B png\ \ \ \ 
@@ -2778,7 +2777,7 @@ Output each frame into a Targa file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
 The purpose of this video output driver is to have a simple lossless
 image writer to use without any external library.
-It supports BGR[A] color format, with 15, 24 and 32 bpp.
+It supports the BGR[A] color format, with 15, 24 and 32 bpp.
 There are no suboptions.
 You can force a particular format with the format video filter.
 .sp 1
@@ -3054,9 +3053,9 @@ error resilience:
 4: very aggressive
 .REss
 .IPs fast\ 
-Enable optimizations that do not comply to the specification and might
+Enable optimizations which do not comply to the specification and might
 potentially cause problems, like simpler dequantization, assuming use
-of the default quantization matrix, assuming YUV 4:2:0, skipping a few
+of the default quantization matrix, assuming YUV 4:2:0 and skipping a few
 checks to detect damaged bitstreams.
 .IPs gray\ 
 grayscale only decoding (a bit faster than with color)
@@ -3132,9 +3131,9 @@ Specifies SwScaler parameters.
 .PD 0
 .RSs
 .IPs lgb=<0\-100>
-Gaussian blur filter (luma)
+gaussian blur filter (luma)
 .IPs cgb=<0\-100>
-Gaussian blur filter (chroma)
+gaussian blur filter (chroma)
 .IPs ls=<0\-100>
 sharpen filter (luma)
 .IPs cs=<0\-100>
@@ -6556,7 +6555,6 @@ H.264's quantizer parameter (QP) is on a logarithmic scale.
 As an example, the bitrate difference between QP=20 and QP=40
 is about a factor of 10.
 Useful quantizers in H.264 tend to be very large compared to MPEG[124].
-.br
 .
 .TP
 .B qp_min=<2-51> (CBR only)
