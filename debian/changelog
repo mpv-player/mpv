@@ -1,3 +1,9 @@
+mplayer (0.90rc4-0) unstable; urgency=low
+
+  * new rc-release.
+
+ -- Alex Beregszaszi <alex@naxine.org>  Fri, 7 Feb 2003 23:43:55 +0100
+
 mplayer (0.90rc3-0) unstable; urgency=low
 
   * new release.
