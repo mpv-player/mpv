@@ -1768,7 +1768,7 @@ end
   decoding and for color space conversion in the video output drivers.</P>
 
 
-<H2><A NAME="sgi">6.5 Silicon Graphics / IRIX</A></H2>
+<H2><A NAME="sgi">6.4 Silicon Graphics / IRIX</A></H2>
 
 <P>You can either try to install the GNU install program, and (if you did not
   put it in your global path) then point to the location with:</P>
@@ -1804,7 +1804,7 @@ end
 <P>and then go on with building and installing.</P>
 
 
-<H2><A NAME="qnx">6.6 QNX</A></H2>
+<H2><A NAME="qnx">6.5 QNX</A></H2>
 
 <P>Works. You'll need to download SDL for QNX, and install it. Then run
   MPlayer with <CODE>-vo sdl:photon</CODE> and <CODE>-ao sdl:nto</CODE>
@@ -1814,7 +1814,7 @@ end
   QNX has only X <I>emulation</I> which is VERY slow. Use SDL.</P>
 
 
-<H2><A NAME="cygwin">6.7 Cygwin</A></H2>
+<H2><A NAME="cygwin">6.6 Cygwin</A></H2>
 
 <P>The Cygwin port is still in its infancy. Currently there is no support for
   Win32 DLLs or OpenGL. SDL is known to distort sound and image or crash
@@ -1849,7 +1849,7 @@ end
 <P>DVDs also work, just set the DVD device correctly to whatever your CD-ROM
   device is:</P>
 
-<P><CODE>mplayer -dvd &lt;title&gt; -dvd-device d:</CODE></P>
+<P><CODE>mplayer -dvd &lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
 
 <P>QuickTime DLLs have also been reported to work. Compile with
   <CODE>--enable-qtx-codecs</CODE> and put the codecs into the

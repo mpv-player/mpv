@@ -1557,7 +1557,7 @@ end
   decoding and for color space conversion in the video output drivers.</P>
 
 
-<H2><A NAME=sgi>6.5. Silicon Graphics Indigo / IRIX</A></H2>
+<H2><A NAME=sgi>6.4. Silicon Graphics Indigo / IRIX</A></H2>
 
 <P>A GNU install programot kell felinstallálnod, és (ha nem tetted bele a
   globális path-ba) add meg a helyét:</P>
@@ -1593,7 +1593,7 @@ end
 <P>ezután símán fordítsd le az MPlayer-t.</P>
 
 
-<H2><A NAME=qnx>6.6. QNX</A></H2>
+<H2><A NAME=qnx>6.5. QNX</A></H2>
 
 <P>Mûködik. Töltsd le és installáld az SDL-t, és add meg az <B>MPlayer</B>-nek
   a <CODE>-vo sdl:photon</CODE> és <CODE>-ao sdl:nto</CODE> opciókat.</P>
@@ -1603,7 +1603,7 @@ end
   SDL-t.</P>
 
 
-<H2><A NAME=cygwin>6.7. Cygwin</A></H2>
+<H2><A NAME=cygwin>6.6. Cygwin</A></H2>
 
 <P>A Cygwin port még mindig gyerekcipõben jár, jelenleg az MPlayer paraméterei
   közül a Win32-es DLL-ek használata, és az OpenGL
@@ -1635,7 +1635,7 @@ end
 
 <P>A DVD-k is mûködnek, csak helyesen kell megadni a DVD egység nevét:</P>
 
-<P><CODE>mplayer -dvd &lt;sáv&gt; -dvd-device d:</CODE></P>
+<P><CODE>mplayer -dvd &lt;sáv&gt; -dvd-device '\\.\d:'</CODE></P>
 
 <P>A QuickTime DLL-ek is mûködnek állítólag, ha a DLL keresési útvonalba
   berakod õket: <CODE>c:\winnt\system32</CODE> vagy
