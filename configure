@@ -511,8 +511,34 @@ fi
 
 # Checking CC version...
 if test "$_skip_cc_check" != yes ; then
- for _cc in "$_cc" gcc gcc-3.3 gcc-3.2 gcc-3.1 gcc3 gcc-3.0 cc ; do
+ # Intel C++ Compilers (no autoselect, use CC=/some/binary ./configure)
+ if test "`basename $_cc`" = "icc" || test "`basename $_cc`" = "ecc"; then
   echocheck "$_cc version"
+  cc_vendor=intel
+  cc_name=`( $_cc -V ) 2>&1 | head -1 | cut -d ',' -f 1`
+  cc_version=`( $_cc -V ) 2>&1 | head -1 | cut -d ',' -f 2 | cut -d ' ' -f 3`
+  _cc_major=`echo $cc_version | cut -d '.' -f 1`
+  _cc_minor=`echo $cc_version | cut -d '.' -f 2`
+  # TODO verify older icc/ecc compatibility
+  case $cc_version in
+    '')
+      cc_version="v. ?.??, bad"
+      cc_verc_fail=yes
+      ;;
+    8.0)
+      cc_version="$cc_version, ok"
+      cc_verc_fail=no
+      ;;
+    *)
+      cc_version="$cc_version, bad"
+      cc_verc_fail=yes
+      ;;
+  esac
+  echores "$cc_version"
+ else
+ for _cc in "$_cc" gcc gcc-3.4 gcc-3.3 gcc-3.2 gcc-3.1 gcc3 gcc-3.0 cc ; do
+  echocheck "$_cc version"
+  cc_vendor=gnu
   cc_name=`( $_cc -v ) 2>&1 | tail -1 | cut -d ' ' -f 1`
   cc_version=`( $_cc -dumpversion ) 2>&1`
   if test "$?" -gt 0; then
@@ -541,6 +567,7 @@ if test "$_skip_cc_check" != yes ; then
   echores "$cc_version"
   (test "$cc_verc_fail" = "no") && break
  done 
+ fi # icc
   if test "$cc_verc_fail" = yes ; then
     cat <<EOF
 
@@ -742,7 +769,7 @@ case "$host_arch" in
 
     # gcc >= 3.4.0  doesn't support -mcpu, we have to use -mtune instead
 
-    if [ "$_cc_major" -gt 3 ] || ( [ "$_cc_major" = 3 ] && [ "$_cc_minor" -ge 4 ]) ; then
+    if [ "$cc_vendor" = "gnu" ] && ([ "$_cc_major" -gt 3 ] || ( [ "$_cc_major" = 3 ] && [ "$_cc_minor" -ge 4 ])) ; then
 	cpuopt=-mtune
     else
 	cpuopt=-mcpu
