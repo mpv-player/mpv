@@ -30,6 +30,7 @@
 #ifdef USE_SUB
 #include "subreader.h"
 void find_sub(subtitle* subtitles,int key);
+void adjust_subs_time(subtitle* subtitles, float subadj, float fps);
 #endif
 
 #ifdef USE_LIBVO2
@@ -1031,7 +1032,12 @@ if(!sh_video){
 
 /* display clip info */
 demux_info_print(demuxer);
-
+	
+#ifdef USE_SUB
+// we know fps so now we can adjust subtitles time to ~6 seconds AST
+adjust_subs_time(subtitles, 6.0, sh_video->fps);
+#endif	
+	
 //================== Init AUDIO (codec) ==========================
 
 current_module="init_audio_codec";

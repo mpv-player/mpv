@@ -599,19 +599,20 @@ subtitle* subcp_recode (subtitle *sub)
 
 #endif
 
-static void adjust_subs_time(subtitle* sub, unsigned long subtime){
-	int i = sub_num;
+void adjust_subs_time(subtitle* sub, float subtime, float fps){
 	subtitle* nextsub;
+	int i = sub_num;
+	unsigned long subfms = (sub_uses_time ? 100 : fps) * subtime;
 
-	for (;;){	
+	if (i)	for (;;){	
 		if (sub->end <= sub->start)
-			sub->end = sub->start + subtime;
+			sub->end = sub->start + subfms;
 		if (!--i) return;
 		nextsub = sub + 1;
 		if (sub->end >= nextsub->start){
 			sub->end = nextsub->start - 1;
-			if (sub->end - sub->start > subtime)
-				sub->end = sub->start + subtime;
+			if (sub->end - sub->start > subfms)
+				sub->end = sub->start + subfms;
 		}
 		sub = nextsub;
 	}
@@ -682,11 +683,6 @@ subtitle* sub_read_file (char *filename) {
 	return NULL;
     }
 
-// if sub->end time is 0 set it to sub_>start + ~6 sec but not 
-// after next sub->start time
-// correct also if sub->end time is below sub->start time
-// maybe default subtime (150fms) should be a program option AST
-    adjust_subs_time(first, 150);
     return first;
 }
 
