@@ -951,14 +951,14 @@ static int vesa_screenshot(const char *fname)
 {
     uint32_t i,n;
     uint8_t *ptrs[video_mode_info.YResolution];
-    if(!video_out_png.control(VOCTRL_QUERY_FORMAT, &dstFourcc))
-    {
-	printf("\nvo_vesa: vo_png doesn't support: %s fourcc\n",vo_format_name(dstFourcc));
-	return 1;
-    }
     if(video_out_png.preinit(NULL)) 
     {
 	printf("\nvo_vesa: can't preinit vo_png\n");
+	return 1;
+    }
+    if(!video_out_png.control(VOCTRL_QUERY_FORMAT, &dstFourcc))
+    {
+	printf("\nvo_vesa: vo_png doesn't support: %s fourcc\n",vo_format_name(dstFourcc));
 	return 1;
     }
     if(video_out_png.config(HAS_DGA()?video_mode_info.XResolution:dstW,
