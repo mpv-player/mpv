@@ -4,6 +4,8 @@
 // writes it to stdout.  resulting stream playbackable with sox:
 //   play -c 2 -r 48000 out.sw
 
+//#define TIMING //needs Pentium or newer 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
@@ -16,6 +18,25 @@ static uint8_t buf[3840];
 static int buf_size=0;
 
 static int16_t out_buf[6*256*6];
+
+#ifdef TIMING
+static inline long long rdtsc()
+{
+	long long l;
+	asm volatile(	"rdtsc\n\t"
+		: "=A" (l)
+	);
+//	printf("%d\n", int(l/1000));
+	return l;
+}
+
+#define STARTTIMING t=rdtsc();
+#define ENDTIMING sum+=rdtsc()-t; t=rdtsc();
+#else
+#define STARTTIMING ;
+#define ENDTIMING ;
+#endif
+
 
 static inline int16_t convert (int32_t i)
 {
@@ -126,6 +147,9 @@ int main(){
 int accel=0;
 int sample_rate=0;
 int bit_rate=0;
+#ifdef TIMING
+long long t, sum=0;
+#endif
 
     samples = a52_init (accel);
     if (samples == NULL) {
@@ -144,7 +168,9 @@ while(1){
 	if(c<0) goto eof;
 	buf[buf_size++]=c;
     }
+STARTTIMING
     length = a52_syncinfo (buf, &flags, &sample_rate, &bit_rate);
+ENDTIMING
     if(!length){
 	// bad file => resync
 	memcpy(buf,buf+1,6);
@@ -161,8 +187,10 @@ while(1){
     // decode:
     flags=A52_STEREO; // A52_DOLBY // A52_2F2R // A52_3F2R | A52_LFE
     flags |= A52_ADJUST_LEVEL;
+STARTTIMING
     if (a52_frame (&state, buf, &flags, &level, bias))
 	{ fprintf(stderr,"error at decoding\n"); continue; }
+ENDTIMING
 
     // a52_dynrng (&state, NULL, NULL); // disable dynamic range compensation
 
@@ -170,8 +198,10 @@ while(1){
     for (i = 0; i < 6; i++) {
 	int32_t * f = (int32_t *) samples;
 	int i;
+STARTTIMING
 	if (a52_block (&state, samples))
 	    { fprintf(stderr,"error at sampling\n"); break; }
+ENDTIMING
 	// resample to STEREO/DOLBY:
 	for (i = 0; i < 256; i++) {
 	    s16[2*i] = convert (f[i]);
@@ -184,5 +214,9 @@ while(1){
 }
 
 eof:
+
+#ifdef TIMING
+fprintf(stderr, "%4.4fm cycles\n",sum/1000000.0);
+#endif
 
 }
