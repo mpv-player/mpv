@@ -116,7 +116,7 @@
 # SOME MACROS/USEFUL FUNCTIONS
 # Returns error code only - NO displaye
 cc_check() {
-	"$_cc" "$TMPC" -o "$TMPO" "$@" >/dev/null 2>&1
+	( "$_cc" "$TMPC" -o "$TMPO" "$@" ) >/dev/null 2>&1
 	return "$?"
 }
 
@@ -970,7 +970,7 @@ fi
 if test "$_x11" = yes ; then
 
 cc_check $_x11libdir -lX11 -lXext -lXdpms $_socklib && _xdpms_3=yes
-nm `echo $_x11libdir|cut -c 3-`/libXext.a | grep DPMSQueryExtension > /dev/null 2>&1 && _xdpms_4=yes
+( nm `echo $_x11libdir | cut -c 3-`/libXext.a | grep DPMSQueryExtension ) > /dev/null 2>&1 && _xdpms_4=yes
 cc_check $_x11libdir -lX11 -lXext -lXv $_socklib && _xv=yes
 cc_check $_x11libdir -lX11 -lXext -lXxf86vm $_socklib && _vm=yes
 cc_check $_x11libdir -lX11 -lXext -lXinerama $_socklib && _xinerama=yes
@@ -1769,7 +1769,7 @@ echo "Checking for zlib ... $_zlib"
 
 # check if compiler supports C++ and C++-libs are installed correctly
 if test "$_win32" = yes && test "$_dshow" = yes ; then
-cat > $TMPCPP << EOF
+cat > "$TMPCPP" << EOF
 /* very useful C++ test program by atmos */
 #include <string>
 
@@ -1791,10 +1791,10 @@ int main(void) {
 }
 EOF
 echo $_echo_n "Checking if your compiler '$_cc' supports C++ ... $_echo_c"
-if $_cc $TMPCPP -o $TMPO > /dev/null 2>&1 ; then
+if ( "$_cc" "$TMPCPP" -o "$TMPO" ) > /dev/null 2>&1 ; then
   echo yes
   echo $_echo_n "Checking for proper C++ runtime enviroment ... $_echo_c"
-  if $TMPO ; then
+  if "$TMPO" ; then
     echo yes
   else
     echo no
