@@ -448,7 +448,7 @@ static int sdl_open (void *plugin, void *name)
 	#ifdef SDL_NOHWSURFACE
 		if(verbose) printf("SDL: using software-surface\n");
 		priv->sdlflags = SDL_SWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT|SDL_ANYFORMAT;
-		priv->sdlfullflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT|SDL_ANYFORMAT;
+		priv->sdlfullflags = SDL_SWSURFACE|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_ANYFORMAT;
 	#else	
 		/*if((strcmp(priv->driver, "dga") == 0) && (priv->mode)) {
 			if(verbose) printf("SDL: using software-surface\n");
@@ -458,12 +458,15 @@ static int sdl_open (void *plugin, void *name)
 		else {	*/
 			if(verbose) printf("SDL: using hardware-surface\n");
 			priv->sdlflags = SDL_HWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT|SDL_HWACCEL/*|SDL_ANYFORMAT*/;
-			priv->sdlfullflags = SDL_HWSURFACE|SDL_FULLSCREEN|SDL_DOUBLEBUF|SDL_ASYNCBLIT|SDL_HWACCEL/*|SDL_ANYFORMAT*/;
+			priv->sdlfullflags = SDL_HWSURFACE|SDL_FULLSCREEN|SDL_ASYNCBLIT|SDL_HWACCEL/*|SDL_ANYFORMAT*/;
 		//}	
 	#endif	
-	
+
+#ifndef AMIGA
+	sdl->sdlfullflags |= SDL_DOUBLEBUF;	
 	if (vo_doublebuffering)
 	    priv->sdlflags |= SDL_DOUBLEBUF;
+#endif
 	
 	/* Setup Keyrepeats (500/30 are defaults) */
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, 100 /*SDL_DEFAULT_REPEAT_INTERVAL*/);
@@ -895,9 +898,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		||(strcmp(priv->driver, "windib") == 0)
 		||(strcmp(priv->driver, "directx") == 0)
 		||(strcmp(priv->driver, "Quartz") == 0)
-		||((strcmp(priv->driver, "aalib") == 0)
-		&& priv->X)
-		||(strcmp(priv->driver, "Quartz") == 0)) {
+		||(strcmp(priv->driver, "cgx") == 0)
+		||((strcmp(priv->driver, "aalib") == 0) && priv->X)){
 			if(verbose) printf("SDL: setting windowed mode\n");
             set_video_mode(priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlflags);
 		}

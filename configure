@@ -68,6 +68,7 @@ qnx()     { issystem "QNX"     ; return "$?" ; }
 darwin()  { issystem "Darwin"  ; return "$?" ; }
 gnu()     { issystem "GNU"     ; return "$?" ; }
 mingw32() { issystem "MINGW32" ; return "$?" ; }
+morphos() { issystem "MorphOS" ; return "$?" ; }
 
 # arch test boolean functions
 # x86/x86pc is used by QNX
@@ -383,6 +384,9 @@ if test -z "$_target" ; then
   MINGW32*)
     system_name=MINGW32
     ;;
+  MorphOS)
+    system_name=MorphOS
+    ;;
   *)
     system_name="$system_name-UNKNOWN"
     ;;
@@ -430,6 +434,7 @@ else
     openbsd) system_name=OpenBSD ;;
     sunos) system_name=SunOS ;;
     qnx) system_name=QNX ;;
+    morphos) system_name=MorphOS ;;
   esac
   # We need to convert underscores so that values like k6-2 and pentium-mmx can be passed
   host_arch=`echo $_target | cut -d '-' -f 1 | tr '_' '-'`
