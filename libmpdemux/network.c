@@ -948,36 +948,31 @@ realrtsp_streaming_start( stream_t *stream ) {
 	char *mrl;
 	int port;
 	int redirected, temp;
-	char aport[10];
 	if( stream==NULL ) return -1;
 	
 	temp = 5; // counter so we don't get caught in infinite redirections (you never know)
 	
 	do {
 	
-	redirected = 0;
+		redirected = 0;
 
-	fd = connect2Server( stream->streaming_ctrl->url->hostname,
-		port = (stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 554) );
-	printf("rtsp:// fd=%d\n",fd);
-	if(fd<0) return -1;
-	
-	sprintf(aport,"%d",port);
-	mrl = (char *)malloc(strlen(stream->streaming_ctrl->url->url)+1+10+1);
-	strcpy(mrl,stream->streaming_ctrl->url->url);
-	strcat(mrl,":");
-	strcat(mrl,aport);
-	rtsp = rtsp_session_start(fd,&mrl, stream->streaming_ctrl->url->file,
-		stream->streaming_ctrl->url->hostname, port, &redirected);
+		fd = connect2Server( stream->streaming_ctrl->url->hostname,
+			port = (stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 554) );
+		if(fd<0) return -1;
+		
+		mrl = malloc(sizeof(char)*(strlen(stream->streaming_ctrl->url->hostname)+strlen(stream->streaming_ctrl->url->file)+16));
+		sprintf(mrl,"rtsp://%s:%i/%s",stream->streaming_ctrl->url->hostname,port,stream->streaming_ctrl->url->file);
+		rtsp = rtsp_session_start(fd,&mrl, stream->streaming_ctrl->url->file,
+			stream->streaming_ctrl->url->hostname, port, &redirected);
 
-	if ( redirected == 1 ) {
-		url_free(stream->streaming_ctrl->url);
-		stream->streaming_ctrl->url = url_new(mrl);
-		closesocket(fd);
-	}
+		if ( redirected == 1 ) {
+			url_free(stream->streaming_ctrl->url);
+			stream->streaming_ctrl->url = url_new(mrl);
+			closesocket(fd);
+		}
 
-	free(mrl);
-	temp--;
+		free(mrl);
+		temp--;
 
 	} while( (redirected != 0) && (temp > 0) );	
 
