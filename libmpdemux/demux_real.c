@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.17  2002/06/13 13:31:45  arpi
+    fix fps/frametime parsing - patch by Florian Schneider <flo-mplayer-dev@gmx.net>
+
     Revision 1.16  2002/06/13 00:14:28  atmos4
     Implement Nilmoni's and Bernd Ernesti's patches for:
     Better real codec dir detection and NetBSD real support.
@@ -961,12 +964,20 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->frametime = 1.0f/sh->fps;
 		    
 #if 1
-		    stream_skip(demuxer->stream, 8);
+		    stream_skip(demuxer->stream, 4);
 #else
 		    printf("unknown1: 0x%X  \n",stream_read_dword(demuxer->stream));
 		    printf("unknown2: 0x%X  \n",stream_read_word(demuxer->stream));
 		    printf("unknown3: 0x%X  \n",stream_read_word(demuxer->stream));
 #endif
+		    if (sh->format==0x30335652 ||
+			sh->format==0x30325652 ) {
+		        sh->fps = stream_read_word(demuxer->stream);
+	        	sh->frametime = 1.0f/sh->fps;
+		    } else {
+	    		stream_skip(demuxer->stream, 2);
+		    }
+		    stream_skip(demuxer->stream, 2);
 		    
 		    // read codec sub-format (to make difference between low and high rate codec)
 		    ((unsigned int*)(sh->bih+1))[0]=stream_read_dword(demuxer->stream);
