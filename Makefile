@@ -37,7 +37,7 @@ MANDIR = ${prefix}/man
 # a BSD compatible 'install' program
 INSTALL = install
 
-SRCS_COMMON = cyuv.c adpcm.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c dec_audio.c dec_video.c msvidc.c cinepak.c fli.c qtrle.c codec-cfg.c cfgparser.c my_profile.c RTjpegN.c minilzo.c nuppelvideo.c spudec.c playtree.c playtreeparser.c asxparser.c qtsmc.c ducktm1.c roqav.c qtrpza.c
+SRCS_COMMON = cyuv.c adpcm.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c dec_audio.c msvidc.c cinepak.c fli.c qtrle.c codec-cfg.c cfgparser.c my_profile.c RTjpegN.c minilzo.c nuppelvideo.c spudec.c playtree.c playtreeparser.c asxparser.c qtsmc.c ducktm1.c roqav.c qtrpza.c
 SRCS_MENCODER = mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/img_format.c libvo/osd.c me-opt-reg.c
 SRCS_MPLAYER = mplayer.c $(SRCS_COMMON) find_sub.c subreader.c lirc_mp.c mixer.c vobsub.c mp-opt-reg.c
 
@@ -60,14 +60,14 @@ V_LIBS = $(X_LIB) $(MP1E_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVG
 AO_LIBS = -Llibao2 -lao2
 A_LIBS = $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
 
-CODEC_LIBS = -Lg72x -lg72x -Lmp3lib -lMP3 -Llibac3 -lac3 -Lliba52 -la52 -Lxa -lxa -Llibmpeg2 -lmpeg2 $(AV_LIB)
+CODEC_LIBS = -Llibmpcodecs -lmpcodecs -Lg72x -lg72x -Lmp3lib -lMP3 -Llibac3 -lac3 -Lliba52 -la52 -Lxa -lxa -Llibmpeg2 -lmpeg2 $(AV_LIB)
 COMMON_LIBS = $(CODEC_LIBS) -Llibmpdemux -lmpdemux  $(NEW_INPUT_LIB)  $(LIB_LOADER) $(A_LIBS) $(CSS_LIB) $(ARCH_LIB) -Lpostproc -lpostproc $(DECORE_LIB) -Llinux -losdep $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) -lm
 ifeq ($(VIDIX),yes)
 MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) # -Wall
 
-PARTS = g72x libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 libavcodec opendivx libao2 drivers drivers/syncfb linux postproc xa input
+PARTS = g72x libmpdemux libmpcodecs mp3lib libac3 liba52 libmp1e libmpeg2 libavcodec opendivx libao2 drivers drivers/syncfb linux postproc xa input
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
@@ -109,7 +109,7 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a opendivx/libdecore.a xa/libxa.a input/libinput.a
+COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a opendivx/libdecore.a xa/libxa.a input/libinput.a
 
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
@@ -125,6 +125,9 @@ loader/libloader.a:
 
 libmpdemux/libmpdemux.a:
 	$(MAKE) -C libmpdemux
+
+libmpcodecs/libmpcodecs.a:
+	$(MAKE) -C libmpcodecs
 
 loader/DirectShow/libDS_Filter.a:
 	$(MAKE) -C loader/DirectShow
