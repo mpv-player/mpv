@@ -44,5 +44,12 @@
 #define MKV_S_TEXTASCII  "S_TEXT/ASCII"
 #define MKV_S_TEXTUTF8   "S_TEXT/UTF8"
 #define MKV_S_TEXTSSA    "S_TEXT/SSA"
+#define MKV_S_VOBSUB     "S_VOBSUB"
+
+typedef struct {
+  char type;                    // t = text, v = VobSub
+  unsigned int palette[16];     // for VobSubs
+  int width, height;            // for VobSubs
+} mkv_sh_sub_t;
 
 #endif /* __MATROSKA_H */

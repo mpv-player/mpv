@@ -104,6 +104,9 @@ static int quiet=0;
 static int last_dvb_step = 1;
 #endif
 
+#ifdef HAVE_MATROSKA
+#include "libmpdemux/matroska.h"
+#endif
 
 //**************************************************************************//
 //             Playtree
@@ -1599,6 +1602,16 @@ if (vo_spudec==NULL && stream->type==STREAMTYPE_DVD) {
   current_module="spudec_init_dvdread";
   vo_spudec=spudec_new_scaled(((dvd_priv_t *)(stream->priv))->cur_pgc->palette,
 			    sh_video->disp_w, sh_video->disp_h);
+}
+#endif
+
+#ifdef HAVE_MATROSKA
+if ((vo_spudec == NULL) && (demuxer->type == DEMUXER_TYPE_MATROSKA) &&
+    (d_dvdsub->sh != NULL) && (((mkv_sh_sub_t *)d_dvdsub->sh)->type == 'v')) {
+  current_module = "spudec_init_matroska";
+  vo_spudec = spudec_new_scaled(((mkv_sh_sub_t *)d_dvdsub->sh)->palette,
+                                ((mkv_sh_sub_t *)d_dvdsub->sh)->width,
+                                ((mkv_sh_sub_t *)d_dvdsub->sh)->height);
 }
 #endif
 
