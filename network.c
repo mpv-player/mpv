@@ -4,7 +4,7 @@
  * (C) 2001, MPlayer team.
  */
 
-#define DUMP2FILE
+//#define DUMP2FILE
 
 #include <unistd.h>
 #include <fcntl.h>
