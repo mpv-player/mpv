@@ -782,6 +782,7 @@ uninit( void )
       */
 }
 
+#if 0
 static int
 directfb_set_video_eq( const vidix_video_eq_t * info )
 {
@@ -849,6 +850,7 @@ directfb_get_video_eq( vidix_video_eq_t * info )
 
      return 0;
 }
+#endif
 
 static uint32_t
 control( uint32_t request, void *data, ... )
@@ -856,6 +858,7 @@ control( uint32_t request, void *data, ... )
      switch (request) {
      case VOCTRL_QUERY_FORMAT:
 	  return query_format( *((uint32_t *) data) );
+#if 0
      case VOCTRL_SET_EQUALIZER:
           {
                va_list ap;
@@ -915,8 +918,8 @@ control( uint32_t request, void *data, ... )
 
                return VO_TRUE;
           }
+#endif
      }
-
      return VO_NOTIMPL;
 }
 
