@@ -9,7 +9,7 @@ static int mga_next_frame=0;
 
 static mga_vid_config_t mga_vid_config;
 static uint8_t *vid_data, *frames[4];
-static int f;
+static int f = -1;
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
     int x,y;
@@ -334,6 +334,7 @@ static int mga_uninit(){
 	ioctl( f,MGA_VID_OFF,0 );
 	munmap(frames[0],mga_vid_config.frame_size*mga_vid_config.num_frames);
 	close(f);
+	f = -1;
 }
 
 static uint32_t preinit(const char *arg)

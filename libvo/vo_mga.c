@@ -62,6 +62,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 {
 char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 
+	if (f >= 0) mga_uninit();
 	if(!vo_screenwidth || !vo_screenheight) {
 		int fd;
 		struct fb_var_screeninfo fbinfo;
