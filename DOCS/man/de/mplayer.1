@@ -1976,12 +1976,6 @@ audiodump.wav.
 Wurde nowaveheader angegeben, ist der Standard audiodump.pcm.
 .REss
 .PD 1
-.RS
-.sp 1
-.I ANMERKUNG:
-Wenn du gar keine Option angibst, ist die Ausgabe progressive (d.h.\& nicht
-interlaced).
-.RE
 .
 .TP
 .B plugin\ \ 
@@ -4735,7 +4729,7 @@ Durchlauf 2 liest dann dieses Logfile und benutzt die Informationen für die
 eigentliche Arbeit.
 Beachte, dass diese Durchläufe
 .B nicht
-den Durchläufen 1 und 2 des Encodierung-Vorgangs entsprechen.
+den Durchläufen 1 und 2 des Encodierungs-Vorgangs entsprechen.
 Um divtc two-pass mit der two-pass-Videoencodierung zu benutzen, sind drei
 Schritte nötig: zuerst divtc Durchlauf 1 und Encoder Durchlauf 1, dann divtc
 Durchlauf 2 und Encoder Durchlauf 1, schließlich dann divtc
@@ -4748,17 +4742,17 @@ es als solches wahrnimmt (Standard: 0.5).
 Dies wird benutzt, um bei sehr dunklen oder fast still stehenden Videos die
 Erkennung von falschen Mustern zu vermeiden.
 .IPs window=numframes
-Setzt die Anzahl der vorangegangenenn Frames, die bei der Suche nach Mustern
+Setzt die Anzahl der vorangegangenen Frames, die bei der Suche nach Mustern
 berücksichtigt werden (Standard: 30).
-Ein längeres Zeitfenster erhöht die Zuverlässigkeit der Mustsuche, ein kürzeres
-Zeitfenster jedoch verbessert die Reaktionszeit für Änderungen in der
+Ein längeres Zeitfenster erhöht die Zuverlässigkeit der Mustersuche, ein
+kürzeres Zeitfenster jedoch verbessert die Reaktionszeit für Änderungen in der
 telecine-Phase.
 Dies betrifft nur den one-pass-Modus.
 Der two-pass-Modus benutzt zur Zeit ein festes Zeitfenster, das nach vorne und
 hinten gerichtet ist.
 .IPs phase=0|1|2|3|4
 Setzt die anfängliche telecine-Phase für den one-pass-Modus (Standard: 0).
-Der two-pass-Modus kann Zukünftiges sehen, so dass er von Anfang an die
+Der two-pass-Modus kann in die Zukunft sehen, so dass er von Anfang an die
 richtige Phase wählen kann, der one-pass-Modus kann jedoch nur raten.
 Er erkennt die richtige Phase, wenn er sie findet, aber diese Option kann
 genutzt werden, um ein mögliches Haken am Anfang zu korrigieren.
@@ -4806,9 +4800,9 @@ Nimm die Feldreihenfolge, die durch die Flags der Felder automatisch bestimmt
 werden und transferiere die andere.
 Der Filter wählt einen der Modi t und b Frame für Frame aus unter Zuhilfenahme
 der Feld-Flags.
-Ist keine Feldinformation verfügbar, arbeitet er wie wie Angabe von u.
+Ist keine Feldinformation verfügbar, arbeitet er wie bei Angabe von u.
 .IPs u
-Nimm unbekannte oder variable, transferiere die andere [Feldreihenfolge].
+Nimm unbekannte oder variable, transferiere die andere Feldreihenfolge.
 Der Filter wählt einen der Modi t und b Frame für Frame aus durch Analyse der
 Bilder und sucht diejenige Alternative mit dem besten Treffer zwischen den
 Feldern aus.
@@ -4825,7 +4819,7 @@ Der Filter wählt einen der Modi t und p nach Analyse der Bilder.
 Ist keine Feldinformation verfügbar, arbeitet der Filter wie Angabe von U.
 Dies ist der Standardmodus.
 .IPs U
-Nimm auf und transferiere unbekannte oder variable [Feldreihenfolge].
+Nimm auf und transferiere unbekannte oder variable Feldreihenfolge.
 Der Filter wählt einen der Modi t, b und p nur anhand der Bildanalyse.
 .IPs v
 Ausführliche Vorgehensweise.
@@ -5110,7 +5104,7 @@ Dicke des inneren Rahmens in Pixeln (Standard: 2)
 .B delogo[=x:y:b:h:t]
 Unterdrückt das Logo eines Fernsehsenders durch einfache Interpolation der
 umgebenden Pixel.
-Setze einfach ein Rechteck, das das Logo bedeckt, und siehe wie es
+Setze einfach ein Rechteck, das das Logo bedeckt, und sieh wie es
 verschwindet (und manchmal etwas unschöneres entsteht \- deine Erfahrungen
 können variieren).
 .PD 0
@@ -5163,7 +5157,7 @@ Die Option fd weist den Filter an, die geforderte Skalierung immer auszuführen
 .
 .TP
 .B \-audio-delay <0.0\-...>
-Setzt das Feld für die Audioverzögerung im Dateikopf.
+Setzt den Header für die Audioverzögerung im Dateikopf.
 Standardwert ist 0.0, negative Werte funktionieren nicht.
 Diese Option verzögert den Ton nicht während des Encodierens, sondern der
 Player wird beim Abspielen den Ton verzögern, sodass du dann nicht mehr
@@ -5259,7 +5253,7 @@ Zur Zeit ist der einzige solche Filter harddup.
 .
 .TP
 .B \-noodml (nur bei \-of AVI)
-Schreibe keinen OpenDML-Indel für AVI-Dateien größer als 1GB.
+Schreibe keinen OpenDML-Index für AVI-Dateien größer als 1GB.
 .
 .TP
 .B \-noskip
@@ -5580,11 +5574,11 @@ sucht MPlayer nach Untertiteldateien in folgender Reihenfolge:
 .SH BEISPIELE
 .
 .TP
-.B Simples Kommando für das Abspielen einer DVD:
+.B Schnellstart für das Abspielen einer DVD:
 mplayer dvd://1
 .
 .TP
-.B Audio auf japanisch mit englischen Untertiteln:
+.B Audio auf Japanisch mit englischen Untertiteln:
 mplayer dvd://1 \-alang ja \-slang en
 .
 .TP
@@ -5682,7 +5676,7 @@ vcodec=mpeg4:vbitrate=800 \-ofps 24 -
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Fehler, Autoren, Haftunsausschluss
+.\" Fehler, Autoren, Haftungsausschluss
 .\" --------------------------------------------------------------------------
 .
 .SH FEHLER/\:BUGS
