@@ -594,10 +594,11 @@ int vo_x11_check_events(Display *mydisplay){
 	   {
 	    Window root;
 	    int foo;
+	    Window win;
 	    XGetGeometry(mydisplay, vo_window, &root, &foo, &foo, 
 		&foo/*width*/, &foo/*height*/, &foo, &foo);
 	    XTranslateCoordinates(mydisplay, vo_window, root, 0, 0,
-		&vo_dx, &vo_dy, (Window *)&foo);
+		&vo_dx, &vo_dy, &win);
 	    }
 #endif
            ret|=VO_EVENT_RESIZE;
