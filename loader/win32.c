@@ -195,6 +195,7 @@ static inline void dbgprintf(char* fmt, ...)
 	va_list va;
 	
 	va_start(va, fmt);
+//	vprintf(fmt, va);
 	mp_dbg(MSGT_WIN32, MSGL_DBG3, fmt, va);
 	va_end(va);
     }
@@ -2813,6 +2814,8 @@ static int WINAPI expIsRectEmpty(CONST RECT *lprc)
 {
     int r = (!lprc || (lprc->right == lprc->left) || (lprc->top == lprc->bottom));
     dbgprintf("IsRectEmpty(%p) => %s\n", lprc, (r) ? "TRUE" : "FALSE");
+//    printf("Rect: left: %d, top: %d, right: %d, bottom: %d\n",
+//	lprc->left, lprc->top, lprc->right, lprc->bottom);
     return r;
 }
 
@@ -4073,6 +4076,37 @@ void* LookupExternal(const char* library, int ordinal)
     }
     //    printf("%x %x\n", &unk_exp1, &unk_exp2);
 
+    printf("External func %s:%d\n", library, ordinal);
+
+    /* ok, this is a hack, and a big memory leak. should be fixed. - alex */
+    {
+	HMODULE *hand;
+	WINE_MODREF *wm;
+	void *func;
+
+	hand = LoadLibraryA(library);
+	if (!hand)
+	    goto no_dll;
+	wm = MODULE32_LookupHMODULE(hand);
+	if (!wm)
+	{
+	    FreeLibrary(hand);
+	    goto no_dll;
+	}
+	func = PE_FindExportedFunction(wm, ordinal, 0);
+	if (!func)
+	{
+	    printf("No such ordinal in external dll\n");
+	    FreeLibrary(hand);
+	    goto no_dll;
+	}
+
+	printf("External dll loaded (offset: %p, func: %p)\n",
+	    hand, func);
+	return func;
+    }
+
+no_dll:
     for(i=0; i<sizeof(libraries)/sizeof(struct libs); i++)
     {
 	if(strcasecmp(library, libraries[i].name))
@@ -4085,7 +4119,6 @@ void* LookupExternal(const char* library, int ordinal)
 	    return libraries[i].exps[j].func;
 	}
     }
-    printf("External func %s:%d\n", library, ordinal);
     if(pos>150)return 0;
     sprintf(export_names[pos], "%s:%d", library, ordinal);
     return add_stub(pos);
