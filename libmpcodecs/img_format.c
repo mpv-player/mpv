@@ -4,11 +4,15 @@ char *vo_format_name(int format)
 {
     switch(format)
     {
+	case IMGFMT_RGB1: return("RGB 1-bit");
+	case IMGFMT_RGB4: return("RGB 4-bit");
 	case IMGFMT_RGB8: return("RGB 8-bit");
 	case IMGFMT_RGB15: return("RGB 15-bit");
 	case IMGFMT_RGB16: return("RGB 16-bit");
 	case IMGFMT_RGB24: return("RGB 24-bit");
 	case IMGFMT_RGB32: return("RGB 32-bit");
+	case IMGFMT_BGR1: return("BGR 1-bit");
+	case IMGFMT_BGR4: return("BGR 4-bit");
 	case IMGFMT_BGR8: return("BGR 8-bit");
 	case IMGFMT_BGR15: return("BGR 15-bit");
 	case IMGFMT_BGR16: return("BGR 16-bit");
