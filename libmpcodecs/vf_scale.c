@@ -71,6 +71,7 @@ static unsigned int outfmt_list[]={
     IMGFMT_Y800,
     IMGFMT_Y8,
     IMGFMT_YUY2,
+    IMGFMT_UYVY,
     0
 };
 
