@@ -1,6 +1,4 @@
 
-#include "config.h"
-
 #define MAX_PACKS 4096
 #define MAX_PACK_BYTES 0x800000
 
@@ -152,6 +150,12 @@ static inline int avi_stream_id(unsigned int id){
 
 demuxer_t* demux_open(stream_t *stream,int file_format,int aid,int vid,int sid);
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
+
+// AVI demuxer params:
+extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) index
+extern int force_ni;
+extern int pts_from_bps;
+
 
 
 

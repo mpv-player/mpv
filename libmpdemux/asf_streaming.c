@@ -3,6 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "config.h"
+
 #include "url.h"
 #include "http.h"
 #include "asf.h"

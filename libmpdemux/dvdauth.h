@@ -1,4 +1,3 @@
-//#include "config.h"
 #ifdef HAVE_LIBCSS
 #ifndef _MPLAYER_CSS_H
 #define _MPLAYER_CSS_H

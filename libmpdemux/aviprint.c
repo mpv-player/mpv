@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "config.h"
+
 #include "stream.h"
 #include "demuxer.h"
 

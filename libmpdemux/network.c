@@ -24,6 +24,8 @@
 #include <errno.h>
 #include <ctype.h>
 
+#include "config.h"
+
 #include "stream.h"
 #include "demuxer.h"
 

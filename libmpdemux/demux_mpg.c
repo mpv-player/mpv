@@ -8,12 +8,12 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#include "config.h"
-#include "dvdauth.h"
 #include "stream.h"
 #include "demuxer.h"
 #include "parse_es.h"
 #include "stheader.h"
+
+#include "dvdauth.h"
 
 //#define MAX_PS_PACKETSIZE 2048
 #define MAX_PS_PACKETSIZE (224*1024)
