@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- synced to 1.10 -->
+<appendix id="bugs">
+<title>Ismert hibák</title>
+<sect1 id="bugs-special">
+<title>Speciális rendszer/CPU-specifikus hibák/problémák</title>
+<itemizedlist>
+<listitem>
+<para>SIGILL (signal 4) P3-on 2.2.x kernelekkel:</para>
+<para>Probléma: a 2.2.x kernelben nincs megfelelõ (mûködõ) SSE támogatás</para>
+<para>Megoldás: frissítsd a kernelt 2.4.x-re</para>
+<para>Tüneti kezelés: <command>./configure --disable-sse</command></para>
+</listitem>
+<listitem>
+<para>Általános SIGILL (signal 4):</para>
+<para>Probléma: az <application>MPlayer</application> nem ugyan azon a gépen
+fordítottad és futtattad (például P3-on fordítottad és Celeron futtattad)</para>
+<para>Megoldás: ugyan azon a gépen fordítsd le az <application>MPlayer</application>t,
+amelyiken futtatni fogod!</para>
+<para>Tüneti kezelés: <command>./configure --disable-sse</command> stb. kapcsolók</para>
+</listitem>
+<listitem>
+<para>&quot;Internal buffer inconsistency&quot; (Belsõ buffer inkonzisztencia) a <application>MEncoder</application> futása közben:</para>
+<para>Probléma: ismert hiba, mely akkor fordul elõ, ha a lame &lt; 3.90 gcc 2.96 vagy 3.x-val lett fordítva.</para>
+<para>Megoldás: lame &gt;=3.90 használata.</para>
+<para>Tüneti kezelés: fordítsd le a lame-t a 2.95.x-es gcc-vel és távolíts el minden
+már telepített lame csomagot, valószínûleg gcc 2.96-tal fordították õket.</para>
+</listitem>
+<listitem>
+<para>Elrontott MP2/MP3 hang PPC-n:</para>
+<para>Probléma: ismert GCC fordítási hiba a PPC platformon, nincs még javítás.</para>
+<para>Tüneti kezelés: használd az FFmpeg (lassú) MP1/MP2/MP3 dekóderét (<option>-ac ffmpeg</option>)</para>
+</listitem>
+<listitem>
+<para>SIGSEGV (signal 11) a libmpeg2-ben, scaling+kódolásnál:</para>
+<para>Probléma: ismert GCC 2.95.2 MMX hiba</para>
+<para>Megoldás: frissíts 2.95.3-ra</para>
+</listitem>
+</itemizedlist>
+</sect1>
+
+<sect1 id="bugs-audio">
+<title>Különbözõ A-V szinkron és egyéb audió problémán</title>
+
+<sect2 id="bugs-delay-all">
+<title>Általánosan elõforduló audió késés vagy szaggatott hang (kilép az összes, vagy legalábbis sok fájlnál)</title>
+<itemizedlist>
+<listitem><para>
+Leggyakrabban: hibás audió vezérlõ! - próbálj meg más vezérlõt használni, nézd meg az ALSA 0.9-et
+OSS emulációval a <option>-ao oss</option> kapcsolóval, próbáld ki a <option>-ao sdl</option>-t is,
+néha segít. Ha a fájl lejátszása jó a <option>-nosound</option> kapcsolóval, akkor biztos lehetsz
+benne, hogy a hangkártya (vezérlõ) a hibás.
+</para></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem>
+<para>audió buffer problémák (a buffer méretét rosszul detektálja)</para>
+<para>Tüneti kezelés: az <application>MPlayer</application> <option>-abs</option> kapcsolója</para>
+</listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem><para>
+mintaráta problémák - talán a kártyád nem támogatja a fájlban használt mintarátát -
+próbáld ki a resampling szûrõt (<option>-af resample=...</option>)
+</para></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem>
+<para>lassú gép (CPU vagy VGA)</para>
+<para>próbáld ki a <option>-vo null</option> kapcsolót, ha úgy jól mûködik, akkor lassú
+a VGA kártyád/vezérlõd</para>
+<para>Tüneti kezelés: vegyél egy gyorsabb kártyát vagy olvasd el a tuningolási dokumentációt</para>
+<para>Megpróbálhatod még a <option>-framedrop</option>-ot is</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-delay-specific">
+<title>Audió késés/szinkronizáció elvesztése egy vagy néhány fájl esetén</title>
+<itemizedlist>
+<listitem>
+<para>hibás fájl</para>
+<para>
+Tüneti kezelés:
+  <itemizedlist>
+  <listitem>
+    <para><option>-ni</option> vagy <option>-nobps</option> kapcsoló (a
+    nem-átlapolt vagy hibás fájlokhoz)</para>
+    <para>and/or</para>
+  </listitem>
+  <listitem>
+    <para><option>-mc 0</option>(szükséges a rosszul átlapolt VBS audiós
+    fájlokhoz)</para>
+    <para>és/vagy</para>
+  </listitem>
+  <listitem>
+    <para><option>-delay</option> vagy a <keycap>+</keycap>/<keycap>-</keycap>
+    gombok futás közbeni beállításhoz</para>
+  </listitem>
+  </itemizedlist>
+Ha egyik sem segít, légy szíves töltsd fel a fájlt, és megnézzük (és javítjuk).
+</para>
+</listitem>
+<listitem>
+<para>a hangkártyád nem támogatja a 48kHz-es lejátszást</para>
+<para>Tüneti kezelés: vegyél egy jobb hangkártyát... vagy próbáld meg csökkenteni az
+fps-t 10%-kal (<option>-fps 27</option> kapcsoló egy 30fps-es filmnél) vagy használd a
+resample szûrõt</para>
+</listitem>
+<listitem>
+<para>lassú gép (ha az A-V nem 0 körüli és a státusz sorban lévõ utolsó szám
+emelkedik)</para>
+<para>Tüneti kezelés: <option>-framedrop</option></para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-nosound">
+<title>Egyáltalán nincs hang</title>
+<itemizedlist>
+<listitem>
+<para>a fájlod nem támogatott audió codec-et használ</para>
+<para>olvasd el a dokumentációt és segíts a támogatás elkészítésében</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-nopicture">
+<title>Egyáltalán nincs kép (csak üres szürke/zöld ablak)</title>
+<itemizedlist>
+<listitem>
+<para>a fájlod egy nem támogatott videó codec-et használ</para>
+<para>olvasd el a dokumentációt és segíts nekünk a támogatás elkészítésében</para>
+</listitem>
+<listitem>
+<para>
+az automatikusan kiválasztott codec nem tudja dekódolni a fájlt, próbálj meg másik
+codec-et kiválasztani a <option>-vc</option> vagy <option>-vfm</option> kapcsolókkal
+</para>
+</listitem>
+<listitem>
+<para>
+DivX 3.x fájlt akarsz lejátszani az OpenDivX dekódolóval vagy az XviD-del
+(<option>-vc odivx</option>) - telepítsd fel a DivX4Linux-ot és fordítsd újra a lejátszót
+</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-video">
+<title>Videó-kimeneti problémák</title>
+<para>
+Elsõ megjegyzés: a <option>-fs -vm</option> és <option>-zoom</option> kapcsolók
+csak ajánlások, (még) nem támogatja õket minden vezérlõ. Tehát az nem hiba, ha
+ezek nem mûködnek. Csak egy pár vezérlõ támogatja a scaling-et/nagyítást, ne várd
+ezt el az x11-tõl vagy a dga-tól.
+</para>
+
+<formalpara>
+<title>OSD/felirat vibrálás</title>
+<para>
+<itemizedlist>
+<listitem><para>x11 vezérlõ: bocs, ez jelenleg nem javítható</para></listitem>
+<listitem><para>xv vezérlõ: használd a <option>-double</option> kapcsolót</para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+<formalpara>
+<title>Zöld kép mga_vid használatakor (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
+<para>
+<itemizedlist>
+<listitem><para>az mga_vid rosszul detektálja a kártyád RAM-jának méretét, töltsd be újra
+a <option>mga_ram_size</option> kapcsolóval
+</para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+</sect2>
+</sect1>
+
+</appendix>
