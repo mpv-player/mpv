@@ -26,6 +26,7 @@
 #include "../../libmpdemux/stheader.h"
 #include "../../codec-cfg.h"
 
+#define GUI_REDRAW_WAIT 375
 
 #include "play.h"
 #include "widgets.h"
@@ -76,6 +77,7 @@ void mplMainDraw( void )
 extern void exit_player(char* how);
 extern int vcd_track;
 extern int osd_visible;
+static unsigned last_redraw_time = 0;
 
 void mplEventHandling( int msg,float param )
 {
@@ -329,6 +331,15 @@ set_volume:
 
 // --- timer events
    case evRedraw:
+        {
+          unsigned now = GetTimerMS();
+          extern int mplPBFade;
+          if ((now > last_redraw_time) &&
+              (now < last_redraw_time + GUI_REDRAW_WAIT) &&
+              !mplPBFade)
+            break;
+          last_redraw_time = now;
+        }
         mplMainRender=1;
         wsPostRedisplay( &appMPlayer.mainWindow );
 	wsPostRedisplay( &appMPlayer.barWindow );
