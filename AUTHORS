@@ -196,6 +196,7 @@ Döffinger, Reimar (reimar) <reimar.doeffinger@stud.uni-karlsruhe.de>
     * GL code fixes
     * various fixes all over the place
     * reworked live changing playback speed
+    * made MMS over HTTP stream selection work and modified ASF header parsing
 
 Dolbeau, Romain <romain@dolbeau.org>
     * random AltiVec (PowerPC multimedia extensions) stuff
