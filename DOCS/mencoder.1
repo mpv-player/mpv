@@ -29,6 +29,7 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-divx4opts\ <codec\ options> ]
 .RB [ \-lameopts\ <codec\ options> ]
 .RB [ \-pass\ <1/2> ]
+.RB [ \-passlogfile\ <filename> ]
 .RB [ \-ofps\ <fps> ]
 .RB [ \-o\ <filename> ]
 .RB [ \-frames\ <number> ]
@@ -188,6 +189,10 @@ Available options:
 .B \-pass <1/2>
 With this you can encode 2pass DivX4 files. First encode with -pass 1, then
 with the same parameters, encode with -pass 2.
+.TP
+.B \-passlogfile <filename>
+When encoding in 2pass mode, MEncoder dumps first pass' informations
+to the given file instead of the default divx2pass.log .
 .TP
 .B \-ofps <fps>
 The output file will have different frame/sec than the source.

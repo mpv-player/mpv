@@ -248,19 +248,14 @@ set aspect ratio of your screen. Examples:
 .TP
 .B \-playlist <file>
 play files according to this filelist (1 file/row).
-
 .TP
 .B \-slave
 This option switches on slave mode. This is intended for use
-of mplayer as a backend to other programs. Instead of intercepting keyboard
-events, mplayer will read simplistic command lines from its stdin.
-See section 
+of MPlayer as a backend to other programs. Instead of intercepting keyboard
+events, MPlayer will read simplistic command lines from its stdin.
+See section
 .B SLAVE MODE PROTOCOL
 for the syntax.
-
-
-
-
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
@@ -568,6 +563,7 @@ the DivX4 codec with -vc divx4)
 
 7 or 8          adjust saturation
 
+.IP
 .SH SLAVE MODE PROTOCOL
 If the -slave switch is given, playback is controlled by a 
 line-based protocol with the following tokens:

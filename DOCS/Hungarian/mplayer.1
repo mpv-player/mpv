@@ -49,6 +49,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-nodouble ]
 .RB [ \-double ]
 .RB [ \-stereo\ mód ]
+.RB [ \-channels\ n ]
 .RB [ \-srate\ Hz ]
 .RB [ \-osdlevel\ fokozat ]
 .RB [ \-config\ file ]
@@ -81,7 +82,6 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-bpp\ mélység ]
 .RB [ \-flip ]
 .RB [ \-playlist\ <file> ]
-.RB [ \-channels\ n ]
 .I - vagy file vagy eszköz
 .PP
 .SH LEÍRÁS
@@ -250,6 +250,13 @@ a képernyõ aspektusarányának beállítása. Példák:
 .TP
 .B \-playlist <file>
 az itt megadott fileban található fileok lejátszása (1 file/sor).
+.TP
+.B \-slave
+Ez az opció bekapcsolja a "slave" módot. Ez az üzemmód az MPlayernek más
+programokkal való kommunikációját segíti elõ. A billentyûzet figyelése helyett
+a stdin-rõl jövõ parancsokra fog reagálni a lejátszó. Lásd a
+.B SLAVE MODE PROTOCOL
+fejezetet.
 .IP
 .SH "HALADÓSZINTÛ OPCIÓK"
 .TP
@@ -556,6 +563,21 @@ z v. x          felirat késleltetésének változtatása +- 0.1 mp-cel
 5 v. 6          hue állítása
 
 7 v. 8          szaturáció állítása
+
+.IP
+.SH SLAVE MODE PROTOCOL
+Ha meg van adva a -slave opció, a lejátszás a következõ parancsokkal
+befolyásolható:
+.TP
+       stop            pillanatállj
+
+play            lejátszás folytatása
+
+seek <NUM>      folytatás NUM másodperctõl
+
+skip <NUM>      NUM másodperc átugrása (lehet negatív)
+
+quit            kilépés
 
 .IP
 .SH FILE-OK ÉS KÖNYVTÁRAK
