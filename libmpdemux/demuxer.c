@@ -569,10 +569,20 @@ extern int ts_check_file(demuxer_t * demuxer);
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
-extern int use_rawaudio;
-extern int use_rawvideo;
-
 int extension_parsing=1; // 0=off 1=mixed (used only for unstable formats)
+
+/*
+  NOTE : Several demuxers may be opened at the same time so
+  demuxers should NEVER rely on an external var to enable them
+  self. If a demuxer can't do any autodection it should only use
+  file_format. The user can explictly set file_format with the -demuxer
+  option so there is really no need for another extra var.
+  For conivence an option can be added to set file_format directly
+  to the right type (ex: rawaudio,rawvideo).
+  Also the stream can override the file_format so a demuxer wich rely
+  on a special stream type can set file_format at the stream level
+  (ex: tv,mf).
+*/
 
 static demuxer_t* demux_open_stream(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id,char* filename){
 
@@ -588,38 +598,25 @@ sh_video_t *sh_video=NULL;
 
 //printf("demux_open(%p,%d,%d,%d,%d)  \n",stream,file_format,audio_id,video_id,dvdsub_id);
 
-if ( mf_support )
- {
-  mp_msg(MSGT_DEMUXER,MSGL_INFO,"forced mf.\n");
-  file_format=DEMUXER_TYPE_MF;
- }
-
-if(stream->type == STREAMTYPE_CDDA || use_rawaudio) {
+if(file_format == DEMUXER_TYPE_RAWAUDIO) {
   demuxer = new_demuxer(stream,DEMUXER_TYPE_RAWAUDIO,audio_id,video_id,dvdsub_id);
-  file_format = DEMUXER_TYPE_RAWAUDIO;
 }
 if(file_format == DEMUXER_TYPE_RAWVIDEO) {
   demuxer = new_demuxer(stream,DEMUXER_TYPE_RAWVIDEO,audio_id,video_id,dvdsub_id);
-  //file_format = DEMUXER_TYPE_RAWVIDEO;
 }
 
 #ifdef USE_TV
 //=============== Try to open as TV-input: =================
-if((tv_param_on == 1) &&
-    (file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_TV)){
+if(file_format==DEMUXER_TYPE_TV){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_TV,audio_id,video_id,dvdsub_id);
   mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedTV);
-  file_format=DEMUXER_TYPE_TV;
 }
 #endif
 
 //=============== Try to open as multi file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MF){
-  if ( mf_support ){
+if(file_format==DEMUXER_TYPE_MF){
      demuxer=new_demuxer(stream,DEMUXER_TYPE_MF,audio_id,video_id,dvdsub_id);
-     file_format=DEMUXER_TYPE_MF;
      mp_msg( MSGT_DEMUXER,MSGL_INFO,"[demuxer] mf support.\n" );
-  }
 }
 
 //=============== Try to open as AVI file: =================
