@@ -9,7 +9,7 @@
 <BODY>
 
 
-<H1><A NAME=B>B függelék - Hogyan jelezd a hibákat</A></H1>
+<H1><A NAME=appendix_b>B függelék - Hogyan jelezd a hibákat</A></H1>
 
 <P>Egy jó bugreport nagyon hasznosan járul hozzá a szoftver fejlõdéséhez.
   Ennek megfelelõen mindkettejük elkészítése is bizonyos idõt igényel.
@@ -19,7 +19,7 @@
   kért információt meg kell adnod, és lépésrõl-lépésre követned kell
   az itt leírtakat.</P>
 
-<H2>Hogyan javítsak egy bugot?</H2>
+<H2><A NAME="fix">B.1 Hogyan javítsak egy bugot?</A></H2>
 
 <P>Ha elég tudást érzel magadban, próbáld kijavítani a hibát saját magad.
   Vagy talán már meg is tetted? Olvasd el ezt a
@@ -29,7 +29,7 @@
   listán lévõk segítenek ha kérdésed van.</P>
 
 
-<H2>Hogyan jelents be hibát?</H2>
+<H2><A NAME="report">B.2 Hogyan jelents be hibát?</A></H2>
 
 <P>Elõször is nézd meg a CVS verziót, mert lehet hogy az általad talált hibát
   már kijavítottuk. A fejlesztés nagyon gyors ütemben zajlik, a "hivatalosan"
@@ -71,7 +71,7 @@
   probléma megoldását.</P>
 
 
-<P><B>Hol jelentheted be?</B></P>
+<H2><A NAME="where">B.3 Hol jelentheted be?</H2>
 
 <P>Iratkozz fel az mplayer-users levelezési listára:<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
@@ -88,7 +88,7 @@
   Megjegyzendõ továbbá, hogy nem fogunk CC-zni (carbon copy) mindenkinek,
   így jó ötlet feliratkozni a listára mielõtt elküldöd a leveled.</P>
 
-<H3>Mibõl álljon a bugreport:</H3>
+<H2><A NAME="what">B.4 Mibõl álljon a bugreport</A></H2>
 
 <P>Szükség lehet naplófile-okra, konfigurációra, vagy egy minta file-ra a
   bugreporthoz.Ha ezek közül valamelyik nagy méretû, akkor jobb ha
@@ -97,9 +97,8 @@
   korlátozva, így ha ennél nagyobb állományt akarsz küldeni tömörítsd,
   vagy tedd letölthetõvé.</P>
 
-<H3>Mit tartalmazzon a bugreport?</H3>
 
-<H4>Rendszer információ</H4>
+<H3><A NAME="system">B.4.1 Rendszer információ</A></H3>
 
 <UL>
   <LI>milyen disztribúciót használsz?<BR>
@@ -140,7 +139,7 @@
   </LI>
 </UL>
 
-<P><B>Hardver és eszközmeghajtók:</B></P>
+<H3><A NAME="hardware">B.4.2 Hardver és eszközmeghajtók</A></H3>
 
 <UL>
   <LI>CPU típusa:<BR>
@@ -173,7 +172,14 @@
     kimenetét</LI>
 </UL>
 
-<P><B>Fordítási problémákhoz, hibákhoz</B></P>
+
+<H3><A NAME="configure">B.4.3 Configure problémákhoz</A></H3>
+
+<P>Ha hibát kapsz miközben a <CODE>./configure</CODE> fut, vagy egy
+  autodetektálás hibát jelez, olvasd el a <CODE>configure.log</CODE> file-t.</P>
+
+
+<H3><A NAME="compilation">B.4.4 Fordítási problémákhoz, hibákhoz</A></H3>
 
 <P><B>Kérlek küldd el az alábbi file-okat:</B></P>
   <UL>
@@ -192,11 +198,8 @@ file-okat is küldd el:
   <LI><CODE>libao2/config.mak</CODE></LI>
 </UL>
 
-<H4>Configure problémákhoz</H4>
 
-A <CODE>configure.log</CODE>-ot.
-
-<P><B>Lejátszási problémákhoz</B></P>
+<H3><A NAME="playback">B.4.5 Lejátszási problémákhoz</A></H3>
 
 <P>Kérjük mellékeld az <B>MPlayer</B> kimenetét legalább 1-es bõségi
   (verbosity) szinten, de <B>ne töröld ki sorokat a kimenetbõl</B>, mikor
@@ -224,12 +227,12 @@ A <CODE>configure.log</CODE>-ot.
   el! Ha a file a neten hozzaférhetõ, akkor a <B>pontos</B> URL elküldése is
   elég!
 
-<H4>Összeomlás (Michael Douglas) esetén</H4>
+<H3><A NAME="crash">B.4.6 Összeomlás (Michael Douglas) esetén</A></H3>
 
 <P>Futtasd az MPlayer-t <CODE>gdb</CODE>-ben, és a kimenetét küldd el
   nekünk, vagy coredump file esetén a következõk szerint járj el:</P>
 
-<H4>Hogyan nyerjünk ki értelmes tartalmat egy reprodukálható crash-bõl</H4>
+<H4><A NAME="debug">B.4.6.1 Hogyan nyerjünk ki értelmes tartalmat egy reprodukálható crash-bõl</A></H4>
 
 Fordítsd újra az <B>MPlayer</B>-t engedélyezve a hibakeresõ módot:
 
@@ -253,11 +256,12 @@ a következõket kell beírnod
 
 és a kimenetet elküldeni nekünk.
 
-<H4>Hogyan nyerjünk ki értelmes tartalmat a coredump-ból</H4>
+<H4><A NAME="core">B.4.6.2 Hogyan nyerjünk ki értelmes tartalmat a coredump-ból</A></H4>
 
 <P>Hozz létre egy file-t (parancs_file) a következõ tartalommal:</P>
 
-<P><CODE>disass $pc-32 $pc+32<BR>
+<P><CODE>bt<BR>
+  disass $pc-32 $pc+32<BR>
   info all-registers</CODE></P>
 
 <P>Ezután írd be a következõ parancsot:</P>
@@ -266,7 +270,7 @@ a következõket kell beírnod
 
 
 
-<H2>Tudom hogy mit csinálok...</H2>
+<H2><A NAME="advusers">B.5 Tudom hogy mit csinálok...</A></H2>
 
 <P>Ha a fentieket követve csináltál egy megfelelõ bugreportot, biztos
   vagy benne hogy <B>MPlayer</B>, nem pedig fordító, file, hang-meghajtó

@@ -20,7 +20,7 @@
   <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">archívumát</A>
   böngészgetni infóért.</P>
 
-<H3><A NAME=2pass>7.1 2, 3 menetes MPEG4 ("DivX") enkódolása</A></H3>
+<H2><A NAME=2pass>7.1 2, 3 menetes MPEG4 ("DivX") enkódolása</A></H2>
 
 <P><U><B>2 menetes enkódolás:</B></U> az elnevezés onnan jön, hogy ezzel a
   módszerrel a file <I>kétszer</I> lesz enkódolva. Az elsõ menet néhány pár
@@ -107,7 +107,7 @@
   -oac copy &lt;other options&gt; media.avi -o output.mpg</CODE></P>
 
 
-<H3><A NAME=rescaling>7.3 Filmek átméretezése</A></H3>
+<H2><A NAME=rescaling>7.3 Filmek átméretezése</A></H2>
 
 <P>Gyakran elõjön a filmek átméretezésének igénye. Ennek sok oka lehet,
   például a fileméret csökkentése, illetve a szükséges hálózati
@@ -124,7 +124,7 @@
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1300 -vop
   scale=640:480 -oac copy -o output.avi</CODE></P>
 
-<H3><A NAME=copying>7.4 Stream másolása</A></H3>
+<H2><A NAME=copying>7.4 Stream másolása</A></H2>
 
 <P>A <B>MEncoder</B> kétféleképpen tudja a bemeneti stream-eket kezelni:
   <B>enkódolja</B> vagy csak <B>átmásolja</B> õket. Ez a rész a <B>másolásról</B>
@@ -145,7 +145,7 @@
     használni.</LI>
 </UL>
 
-<H3><A NAME=fixing>7.5 Hibás index-szel rendelkezõ AVI-k rendbehozása</A></H3>
+<H2><A NAME=fixing>7.5 Hibás index-szel rendelkezõ AVI-k rendbehozása</A></H2>
 
 <P>A legkönnyebb dolog a világon. Egyszerûen átmásoljuk a video és audio
   streameket, és közben a <B>MEncoder</B> létrehozza a megfelelõ indexet is.
@@ -155,7 +155,21 @@
 <P>A parancs: <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
 
-<H3><A NAME=libavcodec>7.6 Enkódolás a <I>libavcodec</I> codec-ekkel</A></H3>
+<H3><A NAME=appending>7.5.1 Több AVI file összefûzése</A></H3>
+
+<P>Az index javító funkció mellékhatásként megoldást jelent AVI-k összefûzésére
+  is:</P>
+
+<P>Parancs: <CODE>cat 1.avi 2.avi | mencoder -noidx -ovc copy -oac copy -o
+  kimenet.avi -</CODE></P>
+
+<P>Megjegyzés: Az <CODE>1.avi</CODE> és <CODE>2.avi</CODE> file-ok azonos
+  codec-kel, felbontással, frame rate-tel kell rendelkeznie, és az
+  <CODE>1.avi</CODE>-nak nem szabad hibásnak lennie. A hibás file-ok javításának
+  folyamata a 7.5-ös fejezetben van leírva.</P>
+
+
+<H2><A NAME=libavcodec>7.6 Enkódolás a <I>libavcodec</I> codec-ekkel</A></H2>
 
 <P>A <A HREF="codecs.html#libavcodec">libavcodec</A>-kel egyszerûen lehet kódolni
   jónéhány érdekes video és audio formátumba (jelenleg az audio codec-ek nem
@@ -183,7 +197,7 @@
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
-<H3><A NAME=image_files>7.7 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></H3>
+<H2><A NAME=image_files>7.7 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></H2>
 
 <P>A <B>MEncoder</B> képes több JPEG vagy PNG file-ból filmet létrehozni.
   Egyszerû framecopy használatával pedig MJPEG (Motion JPEG) vagy MPNG
@@ -218,12 +232,15 @@
   &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc rawrgb -o
   kimenet.avi \*.png</CODE></P>
 
+<P><B>Megjegyzés:</B> a szélességnek 4-gyel oszthatónak kell lennie, ez a RAW
+  RGB AVI formátum egyik megkötése.</P>
+
 <P><I>MPNG (Motion PNG) film létrehozása az aktuális könyvtárban található összes PNG fileból:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy
   -o kimenet.avi \*.png</CODE></P>
 
 
-<H3><A NAME=vobsub>7.8  DVD feliratok VOBsub formátumúvá alakítása</A></H3>
+<H2><A NAME=vobsub>7.8  DVD feliratok VOBsub formátumúvá alakítása</A></H2>
 
 <P>A <B>MEncoder</B> képes DVD-rõl kivonni a feliratot, és átalakítani
   Vobsub formátumú felirattá. Ezek egy <CODE>.idx</CODE> és egy
@@ -262,7 +279,7 @@
     -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
 
-<H3><A NAME=aspect>7.9 Aspect ratio megõrzése</A></H3>
+<H2><A NAME=aspect>7.9 Aspect ratio megõrzése</A></H2>
 
 <P>A DVD-k és az SVCD-k (tehát az MPEG1/2 file-ok) tartalmazzák azt az értéket
   amibõl a lejátszó tudni fogja merre és mennyire kell a képet széthúzni,

@@ -211,20 +211,27 @@
 
 <H4><A NAME=xv_trident>2.3.1.2.1.6. Trident kártyák</A></H4>
 
-<P>Ha egy Trident kártyád van és a 4.1.0-es X-szel nem mûködik az xv kimenet,
+<P>Ha egy Trident kártyád van és a 4.1.0-es X-szel nem mûködik az Xv kimenet,
   installáld a 4.2.0-ás XFree-t, amiben már van teljesképernyõs támogatás a
   Cyberblade XP kártyákhoz.</P>
 
 
+<H4><A NAME="xv_powervr">2.3.1.2.1.7 Kyro/PowerVR kártyák</A></H4>
+
+<P>Ha egy Kyro alapú kártyán akarsz Xv-t használni (mint például a Hercules
+  Prophed 4000XT), le kell töltened a meghajtót a
+  <A HREF="http://www.powervr.com">PowerVR oldaláról</A>.</P>
+
+
 <H4><A NAME=dga>2.3.1.2.2 DGA</A></H4>
 
-<H4><A NAME=dga_summary>2.3.1.2.2.1 Elõszó</A></H4>
+<H4>ELÕSZÓ</H4>
 
 <P>Ez a dokumentum néhány szóban elmagyarázza, hogy általában véve mi is az a
   DGA, és mit tud az MPlayerben (és mit nem).</P>
 
 
-<H4><A NAME=dga_whatis>2.3.1.2.2.2 Mi az a DGA ?</A></H4>
+<H4>MI AZ A DGA?</H4>
 
 <P>A DGA szó a Direct Graphics Access rövidítése, és egy olyan módszert takar,
   amivel a program az X szerver kikerülésével közvetlenül írhat a framebuffer
@@ -247,7 +254,7 @@
   X-es driverétõl, ezért nem minden rendszeren mûködik ...</P>
 
 
-<H4><A NAME=dga_installation>2.3.1.2.2.3 DGA támogatás telepítése <B>MPlayer</B>-be</A></H4>
+<H4>DGA támogatás telepítése <B>MPlayer</B>-be</H4>
 
 <P>Elõször bizonyosodj meg arról, hogy az X betölti-e a DGA kiterjesztést, lásd
   /var/log/XFree86.0.log :</P>
@@ -284,7 +291,7 @@
   Ajánlatos kipróbálni továbbá a '-vo sdl:dga' opciót is, ha mûködik.
   Sokkal gyorsabb!!!</P>
 
-<H4><A NAME=dga_resolution>2.3.1.2.2.4 Felbontásváltás</A></H4>
+<H4>FELBONTÁSVÁLTÁS</H4>
 
 <P>A DGA driver képes felbontásváltásra. Ezzel kikerülhetõ a (lassú) szoftveres
   scale, ugyanakkor teljesképernyõs lesz a lejátszás. Ideális esetben pontosan
@@ -293,18 +300,32 @@
   definiáljuk, és a videokártya képességeitõl függenek. Az X szerver ezt
   a config file-t nézi át induláskor, és kikapcsolja mindazokat, amiket a
   kártya nem tud. A fennmaradó módok az X11 log-jában találhatóak:
-  <CODE>/var/log/XFree86.0.log</CODE>
-  Az A függelékben néhány modeline példa található.</P>
+  <CODE>/var/log/XFree86.0.log</CODE></P>
+
+  <P>Ezek a bejegyzések mûködnek az én (Acki) Riva128-asomon, az nv.o driverrel.</P>
+
+<PRE>
+  Section "Modes"
+    Identifier    "Modes[0]"
+    Modeline	"800x600"  40     800 840 968 1056  600 601 605 628 
+    Modeline	"712x600"  35.0   712 740 850 900   400 410 412 425
+    Modeline	"640x480"  25.175 640 664 760 800   480 491 493 525 
+    Modeline 	"400x300"  20     400 416 480 528   300 301 303 314 Doublescan
+    Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
+    Modeline	"352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
+    Modeline	"320x240"  12.588 320 336 384 400   240 245 246 262 Doublescan
+  EndSection
+</PRE>
 
 
-<H4><A NAME=dga_mplayer>2.3.1.2.2.5 DGA és <B>MPlayer</B></A></H4>
+<H4>DGA ÉS MPlayer</H4>
 
 <P>Az <B>MPlayer</B>-ben két helyen lehet DGA-t használni: az SDL driverben
   (-vo sdl:dga), valamint a DGA driverben (-vo dga). A fentiek mindkettõre
   igazak; a következõ néhány részben elmagyarazom, hogy is mûködik az <B>MPlayer</B>
   DGA drivere.</P>
 
-<H4><A NAME=dga_features>2.3.1.2.2.6 A DGA meghajtó képességei</A></H4>
+<H4>A DGA MEGHAJTÓ KÉPESSÉGEI</H4>
 
 <P>A DGA driver meghívása a -vo dga parancssori opció megadásával történik.
   Az alapértelmezett magatartás szerint a video méretéhez legközelebb esõ
@@ -336,7 +357,7 @@
   függõen a videokártyád DGA driverértõl.</P>
 
 
-<H4><A NAME=dga_speed>2.3.1.2.2.7 Sebesség</A></H4>
+<H4>SEBESSÉG</H4>
 
 <P>A DGA framebuffer használatával legalább olyan gyors képet kapunk mint X11-el,
   plusz teljeskepérnyõs módot. A százalékos CPU használati értekeket, amiket az 
@@ -357,7 +378,7 @@
 <P>Már láttam (divx) AVI file-okat lejátszódni Pentium MMX 266-on. AMD K6/2 CPU-k
   400Mhz-en vagy afölött már jók.</P>
 
-<H4><A NAME=dga_bugs>2.3.1.2.2.8 Ismert hibák</A></H4>
+<H4>ISMERT HIBÁK</H4>
 
 <P>Nos, néhány XFree fejlesztõ szerint a DGA nagy szörnyûség. Szerintük nem
   érdemes használni. Az implementációja nem minden driverben tökeletes.</P>
@@ -377,46 +398,6 @@
       ilyesmi...</LI>
   <LI>az OSD csak doublebuffering-el mûködik</LI>
 </UL>
-
-
-<H4><A NAME=dga_future>2.3.1.2.2.9 Beépítendõ dolgok</A></H4>
-
-<UL>
-  <LI>az új X11 render interface használata OSD-hez</LI>
-  <LI>hol van a TODO listám ???? :-((((</LI>
-</UL>
-
-
-<H4><A NAME=dga_modelines>2.3.1.2.2.A Néhány modeline</A></H4>
-
-<PRE>
-  Section "Modes"
-    Identifier    "Modes[0]"
-    Modeline	"800x600"  40     800 840 968 1056  600 601 605 628 
-    Modeline	"712x600"  35.0   712 740 850 900   400 410 412 425
-    Modeline	"640x480"  25.175 640 664 760 800   480 491 493 525 
-    Modeline 	"400x300"  20     400 416 480 528   300 301 303 314 Doublescan
-    Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
-    Modeline	"352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
-    Modeline	"320x240"  12.588 320 336 384 400   240 245 246 262 Doublescan
-  EndSection
-</PRE>
-
-<P>Ezek a bejegyzések mûködnek az én Riva128-asomon, az nv.o driverrel.</P>
-
-
-<H4><A NAME=dga_bug_reports>2.3.1.2.2.B Bug Reports</A></H4>
-
-<P>If you experience troubles with the DGA driver please feel free to file 
-  a bug report to me (e-mail address below). Please start mplayer with the 
-  -v option and include all lines in the bug report that start with vo_dga:</P>
- 
-<P>Please do also include the version of X11 you are using, the graphics card 
-  and your CPU type. The X11 driver module (defined in XF86-Config) might 
-  also help. Thanks!</P>
-
- 
-<P><I>Acki (acki@acki-netz.de, www.acki-netz.de)</I></P>
 
 
 <H4><A NAME=sdl>2.3.1.2.3 SDL</A></H4>
@@ -462,7 +443,7 @@ esd, arts)</TD><TR>
 
 </TABLE>
 
-<P><B>Ismert hibák:</B></P>
+<H4>ISMERT HIBÁK</H4>
 <UL>
   <LI>az sdl:aalib-nél a lenyomott gombok örökké ismétlõdnek. (használj
     <CODE>-vo aa</CODE>-t!) Ez SDL hiba, nem változtathatok rajta (SDL 1.2.1-el
@@ -856,11 +837,64 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
   lehetõség, ha átportolod (fõleg a libdha-t). Nagyon valószínû hogy a VIDIX
   minden olyan rendszeren mûködõképes, ahol az X11.</P>
 
-<P>És egy utolsó figyelmezetetés: sajnos/szerencsére a VIDIX <B>CSAK ROOT</B>
-  jogosultsággal elérhetõ, mivel közvetlen hardveres hozzáférésre van
-  szükség. A minimum, hogy a <B>suid</B> bitet bebillented az <B>MPlayer</B>
-  binárison.
-</P>
+<P>Mivel a VIDIX közvetlen hozzáférést igényel a hardverhez, vagy root
+  jogosultsággal kell futtatni, vagy a SUID bitet kell bebillenteni a
+  binárisra (<B>Vigyázat: Ez egy sechole!</B>). Alternatív megoldásként
+  lehetséges egy speciális kernelmodul használata, valahogy így:</P>
+
+<OL>
+  <LI>Töltsd le az svgalib
+    <A HREF="http://www.arava.co.il/matan/svgalib/">fejlesztõi verzióját</A>
+    (mint például az 1.9.17),<BR>
+    <B>VAGY</B><BR>
+    használd az Alex által az MPlayer-re specializált
+    verziót (nem igényel svgalib-et a fordításhoz),
+    <A HREF="http://www.mplayerhq.hu/~alex/svgalib_helper-1.9.17-mplayer.tar.bz2">innen</A>.</LI>
+  <LI>Fordítsd le az <CODE>svgalib_helper</CODE> könyvtárban az illetõ
+    modult, és töltsd be insmod-dal.</LI>
+  <LI>Mozgasd át az <CODE>svgalib-1.9.17/kernel/svgalib_helper</CODE> könyvtárat
+    ide: <CODE>mplayer/main/libdha/svgalib_helper</CODE>.</LI>
+  <LI>Ha az svgalib-es verziót töltötted le, a <CODE>libdha/Makefile</CODE>
+    file-ban az "svgalib_helper"-t tartalmazó CFLAGS sor elõl töröld ki a
+    commentet.</LI>
+  <LI>Fordíts újra és installáld a libdha-t.</LI>
+</OL>
+
+
+<H4><A NAME="vidix_ati">2.3.1.2.12.1 ATI kártyák</A></H4>
+
+<P>Jelenleg a legtöbb ATI kártya natív támogatást élvez, a Mach64-tõl kezdve
+  a legújabb Radeon-okig.</P>
+
+<P>Két bináris van: <CODE>radeon_vid</CODE> a Radeon-okhoz, és
+  <CODE>rage128_vid</CODE> a Rage 128 kártyákhoz. Lehet kényszeríteni a
+  betöltésüket, vagy engedni a VIDIX-nek hogy automatikusan megkeresse a
+  használandót közülük.</P>
+
+
+<H4><A NAME="vidix_matrox">2.3.1.2.12.2 Matrox kártyák</A></H4>
+
+<P>A Matrox G200,G400,G450 és G550 bizonyosan mûködik.</P>
+
+<P>A meghajtó támogatja a video equalizereket, és legalább olyan gyors mint a
+  <A HREF="#mga_vid">Matrox framebuffer</A>.</P>
+
+
+<H4><A NAME="vidix_trident">2.3.1.12.3 Trident kártyák</A></H4>
+
+<P>Rendelkezésre áll egy meghajtó a Trident Cyberblade/i1 chipset-hez, amely
+  a VIA Epia alaplapokon található.</P>
+
+<P>A meghajtó írója és karbantartója Alastair M. Robinson, akinek
+  <A HREF="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">honlapjáról</A>
+  letölthetõk ezen meghajtónak esetleges újabb verziói is. Az MPlayer CVS-be
+  hamar bekerülnek ezek az újítások.</P>
+
+
+<H4><A NAME="vidix_3dlabs">2.3.1.2.12.4 3DLabs kártyák</A></H4>
+
+<P>Bár van meghajtó a 3DLabs GLINT R3 és Permedia3 chip-ekhez, ezeket
+  még senki nem tesztelte, ígyhát nyugodtan írjatok róla.</P>
 
 
 <H4><A NAME=directfb>2.3.1.2.13 DirectFB</A></H4>
@@ -1167,8 +1201,9 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 
 <H4><A NAME=blinken>2.3.1.4.2. Blinkenlights</A></H4>
 
-<P>Ez a kimeneti meghajtó a Blinkenlights UDP protokolljával játszik le
-  videot. Ha nem tudod mi az a Blinkenlights, nincs erre szükséged.</P>
+<P>Ez a kimeneti meghajtó a <A HREF="http://www.blinkenlights.de">Blinkenlights</A>
+  UDP protokolljával játszik le videot. Ha nem tudod mi az a Blinkenlights,
+  nincs erre szükséged.</P>
 
 
 <H4><A NAME=tv_out>2.3.1.5 TV kimenet</A></H4>

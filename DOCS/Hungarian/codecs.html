@@ -22,11 +22,11 @@
   <LI>MPEG1 (VCD) és MPEG2 (DVD) video</LI>
   <LI>natív dekóderek DivX ;-), OpenDivX, DivX4, DivX5, M$ MPEG4 v1, v2
     és más MPEG4 variánsokhoz</LI>
-  <LI>natív dekóder Windows Media Video 7-hez (WMV1), és Win32 dekóder a
-    Windows Media Video 8-hoz (WMV2), amik .wmv file-okban találhatóak</LI>
+  <LI>natív dekóder Windows Media Video 7/8-hoz (WMV1/WMV2), és Win32 dekóder a
+    Windows Media Video 9-hoz (WMV3), amik .wmv file-okban találhatóak</LI>
   <LI><B>natív Sorenson 1 (SVQ1) dekóder</B></LI>
   <LI><B>Win32/QT Sorenson 3 (SVQ3) dekóder</B></LI>
-  <LI>3ivx dekóder</LI>
+  <LI>3ivx v1, v2 dekóder</LI>
   <LI>Cinepak és Intel Indeo codecek (3.1, 3.2, 4.1, 5.0)</LI>
   <LI>MJPEG, AVID, VCR2, ASV2 és más hardware formátumok</LI>
   <LI>VIVO 1.0, 2.0, I263 és más h263+ variánsok</LI>
@@ -79,21 +79,22 @@
 <P>Megj: ha a -vo meghajtód támogat direct renderinget, a <CODE>-vc divx4</CODE>
   gyorsabb lehet!</P>
 
-<P>A codec az <A HREF="http://avifile.sourceforge.net">avifile</A> project
-  lapjarol toltheto le. Letoltes utan csomagold ki es root-kent futtasd le
-  az <CODE>install.sh</CODE> scriptet. Ne felejtsd el hozzaadni az
-  <CODE>/usr/local/lib</CODE> utvonalat az <CODE>/etc/ld.so.conf</CODE>
-  file vegere, majd futtasd az ldconfig-ot.</P>
+<P>A codec az <A HREF="http://avifile.sourceforge.net">avifile</A> project,
+  vagy a <A HREF="http://www.divx.com">divx.com</A>
+  lapjárol tölthetõ le. Letöltés után csomagold ki és root-ként futtasd le
+  az <CODE>install.sh</CODE> scriptet. Ne felejtsd el hozzáadni az
+  <CODE>/usr/local/lib</CODE> útvonalat az <CODE>/etc/ld.so.conf</CODE>
+  file végére, majd futtasd az ldconfig-ot.</P>
 
-<P>A CVS verzio a kovetkezokepp toltheto le:</P>
+<P>A RÉGI OpenDivX CVS verzió a következõképp tölthetõ le:</P>
 
 <OL>
   <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot
     login</CODE></LI>
   <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot co
     divxcore</CODE></LI>
-  <LI>A kod ket reszre van osztva, decore es encore neven. Ezeket kulon-kulon
-    kell leforditani. A decore resz forditasa igy tortenik:
+  <LI>A kód két részre van osztva, decore és encore néven. Ezeket külön-külön
+    kell leforditani. A decore rész forditása így történik:
     <PRE>
     cd divxcore/decore/build/linux
     make
@@ -108,10 +109,10 @@
     cp ../../src/decore.h /usr/local/include
     </PRE>
     </LI>
-  <LI>Az encore reszhez nincs linuxos Makefile, es az MMX optimalizalt resz
+  <LI>Az encore részhez nincs linuxos Makefile, és az MMX optimalizált rész
     csak Windows-on fordul le. Viszont
     <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">ezzel a
-    Makefile-lal</A> szepen lefordul Linux alatt is.
+    Makefile-lal</A> szépen lefordul Linux alatt is.
     <PRE>
     cd ../../../encore/build
     mkdir linux
@@ -125,16 +126,16 @@
     </LI>
 </OL>
 
-<P>Az MPlayer automatikusan detektalja a helyesen felinstallalt DivX4/5-ot,
-  a forditas a szokasos modon tortenik. Ha valami folytan megse jon ossze,
-  a <CODE>configure</CODE>-nak vannak opcioi erre a celra.</P>
+<P>Az MPlayer automatikusan detektálja a helyesen felinstallált DivX4/5-ot,
+  a fordítás a szokásos módon történik. Ha valami folytán mégse jön össze,
+  a <CODE>configure</CODE>-nak vannak opciói erre a célra.</P>
 
 
 <H4><A NAME=libavcodec>2.2.1.2  ffmpeg DivX/libavcodec</A></H4>
 
 <P>Az <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> tartalmaz egy
   <B>nyitott forráskódú</B> codec csomagot, amely képes
-  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1
+  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV
   codec-ekkel enkódolt videok, és WMA-val (Windows Media Audio) kódolt
   audiok lejátszására. Továbbá nemcsakhogy néhányukkal
   még enkódolni is lehet, de ezek sokkal szebbek és gyorsabbak mint a
@@ -194,7 +195,7 @@
     vid_iv50.xa</CODE></LI>
 </OL>
 
-<P>Ezek a 10-es video codec családba tartoznak, így a <CODE>-vfm 10</CODE>
+<P>Ezek az <CODE>xanim</CODE> video codec családba tartoznak, így a <CODE>-vfm 10</CODE>
 opcióval megadhatod az <B>MPlayer</B>-nek, hogy ezeket használja, ha
 lehetséges.</P>
 
@@ -312,7 +313,8 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
     MPlayer része alapállapotban, míg a másik dekóder a libavcodec-ben
     található. Ezek a <CODE>-vc svq1</CODE> illetve <CODE>-vc ffsvq1</CODE>
     opciókkal használhatóak, ilyen sorrendben. Némely file-ok csak az egyikkel
-    mûködnek, így hiba esetén ajánlott mindkettõt kipróbálni.</LI>
+    mûködnek, így hiba esetén ajánlott mindkettõt kipróbálni. A dekódert a
+    Xine készítõi irták.</LI>
   <LI>Sorenson 3 (fourcc <I>SVQ3</I>) - dekódolás a <B>Win32 QuickTime
     könyvtárral</B></LI>
 </UL>
@@ -497,7 +499,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 
 <P><B>Megj.:</B> ha nincs <CODE>Filename</CODE> mezõ, és a
   <CODE>DisplayName</CODE> valami olyat tartalmaz, hogy <CODE>device:dmo</CODE>,
-  akkor az a codec egy DMO codec, amit jelenleg az <B>MPlayer</B> nem támogat.</P>
+  akkor az a codec egy DMO codec.</P>
 
 
 <P><B>Régi módszer:</B> kezdjük átnézni azt az istenverte registry-t...</P>

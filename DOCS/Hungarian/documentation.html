@@ -122,6 +122,7 @@
 	    <LI><A HREF="video.html#xv_ati">2.3.1.2.1.4 ATI kártyák</A></LI>
 	    <LI><A HREF="video.html#xv_neomagic">2.3.1.2.1.5 NeoMagic kártyák</A></LI>
 	    <LI><A HREF="video.html#xv_trident">2.3.1.2.1.6 Trident kártyák</A></LI>
+	    <LI><A HREF="video.html#xv_powervr">2.3.1.2.1.7 Kyro/PowerVR kártyák</A></LI>
 	  </UL>
 	  <LI><A HREF="video.html#dga">2.3.1.2.2 DGA</A></LI>
 	  <LI><A HREF="video.html#sdl">2.3.1.2.3 SDL</A></LI>
@@ -134,6 +135,10 @@
 	  <LI><A HREF="video.html#vesa">2.3.1.2.10 VESA - megjelenítés a VESA BIOS segítségével</A></LI>
 	  <LI><A HREF="video.html#x11">2.3.1.2.11 X11</A></LI>
 	  <LI><A HREF="video.html#vidix">2.3.1.2.12 Vidix</A></LI>
+	    <LI><A HREF="video.html#vidix_ati"> 2.3.1.2.12.1 ATI kártyák</A></LI>
+	    <LI><A HREF="video.html#vidix_matrox"> 2.3.1.2.12.2 Matrox kártyák</A></LI>
+	    <LI><A HREF="video.html#vidix_trident"> 2.3.1.2.12.3 Trident kártyák</A></LI>
+	    <LI><A HREF="video.html#vidix_3dlabs"> 2.3.1.2.12.4 3DLabs kártyák</A></LI>
 	  <LI><A HREF="video.html#directfb">2.3.1.2.13 DirectFB</A></LI>
 	  <LI><A HREF="video.html#dfbmga">2.3.1.2.14 DirectFB/Matrox (dfbmga)</A></LI>
         </UL>
@@ -256,6 +261,9 @@
         <LI><A HREF="encoding.html#rescaling">7.3 Filmek átméretezése</A></LI>
         <LI><A HREF="encoding.html#copying">7.4 Stream másolása</A></LI>
         <LI><A HREF="encoding.html#fixing">7.5 Hibás index-û AVI-k rendbehozása</A></LI>
+        <UL>
+          <LI><A HREF="encoding.html#appending">7.5.1 Több AVI file egybefûzése</A></LI>
+        </UL>
         <LI><A HREF="encoding.html#libavcodec">7.6 Enkódolás a libavcodec codec-ekkel</A></LI>
         <LI><A HREF="encoding.html#image_files">7.7 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></LI>  
         <LI><A HREF="encoding.html#vobsub">7.8 DVD feliratok VOBsub formátumúvá alakítása</A></LI>  
@@ -372,9 +380,7 @@
     <LI>opcionálisan külsõ audio stream használata</LI>
     <LI>1, 2 vagy 3 menetes enkódolás</LI>
     <LI><B>VBR</B> MP3 audio - <B>FONTOS</B>: a VBR-es mp3-ak nem minden
-      körülmények között lejátszhatóak windows rendszereken! Viszont a
-      <B>MEncoderrel</B> által létrehozott CBR AVI-k teljesen lejátszhatatlanok
-      Win32 lejátszókkal :)</LI>
+      körülmények között lejátszhatóak windows rendszereken!</LI>
     <LI>PCM audio</LI>
     <LI>stream másolás</LI>
     <LI>bemeneti file A/V szinkronizálása (PTS-alapú, az -mc 0 opcióval
@@ -477,7 +483,8 @@
 <UL>
   <LI><B>binutils</B> - <B>2.11.x</B> ajánlott. Ez a program felelõs az
     MMX/3DNow!/stb utasításokért, ezért igen fontos.</LI>
-  <LI><B>gcc</B> - <B>2.95.3</B>-tól <B>2.95.4</B> verziók ajánlottak.
+  <LI><B>gcc</B> - <B>2.95.3</B>-tól <B>2.95.4</B> verziók ajánlottak, végsõ
+    esetben pedig <B>3.2+</B>.
     <B>SOHA</B> ne használj 2.96-ot vagy 3.x.x-et !!! Hibás kódot generálnak.
     Ha úgy döntesz hogy 2.96 helyett mást használsz, NE a 3.0 mellett
     dönts, csak azért mert újabb! Sok tekintetben bugosabb is mint a 2.96.
@@ -811,8 +818,9 @@
 
 <H2><A NAME=gui>1.3. És a grafikus felület?</A></H2>
 
-<P>A grafikus felület GTK-t használ (de alapban nem épül rá), így a gtk-t (és a
-  hozzávaló fejlesztõi csomagokat) fel kell installálni. A lefordításhoz meg
+<P>A grafikus felület GTK 1.2.x-et és libpng-t használ, így ezeket és a
+  fejlesztõi csomagjait (általában gtk-dev és libpng-dev) 
+  fel kell installálni. A lefordításhoz meg
   kell adni a <CODE>--enable-gui</CODE> opciót a ./configure-nak. Ezután, a GUI
   mód bekapcsolásához:</P>
 
@@ -917,7 +925,7 @@
 <H3><A NAME="mpsub">1.4.1 Az MPlayer saját feliratformátuma (MPsub)</A></H3>
 
 <P>Az <B>MPlayer</B> tartalmaz egy új, <B><I>MPsub</I></B> nevû feliratformátumot.
-  A tervezés az én (Gabucino) kezem munkáját dicséri. A legfõbb újítása hogy
+  A tervezés Gabucino keze munkáját dicséri. A legfõbb újítása hogy
   <I>dinamikusan</I> idõ alapú (bár van képkocka alapú módja is). Példa (a
   <A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A> file-ból):
 </P>
