@@ -497,7 +497,7 @@ case ACODEC_VBRMP3:
 }
 }
 
-printf("Writting AVI header...\n");
+printf("Writing AVI header...\n");
 aviwrite_write_header(muxer,muxer_f);
 
 switch(mux_v->codec){
@@ -795,7 +795,7 @@ if(sh_audio){
 
 } // while(!eof)
 
-printf("\nWritting AVI index...\n");
+printf("\nWriting AVI index...\n");
 aviwrite_write_index(muxer,muxer_f);
 printf("Fixup AVI header...\n");
 fseek(muxer_f,0,SEEK_SET);
