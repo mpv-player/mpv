@@ -2486,8 +2486,8 @@ EOF
 fi
 if test "$_x11" = yes ; then
   _def_x11='#define HAVE_X11 1'
-  _vosrc="$_vosrc x11_common.c vo_x11.c"
-  _vomodules="x11 $_vomodules"
+  _vosrc="$_vosrc x11_common.c vo_x11.c vo_xover.c"
+  _vomodules="x11 xover $_vomodules"
 else
   _def_x11='#undef HAVE_X11'
   _inc_x11=''
@@ -3198,8 +3198,8 @@ echocheck "DXR2"
 if test "$_dxr2" = auto; then
   _dxr2=no
   for _inc_dxr2 in "$_inc_dxr2" \
-		   "-I /usr/local/include/dxr2" \
-		   "-I /usr/include/dxr2"; do
+		   "-I/usr/local/include/dxr2" \
+		   "-I/usr/include/dxr2"; do
     cat > $TMPC << EOF
 #include <dxr2ioctl.h>
 int main(void) { return 0; }

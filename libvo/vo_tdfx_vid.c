@@ -35,6 +35,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "aspect.h"
+#include "mp_msg.h"
 
 #include "fastmemcpy.h"
 #include "drivers/tdfx_vid.h"
@@ -42,7 +43,7 @@
 
 static vo_info_t info = 
 {
-	"tdfx_vid video output",
+	"tdfx vid",
 	"tdfx_vid",
 	"Albeu",
 	""
@@ -71,6 +72,7 @@ static uint8_t current_ip_buf = 0;
 static uint32_t buffer_stride[3];
 
 static int use_overlay = 1;
+static tdfx_vid_overlay_t tdfx_ov;
 
 // FIXME
 static void clear_screen(void) {
@@ -147,6 +149,11 @@ flip_page(void)
   printf("Flip\n");
 #endif
   if(use_overlay) {
+    // TDFX_VID_OVERLAY_ON does nothing if the overlay is alredy on
+    if(!ioctl(tdfx_fd,TDFX_VID_OVERLAY_ON)) { // X11 killed the overlay :(
+      if(ioctl(tdfx_fd,TDFX_VID_SET_OVERLAY,&tdfx_ov))
+	mp_msg(MSGT_VO, MSGL_ERR, "tdfx_vid: set_overlay failed\n");
+    }
     // These formats need conversion
     switch(src_fmt) {
     case IMGFMT_BGR8:
@@ -230,24 +237,25 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   if(tdfx_fd < 0)
     return 1;
-
-  if(!vo_screenwidth)
-    vo_screenwidth = tdfx_cfg.screen_width;
-  if(!vo_screenheight)
-    vo_screenheight = tdfx_cfg.screen_height;
-
-  aspect_save_orig(width,height);
-  aspect_save_prescale(d_width,d_height);
-  aspect_save_screenres(vo_screenwidth,vo_screenheight);
-	
-  if(fullscreen&0x01) { /* -fs */
-    aspect(&d_width,&d_height,A_ZOOM);
-    vo_fs = VO_TRUE;
-  } else {
-    aspect(&d_width,&d_height,A_NOZOOM);
-    vo_fs = VO_FALSE;
+  // When we are run as sub vo we must follow the size gaven to us
+  if(!(fullscreen & VOFLAG_XOVERLAY_SUB_VO)) {
+    if(!vo_screenwidth)
+      vo_screenwidth = tdfx_cfg.screen_width;
+    if(!vo_screenheight)
+      vo_screenheight = tdfx_cfg.screen_height;
+    
+    aspect_save_orig(width,height);
+    aspect_save_prescale(d_width,d_height);
+    aspect_save_screenres(vo_screenwidth,vo_screenheight);
+    
+    if(fullscreen&0x01) { /* -fs */
+      aspect(&d_width,&d_height,A_ZOOM);
+      vo_fs = VO_TRUE;
+    } else {
+      aspect(&d_width,&d_height,A_NOZOOM);
+      vo_fs = VO_FALSE;
+    }
   }
-
   src_width = width;
   src_height = height;
   buffer_size = 0;
@@ -325,8 +333,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     ov.format = ov_fmt;
     ov.dst_width = dst_width;
     ov.dst_height = dst_height;
-    ov.dst_x = 0;
-    ov.dst_y = 0;
+    ov.dst_x = vo_dx;
+    ov.dst_y = vo_dy;
     ov.use_colorkey = 0;
 
     if(ioctl(tdfx_fd,TDFX_VID_SET_OVERLAY,&ov)) {
@@ -334,6 +342,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
       use_overlay = 0;
       break;
     }
+    tdfx_ov = ov;
     if(use_overlay == 1) {
       if(ioctl(tdfx_fd,TDFX_VID_OVERLAY_ON)) {
 	printf("tdfx_vid: Overlay on failed\n");
@@ -609,6 +618,32 @@ static uint32_t fullscreen(void) {
   return VO_TRUE;
 }
 
+static uint32_t set_window(mp_win_t* w) {
+  if(!use_overlay) return VO_FALSE;
+
+  tdfx_ov.dst_x = w->x;
+  tdfx_ov.dst_y = w->y;
+  tdfx_ov.dst_width = w->w;
+  tdfx_ov.dst_height = w->h;
+
+  if(ioctl(tdfx_fd,TDFX_VID_SET_OVERLAY,&tdfx_ov))
+    mp_msg(MSGT_VO, MSGL_V, "tdfx_vid: set window failed\n");
+
+  return VO_TRUE;
+}
+
+static uint32_t set_colorkey(mp_colorkey_t* colork) {
+  if(!use_overlay) return VO_FALSE;
+
+  tdfx_ov.colorkey[0] = tdfx_ov.colorkey[1] = colork->x11;
+  tdfx_ov.use_colorkey = 1;
+  tdfx_ov.invert_colorkey = 0;
+
+  if(ioctl(tdfx_fd,TDFX_VID_SET_OVERLAY,&tdfx_ov))
+    mp_msg(MSGT_VO, MSGL_V, "tdfx_vid: set colorkey failed\n");
+
+  return VO_TRUE;
+}
 
 static uint32_t control(uint32_t request, void *data, ...)
 {
@@ -623,6 +658,12 @@ static uint32_t control(uint32_t request, void *data, ...)
     return start_slice(data);
   case VOCTRL_FULLSCREEN:
     return fullscreen();
+  case VOCTRL_XOVERLAY_SUPPORT:
+    return VO_TRUE;
+  case VOCTRL_XOVERLAY_SET_COLORKEY:
+    return set_colorkey(data);
+  case VOCTRL_XOVERLAY_SET_WIN:
+    return set_window(data);
   }
   return VO_NOTIMPL;
 }

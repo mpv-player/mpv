@@ -52,6 +52,7 @@ int vo_directrendering=0;
 extern vo_functions_t video_out_mga;
 extern vo_functions_t video_out_xmga;
 extern vo_functions_t video_out_x11;
+extern vo_functions_t video_out_xover;
 extern vo_functions_t video_out_xv;
 extern vo_functions_t video_out_gl;
 extern vo_functions_t video_out_gl2;
@@ -131,6 +132,7 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_X11
         &video_out_x11,
+        &video_out_xover,
 #endif
 #ifdef HAVE_GL
         &video_out_gl,
