@@ -157,12 +157,13 @@ GNU C/C++ compiler is configured with or without the GNU assembler.
 
 <para>
 On Solaris x86, you need the GNU assembler and the GNU C/C++ compiler,
-configured to use the GNU assembler! The mplayer code on the x86 platform
-makes heavy use of MMX, SSE and 3DNOW! instructions that cannot be compiled
-using Sun's assembler <filename>/usr/ccs/bin/as</filename>.
+configured to use the GNU assembler! The <application>MPlayer</application>
+code on the x86 platform makes heavy use of MMX, SSE and 3DNOW! instructions
+that cannot be compiled using Sun's assembler <filename>/usr/ccs/bin/as</filename>.
 </para>
 
-<para>The <filename>configure</filename> script tries to find out, which
+<para>
+The <filename>configure</filename> script tries to find out, which
 assembler program is used by your &quot;gcc&quot; command (in case the autodetection
 fails, use the <option>--as=<replaceable>/wherever/you/have/installed/gnu-as</replaceable></option>
 option to tell the <filename>configure</filename> script where it can find GNU
@@ -216,18 +217,6 @@ accessed modulo 4GB
 The hsfs problem can be fixed by installing patch 109764-04 (sparc) / 109765-04 (x86).
 </para></listitem>
 </itemizedlist>
-
-<para>
-On Solaris with an UltraSPARC CPU, you can get some extra speed by using the
-CPU's VIS instructions for certain time consuming operations. VIS acceleration
-can be used in <application>MPlayer</application> by calling functions in Sun's
-<ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mediaLib</ulink>.
-</para>
-
-<para>
-VIS accelerated operations from mediaLib are used for mpeg2 video decoding
-and for color space conversion in the video output drivers.
-</para>
 </sect1>
 
 <sect1 id="irix">
