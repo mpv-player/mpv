@@ -896,7 +896,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		||(strcmp(priv->driver, "directx") == 0)
 		||(strcmp(priv->driver, "Quartz") == 0)
 		||((strcmp(priv->driver, "aalib") == 0)
-		&& priv->X)) {
+		&& priv->X)
+		||(strcmp(priv->driver, "Quartz") == 0)) {
 			if(verbose) printf("SDL: setting windowed mode\n");
             set_video_mode(priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlflags);
 		}
