@@ -1648,7 +1648,11 @@ char** sub_filenames(char* path, char *fname)
 
 		// does it end with a subtitle extension?
 		found = 0;
+#ifdef USE_ICONV
 		for (i = (sub_cp ? 1 : 0); sub_exts[i]; i++) {
+#else
+		for (i = 0; sub_exts[i]; i++) {
+#endif
 		    if (strcmp(sub_exts[i], tmp_fname_ext) == 0) {
 			found = 1;
 			break;
