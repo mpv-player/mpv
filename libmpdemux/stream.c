@@ -276,6 +276,7 @@ void free_stream(stream_t *s){
 //    kill(s->cache_pid,SIGTERM);
     kill(s->cache_pid,SIGKILL);
     waitpid(s->cache_pid,NULL,0);
+    shmem_free(s->cache_data);
   }
   if(s->fd>0) close(s->fd);
   switch(s->type) {
