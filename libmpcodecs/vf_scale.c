@@ -35,6 +35,7 @@ static unsigned int outfmt_list[]={
     IMGFMT_Y800,
     IMGFMT_Y8,
     IMGFMT_YVU9,
+    IMGFMT_IF09,
     0
 };
 
@@ -162,6 +163,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_Y800: 
     case IMGFMT_Y8: 
     case IMGFMT_YVU9: 
+    case IMGFMT_IF09: 
     {
 	unsigned int best=find_best_out(vf);
 	int flags;
