@@ -82,7 +82,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   pformat = format;
   if (format == IMGFMT_YV12) bpp = 32;
   else bpp = format & 255;
-  if (d_width > 800)
+  if (width > 800)
     switch (bpp) {
       case 32: vid_mode = 36; break;
       case 24: vid_mode = 25; break;
@@ -90,7 +90,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
       case 15: vid_mode = 23; break;
     }
   else
-    if (d_width > 640)
+    if (width > 640)
       switch (bpp) {
         case 32: vid_mode = 35; break;
         case 24: vid_mode = 22; break;
@@ -125,7 +125,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   
   orig_w = width;
   orig_h = height;
-  if (fullscreen && (WIDTH != orig_w)) {
+  if ((fullscreen & 0x04) && (WIDTH != orig_w)) {
     if (((orig_w*1.0) / orig_h) < (4.0/3)) {
       maxh = HEIGHT;
       scaling = maxh / (orig_h * 1.0);
