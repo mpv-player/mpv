@@ -11,7 +11,7 @@
 #define evPrev              6
 #define evNext              7
 #define evLoad              8
-#define evEqualeaser        9
+#define evEqualizer         9
 #define evPlayList          10
 #define evIconify           11
 #define evAbout             12

@@ -10,7 +10,7 @@ evName evNames[] =
   { evPrev,              "evPrev"              },
   { evNext,              "evNext"              },
   { evLoad,              "evLoad"              },
-  { evEqualeaser,        "evEqualeaser"        },
+  { evEqualizer,         "evEqualizer"         },
   { evPlayList,          "evPlaylist"          },
   { evExit,              "evExit"              },
   { evIconify,           "evIconify"           },

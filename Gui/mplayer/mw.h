@@ -365,7 +365,7 @@ NoPause:
    case evSkinBrowser: gtkShow( evSkinBrowser,skinName ); break;
    case evAbout:       gtkShow( evAbout,NULL ); break;
    case evPreferences: gtkShow( evPreferences,NULL ); break;
-   case evEqualeaser:  gtkMessageBox( GTK_MB_WARNING,"Sorry, this feature not implemented ..." ); break;
+   case evEqualizer:   gtkMessageBox( GTK_MB_WARNING,"Sorry, this feature is not implemented yet ..." ); break;
 
    case evForward1min:      mplRelSeek( 60 );  break;
    case evBackward1min:     mplRelSeek( -60 ); break;
@@ -615,7 +615,7 @@ void mplMainKeyHandle( int KeyCode,int Type,int Key )
       case wsb:
       case wsB:         msg=evSkinBrowser; break;
       case wse:
-      case wsE:         msg=evEqualeaser; break;
+      case wsE:         msg=evEqualizer; break;
       case wsf:
       case wsF:         msg=evFullScreen; break;
       case wsl:
