@@ -21,8 +21,14 @@ extern ao_functions_t audio_out_null;
 #ifdef HAVE_ALSA5
  extern ao_functions_t audio_out_alsa5;
 #endif
-//extern ao_functions_t audio_out_alsa9;
-extern ao_functions_t audio_out_esd;
+/*
+#ifdef HAVE_ALSA9
+ extern ao_functions_t audio_out_alsa9;
+#endif
+#ifdef HAVE_ESD
+ extern ao_functions_t audio_out_esd;
+#endif
+*/
 #ifdef HAVE_SDL
 extern ao_functions_t audio_out_sdl;
 #endif
@@ -34,8 +40,14 @@ ao_functions_t* audio_out_drivers[] =
 #ifdef HAVE_ALSA5
 	&audio_out_alsa5,
 #endif
-//	&audio_out_alsa9,
-//	&audio_out_esd,
+/*
+#ifdef HAVE_ALSA9
+	&audio_out_alsa9,
+#endif
+#ifdef HAVE_ESD
+	&audio_out_esd,
+#endif
+*/
 #ifdef HAVE_SDL
         &audio_out_sdl,
 #endif
