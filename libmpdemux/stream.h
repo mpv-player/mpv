@@ -42,7 +42,7 @@ typedef struct {
   int eof;
   unsigned int cache_pid;
   void* cache_data;
-  void* priv; // used for DVD
+  void* priv; // used for DVD, TV, RTSP etc
   unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
 #ifdef STREAMING
   streaming_ctrl_t *streaming_ctrl;

@@ -82,7 +82,7 @@ int quiet=0;
 #include "libmpdemux/tv.h"
 
 extern int tv_param_on;
-extern tvi_handle_t *tv_handler;
+//extern tvi_handle_t *tv_handler;
 #endif
 
 //**************************************************************************//
@@ -2220,18 +2220,18 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       if (tv_param_on == 1) {
 	int v = cmd->args[0].v.i;
 	if(v > 0)
-	  tv_step_channel(tv_handler, TV_CHANNEL_HIGHER);
+	  tv_step_channel((tvi_handle_t*)(stream->priv), TV_CHANNEL_HIGHER);
 	else
-	  tv_step_channel(tv_handler, TV_CHANNEL_LOWER);
+	  tv_step_channel((tvi_handle_t*)(stream->priv), TV_CHANNEL_LOWER);
       }
     } break;
     case MP_CMD_TV_STEP_NORM :  {
       if (tv_param_on == 1)
-	tv_step_norm(tv_handler);
+	tv_step_norm((tvi_handle_t*)(stream->priv));
     } break;
     case MP_CMD_TV_STEP_CHANNEL_LIST :  {
       if (tv_param_on == 1)
-	tv_step_chanlist(tv_handler);
+	tv_step_chanlist((tvi_handle_t*)(stream->priv));
     } break;
 #endif
     case MP_CMD_VO_FULLSCREEN:

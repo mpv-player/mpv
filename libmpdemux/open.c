@@ -68,7 +68,6 @@ extern int vcd_get_track_end(int fd,int track);
 
 #ifdef USE_TV
 #include "tv.h"
-tvi_handle_t *tv_handler;
 
 extern int stream_open_tv(stream_t *stream, tvi_handle_t *tvh);
 #endif
@@ -401,6 +400,8 @@ if(dvd_title){
 //============ Check for TV-input ====
   if (tv_param_on == 1)
   {
+    tvi_handle_t *tv_handler;
+
     /* create stream */
     stream = new_stream(-1, STREAMTYPE_TV);
     if (!stream)
@@ -417,6 +418,8 @@ if(dvd_title){
 
     if (!stream_open_tv(stream, tv_handler))
 	goto tv_err;
+
+    stream->priv=tv_handler;
     
     return(stream);
 
