@@ -3529,10 +3529,10 @@ if(use_gui || playtree_iter != NULL
   goto play_next_file;
 }
 
+#ifdef HAVE_FREETYPE
 current_module="uninit_font";
 if (vo_font) free_font_desc(vo_font);
 vo_font = NULL;
-#ifdef HAVE_FREETYPE
 done_freetype();
 #endif
 
