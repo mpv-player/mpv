@@ -807,7 +807,7 @@ case VCODEC_LIBAVCODEC:
 	avcodec_inited=1;
     }
     
-#if 1
+#if 0
     {
 	extern AVCodec *first_avcodec;
 	AVCodec *p = first_avcodec;
@@ -836,13 +836,14 @@ case VCODEC_LIBAVCODEC:
     
 //    lavc_venc_context.width = mux_v->bih->biWidth;
 //    lavc_venc_context.height = mux_v->bih->biHeight;
+    /* scaling only for YV12 (and lavc supports only YV12 ;) */
     lavc_venc_context.width = vo_w;
     lavc_venc_context.height = vo_h;
     if (lavc_param_vbitrate >= 0) /* != -1 */
 	lavc_venc_context.bit_rate = lavc_param_vbitrate;
     else
 	lavc_venc_context.bit_rate = 800000; /* default */
-    lavc_venc_context.frame_rate = sh_video->fps * FRAME_RATE_BASE;    
+    lavc_venc_context.frame_rate = (float)(force_ofps?force_ofps:sh_video->fps) * FRAME_RATE_BASE;
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */
 	lavc_venc_context.gop_size = lavc_param_keyint;
