@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Version:          0.1.8
+# Version:          0.1.9
 #
 # Licence:          GPL
 #
@@ -43,6 +43,8 @@
 #                     - more help
 # 2002/05/26        v0.1.8
 #                     - new option "-sync"
+# 2002/06/19        v0.1.9
+#                     - new option "-mpgonly"
 #
 ################################################################################
 #
@@ -76,6 +78,7 @@ function usage() {
    echo "-mp3          outputs audio in mp3 instead of mp2 format."
    echo "-mpg          don't encode from source, multiplex/burn."
    echo "              only the encoded mpg stream."
+   echo "-mpgonly      do only encoding to mpeg 1/2 format."
    echo "-noburn       disables burning."
    echo "-ratio <s>    output ratio size of frames, see yuvscaler (1)."
    echo "-size <X>x<Y> sets output size of frames."
@@ -135,6 +138,7 @@ blank=0
 burn=1
 burnonly=0
 mp3=0
+mpgonly=0
 mkstream=1
 abr=224
 abrset=0
@@ -192,6 +196,9 @@ while [ "$1"x != "x" ]; do
         ;;
       -mpg)
       	mkstream=0
+	;;
+      -mpgonly)
+        mpgonly=1
 	;;
       -vnorm)
         yuvin="-n $2"
@@ -291,6 +298,9 @@ if [ $burnonly -eq 0 ]; then
    [ -f $NAME.mpv -a -f $NAME.mpa ] || exit 1
    rm -f ${NAME}*.mpg
    mplex $mplexnorm $sync $NAME.mpv $NAME.mpa -o ${NAME}%d.mpg
+
+   # should i create only the mpeg file?
+   [ $mpgonly -eq 1 ] && exit 0
 
    # create cd images
    for mpg in ${NAME}*.mpg; do 
