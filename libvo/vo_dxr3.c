@@ -105,6 +105,7 @@ uint32_t control(uint32_t request, void *data, ...)
 		if (!noprebuf) {
 			close(fd_video);
 			fd_video = open(fdv_name, O_WRONLY);
+			fsync(fd_video);
 		}
 		return VO_TRUE;
 	case VOCTRL_QUERY_FORMAT:
@@ -165,6 +166,10 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 	ioctl(fd_control, EM8300_IOCTL_WRITEREG, &reg);
 	
 	/* Clean buffer by syncing it */
+	ioval = EM8300_SUBDEVICE_VIDEO;
+	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
+	ioval = EM8300_SUBDEVICE_AUDIO;
+	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 	fsync(fd_video);
 	ioval = 0x900;
 	ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
