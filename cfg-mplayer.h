@@ -393,7 +393,8 @@ m_option_t mplayer_opts[]={
 	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
-	{"gui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_NOCMD, 0, 1, NULL},
+	{"gui", "Please remove gui=yes from your config and run gmplayer if you want the GUI.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+//	{"gui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_NOCMD, 0, 1, NULL},
 //	{"nogui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
       
 #ifdef HAVE_NEW_GUI
