@@ -17,7 +17,9 @@ static struct {
 } extensions_table[] = {
         { "mpeg", DEMUXER_TYPE_MPEG_PS },
         { "mpg", DEMUXER_TYPE_MPEG_PS },
-        { "mpe", DEMUXER_TYPE_MPEG_ES },
+        { "mpe", DEMUXER_TYPE_MPEG_PS },
+        { "vob", DEMUXER_TYPE_MPEG_PS },
+        { "m2v", DEMUXER_TYPE_MPEG_PS },
         { "avi", DEMUXER_TYPE_AVI },
         { "mov", DEMUXER_TYPE_MOV },
         { "qt", DEMUXER_TYPE_MOV },
@@ -26,14 +28,24 @@ static struct {
         { "wmv", DEMUXER_TYPE_ASF },
         { "wma", DEMUXER_TYPE_ASF },
         { "viv", DEMUXER_TYPE_VIVO },
+        { "vivo", DEMUXER_TYPE_VIVO },
         { "rm", DEMUXER_TYPE_REAL },
+        { "rmvb", DEMUXER_TYPE_REAL },
         { "ra", DEMUXER_TYPE_REAL },
         { "y4m", DEMUXER_TYPE_Y4M },
         { "mp3", DEMUXER_TYPE_AUDIO },
-        { "ogg", DEMUXER_TYPE_OGG },
         { "wav", DEMUXER_TYPE_AUDIO },
+        { "ogg", DEMUXER_TYPE_OGG },
+        { "ogm", DEMUXER_TYPE_OGG },
         { "pls", DEMUXER_TYPE_PLAYLIST },
-        { "m3u", DEMUXER_TYPE_PLAYLIST }
+        { "m3u", DEMUXER_TYPE_PLAYLIST },
+        { "xm", DEMUXER_TYPE_XMMS },
+        { "mod", DEMUXER_TYPE_XMMS },
+        { "s3m", DEMUXER_TYPE_XMMS },
+        { "it", DEMUXER_TYPE_XMMS },
+        { "mid", DEMUXER_TYPE_XMMS },
+        { "midi", DEMUXER_TYPE_XMMS },
+        { "vqf", DEMUXER_TYPE_XMMS }
 };
 
 int demuxer_type_by_filename(char* filename){
