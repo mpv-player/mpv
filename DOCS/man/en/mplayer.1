@@ -1555,7 +1555,7 @@ Used for RAW PCM.
 Audio output drivers are interfaces to different output facilities.
 The syntax is:
 .TP
-.B \-ao <driver1[:option],driver2,...[,]>
+.B \-ao <driver1[:suboption1[=value]:...],driver2,...[,]>
 Specify a priority list of audio output drivers to be used.
 .PP
 If the list has a trailing ',' it will fall back to drivers not listed
@@ -3670,7 +3670,7 @@ decimation (ugly).
 Video output drivers are interfaces to different output facilities.
 The syntax is:
 .TP
-.B \-vo <driver1[:option],driver2,...[,]>
+.B \-vo <driver1[:suboption1[=value]:...],driver2,...[,]>
 Specify a priority list of video output drivers to be used.
 .PP
 If the list has a trailing ',' it will fall back to drivers not listed on the
@@ -3692,11 +3692,11 @@ Uses the DirectX driver with acceleration features turned off.
 .PD 1
 .
 
+FIXME: Document suboptions for x11, xover, dga, sdl, vidix, xvidix, fbdev,
+fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
+dxr2, dxr3, mpegpes, zr, zr2, md5, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
+
 Available video output drivers are:
-FIXME: Document suboptions for x11, xover, xvmc, dga, sdl, vidix, xvidix,
-cvidix, winvidix, fbdev, fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga,
-syncfb, 3dfx, tdfx_vid, dxr2, dxr3, mpegpes, zr, zr2, md5, yuv4mpeg, gif89a,
-jpeg, pgm, png, tga.
 .
 .TP
 .B xv (X11 only)
@@ -3719,19 +3719,24 @@ works whenever X11 is present.
 Adds X11 support to all overlay based video output drivers.
 Currently only supported by tdfx_vid.
 .TP
-.B xvmc (X11 only)
-This video output driver employs the XvMC (X Video Motion Compensation)
-extension of XFree86 4.x.
-FIXME: The suboption descriptions are incomplete/imprecise.
+.B xvmc (X11, \-vc ffmpeg12mc only)
+Video output driver that uses the XvMC (X Video Motion Compensation)
+extension of XFree86 4.x to speed up MPEG1/2 and VCR2 decoding.
 .PD 0
 .RSs
-.IPs benchmark=<number>
-Disable display of image to prevent vsync on benchmarking.
-.IPs wait
-.IPs sleep
-Use sleep function while waiting for rendering to finish (not recomended on Linux).
+.IPs benchmark
+Disables image display.
+Necessary for proper benchmarking of drivers that change
+image buffers on monitor retrace only (nVidia).
 .IPs queue
-Use display queue to allow more paralel work of the video hardware.
+Queue frames for display to allow more parallel work of the video hardware.
+May add a small (not noticeable) constant A/V desync.
+.IPs sleep
+Use sleep function while waiting for rendering to finish
+(not recomended on Linux).
+.IPs wait\ 
+Do not use sleep function while waiting for rendering to finish
+(default).
 .RE
 .PD 1
 .TP
@@ -3747,15 +3752,42 @@ video output driver.
 VIDIX (VIDeo Interface for *niX) is an interface to the
 video acceleration features of different graphics cards.
 Very fast output driver on cards that support it.
+.PD 0
+.RSs
+.IPs <subdevice>
+Explicitly choose the VIDIX subdevice driver to use.
+Available subdevice drivers are cyberblade_vid, mach64_vid, mga_crtc2_vid,
+mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid, sis_vid.
+.RE
+.PD 1
 .TP
 .B xvidix (X11 only)
-VIDIX running under X11.
+X11 frontend for VIDIX
+.PD 0
+.RSs
+.IPs <subdevice>
+same as vidix
+.RE
+.PD 1
 .TP
 .B cvidix\ 
-VIDIX running in a console.
+Generic and platform independent VIDIX frontend, can even run in a
+textconsole with nVidia cards.
+.PD 0
+.RSs
+.IPs <subdevice>
+same as vidix
+.RE
+.PD 1
 .TP
 .B winvidix (Windows only)
-Windows version of the VIDIX driver.
+Windows frontend for VIDIX
+.PD 0
+.RSs
+.IPs <subdevice>
+same as vidix
+.RE
+.PD 1
 .TP
 .B directx (Windows only)
 Output driver that uses the DirectX interface.
