@@ -26,7 +26,7 @@ static int config(struct vf_instance_s* vf,
 static int control(struct vf_instance_s* vf,
         int request, void* data){
     // return video_out->control(request,data);
-    return -3;
+    return CONTROL_UNKNOWN;
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){

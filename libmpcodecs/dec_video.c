@@ -45,14 +45,31 @@ int divx_quality=0;
 vd_functions_t* mpvdec=NULL;
 
 int get_video_quality_max(sh_video_t *sh_video){
+  vf_instance_t* vf=sh_video->vfilter;
+  if(vf){
+    int ret=vf->control(vf,VFCTRL_QUERY_MAX_PP_LEVEL,NULL);
+    if(ret>0){
+      mp_msg(MSGT_DECVIDEO,MSGL_INFO,"[PP] Using external postprocessing filter, max q = %d\n",ret);
+      return ret;
+    }
+  }
   if(mpvdec){
     int ret=mpvdec->control(sh_video,VDCTRL_QUERY_MAX_PP_LEVEL,NULL);
-    if(ret>=0) return ret;
+    if(ret>0){
+      mp_msg(MSGT_DECVIDEO,MSGL_INFO,"[PP] Using codec's postprocessing, max q = %d\n",ret);
+      return ret;
+    }
   }
- return 0;
+  mp_msg(MSGT_DECVIDEO,MSGL_INFO,"[PP] Sorry, postprocessing is not available\n");
+  return 0;
 }
 
 void set_video_quality(sh_video_t *sh_video,int quality){
+  vf_instance_t* vf=sh_video->vfilter;
+  if(vf){
+    int ret=vf->control(vf,VFCTRL_SET_PP_LEVEL, (void*)(&quality));
+    if(ret==CONTROL_TRUE) return; // success
+  }
   if(mpvdec)
     mpvdec->control(sh_video,VDCTRL_SET_PP_LEVEL, (void*)(&quality));
 }

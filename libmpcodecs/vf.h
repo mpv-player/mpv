@@ -40,6 +40,13 @@ typedef struct vf_instance_s {
     struct vf_priv_s* priv;
 } vf_instance_t;
 
+// control codes:
+#include "mpc_info.h"
+
+#define VFCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */
+#define VFCTRL_SET_PP_LEVEL 5 /* set postprocessing level */
+#define VFCTRL_SET_EQUALIZER 6 /* set color options (brightness,contrast etc) */
+
 // functions:
 mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype, int mp_imgflag, int w, int h);
 vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args);

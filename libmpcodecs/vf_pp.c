@@ -28,6 +28,17 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
+static int control(struct vf_instance_s* vf, int request, void* data){
+    switch(request){
+    case VFCTRL_QUERY_MAX_PP_LEVEL:
+	return GET_PP_QUALITY_MAX;
+    case VFCTRL_SET_PP_LEVEL:
+	vf->priv->pp=getPpModeForQuality(*((unsigned int*)data));
+	return CONTROL_TRUE;
+    }
+    return vf_next_control(vf,request,data);
+}
+
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(vf->priv->pp&0xFFFF) return; // non-local filters enabled
     if((mpi->type==MP_IMGTYPE_IPB || vf->priv->pp) && 
@@ -74,6 +85,7 @@ extern int divx_quality;
 static int open(vf_instance_t *vf, char* args){
     char *endptr;
     vf->query_format=query_format;
+    vf->control=control;
     vf->get_image=get_image;
     vf->put_image=put_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
