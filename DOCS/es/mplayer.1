@@ -2786,6 +2786,27 @@ opciones son esenciales! (la sincronización A/V puede romperse si se ponen
 mal). El parámetro opcional inicio le dice al filtro donde iniciar el 
 patrón de telecine (0-3).
 .TP
+.B "tinterlace[=modo]"
+Entrelazado de campo temporal -- mezcla pares de marcos en un marco
+entrelazado, dividiendo en dos el número de imágenes por segundo. Los
+marcos pares son movidos en el campo superior, los impares en el campo
+inferior. Esto puede ser usado para invertir totalmente el efecto del
+filtro tfields (en modo 0). Los modos disponibles son:
+.PD 0
+.RSs
+.IPs 0
+marcos impares en campo superior, pares en inferior, generando un marco
+de imagen completo a la mitad de imágenes por segundo
+.IPs 1
+solo saca los marcos impares, los pares son eliminados, la altura no cambia
+.IPs 2
+solo saca los marcos pares, los impares son eliminados, la altura no cambia
+.IPs 3
+expande cada marco a su altura completa, pero rellena líneas alternas con
+negro, las imágenes por segundo no cambian
+.RE
+.PD 1
+.TP
 .B "tfields[=modo]"
 Separación temporal de campo -- separa campos en imágenes, doblando el
 número de imágenes por segundo de salida. Como el filtro de telecine,
