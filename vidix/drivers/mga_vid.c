@@ -721,7 +721,7 @@ int vixConfigPlayback(vidix_playback_t *config)
     dh = config->dest.h;
     
     config->dest.pitch.y=32;
-    config->dest.pitch.u=config->dest.pitch.v=16;
+    config->dest.pitch.u=config->dest.pitch.v=32;
 
     if (mga_verbose) printf("[mga] Setting up a %dx%d-%dx%d video window (src %dx%d) format %X\n",
            dw, dh, x, y, sw, sh, config->fourcc);
