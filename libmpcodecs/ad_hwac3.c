@@ -80,8 +80,8 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
-  int len=-1;
-  if(!sh_audio->a_in_buffer_len)
+  int len=sh_audio->a_in_buffer_len;
+  if(len<=0)
     if((len=a52_fillbuff(sh_audio))<=0) return len; /*EOF*/
   sh_audio->a_in_buffer_len=0;
 
