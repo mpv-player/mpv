@@ -701,11 +701,15 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     pic->linesize[2]=mpi->stride[2];
 
 #if LIBAVCODEC_BUILD >= 4697
-    if(mpi->fields & MP_IMGFIELD_ORDERED)
-        pic->top_field_first= !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
+    if(lavc_param_interlaced_dct){
+        if((mpi->fields & MP_IMGFIELD_ORDERED) && (mpi->fields & MP_IMGFIELD_INTERLACED))
+            pic->top_field_first= !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
+        else 
+            pic->top_field_first= 1;
     
-    if(lavc_param_top!=-1)
-        pic->top_field_first= lavc_param_top;
+        if(lavc_param_top!=-1)
+            pic->top_field_first= lavc_param_top;
+    }
 #endif
 
 	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
