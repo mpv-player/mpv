@@ -134,6 +134,7 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
     // last 2 bytes 17 and 18 are unknown but right after that comes the length
     unsigned char hdr[17];
     int videolen,audiolen;
+    unsigned char buf[9];
     sh_video_t *sh_video = NULL;
     sh_audio_t *sh_audio = NULL;
     
@@ -265,23 +266,20 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
             // here we search for the correct keyframe 
             // vp6 keyframe is when the 2nd byte of the vp6 header is 0x36
             if(priv->v_format==mmioFOURCC('V','P','6','1')){
-                stream_read(demuxer->stream,hdr,9);
-                videolen=(hdr[2]>>4)|(hdr[3]<<4)|(hdr[4]<<0xC);
-                audiolen=(hdr[5])|(hdr[6]<<8);
-                mp_msg(MSGT_DEMUX,MSGL_V,"demux_nsv: Header: %08X\n",*hdr);
-                stream_skip(demuxer->stream, videolen+audiolen-2);
-                stream_read(demuxer->stream,hdr,9);
-
+                stream_read(demuxer->stream,buf,9);
                 if (hdr[8]!=0x36) {
-                    while(hdr[8]!=0x36){
-                        videolen=(hdr[2]>>4)|(hdr[3]<<4)|(hdr[4]<<0xC);
-                        audiolen=(hdr[5])|(hdr[6]<<8);
+                    mp_msg(MSGT_DEMUX,MSGL_V,"demux_nsv: searching vp6 keyframe...\n");
+                    while(buf[8]!=0x36){
+                        mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_nsv: vp6 block skip.\n");
+                        videolen=(buf[2]>>4)|(buf[3]<<4)|(buf[4]<<0xC);
+                        audiolen=(buf[5])|(buf[6]<<8);
                         stream_skip(demuxer->stream, videolen+audiolen-2);
-                        stream_read(demuxer->stream,hdr,9);
-                        if(hdr[0]==0x4E){
+                        stream_read(demuxer->stream,buf,9);
+                        if(buf[0]==0x4E){
+                            mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_nsv: Got NSVs block.\n");
                             if(stream_eof(demuxer->stream)) return 0;
                             stream_skip(demuxer->stream,8);
-                            stream_read(demuxer->stream,hdr,9);
+                            stream_read(demuxer->stream,buf,9);
                         }
                     }
                 }
