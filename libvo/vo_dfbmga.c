@@ -404,7 +404,11 @@ preinit( const char *arg )
 
      if (use_crtc2) {
           struct layer_enum l = {
+#if DIRECTFBVERSION > 920
+               "Matrox CRTC2 Layer",
+#else
                "Matrox CRTC2",
+#endif
                &crtc2,
                DFB_UNSUPPORTED
           };
