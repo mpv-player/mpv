@@ -159,6 +159,7 @@ int demux_avi_fill_buffer_nini(demuxer_t *demux,demux_stream_t *ds);
 int demux_asf_fill_buffer(demuxer_t *demux);
 int demux_mov_fill_buffer(demuxer_t *demux,demux_stream_t* ds);
 int demux_vivo_fill_buffer(demuxer_t *demux);
+int demux_real_fill_buffer(demuxer_t *demux);
 #ifdef USE_TV
 #include "tv.h"
 extern tvi_handle_t *tv_handler;
@@ -181,6 +182,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_ASF: return demux_asf_fill_buffer(demux);
     case DEMUXER_TYPE_MOV: return demux_mov_fill_buffer(demux,ds);
     case DEMUXER_TYPE_VIVO: return demux_vivo_fill_buffer(demux);
+    case DEMUXER_TYPE_REAL: return demux_real_fill_buffer(demux);
 #ifdef USE_TV
     case DEMUXER_TYPE_TV: return demux_tv_fill_buffer(demux, tv_handler);
 #endif
@@ -362,6 +364,9 @@ int demux_open_fli(demuxer_t* demuxer);
 extern int vivo_check_file(demuxer_t *demuxer);
 extern void demux_open_vivo(demuxer_t *demuxer);
 
+extern int real_check_file(demuxer_t *demuxer);
+extern void demux_open_real(demuxer_t *demuxer);
+
 demuxer_t* demux_open(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id){
 
 //int file_format=(*file_format_ptr);
@@ -423,6 +428,14 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
   if(vivo_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected VIVO file format!\n");
       file_format=DEMUXER_TYPE_VIVO;
+  }
+}
+//=============== Try to open as REAL file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_REAL){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_REAL,audio_id,video_id,dvdsub_id);
+  if(real_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected REAL file format!\n");
+      file_format=DEMUXER_TYPE_REAL;
   }
 }
 //=============== Try to open as FLI file: =================
@@ -528,6 +541,10 @@ switch(file_format){
  }
  case DEMUXER_TYPE_VIVO: {
   demux_open_vivo(demuxer);
+  break;
+ }
+ case DEMUXER_TYPE_REAL: {
+  demux_open_real(demuxer);
   break;
  }
  case DEMUXER_TYPE_ASF: {

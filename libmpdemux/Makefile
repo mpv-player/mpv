@@ -3,7 +3,7 @@ LIBNAME = libmpdemux.a
 
 include ../config.mak
 
-SRCS = mp3_hdr.c video.c mpeg_hdr.c cache2.c asfheader.c aviheader.c aviprint.c aviwrite.c demux_asf.c demux_avi.c demux_mov.c demux_mpg.c demux_viv.c demuxer.c dvdauth.c open.c parse_es.c stream.c tv.c tvi_dummy.c tvi_v4l.c frequencies.c demux_fli.c
+SRCS = mp3_hdr.c video.c mpeg_hdr.c cache2.c asfheader.c aviheader.c aviprint.c aviwrite.c demux_asf.c demux_avi.c demux_mov.c demux_mpg.c demux_viv.c demuxer.c dvdauth.c open.c parse_es.c stream.c tv.c tvi_dummy.c tvi_v4l.c frequencies.c demux_fli.c demux_real.c
 ifeq ($(STREAMING),yes)
 SRCS += asf_streaming.c url.c http.c network.c rtp.c
 endif
