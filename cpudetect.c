@@ -14,7 +14,7 @@
 #include <signal.h>
 #endif
 
-#define X86_FXSR_MAGIC
+//#define X86_FXSR_MAGIC
 /* Thanks to the FreeBSD project for some of this cpuid code, and 
  * help understanding how to use it.  Thanks to the Mesa 
  * team for SSE support detection and more cpu detect code.
@@ -25,40 +25,58 @@
 CpuCaps gCpuCaps;
 static void check_os_katmai_support( void );
 
-#if 0
+#if 1
+// return TRUE if cpuid supported
 static int has_cpuid()
 {
 	int a, c;
-	__asm __volatile(
-	"pushl %%ebx;"
-	/* Test for the CPUID command.  If the ID Flag bit in EFLAGS
-	 * (bit 21) is writable, the CPUID command is present */
-	"pushfl;"
-	"popl %%eax;"
-	"movl %%ecx, %%eax;"
-	"xorl %%eax, 0x00200000;"
-	"push %%eax;"
-	"popfl;"
-	"pushfl;"
-	"popl %%eax;"
-	"popl %%ebx"
-	: "=a" (a), "=c" (c)
-	:
-	: "cx"
-	 );
-	/* FIXME: I have no clue on intel assembly. */
-	return (a==c);
+
+// code from libavcodec:
+    __asm__ __volatile__ (
+                          /* See if CPUID instruction is supported ... */
+                          /* ... Get copies of EFLAGS into eax and ecx */
+                          "pushf\n\t"
+                          "popl %0\n\t"
+                          "movl %0, %1\n\t"
+                          
+                          /* ... Toggle the ID bit in one copy and store */
+                          /*     to the EFLAGS reg */
+                          "xorl $0x200000, %0\n\t"
+                          "push %0\n\t"
+                          "popf\n\t"
+                          
+                          /* ... Get the (hopefully modified) EFLAGS */
+                          "pushf\n\t"
+                          "popl %0\n\t"
+                          : "=a" (a), "=c" (c)
+                          :
+                          : "cc" 
+                          );
+
+	return (a!=c);
 }
 #endif
 
 static void
 do_cpuid(unsigned int ax, unsigned int *p)
 {
+#if 0
 	__asm __volatile(
 	"cpuid;"
 	: "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
 	:  "0" (ax)
 	);
+#else
+// code from libavcodec:
+    __asm __volatile
+	("movl %%ebx, %%esi\n\t"
+         "cpuid\n\t"
+         "xchgl %%ebx, %%esi"
+         : "=a" (p[0]), "=S" (p[1]),
+           "=c" (p[2]), "=d" (p[3])
+         : "0" (ax));
+#endif
+
 }
 
 
@@ -68,11 +86,14 @@ void GetCpuCaps( CpuCaps *caps)
 	unsigned int regs2[4];
 	
 	bzero(caps, sizeof(*caps));
+	printf("CPUid available: %s\n",has_cpuid()?"yes":"no");
 	/*if (!has_cpuid())
 		return;*/
 	do_cpuid(0x00000000, regs);
+	printf("CPU vendor name: %.4s%.4s%.4s\n",&regs[1],&regs[3],&regs[2]);
 	if (regs[0]>0x00000001) {
 		do_cpuid(0x00000001, regs2);
+		printf("CPU family: %d\n",(regs2[0] >> 8)&0xf);
 		switch ((regs2[0] >> 8)&0xf) {
 			case 3:
 				caps->cpuType=CPUTYPE_I386;
@@ -90,9 +111,11 @@ void GetCpuCaps( CpuCaps *caps)
 				printf("Unknown cpu type, default to i386\n");
 				break;
 		}
-		caps->hasMMX  = (regs2[3] & (1 << 23 )) >> 23;
-		caps->hasSSE  = (regs2[3] & (1 << 25 )) >> 25;
-		caps->hasSSE2 = (regs2[3] & (1 << 26 )) >> 26;
+		caps->hasMMX  = (regs2[3] & (1 << 23 )) >> 23; // 0x0800000
+		
+		// FIXME: is this ok for non-intel CPUs too? (cyrix,amd)
+		caps->hasSSE  = (regs2[3] & (1 << 25 )) >> 25; // 0x2000000
+		caps->hasSSE2 = (regs2[3] & (1 << 26 )) >> 26; // 0x4000000
 		/* FIXME: Does SSE2 need more OS support, too? */
 #if defined(__linux__) || defined(__FreeBSD__)
 		if (caps->hasSSE)
@@ -106,15 +129,18 @@ void GetCpuCaps( CpuCaps *caps)
 		/* FIXME: Are MMX2 ops on the same set of processors as SSE?  Do they need OS support?*/
 		caps->hasMMX2 = caps->hasSSE;
 	}
-	if (memcmp(&regs[1], "AuthenticAMD", 12)) {
+	if (regs[1] == 0x68747541 &&    // AuthenticAMD
+            regs[3] == 0x69746e65 &&
+            regs[2] == 0x444d4163) {
 		do_cpuid(0x80000000, regs);
-		if (regs[0]>0x80000001) {
+		if (regs[0]>=0x80000001) {
 			do_cpuid(0x80000001, regs2);
-			/*caps->hasMMX2 = regs[3] & (1 << 23 );*/
-			caps->has3DNow    = (regs2[3] & (1 << 31 )) >> 31;
+			caps->hasMMX2 = (regs[3] & (1 << 22 )) >> 22; // 0x400000
+			caps->has3DNow    = (regs2[3] & (1 << 31 )) >> 31; //0x80000000
 			caps->has3DNowExt = (regs2[3] & (1 << 30 )) >> 30;
 		}
 	}
+#if 0
 	printf("cpudetect: MMX=%d MMX2=%d SSE=%d SSE2=%d 3DNow=%d 3DNowExt=%d\n",
 		gCpuCaps.hasMMX,
 		gCpuCaps.hasMMX2,
@@ -122,6 +148,7 @@ void GetCpuCaps( CpuCaps *caps)
 		gCpuCaps.hasSSE2,
 		gCpuCaps.has3DNow,
 		gCpuCaps.has3DNowExt );
+#endif
 
 }
 
@@ -203,7 +230,8 @@ static void check_os_katmai_support( void )
    if ( gCpuCaps.hasSSE ) {
       printf( "Testing OS support for SSE... " );
 
-      __asm __volatile ("xorps %%xmm0, %%xmm0");
+//      __asm __volatile ("xorps %%xmm0, %%xmm0");
+      __asm __volatile ("xorps %xmm0, %xmm0");
 
       if ( gCpuCaps.hasSSE ) {
 	 printf( "yes.\n" );
@@ -228,7 +256,7 @@ static void check_os_katmai_support( void )
    if ( gCpuCaps.hasSSE ) {
       printf( "Testing OS support for SSE unmasked exceptions... " );
 
-      test_os_katmai_exception_support();
+//      test_os_katmai_exception_support();
 
       if ( gCpuCaps.hasSSE ) {
 	 printf( "yes.\n" );
