@@ -78,10 +78,6 @@ $(HTMLFILE): documentation.xml $(XSL_DEPS)
 	cd .. && sh configure
 
 distclean:
-	if test "$(USE_SYMLINKS)" = "yes" ; then \
-		for file in *.xml ; do \
-		if test -L $$file && test "`readlink $$file`" = "../en/$$file" ; then \
-			rm $$file ; \
-		fi ; \
-		done ; \
+	@if test "$(USE_SYMLINKS)" = "yes" ; then \
+		rm -f `find *.xml -type l`; \
 	fi
