@@ -31,6 +31,50 @@
 #include "osdep/timer.h"
 
 #define WAVE_FORMAT_DOLBY_AC3_SPDIF 0x0092
+#define WAVE_FORMAT_EXTENSIBLE      0xFFFE
+
+static const  GUID KSDATAFORMAT_SUBTYPE_PCM = {
+	0x1,0x0000,0x0010,{0x80,0x00,0x00,0xaa,0x00,0x38,0x9b,0x71}
+};
+
+typedef struct {
+  WAVEFORMATEX  Format;
+  union {
+    WORD  wValidBitsPerSample;
+    WORD  wSamplesPerBlock;
+    WORD  wReserved;
+  } Samples;
+  DWORD  dwChannelMask;
+  GUID  SubFormat;
+} WAVEFORMATEXTENSIBLE, *PWAVEFORMATEXTENSIBLE;
+
+#define SPEAKER_FRONT_LEFT              0x1
+#define SPEAKER_FRONT_RIGHT             0x2
+#define SPEAKER_FRONT_CENTER            0x4
+#define SPEAKER_LOW_FREQUENCY           0x8
+#define SPEAKER_BACK_LEFT               0x10
+#define SPEAKER_BACK_RIGHT              0x20
+#define SPEAKER_FRONT_LEFT_OF_CENTER    0x40
+#define SPEAKER_FRONT_RIGHT_OF_CENTER   0x80
+#define SPEAKER_BACK_CENTER             0x100
+#define SPEAKER_SIDE_LEFT               0x200
+#define SPEAKER_SIDE_RIGHT              0x400
+#define SPEAKER_TOP_CENTER              0x800
+#define SPEAKER_TOP_FRONT_LEFT          0x1000
+#define SPEAKER_TOP_FRONT_CENTER        0x2000
+#define SPEAKER_TOP_FRONT_RIGHT         0x4000
+#define SPEAKER_TOP_BACK_LEFT           0x8000
+#define SPEAKER_TOP_BACK_CENTER         0x10000
+#define SPEAKER_TOP_BACK_RIGHT          0x20000
+
+static const int channel_mask[] = {
+  SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_RIGHT  | SPEAKER_LOW_FREQUENCY,
+  SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_CENTER | SPEAKER_FRONT_RIGHT  | SPEAKER_LOW_FREQUENCY,
+  SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_CENTER | SPEAKER_FRONT_RIGHT  | SPEAKER_BACK_CENTER  | SPEAKER_LOW_FREQUENCY,
+  SPEAKER_FRONT_LEFT   | SPEAKER_FRONT_CENTER | SPEAKER_FRONT_RIGHT  | SPEAKER_BACK_LEFT    | SPEAKER_BACK_RIGHT     | SPEAKER_LOW_FREQUENCY
+};
+
+
 
 #define SAMPLESIZE   1024
 #define BUFFER_SIZE  4096
@@ -98,7 +142,7 @@ static int control(int cmd,void *arg)
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags)
 {
-	WAVEFORMATEX wformat;      
+	WAVEFORMATEXTENSIBLE wformat;      
 	DWORD totalBufferSize = (BUFFER_SIZE + sizeof(WAVEHDR)) * BUFFER_COUNT;
 	MMRESULT result;
 	unsigned char* buffer;
@@ -121,41 +165,47 @@ static int init(int rate,int channels,int format,int flags)
     mp_msg(MSGT_AO, MSGL_V,"ao_win32: Buffersize:%d\n",ao_data.buffersize);
 	
 	//fill waveformatex
-    ZeroMemory( &wformat, sizeof(WAVEFORMATEX));
-    wformat.cbSize          = 0; /* size of _extra_ info */
-    wformat.nChannels       = channels;                
-    wformat.nSamplesPerSec  = rate;            
+    ZeroMemory( &wformat, sizeof(WAVEFORMATEXTENSIBLE));
+    wformat.Format.cbSize          = (channels>2)?sizeof(WAVEFORMATEXTENSIBLE):0;
+    wformat.Format.nChannels       = channels;                
+    wformat.Format.nSamplesPerSec  = rate;            
     if(format == AFMT_AC3)
     {
-        wformat.wFormatTag      = WAVE_FORMAT_DOLBY_AC3_SPDIF;
-        wformat.wBitsPerSample  = 16;
-        wformat.nBlockAlign     = 4;
+        wformat.Format.wFormatTag      = WAVE_FORMAT_DOLBY_AC3_SPDIF;
+        wformat.Format.wBitsPerSample  = 16;
+        wformat.Format.nBlockAlign     = 4;
     }
     else 
     {
-        wformat.wFormatTag      = WAVE_FORMAT_PCM;
-        wformat.wBitsPerSample  = audio_out_format_bits(format); 
-        wformat.nBlockAlign     = wformat.nChannels * (wformat.wBitsPerSample >> 3);
-    }       
-    wformat.nAvgBytesPerSec = wformat.nSamplesPerSec * wformat.nBlockAlign;
+        wformat.Format.wFormatTag      = (channels>2)?WAVE_FORMAT_EXTENSIBLE:WAVE_FORMAT_PCM;
+        wformat.Format.wBitsPerSample  = audio_out_format_bits(format); 
+        wformat.Format.nBlockAlign     = wformat.Format.nChannels * (wformat.Format.wBitsPerSample >> 3);
+    }
+	if(channels>2)
+	{
+        wformat.dwChannelMask = channel_mask[channels-3];
+        wformat.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+	    wformat.Samples.wValidBitsPerSample=audio_out_format_bits(format);
+    }
+  
+    wformat.Format.nAvgBytesPerSec = wformat.Format.nSamplesPerSec * wformat.Format.nBlockAlign;
  	
     //open sound device
     //WAVE_MAPPER always points to the default wave device on the system
-    result = waveOutOpen(&hWaveOut,WAVE_MAPPER,&wformat,(DWORD_PTR)waveOutProc,0,CALLBACK_FUNCTION);
+    result = waveOutOpen(&hWaveOut,WAVE_MAPPER,(WAVEFORMATEX*)&wformat,(DWORD_PTR)waveOutProc,0,CALLBACK_FUNCTION|WAVE_FORMAT_DIRECT);
 	if(result == WAVERR_BADFORMAT)
 	{
 		mp_msg(MSGT_AO, MSGL_ERR,"ao_win32: format not supported switching to default\n");
-        ao_data.channels = wformat.nChannels = 2;
-	    ao_data.samplerate = wformat.nSamplesPerSec = 44100;
+        ao_data.channels = wformat.Format.nChannels = 2;
+	    ao_data.samplerate = wformat.Format.nSamplesPerSec = 44100;
 	    ao_data.format = AFMT_S16_LE;
-	    ao_data.bps=ao_data.channels * ao_data.samplerate*2;
-	    ao_data.buffersize=wformat.wBitsPerSample=16;
-        wformat.nBlockAlign     = wformat.nChannels * (wformat.wBitsPerSample >> 3);
-        wformat.nAvgBytesPerSec = wformat.nSamplesPerSec * wformat.nBlockAlign;
-		ao_data.buffersize/=8;
-		ao_data.buffersize*= ao_data.channels;
-		ao_data.buffersize*= SAMPLESIZE;
-        result = waveOutOpen(&hWaveOut,WAVE_MAPPER,&wformat,(DWORD_PTR)waveOutProc,0,CALLBACK_FUNCTION);
+		ao_data.bps=ao_data.channels * ao_data.samplerate*2;
+	    wformat.Format.wBitsPerSample=16;
+        wformat.Format.wFormatTag=WAVE_FORMAT_PCM;
+		wformat.Format.nBlockAlign     = wformat.Format.nChannels * (wformat.Format.wBitsPerSample >> 3);
+        wformat.Format.nAvgBytesPerSec = wformat.Format.nSamplesPerSec * wformat.Format.nBlockAlign;
+		ao_data.buffersize=(wformat.Format.wBitsPerSample>>3)*wformat.Format.nChannels*SAMPLESIZE;
+        result = waveOutOpen(&hWaveOut,WAVE_MAPPER,(WAVEFORMATEX*)&wformat,(DWORD_PTR)waveOutProc,0,CALLBACK_FUNCTION);
 	}
 	if(result != MMSYSERR_NOERROR)
 	{
