@@ -784,7 +784,8 @@ static int check_track_information(mkv_demuxer_t *d) {
             t->a_formattag = get_uint16(&wfe->wFormatTag);
           }
         } else {
-          if (!strcmp(t->codec_id, MKV_A_MP3))
+          if (!strcmp(t->codec_id, MKV_A_MP3) ||
+              !strcmp(t->codec_id, MKV_A_MP2))
             t->a_formattag = 0x0055;
           else if (!strncmp(t->codec_id, MKV_A_AC3, strlen(MKV_A_AC3)))
             t->a_formattag = 0x2000;
@@ -1836,7 +1837,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     sh_a->samplerate = (uint32_t)track->a_sfreq;
     sh_a->wf->nSamplesPerSec = (uint32_t)track->a_sfreq;
     sh_a->samplesize = track->a_bps / 8;
-    if (!strcmp(track->codec_id, MKV_A_MP3)) {
+    if (!strcmp(track->codec_id, MKV_A_MP3) ||
+        !strcmp(track->codec_id, MKV_A_MP2)) {
       sh_a->wf->nAvgBytesPerSec = 16000;
       sh_a->wf->nBlockAlign = 1152;
       sh_a->wf->wBitsPerSample = 0;
