@@ -78,8 +78,8 @@ align_byte
 reserved_bytes
 	for(i=0; i<forward_ptr - length_of_non_reserved; i++)
 		reserved			u(8)
-	a decoder MUST ignore any reserved bytes
-	a encoder MUST NOT write any reserved bytes, as this would make it
+	a demuxer MUST ignore any reserved bytes
+	a muxer MUST NOT write any reserved bytes, as this would make it
 	inpossible to add new fields at the end of packets in the future in
 	a compatible way
 
@@ -254,7 +254,7 @@ stream_class
 	32	audio
 	64	subtiles
 	Note the remaining values are reserved and MUST NOT be used
-	     a decoder MUST ignore streams with reserved classes
+	     a demuxer MUST ignore streams with reserved classes
 
 fourcc
 	identification for the codec
@@ -330,8 +330,9 @@ flags[frame_code]
 		delta= last_timestamp - mask/2
 		timestamp= ((timestamp_lsb-delta)&mask) + delta
 		TTT must be 100 or 101 if the packet_type is not 0
-		the last timestamp differences are reset to the default values
-		from the stream header if a packet of type not 0 in encountered
+		the last timestamp differences are reset to the 
+		initial_timestamp_predictor values from the stream header if a
+		packet of type not 0 in encountered
 	if D is 1 then data_size_msb is coded, otherwise its 0
 	KK is the keyframe_type 
 		00-> no keyframe, 
@@ -368,12 +369,14 @@ data_size
 	if(data_size_lsb == data_size_mul)
 		data_size= last;
 	else if(data_size_lsb == data_size_mul+1)
-		data_size= next last;
+		data_size= next_last;
 	else if(data_size_lsb < data_size_mul)
 		data_size= data_size_lsb + data_size_msb*data_size_mul;
 	else reserved
-	last and next last are reset to the values stored in the stream header
-	if an frame with type > 0 is encountered
+	next_last is the second last unique data_size, for example:
+	previous data_size: 123,500,312,500,500    last=500, next_last=312
+	last and next_last are reset to the initial_data_size_predictor values
+	stored in the stream header if an frame with type > 0 is encountered
 
 lsb_timestamp
 	least significant bits of the timestamp in time_base precission
@@ -519,7 +522,7 @@ for realtime streaming info packets will normally be transmitted when they apply
 for example, the current song title & artist of the currently shown music video
 
 		Unknown packets
-MUST be ignored by the decoder
+MUST be ignored by the demuxer
 
 			Sample code (GPL, & untested)
 
