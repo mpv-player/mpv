@@ -73,6 +73,9 @@ vpass
         2 second pass
           (only need to specify if two-pass encoding is used)
         Tip: u can try to use constant quantizer mode for pass1 (vqscale=<quantizer>)
+        for huffyuv:
+        	pass 1 saves statistics
+                pass 2 encodes with a optimal huffman table based upon the pass 1 stats
 
 vbitrate (kbits per second) for pass1/2
 	800 is default
@@ -254,6 +257,15 @@ naq	normalize adaptive quantization
  
 ildct	use interlaced dct
 
+format
+	YV12 (default)
+        422P (for huffyuv)
+
+pred (for huffyuv)
+	0 left prediction
+        1 plane/gradient prediction
+        2 median prediction
+
 lavdopts: (decoder options)
 ---------------------------
 
@@ -278,7 +290,7 @@ bug	manual workaround encoder bugs (autodetection isnt foolproof for these)
 	8 for mpeg4	UMP4                     (autodetected if fourcc==UMP4)
         16for mpeg4	padding bug
         32for mpeg4	illegal vlc bug          (autodetected per fourcc)
-	64for mpeg4	XVID&DIVX qpel bug	 (autodetected for divx)
+	64for mpeg4	XVID&DIVX qpel bug	 (autodetected)
         Note: just add the ones u want to enable
 
 gray	grayscale only decoding (a bit faster than with color ...)
