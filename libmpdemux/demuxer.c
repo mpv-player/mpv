@@ -146,6 +146,9 @@ extern void demux_close_film(demuxer_t* demuxer);
 extern void demux_close_bmp(demuxer_t* demuxer);
 extern void demux_close_fli(demuxer_t* demuxer);
 extern void demux_close_nuv(demuxer_t* demuxer);
+extern void demux_close_audio(demuxer_t* demuxer);
+extern void demux_close_ogg(demuxer_t* demuxer);
+extern void demux_close_demuxers(demuxer_t* demuxer);
 
 void free_demuxer(demuxer_t *demuxer){
     int i;
@@ -169,6 +172,12 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_fli(demuxer); break;
     case DEMUXER_TYPE_NUV:
       demux_close_nuv(demuxer); break;
+    case DEMUXER_TYPE_AUDIO:
+      demux_close_audio(demuxer); break;
+    case DEMUXER_TYPE_OGG:
+      demux_close_ogg(demuxer); break;
+    case DEMUXER_TYPE_DEMUXERS:
+      demux_close_demuxers(demuxer); return;
     }
     // free streams:
     for(i=0;i<256;i++){

@@ -81,3 +81,24 @@ void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
       demux_seek(priv->sd,pos,1);
 
 }
+
+void demux_close_demuxers(demuxer_t* demuxer) {
+  int i;
+  dd_priv_t* priv = demuxer->priv;
+
+  if(priv->vd)
+    free_demuxer(priv->vd);
+  if(priv->ad && priv->ad != priv->vd)
+    free_demuxer(priv->ad);
+  if(priv->sd && priv->sd != priv->vd && priv->sd != priv->ad)
+    free_demuxer(priv->sd);
+
+  free(priv);
+  if(demuxer->info) {
+    for(i=0;demuxer->info[i] != NULL; i++)
+      free(demuxer->info[i]);
+    free(demuxer->info);
+  }
+  free(demuxer);
+}
+  

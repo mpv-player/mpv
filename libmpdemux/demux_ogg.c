@@ -27,6 +27,10 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   demuxer->audio->id = -2;
   return demuxer;
 }
+
+void demux_close_ogg(demuxer_t* demuxer) {
+
+}
 #else
 
 #include <ogg/ogg.h>
@@ -695,6 +699,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   ogg_d = (ogg_demuxer_t*)calloc(1,sizeof(ogg_demuxer_t));
   ogg_d->num_sub = 1;
   ogg_d->subs = (ogg_stream_t*)malloc(sizeof(ogg_stream_t));
+  ogg_d->subs[0].vorbis = 1;
 
    // Init the ogg physical stream
   ogg_sync_init(&ogg_d->sync);
@@ -868,6 +873,19 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
 
   mp_msg(MSGT_DEMUX,MSGL_ERR,"Can't find the good packet :(\n");  
 
+}
+
+void demux_close_ogg(demuxer_t* demuxer) {
+  ogg_demuxer_t* ogg_d = demuxer->priv;
+
+  if(!ogg_d)
+    return;
+
+  if(ogg_d->subs)
+    free(ogg_d->subs);
+  if(ogg_d->syncpoints)
+    free(ogg_d->syncpoints);
+  free(ogg_d);
 }
 
 #endif

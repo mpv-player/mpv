@@ -317,6 +317,14 @@ void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
 
 }
 
+void demux_close_audio(demuxer_t* demuxer) {
+  da_priv_t* priv = demuxer->priv;
+
+  if(!priv)
+    return;
+  free(priv);
+}
+
 /****************** Options stuff ******************/
 
 #include "../cfgparser.h"
