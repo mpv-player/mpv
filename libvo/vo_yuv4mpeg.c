@@ -13,25 +13,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <signal.h>
-#include <sys/wait.h>
-
-#if defined (linux)
-#include <linux/videodev.h>
-#endif
-
+#include "fastmemcpy.h"
+#include "../postproc/rgb2rgb.h"
 
 LIBVO_EXTERN (yuv4mpeg)
 
@@ -54,80 +44,6 @@ static uint8_t *image_v = NULL;
 static int using_format = 0;
 static FILE *yuv_out;
 int write_bytes;
-
-
-/**
- *
- * height should be a multiple of 2 and width should be a multiple of 2
- * chrominance data is only taken from every secound line others are ignored 
- */
-#define RGB2YUV_SHIFT 8
-#define BY ((int)( 0.098*(1<<RGB2YUV_SHIFT)+0.5))
-#define BV ((int)(-0.071*(1<<RGB2YUV_SHIFT)+0.5))
-#define BU ((int)( 0.439*(1<<RGB2YUV_SHIFT)+0.5))
-#define GY ((int)( 0.504*(1<<RGB2YUV_SHIFT)+0.5))
-#define GV ((int)(-0.368*(1<<RGB2YUV_SHIFT)+0.5))
-#define GU ((int)(-0.291*(1<<RGB2YUV_SHIFT)+0.5))
-#define RY ((int)( 0.257*(1<<RGB2YUV_SHIFT)+0.5))
-#define RV ((int)( 0.439*(1<<RGB2YUV_SHIFT)+0.5))
-#define RU ((int)(-0.148*(1<<RGB2YUV_SHIFT)+0.5))
-
-static inline void rgb24toyv12(const uint8_t *src, uint8_t *ydst, uint8_t *udst, uint8_t *vdst,
-	unsigned int width, unsigned int height,
-	unsigned int lumStride, unsigned int chromStride, unsigned int srcStride)
-{
-	int y;
-	const int chromWidth= width>>1;
-	for(y=0; y<height; y+=2)
-	{
-		int i;
-		for(i=0; i<chromWidth; i++)
-		{
-			unsigned int b= src[6*i+0];
-			unsigned int g= src[6*i+1];
-			unsigned int r= src[6*i+2];
-
-			unsigned int Y  =  ((RY*r + GY*g + BY*b)>>RGB2YUV_SHIFT) + 16;
-			unsigned int V  =  ((RV*r + GV*g + BV*b)>>RGB2YUV_SHIFT) + 128;
-			unsigned int U  =  ((RU*r + GU*g + BU*b)>>RGB2YUV_SHIFT) + 128;
-
-			udst[i] 	= U;
-			vdst[i] 	= V;
-			ydst[2*i] 	= Y;
-
-			b= src[6*i+3];
-			g= src[6*i+4];
-			r= src[6*i+5];
-
-			Y  =  ((RY*r + GY*g + BY*b)>>RGB2YUV_SHIFT) + 16;
-			ydst[2*i+1] 	= Y;
-		}
-		ydst += lumStride;
-		src  += srcStride;
-
-		for(i=0; i<chromWidth; i++)
-		{
-			unsigned int b= src[6*i+0];
-			unsigned int g= src[6*i+1];
-			unsigned int r= src[6*i+2];
-
-			unsigned int Y  =  ((RY*r + GY*g + BY*b)>>RGB2YUV_SHIFT) + 16;
-
-			ydst[2*i] 	= Y;
-
-			b= src[6*i+3];
-			g= src[6*i+4];
-			r= src[6*i+5];
-
-			Y  =  ((RY*r + GY*g + BY*b)>>RGB2YUV_SHIFT) + 16;
-			ydst[2*i+1] 	= Y;
-		}
-		udst += chromStride;
-		vdst += chromStride;
-		ydst += lumStride;
-		src  += srcStride;
-	}
-}
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, 
        uint32_t d_height, uint32_t fullscreen, char *title, 
