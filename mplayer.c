@@ -380,6 +380,11 @@ int has_audio=1;
 //int has_video=1;
 //
 int audio_format=0; // override
+#ifdef USE_DIRECTSHOW
+int allow_dshow=1;
+#else
+int allow_dshow=0;
+#endif
 #ifdef ALSA_TIMER
 int alsa=1;
 #else
@@ -890,13 +895,18 @@ if(stream_dump_type){
 //================== Init AUDIO (codec) ==========================
 if(has_audio){
   // Go through the codec.conf and find the best codec...
-  sh_audio->codec=find_codec(sh_audio->format,NULL,NULL,1);
-  if(!sh_audio->codec){
-    printf("Can't find codec for audio format 0x%X !\n",sh_audio->format);
-    has_audio=0;
-  } else {
+  sh_audio->codec=NULL;
+  while(1){
+    sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
+    if(!sh_audio->codec){
+      printf("Can't find codec for audio format 0x%X !\n",sh_audio->format);
+      has_audio=0;
+      break;
+    }
+    if(audio_format>0 && sh_audio->codec->driver!=audio_format) continue;
     printf("Found audio codec: [%s] drv:%d (%s)\n",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
     //has_audio=sh_audio->codec->driver;
+    break;
   }
 }
 
@@ -913,11 +923,16 @@ if(has_audio){
 //================== Init VIDEO (codec & libvo) ==========================
 
 // Go through the codec.conf and find the best codec...
-sh_video->codec=find_codec(sh_video->format,
-    sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,NULL,0);
-if(!sh_video->codec){
+sh_video->codec=NULL;
+while(1){
+  sh_video->codec=find_codec(sh_video->format,
+    sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
+  if(!sh_video->codec){
     printf("Can't find codec for video format 0x%X !\n",sh_video->format);
     exit(1);
+  }
+  if(!allow_dshow && sh_video->codec->driver==4) continue; // skip DShow
+  break;
 }
 //has_video=sh_video->codec->driver;
 

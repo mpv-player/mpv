@@ -75,6 +75,8 @@ struct config conf[]={
 	{"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 10},
 	{"fps", &force_fps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0},
 	{"afm", &audio_format, CONF_TYPE_INT, CONF_RANGE, 1, 6},
+	{"dshow", &allow_dshow, CONF_TYPE_FLAG, 0, 0, 1},
+	{"nodshow", &allow_dshow, CONF_TYPE_FLAG, 0, 1, 0},
 	{"vcd", &vcd_track, CONF_TYPE_INT, CONF_RANGE, 1, 99},
 	{"divxq", "Option -divxq has been renamed to -pp (postprocessing), use -pp !\n",
             CONF_TYPE_PRINT, 0, 0, 0},
