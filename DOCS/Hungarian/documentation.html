@@ -17,104 +17,120 @@
 
 <P><HR></P>
 
-<P><UL>
-<LI><A HREF="#1">1. Bevezetés</A>
-     <UL><LI><A HREF="#1.1">1.1 Röviden</A></LI>
-     <LI><A HREF="#1.2">1.2 Történelem</A></LI>
-     <LI><A HREF="#1.3">1.3 Telepítés</A></LI>
-     <LI><A HREF="#1.4">1.4 És a grafikus felület?</A>
-     <LI><A HREF="#1.5">1.5 Feliratok és OSD</A>
-     </LI></UL>
-</LI><LI><A HREF="#2">2. Funkciók</A>
-     <UL><LI><A HREF="codecs.html">2.1 Video formátumok, audio és video codec-ek</A>
-	<UL><LI><A HREF="codecs.html#2.1.1">2.1.1 Támogatott input formátumok</A></LI>
-        <LI><A HREF="codecs.html#2.1.2">2.1.2 Támogatott audio és video codec-ek</A>
-	     <UL><LI><A HREF="codecs.html#2.1.2.1">2.1.2.1 DivX4</A></LI>
-	     <LI><A HREF="codecs.html#2.1.2.2">2.1.2.2 ffmpeg DivX/libavcodec</A></LI>
-	     <LI><A HREF="codecs.html#2.1.2.3">2.1.2.3 Hardveres AC3 dekódolás</A></LI>
-	     </UL>
-	</LI><LI><A HREF="codecs.html#2.1.4">2.1.4 Hogyan használj ismeretlen Win32 codec-et</A></LI>
-	     <UL><LI><A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW</A></LI>
-	     <LI><A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow</A></LI>
-	     </UL>
+<P>
+<UL>
+  <LI><A HREF="#1">1. Bevezetés</A></LI>
+  <UL>
+    <LI><A HREF="#1.1">1.1 Röviden</A></LI>
+    <LI><A HREF="#1.2">1.2 Történelem</A></LI>
+    <LI><A HREF="#1.3">1.3 Telepítés</A></LI>
+    <LI><A HREF="#1.4">1.4 És a grafikus felület?</A></LI>
+    <LI><A HREF="#1.5">1.5 Feliratok és OSD</A></LI>
+  </UL>
+  <LI><A HREF="#2">2. Funkciók</A></LI>
+  <UL>
+    <LI><A HREF="codecs.html">2.1 Video formátumok, audio és video codec-ek</A></LI>
+    <UL>
+      <LI><A HREF="codecs.html#2.1.1">2.1.1 Támogatott input formátumok</A></LI>
+      <LI><A HREF="codecs.html#2.1.2">2.1.2 Támogatott audio és video codec-ek</A></LI>
+      <UL>
+	<LI><A HREF="codecs.html#2.1.2.1">2.1.2.1 DivX4</A></LI>
+	<LI><A HREF="codecs.html#2.1.2.2">2.1.2.2 ffmpeg DivX/libavcodec</A></LI>
+	<LI><A HREF="codecs.html#2.1.2.3">2.1.2.3 Hardveres AC3 decoding</A></LI>
+      </UL>
+      <LI><A HREF="codecs.html#2.1.4">2.1.4 Hogyan használj ismeretlen Win32 codec-et</A></LI>
+      <UL>
+	<LI><A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW</A></LI>
+	<LI><A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow</A></LI>
+      </UL>
+    </UL>
+    <LI><A HREF="video.html">2.2 Video és audio kimeneti eszközök</A></LI>
+    <UL>
+      <LI><A HREF="video.html#2.2.1">2.2.1 Video kimenetek</A></LI>
+      <UL>
+	<LI><A HREF="video.html#2.2.1.1">2.2.1.1 MTRR</A></LI>
+	<LI><A HREF="video.html#2.2.1.2">2.2.1.2 Xv</A></LI>
+	<UL>
+	  <LI><A HREF="video.html#2.2.1.2.1">2.2.1.2.1 3dfx kártyák</A></LI>
+	  <LI><A HREF="video.html#2.2.1.2.2">2.2.1.2.2 S3 kártyák</A></LI>
+	  <LI><A HREF="video.html#2.2.1.2.3">2.2.1.2.3 nVidia kártyák</A></LI>
+	  <LI><A HREF="video.html#2.2.1.2.4">2.2.1.2.4 ATI kártyák</A></LI>
+	  <LI><A HREF="video.html#2.2.1.2.5">2.2.1.2.5 NeoMagic kártyák</A></LI>
 	</UL>
-    </LI><LI><A HREF="video.html">2.2 Video és audio kimeneti eszközök</A>
-	<UL><LI><A HREF="video.html#2.2.1">2.2.1 Video kimenetek</A>
-	     <UL><LI><A HREF="video.html#2.2.1.1">2.2.1.1 MTRR</A>
-	     </LI><LI><A HREF="video.html#2.2.1.2">2.2.1.2 Xv</A>
-		      <UL><LI><A HREF="video.html#2.2.1.2.1">2.2.1.2.1 3dfx kártyák</A>
-		      </LI><LI><A HREF="video.html#2.2.1.2.2">2.2.1.2.2 S3 kártyák</A>
-		      </LI><LI><A HREF="video.html#2.2.1.2.3">2.2.1.2.3 nVidia kártyák</A>
-		      </LI><LI><A HREF="video.html#2.2.1.2.4">2.2.1.2.4 ATI kártyák</A>
-		      </LI><LI><A HREF="video.html#2.2.1.2.5">2.2.1.2.5 NeoMagic kártyák</A>
-		      </LI></UL>
-	     </LI><LI><A HREF="video.html#2.2.1.3">2.2.1.3 DGA</A>
-		    <UL><LI><A HREF="video.html#2.2.1.3.1">2.2.1.3.1 Elõszó</A>
-		    </LI><LI><A HREF="video.html#2.2.1.3.2">2.2.1.3.2 Mi az a DGA</A>
-		    </LI><LI><A HREF="video.html#2.2.1.3.3">2.2.1.3.3 DGA támogatás telepítése MPlayer-be</A>
-		    </LI><LI><A HREF="video.html#2.2.1.3.4">2.2.1.3.4 Felbontásváltás</A>
-		    </LI><LI><A HREF="video.html#2.2.1.3.5">2.2.1.3.5 DGA és MPlayer</A>
-		    </LI><LI><A HREF="video.html#2.2.1.3.6">2.2.1.3.6 A DGA driver képességei</A>
-		    </LI><LI><A HREF="video.html#2.2.1.3.7">2.2.1.3.7 Sebesség</A>
-		    </LI><LI><A HREF="video.html#2.2.1.3.8">2.2.1.3.8 Ismert hibák</A>
-		    </LI><LI><A HREF="video.html#2.2.1.3.9">2.2.1.3.9 Beépítendõ dolgok</A>
-		    </LI><LI><A HREF="video.html#2.2.1.3.A">2.2.1.3.A Néhány modeline</A>
-		    </LI><LI><A HREF="video.html#2.2.1.3.B">2.2.1.3.B Hibabejelentés</A>
-		    </LI></UL>
-	     </LI><LI><A HREF="video.html#2.2.1.4">2.2.1.4 SDL</A>
-	     </LI><LI><A HREF="video.html#2.2.1.5">2.2.1.5 SVGAlib</A>
-	     </LI><LI><A HREF="video.html#2.2.1.6">2.2.1.6 Framebuffer kimenet (FBdev)</A>
-	     </LI><LI><A HREF="video.html#2.2.1.7">2.2.1.7 Matrox framebuffer (mga_vid)</A>
-	     </LI><LI><A HREF="video.html#2.2.1.8">2.2.1.8 SiS 6326 framebuffer (sis_vid)</A>
-	     </LI><LI><A HREF="video.html#2.2.1.9">2.2.1.9 3dfx YUV támogatás (tdfxfb)</A>
-	     </LI><LI><A HREF="video.html#2.2.1.10">2.2.1.10 OpenGL kimenet</A>
-	     </LI><LI><A HREF="video.html#2.2.1.11">2.2.1.11 AAlib - szöveges módú megjelenítés</A>
-	     </LI><LI><A HREF="video.html#2.2.1.A">2.2.1.A TV kimenet</A></LI>
-		     <UL>
-		     <LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox TV kártyák</A></LI>
-		     <LI><A HREF="video.html#2.2.1.A.2">2.2.1.A.2 ATI kártyák</A></LI>
-        </UL>
+	<LI><A HREF="video.html#2.2.1.3">2.2.1.3 DGA</A></LI>
+	<UL>
+	  <LI><A HREF="video.html#2.2.1.3.1">2.2.1.3.1 Elõszó</A></LI>
+	  <LI><A HREF="video.html#2.2.1.3.2">2.2.1.3.2 Mi az a DGA</A></LI>
+	  <LI><A HREF="video.html#2.2.1.3.3">2.2.1.3.3 DGA támogatás telepítése MPlayer-be</A></LI>
+	  <LI><A HREF="video.html#2.2.1.3.4">2.2.1.3.4 Felbontásváltás</A></LI>
+	  <LI><A HREF="video.html#2.2.1.3.5">2.2.1.3.5 DGA és MPlayer</A></LI>
+	  <LI><A HREF="video.html#2.2.1.3.6">2.2.1.3.6 A DGA driver képességei</A></LI>
+	  <LI><A HREF="video.html#2.2.1.3.7">2.2.1.3.7 Sebesség</A></LI>
+	  <LI><A HREF="video.html#2.2.1.3.8">2.2.1.3.8 Ismert hibák</A></LI>
+	  <LI><A HREF="video.html#2.2.1.3.9">2.2.1.3.9 Beépítendõ dolgok</A></LI>
+	  <LI><A HREF="video.html#2.2.1.3.A">2.2.1.3.A Néhány modeline</A></LI>
+	  <LI><A HREF="video.html#2.2.1.3.B">2.2.1.3.B Hibabejelentés</A></LI>
 	</UL>
-	</LI><LI><A HREF="sound.html#2.2.2">2.2.2 Hangkártyák, audio kimenetek</A>
-	     <UL><LI><A HREF="sound.html#2.2.2.1">2.2.2.1 Ajánlott beállítások különféle hangkártyákhoz</A>
-	     </LI></UL>
-	</LI></LI></UL></LI></UL></LI></UL></LI></UL></LI>
-</LI><LI><A HREF="#3">3. Használat</A>
-     <UL><LI><A HREF="#3.1">3.1 Irányítás billentyûzetrõl</A>
-     </LI><LI><A HREF="#3.2">3.2 Irányítás LIRC-cel (Linux Infrared Remote Control)</A>
-     </LI><LI><A HREF="#3.3">3.3 Lejátszás hálózatról, vagy pipe-on keresztül</A>
-     </LI></UL>
-</LI><LI><A HREF="cd-dvd.html#4">4. CD/DVD fejezet</A>
-     <UL><LI><A HREF="cd-dvd.html#4.1">4.1 CD meghajtók</A>
-     </LI><LI><A HREF="cd-dvd.html#4.2">4.2 DVD lejátszás</A>
-     </LI><LI><A HREF="cd-dvd.html#4.3">4.3 DVD FAQ</A>
-     </LI></UL>
-</LI><LI><A HREF="faq.html">5. FAQ fejezet</A>
-     <UL><LI><A HREF="faq.html#5.1">5.1 Fordítás</A>
-     </LI><LI><A HREF="faq.html#5.2">5.2 Általános kérdések</A>
-     </LI><LI><A HREF="faq.html#5.3">5.3 File lejátszással kapcsolatos problémák</A>
-     </LI><LI><A HREF="faq.html#5.4">5.4 Video/audio meghajtókkal kapcsolatos problémák</A>
-     </LI><LI><A HREF="faq.html#5.5">5.5 Feature kérések</A>
-     </LI></UL>
-</LI><LI><A HREF="#6">6. Különféle operációs rendszerek</A>
-     <UL><LI><A HREF="#6.1">6.1 Debian csomagolás</A>
-     </LI><LI><A HREF="#6.2">6.2 FreeBSD</A>
-     </LI><LI><A HREF="#6.3">6.3 Solaris</A>
-     </LI><LI><A HREF="#6.4">6.4 StrongARM</A>
-     </LI></UL>
-</LI><LI><A HREF="../documentation.html#A">A. Készítõk</A></LI>
-<UL><LI><A HREF="../documentation.html#A2">A/2. Maintainerek</A></LI></UL>
-<LI><A HREF="#B">B. Levelezési listák</A>
-</LI><LI><A HREF="bugreports.html">C. Hogyan jelents be hibát</A>
-</LI><UL><LI><A HREF="../tech/patches.txt">C/2. Hogyan küldj patch-et</A></LI></UL>
-</LI><LI><A HREF="../documentation.html#D">D. Ismert hibák</A>
-</LI><LI><A HREF="skin-hu.html">X. Hogyan Legyél Világhírû SkinKészítõ 5 Perc Alatt</A>
-
-</LI></UL></P>
-</LI></UL>
-</LI></UL>
-</LI></UL>
-</LI></UL>
+	<LI><A HREF="video.html#2.2.1.4">2.2.1.4 SDL</A></LI>
+	<LI><A HREF="video.html#2.2.1.5">2.2.1.5 SVGAlib</A></LI>
+	<LI><A HREF="video.html#2.2.1.6">2.2.1.6 Framebuffer kimenet (FBdev)</A></LI>
+	<LI><A HREF="video.html#2.2.1.7">2.2.1.7 Matrox framebuffer (mga_vid)</A></LI>
+	<LI><A HREF="video.html#2.2.1.8">2.2.1.8 SiS 6326 framebuffer (sis_vid)</A></LI>
+	<LI><A HREF="video.html#2.2.1.9">2.2.1.9 3dfx YUV támogatás (tdfxfb)</A></LI>
+	<LI><A HREF="video.html#2.2.1.10">2.2.1.10 OpenGL kimenet</A></LI>
+	<LI><A HREF="video.html#2.2.1.11">2.2.1.11 AAlib - szöveges módú megjelenítés</A></LI>
+	<LI><A HREF="video.html#2.2.1.A">2.2.1.A TV kimenet</A></LI>
+	<UL>
+	  <LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox kártyák</A></LI>
+	  <LI><A HREF="video.html#2.2.1.A.2">2.2.1.A.2 ATI kártyák</A></LI>
+	</UL>
+      </UL>
+      <LI><A HREF="sound.html#2.2.2">2.2.2 Hangkártyák, audio kimenetek</A></LI>
+      <UL>
+	<LI><A HREF="sound.html#2.2.2.1">2.2.2.1 Ajánlott beállítások különféle hangkártyákhoz</A></LI>
+      </UL>
+    </UL>
+  </UL>
+  <LI><A HREF="#3">3. Használat</A></LI>
+    <UL>
+      <LI><A HREF="#3.1">3.1 Irányítás billentyûzetrõl</A></LI>
+      <LI><A HREF="#3.2">3.2 Irányítás LIRC-cel(Linux Infrared Remote Control)</A></LI>
+      <LI><A HREF="#3.3">3.3 Lejátszás hálózatról, vagy pipe-on keresztül</A></LI>
+    </UL>
+  <LI><A HREF="cd-dvd.html#4">4. CD/DVD fejezet</A></LI>
+    <UL>
+      <LI><A HREF="cd-dvd.html#4.1">4.1 CD meghajtók</A></LI>
+      <LI><A HREF="cd-dvd.html#4.2">4.2 DVD lejátszás</A></LI>
+      <LI><A HREF="cd-dvd.html#4.3">4.3 DVD FAQ</A></LI>
+    </UL>
+  <LI><A HREF="faq.html">5. FAQ fejezet</A></LI>
+    <UL>
+      <LI><A HREF="faq.html#5.1">5.1 Fordítás</A></LI>
+      <LI><A HREF="faq.html#5.2">5.2 Általános kérdések</A></LI>
+      <LI><A HREF="faq.html#5.3">5.3 File lejátszással kapcsolatos problémák</A></LI>
+      <LI><A HREF="faq.html#5.4">5.4 Video/audio meghajtókkal kapcsolatos problémák</A></LI>
+      <LI><A HREF="faq.html#5.5">5.5 Feature kérések</A></LI>
+    </UL>
+  <LI><A HREF="#6">6. Különféle operációs rendszerek</A></LI>
+    <UL>
+      <LI><A HREF="#6.1">6.1 Debian csomagolás</A></LI>
+      <LI><A HREF="#6.2">6.2 FreeBSD</A></LI>
+      <LI><A HREF="#6.3">6.3 Solaris</A></LI>
+      <LI><A HREF="#6.4">6.4 StrongARM</A></LI>
+    </UL>
+  <LI><A HREF="../documentation.html#A">A. Készítõk</A></LI>
+  <UL>
+    <LI><A HREF="../documentation.html#A2">A/2. Maintainerek</A></LI>
+  </UL>
+  <LI><A HREF="#B">B. Levelezési listák</A></LI>
+  <LI><A HREF="bugreports.html">C. Hogyan jelents be hibát</A></LI>
+  <UL>
+    <LI><A HREF="../tech/patches.txt">C/2. Hogyan küldj patch-et</A></LI>
+  </UL>
+  <LI><A HREF="../documentation.html#D">D. Ismert hibák</A></LI>
+  <LI><A HREF="skin-hu.html">X. Hogyan Legyél Világhírû SkinKészítõ 5 Perc Alatt!</A></LI>
+</UL>
+</P>
 
 <P><HR></P>
 
