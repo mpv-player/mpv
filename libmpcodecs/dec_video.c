@@ -158,6 +158,8 @@ unsigned int t2;
 double tt;
 
 sh_video->video_out=video_out;
+
+//if(!(sh_video->ds->flags&1) || sh_video->ds->pack_no<5)
 mpi=mpvdec->decode(sh_video, start, in_size, drop_frame);
 
 //------------------------ frame decoded. --------------------
