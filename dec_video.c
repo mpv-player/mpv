@@ -570,7 +570,6 @@ switch(d_video->demuxer->file_format){
    }
    if(verbose) printf("OK!\n");
 //   sh_video=d_video->sh;sh_video->ds=d_video;
-   sh_video->format=0x10000001; // mpeg video
    mpeg2_init();
    // ========= Read & process sequence header & extension ============
    videobuffer=shmem_alloc(VIDEOBUFFER_SIZE);
@@ -610,6 +609,7 @@ switch(d_video->demuxer->file_format){
     }
    }
    // display info:
+   sh_video->format=picture->mpeg1?0x10000001:0x10000002; // mpeg video
    sh_video->fps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
    if(!sh_video->fps){
 //     if(!force_fps){
