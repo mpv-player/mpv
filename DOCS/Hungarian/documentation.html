@@ -222,7 +222,6 @@
     <UL>
       <LI><A HREF="cd-dvd.html#4.1">4.1 CD meghajtók</A></LI>
       <LI><A HREF="cd-dvd.html#4.2">4.2 DVD lejátszás</A></LI>
-      <LI><A HREF="cd-dvd.html#4.3">4.3 DVD FAQ</A></LI>
     </UL>
   <LI><A HREF="faq.html">5. FAQ fejezet</A></LI>
     <UL>
@@ -230,7 +229,9 @@
       <LI><A HREF="faq.html#5.2">5.2 Általános kérdések</A></LI>
       <LI><A HREF="faq.html#5.3">5.3 File lejátszással kapcsolatos problémák</A></LI>
       <LI><A HREF="faq.html#5.4">5.4 Video/audio meghajtókkal kapcsolatos problémák</A></LI>
-      <LI><A HREF="faq.html#5.5">5.5 Feature kérések</A></LI>
+      <LI><A HREF="faq.html#5.5">5.5 DVD lejátszás</A></LI>
+      <LI><A HREF="faq.html#5.6">5.6 Feature kérések</A></LI>
+      <LI><A HREF="faq.html#5.7">5.7 Enkódolás</A></LI>
     </UL>
   <LI><A HREF="#6">6. Különféle operációs rendszerek</A></LI>
     <UL>
@@ -241,6 +242,7 @@
       <LI><A HREF="#6.5">6.5 SGI/Irix</A></LI>
       <LI><A HREF="#6.6">6.6 QNX</A></LI>
       <LI><A HREF="#6.7">6.7 OpenBSD</A></LI>
+      <LI><A HREF="#6.8">6.8 Cygwin</A></LI>
     </UL>
   <LI><A HREF="../documentation.html#A">A. Készítõk</A></LI>
   <UL>
@@ -1643,6 +1645,15 @@ Közelebbi információ valakinél?</P>
 <P>Ha az <B>MPlayer</B> a <CODE>/dev/cdrom</CODE> vagy <CODE>/dev/dvd</CODE>
   hiányára panaszkodik, csinálj egy szimbolikus linket :<BR>
   <CODE>ln -s /dev/(cdrom egység) /dev/cdrom</CODE></P>
+
+
+<P><B><A NAME=6.8>6.8. Cygwin</A></B></P>
+
+<P>Be kell lépned az <B>MPlayer</B> könyvtárába és át kell másolnod az
+  <CODE>etc/cygwin_inttypes.h</CODE> file-t az
+  <CODE>/usr/include/inttypes.h</CODE> file helyére hogy az <B>MPlayer</B>
+  leforduljon. Máskülönben a fordításkor panaszkodni fog az inttypes.h
+  hiányára.</P>
 
 
 <P><B><A NAME=A>A függelék - Készítõk</A></B></P>

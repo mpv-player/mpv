@@ -156,55 +156,6 @@ változtathatod meg (fordításkor), van megadhatod a -dvd-device opcióval :</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
 
-<P><B><A NAME=4.3>4.3.  DVD FAQ</A></B></P>
-
-<TABLE BORDER=0 ALIGN=left WIDTH=100%>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>DVD lejátszás elõtt/helyett/közben ezt a hibaüzenetet kapom :<BR>
-<CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion     nfo_length /
-sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Ismert libdvdread 0.9.1 bug, a 0.9.2-ben és a libmpdvdkit-ben már javítva van,
-miért nem ezutóbbi használod?
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>   
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>Lefordíthatom a libdvdread-et és a libdvdcss-t például az én szép kis
-Sparc/Solarisomon?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Ki tudja ... Próbáld ki és mondd el nekünk is. De elvileg mûködik.
-Olvasd el a libdvdread dokumentációját és honlapját. Nem mi vagyunk
-a készítõi...
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>   
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>És a feliratok? Az MPlayer meg tudja jeleníteni õket?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Igen, lásd fent, a DVD fejezetet.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B> Hogy állíthatom be a DVD régiókódját ? Nincs windowsom!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD> Használd a 'regionset' parancsot :
-     <A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz</A>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>Muszáj rendszergazdai jogosultságokkal rendelkeznem hogy le tudjak
-játszani egy DVD-t?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Csak a régi fajta DVD támogatáshoz. Ezenkívül persze kellenek megfelelõ
-jogosultságok a DVD egységhez (pl /dev/dvd).
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>Hol lehet letölteni a libdvdread-et és a libdvdcss-t?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Innen:
-<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>Lehetséges csak bizonyos fejezeteket lejátszani/enkódolni ?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Igen, lásd fent a <CODE>-chapter</CODE> opciót.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>Nagyon lassú a DVD lejátszás !
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Próbáld a <CODE>-cache</CODE> opciót (lásd manpage!). Ha így se jó, próbáld meg
-bekapcsolni a DMA-t a DVD meghajtón.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-</TABLE>
-
 </BODY>
 
 </HTML>
