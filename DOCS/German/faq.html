@@ -669,6 +669,16 @@ Wenn ich das GUI mit SDL Videoausgabe verwende wird ein zweites Fenster erzeugt.
 Bekannt, verwende SDL für GUI zur Zeit nicht.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Oh die Welt ist grausam..! SDL besitzt nur <CODE>x11</CODE> aber kein <CODE>xv</CODE>
+als Ausgabe!
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
+Versuch nochmals die <CODE>x11</CODE> Ausgabe. Nun versuch <CODE>-vo x11 -fs -zoom</CODE>.
+Siehst du irgendwelche Unterschiede? Nein?! Ok, hier die Erleuchtung: SDL's
+<CODE>x11</CODE> Ausgabe verwendet xv, falls vorhanden. Du musst dir keine Sorgen dazu 
+machen...
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 
 <TD COLSPAN=3>
 <B><A NAME=5.5><font face="Verdana, Arial, Helvetica, sans-serif" size="2">5.5. Feature-Wünsche</A></B>
