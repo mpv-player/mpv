@@ -470,12 +470,12 @@ int parse_codec_cfg(char *cfgfile)
 	int codec_type;		/* TYPE_VIDEO/TYPE_AUDIO */
 	int tmp, i;
 	
-	// in case we call it secont time
+	// in case we call it a second time
 	if(video_codecs!=NULL)free(video_codecs);
-	else video_codecs=NULL;
+	video_codecs=NULL;
  
  	if(audio_codecs!=NULL)free(audio_codecs);
-	else audio_codecs=NULL;
+	audio_codecs=NULL;
 	
 	nr_vcodecs = 0;
 	nr_acodecs = 0;
@@ -830,6 +830,13 @@ void list_codecs(int audioflag){
 
 
 #ifdef CODECS2HTML
+/*
+ * Fake out GUI references when building the codecs2html utility.
+ */
+#ifdef HAVE_NEW_GUI
+void gtkMessageBox( int type,char * str ) { return; }
+int use_gui = 0;
+#endif
 
 void wrapline(FILE *f2,char *s){
     int c;
@@ -863,7 +870,7 @@ void parsehtml(FILE *f1,FILE *f2,codecs_t *codec,int section,int dshow){
             case 'd':
                 wrapline(f2,codec->dll); break;
             case 'D':
-                fprintf(f2,"%c",codec->driver==dshow?'+':'-'); break;
+                fprintf(f2,"%c",!strcmp(codec->drv,"dshow")?'+':'-'); break;
             case 'F':
                 for(d=0;d<CODECS_MAX_FOURCC;d++)
                     if(!d || codec->fourcc[d]!=0xFFFFFFFF)
@@ -949,13 +956,13 @@ int main(void)
                     case 0:
                     case 5:
                         if(cl[i].status==CODECS_STATUS_WORKING)
-                            if(!(cl[i].driver==win32 || cl[i].driver==dshow || cl[i].driver==win32ex))
+                            if(!(!strcmp(cl[i].drv,"win32") || !strcmp(cl[i].drv,"dshow") || !strcmp(cl[i].drv,"win32ex")))
                                 parsehtml(f1,f2,&cl[i],section,dshow);
                         break;
                     case 1:
                     case 6:
                         if(cl[i].status==CODECS_STATUS_WORKING)
-                            if(cl[i].driver==win32 || cl[i].driver==dshow || cl[i].driver==win32ex)
+                            if((!strcmp(cl[i].drv,"win32") || !strcmp(cl[i].drv,"dshow") || !strcmp(cl[i].drv,"win32ex")))
                                 parsehtml(f1,f2,&cl[i],section,dshow);
                         break;
                     case 2:
