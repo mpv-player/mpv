@@ -366,6 +366,7 @@ extern ao_functions_t * audio_out;
 extern vo_functions_t * video_out;
 extern int    		frame_dropping;
 extern int              stream_dump_type;
+extern int  		vcd_track;
 extern m_obj_settings_t*vo_plugin_args;
 
 #if defined( USE_OSD ) || defined( USE_SUB )
@@ -694,12 +695,20 @@ int guiGetEvent( int type,char * arg )
 	       break;
 #ifdef HAVE_VCD
 	  case STREAMTYPE_VCD:
-	       vcd_track=guiIntfStruct.Track;
+	       {
+	        char tmp[512];
+		sprintf( tmp,"vcd://%d",guiIntfStruct.Track + 1 );
+		guiSetFilename( guiIntfStruct.Filename,tmp );
+	       }
 	       break;
 #endif
 #ifdef USE_DVDREAD
  	  case STREAMTYPE_DVD:
-	       dvd_title=guiIntfStruct.Title;
+	       {
+	        char tmp[512];
+		sprintf( tmp,"dvd://%d",guiIntfStruct.Title );
+		guiSetFilename( guiIntfStruct.Filename,tmp );
+	       }
 	       dvd_chapter=guiIntfStruct.Chapter;
 	       dvd_angle=guiIntfStruct.Angle;
 	       break;

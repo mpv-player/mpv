@@ -234,17 +234,19 @@ static void plButtonReleased( GtkButton * button,gpointer user_data )
        break;
   case 2: // remove
        {
-	int i; int c=0;
+	int i; int j; int c=0;
 
 	gtk_signal_handler_block( GTK_OBJECT( CLSelected ),sigSel );
 	gtk_signal_handler_block( GTK_OBJECT( CLSelected ),sigUnsel );
 
         gtk_clist_freeze( GTK_CLIST( CLSelected ) );
-        for ( i=0;i<NrOfSelected;i++ )
+        for ( i=0;i<NrOfSelected-c;i++ )
   	 if ( CLListSelected[i] ) 
 	  {
 	   gtk_clist_remove( GTK_CLIST( CLSelected ),i - c );
 	   c++;
+	   for ( j=i;j<NrOfSelected-c;j++ )
+		CLListSelected[i] = CLListSelected[i+1];
 	  }
 	NrOfSelected-=c;
 	gtk_clist_thaw( GTK_CLIST( CLSelected ) );
