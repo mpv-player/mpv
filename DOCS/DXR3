@@ -1,0 +1,109 @@
+DXR3/H+ video/audio output plugins manual by David Holm
+=======================================================
+
+1. Introduction
+
+The DXR3 and Hollywood+ are two not too different mpeg-(1/2) and ac3
+hardware playback cards that came at about the same time as the first
+dvd-rom drives hit the market. At that time most computers weren't
+powerful enough for synced software dvd playback. And even the faster
+(intel-based) computers had troubles with artifacts.
+Sigma Designs came up with the great idea to create a hardware
+mpeg-(1/2), ac3 decoder. Sigma Designs are known for their realmagic
+hardware (or they bought the company who came up with the first
+realmagic boards, I don't know which).
+Later Creative Labs thought, hey, we also wan't this product, and to
+distribute it with our dvd-drives (the DVD Encore packages if I recall
+correctly). So they bought the designs for the Hollywood plus and
+replaced the circuit used to produce a proper video feed for tv's
+called adv7170 or adv7175a depending on which h+ board you own with
+a bt865. The reason for this is beyond my understanding as this seems
+complete illogical to me, but I have had great experiences with
+bt(brooktree) circuits in the past, so I don't mind.
+Well, nowadays most people have no use for a mpeg-(1/2) or ac3
+hardware decoder since most computers these days have no problem doing
+this in software and have cycles left for posprocessing (removing of
+artefacts and other garbage produced by compression).
+These days, you have two uses for this card:
+1. You have a slow computer which you use for vcd/dvd playback
+2. You discover what I have done with the implementation of this as
+   an audio/video output device for mplayer (read on and you'll find
+   out).
+   
+
+
+2. Requirements
+
+ * First of all you will need the DXR3/H+ drivers properly installed,
+   including the dev-api.
+   These can be downloaded from dxr3.sourceforge.net
+
+ * <mplayerdir>/libavcodec from ffmpeg (only required if you intend to
+   play formats other than mpeg-(1/2), highly recommended!) there are
+   two ways of doing this:
+   1. Download and install ffmpeg from ffmpeg.sourceforge.net. 
+      Configure it with --enable-shared
+   2. Download ffmpeg from ffmpeg.sourceforge.net, copy the entire 
+      contents from <ffmpegdir>/libavcodec into <mplayer>/libavcodec 
+      (symlinking won't work!). Then edit <mplayerdir>/libavcodec/utils.c 
+      and move the line containing register_avcodec(&mpeg1video_encoder); 
+      out of the CONFIG_ENCODERS #ifdef block and place it outside, for 
+      instance below register_avcodec(&rawvideo_encoder);
+
+ * Run <mplayerdir>/configure and make sure that DXR3/H+ support =yes
+   and optionally that libavcodec or ffmpeg.so = yes
+   
+ From here on compilation (of at least my code ;) should go without
+ problems.
+
+
+ 
+3. Usage
+
+After installation you will have two new outdevices in mplayer:
+    -vo dxr3	For video output
+    -ao dxr3	For audio output
+
+There are some notes to take into account here for optimum playback.
+When playing any mpeg-(1/2) file, this including usage of the "-dvd"
+and "-vcd" options you must either add the "-vc mpegpes" or edit
+codecs.conf and make sure videocodec mpegpes is listed above mpeg12.
+If you fail to do this you will only get software playback which kinda
+spoils most of the useful features of this card except for tv-out ;).
+Remember that if you edit the codecs.conf file and move the mpegpes
+section will have to specify "-vc mpeg12" if you want to playback
+any of these video types without "-vo dxr3"!
+
+If you ever get a codec unsupported message, lookup the codec in the
+codecs.conf file (search for "videocodec <codecname>"), copy the entire
+codec section and send it to me and I'll make sure it works with the
+next patch (or the next after that if I have a thousand things to take
+care of first ;) my e-mail is at the bottom of this page.
+
+
+
+4. Todo
+
+ * Make the osd use the subpic feature of the dxr3 		(High)
+ * Overlay output						(Medium)
+ * Driver options						(Medium)
+ * Add an onscreen menu for "live" performance tuning		(Low)
+ 
+(yuv2rgb (24bpp) asm optimizations, not my job though... but
+ this will improve playback of anything not mpeg-(1/2) for us
+ all)
+
+
+ 
+5. Contacting me
+
+You can contact me either by e-mailing me, dholm@iname.com or by using
+icq: 798427
+Feedback, bugreports and general suggestions are appreciated 
+(preferably by e-mail)
+My name is David Holm for those of you who are incapable of reading
+a heading. ;)
+
+
+
+
