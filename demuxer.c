@@ -13,6 +13,7 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
   ds->buffer_pos=ds->buffer_size=0;
   ds->buffer=NULL;
   ds->pts=0;
+  ds->pts_bytes=0;
   ds->eof=0;
   ds->pos=0;
   ds->dpos=0;
@@ -120,7 +121,11 @@ int ds_fill_buffer(demux_stream_t *ds){
       ds->buffer_size=p->len;
       ds->pos=p->pos;
       ds->dpos+=p->len; // !!!
-      ds->pts=p->pts;
+      if(p->pts){
+        ds->pts=p->pts;
+        ds->pts_bytes=0;
+      }
+      ds->pts_bytes+=p->len; // !!!
       // free packet:
       ds->bytes-=p->len;
       ds->first=p->next;
@@ -163,6 +168,24 @@ while(len>0){
 }
 return bytes;
 }
+
+int demux_read_data_pack(demux_stream_t *ds,unsigned char* mem,int len){
+int x;
+int bytes=0;
+while(len>0){
+  x=ds->buffer_size-ds->buffer_pos;
+  if(x==0){
+    if(!ds_fill_buffer(ds)) return bytes;
+  } else {
+    if(x>len) x=len;
+    if(mem) memcpy(mem+bytes,&ds->buffer[ds->buffer_pos],x);
+    bytes+=x;len-=x;ds->buffer_pos+=x;
+    return bytes; // stop at end of package! (for correct timestamping)
+  }
+}
+return bytes;
+}
+
 
 void ds_free_packs(demux_stream_t *ds){
   demux_packet_t *dp=ds->first;

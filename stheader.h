@@ -15,7 +15,8 @@ typedef struct {
   int samplerate;
   int samplesize;
   int channels;
-  int o_bps; // == samplerate*samplesize*channels
+  int o_bps; // == samplerate*samplesize*channels   (uncompr. bytes/sec)
+  int i_bps; // == bitrate  (compressed bytes/sec)
   // in buffers:
   char* a_in_buffer;
   int a_in_buffer_len;

@@ -60,11 +60,12 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
     if(verbose) printf("Audio codec opened OK! ;-)\n");
 
     acmStreamSize(sh_audio->srcstream, in_fmt->nBlockAlign, &srcsize, ACM_STREAMSIZEF_SOURCE);
-    if(srcsize<OUTBURST) srcsize=OUTBURST;
+    srcsize*=2;
+    if(srcsize<MAX_OUTBURST) srcsize=MAX_OUTBURST;
     sh_audio->audio_out_minsize=srcsize; // audio output min. size
     if(verbose) printf("Audio ACM output buffer min. size: %ld\n",srcsize);
 
-    acmStreamSize(sh_audio->srcstream, 2*srcsize, &srcsize, ACM_STREAMSIZEF_DESTINATION);
+    acmStreamSize(sh_audio->srcstream, srcsize, &srcsize, ACM_STREAMSIZEF_DESTINATION);
     sh_audio->audio_in_minsize=srcsize; // audio input min. size
     if(verbose) printf("Audio ACM input buffer min. size: %ld\n",srcsize);
     
@@ -106,11 +107,12 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len){
         }
         hr=acmStreamConvert(sh_audio->srcstream,&ash,0);
         if(hr){
-          printf("ACM_Decoder: acmStreamConvert error %d\n",(int)hr);
+          if(verbose>=2) printf("ACM_Decoder: acmStreamConvert error %d\n",(int)hr);
           
 //					return -1;
         }
-        if(verbose>=3) printf("acm converted %d -> %d\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed);
+        //if(verbose>=3)
+        printf("acm converted %d -> %d\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed);
         if(ash.cbSrcLengthUsed>=sh_audio->a_in_buffer_len){
           sh_audio->a_in_buffer_len=0;
         } else {
@@ -138,8 +140,8 @@ int init_video_codec(sh_video_t *sh_video){
   sh_video->o_bih.biSize = sizeof(BITMAPINFOHEADER);
 
   win32_codec_name = sh_video->codec->dll;
-  sh_video->hic = ICOpen( 0x63646976, sh_video->bih->biCompression, ICMODE_FASTDECOMPRESS);
-//  sh_video->hic = ICOpen( 0x63646976, sh_video->bih.biCompression, ICMODE_DECOMPRESS);
+//  sh_video->hic = ICOpen( 0x63646976, sh_video->bih->biCompression, ICMODE_FASTDECOMPRESS);
+  sh_video->hic = ICOpen( 0x63646976, sh_video->bih->biCompression, ICMODE_DECOMPRESS);
   if(!sh_video->hic){
     printf("ICOpen failed! unknown codec / wrong parameters?\n");
     return 0;
@@ -259,19 +261,6 @@ int init_video_codec(sh_video_t *sh_video){
     printf("ICDecompressBegin failed: Error %d\n", (int)ret);
     return 0;
   }
-
-#if 0
-
-//sh_video->hic
-//ICSendMessage(HIC hic,unsigned int msg,long lParam1,long lParam2)
-{ int i;
-  for(i=73;i<256;i++){
-    printf("Calling ICM_USER+%d function...",i);fflush(stdout);
-    ret = ICSendMessage(sh_video->hic,ICM_USER+i,NULL,NULL);
-    printf(" ret=%d\n",ret);
-  }
-}
-#endif
 
   sh_video->our_out_buffer = shmem_alloc(sh_video->o_bih.biSizeImage);
   if(!sh_video->our_out_buffer){

@@ -50,16 +50,18 @@ int main(){
   }
 
 //  ioctl(audio_fd, SNDCTL_DSP_RESET, NULL);
-//  print_info(audio_fd);
 
-  ioctl(audio_fd, SNDCTL_DSP_RESET, NULL);
+//  ioctl(audio_fd, SNDCTL_DSP_RESET, NULL);
   
   r=AFMT_S16_LE;ioctl (audio_fd, SNDCTL_DSP_SETFMT, &r);
   r=1; ioctl (audio_fd, SNDCTL_DSP_STEREO, &r);
   r=44100; if(ioctl (audio_fd, SNDCTL_DSP_SPEED, &r)==-1)
       printf("audio_setup: your card doesn't support %d Hz samplerate\n",r);
 
-//  print_info(audio_fd);
+  r=0; ioctl (audio_fd, SNDCTL_DSP_GETBLKSIZE, &r);
+  printf("fragment size = %d\n",r);
+
+  print_info(audio_fd);
 
   t0=t1=GetTimer();
 

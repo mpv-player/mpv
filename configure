@@ -1058,6 +1058,7 @@ $_xmmpaudio
 #define XMMP_AUDIO_DRIVER PLUGINDIR "/Sound/oss.so"
 
 /* set up audio OUTBURST. Do not change this! */
+#define MAX_OUTBURST 32768
 #ifdef USE_XMMP_AUDIO
 #define OUTBURST 4096
 #else

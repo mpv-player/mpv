@@ -29,6 +29,7 @@ typedef struct {
   int buffer_size;         // current buffer size
   unsigned char* buffer;   // current buffer
   float pts;               // current buffer's pts
+  int pts_bytes;           // number of bytes read after last pts stamp
   int eof;                 // end of demuxed stream? (true if all buffer empty)
   int pos;                 // position in the input stream (file)
   int dpos;                // position in the demuxed stream
@@ -106,7 +107,12 @@ inline static int ds_tell(demux_stream_t *ds){
   return (ds->dpos-ds->buffer_size)+ds->buffer_pos;
 }
 
+inline static int ds_tell_pts(demux_stream_t *ds){
+  return (ds->pts_bytes-ds->buffer_size)+ds->buffer_pos;
+}
+
 int demux_read_data(demux_stream_t *ds,unsigned char* mem,int len);
+int demux_read_data_pack(demux_stream_t *ds,unsigned char* mem,int len);
 
 #if 1
 #define demux_getc(ds) (\
