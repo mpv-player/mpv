@@ -4,7 +4,7 @@
 //static int vo_font_loaded=-1;
 font_desc_t* vo_font=NULL;
 
-unsigned char* vo_osd_text="00:00:00";
+unsigned char* vo_osd_text=NULL;
 int sub_unicode=0;
 int sub_utf8=0;
 

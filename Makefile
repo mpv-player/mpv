@@ -23,6 +23,9 @@ A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB)
 VO_LIBS = -Llibvo -lvo $(MLIB_LIB) $(X_LIBS)
 
 PARTS = mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb
+ifeq ($(GUI),yes)
+PARTS += Gui
+endif
 
 ifneq ($(W32_LIB),)
 PARTS += loader loader/DirectShow
@@ -74,8 +77,13 @@ opendivx/libdecore.a:
 encore/libencore.a:
 	$(MAKE) -C encore
 
+Gui/libgui.a:
+	$(MAKE) -C Gui
 
 MPLAYER_DEP = mplayer.o $(OBJS) $(LOADER_DEP) $(AV_DEP) $(COMMONLIBS) 
+ifeq ($(GUI),yes)
+MPLAYER_DEP += Gui/libgui.a
+endif
 mplayerwithoutlink: $(MPLAYER_DEP)	
 	@for a in $(PARTS); do $(MAKE) -C $$a all ; done
 
