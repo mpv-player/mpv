@@ -65,6 +65,10 @@ extern int WinID;
 extern int vo_aa_parseoption(struct config * conf, char *opt, char * param);
 #endif
 
+#ifdef HAVE_ZR
+extern int vo_zr_parseoption(struct config * conf, char *opt, char * param);
+#endif
+
 #ifdef HAVE_NEW_GUI
 extern char * skinName;
 #endif
@@ -237,6 +241,10 @@ static config_t mplayer_opts[]={
 
 #ifdef HAVE_AA
 	{"aa*",	vo_aa_parseoption,  CONF_TYPE_FUNC_FULL, 0, 0, 0 , NULL},
+#endif
+
+#ifdef HAVE_ZR
+	{"zr*", vo_zr_parseoption, CONF_TYPE_FUNC_FULL, 0, 0, 0 },
 #endif
 
 #ifdef HAVE_LIRC
