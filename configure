@@ -4107,7 +4107,7 @@ else
   _def_gif='#undef HAVE_GIF'
   _def_gif_4='#undef HAVE_GIF_4'
   _novomodules="gif89a $_novomodules"
-  _nocodecmodules="gif $_codecmodules"
+  _nocodecmodules="gif $_nocodecmodules"
   _mkf_gif="no"
 fi
 echores "$_gif"
