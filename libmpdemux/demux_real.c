@@ -961,6 +961,8 @@ void demux_open_real(demuxer_t* demuxer)
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: DNET -> AC3\n");
 			    sh->format = 0x2000;
 			    break;
+			case MKTAG('1', '4', '_', '4'):
+			case MKTAG('2', '8', '_', '8'):
 			case MKTAG('s', 'i', 'p', 'r'):
 #if 0
 			    sh->format = 0x130;
