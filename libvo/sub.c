@@ -342,7 +342,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
    
    obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
 
-   if(!vo_sub || !vo_font || !sub_visibility){
+   if(!vo_sub || !vo_font || !sub_visibility || (vo_font->font[40]<0)){
        obj->flags&=~OSDFLAG_VISIBLE;
        return;
    }
