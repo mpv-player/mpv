@@ -11,14 +11,6 @@ mailing list. Number one is of course the topic of the</P>
 
 <P><B><I>GCC 2.96 series</I></B></P>
 
-<P>The <I>facts</I> : <B>MPlayer</B>'s compile process needs the
-<CODE>--disable-gcc-checking</CODE> to proceed upon detecting a GCC version
-of 2.96 (apparently it needs this option on <B>egcs</B> too. It's because we
-don't test <B>MPlayer</B> on egcs. Pardon us, but we rather develop <B>MPlayer</B>).
-If you know <B>MPlayer</B>, you should know that it has great speed. It
-achieves this by having overoptimized MMX/SSE/3DNow/etc codes, fastmemcpy, and
-lots of other features.
-
 <P>The <I>background</I> : there were/are the GCC <B>2.95</B> series. The
 best of them was 2.95.3 . Please note the style of the version numbering.
 This is how the GCC team numbers their compilers. The 2.95 series are good.
@@ -27,8 +19,22 @@ We never ever saw anything that was miscompiled because of the 2.95's faultiness
 <P>The <I>action</I> : <B>RedHat</B> started to include a GCC version of <B>2.96</B>
 with their distributions. Note the version numbering. This should be the GCC
 team's versioning. They patched the CVS version of GCC (something between 2.95 and 3.0)
-They patched it very deep, and used this version in the distrib, because 3.0
-wasn't out at time.</P>
+They patched it very deep, and used this version in the distrib because 3.0
+wasn't out at time, and they wanted IA64 support ASAP (business reasons).
+Oh, and GCC 2.95 miscompiles bash on the s390 architecture (there is
+no RedHat distribution for s390..) .</P>
+
+<P>The <I>facts</I> : <B>MPlayer</B>'s compile process needs the
+<CODE>--disable-gcc-checking</CODE> to proceed upon detecting a GCC version of
+2.96 (apparently it needs this option on <B>egcs</B> too. It's because we don't
+test <B>MPlayer</B> on egcs. Pardon us, but we rather develop <B>MPlayer</B>).
+If you know <B>MPlayer</B>, you should know that it has great speed. It
+achieves this by having overoptimized MMX/SSE/3DNow/etc codes, fastmemcpy, and
+lots of other features. <B>MPlayer</B> contained MMX/3DNow instructions in a
+syntax that all Linux compilers accept it... except RedHat's GCC (it's more
+standard compliant). It simply <B><I>skips</I></B> them. It doesn't give
+errors. It doesn't give warnings. But hey, it compiles bash on s390 and
+IA64.</P>
 
 <P>The <I>statements</I> : most developers around the world begun having
 bad feelings about RedHat's GCC 2.96 , and told their RedHat users to
@@ -67,6 +73,38 @@ won't bring you anywhere.</P>
 
 <P><B><I>Binary distribution of MPlayer</I></B></P>
 
-<P>I'm too moody now for this.</P>
+<P>Tons of users asked us about this. For example Debian users tend to say: Oh,
+I can <CODE>apt-get install avifile</CODE>, why should I <B>compile MPlayer</B> ?
+While this may sound reasonable, the problem lies a bit deeper than
+those-fuckin-MPlayer-developers-hate-gcc-2.96-and-RedHat-and-Debian.
+<UL>
+  <LI><B>MPlayer's</B> speed (MMX, SSE, fastmemcpy, etc) optimizations are
+    determined during compilation. Thus a compiled binary contains very
+    processor-specific code. An <B>MPlayer</B> binary compiled for K6 will die
+    on Pentiums and vice versa. This has to be workarounded by runtime
+    detection, which is not an easy thing to do becase it causes massive speed
+    decrease. If you don't believe (it was explained in details 10000 times on
+    mplayer-users, search the archive), solve it and send us a patch. Someone
+    begun work on it, but disappeared since then.</LI>
+  <LI><B>MPlayer's</B> video/audio system is not plugin based. It is compiled
+    into the binary, thus making the binary depend on various libraries (the
+    GUI depends on GTK, DivX4 depends on libdivxdecore, SDL depends on libSDL,
+    every SDL release contains an unique bug that has to be workarounded during
+    compiletime, X11 output compiles differently for X3 and X4, etc). You may
+    say: yes, let's make 30 versions of downloadable binaries! We won't. We
+    will make these stuff pluggable in the future.</LI>
+  <LI><B>MPlayer</B> includes GPL codes, and some non-GPL ones
+    (like OpenDivX alpha 48). Arpi's demuxers and other code has a special
+    license which is like GPL with one exception: it doesn't allow binary
+    distribution. Thus, anyone who distributes a binary which contains Arpi's
+    code (which is the core of <B>MPlayer</B>) is doing a
+    <B><I>FORBIDDEN THING</I></B> ! For example that french guy called
+    <B>Christian Marillat</B> who denied our request, and is still distributing
+    binary Debian packages of <B>MPlayer</B>, despite the fact that there was
+    at least one user who downloaded it and failed (of course compiling from
+    source helped him). We're trying to be GPL, but there are still
+    problems to resolve. Don't come and flame, instead help (or better,
+    stay quiet). Thanks.
+</UL>
 
 </HTML>
