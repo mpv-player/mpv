@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.34  2001/12/04 17:24:25  alex
+ * do not crash if can't get modelines (dga2.0)
+ *
  * Revision 1.33  2001/11/06 11:21:08  nick
  * Move yuv2rgb to postprocess
  *
@@ -859,6 +862,15 @@ static uint32_t init( uint32_t width,  uint32_t height,
 // mgraffam@idsi.net
   if (modelines==NULL)
     modelines=XDGAQueryModes(vo_dga_dpy, XDefaultScreen(vo_dga_dpy),&modecount);
+
+  vd_printf(VD_DBG,
+	    "vo_dga: modelines=%p, modecount=%d\n", modelines, modecount);
+
+  if (modelines == NULL)
+  {
+    vd_printf(VD_ERR, "vo_dga: can't get modelines\n");
+    return 1;
+  }
   
   vd_printf(VD_INFO, 
             "vo_dga: DGA 2.0 available :-) Can switch resolution AND depth!\n");	
