@@ -715,8 +715,8 @@ libraries. For installation instructions please see the
 AAC (Advanced Audio Coding) is an audio codec sometimes found in MOV and MP4
 files. An open source decoder called FAAD is available from
 <ulink url="http://www.audiocoding.com"/>.
-<application>MPlayer</application> includes libfaad 2.0RC1, so you do not need
-to get it separately.
+<application>MPlayer</application> includes a CVS snapshot of libfaad 2.1
+beta, so you do not need to get it separately.
 </para>
 
 <para>
