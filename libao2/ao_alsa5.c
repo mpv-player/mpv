@@ -117,6 +117,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    printf("alsa-init: invalid format (%s) requested - output disabled\n",
 		audio_out_format_name(format));
 	    return(0);
+	default:
+	    break;
     }
 
     switch(rate_hz)
