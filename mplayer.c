@@ -820,6 +820,11 @@ static void print_status(float a_pos, float a_v, float corr)
     width = screen_width;
   else
   width = 80;
+#ifdef WIN32
+  // windows command line is broken (MinGW's rxvt works though, but we
+  // should not depend on that).
+  width--;
+#endif
   line = malloc(width + 1); // one additional for terminating null
   
   // Audio time
