@@ -990,7 +990,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     else if (!strcasecmp(lavc_param_vcodec, "ljpeg"))
 	mux_v->bih->biCompression = mmioFOURCC('L', 'J', 'P', 'G');
     else if (!strcasecmp(lavc_param_vcodec, "mpeg4"))
-	mux_v->bih->biCompression = mmioFOURCC('D', 'I', 'V', 'X');
+	mux_v->bih->biCompression = mmioFOURCC('F', 'M', 'P', '4');
     else if (!strcasecmp(lavc_param_vcodec, "msmpeg4"))
 	mux_v->bih->biCompression = mmioFOURCC('d', 'i', 'v', '3');
     else if (!strcasecmp(lavc_param_vcodec, "msmpeg4v2"))

@@ -289,6 +289,8 @@ while(1){
         case mmioFOURCC('D', 'X', '5', '0'):
         case mmioFOURCC('X', 'V', 'I', 'D'):
         case mmioFOURCC('x', 'v', 'i', 'd'):
+        case mmioFOURCC('F', 'M', 'P', '4'):
+        case mmioFOURCC('f', 'm', 'p', '4'):
           idxfix_divx=2; // set index recovery mpeg4 flavour: generic mpeg4
 	  mp_msg(MSGT_HEADER,MSGL_V,"Regenerating keyframe table for MPEG4 video\n");
 	  break;
