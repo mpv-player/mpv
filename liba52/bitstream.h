@@ -30,6 +30,30 @@
 #else
 // alternative (faster) bitstram reader (reades upto 3 bytes over the end of the input)
 #define ALT_BITSTREAM_READER
+
+/* used to avoid missaligned exceptions on some archs (alpha, ...) */
+#ifdef ARCH_X86
+#    define unaligned32(a) (*(uint32_t*)(a))
+#else
+#    ifdef __GNUC__
+static inline uint32_t unaligned32(const void *v) {
+    struct Unaligned {
+	uint32_t i;
+    } __attribute__((packed));
+
+    return ((const struct Unaligned *) v)->i;
+}
+#    elif defined(__DECC)
+static inline uint32_t unaligned32(const void *v) {
+    return *(const __unaligned uint32_t *) v;
+}
+#    else
+static inline uint32_t unaligned32(const void *v) {
+    return *(const uint32_t *) v;
+}
+#    endif
+#endif //!ARCH_X86
+
 #endif
  
 /* (stolen from the kernel) */
@@ -74,7 +98,7 @@ static inline uint32_t
 bitstream_get(uint32_t num_bits) // note num_bits is practically a constant due to inlineing
 {
 #ifdef ALT_BITSTREAM_READER
-    uint32_t result= swab32( *(uint32_t *)(((uint8_t *)buffer_start)+(indx>>3)) );
+    uint32_t result= swab32( unaligned32(((uint8_t *)buffer_start)+(indx>>3)) );
 
     result<<= (indx&0x07);
     result>>= 32 - num_bits;
@@ -107,7 +131,7 @@ static inline int32_t
 bitstream_get_2(uint32_t num_bits)
 {
 #ifdef ALT_BITSTREAM_READER
-    int32_t result= swab32( *(uint32_t *)(((uint8_t *)buffer_start)+(indx>>3)) );
+    int32_t result= swab32( unaligned32(((uint8_t *)buffer_start)+(indx>>3)) );
 
     result<<= (indx&0x07);
     result>>= 32 - num_bits;
