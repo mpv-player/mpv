@@ -255,6 +255,7 @@ static int parse_float(m_option_t* opt,char *name, char *param, void* dst, int s
     double tmp;
     int r= parse_double(opt, name, param, &tmp, src);
     if(r==1 && dst) VAL(dst) = tmp;
+    return r;
 }
 
 static char* print_float(m_option_t* opt,  void* val) {
