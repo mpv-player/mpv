@@ -1629,10 +1629,12 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track)
     track->v_frate = 25.0;
   sh_v->fps = track->v_frate;
   sh_v->frametime = 1 / track->v_frate;
+  sh_v->aspect = 0;
   if (!track->realmedia)
     {
       sh_v->disp_w = track->v_width;
       sh_v->disp_h = track->v_height;
+      if (track->v_dheight)
       sh_v->aspect = (float)track->v_dwidth / (float)track->v_dheight;
     }
   else
