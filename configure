@@ -6342,7 +6342,7 @@ $_def_vcd
 $_def_lrintf
 
 /* yes, we have inttypes.h */
-#define HAVE_INTTYPES_H
+#define HAVE_INTTYPES_H 1
 
 /* int_fastXY_t emulation */
 $_def_fast_inttypes
