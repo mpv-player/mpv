@@ -203,6 +203,12 @@ should be good). Since it is not our fault, please do <B>not</B> report!
 <TD COLSPAN=3><B><A NAME="5.2">5.2 General questions</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>There is a timer in the upper
+left corner. How can I get rid of it?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Press <CODE>o</CODE> and try the
+<CODE>-osdlevel</CODE> option.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>The <CODE>-xy</CODE> or <CODE>-fs</CODE> option doesn't work with the x11 driver (<CODE>-vo x11</CODE>) ...
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>It does, but you have to explicitly specify software scaling (it's SLOW!) with
 the <CODE>-zoom</CODE> option. You better use XF86VidMode support:
@@ -627,6 +633,14 @@ and try enabling DMA for the DVD drive with the hdparm tool (described in the
 <B><A NAME="5.6">5.6 Feature requests</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>If <B>MPlayer</B> is paused
+and I try to seek or press any key at all, <B>MPlayer</B> ceases to be paused.
+I would like to be able to seek in the paused movie.
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>This is very tricky to implement
+without losing A/V synchronization. All attempts have failed so far, but patches
+are welcome.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I'd like to seek +/- 1 frames instead of 10 seconds.
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>This won't be done. It was, but then it messed up A/V sync. Feel free to
 implement it, and send a patch. Don't ask for it.
@@ -645,6 +659,12 @@ implement it, and send a patch. Don't ask for it.
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>How can I encode?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Read the <B>MEncoder</B> <A HREF="encoding.html">documentation</A>.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>How can I create VCDs?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Try the <CODE>mencvcd</CODE>
+script from the <CODE>TOOLS</CODE> subdirectory. With it you can encode DVDs or
+other movies to VCD or SVCD format and even burn them directly to CD.</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>My tuner works, I can hear the sound and watch the video with MPlayer, but
