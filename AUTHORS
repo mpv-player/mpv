@@ -325,6 +325,7 @@ Diego Biurrun <diego@biurrun.de>
     * random trivial fixes
     * testing, bug reports
     * homepage improvements
+    * head of the Ministry for English Composition
 
 Sascha Sommer <saschasommer@freenet.de>
     * directx VO driver
@@ -489,6 +490,7 @@ Attila Kinali <kinali@gmx.net>
     * various small fixes in the x11 code
     * xinerama support
     * documentation
+    * patch application monkey
 
 Andoni Zubimendi <andoni@lpsat.net>.
     * Spanish documentation translation
