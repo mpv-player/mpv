@@ -1,4 +1,4 @@
-.\" synced with 1.867
+.\" synced with 1.875
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -122,7 +122,7 @@ mencoder \- enkoder (koder) filmów
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p | ftp ] ://
+.RI [ mms[t] | http | http_proxy | rt[s]p | ftp | udp ] ://
 [u¿ytkownik:has³o@]\fIURL\fP[:port] [opcje]
 .
 .br
@@ -282,8 +282,8 @@ Ustawia znak EDL.
 .PD 1
 .PP
 (Nastêpuj±ce klawisze dzia³aj± tylko, je¿eli u¿ywasz wyj¶cia video ze sprzêtow±
-akceleracj± (xv, (x)vidix, (x)mga, etc) lub programowego filtru korekcji
-(\-vf eq lub \-vf eq2).
+akceleracj± (xv, (x)vidix, (x)mga, etc), programowego filtru korekcji
+(\-vf eq lub \-vf eq2), lub filtru barwy (\-vf hue).
 .PP
 .PD 0
 .RSs
@@ -704,11 +704,11 @@ Zwalnia lub przyspiesza odtwarzanie o wspó³czynnik podany jako parametr.
 .
 .TP
 .B \-sstep <sek>
-Wy¶wietla jedn± klatkê co <sek> sekund.
-U¿yteczny w pokazie slajdów.
+Przeskakuje <sek> sekund po ka¿dej klatce.
+Normalna prêdko¶æ odtwarzania klatek jest utrzymana, wiêc odtwarzanie jest
+szybsze.
 Jako ¿e MPlayer potrafi przeszukiwaæ tylko do najbli¿szej klatki kluczowej,
 mo¿e to byæ niedok³adne.
-Wiêszko¶æ formatów ma klatkê kluczow± miêczy <sek> a <sek>+20 sekund.
 .
 .
 .
@@ -3769,9 +3769,9 @@ Kadruje dan± czê¶æ partii obrazu i wyrzuca resztê.
 Przydatne do usuwania czarnych obramowañ z szerokoekranowych filmów.
 .PD 0
 .RSs
-.IPs w,h
+.IPs <w>,<h>
 Szeroko¶æ i wysoko¶æ obciêcia, domy¶lnie oryginalna szeroko¶æ i wysoko¶æ.
-.IPs x,y
+.IPs <x>,<y>
 Pozycja wycinanego obrazu, domy¶lnie ¶rodek.
 .RE
 .PD 1
@@ -3782,11 +3782,11 @@ Oblicza niezbêdne parametry przycinania i wy¶wietla propozycje na standardowe
 wyj¶cie.
 .PD 0
 .RSs
-.IPs limit
+.IPs <limit>
 Próg, który mo¿e byæ opcjonalnie podany od niczego (0) do wszystkiego (255)
 (domy¶lnie: 24).
 .br
-.IPs round
+.IPs <round>
 Warto¶æ, przez któr± szeroko¶æ/\:wysoko¶æ powinny byæ podzielne (domy¶lnie: 16).
 Offset jest automatycznie dopasowywany tak, aby wycentrowaæ film.
 U¿yj 2, aby otrzymaæ równe wymiary (wymagane przez film 4:2:2).
@@ -3800,10 +3800,10 @@ Reaguje na przyjmuj±c± dwa parametry dyrektywê "change_rectangle" w zbiorze
 input.conf.
 .PD 0
 .RSs
-.IPs w,h
+.IPs <w>,<h>
 szeroko¶æ i wysoko¶æ (domy¶lnie: -1, maksymalny mo¿liwy rozmiar przy którym
 granice wci±¿ s± widoczne.)
-.IPs x,y
+.IPs <x>,<y>
 pozycja lewego górnego rogu (domy¶lnie: -1, najwy¿ej i najbardziej w lewo jak
 to tylko mo¿liwe)
 .RE
@@ -3815,7 +3815,7 @@ Zwiêksza rozdzielczo¶æ (nie skaluje) filmu do podanej warto¶ci i umieszcza
 nieprzeskalowany obraz pod wspó³rzêdnymi x, y.
 Mo¿e byæ u¿yty do umieszczenia napisów/\:OSD w otrzymanym czarnym pasku.
 .RSs
-.IPs w,h
+.IPs <w>,<h>
 Szeroko¶æ i wysoko¶æ po poszerzeniu (domy¶lnie: oryginalna szeroko¶æ, wysoko¶æ).
 Ujemne warto¶ci traktowane s± jak zmiany oryginalnej wielko¶ci
 .sp 1
@@ -3826,9 +3826,9 @@ Ujemne warto¶ci traktowane s± jak zmiany oryginalnej wielko¶ci
 Dodaje 50 pixeli ramki na dole obrazka.
 .RE
 .PD 1
-.IPs x,y
+.IPs <x>,<y>
 pozycja oryginalnego obrazu na rozszerzonym obrazie (domy¶lnie: na ¶rodku)
-.IPs o
+.IPs <o>\ 
 wy¶wietlanie OSD/\:napisów
 .RSss
 0: wy³±czone (domy¶lnie)
@@ -3989,7 +3989,7 @@ Stosowaæ razem z filtrem skaluj±cym do prawdziwej konwersji.
 Listê dostêpnych formatów mo¿na uzskaæ wywo³uj±c format=fmt=help.
 .PD 0
 .RSs
-.IPs fourcc
+.IPs <fourcc>
 nazwa formatu taka jak rgb15, bgr24, yv12, itp (domy¶lnie: yuy2)
 .RE
 .PD 1
@@ -4006,7 +4006,7 @@ tej, któr± okre¶li³e¶.
 Listê dostêpnych formatów mo¿na uzyskaæ wywo³uj±c format=fmt=help.
 .PD 0
 .RSs
-.IPs fourcc
+.IPs <fourcc>
 nazwa formatu taka jak rgb15, bgr24, yv12, itp (domy¶lnie: yv12)
 .RE
 .PD 1
@@ -4016,15 +4016,16 @@ nazwa formatu taka jak rgb15, bgr24, yv12, itp (domy¶lnie: yv12)
 Ta opcja uruchamia okre¶lony ³añcuch podfiltrów postprocessingu.
 Podfiltry musz± byæ oddzielone znakiem "/" i mog± byæ wy³±czone przez
 poprzedzenie ich znakiem "\-".
-Zakres podfiltru mo¿e zostaæ okre¶lony przez dodanie ":" i "a", "c"
-lub "y" (domy¶lnie: c):
+Ka¿dy podfiltr i niektóre opcje maj± d³ug± i krótk± nazwê których mo¿na u¿ywaæ
+zamiennie, tzn.\& dr/dering oznaczaj± to samo.
+Wszystkie podfiltry maj± wspólne opcje okre¶laj±ce ich zasiêg:
 .PD 0
 .RSs
-.IPs a
+.IPs a/autoq
 Automatycznie wy³±cza filtr, je¶li procesor jest zbyt wolny.
-.IPs c
-Filtruje te¿ kolory.
-.IPs y
+.IPs c/chrom
+Filtruje te¿ kolory (domy¶lnie).
+.IPs y/nochrom
 Wykonuje tylko filtrowanie jasno¶ci (nie filtruje barw).
 .RE
 .PD 1
@@ -4034,6 +4035,99 @@ Wykonuje tylko filtrowanie jasno¶ci (nie filtruje barw).
 .I INFORMACJA:
 \-pphelp poka¿e wszystkie dostêpne podfiltry.
 .sp 1
+Dostêpne s± podfiltry
+.RE
+.RSs
+.IPs hb/hdeblock[:ró¿nica[:p³asko¶æ]]
+poziomy filtr usuwania efektu blokowego
+.RSss
+<ró¿nica>: Wspó³czynnik ró¿nicy, gdzie wiêksze warto¶ci oznaczaj± wiêksze
+usuwanie bloków (domy¶lnie: 32).
+.br
+<p³asko¶æ>: Wspó³czynnik p³asko¶ci, gdzie wiêksze warto¶ci oznaczaj± wiêksze
+usuwanie bloków (domy¶lnie: 39).
+.REss
+.IPs vb/vdeblock[:ró¿nica[:p³asko¶æ]]
+pionowy filtr usuwania efektu blokowego
+.RSss
+<ró¿nica>: Wspó³czynnik ró¿nicy, gdzie wiêksze warto¶ci oznaczaj± wiêksze
+usuwanie bloków (domy¶lnie: 32).
+.br
+<p³asko¶æ>: Wspó³czynnik p³asko¶ci, gdzie wiêksze warto¶ci oznaczaj± wiêksze
+usuwanie bloków (domy¶lnie: 39).
+.REss
+.IPs ha/hadeblock[:ró¿nica[:p³asko¶æ]]
+dok³adny poziomy filtr usuwania efektu blokowego
+.RSss
+<ró¿nica>: Wspó³czynnik ró¿nicy, gdzie wiêksze warto¶ci oznaczaj± wiêksze
+usuwanie bloków (domy¶lnie: 32).
+.br
+<p³asko¶æ>: Wspó³czynnik p³asko¶ci, gdzie wiêksze warto¶ci oznaczaj± wiêksze
+usuwanie bloków (domy¶lnie: 39).
+.REss
+.IPs va/vadeblock[:ró¿nica[:p³asko¶æ]]
+dok³adny pionowy filtr usuwania efektu blokowego
+.RSss
+<ró¿nica>: Wspó³czynnik ró¿nicy, gdzie wiêksze warto¶ci oznaczaj± wiêksze
+usuwanie bloków (domy¶lnie: 32).
+.br
+<p³asko¶æ>: Wspó³czynnik p³asko¶ci, gdzie wiêksze warto¶ci oznaczaj± wiêksze
+usuwanie bloków (domy¶lnie: 39).
+.REss
+.sp 1
+Poziome i pionowe filtry usuwania bloków maj± wspólne warto¶ci ró¿nicy
+i p³asko¶ci, wiêc nie mo¿na ustawiæ ró¿nych progów poziomych i pionowych.
+.sp 1
+.IPs h1/x1hdeblock
+eksperymentalny poziomy filtr usuwania efektu blokowego
+.IPs v1/x1vdeblock
+eksperymentalny pionowy filtr usuwania efektu blokowego
+.IPs dr/dering
+filtr usuwania efektu dzwonienia
+.IPs tn/tmpnoise[:próg1[:próg2[:próg3]]]
+redukcja szumów czasowych
+.RSss
+<próg1>: wiêkszy -> mocniejsze filtrowanie
+.br
+<próg2>: wiêkszy -> mocniejsze filtrowanie
+.br
+<próg3>: wiêkszy -> mocniejsze filtrowanie
+.REss
+.IPs al/autolevels[:f/fullyrange]
+automatyczna korekta jasno¶ci / kontrastu
+.RSss
+f/fullyrange: Rozci±ga jasno¶æ do zakresu (0\-255).
+.REss
+.IPs lb/linblenddeint
+Filtr usuwania przeplotu liniowym rozmyciem, który usuwa przeplot z danego
+bloku stosuj±c do wszystkich linii filtr (1 2 1).
+.IPs li/linipoldeint
+Liniowo interpoluj±cy filtr usuwania przeplotu, który usuwa przeplot z danego
+bloku stosuj±c do co drugiej linii interpolacjê liniow±.
+.IPs ci/cubicipoldeint
+Kubicznie interpoluj±cy filtr usuwania przeplotu, który usuwa przeplot z danego
+bloku stosuj±c do co drugiej linii interpolacjê kubiczn±.
+.IPs md/mediandeint
+Medianowy filtr usuwania przeplotu, który usuwa przeplot z danego
+bloku stosuj±c do co drugiej linii filtr medianowy.
+.IPs fd/ffmpegdeint
+Filtr usuwania przeplotu z FFmpeg, który usuwa przeplot z danego
+bloku stosuj±c do co drugiej linii filtr (-1 4 2 4 -1).
+.IPs l5/lowpass5
+Pionowo stosowany dolnoprzepustowy fir FIR usuwania przeplotu, który usuwa
+przeplot z danego bloku stosuj±c do wszystkich linii filtr (-1 2 6 2 -1).
+.IPs fq/forceQuant[:kwantyzator]
+Wymusza zastosowanie podanego kwantyzatora zamiast tego z wej¶cia.
+.RSss
+<kwantyzator>: u¿ywany kwantyzator
+.REss
+.IPs de/default
+domy¶lna kombinacja filtrów (hb:a,vb:a,dr:a)
+.IPs fa/fast
+szybka kombinacja filtrów (h1:a,v1:a,dr:a)
+.RE
+.RS
+.sp 1
 .I PRZYK£AD:
 .RE
 .PD 0
@@ -4041,13 +4135,10 @@ Wykonuje tylko filtrowanie jasno¶ci (nie filtruje barw).
 .IPs "\-vf pp=hb/vb/dr/al"
 odblokowywanie poziome i pionowe, usuwanie efektu dzwonienia
 i automatyczna korekcja jasno¶ci/\:kontrastu
-.IPs "\-vf pp=hb/vb/dr/al/lb"
-odblokowywanie poziome i pionowe, usuwanie efektu dzwonienia, automatyczna
-korekcja jasno¶ci/\:kontrastu i usuwanie przeplotu liniowym rozmyciem
 .IPs "\-vf pp=de/-al"
 domy¶lne filtry bez korekty jasno¶ci/\:kontrastu
-.IPs "\-vf pp=de/tn:1:2:3"
-domy¶lne filtry i tymczasowy odszumiacz
+.IPs "\-vf pp=default/tmpnoise:1:2:3"
+domy¶lne filtry i czasowy odszumiacz
 .IPs "\-vf pp=hb:y/vb:a"
 Odblokowywanie poziome tylko na jasno¶ci i automatyczne w³±czenie lub wy³±czenie
 odblokowywania pionowego w zale¿no¶ci od dostêpnego czasu procesora.
@@ -4058,11 +4149,11 @@ odblokowywania pionowego w zale¿no¶ci od dostêpnego czasu procesora.
 .B spp[=jako¶æ[qp:[:tryb]]
 prosty filtr postprocessingu
 .RSs
-.IPs jako¶æ
+.IPs <jako¶æ>
 0\-6 (domy¶lnie: 3)
-.IPs qp\ \ 
+.IPs <qp>\ 
 Wymusza parametr kwantyzacji (domy¶lnie: 0, parametr QP z video).
-.IPs tryb\ \ \ 
+.IPs <tryb>
 0: twardy próg (domy¶lne)
 .br
 1: miêkki próg (lepiej usuwa efekt dzwonienia, wiêksze rozmycie)
@@ -4072,7 +4163,7 @@ Wymusza parametr kwantyzacji (domy¶lnie: 0, parametr QP z video).
 .B qp=równanie
 filtr zmiany parametru kwantyzacji (QP)
 .RSs
-.IPs równanie
+.IPs <równanie>
 jakie¶ równanie postaci "2+2*sin(PI*qp)"
 .RE
 .
@@ -4091,13 +4182,13 @@ Szybka programowa konwersja z YV12 na MPEG-1 przy pomocy libavcodec do
 stosowania z DVB/\:DXR3.
 Szybsza i lepsza jako¶æ ni¿ \-vf fame.
 .RSs
-.IPs jako¶æ
+.IPs <jako¶æ>
 .RSss
 1\-31: ustalone qscale
 .br
 32\-: ustalone tempo bitowe w kbps
 .REss
-.IPs fps\ \ 
+.IPs <fps>
 wymusza fps wyj¶cia (liczba rzeczywista) (domy¶lnie: 0, wykrywanie wg wysoko¶ci)
 .RE
 .
@@ -4112,7 +4203,7 @@ Ustawia optymalne skalowanie dla kart DVB, czyli sprzêtowe skalowanie osi x
 i programowe wyliczanie skalowania osi y tak, by zachowaæ proporcje.
 U¿yteczne tylko w po³±czeniu z expand i scale.
 .RSs
-.IPs aspect
+.IPs <aspekt>
 Kontroluje proporcje, wyliczane przez wzór DVB_HEIGHT*ASPECTRATIO (domy¶lnie:
 576*4/\:3=768), ustaw na 576*(16/\:9)=1024 dla TV 16:9.
 .RE
@@ -4155,12 +4246,12 @@ Ten filtr redukuje zak³ócenia obrazu wyg³adzaj±c obraz, a nieruchome obrazy
 staj± siê naprawdê nieruchome (Powinno to poprawiæ mo¿liwo¶ci kompresji.).
 .PD 0
 .RSs
-.IPs luma\ 
+.IPs <luma>
 wp³yw przestrzeni jasno¶ci (domy¶lnie: 4)
-.IPs chroma
+.IPs <chroma>
 wp³yw przestrzeni kolorów (domy¶lnie: 3)
-.IPs time\ 
-czas wp³ywu (domy¶lnie: 6)
+.IPs <time>
+wp³yw czasu (domy¶lnie: 6)
 .RE
 .PD 1
 .
@@ -4174,11 +4265,17 @@ Parametry i sposób u¿ycia s± takie same.
 Programowy korektor z interaktywnym sterowaniem, zupe³nie jak korektor
 sprzêtowy, dla kart/\:sterowników które nie obs³uguj± sprzêtowego sterowania
 jasno¶ci± i kontrastem.
-Pocz±tkowe warto¶ci z przedzia³u -100\-100 mog± byæ podane w wierszu
-poleceñ.
 Mo¿e byæ tak¿e u¿yteczny z MEncoderem, w celu poprawy kiepsko przechwyconych
 filmów, lub te¿ w celu lekkiego zmniejszenia kontrastu, by ukryæ artefakty
 powsta³e z winy niskiego tempa bitowego.
+.PD 0
+.RSs
+.IPs <-100\-100>
+pocz±tkowa jasno¶æ
+.IPs <-100\-100>
+pocz±tkowy kontrast
+.RE
+.PD 1
 .
 .TP
 .B eq2[=gamma:kontrast:jasno¶æ:nasycenie:rg:gg:bg:waga]
@@ -4190,31 +4287,41 @@ je¶li wszystkie warto¶ci gamma s± 1.0.
 Parametry s± podane jako liczby rzeczywiste.
 .PD 0
 .RSs
-.IPs rg
-warto¶æ gamma dla czerwonej sk³adowej
-.IPs gg
-warto¶æ gamma dla zielonej sk³adowej
-.IPs bg
-warto¶æ gamma dla niebieskiej sk³adowej
-.REss
-.PD 1
-.RS
-Parametry rg, gg, bg s± niezale¿ne warto¶ciami gamma dla czerwonej (rg),
-zielonej (gg) i niebieskiej (bg) sk³adowej obrazu.
+.IPs <0.1\-10>
+pocz±tkowa warto¶æ gamma (domy¶lnie: 1.0)
+.IPs <-2\-2>
+pocz±tkowy kontrast, ujemne warto¶ci daj± negatyw obrazu (domy¶lnie 1.0)
+.IPs <-1\-1>
+pocz±tkowa jasno¶æ (domy¶lnie: 1.0)
+.IPs <0\-3>
+pocz±tkowe nasycenie (domy¶lnie: 1.0)
+.IPs <0.1\-10>
+warto¶æ gamma dla czerwonej sk³adowej obrazu (domy¶lnie: 1.0)
+.IPs <0.1\-10>
+warto¶æ gamma dla zielonej sk³adowej obrazu (domy¶lnie: 1.0)
+.IPs <0.1\-10>
+warto¶æ gamma dla niebieskiej sk³adowej obrazu (domy¶lnie: 1.0)
+.IPs <0\-1>
 Parametr wagi mo¿e byæ u¿yty do zmniejszenia efektu wysokiej warto¶ci gamma na
 jasnych obszarach obrazu, np.\& ¿eby nie zosta³y wzmocnione a¿ do czystej
 bieli.
-Warto¶æ 0.0 ca³kowicie wy³±cza korektê gamma a 1.0 zostawia j± z pe³n± moc±.
-Domy¶lnie kontrast=1.0, jasno¶æ=0.0, gamma=1.0, nasycenie=1.0, waga=1.0
-Zakresy warto¶ci dla gammy to 0.1\-10, -2\-2 dla kontrastu (ujemne warto¶ci
-daj± negatyw obrazu), -1\-1 dla jasno¶ci, 0\-3 dla nasycenia i 0\-1 dla wagi.
+Warto¶æ 0.0 ca³kowicie wy³±cza korektê gamma a 1.0 zostawia j± z pe³n± moc±
+(domy¶lnie: 1.0).
 .RE
+.PD 1
 .
 .TP
 .B hue[=barwa:nasycenie]
-Domy¶lne warto¶ci to barwa=0.0, nasycenie 1.0.
-Zakresy warto¶ci to -180\-180 dla barwy, -2\-2 dla nasycenia (ujemne warto¶ci
-daj± negatyw obrazu).
+Korektor programowy z interaktywnym sterowaniem, taki jak korektor sprzêtowy,
+dla kart/\:sterowników nie obs³uguj±cych sprzêtowo korekty barwy i nasycenia.
+.PD 0
+.RSs
+.IPs <-180\-180>
+pocz±tkowa barwa (domy¶lnie: 0.0)
+.IPs <-100\-100>
+domy¶lne nasycenie, liczby ujemne daj± przeciwne barwy (domy¶lnie: 1.0)
+.RE
+.PD 1
 .
 .TP
 .B halfpack[=f]
@@ -4225,10 +4332,18 @@ U¿yteczne przy wy¶wietlaniu na urz±dzeniach o niskiej rozdzielczo¶ci, gdy
 sprzêtowe skalowanie jest kiepskiej jako¶ci lub nie jest dostêpne.
 Mo¿e byæ tak¿e u¿yte jako prymitywne usuwanie przeplotu jasno¶ci przy bardzo
 niskim zu¿yciu procesora.
+.PD 0
+.RSs
+.IPs <f>\ 
 Domy¶lnie, halfpack pobiera ¶rednie z pary linii, kiedy zmniejsza próbkowanie.
-Warto¶æ 0 opcjonalnego parametru f wymusza u¿ywanie tylko parzystych linii,
-za¶ warto¶æ 1 tylko nieparzystych.
-Inne warto¶ci f daj± domy¶lne (u¶redniaj±ce) zachowanie.
+Dowolna warto¶æ inna ni¿ 0 lub 1 daje domy¶lne (u¶redniaj±ce) zachowanie.
+.RSss
+0: U¿ywa tylko parzystych linii przy zmniejszaniu próbkowania.
+.br
+1: U¿ywa tylko nieparzystych linii przy zmniejszaniu próbkowania.
+.REss
+.RE
+.PD 1
 .
 .TP
 .B ilpack[=tryb]
@@ -4237,10 +4352,18 @@ ustawiany prawid³owo z powodu zmniejszenia ilo¶ci kana³ów barw w pionie.
 Filtr ten pakuje p³askie 4:2:0 w format YUY2 (4:2:2) z liniami barwy na
 w³a¶ciwych miejscach, ¿eby w ka¿dej linii skanowania dane barwy i jasno¶ci
 pochodzi³y z tego samego pola.
-Opcjonalny argument podaje tryb próbkowania.
-Domy¶lnie u¿ywana jest interpolacja liniowa (tryb 1).
-Tryb 0 u¿ywa trybu najbli¿szego s±siada (nearest-neighbor), który jest szybki,
-ale niepoprawny.
+.PD 0
+.RSs
+.IPs <tryb>
+Wybiera tryb própkowania.
+.RSss
+0: tryb najbli¿szego s±siada (nearest-neighbor), który jest szybki,
+ale niepoprawny
+.br
+1: interpolacja liniowa (domy¶lnie)
+.REss
+.RE
+.PD 1
 .
 .TP
 .B harddup
@@ -4266,25 +4389,37 @@ po kolejnych filtrach, które wymagaj± du¿ej mocy obliczeniowej.
 .B decimate[=max:hi:lo:u³]
 Usuwa ramki, które niewiele ró¿ni± siê od poprzednich w celu zmniejszenia
 framerate.
-Argument max (je¶li dodatni) ustawia maksymaln± ilo¶æ kolejnych ramek, które
-mog± zostaæ usuniête, albo (gdy ujemny) minimaln± odleg³o¶æ miêdzy usuniêtymi
-ramkami.
-Ramka jest kandydatem do usuniêcia, je¶li ¿aden region 8x8 nie ró¿ni siê o
-wiêcej ni¿ hi i je¶li nie wiêcej ni¿ u³ obrazu (1 oznacza ca³y obraz) ró¿ni
-siê o wiêcej ni¿ lo.
-Warto¶ci hi i lo odnosz± siê do bloków 8x8 i reprezentuj± faktyczne ró¿nice w
-warto¶ciach pikseli, wiêc granica 64 przek³ada siê na 1 jednostkê ró¿nicy na
-ka¿dym pikselu lub to samo inaczej rozmieszczone w ca³ym bloku.
 G³ówne zastosowanie tego filtra to kodowanie-z-bardzo-niskim-tempem-bitowym
 (np.\& strumieniowanie przez modem), ale teoretycznie mo¿e on byæ u¿yty do
 naprawy filmów w których nieprawid³owo odwrócono telecine.
+.PD 0
+.RSs
+.IPs <max>
+Ustawia maksymaln± ilo¶æ kolejnych ramek, które mog± zostaæ usuniête (je¶li
+dodatni), albo (gdy ujemny) minimaln± odleg³o¶æ miêdzy usuniêtymi ramkami.
+.IPs <hi>,<lo>,<u³>
+Ramka jest kandydatem do usuniêcia, je¶li ¿aden region 8x8 nie ró¿ni siê o
+wiêcej ni¿ <hi> i je¶li nie wiêcej ni¿ <u³> obrazu (1 oznacza ca³y obraz) ró¿ni
+siê o wiêcej ni¿ <lo>.
+Warto¶ci <hi> i <lo> odnosz± siê do bloków 8x8 i reprezentuj± faktyczne ró¿nice
+w warto¶ciach pikseli, wiêc granica 64 przek³ada siê na 1 jednostkê ró¿nicy na
+ka¿dym pikselu lub to samo inaczej rozmieszczone w ca³ym bloku.
+.RE
+.PD 1
 .
 .TP
 .B dint[=czu³o¶æ:poziom]
-Wykrywa i usuwa pierwsz± z szeregu klatek z przeplotem w strumieniu video.
-Warto¶ci mog± byæ z zakresu 0.0 do 1.0 \- pierwszy (domy¶lnie 0.1) jest wzglêdn±
-ró¿nic± pomiêdzy s±siaduj±cymi pikselami, drugi (domy¶lnie 0.15) okre¶la w
-jakiej czê¶ci klatki musi byæ wykryty przeplot, aby j± usun±æ.
+Filtr dint (od drop-deinterlace) wykrywa i usuwa pierwsz± z szeregu klatek
+video z przeplotem.
+.PD 0
+.RSs
+.IPs <0.0\-1.0>
+wzglêdna ró¿nica miêdzy s±siednimi pikselami (domy¶lnie: 0.1)
+.IPs <0.0\-1.0>
+Jaka czê¶æ obrazu musi zostaæ uznana za z przeplotem ¿eby usun±æ klatkê
+(domy¶lnie: 0.15)
+.RE
+.PD 1
 .
 .TP
 .B lavcdeint (PRZESTARZA£E)
@@ -4296,16 +4431,32 @@ Adaptatywny deinterlacer j±dra autorstwa Donald'a Graft'a.
 Usuwa przeplot z czê¶ci video, je¶li zostanie przekroczony konfigurowalny próg.
 .PD 0
 .RSs
-.IPs "próg (0 \- 255)"
-Warto¶æ progowa (domy¶lnie 10).
-.IPs "mapa (0 lub 1)"
-Koloruje piksele przekraczaj±ce próg na bia³o (domy¶lnie: 0).
-.IPs "kolejno¶æ (0 lub 1)"
-Zamienia pola je¶li 1 (domy¶lnie: 0).
-.IPs "ostr (0 lub 1)"
-W³±cza dodatkowe wyostrzanie (domy¶lnie: 0).
-.IPs "dwustr (0 lub 1)"
-W³±cza dwustronne wyostrzanie (domy¶lnie: 0).
+.IPs <0\-255>
+próg (domy¶lnie: 10)
+.IPs <mapa>
+.RSss
+0: Ignoruje piksele przekraczaj±ce próg (domy¶lnie).
+.br
+1: Koloruje piksele przekraczaj±ce próg na bia³o.
+.REss
+.IPs <kolejno¶æ>
+.RSss
+0: Pozostawia kolejno¶æ pól (domy¶lnie).
+.br
+1: Zamienia pola.
+.REss
+.IPs <ostr>
+.RSss
+0: Wy³±cza dodatkowe wyostrzanie (domy¶lnie).
+.br
+1: W³±cza dodatkowe wyostrzanie.
+.REss
+.IPs <dwustr>
+.RSss
+0: Wy³±cza dwukierunkowe wyostrzanie (domy¶lnie).
+.br
+1: W³±cza dwukierunkowe wyostrzanie.
+.REss
 .RE
 .PD 1
 .
@@ -4396,29 +4547,34 @@ siê do wiêkszo¶ci zastosowañ.
 Poni¿sze argumenty (sk³adnia jest opisana wy¿ej) mog± byæ u¿yte by kontrolowaæ
 jego dzia³anie:
 .RSs
-.IPs dr\ \ 
+.IPs <dr>\ 
 Ustawia tryb gubienia klatek.
-0 (domy¶lnie) oznacza, ¿e klatki
-nie bêd± porzucane by utrzymaæ ustalon± wyj¶ciow± prêdko¶æ klatek.
-1 oznacza, ¿e klatki bêd± zawsze porzucane gdy nie by³o porzucania lub
-³±czenia telecine w poprzednich 5 klatkach.
-2 oznacza, ¿e zawsze bêdzie utrzymywany dok³adny stosunek 5:4 klatek
-wej¶ciowych do wyj¶ciowych.
+.RSss
+0: Nie usuwaæ klatek by utrzymaæ ustalon± wyj¶ciow± prêdko¶æ klatek (domy¶lnie).
+.br
+1: Zawsze usuwaæ klatkê gdy nie by³o porzucania lub ³±czenia telecine
+w poprzednich 5 klatkach.
+.br
+2: Zawsze utrzymywaæ dok³adny stosunek 5:4 ilo¶ci klatek wej¶ciowych do
+wyj¶ciowych.
 .br
 .I INFORMACJA:
 Z MEncoderem u¿ywaj zawsze trybu 1 lub 2!
-.IPs am\ \ 
+.REss
+.IPs <am>\ 
 Tryb analizy.
-Dostêpne warto¶ci to 0 (ustalony wzorzec z numerem klatki inicjalizuj±cej
-okre¶lony przez fr=#) i 1 (agresywne szukanie wzorca telecine).
-Domy¶lnie jest 1.
-.IPs fr\ \ \ 
+.RSss
+0: Ustalony wzorzec z numerem klatki pocz±tkowej okre¶lonym przez <fr>
+.br
+1: agresywne szukanie wzorca telecine (domy¶lnie)
+.REss
+.IPs <fr>\ 
 Ustawia numer pocz±tkowej klatki w sekwencji.
 0\-2 to trzy nastêpuj±ce po sobie klatki bez przeplotu; 3 i 4 to dwie klatki
 z przeplotem.
 Domy¶lne -1 oznacza "poza sekwencj± telecine".
 Liczba podana tutaj odnosi siê do hipotetycznej klatki przed pocz±tkiem filmu.
-.IPs "tr0, tr1, tr2, tr3"
+.IPs "<t0>, <t1>, <t2>, <t3>"
 Warto¶ci progowe u¿ywane w niektórych trybach.
 .RE
 .
@@ -4494,27 +4650,27 @@ odtwarzania, ale i tak jest to generalnie lepsze ni¿ u¿ycie pp=lb albo
 ca³kowity brak usuwania przeplotu.
 Poszczególne opcje s± oddzielane znakiem /.
 .RSs
-.IPs crop=w:h:x:y
+.IPs crop=<w>:<h>:<x>:<y>
 Tak jak filtr crop, ale szybciej i dzia³a na mieszance twardego i miêkkiego
 telecine oraz gdy y nie jest wielokrotno¶ci± 4.
 Je¶li x lub y wymaga³yby obcinania u³amków piksela z p³aszczyzn barw obszar
 obcinania jest powiêkszany.
 Zazwyczaj oznacza to ¿e x i y musz± byæ parzyste.
-.IPs io=ifps:ofps
+.IPs io=<ifps>:<ofps>
 Na ka¿de ifps klatek wej¶ciowych filtr wygeneruje ofps klatek wyj¶ciowych.
 Stosunek ifps/\:ofps powinien byæ taki sam jak stosunek \-fps/\-ofsp.
 Mo¿e to byæ u¿yte do filtrowania filmów, które s± nadawane w TV z inn±
 czêstotliwo¶ci± ni¿ oryginalna.
-.IPs luma_only=n
+.IPs luma_only=<n>
 Je¶li n jest niezerowe, p³aszczyzna barwy jest kopiowana bez zmian.
 Przydatne przy telewizji próbkowanej w YV12, która ignoruje jedno z pól barwy.
-.IPs mmx2=n
+.IPs mmx2=<n>
 Na x86 je¶li n=1 u¿ywa funkcji optymalizowanych dla MMX2 za¶ je¶li n=2 u¿ywa
 funkcji optymalizowanych dla 3DNow!.
 Gdzie indziej u¿ywa czystego C.
 Je¶li nie podano tej opcji MMX2 i 3DNow! s± wykrywane automatycznie, u¿yj tego
 by wy³±czyæ autodetekcjê.
-.IPs fast=n
+.IPs fast=<n>
 Du¿e n przyspieszy filtr kosztem dok³adno¶ci.
 Domy¶lne jest n=3.
 Je¶li n jest nieparzyste, klatka bezpo¶rednio po klatce z zaznaczon± flag± MPEG
@@ -4529,21 +4685,21 @@ dok³adno¶ci.
 Je¶li n=4 lub 5 to szybszy, ale o wiele mniej dok³adny, algorytm jest u¿ywany
 do szukania prze³omu klatek.
 Jest on bardziej sk³onny do wykrycia du¿ych pionowych detali jako przeplotu.
-.IPs verbose=n
+.IPs verbose=<n>
 Je¶li n jest niezerowe, wy¶wietla szczegó³owe metryki dla ka¿dej ramki.
 Przydatne przy debugowaniu.
-.IPs dint_thres=n
+.IPs dint_thres=<n>
 Próg usuwania przeplotu.
 U¿ywany przy usuwaniu przeplotu niedopasowanych ramek.
 Du¿a warto¶æ oznacza mniej usuwania przeplotu, n=256 ca³kowicie je wy³±cza.
 Domy¶lnie n=8.
-.IPs comb_thres=n
+.IPs comb_thres=<n>
 Próg do porównywania górnego i dolnego pola.
 Domy¶lnie 128.
-.IPs diff_thres=n
+.IPs diff_thres=<n>
 Próg do wykrywania czasowych zmian pola.
 Domy¶lnie 128.
-.IPs sad_thres=n
+.IPs sad_thres=<n>
 Suma progów Ca³kowitej Ró¿nicy (Absolute Difference), domy¶lnie 64.
 .RE
 .
@@ -4578,15 +4734,15 @@ odpowiadaj± przebiegom 1 i 2 w procesie kodowania.
 Aby wykorzystaæ tryb dwuprzebiegowy divtc z dwuprzebiegowym kodowaniem, musisz
 wykonaæ nastêpuj±ce trzy kroki: 1 przebieg divtc i kodera, pó¼niej 2 przebieg
 divtc i 1 kodera, na koñcu 2 przebieg divtc i kodera.
-.IPs file=nazwa\ pliku
+.IPs file=<nazwa\ pliku>
 Ustawia nazwê dla pliku informacyjnego kodowania 2-przebiegowego
 (domy¶lnie: "framediff.log").
-.IPs threshold=warto¶æ
+.IPs threshold=<warto¶æ>
 Ustawia minimaln± si³ê, któr± musi mieæ wzorzec telecine, aby filtr w niego
 uwierzy³ (domy¶lnie: 0.5).
 Stosuje siê to do rozpoznawania fa³szywych wzorców z czê¶ci filmu, które s±
 bardzo ciemne lub prawie nieruchome.
-.IPs window=ilo¶æklatek
+.IPs window=<ilo¶æklatek>
 Ustawia ilo¶æ poprzednich ramek, które bêd± przeszukiwane pod k±tem
 odnalezienia wzorca (domy¶lnie: 30).
 Wiêksza ilo¶æ zapewnia wiêksz± wiarygodno¶æ w przeszukiwaniu wzorca, jednak
@@ -4602,7 +4758,7 @@ Kiedy ju¿ j± odnajdzie, zaczyna z niej korzystaæ, ale ta opcja pozwala na
 pozbycie siê szumu na pocz±tku.
 Poza tym, pierwszy przebieg trybu dwuprzebiegowego te¿ korzysta z tej opcji,
 wiêc je¿eli zachowasz wyj¶cie to otrzymasz w efekcie sta³a fazê.
-.IPs deghost=warto¶æ
+.IPs deghost=<warto¶æ>
 Ustawia próg deghostingu (0\-255 dla trybu jednoprzebiegowego, -255\-255 dla
 trybu dwuprzebiegowego, domy¶lnie 0).
 Je¿eli warto¶æ jest ró¿na od 0, tryb deghostingu jest w³±czony.
@@ -4770,9 +4926,9 @@ lub filtruj krawêdzie (-30\-0)
 Popraw perspektywê w filmach, nie krêconych prostopadle do ekranu.
 .PD 0
 .RSs
-.IPs x0,y0,...
+.IPs <x0>,<y0>,...
 wspó³rzêdne lewego górnego, prawego górnego i prawego dolnego rogu
-.IPs t\ \ \ \ 
+.IPs <t>\ \ 
 liniowy (0) lub sze¶cienny resampling (1)
 .RE
 .PD 1
@@ -4793,7 +4949,7 @@ Wydobywa oba pola stereo i umieszcza je wspólnie, zmieniaj±c im rozmiar tak,
 by utrzymaæ proporcje filmu.
 .PD 0
 .RSs
-.IPs linie
+.IPs <linie>
 ilo¶æ linii wybierana ze ¶rodka obrazu (domy¶lnie: 12)
 .RE
 .PD 1
@@ -4847,11 +5003,11 @@ Argumenty oznaczaj±:
 .RE
 .PD 0
 .RSs
-.IPs "szeroko¶æ, wysoko¶æ"
+.IPs "<szeroko¶æ>, <wysoko¶æ>"
 wymiary obrazu/obszaru
-.IPs "xpoz, ypoz"
-Rozpoczyna blitting w punkcie o wspó³rzêdnych x/y.
-.IPs alfa
+.IPs "<xpoz>, <ypoz>"
+Rozpoczyna blitting w punkcie o wspó³rzêdnych xpoz/ypoz.
+.IPs <alfa>
 Ustawia ró¿nicê alfa.
 Je¿eli ustawisz na -255, mo¿esz pó¼niej wysy³aæ sekwencjê komend ALPHA,
 aby zmieniæ warto¶æ na -225, -200, -175 itd.\& \- uzyskasz ciekawy efekt
@@ -4863,7 +5019,7 @@ przenikania ! ;)
 .br
 -255: Zmienia wszystko na przezroczyste.
 .REss
-.IPs clear
+.IPs <clear>
 czy¶ci bufor przed blittingiem
 .RSss
 0: Obraz bêdzie po prostu blittowany na wierzchu starego, wiêc nie bêdziesz
@@ -4937,11 +5093,11 @@ Wystarczy, ¿e ustawisz prostok±t przykrywaj±cy znak i bêdziesz ¶wiadkiem jak
 znika (a czasami pojawi siê co¶ o wiele brzydszego \- efekty mog± byæ ró¿ne).
 .PD 0
 .RSs
-.IPs x,y
+.IPs <x>,<y>
 pozycja lewego, górnego rogu logo
-.IPs w,h
+.IPs <w>,<h>
 szeroko¶æ i wysoko¶æ czyszczonego prostok±ta
-.IPs t
+.IPs <t>
 Grubo¶æ niewyra¼nej krawêdzi (dodana do w i h).
 Kiedy ustawiona zostanie na -1, zielony prostok±t zostanie narysowany na
 ekranie, aby upro¶ciæ odnalezienie w³a¶ciwych parametrów x,y,w,h.
@@ -4952,7 +5108,7 @@ ekranie, aby upro¶ciæ odnalezienie w³a¶ciwych parametrów x,y,w,h.
 .B zrmjpeg[=opcje]
 Programowy koder YV12 do MJPEG wykorzystywany przy wyj¶ciu video zr2.
 .RSs
-.IPs maxheight=h|maxwidth=w
+.IPs maxheight=<h>|maxwidth=<w>
 Te opcje ustawiaj± maksymaln± szeroko¶æ i wysoko¶æ, któr± karta zr mo¿e obs³u¿yæ
 (obecnie wartstwa filtrów MPlayera nie mo¿e wykryæ prawid³owych warto¶ci).
 .IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
@@ -5689,8 +5845,8 @@ Unika ramek B w scenach z du¿± ilo¶ci± ruchu.
 .
 .TP
 .B vpass=<1\-3>
-W³±cza wewnêtrzny tryb dwu- lub trójprzebiegowy, podawaj tylko, je¿eli chcesz
-korzystaæ z kodowania dwu- lub trójprzebiegowego (domy¶lnie: wy³±czony).
+W³±cza wewnêtrzny tryb dwu- (lub wiêcej) przebiegowy, podawaj tylko, je¿eli chcesz
+korzystaæ z kodowania dwu- (lub wiêcej) przebiegowego.
 .PD 0
 .RSs
 .IPs 1
@@ -5698,7 +5854,7 @@ pierwszy przebieg (sprawd¼ te¿ opcjê turbo)
 .IPs 2
 drugi przebieg
 .IPs 3
-n-ty przebieg (drugi i trzeci przebieg kodowania trójprzebiegowego)
+n-ty przebieg (drugi i nastêpne przebiegi kodowania N-przebiegowego)
 .RE
 .RS
 Jak to dzia³a i jak tego u¿ywaæ:
@@ -5708,19 +5864,24 @@ Mo¿e bêdziesz chcia³ wy³±czyæ niektóre opcje znacznie obci±¿aj±ce procesor,
 podobnie jak robi to tryb "turbo".
 .br
 W trybie dwuprzebiegowym drugi przebieg (vpass=2) czyta plik ze statystykami
-i opiera decyzje o kontroli tempa na nim.
+i opiera na nim decyzje o kontroli tempa.
 .br
-W trybie trójprzebiegowym drugi przebieg (vpass=3, to nie b³±d)
+W trybie N-przebiegowym drugi przebieg (vpass=3, to nie b³±d)
 robi obie rzeczy: Najpierw czyta statystyki z pliku, pó¼niej je nadpisuje.
 Mo¿e bêdziesz chcia³ zachowaæ kopiê pliku divx2pass.log zanim to siê stanie,
-je¶li istnieje mo¿liwo¶æ, ¿e bêdiesz musia³ przerwaæ dzia³anie MEncodera.
+je¶li istnieje mo¿liwo¶æ, ¿e bêdziesz musia³ przerwaæ dzia³anie MEncodera.
 Mo¿esz u¿ywaæ wszystkich opcji kodowania, poza tymi obci±¿aj±cymi procesor
 w znacznym stopniu (jak "qns").
 .br
-Trzeci przebieg (vpass=3) jest taki sam jak drugi, poza tym ¿e korzysta
-ze statystyk zebranych podczas drugiego przebiegu.
-Mo¿esz u¿ywaæ wszystkich opcji kodowania, nawet tych bardzo obci±¿aj±cych
-procesor.
+Mo¿esz pó¼niej powtarzaæ ten przebieg, poprawiaj±c proces kodowania.
+Ka¿dy przebieg bêdzie u¿ywa³ statystyk z poprzedniego ¿eby poprawiæ kodowanie.
+Ostatni przebieg mo¿e mieæ opcje dowolnie obci±¿aj±ce procesor.
+.br
+Je¶li chcesz kodowania dwuprzebiegowego, u¿yj najpierw vpass=1 potem vpass=2.
+.br
+Je¶li chcesz trój- lub wiêcej przebiegowego u¿yj vpass=1 przy pierwszym
+przebiegu a potem vpass=3 i vpass=3 i tak dalej dopóki nie jeste¶ zadowolony
+z wyniku kodowania.
 .RE
 .PD 1
 .sp 1
@@ -7203,7 +7364,7 @@ du¿ej mocy obliczeniowej.
 Pierwszy przebieg mo¿e u¿ywaæ albo sta³ej warto¶ci bitrate albo sta³ego
 kwantyzatora. Ten drugi czêsto jest lepszym wyborem, ale wymaga okre¶lenia
 warto¶ci qp_constant bêd±cej najbli¿szej oczekiwanej warto¶ci bitrate.
-(Lepiej jest b³êdnie wybraæ ni¿sz± warto¶æ qp_constant, np. wy¿szy bitrate.)
+(Lepiej jest b³êdnie wybraæ ni¿sz± warto¶æ qp_constant, tzn.\& wy¿szy bitrate.)
 Kolejne przebiegi s± w trybie ABR i musi zostaæ okre¶lona warto¶æ bitrate.
 .br
 .I
