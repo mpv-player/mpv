@@ -117,7 +117,7 @@ MPlayer (1.0)
     * adapt MMX/MMX2/SSE/3DNow! optimizations to work on x86_64
     * seeking fixes
     * better and faster audio resampler
-    * New dc1384 grabbing interface
+    * New dc1394 grabbing interface
     * preliminary decoding support for H.264 with CABAC and B-frames
     * dvr-ms suport in ASF demuxer
     * MJPEG-B fixes
