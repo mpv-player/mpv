@@ -580,9 +580,15 @@ int guiGetEvent( int type,char * arg )
 	  case STREAMTYPE_VCD: 
 	       {
 	        int i;
+		
+		if (!stream->priv)
+		{
+		    guiIntfStruct.VCDTracks=0;
+		    break;
+		}
 		for ( i=1;i < 100;i++ )
-		  if ( vcd_seek_to_track( stream->fd,i ) < 0 ) break;
-		vcd_seek_to_track( stream->fd,vcd_track );
+		  if ( vcd_seek_to_track( stream->priv,i ) < 0 ) break;
+		vcd_seek_to_track( stream->priv,vcd_track );
 		guiIntfStruct.VCDTracks=--i;
 	        break;
 	       }
