@@ -18,16 +18,16 @@
 <P>Nézd meg a <CODE>/proc/mtrr</CODE> file tartalmát :</P>
 
 <P><CODE>
---($:~)-- cat /proc/mtrr<BR>
-reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9<BR>
-reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<BR>
+  --($:~)-- cat /proc/mtrr<BR>
+  reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9<BR>
+  reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<BR>
 </CODE></P>
 
 <P>Helyes, ott látszik a Matrox G400-am 16Mb memóriája. Ezt a parancsot
-XFree 4.x.x alól adtam ki, ami automatikusan beállítja az MTRR-t.</P>
+  XFree 4.x.x alól adtam ki, ami automatikusan beállítja az MTRR-t.</P>
 
 <P>Ha nálad nem sikerül neki, kézzel kell beállítani. Elõször a báziscímet kell
-megkeresni. Erre van 3 módszer :</P>
+  megkeresni. Erre van 3 módszer :</P>
 
 <UL>
   <LI>az X11 induló üzeneteibõl, például :
@@ -134,8 +134,8 @@ megkeresni. Erre van 3 módszer :</P>
   (annak is van XVideo támogatása), az segíthet. Nézd meg a <A HREF="#2.3.1.4">2.3.1.4-es</A>
   fejezetet a részletekhez.</P>
 
-<P><B>VAGY</B> inkább használd az ÚJ -vo tdfxfb meghajtót! Lásd <A
-HREF=#2.3.1.9>2.3.1.9-es</A> fejezet.</P>
+<P><B>VAGY</B> inkább használd az ÚJ -vo tdfxfb meghajtót! Lásd
+  <A HREF=#2.3.1.9>2.3.1.9-es</A> fejezet.</P>
 
 
 <P><B><A NAME=2.3.1.2.2>2.3.1.2.2.  S3 kártyák</A></B></P>
@@ -180,9 +180,10 @@ HREF=#2.3.1.9>2.3.1.9-es</A> fejezet.</P>
   Hz-re.</LI>
 
 <LI>Radeon VE - ehhez a kártyához jelenleg csak az XFree86 CVS-ében van
-meghajtó, TV kimenet nélkül. Természetesen az <B>MPlayer</B>-rel teljeskörû
-<B>hardveres gyorsítást</B> és <B>TV kimenetet</B> kapsz, és semmilyen könyvtár
-vagy X nem kell. Olvasd el a <A HREF=#2.3.1.15>Vidix</A> fejezetet.</LI>
+  meghajtó, TV kimenet nélkül. Természetesen az <B>MPlayer</B>-rel teljeskörû
+  <B>hardveres gyorsítást</B> és <B>TV kimenetet</B> kapsz, és semmilyen
+  könyvtár vagy X nem kell. Olvasd el a <A HREF=#2.3.1.15>Vidix</A>
+  fejezetet.</LI>
 </LI>
 </UL>
 
@@ -199,12 +200,12 @@ vagy X nem kell. Olvasd el a <A HREF=#2.3.1.15>Vidix</A> fejezetet.</LI>
 <P>DVD méretû filmek lejátszásához írd át az XF86Config-ot a következõképp :</P>
 
 <P>
-Section "Device"<BR>
-&nbsp; &nbsp; <I>[...]</I><BR>
-&nbsp; &nbsp; Driver "neomagic"<BR>
-&nbsp; &nbsp; <B>Option "OverlayMem" "829440"</B><BR>
-&nbsp; &nbsp; <I>[...]</I><BR>
-EndSection
+  Section "Device"<BR>
+  &nbsp; &nbsp; <I>[...]</I><BR>
+  &nbsp; &nbsp; Driver "neomagic"<BR>
+  &nbsp; &nbsp; <B>Option "OverlayMem" "829440"</B><BR>
+  &nbsp; &nbsp; <I>[...]</I><BR>
+  EndSection
 </P>
 
 
@@ -267,9 +268,9 @@ EndSection
   SUID root-ként kell installálnod :</P>
 
 <P><CODE>
-&nbsp;&nbsp;&nbsp;&nbsp;chown root /usr/local/bin/mplayer<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;chmod 750 /usr/local/bin/mplayer<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;chmod +s /usr/local/bin/mplayer</CODE></P>
+  &nbsp;&nbsp;&nbsp;&nbsp;chown root /usr/local/bin/mplayer<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;chmod 750 /usr/local/bin/mplayer<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;chmod +s /usr/local/bin/mplayer</CODE></P>
 
 <P>Így már felhasználóként is mûködik.</P>
 
@@ -363,18 +364,19 @@ EndSection
   érdemes használni. Az implementációja nem minden driverben tökeletes.</P>
 
 <UL>
-<LI>XFree 4.0.3-mal és nv.o driverrel van egy bug, ami furcsa színeket eredménye</LI>
-<LI>az ATI driverrel egynél többször kell módot váltani, miután a DGA használat
-    befejezõdott</LI>
-<LI>némely driverek egyszerûen nem tudnak visszaváltani a normális felbontásba  
-    (használd a Ctrl-Alt-Keypad +, - billentyûket)</LI>
-<LI>néhány driver furcsa színeket jelenít meg</LI>
-<LI>mások hazudnak arról, hogy mennyi memóriát map-elnek be, így vo_dga
-    nem fog doublebuffering-et használni (SIS?)</LI>
-<LI>megint mások nem adnak vissza egyetlen videomódot se. Ebben az esetben
-    a DGA driver leáll valami nonszensz üzenettel mint pl 100000x100000 vagy
-    ilyesmi...</LI>
-<LI>az OSD csak doublebuffering-el mûködik</LI>
+  <LI>XFree 4.0.3-mal és nv.o driverrel van egy bug, ami furcsa színeket
+    eredménye</LI>
+  <LI>az ATI driverrel egynél többször kell módot váltani, miután a DGA
+      használat befejezõdott</LI>
+  <LI>némely driverek egyszerûen nem tudnak visszaváltani a normális
+      felbontásba (használd a Ctrl-Alt-Keypad +, - billentyûket)</LI>
+  <LI>néhány driver furcsa színeket jelenít meg</LI>
+  <LI>mások hazudnak arról, hogy mennyi memóriát map-elnek be, így vo_dga
+      nem fog doublebuffering-et használni (SIS?)</LI>
+  <LI>megint mások nem adnak vissza egyetlen videomódot se. Ebben az esetben
+      a DGA driver leáll valami nonszensz üzenettel mint pl 100000x100000 vagy
+      ilyesmi...</LI>
+  <LI>az OSD csak doublebuffering-el mûködik</LI>
 </UL>
 
 
@@ -479,7 +481,7 @@ esd, arts)</TD><TR>
   monitorod tulajdonságait.</P>
 
 <P><B><U>Megjegyzések</U></B><BR>
- Bizonyosodj meg róla, hogy nem használod a -fs kapcsolót, mert ez itt a
+  Bizonyosodj meg róla, hogy nem használod a -fs kapcsolót, mert ez itt a
   szoftveres scaler-t kapcsolja be, ami pedig lassú. Ha tényleg szükséged van
   rá használd az <CODE>-sws 4</CODE> opciót, ami valamivel rosszabb minõség
   mellett sokkal gyorsabban mûködik.</P>
@@ -560,7 +562,7 @@ a framebuffer egység megadása (/dev/fb0)</TD><TR>
 <P>A használatához elõszöris le kell fordítani :</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;cd drivers<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
+  &nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
 
 <P>Aztán létrehozni a /dev/mga_vid egységet :</P>
 
@@ -611,8 +613,9 @@ a framebuffer egység megadása (/dev/fb0)</TD><TR>
 <P><B><A NAME=2.3.1.9>2.3.1.9.  3dfx YUV támogatás</A></B></P>
 
 <P>Ez a meghajtó a kernel tdfx framebufferét használva jelenít meg filmeket
-hardveres gyorsítással. tdfxfb kell a kernelbe, és a következõképp kell
-újrafordítani az <B>MPlayer</B>-t : <CODE>./configure --enable-tdfxfb</CODE></P>
+  hardveres gyorsítással. tdfxfb kell a kernelbe, és a következõképp kell
+  újrafordítani az <B>MPlayer</B>-t : <CODE>./configure
+  --enable-tdfxfb</CODE></P>
 
 <P><B><A NAME=2.3.1.10>2.3.1.10.  OpenGL kimenet</A></B></P>
 
@@ -674,58 +677,45 @@ Here are some important:</P></B></TD><TR>
 
 
 <P><B><A NAME=2.3.1.12>2.3.1.12.  VESA - megjelenítés a VESA BIOS segítségével</B></P>
-<P>
-Ez egy <B>általános meghajtó</B> minden olyan kártyára, melynek VESA VBE 2.0
-kompatibilis BIOS-a van. Ezen kívül még egy oka van ezen meghajtó
-kifejlesztésének - a TV-n történõ lejátszással kapcsolatos gondok.<BR>
-<B>VESA BIOS EXTENSION (VBE) 3.0-ás verzió Dátum: Szeptember 16, 1998</B> (70. oldal)
-ezt írja:
+
+<P>Ez egy <B>általános meghajtó</B> minden olyan kártyára, melynek VESA VBE 2.0
+  kompatibilis BIOS-a van. Ezen kívül még egy oka van ezen meghajtó
+  kifejlesztésének - a TV-n történõ lejátszással kapcsolatos gondok.<BR>
+  <B>VESA BIOS EXTENSION (VBE) 3.0-ás verzió Dátum: Szeptember 16, 1998</B>
+  (70. oldal) ezt írja:
 </P>
 
-<P>
-<code><i>
-<b>Duál-Kontroller Elv</b><br>
-A VBE 3.0 támogatja a duál-kontroller elvet, miszerint mivel mindkét
-kontroller tipikusan ugyanattól az OEM-tõl került ki, ugyanazon a grafikus
-kártyán ugyanazon BIOS ROM irányítása alatt, lehetséges az applikáció elöl
-elrejteni a tényt, hogy tulajdonképpen két kontroller van jelen.
-Ennek megvan az a hátránya hogy nem lehet egyszerre használni a két adaptert,
-de cserébe a VBE 3.0 elõtti programok normálisan futhatnak. A 00h VBE
-funkció (Kontroller Információ Lekérése) visszaadja az adapterek
-információit, beleértve a rendelkezésre álló videomódok kombinált
-listáját. Mikor egy program kiválaszt egy módot, a megfelelõ kontroller
-aktiválódik.
-</i></code>
-</P>
+<BLOCKQUOTE>
+  <b>Duál-Kontroller Elv</b><br>
+  A VBE 3.0 támogatja a duál-kontroller elvet, miszerint mivel mindkét
+  kontroller tipikusan ugyanattól az OEM-tõl került ki, ugyanazon a grafikus
+  kártyán ugyanazon BIOS ROM irányítása alatt, lehetséges az applikáció elöl
+  elrejteni a tényt, hogy tulajdonképpen két kontroller van jelen.
+  Ennek megvan az a hátránya hogy nem lehet egyszerre használni a két adaptert,
+  de cserébe a VBE 3.0 elõtti programok normálisan futhatnak. A 00h VBE
+  funkció (Kontroller Információ Lekérése) visszaadja az adapterek
+  információit, beleértve a rendelkezésre álló videomódok kombinált
+  listáját. Mikor egy program kiválaszt egy módot, a megfelelõ kontroller
+  aktiválódik.
+</BLOCKQUOTE>
 
-<P>
-Azaz ezzel a meghajtóval van esély hogy a TV kimenetet mûködésre bírd.<BR>
-</P>
+<P>Azaz ezzel a meghajtóval van esély hogy a TV kimenetet mûködésre bírd.</P>
 
-<P>
-<b>Elõnyök:</b><BR>
- - Akkor is nézhetsz filmeket ha a Linux <B>nem is ismeri</B> a kártyádat.<BR>
- - Nem kell semmilyen grafikai program a Linuxodra (mint az XFree86, fbdev, stb).
-Ez a meghajtó <B>szöveges módból</B> is futtatható.<BR>
- - Lehetséges hogy mûködni fog vele a <B>TV kimenet</B>. (ATI kártyákkal
-legalábbis)<BR>
- - A meghajtó a <B>10h megszakítást</B> hívja, tehát nem emulátor -
-az <B>igazi</B> BIOS-t hívja, <B>valós</B> módban. (igazából vm86 módból)<BR>
- - Legfontosabb :) <B>320x200-as felbontásban</B> nézhetsz vele DVD-t, ha nincs elég erõs processzorod
-a magasabb módokhoz.<BR>
-</P>
+<P><B>Elõnyök:</B><BR>
+  - Akkor is nézhetsz filmeket ha a Linux <B>nem is ismeri</B> a kártyádat.<BR>
+  - Nem kell semmilyen grafikai program a Linuxodra (mint az XFree86, fbdev,
+    stb).  Ez a meghajtó <B>szöveges módból</B> is futtatható.<BR>
+  - Lehetséges hogy mûködni fog vele a <B>TV kimenet</B>. (ATI kártyákkal
+    legalábbis)<BR>
+  - A meghajtó a <B>10h megszakítást</B> hívja, tehát nem emulátor - az
+    <B>igazi</B> BIOS-t hívja, <B>valós</B> módban. (igazából vm86 módból)<BR>
+  - Használhatod vele a Vidix-et, így a hardveres gyorsítású megjelenítést,
+    ÉS a TV kimenetet egyszerre használhatod! (ATI kártyákhoz ajánlott)</P>
 
-<P>
-<b>Hátrányok:</b><BR>
+<P><B>Hátrányok:</B><BR>
  - Csak <B>x86 rendszereken</B> mûködik.<BR>
-   (De csak akkor ha a kártyád nem támogatja a <B>DGA módot</B> - ha igen,
-   akkor ez a meghajtó hasonló sebességet nyújt mint a <B>-vo dga</B> és a
-   <B>-vo fbdev</B>.<BR>
- - Ez a <B>leglassabb</B> meghajtó az <B>MPlayer</B> meghajtói közül.<BR>
  - Csak <B>ROOT</B> használhatja.<BR>
  - Csak <B>Linux</B>on elérhetõ.<BR>
- - Jelenleg <B>nem használ hardveres gyorsítást</B> (mint például a YUV
-overlay, vagy hardveres skálázás)<BR>
 </P>
 
 <P>Ne használd ezt a meghajtót <B>GCC 2.96-tal</B> együtt ! Nem fog mûködni !</P>
@@ -749,71 +739,62 @@ hamarosan implementálva lesz (Will specify mode parameters such as refresh rate,
 </TABLE>
 </P>
 
-<P>
-<b>Ismert problémák, és elkerülésük :</b><br>
- - Ha van installálva <B>NLS</B> betûtipus a Linuxodon és szöveges módból
-futtatod a meghajtót, kilépés után a <B>ROM betütipus</B> lesz betöltve.
-A szokásos betûtipusodat a <B><I>setsysfont</I></B> programmal töltheted
-be.<BR>
- - Gyakran kilépés után <B>fekete a képernyõ</B>. Ilyenkor válts át egy
-másik konzolra, és vissza.<BR>
- - A <B>mûködõ TV kimenethez</B> be kell dugnod a TV kábelt bootolás elõtt,
-mivel a BIOS csak akkor inicializálja magát.
+<P><B>Ismert problémák, és elkerülésük:</B><BR>
+  - Ha van installálva <B>NLS</B> betûtipus a Linuxodon és szöveges módból
+    futtatod a meghajtót, kilépés után a <B>ROM betütipus</B> lesz betöltve.
+    A szokásos betûtipusodat a <B><I>setsysfont</I></B> programmal töltheted
+    be.<BR>
+  - Gyakran kilépés után <B>fekete a képernyõ</B>. Ilyenkor válts át egy
+    másik konzolra, és vissza.<BR>
+  - A <B>mûködõ TV kimenethez</B> be kell dugnod a TV kábelt bootolás elõtt,
+    mivel a BIOS csak akkor inicializálja magát.
 </P>
 
 
 <P><B><A NAME=2.3.1.13>2.3.1.13.  X11</B></P>
 
 <P>Kerülendõ. Szabványos X11 kimenet (megosztott memóriával - mitshm),
-és abszolut nélkülözi a hardveres gyorsítást. Támogat (MMX/3DNow/SSE
-optimalizált, de még mindig lassú) szoftveres nagyítást, az <CODE>-fs -zoom</CODE>
-opciók használata esetén. A legtöbb mai kártyának van hardveres támogatása,
-nekik a <CODE>-vo xv</CODE> opció kell, vagy Matroxokhoz <CODE>-vo xmga</CODE>.</P>
+  és abszolut nélkülözi a hardveres gyorsítást. Támogat (MMX/3DNow/SSE
+  optimalizált, de még mindig lassú) szoftveres nagyítást, az <CODE>-fs
+  -zoom</CODE> opciók használata esetén. A legtöbb mai kártyának van hardveres
+  támogatása, nekik a <CODE>-vo xv</CODE> opció kell, vagy Matroxokhoz
+  <CODE>-vo xmga</CODE>.</P>
 
 <P>A baj ott van hogy a legtöbb kártya meghajtója nem támogatja a hardveres
-gyorsítást a második fejen vagy TV kimeneten. Ezekben az esetekben zöld/kék
-színû ablak látszik a film helyett. Itt lesz hasznos ez a meghajtó, de
-a szoftveres nagyításhoz erõs CPU is szükségeltetik. Ne használd az SDL
-meghajtó szoftveres kimenetét+nagyítását mert annak sokkal rosszabb képminõsége
-van !</P>
+  gyorsítást a második fejen vagy TV kimeneten. Ezekben az esetekben zöld/kék
+  színû ablak látszik a film helyett. Itt lesz hasznos ez a meghajtó, de
+  a szoftveres nagyításhoz erõs CPU is szükségeltetik. Ne használd az SDL
+  meghajtó szoftveres kimenetét+nagyítását mert annak sokkal rosszabb
+  képminõsége van !</P>
 
+<P>A szoftveres nagyítás nagyon lassú, jobb ha videomódot váltasz inkább.
+  Írd bele az XF86Config-ba a DGA fejezet modeline-it.</P>
 
-<P><B><A NAME=2.3.1.14>2.3.1.14. Rage128 (Pro) / Radeon video overlay (radeon_vid)</A></B></P>
+<UL>
+  <LI>ha 4-es XFree86-od van, használd a <CODE>-vm</CODE> opciót, ami
+    majd a megfelelõ videomódba kapcsol. Ha nem teszi:</LI>
+  <LI>3-as XFree86-tal, a <B>CTRL-ALT-plusz</B> és <B>minusz</B> billentyûkkel
+    válts a megfelelõ módba.</LI>
+</UL>
 
-<P>Rossz helyen keresel.. Neked a Vidix kell !</P>
+<P>Ha nem találod az általad beillesztett videomódokat, nézd át az XFree86
+  kimenetét. Néhány meghajtója nem támogatja az alacsony pixelclock-okat
+  amiket ezek a módok használnak.</P>
 
 
 <P><B><A NAME=2.3.1.15>2.3.1.15. VIDIX</A></B></P>
 
-<P><B><I>MI IS AZ A VIDIX ?</I></B></P>
+<P><B><I>MI IS AZ A VIDIX?</I></B></P>
 
 <P>A VIDIX a <B>VID</B>eo <B>I</B>nterface for *ni<B>X</B> szavak rövidítése.
-  A VIDIX tervezésekor a cél egy - néhány userspace meghajtót egységbe fogó -
-  interface létrehozása volt, ezáltal - az X11-tõl eltérõen - mindenhol
-  elérhetõvé tenni a DGA-t, ahol ez lehetséges. Remélem hogy ezek a meghajtók
-  legalább annyira portolhatóak lesznek mint az X11 (<B>és nem csak
-  *nix-okon</B>).<BR>
-  Amibõl áll:
-  <LI>Portolható utódja az mga_vid technológiának, de userspace-ben helyezkedik
-    el.</LI>
-  <LI>Az X11-tõl eltérõen mindenhol elérhetõ vele a DGA, ahol csak
-    lehetséges</LI>
-  <LI>A v4l-tõl eltérõen interface-t nyújt a videok lejátszására is</LI>
-  <LI>Más Linuxos meghajtóktól eltérõen matematikai libraryt használ</LI>
-</P>
+  A VIDIX egy interface az olyan meghajtók számára, mint például az
+  mga_vid. Könnyen portolható.</P>
 
-<P>És ilyen szép nagy betûkkel :<BR>
-  <B>A VIDIX KÖZVETLEN HOZZÁFÉRÉST NYÚJT A KÁRTYA BES YUV MEMÓRIÁJÁHOZ.</B>
-</P>
-
-<P>Ez az interface a meglévõ meghajtókat (amik mga_vid, mga_yuv, radeon_vid
+<P>Ez az interface a meglévõ meghajtókat (amik mga_vid, rage128_vid, radeon_vid, pm3_vid
   neveken ismertek) egy fix keretbe foglalja. Továbbá magas szintû interface-t
   nyújt a BES (BackEnd Scaler) vagy OV (Video Overlay) chip-ek eléréséhez.
   Nincs benne viszont alacsonyszintû interface a grafikus szerverekhez
-  hasonlóan (nem akarok az X11-gyel versengeni). A jövõben el tudok képzelni
-  valami olyasmit mint egy mini-X (nem összekeverendõ a Minix-szel ;), ha
-  elegendõen jelentkeznek.
-</P>
+  hasonlóan.</P>
 
 <P><B><I>HASZNÁLAT</I></B></P>
 
@@ -828,7 +809,7 @@ van !</P>
 
 A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 
-<P><B><I>SZÜKSÉGES</I></B></P>
+<P><B>SZÜKSÉGES</B></P>
 
 <UL>
   <LI>Hogy a videokártya grafikus módban legyen (bár megnéztem szöveges
@@ -838,8 +819,6 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
   <LI>Az <B>MPlayer</B> választott video kimeneti meghajtójának tudnia kell
     a használt képernyõ méreteirõl, és ezt el is kell mondania a VIDIX
     almeghajtónak.</LI>
-  Remélem hogy hamarosan az összes meghajtó el fogja fogadni a <CODE>:vidix</CODE>
-  almeghajtót.
 </UL>
 
 <P><B><I>VARIÁCIÓK A HASZNÁLATRA</I></B></P>
@@ -938,6 +917,7 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
     történik. Ezen opciók help-je a <CODE>-zrhelp</CODE> opcióval kérhetõ
     le.</LI>
   <LI>csak YV12 formátum használható (például libmpeg2, libavcodec).</LI>
+  <LI>az OSD nem támogatott</LI>
 </UL>
 
 
@@ -1017,75 +997,35 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 
 <P><B><A NAME=2.3.1.A.2>2.3.1.A.2. ATI kártyák</A></B></P>
 
-<P>
-<b>Néhány szó az ATI kártyák TV kimenetérõl:</b><BR>
-Jelenleg az ATI nem akarja hogy bármely TV kimeneti chip-je Linux alatt
-is támogatott legyen. Íme a tõlük származó hivatalos állásfoglalás :
-
-<P>
-<code>
-<i>
-<br>&gt; Hello!
-<br>&gt;
-<br>&gt; A honlapjukon azt írják hogy támogatják a Linuxos fejlesztõket.
-<br>&gt; Jelenleg az mplayer projectben veszek részt, (www.mplayerhq.hu)
-<br>&gt; és a Radeon VE kártyák TV kimenetét szeretném bekapcsolni
-<br>&gt; filmlejátszás alatt. Ezt a képességet szeretném a radeonfb-be is beépíteni
-<br>&gt; (ami az mplayer CVS fa main/drivers/radeon könyvtárában található).
-<br>&gt; Lehetséges hogy hivatalos technikai dokumentációt kapjak?
-</i>
-<br>A TV kimeneti dokumentációt a Macrovision miatt nem adjuk ki.
-<br>Az MPEG2 dekódolást LEHET hogy megfontoljuk a jövõben, de ezt se most.
-<br>Szintén a nem kiadható információk miatt.
-</code>
-</P>
-
-<P>Milyen kár.</P>
-
-<P>
-<code>
-<B>Q:Mi az a Macrovision?</B><BR>
-A:Egy másolásvédelmi mechanizmus.</code>
-</P>
-
-<P>Tehát ha kiadnák a dokumentációt, a hackerek képesek lennének kikapcsolni
-a másolásvédelmet a chipjeiken. Ígyhát nincs esélyünk TV kimenetre.</P>
-
 <P>Az ATI TV kimenetek jelenlegi támogatottsága:</P>
 <UL>
-  <LI><b>ATI Mach64</b> : <i>ImpacTV</i> van rajta, amit a <A HREF="http://gatos.sourceforge.net">gatos</A>
+  <LI><b>ATI Mach64</b>: <i>ImpacTV</i> van rajta, amit a <A HREF="http://gatos.sourceforge.net">gatos</A>
     támogat.</LI>
-  <LI><b>ASIC Radeon VIVO</b> : <i>Rage Theatre</i>, ami szintén támogatott a <A HREF="http://gatos.sourceforge.net">gatos</A>
+  <LI><b>ASIC Radeon VIVO</b>: <i>Rage Theatre</i>, ami szintén támogatott a <A HREF="http://gatos.sourceforge.net">gatos</A>
     által.</LI>
-  <LI><b>Radeon VE</b> és <b>Rage PRO LT</b> : <i>ImpacTV2+</i> ami jelenleg nem támogatott Linux alatt.
+  <LI><b>Radeon VE</b> és <b>Rage PRO LT</b>: <i>ImpacTV2+</i> ami jelenleg nem támogatott Linux alatt.
     Viszont <B>MPlayer</B>-rel teljeskörû <B>hardveres gyorsítást</B> és
-    <B>TV kimenetet</B> kapsz Radeonokhoz ! Lásd a <a href=#2.3.1.12>VESA meghajtó</a> és
+    <B>TV kimenetet</B> kapsz Radeonokhoz! Lásd a <a href=#2.3.1.12>VESA meghajtó</a> és
     <A HREF=#2.3.1.14>Radeon video overlay</A> fejezeteket.</LI>
 </UL>
 
-<P>
-Szerencsére ha elég gyors processzorod van (Duron, Celeron2 vagy jobb),
-<B>használhatod a TV kimenetet</B> a <A HREF=#2.3.1.12>VESA meghajtón</A>
-keresztül.
-</P>
+<P>Szerencsére ha elég gyors processzorod van (Duron, Celeron2 vagy jobb),
+  <B>használhatod a TV kimenetet</B> a <A HREF=#2.3.1.12>VESA meghajtón</A>
+  keresztül.</P>
 
-<P>
-A <B>VESA meghajtó</B> nem használ hardveres gyorsítást, hanem <B>DGA-t</B>
-szimulál egy 64k-s ablakon keresztül, ami a BIOS 32 bites funkcióin
-keresztül konfigurálható. Az ATI kártyák elég gyors memóriával rendelkeznek,
-így az itt elveszített sebesség minimális. Más kártyákkal ellentétben
-itt nincs meghatározva a TV-n használható módok száma, így <B>320x200</B>-tól
-<B>1024x768</B>-ig bármilyen módot használhatsz.<BR>
-Van <B>DGA</B> mód (legalábbis a Radeonoknál biztosan), ami automatikusan
-detektálódik, és így hasonló teljesítményt kapsz mint a <B>-vo dga</B> és
-<B>-vo fbdev</B> módokban.<BR>
-Egy dologra kell figyelned : a PC bekapcsolásakor <B>legyen bedugva a TV
-kábele</B>, mert a BIOS csak bootolásnál inicializálja magát.
-</P>
+<P>A <B>VESA meghajtó</B> nem használ hardveres gyorsítást, hanem <B>DGA-t</B>
+  szimulál egy 64k-s ablakon keresztül, ami a BIOS 32 bites funkcióin keresztül
+  konfigurálható. Az ATI kártyák elég gyors memóriával rendelkeznek, így az itt
+  elveszített sebesség minimális. Más kártyákkal ellentétben itt nincs
+  meghatározva a TV-n használható módok száma, így <B>320x200</B>-tól
+  <B>1024x768</B>-ig bármilyen módot használhatsz.<BR>
+  Van <B>DGA</B> mód (legalábbis a Radeonoknál biztosan), ami automatikusan
+  detektálódik, és így hasonló teljesítményt kapsz mint a <B>-vo dga</B> és
+  <B>-vo fbdev</B> módokban.<BR>
+  Egy dologra kell figyelned : a PC bekapcsolásakor <B>legyen bedugva a TV
+  kábele</B>, mert a BIOS csak bootolásnál inicializálja magát.</P>
 
-<P>
-A részleteket lásd a <A HREF=#2.3.1.12>VESA meghajtó</A> leírásánál.
-</P>
+<P>A részleteket lásd a <A HREF=#2.3.1.12>VESA meghajtó</A> leírásánál.</P>
 
 
 <P><B><A NAME=2.3.1.A.3>2.3.1.A.3. Voodoo 3</A></B></P>

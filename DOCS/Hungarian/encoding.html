@@ -14,13 +14,14 @@
 <P><B><A NAME=2.4.1>2.4.1.  Bevezetõ</B></P>
 
 <P>A <B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder) egy egyszerû film
-enkóder, az MPlayer által lejátszható formátumok
-(<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) más - MPlayerrel lejátszható -
-formátumokba kódolására.
-Sokféle codec-kel tud enkódolni, például <B>DivX4</B>-gyel (1 vagy 2 menetes),
-a libavcodec-et alkotó codec-ekkel, audiot tekintve pedig
-<B>PCM</B>/<B>MP3</B>/<B>VBR MP3</B> a választék. Rendelkezik továbbá stream
-másoló, és video átméretezõ képességgel.</P>
+  enkóder, az MPlayer által lejátszható formátumok
+  (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) más - MPlayerrel
+  lejátszható - formátumokba kódolására. Sokféle codec-kel tud enkódolni,
+  például <B>DivX4</B>-gyel (1 vagy 2 menetes), a libavcodec-et alkotó
+  codec-ekkel, audiot tekintve pedig
+  <B>PCM</B>/<B>MP3</B>/<B>VBR MP3</B> a választék. Rendelkezik továbbá stream
+  másoló, és video átméretezõ képességgel.</P>
+
 
 <P><B><A NAME=2.4.2>2.4.2.  Fordítás</B></P>
 
@@ -31,13 +32,12 @@ másoló, és video átméretezõ képességgel.</P>
       <A HREF="http://avifile.sourceforge.net/download.htm">innen</A>, és
       installáld HELYESEN. Ez szükséges a DivX4 (1/2 menetes) enkódoláshoz.</LI>
     <LI><B>OPCIONÁLIS</B> - <A HREF="codecs.html#2.2.1.9">töltsd le és
-      installáld az <B>XViD</B>-et</A>. Nagyon hasznos nem-Linux rendszerû
-      gépeken, és/vagy ha a DivX4-nél gyorsabb, de kb azonos minõségû
-      enkódolásra van szükséged.</LI>
+      installáld az <B>XViD</B>-et</A>. Nem túl hasznos, a libavcodec
+      <I>mpeg4</I> codec-e sokkal gyorsabban és jobb minõségben kódol.</LI>
     <LI><B>OPCIONÁLIS</B> - ha a libavcodec codec-ekkel is akarsz enkódolni,
       installáld a libavcodec-et, ahogyan az a <A HREF="codecs.html#2.2.1.2">libavcodec
       fejezetben</A> le van írva.</LI>
-    <LI><B>OPCIONÁLIS</B> -töltsd és fordítsd le a <B>libmp3lame-t</B> (a lame 3.89bétából vagy
+    <LI><B>OPCIONÁLIS</B> - töltsd és fordítsd le a <B>libmp3lame-t</B> (a lame 3.89bétából vagy
       CVS-bõl).<BR>
       <B>NE GCC 2.96-TAL FORDÍTSD ! Nem fog helyesen mûködni !</B><BR>
       Ez szükségeltetik a CBR/VBR MP3 audio enkódoláshoz. Egy
@@ -54,8 +54,8 @@ másoló, és video átméretezõ képességgel.</P>
   </UL>
 </P>
 
-<P>Kész. Mint minden bizonnyal tudod, más enkódolóknak szüksége van az
-<I>avifile</I> könyvtárra. A <B>MEncoder</B>-nek egyáltalán nincs.</P>
+<P>Kész. Mint minden bizonnyal tudod, más enkódolóknak szükségük van az
+  <I>avifile</I> könyvtárra. A <B>MEncoder</B>-nek egyáltalán nincs.</P>
 
 <P><B><A NAME=2.4.3>2.4.3.  MEncoder funkciók</B></P>
 
@@ -68,7 +68,7 @@ másoló, és video átméretezõ képességgel.</P>
     <LI>enkódolás <B>V4L kompatibilis TV tunerekrõl</B></LI>
     <LI>enkódolása/multiplexelése interleaved AVI-knak, megfelelõ index-szel</LI>
     <LI>opcionálisan külsõ audio stream használata</LI>
-    <LI>1, 2 vagy 3 menetes <B>DivX4</B> video</LI>
+    <LI>1, 2 vagy 3 menetes enkódolás</LI>
     <LI><B>VBR</B> MP3 audio - <B>FONTOS</B> : a VBR-es mp3-ak nem minden
       körülmények között lejátszhatóak windows rendszereken! Viszont a
       <B>MEncoderrel</B> által létrehozott CBR AVI-k teljesen lejátszhatatlanok
@@ -83,6 +83,7 @@ másoló, és video átméretezõ képességgel.</P>
       rotate, scale, RGB/YUV konverzió)</LI>
     <LI>a kimeneti file-ba bele tudja kódolni mind a DVD/VOBsub, mind a
       szöveges feliratokat</LI>
+    <LI>DVD feliratok külsõ VOBsub file-ba történõ rippelése</LI>
   </UL>
 </P>
 
@@ -106,13 +107,13 @@ másoló, és video átméretezõ képességgel.</P>
   keresel a neten egy útmutatót.</P>
 
 <P>A következõ példa egy DVD 2 menetes DivX4 AVI-ba történõ enkódolását
-mutatja be. Csak két parancs szükséges :<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - töröld ezt a file-t,
-  ami egy esetleges elõzõ 3 menetes enkódolásból származhat<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100
-  -o movie.avi -pass 1<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100 
-  -o movie.avi -pass 2</CODE></P>
+  mutatja be. Csak két parancs szükséges :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - töröld ezt a file-t,
+    ami egy esetleges elõzõ 3 menetes enkódolásból származhat<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100
+    -o movie.avi -pass 1<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100 
+    -o movie.avi -pass 2</CODE></P>
 
 <P><U><B>3 menetes enkódolás :</B></U> ez egyfajta bõvített kétmenetes
   enkódolás. A különbség abban áll hogy itt az audio enkódolása külön
@@ -122,10 +123,9 @@ mutatja be. Csak két parancs szükséges :<BR>
   az audio csak egyszer kerül enkódolásra, ellentétben a 2 menetes móddal.
   A használata a következõ :</P>
 
-<P>
-  <TABLE>
+<TABLE>
   <TR>   
-    <TD>      <CODE>rm frameno.avi</CODE></TD>
+  <TD>      <CODE>rm frameno.avi</CODE></TD>
     <TD>      <B>egy esetleges elõzõ 3 menetes enkódolásból származó file törlése,
       mely konfliktolhat a most következõvel</B></TD>
   </TR>
@@ -155,20 +155,39 @@ mutatja be. Csak két parancs szükséges :<BR>
       <CODE>frameno.avi</CODE>-ban levõ audio belekerül a célfileba..
       és kész is az egész!</B></TD>
   </TR>
-  </TABLE>
-</P>
+</TABLE>
 
 <P><B>Példa a 3 menetes enkódolásra :</B></P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - esetlegesen egy elõzõ
   enkódolásbol származó file törlése (bezavar a most következõnek)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
-  -o frameno.avi<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
-  -divx4opts br=1100 -oac copy -o movie.avi -pass 1<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts
-  br=1100 -oac copy -o movie.avi -pass 2</CODE>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+    -o frameno.avi<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
+    -divx4opts br=1100 -oac copy -o movie.avi -pass 1<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts
+    br=1100 -oac copy -o movie.avi -pass 2</CODE>
 </P>
+
+<P><U><B>2, vagy 3 menetes enkódolás a libavcodec 2 menetes kódjával:</B></U>
+  Használata esetén elképzelhetõ, hogy az átlagos bitráta jobban fog
+  közelíteni a megadotthoz, mint a DivX4-es módszer esetén.</P>
+
+<UL>
+  <LI><B>2 menetes enkódolás:</B><BR>
+    <CODE>rm -f lavc_stats.txt<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 (audio-opciók) -o
+      movie.avi<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 (audio-opciók) -o
+      movie.avi</CODE></LI>
+  <LI><B>3 menetes enkódolás:</B><BR>
+    <CODE>rm -f frameno.avi lavc_stats.txt<BR>
+    mencoder -dvd 2 -ovc frameno (audio-opciók) -o frameno.avi<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o
+      movie.avi<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o
+      movie.avi</CODE></LI>
+</UL>
 
 
 <P><B><A NAME=2.4.3.2>2.4.3.2.  Átméretezés</B></P>
@@ -196,41 +215,40 @@ mutatja be. Csak két parancs szükséges :<BR>
   <B>enkódolja</B> vagy csak <B>átmásolja</B> õket. Ez a rész a <B>másolásról</B>
   szól.</P>
 
-<P>
 <UL>
-  <LI><B>Video stream-ek</B> (<CODE>-ovc copy</CODE> opció) : érdekes dolgokat
+  <LI><B>Video stream-ek</B> (<CODE>-ovc copy</CODE> opció): érdekes dolgokat
     lehet vele csinálni :)<BR>
-    Mint például FLI vagy VIVO vagy MPEG1 video másolása AVI file-ba !
+    Mint például FLI vagy VIVO vagy MPEG1 video másolása AVI file-ba!
     Persze az ilyen videokat csak az <B>MPlayer</B> tudja lejátszani :) És
     ezeknek a haszna gyakorlatilag nulla. A racionális felhasználása ennek
     például amikor csak az audio stream-et kell enkódolni (pl tömörítetlen
     PCM-et MP3-ba).</LI>
 
-  <LI><B>Audio stream-ek</B> (<CODE>-oac copy</CODE> opció) : egyértelmû.
-  Lehetséges az audio streamet egy külsõ fileból (MP3, AC3, Vorbis) is venni,
-  ehhez az <CODE>-audiofile &lt;filenév&gt;</CODE> opciót kell használni.</LI>
+  <LI><B>Audio stream-ek</B> (<CODE>-oac copy</CODE> opció): egyértelmû.
+    Lehetséges az audio streamet egy külsõ fileból (MP3, AC3, Vorbis) is venni,
+    ehhez az <CODE>-audiofile &lt;filenév&gt;</CODE> opciót kell
+    használni.</LI>
 </UL>
-</P>
 
 <P><B><A NAME=2.4.3.4>2.4.3.4.  Hibás index-szel rendelkezõ AVI-k rendbehozása</B></P>
 
-<P>Legkönnyebb dolog a világon. Egyszerûen átmásoljuk a video és audio
-streameket, és közben a <B>MEncoder</B> létrehozza a megfelelõ indexet is.
-Ez persze nem tudja kijavítani az esetleges hibákat a video és/vagy audio
-stream-ekben, viszont a hibásan interleave-elt fileokat igen.</P>
+<P>A legkönnyebb dolog a világon. Egyszerûen átmásoljuk a video és audio
+  streameket, és közben a <B>MEncoder</B> létrehozza a megfelelõ indexet is.
+  Ez persze nem tudja kijavítani az esetleges hibákat a video és/vagy audio
+  stream-ekben, viszont a hibásan interleave-elt fileokat igen.</P>
 
-<P>A parancs : <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
+<P>A parancs: <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
 
 <P><B><A NAME=2.4.3.5>2.4.3.5.  Enkódolás a <I>libavcodec</I> codec-ekkel</B></P>
 
 <P>A <A HREF="codecs.html#2.2.1.2">libavcodec</A>-kel egyszerûen lehet kódolni
-jónéhány érdekes video és audio formátumba (jelenleg az audio codec-ek nem
-támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
+  jónéhány érdekes video és audio formátumba (jelenleg az audio codec-ek nem
+  támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
 
-<P>
 <UL>
   <LI>mjpeg - Motion JPEG</LI>
+  <LI>h263 - H263</LI>
   <LI>h263p - H263 Plus</LI>
   <LI>mpeg4 - DivX4</LI>
   <LI>msmpeg4 - a régi DivX</LI>
@@ -238,10 +256,13 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   <LI>rv10 - egy régi RealVideo codec</LI>
   <LI>mpeg1video - MPEG1 video :)</LI>
 </UL>
-</P>
 
 <P>Az elsõ oszlopban felsorolt codec-eket kell átadni a
   <CODE>vcodec</CODE> opciónak, pl : <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
+
+<P>Egy példa, MJPEG tömörítéssel:<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc
+    -lavcopts vcodec=mjpeg</CODE></P>
 
 
 <P><B><A NAME=2.4.3.6>2.4.3.6.  Enkódolás több bemeneti file-ból (JPEG, PNG)</B></P>
@@ -288,9 +309,49 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   -o kimenet.avi</CODE></P>
 
 
+<P><B><A NAME=2.4.3.7>2.4.3.7  DVD feliratok VOBsub formátumúvá alakítása
+
+<P><B>A <B>MEncoder</B> képes DVD-rõl kivonni a feliratot, és átalakítani
+  Vobsub formátumú felirattá. Ezek egy <CODE>.idx</CODE> és egy
+  <CODE>.sub</CODE> kiterjesztésû file-ból állnak, gyakran egyetlen
+  <CODE>.rar</CODE> archívba tömörítve. Az <B>MPlayer</B> képes az ilyen
+  feliratok megjelenítésére a <CODE>-vobsub</CODE> és <CODE>-vobsubid</CODE>
+  opciókkal.</P>
+
+<P>Az alap filenevet (tehát kiterjesztés nélkül) a <CODE>-vobsubout</CODE>
+  opcióval adhatod meg. Az index számot amin el lesz tárolva a felirat,
+  pedig a <CODE>-vobsuboutindex</CODE> opcióval.</P>
+
+<P>Ha a bemeneti file nem DVD, használd az <CODE>-ifo</CODE> opciót, amivel
+  megadhatod hogy melyik file legyen <CODE>.idx</CODE>-é alakítva.</P>
+
+<P>Ha a bemeneti file nem DVD, de nincs meg hozzá az <CODE>.ifo</CODE> file,
+  használd a <CODE>-vobsubid</CODE> opciót a használandó nyelv azonosítójának
+  kiválasztásához.</P>
+
+<P>Minden egyes futás hozzáfûzi a kimenetet az esetlegesen már létezõ
+  kimeneti file-hoz, így ajánlott körülnézni indítás elõtt.</P>
+
+<P><B>Példák</B></P>
+
+<P><I>Két felirat másolása DVD-rõl, 3 menetes enkódolás közben</I><BR>
+  &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0
+    -sid 2 -o frameno.avi -ovc frameno</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout
+    subtitles -vobsuboutindex 1 -sid 5</CODE></P>
+
+<P><I>Francia nyelvû felirat másolása MPEG-bõl</I><BR>
+  &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles
+    -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
+
+
 <P><B><A NAME=2.4.4>2.4.4.  Szintaxis</B></P>
 
 <P>&nbsp;&nbsp;<CODE>mencoder [opciók] [bemeneti file] [opciók] ...</P>
+
 
 <P><B><A NAME=2.4.5>2.4.5.  Opciók</B></P>
 

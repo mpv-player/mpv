@@ -11,28 +11,6 @@
 
 <P><B><A NAME=4.1>4.1.  CD-ROM meghajtók</A></B></P>
 
-<P>Szabványos Video CD-k lejátszása a következõképpen lehetséges:</P>
-
-<P>
-  mplayer -vcd <I>sáv száma</I> [-cdrom-device eszköz]<BR><BR>
-
-  Néhány példa:<BR>
-  mplayer -vcd 1<BR>
-  mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
-</P>
-
-<P>
-  Megjegyzések:<BR>
-  - NE próbálj mountolni VCD-ket, és közvetlen lejátszani DAT fájlokat! Ez
-    windows alatt mûködik, de Linux alatt nem.<BR>
-  - A VCD lemezeken általában 2 sáv van: egy adatsáv (windowsos lejátszót,
-    karaoke adatot tartalmaz, stb) és egy mode-2 sáv (a film), így elõször
-    <CODE>-vcd 2</CODE>-t írj be!<BR>
-  - Az alapértelmezett VCD eszköz a /dev/cdrom. Ha a tied ettõl eltér,
-    szimbolikus linket kell létrehozni, vagy megadni az eszközt a
-    parancssorban!
-</P>
-
 <P>A Linux dokumentációjából:</P>
 
 <P>Néhány CDROM meghajtó képes szabályozni az olvasás sebességét. Jónéhány okunk
@@ -159,6 +137,31 @@
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang hu -chapter 5-9 -dvdangle 2</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
+
+
+<P><B><A NAME="vcd">4.3.  VCD lejátszás</A></B></P>
+
+<P>Szabványos Video CD-k lejátszása a következõképpen lehetséges:</P>
+
+<P>
+  mplayer -vcd <I>sáv száma</I> [-cdrom-device eszköz]<BR><BR>
+
+  Néhány példa:<BR>
+  mplayer -vcd 1<BR>
+  mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
+</P>
+
+<P>
+  Megjegyzések:<BR>
+  - NE próbálj mountolni VCD-ket, és közvetlen lejátszani DAT fájlokat! Ez
+    windows alatt mûködik, de Linux alatt nem.<BR>
+  - A VCD lemezeken általában 2 sáv van: egy adatsáv (windowsos lejátszót,
+    karaoke adatot tartalmaz, stb) és egy mode-2 sáv (a film), így elõször
+    <CODE>-vcd 2</CODE>-t írj be!<BR>
+  - Az alapértelmezett VCD eszköz a /dev/cdrom. Ha a tied ettõl eltér,
+    szimbolikus linket kell létrehozni, vagy megadni az eszközt a
+    parancssorban!
+</P>
 
 </BODY>
 
