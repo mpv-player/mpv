@@ -106,8 +106,7 @@ listed above, for example:
 
 <h3><a name="images">2.2 Image formats</a></h3>
 
-Images must be truecolor (24 or 32 bpp) and can be in BMP, PNG or uncompressed
-TGA format. The preferred format is PNG as it compresses very well.
+Images must be truecolor (24 or 32 bpp) PNG.
 
 <p>
 In the main window (see below) you can use images with `transparency':
@@ -165,7 +164,10 @@ for details.
 <p>
 <em class=note>
 <b>Note:</b> all images can have full transparency as described in the
-section about <a href="#images">image formats</a>.
+section about <a href="#images">image formats</a>. If the X Server doesn't
+support the XShape extension, the parts marked transparent will be black. If
+you'd like to use this feature, the width of the main window's background image
+must be dividable by 8.
 </em>
 </p>
 </li>
@@ -307,7 +309,7 @@ section = movieplayer
   end
   
   window = menu
-  ; ... items for skin menu ...
+  ; ... items for menu ...
   end
 end
 </pre></td></tr></table>
@@ -317,8 +319,7 @@ The name of an image file must be given without leading directories - images are
 searched for in the <code>Skin</code> directory. You may (but you need not)
 specify the extension of the file. If the file does not exist, MPlayer
 tries to load the file <code>&lt;filename&gt;.&lt;ext&gt;</code>, where
-<code>tga</code>, <code>TGA</code>, <code>bmp</code>, <code>BMP</code>,
-<code>png</code> and <code>PNG</code> is tried for <code>&lt;ext&gt;</code>
+<code>png</code> and <code>PNG</code> are tried for <code>&lt;ext&gt;</code>
 (in this order). The first matching file will be used.
 </p>
 
@@ -350,20 +351,9 @@ Here is an example to make this clear. Suppose that you have an image called
 </pre>
 </blockquote>
 
-MPlayer tries to load <code>main</code>, <code>main.tga</code>,
-<code>main.TGA</code>, <code>main.bmp</code> etc, so that <code>main.png</code>
-will be found.
+MPlayer tries to load <code>main</code>, <code>main.png</code>,
+<code>main.PNG</code> files.
 <br>
-If (by accident) you wrote
-<blockquote>
-<pre>
-    base = main.bmp, -1, -1
-</pre>
-</blockquote>
-then <code>main.bmp</code>, <code>main.bmp.tga</code>, <code>main.bmp.TGA</code>,
-<code>main.bmp.bmp</code> would be searched for and MPlayer would finally
-give up because there is no <code>main.bmp</code> in the directory, only
-<code>main.png</code>.
 </td></tr></table>
 
 
@@ -383,7 +373,8 @@ The window will have the size of the image.
 <div>
 <em class=warn>
 <b>Warning:</b> Transparent regions in the image (colored #FF00FF) appear
-black on X servers without the XShape extension.
+black on X servers without the XShape extension. The image's width must be
+dividable by 8.
 </em>
 </div>
 </dd>
@@ -577,6 +568,15 @@ You can use the following variables in the text:
     <td>the "e" character (if playback is paused and the font has the "e"
     character)
     </td></tr>
+<tr><td align=center><kbd>$x</kbd></td>
+    <td>movie width
+    </td></tr>
+<tr><td align=center><kbd>$y</kbd></td>
+    <td>movie height
+    </td></tr> 
+<tr><td align=center><kbd>$C</kbd></td>
+    <td>used codec's name
+    </td></tr> 
 </table>
 
 <em class="note">
@@ -741,11 +741,6 @@ symbols (and thus require a different font).
     <td align=left>stream is a URL</td></tr>
 </table>
 
-<p>
-<em class="note">
-<b>Note:</b> Currently only 'p', 's', 'e', 'n', 'm' and 't' are used.
-</em>
-</p>
 
 <h2><a name="guimsg">Appendix A: GUI messages</a></h2>
 
@@ -868,6 +863,9 @@ value (0-100%) of the potmeter is used).
 <dt><b>evAbout</b>
 <dd>Open the about window.
 
+<dt><b>evDropSubtitle</b>
+<dd>Disables the currently used subtitle.
+
 <dt><b>evEqualizer</b>
 <dd>Turn the equalizer on/off.
 
@@ -885,14 +883,32 @@ file).
 <dd>Does the same as <code>evLoad</code>, but it automatically starts
 playing after the file is loaded.
 
+<dt><b>evLoadSubtitle</b>
+<dd>Loads a subtitle file (with the fileselector)
+
+<dt><b>evLoadAudioFile</b>
+<dd>Loads an audio file (with the fileselector)
+
 <dt><b>evNone</b>
 <dd>Empty message, it has no effect (except maybe in CVS versions :-)).
 
 <dt><b>evPlayList</b>
 <dd>Open/close the playlist window.
 
+<dt><b>evPlayDVD</b>
+<dd>Tries to open the disc in the given DVDROM drive.
+
+<dt><b>evPlayVCD</b>
+<dd>Tries to open the disc in the given CDROM drive.
+
 <dt><b>evPreferences</b>
 <dd>Open the preferences window.
+
+<dt><b>evSetAspect</b>
+<dd>Sets displayed image aspect.
+
+<dt><b>evSetURL</b>
+<dd>Displays the URL dialog window.
 
 <dt><b>evSkinBrowser</b>
 <dd>Open the skin browser window.
