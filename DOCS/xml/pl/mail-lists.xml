@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.15 -->
 <appendix id="mailinglists">
 <title>Listy dyskusyjne</title>
 <para>
 Istnieją publiczne listy dyskusyjne o <application>MPlayerze</application>.
 Jeśli nie jest to wyraźnie zaznaczone, językiem obowiązującym na nich jest
-<emphasis role="bold">angielski</emphasis>. Proszę nie przysyłać wiadomości w
-innym języku, ani w formacie HTML! Limit na wielkość wiadomości wynosi 80KB.
-Większe dane należy ulokować w miejscu przeznaczonym do publicznego
-ściągania. Żeby się zapisać, należy kliknąć na poniższych odnośnikach. Na tych
-listach obowiązują te same zasady pisania i cytowania, co w Usenecie. Prosimy o
-ich przestrzeganie, ułatwia to życie tym, którzy czytają Wasze maile. Zasady
-pisania dostępne są pod adresami
-<ulink url="http://learn.to/edit_messages">HOWTO edit messages</ulink>
-lub (dla niecierpliwych)
-<ulink url="http://www.xs4all.nl/~hanb/documents/quotingguide.html">Quoting HOWTO</ulink>.
+<emphasis role="bold">angielski</emphasis>. Proszę nie przysyłać wiadomości
+w innym języku, ani w formacie HTML! Jeśli wiadomość zostanie odrzucona
+z powodu zbyt dużego załącznika proszę go w zamian ulokować w miejscu
+przeznaczonym do publicznego ściągania. Żeby się zapisać, należy kliknąć na
+poniższych odnośnikach. Na tych listach obowiązują te same zasady Netetykiety
+odnoścnie pisania i cytowania, co w Usenecie. Prosimy o ich przestrzeganie,
+ułatwia to życie tym, którzy czytają Wasze maile. Można się z nimi zaznajomić
+na stronie
+<ulink url="http://learn.to/edit_messages">HOWTO edit messages</ulink>.
 <itemizedlist>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"><application>MPlayer</application>-announce</ulink>
