@@ -303,6 +303,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_BMP: return demux_bmp_fill_buffer(demux);
     case DEMUXER_TYPE_FLI: return demux_fli_fill_buffer(demux);
     case DEMUXER_TYPE_MPEG4_ES:
+    case DEMUXER_TYPE_H264_ES:
     case DEMUXER_TYPE_MPEG_ES: return demux_mpg_es_fill_buffer(demux);
     case DEMUXER_TYPE_MPEG_PS: return demux_mpg_fill_buffer(demux);
     case DEMUXER_TYPE_AVI: return demux_avi_fill_buffer(demux);
@@ -518,6 +519,13 @@ extern int num_elementary_packets101;
 extern int num_elementary_packetsPES;
 extern int num_elementary_packets1B6;
 extern int num_elementary_packets12x;
+extern int num_h264_slice; //combined slice
+extern int num_h264_dpa; //DPA Slice
+extern int num_h264_dpb; //DPB Slice
+extern int num_h264_dpc; //DPC Slice
+extern int num_h264_idr; //IDR Slice
+extern int num_h264_sps;
+extern int num_h264_pps;
 extern int num_mp3audio_packets;
 
 // commandline options, flags:
@@ -855,6 +863,13 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
   num_elementary_packets1B6=0;
   num_elementary_packets12x=0;
   num_elementary_packetsPES=0;
+  num_h264_slice=0; //combined slice
+  num_h264_dpa=0; //DPA Slice
+  num_h264_dpb=0; //DPB Slice
+  num_h264_dpc=0; //DPC Slice
+  num_h264_idr=0; //IDR Slice
+  num_h264_sps=0;
+  num_h264_pps=0;
   num_mp3audio_packets=0;
 
   if(ds_fill_buffer(demuxer->video)){
@@ -864,9 +879,13 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"MPEG-PS");
     file_format=DEMUXER_TYPE_MPEG_PS;
   } else {
-    mp_msg(MSGT_DEMUX,MSGL_V,"MPEG packet stats: p100: %d  p101: %d p1B6: %d p12x: %d PES: %d  MP3: %d \n",
+    mp_msg(MSGT_DEMUX,MSGL_V,"MPEG packet stats: p100: %d  p101: %d p1B6: %d p12x: %d sli: %d a: %d b: %d c: %d idr: %d sps: %d pps: %d PES: %d  MP3: %d \n",
 	num_elementary_packets100,num_elementary_packets101,
 	num_elementary_packets1B6,num_elementary_packets12x,
+	num_h264_slice, num_h264_dpa,
+	num_h264_dpb, num_h264_dpc=0,
+	num_h264_idr,  num_h264_sps=0,
+	num_h264_pps,
 	num_elementary_packetsPES,num_mp3audio_packets);
 //MPEG packet stats: p100: 458  p101: 458  PES: 0  MP3: 1103  (.m2v)
     if(num_mp3audio_packets>50 && num_mp3audio_packets>2*num_elementary_packets100
@@ -888,6 +907,15 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       file_format=DEMUXER_TYPE_MPEG4_ES;
     } else
 #endif
+#if 1
+    // fuzzy h264-es detection. do NOT enable without heavy testing of mpeg formats detection!
+    if(num_h264_slice>3 || (num_h264_dpa>3 && num_h264_dpb>3 && num_h264_dpc>3) && 
+       num_h264_sps>=1 && num_h264_pps>=1 /*&& num_h264_idr>=1*/ &&
+       num_elementary_packets1B6==0 && num_elementary_packetsPES==0 &&
+       demuxer->synced<2){
+      file_format=DEMUXER_TYPE_H264_ES;
+    } else
+#endif
     {
       if(demuxer->synced==2)
         mp_msg(MSGT_DEMUXER,MSGL_ERR,"MPEG: " MSGTR_MissingVideoStreamBug);
@@ -901,7 +929,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  }
 }
 //=============== Try to open as MPEG-ES file: =================
-if(file_format==DEMUXER_TYPE_MPEG_ES || file_format==DEMUXER_TYPE_MPEG4_ES){ // little hack, see above!
+if(file_format==DEMUXER_TYPE_MPEG_ES || file_format==DEMUXER_TYPE_MPEG4_ES  || file_format==DEMUXER_TYPE_H264_ES){ // little hack, see above!
   demuxer=new_demuxer(stream,file_format,audio_id,video_id,dvdsub_id);
   if(!ds_fill_buffer(demuxer->video)){
     mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_InvalidMPEGES);
@@ -909,7 +937,14 @@ if(file_format==DEMUXER_TYPE_MPEG_ES || file_format==DEMUXER_TYPE_MPEG4_ES){ // 
     free_demuxer(demuxer);
     demuxer = NULL;
   } else {
-    mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,(file_format==DEMUXER_TYPE_MPEG_ES)?"MPEG-ES":"MPEG4-ES");
+    switch(file_format){
+    case DEMUXER_TYPE_MPEG_ES: 
+        mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat, "MPEG-ES"); break;
+    case DEMUXER_TYPE_MPEG4_ES: 
+        mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat, "MPEG4-ES"); break;
+    case DEMUXER_TYPE_H264_ES: 
+        mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat, "H264-ES"); break;
+    }
   }
 }
 #ifdef HAVE_LIBDV095
@@ -1102,6 +1137,7 @@ switch(file_format){
   }
   break;
  }
+ case DEMUXER_TYPE_H264_ES:
  case DEMUXER_TYPE_MPEG4_ES:
  case DEMUXER_TYPE_MPEG_ES: {
    sh_audio=NULL;   // ES streams has no audio channel
@@ -1287,6 +1323,7 @@ switch(demuxer->file_format){
   case DEMUXER_TYPE_ASF:
       demux_seek_asf(demuxer,rel_seek_secs,flags);  break;
   
+  case DEMUXER_TYPE_H264_ES:
   case DEMUXER_TYPE_MPEG4_ES:
   case DEMUXER_TYPE_MPEG_ES:
   case DEMUXER_TYPE_MPEG_PS:

@@ -126,6 +126,46 @@ switch(d_video->demuxer->file_format){
    sh_video->format=0x10000004;
    break;
  }
+ case DEMUXER_TYPE_H264_ES: {
+   videobuf_len=0; videobuf_code_len=0;
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for sequence parameter set... ");fflush(stdout);
+   while(1){
+      int i=sync_video_packet(d_video);
+      if((i&~0x60) == 0x107 && i != 0x107) break; // found it!
+      if(!i || !skip_video_packet(d_video)){
+        mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
+	return 0;
+      }
+   }
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
+   if(!videobuffer) videobuffer=(char*)memalign(8,VIDEOBUFFER_SIZE);
+   if(!videobuffer){ 
+     mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
+     return 0;
+   }
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for picture parameter set... ");fflush(stdout);
+   while(1){
+      int i=sync_video_packet(d_video);
+      printf("0x%X\n",i);
+      if((i&~0x60) == 0x108 && i != 0x108) break; // found it!
+      if(!i || !read_video_packet(d_video)){
+        mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
+	return 0;
+      }
+   }
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\nSearching for Slice... ");fflush(stdout);
+   while(1){
+      int i=sync_video_packet(d_video);
+      if((i&~0x60) == 0x101 || (i&~0x60) == 0x102 || (i&~0x60) == 0x105) break; // found it!
+      if(!i || !read_video_packet(d_video)){
+        mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
+	return 0;
+      }
+   }
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
+   sh_video->format=0x10000005;
+   break;
+ }
 #ifdef STREAMING_LIVE_DOT_COM
  case DEMUXER_TYPE_RTP:
    // If the RTP stream is a MPEG stream, then we use this code to check
@@ -367,6 +407,16 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
           int i=sync_video_packet(d_video);
           if(!read_video_packet(d_video)) return -1; // EOF
 	  if(i==0x1B6) break;
+        }
+	*start=videobuffer; in_size=videobuf_len;
+	videobuf_len=0;
+
+  } else if(demuxer->file_format==DEMUXER_TYPE_H264_ES){
+      //
+        while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
+          int i=sync_video_packet(d_video);
+          if(!read_video_packet(d_video)) return -1; // EOF
+          if((i&~0x60) == 0x101 || (i&~0x60) == 0x102 || (i&~0x60) == 0x105) break;
         }
 	*start=videobuffer; in_size=videobuf_len;
 	videobuf_len=0;

@@ -250,6 +250,14 @@ int num_elementary_packets101=0;
 int num_elementary_packets12x=0;
 int num_elementary_packets1B6=0;
 int num_elementary_packetsPES=0;
+int num_h264_slice=0; //combined slice
+int num_h264_dpa=0; //DPA Slice
+int num_h264_dpb=0; //DPB Slice
+int num_h264_dpc=0; //DPC Slice
+int num_h264_idr=0; //IDR Slice
+int num_h264_sps=0;
+int num_h264_pps=0;
+
 int num_mp3audio_packets=0;
 
 int demux_mpg_es_fill_buffer(demuxer_t *demux){
@@ -317,6 +325,15 @@ do{
       if(head==0x100) ++num_elementary_packets100; else
       if(head==0x101) ++num_elementary_packets101; else
       if(head>=0x120 && head<=0x12F) ++num_elementary_packets12x;
+      
+      if((head&~0x60) == 0x101) ++num_h264_slice; else
+      if((head&~0x60) == 0x102) ++num_h264_dpa; else
+      if((head&~0x60) == 0x103) ++num_h264_dpb; else
+      if((head&~0x60) == 0x104) ++num_h264_dpc; else
+      if((head&~0x60) == 0x105 && head != 0x105) ++num_h264_idr; else
+      if((head&~0x60) == 0x107 && head != 0x107) ++num_h264_sps; else
+      if((head&~0x60) == 0x108 && head != 0x108) ++num_h264_pps;
+      
       mp_msg(MSGT_DEMUX,MSGL_DBG3,"Opps... elementary video packet found: %03X\n",head);
     } else
     if((head>=0x1C0 && head<0x1F0) || head==0x1BD){
