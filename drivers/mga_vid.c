@@ -879,6 +879,7 @@ static int mga_vid_release(struct inode *inode, struct file *file)
 	vid_src_ready = 0;   
 	regs.besctl &= ~1;
         regs.besglobctl &= ~(1<<6);  // UYVY format selected
+	mga_config.colkey_on=0; //!!!
 	mga_vid_write_regs();
 	mga_vid_in_use = 0;
 
