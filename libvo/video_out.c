@@ -50,6 +50,7 @@ extern vo_functions_t video_out_pgm;
 extern vo_functions_t video_out_md5;
 extern vo_functions_t video_out_syncfb;
 extern vo_functions_t video_out_fbdev;
+extern vo_functions_t video_out_svga;
 
 vo_functions_t* video_out_drivers[] =
 {
@@ -83,6 +84,9 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_FBDEV
 	&video_out_fbdev,
+#endif
+#ifdef HAVE_SVGALIB
+	&video_out_svga,
 #endif
         &video_out_null,
         &video_out_odivx,

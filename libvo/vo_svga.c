@@ -59,7 +59,7 @@ static uint8_t bpp;
 
 static uint8_t checked = 0;
 
-static checksupportedmodes() {
+static void checksupportedmodes() {
   int i;
   
   checked = 1;
@@ -101,14 +101,20 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
         case 16: vid_mode = 18; break;
         case 15: vid_mode = 17; break;
       }
-  if (vga_setmode(vid_mode) == -1)
+  if (vga_setmode(vid_mode) == -1){
+    printf("vo_svga: vga_setmode(%d) failed.\n",vid_mode);
     return(1); // error
-  if (gl_setcontextvga(vid_mode))
+  }
+  if (gl_setcontextvga(vid_mode)){
+    printf("vo_svga: gl_setcontextvga(%d) failed.\n",vid_mode);
     return(1); // error
+  }
   screen = gl_allocatecontext();
   gl_getcontext(screen);
-  if (gl_setcontextvgavirtual(vid_mode))
+  if (gl_setcontextvgavirtual(vid_mode)){
+    printf("vo_svga: gl_setcontextvgavirtual(%d) failed.\n",vid_mode);
     return(1); // error
+  }
   virt = gl_allocatecontext();
   gl_getcontext(virt);
   gl_setcontext(virt);
