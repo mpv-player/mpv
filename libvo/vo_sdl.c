@@ -1242,10 +1242,8 @@ static void check_events (void)
                                 case SDLK_GREATER: mplayer_put_key('>'); break;
                                 case SDLK_ASTERISK:
 				case SDLK_KP_MULTIPLY:
-				case SDLK_w: mplayer_put_key('*'); break;
 				case SDLK_SLASH:
 				case SDLK_KP_DIVIDE:
-                                case SDLK_s: mplayer_put_key('/'); break;
 				default: break;
 				}
 			break;
