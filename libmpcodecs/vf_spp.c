@@ -478,7 +478,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
                     mpi->w,mpi->h);
                 vf_clone_mpi_attributes(dmpi, mpi);
         }else{
-           dmpi=mpi;
+           dmpi=vf->dmpi;
         }
 
         vf->priv->mpeg2= mpi->qscale_type;
