@@ -584,6 +584,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Cache si/no"
 #define MSGTR_PREFERENCES_CacheSize "Tamaño de Cache: "
 #define MSGTR_PREFERENCES_LoadFullscreen "Empezar en pantalla completa"
+#define MSGTR_PREFERENCES_SaveWinPos "Guardar posición de la ventana"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Detener Salvador de Pantallas de X"
 #define MSGTR_PREFERENCES_PlayBar "Habilitar barra de reproducción"
 #define MSGTR_PREFERENCES_AutoSync "AutoSync si/no"
