@@ -38,6 +38,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "dvdcss/dvdcss.h"
 
@@ -269,7 +272,8 @@ int _dvdcss_title ( dvdcss_t dvdcss, int i_block )
     dvd_title_t *p_title;
     dvd_title_t *p_newtitle;
     dvd_key_t    p_title_key;
-    int          i_ret;
+    int          i_ret=-1;
+    char* key_file=NULL;
 
     if( ! dvdcss->b_scrambled )
     {
@@ -293,8 +297,24 @@ int _dvdcss_title ( dvdcss_t dvdcss, int i_block )
         return 0;
     }
 
+    /* check teh CSS Key cache, if available: */
+    if(dvdcss->psz_cache){
+	int fd;
+	key_file=malloc(strlen(dvdcss->psz_cache)+12+4);
+	sprintf(key_file,"%s/%0.10x",dvdcss->psz_cache,i_block);
+	if ( (fd=open( key_file,O_RDONLY ) ) > 0 ){
+	    if(read(fd, p_title_key, 5)==5){
+		// success!
+		free(key_file); key_file=NULL;
+		i_ret=1;
+		_dvdcss_debug( dvdcss, "key found in cache" );
+	    }
+	    close(fd);
+	}
+    }
+
     /* Crack or decrypt CSS title key for current VTS */
-    i_ret = _dvdcss_titlekey( dvdcss, i_block, p_title_key );
+    if(i_ret<0) i_ret = _dvdcss_titlekey( dvdcss, i_block, p_title_key );
 
     if( i_ret < 0 )
     {
@@ -305,6 +325,16 @@ int _dvdcss_title ( dvdcss_t dvdcss, int i_block )
     {
         _dvdcss_debug( dvdcss, "unencrypted title" );
         /* Still store this in the cache, so we don't need to check again. */
+    }
+
+    /* store in key-cache */
+    if(key_file){
+	int fd;
+	if ( (fd=open( key_file,O_RDWR|O_CREAT|O_EXCL,0644 ) ) > 0 ){
+	    write(fd, p_title_key, 5);
+	    close(fd);
+	}
+	free(key_file);
     }
 
     /* Find our spot in the list */
@@ -1437,7 +1467,7 @@ static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
         return 1;
     }
 
-    if( i_encrypted == 0 )
+    if( i_encrypted == 0 && i_reads>0 )
     {
         memset( p_titlekey, 0, KEY_SIZE );
         _dvdcss_debug( dvdcss, "file was unscrambled" );

@@ -38,6 +38,7 @@ struct dvdcss_s
     int          b_ioctls;
     int          b_scrambled;
     dvd_title_t *p_titles;
+    char *	 psz_cache;
 
     /* Error management */
     char * psz_error;

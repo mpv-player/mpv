@@ -117,6 +117,8 @@
  */
 char * dvdcss_interface_2 = VERSION;
 
+char * dvdcss_cache_dir = NULL;
+
 /**
  * \brief Open a DVD device or directory and return a dvdcss instance.
  *
@@ -164,6 +166,7 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
     dvdcss->i_method = DVDCSS_METHOD_KEY;
     dvdcss->b_debug = 0;
     dvdcss->b_errors = 0;
+    dvdcss->psz_cache = NULL;
 
     /*
      *  Find verbosity from DVDCSS_VERBOSE environment variable
@@ -207,6 +210,8 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
             return NULL;
         }
     }
+
+    if(!dvdcss_cache_dir) dvdcss_cache_dir = getenv( "DVDCSS_CACHE" );
 
     /*
      *  Open device
@@ -260,6 +265,46 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
         _dvdcss_raw_open( dvdcss, psz_raw_device );
     }
 #endif
+
+    /* if the CACHE is enabled, extract some unique disc ID */
+    if(dvdcss_cache_dir){
+	char* disc_id=NULL;
+	char title_name[64];
+	char sector[DVDCSS_BLOCK_SIZE];
+	// 32768+40  -> disc title (32 uppercase chars)
+	// 32768+813 -> disc manufacturing date + serial no (16 digit number)
+	_dvdcss_seek( dvdcss, 32768/DVDCSS_BLOCK_SIZE);
+	if(_dvdcss_read( dvdcss, sector, 1) == 1){
+	    // check disc title first:
+	    char* title_name=&sector[40];
+	    int i=31;
+	    while(i>=0 && title_name[i]<=32) i--;
+	    title_name[i+1]=0;
+	    if(strlen(title_name)>5){
+		disc_id=strdup(title_name);
+	    } else {
+		// use disc date+serial:
+		title_name=&sector[813];
+		title_name[16]=0;
+	        for ( i=0;i<16;i++ )
+		    if ( ( title_name[i] < '0' )||( title_name[i] > '9' ) ){
+		        disc_id=malloc(16+4);
+	                sprintf( disc_id,"%0.2X%0.2X%0.2X%0.2X%0.2X%0.2X%0.2X%0.2X",title_name[0],title_name[1],title_name[2],title_name[3],title_name[4],title_name[5],title_name[6],title_name[7] );
+			break;
+		    }
+		if(!disc_id) disc_id=strdup(title_name);
+	    }
+	    if(disc_id){
+		// yeah, we have a disc name/id, let's set up cache path:
+		char* dir;
+		dvdcss->psz_cache = malloc(strlen(dvdcss_cache_dir)+strlen(disc_id)+4);
+		sprintf(dvdcss->psz_cache,"%s/%s",dvdcss_cache_dir,disc_id);
+		mkdir( dvdcss->psz_cache,493 );
+		free(disc_id);
+		fprintf(stderr,"Using CSS Key-cache dir: %s\n",dvdcss->psz_cache);
+	    }
+	}
+    }
 
     return dvdcss;
 }
