@@ -10,6 +10,7 @@
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
+#include <stdlib.h>
 #include "parse_mp4.h"
 #include "mp_msg.h"
 #include "stream.h"
