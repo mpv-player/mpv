@@ -1,16 +1,11 @@
 <HTML>
 
 <HEAD>
-<STYLE TYPE="text/css">
-       .text
-               {font-family    :       Verdana, Arial, Helvetica, sans-serif;
-               font-size       :       14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
 
 <BODY BGCOLOR=white>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=2.3.1>2.3.1. Video Ausgabe-Geräte</A></B></P>
 
@@ -453,19 +448,19 @@ auch möglicherweise. Danke!</P>
 
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT CLASS="text">Es gibt einige Commandline-Optionen für SDL:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-vo sdl:name</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">
-wählt den zu verwendenden Video Treiber aus (z.B. aalib, dga, x11)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-ao sdl:name</TD><TD></TD><TD><FONT CLASS="text">wählt den zu verwendenden Audio Treiber aus (z.B. dsp,
+<TD COLSPAN=4><P><B>Es gibt einige Commandline-Optionen für SDL:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>-vo sdl:name</TD><TD>&nbsp;&nbsp;</TD>
+<TD>wählt den zu verwendenden Video Treiber aus (z.B. aalib, dga, x11)</TD><TR>
+<TD></TD><TD>-ao sdl:name</TD><TD></TD><TD>wählt den zu verwendenden Audio Treiber aus (z.B. dsp,
 esd, arts)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-noxv</TD><TD></TD><TD><FONT CLASS="text">schaltet die Xvideo Hardwarebeschleunigung aus</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-forcexv</TD><TD></TD><TD><FONT CLASS="text">versucht die Xvideo-Beschleunigung zu erzwingen</TD><TR>
+<TD></TD><TD>-noxv</TD><TD></TD><TD>schaltet die Xvideo Hardwarebeschleunigung aus</TD><TR>
+<TD></TD><TD>-forcexv</TD><TD></TD><TD>versucht die Xvideo-Beschleunigung zu erzwingen</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT CLASS="text">SDL-Tasten:</B></P></TD><TR>
+<TD COLSPAN=4><P><B>SDL-Tasten:</B></P></TD><TR>
 
-<TD></TD><TD><FONT CLASS="text">F</TD><TD></TD><TD><FONT CLASS="text">wählt Vollbild-/Fenster-Modus</TD><TR>
-<TD></TD><TD><FONT CLASS="text">C</TD><TD></TD><TD><FONT CLASS="text">verfügbare Zyklen beim Vollbild-Modus</TD><TR>
-<TD></TD><TD><FONT CLASS="text">W/S</TD><TD></TD><TD><FONT CLASS="text">zusammenhängend mit * und / (Mixer-Kontrolle)</TD><TR>
+<TD></TD><TD>F</TD><TD></TD><TD>wählt Vollbild-/Fenster-Modus</TD><TR>
+<TD></TD><TD>C</TD><TD></TD><TD>verfügbare Zyklen beim Vollbild-Modus</TD><TR>
+<TD></TD><TD>W/S</TD><TD></TD><TD>zusammenhängend mit * und / (Mixer-Kontrolle)</TD><TR>
 
 </TABLE></P>
 
@@ -500,13 +495,13 @@ DOS-Startdiskette oder was auch immer. Und vergiss nicht dein UniVBE zu registri
 <P>Bei der FBdev Ausgabe können einige zusätzliche Parameter verwendet werden:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-fb</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">
-spezifiziert den zu verwendenden Framebuffer (/dev/fb0)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-fbmode</TD><TD></TD><TD><FONT CLASS="text">Modus das verwendet werden soll (siehe /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-fbmodeconfig</TD><TD></TD><TD><FONT CLASS="text">Konfigurationsdatei für das Modus (standard ist /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT CLASS="text">WICHTIGE Werte, siehe example.conf</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-monitor_vfreq</TD><TD></TD><TR>		
-<TD></TD><TD><FONT CLASS="text">-monitor_dotclock</TD><TD></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>-fb</TD><TD>&nbsp;&nbsp;</TD>
+<TD>spezifiziert den zu verwendenden Framebuffer (/dev/fb0)</TD><TR>
+<TD></TD><TD>-fbmode</TD><TD></TD><TD>Modus das verwendet werden soll (siehe /etc/fb.modes)</TD><TR>
+<TD></TD><TD>-fbmodeconfig</TD><TD></TD><TD>Konfigurationsdatei für das Modus (standard ist /etc/fb.modes)</TD><TR>
+<TD></TD><TD>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3>WICHTIGE Werte, siehe example.conf</TD><TR>
+<TD></TD><TD>-monitor_vfreq</TD><TD></TD><TR>		
+<TD></TD><TD>-monitor_dotclock</TD><TD></TD><TR>
 </TABLE></P>
 
 <P>Wenn du zu einem speziellen Modus wechseln willst, verwende</P>
@@ -622,29 +617,29 @@ Wenn ./configure erkennt, dass aalib installiert ist, wird der aalib libvo
 Treiber eingebaut.</P>
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT CLASS="text">Du kannst einige Tasten verwenden im AA Fenster, um Rendering-Optionen zu ändern:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">1</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">verringert Kontrast</TD><TR>
-<TD></TD><TD><FONT CLASS="text">2</TD><TD></TD><TD><FONT CLASS="text">erhöht Kontrast</TD><TR>
-<TD></TD><TD><FONT CLASS="text">3</TD><TD></TD><TD><FONT CLASS="text">verringert Schärfe</TD><TR>
-<TD></TD><TD><FONT CLASS="text">4</TD><TD></TD><TD><FONT CLASS="text">erhöht Schärfe</TD><TR>
-<TD></TD><TD><FONT CLASS="text">5</TD><TD></TD><TD><FONT CLASS="text">schaltet schnelles Rendern ein/aus</TD><TR>
-<TD></TD><TD><FONT CLASS="text">6</TD><TD></TD><TD><FONT CLASS="text">wählt das Farbmischungs-Modus (keine, error dithering, floyd steinberg)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">7</TD><TD></TD><TD><FONT CLASS="text">invertiert Bild</TD><TR>
-<TD></TD><TD><FONT CLASS="text">a</TD><TD></TD><TD><FONT CLASS="text">wechselt zwischen AA und MPlayer Kontrolle)</TD><TR>
+<TD COLSPAN=4><P><B>Du kannst einige Tasten verwenden im AA Fenster, um Rendering-Optionen zu ändern:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>1</TD><TD>&nbsp;&nbsp;</TD><TD>verringert Kontrast</TD><TR>
+<TD></TD><TD>2</TD><TD></TD><TD>erhöht Kontrast</TD><TR>
+<TD></TD><TD>3</TD><TD></TD><TD>verringert Schärfe</TD><TR>
+<TD></TD><TD>4</TD><TD></TD><TD>erhöht Schärfe</TD><TR>
+<TD></TD><TD>5</TD><TD></TD><TD>schaltet schnelles Rendern ein/aus</TD><TR>
+<TD></TD><TD>6</TD><TD></TD><TD>wählt das Farbmischungs-Modus (keine, error dithering, floyd steinberg)</TD><TR>
+<TD></TD><TD>7</TD><TD></TD><TD>invertiert Bild</TD><TR>
+<TD></TD><TD>a</TD><TD></TD><TD>wechselt zwischen AA und MPlayer Kontrolle)</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT CLASS="text">Die folgenden Kommandozeilen-Optionen können verwendet werden:</B></P></TD><TR>
+<TD COLSPAN=4><P><B>Die folgenden Kommandozeilen-Optionen können verwendet werden:</B></P></TD><TR>
 
-<TD></TD><TD><FONT CLASS="text">-aaosdcolor=V</TD><TD></TD><TD><FONT CLASS="text">ändert OSD-Farbe</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aasubcolor=V</TD><TD></TD><TD><FONT CLASS="text">ändert Untertitel-Farbe</TD><TR>
-<TD COLSPAN=3></TD><TD><P><I><FONT CLASS="text">wobei V sein kann: (0/Normal, 1/Dunkel, 2/Fett, 3/Fettschift, 4/Rückwärts, 5/Spezial)</P></TD><TR>
+<TD></TD><TD>-aaosdcolor=V</TD><TD></TD><TD>ändert OSD-Farbe</TD><TR>
+<TD></TD><TD>-aasubcolor=V</TD><TD></TD><TD>ändert Untertitel-Farbe</TD><TR>
+<TD COLSPAN=3></TD><TD><P><I>wobei V sein kann: (0/Normal, 1/Dunkel, 2/Fett, 3/Fettschift, 4/Rückwärts, 5/Spezial)</P></TD><TR>
 	      
-<TD COLSPAN=4><P><B><FONT CLASS="text">AAlib selbst unterstützt eine größe Summe von Optionen.
+<TD COLSPAN=4><P><B>AAlib selbst unterstützt eine größe Summe von Optionen.
 Hier einige wichtige:</P></B></TD><TR>
 
-<TD></TD><TD><FONT CLASS="text">-aadriver</TD><TD></TD><TD><FONT CLASS="text">setzt erforderlichen AA Treiber (X11, curses, linux)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aaextended</TD><TD></TD><TD><FONT CLASS="text">verwende alle 256 Zeichen</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aaeight</TD><TD></TD><TD><FONT CLASS="text">verwendet acht-bit ASCII</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aahelp</TD><TD></TD><TD><FONT CLASS="text">gibt alle AAlib-Optionen aus</TD><TR>
+<TD></TD><TD>-aadriver</TD><TD></TD><TD>setzt erforderlichen AA Treiber (X11, curses, linux)</TD><TR>
+<TD></TD><TD>-aaextended</TD><TD></TD><TD>verwende alle 256 Zeichen</TD><TR>
+<TD></TD><TD>-aaeight</TD><TD></TD><TD>verwendet acht-bit ASCII</TD><TR>
+<TD></TD><TD>-aahelp</TD><TD></TD><TD>gibt alle AAlib-Optionen aus</TD><TR>
 </TABLE></P>
 
 <P>HINWEIS: Das Rendering ist sehr CPU-Intersiv, besonders bei AA-on-X (AAlib
@@ -718,24 +713,23 @@ fbdev usw.). Dieser Treiber kann vom <B>Textmodus</B> aus betrieben werden.<BR>
 
 <P>
 <TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT CLASS="text">Diese Commandline-Parameter sind zur Zeit verfügbar für VESA:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-vo vesa:opts</TD>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">
-  erkennt momentan: <B>dga</B> um den DGA-Modus zu erzwingen und <B>nodga</B> um ihn zu deaktivieren. Hinweis: Du kannst diese
+<TD COLSPAN=4><P><B>Diese Commandline-Parameter sind zur Zeit verfügbar für VESA:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>-vo vesa:opts</TD>
+<TD>&nbsp;&nbsp;</TD><TD>erkennt momentan: <B>dga</B> um den DGA-Modus zu erzwingen und <B>nodga</B> um ihn zu deaktivieren. Hinweis: Du kannst diese
   Parameter auslassen um den DGA-Modus <B>automatisch</B> erkennen zu können. (In Zukunft wirst du Parameter wie Wiederholrate,
   Interlacing, Doublescan und so weiter einstellen. Beispiele: i43,  85,  d100)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-screenw, -screenh, -bpp</TD>
-  <TD></TD><TD><FONT CLASS="text">verwendet von Anwender definierte Modie</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-x, -y</TD>
-<TD></TD><TD><FONT CLASS="text">setzt Prescaling-Auflösung</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-zoom</TD>
-<TD></TD><TD><FONT CLASS="text">aktiviert Prescaling</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-fs</TD>
-<TD></TD><TD><FONT CLASS="text">Vollbild-Scaling</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-fs -zoom</TD>
-<TD></TD><TD><FONT CLASS="text">Vollbild-Scaling des prescalten Bildes</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-double</TD>
-<TD></TD><TD><FONT CLASS="text">aktiviert den Doppelpuffer-Modus (double buffering). 
+<TD></TD><TD>-screenw, -screenh, -bpp</TD>
+  <TD></TD><TD>verwendet von Anwender definierte Modie</TD><TR>
+<TD></TD><TD>-x, -y</TD>
+<TD></TD><TD>setzt Prescaling-Auflösung</TD><TR>
+<TD></TD><TD>-zoom</TD>
+<TD></TD><TD>aktiviert Prescaling</TD><TR>
+<TD></TD><TD>-fs</TD>
+<TD></TD><TD>Vollbild-Scaling</TD><TR>
+<TD></TD><TD>-fs -zoom</TD>
+<TD></TD><TD>Vollbild-Scaling des prescalten Bildes</TD><TR>
+<TD></TD><TD>-double</TD>
+<TD></TD><TD>aktiviert den Doppelpuffer-Modus (double buffering). 
   (Nur im DGA Modus möglich). Sollte langsamer sein als single buffering, hat jedoch keine Flimmereffekte.</TD><TR>
 </TABLE>
 </P>

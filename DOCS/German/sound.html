@@ -1,16 +1,11 @@
 <HTML>
 
 <HEAD>
-<STYLE>
-       .text
-               {font-family    :       Verdana, Arial, Helvetica, sans-serif;
-               font-size       :       14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
 
 <BODYBGCOLOR=white>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=2.3.2>2.3.2. Audio Ausgabe-Geräte</A></B></P>
 
@@ -19,15 +14,15 @@ zur Zeit diese Treiber:</P>
 
 <TABLE BORDER=0>
 
-<TR><TD COLSPAN=4><P><B><FONT CLASS="text">Allgemein:</B></P></TD></TR>
+<TR><TD COLSPAN=4><P><B>Allgemein:</B></P></TD></TR>
 
-<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">oss</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">OSS (ioctl) Treiber (unterstützt Hardware AC3-Durchgabe)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">sdl</TD><TD></TD><TD><FONT CLASS="text">SDL Treiber (unterstützt Up-/Downsampling, <B>ESD</B>, <B>ARTS</B> usw.)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">nas</TD><TD></TD><TD><FONT CLASS="text">NAS (Network Audio System) Treiber</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">alsa5</TD><TD></TD><TD><FONT CLASS="text">ALSA 0.5 Treiber</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">alsa9</TD><TD></TD><TD><FONT CLASS="text">ALSA 0.9 Treiber (funkioniert, macht aber Probleme -> verwende OSS) (unterstützt Hardware AC3-Durchgabe)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">sun</TD><TD></TD><TD><FONT CLASS="text">SUN Audio-Treiber (/dev/audio) für BSD und Solaris8 Anwender</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">arts</TD><TD></TD><TD><FONT CLASS="text">ARTS Treiber (hauptsächlich für KDE Benutzer)</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS (ioctl) Treiber (unterstützt Hardware AC3-Durchgabe)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL Treiber (unterstützt Up-/Downsampling, <B>ESD</B>, <B>ARTS</B> usw.)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS (Network Audio System) Treiber</TD></TR>
+<TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>ALSA 0.5 Treiber</TD></TR>
+<TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>ALSA 0.9 Treiber (funkioniert, macht aber Probleme -> verwende OSS) (unterstützt Hardware AC3-Durchgabe)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>SUN Audio-Treiber (<CODE>/dev/audio</CODE>) für BSD und Solaris8 Anwender</TD></TR>
+<TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>ARTS Treiber (hauptsächlich für KDE Benutzer)</TD></TR>
 </TABLE>
 
 <P>Fakt ist, dass Linux-Soundkartentreiber Kompatibilitätsprobleme haben.
@@ -55,71 +50,71 @@ ansonsten wirst du weder Video noch Ton haben.</P>
 <P><B><A NAME=2.3.2.1>2.3.2.1. Soundkarten Erfahrungen, Empfehlungen</A></B></P>
 
 <TABLE BORDER=0 WIDTH=100%>
-<TR><TD COLSPAN=3><B><FONT CLASS="text">VIA Onboard-Chipset (via82cxxx) nur 48Khz</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">Treiber:</TD><TD><FONT CLASS="text"> siehe 
+<TR><TD COLSPAN=3><B>VIA Onboard-Chipset (via82cxxx) nur 48Khz</B></TD><TR>
+<TD></TD><TD>Treiber:</TD><TD> siehe 
   <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">hier</A></TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Aureal Vortex 2</B></TD><TR>
-<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD><FONT CLASS="text">OSS/Free:</TD><TD><FONT CLASS="text">kein Treiber</TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">kein Treiber</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Treiber:</TD><TD><FONT CLASS="text"><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
-<TD></TD><TD><FONT CLASS="text">Treiber2:</TD><TD><FONT CLASS="text"> von <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">hier</A><BR>
+<TD COLSPAN=3><B>Aureal Vortex 2</B></TD><TR>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS/Free:</TD><TD>kein Treiber</TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>kein Treiber</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+<TD></TD><TD>Treiber:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
+<TD></TD><TD>Treiber2:</TD><TD> von <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">hier</A><BR>
   (<I>Buffergröße erhöht auf 32k</I>)</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">GUS PnP</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">kein Treiber</TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS/Pro:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>GUS PnP</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>kein Treiber</TD><TR>
+<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">SB Live!</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">Analog OK, SP/DIF funktioniert nicht</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">Beide OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">192</TD><TR>
+<TD COLSPAN=3><B>SB Live!</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>Analog OK, SP/DIF funktioniert nicht</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>Beide OK</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>192</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">SB AWE 64</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">max 44kHz</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">48kHz schlechte Soundqualität</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>SB AWE 64</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>max 44kHz</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>48kHz schlechte Soundqualität</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Gravis UltraSound ACE</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">nicht OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>nicht OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Gravis UltraSound MAX</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">ESS 688</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>ESS 688</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">C-Media Karten (welche?)</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">nicht OK (zischen) (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
+<TD COLSPAN=3><B>C-Media Karten (welche?)</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>nicht OK (zischen) (?)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Yamaha Karten (*ymf*)</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">nicht OK (?) (vielleicht <CODE>-ao sdl</CODE>)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK, nur mit ALSA 0.5 mit OSS-Emulation <B>UND</B> <CODE>-ao sdl</CODE> (!) (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
+<TD COLSPAN=3><B>Yamaha Karten (*ymf*)</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>nicht OK (?) (vielleicht <CODE>-ao sdl</CODE>)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK, nur mit ALSA 0.5 mit OSS-Emulation <B>UND</B> <CODE>-ao sdl</CODE> (!) (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Karten mit envy24 Chips (wie Terratec EWS88MT)</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">?</TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS/Pro:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">?</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
+<TD COLSPAN=3><B>Karten mit envy24 Chips (wie Terratec EWS88MT)</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>?</TD><TR>
+<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>?</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">PC Speaker oder DAC</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK (verwende den SDL-Treiber: <CODE>-ao sdl</CODE>)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">kein Treiber</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">der Treiber emuliert 44.1, möglicherweise mehr</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Treiber:</TD><TD><FONT CLASS="text"><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD>
+<TD COLSPAN=3><B>PC Speaker oder DAC</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK (verwende den SDL-Treiber: <CODE>-ao sdl</CODE>)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>kein Treiber</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>der Treiber emuliert 44.1, möglicherweise mehr</TD><TR>
+<TD></TD><TD>Treiber:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD>
 </TABLE>
 
 <UL>

@@ -1,16 +1,11 @@
 <HTML>
 
 <HEAD>
-<STYLE>
-       .text
-               {font-family    :       Verdana, Arial, Helvetica, sans-serif;
-               font-size       :       14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
 
 <BODY BGCOLOR=WHITE>
 
-<FONT CLASS="text">
 
 
 <P><B><A NAME=2.1>2.1. Unterstützte Formate</A></B></P>
@@ -173,9 +168,23 @@ Bildern kurz nach dem Suchen führt.</P>
 <P><B><A NAME=2.1.1.7>2.1.1.7. RealMedia (RM) Dateien</A></B></P>
 
 <P>Ja, <B>MPlayer</B> kann RealMedia (.rm) Dateien lesen (demuxen). Suchen (seeking)
-funktioniert (Das Format unterstüzt Keyframes). Hier ist die Liste der unterstützten 
+funktioniert, muss jedoch durch die <CODE>-forceidx</CODE> Option erzwungen werden
+(Das Format unterstüzt Keyframes). Hier ist die Liste der unterstützten 
 <A HREF="codecs.html#2.2.1.8">RealVideo</A> und 
 <A HREF="codecs.html#2.2.2.5">RealAudio</A> Codecs.
+
+<P>Es wird empfohlen RealPlayer8 oder RealONE herunterzuladen, da
+<B>MPlayer</B> deren Libraries zur Dekodierung von RealVideo 2.0 oder
+RealVideo 3.0 Dateien verwenden kann! Alles was es zu tun gibt ist folgendes:</P>
+<P>
+&nbsp;&nbsp;<CODE>ln -s /usr/local/RealPlayer8/Codecs $PREFIX/real</CODE>
+</P>
+
+<P>HINWEIS: RealPlayer's Installations-Pfad kann von dem obrigen abweichen,
+es wird gebeten dies dementsprechend zu überprüfen.</P>
+
+<P>HINWEIS: RealPlayer Libraries <B>können momentan nur auf der x86 Plattform und
+Linux oder FreeBSD verwendet werden</B>!</P>
 
 
 <P><B><A NAME=2.1.1.8>2.1.1.8. NuppelVideo Dateien</A></B></P>

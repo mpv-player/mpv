@@ -1,16 +1,11 @@
 <HTML>
 
 <HEAD>
-<STYLE>
-       .text
-               {font-family    :       Verdana, Arial, Helvetica, sans-serif;
-               font-size       :       14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
 
 <BODY BGCOLOR=white>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=2.4>2.4.  Encodieren mit MEncoder</A></B></P>
 
@@ -104,16 +99,12 @@ besitzen. Wenn dies das erst Mal ist das du davon hörst, solltest du einige Guid
 <P>
   <TABLE>
   <TR>
-    <TD><FONT CLASS="text">
-      <CODE>rm frameno.avi</CODE></TD>
-    <TD><FONT CLASS="text">
-      <B>Lösche störende temporäre Dateien</B></TD>
+    <TD><CODE>rm frameno.avi</CODE></TD>
+    <TD><B>Lösche störende temporäre Dateien</B></TD>
   </TR>
   <TR>
-    <TD><FONT CLASS="text">
-      <CODE>mencoder &lt;datei/DVD&gt; -ovc frameno -o
-        frameno.avi</CODE></TD>
-    <TD><FONT CLASS="text">
+    <TD><CODE>mencoder &lt;datei/DVD&gt; -ovc frameno -o frameno.avi</CODE></TD>
+    <TD>
       <B><U>Erster Durchlauf</U> : Eine Audio-only avi Datei wird erzeugt, welche
       NUR den verlangten Audiostream enthält. Vergiss nicht <CODE>-lameopts</CODE> zu setzen,
       wenn du sie setzen musst. Wenn du einen langen Film encodierst, zeigt MEncoder
@@ -121,20 +112,14 @@ besitzen. Wenn dies das erst Mal ist das du davon hörst, solltest du einige Guid
       wenn er diesen Durchlauf beendet hat.</B></TD>
   </TR>
   <TR>
-    <TD><FONT CLASS="text">
-      <CODE>mencoder &lt;datei/DVD&gt; -oac copy -pass 1
-        -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT CLASS="text">
-      <B><U>Zweiter Durchlauf</U> : Integriert den ersten Durchlauf der DivX4 Video-Encodierung. 
+    <TD><CODE>mencoder &lt;datei/DVD&gt; -oac copy -pass 1 -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+    <TD><B><U>Zweiter Durchlauf</U> : Integriert den ersten Durchlauf der DivX4 Video-Encodierung. 
       Optional kann die Video-Bitrate, welche am Ende des letzten Durchlaufes gezeigt wurde, 
       hier definiert werden.</B></TD>
   </TR>
   <TR>
-    <TD><FONT CLASS="text">
-      <CODE>mencoder &lt;datei/DVD&gt; -oac copy -pass 2
-        -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT CLASS="text">
-      <B><U>Dritter Durchlauf</U> : Integriert den zweiten Durchlauf der DivX4 Video Encodierung. 
+    <TD><CODE>mencoder &lt;datei/DVD&gt; -oac copy -pass 2 -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+    <TD><B><U>Dritter Durchlauf</U> : Integriert den zweiten Durchlauf der DivX4 Video Encodierung. 
       Optional kann die Video-Bitrate, welche am Ende des letzten Durchlaufes gezeigt wurde, 
       In diesem Durchlauf wird der Ton vom <CODE>frameno.avi</CODE> in die endgültige Datei
       eingefügt und es ist alles bereit!</B></TD>
@@ -309,41 +294,28 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
         
 <TABLE BORDER=1>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-ss</I> Zeit</TD>
-  <TD><FONT CLASS="text">
-    Startet die Encodierung von der gegebenen Zeit an (er kann nur von Keyframes aus starten !)
-  </TD>
+  <TD><I>-ss</I> Zeit</TD>
+  <TD>Startet die Encodierung von der gegebenen Zeit an (er kann nur von Keyframes aus starten !)</TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-endpos</I> Zeit / byte-Position</TD>
-  <TD><FONT CLASS="text">
-    Stoppt die Encodierung zu der gegebenen Zeit / byte-Position. Lies die Manpage für Beispiele !
-  </TD>
+  <TD><I>-endpos</I> Zeit / byte-Position</TD>
+  <TD>Stoppt die Encodierung zu der gegebenen Zeit / byte-Position. Lies die Manpage für Beispiele !</TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-o</I> Dateiname</TD>
-  <TD><FONT CLASS="text">
-    definiert den Namen der Ausgabedatei
-  </TD>
+  <TD><I>-o</I> Dateiname</TD>
+  <TD>definiert den Namen der Ausgabedatei</TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-sws</I> 0-2</TD>
-  <TD><FONT CLASS="text">
-    Arte der Scaling-Methode<BR>
+  <TD><I>-sws</I> 0-2</TD>
+  <TD>Arte der Scaling-Methode<BR>
     &nbsp;&nbsp;0 - fast bilinear<BR>
     &nbsp;&nbsp;1 - bilinear<BR>
     &nbsp;&nbsp;2 - bicubic (beste Qualität)<BR>
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-ovc</I> Codecname</TD>
-  <TD><FONT CLASS="text">
-    Encodiert mit dem angegebenen Codec (Codecnamen sind von codecs.conf). Beispiele:<BR>
+  <TD><I>-ovc</I> Codecname</TD>
+  <TD>Encodiert mit dem angegebenen Codec (Codecnamen sind von codecs.conf). Beispiele:<BR>
     &nbsp;&nbsp;<B>help</B> - zeigt eine Liste der verfügbaren Codecs an<BR>
     &nbsp;&nbsp;<B>rawrgb</B> - ?<BR>
     &nbsp;&nbsp;<B>copy</B> - kein Encodieren, kopiert den Stream (nur von AVI/ASF zur Zeit)<BR>
@@ -353,10 +325,8 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-oac</I> Codecname</TD>
-  <TD><FONT CLASS="text">
-    Encodiert mit dem angegebenen Codec (Codecnamen sind von codecs.conf). Beispiele:<BR>
+  <TD><I>-oac</I> Codecname</TD>
+  <TD>Encodiert mit dem angegebenen Codec (Codecnamen sind von codecs.conf). Beispiele:<BR>
     &nbsp;&nbsp;<B>help</B> - zeigt eine Liste der verfügbaren Codecs an<BR>
     &nbsp;&nbsp;<B>copy</B> - kein Encodieren, kopiert den Stream (nur von AVI/ASF zur Zeit)<BR>
     &nbsp;&nbsp;<B>pcm</B> - encodierten zu einem unkomprimiertem PCM<BR>
@@ -364,10 +334,8 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-mf</I> Optionen für mehrere Eingangsdateien</TD>
-  <TD><FONT CLASS="text">
-    Wenn von mehreren JPEG-Dateien konvertiert wird, kann man folgende Unteroptionen
+  <TD><I>-mf</I> Optionen für mehrere Eingangsdateien</TD>
+  <TD>Wenn von mehreren JPEG-Dateien konvertiert wird, kann man folgende Unteroptionen
     angeben:<BR>
     &nbsp;&nbsp;<B>on</B> - aktiviert die Unterstützung für mehrere Eingangsdateien<BR>
     &nbsp;&nbsp;<B>w</B>=&lt;Wert&gt; - Breite der Ausgabedatei<BR>
@@ -379,10 +347,8 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
 </TR>
 
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-divx4opts</I></TD>
-  <TD><FONT CLASS="text">
-    Wenn du zu DivX4 encodierst kannst du hier die Parameter angeben, wie z.B.:<BR>
+  <TD><I>-divx4opts</I></TD>
+  <TD>Wenn du zu DivX4 encodierst kannst du hier die Parameter angeben, wie z.B.:<BR>
     &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
     Allgemeine Optionen: <B>(Lies in der Manpage für die vollständige Liste!)</B><BR>
     &nbsp;&nbsp;<B>help</B> - zeigt die Hilfe<BR>
@@ -392,10 +358,8 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-lavcopts</I></TD>
-  <TD><FONT CLASS="text">
-     Wenn du mit der libavcodec encodierst, kannst du deren Parameter hier angeben, wie:<BR>
+  <TD><I>-lavcopts</I></TD>
+  <TD>Wenn du mit der libavcodec encodierst, kannst du deren Parameter hier angeben, wie:<BR>
      &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
      Häufige Optionen: <B>(Lies in der Manpage für die vollständige Liste!)</B><BR>
      &nbsp;&nbsp;<B>help</B> - zeigt die Hilfe<BR>
@@ -406,10 +370,8 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-lameopts</I></TD>
-  <TD><FONT CLASS="text">
-    Wenn du zu MP3 mit libmp3lame encodierst kannst du hier die Parameter angeben, wie z.B.:<BR>
+  <TD><I>-lameopts</I></TD>
+  <TD>Wenn du zu MP3 mit libmp3lame encodierst kannst du hier die Parameter angeben, wie z.B.:<BR>
     &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
     &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>
     Allgemeine Optionen: <B>(Lies in der Manpage für die vollständige Liste!)</B><BR>
@@ -449,6 +411,5 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
 
 <P><B><I>Lies die MEncoder Manpage</I> </B>um alle verfügbaren Optionen zu sehen.
 <P>
-</FONT>
 </BODY>
 </HTML>

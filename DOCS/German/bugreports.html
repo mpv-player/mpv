@@ -1,16 +1,11 @@
 <HTML>
 
 <HEAD>
-<STYLE>
-       .text
-               {font-family    :       Verdana, Arial, Helvetica, sans-serif;
-               font-size       :       14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
 
 <BODY BGCOLOR=white>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=C>Anhang C - Wie man einen Fehler berichtet</A></B></P>
 
@@ -44,7 +39,7 @@ nicht, dass dein Bericht folgendes beinhalten sollte:</P>
 
 <P><B>Was soll berichtet werden?</B></P>
 
-<P><B><I>Systeminformationen:</I></B></P>
+<P><B>Systeminformationen:</B></P>
 
 <UL>
 <LI>Deine Linux Distribution oder Betriebssystem:<BR>
@@ -65,7 +60,7 @@ nicht, dass dein Bericht folgendes beinhalten sollte:</P>
     <CODE>as --version</CODE>
 </UL>
 
-<P><B><I>Hardware &amp; Treiber:</I></B></P>
+<P><B>Hardware &amp; Treiber:</B></P>
 
 <UL>
 <LI>CPU Infos (dies funktioniert nur mit Linux):<BR>
@@ -93,7 +88,7 @@ nicht, dass dein Bericht folgendes beinhalten sollte:</P>
 
 <P><B>Bei Kompilierungsfehlern/-problemen:</B></P>
 
-<P><B><I>Bitte schicke diese Dateien mit:</I></B></P>
+<P><B>Bitte schicke diese Dateien mit:</B></P>
 <UL>
 <LI>configure.log
 <LI>config.h
@@ -103,11 +98,15 @@ nicht, dass dein Bericht folgendes beinhalten sollte:</P>
 
 <P><B>Bei Wiedergabeproblemen:</B></P>
 
-<P><B><I>Bitte gib die Ausgabe von MPlayer in Ausführlichkeits-Stufe 1 (-v) mit an:</I></B></P>
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [Optionen] Dateiname &amp;&gt; mplayer.log</CODE></P>
+<P>Bitte gib die Ausgabe von MPlayer in Ausführlichkeits-Stufe 1, aber denk daran
+<B>die Ausgabe nicht zu kürzen</B> wenn diese dem Mail eingefügt wird. Die Entwickler
+benötigen alle Meldungen, um eine geignete Diagnose des Problems durchführen zu können.
+Die Ausgabe kann mit folgendem Befehl in eine Datei geschrieben werden:</P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [Optionen] [Dateiname] &amp;&gt; mplayer.log</CODE></P>
   
-<P><B><I>Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
-  lade die Datei bitte auf</I></B></P>
+<P><B>Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
+  lade die Datei bitte auf</B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;<A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">ftp://mplayerhq.hu/MPlayer/incoming/</A></P>
   Uploade auch eine kleine .txt-Datei mit dem selben Namen wie die Datei 
   (+ .txt Endung), die eine Problembeschreibung zur jeweiligen Datei, die 
@@ -128,7 +127,7 @@ nicht, dass dein Bericht folgendes beinhalten sollte:</P>
 <P>Wenn du ein Speicherabbild (core dump) vom Absturz besitzt, lies beim nächsten
   Paragraph weiter, ansonsten lass ihn aus.</P>
 
-<P><B><I>Wie brauchbare Informationen von einem core dump extrahiert werden können:</I></B></P>
+<P><B>Wie brauchbare Informationen von einem core dump extrahiert werden können:</B></P>
 
 <P>Bitte erzeuge die folgende Befehlsdatei (Command File):</P>
 
@@ -146,7 +145,7 @@ printf "esi=%08lX\n",$esi<BR>
 <P>Dann führe einfach den folgenden Befehl auf der Konsole aus:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=Kommandodatei &gt; mplayer.bug</CODE></P>
 
-<P><B><I>Wie Informationen eines reproduzierbaren Absturzes bewahrt werden können:</I></B></P>
+<P><B>Wie Informationen eines reproduzierbaren Absturzes bewahrt werden können:</B></P>
 <P>Kompiliere MPlayer mit eingeschaltetem Debugging mit:<P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>

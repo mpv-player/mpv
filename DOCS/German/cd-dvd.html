@@ -1,16 +1,11 @@
 <HTML>
 
 <HEAD>
-<STYLE>
-       .text
-               {font-family    :       Verdana, Arial, Helvetica, sans-serif;
-               font-size       :       14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
 
 <BODY BGCOLOR=white>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=4.1>4.1. CD-ROM Laufwerke</A></B></P>
 
@@ -111,46 +106,40 @@ Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
 
 
 <TABLE BORDER=0 WIDTH=100%>
-<TD VALIGN=top><FONT CLASS="text">-dvd &lt;title_id&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">Aktiviert die DVD-Unterstützung und wählt den Titel aus.</TD><TR>
-<TD VALIGN=top><FONT CLASS="text">-chapter &lt;chapter_id&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">Wählt das DVD-Kapitel (Standard: Wiedergabe von Kapitel 1).
+<TD VALIGN=top>-dvd &lt;title_id&gt;&nbsp;</TD>
+<TD>Aktiviert die DVD-Unterstützung und wählt den Titel aus.</TD><TR>
+<TD VALIGN=top>-chapter &lt;chapter_id&gt;&nbsp;</TD>
+<TD>Wählt das DVD-Kapitel (Standard: Wiedergabe von Kapitel 1).
   Beispiel : <CODE>-chapter 5-10</CODE> oder <CODE>-chapter -9</CODE></TD><TR>
-<TD VALIGN=top><FONT CLASS="text">-dvdangle &lt;angle_id&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">Zum Auswählen der Kamera-Perspektive (Standard: 1)</TD><TR>
-<TD VALIGN=top><FONT CLASS="text">-alang &lt;Ländercode&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
-  Der <CODE>Ländercode</CODE> sagt <B>MPlayer</B> welche Sprache bevorzugt werden soll.
+<TD VALIGN=top>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
+<TD>Zum Auswählen der Kamera-Perspektive (Standard: 1)</TD><TR>
+<TD VALIGN=top>-alang &lt;Ländercode&gt;&nbsp;</TD>
+<TD>Der <CODE>Ländercode</CODE> sagt <B>MPlayer</B> welche Sprache bevorzugt werden soll.
   Gib die Option <CODE>-v</CODE> nach den DVD-Optionen an und betrachte die Ausgabe, 
   um eine Liste der verfügbaren Sprachen zu erhalten.<BR>
   Zum Beispiel:<BR>
   &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - versucht zuerst den ungarischen Ton zu finden und spielt
   den englischen Ton, falls es jenen nicht findet.</TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-slang &lt;Ländercode&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
-  Aktiviert die DVD-Untertitel. Der <CODE>Ländercode</CODE> sagt <B>MPlayer</B>,
+<TD VALIGN=top>-slang &lt;Ländercode&gt;&nbsp;</TD>
+<TD>Aktiviert die DVD-Untertitel. Der <CODE>Ländercode</CODE> sagt <B>MPlayer</B>,
   welche Sprache bevorzugt werden soll.
   Gib die Option <CODE>-v</CODE> nach den DVD-Optionen an und betrachte die Ausgabe,
   um eine Liste der verf|gbaren Sprachen zu erhalten.<BR>
   Zum Beispiel:<BR>
   &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - versucht zuerst die ungarischen Untertitel anzuzeigen und zeigt
   die englischen Untertitel, falls es die ungarischen nicht findet.</TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-sid &lt;subtitel_id&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
-  Aktiviert die DVD-Untertitel Ausgabe für einen bestimmten Kanal durch die gegebenen <CODE>subtitel_id</CODE> 
+<TD VALIGN=top>-sid &lt;subtitel_id&gt;&nbsp;</TD>
+<TD>Aktiviert die DVD-Untertitel Ausgabe für einen bestimmten Kanal durch die gegebenen <CODE>subtitel_id</CODE> 
   (Die Werte können von 0-31 sein). Nützlich um z.B. schlecht erstellte DVDs abzuspielen, 
   wo eine Länderangabe den falschen Kanal wählt.</TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-csslib &lt;pfad/dateiname&gt;</TD>
-<TD><FONT CLASS="text">
-  (alte DVD Option) Diese Option wird benützt die Lage von <CODE>libcss.so</CODE> anzugeben.
+<TD VALIGN=top>-csslib &lt;pfad/dateiname&gt;</TD>
+<TD>(alte DVD Option) Diese Option wird benützt die Lage von <CODE>libcss.so</CODE> anzugeben.
 </TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-dvdauth &lt;DVD Gerät (Device)&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
-  (alte DVD Option) Aktiviert die DVD Authentifizierung des angegebenen Gerätes.
+<TD VALIGN=top>-dvdauth &lt;DVD Gerät (Device)&gt;&nbsp;</TD>
+<TD>(alte DVD Option) Aktiviert die DVD Authentifizierung des angegebenen Gerätes.
 </TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-dvdkey &lt;CSS key&gt;</TD>
-<TD><FONT CLASS="text">
-  (alte DVD Option) Wenn keine DVD dekodiert wird, gibt diese Option den CSS Key an welcher benötigt wird
+<TD VALIGN=top>-dvdkey &lt;CSS key&gt;</TD>
+<TD>(alte DVD Option) Wenn keine DVD dekodiert wird, gibt diese Option den CSS Key an welcher benötigt wird
   um die DVD zu knacken. (Der CSS Key wird bei der Authentifizierung mit der DVD angezeigt).
 </TD></TR>
 </TABLE>

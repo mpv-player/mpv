@@ -1,16 +1,11 @@
 <HTML>
 
 <HEAD>
-<STYLE>
-       .text
-               {font-family    :       Verdana, Arial, Helvetica, sans-serif;
-               font-size       :       14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
 
 <BODY BGCOLOR=WHITE>
 
-<FONT CLASS="text">
 
 <P><CENTER><B>MPlayer - Movie Player für LINUX (C) 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
 <BR><A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A><BR><BR>
@@ -423,10 +418,10 @@ es zahlt sich aus.</P>
 <P><B><I>CODECS</I></B></P>
 
 <UL>
-	<LI><B>libavcodec</B> : Wenn du diese DivX3/DivX4/DivX5/MP42/usw Codecs verwenden willst schau dir die Sektion
+	<LI><B>libavcodec</B> : Wenn du diese DivX3/DivX4/DivX5/MP41/MP42/usw Codecs verwenden willst schau dir die Sektion
 <A HREF="codecs.html#2.2.1.2">2.2.1.2</A> vor dem Kompilieren an. Features:<BR>
 <UL>
-  <LI><B><I>DivX/DivX4/DivX5/MP42</I>-Wiedergabe auf nicht-x86 Maschinen</B></LI>
+  <LI><B><I>DivX/DivX4/DivX5/MP41/MP42</I>-Wiedergabe auf nicht-x86 Maschinen</B></LI>
   <LI>Wiedergabe von RealVideo 1.0/VIVO/MJPEG/h263/andere und Encodierung</LI>
   <LI>dieser Codec hat die <B>größte Geschwindigkeit beim Decodieren</B> von DivX/DivX4/DivX5
   Filmen (auch schneller als der originale DivX4-Codec) !</LI>
@@ -441,7 +436,7 @@ unser Paket! Wie auch immer, du kannst auch unserer Paket für avifile nutzen. Fe
 <UL>
   <LI>du wirst sie möglicherweise brauchen um Video mit verschiedenen Hardware-Kompressoren, 
   wie Tuner Karten und digitalen Kameras (z.B. DV, ATI VCR, MJPEG) abzuspielen oder zu enkodieren</LI>
-  <LI>erforderlich um <B>WMV Filme</B> oder ältere (MP42) ASFs abzuspielen</LI>
+  <LI>erforderlich um <B>WMV Filme</B> oder ältere (MP41/MP42) ASFs abzuspielen</LI>
 </UL>
 </LI>
 
@@ -475,6 +470,10 @@ Filme werden mit dem <B>MPlayer</B> eigenen Cinepak-Decoder am besten wiedergege
   oder <A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">diese Sourcen</A>
   kompiliert werden (dies ist eine täglich erneuerter tarball des Vorbis CVS).</LI>
 
+<LI><B>MPlayer</B> kann die Libraries von RealPlayer 8 oder RealONE verwenden, um
+  <B>RealVideo 2.0 und 3.0</B> Dateien wiederzugeben. Eine Installationsanleitung und weitere
+  Informationen finden sich in der Sektion <A HREF="formats.html#2.1.1.7">RealMedia Dateiformat</A>!</LI>
+
 </UL>
 
 <P><B><I>VIDEOKARTEN</I></B></P>
@@ -492,40 +491,53 @@ auch ein nettes und sehr schnelle Vollbild.</P>
 
 <P>
 <UL>
-<LI><B>Matrox G200/G400/G450/G550 Karten</B> : Schau bitte auf die
-<A HREF="video.html#2.3.1.7">mga_vid Sektion</A> um einen großen Geschwindigkeitsvorteil
-zu erhalten. Es ist wichtig, dass du diese Schritte <I>vor</I> dem Kompilieren von <B>MPlayer</B>
-machst, ansonsten wird die Matrox-spezifische Unterstützung nicht eingebaut.
-Schau dir auch die <A HREF="video.html#2.3.1.A.1">Matrox TV-Out</A> Sektion an.
-<U><B>Wenn du ein nicht-Linux User bist</B></U>, lies dir die <A HREF="video.html#2.3.1.15">Vidix</A> 
-Dokumentation durch.</LI>
+<LI><B>Matrox G200/G400/G450/G550 Karten</B> : Obwohl ein
+  <A HREF="video.html#2.3.1.9">Vidix Treiber</A> zur Verfügung gestellt wird,
+  wird empfohlen, stattdessen die alten mga_vid Kernelmodule zu verwenden,
+  diese funktionieren viel besser. Näheres zur Installation und dem Gebrauch
+  findet man in der <A HREF="video.html#2.3.1.7">mga_vid</A> Sektion. Es ist
+  wichtig, diese Schritte <I>vor</I> der Kompilierung von <B>MPlayer</B>
+  vorzunehmen, da ansonsten keine mga_vid Unterstützung einkompiliert wird.
+  Man sollte auch die <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A> Sektion
+  lesen.
+  <U><B>Nicht-Linux Benutzer</B></U> können nur noch die Vidix Treiber verwenden:
+  Dazu sollte die <A HREF="video.html#2.3.1.15">Vidix</A> Dokumentation gelesen
+  werden!</LI>
 
+<LI><B>3Dfx Voodoo3/Banshee Karten</B> : Es sollte die Sektion
+  <A HREF="video.html#2.3.1.9">2.3.1.9</A> gelesen werden, um eine möglichst
+  hohe Geschwindigkeit zu erzielen. Es ist wichtig, diese Schritte <I>vor</I>
+  der Kompilierung von <B>MPlayer</B> vorzunehmen, da ansonsten keine 3Dfx
+  Unterstützung einkompiliert wird. Man sollte auch die 
+  <A HREF="video.html#2.3.1.A.3">3dfx TV-out</A> Sektion lesen. Wenn X verwendet
+  wird, sollte mindestens Version 4.2.0 verwendet werden, da die 3dfx Xv-Treiber
+  in 4.1.0 und den früheren Versionen kaputt waren!</LI>
 
-<LI><B>3Dfx Voodoo3/Banshee Karten</B> : schau bitte auf die
-<A HREF="video.html#2.2.1.9">Sektion 2.2.1.9</A> um einen großen Geschwindigkeitsvorteil
-zu erhalten. Es ist wichtig, dass du diese Schritte <I>vor</I> dem Kompilieren von <B>MPlayer</B>
-machst, ansonsten wird die 3Dfx-Unterstützung nicht eingebaut. Lies auch in der
-<A HREF="video.html#2.3.1.A.3">3dfx TV-Out Sektion</A>. Wenn du X benutzt, benutze mindestens
-4.2.0, da die 3dfx Xv Treiber in 4.1.0 und früheren Versionen kaputt waren.</LI>
+<LI><B>ATI Karten</B> : Der <A HREF="video.html#2.3.1.14">Vidix Treiber</A>
+  wird für folgende Karten zur Verfügung gestellt:
+  <B>Radeon</B>, <B>Rage128</B>, <B>Mach64</B> (Rage XL/Mobility, Xpert98).
+  Es sollte auch die <A HREF="video.html#2.3.1.A.2">ATI Karten</A> Sektion
+  der TV-out Dokumentation gelesen werden um herauszufinden, ob der jeweilige
+  TV-out der Karte unter Linux/MPlayer unterstützt wird.</LI>
 
-<LI><B>ATI Karten</B> : schau bitte auf die <A HREF="video.html#2.3.1.A.2">
-ATI-Karten Sektion</A> für Dokumentationen zum TV-Out und um zu erfahren, welches
-Features von deiner Karte unter Linux/MPlayer unterstützt werden. Wenn du eine <B>Radeon</B>, <B>Rage 128</B>
-oder <B>Mach64</B> (Rage XL/Mobility, Xpert98) Karte besitzt, haben wir einen <B>Vidix</B>-Treiber für 
-dich mit optionalem TV-Out ! Lies <AHREF="video.html#2.3.1.14">diese</A> Sektion!
-<U><B>Wenn du ein nicht-Linux User bist</B></U>, lies die <A HREF="video.html#2.3.1.15">Vidix</A>
-Dokumentation !</LI>
-
-<LI><B>S3 Karten</B> : Die Savage und Virge/DX Chips besitzen Hardwarebeschleunigung. Verwende
-die neueste XFree86 Version, ältere Treiber sind fehlerhaft. Savage Chips
-machen Problem mit YV12 Anzeige, siehe <A HREF="video.html#2.3.1.2.2">S3 Xv Sektion</A>
-für Details. Ältere, Trio Karten haben keinen oder langsamen Hardwaresupport.</LI>
+<LI><B>S3 Karten</B> : Die Savage und Virge/DX Chips besitzen
+  Hardwarebeschleunigung. Verwende die neueste XFree86 Version, ältere Treiber
+  sind fehlerhaft. Savage Chips machen Problem mit YV12 Anzeige, siehe
+  <A HREF="video.html#2.3.1.2.2">S3 Xv Sektion</A> für Details. Ältere, Trio
+  Karten haben keinen oder langsamen Hardwaresupport.</LI>
 
 <LI><B>nVidia Karten</B> : sehr schlechte Wahl für Videowiedergabe. nVidias Karten
-werden im Fernen Osten erzeugt und haben sehr billige und qualitativ minderwertige Chips.
-<U>Der eingebaute nVidia Treiber in XFree86 enthält keine Hardwareunterstützung
-für YUV Beschleunigung!</U> Du musst dir die Closed-Source Treiber von nvidia.com downloaden.
-Für Details siehe <A HREF="video.html#2.3.1.2.3">Nvidia Xv Treiber</A> Sektion.</LI>
+  werden im Fernen Osten erzeugt und haben sehr billige und qualitativ
+  minderwertige Chips.
+  <U>Der eingebaute nVidia Treiber in XFree86 enthält keine Hardwareunterstützung
+  für YUV Beschleunigung!</U> Du musst dir die Closed-Source Treiber von
+  nvidia.com downloaden. Nähere Details finden sich in der
+  <A HREF="video.html#2.3.1.2.3">Nvidia Xv Treiber</A> Sektion.</LI>
+
+<LI><B>3DLabs GLINT R3 und Permedia3</B> : Ein Vidix-Treiber steht zur Verfügung
+  (pm3_vid). Es sollten auch die
+  <A HREF="video.html#2.3.1.15">Vidix Instruktionen</A> gelesen werden.
+</LI>
 
 <LI><B>andere Karten</B> : keine oben genannte?
   <UL>
@@ -857,91 +869,85 @@ TV-Tuner ermöglicht</B>.</P>
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>on</I></TD>
+  <TD><I>on</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">verwenden des TV-Inputs</TD>
+  <TD>verwenden des TV-Inputs</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>noaudio</I></TD>
+  <TD><I>noaudio</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">kein Ton</TD>
+  <TD>kein Ton</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>driver</I></TD>
+  <TD><I>driver</I></TD>
   <TD></TD>
-  <TD><FONT CLASS="text">
-    <B>dummy</B> - NULL TV-Input :) Nur zum Testen, erzeugt Dummy-Input.<BR>
+  <TD><B>dummy</B> - NULL TV-Input :) Nur zum Testen, erzeugt Dummy-Input.<BR>
     <B>v4l</B> - nimmt Bilder vom Standard-V4L-Interface (normalerweise
     <CODE>/dev/video0</CODE>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>device</I></TD>
+  <TD><I>device</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">wählt einen anderen
+  <TD>wählt einen anderen
   Treiber als <CODE>/dev/video0</CODE></TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>input</I></TD>
+  <TD><I>input</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">welcher Eingang
+  <TD>welcher Eingang
     des TV-Tuners verwendet werden soll (z.B. <B>television</B>, <B>s-video</B>, 
     <B>composite</B>, ...)<BR>
     Beim Inizialisieren werden die verfügbaren Eingänge angezeigt.</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>freq</I></TD>
+  <TD><I>freq</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">wählt die Frequenz
+  <TD>wählt die Frequenz
   für den Tuner (z.B. <B>511.250</B>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>outfmt</I></TD>
+  <TD><I>outfmt</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">Format, mit
+  <TD>Format, mit
     dem ausgegeben werden soll (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, 
     <B>i420</B> (für i420 musst du die Option <CODE>-vc rawi420</CODE> übergeben, 
     wegen eines fourcc Konflikts))</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>width</I></TD>
+  <TD><I>width</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">
-    die Breite des Ausgabe-Fensters, in Pixel</TD>
+  <TD>die Breite des Ausgabe-Fensters, in Pixel</TD>
 </TR>
   <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>height</I></TD>
+  <TD><I>height</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">
-    die Höhe des Ausgabe-Fensters, in Pixel</TD>
+  <TD>die Höhe des Ausgabe-Fensters, in Pixel</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>norm</I></TD>
+  <TD><I>norm</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">
-  verfügbare Normen: PAL, SECAM, NTSC</TD>
+  <TD>verfügbare Normen: PAL, SECAM, NTSC</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>channel</I></TD>
+  <TD><I>channel</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">
-  Tuner auf eingestellten Kanal setzen</TD>
+  <TD>Tuner auf eingestellten Kanal setzen</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>chanlist</I></TD>
+  <TD><I>chanlist</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">
-  verfügbar: <CODE>us-bcast, us-cable, europe-west, europe-east, usw</CODE></TD>
+  <TD>verfügbar: <CODE>us-bcast, us-cable, europe-west, europe-east, usw</CODE></TD>
 </TR>
 </TABLE>
 </P>
@@ -949,10 +955,10 @@ TV-Tuner ermöglicht</B>.</P>
 <A NAME=2.5.4><P><B><I>2.5.4.  Tastatursteuerung</I></B></P>
 
 <TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">wählt
+<TD>&nbsp;&nbsp;</TD><TD>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD>wählt
 vorherigen/nächsten Kanal</TD><TR>
-<TD></TD><TD><FONT CLASS="text">n</TD><TD></TD><TD><FONT CLASS="text">ändern der Norm</TD><TR>
-<TD></TD><TD><FONT CLASS="text">b</TD><TD></TD><TD><FONT CLASS="text">ändern der Kanalliste</TD><TR>
+<TD></TD><TD>n</TD><TD></TD><TD>ändern der Norm</TD><TR>
+<TD></TD><TD>b</TD><TD></TD><TD>ändern der Kanalliste</TD><TR>
 </TABLE>
 
 <A NAME=2.5.5><P><B><I>2.5.5.  Beispiele</I></B></P>
@@ -1192,11 +1198,11 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 </P>
       
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">Datei</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] [Pfad/]Dateiname</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">Datei</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [standard Optionen] [Pfad/]Dateiname [Optionen für datei1] datei2 datei3 [Optionen für datei3]</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">VCD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] -vcd Tracknr [-cdrom-device /dev/cdrom]</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">DVD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] -dvd Titelnr [-dvd-device /dev/dvd]</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">Netz</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] http://site.com/datei.asf (playlist kann auch benutzt werden)</CODE></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>Datei</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [Optionen] [Pfad/]Dateiname</CODE></TD><TR>
+<TD></TD><TD>Datei</TD><TD></TD><TD><CODE>mplayer [standard Optionen] [Pfad/]Dateiname [Optionen für datei1] datei2 datei3 [Optionen für datei3]</CODE></TD><TR>
+<TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [Optionen] -vcd Tracknr [-cdrom-device /dev/cdrom]</CODE></TD><TR>
+<TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [Optionen] -dvd Titelnr [-dvd-device /dev/dvd]</CODE></TD><TR>
+<TD></TD><TD>Netz</TD><TD></TD><TD><CODE>mplayer [Optionen] http://site.com/datei.asf (playlist kann auch benutzt werden)</CODE></TD><TR>
 </TABLE></P>
 
 <P>
@@ -1221,54 +1227,54 @@ zu steuern.</P>
 <P><B>Tastatur</B></P>
   
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">&lt;-  oder  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">Suche zurück/vorwärts 10 Sekunden</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">nach-oben und nach-unten</TD><TD></TD><TD><FONT CLASS="text">suche zurück/vorwärts 1 Minute</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">Bild-nach-oben und Bild-nach-unten</TD><TD></TD><TD><FONT CLASS="text">suche zurück/vorwärts 10 Minute</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">&lt; oder &gt;</TD><TD></TD><TD><FONT CLASS="text">suche rück-/vorwärts in der Playliste</TD><TR>
-<TR><TD></TD><TD><FONT CLASS="text">p oder Leertaste</TD><TD></TD><TD><FONT CLASS="text">Pause (drücke irgendeine Taste um weiterzumachen)</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">q oder ESC</TD><TD></TD><TD><FONT CLASS="text">stoppe die Wiedergabe und beende Programm</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">+ oder -</TD><TD></TD><TD><FONT CLASS="text">einstellen des Audio-Delays, +/- 0,1 Sekunden</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">/ oder *</TD><TD></TD><TD><FONT CLASS="text">vermindere/erhöhe Lautstärke</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">f</TD><TD></TD><TD><FONT CLASS="text">wechselt den Vollbildschirm-Modus</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">o</TD><TD></TD><TD><FONT CLASS="text">wechselt OSD: kein / Suchleiste / Suchleiste und Zeit</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">z oder x</TD><TD></TD><TD><FONT CLASS="text">einstellen des Untertitel-Delays, +/- 0,1 Sekunden</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">r oder t</TD><TD></TD><TD><FONT CLASS="text">einstellen der Untertitel-Position</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">&gt; oder &lt;</TD><TD></TD><TD><FONT CLASS="text">nächster/vorheriger playtree Eintrag</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">HOME oder END</TD><TD></TD><TD><FONT CLASS="text">nächster/vorheriger playtree Eintrag in der übergeordneten Liste</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">INSERT oder DELETE</TD><TD></TD><TD><FONT CLASS="text">nächste/vorherige alternative Quelle
+<TR><TD>&nbsp;&nbsp;</TD><TD>&lt;-  oder  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>Suche zurück/vorwärts 10 Sekunden</TD></TR>
+<TR><TD></TD><TD>nach-oben und nach-unten</TD><TD></TD><TD>suche zurück/vorwärts 1 Minute</TD></TR>
+<TR><TD></TD><TD>Bild-nach-oben und Bild-nach-unten</TD><TD></TD><TD>suche zurück/vorwärts 10 Minute</TD></TR>
+<TR><TD></TD><TD>&lt; oder &gt;</TD><TD></TD><TD>suche rück-/vorwärts in der Playliste</TD><TR>
+<TR><TD></TD><TD>p oder Leertaste</TD><TD></TD><TD>Pause (drücke irgendeine Taste um weiterzumachen)</TD></TR>
+<TR><TD></TD><TD>q oder ESC</TD><TD></TD><TD>stoppe die Wiedergabe und beende Programm</TD></TR>
+<TR><TD></TD><TD>+ oder -</TD><TD></TD><TD>einstellen des Audio-Delays, +/- 0,1 Sekunden</TD></TR>
+<TR><TD></TD><TD>/ oder *</TD><TD></TD><TD>vermindere/erhöhe Lautstärke</TD></TR>
+<TR><TD></TD><TD>f</TD><TD></TD><TD>wechselt den Vollbildschirm-Modus</TD></TR>
+<TR><TD></TD><TD>o</TD><TD></TD><TD>wechselt OSD: kein / Suchleiste / Suchleiste und Zeit</TD></TR>
+<TR><TD></TD><TD>z oder x</TD><TD></TD><TD>einstellen des Untertitel-Delays, +/- 0,1 Sekunden</TD></TR>
+<TR><TD></TD><TD>r oder t</TD><TD></TD><TD>einstellen der Untertitel-Position</TD></TR>
+<TR><TD></TD><TD>&gt; oder &lt;</TD><TD></TD><TD>nächster/vorheriger playtree Eintrag</TD></TR>
+<TR><TD></TD><TD>HOME oder END</TD><TD></TD><TD>nächster/vorheriger playtree Eintrag in der übergeordneten Liste</TD></TR>
+<TR><TD></TD><TD>INSERT oder DELETE</TD><TD></TD><TD>nächste/vorherige alternative Quelle
   (nur verfügbar in der asx Wiedergabeliste)</TD></TR>
 
-<TR><TD COLSPAN=4><P><I><FONT CLASS="text">(die folgende Tasten sind nur gültig, wenn man <CODE>-vo xv</CODE> verwendet)</I></P></TD></TR>
+<TR><TD COLSPAN=4><P><I>(die folgende Tasten sind nur gültig, wenn man <CODE>-vo xv</CODE> verwendet)</I></P></TD></TR>
 
-<TR><TD></TD><TD><FONT CLASS="text">1 oder 2</TD><TD></TD><TD><FONT CLASS="text">Kontrast-Einstellung</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">3 oder 4</TD><TD></TD><TD><FONT CLASS="text">Helligkeits-Einstellung</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">5 oder 6</TD><TD></TD><TD><FONT CLASS="text">Farbton-Einstellung</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">7 oder 8</TD><TD></TD><TD><FONT CLASS="text">Sättigungs-Einstellung</TD></TR>
+<TR><TD></TD><TD>1 oder 2</TD><TD></TD><TD>Kontrast-Einstellung</TD></TR>
+<TR><TD></TD><TD>3 oder 4</TD><TD></TD><TD>Helligkeits-Einstellung</TD></TR>
+<TR><TD></TD><TD>5 oder 6</TD><TD></TD><TD>Farbton-Einstellung</TD></TR>
+<TR><TD></TD><TD>7 oder 8</TD><TD></TD><TD>Sättigungs-Einstellung</TD></TR>
 </TABLE></P>
 
 <P><B>GUI</B></P>
    
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">, und .</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">vorherige / nächste Datei</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">graues - und +</TD><TD></TD><TD><FONT CLASS="text">verringere / erhöhe Lautstärke</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">Enter</TD><TD></TD><TD><FONT CLASS="text">startet Wiedergabe</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">Leertaste</TD><TD></TD><TD><FONT CLASS="text">Pause</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">s</TD><TD></TD><TD><FONT CLASS="text">Stop</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">a</TD><TD></TD><TD><FONT CLASS="text">über</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">l</TD><TD></TD><TD><FONT CLASS="text">lädt Datei</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">b</TD><TD></TD><TD><FONT CLASS="text">Skin-Browser</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">e</TD><TD></TD><TD><FONT CLASS="text">zeigt Equalizer</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">p</TD><TD></TD><TD><FONT CLASS="text">zeigt Playliste</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">f</TD><TD></TD><TD><FONT CLASS="text">wechselt zu/von Vollbild</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">m</TD><TD></TD><TD><FONT CLASS="text">aktiviert/deaktiviert Mute</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD>, und .</TD><TD>&nbsp;&nbsp;</TD><TD>vorherige / nächste Datei</TD></TR>
+<TR><TD></TD><TD>graues - und +</TD><TD></TD><TD>verringere / erhöhe Lautstärke</TD></TR>
+<TR><TD></TD><TD>Enter</TD><TD></TD><TD>startet Wiedergabe</TD></TR>
+<TR><TD></TD><TD>Leertaste</TD><TD></TD><TD>Pause</TD></TR>
+<TR><TD></TD><TD>s</TD><TD></TD><TD>Stop</TD></TR>
+<TR><TD></TD><TD>a</TD><TD></TD><TD>über</TD></TR>
+<TR><TD></TD><TD>l</TD><TD></TD><TD>lädt Datei</TD></TR>
+<TR><TD></TD><TD>b</TD><TD></TD><TD>Skin-Browser</TD></TR>
+<TR><TD></TD><TD>e</TD><TD></TD><TD>zeigt Equalizer</TD></TR>
+<TR><TD></TD><TD>p</TD><TD></TD><TD>zeigt Playliste</TD></TR>
+<TR><TD></TD><TD>f</TD><TD></TD><TD>wechselt zu/von Vollbild</TD></TR>
+<TR><TD></TD><TD>m</TD><TD></TD><TD>aktiviert/deaktiviert Mute</TD></TR>
 </TABLE></P>
 
 <P><B>TV</B></P>
 
 <P><TABLE BORDER=0>
-<TR><TD></TD><TD><FONT CLASS="text">h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">vorheriger/nächster Kanal</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">n</TD><TD></TD><TD><FONT CLASS="text">ändern der Norm</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">b</TD><TD></TD><TD><FONT CLASS="text">ändern der Kanalliste/TD></TR>
+<TR><TD></TD><TD>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD>vorheriger/nächster Kanal</TD></TR>
+<TR><TD></TD><TD>n</TD><TD></TD><TD>ändern der Norm</TD></TR>
+<TR><TD></TD><TD>b</TD><TD></TD><TD>ändern der Kanalliste/TD></TR>
 
 </TABLE></P>
 
