@@ -992,8 +992,17 @@ static void radeon_compute_framesize(vidix_playback_t *info)
 {
   unsigned pitch,awidth;
   pitch = radeon_query_pitch(info->fourcc);
-  awidth = info->src.w + ((pitch-1) & ~(pitch-1));
-  info->frame_size = awidth*info->src.h+(awidth*info->src.h)/2;
+  awidth = (info->src.w + (pitch-1)) & ~(pitch-1);
+  switch(info->fourcc)
+  {
+    case IMGFMT_I420:
+    case IMGFMT_YV12:
+    case IMGFMT_IYUV:
+		info->frame_size = awidth*info->src.h+(awidth*info->src.h)/2;
+		break;
+    default:	info->frame_size = awidth*info->src.h*2;
+		break;
+  }
 }
 
 int vixConfigPlayback(vidix_playback_t *info)
@@ -1021,7 +1030,7 @@ int vixPlaybackOff( void )
   return 0;
 }
 
-int vixPlaybackFrameSel(unsigned frame)
+int vixPlaybackFrameSelect(unsigned frame)
 {
     uint32_t off0,off1,off2;
 /*    if(!besr.double_buff) return; */
