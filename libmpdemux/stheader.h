@@ -70,6 +70,9 @@ typedef struct {
   int a_out_buffer_size;
 //  void* audio_out;        // the audio_out handle, used for this audio stream
   void* afilter;          // the audio filter stream
+#ifdef DYNAMIC_PLUGINS
+  void *dec_handle;
+#endif
   // win32-compatible codec parameters:
   AVIStreamHeader audio;
   WAVEFORMATEX* wf;
@@ -99,6 +102,9 @@ typedef struct {
   void* video_out;        // the video_out handle, used for this video stream
   void* vfilter;          // the video filter chain, used for this video stream
   int vf_inited;
+#ifdef DYNAMIC_PLUGINS
+  void *dec_handle;
+#endif
   // win32-compatible codec parameters:
   AVIStreamHeader video;
   BITMAPINFOHEADER* bih;

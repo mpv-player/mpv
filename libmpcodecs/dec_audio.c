@@ -18,6 +18,10 @@
 
 #include "../libaf/af.h"
 
+#ifdef DYNAMIC_PLUGINS
+#include <dlfcn.h>
+#endif
+
 #ifdef USE_FAKE_MONO
 int fakemono=0;
 #endif
@@ -147,6 +151,39 @@ int init_audio(sh_audio_t *sh_audio,char* codecname,char* afm,int status){
 	for (i=0; mpcodecs_ad_drivers[i] != NULL; i++)
 	    if(!strcmp(mpcodecs_ad_drivers[i]->info->short_name,sh_audio->codec->drv)) break;
 	mpadec=mpcodecs_ad_drivers[i];
+#ifdef DYNAMIC_PLUGINS
+	if (!mpadec)
+	{
+	    /* try to open shared decoder plugin */
+	    int buf_len;
+	    char *buf;
+	    ad_functions_t *funcs_sym;
+	    ad_info_t *info_sym;
+	    
+	    buf_len = strlen(LIBDIR)+strlen(sh_audio->codec->drv)+16;
+	    buf = malloc(buf_len);
+	    if (!buf)
+		break;
+	    snprintf(buf, buf_len, "%s/mplayer/ad_%s.so", LIBDIR, sh_audio->codec->drv);
+	    mp_msg(MSGT_DECAUDIO, MSGL_DBG2, "Trying to open external plugin: %s\n", buf);
+	    sh_audio->dec_handle = dlopen(buf, RTLD_LAZY);
+	    if (!sh_audio->dec_handle)
+		break;
+	    snprintf(buf, buf_len, "mpcodecs_ad_%s", sh_audio->codec->drv);
+	    funcs_sym = dlsym(sh_audio->dec_handle, buf);
+	    if (!funcs_sym || !funcs_sym->info || !funcs_sym->preinit ||
+		!funcs_sym->init || !funcs_sym->uninit || !funcs_sym->control ||
+		!funcs_sym->decode_audio)
+		break;
+	    info_sym = funcs_sym->info;
+	    if (strcmp(info_sym->short_name, sh_audio->codec->drv))
+		break;
+	    free(buf);
+	    mpadec = funcs_sym;
+	    mp_msg(MSGT_DECAUDIO, MSGL_V, "Using external decoder plugin (%s/mplayer/ad_%s.so)!\n",
+		LIBDIR, sh_audio->codec->drv);
+	}
+#endif
 	if(!mpadec){ // driver not available (==compiled in)
             mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_AudioCodecFamilyNotAvailableStr,
         	sh_audio->codec->name, sh_audio->codec->drv);
@@ -225,6 +262,10 @@ void uninit_audio(sh_audio_t *sh_audio)
     if(sh_audio->inited){
 	mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_UninitAudioStr,sh_audio->codec->drv);
 	mpadec->uninit(sh_audio);
+#ifdef DYNAMIC_PLUGINS
+	if (sh_audio->dec_handle)
+	    dlclose(sh_audio->dec_handle);
+#endif
 	sh_audio->inited=0;
     }
     if(sh_audio->a_out_buffer!=sh_audio->a_buffer) free(sh_audio->a_out_buffer);
