@@ -227,6 +227,11 @@ typedef struct voodoo_yuv_fb_t voodoo_yuv_fb;
 #define CLIP0MAX		(0x00100000 + 0x0c)
 #define DSTBASE			(0x00100000 + 0x10)
 #define DSTFORMAT		(0x00100000 + 0x14)
+#define SRCCOLORKEYMIN		(0x00100000 + 0x18)
+#define SRCCOLORKEYMAX		(0x00100000 + 0x1c)
+#define DSTCOLORKEYMIN		(0x00100000 + 0x20)
+#define DSTCOLORKEYMAX		(0x00100000 + 0x24)
+#define ROP123			(0x00100000 + 0x30)
 #define SRCBASE			(0x00100000 + 0x34)
 #define COMMANDEXTRA_2D	(0x00100000 + 0x38)
 #define CLIP1MIN		(0x00100000 + 0x4c)
@@ -255,9 +260,15 @@ typedef struct voodoo_yuv_fb_t voodoo_yuv_fb;
 
 #define AUTOINC_DSTX                    BIT(10)
 #define AUTOINC_DSTY                    BIT(11)
-#define COMMAND_2D_FILLRECT				0x05
+
+
 #define COMMAND_2D_S2S_BITBLT			0x01      // screen to screen
-#define COMMAND_2D_H2S_BITBLT           0x03       // host to screen
+#define COMMAND_2D_S2S_STRECH_BLT		0x02 // BLT + Strech
+#define COMMAND_2D_H2S_BITBLT                   0x03       // host to screen
+#define COMMAND_2D_FILLRECT			0x05
+
+#define COMMAND_2D_DO_IMMED		        BIT(8) // Do it immediatly
+
 
 
 #define COMMAND_3D_NOP				0x00
@@ -290,6 +301,30 @@ typedef struct voodoo_yuv_fb_t voodoo_yuv_fb;
 #define VIDCFG_PIXFMT_SHIFT				18
 #define DACMODE_2X					BIT(0)
 
+/* AGP registers */
+#define AGPREQSIZE          (0x0080000 + 0x00)
+#define AGPHOSTADDRESSLOW   (0x0080000 + 0x04)
+#define AGPHOSTADDRESSHIGH  (0x0080000 + 0x08)
+#define AGPGRAPHICSADDRESS  (0x0080000 + 0x0C)
+#define AGPGRAPHICSSTRIDE   (0x0080000 + 0x10)
+#define AGPMOVECMD          (0x0080000 + 0x14)
+
+/* FIFO registers */
+#define CMDBASEADDR0        (0x0080000 + 0x20)
+#define CMDBASESIZE0        (0x0080000 + 0x24)
+#define CMDBUMP0            (0x0080000 + 0x28)
+#define CMDRDPTRL0          (0x0080000 + 0x2C)
+#define CMDRDPTRH0          (0x0080000 + 0x30)
+#define CMDAMIN0            (0x0080000 + 0x34)
+#define CMDAMAX0            (0x0080000 + 0x38)
+#define CMDFIFODEPTH0       (0x0080000 + 0x44)
+#define CMDHOLECNT0         (0x0080000 + 0x48)
+
+
+/* YUV reisters */
+#define YUVBASEADDRESS (0x0080000 + 0x100)
+#define YUVSTRIDE      (0x0080000 + 0x104)
+
 /* VGA rubbish, need to change this for multihead support */
 #define MISC_W 	0x3c2
 #define MISC_R 	0x3cc
@@ -298,6 +333,9 @@ typedef struct voodoo_yuv_fb_t voodoo_yuv_fb;
 #define CRT_I	0x3d4
 #define CRT_D	0x3d5
 #define ATT_IW	0x3c0
+#define RAMDAC_R 0x3c7
+#define RAMDAC_W 0x3c8
+#define RAMDAC_D 0x3c9
 #define IS1_R	0x3da
 #define GRA_I	0x3ce
 #define GRA_D	0x3cf
