@@ -111,7 +111,7 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
       char const* url = demuxer->stream->streaming_ctrl->url->url;
 
       extern int verbose;
-      rtspClient = RTSPClient::createNew(*env, verbose);
+      rtspClient = RTSPClient::createNew(*env, verbose, "mplayer");
       if (rtspClient == NULL) {
 	fprintf(stderr, "Failed to create RTSP client: %s\n",
 		env->getResultMsg());
@@ -310,6 +310,7 @@ extern "C" void demux_close_rtp(demuxer_t* demuxer) {
 
   // Get the RTP state that was stored in the demuxer's 'priv' field:
   RTPState* rtpState = (RTPState*)(demuxer->priv);
+  if (rtpState == NULL) return;
   UsageEnvironment* env = NULL;
   TaskScheduler* scheduler = NULL;
   if (rtpState->mediaSession != NULL) {
