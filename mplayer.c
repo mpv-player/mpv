@@ -166,7 +166,7 @@ int benchmark=0;
 // static int play_in_bg=0;
 
 // options:
-static int auto_quality=0;
+       int auto_quality=0;
 static int output_quality=0;
 
 int use_gui=0;
@@ -220,20 +220,20 @@ extern int cache_fill_status;
 
 // dump:
 static char *stream_dump_name="stream.dump";
-static int stream_dump_type=0;
+       int stream_dump_type=0;
 
 // A-V sync:
 static float default_max_pts_correction=-1;//0.01f;
 static float max_pts_correction=0;//default_max_pts_correction;
 static float c_total=0;
-static float audio_delay=0;
+       float audio_delay=0;
 
 static int dapsync=0;
 static int softsleep=0;
 
 static float force_fps=0;
 static int force_srate=0;
-static int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
+       int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
 static int play_n_frames=-1;
 static int play_n_frames_mf=-1;
 
@@ -897,7 +897,6 @@ if(!use_stdin && !slave_mode){
       video_out = video_out_drivers[i];break;
     }
   }
-
   if(!video_out){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidVOdriver,vo?vo:"?");
     exit_player(MSGTR_Exit_error);
@@ -1211,7 +1210,7 @@ if(sh_video) {
   } else
   if(sub_auto) { // auto load sub file ...
     subtitles=sub_read_file( filename ? sub_filename( get_path("sub/"), filename )
-	                              : "default.sub", sh_video->fps );
+                                     : "default.sub", sh_video->fps );
   }
   if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
   if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, sh_video->fps);
@@ -1355,10 +1354,10 @@ fflush(stdout);
 #ifdef HAVE_NEW_GUI
    if ( use_gui )
     {
-     guiGetEvent( guiSetFileName,filename );
      guiGetEvent( guiSetStream,(char *)stream );
+     guiGetEvent( guiSetFileName,filename );
      if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels; else guiIntfStruct.AudioType=0;
-     if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,1 ); else guiGetEvent( guiSetAudioOnly,0 );
+     if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,(char *)1 ); else guiGetEvent( guiSetAudioOnly,(char *)0 );
      guiGetEvent( guiSetVolume,NULL );
     }
 #endif
@@ -1948,7 +1947,7 @@ if(auto_quality>0){
         guiGetEvent( guiCEvent,(char *)guiSetPlay );
        }
 #endif
-      if(pkey!=32 && pkey!=112)
+      if(pkey!=32 && pkey!=112 && pkey!=-1)
         mplayer_put_key(pkey); // pass on the key
   }
 
@@ -3107,7 +3106,8 @@ if(use_gui || playtree_iter != NULL){
   current_module="free_stream";
   if(stream) free_stream(stream);
   stream=NULL;
-  
+
+#ifdef USE_SUB  
   current_module="sub_free";
   if ( subtitles ) 
    {
@@ -3116,6 +3116,7 @@ if(use_gui || playtree_iter != NULL){
     vo_sub=NULL;
     subtitles=NULL;
    }
+#endif
 
   eof = 0;
   goto play_next_file;
