@@ -186,7 +186,7 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
     apitch = vidix_play.dest.pitch.v-1;
     bespitch = (w + apitch) & ~apitch;
     dest = vidix_mem + frames[next_frame] + vidix_play.offset.v;
-    dest += (bespitch*y + x)/2;
+    dest += bespitch*y/4 + x;
     src = image[1];
     for(i=0;i<h/2;i++){
         memcpy(dest,src,w/2);
@@ -197,7 +197,7 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
     bespitch = (w + apitch) & ~apitch;
 
     dest = vidix_mem + frames[next_frame] + vidix_play.offset.u;
-    dest += (bespitch*y + x)/2;
+    dest += bespitch*y/4 + x;
     src = image[2];
     for(i=0;i<h/2;i++){
         memcpy(dest,src,w/2);
