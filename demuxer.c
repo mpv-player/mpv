@@ -1,5 +1,8 @@
 //=================== DEMUXER v2.5 =========================
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -96,12 +99,12 @@ void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp){
       ds->first=ds->last=dp;
     }
     if(verbose>=2)
-      printf("DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%d  [packs: A=%d V=%d]\n",
+      printf("DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%u  [packs: A=%d V=%d]\n",
         (ds==ds->demuxer->audio)?"d_audio":"d_video",
-        dp->len,dp->pts,dp->pos,ds->demuxer->audio->packs,ds->demuxer->video->packs);
+        dp->len,dp->pts,(unsigned int)dp->pos,ds->demuxer->audio->packs,ds->demuxer->video->packs);
 }
 
-void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,int pos,int flags){
+void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,off_t pos,int flags){
     demux_packet_t* dp=new_demux_packet(len);
     stream_read(stream,dp->buffer,len);
     dp->pts=pts; //(float)pts/90000.0f;
@@ -574,4 +577,3 @@ switch(file_format){
 demuxer->file_format=file_format;
 return demuxer;
 }
-

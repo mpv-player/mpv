@@ -1,9 +1,14 @@
 
+#include "config.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <sys/ioctl.h>
-#include <unistd.h>
 
 #include "stream.h"
 
@@ -40,14 +45,19 @@ int stream_fill_buffer(stream_t *s){
   return len;
 }
 
-int stream_seek_long(stream_t *s,unsigned int pos){
-unsigned int newpos;
+int stream_seek_long(stream_t *s,off_t pos){
+off_t newpos;
 
-//  if(verbose>=3) printf("seek to 0x%X\n",pos);
+//  if(verbose>=3) printf("seek to 0x%X\n",(unsigned int)pos);
 
 if(verbose>=3){
+#ifdef _LARGEFILE_SOURCE
+  printf("s->pos=%llX  newpos=%llX  new_bufpos=%llX  buflen=%X  \n",
+    (long long)s->pos,(long long)newpos,(long long)pos,s->buf_len);
+#else
   printf("s->pos=%X  newpos=%X  new_bufpos=%X  buflen=%X  \n",
     (unsigned int)s->pos,newpos,pos,s->buf_len);
+#endif
 }
 
   s->buf_pos=s->buf_len=0;
@@ -55,7 +65,11 @@ if(verbose>=3){
   switch(s->type){
   case STREAMTYPE_FILE:
   case STREAMTYPE_STREAM:
+#ifdef _LARGEFILE_SOURCE
+    newpos=pos&(~((long long)STREAM_BUFFER_SIZE-1));break;
+#else
     newpos=pos&(~(STREAM_BUFFER_SIZE-1));break;
+#endif
   case STREAMTYPE_VCD:
     newpos=(pos/VCD_SECTOR_DATA)*VCD_SECTOR_DATA;break;
   }
@@ -97,7 +111,11 @@ if(newpos==0 || newpos!=s->pos){
     s->buf_pos=pos; // byte position in sector
     return 1;
   }
-  if(verbose) printf("stream_seek: WARNING! Can't seek to 0x%X !\n",pos+newpos);
+#ifdef _LARGEFILE_SOURCE
+  if(verbose) printf("stream_seek: WARNING! Can't seek to 0x%llX !\n",(long long)(pos+newpos));
+#else
+  if(verbose) printf("stream_seek: WARNING! Can't seek to 0x%X !\n",(pos+newpos));
+#endif
   return 0;
 }
 

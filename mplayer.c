@@ -1,24 +1,25 @@
 // AVI & MPEG Player    v0.18   (C) 2000-2001. by A'rpi/ESP-team
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <signal.h>
+#include "version.h"
+#include "config.h"
 
 #include <sys/ioctl.h>
-#include <unistd.h>
-#include <time.h>
 #include <sys/mman.h>
-
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 
-#include "version.h"
-#include "config.h"
+#include <signal.h>
+
+#include <time.h>
+
+#include <fcntl.h>
+#include <unistd.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef __FreeBSD__
 #include <sys/cdrio.h>
@@ -227,7 +228,7 @@ extern void avi_fixate();
 int osd_level=2;
 int divx_quality=0;
 char *seek_to_sec=NULL;
-int seek_to_byte=0;
+off_t seek_to_byte=0;
 int has_audio=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
@@ -641,7 +642,7 @@ if(vcd_track){
   stream->end_pos=ret2;
 } else {
 //============ Open plain FILE ============
-  int len;
+  off_t len;
   if(!strcmp(filename,"-")){
       // read from stdin
       printf("Reading from stdin...\n");
@@ -656,6 +657,14 @@ if(vcd_track){
        f=open(filename,O_RDONLY);
        if(f<0){ fprintf(stderr,"File not found: '%s'\n",filename);return 1; }
        len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
+       if (len == -1)
+	 perror("Error: lseek failed to obtain video file size");
+       else
+#ifdef _LARGEFILE_SOURCE
+	 fprintf(stderr, "File size is %lld bytes\n", (long long)len);
+#else
+	 fprintf(stderr, "File size is %u bytes\n", (unsigned int)len);
+#endif
        stream=new_stream(f,STREAMTYPE_FILE);
        stream->end_pos=len;
 #ifdef STREAMING

@@ -6,6 +6,9 @@
 #
 # Changes in reversed order:
 #
+# 2001/07/31 by Steve Davies
+# - added --enable-largefiles
+#
 # 2001/07/12 by Juergen Keil
 #  - add support for non-x86 targets
 #  - add autoconf checks for loader/wine
@@ -122,6 +125,7 @@ params:
 				data [/usr/local/share/mplayer] 
 	--enable-debug[=1-3]	compile debugging information into mplayer [disable]
 	--enable-profile	compile profiling information into mplayer [disable]
+	--enable-largefiles	build with support for files >2^32 bytes long [disable]
         --enable-mmx            build with mmx support [autodetect]
         --enable-mmx2           build with mmx2 support (PIII, Athlon) [autodetect]
         --enable-3dnow          build with 3dnow! support [autodetect]
@@ -962,6 +966,9 @@ for ac_option do
   --enable-debug)
   	_debug='-g'
 	;;
+  --enable-largefiles)
+	_largefiles=yes
+	;;
   --enable-debug=*)
         _debug=`echo $_echo_n '-g'$_echo_c; echo $ac_option | cut -d '=' -f 2`
 	;;
@@ -1573,6 +1580,11 @@ fi
 # for MT applications: 
 if [ "$system_name" = "FreeBSD" ]; then
 CFLAGS="$CFLAGS -D_THREAD_SAFE"
+fi
+
+# 64 bit file offsets?
+if [ "$_largefiles" = "yes" ]; then
+CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 fi
 
 # echo 'CFLAGS=$(OPTFLAGS) -Wall -DMPG12PLAY' >> config.mak

@@ -20,16 +20,17 @@ void vcd_cache_init(int s);
 
 typedef struct {
   int fd;
-  long pos;
+  off_t pos;
   int eof;
   int type; // 0=file 1=VCD
   unsigned int buf_pos,buf_len;
-  long start_pos,end_pos;
+  off_t start_pos,end_pos;
   unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
 } stream_t;
 
 int stream_fill_buffer(stream_t *s);
-int stream_seek_long(stream_t *s,unsigned int pos);
+
+int stream_seek_long(stream_t *s,off_t pos);
 
 inline static int stream_read_char(stream_t *s){
   return (s->buf_pos<s->buf_len)?s->buffer[s->buf_pos++]:
@@ -91,16 +92,16 @@ inline static int stream_eof(stream_t *s){
   return s->eof;
 }
 
-inline static int stream_tell(stream_t *s){
+inline static off_t stream_tell(stream_t *s){
   return s->pos+s->buf_pos-s->buf_len;
 }
 
-inline static int stream_seek(stream_t *s,unsigned int pos){
+inline static int stream_seek(stream_t *s,off_t pos){
 
-//  if(verbose>=3) printf("seek to 0x%X\n",pos);
+//  if(verbose>=3) printf("seek to 0x%qX\n",(long long)pos);
 
   if(pos<s->pos){
-    int x=pos-(s->pos-s->buf_len);
+    off_t x=pos-(s->pos-s->buf_len);
     if(x>=0){
       s->buf_pos=x;
 //      putchar('*');fflush(stdout);

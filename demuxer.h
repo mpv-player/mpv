@@ -18,10 +18,11 @@
 #define DEMUXER_TIME_BPS 3
 
 
+// Holds one packet/frame/whatever
 typedef struct demux_packet_st {
   int len;
   float pts;
-  int pos;  // pozicio indexben (AVI) ill. fileban (MPG)
+  off_t pos;  // pozicio indexben (AVI) ill. fileban (MPG)
   unsigned char* buffer;
   int flags; // keyframe, etc
   struct demux_packet_st* next;
@@ -34,8 +35,8 @@ typedef struct {
   float pts;               // current buffer's pts
   int pts_bytes;           // number of bytes read after last pts stamp
   int eof;                 // end of demuxed stream? (true if all buffer empty)
-  int pos;                 // position in the input stream (file)
-  int dpos;                // position in the demuxed stream
+  off_t pos;                 // position in the input stream (file)
+  off_t dpos;                // position in the demuxed stream
   int pack_no;		   // serial number of packet
   int flags;               // flags of current packet (keyframe etc)
 //---------------
@@ -55,12 +56,12 @@ typedef struct {
 typedef struct demuxer_st {
   stream_t *stream;
   int synced;  // stream synced (used by mpeg)
-  int filepos; // input stream current pos.
+  off_t filepos; // input stream current pos.
   int type;    // demuxer type: mpeg PS, mpeg ES, avi, avi-ni, avi-nini, asf
   int file_format;  // file format: mpeg/avi/asf
 //  int time_src;// time source (pts/file/bps)
-  unsigned int movi_start;
-  unsigned int movi_end;
+  off_t movi_start;
+  off_t movi_end;
   //
   demux_stream_t *audio;
   demux_stream_t *video;
@@ -68,6 +69,7 @@ typedef struct demuxer_st {
 
   // index:
 //  AVIINDEXENTRY* idx;
+// FIXME: off_t???
   void* idx;
   int idx_size;
   int idx_pos;
@@ -103,12 +105,12 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id);
 demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id);
 
 void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp);
-void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,int pos,int flags);
+void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,off_t pos,int flags);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 int ds_fill_buffer(demux_stream_t *ds);
 
-inline static int ds_tell(demux_stream_t *ds){
+inline static off_t ds_tell(demux_stream_t *ds){
   return (ds->dpos-ds->buffer_size)+ds->buffer_pos;
 }
 

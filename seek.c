@@ -58,6 +58,7 @@ if(demuxer->file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){
 
 switch(demuxer->file_format){
 
+  //FIXME: OFF_T - Didn't check AVI case yet (avi files can't be >2G anyway?)
   case DEMUXER_TYPE_AVI: {
   //================= seek in AVI ==========================
     int rel_seek_frames=rel_seek_secs*sh_video->fps;
@@ -187,12 +188,14 @@ switch(demuxer->file_format){
   }
   break;
 
+  //FIXME: OFF_T - didn't test ASF case yet (don't have a large asf...)
+  //FIXME: reports good or bad to steve@daviesfam.org please
   case DEMUXER_TYPE_ASF: {
   //================= seek in ASF ==========================
     float p_rate=10; // packets / sec
-    int rel_seek_packs=rel_seek_secs*p_rate;
-    int rel_seek_bytes=rel_seek_packs*asf_packetsize;
-    int newpos;
+    off_t rel_seek_packs=rel_seek_secs*p_rate; // FIXME: int may be enough?
+    off_t rel_seek_bytes=rel_seek_packs*asf_packetsize;
+    off_t newpos;
     //printf("ASF: packs: %d  duration: %d  \n",(int)fileh.packets,*((int*)&fileh.duration));
 //    printf("ASF_seek: %d secs -> %d packs -> %d bytes  \n",
 //       rel_seek_secs,rel_seek_packs,rel_seek_bytes);
@@ -228,14 +231,18 @@ switch(demuxer->file_format){
   case DEMUXER_TYPE_MPEG_ES:
   case DEMUXER_TYPE_MPEG_PS: {
   //================= seek in MPEG ==========================
-        int newpos;
+        off_t newpos;
         if(!sh_video->i_bps) // unspecified?
           newpos=demuxer->filepos+2324*75*rel_seek_secs; // 174.3 kbyte/sec
         else
           newpos=demuxer->filepos+(sh_video->i_bps)*rel_seek_secs;
 
         if(newpos<seek_to_byte) newpos=seek_to_byte;
+#ifdef _LARGEFILE_SOURCE
+        newpos&=~((long long)STREAM_BUFFER_SIZE-1);  /* sector boundary */
+#else
         newpos&=~(STREAM_BUFFER_SIZE-1);  /* sector boundary */
+#endif
         stream_seek(demuxer->stream,newpos);
 
         // re-sync video:
