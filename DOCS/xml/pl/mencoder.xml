@@ -214,7 +214,7 @@ Komenda:
 </para>
 
 <note><para>
-Komenda ta oczekuje tego, ¿eby<filename>1.avi</filename> i <filename>2.avi</filename> u¿ywa³y tego
+Komenda ta oczekuje tego, ¿eby <filename>1.avi</filename> i <filename>2.avi</filename> u¿ywa³y tego
 samego kodeka, rozdzielczo¶ci, szybko¶ci strumienia (stream rate), i przynajmniej
 <filename>1.avi</filename> nie mo¿e byæ zepsute. Mo¿liwe, ¿e bêdziesz musia³ naprawiæ pliki wej¶ciowe,
 jak by³o opisane
