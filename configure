@@ -154,6 +154,7 @@ Optional features:
   --enable-new-conf      Enable new config stuff [disabled]
   --enable-menu          Enable osd menu support (need new config) [disabled]
   --enable-qtx-codecs	 Enable Quicktime codecs [disabled]
+  --disable-sortsub      Disable subtitles sorting [enabled]
 
 Codecs:
   --enable-gif		 enable gif89a output support [autodetect]
@@ -1029,6 +1030,7 @@ _shared_pp=no
 _new_conf=no
 _menu=no
 _qtx_codecs=no
+_sortsub=yes
 
 for ac_option do
   case "$ac_option" in
@@ -1220,6 +1222,9 @@ for ac_option do
 
   --enable-qtx-codecs) _qtx_codecs=yes ;;
   --disable-qtx-codecs) _qtx_codecs=no ;;
+
+  --enable-sortsub) _sortsub=yes ;;
+  --disable-sortsub) _sortsub=no ;;
 
   --language=*)
     LINGUAS=`echo $ac_option | cut -d '=' -f 2`
@@ -4329,6 +4334,14 @@ else
 fi
 echores "$_qtx_codecs"
 
+echocheck "Subtitles sorting"
+if test "$_sortsub" = yes ; then
+    _def_sortsub='#define USE_SORTSUB 1'
+else
+    _def_sortsub='#undef USE_SORTSUB'
+fi
+echores "$_sortsub"
+
 # --------------- GUI specific tests begin -------------------
 echocheck "GUI"
 echo "$_gui"
@@ -5080,6 +5093,9 @@ $_def_qtx_codecs
 
 /* enables / disables osd menu */
 $_def_menu
+
+/* enables / disables subtitles sorting */
+$_def_sortsub
 
 /* Extension defines */
 $_def_3dnow	// only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)

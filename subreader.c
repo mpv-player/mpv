@@ -35,6 +35,20 @@ int sub_slacktime=2000; // 20 seconds
 
 /* Use the SUB_* constant defined in the header file */
 int sub_format=SUB_INVALID;
+#ifdef USE_SORTSUB
+/* 
+   Some subtitling formats, namely AQT and Subrip09, define the end of a
+   subtitle as the beginning of the following. Since currently we read one
+   subtitle at time, for these format we keep two global *subtitle,
+   previous_aqt_sub and previous_subrip09_sub, pointing to previous subtitle,
+   so we can change its end when we read current subtitle starting time.
+   When USE_SORTSUB is defined, we use a single global unsigned long, 
+   previous_sub_end, for both (and even future) formats, to store the end of
+   the previous sub: it is initialized to 0 in sub_read_file and eventually
+   modified by sub_read_aqt_line or sub_read_subrip09_line.
+ */
+unsigned long previous_sub_end;
+#endif
 
 static int eol(char p) {
     return (p=='\r' || p=='\n' || p=='\0');
@@ -510,7 +524,10 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 	return NULL; // we should have returned before if it's OK
 }
 
+#ifndef USE_SORTSUB
+//we don't need this if we use previous_sub_end
 subtitle *previous_aqt_sub = NULL;
+#endif
 
 subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
     char line[LINE_LEN+1];
@@ -525,10 +542,14 @@ subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
 		break;
     }
     
+#ifdef USE_SORTSUB
+    previous_sub_end = (current->start) ? current->start - 1 : 0; 
+#else
     if (previous_aqt_sub != NULL) 
 	previous_aqt_sub->end = current->start-1;
     
     previous_aqt_sub = current;
+#endif
 
     if (!fgets (line, LINE_LEN, fd))
 	return NULL;
@@ -549,15 +570,21 @@ subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
     current->lines=i+1;
 
     if ((current->text[0]=="") && (current->text[1]=="")) {
+#ifdef USE_SORTSUB
+	previous_sub_end = 0;
+#else
 	// void subtitle -> end of previous marked and exit
 	previous_aqt_sub = NULL;
+#endif	
 	return NULL;
 	}
 
     return current;
 }
 
+#ifndef USE_SORTSUB
 subtitle *previous_subrip09_sub = NULL;
+#endif
 
 subtitle *sub_read_line_subrip09(FILE *fd,subtitle *current) {
     char line[LINE_LEN+1];
@@ -572,16 +599,20 @@ subtitle *sub_read_line_subrip09(FILE *fd,subtitle *current) {
         if (!((len=sscanf (line, "[%d:%d:%d]",&a1,&a2,&a3)) < 3))
 		break;
     }
+
+    current->start = a1*360000+a2*6000+a3*100;
     
+#ifdef USE_SORTSUB
+    previous_sub_end = (current->start) ? current->start - 1 : 0; 
+#else
     if (previous_subrip09_sub != NULL) 
 	previous_subrip09_sub->end = current->start-1;
     
     previous_subrip09_sub = current;
+#endif
 
     if (!fgets (line, LINE_LEN, fd))
 	return NULL;
-
-    current->start = a1*360000+a2*6000+a3*100;
 
     next = line,i=0;
     
@@ -595,8 +626,12 @@ subtitle *sub_read_line_subrip09(FILE *fd,subtitle *current) {
     current->lines=i+1;
 
     if ((current->text[0]=="") && (i==0)) {
+#ifdef USE_SORTSUB
+	previous_sub_end = 0;
+#else
 	// void subtitle -> end of previous marked and exit
 	previous_subrip09_sub = NULL;
+#endif	
 	return NULL;
 	}
 
@@ -978,7 +1013,7 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block)
 subtitle* sub_read_file (char *filename, float fps) {
     FILE *fd;
     int n_max, n_first, i, j, sub_first, sub_orig;
-    subtitle *first, *second;
+    subtitle *first, *second, *sub;
     char *fmtname[] = { "microdvd", "subrip", "subviewer", "sami", "vplayer",
 			"rt", "ssa", "dunnowhat", "mpsub", "aqt", "subviewer 2.0", "subrip 0.9", "jacosub" };
     subtitle * (*func[])(FILE *fd,subtitle *dest)= 
@@ -1015,19 +1050,63 @@ subtitle* sub_read_file (char *filename, float fps) {
     first=(subtitle *)malloc(n_max*sizeof(subtitle));
     if(!first) return NULL;
     
+#ifdef USE_SORTSUB
+    sub = (subtitle *)malloc(sizeof(subtitle));
+    //This is to deal with those formats (AQT & Subrip) which define the end of a subtitle
+    //as the beginning of the following
+    previous_sub_end = 0;
+#endif    
     while(1){
-        subtitle *sub;
         if(sub_num>=n_max){
             n_max+=16;
             first=realloc(first,n_max*sizeof(subtitle));
         }
+#ifndef USE_SORTSUB
 	sub = &first[sub_num];
+#endif	
 	memset(sub, '\0', sizeof(subtitle));
         sub=func[sub_format](fd,sub);
         if(!sub) break;   // EOF
 #ifdef USE_ICONV
 	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
 #endif
+#ifdef USE_SORTSUB
+	if(!sub_num || (first[sub_num - 1].start <= sub->start)){
+	    first[sub_num].start = sub->start;
+  	    first[sub_num].end   = sub->end;
+	    first[sub_num].lines = sub->lines;
+  	    for(i = 0; i < sub->lines; ++i){
+		first[sub_num].text[i] = sub->text[i];
+  	    }
+	    if (previous_sub_end){
+  		first[sub_num - 1].end = previous_sub_end;
+    		previous_sub_end = 0;
+	    }
+	} else {
+	    for(j = sub_num - 1; j >= 0; --j){
+    		first[j + 1].start = first[j].start;
+    		first[j + 1].end   = first[j].end;
+		first[j + 1].lines = first[j].lines;
+    		for(i = 0; i < first[j].lines; ++i){
+      		    first[j + 1].text[i] = first[j].text[i];
+		}
+		if(!j || (first[j - 1].start <= sub->start)){
+	    	    first[j].start = sub->start;
+	    	    first[j].end   = sub->end;
+	    	    first[j].lines = sub->lines;
+	    	    for(i = 0; i < SUB_MAX_TEXT; ++i){
+			first[j].text[i] = sub->text[i];
+		    }
+		    if (previous_sub_end){
+			first[j].end = first[j - 1].end;
+			first[j - 1].end = previous_sub_end;
+			previous_sub_end = 0;
+		    }
+		    break;
+    		}
+	    }
+	}
+#endif	
         if(sub==ERR) ++sub_errs; else ++sub_num; // Error vs. Valid
     }
     
