@@ -317,46 +317,6 @@ static WINE_MODREF *MODULE_LoadLibraryExA( LPCSTR libname, HFILE hfile, DWORD fl
 		/* decrement the dependencies through the MODULE_FreeLibrary call. */
 		pwm->refCount++;
 
-		if(strstr(libname,"QuickTime.qts")){
-		    void** ptr=0x62b75ca4;
-		    int i;
-		    fprintf(stderr,"QuickTime.qts patched!!! old entry=%p\n",ptr[0]);
-		    // NOP out directx, fontmanager and some other init calls:
-		    for(i=0;i<5;i++) ((char*)0x6299e842)[i]=0x90;
-		    for(i=0;i<28;i++) ((char*)0x6299e86d)[i]=0x90;
-		    for(i=0;i<5;i++) ((char*)0x6299e898)[i]=0x90;
-		    for(i=0;i<9;i++) ((char*)0x6299e8ac)[i]=0x90;
-		    /* remove threads */
-#if 1
-		    for (i=0;i<0x6a;i++) ((char*)0x62a61b10)[i]=0x90;
-#else
-		    /* callers */
-		    for (i=0;i<5;i++) ((char*)0x629487c5)[i]=0x90;
-		    for (i=0;i<5;i++) ((char*)0x6294b275)[i]=0x90;
-		    for (i=0;i<5;i++) ((char*)0x629a24b1)[i]=0x90;
-		    for (i=0;i<5;i++) ((char*)0x629afc5a)[i]=0x90;
-		    for (i=0;i<5;i++) ((char*)0x62af799c)[i]=0x90;
-		    for (i=0;i<5;i++) ((char*)0x62af7efe)[i]=0x90;
-		    for (i=0;i<5;i++) ((char*)0x62afa33e)[i]=0x90;
-#endif
-		    /* load fonts */
-//		    for (i=0;i<5;i++) ((char*)0x6288dd77)[i]=0x90;
-		    /* terminateqtml fix */
-#if 0
-		    for (i=0;i<2;i++) ((char*)0x629a13c7)[i]=0x90;
-		    for (i=0;i<5;i++) ((char*)0x629a13cb)[i]=0x90;
-		    for (i=0;i<5;i++) ((char*)0x62890337)[i]=0x90;
-//		    for (i=0;i<5;i++) ((char*)0x629a13d5)[i]=0x90;
-//		    for (i=0;i<5;i++) ((char*)0x6299fe14)[i]=0x90;
-#endif
-#ifdef EMU_QTX_API
-		    report_entry = report_func;
-		    report_ret   = report_func_ret;
-		    wrapper_target=ptr[0];
-		    ptr[0]=wrapper;
-#endif
-		}
-
                 SetLastError( err );  /* restore last error */
 		return pwm;
 	}
@@ -462,6 +422,67 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 	if (!wm)
 	    printf("Win32 LoadLibrary failed to load: %s\n", checked);
 
+	if (strstr(libname,"QuickTime.qts") && wm)
+	{
+	    void** ptr;
+	    void *dispatch_addr;
+	    int i;
+
+//	    dispatch_addr = GetProcAddress(wm->module, "theQuickTimeDispatcher", TRUE);
+	    dispatch_addr = PE_FindExportedFunction(wm, "theQuickTimeDispatcher", TRUE);
+	    if (dispatch_addr == 0x62924c30)
+	    {
+	        fprintf(stderr, "QuickTime5 DLLs found\n");
+		ptr = 0x62b75ca4; // dispatch_ptr
+	        for (i=0;i<5;i++)  ((char*)0x6299e842)[i]=0x90; // make_new_region ?
+	        for (i=0;i<28;i++) ((char*)0x6299e86d)[i]=0x90; // call__call_CreateCompatibleDC ?
+		for (i=0;i<5;i++)  ((char*)0x6299e898)[i]=0x90; // jmp_to_call_loadbitmap ?
+	        for (i=0;i<9;i++)  ((char*)0x6299e8ac)[i]=0x90; // call__calls_OLE_shit ?
+	        for (i=0;i<106;i++) ((char*)0x62a61b10)[i]=0x90; // disable threads
+#if 0
+		/* CreateThread callers */
+		for (i=0;i<5;i++) ((char*)0x629487c5)[i]=0x90;
+		for (i=0;i<5;i++) ((char*)0x6294b275)[i]=0x90;
+		for (i=0;i<5;i++) ((char*)0x629a24b1)[i]=0x90;
+		for (i=0;i<5;i++) ((char*)0x629afc5a)[i]=0x90;
+		for (i=0;i<5;i++) ((char*)0x62af799c)[i]=0x90;
+		for (i=0;i<5;i++) ((char*)0x62af7efe)[i]=0x90;
+		for (i=0;i<5;i++) ((char*)0x62afa33e)[i]=0x90;
+#endif
+
+#if 0
+		/* TerminateQTML fix */
+		for (i=0;i<47;i++) ((char*)0x62afa3b8)[i]=0x90; // terminate thread
+		for (i=0;i<47;i++) ((char*)0x62af7f78)[i]=0x90; // terminate thread
+		for (i=0;i<77;i++) ((char*)0x629a13d5)[i]=0x90;
+		((char *)0x6288e0ae)[0] = 0xc3; // font/dc remover
+		for (i=0;i<24;i++) ((char*)0x6287a1ad)[i]=0x90; // destroy window
+#endif
+	    } else if (dispatch_addr == 0x6693b330)
+	    {
+    		fprintf(stderr, "QuickTime6 DLLs found\n");
+		ptr = 0x66bb9524; // dispatcher_ptr
+		for (i=0;i<5;i++)  ((char *)0x66a730cc)[i]=0x90; // make_new_region
+		for (i=0;i<28;i++) ((char *)0x66a730f7)[i]=0x90; // call__call_CreateCompatibleDC
+		for (i=0;i<5;i++)  ((char *)0x66a73122)[i]=0x90; // jmp_to_call_loadbitmap
+		for (i=0;i<9;i++)  ((char *)0x66a73131)[i]=0x90; // call__calls_OLE_shit
+		for (i=0;i<96;i++) ((char *)0x66aac852)[i]=0x90; // disable threads
+	    } else
+	    {
+	        fprintf(stderr, "Unsupported QuickTime version (0x%x)\n",
+		    dispatch_addr);
+		return NULL;
+	    }
+
+	    fprintf(stderr,"QuickTime.qts patched!!! old entry=%p\n",ptr[0]);
+
+#ifdef EMU_QTX_API
+	    report_entry = report_func;
+	    report_ret   = report_func_ret;
+	    wrapper_target=ptr[0];
+	    ptr[0]=wrapper;
+#endif
+	}
 
 	return wm ? wm->module : 0;
 }
