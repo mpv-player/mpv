@@ -225,10 +225,10 @@ work with <application>MPlayer</application>. In order to achieve this do:
 
 <procedure>
 <step><para>
-  <screen>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login</screen>
+  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
   </para></step>
 <step><para>
-  <screen>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg</screen>
+  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg</screen>
   </para></step>
 <step><para>
   Move the <filename>libavcodec</filename> directory from the FFmpeg
