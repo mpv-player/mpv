@@ -13,7 +13,7 @@
 
 typedef struct equalizer_s
 {
-  float gain;   	// Gain in db  -15 - 15 
+  float gain;   	// Gain in dB  -15 - 15 
   int	channel; 	// Channel number 0 - 5 
   int 	band;		// Frequency band 0 - 9
 }equalizer_t;

@@ -43,7 +43,7 @@ LIBAO_PLUGIN_EXTERN(eq)
 #define KM  10    // Max number of octaves
 
 #define Q   1.2247 /* Q value for band-pass filters 1.2247=(3/2)^(1/2)
-		      gives 4db suppression @ Fc*2 and Fc/2 */
+		      gives 4dB suppression @ Fc*2 and Fc/2 */
 
 // Center frequencies for band-pass filters
 #define CF  {31.25,62.5,125,250,500,1000,2000,4000,8000,16000}
@@ -146,13 +146,6 @@ static int init(){
   // Reset buffers
   reset();
 
-#if 0
-  // Reset gain factors
-  for(c=0;c<pl_eq.channels;c++)
-    for(k=0;k<pl_eq.K;k++)
-      pl_eq.g[c][k]=0;
-#endif
-
   // Tell ao_plugin how much this plugin adds to the overall time delay
   ao_plugin_data.delay_fix-=2/((float)pl_eq.channels*(float)ao_plugin_data.rate);
   // Print some cool remark of what the plugin does
@@ -179,8 +172,7 @@ static int play(){
     while(in < end){
       register int16_t k   = 0;	   	// Frequency band index
       register int32_t yt  = 0;    	// Total output from filters
-      register int16_t x   = *in; 	/* Current input sample scale
-					   to prevent overflow in wq */
+      register int16_t x   = *in; 	// Current input sample
       in+=nch;
 
       // Run the filters 
