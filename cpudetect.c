@@ -129,8 +129,8 @@ void GetCpuCaps( CpuCaps *caps)
 	if (regs[0]>=0x80000001) {
 		printf("extended cpuid-level: %d\n",regs[0]&0x7FFFFFFF);
 		do_cpuid(0x80000001, regs2);
-		caps->hasMMX  = (regs2[3] & (1 << 23 )) >> 23; // 0x0800000
-		caps->hasMMX2 = (regs2[3] & (1 << 22 )) >> 22; // 0x400000
+		caps->hasMMX  |= (regs2[3] & (1 << 23 )) >> 23; // 0x0800000
+		caps->hasMMX2 |= (regs2[3] & (1 << 22 )) >> 22; // 0x400000
 		caps->has3DNow    = (regs2[3] & (1 << 31 )) >> 31; //0x80000000
 		caps->has3DNowExt = (regs2[3] & (1 << 30 )) >> 30;
 	}
