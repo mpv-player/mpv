@@ -22,7 +22,7 @@
 #include <winsock2.h>
 #endif
 
-#ifndef USE_SETLOCAL
+#ifndef USE_SETLOCALE
 #undef USE_ICONV
 #endif
 
