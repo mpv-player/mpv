@@ -5,12 +5,10 @@
 #include "stream.h"
 #include "../cfgparser.h"
 
-#include <cdda_interface.h>
-#include <cdda_paranoia.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cdd.h"
 
 static int speed = -1;
 static int paranoia_mode = 1;
@@ -43,14 +41,6 @@ void cdda_register_options(m_config_t* cfg) {
   m_config_register_options(cfg,cdda_conf);
 }
 
-typedef struct {
-  cdrom_drive* cd;
-  cdrom_paranoia* cdp;
-  int sector;
-  int start_sector;
-  int end_sector;
-} cdda_priv;
-
 stream_t* open_cdda(char* dev,char* track) {
   stream_t* st;
   int start_track = 0;
@@ -60,6 +50,9 @@ stream_t* open_cdda(char* dev,char* track) {
   cdrom_drive* cdd = NULL;
   cdda_priv* priv;
   char* end = strchr(track,'-');
+  cd_info_t *cd_info;
+  unsigned int audiolen=0;
+  int i;
 
   if(!end)
     start_track = end_track = atoi(track);
@@ -93,7 +86,6 @@ stream_t* open_cdda(char* dev,char* track) {
 
   cdda_verbose_set(cdd, CDDA_MESSAGE_FORGETIT, CDDA_MESSAGE_FORGETIT);
 
-
   if(sector_size) {
     cdd->nsectors = sector_size;
     cdd->bigbuff = sector_size * CD_FRAMESIZE_RAW;
@@ -105,8 +97,25 @@ stream_t* open_cdda(char* dev,char* track) {
     return NULL;
   }
 
+  cd_info = cd_info_new();
+  mp_msg(MSGT_OPEN,MSGL_INFO,"Found Audio CD with %d tracks\n",cdda_tracks(cdd));
+  for(i=0;i<cdd->tracks;i++) {
+	  char track_name[80];
+	  long sec=cdda_track_firstsector(cdd,i+1);
+	  long off=cdda_track_lastsector(cdd,i+1)-sec+1;
+
+	  sprintf(track_name, "Track %d", i+1);
+	  cd_info_add_track(cd_info, track_name, i+1, (unsigned int)(off/(60*75)), (unsigned int)((off/75)%60), (unsigned int)(off%75), sec, off );
+	  audiolen += off;
+  }
+  cd_info->min  = (unsigned int)(audiolen/(60*75));
+  cd_info->sec  = (unsigned int)((audiolen/75)%60);
+  cd_info->msec = (unsigned int)(audiolen%75);
+
   priv = (cdda_priv*)malloc(sizeof(cdda_priv));
+  memset(priv, 0, sizeof(cdda_priv));
   priv->cd = cdd;
+  priv->cd_info = cd_info;
 
   if(toc_bias)
     offset -= cdda_track_firstsector(cdd,1);
@@ -168,7 +177,9 @@ static void cdparanoia_callback(long inpos, int function) {
 
 int read_cdda(stream_t* s) {
   cdda_priv* p = (cdda_priv*)s->priv;
+  cd_track_t *cd_track;
   int16_t * buf;
+  unsigned int i;
   
   buf = paranoia_read(p->cdp,cdparanoia_callback);
 
@@ -179,21 +190,59 @@ int read_cdda(stream_t* s) {
   if(p->sector == p->end_sector)
     s->eof = 1;
 
+  for(i=0;i<p->cd->tracks;i++){
+	  if(p->cd->disc_toc[i].dwStartSector==p->sector-1) {
+		  cd_track = cd_info_get_track(p->cd_info, i+1);
+//printf("Track %d, sector=%d\n", i, p->sector-1);
+		  if( cd_track!=NULL ) {
+			  printf("%s\n", cd_track->name ); 
+		  }
+		  break;
+	  }
+  }
+
+  
   return CD_FRAMESIZE_RAW;
 }
 
 void seek_cdda(stream_t* s) {
   cdda_priv* p = (cdda_priv*)s->priv;
-  int sec = s->pos/CD_FRAMESIZE_RAW;
+  cd_track_t *cd_track;
+  int sec;
+  int current_track=0, seeked_track=0;
+  int i;
 
+  sec = s->pos/CD_FRAMESIZE_RAW;
+//printf("pos: %d, sec: %d ## %d\n", s->pos, sec, s->pos/CD_FRAMESIZE_RAW);
+//printf("sector: %d\n", p->sector );
+ 
+  for(i=0;i<p->cd->tracks;i++){
+	if( p->sector>p->cd->disc_toc[i].dwStartSector && p->sector<p->cd->disc_toc[i+1].dwStartSector ) {
+		current_track = i;
+	}
+	if( sec>p->cd->disc_toc[i].dwStartSector && sec<p->cd->disc_toc[i+1].dwStartSector ) {
+		seeked_track = i;
+	}
+  }
+//printf("current: %d, seeked: %d\n", current_track, seeked_track);
+	if( current_track!=seeked_track ) {
+//printf("Track %d, sector=%d\n", seeked_track, sec);
+		  cd_track = cd_info_get_track(p->cd_info, seeked_track+1);
+		  if( cd_track!=NULL ) {
+			  printf("%s\n", cd_track->name ); 
+		  }
+
+	}
+ 
   if(sec < p->start_sector)
     sec = p->start_sector;
   else if(sec > p->end_sector)
     sec = p->end_sector;
 
   p->sector = sec;
-  s->pos = sec*CD_FRAMESIZE_RAW;
+//  s->pos = sec*CD_FRAMESIZE_RAW;
 
+//printf("seek: %d, sec: %d\n", s->pos, sec);
   paranoia_seek(p->cdp,sec,SEEK_SET);
 
 }
