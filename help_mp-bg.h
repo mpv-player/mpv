@@ -14,11 +14,7 @@ static char* banner_text=
 "(прочети Документацията в ./DOCS/ и manpage -> `man mplayer` )  \n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"Употреба:   mplayer [-gui] [опции] [url | път/]име_на_файл\n"
-#else
 "Употреба:   mplayer [опции] [url | път/]име_на_файл\n"
-#endif
 "\n"
 "Основни опции: (вижте manpage `man mplayer` за пълен списък на всички опции!)\n"
 " -vo <drv[:dev]> Избира видео изход (драйвер и устройство) (виж '-vo help')\n"
