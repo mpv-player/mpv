@@ -1161,6 +1161,10 @@ int vixConfigPlayback(vidix_playback_t *config)
     sh = config->src.h;
     dw = config->dest.w;
     dh = config->dest.h;
+    
+    config->dest.pitch.y=32;
+    config->dest.pitch.u=
+    config->dest.pitch.v=16;
 
     printf("[mga] Setting up a %dx%d+%d+%d video window (src %dx%d) format %X\n",
            dw, dh, x, y, sw, sh, config->fourcc);
@@ -1193,7 +1197,11 @@ int vixConfigPlayback(vidix_playback_t *config)
 //    config->frame_size = config->src.h*config->src.w+(config->src.w*config->src.h)/2;
 
     frame_size = config->frame_size;
-			
+    
+    config->offset.y=0;
+    config->offset.v=((sw + 31) & ~31) * sh;
+    config->offset.u=config->offset.v+((sw + 31) & ~31) * sh /4;
+
     mga_src_base = (mga_ram_size*0x100000-config->num_frames*config->frame_size);
     if (mga_src_base < 0)
     {
