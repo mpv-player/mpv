@@ -473,6 +473,7 @@ int pts_from_bps=1;
 #else
 int pts_from_bps=0;
 #endif
+int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
 char* title="MPlayer";
 // screen info:
 char* video_driver=NULL; //"mga"; // default
@@ -1662,7 +1663,7 @@ if(1)
     current_module="decode_video";
     
 //    if(!force_redraw && v_frame+0.1<a_frame) drop_frame=1; else drop_frame=0;
-    drop_frame_cnt+=drop_frame;
+//    if(drop_frame) ++drop_frame_cnt;
 
   //--------------------  Decode a frame: -----------------------
 switch(sh_video->codec->driver){
@@ -1700,7 +1701,7 @@ switch(sh_video->codec->driver){
     if(in_size<0){ eof=1;break;}
     if(in_size>max_framesize) max_framesize=in_size;
 
-    DS_VideoDecoder_DecodeFrame(start, in_size, 0, !drop_frame);
+    if(drop_frame<2) DS_VideoDecoder_DecodeFrame(start, in_size, 0, !drop_frame);
     current_module="draw_frame";
 
     if(!drop_frame && sh_video->our_out_buffer){
@@ -1734,7 +1735,7 @@ switch(sh_video->codec->driver){
       sh_video->bih->biSizeImage = in_size;
 //      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME|(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL), 
       ret = ICDecompress(sh_video->hic, ICDECOMPRESS_NOTKEYFRAME |
-                        ( drop_frame?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
+                        ( (drop_frame==2)?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
                          sh_video->bih,   start,
                         &sh_video->o_bih,
                         drop_frame ? 0 : sh_video->our_out_buffer);
@@ -1838,8 +1839,17 @@ switch(sh_video->codec->driver){
 
     if(file_format==DEMUXER_TYPE_MPEG_PS) d_video->pts+=frame_time;
 
-    if(!drop_frame){
+    if(drop_frame){
 
+      if(has_audio){
+          int delay=get_audio_delay(audio_fd);
+          if(verbose>1)printf("delay=%d\n",delay);
+          time_frame=v_frame;
+          time_frame-=a_frame-(float)delay/(float)sh_audio->o_bps;
+	  if(time_frame>-0.1) drop_frame=0; // stop dropping frames
+      }
+
+    } else {
       // It's time to sleep...
       current_module="sleep";
 
@@ -1850,10 +1860,15 @@ switch(sh_video->codec->driver){
           if(verbose>1)printf("delay=%d\n",delay);
           time_frame=v_frame;
           time_frame-=a_frame-(float)delay/(float)sh_audio->o_bps;
+          // we are out of time... drop next frame!
+	  if(time_frame<-0.1){
+	      drop_frame=frame_dropping; // tricky!
+	      ++drop_frame_cnt;
+	  }
       } else {
           if(time_frame<-0.1 || time_frame>0.1) time_frame=0;
       }
-    
+
       if(verbose>1)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",time_frame,a_frame,v_frame);
       
       while(time_frame>0.005){
@@ -1929,12 +1944,12 @@ switch(sh_video->codec->driver){
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
         a_frame+=x; c_total+=x;
-        printf("  ct:%7.3f  %3d  %2d%%  %2d%%  %3.1f%% \r",c_total,
+        printf(" ct:%7.3f  %3d  %2d%% %2d%% %3.1f%% %d\r",c_total,
         (int)num_frames,
         (v_frame>0.5)?(int)(100.0*video_time_usage/(double)v_frame):0,
         (v_frame>0.5)?(int)(100.0*vout_time_usage/(double)v_frame):0,
         (v_frame>0.5)?(100.0*audio_time_usage/(double)v_frame):0
-//        ,drop_frame_cnt
+        ,drop_frame_cnt
 //        dbg_es_sent-dbg_es_rcvd 
         );
         fflush(stdout);
@@ -2070,8 +2085,8 @@ switch(sh_video->codec->driver){
       mixer_usemaster=!mixer_usemaster;
       break;
     case 'd':
-      drop_frame=!drop_frame;
-      printf("== drop: %d ==  \n",drop_frame);
+      frame_dropping=(frame_dropping+1)%3;
+      printf("== drop: %d ==  \n",frame_dropping);
       break;
   }
   if (seek_to_sec) {
