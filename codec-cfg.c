@@ -651,16 +651,25 @@ void list_codecs(int audioflag){
 		if (audioflag) {
 			i = nr_acodecs;
 			c = audio_codecs;
+			printf("ac:      afm: status:   info:  [lib/dll]\n");
 		} else {
 			i = nr_vcodecs;
 			c = video_codecs;
+			printf("vc:      vfm: status:   info:  [lib/dll]\n");
 		}
 		if(!i) return NULL;
 		for (/* NOTHING */; i--; c++) {
+			char* s="unknown ";
+			switch(c->status){
+			  case CODECS_STATUS_WORKING:     s="working ";break;
+			  case CODECS_STATUS_PROBLEMS:    s="problems";break;
+			  case CODECS_STATUS_NOT_WORKING: s="crashing";break;
+			  case CODECS_STATUS_UNTESTED:    s="untested";break;
+			}
 			if(c->dll)
-			  printf("%-10s %2d  %s  [%s]\n",c->name,c->driver,c->info,c->dll);
+			  printf("%-10s%2d  %s  %s  [%s]\n",c->name,c->driver,s,c->info,c->dll);
 			else
-			  printf("%-10s %2d  %s\n",c->name,c->driver,c->info);
+			  printf("%-10s%2d  %s  %s\n",c->name,c->driver,s,c->info);
 			
 		}
 
