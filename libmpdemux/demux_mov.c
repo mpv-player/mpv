@@ -988,6 +988,15 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 #endif			  
 			}
 		      } break;
+		      case MOV_FOURCC('a','l','a','c'): {
+			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found alac atom (%d)!\n", atom_len);
+			if(atom_len > 8) {
+			    // copy all the atom (not only payload) for lavc alac decoder
+			    sh->codecdata_len = atom_len;
+			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
+			    memcpy(sh->codecdata, &trak->stdata[28], sh->codecdata_len);
+			}
+		      } break;
 		      default:
 			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown audio atom %c%c%c%c (%d)!\n",
 			    trak->stdata[32+adjust],trak->stdata[33+adjust],trak->stdata[34+adjust],trak->stdata[35+adjust],
