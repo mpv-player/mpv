@@ -34,7 +34,7 @@ static uint8_t *lvo_mem = NULL;
 static uint8_t next_frame;
 static mga_vid_config_t mga_vid_config;
 static unsigned image_bpp,image_height,image_width;
-
+extern int verbose;
 
 #define PIXEL_SIZE() ((video_mode_info.BitsPerPixel+7)/8)
 #define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*(pixel_size) )
@@ -162,7 +162,7 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
         src+=stride[2];
         dest += bespitch2;
     }
-#else
+#elsif 0
 /* vo_xv stuff: slightly better for YV12 on radeon_vid */
  uint8_t *src;
  uint8_t *dst;
@@ -201,6 +201,18 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
      src+=stride[1];
      dst+=image_width/2;
     }
+#else
+ uint8_t *src;
+ uint8_t *dst;
+    dst = lvo_mem + image_width * y + x;
+    src = image[0];
+    w <<= 1;
+    while(h--) {
+	memcpy(dst, src, w);
+	src += stride[0];
+	dst += stride[0];
+    }
+
 #endif
  return 0;
 }
@@ -235,5 +247,6 @@ void     vlvo_draw_osd(void)
 
 uint32_t vlvo_query_info(uint32_t format)
 {
+  if(verbose) printf("vesa_lvo: query_format was called: %x (%s)\n",format,vo_format_name(format));
   return 1;
 }
