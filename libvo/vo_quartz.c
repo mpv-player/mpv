@@ -49,8 +49,6 @@ static vo_info_t info =
 
 LIBVO_EXTERN(quartz)
 
-static uint32_t image_width;
-static uint32_t image_height;
 static uint32_t image_depth;
 static uint32_t image_format;
 static uint32_t image_size;
@@ -59,7 +57,7 @@ static char *image_data;
 
 static ImageSequence seqId;
 static CodecType image_qtcodec;
-static PlanarPixmapInfoYUV420 *P;
+static PlanarPixmapInfoYUV420 *P = NULL;
 static struct
 {
 	ImageDescriptionHandle desc;
@@ -70,25 +68,26 @@ static struct
 } yuv_qt_stuff;
 static MatrixRecord matrix;
 static int EnterMoviesDone = 0;
+static int get_image_done = 0;
 
 extern int vo_ontop;
-extern int vo_fs;
+extern int vo_fs; // user want fullscreen
+static int vo_quartz_fs; // we are in fullscreen
 
-int int_pause = 0;
-float winAlpha = 1;
+static int int_pause = 0;
+static float winAlpha = 1;
 
-int device_width;
-int device_height;
+static int device_width;
+static int device_height;
 
-WindowRef theWindow;
+static WindowRef theWindow = NULL;
 
-GWorldPtr imgGWorld;
+static Rect imgRect; // size of the original image (unscaled)
+static Rect dstRect; // size of the displayed image (after scaling)
+static Rect winRect; // size of the window containg the displayed image (include padding)
+static Rect oldWinRect; // size of the window containg the displayed image (include padding) when NOT in FS mode
 
-Rect imgRect;
-Rect dstRect;
-Rect winRect;
-
-CGContextRef context;
+static CGContextRef context;
 
 #include "../osdep/keycodes.h"
 extern void mplayer_put_key(int code);
@@ -112,15 +111,15 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 		case IMGFMT_YV12:
 		case IMGFMT_IYUV:
 		case IMGFMT_I420:
-			vo_draw_alpha_yv12(w,h,src,srca,stride, ((char*)P) + P->componentInfoY.offset + x0 + y0 * image_width, image_width);
+			vo_draw_alpha_yv12(w,h,src,srca,stride, ((char*)P) + P->componentInfoY.offset + x0 + y0 * imgRect.right, imgRect.right);
 			break;
 		case IMGFMT_UYVY:
-			//vo_draw_alpha_uyvy(w,h,src,srca,stride,((char*)P) + (x0 + y0 * image_width) * 2,image_width*2);
+			//vo_draw_alpha_uyvy(w,h,src,srca,stride,((char*)P) + (x0 + y0 * imgRect.right) * 2,imgRect.right*2);
 			break;
 		case IMGFMT_YUY2:
-			vo_draw_alpha_yuy2(w,h,src,srca,stride,((char*)P) + (x0 + y0 * image_width) * 2,image_width*2);
+			vo_draw_alpha_yuy2(w,h,src,srca,stride,((char*)P) + (x0 + y0 * imgRect.right) * 2,imgRect.right*2);
 			break;
-  }
+	}
 }
 
 //default window event handler
@@ -291,12 +290,38 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
     return err;
 }
 
+static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttributes windowAttrs) 
+{
+	CFStringRef		titleKey;
+	CFStringRef		windowTitle; 
+	OSStatus	       	result;
+ 
+	SetRect(&winRect, 0, 0, d_width, d_height);
+	SetRect(&oldWinRect, 0, 0, d_width, d_height);
+	SetRect(&dstRect, 0, 0, d_width, d_height);
+  
+	CreateNewWindow(kDocumentWindowClass, windowAttrs, &winRect, &theWindow);
+  
+	//Set window title
+	titleKey	= CFSTR("MPlayer");
+	windowTitle = CFCopyLocalizedString(titleKey, NULL);
+	result		= SetWindowTitleWithCFString(theWindow, windowTitle);
+	CFRelease(titleKey);
+	CFRelease(windowTitle);
+  
+	//Install event handler
+	const EventTypeSpec winEvents[] = { { kEventClassKeyboard, kEventRawKeyDown },
+										{ kEventClassMouse, kEventMouseDown },
+										{ kEventClassMouse, kEventMouseWheelMoved },
+										{ kEventClassWindow, kEventWindowClosed }, 
+										{ kEventClassWindow, kEventWindowBoundsChanged } };
+  
+	InstallApplicationEventHandler (NewEventHandlerUPP (MainEventHandler), GetEventTypeCount(winEvents), winEvents, 0, NULL);
+}
+
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	WindowAttributes	windowAttrs;
-	CFStringRef			titleKey;
-	CFStringRef			windowTitle; 
-	OSStatus			result;
 	GDHandle			deviceHdl;
 	Rect				deviceRect;
 	OSErr				qterr;
@@ -309,8 +334,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	device_height = deviceRect.bottom;
 	
 	//misc mplayer setup/////////////////////////////////////////////////////
-	image_width = width;
-	image_height = height;
+	SetRect(&imgRect, 0, 0, width, height);
 	switch (image_format) 
 	{
 		case IMGFMT_RGB32:
@@ -324,7 +348,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			image_depth = 16;
 			break;
 	}
-	image_size = ((image_width*image_height*image_depth)+7)/8;
+	image_size = ((imgRect.right*imgRect.bottom*image_depth)+7)/8;
 
 	vo_fs = flags & VOFLAG_FULLSCREEN;
 	
@@ -342,28 +366,27 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 					
 	windowAttrs &= (~kWindowResizableAttribute);
 
-	SetRect(&winRect, 0, 0, d_width, d_height);
-	SetRect(&dstRect, 0, 0, d_width, d_height);
-	SetRect(&imgRect, 0, 0, image_width, image_height);
-	
-	CreateNewWindow(kDocumentWindowClass, windowAttrs, &winRect, &theWindow);
+ 	if (theWindow == NULL)
+	{
+		quartz_CreateWindow(d_width, d_height, windowAttrs);
+		
+		if (theWindow == NULL)
+		{
+			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: Couldn't create window !!!!!\n");
+			return -1;
+		}
+	}
+	else 
+	{
+		HideWindow(theWindow);
+		ChangeWindowAttributes(theWindow, ~windowAttrs, windowAttrs);
+		SetRect(&winRect, 0, 0, d_width, d_height);
+		SetRect(&oldWinRect, 0, 0, d_width, d_height);
+		SizeWindow (theWindow, d_width, d_height, 1);
+ 	}
+ 	
+ 	get_image_done = 0;
 
-	//Set window title
-	titleKey	= CFSTR("MPlayer");
-	windowTitle = CFCopyLocalizedString(titleKey, NULL);
-	result		= SetWindowTitleWithCFString(theWindow, windowTitle);
-	CFRelease(titleKey);
-	CFRelease(windowTitle);
-
-	//Install event handler
-	const EventTypeSpec winEvents[] = { { kEventClassKeyboard, kEventRawKeyDown },
-										{ kEventClassMouse, kEventMouseDown },
-										{ kEventClassMouse, kEventMouseWheelMoved },
-										{ kEventClassWindow, kEventWindowClosed }, 
-										{ kEventClassWindow, kEventWindowBoundsChanged } };
-	
-    //InstallWindowEventHandler (theWindow, NewEventHandlerUPP (MainEventHandler), GetEventTypeCount(winEvents), winEvents, theWindow, NULL);	
-	InstallApplicationEventHandler (NewEventHandlerUPP (MainEventHandler), GetEventTypeCount(winEvents), winEvents, 0, NULL);
 	if (!EnterMoviesDone)
 	{
 		qterr = EnterMovies();
@@ -375,6 +398,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	if (qterr)
 	{
 		mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: EnterMovies (%d)\n", qterr);
+		return -1;
 	}
 	
 	SetPort(GetWindowPort(theWindow));
@@ -390,9 +414,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		case IMGFMT_RGB32:
 		{
 			ImageDescriptionHandle desc;
-		
+			GWorldPtr imgGWorld;
 			image_data = calloc(sizeof(image_size),1);
-			NewGWorldFromPtr (&imgGWorld, k32ARGBPixelFormat, &imgRect, 0, 0, 0, image_data, image_width * 4);
+			NewGWorldFromPtr (&imgGWorld, k32ARGBPixelFormat, &imgRect, 0, 0, 0, image_data, imgRect.right * 4);
 			MakeImageDescriptionForPixMap(GetGWorldPixMap(imgGWorld), &desc);
 			DisposeGWorld(imgGWorld);
 		
@@ -409,9 +433,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 												0,
 												codecLosslessQuality,
 												bestSpeedCodec);
+			free(image_data);
+			image_data = NULL;
 			if (qterr)
 			{
 				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: DecompressSequenceBeginS (%d)\n", qterr);
+				return -1;
 			}
 		}
 		break;
@@ -435,9 +462,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			((FieldInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_fiel))->fieldOrderings = 0;
 		
 			yuv_qt_stuff.extension_clap = NewHandleClear(sizeof(CleanApertureImageDescriptionExtension));
-			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureWidthN = image_width;
+			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureWidthN = imgRect.right;
 			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureWidthD = 1;
-			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureHeightN = image_height;
+			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureHeightN = imgRect.bottom;
 			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureHeightD = 1;
 			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->horizOffN = 0;
 			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->horizOffD = 1;
@@ -453,8 +480,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			(*yuv_qt_stuff.desc)->version = 2;
 			(*yuv_qt_stuff.desc)->revisionLevel = 0;
 			(*yuv_qt_stuff.desc)->vendor = 'mpla';
-			(*yuv_qt_stuff.desc)->width = image_width;
-			(*yuv_qt_stuff.desc)->height = image_height;
+			(*yuv_qt_stuff.desc)->width = imgRect.right;
+			(*yuv_qt_stuff.desc)->height = imgRect.bottom;
 			(*yuv_qt_stuff.desc)->hRes = Long2Fix(72);
 			(*yuv_qt_stuff.desc)->vRes = Long2Fix(72);
 			(*yuv_qt_stuff.desc)->temporalQuality = 0;
@@ -467,27 +494,29 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_colr, kColorInfoImageDescriptionExtension);
 			if (qterr)
 			{
-				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [colr] (%d)\n", qterr);
+				mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: AddImageDescriptionExtension [colr] (%d)\n", qterr);
 			}
 			
 			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_fiel, kFieldInfoImageDescriptionExtension);
 			if (qterr)
 			{
-				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [fiel] (%d)\n", qterr);
+				mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: AddImageDescriptionExtension [fiel] (%d)\n", qterr);
 			}
 		
 			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_clap, kCleanApertureImageDescriptionExtension);
 			if (qterr)
 			{
-				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [clap] (%d)\n", qterr);
+				mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: AddImageDescriptionExtension [clap] (%d)\n", qterr);
 			}
 		
 			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_pasp, kCleanApertureImageDescriptionExtension);
 			if (qterr)
 			{
-				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [pasp] (%d)\n", qterr);
+				mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: AddImageDescriptionExtension [pasp] (%d)\n", qterr);
 			}
-		
+			if (P != NULL) { // second or subsequent movie
+				free(P);
+			}
 			P = calloc(sizeof(PlanarPixmapInfoYUV420) + image_size, 1);
 			switch (image_format)
 			{
@@ -497,9 +526,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 					P->componentInfoY.offset = sizeof(PlanarPixmapInfoYUV420);
 					P->componentInfoCb.offset = P->componentInfoY.offset + image_size / 2;
 					P->componentInfoCr.offset = P->componentInfoCb.offset + image_size / 4;
-					P->componentInfoY.rowBytes = image_width;
-					P->componentInfoCb.rowBytes =  image_width / 2;
-					P->componentInfoCr.rowBytes =  image_width / 2;
+					P->componentInfoY.rowBytes = imgRect.right;
+					P->componentInfoCb.rowBytes =  imgRect.right / 2;
+					P->componentInfoCr.rowBytes =  imgRect.right / 2;
 					image_buffer_size = image_size + sizeof(PlanarPixmapInfoYUV420);
 					break;
 				case IMGFMT_UYVY:
@@ -526,6 +555,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			if (qterr)
 			{
 				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: DecompressSequenceBeginS (%d)\n", qterr);
+				return -1;
 			}
 		}
 		break;
@@ -577,7 +607,7 @@ static void check_events(void)
 
 static void draw_osd(void)
 {
-	vo_draw_text(image_width,image_height,draw_alpha);
+	vo_draw_text(imgRect.right,imgRect.bottom,draw_alpha);
 }
 
 static void flip_page(void)
@@ -586,7 +616,7 @@ static void flip_page(void)
 	{
 		case IMGFMT_RGB32:
 		{
-			if (EnterMoviesDone) 
+		  if (EnterMoviesDone && (image_data != NULL)) 
 			{
 				OSErr qterr;
 				CodecFlags flags = 0;
@@ -598,10 +628,10 @@ static void flip_page(void)
 													&flags,
 													NULL,
 													NULL);
-													
+				image_data = NULL;
 				if (qterr)
 				{
-					mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: DecompressSequenceFrameWhen in flip_page (%d) flags:0x%08x\n", qterr, flags);
+					mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: DecompressSequenceFrameWhen in flip_page (%d) flags:0x%08x\n", qterr, flags);
 				}
 			}
 		}
@@ -625,7 +655,7 @@ static void flip_page(void)
 													NULL);
 				if (qterr)
 				{
-					mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: DecompressSequenceFrameWhen in flip_page (%d) flags:0x%08x\n", qterr, flags);
+					mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: DecompressSequenceFrameWhen in flip_page (%d) flags:0x%08x\n", qterr, flags);
 				}
 			}
 		break;
@@ -636,22 +666,22 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y
 {
 	switch (image_format)
 	{
-		case IMGFMT_YV12:
-		case IMGFMT_I420:
-			memcpy_pic(((char*)P) + P->componentInfoY.offset + x + image_width * y, src[0], w, h, image_width, stride[0]);
-			x=x/2;y=y/2;w=w/2;h=h/2;
-    
-			memcpy_pic(((char*)P) + P->componentInfoCb.offset + x + image_width / 2 * y, src[1], w, h, image_width / 2, stride[1]);
-			memcpy_pic(((char*)P) + P->componentInfoCr.offset + x + image_width / 2 * y, src[2], w, h, image_width / 2, stride[2]);
-			return 0;
-    
-		case IMGFMT_IYUV:
-			memcpy_pic(((char*)P) + P->componentInfoY.offset + x + image_width * y, src[0], w, h, image_width, stride[0]);
-			x=x/2;y=y/2;w=w/2;h=h/2;
-			
-			memcpy_pic(((char*)P) + P->componentInfoCr.offset + x + image_width / 2 * y, src[1], w, h, image_width / 2, stride[1]);
-			memcpy_pic(((char*)P) + P->componentInfoCb.offset + x + image_width / 2 * y, src[2], w, h, image_width / 2, stride[2]);
-			return 0;
+  		case IMGFMT_YV12:
+  		case IMGFMT_I420:
+ 			memcpy_pic(((char*)P) + P->componentInfoY.offset + x + imgRect.right * y, src[0], w, h, imgRect.right, stride[0]);
+  			x=x/2;y=y/2;w=w/2;h=h/2;
+  
+ 			memcpy_pic(((char*)P) + P->componentInfoCb.offset + x + imgRect.right / 2 * y, src[1], w, h, imgRect.right / 2, stride[1]);
+ 			memcpy_pic(((char*)P) + P->componentInfoCr.offset + x + imgRect.right / 2 * y, src[2], w, h, imgRect.right / 2, stride[2]);
+  			return 0;
+  
+  		case IMGFMT_IYUV:
+ 			memcpy_pic(((char*)P) + P->componentInfoY.offset + x + imgRect.right * y, src[0], w, h, imgRect.right, stride[0]);
+  			x=x/2;y=y/2;w=w/2;h=h/2;
+  			
+ 			memcpy_pic(((char*)P) + P->componentInfoCr.offset + x + imgRect.right / 2 * y, src[1], w, h, imgRect.right / 2, stride[1]);
+ 			memcpy_pic(((char*)P) + P->componentInfoCb.offset + x + imgRect.right / 2 * y, src[2], w, h, imgRect.right / 2, stride[2]);
+  			return 0;
 	}
 	return -1;
 }
@@ -666,7 +696,7 @@ static uint32_t draw_frame(uint8_t *src[])
 
 		case IMGFMT_UYVY:
 		case IMGFMT_YUY2:
-			memcpy_pic(((char*)P), src[0], image_width * 2, image_height, image_width * 2, image_width * 2);
+			memcpy_pic(((char*)P), src[0], imgRect.right * 2, imgRect.bottom, imgRect.right * 2, imgRect.right * 2);
 			return 0;
 	}
 	return -1;
@@ -679,25 +709,25 @@ static uint32_t query_format(uint32_t format)
     
 	if (format == IMGFMT_RGB32)
 	{
-        return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE;
+		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
 	}
     
     if ((format == IMGFMT_YV12) || (format == IMGFMT_IYUV) || (format == IMGFMT_I420))
 	{
 		image_qtcodec = kMpegYUV420CodecType; //kYUV420CodecType ?;
-		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE | VFCAP_ACCEPT_STRIDE;
+		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
     }
 
     if (format == IMGFMT_YUY2)
 	{
 		image_qtcodec = kComponentVideoUnsigned;
-		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE;
+		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
     }
     
     if (format == IMGFMT_UYVY)
 	{
 		image_qtcodec = k422YpCbCr8CodecType;
-		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE;
+		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
 	}
 
     return 0;
@@ -712,7 +742,7 @@ static void uninit(void)
 		qterr = CDSequenceEnd(seqId);
 		if (qterr)
 		{
-			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: CDSequenceEnd (%d)\n", qterr);
+			mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: CDSequenceEnd (%d)\n", qterr);
 		}
 	}
 
@@ -729,7 +759,7 @@ static uint32_t draw_yuv_image(mp_image_t *mpi)
 	// ATM we're only called for planar IMGFMT
 	// drawing is done directly in P
 	// and displaying is in flip_page.
-	return VO_TRUE;  
+	return get_image_done ? VO_TRUE : VO_FALSE;  
 }
 
 static uint32_t get_yuv_image(mp_image_t *mpi)
@@ -747,27 +777,28 @@ static uint32_t get_yuv_image(mp_image_t *mpi)
 		}
 
 		mpi->planes[0]=((char*)P) + P->componentInfoY.offset;
-		mpi->stride[0]=image_width;
-		mpi->width=image_width;
+		mpi->stride[0]=imgRect.right;
+		mpi->width=imgRect.right;
 
 		if(mpi->flags&MP_IMGFLAG_SWAPPED)
 		{
 			// I420
 			mpi->planes[1]=((char*)P) + P->componentInfoCb.offset;
 			mpi->planes[2]=((char*)P) + P->componentInfoCr.offset;
-			mpi->stride[1]=image_width/2;
-			mpi->stride[2]=image_width/2;
+			mpi->stride[1]=imgRect.right/2;
+			mpi->stride[2]=imgRect.right/2;
 		} 
 		else 
 		{
 			// YV12
 			mpi->planes[1]=((char*)P) + P->componentInfoCr.offset;
 			mpi->planes[2]=((char*)P) + P->componentInfoCb.offset;
-			mpi->stride[1]=image_width/2;
-			mpi->stride[2]=image_width/2;
+			mpi->stride[1]=imgRect.right/2;
+			mpi->stride[2]=imgRect.right/2;
 		}
 		
 		mpi->flags|=MP_IMGFLAG_DIRECT;
+		get_image_done = 1;
 		return VO_TRUE;
 	}
 	else 
@@ -780,9 +811,10 @@ static uint32_t get_yuv_image(mp_image_t *mpi)
 		}
 
 		mpi->planes[0] = (char*)P;
-		mpi->stride[0] = image_width * 2;
-		mpi->width=image_width;
+		mpi->stride[0] = imgRect.right * 2;
+		mpi->width=imgRect.right;
 		mpi->flags|=MP_IMGFLAG_DIRECT;
+		get_image_done = 1;
 		return VO_TRUE;
 	}
 	return VO_FALSE;
@@ -803,7 +835,11 @@ static uint32_t control(uint32_t request, void *data, ...)
 				case IMGFMT_YV12:
 				case IMGFMT_IYUV:
 				case IMGFMT_I420:
+				case IMGFMT_UYVY:
+				case IMGFMT_YUY2:
 					return get_yuv_image(data);
+					break;
+				default:
 					break;
 			}
 		case VOCTRL_DRAW_IMAGE:
@@ -812,7 +848,11 @@ static uint32_t control(uint32_t request, void *data, ...)
 				case IMGFMT_YV12:
 				case IMGFMT_IYUV:
 				case IMGFMT_I420:
+				case IMGFMT_UYVY:
+				case IMGFMT_YUY2:
 					return draw_yuv_image(data);
+					break;
+				default:
 					break;
 			}
 	}
@@ -857,11 +897,11 @@ void window_resized()
 	CGContextFillRect(context, winBounds);
 	CGContextFlush(context);
 
-	long scale_X = FixDiv(Long2Fix(dstRect.right - dstRect.left),Long2Fix(image_width));
-	long scale_Y = FixDiv(Long2Fix(dstRect.bottom - dstRect.top),Long2Fix(image_height));
+	long scale_X = FixDiv(Long2Fix(dstRect.right - dstRect.left),Long2Fix(imgRect.right));
+	long scale_Y = FixDiv(Long2Fix(dstRect.bottom - dstRect.top),Long2Fix(imgRect.bottom));
 
 	SetIdentityMatrix(&matrix);
-	if (((dstRect.right - dstRect.left)   != image_width) || ((dstRect.bottom - dstRect.right) != image_height))
+	if (((dstRect.right - dstRect.left)   != imgRect.right) || ((dstRect.bottom - dstRect.right) != imgRect.bottom))
 	{
 		ScaleMatrix(&matrix, scale_X, scale_Y, 0, 0);
 	      
@@ -884,7 +924,6 @@ void window_ontop()
 
 void window_fullscreen()
 {
-	static Rect oldRect;
 	GDHandle deviceHdl;
 	Rect deviceRect;
 
@@ -894,7 +933,8 @@ void window_fullscreen()
 		HideMenuBar();
 
 		//save old window size
-		GetWindowPortBounds(theWindow, &oldRect);
+ 		if (!vo_quartz_fs)
+			GetWindowPortBounds(theWindow, &oldWinRect);
 		
 		//hide mouse cursor
 		HideCursor();
@@ -904,6 +944,8 @@ void window_fullscreen()
 			
 		MoveWindow (theWindow, 0, 0, 1);		
 		SizeWindow(theWindow, device_width, device_height,1);
+
+		vo_quartz_fs = 1;
 	}
 	else //go back to windowed mode
 	{
@@ -915,8 +957,10 @@ void window_fullscreen()
 		//revert window to previous setting
 		//ChangeWindowAttributes(theWindow, kWindowResizableAttribute, 0);
 			
-		SizeWindow(theWindow, oldRect.right, oldRect.bottom,1);
+		SizeWindow(theWindow, oldWinRect.right, oldWinRect.bottom,1);
 		RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+
+ 		vo_quartz_fs = 0;
 	}
 	
 	window_resized();
