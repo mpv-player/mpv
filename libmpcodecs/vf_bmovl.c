@@ -199,6 +199,7 @@ _read_cmd(int fd, char *cmd, char *args) {
 static int
 put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 	int buf_x=0, buf_y=0, buf_pos=0;
+	int have, got, want;
 	int xpos=0, ypos=0, pos=0;
 	unsigned char red=0, green=0, blue=0;
 	int  alpha;
@@ -267,7 +268,22 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 			    	mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl: Couldn't allocate temporary buffer! Skipping...\n\n");
 					return vf_next_put_image(vf, dmpi);
 			    }
-			    mp_msg(MSGT_VFILTER, MSGL_DBG2, "Got %d bytes...\n", read( vf->priv->stream_fd, buffer, (imgw*imgh*pxsz) ) );
+  				/* pipes/sockets might need multiple calls to read(): */
+			    want = (imgw*imgh*pxsz);
+			    have = 0;
+			    while (have < want) {
+				got = read( vf->priv->stream_fd, buffer+have, want-have );
+				if (got == 0) {
+			    	    mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl: premature EOF...\n\n");
+				    break;
+				}
+				if (got < 0) {
+			    	    mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl: read error: %s\n\n", strerror(errno));
+				    break;
+				}
+				have += got;
+			    }
+			    mp_msg(MSGT_VFILTER, MSGL_DBG2, "Got %d bytes... (wanted %d)\n", have, want );
 
 				if(clear) {
 					memset( vf->priv->bitmap.y,   0, vf->priv->w*vf->priv->h );
