@@ -108,6 +108,10 @@ char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 	mga_vid_config.dest_height= d_height;
 	mga_vid_config.x_org= 0; // (720-mga_vid_config.dest_width)/2;
 	mga_vid_config.y_org= 0; // (576-mga_vid_config.dest_height)/2;
+	if(vo_screenwidth && vo_screenheight){
+		mga_vid_config.x_org=(vo_screenwidth-d_width)/2;
+		mga_vid_config.y_org=(vo_screenheight-d_height)/2;
+	}
 	
 	mga_vid_config.version=MGA_VID_VERSION;
 
