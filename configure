@@ -470,7 +470,8 @@ _aa=no
 _ggi=no
 _xv=no
 _vm=no
-_xdpms=no
+_xdpms_3=no
+_xdpms_4=no
 _3dfx=no
 _syncfb=no
 _mlib=no _mlibdir=/opt/SUNWmlib
@@ -853,7 +854,8 @@ fi
 
 if [ $_x11 = yes ]; then
 
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib > /dev/null 2>&1 && _xdpms=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib > /dev/null 2>&1 && _xdpms_3=yes
+nm `echo $_x11libdir|cut -b 3-`/libXext.a | grep -q DPMSQueryExtension && _xdpms_4=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv $_socklib > /dev/null 2>&1 && _xv=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib > /dev/null 2>&1 && _vm=yes
 
@@ -1747,14 +1749,20 @@ else
 fi
 
 if [ $_x11 = yes ]; then
-  if [ $_xdpms = yes ]; then
+  if [ $_xdpms_3 = yes ]; then
     _x11lib='-lX11 -lXext -lXdpms'
+    _have_xdpms='#define HAVE_XDPMS 1'
+  elif [ $_xdpms_4 = yes ]; then
+    _x11lib='-lX11 -lXext'
     _have_xdpms='#define HAVE_XDPMS 1'
   else
     _x11lib='-lX11 -lXext'
     _have_xdpms='#undef HAVE_XDPMS'
   fi
 fi
+
+echo XXXXXXXXXX $_xdpms_3 $_xdpms_4
+
 
 if [ $_xv = yes ]; then
   _xvlib='-lXv'
