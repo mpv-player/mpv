@@ -1,20 +1,4 @@
 
-/*
- * video_out_x11.c,X11 interface
- *
- *
- * Copyright ( C ) 1996,MPEG Software Simulation Group. All Rights Reserved.
- *
- * Hacked into mpeg2dec by
- *
- * Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
- *
- * 15 & 16 bpp support added by Franck Sicard <Franck.Sicard@solsoft.fr>
- * use swScaler instead of lots of tricky converters by Michael Niedermayer <michaelni@gmx.at>
- * runtime fullscreen switching by alex
- *
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -531,6 +515,7 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 }
 
 static uint32_t draw_frame( uint8_t *src[] ){
+#if 0
       int stride[3]= {0,0,0};
       
       if     (in_format==IMGFMT_YUY2)  stride[0]=srcW*2;
@@ -541,6 +526,17 @@ static uint32_t draw_frame( uint8_t *src[] ){
       else if(in_format==IMGFMT_BGR32) stride[0]=srcW*4;
       
       return draw_slice(src, stride, srcW, srcH, 0, 0);
+#else
+    printf("draw_frame() called!!!!!!\n");
+    return -1;
+#endif
+}
+
+static uint32_t draw_image(mp_image_t *mpi){
+    // if -dr or -slices then do nothing:
+    if(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK)) return VO_TRUE;
+    draw_slice(mpi->planes,mpi->stride,mpi->w,mpi->h,0,0);
+    return VO_TRUE;
 }
 
 static uint32_t get_image(mp_image_t *mpi)
@@ -602,8 +598,7 @@ static uint32_t query_format( uint32_t format )
 }
 
 
-static void
-uninit(void)
+static void uninit(void)
 {
  if(!myximage) return;
  
@@ -628,11 +623,7 @@ static uint32_t preinit(const char *arg)
 	return ENOSYS;
     }
 
-#ifdef HAVE_NEW_GUI
-    if ( !use_gui )
-#endif   
-	if( !vo_init() ) return -1; // Can't open X11
-
+    if( !vo_init() ) return -1; // Can't open X11
     return 0;
 }
 
@@ -645,6 +636,8 @@ static uint32_t control(uint32_t request, void *data, ...)
     return VO_TRUE;
   case VOCTRL_GET_IMAGE:
     return get_image(data);
+  case VOCTRL_DRAW_IMAGE:
+    return draw_image(data);
   case VOCTRL_FULLSCREEN:
     vo_x11_fullscreen();
     return VO_TRUE;
