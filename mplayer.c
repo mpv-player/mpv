@@ -782,7 +782,7 @@ if(sh_audio){
       }
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
       mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-      sh_audio=NULL;
+      free_sh_audio(sh_audio); sh_audio=NULL; d_audio->sh=NULL;
       break;
     }
     if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
@@ -796,7 +796,7 @@ if(sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_V,"Initializing audio codec...\n");
   if(!init_audio(sh_audio)){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
-    sh_audio=0;
+    free_sh_audio(sh_audio); sh_audio=NULL; d_audio->sh=NULL;
   } else {
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
         sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
@@ -897,7 +897,7 @@ if(auto_quality>0){
      if((encode_file=fopen(encode_index_name,"wb")))
        fclose(encode_file);
      else encode_index_name=NULL;
-     sh_audio=0; // disable audio !!!!!
+     free_sh_audio(sh_audio); sh_audio=NULL; d_audio->sh=NULL; // disable audio !!!!!
    }
 
 // ========== Init keyboard FIFO (connection to libvo) ============
@@ -1015,7 +1015,7 @@ if(sh_audio){
   if(!audio_out->init(force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels,sh_audio->sample_format,0)){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
-    sh_audio=0; audio_out=NULL;
+    free_sh_audio(sh_audio); sh_audio=NULL; d_audio->sh=NULL;
   }
 
 //  printf("Audio buffer size: %d bytes, delay: %5.3fs\n",audio_buffer_size,audio_buffer_delay);
@@ -1033,11 +1033,10 @@ if(sh_audio){
   if(sh_audio) sh_audio->timer=0;
 
 if(!sh_audio){
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Audio: no sound\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Audio: no sound!!!\n");
   if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
-  if(sh_audio) if(sh_audio->a_buffer) free(sh_audio->a_buffer);
   if(audio_out){ audio_out->uninit(); audio_out=NULL;} // close device
 }
 
