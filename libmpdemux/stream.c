@@ -278,10 +278,17 @@ void free_stream(stream_t *s){
     waitpid(s->cache_pid,NULL,0);
   }
   if(s->fd>0) close(s->fd);
+  switch(s->type) {
 #ifdef HAVE_CDDA
-  if(s->type == STREAMTYPE_CDDA)
+  case STREAMTYPE_CDDA:
     close_cdda(s);
+    break;
 #endif
+#ifdef USE_DVDREAD
+  case STREAMTYPE_DVD:
+    dvd_close(s->priv);
+#endif
+  }  
   if(s->priv) free(s->priv);
   free(s);
 }

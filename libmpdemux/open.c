@@ -686,4 +686,11 @@ d->angle_seek=1;
 
 }
 
+void dvd_close(dvd_priv_t *d) {
+  ifoClose(d->vts_file);
+  ifoClose(d->vmg_file);
+  DVDCloseFile(d->title);
+  DVDClose(d->dvd);
+}
+
 #endif
