@@ -438,8 +438,10 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
       declen, pafd->len, maxlen);
   
   // copy filter==>out:
-  if(maxlen < pafd->len)
+  if(maxlen < pafd->len) {
+    maxlen -= maxlen % (sh_audio->channels * sh_audio->samplesize);
     mp_msg(MSGT_DECAUDIO,MSGL_WARN,"%i bytes of audio data lost due to buffer overflow, len = %i\n", pafd->len - maxlen,pafd->len);
+  }
   else
     maxlen=pafd->len;
   memmove(buf, pafd->audio, maxlen);
