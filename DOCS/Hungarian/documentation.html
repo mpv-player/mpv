@@ -25,7 +25,7 @@
         <LI><A HREF="codecs.html#2.1.2">2.1.2 Támogatott audio és video codec-ek</A>
 	     <UL><LI><A HREF="codecs.html#2.1.2.1">2.1.2.1 DivX4</A></LI>
 	     <LI><A HREF="codecs.html#2.1.2.2">2.1.2.2 ffmpeg DivX/libavcodec</A></LI>
-	     <LI><A HREF="codecs.html#2.1.2.3">2.1.2.3 Hardware-es AC3 dekodolas</A></LI>
+	     <LI><A HREF="codecs.html#2.1.2.3">2.1.2.3 Hardveres AC3 dekódolás</A></LI>
 	     </UL>
 	</LI><LI><A HREF="codecs.html#2.1.4">2.1.4 Hogyan használj ismeretlen Win32 codec-et</A></LI>
 	     <UL><LI><A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW</A></LI>
@@ -106,16 +106,19 @@
 
 <P><B><A NAME=1.1>1.1.  Röviden</A></B></P>
 
-<P>Az <B>MPlayer</B> egy LINUXON mûködõ videolejátszó. Le tudja játszani a
-  legtöbb MPEG, AVI és ASF file-t, valamint felsorakoztat jónéhány nativ és
-  Win32 codecet.  Nézhetsz vele VCD-t, DVD-t, és még DivX-et is. A másik óriási
+<P>Az <B>MPlayer</B> egy LINUXON mûködõ videolejátszó (fut sok más Unix-on és
+akár nem-x86 processzorokon is. Lásd a <A HREF="#6">6-os fejezetet</A>).
+  Le tudja játszani a legtöbb MPEG, AVI és ASF file-t, valamint felsorakoztat
+  jónéhány natív és Win32 codecet.  Nézhetsz vele <B>VideoCD</B>-t,
+  <B>SVCD</B>-t, <B>DVD</B>-t, és még <B>DivX</B>-et is. A másik óriási
   tulajdonsága az MPlayernek a megjelenítési módok széles választéka. Mûködik
   X11, Xv, DGA, OpenGL, SVGAlib, fbdev, aalib, sõt SDL-lel is (beleértve
   ezáltal az SDL drivereit is), és néhány alacsonyszintû kártyaspecifikus
-  driver (Matrox/3dfx/SiS) is használható! Legtöbbjük támogat software vagy
-  hardware scaling-et, így a teljesképernyõs mód is elérhetõ. És még nem is
+  driver (Matrox/3dfx/SiS) is használható! Legtöbbjük támogat szoftveres vagy
+  hardveres skálázást, így a teljesképernyõs mód is elérhetõ.  És még nem is
   szóltam a szép, élsímított, árnyékolt feliratozásról (7 támogatott típus!),
-  ami támogat magyar, angol, cirill, cseh és koreai fontokat, valamint OSD-t!</P>
+  ami támogat magyar, angol, cirill, cseh és koreai fontokat, valamint
+  OSD-t!</P>
 
 <P>Nem codeceket írtam, csak néhány lejátszót. Sok idõt töltöttem azzal is, hogy
   megtaláljam a megfelelõ módszert a hibás file-ok beolvasására (mind MPEG,
@@ -123,8 +126,8 @@
   sziklaszilárdan játszik le hibás MPEG file-okat (hasznos néhány VCD-nél), és
   lejátszik minden olyan hibás AVI-t, amit a csodás windows media player nem.
   Még az index chunk nélküli AVI-k is lejátszhatók, sõt az indexet fel is lehet
-  építeni a '-idx' opcióval, így seekelni is lehet bennük! Amint az látszik, a
-  stabilitás és a minõség a legfontosabbak a számomra, de a sebesség se semmi.</P>
+  építeni a '-idx' opcióval, így tekerni is lehet bennük! Amint az látszik, a
+  stabilitás és a minõség a legfontosabbak a számomra, és a sebesség is fontos.</P>
 
 <B><P><A NAME=1.2>1.2.  Történelem</A></B></P>
 
@@ -181,8 +184,16 @@
   fordítás _elõtt_ kell megcsinálni, különben nem épül be Matrox támogatás az
   <B>MPlayer</B>-be.</LI>
 
-<LI>Ha tervezed a ProjectMayo <B>DivX4</B> codec-ének használatát, nézd meg a
-  <A HREF="codecs.html#2.1.2.1">2.1.2.1</A>-es fejezetet még fordítás elõtt.</LI>
+<LI>Ha használni akarod a ProjectMayo <B>DivX4</B> codec-ét, nézd meg a
+  <A HREF="codecs.html#2.1.2.1">2.1.2.1</A>-es fejezetet még fordítás elõtt.
+Ez a codec sokkal gyorsabban játszik le <B>DivX</B> filmeket mint a Win32-es
+codec, vagy az ffmpeg. Hátránya hogy zárt forráskódú, és egyelõre csak x86-os
+gépeken futtatható.</LI>
+
+<LI>Ha használni akarod az ffmpeg <B>libavcodec</B>-ét, nézd meg a
+  <A HREF="codecs.html#2.1.2.2">2.1.2.2</A>-es fejezetet még fordítás elõtt.
+Szükséged lesz erre a codecre ha nem-x86 gépen akarsz lejátszani, vagy
+nagyobb sebességet akarsz mint amennyit a Win32-es codec tud.</LI>
 
 <LI>A DVD támogatáshoz le kell fordítanod a libdvdread-ot és a libcss-t.
 Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
@@ -234,7 +245,7 @@ Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
 <P><PRE>  mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
   mplayer -vcd 2 /dev/cdrom
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-  mplayer -dvd /dev/dvd /mnt/dvd/matrix.vob
+  mplayer -dvd 1 /dev/dvd
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
 
@@ -342,7 +353,7 @@ Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
     fakeroot debian/rules binary</PRE></P>
 
 
-<P>(... mplayer detektálja a hardware-t/software-t, lefordul, és..)</P>
+<P>(... mplayer detektálja a hardvert/szoftvert, lefordul, és..)</P>
 
 <P><PRE>    dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.</PRE></P>
 
@@ -373,9 +384,7 @@ Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
 <P>Ha az <B>MPlayer</B> azt mondja hogy "CD-ROM Device '/dev/cdrom' not found!",
   csinálj egy linket : <CODE>ln -s /dev/(meghajtó) /dev/cdrom</CODE></P>
 
-<P>Egyenlõre nincs DVD támogatás FreeBSD-hez.
-  Nyugodtan csinálj egyet :-)</P>
-
+<P>Egyenlõre nincs DVD támogatás FreeBSD-hez. (??? libdvdread?)</P>
 
 <P><B><A NAME=6.3>6.3.  Solaris</A></B></P>
 
@@ -384,6 +393,13 @@ Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
   Solaris SPARC-on jónéhány AVI file lesz ami nem fog mûködni, mert csak
   win32-es codec van hozzá. <B>DivX/OpenDivX</B> filmek menni fognak,
   ha libavcodec-et használsz.</P>
+
+<P>Az <B>MPlayer</B> kihasználja az <B>UltraSPARC</B> gépek <B>VIS</B>
+utasításkészletét (az MMX sparc-os megfelelõje), bár jelenleg csak(?) a
+<I>libmpeg2</I>-ben, és a <I>libvo</I>-ban, libavcodec/mp3lib-ben nem.
+Egy 400Mhz-es CPU elég hogy megnézz egy VOB fájlt. Szükséged lesz egy
+felinstallált <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>-re
+is.</P>
 
 <P>A fordításhoz GNU make-re lesz szükséged (gmake, /opt/sfw/gmake), natív
   Solaris make nem jo. Egy tipikus hiba ha mégis azzal próbálkozol :</P>
@@ -433,12 +449,12 @@ Lásd <A HREF="cd-dvd.html#4.2">4.2-es fejezet</A>.</LI>
      disk block >4GB on a device using a logical blocksize != DEV_BSIZE
      (i.e. CDROM and DVD media).  Due to a 32bit int overflow, a disk
      address modulo 4GB is accessed.
-     (http://groups.yahoo.com/group/solarisonintel/message/22516)
+     (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
 
 <LI>The similar bug is present in the hsfs(7FS) filesystem code (aka
      ISO9660), hsfs currently does not support partitions/disks >4GB,
      all data is accessed modulo 4GB
-     (http://groups.yahoo.com/group/solarisonintel/message/22592)
+     (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)
 </UL></P>
 
 <P>On Solaris with an UltraSPARC CPU, you can get some extra speed by

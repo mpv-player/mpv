@@ -11,7 +11,7 @@
 <TD COLSPAN=4><P><B>Általános:</B></P></TD><TR>
 
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top>x11</TD><TD>&nbsp;&nbsp;</TD><TD>X11, opcionálisan az SHM kiterjesztéssel</TD><TR>
-<TD></TD><TD VALIGN=top>xv</TD><TD></TD><TD>X11 az XVideo kiterjesztés overlay-eivel (hardware támogatás)</TD><TR>
+<TD></TD><TD VALIGN=top>xv</TD><TD></TD><TD>X11 az XVideo kiterjesztés overlay-eivel (hardveres támogatás)</TD><TR>
 <TD></TD><TD VALIGN=top>gl</TD><TD></TD><TD>OpenGL renderelõ, egyelõre csak ezekkel megy:
 <UL><LI>bármely kártyával, Utah-GLX-szel
 <LI>Matrox kártyák + X/DRI >=4.0.3
@@ -20,15 +20,15 @@
 <TD></TD><TD VALIGN=top>fbdev</TD><TD></TD><TD>Megjelenítés általános framebuffereken</TD><TR>
 <TD></TD><TD VALIGN=top>svga</TD><TD></TD><TD>Megjelenítés SVGAlib-bel</TD><TR>
 <TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>
-&nbsp;&nbsp;<CODE>1.1.7:</CODE> software-es skalazas<BR>
-&nbsp;&nbsp;<CODE>1.1.8:</CODE> támogatja a hardware-es gyorsítást XVideo-n keresztül<BR>
+&nbsp;&nbsp;<CODE>1.1.7:</CODE> szoftveres skálázás<BR>
+&nbsp;&nbsp;<CODE>1.1.8:</CODE> támogatja a hardveres gyorsítást XVideo-n keresztül<BR>
 &nbsp;&nbsp;<CODE>1.2.0:</CODE> aalib támogatás (használd inkább a -vo aa opciót!)</TD><TR>
 <TD></TD><TD VALIGN=top>ggi</TD><TD></TD><TD>SDL-hez hasonló</TD><TR>
 <TD></TD><TD VALIGN=top>aa</TD><TD></TD><TD>szöveges módú megjelenítés AAlib-bel</TD><TR>
 
 <TD COLSPAN=4><P><B>Kártyaspecifikus:</B></P></TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>mga</TD><TD>&nbsp;&nbsp;</TD><TD>Matrox G200/G400 hardware-es YUV overlay az mga_vid-en keresztül</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>mga</TD><TD>&nbsp;&nbsp;</TD><TD>Matrox G200/G400 hardveres YUV overlay az mga_vid-en keresztül</TD><TR>
 <TD></TD><TD VALIGN=top>xmga</TD><TD></TD><TD>Matrox G200/G400 overlay (mga_vid) X11 ablakban<BR>
 (<I>(Xv emuláció 3.3.x-es X-szel!)</I>)</TD><TR>
 <TD></TD><TD VALIGN=top>syncfb</TD><TD></TD><TD>Matrox G400 YUV támogatás framebufferen (régi, használj mga/xmga-t)</TD><TR>
@@ -91,12 +91,12 @@
 
 <P><B><A NAME=2.2.1.2>2.2.1.2.  Xv</A></B></P>
 
-<P>XFree86 4.0.2 vagy újabb alatt használhatod a kártyád hardware-es YUV
+<P>XFree86 4.0.2 vagy újabb alatt használhatod a kártyád hardveres YUV
   rutinjait, az XVideo kiterjesztéssel. Ezt használja a '-vo xv' opció.
   Hogy mûködjön, a következõ feltételeknek kell teljesülniük :</P>
 <P><UL>
 <LI>XFree86 4.0.2 vagy újabb kell (elõzõ verziókban nincs XVideo)
-<LI>A kártyádnak tudnia kell hardware-es gyorsítást (a mai kártyák tudják)
+<LI>A kártyádnak tudnia kell hardveres gyorsítást (a mai kártyák tudják)
 <LI>Az X-nek be kell töltenie az XVideo kiterjesztést, valahogy így néz ki:
 
 <P><CODE>&nbsp;&nbsp;(II) Loading extension XVideo</CODE></P>
@@ -279,7 +279,7 @@
   A -v opció megadásaval a DGA driver többek között kiírja az XF86Config
   file-od által elérhetõ felbontásokat.
   DGA2-vel megadhatod a használandó színmélységet is a -bpp opcióval.
-  A megadott szám lehet: 15, 16, 24 és 32. A hardware-edtõl függ, hogy ezek  
+  A megadott szám lehet: 15, 16, 24 és 32. A hardveredtõl függ, hogy ezek  
   közül melyeket használhatod, valamint, hogy (lassú) konverzió kell-e.</P>
 
 <P>Ha szerencséd van és van még elég memóriád hogy a kép mégegyszer elférjen,
@@ -387,8 +387,8 @@
 megadható hogy melyik video SDL meghajtót használja (pl. aalib, dga, x11)</TD><TR>   
 <TD></TD><TD>-ao sdl:név</TD><TD></TD><TD>megadható hogy melyik audio SDL meghajtót használja (pl. dsp,
 esd, arts)</TD><TR>
-<TD></TD><TD>-noxv</TD><TD></TD><TD>kikapcsolja az XVideo hardware-es gyorsítást</TD><TR>
-<TD></TD><TD>-forcexv</TD><TD></TD><TD>megerõsíti a hardware-es gyorsítás használatát</TD><TR>
+<TD></TD><TD>-noxv</TD><TD></TD><TD>kikapcsolja az XVideo hardveres gyorsítást</TD><TR>
+<TD></TD><TD>-forcexv</TD><TD></TD><TD>megerõsíti a hardveres gyorsítás használatát</TD><TR>
 
 <TD COLSPAN=4><P><B>SDL billentyûk:</B></P></TD><TR>
 
@@ -406,7 +406,7 @@ esd, arts)</TD><TR>
 <P><B><A NAME=2.2.1.5>2.2.1.5.  SVGAlib</A></B></P>
 
 <P>Ha nincs X-ed, használd az SVGAlib meghajtót! Bizonyosodj meg róla, hogy nem
-  használod a -fs kapcsolót, mert ez itt a software-es scaler-t kapcsolja be,
+  használod a -fs kapcsolót, mert ez itt a szoftveres scaler-t kapcsolja be,
   és ez LASSÚÚÚÚ egyelõre, hacsak nincs egy igazán gyors procid (és/vagy
   MTRR?). :(</P>
 
@@ -450,7 +450,7 @@ a framebuffer egység megadása (/dev/fb0)</TD><TR>
   támogatott, ha a film pixelformátuma megegyezik a videomód formátumával.
   Figyelj a bpp értékére is, az fbdev meghajtó a jelenlegit próbálja
   használni, vagy ha a -bpp opciót használod, akkor azt.
-<LI><B>-zoom</B> opció nem támogatott (a software-es nagyítás nagyon lassú).
+<LI><B>-zoom</B> opció nem támogatott (a szoftveres nagyítás nagyon lassú).
   Az -fs opciónak nincs jelentõsége. Továbbá nem használhatsz 8 vagy kisebb
   bpp-s módokat.</UL></P>
 
@@ -460,7 +460,7 @@ a framebuffer egység megadása (/dev/fb0)</TD><TR>
 <P><B><A NAME=2.2.1.7>2.2.1.7.  Matrox framebuffer (mga_vid)</A></B></P>
 
 <P>Ez a rész a Matrox G200/G400/G450 BES (Back-End Scaler) támogatásról szól,
-  azaz az mga_vid kernel meghajtóról. Hardware-es VSYNC támogatást tartalmaz,
+  azaz az mga_vid kernel meghajtóról. Hardveres VSYNC támogatást tartalmaz,
   tripla buffereléssel. Framebufferes konzolon is, és X alatt is mûködik.</P>
 
 <P>A használatához elõszöris le kell fordítani :</P>

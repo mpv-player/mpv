@@ -107,15 +107,17 @@
 
 <P><B><A NAME=1.1>1.1. Overview</A></B></P>
 
-<P><B>MPlayer</B> is a movie player for LINUX. It plays most MPEG, AVI and ASF files,
-supported by many native and Win32 DLL codecs. You can watch VCD, DVD and
-even DivX movies too. The another big feature of mplayer is the wide range of
-supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
-AAlib, but you can use SDL (and this way all drivers of SDL) and some
-lowlevel card-specific drivers (for Matrox) too! Most of them supports
-software or hardware scaling, so you can enjoy movies in fullscreen. And what
-about the nice big antialiased shaded subtitles (7 supported types!!!) with
-hungarian, english, cyrillic, czech, korean fonts, and OSD?</P>
+<P><B>MPlayer</B> is a movie player for LINUX (runs on many other Unices, and
+<B>non-x86</B> CPUs, see <A HREF="#6">section 6</A>). It plays most MPEG, AVI
+and ASF files, supported by many native and Win32 DLL codecs. You can watch
+<B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B> and even <B>DivX</B> movies too. The
+another big feature of mplayer is the wide range of supported output drivers.
+It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, but you can use SDL
+(and this way all drivers of SDL) and some lowlevel card-specific drivers (for
+Matrox) too! Most of them supports software or hardware scaling, so you can
+enjoy movies in fullscreen. And what about the nice big antialiased shaded
+subtitles (7 supported types!!!) with hungarian, english, cyrillic, czech,
+korean fonts, and OSD?</P>
 
 <P>I didn't write any codecs, just some players. I spent
 a lot of time finding the best way to parse bad damaged input files
@@ -172,7 +174,7 @@ too. So I've decided to write/modify one...</P>
 <LI>If you plan to use <B>MPlayer</B> on x86 architecture, you possibly want to use
 Win32 codecs. Download and unzip w32codecs.zip to /usr/lib/win32 .
 Note: the avifile project has similar codecs package, but it differs
-from our, so if you want to use all supported codecs, then use
+from ours, so if you want to use all supported codecs, then use
 our package! However, you can use our codecs package with avifile.</LI>
 
 <LI>If you own a Matrox G200/G400/G450 card, then please see the <A HREF="video.html#2.2.1.7">2.2.1.7</A>
@@ -181,7 +183,14 @@ _before_ compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
 built.</LI>
 
 <LI>If you plan to use the ProjectMayo's <B>DivX4</B> codec, check the
-<A HREF="codecs.html#2.1.2.1">2.1.2.1</A> section before compiling.</LI>
+<A HREF="codecs.html#2.1.2.1">2.1.2.1</A> section before compiling.
+This codec can play <B>DivX</B> movies much faster than the Win32 DLL, and
+<B>ffmpeg</B>. It's closed-source, and only an x86 version is available.</LI>
+
+<LI>If you plan to use ffmpeg's <B>libavcodec</B>, check the
+<A HREF="codecs.html#2.1.2.2">2.1.2.2</A> section before compiling.
+You'll need this to gain <B>DivX</B> playing on non-x86 machines, or want to
+gain bigger speed than the Win32 codec does.</LI>
 
 <LI>For DVD support, you'll have to compile libdvdread and libcss.
 See <A HREF="cd-dvd.html#4.2">section 4.2</A> for more information.</LI>
@@ -254,13 +263,14 @@ Some URLs:
   <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - korean fonts & RAW plugin
 </UL>
 </P>
+</UL>
 <P>After that, UNZIP the files to ~/.mplayer/font/ .
-Now you have to see a clock at the upper left corner of the movie
+Now you have to see a timer at the upper left corner of the movie
 (switch it off with 'o') .</P>
 
 <P>OSD has 3 states: (switch with 'o')<BR>
 <UL>
-  <LI>clock + volume bar + seek bar + subtitles (default)
+  <LI>timer + volume bar + seek bar + subtitles (default)
   <LI>volume bar + seek bar + subtitles
   <LI>subtitles only
 </UL>
@@ -285,7 +295,7 @@ Now you have to see a clock at the upper left corner of the movie
 <P><PRE>  mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
   mplayer -vcd 2 /dev/cdrom
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-  mplayer -dvd /dev/dvd /mnt/dvd/matrix.vob 
+  mplayer -dvd 1 /dev/dvd
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
 
@@ -419,20 +429,24 @@ If you have a CPU with SSE also use "options CPU_ENABLE_SSE" to use it
 <P>If <B>MPlayer</B> complains about "CD-ROM Device '/dev/cdrom' not found!" make a 
 symbolic link: <CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE></P>
 
-<P>There's no DVD support for FreeBSD yet. 
-Feel free to add it :-)</P>
-
+<P>There's no DVD support for FreeBSD yet. (??? libdvdread?)</P>
 
 <P><B><A NAME=6.3>6.3. Solaris</A></B></P>
 
 <P>MPlayer should work on Solaris 2.6 or newer.</P>
 
 <P>AVI file playback works best on Solaris x86, because you have the
-option to use the win32 codecs on the x86 platform.  On Solaris SPARC,
+option to use the win32 codecs on the x86 platform, or can use MMX/MMX2/3DNow/etc
+instructions for MP3/DivX/DVD/whatever. On Solaris SPARC,
 you'll find quite a few AVI files with non working video and/or
-audio playback, because the video/audio codecs using the win32 DLLs
+audio playback, because the video/audio codecs using the Win32 DLLs
 are not available. However, <B>DivX/OpenDivX</B> movies should work,
 when using libavcodec.</P>
+
+<P>On <B>UltraSPARC</B>s, <B>MPlayer</B> takes advantage of their <B>VIS</B>
+extensions (equivalent to MMX), currently only(?) in <I>libmpeg2</I> and <I>libvo</I>, not
+libavcodec/mp3lib. You can watch a VOB file on a 400Mhz CPU. You'll need
+<A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A> installed.</P>
 
 <P>To build the package you will need GNU make (gmake, /opt/sfw/gmake), native
 Solaris make will not work. Typical error you get when building with solaris'
@@ -487,12 +501,12 @@ capacity >4GB:</P>
 disk block >4GB on a device using a logical blocksize != DEV_BSIZE
 (i.e. CDROM and DVD media).  Due to a 32bit int overflow, a disk
 address modulo 4GB is accessed.
-(http://groups.yahoo.com/group/solarisonintel/message/22516)
+(<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
 
 <LI>The similar bug is present in the hsfs(7FS) filesystem code (aka
 ISO9660), hsfs currently does not support partitions/disks >4GB,
 all data is accessed modulo 4GB
-(http://groups.yahoo.com/group/solarisonintel/message/22592)
+(<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)
 </UL></P>
 
 <P>On Solaris with an UltraSPARC CPU, you can get some extra speed by
@@ -665,7 +679,7 @@ all data is accessed modulo 4GB
 
 </LI><LI>Adam Tla/lka: &lt;atlka@pg.gda.pl&gt;
 <UL><LI>osd/sub review, fixes, optimization, utf8 support
-</LI></LI>various fixes
+</LI><LI>various fixes
 </LI></UL>
 
 </LI><LI>Folke Ashberg: &lt;folke@ashberg.de&gt;
@@ -712,7 +726,7 @@ all data is accessed modulo 4GB
 <UL><LI>ffmpeg/libavcodec author,maintainer (opensource mpeg, mjpeg, divx en/decoder)
 </LI></UL>
 
-</LI><LI>Project Mayo:  &lt;http://www.projectmayo.com&gt;
+</LI><LI>Project Mayo:  &lt;<A HREF="http://www.projectmayo.com">http://www.projectmayo.com</A>&gt;
 <UL><LI>the OpenDivX codec authors
 </LI></UL>
 
