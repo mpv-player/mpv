@@ -4,7 +4,7 @@
 
 #include "cfg-common.h"
 
-extern char *playlist_file;
+extern int use_stdin;
 
 #ifdef HAVE_FBDEV
 extern char *fb_dev_name;
@@ -295,6 +295,7 @@ static config_t mplayer_opts[]={
 	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
 	{"slave", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
+	{"use-stdin", &use_stdin, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 
 #ifdef HAVE_X11
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},
