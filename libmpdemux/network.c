@@ -700,6 +700,11 @@ extension=NULL;
 #endif
 		}
 
+		if(!strcasecmp(url->protocol, "udp") ) {
+			*file_format = DEMUXER_TYPE_UNKNOWN;
+			return 0;
+		}
+
 	// Old, hacked RTP support, which works for MPEG Streams
 	//   RTP streams only:
 		// Checking for RTP
@@ -1185,7 +1190,7 @@ rtp_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_
 }
 
 static int
-rtp_streaming_start( stream_t *stream ) {
+rtp_streaming_start( stream_t *stream, int raw_udp ) {
 	streaming_ctrl_t *streaming_ctrl;
 	int fd;
 
@@ -1199,7 +1204,10 @@ rtp_streaming_start( stream_t *stream ) {
 		stream->fd = fd;
 	}
 
-	streaming_ctrl->streaming_read = rtp_streaming_read;
+	if(raw_udp)
+		streaming_ctrl->streaming_read = nop_streaming_read;
+	else
+		streaming_ctrl->streaming_read = rtp_streaming_read;
 	streaming_ctrl->streaming_seek = nop_streaming_seek;
 	streaming_ctrl->prebuffer_size = 64*1024;	// 64 KBytes	
 	streaming_ctrl->buffering = 0;
@@ -1244,7 +1252,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 				mp_msg(MSGT_NETWORK,MSGL_ERR,"streaming_start : Closing socket %d failed %s\n",stream->fd,strerror(errno));
 		}
 		stream->fd = -1;
-		ret = rtp_streaming_start( stream );
+		ret = rtp_streaming_start( stream, 0);
 	} else
 
 	if( !strcasecmp( stream->streaming_ctrl->url->protocol, "pnm")) {
@@ -1269,6 +1277,14 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		    return -1;
 #endif
 		}
+	} else if(!strcasecmp( stream->streaming_ctrl->url->protocol, "udp")) {
+		stream->fd = -1;
+		ret = rtp_streaming_start(stream, 1);
+		if(ret<0) {
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"rtp_streaming_start(udp) failed\n");
+			return -1;
+		}
+		*demuxer_type =  DEMUXER_TYPE_UNKNOWN;
 	} else
 
 	// For connection-oriented streams, we can usually determine the streaming type.
