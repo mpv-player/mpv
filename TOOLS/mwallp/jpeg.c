@@ -134,8 +134,8 @@ int decode_jpeg(void* data,int len,char* dbuffer,int dwidth,int dheight, int dst
  jpeg_finish_decompress(&cinfo);
  jpeg_destroy_decompress(&cinfo);
 
- swsContext= sws_getContextFromCmdLine(width,height, in_fmt, 
-    				      dwidth,dheight, IMGFMT_BGR|dbpp);
+ swsContext= sws_getContext(width,height, in_fmt, 
+		            dwidth,dheight, IMGFMT_BGR|dbpp, SWS_BICUBIC, NULL, NULL);
 
  sws_scale(swsContext,&img,&row_stride,0,height,&dbuffer, &dstride);
  
