@@ -382,7 +382,7 @@ vf=eq2=1.0:-0.8
 You can also write file-specific configuration files.
 If you wish to have a configuration file for a file called 'movie.avi', create a file
 named 'movie.avi.conf' with the file-specific options in it and put it in
-~/.mplayer or in the same directory as the file.
+~/.mplayer/ or in the same directory as the file.
 .
 .
 .
@@ -766,8 +766,8 @@ Especially useful on slow media.
 .
 .TP
 .B \-cache-min <percentage>
-Playback will start when the cache fill threshold set with this option
-is reached.
+Playback will start when the cache has been filled up to <percentage>
+of the total.
 .
 .TP
 .B \-cache-prefill <percentage> (not yet implemented)
@@ -3070,9 +3070,8 @@ Try Win32 codecs first.
 .
 .TP
 .B \-aspect <ratio> (also see \-zoom)
-Override movie aspect ratio.
-Aspect ratio is autodetected for MPEG files, but cannot be
-autodetected for most AVI files.
+Override movie aspect ratio, in case aspect information is
+incorrect or missing in the file being played.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -4230,7 +4229,7 @@ be detected as interlaced to drop the frame.
 .
 .TP
 .B lavcdeint (OBSOLETE)
-libavcodec deinterlacing filter, same as \-vf pp=fd
+FFmpeg deinterlacing filter, same as \-vf pp=fd
 .
 .TP
 .B kerndeint[=thresh[:map[:order[:sharp[:twoway]]]]]
@@ -7429,7 +7428,7 @@ in this order:
 .\" Examples
 .\" --------------------------------------------------------------------------
 .
-.SH EXAMPLES
+.SH EXAMPLES OF MPLAYER USAGE
 .
 .TP
 .B Quickstart DVD playing:
@@ -7494,6 +7493,12 @@ mplayer \-vo zr \-vf scale=352:288 file.avi
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
 .TP
+.B Play a 6-channel AAC file with only two speakers:
+mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
+.
+.SH EXAMPLES OF MENCODER USAGE
+.
+.TP
 .B Encode DVD title #2, only selected chapters:
 mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
 .
@@ -7527,10 +7532,6 @@ mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .TP
 .B Encode from a pipe:
 rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
-.
-.TP
-.B Play a 6-channel AAC file with only two speakers:
-mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
 .
 .
 .\" --------------------------------------------------------------------------
