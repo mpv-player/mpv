@@ -91,8 +91,8 @@ static int control(int cmd,int arg){
     if(!pl_resample.data)
       return CONTROL_ERROR;
     ao_plugin_data.len = (int)((double)ao_plugin_data.len * 
-			     ((double)pl_resample.up)/
-			     ((double)pl_resample.dn));
+			     ((double)pl_resample.dn)/
+			     ((double)pl_resample.up));
     return CONTROL_OK;
   }
   return -1;

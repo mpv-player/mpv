@@ -159,7 +159,7 @@ static int init(int rate,int channels,int format,int flags){
 
   if(!ok) return 0;
 
-  // Allocate output buffer */
+  // Allocate output buffer
   if(ao_plugin_local_data.buf)
     free(ao_plugin_local_data.buf);
   ao_plugin_local_data.buf=malloc(MAX_OUTBURST);

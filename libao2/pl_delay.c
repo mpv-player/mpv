@@ -101,18 +101,16 @@ static void reset(){
 // processes 'ao_plugin_data.len' bytes of 'data'
 // called for every block of data
 static int play(){
-  int i=0;
-  int j=0;
-  int k=0;
   // Copy end of prev block to begining of buffer
-  for(i=0;i<ao_plugin_cfg.pl_delay_len;i++,j++)
-    ((char*)pl_delay.data)[j]=((char*)pl_delay.delay)[i];
+  memcpy(pl_delay.data,pl_delay.delay,ao_plugin_cfg.pl_delay_len);
   // Copy current block except end
-  for(i=0;i<ao_plugin_data.len-ao_plugin_cfg.pl_delay_len;i++,j++,k++)
-    ((char*)pl_delay.data)[j]=((char*)ao_plugin_data.data)[k];
+  memcpy(pl_delay.data+ao_plugin_cfg.pl_delay_len,
+  	 ao_plugin_data.data,
+  	 ao_plugin_data.len-ao_plugin_cfg.pl_delay_len);
   // Save away end of current block for next call
-  for(i=0;i<ao_plugin_cfg.pl_delay_len;i++,k++)
-    ((char*)pl_delay.delay)[i]=((char*)ao_plugin_data.data)[k];
+  memcpy(pl_delay.delay,
+	 ao_plugin_data.data+ao_plugin_data.len-ao_plugin_cfg.pl_delay_len,
+	 ao_plugin_cfg.pl_delay_len);
   // Set output data block
   ao_plugin_data.data=pl_delay.data;
   return 1;
