@@ -581,6 +581,26 @@ got_audio:
 	    static int cnt=0;
 	    static int cnt2=CRACK_MATRIX;
 #endif
+	    if (((sh_audio_t *)ds->sh)->format == mmioFOURCC('M', 'P', '4', 'A')) {
+		uint16_t *sub_packet_lengths, sub_packets, i;
+		/* AAC in Real: several AAC frames in one Real packet. */
+		/* Second byte, upper four bits: number of AAC frames */
+		/* next n * 2 bytes: length of the AAC frames in bytes, BE */
+		sub_packets = (stream_read_word(demuxer->stream) & 0xf0) >> 4;
+		sub_packet_lengths = calloc(sub_packets, sizeof(uint16_t));
+		for (i = 0; i < sub_packets; i++)
+		    sub_packet_lengths[i] = stream_read_word(demuxer->stream);
+		for (i = 0; i < sub_packets; i++) {
+		    demux_packet_t *dp = new_demux_packet(sub_packet_lengths[i]);
+		    stream_read(demuxer->stream, dp->buffer, sub_packet_lengths[i]);
+		    dp->pts = (priv->a_pts == timestamp) ? 0 : (timestamp / 1000.0f);
+		    priv->a_pts = timestamp;
+		    dp->pos = demuxer->filepos;
+		    ds_add_packet(ds, dp);
+		}
+		free(sub_packet_lengths);
+		return 1;
+	    }
             demux_packet_t *dp = new_demux_packet(len);
 	    stream_read(demuxer->stream, dp->buffer, len);
 #ifdef CRACK_MATRIX
@@ -1192,6 +1212,23 @@ void demux_open_real(demuxer_t* demuxer)
 			    ((short*)(sh->wf+1))[4]=codecdata_length;
 //			    stream_read(demuxer->stream, ((char*)(sh->wf+1))+6, 24); // extras
 			    stream_read(demuxer->stream, ((char*)(sh->wf+1))+10, codecdata_length); // extras
+			    break;
+			case MKTAG('r', 'a', 'a', 'c'):
+			case MKTAG('r', 'a', 'c', 'p'):
+			    /* This is just AAC. The two or five bytes of */
+			    /* config data needed for libfaad are stored */
+			    /* after the audio headers. */
+			    stream_skip(demuxer->stream,3);  // Skip 3 unknown bytes 
+			    if (version==5)
+				stream_skip(demuxer->stream,1);  // Skip 1 additional unknown byte 
+			    codecdata_length=stream_read_dword(demuxer->stream);
+			    if (codecdata_length>=1) {
+				sh->codecdata_len = codecdata_length - 1;
+				sh->codecdata = calloc(sh->codecdata_len, 1);
+				stream_skip(demuxer->stream, 1);
+				stream_read(demuxer->stream, sh->codecdata, sh->codecdata_len);
+			    }
+			    sh->format = mmioFOURCC('M', 'P', '4', 'A');
 			    break;
 			default:
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%s)\n", buf);
