@@ -19,14 +19,14 @@ typedef struct {
 	char *password;
 } URL_t;
 
-URL_t* url_new(char* url);
+URL_t* url_new(const char* url);
 void   url_free(URL_t* url);
 
-void url_unescape_string(char *outbuf, char *inbuf);
-void url_escape_string(char *outbuf, char *inbuf);
+void url_unescape_string(char *outbuf, const char *inbuf);
+void url_escape_string(char *outbuf, const char *inbuf);
 
 #ifdef __URL_DEBUG
-void url_debug(URL_t* url);
+void url_debug(const URL_t* url);
 #endif // __URL_DEBUG
 
 #endif // __URL_H
