@@ -213,7 +213,7 @@ mutatja be. Csak két parancs szükséges :<BR>
 <P>Legkönnyebb dolog a világon. Egyszerûen átmásoljuk a video és audio
 streameket, és közben a <B>MEncoder</B> létrehozza a megfelelõ indexet is.
 Ez persze nem tudja kijavítani az esetleges hibákat a video és/vagy audio
-stream-ekben.</P>
+stream-ekben, viszont a hibásan interleave-elt fileokat igen.</P>
 
 <P>A parancs : <CODE>mencoder input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
@@ -352,7 +352,7 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi</CODE></P>
 
 <P>Ugyanez libavcodec-kel, MJPEG tömörítéssel :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg</CODE></P>
 
 <P>A DVD 2-es fejezetének enkódolása, átméretezéssel :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -x 640 -y 480 -sws 2 -o title2.avi</CODE></P>

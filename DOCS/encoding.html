@@ -193,11 +193,12 @@ commands are needed :<BR>
 </UL>
 </P>
 
-<P><B><A NAME=2.4.3.4>2.4.3.4.  Fixing AVIs with broken index</B></P>
+<P><B><A NAME=2.4.3.4>2.4.3.4.  Fixing AVIs with broken index or interleaving</B></P>
 
 <P>Easiest thing. We simply copy the video and audio streams, and
 <B>MEncoder</B> generates the index. Of course this cannot fix possible bugs in
-the video and/or audio streams.</P>
+the video and/or audio streams. It also fixes files with broken interleaving,
+thus the <CODE>-ni</CODE> option won't be needed for them anymore.</P>
 
 <P>Command : <CODE>mencoder input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
@@ -224,7 +225,7 @@ unsupported). You can encode to the following codecs :</P>
   <CODE>vcodec</CODE> config, like : <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
 
 <P>An example, with MJPEG compression :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg</CODE></P>
 
 <P><B><A NAME=2.4.4>2.4.4.  Syntax</B></P>
 
