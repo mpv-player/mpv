@@ -317,6 +317,7 @@ uint32_t audiosamples=1;
 uint32_t videosamples=1;
 uint32_t skippedframes=0;
 uint32_t duplicatedframes=0;
+uint32_t badframes=0;
 
 aviwrite_stream_t* mux_a=NULL;
 aviwrite_stream_t* mux_v=NULL;
@@ -1039,7 +1040,9 @@ case VCODEC_FRAMENO:
 default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
     blit_frame=decode_video(sh_video,start,in_size,(skip_flag>0)?1:0);
-    if(!blit_frame && skip_flag<=0){
+    if(!blit_frame){
+      badframes++;
+      if(skip_flag<=0){
 	// unwanted skipping of a frame, what to do?
 	if(skip_limit==0){
 	    // skipping not allowed -> write empty frame:
@@ -1048,6 +1051,7 @@ default:
 	    // skipping allowed -> skip it and distriubute timer error:
 	    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
 	}
+      }
     }
 }
 
@@ -1134,7 +1138,7 @@ if(sh_audio && !demuxer2){
 	    (int)demuxer->movi_end);
 #else
 	if(verbose) {
-		mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d] A/Vms %d/%d D/S %d/%d \r",
+		mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d] A/Vms %d/%d D/B/S %d/%d/%d \r",
 	    	mux_v->timer, decoded_frameno, (int)(p*100),
 	    	(t>1) ? (int)(decoded_frameno/t+0.5) : 0,
 	    	(p>0.001) ? (int)((t/p-t)/60) : 0, 
@@ -1143,7 +1147,7 @@ if(sh_audio && !demuxer2){
 	    	(mux_v->timer>1) ? (int)(mux_v->size/mux_v->timer/125) : 0,
 	    	(mux_a && mux_a->timer>1) ? (int)(mux_a->size/mux_a->timer/125) : 0,
 			audiorate/audiosamples, videorate/videosamples,
-			duplicatedframes, skippedframes
+			duplicatedframes, badframes, skippedframes
 		);
 	} else
 	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d]\r",
