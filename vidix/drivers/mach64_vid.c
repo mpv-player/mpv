@@ -84,6 +84,10 @@ typedef struct video_registers_s
 }video_registers_t;
 
 static bes_registers_t besr;
+
+/* Graphic keys */
+static vidix_grkey_t mach64_grkey;
+
 #define DECLARE_VREG(name) { #name, name, 0 }
 static video_registers_t vregs[] = 
 {
@@ -133,6 +137,12 @@ static video_registers_t vregs[] =
 		_tmp |= (val);						\
 		OUTREG(addr, _tmp);					\
 	} while (0)
+
+static __inline__ int ATIGetMach64LCDReg(int _Index)
+{
+        OUTREG8(LCD_INDEX, _Index);
+        return INREG(LCD_DATA);
+}
 
 static __inline__ uint32_t INPLL(uint32_t addr)
 {
@@ -232,6 +242,40 @@ static uint32_t mach64_get_yres( void )
   v_total = INREG(CRTC_V_TOTAL_DISP);
   yres = (v_total >> 16) & 0xffff;
   return yres + 1;
+}
+
+// returns the verical stretch factor in 16.16
+static int mach64_get_vert_stretch(void)
+{
+    int lcd_index;
+    int lcd_gen_ctrl;
+    int vert_stretching;
+    int ext_vert_stretch;
+    int ret;
+    int yres= mach64_get_yres();
+
+//FIXME check for mobility & co
+
+    lcd_index= INREG(LCD_INDEX);
+    
+    vert_stretching= ATIGetMach64LCDReg(LCD_VERT_STRETCHING);
+    if(!(vert_stretching&VERT_STRETCH_EN)) ret= 1<<16;
+    else
+    {
+    	int panel_size;
+        
+	ext_vert_stretch= ATIGetMach64LCDReg(LCD_EXT_VERT_STRETCH);
+	panel_size= (ext_vert_stretch&VERT_PANEL_SIZE)>>11;
+	panel_size++;
+	
+	ret= ((yres<<16) + (panel_size>>1))/panel_size;
+    }
+      
+//    lcd_gen_ctrl = ATIGetMach64LCDReg(LCD_GEN_CNTL);
+    
+    OUTREG(LCD_INDEX, lcd_index);
+    
+    return ret;
 }
 
 static void mach64_vid_make_default()
@@ -531,46 +575,10 @@ static void mach64_vid_display_video( void )
 // bit 28-31 nothing interresting just crashed my system when i played with them  :(
 
     mach64_fifo_wait(3);
-    if(besr.ckey_on)
-    {
-	OUTREG(OVERLAY_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
-	OUTREG(OVERLAY_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
-	OUTREG(OVERLAY_KEY_CNTL,0x50);
-    }
-    else
-    {
-	OUTREG(OVERLAY_GRAPHICS_KEY_MSK, 0ULL);
-	OUTREG(OVERLAY_GRAPHICS_KEY_CLR, 0ULL);
-	OUTREG(OVERLAY_KEY_CNTL,0x50);
-    }
-switch(mach64_vid_get_dbpp()) //Ugly Hack (remove me if colorkey is correctly supported in vidix)
-{
-case 15: 
-	OUTREG(OVERLAY_GRAPHICS_KEY_MSK, 0x7FFF);
-	OUTREG(OVERLAY_GRAPHICS_KEY_CLR, 0x7C1F);
-	OUTREG(OVERLAY_KEY_CNTL,0x50);
-	break;
-case 16: 
-	OUTREG(OVERLAY_GRAPHICS_KEY_MSK, 0xFFFF);
-	OUTREG(OVERLAY_GRAPHICS_KEY_CLR, 0xF81F);
-	OUTREG(OVERLAY_KEY_CNTL,0x50);
-	break;
-case 24: 
-	OUTREG(OVERLAY_GRAPHICS_KEY_MSK, 0xFFFFFF);
-	OUTREG(OVERLAY_GRAPHICS_KEY_CLR, 0xFF00FF);
-	OUTREG(OVERLAY_KEY_CNTL,0x50);
-	break;
-case 32: 
-	OUTREG(OVERLAY_GRAPHICS_KEY_MSK, 0xFFFFFF);
-	OUTREG(OVERLAY_GRAPHICS_KEY_CLR, 0xFF00FF);
-	OUTREG(OVERLAY_KEY_CNTL,0x50);
-	break;
-default:
-	OUTREG(OVERLAY_GRAPHICS_KEY_MSK, 0);
-	OUTREG(OVERLAY_GRAPHICS_KEY_CLR, 0);
-	OUTREG(OVERLAY_KEY_CNTL,0x50);
-	break;
-}
+    OUTREG(OVERLAY_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
+    OUTREG(OVERLAY_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
+    OUTREG(OVERLAY_KEY_CNTL,0x50);
+
     mach64_wait_for_idle();
     vf = INREG(VIDEO_FORMAT);
 
@@ -661,11 +669,13 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     dest_h = config->dest.h;
     besr.fourcc = config->fourcc;
     ecp = (INPLL(PLL_VCLK_CNTL) & PLL_ECP_DIV) >> 4;
-    v_inc = (src_h << (12
-		+(mach64_is_interlace()?1:0)
-		-(mach64_is_dbl_scan()?1:0)
-//		+(is_420?1:0)
-		)) / dest_h;
+    v_inc = src_h * mach64_get_vert_stretch();
+    
+    if(mach64_is_interlace()) v_inc<<=1;
+    if(mach64_is_dbl_scan() ) v_inc>>=1;
+    v_inc>>=4; // convert 16.16 -> 20.12
+    v_inc/= dest_h;
+    
     h_inc = (src_w << (12+ecp)) / dest_w;
     /* keep everything in 16.16 */
     config->offsets[0] = 0;
@@ -726,6 +736,52 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     besr.y_x_end = y_pos | ((config->dest.x + dest_w) << 16);
     besr.height_width = ((src_w - left)<<16) | (src_h - top);
 
+    if(mach64_grkey.ckey.op == CKEY_TRUE)
+    {
+	besr.ckey_on=1;
+	
+	switch(mach64_vid_get_dbpp())
+	{
+	case 15:
+		besr.graphics_key_msk=0x7FFF;
+		besr.graphics_key_clr=
+			  ((mach64_grkey.ckey.blue &0xF8)>>3)
+			| ((mach64_grkey.ckey.green&0xF8)<<2)
+			| ((mach64_grkey.ckey.red  &0xF8)<<7);
+		break;
+	case 16:
+		besr.graphics_key_msk=0xFFFF;
+		besr.graphics_key_clr=
+			  ((mach64_grkey.ckey.blue &0xF8)>>3)
+			| ((mach64_grkey.ckey.green&0xFC)<<3)
+			| ((mach64_grkey.ckey.red  &0xF8)<<8);
+		break;
+	case 24:
+		besr.graphics_key_msk=0xFFFFFF;
+		besr.graphics_key_clr=
+			  ((mach64_grkey.ckey.blue &0xFF))
+			| ((mach64_grkey.ckey.green&0xFF)<<8)
+			| ((mach64_grkey.ckey.red  &0xFF)<<16);
+		break;
+	case 32:
+		besr.graphics_key_msk=0xFFFFFF;
+		besr.graphics_key_clr=
+			  ((mach64_grkey.ckey.blue &0xFF))
+			| ((mach64_grkey.ckey.green&0xFF)<<8)
+			| ((mach64_grkey.ckey.red  &0xFF)<<16);
+	default:
+		besr.ckey_on=0;
+		besr.graphics_key_msk=0;
+		besr.graphics_key_clr=0;
+	}
+    }
+    else
+    {
+	besr.ckey_on=0;
+	besr.graphics_key_msk=0;
+	besr.graphics_key_clr=0;
+    }
+
     return 0;
 }
 
@@ -756,7 +812,7 @@ int vixQueryFourcc(vidix_fourcc_t *to)
 		    VID_DEPTH_12BPP| VID_DEPTH_15BPP|
 		    VID_DEPTH_16BPP| VID_DEPTH_24BPP|
 		    VID_DEPTH_32BPP;
-	to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK;
+	to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK | VID_CAP_COLORKEY;
 	return 0;
     }
     else  to->depth = to->flags = 0;
@@ -948,4 +1004,16 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
     if(sat < 0) sat = 0; if(sat > 31) sat = 31;
     OUTREG(SCALER_COLOUR_CNTL, (br & 0x7f) | (sat << 8) | (sat << 16));
   return 0;
+}
+
+int vixGetGrKeys(vidix_grkey_t *grkey)
+{
+    memcpy(grkey, &mach64_grkey, sizeof(vidix_grkey_t));
+    return(0);
+}
+
+int vixSetGrKeys(const vidix_grkey_t *grkey)
+{
+    memcpy(&mach64_grkey, grkey, sizeof(vidix_grkey_t));
+    return(0);
 }
