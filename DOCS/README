@@ -46,7 +46,7 @@ or speed problems too. So I've decided to write/modify one...
   The release version of the 0.11pre after 4 months of heavy development!
   Try it, and be amazed! Thousands of new features added... and of course
   old code was improved too, bugs removed etc.
-- MPlayer 0.18
+- MPlayer 0.18 "The BugCounter"
   2 months since 0.17 and here's a new release.. Completed ASF support,
   more subtitle formats, introduced libao (similar to libvo but to audio),
   even more stable than ever, and so on. It's a MUST !
@@ -299,7 +299,7 @@ License:
 ~~~~~~~~
 MPlayer incorporates a lot of code from other projects, but for now everything
 except the OpenDivX stuff is under General Public License (GPL) version 2 or
-later. See DOCS/COPYING
+later.
 
 Standard Disclaimer:
 ~~~~~~~~~~~~~~~~~~~~
