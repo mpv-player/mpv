@@ -63,7 +63,10 @@ I. TECH SIDE:
     cvs add filename/dirname
     cvs commit filename
 
-  Directories are added immediately, no commit necessary.
+  Directories are added immediately, no commit necessary. Make sure you do not
+  wrongly commit non-executable files with execute permissions set as this has
+  to be fixed manually in the repository. Binary files must be added with
+  'cvs add -kb'.
 
 5. Removing files:
 
