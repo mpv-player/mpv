@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 #ifdef MP_DEBUG
 #include <assert.h>
 #endif
@@ -13,11 +14,15 @@
 static int
 play_tree_is_valid(play_tree_t* pt);
 
+static void
+play_tree_iter_set_param(play_tree_iter_t* iter,char* opt,char* val);
+
 play_tree_t*
 play_tree_new(void) {
   play_tree_t* r = (play_tree_t*)calloc(1,sizeof(play_tree_t));
   if(r == NULL)
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",sizeof(play_tree_t));
+  r->entry_type = PLAY_TREE_ENTRY_NODE;
   return r;
 }
 
@@ -189,7 +194,7 @@ play_tree_set_child(play_tree_t* pt, play_tree_t* child) {
 
 #ifdef MP_DEBUG
   assert(pt != NULL);
-  assert(pt->files == NULL);
+  assert(pt->entry_type == PLAY_TREE_ENTRY_NODE);
 #endif
 
   for(iter = pt->child ; iter != NULL ; iter = iter->next)
@@ -234,12 +239,17 @@ play_tree_set_parent(play_tree_t* pt, play_tree_t* parent) {
 void
 play_tree_add_file(play_tree_t* pt,char* file) {
   int n = 0;
+  char* e;
 
 #ifdef MP_DEBUG
   assert(pt != NULL);
   assert(pt->child == NULL);
   assert(file != NULL);
 #endif
+
+  if(pt->entry_type != PLAY_TREE_ENTRY_NODE && 
+     pt->entry_type != PLAY_TREE_ENTRY_FILE)
+    return;
 
   if(pt->files) {
     for(n = 0 ; pt->files[n] != NULL ; n++)
@@ -251,8 +261,20 @@ play_tree_add_file(play_tree_t* pt,char* file) {
     return;
   }
 
-  pt->files[n] = strdup(file);
+  e = pt->files[n] = strdup(file);
   pt->files[n+1] = NULL;
+
+  if(strncasecmp(e,"vcd://",6) == 0 && strlen(&e[6]) > 0) {
+    pt->entry_type = PLAY_TREE_ENTRY_VCD;
+    memmove(e,e + 6,strlen(&e[6])+1);
+  } else if(strncasecmp(e,"dvd://",6) == 0 && strlen(&e[6]) > 0) {
+    pt->entry_type = PLAY_TREE_ENTRY_DVD;
+    memmove(e,&e[6],strlen(&e[6])+1);
+  } else if(strncasecmp(e,"tv://",5) == 0 && strlen(&e[5]) > 0) {
+    pt->entry_type = PLAY_TREE_ENTRY_TV;
+    memmove(e,&e[5],strlen(&e[5])+1);
+  } else
+    pt->entry_type = PLAY_TREE_ENTRY_FILE;
 
 }
 
@@ -263,7 +285,7 @@ play_tree_remove_file(play_tree_t* pt,char* file) {
 #ifdef MP_DEBUG
   assert(pt != NULL);
   assert(file != NULL);
-  assert(pt->files != NULL);
+  assert(pt->entry_type != PLAY_TREE_ENTRY_NODE);
 #endif
 
   for(n=0 ; pt->files[n] != NULL ; n++) {
@@ -383,7 +405,9 @@ play_tree_iter_push_params(play_tree_iter_t* iter) {
 	     pt->params[n].name,pt->params[n].value);      
     }
   }
-  //printf("Param pushed\n");
+
+  if(!pt->child)
+    iter->entry_pushed = 1;
   return 1;
 }
 
@@ -397,7 +421,7 @@ play_tree_iter_pop_params(play_tree_iter_t* iter) {
 
   if(iter->tree->params == NULL)
     return;
-  //printf("Poping params\n");
+  iter->entry_pushed = 0;
   m_config_pop(iter->config);
 }
 
@@ -457,12 +481,10 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
     return play_tree_iter_step(iter,0,with_nodes);
   }
 
-  if(iter->config && iter->entry_pushed) {
+  if(iter->config && iter->entry_pushed)
     play_tree_iter_pop_params(iter);
-    iter->entry_pushed = 0;
-  }
 
-  iter->file = 0;
+  iter->file = -1;
   if( d > 0 )
     pt = iter->tree->next;
   else if(d < 0)
@@ -511,14 +533,15 @@ play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
 #ifdef MP_DEBUG
   assert(pt->files != NULL);
 #endif
-  
+
   iter->tree = pt;
+    
   for(d = 0 ; iter->tree->files[d] != NULL ; d++)
     /* NOTHING */;
   iter->num_files = d;
-  
+
   if(iter->config)
-    iter->entry_pushed = play_tree_iter_push_params(iter);
+    play_tree_iter_push_params(iter);
 
   return PLAY_TREE_ITER_ENTRY;
 
@@ -532,8 +555,12 @@ play_tree_is_valid(play_tree_t* pt) {
   assert(pt != NULL);
 #endif
 
-  if(pt->files != NULL)
+  if(pt->entry_type != PLAY_TREE_ENTRY_NODE) {
+#ifdef MP_DEBUG
+    assert(pt->child == NULL);
+#endif
     return 1;
+  }
   else if (pt->child != NULL) {
     for(iter = pt->child ; iter != NULL ; iter = iter->next) {
       if(play_tree_is_valid(iter))
@@ -552,7 +579,7 @@ play_tree_iter_up_step(play_tree_iter_t* iter, int d,int with_nodes) {
   //printf("PT : Go UP\n");
 #endif
   
-  iter->file = 0;
+  iter->file = -1;
   if(iter->tree->parent == iter->root->parent)
     return PLAY_TREE_ITER_END;
 
@@ -588,7 +615,7 @@ play_tree_iter_down_step(play_tree_iter_t* iter, int d,int with_nodes) {
   //printf("PT : Go DOWN\n");
 #endif
 
-  iter->file = 0;
+  iter->file = -1;
 
   //  Push subtree params
   if(iter->config)
@@ -617,7 +644,7 @@ play_tree_iter_down_step(play_tree_iter_t* iter, int d,int with_nodes) {
 
 char*
 play_tree_iter_get_file(play_tree_iter_t* iter, int d) {
-  
+  char* entry;
 #ifdef MP_DEBUG
   assert(iter != NULL);
   assert(iter->tree->child == NULL);
@@ -626,16 +653,43 @@ play_tree_iter_get_file(play_tree_iter_t* iter, int d) {
   if(iter->tree->files == NULL)
     return NULL;
 
+#ifdef MP_DEBUG
+  assert(iter->num_files > 0);
+#endif
+
+  if(iter->file >= iter->num_files-1 || iter->file < -1)
+    return NULL;
+
   if(d > 0) {
-    if(iter->tree->files[iter->file] == NULL)
-      return NULL;
-    iter->file++;
+    if(iter->file >= iter->num_files - 1)
+      iter->file = 0;
+    else
+      iter->file++;
   } else if(d < 0) {
-    if(iter->file == 0)
-      return NULL;
-    iter->file--;
-  } 
-  return iter->tree->files[iter->file-1];
+    if(iter->file <= 0)
+      iter->file = iter->num_files - 1;
+    else
+      iter->file--;
+  }
+  entry = iter->tree->files[iter->file];
+
+  switch(iter->tree->entry_type) {
+  case PLAY_TREE_ENTRY_DVD :
+    play_tree_iter_set_param(iter,"dvd",entry);
+    break;
+  case PLAY_TREE_ENTRY_VCD :
+    play_tree_iter_set_param(iter,"vcd",entry);
+    break;
+  case PLAY_TREE_ENTRY_TV : 
+    {
+      char* val = (char*)malloc(strlen(entry) + 11 + 1);
+      sprintf(val,"on:channel=%s",entry);
+      play_tree_iter_set_param(iter,"tv",val);
+      break;
+    }
+  }
+
+  return entry;
 }
 
 play_tree_t*
@@ -700,3 +754,27 @@ play_tree_iter_new_copy(play_tree_iter_t* old) {
 
   return iter;
 }
+
+static void
+play_tree_iter_set_param(play_tree_iter_t* iter,char* opt,char* val) {
+  int push = 0;
+  play_tree_t* pt;
+#ifdef MP_DEBUG
+  assert(iter != NULL);
+  assert(iter->tree != NULL);
+#endif
+
+  pt = iter->tree;
+  
+  if(iter->tree->params == NULL)
+    push = 1;
+
+  play_tree_set_param(iter->tree,opt,val);
+
+  if(push)
+    play_tree_iter_push_params(iter);
+  else if(iter->config)
+    m_config_set_option(iter->config,opt,val);
+
+}
+

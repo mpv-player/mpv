@@ -300,7 +300,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 
 	mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "read_option: conf=%p opt='%s' param='%s'\n",
 	    conf, opt, param);
-	for(nconf = 0 ;  conf_list&& conf_list[nconf] != NULL; nconf++) {
+	for(nconf = 0 ;  conf_list[nconf] != NULL; nconf++) {
 	  conf = conf_list[nconf];
 		for (i = 0; conf[i].name != NULL; i++) {
 			int namelength;
@@ -563,7 +563,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			break;
 	}
 out:
-	if(config->global == 0 && ! (conf[i].flags & CONF_GLOBAL)) {
+	if(ret >= 0 && config->global == 0 && ! (conf[i].flags & CONF_GLOBAL)) {
 	  play_tree_t* dest = config->last_entry ? config->last_entry : config->last_parent;
 #ifdef MP_DEBUG
 	  assert(dest != NULL);

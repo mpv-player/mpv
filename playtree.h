@@ -10,6 +10,12 @@
 #define PLAY_TREE_ITER_NODE  2
 #define PLAY_TREE_ITER_END 3
 
+#define PLAY_TREE_ENTRY_NODE -1
+#define PLAY_TREE_ENTRY_DVD 0
+#define PLAY_TREE_ENTRY_VCD 1
+#define PLAY_TREE_ENTRY_TV    2
+#define PLAY_TREE_ENTRY_FILE  3
+
 typedef struct play_tree play_tree_t;
 typedef struct play_tree_iter play_tree_iter_t;
 typedef struct play_tree_param play_tree_param_t;
@@ -44,6 +50,7 @@ struct play_tree {
   play_tree_param_t* params;
   int loop;
   char** files;
+  int entry_type;
 };
   
 struct play_tree_iter {

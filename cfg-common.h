@@ -8,10 +8,12 @@
 #endif
 #ifdef HAVE_VCD
 	{"vcd", &vcd_track, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
+	{"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #else
 	{"vcd", "VCD support is NOT available on this system!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 #ifdef USE_DVDREAD
+	{"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 	{"dvd", &dvd_title, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
 	{"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
 	{"chapter", &dvd_chapter, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
@@ -115,6 +117,7 @@ extern int vivo_param_bytesperblock;
 extern int vivo_param_width;
 extern int vivo_param_height;
 extern int vivo_param_vformat;
+extern char *dvd_device, *cdrom_device;
 
 struct config vivoopts_conf[]={
 	{"version", &vivo_param_version, CONF_TYPE_INT, 0, 0, 0, NULL},
