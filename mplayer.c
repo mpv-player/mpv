@@ -2718,6 +2718,7 @@ if(rel_seek_secs || abs_seek_pos){
       /* FIXME there should be real seeking for vobsub */
       if (vo_vobsub)
 	vobsub_reset(vo_vobsub);
+#if 0
       if(sh_video && d_video->packs == 0)
 	ds_fill_buffer(d_video);
       if(sh_audio){
@@ -2732,6 +2733,7 @@ if(rel_seek_secs || abs_seek_pos){
       } else {
         mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A: ---   V:%6.1f   \r",d_video->pts);
       }
+#endif
       fflush(stdout);
 
       if(sh_video){
