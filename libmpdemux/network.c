@@ -209,7 +209,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	
 	
 	if( socket_server_fd==-1 ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create %s socket:\n", af2String(af));
+//		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create %s socket:\n", af2String(af));
 		return -2;
 	}
 
