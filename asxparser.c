@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "playtreeparser.h"
 #include "asxparser.h"
 #include "mp_msg.h"
 
@@ -436,7 +437,7 @@ asx_parse_ref(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
 
   href = asx_get_attrib("HREF",attribs);
   if(href == NULL) {
-    asx_warning_attrib_required(parser,"ENTRYREF" ,"HREF" );
+    asx_warning_attrib_required(parser,"REF" ,"HREF" );
     return;
   }
 
@@ -450,8 +451,43 @@ asx_parse_ref(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
 
 static play_tree_t*
 asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs) {
-  mp_msg(MSGT_PLAYTREE,MSGL_INFO,"Need to implement entryref\n");
-  return NULL;
+  play_tree_t* pt;
+  char *href;
+  stream_t* stream;
+  play_tree_parser_t* ptp;
+  int f;
+
+  if(parser->deep > 0)
+    return NULL;
+
+  href = asx_get_attrib("HREF",_attribs);
+  if(href == NULL) {
+    asx_warning_attrib_required(parser,"ENTRYREF" ,"HREF" );
+    return NULL;
+  }
+  stream=open_stream(href,0,&f);
+  if(!stream) {
+    mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Can't open playlist %s\n",href);
+    return NULL;
+  }
+  if(stream->type != STREAMTYPE_PLAYLIST) {
+    mp_msg(MSGT_PLAYTREE,MSGL_WARN,"URL %s dont point to a playlist\n",href);
+    free_stream(stream);
+    return NULL;
+  }
+
+  mp_msg(MSGT_PLAYTREE,MSGL_V,"Adding playlist %s to element entryref\n",href);
+
+  ptp = play_tree_parser_new(stream,parser->deep+1);
+
+  pt = play_tree_parser_get_play_tree(ptp);
+
+  play_tree_parser_free(ptp);
+  free_stream(stream);
+
+  //mp_msg(MSGT_PLAYTREE,MSGL_INFO,"Need to implement entryref\n");
+    
+  return pt;
 }
 
 static play_tree_t*
@@ -557,13 +593,14 @@ asx_parse_repeat(ASX_Parser_t* parser,char* buffer,char** _attribs) {
 
 
 play_tree_t*
-asx_parser_build_tree(char* buffer) {
+asx_parser_build_tree(char* buffer,int deep) {
   char *element,*asx_body,**asx_attribs,*body, **attribs;
   int r;
   play_tree_t *asx,*entry,*list = NULL;
   ASX_Parser_t* parser = asx_parser_new();
 
   parser->line = 1;
+  parser->deep = deep;
 
    r = asx_get_element(parser,&buffer,&element,&asx_body,&asx_attribs);
   if(r < 0) {
