@@ -181,7 +181,7 @@ static void mach64_wait_for_idle( void )
 static vidix_capability_t mach64_cap =
 {
     "BES driver for Mach64/3DRage cards",
-    "Nick Kurshev",
+    "Nick Kurshev and Michael Niedermayer",
     TYPE_OUTPUT,
     { 0, 0, 0, 0 },
     2048,
@@ -270,13 +270,24 @@ static int mach64_get_vert_stretch(void)
     
     OUTREG(LCD_INDEX, lcd_index);
     
+    if(__verbose>VERBOSE_LEVEL) printf("[mach64] vertical stretching factor= %d\n", ret);
+    
     return ret;
 }
 
 static void mach64_vid_make_default()
 {
-  mach64_fifo_wait(2);
+  mach64_fifo_wait(5);
   OUTREG(SCALER_COLOUR_CNTL,0x00101000);
+
+  besr.ckey_on=0;
+  besr.graphics_key_msk=0;
+  besr.graphics_key_clr=0;
+
+  OUTREG(OVERLAY_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
+  OUTREG(OVERLAY_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
+  OUTREG(OVERLAY_KEY_CNTL,VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_EQ|CMP_MIX_AND);
+
 }
 
 static void mach64_vid_dump_regs( void )
@@ -490,6 +501,10 @@ static unsigned mach64_query_pitch(unsigned fourcc,const vidix_yuv_t *spitch)
 		if(spy > 16 && spu == spy/2 && spv == spy/2)	pitch = spy;
 		else						pitch = 32;
 		break;
+	case IMGFMT_YVU9:
+		if(spy > 32 && spu == spy/4 && spv == spy/4)	pitch = spy;
+		else						pitch = 64;
+		break;
 	default:
 		if(spy >= 16)	pitch = spy;
 		else		pitch = 16;
@@ -510,7 +525,11 @@ static void mach64_compute_framesize(vidix_playback_t *info)
 		awidth = (info->src.w + (pitch-1)) & ~(pitch-1);
 		info->frame_size = awidth*(info->src.h+info->src.h/2);
 		break;
-    case IMGFMT_RGB32:
+    case IMGFMT_YVU9:
+		awidth = (info->src.w + (pitch-1)) & ~(pitch-1);
+		info->frame_size = awidth*(info->src.h+info->src.h/8);
+		break;
+//    case IMGFMT_RGB32:
     case IMGFMT_BGR32:
 		awidth = (info->src.w*4 + (pitch-1)) & ~(pitch-1);
 		info->frame_size = (awidth*info->src.h);
@@ -521,6 +540,8 @@ static void mach64_compute_framesize(vidix_playback_t *info)
 		info->frame_size = (awidth*info->src.h);
 		break;
   }
+  info->frame_size+=256; // so we have some space for alignment & such
+  info->frame_size&=~16;
 }
 
 static void mach64_vid_stop_video( void )
@@ -535,9 +556,6 @@ static void mach64_vid_stop_video( void )
     OUTREG(SCALER_H_COEFF3, 0x0C0E1A0C);
     OUTREG(SCALER_H_COEFF4, 0x0C14140C);
     OUTREG(VIDEO_FORMAT, 0xB000B);
-    OUTREG(OVERLAY_GRAPHICS_KEY_MSK, 0);
-    OUTREG(OVERLAY_GRAPHICS_KEY_CLR, 0);
-    OUTREG(OVERLAY_KEY_CNTL, 0x50);
     OUTREG(OVERLAY_TEST, 0x0);
 }
 
@@ -568,16 +586,6 @@ static void mach64_vid_display_video( void )
 // bit 7 nothing visible if set
 // bit 8-27 no effect
 // bit 28-31 nothing interresting just crashed my system when i played with them  :(
-
-    mach64_fifo_wait(3);
-    OUTREG(OVERLAY_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
-    OUTREG(OVERLAY_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
-//    OUTREG(OVERLAY_VIDEO_KEY_MSK, 0x80);
-//    OUTREG(OVERLAY_VIDEO_KEY_CLR, 0x80);
-    if(besr.ckey_on)
-    	OUTREG(OVERLAY_KEY_CNTL,VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_EQ|CMP_MIX_AND);
-    else
-    	OUTREG(OVERLAY_KEY_CNTL,VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_TRUE|CMP_MIX_AND);
 
     mach64_wait_for_idle();
     vf = INREG(VIDEO_FORMAT);
@@ -613,6 +621,8 @@ static void mach64_vid_display_video( void )
 	case IMGFMT_IYUV:
 	case IMGFMT_I420:
 	case IMGFMT_YV12:  OUTREG(VIDEO_FORMAT, 0x000A0000);  break;
+
+	case IMGFMT_YVU9:  OUTREG(VIDEO_FORMAT, 0x00090000);  break;
         /* 4:2:2 */
         case IMGFMT_YVYU:
 	case IMGFMT_UYVY:  OUTREG(VIDEO_FORMAT, 0x000C0000); break;
@@ -628,7 +638,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     int is_420,best_pitch,mpitch;
     int src_offset_y, src_offset_u, src_offset_v;
     unsigned int i;
-    
+
     mach64_vid_stop_video();
 /* warning, if left or top are != 0 this will fail, as the framesize is too small then */
     left = config->src.x;
@@ -643,6 +653,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     mpitch = best_pitch-1;
     switch(config->fourcc)
     {
+	case IMGFMT_YVU9:
 	/* 4:2:0 */
 	case IMGFMT_IYUV:
 	case IMGFMT_YV12:
@@ -686,17 +697,23 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     for(i=1; i<config->num_frames; i++)
         config->offsets[i] = config->offsets[i-1] + config->frame_size;
     
+	/*FIXME the left / top stuff is broken (= zoom a src rectangle from a larger one)
+		1. the framesize isnt known as the outer src rectangle dimensions arent known
+		2. the mach64 needs aligned addresses so it cant work anyway
+		   -> so we could shift the outer buffer to compensate that but that would mean
+		      alignment problems for the code which writes into it
+	*/
+    
     if(is_420)
     {
 	config->offset.y= 0;
-	config->offset.u= pitch*src_h; // FIXME wrong?
-	config->offset.v= config->offset.u + (pitch*src_h>>2); // FIXME wrong?
-	//FIXME align & fix framesize
-
+	config->offset.u= (pitch*src_h + 15)&~15; 
+	config->offset.v= (config->offset.u + (pitch*src_h>>2) + 15)&~15;
+	
 	src_offset_y= config->offset.y + top*pitch + left;
 	src_offset_u= config->offset.u + (top*pitch>>2) + (left>>1);
 	src_offset_v= config->offset.v + (top*pitch>>2) + (left>>1);
-	
+
 	if(besr.fourcc == IMGFMT_I420 || besr.fourcc == IMGFMT_IYUV)
 	{
 	  uint32_t tmp;
@@ -705,15 +722,25 @@ static int mach64_vid_init_video( vidix_playback_t *config )
 	  config->offset.v = tmp;
 	}
     }
+    else if(besr.fourcc == IMGFMT_YVU9)
+    {
+	config->offset.y= 0;
+	config->offset.u= (pitch*src_h + 15)&~15; 
+	config->offset.v= (config->offset.u + (pitch*src_h>>4) + 15)&~15;
+	
+	src_offset_y= config->offset.y + top*pitch + left;
+	src_offset_u= config->offset.u + (top*pitch>>4) + (left>>1);
+	src_offset_v= config->offset.v + (top*pitch>>4) + (left>>1);
+    }
     else if(besr.fourcc == IMGFMT_BGR32)
     {
       config->offset.y = config->offset.u = config->offset.v = 0;
-      src_offset_y= src_offset_u= src_offset_v= (left << 2)&~15;
+      src_offset_y= src_offset_u= src_offset_v= top*pitch + (left << 2);
     }
     else
     {
       config->offset.y = config->offset.u = config->offset.v = 0;
-      src_offset_y= src_offset_u= src_offset_v= (left << 1)&~15;
+      src_offset_y= src_offset_u= src_offset_v= top*pitch + (left << 1);
     }
 
     num_mach64_buffers= config->num_frames;
@@ -739,53 +766,6 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     besr.y_x_end = y_pos | ((config->dest.x + dest_w) << 16);
     besr.height_width = ((src_w - left)<<16) | (src_h - top);
 
-    if(mach64_grkey.ckey.op == CKEY_TRUE)
-    {
-	besr.ckey_on=1;
-
-	switch(mach64_vid_get_dbpp())
-	{
-	case 15:
-		besr.graphics_key_msk=0x7FFF;
-		besr.graphics_key_clr=
-			  ((mach64_grkey.ckey.blue &0xF8)>>3)
-			| ((mach64_grkey.ckey.green&0xF8)<<2)
-			| ((mach64_grkey.ckey.red  &0xF8)<<7);
-		break;
-	case 16:
-		besr.graphics_key_msk=0xFFFF;
-		besr.graphics_key_clr=
-			  ((mach64_grkey.ckey.blue &0xF8)>>3)
-			| ((mach64_grkey.ckey.green&0xFC)<<3)
-			| ((mach64_grkey.ckey.red  &0xF8)<<8);
-		break;
-	case 24:
-		besr.graphics_key_msk=0xFFFFFF;
-		besr.graphics_key_clr=
-			  ((mach64_grkey.ckey.blue &0xFF))
-			| ((mach64_grkey.ckey.green&0xFF)<<8)
-			| ((mach64_grkey.ckey.red  &0xFF)<<16);
-		break;
-	case 32:
-		besr.graphics_key_msk=0xFFFFFF;
-		besr.graphics_key_clr=
-			  ((mach64_grkey.ckey.blue &0xFF))
-			| ((mach64_grkey.ckey.green&0xFF)<<8)
-			| ((mach64_grkey.ckey.red  &0xFF)<<16);
-		break;
-	default:
-		besr.ckey_on=0;
-		besr.graphics_key_msk=0;
-		besr.graphics_key_clr=0;
-	}
-    }
-    else
-    {
-	besr.ckey_on=0;
-	besr.graphics_key_msk=0;
-	besr.graphics_key_clr=0;
-    }
-
     return 0;
 }
 
@@ -793,7 +773,8 @@ static int mach64_vid_init_video( vidix_playback_t *config )
 uint32_t supported_fourcc[] = 
 {
   IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV, 
-  IMGFMT_UYVY, IMGFMT_YUY2, IMGFMT_YVYU,
+  IMGFMT_YVU9,
+  IMGFMT_UYVY, IMGFMT_YUY2,
   IMGFMT_BGR15,IMGFMT_BGR16,IMGFMT_BGR32
 };
 
@@ -943,5 +924,63 @@ int vixGetGrKeys(vidix_grkey_t *grkey)
 int vixSetGrKeys(const vidix_grkey_t *grkey)
 {
     memcpy(&mach64_grkey, grkey, sizeof(vidix_grkey_t));
+
+    if(mach64_grkey.ckey.op == CKEY_TRUE)
+    {
+	besr.ckey_on=1;
+
+	switch(mach64_vid_get_dbpp())
+	{
+	case 15:
+		besr.graphics_key_msk=0x7FFF;
+		besr.graphics_key_clr=
+			  ((mach64_grkey.ckey.blue &0xF8)>>3)
+			| ((mach64_grkey.ckey.green&0xF8)<<2)
+			| ((mach64_grkey.ckey.red  &0xF8)<<7);
+		break;
+	case 16:
+		besr.graphics_key_msk=0xFFFF;
+		besr.graphics_key_clr=
+			  ((mach64_grkey.ckey.blue &0xF8)>>3)
+			| ((mach64_grkey.ckey.green&0xFC)<<3)
+			| ((mach64_grkey.ckey.red  &0xF8)<<8);
+		break;
+	case 24:
+		besr.graphics_key_msk=0xFFFFFF;
+		besr.graphics_key_clr=
+			  ((mach64_grkey.ckey.blue &0xFF))
+			| ((mach64_grkey.ckey.green&0xFF)<<8)
+			| ((mach64_grkey.ckey.red  &0xFF)<<16);
+		break;
+	case 32:
+		besr.graphics_key_msk=0xFFFFFF;
+		besr.graphics_key_clr=
+			  ((mach64_grkey.ckey.blue &0xFF))
+			| ((mach64_grkey.ckey.green&0xFF)<<8)
+			| ((mach64_grkey.ckey.red  &0xFF)<<16);
+		break;
+	default:
+		besr.ckey_on=0;
+		besr.graphics_key_msk=0;
+		besr.graphics_key_clr=0;
+	}
+    }
+    else
+    {
+	besr.ckey_on=0;
+	besr.graphics_key_msk=0;
+	besr.graphics_key_clr=0;
+    }
+
+    mach64_fifo_wait(4);
+    OUTREG(OVERLAY_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
+    OUTREG(OVERLAY_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
+//    OUTREG(OVERLAY_VIDEO_KEY_MSK, 0);
+//    OUTREG(OVERLAY_VIDEO_KEY_CLR, 0);
+    if(besr.ckey_on)
+    	OUTREG(OVERLAY_KEY_CNTL,VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_EQ|CMP_MIX_AND);
+    else
+    	OUTREG(OVERLAY_KEY_CNTL,VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_TRUE|CMP_MIX_AND);
+
     return(0);
 }
