@@ -47,8 +47,21 @@
 <P><B><A NAME=2.2.1.1>2.2.1.1.  MTRR</A></B></P>
 
 <P>Nagyon ajánlott az MTRR helyes beállítása, mert minden esetben
-  sebességnövekedést eredményez. Elõször a báziscímet kell megkeresni.
-  Erre van 3 módszer :</P>
+  sebességnövekedést eredményez.</P>
+
+<P>Nézd meg a <CODE>/proc/mtrr</CODE> file tartalmát :</P>
+
+<P><CODE>
+--($:~)-- cat /proc/mtrr<BR>
+reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9<BR>
+reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<BR>
+</CODE></P>
+
+<P>Helyes, ott látszik a Matrox G400-am 16Mb memóriája. Ezt a parancsot
+XFree 4.x.x alól adtam ki, ami automatikusan beállítja az MTRR-t.</P>
+
+Ha nálad nem sikerül neki, kézzel kell beállítani. Elõször a báziscímet kell
+megkeresni. Erre van 3 módszer :</P>
 
 <P><UL>
 <LI>az X11 induló üzeneteibõl, például :
