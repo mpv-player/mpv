@@ -8,6 +8,8 @@
  *
  * <acki@acki-netz.de>
  *
+ * Sourceforge username: acki2
+ * 
  * note well: 
  *   
  * o this is alpha
@@ -23,7 +25,7 @@
 #include <string.h>
 
 
-#include "linux/keycodes.h"
+//#include "linux/keycodes.h"
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
@@ -52,25 +54,25 @@ static int       vo_dga_src_width;       // width of video in pixels
 static int       vo_dga_src_height;      // height of video in pixels
 static int       vo_dga_bpp;             // bytes per pixel in framebuffer
 static int       vo_dga_src_offset=0;    // offset in src
-static int       vo_dga_vp_offset=0;   // offset in dest
+static int       vo_dga_vp_offset=0;     // offset in dest
 static int       vo_dga_bytes_per_line;  // longwords per line to copy
 static int       vo_dga_src_skip;        // bytes to skip after copying one line 
-                                  // (not supported yet) in src
-static int       vo_dga_vp_skip;       // dto. for dest 
-static int       vo_dga_lines;         // num of lines to copy
+                                         // (not supported yet) in src
+static int       vo_dga_vp_skip;         // dto. for dest 
+static int       vo_dga_lines;           // num of lines to copy
 static int       vo_dga_src_format;                                 
 
 static unsigned char     *vo_dga_base;
 static Display  *vo_dga_dpy;
 
+//---------------------------------------------------------
 
-#include "mmx.h"
-
-#if defined (HAVE_SSE) || defined (HAVE_3DNOW)
-#define movntq "movntq" // use this for processors that have SSE or 3Dnow
-#else
-#define movntq "movq" // for MMX-only processors
-#endif
+// I had tried to work with mmx/3dnow copy code but
+// there was not much speed gain and I didn't know
+// how to save the FPU/mmx registers - so the copy
+// code interferred with sound output ...
+// removed the leftovers
+// acki2 on 30/3/2001
 
 
 #define rep_movsl(dest, src, numwords, d_add, count) \
@@ -86,69 +88,13 @@ xfer:                     \n\t\
                   jnz xfer \n\t\
 " \
                   : \
-                  : "a" (d_add), "b" (count), "S" (src), "D" (dest), "d" (numwords) \
+                  : "a" (d_add), "b" (count), "S" (src), "D" (dest), \
+		    "d" (numwords) \
                   : "memory" )
 
-#if 0
-                  : "S" (src), "D" (dest), "c" (numwords) \
-	  movq (%%eax), %%mm0      \n\t \
-          add $64, %%edx            \n\t \
-	  movq 8(%%eax), %%mm1     \n\t \
-          add $64, %%eax            \n\t \
-	  movq -48(%%eax), %%mm2   \n\t \
-          movq %%mm0, -64(%%edx)   \n\t \
-	  movq -40(%%eax), %%mm3   \n\t \
-          movq %%mm1, -56(%%edx)   \n\t \
-	  movq -32(%%eax), %%mm4   \n\t \
-          movq %%mm2, -48(%%edx)   \n\t \
-	  movq -24(%%eax), %%mm5   \n\t \
-          movq %%mm3, -40(%%edx)   \n\t \
-	  movq -16(%%eax), %%mm6   \n\t \
-          movq %%mm4, -32(%%edx)   \n\t \
-	  movq -8(%%eax), %%mm7    \n\t \
-          movq %%mm5, -24(%%edx)   \n\t \
-          movq %%mm6, -16(%%edx)   \n\t \
-          dec %%ecx                \n\t \
-          movq %%mm7, -8(%%edx)    \n\t \
-          jnz xfer                  \n\t \
 
-#endif
+//---------------------------------------------------------
 
-#define mmx_movsl(dest, src, numwords) \
-__asm__ __volatile__(  \
-" \
-                                  \n\t \
-xfer:                              \n\t \
-	  movq (%%eax), %%mm0      \n\t \
-          add $64, %%edx            \n\t \
-	  movq 8(%%eax), %%mm1     \n\t \
-          add $64, %%eax            \n\t \
-	  movq -48(%%eax), %%mm2   \n\t \
-          movq %%mm0, -64(%%edx)   \n\t \
-	  movq -40(%%eax), %%mm3   \n\t \
-          movq %%mm1, -56(%%edx)   \n\t \
-	  movq -32(%%eax), %%mm4   \n\t \
-          movq %%mm2, -48(%%edx)   \n\t \
-	  movq -24(%%eax), %%mm5   \n\t \
-          movq %%mm3, -40(%%edx)   \n\t \
-	  movq -16(%%eax), %%mm6   \n\t \
-          movq %%mm4, -32(%%edx)   \n\t \
-	  movq -8(%%eax), %%mm7    \n\t \
-          movq %%mm5, -24(%%edx)   \n\t \
-          movq %%mm6, -16(%%edx)   \n\t \
-          dec %%ecx                \n\t \
-          movq %%mm7, -8(%%edx)    \n\t \
-          jnz xfer                  \n\t \
-             \
-" \
-      : \
-      : "a" (src), "d" (dest), "c" (numwords) \
-      :  "memory" )
-
-     // src <= eax
-     // dst <= edx
-     // num <= ecx  
- 
 static uint32_t draw_frame( uint8_t *src[] ){
 
   int vp_skip = vo_dga_vp_skip;
@@ -158,7 +104,8 @@ static uint32_t draw_frame( uint8_t *src[] ){
   char *s, *d;
 
   if( vo_dga_src_format==IMGFMT_YV12 ){
-    // We'll never reach this point, because YV12 codecs always calls draw_slice
+    // We'll never reach this point, because YV12 codecs always
+    // calls draw_slice
     printf("vo_dga: draw_frame() doesn't support IMGFMT_YV12 (yet?)\n");
   }else{
     s = *src;
@@ -169,40 +116,45 @@ static uint32_t draw_frame( uint8_t *src[] ){
   return 0;
 }
 
+//---------------------------------------------------------
+
 static void check_events(void)
 {
-    int e=vo_x11_check_events(vo_dga_dpy);
+  int e=vo_x11_check_events(vo_dga_dpy);
 }
+
+//---------------------------------------------------------
 
 static void flip_page( void ){
-    check_events(); 
-  //  printf("vo_dga: In flippage\n");
-
+  check_events();
 }
+
+//---------------------------------------------------------
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],
                             int w,int h,int x,int y )
 {
-  //  printf("vo_dga: draw_slice() not implemented (yet?)\n");
-
   yuv2rgb( vo_dga_base + vo_dga_vp_offset + 
           (vo_dga_width * y +x) * vo_dga_bpp,
            src[0], src[1], src[2],
            w,h, vo_dga_width * vo_dga_bpp,
            stride[0],stride[1] );
- return 0;
-
-
   return 0;
 };
 
-static void Terminate_Display_Process( void ){
+//---------------------------------------------------------
 
+
+static void Terminate_Display_Process( void ){
   printf("vo_dga: Terminating display process\n");
 }
 
+//---------------------------------------------------------
+
 static const vo_info_t* get_info( void )
 { return &vo_info; }
+
+//---------------------------------------------------------
 
 static uint32_t query_format( uint32_t format )
 {
@@ -217,6 +169,7 @@ static uint32_t query_format( uint32_t format )
  return 0;
 }
 
+//---------------------------------------------------------
 
 static void
 uninit(void)
@@ -230,8 +183,7 @@ uninit(void)
   XCloseDisplay(vo_dga_dpy);
 }
 
-
-
+//---------------------------------------------------------
 
 static uint32_t init( uint32_t width,  uint32_t height,
                       uint32_t d_width,uint32_t d_height,
@@ -243,9 +195,9 @@ static uint32_t init( uint32_t width,  uint32_t height,
 
 #ifdef HAVE_DGA2
 // needed to change DGA video mode
-  int modecount,mX, mY, i,j;
+  int modecount,mX, mY, mVBI, i,j;
   int X,Y;
-  XDGAMode *modelines=NULL;
+  XDGAMode   *modelines=NULL;
   XDGADevice *dgadevice;
 #endif
 
@@ -270,27 +222,80 @@ static uint32_t init( uint32_t width,  uint32_t height,
   
   mX=modelines[0].imageWidth;
   mY=modelines[0].imageHeight;
+  mVBI = modelines[0].verticalRefresh;
   X=d_width; Y=d_height; 
   
+  printf("vo_dga: Using DGA 2.0 mode changing support\n");	
   j=0; 
-  for (i=1; i<=modecount; i++)
+  // offbyone-error !!! i<=modecount is WRONG !!!
+  for (i=1; i<modecount; i++)
   {
-    if ( (modelines[i].bitsPerPixel == vo_depthonscreen) && 
-         (modelines[i].maxViewportX) && 
-         (modelines[i].viewportWidth >= X) && 
-         (modelines[i].viewportHeight >= Y) && 
-         (modelines[i].viewportWidth < mX) &&
-         (modelines[i].viewportHeight < mY) ) 
-        {
+     if( modelines[i].bitsPerPixel == vo_depthonscreen &&
+	 modelines[i].maxViewportX)
+     {
+       printf("vo_dga: (%3d) Trying %4d x %4d @ %3d Hz @ %2d bpp ..",
+		     i,
+		     modelines[i].viewportWidth, 
+		     modelines[i].viewportHeight,
+		     (unsigned int) modelines[i].verticalRefresh,
+		     modelines[i].bitsPerPixel );
+     
+       if (
+          (modelines[i].viewportWidth >= X) && 
+          (modelines[i].viewportHeight >= Y) &&
+	  ( 
+	   // prefer a better resolution either in X or in Y
+	   // as long as the other dimension is at least the same
+	   // 
+	   // hmm ... MAYBE it would be more clever to focus on the 
+	   // x-resolution; I had 712x400 and 640x480 and the movie 
+	   // was 640x360; 640x480 would be the 'right thing' here
+	   // but since 712x400 was queried first I got this one. 
+	   // I think there should be a cmd-line switch to let the
+	   // user choose the mode he likes ...   (acki2)
+	   
+	   (
+            ((modelines[i].viewportWidth < mX) &&
+	    !(modelines[i].viewportHeight > mY)) ||
+	    ((modelines[i].viewportHeight < mY) &&
+	    !(modelines[i].viewportWidth > mX)) 
+	   ) 
+	   // but if we get an identical resolution choose
+	   // the one with the lower refreshrate (saves bandwidth !!!)
+	   // as long as it's above 50 Hz (acki2 on 30/3/2001)
+	   ||
+	   (
+	    (modelines[i].viewportWidth == mX) &&
+	    (modelines[i].viewportHeight == mY) &&
+	      (
+	       (
+		modelines[i].verticalRefresh >= mVBI && mVBI < 50
+	       )  
+	       ||
+               (
+		mVBI >= 50 && 
+		modelines[i].verticalRefresh < mVBI &&
+		modelines[i].verticalRefresh >= 50
+	       )
+	      )
+	     )
+	    )
+	  )  
+	  {
            mX=modelines[i].viewportWidth;
            mY=modelines[i].viewportHeight;
+	   mVBI = modelines[i].verticalRefresh;
            j=i;
-        }
-   }
+	   printf(".ok!!\n");
+        }else{
+           printf(".no\n");
+	}
+    }
+  }
   X=(modelines[j].imageWidth-mX)/2;
   Y=(modelines[j].imageHeight-mY)/2;
-  printf("vo_dga: Using DGA 2.0 mode changing support\n");
-  printf("vo_dga: Selected video mode %dx%d for image size %dx%d.\n", mX, mY,width, height);  
+  printf("vo_dga: Selected video mode %4d x %4d @ %3d Hz for image size %3d x %3d.\n", 
+		  mX, mY, mVBI, width, height);  
 
   XF86DGASetViewPort (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), X,Y);
   dgadevice=XDGASetMode(vo_dga_dpy, XDefaultScreen(vo_dga_dpy), modelines[j].num);
@@ -300,18 +305,18 @@ static uint32_t init( uint32_t width,  uint32_t height,
   XFree(dgadevice);
   // end mode change code
 #else
-printf("vo_dga: DGA 1.0 compatibility code\n");
+  printf("vo_dga: DGA 1.0 compatibility code\n");
 #endif
 
-XF86DGAGetViewPortSize(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),
-			&vo_dga_vp_width,
-			&vo_dga_vp_height); 
+  XF86DGAGetViewPortSize(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),
+		         &vo_dga_vp_width,
+			 &vo_dga_vp_height); 
 
-XF86DGAGetVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
-                (char **)&vo_dga_base, &vo_dga_width, &bank, &ram);
+  XF86DGAGetVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
+		   (char **)&vo_dga_base, &vo_dga_width, &bank, &ram);
 
 #ifndef HAVE_DGA2
-XF86DGASetViewPort (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0, 0);
+  XF86DGASetViewPort (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0, 0);
 #endif
 
   // do some more checkings here ...
@@ -370,62 +375,8 @@ XF86DGASetViewPort (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0, 0);
   return 0;
 }
 
-#if 0
-int vo_dga_query_event(void){
+//---------------------------------------------------------
 
-  XEvent  myevent;
-  char    text[10];
-  KeySym  mykey;
-  int     retval = 0;
-  int     i;
-
-  if( vo_dga_is_running ){  
-     if(XPending(vo_dga_dpy)>0)
-      {
-	XNextEvent(vo_dga_dpy, &myevent);
-	switch (myevent.type)
-	  {
-	  case ButtonPress:
-	    /* Reaktion auf Knopfdruck ---> Textausgabe an der 
-	       Mauscursorposition */ 
-	   
-	    retval = 'q';
-            break;
-	  case KeyPress:
-	    /* Reaktion auf Tastendruck --> Testen ob Taste == "q",
-	       falls ja: Programmende */
-	    i=XLookupString(&myevent, text, 10, &mykey, 0);
-
-            if (mykey&0xff00 != 0) mykey=mykey&0x00ff + 256;
-	
-            switch ( mykey )
-            {
-	    case wsLeft:      retval=KEY_LEFT; break;
-	    case wsRight:     retval=KEY_RIGHT; break;
-	    case wsUp:        retval=KEY_UP; break;
-	    case wsDown:      retval=KEY_DOWN; break;
-	    case wsSpace:     retval=' '; break;
-	    case wsEscape:    retval=KEY_ESC; break;
-	    case wsEnter:     retval=KEY_ENTER; break;
-	    case wsq:
-	    case wsQ:         retval='q'; break;
-	    case wsp:
-	    case wsP:         retval='p'; break;
-	    case wsMinus:
-	    case wsGrayMinus: retval='-'; break;
-	    case wsPlus:
-	    case wsGrayPlus:  retval='+'; break;
-	    }
-	    break;
-	  }
-      }
-  }
-  return retval;
-}
-#endif
-
-
-
-
-
-
+// deleted the old vo_dga_query_event() routine 'cause it is obsolete  
+// since using check_events()
+// acki2 on 30/3/2001
