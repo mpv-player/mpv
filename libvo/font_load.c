@@ -170,10 +170,11 @@ while(fgets(sor,1020,f)){
   } else
 
   if(strcmp(section,"[characters]")==0){
-      if(pdb==3 && strlen(p[0])==1){
+      if(pdb==3){
           int chr=p[0][0];
           int start=atoi(p[1]);
           int end=atoi(p[2]);
+          if(strlen(p[0])!=1) chr=strtol(p[0],NULL,0);
           if(end<start) {
               printf("error in font desc: end<start for char '%c'\n",chr);
           } else {
