@@ -211,6 +211,7 @@ Video output:
 Audio output:
   --disable-ossaudio     disable OSS sound support [autodetect]
   --disable-arts         disable aRts sound support [autodetect]
+  --disable-esd          disable esd sound support [autodetect]
   --disable-alsa         disable alsa sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
   --disable-win32waveout disable windows waveout sound support [autodetect]
@@ -975,6 +976,7 @@ _iconv=auto
 _rtc=auto
 _ossaudio=auto
 _arts=auto
+_esd=auto
 _liblzo=auto
 _mad=auto
 _vorbis=auto
@@ -1112,6 +1114,8 @@ for ac_option do
   --disable-ossaudio)	_ossaudio=no	;;
   --enable-arts)	_arts=yes	;;
   --disable-arts)	_arts=no	;;
+  --enable-esd)		_esd=yes	;;
+  --disable-esd)	_esd=no		;;
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
   --enable-liblzo)	_liblzo=yes	;;
@@ -3181,6 +3185,32 @@ fi
 echores "$_arts"
 
 
+echocheck "EsounD"
+if test "$_esd" = auto ; then
+  _esd=no
+  if ( esd-config --version ) >> "$TMPLOG" 2>&1 ; then
+
+cat > $TMPC << EOF
+#include <esd.h>
+int main(void) { return 0; }
+EOF
+cc_check `esd-config --libs` `esd-config --cflags` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _esd=yes
+
+  fi
+fi
+
+if test "$_esd" = yes ; then
+  _def_esd='#define USE_ESD 1'
+  _aosrc="$_aosrc ao_esd.c"
+  _aomodules="esd $_aomodules"
+  _ld_esd=`esd-config --libs`
+  _inc_esd=`esd-config --cflags`
+else
+  _noaomodules="esd $_noaomodules"
+fi
+echores "$_esd"
+
+
 echocheck "ALSA audio"
 if test "$_alsa" != no ; then
   _alsa=no
@@ -4711,6 +4741,8 @@ ALSA_LIB = $_ld_alsa
 NAS_LIB = $_ld_nas
 ARTS_LIB = $_ld_arts
 ARTS_INC = $_inc_arts
+ESD_LIB = $_ld_esd
+ESD_INC = $_inc_esd
 SGIAUDIO_LIB = $_ld_sgiaudio
 
 # input/demuxer/codecs
@@ -5027,6 +5059,7 @@ $_def_ossaudio_devmixer
 $_def_alsa5
 $_def_alsa9
 $_def_arts
+$_def_esd
 $_def_sys_asoundlib_h
 $_def_alsa_asoundlib_h
 $_def_sunaudio

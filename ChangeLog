@@ -1,6 +1,8 @@
 
 mplayer (0.90)
 
+    * -ao esd: new EsounD audio driver
+	
   rc2:
     General:
     * DOCS/tech/encoding-tips.txt and tech/directfb.txt
