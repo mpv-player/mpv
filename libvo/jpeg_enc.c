@@ -2,7 +2,7 @@
  * based on mjpeg code from ffmpeg. 
  *
  * Copyright (c) 2002, Rik Snel
- * Parts from ffmpeg Copyright (c) 2000, 2001 Gerard Lantau
+ * Parts from ffmpeg Copyright (c) 2000-2002 Fabrice Bellard
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
 			 * 	qscale * quant_matrix[i]) >= (1<<36)/249205025
 			 * 3444240       >= (1<<36)/(aanscales[i] *
 			 *      qscale * quant_matrix[i]) >= 275              */
-			qmat[qscale][j] = (int)((UINT64_C(1) << (QMAT_SHIFT-3))/
+			qmat[qscale][i] = (int)((UINT64_C(1) << (QMAT_SHIFT-3))/
 					(qscale * quant_matrix[j]));
 		}
 	} else if (s->fdct == fdct_ifast) {
@@ -102,7 +102,7 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
                 /* (1<<36)/19952 >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) >= (1<<36)/249205026 */
                 /* 3444240       >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) >= 275 */
                 
-                qmat[qscale][j] = (int)((UINT64_C(1) << (QMAT_SHIFT + 11)) / 
+                qmat[qscale][i] = (int)((UINT64_C(1) << (QMAT_SHIFT + 11)) / 
                                 (aanscales[i] * qscale * quant_matrix[j]));
             }
         } else {

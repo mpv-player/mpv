@@ -2,7 +2,7 @@
  * based on mjpeg code from ffmpeg. 
  *
  * Copyright (c) 2002, Rik Snel
- * Parts from ffmpeg Copyright (c) 2000, 2001 Gerard Lantau
+ * Parts from ffmpeg Copyright (c) 2000-2002 Fabrice Bellard
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
