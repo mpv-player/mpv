@@ -168,7 +168,17 @@
 </UL>
 
 
-<H3><A NAME="compilation">B.4.3 Compilation problems</A></H3>
+<H3><A NAME="configure">B.4.3 Configure problems</A></H3>
+
+If you get errors while running <CODE>./configure</CODE>, or autodetection
+of something fails, read configure.log maybe you'll find the answer there,
+for example multiple versions of the same library mixed on your system,
+or you forgot to install the development package (those with the -dev suffix).
+If you think there is a bug, then include <CODE>configure.log</CODE> in
+your bugreport!
+
+
+<H3><A NAME="compilation">B.4.4 Compilation problems</A></H3>
 
 Please include these files:
 
@@ -184,11 +194,6 @@ Only if compilation fails below one of these directories, include these files:
   <LI><CODE>libvo/config.mak</CODE></LI>
   <LI><CODE>libao2/config.mak</CODE></LI>
 </UL>
-
-
-<H3><A NAME="configure">B.4.4 Configure problems</A></H3>
-
-Include <CODE>configure.log</CODE>.
 
 
 <H3><A NAME="playback">B.4.5 Playback problems</A></H3>
@@ -256,7 +261,8 @@ return you to the command line prompt where you have to enter
 
 <P>Please create the following command file:</P>
 
-<P><CODE>disass $pc-32 $pc+32<BR>
+<P><CODE>bt<BR>
+  disass $pc-32 $pc+32<BR>
   info all-registers</CODE></P>
 
 <P>Then simply execute the following on your command line:</P>
