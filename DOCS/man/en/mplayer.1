@@ -2692,6 +2692,11 @@ Defaults are 1.0, brightness=0.0.
 Value ranges are 0.1\-10 for gammas, -2\-2 for contrast (negative values result
 in a negative image), -1\-1 for brightness and 0\-3 for saturation.
 .TP
+.B hue[=hue:saturation]
+Defaults are hue=0.0, saturation=1.0.
+Value ranges are -180\-180 for hue, -2\-2 for saturation (negative values result
+in a negative chroma)
+.TP
 .B halfpack[=f]
 Convert planar YUV 4:2:0 to half-height packed 4:2:2, downsampling luma but
 keeping all chroma samples.
