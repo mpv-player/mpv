@@ -29,6 +29,8 @@ static struct vf_priv_s* st_priv = NULL;
 
 static mp_image_t* pause_mpi = NULL;
 static int go2pause = 0;
+/// if nonzero display menu at startup
+int menu_startup = 0;
 
 struct vf_priv_s {
   menu_t* root;
@@ -260,6 +262,7 @@ static int open(vf_instance_t *vf, char* args){
       st_priv = NULL;
       return 0;
     }
+    st_priv->root->show = menu_startup;
     mp_input_add_cmd_filter((mp_input_cmd_filter)cmd_filter,st_priv);
   }
 

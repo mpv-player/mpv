@@ -82,6 +82,10 @@ extern int vo_nomouse_input;
 extern int WinID;
 #endif
 
+#ifdef HAVE_MENU
+extern int menu_startup;
+#endif
+
 #ifdef HAVE_AA
 extern int vo_aa_parseoption(m_option_t* conf, char *opt, char * param);
 extern void vo_aa_revertoption(m_option_t* opt,char* param);
@@ -331,6 +335,7 @@ m_option_t mplayer_opts[]={
 	{"nomenu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	{"menu-root", &menu_root, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 	{"menu-cfg", &menu_cfg, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
+	{"menu-startup", &menu_startup, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 #else
 	{"menu", "OSD menu support was not compiled in.\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
 #endif
