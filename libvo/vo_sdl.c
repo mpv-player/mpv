@@ -327,9 +327,9 @@ static int sdl_open (void *plugin, void *name)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 	const SDL_VideoInfo *vidInfo = NULL;
-	static int opened = 0;
+	/*static int opened = 0;
 	
-	/*if (opened)
+	if (opened)
 	    return 0;
 	opened = 1;*/
 
@@ -1018,7 +1018,8 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 
 #include "../linux/keycodes.h"
 extern void mplayer_put_key(int code);
- 
+
+#define shift_key (event.key.keysym.mod==(KMOD_LSHIFT||KMOD_RSHIFT)) 
 static void check_events (void)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
@@ -1051,6 +1052,8 @@ static void check_events (void)
                                 case SDLK_DOWN: mplayer_put_key(KEY_DOWN); break;
                                 case SDLK_LEFT: mplayer_put_key(KEY_LEFT); break;
                                 case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT); break;
+                                case SDLK_LESS: mplayer_put_key(shift_key?'>':'<'); break;
+                                case SDLK_GREATER: mplayer_put_key('>'); break;
                                 case SDLK_ASTERISK:
 				case SDLK_KP_MULTIPLY:
 				case SDLK_w: mplayer_put_key('*'); break;
@@ -1120,7 +1123,8 @@ static void check_events (void)
                                 /*case SDLK_o: mplayer_put_key('o');break;
                                 case SDLK_SPACE: mplayer_put_key(' ');break;
                                 case SDLK_p: mplayer_put_key('p');break;*/
-                                case SDLK_PLUS:
+				case SDLK_7: mplayer_put_key(shift_key?'/':'7');
+                                case SDLK_PLUS: mplayer_put_key(shift_key?'*':'+');
                                 case SDLK_KP_PLUS: mplayer_put_key('+');break;
                                 case SDLK_MINUS:
                                 case SDLK_KP_MINUS: mplayer_put_key('-');break;
@@ -1144,6 +1148,8 @@ static void check_events (void)
                                 case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
                                 case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
                                 case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT);break;
+                                case SDLK_LESS: mplayer_put_key(shift_key?'>':'<'); break;
+                                case SDLK_GREATER: mplayer_put_key('>'); break;
                                 case SDLK_ASTERISK:
 				case SDLK_KP_MULTIPLY:
 				case SDLK_w: mplayer_put_key('*');break;
@@ -1152,6 +1158,7 @@ static void check_events (void)
                                 case SDLK_s: mplayer_put_key('/');break;
 #endif				
 				default:
+					//printf("got scancode: %d keysym: %d mod: %d %d\n", event.key.keysym.scancode, keypressed, event.key.keysym.mod);
 					mplayer_put_key(keypressed);
                                 }
                                 
@@ -1163,6 +1170,7 @@ static void check_events (void)
 		}
 	}
 }
+#undef shift_key
 
 static void draw_osd(void)
 {	struct sdl_priv_s *priv = &sdl_priv;
