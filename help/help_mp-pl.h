@@ -2,7 +2,7 @@
 // Wszelkie uwagi i poprawki mile widziane :)
 //
 // Fixes and updates: Wojtek Kaniewski <wojtekka@bydg.pdi.net>
-// Last sync with help_mp-en.h: 2003-03-29
+// Last sync on 2003-03-29 with help_mp-en.h 1.93
 
 // ========================= MPlayer help ===========================
 
@@ -22,7 +22,7 @@ static char help_text[]=
 " -vcd <trackno>  odtwarzanie bezpo¶rednio ¶cie¿ki VCD (video cd)\n"
 #endif
 #ifdef HAVE_LIBCSS
-" -dvdauth <dev>  urz±dzenie DVD do autentykacji (dla zaszyfrowanych dysków)\n"
+" -dvdauth <dev>  urz±dzenie DVD do autoryzacji (dla zaszyfrowanych dysków)\n"
 #endif
 #ifdef USE_DVDREAD
 " -dvd <titleno>  odtwarzanie bezpo¶rednio tytu³u DVD\n"
@@ -71,7 +71,7 @@ static char help_text[]=
 #define MSGTR_InvalidAOdriver "Nieprawid³owa nazwa sterownika audio: %s\nU¿yj '-ao help' aby dostaæ listê dostêpnych sterowników audio.\n"
 #define MSGTR_CopyCodecsConf "(skopiuj/zlinkuj etc/codecs.conf do ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "U¿ywam domy¶lnego (wkompilowanego) codecs.conf\n"
-#define MSGTR_CantLoadFont "Nie mogê za³adowaæ fontu: %s\n"
+#define MSGTR_CantLoadFont "Nie mogê za³adowaæ czcionki: %s\n"
 #define MSGTR_CantLoadSub "Nie mogê za³adowaæ napisów: %s\n"
 #define MSGTR_ErrorDVDkey "B³±d w przetwarzaniu DVD KEY.\n"
 #define MSGTR_CmdlineDVDkey "¯±dany klucz DVD u¿ywany jest do dekodowania.\n"
@@ -292,7 +292,7 @@ static char help_text[]=
 #define MSGTR_CantSeekFile "Nie mogê przeszukiwaæ tego pliku.\n"
 
 #define MSGTR_EncryptedVOB "Zaszyfrowany plik VOB (nie wkompilowano obs³ugi libcss)! Przeczytaj DOCS/cd-dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Zaszyfrowany strumieñ, nie za¿±da³e¶ autentykacji!\n"
+#define MSGTR_EncryptedVOBauth "Zaszyfrowany strumieñ, nie za¿±da³e¶ autoryzacji!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Skompresowane nag³ówki nie s± obs³ugiwane (na razie).\n"
 #define MSGTR_MOVvariableFourCC "MOV: Uwaga! Wykryto zmienn± FOURCC!?\n"
@@ -310,8 +310,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s already present!\n"
 #define MSGTR_ClipInfo "Informacja o klipie: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Progressive seq detected, leaving 3:2 TELECINE mode\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE detected, enabling inverse telecine fx. FPS changed to %5.3f!  \n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Wykryto progresywn± sekwencjê, wy³±czam 3:2 TELECINE\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: Wykryto 3:2 TELECINE, w³±czam odwrotne telecine. Zmieniono FPS do %5.3f!  \n"
 
 
 // dec_video.c & dec_audio.c:
@@ -361,7 +361,7 @@ static char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Kodek nie ustawia sh->disp_w i sh->disp_h, probujê to rozwi±zaæ.\n"
-#define MSGTR_VoConfigRequest "VDec: vo config request - %d x %d (preferred csp: %s)\n"	/* XXX */
+#define MSGTR_VoConfigRequest "VDec: ¯±danie konfiguracji vo - %d x %d (preferowana przestrzeñ kolorów: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Nie mogê znale¼æ pasuj±cej przestrzeni koloru - ponawiam próbê z -vop scale...\n"
 #define MSGTR_MovieAspectIsSet "Proporcje filmu to %.2f:1 - skalujê do prawid³owych propocji.\n"
 #define MSGTR_MovieAspectUndefined "Proporcje filmu nie s± zdefiniowane - nie skalujê.\n"
@@ -376,7 +376,7 @@ static char help_text[]=
 #define MSGTR_SubtitleSelect "Wybór napisów ..."
 #define MSGTR_OtherSelect "Wybór ..."
 #define MSGTR_AudioFileSelect "Wybór zewnêtrznego kana³u ..."
-#define MSGTR_FontSelect "Wybór fontu ..."
+#define MSGTR_FontSelect "Wybór czcionki ..."
 #define MSGTR_PlayList "Playlista"
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Przegl±darka Skórek"
@@ -421,10 +421,10 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_ConvertError "b³±d konwersji 24 bitów na 32 bity ( %s )\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "nieznany komunikat: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "za ma³o pamiêci\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "za du¿o zadeklarowanych fontów\n"
-#define MSGTR_SKIN_FONT_FontFileNotFound "nie znaleziono pliku z fontami\n"
-#define MSGTR_SKIN_FONT_FontImageNotFound "nie znaleziono pliku z obrazem fontu\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "nie istniej±cy identyfikator fontu ( %s )\n"
+#define MSGTR_SKIN_FONT_TooManyFontsDeclared "za du¿o zadeklarowanych czcionek\n"
+#define MSGTR_SKIN_FONT_FontFileNotFound "nie znaleziono pliku z czcionk±\n"
+#define MSGTR_SKIN_FONT_FontImageNotFound "nie znaleziono pliku z obrazem czcionki\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "nie istniej±cy identyfikator czcionki ( %s )\n"
 #define MSGTR_SKIN_UnknownParameter "nieznany parametr ( %s )\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] za ma³o pamiêci.\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skórka nie znaleziona ( %s ).\n"
@@ -513,7 +513,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizuj d¼wiêk"
 #define MSGTR_PREFERENCES_EnEqualizer "W³±cz equalizer"
 #define MSGTR_PREFERENCES_ExtraStereo "W³±cz extra stereo"
-#define MSGTR_PREFERENCES_Coefficient "Coefficient:"	/* XXX */
+#define MSGTR_PREFERENCES_Coefficient "Wspó³czynnik:"
 #define MSGTR_PREFERENCES_AudioDelay "Opó¼nienie d¼wiêku"
 #define MSGTR_PREFERENCES_DoubleBuffer "W³±cz podwójne buforowanie"
 #define MSGTR_PREFERENCES_DirectRender "W³±cz rysowanie bezpo¶rednie"
@@ -529,7 +529,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
 #define MSGTR_PREFERENCES_SUB_POS "Pozycja: "
 #define MSGTR_PREFERENCES_SUB_AutoLoad "Wy³±cz automatyczne ³adowanie napisów"
-#define MSGTR_PREFERENCES_SUB_Unicode "Napisy w Unicode"
+#define MSGTR_PREFERENCES_SUB_Unicode "Napisy w Unikodzie"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Konwertuj podane napisy do formatu napisów Mplayera"
 #define MSGTR_PREFERENCES_SUB_SRT "Konwertuj podane napisy do formatu SRT (time based SubViewer)"
 #define MSGTR_PREFERENCES_SUB_Overlap "Prze³±cz nak³adanie siê napisów"
@@ -543,7 +543,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AudioCodecFamily "Rodzina kodeków audio:"
 #define MSGTR_PREFERENCES_FRAME_OSD_Level "Poziom OSD"
 #define MSGTR_PREFERENCES_FRAME_Subtitle "Napisy"
-#define MSGTR_PREFERENCES_FRAME_Font "Font"
+#define MSGTR_PREFERENCES_FRAME_Font "Czcionka"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocesing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Kodek i demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Pamiêæ podrêczna"
@@ -585,12 +585,12 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOutLine "Obramowanie:"
 #define MSGTR_PREFERENCES_FontTextScale "Skalowanie tekstu:"
 #define MSGTR_PREFERENCES_FontOSDScale "Skalowanie OSD:"
-#define MSGTR_PREFERENCES_Cache "Cache w³±cz/wy³±cz"
-#define MSGTR_PREFERENCES_CacheSize "Wielko¶æ cache: "
+#define MSGTR_PREFERENCES_Cache "Pamiêæ podrêczna"
+#define MSGTR_PREFERENCES_CacheSize "Wielko¶æ pamiêci podrêcznej: "
 #define MSGTR_PREFERENCES_LoadFullscreen "Rozpocznij na pe³nym ekranie"
-#define MSGTR_PREFERENCES_SaveWinPos "Zapisz po³o¿enei okna"
+#define MSGTR_PREFERENCES_SaveWinPos "Zapisz po³o¿enie okna"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Zatrzymaj wygaszacz ekranu"
-#define MSGTR_PREFERENCES_PlayBar "Enable playbar"	/* XXX */
+#define MSGTR_PREFERENCES_PlayBar "W³±cz podrêczny pasek"
 #define MSGTR_PREFERENCES_AutoSync "Autosynchronizacja w³±cz/wy³±cz"
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosynchronizacja: "
 #define MSGTR_PREFERENCES_CDROMDevice "Urz±dzenie CD-ROM:"
