@@ -54,10 +54,8 @@ extern vd_functions_t mpcodecs_vd_ijpg;
 extern vd_functions_t mpcodecs_vd_mtga;
 extern vd_functions_t mpcodecs_vd_sgi;
 extern vd_functions_t mpcodecs_vd_libmpeg2;
-extern vd_functions_t mpcodecs_vd_huffyuv;
 extern vd_functions_t mpcodecs_vd_mpegpes;
 extern vd_functions_t mpcodecs_vd_realvid;
-extern vd_functions_t mpcodecs_vd_svq1;
 extern vd_functions_t mpcodecs_vd_xvid;
 extern vd_functions_t mpcodecs_vd_libdv;
 extern vd_functions_t mpcodecs_vd_lcl;
@@ -113,13 +111,9 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #ifdef USE_LIBMPEG2
         &mpcodecs_vd_libmpeg2,
 #endif
-        &mpcodecs_vd_huffyuv,
         &mpcodecs_vd_mpegpes,
 #ifdef USE_REALCODECS
 	&mpcodecs_vd_realvid,
-#endif
-#ifdef USE_SVQ1
-	&mpcodecs_vd_svq1,
 #endif
 #ifdef HAVE_XVID
 	&mpcodecs_vd_xvid,

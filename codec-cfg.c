@@ -285,11 +285,9 @@ static short get_driver(char *s,int audioflag)
 		"qtrpza",
 		"mpng",
 		"ijpg",
-		"huffyuv",
 		"zlib",
 		"mpegpes",
 		"realvid",
-		"svq1",
 		"xvid",
 		"libdv",
 		NULL
