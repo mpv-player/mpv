@@ -73,7 +73,8 @@ Supported input formats:
 
 Supported audio & video codecs:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*** See DOCS/CODECS for the complete list! ***
+*** See DOCS/CODECS for the complete list, or check ***
+*** http://mplayer.sourceforge.net/DOCS/codecs.html ***
 
 The most important video codecs:
 - mpeg1 (VCD) and mpeg2 (DVD) video
@@ -85,7 +86,12 @@ The most important video codecs:
 The most important audio codecs:
 - mpeg layer 2, and layer 3 (MP3) audio
 - AC3 dolby audio
+- Voxware audio
 - alaw, msgsm, pcm and other simple old audio formats
+
+If you have a codec not listed here, and not supported yet,
+just read CODECS to get info about its status or about how
+to help us adding support for it!
 
 Supported video output devices:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,19 +104,18 @@ General:
 - fbdev:Output to general framebuffers
 - svga: Output to SVGAlib
 - sdl:	SDL >= v1.1.7 driver (supports software scaling, and versions >=1.1.8
-        even support Xvideo, thus hardware rendering)
-- aalib:Text mode rendering (through SDL) (native driver in progress!)
+        even support Xvideo (thus hardware rendering) and with >=1.2.0 aalib)
 
 Card specific:
 - mga:	Matrox G200/G400 hardware YUV overlay via the mga_vid device
 - xmga:	Matrox G200/G400 overlay (mga_vid) in X11 window
 	(Xv emulation on X 3.3.x !)
-- syncfb: Matrox G400 YUV support on framebuffer (not tested, maybe broken)
+- syncfb: Matrox G400 YUV support on framebuffer (obsoloted, use mga/xmga)
 - 3dfx:	Voodoo2/3 hardware YUV (/dev/3dfx) support (not yet tested, maybe broken)
 
 Special:
 - png:  PNG files output (use -z switch to set compression)
-- pgm:	PGM files output (for testing purposes)
+- pgm:	PGM files output (for testing purposes or ffmpeg encoding)
 - md5:	MD5sum output (for mpeg conformance tests)
 - odivx:OpenDivX AVI File writer (use -br to set encoding bitrate)
 - null:	Null output (for speed tests/benchmarking)
@@ -147,11 +152,12 @@ Usage:
     o               toggle OSD : none / seek / seek+timer
     /  and *        decrease/increase volume
     m               toggle using master/pcm channel for volume setting
+    f               toggle fullscreen (only with -vo sdl)
 
   Examples:
     mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-    mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
     mplayer -vcd 2 /dev/cdrom
+    mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
     mplayer -dvd /dev/dvd /mnt/dvd/matrix.vob
     mplayer -alsa -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
 
@@ -161,125 +167,28 @@ Usage:
          alias char-major-178 mga_vid
          and run 'depmod -a' .
 
-License:                                                                     
-~~~~~~~~
-Since MPlayer incorporates a lot of code from other projects, this isn't
-decided yet. We're going for GPL (will be pretty hard, though).
-
 TV output:
 ~~~~~~~~~~
-If you have a Matrox G400 Dual-Head card, you can watch movies on TV,
-using TV-out feature of the second head. You must have matroxfb support
-enabled in your kernel (2.4.x kernels). You don't need X11 for this!
-Tested only with PAL TV!
+If you have a Matrox G400 Dual-Head card, you can watch movies on TV, using
+the TV-out feature of the second head. Read DOCS/TVout-G400 for details!
 
-  cd TVout
-  ./modules
-  ./cloning or ./independ
-  ./TV-704x528 (or another TV* script)
-
-Sending bugreports:
-~~~~~~~~~~~~~~~~~~~
+Sending bugreports, comments, feature requests etc:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 First please read all the docs in this package, most of the problems are
-described somewhere. At least read the Troubleshooting section!
-We don't like answering questions which are already answered in this
-readme or other docs.
-You should try the latest development version (from CVS) too, maybe your bug
-is already fixed, but the new version hasn't been released.
-If you couldn't solve the problem, then send a quality bugreport
-via E-Mail to the MPlayer-users list : mplayer-users@lists.sourceforge.net
+described somewhere. At least read DOCS/BUGS !  We don't like answering
+questions which are already answered in this readme or other docs.
 
-*NEVER* send attached AVIs, MPEGs, or any big files to this list or private!!!
-Upload them to ftp://thot.banki.hu/MPlayer/incoming , and inform the list
-about your upload.
+Read the FAQ. Most common problems are answered there!
 
-Please include these:
-- your kernel version number ('uname -a')
-- linux distribution and glibc version  (example: Slackware 7.1 + glibc 2.1.3)
-- gcc and binutils version ('gcc -v' and 'as --version')
-- your X11 version         (example: X 4.0.2 + DRI snapshot2001jan12)
-- video card vendor/model  (example: Matrox G400 DH MAX AGP)
-- sound card model+driver  (example: Creative SBLive! with OSS (kernel) )
-- CPU vendor and type      (example: Intel Celeron2-566 at 850MHz)
+You should try the latest development version (from CVS) too, maybe your
+bug is already fixed, but the new version hasn't been released.
+If you couldn't solve the problem, then send a quality bugreport:
+read DOCS/BUGREPORTS for instructions (where, what and how...)
 
-Also include the required logs (as attachment, may be compressed zip/gz/bz2)
-depending the problem type (see bellow at Troubleshooting section).
-Do not send level-0 logs, always use the mplayer option '-v' when making log:
-
-  ./configure &>configure.log
-  make &>make.log
-  mplayer -v test.avi &>play.log
-
-If we ask you for the file, then you have two choices:
-- upload the file to ftp://thot.banki.hu/MPlayer/incoming (at least a few
-  megabytes)
-- send the exact URL of the file, and we'll download it soon.
-
-Please do not ask for features already listed in the TODO!
-
-Troubleshooting:
-~~~~~~~~~~~~~~~~
-1. Please read the docs first...
-
-2. If you have compiling problems:
-   - if you are an experienced programmer, please try to fix it, and send
-     us the patch
-   - if gcc reports problems around inttypes.h, try to copy DOCS/inttypes.h
-     to the directory where the error occured. (or upgrade glibc to 2.1/newer)
-   - if gcc reports problems around video_out_gl.c, try disabling OpenGL
-     support: ./configure --disable-gl (you have broken OpenGL headers/libs)
-   - if you are a user, send us a bugreport (see above), including these:
-      - output of ./configure
-      - output of make
-      - config.h and all of config.mak files
-   Note: many users reported that SSE was not detected while running on P3.
-   Current stable 2.2.x kernels does NOT support SSE, so you can't use it
-   without patches or using the 2.4.x series. (or try latest 2.2.19 or newer)
-
-3. If you have a problem with the player, please run it with -v option, and
-   send the output of it, with a detailed description of the problem.
-   - can't play AVI files: check that codec .DLL and .ACM files are installed to
-     /usr/lib/win32/ and are all lowercase (divxc32.dll instead of DivXc32.DLL)
-   
-4. If you have a file-specific problem (can't play a special file,
-   crashes with it or similar) then please run with -v -v -v (debug level 3).
-   Send us the output and the problem description via email bugreport.
-   We may ask you to upload the file.
-   - if it segfaults with an AVI file with MP3 audio, try with -afm 1 or -afm 4
-   - if it's still bad, try with -nosound
-
-5. If you have problem with display driver, please first check the list above,
-   many of them isn't yet capable to AVI playing, and some of them are
-   untested and/or unfinished.
-
-6. If you have speed problems (too slow playing), then please first check that:
-   - you don't use OpenGL driver while have software-only opengl (Utah-GLX
-     disabled, or not yet installed, conflicting libs installed, or your
-     hardware not supported etc...)
-   - you have set up MTRR registers properly (many new cards are really
-     slow without setting up MTRR registers. it's NOT done by X 3.3.x! Also,
-     there are older K6-2's, which lack MTRR support /stepping=0/).
-     Check DOCS/MTRR !
-   - you have a fast machine (don't report that your 386 can't play DivX)
-   - try with Null output (-vo null) and check CPU usage (first % value)
-
-7. sound-related problems:
-   - maybe your card doesn't support 48kHz playback and the movie requires it.
-   - try MPlayer with the -noalsa option
-   - compile MPlayer with --disable-select
-   - delayed audio with some AVI files: try with -bps or -nobps option!
-   - if you experienced delayed audio, try to compensate with -delay or -abs.
-     you can specify audio card's buffer size in bytes with -abs option, or
-     specify audio delay in seconds (positive/negative float) with -delay
-     for example:  mplayer -alsa -delay -0.75 test.avi
-                   mplayer -abs 65536 -delay 0.3 test.mpg
-   - to play AVI files with VBR MP3 audio use the  -mc 0  option!
-   - no sound at all: check that you have working OSS driver (/dev/dsp),
-     and it isn't used by another program (for example esd, xmms etc.)
-   - use OSS. If the problem persists, use ALSA ;)
-
-8. unsupported codecs (AVI files):
-   Check DOCS/CODECS
+Subscribe to the mplayer-users mailing list. There are many MPlayer
+users, maybe they can help or know the solution to your problem.
+You also should send ideas, feature requests, comments to there!
+Please do not ask for features already listed in the DOCS/TODO!
 
 Contact information:
 ~~~~~~~~~~~~~~~~~~~~
@@ -293,14 +202,25 @@ the following addresses:
 - MPlayer users list:  (send your ideas, bugreports, feature requests here)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-users
 
-- MPlayer announce:    (information about new releases or big changes in CVS)
-	http://lists.sourceforge.net/lists/listinfo/mplayer-announce
-
 - MPlayer & Matrox G200/G400/G450 users: (about TV-out, mga_vid, syncfb, Xv)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-matrox
 
+- MPlayer developers list:  (send your patches here)
+	http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng
+
+- MPlayer announce:    (information about new releases or big changes in CVS)
+	http://lists.sourceforge.net/lists/listinfo/mplayer-announce
+
 - MPlayer CVS-log:     (announce about _every_ CVS commit)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-cvslog
+
+NOTE: language of above lists are ENGLISH. Please do not send there
+      messages using other language!
+
+License:                                                                     
+~~~~~~~~
+Since MPlayer incorporates a lot of code from other projects, this isn't
+decided yet. We're going for GPL (will be pretty hard, though).
 
 Standard Disclaimer:
 ~~~~~~~~~~~~~~~~~~~~
