@@ -14,6 +14,10 @@
 #define VCD_SECTOR_OFFS 24
 #define VCD_SECTOR_DATA 2324
 
+#ifdef STREAMING
+#include "network.h"
+#endif
+
 int vcd_seek_to_track(int fd,int track);
 void vcd_read_toc(int fd);
 
@@ -32,6 +36,9 @@ typedef struct {
   void* cache_data;
   void* priv; // used for DVD
   unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
+#ifdef STREAMING
+  streaming_ctrl_t *streaming_ctrl;
+#endif
 } stream_t;
 
 #ifdef USE_STREAM_CACHE
