@@ -946,7 +946,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			    sh->i_bps = esds.avgBitrate/8; 
 
 //			    printf("######## audio format = %d ########\n",esds.objectTypeId);
-			    if(esds.objectTypeId==107)
+			    if(esds.objectTypeId==MP4OTI_MPEG1Audio || esds.objectTypeId==MP4OTI_MPEG2AudioPart3)
 				sh->format=0x55; // .mp3
 
 			    // dump away the codec specific configuration for the AAC decoder
@@ -1103,6 +1103,13 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
       			esds_t esds; 				  
 			if(!mp4_parse_esds(trak->stdata+pos+8, atom_len-8, &esds)) {
     
+			  if(esds.objectTypeId==MP4OTI_MPEG2VisualSimple || esds.objectTypeId==MP4OTI_MPEG2VisualMain ||
+			     esds.objectTypeId==MP4OTI_MPEG2VisualSNR || esds.objectTypeId==MP4OTI_MPEG2VisualSpatial ||
+			     esds.objectTypeId==MP4OTI_MPEG2VisualHigh || esds.objectTypeId==MP4OTI_MPEG2Visual422)
+			    sh->format=mmioFOURCC('m', 'p', 'g', '2');
+			  else if(esds.objectTypeId==MP4OTI_MPEG1Visual)
+			    sh->format=mmioFOURCC('m', 'p', 'g', '1');
+
 			  // dump away the codec specific configuration for the AAC decoder
 			  trak->stream_header_len = esds.decoderConfigLen;
 			  trak->stream_header = (unsigned char *)malloc(trak->stream_header_len);

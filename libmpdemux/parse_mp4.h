@@ -30,6 +30,36 @@
 #define MP4ExtDescrTagsStart		0x80 
 #define MP4ExtDescrTagsEnd		0xFE 
 
+/* object type identifiers in the ESDS */
+/* See http://gpac.sourceforge.net/tutorial/mediatypes.htm */
+/* BIFS stream version 1 */
+#define MP4OTI_MPEG4Systems1                                0x01
+/* BIFS stream version 2 */
+#define MP4OTI_MPEG4Systems2                                0x02
+/* MPEG-4 visual stream */
+#define MP4OTI_MPEG4Visual                                  0x20
+/* MPEG-4 audio stream */
+#define MP4OTI_MPEG4Audio                                   0x40
+/* MPEG-2 visual streams with various profiles */
+#define MP4OTI_MPEG2VisualSimple                            0x60
+#define MP4OTI_MPEG2VisualMain                              0x61
+#define MP4OTI_MPEG2VisualSNR                               0x62
+#define MP4OTI_MPEG2VisualSpatial                           0x63
+#define MP4OTI_MPEG2VisualHigh                              0x64
+#define MP4OTI_MPEG2Visual422                               0x65
+/* MPEG-2 audio stream part 7 ("AAC") with various profiles */
+#define MP4OTI_MPEG2AudioMain                               0x66
+#define MP4OTI_MPEG2AudioLowComplexity                      0x67
+#define MP4OTI_MPEG2AudioScaleableSamplingRate              0x68
+/* MPEG-2 audio part 3 ("MP3") */
+#define MP4OTI_MPEG2AudioPart3                              0x69
+/* MPEG-1 visual visual stream */
+#define MP4OTI_MPEG1Visual                                  0x6A
+/* MPEG-1 audio stream part 3 ("MP3") */
+#define MP4OTI_MPEG1Audio                                   0x6B
+/* JPEG visual stream */
+#define MP4OTI_JPEG                                         0x6C
+
 /* I define uint24 here for better understanding */
 #ifndef uint24_t
 #define uint24_t uint32_t
