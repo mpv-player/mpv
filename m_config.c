@@ -215,7 +215,7 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
 
   co = m_config_get_co(config,arg);
   if(!co){
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Unknown option: %s\n",arg);
+//    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Unknown option: %s\n",arg);
     return M_OPT_UNKNOW;
   }
 
@@ -241,6 +241,7 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
     // Parse the child options
     r = m_option_parse(co->opt,arg,param,&lst,config->mode);
     // Set them now
+    if(r >= 0)
     for(i = 0 ; lst && lst[2*i] ; i++) {
       int l = strlen(co->name) + 1 + strlen(lst[2*i]) + 1;
       if(r >= 0) {
@@ -248,7 +249,13 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
 	char n[l];
 	sprintf(n,"%s:%s",co->name,lst[2*i]);
 	sr = m_config_parse_option(config,n,lst[2*i+1],set);
-	if(sr < 0) r = sr;
+	if(sr < 0){
+	  if(sr == M_OPT_UNKNOW){
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Error: option '%s' has no suboption '%s'\n",co->name,lst[2*i]);
+	    r = M_OPT_INVALID;
+	  } else
+	    r = sr;
+	}
       }
       free(lst[2*i]);
       free(lst[2*i+1]);
