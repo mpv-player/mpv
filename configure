@@ -892,7 +892,8 @@ cc_check $_extraincdir $_extralibdir -ltermcap && _termcap=yes
 
 _png=no
 if irix64 ; then
-  : Don't check for -lpng on irix	
+  # Don't check for -lpng on irix since irix has its own libpng
+  # incompatible with the GNU one
 else
   cc_check $_extraincdir $_extralibdir -lpng -lz -lm && _png=yes
 fi
