@@ -107,7 +107,7 @@ static char help_text[]=
 #define MSGTR_Playing "Проигрывание %s.\n"
 #define MSGTR_NoSound "Аудио: без звука!!!\n"
 #define MSGTR_FPSforced "Кадры/сек форсированы в %5.3f (ftime: %5.3f).\n"
-#define MSGTR_CompiledWithRuntimeDetection "Скомпилировано для определениея типа процессора во время выполнения -\nПРЕДУПРЕЖДЕНИЕ - это не оптимально!\nДля получения максимальной производительности,\nперекомпилируйте MPlayer c --disable-runtime-cpudetection.\n"
+#define MSGTR_CompiledWithRuntimeDetection "Скомпилировано для определения типа процессора во время выполнения -\nПРЕДУПРЕЖДЕНИЕ - это не оптимально!\nДля получения максимальной производительности,\nперекомпилируйте MPlayer c --disable-runtime-cpudetection.\n"
 #define MSGTR_CompiledWithCPUExtensions "Скомпилировано для x86 CPU со следующими расширениями:"
 #define MSGTR_AvailableVideoOutputPlugins "Доступные плагины вывода видео:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Доступные драйвера вывода видео:\n"
@@ -190,7 +190,7 @@ static char help_text[]=
 " cbr           постоянный битпоток\n"\
 "               Также вызывает CBR кодирование в предустановленных ABR режимах\n"\
 "\n"\
-" br=<0-1024>   укажите битпоток в кБит (только CBR и ABR)\n"\
+" br=<0-1024>   укажите битпоток в кбит (только CBR и ABR)\n"\
 "\n"\
 " q=<0-9>       качество (0-высшее, 9-наименьшее) (только для VBR)\n"\
 "\n"\
