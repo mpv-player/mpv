@@ -76,6 +76,7 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->flags|=MP_IMGFLAG_PLANAR;
 	mpi->bpp=12;
 	return;
+    case IMGFMT_IF09:
     case IMGFMT_YVU9:
 	mpi->flags|=MP_IMGFLAG_PLANAR;
 	mpi->bpp=9;

@@ -67,6 +67,8 @@ static int init(sh_video_t *sh){
     case IMGFMT_I420:
     case IMGFMT_IYUV:
 	DS_VideoDecoder_SetDestFmt(sh->context,12,out_fmt);break; // planar YUV
+    case IMGFMT_YVU9:
+        DS_VideoDecoder_SetDestFmt(sh->context,9,out_fmt);break;
     default:
 	DS_VideoDecoder_SetDestFmt(sh->context,out_fmt&255,0);    // RGB/BGR
     }

@@ -31,12 +31,15 @@ static int open(vf_instance_t *vf, char* args){
 	if(!strcasecmp(args,"yuy2")) vf->priv->fmt=IMGFMT_YUY2; else
 	if(!strcasecmp(args,"yv12")) vf->priv->fmt=IMGFMT_YV12; else
 	if(!strcasecmp(args,"i420")) vf->priv->fmt=IMGFMT_I420; else
+	if(!strcasecmp(args,"yvu9")) vf->priv->fmt=IMGFMT_YVU9; else
+	if(!strcasecmp(args,"if09")) vf->priv->fmt=IMGFMT_IF09; else
 	if(!strcasecmp(args,"iyuv")) vf->priv->fmt=IMGFMT_IYUV; else
 	if(!strcasecmp(args,"uyvy")) vf->priv->fmt=IMGFMT_UYVY; else
 	if(!strcasecmp(args,"bgr24")) vf->priv->fmt=IMGFMT_BGR24; else
 	if(!strcasecmp(args,"bgr32")) vf->priv->fmt=IMGFMT_BGR32; else
 	if(!strcasecmp(args,"bgr16")) vf->priv->fmt=IMGFMT_BGR16; else
 	if(!strcasecmp(args,"bgr15")) vf->priv->fmt=IMGFMT_BGR15; else
+	if(!strcasecmp(args,"bgr8")) vf->priv->fmt=IMGFMT_BGR8; else
 	{ printf("Unknown format name: '%s'\n",args);return 0;}
     } else
         vf->priv->fmt=IMGFMT_YUY2;

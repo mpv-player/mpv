@@ -28,7 +28,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
-    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,sh->format)) return 0;
+    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12)) return 0;
     return xacodec_init_video(sh,sh->codec->outfmt[sh->outfmtidx]);
 }
 
