@@ -1595,8 +1595,8 @@ m_option_type_t m_option_type_obj_presets = {
 
 static int parse_custom_url(m_option_t* opt,char *name,
 			    char *url, void* dst, int src) {
-  int pos1, pos2, r;
-  char *ptr1=NULL, *ptr2=NULL, *ptr3=NULL;
+  int pos1, pos2, r, v6addr = 0;
+  char *ptr1=NULL, *ptr2=NULL, *ptr3=NULL, *ptr4=NULL;
   m_struct_t* desc = opt->priv;
   
   if(!desc) {
@@ -1688,11 +1688,14 @@ static int parse_custom_url(m_option_t* opt,char *name,
   // in an IPv6 URL the numeric address should be inside square braces.
   ptr2 = strstr(ptr1, "[");
   ptr3 = strstr(ptr1, "]");
-  if( ptr2!=NULL && ptr3!=NULL ) {
+  // If the [] is after the first it isn't the hostname
+  ptr4 = strstr(ptr1, "/");
+  if( ptr2!=NULL && ptr3!=NULL && (ptr2 < ptr3) && (!ptr4 || ptr4 > ptr3)) {
     // we have an IPv6 numeric address
     ptr1++;
     pos1++;
     ptr2 = ptr3;
+    v6addr = 1;
   } else {
     ptr2 = ptr1;  
   }
@@ -1733,7 +1736,7 @@ static int parse_custom_url(m_option_t* opt,char *name,
     }
     pos2 = ptr2-url;
   }
-  if( strstr(ptr1, "]")!=NULL ) pos2--;
+  if( v6addr ) pos2--;
   // Get the hostname
   if(pos2-pos1 > 0) {
     if(!m_option_list_find(desc->fields,"hostname")) {

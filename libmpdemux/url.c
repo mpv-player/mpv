@@ -14,9 +14,9 @@
 
 URL_t*
 url_new(const char* url) {
-	int pos1, pos2;
+	int pos1, pos2,v6addr = 0;
 	URL_t* Curl;
-	char *ptr1=NULL, *ptr2=NULL, *ptr3=NULL;
+	char *ptr1=NULL, *ptr2=NULL, *ptr3=NULL, *ptr4=NULL;
 	int jumpSize = 3;
 
 	if( url==NULL ) return NULL;
@@ -106,11 +106,13 @@ url_new(const char* url) {
 	// in IPv6 URL the numeric address should be inside square braces.
 	ptr2 = strstr(ptr1, "[");
 	ptr3 = strstr(ptr1, "]");
-	if( ptr2!=NULL && ptr3!=NULL ) {
+	ptr4 = strstr(ptr1, "/");
+	if( ptr2!=NULL && ptr3!=NULL && ptr2 < ptr3 && (!ptr4 || ptr4 > ptr3)) {
 		// we have an IPv6 numeric address
 		ptr1++;
 		pos1++;
 		ptr2 = ptr3;
+		v6addr = 1;
 	} else {
 		ptr2 = ptr1;
 
@@ -138,7 +140,7 @@ url_new(const char* url) {
 		Curl->port = atoi(ptr2+1);
 		pos2 = ptr2-url;
 	}
-	if( strstr(ptr1, "]")!=NULL ) pos2--;
+	if( v6addr ) pos2--;
 	// copy the hostname in the URL container
 	Curl->hostname = (char*)malloc(pos2-pos1+1);
 	if( Curl->hostname==NULL ) {
@@ -206,9 +208,9 @@ url_unescape_string(char *outbuf, const char *inbuf)
 			if (	((c1>='0' && c1<='9') || (c1>='A' && c1<='F')) &&
 				((c2>='0' && c2<='9') || (c2>='A' && c2<='F')) ) {
 				if (c1>='0' && c1<='9') c1-='0';
-				else c1-='A';
+				else c1-='A'-10;
 				if (c2>='0' && c2<='9') c2-='0';
-				else c2-='A';
+				else c2-='A'-10;
 				c = (c1<<4) + c2;
 			}
 		}
