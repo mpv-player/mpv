@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.141
+// In synch with rev 1.144
 
 // ========================= MPlayer help ===========================
 
@@ -47,9 +47,11 @@ static char help_text[]=
 " z oder x         Untertitelverzögerung um +/- 0.1 Sekunde anpassen\n"
 " r oder t         Verschiebe die Untertitel-Position, siehe auch '-vf expand'\n"
 "\n"
-" * * * SIEHE MANPAGE FÜR DETAILS, WEITERE OPTIONEN UND TASTEN* * *\n"
+" * * * SIEHE MANPAGE FÜR DETAILS, WEITERE OPTIONEN UND TASTEN * * *\n"
 "\n";
 #endif
+
+#define MSGTR_SamplesWanted "Beispiele für dieses Format werden gebraucht, um die Unterstützung zu verbessern. Bitte kontaktiere die Entwickler.\n"
 
 // ========================= MPlayer Ausgaben ===========================
 
@@ -803,6 +805,9 @@ static char help_text[]=
 // ======================= AO Audio Output drivers ========================
 
 // libao2
+
+// audio_out.c
+#define MSGTR_AO_ALSA9_1x_Removed "audio_out: Die Module alsa9 und alsa1x wurden entfernt, benutze stattdessen -ao alsa.\n"
 
 // ao_oss.c
 #define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Kann Mixer %s: %s nicht öffnen.\n"
