@@ -9,4 +9,4 @@ extern void timerSetHandler( timerTSigHandler handler );
 extern void timerInit( void );
 extern void timerDone( void );
 
-#endif;
+#endif

@@ -115,7 +115,7 @@ void mpeg2_allocate_image_buffers (picture_t * picture)
 #else
 	for(i=0;i<3;i++){
 #endif
-            base = memalign(64,buff_size);
+            base = (unsigned char *)memalign(64,buff_size);
 	    frames[i].base[0] = base;
 	    frames[i].base[1] = base + frame_size * 5 / 4;
 	    frames[i].base[2] = base + frame_size;

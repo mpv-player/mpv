@@ -93,11 +93,8 @@ static int control(int cmd,int arg){
 		close(fd);
 		return CONTROL_OK;
 	    }
-	    else
-		return CONTROL_ERROR;
 	}
 	return CONTROL_ERROR;
-	default:
     }
     return CONTROL_UNKNOWN;
 }
