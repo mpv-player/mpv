@@ -293,7 +293,7 @@ The explanation of the <option>-mf</option> option is in the man page.
 <para>
 Creating an MPEG-4 file from all the JPEG files in the current directory:
 <screen>
-mencoder mf://*.jpg -mf type=jpg:w=800:h=600:fps=25 -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -302,7 +302,7 @@ mencoder mf://*.jpg -mf type=jpg:w=800:h=600:fps=25 -ovc lavc -lavcopts vcodec=m
 <para>
 Creating an MPEG-4 file from some JPEG files in the current directory:
 <screen>
-mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf type=jpg:w=800:h=600:fps=25 -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -312,7 +312,7 @@ mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf type=jpg:
 Creating a Motion JPEG (MJPEG) file from all the JPEG files in the current
 directory:
 <screen>
-mencoder mf://*.jpg -mf type=jpg:w=800:h=600:fps=25 -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -335,7 +335,7 @@ Width must be integer multiple of 4, it's a limitation of the RAW RGB AVI format
 Creating a Motion PNG (MPNG) file from all the PNG files in the current
 directory:
 <screen>
-mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>output.avi</replaceable> <!--
+mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>output.avi</replaceable> <!--
 --></screen>
 </para>
 </informalexample>
