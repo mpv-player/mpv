@@ -637,6 +637,9 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    priv->picture.contrast = (int)*(void **)arg;
 	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
 	    return(TVI_CONTROL_TRUE);
+	case TVI_CONTROL_VID_GET_FPS:
+	    (int)*(void **)arg=priv->fps;
+	    return(TVI_CONTROL_TRUE);
 
 	/* ========== TUNER controls =========== */
 	case TVI_CONTROL_TUN_GET_FREQ:
@@ -743,10 +746,9 @@ static int control(priv_t *priv, int cmd, void *arg)
 	}
 	case TVI_CONTROL_AUD_SET_SAMPLERATE:
 	{
-	    priv->audio_samplerate[priv->audio_id] = (int)*(void **)arg;
+	    int tmp = priv->audio_samplerate[priv->audio_id] = (int)*(void **)arg;
 	    
-	    if (ioctl(priv->audio_fd, SNDCTL_DSP_SPEED,
-		&priv->audio_samplerate[priv->audio_id]) == -1)
+	    if (ioctl(priv->audio_fd, SNDCTL_DSP_SPEED, &tmp) == -1)
 		return(TVI_CONTROL_FALSE);
 	    priv->audio_samplesize[priv->audio_id] =
 		priv->audio_samplerate[priv->audio_id]/8/priv->fps*
