@@ -5523,7 +5523,7 @@ quantizer factor between B and non B frames (pass\ 1/\:2) (default: 1.25)
 .
 .TP
 .B vi_qfactor=<-31.0\-31.0>
-quantizer factor between I and non I frames (pass\ 1/\:2) (default: 0.8)
+quantizer factor between I and non-I frames (pass\ 1/\:2) (default: 0.8)
 .
 .TP
 .B vb_qoffset=<-31.0\-31.0>
@@ -5854,13 +5854,13 @@ sane range
 .TP
 .B tcplx_mask=<0.0\-1.0>
 temporal complexity masking (default: 0.0 (disabled))
-Imagine a scene with a bird flying across the whole scene, tcplx_mask
+Imagine a scene with a bird flying across the whole scene; tcplx_mask
 will decrease the quantizers of the bird's macroblocks (thus decreasing their
-quality) as the human eye usually does not have time to see all the bird's
+quality), as the human eye usually does not have time to see all the bird's
 details.
 Be warned that if the masked object stops (e.g.\& the bird lands) it is
-likely to look horrible for a a short period of time (until the encoder
-figures out that the object is not moving and needs refined blocks).
+likely to look horrible for a a short period of time, until the encoder
+figures out that the object is not moving and needs refined blocks.
 The saved bits will be spent on other parts of the video, which may increase
 subjective quality, provided that tcplx_mask is carefully chosen.
 .
@@ -5870,9 +5870,9 @@ Spatial complexity masking.
 Larger values help against blockiness, if no deblocking filter is used for
 decoding, which is maybe not a good idea.
 .br
-Imagine a scene with grass (which usually has a great spatial complexity),
-a blue sky and a house, scplx_mask will raise the quantizers of the grass'
-macroblocks (thus decreasing its quality), in order to spend more bits on
+Imagine a scene with grass (which usually has great spatial complexity),
+a blue sky and a house; scplx_mask will raise the quantizers of the grass'
+macroblocks, thus decreasing its quality, in order to spend more bits on
 the sky and the house.
 .br
 .I HINT:
@@ -5888,15 +5888,15 @@ sane range
 .I NOTE:
 This setting does not have the same effect as using a custom matrix that
 whould compress high frequencies harder, as scplx_mask will reduce the
-quality of P-blocks even if only DC is changing, which will probably not
-look as good.
+quality of P blocks even if only DC is changing.
+The result of scplx_mask will probably not look as good.
 .
 .TP
 .B p_mask=<0.0\-1.0> (also see vi_qfactor)
-Reduces the quality of inter blocks, which is equivalent to increasing
-the quality of intra blocks, since the same average bitrate will be
-distributed by the rate controller to the whole video sequence
-(default: 0.0 (disabled)).
+Reduces the quality of inter blocks.
+This is equivalent to increasing the quality of intra blocks, because the
+same average bitrate will be distributed by the rate controller to the
+whole video sequence (default: 0.0 (disabled)).
 p_mask=1.0 doubles the bits allocated to each intra block.
 .
 .TP
