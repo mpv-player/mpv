@@ -90,7 +90,7 @@ static Window                 mRoot;
 static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
 static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
 
-#ifdef HAVE_GUI
+#ifdef HAVE_NEW_GUI
  static uint32_t               mdwidth,mdheight;
 #endif
 
@@ -135,13 +135,18 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
  image_width = width;
  image_format=format;
 
+#ifdef HAVE_NEW_GUI
+ mdwidth=width;
+ mdheight=height;
+#endif
+
  mFullscreen=flags&1;
  dwidth=d_width; dheight=d_height;
  num_buffers=vo_doublebuffering?NUM_BUFFERS:1;
  
  if (!vo_init()) return -1;
 
-#ifdef HAVE_GUI
+#ifdef HAVE_NEW_GUI
  if ( vo_window == None )
   {
 #endif
@@ -174,24 +179,17 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
    XSetStandardProperties(mDisplay, mywindow, hello, hello, None, NULL, 0, &hint);
    if ( mFullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
    XMapWindow(mDisplay, mywindow);
+   mygc = XCreateGC(mDisplay, mywindow, 0L, &xgcv);
    XFlush(mDisplay);
    XSync(mDisplay, False);
-#ifdef HAVE_GUI
+#ifdef HAVE_NEW_GUI
   }
   else
     {
      mywindow=vo_window;
      mygc=vo_gc;
-     if ( vo_screenwidth != d_width )
-      {
-       XMoveWindow( mDisplay,mywindow,( vo_screenwidth - d_width ) / 2,( vo_screenheight - d_height ) / 2 );
-       XResizeWindow( mDisplay,mywindow,d_width,d_height );
-      }
-      else mFullscreen=1;
     }
 #endif
-
- mygc = XCreateGC(mDisplay, mywindow, 0L, &xgcv);
 
  xv_port = 0;
  if (Success == XvQueryExtension(mDisplay,&ver,&rel,&req,&ev,&err))
@@ -309,7 +307,7 @@ static void check_events(void)
    XTranslateCoordinates( mDisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
    printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
-   #ifdef HAVE_GUI
+   #ifdef HAVE_NEW_GUI
     if ( vo_window != None )
      {
       mFullscreen=0;
