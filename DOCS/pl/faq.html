@@ -204,9 +204,8 @@
     <CODE>Warning: loading mga_vid.o will taint the kernel: no license</CODE><BR>
     <CODE>Warning: ³adowanie mga_vid.o zanieczy¶ci j±dro: nie ma licencji</CODE></DT>
   <DD>A: Najnowszy modutils (narzêdzie do ³adownie modu³ów do j±dra - przyp. t³um.)
-    wymaga flagi wskazuj±cej licencjê equire a flag indicating the license
-    (g³ównie by unikn±æ debugowania sterowników z zamkniêtym kodem).
-    Zrób upgrade kernela, modutilsa i MPlayera.</DD>
+    wymaga flagi wskazuj±cej licencjê (g³ównie by unikn±æ debugowania sterowników
+    z zamkniêtym kodem). Uaktualnij kernel, modutils i MPlayera.</DD>
   <DD>&nbsp;</DD>
 
     <DT>Q: Podczas kompilowania MEncodera, 'wywala siê' (segfaults) podczas linkowania!</DT>
@@ -221,6 +220,7 @@
 
     <DT>Q: Chcia³bym skompilowaæ MPlayera na Miniksie!</DT>
     <DD>A: Ja te¿. :)</DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -305,7 +305,7 @@
     <CODE>-vo null</CODE> i potem <CODE>-vo ...</CODE> i sprawdziæ ró¿nice
     prêdko¶ci video_out.</DD>
   <DD>A2: U¿ywasz Direct Rendering,
-    kiedu to procent u¿ycia procesora na dekodowanie zawiera równie¿ procent 
+    kiedu to procent u¿ycia procesora na dekodowanie zawiera równie¿ procent
     u¿ycia procesora na wy¶wietlanie.</DD>
   <DD>&nbsp;</DD>
 
@@ -393,6 +393,7 @@
 
   <DT>Q: Jak mogê uruchomiæ MPlayera w tle?</DT>
   <DD>A: U¿yj: <CODE>mplayer &lt;opcje&gt; &lt;nazwa pliku&gt; &lt; /dev/null &amp;</CODE></DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -531,7 +532,7 @@
     <A HREF="documentation.html#rtc">sekcjê o RTC</A> dokumentacji.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Mam problemy z synchronizacj± A/V. Niektóre pliki AVI s± odtwarzane dobrze, 
+  <DT>Q: Mam problemy z synchronizacj± A/V. Niektóre pliki AVI s± odtwarzane dobrze,
     ale niektóre odtwarzane s± z podwójn± prêdko¶ci±!</DT>
   <DD>A: Toja karta/sterownik d¼wiêku jest uszkodzony. Najbardziej prawdopodobne,
     ¿e s± one ustawione na 44100Hz, a ty próbujesz odtworzyæ plik z d¼wiêkiem
@@ -558,6 +559,7 @@
   <DD>A: To znowu skutek power managementa (patrz powy¿ej).  Pod³±cz zewnêtrzne
     ¼ród³o energii <B>przed</B> w³±czeniem laptopa lub u¿yj opcji
     <CODE>-nortc</CODE>.</DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -659,6 +661,7 @@
     o¶wiecenie: podsterownik SDLa <CODE>x11</CODE> u¿ywa xv gdy jest dostêpne,
     nie musisz siê o to martwiæ ... Informacja: mo¿esz wymusiæ/wy³±czyæ u¿ywanie
     Xv przez SDL using <CODE>-forcexv</CODE> i <CODE>-noxv</CODE></DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -712,7 +715,7 @@
     ze <A HREF="http://www.dtek.chalmers.se/groups/dvd/">strony Ogle</A>.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: ICzy jest mo¿liwe odtworzyæ/skodowaæ tylko okre¶lone rozdzia³y?</DT>
+  <DT>Q: Czy jest mo¿liwe, by odtworzyæ/skodowaæ tylko okre¶lone rozdzia³y?</DT>
   <DD>A: Tak, spróbuj opcji <CODE>-chapter</CODE>.</DD>
   <DD>&nbsp;</DD>
 
@@ -720,6 +723,15 @@
   <DD>A: U¿yj opcji <CODE>-cache</CODE> (opisano w stronie manuala)
     i spróbuj w³±czyæ DMA w napêdzie DVD narzêdziem hdparm (opisano
     w <A HREF="cd-dvd.html#cd">rozdziale o CD</A> w dokumentacji).</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Gdy odtwarzam film, nagle zaczyna siê on zacinaæ i dostajê ten
+    komunikat:<BR>
+    <CODE>Badly interleaved AVI file detected - switching to -ni
+    mode...</CODE>
+  <DD>A: Popsute pliki interleaved  i <CODE>-cache</CODE> nie dzia³aj± razem
+    za dobrze. Spróbuj <CODE>-nocache</CODE>.</DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
