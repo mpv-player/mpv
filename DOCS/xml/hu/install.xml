@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.52 -->
+<!-- synced with 1.54 -->
 <sect1 id="install">
 <title>Telepítés</title>
 
@@ -637,7 +637,7 @@ tudod megadni (teljes elérési út is megadható).
   <term><option>-subdelay <replaceable>mp</replaceable></option></term>
   <listitem><simpara>
     Késlelteti a feliratot <option><replaceable>mp</replaceable></option> másodperccel.
-    Lehet negatív is.
+    Lehet negatív is. Az érték a film időpozíciójának számlálójához adódik hozzá.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -658,12 +658,12 @@ tudod megadni (teljes elérési út is megadható).
 Ha MicroDVD felirat fájl használa közben egyre növekvő csúszást tapasztalsz a
 film és a felirat között, akkor a legvalószínűbb, hogy a film és a felirat frame
 rátája különböző. Jegyezd meg, hogy a MicroDVD felirat formátum abszolút képkocka
-számokat használ az időzítéshez, és emiatt a <option>-subfps</option> kapcsoló
-nem használható ezzel a formátummal. Mivel az <application>MPlayer</application>
-nem tudja kitalálni a felirat fájl frame rátáját, kézzel kell átkonvertálnod.
-Van egy kis Perl script a <filename class="directory">contrib</filename>
-könyvtárban az <application>MPlayer</application> FTP szerverén, ami megcsinálja
-ezt a konvertálást neked.
+számokat használ az időzítéshez, és nincs benne fps információ, emiatt a
+<option>-subfps</option> kapcsoló használata javasolt ezzel a formátummal. Ha
+végleg meg akarod oldani ezt a problémát, kézzel kell átkonvertálnod a felirat
+fájl frame rátáját.
+Az <application>MPlayer</application> el tudja végezni ezt a konverziót neked:
+<screen>mplayer <replaceable>dummy.avi</replaceable> -fps subtitles_fps -subfps avi_fps [-subdelay sec] [-sub subtitle_filename] <replaceable>-dumpmicrodvdsub</replaceable></screen>
 </para>
 
 <para>
