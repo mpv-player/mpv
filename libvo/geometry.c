@@ -4,17 +4,9 @@
 #include <string.h>
 #include "geometry.h"
 #include "../mp_msg.h"
-#include "../mplayer.h" /* exit_player() */
 
 /* A string of the form [WxH][+X+Y] or xpos[%]:ypos[%] */
 char *vo_geometry = NULL;
-
-int geometry_error()
-{
-	mp_msg(MSGT_VO, MSGL_ERR, "-geometry must be in [WxH][+X+Y] | [X[%%]:[Y[%%]]] format, incorrect (%s)\n", vo_geometry);
-	exit_player(NULL);		/* ????? what else could we do ? */
-	return 0;
-}
 
 #define RESET_GEOMETRY width = height = xoff = yoff = xper = yper = -1;
 
@@ -50,7 +42,11 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 		     {
 		      RESET_GEOMETRY
 		      if(sscanf(vo_geometry, "%i%%", &xper) != 1)
-			return geometry_error();
+		      {
+			mp_msg(MSGT_VO, MSGL_ERR,
+			    "-geometry must be in [WxH][+X+Y] | [X[%%]:[Y[%%]]] format, incorrect (%s)\n", vo_geometry);
+			return 0;
+		      }
 		     }
 		    }
 		   }

@@ -32,7 +32,6 @@
 
 #include "vosub_vidix.h"
 #include "../vidix/vidixlib.h"
-#include "../mplayer.h" /* exit_player() */
 
 #ifdef HAVE_NEW_GUI
 #include "../Gui/interface.h"
@@ -188,7 +187,7 @@ static void set_window(int force_update)
 	    vo_screenwidth, vo_screenheight) != 0)
         {
 	    mp_msg(MSGT_VO, MSGL_FATAL, "Can't initialize VIDIX driver: %s\n", strerror(errno));
-    	    exit_player("vidix error"); /* !!! */
+    	    abort();
 	}
 	vidix_start();
     }
