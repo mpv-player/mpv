@@ -7,7 +7,7 @@
 #ifdef __i386__
 #include <sys/perm.h>
 #else
-#ifndef __sparc__
+#if !defined(__sparc__) && !defined(__powerpc__)
 #include <sys/io.h>
 #endif
 #endif

@@ -11,7 +11,7 @@ static int pci_config_type( void ) { return 1; }
    questions, suggestions etc: 
    mplayer-dev-eng@mplayerhq.hu, colin@colino.net*/
 #include <fcntl.h>
-#include <sys/io.h>
+//#include <sys/io.h>
 #include <linux/pci.h>
 #include "../../bswap.h"
 
