@@ -1217,6 +1217,31 @@ case VCODEC_LIBAVCODEC:
 	lavc_venc_context.quality = lavc_param_vqscale;
     }
 
+    switch(pass){
+    case 1:
+	if (VbrControl_init_2pass_vbr_analysis(passtmpfile, lavc_param_vme) == -1)
+	{
+	    printf("2pass failed: filename=%s\n", passtmpfile);
+	    pass_working = 0;
+	}
+	else
+	    pass_working = 1;
+	break;
+    case 2:
+        if (VbrControl_init_2pass_vbr_encoding(passtmpfile,
+		    lavc_venc_context.bit_rate,
+		    lavc_venc_context.frame_rate,
+		    100, /* crispness */
+		    lavc_param_vme) == -1)
+	{
+	    printf("2pass failed: filename=%s\n", passtmpfile);
+	    pass_working = 0;
+	}
+	else
+	    pass_working = 1;
+	break;
+    }
+
     if (avcodec_open(&lavc_venc_context, lavc_venc_codec) != 0)
     {
 	printf(MSGTR_CantOpenCodec);
@@ -1654,8 +1679,34 @@ case VCODEC_LIBAVCODEC:
 	    break;
 	}
 
+    if(pass==2 && pass_working){	// handle 2-pass:
+	lavc_venc_context.flags|=CODEC_FLAG_QSCALE; // enable VBR
+	lavc_venc_context.quality=VbrControl_get_quant();
+#ifdef CODEC_FLAG_TYPE
+	lavc_venc_context.flags|=CODEC_FLAG_TYPE; // force keyframes
+	lavc_venc_context.key_frame=VbrControl_get_intra();
+	lavc_venc_context.gop_size=0x3fffffff;
+#else
+#error you should upgrade libavcodec... get latest CVS
+#endif
 	out_size = avcodec_encode_video(&lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    &lavc_venc_picture);
+	VbrControl_update_2pass_vbr_encoding(lavc_venc_context.mv_bits,
+	      lavc_venc_context.i_tex_bits+lavc_venc_context.p_tex_bits,
+	      8*out_size);
+    } else {
+	out_size = avcodec_encode_video(&lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
+	    &lavc_venc_picture);
+
+	if(pass==1 && pass_working){
+	  VbrControl_update_2pass_vbr_analysis(lavc_venc_context.key_frame,
+	      lavc_venc_context.mv_bits,
+	      lavc_venc_context.i_tex_bits+lavc_venc_context.p_tex_bits,
+	      8*out_size, lavc_venc_context.quality);
+	}
+	
+    }
+
 	aviwrite_write_chunk(muxer,mux_v,muxer_f,out_size,lavc_venc_context.key_frame?0x10:0);
 #endif
     }
