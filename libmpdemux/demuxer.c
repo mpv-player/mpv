@@ -1360,7 +1360,7 @@ switch(file_format){
 #endif
 #ifdef STREAMING_LIVE_DOT_COM
  case DEMUXER_TYPE_RTP: {
-   demuxer = demux_open_rtp(demuxer);
+   if (!(demuxer = demux_open_rtp(demuxer))) return NULL;
    break;
  }
 #endif
