@@ -1036,6 +1036,15 @@ int vixInit( void )
       printf(RADEON_MSG" Workarounding buggy Radeon Mobility M6 (0 vs. 8MB ram)\n");
       radeon_ram_size = 8192*1024;
   }
+#else
+  /* Rage Mobility (rage128) also has memsize bug */
+  if (radeon_ram_size == 0 &&
+      (def_cap.device_id == DEVICE_ATI_RAGE_MOBILITY_M3 ||
+       def_cap.device_id == DEVICE_ATI_RAGE_MOBILITY_M32))
+  {
+      printf(RADEON_MSG" Workarounding buggy Rage Mobility M3 (0 vs. 8MB ram)\n");
+      radeon_ram_size = 8192*1024;
+  }
 #endif
   if((radeon_mem_base = map_phys_mem(pci_info.base0,radeon_ram_size))==(void *)-1) return ENOMEM;
   memset(&besr,0,sizeof(bes_registers_t));
