@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.105
+// Updated to help_mp-en.h v1.104
 
 // Translated files should be sent to the mplayer-dev-eng mailing list or
 // to the help messages maintainer, see DOCS/tech/MAINTAINERS.
