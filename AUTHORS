@@ -361,6 +361,10 @@ Colin Leroy <colin@colino.net>
     * libdha on powerpc linux
     * mach64 vidix driver endianness fixes
 
+Mark Zealey <mark@zealos.org>
+   * tdfxfb driver
+   * -geometry window positioning code
+
 NOTE: If you feel you were missed here, feel free to send a patch.
 =====
 
