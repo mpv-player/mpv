@@ -864,6 +864,7 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	cachedsi.wProcessorLevel		= 5; /* pentium */
 	cachedsi.wProcessorRevision		= 0x0101;
 
+#ifdef USE_WIN32DLL
 	/* mplayer's way to detect PF's */
 	{
 	    #include "../cpudetect.h"
@@ -896,9 +897,10 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	    cachedsi.wProcessorRevision = gCpuCaps.cpuStepping;
     	    cachedsi.dwNumberOfProcessors = 1;	/* hardcoded */
 	}
+#endif
 
 /* disable cpuid based detection (mplayer's cpudetect.c does this - see above) */
-#if 0
+#ifndef USE_WIN32DLL
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__svr4__)
 	do_cpuid(1, regs);
 	switch ((regs[0] >> 8) & 0xf) {			// cpu family
@@ -929,10 +931,11 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	  PF[PF_AMD3D_INSTRUCTIONS_AVAILABLE] = TRUE;
         cachedsi.dwNumberOfProcessors=1;
 #endif
-#endif /* if 0 */
+#endif /* USE_WIN32DLL */
 
-/* linux detection enabled (based on proc/cpuinfo) for checking
-   fdiv_bug and fpu emulation flags -- alex */
+
+/* MPlayer: linux detection enabled (based on proc/cpuinfo) for checking
+   fdiv_bug and fpu emulation flags -- alex/MPlayer */
 #ifdef __linux__
 	{
 	char buf[20];
