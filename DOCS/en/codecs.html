@@ -260,12 +260,12 @@ MPlayer supports decoding all versions of RealVideo:
   have been tested) platforms.</B></P>
 
 
-<H4><A NAME="xvid">2.2.1.9 XViD</A></H4>
+<H4><A NAME="xvid">2.2.1.9 XviD</A></H4>
 
-<P><A HREF="http://www.xvid.org/"><B>XViD</B></A> is a forked development of
+<P><A HREF="http://www.xvid.org/"><B>XviD</B></A> is a forked development of
   the OpenDivX codec. It happened when ProjectMayo changed OpenDivX to closed
   source DivX4 (now DivX5), and the non-ProjectMayo people working on OpenDivX
-  got angry, then started XViD. So both projects have the same origin.</P>
+  got angry, then started XviD. So both projects have the same origin.</P>
 
 <H4>ADVANTAGES</H4>
 
@@ -282,27 +282,29 @@ MPlayer supports decoding all versions of RealVideo:
 <UL>
   <LI>currently it does not properly <B>decode</B> all DivX/DivX4 files (no 
     problem as <A HREF="#libavcodec">libavcodec</A> can play them)</LI>
-  <LI>you have to choose between DivX4 <B>or</B> XViD support at compiletime</LI>
+  <LI>you have to choose between DivX4 <B>or</B> XviD support at compiletime</LI>
   <LI>under development</LI>
 </UL>
 
 <H4>INSTALLING XVID CVS</H4>
 
-<P>XViD is currently available only from CVS. Here are the
-  download and installation instructions:</P>
+<P>XviD is currently available only from CVS. Here are download and installation
+  instructions (you need at least autoconf 2.50, automake and libtool):</P>
 
 <OL>
   <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</CODE></LI>
   <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</CODE></LI>
   <LI><CODE>cd xvidcore/build/generic</CODE></LI>
-  <LI>Edit the Makefile for your architecture (probably
-    <CODE>Makefile.linuxx86</CODE>) to fit your needs.</LI>
-  <LI><CODE>make -f Makefile.linuxx86</CODE></LI>
-  <LI>Copy the <CODE>divx4.h</CODE> and <CODE>xvid.h</CODE> header files from
+  <LI><CODE>./bootstrap.sh</CODE></LI>
+  <LI><CODE>./configure</CODE><BR>
+    You may have to add some options (examine the output of
+    <CODE>./configure --help</CODE>).</LI>
+  <LI><CODE>make &amp;&amp; make install</CODE></LI>
+  <LI>If you specified <CODE>--enable-divxcompat</CODE>,
+    copy the <CODE>divx4.h</CODE> header file from
     <CODE>xvidcore/src/</CODE> to <CODE>/usr/local/include/</CODE>.</LI>
-  <LI>Get <CODE>encore2.h</CODE> and <CODE>decore.h</CODE> from the DivX4Linux
-    package, and copy them to <CODE>/usr/local/include/</CODE>.</LI>
-  <LI>Recompile MPlayer with <CODE>--with-xvidcore=/path/to/libxvidcore.a</CODE>.</LI>
+  <LI>Recompile MPlayer with
+    <CODE>--with-xvidcore=/path/to/libxvidcore.a</CODE>.</LI>
 </OL>
 
 
