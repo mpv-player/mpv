@@ -462,7 +462,6 @@ char* title="MPlayer";
 
 // movie info:
 int out_fmt=0;
-//int user_bpp=0;
 
 int osd_visible=100;
 int osd_function=OSD_PLAY;
@@ -583,7 +582,7 @@ if(!filename){
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
-    printf("(copy/link DOCS/codecs.conf to ~/.mplayer/codecs.conf)\n");
+    fprintf(stderr,"(copy/link DOCS/codecs.conf to ~/.mplayer/codecs.conf)\n");
     GUI_MSG( mplCodecConfNotFound )
     exit(1);
 }
@@ -618,9 +617,9 @@ if(vcd_track){
   if(f<0){ fprintf(stderr,"CD-ROM Device '%s' not found!\n",filename);return 1; }
   vcd_read_toc(f);
   ret2=vcd_get_track_end(f,vcd_track);
-  if(ret2<0){ fprintf(stderr,"Error selecting VCD track!\n");return 1;}
+  if(ret2<0){ fprintf(stderr,"Error selecting VCD track! (get)\n");return 1;}
   ret=vcd_seek_to_track(f,vcd_track);
-  if(ret<0){ fprintf(stderr,"Error selecting VCD track!\n");return 1;}
+  if(ret<0){ fprintf(stderr,"Error selecting VCD track! (seek)\n");return 1;}
   seek_to_byte+=ret;
   if(verbose) printf("VCD start byte position: 0x%X  end: 0x%X\n",seek_to_byte,ret2);
 #ifdef VCD_CACHE
@@ -699,7 +698,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
   stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_AVI,audio_id,video_id,dvdsub_id);
   stream_seek(demuxer->stream,seek_to_byte);
-  //printf("stream3=0x%X vs. 0x%X\n",demuxer->stream,stream);
   { //---- RIFF header:
     int id=stream_read_dword_le(demuxer->stream); // "RIFF"
     if(id==mmioFOURCC('R','I','F','F')){
@@ -728,14 +726,13 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id,dvdsub_id);
   stream_seek(demuxer->stream,seek_to_byte);
   // Arpi? why is this extra and not in codec selection? - atmos ::
+  // Hmm. This should be fixed somehow... I'll check diz later. - arpi
   if(audio_format) demuxer->audio->type=audio_format; // override audio format
   if(ds_fill_buffer(demuxer->video)){
     printf("Detected MPEG-PS file format!\n");
     file_format=DEMUXER_TYPE_MPEG_PS;
   } else {
     // some hack to get meaningfull error messages to our unhappy users:
-//    if(num_elementary_packets100>16 &&
-//       abs(num_elementary_packets101-num_elementary_packets100)<8){
     if(num_elementary_packets100>=2 && num_elementary_packets101>=2 &&
        abs(num_elementary_packets101-num_elementary_packets100)<8){
       file_format=DEMUXER_TYPE_MPEG_ES; //  <-- hack is here :)
@@ -833,7 +830,7 @@ switch(file_format){
         has_audio=0;sh_audio=NULL;
       } else {
         if(force_ni || abs(a_pos-v_pos)>0x100000){  // distance > 1MB
-          printf("Detected NON-INTERLEAVED AVI file-format!\n");
+          printf("%s NON-INTERLEAVED AVI file-format!\n",force_ni?"Forced":"Detected");
           demuxer->type=DEMUXER_TYPE_AVI_NI; // HACK!!!!
 	  pts_from_bps=1; // force BPS sync!
         }
@@ -1247,9 +1244,6 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
         printf("VO: Comment: %s\n", info->comment);
    }
 
-//   if(verbose) printf("Destination size: %d x %d  out_fmt=%0X\n",
-//                      screen_size_x,screen_size_y,out_fmt);
-
    if(verbose) printf("video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
                       sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
@@ -1281,9 +1275,7 @@ if(verbose) printf("vo_debug3: out_fmt=%s\n",vo_format_name(out_fmt));
    
 //================== MAIN: ==========================
 {
-//float audio_buffer_delay=0;
 
-//float buffer_delay=0;
 float frame_correction=0; // A-V timestamp kulonbseg atlagolas
 int frame_corr_num=0;   //
 float v_frame=0;    // Video
@@ -1433,12 +1425,6 @@ while(!eof){
     }
 
 /*========================== PLAY AUDIO ============================*/
-//if(!has_audio){
-//  int playsize=512;
-//  a_frame+=playsize/(float)(sh_audio->o_bps);
-//  a_pts+=playsize/(float)(sh_audio->o_bps);
-  //time_frame+=playsize/(float)(sh_audio->o_bps);
-//} else
 while(has_audio){
   unsigned int t;
   int playsize=audio_out->get_space();
@@ -1540,7 +1526,7 @@ if(1)
           if(!read_video_packet(d_video)){ eof=1; break;} // EOF
           //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
 	  if(sh_video->codec->driver!=1){
-	    // not libmpeg2:
+	    // if not libmpeg2:
 	    switch(i){
 	      case 0x1B3: header_process_sequence_header (picture, buffer);break;
 	      case 0x1B5: header_process_extension (picture, buffer);break;
