@@ -136,7 +136,7 @@ static int load_syms_linux(char *path)
     raSetDLLAccessPath = dlsym(handle, "SetDLLAccessPath");
     raSetPwd = dlsym(handle, "RASetPwd"); // optional, used by SIPR
     
-    if (raCloseCodec && raDecode && raFlush && raFreeDecoder &&
+    if (raCloseCodec && raDecode && /*raFlush && */raFreeDecoder &&
 	raGetFlavorProperty && (raOpenCodec||raOpenCodec2) && raSetFlavor &&
 	/*raSetDLLAccessPath &&*/ raInitDecoder)
     {
@@ -398,12 +398,26 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   int sps=((short*)(sh->wf+1))[0];
   int w=sh->wf->nBlockAlign; // 5
   int h=((short*)(sh->wf+1))[1];
+  int cfs=((short*)(sh->wf+1))[3];
 
 //  printf("bs=%d  sps=%d  w=%d h=%d \n",sh->wf->nBlockAlign,sps,w,h);
   
 #if 1
   if(sh->a_in_buffer_len<=0){
       // fill the buffer!
+		if (sh->format == mmioFOURCC('1','4','_','4')) {
+			demux_read_data(sh->ds, sh->a_in_buffer, sh->wf->nBlockAlign);
+			sh->a_in_buffer_size=
+			sh->a_in_buffer_len=sh->wf->nBlockAlign;
+		} else
+		if (sh->format == mmioFOURCC('2','8','_','8')) {
+			int i,j;
+			for (j = 0; j < h; j++)
+				for (i = 0; i < h/2; i++)
+					demux_read_data(sh->ds, sh->a_in_buffer+i*2*w+j*cfs, cfs);
+			sh->a_in_buffer_size=
+			sh->a_in_buffer_len=sh->wf->nBlockAlign*h;
+		} else
     if(!sps){
       // 'sipr' way
       int j,n;
