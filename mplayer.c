@@ -483,7 +483,17 @@ static void exit_player_with_rc(char* how, int rc){
   vo_uninit();	// close the X11 connection (if any opened)
 #endif
 
+#ifdef HAVE_FREETYPE
+  current_module="uninit_font";
+  if (vo_font) free_font_desc(vo_font);
+  vo_font = NULL;
+  done_freetype();
+#endif
+
   current_module="exit_player";
+
+// free mplayer config
+  free(mconfig);
 
 #ifdef USE_EDL
   if(edl_records != NULL) free(edl_records); // free mem allocated for EDL
@@ -4129,12 +4139,6 @@ if(use_gui || playtree_iter != NULL){
   goto play_next_file;
 }
 
-#ifdef HAVE_FREETYPE
-current_module="uninit_font";
-if (vo_font) free_font_desc(vo_font);
-vo_font = NULL;
-done_freetype();
-#endif
 
 exit_player_with_rc(MSGTR_Exit_eof, 0);
 
