@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan,  technik at domotech.cz
-// Synced to 1.152
+// Synced to 1.153
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -98,7 +98,7 @@ static char help_text[]=
 "  - Zkuste -cache 8192.\n"\
 "- Pou¾íváte -cache pro neprokládané AVI soubory?\n"\
 "  - Zkuste -nocache.\n"\
-"Tipy na vyladìní a zrychlení najdete v DOCS/HTML/en/video.html.\n"\
+"Tipy na vyladìní a zrychlení najdete v DOCS/HTML/en/devices.html.\n"\
 "Pokud nic z toho nepomù¾e, pøeètìte si DOCS/HTML/en/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer byl pøelo¾en BEZ podpory GUI.\n"
@@ -432,10 +432,10 @@ static char help_text[]=
 
 // m_config.c
 #define MSGTR_SaveSlotTooOld "Nalezen pøíli¾ starý save slot z lvl %d: %d !!!\n"
-#define MSGTR_InvalidCfgfileOption "Volbu %s nelze pou¾ít v konfiguraèním souboru.\n"
-#define MSGTR_InvalidCmdlineOption "Volbu %s nelze pou¾ít z pøíkazového øádku.\n"
-#define MSGTR_InvalidSuboption "Chyba: volba '%s' nemá ¾ádnou podvolbu '%s'.\n"
-#define MSGTR_MissingSuboptionParameter "Chyba: podvolba '%s' volby '%s' musí mít parametr!\n"
+#define MSGTR_InvalidCfgfileOption "Volbu %s nelze pou¾ít v konfiguraèním souboru\n"
+#define MSGTR_InvalidCmdlineOption "Volbu %s nelze pou¾ít z pøíkazového øádku\n"
+#define MSGTR_InvalidSuboption "Chyba: volba '%s' nemá ¾ádnou podvolbu '%s'\n"
+#define MSGTR_MissingSuboptionParameter "Chyba: podvloba '%s' volby '%s' musí mít parametr!\n"
 #define MSGTR_MissingOptionParameter "Chyba: volba '%s' musí mít parametr!\n"
 #define MSGTR_OptionListHeader "\n Název                Typ             Min        Max      Globál  CL    Konfig\n\n"
 #define MSGTR_TotalOptions "\nCelkem: %d voleb\n"
@@ -858,7 +858,7 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Vstup není RGB, nelze oddìlit jasovou slo¾ku podle polí!"
 #define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "©íøka obrazu musí být dìlitelná 2."
 #define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Není dostatek pamìti pro alokaci RGB framebufferu."
-#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Nelze získat pamì» nebo ukazatel souboru pro zápis \"stream.yuv\"!"
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Nelze získat pamì» nebo ukazatel souboru pro zápis \"%s\"!"
 #define MSGTR_VO_YUV4MPEG_OutFileWriteError "Chyba pøi zápisu obrázku na výstup!"
 #define MSGTR_VO_YUV4MPEG_UnknownSubDev "Neznámé podzaøízení: %s"
 #define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Pou¾ívám prokládaný výstupní re¾im, horní pole napøed."
