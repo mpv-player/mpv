@@ -61,7 +61,7 @@ AO_LIBS = -Llibao2 -lao2
 A_LIBS = $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
 
 CODEC_LIBS = -Lg72x -lg72x -Lmp3lib -lMP3 -Llibac3 -lac3 -Lliba52 -la52 -Lxa -lxa -Llibmpeg2 -lmpeg2 $(AV_LIB)
-COMMON_LIBS = $(CODEC_LIBS) -Llibmpdemux -lmpdemux  $(NEW_INPUT_LIB)  $(LIB_LOADER) $(A_LIBS) $(CSS_LIB) $(ARCH_LIB) -Lpostproc -lpostproc $(DECORE_LIB)  $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) -Llinux -losdep -lm
+COMMON_LIBS = $(CODEC_LIBS) -Llibmpdemux -lmpdemux  $(NEW_INPUT_LIB)  $(LIB_LOADER) $(A_LIBS) $(CSS_LIB) $(ARCH_LIB) -Lpostproc -lpostproc $(DECORE_LIB) -Llinux -losdep $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) -lm
 ifeq ($(VIDIX),yes)
 MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
 endif
@@ -204,7 +204,7 @@ VIDIX_LIBS += -Lvidix -lvidix
 endif
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(VO_LIBS)  $(COMMON_LIBS) $(EXTRA_LIB) $(V_LIBS) $(AO_LIBS) $(VIDIX_LIBS) $(GUI_LIBS)  $(LIRC_LIB) $(STATIC_LIB) 
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(VO_LIBS)  $(COMMON_LIBS) $(EXTRA_LIB) $(AO_LIBS) $(V_LIBS) $(VIDIX_LIBS) $(GUI_LIBS)  $(LIRC_LIB) $(STATIC_LIB) 
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
