@@ -466,15 +466,9 @@ static int encoder_frameno=0;
 //int init_vfw_encoder(char *dll_name, BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *output_bih)
 BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, BITMAPINFOHEADER *input_bih,unsigned int out_fourcc)
 {
-//  sh_video_t *sh_video;
   HRESULT ret;
-//  int yuv=0;
-//  unsigned int outfmt=sh_video->codec->outfmt[sh_video->outfmtidx];
-//  unsigned int outfmt;
   BITMAPINFOHEADER* output_bih=NULL;
   int temp_len;
-  int i;
-//  int hic;
 
 //sh_video = malloc(sizeof(sh_video_t));
 
@@ -524,12 +518,20 @@ printf("\n");
   memset(output_bih,0,temp_len);
   output_bih->biSize = temp_len; //sizeof(BITMAPINFOHEADER);
 
+  return output_bih;
+}
+
+int vfw_start_encoder(BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *output_bih){
+  HRESULT ret;
+  int temp_len=output_bih->biSize;
+  int i;
+
   ret = ICCompressGetFormat(encoder_hic, input_bih, output_bih);
   if(ret < 0){
     unsigned char* temp=output_bih;
     mp_msg(MSGT_WIN32,MSGL_ERR,"ICCompressGetFormat failed: Error %d  (0x%X)\n", (int)ret, (int)ret);
     for (i=0; i < temp_len; i++) mp_msg(MSGT_WIN32, MSGL_DBG2, "%02x ", temp[i]);
-    return NULL;
+    return 0;
   }
   mp_msg(MSGT_WIN32,MSGL_V,"ICCompressGetFormat OK\n");
   
@@ -592,7 +594,7 @@ printf("\n");
   encoder_frameno=0;
 
   mp_msg(MSGT_WIN32,MSGL_V,"VIDEO CODEC Init OK!!! ;-)\n");
-  return output_bih;
+  return 1;
 }
 
 int vfw_encode_frame(BITMAPINFOHEADER* biOutput,void* OutBuf,

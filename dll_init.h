@@ -11,7 +11,7 @@ int vfw_decode_video(sh_video_t* sh_video,void* start,int in_size,int drop_frame
 int vfw_set_postproc(sh_video_t* sh_video,int quality);
 
 BITMAPINFOHEADER* vfw_open_encoder(char *dll_name, BITMAPINFOHEADER *input_bih,unsigned int out_fourcc);
+int vfw_start_encoder(BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *output_bih);
 int vfw_encode_frame(BITMAPINFOHEADER* biOutput,void* OutBuf,
 		     BITMAPINFOHEADER* biInput,void* Image,
 		     long* keyframe, int quality);
-		     
