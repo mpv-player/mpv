@@ -118,6 +118,7 @@
 #include "aspect.h"
 #include "spuenc.h"
 #include "sub.h"
+#include "../vidix/vidix.h"
 #ifdef HAVE_NEW_GUI
 #include "../Gui/interface.h"
 #endif
