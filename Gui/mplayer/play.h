@@ -38,9 +38,13 @@ typedef struct
    mplUnknowErrorStruct error;
 
    int    Playing;
-   float  Volume;
    float  Position;
+
+   float  Volume;
+   int    VolumeChanged;
    float  Balance;
+   int    Mute;
+   
    int    Track;
    int    AudioType;
    int    StreamType;

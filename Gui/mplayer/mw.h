@@ -1,8 +1,6 @@
 
 // main window
 
-#include "mixer.h"
-
 unsigned char * mplDrawBuffer = NULL;
 int             mplMainRender = 1;
 int             mplMainAutoPlay = 0;
@@ -320,11 +318,10 @@ NoPause:
    case evBackward10sec:    mplRelSeek( -10 ); break;
    case evSetMoviePosition: mplAbsSeek( param ); break;
 
-   case evIncVolume:  mixerIncVolume(); break;
-   case evDecVolume:  mixerDecVolume(); break;
-   case evSetVolume:  mixerSetVolume( param ); break;
-   case evSetBalance: mixerSetBalance( param ); break;
-   case evMute:       mixerMute();       break;
+   case evMute:       mplShMem->Mute=1; break;
+   case evSetVolume:  
+   case evSetBalance: mplShMem->VolumeChanged=1; break;
+
 
    case evNormalSize:
         if ( mplShMem->Playing ) 
@@ -438,6 +435,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
                        mplMainRender=1;
                        SelectedButton=i;
                        boxMoved=0;
+                       if ( ( item->msg == evSetVolume )||( item->msg == evSetBalance ) ) mplShMem->VolumeChanged=1;
                        msButton=itPotmeter;
                        itemtype=itPotmeter;
                       }
@@ -452,6 +450,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
                        mplMainRender=1;
                        SelectedButton=i;
                        boxMoved=0;
+                       if ( ( item->msg == evSetVolume )||( item->msg == evSetBalance ) ) mplShMem->VolumeChanged=1;
                        msButton=itHPotmeter;
                        itemtype=itHPotmeter;
                       }
