@@ -178,7 +178,7 @@ Codecs:
   --enable-liblzo	 enable external liblzo support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable Win32/DirectShow support [autodetect]
-  --disable-qtx-codecs   disable Quicktime codecs [autodetect]
+  --disable-qtx          disable Quicktime codecs [autodetect]
   --disable-xanim        disable XAnim DLL support [autodetect]
   --disable-real         disable RealPlayer DLL support [autodetect]
   --disable-xvid         disable XviD codec [autodetect]
@@ -1088,7 +1088,7 @@ _freetype=auto
 _shared_pp=no
 _new_conf=yes
 _menu=no
-_qtx_codecs=auto
+_qtx=auto
 _macosx=auto
 _sortsub=yes
 _freetypeconfig='freetype-config'
@@ -1308,8 +1308,8 @@ for ac_option do
   --enable-menu) _menu=yes ;;
   --disable-menu) _menu=no ;;
 
-  --enable-qtx-codecs) _qtx_codecs=yes ;;
-  --disable-qtx-codecs) _qtx_codecs=no ;;
+  --enable-qtx) _qtx=yes ;;
+  --disable-qtx) _qtx=no ;;
 
   --enable-macosx) _macosx=yes ;;
   --disable-macosx) _macosx=no ;;
@@ -4850,17 +4850,17 @@ echores "$_menu"
 
 # Check to see if they want QTX codecs enabled
 echocheck "QTX codecs"
-if test "$_qtx_codecs" = auto ; then
-    _qtx_codecs=$_win32
+if test "$_qtx" = auto ; then
+    _qtx=$_win32
 fi
-if test "$_qtx_codecs" = yes ; then
-    _def_qtx_codecs='#define USE_QTX_CODECS 1'
+if test "$_qtx" = yes ; then
+    _def_qtx='#define USE_QTX_CODECS 1'
     _codecmodules="qtx $_codecmodules"
 else
-    _def_qtx_codecs='#undef USE_QTX_CODECS'
+    _def_qtx='#undef USE_QTX_CODECS'
     _nocodecmodules="qtx $_nocodecmodules"
 fi
-echores "$_qtx_codecs"
+echores "$_qtx"
 
 
 echocheck "Subtitles sorting"
@@ -5752,7 +5752,7 @@ $_def_joystick
 $_def_new_conf
 
 /* enables / disables QTX codecs */
-$_def_qtx_codecs
+$_def_qtx
 
 /* enables / disables osd menu */
 $_def_menu
