@@ -357,9 +357,8 @@ named 'movie.avi.conf' with the file-specific options in it and put it in
 .SH "GENERAL OPTIONS"
 .
 .TP
-.B \-codecs-file <filename>
+.B \-codecs-file <filename> (also see \-afm, \-ac, \-vfm, \-vc)
 Use the specified file instead of system wide installed or builtin codecs.conf.
-See also \-afm, \-ac, \-vfm and \-vc.
 .
 .TP
 .B \-include <configuration\ file>
@@ -2147,9 +2146,10 @@ Furthermore under X11 your window manager has to honor window aspect hints.
 Disables using XVideo through the sdl video output driver.
 .
 .TP
-.B \-ontop
-Makes the player window stay on top other windows.
-Supported by drivers which use X11, except SDL, as well as directx and gl2 under Windows.
+.B \-ontop\ 
+Makes the player window stay on top of other windows.
+Supported by video output drivers which use X11, except SDL,
+as well as directx and gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
@@ -2758,11 +2758,11 @@ See \-ac help for a full list of available codecs.
 .PD 0
 .RSs
 .IPs "\-ac mp3acm"
-Force l3codeca.acm MP3 codec.
+Force the l3codeca.acm MP3 codec.
 .IPs "\-ac mad,"
 Try libmad first, then fall back on others.
 .IPs "\-ac hwac3,a52,"
-Try hardware AC3 passthrough, then software AC3 codec, then others.
+Try hardware AC3 passthrough, software AC3, then others.
 .IPs "\-ac -ffmp3,"
 Skip FFmpeg's MP3 decoder.
 .RE
@@ -2771,21 +2771,22 @@ Skip FFmpeg's MP3 decoder.
 .TP
 .B \-af <filter1[=option1:option2:...],filter2,...>
 Activate a comma separated list of audio filters and their options.
+Also see the audio filters section of the documentation.
 .sp 1
 Available filters are:
 .RSs
 .IPs resample[=srate[:sloppy][:type]]
-Changes the sample rate of the audio stream to an integer srate (Hz).
+Changes the sample rate of the audio stream to an integer srate in Hz.
 It only supports the 16-bit little-endian format.
 .IPs channels[=nch]
 Change the number of channels to nch output channels.
 If the number of output channels is bigger than the number of input channels
-empty channels are inserted (except mixing from mono to stereo, then the mono
-channel is repeated in both of the output channels).
+empty channels are inserted (except when mixing from mono to stereo, then
+the mono channel is repeated in both of the output channels).
 If the number of output channels is smaller than the number of input channels
 the exceeding channels are truncated.
 .IPs format[=bps:f]
-Select the format f and bytes per sample bps used for output from the
+Select the bytes per sample and the format used for output from the
 filter layer.
 The option bps is an integer and denotes Bytes per sample.
 The format f is a string containing a concatenated mix of:
@@ -2803,25 +2804,25 @@ Select the output volume level.
 This filter is not reentrant and can therefore only be enabled once for every
 audio stream.
 .RSss
-v: desired gain in dB for all channels in the stream.
-The gain can be set from -200dB to +60dB (where -200dB mutes the sound
+v: Sets the desired gain in dB for all channels in the stream
+from -200dB to +60dB (where -200dB mutes the sound
 completely and +60dB equals a gain of 1000).
 .br
-sc: enable soft clipping.
+sc: Enable soft clipping.
 .REss
 .IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
 Mixes channels arbitrarily, see DOCS/\:HTML/\:en/\:devices.html#audio-dev for details.
 .RSss
-n: number of output channels (1\-6).
+n: number of output channels (1\-6)
 .br
 lij: How much of input channel j is mixed into output channel i.
 .REss
 .IPs sub[=fc:ch]
-Add sub-woofer channel.
+Add subwoofer channel.
 .RSss
 fc: cutoff frequency for low-pass filter (20Hz to 300Hz) (default: 60Hz)
 .br
-ch: channel number for the sub-channel.
+ch: channel number for the sub-channel
 .REss
 .IPs surround[=d]
 Decoder for matrix encoded surround sound, works on many 2 channel files.
@@ -2835,7 +2836,7 @@ number between 0 and 1000).
 .IPs export[=mmapped_file[:nsamples]]
 Exports the incoming signal to other processes using memory mapping (mmap()).
 .RSss
-mmapped_file: File to map data to (default: ~/.mplayer/\:mplayer-af_export).
+mmapped_file: file to map data to (default: ~/.mplayer/\:mplayer-af_export)
 .br
 nsamples: number of samples per channel (default: 512)
 .REss
@@ -2848,13 +2849,13 @@ Specify advanced audio filter options:
 .IPs force=<0\-3>
 Forces the insertion of audio filters to one of the following:
 .RSss
-0: Completely automatic insertion of filters (default)
+0: completely automatic filter insertion (default)
 .br
 1: Optimize for accuracy.
 .br
 2: Optimize for speed.
 .br
-3: Turn off auto.
+3: Turn off automatic filter insertion.
 .REss
 .IPs list=<filters>
 Same as \-af.
@@ -2867,22 +2868,22 @@ to their codec name in codecs.conf.
 Falls back on the default codecs if none of the given codec families work.
 .br
 .I NOTE:
-See \-afm help for a full list of available drivers.
+See \-afm help for a full list of available codec families.
 .sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
 .IPs "\-afm ffmpeg"
-Try FFmpeg's libavcodec (mp1/\:2/\:3) codecs first.
+Try FFmpeg's libavcodec codecs first.
 .IPs "\-afm acm,dshow"
-try Win32 codecs first
+Try Win32 codecs first.
 .RE
 .PD 1
 .
 .TP
 .B \-aspect <ratio>
-Override aspect ratio of movies.
-It's autodetected on MPEG files, but can't be autodetected on most AVI files.
+Override movie aspect ratio.
+It is autodetected for MPEG files, but it cannot be done for most AVI files.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -2903,7 +2904,7 @@ Flip image upside-down.
 .
 .TP
 .B \-lavdopts <option1:option2:...> (DEBUG CODE)
-If decoding with libavcodec, you can specify its parameters here.
+Specify libavcodec decoding parameters.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -2913,16 +2914,13 @@ If decoding with libavcodec, you can specify its parameters here.
 .PD 1
 .sp 1
 .RS
-.I NOTE:
-Just add the values of the things you want to enable.
-.sp 1
 Available options are:
 .RE
 .RSs
 .IPs ec\ \ \ 
 error concealment:
 .RSss
-1: use strong deblock filter for damaged MBs
+1: Use strong deblock filter for damaged MBs.
 .br
 2: iterative MV search (slow)
 .br
@@ -2934,13 +2932,13 @@ error resilience:
 .br
 0: disabled
 .br
-1: careful (should work with broken encoders)
+1: careful (Should work with broken encoders.)
 .br
-2: normal (default) (works with compliant encoders)
+2: normal (default) (Works with compliant encoders.)
 .br
-3: agressive (more checks but might cause problems even for valid bitstreams)
+3: aggressive (More checks, but might cause problems even for valid bitstreams.)
 .br
-4: very agressive
+4: very aggressive
 .REss
 .IPs debug=<value>
 debug:
@@ -2960,7 +2958,7 @@ debug:
 .br
 32: Motion vector
 .br
-0x0040: Motion vector visualization (use \-noslices)
+0x0040: motion vector visualization (use \-noslices)
 .br
 0x0080: MB skip
 .br
@@ -2987,13 +2985,13 @@ vismv:
 4: visualize backward predicted MVs of B frames
 .REss
 .IPs bug=<value>
-manually work around encoder bugs:
+Manually work around encoder bugs:
 .RSss
 0: nothing
 .br
 1: autodetect bugs (default)
 .br
-2 (msmpeg4v3): some old lavc generated msmpeg4v3 files (no autodetect)
+2 (msmpeg4v3): some old lavc generated msmpeg4v3 files (no autodetection)
 .br
 4 (mpeg4): XviD interlacing bug (autodetected if fourcc==XVIX)
 .br
@@ -3003,15 +3001,15 @@ manually work around encoder bugs:
 .br
 32 (mpeg4): illegal vlc bug (autodetected per fourcc)
 .br
-64 (mpeg4): XviD and DivX qpel bug (autodetected per fourcc/\:ver)
+64 (mpeg4): XviD and DivX qpel bug (autodetected per fourcc/\:version)
 .br
-128 (mpeg4): old standard qpel (autodetected per fourcc/\:ver)
+128 (mpeg4): old standard qpel (autodetected per fourcc/\:version)
 .br
-256 (mpeg4): another qpel bug (autodetected per fourcc/\:ver)
+256 (mpeg4): another qpel bug (autodetected per fourcc/\:version)
 .br
-512 (mpeg4): direct-qpel-blocksize bug (autodetected per fourcc/\:ver)
+512 (mpeg4): direct-qpel-blocksize bug (autodetected per fourcc/\:version)
 .br
-1024 (mpeg4): edge padding bug (autodetected per fourcc/\:ver)
+1024 (mpeg4): edge padding bug (autodetected per fourcc/\:version)
 .REss
 .IPs "idct=<0\-99> (see \-lavcopts)"
 For best decoding quality use the same idct algorithm for decoding and encoding.
@@ -3047,18 +3045,16 @@ Do not play/\:encode video.
 Use the opendivx postprocessing code instead of the internal one.
 Superseded by \-pp, the internal postprocessing offers better
 quality and performance.
-.
-The valid range of \-oldpp values varies by codec, mostly
-0\-6, where 0=disable 6=slowest/\:best.
+The valid range of \-oldpp values varies by codec, it is mostly
+0\-6, where 0=disable, 6=slowest/\:best.
 .
 .TP
 .B \-pp <quality> (also see \-vf pp)
-Set postprocess level of the DLL.
-This option is NO LONGER USABLE with MPlayer's postprocess filter, but only
-with Win32 DirectShow DLLs which have internal postprocessing routines.
-.
-The valid range of \-pp values varies by codec, mostly
-0\-6, where 0=disable 6=slowest/\:best.
+Set the DLL postprocess level.
+This option is no longer usable with \-vf pp.
+It only works with Win32 DirectShow DLLs with internal postprocessing routines.
+The valid range of \-pp values varies by codec, it is mostly
+0\-6, where 0=disable, 6=slowest/\:best.
 .
 .TP
 .B \-pphelp (also see \-vf pp)
@@ -3097,25 +3093,20 @@ Select type of MP2/\:MP3 stereo output.
 .PD 0
 .RSs
 .IPs 0
-Stereo
+stereo
 .IPs 1
-Left channel
+left channel
 .IPs 2
-Right channel
+right channel
 .RE
 .PD 1
 .
 .TP
-.B \-sws <software\ scaler\ type> (also see \-vf scale)
-This option sets the quality (and speed, respectively) of the software scaler,
-with the \-zoom option.
-For example with x11 or other outputs which lack hardware acceleration.
-Possible settings are:
-.br
-.I NOTE:
-For \-sws\ 2 and 7, the sharpness can be set with the scaling parameter (p)
-of \-vf scale (0 (soft) \- 100 (sharp)), for \-sws 9, it specifies the filter
-length (1 \- 10).
+.B \-sws <software\ scaler\ type> (also see \-vf scale and \-zoom)
+Specify the software scaler algorithm to be used with the \-zoom option.
+This affects video output drivers which lack hardware acceleration, e.g.\& x11.
+.sp 1
+Available types are:
 .sp 1
 .PD 0
 .RSs
@@ -3143,6 +3134,13 @@ lanczos
 bicubic spline
 .RE
 .PD 1
+.sp 1
+.RS
+.I NOTE:
+For \-sws\ 2 and 7, the sharpness can be set with the scaling parameter (p)
+of \-vf scale (0 (soft) \- 100 (sharp)), for \-sws 9, it specifies the filter
+length (1 \- 10).
+.RE
 .
 .TP
 .B \-vc <[-]codec1,[-]codec2,...[,]>
@@ -3163,7 +3161,7 @@ Force Win32/\:VFW DivX codec, no fallback.
 .IPs "\-vc divx4,"
 Try divx4linux codec first, then fall back on others.
 .IPs "\-vc -divxds,-divx,"
-Try other codecs except Win32 DivX codecs.
+Skip Win32 DivX codecs.
 .IPs "\-vc ffmpeg12,mpeg12,"
 Try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others.
 .RE
@@ -3176,7 +3174,7 @@ to their names in codecs.conf.
 Falls back on the default codecs if none of the given codec families work.
 .br
 .I NOTE:
-See \-vfm help for a full list of available drivers.
+See \-vfm help for a full list of available codec families.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -3191,7 +3189,7 @@ Try XAnim codecs first.
 .
 .TP
 .B \-x <x> (MPlayer only)
-Scale image to x width (if sw/\:hw scaling available).
+Scale image to width <x> (if software/\:hardware scaling is available).
 Disables aspect calculations.
 .
 .TP
@@ -3230,16 +3228,16 @@ Set width to value and calculate height to keep correct aspect ratio.
 .
 .TP
 .B \-y <y> (MPlayer only)
-Scale image to y height (if sw/\:hw scaling available).
+Scale image to height <y> (if software/\:hardware scaling is available).
 Disables aspect calculations.
 .
 .TP
-.B \-zoom \ 
+.B \-zoom\ \ 
 Allow software scaling, where available.
-Could be used to force scaling with \-vf scale.
+Can be used to force scaling with \-vf scale.
 .br
 .I NOTE:
-\-vf scale will IGNORE options \-x / \-y / \-xy / \-fs / \-aspect without
+\-vf scale will ignore \-x / \-y / \-xy / \-fs / \-aspect without
 \-zoom.
 .
 .
