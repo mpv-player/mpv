@@ -112,6 +112,7 @@ typedef struct ogg_stream {
   int hdr_packets;
   int vorbis;
   int theora;
+  int flac;
 } ogg_stream_t;
 
 typedef struct ogg_demuxer {
@@ -362,6 +363,11 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
 	}
      }
 #endif /* HAVE_OGGTHEORA */
+# ifdef HAVE_FLAC
+  } else if (os->flac) {
+     /* we pass complete packets to flac, mustn't strip the header! */
+     data = pack->packet;
+#endif /* HAVE_FLAC */
   } else {
     // Find data start
     int16_t hdrlen = (*pack->packet & PACKET_LEN_BITS01)>>6;
@@ -679,6 +685,16 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	    if(verbose>0) print_video_header(sh_v->bih);
 	}
 #   endif /* HAVE_OGGTHEORA */
+#   ifdef HAVE_FLAC
+    } else if (pack.bytes >= 4 && !strncmp (&pack.packet[0], "fLaC", 4)) {
+	sh_a = new_sh_audio(demuxer,ogg_d->num_sub);
+	sh_a->format =  mmioFOURCC('f', 'L', 'a', 'C');
+	n_audio++;
+	ogg_d->subs[ogg_d->num_sub].flac = 1;
+	sh_a->wf = NULL;
+	mp_msg(MSGT_DEMUX,MSGL_V,"OGG : stream %d is FLAC\n",ogg_d->num_sub);
+#   endif /* HAVE_FLAC */
+
       /// Check for old header
     } else if(pack.bytes >= 142 && ! strncmp(&pack.packet[1],"Direct Show Samples embedded in Ogg",35) ) {
 

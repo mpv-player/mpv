@@ -198,6 +198,8 @@ Codecs:
   --disable-mad          disable libmad (mpeg audio) support [autodetect]
   --enable-xmms          build with XMMS inputplugin support [disabled]
   --enable-externalfaad  use external faad library if available [disabled]
+  --enable-flac          build with FLAC support [autodetect]
+  --enable-external-flac build with external libFLAC [disable]
   
 Video output:
   --disable-vidix        disable VIDIX stuff [enable on x86 *nix]
@@ -1087,6 +1089,8 @@ _tremor=no
 _faad=auto
 _faad_local=yes
 _xmms=no
+_flac=auto
+_external_flac=no
 _css=auto
 # dvdnav disabled, it does not work
 #_dvdnav=no
@@ -1252,6 +1256,10 @@ for ac_option do
   --enable-externalfaad) _faad_local=no ;;
   --disable-externalfaad) _faad_local=yes ;;
   --enable-xmms)	_xmms=yes	;;
+  --enable-flac)	_flac=yes	;;
+  --disable-flac)	_flac=no	;;
+  --enable-external-flac)	_external_flac=yes	;;
+  --disable-external-flac)	_external_flac=no	;;
   --enable-css)		_css=yes	;;
   --disable-css)	_css=no		;;
   --enable-dvdread)	_dvdread=yes	;;
@@ -5168,6 +5176,55 @@ else
 fi
 echores "$_xmms"
 
+echocheck "FLAC support"
+if test "$_flac" = auto ; then
+  if test "$_external_flac" = yes ; then
+    cat > $TMPC << EOF
+#include <FLAC/stream_decoder.h>
+#include <stdlib.h>
+
+int main()
+{
+  FLAC__StreamDecoder *fdec = FLAC__stream_decoder_new();
+  return fdec != NULL;
+}
+EOF
+    _flac=no
+    if cc_check -lFLAC ; then
+      _flac=external
+    fi
+  else
+    _flac=yes
+  fi
+fi
+
+if test "$_flac" = external ; then
+  _def_flac='#define HAVE_FLAC 1'
+  #Still use dither.c & replay_gain from libmpflac
+  _def_mpflac='#undef USE_MPFLAC_DECODER'
+  _mpflac='process'
+  _ld_flac='-lFLAC -Llibmpflac -lmpflac'
+  _codecmodules="flac(external) $_codecmodules"
+  echores "yes (using external libFLAC)"
+else
+  if test "$_flac" = yes ; then
+    _def_flac='#define HAVE_FLAC 1'
+    #use decoder, dither.c & replay_gain from libmpflac
+    _def_mpflac='#define USE_MPFLAC_DECODER 1'
+    _mpflac='full'
+    _ld_flac='-Llibmpflac -lmpflac'
+    _codecmodules="flac(internal) $_codecmodules"
+    echores "yes (using internal libmpflac)"
+  else
+    _def_flac='#undef HAVE_FLAC'
+    _def_mpflac='#undef USE_MPFLAC_DECODER'
+    _mpflac='none'
+    _ld_flac=''
+    _nocodecmodules="flac $_nocodecmodules"
+    echores "no"
+  fi
+fi
+echores "$_flac"
 
 echocheck "inet6"
 if test "$_inet6" = auto ; then
@@ -5615,6 +5672,8 @@ XMMS_PLUGINS = $_xmms
 XMMS_LIB = $_xmms_lib
 MACOSX = $_macosx
 MACOSX_FRAMEWORKS = $_macosx_frameworks
+FLAC_LIB = $_ld_flac
+MPFLAC = $_mpflac
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -5832,6 +5891,12 @@ $_def_lirc
  * See http://www.dolda2000.cjb.net/~fredrik/lirccd/
  */
 $_def_lircc
+
+/*
+ * FLAC decoding
+ */
+$_def_flac
+$_def_mpflac
 
 /* DeCSS support using libcss */
 $_def_css

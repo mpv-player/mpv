@@ -36,6 +36,8 @@ static struct {
         { "y4m", DEMUXER_TYPE_Y4M },
         { "mp3", DEMUXER_TYPE_AUDIO },
         { "wav", DEMUXER_TYPE_AUDIO },
+        { "flac", DEMUXER_TYPE_AUDIO },
+        { "fla", DEMUXER_TYPE_AUDIO },
         { "ogg", DEMUXER_TYPE_OGG },
         { "ogm", DEMUXER_TYPE_OGG },
 //        { "pls", DEMUXER_TYPE_PLAYLIST },

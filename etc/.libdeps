@@ -24,4 +24,7 @@ Gui/libgui.a: $(wildcard Gui/*.[ch])
 linux/libosdep.a: $(wildcard linux/*.[ch])
 postproc/libpostproc.a: $(wildcard postproc/*.[ch])
 input/libinput.a: $(wildcard input/*.[ch])
+ifneq ($(MPFLAC),none)
+libmpflac/libmpflac.a: $(wildcard libmpflac/*.[ch])
+endif
 

@@ -17,6 +17,7 @@
 
 #define MP3 1
 #define WAV 2
+#define fLaC 3
 
 
 #define HDR_SIZE 4
@@ -78,6 +79,10 @@ int demux_audio_open(demuxer_t* demuxer) {
       break;      
     } else if((n = mp_get_mp3_header(hdr,&mp3_chans,&mp3_freq)) > 0) {
       frmt = MP3;
+      break;
+    } else if( hdr[0] == 'f' && hdr[1] == 'L' && hdr[2] == 'a' && hdr[3] == 'C' ) {
+      frmt = fLaC;
+      stream_skip(s,-4);
       break;
     }
     // Add here some other audio format detection
@@ -202,6 +207,11 @@ int demux_audio_open(demuxer_t* demuxer) {
     demuxer->movi_end = s->end_pos;
 //    printf("wav: %X .. %X\n",(int)demuxer->movi_start,(int)demuxer->movi_end);
   } break;
+  case fLaC:
+	    sh_audio->format = mmioFOURCC('f', 'L', 'a', 'C');
+	    demuxer->movi_start = stream_tell(s);
+	    demuxer->movi_end = s->end_pos;
+	    break;
   }
 
   priv = (da_priv_t*)malloc(sizeof(da_priv_t));
@@ -264,6 +274,16 @@ int demux_audio_fill_buffer(demux_stream_t *ds) {
     } break;
   case WAV : {
     int l = sh_audio->wf->nAvgBytesPerSec;
+    demux_packet_t*  dp = new_demux_packet(l);
+    l = stream_read(s,dp->buffer,l);
+    resize_demux_packet(dp, l);
+    priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + l/(float)sh_audio->i_bps;
+    ds->pts = priv->last_pts - (ds_tell_pts(demux->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+    ds_add_packet(ds,dp);
+    return 1;
+  }
+  case fLaC: {
+    int l = 65535;
     demux_packet_t*  dp = new_demux_packet(l);
     l = stream_read(s,dp->buffer,l);
     resize_demux_packet(dp, l);
