@@ -387,9 +387,9 @@ static void read_key(menu_t* menu,int c) {
     else {
       switch(c->id) {
       case MP_CMD_CHELP:
-	add_line(mpriv,"Mplayer console 0.01");
-	add_line(mpriv,"TODO: Write some mainful help msg ;)");
-	add_line(mpriv,"Enter any mplayer command");
+	add_line(mpriv,"MPlayer console 0.01");
+	add_line(mpriv,"TODO: meaningful help message ;)");
+	add_line(mpriv,"Enter any slave command");
 	add_line(mpriv,"exit close this console");
 	break;
       case MP_CMD_CEXIT:
