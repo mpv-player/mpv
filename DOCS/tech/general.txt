@@ -106,40 +106,6 @@ Now, go on:
 	 And they call the appropriate demuxer, to get the compressed data.
 	 (see 2.)
 
-5.a Codec controller: this is the greatest hack in the whole :)
-	 The libmpeg2 is so unstable, that I can't believe it.
-	 Of course I don't mean it's bullshit :) rather it only accepts
-	 totally perfect, error-free streams. If it founds error, it
-	 just segfaults ;) And don't start laughing, this is great this way,
-	 from the view of speed it would be 50-100% slower if stuffed full with
-	 verifications. That's why I solved it by running it in a separate
-	 process, and if it dies, who cares, just start another.
-	 However, a few things are needed for this:
-	 - codec controller process: a separate process, which sleeps, but if
-		 its child (the libmpeg2 process) dies, it quickly starts another.
-		 So the MPlayer doesn't have to care about this, it just pumps the
-		 compressed stuff into the child, which displays it.
-	 - shmem: the compressed data, and the uncompressed frames are both
-		 in shared memory, so all 3 processes (mplayer, codeccontrol,
-		 libmpeg2 codec) sees 'em, so they can trade data fast.
-	 - FIFO is used for the communication between them.
-	 - If the child dies while decoding, the succesfully decoded data
-		 isn't lost, it's inherited by the new child through the
-		 shared mem! So only a little error can be seen in the video,
-		 it won't disappear or turn green, as in the older versions.
-
-	 The disadvantage of this all is that since the libvo and libmpeg2
-	 are closely related, the libvo needs to run in the same process as
-	 the libmpeg2, in the one that keeps dying/reborning, and not in the
-	 one that has the controlling process, the MPlayer. This causes a
-	 lot of problems, mostly at the handling of events in the libvo window
-	 (keypresses, etc). So there are miscellaneous workarounds, a lot of
-	 FIFO, and trick which exploits that X doesn't care which process
-	 queries its events.
-
-	 I'd like to solve this in the near future, and use the signal/longjmp
-	 (this is a hack, too:)) method, developed on the mpeg2dec-devel list.
-
 5. libvo: this displays the frame. There are 2 different output routines in it:
 
 5.a draw_slice(): this displays YV12 pictures (3 frames, a full sized which

@@ -106,39 +106,6 @@ na nezzuk tovabb:
 	 kell lejatszani (lasd 3. pont elejen)
 	 ezek pedig hivjak a megfelelo demuxert hogy megkapjak a tomoritett
 	 adatokat (lasd 2. pont).
-	 
-4.a codec controller: na ez a legnagypbb gány az egeszben :)
-	 a libmpeg2 ugyanis annyira instabil hogy az mar hatareset.
-	 persze ezt nem ugy kell erteni hogy szar :) hanem ugy, hogy csak
-	 teljesen szabvanyos, hibatlan mpeg streamet eszik meg. ha hibat
-	 talal, egyszeruen segfault ;)  es nem rohogni, ez nagyon jo igy,
-	 teljesitmeny szempontbol 50-100%-al lasabb lenne ha teleraknak
-	 ellenorzesekkel. ezert csinaltam azt a megoldast, hogy kulon
-	 processzben futtatom, es ha elszall, hat kit izgat, majd inditok
-	 egy masikat. ehhez azert kell par dolog:
-	 - codec controller process: egy kulon processz, ami sleep-el, de
-	   ha a gyereke (a libmpeg2 processz) meghal, akkor indit gyorsan
-		 egy masikat. igy az mplayer-nek nem kell ezzel fogallkoznia, o
-		 csak pumpalja a gyerekbe a tomoritett adatot az meg rakja kifele.
-	 - shmem: a tomoritett adatok, es a kitomoritett framek is shared
-	   memoryban vannak, tehat mind a 3 processz (mplayer, codeccontrol,
-		 libmpeg2 codec) is latja. igy tudnak gyorsan adatot cserelni.
-	 - a koztuk levo kommunikaciora meg FIFO van.
-	 - valamint ha dekodolas kozben meghal a gyerek, az altala sikeresen
-		 dekodolt adatok nem vesznek el, hanem a shmem-en keresztul oroklodik
-		 az uj gyereknek! ezert max egy pici hiba latszik a kepen, nem tunik
-		 el az egesz meg zoldul be, mint a regi verzioban.
-	 hatranya ennek az egesznek, hogy a libvo-libmpeg2 szoros kapcsolodasa
-	 miatt a libvo is abban a processzben kell fusson, amiben a libmpeg2,
-	 tehat abban ami allandoan megdoglik-ujraszuletik, es nem abban amiben
-	 a vezerlo processz, az mplayer fut. ez eleg sok gondot okozik, foleg
-	 a libvo ablakban tortent esemenyek (billentyunyomas pl) kezelesekor.
-	 erre mindenfele workaroundok vannak, FIFO-k minden mennyisegben, meg
-	 trukk ami kihasznalja hogy az X-nek mind1 melyik processz kerdezi
-	 le az Event-jeit.
-	 
-	 szeretnem a kozeljovoben ezt megszuntetni, es az mpeg2dec-devel
-	 listan kidolgozott signal/longjmp (szinten gány :)) modszert hasznalni.
 
 5. libvo: ez vegzi a kep kirakasat. jelenleg 2 kulonbozo kepkirako
    van benne:
@@ -152,5 +119,3 @@ na nezzuk tovabb:
    es csak packed formatumot (YUY2, RGB/BGR) tud.
 	 ezt hasznaljak a win32 codecek (divx,indeo stb).
 	 
-
-
