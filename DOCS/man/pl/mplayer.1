@@ -1,4 +1,4 @@
-.\" synced with 1.849
+.\" synced with 1.851
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1694,30 +1694,6 @@ Okre¶la ID napisów VOBsub.
 Zmienia wykryt± wielko¶æ bufora sterownika audio/\:karty.
 .
 .TP
-.B \-aop <list=wtyczka1,wtyczka2...:opcja1=warto¶æ1:opcja2=warto¶æ2...>
-Okre¶l wtyczki audio i ich opcje
-(sprawd¼ równie¿ rozdzia³ dokumentacji traktuj±cy o wtyczkach audio).
-.sp 1
-Dostêpne s± opcje:
-.RSs
-.IPs list=[wtyczki]
-oddzielona przecinkami lista wtyczek (resample, surround, format, volume,
-extrastereo, volnorm, delay)
-.IPs delay=<sek>
-przyk³adowa wtyczka, nie u¿ywaj jej (tylko wtyczka delay)
-.IPs format=<format>
-format danych wyj¶ciowych (tylko wtyczka format)
-.IPs fout=<Hz>
-czêstotliwo¶æ danych wyj¶ciowych (tylko wtyczka resample)
-.IPs volume=<0\-255>
-g³o¶no¶æ (tylko wtyczka volume)
-.IPs mul=<warto¶æ>
-wspó³czynnik stereo, domy¶lnie: 2.5 (tylko wtyczka extrastereo)
-.IPs softclip
-w³±cza kompresjê / "miêkkie obcinanie (soft-clipping)" (tylko wtyczka volume)
-.RE
-.
-.TP
 .B \-delay <sekundy>
 Ustawia opó¼nienie d¼wiêku w sekundach (dodatnia lub ujemna liczba rzeczywista).
 .
@@ -2319,11 +2295,6 @@ Przydatne, by osadziæ MPlayera w przegl±darce (na przyk³ad za pomoc± wtyczki).
 .B \-xineramascreen <0\-...>
 W konfiguracjach Xinerama (tj.\& pojedynczy pulpit obejmuj±cy wiele ekranów)
 opcja ta przeka¿e MPlayerowi na którym ekranie ma wy¶wietlaæ film.
-.
-.TP
-.B \-z <0\-9> (tylko \-vo png)
-Podaje poziom kompresji dla sterownika wyj¶cia video png.
-0 to brak kompresji, 9 to maksymalna kompresja.
 .
 .TP
 .B \-zrbw (tylko \-vo zr)
@@ -3039,10 +3010,17 @@ Warto¶æ musi byæ wiêksza lub równa 1 (domy¶lnie: 1000).
 .PD 1
 .
 .TP
-.B png (patrz te¿ \-z)
+.B png\ \
 Zapisuje ka¿d± klatkê do pliku PNG w bie¿±cym katalogu.
 Ka¿dy plik dostaje jako nazwê numer klatki poprzedzony zerami.
 Obs³uguje formaty RGB i BGR z 24 bpp.
+.PD 0
+.RSs
+.IPs z=<0-9>
+Okre¶la poziom kompresji.
+0 oznacza jej brak, a 9 maksymaln±.
+.RE
+.PD 1
 .
 .TP
 .B tga\ \ \ \ 
