@@ -71,9 +71,10 @@ void print_wave_header(WAVEFORMATEX *h){
   else if (h->cbSize > 0)
   {
     int i;
+    uint8_t* p = ((uint8_t*)h) + sizeof(WAVEFORMATEX);
     printf("Unknown extra header dump: ");
     for (i = 0; i < h->cbSize; i++)
-	printf("[%x] ", *(h+i));
+	printf("[%x] ", *(p+i));
     printf("\n");
   }
 }
