@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.11  2002/04/30 23:29:38  alex
+    completed real seeking - working very well with audio only files
+
     Revision 1.10  2002/04/24 15:36:06  albeu
     Added demuxer uninit
 
@@ -25,12 +28,13 @@
 
 
 Audio codecs: (supported by RealPlayer8 for Linux)
-    ATRC - RealAudio 8 (ATRAC3) - www.minidisc.org/atrac3_article.pdf,
-           ACM decoder uploaded, needs some fine-tuning to work
-    COOK/COKR - RealAudio G2
     DNET - RealAudio 3.0, really it's AC3 in swapped-byteorder
     SIPR - SiproLab's audio codec, ACELP decoder working with MPlayer,
 	   needs fine-tuning too :)
+    ATRC - RealAudio 8 (ATRAC3) - www.minidisc.org/atrac3_article.pdf,
+           ACM decoder uploaded, needs some fine-tuning to work
+	   -> RealAudio 8
+    COOK/COKR - Real Cooker -> RealAudio G2
 
 Video codecs: (supported by RealPlayer8 for Linux)
     RV10 - H.263 based, working with libavcodec's decoder
@@ -448,6 +452,8 @@ void demux_open_real(demuxer_t* demuxer)
     num_of_headers = stream_read_dword(demuxer->stream);
 //    stream_skip(demuxer->stream, 4); /* number of headers */
 
+    priv->current_vid = priv->current_aid = -1;
+
     /* parse chunks */
     for (i = 1; i < num_of_headers; i++)
     {
@@ -585,7 +591,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    char buf[128]; /* for codec name */
 		    int frame_size;
 		    int version;
-
+		    
 		    printf("Found audio stream!\n");
 		    version = stream_read_word(demuxer->stream);
 		    printf("version: %d\n", version);
@@ -671,11 +677,15 @@ void demux_open_real(demuxer_t* demuxer)
 			    tmp = 0;
 			    break;
 			case MKTAG('a', 't', 'r', 'c'):
-			    printf("Audio: Sony ATRAC3 (RealAudio 8?) (unsupported)\n");
+			    printf("Audio: Sony ATRAC3 (RealAudio 8) (unsupported)\n");
 			    sh->format = 0x270;
 
-			    sh->wf->nAvgBytesPerSec = 8268;
-			    sh->wf->nBlockAlign = 192;
+			    sh->wf->nAvgBytesPerSec = 16537; // 8268
+			    sh->wf->nBlockAlign = 384; // 192
+			    sh->wf->wBitsPerSample = 0; /* from AVI created by VirtualDub */
+			    /* 14 bytes extra header needed ! */
+			    sh->wf->cbSize = 14;
+			    sh->wf = realloc(sh->wf, 18+sh->wf->cbSize);
 			    break;
 			default:
 			    printf("Audio: Unknown (%s)\n", buf);
@@ -699,6 +709,7 @@ void demux_open_real(demuxer_t* demuxer)
 			    priv->a_streams[priv->last_a_stream] = stream_id;
 			    priv->last_a_stream++;
 			}
+	    		priv->current_aid = stream_id;
 		    }
 		    else
 			free(sh->wf);
@@ -773,6 +784,7 @@ void demux_open_real(demuxer_t* demuxer)
 			priv->v_streams[priv->last_v_stream] = stream_id;
 			priv->last_v_stream++;
 		    }
+	    	    priv->current_vid = stream_id;
 		}
 //		break;
 //	    default:
@@ -825,9 +837,7 @@ void demux_close_real(demuxer_t *demuxer)
     return;
 }
 
-#if 1
-/* XXX: FIXME!!!! */
-/* will complete it later - please upload RV10 samples WITH INDEX CHUNK */
+/* please upload RV10 samples WITH INDEX CHUNK */
 int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     real_priv_t *priv = demuxer->priv;
@@ -835,47 +845,78 @@ int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
     demux_stream_t *d_video = demuxer->video;
     sh_audio_t *sh_audio = d_audio->sh;
     sh_video_t *sh_video = d_video->sh;
-    int rel_seek_frames = sh_video->fps*rel_seek_secs;
     int video_chunk_pos = d_video->pos;
     int vid = priv->current_vid, aid = priv->current_aid;
-    int i;
-
-    printf("real seek\n\n");
+    int next_offset;
+    int rel_seek_frames = 0;
+    int streams = 0;
 
     if ((index_mode != 1) && (index_mode != 2))
+	return 0;
+
+    if (sh_video)
+	streams |= 1;
+    if (sh_audio)
+	streams |= 2;
+
+//    printf("streams: %d\n", streams);
+
+    if (!streams)
 	return 0;
 
     if (flags & 1)
 	/* seek absolute */
 	priv->current_apacket = priv->current_vpacket = 0;
 
-    if (flags & 2)
-	rel_seek_frames = rel_seek_secs*sh_video->fps;
+    /* flags & 2 ? */
+    if (streams & 1)
+        rel_seek_frames = (int)(sh_video->fps*rel_seek_secs);
+    else if (streams & 2)
+        rel_seek_frames = (int)(rel_seek_secs);
 
-    printf("rel_seek_frames: %d\n", rel_seek_frames);
+//    printf("rel_seek_frames: %d\n", rel_seek_frames);
     
-    priv->current_apacket+=rel_seek_frames;
-    priv->current_vpacket+=rel_seek_frames;
+    if (streams & 2)
+	priv->current_apacket += rel_seek_frames;
+    if (streams & 1)
+	priv->current_vpacket += rel_seek_frames;
 
-    if ((priv->current_apacket > priv->index_table_size[vid]) ||
-	(priv->current_vpacket > priv->index_table_size[aid]))
+    if (
+    ((streams & 2) && (priv->current_apacket > priv->index_table_size[aid])) ||
+    ((streams & 1) && (priv->current_vpacket > priv->index_table_size[vid])) )
 	return 0;
 
-    if (priv->current_apacket > priv->current_vpacket)
+    /* both video and audio stream */
+    if (streams == 3)
     {
+//    if (priv->current_apacket > priv->current_vpacket)
+//    {
+	/* search keyframe */
 	while (!(priv->index_table[vid][priv->current_vpacket].flags & 0x2))
 	    priv->current_vpacket++;
-	i = priv->index_table[vid][priv->current_vpacket].offset;
+	next_offset = priv->index_table[vid][priv->current_vpacket].offset;
+//    }
+//    else
+//    {
+//	next_offset = priv->index_table[aid][priv->current_apacket].offset;
+//    }
     }
     else
     {
-	while (!(priv->index_table[aid][priv->current_apacket].flags & 0x2))
-	    priv->current_apacket++;	
-	i = priv->index_table[aid][priv->current_apacket].offset;
+	if (streams & 1)
+	{
+	    /* search keyframe */
+	    while (!(priv->index_table[vid][priv->current_vpacket].flags & 0x2))
+		priv->current_vpacket++;
+	    next_offset = priv->index_table[vid][priv->current_vpacket].offset;
+	}
+	else if (streams & 2)
+	{
+	    next_offset = priv->index_table[aid][priv->current_apacket].offset;
+	}
     }
     
-    printf("seek: pos: %d, packets: a: %d, v: %d\n",
-	i, priv->current_apacket, priv->current_vpacket);
-    stream_seek(demuxer->stream, i);
+//    printf("seek: pos: %d, current packets: a: %d, v: %d\n",
+//	next_offset, priv->current_apacket, priv->current_vpacket);
+    stream_seek(demuxer->stream, next_offset);
 }
-#endif
