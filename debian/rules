@@ -33,9 +33,6 @@ binary-arch: checkroot build
 	cd debian/tmp && install -d `cat ../dirs`
 	$(MAKE) install prefix=`pwd`/debian/tmp/usr
 
-# questionable quality of solution:	
-	mkdir -p debian/tmp/etc
-	cp debian/mplayer.conf debian/tmp/etc/
 
 # Must have debmake installed for this to work. Otherwise please copy
 # /usr/bin/debstd into the debian directory and change debstd to debian/debstd
