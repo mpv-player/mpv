@@ -19,9 +19,9 @@ mplayer (0.99)
     
     Ports:
     * HPUX fixes
-    * Ported to Darwin / MACOS X
-    * Ported to Win32/Mingw (including network, timers, getch etc)
-    * win32 codecs DLL support on Win32/Cygwin (and Mingw too!)
+    * Ported to Darwin / Mac OS X
+    * Ported to Win32/MinGW (including network, timers, getch etc)
+    * win32 codecs DLL support on Win32/Cygwin (and MinGW too!)
     * Lots of Altivec optimizations
     
     Codecs/demuxers support:
@@ -45,25 +45,25 @@ mplayer (0.99)
     * SGI image files decoding (-mf)
     * Theora video (using libtheora/libogg) support
     * DivX.com 5.0.5 libs support
-    * support for latest Xvid en/decoder features
+    * support for latest XviD en/decoder features
     * decoder for Hauppauge PVR 250/350 MB-YUV format (fourcc HM12)
     * support for Vanguard's win32 h264 etc codecs
 
-    FFMpeg/libavcodec:
+    FFmpeg/libavcodec:
     * libavcodec: static,const,compiler warning cleanup, UINTX -> uintx_t
     * huffyuv v1 support
     * PAL 4:1:1 SMPTE 314M DV streams support, NTSC DV last MB column fix
     * fixing padding bug autodetection for some rare files
     * DspContext.(i)dct_* bitexact cleanup
     * user setable quantizer bias
-    * mpeg1 slice encoidng support
+    * mpeg1 slice encoding support
     * msmpeg4 2-pass support
     * H264 video decoding
     * Indeo 3 video decoding
     * buggy VP3 video decoder (no UMV and inaccurate idct)
     * Sorenson 3 (SVQ3) video decoder (it's actually a h264 variant)
     * 3IV1 (3ivx v1) decoding, ASV1 (ASUS Vidoe v1) decoding
-    * Improved SVQ1 decoding (using ffmpeg VLC functions)
+    * Improved SVQ1 decoding (using FFmpeg VLC functions)
     * truncated unary binerization, unary k-th order exp golomb binarization :)
     * FFV1: lossless YUV codec, compress a lot better than huffyuv, but slower
     * lossless MJPEG en/decoding, pegasus "pseudo yuv" (=RCT) decoding
@@ -142,7 +142,7 @@ mplayer (0.90)
     * per-channel gamma and MMX-opt'ed bri/cont/saturation support in -vop eq2
     * live.com lib support cleanup, support for more stream types
     * importing the playtree into the Gui instead of gui's own playlist hack
-    * support for the xvid and divx4/5linux libraries at the same time
+    * support for the XviD and divx4/5linux libraries at the same time
     * -fstype option: override priority/layer of the fullscreen switch methods
     * libavcodec: some B-frames related encoding failures/crashes fixed
 
@@ -407,7 +407,7 @@ mplayer (0.90)
     * new audio filter layer (libaf) - automatic samplerate conversion
     * experimental -vo directx driver for cygwin build
     * unrarlib included for rar'ed vobsubs
-    * native xvid encoding (-ovc xvid) interface for mencoder
+    * native XviD encoding (-ovc xvid) interface for mencoder
     * new softeq filter with gamma support: -vop eq2
     * -ao/-vo accepts list of drivers and can fall back to one, just like -ac/-vc
     * audio/video codec selection (-ac/-afm) rewritten, now uses codec/fm list
