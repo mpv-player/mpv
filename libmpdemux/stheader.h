@@ -46,7 +46,7 @@ typedef struct {
   struct codecs_st *codec;
   unsigned int format;
   int inited;
-  float delay;		   // value of old a_frame
+  float delay;	   // relative (to sh_video->timer) time in audio stream
   // output format:
   int sample_format;
   int samplerate;
@@ -84,7 +84,7 @@ typedef struct {
   struct codecs_st *codec;
   unsigned int format;
   int inited;
-  float timer;		  // value of old v_frame
+  float timer;		  // absolute time in video stream, since last start/seek
   // frame counters:
   float num_frames;       // number of frames played
   int num_frames_decoded; // number of frames decoded
