@@ -55,6 +55,7 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
     sh_audio->o_wf.cbSize=0;
 
     if(verbose) {
+#if 0
 	printf("Input format:\n");
 	    printf("  wFormatTag %d\n", in_fmt->wFormatTag);
 	    printf("  nChannels %d\n", in_fmt->nChannels);
@@ -71,6 +72,13 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
 	    printf("  nBlockAlign %d\n", sh_audio->o_wf.nBlockAlign);
 	    printf("  wBitsPerSample %d\n", sh_audio->o_wf.wBitsPerSample);
 	    printf("  cbSize %d\n", sh_audio->o_wf.cbSize);
+#else
+	printf("Input format:\n");
+	print_wave_header(in_fmt);
+	printf("Output fmt:\n");
+	print_wave_header(&sh_audio->o_wf);
+	printf("\n");
+#endif
     }
 
 
