@@ -166,8 +166,8 @@ static config_t mplayer_opts[]={
 //---------------------- libao/libvo options ------------------------
 	{"o", "Option -o has been renamed to -vo (video-out), use -vo !\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"ao", &audio_driver, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vo", &video_driver_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+	{"ao", &audio_driver_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
 	{"aop", ao_plugin_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},

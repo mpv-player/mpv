@@ -12,6 +12,9 @@
 #include "config.h"
 #include "video_out.h"
 
+#include "mp_msg.h"
+#include "help_mp.h"
+
 #include "../linux/shmem.h"
 
 //int vo_flags=0;
@@ -190,6 +193,52 @@ void libvo_register_options(void* cfg) {
   vo_dxr2_register_options(cfg);
 #endif
 }
+
+void list_video_out(){
+      int i=0;
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputDrivers);
+      while (video_out_drivers[i]) {
+        const vo_info_t *info = video_out_drivers[i++]->get_info ();
+      	printf("\t%s\t%s\n", info->short_name, info->name);
+      }
+      printf("\n");
+}
+
+vo_functions_t* init_best_video_out(char** vo_list){
+    int i;
+    // first try the preferred drivers, with their optional subdevice param:
+    if(vo_list && vo_list[0])
+      while(vo_list[0][0]){
+        char* vo=strdup(vo_list[0]);
+	vo_subdevice=strchr(vo,':');
+	if(vo_subdevice){
+	    vo_subdevice[0]=0;
+	    ++vo_subdevice;
+	}
+	for(i=0;video_out_drivers[i];i++){
+	    vo_functions_t* video_driver=video_out_drivers[i];
+	    const vo_info_t *info = video_driver->get_info();
+	    if(!strcmp(info->short_name,vo)){
+		// name matches, try it
+		if(!video_driver->preinit(vo_subdevice))
+		    return video_driver; // success!
+	    }
+	}
+        // continue...
+	++vo_list;
+	if(!(vo_list[0])) return NULL; // do NOT fallback to others
+      }
+    // now try the rest...
+    vo_subdevice=NULL;
+    for(i=0;video_out_drivers[i];i++){
+	vo_functions_t* video_driver=video_out_drivers[i];
+	if(!video_driver->preinit(vo_subdevice))
+	    return video_driver; // success!
+    }
+    return NULL;
+}
+
+
 #if defined(HAVE_FBDEV)||defined(HAVE_VESA)  
 /* Borrowed from vo_fbdev.c 
 Monitor ranges related functions*/

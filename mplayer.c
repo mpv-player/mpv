@@ -219,8 +219,10 @@ static int play_n_frames=-1;
 static int play_n_frames_mf=-1;
 
 // screen info:
-char* video_driver=NULL; //"mga"; // default
-char* audio_driver=NULL;
+char* video_driver=NULL; // OBSOLETE, FIXME gui
+char* audio_driver=NULL; // OBSOLETE, FIXME gui
+char** video_driver_list=NULL;
+char** audio_driver_list=NULL;
 
 extern char *vo_subdevice;
 extern char *ao_subdevice;
@@ -591,17 +593,12 @@ int gui_no_filename=0;
       exit(0);
     }
 
-    if(video_driver && strcmp(video_driver,"help")==0){
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputDrivers);
-      i=0;
-      while (video_out_drivers[i]) {
-        const vo_info_t *info = video_out_drivers[i++]->get_info ();
-      	printf("\t%s\t%s\n", info->short_name, info->name);
-      }
-      printf("\n");
+    if(video_driver_list && strcmp(video_driver_list[0],"help")==0){
+      list_video_out();
       exit(0);
     }
 
+    audio_driver=audio_driver_list?audio_driver_list[0]:NULL;
     if(audio_driver && strcmp(audio_driver,"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableAudioOutputDrivers);
       i=0;
@@ -849,46 +846,6 @@ if(!use_stdin && !slave_mode){
     if(vo_vobsub)
       sub_auto=0; // don't do autosub for textsubs if vobsub found
 
-//==================== Init Video Out ============================
-    
-// check video_out driver name:
-{
-    char* vo = video_driver ? strdup(video_driver) : NULL;
-    if(vo_subdevice) {
-      free(vo_subdevice);
-      vo_subdevice = NULL;
-    }
-    if (video_driver)
-	if ((i = strcspn(video_driver, ":")) > 0)
-	{
-	    size_t i2 = strlen(video_driver);
-
-	    if (video_driver[i] == ':')
-	    {
-		vo_subdevice = malloc(i2-i);
-		if (vo_subdevice != NULL)
-		    strncpy(vo_subdevice, (char *)(video_driver+i+1), i2-i);
-		vo[i] = '\0';
-	    }
-//	    printf("video_driver: %s, subdevice: %s\n", video_driver, vo_subdevice);
-	}
-  if(!video_driver)
-    video_out=video_out_drivers[0];
-  else
-  for (i=0; video_out_drivers[i] != NULL; i++){
-    const vo_info_t *info = video_out_drivers[i]->get_info ();
-    if(strcmp(info->short_name,vo) == 0){
-      video_out = video_out_drivers[i];break;
-    }
-  }
-  if(!video_out){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidVOdriver,vo?vo:"?");
-    exit_player(MSGTR_Exit_error);
-  }
-  if(vo)
-    free(vo);
-}
-
 //==================== Init Audio Out ============================
 
 // check audio_out driver name:
@@ -1123,13 +1080,15 @@ if(sh_video){
 	   sh_video->fps,sh_video->frametime
 	   );
 
-    vo_fps = sh_video->fps;
     /* need to set fps here for output encoders to pick it up in their init */
     if(force_fps){
       sh_video->fps=force_fps;
       sh_video->frametime=1.0f/sh_video->fps;
-      vo_fps = force_fps;
     }
+    vo_fps = sh_video->fps;
+#ifdef X11_FULLSCREEN
+    vo_mouse_timer_const=(int)sh_video->fps;
+#endif
 
     if(!sh_video->fps && !force_fps){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_FPSnotspecified);
@@ -1224,13 +1183,11 @@ if(!sh_video) goto main; // audio-only
 current_module="preinit_libvo";
 
 vo_config_count=0;
-if((video_out->preinit(vo_subdevice))!=0){
+//if((video_out->preinit(vo_subdevice))!=0){
+if(!(video_out=init_best_video_out(video_driver_list))){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
-#ifdef X11_FULLSCREEN
-vo_mouse_timer_const=(int)sh_video->fps;
-#endif
 sh_video->video_out=video_out;
 inited_flags|=INITED_VO;
 
@@ -1356,8 +1313,6 @@ if(sh_audio){
       sh_audio->channels,sh_audio->sample_format,0)){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
     sh_audio=d_audio->sh=NULL;
-    if(sh_video == NULL)
-      goto goto_next_file;
   } else {
     inited_flags|=INITED_AO;
   }
