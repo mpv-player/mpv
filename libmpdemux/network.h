@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 
 #include "url.h"
+#include "http.h"
 #include "stream.h"
 
 #define BUFFER_SIZE		2048
@@ -46,5 +47,8 @@ int nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream
 int nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl );
 
 int connect2Server(char *host, int port);
+
+int http_send_request(URL_t *url);
+HTTP_header_t *http_read_response(int fd);
 
 #endif
