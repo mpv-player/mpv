@@ -449,8 +449,8 @@ static int sdl_close (void)
 	/* DONT attempt to free the fullscreen modes array. SDL_Quit* does this for us */
 	
 	/* Cleanup SDL */
-	SDL_Quit();
-	//SDL_QuitSubSystem(SDL_INIT_VIDEO);
+	//SDL_Quit();
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	/* might have to be changed to quitsubsystem only, if plugins become
 	 * changeable on the fly */
 
