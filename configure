@@ -2345,9 +2345,11 @@ else
   echores "$_libavcodec"
 fi
 
+if test "$_libavcodec" != yes ; then
 echocheck "FFmpeg libavcodec (dynamic)"
-if test "$_libavcodec" != yes && test "$_libavcodecso" = auto ; then
+if test "$_libavcodecso" = auto ; then
   _libavcodecso=no
+# FIXME : check for avcodec_find_encoder_by_name() for mencoder
   cat > $TMPC << EOF
 #define FF_POSTPROCESS 1 
 #include <libffmpeg/avcodec.h>
@@ -2361,8 +2363,10 @@ EOF
     echores "no: libffmpeg.so is broken/obsolete"
   fi
 else
-  echores "no"
+  echores "$_libavcodecso"
 fi
+fi
+
 _def_libavcodec='#undef USE_LIBAVCODEC'
 _def_libavcodecso='#undef USE_LIBAVCODEC_SO'
 _def_ffpostprocess='#undef FF_POSTPROCESS'
@@ -2378,7 +2382,6 @@ elif test "$_libavcodecso" = yes ; then
   _def_ffpostprocess='#define FF_POSTPROCESS 1'
   _codecmodules="libavcodec.so $_codecmodules"
 fi
-# FIXME : check for avcodec_find_encoder_by_name() for mencoder
 
 
 # FIXME : variables don't have a "standard" name so check this one day
@@ -2408,9 +2411,8 @@ else
   _codecmodules="opendivx $_codecmodules"
 fi
 
-# mencoder requires those libs: libmp3lame and divx4linux encore
+# mencoder requires (optional) those libs: libmp3lame and divx4linux encore
 if test "$_mencoder" != no ; then
-  _mencoder=no
 
   echocheck "libmp3lame (required for mencoder)"
   _mp3lame=no
@@ -2436,14 +2438,13 @@ int main(void) { (void) encore(0, 0, 0, 0); return 0; }
 EOF
   if cc_check -ldivxencore -lm ; then
     _divx4linux_encore=yes
-    _def_encore='#define NEW_ENCORE 1'
+    _def_encore='#define HAVE_DIVX4ENCORE 1'
     _ld_encore='-ldivxencore'
   else
-    _def_encore='#undef NEW_ENCORE'
+    _def_encore='#undef HAVE_DIVX4ENCORE'
   fi
   echores "$_divx4linux_encore"
 
-  test "$_mp3lame" = yes && test "$_divx4linux_encore" = yes && _mencoder=yes
 fi
 
 
