@@ -345,6 +345,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				dmpi->stride[2], mpi->stride[2]*2);
 		}
 		ret = vf_next_put_image(vf, dmpi);
+		vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		
 		memcpy_pic(dmpi->planes[0], mpi->planes[0] + mpi->stride[0],
 			mpi->w, mpi->h/2, dmpi->stride[0], mpi->stride[0]*2);
@@ -377,6 +378,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				mpi->chroma_width, mpi->chroma_height, 0);
 		}
 		ret = vf_next_put_image(vf, dmpi);
+		vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		
 		my_memcpy_pic(dmpi->planes[0] + dmpi->stride[0], mpi->planes[0] + mpi->stride[0],
 			mpi->w, mpi->h/2, dmpi->stride[0]*2, mpi->stride[0]*2);
@@ -411,6 +413,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				dmpi->stride[2], mpi->stride[2]*2, 0);
 		}
 		ret = vf_next_put_image(vf, dmpi);
+		vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		
 		qpel(dmpi->planes[0], mpi->planes[0] + mpi->stride[0],
 			mpi->w, mpi->h/2, dmpi->stride[0], mpi->stride[0]*2, 1);

@@ -62,6 +62,7 @@ typedef struct vf_seteq_s
 #define VFCTRL_GET_EQUALIZER 8 /* gset color options (brightness,contrast etc) */
 #define VFCTRL_DRAW_OSD 7
 #define VFCTRL_CHANGE_RECTANGLE 9 /* Change the rectangle boundaries */
+#define VFCTRL_FLIP_PAGE 10 /* Tell the vo to flip pages */
 
 #include "vfcap.h"
 
