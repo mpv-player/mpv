@@ -62,12 +62,22 @@ static int config(struct vf_instance_s* vf,
 	switch(height){
 	case 240:
 	case 480:
+#if LIBAVCODEC_BUILD >= 4662
+	    lavc_venc_context.frame_rate     = 30000;
+	    lavc_venc_context.frame_rate_base= 1001;
+#else
 	    lavc_venc_context.frame_rate=29.97*FRAME_RATE_BASE; // NTSC
+#endif
 	    break;
 	case 576:
 	case 288:
 	default:
+#if LIBAVCODEC_BUILD >= 4662
+	    lavc_venc_context.frame_rate     = 25;
+	    lavc_venc_context.frame_rate_base= 1;
+#else
 	    lavc_venc_context.frame_rate=25*FRAME_RATE_BASE; // PAL
+#endif
 	    break;
 //	    lavc_venc_context.frame_rate=vo_fps*FRAME_RATE_BASE; // same as src
 	}
@@ -174,8 +184,12 @@ static int open(vf_instance_t *vf, char* args){
 	// fixed bitrate (in kbits)
 	lavc_venc_context.bit_rate = 1000*p_quality;
     }
-    lavc_venc_context.frame_rate = (p_fps<1.0) ? 0 : (p_fps * FRAME_RATE_BASE);
-    lavc_venc_context.qmin= 1;
+#if LIBAVCODEC_BUILD >= 4662
+    lavc_venc_context.frame_rate_base = 1000*1001;
+    lavc_venc_context.frame_rate      = (p_fps<1.0) ? 0 : (p_fps * lavc_venc_context.frame_rate_base);
+#else
+    lavc_venc_context.frame_rate      = (p_fps<1.0) ? 0 : (p_fps * FRAME_RATE_BASE);
+#endif
     lavc_venc_context.gop_size = 0; // I-only
 
     return 1;
