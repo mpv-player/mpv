@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.56 -->
+<!-- synced with 1.58 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -1315,8 +1315,8 @@ Az összes kísérlet eddig kudarcba fulladt, de örömmel fogadjuk a javításokat.
 Szeretnék +/- 1 képkockát ugrani a 10 másodperc helyett.
 </para></question>
 <answer><para>
-Ez nem lesz megvalósítva. Volt, de elszúrta az A/V szinkront.
-Nyugodtan csináld meg és küldd be a javítást. De ne kérd tőlünk.
+Egy képkockával előre léphetsz a <keycap>.</keycap> gombbal.
+A visszafelé lépés valószínűleg nem lesz mostanában megvalósítva.
 </para></answer>
 </qandaentry>
 
