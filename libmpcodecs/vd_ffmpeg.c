@@ -83,8 +83,8 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
         case IMGFMT_YV12:
         case IMGFMT_IYUV:
         case IMGFMT_I420:
-            if(ctx->yuy2_support || ctx->yvu9_support) return CONTROL_FALSE;
-            else                                       return CONTROL_TRUE;
+            if(ctx->yvu9_support) return CONTROL_FALSE;
+            else                  return CONTROL_TRUE;
         case IMGFMT_YUY2:
             if(ctx->yuy2_support) return CONTROL_TRUE;
                                   return CONTROL_FALSE;
@@ -216,11 +216,38 @@ static void draw_slice(struct AVCodecContext *s,
                 	int y, int width, int height){
     sh_video_t * sh = s->opaque;
     int stride[3];
+    int start=0, i;
+    int skip_stride= (s->width+15)>>4;
+    UINT8 *skip= &s->mbskip_table[(y>>4)*skip_stride];
+#if LIBAVCODEC_BUILD > 4615
+    int threshold= s->pict_type==B_TYPE ? -99 : s->dr_ip_buffer_count;
+#endif
 
     stride[0]=linesize;
-    stride[1]=stride[2]=stride[0]/2;
-
-    mpcodecs_draw_slice (sh,src, stride, width, height, 0, y);
+#if LIBAVCODEC_BUILD > 4615
+    if(s->dr_uvstride)
+        stride[1]=stride[2]= s->dr_uvstride;
+    else
+#endif
+        stride[1]=stride[2]=stride[0]/2;
+#if 0
+    if(s->pict_type!=B_TYPE){
+        for(i=0; i*16<width+16; i++){ 
+            if(i*16>=width || skip[i]>=threshold){
+                if(start==i) start++;
+                else{
+                    UINT8 *src2[3]= {src[0] + start*16, 
+                                     src[1] + start*8, 
+                                     src[2] + start*8};
+//printf("%2d-%2d x %d\n", start, i, y);
+                    mpcodecs_draw_slice (sh,src2, stride, (i-start)*16, height, start*16, y);
+                    start= i+1;
+                }
+            }       
+        }
+    }else
+#endif
+        mpcodecs_draw_slice (sh,src, stride, width, height, 0, y);
 }
 
 static int init_vo(sh_video_t *sh){
