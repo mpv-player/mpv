@@ -3091,6 +3091,18 @@ int WINAPI expDuplicateHandle(
     return 1;
 }
 
+HRESULT WINAPI expCoInitialize(
+	LPVOID lpReserved	/* [in] pointer to win32 malloc interface
+                                   (obsolete, should be NULL) */
+)
+{
+  /*
+   * Just delegate to the newer method.
+   */
+  return 0; //CoInitializeEx(lpReserved, COINIT_APARTMENTTHREADED);
+}
+
+
 
 struct exports
 {
@@ -3308,6 +3320,7 @@ FF(CoTaskMemFree, -1)
 FF(CoCreateInstance, -1)
 FF(StringFromGUID2, -1)
 FF(CoCreateFreeThreadedMarshaler,-1)
+FF(CoInitialize, -1)
 };
 struct exports exp_crtdll[]={
 FF(memcpy, -1)
