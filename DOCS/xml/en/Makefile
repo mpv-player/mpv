@@ -1,5 +1,3 @@
-include ../Makefile.inc
-
 # Set if you are using your own HTML stylesheet...
 #HTML_STYLESHEET = mystyle.css
 
@@ -9,3 +7,5 @@ USE_SYMLINKS = no
 # Dependency information.
 $(HTMLDIR)/index.html: $(wildcard *.xml)
 $(HTMLFILE): $(wildcard *.xml)
+
+include ../Makefile.inc
