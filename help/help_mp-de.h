@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <spambouncer@skraemer.de>
 
-// In synch with rev 1.117
+// In synch with rev 1.119
 
 // ========================= MPlayer help ===========================
 
@@ -356,7 +356,7 @@ static char help_text[]=
 #define MSGTR_CouldNotFindVideoFilter "Konnte Videofilter '%s' nicht finden.\n"
 #define MSGTR_CouldNotOpenVideoFilter "Konnte Videofilter '%s' nicht öffnen.\n"
 #define MSGTR_OpeningVideoFilter "Öffne Videofilter: "
-#define MSGTR_CannotFindColorspace "Konnte keinen gemeinsamen Farbraum finden, auch nicht mit '-vf scale' :-(\n"
+#define MSGTR_CannotFindColorspace "Konnte keinen passenden Farbraum finden, auch nicht mit '-vf scale' :-(\n"
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Codec hat sh->disp_w und sh->disp_h nicht gesetzt!\nVersuche Problem zu umgehen..\n"
@@ -367,6 +367,7 @@ static char help_text[]=
 
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Konnte EWMH-Fullscreen-Event nicht senden!\n"
+#define MSGTR_NeedAfVolume "Mixer: Dieses ao benötigt -af volume zum Ändern der Lautstärke\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -410,9 +411,9 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[Skin] Fehler in Skin-Konfigurationsdatei in Zeile %d: %s" 
-#define MSGTR_SKIN_WARNING1 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d: Widget gefunden, aber davor wurde \"section\" nicht gefunden (%s)"
-#define MSGTR_SKIN_WARNING2 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d: Widget gefunden, aber davor wurde \"subsection\" nicht gefunden (%s)"
-#define MSGTR_SKIN_WARNING3 "[skin] Warnung in Skin-Konfigurationsdatei in Zeile %d: Diese Untersektion wird von diesem Widget nicht unterstützt (%s).\n"
+#define MSGTR_SKIN_WARNING1 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"section\" nicht gefunden"
+#define MSGTR_SKIN_WARNING2 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"subsection\" nicht gefunden (%s)"
+#define MSGTR_SKIN_WARNING3 "[skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nDiese Untersektion wird vom Widget nicht unterstützt (%s).\n"
 #define MSGTR_SKIN_BITMAP_16bit  "Bitmaps mit 16 Bits oder weniger werden nicht unterstützt (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "Datei nicht gefunden (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "BMP-Lesefehler (%s)\n"
