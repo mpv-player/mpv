@@ -75,8 +75,10 @@ static int oss2sunfmt(int oss_format)
     case AFMT_S16_BE:
     case AFMT_S16_LE:
 	return AUDIO_ENCODING_LINEAR;
+#ifdef	AUDIO_ENCODING_LINEAR8	// Missing on SunOS 5.5.1...
     case AFMT_U8:
 	return AUDIO_ENCODING_LINEAR8;
+#endif
 #ifdef	AUDIO_ENCODING_DVI	// Missing on NetBSD...
     case AFMT_IMA_ADPCM:
 	return AUDIO_ENCODING_DVI;
