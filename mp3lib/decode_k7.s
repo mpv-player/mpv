@@ -7,14 +7,19 @@
 ///  - Added new opcode PFNACC
 ///  - decreased number of opcodes (as it was suggested by k7 manual)
 ///    (using memory reference as operand of instructions)
-///  - added PREFETCHW opcode. It has different semantic than k6-2
+///  - added PREFETCHW opcode. It has different semantic on k7 than on k6-2
 ///    and saves 15-25 cpu clocks for athlon.
 ///  - partial unrolling loops for removing slower MOVW insns.
-///    (Note probably same operation should be done for decode_3dnow)
+///    (Note: probably same operation should be done for decode_3dnow.s)
 ///  - change function name for support 3DNowEx! automatic detect
 ///
 /// note: because K7 processors are an aggresive out-of-order three-way
 ///       superscalar ones instruction order is not significand for them.
+///
+/// Benchmark: measured by mplayer on Duron-700:
+///      3dNow! optimized code - 1.5% of cpu usage
+///      k7 optimized code     - 1.1% of cpu usage
+/// Note: K6-2 users have an chance with partial loops unrolling
 ///
 /// Modified by Nick Kurshev <nickols_k@mail.ru>
 ///
