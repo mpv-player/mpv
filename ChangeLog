@@ -1,7 +1,19 @@
 
 mplayer (0.90)
 
-  pre11:  "CodecCounter"
+  rc2:
+    * X11 fullscreen switching code changed again (esp. for gnome2/kde3.1)
+    * libavcodec: fixed possible 20% speedloss bug
+    * Some DOCS corrections/updates/sync/html fixes
+    * DOCS/tech/encoding-tips.txt and tech/directfb.txt
+    * GUI: fixed three submenu bugs and other problems
+    * more compiler warning fixes
+    * fixed possible v4l capturing crash
+    * yuv4mpeg vs. framedrop/frameskip fixed
+    * support for the experimental (and buggy) dev-api-3 XViD CVS branch
+    * fallback to built-in codecs.conf if no compatible external file found
+
+  rc1:  "CodecCounter"
     Docs:
     * new French translation
     * Irix section
