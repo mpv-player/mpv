@@ -108,6 +108,11 @@
 #include "fastmemcpy.h"
 #include "sub.h"
 
+#ifdef HAVE_X11
+#include <X11/Xlib.h>
+#include "x11_common.h"
+#endif
+
 LIBVO_EXTERN(sdl)
 
 extern int verbose;
@@ -171,6 +176,10 @@ static struct sdl_priv_s {
 	
 	/* RGB ints */
 	int framePlaneRGB;
+	int stridePlaneRGB;
+
+	/* Flip image */
+	int flip;
 	
         int width,height;
         int format;
@@ -349,7 +358,7 @@ increase your display's color depth, if possible.\n", priv->bpp);
 	 * We use SDL_KEYUP cause SDL_KEYDOWN seems to cause problems
 	 * with keys need to be pressed twice, to be recognized.
 	 */
-#ifndef BUGGY_SDL	
+#ifndef BUGGY_SDL
 	SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
@@ -357,7 +366,7 @@ increase your display's color depth, if possible.\n", priv->bpp);
 	SDL_EventState(SDL_QUIT, SDL_IGNORE);
 	SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
 	SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
-#endif	
+#endif
 	
 	/* Success! */
 	return 0;
@@ -453,11 +462,16 @@ static void set_fullmode (int mode)
  **/
 
 static uint32_t
-init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
+init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 //static int sdl_setup (int width, int height)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
         unsigned int sdl_format;
+#ifdef HAVE_X11	
+	static Display *XDisplay;
+#endif
+
+	//priv->flip = 1; // debugging only
 	
 	sdl_format = format;
         switch(format){
@@ -514,6 +528,14 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	}
 
 	sdl_open (NULL, NULL);
+#ifdef HAVE_X11
+	if(getenv("DISPLAY")) {
+		if(verbose) printf("SDL: deactivating XScreensaver/DPMS\n");
+		XDisplay = XOpenDisplay(getenv("DISPLAY"));
+		saver_off(XDisplay);
+		XCloseDisplay(XDisplay);
+	}
+#endif
 
 	/* Set output window title */
 	SDL_WM_SetCaption (".: MPlayer : F = Fullscreen/Windowed : C = Cycle Fullscreen Resolutions :.", "SDL Video Out");
@@ -532,37 +554,44 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	/* bit 0 (0x01) means fullscreen (-fs)
 	 * bit 1 (0x02) means mode switching (-vm)
 	 * bit 2 (0x04) enables software scaling (-zoom)
-	 */  
-//      printf("SDL: fullscreenflag is set to: %i\n", fullscreen);
+	 * bit 3 (0x08) enables flipping (-flip)
+	 */
+	#define FS 0x01
+	#define VM 0x02
+	#define ZOOM 0x04
+	#define FLIP 0x08  
+//      printf("SDL: flags are set to: %i\n", flags);
 //	printf("SDL: Width: %i Height: %i D_Width %i D_Height: %i\n", width, height, d_width, d_height);
-	switch(fullscreen){
-	  case 0x01:
-	  case 0x05:
+	if(flags&FLIP) { // flipping flag set, use it
+		if(verbose) printf("SDL: using flipped video (only with RGB/BGR)\n");
+		priv->flip = 1; 
+	}
+	if(flags&FS) {
 	  	priv->width = width;
 		priv->height = height;
 	  	if(verbose) printf("SDL: setting zoomed fullscreen without modeswitching\n");
 		printf("SDL: Info - please use -vm (unscaled) or -zoom (scaled) for best fullscreen experience\n");
           	if((priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags)))
 			SDL_ShowCursor(0);
-	  break;	
-	  case 0x02:
+	} else	
+	if(flags&VM) {
 	 	if(verbose) printf("SDL: setting nonzoomed fullscreen with modeswitching\n");
 		printf("SDL: Info - please use -zoom switch to scale video\n");
           	if((priv->surface = SDL_SetVideoMode (d_width ? d_width : width, d_height ? d_height : height, priv->bpp, priv->sdlfullflags)))
 			SDL_ShowCursor(0);
-	  break;
-	  case 0x04:		
-	  case 0x06:
+	} else
+	if(flags&ZOOM) {
 	 	if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
 		printf("SDL: Info - please use -vm switch instead if you don't want scaled video\n");
           	priv->surface=NULL;
           	set_fullmode(priv->fullmode);
-	  break;  
-          default:
-	 	if(verbose) printf("SDL: setting windowed mode\n");
+	} 
+        else {
+		if(verbose) printf("SDL: setting windowed mode\n");
           	if((priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlflags))
 			&& (strcmp(priv->driver, "dga") == 0)) SDL_ShowCursor(0); //TODO: other sdl drivers that are fullscreen only?
-        }
+	}
+
         if(!priv->surface) { // cannot SetVideoMode
 		printf("SDL: failed to set video mode: %s\n", SDL_GetError());
 		return -1;
@@ -639,6 +668,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	
 	if(priv->mode) {
 		priv->framePlaneRGB = width * height * priv->rgbsurface->format->BytesPerPixel;
+		priv->stridePlaneRGB = width * priv->rgbsurface->format->BytesPerPixel;
 	}	
 	return 0;
 }
@@ -656,6 +686,8 @@ static uint32_t draw_frame(uint8_t *src[])
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 	uint8_t *dst;
+	int i;
+	uint8_t *mysrc = src[0];
 	
         switch(priv->format){
         case IMGFMT_YV12:
@@ -701,7 +733,15 @@ static uint32_t draw_frame(uint8_t *src[])
 	    		}
 		}*/
 		dst = (uint8_t *) priv->rgbsurface->pixels;
-		memcpy (dst, src[0], priv->framePlaneRGB);
+	    	if(priv->flip) {
+	    		mysrc+=priv->framePlaneRGB;
+			for(i = 0; i < priv->height; i++) {
+				mysrc-=priv->stridePlaneRGB;
+				memcpy (dst, mysrc, priv->stridePlaneRGB);
+				dst+=priv->stridePlaneRGB;
+			}
+		}
+		else memcpy (dst, src[0], priv->framePlaneRGB);
 		/*if(SDL_MUSTLOCK(priv->rgbsurface)) 
 			SDL_UnlockSurface (priv->rgbsurface);*/
 		break;
@@ -996,6 +1036,15 @@ get_info(void)
 static void
 uninit(void)
 {
+#ifdef HAVE_X11
+	static Display *XDisplay;
+	if(getenv("DISPLAY")) {
+		if(verbose) printf("SDL: activating XScreensaver/DPMS\n");
+		XDisplay = XOpenDisplay(getenv("DISPLAY"));
+		saver_on(XDisplay);
+		XCloseDisplay(XDisplay);
+	}
+#endif
 sdl_close();
 }
 
