@@ -3,6 +3,7 @@
  * See ChangeLog of mpg123-0.59s-pre.1 for detail
  * Applied to mplayer by Nick Kurshev <nickols_k@mail.ru>
 */
+#include "../config.h"
 #include "../mangle.h"
 
 long __attribute__((aligned(8))) mp3lib_decwins [544];
@@ -11,7 +12,7 @@ long __attribute__((aligned(8))) mp3lib_decwins [544];
 extern real mp3lib_decwin[(512+32)];
 // static long decwin [544];
 
-static short intwinbase_MMX[] = 
+static short attribute_used intwinbase_MMX[] = 
 {
 	      0,    -1,    -1,    -1,    -1,    -1,    -1,    -2,
 	     -2,    -2,    -2,    -3,    -3,    -4,    -4,    -5,

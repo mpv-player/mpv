@@ -9,10 +9,11 @@
 */
 #define real float /* ugly - but only way */
 
+#include "../config.h"
 #include "../mangle.h"
 
 static unsigned long long int __attribute__((aligned(8))) x_plus_minus_3dnow = 0x8000000000000000ULL;
-static float plus_1f = 1.0;
+static float attribute_used plus_1f = 1.0;
 
 void dct64_MMX_3dnow(real *a,real *b,real *c)
 {

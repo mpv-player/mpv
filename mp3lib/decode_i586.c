@@ -23,11 +23,12 @@
 *
 * $Id$
 */
+#include "../config.h"
 #include "../mangle.h"
 #define real float /* ugly - but only way */
 
 static long buffs[1088];
-static long bo=1;
+static long attribute_used bo=1;
 static long saved_ebp;
 
 int synth_1to1_pent(real *bandPtr, int channel, short *samples)
