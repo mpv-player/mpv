@@ -237,7 +237,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  int vm=0;
 // int interval, prefer_blank, allow_exp, nothing;
  unsigned int fg,bg;
- XSizeHints hint;
  XEvent xev;
  XGCValues xgcv;
  Colormap theCmap;
@@ -290,10 +289,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
   else
 #endif   
    {
-    hint.x=vo_dx;
-    hint.y=vo_dy;
-    hint.width=width;
-    hint.height=height;
  
 #ifdef HAVE_XF86VM
     if ( vm )
@@ -303,21 +298,16 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 	else
 	  { vm_width=d_width; vm_height=d_height; }
 	vo_vm_switch(vm_width, vm_height,&modeline_width, &modeline_height);
-	hint.x=(vo_screenwidth-modeline_width)/2;
-	hint.y=(vo_screenheight-modeline_height)/2;
-	hint.width=modeline_width;
-	hint.height=modeline_height;
+	vo_dx=(vo_screenwidth-modeline_width)/2;
+	vo_dy=(vo_screenheight-modeline_height)/2;
+	vo_dwidth=modeline_width;
+	vo_dheight=modeline_height;
    }
 #endif
-    hint.flags=PPosition | PSize;
-
     bg=WhitePixel( mDisplay,mScreen );
     fg=BlackPixel( mDisplay,mScreen );
-    vo_dwidth=hint.width;
-    vo_dheight=hint.height;
 
-    theCmap  =XCreateColormap( mDisplay,RootWindow( mDisplay,mScreen ),
-    vinfo.visual,AllocNone );
+    theCmap=XCreateColormap( mDisplay,mRootWin,vinfo.visual,AllocNone );
 
     xswa.background_pixel=0;
     xswa.border_pixel=0;
@@ -344,18 +334,18 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     else
      {
       vo_window=XCreateWindow( mDisplay,mRootWin,
-                         hint.x,hint.y,
-                         hint.width,hint.height,
+    			 vo_dx,vo_dy,
+			 vo_dwidth,vo_dheight,
                          xswa.border_pixel,depth,CopyFromParent,vinfo.visual,xswamask,&xswa );
 
       vo_x11_classhint( mDisplay,vo_window,"x11" );
       vo_hidecursor(mDisplay,vo_window);
+      vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight,0 );
       XSelectInput( mDisplay,vo_window,StructureNotifyMask );
-      XSetStandardProperties( mDisplay,vo_window,title,title,None,NULL,0,&hint );
+      XStoreName( mDisplay,vo_window,title );
       XMapWindow( mDisplay,vo_window );
       if(WinID!=0)
          do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != vo_window );
-      XSelectInput( mDisplay,vo_window,NoEventMask );
 
       if ( fullscreen ) vo_x11_fullscreen();
 #ifdef HAVE_XINERAMA
@@ -367,7 +357,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     XSync( mDisplay,False );
 
     // we cannot grab mouse events on root window :(
-    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask |
+    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | ExposureMask |
 	((WinID==0)?0:(ButtonPressMask | ButtonReleaseMask | PointerMotionMask)) );
 
 #ifdef HAVE_XF86VM
