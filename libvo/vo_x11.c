@@ -406,7 +406,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 
 
 static void flip_page( void ){
-    vo_draw_text(draw_alpha);
+    vo_draw_text(image_width,image_height,draw_alpha);
     check_events();
     Display_Image( myximage,ImageData );
 }

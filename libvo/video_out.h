@@ -8,6 +8,8 @@
 
 #include <inttypes.h>
 
+#include "font_load.h"
+
 #define IMGFMT_YV12 0x32315659
 //#define IMGFMT_YUY2 (('Y'<<24)|('U'<<16)|('Y'<<8)|'2')
 #define IMGFMT_YUY2 (('2'<<24)|('Y'<<16)|('U'<<8)|'Y')
@@ -102,4 +104,9 @@ typedef struct vo_functions_s
 
 // NULL terminated array of all drivers
 extern vo_functions_t* video_out_drivers[];
+
+extern int vo_sub_lines;
+extern unsigned char* vo_sub_text[8];
+extern unsigned char* vo_osd_text;
+extern font_desc_t* vo_font;
 

@@ -105,7 +105,7 @@ printf("vo: uninit!\n");
 
 static void flip_page(void)
 {
-    vo_draw_text(draw_alpha);
+    vo_draw_text(mga_vid_config.src_width,mga_vid_config.src_height,draw_alpha);
     vo_mga_flip_page();
 }
 
