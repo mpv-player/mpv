@@ -111,6 +111,10 @@ switch_vsync [<value>]
     Toggle vsync (1 == on, 0 == off). If no value is provided,
     vsync status is inverted.
 
+switch_ratio [<value>]
+    Change aspect ratio at runtime. Value is the new aspect ratio expressed
+    as a float (e.g. 1.77778 for 16/9).
+
 panscan <value> [value2]
     ???
 
