@@ -3021,7 +3021,7 @@ fi
 echores "$_gif"
 
 
-if test "$_gif" = yes ; then
+case "$_gif" in yes*)
   echocheck "broken giflib workaround"
   _def_gif_tvt_hack='#define HAVE_GIF_TVT_HACK 1'
 
@@ -3039,7 +3039,8 @@ EOF
   else
     echores "enabled"
   fi
-fi
+  ;;
+esac
 
 
 if test "$_vesa" != no ; then
