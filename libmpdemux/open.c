@@ -25,6 +25,8 @@ static URL_t* url;
 int dvd_title=0;
 int dvd_chapter=1;
 int dvd_angle=1;
+char* dvd_device=NULL;
+char* cdrom_device=NULL;
 
 #ifdef USE_DVDREAD
 
@@ -78,9 +80,9 @@ int bsize = VCD_SECTOR_SIZE;
 #ifdef HAVE_VCD
 if(vcd_track){
   int ret,ret2;
-  if(!filename) filename=DEFAULT_CDROM_DEVICE;
-  f=open(filename,O_RDONLY);
-  if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CdDevNotfound,filename);return NULL; }
+  if(!cdrom_device) cdrom_device=DEFAULT_CDROM_DEVICE;
+  f=open(cdrom_device,O_RDONLY);
+  if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CdDevNotfound,cdrom_device);return NULL; }
   vcd_read_toc(f);
   ret2=vcd_get_track_end(f,vcd_track);
   if(ret2<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (get)\n");return NULL;}
@@ -117,10 +119,10 @@ if(dvd_title){
     /**
      * Open the disc.
      */
-    if(!filename) filename=DEFAULT_DVD_DEVICE;
-    dvd = DVDOpen(filename);
+    if(!dvd_device) dvd_device=DEFAULT_DVD_DEVICE;
+    dvd = DVDOpen(dvd_device);
     if( !dvd ) {
-        mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,filename);
+        mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,dvd_device);
         return NULL;
     }
 
