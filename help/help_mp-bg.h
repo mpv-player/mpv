@@ -510,7 +510,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_LoadFullscreen "Старт на цял екран"
 #define MSGTR_PREFERENCES_CacheSize "Големина на кеша: "
 #define MSGTR_PREFERENCES_XSCREENSAVER "Изключи XScreenSaver"
-#define MSGTR_PREFERENCES_AutoSync "Автономна синхронизяция (при бъгави звукови карти) "
+#define MSGTR_PREFERENCES_AutoSync "Автономна синхронизация (при бъгави звукови карти) "
 #define MSGTR_PREFERENCES_AutoSyncValue "Степен на Autosync:"
 
 // --- messagebox
