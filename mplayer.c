@@ -1606,6 +1606,8 @@ if(!sh_video) {
     
 //============================== SLEEP: ===================================
 
+time_frame/=playback_speed;
+
 // flag 256 means: libvo driver does its timing (dvb card)
 if(time_frame>0.001 && !(vo_flags&256)){
 
