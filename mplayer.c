@@ -2920,9 +2920,9 @@ if(rel_seek_secs || abs_seek_pos){
 	  // get pos from frame number / total frames
 	  guiIntfStruct.Position=(float)d_video->pack_no*100.0f/sh_video->video.dwLength;
 	} else {
-	 int len = ( ( demuxer->movi_end - demuxer->movi_start ) >> 8 );
-	 int pos = ( demuxer->file_format == DEMUXER_TYPE_AUDIO?stream->pos:demuxer->filepos );
-	 guiIntfStruct.Position=(len <= 0? 0.0f : ( pos - demuxer->movi_start ) / len / 2.56f /* / 256.0f * 100.0f */ );
+	 off_t len = ( demuxer->movi_end - demuxer->movi_start );
+	 off_t pos = ( demuxer->file_format == DEMUXER_TYPE_AUDIO?stream->pos:demuxer->filepos );
+	 guiIntfStruct.Position=(len <= 0? 0.0f : ( pos - demuxer->movi_start ) * 100.0f / len );
 	}
 	if ( sh_video ) guiIntfStruct.TimeSec=d_video->pts;
 	  else if ( sh_audio ) guiIntfStruct.TimeSec=sh_audio->timer;
