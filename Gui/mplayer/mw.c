@@ -30,6 +30,8 @@
 #include "play.h"
 #include "widgets.h"
 
+extern mixer_t mixer; // mixer from mplayer.c
+
 extern unsigned int GetTimerMS( void );
 
 unsigned char * mplDrawBuffer = NULL;
@@ -242,7 +244,7 @@ NoPause:
 
    case evIncVolume:  vo_x11_putkey( wsGrayMul ); break;
    case evDecVolume:  vo_x11_putkey( wsGrayDiv ); break;
-   case evMute:       mixer_mute(); break;
+   case evMute:       mixer_mute( &mixer ); break;
 
    case evSetVolume:
         guiIntfStruct.Volume=param;
@@ -256,7 +258,7 @@ set_volume:
 	 if ( l > guiIntfStruct.Volume ) l=guiIntfStruct.Volume;
 	 if ( r > guiIntfStruct.Volume ) r=guiIntfStruct.Volume;
 //	 printf( "!!! v: %.2f b: %.2f -> %.2f x %.2f\n",guiIntfStruct.Volume,guiIntfStruct.Balance,l,r );
-         mixer_setvolume( l,r );
+         mixer_setvolume( &mixer,l,r );
 	}
 #ifdef USE_OSD
 	if ( osd_level )

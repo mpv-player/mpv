@@ -171,7 +171,6 @@ static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,g
 static void prEntry( GtkContainer * container,gpointer user_data );
 #endif
 
-extern int    muted;
 extern int    stop_xscreensaver;
 
 void ShowPreferences( void )

@@ -30,6 +30,8 @@
 #include "play.h"
 #include "widgets.h"
 
+extern mixer_t mixer; // mixer from mplayer.c
+
 extern unsigned int GetTimerMS( void );
 
 inline void TranslateFilename( int c,char * tmp,size_t tmplen )
@@ -143,7 +145,7 @@ calclengthmmmmss:
        case 'l': if ( guiIntfStruct.Playing == 1 ) strlcat( trbuf,"p",sizeof( trbuf ) ); break;
        case 'e': if ( guiIntfStruct.Playing == 2 ) strlcat( trbuf,"e",sizeof( trbuf ) ); break;
        case 'a':
-            if ( muted ) { strlcat( trbuf,"n",sizeof( trbuf ) ); break; }
+            if ( mixer.muted ) { strlcat( trbuf,"n",sizeof( trbuf ) ); break; }
             switch ( guiIntfStruct.AudioType )
              {
               case 0: strlcat( trbuf,"n",sizeof( trbuf ) ); break;

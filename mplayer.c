@@ -525,7 +525,7 @@ static void exit_sighandler(int x){
 extern void mp_input_register_options(m_config_t* cfg);
 
 #include "mixer.h"
-static mixer_t mixer;
+mixer_t mixer;
 
 #include "cfg-mplayer.h"
 

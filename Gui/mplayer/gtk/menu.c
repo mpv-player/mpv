@@ -17,6 +17,8 @@
 #include "../../../libmpdemux/stream.h"
 #include "../../../libmpdemux/demuxer.h"
 
+extern mixer_t mixer; // mixer from mplayer.c
+
 void ActivateMenuItem( int Item )
 {
 // fprintf( stderr,"[menu] item: %d.%d\n",Item&0xffff,Item>>16 );
@@ -462,7 +464,7 @@ GtkWidget * create_PopUpMenu( void )
    }
 
   AddSeparator( Menu );
-  MenuItem=AddMenuCheckItem( Menu,MSGTR_MENU_Mute,muted,evMute );
+  MenuItem=AddMenuCheckItem( Menu,MSGTR_MENU_Mute,mixer.muted,evMute );
   if ( !guiIntfStruct.AudioType ) gtk_widget_set_sensitive( MenuItem,FALSE );
   AddMenuItem( Menu,MSGTR_MENU_PlayList, evPlayList );
   AddMenuItem( Menu,MSGTR_MENU_SkinBrowser, evSkinBrowser );
