@@ -25,11 +25,8 @@ OSDEP_LIBS = -Llinux -losdep
 PP_LIBS = -Lpostproc -lpostproc
 XA_LIBS = -Lxa -lxa
 
-ifeq ($(TARGET_ARCH_SGI_MIPS),yes)
-PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb
-else
 PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb linux postproc xa
-endif
+
 ifeq ($(GUI),yes)
 PARTS += Gui
 endif
@@ -46,7 +43,7 @@ ifeq ($(CSS_USE),yes)
 ALL_PRG += $(PRG_FIBMAP)
 endif
 
-.SUFFIXES: .c .o
+.SUFFIXES: .cc .c .o
 
 # .PHONY: all clean
 
