@@ -996,7 +996,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y
 {
 	uint8_t *s;
     uint8_t *d;
-    uint32_t i=0;
+    uint32_t i=0, uvstride=dstride/2;
     
 	// copy Y
     d=image+dstride*y+x;                
@@ -1004,29 +1004,29 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y
     for(i=0;i<h;i++){
         memcpy(d,s,w);                  
         s+=stride[0];                  
-        d+=stride[0];
+        d+=dstride;
     }
     
 	w/=2;h/=2;x/=2;y/=2;
 	
 	// copy U
-    d=image+image_width*image_height + dstride*y/2+x;
+    d=image+dstride*image_height + uvstride*y+x;
     if(swap)s=src[2];
 	else s=src[1];
     for(i=0;i<h;i++){
         memcpy(d,s,w);
         s+=stride[1];
-        d+=stride[1];
+        d+=uvstride;
     }
 	
 	// copy V
-    d=image+image_width*image_height +image_width*image_height/4 + dstride*y/2+x;
+    d=image+dstride*image_height +uvstride*(image_height/2) + uvstride*y+x;
     if(swap)s=src[1];
 	else s=src[2];
     for(i=0;i<h;i++){
         memcpy(d,s,w);
         s+=stride[2];
-        d+=stride[2];
+        d+=uvstride;
     }
     return 0;
 }
