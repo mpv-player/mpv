@@ -46,8 +46,7 @@ extern int gtkIsOk;
 extern pid_t mplMPlayerPID;
 extern pid_t mplParentPID;
 
-extern pid_t gtkChildPID;
-extern pid_t gtkParentPID;
+extern pid_t gtkPID;
 
 extern void gtkSigHandler( int s );
 extern void mplPlayerSigHandler( int s );

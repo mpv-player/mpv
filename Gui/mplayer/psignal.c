@@ -28,8 +28,7 @@
 pid_t mplMPlayerPID = 0;
 pid_t mplParentPID = 0;
 
-pid_t gtkChildPID = 0;
-pid_t gtkParentPID = 0;
+pid_t gtkPID = 0;
 
 int mplCriticalError = 0;
 int gtkIsOk = 0;
@@ -46,9 +45,9 @@ void mplErrorHandler( int critical,const char * format, ... )
  va_end( ap );
  mplCriticalError=critical;
  gtkMessageBox( p );
-// message( False,p );
 }
 
+/*
 void mplPlayerSigHandler( int s )
 {
  #ifdef DEBUG
@@ -91,6 +90,7 @@ void mplPlayerSigHandler( int s )
   }
  mplShMem->message=0;
 }
+*/
 
 void gtkSigHandler( int s )
 {
@@ -137,6 +137,12 @@ void gtkSigHandler( int s )
         gtkVisibleFileSelect=1;
         gtkShow( evPlay );
         break;
+   case evFirstLoad:
+        if ( gtkVisibleFileSelect ) gtk_widget_hide( FileSelect );
+        gtk_widget_show( FileSelect );
+        gtkVisibleFileSelect=1;
+        gtkShow( evFirstLoad );
+        break;
    case evMessageBox:
         gtk_label_set_text( gtkMessageBoxText,(char *)gtkShMem->mb.str );
         gtk_widget_set_usize( MessageBox,gtkShMem->mb.sx,gtkShMem->mb.sy );
@@ -161,18 +167,18 @@ listItems tmpList;
 
 void mplMainSigHandler( int s )
 {
+ if ( s != SIGTYPE ) return;
+
  #ifdef DEBUG
   if ( gtkShMem->message ) dbprintf( 5,"[psignal] main sig handler gtk msg: %d\n",gtkShMem->message );
-  if ( mplShMem->message ) dbprintf( 5,"[psignal] main sig handler mpl msg: %d\n",mplShMem->message );
+//  if ( mplShMem->message ) dbprintf( 5,"[psignal] main sig handler mpl msg: %d\n",mplShMem->message );
  #endif
-
- if ( s != SIGTYPE ) return;
 
  switch ( gtkShMem->message )
   {
    case evGtkIsOk:
         #ifdef DEBUG
-         dbprintf( 1,"[psignal] gtk is ok.\n" );
+         dbprintf( 5,"[psignal] gtk is ok.\n" );
         #endif
         gtkIsOk=True;
         break;
@@ -276,15 +282,15 @@ void mplMainSigHandler( int s )
 //  {
 //  }
  gtkShMem->message=0;
- mplShMem->message=0;
+// mplShMem->message=0;
 }
 
 void mplSendMessage( int msg )
 {
  if ( !mplShMem->Playing ) return;
  mplShMem->message=msg;
- kill( mplMPlayerPID,SIGTYPE ); usleep( 10 );
- kill( mplMPlayerPID,SIGTYPE ); usleep( 10 );
+// kill( mplMPlayerPID,SIGTYPE ); usleep( 10 );
+// kill( mplMPlayerPID,SIGTYPE ); usleep( 10 );
  kill( mplMPlayerPID,SIGTYPE );
 }
 
@@ -292,5 +298,5 @@ void gtkSendMessage( int msg )
 {
  if ( !gtkIsOk ) return;
  gtkShMem->message=msg;
- kill( gtkChildPID,SIGTYPE );
+ kill( gtkPID,SIGTYPE );
 }
