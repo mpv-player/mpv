@@ -88,7 +88,7 @@ draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y
 	dest = vid_data + bespitch*mga_vid_config.src_height + bespitch*y + 2*x;
 
 	interleaveBytes(image[1],image[2],dest,
-		mga_vid_config.src_width, height,
+		width, height,
 		stride[1], stride[2], bespitch);
 }
 
