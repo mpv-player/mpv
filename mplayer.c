@@ -139,6 +139,8 @@ int use_stdin=0;
 vo_functions_t *video_out=NULL;
 ao_functions_t *audio_out=NULL;
 
+int fixed_vo=0;
+
 // benchmark:
 double video_time_usage=0;
 double vout_time_usage=0;
@@ -1148,6 +1150,7 @@ if(sh_audio){
 if(!sh_video) goto main; // audio-only
 
 //================== Init VIDEO (codec & libvo) ==========================
+if(!fixed_vo || !(inited_flags&INITED_VO)){
 current_module="preinit_libvo";
 
 vo_config_count=0;
@@ -1158,6 +1161,7 @@ if(!(video_out=init_best_video_out(video_driver_list))){
 }
 sh_video->video_out=video_out;
 inited_flags|=INITED_VO;
+}
 
 current_module="init_video_filters";
 
@@ -1171,7 +1175,7 @@ init_best_video_codec(sh_video,video_codec_list,video_fm_list);
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 if(!sh_video->inited){
-    uninit_player(INITED_VO);
+    if(!fixed_vo) uninit_player(INITED_VO);
     if(!sh_audio) goto goto_next_file;
     sh_video = d_video->sh = NULL;
     goto main; // exit_player(MSGTR_Exit_error);
@@ -1325,7 +1329,7 @@ if(!sh_video){
    if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks\n",d_video->packs);
    ds_free_packs(d_video);
    d_video->id=-2;
-   //uninit_player(INITED_VO);
+   //if(!fixed_vo) uninit_player(INITED_VO);
 }
 
 if (!sh_video && !sh_audio)
@@ -2685,7 +2689,7 @@ if(benchmark){
 }
 
 // time to uninit all, except global stuff:
-uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT));
+uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT+(fixed_vo?INITED_VO:0)));
 
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
   eof = eof == PT_NEXT_ENTRY ? 1 : -1;
