@@ -190,7 +190,7 @@ If you couldn't solve the problem, then send a quality bugreport
 via E-Mail to the MPlayer-users list : mplayer-users@lists.sourceforge.net
 
 *NEVER* send attached AVIs, MPEGs, or any big files to this list or private!!!
-Upload them to ftp://thot.banki.hu/incoming/MPlayer/ , and inform the list
+Upload them to ftp://thot.banki.hu/MPlayer/incoming , and inform the list
 about your upload.
 
 Please include these:
@@ -211,7 +211,8 @@ Do not send level-0 logs, always use the mplayer option '-v' when making log:
   mplayer -v test.avi &>play.log
 
 If we ask you for the file, then you have two choices:
-- upload the file to ftp://thot.banki.hu/incoming (at least a few megabytes)
+- upload the file to ftp://thot.banki.hu/MPlayer/incoming (at least a few
+  megabytes)
 - send the exact URL of the file, and we'll download it soon.
 
 Please do not ask for features already listed in the TODO!

@@ -140,7 +140,7 @@ This is the MP3 codec.
 
 So, now we have all the info needed (fourcc, codec file, sample AVI), submit
 your codec support request in mail, and upload these files to the FTP:
-    ftp://thot.banki.hu/incoming/MPlayer/<codecname>/
+    ftp://thot.banki.hu/MPlayer/incoming/<codecname>/
 
 
 2. DirectShow
@@ -171,7 +171,7 @@ NOTE : dump that M$ shit.
 
 So, now we have all the info needed (fourcc, GUID, codec file, sample AVI),
 submit your codec support request in mail, and upload these files to the FTP:
-    ftp://thot.banki.hu/incoming/MPlayer/<codecname>/
+    ftp://thot.banki.hu/MPlayer/incoming/<codecname>/
 
 
 	Gabucino & A'rpi
