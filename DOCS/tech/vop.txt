@@ -172,6 +172,15 @@ Current plugins:
     given on the command line, and the eq filter is controllable
     interactively just like with normal hardware equalizer controls.
 
+-vop eq2[=gamma:contrast:brightness:saturation:r_gamma:g_gamma:b_gamma]
+    advanced software equalizer, for use with cards that don't support
+    brightness/contrast/saturation and channel gamma controls in hardware.
+    Initial values in the range -2.0 .. 2.0 may be given on the command line,
+    and the eq2 filter is controllable interactively just like with normal
+    hardware equalizer controls or -vop eq. Defaults: 1:1:0:1:1:1:1
+    This filter uses MMX only if available and all gamma == 1.0, otherwise
+    LUT (look-up table) is being used.
+
 -vop unsharp=l|cWxH:amount[:l|cWxH:amount]
     unsharp mask / gaussian blur.
         l   apply effect on luma component
