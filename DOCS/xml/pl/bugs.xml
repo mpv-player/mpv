@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.5 -->
+<!-- synced with 1.6 -->
 <appendix id="bugs">
 <title>Znane błędy</title>
 <sect1 id="bugs-special">
@@ -148,7 +148,7 @@ za pomocą opcji <option>-vc</option> lub <option>-vfm</option>
 <listitem>
 <para>
 próbujesz odtwarzać plik DivX 3.x za pomocą kodeka OpenDivX lub XviD (opcja
-<option>-vc odivx</option>) - zainstaluj Divx4Linux i przekompiluj odtwarzacz
+<option>-vc odivx</option>) - zainstaluj DivX4Linux i przekompiluj odtwarzacz
 </para>
 </listitem>
 </itemizedlist>
