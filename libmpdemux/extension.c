@@ -56,7 +56,9 @@ static struct {
 #endif
 	{ "nut", DEMUXER_TYPE_LAVF },
 	{ "swf", DEMUXER_TYPE_LAVF },
-	{ "flv", DEMUXER_TYPE_LAVF }
+	{ "flv", DEMUXER_TYPE_LAVF },
+        { "264", DEMUXER_TYPE_H264_ES },
+        { "26l", DEMUXER_TYPE_H264_ES }
 };
 
 int demuxer_type_by_filename(char* filename){
