@@ -1,10 +1,12 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.89
+// Updated to help_mp-en.h v1.96
 
-// Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming
-// and send a notify message to mplayer-dev-eng maillist.
+// Translated files should be sent to the mplayer-dev-eng mailing list or
+// to the help messages maintainer, see DOCS/tech/MAINTAINERS.
+// Please also put a note like "sync'ed with help_mp-en.h XXX" in the header
+// of the translated file so that we see at a glance if it is outdated.
 
 // ========================= MPlayer help ===========================
 
@@ -581,6 +583,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Cache on/off"
 #define MSGTR_PREFERENCES_LoadFullscreen "Avvia a pieno schermo"
 #define MSGTR_PREFERENCES_CacheSize "Dimensione cache: "
+#define MSGTR_PREFERENCES_SaveWinPos "Salva la posizione della finestra"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Arresta XScreenSaver"
 #define MSGTR_PREFERENCES_PlayBar "Attiva playbar"
 #define MSGTR_PREFERENCES_AutoSync "AutoSync on/off"
