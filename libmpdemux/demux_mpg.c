@@ -349,7 +349,10 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
           newpos+=sh_video->i_bps*rel_seek_secs;
     }
 
-        if(newpos<demuxer->movi_start) newpos=demuxer->movi_start;
+        if(newpos<demuxer->movi_start){
+	    if(demuxer->stream->type!=STREAMTYPE_VCD) demuxer->movi_start=0; // for VCD
+	    if(newpos<demuxer->movi_start) newpos=demuxer->movi_start;
+	}
 
 #ifdef _LARGEFILE_SOURCE
         newpos&=~((long long)STREAM_BUFFER_SIZE-1);  /* sector boundary */

@@ -642,7 +642,7 @@ switch(file_format){
  }
  case DEMUXER_TYPE_MPEG_PS: {
   sh_video=d_video->sh;sh_video->ds=d_video;
-  if(demuxer->stream->type!=STREAMTYPE_VCD) demuxer->movi_start=0; // for VCD
+//  if(demuxer->stream->type!=STREAMTYPE_VCD) demuxer->movi_start=0; // for VCD
 
   if(audio_id!=-2) {
    if(!ds_fill_buffer(d_audio)){
