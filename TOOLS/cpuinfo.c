@@ -2,6 +2,18 @@
 #include <stdio.h>
 #include <sys/time.h>
 
+#ifdef __MINGW32__
+#include <sys/timeb.h>
+void gettimeofday(struct timeval* t,void* timezone)
+{       struct timeb timebuffer;
+        ftime( &timebuffer );
+        t->tv_sec=timebuffer.time;
+        t->tv_usec=1000*timebuffer.millitm;
+}
+#define MISSING_USLEEP
+#define sleep(t) _sleep(1000*t);
+#endif
+
 #ifdef M_UNIX
 typedef long long int64_t;
 #define	MISSING_USLEEP
