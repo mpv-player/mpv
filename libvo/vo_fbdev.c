@@ -4,9 +4,8 @@
  * (C) 2001
  * 
  * Some idea and code borrowed from Chris Lawrence's ppmtofb-0.27
+ * Some fixes and small improvements by Joey Parrish <joey@nicewarrior.org>
  */
-
-#define FBDEV "fbdev: "
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,8 +13,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include <ctype.h>
-#include <assert.h>
 
 #include <sys/mman.h>
 #include <sys/ioctl.h>
@@ -27,16 +24,11 @@
 #include "video_out_internal.h"
 #include "fastmemcpy.h"
 #include "sub.h"
-#include "../postproc/rgb2rgb.h"
-#include "../libmpcodecs/vf_scale.h"
 #ifdef CONFIG_VIDIX
 #include "vosub_vidix.h"
 #endif
 #include "aspect.h"
-
-#ifdef HAVE_PNG
-extern vo_functions_t video_out_png;
-#endif
+#include "mp_msg.h"
 
 static vo_info_t info = {
 	"Framebuffer Device",
@@ -46,8 +38,6 @@ static vo_info_t info = {
 };
 
 LIBVO_EXTERN(fbdev)
-
-extern int verbose;
 
 #ifdef CONFIG_VIDIX
 /* Name of VIDIX driver */
@@ -74,8 +64,6 @@ typedef struct {
 	uint32_t vmode;
 } fb_mode_t;
 
-#define PRINT_LINENUM printf(" at line %d\n", line_num)
-
 #define MAX_NR_TOKEN	16
 
 #define MAX_LINE_LEN	1000
@@ -86,11 +74,11 @@ typedef struct {
 static int validate_mode(fb_mode_t *m)
 {
 	if (!m->xres) {
-		printf("needs geometry ");
+		mp_msg(MSGT_VO, MSGL_V, "needs geometry ");
 		return 0;
 	}
 	if (!m->pixclock) {
-		printf("needs timings ");
+		mp_msg(MSGT_VO, MSGL_V, "needs timings ");
 		return 0;
 	}
 	return 1;
@@ -100,7 +88,6 @@ static FILE *fp;
 static int line_num = 0;
 static char *line;
 static char *token[MAX_NR_TOKEN];
-static uint32_t dstFourcc;
 
 static int get_token(int num)
 {
@@ -110,7 +97,7 @@ static int get_token(int num)
 	char c;
 
 	if (num >= MAX_NR_TOKEN) {
-		printf("get_token(): max >= MAX_NR_TOKEN!");
+		mp_msg(MSGT_VO, MSGL_V, "get_token(): max >= MAX_NR_TOKEN!\n");
 		goto out_eof;
 	}
 
@@ -164,28 +151,24 @@ static int nr_modes = 0;
 static int parse_fbmode_cfg(char *cfgfile)
 {
 #define CHECK_IN_MODE_DEF\
-	do {\
 	if (!in_mode_def) {\
-		printf("'needs 'mode' first");\
+		mp_msg(MSGT_VO, MSGL_V, "'needs 'mode' first");\
 		goto err_out_print_linenum;\
-	}\
-	} while (0)
-
+	}
 	fb_mode_t *mode = NULL;
 	char *endptr;	// strtoul()...
 	int in_mode_def = 0;
 	int tmp, i;
 
-	if (verbose > 0)
-		printf("Reading %s: ", cfgfile);
+	mp_msg(MSGT_VO, MSGL_V, "Reading %s: ", cfgfile);
 
 	if ((fp = fopen(cfgfile, "r")) == NULL) {
-		printf("can't open '%s': %s\n", cfgfile, strerror(errno));
+		mp_msg(MSGT_VO, MSGL_V, "can't open '%s': %s\n", cfgfile, strerror(errno));
 		return -1;
 	}
 
 	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
-		printf("can't get memory for 'line': %s\n", strerror(errno));
+		mp_msg(MSGT_VO, MSGL_V, "can't get memory for 'line': %s\n", strerror(errno));
 		return -2;
 	}
 
@@ -205,7 +188,7 @@ static int parse_fbmode_cfg(char *cfgfile)
 			continue;
 		if (!strcmp(token[0], "mode")) {
 			if (in_mode_def) {
-				printf("'endmode' required");
+				mp_msg(MSGT_VO, MSGL_V, "'endmode' required");
 				goto err_out_print_linenum;
 			}
 			if (!validate_mode(mode))
@@ -213,7 +196,7 @@ static int parse_fbmode_cfg(char *cfgfile)
 		loop_enter:
 		        if (!(fb_modes = (fb_mode_t *) realloc(fb_modes,
 				sizeof(fb_mode_t) * (nr_modes + 1)))) {
-			    printf("can't realloc 'fb_modes' (nr_modes = %d):"
+			    mp_msg(MSGT_VO, MSGL_V, "can't realloc 'fb_modes' (nr_modes = %d):"
 					    " %s\n", nr_modes, strerror(errno));
 			    goto err_out;
 		        }
@@ -225,12 +208,12 @@ static int parse_fbmode_cfg(char *cfgfile)
 				goto err_out_parse_error;
 			for (i = 0; i < nr_modes - 1; i++) {
 				if (!strcmp(token[0], fb_modes[i].name)) {
-					printf("mode name '%s' isn't unique", token[0]);
+					mp_msg(MSGT_VO, MSGL_V, "mode name '%s' isn't unique", token[0]);
 					goto err_out_print_linenum;
 				}
 			}
 			if (!(mode->name = strdup(token[0]))) {
-				printf("can't strdup -> 'name': %s\n", strerror(errno));
+				mp_msg(MSGT_VO, MSGL_V, "can't strdup -> 'name': %s\n", strerror(errno));
 				goto err_out;
 			}
 			in_mode_def = 1;
@@ -355,15 +338,14 @@ static int parse_fbmode_cfg(char *cfgfile)
 	if (!validate_mode(mode))
 		goto err_out_not_valid;
 out:
-	if (verbose > 0)
-		printf("%d modes\n", nr_modes);
+	mp_msg(MSGT_VO, MSGL_V, "%d modes\n", nr_modes);
 	free(line);
 	fclose(fp);
 	return nr_modes;
 err_out_parse_error:
-	printf("parse error");
+	mp_msg(MSGT_VO, MSGL_V, "parse error");
 err_out_print_linenum:
-	PRINT_LINENUM;
+	mp_msg(MSGT_VO, MSGL_V, " at line %d\n", line_num);
 err_out:
 	if (fb_modes) {
 		free(fb_modes);
@@ -374,7 +356,7 @@ err_out:
 	free(fp);
 	return -2;
 err_out_not_valid:
-	printf("previous mode is not correct");
+	mp_msg(MSGT_VO, MSGL_V, "previous mode is not correct");
 	goto err_out_print_linenum;
 }
 
@@ -414,29 +396,23 @@ static int mode_works(fb_mode_t *m, range_t *hfreq, range_t *vfreq,
 	float d = dcf(m);
 	int ret = 1;
 
-	if (verbose > 1)
-		printf(FBDEV "mode %dx%d:", m->xres, m->yres);
+	mp_msg(MSGT_VO, MSGL_DBG2, "mode %dx%d:", m->xres, m->yres);
 	if (!in_range(hfreq, h)) {
 		ret = 0;
-		if (verbose > 1)
-			printf(" hsync out of range.");
+		mp_msg(MSGT_VO, MSGL_DBG2, " hsync out of range.");
 	}
 	if (!in_range(vfreq, v)) {
 		ret = 0;
-		if (verbose > 1)
-			printf(" vsync out of range.");
+		mp_msg(MSGT_VO, MSGL_DBG2, " vsync out of range.");
 	}
 	if (!in_range(dotclock, d)) {
 		ret = 0;
-		if (verbose > 1)
-			printf(" dotclock out of range.");
+		mp_msg(MSGT_VO, MSGL_DBG2, " dotclock out of range.");
 	}
-	if (verbose > 1) {
-		if (ret)
-			printf(" hsync, vsync, dotclock ok.\n");
-		else
-			printf("\n");
-	}
+	if (ret)
+		mp_msg(MSGT_VO, MSGL_DBG2, " hsync, vsync, dotclock ok.\n");
+	else
+		mp_msg(MSGT_VO, MSGL_DBG2, "\n");
 
 	return ret;
 }
@@ -448,8 +424,7 @@ static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
 	fb_mode_t *best = fb_modes;
 	fb_mode_t *curr;
 
-	if (verbose > 1)
-		printf(FBDEV "Searching for first working mode\n");
+	mp_msg(MSGT_VO, MSGL_DBG2, "Searching for first working mode\n");
 
 	for (i = 0; i < nr_modes; i++, best++)
 		if (mode_works(best, hfreq, vfreq, dotclock))
@@ -460,43 +435,35 @@ static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
 	if (i == nr_modes - 1)
 		return best;
 
-	if (verbose > 1) {
-		printf(FBDEV "First working mode: %dx%d\n", best->xres, best->yres);
-		printf(FBDEV "Searching for better modes\n");
-	}
+	mp_msg(MSGT_VO, MSGL_DBG2, "First working mode: %dx%d\n", best->xres, best->yres);
+	mp_msg(MSGT_VO, MSGL_DBG2, "Searching for better modes\n");
 
 	for (curr = best + 1; i < nr_modes - 1; i++, curr++) {
 		if (!mode_works(curr, hfreq, vfreq, dotclock))
 			continue;
 
-		if (verbose > 1)
-			printf(FBDEV);
-
 		if (best->xres < xres || best->yres < yres) {
 			if (curr->xres > best->xres || curr->yres > best->yres) {
-				if (verbose > 1)
-					printf("better than %dx%d, which is too small.\n",
+				mp_msg(MSGT_VO, MSGL_DBG2, "better than %dx%d, which is too small.\n",
 							best->xres, best->yres);
 				best = curr;
-			} else if (verbose > 1)
-				printf("too small.\n");
+			} else
+				mp_msg(MSGT_VO, MSGL_DBG2, "too small.\n");
 		} else if (curr->xres == best->xres && curr->yres == best->yres &&
 				vsf(curr) > vsf(best)) {
-			if (verbose > 1)
-				printf("faster screen refresh.\n");
+			mp_msg(MSGT_VO, MSGL_DBG2, "faster screen refresh.\n");
 			best = curr;
 		} else if ((curr->xres <= best->xres && curr->yres <= best->yres) &&
 				(curr->xres >= xres && curr->yres >= yres)) {
-			if (verbose > 1)
-				printf("better than %dx%d, which is too large.\n",
+			mp_msg(MSGT_VO, MSGL_DBG2, "better than %dx%d, which is too large.\n",
 						best->xres, best->yres);
 			best = curr;
-		} else if (verbose > 1) {
+		} else {
 			if (curr->xres < xres || curr->yres < yres)
-				printf("too small.\n");
+				mp_msg(MSGT_VO, MSGL_DBG2, "too small.\n");
 			else if (curr->xres > best->xres || curr->yres > best->yres)
-				printf("too large.\n");
-			else printf("it's worse, don't know why.\n");
+				mp_msg(MSGT_VO, MSGL_DBG2, "too large.\n");
+			else mp_msg(MSGT_VO, MSGL_DBG2, "it's worse, don't know why.\n");
 		}
 	}
 
@@ -568,13 +535,12 @@ char *fb_mode_name = NULL;
 static fb_mode_t *fb_mode = NULL;
 
 /* vt related variables */
-static int vt_fd;
-static FILE *vt_fp;
+static FILE *vt_fp = NULL;
 static int vt_doit = 1;
 
 /* vo_fbdev related variables */
 static int fb_dev_fd;
-static int fb_tty_fd;
+static int fb_tty_fd = -1;
 static size_t fb_size;
 static uint8_t *frame_buffer;
 static uint8_t *center;	/* thx .so :) */
@@ -584,7 +550,6 @@ static struct fb_var_screeninfo fb_vinfo;
 static struct fb_cmap fb_oldcmap;
 static int fb_cmap_changed = 0;
 static int fb_pixel_size;	// 32:  4  24:  3  16:  2  15:  2
-static int fb_real_bpp;		// 32: 24  24: 24  16: 16  15: 15
 static int fb_bpp;		// 32: 32  24: 24  16: 16  15: 15
 static int fb_bpp_we_want;	// 32: 32  24: 24  16: 16  15: 15
 static int fb_line_len;
@@ -603,7 +568,6 @@ static int first_row;
 static int last_row;
 static uint32_t pixel_format;
 static int fs;
-static int flip;
 
 /*
  * Note: this function is completely cut'n'pasted from
@@ -632,7 +596,7 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   
   red = malloc(cols * sizeof(red[0]));
   if(!red) {
-	  printf("Can't allocate red palette with %d entries.\n", cols);
+	  mp_msg(MSGT_VO, MSGL_V, "Can't allocate red palette with %d entries.\n", cols);
 	  return NULL;
   }
   for(i=0; i< rcols; i++)
@@ -640,7 +604,7 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   
   green = malloc(cols * sizeof(green[0]));
   if(!green) {
-	  printf("Can't allocate green palette with %d entries.\n", cols);
+	  mp_msg(MSGT_VO, MSGL_V, "Can't allocate green palette with %d entries.\n", cols);
 	  free(red);
 	  return NULL;
   }
@@ -649,7 +613,7 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   
   blue = malloc(cols * sizeof(blue[0]));
   if(!blue) {
-	  printf("Can't allocate blue palette with %d entries.\n", cols);
+	  mp_msg(MSGT_VO, MSGL_V, "Can't allocate blue palette with %d entries.\n", cols);
 	  free(red);
 	  free(green);
 	  return NULL;
@@ -659,7 +623,7 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   
   cmap = malloc(sizeof(struct fb_cmap));
   if(!cmap) {
-	  printf("Can't allocate color map\n");
+	  mp_msg(MSGT_VO, MSGL_V, "Can't allocate color map\n");
 	  free(red);
 	  free(green);
 	  free(blue);
@@ -680,7 +644,7 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
 static uint32_t parseSubDevice(const char *sd)
 {
    if(memcmp(sd,"vidix",5) == 0) vidix_name = &sd[5]; /* vidix_name will be valid within init() */
-   else { printf(FBDEV "Unknown subdevice: '%s'\n", sd); return -1; }
+   else { mp_msg(MSGT_VO, MSGL_WARN, "Unknown subdevice: '%s'\n", sd); return -1; }
    return 0;
 }
 #endif
@@ -701,40 +665,34 @@ static int fb_preinit(int reset)
 
 	if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER")))
 		fb_dev_name = "/dev/fb0";
-	if (verbose > 0)
-		printf(FBDEV "using %s\n", fb_dev_name);
+	mp_msg(MSGT_VO, MSGL_V, "using %s\n", fb_dev_name);
 
 	if ((fb_dev_fd = open(fb_dev_name, O_RDWR)) == -1) {
-		printf(FBDEV "Can't open %s: %s\n", fb_dev_name, strerror(errno));
+		mp_msg(MSGT_VO, MSGL_ERR, "Can't open %s: %s\n", fb_dev_name, strerror(errno));
 		goto err_out;
 	}
 	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
-		printf(FBDEV "Can't get VSCREENINFO: %s\n", strerror(errno));
+		mp_msg(MSGT_VO, MSGL_ERR, "Can't get VSCREENINFO: %s\n", strerror(errno));
 		goto err_out_fd;
 	}
 	fb_orig_vinfo = fb_vinfo;
 
         if ((fb_tty_fd = open("/dev/tty", O_RDWR)) < 0) {
-                if (verbose > 0)
-                        printf(FBDEV "notice: Can't open /dev/tty: %s\n", strerror(errno));
+                mp_msg(MSGT_VO, MSGL_ERR, "notice: Can't open /dev/tty: %s\n", strerror(errno));
         }
 
-	fb_bpp = fb_vinfo.bits_per_pixel;
+	fb_bpp = fb_vinfo.red.length + fb_vinfo.green.length +
+		fb_vinfo.blue.length + fb_vinfo.transp.length;
 
 	if (fb_bpp == 8 && !vo_dbpp) {
-		printf(FBDEV "8 bpp output is not supported.\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "8 bpp output is not supported.\n");
 		goto err_out_tty_fd;
 	}
-
-	/* 16 and 15 bpp is reported as 16 bpp */
-	if (fb_bpp == 16)
-		fb_bpp = fb_vinfo.red.length + fb_vinfo.green.length +
-			fb_vinfo.blue.length;
 
 	if (vo_dbpp) {
 		if (vo_dbpp != 15 && vo_dbpp != 16 && vo_dbpp != 24 &&
 				vo_dbpp != 32) {
-			printf(FBDEV "can't switch to %d bpp\n", vo_dbpp);
+			mp_msg(MSGT_VO, MSGL_ERR, "can't switch to %d bpp\n", vo_dbpp);
 			goto err_out_fd;
 		}
 		fb_bpp = vo_dbpp;		
@@ -757,78 +715,70 @@ err_out:
 
 static void lots_of_printf(void)
 {
-	if (verbose > 0) {
-		printf(FBDEV "var info:\n");
-		printf(FBDEV "xres: %u\n", fb_vinfo.xres);
-		printf(FBDEV "yres: %u\n", fb_vinfo.yres);
-		printf(FBDEV "xres_virtual: %u\n", fb_vinfo.xres_virtual);
-		printf(FBDEV "yres_virtual: %u\n", fb_vinfo.yres_virtual);
-		printf(FBDEV "xoffset: %u\n", fb_vinfo.xoffset);
-		printf(FBDEV "yoffset: %u\n", fb_vinfo.yoffset);
-		printf(FBDEV "bits_per_pixel: %u\n", fb_vinfo.bits_per_pixel);
-		printf(FBDEV "grayscale: %u\n", fb_vinfo.grayscale);
-		printf(FBDEV "red: %lu %lu %lu\n",
-				(unsigned long) fb_vinfo.red.offset,
-				(unsigned long) fb_vinfo.red.length,
-				(unsigned long) fb_vinfo.red.msb_right);
-		printf(FBDEV "green: %lu %lu %lu\n",
-				(unsigned long) fb_vinfo.green.offset,
-				(unsigned long) fb_vinfo.green.length,
-				(unsigned long) fb_vinfo.green.msb_right);
-		printf(FBDEV "blue: %lu %lu %lu\n",
-				(unsigned long) fb_vinfo.blue.offset,
-				(unsigned long) fb_vinfo.blue.length,
-				(unsigned long) fb_vinfo.blue.msb_right);
-		printf(FBDEV "transp: %lu %lu %lu\n",
-				(unsigned long) fb_vinfo.transp.offset,
-				(unsigned long) fb_vinfo.transp.length,
-				(unsigned long) fb_vinfo.transp.msb_right);
-		printf(FBDEV "nonstd: %u\n", fb_vinfo.nonstd);
-		if (verbose > 1) {
-			printf(FBDEV "activate: %u\n", fb_vinfo.activate);
-			printf(FBDEV "height: %u\n", fb_vinfo.height);
-			printf(FBDEV "width: %u\n", fb_vinfo.width);
-			printf(FBDEV "accel_flags: %u\n", fb_vinfo.accel_flags);
-			printf(FBDEV "timing:\n");
-			printf(FBDEV "pixclock: %u\n", fb_vinfo.pixclock);
-			printf(FBDEV "left_margin: %u\n", fb_vinfo.left_margin);
-			printf(FBDEV "right_margin: %u\n", fb_vinfo.right_margin);
-			printf(FBDEV "upper_margin: %u\n", fb_vinfo.upper_margin);
-			printf(FBDEV "lower_margin: %u\n", fb_vinfo.lower_margin);
-			printf(FBDEV "hsync_len: %u\n", fb_vinfo.hsync_len);
-			printf(FBDEV "vsync_len: %u\n", fb_vinfo.vsync_len);
-			printf(FBDEV "sync: %u\n", fb_vinfo.sync);
-			printf(FBDEV "vmode: %u\n", fb_vinfo.vmode);
-		}
-		printf(FBDEV "fix info:\n");
-		printf(FBDEV "framebuffer size: %d bytes\n", fb_finfo.smem_len);
-		printf(FBDEV "type: %lu\n", (unsigned long) fb_finfo.type);
-		printf(FBDEV "type_aux: %lu\n", (unsigned long) fb_finfo.type_aux);
-		printf(FBDEV "visual: %lu\n", (unsigned long) fb_finfo.visual);
-		printf(FBDEV "line_length: %lu bytes\n", (unsigned long) fb_finfo.line_length);
-		if (verbose > 1) {
-			printf(FBDEV "id: %.16s\n", fb_finfo.id);
-			printf(FBDEV "smem_start: %p\n", (void *) fb_finfo.smem_start);
-			printf(FBDEV "xpanstep: %u\n", fb_finfo.xpanstep);
-			printf(FBDEV "ypanstep: %u\n", fb_finfo.ypanstep);
-			printf(FBDEV "ywrapstep: %u\n", fb_finfo.ywrapstep);
-			printf(FBDEV "mmio_start: %p\n", (void *) fb_finfo.mmio_start);
-			printf(FBDEV "mmio_len: %u bytes\n", fb_finfo.mmio_len);
-			printf(FBDEV "accel: %u\n", fb_finfo.accel);
-		}
-		printf(FBDEV "fb_bpp: %d\n", fb_bpp);
-		printf(FBDEV "fb_real_bpp: %d\n", fb_real_bpp);
-		printf(FBDEV "fb_pixel_size: %d bytes\n", fb_pixel_size);
-		printf(FBDEV "other:\n");
-		printf(FBDEV "in_width: %d\n", in_width);
-		printf(FBDEV "in_height: %d\n", in_height);
-		printf(FBDEV "out_width: %d\n", out_width);
-		printf(FBDEV "out_height: %d\n", out_height);
-		printf(FBDEV "first_row: %d\n", first_row);
-		printf(FBDEV "last_row: %d\n", last_row);
-		if (verbose > 1)
-			printf(FBDEV "draw_alpha_p:%dbpp = %p\n", fb_bpp, draw_alpha_p);
-	}
+	mp_msg(MSGT_VO, MSGL_V, "var info:\n");
+	mp_msg(MSGT_VO, MSGL_V, "xres: %u\n", fb_vinfo.xres);
+	mp_msg(MSGT_VO, MSGL_V, "yres: %u\n", fb_vinfo.yres);
+	mp_msg(MSGT_VO, MSGL_V, "xres_virtual: %u\n", fb_vinfo.xres_virtual);
+	mp_msg(MSGT_VO, MSGL_V, "yres_virtual: %u\n", fb_vinfo.yres_virtual);
+	mp_msg(MSGT_VO, MSGL_V, "xoffset: %u\n", fb_vinfo.xoffset);
+	mp_msg(MSGT_VO, MSGL_V, "yoffset: %u\n", fb_vinfo.yoffset);
+	mp_msg(MSGT_VO, MSGL_V, "bits_per_pixel: %u\n", fb_vinfo.bits_per_pixel);
+	mp_msg(MSGT_VO, MSGL_V, "grayscale: %u\n", fb_vinfo.grayscale);
+	mp_msg(MSGT_VO, MSGL_V, "red: %lu %lu %lu\n",
+			(unsigned long) fb_vinfo.red.offset,
+			(unsigned long) fb_vinfo.red.length,
+			(unsigned long) fb_vinfo.red.msb_right);
+	mp_msg(MSGT_VO, MSGL_V, "green: %lu %lu %lu\n",
+			(unsigned long) fb_vinfo.green.offset,
+			(unsigned long) fb_vinfo.green.length,
+			(unsigned long) fb_vinfo.green.msb_right);
+	mp_msg(MSGT_VO, MSGL_V, "blue: %lu %lu %lu\n",
+			(unsigned long) fb_vinfo.blue.offset,
+			(unsigned long) fb_vinfo.blue.length,
+			(unsigned long) fb_vinfo.blue.msb_right);
+	mp_msg(MSGT_VO, MSGL_V, "transp: %lu %lu %lu\n",
+			(unsigned long) fb_vinfo.transp.offset,
+			(unsigned long) fb_vinfo.transp.length,
+			(unsigned long) fb_vinfo.transp.msb_right);
+	mp_msg(MSGT_VO, MSGL_V, "nonstd: %u\n", fb_vinfo.nonstd);
+	mp_msg(MSGT_VO, MSGL_DBG2, "activate: %u\n", fb_vinfo.activate);
+	mp_msg(MSGT_VO, MSGL_DBG2, "height: %u\n", fb_vinfo.height);
+	mp_msg(MSGT_VO, MSGL_DBG2, "width: %u\n", fb_vinfo.width);
+	mp_msg(MSGT_VO, MSGL_DBG2, "accel_flags: %u\n", fb_vinfo.accel_flags);
+	mp_msg(MSGT_VO, MSGL_DBG2, "timing:\n");
+	mp_msg(MSGT_VO, MSGL_DBG2, "pixclock: %u\n", fb_vinfo.pixclock);
+	mp_msg(MSGT_VO, MSGL_DBG2, "left_margin: %u\n", fb_vinfo.left_margin);
+	mp_msg(MSGT_VO, MSGL_DBG2, "right_margin: %u\n", fb_vinfo.right_margin);
+	mp_msg(MSGT_VO, MSGL_DBG2, "upper_margin: %u\n", fb_vinfo.upper_margin);
+	mp_msg(MSGT_VO, MSGL_DBG2, "lower_margin: %u\n", fb_vinfo.lower_margin);
+	mp_msg(MSGT_VO, MSGL_DBG2, "hsync_len: %u\n", fb_vinfo.hsync_len);
+	mp_msg(MSGT_VO, MSGL_DBG2, "vsync_len: %u\n", fb_vinfo.vsync_len);
+	mp_msg(MSGT_VO, MSGL_DBG2, "sync: %u\n", fb_vinfo.sync);
+	mp_msg(MSGT_VO, MSGL_DBG2, "vmode: %u\n", fb_vinfo.vmode);
+	mp_msg(MSGT_VO, MSGL_V, "fix info:\n");
+	mp_msg(MSGT_VO, MSGL_V, "framebuffer size: %d bytes\n", fb_finfo.smem_len);
+	mp_msg(MSGT_VO, MSGL_V, "type: %lu\n", (unsigned long) fb_finfo.type);
+	mp_msg(MSGT_VO, MSGL_V, "type_aux: %lu\n", (unsigned long) fb_finfo.type_aux);
+	mp_msg(MSGT_VO, MSGL_V, "visual: %lu\n", (unsigned long) fb_finfo.visual);
+	mp_msg(MSGT_VO, MSGL_V, "line_length: %lu bytes\n", (unsigned long) fb_finfo.line_length);
+	mp_msg(MSGT_VO, MSGL_DBG2, "id: %.16s\n", fb_finfo.id);
+	mp_msg(MSGT_VO, MSGL_DBG2, "smem_start: %p\n", (void *) fb_finfo.smem_start);
+	mp_msg(MSGT_VO, MSGL_DBG2, "xpanstep: %u\n", fb_finfo.xpanstep);
+	mp_msg(MSGT_VO, MSGL_DBG2, "ypanstep: %u\n", fb_finfo.ypanstep);
+	mp_msg(MSGT_VO, MSGL_DBG2, "ywrapstep: %u\n", fb_finfo.ywrapstep);
+	mp_msg(MSGT_VO, MSGL_DBG2, "mmio_start: %p\n", (void *) fb_finfo.mmio_start);
+	mp_msg(MSGT_VO, MSGL_DBG2, "mmio_len: %u bytes\n", fb_finfo.mmio_len);
+	mp_msg(MSGT_VO, MSGL_DBG2, "accel: %u\n", fb_finfo.accel);
+	mp_msg(MSGT_VO, MSGL_V, "fb_bpp: %d\n", fb_bpp);
+	mp_msg(MSGT_VO, MSGL_V, "fb_pixel_size: %d bytes\n", fb_pixel_size);
+	mp_msg(MSGT_VO, MSGL_V, "other:\n");
+	mp_msg(MSGT_VO, MSGL_V, "in_width: %d\n", in_width);
+	mp_msg(MSGT_VO, MSGL_V, "in_height: %d\n", in_height);
+	mp_msg(MSGT_VO, MSGL_V, "out_width: %d\n", out_width);
+	mp_msg(MSGT_VO, MSGL_V, "out_height: %d\n", out_height);
+	mp_msg(MSGT_VO, MSGL_V, "first_row: %d\n", first_row);
+	mp_msg(MSGT_VO, MSGL_V, "last_row: %d\n", last_row);
+	mp_msg(MSGT_VO, MSGL_DBG2, "draw_alpha_p:%dbpp = %p\n", fb_bpp, draw_alpha_p);
 }
 
 static void vt_set_textarea(int u, int l)
@@ -839,8 +789,7 @@ static void vt_set_textarea(int u, int l)
 	int urow = ((u + 15) / 16) + 1;
 	int lrow = l / 16;
 
-	if (verbose > 1)
-		printf(FBDEV "vt_set_textarea(%d,%d): %d,%d\n", u, l, urow, lrow);
+	mp_msg(MSGT_VO, MSGL_DBG2, "vt_set_textarea(%d,%d): %d,%d\n", u, l, urow, lrow);
 	if(vt_fp) {
 	  fprintf(vt_fp, "\33[%d;%dr\33[%d;%dH", urow, lrow, lrow, 0);
 	  fflush(vt_fp);
@@ -854,30 +803,20 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	struct fb_cmap *cmap;
 	int vm = flags & 0x02;
 	int zoom = flags & 0x04;
+	int vt_fd;
 
 	fs = flags & 0x01;
-	flip = flags & 0x08;
 
 	if(pre_init_err == -2)
 	{
-	    printf(FBDEV "Internal fatal error: init() was called before preinit()\n");
+	    mp_msg(MSGT_VO, MSGL_ERR, "Internal fatal error: config() was called before preinit()\n");
 	    return -1;
 	}
 
 	if (pre_init_err) return 1;
 
-#if 0
-	if (zoom
-#ifdef CONFIG_VIDIX
-	 && !vidix_name
-#endif
-	 ) {
-		printf(FBDEV "-zoom is not supported\n");
-		return 1;
-	}
-#endif
 	if (fb_mode_name && !vm) {
-		printf(FBDEV "-fbmode can only be used with -vm\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "-fbmode can only be used with -vm\n");
 		return 1;
 	}
 	if (vm && (parse_fbmode_cfg(fb_mode_cfgfile) < 0))
@@ -895,7 +834,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
 	if (fb_mode_name) {
 		if (!(fb_mode = find_mode_by_name(fb_mode_name))) {
-			printf(FBDEV "can't find requested video mode\n");
+			mp_msg(MSGT_VO, MSGL_ERR, "can't find requested video mode\n");
 			return 1;
 		}
 		fb_mode2fb_vinfo(fb_mode, &fb_vinfo);
@@ -904,17 +843,17 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		monitor_vfreq = str2range(monitor_vfreq_str);
 		monitor_dotclock = str2range(monitor_dotclock_str);
 		if (!monitor_hfreq || !monitor_vfreq || !monitor_dotclock) {
-			printf(FBDEV "you have to specify the capabilities of"
+			mp_msg(MSGT_VO, MSGL_ERR, "you have to specify the capabilities of"
 					" the monitor.\n");
 			return 1;
 		}
 		if (!(fb_mode = find_best_mode(out_width, out_height,
 					monitor_hfreq, monitor_vfreq,
 					monitor_dotclock))) {
-			printf(FBDEV "can't find best video mode\n");
+			mp_msg(MSGT_VO, MSGL_ERR, "can't find best video mode\n");
 			return 1;
 		}
-		printf(FBDEV "using mode %dx%d @ %.1fHz\n", fb_mode->xres,
+		mp_msg(MSGT_VO, MSGL_V, "using mode %dx%d @ %.1fHz\n", fb_mode->xres,
 				fb_mode->yres, vsf(fb_mode));
 		fb_mode2fb_vinfo(fb_mode, &fb_vinfo);
 	}
@@ -924,52 +863,32 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	fb_vinfo.yres_virtual = fb_vinfo.yres;
 
         if (fb_tty_fd >= 0 && ioctl(fb_tty_fd, KDSETMODE, KD_GRAPHICS) < 0) {
-                if (verbose > 0)
-                        printf(FBDEV "Can't set graphics mode: %s\n", strerror(errno));
+                mp_msg(MSGT_VO, MSGL_V, "Can't set graphics mode: %s\n", strerror(errno));
                 close(fb_tty_fd);
                 fb_tty_fd = -1;
         }
 
 	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
-		printf(FBDEV "Can't put VSCREENINFO: %s\n", strerror(errno));
+		mp_msg(MSGT_VO, MSGL_ERR, "Can't put VSCREENINFO: %s\n", strerror(errno));
                 if (fb_tty_fd >= 0 && ioctl(fb_tty_fd, KDSETMODE, KD_TEXT) < 0) {
-                        printf(FBDEV "Can't restore text mode: %s\n", strerror(errno));
+                        mp_msg(MSGT_VO, MSGL_ERR, "Can't restore text mode: %s\n", strerror(errno));
                 }
 		return 1;
 	}
 
 	fb_pixel_size = fb_vinfo.bits_per_pixel / 8;
-	fb_real_bpp = fb_vinfo.red.length + fb_vinfo.green.length +
-		fb_vinfo.blue.length;
-	fb_bpp = (fb_pixel_size == 4) ? 32 : fb_real_bpp;
+	fb_bpp = fb_vinfo.red.length + fb_vinfo.green.length +
+		fb_vinfo.blue.length + fb_vinfo.transp.length;
 	if (fb_bpp_we_want != fb_bpp)
-		printf(FBDEV "requested %d bpp, got %d bpp!!!\n",
+		mp_msg(MSGT_VO, MSGL_WARN, "requested %d bpp, got %d bpp!!!\n",
 				fb_bpp_we_want, fb_bpp);
 
 	switch (fb_bpp) {
-	case 32:
-		draw_alpha_p = vo_draw_alpha_rgb32;
-		dstFourcc = IMGFMT_BGR32;
-		break;
-	case 24:
-		draw_alpha_p = vo_draw_alpha_rgb24;
-		dstFourcc = IMGFMT_BGR24;
-		break;
-	default:
-	case 16:
-		draw_alpha_p = vo_draw_alpha_rgb16;
-		dstFourcc = IMGFMT_BGR16;
-		break;
-	case 15:
-		draw_alpha_p = vo_draw_alpha_rgb15;
-		dstFourcc = IMGFMT_BGR15;
-		break;
-	}
-
-	if (flip & ((((pixel_format & 0xff) + 7) / 8) != fb_pixel_size)) {
-		printf(FBDEV "Flipped output with depth conversion is not "
-				"supported\n");
-		return 1;
+		case 32: draw_alpha_p = vo_draw_alpha_rgb32; break;
+		case 24: draw_alpha_p = vo_draw_alpha_rgb24; break;
+		case 16: draw_alpha_p = vo_draw_alpha_rgb16; break;
+		case 15: draw_alpha_p = vo_draw_alpha_rgb15; break;
+		default: return 1;
 	}
 
 	fb_xres = fb_vinfo.xres;
@@ -980,7 +899,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		out_height = fb_yres;
 	}
 	if (out_width < in_width || out_height < in_height) {
-		printf(FBDEV "screensize is smaller than video size\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "screensize is smaller than video size\n");
 		return 1;
 	}
 
@@ -988,14 +907,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	last_row = (out_height + in_height) / 2;
 
 	if (ioctl(fb_dev_fd, FBIOGET_FSCREENINFO, &fb_finfo)) {
-		printf(FBDEV "Can't get FSCREENINFO: %s\n", strerror(errno));
+		mp_msg(MSGT_VO, MSGL_ERR, "Can't get FSCREENINFO: %s\n", strerror(errno));
 		return 1;
 	}
 
 	lots_of_printf();
 
 	if (fb_finfo.type != FB_TYPE_PACKED_PIXELS) {
-		printf(FBDEV "type %d not supported\n", fb_finfo.type);
+		mp_msg(MSGT_VO, MSGL_ERR, "type %d not supported\n", fb_finfo.type);
 		return 1;
 	}
 
@@ -1003,17 +922,16 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		case FB_VISUAL_TRUECOLOR:
 			break;
 		case FB_VISUAL_DIRECTCOLOR:
-			if (verbose > 0)
-				printf(FBDEV "creating cmap for directcolor\n");
+			mp_msg(MSGT_VO, MSGL_V, "creating cmap for directcolor\n");
 			if (ioctl(fb_dev_fd, FBIOGETCMAP, &fb_oldcmap)) {
-				printf(FBDEV "can't get cmap: %s\n",
+				mp_msg(MSGT_VO, MSGL_ERR, "can't get cmap: %s\n",
 						strerror(errno));
 				return 1;
 			}
 			if (!(cmap = make_directcolor_cmap(&fb_vinfo)))
 				return 1;
 			if (ioctl(fb_dev_fd, FBIOPUTCMAP, cmap)) {
-				printf(FBDEV "can't put cmap: %s\n",
+				mp_msg(MSGT_VO, MSGL_ERR, "can't put cmap: %s\n",
 						strerror(errno));
 				return 1;
 			}
@@ -1024,7 +942,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 			free(cmap);
 			break;
 		default:
-			printf(FBDEV "visual: %d not yet supported\n",
+			mp_msg(MSGT_VO, MSGL_ERR, "visual: %d not yet supported\n",
 					fb_finfo.visual);
 			return 1;
 	}
@@ -1054,19 +972,16 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		    y_offset = (fb_yres - image_height) / 2;
 		else y_offset = 0;
 
-		//FIXME: update geometry code
-		//geometry(&x_offset,&y_offset,fb_xres,fb_yres,image_width,image_height);
-
 		if(vidix_init(width,height,x_offset,y_offset,image_width,
 			    image_height,format,fb_bpp,
 			    fb_xres,fb_yres) != 0)
 		{
-		    printf(FBDEV "Can't initialize VIDIX driver\n");
+		    mp_msg(MSGT_VO, MSGL_ERR, "Can't initialize VIDIX driver\n");
 		    vidix_name = NULL;
 		    vidix_term();
 		    return -1;
 		}
-		else printf(FBDEV "Using VIDIX\n");
+		else mp_msg(MSGT_VO, MSGL_V, "Using VIDIX\n");
 		vidix_start();
 	}
 	else
@@ -1075,53 +990,42 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	    int x_offset=0,y_offset=0;
 	    if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
 				    MAP_SHARED, fb_dev_fd, 0)) == (uint8_t *) -1) {
-		printf(FBDEV "Can't mmap %s: %s\n", fb_dev_name, strerror(errno));
+		mp_msg(MSGT_VO, MSGL_ERR, "Can't mmap %s: %s\n", fb_dev_name, strerror(errno));
 		return 1;
 	    }
-
-	    //FIXME: update geometry code
-	    //geometry(&x_offset,&y_offset,fb_xres,fb_yres,out_width,out_height);
 
 	    center = frame_buffer + (out_width - in_width) * fb_pixel_size /
 		    2 + ( (out_height - in_height) / 2 ) * fb_line_len +
 		    x_offset * fb_pixel_size + y_offset * fb_line_len;
 
-	    if (verbose > 0) {
-		if (verbose > 1) {
-			printf(FBDEV "frame_buffer @ %p\n", frame_buffer);
-			printf(FBDEV "center @ %p\n", center);
-		}
-		printf(FBDEV "pixel per line: %d\n", fb_line_len / fb_pixel_size);
-	    }
+	    mp_msg(MSGT_VO, MSGL_DBG2, "frame_buffer @ %p\n", frame_buffer);
+	    mp_msg(MSGT_VO, MSGL_DBG2, "center @ %p\n", center);
+	    mp_msg(MSGT_VO, MSGL_V, "pixel per line: %d\n", fb_line_len / fb_pixel_size);
 
 	    if (!(next_frame = (uint8_t *) malloc(in_width * in_height * fb_pixel_size))) {
-		printf(FBDEV "Can't malloc next_frame: %s\n", strerror(errno));
+		mp_msg(MSGT_VO, MSGL_ERR, "Can't malloc next_frame: %s\n", strerror(errno));
 		return 1;
 	    }
 	    if (fs || vm)
 		memset(frame_buffer, '\0', fb_line_len * fb_yres);
 	}
 	if (vt_doit && (vt_fd = open("/dev/tty", O_WRONLY)) == -1) {
-		printf(FBDEV "can't open /dev/tty: %s\n", strerror(errno));
+		mp_msg(MSGT_VO, MSGL_ERR, "can't open /dev/tty: %s\n", strerror(errno));
 		vt_doit = 0;
 	}
 	if (vt_doit && !(vt_fp = fdopen(vt_fd, "w"))) {
-		printf(FBDEV "can't fdopen /dev/tty: %s\n", strerror(errno));
+		mp_msg(MSGT_VO, MSGL_ERR, "can't fdopen /dev/tty: %s\n", strerror(errno));
 		vt_doit = 0;
 	}
 
 	if (vt_doit)
 		vt_set_textarea(last_row, fb_yres);
 
-	sws_rgb2rgb_init(get_sws_cpuflags());
-
 	return 0;
 }
 
 static uint32_t query_format(uint32_t format)
 {
-	int ret = VFCAP_OSD|VFCAP_CSP_SUPPORTED; /* osd/sub is supported on every bpp */
-
 	if (!fb_preinit(0))
 		return 0;
 #ifdef CONFIG_VIDIX
@@ -1132,11 +1036,7 @@ static uint32_t query_format(uint32_t format)
 		int bpp = format & 0xff;
 
 		if (bpp == fb_bpp)
-			return ret|VFCAP_CSP_SUPPORTED_BY_HW;
-		else if (bpp == 15 && fb_bpp == 16)
-			return ret;
-		else if (bpp == 24 && fb_bpp == 32)
-			return ret;
+			return VFCAP_ACCEPT_STRIDE | VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
 	}
 	return 0;
 }
@@ -1147,51 +1047,37 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 	unsigned char *dst;
 	int dstride;
 
-	    dst = next_frame + (in_width * y0 + x0) * fb_pixel_size;
-	    dstride = in_width * fb_pixel_size;
+	dst = next_frame + (in_width * y0 + x0) * fb_pixel_size;
+	dstride = in_width * fb_pixel_size;
 
 	(*draw_alpha_p)(w, h, src, srca, stride, dst, dstride);
 }
 
-static uint32_t draw_frame(uint8_t *src[])
-{
-	if (flip) {
-		int h = in_height;
-		int len = in_width * fb_pixel_size;
-		char *d = next_frame + (in_height - 1) * len;
-		char *s = src[0];
-		while (h--) {
-			memcpy(d, s, len);
-			s += len;
-			d -= len;
-		}
-	} else {
-		int sbpp = ((pixel_format & 0xff) + 7) / 8;
-		char *d = next_frame;
-		char *s = src[0];
-		if (sbpp == fb_pixel_size) {
-		    if (fb_real_bpp == 16 && pixel_format == (IMGFMT_BGR|15))
-			rgb15to16(s, d, 2 * in_width * in_height);
-		    else
-			memcpy(d, s, sbpp * in_width * in_height);
-		}
-	}
-	return 0;
-}
+static uint32_t draw_frame(uint8_t *src[]) { return 1; }
 
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x,
 		int y)
 {
+	uint8_t *d;
+	uint8_t *s;
+	int next;
+
+	d = next_frame + (in_width * y + x) * fb_pixel_size;
+	next = in_width * fb_pixel_size;
+
+	s = src[0];
+	while (h) {
+		memcpy(d, s, w * fb_pixel_size);
+		d += next;
+		s += stride[0];
+		h--;
+	}
+
 	return 0;
 }
 
 static void check_events(void)
 {
-}
-
-static void draw_osd(void)
-{
-	vo_draw_text(in_width, in_height, draw_alpha);
 }
 
 static void flip_page(void)
@@ -1206,35 +1092,39 @@ static void flip_page(void)
 	}
 }
 
+static void draw_osd(void)
+{
+	vo_draw_text(in_width, in_height, draw_alpha);
+}
+
 static void uninit(void)
 {
-	if (verbose > 0)
-		printf(FBDEV "uninit\n");
-	fb_preinit(1);
 	if (fb_cmap_changed) {
 		if (ioctl(fb_dev_fd, FBIOPUTCMAP, &fb_oldcmap))
-			printf(FBDEV "Can't restore original cmap\n");
+			mp_msg(MSGT_VO, MSGL_WARN, "Can't restore original cmap\n");
 		fb_cmap_changed = 0;
 	}
 	if(next_frame) free(next_frame);
 	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo))
-		printf(FBDEV "ioctl FBIOGET_VSCREENINFO: %s\n", strerror(errno));
+		mp_msg(MSGT_VO, MSGL_WARN, "ioctl FBIOGET_VSCREENINFO: %s\n", strerror(errno));
 	fb_orig_vinfo.xoffset = fb_vinfo.xoffset;
 	fb_orig_vinfo.yoffset = fb_vinfo.yoffset;
 	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_orig_vinfo))
-		printf(FBDEV "Can't reset original fb_var_screeninfo: %s\n", strerror(errno));
+		mp_msg(MSGT_VO, MSGL_WARN, "Can't reset original fb_var_screeninfo: %s\n", strerror(errno));
         if (fb_tty_fd >= 0) {
                 if (ioctl(fb_tty_fd, KDSETMODE, KD_TEXT) < 0)
-                        printf(FBDEV "Can't restore text mode: %s\n", strerror(errno));
+                        mp_msg(MSGT_VO, MSGL_WARN, "Can't restore text mode: %s\n", strerror(errno));
         }
 	if (vt_doit)
 		vt_set_textarea(0, fb_orig_vinfo.yres);
         close(fb_tty_fd);
 	close(fb_dev_fd);
 	if(frame_buffer) munmap(frame_buffer, fb_size);
+	frame_buffer = next_frame = NULL;
 #ifdef CONFIG_VIDIX
 	if(vidix_name) vidix_term();
 #endif
+	fb_preinit(1);
 }
 
 static uint32_t preinit(const char *vo_subdevice)
@@ -1243,16 +1133,36 @@ static uint32_t preinit(const char *vo_subdevice)
 #ifdef CONFIG_VIDIX
     if(vo_subdevice) parseSubDevice(vo_subdevice);
     if(vidix_name) pre_init_err = vidix_preinit(vidix_name,&video_out_fbdev);
-    if(verbose > 2)
-	printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
+    mp_msg(MSGT_VO, MSGL_DBG3, "vo_subdevice: initialization returns: %i\n",pre_init_err);
 #endif
     if(!pre_init_err) return (pre_init_err=(fb_preinit(0)?0:-1));
     return(-1);
 }
 
+static uint32_t get_image(mp_image_t *mpi)
+{
+    if (
+	!IMGFMT_IS_BGR(mpi->imgfmt) ||
+	(IMGFMT_BGR_DEPTH(mpi->imgfmt) != fb_bpp) ||
+	((mpi->type != MP_IMGTYPE_STATIC) && (mpi->type != MP_IMGTYPE_TEMP)) ||
+	(mpi->flags & MP_IMGFLAG_PLANAR) ||
+	(mpi->flags & MP_IMGFLAG_YUV) ||
+	(mpi->width != in_width) ||
+	(mpi->height != in_height)
+       )
+    return(VO_FALSE);
+
+    mpi->planes[0] = center;
+    mpi->stride[0] = fb_line_len;
+    mpi->flags |= MP_IMGFLAG_DIRECT;
+    return(VO_TRUE);
+}
+
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
+  case VOCTRL_GET_IMAGE:
+    return get_image(data);
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   }
