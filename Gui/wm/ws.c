@@ -148,6 +148,17 @@ if(mDisplay){
   }
 }
 
+{ /* on remote display XShm will be disabled - LGB */
+ char *dispname=DisplayString(wsDisplay);
+ int localdisp=1;
+ if (dispname&&*dispname!=':') {
+    localdisp=0;
+    wsUseXShm=0;
+ }
+ fprintf(stderr,"[ws] Display name: %s => %s display.\n",dispname,localdisp?"local":"REMOTE");
+ if (!localdisp) fprintf(stderr,"[ws] Remote display, disabling XMITSHM\n");
+}
+
  if ( !XShmQueryExtension( wsDisplay ) )
   {
    fprintf( stderr,"[ws] sorry, your system is not supported X shared memory extension.\n" );
