@@ -207,7 +207,7 @@ void Convert1to32( txSample * in,txSample * out )
  out->ImageSize=out->Width * out->Height * 4;
  out->Image=(char *)calloc( 1,out->ImageSize );
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c32to1] imagesize: %d\n",out->ImageSize );
- if ( (int)out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"nem van ram baze\n" );
+ if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"nem van ram baze\n" );
  {
   int i,b,c=0; unsigned int * buf = NULL; unsigned char tmp = 0;
   buf=(unsigned int *)out->Image;

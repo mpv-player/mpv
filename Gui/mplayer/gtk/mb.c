@@ -41,7 +41,7 @@ GtkWidget * create_MessageBox( int type )
  GtkWidget * Ok;
  GtkAccelGroup * accel_group;
  GtkStyle * pixmapstyle;
- GtkPixmap * pixmapwid;
+ GdkPixmap * pixmapwid;
  GdkBitmap * mask;
 
  accel_group=gtk_accel_group_new();

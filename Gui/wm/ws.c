@@ -158,7 +158,7 @@ int wsWindowManagerType( void )
 // --- gnome
 /*
  type=XInternAtom( wsDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
- if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+ if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
    mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is Gnome\n" );
    XFree( args );
@@ -167,7 +167,7 @@ int wsWindowManagerType( void )
 */
 // --- net wm
  type=XInternAtom( wsDisplay,"_NET_SUPPORTED",False );
- if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+ if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
    mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is NetWM\n" );
    XFree( args );
@@ -761,7 +761,7 @@ void wsSetLayer( Display * wsDisplay, Window win, int layer )
  }
 					
  type=XInternAtom( wsDisplay,"_NET_SUPPORTED",False );
- if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+ if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
    XEvent e;
    e.xclient.type=ClientMessage;
@@ -780,7 +780,7 @@ void wsSetLayer( Display * wsDisplay, Window win, int layer )
    return;
   }
  type=XInternAtom( wsDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
- if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+ if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
    XClientMessageEvent  xev;
    

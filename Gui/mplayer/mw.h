@@ -122,15 +122,15 @@ calclengthmmmmss:
 inline void PutImage( txSample * bf,int x,int y,int max,int ofs )
 {
  int i=0,ix,iy;
- unsigned int * buf = NULL;
- unsigned int * drw = NULL;
- unsigned int   tmp;
+ uint32_t * buf = NULL;
+ uint32_t * drw = NULL;
+ uint32_t   tmp;
 
  if ( ( !bf )||( bf->Image == NULL ) ) return;
 
  i=( bf->Width * ( bf->Height / max ) ) * ofs;
- buf=(unsigned int *)mplDrawBuffer;
- drw=(unsigned int *)bf->Image;
+ buf=(uint32_t *)mplDrawBuffer;
+ drw=(uint32_t *)bf->Image;
 
  for ( iy=y;iy < (int)(y+bf->Height / max);iy++ )
   for ( ix=x;ix < (int)(x+bf->Width);ix++ )
