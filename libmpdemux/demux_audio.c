@@ -27,17 +27,100 @@ typedef struct da_priv {
   float last_pts;
 } da_priv_t;
 
+// how many valid frames in a row we need before accepting as valid MP3
+#define MIN_MP3_HDRS 5
+
+//! Used to describe a potential (chain of) MP3 headers we found
+typedef struct mp3_hdr {
+  off_t frame_pos; // start of first frame in this "chain" of headers
+  off_t next_frame_pos; // here we expect the next header with same parameters
+  int mp3_chans;
+  int mp3_freq;
+  int cons_hdrs; // if this reaches MIN_MP3_HDRS we accept as MP3 file
+  struct mp3_hdr *next;
+} mp3_hdr_t;
+
 extern void free_sh_audio(sh_audio_t* sh);
 extern void resync_audio_stream(sh_audio_t *sh_audio);
 extern void print_wave_header(WAVEFORMATEX *h);
 
 int hr_mp3_seek = 0;
 
+/**
+ * \brief free a list of MP3 header descriptions
+ * \param list pointer to the head-of-list pointer
+ */
+static void free_mp3_hdrs(mp3_hdr_t **list) {
+  mp3_hdr_t *tmp;
+  while (*list) {
+    tmp = (*list)->next;
+    free(*list);
+    *list = tmp;
+  }
+}
+
+/**
+ * \brief add another potential MP3 header to our list
+ * If it fits into an existing chain this one is expanded otherwise
+ * a new one is created.
+ * All entries that expected a MP3 header before the current position
+ * are discarded.
+ * The list is expected to be and will be kept sorted by next_frame_pos
+ * and when those are equal by frame_pos.
+ * \param list pointer to the head-of-list pointer
+ * \param st_pos stream position where the described header starts
+ * \param mp3_chans number of channels as specified by the header
+ * \param mp3_freq sampling frequency as specified by the header
+ * \param mp3_flen length of the frame as specified by the header
+ * \return If non-null the current file is accepted as MP3 and the
+ * mp3_hdr struct describing the valid chain is returned. Must be
+ * freed independent of the list.
+ */
+static mp3_hdr_t *add_mp3_hdr(mp3_hdr_t **list, off_t st_pos,
+                               int mp3_chans, int mp3_freq, int mp3_flen) {
+  mp3_hdr_t *tmp;
+  int in_list = 0;
+  while (*list && (*list)->next_frame_pos <= st_pos) {
+    if (((*list)->next_frame_pos < st_pos) || ((*list)->mp3_chans != mp3_chans)
+         || ((*list)->mp3_freq != mp3_freq)) { // wasn't valid!
+      tmp = (*list)->next;
+      free(*list);
+      *list = tmp;
+    } else {
+      (*list)->cons_hdrs++;
+      (*list)->next_frame_pos = st_pos + mp3_flen;
+      if ((*list)->cons_hdrs >= MIN_MP3_HDRS) {
+        // copy the valid entry, so that the list can be easily freed
+        tmp = malloc(sizeof(mp3_hdr_t));
+        memcpy(tmp, *list, sizeof(mp3_hdr_t));
+        tmp->next = NULL;
+        return tmp;
+      }
+      in_list = 1;
+      list = &((*list)->next);
+    }
+  }
+  if (!in_list) { // does not belong into an existing chain, insert
+    tmp = malloc(sizeof(mp3_hdr_t));
+    tmp->frame_pos = st_pos;
+    tmp->next_frame_pos = st_pos + mp3_flen;
+    tmp->mp3_chans = mp3_chans;
+    tmp->mp3_freq = mp3_freq;
+    tmp->cons_hdrs = 1;
+    tmp->next = *list;
+    *list = tmp;
+  }
+  return NULL;
+}
+
 int demux_audio_open(demuxer_t* demuxer) {
   stream_t *s;
   sh_audio_t* sh_audio;
   uint8_t hdr[HDR_SIZE];
-  int st_pos = 0,frmt = 0, n = 0, pos = 0, step, mp3_freq,mp3_chans;
+  int frmt = 0, n = 0, step, mp3_freq, mp3_chans, mp3_flen;
+  off_t st_pos = 0, next_frame_pos = 0;
+  // mp3_hdrs list is sorted first by next_frame_pos and then by frame_pos
+  mp3_hdr_t *mp3_hdrs = NULL, *mp3_found = NULL;
   da_priv_t* priv;
 #ifdef MP_DEBUG
   assert(demuxer != NULL);
@@ -46,13 +129,10 @@ int demux_audio_open(demuxer_t* demuxer) {
   
   s = demuxer->stream;
 
-  while(n < 5 && ! s->eof) {
-    st_pos = stream_tell(s);
+  stream_read(s, hdr, HDR_SIZE);
+  while(n < 30000 && !s->eof) {
+    st_pos = stream_tell(s) - HDR_SIZE;
     step = 1;
-    if(pos < HDR_SIZE) {
-      stream_read(s,&hdr[pos],HDR_SIZE-pos);
-      pos = HDR_SIZE;
-    }
 
     if( hdr[0] == 'R' && hdr[1] == 'I' && hdr[2] == 'F' && hdr[3] == 'F' ) {
       stream_skip(s,4);
@@ -77,9 +157,12 @@ int demux_audio_open(demuxer_t* demuxer) {
     } else if( hdr[0] == 'f' && hdr[1] == 'm' && hdr[2] == 't' && hdr[3] == ' ' ) {
       frmt = WAV;
       break;      
-    } else if((n = mp_get_mp3_header(hdr,&mp3_chans,&mp3_freq)) > 0) {
-      frmt = MP3;
-      break;
+    } else if((mp3_flen = mp_get_mp3_header(hdr,&mp3_chans,&mp3_freq)) > 0) {
+      mp3_found = add_mp3_hdr(&mp3_hdrs, st_pos, mp3_chans, mp3_freq, mp3_flen);
+      if (mp3_found) {
+        frmt = MP3;
+        break;
+      }
     } else if( hdr[0] == 'f' && hdr[1] == 'L' && hdr[2] == 'a' && hdr[3] == 'C' ) {
       frmt = fLaC;
       stream_skip(s,-4);
@@ -88,8 +171,11 @@ int demux_audio_open(demuxer_t* demuxer) {
     // Add here some other audio format detection
     if(step < HDR_SIZE)
       memmove(hdr,&hdr[step],HDR_SIZE-step);
-    pos -= step;
+    stream_read(s, &hdr[HDR_SIZE - step], step);
+    n++;
   }
+
+  free_mp3_hdrs(&mp3_hdrs);
 
   if(!frmt)
     return 0;
@@ -99,28 +185,20 @@ int demux_audio_open(demuxer_t* demuxer) {
   switch(frmt) {
   case MP3:
     sh_audio->format = 0x55;
-    demuxer->movi_start = st_pos-HDR_SIZE+n;
+    demuxer->movi_start = mp3_found->frame_pos;
+    next_frame_pos = mp3_found->next_frame_pos;
     sh_audio->audio.dwSampleSize= 0;
     sh_audio->audio.dwScale = 1152;
-    sh_audio->audio.dwRate = mp3_freq;
+    sh_audio->audio.dwRate = mp3_found->mp3_freq;
     sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
     sh_audio->wf->wFormatTag = sh_audio->format;
-    sh_audio->wf->nChannels = mp3_chans;
-    sh_audio->wf->nSamplesPerSec = mp3_freq;
+    sh_audio->wf->nChannels = mp3_found->mp3_chans;
+    sh_audio->wf->nSamplesPerSec = mp3_found->mp3_freq;
     sh_audio->wf->nBlockAlign = 1152;
     sh_audio->wf->wBitsPerSample = 16;
     sh_audio->wf->cbSize = 0;    
-    for(n = 0; n < 5 ; n++) {
-      pos = mp_decode_mp3_header(hdr);
-      if(pos < 0)
-	return 0;
-      stream_skip(s,pos-4);
-      if(s->eof)
-	return 0;
-      stream_read(s,hdr,4);
-      if(s->eof)
-	return 0;
-    }
+    free(mp3_found);
+    mp3_found = NULL;
     if(s->end_pos) {
       char tag[4];
       stream_seek(s,s->end_pos-128);
@@ -264,9 +342,22 @@ int demux_audio_open(demuxer_t* demuxer) {
   sh_audio->samplerate = sh_audio->audio.dwRate;
 
   if(stream_tell(s) != demuxer->movi_start)
+  {
+    mp_msg(MSGT_DEMUX, MSGL_V, "demux_audio: seeking from 0x%X to start pos 0x%X\n",
+            (int)stream_tell(s), (int)demuxer->movi_start);
     stream_seek(s,demuxer->movi_start);
+    if (stream_tell(s) != demuxer->movi_start) {
+      mp_msg(MSGT_DEMUX, MSGL_V, "demux_audio: seeking failed, now at 0x%X!\n",
+              (int)stream_tell(s));
+      if (next_frame_pos) {
+        mp_msg(MSGT_DEMUX, MSGL_V, "demux_audio: seeking to 0x%X instead\n",
+                (int)next_frame_pos);
+        stream_seek(s, next_frame_pos);
+      }
+    }
+  }
 
-  mp_msg(MSGT_DEMUX,MSGL_V,"demux_audio: audio data 0x%X - 0x%X  \n",demuxer->movi_start,demuxer->movi_end);
+  mp_msg(MSGT_DEMUX,MSGL_V,"demux_audio: audio data 0x%X - 0x%X  \n",(int)demuxer->movi_start,(int)demuxer->movi_end);
 
   return 1;
 }
