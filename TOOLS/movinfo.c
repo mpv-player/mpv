@@ -1,7 +1,61 @@
 // show QuickTime .mov file structure     (C) 2001. by A'rpi/ESP-team
+// various hacks by alex@naxine.org
+
+/*
+  Blocks: 4bytes atom_size
+          4bytes atom_type (name)
+	  ...
+
+  By older files, mdat is at the beginning, and moov follows it later,
+  by newer files, moov is at the begininng.
+  
+  Fontosabb typeok:
+  
+  trak: track: ezeken belul van egy-egy stream (video/audio)
+  tkhd: track header: fps (video esten picture size is itt van)
+  vmhd: video media handler (video stream informaciok)
+  smhd: sound media handler (audio stream informaciok)
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#undef NO_SPECIAL
+
+char *atom2human_type(int type)
+{
+switch (type)
+{
+  case 0x766F6F6D: return ("Information sections"); /* moov */
+  case 0x6468766D: return ("Movie header"); /* mvhd */
+  case 0x6169646D: return ("Media stream"); /* mdia */
+  case 0x64686D76: return ("Video media header"); /* vmhd */
+  case 0x64686D73: return ("Sound media header"); /* smhd */
+  case 0x6468646D: return ("Media header"); /* mdhd */
+  case 0x666E696D: return ("Media information"); /* minf */
+  case 0x726C6468: return ("Handler.."); /* hdlr */
+  case 0x6B617274: return ("New track (stream)"); /* trak */
+  case 0x75716D72: return ("rmqu");
+  case 0x65657266: return ("free");
+  case 0x64686B74: return ("Track header"); /* tkhd */
+  case 0x61746475: return ("User data"); /* udta */
+  case 0x7461646D: return ("Movie data"); /* mdat */
+  case 0x6C627473: return ("Sample information table"); /* stbl */
+  case 0x64737473: return ("Sample description"); /* stsd */
+  case 0x6F637473: return ("Chunk offset table"); /* stco */
+  case 0x73747473: return ("Sample time table"); /* stts */
+  case 0x63737473: return ("Sample->Chunk mapping table"); /* stsc */
+  case 0x7A737473: return ("Sample size table"); /* stsz */
+}
+    return("unknown");
+}
+
+#define S_NONE 0
+#define S_AUDIO 1
+#define S_VIDEO 2
+int stream = S_NONE;
+int v_stream = 0;
+int a_stream = 0;
 
 unsigned int read_dword(FILE *f){
  unsigned char atom_size_b[4];
@@ -9,10 +63,46 @@ unsigned int read_dword(FILE *f){
  return (atom_size_b[0]<<24)|(atom_size_b[1]<<16)|(atom_size_b[2]<<8)|atom_size_b[3];
 }
 
+void *video_stream_info(FILE *f, int len)
+{
+  int orig_pos = ftell(f);
+  unsigned char data[len-8];
+  int i;
+  char codec[len-8];
+
+  len -= 8;
+  for (i=0; i<len; i++)
+	fread(&data[i], 1, 1, f);
+
+  strncpy(codec, &data[43], len-43);
+  printf("  [codec: %s]\n", &codec);
+  fseek(f,orig_pos,SEEK_SET);
+}
+
+void *audio_stream_info(FILE *f, int len)
+{
+  int orig_pos = ftell(f);
+  unsigned char data[len-8];
+  int i;
+
+  len -= 8;
+  for (i=0; i<len; i++)
+	fread(&data[i], 1, 1, f);
+
+  printf("  [%d bit", data[19]);
+  if (data[17] == 1)
+    printf(" mono");
+  else
+    printf(" %d channels", data[17]);
+  printf("]\n");
+  fseek(f,orig_pos,SEEK_SET);
+}
+
 void lschunks(FILE *f,int level,unsigned int endpos){
  unsigned int atom_size;
  unsigned int atom_type;
  int pos;
+
  while(endpos==0 || ftell(f)<endpos){
   pos=ftell(f);
   atom_size=read_dword(f);//  if(fread(&atom_size_b,4,1,f)<=0) break;
@@ -20,7 +110,39 @@ void lschunks(FILE *f,int level,unsigned int endpos){
   
   if(atom_size<8) break; // error
   
-  printf("%08X:  %*s %.4s (%08X) %d\n",pos,level*2,"",&atom_type,atom_type,atom_size);
+  printf("%08X:  %*s %.4s (%08X) %05d [%s] (begin: %08X)\n",pos,level*2,"",&atom_type,atom_type,atom_size,
+    atom2human_type(atom_type), pos+8); // 8: atom_size fields (4) + atom_type fields (4)
+
+#ifndef NO_SPECIAL
+  if (atom_type == 0x64686D76)
+  {
+    stream = S_VIDEO;
+    printf(" Found VIDEO Stream #%d\n", v_stream++);
+  }
+  
+  if (atom_type == 0x64686D73)
+  {
+    stream = S_AUDIO;
+    printf(" Found AUDIO Stream #%d\n", a_stream++);
+  }
+
+  if (atom_type == 0x64686B74) // tkhd - track header
+  {
+    int i;
+    unsigned char data[atom_size];
+    int fps, x, y;
+
+    for (i=0; i<atom_size; i++)
+	fread(&data[i], 1, 1, f);
+
+    fps = data[3];
+    x = data[77];
+    y = data[81];
+    printf(" Movie fps: %d\n", fps); /* na ez itt az atbaszas ;( */
+    printf(" Picture size: %dx%d\n", x, y);
+    if (x == 0 && y == 0)
+	printf(" Possible audio stream!\n");
+  }
   
   if(atom_type==0x64737473) {  // stsd
     unsigned int tmp;
@@ -35,6 +157,10 @@ void lschunks(FILE *f,int level,unsigned int endpos){
       len=read_dword(f); //      fread(&len,4,1,f);
       fread(&format,4,1,f);
       printf("  desc #%d: %.4s  (%d)\n",i+1,&format,len);
+      if (stream == S_VIDEO)
+        video_stream_info(f, len);
+      if (stream == S_AUDIO)
+        audio_stream_info(f, len);
       fseek(f,len-8,SEEK_CUR);
     }
   }
@@ -69,7 +195,10 @@ void lschunks(FILE *f,int level,unsigned int endpos){
       int first=read_dword(f);
       int spc=read_dword(f);
       int sdid=read_dword(f);
-      printf("  chunk %d...  %d s/c   desc: %d\n",first,spc,sdid);
+      if (stream == S_AUDIO)
+        printf("  chunk from %d: %d Khz (desc: %d)\n", first, spc, sdid);
+      else
+        printf("  chunk %d...  %d s/c   desc: %d\n",first,spc,sdid);
     }
   }
 
@@ -85,15 +214,15 @@ void lschunks(FILE *f,int level,unsigned int endpos){
       for(i=0;i<len;i++) printf("  sample #%d: %d bytes\n",i+1,read_dword(f));
     }
   }
-
+#endif
   
 #if 1
   switch(atom_type){
+  case 0x7461646D: // mdat  Movie data
   case 0x75716D72: // rmqu
   case 0x65657266: // free  JUNK
   case 0x64686B74: // tkhd  Track header
   case 0x61746475: // udta  User data
-  case 0x7461646D: // mdat  Movie data
   case 0x64737473: // stsd  Sample description
   case 0x6F637473: // stco  Chunk offset table
   case 0x73747473: // stts  Sample time table
@@ -114,11 +243,17 @@ void lschunks(FILE *f,int level,unsigned int endpos){
  }
 }
 
-int main(int argc,char* argv[]){
-int pos;
-FILE *f=fopen(argc>1?argv[1]:"Akira.mov","rb");
-if(!f) return 1;
+int main(int argc,char* argv[])
+{
+    FILE *f;
+    
+    if ((f = fopen(argc>1?argv[1]:"Akira.mov","rb")) == NULL)
+	return 1;
 
-lschunks(f,0,0);
+    printf("%.8s    %.4s (%.8s) %05s [%s]\n\n",
+	"position", "atom", "atomtype", "len", "human readable atom name");
 
+    lschunks(f, 0, 0);
+
+    printf("\nSummary: streams: %d video/%d audio\n", v_stream, a_stream);
 }
