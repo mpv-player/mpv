@@ -135,7 +135,7 @@ typedef struct mkv_track_index {
 } mkv_track_index_t;
 
 typedef struct mkv_track {
-  uint32_t tnum;
+  uint32_t tnum, xid;
   
   char *codec_id;
   int ms_compat;
@@ -452,7 +452,19 @@ static mkv_track_t *new_mkv_track(mkv_demuxer_t *d) {
 }
 
 static mkv_track_t *find_track_by_num(mkv_demuxer_t *d, uint32_t n,
-                                      mkv_track_t *c) {
+                                      char track_type) {
+  int i;
+
+  for (i = 0; i < d->num_tracks; i++)
+    if ((d->tracks[i] != NULL) && (d->tracks[i]->type == track_type) &&
+        (d->tracks[i]->xid == n))
+      return d->tracks[i];
+  
+  return NULL;
+}
+
+static mkv_track_t *find_duplicate_track_by_num(mkv_demuxer_t *d, uint32_t n,
+                                                mkv_track_t *c) {
   int i;
   
   for (i = 0; i < d->num_tracks; i++)
@@ -547,6 +559,8 @@ static int check_track_information(mkv_demuxer_t *d) {
 
         // This track seems to be ok.
         t->ok = 1;
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: video (%s), "
+               "-vid: %u\n", t->tnum, t->codec_id, t->xid);
 
         break;
 
@@ -700,11 +714,18 @@ static int check_track_information(mkv_demuxer_t *d) {
 
         // This track seems to be ok.
         t->ok = 1;
-
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: audio (%s), -aid: "
+               "%u%s%s\n", t->tnum, t->codec_id, t->xid,
+               t->language != NULL ? ", -alang: " : "",
+               t->language != NULL ? t->language : "");
         break;
 
       case 's':                 // Text subtitles do not need any data
         t->ok = 1;              // except the CodecID.
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: subtitles (%s), "
+               "-sid: %u%s%s\n", t->tnum, t->codec_id, t->xid,
+               t->language != NULL ? ", -slang: " : "",
+               t->language != NULL ? t->language : "");
         break;
 
       default:                  // unknown track type!? error in demuxer...
@@ -933,7 +954,7 @@ static void parse_seekhead(mkv_demuxer_t *mkv_d, uint64_t pos) {
   KaxSeek *kseek;
   KaxSeekID *ksid;
   KaxSeekPosition *kspos;
-  int upper_lvl_el, i, k, s, id_found;
+  int upper_lvl_el, i, k, s;
   uint64_t seek_pos;
   EbmlId *id;
   EbmlElement *e;
@@ -1018,7 +1039,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   stream_t *s;
   demux_packet_t *dp;
   mkv_demuxer_t *mkv_d;
-  int upper_lvl_el, exit_loop, i;
+  int upper_lvl_el, exit_loop, i, vid, sid, aid;
   // Elements for different levels
   EbmlElement *l0 = NULL, *l1 = NULL, *l2 = NULL;
   EbmlStream *es;
@@ -1096,6 +1117,10 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     mkv_d->parsed_seekheads = new vector<uint64_t>;
     mkv_d->parsed_cues = new vector<uint64_t>;
 
+    vid = 0;
+    aid = 0;
+    sid = 0;
+
     upper_lvl_el = 0;
     exit_loop = 0;
     // We've got our segment, so let's find the tracks
@@ -1164,7 +1189,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
             mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Track number: %u\n",
                    uint32(*ktnum));
             track->tnum = uint32(*ktnum);
-            if (find_track_by_num(mkv_d, track->tnum, track) != NULL)
+            if (find_duplicate_track_by_num(mkv_d, track->tnum, track) != NULL)
               mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] |  + WARNING: There's "
                      "more than one track with the number %u.\n",
                      track->tnum);
@@ -1190,14 +1215,20 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
               case track_audio:
                 mp_msg(MSGT_DEMUX, MSGL_V, "Audio\n");
                 track->type = 'a';
+                track->xid = aid;
+                aid++;
                 break;
               case track_video:
                 mp_msg(MSGT_DEMUX, MSGL_V, "Video\n");
                 track->type = 'v';
+                track->xid = vid;
+                vid++;
                 break;
               case track_subtitle:
                 mp_msg(MSGT_DEMUX, MSGL_V, "Subtitle\n");
                 track->type = 's';
+                track->xid = sid;
+                sid++;
                 break;
               default:
                 mp_msg(MSGT_DEMUX, MSGL_V, "unknown\n");
@@ -1434,7 +1465,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
           break;
         }
   } else if (demuxer->video->id != -2) // -2 = no video at all
-    track = find_track_by_num(mkv_d, demuxer->video->id, NULL);
+    track = find_track_by_num(mkv_d, demuxer->video->id, 'v');
 
   if (track) {
     BITMAPINFOHEADER *bih;
@@ -1565,7 +1596,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
           break;
         }
   } else if (demuxer->audio->id != -2) // -2 = no audio at all
-    track = find_track_by_num(mkv_d, demuxer->audio->id, NULL);
+    track = find_track_by_num(mkv_d, demuxer->audio->id, 'a');
 
   if (track) {
     mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Will play audio track %u\n",
@@ -1725,7 +1756,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   // playback: only show subtitles if the user explicitely wants them.
   track = NULL;
   if (demuxer->sub->id >= 0)
-    track = find_track_by_num(mkv_d, demuxer->sub->id, NULL);
+    track = find_track_by_num(mkv_d, demuxer->sub->id, 's');
   else if (dvdsub_lang != NULL)
     track = find_track_by_language(mkv_d, dvdsub_lang, NULL);
   if (track) {
