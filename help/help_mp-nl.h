@@ -303,7 +303,7 @@ static char help_text[]=
 "            nadeel hiervan is dat voor een gegeven bitrate het uiteindelijke\n"\
 "            bestand groter zal zijn dan in de normale mode, de kwaliteit\n"\
 "            kan ook lager zijn.\n"\
-"   Waarschuwing: Met de huidige versie kunnen de "snelle" presets hogere bitrates geven\n"\
+"   Waarschuwing: Met de huidige versie kunnen de \"snelle\" presets hogere bitrates geven\n"\
 "            dan de normale, tragere presets.\n"\
 "\n"\
 "   \"cbr\"  - Wanneer je de ABR mode (zie hoger) gebruikt en 1 van de volgende\n"\
