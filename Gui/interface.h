@@ -101,6 +101,8 @@ extern guiInterface_t guiIntfStruct;
 #define guiSetPlay  1
 #define guiSetPause 2
 
+extern char *get_path(char *filename); 
+
 extern void guiInit( int argc,char* argv[], char *envp[] );
 extern void guiDone( void );
 extern void guiGetEvent( int type,char * arg );

@@ -11,6 +11,7 @@
 #include "wm/wskeys.h"
 #include "skin/skin.h"
 #include "mplayer/mplayer.h"
+#include "interface.h"
 
 listItems   appMPlayer;
 
@@ -27,12 +28,12 @@ void appClearItem( wItem * item )
  item->px=0; item->py=0; item->psx=0; item->psy=0;
 // ---
  item->msg=0; item->msg2=0;
- item->pressed=0;
+ item->pressed=btnReleased;
  item->tmp=0;
  item->key=0; item->key2=0;
  item->Bitmap.Width=0; item->Bitmap.Height=0; item->Bitmap.BPP=0; item->Bitmap.ImageSize=0;
- if ( item->Bitmap.Image )
-  { free( item->Bitmap.Image ); item->Bitmap.Image=NULL; }
+ if ( item->Bitmap.Image ) free( item->Bitmap.Image ); 
+ item->Bitmap.Image=NULL;
 // ---
  item->fontid=0;
  if ( item->label ) free( item->label ); item->label=NULL;

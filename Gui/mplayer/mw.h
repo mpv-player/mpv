@@ -23,7 +23,8 @@ inline void TranslateFilename( int c,char * tmp )
    case STREAMTYPE_FILE:
           if ( ( guiIntfStruct.Filename )&&( guiIntfStruct.Filename[0] ) )
            {
-            strcpy( tmp,guiIntfStruct.Filename );
+	    if ( strrchr( guiIntfStruct.Filename,'/' ) ) strcpy( tmp,strrchr( guiIntfStruct.Filename,'/' ) + 1 );
+	     else strcpy( tmp,guiIntfStruct.Filename );
             if ( tmp[strlen( tmp ) - 4] == '.' ) tmp[strlen( tmp ) - 4]=0;
             if ( tmp[strlen( tmp ) - 5] == '.' ) tmp[strlen( tmp ) - 5]=0;
            } else strcpy( tmp,"no file loaded" );
