@@ -282,7 +282,7 @@ void convert_linux(unsigned char *puc_y, int stride_y,
 //**************************************************************************//
 
 static vo_functions_t *video_out=NULL;
-static ao_functions_t *audio_out=NULL;
+ao_functions_t *audio_out=NULL;
 
 double video_time_usage=0;
 double vout_time_usage=0;
@@ -367,6 +367,8 @@ char *dsp=NULL;
 
 float rel_seek_secs=0;
 
+extern char *vo_subdevice;
+extern char *ao_subdevice;
 
 void exit_player(char* how){
  total_time_usage_start=GetTimer()-total_time_usage_start;
@@ -562,6 +564,17 @@ if(!filename){
 }
 
 // check video_out driver name:
+    if (video_driver)
+	if ((i = strcspn(video_driver, ":")) > 0)
+	{
+	    size_t i2 = strlen(video_driver);
+
+	    vo_subdevice = malloc(i2-i);
+	    if (vo_subdevice != NULL)
+		strncpy(vo_subdevice, (char *)(video_driver+i+1), i2-i);
+	    video_driver[i] = '\0';
+//	    printf("video_driver: %s, subdevice: %s\n", video_driver, vo_subdevice);
+	}
   if(!video_driver)
     video_out=video_out_drivers[0];
   else
@@ -577,6 +590,17 @@ if(!filename){
   }
   
 // check audio_out driver name:
+    if (audio_driver)
+	if ((i = strcspn(audio_driver, ":")) > 0)
+	{
+	    size_t i2 = strlen(audio_driver);
+
+	    ao_subdevice = malloc(i2-i);
+	    if (ao_subdevice != NULL)
+		strncpy(ao_subdevice, (char *)(audio_driver+i+1), i2-i);
+	    audio_driver[i] = '\0';
+//	    printf("audio_driver: %s, subdevice: %s\n", audio_driver, ao_subdevice);
+	}
   if(!audio_driver)
     audio_out=audio_out_drivers[0];
   else
@@ -1067,7 +1091,7 @@ switch(file_format){
 
 if(sh_video)
 printf("[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
-   file_format,sh_video->format,sh_video->disp_w,sh_video->disp_h,
+   file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
    sh_video->fps,sh_video->frametime
 );
 
@@ -1142,7 +1166,7 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
     out_fmt=sh_video->codec->outfmt[i];
     if(out_fmt==0xFFFFFFFF) continue;
     ret=video_out->query_format(out_fmt);
-    if(verbose) printf("vo_debug: query(0x%X) returned 0x%X\n",out_fmt,ret);
+    if(verbose) printf("vo_debug: query(%s) returned 0x%X\n",vo_format_name(out_fmt),ret);
     if(ret) break;
 }
 if(i>=CODECS_MAX_OUTFMT){
@@ -1160,7 +1184,7 @@ if(flip==-1){
          flip=1;
 }
 
-if(verbose) printf("vo_debug1: out_fmt=0x%08X\n",out_fmt);
+if(verbose) printf("vo_debug1: out_fmt=%s\n",vo_format_name(out_fmt));
 
 switch(sh_video->codec->driver){
  case 2: {
@@ -1263,7 +1287,7 @@ switch(sh_video->codec->driver){
  }
 }
 
-if(verbose) printf("vo_debug2: out_fmt=0x%08X\n",out_fmt);
+if(verbose) printf("vo_debug2: out_fmt=%s\n",vo_format_name(out_fmt));
 
 // ================== Init output files for encoding ===============
    if(encode_name){
@@ -1321,25 +1345,16 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
    }
 
    { const vo_info_t *info = video_out->get_info();
-     printf("VO: [%s] %dx%d => %dx%d %s%s%s%s ",info->short_name,
+     printf("VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
          sh_video->disp_w,sh_video->disp_h,
          screen_size_x,screen_size_y,
+	 vo_format_name(out_fmt),
          fullscreen?"fs ":"",
          vidmode?"vm ":"",
          softzoom?"zoom ":"",
          (flip==1)?"flip ":""
 //         fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3)
      );
-     if((out_fmt&IMGFMT_BGR_MASK)==IMGFMT_BGR)
-       printf("BGR%d\n",out_fmt&255); else
-     if((out_fmt&IMGFMT_RGB_MASK)==IMGFMT_RGB)
-       printf("RGB%d\n",out_fmt&255); else
-     if(out_fmt==IMGFMT_YUY2) printf("YUY2\n"); else
-     if(out_fmt==IMGFMT_UYVY) printf("UYVY\n"); else
-     if(out_fmt==IMGFMT_YVYU) printf("YVYU\n"); else
-     if(out_fmt==IMGFMT_I420) printf("I420\n"); else
-     if(out_fmt==IMGFMT_IYUV) printf("IYUV\n"); else
-     if(out_fmt==IMGFMT_YV12) printf("YV12\n");
    }
 
 //   if(verbose) printf("Destination size: %d x %d  out_fmt=%0X\n",
@@ -1351,7 +1366,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       title,out_fmt);
 
-if(verbose) printf("vo_debug3: out_fmt=0x%08X\n",out_fmt);
+if(verbose) printf("vo_debug3: out_fmt=%s\n",vo_format_name(out_fmt));
 
    #ifdef HAVE_GUI
     if ( !nogui )
