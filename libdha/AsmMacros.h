@@ -61,18 +61,7 @@
 
 #if defined(__GNUC__)
 #if defined(linux) && (defined(__alpha__) || defined(__ia64__))
-#undef	inb
-#undef	inw
-#undef	inl
-#undef	outb
-#undef	outw
-#undef	outl
-#define inb _inb
-#define inw _inw
-#define inl _inl
-#define outb(p,v) _outb((v),(p))
-#define outw(p,v) _outw((v),(p))
-#define outl(p,v) _outl((v),(p))
+#include <sys/io.h>
 #else
 #if defined(__sparc__)
 #ifndef ASI_PL

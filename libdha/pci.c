@@ -269,7 +269,11 @@ static void outl(int port, unsigned long value) {
  
 #if defined(__GLIBC__) && __GLIBC__ >= 2
 #if defined(linux)
+#ifdef __i386__
 #include <sys/perm.h>
+#else
+#include <sys/io.h>
+#endif
 #endif
 #endif
  
@@ -278,25 +282,6 @@ static void outl(int port, unsigned long value) {
 #include <asm/unistd.h>
 #define BUS(tag) (((tag)>>16)&0xff)
 #define DFN(tag) (((tag)>>8)&0xff)
-static int pciconfig_read(
-          unsigned char bus,
-          unsigned char dfn,
-          unsigned char off,
-          unsigned char len,
-          void * buf)
-{
-  return syscall(__NR_pciconfig_read, bus, dfn, off, len, buf);
-}
-
-static int pciconfig_write(
-          unsigned char bus,
-          unsigned char dfn,
-          unsigned char off,
-          unsigned char len,
-          void * buf)
-{
-  return syscall(__NR_pciconfig_write, bus, dfn, off, len, buf);
-}
 #else
 Generate compiler error - scanpci unsupported on non-linux alpha platforms
 #endif /* linux */
