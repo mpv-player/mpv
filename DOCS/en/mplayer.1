@@ -2181,10 +2181,30 @@ Extracts a single field from interlaced image using stride arithmetic
 to avoid wasting cpu time. The optional argument n specifies whether
 to extract the even or the odd field (depending on whether n is even
 or odd).
-.IPs "detc"
-Experimental filter for reversing telecine process to get clean
-progressive frames. Not yet configurable and likely to change behavior
-in the future.
+.IPs "detc[=var1=value2:var2=value2:...]"
+Attempts to reverse the "telecine" process to recover a clean,
+non-interlaced stream at film framerate. This filter is still
+experimental but seems to be usable. The following arguments (see
+syntax above) may be used to control its behavior:
+.RSss
+dr: Set the frame dropping mode. 0 (default) means don't drop frames
+to maintain fixed output framerate. 1 means always drop a frame when
+there have been no drops or telecine merges in the past 5 frames. 2
+means always maintain exact 5:4 input to output frame ratio. (Note:
+use mode 1 with mencoder!)
+.br
+am: Analysis mode. Available values are 0 (fixed pattern with initial
+frame number specified by fr=#) and 1 (agressive search for telecine
+pattern). Default is 1.
+.br
+fr: Set initial frame number in sequence. 0-2 are the three clean
+progressive frames; 3 and 4 are the two interlaced frames. The
+default, -1, means "not in telecine sequence". The number specified
+here is the type for the imaginary previous frame before the movie
+starts.
+.br
+tr0, tr1, tr2, tr3: Threshold values to be used in certain modes.
+.REss
 .IPs "telecine[=start]"
 Apply 3:2 "telecine" process to increase framerate by 20%. This most
 likely will not work correctly with mplayer, but it can be used with

@@ -20,13 +20,37 @@ struct metrics {
 
 struct vf_priv_s {
 	int frame;
-	int autosync;
-	int lastsync;
-	int lastdrop;
-	int oddfactor, noisefactor;
-	int resync;
-	struct metrics pm, hi, lo;
-	int prevscore;
+	int drop, lastdrop;
+	struct metrics pm;
+	int thres[4];
+	int inframes, outframes;
+	int mode;
+	int (*analyze)(struct vf_priv_s *, mp_image_t *, mp_image_t *);
+	int needread;
+};
+
+#define COMPE(a,b,e) (abs((a)-(b)) < (((a)+(b))>>(e)))
+#define COMPARABLE(a,b) COMPE((a),(b),2)
+#define VERYCLOSE(a,b) COMPE((a),(b),3)
+
+#define OUTER_TC_NBHD(s) ( \
+ COMPARABLE((s)[-1].m.even,(s)[-1].m.odd) && \
+ COMPARABLE((s)[1].m.even,(s)[0].m.odd) && \
+ COMPARABLE((s)[2].m.even,(s)[1].m.odd) && \
+ COMPARABLE((s)[-1].m.noise,(s)[0].m.temp) && \
+ COMPARABLE((s)[2].m.noise,(s)[2].m.temp) )
+
+#define INNER_TC_NBHD(s,l,h) ( \
+ COMPARABLE((s)[0].m.even,(l)) && \
+ COMPARABLE((s)[2].m.odd,(l)) && ( \
+ COMPARABLE((s)[0].m.noise,(h)) || \
+ COMPARABLE((s)[1].m.noise,(h)) ) )
+
+enum {
+	TC_DROP,
+	TC_PROG,
+	TC_IL1,
+	TC_IL2
 };
 
 static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
@@ -44,27 +68,50 @@ static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int 
 	return retval;
 }
 
+static unsigned int hash_pic(unsigned char *img, int w, int h, int stride)
+{
+	int step = w*h/1024;
+	unsigned int hash=0;
+	int x=0, y;
+
+	step -= step % 3;
+
+	for (y=0; y<h; y++) {
+		for (; x<w; x+=step) {
+			hash = hash ^ (hash<<4) ^ img[x];
+		}
+		x -= w;
+		img += stride;
+	}
+	
+	return hash;
+}
+
 static void block_diffs(struct metrics *m, unsigned char *old, unsigned char *new, int os, int ns)
 {
-	int i, x, even=0, odd=0, noise=0, temp=0, sum=0;
-	for (i = 8; i; i--) {
-		for (x = 0; x < 16; x++) {
-			even += abs(new[x]-old[x]);
-			odd += abs(new[x+ns]-old[x+os]);
-			sum += new[x];
-			noise += new[x+ns];
-			temp += old[x+os];
+	int x, y, even=0, odd=0, noise, temp;
+	unsigned char *oldp, *newp;
+	m->noise = m->temp = 0;
+	for (x = 15; x; x--) {
+		oldp = old++;
+		newp = new++;
+		noise = temp = 0;
+		for (y = 8; y; y--) {
+			even += abs(newp[0]-oldp[0]);
+			odd += abs(newp[ns]-oldp[os]);
+			noise += newp[ns]-newp[0];
+			temp += oldp[os]-newp[0];
+			oldp += os<<1;
+			newp += ns<<1;
 		}
-		old += 2*os; new += 2*ns;
+		m->noise += abs(noise);
+		m->temp += abs(temp);
 	}
 	m->even = even;
 	m->odd = odd;
-	m->noise = abs(noise-sum);
-	m->temp = abs(temp-sum);
 }
 
-
-static void diff_fields(struct metrics *m, unsigned char *old, unsigned char *new, int w, int h, int os, int ns)
+static void diff_planes(struct metrics *m, unsigned char *old, unsigned char *new, int w, int h, int os, int ns)
 {
 	int x, y, me=0, mo=0, mn=0, mt=0;
 	struct metrics l;
@@ -83,103 +130,143 @@ static void diff_fields(struct metrics *m, unsigned char *old, unsigned char *ne
 	m->temp = mt;
 }
 
-static status(int f, struct metrics *m, int s)
+static void diff_fields(struct metrics *metr, mp_image_t *old, mp_image_t *new)
 {
-	mp_msg(MSGT_VFILTER, MSGL_V, "frame %d: e=%d o=%d n=%d t=%d s=%d\n",
-		f, m->even, m->odd, m->noise, m->temp, s);
+	struct metrics m, mu, mv;
+	diff_planes(&m, old->planes[0], new->planes[0],
+		new->w, new->h, old->stride[0], new->stride[0]);
+	if (new->flags & MP_IMGFLAG_PLANAR) {
+		diff_planes(&mu, old->planes[1], new->planes[1],
+			new->chroma_width, new->chroma_height,
+			old->stride[1], new->stride[1]);
+		diff_planes(&mv, old->planes[2], new->planes[2],
+			new->chroma_width, new->chroma_height,
+			old->stride[2], new->stride[2]);
+		if (mu.even > m.even) m.even = mu.even;
+		if (mu.odd > m.odd) m.odd = mu.odd;
+		if (mu.noise > m.noise) m.noise = mu.noise;
+		if (mu.temp > m.temp) m.temp = mu.temp;
+		if (mv.even > m.even) m.even = mv.even;
+		if (mv.odd > m.odd) m.odd = mv.odd;
+		if (mv.noise > m.noise) m.noise = mv.noise;
+		if (mv.temp > m.temp) m.temp = mv.temp;
+	}
+	*metr = m;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static status(int f, struct metrics *m)
 {
-	struct vf_priv_s *p = vf->priv;
-	mp_image_t *dmpi;
+	mp_msg(MSGT_VFILTER, MSGL_V, "frame %d: e=%d o=%d n=%d t=%d\n",
+		f, m->even, m->odd, m->noise, m->temp);
+}
+
+static int analyze_fixed_pattern(struct vf_priv_s *p, mp_image_t *new, mp_image_t *old)
+{
+	if (p->frame >= 0) p->frame = (p->frame+1)%5;
+	mp_msg(MSGT_VFILTER, MSGL_V, "frame %d\n", p->frame);
+	switch (p->frame) {
+	case -1: case 0: case 1: case 2:
+		return TC_PROG;
+	case 3:
+		return TC_IL1;
+	case 4:
+		return TC_IL2;
+	}
+	return 0;
+}
+
+static int analyze_aggressive(struct vf_priv_s *p, mp_image_t *new, mp_image_t *old)
+{
 	int i;
-	struct metrics m;
-	int isdup, notdup;
-	int islaced, notlaced;
-	int tcstart, tcend;
-	int tcscore;
-
-	if (p->frame >= 0)
-		p->frame = (p->frame+1)%5;
+	struct metrics m, pm;
 	
-	dmpi = vf_get_image(vf->next, mpi->imgfmt,
-		MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
-		MP_IMGFLAG_PRESERVE | MP_IMGFLAG_READABLE,
-		mpi->width, mpi->height);
-
-	diff_fields(&m, dmpi->planes[0], mpi->planes[0],
-		mpi->w, mpi->h, dmpi->stride[0], mpi->stride[0]);
-
-	isdup = m.even < p->lo.even;
-	notdup = m.even > p->hi.even;
-
-	tcscore = (m.odd > p->lo.odd) + (m.odd > p->hi.odd) + (m.odd > 4*m.even)
-		+ (m.noise > p->lo.noise) + (m.noise > p->hi.noise)
-		+ (m.noise > m.temp)
-		+ (m.even * p->pm.odd > m.odd * p->pm.even);
-
-	status(p->frame, &m, tcscore);
+	if (p->frame >= 0) p->frame = (p->frame+1)%5;
 	
-	vf->priv->pm = m;
-	vf->priv->prevscore = tcscore;
+	diff_fields(&m, old, new);
 	
-	switch (vf->priv->frame) {
+	status(p->frame, &m);
+
+	pm = p->pm;
+	p->pm = m;
+
+	if (p->frame == 4) {
+		if (2*m.noise > m.temp) {
+			if (VERYCLOSE(m.even, pm.odd)) {
+				//mp_msg(MSGT_VFILTER, MSGL_V, "confirmed field match!\n");
+				return TC_IL2;
+			} else if ((m.even < p->thres[0]) && (m.odd < p->thres[0]) && VERYCLOSE(m.even, m.odd)
+				&& VERYCLOSE(m.noise,m.temp) && VERYCLOSE(m.noise,pm.noise)) {
+				mp_msg(MSGT_VFILTER, MSGL_V, "interlaced frame appears in duplicate!!!\n");
+				p->pm = pm; /* hack :) */
+				p->frame = 3;
+				return TC_IL1;
+			} 
+		} else {
+			mp_msg(MSGT_VFILTER, MSGL_V, "mismatched telecine fields!\n");
+			p->frame = -1;
+		}
+	}
+
+	if (((2*m.even < m.odd) && (5*m.temp < 4*m.noise))
+		|| ((5*m.even < 4*m.odd) && (2*m.temp < m.noise))
+		|| (m.even*m.temp < 2*m.odd*m.noise/5) /* ok? */ ) {
+		mp_msg(MSGT_VFILTER, MSGL_V, "caught telecine sync!\n");
+		p->frame = 3;
+		return TC_IL1;
+	}
+
+	if (p->frame < 3) {
+		if (m.noise > p->thres[3]) {
+			if (m.noise > 2*m.temp) {
+				mp_msg(MSGT_VFILTER, MSGL_V, "merging fields out of sequence!\n");
+				return TC_IL2;
+			}
+			if ((m.noise > 2*pm.noise) && (m.even > p->thres[2]) && (m.odd > p->thres[2])) {
+				mp_msg(MSGT_VFILTER, MSGL_V, "dropping horrible interlaced frame!\n");
+				return TC_DROP;
+			}
+		}
+	}
+
+	switch (p->frame) {
+	case -1:
+		if (4*m.noise > 5*m.temp) {
+			mp_msg(MSGT_VFILTER, MSGL_V, "merging fields out of sequence!\n");
+			return TC_IL2;
+		}
 	case 0:
 	case 1:
 	case 2:
-		if (isdup && (tcscore > 3)) {
-			//status(p->frame, &m, tcscore);
-			mp_msg(MSGT_VFILTER, MSGL_V, "heavy lacing, trying to resync with telecine!\n");
-			vf->priv->frame = 3;
-			return 0;
-		} else if (tcscore > 5) {
-			//status(p->frame, &m, tcscore);
-			mp_msg(MSGT_VFILTER, MSGL_V, "laced scene change, trying to resync with telecine!\n");
-			vf->priv->frame = 3;
-			return 0;
-		}
-		break;
+		return TC_PROG;
 	case 3:
-		if (notdup && (m.noise < p->hi.noise)) {
-			//status(p->frame, &m, tcscore);
-			mp_msg(MSGT_VFILTER, MSGL_V, "non-duplicate field; lost telecine tracking!\n");
-			vf->priv->frame = -1;
+		if ((m.even > p->thres[1]) && (5*m.even > 4*m.odd) && (5*m.temp > 4*m.noise)) {
+			mp_msg(MSGT_VFILTER, MSGL_V, "lost telecine tracking!\n");
+			p->frame = -1;
+			return TC_PROG;
 		}
-		break;
+		return TC_IL1;
 	case 4:
-		if (m.temp > p->hi.temp) { /* bad match */
-			//status(p->frame, &m, tcscore);
-			if (m.noise < p->hi.noise) {
-				mp_msg(MSGT_VFILTER, MSGL_V, "mismatched non-interlaced frame; lost telecine tracking!\n");
-				vf->priv->frame = -1;
-			} else {
-				mp_msg(MSGT_VFILTER, MSGL_V, "mismatched interlaced frame; trying to resync!\n");
-				vf->priv->frame = 3;
-			}
-		}
-		break;
-	default:
-		if (!notdup && (tcscore > 2)) {
-			//status(p->frame, &m, tcscore);
-			mp_msg(MSGT_VFILTER, MSGL_V, "caught the telecine start!\n");
-			vf->priv->frame = 3;
-		}
-		break;
+		return TC_IL2;
 	}
+	return 0;
+}
 
-	if (vf->priv->frame < 3) {
-		memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h,
-			dmpi->stride[0], mpi->stride[0]);
+static void copy_image(mp_image_t *dmpi, mp_image_t *mpi, int field)
+{
+	switch (field) {
+	case 0:
+		my_memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h/2,
+			dmpi->stride[0]*2, mpi->stride[0]*2);
 		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			memcpy_pic(dmpi->planes[1], mpi->planes[1],
-				mpi->chroma_width, mpi->chroma_height,
-				dmpi->stride[1], mpi->stride[1]);
-			memcpy_pic(dmpi->planes[2], mpi->planes[2],
-				mpi->chroma_width, mpi->chroma_height,
-				dmpi->stride[2], mpi->stride[2]);
+			my_memcpy_pic(dmpi->planes[1], mpi->planes[1],
+				mpi->chroma_width, mpi->chroma_height/2,
+				dmpi->stride[1]*2, mpi->stride[1]*2);
+			my_memcpy_pic(dmpi->planes[2], mpi->planes[2],
+				mpi->chroma_width, mpi->chroma_height/2,
+				dmpi->stride[2]*2, mpi->stride[2]*2);
 		}
-	} else if (vf->priv->frame == 3) {
+		break;
+	case 1:
 		my_memcpy_pic(dmpi->planes[0]+dmpi->stride[0],
 			mpi->planes[0]+mpi->stride[0], mpi->w, mpi->h/2,
 			dmpi->stride[0]*2, mpi->stride[0]*2);
@@ -193,26 +280,92 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				mpi->chroma_width, mpi->chroma_height/2,
 				dmpi->stride[2]*2, mpi->stride[2]*2);
 		}
-		p->lastdrop = 0;
-		return 0;
-	} else {
-		my_memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h/2,
-			dmpi->stride[0]*2, mpi->stride[0]*2);
+		break;
+	case 2:
+		memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h,
+			dmpi->stride[0], mpi->stride[0]);
 		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			my_memcpy_pic(dmpi->planes[1], mpi->planes[1],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[1]*2, mpi->stride[1]*2);
-			my_memcpy_pic(dmpi->planes[2], mpi->planes[2],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[2]*2, mpi->stride[2]*2);
+			memcpy_pic(dmpi->planes[1], mpi->planes[1],
+				mpi->chroma_width, mpi->chroma_height,
+				dmpi->stride[1], mpi->stride[1]);
+			memcpy_pic(dmpi->planes[2], mpi->planes[2],
+				mpi->chroma_width, mpi->chroma_height,
+				dmpi->stride[2], mpi->stride[2]);
 		}
+		break;
 	}
-	if (++p->lastdrop >= 5) {
-		mp_msg(MSGT_VFILTER, MSGL_V, "dropping frame!\n");
+}
+
+static int do_put_image(struct vf_instance_s* vf, mp_image_t *dmpi)
+{
+	struct vf_priv_s *p = vf->priv;
+	int dropflag;
+
+	switch (p->drop) {
+	case 0:
+		dropflag = 0;
+		break;
+	case 1:
+		dropflag = (++p->lastdrop >= 5);
+		break;
+	case 2:
+		dropflag = (++p->lastdrop >= 5) && (4*p->inframes <= 5*p->outframes);
+		break;
+	}
+	
+	if (dropflag) {
+		mp_msg(MSGT_VFILTER, MSGL_V, "drop! [%d/%d=%g]\n",
+			p->outframes, p->inframes, (float)p->outframes/p->inframes);
 		p->lastdrop = 0;
 		return 0;
 	}
+
+	p->outframes++;
 	return vf_next_put_image(vf, dmpi);
+}
+
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+{
+	int ret=0;
+	mp_image_t *dmpi;
+	struct vf_priv_s *p = vf->priv;
+
+	p->inframes++;
+
+	if (p->needread) dmpi = vf_get_image(vf->next, mpi->imgfmt,
+		MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
+		MP_IMGFLAG_PRESERVE | MP_IMGFLAG_READABLE,
+		mpi->width, mpi->height);
+	/* FIXME: is there a good way to get rid of static type? */
+	else dmpi = vf_get_image(vf->next, mpi->imgfmt,
+		MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
+		MP_IMGFLAG_PRESERVE, mpi->width, mpi->height);
+		
+	switch (p->analyze(p, mpi, dmpi)) {
+	case TC_DROP:
+		/* Don't copy anything unless we'll need to read it. */
+		if (p->needread) copy_image(dmpi, mpi, 2);
+		p->lastdrop = 0;
+		break;
+	case TC_PROG:
+		/* Copy and display the whole frame. */
+		copy_image(dmpi, mpi, 2);
+		ret = do_put_image(vf, dmpi);
+		break;
+	case TC_IL1:
+		/* Only copy bottom field unless we need to read. */
+		if (p->needread) copy_image(dmpi, mpi, 2);
+		else copy_image(dmpi, mpi, 1);
+		p->lastdrop = 0;
+		break;
+	case TC_IL2:
+		/* Copy top field and show frame, then copy bottom if needed. */
+		copy_image(dmpi, mpi, 0);
+		ret = do_put_image(vf, dmpi);
+		if (p->needread) copy_image(dmpi, mpi, 1);
+		break;
+	}
+	return ret;
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt)
@@ -239,6 +392,44 @@ static void uninit(struct vf_instance_s* vf)
 	free(vf->priv);
 }
 
+static struct {
+	char *name;
+	int (*func)(struct vf_priv_s *p, mp_image_t *new, mp_image_t *old);
+	int needread;
+} anal_funcs[] = {
+	{ "fixed", analyze_fixed_pattern, 0 },
+	{ "aggressive", analyze_aggressive, 1 },
+	{ NULL, NULL, 0 }
+};
+
+#define STARTVARS if (0)
+#define GETVAR(str, name, out, func) \
+ else if (!strncmp((str), name "=", sizeof(name))) \
+ (out) = (func)((str) + sizeof(name))
+
+static void parse_var(struct vf_priv_s *p, char *var)
+{
+	STARTVARS;
+	GETVAR(var, "dr", p->drop, atoi);
+	GETVAR(var, "t0", p->thres[0], atoi);
+	GETVAR(var, "t1", p->thres[1], atoi);
+	GETVAR(var, "t2", p->thres[2], atoi);
+	GETVAR(var, "t3", p->thres[3], atoi);
+	GETVAR(var, "fr", p->frame, atoi);
+	GETVAR(var, "am", p->mode, atoi);
+}
+
+static void parse_args(struct vf_priv_s *p, char *args)
+{
+	char *next, *orig;
+	for (args=orig=strdup(args); args; args=next) {
+		next = strchr(args, ':');
+		if (next) *next++ = 0;
+		parse_var(p, args);
+	}
+	free(orig);
+}
+
 static int open(vf_instance_t *vf, char* args)
 {
 	struct vf_priv_s *p;
@@ -248,19 +439,16 @@ static int open(vf_instance_t *vf, char* args)
 	vf->uninit = uninit;
 	vf->default_reqs = VFCAP_ACCEPT_STRIDE;
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
-	if (args) sscanf(args, "%d:%d", &vf->priv->frame, &vf->priv->autosync);
 	p->frame = -1;
-	p->lastsync = 10;
-	p->lo.even = 1760;
-	p->hi.even = 2880;
-	p->lo.odd = 2560;
-	p->hi.odd = 10240;
-	p->lo.noise = 4480;
-	p->hi.noise = 10240;
-	p->lo.temp = 6400;
-	p->hi.temp = 12800;
-	vf->priv->oddfactor = 3;
-	vf->priv->noisefactor = 6;
+	p->thres[0] = 1760;
+	p->thres[1] = 2880;
+	p->thres[2] = 10000;
+	p->thres[3] = 10000;
+	p->drop = 0;
+	p->mode = 1;
+	if (args) parse_args(p, args);
+	p->analyze = anal_funcs[p->mode].func;
+	p->needread = anal_funcs[p->mode].needread;
 	return 1;
 }
 
