@@ -158,7 +158,8 @@ static void fix_parameters(muxer_stream_t *stream, void *sh)
 		ctx->codec_tag = codec_get_wav_tag(ctx->codec_id);
 		mp_msg(MSGT_MUXER, MSGL_INFO, "AUDIO CODEC ID: %x, TAG: %x\n", ctx->codec_id, (uint32_t) ctx->codec_tag);
 		ctx->bit_rate = stream->wf->nAvgBytesPerSec * 8;
-		ctx->sample_rate = stream->h.dwSampleSize;
+		ctx->sample_rate = stream->wf->nSamplesPerSec;
+//                mp_msg(MSGT_MUXER, MSGL_INFO, "stream->h.dwSampleSize: %d\n", stream->h.dwSampleSize);
 		ctx->channels = stream->wf->nChannels;
 		ctx->frame_size = 576;
 		ctx->block_align = stream->wf->nBlockAlign;
