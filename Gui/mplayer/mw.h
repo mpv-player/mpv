@@ -10,7 +10,6 @@ int             mplMainAutoPlay = 0;
 int             mainVisible = 1;
 
 int             boxMoved = 0;
-int             msButton = 0;
 int             sx = 0,sy = 0;
 int             i,pot = 0;
 
@@ -94,24 +93,24 @@ calclengthmmmmss:
        case 's': if ( mplShMem->Playing == 0 ) strcat( trbuf,"s" ); break;
        case 'l': if ( mplShMem->Playing == 1 ) strcat( trbuf,"p" ); break;
        case 'e': if ( mplShMem->Playing == 2 ) strcat( trbuf,"e" ); break;
-       case 'a': 
+       case 'a':
             switch ( mplShMem->AudioType )
-	     {
-	      case 0: strcat( trbuf,"n" ); break;
-	      case 1: strcat( trbuf,"m" ); break;
-	      case 2: strcat( trbuf,"t" ); break;
-	     }
-	    break;
-       case 'T': 
-    	   switch ( mplShMem->StreamType )
-	    {
-	     case STREAMTYPE_FILE:   strcat( trbuf,"f" ); break;
-	     case STREAMTYPE_VCD:    strcat( trbuf,"v" ); break;
-	     case STREAMTYPE_STREAM: strcat( trbuf,"u" ); break;
-	     case STREAMTYPE_DVD:    strcat( trbuf,"d" ); break;
-	     default:                strcat( trbuf," " ); break;
-	    }
-	   break;
+             {
+              case 0: strcat( trbuf,"n" ); break;
+              case 1: strcat( trbuf,"m" ); break;
+              case 2: strcat( trbuf,"t" ); break;
+             }
+            break;
+       case 'T':
+           switch ( mplShMem->StreamType )
+            {
+             case STREAMTYPE_FILE:   strcat( trbuf,"f" ); break;
+             case STREAMTYPE_VCD:    strcat( trbuf,"v" ); break;
+             case STREAMTYPE_STREAM: strcat( trbuf,"u" ); break;
+             case STREAMTYPE_DVD:    strcat( trbuf,"d" ); break;
+             default:                strcat( trbuf," " ); break;
+            }
+           break;
        case '$': strcat( trbuf,"$" ); break;
        default: continue;
       }
@@ -162,14 +161,14 @@ void mplMainDraw( wsParamDisplay )
    case 0:
         btnModify( evPlaySwitchToPause,btnReleased );
         btnModify( evPauseSwitchToPlay,btnDisabled );
-	break;
+        break;
    case 1:
         if ( mplShMem->Filename[0] != 0 )
-	 {
+         {
           btnModify( evPlaySwitchToPause,btnDisabled );
-	  btnModify( evPauseSwitchToPlay,btnReleased );
-	 }
-  }	 
+          btnModify( evPauseSwitchToPlay,btnReleased );
+         }
+  }
 
 // --- erosen ideiglenes.
  strcpy( gtkShMem->fs.filename,mplShMem->Filename );
@@ -188,11 +187,11 @@ void mplMainDraw( wsParamDisplay )
             break;
        case itPotmeter:
             PutImage( &item->Bitmap,item->x,item->y,item->phases,item->phases * ( item->value / 100.0f ) );
-	    break;
+            break;
        case itHPotmeter:
             PutImage( &item->Bitmap,item->x,item->y,item->phases,item->phases * ( item->value / 100.0f ) );
             PutImage( &item->Mask,item->x + (int)( ( item->width - item->psx ) * item->value / 100.0f ),item->y,3,item->pressed );
-	    break;
+            break;
        case itSLabel:
             image=fntRender( item->fontid,0,item->width,"%s",item->label );
             goto drawrenderedtext;
@@ -230,14 +229,14 @@ void mplMsgHandle( int msg,float param )
    case evExit:
 //        IZE("evExit");
         wsDoExit();  // sets wsTrue=False;
-	exit_player( "Exit" );
+        exit_player( "Exit" );
         break;
    case evIconify:
-	switch ( (int)param )
-	 {
-	  case 0: wsIconify( appMPlayer.mainWindow ); break;
-	  case 1: wsIconify( appMPlayer.subWindow ); break;
-	 }
+        switch ( (int)param )
+         {
+          case 0: wsIconify( appMPlayer.mainWindow ); break;
+          case 1: wsIconify( appMPlayer.subWindow ); break;
+         }
         break;
    case evFullScreen:
         IZE("evFullS");
@@ -340,32 +339,32 @@ NoPause:
    case evIncVolume:  vo_x11_putkey( wsGrayMul ); break;
    case evDecVolume:  vo_x11_putkey( wsGrayDiv ); break;
    case evMute:       mplShMem->Mute=1; break;
-   case evSetVolume:  
+   case evSetVolume:
    case evSetBalance: mplShMem->VolumeChanged=1; break;
 
 
    case evNormalSize:
-        if ( mplShMem->Playing ) 
-	 {
-	  appMPlayer.subWindow.isFullScreen=True;
-	  appMPlayer.subWindow.OldX=( wsMaxX - moviewidth ) / 2;
-	  appMPlayer.subWindow.OldY=( wsMaxY - movieheight ) / 2;
-	  appMPlayer.subWindow.OldWidth=moviewidth; appMPlayer.subWindow.OldHeight=movieheight;
-	  wsFullScreen( &appMPlayer.subWindow );
-	  mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,moviewidth,movieheight );
-	 } 
-	break;
-   case evDoubleSize: 
-        if ( mplShMem->Playing ) 
-	 {
-	  appMPlayer.subWindow.isFullScreen=True; 
-	  appMPlayer.subWindow.OldX=( wsMaxX - moviewidth * 2 ) / 2;
-	  appMPlayer.subWindow.OldY=( wsMaxY - movieheight * 2 ) / 2;
-	  appMPlayer.subWindow.OldWidth=moviewidth * 2; appMPlayer.subWindow.OldHeight=movieheight * 2;
-	  wsFullScreen( &appMPlayer.subWindow );
-	  mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,moviewidth,movieheight );
-	 }
-	break;
+        if ( mplShMem->Playing )
+         {
+          appMPlayer.subWindow.isFullScreen=True;
+          appMPlayer.subWindow.OldX=( wsMaxX - moviewidth ) / 2;
+          appMPlayer.subWindow.OldY=( wsMaxY - movieheight ) / 2;
+          appMPlayer.subWindow.OldWidth=moviewidth; appMPlayer.subWindow.OldHeight=movieheight;
+          wsFullScreen( &appMPlayer.subWindow );
+          mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,moviewidth,movieheight );
+         }
+        break;
+   case evDoubleSize:
+        if ( mplShMem->Playing )
+         {
+          appMPlayer.subWindow.isFullScreen=True;
+          appMPlayer.subWindow.OldX=( wsMaxX - moviewidth * 2 ) / 2;
+          appMPlayer.subWindow.OldY=( wsMaxY - movieheight * 2 ) / 2;
+          appMPlayer.subWindow.OldWidth=moviewidth * 2; appMPlayer.subWindow.OldHeight=movieheight * 2;
+          wsFullScreen( &appMPlayer.subWindow );
+          mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,moviewidth,movieheight );
+         }
+        break;
 
 // --- timer events
    case evHideMouseCursor:
@@ -374,10 +373,10 @@ NoPause:
    case evRedraw:
         mplMainRender=1;
         wsPostRedisplay( &appMPlayer.mainWindow );
-//        if ( !mplShMem->Playing ) 
-//	wsPostRedisplay( &appMPlayer.subWindow );
+//        if ( !mplShMem->Playing )
+//      wsPostRedisplay( &appMPlayer.subWindow );
         XFlush( wsDisplay );
-	mplRedrawTimer=mplRedrawTimerConst;
+        mplRedrawTimer=mplRedrawTimerConst;
         break;
    case evGeneralTimer:
         if ( mplMainAutoPlay )
@@ -397,96 +396,115 @@ NoPause:
   }
 }
 
+#define itPLMButton (itNULL - 1)
+#define itPRMButton (itNULL - 2)
+
 void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
 {
  static int     itemtype = 0;
- static int     SelectedButton = -1;
+        int     i;
         wItem * item = NULL;
         float   value = 0.0f;
+
+ static int     SelectedItem = -1;
+        int     currentselected = -1;
+
  wsVisibleMouse( &appMPlayer.subWindow,wsShowMouseCursor );
+
+ for ( i=0;i < appMPlayer.NumberOfItems + 1;i++ )
+  if ( ( appMPlayer.Items[i].pressed != btnDisabled )&&
+       ( wgIsRect( X,Y,appMPlayer.Items[i].x,appMPlayer.Items[i].y,appMPlayer.Items[i].x+appMPlayer.Items[i].width,appMPlayer.Items[i].y+appMPlayer.Items[i].height ) ) )
+   { currentselected=i; break; }
+
  switch ( Button )
   {
    case wsPRMouseButton:
           mplShowMenu( RX,RY );
-          msButton=wsPRMouseButton;
+          itemtype=itPRMButton;
           break;
    case wsRRMouseButton:
           mplHideMenu( RX,RY );
-          msButton=0;
           break;
+
    case wsPLMouseButton:
-          sx=X; sy=Y;
-          boxMoved=1;
-          msButton=wsPLMouseButton;
-          for ( i=0;i < appMPlayer.NumberOfItems + 1;i++ )
+          sx=X; sy=Y; boxMoved=1; itemtype=itPLMButton; // if move the main window
+          SelectedItem=currentselected;
+          if ( SelectedItem == -1 ) break; // yeees, i'm move the fucking window
+          boxMoved=0; mplMainRender=1; // No, not move the window, i'm pressed one button
+          item=&appMPlayer.Items[SelectedItem];
+          itemtype=item->type;
+          item->pressed=btnPressed;
+          item->used=1;
+          switch( item->type )
            {
-            item=&appMPlayer.Items[i];
-            if ( item->pressed != btnDisabled )
-             {
-              switch( item->type )
-               {
-                case itButton:
-                     if ( wgIsRect( X,Y,
-                          item->x,item->y,
-                          item->x+item->width,item->y+item->height ) )
-                      {
-                       item->pressed=btnPressed;
-                       mplMainRender=1;
-                       SelectedButton=i;
-                       msButton=0;
-                       boxMoved=0;
-                      }
-                     if ( ( SelectedButton > -1 ) &&
-                        ( ( ( appMPlayer.Items[SelectedButton].msg == evPlaySwitchToPause && item->msg == evPauseSwitchToPlay ) ) ||
-                          ( ( appMPlayer.Items[SelectedButton].msg == evPauseSwitchToPlay && item->msg == evPlaySwitchToPause ) ) ) )
-                      {
-                       appMPlayer.Items[SelectedButton].pressed=btnDisabled;
-                       SelectedButton=i;
-                       appMPlayer.Items[SelectedButton].pressed=btnPressed;
-                      }
-                     itemtype=itButton;
-                     break;
-                case itPotmeter:
-                     if ( wgIsRect( X,Y,
-                          item->x,item->y,
-                          item->x+item->width,item->y+item->height ) )
-                      {
-                       item->pressed=btnPressed;
-		       item->used=1;
-                       mplMainRender=1;
-                       SelectedButton=i;
-                       boxMoved=0;
-                       msButton=itPotmeter;
-                       itemtype=itPotmeter;
-                      }
-                      break;
-                case itHPotmeter:
-                     if ( wgIsRect( X,Y,
-                          item->x,item->y,
-                          item->x+item->width,item->y+item->height ) )
-                      {
-                       item->pressed=btnPressed;
-		       item->used=1;
-                       mplMainRender=1;
-                       SelectedButton=i;
-                       boxMoved=0;
-                       msButton=itHPotmeter;
-                       itemtype=itHPotmeter;
-                      }
-                     break;
-               }
-             }
+            case itButton:
+                 if ( ( SelectedItem > -1 ) &&
+                    ( ( ( appMPlayer.Items[SelectedItem].msg == evPlaySwitchToPause && item->msg == evPauseSwitchToPlay ) ) ||
+                      ( ( appMPlayer.Items[SelectedItem].msg == evPauseSwitchToPlay && item->msg == evPlaySwitchToPause ) ) ) )
+                  { appMPlayer.Items[SelectedItem].pressed=btnDisabled; }
+                 break;
            }
           break;
-   case wsMoveMouse:
-          item=&appMPlayer.Items[SelectedButton];
-          switch ( msButton )
+   case wsRLMouseButton:
+          boxMoved=0;
+          item=&appMPlayer.Items[SelectedItem];
+          item->pressed=btnReleased;
+          SelectedItem=-1;
+          if ( currentselected == - 1 ) { itemtype=0; break; }
+          value=0;
+          switch( itemtype )
            {
-            case wsPLMouseButton:
+            case itPotmeter:
+            case itHPotmeter:
+                 item->used=0;
+                 btnModify( item->msg,(float)( X - item->x ) / item->width * 100.0f );
+                 switch ( item->msg )
+                  {
+                   case evSetVolume:
+                        mplShMem->VolumeChanged=1;
+                        mplShMem->Volume=item->value;
+                        break;
+                  }
+                 value=item->value;
+                 break;
+           }
+          mplMsgHandle( item->msg,value );
+          mplMainRender=1;
+          itemtype=0;
+          break;
+
+// --- rolled mouse ... de szar :)))
+   case wsP5MouseButton: value=-2.5f; goto rollerhandled;
+   case wsP4MouseButton: value= 2.5f;
+rollerhandled:
+          item=&appMPlayer.Items[currentselected];
+          if ( ( item->type == itHPotmeter )||( item->type == itVPotmeter )||( item->type == itPotmeter ) )
+           {
+            item->used=0;
+            item->value+=value;
+            btnModify( item->msg,item->value );
+            switch ( item->msg )
+             {
+              case evSetVolume:
+                   mplShMem->VolumeChanged=1;
+                   mplShMem->Volume=item->value;
+                   break;
+             }
+            mplMsgHandle( item->msg,item->value );
+            mplMainRender=1;
+           }
+          break;
+
+// --- moving
+   case wsMoveMouse:
+          item=&appMPlayer.Items[SelectedItem];
+          switch ( itemtype )
+           {
+            case itPLMButton:
                  wsMoveWindow( &appMPlayer.mainWindow,RX - abs( sx ),RY - abs( sy ) );
                  mplMainRender=0;
                  break;
-            case wsPRMouseButton:
+            case itPRMButton:
                  mplMenuMouseHandle( X,Y,RX,RY );
                  break;
             case itPotmeter:
@@ -495,49 +513,20 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
             case itHPotmeter:
                  item->value=(float)( X - item->x ) / item->width * 100.0f;
 potihandled:
-		 if ( item->value > 100.0f ) item->value=100.0f;
-		 if ( item->value < 0.0f ) item->value=0.0f;
-                 if ( ( item->msg == evSetVolume )||( item->msg == evSetBalance ) ) 
-		  {
-		   mplShMem->VolumeChanged=1;
-		   mplShMem->Volume=item->value;
-		  }
-		 mplMsgHandle( item->msg,item->value );
+                 if ( item->value > 100.0f ) item->value=100.0f;
+                 if ( item->value < 0.0f ) item->value=0.0f;
+                 switch ( item->msg )
+                  {
+                   case evSetVolume:
+                        mplShMem->VolumeChanged=1;
+                        mplShMem->Volume=item->value;
+                        break;
+                  }
+                 mplMsgHandle( item->msg,item->value );
                  mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
                  break;
            }
           break;
-   case wsRLMouseButton:
-          msButton=0;
-          boxMoved=0;
-          item=&appMPlayer.Items[SelectedButton];
-          item->pressed=btnReleased;
-          switch( itemtype )
-           {
-            case itButton:
-                 if ( wgIsRect( X,Y,
-                        item->x,item->y,
-                        item->x+item->width,item->y+item->height ) ) value=0;
-                  break;
-            case itPotmeter:
-            case itHPotmeter:
-		 item->used=0;
-                 btnModify( item->msg,(float)( X - item->x ) / item->width * 100.0f );
-                 if ( ( item->msg == evSetVolume )||( item->msg == evSetBalance ) ) 
-		  {
-		   mplShMem->VolumeChanged=1;
-		   mplShMem->Volume=item->value;
-		  }
-		 value=item->value;
-                 break;
-           }
-          if ( SelectedButton != -1 ) mplMsgHandle( item->msg,value );
-          SelectedButton=-1;
-          mplMainRender=1;
-          itemtype=0;
-          break;
-   case wsPMMouseButton: break;
-   case wsRMMouseButton: break;
   }
  if ( Button != wsMoveMouse ) wsPostRedisplay( &appMPlayer.mainWindow );
 }
@@ -555,14 +544,6 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case '<':         msg=evPrev; break;
 
    case wsEscape:    msg=evExit; break;
-
-//   case wsUp:        msg=evForward1min; break;
-//   case wsDown:      msg=evBackward1min; break;
-//   case wsRight:     msg=evForward10sec; break;
-//   case wsLeft:      msg=evBackward10sec; break;
-
-//   case wsGrayMul:   msg=evIncVolume; break;
-//   case wsGrayDiv:   msg=evDecVolume; break;
 
    case wsEnter:     msg=evPlay; break;
    case wsSpace:     msg=evPause; break;
@@ -582,7 +563,7 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case wsS:         msg=evStop; break;
    case wsp:
    case wsP:         msg=evPlayList; break;
-   default:	     vo_x11_putkey( Key ); return;
+   default:          vo_x11_putkey( Key ); return;
   }
  if ( ( msg != evNone )&&( Type == wsKeyPressed ) )
   {

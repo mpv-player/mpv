@@ -7,13 +7,13 @@ int             SubVisible = 0;
 void mplSubDraw( wsParamDisplay )
 {
  if ( appMPlayer.subWindow.State == wsWindowFocusIn ) SubVisible++;
- 
+
  if ( !appMPlayer.subWindow.Mapped ||
       appMPlayer.subWindow.Visible == wsWindowNotVisible ) return;
 
  if ( mplShMem->Playing )
-  { 
-   vo_expose=1; 
+  {
+   vo_expose=1;
    mplSubRender=0;
   }
 
@@ -22,12 +22,13 @@ void mplSubDraw( wsParamDisplay )
    if ( appMPlayer.sub.Bitmap.Image ) wsPutImage( &appMPlayer.subWindow );
 //   XFlush( wsDisplay );
   }
- appMPlayer.subWindow.State=0; 
+ appMPlayer.subWindow.State=0;
 }
 
 void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
 {
  static int mplSubMoved = 0;
+ static int msButton = 0;
 
  mplMouseTimer=mplMouseTimerConst;
  wsVisibleMouse( &appMPlayer.subWindow,wsShowMouseCursor );
@@ -42,7 +43,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
           mplHideMenu( RX,RY );
           msButton=0;
           break;
-// ---	  
+// ---
    case wsPLMouseButton:
           sx=X; sy=Y;
           msButton=wsPLMouseButton;
@@ -64,18 +65,18 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
    case wsRLMouseButton:
 //          if ( ( !mplSubMoved )&&( ( SubVisible++%2 ) ) ) wsMoveTopWindow( &appMPlayer.mainWindow );
           if ( !mplSubMoved )
-	   {
-	    if( SubVisible++%2 )
-	     {
-	      wsMoveTopWindow( &appMPlayer.mainWindow );
-	      fprintf( stderr,"[sw] MAIN TOP\n" );
-	     } 
-	     else 
-	      {
-	       wsMoveTopWindow( &appMPlayer.subWindow );
-	       fprintf( stderr,"[sw] SUB TOP\n" );
-	      }
-	   }
+           {
+            if( SubVisible++%2 )
+             {
+              wsMoveTopWindow( &appMPlayer.mainWindow );
+              fprintf( stderr,"[sw] MAIN TOP\n" );
+             }
+             else
+              {
+               wsMoveTopWindow( &appMPlayer.subWindow );
+               fprintf( stderr,"[sw] SUB TOP\n" );
+              }
+           }
           msButton=0;
           mplSubMoved=0;
           break;

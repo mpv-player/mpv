@@ -25,9 +25,13 @@
 #define  wsPLMouseButton 1
 #define  wsPMMouseButton 2
 #define  wsPRMouseButton 3
+#define  wsP4MouseButton 4
+#define  wsP5MouseButton 5
 #define  wsRLMouseButton 1 + 128
 #define  wsRMMouseButton 2 + 128
 #define  wsRRMouseButton 3 + 128
+#define  wsR4MouseButton 4 + 128
+#define  wsR5MouseButton 5 + 128
 #define  wsEnterWindow   253
 #define  wsLeaveWindow   254
 #define  wsMoveMouse     255
@@ -131,6 +135,8 @@ typedef struct
  Atom                 AtomsProtocols[3];
  Atom                 AtomLeaderClient;
  Atom                 AtomRemote;
+ Atom		      AtomWMSizeHint;
+ Atom		      AtomWMNormalHint;
 
  XShmSegmentInfo      Shminfo;
  unsigned char      * ImageData;

@@ -107,6 +107,7 @@ inline int wsSearch( Window win );
 
 void wsWindowDecoration( wsTWindow * win,long d )
 {
+//XUnmapWindow( wsDisplay,win->WindowID );
  wsMotifHints=XInternAtom( wsDisplay,"_MOTIF_WM_HINTS",0 );
  if ( wsMotifHints != None )
   {
@@ -117,6 +118,17 @@ void wsWindowDecoration( wsTWindow * win,long d )
    XChangeProperty( wsDisplay,win->WindowID,wsMotifHints,wsMotifHints,32,
                     PropModeReplace,(unsigned char *)&wsMotifWmHints,5 );
   }
+//XMapWindow( wsDisplay,win->WindowID );
+// if ( d )
+//  {
+//   win->SizeHint.win_gravity=ForgetGravity;
+//  }
+//   else
+//    {
+//     win->SizeHint.win_gravity=StaticGravity;
+//    }
+// win->SizeHint.flags=PWinGravity;
+// XSetWMSizeHints( wsDisplay,win->WindowID,&win->SizeHint,win->AtomWMSizeHint );
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -350,6 +362,8 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  win->AtomDeleteWindow=XInternAtom( wsDisplay,"WM_DELETE_WINDOW",False );
  win->AtomTakeFocus=XInternAtom( wsDisplay,"WM_TAKE_FOCUS",False );
  win->AtomRolle=XInternAtom( wsDisplay,"WM_WINDOW_ROLE",False );
+ win->AtomWMSizeHint=XInternAtom( wsDisplay,"WM_SIZE_HINT",False );
+ win->AtomWMNormalHint=XInternAtom( wsDisplay,"WM_NORMAL_HINT",False );
  win->AtomProtocols=XInternAtom( wsDisplay,"WM_PROTOCOLS",False );
  {
   char buf[32]; int i;
@@ -406,7 +420,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  wsClassHint.res_class="MPlayer";
  XSetClassHint( wsDisplay,win->WindowID,&wsClassHint );
 
- win->SizeHint.flags=PPosition | PSize | PResizeInc; // | PBaseSize
+ win->SizeHint.flags=PPosition | PSize | PResizeInc | PWinGravity; // | PBaseSize
  win->SizeHint.x=win->X;
  win->SizeHint.y=win->Y;
  win->SizeHint.width=win->Width;
@@ -427,6 +441,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  win->SizeHint.width_inc=1;
 // win->SizeHint.base_width=win->Width;
 // win->SizeHint.base_height=win->Height;
+ win->SizeHint.win_gravity=StaticGravity;
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
 
  win->WMHints.flags=InputHint | StateHint;
@@ -574,14 +589,14 @@ Bool wsEvents( Display * display,XEvent * Event,XPointer arg )
    case UnmapNotify: i=wsWindowUnmapped; wsWindowList[l]->Mapped=wsNone;     goto expose;
    case FocusIn:
         if ( wsWindowList[l]->Focused == wsFocused ) break;
-        i=wsWindowFocusIn; 
-	wsWindowList[l]->Focused=wsFocused; 
-	goto expose;
+        i=wsWindowFocusIn;
+        wsWindowList[l]->Focused=wsFocused;
+        goto expose;
    case FocusOut:
         if ( wsWindowList[l]->Focused == wsNone ) break;
-        i=wsWindowFocusOut; 
-	wsWindowList[l]->Focused=wsNone;   
-	goto expose;
+        i=wsWindowFocusOut;
+        wsWindowList[l]->Focused=wsNone;
+        goto expose;
    case VisibilityNotify:
         switch( Event->xvisibility.state )
          {
@@ -648,11 +663,17 @@ buttonreleased:
           wsWindowList[l]->MouseHandler( i,Event->xbutton.x,Event->xbutton.y,Event->xmotion.x_root,Event->xmotion.y_root );
         break;
 
+   case GravityNotify:
+//        #ifdef DEBUG
+         fprintf( stderr,"[ws] window ( 0x%x ) gravity: %d,%d\n",wsWindowList[l]->WindowID,Event->xgravity.x,Event->xgravity.y );
+//      #endif
+        break;
+
    case PropertyNotify:
-//	break;
-//	#ifdef DEBUG
+//      break;
+//      #ifdef DEBUG
 //         fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",wsWindowList[l]->WindowID,XGetAtomName( wsDisplay,Event->xproperty.atom ),Event->xproperty.atom );
-//	#endif
+//      #endif
         if ( Event->xproperty.atom == wsWindowList[l]->AtomRemote )
          {
           Atom            type;
@@ -672,9 +693,9 @@ buttonreleased:
            {
             args[strlen( args ) - 1]=0;
             wsWindowList[l]->RemoteHandler( args );
-	    #ifdef DEBUG
- 	     fprintf( stderr,"[ws]   args: '%s'\n",args );
-	    #endif
+            #ifdef DEBUG
+             fprintf( stderr,"[ws]   args: '%s'\n",args );
+            #endif
             args[strlen( args ) - 1]=1;
             XFree( args );
            }
@@ -850,9 +871,10 @@ void wsMoveWindow( wsTWindow * win,int x, int y )
    default: win->Y=y; break;
   }
 
- win->SizeHint.flags=PPosition;
+ win->SizeHint.flags=PPosition | PWinGravity;
  win->SizeHint.x=win->X;
  win->SizeHint.y=win->Y;
+ win->SizeHint.win_gravity=StaticGravity;
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
 
  XMoveWindow( wsDisplay,win->WindowID,win->X,win->Y );
@@ -867,7 +889,7 @@ void wsResizeWindow( wsTWindow * win,int sx, int sy )
  win->Width=sx;
  win->Height=sy;
 
- win->SizeHint.flags=PSize;
+ win->SizeHint.flags=PSize | PWinGravity;
  win->SizeHint.width=win->Width;
  win->SizeHint.height=win->Height;
  if ( win->Property & wsMinSize )
@@ -882,6 +904,7 @@ void wsResizeWindow( wsTWindow * win,int sx, int sy )
    win->SizeHint.max_width=win->Width;
    win->SizeHint.max_height=win->Height;
   }
+ win->SizeHint.win_gravity=StaticGravity;
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
  XResizeWindow( wsDisplay,win->WindowID,sx,sy );
  if ( win->ReSize ) win->ReSize( win->X,win->Y,win->Width,win->Height );
@@ -897,9 +920,9 @@ void wsIconify( wsTWindow win )
 //    Move top the window.
 // ----------------------------------------------------------------------------------------------
 void wsMoveTopWindow( wsTWindow * win )
-{ 
-// XUnmapWindow( wsDisplay,win->WindowID ); XMapWindow( wsDisplay,win->WindowID ); 
- XRaiseWindow( wsDisplay,win->WindowID ); 
+{
+// XUnmapWindow( wsDisplay,win->WindowID ); XMapWindow( wsDisplay,win->WindowID );
+ XRaiseWindow( wsDisplay,win->WindowID );
 }
 
 // ----------------------------------------------------------------------------------------------

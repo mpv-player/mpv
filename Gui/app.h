@@ -50,7 +50,7 @@ typedef struct
 {
  wItem           main;
  wsTWindow       mainWindow;
- int		 mainDecoration;
+ int             mainDecoration;
 
  wItem           sub;
  wsTWindow       subWindow;
