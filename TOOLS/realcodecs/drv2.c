@@ -189,12 +189,23 @@ ulong RV20toYUV420CustomMessage(ulong* p1,ulong p2) {
 */
 	
 	if(p1[0]==0x24){
+#if 1
 	    hexdump(p1[2],64);
 	    memset(temp,0x77,16*4);
 	    memcpy(temp,p1[2],16);
 	    p1[2]=temp;
+#endif
 	} else {
-//	    return 0;
+	    switch(p1[0]){
+	    case 17:
+		if(p1[1]==1)
+		break;
+	    case 18:
+	    case 30:
+	    case 3:
+	    default:
+		return 0;
+	    }
 	}
 //	fprintf(stderr, "ulong p2=0x%0x(%d))\n", p2, p2);
 //	hexdump((void*)p1, 12);
@@ -230,11 +241,16 @@ ulong RV20toYUV420HiveMessage(ulong *p1,ulong p2) {
 //	hexdump((void*)p1, sizeof(struct init_data));
 
 	fprintf(stderr,">HIVE %d %p\n",p1[0],p1[1]);
+	
+	if(p1[0]!=0) return 0;
+	
+	p1[1]=0x10000000;
+	return 0;
 
-	fprintf(stderr,"COPY INIT DATA!\n");
+//	fprintf(stderr,"COPY INIT DATA!\n");
 	memset(h_temp,0x77,1000);
 	memcpy(h_temp,p1,4);
-	fprintf(stderr,"COPY OK!\n");
+//	fprintf(stderr,"COPY OK!\n");
 	
 //	tic();
 //	result=(*rvyuvHiveMessage)(p1,p2);
