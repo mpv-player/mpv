@@ -4,6 +4,7 @@
 #define VCODEC_RAW 3
 #define VCODEC_LIBAVCODEC 4
 #define VCODEC_NULL 5
+#define VCODEC_RAWRGB 6
 
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
@@ -45,6 +46,8 @@ static char* banner_text=
 
 #include "dec_audio.h"
 #include "dec_video.h"
+
+#include "postproc/rgb2rgb.h"
 
 #ifdef HAVE_DIVX4ENCORE
 #include <encore2.h>
@@ -192,6 +195,7 @@ static int cfg_include(struct config *conf, char *filename){
 }
 
 static int parse_end_at(struct config *conf, const char* param);
+static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
 
 #include "get_path.c"
 
@@ -520,12 +524,20 @@ mp_msg(MSGT_MENCODER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",vide
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
     out_fmt=sh_video->codec->outfmt[i];
     if(out_fmt==0xFFFFFFFF) continue;
-    if(IMGFMT_IS_RGB(out_fmt) || IMGFMT_IS_BGR(out_fmt)) break;
+
+    if(IMGFMT_IS_RGB(out_fmt)) break;
     if(out_fmt==IMGFMT_YV12) break;
+    
+    if(out_video_codec == VCODEC_RAWRGB) {
+        if(IMGFMT_IS_BGR(out_fmt) && IMGFMT_BGR_DEPTH(out_fmt) == 32) break;
+    }
+    else {
+        if(IMGFMT_IS_BGR(out_fmt)) break;   
     if(out_fmt==IMGFMT_I420) break;
     if(out_fmt==IMGFMT_IYUV) break;
     if(out_fmt==IMGFMT_YUY2) break;
     if(out_fmt==IMGFMT_UYVY) break;
+    }
 }
 if(i>=CODECS_MAX_OUTFMT){
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_VOincompCodec);
@@ -671,6 +683,31 @@ case VCODEC_RAW:
     }
     mux_v->bih->biCompression=0;
     printf("videocodec: raw (%dx%d %dbpp fourcc=%x)\n",
+	mux_v->bih->biWidth, mux_v->bih->biHeight,
+	mux_v->bih->biBitCount, mux_v->bih->biCompression);
+    break;
+case VCODEC_RAWRGB:
+	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
+	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
+	mux_v->bih->biWidth=sh_video->disp_w;
+	mux_v->bih->biHeight=sh_video->disp_h;
+	mux_v->bih->biCompression=0;
+	mux_v->bih->biPlanes=1;
+	
+	if(IMGFMT_IS_RGB(out_fmt))
+        mux_v->bih->biBitCount = IMGFMT_RGB_DEPTH(out_fmt);    
+	else if(IMGFMT_IS_BGR(out_fmt))
+        mux_v->bih->biBitCount = IMGFMT_BGR_DEPTH(out_fmt);
+	else {
+        mux_v->bih->biBitCount = 24;
+        yuv2rgb_init(24, MODE_BGR);
+	}
+    
+    if(mux_v->bih->biBitCount == 32)
+        mux_v->bih->biBitCount = 24;
+
+	mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
+    printf("videocodec: rawrgb (%dx%d %dbpp fourcc=%x)\n",
 	mux_v->bih->biWidth, mux_v->bih->biHeight,
 	mux_v->bih->biBitCount, mux_v->bih->biCompression);
     break;
@@ -862,6 +899,7 @@ aviwrite_write_header(muxer,muxer_f);
 switch(mux_v->codec){
 case VCODEC_COPY:
 case VCODEC_RAW:
+case VCODEC_RAWRGB:        
 case VCODEC_NULL:
     break;
 case VCODEC_FRAMENO:
@@ -1277,6 +1315,57 @@ case VCODEC_COPY:
     mux_v->buffer=start;
     if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
     break;
+case VCODEC_RAWRGB:
+ {
+     static uint8_t* raw_rgb_buffer = NULL;
+     static uint8_t* raw_rgb_buffer2 = NULL;
+        
+     if(!raw_rgb_buffer) {
+         raw_rgb_buffer = malloc(vo_w*vo_h*4);
+         raw_rgb_buffer2 = malloc(vo_w*vo_h*4);
+     }
+	    
+     blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+     if(skip_flag>0) break;
+     if(!blit_frame){
+         // empty.
+         aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
+         break;
+     }
+
+     /* Uncompressed avi files store rgb data with the top most row last so we
+      * have to flip the frames. */
+     if(IMGFMT_IS_BGR(out_fmt)) {
+         if(IMGFMT_BGR_DEPTH(out_fmt) == 32) {
+             rgb32to24(vo_image_ptr, raw_rgb_buffer, vo_w*vo_h*4);
+             mux_v->buffer = flip_upside_down(raw_rgb_buffer, raw_rgb_buffer,
+                                              vo_w*3, vo_h);
+         }
+         else
+             mux_v->buffer = flip_upside_down(raw_rgb_buffer, vo_image_ptr,
+                                              vo_w*3, vo_h);
+     }
+     else if(IMGFMT_IS_RGB(out_fmt)) {
+         if(IMGFMT_RGB_DEPTH(out_fmt) == 32) {
+             rgb32tobgr32(vo_image_ptr, raw_rgb_buffer2, vo_w*vo_h*4);
+             rgb32to24(raw_rgb_buffer2, raw_rgb_buffer, vo_w*vo_h*4);
+             mux_v->buffer = flip_upside_down(raw_rgb_buffer, raw_rgb_buffer,
+                                              vo_w*3, vo_h);
+         }
+         else
+             mux_v->buffer = flip_upside_down(raw_rgb_buffer, vo_image_ptr,
+                                              vo_w*3, vo_h);
+     }
+     else {
+         yuv2rgb(raw_rgb_buffer, vo_image_ptr, vo_image_ptr + vo_w*vo_h*5/4,
+                 vo_image_ptr + vo_w*vo_h, vo_w, vo_h, vo_w*24/8, vo_w, vo_w/2);
+         mux_v->buffer = flip_upside_down(raw_rgb_buffer, raw_rgb_buffer,
+                                          vo_w*3, vo_h);
+     }
+
+     aviwrite_write_chunk(muxer,mux_v,muxer_f, vo_w*vo_h*3, 0x10);
+ }
+ break;
 case VCODEC_RAW:
     blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
     if(skip_flag>0) break;
@@ -1440,7 +1529,7 @@ if(sh_audio && !demuxer2){
 	    (p>0.001) ? (int)(ftell(muxer_f)/p/1024/1024) : 0,
 	    v_pts_corr,
 	    (mux_v->timer>1) ? (int)(mux_v->size/mux_v->timer/125) : 0,
-	    (mux_a->timer>1) ? (int)(mux_a->size/mux_a->timer/125) : 0
+	    (mux_a && mux_a->timer>1) ? (int)(mux_a->size/mux_a->timer/125) : 0
 	);
 #endif
     }
@@ -1540,4 +1629,22 @@ static int parse_end_at(struct config *conf, const char* param)
         return ERR_FUNC_ERR;
 
     return 1;
+}
+
+/* Flip the image in src and store the result in dst. src and dst may overlap.
+   width is the size of each line in bytes. */
+static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width,
+                                 int height)
+{
+    uint8_t* tmp = malloc(width);
+    int i;
+
+    for(i = 0; i < height/2; i++) {
+        memcpy(tmp, &src[i*width], width);
+        memcpy(&dst[i * width], &src[(height - i) * width], width);
+        memcpy(&dst[(height - i) * width], tmp, width);
+    }
+
+    free(tmp);
+    return dst;
 }
