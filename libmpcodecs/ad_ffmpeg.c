@@ -58,10 +58,23 @@ static int init(sh_audio_t *sh_audio)
 	return 0;
     }
     
-    lavc_context = malloc(sizeof(AVCodecContext));
-    memset(lavc_context, 0, sizeof(AVCodecContext));
+    lavc_context = avcodec_alloc_context();
     sh_audio->context=lavc_context;
-    
+
+    lavc_context->channels = sh_audio->wf->nChannels;
+    lavc_context->sample_rate = sh_audio->wf->nSamplesPerSec;
+    lavc_context->bit_rate = sh_audio->wf->nAvgBytesPerSec * 8;
+    lavc_context->fourcc = sh_audio->format;
+    lavc_context->block_align = sh_audio->wf->nBlockAlign;
+
+    /* alloc extra data */
+    if (sh_audio->wf->cbSize > 0) {
+        lavc_context->extradata = malloc(sh_audio->wf->cbSize);
+        lavc_context->extradata_size = sh_audio->wf->cbSize;
+        memcpy(lavc_context->extradata, (char *)sh_audio->wf + sizeof(WAVEFORMATEX), 
+               lavc_context->extradata_size);
+    }
+
     /* open it */
     if (avcodec_open(lavc_context, lavc_codec) < 0) {
         mp_msg(MSGT_DECAUDIO,MSGL_ERR, MSGTR_CantOpenCodec);
@@ -87,9 +100,13 @@ static int init(sh_audio_t *sh_audio)
 
 static void uninit(sh_audio_t *sh)
 {
-    if (avcodec_close(sh->context) < 0)
+    AVCodecContext *lavc_context = sh->context;
+
+    if (avcodec_close(lavc_context) < 0)
 	mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_CantCloseCodec);
-    free(sh->context);
+    if (lavc_context->extradata)
+        free(lavc_context->extradata);
+    free(lavc_context);
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)
@@ -120,3 +137,5 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 }
 
 #endif
+
+
