@@ -123,6 +123,7 @@ static char help_text[]=
 #define MSGTR_InitializingAudioCodec "Initialisiere Audiocodec...\n"
 #define MSGTR_ErrorInitializingVODevice "Fehler beim Öffenen/Initialisieren des ausgewählten Videoausgabe (-vo) Treibers!\n"
 #define MSGTR_ForcedVideoCodec "Videocodec fixiert: %s\n"
+#define MSGTR_ForcedAudioCodec "Audiocodec fixiert: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: Beschreibung: %s\nAO: Autor: %s\n"
 #define MSGTR_AOComment "AO: Hinweis: %s\n"
 #define MSGTR_Video_NoVideo "Video: kein Video!!!\n"
