@@ -1235,8 +1235,11 @@ void window_ontop()
 	{
 		if(winLevel != 0)
 		{
-			HideMenuBar();
-			HideCursor();
+			if(device_id == 0)
+			{
+				HideMenuBar();
+				HideCursor();
+			}
 		}
 		else
 		{
@@ -1258,8 +1261,11 @@ void window_fullscreen()
 	{
 		if(winLevel != 0)
 		{
-			HideMenuBar();
-			HideCursor();
+			if(device_id == 0)
+			{
+				HideMenuBar();
+				HideCursor();
+			}
 			
 			if(fs_res_x != 0 || fs_res_y != 0)
 			{
