@@ -79,7 +79,7 @@ extern "C" int DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER*
 	memset(&m_obh, 0, sizeof(m_obh));
 	m_obh.biSize=sizeof(m_obh);
 
-	memset(&m_sVhdr, 0, sizeof m_sVhdr);
+	memset(&m_sVhdr, 0, sizeof(m_sVhdr));
 	m_sVhdr.bmiHeader=m_bh;
 	m_sVhdr.rcSource.left=m_sVhdr.rcSource.top=0;
 	m_sVhdr.rcSource.right=m_sVhdr.bmiHeader.biWidth;
@@ -93,7 +93,7 @@ extern "C" int DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER*
         m_sOurType.bFixedSizeSamples=false;
 	m_sOurType.bTemporalCompression=true;
 	m_sOurType.pUnk=0;
-        m_sOurType.cbFormat=sizeof m_sVhdr;
+        m_sOurType.cbFormat=sizeof(m_sVhdr);
         m_sOurType.pbFormat=(char*)&m_sVhdr;
 
 	m_sVhdr2=(VIDEOINFOHEADER*)(new char[sizeof(VIDEOINFOHEADER)+12]);
@@ -101,7 +101,7 @@ extern "C" int DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER*
 	m_sVhdr2->bmiHeader.biCompression=0;
 	m_sVhdr2->bmiHeader.biBitCount=24;
 
-	memset(&m_sDestType, 0, sizeof m_sDestType);
+	memset(&m_sDestType, 0, sizeof(m_sDestType));
 	m_sDestType.majortype=MEDIATYPE_Video;
 	m_sDestType.subtype=MEDIASUBTYPE_RGB24;
 	m_sDestType.formattype=FORMAT_VideoInfo;
@@ -119,18 +119,19 @@ extern "C" int DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER*
         
 	HRESULT result;
 
+        dsf=new DS_Filter();
+	dsf->Create(dllname, guid, &m_sOurType, &m_sDestType);
+
 	if(!flip)
 	{
 	    m_sVhdr2->bmiHeader.biHeight*=-1;
 	    m_obh.biHeight*=-1;
-//	    result=m_pOutputPin->vt->QueryAccept(m_pOutputPin, &m_sDestType);
-//	    if(result)
-//		throw FATAL("Decoder does not support upside-down frames");
+	    result=dsf->m_pOutputPin->vt->QueryAccept(dsf->m_pOutputPin, &m_sDestType);
+	    if(result){
+                printf("DShow: Decoder does not support upside-down frames");
+                m_obh.biHeight*=-1;
+            }
 	}	
-
-        dsf=new DS_Filter();
-        
-	dsf->Create(dllname, guid, &m_sOurType, &m_sDestType);
 
 #if 0
 	m_sVhdr2->bmiHeader.biBitCount=16;
@@ -182,7 +183,7 @@ extern "C" void DS_VideoDecoder_Start(){
 extern "C" void DS_VideoDecoder_Stop(){
     if(dsf->m_iState!=2) return;
     dsf->Stop();
-    dsf->m_pOurOutput->SetFramePointer(0);
+//    dsf->m_pOurOutput->SetFramePointer(0);
 //    free(m_outFrame->data());
     //m_outFrame->release();//just in case
     //m_outFrame=0;

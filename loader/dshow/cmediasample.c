@@ -33,12 +33,15 @@ CMediaSample::CMediaSample(IMemAllocator* allocator, long _size):refcount(0)
     isPreroll=0;
     type_valid=0;
     block=new char[size];    
+    old_block=0;
     Debug printf("%x: Creating media sample with size %d, buffer 0x%x\n", this, _size, block);
 }
 CMediaSample::~CMediaSample()
 {
     Debug printf("%x: CMediaSample::~CMediaSample() called\n", this);
     delete vt;
+    if(old_block)
+	block=old_block;
     delete[] block;
     if(media_type.pbFormat)
 	CoTaskMemFree(media_type.pbFormat);

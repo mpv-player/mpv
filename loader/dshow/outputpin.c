@@ -1,8 +1,11 @@
+
+#include <cstdio>
+#include <string>
+
 #include "outputpin.h"
-#include <string.h>
-#include <stdio.h>
 #include "allocator.h"
 #include "iunk.h"
+
 #define E_NOTIMPL 0x80004001
 /*
     An object beyond interface IEnumMediaTypes.
@@ -112,7 +115,7 @@ HRESULT STDCALL CEnumMediaTypes::Clone (
 
 COutputPin::COutputPin(const AM_MEDIA_TYPE& vh) :refcount(1), type(vh), remote(0), frame_pointer(0), frame_size_pointer(0)
 {
-    IPin::vt=new IPin_vt;
+    IPin::vt = new IPin_vt;
     IPin::vt->QueryInterface = QueryInterface;
     IPin::vt->AddRef = AddRef;
     IPin::vt->Release = Release;
@@ -142,6 +145,15 @@ COutputPin::COutputPin(const AM_MEDIA_TYPE& vh) :refcount(1), type(vh), remote(0
     IMemInputPin::vt->Receive = Receive;
     IMemInputPin::vt->ReceiveMultiple = ReceiveMultiple;
     IMemInputPin::vt->ReceiveCanBlock = ReceiveCanBlock;
+    
+    pAllocator = 0;
+    frame_pointer = 0;
+}
+
+COutputPin::~COutputPin()
+{
+    delete IPin::vt;
+    delete IMemInputPin::vt;
 }
 
 // IPin->IUnknown methods
@@ -164,19 +176,22 @@ HRESULT STDCALL COutputPin::QueryInterface(IUnknown* This, GUID* iid, void** ppv
     }
 
     Debug printf("Unknown interface : %08x-%04x-%04x-%02x%02x-" \
-			"%02x%02x%02x%02x%02x%02x\n",
-	 iid->f1,  iid->f2,  iid->f3,
-    	 (unsigned char)iid->f4[1], (unsigned char)iid->f4[0],
-	(unsigned char)iid->f4[2],(unsigned char)iid->f4[3],(unsigned char)iid->f4[4],	  
-	(unsigned char)iid->f4[5],(unsigned char)iid->f4[6],(unsigned char)iid->f4[7]);
+		 "%02x%02x%02x%02x%02x%02x\n",
+		 iid->f1,  iid->f2,  iid->f3,
+		 (unsigned char)iid->f4[1], (unsigned char)iid->f4[0],
+		 (unsigned char)iid->f4[2], (unsigned char)iid->f4[3],
+		 (unsigned char)iid->f4[4], (unsigned char)iid->f4[5],
+		 (unsigned char)iid->f4[6], (unsigned char)iid->f4[7]);
     return 0x80004002;
 }
+
 HRESULT STDCALL COutputPin::AddRef(IUnknown* This)
 {
     Debug printf("COutputPin::AddRef() called\n");
     ((COutputPin*)This)->refcount++;
     return 0;
 }
+
 HRESULT STDCALL COutputPin::Release(IUnknown* This)
 {
     Debug printf("COutputPin::Release() called\n");
@@ -277,7 +292,6 @@ HRESULT STDCALL COutputPin::QueryId (
     Debug printf("COutputPin::QueryId() called\n");
     return E_NOTIMPL;
 }
-
 
 HRESULT STDCALL COutputPin::QueryAccept ( 
     IPin * This,
@@ -426,6 +440,8 @@ HRESULT STDCALL COutputPin::NotifyAllocator(
     /* [in] */ int bReadOnly)
 {
     Debug printf("COutputPin::NotifyAllocator() called\n");
+    COutputPin* pPin=(COutputPin*)This;
+    pPin->pAllocator=(MemAllocator*)pAllocator;
     return 0;
 }
 
@@ -450,7 +466,8 @@ HRESULT STDCALL COutputPin::Receive(
     int len=pSample->vt->GetActualDataLength(pSample);
     if(len==0)len=pSample->vt->GetSize(pSample);//for iv50
     //if(me.frame_pointer)memcpy(me.frame_pointer, pointer, len);
-    *me.frame_pointer=pointer;
+    if(me.frame_pointer)
+	*me.frame_pointer=pointer;
     if(me.frame_size_pointer)*me.frame_size_pointer=len;
 /*
     FILE* file=fopen("./uncompr.bmp", "wb");

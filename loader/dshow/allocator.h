@@ -6,19 +6,29 @@
 #include <list>
 #include "iunk.h"
 #include "default.h"
-using namespace std;
+
 class MemAllocator: public IMemAllocator
 {
     ALLOCATOR_PROPERTIES props;
-    list<CMediaSample*> used_list;
-    list<CMediaSample*> free_list;
+    std::list<CMediaSample*> used_list;
+    std::list<CMediaSample*> free_list;
+    char* new_pointer;
+    CMediaSample* modified_sample;
     static GUID interfaces[];
     DECLARE_IUNKNOWN(MemAllocator)
 public:
     MemAllocator();
     ~MemAllocator(){delete vt;}
     static long CreateAllocator(GUID* clsid, GUID* iid, void** ppv);
-
+    void SetPointer(char* pointer) { new_pointer=pointer; }
+    void ResetPointer() 
+    { 
+	if(modified_sample) 
+	{
+	    modified_sample->ResetPointer(); 
+	    modified_sample=0;
+	}
+    }
     static HRESULT STDCALL SetProperties ( 
         IMemAllocator * This,
         /* [in] */ ALLOCATOR_PROPERTIES *pRequest,

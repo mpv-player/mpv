@@ -2,6 +2,8 @@
 #include "allocator.h"
 #include <com.h>
 #define E_NOTIMPL 0x80004001
+using namespace std;
+
 class AllocatorKeeper
 {
 public:
@@ -36,6 +38,9 @@ MemAllocator::MemAllocator()
     props.cBuffers=1;
     props.cbBuffer=65536;/* :/ */
     props.cbAlign=props.cbPrefix=0;
+    
+    new_pointer=0;
+    modified_sample=0;
 }
 
 long MemAllocator::CreateAllocator(GUID* clsid, GUID* iid, void** ppv)
@@ -131,6 +136,14 @@ HRESULT STDCALL MemAllocator::GetBuffer (
     me->used_list.push_back(*it);
     *ppBuffer=*it;
     (*ppBuffer)->vt->AddRef((IUnknown*)*ppBuffer);
+    if(me->new_pointer)
+    {
+	if(me->modified_sample)
+	    me->modified_sample->ResetPointer();
+        (*it)->SetPointer(me->new_pointer);
+	me->modified_sample=*it;
+	me->new_pointer=0;
+    }
     me->free_list.remove(*it);
     return 0;
 }

@@ -10,6 +10,7 @@ class CMediaSample: public IMediaSample
     int size;
     int actual_size;
     char* block;
+    char* old_block;
     int refcount;
     int isPreroll;
     int isSyncPoint;
@@ -18,6 +19,8 @@ class CMediaSample: public IMediaSample
 public:
     CMediaSample(IMemAllocator* allocator, long _size);
     ~CMediaSample();
+    void SetPointer(char* pointer) { old_block=block; block=pointer; }
+    void ResetPointer() { block=old_block; old_block=0; }
 
     static long STDCALL QueryInterface ( 
         IUnknown * This,

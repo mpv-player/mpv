@@ -5,18 +5,16 @@
 #include "inputpin.h"
 #include "outputpin.h"
 #include <string>
-using namespace std;
+
 /**
     User will allocate and fill format structures, call Create(),
     and then set up m_pAll.
 **/    
 class DS_Filter
 {
-protected:
 public:
     DS_Filter();
     virtual ~DS_Filter();
-    void Create(char* dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM_MEDIA_TYPE* out_fmt);
     void Start();
     void Stop();
     int m_iHandle;
@@ -33,8 +31,11 @@ public:
     IMemAllocator* m_pAll;
     IMemInputPin* m_pImp;
     int m_iState;
-protected:
-};    
+
+    void Create(char* dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM_MEDIA_TYPE* out_fmt);
+    void SetPointer(char* pointer);
+private:
+    void clean();
+};
 
 #endif
-

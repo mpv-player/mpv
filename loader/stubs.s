@@ -1,10 +1,10 @@
 	.file	"stubs.c"
-	.version	"01.01"
+	.version  "01.01"
 gcc2_compiled.:
 .section	.rodata
 .LC0:
 	.string	"Called unk_%s\n"
-.text
+.data
 	.align 4
 .globl unk_exp1
 	.type	 unk_exp1,@function

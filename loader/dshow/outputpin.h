@@ -5,7 +5,7 @@
 #include "interfaces.h"
 #include "guids.h"
 #include "default.h"
-
+#include "allocator.h"
 class COutputPin: public IPin, public IMemInputPin
 {
     int refcount;
@@ -13,10 +13,12 @@ class COutputPin: public IPin, public IMemInputPin
     IPin* remote;
     char** frame_pointer;
     long* frame_size_pointer;
+    MemAllocator* pAllocator;
 public:
     COutputPin(const AM_MEDIA_TYPE& vhdr);
-    ~COutputPin(){delete IPin::vt; delete IMemInputPin::vt;}
+    ~COutputPin();
     void SetFramePointer(char** z){frame_pointer=z;}
+    void SetPointer2(char* p) { if(pAllocator) pAllocator->SetPointer(p); }
     void SetFrameSizePointer(long* z){frame_size_pointer=z;}
     void SetNewFormat(const AM_MEDIA_TYPE& a){type=a;}
     static HRESULT STDCALL QueryInterface(IUnknown* This, GUID* iid, void** ppv);

@@ -1577,6 +1577,26 @@ int WINAPI expLoadLibraryA(char* name)
 {
     char qq[256];
     int result;
+    char* lastbc;
+    if (!name)
+	return -1;
+    // we skip to the last backslash
+    // this is effectively eliminating weird characters in
+    // the text output windows
+    lastbc = strrchr(name, '\\');
+    if (lastbc)
+    {
+        int i;
+        lastbc++;
+	for (i = 0; 1 ;i++)
+	{
+	    name[i] = *lastbc++;
+	    if (!name[i])
+		break;
+	}
+    }
+//    printf("LoadLibrary wants: %s/%s\n", def_path, name);
+
     if(strncmp(name, "c:\\windows\\", 11)==0)name+=11;
     if(name[0]!='/')
     {
@@ -1848,10 +1868,10 @@ int expstrlen(char* str)
     dbgprintf("strlen(0x%x='%s') => %d\n", str, str, result);
     return result; 
 }
-void *expstrcpy(char* str1, const char* str2) 
+int expstrcpy(char* str1, const char* str2) 
 {
-    void *result=strcpy(str1, str2);
-    dbgprintf("strcpy(0x%x, 0x%x='%s') => %p\n", str1, str2, str2, result);
+    int result= (int) strcpy(str1, str2);
+    dbgprintf("strcpy(0x%x, 0x%x='%s') => %d\n", str1, str2, str2, result);
     return result;
 }
 int expstrcmp(const char* str1, const char* str2)
@@ -1860,17 +1880,23 @@ int expstrcmp(const char* str1, const char* str2)
     dbgprintf("strcmp(0x%x='%s', 0x%x='%s') => %d\n", str1, str1, str2, str2, result);
     return result;
 }
-void *expstrcat(char* str1, const char* str2)
+int expstrcat(char* str1, const char* str2) 
 {
-    void *result=strcat(str1, str2);
-    dbgprintf("strcat(0x%x='%s', 0x%x='%s') => %p\n", str1, str1, str2, str2, result);
+    int result= (int) strcat(str1, str2);
+    dbgprintf("strcat(0x%x='%s', 0x%x='%s') => %d\n", str1, str1, str2, str2, result);
     return result;    
 }
-void *expmemmove(void* dest, void* src, int n) 
+int expisalnum(int c)
 {
-    void *result=memmove(dest, src, n);
-    dbgprintf("memmove(0x%x, 0x%x, %d) => %p\n", dest, src, n, result);
-    return memmove;
+    int result= (int) isalnum(c);
+    dbgprintf("isalnum(0x%x='%c' => %d\n", c, c, result);
+    return result;    
+}
+int expmemmove(void* dest, void* src, int n) 
+{
+    int result= (int) memmove(dest, src, n);
+    dbgprintf("memmove(0x%x, 0x%x, %d) => %d\n", dest, src, n, result);
+    return result;
 }
 int expmemcmp(void* dest, void* src, int n) 
 {
@@ -1916,6 +1942,16 @@ int WINAPI expIsBadStringPtrW(const short* string, int nchars)
     if(string)wch_print(string);
     return result;
 }    
+
+int WINAPI expIsBadStringPtrA(const char* string, int nchars)
+{
+    int result;
+//    if(string==0)result=1; else result=0;
+//    dbgprintf("IsBadStringPtrW(0x%x, %d) => %d", string, nchars, result);
+//    if(string)wch_print(string);
+    return result;
+}    
+
 extern long WINAPI InterlockedExchangeAdd( long* dest, long incr )
 {
     long ret;
@@ -2354,6 +2390,45 @@ WIN_BOOL
 }
  
 
+#if 0
+INT WINAPI expMulDiv(int nNumber,int nNumerator,int nDenominator)
+{
+	return ((long long)nNumber * (long long)nNumerator) / nDenominator;
+}
+#endif
+
+int WINAPI expMulDiv(int nNumber, int nNumerator, int nDenominator)
+{
+    static const long long max_int=0x7FFFFFFFLL;
+    static const long long min_int=-0x80000000LL;
+    long long tmp=(long long)nNumber*(long long)nNumerator;
+    if(!nDenominator)return 1;
+    tmp/=nDenominator;
+    if(tmp<min_int) return 1;
+    if(tmp>max_int) return 1;
+    return (int)tmp;
+}
+
+LONG WINAPI explstrcmpiA(const char* str1, const char* str2)
+{
+    LONG result=strcasecmp(str1, str2);
+    dbgprintf("strcmpi(0x%x='%s', 0x%x='%s') => %d\n", str1, str1, str2, str2, result);
+    return result;
+}
+
+LONG WINAPI explstrlenA(const char* str1)
+{
+    LONG result=strlen(str1);
+    dbgprintf("strlen(0x%x='%s') => %d\n", str1, str1, result);
+    return result;
+}
+
+LONG WINAPI explstrcpyA(char* str1, const char* str2)
+{
+    int result= (int) strcpy(str1, str2);
+    dbgprintf("strcpy(0x%x, 0x%x='%s') => %d\n", str1, str2, str2, result);
+    return result;
+}
 
 LONG WINAPI expInterlockedExchange(long *dest, long l)
 {
@@ -2362,15 +2437,6 @@ LONG WINAPI expInterlockedExchange(long *dest, long l)
 	*dest = l;
 	return retval;
 }
-
-INT WINAPI expMulDiv(int nNumber,int nNumerator,int nDenominator)
-{
-	return ((long long)nNumber * (long long)nNumerator) / nDenominator;
-}
-
-
-
-
 
 struct exports
 {
@@ -2392,6 +2458,7 @@ struct exports exp_kernel32[]={
 FF(IsBadWritePtr, 357)
 FF(IsBadReadPtr, 354)
 FF(IsBadStringPtrW, -1)
+FF(IsBadStringPtrA, -1)
 FF(DisableThreadLibraryCalls, -1)
 FF(CreateThread, -1)
 FF(CreateEventA, -1)
@@ -2497,6 +2564,9 @@ FF(IsProcessorFeaturePresent, -1)
 FF(GetProcessAffinityMask, -1)
 FF(InterlockedExchange, -1)
 FF(MulDiv, -1)
+FF(lstrcmpiA, -1)
+FF(lstrlenA, -1)
+FF(lstrcpyA, -1)
 };
 
 struct exports exp_msvcrt[]={
@@ -2512,9 +2582,9 @@ FF(strlen, -1)
 FF(strcpy, -1)
 FF(strcmp, -1)
 FF(strcat, -1)
+FF(isalnum, -1)
 FF(memmove, -1)
 FF(memcmp, -1)
-//FF(memcpy, -1)
 FF(time, -1)
 };
 struct exports exp_winmm[]={
