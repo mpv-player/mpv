@@ -7,20 +7,14 @@
 
 #include "mixer.h"
 
-#define DEV_MIXER "/dev/mixer"
-
 char * mixer_device=NULL;
-char * devname=NULL;
 int    mixer_usemaster=0;
 
 void mixer_getvolume( int *l,int *r )
 {
  int fd,v,cmd,devs;
 
- if ( !mixer_device ) devname=strdup( DEV_MIXER );
-   else devname=strdup( mixer_device );
- fd=open( devname,O_RDONLY );
- free( devname );
+ fd=open( mixer_device,O_RDONLY );
  if ( fd != -1 )
   {
    ioctl( fd,SOUND_MIXER_READ_DEVMASK,&devs );
@@ -43,10 +37,7 @@ void mixer_setvolume( int l,int r )
 {
  int fd,v,cmd,devs;
 
- if ( !mixer_device ) devname=strdup( DEV_MIXER );
-   else devname=strdup( mixer_device );
- fd=open( devname,O_RDONLY );
- free( devname );
+ fd=open( mixer_device,O_RDONLY );
  if ( fd != -1 )
   {
    ioctl( fd,SOUND_MIXER_READ_DEVMASK,&devs );
