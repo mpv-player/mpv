@@ -249,7 +249,7 @@ static uint32_t Directx_CreateOverlay(uint32_t imgfmt)
 	      case DDERR_INVALIDPARAMS:
 		     {mp_msg(MSGT_VO, MSGL_ERR,"invalid parameters\n");break;}
 	      case DDERR_INVALIDPIXELFORMAT:
-		     {mp_msg(MSGT_VO, MSGL_ERR,"invalid pixelformat\n");break;}
+		     {mp_msg(MSGT_VO, MSGL_ERR,"invalid pixelformat: %s\n",g_ddpf[i].img_format_name);break;}
 	      case DDERR_NODIRECTDRAWHW:
 		     {mp_msg(MSGT_VO, MSGL_ERR,"no directdraw hardware\n");break;}
 	      case DDERR_NOEMULATION:
@@ -815,7 +815,7 @@ static uint32_t Directx_CheckPrimaryPixelformat()
            if (g_ddpf[i].g_ddpfOverlay.dwRBitMask == ddpf.dwRBitMask)
 		   {
 			   mp_msg(MSGT_VO, MSGL_V ,"<vo_directx><FORMAT PRIMARY>%i %s supported\n",i,g_ddpf[i].img_format_name);
-			   g_ddpf[i].drv_caps = VFCAP_CSP_SUPPORTED |VFCAP_OSD |VFCAP_CSP_SUPPORTED_BY_HW;
+			   g_ddpf[i].drv_caps = VFCAP_CSP_SUPPORTED |VFCAP_OSD;
 			   formatcount++;
 		   }
 	   }
