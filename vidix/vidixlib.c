@@ -44,6 +44,7 @@ static char* dlerror(){
 
 #include "vidixlib.h"
 #include "../bswap.h"
+#include "../config.h" 
 
 static char drv_name[FILENAME_MAX];
 
