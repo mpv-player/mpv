@@ -2,7 +2,7 @@
 .\" This manpage was/is done by Gabucino <sendmail@to.mplayer-users>
 .\" (Patches done by Jonas Jermann <sendmail@to.mplayer-users>)
 .\" 
-.TH "MPlayer" "1" "2002-05-04"
+.TH "MPlayer" "1" "2002-05-05"
 
 .SH "NAME"
 mplayer \- Movie Player for Linux
@@ -23,10 +23,10 @@ mencoder \- Movie Encoder for Linux
 .RB [dvd|vcd|tv]://[title]\ [options]
 .br
 .B mplayer
-.RB [mms|http|http_proxy|ftp]://URL[:port]\ [options]
+.RB [mms|http|http_proxy|rtp]://URL[:port]\ [options]
 .br
 .B mencoder
-.RB [options]\ [\fIfile\fP\ |\ \fIURL\fP\ |\ \fIplaylist\fP\ |\ \-\ ]\ [\-o\ file]
+.RB [options]\ [\fIfile\fP\ |\ \fIURL\fP\ |\ \-\ ]\ [\-o\ file]
 .br
 .B gmplayer
 .RB [options]\ [\-skin\ skin]
@@ -79,7 +79,7 @@ Select audio channel [MPG: 0\-31 AVI: 1\-99 ASF: 0\-127 VOB: 128\-...]
 Use \-alang to define the language by name.
 .TP
 .B \-alang <audio\ stream\ language>
-Used when playing DVD disks. Expects a two\-letter country code(s) as
+Usable when playing DVD disks. Expects a two\-letter country code(s) as
 parameter, and always tries to play back audio streams those language
 matches the given code. For example: \-alang hu,en will always try to play
 hungarian or if it's non\-existant then english audio streams if there are any.
@@ -87,15 +87,16 @@ hungarian or if it's non\-existant then english audio streams if there are any.
 .B \-audio\-demuxer <number>
 Force audio demuxer type for \-audiofile. 
 Give the demuxer ID as defined in demuxers.h.
+You can use \-audio\-demuxer 17 to force .mp3 detection!
 .TP
 .B \-audiofile <filename>
-Play audio from an external file (WAV, MP3 or Vorbis)
+Play audio from an external file (WAV, MP3 or OggVorbis)
 .TP
 .B \-cdrom\-device <path\ to\ device>
 Override default CDROM drive name /dev/cdrom
 .TP
 .B \-cache <kbytes>
-This option specifies how much memory to use when precaching a file/URL.
+This option specifies how much memory (in kbytes) to use when precaching a file/URL.
 Especially useful on slow media (default is \-nocache).
 .TP
 .B \-chapter <chapter\ id>[-<end chapter id>]
@@ -112,11 +113,11 @@ Force demuxer type. Give the demuxer ID as defined in demuxers.h.
 Dumps raw compressed audio stream to ./stream.dump (usefull with mpeg/ac3)
 .TP
 .B \-dumpfile <filename> (MPLAYER only)
-Specify to which file MPlayer should dump to. Should be used together
+Specify which file MPlayer should dump to. Should be used together
 with \-dumpaudio/\-dumpvideo/\-dumpstream.
 .TP
 .B \-dumpstream (MPLAYER only)
-Dumps the raw steram to ./stream.dump . Useful for example
+Dumps the raw stream to ./stream.dump . Useful for example
 when ripping from DVD or network.
 .TP
 .B \-dumpsub (MPLAYER only)
@@ -153,12 +154,12 @@ Seeking will be possible. You can fix the index permanently with
 MEncoder (see the documentation).
 .TP
 .B \-fps <value>
-Force frame rate (if value is wrong in the header) (float number)
+Override video frame rate (if value is wrong/missing in the header) (float number)
 .TP
 .B \-frames <number>
-MPlayer plays <number> frames, then quits.
+Play/convert only first <number> frames, then quit.
 .TP
-.B \-hr\-mp3\-seek
+.B \-hr\-mp3\-seek (.MP3 only)
 Hi\-res mp3 seeking. Default is: enabled when playing from external MP3 file,
 as we need to seek to the very exact position to keep A/V sync. It can be slow
 especially when seeking backwards \- it has to rewind to the beginning to find
@@ -182,11 +183,11 @@ Used when decoding from multiple PNG or JPEG files.
     fps=<value>   fps of the output (default: 25)
     type=<value>  type of input files (available types : jpeg, png)
 .TP
-.B \-ni
+.B \-ni (.AVI only)
 Force usage of non\-interleaved AVI parser (fixes playing
 of some bad AVI files).
 .TP
-.B \-nobps
+.B \-nobps (.AVI only)
 Don't use avg. byte/sec value for A\-V sync (AVI).
 Helps with some AVI files with broken header.
 .TP
@@ -277,6 +278,11 @@ Don't play/encode sound
 .B \-npp <option1,option2,...>
 This option allows to give more litterate options for postprocessing, 
 and is another way of calling it (not with \-pp).
+.br
+NOTE: -npp only controls the external postprocess filter, and you HAVE TO
+load it manually by '-vop pp', it is not auto-loaded!
+.br
+So, the usage: -vop pp -npp <options>
 
 .I EXAMPLE:
     '\-pp 0x2007f' <=> '\-npp hb,vb,dr,al,lb'
@@ -309,21 +315,21 @@ Apply postprocess filter on decoded image
 
 Value given by -pp is sent to the codec, if the codec has built-in postprocess
 filter (newer win32 DShow DLLs, divx4linux) otherwise the external postprocess
-filter plugin (-vop pp) is auto-loaded and used. Note, that -npp only works
-with external pp. Also note, that you can use the built-in and external pp at the
+filter plugin (-vop pp) is auto-loaded and used.
+Note, that you can use the built-in and external pp at the
 same time, use -pp to set internal pp, and -vop pp=value to set up the external!
 
 The valid range of -pp value for built-in pp filters vary on codecs, mostly
 0-6, where 0=disable 6=slowest/best.
 
 For the external pp filter, this is the numerical mode to use postprocessing. The '\-npp' option described
-below has the same effects but with letters. To have several filters at the
+above has the same effects but with letters. To have several filters at the
 same time, simply add the hexadecimal values.
 
 .I EXAMPLE:
 The following values are known to give good results:
     \-pp 0x20000 <=> \-npp lb (deinterlacing \- for DVD/MPEG2 playback e.g.)
-    \-pp 0x7f    <=> \-npp hb,vb,dr,al (smooth the images)
+    \-pp 0x7f    <=> \-npp hb,vb,dr,al (deblocking filter - for DivX)
 .TP
 .B \-ssf <mode> (BETA CODE)
 Specifies SwScaler parameters. Available options are:
@@ -387,34 +393,46 @@ just the same DivX4 codec, but different APIs to reach it. For difference
 between them and when to use which, check the DivX4 section in the
 documentation.
 .TP
-.B \-vop <plugin3, plugin2, plugin1, ...>
+.B \-vop <plugin3[=options], plugin2, plugin1, ...>
 Activate coma separated list of video filters (see documentation!).
 Available plugins are:
 
-    crop[=w:h:x:y]     simple cropping plugin
-    expand[=w:h:x:y:o] expanding and (optional) OSD rendering plugin
-    flip               flips image upside-down
-    mirror             horizontal mirroring
-    rotate[=x]         rotate image +/\- 90 degrees
-    scale[=w:h]        software scaling (zoom) and yuv<\->rgb colorspace conversion
-    yuy2               forced software YV12/I420 \-> YUY2 conversion
-    rgb2bgr[=swap]     RGB 24/32 <\-> BGR 24/32 colorspace conversion (default)
-                       optional with R<\->B swapping
-    palette            RGB/BGR 8 \-> RGB/BGR 15/16/24/32 colorspace conversion using palette
-    format[=fourcc]    restrict the list of supported colorspaces to a single fourcc
-                       (default 'yuy2', may be rgb12, bgr24, yv12 etc...)
-    pp[=flags]         postprocessing filter (see \-pp option)
-    lavc               fast software YV12\->MPEG1 conversion using libavcodec
-    fame               fast software YV12\->MPEG1 conversion using libfame
+ crop[=w:h:x:y]     cropping
+ expand[=w:h:x:y:o] expanding and OSD
+ flip               flips upside-down
+ mirror             horizontal mirroring
+ rotate[=direction] rotate image
+ scale[=w:h]        software scaling
+ yuy2               YV12/I420 \-> YUY2
+ rgb2bgr[=swap]     RGB 24/32 <\-> BGR 24/32
+ palette            RGB/BGR 8 \-> 15/16/24/32 bpp
+ format[=fourcc]    restrict colorspace
+ pp[=flags]         postprocessing (see \-pp)
+ lavc               YV12\->MPEG1 (libavcodec)
+ fame               YV12\->MPEG1 (libfame)
+
+.I parameters:
+.br
+ w,h     destination width/height
+         value   : w/h = value
+         0 and \-1: w/h = original (default)
+         \-value  : w/h = original+value
+ x,y     x/y position of the sub-image
+         value   : x/y = value
+         \-1      : x/y = center image (default)
+ o       en/disable OSD/SUB rendering
+         0       : disabled (default)
+         1       : enabled
+
 .TP
 .B \-x <x> (MPLAYER only)
 Scale image to x width (if sw/hw scaling available). Disables aspect calcs.
 .TP
-.B \-xy <x> (MPLAYER only)
+.B \-xy <x>
     x<=8   Scale image by factor <x>
     x>8    Set width to <x> and calculate height to keep correct aspect ratio
 .TP
-.B \-y <y>
+.B \-y <y> (MPLAYER only)
 Scale image to y height (if sw/hw scaling available). Disables aspect calcs.
 .TP
 .B \-zoom
@@ -517,7 +535,7 @@ Specify the VobSub subtitle id. Valid values range from 0 to 31.
 Override audio driver/card buffer size detection, -ao oss only
 .TP
 .B \-ao <driver>[:<device>]
-Select audio output driver and optinaly device. "device" is valid with
+Select audio output driver and optionaly device. "device" is valid with
 SDL too, it means sub\-driver then (for example: \-vo sdl:esd).
 If using OSS, you can specify which sound device to use like this:
 
@@ -822,8 +840,8 @@ Available options:
   deinterlace        enable deinterlacing
                      (don't use, DivX4 is buggy!)
   q=<1\-5>            quality (1\-fastest, 5\-best)
-  min_quant=<0\-32>   minimum quantizer
-  max_quant=<0\-32>   maximum quantizer
+  min_quant=<1\-31>   minimum quantizer
+  max_quant=<1\-31>   maximum quantizer
   rc_period=<value>  rate control period
   rc_reaction_period=<value> 
                      rate control reaction period
@@ -954,10 +972,10 @@ Available options:
                    default = 0.5
 
   vqscale=<2\-31>  gives each frame the same
-                   quantizer (selects fixed quantizer
-                   mode).
-                   default = 0 (fixed quantizer mode
-                   disabled)
+                   quantizer (selects fixed
+                   quantizer mode).
+                   default = 0 (fixed quantizer
+                   mode disabled)
 
   vrc_strategy=<0\-2>
                    different strategies to
@@ -1321,7 +1339,7 @@ rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -
 cat *.vob | mencoder <options> -
 
 
-".SH "BUGS"
+.SH "BUGS"
 Probably. PLEASE, double-check the documentation (especially bugreports.html),
 the FAQ and the mail archive before!
 
