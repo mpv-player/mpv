@@ -91,6 +91,13 @@ extern tvi_handle_t *tv_handler;
 #endif
 
 //**************************************************************************//
+//             Playtree
+//**************************************************************************//
+#include "playtree.h"
+
+play_tree_t* playtree;
+
+//**************************************************************************//
 //             Config file
 //**************************************************************************//
 
@@ -407,6 +414,7 @@ static sh_audio_t *sh_audio=NULL;
 static sh_video_t *sh_video=NULL;
 
 // for multifile support:
+play_tree_iter_t* playtree_iter = NULL;
 char **filenames=NULL;
 int num_filenames=0;
 int curr_filename=0;
@@ -419,6 +427,7 @@ char* title="MPlayer";
 
 // movie info:
 int out_fmt=0;
+int eof=0;
 
 int osd_visible=100;
 int osd_function=OSD_PLAY;
@@ -484,41 +493,43 @@ int gui_no_filename=0;
 
     parse_cfgfiles();
     num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
-
-   if(playlist_file!=NULL)
-   {
-    FILE *playlist_f;
-    char *playlist_linebuffer = (char*)malloc(256);
-    char *playlist_line;    
-    if(!strcmp(playlist_file,"-"))
-    {
-      playlist_f = fopen("/dev/stdin","r");
-    }
-    else
-      playlist_f = fopen(playlist_file,"r");
-    if(playlist_f != NULL)
-    {
-      while(!feof(playlist_f))
-      {
-        memset(playlist_linebuffer,0,255);
-        fgets(playlist_linebuffer,255,playlist_f);
-        if(strlen(playlist_linebuffer)==0)
-          break;
-        playlist_linebuffer[strlen(playlist_linebuffer)-1] = 0;
-        playlist_line = (char*)malloc(strlen(playlist_linebuffer)+1);
-        memset(playlist_line,0,strlen(playlist_linebuffer)+1);
-        strcpy(playlist_line,playlist_linebuffer);
-        if (!(filenames = (char **) realloc(filenames, sizeof(*filenames) * (num_filenames + 2))))
-          exit(3);
-        filenames[num_filenames++] = playlist_line;
-      }
-      fclose(playlist_f);
-    }
-}
-
-
     if(num_filenames<0) exit(1); // error parsing cmdline
 
+    playtree = play_tree_new();
+    {
+      play_tree_t* list = NULL;
+      int i;
+      play_tree_t *entry = NULL, *tree = play_tree_new();
+      for(i= 0; i < num_filenames ; i++) {
+	entry = entry != NULL ? play_tree_new() : tree;
+	play_tree_add_file(entry,filenames[i]);
+	play_tree_append_entry(tree,entry);
+      }
+     
+      entry = play_tree_new();
+      play_tree_set_child(entry,tree);
+      list = entry;
+      if(playlist_file!=NULL) {
+	entry = parse_playlist_file(playlist_file);
+	if(entry != NULL){
+	  if(list) play_tree_append_entry(list,entry);
+	  else list = entry;
+	}
+      }
+      if(list) play_tree_set_child(playtree,list);
+    }
+    playtree = play_tree_cleanup(playtree);
+    if(playtree) {
+      playtree_iter = play_tree_iter_new(playtree);
+      if(playtree_iter) {  
+	if(play_tree_iter_step(playtree_iter,0,0) != PLAY_TREE_ITER_ENTRY) {
+	  play_tree_iter_free(playtree_iter);
+	  playtree_iter = NULL;
+	}
+	filename = play_tree_iter_get_file(playtree_iter,1);
+      }
+    }
+	
 #ifndef HAVE_NEW_GUI
     if(use_gui){
       mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoGui);
@@ -580,7 +591,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     }
 
 
-    if(!num_filenames && !vcd_track && !dvd_title && !tv_param_on){
+    if(!filename && !vcd_track && !dvd_title && !tv_param_on){
       if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
 	printf("%s",help_text);
@@ -596,7 +607,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       printf("num_filenames: %d\n",num_filenames);
     }
 
-    mp_msg_init(verbose+MSGL_STATUS);
 
 //------ load global data first ------
 
@@ -677,9 +687,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
 // ******************* Now, let's see the per-file stuff ********************
 
-    curr_filename=0;
 play_next_file:
-    filename=(num_filenames>0)?filenames[curr_filename]:NULL;
 
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) {
@@ -830,8 +838,36 @@ play_dvd:
 
   current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
-  if(!stream) goto goto_next_file;//  exit_player(MSGTR_Exit_error); // error...
+  if(!stream) { // error...
+    uninit_player(inited_flags-(INITED_GUI+INITED_LIRC));
+    goto goto_next_file_src;
+  }
   inited_flags|=INITED_STREAM;
+  if(stream->type == STREAMTYPE_PLAYLIST) {
+    play_tree_t* entry;
+    // Handle playlist
+    mp_msg(MSGT_CPLAYER,MSGL_V,"Parsing playlist %s...\n",filename);
+    entry = parse_playtree(stream);
+    if(!entry) {      
+      entry = playtree_iter->tree;
+      if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY)
+	goto goto_next_file;
+      if(playtree_iter->tree == entry) { // Loop with a single file
+	if(play_tree_iter_up_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY)
+	  goto goto_next_file;
+      }
+      play_tree_remove(entry,1,1);
+      uninit_player(inited_flags-(INITED_GUI+INITED_LIRC));
+      goto goto_next_file_src;
+    }
+    play_tree_insert_entry(playtree_iter->tree,entry);
+    entry = playtree_iter->tree;
+    if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY)
+      goto goto_next_file;
+    play_tree_remove(entry,1,1);
+    uninit_player(inited_flags-(INITED_GUI+INITED_LIRC));
+    goto goto_next_file_src;
+  }
   stream->start_pos+=seek_to_byte;
 
 if(stream_dump_type==5){
@@ -1244,7 +1280,6 @@ current_module="init_libvo";
 //int frame_corr_num=0;   //
 //float v_frame=0;    // Video
 float time_frame=0; // Timer
-int eof=0;
 int force_redraw=0;
 //float num_frames=0;      // number of frames played
 int grab_frames=0;
@@ -1906,6 +1941,30 @@ if(step_sec>0) {
     case ' ':
       osd_function=OSD_PAUSE;
       break;
+    case KEY_HOME:
+      {
+	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
+	if(play_tree_iter_step(i,1,0) == PLAY_TREE_ITER_ENTRY)
+	  eof = 1;
+	play_tree_iter_free(i);
+      }
+      break;
+    case KEY_END:
+      {
+	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
+	if(play_tree_iter_step(i,-1,0) == PLAY_TREE_ITER_ENTRY)
+	  eof = -1;
+	play_tree_iter_free(i);
+      }	
+      break;
+    case KEY_INS:
+      if(playtree_iter->num_files > 1 && playtree_iter->file < playtree_iter->num_files)
+	eof = 2;
+      break;
+    case KEY_DEL:      
+      if(playtree_iter->num_files > 1 && playtree_iter->file > 1)
+	eof = -2;
+      break;
     case 'o':  // toggle OSD
       osd_level=(osd_level+1)%3;
       break;
@@ -2235,12 +2294,22 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 
 goto_next_file:  // don't jump here after ao/vo/getch initialization!
 
-if(curr_filename+1<num_filenames || use_gui){
-    // partial uninit:
-
-  uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC));
-
+if(eof == 1 || eof == -1) {
+  if(play_tree_iter_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
+    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC));
+    eof = 1;
+  } else {
+    play_tree_iter_free(playtree_iter);
+    playtree_iter = NULL;
+  }
+} else {
+     uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC));
+     eof = eof == -2 ? -1 : 1;
 }
+
+goto_next_file_src: // When we have multiple src for file
+
+if(eof == 0) eof = 1;
 
 #ifdef HAVE_NEW_GUI
       if(use_gui) 
@@ -2252,7 +2321,18 @@ if(curr_filename+1<num_filenames || use_gui){
        }	
 #endif
 
-if(use_gui || ++curr_filename<num_filenames
+while(playtree_iter != NULL) {
+  filename = play_tree_iter_get_file(playtree_iter,eof);
+  if(filename == NULL) {
+    if( play_tree_iter_step(playtree_iter,eof,0) != PLAY_TREE_ITER_ENTRY) {
+      play_tree_iter_free(playtree_iter);
+      playtree_iter = NULL;
+    };
+  } else
+    break;
+} 
+
+if(use_gui || playtree_iter != NULL
 #if defined( HAVE_NEW_GUI ) && defined( USE_DVDREAD )
  || (mplShMem && mplShMem->DVDChanged)
 #endif 
@@ -2277,7 +2357,7 @@ if(use_gui || ++curr_filename<num_filenames
   
   video_out=NULL;
   audio_out=NULL;
-
+  eof = 0;
   goto play_next_file;
 }
 
