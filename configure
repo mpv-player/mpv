@@ -835,12 +835,13 @@ if test -z "$LINGUAS" ; then
 LINGUAS="en"
 fi
 echo Checking for language ... "$LINGUAS"
-_mp_help="help_mp-"$LINGUAS".h"
-if test ! -f "$_mp_help" ; then
-echo "Language file ("$_mp_help") not found!"
-LINGUAS="en"
-_mp_help="help_mp-"$LINGUAS".h"
-fi
+_mp_help="help_mp-${LINGUAS}.h"
+
+test -f "$_mp_help" || {
+  echo "Language file (${_mp_help}) not found!"
+  LINGUAS="en"
+  _mp_help="help_mp-"$LINGUAS".h"
+}
 echo Using ... "$_mp_help" file
 
 cc_check $_extraincdir $_extralibdir -lvgagl -lvga && _svga=yes
@@ -892,8 +893,9 @@ cc_check $_extraincdir $_extralibdir -ltermcap && _termcap=yes
 
 _png=no
 if irix64 ; then
-  # Don't check for -lpng on irix since irix has its own libpng
-  # incompatible with the GNU one
+  # Don't check for -lpng on irix since it has its own libpng
+  # incompatible with the GNU libpng
+  :
 else
   cc_check $_extraincdir $_extralibdir -lpng -lz -lm && _png=yes
 fi
@@ -2042,12 +2044,13 @@ else
  _have_soundcard_h='#undef  HAVE_SYS_SOUNDCARD_H'
 fi
 
-# malloc.h useless in FreeBSD
-if test "$_malloc_h" = yes && test ! freebsd ; then
+if test "$_malloc_h" = yes ; then
   _have_malloc_h='#define HAVE_MALLOC_H 1'
 else
   _have_malloc_h='#undef  HAVE_MALLOC_H'
 fi
+# malloc.h useless in FreeBSD
+freebsd && _have_malloc_h='#undef  HAVE_MALLOC_H'
 
 if test "$_memalign" = yes ; then
  _have_memalign='#define HAVE_MEMALIGN 1'
