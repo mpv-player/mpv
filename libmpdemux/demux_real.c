@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.21  2002/08/14 09:15:31  arpi
+    RV20 A-V desync fixed - use timestamp hack only for RV30
+
     Revision 1.20  2002/08/12 00:04:37  arpi
     RV40 support
 
@@ -371,9 +374,13 @@ int real_check_file(demuxer_t* demuxer)
 
 void hexdump(char *, unsigned long);
 
-static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timestamp, float frametime){
-    int kf=2*(((s[1]&15)<<8)+s[2]); // 12-bit timestamp from frame header
-    float v_pts;
+static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timestamp, float frametime, unsigned int format){
+  float v_pts;
+  int kf=timestamp;
+  if(format==0x30335652){ // RV30 timestamps:
+    kf=2*(((s[1]&15)<<8)+s[2]); // 12-bit timestamp from frame header
+    //kf=((s[1]<<8)+s[2])>>3; // 12-bit timestamp from frame header
+    printf("\nTS: %08X (%04X) %02X %02X %02X %02X\n",timestamp,kf,s[0],s[1],s[2],s[3]);
     kf|=timestamp&(~0x1fff);	// combine with packet timestamp
     if(kf<timestamp-4096) kf+=8192; else // workaround wrap-around problems
     if(kf>timestamp+4096) kf-=8192;
@@ -383,6 +390,7 @@ static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timesta
 	priv->kf_pts=tmp;
 //	if(kf<=tmp) kf=0;
     }
+  }
     v_pts=kf*0.001f;
     if(v_pts<priv->v_pts || !kf) v_pts=priv->v_pts+frametime;
     priv->v_pts=v_pts;
@@ -603,7 +611,7 @@ loop:
 			// this fragment is for new packet, close the old one
 			mp_msg(MSGT_DEMUX,MSGL_DBG2, "closing probably incomplete packet, len: %d  \n",dp->len);
 			dp->pts=(dp->len<3)?0:
-			    real_fix_timestamp(priv,dp->buffer,timestamp,sh_video->frametime);
+			    real_fix_timestamp(priv,dp->buffer,timestamp,sh_video->frametime,sh_video->format);
 			ds_add_packet(ds,dp);
 			ds->asf_packet=NULL;
 		    } else {
@@ -627,7 +635,7 @@ loop:
  			    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "fragment (%d bytes) appended, %d bytes left\n",vpkg_offset,len);
 			    // we know that this is the last fragment -> we can close the packet!
 			    dp->pts=(dp->len<3)?0:
-				real_fix_timestamp(priv,dp->buffer,extra[1],sh_video->frametime);
+				real_fix_timestamp(priv,dp->buffer,extra[1],sh_video->frametime,sh_video->format);
 			    ds_add_packet(ds,dp);
 			    ds->asf_packet=NULL;
 			    // continue parsing
@@ -666,7 +674,7 @@ loop:
 		dp->len=vpkg_length; len-=vpkg_length;
 		stream_read(demuxer->stream, dp->buffer, dp->len);
 		dp->pts=(dp->len<3)?0:
-		    real_fix_timestamp(priv,dp->buffer,extra[1],sh_video->frametime);
+		    real_fix_timestamp(priv,dp->buffer,extra[1],sh_video->frametime,sh_video->format);
 		ds_add_packet(ds,dp);
 
 	    } // while(len>0)
