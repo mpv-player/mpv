@@ -90,7 +90,7 @@ config (struct vf_instance_s* vf,
     return 0;
   
   /* The deinterlacer will fail if this is false */
-  if ((width & 1) != 0 || (height & 3) != 0)
+  if ((width & 3) != 0 || (height & 3) != 0)
     return 0;
 
   /* If we get here, the deinterlacer is guaranteed not to fail */
