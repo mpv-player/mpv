@@ -116,13 +116,21 @@ int add_plugin(int i,char* cfg){
 // open & setup audio device and plugins
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
+  int use_plugin[NPL];
+  int x,npl,unused=0;
   int ok=1;
+  char *config;
 
   // Create list of plugins from cfg option
   int i=0; 
   if(ao_plugin_cfg.plugin_list){
-    if(!add_plugin(i,ao_plugin_cfg.plugin_list))
+    config = malloc(strlen(ao_plugin_cfg.plugin_list));
+    if(!config) return 0;
+    if(!strcpy(config, ao_plugin_cfg.plugin_list) || !add_plugin(i,config)){
+      free(config);
       return 0;
+    }
+    free(config);
   }
 
   /* Set input parameters and itterate through plugins each plugin
@@ -139,11 +147,21 @@ static int init(int rate,int channels,int format,int flags){
   ao_plugin_data.sz_fix=0;
   ao_plugin_data.delay_mult=1;
   ao_plugin_data.delay_fix=0;
-  i=0;
-  while(plugin(i)&&ok)
-    ok=plugin(i++)->init();
-  
-  if(!ok) return 0;
+
+  for(i=0;i<NPL,plugin(i);i++){
+    use_plugin[i]=plugin(i)->init();
+    if(!use_plugin[i]) plugin(i)->uninit();
+  }
+  npl=i;
+  for(i=0;i<npl,plugin(i);i++)
+    if(!use_plugin[i+unused]){
+      unused++;
+      for(x=i;x<npl,plugin(x+1);x++) plugin(x)=plugin(x+1);
+      plugin(x)=NULL;
+      npl--;
+      i--;
+    }
+  i=npl;
 
   // Calculate bps
   ao_plugin_local_data.bps=(float)(ao_plugin_data.rate * 
