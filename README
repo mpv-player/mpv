@@ -15,7 +15,7 @@ Also read the man page to learn how to use MPlayer.
 Requirements:
 - To compile MPlayer with X11 support, you need to have the XFree86 development
   packages installed.
-- For the GUI you need the GTK 1.2 development packages.
+- For the GUI you need the libpng and GTK 1.2 development packages.
 
 
 Before you start...
@@ -88,7 +88,7 @@ When asked for a password, you can just hit enter.
 
 Now, replace the empty libavcodec directory in the MPlayer source tree with the
 FFmpeg libavcodec source by removing the libavcodec subdirectory in the MPlayer
-source tree and then copying (symbolic linking does not suffice) the freshly
+source tree and then copying (symbolic linking does NOT suffice) the freshly
 downloaded FFmpeg libavcodec directory back into the MPlayer source tree.
 
 
@@ -98,10 +98,10 @@ STEP2: Installing Win32 Codecs
 
 MPlayer and libavcodec have builtin support for the most common audio and video
 formats, but some others are playable only with the Win32 DLLs or the XAnim
-binary plugins. Examples include WMV video, DivX with WMA audio (not normal
+binary plugins. Examples include WMV8 video, DivX with WMA audio (not normal
 DivX files) and Indeo. This step is not mandatory, but recommended for getting
 MPlayer to play more different file types. Note that Win32 codecs only work on
-Intel compatible PCs.
+Intel x86 compatible PCs.
 
 Unpack the codecs archive and put the contents in a directory where MPlayer
 will find them. The default directory is /usr/lib/win32/ but you can change
@@ -217,4 +217,4 @@ option.
 
 Questions you may have are probably answered in the rest of the documentation.
 The places to start reading are the man page, DOCS/documentation.html and
-DOCS/faq.html.
+DOCS/faq.html. If you find a bug, read DOCS/bugreports.html first!
