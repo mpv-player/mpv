@@ -78,7 +78,7 @@ static void resize(int x, int y)
 	vidix_term();
 	vidix_preinit(vidix_name, &video_out_xvidix);
 	if (vidix_init(image_width, image_height, window_x, window_y,
-	    window_width, window_height, image_format, image_depth, image_width, image_height) != 0)
+	    window_width, window_height, image_format, vo_depthonscreen, vo_screenwidth, vo_screenheight) != 0)
         {
 	    mp_msg(MSGT_VO, MSGL_FATAL, "Can't initialize VIDIX driver: %s: %s\n",
 		vidix_name, strerror(errno));
@@ -259,7 +259,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	window_x, window_y, window_width, window_height);
 
     if (vidix_init(image_width, image_height, window_x, window_y, window_width,
-	window_height, format, image_depth, vo_screenwidth, vo_screenheight) != 0)
+	window_height, format, vo_depthonscreen, vo_screenwidth, vo_screenheight) != 0)
     {
 	mp_msg(MSGT_VO, MSGL_FATAL, "Can't initialize VIDIX driver: %s: %s\n",
 	    vidix_name, strerror(errno));
