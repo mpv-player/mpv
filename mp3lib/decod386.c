@@ -150,13 +150,11 @@ static int synth_1to1_r(real *bandPtr,int channel,unsigned char *out,int *pnt)
 synth_func_t synth_func;
 
 #ifdef HAVE_MMX
-int synth_1to1_MMX( real *bandPtr ,int channel,short * samples)
+int synth_1to1_MMX( real *bandPtr,int channel,short * samples)
 {
-    real *mybandPtr __attribute__((aligned(16))) = bandPtr;
-    short *mysamples __attribute__((aligned(16))) = samples;
-    static short buffs[2][2][0x110] __attribute__((aligned(16)));
-    static int bo __attribute__((aligned(16))) = 1;
-    synth_1to1_MMX_s(mybandPtr, channel, mysamples, (short *) buffs, &bo); 
+    static short buffs[2][2][0x110];
+    static int bo = 1;
+    synth_1to1_MMX_s(bandPtr, channel, samples, (short *) buffs, &bo); 
     return 0;
 } 
 #endif
