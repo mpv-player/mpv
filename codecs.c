@@ -39,6 +39,8 @@ char* get_vids_codec_name(){
 	case mmioFOURCC('d', 'i', 'v', '3'):
 	case mmioFOURCC('D', 'I', 'V', '4'):
         case mmioFOURCC('d', 'i', 'v', '4'):
+	case mmioFOURCC('D', 'I', 'V', '5'):
+        case mmioFOURCC('d', 'i', 'v', '5'):
 	case mmioFOURCC('M', 'P', '4', '1'):
 	case mmioFOURCC('m', 'p', '4', '1'):
 	  printf("Video in DivX ;-) format\n");
@@ -73,6 +75,13 @@ char* get_vids_codec_name(){
 	  printf("Video in Cinepak format\n");
           avi_header.yuv_supported=1;
           return "iccvid.dll";
+
+	case mmioFOURCC('c', 'r', 'a', 'm'):
+	case mmioFOURCC('C', 'R', 'A', 'M'):
+	  printf("Video in CRAM format\n");
+	  avi_header.no_32bpp_support=1;
+          //avi_header.yuv_supported=1;
+          return "msvidc32.dll";
 
 //*** Only 16bit .DLL available (can't load under linux) ***
 //	case mmioFOURCC('V', 'C', 'R', '1'):
