@@ -552,7 +552,7 @@ Currently the following formats are supported:
 <listitem><para>VobSub</para></listitem>
 <listitem><para>OGM</para></listitem>
 <listitem><para>CC (closed caption)</para></listitem>
-<listitem><para>Microdvd</para></listitem>
+<listitem><para>MicroDVD</para></listitem>
 <listitem><para>SubRip</para></listitem>
 <listitem><para>SubViewer</para></listitem>
 <listitem><para>Sami</para></listitem>
@@ -572,7 +572,7 @@ destination formats, with the given options:
 <itemizedlist>
 <listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
 <listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
-<listitem><para>Microdvd: <option>-dumpmicrodvdsub</option></para></listitem>
+<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
 <listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
 <listitem><para>Sami: <option>-dumpsami</option></para></listitem>
 </itemizedlist>
