@@ -896,7 +896,8 @@ There are three timing methods in <application>MPlayer</application>.
   when available, but requires root privileges, a <emphasis>setuid root</emphasis>
   <application>MPlayer</application> binary or a properly set up kernel.
   If you are running kernel 2.4.19pre8 or later you can adjust the maximum RTC
-  frequency for normal users through the /proc filesystem. Use this command to
+  frequency for normal users through the <systemitem class="systemname">/proc
+  </systemitem> filesystem. Use this command to
   enable RTC for normal users:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
   If you do not have such a new kernel, you can also change one line in
