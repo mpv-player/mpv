@@ -31,7 +31,7 @@ GtkWidget     * PlayList;
 GtkWidget     * FileSelect;
 GtkWidget     * AboutBox;
 GtkWidget     * Options;
-GtkWidget     * PopUpMenu;
+GtkWidget     * PopUpMenu = NULL;
 
 GtkWidget     * MessageBox;
 
@@ -165,12 +165,12 @@ void gtkShow( int type,char * param )
    case evShowPopUpMenu:
         gtkPopupMenu=evNone;
         gtkPopupMenuParam=0;
-        gtk_widget_hide_on_delete( PopUpMenu );
+        if ( PopUpMenu ) gtk_widget_hide_on_delete( PopUpMenu );
         PopUpMenu=create_PopUpMenu();
         gtk_menu_popup( GTK_MENU( PopUpMenu ),NULL,NULL,NULL,NULL,0,0 );
         break;
    case evHidePopUpMenu:
-        gtk_widget_hide_on_delete( PopUpMenu );
+        if ( PopUpMenu ) gtk_widget_hide_on_delete( PopUpMenu );
         break;
   }
 }

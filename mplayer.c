@@ -673,16 +673,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 #endif
 
-  // It's time to init the GUI code: (and fork() the GTK process)
-#ifdef HAVE_NEW_GUI
-  if(use_gui){
-       guiInit( argc,argv,envp );
-       inited_flags|=INITED_GUI;
-       guiIntfStruct.Playing= (gui_no_filename) ? 0 : 1;
-       mplState();
-  }
-#endif
-
 #if defined(HAVE_LIRC) && ! defined(HAVE_NEW_INPUT)
   lirc_mp_setup();
   inited_flags|=INITED_LIRC;
@@ -722,6 +712,17 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 
 // ========== Init keyboard FIFO (connection to libvo) ============
 make_pipe(&keyb_fifo_get,&keyb_fifo_put);
+
+  // It's time to init the GUI code: (and fork() the GTK process)
+#ifdef HAVE_NEW_GUI
+  if(use_gui){
+       guiInit( argc,argv,envp );
+       inited_flags|=INITED_GUI;
+       guiIntfStruct.Playing= (gui_no_filename) ? 0 : 1;
+       mplState();
+  }
+#endif
+
 
 // Init input system
 #ifdef HAVE_NEW_INPUT
@@ -777,7 +778,7 @@ if(!use_stdin && !slave_mode){
       }
 #endif
 
-      if(filename && !guiIntfStruct.FilenameChanged) guiSetFilename( guiIntfStruct.Filename,filename );
+//      if(filename && !guiIntfStruct.FilenameChanged) guiSetFilename( guiIntfStruct.Filename,filename );
 //      guiIntfStruct.Playing= (gui_no_filename) ? 0 : 1;
       while(guiIntfStruct.Playing!=1){
         mp_cmd_t* cmd;                                                                                   
@@ -795,11 +796,36 @@ play_dvd:
         guiIntfStruct.SubtitleChanged=0;
        }
 #endif
-
       if ( guiIntfStruct.FilenameChanged || !filename )
        {
-        filename=strdup( guiIntfStruct.Filename );
-	guiIntfStruct.FilenameChanged=0;
+        play_tree_t * entry = play_tree_new();
+        play_tree_add_file( entry,guiIntfStruct.Filename );
+        if ( playtree )
+	 {
+          play_tree_free_list( playtree->child,1 );
+          play_tree_set_child( playtree,entry );
+	 }
+          else
+           {
+	    fprintf( stderr,"[mplayer] new playtree created.\n" );
+            if ( !playtree ) playtree=play_tree_new();
+            play_tree_set_child( playtree,entry );
+           }
+
+        if(playtree->child)
+	 {
+	  playtree_iter = play_tree_iter_new(playtree->child,mconfig);
+	  if(playtree_iter)
+	   {
+	    if(play_tree_iter_step(playtree_iter,0,0) != PLAY_TREE_ITER_ENTRY)
+	     {
+	      play_tree_iter_free(playtree_iter);
+	      playtree_iter = NULL;
+	     }
+	    filename = play_tree_iter_get_file(playtree_iter,1);
+	   }
+         }
+   	guiIntfStruct.FilenameChanged=0;
        }
     }
 #endif
@@ -1401,7 +1427,7 @@ current_module="init_libvo";
      guiIntfStruct.MovieWidth=sh_video->disp_w;
      guiIntfStruct.MovieHeight=sh_video->disp_h;
      guiIntfStruct.StreamType=stream->type;
-     guiSetFilename( guiIntfStruct.Filename,filename );
+//     guiSetFilename( guiIntfStruct.Filename,filename );
     }
 #endif
 
@@ -2897,7 +2923,7 @@ if(benchmark){
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
   eof = eof == PT_NEXT_ENTRY ? 1 : -1;
   if(play_tree_iter_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
-    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
+    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT+INITED_VO));
     eof = 1;
   } else {
     play_tree_iter_free(playtree_iter);
@@ -2906,16 +2932,18 @@ if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
 } else if (eof == PT_UP_NEXT || eof == PT_UP_PREV) {
   eof = eof == PT_UP_NEXT ? 1 : -1;
   if(play_tree_iter_up_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
-    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
+    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT+INITED_VO));
     eof = 1;
   } else {
     play_tree_iter_free(playtree_iter);
     playtree_iter = NULL;
   }
 }else { // NEXT PREV SRC
-     uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
+     uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT+INITED_VO));
      eof = eof == PT_PREV_SRC ? -1 : 1;
 }
+
+uninit_player(INITED_VO);
 
 if(eof == 0) eof = 1;
 
@@ -2942,13 +2970,13 @@ while(playtree_iter != NULL) {
 
 if(use_gui || playtree_iter != NULL
 #if defined( HAVE_NEW_GUI ) && defined( USE_DVDREAD )
- || guiIntfStruct.DVDChanged
+ || ( guiIntfStruct.DVDChanged && use_gui )
 #endif 
 ){
 
   current_module="uninit_vcodec";
   if(sh_video) uninit_video(sh_video);
-
+  
   current_module="free_demuxer";
   if(demuxer) free_demuxer(demuxer);
 

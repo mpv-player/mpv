@@ -559,7 +559,7 @@ int keyPressed = 0;
 void mplMainKeyHandle( int State,int Type,int Key )
 {
  int msg = evNone;
-// return;
+
  if ( Type != wsKeyPressed ) return;
  switch ( Key )
   {
