@@ -430,28 +430,26 @@ int af_calc_insize_constrained(af_stream_t* s, int len,
     mul.d *= af->mul.d;
     af=af->next;
   }while(af);
-  in = t * (((len/t) * mul.d)/mul.n);
+  in = t * (((len/t) * mul.d - 1)/mul.n);
+  
+  if(in>max_insize) in=t*(max_insize/t);
 
   // Try to meet constraint nr 3. 
-  out = t * (((in/t)*mul.n + 1)/mul.d);
-  while(in <= max_insize && out <= max_outsize){
-    if(out > len)
-      return in;
-    out = t * (((in/t)*mul.n + 1)/mul.d);
+  while((out=t * (((in/t+1)*mul.n - 1)/mul.d)) <= max_outsize){
+    if( (t * (((in/t)*mul.n))/mul.d) >= len) return in;
     in+=t;
   }
   
+//  printf("Could no meet constraint nr 3.  in=%d out=%d len=%d max_in=%d max_out=%d",
+//      in,out,len,max_insize,max_outsize);
+  
   // Could no meet constraint nr 3.
-  while((out > max_outsize || in > max_insize) && in > 1)
-  {
+  while(out > max_outsize || in > max_insize){
     in-=t;
+    if(in<t) return -1; // Input parameters are probably incorrect
     out = t * (((in/t)*mul.n + 1)/mul.d);
   }
-  if(in > 1)
-    return in;
-
-  // Input parameters are probably incorrect
-  return -1;
+  return in;
 }
 
 /* Helper function called by the macro with the same name this
