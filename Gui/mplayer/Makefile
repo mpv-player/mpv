@@ -10,7 +10,7 @@ LIB = mplayer
 INCDIR  = -I. -I../event -I../wm -I../skin $(GTKINC)
 
 OPTIMIZE =  $(OPTFLAGS) -fomit-frame-pointer \
-	    -fexpensive-optimizations -malign-double -fschedule-insns2 -Wall
+	    -fexpensive-optimizations -fschedule-insns2 -Wall
 
 CFLAGS = $(OPTIMIZE) $(INCDIR) $(DEBUG)
 
