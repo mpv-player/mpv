@@ -207,7 +207,10 @@ MCONF='config.mak'
 # ---  Check for C compiler:
 
 _cc=gcc
-_as=as
+_as=`gcc -print-prog-name=as`
+if [ x"_$as" = x ]; then
+  _as=as
+fi
 _x11=auto
 
 _x11libdir=
@@ -617,6 +620,10 @@ $_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -lpng -lz -lm > /dev/null 2>&1 &
 _ggi=no
 $_cc $TMPC -o $TMPO -lggi > /dev/null 2>&1 && _ggi=yes
 
+_kstat=no
+$_cc $TMPC -o $TMPO -lkstat >/dev/null 2>&1 && _kstat=yes _archlibs="-lkstat $_archlibs"
+$_cc $TMPC -o $TMPO -lrt >/dev/null 2>&1 && _archlibs="-lrt $_archlibs"
+
 _binutils=no
 $_as libac3/downmix/downmix_i386.S -o $TMPO > /dev/null 2>&1 && _binutils=yes
 
@@ -990,7 +997,7 @@ done
 
 # Checking assembler (_as) compatibility...
 as_version=`$_as --version 2>&1 | sed -n 's/^.*assembler \([0-9.]*\).*$/\1/p'`
-echo $_echo_n "Checking assembler (as) ... $as_version, $_echo_c"
+echo $_echo_n "Checking assembler ($_as) ... $as_version, $_echo_c"
 _pref_as_version='2.9.1'
 ### this test disabled, see _binutils test above!  --A'rpi
 # cat > astest.S <<EOF
@@ -1216,6 +1223,12 @@ if [ "$_termcap" = "yes" ]; then
 else
  _termcap='#undef USE_TERMCAP'
  _libtermcap=''
+fi
+
+if [ "$_kstat" = "yes" ]; then
+  _have_kstat="#define	HAVE_KSTAT 1"
+else
+  _have_kstat="#undef	HAVE_KSTAT"
 fi
 
 if [ "$_xmmp" = "yes" ]; then
@@ -1564,6 +1577,10 @@ $_xmmpaudio
 
 /* Define this if your system has the header file for the OSS sound interface */
 $_have_soundcard_h
+
+
+/* Define this if you have the kstat kernel statistics library */
+$_have_kstat
 
 
 /* LIRC (remote control, see www.lirc.org) support: */
