@@ -1471,7 +1471,7 @@ if(identify) {
     mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_WIDTH=%d\n", sh_video->disp_w);
     mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_HEIGHT=%d\n", sh_video->disp_h);
     mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FPS=%5.3f\n", sh_video->fps);
-    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_ASPECT=%1.2f\n", sh_video->aspect);
+    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_ASPECT=%1.4f\n", sh_video->aspect);
   }
   if (sh_audio) {
     if (sh_audio->codec)
