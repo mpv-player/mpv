@@ -73,11 +73,11 @@ So everything is ok 'till now, I want to move them to a separate lib.
 Now, go on:
 
 3. mplayer.c - ooh, he's the boss :)
-   The timing is solved odd, since it has/recommended to be done differently
-	 for each of the formats, and sometimes can be done in many ways.
+    It's main purpose is connecting the other modules, and maintaining A/V
+    sync.
 
-	 There are float variables called a_frame and v_frame, they store
-	 the just played A/V position in seconds.
+    The given stream's actual position is in the corresponding stream header
+    timer field (sh_audio / sh_video).
 
 	 The structure of the playing loop :
          while(not EOF) {
@@ -129,19 +129,28 @@ Now, go on:
 	 
 	 Life didn't get simpler with AVI. There's the "official" timing
 	 method, the BPS-based, so the header contains how many compressed
-	 audio bytes belong to one second of frames.
-	 Of course this doesn't always work... why it should :)
-	 So I emulate the MPEG's PTS/sector method on AVI, that is the
-	 AVI parser calculates a fake PTS for every read chunk, decided by
-	 the type of the frames. This is how my timing is done. And sometimes
-	 this works better.
+	 audio bytes or chunks belong to one second of frames.
+	 In the AVI stream header there are 2 important fields, the
+	 dwSampleSize, and dwRate/dwScale pairs:
+	 - If the dwSampleSize is 0, then it's VBR stream, so its bitrate
+	 isn't constant. It means that 1 chunk stores 1 sample, and
+	 dwRate/dwScale gives the chunks/sec value.
+	 - If the dwSampleSize is >0, then it's constant bitrate, and the
+	 time can be measured this way:  time = (bytepos/dwSampleSize) /
+	 (dwRate/dwScale) (so the sample's number is divided with the
+	 samplerate). Now the audio can be handled as a stream, which can
+	 be cut to chunks, but can be one chunk also.
 
-	 In AVI, usually there is a bigger piece of audio stored first, then
-	 comes the video. This needs to be calculated into the delay, this is
-	 called "Initial PTS delay".
-	 Of course there are 2 of them, one is stored in the header and not
-	 really used :) the other isn't stored anywhere, this can only be
-	 measured...
+	 The other method can be used only for interleaved files: from
+	 the order of the chunks, a timestamp (PTS) value can be calculated.
+	 The PTS of the video chunks are simple: chunk number * fps
+	 The audio is the same as the previous video chunk was.
+	 We have to pay attention to the so called "audio preload", that is,
+	 there is a delay between the audio and video streams. This is
+	 usually 0.5-1.0 sec, but can be totally different.
+	 The exact value was measured until now, but now the demux_avi.c
+	 handles it: at the audio chunk after the first video, it calculates
+	 the A/V difference, and take this as a measure for audio preload.
 
 3.a. audio playback:
 	 Some words on audio playback:
@@ -166,17 +175,10 @@ Now, go on:
 	 
 4. Codecs. They are separate libs.
    For example libac3, libmpeg2, xa/*, alaw.c, opendivx/*, loader, mp3lib.
-	 mplayer.c calls them if a piece of audio or video needs to be played.
-	 (see the beginning of 3.)
-	 And they call the appropriate demuxer, to get the compressed data.
-	 (see 2.)
-	 We have to pass the appropriate stream header as parameter (sh_audio/
-	 sh_video), this should contain all the needed info for decoding
-	 (the demuxer too: sh->ds).
-   The codecs' seprating is underway, the audio is already done, the video is
-	 work-in-progress. The aim is that mplayer.c won't have to know
-	 which are the codecs and how to use 'em, instead it should call
-	 an init/decode audio/video function.
+
+   mplayer.c doesn't call the directly, but through the dec_audio.c and
+   dec_video.c files, so the mplayer.c doesn't have to know anything about
+   the codec.
 
 5. libvo: this displays the frame.
    The constants for different pixelformats are defined in img_format.h,

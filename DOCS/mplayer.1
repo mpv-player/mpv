@@ -60,6 +60,9 @@ mplayer \- Movie Player for Linux
 .RB [ \-afm\ audio\ codec\ family ]
 .RB [ \-frames\ number ]
 .RB [ \-autoq\ quality ]
+.RB [ \-fb\ device ]
+.RB [ \-fbmode\ modename ]
+.RB [ \-fbmodeconfig filename ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -326,6 +329,7 @@ tells MPlayer to handle the subtitle file as UTF8.
 This option workarounds some problems when using specific windowmanagers and
 fullscreen mode. If you experience fullscreen problems, try changing this
 value between 0 and 7.
+
         -fsmode 0      new method (since 0.18pre3)
         -fsmode 1      ICCCWM patch (for KDE2/icewm)
         -fsmode 2      old method (0.17a)
@@ -333,6 +337,21 @@ value between 0 and 7.
 .TP
 .B \-frames\ number
 MPlayer plays <number> frames, then quits.
+.TP
+.B \-fb\ device
+Specifies the framebuffer device to use. By default it uses /dev/fb0 .
+Only valid for the fbdev driver.
+.TP
+.B \-fbmode\ modename
+Change videomode to the one that is labelled as <modename> in /etc/fb.modes .
+Only valid for the fbdev driver.
+.TP
+.I NOTE
+VESA framebuffer doesn't support mode changing.
+.TP
+.B \-fbmodeconfig\ filename
+Use this config file instead of the default /etc/fb.modes .
+Only valid for the fbdev driver.
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
