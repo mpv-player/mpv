@@ -2758,7 +2758,7 @@ linux && _def_linux='#define TARGET_LINUX 1'
 _def_vidix='#define CONFIG_VIDIX 1'
 test "$_vidix" = no && _def_vidix='#undef CONFIG_VIDIX'
 if test "$_vidix" = yes && test "$_x11" = yes; then
-  _vosrc="$_vosrc vo_xvidux.c"
+  _vosrc="$_vosrc vo_xvidix.c"
   _vomodules="xvidix $_vomodules"
 fi
 echo Checking for vidix ... "$_vidix"
