@@ -48,7 +48,7 @@
         <LI><A HREF="formats.html#2.1.1.2">2.1.1.2 File AVI</A></LI>
         <LI><A HREF="formats.html#2.1.1.3">2.1.1.3 File ASF/WMV</A></LI>
         <LI><A HREF="formats.html#2.1.1.4">2.1.1.4 File QT/MOV</A></LI>
-        <LI><A HREF="formats.html#2.1.1.5">2.1.1.5 File VIV</A></LI>
+        <LI><A HREF="formats.html#2.1.1.5">2.1.1.5 File VIVO</A></LI>
         <LI><A HREF="formats.html#2.1.1.6">2.1.1.6 File FLI</A></LI>
         <LI><A HREF="formats.html#2.1.1.7">2.1.1.7 File RealMedia</A></LI>
         <LI><A HREF="formats.html#2.1.1.8">2.1.1.8 File NuppelVideo</A></LI>
@@ -191,7 +191,7 @@
       <LI><A HREF=#2.6.2>2.6.2 Utilizzo</A></LI>
       <LI><A HREF=#2.6.3>2.6.3 Taglia</A></LI>
       <LI><A HREF=#2.6.4>2.6.4 Espandi</A></LI>
-      <LI><A HREF=#2.6.5>2.6.5 Fame</A></LI>
+      <LI><A HREF=#2.6.5>2.6.5 Fame/Lavc</A></LI>
       <LI><A HREF=#2.6.6>2.6.6 Capovolgi</A></LI>
       <LI><A HREF=#2.6.7>2.6.7 Formato</A></LI>
       <LI><A HREF=#2.6.8>2.6.8 Post-processa</A></LI>
@@ -199,7 +199,9 @@
       <LI><A HREF=#2.6.10>2.6.10 Ruota</A></LI>
       <LI><A HREF=#2.6.11>2.6.11 Ridimensiona</A></LI>
       <LI><A HREF=#2.6.12>2.6.12 YUY2</A></LI>
-      <LI><A HREF=#2.6.13>2.6.13 Lavc</A></LI>
+      <LI><A HREF=#2.6.13>2.6.13 Speculare</A></LI>
+      <LI><A HREF=#2.6.14>2.6.14 DVBscale</A></LI>
+      <LI><A HREF=#2.6.15>2.6.15 Cropdetect</A></LI>
     </UL>
   </UL>
   <LI><A HREF="#3">3. Utilizzo</A></LI>
@@ -223,7 +225,6 @@
     <UL>
       <LI><A HREF="cd-dvd.html#4.1">4.1 Lettori CD</A></LI>
       <LI><A HREF="cd-dvd.html#4.2">4.2 Vedere i DVD</A></LI>
-      <LI><A HREF="cd-dvd.html#4.3">4.3 FAQ sulla riproduzione DVD</A></LI>
     </UL>
   <LI><A HREF="faq.html">5. Sezione FAQ (Domande frequenti)</A></LI>
     <UL>
@@ -231,8 +232,9 @@
       <LI><A HREF="faq.html#5.2">5.2 Domande generali</A></LI>
       <LI><A HREF="faq.html#5.3">5.3 Problemi di lettura file</A></LI>
       <LI><A HREF="faq.html#5.4">5.4 Problemi di driver Video/audio</A></LI>
-      <LI><A HREF="faq.html#5.5">5.5 Richieste di caratteristiche</A></LI>
-      <LI><A HREF="faq.html#5.6">5.6 Codificare</A></LI>
+      <LI><A HREF="faq.html#5.5">5.5 Riproduzione DVD</A></LI>
+      <LI><A HREF="faq.html#5.6">5.6 Richieste di caratteristiche</A></LI>
+      <LI><A HREF="faq.html#5.7">5.7 Codificare</A></LI>
     </UL>
   <LI><A HREF="#6">6. Vari Sistemi Operativi</A></LI>
     <UL>
@@ -407,8 +409,7 @@ del tempo, ma ne vale sicuramente la pena.</P>
     non è importante.</LI>
   <LI><B>SDL</B> - non è obbligatorio, ma può aiutare in alcuni casi (audio difettoso,
     schede video stranamente lente col driver xv). Usate sempre la versione più recente
-    (a partire dalla 1.2.x). Può anche <B>visualizzare i sottotitoli sotto al filmato, sulla
-    barra nera</B>.</LI>
+    (a partire dalla 1.2.x).</LI>
   <LI><B>libjpeg</B> - decodificatore JPEG opzionale, usato da -mf e alcuni file qt mov.
     Utile sia per <B>MPlayer</B> che per <B>MEncoder</B> se hai intenzione di lavorare con file jpeg.</LI>
   <LI><B>libpng</B> - decodificatore (M)PNG raccomandato e usato di default. Necessario per la GUI.
@@ -621,7 +622,7 @@ sistema multiutente!</B> E' un modo semplice per far ottenere a chiunque i privi
     make install</PRE>
 
 <P>A questo punto, <B>MPlayer</B> è pronto ad essere usato. La directory
-<CODE>/usr/local/share/mplayer</CODE> contiene il file <CODE>codecs.conf</CODE>,
+<CODE>$PREFIX/share/mplayer</CODE> contiene il file <CODE>codecs.conf</CODE>,
 che serve per dire al programma di quali codec dispone e le loro caratteristiche.
 Questo file dovrebbe essere sempre tenuto aggiornato di pari passo col binario principale !</BR>
 Controlla se hai codecs.conf nella tua directory home (~/.mplayer/codecs.conf)
@@ -646,8 +647,8 @@ per la tua lingua (se esistono). E' CALDAMENTE CONSIGLIATO leggere la
 
 <PRE>    mkdir ~/.mplayer/font
     cd ~/.mplayer/font
-    unzip mp-arial-iso-8859-1.zip</PRE>
-
+    unzip mp-arial-iso-8859-1.zip
+    ln -s ~/.mplayer/font/arial-24 font</PRE>
 
 <P><B><A NAME=1.4>1.4. E la GUI?</A></B></P>
 
@@ -658,7 +659,7 @@ Quindi, per usare la modalità GUI, si può sia
 <UL>
   <LI>usare l'opzione <CODE>-gui</CODE></LI>
   <LI>specificare <CODE>gui=yes</CODE> nel tuo file di configurazione</LI>
-  <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE> ,
+  <LI><CODE>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</CODE> ,
   e chiamare <CODE>gmplayer</CODE>.
 </UL>
 </P>
@@ -668,7 +669,7 @@ contemporaneamente) per visualizzare un menu GTK, con opzioni per la lettura di 
 
 <P>Dato che <B>MPlayer</B> non ha una skin inclusa, devi scaricarle
 se vuoi usare la GUI. Vedi la <A HREF="http://www.mplayerhq.hu/homepage/dload.html">pagina dei download</A>.
-Dovranno essere estratti nella solita directory valida per tutto il sistema (<CODE>/usr/local/share/mplayer/Skin</CODE>),
+Dovranno essere estratti nella solita directory valida per tutto il sistema (<CODE>$PREFIX/share/mplayer/Skin</CODE>),
 o in <CODE>$HOME/.mplayer/Skin</CODE> . <B>MPlayer</B> cerca in
 queste una directory di nome  <I>default</I>, ma puoi usare l'opzione
 <I>-skin nuovaskin</I>, o la direttiva <I>skin=nuovaskin</I> del file di configurazione
@@ -798,7 +799,7 @@ Si tratta di un'utility completa per convertire da font TTF/Type1/ecc al pacchet
 <CODE>$PREFIX/share/mplayer</CODE>. Quindi rinomina o crea un symlink tra uno di questi e
 <CODE>font</CODE> (come : <CODE>ln -s ~/.mplayer/arial-24
 ~/.mplayer/font</CODE>). Ora potrai vedere un timer nell'angolo in alto a sinistra
-del filmato (disattivabile con 'o').</P>
+del filmato (disattivabile col tasto 'o').</P>
 
 <P>OSD ha 3 stati: (selezionabili con 'o')<BR>
 <UL>
@@ -831,6 +832,9 @@ del filmato (disattivabile con 'o').</P>
 
 <P>Questa sezione spiega come abilitare la  <B>visualizzazione/cattura da un sintonizzatore TV
 compatibile con V4L</B>.</P>
+
+<P><B>QUESTO CODICE NON E' ANCORA COMPLETO! Non aspettarti che funzioni senza
+  regolazioni/esperimenti!</B></P>
 
 <A NAME=2.5.2><P><B><I>2.5.2.  Compilazione</I></B></P>
 
@@ -999,6 +1003,9 @@ Input da standard V4L<BR>
 <P>I filtri sono accodati a partire da libvo, quindi <CODE>filtro1</CODE> sarà l'utimo filtro
   eseguito (dopo di che viene libvo, o usando <B>MEncoder</B>,
   la codifica).</P>
+  
+<P>Puoi ottenere la lista dei filtri video disponibili con il comando<BR>
+  "<CODE>mplayer -vop help</CODE>".</P>
 
 
 <A NAME=2.6.3><P><B><I>2.6.3.  Taglia</I></B></P>
@@ -1029,16 +1036,17 @@ Input da standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop expand[=largh:alt:x:y]</CODE></P>
 
 
-<A NAME=2.6.5><P><B><I>2.6.5.  Fame</I></B></P>
+<A NAME=2.6.5><P><B><I>2.6.5.  Fame/Lavc</I></B></P>
 
 <P><B><U>Descrizione</U></B>:</P>
 
-<P>Codifica in MPEG1 in realtime (da usare con DVB/DXR3).</P>
+<P>Codifica in MPEG1 in realtime (usando libfame o libavcodec) (da usare con DVB/DXR3).</P>
 
 <P><B><U>Utilizzo</U></B>:</P>
 
 <P><CODE>&nbsp;&nbsp;-vop fame</CODE></P>
 
+<P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
 
 <A NAME=2.6.6><P><B><I>2.6.6.  Capovolgi</I></B></P>
 
@@ -1089,6 +1097,8 @@ Input da standard V4L<BR>
 
 <P><B><U>Utilizzo</U></B>:</P>
 
+<P><CODE>&nbsp;&nbsp;-vop rgb2bgr[=swap]</CODE></P>
+
 <A NAME=2.6.10><P><B><I>2.6.10.  Ruota</I></B></P>
 
 <P><B><U>Descrizione</U></B>:</P>
@@ -1130,15 +1140,37 @@ Input da standard V4L<BR>
 
 <P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
 
-<A NAME=2.6.13><P><B><I>2.6.13.  Lavc</I></B></P>
+<A NAME=2.6.13><P><B><I>2.6.13.  Speculare</I></B></P>
 
 <P><B><U>Descrizione</U></B>:</P>
 
-<P>Codifica in MPEG1 in realtime (da usare con DVB/DXR3).</P>
+<P>Ribalta l'immagine sull'asse Y.</P>
 
 <P><B><U>Utilizzo</U></B>:</P>
 
-<P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
+<P><CODE>&nbsp;&nbsp;-vop mirror</CODE></P>
+
+<A NAME=2.6.14><P><B><I>2.6.14.  DVBscale</I></B></P>
+
+<P><B><U>Descrizione</U></B>:</P>
+
+<P>Calcola il ridimensionamento Y per una scheda DVB.</P>
+
+<P><B><U>Utilizzo</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop dvbscale</CODE></P>
+
+
+<A NAME=2.6.15><P><B><I>2.6.15.  Cropdetect</I></B></P>
+
+<P><B><U>Descrizione</U></B>:</P>
+
+<P>Calcola i necessari parametri di taglio. Stamperà in stdout l'opzione -vop
+  raccomanda.</P>
+
+<P><B><U>Utilizzo</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop cropdetect</CODE></P>
 
 
 <P><B><A NAME=3>3. Utilizzo</A></B></P>
@@ -1176,7 +1208,7 @@ Xine: <CODE>mplayer dvd://1</CODE> o <CODE>mplayer vcd://1</CODE>
 <P><B><A NAME=3.2>3.2. Controllo</A></B></P>
 
 <P><B>MPlayer</B> ha un livello di controllo totalmente configurabile che permette
-di controllare <B>MPlayer</B> usando la tastiera, il mouse, il joystick o un telecomando (usando lirc).</P>
+di controllare <B>MPlayer</B> usando la tastiera, il mouse, il joystick o un telecomando (usando LIRC).</P>
 
 <P><B><A NAME=3.2.1>3.2.1. Controlli standard</A></B></P>
 
@@ -1234,7 +1266,7 @@ di controllare <B>MPlayer</B> usando la tastiera, il mouse, il joystick o un tel
 
 <P><B><A NAME=3.2.2>3.2.2. Configurazione dei controlli</A></B></P>
 
-<P>MPlayer ti permette di collegare qualsiasi tasto/bottone a qualsiasi comando di MPlayer usando un semplice file di configurazione.
+<P><B>MPlayer</B> ti permette di collegare qualsiasi tasto/bottone a qualsiasi comando di <B>MPlayer</B> usando un semplice file di configurazione.
 La sintassi consiste in un nome tasto seguito da un comando. La posizione di default del file di configurazione è
 $HOME/.mplayer/input.conf ma può essere cambiata con l'opzione -input conf (path relativi sono relativi a $HOME/.mplayer).
 <P>
@@ -1636,6 +1668,9 @@ kernel con "<CODE>option USER_LDT</CODE>".</P>
 <P>Se <B>MPlayer</B> si lamenta di non trovare '/dev/cdrom' o
 '/dev/dvd' fai un link simbolico, es <CODE>ln -s
 /dev/rcd0c /dev/dvd</CODE></P>
+
+<P>Quelli tra di voi che non si sentono così "hardcore hacker" possono usare la versione
+ports (/usr/ports/x11/mplayer).</P>
 
 <P><B><A NAME=A>Appendice A - Autori</A></B></P>
 

@@ -20,90 +20,86 @@ Il numero uno è naturalmente l'argomento</P>
 
 <A NAME=gcc><P><B><I>GCC 2.96</I></B></P>
 
-<P><B>Leggi anche <A HREF="gcc-2.96-3.0.html">questo</A> testo !!!</B></P>
-
 <P>Il <I>retroscena</I> : C'erano/ci sono le serie GCC <B>2.95</B>. Il migliore
 era il 2.95.3 . Per favore nota lo stile di numerazione delle versioni.
 Così è come il team GCC numera i loro compilatori. Quelli della serie 2.95 sono buoni.
 Non abbiamo mai visto nulla compilato male a causa di errori del 2.95.3.</P>
 
-<P>L' <I>atto</I> : <B>RedHat</B> cominciò ad includere una versione <B>2.96</B> di GCC
-con le loro distribuzioni. Nota il numero di versione. Questo dovrebbe essere una versione del
-team GCC. Hanno modificato la versione CVS di GCC (qualcosa tre 2.95 e 3.0)
-L'hanno modificata profondamente, e hanno usato questa versione nella distribuzione perchè il 3.0
-non era uscito a quel tempo, e vollero che IA64 supportasse ASAP (ragioni di mercato).
-Oh, e GCC 2.95 compila male bash sull'architettura s390...</P>
+<P><B>Le dichiarazioni:</B> Il team GCC dichiarato di non avere nessun collegamento col GCC 2.96 e ha dato una
+<A HREF="http://gcc.gnu.org/gcc-2.96.html">risposta ufficiale</A> riguardante il GCC 2.96.
+Molti sviluppatori nel mondo hanno cominciato a riscontrare problemi col GCC 2.96, e
+hanno cominciato a raccomandare altri compilatori. Esempi sono
+<A HREF="http://www.apachelabs.org/apr-mbox/200106.mbox/%3c20010623194228.C25512@ebuilt.com%3e">Apache</A>,
+<A HREF="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</A>,
+<A HREF="http://avifile.sourceforge.net/news-old1.htm">avifile</A> e
+<A HREF="http://www.winehq.com/news/?view=92#RH 7.1 gcc fixes compiler bug">Wine</A>.
+Altri link interessanti sono
+<A HREF="http://www.realtimelinux.org/archives/rtai/20017/0144.html">Real time Linux</A>,
+<A HREF="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
+Linux kernel news flash about kernel 2.4.17</A> e
+<A HREF="http://www.voy.com/3516/572.html">Voy Forum</A>.
+Anche <B>MPlayer</B> ha sofferto di problemi intermittenti che si sono tutti risolti
+cambiando versione di GCC. Alcuni progetti hanno cominciato a implementare metodi
+per aggirare alcuni dei problemi del 2.96, ma noi ci siamo rifiutati di correggere i bug di altri,
+specialmente perchè alcuni di questi metodi implicano un calo delle prestazioni.</P>
 
-<P>I <I>fatti</I> : Per compilare <B>MPlayer</B> necessita l'opzione
-<CODE>--disable-gcc-checking</CODE> per procedere dopo l'aver trovato la versione 2.96 di GCC
-(apparentemente la necessita anche con <B>egcs</B>. Questo perchè noi non
-testiamo <B>MPlayer</B> con egcs. Perdonaci, noi preferiamo sviluppare <B>MPlayer</B>).
-Se conosci <B>MPlayer</B>, dovresti sapere che è molto veloce. Ottiene questo
-grazie al fatto di avere codici MMX/SSE/3DNow/ecc stra-ottimizzati, fastmemcpy, e
-molte altre caratteristiche. <B>MPlayer</B> contiene istruzioni MMX/3DNow in una
-sintassi che tutti i compilaturi linux accettano... tranne il GCC della RedHat (è più
-compatibile con gli standard). Semplicemente li <B><I>salta</I></B>. Non mostra
-errori. Non mostra avvertimenti. <B>E</B>, c'è Lame. Col gcc 2.96, il suo test di qualità
-(<CODE>make test</CODE> dopo aver compilato) <I>non parte nemmeno !!!</I>
-Ma hey, compila bash su s390 e IA64.</P>
+<P>Puoi leggere l'altro lato della storia
+<A HREF="http://www.bero.org/gcc296.html">qui</A>.
+GCC 2.96 non permette i caratteri | (pipe) nei commenti in assembler
+perchè supporta sia la sintassi Intel che AT&amp;T e il carattere |
+è un simbolo nella variante Intel. Il problema è che ignora <B>silenziosamente</B>
+l'intero blocco in assembler. Questo dovrebbe essere stato corretto ora, GCC stampa un avvertimento
+invece di saltare il blocco.</P>
 
-<P>Le <I>dichiarazioni</I> : la maggior parte degli sviluppatori del mondo cominciarono
-ad avere una cattiva idea del GCC 2.96 della RedHat, e dissero ai loro utenti RedHat di
-compilare con un altro compilatore. Il disappunto degli utenti RedHat si trasformò lentamente
-in rabbia. A cosa serviva,
-se non a procurare mal di testa agli sviluppatori, gettare benzina su flame anti-RedHat,
-confondere gli utenti? La risposta, non la conosco.</P>
+<P><B>Il presente:</B> Red Hat dice che il GCC 2.96-85 e superiori sono stati corretti. La
+situazione è migliorata, ma noi vediamo ancora segnalazioni di problemi sulle nostre
+mailing list che scompaiono con un diverso compilatore. In ogni caso non importa
+più. Si spera che il maturante GCC 3.x risolverà la questione per il meglio.
+Se desideri compilare col 2.96 passa l'opzione <CODE>--disable-gcc-checking</CODE>
+a configure. Però devi arrangiarti da solo, <B>non segnalare nessun
+bug</B>. Se lo farai, sarai solo escluso dalla mailing list perchè
+abbiamo avuto già abbastanza flame sul GCC 2.96.</P>
 
-<P><I>I giorni nostri</I> : RedHat dice che il GCC 2.96-85 e superiori
-sono stati corretti, e funzionano propriamente. Nota il numero di versione. Avrebbero dovuto cominciare
-con qualcosa del genere. Com'è il GCC 2.96.85 ? Non importa ora.
-Non ho cercato, ma vedo ancora bug nel 2.96 . Non importa ora,
-si spera che ora <B>RedHat dimenticherà il 2.96</B> e si rivolgerà verso il <B>3.0</B>.
-Verso un 3.0 profondamente modificato...
-</P>
+<P>Se hai problemi col GCC 2.96, puoi prendere i pacchetti 2.96-85 dal
+<A HREF="ftp://updates.redhat.com">server ftp</A> della RedHat, usa i pacchetti
+3.04 offerti per la versione 7.2 e successive. Se no vuoi o non puoi usare
+i pacchetti binari, ecco come compilare il GCC 3.0.4 dai sorgenti:</P>
 
-<P><I>Quello che non capisco</I> è perchè gli utenti RedHat ci odino per aver
-inserito messaggi di avvertimento, e documenti che consigliano di stare alla larga dal 2.96 in <B>MPlayer</B> .
-Perchè siamo chiamati "teste bacate", "scemi totali", "puerili" dagli
-<B>utenti RedHat</B>, sulla nostra mailing list, e perfino su quella <B>redhat-devel</B> .
-Hanno anche considerato l'idea di un fork di <B>MPlayer</B> per loro stessi. Utenti RedHat.
-Perchè? E' RedHat che ha fatto il compilatore, perchè <U>voi</U> dovete odiarci?
-Siete <U>così</U> adoratori di RedHat? Per favore smettetela. Non abbiamo
-nessun rancore nei confronti degli utenti, non importa se vi sembra tanto il contrario.
-Per favore andateci di flame con Linus Torvalds, gli sviluppatori DRI (oh, ora so perchè sono
-stati sospesi da VA!), di Wine, di avifile. Anche se siamo arroganti,
-non siamo come questi elencati? Perchè <B>noi</B> dovremmo
-soffrire la vostra ingiusta collera?</P>
-
-<P><A HREF="mailto:willis_matthew@yahoo.com">Matt Willis</A> ci ha gentilmente mandato
-  un semplice documento su come compilare col GCC-3.0.3, lo copio qui sotto:</P>
-
-<P>
 <UL>
- <LI>Scarica gcc. Vai alla pagina <A
-  HREF="http://gcc.gnu.org/mirrors.html">http://gcc.gnu.org/mirrors.html</A>
-   Io ho scaricato i seguenti file, ma non devi avere tutto:<BR>
-    <CODE>gcc-g++-3.0.3.tar.gz<BR>
-    gcc-objc-3.0.3.tar.gz<BR>
-    gcc-3.0.3.tar.gz<BR>
-    gcc-g77-3.0.3.tar.gz<BR>
-    gcc-testsuite-3.0.3.tar.gz<BR>
-    gcc-core-3.0.3.tar.gz<BR>
-    gcc-java-3.0.3.tar.gz</CODE>
-  </LI>
-
-  <LI>Scompatta i file, fai una directory per la compilazione, e compila<CODE><PRE>
-     tar xvzf gcc-*3.0.3.tar.gz
-     mkdir gcc-build; cd gcc-build
-     ../gcc-3.0.3/configure --prefix=/opt --program-suffix=-3.0.3
-     make bootstrap; mkdir -p /opt; make install</PRE></CODE>
-
-  <LI>Inserisci nel tuo path /opt/bin<BR>
-     <CODE>export PATH=/opt/bin:${PATH}</CODE>
-
-  <LI>Ora puoi compilare MPlayer.</LI>
+  <LI>Vai alla pagina dei<A HREF="http://gcc.gnu.org/mirrors.html">mirror di GCC</A>
+    e scarica <CODE>gcc-core-3.0.4.tar.gz</CODE>.  Questo include il completo
+    compilatore C ed è sufficente per <B>MPlayer</B>. Se vuoi anche
+    C++, Java o altre caratteristiche avanzate di GCC
+    <CODE>gcc-3.0.4.tar.gz</CODE> potrebbe soddisfare meglio le tue esigenze.</LI>
+  <LI>Estrai l'archivio con<BR>
+    <CODE>tar -xvzf gcc-core-3.0.4.tar.gz</CODE></LI>
+  <LI>GCC non viene compilato all'interno della directory dei sorgenti come la maggior parte dei programmi,
+    ma necessita una directory esterna.  Quindi bisogna crearla con<BR>
+    <CODE>mkdir gcc-build</CODE></LI>
+  <LI>Quindi si può procedere a configurare gcc in questa directory, ma devi usare il
+    configure dei sorgenti:<BR>
+    <CODE>cd gcc-build<BR>
+    ../gcc-3.0.4/configure</CODE></LI>
+  <LI>Compila GCC passando questo comando:<BR>
+    <CODE>make bootstrap</CODE></LI>
+  <LI>Ora puoi installare GCC (da root) facendo<BR>
+    <CODE>make install</CODE></LI>
 </UL>
-</P>
+
+<P><A NAME=binary><B>Distribuzione binaria di MPlayer</B></A></P>
+
+
+<P>Questo era il secondo grande problema, ma è stato risolto dalla versione
+0.90-pre1. <B>MPlayer</B> in precedenza conteneva dei sorgenti del progetto OpenDivX,
+che non permetteva la ridistribuzione binaria. Questo codice è stato rimosso e ora
+puoi creare pacchetti binari se vuoi.</P>
+
+<P>Un altro impedimento alla distribuzione binaria erano le ottimizzazioni di compilazione
+per l'architettura della CPU.  <B>MPlayer</B> ora supporta il riconoscimento della CPU a runtime.
+Sebbene questo implichi un piccolo sacrificio per la velocità, è ora possibile creare binari
+che si possono eseguire su diversi membri della famiglia di CPU di Intel. Per migliori
+prestazioni puoi disabilitare il riconoscimento della CPU a runtime prima di compilare
+(<CODE>configure --disable-runtime-cpudetection</CODE>).</P>
 
 <A NAME=nvidia><P><B><I>NVidia</I></B></P>
 

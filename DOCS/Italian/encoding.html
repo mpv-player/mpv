@@ -104,9 +104,9 @@ dovresti consultare alcune guide disponibili in rete.</P>
 due comandi :<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - rimuovi questo file che può essere rimasto
   da una precedente codifica a 3 passaggi (interferisce col processo attuale)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:altre_opzioni
 -o movie.avi -pass 1<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100 -o movie.avi -pass 2</CODE></P>
+&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:altre_opzioni -o movie.avi -pass 2</CODE></P>
 
 <P><U><B>codifica a 3 passaggi :</B></U> questa è un' estensione della codifica a 2 passaggi,
   dove la codifica audio avviene in un passaggio separato. Questo metodo abilita la
@@ -135,7 +135,7 @@ due comandi :<BR>
   <TR>
     <TD><FONT CLASS="text">
       <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
-        -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+        -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
     <TD><FONT CLASS="text">
       <B><U>Secondo passaggio</U> : cioè il primo passaggio della codifica del video DivX4.
       Puoi specificare il bitrate video dato da MEncoder alla fine del precedente
@@ -144,7 +144,7 @@ due comandi :<BR>
   <TR>
     <TD><FONT CLASS="text">
       <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
-        -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+        -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
     <TD><FONT CLASS="text">
       <B><U>Terzo passaggio</U> : cioè il secondo passaggio della codifica video DivX4.
       Puoi specificare il bitrate video dato da MEncoder alla fine del precedente
@@ -162,9 +162,9 @@ due comandi :<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
   -o frameno.avi<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
-  -divx4opts br=1100 -oac copy -o movie.avi -pass 1<BR>
+  -lavcopts vcodec=mpeg4:altre_opzioni -oac copy -o movie.avi -pass 1<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
-  -divx4opts br=1100 -oac copy -o movie.avi -pass 2</CODE>
+  -lavcopts vcodec=mpeg4:altre_opzioni -oac copy -o movie.avi -pass 2</CODE>
 </P>
 
 <P><U><B>Codifica a 2 o 3 passaggi usando il controller interno di libavcodec</B></U> :
@@ -174,14 +174,14 @@ con libavcodec.<BR>
 <UL>
 <B>codifica a 2 passaggi</B> :<BR>
 <CODE>rm -f lavc_stats.txt<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=1 (opzioni audio) -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 (opzioni audio) -o movie.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 (opzioni audio) -o movie.avi<BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 (opzioni audio) -o movie.avi</CODE><BR>
 <BR>
 <B>codifica a 3 passaggi</B> :<BR>
 <CODE>rm -f frameno.avi lavc_stats.txt<BR>
 mencoder -dvd 2 -ovc frameno (opzioni audio) -o frameno.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=1 -oac copy -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 -oac copy -o movie.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE><BR>
 </UL>
 </P>
 
@@ -202,7 +202,7 @@ mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 -oac copy -o movie.avi</CODE><BR>
   bilineare veloce.</P>
 
 <P>Utilizzo :<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder esempio-svcd.mpg -divx4opts br=1300 -vop scale=640:480 -sws 2 -o output.avi</CODE></P>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder esempio-svcd.mpg -lavcopts vcodec=mpeg4:altre_opzioni -vop scale=640:480 -sws 2 -o output.avi</CODE></P>
 
 
 <P><B><A NAME=2.4.3.3>2.4.3.3.  Copia da stream</B></P>
@@ -440,19 +440,19 @@ supportati). Puoi codificare i seguenti codec :</P>
 <P>Usare <B>MEncoder</B> è la cosa più facile della Terra. Vedi il seguito :</P>
 
 <P>Codificare da DVD, titolo 2 :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:altre_opzioni -o title2.avi</CODE></P>
 
 <P>Lo stesso, ma con la famiglia libavcodec, compressione MJPEG :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mjpeg:altre_opzioni -ffourcc mjpg -o title2.avi</CODE></P>
 
 <P>Codifica da DVD, titolo 2, con ridimensionamento :<BR>
- <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -vop scale=640:480 -sws 2 -o titolo2.avi</CODE></P>
+ <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -vop scale=640:480 -sws 2 -lavcopts vcodec=mpeg4:altre_opzioni -o titolo2.avi</CODE></P>
 
 <P>Codifica da HTTP :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/example.avi  -o  example.avi</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/example.avi  -lavcopts vcodec=mpeg4:altre_opzioni -o  example.avi</CODE></P>
 
 <P>Codifica da pipe :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rar p test-SVCD.rar | mencoder -lavcopts vcodec=mpeg4:altre_opzioni -ofps 24 -pass 1 -- -</CODE></P>
 
 <P>Codificare file *.vob multipli :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;cat *.vob | mencoder &lt;opzioni&gt; -</CODE></P>

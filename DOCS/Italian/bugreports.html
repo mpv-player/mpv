@@ -46,19 +46,26 @@ queste importanti informazioni:</P>
 <UL>
 <LI>La tua distribuzione Linux o il tuo sistema operativo es.:<BR>
 <UL>
-    <LI>RedHat 7.1
-    <LI>Slackware 7.0 + pacchetti di sviluppo dalla 7.1 ...</UL>
+    <LI>RedHat 7.1</LI>
+    <LI>Slackware 7.0 + pacchetti di sviluppo dalla 7.1 ...</LI>
+</UL>
+</LI>
 <LI>versione kernel:<BR>
-    <CODE>uname -a</CODE>
+    <CODE>uname -a</CODE></LI>
 <LI>versione libc:<BR>
-    <CODE>ls -l /lib/libc[.-]*</CODE>
+    <CODE>ls -l /lib/libc[.-]*</CODE></LI>
 <LI>versione X:<BR>
-    <CODE>X -version</CODE>
+    <CODE>X -version</CODE></LI>
 <LI>versione gcc e ld:<BR>
     <CODE>gcc -v<BR>
-    ld -v</CODE>
+    ld -v</CODE></LI>
 <LI>versione binutils:<BR>
-    <CODE>as --version</CODE>
+    <CODE>as --version</CODE></LI>
+<LI>Se hai problemi con la modalità a pieno schermo:
+  <UL>
+    <LI>Tipo e versione del window manager</LI>
+  </UL>
+</LI>
 <LI>se solo la GUI è difettosa :
   <UL>
     <LI>versione GTK</LI>
@@ -73,32 +80,39 @@ queste importanti informazioni:</P>
 
 <UL>
 <LI>informazioni sulla CPU (questo funziona solo su Linux):<BR>
-    <CODE>cat /proc/cpuinfo</CODE>
-<LI>Produttore e modello della scheda video, es.:<BR>
+    <CODE>cat /proc/cpuinfo</CODE></LI>
+<LI>Produttore e modello della scheda video, es.:
 <UL>
-    <LI>chip ASUS V3800U: nVidia TNT2 Ultra pro 32MB SDRAM
-    <LI>Matrox G400 DH 32MB SGRAM</UL>
-<LI>Tipo e versione del driver video, es.:<BR>
+    <LI>chip ASUS V3800U: nVidia TNT2 Ultra pro 32MB SDRAM</LI>
+    <LI>Matrox G400 DH 32MB SGRAM</LI>
+</UL>
+</LI>
+<LI>Tipo e versione del driver video, es.:
 <UL>
-    <LI>driver di X
-    <LI>nvidia 0.9.623
-    <LI>Utah-GLX CVS 2001-02-17
-    <LI>DRI di X 4.0.3</UL>
-<LI>Tipo e driver della scheda sonora, es.:<BR>
+    <LI>driver di X</LI>
+    <LI>nvidia 0.9.623</LI>
+    <LI>Utah-GLX CVS 2001-02-17</LI>
+    <LI>DRI di X 4.0.3</LI>
+</UL>
+</LI>
+<LI>Tipo e driver della scheda sonora, es.:
 <UL>
-    <LI>Creative SBLive! Gold con driver OSS da oss.creative.com
-    <LI>Creative SB16 con driver OSS del kernel
-    <LI>GUS PnP con emulazione OSS di ALSA</UL>
-<LI>se non sei sicuro manda l'output di lspci -v
+    <LI>Creative SBLive! Gold con driver OSS da oss.creative.com</LI>
+    <LI>Creative SB16 con driver OSS del kernel</LI>
+    <LI>GUS PnP con emulazione OSS di ALSA</LI>
+</UL>
+</LI>
+<LI>se non sei sicuro manda l'output di lspci -v</LI>
 </UL>
 
 <P><B>Per problemi/errori di compilazione</B></P>
 
 <P><B><I>Per favore includi questi file:</I></B></P>
-<UL><LI>configure.log
-<LI>config.h
-<LI>config.mak
-<LI>libvo/config.mak
+<UL>
+<LI>configure.log</LI>
+<LI>config.h</LI>
+<LI>config.mak</LI>
+<LI>libvo/config.mak</LI>
 </UL>
 
 <P><B>Per problemi di riproduzione:</B></P>

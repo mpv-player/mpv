@@ -71,10 +71,15 @@ a qualcuno importi.<BR>
 
 <P>Esiste un trucco per i file AVI che permette di usare un flusso audio Ogg Vorbis,
    ma li rende incompatibili con gli standard AVI. <B>MPlayer</B>
-   supporta la lettura di questi file, sebbene la ricerca non sia ancora implementata.</P>
+   supporta la lettura di questi file. Anche la ricerca è implementata ma è inutilizzabile
+  in file mal codificati con header confusi. Sfortunatamente
+  l'unico encoder attualmente capace di creare questi file, nandub, soffre di
+  questo problema.</P>
 
-<B>NOTA:</B> le videocamere DV possono creare due tipi di formato AVI, uno è usuale e
-leggibile, l'altro no.</P>
+<B>NOTA:</B> le videocamere DV creano puri flussi DV che i programmi di cattura DV
+convertono in due diversi tipi di file AVI. L' AVI quindi conterrà o
+flussi audio e video separati che <B>MPlayer</B> può riprodurre o il puro flusso DV
+il supporto del quale è in sviluppo.</P>
 
 <P>Ci sono due tipi di file AVI:</P>
 <UL>
@@ -133,7 +138,7 @@ e probabilmente così rimmarrà in futuro e quindi solo il lettore Quicktime di Ap
 Windows/Mac OS).</P>
 
 
-<P><B><A NAME=2.1.1.5>2.1.1.5. File VIV</A></B></P>
+<P><B><A NAME=2.1.1.5>2.1.1.5. File VIVO</A></B></P>
 
 <P><B>MPlayer</B> legge felicemente i formati file VIVO. Il più grande svantaggio di questo formato
 è che non c'è un'area per l'indice, ne una grandezza fissa di pacchetto o byte di sincronia,

@@ -14,6 +14,17 @@
 
 <P><B><A NAME=5>5. Sezione FAQ (Domande frequenti)</A></B></P>
 
+<UL>
+  <LI><A HREF="#5.1">5.1 Compilazione</A></LI>
+  <LI><A HREF="#5.2">5.2 Domande generali</A></LI>
+  <LI><A HREF="#5.3">5.3 Problemi di riproduzione file</A></LI>
+  <LI><A HREF="#5.4">5.4 Problemi driver video/audio (vo/ao)</A></LI>
+  <LI><A HREF="#5.5">5.5 Riproduzione DVD</A></LI>
+  <LI><A HREF="#5.6">5.6 Richieste di caratteristiche</A></LI>
+  <LI><A HREF="#5.7">5.7 Codificare</A></LI>
+</UL>
+
+
 <TABLE BORDER=0 WIDTH=100% ALIGN=left>
 
 <TR><TD COLSPAN=3><P><B><A NAME=5.1><FONT CLASS="text">5.1 Compilazione</A></B></P>
@@ -44,8 +55,7 @@ Qual'è il problema col gcc 2.96 ?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
 Per essere breve: <B><I>NON USARE il gcc 2.96 !!!</I></B><BR>
-Leggi <A HREF="gcc-2.96-3.0.html">questo</A> e <A
- HREF="users_against_developers.html">questo</A> testo!
+Leggi <A HREF="users_against_developers.html#gcc">questo</A> testo per sapere i dettagli.
 Se ancora vuoi veramente-veramente usarlo, assicurati di usare l'ultima versione
  rilasciata.
 <BR>
@@ -58,7 +68,7 @@ Bene, ho il gcc 3.0.1 di RedHat/Mandrake, quindi sono a posto--!
 <TD><FONT CLASS="text">
 No, ci sono questioni anche con quei compilatori.<BR>
 Usa la serie 2.95.x per l'affidabilità (non <A
- HREF="gcc-2.96-3.0.html">2.96</A>).
+ HREF="users_against_developers.html#gcc">2.96</A>).
 Usa l'ultimo gcc 3.0.x (a partire dal 3.0.2) se vuoi usare una versione 3.0.x.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -134,9 +144,8 @@ casa, ecc ecc. Volete proprio questo? Sembra.</P>
 Dove trovo informazioni sui bug del gcc 2.96 ?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
-In <A HREF="gcc-2.96-3.0.html">questa</A> documentazione. E <A
- HREF="users_against_developers.html">questa</A>
-documentazione dice perchè RedHat ha rilasciato il 2.96 e altre cose
+<A HREF="users_against_developers.html#gcc">Questo</A>
+documento dice perchè RedHat ha rilasciato il 2.96 e altre cose
  interessanti.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -278,7 +287,7 @@ Anche a me. :)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
-<TD COLSPAN=3><B><A NAME=5.2><FONT CLASS="text">5.2. Domande generali</A></B>
+<TD COLSPAN=3><B><A NAME="5.2"><FONT CLASS="text">5.2. Domande generali</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
@@ -361,8 +370,8 @@ E' un nuovo progetto, vedi http://frozenproductions.com per dettagli.
 Ci sono messaggi d'errore circa un file non trovato /usr/lib/win32/....
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
-Scarica <A
- HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/w32codec-0.60.tar.bz2">w32codec-0.60.tar.bz2</A>
+Scarica i <A
+ HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/w32codec-0.90.tar.bz2">codec Win32</A>
 dal *nostro* FTP (il pacchetto di codec di avifile ha un differente set di DLL).
 Installalo.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -463,16 +472,11 @@ Devi prendere libavcodec dal CVS di FFmpeg. Leggi le istruzioni nella
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
 <TD WIDTH=100%><B><FONT CLASS="text">
-La GUI non è utilizzabile con icewm, alcuni pannelli sono sopra al filmato!!
+La taskbar di Icewm continua a coprire il filmato nella modalità a pieno schermo!
 </B></TD><TR><TD></TD><TD VALIGN=top>
 <FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
-Si sa, icewm è dittatoriale. Irrisolvibile. In dettaglio:
-La sua taskbar tralascia le richieste di ridimensionamento della finestra della
- GUI. Se questa chiede
-800x600, allora ridimensiona la finestra a 800x(600-grandezza della taskbar). E'
- male.
-Molto male.
+Questo non dovrebbe più succedere se usi l'opzione <CODE>-icelayer</CODE>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
@@ -493,7 +497,7 @@ Come posso eseguire MPlayer in background ?
 Usa : <CODE>mplayer &lt;opzioni&gt; &lt;nomefile&gt; &lt; /dev/null &
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 <TD COLSPAN=3>
-<B><A NAME=5.3><FONT CLASS="text">5.3.
+<B><A NAME="5.3"><FONT CLASS="text">5.3.
  Problemi di lettura file</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -584,7 +588,8 @@ Ho problemi con [il tuo window manager] e le modalità a pieno schermo in
  ..
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
-Usa l'opzione -fsmode. Vedi example.conf o le pagine di man.
+Leggi la <A HREF="bugreports.html">guida alla segnalazione di bug</A> e mandaci un corretto
+bug report.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
@@ -726,7 +731,7 @@ Ottengo delle percentuali molto strane (troppo grandi) leggendo dei filmati sul 
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD><TD><FONT CLASS="text">
 E' un effetto del sistema di gestione/risparmio energetico del tuo notebook
 (bios, non kernel). Collega l'alimentazione esterna <b>prima</b> di accendere il
-notebook.
+notebook o usa l'opzione <CODE>-nortc</CODE>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -738,7 +743,7 @@ Questo è ancora un effetto della gestione energetica (vedi sopra). Collega l'ali
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.4><FONT CLASS="text">5.4.
+<B><A NAME="5.4"><FONT CLASS="text">5.4.
  Problemi driver video/audio (vo/ao)</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -777,24 +782,6 @@ Quando uso Xvideo, la mia Voodoo 3/Banshee dice:<BR>
 Il tuo driver è vecchio, aggiornalo. O scarica (almeno) la versione DRI 0.6
 da <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A>,
 o usa il cvs DRI.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
-<TD WIDTH=100%><B><FONT CLASS="text">
-Quando uso Xvideo, non riesco a leggere i DivX con la mia Voodoo 3/Banshee!
-Dice:<BR>
-...<BR>
-<CODE>Xvideo image format: 0x32315659 (YV12) planar<BR>
-Xvideo image format: 0x30323449 (I420) planar<BR></CODE>
-...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R1:</TD>
-<TD><FONT CLASS="text">
-Vedi la risposta precedente.
-</TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R2:</TD>
-<TD><FONT CLASS="text">
-Dalla 0.18pre4 supportiamo libavcodec dal pacchetto ffmpeg. Contiene
-un decoder DivX e OpenDivX in linguaggio C. Il decoder DivX usa il formato YV12
-per l'output, quindi dovrebbe funzionare per te. Compila il supporto libavcodec.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
@@ -855,21 +842,70 @@ Vedi la differenza? No?! Ok, ecco l'illuminazione: il target
 <CODE>x11</CODE> di SDL usa xv quando disponibile, tu non devi preoccupartene...
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD COLSPAN=3>
-<B><A NAME=5.5><FONT CLASS="text">5.5.
- Richieste di caratteristiche</A></B>
+<TD COLSPAN="3">
+<B><A NAME="5.5"><FONT CLASS="text">5.5. Riproduzione DVD</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
-<TD WIDTH=100%><B><FONT CLASS="text">
-C'è la possibilità di vedere filmati RealMedia in MPlayer?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
-<TD><FONT CLASS="text">
-Non c'è modo di farlo. Quindi questo formato merita di morire tra le fiamme.
-Teoricamente si può operare un reverse engineer sui codec Real fatti per Linux
- (sono
-disponibili come file .so), ma in pratica è veramente difficile, anche se
-si conoscesse con che compilatore Real ha fatto il codice assembler.
+<TD></TD><TD VALIGN=top>D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Leggendo un DVD, ho trovato questo errore :<BR>
+<CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion     nfo_length /
+sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE>
+</B></TD><TR><TD></TD><TD VALIGN=top>R:</TD><TD><FONT CLASS="text">
+Questo è un bug conosciuto di libdvdread 0.9.1, dovrebbe essere già stato corretto nella 0.9.2 e
+in libmpdvdkit, usa questultimo.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Posso compilare libdvdread e libdvdcss per esempio sul mio dolce Sparc/Solaris?
+</B></TD><TR><TD></TD><TD VALIGN=top>R:</TD><TD><FONT CLASS="text">
+Chi sa ... Per favore provaci e dicci. Ma si dice che
+dovrebbe funzionare. Per favore leggi la documentazione di libdvdread e anche la sua homepage.
+Non siamo gli autori di libdvdread.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+E i sottotitoli? MPlayer può mostrarli?
+</B></TD><TR><TD></TD><TD VALIGN=top>R:</TD><TD><FONT CLASS="text">
+Si! Vedi sopra nel capitolo sui DVD.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Come posso configurare il codice regionale del mio lettore DVD ? Non ho windows!
+</B></TD><TR><TD></TD><TD VALIGN=top>R:</TD><TD><FONT CLASS="text">
+Usa il programma 'regionset':
+<A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz</A>
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Devo essere root o rendere suid fibmap_mplayer per poter leggere i DVD?
+</B></TD><TR><TD></TD><TD VALIGN=top>R:</TD><TD><FONT CLASS="text">
+No, non devi. Solo per il supporto DVD vecchio stile. Però naturalmente devi avere i
+permessi giusti sul file del dispositivo DVD (in /dev).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Da dove prendo i pacchetti libdvdread e libdvdcss?
+</B></TD><TR><TD></TD><TD VALIGN=top>R:</TD><TD><FONT CLASS="text">
+Dal sito di Ogle:
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+E' possibile leggere/codificare solo determinati capitoli ?
+</B></TD><TR><TD></TD><TD VALIGN=top>R:</TD><TD><FONT CLASS="text">
+Si, vedi l'opzione <CODE>-chapter</CODE>.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+La riproduzione DVD è lenta !
+</B></TD><TR><TD></TD><TD VALIGN=top>R:</TD><TD><FONT CLASS="text">
+Usa l'opzione <CODE>-cache</CODE> (vedi la pagina di man!). Se ancora non
+funziona, prova ad abilitare il DMA per il lettore DVD.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD COLSPAN=3>
+<B><A NAME="5.6"><FONT CLASS="text">5.6.
+ Richieste di caratteristiche</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
@@ -1153,7 +1189,7 @@ A causa della sua memoria SIMM.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.6><FONT CLASS="text">5.6.
+<B><A NAME="5.7"><FONT CLASS="text">5.7.
  Encoding</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
