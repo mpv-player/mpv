@@ -257,6 +257,15 @@ Du brauchst libavcodec vom FFmpeg CVS. Lese die Anweisungen in der <A HREF="code
 Sektion</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Das GUI kann nicht mir icewm verwendet werden, denn einige Buttons sind über der Filmausgabe!
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Ist bekannt, icewm ist scheisse und versucht den Ton anzugeben. Unlösbar. Im Detail:
+icewm ist deshalb schlecht, weil seine Taskbar die Angaben für die Festergrößenänderung
+überscheibt. Wenn du eine Änderung auf 800x600 wünscht ändert es das Fenster auf 800x(600-Taskbar-Größe).
+Das ist schlecht, sehr schlecht. Kurz gesagt, scheisse.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD COLSPAN=3>
 <B><A NAME=5.3><font face="Verdana, Arial, Helvetica, sans-serif" size="2">5.3. Dateiwiedergabe-Probleme</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -453,7 +462,17 @@ Ich habe eine nVidia TNT/TNT2-Karte und ich habe Probleme mit eigenartigen
 Farben, rechts unter dem Film! Was ist das Auslöser?
 </B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es ist der nVidia X-Treiber. Dieser Bug ist NUR mit TNT/TNT2-Karten und wir
-können dafür nicht tun, es ist nicht unser Fehler.
+können dafür nicht tun, es ist nicht unser Fehler. UPDATE: es ist gelöst mit
+dem neuem Treiber ...
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Ich habe eine nVidia XYZ-Karte und wenn ich auf der GUI-Fenster klicke erscheint
+an der Stelle wo ich geklickt habe ein scharzes Quadrat. Ich verwende den letzten
+Treiber.
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Ja ... nVidia hat von vorigen Bug (siehe darüber) korrigiert und hat einen neuen
+implementiert. Lass uns nVidia gratulieren.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
