@@ -1,4 +1,4 @@
-.\" synced with 1.587
+.\" synced with 1.593
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduzione in italiano di Daniele Forghieri
@@ -448,14 +448,14 @@ Disabilita il colorkeying.
 Supportato solo dai driver di uscita cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix e
 xover.
 .TP
-.B \-edl <nomefile>
+.B \-edl <nomefile> (solo EDL)
 Abilita le azioni della lista di decisione di modifica (edit decision list, EDL)
 durante la riproduzione.
 Il video viene saltato e l' audio viene suonato o meno controllato dai valori presenti nel
 file specificato.
 Vedi DOCS/HTML/en/edl.html per dettagli su come usare le EDL.
 .TP
-.B \-edlout <nomefile>
+.B \-edlout <nomefile> (solo EDL)
 Crea un nuovo file e scrive comandi della lista di decisione di modifica (EDL)
 in questo file.
 Durante la riproduzione, quando l' utente preme 'i', un' azione per saltare gli
@@ -780,18 +780,18 @@ L' ID deve esse specificato come definito in libmpdemux/demuxer.h.
 Utilizza \-demuxer 17 per forzare il riconoscimento del formato .mp3.
 .TP
 .B \-dumpaudio (solo MPLAYER)
-Scrive il flusso audio compresso grezzo su ./\:stream.dump (utile con mpeg/\:ac3).
+Scrive il flusso audio compresso grezzo su ./stream.dump (utile con mpeg/\:ac3).
 .TP
 .B \-dumpfile <nomefile> (solo MPLAYER)
 Specifica su quale file MPlayer deve scrivere i flussi (dump).
 Dovrebbe essere usata con \-dumpaudio / \-dumpvideo / \-dumpstream.
 .TP
 .B \-dumpstream (solo MPLAYER)
-Scrive il flusso completo (audio/video) compresso grezzo su ./\:stream.dump.
+Scrive il flusso completo (audio/video) compresso grezzo su ./stream.dump.
 Utile quando si codifica / copia ('rippa') da DVD oppure da una rete.
 .TP
 .B \-dumpvideo (solo MPLAYER)
-Scrive il flusso video compresso grezzo su ./\:stream.dump (non molto usabile).
+Scrive il flusso video compresso grezzo su ./stream.dump (non molto usabile).
 .TP
 .B \-dvbin <options> (solo DVB)
 Passa i parametri successivi al modulo DVB (Digital Video Board, Scheda Video
@@ -1423,6 +1423,28 @@ specificare la pagina codici (codepage) dei sottotitoli.
 .PD 1
 .
 .TP
+.B \-subcp enca:<linguaggio>:<pagina codici di riserva> (solo ENCA)
+Puoi specificare il tuo linguaggio utilizzando il codice a due lettere
+per fare in modo che ENCA trovi automaticamente la pagina codici.
+Se non sei sicuro, inserisci qualsiasi cosa e guarda l' uscita di 
+mplayer -v per i linguaggi disponibili.
+La pagina codici di riserva specifica quale deve usare quando il
+riconoscimento automatico non funziona.
+
+.I ESEMPIO:
+.PD 0
+.RSs
+.IPs "\-subcp enca:cs:latin2"
+Trova la codifica, supponendo che i sottotitoli siano cecoslovacchi,
+passa automaticamente alla modalita' latin 2 se non riesce a trovare i 
+valori corretti.
+.br
+.IPs "\-subcp enca:pl:cp1250"
+Trova la codifica per il polacco, passa (eventualmente) a cp1250.
+.RE
+.PD 1
+
+.TP
 .B \-subdelay <sec>
 Ritarda i sottotitoli di <sec> secondi.
 Puo' essere negativo.
@@ -1508,29 +1530,6 @@ Specifica l' id del sottotitolo VobSub.
 Sovrascrive la ricerca della dimensione del buffer del driver/\:scheda,
 solo \-ao oss.
 .TP
-.B \-ao <driver1[:device],driver2,...[,]>
-Specifica una lista di priorita' dei driver di uscita audio (opzionalmente
-con il dispositivo) da usare.
-Con SDL anche 'device' e' valido ed in questo caso indica il sotto driver.
-.br
-.I NOTA:
-Per avere una lista completa dei driver disponibili vedi \-ao help.
-.br
-Se la lista ha una ',' finale allora verranno usati anche i driver non
-indicati.
-
-.I ESEMPIO:
-.PD 0
-.RSs
-.IPs "\-ao oss:/\:dev/\:dsp2,oss:/\:dev/\:dsp1,"
-prova ad usare OSS con il dispositivo del suono specificato e passa agli
-altri se non riesce
-.IPs "\-ao sdl:esd"
-specifica il sotto driver SDL
-.RE
-.PD 1
-.
-.TP
 .B \-aofile <nomefile>
 Nome del file per \-ao pcm.
 .TP
@@ -1613,6 +1612,106 @@ SOUND_DEVICE_NAMES in /usr/include/linux/soundcard.h.
 .B \-nowaveheader (solo \-ao pcm)
 Non includere l' intestazione wave.
 Utilizzato per RAW PCM (dati PCM grezzi).
+.
+.
+.SH "DRIVER DI USCITA AUDIO (SOLO MPLAYER)"
+I driver di uscita audio sono interfaccie verso le varie possibilita'
+di uscita
+La sintaasi e'
+.TP
+.B \-ao <driver1[:sottoopzione1[=valore]:...],driver2,...[,]>
+Specifia una lista di priorita' dei driver di uscita da usare.
+.PP
+Se la lista ha un ',' finale passa automaticamente ai driver non indicati
+sulla linea di comando.
+Le sottoopzioni sono opzionali e possono, generalmente, essere omesse.
+.br
+.I NOTA:
+Vedi \-ao help per una lista dei driver compilati internamente.
+
+.I ESEMPIO:
+.PD 0
+.RSs
+.IPs "\-ao alsa,oss,"
+Prova il driver ALSA, pei il driver OSS, poi gli altri.
+.br
+.IPs "\-ao sdl:esd"
+Usa il driver SDL con il sotto driver ESD.
+.RE
+.PD 1
+.
+
+I driver di uscita audio disponibili sono:
+FIXME: Documentare tutte le sotto opzioni.
+.
+.TP
+.B alsa\ \ \ 
+Driver di uscita audio ALSA 0.9/1.x.
+.PD 0
+.RSs
+.IPs mmap\ \ \ 
+Attiva la modalita' mmap sperimentale (non funziona per piu' di 2 canali)
+.IPs noblock
+Seleziona la modalita' noblock (non bloccante)
+.IPs hw=device0.3
+Seleziona il nome del dispositivo.
+.RE
+.PD 1
+.TP
+.B alsa1x\ 
+Driver di uscita ALSA 1.x.
+.TP
+.B alsa9\ \ 
+Driver di uscita ALSA 0.9.
+.TP
+.B alsa5\ \ 
+Driver di uscita ALSA 0.5.
+.TP
+.B oss\ \ \ \ 
+Driver di uscita OSS.
+.TP
+.B sdl\ \ \ \ 
+Driver di uscita molto indipendente dalla piattaforma che utilizza la
+libreria SDL (Simple Directmedia Layer).
+.TP
+.B arts\ \ \ 
+Genera l' uscita audio attraverso il demone Arts.
+.TP
+.B esd\ \ \ \ 
+Genera l' uscita audio attraverso il demone ESD.
+.TP
+.B nas\ \ \ \ 
+Uscita audio attraverso NAS.
+.TP
+.B macosx (solo Mac OS X)
+Driver di uscita audio nativo per Mac OS X
+.TP
+.B sgi (solo SGI)
+Driver di uscita nativo per SGI.
+.TP
+.B sun (solo Sun)
+Driver di uscita nativo Sun.
+.TP
+.B win32 (solo Windows)
+Driver di uscita nativo wave di Windows.
+.TP
+.B dxr2 (solo DXR2 only)
+Driver specifico per la scheda Creative DXR2.
+Vedi anche le opzioni \-dxr2.
+.TP
+.B mpegpes (solo DVB)
+Driver di uscita specifico per DVB.
+.TP
+.B null\ \ \ 
+Non produce uscita audio ma mantiene la vecolita' di riproduzione video.
+Utilizza \-noosund per i test di velocita' (benchmarking).
+.TP
+.B pcm\ \ \ \ 
+Driver di uscita grezzo per scrittura di file PCM/wave.
+Scrive il suono su ./audiodump.wav.
+.TP
+.B plugin\ \ 
+Driver di uscita audio plugin.
 .
 .
 .SH "OPZIONI DI USCITA VIDEO (MPLAYER ONLY)"
@@ -2086,10 +2185,10 @@ vengono inseriti dei canali vuoti (eccetto nel caso da mono a stereo dove
 il canale mono viene ripetuto su entrambi i canali di uscita).
 Se il numero di canali di uscita e' minore del numero di canali di ingresso i
 canali in eccesso sono troncati.
-.IPs format[=bps,f]
+.IPs format[=bps:f]
 Seleziona il formato f e bps byte per campionamento usati per l' uscita
 dalla gestione dei filtri
-L' opzione bps e' un intero ed indica byte per campionamento.
+L' opzione bps e' un intero ed indica i byte per campionamento.
 Il formato f e' una stringa che contiene un insieme di:
 .br
 alaw, mulaw o imaadpcm
@@ -2337,6 +2436,7 @@ Ha effetto solo con i codec libmpeg2 e libavcodec.
 .TP
 .B \-nosound
 Non riprodurre/\:codificare il suono.
+Utile per le prove di velocita' (benchmark).
 .TP
 .B \-novideo
 Non riprodurre/\:codificare il video.
@@ -3716,7 +3816,7 @@ I dispositivi (driver) di uscita video sono interfaccie alle differenti
 possibilita' di uscita.
 La sintassi e':
 .TP
-.B \-vo <driver1[:option],driver2,...[,]>
+.B \-vo <driver1[:sottopzione1[=valore]:...],driver2,...[,]>
 Specifica una lista di priorita' dei driver di uscita video da usare.
 .PP
 Se la lista ha una ',' finale allora si proveranno anche i driver non indicati
@@ -3738,7 +3838,11 @@ Usa il driver DirectX con le accelerazioni disabilitate.
 .PD 1
 .
 
-I driver di uscita disponibili sono:
+FIXME: Documentare le sottopzioni per  x11, xover, dga, sdl, vidix, xvidix, fbdev,
+fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
+dxr2, dxr3, mpegpes, zr, zr2, md5, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
+
+I driver di uscita video disponibili sono:
 .
 .TP
 .B xv (solo X11)
@@ -3764,29 +3868,80 @@ Attualmente e' supportato solo da tdfx_vid.
 .B xvmc (solo X11)
 Questo driver di uscita video impiega le estensioni XvMC (X
 Video Motion Compensation) di XFree86 4.x.
+.B xvmc (X11, \-vc ffmpeg12mc only)
+Driver di uscita video che utilizza le estensioni XvMC (X
+Video Motion Compensation) di XFree86 4.x. per velocizzare la decodica
+dei formati MPEG1/2 e VCR2.
+.PD 0
+.RSs
+.IPs benchmark
+Disabilita la visualizzazione delle immagini.
+Necessario per effettuare dei test corretti con quei driver che
+cambiano i buffer delle immagini solo sul rinfresco verticale del
+monitor (nVidia).
+.IPs queue
+Mette in coda i fotogrammi da visualizzare per permettere un miglior lavoro
+in parallelo dell' hardware video.
+Puo' aggiungere una piccola (non distinguibile) desincronizzazione costante 
+del flusso A/V.
+.IPs sleep
+Utilizza la funzione sleep mentre aspetta che finisca la visualizzazione.
+(non raccomandato con Linux).
+.IPs wait\ 
+Non usare la funzione sleep mentre aspetta che finisca la visualizzazione.
+(default).
+.RE
+.PD 1
 .TP
 .B dga (solo X11)
 Visualizza il video utilizzando l' estensione Direct Graphics
 Access di XFree86.
 Considerato obsoleto.
 .TP
-.B sdl\ \ \ \ 
-Driver di uscita molto indipendente dalla piattaforma basato sulla
+.B sdl (solo SDL)
+Driver di uscita video molto indipendente dalla piattaforma basato sulla
 libreria SDL (Simple Directmedia Layer).
 .TP
 .B vidix\ \ 
 VIDIX (VIDeo Interface for *niX) e' una interfaccia verso
 le caratteristiche di accelerazione delle varie schede grafiche.
 Uscita video molto veloce su schede che lo supportano.
+.PD 0
+.RSs
+.IPs <sottodevice>
+Seleziona in modo esplicito il sotto device del driver VIDIX da usare.
+I driver disponibili sono cyberblade_vid, mach64_vid, mga_crtc2_vid,
+mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid, sis_vid.
+.RE
+.PD 1
 .TP
 .B xvidix (solo X11)
-VIDIX che gira sotto X11.
+Interfaccia VIDIX di X11.
+.PD 0
+.RSs
+.IPs <sottodevice>
+Uguale a vidix
+.RE
+.PD 1
 .TP
 .B cvidix\ 
-VIDIX che gira in una console.
+Interfaccia generica ed indipendente dalla piattaforma di VIDIX, puo'
+girare persino in una console di testo con schede nVidia.
+.PD 0
+.RSs
+.IPs <sottodevice>
+Uguale a vidix
+.RE
+.PD 1
 .TP
 .B winvidix (solo Windows)
-Versione Windows del driver VIDIX.
+Interfaccia VIDIX di windows.
+.PD 0
+.RSs
+.IPs <sottodevice>
+Uguale a vidix
+.RE
+.PD 1
 .TP
 .B directx (solo Windows)
 Driver di uscita che utilizza l' interfaccia DirectX.
@@ -3953,9 +4108,9 @@ filmati con accelerazione YUV.
 Driver specifico di uscita 3Dfx.
 Funziona insieme ad un modulo del kernel.
 .TP
-.B dxr2\ \ \ 
+.B dxr2 (solo DXR2)
 Driver di uscita specifico per Creative DXR2.
-Vedi anche l' opzione -dxr2.
+Vedi anche l' opzione \-dxr2.
 .PD 0
 .RSs
 .IPs x11
@@ -3965,7 +4120,7 @@ Abilita l' overlay.
 .RE
 .PD 1
 .TP
-.B dxr3\ \ \ 
+.B dxr3 (solo DXR3)
 Driver di uscita specifico del chip di decodifica MPEG Sigma Designs em8300
 (Creative DXR3, Sigma Designs Hollywood Plus).
 Vedi anche il filtro video lavc.
@@ -3997,7 +4152,7 @@ Specifica il numero di dispositivo se hai piu' di una scheda em8300.
 +.RE
 .PD 1
 .TP
-.B mpegpes
+.B mpegpes (solo DVB)
 Driver di uscita specifico per DVB.
 .TP
 .B zr\ \ \ \ \ 
@@ -5650,7 +5805,7 @@ mplayer http://mplayer.hq/\:example.avi
 .B Stream utilizzando RTSP
 mplayer rtsp://server.example.com/\:streamName
 .TP
-.B Converti i sottotitoli in MPsub (su ./\:dump.mpsub)
+.B Converti i sottotitoli in MPsub (su ./dump.mpsub)
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .TP
 .B Convert i sottotitoli in MPsub senza guardare il film
@@ -5668,14 +5823,14 @@ mplayer -vo zr -vf scale=352:288 file.avi
 mplayer -vo zr2 -vf scale=352:288,zrmjpeg file.avi
 .TP
 .B Codifica il titolo DVD #2, solo i capitoli selezionati
-mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
+mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
 .TP
 .B Codifica il titolo DVD #2, riscalando a 640x480
-mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
 .TP
 .B Codifica il titolo DVD #2, riscalando a 512xHHH (mantiene il rapporto di aspetto)
 mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
-\-ovc divx4
+\-ovc lavc \-lavcopts vcodec=mpeg4
 .TP
 .B Stessa cosa, con la compressione MPEG4 (Divx5) di libavcodec
 mencoder dvd://2 \-o title2.avi \-ovc lavc
@@ -5686,13 +5841,13 @@ mencoder dvd://2 \-o titel2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
 .TP
 .B Codifica tutti i file *.jpg nella directory corrente
-mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc divx4
+mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc lavc \-lavcopts vcodec=mpeg4
 .TP
 .B Codifica dal sintonizzatore
 mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .TP
 .B Codifica da una pipe
-rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24 \-
+rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
 .
 .
 .\" --------------------------------------------------------------------------
