@@ -328,15 +328,17 @@ int mplayer_audio_read(char *buf,int size){
 int init_audio(sh_audio_t *sh_audio){
 int driver=sh_audio->codec->driver;
 
-sh_audio->samplesize=2;
+if(!sh_audio->samplesize)
+  sh_audio->samplesize=2;
+if(!sh_audio->sample_format)
 #ifdef WORDS_BIGENDIAN
-sh_audio->sample_format=AFMT_S16_BE;
+  sh_audio->sample_format=AFMT_S16_BE;
 #else
-sh_audio->sample_format=AFMT_S16_LE;
+  sh_audio->sample_format=AFMT_S16_LE;
 #endif
-sh_audio->samplerate=0;
+//sh_audio->samplerate=0;
 //sh_audio->pcm_bswap=0;
-sh_audio->o_bps=0;
+//sh_audio->o_bps=0;
 
 sh_audio->a_buffer_size=0;
 sh_audio->a_buffer=NULL;
@@ -840,16 +842,15 @@ case AFM_AAC: {
   faacDecConfigurationPtr faac_conf;
   faac_hdec = faacDecOpen();
 
-#if 0
+#if 1
   /* Set the default object type and samplerate */
   /* This is useful for RAW AAC files */
   faac_conf = faacDecGetCurrentConfiguration(faac_hdec);
   if(sh_audio->samplerate)
     faac_conf->defSampleRate = sh_audio->samplerate;
-  /* XXX: is outputFormat samplesize of compressed data or samplesize of
-   * decoded data, maybe upsampled? Also, FAAD support FLOAT output,
-   * how do we handle that (FAAD_FMT_FLOAT)? ::atmos
-   */
+   /* XXX: FAAD support FLOAT output, how do we handle
+    * that (FAAD_FMT_FLOAT)? ::atmos
+    */
   if(sh_audio->samplesize)
     switch(sh_audio->samplesize){
       case 1: // 8Bit
@@ -865,7 +866,7 @@ case AFM_AAC: {
 	faac_conf->outputFormat = FAAD_FMT_32BIT;
 	break;
     }
-  faac_conf->defObjectType = LTP; // => MAIN, LC, SSR, LTP available.
+  //faac_conf->defObjectType = LTP; // => MAIN, LC, SSR, LTP available.
 
   faacDecSetConfiguration(faac_hdec, faac_conf);
 #endif
@@ -887,7 +888,11 @@ case AFM_AAC: {
     mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: Negotiated samplerate: %dHz  channels: %d\n", faac_samplerate, faac_channels);
     sh_audio->channels = faac_channels;
     sh_audio->samplerate = faac_samplerate;
-    sh_audio->i_bps = 128*1000/8; // XXX: HACK!!! There's currently no way to get bitrate from libfaad2! ::atmos
+    if(!sh_audio->i_bps) {
+      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: compressed input bitrate missing, assuming 128kbit/s!\n");
+      sh_audio->i_bps = 128*1000/8; // XXX: HACK!!! There's currently no way to get bitrate from libfaad2! ::atmos
+    } else 
+      mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: got %dkbit/s rate from MP4 header!\n",sh_audio->i_bps*8/1000);
   }  
 	    
 } break;		

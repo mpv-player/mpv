@@ -562,9 +562,37 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    mov_build_index(trak);
 	    switch(trak->type){
 	    case MOV_TRAK_AUDIO: {
+#if 0				   
+		struct {
+		   int16_t version;		// 0 or 1 (version 1 is qt3.0+)
+		   int16_t revision;		// 0
+		   int32_t vendor_id;		// 0
+		   int16_t channels;		// 1 or 2  (Mono/Stereo)
+		   int16_t samplesize;		// 8 or 16 (8Bit/16Bit)	
+		   int16_t compression_id;	// if version 0 then 0
+		  				// if version 1 and vbr then -2 else 0
+		   int16_t packet_size;		// 0
+		   uint32_t sample_rate;	// samplerate (Hz)
+		   // qt3.0+ (version == 1)
+		   uint32_t samples_per_packet;	// 0 or num uncompressed samples in a packet
+		   				// if 0 below three values are also 0
+		   uint32_t bytes_per_packet;	// 0 or num compressed bytes for one channel
+		   uint32_t bytes_per_frame;	// 0 or num compressed bytes for all channels
+		   				// (channels * bytes_per_packet)
+		   uint32_t bytes_per_sample;	// 0 or size of uncompressed sample
+		   // if samples_per_packet and bytes_per_packet are constant (CBR)
+		   // then bytes_per_frame and bytes_per_sample must be 0 (else is VBR)
+		   // ---
+		   // optional additional atom-based fields
+		   // ([int32_t size,int32_t type,some data ],repeat)
+		} my_stdata;		  
+#endif		
 		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
 		sh->format=trak->fourcc;
 
+// assumptions for below table: short is 16bit, int is 32bit		
+// short values are usually one byte leftpadded by zero		
+//   int values are usually two byte leftpadded by zero		
 //  stdata[]:
 //	8   short	version
 //	10  short	revision
@@ -579,8 +607,48 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 //	32  int		bytes_per_packet
 //	36  int		bytes_per_frame
 //	40  int		bytes_per_sample
+// my recoveries from .mp4 files with correct index (counting from 0):
+// it's always start with padding/real start		
+//    8/ 9  short	version	
+//   10/11  short	revision	
+//   12/14  int		vendor_id	
+//   16/17  short	channels
+//   18/19  short	samplesize
+//   20/21  short	compression_id		
+//   22/23  short	packet_size (XXX: this overlaps with sample_rate ?)		
+//   22/24  int		sample_rate		
+// esds atom:
+//   28/31  int		atom size (bytes of int size, int type and data)
+//   32/32  int		atom type (fourc charater code -> esds)		
+//   62/63  int  	compressed datarate (Bits)
 
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio bits: %d  chans: %d\n",trak->stdata[19],trak->stdata[17]);
+#define char2short(x,y) ((x[y]<<8)|x[y+1])
+#define char2int(x,y) ((x[y]<<24)|(x[y+1]<<16)|(x[y+2]<<8)|x[y+3])
+
+		sh->samplesize=char2short(trak->stdata,18)/8;
+		sh->channels=char2short(trak->stdata,16);
+		sh->samplerate=char2short(trak->stdata,24);
+
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio bits: %d  chans: %d\n",
+		    trak->stdata[19],trak->stdata[17]);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio sample rate: %d\n",
+		    char2short(trak->stdata,24));
+		if((trak->stdata[9]==0) && trak->stdata_len >= 36) { // version 0 with extra atoms
+		    int atom_len = char2int(trak->stdata,28);
+		    switch(char2int(trak->stdata,32)) { // atom type
+		      case MOV_FOURCC('e','s','d','s'):
+			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: MP4 esds audio atom found (%d)!\n", atom_len);
+			if(atom_len >= 28)
+			  mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio compressed datarate: %dkbit/s\n",
+			      char2int(trak->stdata,62)/1000);
+			  sh->i_bps=char2int(trak->stdata,62)/8;
+			break;
+		      default:
+			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: unknown audio atom %c%c%c%c found (%d)!\n",
+			    trak->stdata[32],trak->stdata[33],trak->stdata[34],trak->stdata[35],
+			    atom_len);
+		    }
+		}  
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s\n",&trak->fourcc);
 #if 0
 		{ FILE* f=fopen("stdata.dat","wb");
