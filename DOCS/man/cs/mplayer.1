@@ -1,4 +1,4 @@
-.\" synced with 1.734
+.\" synced with 1.739
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -1668,7 +1668,7 @@ Pou¾ije jiné mixá¾ní zaøízení ne¾ je defaultní /dev/\:mixer.
 Pou¾íváte-li ALSA zadejte jméno mixeru.
 .
 .TP
-.B \-mixer-channel <kanál mixeru> (pouze \-ao oss a \-ao alsa)
+.B \-mixer-channel <kanál mixeru>[,index mixeru] (pouze \-ao oss a \-ao alsa)
 Tato volba naøídí MPlayer pou¾ít jiný kanál pro ovládání hlasitosti
 ne¾ defaultní PCM.
 Volby pro OSS zahrnují
@@ -1677,6 +1677,11 @@ Chcete-li úplný seznam voleb, poohlédnìte se po SOUND_DEVICE_NAMES v
 /usr/\:include/\:linux/\:soundcard.h.
 V pøípadì ALSA mù¾ete pou¾ít jména která zobrazí alsamixer, jako 
 .B Master, Line, PCM.
+.br
+.I POZNÁMKA:
+Jména kanálù ALSA mixeru následovaná èíslem musí být zadána ve formátu <jméno,èíslo>, 
+napø.\& jméno kanálu 'PCM 1' v alsamixeru musí být pøevedeno na
+.BR PCM,1 .
 .
 .TP
 .B \-nowaveheader (pouze \-ao pcm)
@@ -5065,8 +5070,8 @@ vypí¹e doplòkové volby a informace o preset nastaveních.
 .SS toolame (\-toolameopts)
 .
 .TP
-.B br=<0\-384>
-nastaví datový tok v kBitech/\:s (pouze CBR)
+.B br=<0\-384> (pouze CBR)
+Nastaví datový tok v kBitech/\:s.
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (default: mono pro 1-kanálový zvuk, jinak stereo)
@@ -5075,7 +5080,7 @@ nastaví datový tok v kBitech/\:s (pouze CBR)
 psychoakustický model (default: 2)
 .TP
 .B errprot=<0 | 1>
-zaøadí ochranu proti chybám
+Zaøadí ochranu proti chybám.
 .TP
 .B debug=<0\-10>
 úroveò ladících informací
@@ -5257,7 +5262,7 @@ log (nízká kvalita)
 .IPs 3
 phods (nízká kvalita)
 .IPs 4
-EPZS (default)
+EPZS: diamant velikost=1 (default)
 .IPs 5
 X1 (experimentální)
 .RE
@@ -5289,6 +5294,7 @@ Stejné jako mbd=1, zachováno z dùvodu kompatibility.
 .TP
 .B v4mv\ \ \ 
 Povoleny 4 vektory pohybu na makroblok (o nìco lep¹í kvalita).
+Pracuje lépe v kombinaci s mbd>0.
 .
 .TP
 .B obmc\ \ \ 
@@ -5412,6 +5418,8 @@ Pomìr stran mù¾e být zadán jako zlomek nebo desetinné èíslo.
 .B autoaspect
 Stejné jako volba aspect, ale pomìr stran se spoèítá automaticky, vèetnì zmìn
 provedených v øetìzu filtrù (crop/\:expand/\:scale/\:atd.).
+Nepøedstavuje ¾ádné sní¾ení výkonnosti, tak¾e mù¾ete mít tuto volbu stále
+zapnutou.
 .
 .TP
 .B vbitrate=<hodnota>
@@ -5750,7 +5758,11 @@ sh4
 .
 .TP
 .B lumi_mask=<0.0\-1.0>
-maskování jasu
+Maskování svìtla je 'psychovizuální' nastavení vyu¾ívající poznatku, ¾e lidské
+oko rozli¹uje ménì detailù ve velmi jasných èástech obrázku.
+Maskování svìtla komprimuje jasné oblasti silnìji ne¾ ty ménì jasné.
+Takto u¹etøené bity mohou být pou¾ity v ostatních snímcích, èím¾ se zlep¹í
+celková subjektivní kvalita ale mo¾ná se sní¾í PSNR.
 .br
 .I VAROVÁNÍ:
 Buïte opatrní, pøíli¹ vysoké hodnoty mohou zpùsobit rùzné stra¹idelnosti.
@@ -5767,7 +5779,11 @@ rozumný rozsah
 .
 .TP
 .B dark_mask=<0.0\-1.0>
-maskování tmavé
+Maskování tmy je 'psychovizuální' nastavení vyu¾ívající poznatku, ¾e lidské
+oko rozli¹uje ménì detailù ve velmi tmavých èástech obrázku.
+Maskování tmy komprimuje tmavé oblasti silnìji ne¾ ty ménì tmavé.
+Takto u¹etøené bity mohou být pou¾ity v ostatních snímcích, èím¾ se zlep¹í
+subjektivní kvalita ale mo¾ná se sní¾í PSNR.
 .br
 .I VAROVÁNÍ:
 Buïte opatrní, pøíli¹ vysoké hodnoty mohou zpùsobit rùzné stra¹idelnosti.
@@ -5962,8 +5978,10 @@ pou¾ít té¾ barvu, v souèasnosti nepracuje (správnì) s B snímky
 .
 .TP
 .B nssew=<0\-100>
-NSSE váha, vìt¹í váha mù¾e zpùsobit zvý¹ení ¹umu,s tím, ¾e 0 NSSE odpovídá
-pou¾ití SSE.
+Tato volba ovládá NSSE váhu. Vìt¹í váha mù¾e zpùsobit zvý¹ení ¹umu.
+0 NSSE odpovídá pou¾ití SSE.
+Volbu mù¾ete shledat u¾iteènou, pokud radìji necháváte tro¹ku ¹umu
+v enkódovaném videu, ne¾ byste jej pøedtím odfiltrovali.
 .
 .TP
 .B predia=<-99\-6>
@@ -6668,6 +6686,7 @@ Toto je nutné, pokud chcete provádìt CBR (konstantní datový tok) enkódování.
 .TP
 .B iframe=<hodnota>
 Frekvence I snímkù (default: 60)
+Vy¹¹í frekvence klíèových (I) snímkù obvykle zlep¹uje kvalitu.
 .
 .TP
 .B frameref=<hodnota>
@@ -6701,6 +6720,10 @@ Zaprvé, tento parametr nastavuje maximální zmìnu kterou filtr mù¾e
 provést na jakémkoli pixelu.
 Zadruhé, tento parametr ovlivòuje práh pro zmìnu pøi filtrování obrysù.
 Kladná hodnota sni¾uje blokové artefakty více, ale rovnì¾ sma¾e detaily.
+.br
+Pokud enkódujete na rozumnì vysokou kvalitu, mìli byste zde ponìkud ubrat.
+Aèkoli pokud zdrojový materiál ji¾ obsahuje jisté ètvereèkování nebo ¹um,
+kterých byste se chtìli zbavit, pak není od vìci zde naopak trochu pøidat.
 .
 .TP
 .B deblockbeta=<-6\-6>
@@ -6711,6 +6734,7 @@ Ovlivòuje maximální povolený gradient uvnitø dvou pøilehlých blokù.
 .B cabac\ \ \ 
 Pou¾ije CABAC (Kontextovì-Adaptivní Binární Aritmetické Kódování).
 Zpomalí enkódování, ale mìlo by u¹etøit 10-15% bitù.
+Tuto volbu byste mìli aktivovat v¾dy, kdy¾ není kritická rychlost enkódování.
 .
 .TP
 .B cabacidc=<hodnota>
@@ -6776,6 +6800,8 @@ faktor kvantizeru mezi P a B snímky (default: 2.0)
 .B pass=<1|2>
 Zapne 2-prùchodový re¾im.
 První prùchod ukládá statistiky.
+Doporuèujeme v¾dy enkódovat ve 2-prùchodovém re¾imu, jeliko¾ umo¾òuje lep¹í
+rozdìlení bitù a zlepøuje celkovou kvalitu.
 .
 .TP
 .B qcomp=<0\-1>
@@ -6795,6 +6821,8 @@ Pou¾ije ve snímku v¹echny dostupné typy makrobloku (i16x16, i4x4, p16x16-4x4)
 Úèelem je najít typ a rozmìr nejlépe odpovídající urèité oblasti obrázku,
 co¾ se projeví zejména na animované tvorbì, kde jsou obvyklé velké stejnobarevné
 oblasti (default: i16x16, i4x4, p16x16-8x8).
+V závislosti na zdrojovém materiálu mù¾e tato volba zlep¹it, ale i zhor¹it
+kvalitu. Pou¾ívejte opatrnì.
 .
 .TP
 .B log=<-1\-3>
@@ -6817,6 +6845,7 @@ Nastavení mno¾ství logovacích informací vypisovaných na obrazovku.
 Nastavuje kvalitu subpel dolaïování.
 Tento parametr ovlivòuje pomìr kvalita versus rychlost v procesu rozhodování
 o pøedpokládaném pohybu.
+Takto mù¾ete znatelnì zlep¹it kvalitu.
 .RSs
 0: pouze halfpel
 .br
