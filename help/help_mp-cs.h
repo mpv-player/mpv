@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan,  technik at domotech.cz
-// Synced to 1.156
+// Synced to 1.157
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -661,6 +661,7 @@ static char help_text[]=
 #define MSGTR_MENU_NextStream "Dal¹í proud"
 #define MSGTR_MENU_PrevStream "Pøedchozí proud"
 #define MSGTR_MENU_Size "Velikost"
+#define MSGTR_MENU_HalfSize   "Polovièní velikost"
 #define MSGTR_MENU_NormalSize "Normální velikost"
 #define MSGTR_MENU_DoubleSize "Dvojnásobná velikost"
 #define MSGTR_MENU_FullScreen "Celá obrazovka"
