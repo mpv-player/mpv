@@ -264,8 +264,13 @@ static uint32_t preinit()
 		directfb_micro_version);
 	}
 
-        if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER"))) fb_dev_name = "/dev/fb0";
-        DFBCHECK (DirectFBSetOption ("fbdev",fb_dev_name));
+	if ((directfb_major_version >= 0) &&
+	    (directfb_minor_version >= 9) &&
+	    (directfb_micro_version >= 7))
+	{
+    	    if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER"))) fb_dev_name = "/dev/fb0";
+    	    DFBCHECK (DirectFBSetOption ("fbdev",fb_dev_name));
+	}
 
 //	uncomment this if you do not wish to create a new vt for DirectFB
 //       DFBCHECK (DirectFBSetOption ("no-vt-switch",fb_dev_name));
