@@ -1,12 +1,12 @@
 /* Translated by:  Nick Kurshev <nickols_k@mail.ru>,
  *		Dmitry Baryshkov <lumag@qnc.ru>
-   Was synced with help_mp-en.h: rev 1.97
+   Was synced with help_mp-en.h: rev 1.99
  ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2003 Arpad Gereoffy (см. DOCS!)\n"
+"MPlayer " VERSION "(C) 2000-2003 'Arp'ad Gere\"offy (см. DOCS)\n"
 "\n";
 
 static char help_text[]=
