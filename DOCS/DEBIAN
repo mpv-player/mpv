@@ -1,20 +1,18 @@
 To build the package:
  Get the cvs version, or .tgz and uncompress it,
- link main to something nicer... ln -s main mplayer-0.11pre (optional)
- move there (cd main)
- run dpkg-buildpackage
- be patient... and you're done!
- go up a directory and run:
-  dpkg -i --force-overwrite mplayerXXXXXX.deb !!!!
+ cd into programs direcotry:
+eyck@incubus:~/src$ cd main
+eyck@incubus:~/src/main$ fakeroot debian/rules binary
+ (... mplayer detects hardware/software, builds itself and.. )
+ ..
+ dpkg-deb: building package `mplayer' in `../mplayer_0.17a-1_i386.deb'.
 
- That's all folks!
+And now just dpkg -i ../mplayer_0.17a-1_i386.deb
 
-TeLeNiEkO:/opt# dpkg -i --force-overwrite mplayer_0.11pre-1_i386.deb
-Seleccionando el paquete mplayer previamente no seleccionado.
-(Leyendo la base de datos ...
-55966 ficheros y directorios instalados actualmente.)
-Desempaquetando mplayer (de mplayer_0.11pre-1_i386.deb) ...
-Configurando mplayer (0.11pre-1) ... <- Installed!
-
-TeLeNiEkO:/opt#
+eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.17a-1_i386.deb 
+Password:
+(Reading database ... 26946 files and directories currently installed.)
+Preparing to replace mplayer 0.11pre-1 (using ../mplayer_0.17a-1_i386.deb) ...
+Unpacking replacement mplayer ...
+Setting up mplayer (0.17a-1) ...
 
