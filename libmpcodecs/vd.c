@@ -137,7 +137,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDec: vo config request - %d x %d, %s  \n",
 	w,h,vo_format_name(preferred_outfmt));
 
-    if(!vf) return 1; // temp hack
+//    if(!vf) return 1; // temp hack
     
     if(get_video_quality_max(sh)<=0 && divx_quality){
 	// user wants postprocess but no pp filter yet:
@@ -167,7 +167,8 @@ csp_again:
 	    vf=vf_open_filter(vf,"scale",NULL);
 	    goto csp_again;
 	}
-	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VOincompCodec);
+	mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_VOincompCodec);
+	sh->vf_inited=-1;
 	return 0;	// failed
     }
     out_fmt=sh->codec->outfmt[j];
@@ -262,19 +263,12 @@ csp_again:
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       out_fmt)==0){
 //                      "MPlayer",out_fmt,&vtune)){
-	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO);
-	return 0; // exit_player(MSGTR_Exit_error);
+	mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_CannotInitVO);
+	sh->vf_inited=-1;
+	return 0;
     }
 
-#if 0
-#define FREE_MPI(mpi) if(mpi){if(mpi->flags&MP_IMGFLAG_ALLOCATED) free(mpi->planes[0]); free(mpi); mpi=NULL;}
-    FREE_MPI(static_images[0])
-    FREE_MPI(static_images[1])
-    FREE_MPI(temp_images[0])
-    FREE_MPI(export_images[0])
-#undef FREE_MPI
-#endif
-
+    sh->vf_inited=1;
     return 1;
 }
 

@@ -136,6 +136,7 @@ void uninit_video(sh_video_t *sh_video){
 
 int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
     sh_video->codec=NULL;
+    sh_video->vf_inited=0;
     while((sh_video->codec=find_codec(sh_video->format,
       sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,
       sh_video->codec,0) )){
@@ -151,14 +152,14 @@ int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
 	    if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver) break;
 	mpvdec=mpcodecs_vd_drivers[i];
 	if(!mpvdec){ // driver not available (==compiled in)
-	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Requested video codec family [%s] (vfm=%d) not available (enable it at compile time!)\n",
+	    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Requested video codec family [%s] (vfm=%d) not available (enable it at compile time!)\n",
 		sh_video->codec->name, sh_video->codec->driver);
 	    continue;
 	}
 	// it's available, let's try to init!
-	printf("Opening Video Decoder: [%s] %s\n",mpvdec->info->short_name,mpvdec->info->name);
+	mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Opening Video Decoder: [%s] %s\n",mpvdec->info->short_name,mpvdec->info->name);
 	if(!mpvdec->init(sh_video)){
-	    printf("VDecoder init failed :(\n");
+	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDecoder init failed :(\n");
 	    continue; // try next...
 	}
 	// Yeah! We got it!
