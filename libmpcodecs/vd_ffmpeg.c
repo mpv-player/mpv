@@ -490,6 +490,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         avctx->slice_count= hdr->chunks+1;
         for(i=0; i<avctx->slice_count; i++)
             avctx->slice_offset[i]= ((uint32_t*)(data+hdr->chunktab))[2*i+1];
+	len=hdr->len;
         data+= sizeof(dp_hdr_t);
     }
 #endif
