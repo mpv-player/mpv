@@ -5,13 +5,13 @@
 <para>
 There are some public mailing lists on <application>MPlayer</application>. Unless
 explicitly stated otherwise the language of these lists is <emphasis role="bold">English</emphasis>.
-Please do not send messages in other languages or HTML mail! Message size limit
-is 80k. If you have something bigger put it up for download somewhere. Click the
-links to subscribe. On the mailing lists, the same rules about writing and quoting
-apply as on usenet. Please follow them, it makes the life of those who read your
-mails a lot easier. If you do not know them please read
-<ulink url="http://learn.to/edit_messages">HOWTO edit messages</ulink> or (if you
-are in a hurry) <ulink url="http://www.xs4all.nl/~hanb/documents/quotingguide.html">Quoting HOWTO</ulink>.
+Please do not send messages in other languages or HTML mail! If you send an
+overly big attachment and your mail gets rejected, put the attachment up for
+download somewhere instead. Click the links to subscribe. On the mailing lists,
+the Netiquette rules about writing and quoting apply just as on usenet. Please
+follow them, it makes the life of those who read your mails a lot easier.
+If you do not know them please read
+<ulink url="http://www.river.com/users/share/etiquette/edit.html">HOWTO Edit Messages</ulink>.
 <itemizedlist>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"><application>MPlayer</application>-announce</ulink>
