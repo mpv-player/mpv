@@ -46,7 +46,7 @@ die () {
   echo "Error: $@" >&2
   echo >&2
   rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP"
-  echo "Check "$TMPLOG" if you don't understand why it failed."
+  echo "Check "$TMPLOG" if you do not understand why it failed."
   exit 1
 }
 
@@ -1168,10 +1168,10 @@ echores "$_sys_soundcard"
 
 echocheck "termcap"
 if test "$_termcap" = auto ; then
-  _termcap=no
   cat > $TMPC <<EOF
 int main(void) { return 0; }
 EOF
+  _termcap=no
   cc_check -ltermcap && _termcap=yes
 fi
 if test "$_termcap" = yes ; then
@@ -1185,11 +1185,11 @@ echores "$_termcap"
 
 echocheck "termios"
 if test "$_termios" = auto ; then
-  _termios=no
   cat > $TMPC <<EOF
 #include <sys/termios.h>
 int main(void) { return 0; }
 EOF
+  _termios=no
   cc_check && _termios=yes
 fi
 if test "$_termios" = yes ; then
@@ -1202,12 +1202,12 @@ echores "$_termios"
 
 echocheck "shm"
 if test "$_shm" = auto ; then
-  _shm=no
   cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/shm.h>
 int main(void) { shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0); return 0; }
 EOF
+  _shm=no
   cc_check && _shm=yes
 fi
 if test "$_shm" = yes ; then
@@ -1222,6 +1222,7 @@ echocheck "3dfx"
 if test "$_3dfx" = yes ; then
   _def_3dfx='#define HAVE_3DFX 1'
   _vosrc="$_vosrc vo_3dfx.c"
+  _vomodules="3dfx $_vomodules"
 else
   _def_3dfx='#undef HAVE_3DFX'
 fi
@@ -1232,6 +1233,7 @@ echocheck "tdfxfb"
 if test "$_tdfxfb" = yes ; then
   _def_tdfxfb='#define HAVE_TDFXFB 1'
   _vosrc="$_vosrc vo_tdfxfb.c"
+  _vomodules="tdfxfb $_vomodules"
 else
   _def_tdfxfb='#undef HAVE_TDFXFB'
 fi
@@ -1318,6 +1320,7 @@ fi
 if test "$_x11" = yes ; then
   _def_x11='#define HAVE_X11 1'
   _vosrc="$_vosrc vo_x11.c"
+  _vomodules="x11 $_vomodules"
 else
   _def_x11='#undef HAVE_X11'
   _inc_x11=''
@@ -1382,6 +1385,7 @@ if test "$_xv" = yes ; then
   _def_xv='#define HAVE_XV 1'
   _ld_xv='-lXv'
   _vosrc="$_vosrc vo_xv.c"
+  _vomodules="xv $_vomodules"
 else
   _def_xv='#undef HAVE_XV'
 fi
@@ -1451,6 +1455,7 @@ if test "$_dga" = yes ; then
   _def_dga='#define HAVE_DGA 1'
   _ld_dga='-lXxf86dga -lXxf86vm'
   _vosrc="$_vosrc vo_dga.c"
+  _vomodules="dga $_vomodules"
 else
   _def_dga='#undef HAVE_DGA'
 fi
@@ -1471,6 +1476,7 @@ if test "$_dga2" = yes ; then
   _def_dga2='#define HAVE_DGA2 1'
   _ld_dga2='-lXxf86dga -lXxf86vm'
   _vosrc="$_vosrc vo_dga.c"
+  _vomodules="dga2 $_vomodules"
 else
   _def_dga2='#undef HAVE_DGA2'
 fi
@@ -1498,6 +1504,7 @@ fi
 if test "$_gl" = yes ; then
   _def_gl='#define HAVE_GL 1'
   _vosrc="$_vosrc vo_gl.c vo_gl2.c"
+  _vomodules="opengl $_vomodules"
 else
   _def_gl='#undef HAVE_GL'
 fi
@@ -1512,6 +1519,7 @@ fi
 if test "$_mga" = yes ; then
   _def_mga='#define HAVE_MGA 1'
   _vosrc="$_vosrc vo_mga.c"
+  _vomodules="mga $_vomodules"
 else
   _def_mga='#undef HAVE_MGA'
 fi
@@ -1538,6 +1546,7 @@ fi
 if test "$_xmga" = yes ; then
   _def_xmga='#define HAVE_XMGA 1'
   _vosrc="$_vosrc vo_xmga.c"
+  _vomodules="xmga $_vomodules"
 else
   _def_xmga='#undef HAVE_XMGA'
 fi
@@ -1557,6 +1566,7 @@ if test "$_ggi" = yes ; then
   _def_ggi='#define HAVE_GGI 1'
   _ld_ggi='-lggi'
   _vosrc="$_vosrc vo_ggi.c"
+  _vomodules="ggi $_vomodules"
 else
   _def_ggi='#undef HAVE_GGI'
 fi
@@ -1576,6 +1586,7 @@ if test "$_aa" = yes ; then
   _def_aa='#define HAVE_AA 1'
   _ld_aa='-laa'
   _vosrc="$_vosrc vo_aa.c"
+  _vomodules="aa $_vomodules"
 else
   _def_aa='#undef HAVE_AA'
 fi
@@ -1596,6 +1607,7 @@ if test "$_svga" = yes ; then
   _def_svga='#define HAVE_SVGALIB 1'
   _ld_svga='-lvgagl -lvga'
   _vosrc="$_vosrc vo_svga.c"
+  _vomodules="svga $_vomodules"
 else
   _def_svga='#undef HAVE_SVGALIB'
 fi
@@ -1610,6 +1622,7 @@ fi
 if test "$_fbdev" = yes ; then
   _def_fbdev='#define HAVE_FBDEV 1'
   _vosrc="$_vosrc vo_fbdev.c"
+  _vomodules="fbdev $_vomodules"
 else
   _def_fbdev='#undef HAVE_FBDEV'
 fi
@@ -1651,6 +1664,7 @@ if test "$_png" = yes ; then
   _def_png='#define HAVE_PNG 1'
   _ld_png='-lpng -lz'
   _vosrc="$_vosrc vo_png.c"
+  _vomodules="png $_vomodules"
 else
   _def_png='#undef HAVE_PNG'
 fi
@@ -1699,6 +1713,7 @@ if test "$_sdl" = yes ; then
   _inc_sdl=`$_sdlconfig --cflags`
   _vosrc="$_vosrc vo_sdl.c"
   _aosrc="$_aosrc ao_sdl.c"
+  _aomodules="sdl $_aomodules"
 else
   _def_sdl='#undef HAVE_SDL'
 fi
@@ -1718,6 +1733,7 @@ if test "$_dxr3" = yes ; then
   _ld_dxr3='-ldxr3'
   _vosrc="$_vosrc vo_dxr3.c"
   _aosrc="$_aosrc ao_dxr3.c"
+  _aomodules="dxr3 $_aomodules"
 else
   _def_dxr3='#undef HAVE_DXR3'
 fi
@@ -1739,10 +1755,11 @@ EOF
   cc_check && _ossaudio=yes
 fi
 if test "$_ossaudio" = yes ; then
- _def_ossaudio='#define USE_OSS_AUDIO 1'
- _aosrc="$_aosrc ao_oss.c"
+  _def_ossaudio='#define USE_OSS_AUDIO 1'
+  _aosrc="$_aosrc ao_oss.c"
+  _aomodules="oss $_aomodules"
 else
- _def_ossaudio='#undef USE_OSS_AUDIO'
+  _def_ossaudio='#undef USE_OSS_AUDIO'
 fi
 echores "$_ossaudio"
 
@@ -1775,9 +1792,11 @@ _def_alsa9='#undef HAVE_ALSA9'
 if test "$_alsa" = yes ; then
   if test "$_alsaver" = '0.5.x' ; then
     _aosrc="$_aosrc ao_alsa5.c"
+    _aomodules="alsa5 $_aomodules"
     _def_alsa5='#define HAVE_ALSA5 1'
   elif test "$_alsaver" = '0.9.x' ; then
     _aosrc="$_aosrc ao_alsa9.c"
+    _aomodules="alsa9 $_aomodules"
     _def_alsa9='#define HAVE_ALSA9 1'
   fi
   _ld_alsa='-lasound'
@@ -1797,6 +1816,7 @@ fi
 if test "$_sunaudio" = yes ; then
   _def_sunaudio='#define USE_SUN_AUDIO 1'
   _aosrc="$_aosrc ao_sun.c"
+  _aomodules="sun $_aomodules"
 else
   _def_sunaudio='#undef USE_SUN_AUDIO'
 fi
@@ -1837,6 +1857,7 @@ if test "$_sgiaudio" = "yes" ; then
   _def_sgiaudio='#define USE_SGI_AUDIO 1'
   _ld_sgiaudio='-laudio'
   _aosrc="$_aosrc ao_sgi.c"
+  _aomodules="sgi $_aomodules"
 else
   _def_sgiaudio='#undef USE_SGI_AUDIO'
 fi
@@ -2012,7 +2033,7 @@ Hints: Does $_cc support C++ ? Have you a C++ compiler installed ?
        Are the C++ libraries correctly installed ?
        Check for libstdc++ and in (/etc/)ld.so.conf
 
-If you don't need DirectShow support, you can also use:
+If you do not need DirectShow support, you can also use:
   ./configure --disable-dshow <your-normal-configure-options>
 to disable building of the C++ based DirectShow code.
 
@@ -2426,33 +2447,46 @@ STREAMING = $_streaming
 
 VO2 = $_vo2
 
-X11_INC = $_inc_x11
-X11DIR = $_ld_static $_ld_x11
-X_LIBS = $_ld_static $_ld_x11 $_ld_extra $_ld_gl $_ld_ggi $_ld_dxr3 $_ld_sdl $_ld_dga $_ld_dga2 $_ld_xv $_ld_vm $_ld_svga $_ld_png $_ld_sock $_ld_aa $_ld_vorbis $_ld_xinerama $_ld_mad $_ld_zlib
+EXTRA_LIB = $_ld_extra
+Z_LIB =  $_ld_static $_ld_zlib
+STATIC_LIB = $_ld_static
 
-TERMCAP_LIB = $_ld_static $_ld_termcap
-LIRC_LIBS = $_ld_static $_ld_lirc
+X11_INC = $_inc_x11
+X11DIR = $_ld_x11
+
+# video output
+X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_dga2 $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_sock 
+DXR3_LIB =  $_ld_dxr3
+GGI_LIB = $_ld_ggi
+MLIB_LIB =  $_ld_mlib
+PNG_LIB = $_ld_png
+SDL_LIB = $_ld_sdl
+SVGA_LIB = $_ld_svga
+AA_LIB = $_ld_aa
+
+# audio output
+ALSA_LIB = $_ld_alsa
+MAD_LIB = $_ld_mad
+VORBIS_LIB = $_ld_vorbis
+SGIAUDIO_LIB = $_ld_sgiaudio
+
+# input
+TERMCAP_LIB = $_ld_termcap
+LIRC_LIB = $_ld_lirc
 CSS_USE = $_css
-CSS_LIB = $_ld_static $_ld_css
+CSS_LIB = $_ld_css
 SDL_INC = $_inc_sdl
 W32_DEP = $_dep_win32
-W32_LIB = $_ld_static $_ld_win32
+W32_LIB = $_ld_win32
 DS_DEP = $_dep_dshow
-DS_LIB = $_ld_static $_ld_dshow
+DS_LIB = $_ld_dshow
 AV_DEP = $_dep_libavcodec
-AV_LIB = $_ld_static $_ld_libavcodec
-ALSA_LIB = $_ld_alsa
-SGI_AUDIO_LIB = $_ld_sgiaudio
-ARCH_LIBS =  $_ld_static $_ld_arch $_ld_iconv
-DIVX4LINUX = $_ld_static  $_divx4linux
-DECORE_LIBS = $_ld_static $_ld_decore
+AV_LIB = $_ld_libavcodec
+ARCH_LIB =  $_ld_arch $_ld_iconv
+DIVX4LINUX = $_divx4linux
+DECORE_LIB = $_ld_decore
 MENCODER = $_mencoder
-ENCORE_LIBS =  $_ld_static $_ld_encore 
-HAVE_MLIB = $_mlib
-MLIB_INC = $_inc_mlib
-MLIB_LIB =  $_ld_static $_ld_mlib
-MADLIB_LIB = $_madlibdir
-STATIC = $_ld_static
+ENCORE_LIB =  $_ld_encore 
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -2513,7 +2547,7 @@ $_def_encore
    buffer problems, but it seems to be useful for every soundcard drivers) */
 #define ALSA_TIMER 1
 
-/* Undefine this if you don't want to select mono audio (left or right)
+/* Undefine this if you do not want to select mono audio (left or right)
    with a stereo MPEG layer 2/3 audio stream. The command-line option
    -stereo has three possible values (0 for stereo, 1 for left-only, 2 for
    right-only), with 0 being the default.
@@ -2776,6 +2810,11 @@ Config files successfully generated by ./configure !
 
   Install prefix: $_prefix
   Data directory: $_datadir
+  Optimizing for: [TODO - do NOT bugreport this !]
+  Input: [TODO - do NOT bugreport this !]
+  Codecs: [TODO  - do NOT bugreport this !]
+  Audio output drivers: $_aomodules
+  Video output drivers: $_vomodules
 
 'config.h' and 'config.mak' contain your configuration options.
 Note: if you alter theses files (for instance CFLAGS) MPlayer may no longer
