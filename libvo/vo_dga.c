@@ -724,13 +724,13 @@ static uint32_t config( uint32_t width,  uint32_t height,
   int x_off, y_off;
   int wanted_width, wanted_height;
 
+  unsigned char *vo_dga_base;
 #ifdef HAVE_DGA2
   // needed to change DGA video mode
   int modecount, mX=VO_DGA_INVALID_RES, mY=VO_DGA_INVALID_RES , mVBI=100000, mMaxY=0, i,j=0;
   int dga_modenum;
   XDGAMode   *modelines=NULL, *modeline;
   XDGADevice *dgadevice;
-  unsigned char *vo_dga_base;
 #else
 #ifdef HAVE_XF86VM
   unsigned int vm_event, vm_error;
