@@ -28,6 +28,7 @@ MPlayer (1.0)
     * AC3 passthrough for ao_win32
     * improved vo_quartz (YUV, multiple screens support)
     * vo_quartz made default on Mac OS X
+    * ao_macosx fixed
     * RealVideo binary codecs support on MacOS X (still buggy)
     * bigendian fixes in vf.c, vo_tga
     * OpenBSD/VAX support
@@ -55,6 +56,7 @@ MPlayer (1.0)
     * Indeo audio (iac25) support via binary codec
     * upgrade libfaad2 to the FAAD 2.0 release
     * MPEG2 chroma422/444 support
+    * Winnov WINX and WNV1 support via binary codec
 
     Demuxers:
     * Ogg subtitle handling and other bug fixes
@@ -94,6 +96,8 @@ MPlayer (1.0)
     * -rtc-device option for specifying the RTC device
     * desktop/menu icon added
     * miscellaneous bug fixes and cleanups
+    * multi-threaded encoding with lavc
+    * fixed a bug with Real files introduced in pre4
 
 
   pre4: "YAML Counter" Apr 28, 2004
