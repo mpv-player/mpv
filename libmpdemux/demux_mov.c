@@ -973,6 +973,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 
 			    // dump away the codec specific configuration for the AAC decoder
 			    if(esds.decoderConfigLen){
+			    if( (esds.decoderConfig[0]>>3) == 29 )
+			    	sh->format = 0x1d61346d; // request multi-channel mp3 decoder
 			    sh->codecdata_len = esds.decoderConfigLen;
 			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
 			    memcpy(sh->codecdata, esds.decoderConfig, sh->codecdata_len);
