@@ -1845,13 +1845,19 @@ int main(void) { return 0; }
 EOF
 _soundcard=no
 cc_check && _soundcard=yes
+if ! linux && test "$_ossaudio" = no ; then
+  # we don't want touse soundcard.h on non-linux if no OSS support enabled!
+  echores "$_soundcard, but ignored!"
+  _soundcard=no
+else
+  echores "$_soundcard"
+fi
 if test "$_soundcard" = yes ; then
   _def_soundcard='#define HAVE_SOUNDCARD_H 1'
   _inc_soundcard='#include <soundcard.h>'
 else
   _def_soundcard='#undef HAVE_SOUNDCARD_H'
 fi
-echores "$_soundcard"
 else
   _def_soundcard='#undef HAVE_SOUNDCARD_H'
 fi
