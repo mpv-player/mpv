@@ -271,6 +271,10 @@ problémákba ütközni:<BR>
 <P>Mielõtt sietnél fordítani, olvasd el a következõket is :</P>
 
 <UL>
+
+<LI>Ha 2.96-os GCC-d van (pl. RedHat 7.1, Mandrake 8), <B><I>olvasd el
+  <A HREF="../users_against_developers.html">ezt</A> vagy a <A HREF="faq.html">FAQ-t!</A></I></B></LI>
+
 <LI>Ha az <B>MPlayer</B>-t x86-os gépen fogod használni, valószínûleg használni
   akarod a Win32 codec-eket. Ha digitális kamerával (pl. DV) felvett filmeket
   is le akarsz játszani, akkor muszáj ezeket feltenned. Töltsd le és tömörítsd
@@ -327,7 +331,18 @@ problémákba ütközni:<BR>
   <A HREF=codecs.html#2.1.2.4>2.1.2.4-es fejezetet</A>.</LI>
 
 <LI>Ha van V4L kompatibilis <B>TV tunered</B>, nézd meg a <A HREF=#2.5>TV bemenet</A>
-fejezetet.</LI>
+  fejezetet.</LI>
+
+<LI>Kétféle audio/video szinkronizáló kód van az <B>MPlayerben</B>. A régi
+módszer használatához nem kell semmit tenned, alapértelmezett. Lényege hogy
+<CODE>usleep()</CODE>-et használ az A/V szinkron javításához, +/- 10ms
+pontossággal. Néha ez nem elég pontos. Az új kód a PC-k RTC-jét (Real Time
+Clock) használja erre a célra, mivel ezzel sokkal pontosabb, +/- 1ms-os
+idõzítést lehet elérni. Ez root jogokat követel, vagy egy <I>setuid root</I>
+<B>MPlayer</B> binárist (nos, vagy egy kis kernel átirást, ezt azért inkább
+ne..). Az új szinkron kód hatékonysága szépen látszik a státuszsorban.
+Megj.: <B>SOHA ne installálj setuid MPlayer binárist többfelhasználós
+gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</LI>
 
 </UL>
 

@@ -15,13 +15,15 @@
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
  gcc 2.96 a RedHat NEM HIVATALOS (csak a RedHat/Mandrake-nél, vagy RedHat/Mandrake
      disztribúciókban található meg) és HIBÁS gcc-je. A gcc 2.96 TELJESEN
-     használhatatlan az MPlayer-rel, mert egyszerûen ÁTUGORJA a 3DNow
+     használhatatlan az MPlayer-rel, mert egyszerûen ÁTUGORJA az MMX/3DNow
      utasításokat, nem fordítja le õket. Fontos: ez NEM MPlayer-specifikus   
      probléma, számos más project (DRI, avifile, Wine, stb..) szenved ebbõl fakadó
      problémáktól.<BR>
 <B><I>NE HASZNÁLD a gcc 2.96-ot !!!</I></B><BR>
 De ha valamilyen okból kifolyólag emésztõ vágy gyötör ezirányban, mindig
-csakis a legújabbat használd.
+csakis a legújabbat használd. További (angol nyelvû) információk
+<A HREF="../gcc-2.96-3.0.html">itt</A> és <A HREF="../users_against_developers.html">itt</A>
+(ajánlott!)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -56,8 +58,7 @@ Frissítsd a glibc-det. Mandrake rendszereken például 2.2.4-8mdk-ra.
  Az SDL output nem mûködik/fordul. A baj ....
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
  A legújabb SDL-lel tesztelünk (valószínûleg fut 1.1.7-en vagy újabb
-     verziókon is). NEM FUT 1.1.6, 1.1.5, 1.1.4, 1.1.3, 1.0.4-en stb, ne is
-     kérdezd.
+     verziókon is). NEM FUT régebbi verziókon, ne is kérdezd.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -167,6 +168,12 @@ marhaság van), frissíts MPlayer CVS-bõl, vagy valami.
 Mikor fordítanám a <B>MEncoder</B>-t, segmentation fault-tal elszáll linkelésnél.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Frissítsd a binutils csomagodat, az remélhetõleg segít.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Le akarom fordítani az MPlayer-t Minixre.
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Én is.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
@@ -462,6 +469,14 @@ A kártyád valószínûleg rosszul adja vissza a colorspace képességét. Próbáld
 ki a YUY2-t az alapértelmezett YV12 helyett (lásd TV bemenet dokumentáció).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Mûködik a lejátszás, de az MPlayer ezt írja ki :
+<CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Olvasd el az <A HREF="documentation.html#1.3">Installálás</A> fejezetet. Azt
+a részt ami az új A/V szinkron kódrol szól.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD COLSPAN=3><P><B><A NAME=5.4><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.4.  Video/audio meghajtó problémák (vo/ao)</A></B></P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -584,6 +599,13 @@ Nem fogsz tudni. Vannak sokkal alkalmasabb lejátszók erre a célra (mpg123,
   sans-serif" size="2">
   Ez nem lesz megcsinálva. Amikor megvolt, elrontotta az A/V szinkront.
   Ha tudod, implementáld és küldj patch-et.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+  Hol a windows verzió ?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+  Nincs kiadva, és nem is lesz. Nézz körül windowson milyen opensource ASF olvasók,
+  és fõleg enkódolók vannak, és rájössz miért. Nem igazán akarunk börtönbe jutni.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 </TABLE>

@@ -268,7 +268,7 @@ experience any problems:<BR>
 
 <UL>
 <LI>If you have <B>gcc 2.96</B> on your system, <A HREF="users_against_developers.html"><B><I>READ
-THIS!!!</I></B></A></LI>
+THIS</A> or the <A HREF="faq.html">FAQ</A> !</I></B></LI>
 
 <LI>If you plan to use <B>MPlayer</B> on x86 architecture, you possibly want to
 use Win32 codecs. If you want to play or encode for example movies recorded
@@ -325,6 +325,17 @@ XAnim codecs section</A>.</LI>
 
 <LI>If you have a V4L compatible <B>TV tuner</B> card, and wish to watch/grab and
 encode movies with <B>MPlayer</B>, read the <A HREF=#2.5>TV input</A> section.</LI>
+
+<LI>There are two audio/video sync codes in <B>MPlayer</B>. To use the old
+method, you don't have to do anything. It uses <CODE>usleep()</CODE> to tune
+A/V sync, with +/- 10ms accuracy. However sometimes the sync has to be tuned
+even finer. The new sync code uses PC's RTC (Real Time Clock) for this task,
+because it has precise 1ms timers. This requires root, or a <I>setuid root</I>
+<B>MPlayer</B> binary (or a little kernel hacking, but that's unadvised). You
+can see the new sync's efficiency in the status line. Note: <B>NEVER install
+setuid MPlayer binary on a multiuser system!</B> It's a clear way for everyone
+to gain root.</LI>
+
 </UL>
 
 <P>Then build <B>MPlayer</B>:</P>
