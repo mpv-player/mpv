@@ -99,7 +99,7 @@ void mov_build_index(mov_track_t* trak){
     {
 	mp_msg(MSGT_DEMUX, MSGL_WARN, "No chunk offset table, trying to build one!\n");
 	
-	trak->chunks_size = trak->samples_size;
+	trak->chunks_size = trak->samples_size; /* XXX: FIXME ! */
 	trak->chunks = realloc(trak->chunks, sizeof(mov_chunk_t)*trak->chunks_size);
 	
 	for (i=0; i < trak->chunks_size; i++)
@@ -223,32 +223,44 @@ int mov_check_file(demuxer_t* demuxer){
 #endif
 	    skipped += 8;
 	}
+	else if (len == 0) /* deleted chunk */
+	{
+	    /* XXX: CJB! is this right? - alex */
+	    goto skip_chunk;
+	}
 	else if(len<8) break; // invalid chunk
 
 	switch(id){
 	case MOV_FOURCC('m','o','o','v'):
+//	case MOV_FOURCC('c','m','o','v'):
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Movie header found!\n");
-	  priv->moov_start=stream_tell(demuxer->stream);
-	  priv->moov_end=priv->moov_start+len-skipped;
+	  priv->moov_start=(off_t)stream_tell(demuxer->stream);
+	  priv->moov_end=(off_t)priv->moov_start+len-skipped;
+	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: Movie header: start: %x end: %x\n",
+	    priv->moov_start, priv->moov_end);
 	  flags|=1;
 	  break;
 	case MOV_FOURCC('m','d','a','t'):
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Movie DATA found!\n");
 	  priv->mdat_start=stream_tell(demuxer->stream);
 	  priv->mdat_end=priv->mdat_start+len-skipped;
+	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: Movie data: start: %x end: %x\n",
+	    priv->mdat_start, priv->mdat_end);
 	  flags|=2;
 	  break;
 	case MOV_FOURCC('f','r','e','e'):
 	case MOV_FOURCC('s','k','i','p'):
-	  /* unused, if you edit a mov, you can use space provided by free atoms (redefining it) */
-	  break;
 	case MOV_FOURCC('w','i','d','e'):
+	case MOV_FOURCC('j','u','n','k'):
+	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: free space (len: %d)\n", len);
+	  /* unused, if you edit a mov, you can use space provided by free atoms (redefining it) */
 	  break;
 	default:
 	  if(no==0) return 0; // first chunk is bad!
 	  id = be2me_32(id);
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
 	}
+skip_chunk:
 	if(!stream_skip(demuxer->stream,len-skipped)) break;
 	++no;
     }
@@ -263,6 +275,7 @@ return (flags==3);
 
 static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak){
     mov_priv_t* priv=demuxer->priv;
+//    printf("lschunks (level=%d,endpos=%x)\n", level, endpos);
     while(1){
 	off_t pos;
 	off_t len;
@@ -281,6 +294,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	//
 	if(trak){
 	  switch(id){
+	    case MOV_FOURCC('m','d','a','t'): {
+		mp_msg(MSGT_DEMUX,MSGL_WARN,"Hmm, strange MOV, parsing mdat in lschunks?\n");
+		return;
+	    }
 	    case MOV_FOURCC('f','r','e','e'):
 	    case MOV_FOURCC('u','d','t','a'):
 		/* here not supported :p */
@@ -380,8 +397,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    
 		    if(i==0 && trak->type == MOV_TRAK_VIDEO)
 		    {
-		    sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
-		    if (!sh->fps)
+		    sh_video_t* sh=get_sh_video(demuxer,priv->track_db);
+		    if (sh && !sh->fps)
 			sh->fps = trak->timescale/trak->durmap[i].dur;
 		    /* initial fps */
 		    }
@@ -521,7 +538,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    }
 	    case MOV_FOURCC('c','o','d','e'):
 	    {
-#warning "Implement atom 'code' for FLASH support"
+	    /* XXX: Implement atom 'code' for FLASH support */
 	    }
 	    default:
 		id = be2me_32(id);
@@ -649,6 +666,12 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  end = BE_16(&trak->stdata[hdr_ptr]);
 		  hdr_ptr += 2;
 		  palette_map = (unsigned char *)sh->bih + 40;
+		  mp_msg(MSGT_DEMUX, MSGL_INFO, "Allocated %d entries for palette\n",
+		    palette_count);
+		  mp_msg(MSGT_DEMUX, MSGL_DBG2, "QT palette: start: %x, end: %x, count flag: %d, flags: %x\n",
+		    start, end, count_flag, flag);
+
+		  /* XXX: problems with sample (statunit6.mov) with flag&0x4 set! - alex*/
 
 		  // load default palette
 		  if (flag & 0x08)
@@ -673,9 +696,20 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      if (count_flag & 0x8000)
 		        entry = i;
 		      // only care about top 8 bits of 16-bit R, G, or B value
-		      palette_map[entry * 4 + 2] = trak->stdata[hdr_ptr + 0];
-		      palette_map[entry * 4 + 1] = trak->stdata[hdr_ptr + 2];
-		      palette_map[entry * 4 + 0] = trak->stdata[hdr_ptr + 4];
+		      if (entry <= palette_count && entry >= 0)
+		      {
+		        palette_map[entry * 4 + 2] = trak->stdata[hdr_ptr + 0];
+		        palette_map[entry * 4 + 1] = trak->stdata[hdr_ptr + 2];
+		        palette_map[entry * 4 + 0] = trak->stdata[hdr_ptr + 4];
+		        mp_dbg(MSGT_DEMUX, MSGL_DBG2, "QT palette: added entry: %d of %d (colors: R:%x G:%x B:%x)\n",
+			    entry, palette_count,
+			    palette_map[entry * 4 + 2], 
+			    palette_map[entry * 4 + 1],
+			    palette_map[entry * 4 + 0]);
+		      }
+		      else
+		        mp_msg(MSGT_DEMUX, MSGL_V, "QT palette: skipped entry (out of count): %d of %d\n",
+			    entry, palette_count);
 		      hdr_ptr += 6;
 		    }
 		  }
@@ -710,7 +744,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    case MOV_TRAK_GENERIC:
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Generic track - not completly understood! (id: %d)\n",
 		    trak->id);
-#warning "Also this contains the FLASH data"
+		/* XXX: Also this contains the FLASH data */
 #if 0
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Extracting samples to files (possibly this is an flash anim)\n");
 	    {
@@ -770,6 +804,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    return;
 	}
 #else
+	case MOV_FOURCC('m','o','o','v'):
 	case MOV_FOURCC('c','m','o','v'): {
 //	    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVcomprhdr);
 	    lschunks(demuxer,level+1,pos+len,NULL);
@@ -777,8 +812,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	}
 	case MOV_FOURCC('d','c','o','m'): {
 //	    int temp=stream_read_dword(demuxer->stream);
-	    unsigned int len=be2me_32(stream_read_dword(demuxer->stream));
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Compressed header uses %.4s algo!\n",&len);
+	    unsigned int algo=be2me_32(stream_read_dword(demuxer->stream));
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Compressed header uses %.4s algo!\n",&algo);
 	    break;
 	}
 	case MOV_FOURCC('c','m','v','d'): {
@@ -966,7 +1001,12 @@ int mov_read_header(demuxer_t* demuxer){
 
     // Parse header:    
     stream_reset(demuxer->stream);
-    if(!stream_seek(demuxer->stream,priv->moov_start)) return 0; // ???
+    if(!stream_seek(demuxer->stream,priv->moov_start))
+    {
+	mp_msg(MSGT_DEMUX,MSGL_ERR,"MOV: Cannot seek to the beginning of the Movie header (0x%x)\n",
+	    priv->moov_start);
+	return 0;
+    }
     lschunks(demuxer, 0, priv->moov_end, NULL);
 
     return 1;
@@ -1014,9 +1054,9 @@ if(trak->samplesize){
 	    x*=(trak->stdata[18]<<8)+trak->stdata[19];x/=8;  // bits/sample
 	}
     }
+    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Audio sample %d bytes pts %5.3f\n",trak->chunks[trak->pos].size*trak->samplesize,pts);
     } /* MOV_TRAK_AUDIO */
     ds_read_packet(ds,demuxer->stream,x,pts,trak->chunks[trak->pos].pos,0);
-    if(ds==demuxer->audio) mp_msg(MSGT_DEMUX, MSGL_DBG2, "sample %d bytes pts %5.3f\n",trak->chunks[trak->pos].size*trak->samplesize,pts);
 } else {
     // read sample:
     if(trak->pos>=trak->samples_size) return 0; // EOF
