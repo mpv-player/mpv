@@ -17,6 +17,7 @@ Also read the man page to learn how to use MPlayer.
 
 
 Requirements:
+- You have to install libc6 (glibc) development packages or kernel headers.
 - To compile MPlayer with X11 support, you need to have the XFree86 development
   packages installed.
 - For the GUI you need the libpng and GTK 1.2 development packages.
