@@ -253,7 +253,7 @@ int parse_config_file(struct config *conf, char *conffile)
 		return -1;
 	}		
 
-	if (verbose) printf("Reading config file: %s", conffile);
+//	printf("Reading config file: %s", conffile);
 
 	if (init_conf(conf, CONFIG_FILE) == -1) {
 		ret = -1;
@@ -267,13 +267,12 @@ int parse_config_file(struct config *conf, char *conffile)
 	}
 
 	if ((fp = fopen(conffile, "r")) == NULL) {
-		if (!verbose) printf("Reading config file: %s", conffile);
-		printf(": %s\n", strerror(errno));
+//		printf(": %s\n", strerror(errno));
 		free(line);
 		ret = 0;
 		goto out;
 	}
-	if (verbose) printf("\n");
+//	printf("\n");
 
 	while (fgets(line, MAX_LINE_LEN, fp)) {
 		line_num++;
@@ -418,8 +417,13 @@ int parse_command_line(struct config *conf, int argc, char **argv, char **envp, 
 
 	for (i = 1; i < argc; i++) {
 		opt = argv[i];
-		if (*opt != '-')
-			goto not_an_option;
+		if (*opt != '-') {
+			if (found_filename) {
+				printf("invalid option:\n");
+				goto err_out;
+			}
+			goto filename;
+		}
 
 		/* remove trailing '-' */
 		opt++;
@@ -428,28 +432,26 @@ int parse_command_line(struct config *conf, int argc, char **argv, char **envp, 
 
 		switch (tmp) {
 		case ERR_NOT_AN_OPTION:
-not_an_option:
 			/* opt is not an option -> treat it as a filename */
 			if (found_filename) {
 				/* we already have a filename */
 				goto err_out;
-			} else {
-				found_filename = 1;
-				*filename = argv[i];
-				continue;	/* next option */
 			}
+filename:
+			found_filename = 1;
+			*filename = argv[i];
 			break;
 		case ERR_MISSING_PARAM:
 		case ERR_OUT_OF_RANGE:
 		case ERR_FUNC_ERR:
 			goto err_out;
 			/* break; */
+		default:
+			i += tmp;
 		}
-
-		i += tmp;	/* we already processed the params (if there was any) */
 	}	
 	return found_filename;
 err_out:
-	printf("parse_command_line: %s\n", argv[i]);
+	printf("command line: %s\n", argv[i]);
 	return -1;
 }
