@@ -1593,7 +1593,7 @@ uninit(void)
 static uint32_t preinit(const char *arg)
 {
     struct sdl_priv_s *priv = &sdl_priv;
-    char * sdl_driver;
+    char * sdl_driver = NULL;
     int sdl_hwaccel;
     int sdl_forcexv;
     opt_t subopts[] = {
@@ -1605,7 +1605,6 @@ static uint32_t preinit(const char *arg)
 
     sdl_forcexv = 1;
     sdl_hwaccel = 1;
-    sdl_driver = strdup("x11");
 
     if (subopt_parse(arg, subopts) != 0) return -1;
 
@@ -1615,8 +1614,10 @@ static uint32_t preinit(const char *arg)
 
     if(verbose > 2) printf("SDL: Opening Plugin\n");
 
-    if(sdl_driver) setenv("SDL_VIDEODRIVER", sdl_driver, 1);
+    if(sdl_driver) {
+        setenv("SDL_VIDEODRIVER", sdl_driver, 1);
     free(sdl_driver);
+    }
 
     /* does the user want SDL to try and force Xv */
     if(sdl_forcexv)	setenv("SDL_VIDEO_X11_NODIRECTCOLOR", "1", 1);
