@@ -204,29 +204,9 @@ Q: My computer plays M$ DivX AVIs with resolutions ~ 640x300 and stereo mp3
 A: Those files probably have 48Khz audio, and your soundcard/driver can't play
    it correctly. Audio downsampling isn't implemented in MPlayer (yet).
 
-Q: I'd like to use/port MPlayer on/to my <insert your favourite architecture
-   here> on <insert your favourite OS here> . Is it possible?
-A: No.
-
-Q: But...!
-A: No.
-
-Q: And if MPEG is sufficient?
-A: Maybe. But you better look for already existant MPEG players on that
-   platform.
-
 Q: MPlayer dies with "MPlayer interrupted by signal 4 in module: decode_video".
 A: Try running MPlayer on the machine you compiled on. Or recompile. Don't
    use MPlayer on different CPU than it was compiled on.
-
-Q: I have problems with icewm and fullscreen xv mode..
-A: Known problem, icewm sucks.
-
-Q: But it works with avifile !
-A: So what?
-
-Q: Then avifile is better !
-A: Then use avifile, it has nice GUI and nice C++ code :)
 
 Q: I got this playing mpeg files: Can't find codec for video format 0x10000001 !
 A: You have old version of codecs.conf at ~/.mplayer/. Upgrade it from DOCS/
