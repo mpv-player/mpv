@@ -1423,6 +1423,10 @@ Voir aussi \-aspect pour l'aspect du film.
 Ne capte pas le pointeur de la sourie après une changement de Vidmode (\-vm),
  utile pour les configurations multihead.
 .TP
+.B \-nokeepaspect
+Ne garde pas l'aspect ratio de la fenêtre en redimensionnant les fenêtres X11.
+(ne fonctionne actuellement qu'avec \-vo x11, xv, xmga et xvidix)
+.TP
 .B \-noslices
 Désactive l'affichage de la vidéo par tranches/\:bandes de 16 pixels, affiche
 la trame entière d'un seul coup.
@@ -2362,9 +2366,9 @@ rv10: un ancien codec RealVideo
 .br
 mpeg1video: MPEG1 video :)
 .REss
-.IPs vqmin=<2\-31>
+.IPs vqmin=<1\-31>
 minimum quantizer (passe\ 1/\:2) (par défaut: 2)
-.IPs vqscale=<2\-31>
+.IPs vqscale=<1\-31>
 constant quantizer (sélectionne le mode quantizer fixe) (par défaut: 0 (désactivé))
 .IPs vqmax=<1\-31>
 maximum quantizer (passe\ 1/\:2) (par défaut: 31)
