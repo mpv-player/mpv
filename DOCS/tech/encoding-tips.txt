@@ -6,7 +6,85 @@ http://rguyom.chez.tiscali.fr/libavcodec_tests.html  <- lavc benchmarks, options
 http://cutka.szm.sk/ffdshow/index.html               <- lavc for win32 :)
 http://www.bunkus.org/dvdripping4linux/index.html    <- a nice tutorial
 
+
 ================================================================================
+
+
+FIXING A/V SYNC WHEN ENCODING
+
+I know this is a popular topic on the list, so I thought I'd share a
+few comments on my experience fixing a/v sync. As everyone seems to
+know, mencoder unfortunately doesn't have a -delay option. But that
+doesn't mean you can't fix a/v sync. There are a couple ways to still
+do it.
+
+In example 1, we'll suppose you want to re-encode the audio anyway.
+This will be essential if your source audio isn't mp3, e.g. for DVD's
+or nasty avi files with divx/wma audio. This approach makes things
+much easier.
+
+Step 1: Dump the audio with mplayer -ao pcm -nowaveheader. There are
+various options that can be used to speed this up, most notably -vo
+null, -vc null, and/or -hardframedrop. -benchmark also seemed to help
+in the past. :)
+
+Step 2: Figure out what -delay value syncs the audio right in mplayer.
+If this number is positive, use a command like the following:
+
+dd if=audiodump.wav bs=1764 skip=[delay] | lame -x - out.mp3
+
+where [delay] is replaced by your delay amount in hundredths of a
+second (1/10 the value you use with mplayer). Otherwise, if delay is
+negative, use a command like this:
+
+( dd if=/dev/zero bs=1764 skip=[delay] ; cat audiodump.wav ) | lame -x - out.mp3
+
+Don't include the minus (-) sign in delay. Also, keep in mind you'll
+have to change the 1764 number and provide additional options to lame
+if your audio stream isn't 44100/16bit/littleendian/stereo.
+
+Step 3: Use mencoder to remux your new mp3 file with the movie:
+
+mencoder -audiofile out.mp3 -oac copy ...
+
+You can either copy video as-is (with -ovc copy) or re-encode it at
+the same time you merge in the audio like this.
+
+Finally, as a variation on this method (makes things a good bit faster
+and doesn't use tons of temporary disk space) you can merge steps 1
+and 2 by making a named pipe called "audiodump.wav" (type mkfifo
+audiodump.wav) and have mplayer write the audio to it at the same time
+you're running lame to encode.
+
+Now for example 2. This time we won't re-encode audio at all. Just
+dump the mp3 stream from the avi file with mplayer -dumpaudio. Then,
+you have to cut and paste the raw mp3 stream a bit...
+
+If delay is negative, things are easier. Just use lame to encode
+silence for the duration of delay, at the same samplerate and
+samplesize used in your avi file. Then, do something like:
+
+cat silence.mp3 stream.dump > out.mp3
+mencoder -audiofile out.mp3 -oac copy ...
+
+On the other hand, if delay is positive, you'll need to crop off part
+of the mp3 from the beginning. If it's (at least roughly) CBR this is
+easy -- just take off the first (bitrate*delay/8) bytes of the file.
+You can use the excellent dd tool, or just your favorite
+binary-friendly text editor to do this. Otherwise, you'll have to
+experiment with cutting off different amounts. You can test with
+mplayer -audiofile before actually spending time remuxing/encoding
+with mencoder to make sure you cut the right amount.
+
+I hope this has all been informative. If anyone would like to clean
+this message up a bit and make it into part of the docs, feel free. Of
+course mencoder should eventually just get -delay. :)
+
+Rich
+
+
+================================================================================
+
 
 ENCODING QUALITY - OR WHY AUTOMATISM IS BAD.
 
@@ -397,7 +475,10 @@ Have fun playing around with it.
 
 Rich
 
-======================
+
+================================================================================
+
+
 TIPS FOR ENCODING OLD BLACK & WHITE MOVIES:
 
 I found myself that  4:3 B&W old movies are very hard  to compress well. In
@@ -520,7 +601,9 @@ done
 --                                                                              
 Rémi
 
-================================
+
+================================================================================
+
 
 TIPS FOR SMOKE & CLOUDS 
 
