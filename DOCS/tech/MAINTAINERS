@@ -14,21 +14,23 @@ based on maillist/cvs activity. It may be wrong.
 Always send the patches (first read DOCS/tech/patches.txt), comments to
 the mplayer-dev-eng mailing list!!!
 
+Everyone is free to nominate himself/herself for a maintainership.
+
 Homepage:
-    * Design: Chass and Tornado
-    * Contents: Gabucino
+    * Design: None
+    * Contents: Diego Biurrun, Alex Beregszaszi
 
 English documentation:
-    * user docs: Gabucino, Diego Biurrun
-    * input layer, lirc, slave mode docs: Albeu
+    * user docs: Diego Biurrun
+    * input layer, lirc, slave mode docs: Alban Bedel
     * man page: Diego Biurrun
-    * tech/* docs: A'rpi
+    * tech/* docs: Alex Beregszaszi
     * tech/* documentation docs: Diego Biurrun
 
 Documentation translations:
     * Help Messages: Diego Biurrun
-    * Hungarian: Gabucino
-    * German: Moritz Bunkus (unmaintained)
+    * Hungarian: outdated and unmaintained
+    * German: outdated and unmaintained
     * French: Nicolas Le Gaillart
     * Russian: Dmitry Baryshkov
     * Polish: Waclaw Schiller
@@ -48,29 +50,30 @@ Platforms/ports: (see also DOCS/tech/porting-status.txt)
     * Win32/Cygwin/MinGW support: Sascha Sommer, Atmosfear, Diego Biurrun
 
 MPlayer code:
-    * A-V sync code, MPlayer/MEncoder core: A'rpi
-    * libmpdemux, libmpcodecs: A'rpi (sometimes Alex too)
-    * TV input/capture: Alex, Jindrich Makovicka
-    * DVD support (experimental - dvdnav): -
-    * DVD support (new - dvdread/dvdcss): A'rpi
-    * DVD support (old - libcss): LGB
+    * A-V sync code, MPlayer/MEncoder core: Alex Beregszaszi
+    * libmpdemux, libmpcodecs: Alex Beregszaszi
+    * TV input/capture: Jindrich Makovicka
+    * DVD support (experimental - dvdnav): None
+    * DVD support (new - dvdread/dvdcss): None
+    * DVD support (old - libcss): None
     * network streaming: Bertrand Baudet
     * DVD/VOB subtitles: Kim Minh Kaplan
-    * config files & commandline parser: Albeu, Alex
-    * playtree, input layer: Albeu
+    * config files & commandline parser: Alban Bedel, Alex Beregszaszi
+    * playtree, input layer: Alban Bedel
     * postproc, colorspace converters: Michael Niedermayer
     * DVB support: Nico Sabbi
-    * GUI: Pontscho
-    * GUI skins: Pontscho, Gabucino, Diego Biurrun
+    * GUI: Zoltan Ponekker
+    * GUI skins: Diego Biurrun
 
 Imported libs/projects:
-    * libavcodec: Michael Niedermayer, Fabrice Bellard @ FFmpeg
-    * VIDIX core, libdha: Alex, Nick Kurshev @ MPlayerxp
-    * mp3lib: A'rpi, mpg123/mpglib project
-    * loader, dshow: Alex, A'rpi, Zdenek Kabelac @ avifile
-    * liba52, libmpeg2: A'rpi, Michel Lespinasse @ liba52.sf.net
-    * libmpdvdkit2: A'rpi, libdvdcss-devel@videolan.org
-    * libfaad2: Alex, A'rpi, audiocoding.sf.net
+    * libavcodec, libavformat: Michael Niedermayer
+    * VIDIX core, libdha: Sascha Sommer
+    * mp3lib: Alex Beregszaszi
+    * loader, dshow: Alex Beregszaszi
+    * liba52: Alex Beregszaszi
+    * libmpeg2: None
+    * libmpdvdkit2: None
+    * libfaad2: Alex Beregszaszi
 
 libvo drivers:
     * vo_3dfx.c - OBSOLETED, use xv or tdfxfb
@@ -78,70 +81,61 @@ libvo drivers:
     * vo_caca.c - Howell Tam (Pigeon)
     * vo_bl.c - Rik Snel
     * vo_cvidix.c - Sascha Sommer
-    * vo_dga.c - ? (Acki (outdated))
+    * vo_dga.c - None
     * vo_dfbmga.c - Ville Syrjälä
     * vo_directfb[2].c - Jiri Svoboda
     * vo_directx.c - Sascha Sommer
-    * vo_dxr2.c - Albeu
-    * vo_dxr3.c - ? (David Holm)
+    * vo_dxr2.c - Alban Bedel
+    * vo_dxr3.c - None
     * vo_fbdev.c - Joey Parrish
     * vo_fbdev2.c - Joey Parrish
-    * vo_ggi.c - Alex
+    * vo_ggi.c - Alex Beregszaszi
     * vo_gif89a.c - Joey Parrish
     * vo_gl.c - Reimar Döffinger
     * vo_gl2.c - Reimar Döffinger
-    * vo_jpeg.c - Pontscho
-    * vo_md5.c - A'rpi
-    * vo_mga.c - A'rpi
-    * vo_mpegpes.c - A'rpi
-    * vo_null.c - A'rpi
-    * vo_pgm.c - A'rpi
-    * vo_png.c - Atmos
-    * vo_sdl.c - Atmos
-    * vo_svga.c - ? (Matan Ziv-Av)
+    * vo_jpeg.c - None
+    * vo_md5.c - None
+    * vo_mga.c - None
+    * vo_mpegpes.c - None
+    * vo_null.c - None
+    * vo_pgm.c - None
+    * vo_png.c - Felix Bunemann
+    * vo_sdl.c - Felix Bunemann
+    * vo_svga.c - None
     * vo_tdfxfb.c - Alban Bedel
     * vo_tga.c - Daniele Forghieri
-    * vo_vesa.c - ? (Nick Kurshev)
+    * vo_vesa.c - None
     * vo_winvidix.c - Sascha Sommer
-    * vo_x11.c - Pontscho
-    * vo_xmga.c - Pontscho, A'rpi
-    * vo_xover.c - Albeu
-    * vo_xv.c - Pontscho
-    * vo_xvidix.c - Pontscho, Alex
+    * vo_x11.c - None
+    * vo_xmga.c - None
+    * vo_xover.c - Alban Bedel
+    * vo_xv.c - None
+    * vo_xvidix.c - None
     * vo_xvmc.c - Ivan Kalvachev
-    * vo_yuv4mpeg.c - ?
+    * vo_yuv4mpeg.c - None
     * vo_zr.c - Rik Snel
 
 VIDIX drivers:
-    * mach64_vid - Michael Niedermayer, A'rpi
-    * mga_vid - Alex
+    * mach64_vid - None
+    * mga_vid - None
     * nvidia_vid - Sascha Sommer
-    * radeon_vid - ? (Alex, Nick Kurshev @ mplayerxp)
-    * rage128_vid - ? (Alex, Nick Kurshev @ mplayerxp)
+    * radeon_vid - None
+    * rage128_vid - None
     * sis_vid - Jake Page
 
 libao2 drivers:
-    * ao_alsa5.c - Alex
-    * ao_alsa9.c - Joy Winter, Alex
-    * ao_arts.c - ?
-    * ao_dxr2.c - Albeu
-    * ao_esd.c - ?
-    * ao_mpegpes.c - A'rpi
-    * ao_nas.c - ?
-    * ao_null.c - A'rpi
-    * ao_oss.c - A'rpi
-    * ao_pcm.c - Atmos
-    * ao_plugin.c - Anders Johansson
-    * ao_sdl.c - Atmos
-    * ao_sgi.c - Oliver Schoenbrunner
-    * ao_sun.c - Jürgen Keil
+    * ao_alsa5.c - None
+    * ao_alsa9.c - Zsolt Barat
+    * ao_arts.c - None
+    * ao_dxr2.c - None
+    * ao_esd.c - None
+    * ao_mpegpes.c - None
+    * ao_nas.c - None
+    * ao_null.c - None
+    * ao_oss.c - None
+    * ao_pcm.c - None
+    * ao_plugin.c - None
+    * ao_sdl.c - None
+    * ao_sgi.c - None
+    * ao_sun.c - None
     * ao_win32.c - Sascha Sommer
-
-TOOLS:
-    * subfont-c - Artur Zaprzala
-    * subfont-GIMP - lanzz@lanzz.org
-    * x2mpsub, benchmark-gab - Gabucino
-    * mencvcd - Juergen Hammelmann
-    * subrip - Kim Minh Kaplan
-    * perl files - Atmos
-    * others - A'rpi
