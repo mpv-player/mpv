@@ -10,10 +10,13 @@ extern int divx_quality;
 extern double video_time_usage;
 extern double vout_time_usage;
 
+extern int frameratecode2framerate[16];
+
 #include "linux/timer.h"
 
 #include "stream.h"
 #include "demuxer.h"
+#include "parse_es.h"
 
 #include "wine/mmreg.h"
 #include "wine/avifmt.h"
@@ -424,3 +427,106 @@ case 2:
 
   return blit_frame;
 }
+
+
+int video_read_properties(sh_video_t *sh_video){
+demux_stream_t *d_video=sh_video->ds;
+
+// Determine image properties:
+switch(d_video->demuxer->file_format){
+ case DEMUXER_TYPE_AVI:
+ case DEMUXER_TYPE_ASF: {
+  // display info:
+    sh_video->format=sh_video->bih->biCompression;
+    sh_video->disp_w=sh_video->bih->biWidth;
+    sh_video->disp_h=abs(sh_video->bih->biHeight);
+  break;
+ }
+ case DEMUXER_TYPE_MPEG_ES:
+ case DEMUXER_TYPE_MPEG_PS: {
+   // Find sequence_header first:
+   if(verbose) printf("Searching for sequence header... ");fflush(stdout);
+   while(1){
+      int i=sync_video_packet(d_video);
+      if(i==0x1B3) break; // found it!
+      if(!i || !skip_video_packet(d_video)){
+        if(verbose)  printf("NONE :(\n");
+        fprintf(stderr,"MPEG: FATAL: EOF while searching for sequence header\n");
+	return 0;
+//        GUI_MSG( mplMPEGErrorSeqHeaderSearch )
+//        exit(1);
+      }
+   }
+   if(verbose) printf("OK!\n");
+//   sh_video=d_video->sh;sh_video->ds=d_video;
+   sh_video->format=0x10000001; // mpeg video
+   mpeg2_init();
+   // ========= Read & process sequence header & extension ============
+   videobuffer=shmem_alloc(VIDEOBUFFER_SIZE);
+   if(!videobuffer){ 
+     fprintf(stderr,"Cannot allocate shared memory\n");
+     return 0;
+//     GUI_MSG( mplErrorShMemAlloc )
+//     exit(0);
+   }
+   videobuf_len=0;
+   if(!read_video_packet(d_video)){ 
+     fprintf(stderr,"FATAL: Cannot read sequence header!\n");
+     return 0;
+//     GUI_MSG( mplMPEGErrorCannotReadSeqHeader )
+//     exit(1);
+   }
+   if(header_process_sequence_header (picture, &videobuffer[4])) {
+     printf ("bad sequence header!\n"); 
+     return 0;
+//     GUI_MSG( mplMPEGErrorBadSeqHeader )
+//     exit(1);
+   }
+   if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
+    videobuf_len=0;
+    if(!read_video_packet(d_video)){ 
+      fprintf(stderr,"FATAL: Cannot read sequence header extension!\n");
+      return 0;
+//      GUI_MSG( mplMPEGErrorCannotReadSeqHeaderExt )
+//      exit(1);
+    }
+    if(header_process_extension (picture, &videobuffer[4])) {
+      printf ("bad sequence header extension!\n");  
+      return 0;
+//      GUI_MSG( mplMPEGErrorBadSeqHeaderExt )
+//      exit(1);
+    }
+   }
+   // display info:
+   sh_video->fps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
+   if(!sh_video->fps){
+//     if(!force_fps){
+//       fprintf(stderr,"FPS not specified (or invalid) in the header! Use the -fps option!\n");
+//       return 0; //exit(1);
+//     }
+     sh_video->frametime=0;
+   } else {
+     sh_video->frametime=10000.0f/(float)frameratecode2framerate[picture->frame_rate_code];
+   }
+   sh_video->disp_w=picture->display_picture_width;
+   sh_video->disp_h=picture->display_picture_height;
+   // info:
+   if(verbose) printf("mpeg bitrate: %d (%X)\n",picture->bitrate,picture->bitrate);
+   printf("VIDEO:  %s  %dx%d  (aspect %d)  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
+    picture->mpeg1?"MPEG1":"MPEG2",
+    sh_video->disp_w,sh_video->disp_h,
+    picture->aspect_ratio_information,
+    sh_video->fps,
+    picture->bitrate*0.5f,
+    picture->bitrate/16.0f );
+  break;
+ }
+} // switch(file_format)
+
+return 1;
+}
+
+
+
+
+

@@ -56,8 +56,8 @@ typedef struct demuxer_st {
   stream_t *stream;
   int synced;  // stream synced (used by mpeg)
   int filepos; // input stream current pos.
-//  int endpos;  // input stream end pos. (return EOF fi filepos>endpos)
-  int type;    // mpeg system stream, mpeg elementary s., avi raw, avi indexed
+  int type;    // demuxer type: mpeg PS, mpeg ES, avi, avi-ni, avi-nini, asf
+  int file_format;  // file format: mpeg/avi/asf
 //  int time_src;// time source (pts/file/bps)
   unsigned int movi_start;
   unsigned int movi_end;
