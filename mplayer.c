@@ -870,6 +870,9 @@ if(sh_audio){
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
         sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
   }
+#ifdef HAVE_NEW_GUI
+  if ( use_gui ) mplShMem->AudioType=sh_audio->channels;
+#endif
 }
 
 //================== Init VIDEO (codec & libvo) ==========================

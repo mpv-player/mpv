@@ -73,18 +73,17 @@ char * Translate( char * str )
        case '6': t=mplShMem->LengthInSec; goto calclengthhhmmss;
        case '1': t=mplShMem->TimeSec;
 calclengthhhmmss:
-            s=t%60; t=( t - s ) / 60; m=t%60; h=t/60;
-            sprintf( tmp,"%02d:%02d:%02d",h,m,s ); strcat( trbuf,tmp );
+            sprintf( tmp,"%02d:%02d:%02d",t/3600,t/60%60,t%60 ); strcat( trbuf,tmp );
             break;
        case '7': t=mplShMem->LengthInSec; goto calclengthmmmmss;
        case '2': t=mplShMem->TimeSec;
 calclengthmmmmss:
-            s=t%60; m=( ( t - s ) / 60 ) % 60;
-            sprintf( tmp,"%04d:%02d",m,s ); strcat( trbuf,tmp );
+            sprintf( tmp,"%04d:%02d",t/60,t%60 ); strcat( trbuf,tmp );
             break;
-       case '3': sprintf( tmp,"%02d",( mplShMem->TimeSec - ( mplShMem->TimeSec % 60 ) ) / 3600 ); strcat( trbuf,tmp ); break;
-       case '4': sprintf( tmp,"%02d",( ( mplShMem->TimeSec - ( mplShMem->TimeSec % 60 ) ) / 60 ) % 60 ); strcat( trbuf,tmp ); break;
+       case '3': sprintf( tmp,"%02d",mplShMem->TimeSec / 3600 ); strcat( trbuf,tmp ); break;
+       case '4': sprintf( tmp,"%02d",( ( mplShMem->TimeSec / 60 ) % 60 ) ); strcat( trbuf,tmp ); break;
        case '5': sprintf( tmp,"%02d",mplShMem->TimeSec % 60 ); strcat( trbuf,tmp ); break;
+       case '8': sprintf( tmp,"%01d:%02d:%02d",mplShMem->TimeSec / 3600,( mplShMem->TimeSec / 60 ) % 60,mplShMem->TimeSec % 60 ); strcat( trbuf,tmp ); break;
        case 'v': sprintf( tmp,"%3.2f%%",mplShMem->Volume ); strcat( trbuf,tmp ); break;
        case 'V': sprintf( tmp,"%3.1f",mplShMem->Volume ); strcat( trbuf,tmp ); break;
        case 'b': sprintf( tmp,"%3.2f%%",mplShMem->Balance ); strcat( trbuf,tmp ); break;
@@ -93,6 +92,14 @@ calclengthmmmmss:
        case 's': if ( mplShMem->Playing == 0 ) strcat( trbuf,"s" ); break;
        case 'l': if ( mplShMem->Playing == 1 ) strcat( trbuf,"p" ); break;
        case 'e': if ( mplShMem->Playing == 2 ) strcat( trbuf,"e" ); break;
+       case 'a': 
+            switch ( mplShMem->AudioType )
+	     {
+	      case 0: strcat( trbuf,"n" ); break;
+	      case 1: strcat( trbuf,"m" ); break;
+	      case 2: strcat( trbuf,"t" ); break;
+	     }
+	    break;
        case '$': strcat( trbuf,"$" ); break;
        default: continue;
       }

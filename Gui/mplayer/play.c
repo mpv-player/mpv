@@ -50,6 +50,7 @@ void mplStop()
  mplShMem->Playing=0;
  mplShMem->TimeSec=0;
  mplShMem->Position=0;
+ mplShMem->AudioType=0;
  if ( !appMPlayer.subWindow.isFullScreen )
   {
    wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
