@@ -4315,9 +4315,9 @@ cat > $TMPC <<EOF
 #endif
 int main(void) {
 #ifdef FAAD2_VERSION
-  printf("%s",FAAD2_VERSION);
+  printf("%s\n",FAAD2_VERSION);
 #else
-  printf("1.0");
+  printf("1.0\n");
 #endif
   return 0;
 }
