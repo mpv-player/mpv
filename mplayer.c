@@ -356,13 +356,13 @@ static char* rtc_device;
 #endif
 
 #ifdef USE_EDL
-edl_record_ptr edl_records = NULL; /// EDL entries memory area
-edl_record_ptr next_edl_record = NULL; /// only for traversing edl_records
-int edl_memory_slots = 0; /// number of EDL entries (1 for skip + 2 for each mute)
-int edl_operations = 0; /// number of EDL operations, skip + mute
-short edl_decision = 0; /// 1 when an EDL operation has been made
-FILE* edl_fd = NULL; /// fd to write to when in -edlout mode
-int edl_mute_count = 0; /// even number when mute and unmute has been matched
+edl_record_ptr edl_records = NULL; ///< EDL entries memory area
+edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
+int edl_memory_slots = 0; ///< number of EDL entries (1 for skip + 2 for each mute)
+int edl_operations = 0; ///< number of EDL operations, skip + mute
+short edl_decision = 0; ///< 1 when an EDL operation has been made
+FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode
+int edl_mute_count = 0; ///< even number when mute and unmute has been matched
 #endif
 
 static unsigned int inited_flags=0;
