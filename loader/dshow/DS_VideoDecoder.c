@@ -166,7 +166,7 @@ DS_VideoDecoder * DS_VideoDecoder_Create(CodecInfo * info,  BITMAPINFOHEADER * f
 	case fccMP42:
 	case fccWMV2:
 	    //YV12 seems to be broken for DivX :-) codec
-	case fccIV50:
+//	case fccIV50:
 	    //produces incorrect picture
 	    //m_Caps = (CAPS) (m_Caps & ~CAP_YV12);
 	    //m_Caps = CAP_UYVY;//CAP_YUY2; // | CAP_I420;
@@ -290,7 +290,7 @@ int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int s
     // crashes inside ...->Receive() fixed now?
     //
     // nope - but this is surely helpfull - I'll try some more experiments
-    //Setup_FS_Segment();
+    Setup_FS_Segment();
 #if 0
     if (!this->m_pDS_Filter || !this->m_pDS_Filter->m_pImp
 	|| !this->m_pDS_Filter->m_pImp->vt
