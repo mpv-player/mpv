@@ -524,6 +524,8 @@ static void exit_sighandler(int x){
 extern void mp_input_register_options(m_config_t* cfg);
 
 #include "mixer.h"
+static mixer_t mixer;
+
 #include "cfg-mplayer.h"
 
 void parse_cfgfiles( m_config_t* conf )
@@ -1902,6 +1904,9 @@ if(sh_audio){
     }
 #endif
   }
+  mixer.audio_out = audio_out;
+  mixer.afilter = sh_audio->afilter;
+  mixer.volstep = 3;
 }
 
 current_module="av_init";
@@ -2488,7 +2493,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
        edl_decision = 1;
        next_edl_record = next_edl_record->next;
      } else if( next_edl_record->action == EDL_MUTE ) {
-       mixer_mute();
+       mixer_mute(&mixer);
 #ifdef DEBUG_EDL
        printf( "\nEDL_MUTE: [%f]\n", next_edl_record->start_sec );
 #endif
@@ -2657,25 +2662,27 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 		
 		if( abs )
 		{
-			mixer_setvolume( (float)v, (float)v );
+			mixer_setvolume(&mixer, (float)v, (float)v );
 		} else {
       if(v > 0)
-	mixer_incvolume();
+	mixer_incvolume(&mixer);
       else
-	mixer_decvolume();
+	mixer_decvolume(&mixer);
 		}
 	  
 #ifdef USE_OSD
       if(osd_level && sh_video){
+        float vol;
 	osd_visible=sh_video->fps; // 1 sec
 	vo_osd_progbar_type=OSD_VOLUME;
-	vo_osd_progbar_value=(mixer_getbothvolume()*256.0)/100.0;
+	mixer_getbothvolume(&mixer, &vol);
+	vo_osd_progbar_value=(vol*256.0)/100.0;
 	vo_osd_changed(OSDTYPE_PROGBAR);
       }
 #endif
     } break;
     case MP_CMD_MUTE:
-      mixer_mute();
+      mixer_mute(&mixer);
       break;
     case MP_CMD_LOADFILE : {
       play_tree_t* e = play_tree_new();
