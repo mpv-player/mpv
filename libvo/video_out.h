@@ -21,8 +21,10 @@
 #define VOCTRL_QUERY_VAA 1
 /* takes a pointer to uint32_t fourcc */
 #define VOCTRL_QUERY_FORMAT 2
-/* signal a device reset (seek/paus) */
+/* signal a device reset (seek/pause) */
 #define VOCTRL_RESET 3
+/* true if vo driver can use GUI created windows */
+#define VOCTRL_GUISUPPORT 4
 
 #define VO_TRUE		1
 #define VO_FALSE	0
@@ -50,8 +52,8 @@ typedef struct bes_da_s
 					   vidix:dest */
 	int		flags;          /* Probably will work only when flag == 0 */
 	/* memory model */
-	unsigned	frame_size;		/* destinition frame size */
-	unsigned	num_frames;		/* number available frames */
+	unsigned	frame_size;		/* destination frame size */
+	unsigned	num_frames;		/* number of available frames */
 	unsigned	offsets[VID_PLAY_MAXFRAMES]; /* relative offset of each frame from begin of video memory */
 	vidix_yuv_t	offset;			/* relative offsets within frame for yuv planes */
 	void*		dga_addr;		/* linear address of BES */
@@ -164,7 +166,7 @@ int vo_init(void);
 // NULL terminated array of all drivers
 extern vo_functions_t* video_out_drivers[];
 
-// currect resolution/bpp on screen:  (should be autodetected by vo_init())
+// correct resolution/bpp on screen:  (should be autodetected by vo_init())
 extern int vo_depthonscreen;
 extern int vo_screenwidth;
 extern int vo_screenheight;
