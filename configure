@@ -418,7 +418,35 @@ EOF
 exit
 fi
 else
-echo "YOU'VE SELECTED '--disable-gcc-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"
+# echo "YOU'VE SELECTED '--disable-gcc-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"
+
+cat <<EOF
+
+
+Hmm. You want to compile MPlayer with gcc 2.96? Ok. You know. Do it.
+
+    *** BUT WE DO NOT RECOMMEND SENDING ANY MAIL TO THE ***
+       *** MAILING LISTS OR DIRECTLY TO THE AUTHORS! ***
+
+       *** gcc 2.96 is broken. nobody will help you! ***
+
+If you have any problem, then install 2.95.x or 3.0 version and try again.
+If the problem still exists, then read DOCS/bugreports.html.
+
+EOF
+
+echo -n "Enter keyword to continue: "
+read _answer
+
+if [ "$_answer" != "gcc 2.96 is broken" ]; then
+cat <<EOF
+
+Wrong answer. Next time try 'gcc 2.96 is broken'. But you'd better to downgrade.
+
+EOF
+exit
+fi
+
 fi
 # ---
 
