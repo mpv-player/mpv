@@ -15,16 +15,34 @@
 /   return: cpu ident number.
 / ---------------------------------------------------------------------------
 CpuDetect:
+	pushl %eax
         pushl %ebx
         pushl %ecx
         pushl %edx
 
-        movl  $1,%eax
+        pushfl
+        popl   %eax
+        movl   %eax,%ebx
+        xorl   $0x00200000,%eax
+        pushl  %eax
+        popfl
+        pushfl
+        popl   %eax
+        cmpl   %eax,%ebx
+        jz     no_cpuid_cpudetect
+	
+        movl   $1,%eax
         cpuid
+	
+        jmp    exit_cpudetect
+no_cpuid_cpudetect:
+        xorl   %eax,%eax
+exit_cpudetect:
 
         popl  %edx
         popl  %ecx
         popl  %ebx
+	popl  %eax
         ret
 
 / ---------------------------------------------------------------------------
