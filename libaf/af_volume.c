@@ -112,8 +112,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if(!s->fast){
       for(i=0;i<AF_NCH;i++)
 	m=max(m,s->max[i]);
-      af_msg(AF_MSG_INFO,"[volume] The maximum volume was %0.2fdB \n",
-	     10*log10(m));
+	af_to_dB(1, &m, &m, 10.0);
+	af_msg(AF_MSG_INFO,"[volume] The maximum volume was %0.2fdB \n", m);
     }
     return AF_OK;
   }
