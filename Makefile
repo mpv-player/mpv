@@ -121,7 +121,7 @@ install: $(ALL_PRG)
 	if test ! -d $(BINDIR) ; then mkdir -p $(BINDIR) ; fi
 	install -m 755 -s $(PRG) $(BINDIR)/$(PRG)
 ifeq ($(GUI),yes)
-	-ln -s $(BINDIR)/$(PRG) $(BINDIR)/gmplayer
+	-ln -sf $(BINDIR)/$(PRG) $(BINDIR)/gmplayer
 endif
 	if test ! -d $(prefix)/man/man1 ; then mkdir -p $(prefix)/man/man1; fi
 	install -c -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
