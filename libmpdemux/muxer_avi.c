@@ -188,6 +188,8 @@ static void avifile_odml_new_riff(muxer_t *muxer)
     muxer->file_end = ftello(f);
 }
 
+static void avifile_write_header(muxer_t *muxer);
+
 static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags){
     off_t rifflen;
     muxer_t *muxer=s->muxer;
