@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.57 -->
+<!-- Synced with 1.58 -->
 <sect1 id="codecs">
 <title>Podporované kodeky</title>
 
@@ -726,8 +726,8 @@ Návod k instalaci naleznete v sekci
 AAC (Advanced Audio Coding) je audio kodek, který lze občas nalézt v MOV a
 MP4 souborech. Open source dekodér jménem FAAD je k dispozici na
 <ulink url="http://www.audiocoding.com"/>.
-<application>MPlayer</application> obsahuje libfaad 2.0RC1, takže jej nemusíte
-stahovat dodatečně.
+<application>MPlayer</application> obsahuje CVS obraz libfaad 2.1 beta,
+takže jej nemusíte stahovat dodatečně.
 </para>
 
 <para>
