@@ -159,7 +159,7 @@ using Sun's assembler <filename>/usr/ccs/bin/as</filename>.
 
 <para>The <filename>configure</filename> script tries to find out, which
 assembler program is used by your &quot;gcc&quot; command (in case the autodetection
-fails, use the <option>--as=/wherever/you/have/installed/gnu-as</option>
+fails, use the <option>--as=<replaceable>/wherever/you/have/installed/gnu-as</replaceable></option>
 option to tell the <filename>configure</filename> script where it can find GNU
 "as" on your system).
 </para>
@@ -230,7 +230,7 @@ and for color space conversion in the video output drivers.
 <para>
 You can either try to install the GNU install program, and (if you did
 not put it in your global path) then point to the location with:
-<screen>./configure --with-install=/path/and/name/of/install</screen>
+<screen>./configure --with-install=<replaceable>/path/and/name/of/install</replaceable></screen>
 </para>
 
 <para>
