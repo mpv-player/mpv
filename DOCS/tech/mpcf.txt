@@ -18,6 +18,8 @@ Extendible
 Compact
 	~0.2% overhead, for normal bitrates
 	index is <10kb per hour (1 keyframe every 3sec)
+	a usual header for a file is about 100bytes (audio + video headers together)
+	a packet header is about ~8 bytes
 Error resistant
 	seeking / playback without an index
 	headers & index can be repeated
@@ -82,8 +84,8 @@ reserved_bytes
 	a compatible way
 
 main header:
-	packet header
 	main_startcode				f(64)
+	packet header
 	version					v
 	stream_count				v
 	file_size				v
@@ -92,8 +94,8 @@ main header:
 	checksum				u(32)
 
 stream_header:
-	packet_header
 	stream_startcode			f(64)
+	packet_header
 	stream_id				v
 	stream_class				v
 	fourcc					b
@@ -130,7 +132,6 @@ audio_stream_header:
 	checksum				u(32)
 
 frame
-	packet header
 	if(keyframe){
 		keyframe_startcode		f(64)
 	}
@@ -140,6 +141,7 @@ frame
 	msb_timestamp_flag			u(1)
 	subpacket_type				u(2)
 	reserved				u(1)
+	packet header
 	stream_id				v
 	if(msb_timestamp_flag)
 		msb_timestamp			v
@@ -168,8 +170,8 @@ frame
 		frame_checksum			u(32)
 
 Index:
-	packet header
 	index_startcode				f(64)
+	packet header
 	stream_id				v
 	index_length				v
 	for(i=0; i<index_length; i++){
@@ -180,8 +182,8 @@ Index:
 	checksum				u(32)
 
 info_packet: (optional)
-	packet header
 	info_startcode				f(64)
+	packet header
 	for(;;){
 		id				v
 		if(id==0) break
