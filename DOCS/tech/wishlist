@@ -115,6 +115,7 @@ Enhancements:
 
  * ADTS AAC support
 
+ * implement Jack Transport API
 
 
 Difficult stuff:
@@ -159,5 +160,3 @@ Difficult stuff:
 
  * smooth stream switching / multiple file caching to avoid the small skip
    between files when playing multiple files
-
- * multiple input support for MEncoder
