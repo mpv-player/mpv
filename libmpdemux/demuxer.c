@@ -687,8 +687,12 @@ if(!demuxer->seekable){
     demuxer->video->eof=0;
     demuxer->audio->eof=0;
 
+#if 1
+    if(sh_audio) sh_audio->timer=sh_video->timer;
+#else
     if(sh_audio) sh_audio->timer=0;
     sh_video->timer=0; // !!!!!!
+#endif
 
 switch(demuxer->file_format){
 
