@@ -163,16 +163,14 @@ void gtkSigHandler( int s )
  gtkShMem->message=0;
 }
 
-listItems tmpList;
-
 void mplMainSigHandler( int s )
 {
  if ( s != SIGTYPE ) return;
 
- #ifdef DEBUG
+// #ifdef DEBUG
   if ( gtkShMem->message ) dbprintf( 5,"[psignal] main sig handler gtk msg: %d\n",gtkShMem->message );
 //  if ( mplShMem->message ) dbprintf( 5,"[psignal] main sig handler mpl msg: %d\n",mplShMem->message );
- #endif
+// #endif
 
  switch ( gtkShMem->message )
   {
@@ -202,68 +200,7 @@ void mplMainSigHandler( int s )
          }
         break;
    case evSkinBrowser:
-        if ( strcmp( cfgSkin,gtkShMem->sb.name ) )
-         {
-          int ret;
-          #ifdef DEBUG
-           dbprintf( 1,"[psignal] skin: %s\n",gtkShMem->sb.name );
-          #endif
-
-          mainVisible=0;
-
-          appInitStruct( &tmpList );
-          skinAppMPlayer=&tmpList;
-          ret=skinRead( gtkShMem->sb.name );
-
-          appInitStruct( &tmpList );
-          skinAppMPlayer=&appMPlayer;
-          appInitStruct( &appMPlayer );
-          if ( !ret ) strcpy( cfgSkin,gtkShMem->sb.name );
-          skinRead( cfgSkin );
-
-          if ( ret )
-           {
-            mainVisible=1;
-            break;
-           }
-
-//          appCopy( &appMPlayer,&tmpList );
-//          appInitStruct( &tmpList );
-//          skinAppMPlayer=&appMPlayer;
-//          strcpy( cfgSkin,gtkShMem->sb.name );
-
-          if ( mplDrawBuffer ) free( mplDrawBuffer );
-          if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
-           { message( False,langNEMDB ); break; }
-          wsResizeWindow( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
-          wsMoveWindow( &appMPlayer.mainWindow,appMPlayer.main.x,appMPlayer.main.y );
-          wsResizeImage( &appMPlayer.mainWindow );
-          wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
-          mainVisible=1; mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
-          btnModify( evSetVolume,mplShMem->Volume );
-          btnModify( evSetBalance,mplShMem->Balance );
-          btnModify( evSetMoviePosition,mplShMem->Position );
-
-          if ( appMPlayer.menuBase.Bitmap.Image )
-           {
-            if ( mplMenuDrawBuffer ) free( mplMenuDrawBuffer );
-            if ( ( mplMenuDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
-             { message( False,langNEMDB ); break; }
-            wsResizeWindow( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
-            wsResizeImage( &appMPlayer.menuWindow );
-           }
-
-          mplSkinChanged=1;
-          if ( !mplShMem->Playing )
-           {
-            mplSkinChanged=0;
-            if ( appMPlayer.subWindow.isFullScreen ) wsFullScreen( &appMPlayer.subWindow );
-            wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
-            wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
-            if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow );
-            mplSubRender=1; wsPostRedisplay( &appMPlayer.subWindow );
-           }
-         }
+        ChangeSkin();
         break;
    case evFileLoaded:
         strcpy( mplShMem->Filename,gtkShMem->fs.dir ); strcat( mplShMem->Filename,"/" ); strcat( mplShMem->Filename,gtkShMem->fs.filename );

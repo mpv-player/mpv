@@ -81,4 +81,6 @@ extern void mplSigHandler( int s );
 extern void mplSendMessage( int msg );
 extern void mplPlayerThread( void );
 
+extern void ChangeSkin( void );
+
 #endif

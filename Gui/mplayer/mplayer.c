@@ -15,6 +15,7 @@
 #include "../timer.h"
 #include "../language.h"
 #include "../error.h"
+#include "../config.h"
 
 #include "../../config.h"
 #include "../../libvo/x11_common.h"
@@ -36,7 +37,7 @@ void mplMsgHandle( int msg,float param );
 #include "menu.h"
 #include "mw.h"
 #include "sw.h"
-#include "widget.h"
+#include "widgets.h"
 
 void mplTimerHandler( int signum )
 {
@@ -56,6 +57,7 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  // allocates shmem to gtkShMem
  // fork() a process which runs gtkThreadProc()  [gtkPID]
  gtkInit( argc,argv,envp );
+ strcpy( gtkShMem->sb.name,cfgSkin ); 
 
  // allocates shmem to mplShMem
  // init fields of this struct to default values
