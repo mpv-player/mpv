@@ -71,7 +71,7 @@
           <LI><A HREF="codecs.html#2.2.1">2.2.1 Video</A>
             <UL>
               <LI><A HREF="codecs.html#2.2.1.1">2.2.1.1 DivX4/DivX5</A></LI>
-              <LI><A HREF="codecs.html#2.2.1.2">2.2.1.2 ffmpeg's DivX/libavcodec</A></LI>
+              <LI><A HREF="codecs.html#2.2.1.2">2.2.1.2 FFmpeg DivX/libavcodec</A></LI>
               <LI><A HREF="codecs.html#2.2.1.3">2.2.1.3 XAnim codecs</A></LI>
               <LI><A HREF="codecs.html#2.2.1.4">2.2.1.4 VIVO video</A></LI>
               <LI><A HREF="codecs.html#2.2.1.5">2.2.1.5 MPEG1/2 video</A></LI>
@@ -91,7 +91,7 @@
               <LI><A HREF="codecs.html#2.2.2.5">2.2.2.5 RealAudio</A></LI>
              </UL>
           </LI>
-          <LI><A HREF="codecs.html#2.2.3">2.2.3 Win32 codec importing howto</A>
+          <LI><A HREF="codecs.html#2.2.3">2.2.3 Win32 codec importing HOWTO</A>
             <UL>
               <LI><A HREF="codecs.html#2.2.3.1">2.2.3.1 VFW codecs</A></LI>
               <LI><A HREF="codecs.html#2.2.3.2">2.2.3.2 DirectShow codecs</A></LI>
@@ -407,15 +407,15 @@ too. So I've decided to write/modify one...</P>
 <P><B><A NAME=1.3>1.3. Installation</A></B></P>
 
 <P>In this chapter I'll try to guide you through the compiling and
-configuring process of <B>MPlayer</B>. It's not easy, but it won't neccessarily
-be hard. If you experience a different behaviour than what I explain, please
+configuring process of <B>MPlayer</B>. It's not easy, but it won't necessarily
+be hard. If you experience a different behavior than what I explain, please
 search through this documentation and you'll find your answers. If you
 see links, please follow them and read carefully what they contain. It
 will take some time, but it DOES worth it.</P>
 
 <P>You need a fairly recent system. On Linux, 2.4.x kernels are recommended.</P>
 
-<P><B><I>SOFTWARE REQUIREMENTS</I></B><BR>
+<P><B>SOFTWARE REQUIREMENTS</B><BR>
 
 <UL>
   <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
@@ -428,7 +428,7 @@ will take some time, but it DOES worth it.</P>
     need it) or don't up/downgrade at all (but in this case, be prepared for
     runtime problems). If you vote for 3.x.x, try to use the latest version,
     early releases had various bugs, so be sure you use at least 3.1, it's
-    tested and working. Don't use RedHat's gcc 3.0.x versions! 3.0.4-RH
+    tested and working. Don't use Red Hat's gcc 3.0.x versions! 3.0.4-RH
     reproducibly dies with internal error during GUI compilation (vanilla 3.0.4
     does not). Detailed information about gcc 2.96's bugs (that are still NOT
     fixed, they have been WORKED AROUND in <B>MPlayer</B>!) can be found
@@ -442,13 +442,13 @@ will take some time, but it DOES worth it.</P>
     information available.</A><BR>
     Make sure its <B>development package</B> is installed, too, otherwise
     it won't work.<BR>
-    For some videocards you don't need XFree86. See list below.</LI>
+    For some video cards you don't need XFree86. See list below.</LI>
   <LI><B>make</B> - suggested version is <B>always the newest</B> (at least 3.79.x). This
     usually isn't important.</LI>
   <LI><B>SDL</B> - it's not mandatory, but can help in some cases (bad audio,
-    videocards that lag strangely with the xv driver). Always use the newest
+    video cards that lag strangely with the xv driver). Always use the newest
     (beginning from 1.2.x).</LI>
-  <LI><B>libjpeg</B> - optional JPEG decoder, used by -mf and some qt mov files.
+  <LI><B>libjpeg</B> - optional JPEG decoder, used by -mf and some QT MOV files.
     Useful for both <B>MPlayer</B> and <B>MEncoder</B> if you plan to work with jpeg files.</LI>
   <LI><B>libpng</B> - recommended and default (M)PNG decoder. Required for GUI.
     Useful for both <B>MPlayer</B> and <B>MEncoder</B>.</LI>
@@ -458,14 +458,14 @@ will take some time, but it DOES worth it.</P>
   <LI><B>libvorbis</B> - optional, needed for playing OGG Vorbis audio.</LI>
 </UL>
 
-<P><B><I>CODECS</I></B></P>
+<P><B>CODECS</B></P>
 
 <UL>
 <LI><B>libavcodec</B> : If you want to use this DivX3/DivX4/DivX5/MP41/MP42/etc
 codec, check the
 <A HREF="codecs.html#2.2.1.2">2.2.1.2</A> section before compiling. Features :<BR>
 <UL>
-  <LI>you can <B>gain <I>DivX/DivX4/DivX5/MP41/MP42</I> playing on non-x86
+  <LI>you can <B>gain DivX/DivX4/DivX5/MP41/MP42 playback on non-x86
     machines</B></LI>
   <LI>RealVideo 1.0/VIVO/MJPEG/h263/others playing and encoding</LI>
   <LI>this codec has the <B>greatest decoding speed</B> for DivX and DivX4/DivX5
@@ -502,7 +502,7 @@ Features:
 </UL>
 </LI>
 
-<LI><B>XviD</B> : Opensource encoding alternative to Divx4Linux<BR>
+<LI><B>XviD</B> : Open source encoding alternative to Divx4Linux<BR>
 Features:
 <UL>
   <LI>1 pass or 2 pass encoding with <A HREF="encoding.html">MEncoder</A></LI>
@@ -521,7 +521,7 @@ movies are best played with <B>MPlayer</B>'s own Cinepak decoder !</LI>
   <CODE>libvorbis</CODE> properly. Use deb/rpm packages if available, or
   compile from
   <A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">source</A>
-  (this is a nightly updated tarball of vorbis CVS).</LI>
+  (this is a nightly updated tarball of Vorbis CVS).</LI>
 
 <LI><B>MPlayer</B> can use the libraries of RealPlayer 8 or RealONE to play
   files with <B>RealVideo 2.0 and 3.0</B> video, and Sipro/Cook audio. See
@@ -530,13 +530,13 @@ movies are best played with <B>MPlayer</B>'s own Cinepak decoder !</LI>
 
 </UL>
 
-<P><B><I>VIDEOCARDS</I></B></P>
+<P><B>VIDEO CARDS</B></P>
 
-<P>There are generally two kind of videocards. One kind (the newer cards) has
+<P>There are generally two kind of video cards. One kind (the newer cards) has
 <B>hardware scaling and YUV acceleration</B> support, the other cards don't.</P>
 
 <P>
-<B><I>YUV cards</I></B></P>
+<B>YUV cards</B></P>
 
 <P>
 They can display and scale (zoom) the picture to any size that fits in
@@ -575,13 +575,13 @@ have problems with YV12 display, see <A HREF="video.html#2.3.1.2.2">S3 Xv
 section</A> for details. Older, Trio cards have no, or slow hardware
 support.</LI>
 
-<LI><B>Nvidia cards</B>: very bad choice for video playing (NVidia has
+<LI><B>nVidia cards</B>: very bad choice for video playing (nVidia has
 <A HREF="users_against_developers.html#nvidia">different opinion</A>!).
-Nvidia's cards have very cheap and bad
-quality chips. Moreover, <U>the built-in Nvidia driver in XFree86 doesn't
-contain support for hardware YUV acceleration for all NVidia cards !</U>
-You have to download Nvidia's closed-source drivers from nvidia.com. See
-details in <A HREF="video.html#2.3.1.2.3">Nvidia Xv driver</A> section.</LI>
+nVidia's cards have very cheap and bad
+quality chips. Moreover, <U>the built-in nVidia driver in XFree86 doesn't
+contain support for hardware YUV acceleration for all nVidia cards !</U>
+You have to download nVidia's closed-source drivers from nVidia.com. See
+details in <A HREF="video.html#2.3.1.2.3">nVidia Xv driver</A> section.</LI>
 
 <LI><B>3DLabs GLINT R3 and Permedia3</B>: a Vidix driver is provided
   (pm3_vid). Please see the <A HREF="video.html#2.3.1.15">Vidix
@@ -604,14 +604,14 @@ details in <A HREF="video.html#2.3.1.2.3">Nvidia Xv driver</A> section.</LI>
 </UL>
 
 <P>
-<B><I>Non-YUV cards</I></B></P>
+<B>Non-YUV cards</B></P>
 
 <P>
 Fullscreen playing can be achieved by either zooming
 <B>by software</B> (use the option -zoom, but i warn you: this is slooow!),
-or changing to a smaller videomode, for
-example to 352x288. If you don't have YUV accel, this latter method is
-the recommended one. Throughout <B>MPlayer</B>, <U>this behaviour can
+or changing to a smaller video mode, for
+example to 352x288. If you don't have YUV acceleration, this latter method is
+the recommended one. Throughout <B>MPlayer</B>, <U>this behavior can
 be switched on by using the <CODE>-vm</CODE> option</U> and with
 the following drivers :
 </P>
@@ -628,7 +628,7 @@ the following drivers :
     <A HREF="video.html#2.3.1.11">aalib</A>.</LI>
 </UL>
 
-<P><B><I>SOUNDCARDS</I></B></P>
+<P><B>SOUND CARDS</B></P>
 
 <UL>
 <LI><B>Soundblaster Live!</B> : with this card you can use 4 or 6 (<B>5.1</B>)
@@ -641,11 +641,11 @@ For hardware AC3 passthrough you MUST use ALSA 0.9 oss emulation!</LI>
   <A HREF="codecs.html#2.2.2.2">Hardware AC3 decoding</A> section.</LI>
 
 <LI><B>other cards'</B> features aren't supported by <B>MPlayer</B>.
-  <U>It's very recommended to read the <A HREF="sound.html#2.3.2">soundcards
+  <U>It's very recommended to read the <A HREF="sound.html#2.3.2">sound card
   section</A> !</U>
 </UL>
 
-<P><B><I>FEATURES</I></B></P>
+<P><B>FEATURES</B></P>
 
 <UL>
 <LI>Decide if you need GUI. If you do, see the <A HREF="#1.4">1.4 section</A>
@@ -658,28 +658,41 @@ see the <A HREF="encoding.html#2.4">MEncoder section</A> .</LI>
 <LI>If you have a V4L compatible <B>TV tuner</B> card, and wish to watch/grab and
 encode movies with <B>MPlayer</B>, read the <A HREF="#2.5">TV input</A> section.</LI>
 
-<LI>There are three timing methods in <B>MPlayer</B>.<BR>
-<BR>
-<B>To use the old method</B>, you don't have to do anything. It uses
-<CODE>usleep()</CODE> to tune A/V sync, with +/- 10ms accuracy. However
-sometimes the sync has to be tuned even finer.<BR>
-<BR>
-<B>The new timer</B> code uses PC's RTC (Real Time Clock) for this task,
-because it has precise 1ms timers. This requires root, or a <I>setuid root</I>
-<B>MPlayer</B> binary (or a little kernel hacking, but that's unadvised). You
-can see the new timer's efficiency in the status line. In some hardware
-combinations (confirmed during usage of non-DMA DVD drive on an ALi1541 board)
-usage of the RTC timer causes skippy playback. It's recommended to use the
-following method in these cases.<BR>
-<BR>
-<B>The third timer code</B> is turned on with the <CODE>-softsleep</CODE>
-option. It has the efficiency of the RTC, but it doesn't use RTC. On the other
-hand, it requires more CPU.<BR>
-<BR>
-Note: <B>NEVER install setuid MPlayer binary on a
-multiuser system!</B> It's a clear way for everyone to gain root.</LI>
-
+<LI>There are three timing methods in <B>MPlayer</B>.
+  <UL>
+    <LI><B>To use the old method</B>, you don't have to do anything. It uses
+      <CODE>usleep()</CODE> to tune A/V sync, with +/- 10ms accuracy. However
+      sometimes the sync has to be tuned even finer.</LI>
+    <LI><B>The new timer</B> code uses PC's RTC (Real Time Clock) for this task,
+      because it has precise 1ms timers. This requires root privileges, or a
+      <I>setuid root</I> <B>MPlayer</B> binary. If you are running kernel
+      2.4.19pre8 or later you can adjust the maximum RTC frequency for normal
+      users through the <CODE>/proc</CODE> filesystem. Use this command to enable
+      RTC for normal users:
+      <P>
+      <CODE>echo 1025 > /proc/sys/dev/rtc/max-user-freq</CODE>
+      </P>
+      If you do not have such a new kernel, you can also change one line in
+      <CODE>drivers/char/rtc.c</CODE> and recompile your kernel. Find the line
+      <P>
+      <CODE>if ((rtc_freq > 64) && (!capable(CAP_SYS_RESOURCE)))</CODE>
+      </P>
+      and change the 64 to 1024. You should really know what you are doing, though.
+      <BR>
+      You can see the new timer's efficiency in the status line. In some hardware
+      combinations (confirmed during usage of non-DMA DVD drive on an ALi1541 board)
+      usage of the RTC timer causes skippy playback. It's recommended to use the
+      following method in these cases.</LI>
+    <LI><B>The third timer code</B> is turned on with the <CODE>-softsleep</CODE>
+      option. It has the efficiency of the RTC, but it doesn't use RTC. On the other
+      hand, it requires more CPU.</LI>
+  </UL>
+</LI>
 </UL>
+
+Note: <B>NEVER install setuid MPlayer binary on a
+multiuser system!</B> It's a clear way for everyone to gain root.
+
 
 <P>Then build <B>MPlayer</B>:</P>
 
@@ -700,7 +713,7 @@ left from old MPlayer versions, and remove it!</P>
 simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in <B>MPlayer</B>'s
 root dir. Detailed instructions can be found <A HREF="documentation.html#6.1">here</A>.</P>
 
-<P><B><I>ALWAYS browse the output of ./configure</I></B>, and the
+<P><B>ALWAYS browse the output of ./configure</B>, and the
 <CODE>configure.log</CODE> file, they contain info about what will be built,
 and what won't. You may also want to view config.h and config.mak files.<BR>
 If you have some libs installed, but not detected by ./configure, then check
@@ -796,11 +809,11 @@ Please note that the MicroDVD subtitle format uses absolute frame numbers for it
 timing, and therefore the <CODE>-subfps</CODE> option cannot be used with this format. As 
 <B>MPlayer</B> has no way to guess the frame rate of the subtitle file, you have to manually
 convert the frame rate. There is a little perl script in the <CODE>contrib</CODE> directory of 
-the MPlayer ftp site to do this conversion for you.</P>
+the MPlayer FTP site to do this conversion for you.</P>
 
 <P>About DVD subtitles, read the <A HREF="cd-dvd.html#4.2">DVD section</A>.</P>
 
-<P><B>MPlayer</B> introduces a new subtitle format called <B><I>MPsub</I></B>.
+<P><B>MPlayer</B> introduces a new subtitle format called <B>MPsub</B>.
 It was designed by me (Gabucino). Basically its main feature is being
 <I>dynamically</I> time-based (although it has frame-based mode too). Example (from
 <A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>) :
@@ -825,7 +838,7 @@ if you - say - get an SSA subtitle but it's badly timed/delayed to your
 version of the movie, you simply do a <I>mplayer dummy.avi -sub source.ssa
 -dumpmpsub</I> . A <CODE>dump.mpsub</CODE> file will be created in the
 current directory, which will contain the source subtitle's text, but in
-<B>MPsub</B> format. Then you can freely add/substract seconds to/from the
+<B>MPsub</B> format. Then you can freely add/subtract seconds to/from the
 subtitle.</P>
 
 <P>Subtitles are displayed with a technique called <B>'OSD', On Screen Display</B>.
@@ -839,7 +852,7 @@ There are many ways to get it:</P>
 
 <LI>download ready-to-use font packages from <B>MPlayer</B> site.
 Note: currently available fonts are limited for iso 8859-1/2 support,
-but there are some other (including korean, russian, 8859-8 etc) fonts
+but there are some other (including Korean, Russian, 8859-8 etc) fonts
 at contrib/font section of FTP, made by users.
 
 Font should have appropriate font.desc file which maps unicode font
@@ -847,12 +860,12 @@ positions to the actual code page of the subtitles text. Other solution
 is to have subtitles encoded in utf8 encoding and use -utf8 option
 or just name the subtitles file &lt;video_name&gt;.utf and have it in the same
 dir as the video file. Recoding from different codepages to utf8 could be
-done by using konwert (debian) or iconv (RedHat) programs.<BR>
+done by using konwert (Debian) or iconv (Red Hat) programs.<BR>
 Some URLs:
 <UL>
   <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO fonts
   <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - various fonts by users
-  <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - korean fonts & RAW plugin
+  <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - Korean fonts & RAW plugin
 </UL>
 </LI>
 
@@ -898,7 +911,7 @@ of the movie (switch it off with the "o" key).</P>
 <P><A NAME=2.5><B>2.5. TV input</B></A></P>
 
 
-<P><A NAME=2.5.1><B><I>2.5.1.  Overview</I></B></A></P>
+<P><A NAME=2.5.1><B>2.5.1.  Overview</B></A></P>
 
 <P>This section is about how to enable <B>watching/grabbing from V4L compatible
 TV tuner</B>.</P>
@@ -907,7 +920,7 @@ TV tuner</B>.</P>
   tweaking/experimenting!</B></P>
 
 
-<P><A NAME=2.5.2><B><I>2.5.2.  Compilation</I></B></A></P>
+<P><A NAME=2.5.2><B>2.5.2.  Compilation</B></A></P>
 
 <UL>
   <LI>first, you have to recompile. <CODE>./configure</CODE> will autodetect kernel headers
@@ -922,7 +935,7 @@ TV tuner</B>.</P>
   with <CODE>-vo sdl</CODE>) colorspaces.
   You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
 
-<P><A NAME=2.5.3><B><I>2.5.3.  Available options</I></B></A></P>
+<P><A NAME=2.5.3><B>2.5.3.  Available options</B></A></P>
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -935,7 +948,7 @@ TV tuner</B>.</P>
   <TD>&nbsp;&nbsp;</TD>
   <TD><I>noaudio</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD>thanx, no sound</TD>
+  <TD>thanks, no sound</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -1010,7 +1023,7 @@ TV tuner</B>.</P>
 </TR>
 </TABLE>
 
-<P><A NAME=2.5.4><B><I>2.5.4.  Keyboard control</I></B></A></P>
+<P><A NAME=2.5.4><B>2.5.4.  Keyboard control</B></A></P>
 
 <TABLE BORDER=0>
 <TR><TD>&nbsp;&nbsp;</TD><TD>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD>select previous/next channel</TD></TR>
@@ -1018,7 +1031,7 @@ TV tuner</B>.</P>
 <TR><TD></TD><TD>b</TD><TD></TD><TD>change channel list</TD></TR>
 </TABLE>
 
-<P><A NAME=2.5.5><B><I>2.5.5.  Examples</I></B></A></P>
+<P><A NAME=2.5.5><B>2.5.5.  Examples</B></A></P>
 
 <P>
 Dummy output, to AAlib :)<BR>
@@ -1029,10 +1042,10 @@ Input from standard V4L<BR>
 </P>
 
 
-<P><A NAME=2.6><B><I>2.6.  Video filters</I></B></A></P>
+<P><A NAME=2.6><B>2.6.  Video filters</B></A></P>
 
 
-<P><A NAME=2.6.1><B><I>2.6.1.  Overview</I></B></A></P>
+<P><A NAME=2.6.1><B>2.6.1.  Overview</B></A></P>
 
 <P>Both <B>MPlayer</B> and <B>MEncoder</B> supports using a universal
   video filter layer, which comprises of numerous plugins - listed and
@@ -1042,7 +1055,7 @@ Input from standard V4L<BR>
   can boost playing speed on slow boards), expand image (for SVCDs).</P>
 
 <P>With this filter layer it's possible to perform fast image format conversion
-  between the various RGB and YUV when neccessary. This enables for example
+  between the various RGB and YUV when necessary. This enables for example
   playing RGB data on <CODE>xv</CODE> and <CODE>xmga</CODE> outputs, amongst
   others. (see the <A HREF="#2.6.11">Scale</A> filter)</P>
 
@@ -1052,7 +1065,7 @@ Input from standard V4L<BR>
 <P>Note that the postprocessing code is now also a part of the layer. It
   will be explained below.</P>
 
-<P><A NAME=2.6.2><B><I>2.6.2.  Usage</I></B></A></P>
+<P><A NAME=2.6.2><B>2.6.2.  Usage</B></A></P>
 
 <P><CODE>&nbsp;&nbsp;mplayer/mencoder -vop filter1,filter2,filter3,...</CODE>
   </P>
@@ -1070,7 +1083,7 @@ Input from standard V4L<BR>
   "<CODE>mplayer -vop help</CODE>" command line.</P>
 
 
-<P><A NAME=2.6.3><B><I>2.6.3.  Crop</I></B></A></P>
+<P><A NAME=2.6.3><B>2.6.3.  Crop</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1082,7 +1095,7 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop crop[=width:height:x:y]</CODE></P>
 
 
-<P><A NAME=2.6.4><B><I>2.6.4.  Expand</I></B></A></P>
+<P><A NAME=2.6.4><B>2.6.4.  Expand</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1098,7 +1111,7 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop expand[=width:height:x:y]</CODE></P>
 
 
-<P><A NAME=2.6.5><B><I>2.6.5.  Fame/Lavc</I></B></A></P>
+<P><A NAME=2.6.5><B>2.6.5.  Fame/Lavc</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1112,7 +1125,7 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
 
 
-<P><A NAME=2.6.6><B><I>2.6.6.  Flip</I></B></A></P>
+<P><A NAME=2.6.6><B>2.6.6.  Flip</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1124,7 +1137,7 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop flip</CODE></P>
 
 
-<P><A NAME=2.6.7><B><I>2.6.7.  Format</I></B></A></P>
+<P><A NAME=2.6.7><B>2.6.7.  Format</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1138,11 +1151,11 @@ Input from standard V4L<BR>
   <CODE>format</CODE> can be for example: rgb32, yuy2, etc...)</P>
 
 
-<P><A NAME=2.6.8><B><I>2.6.8.  Postprocess</I></B></A></P>
+<P><A NAME=2.6.8><B>2.6.8.  Postprocess</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
-<P>This is our good old postprocess, juts converted to the filter layer.
+<P>This is our good old postprocess, just converted to the filter layer.
   Performs image quality enhancement, deinterlacing, etc, see
   <CODE>-npp help</CODE> for available options.</P>
 
@@ -1151,11 +1164,11 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop pp[=postprocess options/keywords]</CODE></P>
 
 
-<P><A NAME=2.6.9><B><I>2.6.9.  RGB2BGR</I></B></A></P>
+<P><A NAME=2.6.9><B>2.6.9.  RGB2BGR</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
-<P>Performs RGB 24/32 <-> BGR 24/32 colorspace conversion (default behaviour)
+<P>Performs RGB 24/32 <-> BGR 24/32 colorspace conversion (default behavior)
   or RGB 24/32 <-> RGB 24/32 conversion with R<->B swapping (with the 'swap'
   option)</P>
 
@@ -1164,7 +1177,7 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop rgb2bgr[=swap]</CODE></P>
 
 
-<P><A NAME=2.6.10><B><I>2.6.10.  Rotate</I></B></A></P>
+<P><A NAME=2.6.10><B>2.6.10.  Rotate</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1176,7 +1189,7 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop rotate[=x]</CODE></P>
 
 
-<P><A NAME=2.6.11><B><I>2.6.11.  Scale</I></B></A></P>
+<P><A NAME=2.6.11><B>2.6.11.  Scale</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1195,7 +1208,7 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop scale[=width:height]</CODE></P>
 
 
-<P><A NAME=2.6.12><B><I>2.6.12.  YUY2</I></B></A></P>
+<P><A NAME=2.6.12><B>2.6.12.  YUY2</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1206,7 +1219,7 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
 
 
-<P><A NAME=2.6.13><B><I>2.6.13.  Mirror</I></B></A></P>
+<P><A NAME=2.6.13><B>2.6.13.  Mirror</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1217,7 +1230,7 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop mirror</CODE></P>
 
 
-<P><A NAME=2.6.14><B><I>2.6.14.  DVBscale</I></B></A></P>
+<P><A NAME=2.6.14><B>2.6.14.  DVBscale</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1228,7 +1241,7 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop dvbscale</CODE></P>
 
 
-<P><A NAME=2.6.15><B><I>2.6.15.  Cropdetect</I></B></A></P>
+<P><A NAME=2.6.15><B>2.6.15.  Cropdetect</B></A></P>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1298,7 +1311,7 @@ Xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE>
 <TR><TD></TD><TD>z or x</TD><TD></TD><TD>adjust subtitle delay by +/- 0.1 second</TD></TR>
 <TR><TD></TD><TD>r or t</TD><TD></TD><TD>adjust subtitle position</TD></TR>
 <TR><TD></TD><TD>HOME or END</TD><TD></TD><TD>go to next/previous playtree entry in the parent list</TD></TR>
-<TR><TD></TD><TD>INSERT or DELETE</TD><TD></TD><TD>go to next/previous alternative source (only avaible in asx playlist)</TD></TR>
+<TR><TD></TD><TD>INSERT or DELETE</TD><TD></TD><TD>go to next/previous alternative source (only available in asx playlist)</TD></TR>
 
 <TR><TD COLSPAN=4><P><I>(the following keys are valid only when using <CODE>-vo xv</CODE>)</I></P></TD></TR>
 
@@ -1338,7 +1351,7 @@ Xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE>
 <P><B>MPlayer</B> allows you bind any key/button to any <B>MPlayer</B> command
   using a simple config file.  The syntax consist of a key name followed by a
   command. The default config file location is
-  <CODE>$HOME/.mplayer/input.conf</CODE> but it can be overrided using the
+  <CODE>$HOME/.mplayer/input.conf</CODE> but it can be overridden using the
   <CODE>-input</CODE> conf switch (relative path are relative to
   <CODE>$HOME/.mplayer</CODE>).
 
@@ -1440,15 +1453,15 @@ ENTER pt_step 1 1
          <P>Somebody know ?</P>
   </LI>
   <LI><B>pt_step</B> (int) val [(int) force=0]
-         <P>Go to next/prev entry in playtree. Val sign tell the direction.<BR>
-              If no other entry is avaible in the given direction it won't do anything unless force is non 0.
+         <P>Go to next/previous entry in playtree. Val sign tell the direction.<BR>
+              If no other entry is available in the given direction it won't do anything unless force is non 0.
          </P>
   </LI>
   <LI><B>pt_up_step</B> (int) val [(int) force=0]
-         <P>Like pt_step but it jump to next/prev in the parent list. It's useful to break innner loop in the playtree.</P>
+         <P>Like pt_step but it jump to next/previous in the parent list. It's useful to break inner loop in the playtree.</P>
   </LI>
   <LI><B>alt_src_step</B> (int) val
-         <P>When more than one source is avaible it select the next/previous one (only supported by asx playlist).</P>
+         <P>When more than one source is available it select the next/previous one (only supported by asx playlist).</P>
   </LI>
   <LI><B>sub_delay</B> (float) val [(int) abs=0]
          <P>Adjust the subtitles delay of +/- val seconds or set it to val seconds when abs is non zero.</P>
@@ -1463,7 +1476,7 @@ ENTER pt_step 1 1
   <LI><B>brightness</B> (int) val [(int) abs=0]</LI>
   <LI><B>hue</B> (int) val [(int) abs=0]</LI>
   <LI><B>saturation</B> (int) val [(int) abs=0]
-         <P>Set/Adjust video paramters. Val range from -100 to 100.</P>
+         <P>Set/Adjust video parameters. Val range from -100 to 100.</P>
   </LI>
   <LI><B>frame_drop</B> [(int) type=-1]
          <P>Toggle/Set frame dropping mode.</P>
@@ -1549,7 +1562,7 @@ use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
 <P>The slave mode allow you to build simple frontend to <B>MPlayer</B>. When
   enabled (with the <CODE>-slave</CODE> switch) <B>MPlayer</B> will read
-  commands separeted by new line (\n) from stdin.</P>
+  commands separated by new line (\n) from stdin.</P>
 
 
 <P><B><A NAME=3.3>3.3. Streaming from network or pipes</A></B></P>
@@ -1557,7 +1570,7 @@ use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 <P><B>MPlayer</B> can play files from network, using the HTTP or MMS protocol.</P>
 
 <P>Playing goes by simply using adding the URL to the command line. <B>MPlayer</B>
-also honours the http_proxy environment variable, and uses proxy if available.
+also honors the http_proxy environment variable, and uses proxy if available.
 Proxy usage can also be forced :</P>
 
 <P><CODE>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
@@ -1640,11 +1653,11 @@ when using libavcodec.</P>
 <P>On <B>UltraSPARC</B>s, <B>MPlayer</B> takes advantage of their <B>VIS</B>
 extensions (equivalent to MMX), currently only in <I>libmpeg2</I>,
 <I>libvo</I> and <I>libavcodec</I>, but not in mp3lib. You can watch a VOB file
-on a 400Mhz CPU. You'll need <A
+on a 400MHz CPU. You'll need <A
 HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A> installed.</P>
 
 <P>To build the package you will need GNU make (gmake, /opt/sfw/gmake), native
-Solaris make will not work. Typical error you get when building with solaris'
+Solaris make will not work. Typical error you get when building with Solaris'
 make instead of GNU make:</P>
 
 <PRE>
@@ -1695,13 +1708,13 @@ not use GNU as:</P>
 <P>For DVD support you must have the patched libcss installed. Patch:
 <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A>.</P>
 
-<P>Due to two bugs in solaris 8 x86,  you cannot reliably play DVDs using a
+<P>Due to two bugs in Solaris 8 x86,  you cannot reliably play DVDs using a
 capacity >4GB:</P>
 
 <UL>
-<LI>The sd(7D) driver on solaris 8 x86 driver has bug when accessing a
+<LI>The sd(7D) driver on Solaris 8 x86 driver has bug when accessing a
 disk block >4GB on a device using a logical blocksize != DEV_BSIZE
-(i.e. CDROM and DVD media).  Due to a 32bit int overflow, a disk
+(i.e. CD-ROM and DVD media).  Due to a 32bit int overflow, a disk
 address modulo 4GB is accessed.
 (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
 
@@ -1732,7 +1745,7 @@ all data is accessed modulo 4GB
 
 <P><B><A NAME=6.5>6.5. Silicon Graphics Indigo / IRIX</A></B></P>
 
-<P>Reported working. You'll probably have to use the <I>sgi</I> ao driver.
+<P>Reported working. You'll probably have to use the <I>SGI</I> ao driver.
 Anyone has closer info?</P>
 
 
@@ -1761,7 +1774,7 @@ that the native version is used and do '<CODE>gmake</CODE>'.</P>
 kernel with "<CODE>option USER_LDT</CODE>".</P>
 
 <P>If <B>MPlayer</B> complains about not finding '/dev/cdrom' or
-'/dev/dvd' make a symbolic link, eg <CODE>ln -s
+'/dev/dvd' make a symbolic link, e.g. <CODE>ln -s
 /dev/rcd0c /dev/dvd</CODE></P>
 
 <P>The not so hardcore hackers amongst us might want to use the ports
@@ -1777,7 +1790,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 
 <P><B><A NAME=A>Appendix A - Authors</A></B></P>
 
-<P>NOTE: Do *NOT* send bugreports, help &amp; feature requests directly to the authors!</P>
+<P>NOTE: Do *NOT* send bug reports, help &amp; feature requests directly to the authors!</P>
 
 <P>Read Appendix <A HREF="#C">C</A> and subscribe to mplayer-users mailing lists.</P>
 
@@ -1797,8 +1810,8 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
   <LI>hacking DivX/Mpeg4 VfW codecs to get YUV output</LI>
   <LI>opendivx decoder speed optimizations (see opendivx/ChangeLog)</LI>
   <LI>OSD &amp; SUB display code</LI>
-  <LI>ffmpeg/libavcodec integration</LI>
-  <LI>DivX4Linux (ProjectMayo) support (see documentation)</LI>
+  <LI>FFmpeg/libavcodec integration</LI>
+  <LI>DivX4Linux (Project Mayo) support (see documentation)</LI>
   <LI>New DVD-Support using libdvdread</LI>
   <LI>DVB support</LI>
   <LI>MPEG PES output &amp; DVB card support</LI>
@@ -1822,7 +1835,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 <UL>
   <LI>./configure script improvements</LI>
   <LI>Makefile improvements</LI>
-  <LI>prelimenary DVD support</LI>
+  <LI>preliminary DVD support</LI>
   <LI>various X11 cleanups and fixes</LI>
   <LI>HTMLization of documentation</LI>
 </UL>
@@ -1834,7 +1847,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
   <LI>hungarian translation of documentation, homepage, and help output</LI>
   <LI>second homepage design&amp;gfx</LI>
   <LI>homepage maintainer</LI>
-  <LI>testing, codecs quality &amp; speed comparsions</LI>
+  <LI>testing, codecs quality &amp; speed comparisons</LI>
   <LI>IRC channels operator (#MPlayer is user channel)</LI>
   <LI>experimental MINIX port :) (what's funny about it?)</LI>
   <LI>MPsub subtitle format design</LI>
@@ -1876,15 +1889,15 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 <UL>
   <LI>ALSA output driver in libao2</LI>
   <LI>vo_ggi output driver in libvo (www.ggi-project.org)</LI>
-  <LI>xanim codecs support</LI>
+  <LI>XAnim codecs support</LI>
   <LI>VIVO files support</LI>
   <LI>TV grabbing support</LI>
   <LI>Quicktime hackings</LI>
   <LI>libavcodec support in MEncoder</LI>
-  <LI>RM fileformat demuxer</LI>
+  <LI>RM file format demuxer</LI>
   <LI>mencoder framecopy</LI>
   <LI>yuv4mpeg1 support</LI>
-  <LI>Nuppelvideo demuxer changes</LI>
+  <LI>NuppelVideo demuxer changes</LI>
   <LI>subconfig</LI>
   <LI>VIDIX and libdha hackings</LI>
   <LI>Matrox driver port to Vidix</LI>
@@ -1900,7 +1913,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 </UL>
 </LI>
 
-<LI><B><A HREF="mailto:atmosfear@users.sourceforge.net">Felix B&uuml;nemann (Atmos)</A></B>
+<LI><B><A HREF="mailto:atmosfear@users.sourceforge.net">Felix Bünemann (Atmos)</A></B>
 <UL>
   <LI>SDL driver maintainer</LI>
   <LI>Additional YUV formats fixes</LI>
@@ -1909,7 +1922,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
   <LI>flipping support (for Indeo 3/4, etc)</LI>
   <LI>SDL audio driver in libao2</LI>
   <LI>RAW PCM/WAVE file writer for libao2</LI>
-  <LI>OggVorbis audio support</LI>
+  <LI>Ogg Vorbis audio support</LI>
   <LI>Various aspect code</LI>
   <LI>Win32 (Cygwin) port</LI>
   <LI>priority support in codecs.conf (never used ;)</LI>
@@ -1921,7 +1934,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 
 <LI><B><A HREF="mailto:telenieko@telenieko.com">TeLeNiEkO</A></B>
 <UL>
-  <LI>spanish translation of documentation</LI>
+  <LI>Spanish translation of documentation</LI>
 </UL>
 </LI>
 
@@ -1942,9 +1955,9 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 <LI><B><A HREF="mailto:nickols_k@mail.ru">Nick Kurshev</A></B>
 <UL>
   <LI>memcpy optimizations for AMD K7 and Intel Pentium III  (fastmemcpy.h)</LI>
-  <LI>CDROM tune info</LI>
-  <LI>further 3DNow! optimizations into mp3lib and libac3 and ffmpeg</LI>
-  <LI>russian translation of documentation</LI>
+  <LI>CD-ROM tune info</LI>
+  <LI>further 3DNow! optimizations into mp3lib and libac3 and FFmpeg</LI>
+  <LI>Russian translation of documentation</LI>
   <LI>radeon_vid, rage128_vid, radeonfb</LI>
   <LI>libvo driver: vo_vesa</LI>
   <LI>VIDIX and libdha design, programming</LI>
@@ -1959,15 +1972,15 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 
 <LI><B><A HREF="mailto:eyck@incubus.ar.lublin.pl">Dariusz Pietrzak (Eyck)</A></B>
 <UL>
-  <LI>debian packaging support (see debian/* and this documentation)</LI>
+  <LI>Debian packaging support (see debian/* and this documentation)</LI>
   <LI>support for vplayer subtitle format</LI>
-  <LI>prelimenary support for .RT subtitle format</LI>
+  <LI>preliminary support for .RT subtitle format</LI>
 </UL>
 </LI>
 
 <LI><B><A HREF="mailto:marcus@idonex.se">Marcus Comstedt</A></B>
 <UL>
-  <LI>initial solaris8-x86 support</LI>
+  <LI>initial Solaris8-x86 support</LI>
   <LI>configure fixes</LI>
 </UL>
 </LI>
@@ -2006,7 +2019,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
   <LI>Playlist parsers</LI>
   <LI>New input</LI>
   <LI>Audio only support</LI>
-  <LI>MP3, Wav and Ogg demuxers</LI>
+  <LI>MP3, WAV and Ogg demuxers</LI>
   <LI>Support for audio from external file</LI>
   <LI>DXR2 driver</LI>
   <LI>vo_aa improvements</LI>
@@ -2040,7 +2053,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 
 <LI><B><A HREF="mailto:ktoman@email.cz">Kamil Toman</A></B>
 <UL>
-  <LI>czech fonts</LI>
+  <LI>Czech fonts</LI>
 </UL>
 </LI>
 
@@ -2054,7 +2067,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 <LI><B><A HREF="mailto:p_l@gmx.fr">pl</A></B>
 <UL>
   <LI>new ./configure script</LI>
-  <LI>general code maintaining, fixes, patch commiting</LI>
+  <LI>general code maintaining, fixes, patch committing</LI>
 </UL>
 </LI>
 
@@ -2064,7 +2077,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
   <LI>software scaling C/MMX/MMX2/3DNow support (swscale.c)</LI>
   <LI>various rgb/yuv bpp converters</LI>
   <LI>new, better IDCT code for libavcodec</LI>
-  <LI>runtime cpu detection</LI>
+  <LI>runtime CPU detection</LI>
   <LI>SSE optimization of liba52</LI>
 </UL>
 </LI>
@@ -2151,8 +2164,8 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 
 <LI><B><A HREF="mailto:timf@mail.csse.monash.edu.au">Tim Ferguson</A></B>
 <UL>
-  <LI>Opensource Cinepak decoder</LI>
-  <LI>Opensource CYUV decoder</LI>
+  <LI>Open source Cinepak decoder</LI>
+  <LI>Open source CYUV decoder</LI>
 </UL>
 </LI>
 
@@ -2164,7 +2177,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 
 <LI><B><A HREF="mailto:johannes.feigl@mcse.at">Johannes Feigl</A></B>
 <UL>
-  <LI>original german docs translation</LI>
+  <LI>original German docs translation</LI>
   <LI>some improvements in configure, small patches</LI>
   <LI>found somebody (Thilo Wunderlich) who sent a DVB card</LI>
 </UL>
@@ -2258,7 +2271,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
     <UL>
       <LI>avifile author  [AVI player library for linux, using Win32 VfW/ACM codecs]</LI>
       <LI>technical help about AVI and ASF formats, and how to get YUV using VfW...</LI>
-      <LI>divx4linux techical support</LI>
+      <LI>divx4linux technical support</LI>
     </UL>
   </LI>
   <LI>Zdenek Kabelac:  &lt;kabi@informatics.muni.cz&gt;
@@ -2269,7 +2282,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
   </LI>
   <LI>Gerard Lantau: &lt;glantau@yahoo.fr&gt;
     <UL>
-      <LI>ffmpeg/libavcodec author,maintainer (opensource mpeg, mjpeg, divx en/decoder)</LI>
+      <LI>FFmpeg/libavcodec author,maintainer (open source mpeg, mjpeg, divx en/decoder)</LI>
     </UL>
   </LI>
   <LI>Project Mayo:  &lt;<A HREF="http://www.projectmayo.com">http://www.projectmayo.com</A>&gt;
@@ -2306,7 +2319,7 @@ other technical help from:</P>
 <UL>
   <LI>John F. McGowan   http://www.jmcgowan.com/
     <UL>
-      <LI>AVI FAQ author/collector. [site with many useful docs on codecs and avi fmt]</LI>
+      <LI>AVI FAQ author/collector. [site with many useful docs on codecs and avi format]</LI>
     </UL>
   </LI>
   <LI>Dirk Farin:      &lt;farin@ti.uni-mannheim.de&gt;
@@ -2470,10 +2483,10 @@ This list should be kept low-traffic.</P>
 </LI>
 <LI>MPlayer &amp; Matrox G200/G400/G450/G550 users:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox">http://mplayerhq.hu/mailman/listinfo/mplayer-matrox</A>
-Send matrox-related questions here
+Send Matrox related questions here
 <UL>
 <LI>things about mga_vid</LI>
-<LI>matrox's official beta drivers (for X 4.x.x)</LI>
+<LI>Matrox's official beta drivers (for X 4.x.x)</LI>
 <LI>and about matroxfb-TVout stuff.</LI>
 </UL>
 </LI>
@@ -2485,7 +2498,7 @@ Send matrox-related questions here
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A>
 <P>Send only questions about CVS changes here.
 (if you don't understand why a change is required or you've better fix or you've
-noticed possible bug/problem in the commited patch)
+noticed possible bug/problem in the committed patch)
 Be sure in that your target developer reads this list!</P>
 </LI>
 </UL>
@@ -2501,7 +2514,7 @@ otherwise.  Please do not send messages using other language!</P>
 
 <P><B><A NAME=D>Appendix D - Known bugs</A></B></P>
 
-<P>Special system/cpu-specific bugs/problems:</P>
+<P>Special system/CPU-specific bugs/problems:</P>
 <UL>
 
 <LI>SIGILL (signal 4) on P3 using 2.2.x kernels:<BR>
@@ -2511,7 +2524,7 @@ otherwise.  Please do not send messages using other language!</P>
 
 <LI>General SIGILL (signal 4):<BR>
   Problem: you compiled and run mplayer in different machines
-  (for example compiled on P3 and running on celeron)<BR>
+  (for example compiled on P3 and running on Celeron)<BR>
   Solution: compile MPlayer on the same machine where you will use it!<BR>
   Workaround: ./configure --disable-sse etc. options</LI>
 
@@ -2535,13 +2548,13 @@ General audio delay or jerky sound (exists with all or many files):
 <UL>
 <LI>most common: buggy audio driver! - try to use different drivers, try
 ALSA 0.9 OSS emulation with -ao oss, also try -ao sdl, sometimes it helps.
-If your file plays fine with -nosound, then you can be sure it's soundcard
+If your file plays fine with -nosound, then you can be sure it's sound card
 (driver) problem.</LI>
 <LI>audio buffer problems (buffer size badly detected)<BR>
   Workaround:  mplayer -abs option</LI>
 <LI>samplerate problems - maybe your card doesn't support the samplerate
 used in your files - try the resampling plugin (-aop)</LI>
-<LI>slow machine (cpu or vga)<BR>
+<LI>slow machine (CPU or VGA)<BR>
   try with -vo null, if it plays well, then you have slow VGA card/driver<BR>
   Workaround: buy a faster card or read this documentation about how to speed up<BR>
   Also try -framedrop</LI>
@@ -2560,8 +2573,8 @@ Audio delay/de-sync specific to one or a few files:
   </UL>
   If none of these help, please upload the file, we'll check (and fix).
 </LI>
-<LI>your soundcard doesn't support 48Khz playback<BR>
-  Workaround: buy a better soundcard...  or try to decrease fps by 10% (use -fps 27 for a 30fps movie)
+<LI>your sound card doesn't support 48kHz playback<BR>
+  Workaround: buy a better sound card...  or try to decrease fps by 10% (use -fps 27 for a 30fps movie)
   or use the resampler plugin</LI>
 <LI>slow machine<BR>
   (if A-V is not around 0, and the last number in the status line increasing)<BR>
@@ -2579,7 +2592,7 @@ No picture at all (just plain grey/green window):
 <LI>your file uses an unsupported video codec<BR>
   Workaround: read the documentation and help us adding support for it</LI>
 <LI>auto-selected codec can't decode the file, try to select another using -vc or -vfm options</LI>
-<LI>you try to play DivX 3.x file with opendivx decoder or XviD (-vc odivx) - install Divx4Linux and recompile player</LI>
+<LI>you try to play DivX 3.x file with OpenDivX decoder or XviD (-vc odivx) - install Divx4Linux and recompile player</LI>
 </UL>
 
 <P>Video-out problems:</P>
@@ -2593,7 +2606,7 @@ Only a few driver supports scaling/zooming, don't expect this from x11 or dga.</
 - xv driver: use -double option</P>
 
 <P>Green image using mga_vid (-vo mga / -vo xmga):<BR>
-- mga_vid missdetected your card's RAM amount, reload it using mga_ram_size option<BR>
+- mga_vid misdetected your card's RAM amount, reload it using mga_ram_size option<BR>
 </P>
 
 </BODY>
