@@ -138,6 +138,8 @@ read_rtp_from_server(int fd, char *buffer, int length) {
 #endif
 
 // Connect to a server using a TCP connection
+// return -2 for fatal error, like unable to resolve name, connection timeout...
+// return -1 is unable to connect to a particular port
 int
 connect2Server(char *host, int port) {
 	int socket_server_fd;
@@ -152,7 +154,7 @@ connect2Server(char *host, int port) {
 	socket_server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if( socket_server_fd==-1 ) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create socket\n");
-		return -1;
+		return -2;
 	}
 
 	if( isalpha(host[0]) ) {
@@ -160,7 +162,7 @@ connect2Server(char *host, int port) {
 		hp=(struct hostent*)gethostbyname( host );
 		if( hp==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Counldn't resolve name: %s\n", host);
-			return -1;
+			return -2;
 		}
 		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
 	} else {
@@ -191,7 +193,7 @@ connect2Server(char *host, int port) {
 		  mp_msg(MSGT_NETWORK,MSGL_ERR,"Connection timeout\n");
 		else
 		  mp_msg(MSGT_NETWORK,MSGL_V,"Connection interuppted by user\n");
-		return -1;
+		return -2;
 	      }
 	      count++;
 	      FD_ZERO( &set );
@@ -207,7 +209,7 @@ connect2Server(char *host, int port) {
 	ret =  getsockopt(socket_server_fd,SOL_SOCKET,SO_ERROR,&err,&err_len);
 	if(ret < 0) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"getsockopt failed : %s\n",strerror(errno));
-		return -1;
+		return -2;
 	}
 	if(err > 0) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Connect error : %s\n",strerror(err));
