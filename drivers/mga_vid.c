@@ -732,15 +732,33 @@ static int mga_vid_find_card(void)
 
 #else
 	if (is_g400){
+		switch((card_option>>10)&0x17){
+		    // SDRAM:
+		    case 0x00:
+		    case 0x04:  mga_ram_size = 16; break;
+		    case 0x03:
+		    case 0x05:  mga_ram_size = 64; break;
+		    // SGRAM:
+		    case 0x10:
+		    case 0x14:  mga_ram_size = 32; break;
+		    case 0x11:
+		    case 0x12:  mga_ram_size = 16; break;
+		    default:
+			mga_ram_size = 16;
+			printk(KERN_INFO "mga_vid: Couldn't detect RAMSIZE, assuming 16MB!");
+		}
+#if 0
 		switch((card_option>>10)&7){
-		    case 0:  mga_ram_size = ((card_option>>14)&1)? 32:16; break;
+		    case 0:
+		    case 4:  mga_ram_size = ((card_option>>14)&1)? 32:16; break;
 		    case 1:
 		    case 2:  mga_ram_size = 16; break;	// SGRAM
 		    case 3:
 		    case 5:  mga_ram_size = 64; break;	// SDRAM
-		    case 4:  mga_ram_size = 32; break;	// SGRAM
+//		    case 4:  mga_ram_size = 32; break;	// SGRAM
 		    default: mga_ram_size = 16;
 		}
+#endif
 	}else{
 		switch((card_option>>11)&3){
 		    case 0:  mga_ram_size = 8; break;
