@@ -6,7 +6,7 @@ defined in vf.h
 
 basically it means video output manipulation, ie. these plugins can
 modify the image and the image properties (size, colorspace etc) between
-the video decoders (vd.h) and output plugins (libvo or video encoders)
+the video decoders (vd.h) and output layer (libvo or video encoders)
 
 the actual API is a mixture of the video decoder (vd.h) and libvo
 (video_out.h) APIs.
@@ -15,7 +15,7 @@ the main differences:
 - vf plugins may be "loaded" multiple times, with different parameters
   and context - it's new in mplayer, old APIs weren't reentrant
 - vf plugins don't have to implement all functions - all funcs has
-  'fallback' version, so teh plugins only override these if want
+  'fallback' version, so the plugins only override these if want
 - each vf plugin has its own get_image context, and they can interchange
   images/buffers using these get_image/put_image calls.
 
@@ -30,6 +30,7 @@ Current plugins:
     w,h (cropped width,height) defaults to original width,height
     x,y (position of cropped subimage on the original image) defaults to center
     MPI: EXPORT only, using stride manipulation
+
 -vop expand[=w:h:x:y:o]
     Expanding _and_ (optional) OSD rendering plugin.
     w,h (expanded width,height) defaults to original width,height
@@ -38,6 +39,7 @@ Current plugins:
     MPI: DR (if possible) or copy
     Special: mpcodecs core uses it to solve stride restrictions between filters
 	     mencoder uses (autoload) it to render SUB/OSD
+
 -vop flip
     Flips image upside-down.
     No parameters.
