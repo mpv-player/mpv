@@ -6,14 +6,14 @@
 <para>
 Przewodnik szybkiej instalacji znajdziesz w pliku <filename>README</filename>.
 Proszê, najpierw go przeczytaj, a pó¼niej wróæ do tego dokumentu
-po bardziej mordercze szczegó³y.
+po mro¿±ce krew w ¿y³ach szczegó³y.
 </para>
 
 <para>
 W tym rozdziale postaram siê przeprowadziæ Ciê przez kompilacjê
 i konfiguracjê <application>MPlayera</application>. Nie bêdzie to ³atwe,
-ale niekoniecznie te¿ musi byæ ciê¿kie. Je¿eli zauwa¿ysz zachowanie inne ni¿
-to które obja¶niam, proszê poszukaj w dokumentacji, a na pewno znajdziesz
+ale niekoniecznie te¿ musi byæ trudne. Je¿eli zauwa¿ysz zachowanie inne ni¿
+to, które obja¶niam, proszê poszukaj w dokumentacji, a na pewno znajdziesz
 odpowiedzi. Je¿eli widzisz linki, ¶led¼ je i czytaj uwa¿nie ich zawarto¶æ.
 Zajmie to trochê czasu, ale z pewno¶ci± JEST tego warte.
 </para>
@@ -203,7 +203,7 @@ Potrzebujesz do¶æ nowego sprzêtu. Je¶li u¿ywasz Linuksa, zalecane s± j±dra z ser
   kodowania. Cechy:
   <itemizedlist>
   <listitem><simpara>
-    1 lub  2 przej¶ciowe kodowanie przy pomocy <link linkend="mencoder">
+    1 lub  2 przebiegowe kodowanie przy pomocy <link linkend="mencoder">
     <application>MEncodera</application></link>
     </simpara></listitem>
   <listitem><simpara>
@@ -221,14 +221,14 @@ Potrzebujesz do¶æ nowego sprzêtu. Je¶li u¿ywasz Linuksa, zalecane s± j±dra z ser
   z otwartym ¼ród³em. Cechy:
   <itemizedlist>
   <listitem><simpara>
-    1 lub 2 przej¶ciowe kodowanie przy pomocy <link linkend="mencoder">
+    1 lub 2 przebiegowe kodowanie przy pomocy <link linkend="mencoder">
     <application>MEncodera</application></link>
     </simpara></listitem>
   <listitem><simpara>
     ma otwarte ¼ród³o, wiêc jest wieloplatformowa.
     </simpara></listitem>
   <listitem><simpara>
-    jest oko³o 2 razy szybsza od divX4 podczas zakodowywania, a osi±ga mniej wiêcej tê sam± jako¶æ
+    jest oko³o 2 razy szybsza od DivX4 podczas zakodowywania, a osi±ga mniej wiêcej tê sam± jako¶æ
     </simpara></listitem>
   </itemizedlist>
   </para></listitem>
@@ -459,7 +459,7 @@ dzia³a ona z nastêpuj±cymi sterownikami:
   </para></listitem>
 <listitem><para>
   Je¿eli masz <emphasis role="bold">tuner TV</emphasis> kompatybilny z V4L i
-  chcesz ogl±daæ/przechwytywaæ, i enkodowaæ filmy przy pomocy <application>MPlayera</application>,
+  chcesz ogl±daæ/przechwytywaæ, i kodowaæ filmy przy pomocy <application>MPlayera</application>,
   przeczytaj rozdzia³ <link linkend="tv-input">wej¶cie TV</link>.
   </para></listitem>
 <listitem><para>
@@ -549,7 +549,7 @@ komendê <command>gmplayer</command>.
 
 <para>
 Obecnie nie mo¿esz skorzystaæ z opcji <option>-gui</option> w wierszu poleceñ
-z powodów technicznych.
+z przyczyn technicznych.
 </para>
 
 <para>
@@ -613,13 +613,13 @@ je¶li podasz odpowiedni± opcjê:
 </para>
 
 <para>
-Opcje dla wiersza poleceñ ró¿ni± siê delikatnie dla ró¿nych formatów:
+Opcje dla wiersza poleceñ ró¿ni± siê nieco dla ró¿nych formatów:
 </para>
 
 <formalpara>
 <title>Format VOBsub</title>
 <para>
-Napisy VOBsub sk³adaj± siê z du¿ego (kilku megabajtowego) pliku <filename>.SUB</filename>
+Napisy VOBsub sk³adaj± siê z du¿ego (kilkumegabajtowego) pliku <filename>.SUB</filename>
 i opcjonalnych plików <filename>.IDX</filename> i/lub <filename>.IFO</filename>.
 Je¿eli masz takie pliki, jak
 <filename><replaceable>przyk³ad.sub</replaceable></filename>,
@@ -717,8 +717,8 @@ planeta Naboo by³a atakowana.<!--
 
 <para>
 Widzisz wiêc, ¿e g³ównym celem by³o <emphasis role="bold">umo¿liwienie ³atwej
-edycji/synchronizacji/³±czenia/obcinania napisów</emphasis>. Wiêc, je¶li - powiedzmy -
-pobierzesz napisy SSA, które s± ¼le umieszczone w czasie/opó¼nione w stosunku do Twojej wersji
+edycji/synchronizacji/³±czenia/obcinania napisów</emphasis>. Wiêc je¶li - powiedzmy -
+pobierzesz napisy SSA, które s± ¼le rozmieszczone w czasie/opó¼nione w stosunku do Twojej wersji
 filmu, wykonujesz wtedy
 
 <screen>mplayer <replaceable>film.avi</replaceable> -sub ¼ród³o.ssa -dumpmpsub</screen>
@@ -965,8 +965,8 @@ Istniej± trzy metody synchronizacji w <application>MPlayerze</application>.
   </para></listitem>
 <listitem><simpara>
   <emphasis role="bold">Trzeci kod zegara</emphasis> w³±czany jest opcj±
-  <option>-softsleep</option>. Ma wydajno¶æ RTC, ale z niego nie korzysta.
-  Wymaga wiêkszej mocy obliczeniowej procesora.
+  <option>-softsleep</option>. Ma dok³adno¶æ RTC, ale z niego nie korzysta.
+  Wymaga jednak wiêkszej mocy obliczeniowej procesora.
   </simpara></listitem>
 </itemizedlist>
 <note><para><emphasis role="bold">NIGDY nie instaluj pliku wykonywalnego
