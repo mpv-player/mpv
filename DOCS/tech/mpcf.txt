@@ -93,8 +93,8 @@ stream_header:
 	index_flag				u(1)
 	reserved				u(6)
 	for(;;){
-		codec_specific_data_type	b
-		if(codec_specific_data_type=="") break;
+		codec_specific_data_type	v
+		if(codec_specific_data_type==0) break;
 		codec_specific_data		b
 	}
 
@@ -255,8 +255,12 @@ fixed_fps
 	1 indicates that the fps is fixed
 
 codec_specific_data_type
-	"bitmapinfoheader", "waveformatex", "imagedesc", "sounddesc",
-	"native"
+	0	end
+	1	native
+	2	bitmapinfoheader
+	3	waveformatex
+	4	imagedesc
+	5	sounddesc
 	"native", means a simple api & container independanet storage form,
 	for example some mpeg4-es headers
         
