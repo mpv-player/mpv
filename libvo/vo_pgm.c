@@ -61,7 +61,6 @@ get_info(void)
 static void flip_page (void)
 {
     FILE * f;
-    int i;
 
     snprintf (vo_pgm_filename, 24, "%08d.pgm", framenum++);
 

@@ -43,7 +43,7 @@ static vo_info_t vo_info =
 };
 
 /* private prototypes */
-static void Display_Image (unsigned char *ImageData);
+// static void Display_Image (unsigned char *ImageData);
 
 /* local data */
 static unsigned char *ImageData=NULL;
@@ -57,7 +57,7 @@ static Window mywindow;
 static XWindowAttributes attribs;
 static int X_already_started = 0;
 
-static int texture_id=1;
+//static int texture_id=1;
 
 static GLXContext wsGLXContext;
 //XVisualInfo        * wsVisualInfo;
@@ -105,7 +105,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	XVisualInfo *vinfo;
 	XEvent xev;
 
-	XGCValues xgcv;
+//	XGCValues xgcv;
 	XSetWindowAttributes xswa;
 	unsigned long xswamask;
 
@@ -414,7 +414,6 @@ uint8_t *s=src[0];
 uint8_t *de=&ImageData[3*image_width];
 
     for(i=0;i<image_height;i++){
-      int j;
       uint8_t *d=ImageData;
       while(d<de){
         d[0]=s[2];

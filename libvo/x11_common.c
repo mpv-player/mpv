@@ -47,7 +47,6 @@ void vo_hidecursor ( Display *disp , Window win )
 
 int vo_init( void )
 {
- int       CompletionType = -1;
 // int       mScreen;
  int bpp;
 // char    * DisplayName = ":0.0";

@@ -32,7 +32,6 @@ int vo_osd_progbar_type=-1;
 int vo_osd_progbar_value=100;   // 0..255
 
 static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-        int len=strlen(vo_osd_text);
         int i;
         int y=dys/2;
         int x;
@@ -100,10 +99,8 @@ static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, i
     for(i=0;i<vo_sub->lines;i++){
         unsigned char* text=vo_sub->text[i];
         int len=strlen(text);
-        int j,k;
+	int j;
         int xsize=-vo_font->charspace;
-        int x=0;
-
 	int lastStripPosition=-1;
 	int previousStrip=0;
 	int lastxsize=0;
@@ -119,7 +116,7 @@ static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, i
 	    lastxsize=xsize;
 	  }
           xsize+=w+vo_font->charspace;
-	  if (dxs<xsize & lastStripPosition>0)
+	  if (dxs<xsize && lastStripPosition>0)
 	  {
 	    xsize=lastxsize;
 	    j=lastStripPosition;
@@ -153,7 +150,7 @@ static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, i
 	    lastxsize=xsize;
 	  }
           xsize+=w+vo_font->charspace;
-	  if ((dxs<xsize & lastStripPosition>0)| j==len-1)
+	  if ((dxs<xsize && lastStripPosition>0) || j==len-1)
 	  {
 	    if (j==len-1) lastStripPosition=len;
 	      else xsize=lastxsize;
@@ -188,6 +185,8 @@ static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, i
 
 static int draw_alpha_init_flag=0;
 
+extern void vo_draw_alpha_init();
+
 void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
 
     if(!vo_font) return; // no font
@@ -210,5 +209,3 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
     }
 
 }
-
-
