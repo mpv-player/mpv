@@ -129,8 +129,9 @@ static int init(int rate,int channels,int format,int flags){
     // We only use SNDCTL_DSP_CHANNELS for >2 channels, in case some drivers don't have it
     ao_data.channels = channels;
     if (ao_data.channels > 2) {
-      if (ioctl (audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels) == -1) {
-	printf("audio_setup: Failed to set audio device to %d channels\n", ao_data.channels);
+      if ( ioctl(audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels) == -1 ||
+	   ao_data.channels != channels ) {
+	printf("audio_setup: Failed to set audio device to %d channels\n", channels);
 	return 0;
       }
     }
@@ -141,7 +142,7 @@ static int init(int rate,int channels,int format,int flags){
 	return 0;
       }
     }
-    printf("audio_setup: using %d channels (requested: %d)\n", ao_data.channels, ao_data.channels);
+    printf("audio_setup: using %d channels (requested: %d)\n", ao_data.channels, channels);
     // set rate
     ao_data.samplerate=rate;
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
