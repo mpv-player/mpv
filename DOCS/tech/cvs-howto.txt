@@ -2,6 +2,29 @@
 About CVS write access:
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+Before everything else, you should know how to use CVS properly. CVS comes with
+some documentation, as usual
+
+  cvs --help
+  man cvs
+
+are a good start. The most comprehensive manual is the book "Version Management
+with CVS" by Per Cederqvist. It may be available on your system via
+
+  info cvs
+
+or online at
+
+  http://www.cvshome.org/docs/manual/
+
+Another very good resource is "The CVS Book - Open Source Development with CVS"
+by Karl Fogel and Moshe Bar. It is also available online:
+
+http://cvsbook.red-bean.com/
+
+Consult these resources whenever you have problems, they are quite exhaustive.
+What follows now are MPlayer specific guidelines.
+
 
 I. TECH SIDE:
 =============
@@ -21,6 +44,7 @@ I. TECH SIDE:
     export CVS_RSH=ssh
     cvs -z3 -d:ext:LOGIN@mplayerhq.hu:/cvsroot/mplayer co main
   
+  Replace LOGIN with your login name.
   NOTE: cvs -d:pserver: mode doesn't allow writing, even with password!
   
 3. Committing changes:
@@ -31,7 +55,7 @@ I. TECH SIDE:
   You don't have to include the filename in the comment, as comments are linked
   to files. If you have different comments for different files, commit them
   separately, not at the same time. If you leave out -m at the command line you
-  will be prompted for a comment in an editor.
+  will be prompted for a comment in an editor (usually vi).
   
 4. Adding new files/dirs:
 
@@ -67,8 +91,19 @@ I. TECH SIDE:
 
   Such actions are useless and treated as cosmetics in 99% of cases,
   so try to avoid them.
-  
-  
+
+9. Reverting broken commits
+
+  In case you committed something really broken and wish to undo it completely,
+  you can use the 'cvs admin -o' command. Assuming that 1.123 is the latest
+  version of the file and the one you want to remove
+
+  cvs -z3 admin -o1.123 filename
+
+  Do NOT do this unless you really know what you are doing and the version you
+  are removing is the last version, e.g. there were no commits after yours.
+
+
 Contact A'rpi <arpi@thot.banki.hu> if you have technical problems with the CVS
 server.
 
