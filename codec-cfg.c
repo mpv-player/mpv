@@ -243,26 +243,34 @@ static short get_driver(char *s,int audioflag)
 
 static int validate_codec(codecs_t *c, int type)
 {
-#if 0
 	int i;
+	char *tmp_name = strdup(c->name);
 
-	for (i = 0; i < strlen(c->name) && isalnum(c->name[i]); i++)
+	for (i = 0; i < strlen(tmp_name) && isalnum(tmp_name[i]); i++)
 		/* NOTHING */;
-	if (i < strlen(c->name)) {
-		printf("\ncodec(%s)->name is not valid!\n", c->name);
+
+	if (i < strlen(tmp_name)) {
+		printf("\ncodec(%s) name is not valid!\n", c->name);
 		return 0;
 	}
-#warning codec->info = codec->name; ez ok, vagy strdup()?
+
 	if (!c->info)
-		c->info = c->name;
+		c->info = strdup(c->name);
+
+#if 0
 	if (c->fourcc[0] == 0xffffffff) {
 		printf("\ncodec(%s) does not have fourcc/format!\n", c->name);
 		return 0;
 	}
+
+	/* XXX fix this: shitty with 'null' codec */
 	if (!c->driver) {
 		printf("\ncodec(%s) does not have a driver!\n", c->name);
 		return 0;
 	}
+#endif
+
+#if 0
 #warning codec->driver == 4;... <- ezt nem kellene belehegeszteni...
 #warning HOL VANNAK DEFINIALVA????????????
 	if (!c->dll && (c->driver == 4 ||
@@ -595,7 +603,7 @@ err_out:
 	free(fp);
 	return NULL;
 err_out_not_valid:
-	printf("codec is not definied correctly");
+	printf("codec is not defined correctly");
 	goto err_out_print_linenum;
 }
 
