@@ -11,6 +11,7 @@
 
 #include "mp3lib/mp3.h"
 #include "config.h"
+#include "cpudetect.h"
 
 static FILE* mp3file=NULL;
 
@@ -21,6 +22,7 @@ int mplayer_audio_read(char *buf,int size){
 #define BUFFLEN 4608
 static unsigned char buffer[BUFFLEN];
 
+
 int main(int argc,char* argv[]){
   int len;
   int total=0;
@@ -30,6 +32,8 @@ int main(int argc,char* argv[]){
   
   mp3file=fopen((argc>1)?argv[1]:"test.mp3","rb");
   if(!mp3file){  printf("file not found\n");  exit(1); }
+  
+  GetCpuCaps(&gCpuCaps);
 
   // MPEG Audio:
 #ifdef USE_FAKE_MONO

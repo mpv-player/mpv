@@ -94,8 +94,8 @@ struct gr_info_s {
       unsigned preflag;
       unsigned scalefac_scale;
       unsigned count1table_select;
-      int full_gain[3];
-      int pow2gain;
+      real *full_gain[3];
+      real *pow2gain;
 };
 
 struct III_sideinfo
