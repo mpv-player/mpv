@@ -47,6 +47,10 @@ extern int frame_dropping;
 
 extern int auto_quality;
 
+extern int audio_id;
+extern int video_id;
+extern int dvdsub_id;
+
 extern void exit_player(char* how);
 
 #endif
