@@ -35,6 +35,7 @@ static int mplGotoTheNext = 1;
 
 void mplFullScreen( void )
 {
+ if ( guiIntfStruct.NoWindow && guiIntfStruct.Playing ) return;
 #if 0
  static int sx,sy;
 // if ( !guiIntfStruct.Playing )

@@ -323,8 +323,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	ioctl(fd_control, EM8300_IOCTL_SET_ASPECTRATIO, &ioval);
 
 #ifdef SPU_SUPPORT
+#ifdef HAVE_FREETYPE
+	s_width*=1.5;
+#else
 	s_width*=2;
 	s_height*=2;
+#endif
 
 	osdpicbuf = calloc( 1,s_width * s_height);
 	if (osdpicbuf == NULL) {

@@ -507,9 +507,6 @@ int guiGetEvent( int type,char * arg )
 	remove_vop( "fame" );
 	if ( !gstrcmp( video_driver,"dxr3" ) )
 	 {
-	  #warning workaround for this moment.
-	  osd_level=0;
-	  // ---
 	  if ( ( guiIntfStruct.StreamType != STREAMTYPE_DVD)&&( guiIntfStruct.StreamType != STREAMTYPE_VCD ) )
 	   {
 	    if ( gtkVopLAVC ) add_vop( "lavc" );
