@@ -278,6 +278,8 @@ if(dvd_title){
 
 static int dvd_next_cell(dvd_priv_t *d){
     int next_cell=d->cur_cell;
+
+    mp_msg(MSGT_DVD,MSGL_V, "dvd_next_cell: next1=0x%X  \n",next_cell);
     
     if( d->cur_pgc->cell_playback[ next_cell ].block_type
                                         == BLOCK_TYPE_ANGLE_BLOCK ) {
@@ -288,6 +290,7 @@ static int dvd_next_cell(dvd_priv_t *d){
 		++next_cell;
             }
     }
+    mp_msg(MSGT_DVD,MSGL_V, "dvd_next_cell: next2=0x%X  \n",next_cell);
     
     ++next_cell;
     if(next_cell>=d->cur_pgc->nr_of_cells) return -1; // EOF
@@ -295,6 +298,7 @@ static int dvd_next_cell(dvd_priv_t *d){
 	next_cell+=dvd_angle;
 	if(next_cell>=d->cur_pgc->nr_of_cells) return -1; // EOF
     }
+    mp_msg(MSGT_DVD,MSGL_V, "dvd_next_cell: next3=0x%X  \n",next_cell);
     return next_cell;
 }
 
