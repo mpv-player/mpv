@@ -39,7 +39,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2003-01-12"
+.TH MPlayer 1 "2003-01-19"
 .
 .SH NAME
 mplayer  \- Lecteur Vidéo pour Linux
@@ -618,6 +618,13 @@ lire certains mauvais fichiers AVI).
 .B \-nobps (.AVI uniquement)
 Ne pas utiliser la valeur octet/\:sec moyenne pour la synchro A\-V (AVI).
 Aide pour certains fichiers AVI avec une entête cassée.
+.TP
+.B \-noextbased
+Désactive la sélection de demuxer basée sur l'extension du fichier.
+Par défaut, quand le type de fichier (demuxer) ne peut être détecté de façon 
+fiable (le fichier n'a pas d'entête ou n'est pas suffisemment fiable), 
+l'extension du fichier est utilisée pour sélectionner le demuxer. Il se rabbat
+toujours sur une sélection de demuxer basée sur le contenu.
 .TP
 .B \-passwd <mot\ de\ passe> (voir également l'option \-user)
 Indique le mot de passe pour l'identification http.
