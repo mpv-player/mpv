@@ -135,5 +135,12 @@ vixPlaybackOff
 
 All other functions are optionaly.
 
+Useful links:
+~~~~~~~~~~~~~
+Guide to DTV		http://www.digitaltelevision.com/dtvbook/toc.shtml
+Fourcc			http://www.webartz.com/fourcc/
+MPEG			http://www.mpeg.org/MPEG/index.html
+Analog colors		http://www.miranda.com/en/app_notes/TN/TN-05/TN-05.htm
+
 Please send your suggestions, reports, feedback to mplayer-dev-eng@mplayerhq.hu
 Best regards! Nick Kurshev.
