@@ -39,9 +39,7 @@ extern "C" {
 #define __STRICT_ANSI__
 #endif
 
-#ifdef HAVE_CONFIG_H
-#  include "../config.h"
-#endif
+#include "../config.h"
 
 #define INLINE __inline
 #if 0 //defined(_WIN32) && !defined(_WIN32_WCE)
@@ -200,10 +198,6 @@ typedef float float32_t;
 
 /* Define if you have the ANSI C header files. */
 #define STDC_HEADERS 1
-
-#ifdef HAVE_CONFIG_H
-#  include "../config.h"
-#endif
 
 #include <stdio.h>
 #if HAVE_SYS_TYPES_H
@@ -375,6 +369,8 @@ char *strchr(), *strrchr();
 
   #else
 
+#include <math.h>
+
 #ifdef HAVE_LRINTF
 #  define HAS_LRINTF
 #  define _ISOC9X_SOURCE 1
@@ -382,8 +378,6 @@ char *strchr(), *strrchr();
 #  define __USE_ISOC9X   1
 #  define __USE_ISOC99   1
 #endif
-
-    #include <math.h>
 
 #ifdef HAVE_SINF
 #  define sin sinf
