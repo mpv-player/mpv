@@ -59,17 +59,18 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
     }
     if(verbose) printf("Audio codec opened OK! ;-)\n");
 
-    srcsize=in_fmt->nBlockAlign;
-    acmStreamSize(sh_audio->srcstream, srcsize, &srcsize, ACM_STREAMSIZEF_SOURCE);
+    acmStreamSize(sh_audio->srcstream, in_fmt->nBlockAlign, &srcsize, ACM_STREAMSIZEF_SOURCE);
     if(srcsize<OUTBURST) srcsize=OUTBURST;
     sh_audio->audio_out_minsize=srcsize; // audio output min. size
     if(verbose) printf("Audio ACM output buffer min. size: %ld\n",srcsize);
 
-    acmStreamSize(sh_audio->srcstream, srcsize, &srcsize, ACM_STREAMSIZEF_DESTINATION);
+    acmStreamSize(sh_audio->srcstream, 2*srcsize, &srcsize, ACM_STREAMSIZEF_DESTINATION);
     sh_audio->audio_in_minsize=srcsize; // audio input min. size
     if(verbose) printf("Audio ACM input buffer min. size: %ld\n",srcsize);
+    
+    if(srcsize<in_fmt->nBlockAlign) srcsize=in_fmt->nBlockAlign;
 
-    sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
+    sh_audio->a_in_buffer_size=2*sh_audio->audio_in_minsize;
     sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
     sh_audio->a_in_buffer_len=0;
 
@@ -89,6 +90,7 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len){
             demux_read_data(sh_audio->ds,&sh_audio->a_in_buffer[sh_audio->a_in_buffer_len],
             srcsize-sh_audio->a_in_buffer_len);
         }
+        if(verbose>=3)printf("acm convert %d -> %d bytes\n",sh_audio->a_in_buffer_len,len);
         memset(&ash, 0, sizeof(ash));
         ash.cbStruct=sizeof(ash);
         ash.fdwStatus=0;
@@ -105,9 +107,10 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len){
         hr=acmStreamConvert(sh_audio->srcstream,&ash,0);
         if(hr){
           printf("ACM_Decoder: acmStreamConvert error %d\n",(int)hr);
-					return -1;
+          
+//					return -1;
         }
-        //printf("ACM convert %d -> %d  (buf=%d)\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed,a_in_buffer_len);
+        if(verbose>=3) printf("acm converted %d -> %d\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed);
         if(ash.cbSrcLengthUsed>=sh_audio->a_in_buffer_len){
           sh_audio->a_in_buffer_len=0;
         } else {
