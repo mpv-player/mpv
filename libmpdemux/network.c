@@ -63,6 +63,7 @@ static struct {
 	{ "video/x-ms-wmv", DEMUXER_TYPE_ASF },
 	{ "video/x-ms-wma", DEMUXER_TYPE_ASF },
 	// Playlists
+	{ "video/x-ms-wmx", DEMUXER_TYPE_PLAYLIST },
 	{ "audio/x-scpls", DEMUXER_TYPE_PLAYLIST },
 	{ "audio/x-mpegurl", DEMUXER_TYPE_PLAYLIST },
 	{ "audio/x-pls", DEMUXER_TYPE_PLAYLIST },
