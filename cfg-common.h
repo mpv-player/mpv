@@ -6,7 +6,11 @@
 #else
 	{"cache", "MPlayer was compiled WITHOUT cache2 support", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 #endif
+#ifdef HAVE_VCD
 	{"vcd", &vcd_track, CONF_TYPE_INT, CONF_RANGE, 1, 99},
+#else
+	{"vcd", "VCD support is NOT available on this system!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+#endif
 #ifdef USE_DVDREAD
 	{"dvd", &dvd_title, CONF_TYPE_INT, CONF_RANGE, 1, 99},
 	{"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99},
