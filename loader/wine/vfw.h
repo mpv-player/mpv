@@ -211,10 +211,10 @@ typedef struct {
 } ICCOMPRESS;
 
 long VFWAPIV ICCompress(
-	HIC hic,long dwFlags,LPBITMAPINFOHEADER lpbiOutput,void* lpData,
-	LPBITMAPINFOHEADER lpbiInput,void* lpBits,long* lpckid,
+	HIC hic,long dwFlags,LPBITMAPINFOHEADER lpbiOutput,void* lpOutputBuf,
+	LPBITMAPINFOHEADER lpbiInput,void* lpImage,long* lpckid,
 	long* lpdwFlags,long lFrameNum,long dwFrameSize,long dwQuality,
-	LPBITMAPINFOHEADER lpbiPrev,void* lpPrev
+	LPBITMAPINFOHEADER lpbiInputPrev,void* lpImagePrev
 );
 
 
