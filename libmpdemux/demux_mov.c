@@ -1107,7 +1107,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		if(depth>32+8) printf("*** depth = 0x%X\n",depth);
 
 		// palettized?
-		depth&=31; // flag 32 means grayscale
+		if (depth > 32) depth&=31; // depth > 32 means grayscale
 		if ((depth == 2) || (depth == 4) || (depth == 8))
 		  palette_count = (1 << depth);
 		else
