@@ -686,16 +686,17 @@ static int check_res( int num, int x, int y, int bpp,
 
 //---------------------------------------------------------
 
-static void init_video_buffers(XDGAMode *modeline, uint8_t *buffer_base,
+static void init_video_buffers(uint8_t *buffer_base,
+			       int view_port_height,
+			       int bytes_per_scanline,
+			       int max_view_port_y,
 			       int use_multiple_buffers)
 {
-	int bytes_per_buffer =
-		modeline->viewportHeight * modeline->bytesPerScanline;
+	int bytes_per_buffer = view_port_height * bytes_per_scanline;
 	int i;
 
 	if(use_multiple_buffers)
-		vo_dga_nr_video_buffers =
-			modeline->pixmapHeight / modeline->viewportHeight;
+		vo_dga_nr_video_buffers = max_view_port_y / view_port_height;
 	else
 		vo_dga_nr_video_buffers = 1;
 
@@ -706,7 +707,7 @@ static void init_video_buffers(XDGAMode *modeline, uint8_t *buffer_base,
 	
 	for(i = 0; i < vo_dga_nr_video_buffers; i++)
 	{
-		vo_dga_video_buffer[i].y = i * modeline->viewportHeight;
+		vo_dga_video_buffer[i].y = i * view_port_height;
 		vo_dga_video_buffer[i].data =
 			buffer_base + i * bytes_per_buffer;
 		
@@ -730,7 +731,6 @@ static uint32_t config( uint32_t width,  uint32_t height,
   XDGAMode   *modelines=NULL, *modeline;
   XDGADevice *dgadevice;
   unsigned char *vo_dga_base;
-  int max_vpy_pos;
 #else
 #ifdef HAVE_XF86VM
   unsigned int vm_event, vm_error;
@@ -866,7 +866,6 @@ static uint32_t config( uint32_t width,  uint32_t height,
 
   vo_dga_width = modelines[j].bytesPerScanline / HW_MODE.vdm_bytespp ;
   dga_modenum =  modelines[j].num;
-  max_vpy_pos =  modelines[j].maxViewportY;
   modeline = modelines + j;
   
   XFree(modelines);
@@ -1042,7 +1041,15 @@ static uint32_t config( uint32_t width,  uint32_t height,
                 ButtonPressMask,GrabModeAsync, GrabModeAsync, 
                 None, None, CurrentTime);
 
-  init_video_buffers(modeline, vo_dga_base, vo_doublebuffering);
+  init_video_buffers(vo_dga_base,
+		     vo_dga_vp_height,
+		     vo_dga_width * HW_MODE.vdm_bytespp,
+#if HAVE_DGA2
+		     modeline->maxViewportY,
+#else
+		     vo_dga_vp_height,
+#endif
+		     vo_doublebuffering);
 
   mp_msg(MSGT_VO, MSGL_V, "vo_dga: Using %d frame buffer%s.\n",
 	    vo_dga_nr_video_buffers, vo_dga_nr_video_buffers == 1 ? "" : "s");
