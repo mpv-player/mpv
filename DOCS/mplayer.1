@@ -32,7 +32,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-sub\ file ]
 .RB [ \-subfps\ rate ]
 .RB [ \-subdelay\ sec ]
-.RB [ \-dvd\ device ]
+.RB [ \-dvdauth\ device ]
 .RB [ \-z\ <0-8> ]
 .RB [ \-idx ]
 .RB [ \-forceidx ]
@@ -89,7 +89,7 @@ you can get the list of available drivers executing
 .B \-vcd\ track
 play video cd track from device instead of plain file
 .TP
-.B \-dvd\ device
+.B \-dvdauth\ device
 specify DVD-ROM drive to use for MPEG2 decoding.
 (use *_only_* when playing from DVD!)
 .TP
@@ -241,7 +241,7 @@ specify -nodshow !!!)
 .TP
 .B \-dvdkey key
 key to decrypt stream encrypted with CSS. For example : -dvdkey F169072699
-(this is NOT for DVD playing! For DVD use the -dvd option!)
+(this is NOT for DVD playing! For DVD use the -dvdauth option!)
 .TP
 .B \-stereo mode
 select type of MPEG1 stereo output. Mode may be 0:stereo 1:left 2:right
