@@ -5,17 +5,17 @@ include ../config.mak
 
 SRCS	= decode.c header.c idct.c idct_mmx.c motion_comp.c motion_comp_mmx.c slice.c stats.c
 OBJS	= decode.o header.o idct.o idct_mmx.o motion_comp.o motion_comp_mmx.o slice.o stats.o
-CFLAGS  = $(OPTFLAGS) -DMPG12PLAY
 INCLUDE = -I. -I../libvo -I..
+CFLAGS  = $(OPTFLAGS) $(INCLUDE) -DMPG12PLAY
 
 .SUFFIXES: .c .o
 
 # .PHONY: all clean
 
 .c.o:
-	$(CC) -c $(CFLAGS) $(INCLUDE) -o $@ $<
+	$(CC) -c $(CFLAGS) -o $@ $<
 
-$(LIBNAME):	$(OBJS)
+$(LIBNAME):	.depend $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
 
 all:	$(LIBNAME)
@@ -24,12 +24,17 @@ clean:
 	rm -f *.o *.a *~
 
 distclean:
-	makedepend
-	rm -f Makefile.bak *.o *.a *~
+	rm -f Makefile.bak *.o *.a *~ .depend
 
-dep:	depend
+dep:    depend
+depend: .depend
 
-depend:
-	makedepend -- $(CFLAGS) -- $(SRCS) &> /dev/null
+.depend: Makefile ../config.mak ../config.h
+	makedepend -f- -- $(CFLAGS) -- $(SRCS) 1>.depend 2>/dev/null
 
-# DO NOT DELETE
+#
+# include dependency files if they exist
+#
+ifneq ($(wildcard .depend),)
+include .depend
+endif
