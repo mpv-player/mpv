@@ -25,6 +25,10 @@ mplayer (0.90)
     * GUI code cleanup, obsolete files/dirs removed
     * various small bugfixes, endianess fixes
     * mencoder: -pass option removed, use -divx4opts pass=N / -lavcopts vpass=N
+    * mencoder: "ff_rate_estimate_qscale: Assertion `q>0.0' failed" fixed!
+    * mencoder: -ovc xvid fixes, cleanup, enhancements
+    * screensaver/dpms re-enabling fixed
+    * realvideo demuxer fixes - asf-style stream detection method
     
     Features:
     * -ao win32 (for windows port)
@@ -33,9 +37,11 @@ mplayer (0.90)
     * overlapping subtitles support, jacosub (*.js) format support
     * -vo dxr3 got a new syncengine, ':sync', also added native overlay support,
       activate with ':overlay', read the manual for more info on how to set up
-    * QDMC/QDM2 audio codec support, using quicktime 5 win32 DLLs (libwine!)
+    * QDMC/QDM2/MACE audio codec support, using quicktime 5 win32 DLLs (libwine!)
     * libavcodec: various MJPEG decoding fixes - now it decodes all sample files!
     * mencvcd updates, sox/toolame support etc
+    * -vo dfbmga - play video on Matrox G400's second head using directfb 0.9.14
+    * RealAudio ATRC (sony atrac3) audio support (using binary plugin)
     
     Filters:
     * -af/-af-adv options cleanup
@@ -47,6 +53,9 @@ mplayer (0.90)
     * -vop il - (de)interleave fields
     * -vop swapuv - guess what :)
     * -vop boxblur - box blur...
+    * -vop perpective
+    * -vop sab
+    * -vop smartblur
 
   pre9:
     Docs:
