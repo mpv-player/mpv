@@ -198,10 +198,13 @@ static void * radeon_mem_base = 0;
 static int32_t radeon_overlay_off = 0;
 static uint32_t radeon_ram_size = 0;
 
-#define INREG8(addr)		INPORT8((uint32_t)(radeon_mmio_base)+addr)
-#define OUTREG8(addr,val)	OUTPORT8((uint32_t)(radeon_mmio_base)+addr,val)
-#define INREG(addr)		INPORT((uint32_t)(radeon_mmio_base)+addr)
-#define OUTREG(addr,val)	OUTPORT((uint32_t)(radeon_mmio_base)+addr,val)
+#define GETREG(TYPE,PTR,OFFZ)		(*((volatile TYPE*)((PTR)+(OFFZ))))
+#define SETREG(TYPE,PTR,OFFZ,VAL)	(*((volatile TYPE*)((PTR)+(OFFZ))))=VAL
+
+#define INREG8(addr)		GETREG(uint8_t,(uint32_t)(radeon_mmio_base),addr)
+#define OUTREG8(addr,val)	SETREG(uint8_t,(uint32_t)(radeon_mmio_base),addr,val)
+#define INREG(addr)		GETREG(uint32_t,(uint32_t)(radeon_mmio_base),addr)
+#define OUTREG(addr,val)	SETREG(uint32_t,(uint32_t)(radeon_mmio_base),addr,val)
 #define OUTREGP(addr,val,mask)  					\
 	do {								\
 		unsigned int _tmp = INREG(addr);			\
@@ -660,8 +663,12 @@ int vixProbe( int verbose )
 
 int vixInit( void )
 {
-  if(!probed) return EINTR;
-  if((radeon_mmio_base = map_phys_mem(pci_info.base2,0x7FFF))==(void *)-1) return ENOMEM;
+  if(!probed) 
+  {
+    printf(RADEON_MSG" Driver was not probed but is being initializing\n");
+    return EINTR;
+  }    
+  if((radeon_mmio_base = map_phys_mem(pci_info.base2,0xFFFF))==(void *)-1) return ENOMEM;
   radeon_ram_size = INREG(CONFIG_MEMSIZE);
   /* mem size is bits [28:0], mask off the rest. Range: from 1Mb up to 512 Mb */
   radeon_ram_size &=  CONFIG_MEMSIZE_MASK;
