@@ -13,6 +13,12 @@ extern char *monitor_dotclock_str;
 #ifdef HAVE_PNG
 extern int z_compression;
 #endif
+#ifdef HAVE_SDL
+extern char *sdl_driver;
+extern int sdl_noxv;
+extern int sdl_forcexv;
+#endif
+
 extern int vo_dbpp;
 
 struct config conf[]={
@@ -85,7 +91,11 @@ struct config conf[]={
 #ifdef HAVE_PNG
 	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 10},
 #endif	
-
+#ifdef HAVE_SDL
+	{"sdl", &sdl_driver, CONF_TYPE_STRING, 0, 0, 0},
+	{"noxv", &sdl_noxv, CONF_TYPE_FLAG, 0, 0, 1},
+	{"forcexv", &sdl_forcexv, CONF_TYPE_FLAG, 0, 0, 1},
+#endif	
 	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
 	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
 	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
