@@ -7,19 +7,20 @@ Istniej± publiczne listy dyskusyjne o <application>MPlayerze</application>.
 Je¶li nie jest to wyra¼nie zaznaczone, jêzykiem obowi±zuj±cym na nich jest
 <emphasis role="bold">angielski</emphasis>. Proszê nie przysy³aæ wiadomo¶ci
 w innym jêzyku, ani w formacie HTML! Je¶li wiadomo¶æ zostanie odrzucona
-z powodu zbyt du¿ego za³±cznika proszê go w zamian ulokowaæ w miejscu
+z powodu zbyt du¿ego za³±cznika, proszê ulokowaæ go w miejscu
 przeznaczonym do publicznego ¶ci±gania. ¯eby siê zapisaæ, nale¿y klikn±æ na
-poni¿szych odno¶nikach. Na tych listach obowi±zuj± te same zasady Netetykiety
-odno¶cnie pisania i cytowania, co w Usenecie. Prosimy o ich przestrzeganie,
-u³atwia to ¿ycie tym, którzy czytaj± Wasze maile. Mo¿na siê z nimi zaznajomiæ
+poni¿szych odno¶nikach. Na tych listach obowi±zuj± te same zasady Netykiety
+odno¶nie pisania i cytowania, co w Usenecie. Prosimy o ich przestrzeganie,
+u³atwia to ¿ycie tym, którzy czytaj± Wasze e-maile. Mo¿na siê z nimi zaznajomiæ
 na stronie
-<ulink url="http://learn.to/edit_messages">HOWTO edit messages</ulink>.
+<ulink url="http://www.river.com/users/share/etiquette/edit.html">Jak pisaæ listy</ulink>.
 <itemizedlist>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"><application>MPlayer</application>-announce</ulink>
 </para>
 <para>
-Wysy³ane s± na ni± og³oszenia bezpieczeñstwa i o nowych wersjach programu.
+Wysy³ane s± na ni± og³oszenia zwi±zane z bezpieczeñstwem i o nowych wersjach
+programu.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users</ulink>
@@ -27,23 +28,23 @@ Wysy³ane s± na ni± og³oszenia bezpieczeñstwa i o nowych wersjach programu.
 <para>Ogólna lista pomocy i odpowiedzi na pytania zwi±zane z
 <application>MPlayerem</application>.
 Proszê przeczytaæ <emphasis role="bold">ca³± dokumentacjê</emphasis> przed
-wys³aniem tutaj swoich problemów i pró¶b o mo¿liwo¶ci.
-Zg³oszenia b³êdów w <application>MPlayerze</application> te¿ tu
-nale¿±, ale proszê najpierw przeczytaæ sekcje <link linkend="bugs">znane
+wys³aniem tutaj swoich problemów i pró¶b o nowe funkcje.
+Zg³oszenia b³êdów w <application>MPlayerze</application> nale¿y wysy³aæ tylko
+tutaj, ale proszê najpierw przeczytaæ sekcje <link linkend="bugs">znane
 b³êdy</link> i <link linkend="bugreports">zg³aszanie b³êdów</link>.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"><application>MPlayer</application>-felhasznalok</ulink> (Wêgierska)
 </para>
-<para>Lista w jêzyku wêgierskim.  Temat? Jeszcze zobaczymy... Na razie g³ównie
+<para>Lista w jêzyku wêgierskim. Temat? Jeszcze zobaczymy... Na razie g³ównie
 flame'y i pytania typu RTFM :(
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"><application>MPlayer</application>-Matrox</ulink>
 </para>
-<para>Pytania zwi±zane z kartami graficznymi Matroxem, takie jak
-<link linkend="mga_vid">mga_vid</link>, oficjalne sterowniki beta Matroxa (dla
-XFree86 4.x.x), pytania o matroxfb-TVout.
+<para>Pytania dotycz±ce kart graficznych Matrox, np. na temat
+<link linkend="mga_vid">mga_vid</link>, oficjalnych sterowników beta Matroxa
+(dla XFree86 4.x.x), czy o matroxfb-TVout.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"><application>MPlayer</application>-dvb</ulink>
@@ -57,9 +58,9 @@ XFree86 4.x.x), pytania o matroxfb-TVout.
 <para>Ogólna lista pomocy i odpowiedzi na pytania zwi±zane z
 <application>MEncoderem</application>.
 Proszê przeczytaæ <emphasis role="bold">ca³± dokumentacjê</emphasis> przed
-wys³aniem tutaj swoich problemów i pró¶b o mo¿liwo¶ci.
-Zg³oszenia b³êdów w <application>MEncoderze</application> te¿ tu
-nale¿±, ale proszê najpierw przeczytaæ sekcje <link linkend="bugs">znane
+wys³aniem tutaj swoich problemów i pró¶b o nowe funkcje.
+Zg³oszenia b³êdów w <application>MEncoderze</application> nale¿y wysy³aæ tylko
+tutaj, ale proszê najpierw przeczytaæ sekcje <link linkend="bugs">znane
 b³êdy</link> i <link linkend="bugreports">zg³aszanie b³êdów</link>.
 </para></listitem>
 <listitem><para>
