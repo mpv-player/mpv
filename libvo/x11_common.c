@@ -34,6 +34,10 @@
 #include "../input/mouse.h"
 #endif
 
+#ifdef HAVE_NEW_GUI
+#include "../Gui/interface.h"
+#endif
+
 /*
  * If SCAN_VISUALS is defined, vo_init() scans all available TrueColor
  * visuals for the 'best' visual for MPlayer video display.  Note that
@@ -429,9 +433,9 @@ int vo_x11_check_events(Display *mydisplay){
  while ( XPending( mydisplay ) )
   {
    XNextEvent( mydisplay,&Event );
-//   #ifdef HAVE_NEW_GUI
-//    if ( use_gui ) gEvent( 0,(char*)&Event );
-//   #endif
+   #ifdef HAVE_NEW_GUI
+    if ( use_gui ) guiGetEvent( 0,(char*)&Event );
+   #endif
    if ( vo_window == Event.xany.window )
     switch( Event.type )
      {

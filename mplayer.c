@@ -70,7 +70,7 @@ extern void* mDisplay; // Display* mDisplay;
 #endif
 
 #ifdef HAVE_NEW_GUI
-#include "Gui/mplayer/play.h"
+#include "Gui/interface.h"
 #endif
 
 #ifdef HAVE_NEW_INPUT
@@ -741,7 +741,7 @@ play_next_file:
 //      mplShMem->Playing= (gui_no_filename) ? 0 : 1;
       while(mplShMem->Playing!=1){
 	usleep(20000);
-	EventHandling();
+	guiEventHandling();
       }
 
 play_dvd:
@@ -1657,7 +1657,7 @@ if(1)
 	  }
       }
 #ifdef HAVE_NEW_GUI
-      if(use_gui) EventHandling();
+      if(use_gui) guiEventHandling();
 #endif
       video_out->check_events(); // check events AST
     } else {
@@ -1747,7 +1747,7 @@ if(!dapsync){
 
 #ifdef HAVE_NEW_GUI
       if(use_gui){
-	EventHandling();
+	guiEventHandling();
       }
 #endif
 
@@ -2001,7 +2001,7 @@ read_input:
 #endif /* HAVE_NEW_INPUT */
 #ifdef HAVE_NEW_GUI
              if(use_gui){
-		EventHandling();
+		guiEventHandling();
 		if(mplShMem->Playing!=2 || (rel_seek_secs || abs_seek_pos))
 		  { gui_pause_flag=1; break; } // end of pause or seek
              }

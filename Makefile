@@ -194,7 +194,7 @@ VIDIX_LIBS += -Lvidix -lvidix
 endif
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(GUI_LIBS) $(VO_LIBS) $(AO_LIBS) $(LIB_LOADER) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(V_LIBS) $(LIRC_LIB) $(CSS_LIB) $(ARCH_LIB) $(DECORE_LIB) $(TERMCAP_LIB) $(STATIC_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(STREAMING_LIB) $(VIDIX_LIBS) -Linput -linput -lm
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(VO_LIBS) $(GUI_LIBS) $(AO_LIBS) $(LIB_LOADER) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(V_LIBS) $(LIRC_LIB) $(CSS_LIB) $(ARCH_LIB) $(DECORE_LIB) $(TERMCAP_LIB) $(STATIC_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(STREAMING_LIB) $(VIDIX_LIBS) -Linput -linput -lm
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o

@@ -225,12 +225,6 @@ void ChangeSkin( void )
  btnModify( evFullScreen,!appMPlayer.subWindow.isFullScreen );
 }
 
-void EventHandling( void )
-{
- wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
- if ( mplShMem->SkinChange ) { ChangeSkin(); mplShMem->SkinChange=0;  }
-}
-
 void mplResizeToMovieSize( unsigned int width,unsigned int height )
 {
  if ( !appMPlayer.subWindow.isFullScreen )
