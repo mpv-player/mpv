@@ -348,12 +348,12 @@ change channel list
 
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
 .TP
-.B \-autoq <quality> (use with \-vf pp)
+.B \-autoq <quality> (use with \-vf [s]pp)
 Dynamically changes the level of postprocessing depending on available spare
 CPU time.
 The number you specify will be the maximum level used.
 Usually you can use some big number.
-You have to use \-vf pp without parameters in order to use this.
+You have to use \-vf [s]pp without parameters in order to use this.
 .TP
 .B \-autosync <factor>
 Gradually adjusts the A/\:V sync based on audio delay measurements.
@@ -523,7 +523,7 @@ Display even less output and status messages.
 .B \-shuffle \ \ 
 Play files in random order.
 .TP
-.B \-skin <skin\ directory> (GUI only) (BETA CODE)
+.B \-skin <skin\ directory> (GUI only)
 Load skin from the given directory (WITHOUT path name).
 
 .I EXAMPLE:
@@ -1011,7 +1011,7 @@ Warning: The channel number will then be the position in the 'channels' list,
 beginning with 1.
 Example: use tv://1, tv://2, tv://TV1, tv_set_channel 1, tv_set_channel 2, tv_set_channel TV1, etc.
 .IPs [brightness|contrast|hue|saturation]=<-100\-100>
-set the color equalizer on the video card.
+set the color equalizer on the card
 .IPs audiorate=<value>
 set audio capture bitrate
 .IPs forceaudio
@@ -1289,7 +1289,7 @@ The 255 value means white and 0 black.
 Force subtitle demuxer type for \-subfile.
 Give the demuxer ID as defined in subreader.h.
 .TP
-.B \-sub-fuzziness
+.B \-sub-fuzziness <mode>
 Adjust matching fuzziness when searching for subtitles:
 .PD 0
 .RSs
@@ -3186,18 +3186,18 @@ the right x,y,w,h parameters.
 
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
 .TP
-.B \-audio-delay <0.0\-...>
-Sets the audio delay field in the header.
-Default is 0.0, negative values do not work.
-This does not delay the audio while encoding, but the player will see the
-default audio delay, sparing you the use of the \-delay option.
-.TP
 .B \-audio-density <1\-50>
 Number of audio chunks per second (default is 2 for 0.5s long audio chunks).
 
 .I NOTE:
 .br
 CBR only, VBR ignores this as it puts each packet in a new chunk.
+.TP
+.B \-audio-delay <0.0\-...>
+Sets the audio delay field in the header.
+Default is 0.0, negative values do not work.
+This does not delay the audio while encoding, but the player will see the
+default audio delay, sparing you the use of the \-delay option.
 .TP
 .B \-audio-preload <0.0\-2.0>
 Sets up audio buffering time interval (default: 0.5s).
