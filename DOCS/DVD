@@ -14,21 +14,21 @@ This means current DVD functions are mainly for developers and not for users!
 Building MPlayer with libcss support
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 First, you must compile and install libcss on your system.
-Second, you must call ./configure script of MPlayer with these options:
+Second, you have to recompile MPlayer with libcss support. There is
+autodetection of libcss, but if it fails, see below :
 
-./configure --enable-css --withcsslibdir=/usr/local/lib --withcssincidr=/usr/local/include
+Call ./configure script of MPlayer with these options:
+
+./configure --enable-css --withcsslibdir=/usr/local/lib --withcssincdir=/usr/local/include
 
 (of course you can append your favourite options as well)
 
---withcsslibdir=/usr/local/lib
+--with-csslibdir=/usr/local/lib
 	Directory contains libcss.so shared library. This directory should
 	be in your /etc/ld.so.conf as well.
 	
---withcssindfir=/usr/local/include
+--with-cssincdir=/usr/local/include
 	Directory contains header file 'css.h' of libcss.
-
-NOTE: Currently there is no autodetection for libcss! You MUST specify it with
-configure options.
 
 Viewing VOB files directly from DVD
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

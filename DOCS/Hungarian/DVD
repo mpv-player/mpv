@@ -14,17 +14,18 @@ Ez egyben azt is jelenti, hogy a jelenleg létezõ DVD funkciók a fejlesztõknek,
 MPlayer fordítása libcss támogatással
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Elõször fordítsd le és installáld a libcss-t.
-Utána fordítsd újra az MPlayer-t ezekkel az opciókkal:
+Utána fordítsd újra az MPlayer-t, hogy beleforduljon a libcss tamogatas is.
+Ha nem teszi ezt automatikusan, akkor probald igy :
 
-./configure --enable-css --withcsslibdir=/usr/local/lib --withcssincidr=/usr/local/include
+./configure --enable-css --withcsslibdir=/usr/local/lib --withcssincdir=/usr/local/include
 
 (természetesen beírhatod a saját opcióidat is)
 
---withcsslibdir=/usr/local/lib
+--with-csslibdir=/usr/local/lib
 	Ez a könyvtár tartalmazza a libcss.so-t. Jó, ha benne van az
 	/etc/ld.so.conf-ban is.
 	
---withcssindfir=/usr/local/include
+--with-cssincdir=/usr/local/include
 	Ez tartalmazza a 'css.h' header file-t.
 
 MEGJ.: Jelenleg nincs automatikus detektálás a libcss-hez! Ezeket az opciókat
