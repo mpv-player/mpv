@@ -129,7 +129,7 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: Комментарий: %s\n"
 #define MSGTR_Video_NoVideo "Видео: нет видео\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Не могу инициализировать видео фильтры (-vop) или видео вывод (-vo).\n"
-#define MSGTR_Paused "\n  =====  ПРИОСТАНОВЛЕНО  =====\r" // no more than 23 characters (status line for audio files)
+#define MSGTR_Paused "\n====ПРИОСТАНОВЛЕНО====\r" // no more than 23 characters (status line for audio files)
 #define MSGTR_PlaylistLoadUnable "\nНе могу загрузить playlist %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer сломался из-за 'Неправильной инструкции'.\n"\
