@@ -235,7 +235,7 @@ DFBEnumerationResult enum_layers_callback( unsigned int                 id,
      return DFENUM_OK;
 }
 
-static uint32_t preinit()
+static uint32_t preinit(const char *arg)
 {
      DFBSurfaceDescription dsc;
      DFBResult             ret;
@@ -357,7 +357,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	}
 
 
-        if (!preinit()) return 1;
+        if (!preinit(NULL)) return 1;
 
 
   if (vm) {
@@ -598,7 +598,7 @@ static uint32_t query_format(uint32_t format)
 {
 	int ret = 0x4; /* osd/sub is supported on every bpp */
 
-        preinit();
+        preinit(NULL);
 
 //        printf("Format query: %s\n",vo_format_name(format));
 	switch (format) {
@@ -886,11 +886,6 @@ static void uninit(void)
 //  dfb->Release (dfb);
 //  preinit_done=0;
 
-}
-
-static uint32_t preinit(const char *arg)
-{
-  return 0;
 }
 
 static void query_vaa(vo_vaa_t *vaa)
