@@ -149,6 +149,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  Colormap theCmap;
  XSetWindowAttributes xswa;
  unsigned long xswamask;
+ unsigned int modeline_width, modeline_height;
 
  image_height=height;
  image_width=width;
@@ -182,7 +183,7 @@ printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
 
 #ifdef HAVE_XF86VM
     if (vm) {
-        unsigned int modeline_width, modeline_height, vm_event, vm_error;
+        unsigned int vm_event, vm_error;
 	unsigned int vm_ver, vm_rev;
         int i,j,have_vm=0,X,Y;
 
@@ -226,7 +227,16 @@ printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
   }
 #endif
 
-
+#ifdef HAVE_XF86VM
+    if ( vm )
+     {
+      hint.x=(vo_screenwidth-modeline_width)/2;
+      hint.y=(vo_screenheight-modeline_height)/2;
+      hint.width=modeline_width;
+      hint.height=modeline_height;
+     }
+    else
+#endif
     if ( fullscreen )
      {
       hint.width=vo_screenwidth;
@@ -243,14 +253,23 @@ printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
     vinfo.visual,AllocNone );
 
     xswa.background_pixel=0;
-    xswa.border_pixel=1;
+    xswa.border_pixel=0;
     xswa.colormap=theCmap;
-    xswamask=CWBackPixel | CWBorderPixel |CWColormap;
+    xswamask=CWBackPixel | CWBorderPixel | CWColormap;
 
+#ifdef HAVE_XF86VM
+    if ( vm )
+     {
+      xswa.override_redirect=True;
+      xswamask|=CWOverrideRedirect;
+     }
+#endif
+ 
     mywindow=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
                          hint.x,hint.y,
                          hint.width,hint.height,
                          xswa.border_pixel,depth,CopyFromParent,vinfo.visual,xswamask,&xswa );
+
     vo_x11_classhint( mDisplay,mywindow,"x11" );
     vo_hidecursor(mDisplay,mywindow);
     if ( fullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
@@ -262,8 +281,18 @@ printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
 
     XFlush( mDisplay );
     XSync( mDisplay,False );
-
     mygc=XCreateGC( mDisplay,mywindow,0L,&xgcv );
+
+#ifdef HAVE_XF86VM
+    if ( vm )
+     {
+      /* Grab the mouse pointer in our window */
+      XGrabPointer(mDisplay, mywindow, True, 0,
+                   GrabModeAsync, GrabModeAsync,
+                   mywindow, None, CurrentTime);
+      XSetInputFocus(mDisplay, mywindow, RevertToNone, CurrentTime);
+     }
+#endif
    }
 
 #ifdef SH_MEM
