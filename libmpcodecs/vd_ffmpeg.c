@@ -334,16 +334,18 @@ static void draw_slice(struct AVCodecContext *s,
 #else
                         uint8_t **src, int linesize,
 #endif                        
-                	int y, int width, int height){
+                	int y, int type, int height){
     sh_video_t * sh = s->opaque;
     int start=0, i;
-    int skip_stride= (s->width+15)>>4;
+    int width= s->width;
+    int skip_stride= (width+15)>>4;
     uint8_t *skip= &s->coded_frame->mbskip_table[(y>>4)*skip_stride];
     int threshold= s->coded_frame->age;
 #if LIBAVCODEC_BUILD >= 4670
     uint8_t *source[3]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
 #else
     int stride[3];
+    
     stride[0]=linesize;
     if(s->coded_frame->linesize[1]){
         stride[1]= s->coded_frame->linesize[1];
