@@ -128,6 +128,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     vf->control = control;
     vf->query_format = query_format;
     vf->put_image = put_image;
+    vf->default_caps = 0;
     vf->priv = malloc(sizeof(struct vf_priv_s));
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
     vf->priv->mux = (muxer_stream_t*)args;
