@@ -284,10 +284,12 @@ echo "Detected host architecture: $host_arch"
 
 # Determine OS dependent libs
 _confcygwin="TARGET_CYGWIN=no"
+_confwin32=
 if [ "$system_name" = "FreeBSD" ]; then
     _archlibs="-rdynamic -pthread"
 elif [ `echo $system_name | sed 's/CYGWIN.*/CYGWIN/i'` = "CYGWIN" ]; then
     _confcygwin="TARGET_CYGWIN=yes"
+    _confwin32="#define WIN32"
     _archlibs="-lpthread"
 else
     _archlibs="-ldl -lpthread"
@@ -1935,6 +1937,8 @@ $_sunaudio
 $_words_endian
 
 $_arch
+
+$_confwin32
 
 /* Define this to any prefered value from 386 up to infinity with step 100 */
 #define __CPU__ $iproc
