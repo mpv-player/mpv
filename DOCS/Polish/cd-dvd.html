@@ -1,0 +1,227 @@
+<HTML>
+<BODY BGCOLOR=white>
+
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+
+<P><B><A NAME=4.1>4.1. CD-ROM drives</A></B></P>
+
+<P>Playing standard Video CDs:</P>
+
+<P>
+mplayer -vcd <I>trackno</I> [device]<BR><BR>
+Examples:<BR>
+mplayer -vcd 1<BR>
+mplayer -fs -vcd 2 /dev/hdc<BR>
+</P>
+
+<P>
+Notes:<BR>
+- Do NOT mount VCD disks and play DAT files directly! It may work under windows
+but won't work under linux. You have to play them directly, with the -vcd
+option!<BR>
+- VCD disks usually have 2 tracks: a data track (containing autostart windows
+playback program, karaoke data etc) and a mode-2 track (the movie), so try
+-vcd 2 first!<BR>
+- the default VCD device is /dev/cdrom. if your device differs, then you have
+to make a symlink, or specify it in command line!
+</P>
+
+<P>From Linux documentation:</P>
+
+<P>Some CDROM drives are capable of changing their head-speed. There are several
+reasons for changing the speed of a CDROM drive. Badly pressed CDROMs may
+benefit from less-than-maximum head rate. Modern CDROM drives can obtain very
+high head rates (up to 24-times is common).  It has been reported that these
+drives can make reading errors at these high speeds, reducing the speed can
+prevent data loss in these circumstances.  Finally, some of these drives can
+make an annoyingly loud noise, which a lower speed may reduce.</P>
+
+<P>The recommended way to do it is with a program called 'setcd' . It's kinda
+old, but won't be too hard to find on the Net. (UPDATE : new hdparm
+has an option for this !)
+Use it with :</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>setcd -x [speed] [cdrom device]</CODE></P>
+
+<P>Also you can try:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 >/proc/ide/[cdrom device]/settings</CODE></P>
+
+<P>but you'll need root privileges. I use following command too:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 >/proc/ide/[cdrom device]/settings</CODE></P>
+
+<P>for 2MB prefetched reading from the file (it's useful for scratched CDROMs).
+It's recommended that you tuneup your CDROM drive also with hdparm:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (cdrom device)</CODE></P>
+
+<P>to enable using DMA access, readahead, and IRQ unmasking.
+(if you don't understand these, *read the hdparm manpage*)</P>
+
+<P>Please refer to "<CODE>/proc/ide/[cdrom device]/settings</CODE>" for fine-tuning your
+CDROM.</P>
+
+<P><B><A NAME=4.2>4.2. DVD playback</A></B></P>
+  
+<P>Yes, the real DVD support has been arrived. You don't need to play VOB files
+manually from disk thinking of the purpose of a file in the video_ts
+directory, you don't need worry it it's an encrypted disk or not (in old
+<B>MPlayer</B> you had to put '-dvdauth /dev/dvd' into the command line in case
+of encrypted discs), and you don't need even mount your disk to be able to
+play :)</P>
+  
+<P>IMPORTANT NOTE: please _DO_NOT_ require further features for DVD playback.
+This is the first version of some real DVD support inside <B>MPlayer</B> and
+we're busy with hunting bugs and implementing basic DVD player features.</P>
+
+<P><B>MPlayer</B> uses libdvdread which has got built in support for IFO
+parsing, reading navi blocks and doing authentication/descrambling. libdvdread
+uses libdvdcss to the latter tasks. So you will need libdvdcss and libdvdread
+downloaded, compiled and installed BEFORE you run ./configure script of
+<B>MPlayer</B> which will autodetect libdvdread for you in this way.</P>
+
+<UL>  
+<LI><P><B>Download source of libdvdread and libdvdcss.</B></P>
+  
+<P><I>You can download them from
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>
+(click 'download' in the menu at the left, and you can find libdvdcss and
+libdvdread in a table).</I></P>
+
+<P><B><I>IMPORTANT !</I></B><BR>
+For
+<UL>
+  <LI>libdvdread 0.8 - you'll need <B>libcss</B> instead of libdvdcss</LI>
+  <LI>libdvdread 0.9 - you'll need <B>libdvdcss 0.0.3</B> ! Don't use newer
+    versions, they won't work!</LI>
+  <LI>For example <B><U>never</U></B> use libdvdcss <B>1.0</B>, it will be unusably slow!</LI>
+</UL>
+</P>
+</LI>
+  
+<LI><P><B>Compile and install libdvdcss THEN libdvdread.</B></P>
+    
+<P><I>Read documentation of these packages to do this step easily.</I></P></LI>
+  
+<LI><P><B>Recompile MPlayer.</B></P>
+  
+<P><I>Run <CODE>./configure</CODE>. If you install libdvdread correctly, ./configure
+says something similar:<BR><CODE>Checking for DVDread support ... yes</CODE><BR>
+(Of course you can put your favourite configure options into the command
+line when you run ./configure). That's it! Say: <CODE>make</CODE>, then <CODE>make install</CODE>.</I></P></LI>
+</UL>
+
+<P>Of course after installing libdvdcss and libdvdread you don't need recompile
+them at each time when you want to recompile <B>MPlayer</B> (from a new CVS version
+for example) since the needed packages have already been installed on your
+machine.</P>
+
+<P><B>Using MPlayer to play DVDs:</B></P>
+
+
+<TABLE BORDER=0 WIDTH=100%>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvd &lt;title_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Enables DVD support and selects title.</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-chapter &lt;chapter_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Selects DVD chapter (default: play from chapter 1)</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Selects camera angle (default: 1)</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-sid &lt;subtitle_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Turns DVD subtitle displaying (of the given subtitle_id or language) on (default: no)<BR>
+  For the list of available languages, use <CODE>-sid 1 -v</CODE> options and
+  browse the output.</TD><TR>
+</TABLE>
+
+<P>Default device is <CODE>/dev/dvd</CODE>, you can change it in config.h
+(compile time option), or you can specify it as a filename for <B>MPlayer</B>:
+</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -sid 5 /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -chapter 5 -dvdangle 2</CODE></P>
+
+<P><B><A NAME=4.3>4.3. DVD playback FAQ</A></B></P>
+
+<TABLE BORDER=0 ALIGN=left WIDTH=100%>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Playing a DVD, I encountered this error :<BR>
+<CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion     nfo_length /
+sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+This is a known libdvdread 0.9.1 bug, it should be already fixed in 0.9.2.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Can I compile libdvdread and libdvdcss for example on my sweet Sparc/Solaris?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Who knows ... Please test it and send feedback. But it's said that it
+should work. Please refer documentation of libdvdread and its homepage
+as well. We're not authors of libdvdread.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+What about subtitles? Can MPlayer display them?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Yes! See above in the DVD chapter.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+I've got no sound / bad sound (Spanish audio and other ugly things).
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<B>MPlayer</B> currently does not use all of information of IFO blocks from DVD.
+You can adjust the right DVD audio stream with: '-aid 128' command line
+option, where 128 is the stream id of requested audio stream. You can
+experience with numbers of 128,129,... and so on. Of course this problem
+will be solved in the future.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+There is some strange effect (interlace like thing) especially when fast
+moving objects are shown in the movie.
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Known problem, we try to fix it later (when we switch to libvo2).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+How can I set the region code of my DVD-Drive ? I don't have windows!
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Use the 'regionset' tool:
+<A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz</A>
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+So MPlayer can play DVDs? Then it must use DeCSS! You are under arrest
+under the XYZ#$ paragraph of the--
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Get back asshole, there is no DeCSS code in <B>MPlayer</B>. <B>MPlayer</B> uses libdvdread
+by linking against it, and libdvdread uses libdvdcss by dynamic loading it.<BR>
+<B>UPDATE</B> : DeCSS is free.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Do I need to be (setuid) root/setuid fibmap_mplayer to be able to play DVD?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+No, you don't. This is the past :) However of course you must have got
+the proper rights to the DVD device driver entry (in /dev).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+How can I ... (insert some expectable DVD player feature here)?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+The current implementation is the first implementation of some real DVD
+player functionality. First, we would like to target existing bugs and
+basic features before implementing new features.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Where can I get libdvdread and libdvdcss packages from?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+From the site of Ogle:
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+</TABLE>
+
+</BODY>
+</HTML>

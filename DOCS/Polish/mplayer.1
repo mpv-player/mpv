@@ -1,0 +1,643 @@
+.\" MPlayer (C) 2000-2001 Arpad Gereoffy <arpi@esp-team.scene.hu>
+.\" This manpage was/is done by Gabucino
+.\"
+.TH MPlayer
+.SH NAME
+mplayer \- Movie Player for Linux
+.SH SYNOPSIS
+.B mplayer
+.RB [ \-gui ]
+.RB [ \-v ]
+.RB [ \-quiet ]
+.RB [ \-vo\ <driver>[:<device>] ]
+.RB [ \-ao\ <driver>[:<device>] ]
+.RB [ \-vcd\ track\ number ]
+.RB [ \-sb\ byte\ position ]
+.RB [ \-nosound ]
+.RB [ \-abs\ bytes ]
+.RB [ \-delay\ secs ]
+.RB [ \-nobps ]
+.RB [ \-aid\ id ]
+.RB [ \-vid\ id ]
+.RB [ \-fps\ rate ]
+.RB [ \-mc\ seconds/5f ]
+.RB [ \-fs ]
+.RB [ \-vm ]
+.RB [ \-zoom ]
+.RB [ \-x\ x ]
+.RB [ \-y\ y ]
+.RB [ \-xy\ factor ]
+.RB [ \-pp\ quality ]
+.RB [ \-include\ configfile ]
+.RB [ \-lircconf\ configfile ]
+.RB [ \-ffactor\ number ]
+.RB [ \-sub\ file ]
+.RB [ \-subfps\ rate ]
+.RB [ \-subdelay\ sec ]
+.RB [ \-z\ <0-8> ]
+.RB [ \-idx ]
+.RB [ \-forceidx ]
+.RB [ \-nodshow ]
+.RB [ \-noxv ]
+.RB [ \-forcexv ]
+.RB [ \-ss\ time ]
+.RB [ \-dumpaudio ]
+.RB [ \-dumpvideo ]
+.RB [ \-dumpstream ]
+.RB [ \-noframedrop ]
+.RB [ \-framedrop ]
+.RB [ \-nodouble ]
+.RB [ \-double ]
+.RB [ \-stereo\ mode ]
+.RB [ \-channels\ n ]
+.RB [ \-srate\ Hz ]
+.RB [ \-osdlevel\ level ]
+.RB [ \-config\ file ]
+.RB [ \-display\ name ]
+.RB [ \-unicode ]
+.RB [ \-utf8 ]
+.RB [ \-fsmode\ mode ]
+.RB [ \-vc\ video\ codec\ name ]
+.RB [ \-ac\ audio\ codec\ name ]
+.RB [ \-vfm\ video\ codec\ family ]
+.RB [ \-afm\ audio\ codec\ family ]
+.RB [ \-frames\ number ]
+.RB [ \-autoq\ quality ]
+.RB [ \-fb\ device ]
+.RB [ \-fbmode\ modename ]
+.RB [ \-fbmodeconfig\ filename ]
+.RB [ \-benchmark ]
+.RB [ \-dvd\ titleid ]
+.RB [ \-chapter\ chapterid ]
+.RB [ \-dvdangle\ angleid ]
+.RB [ \-dvdkey\ key ]
+.RB [ \-skin\ skin ]
+.RB [ \-aspect\ ratio ]
+.RB [ \-monitoraspect\ ratio ]
+.RB [ \-subcp\ codepage ]
+.RB [ \-dumpmpsub ]
+.RB [ \-screenw\ pixels ]
+.RB [ \-screenh\ pixels ]
+.RB [ \-cache\ kbytes ]
+.RB [ \-bpp\ depth ]
+.RB [ \-flip ]
+.RB [ \-playlist\ <filename> ]
+.RB [ \-slave ]
+.I - or file or device
+.PP
+.SH DESCRIPTION
+.I mplayer
+MPlayer is a movie player for LINUX (runs on many other Unices, and
+non-x86 CPUs, see section 6). It plays most MPEG, AVI and ASF/WMV files,
+supported by many native and Win32 DLL codecs. You can watch VideoCD,
+SVCD, DVD and even DivX movies too (and you don't need the avifile library
+at all!). The another big feature of mplayer is the wide range of
+supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
+fbdev, AAlib, but you can use SDL (and this way all drivers of SDL) and
+some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon) too!
+Most of them supports software or hardware scaling, so you can enjoy
+movies in fullscreen. And what about the nice big antialiased shaded
+subtitles (7 supported types!!!) with european/ISO 8859-1,2 (hungarian,
+english, czech, etc), cyrillic, korean fonts, and OSD?
+.LP
+.SH "GENERAL OPTIONS"
+.TP
+.I NOTE
+Every "flag" option has "noflag" pair, e.g. -fs opposite is -nofs
+.TP
+.B \-gui
+start MPlayer with the GUI mode. You have to compile it in, for details
+see the documentation.
+.TP
+.B \-dvd\ titleid
+tell MPlayer which movies (marked with titleid) to play. For example
+sometimes '1' are trailers, and '2' is the real movie.
+.TP
+.B \-sid\ id
+Turns on DVD subtitle displaying. Also, you MUST specify a number which
+corresponds to a DVD subtitle language (1-...). For the list of available
+subtitles, use with the -v switch and look at the output. (EXPERIMENTAL)
+.TP
+.B \-chapter\ chapterid
+specify which chapter to start playing at. Examples can be found below.
+.TP
+.B \-dvdangle\ angleid
+some DVD discs contain scenes that can be viewed from multiple angles.
+Here you can tell MPlayer which angles to use. Examples can be found below.
+.TP
+.B \-vo\ <driver>[:<device>]
+select video output driver and optinaly device. "device" is valid with
+SDL and GGI too, it means sub-driver then (for example: -vo sdl:aalib).
+
+you can get the list of available drivers executing
+.I mplayer -vo help
+
+.TP
+.B \-ao\ <driver>[:<device>]
+select audio output driver and optinaly device. "device" is valid with
+SDL too, it means sub-driver then (for example: -vo sdl:esd).
+
+If using OSS, you can specify which sound device to use like this :
+-ao oss:/dev/dsp1     (replaces the old -dsp option)
+
+you can get the list of available drivers executing
+.I mplayer -ao help
+
+.TP
+.B \-vcd\ track
+play video cd track from device instead of plain file
+.TP
+.B \-nosound
+don't play sound
+.TP
+.B \-fs
+fullscreen playing (centers movie, and makes black
+bands around it)
+.TP
+.B \-vm
+try to change to a different video mode. dga2, x11 (XF86VidMode) and sdl
+output drivers support it.
+.TP
+.B \-zoom
+use software scaling, where available (use with -nofs). svga, x11, vesa
+output drivers support it.
+.TP
+.B \-flip
+flip image (useful for example for old Indeo codecs). Supported only(?)
+by the 'sdl' and 'x11' outputs.
+.TP
+.B \-x\ x
+scale image to x width [if driver suppports!]
+.TP
+.B \-y\ y
+scale image to y height
+.TP
+.B \-xy\ factor
+scale image by <factor>
+.TP
+.B \-pp\ quality
+apply postprocess filter on decoded image.
+You need a STRONG CPU in order to use this!
+The supported formats and settings are:
+
+        MPEG 1/2   0 (none), TODO
+        OpenDivX   0 (none), TODO
+        DivX4      0 (none), TODO
+        DivX       0 (none), TODO
+
+        -pp 0x20000 TODO
+
+.TP
+.B \-autoq\ quality
+dynamically changes the level of postprocess, depending on spare CPU
+time available. Uses the same value ranges as -pp . The number you
+specify will be the maximum level used. Usually you can use some big
+number. You don't have to (and don't) use together with -pp !
+.TP
+.B \-ffactor\ number
+resample alphamap of the font. Can be:
+
+        0    plain white fonts
+        0.75 very narrow black outline [default]
+        1    narrow black outline
+        10   bold black outline
+.TP
+.B \-sub\ file
+use/display this subtitle file
+.TP
+.B \-subfps\ rate
+specify frame/sec rate of subtitle file
+(ONLY for frame-based SUB files, i.e. NOT MicroDVD format!)
+(default: the same as the movie)
+.TP
+.B \-subdelay\ sec
+delays subtitles by <sec> seconds. Can be negative.
+.TP
+.B \-osdlevel\ level
+specifies which mode the OSD should start in (0 : none, 1 : seek, 2: seek+timer)
+(default = 2)
+.TP
+.B \-lircconf\ configfile
+specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc
+.TP
+.B \-v
+enable verbose output (more -v means more verbose)
+.TP
+.B \-quiet
+display less output, status messages.
+.TP
+.B \-benchmark
+used in combination with -nosound and -vo null for benchmarking.
+.TP
+.B \-skin skin directory
+load skin from this directory (WITHOUT path name!). For example '-skin fittyfene' tries these :
+
+    /usr/local/share/mplayer/Skin/fittyfene
+    ~/.mplayer/Skin/fittyfene
+.TP
+.B \-aspect ratio
+set aspect ratio of movies. It's autodetected on MPEG files, and can't be
+autodetected on AVI files. Examples:
+
+    -aspect 4:3  or -aspect 1.3333
+    -aspect 16:9 or -aspect 1.7777
+
+(has -noaspect pair)
+.TP
+.B \-monitoraspect ratio
+set aspect ratio of your screen. Examples:
+
+    -monitoraspect 4:3  or 1.3333
+    -monitoraspect 16:9 or 1.7777
+
+.TP
+.B \-playlist <file>
+play files according to this filelist (1 file/row).
+.TP
+.B \-slave
+This option switches on slave mode. This is intended for use
+of MPlayer as a backend to other programs. Instead of intercepting keyboard
+events, MPlayer will read simplistic command lines from its stdin.
+See section
+.B SLAVE MODE PROTOCOL
+for the syntax.
+.IP
+.SH "ADVANCED OPTIONS"
+.TP
+.I NOTE
+These options can help you solve your particular problem.. Also, see the
+documentation !
+.TP
+.B \-vc <name>
+force usage of a specific video codec, according to its name in codecs.conf,
+for example :
+
+    -vc divx       use VFW DivX codec
+    -vc divxds     use DirectShow DivX codec
+    -vc ffdivx     use libavcodec's DivX codec
+    -vc ffmpeg12   use libavcodec's MPEG1/2 codec
+    -vc divx4      use ProjectMayo's DivX codec
+
+See -vc help for FULL list !
+.TP
+.B \-ac <name>
+force usage of a specific audio codec, according to its name in codecs.conf,
+for example :
+
+    -ac mp3        use libmp3 MP3 codec
+    -ac mp3acm     use l3codeca.acm MP3 codec
+    -ac ac3        use AC3 codec
+    -ac hwac3      enable Hardware AC3 passthrough
+                   (see documentation)
+    -ac vorbis     use libvorbis
+    -ac ffmp3      use ffmpeg's MP3 decoder (SLOW)
+
+See -ac help for FULL list !
+.TP
+.B \-vfm <1-12>
+force usage of a specific codec FAMILY, and FALLBACK to default if failed.
+For example:
+
+    -vfm 2         use VFW (Win32) codecs
+    -vfm 3         use OpenDivX/DivX4 codec (YV12)
+                   (same as -vc odivx but fallback)
+    -vfm 4         use DirectShow (Win32) codecs
+    -vfm 5         use libavcodec codecs
+    -vfm 7         use DivX4 codec (YUY2)
+                   (same as -vc divx4 but fallback)
+    -vfm 10        use XAnim codecs
+
+See -vc help for FULL list !
+
+NOTE : if libdivxdecore support was compiled in, then type 3 and 7 now contains
+just the same DivX4 codec, but different APIs to reach it. For difference
+between them and when to use which, check the DivX4 section in the
+documentation.
+.TP
+.B \-afm <1-12>
+force usage of a specific audio format. For example:
+
+    -afm 1         use libmp3 (mp2/mp3,
+                   but not mp1)
+    -afm 2         suppose raw PCM audio
+    -afm 3         use libac3
+    -afm 4         use a matching Win32 codec
+    -afm 5         use aLaw/uLaw driver
+    -afm 10        use libvorbis
+    -afm 11        use ffmpeg's MP3 decoder (even mp1)
+
+See -ac help for FULL list !
+.TP
+.B \-sb\ position
+seek to byte position
+.TP
+.B \-ss\ time
+seek to given time position. For example :
+
+    -ss 56
+    -ss 01:10:00
+
+.TP
+.B \-bpp\ depth
+use different color depth than autodetect. Not all -vo drivers support
+it (fbdev, dga2, svga, vesa).
+.TP
+.B \-abs\ bytes
+sound card audio buffer size (in bytes, default: measuring)
+.TP
+.B \-delay\ secs
+audio delay in seconds (may be +/- float value)
+.TP
+.B \-nobps
+don't use avg. byte/sec value for A-V sync (AVI)
+.TP
+.B \-aid\ id
+select audio channel [MPG: 0-31 AVI: 1-99 ASF: 0-127 VOB: 128-...]
+.TP
+.B \-vid\ id
+select video channel [MPG: 0-15  AVI:  -- ]
+.TP
+.B \-fps\ value
+force frame rate (if value is wrong in the header)
+.TP
+.B \-mc\ seconds/5frame
+maximum sync correction per 5 frames (in seconds)
+.TP
+.B \-ni
+force usage of non-interleaved AVI parser
+.TP
+.B \-include configfile
+specify config file to be parsed after the default
+.TP
+.B \-z\ <0-8>
+specifies compression level for PNG output
+          0 : no compression
+          8 : max compression
+.TP
+.B \-idx
+rebuilds INDEX of the AVI. Useful with broken downloads, or badly
+created AVIs.
+.TP
+.B \-forceidx
+force rebuilding of INDEX. Useful for testing, or AVIs with bad
+indexes.
+.TP
+.B \-nodshow
+disables usage of DirectShow video codecs
+.TP
+.B \-noxv
+disable XVideo hardware acceleration (with SDL only!)
+.TP
+.B \-forcexv
+force using XVideo (SDL!)
+.TP
+.B \-dumpaudio
+writes audio stream of the file to ./stream.dump (mostly usable
+with mpeg/ac3)
+.TP
+.B \-dumpstream
+dumps the file to ./stream.dump . Useful for example
+when ripping from DVD.
+.TP
+.B \-noframedrop
+no frame dropping : every frame is played, audio and video may be out of
+sync (default)
+.TP
+.B \-framedrop
+frame dropping : decode all frames, video may skip
+.TP
+.B \-nodouble
+disable doublebuffering (default). Currently this is only honoured by the Xv and the DGA driver.
+With the DGA driver this also disables OSD support but yields some speed gain.
+.TP
+.B \-double
+enable doublebuffering. Currently this is only honoured by the Xv and the DGA driver.
+.TP
+.B \-dvdkey key
+key to decrypt stream encrypted with CSS. For example : -dvdkey F169072699
+(this is NOT for DVD playing! For DVD use the -dvd option!)
+.TP
+.B \-stereo mode
+select type of MP2/MP3 stereo output.
+
+        Stereo         0
+        Left channel   1
+        Right channel  2
+.TP
+.B \-channels n
+select number of audio output channels to be used
+
+        Stereo         2
+        Surround       4
+        Full 5.1       6
+
+Currently this option is only honoured for AC3 audio.
+.TP
+.B \-srate Hz
+specifies Hz to playback audio on. Has effect on playback speed!
+.TP
+.B \-config configfile
+specifies where to search for config file
+.TP
+.B \-display name
+specify the hostname and display number of the X server you want
+to display on. For example : -display xtest.localdomain:0
+.TP
+.B \-unicode
+tells MPlayer to handle the subtitle file as UNICODE.
+Contrary: -nounicode
+.TP
+.B \-utf8
+tells MPlayer to handle the subtitle file as UTF8.
+.TP
+.B \-fsmode\ mode
+This option workarounds some problems when using specific windowmanagers and
+fullscreen mode. If you experience fullscreen problems, try changing this
+value between 0 and 7.
+
+        -fsmode 0      new method
+        -fsmode 1      ICCCWM patch
+                       (for KDE2/icewm)
+        -fsmode 2      old method
+        -fsmode 3      ICCCWM patch
+                       plus Motif method
+.TP
+.B \-frames\ number
+MPlayer plays <number> frames, then quits.
+.TP
+.B \-fb\ device
+Specifies the framebuffer device to use. By default it uses /dev/fb0 .
+Only valid for the fbdev driver.
+.TP
+.B \-fbmode\ modename
+Change videomode to the one that is labelled as <modename> in /etc/fb.modes .
+Only valid for the fbdev driver.
+.TP
+.I NOTE
+VESA framebuffer doesn't support mode changing.
+.TP
+.B \-fbmodeconfig\ filename
+Use this config file instead of the default /etc/fb.modes .
+Only valid for the fbdev driver.
+.TP
+.B \-subcp\ codepage
+If your system supports iconv(3), you can use this option to
+specify codepage of the subtitle. Examples:
+
+        -subcp latin2
+        -subcp cp1250
+
+.TP
+.B \-dumpmpsub
+Convert the given subtitle (specified with the -sub switch) to MPlayer's
+subtitle format, MPsub. Dumps a dump.mpsub file to current directory.
+.TP
+.B \-screenw\ pixels
+If you use an output driver which can't know the resolution of the screen
+(mga/fbdev/x11 and/or TVout) this is where you can specify the horizontal
+resolution.
+.TP
+.B \-screenh\ pixels
+If you use an output driver which can't know the resolution of the screen
+(mga/fbdev/x11 and/or TVout) this is where you can specify the vertical
+resolution.
+.TP
+.B \-cache\ kbytes
+This option specifies how much memory to use when precaching a file/URL .
+Especially useful on slow media. Default is off.
+.IP
+.SH "ALPHA/BETA CODE"
+.TP
+.I NOTE
+These are included in this manpage just for completeness! These may or may NOT
+work! If you don't know what are these, you DON'T need these! In either case,
+double-check the documentation !
+.TP
+.B \-br\ rate
+used with '-vo odivx' .
+Specifies the bitrate to encode OpenDivx at
+(in bits! e.g: 780000).
+.TP
+.I NOTE
+You CAN'T encode sound, only video right now! Don't ask for it,
+it's on the TODO list.
+.TP
+.B \-encode\ file
+used with '-vo odivx' .
+Specifies the output OpenDivX file. Won't overwrite.
+.TP
+.B \-dumpvideo
+dump video stream to ./stream.dump (only with MPEG-PS) (not very usable)
+.IP
+.SH KEYBOARD CONTROL
+.TP
+.I NOTE
+These keys may/may not work, depending on your video output driver.
+.TP
+	  <-  or  ->      seek backward/forward  10 seconds
+
+up or down      seek backward/forward   1 minute
+
+pgup/pgdown     seek backward/forward  10 minutes
+
+p or SPACE      pause movie (press any key)
+
+q or ESC        stop playing and quit program
+
++ or -          adjust audio delay by +/- 0.1 second
+
+/ or *          decrease/increase volume
+
+o               toggle OSD: none / seek / seek+timer
+
+m               toggle using master/pcm volume
+
+z or x          adjust subtitle delay by +/- 0.1 second
+
+(the following keys are valid only when using DirectShow DivX codec, or
+the DivX4 codec with -vc divx4)
+
+1 or 2          adjust contrast
+
+3 or 4          adjust brightness
+
+5 or 6          adjust hue
+
+7 or 8          adjust saturation
+
+.IP
+.SH SLAVE MODE PROTOCOL
+If the -slave switch is given, playback is controlled by a 
+line-based protocol with the following tokens:
+.TP
+       stop            pause playback
+
+play            resume playback
+
+seek <NUM>      continue at second NUM
+
+skip <NUM>      skip NUM seconds (may be negative)
+
+quit            exit mplayer
+
+.IP
+.SH FILES AND DIRECTORIES
+.TP
+.I CONFIG FILES
+Settings are stored system-wide in the /etc/mplayer.conf file,
+and per-user in $HOME/.mplayer/config. The directory
+$HOME/.mplayer and the 'config' are created if doesn't exist.
+.TP
+.I FONTS
+Fonts are searched in $HOME/.mplayer/font. There must be a font.desc
+file, and files with .RAW extension.
+.TP
+.I SUBTITLE FILES
+MPlayer currently supports 9 subtitle formats : MicroDVD, SubRip, unnamed,
+SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha), AQT, and our own: MPsub.
+Sub files are searched in this priority : (for example /mnt/cdrom/movie.avi)
+    /mnt/cdrom/movie.sub
+     (utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)
+    $HOME/.mplayer/sub/movie.sub
+     (utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)
+    $HOME/.mplayer/default.sub
+.IP
+.SH "EXAMPLES"
+.B Quickstart DVD playing
+mplayer -dvd 1
+.TP
+.B Multiangle DVD playing
+mplayer -dvd 1 -dvdangle 2
+.TP
+.B Playing from a different DVD device
+mplayer -dvd 1 /dev/dvd2
+.TP
+.B Stream from HTTP
+mplayer http://mplayer.hq/example.avi
+.TP
+.B Convert subtitle to MPsub (to ./dump.mpsub)
+mplayer dummy.avi -sub source.sub -dumpmpsub
+.LP
+.SH BUGS
+Probably. Check the documentation.
+
+Bugreports should be addressed to the MPlayer-users mailing list
+(mplayer-users@mplayerhq.hu) ! If you want to submit a bugreport
+(which we love to receive!), please double-check the bugreports.html, and
+tell us all that we need to know to identify your problem.
+
+.LP
+.SH AUTHORS
+Check documentation !
+
+MPlayer is (C) 2000-2001
+.I Arpad Gereoffy <arpi@thot.banki.hu>
+
+This manpage is written and maintained by
+.I Gabucino .
+.LP
+.SH STANDARD DISCLAIMER
+Use only at your own risk! There may be errors and inaccuracies that could
+be damaging to your system or your eye. Proceed with caution, and although
+this is highly unlikely, the author doesn't take any responsibility for that!
+.\" end of file

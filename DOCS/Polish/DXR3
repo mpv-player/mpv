@@ -1,0 +1,103 @@
+DXR3/H+ video/audio output plugins manual by David Holm
+=======================================================
+
+2001-12-04: Thanks to Inaki Garci'a Etxebarria of
+	    zapping.sourceforge.net we have now
+	    abandoned rte since it caused problems for
+	    users who didn't rtfm and compiled it with
+	    ffmpeg support. Instead we are now using
+	    libmp1e which is a modified version of mp1e.
+	    
+2001-11-29: Thanks to Felix Buenemann I managed to
+	    optimize the odivx playback as well as add
+	    support for the rest of the codecs!
+	    
+2001-11-28: ffmpeg replaced with mp1e, divx playback
+	    won't get much faster than this, huge thanks
+	    goes out to Ivan Kalvachev for helping me
+	    fix the final mp1e bugs (and contributing
+	    to the libvo2 development)
+	    
+1. Introduction
+
+The DXR3 and Hollywood+ are two not too different mpeg-(1/2) and ac3
+hardware playback cards that came at about the same time as the first
+dvd-rom drives hit the market. At that time most computers weren't
+powerful enough for synced software dvd playback. And even the faster
+(intel-based) computers had troubles with artifacts.
+Sigma Designs came up with the great idea to create a hardware
+mpeg-(1/2), ac3 decoder. Sigma Designs are known for their realmagic
+hardware (or they bought the company who came up with the first
+realmagic boards, I don't know which).
+Later Creative Labs thought, hey, we also wan't this product, and to
+distribute it with our dvd-drives (the DVD Encore packages if I recall
+correctly). So they bought the designs for the Hollywood plus and
+replaced the circuit used to produce a proper video feed for tv's
+called adv7170 or adv7175a depending on which h+ board you own with
+a bt865. The reason for this is beyond my understanding as this seems
+complete illogical to me, but I have had great experiences with
+bt(brooktree) circuits in the past, so I don't mind.
+Well, nowadays most people have no use for a mpeg-(1/2) or ac3
+hardware decoder since most computers these days have no problem doing
+this in software and have cycles left for posprocessing (removing of
+artefacts and other garbage produced by compression).
+These days, you have two uses for this card:
+1. You have a slow computer which you use for vcd/dvd playback
+2. You discover what I have done with the implementation of this as
+   an audio/video output device for mplayer (read on and you'll find
+   out).
+
+
+
+2. Requirements
+
+ * First of all you will need the DXR3/H+ drivers properly installed.
+   Version 0.9.0 or later
+
+ * Run <mplayerdir>/configure and make sure that DXR3/H+ support = yes
+   
+ From here on compilation (of at least my code ;) should go without any
+ problems.
+
+
+
+3. Usage
+
+After installation you will have two new outdevices in mplayer:
+    -vo dxr3	For video output
+    -ao dxr3	For audio output 
+
+MPEG-1, MPEG-2, VCD and DVD Notes
+There are some notes to take into account here for optimum playback.
+When playing any mpeg-(1/2) file, this including usage of the "-dvd"
+and "-vcd" options you must either add the "-vc mpegpes" or edit
+codecs.conf and make sure videocodec mpegpes is listed above mpeg12.
+If you fail to do this you will only get software playback which kinda
+spoils most of the useful features of this card except for tv-out ;).
+Remember that if you edit the codecs.conf file and move the mpegpes
+section will have to specify "-vc mpeg12" if you want to playback
+any of these video types _without_ "-vo dxr3"!
+
+DIVX Notes
+When playing divx's add "-vc odivx" for maximum performance.
+I've switched to mp1e from ffmpeg so it should be lightning fast now.
+
+Other codecs:
+No "-vc <codec>" switches should be required as mplayer will autodetect.
+If you find an unsupported codec please contact me!
+
+* Avoid running mplayer as root or setuid root as rtc timing seems to
+  slow down playback on the dxr3 for some users. I will look into this
+  at a later point as this hardly qualifies as a severe bug *
+
+
+ 
+4. Contacting me
+
+You can contact me either by e-mailing me, <dholm@iname.com> or by using
+icq: 798427
+Feedback, bugreports and general suggestions are appreciated (preferably
+by e-mail). My name is David Holm for those of you who are incapable of 
+reading a heading. ;)
+
+

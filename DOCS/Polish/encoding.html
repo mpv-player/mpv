@@ -1,0 +1,255 @@
+<HTML>
+<BODY BGCOLOR=white>
+
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+
+<P><B><A NAME=2.4>2.4.  Encoding with MEncoder</A></B></P>
+
+<A NAME=2.4.1><P><B><I>Overview</I></B>
+<P><B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder) is a simple movie encoder,
+designed to encode MPlayer-playable movies
+(<B>AVI/DVD/VCD/VOB/MPG/MOV/VIV/NET</B>) to other MPlayer-playable formats (see
+below). Currently it's in beta stage, and encodes only to <B>DivX4</B> (1 or 2
+passes) video, <B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B> audio. Also has stream
+copying abilities. In the future, there will be cropping, resizing filters, and
+other interesting stuff.</P>
+
+<A NAME=2.4.2><P><B><I>Compiling</I></B>
+  <UL>
+    <LI>read <B>MPlayer</B>'s compilation instructions, it contains info about
+      how to install <I>libdvdread</I> for <B>DVD</B> support, etc.</LI>
+    <LI>download the newest <B>DivX4linux</B> libs
+      from <A HREF="http://avifile.sourceforge.net/download.htm">avifile.sourceforge.net</A>,
+      and have them PROPERLY installed. This is needed for DivX4 (1/2 pass)
+      encoding. And since this is mandatory (now), MEncoder is Linux-only.</LI>
+    <LI>download and compile <B>libmp3lame</B> (from lame 3.89beta or lame CVS).<BR>
+      <B>WARNING : DO NOT COMPILE LAME WITH <U>GCC 2.96</U> ! It won't
+      work properly !</B><BR>
+      This
+      is needed for CBR/VBR MP3 audio encoding ability. Note that a single
+      <CODE>lame</CODE> binary isn't sufficient. BTW: the less optimization
+      you use for lame, the better the quality will be. You can test
+      quality by running <CODE>make test</CODE> after lame's compiling process
+      is over. The resulting number should be less than <B>30</B>. Don't
+      panic if it's <B>400</B> or so, you shouldn't heard any audible
+      quality decrease. Oh, and if your compiler doesn't even run <CODE>make test</CODE> ...
+      Well, delete that <B>GCC 2.96</B>.</LI>
+    <LI>use <CODE>./configure</CODE> with optional parameters as usual
+      (use <CODE>--enable-tv</CODE> to include V4L tuner grabbing code), and
+      type : <CODE>make mencoder</CODE> , then <CODE>make install</CODE>.</LI>
+  </UL>
+</P>
+
+<P>You are ready. As you probably know, other encoding tools need the
+<I>avifile</I> library installed. <B>MEncoder</B> doesn't need it at all.</P>
+
+<A NAME=2.4.3><P><B><I>MEncoder features</I></B> :
+  <UL>
+    <LI>encoding from the wide range of fileformats and decoders of <B>MPlayer</B></LI>
+    <LI>encoding from <B>V4L compatible TV tuners</B></LI>
+    <LI>encoding/multiplexing to interleaved AVI files with proper index</LI>
+    <LI>1 or 2 pass <B>DivX4</B> video</LI>
+    <LI><B>VBR</B> MP3 audio</LI>
+    <LI>PCM audio</LI>
+    <LI>stream copying (CBR audio only)</LI>
+    <LI>input A/V synchronizing (PTS-based, can be disabled with -mc 0 option)</LI>
+    <LI>FPS correction with <CODE>-ofps</CODE> option (useful when encoding
+    29.97fps VOB to 24fps AVI)</LI>
+    <LI>movie rescaling</LI>
+  </UL>
+</P>
+
+<P><B><I>Planned features</I></B> :
+  <UL>
+    <LI>using audio from separate file (AC3, MP3, OGG)</LI>
+    <LI>VBR audio stream copy</LI>
+    <LI>even wider variety of available en/decoding formats/codecs
+    (creating VOB files with DivX4/Indeo5/VIVO streams :)</LI>
+  </UL>
+</P>
+
+<A NAME=2.4.3.1><P><B><I>Encoding 2-pass DivX4</I></B></P>
+
+<P>The name comes from the fact that this method encodes the file <I>twice</I>.
+The first encoding (dubbed <I>pass</I>) creates some temporary files with a
+size of few megabytes (do not delete them yet). In the second pass, the output
+file is created, using the bitrate data from the temporary file. The resulting
+file will have much better image quality. If this is the first time you heard
+about this, you should consult some guides available on the Net.</P>
+
+<P>This example shows how to encode a DVD to a 2-pass DivX4 AVI. Just two
+commands are needed :<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc divx4 -oac mp3lame -divx4opts br=1100
+-o movie.avi -pass 1<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc divx4 -oac mp3lame -divx4opts br=1100 -o movie.avi -pass 2</CODE></P>
+
+<A NAME=2.4.3.2><P><B><I>Rescaling movies</I></B></P>
+
+<P>Often the need to resize movie images' size emerges. Its reasons can be many,
+  examples are decreasing output file size, encoding SVCDs to DivX. Ripped DVDs
+  are mostly rescaled, for example a 4:3 DVD should be 640x480, especially
+  when you want it to fit to 1 CD, and have good quality at the same time.
+  SVCDs have 480x480 size, and their header contains the aspect ratio the
+  player should use (Ex.: 480x480 + 4:3 = 640x480). However when encoding to
+  AVI (DivX) files, you have be aware that AVI headers don't store this
+  value. Thus, the only solution is rescaling.</P>
+
+<P>The output size is specified with the <CODE>-x</CODE>, and <CODE>-y</CODE>
+  options.  Furthermore, there are 3 rescaling filters in <B>MEncoder</B>, <I>0
+  : fast 1 : bilinear</I>, <I>2 : bilinear</I>, <I>bicubic</I> (best quality).
+  They can be specified with the <CODE>-sws</CODE> option. If not specified,
+  <B>MEncoder</B> will use 0 : fast bilinear.</P>
+
+<P>Rescaling is very simple :<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -divx4opts br=1300 -x 640 -y 480 -sws 2 -o output.avi</CODE></P>
+
+<A NAME=2.4.3.3><P><B><I>Stream copying</I></B></P>
+
+<P><B>MEncoder</B> can handle input streams in two ways : <B>encode</B> or
+  <B>copy</B> them. This section is about <B>copying</B>.</P>
+
+<P>
+<UL>
+  <LI><B>Video stream</B> (option <CODE>-ovc copy</CODE>) : nice stuff can be done :)<BR>
+  Like, putting (not converting!) FLI or VIVO or MPEG1 video into an AVI file !
+  Of course only <B>MPlayer</B> can play such files :) And it probably has no
+  real life value at all. Rationally : video stream copying can be useful for
+  example when only the audio stream has to be encoded (like, uncompressed PCM
+  to MP3).</LI>
+
+  <LI><B>Audio stream</B> (option <CODE>-oac copy</CODE>) : straightforward.</LI>
+</UL>
+</P>
+
+<A NAME=2.4.4><P><B><I>Syntax</I></B></P>
+
+<P>&nbsp;&nbsp;<CODE>mencoder [options] [input file] [options] ...</P>
+
+<A NAME=2.4.5><P><B><I>Available options</I></B></P>
+
+<P>NOTE : for all available options, <B>read the manpage !</B></P>
+
+<TABLE BORDER=0>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-o</I> filename</TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    specify output filename
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-x</I> width in pixels</TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    rescale output video to given pixels width
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-y</I> height in pixels</TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    rescale output video to given pixels height
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-sws</I> 0-2</TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    type of scaling method<BR>
+    &nbsp;&nbsp;0 - fast bilinear<BR>
+    &nbsp;&nbsp;1 - bilinear<BR>
+    &nbsp;&nbsp;2 - bicubic (best quality)<BR>
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-ovc</I> codecname</TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
+    &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
+    &nbsp;&nbsp;<B>copy</B> - no encoding, just copy the stream (only from AVI/ASF now)<BR>
+    &nbsp;&nbsp;<B>divx4</B> - encode to DivX4<BR>
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-oac</I> codecname</TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
+    &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
+    &nbsp;&nbsp;<B>copy</B> - no encoding, just copy the stream (only from AVI/ASF now)<BR>
+    &nbsp;&nbsp;<B>pcm</B> - encode to uncompressed PCM<BR>
+    &nbsp;&nbsp;<B>mp3lame</B> - encode to MP3 (using Lame)<BR>
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-divx4opts</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    If encoding to DivX4, you can specify its parameters here, like:<BR>
+    &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
+    Common options: <B>(for full list, check the manpage!)</B><BR>
+    &nbsp;&nbsp;<B>help</B> - get help<BR>
+    &nbsp;&nbsp;<B>br</B>=XXX - specify bitrate in kbit &lt;4-16000&gt; or bit &lt;16001-24000000&gt;<BR>
+    &nbsp;&nbsp;<B>q</B>=XXXX - quality (1-fastest, 5-best - default 5)<BR>
+  </TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-lameopts</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    If encoding to MP3 with libmp3lame, you can specify its parameters here, like:<BR>
+    &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
+    &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>
+    Common options: <B>(for full list, check the manpage!)</B><BR>
+    &nbsp;&nbsp;<B>help</B> - get help<BR>
+    &nbsp;&nbsp;<B>cbr</B> - select <B>CBR</B> MP3 (default is <B>VBR</B>)<BR>
+    &nbsp;&nbsp;<B>br</B>=XXX - specify bitrate in kbit &lt;0-1024&gt; (this is for <B>CBR</B> only!)<BR>
+    &nbsp;&nbsp;<B>q</B>=XXXX - quality (0-highest, 9-fastest - default 0) (this is for <B>VBR</B> only!)<BR>
+  </TD>
+</TR>
+</TABLE>
+
+<A NAME=2.4.6><P><B><I>Examples</I></B></P>
+
+<P>Using <B>MEncoder</B> is the easiest thing on Earth. See the following :</P>
+
+<P>Encoding from DVD, title 2 :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi</CODE></P>
+
+<P>Encoding from DVD, title 2, with rescaling :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -x 640 -y 480 -sws 2 -o title2.avi</CODE></P>
+
+<P>Encoding from HTTP :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/example.avi  -o  example.avi</CODE></P>
+
+<P>Encoding from a pipe :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -</CODE></P>
+
+<P>Encoding multiple *.vob files :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;cat *.vob | mencoder &lt;options&gt; -</CODE></P>
+
+<P>Encoding from tuner (for tuner options <A HREF="documentation.html#2.5">see the TV input section !</A>) :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=640:height=480 &lt;options&gt;</CODE></P>
+
+<P>For all available options, <B><I>check the MEncoder man page !</I></B>
+<P>
+</FONT>
+</BODY>
+</HTML>

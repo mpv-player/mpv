@@ -1,0 +1,127 @@
+<HTML>
+<BODY BGCOLOR=white>
+
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+
+<P><B><A NAME=2.3.2>2.3.2. Audio output devices</A></P></B>
+
+<P><B>MPlayer</B>'s audio interface is called <I>libao2</I>. It currently
+contains these drivers :</P>
+
+<TABLE BORDER=0>
+
+<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>General:</B></P></TD>
+
+<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>oss</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS (ioctl) driver</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sdl</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SDL driver (supports up/downsampling, <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nas</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>NAS (Network Audio System) driver</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>native ALSA 0.5 driver</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa9</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>native ALSA 0.9 driver (works, but has problems -> use OSS)</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sun</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SUN audio driver (/dev/audio) for BSD and Solaris8 users</TD></TR>
+
+</TABLE>
+
+<P>The fact is, Linux soundcard drivers are usually shit, and always as
+incompatible as they can be. It MAY take a while to find your optimal settings.</P>
+<P><UL>
+<LI>if you have OSS as driver, first try with <I>-ao oss</I> (this is the default).
+If you experience glitches, halts or anything out of the ordinary, have a
+look at <I>-ao sdl</I> (NOTE: of course you'll have to have a new SDL library and its
+devel pair installed). It helps in a lot of cases (it also supports ESD, ARTS, and
+up/downsampling. /esd is GNOME's, arts is KDE's sound daemon/).</LI>
+<LI>if you have ALSA version 0.5, then you ALMOST always have to use <I>-ao alsa5</I> ,
+since 0.5 has buggy OSS emulation code, and will <B>crash MPlayer</B> with
+a message like this:<BR>
+  <UL>
+  <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></UL>
+</LI>
+<LI>if you have ALSA version 0.9, use <I>-ao oss</I> or <I>-ao sdl</I> as you
+wish. You can also use <I>-ao alsa9</I> as it works now, however it has many
+problems (losing sync, disappearing audio, etc).</LI>
+</UL></P>
+
+<P>On <B>Solaris/FreeBSD</B> systems, use the SUN audio driver with the
+<I>-ao sun</I> option, otherwise you'll have no video, nor audio playing.</P>
+
+<P><B><A NAME=2.3.2.1>2.3.2.1. Soundcard experiences, recommendations</A></B></P>
+
+<P><TABLE BORDER=0 WIDTH=100%>
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>VIA onboard chipset (via82cxxx) 48Khz only</B></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Driver:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2> from <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&release_id=59602">here</A></TD><TR>
+
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Aureal Vortex 2</B></TD><TR>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>no driver</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS/Pro:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>no driver</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD>48</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Driver:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Driver2:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2> from <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">here</A><BR>
+(<I>buffer size increased to 32k</I>)</TD><TR>
+
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>GUS PnP</B></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>no driver</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS/Pro:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SB Live!</B></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(?)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SB AWE 64</B></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>max 44kHz</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48kHz sounds shit</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Gravis UltraSound ACE</B></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>max 44Khz. <I>not OK</I></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Gravis UltraSound MAX</B></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK (?)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ESS 688</B></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK (?)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
+
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>C-Media cards (which ones?)</B></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>not OK (hissing) (?)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK (?)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
+
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Yamaha cards (*ymf*)</B></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>not OK (?) (maybe -ao sdl)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK only with ALSA 0.5 with OSS emulation <B>AND</B> <I>-ao sdl</I> (!) (?)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
+
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Cards with envy24 chips (like Terratec EWS88MT)</B></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS/Pro:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
+
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PC Speaker or DAC</B></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK (<I>use the SDL driver : -ao sdl</I>)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>no driver</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>the driver emulates 44.1 maybe more</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Driver:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD><TR>
+</TABLE></P>
+
+<P><UL>
+<LI>on Linux, use at least kernel 2.4 if possible, 2.2 isn't tested
+<LI>if sound clicks when playing from CD-ROM, turn on IRQ unmasking !
+     for example "hdparm -u1 /dev/cdrom" (see "man hdparm" !!!)
+     This is recommended anyways... (for XMMS, etc...)
+     Read section <A HREF="cd-dvd.html#4.1">4.1</A>.
+<LI>don't use your soundcard by other application ( for ex. XMMS ) !
+     if you use ESD, start MPlayer with the '-vo sdl:esd' option !
+<LI>Please tell us how MPlayer and your soundcard(s) worked together!
+</UL></P>
+
+</BODY>
+</HTML>
