@@ -1631,11 +1631,37 @@ Pruebe esta opción si continúa teniendo problemas en pantalla completa.
 .TP
 .B \-fstype <tipo1,tipo2,...>
 Especifica una lista de prioridad de los modos de capa de pantalla completa
-para ser usados.
+para ser usados. Los tipos disponibles son:
 
+.PD 0
+.RSs
+.IPs "above"
+Usa _NETWM_STATE_ABOVE si está disponible
+.IPs "below"
+Usa _NETWM_STATE_BELOW si está disponible
+.IPs "fullscreen"
+Usa _NETWM_STATE_FULLSCREEN si está disponible
+.IPs "layer"
+Usa _WIN_LAYER con la capa por defecto
+.IPs "layer=<0..15>"
+Usa _WIN_LAYER con el número de capa indicado
+.IPs "netwm"
+Fuerza estilo NETWM
+.IPs "none"
+No establece una capa de ventana de pantalla completa
+.IPs "stays_on_top"
+Usa _NETWM_STATE_STAYS_ON_TOP si está disponible
+.RE
+.PD 1
+
+Es posible negar los modos usando un "\-" como prefijo
+.br
 El orden por defecto es "layer,stays_on_top,above,fullscreen".
 Se usará por defecto en caso de especificar modos incorrectos o no
 soportados.
+.br
+Los usuarios de OpenBox 1.x tienen que usar \-fstype \-fullscreen
+para que funcione el cambio de fs.
 .br
 Si experimenta problemas con pantalla completa que es cubierta por otras
 ventanas pruebe a usar un orden diferente.
@@ -4094,9 +4120,34 @@ Nota: el cuantizador h263 MMX no puede manejar uniones positivas (establece vfdc
 Consejo: una unión más positiva (-32 - -16 en lugar de -64) parece mejorar la PSNR
 .RE
 
+.SS nuv (-nuvopts)
+
+Nuppel video está basado en rtjpeg y lzo.
+Por defecto los marcos son codificados primero con ftjpeg y luego comprimidos
+con lzo. Pero ambas pasadas pueden ser o no habilitadas. Para que pueda obtener
+una salida raw i420, lzo comprimido i420, rtjpeg, o el rtjpeg comprimido en lzo
+por defecto.
+.br
+Nota: La documentación de nuvrec contiene algunos avisos y ejemplos acerca de
+la configuración a usar en la mayoría de las codificaciones de TV.
+.TP
+.B c=<0\-20>
+umbral de crominancia
+.TP
+.B l=<0\-20>
+umbral de luminancia
+.TP
+.B nolzo
+desactiva la compresión lzo
+.TP
+.B q=<3\-255>
+establece el nivel de calidad
+.TP
+.B raw
+desactiva la codificación rtjpeg
 
 .SS xvidenc (-xvidencopts)
-.br
+
 Hay tres métodos disponibles: tasa de bits constante (CBR), cuantizador fijo y
 2pasadas.
 .TP
