@@ -83,29 +83,61 @@ ASF/WMV. Aber keiner achtet darauf.<BR>
 <B>HINWEIS</B>: DV-Kameras können 2 Arten von AVI-Formaten erzeugen, eines ist
 normal und abspielbar das andere weder normal noch abspielbar.</P>
 
+<P>Es gibt 2 Arten von AVI-Dateien:
+<UL>
+  <LI><B>Interleaved</B>: Audio und Video-Inhalt ist interleaved. Die ist üblich.
+    Empfohlen und wird auch meist verwendet. Einige Tools erzeugen interleaved
+    AVIs mit schlechtem Sync. <B>MPlayer</B> erkennt diese als interleaved und es wird
+    im Verlust der A/V Sync sichtbar, möglichweise auch beim Suchen. Diese Dateien sollten
+    non-interleaved (mit der <CODE>-ni</CODE> Option) abgespielt werden.</LI>
+    <LI><B>Non-interleaved</B>: schlecht. Als erstes kommt der ganze Videostream dann dann der
+    ganze Audiostream, dies erfordert viel suchen in der Datei. Es ist sehr schlecht beim Abspielen
+    vom Netzwerk oder von CDROM.</LI>
+</UL>
+</P>
+
+<P>Einige Audio- und Videocodecs sind erlaubt, aber bedenke das VBR Audio meinst nicht gut
+unstützt wird von den meinsten MPlayer. Das Dateiformat macht es möglich VBR
+Audio zu verwendenm, aber die meinsten Player erwarten CBR Audio, darum funktioniert VBR nicht. VBR ist
+ungewöhnlich und Microsofts Spezifikation zu AVI beschreiben nur CBR Audio. Bedenke auch, dass die meisten
+AVi Encoder/Multiplexer schlechte Dateien mit VBR Audio erzeugen. Es gibt nur 2 Ausnahmen
+(die ich kenne): NaNDub und <A HREF="encoding.html">MEncoder</A>.</P>
+
 
 <P><B><A NAME=2.1.1.3>2.1.1.3. ASF/WMV Dateien</A></B></P>
 
-<P>ASF ist ein sehr neues, undokumentiertes Dateiformat von M$ und WMV ist
-der Nachfolger. Sie sind sehr kommerziell und wenn jemand versucht einen
-Opensource Parser zu entwickeln, wird bald ein bestimmtes Verhängnis treffen.
-Während er Erzeugung des Parsers war es offensichtlich zu sehen, wie aufgeblasen,
-scheisse und unbrauchbar es ist. Nicht das jemand was anderes von M$ erwartet
-hätte.
+<P>ASF (Active Streaming Format) kommt von Microsoft. Sie habe 2 Arten von
+ASF, v1.0 und v2.0 entwickelt. v1.0 wird von ihren Media Tools (Windows
+Media Player und Windows Media Encoder) verwendet und ist sehr geheim. v2.0 ist veröffentlicht und
+patentiert :). Natürlich sind sie unterschiedlich und besitzten überhaupt keine Kompatibilität (es ist
+nur ein anderes legales Spiel). <B>MPlayer</B> unterstützt nur v1.0, weil noch niemand v2.0 Dateien gesehen hat
+:) . Beachte das .ASF Dateien heute auch mit der Extension .WMA oder .WMV vorkommen.</P>
 
 
 <P><B><A NAME=2.1.1.4>2.1.1.4. QT/MOV Dateien</A></B></P>
 
-<P>Dies ist Apples Dateiformat. Nicht viel zu sagen, grundsätzlich gut
-entworfen, vielseitig und streamable, viele Features usw. Es ist schwer Dokumentationen zu
-finden, aber wir denken der der Parser perfekt ist.
+<P>Dies ist von Macintosh. Normalerweise hat es die Extensions .QT oder .MOV . Bedenke dass -
+seitdem die MPEG4-Gruppe QuickTime als das empfohlene Dateiformat für MPEG4 ausgewählt hat -
+deren MPEG4 in .MOV Dateien mit .MPG oder .MP4 Extension erschienen sind (interessant dass
+bei diesen Dateien der Videostream ein richtige .MPG-Datei ist. Mit der <CODE>-dumpvideo</CODE>
+Option kannst du es auch extrahieren.).</P>
+
+<P><B>Codecs</B>: alle Codecs erlaubt, beides, CBR und VBR. Bedenke das die meisten neuen
+MOV-Dateien <B>Sorenson</B> Video und QDesign Music Audio verwenden. Diese Formate sind absolut
+geheim und mir Apples Quicktime Player ist fähig diese Dateien abzuspielen (aber nur auf Win/Mac).</P>
 
 <P><B><A NAME=2.1.1.5>2.1.1.5. VIV Dateien</A></B></P>
 
-<P><B>MPlayer</B> demuxt nun auch fröhlich VIVO-Dateiformate. Dieser Code ist
-neu und möglicherweise fehlerhalft und es gibt noch keine Suchfunktion. Siehe
-<A HREF=codecs.html#2.2.1.4>VIVO Videocodec</A> und <A HREF=codecs.html#2.2.2.4>VIVO Audiocodec</A>
-Sektion für Anweisungen zur Installation.</P>
+<P><B>MPlayer</B> demuxt nun auch fröhlich VIVO-Dateiformate. 
+Der große Nachteil des Formates ist das es keinen Index-Block besitzt, auch keine fixe Paketgröße oder Sync-Bytes.
+Die meisten Dateien besitzen auch Keyframes, also vergiss die Suchfunktion!</P>
+
+<P>Der Videocodec von VIVO/1.0-Datei ist Standard <B>h.263</B> . Der Videocodec der VIVO/2.0 Dateien
+ist veränderter, nichtstandard <B>h.263</B> . Bei Audio ist es das selbe, es ist <B>g.723</B> (standard)
+oder <B>Vivo Siren</B> .</P>
+
+<P>Siehe in der <A HREF=codecs.html#2.2.1.4>VIVO Videocodec</A>
+und <A HREF=codecs.html#2.2.2.4>VIVO Audiocodec</A> Sektion für Installationsanweisungen.</P>
 
 
 <P><B><A NAME=2.1.2>2.1.2. Audio Formate</A></B></P>
