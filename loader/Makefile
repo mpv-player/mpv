@@ -27,7 +27,7 @@ clean:
 
 distclean: clean
 
-.c.o: $@
+.c.o:
 	$(CC) $(CFLAGS) $(DEFINES) -c $<
 
 libloader.a:  $(LIB_OBJECTS) stubs.s

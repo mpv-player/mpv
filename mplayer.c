@@ -82,7 +82,7 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 int slave_mode=0;
 int verbose=0;
 int identify=0;
-static int quiet=0;
+int quiet=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))

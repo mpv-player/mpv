@@ -230,9 +230,6 @@ m_option_t mencoder_opts[]={
 #include "cfg-common.h"
 #undef MAIN_CONF
 
-//	{"quiet", &quiet, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE|CONF_GLOBAL, 0, 100, NULL},
-	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL},
 //	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 //	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 //	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},

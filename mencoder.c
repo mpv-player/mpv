@@ -129,6 +129,7 @@ int out_file_format=MUXER_TYPE_AVI;	// default to AVI
 //void resync_audio_stream(sh_audio_t *sh_audio){}
 
 int verbose=0; // must be global!
+int quiet=0;
 double video_time_usage=0;
 double vout_time_usage=0;
 double max_video_time_usage=0;
@@ -317,7 +318,7 @@ static double end_at;
 
 static void exit_sighandler(int x){
     at_eof=1;
-    interrupted=1;
+    interrupted=2; /* 1 means error */
 }
 
 static muxer_t* muxer=NULL;
@@ -1376,6 +1377,7 @@ if(sh_audio && !demuxer2){
 	    (int)demuxer->filepos,
 	    (int)demuxer->movi_end);
 #else
+      if(!quiet) {
 	if(verbose>0) {
 		mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d] A/Vms %d/%d D/B/S %d/%d/%d \r",
 	    	mux_v->timer, decoded_frameno, (int)(p*100),
@@ -1398,6 +1400,7 @@ if(sh_audio && !demuxer2){
 	    (mux_v->timer>1) ? (int)(mux_v->size/mux_v->timer/125) : 0,
 	    (mux_a && mux_a->timer>1) ? (int)(mux_a->size/mux_a->timer/125) : 0
 	);
+      }
 #endif
     }
         fflush(stdout);
