@@ -2411,7 +2411,7 @@ echores "$_strsep"
 echocheck "vsscanf()"
 cat > $TMPC << EOF
 #include <stdarg.h>
-int main(void) { vsscanf(); return 0; }
+int main(void) { vsscanf(0, 0, 0); return 0; }
 EOF
 _vsscanf=no
 cc_check && _vsscanf=yes
