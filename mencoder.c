@@ -368,7 +368,7 @@ unsigned int timer_start;
 
   mp_msg_init();
   mp_msg_set_level(MSGL_STATUS);
-  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2003 MPlayer Team\n\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2004 MPlayer Team\n\n");
 
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
