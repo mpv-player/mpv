@@ -20,6 +20,7 @@ extern int sub_match_fuzziness;
 #define SUB_SUBVIEWER2 10
 #define SUB_SUBRIP09 11
 #define SUB_JACOSUB  12
+#define SUB_MPL2     13
 
 // One of the SUB_* constant above
 extern int sub_format;

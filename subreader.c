@@ -248,6 +248,32 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
     return current;
 }
 
+subtitle *sub_read_line_mpl2(FILE *fd,subtitle *current) {
+    char line[LINE_LEN+1];
+    char line2[LINE_LEN+1];
+    char *p, *next;
+    int i;
+
+    do {
+	if (!fgets (line, LINE_LEN, fd)) return NULL;
+    } while ((sscanf (line,
+		      "[%ld][%ld]%[^\r\n]",
+		      &(current->start), &(current->end), line2) < 3));
+    current->start *= 10;
+    current->end *= 10;
+    p=line2;
+
+    next=p, i=0;
+    while ((next =sub_readtext (next, &(current->text[i])))) {
+        if (current->text[i]==ERR) {return ERR;}
+	i++;
+	if (i>=SUB_MAX_TEXT) { mp_msg(MSGT_SUBREADER,MSGL_WARN,"Too many lines in a subtitle\n");current->lines=i;return current;}
+    }
+    current->lines= ++i;
+
+    return current;
+}
+
 subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
     char line[LINE_LEN+1];
     int a1,a2,a3,a4,b1,b2,b3,b4;
@@ -954,6 +980,8 @@ int sub_autodetect (FILE *fd, int *uses_time) {
 		{*uses_time=0;return SUB_MICRODVD;}
 	if (sscanf (line, "{%d}{}", &i)==1)
 		{*uses_time=0;return SUB_MICRODVD;}
+	if (sscanf (line, "[%d][%d]", &i, &i)==2)
+		{*uses_time=1;return SUB_MPL2;}
 	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",     &i, &i, &i, &i, &i, &i, &i, &i)==8)
 		{*uses_time=1;return SUB_SUBRIP;}
 	if (sscanf (line, "%d:%d:%d%[,.:]%d --> %d:%d:%d%[,.:]%d", &i, &i, &i, (char *)&i, &i, &i, &i, &i, (char *)&i, &i)==10)
@@ -1239,7 +1267,8 @@ sub_data* sub_read_file (char *filename, float fps) {
 	    { sub_read_line_aqt, NULL, "aqt" },
 	    { sub_read_line_subviewer2, NULL, "subviewer 2.0" },
 	    { sub_read_line_subrip09, NULL, "subrip 0.9" },
-	    { sub_read_line_jacosub, NULL, "jacosub" }
+	    { sub_read_line_jacosub, NULL, "jacosub" },
+	    { sub_read_line_mpl2, NULL, "mpl2" }
     };
     struct subreader *srp;
     
