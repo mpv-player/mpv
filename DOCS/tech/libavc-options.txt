@@ -247,20 +247,28 @@ ildct	use interlaced dct
 lavdopts: (decoder options)
 ---------------------------
 
-ver	error resilience
-	-1 needed for some very broken, encoders which completly ignore the
-           standards (one M4S2 asf sample know to need this) (default)
-	0 
-	1 more aggressive error detection, lavc might think that some correct
-          streams contain errors
+ec	error concealment
+	1 use strong deblock filter for damaged MBs
+        2 iterative MV search (slow)
+        3 all (default)
+        Note: just add the ones u want to enable
 
-bug	manual workaround encoder bugs (cant be easily detected automatically)
-	0 (default)
-	1 for msmpeg4v3	workaround for some old lavc generated msmpeg4v3 files
-	1 for mpeg4	workaround some opendivx? files (autodetected hopefully)
-			see http://heroinewarrior.com for some samples
-	2 for mpeg4	workaround xvid interlacing bug
-	3 for mpeg4	workaround for UMP4 (autodetected hopefully)
+er	error resilience
+	0 disabled
+        1 carefull (should work with broken encoders)
+        2 normal (default) (works with compliant encoders)
+        3 agressive (more checks but might cause problems even for valid bitstreams)
+        4 very agressive
+
+bug	manual workaround encoder bugs (autodetection isnt foolproof for these)
+	0 nothing
+	1		autodetect bugs (default)
+	2 for msmpeg4v3	some old lavc generated msmpeg4v3 files (no autodetect)
+	4 for mpeg4	xvid interlacing bug     (autodetected if fourcc==XVIX)
+	8 for mpeg4	UMP4                     (autodetected if fourcc==UMP4)
+        16for mpeg4	padding bug
+        32for mpeg4	illegal vlc bug          (autodetected per fourcc)
+        Note: just add the ones u want to enable
 
 gray	grayscale only decoding (a bit faster than with color ...)
 
