@@ -207,7 +207,6 @@ read_index:
 	goto read_index;
 
 end:
-    demuxer->seekable = 1; /* got index, we're able to seek */
     if (i == -256)
 	stream_reset(demuxer->stream);
     stream_seek(demuxer->stream, origpos);
@@ -221,7 +220,7 @@ end:
 
 static void add_index_item(demuxer_t *demuxer, int stream_id, int timestamp, int offset)
 {
-  if (index_mode > 0 && (unsigned)stream_id < MAX_STREAMS)
+  if ((unsigned)stream_id < MAX_STREAMS)
   {
     real_priv_t *priv = demuxer->priv;
     real_index_table_t *index;
@@ -242,7 +241,6 @@ static void add_index_item(demuxer_t *demuxer, int stream_id, int timestamp, int
     index = &priv->index_table[stream_id][priv->index_table_size[stream_id]++];
     index->timestamp = timestamp;
     index->offset = offset;
-    demuxer->seekable = 1;
   }
 }
 
@@ -308,13 +306,11 @@ static int generate_index(demuxer_t *demuxer)
     stream_skip(demuxer->stream, 14);
     add_index_segment(demuxer, -1, -1);
   }
-  demuxer->seekable = 0;
   for (i = 0; i < MAX_STREAMS; i++)
   {
     if (priv->index_table_size[i] > 0)
     {
       dump_index(demuxer, i);
-      demuxer->seekable = 1; /* got index, we're able to seek */
     }
   }
   stream_reset(demuxer->stream);
@@ -406,7 +402,6 @@ read_index:
 	goto read_index;
 
 end:
-    demuxer->seekable = 1; /* got index, we're able to seek */
     if (i == -256)
 	stream_reset(demuxer->stream);
     stream_seek(demuxer->stream, origpos);
@@ -1461,16 +1456,35 @@ header_end:
     if (priv->num_of_packets == 0)
 	priv->num_of_packets = -10;
 
-    /* disable seeking */
-    demuxer->seekable = 0;
 
     priv->audio_need_keyframe = 0;
     priv->video_after_seek = 0;
 
-    if (index_mode == 2)
-	generate_index(demuxer);
-    else if (priv->index_chunk_offset && (index_mode == 1))
-	parse_index_chunk(demuxer);
+    switch (index_mode){
+	case -1: // untouched
+	    if (priv->index_chunk_offset && (priv->index_chunk_offset < demuxer->movi_end))
+	    {
+		parse_index_chunk(demuxer);
+		demuxer->seekable = 1;
+	    }
+	    break;
+	case 1: // use (generate index)
+	    if (priv->index_chunk_offset && (priv->index_chunk_offset < demuxer->movi_end))
+	    {
+		parse_index_chunk(demuxer);
+		demuxer->seekable = 1;
+	    } else {
+		generate_index(demuxer);
+		demuxer->seekable = 1;
+	    }
+	    break;
+	case 2: // force generating index
+	    generate_index(demuxer);
+	    demuxer->seekable = 1;
+	    break;
+	default: // do nothing
+    	    break;
+    }
 
     // detect streams:
     if(demuxer->video->id==-1 && v_streams>0){
@@ -1521,8 +1535,6 @@ int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
     int streams = 0;
     int retried = 0;
 
-    if ((index_mode != 1) && (index_mode != 2))
-	return 0;
 
     if (sh_video && (unsigned)vid < MAX_STREAMS && priv->index_table_size[vid])
 	streams |= 1;
