@@ -41,7 +41,7 @@ frame_step
     Play one frame, then pause again.
 
 grab_frames
-    ???
+    Currently unimplemented.
 
 pt_step <value> [<force>]
     Go to the next/previous entry in the playtree. The sign of <value> tells
@@ -59,14 +59,16 @@ sub_delay <value> [<abs>]
     Adjust the subtitle delay by +/- <value> seconds or set it to <value>
     seconds when <abs> is nonzero.
 
-sub_step
-    ???
+sub_step <value>
+    Step forward in the subtitle list by <value> steps or backwards if <value>
+    is negative.
 
 osd [<level>]
     Toggle OSD mode or set it to level when <level> >= 0.
 
-osd_show_text <value>
-    ???
+osd_show_text <string>
+    Show <string> on the OSD. Spaces need to be escaped with \, otherwise
+    only the first word will be shown.
 
 volume <value>
     Increase/decrease volume.
@@ -212,7 +214,7 @@ dvb_set_channel <channel_number> <card_number>
     Set DVB channel.
 
 screenshot
-    Take a screenshot.
+    Take a screenshot. Currently not implemented in any video output driver.
 
 menu <value>
     ???
