@@ -371,7 +371,10 @@ int vo_init(void)
 		WinID = 0; // use root win
 
     if (vo_depthonscreen)
+    {
+        saver_off(mDisplay);
         return 1;               // already called
+    }
 
     XSetErrorHandler(x11_errorhandler);
 
