@@ -1087,7 +1087,7 @@ int init_freetype()
 	mp_msg(MSGT_OSD, MSGL_ERR, "Init_FreeType failed.\n");
 	return -1;
     }
-    fprintf(stderr, "init_freetype\n");
+    mp_msg(MSGT_OSD, MSGL_V, "init_freetype\n");
     using_freetype = 1;
     return 0;
 }
