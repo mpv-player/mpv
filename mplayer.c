@@ -1858,6 +1858,11 @@ if(curr_filename+1<num_filenames || use_gui){
   if(video_out) video_out->uninit();
 #endif
 
+#ifdef HAVE_NEW_GUI
+  mplSubRender=1;
+  wsPostRedisplay( &appMPlayer.subWindow );
+#endif
+
   current_module="uninit_ao";
   if(audio_out) audio_out->uninit();
 //  if(encode_name) avi_fixate();

@@ -53,7 +53,11 @@ void mplStop()
 printf("%%%%%% STOP  \n");
 // ---
  mplShMem->Playing=0;
- mplSubRender=1;
+ if ( !appMPlayer.subWindow.isFullScreen )
+  {
+   wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
+   wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
+  }
 }
 
 void mplPlay( void )
