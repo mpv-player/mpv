@@ -1,4 +1,4 @@
-// sync'ed with help_mp-en.h 1.70 
+// sync'ed with help_mp-en.h 1.73
 // Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
 // Original transation by Firebird <firebird@chez.com>
 
@@ -14,8 +14,8 @@ static char help_text[]=
 "Utilisation:      mplayer [options] [url|répertoire/]fichier\n"
 "\n"
 "Options de base:  (liste complète dans la page de man)\n"
-" -vo <pil[:pér]>  sél. le pil. et le périph. vidéo ('-vo help' pour la liste)\n"
-" -ao <pil[:pér]>  sél. le pil. et le périph. audio ('-ao help' pour la liste)\n"
+" -vo <pil[:pér]>  sélectionne le pilote et le périph. vidéo ('-vo help' pour la liste)\n"
+" -ao <pil[:pér]>  sélectionne le pilote et le périph. audio ('-ao help' pour la liste)\n"
 #ifdef HAVE_VCD
 " -vcd <n°piste>   lit une piste VCD (Video CD) plutôt qu'un fichier\n"
 #endif
@@ -23,7 +23,7 @@ static char help_text[]=
 " -dvdauth <pér>   précise le chemin du lecteur DVD (pour les DVD cryptés)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <num titre> joue un titre DVD plutôt qu'un fichier\n"
+" -dvd <n°titre>   joue un titre DVD plutôt qu'un fichier\n"
 " -alang/-slang    sélectionne la langue audio/sous-titres (code pays à 2 lettres)\n"
 #endif
 " -ss <temps>      démarre la lecture à 'temps' (temps en secondes ou hh:mm:ss)\n"
@@ -299,6 +299,7 @@ static char help_text[]=
 #define MSGTR_Network "Streaming sur le réseau ..."
 #define MSGTR_Preferences "Préférences"
 #define MSGTR_OSSPreferences "Configuration du pilote OSS"
+#define MSGTR_SDLPreferences "Configuration du pilote SDL"
 #define MSGTR_NoMediaOpened "pas de média ouvert"
 #define MSGTR_VCDTrack "Piste du VCD %d"
 #define MSGTR_NoChapter "Pas de chapitre"
@@ -438,6 +439,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_Unicode "Sous-titre en Unicode"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Convertit le sous-titre dans le format MPlayer"
 #define MSGTR_PREFERENCES_SUB_SRT "Convertit le sous-titre vers le format SubViewer (SRT) basé sur le temps"
+#define MSGTR_PREFERENCES_SUB_Overlap "Bascule le recouvrement des sous-titres"
 #define MSGTR_PREFERENCES_Font "Police:"
 #define MSGTR_PREFERENCES_FontFactor "Font factor:"
 #define MSGTR_PREFERENCES_PostProcess "Activer le postprocessing"
@@ -453,8 +455,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
 #define MSGTR_PREFERENCES_FRAME_Misc "Divers"
-#define MSGTR_PREFERENCES_OSS_Device "Device:"
+#define MSGTR_PREFERENCES_OSS_Device "Périphérique:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
+#define MSGTR_PREFERENCES_SDL_Driver "Pilote:"
 #define MSGTR_PREFERENCES_Message "ATTENTION: certaines options requièrent un redémarrage de la lecture!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Encodeur vidéo:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Utiliser LAVC (ffmpeg)"
