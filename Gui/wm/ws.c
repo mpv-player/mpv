@@ -20,7 +20,6 @@
 
 #include "../../config.h"
 #include "ws.h"
-#include "wsconv.h"
 #include "wsxdnd.h"
 #include "../../postproc/rgb2rgb.h"
 #include "../../mp_msg.h"
@@ -77,6 +76,28 @@ int                  wsUseXShape = 1;
 
 int XShmGetEventBase( Display* );
 inline int wsSearch( Window win );
+
+// ---
+
+#define PACK_RGB16(r,g,b,pixel) pixel=(b>>3);\
+                                pixel<<=6;\
+                                pixel|=(g>>2);\
+                                pixel<<=5;\
+                                pixel|=(r>>3)
+
+#define PACK_RGB15(r,g,b,pixel) pixel=(b>>3);\
+                                pixel<<=5;\
+                                pixel|=(g>>3);\
+                                pixel<<=5;\
+	                        pixel|=(r>>3)
+
+typedef void(*wsTConvFunc)( const unsigned char * in_pixels, unsigned char * out_pixels, unsigned num_pixels );
+wsTConvFunc wsConvFunc = NULL;
+																															
+void rgb32torgb32( const unsigned char * src, unsigned char * dst,int src_size )
+{ memcpy( dst,src,src_size ); }
+
+// ---
 
 #define MWM_HINTS_FUNCTIONS     (1L << 0)
 #define MWM_HINTS_DECORATIONS   (1L << 1)
@@ -290,14 +311,13 @@ wsXDNDInitialize();
    #endif
   }
 #endif
- initConverter();
  wsOutMask=wsGetOutMask();
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[ws] Initialized converter: " );
  switch ( wsOutMask )
   {
    case wsRGB32:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to rgb32\n" );
-     wsConvFunc=(void *)BGR8880_to_RGB8880_c;
+     wsConvFunc=rgb32torgb32;
      break;
    case wsBGR32:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr32\n" );
@@ -309,7 +329,7 @@ wsXDNDInitialize();
      break;
    case wsBGR24:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr24\n" );
-     wsConvFunc=(void *)BGR8880_to_BGR888_c;
+     wsConvFunc=rgb32tobgr24;
      break;
    case wsRGB16:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to rgb16\n" );
@@ -317,7 +337,7 @@ wsXDNDInitialize();
      break;
    case wsBGR16:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr16\n" );
-     wsConvFunc=(void *)BGR8880_to_BGR565_c;
+     wsConvFunc=rgb32tobgr16;
      break;
    case wsRGB15:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to rgb15\n" );
@@ -325,7 +345,7 @@ wsXDNDInitialize();
      break;
    case wsBGR15:
      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr15\n" );
-     wsConvFunc=(void *)BGR8880_to_BGR555_c;
+     wsConvFunc=rgb32tobgr15;
      break;
   }
  XSetErrorHandler( wsErrorHandler );
