@@ -61,7 +61,10 @@ asf_streaming_start( stream_t *stream ) {
 		if( fd!=-1 ) return fd;
 		printf("  ===> ASF/TCP failed\n");
 	}
-	if( !strncasecmp( proto_s, "http", 4) || !strncasecmp( proto_s, "mms", 3) ) {
+	if( 	!strncasecmp( proto_s, "http", 4) || 
+		!strncasecmp( proto_s, "mms", 3)  ||
+		!strncasecmp( proto_s, "proxy", 5)
+		) {
 		printf("Trying ASF/HTTP...\n");
 		fd = asf_http_streaming_start( stream );
 		if( fd!=-1 ) return fd;
@@ -373,8 +376,9 @@ asf_http_streaming_type(char *content_type, char *features) {
 HTTP_header_t *
 asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	HTTP_header_t *http_hdr;
-	URL_t *url = streaming_ctrl->url;
-	asf_http_streaming_ctrl_t *asf_http_ctrl = (asf_http_streaming_ctrl_t*)streaming_ctrl->data;
+	URL_t *url = NULL;
+	URL_t *server_url = NULL;
+	asf_http_streaming_ctrl_t *asf_http_ctrl;
 	char str[250];
 	char *ptr;
 	int i,as = -1,vs = -1;
@@ -382,12 +386,33 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	int offset_hi=0, offset_lo=0, length=0;
 	int asf_nb_stream=0;
 
+	// Sanity check
+	if( streaming_ctrl==NULL ) return NULL;
+	url = streaming_ctrl->url;
+	asf_http_ctrl = (asf_http_streaming_ctrl_t*)streaming_ctrl->data;
+	if( url==NULL || asf_http_ctrl==NULL ) return NULL;
+
 	// Common header for all requests.
 	http_hdr = http_new_header();
-	http_set_uri( http_hdr, url->file );
 	http_set_field( http_hdr, "Accept: */*" );
 	http_set_field( http_hdr, "User-Agent: NSPlayer/4.1.0.3856" );
-        sprintf( str, "Host: %s:%d", url->hostname, url->port );
+
+	// Check if we are using a proxy
+	if( !strcasecmp( url->protocol, "proxy" ) ) {
+		server_url = url_new( (url->file)+1 );
+		if( server_url==NULL ) {
+			printf("Invalid proxy URL\n");
+			http_free( http_hdr );
+			return NULL;
+		}
+		http_set_uri( http_hdr, server_url->url );
+		sprintf( str, "Host: %s:%d", server_url->hostname, server_url->port );
+		url_free( server_url );
+	} else {
+		http_set_uri( http_hdr, url->file );
+		sprintf( str, "Host: %s:%d", url->hostname, url->port );
+	}
+	
 	http_set_field( http_hdr, str );
 	http_set_field( http_hdr, "Pragma: xClientGUID={c77e7400-738a-11d2-9add-0020af0a3278}" );
 	sprintf(str, 
@@ -509,16 +534,6 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 	return asf_http_streaming_type( content_type, features );
 }
 
-URL_t *
-asf_http_ASX_redirect( HTTP_header_t *http_hdr ) {
-	URL_t *url_redirect=NULL;
-	printf("=========>> ASX parser not yet implemented <<==========\n");
-
-	printf("ASX=[%s]\n", http_hdr->body );
-
-	return url_redirect;
-}
-
 int
 asf_http_streaming_start( stream_t *stream ) {
 	HTTP_header_t *http_hdr=NULL;
@@ -546,7 +561,11 @@ asf_http_streaming_start( stream_t *stream ) {
 		done = 1;
 		if( fd>0 ) close( fd );
 
-		if( url->port==0 ) url->port = 80;
+		if( !strcasecmp( url->protocol, "proxy" ) ) {
+			if( url->port==0 ) url->port = 8080;
+		} else {
+			if( url->port==0 ) url->port = 80;
+		}
 		fd = connect2Server( url->hostname, url->port );
 		if( fd<0 ) return -1;
 
@@ -566,7 +585,7 @@ asf_http_streaming_start( stream_t *stream ) {
 		http_hdr = http_new_header();
 		do {
 			i = read( fd, buffer, BUFFER_SIZE );
-printf("read: %d\n", i );
+//printf("read: %d\n", i );
 			if( i<0 ) {
 				perror("read");
 				http_free( http_hdr );

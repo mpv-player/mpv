@@ -25,6 +25,8 @@
 #include "asf.h"
 #include "rtp.h"
 
+extern int verbose;
+
 static struct {
 	char *mime_type;
 	int demuxer_type;
@@ -174,11 +176,23 @@ connect2Server(char *host, int port) {
 int
 http_send_request( URL_t *url ) {
 	HTTP_header_t *http_hdr;
+	URL_t *server_url;
 	char str[80];
 	int fd;
+	int ret;
+	int proxy = 0;		// Boolean
+
 	http_hdr = http_new_header();
-	http_set_uri( http_hdr, url->file );
-	snprintf(str, 80, "Host: %s", url->hostname );
+
+	if( !strcasecmp(url->protocol, "proxy") ) {
+		proxy = 1;
+		server_url = url_new( (url->file)+1 );
+		http_set_uri( http_hdr, server_url->url );
+	} else {
+		server_url = url;
+		http_set_uri( http_hdr, server_url->file );
+	}
+	snprintf(str, 80, "Host: %s", server_url->hostname );
 	http_set_field( http_hdr, str);
 	http_set_field( http_hdr, "User-Agent: MPlayer");
 	http_set_field( http_hdr, "Connection: closed");
@@ -186,12 +200,27 @@ http_send_request( URL_t *url ) {
 		return -1;
 	}
 
-	if( url->port==0 ) url->port = 80;
-	fd = connect2Server( url->hostname, url->port );
+	if( proxy ) {
+		if( url->port==0 ) url->port = 8080;			// Default port for the proxy server
+		fd = connect2Server( url->hostname, url->port );
+		url_free( server_url );
+	} else {
+		if( server_url->port==0 ) server_url->port = 80;	// Default port for the web server
+		fd = connect2Server( server_url->hostname, server_url->port );
+	}
 	if( fd<0 ) {
 		return -1; 
 	}
-	write( fd, http_hdr->buffer, http_hdr->buffer_size );
+	if( verbose ) {
+		printf("Request: [%s]\n", http_hdr->buffer );
+	}
+	
+	ret = write( fd, http_hdr->buffer, http_hdr->buffer_size );
+	if( ret!=http_hdr->buffer_size ) {
+		printf("Error while sending HTTP request: didn't sent all the request\n");
+		return -1;
+	}
+	
 	http_free( http_hdr );
 
 	return fd;
@@ -296,8 +325,8 @@ extension=NULL;
 		}
 
 		// HTTP based protocol
-		if( !strcasecmp(url->protocol, "http") ) {
-			if( url->port==0 ) url->port = 80;
+		if( !strcasecmp(url->protocol, "http") || !strcasecmp(url->protocol, "proxy") ) {
+			//if( url->port==0 ) url->port = 80;
 
 			fd = http_send_request( url );
 			if( fd<0 ) {
@@ -312,8 +341,10 @@ extension=NULL;
 			}
 
 			*fd_out=fd;
-			http_debug_hdr( http_hdr );
-
+			if( verbose ) {
+				http_debug_hdr( http_hdr );
+			}
+			
 			streaming_ctrl->data = (void*)http_hdr;
 			
 			// Check if the response is an ICY status_code reason_phrase
@@ -582,7 +613,7 @@ streaming_start(stream_t *stream, int demuxer_type) {
 	if( stream==NULL ) return -1;
 	
 	// For RTP streams, we usually don't know the stream type until we open it.
-	if( !strcmp( stream->streaming_ctrl->url->protocol, "rtp")) {
+	if( !strcasecmp( stream->streaming_ctrl->url->protocol, "rtp")) {
 		if(stream->fd >= 0) {
 			if(close(stream->fd) < 0)
 				printf("streaming_start : Closing socket %d failed %s\n",stream->fd,strerror(errno));
