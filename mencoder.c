@@ -1096,10 +1096,14 @@ if(sh_audio && !demuxer2){
 // fixup CBR mp3 audio header:
 if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
     mux_a->h.dwSampleSize=1;
+    ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nBlockSize=
+	(mux_a->size+(mux_a->h.dwLength>>1))/mux_a->h.dwLength;
+    mux_a->h.dwLength=mux_a->size;
     mux_a->h.dwRate=mux_a->wf->nAvgBytesPerSec;
     mux_a->h.dwScale=1;
-    printf("\n\nCBR audio effective bitrate: %8.3f kbit/s  (%d bytes/sec)\n",
-	    mux_a->h.dwRate*8.0f/1000.0f,mux_a->h.dwRate);
+    mux_a->wf->nBlockAlign=1;
+    printf("\n\nCBR audio: %d bytes/sec, %d bytes/block\n",
+	    mux_a->h.dwRate,((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nBlockSize);
 }
 #endif
 
