@@ -12,6 +12,7 @@
 #include "config.h"
 #include "bswap.h"
 #include "adpcm.h"
+#include "mp_msg.h"
 
 #define BE_16(x) (be2me_16(*(unsigned short *)(x)))
 #define BE_32(x) (be2me_32(*(unsigned int *)(x)))
@@ -196,11 +197,19 @@ int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
   int predictor;
 
   // fetch the header information, in stereo if both channels are present
+  if (input[stream_ptr] > 6)
+    mp_msg(MSGT_DECAUDIO, MSGL_WARN,
+      "MS ADPCM: coefficient (%d) out of range (should be [0..6])\n",
+      input[stream_ptr]);
   coeff1[0] = ms_adapt_coeff1[input[stream_ptr]];
   coeff2[0] = ms_adapt_coeff2[input[stream_ptr]];
   stream_ptr++;
   if (channels == 2)
   {
+    if (input[stream_ptr] > 6)
+     mp_msg(MSGT_DECAUDIO, MSGL_WARN,
+       "MS ADPCM: coefficient (%d) out of range (should be [0..6])\n",
+       input[stream_ptr]);
     coeff1[1] = ms_adapt_coeff1[input[stream_ptr]];
     coeff2[1] = ms_adapt_coeff2[input[stream_ptr]];
     stream_ptr++;
@@ -267,49 +276,71 @@ int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
   return (block_size - (MS_ADPCM_PREAMBLE_SIZE * channels)) * 2;
 }
 
-// note: This decoder assumes the format 0x61 data always comes in
-// mono flavor
-int fox61_adpcm_decode_block(unsigned short *output, unsigned char *input)
+int dk4_adpcm_decode_block(unsigned short *output, unsigned char *input,
+  int channels, int block_size)
 {
   int i;
-  int predictor;
-  int index;
+  int output_ptr;
+  int predictor_l = 0;
+  int predictor_r = 0;
+  int index_l = 0;
+  int index_r = 0;
 
   // the first predictor value goes straight to the output
-  predictor = output[0] = LE_16(&input[0]);
-  SE_16BIT(predictor);
-  index = input[2];
-
-  // unpack the nibbles
-  for (i = 4; i < FOX61_ADPCM_BLOCK_SIZE; i++)
+  predictor_l = output[0] = LE_16(&input[0]);
+  SE_16BIT(predictor_l);
+  index_l = input[2];
+  if (channels == 2)
   {
-    output[1 + (i - 4) * 2 + 0] = (input[i] >> 4) & 0x0F;
-    output[1 + (i - 4) * 2 + 1] = input[i] & 0x0F;
+    predictor_r = output[1] = LE_16(&input[4]);
+    SE_16BIT(predictor_r);
+    index_r = input[6];
   }
 
-  decode_nibbles(&output[1], FOX61_ADPCM_SAMPLES_PER_BLOCK - 1, 1,
-  predictor, index,
-  0, 0);
+  output_ptr = channels;
+  for (i = DK4_ADPCM_PREAMBLE_SIZE * channels; i < block_size; i++)
+  {
+    output[output_ptr++] = input[i] >> 4;
+    output[output_ptr++] = input[i] & 0x0F;
+  }  
 
-  return FOX61_ADPCM_SAMPLES_PER_BLOCK;
+  decode_nibbles(&output[channels],
+  (block_size - DK4_ADPCM_PREAMBLE_SIZE * channels) * 2 - channels,
+  channels,
+  predictor_l, index_l,
+  predictor_r, index_r);
+
+  return (block_size - DK4_ADPCM_PREAMBLE_SIZE * channels) * 2 - channels;
 }
+
+#define DK3_GET_NEXT_NIBBLE() \
+    if (decode_top_nibble_next) \
+    { \
+      nibble = (last_byte >> 4) & 0x0F; \
+      decode_top_nibble_next = 0; \
+    } \
+    else \
+    { \
+      last_byte = input[in_ptr++]; \
+      nibble = last_byte & 0x0F; \
+      decode_top_nibble_next = 1; \
+    }
 
 // note: This decoder assumes the format 0x62 data always comes in
 // stereo flavor
-int fox62_adpcm_decode_block(unsigned short *output, unsigned char *input)
+int dk3_adpcm_decode_block(unsigned short *output, unsigned char *input)
 {
-  int pred1;
-  int pred2;
-  int index1;
-  int index2;
+  int sum_pred;
+  int diff_pred;
+  int sum_index;
+  int diff_index;
+  int diff_channel;
   int in_ptr = 0x10;
   int out_ptr = 0;
 
-  int flag1 = 0;
-  int flag2 = 1;
-  int sum;
   unsigned char last_byte = 0;
   unsigned char nibble;
+  int decode_top_nibble_next = 0;
 
   // ADPCM work variables
   int sign;
@@ -317,137 +348,93 @@ int fox62_adpcm_decode_block(unsigned short *output, unsigned char *input)
   int step;
   int diff;
 
-  pred1 = LE_16(&input[10]);
-  pred2 = LE_16(&input[12]);
-  SE_16BIT(pred1);
-  SE_16BIT(pred2);
-  sum = pred2;
-  index1 = input[14];
-  index2 = input[15];
+  sum_pred = LE_16(&input[10]);
+  diff_pred = LE_16(&input[12]);
+  SE_16BIT(sum_pred);
+  SE_16BIT(diff_pred);
+  diff_channel = diff_pred;
+  sum_index = input[14];
+  diff_index = input[15];
 
   while (in_ptr < 2048)
   {
-    if (flag2)
-    {
-      last_byte = input[in_ptr++];
-      nibble = last_byte & 0x0F;
+    // process the first predictor of the sum channel
+    DK3_GET_NEXT_NIBBLE();
 
-      step = adpcm_step[index1];
+    step = adpcm_step[sum_index];
 
-      sign = nibble & 8;
-      delta = nibble & 7;
+    sign = nibble & 8;
+    delta = nibble & 7;
 
-      diff = step >> 3;
-      if (delta & 4) diff += step;
-      if (delta & 2) diff += step >> 1;
-      if (delta & 1) diff += step >> 2;
+    diff = step >> 3;
+    if (delta & 4) diff += step;
+    if (delta & 2) diff += step >> 1;
+    if (delta & 1) diff += step >> 2;
 
-      if (sign)
-        pred1 -= diff;
-      else
-        pred1 += diff;
-
-      CLAMP_S16(pred1);
-
-      index1 += adpcm_index[nibble];
-      CLAMP_0_TO_88(index1);
-
-      if (flag1)
-        flag2 = 0;
-      else
-      {
-        nibble = (last_byte >> 4) & 0x0F;
-
-        step = adpcm_step[index2];
-
-        sign = nibble & 8;
-        delta = nibble & 7;
-
-        diff = step >> 3;
-        if (delta & 4) diff += step;
-        if (delta & 2) diff += step >> 1;
-        if (delta & 1) diff += step >> 2;
-
-        if (sign)
-          pred2 -= diff;
-        else
-          pred2 += diff;
-
-        CLAMP_S16(pred2);
-
-        index2 += adpcm_index[nibble];
-        CLAMP_0_TO_88(index2);
-
-        sum = (sum + pred2) / 2;
-      }
-      output[out_ptr++] = pred1 + sum;
-      output[out_ptr++] = pred1 - sum;
-
-      flag1 ^= 1;
-      if (in_ptr >= 2048)
-        break;
-    }
+    if (sign)
+      sum_pred -= diff;
     else
-    {
-      nibble = (last_byte >> 4) & 0x0F;
+      sum_pred += diff;
 
-      step = adpcm_step[index1];
+    CLAMP_S16(sum_pred);
 
-      sign = nibble & 8;
-      delta = nibble & 7;
+    sum_index += adpcm_index[nibble];
+    CLAMP_0_TO_88(sum_index);
+    
+    // process the diff channel predictor
+    DK3_GET_NEXT_NIBBLE();
 
-      diff = step >> 3;
-      if (delta & 4) diff += step;
-      if (delta & 2) diff += step >> 1;
-      if (delta & 1) diff += step >> 2;
+    step = adpcm_step[diff_index];
 
-      if (sign)
-        pred1 -= diff;
-      else
-        pred1 += diff;
+    sign = nibble & 8;
+    delta = nibble & 7;
 
-      CLAMP_S16(pred1);
+    diff = step >> 3;
+    if (delta & 4) diff += step;
+    if (delta & 2) diff += step >> 1;
+    if (delta & 1) diff += step >> 2;
 
-      index1 += adpcm_index[nibble];
-      CLAMP_0_TO_88(index1);
+    if (sign)
+      diff_pred -= diff;
+    else
+      diff_pred += diff;
 
-      if (flag1)
-        flag2 = 1;
-      else
-      {
-        last_byte = input[in_ptr++];
-        nibble = last_byte & 0x0F;
+    CLAMP_S16(diff_pred);
 
-        step = adpcm_step[index2];
+    diff_index += adpcm_index[nibble];
+    CLAMP_0_TO_88(diff_index);
 
-        sign = nibble & 8;
-        delta = nibble & 7;
+    // output the first pair of stereo PCM samples
+    diff_channel = (diff_channel + diff_pred) / 2;
+    output[out_ptr++] = sum_pred + diff_channel;
+    output[out_ptr++] = sum_pred - diff_channel;
 
-        diff = step >> 3;
-        if (delta & 4) diff += step;
-        if (delta & 2) diff += step >> 1;
-        if (delta & 1) diff += step >> 2;
+    // process the second predictor of the sum channel
+    DK3_GET_NEXT_NIBBLE();
 
-        if (sign)
-          pred2 -= diff;
-        else
-          pred2 += diff;
+    step = adpcm_step[sum_index];
 
-        CLAMP_S16(pred2);
+    sign = nibble & 8;
+    delta = nibble & 7;
 
-        index2 += adpcm_index[nibble];
-        CLAMP_0_TO_88(index2);
+    diff = step >> 3;
+    if (delta & 4) diff += step;
+    if (delta & 2) diff += step >> 1;
+    if (delta & 1) diff += step >> 2;
 
-        sum = (sum + pred2) / 2;
-      }
+    if (sign)
+      sum_pred -= diff;
+    else
+      sum_pred += diff;
 
-      output[out_ptr++] = pred1 + sum;
-      output[out_ptr++] = pred1 - sum;
+    CLAMP_S16(sum_pred);
 
-      flag1 ^= 1;
-      if (in_ptr >= 2048)
-        break;
-    }
+    sum_index += adpcm_index[nibble];
+    CLAMP_0_TO_88(sum_index);
+
+    // output the second pair of stereo PCM samples
+    output[out_ptr++] = sum_pred + diff_channel;
+    output[out_ptr++] = sum_pred - diff_channel;
   }
 
   return out_ptr;

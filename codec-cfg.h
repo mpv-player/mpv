@@ -35,8 +35,8 @@
 #define AFM_A52 14
 #define AFM_G72X 15
 #define AFM_IMAADPCM 16
-#define AFM_FOX61ADPCM 17
-#define AFM_FOX62ADPCM 18
+#define AFM_DK4ADPCM 17
+#define AFM_DK3ADPCM 18
 #define AFM_ROQAUDIO 19
 
 #define VFM_MPEG 1

@@ -425,21 +425,21 @@ case AFM_MSADPCM:
   sh_audio->ds->ss_div = MS_ADPCM_SAMPLES_PER_BLOCK;
   sh_audio->ds->ss_mul = sh_audio->wf->nBlockAlign;
   break;
-case AFM_FOX61ADPCM:
-  sh_audio->audio_out_minsize=FOX61_ADPCM_SAMPLES_PER_BLOCK * 4;
-  sh_audio->ds->ss_div=FOX61_ADPCM_SAMPLES_PER_BLOCK;
-  sh_audio->ds->ss_mul=FOX61_ADPCM_BLOCK_SIZE;
+case AFM_DK4ADPCM:
+  sh_audio->audio_out_minsize=DK4_ADPCM_SAMPLES_PER_BLOCK * 4;
+  sh_audio->ds->ss_div=DK4_ADPCM_SAMPLES_PER_BLOCK;
+  sh_audio->ds->ss_mul=sh_audio->wf->nBlockAlign;
   break;
-case AFM_FOX62ADPCM:
-  sh_audio->audio_out_minsize=FOX62_ADPCM_SAMPLES_PER_BLOCK * 4;
-  sh_audio->ds->ss_div=FOX62_ADPCM_SAMPLES_PER_BLOCK;
-  sh_audio->ds->ss_mul=FOX62_ADPCM_BLOCK_SIZE;
+case AFM_DK3ADPCM:
+  sh_audio->audio_out_minsize=DK3_ADPCM_SAMPLES_PER_BLOCK * 4;
+  sh_audio->ds->ss_div=DK3_ADPCM_SAMPLES_PER_BLOCK;
+  sh_audio->ds->ss_mul=DK3_ADPCM_BLOCK_SIZE;
   break;
 case AFM_ROQAUDIO:
   // minsize was stored in wf->nBlockAlign by the RoQ demuxer
   sh_audio->audio_out_minsize=sh_audio->wf->nBlockAlign;
-  sh_audio->ds->ss_div=FOX62_ADPCM_SAMPLES_PER_BLOCK;
-  sh_audio->ds->ss_mul=FOX62_ADPCM_BLOCK_SIZE;
+  sh_audio->ds->ss_div=DK3_ADPCM_SAMPLES_PER_BLOCK;
+  sh_audio->ds->ss_mul=DK3_ADPCM_BLOCK_SIZE;
   sh_audio->context = roq_decode_audio_init();
   break;
 case AFM_MPEG:
@@ -724,17 +724,17 @@ case AFM_MSADPCM:
   sh_audio->i_bps = sh_audio->wf->nBlockAlign *
     (sh_audio->channels*sh_audio->samplerate) / MS_ADPCM_SAMPLES_PER_BLOCK;
   break;
-case AFM_FOX61ADPCM:
+case AFM_DK4ADPCM:
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
-  sh_audio->i_bps=FOX61_ADPCM_BLOCK_SIZE*
-    (sh_audio->channels*sh_audio->samplerate) / FOX61_ADPCM_SAMPLES_PER_BLOCK;
+  sh_audio->i_bps = sh_audio->wf->nBlockAlign *
+    (sh_audio->channels*sh_audio->samplerate) / DK4_ADPCM_SAMPLES_PER_BLOCK;
   break;
-case AFM_FOX62ADPCM:
+case AFM_DK3ADPCM:
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
-  sh_audio->i_bps=FOX62_ADPCM_BLOCK_SIZE*
-    (sh_audio->channels*sh_audio->samplerate) / FOX62_ADPCM_SAMPLES_PER_BLOCK;
+  sh_audio->i_bps=DK3_ADPCM_BLOCK_SIZE*
+    (sh_audio->channels*sh_audio->samplerate) / DK3_ADPCM_SAMPLES_PER_BLOCK;
   break;
 case AFM_ROQAUDIO:
   sh_audio->channels=sh_audio->wf->nChannels;
@@ -1163,21 +1163,24 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
           sh_audio->wf->nBlockAlign);
         break;
       }
-      case AFM_FOX61ADPCM:
-      { unsigned char ibuf[FOX61_ADPCM_BLOCK_SIZE]; // bytes / stereo frame
-        if (demux_read_data(sh_audio->ds, ibuf, FOX61_ADPCM_BLOCK_SIZE) != 
-          FOX61_ADPCM_BLOCK_SIZE)
+      case AFM_DK4ADPCM:
+      { static unsigned char *ibuf = NULL;
+        if (!ibuf)
+          ibuf = (unsigned char *)malloc(sh_audio->wf->nBlockAlign);
+        if (demux_read_data(sh_audio->ds, ibuf, sh_audio->wf->nBlockAlign) != 
+          sh_audio->wf->nBlockAlign)
           break; // EOF
-        len=2*fox61_adpcm_decode_block((unsigned short*)buf,ibuf);
+        len=2*dk4_adpcm_decode_block((unsigned short*)buf,ibuf,
+          sh_audio->wf->nChannels, sh_audio->wf->nBlockAlign);
         break;
       }
-      case AFM_FOX62ADPCM:
-      { unsigned char ibuf[FOX62_ADPCM_BLOCK_SIZE * 2]; // bytes / stereo frame
+      case AFM_DK3ADPCM:
+      { unsigned char ibuf[DK3_ADPCM_BLOCK_SIZE * 2]; // bytes / stereo frame
         if (demux_read_data(sh_audio->ds, ibuf,
-          FOX62_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels) != 
-          FOX62_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels) 
+          DK3_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels) != 
+          DK3_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels) 
           break; // EOF
-        len = 2 * fox62_adpcm_decode_block(
+        len = 2 * dk3_adpcm_decode_block(
           (unsigned short*)buf,ibuf);
         break;
       }
