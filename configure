@@ -755,15 +755,18 @@ else
 		fi	
 	fi
 fi
-	
+
+_divx4linux=no
+$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -ldivxdecore > /dev/null 2>&1 && _divx4linux=yes
+
 _termcap=no
-$_cc $TMPC -o $TMPO -ltermcap > /dev/null 2>&1 && _termcap=yes
+$_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -ltermcap > /dev/null 2>&1 && _termcap=yes
 
 _png=no
-$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -lpng -lz -lm > /dev/null 2>&1 && _png=yes
+$_cc  $_extraincdir $_extralibdir $_extraincdir $_extralibdir $TMPC -o $TMPO -lpng -lz -lm > /dev/null 2>&1 && _png=yes
 
 _ggi=no
-$_cc $TMPC -o $TMPO -lggi > /dev/null 2>&1 && _ggi=yes
+$_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -lggi > /dev/null 2>&1 && _ggi=yes
 
 _kstat=no
 $_cc $TMPC -o $TMPO -lkstat >/dev/null 2>&1 && _kstat=yes _archlibs="-lkstat $_archlibs"
@@ -1360,6 +1363,7 @@ echo "Checking for DeCSS support ... $_css"
 echo "Checking for PNG support ... $_png"
 echo "Checking for DirectShow ... $_dshow"
 echo "Checking for libavcodec ... $_libavcodec"
+echo "Checking for divx4linux ... $_divx4linux"
 echo "Checking for fastmemcpy ... $_fastmemcpy"
 echo "Extra libs : $_extralibdir"
 echo "Extra headers : $_extraincdir"
@@ -1745,6 +1749,16 @@ else
  _gui='#undef HAVE_GUI'
 fi
 
+if [ $_divx4linux = yes ]; then
+ _divx4def='#define NEW_DECORE'
+ _decorelibs='-ldivxdecore opendivx/postprocess.o'
+else
+ _divx4def='#undef NEW_DECORE'
+ _decorelibs='-Lopendivx -ldecore'
+# _postproc='#undef MPEG12_POSTPROC'
+fi
+
+ _postproc='#define MPEG12_POSTPROC'
 
 echo
 echo "Creating $MCONF"
@@ -1778,8 +1792,8 @@ ALSA_LIB = $_alsalib
 ESD_LIB = $_esdlib
 ARCH_LIBS = $_archlibs
 STREAM_SRCS = $_streamingsrcs
-DECORE_LIBS = -Lopendivx -ldecore
-# DECORE_LIBS=-L/usr/local/lib -ldivxdecore
+DECORE_LIBS = $_decorelibs
+DIVX4LINUX=$_divx4linux
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -1805,7 +1819,7 @@ cat > $CCONF << EOF
 
 /* Define for using new DivX4Linux library, instead of open-source OpenDivX */
 /* You have to change DECORE_LIBS in config.mak too! */
-#undef NEW_DECORE
+$_divx4def
 
 /* Define this to enable avg. byte/sec-based AVI sync method by default:
    (use -bps or -nobps commandline option for run-time method selection)    */
@@ -1872,7 +1886,7 @@ $_lircdefs
 $_css
 
 /* Define this to enable MPEG 1/2 image postprocessing (requires FAST cpu!) */
-#define MPEG12_POSTPROC
+$_postproc
 
 /* DirectShow support */
 $_dshow
