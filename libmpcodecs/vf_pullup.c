@@ -326,7 +326,7 @@ static int open(vf_instance_t *vf, char* args)
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
 	p->ctx = c = pullup_alloc_context();
 	p->fakecount = 1;
-	c->verbose = verbose;
+	c->verbose = verbose>0;
 	c->junk_left = c->junk_right = 1;
 	c->junk_top = c->junk_bottom = 4;
 	c->strict_breaks = 0;
