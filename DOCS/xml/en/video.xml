@@ -1758,14 +1758,14 @@ NTSC. You <emphasis role="bold">must</emphasis> rescale for other heights by add
 <option>-vf</option> option. DVB cards accept various widths, like 720, 704,
 640, 512, 480, 352 etc and do hardware scaling in horizontal direction, so you
 do not need to scale horizontally in most cases. For a 512x384 (aspect 4:3)
-DivX try:
+MPEG4 (DivX) try:
 </para>
 
 <para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=512:576</screen></para>
 
 <para>If you have a widescreen movie and you do not want to scale it to full height,
 you can use the <option>expand=w:h</option> filter to add black bands. To view a
-640x384 DivX, try:
+640x384 MPEG4 (DivX), try:
 </para>
 
 <para>
@@ -1773,7 +1773,9 @@ you can use the <option>expand=w:h</option> filter to add black bands. To view a
 </screen>
 </para>
 
-<para>If your CPU is too slow for a full size 720x576 DivX, try downscaling:</para>
+<para>
+If your CPU is too slow for a full size 720x576 MPEG4 (DivX), try downscaling:
+</para>
 
 <para>
 <screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 <replaceable>file.avi</replaceable>
@@ -1803,7 +1805,7 @@ In order to play non-25fps movies on a PAL TV or with a slow CPU, add the
 </para>
 
 <para>
-To keep the aspect ratio of DivX files and get the optimal scaling
+To keep the aspect ratio of MPEG4 (DivX) files and get the optimal scaling
 parameters (hardware horizontal scaling and software vertical scaling
 while keeping the right aspect ratio), use the new dvbscale filter:
 </para>
@@ -2043,7 +2045,7 @@ rate of the movie. norm = 0 (default) does not change the current norm.
 <option><replaceable>device</replaceable></option> = device number to use if you have more than one em8300
 card.
 Any of these options may be left out.
-<option>:prebuf:sync</option> seems to work great when playing DivX movies. People
+<option>:prebuf:sync</option> seems to work great when playing MPEG4 (DivX) movies. People
 have reported problems using the prebuf option when playing MPEG1/2 files. You
 might want to try running without any options first, if you have sync problems,
 or DVD subtitle problems, give <option>:sync</option> a try.
@@ -2071,8 +2073,8 @@ This does not work with digital audio output (<option>-ac hwac3</option>).
 <varlistentry>
 <term><option>-vf lavc/fame</option></term>
 <listitem><para>
-To watch non-MPEG content on the em8300 (i.e. DivX or RealVideo) you have to
-specify an MPEG1 video filter such as
+To watch non-MPEG content on the em8300 (i.e. MPEG4 (DivX) or RealVideo)
+you have to specify an MPEG1 video filter such as
 <systemitem class="library">libavcodec</systemitem> (lavc) or
 <systemitem class="library">libfame</systemitem> (fame). At
 the moment lavc is both faster and gives better image quality, it is suggested

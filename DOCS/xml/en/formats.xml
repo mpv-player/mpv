@@ -13,7 +13,8 @@ popular belief such a file <emphasis>can</emphasis> contain MPEG1 video.
 <para>
 You see, a <emphasis role="bold">codec</emphasis> is not the same as a
 <emphasis role="bold">file format</emphasis>.
-Examples of video <emphasis role="bold">codecs</emphasis> are: MPEG1, MPEG2, DivX, Indeo5, 3ivx.
+Examples of video <emphasis role="bold">codecs</emphasis> are: MPEG1, MPEG2,
+MPEG4 (DivX), Indeo5, 3ivx.
 Examples of file <emphasis role="bold">formats</emphasis> are: MPG, AVI, ASF.
 </para>
 
@@ -260,7 +261,8 @@ its <filename>.NUV</filename> files (only NuppelVideo 5.0). Those files can
 contain uncompressed YV12, YV12+RTJpeg compressed, YV12 RTJpeg+lzo
 compressed, and YV12+lzo compressed frames.
 <application>MPlayer</application> decodes (and also <emphasis role="bold">encodes</emphasis>
-them with <application>MEncoder</application> to DivX/etc!) them all. Seeking works.
+them with <application>MEncoder</application> to MPEG4 (DivX)/etc!) them all.
+Seeking works.
 </para>
 </sect3>
 
