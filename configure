@@ -30,6 +30,7 @@ cc_check() {
   cat "$TMPC" >> "$TMPLOG"
   echo >> "$TMPLOG"
   echo "$_cc $_inc_extra $_ld_static $_ld_extra $TMPC -o $TMPO $@" >> "$TMPLOG"
+  > "$TMPO"
   ( "$_cc" $_inc_extra $_ld_static $_ld_extra "$TMPC" -o "$TMPO" "$@" ) >> "$TMPLOG" 2>&1
   TMP="$?"
   echo >> "$TMPLOG"
@@ -1321,7 +1322,7 @@ if test "$_xdpms4" = yes ; then
   echores "using xdpms4"
 elif test "$_xdpms3" = yes ; then
   _def_xdpms='#define HAVE_XDPMS 1'
-  _ld_x11='$_ld_x11 -lXdpms'
+  _ld_x11="$_ld_x11 -lXdpms"
   echores "using xdpms3"
 else
   _def_xdpms='#undef HAVE_XDPMS'
