@@ -244,7 +244,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
   // here is the right place to get screen dimensions
   if (force_load_font) {
     force_load_font = 0;
-    load_font(width,height);
+    load_font_ft(width,height);
   }
 #endif
   return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);

@@ -31,6 +31,7 @@ typedef struct {
     short font[65536];
     int start[65536];   // short is not enough for unicode fonts
     short width[65536];
+    int freetype;
 
 #ifdef HAVE_FREETYPE
     int face_cnt;
@@ -78,23 +79,22 @@ extern int force_load_font;
 int init_freetype();
 int done_freetype();
 
-font_desc_t* read_font_desc(char* fname,int movie_width, int movie_height);
+font_desc_t* read_font_desc_ft(char* fname,int movie_width, int movie_height);
 void free_font_desc(font_desc_t *desc);
 
 void render_one_glyph(font_desc_t *desc, int c);
 int kerning(font_desc_t *desc, int prevc, int c);
 
-void load_font(int width, int height);
+void load_font_ft(int width, int height);
 
 #else
 
-raw_file* load_raw(char *name,int verbose);
-font_desc_t* read_font_desc(char* fname,float factor,int verbose);
-
-static void inline render_one_glyph(font_desc_t *desc, int c) {}
-static int inline kerning(font_desc_t *desc, int prevc, int c) { return 0; }
-static void inline load_font(int width, int height){}
+static void render_one_glyph(font_desc_t *desc, int c) {}
+static int kerning(font_desc_t *desc, int prevc, int c) { return 0; }
 
 #endif
+
+raw_file* load_raw(char *name,int verbose);
+font_desc_t* read_font_desc(char* fname,float factor,int verbose);
 
 #endif /* ! __MPLAYER_FONT_LOAD_H */

@@ -1,7 +1,5 @@
 #include "config.h"
 
-#ifndef HAVE_FREETYPE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -56,6 +54,7 @@ int i,j;
 int chardb=0;
 int fontdb=-1;
 int version=0;
+int first=1;
 
 desc=malloc(sizeof(font_desc_t));if(!desc) return NULL;
 memset(desc,0,sizeof(font_desc_t));
@@ -92,6 +91,21 @@ while(fgets(sor,1020,f)){
   int ec=' ';
   int id=0;
   sor[1020]=0;
+
+  /* skip files that look like: TTF (0x00, 0x01), PFM (0x00, 0x01), PFB
+   * (0x80, 0x01), PCF (0x01, 0x66), fon ("MZ"), gzipped (0x1f, 0x8b) */
+  
+  if (first) {
+    if (!sor[0] || sor[1] == 1 || (sor[0] == 'M' && sor[1] == 'Z') || (sor[0] == 0x1f && sor[1] == 0x8b) || (sor[0] == 1 && sor[1] == 0x66)) {
+      printf("%s doesn't look like a font description, ignoring\n", fname);
+      fclose(f);
+      free(desc);
+      free(dn);
+      return NULL;
+    }
+    first = 0;
+  }
+  
   p[0]=d;++pdb;
   while(1){
       int c=*s++;
@@ -303,4 +317,3 @@ read_font_desc("high_arpi.desc",1);
 }
 #endif
 
-#endif /* HAVE_FREETYPE */

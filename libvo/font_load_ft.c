@@ -50,6 +50,8 @@ int vo_image_width = 0;
 int vo_image_height = 0;
 int force_load_font;
 
+int using_freetype = 0;
+
 //// constants
 static unsigned int const colors = 256;
 static unsigned int const maxcolor = 255;
@@ -937,7 +939,7 @@ int kerning(font_desc_t *desc, int prevc, int c)
     return f266ToInt(kern.x);
 }
 
-font_desc_t* read_font_desc(char *fname, int movie_width, int movie_height)
+font_desc_t* read_font_desc_ft(char *fname, int movie_width, int movie_height)
 {
     font_desc_t *desc;
 
@@ -1086,12 +1088,16 @@ int init_freetype()
 	return -1;
     }
     fprintf(stderr, "init_freetype\n");
+    using_freetype = 1;
     return 0;
 }
 
 int done_freetype()
 {
     int err;
+
+    if (!using_freetype)
+	return 0;
     
     err = FT_Done_FreeType(library);
     if (err) {
@@ -1102,7 +1108,7 @@ int done_freetype()
     return 0;
 }
 
-void load_font(int width, int height) 
+void load_font_ft(int width, int height) 
 {
     vo_image_width = width;
     vo_image_height = height;
@@ -1113,7 +1119,7 @@ void load_font(int width, int height)
     if (vo_font) free_font_desc(vo_font);
 
 #ifdef USE_OSD
-    vo_font=read_font_desc(font_name, width, height);
+    vo_font=read_font_desc_ft(font_name, width, height);
 #endif
 }
 

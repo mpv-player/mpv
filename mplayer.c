@@ -894,7 +894,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 //------ load global data first ------
 
 #ifdef USE_OSD
-#ifndef HAVE_FREETYPE
 // check font
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
@@ -905,8 +904,9 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
        if(!vo_font)
        vo_font=read_font_desc(DATADIR"/font/font.desc",font_factor,verbose>1);
   }
-#else
-  init_freetype();
+#ifdef HAVE_FREETYPE
+  if (!vo_font)
+	init_freetype();
 #endif
 #endif
   vo_init_osd();

@@ -305,7 +305,7 @@ extern char **          vo_plugin_args;
 void guiLoadFont( void )
 {
 #ifdef HAVE_FREETYPE
-  load_font(vo_image_width, vo_image_height);
+  load_font_ft(vo_image_width, vo_image_height);
 #else
  if ( vo_font )
   {

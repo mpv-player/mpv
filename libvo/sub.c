@@ -526,9 +526,9 @@ int vo_update_osd(int dxs,int dys){
 
 #ifdef HAVE_FREETYPE    
     // here is the right place to get screen dimensions
-    if (force_load_font) {
+    if (!vo_font && force_load_font) {
 	force_load_font = 0;
-	load_font(dxs, dys);
+	load_font_ft(dxs, dys);
     }
 #endif
 
