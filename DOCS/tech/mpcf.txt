@@ -352,10 +352,13 @@ name
 	"Copyright"
 	"Encoder"	the name& version of the software used for encoding
 	"Title"
-	"CDCover"	an image of he cd cover (preferable PNG or JPEG)
-	"Source"	"DVD", "VCD", "CD", "MD", "FM radio", "VHS", "PAL-TV", 
-			"NTSC-TV", "LD"
-	"CaptureDevice"	"BT878", "BT848", ... (more exact names are fine too)
+	"CDCover"	an image of the cd cover (preferable PNG or JPEG)
+	"Source"	"DVD", "VCD", "CD", "MD", "FM radio", "VHS", "TV", 
+			"LD"
+	"CaptureDevice"	"BT878", "BT848", "webcam", ... (more exact names are fine too)
+	"CreationTime"	"2003-01-20 20:13:15Z", ... 
+			(ISO 8601 format, see http://www.cl.cam.ac.uk/~mgk25/iso-time.html)
+			Note: dont forget the timezone
 	Note: if someone needs some others, please tell us about them, so we can
 	      add them to the official standard (if they are sane)
 
