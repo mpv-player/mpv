@@ -214,7 +214,11 @@ do
  esac
 done
 
-# Checking CC version... what's with egcs, pgcc? - Atmos
+# Checking CC version...
+# Q: what's with egcs, pgcc? - Atmos
+# A: same as with agcc! These compilers always were introduced as experimental
+# ones. Now gcc-3.0 should introduce all features of these compilers.
+# Since 3.0 is almost released we don't need to support them. - Nick 07 jun 2001
 if test "$_skip_cc_check" != "yes"; then
 echo -n "Checking version of $_cc ... "
 cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
@@ -812,9 +816,11 @@ do
  esac
 done
 
-# Checking as compatibility...
-echo -n "Checking assembler (as) ... "
-
+# Checking assembler (as) compatibility...
+#as_version=`as --version 2>&1 | sed -n 's/^.*assembler \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
+as_version=`as --version 2>&1 | sed -n 's/^.*assembler \([0-9.]*\).*$/\1/p'`
+echo -n "Checking assembler (as) ... $as_version, "
+_pref_as_version='2.9.1'
 ### this test disabled, see _binutils test above!  --A'rpi
 # cat > astest.S <<EOF
 # filds -2(%ebp)
@@ -825,43 +831,50 @@ if [ $_mmx = 'yes' ]; then
 cat > $TMPS <<EOF
 emms
 EOF
-as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
 fi
 
 if [ $_3dnow = 'yes' ]; then
+_pref_as_version='2.10.1'
 cat >> $TMPS <<EOF
 femms
 EOF
-as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
 fi
 
 if [ $_3dnowex = 'yes' ]; then
+_pref_as_version='2.10.1'
 cat >> $TMPS <<EOF
 pswapd %mm0, %mm0
 EOF
-as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
 fi
 
 if [ $_mmx2 = 'yes' ]; then
+_pref_as_version='2.10.1'
 cat >> $TMPS <<EOF
 movntq	%mm0, (%eax)
 EOF
-as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
 fi
 
 if [ $_sse = 'yes' ]; then
+_pref_as_version='2.10.1'
 cat >> $TMPS <<EOF
 xorps %xmm0, %xmm0
 EOF
-as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
 fi
+# Note: for SSE2 assembler v2.11 should be preferred --Nick
+#if [ $_sse2 = 'yes' ]; then
+#_pref_as_version='2.11'
+#cat >> $TMPS <<EOF
+#xorpd %xmm0, %xmm0
+#EOF
+#fi
+as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
+rm -f $TMPS $TMPO $TMPC
 
 if test "$as_verc_fail" != "yes"; then
   echo "ok"
 else
   echo "failed"
-  echo "Please upgrade binutils..." # to which version? - Atmos
-  rm -f $TMPS $TMPO $TMPC
+  echo "Please upgrade(downgrade) binutils to "$_pref_as_version"..."
   exit
 fi
 
