@@ -40,6 +40,7 @@ static struct vf_priv_s {
 
 extern int opt_screen_size_x;
 extern int opt_screen_size_y;
+extern float screen_size_xy;
 
 //===========================================================================//
 
@@ -232,7 +233,7 @@ static int config(struct vf_instance_s* vf,
 	break; }
     }
 
-    if(!opt_screen_size_x && !opt_screen_size_y){
+    if(!opt_screen_size_x && !opt_screen_size_y && !(screen_size_xy >= 0.001)){
 	// Compute new d_width and d_height, preserving aspect
 	// while ensuring that both are >= output size in pixels.
 	if (vf->priv->h * d_width > vf->priv->w * d_height) {
