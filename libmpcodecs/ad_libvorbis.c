@@ -187,6 +187,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
         int len = 0;
         int samples;
         float **pcm;
+        float scale;
         ogg_packet op;
         struct ov_struct_st *ov = sh->context;
         op.b_o_s =  op.e_o_s = 0;
@@ -206,18 +207,14 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 
 	    /* convert floats to 16 bit signed ints (host order) and
 	       interleave */
+#ifdef TREMOR
+           if (ov->rg_scale_int == 64) {
 	    for(i=0;i<ov->vi.channels;i++){
 	      ogg_int16_t *convbuffer=(ogg_int16_t *)(&buf[len]);
 	      ogg_int16_t *ptr=convbuffer+i;
-#ifdef TREMOR
 	      ogg_int32_t  *mono=pcm[i];
 	      for(j=0;j<bout;j++){
-		int val=(mono[j]*ov->rg_scale_int)>>(9+6);
-#else
-	      float  *mono=pcm[i];
-	      for(j=0;j<bout;j++){
-		int val=mono[j]*32767.f*ov->rg_scale;
-#endif    /* TREMOR */
+		int val=mono[j]>>9;
 		/* might as well guard against clipping */
 		if(val>32767){
 		  val=32767;
@@ -231,6 +228,38 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 		ptr+=ov->vi.channels;
 	      }
 	    }
+	   } else
+#endif /* TREMOR */
+	   {
+#ifndef TREMOR
+            scale = 32767.f * ov->rg_scale;
+#endif
+	    for(i=0;i<ov->vi.channels;i++){
+	      ogg_int16_t *convbuffer=(ogg_int16_t *)(&buf[len]);
+	      ogg_int16_t *ptr=convbuffer+i;
+#ifdef TREMOR
+	      ogg_int32_t  *mono=pcm[i];
+	      for(j=0;j<bout;j++){
+		int val=(mono[j]*ov->rg_scale_int)>>(9+6);
+#else
+	      float  *mono=pcm[i];
+	      for(j=0;j<bout;j++){
+		int val=mono[j]*scale;
+		/* might as well guard against clipping */
+		if(val>32767){
+		  val=32767;
+		  clipflag=1;
+		}
+		if(val<-32768){
+		  val=-32768;
+		  clipflag=1;
+		}
+#endif    /* TREMOR */
+		*ptr=val;
+		ptr+=ov->vi.channels;
+	      }
+	    }
+	   }
 		
 	    if(clipflag)
 	      mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"Clipping in frame %ld\n",(long)(ov->vd.sequence));
