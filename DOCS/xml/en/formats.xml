@@ -25,7 +25,7 @@ players will not play it, since they expect MPEG1 video and MP2 audio (unlike
 <emphasis role="bold">AVI</emphasis>, <emphasis role="bold">MPG</emphasis>
 does not have the necessary fields to describe its video and audio streams).
 Or you might put MPEG1 video into an AVI file.
-<ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> and
+<ulink url="http://ffmpeg.org/">FFmpeg</ulink> and
 <link linkend="mencoder"><application>MEncoder</application></link> can create these files.
 </para>
 
@@ -137,7 +137,7 @@ files:
 <listitem><simpara>
   <emphasis role="bold">bps-based:</emphasis> It is based on the
   bitrate/samplerate of the video/audio stream. This method is used by
-  most players, including <ulink url="http://avifile.sourceforge.net">avifile</ulink>
+  most players, including <ulink url="http://avifile.sf.net">avifile</ulink>
   and <application>Windows Media Player</application>. Files with broken
   headers, and files created with VBR audio but not VBR-compliant encoder
   will result in A/V desync with this method (mostly at seeking).
@@ -270,7 +270,7 @@ Seeking works.
 <sect3 id="yuv4mpeg">
 <title>yuv4mpeg files</title>
 <para>
-<ulink url="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</ulink>
+<ulink url="http://mjpeg.sf.net">yuv4mpeg / yuv4mpeg2</ulink>
 is a file format used by the
 <ulink url="http://mjpeg.sf.net">mjpegtools programs</ulink>.
 You can grab, produce, filter or encode video in this format using these tools.

@@ -64,8 +64,8 @@ playing MP3s or sound effects.
 </para>
 
 <para>
-Other media players like <ulink url="http://avifile.sourceforge.net">aviplay</ulink>
-or <ulink url="http://xine.sourceforge.net">xine</ulink> possibly work
+Other media players like <ulink url="http://avifile.sf.net">aviplay</ulink>
+or <ulink url="http://xinehq.de">xine</ulink> possibly work
 out-of-the-box with these drivers because they use "simple" methods
 with internal timing. Measuring showed that their methods are not as
 efficient as <application>MPlayer</application>'s.
@@ -173,7 +173,7 @@ They also support several non-Linux systems.
   <row>
     <entry>VIA onboard (686/A/B, 8233, 8235)</entry>
     <entry>
-      <ulink url="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</ulink>
+      <ulink url="http://sf.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</ulink>
     </entry>
     <entry>snd-via82xx</entry>
     <entry></entry>
@@ -189,7 +189,7 @@ They also support several non-Linux systems.
     <entry>none</entry>
     <entry>OK</entry>
     <entry>
-      <ulink url="http://aureal.sourceforge.net">Linux Aureal Drivers</ulink>
+      <ulink url="http://aureal.sf.net">Linux Aureal Drivers</ulink>
       <ulink url="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">buffer size increased to 32k</ulink>
     </entry>
     <entry>48</entry>

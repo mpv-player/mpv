@@ -133,7 +133,7 @@ divx4</option> may be faster, or even the fastest solution.
 
 <para>
 The DivX4/5 binary codec library can be downloaded from
-<ulink url="http://avifile.sourceforge.net">avifile</ulink> or
+<ulink url="http://avifile.sf.net">avifile</ulink> or
 <ulink url="http://www.divx.com">divx.com</ulink>
 Unpack it, run <filename>./install.sh</filename> as root and do not forget adding
 <filename class="directory">/usr/local/lib</filename> to your
@@ -195,7 +195,7 @@ did not install or configure it correctly.
 <title>FFmpeg/libavcodec</title>
 
 <para>
-<ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> contains an
+<ulink url="http://ffmpeg.org">FFmpeg</ulink> contains an
 <emphasis role="bold">open source</emphasis> codec package, which is capable
 of decoding streams with various audio and video codecs. It also offers an
 impressing encoding facility and higher speed than the Win32 codecs or the
@@ -639,7 +639,7 @@ MPEG decoder cards.
 <title>libmad support</title>
 
 <para>
-<ulink url="http://mad.sourceforge.net">libmad</ulink> is a multiplatform,
+<ulink url="http://www.underbit.com/products/mad/">libmad</ulink> is a multiplatform,
 integer (internally 24bit PCM) only
 MPEG audio decoding library. It does not handle broken files well, and it
 sometimes has problems with seeking, but it may perform better on FPU-less

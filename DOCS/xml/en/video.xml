@@ -962,14 +962,14 @@ alternative.
 <para>
 Unfortunately not all drivers support this feature. The Utah-GLX drivers
 (for XFree86 3.3.6) support it for all cards.
-See <ulink url="http://utah-glx.sourceforge.net"/> for details about how to
+See <ulink url="http://utah-glx.sf.net"/> for details about how to
 install it.
 </para>
 
 <para>
 XFree86(DRI) 4.0.3 or later supports OpenGL with Matrox and Radeon cards,
 4.2.0 or later supports Rage128.
-See <ulink url="http://dri.sourceforge.net"/> for download and installation
+See <ulink url="http://dri.sf.net"/> for download and installation
 instructions.
 </para>
 
@@ -1109,7 +1109,7 @@ driver, not curses (<option>-aadriver linux</option>). But therefore you
 need write access on
 <filename>/dev/vcsa<replaceable>&lt;terminal&gt;</replaceable></filename>!
 That isn't autodetected by aalib, but vo_aa tries to find the best mode.
-See <ulink url="http://aa-project.sourceforge.net/tune"/> for further
+See <ulink url="http://aa-project.sf.net/tune"/> for further
 tuning issues.
 </para>
 </sect3>
@@ -1956,7 +1956,7 @@ decompression).
 <para>
 First of all you will need properly installed DXR2 drivers. You can find
 the drivers and installation instructions at the
-<ulink url="http://dxr2.sourceforge.net/">DXR2 Resource Center</ulink> site.
+<ulink url="http://dxr2.sf.net/">DXR2 Resource Center</ulink> site.
 </para>
 
 <variablelist>
@@ -2000,7 +2000,7 @@ both use the em8300 MPEG decoder chip from Sigma Designs.
 <para>
 First of all you will need properly installed DXR3/H+ drivers, version 0.12.0
 or later. You can find the drivers and installation instructions at the
-<ulink url="http://dxr3.sourceforge.net/">DXR3 &amp; Hollywood Plus for Linux</ulink>
+<ulink url="http://dxr3.sf.net/">DXR3 &amp; Hollywood Plus for Linux</ulink>
 site. <filename>configure</filename> should detect your card automatically,
 compilation should go without problems.
 </para>
@@ -2138,7 +2138,7 @@ downscaled movies.
 
 <para>
 This driver talks to the kernel driver available at
-<ulink url="http://mjpeg.sourceforge.net"/>, so
+<ulink url="http://mjpeg.sf.net"/>, so
 you must get it working first. The presence of an MJPEG card is autodetected by the
 <filename>configure</filename> script, if autodetection fails, force detection with
 <screen>./configure --enable-zr</screen>
@@ -2263,7 +2263,7 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
     -zoom</option> options, but it will be <emphasis role="bold">SLOW</emphasis>,
     and has <emphasis role="bold">Macrovision</emphasis> copy protection enabled
     (you can "workaround" Macrovision using this
-    <ulink url="http://avifile.sourceforge.net/mgamacro.pl">perl script</ulink>).
+    <ulink url="http://avifile.sf.net/mgamacro.pl">perl script</ulink>).
     </para></listitem>
 </varlistentry>
 <varlistentry>

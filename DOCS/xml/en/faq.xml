@@ -1106,7 +1106,7 @@ The <systemitem>tdfx</systemitem> driver in XFree86 4.0.2/4.0.3 had this bug. Th
 solved by <ulink url="http://www.xfree86.org/cvs/changes_4_1.html">bug fix #621
 of the XFree86 4.1.0 CVS log</ulink>. So upgrade to XFree86 4.1.0 or later.
 Alternatively, either download (at least) DRI version 0.6 from the
-<ulink url="http://dri.sourceforge.net">DRI homepage</ulink>, or use CVS DRI.
+<ulink url="http://dri.sf.net">DRI homepage</ulink>, or use CVS DRI.
 </para></answer>
 </qandaentry>
 
