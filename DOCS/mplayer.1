@@ -269,7 +269,8 @@ Seek to byte position. Useful for playback from CDROM
 images / vob files with junk at the beginning.
 .TP
 .B \-srate <Hz>
-Specifies Hz to playback audio on. Affects playback speed!
+Forces the given audio playback rate, changing video speed to keep a-v sync.
+MEncoder passes this value to lame for resampling.
 .TP
 .B \-ss <time> (see \-sb option too!)
 Seek to given time position.
@@ -1013,6 +1014,20 @@ Turns off xscreensaver at startup and turns it on again on exit.
 
 
 .SH "ENCODING OPTIONS (MENCODER ONLY)"
+.TP
+.B -audio-density <1\-50>
+Number of audio chunks per second (default is 2 for 0.5s long audio chunks).
+
+.I Note:
+CBR only, VBR ignores this as it puts each packet in a new chunk.
+.TP
+.B -audio-delay <0.0\-...>
+Sets the audio delay field in the header. Default is 0.0, negative values do
+not work. This does not delay the audio while encoding, but the player will see
+the default audio delay, sparing you the use of the -delay option.
+.TP
+.B -audio-preload <0.0\-2.0>
+Sets up audio buffering time interval (default: 0.5s).
 .TP
 .B \-divx4opts <option1:option2:...>
 If encoding to DivX4, you can specify its parameters here.
