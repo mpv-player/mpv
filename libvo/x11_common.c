@@ -635,7 +635,7 @@ void vo_x11_setlayer( int layer )
  Atom            type;
  int             format;
  unsigned long   nitems, bytesafter;
- unsigned char   * args = NULL;
+ Atom *          args = NULL;
 
  if ( WinID >= 0 ) return;
  
@@ -655,7 +655,7 @@ void vo_x11_setlayer( int layer )
   }
 
  type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
- if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 )
   {
    XEvent e;
    int    i;
@@ -680,7 +680,7 @@ void vo_x11_setlayer( int layer )
    return;
   }
  type=XInternAtom( mDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
- if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 )
   {
    XClientMessageEvent  xev;
    
