@@ -87,7 +87,7 @@ static Window                 mRoot;
 static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
 static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
 
-#ifdef HAVE_GUI
+#ifdef HAVE_NEW_GUI
  static uint32_t               mdwidth,mdheight;
 #endif
 
@@ -97,7 +97,6 @@ static XSetWindowAttributes   xWAttribs;
 
 static void mDrawColorKey( void )
 {
- XClearWindow( mDisplay,mWindow );
  XSetForeground( mDisplay,mGC,fgColor );
  XFillRectangle( mDisplay,mWindow,mGC,drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight) );
  XFlush( mDisplay );
@@ -110,7 +109,7 @@ static void set_window(){
          XTranslateCoordinates( mDisplay,mWindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
          fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
-         #ifdef HAVE_GUI
+         #ifdef HAVE_NEW_GUI
           if ( vo_window != None )
            {
             mFullscreen=0;
@@ -235,7 +234,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  wndX=0; wndY=0;
  wndWidth=d_width; wndHeight=d_height;
  dwidth=d_width; dheight=d_height;
- #ifdef HAVE_GUI
+ #ifdef HAVE_NEW_GUI
   mdwidth=d_width; mdheight=d_height;
  #endif
  mFullscreen=fullscreen&1;
