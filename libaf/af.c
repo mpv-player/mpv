@@ -370,7 +370,7 @@ af_data_t* af_play(af_stream_t* s, af_data_t* data)
    needed */
 inline int af_lencalc(frac_t mul, af_data_t* d){
   register int t = d->bps*d->nch;
-  return t*(((d->len/t)*mul.n + 1)/mul.d);
+  return t*(((d->len/t)*mul.n)/mul.d + 1);
 }
 
 /* Calculate how long the output from the filters will be given the
