@@ -760,6 +760,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN && filename && extension_parsing==1){
     demuxer=demux_open_stream(stream,file_format,audio_id,video_id,dvdsub_id,NULL);
     if(demuxer) return demuxer; // done!
     file_format=DEMUXER_TYPE_UNKNOWN; // continue fuzzy guessing...
+    mp_msg(MSGT_DEMUXER,MSGL_V,"demuxer: continue fuzzy content-based format guessing...\n");
   }
 }
 
@@ -892,6 +893,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  int pes=1;
  int tmp;
  off_t tmppos;
+ file_format=DEMUXER_TYPE_UNKNOWN;
  while(pes>=0){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id,dvdsub_id);
   
