@@ -26,6 +26,7 @@
 
 #include "vidixlib.h"
 
+static char drv_name[FILENAME_MAX];
 
 typedef struct vdl_stream_s
 {
@@ -68,13 +69,15 @@ static int vdl_fill_driver(VDL_HANDLE stream)
   if(!( t_vdl(stream)->get_caps && t_vdl(stream)->query_fourcc &&
 	t_vdl(stream)->config_playback && t_vdl(stream)->playback_on &&
 	t_vdl(stream)->playback_off))
-			return 0;
+  {
+    printf("vidixlib: some features are missed in driver\n");
+    return 0;
+  }
   return 1;
 }
 
 static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,unsigned cap,int verbose)
 {
-  char drv_name[FILENAME_MAX];
   vidix_capability_t vid_cap;
   unsigned (*_ver)(void);
   int      (*_probe)(int);
@@ -82,7 +85,11 @@ static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,
   strcpy(drv_name,path);
   strcat(drv_name,name);
   if(verbose) printf("vidixlib: PROBING: %s\n",drv_name);
-  if(!(t_vdl(stream)->handle = dlopen(drv_name,RTLD_NOW|RTLD_GLOBAL))) return 0;
+  if(!(t_vdl(stream)->handle = dlopen(drv_name,RTLD_LAZY|RTLD_GLOBAL)))
+  {
+    if(verbose) printf("vidixlib: %s not driver: %s\n",drv_name,strerror(errno));
+    return 0;
+  }
   _ver = dlsym(t_vdl(stream)->handle,"vixGetVersion");
   _probe = dlsym(t_vdl(stream)->handle,"vixProbe");
   _cap = dlsym(t_vdl(stream)->handle,"vixGetCapability");
@@ -107,7 +114,11 @@ static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,
   else goto fatal_err;
   if(_cap) { if((*_cap)(&vid_cap) != 0) goto err; }
   else goto fatal_err;
-  if((vid_cap.type & cap) != cap) goto err;
+  if((vid_cap.type & cap) != cap)
+  {
+     if(verbose) printf("vidixlib: Found %s but has no required capability\n",drv_name);
+     goto err;
+  }
   if(verbose) printf("vidixlib: %s probed o'k\n",drv_name);
   return 1;
 }
@@ -135,7 +146,7 @@ static int vdl_find_driver(VDL_HANDLE stream,const char *path,unsigned cap,int v
 VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap,int verbose)
 {
   vdl_stream_t *stream;
-  char drv_name[FILENAME_MAX];
+  int errcode;
   if(!(stream = malloc(sizeof(vdl_stream_t)))) return NULL;
   memset(stream,0,sizeof(vdl_stream_t));
   if(name)
@@ -164,11 +175,26 @@ VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap,int verbose)
     else goto drv_err;
     fill:
     if(!vdl_fill_driver(stream)) goto drv_err;
+    goto ok;
   }
   else
-    if(vdl_find_driver(stream,path,cap,verbose))	goto fill;
-    else						goto err;
-  if(t_vdl(stream)->init) if(t_vdl(stream)->init())	goto drv_err;
+    if(vdl_find_driver(stream,path,cap,verbose))
+    {
+      if(verbose) printf("vidixlib: will use %s driver\n",drv_name);
+      goto fill;
+    }  
+    else goto err;
+  ok:
+  if(t_vdl(stream)->init)
+  {
+   if(verbose) printf("vidixlib: Attempt to initialize driver at: %p\n",t_vdl(stream)->init);
+   if((errcode=t_vdl(stream)->init())!=0)
+   {
+    if(verbose) printf("vidixlib: Can't init driver: %s\n",strerror(errcode));
+    goto drv_err;
+   }
+  } 
+  if(verbose) printf("vidixlib: '%s'successfully loaded\n",drv_name);
   return stream;
 }
 
