@@ -180,6 +180,7 @@ stream_t* new_memory_stream(unsigned char* data,int len);
 stream_t* open_stream(char* filename,int vcd_track,int* file_format);
 
 //#ifdef USE_DVDREAD
+struct config;
 extern int dvd_title;
 extern int dvd_chapter;
 extern int dvd_last_chapter;

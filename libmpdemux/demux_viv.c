@@ -716,6 +716,7 @@ sound_ok:
 		sh->ds=demuxer->audio;
 		demuxer->audio->id=1;
 nosound:
+		;
 }
 }
 
