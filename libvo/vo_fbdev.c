@@ -529,7 +529,7 @@ static void fb_mode2fb_vinfo(fb_mode_t *m, struct fb_var_screeninfo *v)
 
 /* command line/config file options */
 char *fb_dev_name = NULL;
-char *fb_mode_cfgfile = "/etc/fb.modes";
+char *fb_mode_cfgfile = NULL;
 char *fb_mode_name = NULL;
 
 static fb_mode_t *fb_mode = NULL;
@@ -663,7 +663,7 @@ static int fb_preinit(int reset)
 		return fb_works;
 
 	if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER")))
-		fb_dev_name = "/dev/fb0";
+		fb_dev_name = strdup("/dev/fb0");
 	mp_msg(MSGT_VO, MSGL_V, "using %s\n", fb_dev_name);
 
 	if ((fb_dev_fd = open(fb_dev_name, O_RDWR)) == -1) {
@@ -696,6 +696,9 @@ static int fb_preinit(int reset)
 		}
 		fb_bpp = vo_dbpp;		
 	}
+	
+	if (!fb_mode_cfgfile)
+	    fb_mode_cfgfile = strdup("/etc/fb.modes");
 
 	fb_preinit_done = 1;
 	fb_works = 1;

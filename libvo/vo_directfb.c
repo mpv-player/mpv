@@ -314,7 +314,7 @@ if (verbose) printf("DirectFB: Preinit entered\n");
 	    (directfb_minor_version <= 9) &&
 	    (directfb_micro_version < 7)))
 	{
-    	    if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER"))) fb_dev_name = "/dev/fb0";
+    	    if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER"))) fb_dev_name = strdup("/dev/fb0");
     	    DFBCHECK (DirectFBSetOption ("fbdev",fb_dev_name));
 	}
 
