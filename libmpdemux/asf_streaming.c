@@ -59,21 +59,21 @@ asf_streaming_start( stream_t *stream ) {
 		) {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/HTTP...\n");
 		fd = asf_http_streaming_start( stream );
-		if( fd!=-1 ) return fd;
+		if( fd>-1 ) return fd;
 		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/HTTP failed\n");
 		if( fd==-2 ) return -1;
 	}
 	if( !strncasecmp( proto_s, "mms", 3) && strncasecmp( proto_s, "mmst", 4) ) {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/UDP...\n");
 		//fd = asf_mmsu_streaming_start( stream );
-		if( fd!=-1 ) return fd;
+		if( fd>-1 ) return fd;
 		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/UDP failed\n");
 		if( fd==-2 ) return -1;
 	}
 	if( !strncasecmp( proto_s, "mms", 3) ) {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/TCP...\n");
 		fd = asf_mmst_streaming_start( stream );
-		if( fd!=-1 ) return fd;
+		if( fd>-1 ) return fd;
 		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/TCP failed\n");
 		if( fd==-2 ) return -1;
 	}
