@@ -9,6 +9,7 @@ scale-t, bilinear filtering-et jelent. Linux alatt jónéhány módszerrel
 lehet ezeket elérni:
 
 I.   Az XFree86 4.0.2 Xv (XVideo) kiterjesztése
+I.1. Kartyaspecifikus beallitasok, tudnivalok
 II.  OpenGL driverek, megfelelõ glTexSubImage() támogatással
 III. Nativ kártyaspecifikus driverek, amik egyes kártyák különleges
      képességeit használják ki
@@ -69,13 +70,19 @@ Ha mûködésre akarod bírni, a következõket kell figyelembe venned:
    Támogatnia kell a YUY2 packed, YV12 planar pixelformátumokat, hogy
    használható legyen az MPlayer-rel.
 
-   Ha az xvinfo nem írja ki mindezt, de az XVideo kiterjesztés be van töltve,
-   és biztos vagy benne, hogy a kartyád tud YUV konverziót, akkor
+I.1.
+   a, Ha az xvinfo nem írja ki mindezt, de az XVideo kiterjesztés be van
+      töltve, és biztos vagy benne, hogy a kartyád tud YUV konverziót, akkor
     - 3dfx voodoo3/banshee tulajok töltsenek le új DRI-t a
-      http://dri.sourceforge.net címrõl
-    - S3 Savage4-esek töltsék le az XFree86 >= 4.0.3-at
+      http://dri.sourceforge.net címrõl (de valoszinuleg X 4.1.0 is jo)
+    - S3 Savage4-esek töltsék le az XFree86 >= 4.0.3-at (4.1.0 ajanlott!)
     - nVidia felhasználók adják el a kártyájukat... vagy nézzenek el az
       nVidia site-jára
+  b, A GATOS driver (ATI kartyakhoz) alapallapotban bekapcsolt VSYNC-et
+     tartalmaz. Ez azt jelenti hogy a dekodolasi sebesseg (!) hozza van
+     szinkronizalva a monitor frissitesi frekvenciajahoz. Ha a lejatszas
+     lassunak tunik, probald meg valahogy kikapcsolni a VSYNC-et, vagy
+     allitsd a kepfrissitest n*(a film fps-e) Hz-re.
 
 5. MPlayer-t 'xv' támogatással kell fordítani. 'configure'-nak ezt kell
    kiírnia:

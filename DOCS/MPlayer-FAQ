@@ -245,3 +245,11 @@ Q: The OSD is flickering!
 A: You use a vo driver with single buffering (x11,xv). With xv you can change
    the number of buffers in libvo/vo_xv.c :
    Increase #define NUM_BUFFERS 1
+
+Q: What's the problem with gcc 2.96 ?
+A: gcc 2.96 is RedHat's UNOFFICIAL (it can be found only on RedHat sites, or
+   RedHat distributions) and BUGGY gcc release. gcc 2.96 is TOTALLY
+   unsupported by MPlayer, because it simply SKIPS MMX codes, it just does not
+   compile it. Important: this is NOT an MPlayer-specific problem, numerous
+   other projects (DRI, avifile, etc..) have problems with this shit too.
+   ** DO NOT USE gcc 2.96 !!! **

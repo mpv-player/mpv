@@ -109,8 +109,9 @@ General:
 - fsdga:X11 DGA extension with fullscreen scaling (only 24/32bpp and MPEG!)
 - fbdev:Output to general framebuffers
 - svga: Output to SVGAlib
-- sdl:	SDL >= v1.1.7 driver (supports software scaling, and versions >=1.1.8
-        even support Xvideo (thus hardware rendering) and with >=1.2.0 aalib)
+- sdl:	1.1.7 : supports software scaling
+	1.1.8 : supports Xvideo
+	1.2.0 : supports aalib
 - aalib:Textmode rendering (through SDL, native driver is coming soon!)
 
 Card specific:

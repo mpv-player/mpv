@@ -8,6 +8,7 @@ Videocards with hardware acceleration:
 bilinear filtering. Under Linux, there are several ways to access it:
 
 I.   The Xv (XVideo) extension of XFree86 4.0.2
+I.1. Card-specific notes/settings
 II.  OpenGL drivers with glTexSubImage() support
 III. Native card-specific drivers, using special abilities of some cards
 IV.  DGA - direct graphic access. no YUV & scaling, but faster than raw X11
@@ -65,13 +66,18 @@ In order to make this work, be sure to check the following:
    It must support YUY2 packed, and YV12 planar pixel formats to be
    usable with MPlayer.
 
-   If xvinfo doesn't show these, but XVideo extension is loaded and you're
-   sure your card can do YUV conversion,
+I.1.
+  a, If xvinfo doesn't show these, but XVideo extension is loaded and you're
+     sure your card can do YUV conversion,
     - 3dfx voodoo3/banshee users download a new DRI from
-      http://dri.sourceforge.net
-    - S3 Savage4 users download XFree86 >= 4.0.3
+      http://dri.sourceforge.net (or possibly use X 4.1.0)
+    - S3 Savage4 users download XFree86 >= 4.0.3 (4.1.0 preferred)
     - nVidia users sell their card.. or download the nVidia driver from
       nVidia's website
+  b, The GATOS driver (for ATI cards) has VSYNC enabled by default. It means
+     that decoding speed (!) is synced to the monitor's refresh rate. If
+     playing seems to be slow, try disabling VSYNC somehow, or set refresh
+     rate to n*(fps of the movie) Hz.
 
 5. Be sure MPlayer is compiled with the "xv" target. "./configure" should say:
 	Checking for Xv ... yes

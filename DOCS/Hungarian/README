@@ -112,8 +112,9 @@ Támogatott video outputok:
         és MPEG!)
 - fbdev:Megjelenítés általános framebuffereken
 - svga: Megjelenítés SVGAlib-bel
-- sdl:  SDL >= v1.1.7 driver (software scaling, >=1.1.8 támogatja a hardware
-        gyorsítást XVideo-n keresztül, >=1.2.0 aalib)
+- sdl:  1.1.7 : software scaling
+	1.1.8 : támogatja a hardware-es gyorsítást XVideo-n keresztül
+	1.2.0 : aalib tamogatas
 - aalib:Szöveges módú render (SDL-en keresztül, nativ driver hamarosan!)
 
 Kártyaspecifikus:

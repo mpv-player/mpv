@@ -254,3 +254,12 @@ Q: Az OSD villog!
 A: Olyan vo drivert hasznalsz ami egyszeres bufferelest hasznal (x11,xv).
    Xv eseten meg tudod valtoztatni a bufferek szamat a libvo/xv_xv.c-ben :
    Noveld ezt : #define NUM_BUFFERS 1
+
+Q: Mi a fene van azzal a 2.96-os gcc-vel ?
+A: gcc 2.96 a RedHat NEM HIVATALOS (csak a RedHat-nal, vagy RedHat
+   disztribuciokban talalhato meg), es HIBAS gcc-je. A gcc 2.96 TELJESEN
+   hasznalhatatlan az MPlayer-rel, mert egyszeruen ATUGORJA az MMX
+   utasitasokat, nem forditja le oket. Fontos: ez NEM MPlayer-specifikus
+   problema, szamos mas project (DRI, avifile, stb..) szenved ebbol fakado
+   problemaktol.
+   ** NE HASZNALD a gcc 2.96-ot !!! **
