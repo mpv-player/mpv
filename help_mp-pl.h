@@ -1,11 +1,17 @@
+// ========================= MPlayer help ===========================
+
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2001 Arpad Gereoffy (see DOCS/AUTHORS)\n"
+"MPlayer " VERSION "(C) 2000-2001 Arpad Gereoffy (see DOCS!)\n"
 "\n";
 
 static char help_text[]=
+#ifdef HAVE_NEW_GUI
+"U¿ycie:   mplayer [-gui] [opcje] [¶cie¿ka/]nazwa\n"
+#else
 "U¿ycie:   mplayer [opcje] [¶cie¿ka/]nazwa\n"
+#endif
 "\n"
 "Opcje:\n"
 " -vo <drv[:dev]> wybór sterownika[:urz±dzenia] video (lista po '-vo help')\n"
@@ -14,10 +20,13 @@ static char help_text[]=
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>  urz±dzenie DVD do autentykacji (dla zaszyfrowanych dysków)\n"
 #endif
+#ifdef USE_DVDREAD
+" -dvd <titleno>  odtwarzanie bezpo¶rednio ¶cie¿ki DVD\n"
+#endif
 " -ss <timepos>   skok do podanej pozycji (sekundy albo hh:mm:ss)\n"
 " -nosound        odtwarzanie bez d¼wiêku\n"
 #ifdef USE_FAKE_MONO
-" -stereo         wybór trybu stereo dla MPEG1 (0:stereo 1:lewo 2:prawo)\n"
+" -stereo <mode>  wybór trybu stereo dla MPEG1 (0:stereo 1:lewo 2:prawo)\n"
 #endif
 " -fs -vm -zoom   opcje pe³noekranowe (pe³en ekran,zmiana trybu,skalowanie)\n"
 " -x <x> -y <y>   skalowanie do rozdzielczo¶ci <x>*<y> [je¶li -vo pozwala!]\n"
@@ -25,23 +34,25 @@ static char help_text[]=
 " -vid x -aid y   wybór odtwarzanego strumienia video (x) i audio (y)\n"
 " -fps x -srate y wybór prêdko¶ci odtwarzania video (x fps) i audio (y Hz)\n"
 " -pp <quality>   wybór filtra wyg³adzaj±cego (0-4 dla DivX, 0-63 dla mpeg)\n"
-" -bps            inna metoda synchronizacji A-V dla plików AVI (mo¿e pomóc!)\n"
+" -nobps          inna metoda synchronizacji A-V dla plików AVI (mo¿e pomóc!)\n"
 " -framedrop      gubienie klatek (dla wolnych maszyn)\n"
 "\n"
 "Klawisze:\n"
 " Right,Up,PgUp   skok naprzód o 10 sekund, 1 minutê, 10 minut\n"
 " Left,Down,PgDn  skok do ty³u o 10 sekund, 1 minutê, 10 minut\n"
-" p or SPACE      zatrzymanie filmu (naci¶nij dowolny klawisz aby kontynuowaæ)\n"
-" q or ESC        zatrzymanie odtwarzania i wyj¶cie z programu\n"
-" + or -          regulacja opó¼nienia d¼wiêku o +/- 0.1 sekundy\n"
+" p lub SPACE     zatrzymanie filmu (kontynuacja - dowolny klawisz)\n"
+" q lub ESC       zatrzymanie odtwarzania i wyj¶cie z programu\n"
+" + lub -         regulacja opó¼nienia d¼wiêku o +/- 0.1 sekundy\n"
 " o               prze³±czanie trybów OSD: pusty / belka / belka i zegar\n"
-" * or /          zwiêkszenie lub zmniejszenie natê¿enia d¼wiêku\n"
+" * lub /         zwiêkszenie lub zmniejszenie natê¿enia d¼wiêku\n"
 "                 (naci¶nij 'm' ¿eby wybraæ master/pcm)\n"
-" z or x          regulacja opó¼nienia napisów o +/- 0.1 sekundy\n"
+" z lub x         regulacja opó¼nienia napisów o +/- 0.1 sekundy\n"
 "\n"
-" * * * SPRAWD¬ DETALE, POMOCNE OPCJE I KLAWISZE W MANUALU ! * * *\n"
+" *** SPRAWD¬ DETALE, POMOCNE (ZAAWANSOWANE) OPCJE I KLAWISZE W MANUALU ! ***\n"
 "\n";
 #endif
+
+// ========================= MPlayer messages ===========================
 
 // mplayer.c: 
 
@@ -85,17 +96,35 @@ static char help_text[]=
 #define MSGTR_SystemTooSlow "\n*************************************************************************"\
 			    "\n*** Twój system jest zbyt wolny! Sprobuj z opcj± -framedrop lub RTFM! ***"\
 			    "\n*************************************************************************\n"
-//#define MSGTR_
+
+#define MSGTR_NoGui "MPlayer zosta³ skompilowany BEZ obs³ugi GUI!\n"
+#define MSGTR_GuiNeedsX "GUI MPlayera wymaga X11!\n"
+#define MSGTR_Playing "Odtwarzam %s\n"
+#define MSGTR_NoSound "Audio: brak d¼wiêku!!!\n"
+#define MSGTR_FPSforced "FPS wymuszone na %5.3f  (ftime: %5.3f)\n"
+
 
 // open.c: 
 #define MSGTR_CdDevNotfound "Urz±dzenie CD-ROM '%s' nie znalezione!\n"
 #define MSGTR_ErrTrackSelect "B³±d wyboru ¶cie¿ki VCD!"
-#define MSGTR_ReadSTDIN "Odczytuje z stdin...\n"
+#define MSGTR_ReadSTDIN "Odczytujê ze stdin...\n"
 #define MSGTR_UnableOpenURL "Nie mogê otworzyæ URL: %s\n"
 #define MSGTR_ConnToServer "Po³±czony z serwerem: %s\n"
 #define MSGTR_FileNotFound "Plik nie znaleziony: '%s'\n"
 
-// demuxer.c:
+#define MSGTR_CantOpenDVD "Nie mogê otworzyæ urz±dzenia DVD: %s\n"
+#define MSGTR_DVDwait "Odczytujê strukturê dysku, proszê czekaæ...\n"
+#define MSGTR_DVDnumTitles "Na tym DVD znajduje siê %d tytu³ów.\n"
+#define MSGTR_DVDinvalidTitle "Nieprawid³owy numer tytu³u DVD: %d\n"
+#define MSGTR_DVDnumChapters "W tym tytule DVD znajduje siê %d rozdzia³ów.\n"
+#define MSGTR_DVDinvalidChapter "Nieprawid³owy numer rozdzia³u DVD: %d\n"
+#define MSGTR_DVDnumAngles "W tym tytule DVD znajduje siê %d ustawieñ kamery.\n"
+#define MSGTR_DVDinvalidAngle "Nieprawid³owy numer ustawienia kamery DVD: %d\n"
+#define MSGTR_DVDnoIFO "Nie mogê otworzyæ pliku IFO dla tytu³u DVD %d.\n"
+#define MSGTR_DVDnoVOBs "Nie mogê otworzyæ tytu³u VOBS (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDopenOk "DVD otwarte poprawnie!\n"
+
+// demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Uwaga! Nag³ówek strumienia audio %d przedefiniowany!\n"
 #define MSGTR_VideoStreamRedefined "Uwaga! Nag³ówek strumienia video %d przedefiniowany!\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Zbyt wiele (%d w %d bajtach) pakietów audio w buforze!\n"
@@ -107,56 +136,116 @@ static char help_text[]=
 #define MSGTR_DetectedMPEGPSfile "Wykryto format MPEG-PS!\n"
 #define MSGTR_DetectedMPEGESfile "Wykryto format MPEG-ES!\n"
 #define MSGTR_DetectedQTMOVfile "Wykryto format QuickTime/MOV!\n"
-#define MSGTR_MissingMpegVideo "Zagubiony strumien video MPEG !? skontaktuj siê z autorem, mo¿e to b³±d:(\n"
+#define MSGTR_MissingMpegVideo "Zagubiony strumieñ video MPEG !? skontaktuj siê z autorem, mo¿e to b³±d:(\n"
 #define MSGTR_InvalidMPEGES "B³êdny strumieñ MPEG-ES ??? skontaktuj siê z autorem, mo¿e to b³±d:(\n"
 #define MSGTR_FormatNotRecognized "========== Przepraszam,  format pliku nierozpoznany/nieobs³ugiwany ==========\n"\
 				  "=== Je¶li to strumieñ AVI, ASF lub MPEG, proszê skontaktuj siê z autorem! ===\n"
-#define MSGTR_MissingASFvideo "ASF: nie znaleziono strumienia video!\n"
-#define MSGTR_MissingASFaudio "ASF: nie znaleziono strumienia audio...  ->nosound\n"
-#define MSGTR_MissingMPEGaudio "MPEG: nie znaleziono strumienia audio...  ->nosound\n"
+#define MSGTR_MissingVideoStream "Nie znaleziono strumienia video!\n"
+#define MSGTR_MissingAudioStream "Nie znaleziono strumienia audio...  ->nosound\n"
+#define MSGTR_MissingVideoStreamBug "Zgubiony strumieñ video!? skontaktuj siê z autorem, mo¿e to b³±d:(\n"
 
-//#define MSGTR_
+#define MSGTR_DoesntContainSelectedStream "demux: plik nie zawiera wybranego strumienia audio lub video\n"
+
+#define MSGTR_NI_Forced "Wymuszony"
+#define MSGTR_NI_Detected "Wykryty"
+#define MSGTR_NI_Message "%s format pliku NON-INTERLEAVED AVI !\n"
+
+#define MSGTR_UsingNINI "U¿ywa uszkodzonego formatu pliku NON-INTERLEAVED AVI !\n"
+#define MSGTR_CouldntDetFNo "Nie mogê okre¶liæ liczby klatek (dla przeszukiwania)\n"
+#define MSGTR_CantSeekRawAVI "Nie mogê przeszukiwaæ czystych strumieni .AVI! (wymagany indeks, sprobuj z opcj± -idx !)  \n"
+#define MSGTR_CantSeekFile "Nie mogê przeszukiwaæ tego pliku!  \n"
+
+#define MSGTR_EncryptedVOB "Zaszyfrowany plik VOB (nie wkompilowano obs³ugi libcss)! Przeczytaj plik DOCS/DVD\n"
+#define MSGTR_EncryptedVOBauth "Zaszyfrowany strumieñ, nie za¿yczy³e¶ sobie autentykacji!!\n"
+
+#define MSGTR_MOVcomprhdr "MOV: Spakowane nag³ówki nie s± obs³ugiwane (na razie)!\n"
+#define MSGTR_MOVvariableFourCC "MOV: Uwaga! wykryto zmienn± FOURCC!?\n"
+#define MSGTR_MOVtooManyTrk "MOV: Uwaga! zbyt du¿o scie¿ek!"
+#define MSGTR_MOVnotyetsupp "\n**** Format Quicktime MOV nie jest na razie obs³ugiwany !!!!!!! ****\n"
+
+// dec_video.c & dec_audio.c:
+#define MSGTR_CantOpenCodec "nie mogê otworzyæ kodeka\n"
+#define MSGTR_CantCloseCodec "nie mogê zamkn±æ kodeka\n"
+
+#define MSGTR_MissingDLLcodec "ERROR: Nie mogê otworzyæ wymaganego kodeka DirectShow: %s\n"
+#define MSGTR_ACMiniterror "Nie mogê za³adowaæ/zainicjalizowaæ kodeka Win32/ACM AUDIO (brakuje pliku DLL?)\n"
+#define MSGTR_MissingLAVCcodec "Nie moge znale¼æ w libavcodec kodeka '%s' ...\n"
+
+#define MSGTR_NoDShowSupport "MPlayer skompilowany BEZ obs³ugi directshow!\n"
+#define MSGTR_NoWfvSupport "Obs³uga kodeków win32 wy³±czona lub niedostêpna na platformach nie-x86!\n"
+#define MSGTR_NoDivx4Support "MPlayer skompilowany BEZ obs³ugi DivX4Linux (libdivxdecore.so)!\n"
+#define MSGTR_NoLAVCsupport "MPlayer skompilowany BEZ obs³ugi ffmpeg/libavcodec!\n"
+#define MSGTR_NoACMSupport "Kodek audio Win32/ACM wy³±czony lub niedostêpny dla nie-x86 CPU -> wymuszam brak d¼wiêku :(\n"
+#define MSGTR_NoDShowAudio "Skompilowane bez obs³ugi DirectShow -> wymuszam brak d¼wiêku :(\n"
+#define MSGTR_NoOggVorbis "Kodek audio OggVorbis wy³±czony -> wymuszam brak d¼wiêku :(\n"
+
+#define MSGTR_MpegPPhint "UWAGA! Za¿±da³e¶ u¿ycia filtra wyg³adzaj±cego dla video MPEG 1/2,\n" \
+			 "       ale skompilowa³e¶ MPlayera bez obs³ugi wyg³adzania dla MPEG 1/2!\n" \
+			 "       #define MPEG12_POSTPROC w config.h, i przekompiluj libmpeg2!\n"
+#define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF podczas przeszukiwania nag³ówka sekwencji\n"
+#define MSGTR_CannotReadMpegSequHdr "FATAL: Nie mogê odczytaæ nag³ówka sekwencji!\n"
+#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Nie mogê odczytaæ rozszerzenia nag³ówka sekwencji!!\n"
+#define MSGTR_BadMpegSequHdr "MPEG: Nieprawid³owy nag³ówek sekwencji!\n"
+#define MSGTR_BadMpegSequHdrEx "MPEG: Nieprawid³owe rozszerzenie nag³ówka sekwencji!\n"
+
+#define MSGTR_ShMemAllocFail "Nie mogê zaalokowaæ pamiêci dzielonej\n"
+#define MSGTR_CantAllocAudioBuf "Nie mogê zaalokowaæ buforu wyj¶ciowego audio\n"
+#define MSGTR_NoMemForDecodedImage "Za ma³o pamiêci dla zdekodowanego bufora obrazu (%ld bajtów)\n"
+
+#define MSGTR_AC3notvalid "Nieprawid³owy strumieñ AC3.\n"
+#define MSGTR_AC3only48k "Obs³ugiwane s± tylko strumienie 48000 Hz.\n"
+#define MSGTR_UnknownAudio "Nieznany/zgubiony format audio, nie u¿ywam d¼wiêku\n"
+
+// LIRC:
+#define MSGTR_SettingUpLIRC "W³±czam obs³ugê lirc...\n"
+#define MSGTR_LIRCdisabled "Nie bêdziesz móg³ u¿ywaæ twojego pilota\n"
+#define MSGTR_LIRCopenfailed "Nieudane otwarcie obs³ugi lirc!\n"
+#define MSGTR_LIRCsocketerr "Co¶ jest nie tak z socketem lirc: %s\n"
+#define MSGTR_LIRCcfgerr "Nieudane odczytanie pliku konfiguracyjnego LIRC %s !\n"
+
+
+// ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI
 
 // --- labels ---
-#define MSGTR_About "About"
-#define MSGTR_FileSelect "Select file ..."
-#define MSGTR_MessageBox "MessageBox"
-#define MSGTR_PlayList "PlayList"
-#define MSGTR_SkinBrowser "Skin Browser"
+#define MSGTR_About "O programie"
+#define MSGTR_FileSelect "Wybór pliku ..."
+#define MSGTR_MessageBox "Komunikat"
+#define MSGTR_PlayList "Playlista"
+#define MSGTR_SkinBrowser "Przegl±darka Skórek"
 
 // --- buttons ---
-#define MSGTR_Ok "Ok"
-#define MSGTR_Cancel "Cancel"
-#define MSGTR_Add "Add"
-#define MSGTR_Remove "Remove"
+#define MSGTR_Ok "Tak"
+#define MSGTR_Cancel "Anuluj"
+#define MSGTR_Add "Dodaj"
+#define MSGTR_Remove "Usuñ"
 
 // --- error messages ---
-#define MSGTR_NEMDB "Sorry, not enough memory for draw buffer."
-#define MSGTR_NEMFMR "Sorry, not enough memory for menu rendering."
-#define MSGTR_NEMFMM "Sorry, not enough memory for main window shape mask."
+#define MSGTR_NEMDB "Przepraszam, za ma³o pamiêci na bufor rysowania."
+#define MSGTR_NEMFMR "Przepraszam, za ma³o pamiêci na renderowanie menu."
+#define MSGTR_NEMFMM "Przepraszam, za ma³o pamiêci na maskê kszta³tu g³ównego okna."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[skin] error in skin config file on line %d: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] warning in skin config file on line %d: widget found but before \"section\" not found ( %s )"
-#define MSGTR_SKIN_WARNING2 "[skin] warning in skin config file on line %d: widget found but before \"subsection\" not found (%s)"
-#define MSGTR_SKIN_BITMAP_16bit  "16 bits or less depth bitmap not supported ( %s ).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "file not found ( %s )\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "bmp read error ( %s )\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "tga read error ( %s )\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "png read error ( %s )\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed tga not supported ( %s )\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "unknown file type ( %s )\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24 bit to 32 bit convert error ( %s )\n"
-#define MSGTR_SKIN_BITMAP_UnknownMessage "unknown message: %s\n"
-#define MSGTR_SKIN_FONT_NotEnoughtMemory "not enought memory\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "too many fonts declared\n"
-#define MSGTR_SKIN_FONT_FontFileNotFound "font file not found\n"
-#define MSGTR_SKIN_FONT_FontImageNotFound "font image file not found\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "non-existent font identifier ( %s )\n"
-#define MSGTR_SKIN_UnknownParameter "unknown parameter ( %s )\n"
-#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] not enought memory.\n"
+#define MSGTR_SKIN_ERRORMESSAGE "[skin] b³±d w pliku konfiguracyjnym skórki w linii %d: %s"
+#define MSGTR_SKIN_WARNING1 "[skin] ostrze¿enie w pliku konfiguracyjnym skórki w linii %d: widget znaleziony, ale poprzednia \"sekcja\" nie znaleziona ( %s )"
+#define MSGTR_SKIN_WARNING2 "[skin] ostrze¿enie w pliku konfiguracyjnym skórki w linii %d: widget znaleziony, ale poprzednia \"subsekcja\" nie znaleziona (%s)"
+#define MSGTR_SKIN_BITMAP_16bit "Bitmapy 16 bitowe lub mniejsze nie obs³ugiwane ( %s ).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound "plik nie znaleziony ( %s )\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "b³±d odczytu bmp ( %s )\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "b³±d odczytu tga ( %s )\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "b³±d odczytu png ( %s )\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "tga pakowane RLE nie obs³ugiwane ( %s )\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "nieznany typ pliku ( %s )\n"
+#define MSGTR_SKIN_BITMAP_ConvertError "b³±d konwersji 24 bitów na 32 bity ( %s )\n"
+#define MSGTR_SKIN_BITMAP_UnknownMessage "nieznany komunikat: %s\n"
+#define MSGTR_SKIN_FONT_NotEnoughtMemory "za ma³o pamiêci\n"
+#define MSGTR_SKIN_FONT_TooManyFontsDeclared "za du¿o zadeklarowanych fontów\n"
+#define MSGTR_SKIN_FONT_FontFileNotFound "nie znaleziono pliku z fontami\n"
+#define MSGTR_SKIN_FONT_FontImageNotFound "nie znaleziono pliku z obrazem fontu\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "nie istniej±cy identyfikator fontu ( %s )\n"
+#define MSGTR_SKIN_UnknownParameter "nieznany parametr ( %s )\n"
+#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] za ma³o pamiêci.\n"
 
 #endif
 
