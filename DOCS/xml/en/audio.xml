@@ -339,7 +339,9 @@ Feedback to this document is welcome. Please tell us how
 </para>
 </sect2>
 
-<sect2 id="af">
+</sect1>
+
+<sect1 id="af">
 <title>Audio filters</title>
 <para>
   The old audio plugins have been superseded by a new audio filter layer. Audio
@@ -497,7 +499,7 @@ to rectify the difference.
 </varlistentry>
 </variablelist>
 
-<sect3 id="af_resample">
+<sect2 id="af_resample">
 <title>Up/Downsampling</title>
 
 <para>
@@ -553,9 +555,9 @@ has three options:
 would set the output frequency of the resample filter to 44100Hz using exact output
 frequency scaling and linear interpolation.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_channels">
+<sect2 id="af_channels">
 <title>Changing the number of channels</title>
 <para>
 The <option>channels</option> filter can be used for adding and removing
@@ -617,9 +619,9 @@ Example 2:
 would change the number of channels to 6 and set up 4 routes that copy
 channel 0 to channels 0 to 3. Channel 4 and 5 will contain silence.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_format">
+<sect2 id="af_format">
 <title>Sample format converter</title>
 <para>
 The <option>format</option> filter converts between different sample formats. It
@@ -654,9 +656,9 @@ Example:
 <screen>mplayer -af format=4:float <replaceable>media.avi</replaceable></screen>
 would set the output format to 4 bytes per sample floating point data.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_delay">
+<sect2 id="af_delay">
 <title>Delay</title>
 <para>
 The <option>delay</option> filter delays the sound to the loudspeakers such that
@@ -705,9 +707,9 @@ would delay front left and right by 10.5ms, the two rear channels and the sub
 by 0ms and the center channel by 7ms.
 </para>
 
-</sect3>
+</sect2>
 
-<sect3 id="af_volume">
+<sect2 id="af_volume">
 <title>Software volume control</title>
 <para>Software volume control is implemented by the <option>volume</option>
 audio filter. Use this filter with caution since it can reduce the signal to
@@ -753,9 +755,9 @@ and prints out that level when <application>MPlayer</application> exits.
 This volume estimate can be used for setting the sound level in
 <application>MEncoder</application> such that the maximum dynamic range is utilized.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_equalizer">
+<sect2 id="af_equalizer">
 <title>Equalizer</title>
 <para>
 The <option>equalizer</option> filter represents a 10 octave band graphic
@@ -815,9 +817,9 @@ Example:
 would amplify the sound in the upper and lower frequency region while
 canceling it almost completely around 1kHz.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_panning">
+<sect2 id="af_panning">
 <title>Panning filter</title>
 <para>
 Use the <option>pan</option> filter to mix channels arbitrarily. It is
@@ -873,9 +875,9 @@ would give 3 channel output leaving channels 0 and 1 intact, and mix
 channels 0 and 1 into output channel 2 (which could be sent to a
 sub-woofer for example).
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_sub">
+<sect2 id="af_sub">
 <title>Sub-woofer</title>
 <para>
 The <option>sub</option> filter adds a sub woofer channel to the audio
@@ -917,9 +919,9 @@ Example:
 would add a sub-woofer channel with a cutoff frequency of
 100Hz to output channel 4.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_surround">
+<sect2 id="af_surround">
 <title>Surround-sound decoder</title>
 <para>
 Matrix encoded surround sound can be decoded by the <option>surround</option>
@@ -950,9 +952,9 @@ Example:
 would add surround sound decoding with 15ms delay for the sound to the
 rear speakers.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_export">
+<sect2 id="af_export">
 <title>Audio Exporter</title>
 <para>
 This audio filter exports the incoming signal to other processes using memory
@@ -990,9 +992,9 @@ Example:
 <screen>mplayer -af export=/tmp/mplayer-af_export:1024 <replaceable>media.avi</replaceable></screen>
 would export 1024 samples per channel to <filename>/tmp/mplayer-af_export</filename>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_extrastereo">
+<sect2 id="af_extrastereo">
 <title>Extrastereo</title>
 
 <para>
@@ -1021,9 +1023,9 @@ mplayer -af extrastereo <replaceable>media.avi</replaceable>
 mplayer -af extrastereo=3.45 <replaceable>media.avi</replaceable><!--
 --></screen>
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af_volnorm">
+<sect2 id="af_volnorm">
 <title>Volume normalizer</title>
 
 <para>
@@ -1034,8 +1036,6 @@ This audio filter maximizes the volume without distorting the sound.
 Usage:
 <screen>mplayer -af volnorm <replaceable>media.avi</replaceable></screen>
 </para>
-</sect3>
-
 </sect2>
 
 </sect1>
