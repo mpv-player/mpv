@@ -931,7 +931,7 @@ static struct {
   {"i420", IMGFMT_I420},
   {"iyuv", IMGFMT_IYUV},
   {"clpl", IMGFMT_CLPL},
-  {"hm12", IMGFMT_NV12},
+  {"hm12", IMGFMT_HM12},
   {"y800", IMGFMT_Y800},
   {"y8", IMGFMT_Y8},
   {"nv12", IMGFMT_NV12},
