@@ -116,23 +116,23 @@ static mp_key_name_t key_names[] = {
 
   { JOY_AXIS0_PLUS, "JOY_AXIS0_PLUS" },
   { JOY_AXIS0_MINUS, "JOY_AXIS0_MINUS" },
-  { JOY_AXIS1_PLUS, " JOY_AXIS1_PLUS" },
+  { JOY_AXIS1_PLUS, "JOY_AXIS1_PLUS" },
   { JOY_AXIS1_MINUS, "JOY_AXIS1_MINUS" },
   { JOY_AXIS2_PLUS, "JOY_AXIS2_PLUS" },
   { JOY_AXIS2_MINUS, "JOY_AXIS2_MINUS" },
-  { JOY_AXIS3_PLUS, " JOY_AXIS3_PLUS" },
+  { JOY_AXIS3_PLUS, "JOY_AXIS3_PLUS" },
   { JOY_AXIS3_MINUS, "JOY_AXIS3_MINUS" },
   { JOY_AXIS4_PLUS, "JOY_AXIS4_PLUS" },
   { JOY_AXIS4_MINUS, "JOY_AXIS4_MINUS" },
-  { JOY_AXIS5_PLUS, " JOY_AXIS5_PLUS" },
+  { JOY_AXIS5_PLUS, "JOY_AXIS5_PLUS" },
   { JOY_AXIS5_MINUS, "JOY_AXIS5_MINUS" },
   { JOY_AXIS6_PLUS, "JOY_AXIS6_PLUS" },
   { JOY_AXIS6_MINUS, "JOY_AXIS6_MINUS" },
-  { JOY_AXIS7_PLUS, " JOY_AXIS7_PLUS" },
+  { JOY_AXIS7_PLUS, "JOY_AXIS7_PLUS" },
   { JOY_AXIS7_MINUS, "JOY_AXIS7_MINUS" },
   { JOY_AXIS8_PLUS, "JOY_AXIS8_PLUS" },
   { JOY_AXIS8_MINUS, "JOY_AXIS8_MINUS" },
-  { JOY_AXIS9_PLUS, " JOY_AXIS9_PLUS" },
+  { JOY_AXIS9_PLUS, "JOY_AXIS9_PLUS" },
   { JOY_AXIS9_MINUS, "JOY_AXIS9_MINUS" },
 
   { JOY_BTN0, "JOY_BTN0" },
@@ -278,11 +278,16 @@ static unsigned int ar_delay = 100, ar_rate = 8, last_ar = 0;
 static int use_joystick = 1, use_lirc = 1;
 static char* config_file = "input.conf";
 
+static int mp_input_print_key_list(config_t* cfg);
+static int mp_input_print_cmd_list(config_t* cfg);
+
 // Our command line options
 static config_t input_conf[] = {
   { "conf", &config_file, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
   { "ar-delay", &ar_delay, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
   { "ar-rate", &ar_rate, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
+  { "keylist", mp_input_print_key_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
+  { "cmdlist", mp_input_print_cmd_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
   { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -1245,6 +1250,45 @@ mp_input_uninit(void) {
 void
 mp_input_register_options(m_config_t* cfg) {
   m_config_register_options(cfg,mp_input_opts);
+}
+
+static int mp_input_print_key_list(config_t* cfg) {
+  int i;
+  printf("\n");
+  for(i= 0; key_names[i].name != NULL ; i++)
+    printf("%s\n",key_names[i].name);
+  exit(0);
+}
+
+static int mp_input_print_cmd_list(config_t* cfg) {
+  mp_cmd_t *cmd;
+  int i,j;
+  char* type;
+
+  for(i = 0; (cmd = &mp_cmds[i])->name != NULL ; i++) {
+    printf("%-20.20s",cmd->name);
+    for(j= 0 ; j < MP_CMD_MAX_ARGS && cmd->args[j].type != -1 ; j++) {
+      switch(cmd->args[j].type) {
+      case MP_CMD_ARG_INT:
+	type = "Integer";
+	break;
+      case MP_CMD_ARG_FLOAT:
+	type = "Float";
+	break;
+      case MP_CMD_ARG_STRING:
+	type = "String";
+	break;
+      default:
+	type = "??";
+      }
+      if(j+1 > cmd->nargs)
+	printf(" [%s]",type);
+      else
+	printf(" %s",type);
+    }
+    printf("\n");
+  }
+  exit(0);
 }
 
 #endif /* HAVE_NEW_INPUT */
