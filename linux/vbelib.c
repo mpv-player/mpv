@@ -30,9 +30,9 @@ static inline int VERR(const void *p)
 	"xorl	%0, %0\n\t"
 	"verr	%1\n\t"
 	"setnz	%b0"
-	:"=r"(retval)
+	:"=q"(retval)
 	:"m"(*(unsigned char *)p)
-	:"memory");
+	:"memory","cc");
   return retval;
 }
 
@@ -44,9 +44,9 @@ static inline int VERW(const void *p)
 	"xorl	%0, %0\n\t"
 	"verw	%1\n\t"
 	"setnz	%b0"
-	:"=r"(retval)
+	:"=q"(retval)
 	:"m"(*(unsigned char *)p)
-	:"memory");
+	:"memory","cc");
   return retval;
 }
 #endif
