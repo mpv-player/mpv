@@ -281,6 +281,16 @@ void exit_sighandler(int x){
   exit_player(NULL);
 }
 
+void usage(void){
+  printf("%s",help_text);
+  exit(0);
+}
+
+void missing_param(char *s){
+  printf("Missing parameter: %s\n", s);
+  exit(1);
+}
+
 int divx_quality=0;
 
 int main(int argc,char* argv[]){
@@ -335,6 +345,10 @@ int force_ni=0;
 
   printf("%s",banner_text);
 
+/* CHKOPT(a): check, wether there is 'a' more options left */
+#define CHKOPT(a) if ((argc - i) < (a + 1)) missing_param(argv[i]);
+if (argc == 1)
+  usage();
 for(i=1;i<argc;i++){
   if(strcmp(argv[i],"-o")==0){
     printf("Option -o has been renamed to -vo (video-out), use -vo !\n");
@@ -344,48 +358,49 @@ for(i=1;i<argc;i++){
     printf("Option -divxq has been renamed to -pp (postprocessing), use -pp !\n");
     exit(1);
   } else
-  if(strcmp(argv[i],"-vo")==0)  video_driver=argv[++i]; else
-  if(strcmp(argv[i],"-dsp")==0) dsp=argv[++i]; else
-  if(strcmp(argv[i],"-encode")==0)  encode_name=argv[++i]; else
-  if(strcmp(argv[i],"-bg")==0) play_in_bg=1; else
-  if(strcmp(argv[i],"-sb")==0) seek_to_byte=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-ss")==0) seek_to_sec=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-nosound")==0) has_audio=0; else
-  if(strcmp(argv[i],"-abs")==0) audio_buffer_size=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-delay")==0) audio_delay=strtod(argv[++i],NULL); else
+  if(strcmp(argv[i],"-vo")==0) {CHKOPT(1); video_driver=argv[++i];} else
+  if(strcmp(argv[i],"-dsp")==0) {CHKOPT(1); dsp=argv[++i];} else
+  if(strcmp(argv[i],"-encode")==0) {CHKOPT(1); encode_name=argv[++i];} else
+  if(strcmp(argv[i],"-bg")==0) {play_in_bg=1;} else
+  if(strcmp(argv[i],"-sb")==0) {CHKOPT(1); seek_to_byte=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-ss")==0) {CHKOPT(1); seek_to_sec=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-nosound")==0) {has_audio=0;} else
+  if(strcmp(argv[i],"-abs")==0) {CHKOPT(1); audio_buffer_size=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-delay")==0) {CHKOPT(1); audio_delay=strtod(argv[++i],NULL);} else
 #ifdef AVI_SYNC_BPS
-  if(strcmp(argv[i],"-nobps")==0) pts_from_bps=0; else
+  if(strcmp(argv[i],"-nobps")==0) {pts_from_bps=0;} else
 #else
-  if(strcmp(argv[i],"-bps")==0) pts_from_bps=1; else
+  if(strcmp(argv[i],"-bps")==0) {pts_from_bps=1;} else
 #endif
 #ifdef ALSA_TIMER
-  if(strcmp(argv[i],"-noalsa")==0) alsa=0; else
+  if(strcmp(argv[i],"-noalsa")==0) {alsa=0;} else
 #else
-  if(strcmp(argv[i],"-alsa")==0) alsa=1; else
+  if(strcmp(argv[i],"-alsa")==0) {alsa=1;} else
 #endif
-  if(strcmp(argv[i],"-ni")==0) force_ni=1; else
-  if(strcmp(argv[i],"-aid")==0) audio_id=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-vid")==0) video_id=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-auds")==0) avi_header.audio_codec=argv[++i]; else
-  if(strcmp(argv[i],"-vids")==0) avi_header.video_codec=argv[++i]; else
-  if(strcmp(argv[i],"-mc")==0) default_max_pts_correction=strtod(argv[++i],NULL); else
-  if(strcmp(argv[i],"-fps")==0) force_fps=strtod(argv[++i],NULL); else
-  if(strcmp(argv[i],"-afm")==0) audio_format=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-vcd")==0) vcd_track=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-pp")==0) divx_quality=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-br")==0) encode_bitrate=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-x")==0) screen_size_x=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-y")==0) screen_size_y=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-xy")==0) screen_size_xy=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-fs")==0) fullscreen=1; else
-  if(strcmp(argv[i],"-noidx")==0) no_index=1; else
-  if(strcmp(argv[i],"-v")==0) ++verbose; else
-  if(strcmp(argv[i],"-h")==0) break; else
-  if(strcmp(argv[i],"--help")==0) break; else
+  if(strcmp(argv[i],"-ni")==0) {force_ni=1;} else
+  if(strcmp(argv[i],"-aid")==0) {CHKOPT(1); audio_id=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-vid")==0) {CHKOPT(1); video_id=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-auds")==0) {CHKOPT(1); avi_header.audio_codec=argv[++i];} else
+  if(strcmp(argv[i],"-vids")==0) {CHKOPT(1); avi_header.video_codec=argv[++i];} else
+  if(strcmp(argv[i],"-mc")==0) {CHKOPT(1); default_max_pts_correction=strtod(argv[++i],NULL);} else
+  if(strcmp(argv[i],"-fps")==0) {CHKOPT(1); force_fps=strtod(argv[++i],NULL);} else
+  if(strcmp(argv[i],"-afm")==0) {CHKOPT(1); audio_format=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-vcd")==0) {CHKOPT(1); vcd_track=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-pp")==0) {CHKOPT(1); divx_quality=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-br")==0) {CHKOPT(1); encode_bitrate=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-x")==0) {CHKOPT(1); screen_size_x=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-y")==0) {CHKOPT(1); screen_size_y=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-xy")==0) {CHKOPT(1); screen_size_xy=strtol(argv[++i],NULL,0);} else
+  if(strcmp(argv[i],"-fs")==0) {fullscreen=1;} else
+  if(strcmp(argv[i],"-noidx")==0) {no_index=1;} else
+  if(strcmp(argv[i],"-v")==0) {++verbose;} else
+  if(strcmp(argv[i],"-h")==0) {usage();} else
+  if(strcmp(argv[i],"--help")==0) {usage();} else
   { if(filename){ printf("invalid option: %s\n",filename);exit(1);}
     filename=argv[i];
   }
 }
+#undef CHKOPT	/* we don't need this anymore */
 
 // Many users forget to include command line in bugreports...
 if(verbose){
@@ -425,7 +440,7 @@ if(!filename){
   if(vcd_track) filename="/dev/cdrom"; 
   else
   //filename="MI2-Trailer.avi";
-  { printf("%s",help_text); exit(0);}
+  usage();
 }
 
 
