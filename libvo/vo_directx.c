@@ -35,6 +35,12 @@
 #include "aspect.h"
 #include "geometry.h"
 
+#ifndef WM_XBUTTONDOWN
+# define WM_XBUTTONDOWN    0x020B
+# define WM_XBUTTONUP      0x020C
+# define WM_XBUTTONDBLCLK  0x020D
+#endif
+
 static LPDIRECTDRAW7        g_lpdd = NULL;          //DirectDraw Object
 static LPDIRECTDRAWSURFACE7  g_lpddsPrimary = NULL;  //Primary Surface: viewport through the Desktop
 static LPDIRECTDRAWSURFACE7  g_lpddsOverlay = NULL;  //Overlay Surface
@@ -905,6 +911,16 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				mplayer_put_key(MOUSE_BTN3);
 			else
 				mplayer_put_key(MOUSE_BTN4);
+			break;
+		}
+        case WM_XBUTTONDOWN:
+		{
+			if (vo_nomouse_input)
+				break;
+			if (HIWORD(wParam) == 1)
+				mplayer_put_key(MOUSE_BTN5);
+			else
+				mplayer_put_key(MOUSE_BTN6);
 			break;
 		}
 		
