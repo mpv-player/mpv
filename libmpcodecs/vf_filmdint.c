@@ -1239,7 +1239,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	} else {
 	    if (p->notout >= p->num_fields)
 		dropped_fields += p->num_fields + 2 - breaks;
-	    if (breaks == 2 && p->iosync > -3*p->in_inc)
+	    if (breaks == 1) {
+		if (p->iosync >= 4*p->in_inc)
+		    show_fields = 6;
+	    } else if (p->iosync > -3*p->in_inc)
 		show_fields = 3;  /* odd+even */
 	}
 	break;
