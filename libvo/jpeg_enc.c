@@ -297,6 +297,7 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	if (j == NULL) return NULL;
 
 	j->s = av_malloc(sizeof(MpegEncContext));
+	memset(j->s,0x00,sizeof(MpegEncContext));
 	if (j->s == NULL) {
 		av_free(j);
 		return NULL;
@@ -314,6 +315,7 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	j->s->height = h;
 	j->s->qscale = q;
 
+	j->s->mjpeg_data_only_frames = 0;
 	j->s->out_format = FMT_MJPEG;
 	j->s->intra_only = 1;
 	j->s->encoding = 1;
