@@ -1,5 +1,65 @@
 mplayer (1.0)
 
+  pre4: "New Year Release"
+  
+    DOCS:
+    * new Copyright file covering the licenses involved
+
+    Ports:
+    * better PA-RISC detection
+    * support for VAX (tested on VAXstation 4000/VLC) -- really, believe me!
+    * optimizing for specific MIPS cpus under IRIX
+    * AMD64 detection under BSDs
+    
+    Demuxers:
+    * matroska containing realvideo works better
+    * fixed random segfaults in vivo
+    * endianess fixes in cdda
+    * UYVY support in tvi/v4l2
+    * tvi/bsdbt848 now working under FreeBSD 5.2-CURRENT
+    * tvi/bsdbt848 audio part working under NetBSD
+
+    Decoders:
+    * removed zlib dependency in vd/lcl
+    * removed obsoleted decoders (which were moved to libavcodec), affected:
+      vd/8bps, vd/msrle, vd/msvideo1, vd/rpza, vd/smc
+    * workaround for buggy codecs in ad/acm (support for Sharp G.726)
+    * synced to original FLAC sources
+    
+    Filters:
+    * vf/bmovl bugfixes
+    * vf/filmdint now handles 15fps NTSC input
+    * huge updates and speedup on vf/pullup
+    * big updates to vf/ilpack (proper interpolation and mmx optimizations)
+    * new filter: vf/zrmjpeg (fast mjpeg encoder using libavcodec for zoran)
+    * interlaced scaling support in vf/scale
+
+    Drivers:
+    * ao/esd behaves better over network now
+    * support for Radeon 9600 Pro in VIDIX
+
+    FFmpeg/libavcodec:
+    * H.263 AIC and MQ encoding support
+    * fixed low delay decoding
+    * fixed H.263+ encoding without UMV
+    * lot of CBR improvements
+    * MB type and QP visualization
+    * lot of code cleanup
+    * splitted intra & inter dequantization -> speedup
+    * fixed stereo IMA ADPCM encoding
+    * VBV delay setting support (MPEG2 CBR)
+    * improved RV20 decoder (all known errors eliminated)
+    * interlaced DCT
+    * interlaced motion estimation
+    * interlaced MPEG2 encoding
+    * 4MV encoding fixes
+    * initial interlaced MPEG4 encoding
+    * improved visual quality in SVQ3 decoder
+    * fixed never-before-tested embedded string decoder in SVQ1
+    * optimized quantization (including the trellis way)
+    * Sierra VMD video decoder
+
+
   pre3: "The Real Counter"
 
     DOCS:
