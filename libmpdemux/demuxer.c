@@ -1017,7 +1017,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
 }
 #ifdef HAVE_XMMS
 //=============== Try to open as XMMS file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN){
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_XMMS){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_XMMS,audio_id,video_id,dvdsub_id);
   if(demux_xmms_open(demuxer)){
     mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedAudiofile);
