@@ -807,16 +807,40 @@ Indique un périphérique audio
 ID matériel pour ALSA
 .REss
 .IPs audioid=<valeur>
-choisir la sortie audio de la carte de capture, si elle à plus
+choisis la sortie audio de la carte de capture, si elle à plus
 .IPs "[volume|bass|treble|balance]=<0\-65535>"
 Ces options règlent les paramètres du mixeur de la carte de capture vidéo.
 Elles n'auront aucun effet si votre carte ne dispose pas d'un mixeur.
 .IPs immediatemode=<bool>
 Un valeur de 0 signifie capturer et bufferiser l'audio et la vidéo ensemble
 (par défaut pour mencoder).
-Une valeur de 0 (par défaut pour mplayer) signifie ne capturer que la vidéo et 
-laisser l'audio passer au travers du câble de loopback de la carte TV à la 
+Une valeur de 1 (par défaut pour mplayer) signifie ne capturer que la vidéo et
+laisser l'audio passer au travers du câble de loopback de la carte TV à la
 carte son.
+.IPs mjpeg
+Utilise la compression mjpeg matérielle (si la carte le supporte).
+En utilisant cette option, vous n'avez pas besoin de spécifier la largeur
+et la hauteur de la fenêtre de sortie, car MPlayer la déterminera
+automatiquement d'après la valeur de decimation (voir ci-dessous).
+.IPs decimation=<1,2,4>
+choisis la taille de l'image qui sera compressée de façon matérielle:
+.RSss
+1: grande taille
+    704x576    PAL
+    704x480    NTSC
+.br
+2: taille moyenne
+    352x288    PAL
+    352x240    NTSC
+.br
+4: petite taille
+    176x144    PAL
+    176x120    NTSC
+.REss
+.IPs quality=<0-100>
+choisis la qualité de la compression jpeg
+.br
+(quality < 60 recommandé pour la grande taille)
 .RE
 .
 .TP
@@ -1721,7 +1745,7 @@ Un nombre entre 1 et 20 représentant la qualité de l'encodage jpeg.
 .TP
 .B \-zrvdec <1,2,4> \-zrhdec <1,2,4> (\-vo zr uniquement)
 Décimation verticale/\:horizontale: Demande au pilote de n'envoyer que chaque 
-second(e) ou quatrième ligne/pixel de l'image à la carte MJPEG et d'utiliser 
+second(e) ou quatrième ligne/pixel de l'image à la carte MJPEG et d'utiliser
 le zoom de la carte MJPEG pour étirer l'image à sa taille initiale.
 .TP
 .B \-zrxdoff <x display offset>, \-zrydoff <y display offset> (\-vo zr uniquement)
@@ -1798,8 +1822,7 @@ des fichiers AVI.
 Inverse l'image de haut en bas.
 .TP
 .B \-lavdopts <option1:option2:...> (CODE DE DEBOGUAGE)
-Si vous décodez avec un codec de libavcodec, vous pouvez spécifier ses
-paramètres ici.
+Si vous décodez avec libavcodec, vous pouvez spécifier ses paramètres ici.
 
 .I EXEMPLE:
 .PD 0
@@ -1855,14 +1878,24 @@ d'autodétection)
 .br
 8 (mpeg4): UMP4 (autodétecté si fourcc==UMP4)
 .br
-16 (mpeg4): bogue de remplissage
+16 (mpeg4): bogue de remplissage (autodétecté)
 .br
 32 (mpeg4):  bogue vlc illégal (autodétecté par fourcc)
 .br
-64 (mpeg4): bogue qpel XVID et DIVX (autodétecté)
+64 (mpeg4): bogue qpel XVID et DIVX (autodétecté par foorcc/ver)
+.br
+128 (mpeg4): vieux standard qpel (autodétecté par fourcc/ver)
+.br
+256 (mpeg4): un autre bogue qpel (autodétecté par fourcc/ver)
+.br
+512 (mpeg4): bogue direct-qpel-blocksize (autodétecté par fourcc/ver)
+.br
+1024 (mpeg4): bogue de remplissage des bords (autodétecté par fourcc/ver)
 .REss
 .IPs idct=<0\-99>
 (voir lavcopts)
+Pour obtenir la meilleur qualité d'encodage utilisez le même algorithme idct
+pour le décodage et l'encodage.
 .IPs gray
 décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
 .RE
@@ -2039,7 +2072,7 @@ Voir également l'option \-flip.
 Inverse l'image selon l'axe Y.
 .IPs rotate[=<0-7>]
 Tourne et (éventuellement) inverse l'image de +/\:\- 90 degrés. Pour les 
-paramètres entre 4-7 la rotation n'est faite que si la géométrie du film 
+paramètres entre 4-7 la rotation n'est faite que si la géométrie du film
 est en portrait et non en paysage.
 .IPs scale[=w:h[:c[:p]]]
 Redimensionne l'image avec le zoom logiciel (lent) et applique une conversion
@@ -2663,8 +2696,7 @@ paramètres pré-sélectionnés.
 .
 .TP
 .B \-lavcopts <option1:option2:...>
-Pour l'encodage avec un codec de libavcodec, vous pouvez spécifier ses 
-paramètres ici.
+Si vous encodez avec libavcodec, vous pouvez spécifier ses paramètres ici.
 
 .I EXEMPLE:
 .PD 0
@@ -2691,16 +2723,41 @@ mpeg4: DivX 4/\:5
 .br
 msmpeg4: DivX 3
 .br
+msmpeg4v2: MS MPEG4v2
+.br
+wmv1: Windows Media Video 7
+.br
+wmv2: Windows Media Video 8
+.br
 rv10: un ancien codec RealVideo
 .br
 mpeg1video: MPEG1 video :)
+.br
+huffyuv: HuffYUV
 .REss
 .IPs vqmin=<1\-31>
-minimum quantizer (passe\ 1/\:2) (par défaut: 2)
+minimum quantizer (passe\ 1/\:2)
+.RSss
+1: Non recommandé (fichier bien plus gros, petite différence de qualité et
+mauvais effets secondaires: msmpeg4, h263 seront de mauvaise qualité, le
+contrôle du débit sera perdu entrainant une mauvaise qualité et certains
+décodeurs seront incapables de le décoder).
+.br
+2: Recommandé pour l'encodage normal mpeg4/mpeg1video (par défaut).
+.br
+3: Recommandé pour h263(p)/msmpeg4. La raison de préférer 3 à 2 est que
+2 peut conduire à des dépassements (ceci sera corrigé pour h263(p) en changeant
+les quantizer par BM dans le futur, msmpeg4 ne peut être corrigé car il ne
+supporte pas cela)
+.REss
 .IPs vqscale=<1\-31>
-constant quantizer (sélectionne le mode quantizer fixe) (par défaut: 0 (désactivé))
+constant quantizer /\: qualité d'encodage constante (sélectionne le mode
+quantizer fixe). Une valeur basse signifie une meilleur qualité mais de gros
+fichiers (par défaut: 0 (désactivé)).
+1 n'est pas recommandé (voir \-vqmin pour plus de détails).
 .IPs vqmax=<1\-31>
-maximum quantizer (passe\ 1/\:2) (par défaut: 31)
+maximum quantizer (passe\ 1/\:2) 10\-31 devrait être un intervale raisonable
+(par défaut: 31)
 .IPs mbqmin=<1\-31>
 minimum macroblock quantizer (passe\ 1/\:2) (par défault: 2)
 .IPs mbqmax=<1\-31>
@@ -2712,36 +2769,41 @@ nombre maximum de trames B entre les trames non B:
 .RSss
 0: pas de trames B (par défaut)
 .br
-0\-2: intervalle sensé
+0\-2: intervalle sensé pour MPEG4
 .REss
 .IPs vme=<0\-5>
 méthode d'estimation du mouvement:
 .RSss
-0: aucune (très bq)
+0: aucune (qualité très basse)
 .br
 1: pleine (lent)
 .br
-2: log (bq)
+2: log (mauvaise qualité)
 .br
-3: phods (bq)
+3: phods (mauvaise qualité)
 .br
 4: EPZS (par défaut)
 .br
 5: X1 (expérimental)
+Note: 0\-3 pour l'instant ignorent le montant de Bits utilisés, donc la qualité
+peut être mauvaise.
 .REss
 .IPs vhq\ \
-mode haute qualité, décode chaque bloc macro dans tous les modes et choisi le
-plus petit (lent).
-(par défaut: HQ désactivé)
+mode haute qualité, encode chaque bloc macro dans tous les modes et choisi le
+meilleur. C'est lent mais donne de meilleurs qualité et taille de fichier.
+(par défaut: désactivé)
 .IPs v4mv
 4 vecteurs de mouvement par macrobloc (qualité légèrement meilleure),
 (par défaut: désactivé)
 .IPs keyint=<0\-300>
 intervalle entre les trames-clé en trames.
-Les nombres plus grands signifient des fichiers légèrement plus
-petits, mais un déplacement moins précis, 0 signifie pas de
-trame-clé et les valeurs >300 ne sont pas recommandées.
-Pour une conformité stricte mpeg1/\:2/\:4 cela devrait être <=132.
+Les trames-clé sont nécessaires pour les déplacement puisque celui-ci n'est
+possible que vers une trame-clé, mais les trames-clé ont besoin de plus d'espace
+que les autres trames donc de plus grands nombres ici signifient fichiers
+légèrement plus petits, mais déplacement plus précis, 0 signifie pas de
+trame-clé. Les valeurs >300 ne sont pas recommandées car la qualité peut être
+mauvaise suivant le décodeur, l'encodeur et la chance.
+Pour une conformité stricte MPEG1/\:2/\:4 cela devrait être <=132.
 (par défaut: 250 ou une trame-clé toutes les dix secondes dans un
 film à 25fps)
 .IPs vb_strategy=<0\-1>
@@ -2749,16 +2811,27 @@ stratégie à choisir entre les trames I/\:P/\:B (passe\ 2):
 .RSss
 0: toujours utiliser le nombre maximum de trames B (par défaut)
 .br
-1: évite les trames B dans les scènes avec beaucoup de mouvement
+1: éviter les trames B dans les scènes avec beaucoup de mouvement
 (prédictions incorrectes du bitrate)
 .REss
 .IPs vpass=<1\-2>
-Active le mode 2passes interne (par défaut: désactivé):
+Active le mode 2passes interne, ne le spécifiez que si vous désirez utiliser
+l'encodage deux passes (par défaut: désactivé):
 .RSss
 1: première passe
 .br
 2: seconde passe
 .REss
+.IPs
+Astuce: Essayez d'utiliser le mode quantiseur constant pour la première passe
+(vqscale=<quantiseur>).
+.br
+huffyuv:
+.RSss
+la passe 1 sauve les statistiques
+.br
+la passe 2 encode avec une table Huffman optimisée d'après les statistiques de
+la passe 1.
 .IPs aspect=<x/y>
 Stocke l'aspect du film en interne, tout comme les fichiers MPEG.
 Bien meilleur solution que le redimensionnement, car la qualité
@@ -2782,7 +2855,8 @@ Bit  <16001 \- 24000000>
 (par défaut: 800)
 .REss
 .IPs vratetol=<valeur>
-tolérance approximative de taille du fichier en kbit.
+tolérance approximative de taille du fichier en kbit. 1000\-100000 est un
+interval raisonable.
 (Attention: 1kBit = 1000 Bits)
 (par défaut: 8000)
 .IPs vrc_maxrate=<valeur>
@@ -2811,20 +2885,23 @@ sinon
 procède à un contrôle de débit normal (ne verrouille pas le prochain quantizer
 trame P) et initialise
 q= -q * v{b|i}_qfactor + v{b|i}_qoffset
+.IPs
+Astuce: Pour faire de l'encodage avec quantizer constant avec des quantizers
+différents pour les trames I/P et B vous pouvez utiliser:
+vqmin=<ip_quant>:vqmax=<ip_quant>:vb_qfactor=<b_quant/ip_quant>
 .IPs vqblur=<0.0\-1.0>
-flou quantizer (passe1):
+flou quantizer (passe1) Des valeurs plus importantes provoqueront plus de
+moyennes dans le temps (variations plus basses).
 .RSss
 0.0: qblur désactivé
 .br
 0.5 (par défaut)
 .br
-1.0: fais une moyenne du quantizer sur toutes les trames précédentes, de 
-plus grandes valeurs provoqueront plus de moyennes dans le temps 
-(variations plus basses)
+1.0: fais une moyenne du quantizer sur toutes les trames précédentes
 .REss
 .IPs vqblur=<0.0\-99.0>
-flou gaussien quantizer, de plus grandes valeurs provoqueront plus de moyennes
-dans le temps (variations plus basses) (passe2) (par défaut: 0.5)
+flou gaussien quantizer (passe2) De plus grandes valeurs provoqueront plus
+de moyennes dans le temps (variations plus basses) (par défaut: 0.5)
 .IPs vqcomp=<valeur>
 compression quantizer, dépends de vrc_eq (passe\ 1/\:2) (par défaut: 0.5)
 .IPs vrc_eq=<équation>
@@ -2849,19 +2926,19 @@ iTex,pTex:       complexité texture intra, non intra
 .br
 avgTex:          complexité texture moyenne
 .br
-avgIITexaverage: complexité texture intra dans les trames I
+avgIITex:        complexité texture intra dans les trames I
 .br
-avgPITexaverage: complexité texture intra dans les trames P
+avgPITex:        complexité texture intra dans les trames P
 .br
-avgPPTexaverage: complexité texture non intra dans les trames P
+avgPPTex:        complexité texture non intra dans les trames P
 .br
-avgBPTexaverage: complexité texture non intra dans les trames B
+avgBPTex:        complexité texture non intra dans les trames B
 .br
-mv:              bits utilisés pour les MVs
+mv:              Bits utilisés pour les vecteurs de mouvement
 .br
-fCode:           longueur maximum de MV en zoom log2
+fCode:           longueur maximum des vecteurs de mouvement en zoom log2
 .br
-iCount:          nombre d'intra MBs / nombre de MBs
+iCount:          nombre d'intra blocs macro / nombre de blocs macro
 .br
 var:             complexité spatiale
 .br
@@ -2886,7 +2963,8 @@ eq(a,b): est 1 si a==b, 0 sinon
 sin, cos, tan, sinh, cosh, tanh, exp, log, abs
 .
 .IPs vrc_override=<options>
-Qualité définie par l'utilisateur pour les parties spécifiques (passe\ 1/\:2).
+Qualité définie par l'utilisateur pour les parties spécifiques (fin,
+remerciements, ..) (passe\ 1/\:2).
 Les options sont <start-frame, end-frame, quality[/\:start-frame, end-frame,
 quality[/...]]>:
 .RSss
@@ -2896,7 +2974,7 @@ qualité \-500\-0: correction qualité en %
 .REss
 .IPs vrc_init_cplx=<0\-1000>
 complexité initiale (passe\ 1)
-.IPs vqsquish=<0\-1>
+.IPs vqsquish=<0,1>
 spécifie comment garder le quantizer entre qmin et qmax (passe\ 1/\:2):
 .RSss
 0: utilise le clipping
@@ -2921,8 +2999,8 @@ Des valeurs négatives prendront aussi en compte le coefficient dc (qui devrait
 .br
 7 (recommandation JVT)
 .REss
-.IPs vstrict=<-1\-1>
-conformité standard (stricte).
+.IPs vstrict=<-1,0,1>
+conformité standard stricte.
 .RSss
 0: désactivé (par défaut)
 .br
@@ -2936,6 +3014,20 @@ mais qui ne peuvent pas être relus par le codec huffyuv officiel)
 partitionnement des données.
 Ajoute 2 octets par paquet vidéo, améliore la résistance aux erreurs pendant un
 transfert sur un canal non-fiable(c-a-d. streamer sur l'internet)
+Chaque paquet vidéo sera encodé dans trois partitions différentes:
+.RSss
+1. MVs             (=mouvement)
+.br
+2. coefficients DC (=image basse rès.)
+.br
+3. coefficients AC (=détails)
+.REss
+.IPs
+MV & DC sont les plus importants, les perdre est bien pire que de perdre les
+partitions AC et 1. & 2. (MV&DC) sont bien plus petites que la partition 3.
+(AC) ce qui veut dire que les erreurs atteindrons la partition AC bien plus
+souvent que les partitions MV&DC. Ainsi, l'image est plus belle en partitionant
+que sans, car sans partitionement une erreur plantera AC/DC/MV équitablement.
 .IPs vpsize=<0\-10000>
 Taille des paquets vidéo, améliore la résistance aux erreurs (voir également
 l'option \-vdpart):
@@ -2961,7 +3053,7 @@ algorithme dct:
 .REss
 .IPs idct=<0\-99>
 algorithme idct.
-Note: tous ces IDCTs réussissent les test IEEE1180 d'après ce que j'en sais:
+Note: À notre connaissance tous ces IDCTs réussissent les test IEEE1180.
 .RSss
 0: en sélectionne un bon automatiquement (par défaut)
 .br
@@ -2981,9 +3073,9 @@ Note: tous ces IDCTs réussissent les test IEEE1180 d'après ce que j'en sais:
 .REss
 .IPs lumi_mask=<0.0\-1.0>
 masquage de la luminance.
-Attention: soyez prudent, de trop grandes valeurs peuvent causer des résultats 
+Attention: Soyez prudent, de trop grandes valeurs peuvent causer des résultats
 désastreux.
-Attention2: es grandes valeurs peuvent paraître bonnes sur certains moniteurs 
+Attention2: De grandes valeurs peuvent paraître bonnes sur certains moniteurs
 mais peuvent être horribles sur d'autres moniteurs:
 .RSss
 0.0: désactivé (par défaut)
@@ -2992,9 +3084,9 @@ mais peuvent être horribles sur d'autres moniteurs:
 .REss
 .IPs dark_mask=<0.0\-1.0>
 masquage d'obscurité.
-Attention: soyez prudent, de trop grandes valeurs peuvent causer des résultats
+Attention: Soyez prudent, de trop grandes valeurs peuvent causer des résultats
 désastreux.
-Attention2: les grandes valeurs peuvent paraître bonnes sur certains moniteurs
+Attention2: De grandes valeurs peuvent paraître bonnes sur certains moniteurs
 mais peuvent être horribles sur d'autres moniteurs / TV / TFT:
 .RSss
 0.0: désactivé (par défaut)
@@ -3007,7 +3099,8 @@ masquage de la complexité temporelle (par défaut: 0.0 (désactivé))
 masquage de la complexité spatiale.
 De plus grandes valeurs peuvent aider contre le blocage, si aucun filtre de
 déblocage n'est utilisé pour l'encodage.
-Couper les bords noirs pour avoir une meilleur qualité:
+Astuce: Coupe tous les bords noirs car ils vont réduire la qualité des blocs
+macro (s'applique également sans scplx_mask).
 .RSss
 0.0: désactivé (par défaut)
 .br
@@ -3038,6 +3131,7 @@ YV12: défaut
 .REss
 .IPs qpel
 utilise la compensation par quarter pel motion
+Astuce: Cela semble utile uniquement pour les encodages à haut débit.
 .IPs cmp=<0\-2000>
 fonction de comparaison pour estimation pel motion complète
 .IPs subcmp=<0\-2000>
@@ -3051,7 +3145,8 @@ fonction de comparaison pour sous estimation pel motion
 .br
 3 (DCT): somme des différences transformées des dct absolus
 .br
-4 (PSNR): somme des erreurs de quantisation au carré
+4 (PSNR): somme des erreurs de quantisation au carré (ne pas utiliser, mauvaise
+qualité)
 .br
 5 (BIT): nombre de bits requis pour le bloc
 .br
@@ -3059,7 +3154,8 @@ fonction de comparaison pour sous estimation pel motion
 .br
 7 (ZERO): 0
 .br
-+256: utile également chroma, ne fonctionne pas avec les trames b actuellement
++256: utile également chroma, ne fonctionne pas (correctement) avec les trames B
+actuellement
 .REss
 .IPs predia=<\-99\-6>
 Type et taille de diamant pour la pré-passe d'estimation de mouvement
@@ -3111,7 +3207,8 @@ Montant des prédicateurs de mouvement à partir de la trame précédente
 .RSss
 0: (default)
 .br
-a: utilisera 2a+1 x 2a+1 Mo au carré de prédicateurs pour la trame précédente
+a: utilisera 2a+1 x 2a+1 blocs macro au carré de prédicateurs de vecteurs de
+mouvement pour la trame précédente
 .REss
 .IPs preme=<0\-2> 
 pré-passe d'estimation de mouvement
@@ -3124,7 +3221,7 @@ pré-passe d'estimation de mouvement
 .REss
 .IPs subq=<1\-8>
 ré-affinage de la qualité subpel (pour qpel) (par défaut: 8).
-Note: ceci a un effet significatif sur la vitesse
+Note: ceci a un effet significatif sur la vitesse.
 .IPs psnr
 affiche le psnr (peak signal to noise ratio) pour l'ensemble de la vidéo après
 l'encodage et stocke le psnr par trame dans un fichier comme 'psnr_012345.log'.
@@ -3132,6 +3229,34 @@ Les valeurs de retour sont en dB (décibel), le plus haut est le mieux.
 .IPs mpeg_quant
 utilise les quantizers MPEG au lieu de H.263.
 (par défaut: désactivé) (c-a-d.\& utilisez les quantizers H.263)
+.IPs aic
+Intra prédication avancée (H.263+ uniquement)
+Note: vqmin devrait être égal à 8 ou plus.
+.IPs umv
+VMs illimités (H.263+ uniquement)
+Authorise l'encodages de VMs de longueur arbitraire.
+.IPs ibias=<\-256\-256>
+polarisation intra quantizer (256 == 1.0)
+.br
+quantizer style mpeg par défaut: 96
+.br
+quantizer style h263 par défaut: 0
+.br
+Note: le quantizer h263 MMX ne peut pas gérer de polarisations positives
+(vfdct=1or2)
+      le quantizer mpeg MMX ne peut pas gérer de polarisations negatives
+(vfdct=1or2)
+.IPs pbias=<\-256\-256>
+polarisation inter quantizer (256 == 1.0)
+.br
+quantizer style mpeg par défaut: 0
+.br
+quantizer style h263 par défaut: -64
+.br
+Note: le quantizer h263 MMX ne peut pas gérer de polarisations positives
+(vfdct=1or2)
+      le quantizer mpeg MMX ne peut pas gérer de polarisations negatives
+(vfdct=1or2)
 .RE
 .
 .TP
@@ -3370,8 +3495,9 @@ ajuste la position des sous-titres
 créé une marque EDL
 
 .PP
-(Les touches suivantes ne sont valides qu'en utilisant \-vo xv ou
--vo [vesa|fbdev]:vidix ou \-vo xvidix \-vo (x)mga ou \-vc divxds (lent).)
+(Les touches suivantes ne sont valides qu'en utilisant une sortie vidéo
+accélérée matériellement (xv, (x)vidix, (x)mga, etc) ou le filtre égualiseur
+logiciel (-vf eq ou -vf eq2).
 
 .IPs "1 et 2"
 ajuste le contraste

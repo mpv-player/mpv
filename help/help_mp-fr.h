@@ -583,6 +583,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOSDScale "Echelle de l'OSD:"
 #define MSGTR_PREFERENCES_Cache "Cache activé/désactivé"
 #define MSGTR_PREFERENCES_LoadFullscreen "Démarrer en plein écran"
+#define MSGTR_PREFERENCES_SaveWinPos "Sauver la position de la fenêtre"
 #define MSGTR_PREFERENCES_CacheSize "Taille du cache: "
 #define MSGTR_PREFERENCES_XSCREENSAVER "Stopper XScreenSaver"
 #define MSGTR_PREFERENCES_PlayBar "Active la barre de lecture"
