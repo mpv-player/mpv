@@ -10,7 +10,6 @@
 
 /*
   TODO:
-  - DGA support (need volunteers who have corresponding hardware)
   - hw YUV support (need volunteers who have corresponding hardware)
   - double (triple) buffering (if it will really speedup playback).
   - refresh rate support (need additional info from mplayer)
@@ -71,7 +70,8 @@ struct win_frame
   uint8_t   *ptr;   /* pointer to window's frame memory */
   uint32_t   low;   /* lowest boundary of frame */
   uint32_t   high;  /* highest boundary of frame */
-  uint8_t    idx;   /* indicates index of relocatable frame (A or B) */
+  char       idx;   /* indicates index of relocatable frame (A=0 or B=1)
+                       special case for DGA: idx=-1 */
 };
 
 static int vesa_zoom=0; /* software scaling */
@@ -121,6 +121,7 @@ static void vesa_term( void )
   int err;
   if((err=vbeRestoreState(init_state)) != VBE_OK) PRINT_VBE_ERR("vbeRestoreState",err);
   if((err=vbeSetMode(init_mode,NULL)) != VBE_OK) PRINT_VBE_ERR("vbeSetMode",err);
+  if(win.idx == -1) vbeUnmapVideoBuffer((unsigned long)win.ptr,win.high);
   if(yuv_buffer) free(yuv_buffer);
   vbeDestroy();
 }
@@ -135,8 +136,10 @@ static inline void __vbeSwitchBank(unsigned long offset)
   int err;
   gran = video_mode_info.WinGranularity*1024;
   new_offset = offset / gran;
+  if(win.idx == -1) goto show_err;
   if((err=vbeSetWindow(win.idx,new_offset)) != VBE_OK)
   {
+    show_err:
     PRINT_VBE_ERR("vbeSetWindow",err);
     printf("vo_vesa: Fatal error occured! Can't continue\n");
     vesa_term();
@@ -601,7 +604,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		else
 		if((video_mode_info.WinBAttributes & FRAME_MODE) == FRAME_MODE)
 		   win.idx = 1; /* frame B */
-		else { printf("vo_vesa: Can't find usable frame of window\n"); return -1; }
+		else 
+		{
+		  printf("vo_vesa: Can't find usable frame of window\n");
+		  return -1; 
+		}
 		if(!(win_seg = win.idx == 0 ? video_mode_info.WinASegment:video_mode_info.WinBSegment))
 		{
 		  printf("vo_vesa: Can't find valid window address\n");
@@ -623,6 +630,24 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 			,image_width,image_height
 			,video_mode_info.XResolution,video_mode_info.YResolution
 			,x_offset,y_offset);
+		if(video_mode_info.PhysBasePtr && vib.TotalMemory && (video_mode_info.ModeAttributes & MODE_ATTR_LINEAR))
+		{
+		    void *lfb;
+		    lfb = vbeMapVideoBuffer(video_mode_info.PhysBasePtr,vib.TotalMemory*64*1024);
+		    if(lfb == NULL)
+		    {
+		      printf("vo_vesa: can't use DGA. Force bank switching\n");
+		    }
+		    else
+		    {
+		      win.ptr = lfb;
+		      win.low = 0UL;
+		      win.high = vib.TotalMemory*64*1024;
+		      win.idx = -1;
+		      video_mode |= VESA_MODE_USE_LINEAR;
+		      printf("vo_vesa: Using DGA (%08lXh)\n",(unsigned long)lfb);
+		    }
+		}
 		if(yuv_fmt || rgb2rgb_fnc)
 		{
 #ifdef HAVE_MEMALIGN

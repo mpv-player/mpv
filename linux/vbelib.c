@@ -13,7 +13,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/io.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <ctype.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 static struct VesaProtModeInterface vbe_pm_info;
 
@@ -84,6 +89,7 @@ static inline int VBE_LRMI_int(int int_no, struct LRMI_regs *r)
 #endif
 
 static unsigned hh_int_10_seg;
+static int fd_mem;
 int vbeInit( void )
 {
    unsigned short iopl_port;
@@ -106,10 +112,15 @@ int vbeInit( void )
    while((iopl_port=vbe_pm_info.iopl_ports[i]) != 0xFFFF
 	 && vbe_pm_info.iopl_ports[i++] > 1023) ioperm(iopl_port,1,1);
    iopl(3);
+   fd_mem = open("/dev/mem",O_RDWR);
    return VBE_OK;
 }
 
-int vbeDestroy( void ) { return VBE_OK; }
+int vbeDestroy( void ) 
+{
+  close(fd_mem);
+  return VBE_OK;
+}
 
 /* Fixme!!! This code is compatible only with mplayer's version of lrmi*/
 static inline int is_addr_valid(const void *p)
@@ -506,4 +517,20 @@ int vbeWriteString(int x, int y, int attr, char *str)
   retval = r.eax & 0xffff;
   if(retval == 0x4f) retval = VBE_OK;
   return retval;
+}
+
+void * vbeMapVideoBuffer(unsigned long phys_addr,unsigned long size)
+{
+  void *lfb;
+  if(fd_mem == -1) return NULL;
+  if(verbose > 1) printf("vbelib: vbeMapVideoBuffer(%08lX,%08lX)\n",phys_addr,size);
+  /* Here we don't need with MAP_FIXED and prefered address (first argument) */
+  lfb = mmap((void *)0,size,PROT_READ | PROT_WRITE,MAP_SHARED,fd_mem,phys_addr);
+  return lfb == (void *)-1 ? 0 : lfb;
+}
+
+void vbeUnmapVideoBuffer(unsigned long linear_addr,unsigned long size)
+{
+  if(verbose > 1) printf("vbelib: vbeUnmapVideoBuffer(%08lX,%08lX)\n",linear_addr,size);
+  munmap((void *)linear_addr,size);
 }

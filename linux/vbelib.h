@@ -223,4 +223,8 @@ extern int vbeGetProtModeInfo(struct VesaProtModeInterface *);
 /* Standard VGA stuff */
 int vbeWriteString(int x, int y, int attr, char *str);
 
+/* Misc stuff (For portability only) */
+void * vbeMapVideoBuffer(unsigned long phys_addr,unsigned long size);
+void vbeUnmapVideoBuffer(unsigned long linear_addr,unsigned long size);
+
 #endif
