@@ -187,8 +187,17 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	      int align=(mpi->flags&MP_IMGFLAG_PLANAR &&
 	                 mpi->flags&MP_IMGFLAG_YUV) ?
 			 (8<<mpi->chroma_x_shift)-1 : 15; // -- maybe FIXME
-	      mpi->width=w2=((w+align)&(~align));
-	      mpi->chroma_width=w2>>mpi->chroma_x_shift;
+	      w2=((w+align)&(~align));
+	      if(mpi->width!=w2){
+	          // we have to change width... check if we CAN co it:
+		  int flags=vf->query_format(vf,outfmt); // should not fail
+		  if(!(flags&3)) mp_msg(MSGT_DECVIDEO,MSGL_WARN,"??? vf_get_image{vf->query_format(outfmt)} failed!\n");
+//		  printf("query -> 0x%X    \n",flags);
+		  if(flags&VFCAP_ACCEPT_STRIDE){
+	              mpi->width=w2;
+		      mpi->chroma_width=w2>>mpi->chroma_x_shift;
+		  }
+	      }
 	  }
 	  
 	  // IF09 - allocate space for 4. plane delta info - unused
