@@ -80,9 +80,10 @@ extern int ao_pcm_waveheader;
 #ifdef HAVE_X11
 extern char *mDisplayName;
 extern int WinID;
-extern int ice_layer;
+extern int fs_layer;
 extern int stop_xscreensaver;
 extern int vo_x11_keepaspect;
+extern char **vo_fstype_list;
 #endif
 
 #ifdef HAVE_AA
@@ -274,6 +275,7 @@ static config_t mplayer_opts[]={
 	// start in fullscreen mode:
 	{"fs", &fullscreen, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"fstype", &vo_fstype_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	// set fullscreen switch method (workaround for buggy WMs)
 	{"fsmode", "option 'fsmode' is obsolete, avoid using it! if you really want it, try -fsmode-dontuse, but don't report bugs with this option used!", CONF_TYPE_PRINT, CONF_RANGE, 0, 31, NULL},
 	{"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
@@ -294,7 +296,7 @@ static config_t mplayer_opts[]={
 	// x11,xv,xmga,xvidix
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0, NULL},
-	{"icelayer", &ice_layer, CONF_TYPE_INT, CONF_RANGE, 0, 15, NULL},
+	{"icelayer", "Use -fstype layer:<number> instead. -icelayer was obsoleted\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"stop_xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nostop_xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"keepaspect", &vo_x11_keepaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},

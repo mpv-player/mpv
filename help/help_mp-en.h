@@ -127,6 +127,8 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "Available video codecs:\n"
 #define MSGTR_AvailableAudioFm "\nAvailable (compiled-in) audio codec families/drivers:\n"
 #define MSGTR_AvailableVideoFm "\nAvailable (compiled-in) video codec families/drivers:\n"
+#define MSGTR_AvailableFsType "Available fullscreen layer change modes:\n"
+#define MSGTR_DefaultFsType "\nThe deafult order is \"layer=%d,stays_on_top,above,fullscreen\".\nIt will be used in case of specifying incorrect or unsupported types.\n"
 #define MSGTR_UsingRTCTiming "Using Linux hardware RTC timing (%ldHz).\n"
 #define MSGTR_CannotReadVideoProperties "Video: Cannot read properties.\n"
 #define MSGTR_NoStreamFound "No stream found.\n"

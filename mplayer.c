@@ -835,6 +835,11 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       printf("\n");
       exit(0);
     }
+    if(vo_fstype_list && strcmp(vo_fstype_list[0],"help")==0){
+      fstype_help();
+      printf("\n");
+      exit(0);
+    }
 
 #ifdef USE_EDL
  {

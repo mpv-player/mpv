@@ -15,6 +15,7 @@
 #include <sys/mman.h>
 
 #include "video_out.h"
+#include "help_mp.h"
 
 #include <X11/Xmd.h>
 #include <X11/Xlib.h>
@@ -46,8 +47,8 @@
 #define WIN_LAYER_ONTOP                  6
 #define WIN_LAYER_ABOVE_DOCK             10
  
-int ice_layer=WIN_LAYER_ABOVE_DOCK;
-int orig_layer=WIN_LAYER_NORMAL;
+int fs_layer=WIN_LAYER_ABOVE_DOCK;
+int orig_layer;
 
 int stop_xscreensaver=0;
 
@@ -65,18 +66,19 @@ int mLocalDisplay;
 /* output window id */
 int WinID=-1;
 int vo_mouse_autohide = 0;
-int vo_wm_type = -1;
+int vo_wm_type = 0;
+int vo_fs_type = 0;
+char** vo_fstype_list;
 
 /* if equal to 1 means that WM is a metacity (broken as hell) */
 int metacity_hack = 0;
-
-int net_wm_support = 0;
 
 Atom XA_NET_SUPPORTED;
 Atom XA_NET_WM_STATE;
 Atom XA_NET_WM_STATE_FULLSCREEN;
 Atom XA_NET_WM_STATE_ABOVE;
 Atom XA_NET_WM_STATE_STAYS_ON_TOP;
+Atom XA_NET_WM_STATE_BELOW;
 Atom XA_NET_WM_PID;
 Atom XA_WIN_PROTOCOLS;
 Atom XA_WIN_LAYER;
@@ -147,14 +149,30 @@ static int x11_errorhandler(Display *display, XErrorEvent *event)
 #undef MSGLEN
 }
 
+void fstype_help(void)
+{
+ mp_msg(MSGT_VO, MSGL_INFO, MSGTR_AvailableFsType);
+ 
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "none", "don't set fullscreen window layer");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "layer", "use _WIN_LAYER hint with default layer");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "layer=<0..15>", "use _WIN_LAYER hint with a given layer number");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "above", "use _NETWM_STATE_ABOVE hint if available");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "below", "use _NETWM_STATE_BELOW hint if vailable");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "fullscreen", "use _NETWM_STATE_FULLSCREEN hint if availale");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-21s %s\n", "stays_on_top", "use _NETWM_STATE_STAYS_ON_TOP hint if available");
+ 
+ mp_msg(MSGT_VO, MSGL_INFO, MSGTR_DefaultFsType, WIN_LAYER_ABOVE_DOCK);
+}
+ 
 int net_wm_support_state_test( Atom atom )
 {
-#define NET_WM_STATE_TEST(x) { if (atom == XA_NET_WM_STATE_##x) { mp_dbg( MSGT_VO,MSGL_STATUS, "[x11] Detected wm supports " #x " state.\n" ); return SUPPORT_##x; } }
+#define NET_WM_STATE_TEST(x) { if (atom == XA_NET_WM_STATE_##x) { mp_msg( MSGT_VO,MSGL_V, "[x11] Detected wm supports " #x " state.\n" ); return vo_wm_##x; } }
  
  NET_WM_STATE_TEST(FULLSCREEN);
  NET_WM_STATE_TEST(ABOVE);
  NET_WM_STATE_TEST(STAYS_ON_TOP);
- return SUPPORT_NONE;
+ NET_WM_STATE_TEST(BELOW);
+ return 0;
 }
 
 int x11_get_property(Atom type, Atom **args, unsigned long *nitems)
@@ -170,63 +188,57 @@ int x11_get_property(Atom type, Atom **args, unsigned long *nitems)
 int vo_wm_detect( void )
 {
  int             i;
- int             wm = vo_wm_Unknown;
+ int             wm = 0;
  unsigned long   nitems;
  Atom          * args = NULL;
  
- if ( WinID >= 0 ) return vo_wm_Unknown;
+ if ( WinID >= 0 ) return 0;
  
 // -- supports layers
   if (x11_get_property(XA_WIN_PROTOCOLS, &args, &nitems))
   {
-   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm supports layers.\n" );
+   mp_msg( MSGT_VO,MSGL_V,"[x11] Detected wm supports layers.\n" );
    for (i = 0; i < nitems; i++)
    {
      if ( args[i] == XA_WIN_LAYER) {
-       wm = vo_wm_Layered;
+       wm |= vo_wm_LAYER;
        metacity_hack |= 1;
-     }
+     } else
      if ( args[i] == XA_WIN_HINTS)
-       // metacity is the only manager which supports _WIN_LAYER but not _WIN_HINTS
+       // metacity is the only manager which reports that supports _WIN_LAYER but not _WIN_HINTS.
        // what's more is has broken _WIN_LAYER support
        metacity_hack |= 2;
    }
    XFree( args );
-   if (wm && metacity_hack == 3)
-     return wm;
+   if (wm && (metacity_hack == 1))
+   {
+     // metacity reports that it supports layers, but it is not really truth :-)
+     wm ^= vo_wm_LAYER;
+     mp_msg( MSGT_VO,MSGL_V,"[x11] Using workaround for Metacity bugs.\n" );
+   }
   }
 
-  if (metacity_hack == 1)
-   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Using workaround for Metacity bugs.\n" );
-  
 // --- netwm 
   if (x11_get_property(XA_NET_SUPPORTED, &args, &nitems))
   {
-   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is of class NetWM.\n" );
-   net_wm_support = 0;
+   mp_msg( MSGT_VO,MSGL_V,"[x11] Detected wm supports NetWM.\n" );
    for (i = 0; i < nitems; i++)
-     net_wm_support |= net_wm_support_state_test (args[i]);
+     wm |= net_wm_support_state_test (args[i]);
    XFree( args );
-   if (net_wm_support)
+   // ugly hack for broken OpenBox _NET_WM_STATE_FULLSCREEN support
+   // (in their implementation it only changes internal state of window, nothing more!!!)
+   if (wm & vo_wm_FULLSCREEN)
    {
-     // ugly hack for broken OpenBox _NET_WM_STATE_FULLSCREEN support
-     // (in their implementation it only changes internal state of window, nothing more!!!)
-     if (net_wm_support & SUPPORT_FULLSCREEN)
-     {
-        if (x11_get_property(XA_BLACKBOX_PID, &args, &nitems))
+      if (x11_get_property(XA_BLACKBOX_PID, &args, &nitems))
 	{
-           mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is a broken OpenBox.\n" );
-	   net_wm_support=0;
-	   XFree( args );
-           return vo_wm_Unknown;
+           mp_msg( MSGT_VO,MSGL_V,"[x11] Detected wm is a broken OpenBox.\n" );
+           wm ^= vo_wm_FULLSCREEN;
 	}
-	XFree (args);
-     }
-     return vo_wm_NetWM;
+      XFree (args);
    }
   }
- 
- if ( wm == vo_wm_Unknown ) mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Unknown wm type...\n" );
+
+ if ( wm == 0 ) mp_msg( MSGT_VO,MSGL_V,"[x11] Unknown wm type...\n" );
  return wm;
 }    
 
@@ -237,6 +249,7 @@ void vo_init_atoms( void )
  XA_INIT(_NET_WM_STATE_FULLSCREEN);
  XA_INIT(_NET_WM_STATE_ABOVE);
  XA_INIT(_NET_WM_STATE_STAYS_ON_TOP);
+ XA_INIT(_NET_WM_STATE_BELOW);
  XA_INIT(_NET_WM_PID);
  XA_INIT(_WIN_PROTOCOLS);
  XA_INIT(_WIN_LAYER);
@@ -366,6 +379,8 @@ int vo_init( void )
 	dispName,mLocalDisplay?"local":"remote");
 
  vo_wm_type=vo_wm_detect();
+
+ vo_fs_type=vo_x11_get_fs_type(vo_wm_type);
 
  saver_off(mDisplay);
  return 1;
@@ -659,7 +674,6 @@ int vo_x11_check_events(Display *mydisplay){
       case PropertyNotify: 
     	   {
 	    char * name = XGetAtomName( mydisplay,Event.xproperty.atom );
-	    int    wm = vo_wm_Unknown;
 	    
 	    if ( !name ) break;
 	    
@@ -708,7 +722,7 @@ int vo_x11_get_gnome_layer (Display * mDisplay, Window win)
                          &bytesafter, (unsigned char **) &args) == Success
      && nitems > 0 && args)
  {
-    mp_msg (MSGT_VO, MSGL_STATUS, "[x11] original window layer is %d.\n", *args);
+    mp_msg (MSGT_VO, MSGL_V, "[x11] original window layer is %d.\n", *args);
     return *args;
  }
  return WIN_LAYER_NORMAL;
@@ -716,13 +730,9 @@ int vo_x11_get_gnome_layer (Display * mDisplay, Window win)
 
 void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
 {
- if ( WinID >= 0 ) return;
+ if (WinID >= 0) return;
 
- // window manager could be changed during play
- vo_wm_type=vo_wm_detect();
-
- switch ( vo_wm_type )
- { case vo_wm_Layered:
+ if ( vo_fs_type & vo_wm_LAYER )
   {
     XClientMessageEvent xev;
     
@@ -734,15 +744,13 @@ void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
     xev.window = vo_window;
     xev.message_type = XA_WIN_LAYER;
     xev.format = 32;
-    xev.data.l[0] = layer?ice_layer:orig_layer; // if not fullscreen, stay on default layer
+    xev.data.l[0] = layer?fs_layer:orig_layer; // if not fullscreen, stay on default layer
     xev.data.l[1] = CurrentTime;
-    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Layered style stay on top ( layer %d ).\n",xev.data.l[0] );
-    printf( "[x11] Layered style stay on top ( layer %d ).\n",(int)xev.data.l[0] );
+    mp_msg( MSGT_VO,MSGL_V,"[x11] Layered style stay on top ( layer %d ).\n",xev.data.l[0] );
     XSendEvent(mDisplay, mRootWin, False, SubstructureNotifyMask, (XEvent *) &xev);
-    break;
-  }
-  case vo_wm_NetWM:
-  {
+  } else
+ if ( vo_fs_type & vo_wm_NETWM )
+ {
    XClientMessageEvent  xev;
    char *state;
 
@@ -754,38 +762,71 @@ void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
    xev.format=32;
    xev.data.l[0]=layer;
    
-   if (net_wm_support & SUPPORT_ABOVE)
-   {
-     xev.data.l[1]=XA_NET_WM_STATE_ABOVE;
-     XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
-   } else
-   if (net_wm_support & SUPPORT_STAYS_ON_TOP)
-   {
+   if ( vo_fs_type & vo_wm_STAYS_ON_TOP )
      xev.data.l[1]=XA_NET_WM_STATE_STAYS_ON_TOP;
-     XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
-   } else
-   if (net_wm_support & SUPPORT_FULLSCREEN)
-   {
+   else
+   if ( vo_fs_type & vo_wm_ABOVE )
+     xev.data.l[1]=XA_NET_WM_STATE_ABOVE;
+   else
+   if ( vo_fs_type & vo_wm_FULLSCREEN )
      xev.data.l[1]=XA_NET_WM_STATE_FULLSCREEN;
-     XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
-   }
+   else
+   if ( vo_fs_type & vo_wm_BELOW )
+     // This is not fallback. We can safely assume that situation where
+     // only NETWM_STATE_BELOW is supported and others not, doesn't exist.
+     xev.data.l[1]=XA_NET_WM_STATE_BELOW;
+
+   XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
    state = XGetAtomName (mDisplay, xev.data.l[1]);
-   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] NET style stay on top ( layer %d ). Using state %s.\n",layer,state );
-   printf( "[x11] NET style stay on top ( layer %d ). Using state %s.\n",layer,state );
+   mp_msg( MSGT_VO,MSGL_V,"[x11] NET style stay on top ( layer %d ). Using state %s.\n",layer,state );
    XFree (state);
-  }
  }
 }
 
+int vo_x11_get_fs_type( int supported )
+{
+  int i;
+  int type;
+  
+  if (vo_fstype_list) {
+    i = 0;
+    for (i = 0; vo_fstype_list[i]; i++)
+    {
+      type = supported;
+
+      if (strncmp(vo_fstype_list[i], "layer", 5) == 0)
+      {
+        if (vo_fstype_list[i][5] == '=')
+        {
+          char *endptr = NULL;
+          int layer = strtol(vo_fstype_list[i]+6, &endptr, 10);
+            
+          if (endptr && *endptr == '\0' && layer >= 0 && layer <= 15) 
+            fs_layer = layer;
+        }
+        type &= vo_wm_LAYER;
+      }
+      else if (strcmp(vo_fstype_list[i], "above") == 0) type &= vo_wm_ABOVE;
+      else if (strcmp(vo_fstype_list[i], "fullscreen") == 0) type &= vo_wm_FULLSCREEN;
+      else if (strcmp(vo_fstype_list[i], "stays_on_top") == 0) type &= vo_wm_STAYS_ON_TOP;
+      else if (strcmp(vo_fstype_list[i], "below") == 0) type &= vo_wm_BELOW;
+      else if (strcmp(vo_fstype_list[i], "none") == 0) return 0;
+      else type = 0;
+      
+      if (type)
+        return type;
+    }
+  }
+
+  return supported;
+}
+ 
 void vo_x11_fullscreen( void )
 {
  int x,y,w,h;
 
  if ( WinID >= 0 ) return;
 
- // window manager could be changed during play
- vo_wm_type=vo_wm_detect();
- 
  if ( vo_fs ){
    // fs->win
    if(vo_dwidth != vo_screenwidth && vo_dheight != vo_screenheight) return;
@@ -800,19 +841,13 @@ void vo_x11_fullscreen( void )
    vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth; vo_old_height=vo_dheight;
    x=0; y=0; w=vo_screenwidth; h=vo_screenheight;
  }
- if (net_wm_support!=SUPPORT_FULLSCREEN || metacity_hack==1)
- {
-   vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
-   vo_x11_sizehint( x,y,w,h,0 );
- }
+ vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
+ vo_x11_sizehint( x,y,w,h,0 );
  vo_x11_setlayer( mDisplay,vo_window,vo_fs );
- if (net_wm_support!=SUPPORT_FULLSCREEN || metacity_hack==1)
- {
-   if(vo_wm_type==vo_wm_Unknown && !(vo_fsmode&16))
-  //     XUnmapWindow( mDisplay,vo_window );  // required for MWM
+ if(vo_wm_type==0 && !(vo_fsmode&16))
+//    XUnmapWindow( mDisplay,vo_window );  // required for MWM
       XWithdrawWindow(mDisplay,vo_window,mScreen);
-   XMoveResizeWindow( mDisplay,vo_window,x,y,w,h );
- }
+ XMoveResizeWindow( mDisplay,vo_window,x,y,w,h );
 #ifdef HAVE_XINERAMA
  vo_x11_xinerama_move(mDisplay,vo_window);
 #endif

@@ -738,18 +738,12 @@ void wsFullScreen( wsTWindow * win )
 #endif
    }
 
- if ( net_wm_support != SUPPORT_FULLSCREEN || metacity_hack == 1 )
-  {
-   vo_x11_decoration( wsDisplay,win->WindowID,decoration );
-   vo_x11_sizehint( win->X,win->Y,win->Width,win->Height,0 );
-  }
+ vo_x11_decoration( wsDisplay,win->WindowID,decoration );
+ vo_x11_sizehint( win->X,win->Y,win->Width,win->Height,0 );
  vo_x11_setlayer( wsDisplay,win->WindowID,win->isFullScreen );
- if ( net_wm_support != SUPPORT_FULLSCREEN || metacity_hack == 1 )
-  {
-   if ( vo_wm_type == vo_wm_Unknown && !(vo_fsmode&16) )
-    XWithdrawWindow( wsDisplay,win->WindowID,wsScreen );
-   XMoveResizeWindow( wsDisplay,win->WindowID,win->X,win->Y,win->Width,win->Height );
-  }
+ if ( vo_wm_type == 0 && !(vo_fsmode&16) )
+  XWithdrawWindow( wsDisplay,win->WindowID,wsScreen );
+ XMoveResizeWindow( wsDisplay,win->WindowID,win->X,win->Y,win->Width,win->Height );
  XMapRaised( wsDisplay,win->WindowID );
  XRaiseWindow( wsDisplay,win->WindowID );
  XFlush( wsDisplay );
@@ -860,7 +854,7 @@ void wsResizeWindow( wsTWindow * win,int sx, int sy )
  win->SizeHint.win_gravity=StaticGravity;
  win->SizeHint.base_width=sx; win->SizeHint.base_height=sy;
 
- if ( vo_wm_type == vo_wm_Unknown ) XUnmapWindow( wsDisplay,win->WindowID );
+ if ( vo_wm_type == 0 ) XUnmapWindow( wsDisplay,win->WindowID );
 
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
  XResizeWindow( wsDisplay,win->WindowID,sx,sy );

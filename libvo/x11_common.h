@@ -7,16 +7,13 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#define vo_wm_Unknown   0
-#define vo_wm_NetWM	1
-#define vo_wm_Layered	2
+#define vo_wm_LAYER 1
+#define vo_wm_FULLSCREEN 2
+#define vo_wm_STAYS_ON_TOP 4
+#define vo_wm_ABOVE 8
+#define vo_wm_BELOW 16
+#define vo_wm_NETWM (vo_wm_FULLSCREEN | vo_wm_STAYS_ON_TOP | vo_wm_ABOVE | vo_wm_BELOW)
 
-#define SUPPORT_NONE 0
-#define SUPPORT_FULLSCREEN 1
-#define SUPPORT_ABOVE 2
-#define SUPPORT_STAYS_ON_TOP 4
-
-extern int net_wm_support;
 extern int metacity_hack;
 extern int vo_fsmode;
 
@@ -26,7 +23,10 @@ extern int vo_screenheight;
 extern int vo_dwidth;
 extern int vo_dheight;
 extern int vo_fs;
+extern int vo_fs_layer;
 extern int vo_wm_type;
+extern int vo_fs_type;
+extern char** vo_fstype_list;
 
 extern char *mDisplayName;
 extern Display *mDisplay;
@@ -53,6 +53,7 @@ extern void vo_x11_uninit();
 extern Colormap vo_x11_create_colormap(XVisualInfo *vinfo);
 extern uint32_t vo_x11_set_equalizer(char *name, int value);
 extern uint32_t vo_x11_get_equalizer(char *name, int *value);
+extern void fstype_help(void);
 
 #endif
 
