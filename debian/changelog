@@ -1,3 +1,9 @@
+mplayer (0.18-2) unstable; urgency=low
+
+  * modified debian scripts 
+
+ -- Dariush Pietrzak <eyck@ghost.tinet.pl>  Fri, 27 Jul 2001 09:25:52 +0200
+
 mplayer (0.18-1) unstable; urgency=low
 
   * lots of changes in mplayer 

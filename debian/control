@@ -6,7 +6,7 @@ Standards-Version: 3.2.1
 
 Package: mplayer
 Architecture: any
-Depends: ${shlibs:Depends},debconf
+Depends: ${shlibs:Depends},debconf,libconfhelper-perl
 Description: The Ultimate Movie Player For Linux
   MPlayer is a movie player for LINUX. It plays most MPEG, AVI and ASF files,
   supported by many native and Win32 DLL codecs. You can watch VCD, DVD and even

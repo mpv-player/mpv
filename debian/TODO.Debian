@@ -1,3 +1,4 @@
+- create packages of mp_font3 and win32codecs, depend/recommend them.  
 - fibmap_mplayer - figure out what to do with suid.
 - global configuration 
  ( /etc/mplayer/mplayer.conf
@@ -7,5 +8,3 @@
 or figure out some other way of satisfying other dependencies
 like *.dlls and fonts.
 In other words - automate win32dll.zip installation.
-- check debhelper quirks and abilities for config files.
-
