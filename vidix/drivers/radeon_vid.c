@@ -1175,7 +1175,7 @@ static int radeon_vid_init_video( vidix_playback_t *config )
       {
 	besr.vid_buf_base_adrs_y[i] =
 	besr.vid_buf_base_adrs_u[i] =
-	besr.vid_buf_base_adrs_v[i] = radeon_overlay_off + config->offset.y;
+	besr.vid_buf_base_adrs_v[i] = radeon_overlay_off + config->offsets[i] + config->offset.y;
       }
     }
 
