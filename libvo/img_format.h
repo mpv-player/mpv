@@ -50,5 +50,14 @@
 #define IMGFMT_YUVP 0x50565559
 #define IMGFMT_UYVP 0x50565955
 
+/* Compressed Formats */
+#define IMGFMT_MPEGPES (('M'<<24)|('P'<<16)|('E'<<8)|('S'))
+
+typedef struct {
+    void* data;
+    int size;
+    int id;        // stream id. usually 0x1E0
+    int timestamp; // pts, 90000 Hz counter based
+} vo_mpegpes_t;
 
 #endif

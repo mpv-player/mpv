@@ -67,6 +67,7 @@ extern vo_functions_t video_out_svga;
 extern vo_functions_t video_out_png;
 extern vo_functions_t video_out_ggi;
 extern vo_functions_t video_out_aa;
+extern vo_functions_t video_out_mpegpes;
 
 vo_functions_t* video_out_drivers[] =
 {
@@ -118,6 +119,7 @@ vo_functions_t* video_out_drivers[] =
         &video_out_odivx,
         &video_out_pgm,
         &video_out_md5,
+	&video_out_mpegpes,
         NULL
 };
 
@@ -160,6 +162,7 @@ char *vo_format_name(int format)
 	case IMGFMT_CLJR: return("Packed CLJR");
 	case IMGFMT_YUVP: return("Packed YUVP");
 	case IMGFMT_UYVP: return("Packed UYVP");
+	case IMGFMT_MPEGPES: return("Mpeg PES");
     }
     return("Unknown");
 }

@@ -124,6 +124,8 @@ static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 		{"BGR16", IMGFMT_BGR|16},
 		{"BGR24", IMGFMT_BGR|24},
 		{"BGR32", IMGFMT_BGR|32},
+
+		{"MPES",  IMGFMT_MPEGPES},
 		{NULL,    0}
 	};
 
