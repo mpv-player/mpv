@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [ $# -lt 3 ] ; then
+	echo "sws-test <video-file> <start-pos> <res>"
+	echo "example: sws-test abc.avi 10 160:120"
+	exit 1
+fi
+
+for i in `seq 0 10` ; do
+	mplayer -vo png $1 -ss $2 -frames 3 -sws $i -vop scale=$3
+	rm 00000001.png
+	mv 00000002.png sws-`basename $1`-$2-$3-$i.png
+done
+
+#gauss with lowwer variance
+        mplayer -vo png $1 -ss $2 -frames 3 -sws 7 -vop scale=$3:0:50
+	rm 00000001.png
+	mv 00000002.png sws-`basename $1`-$2-$3-7-50.png
+
