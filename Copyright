@@ -21,7 +21,7 @@ Directory:  libfaad2
 License:    GNU General Public License
 
 Name:       FLAC
-Version:    1.1.0
+Version:    1.1.0, updated to CVS from 20031227
 Homepage:   http://flac.sourceforge.net/
 Directory:  libmpflac
 License:    X11 style, see libmpflac/COPYING.Xiph
