@@ -1,6 +1,8 @@
 
 #include "fastmemcpy.h"
 #include "../mmx_defs.h"
+#include "../cpudetect.h"
+#include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"
 #include "mp_msg.h"
 
@@ -413,9 +415,17 @@ static int mga_uninit(){
   return 0;
 }
 
+static int get_sws_cpuflags(){
+    return 
+          (gCpuCaps.hasMMX   ? SWS_CPU_CAPS_MMX   : 0)
+	| (gCpuCaps.hasMMX2  ? SWS_CPU_CAPS_MMX2  : 0)
+	| (gCpuCaps.has3DNow ? SWS_CPU_CAPS_3DNOW : 0);
+}
+
 static uint32_t preinit(const char *vo_subdevice)
 {
   const char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
+	sws_rgb2rgb_init(get_sws_cpuflags());
 
 	f = open(devname,O_RDWR);
 	if(f == -1)
