@@ -1,27 +1,5 @@
-
-//#define memcpy(a,b,c)
-
 /* 
- *    video_out_mga.c
- *
- *	Copyright (C) Aaron Holtzman - Aug 1999
- *
- *  This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
- *	
- *  mpeg2dec is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2, or (at your option)
- *  any later version.
- *   
- *  mpeg2dec is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *   
- *  You should have received a copy of the GNU General Public License
- *  along with GNU Make; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
- *
+ *    output through mga_vid kernel driver
  */
 
 #include <stdio.h>
@@ -46,10 +24,10 @@ LIBVO_EXTERN(mga)
 
 static vo_info_t vo_info = 
 {
-	"Matrox G200/G400 overlay (/dev/mga_vid)",
+	"Matrox G200/G4x0/G550 overlay (/dev/mga_vid)",
 	"mga",
-	"Aaron Holtzman <aholtzma@ess.engr.uvic.ca>",
-	""
+	"A'rpi",
+	"Based on some code by Aaron Holtzman <aholtzma@ess.engr.uvic.ca>"
 };
 
 
@@ -57,8 +35,7 @@ static vo_info_t vo_info =
 
 #define FBDEV	"/dev/fb0"
 
-static uint32_t
-config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
+static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
 
 //	if (f >= 0) mga_uninit();
@@ -94,32 +71,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		printf("vo_mga aspect(): resized to %dx%d\n",d_width,d_height);
 	}
 
-
-        switch(format){
-        case IMGFMT_YV12:
-	    width+=width&1;height+=height&1;
-	    mga_vid_config.frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
-            mga_vid_config.format=MGA_VID_FORMAT_I420; break;
-        case IMGFMT_I420:
-        case IMGFMT_IYUV:
-	    width+=width&1;height+=height&1;
-	    mga_vid_config.frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
-            mga_vid_config.format=MGA_VID_FORMAT_YV12; break;
-        case IMGFMT_YUY2:
-	    mga_vid_config.frame_size = ((width + 31) & ~31) * height * 2;
-            mga_vid_config.format=MGA_VID_FORMAT_YUY2; break;
-        case IMGFMT_UYVY:
-	    mga_vid_config.frame_size = ((width + 31) & ~31) * height * 2;
-            mga_vid_config.format=MGA_VID_FORMAT_UYVY; break;
-        default: 
-            printf("mga: invalid output format %0X\n",format);
-            return (-1);
-        }
-
         mga_vid_config.colkey_on=0;
 
-	mga_vid_config.src_width = width;
-	mga_vid_config.src_height= height;
 	mga_vid_config.dest_width = d_width;
 	mga_vid_config.dest_height= d_height;
 	mga_vid_config.x_org= 0; // (720-mga_vid_config.dest_width)/2;
@@ -129,22 +82,18 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		mga_vid_config.y_org=(vo_screenheight-d_height)/2;
 	}
 	
-	mga_vid_config.version=MGA_VID_VERSION;
-
-  return mga_init();
+    return mga_init(width,height,format);
 }
 
-static const vo_info_t*
-get_info(void)
+static const vo_info_t* get_info(void)
 {
-	return &vo_info;
+    return &vo_info;
 }
 
-static void
-uninit(void)
+static void uninit(void)
 {
- mga_uninit();
- printf("vo: uninit!\n");
+    printf("vo: uninit!\n");
+    mga_uninit();
 }
 
 static void draw_osd(void)

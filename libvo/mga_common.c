@@ -319,7 +319,33 @@ static uint32_t control(uint32_t request, void *data, ...)
 }
 
 
-static int mga_init(){
+static int mga_init(int width,int height,unsigned int format){
+
+        switch(format){
+        case IMGFMT_YV12:
+	    width+=width&1;height+=height&1;
+	    mga_vid_config.frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
+            mga_vid_config.format=MGA_VID_FORMAT_I420; break;
+        case IMGFMT_I420:
+        case IMGFMT_IYUV:
+	    width+=width&1;height+=height&1;
+	    mga_vid_config.frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
+            mga_vid_config.format=MGA_VID_FORMAT_YV12; break;
+        case IMGFMT_YUY2:
+	    mga_vid_config.frame_size = ((width + 31) & ~31) * height * 2;
+            mga_vid_config.format=MGA_VID_FORMAT_YUY2; break;
+        case IMGFMT_UYVY:
+	    mga_vid_config.frame_size = ((width + 31) & ~31) * height * 2;
+            mga_vid_config.format=MGA_VID_FORMAT_UYVY; break;
+        default: 
+            printf("mga: invalid output format %0X\n",format);
+            return (-1);
+        }
+
+	mga_vid_config.src_width = width;
+	mga_vid_config.src_height= height;
+	mga_vid_config.dest_width = width;
+	mga_vid_config.dest_height= height;
 
 	mga_vid_config.num_frames=(vo_directrendering && !vo_doublebuffering)?1:3;
 	mga_vid_config.version=MGA_VID_VERSION;
@@ -329,7 +355,6 @@ static int mga_init(){
                 printf("Your mga_vid driver version is incompatible with this MPlayer version!\n");
 		return -1;
 	}
-	ioctl(f,MGA_VID_ON,0);
 	
 	printf("[mga] Using %d buffers.\n",mga_vid_config.num_frames);
 
@@ -343,15 +368,19 @@ static int mga_init(){
 	//clear the buffer
 	memset(frames[0],0x80,mga_vid_config.frame_size*mga_vid_config.num_frames);
 
+	ioctl(f,MGA_VID_ON,0);
+
   return 0;
 
 }
 
 static int mga_uninit(){
+  if(f>=0){
 	ioctl( f,MGA_VID_OFF,0 );
 	munmap(frames[0],mga_vid_config.frame_size*mga_vid_config.num_frames);
 	close(f);
 	f = -1;
+  }
   return 0;
 }
 
@@ -366,6 +395,11 @@ static uint32_t preinit(const char *vo_subdevice)
 		printf("vo_mga: Couldn't open %s\n",devname);
 		return(-1);
 	}
+
+#ifdef VO_XMGA
+  if (!vo_init()) return -1;
+#endif
+
   return 0;
 }
 

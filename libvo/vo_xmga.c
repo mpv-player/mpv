@@ -205,38 +205,9 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 {
  char                 * mTitle=(title == NULL) ? "XMGA render" : title;
  XVisualInfo            vinfo;
-
  unsigned long          xswamask;
 
- if (!vo_init()) return -1;
-
- width+=width&1;
-
- switch(format)
-  {
-   case IMGFMT_YV12:
-	height+=height&1;
-        mga_vid_config.format=MGA_VID_FORMAT_IYUV;
-        mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height + ( ( ( width + 31 ) & ~31 ) * height ) / 2;
-        break;
-   case IMGFMT_I420:
-   case IMGFMT_IYUV:
-	height+=height&1;
-        mga_vid_config.format=MGA_VID_FORMAT_YV12;
-        mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height + ( ( ( width + 31 ) & ~31 ) * height ) / 2;
-        break;
-   case IMGFMT_YUY2:
-        mga_vid_config.format=MGA_VID_FORMAT_YUY2;
-        mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height * 2;
-        break;
-   case IMGFMT_UYVY:
-        mga_vid_config.format=MGA_VID_FORMAT_UYVY;
-        mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height * 2;
-        break;
-   default:
-       mp_msg(MSGT_VO,MSGL_ERR,"mga: invalid output format %0X\n",format);
-       return -1;
-  }
+ if(mga_init(width,height,format)) return -1; // ioctl errors?
 
  aspect_save_orig(width,height);
  aspect_save_prescale(d_width,d_height);
@@ -246,7 +217,8 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
  vo_panscan_x=vo_panscan_y=vo_panscan_amount=0;
 
- vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
+ vo_dx=( vo_screenwidth - d_width ) / 2;
+ vo_dy=( vo_screenheight - d_height ) / 2;
  vo_dwidth=d_width; vo_dheight=d_height;
  vo_mouse_autohide=1;
 
@@ -269,9 +241,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
   else
 #endif
   {
-#ifdef X11_FULLSCREEN
    if ( flags&1 ) aspect(&dwidth,&dheight,A_ZOOM);
-#endif
 
    XGetWindowAttributes( mDisplay,mRootWin,&attribs );
    mDepth=attribs.depth;
@@ -294,8 +264,8 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
         vo_x11_selectinput_witherr( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
        } else XSelectInput( mDisplay,vo_window,ExposureMask );
        
-    } else 
-     {
+    } else {
+
       vo_window=XCreateWindow( mDisplay,mRootWin,
          vo_dx,vo_dy,
          vo_dwidth,vo_dheight,
@@ -317,45 +287,38 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
       vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
      }
+
     vo_gc=XCreateGC( mDisplay,vo_window,GCForeground,&wGCV );
-  }
+
+  } // !GUI
 
  if ( ( flags&1 )&&( !WinID ) ) { vo_dx=0; vo_dy=0; vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight; vo_fs=1; }
 
  panscan_calc();
- 
- set_window();
+
+ mga_vid_config.colkey_on=1;
+ mga_vid_config.colkey_red=255;
+ mga_vid_config.colkey_green=0;
+ mga_vid_config.colkey_blue=255;
+
+ set_window();	// set up mga_vid_config.dest_width etc
 
  saver_off(mDisplay);
 
  XFlush( mDisplay );
  XSync( mDisplay,False );
 
- mga_vid_config.src_width=width;
- mga_vid_config.src_height=height;
-
- mga_vid_config.colkey_on=1;
- mga_vid_config.colkey_red=255;
- mga_vid_config.colkey_green=0;
- mga_vid_config.colkey_blue=255;
- 
- mga_vid_config.version=MGA_VID_VERSION;
-
- return mga_init();
+ return 0;
 }
 
-static const vo_info_t* get_info( void )
-{ return &vo_info; }
+static const vo_info_t* get_info( void ){ return &vo_info; }
 
-
-static void
-uninit(void)
-{
- if(!inited) return;
- inited=0;
- mga_uninit();
- saver_on(mDisplay);
- vo_x11_uninit();
+static void uninit(void){
  mp_msg(MSGT_VO,MSGL_V,"vo: uninit!\n");
+ mga_uninit();
+ if(!inited) return; // no window?
+ inited=0;
+ saver_on(mDisplay);
+ vo_x11_uninit(); // destroy the window
 }
 
