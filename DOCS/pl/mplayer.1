@@ -225,18 +225,22 @@ Tworzy nowy plik i zapisuje edytowan± listê decyzji (EDL) zapisywan± do tego pli
 Podczas odtwarzania, kiedy u¿ytkownik wci¶nie 'i', wpisy do pominiêtych dwóch
 ostatnich sekund zostan± zapisane do pliku. 
 Prowadzi to do startowege punktu, z którego u¿ytkownik mo¿e 'delikatnie ustawic' 
-wpisy EDL pó¼niej. 
+wpisy EDL pó¼niej.
 Po szczegó³y siêgnij do DOCS/documentation.html#edl.
 .TP
+.B \-enqueue (Tylko GUI)
+Kolejkuj pliki podane w linii komend w playlistê, zamiast odrazu je odtwarzaæ.
+.TP
 .B \-fixed-vo (KOD BETA!)
-Wymusza ustawienia systemu wideo dla plików wielokrotnych (jedna (nie)inicjalizacja 
-dla wszytskich plików.
+Wymusza ustawienia systemu wideo dla plików wielokrotnych (jedna (nie)inicjalizacja
+dla wszytskich plików).
 Dlatego te¿ tylko jedno okno zostanie otworzone dla wszystkich plików.
-Obecnie nastêpuj±ce sterowniki s± problemowo fixed-vo: x11, xv, xvidix, xmga i gl2.
+Obecnie nastêpuj±ce sterowniki mo¿nawykorzystaæ: x11, xv, xvidix, xmga, gl2 i svga.
 .TP
 .B \-framedrop (zobacz tak¿e opcjê \-hardframedrop !)
-Opuszczanie klatek: dekoduj wszystkie klatki (oprócz B), wideo mo¿na pomin±æ.
-U¿yteczne do odtwarzania na wolnych kartach VGA.
+Porzuca wy¶wietlanie niektórych klatek, by utrzymaæ synchronizacje A/\:V na wolnych
+systemach. Filtry wideo nie bêd± stosowane dla tych klatek.
+Dla klatek B nawet dekodowanie jest kompletnie pominiête.
 .TP
 .B \-h, \-\-help
 Zobacz ma³e streszczenie opcji.
@@ -274,7 +278,7 @@ Poka¿ wszystkie klawisze, którymi mo¿na przeskakiwaæ.
 .IPs cmdlist
 Poka¿ wszystkie komendy, którymi mo¿na przeskakiwaæ.
 .IPs js\-dev
-Okre¶l urz±dzenie steruj±ce (domy¶lnie jest to /\dev/\:input/\:js0).
+Wybierz urz±dzenie steruj±ce (domy¶lnie jest to /\dev/\:input/\:js0).
 .IPs plik
 Czytaj komendy z otrzymanego pliku. 
 G³ównie po¿yteczny z fifo.
@@ -283,7 +287,7 @@ G³ównie po¿yteczny z fifo.
 .
 .TP
 .B \-lircconf <plik\ konfiguracyjny>
-Okre¶l plik konfiguracyjny dla LIRC (zdalana kontrola Linuxa na podczerwieñ, 
+Wybierz plik konfiguracyjny dla LIRC (zdalana kontrola Linuxa na podczerwieñ, 
 zobacz http://www.lirc.org), je¿eli nie odpowiada ci domy¶lnie ~/.lircrc.
 .TP
 .B \-loop <numer>
@@ -294,7 +298,7 @@ Ilo¶æ <numer> powtarzania odtwarzania filmu.
 W³±cz wsparcie menu OSD.
 .TP
 .B \-menu-root <warto¶æ> (KOD BETA)
-Okre¶l menu g³ówne.
+Wybierz menu g³ówne.
 .TP
 .B \-menu-cfg <plik> (KOD BETA)
 U¿yj alternatywnego pliku menu.conf.
@@ -373,8 +377,8 @@ MPlayer wy¶wietli dostêpne ID'esy, kiedy uruchamia siê w trybie verbose (-v).
 .B \-alang <dwu literowy\ kod\ kraju> (patrz opcjê \-aid)
 Dzia³a tylko z odtwarzaniem DVD.
 Wybiera jêzyk d¼wiêku na DVD. Zawsze próbuje otworzyæ strumieñ audio pasuj±cy
-do podanego kodu. Aby uzyskaæ listê dostêpnych jêzyków, u¿yj z \-v. i zajrzyj
-do rezultatów.
+do podanego kodu. Aby uzyskaæ listê dostêpnych jêzyków, u¿yj opcji \-v. i
+zajrzyj do rezultatów.
 
 .I PRZYK£AD:
 .PD 0
@@ -425,7 +429,7 @@ ustal poziom  paranoia (0-2)
 2: pe³na korekcja danych i weryfikacja
 .REss
 .IPs generic-dev=<warto¶æ>
-u¿yj okre¶lonego urz±dzenia SCSI
+u¿yj wybranego urz±dzenia SCSI
 .IPs sector-size=<warto¶æ>
 rozmiar obszaru czytania
 .IPs overlap=<warto¶æ>
@@ -450,13 +454,13 @@ puste kana³y zostan± wstawione (poza miksowaniem mono do stereo, wtedy kana³
 mono zostanie powielony we wszystkich kana³ach wyj¶cia).
 Je¿eli liczba kana³ów wyj¶cia jest mniesza od liczby kana³ów wej¶cia,
 wynik zale¿ny jest od dekodera audio (\-afm).
-Mplayer wysy³a zapytanie do dekodera by dekodowa³ audio do okre¶lonej ilo¶ci
+MPlayer wysy³a zapytanie do dekodera by dekodowa³ audio do wybranej ilo¶ci
 kana³ów. 
-Potem ustawia dekoder by spe³nia³ wymagania. 
-Je¿eli dane wyj¶ciowe dekodera zawieraj± wiêcej kana³ow ni¿ wymagane, 
+Potem ustawia dekoder by spe³nia³ wymagania.
+Je¿eli dane wyj¶ciowe dekodera zawieraj± wiêcej kana³ow ni¿ wymagane,
 przekraczaj±ce kana³y zostan± przyciête. Zazwyczaj jest to potrzebne tylko przy 
 odtwarzaniu plików wideo z d¼wiêkiem AC3 (takich jak DVD). W tym przypadku
-liba52 dekoduje domy¶lnie i poprawnie miksuje w dó³ (downmixe) audio w wymaganej 
+liba52 dekoduje domy¶lnie i poprawnie miksuje w dó³ (downmixe) audio w wymaganej
 liczbie kana³ów.
 
 .I INFORMACJA:
@@ -489,7 +493,7 @@ lokalizacji libcss.so.
 .TP
 .B \-cuefile <nazwa\ pliku> (zabacz tak¿e \-vcd)
 Odtwarzaj (S)VCD z obrazów dysków CDRwin (format pliku bin/cue), opisanych 
-przez okre¶lony plik.
+przez wybrany plik.
 .TP
 .B \-demuxer <numer>
 Wymuszenie typu demuxera.
@@ -716,7 +720,7 @@ dostêpne: dummy, v4l, bsdbt848
 .IPs device=<warto¶æ>
 Wyszczególnij inne urz±dzenia ni¿ domy¶lny /dev/\:video0.
 .IPs input=<warto¶æ>
-Okre¶l inne wej¶cie ni¿ domy¶lne 0 (Television) (po listê patrz na dane
+Wybierz inne wej¶cie ni¿ domy¶lne 0 (Television) (po listê patrz na dane
 wyj¶ciowe na konsoli)
 .IPs freq=<warto¶æ>
 Wyszczególnij czêstotliwo¶ci dla tunera (np.\& 511.250).
@@ -731,8 +735,7 @@ wysoko¶æ okna danych wyj¶ciowych
 .IPs fps=<warto¶æ>
 tempo klatki przechwytywanego wideo (klatki na sekundê)
 .IPs buffersize=<warto¶æ>
-maksymalny rozmiar buforu przechwytuj±cego w megabajtach (domy¶lnie jest to po³owa 
-pamiêci fizycznej)
+maksymalny rozmiar buforu przechwytuj±cego w megabajtach (domy¶lnie: dynamicznie)
 .IPs norm=<warto¶æ>
 dostêpne: PAL, SECAM, NTSC
 .IPs channel=<warto¶æ>
@@ -871,8 +874,6 @@ czcionek: ~/\:.mplayer/\:font/\:font.desc, domy¶lny dla czcionek FreeType:
 Z FreeType, ta opcja ustali ¶cie¿kê do pliku tekstowego czcionek.
 .br
 Opcje \-subfont-* dostêpne s± tylko z wkompilowanym wsparciem dla FreeType.
-Je¿eli wspieranie FreeType jest mo¿liwe, stare wspieranie czcionek nie bêdzie
-u¿ywane.
 
 .I PRZYK£AD:
 .PD 0
@@ -892,10 +893,10 @@ W³±cz wsparcie czê¶ciowego pokrywania napisów dla wszystkich formatów napisów.
 .TP
 .B \-nooverlapsub
 Wy³±cz wsparcie czê¶ciowego pokrywania napisów dla wszystkich formatów napisów
-(domy¶lnie w³±cza siê wsparcie tylko dla okre¶lonych formatów).
+(domy¶lnie w³±cza siê wsparcie tylko dla wybranych formatów).
 .TP
 .B \-osdlevel <0\-4> (tylko MPLAYER)
-Okre¶l w którym trybie powinien w³±czyæ siê OSD
+Wybierz, w którym trybie powinien w³±czyæ siê OSD
 
 .PD 0
 .RSs
@@ -914,7 +915,7 @@ g³o¶no¶æ + szukanie + zegar + procent + ca³kowity czas
 .B \-sid <id> (patrz te¿ opcjê \-slang)
 W³±cz wy¶wietlanie napisów DVD.
 Poza tym, MUSISZ podaæ numer który pokrywa siê z jêzykiem napisów DVD (0\-31).
-Po listê dostêpnych jêzyków dla napisów, u¿yj prze³±cznika \-v i patrz na
+Po listê dostêpnych jêzyków dla napisów, u¿yj opcji \-v i patrz na
 konsolê.
 .TP
 .B \-slang <dwu\ literowy\ kod\ kraju> (patrz te¿ opcjê \-sid)
@@ -926,7 +927,7 @@ dostêpnych napisów, u¿yj opcji \-v i patrz na konsolê.
 .PD 0
 .RSs
 .IPs "-slang pl,en"
-Wybiera polskie i powraca do angielskich, gdy polskie nie ± dostêpne.
+Wybiera polskie i powraca do angielskich, gdy polskie nie s± dostêpne.
 .RE
 .PD 1
 .
@@ -935,7 +936,7 @@ Wybiera polskie i powraca do angielskich, gdy polskie nie ± dostêpne.
 U¿yj/\:wy¶wietl ten plik napisów.
 .TP
 .B \-sub-bg-alpha <0\-255>
-Okre¶l warto¶æ kana³u alfa dla napisów i te³ OSD
+Wybierz warto¶æ kana³u alfa dla napisów i te³ OSD
 Du¿e warto¶æ oznaczaj± wiêksz± przezroczysto¶æ.
 Warto¶æ 0 jest rozszerzeniem i oznacza kampletn± przezroczysto¶æ.
 .TP
@@ -953,7 +954,7 @@ wspierane przez DVD z innych regionów.
 .TP
 .B \-subcp <strona\ kodowa>
 Je¿eli masz w systemie iconv(3), mo¿esz u¿yæ tej opcji do
-okre¶lenia strony kodowej napisów.
+wybrania strony kodowej napisów.
 
 .I PRZYK£AD
 .PD 0
@@ -1013,7 +1014,7 @@ Ustaw grubo¶æ linii zewnêtrznej czcionki (domy¶lnie: 2)
 Ustawia autoskalowanie napisów (procent rozmiaru ekranu) (domy¶lnie: 5).
 .TP
 .B \-subfps <tempo>
-Okre¶l tempo klatek/\:sek pliku napisów (numer float),
+Wybierz tempo klatek/\:sek pliku napisów (numer float),
 domy¶lnie: ten sam fps co w filmie.
 
 .I INFORMACJA:
@@ -1025,7 +1026,7 @@ Obecnie bezcelowe.
 To samo co \-audiofile, ale dla strumieni napisów (OggDS?).
 .TP
 .B \-subpos <0 \- 100> (u¿yteczny z rozszerzeniem -vop)
-Okre¶l pozycje napisów na ekranie.
+Wybierz pozycje napisów na ekranie.
 Warto¶æ jest poziom± pozycj± napisów w % wysoko¶ci ekranu.
 .TP
 .B \-subalign <0\-2>
@@ -1043,6 +1044,10 @@ Przeka¿ MPlayerowi by przetwarza³ plik napisów jako UNICODE.
 .TP
 .B \-utf8 \ \
 Przeka¿ MPlayer'owi by przetwarza³ plik napisów jako UTF8.
+.TP
+.B \-sub-no-text-pp
+Wy³±cz wszystkie metody post processingu teksu wykonywanego po za³adowaniu
+napisów. U¿ywane w celu usuwania b³êdów.
 .TP
 .B \-vobsub <plik\ vobsub\ bez\ rozszerzenia>
 Okre¶l plik VobSub które bêd± u¿yte jako napisy.
@@ -1125,7 +1130,6 @@ wszystkich strumieni audio.
 v: ¿adanie przyrostu w dB dla ka¿dego kana³u w strumieniu. 
 Przyrost mo¿e byæ ustawiony od -200dB do +40dB (gdzie -200dB kompletnie 
 wycisza d¼wiêk i +40dB oznacza przyrost 1000). 
-Domy¶lny przyrost to -20dB.
 .br
 sc: w³±cz wycinanie programowe.
 .br
@@ -1416,8 +1420,21 @@ Odtwarzanie pe³noekranowe (film w centrum i czarne obramowanie wokó³ niego).
 Prze³±cz go klawiszem 'f' (nie wszystkie wyj¶cia wideo go wspieraj±).
 Zobacz tak¿e \-zoom.
 .TP
-.B \-fsmode-dontuse <0-31> (PRZESTARZA£A) (u¿ywaj opcji -fs)
+.B \-fsmode-dontuse <0-31> (PRZESTARZA£E) (u¿ywaj opcji -fs)
 Wypróbuj t± opcjê, je¿eli masz problemy z trybem pe³noekranowym.
+.TP
+.B \-fstype <typ1,typ2,...>
+Okre¶l hierarhiê warstw pe³noekranowych utawiaj±cych tryby, które bêd± u¿yte.
+
+Domy¶lnym porz±dkiem jest "layer,stays_on_top,above,fullscreen". Bêdzie u¿yte
+jako inne rozwi±zanie, w przypadku podania niepoprawnych lub niewspieranych trybów.
+.br
+Je¿eli masz problemy z trybem pe³noekranowym, kiedy inne okno zakrywa okno
+z filmem, u¿yj innej kolejno¶ci typów.
+
+.I NOTE:
+.br
+Patrz \-fstype help po pe³n± listê dostêpnych trybów.
 .TP
 .B \-geometry x[%][:y[%]] lub [WxH][+x+y]
 Ustaw, gdzie wyj¶cie ma znajdowaæ siê pocz±tkowo na ekranie.
@@ -1444,6 +1461,11 @@ Umieszcza okno w dolnym-lewym rogu ekranu
 .RE
 .PD 1
 .
+.TP
+.B \-guiwid <id\ okna>
+Przeka¿e to do GUI, ¿e ma równie¿ u¿ywaæ okna X11 i przykleiæ je na dole
+ekranu wideo, co jest u¿yteczne, by osadziæ mini-GUI w przegl±darce (dla
+przyk³adu u¿ywaj±cej mplayerplug-in).
 .TP
 .B \-hue <\-100\-100>
 Modyfikuj barwê sygna³u wideo (domy¶lnie 0).
@@ -1474,8 +1496,26 @@ Menu (domy¶lnie)
 .TP
 .B \-jpeg <opcja1:opcja2:...> (tylko \-vo jpeg)
 Wyszczególnij opcje dla danych wyj¶ciowych JPEG.
-Dostêpne opcje to: [no]progressiv, [no]baseline, optimize, smooth, quality
-i outdir.
+.br
+Dostêpne opcje to:
+
+.PD 0
+.RSs
+.IPs [no]progressive
+Wybierz miêdzy standardowym lub progresywnym JPEG.
+.IPs [no]baseline
+Wybierz, czy ma u¿ywaæ baseline czy nie.
+.IPs optimize=<warto¶æ>
+Wspó³czynnik optimization [0-100]
+.IPs smooth=<warto¶æ>
+Wspó³czynnik wyg³adzania [0-100]
+.IPs quality=<warto¶æ>
+Wspó³czynnik jako¶ci [0-100]
+.IPs outdir=<warto¶æ>
+Katalog, gdzie zapisywaæ pliki JPEG
+.RE
+.PD 1
+.
 .TP
 .B \-monitor_dotclock <zakres\ dotclock\ (lub\ pixelclock)>  (tylko fbdev i vesa)
 Zajrzyj do etc/\:example.conf po dalsze informacje i do DOCS/\:video.html.
@@ -1530,7 +1570,7 @@ Dziêki tej opcji mo¿esz uzyskaæ obraz w skali szaro¶ci.
 .TP
 .B \-screenw <piksele> \-screenh <piksele>
 Je¿eli u¿ywasz sterowników wyj¶cia, które nie mog± rozpoznaæ rozdzielczo¶ci
-ekranu (fbdev/\:x11 i/\:lub TVout) tutaj mo¿esz okre¶liæ pionow± i poziom±
+ekranu (fbdev/\:x11 i/\:lub TVout) tutaj mo¿esz wybraæ pionow± i poziom±
 rozdzielczo¶æ.
 .TP
 .B \-stop_xscreensaver
@@ -1541,7 +1581,7 @@ Wypróbuj, ¿eby uzyskaæ lepszy tryb wideo.
 Sterowniki wyj¶cia dga, x11/xv (XF86VidMode) i sdl wspieraj± to.
 .TP
 .B \-vo <sterownik1[:urz±dzenie],sterownik2,...[,]>
-Okre¶l priorytetow± listê sterowników wyj¶cia wideo  (optymalne z urz±dzeniem).
+Wybierz priorytetow± listê sterowników wyj¶cia wideo  (optymalne z urz±dzeniem).
 do u¿ycia.
 "Urz±dzenie" jest zgodne z SDL i tak¿e GGI, oznacza to wówczas podsterownik.
 
@@ -1574,7 +1614,7 @@ wiele ekranów) Ta opcja przeka¿e MPlayer'owi, w którym ekranie ma wy¶wietliæ
 film.
 .TP
 .B \-z <0\-9>
-Okre¶l poziom kompresji dla wyj¶cia PNG (-vo png)
+Wybierz poziom kompresji dla wyj¶cia PNG (-vo png)
 
 .PD 0
 .RSs
@@ -1615,7 +1655,7 @@ Wy¶wietla listê wszystkich opcji -zr*, ich domy¶ln± warto¶æ oraz przyk³ad
 trybu cinerama.
 .TP
 .B \-zrnorm <norma> (tylko \-vo zr)
-Okre¶l normê PAL/\:NTSC, domy¶ln± jest 'no change'.
+Wybierz normê PAL/\:NTSC, domy¶ln± jest 'no change'.
 .TP
 .B \-zrquality <1\-20> (tylko \-vo zr)
 Liczba od 1 do 20 okre¶la jako¶æ kodowania jpeg.
@@ -1635,7 +1675,7 @@ Film domy¶lnie jest wycentrowany.
 .SH "OPCJE DEKODOWANIA/FILTROWANIA"
 .TP
 .B \-ac <[-]kodek1,[-]kodek2,...[,]>
-Okre¶l priorytetow± listê kodeków audio do u¿ycia, wed³ug ich nazw
+Wybierz priorytetow± listê kodeków audio do u¿ycia, wed³ug ich nazw
 w codecs.conf.
 U¿yj '-' przed nazw± kodeka aby go pomin±æ.
 
@@ -1661,7 +1701,7 @@ próbuj innych kodeków pomijaj±c dekoder MP3 FFmpeg
 .
 .TP
 .B \-afm <sterownik1,sterownik2,...>
-Okre¶l priorytetow± listê sterowników audio do u¿ycia, zgodnie z ich nazwami
+Wybierz priorytetow± listê sterowników audio do u¿ycia, zgodnie z ich nazwami
 w codecs.conf.
 Powraca do domy¶lnego, kiedy ¿aden nie jest poprawny.
 
@@ -1868,7 +1908,7 @@ bicubic spline
 .
 .TP
 .B \-vc <[-]kodek1,[-]kodek2,...[,]>
-Okre¶l priorytetow± listê kodeków wideo do u¿ycia, wed³ug ich nazw w codecs.conf.
+Wybierz priorytetow± listê kodeków wideo do u¿ycia, wed³ug ich nazw w codecs.conf.
 U¿yj '-' przed nazw± kodeka aby go pomin±æ.
 
 .I INFORMACJA:
@@ -1893,7 +1933,7 @@ próbuj kodeki libavcodec's MPEG1/\:2, pó¼niej libmpeg2, potem inne
 .
 .TP
 .B \-vfm <sterownik1,sterownik2,...>
-Okre¶l priorytetow± listê sterowników wideo, zgodnie z ich nazwami
+Wybierz priorytetow± listê sterowników wideo, zgodnie z ich nazwami
 w codecs.conf, powraca do domy¶lnego, kiedy ¿aden nie jest poprawny.
 
 .I INFORMACJE:
@@ -1938,7 +1978,7 @@ Przydatne do usuwania czarnych obramowañ z szerokoekranowych filmów.
 .IPs cropdetect[=0\-255]
 Oblicza niezbêdne parametry przycinaj±ce i wy¶wiatla proponowane na standardowe
 wyj¶cie (and. stdout).
-Próg mo¿e byæ opcjonalnie okre¶lony od niczego (0) do wszystkiego (255).
+Próg mo¿e byæ opcjonalnie wybrany od niczego (0) do wszystkiego (255).
 (domy¶lnie: 24)
 .IPs rectangle[=w:h:x:y]
 Rysuje prostok±t o wskazanej d³ugo¶ci i wysoko¶ci na wyznaczonych
@@ -2044,17 +2084,37 @@ h: wysoka jako¶æ
 .br
 p: mieszaj wed³ug przypadkowgo zaburzenia z (pó³)regularnym wzorem
 .REss
+.IPs "denoise3d[=luma:chroma:time]"
+Ten filtr redukuje zak³ucenia obrazu wyg³adzaj±c obraz, a nieruchome obrazu
+staj± siê naprawdê nieruchome (Powinno to poprawiæ mo¿liwo¶ci kompresji.).
+Mo¿na podaæ od 0 do 3 parametrów. Je¿eli pominiesz parametry, podane zostan±
+rozs±dne warto¶ci.
+.RSss
+luma:	wp³yw przestrzeni  luma (domy¶lnie = 4)
+.br
+chroma:	wp³yw przestrzeni chroma (domy¶lnie = 3)
+.br
+time:	czas wp³ywu (domy¶lnie = 6)
+.REss
+.IPs eq[=bright:cont]
+Activates the software equalizer with interactive controls like the hardware
+eq controls.
+The values can be from -100 to 100.
 .IPs eq[=jasno¶æ:contrast]
 Aktywuje programowy equalizer z kontrol± interaktywn±, tak± jak sprzêtowa
 kontrola eq.
 Warto¶æ mo¿e byæ z przedzia³u -100 do 100.
-.IPs eq2[=gama:kontrast:jasno¶æ]
+.IPs eq2[=gamma:contrast:brightness:saturation:rg:gg:bg]
 Alternatywny programowy equalizer u¿ywaj±cy tabel (bardzo wolne),
-pozwala na korekcjê gamy w dodatku do jasno¶ci i dostosowania kontrastu.
+pozwala na dodatek na korekcjê gamma jasno¶ci, dostosowania kontrastu
+i nasycenia. Informujemy, ¿e wykorzystuje to kilka otymalizacji kodu dla MMX
+tak jak -vop eq, je¿eli wszystkie warto¶ci gamma s± 1.0!
 Parametry s± podane w warto¶ciach zmienno pozycyjnych.
-Domy¶lne to gama=1.0, kontrast=1.0 i jasno¶æ=0.0.
-Warto¶ci dla gamy to 0.1\-10, -2\-2 dla kontrastu (ujemne warto¶ci daj± rezultat
-przecz±cy obrazom.
+Domy¶lne to gama=1.0, kontrast=1.0, jasno¶æ=0.0 i nasycenie 1.0.
+Parametry rg, gg, bg s± niezale¿ne od warto¶ci gamma dla komponentów Red, Green
+i Blue, wszystkie domy¶lnie na 1.0.
+Warto¶ci dla gammy to 0.1\-10, -2\-2 dla kontrastu (ujemne warto¶ci daj± rezultat
+negatywu obrazu) -1\-1 dal jasno¶ci i 0\-3 dal nasycenia.
 .IPs halfpack[=f]
 Konwertuj rozmiar YUV 4:2:0 do pakietu 4:2:2 o po³owie wysoko¶ci, wy³±cza
 próbkowanie luma, ale pozostawia wszystkie próbki chroma.
@@ -2289,7 +2349,7 @@ Dostêpne opcje to:
 .IPs help
 uzyskaj pomoc
 .IPs br=<warto¶æ>
-okre¶l  bitrate w
+wybierz  bitrate w
 .RSss
 kbitach <4\-16000> lub
 .br
@@ -2369,7 +2429,7 @@ da plik wyj¶ciowy zawieraj±cy 'div3' jako wideo fourcc.
 Wyszczególnij plik konfiguracyjny, który bêdzie u¿ywany po domy¶lnym.
 .TP
 .B \-info <opcja1:opcja2:...> (tylko .AVI)
-Okre¶l informacjê nag³ówka otrzymywanego pliku .AVI.
+Wybierz informacjê nag³ówka otrzymywanego pliku .AVI.
 .br
 Dostêpne opcje:
 .
@@ -2503,7 +2563,7 @@ Dostêpne opcje:
 .
 .RSs
 .IPs vcodec=<warto¶æ>
-u¿ywaj okre¶lonych kodeków (nie ma domy¶lnego, musisz sam go wybraæ):
+u¿ywaj wybranych kodeków (nie ma domy¶lnego, musisz sam go wybraæ):
 .RSss
 mjpeg: Motion JPEG
 .br
@@ -2591,7 +2651,7 @@ Przyk³ad:
 aspect=16.0/9.0, aspect=1.78
 .REss
 .IPs vbitrate=<warto¶æ>
-okre¶l bitrate (krok\ 1/\:2) w
+wybierz bitrate (krok\ 1/\:2) w
 .REss
 kbitach <4-16000> lub
 .br
@@ -2973,7 +3033,7 @@ kodowanie do MP3 (u¿ywa Lame)
 .
 .TP
 .B \-of <format> (KOD BETA!)
-Koduj do okre¶lonego formatu.
+Koduj do wybranego formatu.
 U¿yj \-of help, aby otrzymnaæ listê dostêpnych formatów.
 
 .I PRZYK£AD:
@@ -3049,11 +3109,11 @@ Okre¶l index wyj¶ciowego pliku napisów.
 (domy¶lnie: 0).
 .TP
 .B \-vobsuboutid <langid>
-Okre¶l dwu literowy kod jêzyka napisów. Uniewa¿ni to,
+Wybierz dwu literowy kod jêzyka napisów. Uniewa¿ni to,
 co jest czytane z DVD lub pliku .ifo.
 .TP
 .B \-xvidencopts <opcja1:opcja2:...>
-Je¶li koduje do XviD, mo¿esz okre¶liæ jego parametry tutaj.
+Je¶li koduje do XviD, mo¿esz wybraæ jego parametry tutaj.
 .br
 S± trzy dostêpne tryby: sta³y bitrate (CBR), ustalony quantizer i 2kroki (2pass).
 .br
@@ -3068,7 +3128,7 @@ ustaw u¿ywany bitrate, w bitach/\:sekundy, je¿eli <16000 lub w bits/\:second je¿
 .IPs fixed_quant=<1\-31>
 prze³±cz do trybu sta³ego quantizera i wybierz quantizer, który ma byæ u¿yty
 .IPs me_quality=<0\-6>
-okre¶l jako¶æ detekcji ruchu (domy¶lne = 4)
+wybierz jako¶æ detekcji ruchu (domy¶lne = 4)
 .IPs 4mv
 u¿yj 4 vektory ruchu na makro-blok, mo¿e daæ lepsz± jako¶æ na koszt
 wolnego kodowania (domy¶lne=off)
@@ -3238,7 +3298,7 @@ wybierz
 .\" --------------------------------------------------------------------------
 .
 .SH "PROTOKÓ£ TRYBU SLAVE"
-Je¿eli prze³±cznik \-slave jest podany, odtwarzanie jest kontrolowane poprzez
+Je¿eli opcja \-slave jest podana, odtwarzanie jest kontrolowane przez
 protokó³ line\-based.
 Ka¿da linia musi zawieraæ jedn± komendê w przeciwnym razie jedn± z nastêpuj±cych
 warto¶ci:
