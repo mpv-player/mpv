@@ -137,10 +137,9 @@ void decode_msrle4(
       else
       {
         // copy pixels from encoded stream
-        rle_code = stream_byte;
-        rle_code /= 2;
+        rle_code = ((stream_byte + 1) & (~1)) / 2;
         extra_byte = rle_code & 0x01;
-        if ((row_ptr + pixel_ptr + rle_code * bytes_per_pixel > frame_size) ||
+        if ((row_ptr + pixel_ptr + stream_byte * bytes_per_pixel > frame_size) ||
             (row_ptr < 0))
         {
           mp_msg(MSGT_DECVIDEO, MSGL_WARN,
@@ -170,6 +169,8 @@ void decode_msrle4(
           }
           pixel_ptr += bytes_per_pixel;
 
+	  if (i + 1 == rle_code && (stream_byte & 1) != 0)
+	    break;
           if (pixel_ptr >= row_dec)
             break;
           if (bytes_per_pixel == 2)
