@@ -1207,12 +1207,12 @@ No closer info yet.</P>
 <LI><B><A HREF="mailto:marcus@idonex.se">Marcus Comstedt</A></B>
 <UL>
   <LI>initial solaris8-x86 support</LI>
+  <LI>configure fixes</LI>
 </UL></LI>
 
-<LI><B><A HREF="mailto:jk@tools.de">Jürgen Keil and Marcus Comstedt</A></B>
+<LI><B><A HREF="mailto:jk@tools.de">Jürgen Keil</A></B>
 <UL>
   <LI>patched <B>MPlayer</B> to work on Solaris 8 x86</LI>
-  <LI>configure fixes</LI>
   <LI>various fixes (win32, configure, etc)</LI>
   <LI>SUN audio driver in libao2</LI>
   <LI>mediaLib support in libavcodec</LI>
@@ -1256,18 +1256,24 @@ No closer info yet.</P>
 
 <LI><B><A HREF="mailto:iive@yahoo.com">Ivan Kalvatchev</A></B>
 <UL>
-  <LI>interlaced MPEG2 support</LI>
+  <LI>interlaced MPEG2 support (libmpeg2)</LI>
+  <LI>libvo2 draft</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:p_l@gmx.fr">pl</A></B>
 <UL>
-  <LI>./configure fixes</LI>
+  <LI>new ./configure script</LI>
+  <LI>general code maintaining, fixes, patch commiting</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:michaelni@gmx.at">Michael Niedermayer</A></B>
 <UL>
-  <LI>postprocessing support</LI>
+  <LI>new postprocessing code (with deinterlacing etc...)</LI>
   <LI>software scaling C/MMX/MMX2/3DNow support (swscale.c)</LI>
+  <LI>various rgb/yuv bpp converters</LI>
+  <LI>new, better IDCT code for libavcodec</LI>
+  <LI>runtime cpu detection</LI>
+  <LI>SSE optimization of liba52</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:sgoethel@jausoft.com">Sven Goethel</A></B>
@@ -1282,7 +1288,7 @@ No closer info yet.</P>
 
 <LI><B><A HREF="mailto:eanholt@gladstone.uoregon.edu">Eric Anholt</A></B>
 <UL>
-  <LI>runtime CPU detection</LI>
+  <LI>CPU detection code</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri Svoboda</A></B>
@@ -1306,6 +1312,7 @@ No closer info yet.</P>
 <LI><B><A HREF="mailto:dholm@telia.com">David Holm</A></B>
 <UL>
   <LI>DXR3 support</LI>
+  <LI>libmp1e import</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:takis@lumumba.luc.ac.be">Panagiotis Issaris</A></B>
@@ -1317,6 +1324,7 @@ No closer info yet.</P>
 <UL>
   <LI>MS Video1 codec open-source implementation</LI>
   <LI>FLI demuxer, decoder</LI>
+  <LI>Generic ADPCM decoder (supports stereo IMA4 too)</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:ranma@gmx.at">Tobias Diedrich</A></B>
@@ -1337,11 +1345,6 @@ No closer info yet.</P>
 <LI><B><A HREF="mailto:itrs@softwell.com.tw">Sam Lin</A></B>
 <UL>
   <LI>-wid (plugger) patch</LI>
-</UL></LI>
-
-<LI><B><A HREF="mailto:freku045@student.liu.se">Fredrik Kuivinen</A></B>
-<UL>
-  <LI>VirtualDub plugins' support
 </UL></LI>
 
 </UL></P>
