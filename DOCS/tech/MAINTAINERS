@@ -18,12 +18,13 @@ Everyone is free to nominate himself/herself for a maintainership.
 
 Homepage:
     * Design: Diego Biurrun
-    * Contents: Diego Biurrun, Alex Beregszaszi
+    * Content: Diego Biurrun, Alex Beregszaszi
     * Codec packages: Roberto Togni
+    * Mailing lists: Attila Kinali
 
 English documentation:
     * user docs: Diego Biurrun
-    * input layer, lirc, slave mode docs: Alban Bedel
+    * input layer, LIRC, slave mode docs: Alban Bedel
     * man page: Diego Biurrun
     * tech/* docs: Alex Beregszaszi
     * tech/* documentation docs: Diego Biurrun
@@ -31,7 +32,7 @@ English documentation:
 Documentation translations:
     * Help Messages: Diego Biurrun
     * Hungarian: outdated and unmaintained
-    * German: outdated and unmaintained
+    * German: Sebastian Krämer
     * French: Nicolas Le Gaillart, Guillaume Poirier
     * Russian: Dmitry Baryshkov
     * Polish: Waclaw Schiller
@@ -90,7 +91,7 @@ demuxers:
 
 video filters:
     * general: Richard Felker, Michael Niedermayer
-    *	vf_filmdint.c	- Zoltan Hidvegi
+    * vf_filmdint.c - Zoltan Hidvegi
 
 libvo drivers:
     * vo_3dfx.c - OBSOLETED, use xv or tdfxfb
