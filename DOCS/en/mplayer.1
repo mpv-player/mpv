@@ -561,7 +561,7 @@ number).
 .B \-frames <number>
 Play/\:convert only first <number> frames, then quit.
 .TP
-.B \-hr\-mp3\-seek (.MP3 only)
+.B \-hr\-mp3\-seek (MP3 only)
 Hi\-res mp3 seeking.
 Default is: enabled when playing from external MP3 file, as we need to seek
 to the very exact position to keep A/\:V sync. It can be slow especially when
@@ -597,11 +597,11 @@ type of input files (available types: jpeg, png, tga, sgi)
 .PD 1
 .
 .TP
-.B \-ni (.AVI only)
+.B \-ni (AVI only)
 Force usage of non\-interleaved AVI parser (fixes playing
 of some bad AVI files).
 .TP
-.B \-nobps (.AVI only)
+.B \-nobps (AVI only)
 Do not use average byte/\:sec value for A\-V sync (AVI).
 Helps with some AVI files with broken header.
 .TP
@@ -2609,8 +2609,8 @@ will have the output file contain 'div3' as video fourcc.
 .B \-include <configuration\ file>
 Specify configuration file to be parsed after the default ones.
 .TP
-.B \-info <option1:option2:...> (.AVI only)
-Specify the info header of the resulting .AVI file.
+.B \-info <option1:option2:...> (AVI only)
+Specify the info header of the resulting AVI file.
 .br
 Available options are:
 .
@@ -2694,7 +2694,7 @@ set audio input gain
 switch on faster encoding on subsequent VBR presets modes, slightly lower 
 quality and higher bitrates.
 .IPs preset=<value>
-provide the highest possible quality settings.
+preset values
 .RSss
 medium: VBR encoding, good quality, 150\-180 kbps bitrate range.
 .br
