@@ -1,84 +1,85 @@
 <HTML>
-
 <BODY>
 
-<PRE>
+<P><B><A NAME=2.2.2>2.2.2.  Támogatott audio kimenetek:</A></P></B>
 
-  <A NAME=2.2.2>2.2.2.  Támogatott audio kimenetek:</A>
+<P><UL>
+<LI>OSS (ioctl) driver
+<LI>SDL driver (up/downsampling támogatás, esd, arts, stb)
+<LI>nativ ALSA 0.5 driver
+<LI>nativ ALSA 0.9 driver (bugos, használj OSS emulációt!)
+<LI>ESD (SDL-en keresztül)
+<LI>ARTS (SDL-en keresztül)
+<LI>SUN audio driver (/dev/audio) BSD és Solaris8-ra
+</UL></P>
 
-  - OSS (ioctl) driver
-  - SDL driver (up/downsampling támogatás, esd, arts, stb)
-  - nativ ALSA 0.5 driver
-  - nativ ALSA 0.9 driver (bugos, használj OSS emulációt!)
-  - ESD (SDL-en keresztül)
-  - ARTS (SDL-en keresztül)
-  - SUN audio driver (/dev/audio) BSD és Solaris8-ra
+<P><B><A NAME=2.2.2.1>2.2.2.1.  Ajánlott beállítások különféle hangkártyákhoz</A></B></P>
 
+<P><TABLE BORDER=0 WIDTH=100%>
+<TD COLSPAN=3><B>Aureal Vortex 2</B></TD><TR>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS/Free:</TD><TD>nincs</TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>nincs</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+<TD></TD><TD>Driver:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
+<TD></TD><TD>Driver2:</TD><TD> from <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">here</A><BR>
+(<I>bufferméret megnövelve 64k-ra</I>)</TD><TR>
 
-  <A NAME=2.2.2.1>2.2.2.1.  Ajánlott beállítások különféle hangkártyákhoz</A>
+<TD COLSPAN=3><B>GUS PnP</B></TD><TR>
+<TD></TD><TD>OSS/Free:</TD><TD>nincs</TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-  Aureal Vortex 2:
-			OSS/Free: nincs
-			OSS	: OK
-			ALSA	: nincs
-			Max kHz : 48
-			Driver	: <A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A>
-			Driver2 : from <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">here</A>
-				  (bufferméret megnövelve 64k-ra)
+<TD COLSPAN=3><B>SB Live!</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>(?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-  GUS PnP:
-			OSS/Free: nincs
-			OSS	: OK
-			ALSA	: OK
-			Max kHz	: 48
+<TD COLSPAN=3><B>SB AWE 64</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>max 44kHz</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>48kHz rosszul hangzik</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-  SB Live!:
-			OSS	: OK
-			ALSA	: (?)
-			Max kHz : 48
+<TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>nem jó, maximum 44Khz. <I>Az új audio kóddal
+is bugzik...</I></TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-  SB AWE 64		OSS	: max 44kHz
-			ALSA	: 48kHz rosszul hangzik
-			Max kHz : 48
+<TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-  Gravis UltraSound ACE:
-			OSS     : nem jó, maximum 44Khz ! Az új audio kóddal
-				  is bugzik...
-			ALSA    : OK
-			Max kHz : 48
+<TD COLSPAN=3><B>ESS 688</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-  Gravis UltraSound MAX:
-			OSS     : OK
-			ALSA    : OK (?)
-			Max kHz : 48
+<TD COLSPAN=3><B>C-Media cards (which ones?)</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>nem OK (sistereg) (?)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
 
-  ESS 688:
-			OSS     : OK
-			ALSA    : OK (?)
-			Max kHz : 48
+<TD COLSPAN=3><B>PC Speaker or DAC</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK (<I>használd az SDL drivert : -ao sdl</I>)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>nincs</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>a driver 44.1Khz-t emulál, vagy többet</TD><TR>
+<TD></TD><TD>Driver:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD><TR>
+</TABLE></P>
 
-  C-Media cards (which ones?)
-			OSS	: not OK (hissing) (?)
-			ALSA	: OK (?)
-			Max kHz : ?
-
-  PC Speaker or DAC:
-			OSS     : OK (használd az SDL drivert : -ao sdl)
-			ALSA    : nincs
-			Max kHz : a driver 44.1Khz-t emulál, vagy többet
-			Driver  : <A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A>
-
-   - a 2.4-es kerneleket használd, 2.2 nincs tesztelve !
-   - ha kattog a hang és CD-ROM-ról játszol le, kapcsold be az IRQ
+<P><UL>
+<LI>a 2.4-es kerneleket használd, 2.2 nincs tesztelve !
+<LI>ha kattog a hang és CD-ROM-ról játszol le, kapcsold be az IRQ
      unmasking-ot !
      például "hdparm -u1 /dev/cdrom" (lásd "man hdparm" !!!)
      Ez amúgy is ajánlott... (for XMMS, etc...)
      Olvasd el a <A HREF="cd-dvd.html#4.1">4.1</A>-es fejezetet .
-   - ne foglald le a hangkártyád másik programmal (pl. XMMS) !
+<LI>ne foglald le a hangkártyád másik programmal (pl. XMMS) !
      Ha ESD-t használsz, indítsd MPlayer-t a '-vo sdl:esd' opcióval !
-   - Írd meg nekünk, hogy mûködik együtt az MPlayer és a kartyád!  
-
-</PRE>
+<LI>Írd meg nekünk, hogy mûködik együtt az MPlayer és a kartyád!  
+</UL></P>
 
 </BODY>
 

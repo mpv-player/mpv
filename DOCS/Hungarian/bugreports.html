@@ -1,101 +1,101 @@
 <HTML>
-
 <BODY>
 
-<PRE>
+<P><B><A NAME=C>C függelék - Hogyan küldj bugreportot?</A></B></P>
 
-  <A NAME=C>C függelék - Hogyan küldj bugreportot?</A>
+<P><B>Hogyan küldj bugreportot?</B></P>
 
-Hogyan küldj bugreportot?
-~~~~~~~~~~~~~~~~~~~~~~~~~
-Elõször is olvasd el a DOCS/BUGS file-t és amit még találsz. Ha a
+<P>Elõször is olvasd el a DOCS/BUGS file-t és amit még találsz. Ha a
 problémád nem ismert, vagy a mi tanácsaink alapján nem oldódik
-meg, akkor jelentsd be:
+meg, akkor jelentsd be:</P>
 
-Hol?
-====
-Iratkozz fel az mplayer-users levelezési listára:
-   http://lists.sourceforge.net/lists/listinfo/mplayer-users
-és küldd a bugreportot a
-   mplayer-users@lists.sourceforge.net
-címre.
-      
-                ( ! A LISTA NYELVE AZ *ANGOL* ! )
+<P><B>Hol?</B></P>
 
-Nem fogunk CC-zni, szóval légy szíves feliratkozni!!!
+<P>Iratkozz fel az mplayer-users levelezési listára:<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>http://lists.sourceforge.net/lists/listinfo/mplayer-users</CODE><BR>
+és küldd a bugreportot a<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer-users@lists.sourceforge.net</CODE><BR>
+címre. Nem fogunk CC-zni, szóval légy szíves feliratkozni!!!</P>
 
-Ne küldj bugreportot egyenesen valamelyik készítõnek!!!
+<P>Ne küldj bugreportot egyenesen valamelyik készítõnek!!!
 Együtt dolgozunk a kódon, ezért mindenkit érdekelhet.  
 Elõfordulhat, hogy más felhasználók már tudják a megoldást
 (konfigurációs probléma, rossz driver stb.), még ha mi azt hinnénk is,
-hogy a kód bugos.
+hogy a kód bugos.</P>
 
-Légy szíves részletesen leírni a problémát, példákkal stb., és ne
-felejtsd el ezeket se mellékelni:
+<P>Légy szíves részletesen leírni a problémát, példákkal stb., és ne
+felejtsd el ezeket se mellékelni:</P>
 
-Mit?
-====
+<P><B>Mit?</B></P>
 
-1. Mindenképp küldj infót a rendszeredrõl:
-- disztribúció
-  például:
-        RedHat 7.1
-        Slackware 7.0 + csomagok 7.1-bõl ...
-- kernel verzió
-  uname -a
-- libc verzió:
-  ls -l /lib/libc[.-]*
-- X verzió:
-  X -version
-- gcc és ld verzió:
-  gcc -v
-  ld -v 
-- binutils verzió:
-  as --version
+<P><B><I>1. Mindenképp küldj infót a rendszeredrõl:</I></B></P>
+<UL>
+<LI>disztribúció<BR>
+például:<UL>
+        <LI>RedHat 7.1
+        <LI>Slackware 7.0 + csomagok 7.1-bõl ...</UL>
+<LI>kernel verzió<BR>
+  <CODE>uname -a</CODE>
+<LI>libc verzió:<BR>
+  <CODE>ls -l /lib/libc[.-]*</CODE>
+<LI>X verzió:<BR>
+  <CODE>X -version</CODE>
+<LI>gcc és ld verzió:<BR>
+  <CODE>gcc -v<BR>
+  ld -v</CODE>
+<LI>binutils verzió:<BR>
+  <CODE>as --version</CODE>
+</UL>
 
+<P><B><I>2. Hardware &amp; driverek:</I></B></P>
 
-2. Hardware &amp; driverek:
-- CPU infó:
-  cat /proc/cpuinfo
-- video kártya: gyártó és típus
-  például:
-    ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
-    Matrox G400 DH 32MB SGRAM
-- video driver típus és verzió
-  például:
-    X beépített drivere
-    nvidia 0.9.623
-    Utah-GLX CVS 2001-02-17
-    DRI a 4.0.3-as X-bõl   
-- hangkártya típus és driver
-  például:
-    Creative SBLive! Gold az oss.creative.com-ról való driverrel
-    Creative SB16 a kernel OSS driverével
-    GUS PnP az ALSA OSS emulációjával
-- ha nem vagy biztos a dolgodban, csatold az 'lspci -v' eredményét
+<UL>
+<LI>CPU infó:<BR>
+  <CODE>cat /proc/cpuinfo</CODE>
+<LI>video kártya: gyártó és típus<BR>
+  például:<BR><UL>
+  <LI>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
+  <LI>Matrox G400 DH 32MB SGRAM</UL>
+<LI>video driver típus és verzió<BR>
+  például:<UL>
+    <LI>X beépített drivere
+    <LI>nvidia 0.9.623
+    <LI>Utah-GLX CVS 2001-02-17
+    <LI>DRI a 4.0.3-as X-bõl   
+<LI>hangkártya típus és driver<BR>
+  például:<BR><UL>
+    <LI>Creative SBLive! Gold az oss.creative.com-ról való driverrel
+    <LI>Creative SB16 a kernel OSS driverével
+    <LI>GUS PnP az ALSA OSS emulációjával</UL>
+<LI>ha nem vagy biztos a dolgodban, csatold az 'lspci -v' eredményét
+</UL>
 
-Fordítási problémákhoz/hibákhoz:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-3. configure/make outputot:
-     make distclean
-     ./configure &amp;>config.log
-     ./make &amp;>make.log
-   ezeket a file-okat:
-     config.h
-     config.mak
-     libvo/config.mak
+<P><B>Fordítási problémákhoz/hibákhoz:</B></P>
 
-Lejátszási problémákhoz:
-~~~~~~~~~~~~~~~~~~~~~~~~
-3. Az MPlayer outputot 1-es debug szinten (-v)
-  mplayer -v [options] filenév &amp;> mplayer.log 
+<P><B><I>3. configure/make outputot:</I></B></P>
 
-4. Ha a probléma csak egy vagy néhány file-nál jelentkezik,
-  töltsd fel a file-t ide:
-    ftp://mplayerhq.hu/MPlayer/incoming/ 
+<UL><LI><CODE>make distclean</CODE>
+<LI><CODE>./configure &amp;>config.log</CODE>
+<LI><CODE>./make &amp;>make.log
+</UL>
+
+<P><B><I>4. ezeket a file-okat:</I></B></P>
+<UL><LI>config.h
+<LI>config.mak
+<LI>libvo/config.mak
+</UL>
+
+<P><B>Lejátszási problémákhoz:</B></P>
+
+<P><B><I>3. Az MPlayer outputot 1-es debug szinten (-v)</I></B></P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [options] filenév &amp;&gt; mplayer.log</CODE></P>
+
+<P><B><I>4. Ha a probléma csak egy vagy néhány file-nál jelentkezik,
+  töltsd fel a file-t ide:</I></B></P>
+<P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
   Általában az elsõ 1-5 Mb elég, hogy reprodulkáljuk a
   problémát, de elõször probáld ki:
-    dd if=a_file of=kis_file bs=1k count=1024
+<P><CODE>&nbsp;&nbsp;&nbsp;dd if=a_file of=kis_file bs=1k count=1024</CODE></P>
   (ez az 'a_file' elsõ 1 Mb-ját elmenti 'kis_file' néven')
   Ekkor probáld lejátszani a keletkezõ file-t, és ha a bug elõjön,
   akkor elég lesz csak ennyit feltölteni.
@@ -104,44 +104,44 @@ Lejátszási problémákhoz:
   Ha a file a neten hozzaférhetõ, akkor a _pontos_ URL elküldése
   is elég!
 
-5. Segfault, SIGILL, signal 4, stb esetén:
+<P><B><I>5. Segfault, SIGILL, signal 4, stb esetén:</I></B></P>
 
-Ha keletkezett coredump, akkor lásd 5.a pont, máskülönben 5.b:
+<P><I>Ha keletkezett coredump, akkor lásd 5.a pont, máskülönben 5.b:</I></P>
 
-5.a. Küldd el a coredump tartalmát (ha volt).
-Hogyan:
-Hozd létre a következõ parancs file-t:
+<P><B><I>5.a. Küldd el a coredump tartalmát (ha volt).</I></B></P>
 
-disass $eip-32 $eip+32
-printf "eax=%08lX\n",$eax
-printf "ebx=%08lX\n",$ebx
-printf "ecx=%08lX\n",$ecx
-printf "edx=%08lX\n",$edx
-printf "esp=%08lX\n",$esp
-printf "ebp=%08lX\n",$ebp
-printf "edi=%08lX\n",$edi
-printf "esi=%08lX\n",$esi
+<P>Hogyan:
+Hozd létre a következõ parancs file-t:</P>
 
-Aztán írd be a következõt:
-gdb mplayer --core=core -batch --command=parancs_file >mplayer.bug
+<P><CODE>disass $eip-32 $eip+32<BR>
+printf "eax=%08lX\n",$eax<BR>
+printf "ebx=%08lX\n",$ebx<BR>
+printf "ecx=%08lX\n",$ecx<BR>
+printf "edx=%08lX\n",$edx<BR>
+printf "esp=%08lX\n",$esp<BR>
+printf "ebp=%08lX\n",$ebp<BR>
+printf "edi=%08lX\n",$edi<BR>
+printf "esi=%08lX\n",$esi<BR>
+</CODE></P>
 
-5.b.: futtasd <B>MPlayert</B> gdb-n keresztül:
-[a promptnál:]
-  # gdb mplayer
-[a gdb promptnál:]
-  > run -v [mplayer opciói] filenév
-  ... (várj amíg össze nem omlik)  
-  > bt
-  > disass $eip-32 $eip+32
+<P>Aztán írd be a következõt:</P>
+<P>&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=parancs_file >mplayer.bug</CODE></P>
+
+<P><B><I>5.b.: futtasd <B>MPlayert</B> gdb-n keresztül:</I></B></P>
+<P>[a promptnál:]<BR>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE># gdb mplayer</CODE><BR>
+[a gdb promptnál:]<BR>
+&nbsp;&nbsp;&nbsp;<CODE>&gt; run -v [mplayer opciói] filenév</CODE><BR>
+  ... (várj amíg össze nem omlik)<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; bt</CODE><BR>
+&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; disass $eip-32 $eip+32</CODE><BR>
 A fenti parancsok teljes kimenetét küldd el nekünk!
+</P>
 
-Általában véve:
-~~~~~~~~~~~~~~~
-  Ha valami nagy (log-ok stb.), akkor jobb ha FTP-re töltöd (gzip-pel),
-  és csak a file nevét írod le a bugreportban!
+<P><B>Általában véve:</B></P>
 
-</PRE>
+<P>Ha valami nagy (log-ok stb.), akkor jobb ha FTP-re töltöd (gzip-pel),
+  és csak a file nevét írod le a bugreportban!</P>
 
 </BODY>
-
 </HTML>
