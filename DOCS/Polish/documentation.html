@@ -55,12 +55,13 @@
 	<LI><A HREF="formats.html#2.1.1.9">2.1.1.9 Pliki yuv4mpeg</A></LI>
 	<LI><A HREF="formats.html#2.1.1.10">2.1.1.10 FILM files</A></LI>
 	<LI><A HREF="formats.html#2.1.1.11">2.1.1.11 Pliki RoQ</A></LI>
+	<LI><A HREF="formats.html#2.1.1.12">2.1.1.12 Pliki OGG</A></LI>
       </UL>
       <LI><A HREF="formats.html#2.1.2">2.1.2 D¼wiêk</A></LI>
       <UL>
         <LI><A HREF="formats.html#2.1.2.1">2.1.2.1 Pliki MP3</A></LI>
         <LI><A HREF="formats.html#2.1.2.2">2.1.2.2 Pliki WAV</A></LI>
-        <LI><A HREF="formats.html#2.1.2.3">2.1.2.3 Pliki OGG (Vorbis)</A></LI>
+        <LI><A HREF="formats.html#2.1.1.12">2.1.2.3 Pliki OGG (Vorbis)</A></LI>
         <LI><A HREF="formats.html#2.1.1.3">2.1.2.4 Pliki WMA/ASF</A></LI>
         <LI><A HREF="formats.html#2.1.2.5">2.1.2.5 Pliki MP4</A></LI>
       </UL>
@@ -201,17 +202,26 @@
       <LI><A HREF=#2.6.9>2.6.9 RGB2BGR</A></LI>
       <LI><A HREF=#2.6.10>2.6.10 Rotate</A></LI>
       <LI><A HREF=#2.6.11>2.6.11 Scale</A></LI>
-      <LI><A HREF=#2.6.12>2.6.12 VO/A></LI>
-      <LI><A HREF=#2.6.13>2.6.13 YUY2</A></LI>
+      <LI><A HREF=#2.6.12>2.6.13 YUY2</A></LI>
+      <LI><A HREF=#2.6.13>2.6.13 Lavc</A></LI>
     </UL>
 
   </UL>
   <LI><A HREF="#3">3. Sposób u¿ycia</A></LI>
     <UL>
       <LI><A HREF="#3.1">3.1 Linia poleceñ</A></LI>
-      <LI><A HREF="#3.2">3.2 Sterowanie z klawiatury</A></LI>
-      <LI><A HREF="#3.3">3.3 Sterowanie przez LIRC (Linux Infrared Remote Control)</A></LI>
-      <LI><A HREF="#3.4">3.4 Przesy³anie przez sieæ lub za pomoc± pipe</A></LI>
+      <LI><A HREF="#3.2">3.2 Sterowanie</A></LI>
+      <UL>
+        <LI><A HREF="#3.2.1">3.2.1 Domy¶lne klawisze sterowania</A></LI>
+	<LI><A HREF="#3.2.2">3.2.2 Konfiguracja sterowania</A></LI>
+        <UL>
+	  <LI><A HREF="#3.2.2.1">3.2.2.1 Nazwy klawiszy</A></LI>
+          <LI><A HREF="#3.2.2.2">3.2.2.2 Polecenia</A></LI>
+	</UL>  
+        <LI><A HREF="#3.2.3">3.2.3 Sterowanie przez LIRC</A></LI>
+	<LI><A HREF="#3.2.4">3.2.4 Tryb slave</A></LI>
+      </UL>  	
+      <LI><A HREF="#3.3">3.3 Przesy³anie przez sieæ lub za pomoc± pipe</A></LI>
     </UL>
   <LI><A HREF="cd-dvd.html#4">4. Sekcja CD/DVD</A></LI>
     <UL>
@@ -236,6 +246,7 @@
       <LI><A HREF="#6.4">6.4 StrongARM</A></LI>
       <LI><A HREF="#6.5">6.5 SGI/Irix</A></LI>
       <LI><A HREF="#6.6">6.6 QNX</A></LI>
+      <LI><A HREF="#6.7">6.7 OpenBSD</A></LI>
     </UL>
   <LI><A HREF="#A">A. Autorzy</A></LI>
   <UL>
@@ -258,9 +269,8 @@
 <P>
 <UL>
   <LI><A HREF="users_against_developers.html#gcc">1. GCC 2.96</A></LI>
-  <LI><A HREF="users_against_developers.html#binary">2. Pakiety binarne</A></LI>
-  <LI><A HREF="users_against_developers.html#nvidia">3. Opcje NVidii</A></LI>
-  <LI><A HREF="users_against_developers.html#kotsog">4. O Joe Barr'ym</A></LI>
+  <LI><A HREF="users_against_developers.html#nvidia">2. Opcje dla NVidii</A></LI>
+  <LI><A HREF="users_against_developers.html#kotsog">3. O Joe Barr'ym</A></LI>
 </UL>
 </P>
 
@@ -286,8 +296,9 @@ szczê¶cia. Bêdziesz go potrzebowa³ :) </P>
 
 <P><B>MPlayer</B> jest odgrywark± filmów pod LINUXem (dzia³a pod wieloma innymi
 Unixami, i systemami opartymi na innych procesorach ni¿ <B>x86</B>, zobacz <A
-HREF="#6">sekcja 6</A>). Wy¶wietla wiêkszo¶æ plików MPEG, VOB, AVI, VIVO,
-ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ korzystaj±c z wielu
+HREF="#6">sekcja 6</A>). Wy¶wietla wiêkszo¶æ plików MPEG, VOB,
+AVI, OGG, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ,
+korzystaj±c z wielu
 w³asnych, XAnim oraz Win32 DLL kodeków. Mo¿esz równie¿ ogl±daæ <B>VideoCD</B>,
 <B>SVCD</B>, <B>DVD</B>, <B>3ivx</B>, a nawet filmy <B>DivX</B> (i nie
 potrzebujesz wcale biblioteki avifile!). Kolejn± du¿± zalet± mplayera jest
@@ -303,16 +314,7 @@ powiesz na ³adne, du¿e, antyaliasowane i cieniowane napisy (<B>wspieranych jest
 10 typów!!!</B>) z europejskim ISO 8859-1,2 (wêgierskimi, angielskimi, czeskimi
 itd.), cyrylic±, koreañskimi fontami oraz OSD?</P>
 
-<P><B>MPlayer</B> jest oparty na GPL, ale zawiera pewien kod nie-GPL, którego
-nie wolno rozpowszechniaæ w formie binarnej, a tak¿e zawiera bibliotekê
-OpenDivX, która jest na specjalnej licencji. Wcia¿ jednak rozwijamy siê w
-kierunku GPL.</P> 
-
-<P>Rozprowadzanie <B>MPlayera</B> w formie binarnej i/lub w pakietach binarnych
-jest aktualnie niemo¿liwe, zarówno ze wzglêdów <B>technicznych</B>, jak i
-<B>prawnych</B>. O szczegó³ach na ten temat mo¿na przeczytaæ, i jest to
-zalecane, w drugiej czê¶ci <A HREF="users_against_developers.html#binary">tego
-pliku</A>.</P>
+<P><B>MPlayer</B> jest oparty na licencji GPL v2.</P>
 
 <P>Moja odgrywarka jest wybitnie dobra w odgrywaniu uszkodzonych plików MPEG
 (co jest u¿yteczne w pewnych VCD), a tak¿e odgrywa z³e pliki AVI, które s± nie
@@ -374,6 +376,7 @@ zmodyfikowaæ jeden z tych programów...</P>
     ADPCM i wsparcie dla binarnych kodeków XAnim; obs³uga napisów DVD, pierwsze
     wydanie MEncodera, odbioru telewizji, cache, liba52, niezliczone
     poprawki.</LI>
+  <LI><B>MPlayer 0.90 "?"</B> May? ??, 2002<BR>
 </UL></P>
 
 <P><B><A NAME=1.3>1.3. Instalacja</A></B></P>
@@ -427,16 +430,18 @@ odpowiedzialny za generowanie bardzo istotnych instrukcji MMX/3DNow!/itp.</LI>
   je¶li masz zamiar pracowaæ z plikami jpeg.</LI>
   <LI><B>libpng</B> - rekomendowany i domy¶lny dekoder (M)PNG. Wymagany dla GUI.
   U¿yteczny zarówno dla <B>MPlayera</B> jak i dla <B>MEncodera</B>.</LI>  
+  <LI><B>libogg</B> - opcjonalny, potrzebny dla odgrywania OGG Vorbis audio.</LI>
 </UL>
 
 <P><B><I>KODEKI</I></B></P>
 
 <UL>
-<LI><B>libavcodec</B>: Je¿eli chcesz u¿ywaæ tego kodeka DivX3/DivX4/DivX5/itp.,
-zobacz przed kompilacj± sekcjê <A HREF="codecs.html#2.2.1.2">2.2.1.2</A>.
-W³a¶ciwo¶ci:<BR>
+<LI><B>libavcodec</B>: Je¿eli chcesz u¿ywaæ tego kodeka
+DivX3/DivX4/DivX5/MP42/itp., zobacz przed kompilacj± sekcjê <A
+HREF="codecs.html#2.2.1.2">2.2.1.2</A>.  W³a¶ciwo¶ci:<BR>
 <UL>
-  <LI>mo¿esz <B>odgrywaæ <I>DivX/DivX4/DivX5</I> na maszynach nie-x86</B></LI>
+  <LI>mo¿esz <B>odgrywaæ <I>DivX/DivX4/DivX5/MP42</I> na maszynach
+  nie-x86</B></LI>
   <LI>odgrywanie i kodowanie RealVideo 1.0/VIVO/MJPEG/h263/i innych</LI>
   <LI>ten kodek osi±ga <B>najwiêksz± prêdko¶æ dekodowania</B> filmów DivX i
   DivX4/DivX5 (wiêksz± nawet, ni¿ oryginalna biblioteka DivX4)!
@@ -526,7 +531,7 @@ wcze¶niejszych wydaniach!</LI>
 ATI</A> z dokukmentacji TV-out, aby siê dowiedzieæ, jakie w³a¶ciwo¶ci twojej
 karty s± obs³ugiwane pod Linuksem/MPlayerem. Je¿eli masz kartê <B>Radeon</B>,
 <B>Rage128</B>, albo <B>Mach64</B> (Rage XL/Mobility, Xpert98), mamy dla ciebie
-sterownik <B>XXX_vid</B>, z wyj¶ciem TV!  Sprawd¼ <A
+sterownik <B>Vidx</B>, z wyj¶ciem TV!  Sprawd¼ <A
 HREF="video.html#2.3.1.14">t±</A> sekcjê!</LI> <U><B>Je¿eli nie jeste¶
 u¿ytkownikiem Linuksa</B></U>, przeczytaj dokumentacjê <A
 HREF="video.html#2.3.1.15">Vidix</A>!</LI>
@@ -608,10 +613,6 @@ d¼wiêkowe</A>!</U>
 <P><B><I>W£A¦CIWO¦CI</I></B></P>
 
 <UL>
-<LI>Aby mieæ obs³ugê DVD, musisz skompilowaæ libdvdcss i libdvdread, dok³adnie
-w takiej kolejno¶ci! Zobacz szczegó³y w <A HREF="cd-dvd.html#4.2">sekcji
-4.2</A>.</LI>
-
 <LI>Zdecyduj czy potrzebujesz GUI. Je¿eli tak, zobacz, przed kompilacj±, 
 <A HREF=#1.4>sekcjê 1.4</A> .</LI>
 
@@ -704,18 +705,59 @@ konfiguracyjnym wskazaæ u¿ycie skórki z katalogu
 
 <P><B><A NAME=1.5>1.5. Napisy i OSD</A></B></P>
 
-<P>Tak, <B>MPlayer</B> obs³uguje wiele typów napisów. Obecnie 10 rodzajów
-napisów mo¿e byæ u¿ywanych przez kod subreadera. Informacje o formatach
-napisów znajdziesz w pliku subreader.c, w okolicach linii 30.</P>
-
-<P><B>MPlayer</B> obs³uguje napisy VobSub. Napisy VobSub zawieraj± du¿y
-(kilkumegabajtowy) plik .SUB i opcjonalnie pliki .IDX oraz/lub .IFO. 
-Sposób u¿ycia: je¶li
-masz pliki w rodzaju: <CODE>sample.sub</CODE>, <CODE>sample.ifo</CODE>,
-<CODE>sample.idx</CODE> - musisz podaæ opcje: <CODE>-vobsub sample
--vobsubid0</CODE> (opcjonalnie ze ¶cie¿k± dopliku, oczywi¶cie). Opcja
+<P><B>MPlayer</B> mo¿ê wy¶wietlaæ napisy wraz z plikami z filmami. Aktualnie
+obs³ugiwane s± nastêpuj±ce formaty:
+<UL>
+  <LI>VobSub</LI>
+  <LI>Microdvd</LI>
+  <LI>SubRip</LI>
+  <LI>SubViewer</LI>
+  <LI>Sami</LI>
+  <LI>VPlayer</LI>
+  <LI>RT</LI>
+  <LI>SSA</LI>
+  <LI>MPsub</LI>
+  <LI>AQTitle</LI>
+</UL>  
+Polecenia z lini komend ró¿ni± siê odrobinê w ró¿nych formatach.
+</P>
+<P>
+<B>Napisy VobSub</B><BR>
+Napisy VobSub sk³adaj± siê z du¿ego (kilka MB) .SUB  i opcjonalnie z plików
+.IDX oraz/lub .IFO.<BR> 
+Sposób u¿ycia: je¶li masz pliki w rodzaju: 
+<CODE>sample.sub</CODE>, <CODE>sample.ifo</CODE>, <CODE>sample.idx</CODE>
+- musisz podaæ opcje: <CODE>-vobsub sample
+-vobsubid&lt;id&gt;</CODE> (opcjonalnie ze ¶cie¿k± dopliku, oczywi¶cie). Opcja
 <CODE>-vobsubid</CODE> jest odpowiednikiem opcji <CODE>-sid</CODE> dla DVD. Z
 t± opcj± mo¿esz wybieraæ wersjê jêzykow± z dostêpnych ¶cie¿ek napisów.</P>
+
+<P>
+<B>Inne formaty napisów</B><BR>
+Inne formaty napisów sk³adaj± siê z pojedynczego pliku tekstowego,
+zawieraj±cego taktowanie, miejsce i tekstow± informacjê.<BR>
+Sposób u¿ycia: je¶li masz pliki w rodzaju: <CODE>sample.txt</CODE>, 
+- musisz podaæ opcjê: <CODE>-sub sample.txt</CODE> 
+(opcjonalnie ze ¶cie¿k± dopliku, oczywi¶cie).
+</P>
+
+<P>
+<B>Dostrajanie taktowania i rozmieszczenia napisów</B><BR>
+<CODE>-subdelay &lt;sec&gt;</CODE> : opó¼nia napisy o &lt;sec&gt; sekund.
+Mo¿e mieæ ujemn± warto¶æ.<BR>
+<CODE>-subfps &lt;rate&gt;</CODE> : wyznacza wspó³czynnik frame/sec  pliku z napisami (liczba zmiennoprzecinkowa)<BR>
+<CODE>-subpos &lt;0 - 100&gt;</CODE> : wyznacza umiejscowienie napisów.<BR>
+</P>
+<P>
+Je¶li zaobserwujesz rosn±ce opó¼nienie napisów w stosunku do filmu, podczas
+u¿ywania pliku z napisami MicroDVD, najprawdopodobniej frame rate filmu i napisów s± inne.<BR>
+Musisz wiedzieæ, ¿e format napisów MicroDVD stosuje ca³kowit± numeracjê klatek
+do taktowania i dlatego opcja <CODE>-subfps</CODE> nie mo¿e byæ stosowana do
+tego formatu. Poniewa¿ <B>MPlayer</B> nie ma mo¿lliwo¶ci odgadniêcia frame
+rate pliku z napisami, musisz rêcznie przekonwertowaæ frame rate napisów. Ma³y
+skrypt w perlu znajduje siê w katalogu <CODE>contrib</CODE> na stronie ftp
+MPlayera. Za jego pomoc± mo¿na dokonaæ tej konwersji.</P>
+
 
 <P>O napisach DVD przeczytaæ mo¿esz w <A HREF="cd-dvd.html#4.2">sekcji DVD</A>.</P>
 
@@ -1034,7 +1076,13 @@ na SDL</A>, dziêki czemu mo¿na na czarnych pasach umie¶ciæ napisy.</P>
 
 <A NAME=2.6.5><P><B><I>2.6.5.  Fame</I></B></P>
 
-<P>Hmm, ma pe³no segfault'ów. :)</P>
+<P><B><U>Opis</U></B>:</P>
+
+<P> Koder MPEG1 czasu rzeczywistego (do stosowania z DVB/DXR3).</P>
+
+<P><B><U>U¿ycie</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop fame</CODE></P>
 
 
 <A NAME=2.6.6><P><B><I>2.6.6.  Flip</I></B></P>
@@ -1044,7 +1092,7 @@ na SDL</A>, dziêki czemu mo¿na na czarnych pasach umie¶ciæ napisy.</P>
 <P>Zwyczajnie odwraca obraz. U¿yteczny w pewnych starych kodekach, które mog± mieæ na wyj¶ciu
    jedynie odwrócone obrazy (jest to automatycznie wykrywane).</P>
 
-<P><B><U>Usage</U></B>:</P>
+<P><B><U>U¿ycie</U></B>:</P>
 
 <P><CODE>&nbsp;&nbsp;-vop flip</CODE></P>
 
@@ -1058,7 +1106,7 @@ obrazu, który ma byæ u¿yty w nastêpnym filtrze (lub libvo).U¿yteczny przy
 kartach z wolnym YV12, jak tdfx i Savage4. Dla rzeczywistej konwersji u¿yj
 filtru <I>scale</I>.</P>
 
-<P><B><U>Usage</U></B>:</P>
+<P><B><U>U¿ycie</U></B>:</P>
 
 <P><CODE>&nbsp;&nbsp;-vop format[=format]</CODE> (where
   <CODE>format</CODE> can be for example: rgb32, yuy2, etc...)</P>
@@ -1091,8 +1139,14 @@ filtru <I>scale</I>.</P>
 
 <A NAME=2.6.10><P><B><I>2.6.10.  Rotate (obroty)</I></B></P>
 
-<P>Jakie s± parametry?</P>
+<P><B><U>Opis</U></B>:</P>
 
+<P>Obraca (odwraca) obraz. Parametr 'x' (wrto¶ci: 0-3) kontroluje poziome i
+pionowe obdbijanie.</P>
+
+<P><B><U>U¿ycie</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop rotate[=x]</CODE></P>
 
 <A NAME=2.6.11><P><B><I>2.6.11.  Scale (skalowanie)</I></B></P>
 
@@ -1113,11 +1167,7 @@ wywo³ywany w celu konwersji. W innym przypadku mo¿esz go u¿yæ rêcznie.</P>
 <P><CODE>&nbsp;&nbsp;-vop scale[=szeroko¶æ:wysoko¶æ]</CODE></P>
 
 
-<A NAME=2.6.12><P><B><I>2.6.12.  VO</I></B></P>
-
-<P>WTF</P>
-
-<A NAME=2.6.13><P><B><I>2.6.13.  YUY2</I></B></P>
+<A NAME=2.6.12><P><B><I>2.6.13.  YUY2</I></B></P>
 
 <P><B><U>Opis</U></B>:</P>
 
@@ -1127,7 +1177,16 @@ wywo³ywany w celu konwersji. W innym przypadku mo¿esz go u¿yæ rêcznie.</P>
 
 <P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
 
-<P><B><A NAME=3>3. Sposób u¿ycia</A></B></P>
+<A NAME=2.6.13><P><B><I>2.6.13.  Lavc</I></B></P>
+
+<P><B><U>Opis</U></B>:</P>
+
+<P> Koder MPEG1 czasu rzeczywistego (do stosowania z DVB/DXR3).</P>
+
+<P><B><U>U¿ycie</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
+<P><B><A NAME=3>3. U¿ycie</A></B></P>
 <P><B><A NAME=3.1>3.1. Linia poleceñ</A></B></P>
 
 <P><B>MPlayer</B> u¿ywa complex playtree. Zawiera ono globalne opcje zapisane
@@ -1181,58 +1240,103 @@ vcd://1</CODE></P>
   mplayer -dvd 1 -dvd-device /dev/hdc
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
+<P><B><A NAME=3.2>3.2. Sterowanie</A></B></P>
 
-<P><B><A NAME=3.2>3.2. Sterowanie za pomoc± kalwiatury</A></B></P>
+<P><B>MPlayer</B> ma w pe³ni konfigurowalny, strerowany z klawiatury panel
+sterowania, który pozwala ci sterowaæ <B>MPlayerem</B> za pomoc± klawiatury,
+myszy, joysticka b±d¼ pilota (z u¿yciem lirc).</P>
+
+<P><B><A NAME=3.2.1>3.2.1 Domy¶lne sterowanie</A></B></P>
+
+<P><B>Klawiatura</B></P>
 
 <P><TABLE BORDER=0>
+
 <TR>
  <TD></TD>
  <TD> <FONT CLASS="text">&lt;- lub -&gt;</TD>
  <TD></TD>
  <TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 10 sekund</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">strza³ka w górê lub w dó³</TD>
  <TD></TD>
  <TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 1 minutê</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD> <FONT CLASS="text">pgup/pgdown</TD>
  <TD></TD>
- <TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 10 minut</TD></TR>
+ <TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 10 minut</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">&lt; lub &gt;</TD>
  <TD></TD>
  <TD><FONT CLASS="text">poszukiwanie wstecz/naprzód po playli¶cie</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">p lub spacja</TD>
  <TD></TD>
  <TD> <FONT CLASS="text">zatrzymanie filmu (wci¶nij jakikolwiek przycisk)</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD> <FONT CLASS="text">q lub ESC</TD>
  <TD></TD>
  <TD><FONT CLASS="text">zakoñczenie odgrywania i wyj¶cie z programu</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">+ lub -</TD>
  <TD></TD>
  <TD><FONT CLASS="text">dopasuj opó¼nienie d¼wiêku o +/- 0.1 sekundy</TD>
 </TR>
+
+<TR>
+ <TD></TD>
+ <TD><FONT CLASS="text">r lub t</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">dopasuj pozycjê napisów </TD>
+</TR>
+
+<TR>
+ <TD></TD>
+ <TD><FONT CLASS="text">&gt; lub  &lt;</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">id¼ do nastêpnej/poprzedniej pozycji w playtree</TD>
+</TR>
+
+<TR>
+ <TD></TD>
+ <FONT CLASS="text">HOME lub END</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">id¼ do nastêpnej/poprzedniej pozycji w rodzicielskiej li¶cie</TD> 
+</TR>
+
+<TR>
+ <TD></TD>
+ <TD><FONT CLASS="text">INSERT lub DELETE</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">id¼ do nastêpnego/poprzedniego alternatywnego ¼ród³a
+ (dostêpne tylko w playlistach asx)</TD>
+</TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">/ lub *</TD>
  <TD></TD>
  <TD><FONT CLASS="text">zmniejsz/zwiêksz g³o¶no¶æ</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">o</TD>
@@ -1240,18 +1344,21 @@ vcd://1</CODE></P>
  <TD><FONT CLASS="text">w³±cz/wy³±cz OSD: nic /pasek poszukiwania / pasek
   poszukiwania + zegar</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">m</TD>
  <TD></TD>
  <TD><FONT CLASS="text">w³±cz/wy³±cz u¿ywanie d¼wiêku  master/pcm</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">z lub x</TD>
  <TD></TD>
  <TD><FONT CLASS="text">dopasuj opó¼nienie napisów o +/- 0.1 sekundy</TD>
 </TR>
+
 <TR>
  <TD COLSPAN=4>
  <P>
@@ -1260,32 +1367,38 @@ vcd://1</CODE></P>
  </P>
  </TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">1 lub 2</TD>
  <TD></TD>
  <TD><FONT CLASS="text">dostosuj kontrast</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">3 lub 4</TD>
  <TD></TD>
  <TD><FONT CLASS="text">dostosuj jasno¶æ</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">5 lub 6</TD>
  <TD></TD>
  <TD><FONT CLASS="text">dostosuj odcieñ</TD>
 </TR>
+
 <TR>
  <TD></TD>
  <TD><FONT CLASS="text">7 lub 8</TD>
  <TD></TD>
  <TD><FONT CLASS="text">dostosuj nasycenie</TD>
+</TR>
+
 </TABLE>
 
-<P><B>Obs³uga GUI z klawiatury</B></P>
+<P><B>GUI</B></P>
 
 <P><TABLE BORDER=0>
 <TR>
@@ -1361,7 +1474,7 @@ vcd://1</CODE></P>
 <TD><FONT CLASS="text">w³±cz/wy³±cz wyciszenie d¼wiêku</TD>
 </TABLE></P>
 
-<P><B>Sterowanie wej¶ciem TV</B></P>
+<P><B>TV</B></P>
 
 <P><TABLE BORDER=0>
 <TR><TD>&nbsp;&nbsp;</TD>
@@ -1384,99 +1497,230 @@ vcd://1</CODE></P>
 
 </TABLE></P>
 
-<P><B><A NAME=3.3>3.3. Sterowanie za pomoc± LIRC</A></B></P>
+<P><B><A NAME=3.2.2>3.2.2 Konfiguracja sterowania</A></B></P>
+
+<P>MPlayer  pozwala ci podpi±æ dowolny klawisz/przycisk do dowolnej komendy MPlayera za pomoc± prostego pliku konfiguracyjnego.
+Sk³adnia pliku ma postaæ: nazwa klawisza, a po niej polecenie.
+Domy¶lny plik konfiguracyjny jest umieszczony w
+$HOME/.mplayer/input.conf, ale mo¿na go przes³oniæ za pomoc± prze³±cznika
+-input conf (wzglêdna ¶cie¿ka jest traktowana wzglêdem $HOME/.mplayer). 
+Przyk³ad:
+<PRE>
+##
+## MPlayer input control file
+##
+
+RIGHT seek +10
+LEFT seek -10
+- audio_delay 0.100
++ audio_delay -0.100
+q quit
+> pt_step 1
+< pt_step -1
+ENTER pt_step 1 1
+</PRE>
+</P>
+
+<P><B><A NAME=3.2.2.1>3.2.2.1. Nazwy klawiszy</A></B></P>
+<P>Mo¿esz obejrzeæ pe³n± listê, wywo³uj±c <CODE>mplayer -input
+keylist</CODE>.</P>
+
+<P><B>Klawiatura</B></P>
+<P><UL>
+<LI>ka¿dy drukowany znak</LI>
+<LI>SPACE</LI>
+<LI>ENTER</LI>
+<LI>TAB</LI>
+<LI>CTRL</LI>
+<LI>BS</LI>
+<LI>DEL</LI>
+<LI>INS</LI>
+<LI>HOME</LI>
+<LI>END</LI>
+<LI>PGUP</LI>
+<LI>PGDWN</LI>
+<LI>ESC</LI>
+<LI>RIGHT</LI>
+<LI>LEFT</LI>
+<LI>UP</LI>
+<LI>DOWN</LI>
+</UL>
+</P>
+
+<P><B>Mysz</B></P>
+<P>Uwaga : mysz dzia³a tylko w X-ach</P>
+
+<P><UL>
+<LI>MOUSE_BTN0 (Lewy przycisk)</LI>
+<LI>MOUSE_BTN1 (Prawy przycisk)</LI>
+<LI>MOUSE_BTN2 (¦rodkowy przycisk)</LI>
+<LI>MOUSE_BTN3 (Kó³ko)</LI>
+<LI>MOUSE_BTN4 (Kó³ko)</LI>
+<LI>...</LI>
+<LI>MOUSE_BTN9</LI>
+</UL>
+</P>
+
+<P><B>Joystick</B></P>
+
+<P>Uwaga : obs³uga joystick-a musi zostaæ w³±czona podczas kompilacji</P>
+
+<P><UL>
+<LI>JOY_RIGHT lub JOY_AXIS0_PLUS</LI>
+<LI>JOY_LEFT lub JOY_AXIS0_MINUS</LI>
+<LI>JOY_UP lub JOY_AXIS1_MINUS</LI>
+<LI>JOY_DOWN lub JOY_AXIS1_PLUS</LI>
+<LI>JOY_AXIS2_PLUS</LI>
+<LI>JOY_AXIS2_MINUS</LI>
+<LI>....</LI>
+<LI>JOY_AXIS9_PLUS</LI>
+<LI>JOY_AXIS9_MINUS</LI>
+</UL>
+</P>
+
+
+<P><B><A NAME=3.2.2.2>3.2.2.2. Polecenia</A></B></P>
+
+<P>Pe³n± listê zobaczysz, wywo³uj±c <CODE>mplayer -input cmdlist</CODE></P>
+
+<P>
+<UL>
+  <LI><B>seek</B> (int) val [(int) type=0]
+         <P>Przeskocz do konkretnego miejsca w filmie.<BR>
+              Type 0 to skok wzglêdny o +/- val sekund.<BR>
+              Type 1 to skok do val % filmu. </P>
+  </LI>
+  <LI><B>audio_delay</B> (float) val
+         <P>Dostosuj opó¼nienie d¼wiêku o val sekund</P>
+  </LI>
+  <LI><B>quit</B>
+         <P>Wyjd¼ z <B>MPlayera</B></P>
+  </LI>
+  <LI><B>pause</B>
+         <P>Zatrzymaj/wznów odgrywanie</P>
+  </LI>
+  <LI><B>grap_frames</B>
+         <P>Kto¶ wie?</P>
+  </LI>
+  <LI><B>pt_step</B> (int) val [(int) force=0]
+         <P>Id¼ do nast/poprz pozycji w drzewie. Znak val okre¶la kierunek.<BR>
+	    Je¶li nie ma ¿adnego dostêpnej pozycji w podanym kierunku - nie
+	    stanie siê nic, o ile force jest niezerowe.
+         </P>
+  </LI>
+  <LI><B>pt_up_step</B> (int) val [(int) force=0]
+         <P>Jak pt_step ale skacze do nast/poprz w li¶cie rodzicielskiej.
+	 To jest u¿yteczne do przerwania wewnêtrznej pêtli w playtree.</P>
+  </LI>
+  <LI><B>alt_src_step</B> (int) val
+         <P>Kiedy dostêpne jest wiêcej ni¿ jedno ¼ród³o, wybiera nast/poprz 
+	 (tylko z asx playlist).</P>
+  </LI>
+  <LI><B>sub_delay</B> (float) val [(int) abs=0]
+         <P>Dostosouje opó¼nienie napisów o +/- val sekund albo ustawia je na
+	 val skund, gdy abs jest niezerowe.</P>
+  </LI>
+  <LI><B>osd</B> [(int) level=-1]
+         <P>Prze³±cza tryb osd albo ustawia na dany poziom, gdy  level > 0.</P>
+  </LI>
+  <LI><B>volume</B> (int) dir
+         <P>Zwieksza/zmniejsza g³o¶no¶æ</P>
+  </LI>
+  <LI><B>contrast</B> (int) val [(int) abs=0]</LI>
+  <LI><B>brightness</B> (int) val [(int) abs=0]</LI>
+  <LI><B>hue</B> (int) val [(int) abs=0]</LI>
+  <LI><B>saturation</B> (int) val [(int) abs=0]
+         <P>Ustawia/Dostosowuje parametry obrazu. 
+	Zakres val: od -100 do 100.</P>
+  </LI>
+  <LI><B>frame_drop</B> [(int) type=-1]
+         <P>Prze³±cza/Ustawia tryb opuszczania klatek.</P>
+  </LI>
+  <LI><B>sub_pos</B> (int) val
+         <P>Dostosowuje pozycjê napisów.</P>
+  </LI>
+  <LI><B>vo_fullscreen</B>
+         <P>Prze³±cza do trybu pe³noekranowego (fullscreen).</P>
+  </LI>
+  <LI><B>tv_step_channel</B> (int) dir
+         <P>Wybiera nast/poprz kana³ tv.</P>
+  </LI>
+  <LI><B>tv_step_norm</B>
+         <P>Zmienia TV norm.</P>
+  </LI>
+  <LI><B>tv_step_chanlist</B>
+         <P>Zmienia listê kana³ów.</P>
+  </LI>
+  <LI><B>gui_loadfile</B></LI>
+  <LI><B>gui_loadsubtitle</B></LI>
+  <LI><B>gui_about</B></LI>
+  <LI><B>gui_play</B></LI>
+  <LI><B>gui_stop</B></LI>
+  <LI><B>gui_playlist</B></LI>
+  <LI><B>gui_preferences</B></LI>
+  <LI><B>gui_skinbrowser</B></LI>
+         <P>Akcje GUI</P>
+</UL>
+</P>
+
+<P><B><A NAME=3.2.3>3.2.3. Sterowanie za pomoc±  LIRC</A></B></P>
 
 <P> Linux Infrared Remote Control - u¿yj ³atwego w budowie, domowej roboty
 odbiornika IR, (prawie) dowolnego pilota i kontroluj za jego pomoc± swoje linux
 box!  Wiêcej na ten temat na 
 <A HREF="http://www.lirc.org">www.lirc.org</A>.</P>
 
-<P>Je¶li zainstalowa³e¶ pakiet lirc, mo¿esz skompilowaæ <B>MPlayera</B> z
-w³±czeniem obs³ugi LIRC stosuj±c: ./configure --enable-lirc.</P> 
+<P>Je¶li zainstalowa³e¶ pakiet lirc, configure wykryje go automatycznie.
+Je¶li inicjalizacja LIRC zakoñczy³o siê dobrze, <B>MPlayer</B> poinformuje ciê
+o tym na starcie w nastêpuj±cy sposób: "Setting up lirc support...".
+Zawiadomi cie tak¿e wtedy, gdy pojawi± siê b³êdy. Je¶li nie wspomni o LIRC w
+ogóle, oznacza to, ¿e obs³uga LIRC nie zosta³a wkompilowana. To tyle :-)</P>
 
-<P>Je¿eli wszystko posz³o dobrze, <B>MPlayer</B> wy¶le na starcie komunikat, ¿e
-inicjalizacja LIRC zakoñczy³a siê sukcesem. Zawiadomi cie tak¿e wtedy, gdy
-pojawi± siê b³êdy. Je¶li nie wspomni o LIRC w ogóle, oznacza to, ¿e obs³uga
-LIRC nie zosta³a wkompilowana. To tyle :-)</P>
+<P>Nazwa aplikacji dla <B>MPlayera</B>, to - nie zgad³by¶ - 'mplayer'.
+  Mo¿esz u¿ywaæ dowolnych poleceñ mplayera, nawet kilka na raz, oddzielaj±c je
+  za pomoc± "\n". Nie zapomnij w³±czyæ flagi powtarzania w .lircrc,
+  kiedy to  ma sens (seek, volume, itp.). 
+  Oto wyrywek z mojego .lircrc:</P>
 
-<P>Aplikacja dla <B>MPlayera</B> nazywa siê - nie zgad³by¶ - mplayer_lirc.
-Rozumie ona nastêpuj±ce polecenia:</P>
+<P><PRE>
+begin
+     button = VOLUME_PLUS
+     prog = mplayer
+     config = volume 1
+     repeat = 1
+end
 
-<P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD>
-<TD><FONT CLASS="text">PAUSE</TD>
-<TD>&nbsp;&nbsp;</TD>
-<TD><FONT CLASS="text">zatrzymuje odgrywanie (pauza); naci¶niêcie
-dowolnego klawisza powoduje wznowienie odgrywania</TD>
-<TR>
-<TD></TD>
-<TD><FONT CLASS="text">QUIT</TD>
-<TD></TD>
-<TD><FONT CLASS="text">wyj¶cie z MPlayera</TD><TR>
-<TD></TD>
-<TD><FONT CLASS="text">RWND</TD>
-<TD></TD>
-<TD><FONT CLASS="text">10 sekund wstecz</TD>
-<TR>
-<TD></TD>
-<TD><FONT CLASS="text">FRWND</TD>
-<TD></TD>
-<TD><FONT CLASS="text">60 sekund wstecz;</TD>
-<TR>
-<TD></TD>
-<TD><FONT CLASS="text">FWD</TD>
-<TD></TD>
-<TD><FONT CLASS="text">10 sekund naprzód</TD>
-<TR>
-<TD></TD>
-<TD><FONT CLASS="text">FFWD</TD>
-<TD></TD>
-<TD><FONT CLASS="text">60 sekund naprzód</TD>
-<TR>
-<TD></TD>
-<TD><FONT CLASS="text">INCVOL</TD>
-<TD></TD>
-<TD><FONT CLASS="text">zwiêkszenie g³o¶no¶ci o 1%</TD>
-<TR>
-<TD></TD>
-<TD><FONT CLASS="text">DECVOL</TD>
-<TD></TD>
-<TD><FONT CLASS="text">zmniejszenie g³o¶no¶ci o 1%</TD>
-<TR>
-<TD></TD>
-<TD><FONT CLASS="text">MASTER</TD>
-<TD></TD>
-<TD><FONT CLASS="text">u¿ycie g³ównego kana³u miksera</TD>
-<TR>
-<TD></TD>
-<TD><FONT CLASS="text">PCM</TD>
-<TD></TD>
-<TD><FONT CLASS="text">u¿ycie kana³u pcm miksera</TD>
-<TR>
-</TABLE></P>
+begin
+    button = VOLUME_MINUS
+    prog = mplayer
+    config = volume -1
+    repeat = 1
+end
 
-<P>Nie zapomnij ustawiæ flagi powtarzania dla RWND/FWD w .lircrc. Oto
-fragment z mojego .lircrc:</P>
+begin
+    button = CD_PLAY
+    prog = mplayer
+    config = pause
+end
 
-<P><PRE>  begin
-   remote = CU-SX070
-   prog = mplayer_lirc
-   button = Tape_Play
-   repeat = 1
-   config = FFWD
-  end
-
-  begin
-   remote = CU-SX070
-   prog = mplayer_lirc
-   button = Tape_Stop
-   config = QUIT
-  end</PRE></P>
-
+begin
+    button = CD_STOP
+    prog = mplayer
+    config = seek 0 1\npause
+end
+</PRE></P>
+ 
 <P>Je¶li nie odpowiada ci standardowa lokalizacja pliku lirc-config (~/.lircrc)
 u¿yj prze³±cznika -lircconf &lt;nazwa_pliku&gt;, aby podaæ inny plik.</P>
 
-<P><B><A NAME=3.4>3.4. Przesy³anie przez sieæ, b±d¼ za pomoc± pipe</A></B></P>
+ 
+<P><B><A NAME=3.2.4>3.2.4. Tryb slave</A></B></P>
+
+<P>Tryb slave pozwala na zbudowanie prostego frontend-u dla <B>MPlayera</B>.
+Kiedy jest w³±czony (za pomoc± prze³±cznika -slave), <B>MPlayer</B> bedzie
+czyta³ polecenia rozdzielone nowymi liniami (\n) ze standardowego wej¶cia.<P>
+
+<P><B><A NAME=3.3>3.3. Przesy³anie przez sieæ i rurki</A></B></P>
 
 <P><B>MPlayer</B> potrafi odgrywaæ pliki przesy³ane przez sieæ, za pomoc±
 protoko³u HTTP lub MMS.</P>
@@ -1654,6 +1898,24 @@ sdl:nto</CODE>, a powinno dzia³aæ szybko.</P>
 <P>Wyj¶cie <CODE>-vo x11</CODE> jest wolniejsze nawet ni¿ w Linuksie, gdy¿ QNX
 ma tylko <I>emulacjê</I> X-ów, która jest BARDZO wolna. U¿ywaj wiêc SDL.</P>
 
+<P><B><A NAME=6.7>6.7. OpenBSD</A></B></P>
+
+<P>Aby zbudowaæ pakiet, bêdziesz potrzebowa³ GNU make (gmake,
+/usr/ports/devel/gmake), native BSD make nie zadzia³a, a tak¿e najnowsze
+binutils (w³±czaj±c objcopy).</P>
+
+<P>Z powodu ograniczeñ w ró¿nych wersjach  gas (relocation vs mmx),
+musisz przeprowadziæ dwa kroki kompilacji: najpierw upewnij siê, ¿e
+non-native jest jako pierwszy w PATH i wykonaj
+'<CODE>gmake -k</CODE>', a nastêpnie siê upewnij, ¿e
+wersja native jest u¿ywana i wykonaj '<CODE>gmake</CODE>'.</P>
+
+<P>Aby u¿yæ Win32 DLLs z <B>MPlayerem</B>, musisz przekompilowaæ
+j±dro z opcj± "<CODE>USER_LDT</CODE>".</P>
+
+<P>Je¿eli <B>MPlayer</B> zg³asza problem ze znalezieniem '/dev/cdrom' lub
+'/dev/dvd', zrób link symbolliczny, np. <CODE>ln -s
+/dev/rcd0c /dev/dvd</CODE></P>
 
 <P><B><A NAME=A>Dodatek A - Autorzy</A></B></P>
 
@@ -1795,10 +2057,11 @@ u¿ytkowników Mplayera</P>
   <LI>zapisywarka surowych plików PCM/WAVE dla libao2</LI>
   <LI>obs³uga d¼wiêku OggVorbis</LI>
   <LI>kod ró¿nego rodzaju</LI>
-  <LI>port Win32</LI>
+  <LI>port Win32 (Cygwin)</LI>
   <LI>pierwszorzêdne wsparcie w codecs.conf (nigdy nie zastosowany ;)</LI>
   <LI>obs³uga DivX5Linux</LI>
   <LI>wsparcie dla dekodowania AAC via libfaad2</LI>
+  <LI>post Darwin (MacOS X)</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:telenieko@telenieko.com">TeLeNiEkO</A></B>
@@ -2117,14 +2380,15 @@ MPlayera</A></B></P>
 
 <P>Strona domowa
 <UL>
-  <LI><B>Design</B>: Chass
+  <LI><B>Design</B>: Chass i Tornado
   <LI><B>Zawarto¶æ</B>: Gabucino
 </UL></P>
 <P>Dokumentacja w jêzyku angielskim
 <UL>
   <LI><B>dokumentacja u¿ytkownika</B>: Gabucino
+  <LI><B>recenzja, poprawki gramatyczne</B>: Diego Biurrun, Nilmoni Deb
+  <LI><B>wej¶ciowy layer, lirc, dokumentacja trybu slave</B>: Albeu
   <LI><B>dokumentacja tech/*</B>: A'rpi
-  <LI><B>HTMLization</B>: LGB
 </UL></P>
 <P>T³umaczenia dokumentacji
 <UL>
@@ -2134,13 +2398,16 @@ MPlayera</A></B></P>
   <LI><B>w³oskie</B>: TeLeNiEkO (nieaktualne)
   <LI><B>rosyjskie</B>: Nick Kurshev (nieaktualne)
   <LI><B>polskie</B>: <A HREF="mailto:nell@skrzynka.pl">Justyna Bia³a</A>
+  <LI><B>w³oskie</B>: Matteo Balduzzi
 </UL></P>
 <P>Platformy sprzêtowe/porty:
 <UL>
   <LI><B>pakiety DEBIANa</B>: Dariusz Pietrzak
   <LI><B>wsparcie dla FreeBSD</B>: Vladimir Kushnir
-  <LI><B>wsparcie dla Solaris 8</B>: Jürgen Keil
+  <LI><B>wsparcie dla BSD/OS</B>: Steven Schultz
+  <LI><B>wsparcie dla Solaris 8</B>: Jürgen Keil, pl
   <LI><B>wsparcie dla MIPS</B>: Oliver Schoenbrunner
+  <LI><B>wsparcie dla Win32/Cygwin</B>: Atmosfear
 </UL></P>
 <P>Kod MPlayera:
 <UL>
@@ -2156,13 +2423,13 @@ MPlayera</A></B></P>
   <LI><B>pliki konfiguracyjne i parser linii poleceñ</B>: Szabi
   <LI><B>playtree, input</B>: Albeu
   <LI><B>postproc, konwertery colorspace</B>: Michael Niedermayer
-  <LI><B>obs³uga LIRC</B>: Acki
+  <LI><B>obs³uga LIRC (stara)</B>: Acki
   <LI><B>VIDIX core, libdha</B>: Nick Kurshev
 </UL></P>
 <P>Sterowniki libvo:
 <UL>
   <LI><B>vo_3dfx.c</B> - PRZESTARZA£E, u¿yj w zamian xv lub tdfxfb
-  <LI><B>vo_tdfxfb.c</B> - <A HREF="mailto:zsteva@ptt.yu">Zeljko Stevanovic</A>
+  <LI><B>vo_tdfxfb.c</B> - Mark Zealey (mark@zealos.org)
   <LI><B>vo_aa.c</B> - Folke Ashberg
   <LI><B>vo_directfb.c</B> - <A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri
   Svoboda</A>
@@ -2179,7 +2446,7 @@ MPlayera</A></B></P>
   <LI><B>vo_pgm.c</B> - A'rpi
   <LI><B>vo_png.c</B> - Atmos
   <LI><B>vo_sdl.c</B> - Atmos
-  <LI><B>vo_svga.c</B> - se7en
+  <LI><B>vo_svga.c</B> - Matan Ziv-Av
   <LI><B>vo_syncfb.c</B> - PRZESTARZA£E, u¿yj w zamian mga
   <LI><B>vo_vesa.c</B> - Nick Kurshev
   <LI><B>vo_x11.c</B> - Pontscho
@@ -2213,10 +2480,11 @@ MPlayera</A></B></P>
 </P>
 <P>Narzêdzia:
 <UL>
-  <LI><B>subfont-c</B> - Artur Zaprza³a: <zybi@fanthom.irc.pl>
+  <LI><B>subfont-c</B> - Artur Zaprza³a <zybi@fanthom.irc.pl>
   <LI><B>subfont-GIMP</B> - lanzz@lanzz.org
   <LI><B>*.pl</B> - Atmos
   <LI><B>x2mpsub</B> - Gabucino
+  <LI><B>mencvcd</B> - Juergen Hammelmann (juergen.hammelmann@gmx.de)
   <LI><B>others</B> - A'rpi
 </UL>
 </P>
@@ -2261,8 +2529,7 @@ HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok">http://mplayerh
 
 </LI><LI>Lista u¿ytkowników MPlayera posiadaj±cych Matrox
 G200/G400/G450/G550:<BR>
-<A
-HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-matrox">http://lists.sourceforge.net/lists/listinfo/mplayer-matrox</A>
+<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox">http://mplayerhq.hu/mailman/listinfo/mplayer-matrox</A>
 <P>Wysy³aj tu pytania zwi±zane z matrox<UL>
 <LI>sprawy dotycz±ce mga_vid</LI>
 <LI>oficjalne beta sterowniki dla matroxa (dla X 4.x.x)</LI>
