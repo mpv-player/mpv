@@ -39,7 +39,7 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2
 
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(FREETYPE_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(SDL_INC) $(X11_INC) $(FRIBIDI_INC) $(DVB_INC) $(XVID_INC) $(FONTCONFIG_INC) # -Wall
 
-PARTS = libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libao2 drivers osdep postproc input libvo libaf
+PARTS = libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libavformat libao2 drivers osdep postproc input libvo libaf
 ifeq ($(INTERNAL_FAAD),yes)
 COMMON_LIBS += libfaad2/libfaad2.a 
 PARTS += libfaad2
@@ -139,6 +139,9 @@ loader/dmo/libDMO_Filter.a:
 
 libavcodec/libavcodec.a:
 	$(MAKE) -C libavcodec LIBPREF=lib LIBSUF=.a
+
+libavformat/libavformat.a:
+	$(MAKE) -C libavformat LIBPREF=lib LIBSUF=.a
 
 libmpeg2/libmpeg2.a:
 	$(MAKE) -C libmpeg2
@@ -304,6 +307,7 @@ distclean:
 	-rm -f *.o *.a .depend configure.log codecs.conf.h
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 	-$(MAKE) -C libavcodec distclean LIBPREF=lib LIBSUF=.a
+	-$(MAKE) -C libavformat distclean LIBPREF=lib LIBSUF=.a
 
 strip:
 	strip -s $(ALL_PRG)

@@ -199,6 +199,7 @@ Codecs:
   --disable-divx4linux   disable DivX4linux/Divx5linux codec [autodetect]
   --enable-opendivx      enable _old_ OpenDivx codec [disable]
   --disable-libavcodec   disable libavcodec [autodetect]
+  --disable-libavformat  disable libavformat [autodetect]
   --enable-libfame       enable libfame realtime encoder [autodetect]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --enable-tremor        build with integer-only OggVorbis support [disabled]
@@ -1133,6 +1134,7 @@ _xvmclib="XvMCNVIDIA"
 # If autodetection is available then the third state is: auto
 _libavcodec=auto
 _libavcodecso=auto 
+_libavformat=auto
 _fame=auto
 _mp1e=no
 _mencoder=yes
@@ -1412,6 +1414,8 @@ for ac_option do
   --disable-opendivx)	_opendivx=no	;;
   --enable-libavcodec)	_libavcodec=yes	;;
   --disable-libavcodec)	_libavcodec=no	;;
+  --enable-libavformat)	_libavformat=yes;;
+  --disable-libavformat)	_libavformat=no	;;
   --enable-libfame)	_fame=yes	;;
   --disable-libfame)	_fame=no	;;
   --enable-lirc)	_lirc=yes	;;
@@ -5029,6 +5033,20 @@ else
   echores "$_libavcodec"
 fi
 
+echocheck "FFmpeg libavformatc (static)"
+if test "$_libavformat" = auto ; then
+  # Note: static linking is preferred to dynamic linking
+  _libavformat=no
+  if test -d libavformat && test -f libavformat/utils.c ; then
+    _libavformat=yes
+    echores "yes"
+  else
+    echores "no"
+  fi
+else
+  echores "$_libavformat"
+fi
+
 _def_haveffpostprocess='no'
 if test -d libavcodec && test -f libavcodec/libpostproc/postprocess.h ; then
    _def_haveffpostprocess='yes'
@@ -5074,6 +5092,13 @@ elif test "$_libavcodecso" = yes ; then
   _codecmodules="libavcodec.so $_codecmodules"
 else
   _nocodecmodules="libavcodec $_nocodecmodules"
+fi
+
+_def_libavformat='#undef USE_LIBAVFORMAT'
+if test "$_libavformat" = yes ; then
+  _def_libavformat='#define USE_LIBAVFORMAT 1'
+  _ld_libavformat='libavformat/libavformat.a'
+  _dep_libavformat='libavformat/libavformat.a'
 fi
 
 echocheck "libdv-0.9.5+"
@@ -5918,7 +5943,7 @@ X11DIR = $_ld_x11
 HAVE_XVMC_ACCEL = $_xvmc
 
 # for libavcodec:
-SRC_PATH=.
+SRC_PATH=..
 LIBPREF=lib
 LIBSUF=.a
 SLIBPREF=lib
@@ -5961,8 +5986,9 @@ W32_DEP = $_dep_win32
 W32_LIB = $_ld_win32
 DS_DEP = $_dep_dshow
 DS_LIB = $_ld_dshow
-AV_DEP = $_dep_libavcodec
-AV_LIB = $_ld_libavcodec
+AV_DEP = $_dep_libavcodec $_dep_libavformat
+AV_LIB = $_ld_libavcodec $_ld_libavformat
+CONFIG_LIBAVFORMAT = $_libavformat
 ZORAN = $_zr
 FAME = $_fame
 FAME_LIB = $_ld_fame
@@ -6267,6 +6293,9 @@ $_def_win32_loader
 /* ffmpeg's libavcodec support (requires libavcodec source) */
 $_def_libavcodec
 $_def_libavcodecso
+
+/* ffmpeg's libavformat support (requires libavformat source) */
+$_def_libavformat
 
 /* risky codecs */
 #define CONFIG_RISKY 1

@@ -139,6 +139,7 @@ extern void demux_close_ts(demuxer_t* demuxer);
 extern void demux_close_mkv(demuxer_t* demuxer);
 extern void demux_close_ra(demuxer_t* demuxer);
 extern void demux_close_ty(demuxer_t* demuxer);
+extern void demux_close_lavf(demuxer_t* demuxer);
 
 
 #ifdef USE_TV
@@ -223,7 +224,10 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_ts(demuxer); break;
     case DEMUXER_TYPE_REALAUDIO:
       demux_close_ra(demuxer); break;
-
+#ifdef USE_LIBAVFORMAT
+    case DEMUXER_TYPE_LAVF:
+      demux_close_lavf(demuxer); break;
+#endif
     }
     // free streams:
     for(i=0;i<256;i++){
@@ -313,6 +317,7 @@ extern int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds);
 extern int demux_smjpeg_fill_buffer(demuxer_t* demux);
 extern int demux_lmlm4_fill_buffer(demuxer_t* demux);
 extern int demux_mkv_fill_buffer(demuxer_t *d);
+extern int demux_lavf_fill_buffer(demuxer_t *d);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -369,6 +374,9 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_MPEG4_IN_TS: 
 	return demux_ts_fill_buffer(demux);
     case DEMUXER_TYPE_REALAUDIO: return demux_ra_fill_buffer(demux);
+#ifdef USE_LIBAVFORMAT
+     case DEMUXER_TYPE_LAVF: return demux_lavf_fill_buffer(demux);
+#endif
   }
   return 0;
 }
@@ -612,6 +620,8 @@ extern int demux_open_ra(demuxer_t* demuxer);
 #ifdef HAVE_MATROSKA
 extern int demux_mkv_open(demuxer_t *demuxer);
 #endif
+extern int lavf_check_file(demuxer_t *demuxer);
+extern int demux_open_lavf(demuxer_t* demuxer);
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
@@ -1078,6 +1088,19 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_TY)
  if(file_format==DEMUXER_TYPE_RTP) {
    demuxer=new_demuxer(stream,DEMUXER_TYPE_RTP,audio_id,video_id,dvdsub_id);
  }
+//=============== Try to open with LAVF: =================
+#ifdef USE_LIBAVFORMAT
+ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_LAVF){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_LAVF,audio_id,video_id,dvdsub_id);
+  if(lavf_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"libavformat"); //FIXME print format
+      file_format=DEMUXER_TYPE_LAVF;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
+#endif
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN || demuxer == NULL){
   //mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized); // will be done by mplayer.c after fallback to playlist-parsing
@@ -1311,6 +1334,12 @@ switch(file_format){
   if (!demux_open_ra(demuxer)) return NULL;
   break;
  }
+#ifdef USE_LIBAVFORMAT
+  case DEMUXER_TYPE_LAVF: {
+  if (!demux_open_lavf(demuxer)) return NULL;
+  break;
+ }
+#endif
 } // switch(file_format)
 pts_from_bps=0; // !!!
 return demuxer;
@@ -1397,6 +1426,7 @@ void demux_seek_mov(demuxer_t *demuxer,float pts,int flags);
 int demux_seek_real(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_pva(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_ts(demuxer_t *demuxer,float rel_seek_secs,int flags);
+int demux_seek_lavf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 #ifdef HAVE_LIBDV095
 int demux_seek_rawdv(demuxer_t *demuxer, float pts, int flags);
@@ -1508,6 +1538,10 @@ switch(demuxer->file_format){
  case DEMUXER_TYPE_MPEG_TS:
  case DEMUXER_TYPE_MPEG4_IN_TS:
       demux_seek_ts(demuxer,rel_seek_secs,flags); break;
+ #ifdef USE_LIBAVFORMAT
+ case DEMUXER_TYPE_LAVF:
+      demux_seek_lavf(demuxer,rel_seek_secs,flags); break;
+ #endif
 
 } // switch(demuxer->file_format)
 
@@ -1573,6 +1607,7 @@ extern int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_audio_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_ogg_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_real_control(demuxer_t *demuxer, int cmd, void *arg);
+extern int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg);
 
 int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
     switch(demuxer->type) {
@@ -1606,6 +1641,10 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
 #endif
 	case DEMUXER_TYPE_REAL:
 	    return demux_real_control(demuxer, cmd, arg);
+#ifdef USE_LIBAVFORMAT
+        case DEMUXER_TYPE_LAVF:
+	    return demux_lavf_control(demuxer, cmd, arg);
+#endif
 
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;

@@ -43,11 +43,12 @@
 #define DEMUXER_TYPE_REALAUDIO 32
 #define DEMUXER_TYPE_MPEG_TY 33
 #define DEMUXER_TYPE_LMLM4 34
+#define DEMUXER_TYPE_LAVF 35
 
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
 #define DEMUXER_TYPE_MIN 0
-#define DEMUXER_TYPE_MAX 34
+#define DEMUXER_TYPE_MAX 35
 
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
 // A virtual demuxer type for the network code
