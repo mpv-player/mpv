@@ -21,6 +21,11 @@
 #include "../../libmpdemux/stream.h"
 #include "../../mp_msg.h"
 
+#include <gdk/gdkprivate.h>
+#include <gdk/gdkkeysyms.h>
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+
 #define mplRedrawTimerConst 5
 
 int mplRedrawTimer = mplRedrawTimerConst;
@@ -99,6 +104,9 @@ void mplInit( void * disp )
  btnModify( evSetVolume,guiIntfStruct.Volume );
  btnModify( evSetBalance,guiIntfStruct.Balance );
  btnModify( evSetMoviePosition,guiIntfStruct.Position );
+
+ wsSetIcon( wsDisplay,appMPlayer.mainWindow.WindowID,guiIcon,guiIconMask );
+ wsSetIcon( wsDisplay,appMPlayer.subWindow.WindowID,guiIcon,guiIconMask );
  
  if ( fullscreen )
   {

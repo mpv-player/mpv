@@ -237,12 +237,14 @@ void guiGetEvent( int type,char * arg )
 #if defined( HAVE_VCD ) || defined( USE_DVDREAD )
         if ( guiIntfStruct.DiskChanged )
           {
+/*
 #ifdef USE_DVDREAD
            switch ( guiIntfStruct.StreamType )
             {
              case STREAMTYPE_DVD: filename=DEFAULT_DVD_DEVICE; break;
             }
 #endif
+*/
            guiIntfStruct.DiskChanged=0;
 	   guiGetEvent( guiCEvent,(char *)guiSetPlay );
 	  }

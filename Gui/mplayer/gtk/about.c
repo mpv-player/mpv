@@ -57,6 +57,10 @@ GtkWidget * create_About( void )
   gtk_window_set_title( GTK_WINDOW( About ),MSGTR_About );
   gtk_window_set_position( GTK_WINDOW( About ),GTK_WIN_POS_CENTER );
   gtk_window_set_policy( GTK_WINDOW( About ),TRUE,FALSE,FALSE );
+  gtk_window_set_wmclass( GTK_WINDOW( About ),MSGTR_About,"MPlayer" );
+
+  gtk_widget_realize( About );
+  gtkAddIcon( About );
 
   frame1=gtk_frame_new( NULL );
   gtk_widget_set_name( frame1,"frame1" );

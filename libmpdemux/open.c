@@ -56,6 +56,8 @@ int dvd_nav=0;                  /* use libdvdnav? */
 char * dvd_audio_stream_types[8] =
         { "ac3","unknown","mpeg1","mpeg2ext","lpcm","unknown","dts" };
 
+char * dvd_audio_stream_channels[6] =
+	{ "unknown", "stereo", "unknown", "unknown", "unknown", "5.1" };
 #endif
 
 extern int vcd_get_track_end(int fd,int track);
@@ -303,9 +305,15 @@ if(dvd_title){
 		    break;
 	   }
 
-          mp_msg(MSGT_OPEN,MSGL_V,"[open] audio stream: %d audio format: %s language: %s aid: %d\n",
+	  d->audio_streams[d->nr_of_channels].type=audio->audio_format;
+	  // Pontscho: to my mind, tha channels:
+	  //  1 - stereo
+	  //  5 - 5.1
+	  d->audio_streams[d->nr_of_channels].channels=audio->channels;
+          mp_msg(MSGT_OPEN,MSGL_V,"[open] audio stream: %d audio format: %s (%s) language: %s aid: %d\n",
 	    d->nr_of_channels,
             dvd_audio_stream_types[ audio->audio_format ],
+	    dvd_audio_stream_channels[ audio->channels ],
 	    tmp,
 	    d->audio_streams[d->nr_of_channels].id
 	    );
@@ -369,8 +377,7 @@ if(dvd_title){
     else
 	d->last_cell=d->cur_pgc->nr_of_cells;
     
-    if( d->cur_pgc->cell_playback[d->cur_cell].block_type 
-	== BLOCK_TYPE_ANGLE_BLOCK ) d->cur_cell+=dvd_angle;
+    if( d->cur_pgc->cell_playback[d->cur_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK ) d->cur_cell+=dvd_angle;
     d->cur_pack = d->cur_pgc->cell_playback[ d->cur_cell ].first_sector;
     d->cell_last_pack=d->cur_pgc->cell_playback[ d->cur_cell ].last_sector;
     mp_msg(MSGT_DVD,MSGL_V, "DVD start cell: %d  pack: 0x%X-0x%X  \n",d->cur_cell,d->cur_pack,d->cell_last_pack);

@@ -11,6 +11,7 @@
 
 #include <gdk/gdkprivate.h>
 #include <gdk/gdkkeysyms.h>
+#include <gdk/gdkx.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
@@ -19,6 +20,8 @@
 #include "./mplayer.h"
 #include "../events.h"
 #include "../app.h"
+#include "../wm/ws.h"
+
 
 #include "gtk/menu.h"
 #include "play.h"
@@ -48,7 +51,14 @@ int gtkInited = 0;
 #include "gtk/url.h"
 #include "gtk/eq.h"
 
+#include "pixmaps/MPlayer_mini.xpm"
+
 // --- init & close gtk
+
+GdkPixmap * gtkIcon = NULL;
+GdkBitmap * gtkIconMask = NULL;
+Pixmap	    guiIcon;
+Pixmap	    guiIconMask;
 
 void gtkInit( void )
 {
@@ -57,11 +67,31 @@ void gtkInit( void )
 // gtk_init( &argc,&argv );
  gtk_init( 0,NULL );
 // gdk_set_use_xshm( TRUE );
+
+ {
+  GtkWidget * win;
+  win=gtk_window_new( GTK_WINDOW_TOPLEVEL );
+
+  if ( !gtkIcon ) 
+    gtkIcon=gdk_pixmap_colormap_create_from_xpm_d( win->window,gdk_colormap_get_system(),&gtkIconMask,&win->style->bg[GTK_STATE_NORMAL],MPlayer_mini_xpm );
+
+  guiIcon=GDK_WINDOW_XWINDOW( gtkIcon );
+  guiIconMask=GDK_WINDOW_XWINDOW( gtkIconMask );
+
+  gtk_widget_destroy( win );
+ }
+ 
  gtkInited=1;
 }
 
 void gtkDone( void )
 {
+}
+
+void gtkAddIcon( GtkWidget * window )
+{
+ GdkWindowPrivate * win = (GdkWindowPrivate *)window->window;
+ wsSetIcon( gdk_display,win->xwindow,guiIcon,guiIconMask );
 }
 
 void gtkClearList( GtkWidget * list )
@@ -121,13 +151,13 @@ void gtkMessageBox( int type,gchar * str )
 
 void gtkSetLayer( GtkWidget * wdg )
 {
- GdkWindowPrivate * win = wdg->window;
+ GdkWindowPrivate * win = (GdkWindowPrivate *)wdg->window;
  wsSetLayer( gdk_display,win->xwindow,appMPlayer.subWindow.isFullScreen );
 }
 
 void gtkActive( GtkWidget * wdg )
 {
- GdkWindowPrivate * win = wdg->window;
+ GdkWindowPrivate * win = (GdkWindowPrivate *)wdg->window;
  wsMoveTopWindow( gdk_display,win->xwindow );
 }
 
@@ -145,7 +175,7 @@ void gtkShow( int type,char * param )
         if ( gtkFillSkinList( sbMPlayerPrefixDir ) && gtkFillSkinList( sbMPlayerDirInHome ) )
          {
           gtkSetDefaultToCList( SkinList,param );
-	  gtk_clist_sort( SkinList );
+	  gtk_clist_sort( GTK_CLIST( SkinList ) );
           gtk_widget_show( SkinBrowser );
 	  gtkSetLayer( SkinBrowser );
          } 

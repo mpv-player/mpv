@@ -64,7 +64,7 @@ typedef struct
 } Languages_t;
 
 #define lng( a,b ) ( (int)(a) * 256 + b )
-Languages_t Languages[] =
+static Languages_t Languages[] =
          {
            { lng( 'a','b' ), "Abkhazian"                  },
            { lng( 'a','a' ), "Afar"                       },
@@ -240,9 +240,14 @@ Languages_t Languages[] =
          };
 #undef lng
 
+static char * ChannelTypes[] =
+	{ "Dolby Digital","","Mpeg1","Mpeg2","PCM","","Digital Theatre System" };
+static char * ChannelNumbers[] =
+	{ "","Stereo","","","","5.1" };
+
 char * GetLanguage( int language )
 {
- int i;
+ unsigned int i;
  for ( i=0;i<sizeof( Languages ) / sizeof( Languages_t );i++ )
   if ( Languages[i].id == language ) return Languages[i].name;
  return NULL;
@@ -354,7 +359,9 @@ GtkWidget * create_PopUpMenu( void )
        char tmp[64]; int i;
        for ( i=0;i < guiIntfStruct.DVD.nr_of_audio_channels;i++ )
         {
-         strcpy( tmp,GetLanguage( guiIntfStruct.DVD.audio_streams[i].language ) );
+	 snprintf( tmp,64,"%s - %s %s",GetLanguage( guiIntfStruct.DVD.audio_streams[i].language ),
+	   ChannelTypes[ guiIntfStruct.DVD.audio_streams[i].type ],
+	   ChannelNumbers[ guiIntfStruct.DVD.audio_streams[i].channels ] );
          AddMenuItem( DVDAudioLanguageMenu,tmp,( guiIntfStruct.DVD.audio_streams[i].id << 16 ) + evSetDVDAudio );
         }
       }

@@ -232,6 +232,7 @@ extern void wsSetLayer( Display * wsDisplay,Window win, int layer );
 extern void wsFullScreen( wsTWindow * win );
 extern void wsPostRedisplay( wsTWindow * win );
 extern void wsSetShape( wsTWindow * win,char * data );
+extern void wsSetIcon( Display * dsp,Window win,Pixmap icon,Pixmap mask );
 
 // ----------------------------------------------------------------------------------------------
 //    Draw string at x,y with fc ( foreground color ) and bc ( background color ).

@@ -1292,4 +1292,27 @@ void wsSetShape( wsTWindow * win,char * data )
 #endif
 }
 
+void wsSetIcon( Display * dsp,Window win,Pixmap icon,Pixmap mask )
+{
+ XWMHints * wm;
+ long	    data[2];
+ Atom	    iconatom;
+ 
+ wm=XGetWMHints( dsp,win );
+ if ( !wm ) wm=XAllocWMHints();
+
+ wm->icon_pixmap=icon;
+ wm->icon_mask=mask;
+ wm->flags|=IconPixmapHint | IconMaskHint;
+
+ XSetWMHints( dsp,win,wm );
+
+ data[0]=icon;
+ data[1]=mask;
+ iconatom=XInternAtom( dsp,"KWM_WIN_ICON",0 );
+ XChangeProperty( dsp,win,iconatom,iconatom,32,PropModeReplace,(unsigned char *)data,2 );
+ 
+ XFree( wm );
+}
+
 #include "wsmkeys.h"

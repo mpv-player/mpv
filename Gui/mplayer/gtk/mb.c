@@ -54,6 +54,10 @@ GtkWidget * create_MessageBox( int type )
  gtk_window_set_position( GTK_WINDOW( MessageBox ),GTK_WIN_POS_CENTER );
  gtk_window_set_modal( GTK_WINDOW( MessageBox ),TRUE );
  gtk_window_set_policy( GTK_WINDOW( MessageBox ),TRUE,TRUE,FALSE );
+ gtk_window_set_wmclass( GTK_WINDOW( MessageBox ),"Message","MPlayer" );
+ 
+ gtk_widget_realize( MessageBox );
+ gtkAddIcon( MessageBox );
 
  frame1=gtk_frame_new( NULL );
  gtk_widget_set_name( frame1,"frame1" );

@@ -225,6 +225,8 @@ extern char * audio_stream;
 typedef struct {
  int id; // 0 - 31 mpeg; 128 - 159 ac3; 160 - 191 pcm
  int language; 
+ int type;
+ int channels;
 } stream_language_t;
 
 typedef struct {

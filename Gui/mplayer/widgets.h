@@ -12,6 +12,7 @@
 #include "play.h"
 #include "mplayer.h"
 #include "../interface.h"
+#include "../wm/ws.h"
 
 #define GTK_MB_SIMPLE 0
 #define GTK_MB_MODAL 1
@@ -35,10 +36,16 @@ extern int             gtkPopupMenuParam;
 extern char          * sbMPlayerDirInHome;
 extern char          * sbMPlayerPrefixDir;
 
+extern GdkPixmap * gtkIcon;
+extern GdkBitmap * gtkIconMask;
+extern Pixmap      guiIcon;
+extern Pixmap	   guiIconMask;
+
 extern void widgetsCreate( void );
 
 extern void gtkInit( void );
 extern void gtkDone( void );
+extern void gtkAddIcon( GtkWidget * window );
 
 extern int  gtkFillSkinList( gchar * dir );
 extern void gtkClearList( GtkWidget * list );

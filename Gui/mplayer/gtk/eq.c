@@ -10,6 +10,7 @@
 #include <gtk/gtk.h>
 
 #include "../../events.h"
+#include "../../help_mp.h"
 #include "../../../config.h"
 #include "../../../help_mp.h"
 #include "../../../mplayer.h"
@@ -25,15 +26,30 @@ static GtkWidget * Notebook;
 static GtkWidget * ChannelsList;
 static GtkWidget * VContrast, * VBrightness, * VHue, * VSaturation;
 static GtkAdjustment * VContrastadj, * VBrightnessadj, * VHueadj, * VSaturationadj;
-static GtkWidget * Ok, * Clear;
+static GtkWidget * Ok, * Clear, * Config;
 static GtkWidget * A3125,  * A125, * A6250, * A250, * A500, * A1000, * A2000, * A4000, * A8000, * A16000;
 static GtkAdjustment * A3125adj, * A125adj, * A6250adj, * A250adj, * A500adj, * A1000adj, * A2000adj, * A4000adj, * A8000adj, * A16000adj;
 
 static int Channel = -1;
 static int gtkVEqualizer = 0;
+static int gtkVEquConfig = 0;
+
+// ---
 
 int gtkEnableAudioEqualizer = 1;
 int gtkEnableVideoEqualizer = 1;
+
+char * gtkEquChannel1 = NULL;
+char * gtkEquChannel2 = NULL;
+char * gtkEquChannel3 = NULL;
+char * gtkEquChannel4 = NULL;
+char * gtkEquChannel5 = NULL;
+char * gtkEquChannel6 = NULL;
+
+// ---
+
+void ShowEquConfig( void );
+void HideEquConfig( void );
 
 static void eqSetBands( int channel )
 {
@@ -54,69 +70,85 @@ static void eqSetBands( int channel )
  gtk_adjustment_set_value( VSaturationadj,gtkSaturation );
 }
 
+static void eqSetChannelNames( void )
+{
+ gchar * str[2];
+ gtk_clist_clear( GTK_CLIST( ChannelsList ) );
+ str[1]="";
+ str[0]=MSGTR_EQU_All;
+ gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+ if ( guiIntfStruct.AudioType > 1 )
+  {
+   str[0]=gtkEquChannel1; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+   str[0]=gtkEquChannel2; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+  }
+ if ( guiIntfStruct.AudioType > 2 )
+  {
+   str[0]=gtkEquChannel3; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+   str[0]=gtkEquChannel4; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+  }
+ if ( guiIntfStruct.AudioType > 4 )
+  {
+   str[0]=gtkEquChannel5; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+   str[0]=gtkEquChannel6; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+  }
+ gtk_clist_select_row( GTK_CLIST( ChannelsList ),1,0 );
+}
+
 void ShowEqualizer( void )
 {
  if ( gtkVEqualizer ) gtkActive( Equalizer );
     else Equalizer=create_Equalizer();
 
+ if ( !gtkEquChannel1 ) gtkEquChannel1=strdup( MSGTR_EQU_Front_Right );
+ if ( !gtkEquChannel2 ) gtkEquChannel2=strdup( MSGTR_EQU_Front_Left );
+ if ( !gtkEquChannel3 ) gtkEquChannel3=strdup( MSGTR_EQU_Back_Right );
+ if ( !gtkEquChannel4 ) gtkEquChannel4=strdup( MSGTR_EQU_Back_Left );
+ if ( !gtkEquChannel5 ) gtkEquChannel5=strdup( MSGTR_EQU_Center );
+ if ( !gtkEquChannel6 ) gtkEquChannel6=strdup( MSGTR_EQU_Bass );
+
+ eqSetChannelNames();
+
+ VContrastadj->value=gtkContrast;
+ VBrightnessadj->value=gtkBrightness;
+ VHueadj->value=gtkHue;
+ VSaturationadj->value=gtkSaturation;
+
+ if ( !guiIntfStruct.Playing && gtkEnableVideoEqualizer )
   {
-   gchar * str[2];  str[1]="";
-   str[0]="All"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
-   if ( guiIntfStruct.AudioType > 1 )
-    {
-     str[0]="Front Right"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
-     str[0]="Front Left"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
-    }
-   if ( guiIntfStruct.AudioType > 2 )
-    {
-     str[0]="Channel 3. (Back Right?)"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
-     str[0]="Channel 4. (Back Left?)"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
-    }
-   if ( guiIntfStruct.AudioType > 4 )
-    {
-     str[0]="Channel 5. (?)"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
-     str[0]="Channel 6. (?)"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
-    }
-   gtk_clist_select_row( GTK_CLIST( ChannelsList ),1,0 );
-
-   VContrastadj->value=gtkContrast;
-   VBrightnessadj->value=gtkBrightness;
-   VHueadj->value=gtkHue;
-   VSaturationadj->value=gtkSaturation;
-
-   if ( !guiIntfStruct.Playing && gtkEnableVideoEqualizer )
-    {
-     
-     gtk_widget_set_sensitive( VContrast,FALSE );
-     gtk_widget_set_sensitive( VBrightness,FALSE );
-     gtk_widget_set_sensitive( VHue,FALSE );
-     gtk_widget_set_sensitive( VSaturation,FALSE );
-    }
-
-   Channel=0;
-   eqSetBands( 0 );
-    
-   if ( !guiIntfStruct.Playing && gtkEnableAudioEqualizer )
-    {
-     gtk_widget_set_sensitive( ChannelsList,FALSE );
-     gtk_widget_set_sensitive( A3125,FALSE );
-     gtk_widget_set_sensitive( A125,FALSE );
-     gtk_widget_set_sensitive( A6250,FALSE );
-     gtk_widget_set_sensitive( A250,FALSE );
-     gtk_widget_set_sensitive( A500,FALSE );
-     gtk_widget_set_sensitive( A1000,FALSE );
-     gtk_widget_set_sensitive( A2000,FALSE );
-     gtk_widget_set_sensitive( A4000,FALSE );
-     gtk_widget_set_sensitive( A8000,FALSE );
-     gtk_widget_set_sensitive( A16000,FALSE );
-    }
+   gtk_widget_set_sensitive( VContrast,FALSE );
+   gtk_widget_set_sensitive( VBrightness,FALSE );
+   gtk_widget_set_sensitive( VHue,FALSE );
+   gtk_widget_set_sensitive( VSaturation,FALSE );
+  }
+ Channel=0;
+ eqSetBands( 0 );
+ if ( !guiIntfStruct.Playing && gtkEnableAudioEqualizer )
+  {
+   gtk_widget_set_sensitive( ChannelsList,FALSE );
+   gtk_widget_set_sensitive( A3125,FALSE );
+   gtk_widget_set_sensitive( A125,FALSE );
+   gtk_widget_set_sensitive( A6250,FALSE );
+   gtk_widget_set_sensitive( A250,FALSE );
+   gtk_widget_set_sensitive( A500,FALSE );
+   gtk_widget_set_sensitive( A1000,FALSE );
+   gtk_widget_set_sensitive( A2000,FALSE );
+   gtk_widget_set_sensitive( A4000,FALSE );
+   gtk_widget_set_sensitive( A8000,FALSE );
+   gtk_widget_set_sensitive( A16000,FALSE );
   }
 
+ gtk_widget_show( Config );
  gtk_widget_show( Equalizer );
 }
 
 void HideEqualizer( void )
-{ gtkVEqualizer=0; gtk_widget_hide( Equalizer ); gtk_widget_destroy( Equalizer ); }
+{
+ gtkVEqualizer=0;
+ gtk_widget_hide( Equalizer );
+ gtk_widget_destroy( Equalizer );
+ if ( gtkVEquConfig ) HideEquConfig();
+}
 
 static gboolean eqHScaleMotion( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data )
 {
@@ -167,18 +199,23 @@ static void eqButtonReleased( GtkButton * button,gpointer user_data )
   {
    case 0: HideEqualizer(); break;
    case 1: 
-	if ( gtk_notebook_get_current_page( Notebook ) == 0 )
+	if ( gtk_notebook_get_current_page( GTK_NOTEBOOK( Notebook ) ) == 0 )
 	 { 
+	  if ( !guiIntfStruct.Playing && !gtkEnableAudioEqualizer ) break;
 	  gtkSet( gtkSetEqualizer,0,NULL ); 
 	  eqSetBands( Channel ); 
 	 }
 	 else
 	  {
+	   if ( !guiIntfStruct.Playing && !gtkEnableVideoEqualizer ) break;
 	   gtkSet( gtkSetContrast,0.0f,NULL );
 	   gtkSet( gtkSetBrightness,0.0f,NULL );
 	   gtkSet( gtkSetHue,0.0f,NULL );
 	   gtkSet( gtkSetSaturation,0.0f,NULL );
 	  }
+	break;
+   case 2:
+	ShowEquConfig();
 	break;
   }
 }
@@ -201,6 +238,12 @@ static void eqSelectChannelsListRow( GtkCList * clist,gint row,gint column,GdkEv
     for ( j=0;j<10;j++ )
      { eq.band=j; eq.channel=i; eq.gain=gtkEquChannels[0][j]; gtkSet( gtkSetEqualizer,0,&eq ); }
   }
+}
+
+void eqNotebook( GtkNotebook * notebook,GtkNotebookPage * page,gint page_num,gpointer user_data )
+{
+ if ( page_num ) gtk_widget_hide( Config );
+   else gtk_widget_show( Config );
 }
 
 GtkWidget * create_Equalizer( void )
@@ -239,13 +282,17 @@ GtkWidget * create_Equalizer( void )
   accel_group=gtk_accel_group_new();
 
   Equalizer=gtk_window_new( GTK_WINDOW_DIALOG );
-  gtk_widget_set_name( Equalizer,"Equalizer" );
-  gtk_object_set_data( GTK_OBJECT( Equalizer ),"Equalizer",Equalizer );
+  gtk_widget_set_name( Equalizer,MSGTR_Equalizer );
+  gtk_object_set_data( GTK_OBJECT( Equalizer ),MSGTR_Equalizer,Equalizer );
   gtk_widget_set_usize( Equalizer,550,256 );
-  gtk_window_set_title( GTK_WINDOW( Equalizer ),"Equalizer" );
+  gtk_window_set_title( GTK_WINDOW( Equalizer ),MSGTR_Equalizer );
   gtk_window_set_position( GTK_WINDOW( Equalizer ),GTK_WIN_POS_CENTER );
   gtk_window_set_policy( GTK_WINDOW( Equalizer ),FALSE,FALSE,FALSE );
+  gtk_window_set_wmclass( GTK_WINDOW( Equalizer ),MSGTR_Equalizer,"MPlayer" );
 
+  gtk_widget_realize( Equalizer );
+  gtkAddIcon( Equalizer );
+    
   frame1=gtk_frame_new( NULL );
   gtk_widget_set_name( frame1,"frame1" );
   gtk_widget_ref( frame1 );
@@ -507,7 +554,7 @@ GtkWidget * create_Equalizer( void )
   gtk_table_attach( GTK_TABLE( table1 ),label12,9,10,1,2,( GtkAttachOptions )( GTK_FILL ),( GtkAttachOptions )( 0 ),0,0 );
   gtk_misc_set_alignment( GTK_MISC( label12 ),0,0.5 );
 
-  label1=gtk_label_new( "Audio" );
+  label1=gtk_label_new( MSGTR_EQU_Audio );
   gtk_widget_set_name( label1,"label1" );
   gtk_widget_ref( label1 );
   gtk_object_set_data_full( GTK_OBJECT( Equalizer ),"label1",label1,(GtkDestroyNotify)gtk_widget_unref );
@@ -528,7 +575,7 @@ GtkWidget * create_Equalizer( void )
   gtk_widget_show( vbox2 );
   gtk_box_pack_start( GTK_BOX( hbox2 ),vbox2,FALSE,FALSE,0 );
 
-  label13=gtk_label_new( "Contrast: " );
+  label13=gtk_label_new( MSGTR_EQU_Contrast );
   gtk_widget_set_name( label13,"label13" );
   gtk_widget_ref( label13 );
   gtk_object_set_data_full( GTK_OBJECT( Equalizer ),"label13",label13,(GtkDestroyNotify)gtk_widget_unref );
@@ -537,7 +584,7 @@ GtkWidget * create_Equalizer( void )
   gtk_label_set_justify( GTK_LABEL( label13 ),GTK_JUSTIFY_LEFT );
   gtk_misc_set_alignment( GTK_MISC( label13 ),0.02,0.5 );
 
-  label14=gtk_label_new( "Brightness: " );
+  label14=gtk_label_new( MSGTR_EQU_Brightness );
   gtk_widget_set_name( label14,"label14" );
   gtk_widget_ref( label14 );
   gtk_object_set_data_full( GTK_OBJECT( Equalizer ),"label14",label14,(GtkDestroyNotify)gtk_widget_unref );
@@ -546,7 +593,7 @@ GtkWidget * create_Equalizer( void )
   gtk_label_set_justify( GTK_LABEL( label14 ),GTK_JUSTIFY_LEFT );
   gtk_misc_set_alignment( GTK_MISC( label14 ),0.02,0.5 );
 
-  label15=gtk_label_new( "Hue: " );
+  label15=gtk_label_new( MSGTR_EQU_Hue );
   gtk_widget_set_name( label15,"label15" );
   gtk_widget_ref( label15 );
   gtk_object_set_data_full( GTK_OBJECT( Equalizer ),"label15",label15,(GtkDestroyNotify)gtk_widget_unref );
@@ -555,7 +602,7 @@ GtkWidget * create_Equalizer( void )
   gtk_label_set_justify( GTK_LABEL( label15 ),GTK_JUSTIFY_LEFT );
   gtk_misc_set_alignment( GTK_MISC( label15 ),0.02,0.5 );
 
-  label16=gtk_label_new( "Saturation: " );
+  label16=gtk_label_new( MSGTR_EQU_Saturation );
   gtk_widget_set_name( label16,"label16" );
   gtk_widget_ref( label16 );
   gtk_object_set_data_full( GTK_OBJECT( Equalizer ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
@@ -607,7 +654,7 @@ GtkWidget * create_Equalizer( void )
   gtk_box_pack_start( GTK_BOX( vbox3 ),VSaturation,TRUE,TRUE,0 );
   gtk_scale_set_value_pos( GTK_SCALE( VSaturation ),GTK_POS_RIGHT );
 
-  label2=gtk_label_new( "Video" );
+  label2=gtk_label_new( MSGTR_EQU_Video );
   gtk_widget_set_name( label2,"label2" );
   gtk_widget_ref( label2 );
   gtk_object_set_data_full( GTK_OBJECT( Equalizer ),"label2",label2,(GtkDestroyNotify)gtk_widget_unref );
@@ -621,25 +668,28 @@ GtkWidget * create_Equalizer( void )
   gtk_widget_show( hbuttonbox1 );
   gtk_box_pack_end( GTK_BOX( vbox1 ),hbuttonbox1,FALSE,TRUE,0 );
   gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox1 ),GTK_BUTTONBOX_END );
-  gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox1 ),0 );
+  gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox1 ),10 );
+  gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox1 ),85,20 );
 
-  Clear=gtk_button_new_with_label( "Clear" );
+  Config=gtk_button_new_with_label( MSGTR_Config );
+  gtk_widget_set_name( Config,"Config" );
+  gtk_widget_ref( Config );
+  gtk_object_set_data_full( GTK_OBJECT( Equalizer ),"Config",Config,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Config );
+
+  Clear=gtk_button_new_with_label( MSGTR_Clear );
   gtk_widget_set_name( Clear,"Clear" );
   gtk_widget_ref( Clear );
   gtk_object_set_data_full( GTK_OBJECT( Equalizer ),"Clear",Clear,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( Clear );
   gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Clear );
-  GTK_WIDGET_UNSET_FLAGS( Clear,GTK_CAN_FOCUS );
-  GTK_WIDGET_SET_FLAGS( Clear,GTK_CAN_DEFAULT );
 
-  Ok=gtk_button_new_with_label( "Ok" );
+  Ok=gtk_button_new_with_label( MSGTR_Ok );
   gtk_widget_set_name( Ok,"Ok" );
   gtk_widget_ref( Ok );
   gtk_object_set_data_full( GTK_OBJECT( Equalizer ),"Ok",Ok,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( Ok );
   gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Ok );
-  GTK_WIDGET_UNSET_FLAGS( Ok,GTK_CAN_FOCUS );
-  GTK_WIDGET_SET_FLAGS( Ok,GTK_CAN_DEFAULT );
   gtk_widget_add_accelerator( Ok,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
   gtk_widget_add_accelerator( Ok,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
 
@@ -674,9 +724,351 @@ GtkWidget * create_Equalizer( void )
   
   gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( eqButtonReleased ),(void *)0 );
   gtk_signal_connect( GTK_OBJECT( Clear ),"released",GTK_SIGNAL_FUNC( eqButtonReleased ),(void *)1 );
+  gtk_signal_connect( GTK_OBJECT( Config ),"released",GTK_SIGNAL_FUNC( eqButtonReleased ),(void *)2 );
+
+  gtk_signal_connect( GTK_OBJECT( Notebook ),"switch_page",GTK_SIGNAL_FUNC( eqNotebook ),NULL );
 
   gtk_window_add_accel_group( GTK_WINDOW( Equalizer ),accel_group );
 
   return Equalizer;
+}
+
+// --- equalizer config dialog box
+
+static GtkWidget * EquConfig;
+static GtkWidget * CBChannel1;
+static GtkWidget * CEChannel1;
+static GtkWidget * CBChannel2;
+static GtkWidget * CEChannel2;
+static GtkWidget * CBChannel3;
+static GtkWidget * CEChannel3;
+static GtkWidget * CBChannel4;
+static GtkWidget * CEChannel4;
+static GtkWidget * CBChannel5;
+static GtkWidget * CEChannel5;
+static GtkWidget * CBChannel6;
+static GtkWidget * CEChannel6;
+static GtkWidget * ecOk;
+static GtkWidget * ecCancel;
+
+GtkWidget * create_EquConfig( void );
+
+void ShowEquConfig( void )
+{
+ GList * Items = NULL;
+
+ if ( gtkVEquConfig ) gtkActive( EquConfig );
+    else EquConfig=create_EquConfig();
+	
+ Items=g_list_append( Items,(gpointer)MSGTR_EQU_Front_Right  );
+ Items=g_list_append( Items,(gpointer)MSGTR_EQU_Front_Left );
+ Items=g_list_append( Items,(gpointer)MSGTR_EQU_Back_Right );
+ Items=g_list_append( Items,(gpointer)MSGTR_EQU_Back_Left );
+ Items=g_list_append( Items,(gpointer)MSGTR_EQU_Center );
+ Items=g_list_append( Items,(gpointer)MSGTR_EQU_Bass );
+ 
+ gtk_combo_set_popdown_strings( GTK_COMBO( CBChannel1 ),Items );
+ gtk_combo_set_popdown_strings( GTK_COMBO( CBChannel2 ),Items );
+ gtk_combo_set_popdown_strings( GTK_COMBO( CBChannel3 ),Items );
+ gtk_combo_set_popdown_strings( GTK_COMBO( CBChannel4 ),Items );
+ gtk_combo_set_popdown_strings( GTK_COMBO( CBChannel5 ),Items );
+ gtk_combo_set_popdown_strings( GTK_COMBO( CBChannel6 ),Items );
+
+ g_list_free( Items );
+
+ gtk_entry_set_text( GTK_ENTRY( CEChannel1 ),gtkEquChannel1 ); gtk_entry_set_editable( GTK_ENTRY( CEChannel1 ),FALSE );
+ gtk_entry_set_text( GTK_ENTRY( CEChannel2 ),gtkEquChannel2 ); gtk_entry_set_editable( GTK_ENTRY( CEChannel2 ),FALSE );
+ gtk_entry_set_text( GTK_ENTRY( CEChannel3 ),gtkEquChannel3 ); gtk_entry_set_editable( GTK_ENTRY( CEChannel3 ),FALSE );
+ gtk_entry_set_text( GTK_ENTRY( CEChannel4 ),gtkEquChannel4 ); gtk_entry_set_editable( GTK_ENTRY( CEChannel4 ),FALSE );
+ gtk_entry_set_text( GTK_ENTRY( CEChannel5 ),gtkEquChannel5 ); gtk_entry_set_editable( GTK_ENTRY( CEChannel5 ),FALSE );
+ gtk_entry_set_text( GTK_ENTRY( CEChannel6 ),gtkEquChannel6 ); gtk_entry_set_editable( GTK_ENTRY( CEChannel6 ),FALSE );
+
+ gtk_widget_show( EquConfig );
+}
+
+void HideEquConfig( void )
+{ gtk_widget_hide( EquConfig ); gtk_widget_destroy( EquConfig ); gtkVEquConfig=0; }
+
+static void ecHandler( GtkObject * object,gpointer user_data )
+{
+ switch ( (int)user_data )
+ {
+   case 0: HideEquConfig(); break;
+   case 1: gtkVEquConfig=1; break;
+   case 2: gtkVEquConfig=0; break;
+ }
+}
+
+static void ecButtonReleased( GtkButton * button,gpointer user_data )
+{
+ if ( (int)user_data )
+ { // if you pressed Ok
+  if ( gtkEquChannel1) free( gtkEquChannel1 ); gtkEquChannel1=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel1 ) ) );
+  if ( gtkEquChannel2) free( gtkEquChannel2 ); gtkEquChannel2=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel2 ) ) );
+  if ( gtkEquChannel3) free( gtkEquChannel3 ); gtkEquChannel3=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel3 ) ) );
+  if ( gtkEquChannel4) free( gtkEquChannel4 ); gtkEquChannel4=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel4 ) ) );
+  if ( gtkEquChannel5) free( gtkEquChannel5 ); gtkEquChannel5=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel5 ) ) );
+  if ( gtkEquChannel6) free( gtkEquChannel6 ); gtkEquChannel6=strdup( gtk_entry_get_text( GTK_ENTRY( CEChannel6 ) ) );
+  eqSetChannelNames();
+ }
+ HideEquConfig();
+}
+
+GtkWidget * create_EquConfig( void )
+{
+  GtkWidget * frame1;
+  GtkWidget * frame2;
+  GtkWidget * frame3;
+  GtkWidget * frame4;
+  GtkWidget * vbox1;
+  GtkWidget * table1;
+  GtkWidget * label1;
+  GtkWidget * label2;
+  GtkWidget * label3;
+  GtkWidget * label4;
+  GtkWidget * label5;
+  GtkWidget * label6;
+  GtkWidget * hseparator1;
+  GtkWidget * hbuttonbox1;
+  GtkAccelGroup * accel_group;
+
+  accel_group=gtk_accel_group_new();
+
+  EquConfig=gtk_window_new( GTK_WINDOW_DIALOG );
+  gtk_widget_set_name( EquConfig,"EquConfig" );
+  gtk_object_set_data( GTK_OBJECT( EquConfig ),"EquConfig",EquConfig );
+  gtk_widget_set_usize( EquConfig,350,198 );
+  GTK_WIDGET_SET_FLAGS( EquConfig,GTK_CAN_DEFAULT );
+  gtk_window_set_title( GTK_WINDOW( EquConfig ),"Configure Equalizer" );
+  gtk_window_set_position( GTK_WINDOW( EquConfig ),GTK_WIN_POS_CENTER );
+//  gtk_window_set_modal( GTK_WINDOW( EquConfig ),TRUE );
+  gtk_window_set_policy( GTK_WINDOW( EquConfig ),FALSE,FALSE,FALSE );
+  gtk_window_set_wmclass( GTK_WINDOW( EquConfig ),"EquConfig","MPlayer" );
+
+  gtk_widget_realize( EquConfig );
+  gtkAddIcon( EquConfig );
+
+  frame1=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame1,"frame1" );
+  gtk_widget_ref( frame1 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"frame1",frame1,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame1 );
+  gtk_container_add( GTK_CONTAINER( EquConfig ),frame1 );
+  gtk_container_set_border_width( GTK_CONTAINER( frame1 ),1 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame1 ),GTK_SHADOW_IN );
+
+  frame2=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame2,"frame2" );
+  gtk_widget_ref( frame2 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"frame2",frame2,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame2 );
+  gtk_container_add( GTK_CONTAINER( frame1 ),frame2 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame2 ),GTK_SHADOW_NONE );
+
+  frame3=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame3,"frame3" );
+  gtk_widget_ref( frame3 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"frame3",frame3,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame3 );
+  gtk_container_add( GTK_CONTAINER( frame2 ),frame3 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame3 ),GTK_SHADOW_ETCHED_OUT );
+
+  frame4=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame4,"frame4" );
+  gtk_widget_ref( frame4 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"frame4",frame4,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame4 );
+  gtk_container_add( GTK_CONTAINER( frame3 ),frame4 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame4 ),GTK_SHADOW_NONE );
+
+  vbox1=gtk_vbox_new( FALSE,0 );
+  gtk_widget_set_name( vbox1,"vbox1" );
+  gtk_widget_ref( vbox1 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"vbox1",vbox1,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( vbox1 );
+  gtk_container_add( GTK_CONTAINER( frame4 ),vbox1 );
+
+  table1=gtk_table_new( 6,2,FALSE );
+  gtk_widget_set_name( table1,"table1" );
+  gtk_widget_ref( table1 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"table1",table1,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( table1 );
+  gtk_box_pack_start( GTK_BOX( vbox1 ),table1,TRUE,TRUE,0 );
+  gtk_table_set_row_spacings( GTK_TABLE( table1 ),4 );
+  gtk_table_set_col_spacings( GTK_TABLE( table1 ),4 );
+
+  label1=gtk_label_new( "Channel 1:" );
+  gtk_widget_set_name( label1,"label1" );
+  gtk_widget_ref( label1 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"label1",label1,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label1 );
+  gtk_table_attach( GTK_TABLE( table1 ),label1,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_misc_set_alignment( GTK_MISC( label1 ),0,0.5 );
+
+  label2=gtk_label_new( "Channel 2:" );
+  gtk_widget_set_name( label2,"label2" );
+  gtk_widget_ref( label2 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"label2",label2,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label2 );
+  gtk_table_attach( GTK_TABLE( table1 ),label2,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_misc_set_alignment( GTK_MISC( label2 ),0,0.5 );
+
+  label3=gtk_label_new( "Channel 3:" );
+  gtk_widget_set_name( label3,"label3" );
+  gtk_widget_ref( label3 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"label3",label3,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label3 );
+  gtk_table_attach( GTK_TABLE( table1 ),label3,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_misc_set_alignment( GTK_MISC( label3 ),0,0.5 );
+
+  label4=gtk_label_new( "Channel 4:" );
+  gtk_widget_set_name( label4,"label4" );
+  gtk_widget_ref( label4 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"label4",label4,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label4 );
+  gtk_table_attach( GTK_TABLE( table1 ),label4,0,1,3,4,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_misc_set_alignment( GTK_MISC( label4 ),0,0.5 );
+
+  label5=gtk_label_new( "Channel 5:" );
+  gtk_widget_set_name( label5,"label5" );
+  gtk_widget_ref( label5 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"label5",label5,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label5 );
+  gtk_table_attach( GTK_TABLE( table1 ),label5,0,1,4,5,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_misc_set_alignment( GTK_MISC( label5 ),0,0.5 );
+
+  label6=gtk_label_new( "Channel 6:" );
+  gtk_widget_set_name( label6,"label6" );
+  gtk_widget_ref( label6 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"label6",label6,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label6 );
+  gtk_table_attach( GTK_TABLE( table1 ),label6,0,1,5,6,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_misc_set_alignment( GTK_MISC( label6 ),0,0.5 );
+
+  CBChannel1=gtk_combo_new();
+  gtk_widget_set_name( CBChannel1,"CBChannel1" );
+  gtk_widget_ref( CBChannel1 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CBChannel1",CBChannel1,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CBChannel1 );
+  gtk_table_attach( GTK_TABLE( table1 ),CBChannel1,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+
+  CEChannel1=GTK_COMBO( CBChannel1 )->entry;
+  gtk_widget_set_name( CEChannel1,"CEChannel1" );
+  gtk_widget_ref( CEChannel1 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CEChannel1",CEChannel1,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CEChannel1 );
+
+  CBChannel2=gtk_combo_new();
+  gtk_widget_set_name( CBChannel2,"CBChannel2" );
+  gtk_widget_ref( CBChannel2 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CBChannel2",CBChannel2,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CBChannel2 );
+  gtk_table_attach( GTK_TABLE( table1 ),CBChannel2,1,2,1,2,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  
+  CEChannel2=GTK_COMBO( CBChannel2 )->entry;
+  gtk_widget_set_name( CEChannel2,"CEChannel2" );
+  gtk_widget_ref( CEChannel2 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CEChannel2",CEChannel2,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CEChannel2 );
+
+  CBChannel3=gtk_combo_new();
+  gtk_widget_set_name( CBChannel3,"CBChannel3" );
+  gtk_widget_ref( CBChannel3 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CBChannel3",CBChannel3,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CBChannel3 );
+  gtk_table_attach( GTK_TABLE( table1 ),CBChannel3,1,2,2,3,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  
+  CEChannel3=GTK_COMBO( CBChannel3 )->entry;
+  gtk_widget_set_name( CEChannel3,"CEChannel3" );
+  gtk_widget_ref( CEChannel3 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CEChannel3",CEChannel3,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CEChannel3 );
+
+  CBChannel4=gtk_combo_new();
+  gtk_widget_set_name( CBChannel4,"CBChannel4" );
+  gtk_widget_ref( CBChannel4 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CBChannel4",CBChannel4,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CBChannel4 );
+  gtk_table_attach( GTK_TABLE( table1 ),CBChannel4,1,2,3,4,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  
+  CEChannel4=GTK_COMBO( CBChannel4 )->entry;
+  gtk_widget_set_name( CEChannel4,"CEChannel4" );
+  gtk_widget_ref( CEChannel4 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CEChannel4",CEChannel4,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CEChannel4 );
+
+  CBChannel5=gtk_combo_new();
+  gtk_widget_set_name( CBChannel5,"CBChannel5" );
+  gtk_widget_ref( CBChannel5 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CBChannel5",CBChannel5,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CBChannel5 );
+  gtk_table_attach( GTK_TABLE( table1 ),CBChannel5,1,2,4,5,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  
+  CEChannel5=GTK_COMBO( CBChannel5 )->entry;
+  gtk_widget_set_name( CEChannel5,"CEChannel5" );
+  gtk_widget_ref( CEChannel5 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CEChannel5",CEChannel5,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CEChannel5 );
+
+  CBChannel6=gtk_combo_new();
+  gtk_widget_set_name( CBChannel6,"CBChannel6" );
+  gtk_widget_ref( CBChannel6 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CBChannel6",CBChannel6,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CBChannel6 );
+  gtk_table_attach( GTK_TABLE( table1 ),CBChannel6,1,2,5,6,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  
+  CEChannel6=GTK_COMBO( CBChannel6 )->entry;
+  gtk_widget_set_name( CEChannel6,"CEChannel6" );
+  gtk_widget_ref( CEChannel6 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"CEChannel6",CEChannel6,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CEChannel6 );
+
+  hseparator1=gtk_hseparator_new();
+  gtk_widget_set_name( hseparator1,"hseparator1" );
+  gtk_widget_ref( hseparator1 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"hseparator1",hseparator1,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( hseparator1 );
+  gtk_box_pack_start( GTK_BOX( vbox1 ),hseparator1,FALSE,FALSE,0 );
+  gtk_widget_set_usize( hseparator1,-2,6 );
+
+  hbuttonbox1=gtk_hbutton_box_new();
+  gtk_widget_set_name( hbuttonbox1,"hbuttonbox1" );
+  gtk_widget_ref( hbuttonbox1 );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"hbuttonbox1",hbuttonbox1,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( hbuttonbox1 );
+  gtk_box_pack_start( GTK_BOX( vbox1 ),hbuttonbox1,FALSE,FALSE,0 );
+  gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox1 ),GTK_BUTTONBOX_END );
+  gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox1 ),10 );
+  gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox1 ),-1,20 );
+  gtk_button_box_set_child_ipadding( GTK_BUTTON_BOX( hbuttonbox1 ),0,-1 );
+
+  ecOk=gtk_button_new_with_label( "Ok" );
+  gtk_widget_set_name( ecOk,"Ok" );
+  gtk_widget_ref( ecOk );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"ecOk",ecOk,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( ecOk );
+  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),ecOk );
+  GTK_WIDGET_UNSET_FLAGS( ecOk,GTK_CAN_FOCUS );
+  gtk_widget_add_accelerator( ecOk,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
+
+  ecCancel=gtk_button_new_with_label( "Cancel" );
+  gtk_widget_set_name( ecCancel,"Cancel" );
+  gtk_widget_ref( ecCancel );
+  gtk_object_set_data_full( GTK_OBJECT( EquConfig ),"ecCancel",ecCancel,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( ecCancel );
+  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),ecCancel );
+  GTK_WIDGET_UNSET_FLAGS( ecCancel,GTK_CAN_FOCUS );
+  gtk_widget_add_accelerator( ecCancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
+
+  gtk_signal_connect( GTK_OBJECT( EquConfig ),"destroy",GTK_SIGNAL_FUNC( ecHandler ),(void *)0 );
+  gtk_signal_connect( GTK_OBJECT( EquConfig ),"show",GTK_SIGNAL_FUNC( ecHandler ),(void *)1 );
+  gtk_signal_connect( GTK_OBJECT( EquConfig ),"hide",GTK_SIGNAL_FUNC( ecHandler ),(void *)2 );
+  
+  gtk_signal_connect( GTK_OBJECT( ecOk ),"released",GTK_SIGNAL_FUNC( ecButtonReleased ),(void *)1 );
+  gtk_signal_connect( GTK_OBJECT( ecCancel ),"released",GTK_SIGNAL_FUNC( ecButtonReleased ),(void *)0 );
+
+  gtk_window_add_accel_group( GTK_WINDOW( EquConfig ),accel_group );
+
+  return EquConfig;
 }
 

@@ -13,6 +13,7 @@
 #include "../../interface.h"
 #include "../../events.h"
 #include "../widgets.h"
+#include "../../help_mp.h"
 
 GtkWidget * URL;
 int         gtkVURLDialogBox = 0;
@@ -67,7 +68,7 @@ static void on_Button_pressed( GtkButton * button,gpointer user_data )
      URLComboEntrys=g_list_prepend( URLComboEntrys,(gchar *)str );
 
      guiSetFilename( guiIntfStruct.Filename,str ); guiIntfStruct.FilenameChanged=1;
-     mplEventHandling( evPlay,0 );
+     mplEventHandling( evPlayNetwork,0 );
     }
   }
  HideURLDialogBox(); 
@@ -85,7 +86,7 @@ GtkWidget * create_URL( void )
  GtkWidget * vbox1;
  GtkWidget * hbox1;
  GtkWidget * label1;
- GtkWidget * frame5;
+ GtkWidget * hsep;
  GtkWidget * hbuttonbox1;
  GtkWidget * Ok;
  GtkWidget * Cancel;
@@ -96,13 +97,15 @@ GtkWidget * create_URL( void )
  URL=gtk_window_new( GTK_WINDOW_DIALOG );
  gtk_widget_set_name( URL,"URL" );
  gtk_object_set_data( GTK_OBJECT( URL ),"URL",URL );
- gtk_widget_set_usize( URL,384,80 );
- GTK_WIDGET_SET_FLAGS( URL,GTK_CAN_FOCUS );
+ gtk_widget_set_usize( URL,384,70 );
  GTK_WIDGET_SET_FLAGS( URL,GTK_CAN_DEFAULT );
- gtk_window_set_title( GTK_WINDOW( URL ),"Network streaming ..." );
+ gtk_window_set_title( GTK_WINDOW( URL ),MSGTR_Network );
  gtk_window_set_position( GTK_WINDOW( URL ),GTK_WIN_POS_CENTER );
- gtk_window_set_default_size( GTK_WINDOW( URL ),-1,80 );
  gtk_window_set_policy( GTK_WINDOW( URL ),TRUE,TRUE,FALSE );
+ gtk_window_set_wmclass( GTK_WINDOW( URL ),MSGTR_Network,"MPlayer" );
+ 
+ gtk_widget_realize( URL );
+ gtkAddIcon( URL );
 
  frame1=gtk_frame_new( NULL );
  gtk_widget_set_name( frame1,"frame1" );
@@ -175,13 +178,13 @@ GtkWidget * create_URL( void )
  gtk_object_set_data_full( GTK_OBJECT( URL ),"URLEntry",URLEntry,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( URLEntry );
 
- frame5=gtk_frame_new( NULL );
- gtk_widget_set_name( frame5,"frame5" );
- gtk_widget_ref( frame5 );
- gtk_object_set_data_full( GTK_OBJECT( URL ),"frame5",frame5,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( frame5 );
- gtk_box_pack_start( GTK_BOX( hbox1 ),frame5,FALSE,TRUE,0 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame5 ),GTK_SHADOW_NONE );
+ hsep=gtk_hseparator_new();
+ gtk_widget_set_name( hsep,"hsep" );
+ gtk_widget_ref( hsep );
+ gtk_object_set_data_full( GTK_OBJECT( URL ),"hsep",hsep,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( hsep );
+ gtk_box_pack_start( GTK_BOX( vbox1 ),hsep,FALSE,TRUE,0 );
+ gtk_widget_set_usize( hsep,-2,8 );
 
  hbuttonbox1=gtk_hbutton_box_new();
  gtk_widget_set_name( hbuttonbox1,"hbuttonbox1" );
@@ -190,23 +193,23 @@ GtkWidget * create_URL( void )
  gtk_widget_show( hbuttonbox1 );
  gtk_box_pack_start( GTK_BOX( vbox1 ),hbuttonbox1,FALSE,FALSE,0 );
  gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox1 ),GTK_BUTTONBOX_END );
- gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox1 ),0 );
+ gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox1 ),10 );
+ gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox1 ),85,20 );
+ gtk_button_box_set_child_ipadding( GTK_BUTTON_BOX( hbuttonbox1 ),0,0 );
 
- Ok=gtk_button_new_with_label( "Ok" );
+ Ok=gtk_button_new_with_label( MSGTR_Ok );
  gtk_widget_set_name( Ok,"Ok" );
  gtk_widget_ref( Ok );
  gtk_object_set_data_full( GTK_OBJECT( URL ),"Ok",Ok,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( Ok );
  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Ok );
- GTK_WIDGET_SET_FLAGS( Ok,GTK_CAN_DEFAULT );
 
- Cancel=gtk_button_new_with_label( "Cancel" );
+ Cancel=gtk_button_new_with_label( MSGTR_Cancel );
  gtk_widget_set_name( Cancel,"Cancel" );
  gtk_widget_ref( Cancel );
  gtk_object_set_data_full( GTK_OBJECT( URL ),"Cancel",Cancel,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( Cancel );
  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Cancel );
- GTK_WIDGET_SET_FLAGS( Cancel,GTK_CAN_DEFAULT );
  
  gtk_widget_add_accelerator( Ok,"pressed",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
 // gtk_widget_add_accelerator( Ok,"pressed",accel_group,GDK_O,GDK_MOD1_MASK,GTK_ACCEL_VISIBLE );
@@ -222,7 +225,7 @@ GtkWidget * create_URL( void )
  gtk_signal_connect( GTK_OBJECT( Ok ),"pressed",GTK_SIGNAL_FUNC( on_Button_pressed ),(void *)1 );
  gtk_signal_connect( GTK_OBJECT( Cancel ),"pressed",GTK_SIGNAL_FUNC( on_Button_pressed ),NULL );
 
- gtk_widget_grab_default( Ok );
+ gtk_widget_grab_focus( URLEntry );
  gtk_window_add_accel_group( GTK_WINDOW( URL ),accel_group );
 
  return URL;

@@ -241,12 +241,15 @@ static char help_text[]=
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Skin Browser"
+#define MSGTR_Network "Network streaming ..."
 
 // --- buttons ---
 #define MSGTR_Ok "Ok"
 #define MSGTR_Cancel "Cancel"
 #define MSGTR_Add "Add"
 #define MSGTR_Remove "Remove"
+#define MSGTR_Clear "Clear"
+#define MSGTR_Config "Config"
 
 // --- error messages ---
 #define MSGTR_NEMDB "Sorry, not enough memory for draw buffer."
@@ -311,6 +314,21 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Skin browser"
 #define MSGTR_MENU_Preferences "Preferences"
 #define MSGTR_MENU_Exit "Exit ..."
+
+// --- equalizer
+#define MSGTR_EQU_Audio "Audio"
+#define MSGTR_EQU_Video "Video"
+#define MSGTR_EQU_Contrast "Contras: "
+#define MSGTR_EQU_Brightness "Brightness: "
+#define MSGTR_EQU_Hue "Hue: "
+#define MSGTR_EQU_Saturation "Saturation: "
+#define MSGTR_EQU_Front_Left "Front Left"
+#define MSGTR_EQU_Front_Right "Front Right"
+#define MSGTR_EQU_Back_Left "Back Left"
+#define MSGTR_EQU_Back_Right "Back Right"
+#define MSGTR_EQU_Center "Center"
+#define MSGTR_EQU_Bass "Bass"
+#define MSGTR_EQU_All "All"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "fatal error ..."

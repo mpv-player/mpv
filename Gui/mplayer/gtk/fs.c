@@ -474,7 +474,11 @@ GtkWidget * create_FileSelect( void )
  gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_FileSelect );
  gtk_window_set_position( GTK_WINDOW( fsFileSelect ),GTK_WIN_POS_CENTER );
  gtk_window_set_policy( GTK_WINDOW( fsFileSelect ),TRUE,TRUE,TRUE );
+ gtk_window_set_wmclass( GTK_WINDOW( fsFileSelect ),MSGTR_FileSelect,"MPlayer" );
  fsColorMap=gdk_colormap_get_system();
+ 
+ gtk_widget_realize( fsFileSelect );
+ gtkAddIcon( fsFileSelect );
 
  style=gtk_widget_get_style( fsFileSelect );
  dpixmap=gdk_pixmap_colormap_create_from_xpm_d( fsFileSelect->window,fsColorMap,&dmask,&style->bg[GTK_STATE_NORMAL],(gchar **)dir_xpm );

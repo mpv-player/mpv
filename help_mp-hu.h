@@ -236,12 +236,15 @@ static char help_text[]=
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_PlayList "Lejátszási lista"
 #define MSGTR_SkinBrowser "Skin böngészõ"
+#define MSGTR_Network "Lejátszás WEB - röl ..."
 
 // --- buttons ---
 #define MSGTR_Ok "Ok"
 #define MSGTR_Cancel "Mégse"
 #define MSGTR_Add "Hozzáad"
 #define MSGTR_Remove "Kivesz"
+#define MSGTR_Clear "Törlés"
+#define MSGTR_Config "Beállítás"
 
 // --- error messages ---
 #define MSGTR_NEMDB "Nincs elég memória a buffer kirajzolásához."
@@ -306,6 +309,21 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Skin böngészõ"
 #define MSGTR_MENU_Preferences "Beállítások" 
 #define MSGTR_MENU_Exit "Kilépés ..."
+
+// --- equalizer
+#define MSGTR_EQU_Audio "Audio"
+#define MSGTR_EQU_Video "Video"
+#define MSGTR_EQU_Contrast "Kontraszt: "
+#define MSGTR_EQU_Brightness "Fényerõ: "
+#define MSGTR_EQU_Hue "Szinárnyalat: "
+#define MSGTR_EQU_Saturation "Telítettség: "
+#define MSGTR_EQU_Front_Left "Bal Elsõ"
+#define MSGTR_EQU_Front_Right "Jobb Elsõ"
+#define MSGTR_EQU_Back_Left "Bal Hátsó"
+#define MSGTR_EQU_Back_Right "Jobb Hátsó"
+#define MSGTR_EQU_Center "Középsõ"
+#define MSGTR_EQU_Bass "Basszus"
+#define MSGTR_EQU_All "Mindegyik"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "végzetes hiba ..."

@@ -489,11 +489,11 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
 
  switch ( Button )
   {
-   case wsPRMouseButton:
+   case wsPMMouseButton:
           mplShowMenu( RX,RY );
           itemtype=itPRMButton;
           break;
-   case wsRRMouseButton:
+   case wsRMMouseButton:
           mplHideMenu( RX,RY,0 );
           break;
 
@@ -536,7 +536,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
           itemtype=0;
           break;
 
-   case wsPMMouseButton:
+   case wsPRMouseButton:
         gtkShow( evShowPopUpMenu,NULL );
         break;
 

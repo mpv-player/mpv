@@ -30,15 +30,15 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
 
  switch( Button )
   {
-   case wsPMMouseButton:
+   case wsPRMouseButton:
           gtkShow( evShowPopUpMenu,NULL );
           break;
-   case wsPRMouseButton:
+   case wsPMMouseButton:
           gtkShow( evHidePopUpMenu,NULL );
           mplShowMenu( RX,RY );
-          msButton=wsPRMouseButton;
+          msButton=wsPMMouseButton;
           break;
-   case wsRRMouseButton:
+   case wsRMMouseButton:
           mplHideMenu( RX,RY,1 );
           msButton=0;
           break;
@@ -56,7 +56,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
                    mplSubMoved=1;
                    if ( !appMPlayer.subWindow.isFullScreen ) wsMoveWindow( &appMPlayer.subWindow,False,RX - sx,RY - sy );
                    break;
-            case wsPRMouseButton:
+            case wsPMMouseButton:
                    mplMenuMouseHandle( X,Y,RX,RY );
                    break;
            }
