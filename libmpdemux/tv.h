@@ -27,9 +27,9 @@ extern char **tv_param_channels;
 extern int tv_param_noaudio;
 extern int tv_param_immediate;
 extern int tv_param_audiorate;
+extern int tv_param_audio_id;
 #if defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)
 extern int tv_param_amode;
-extern int tv_param_audio_id;
 extern int tv_param_volume;
 extern int tv_param_bass;
 extern int tv_param_treble;

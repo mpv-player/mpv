@@ -358,6 +358,14 @@ static int control(priv_t *priv, int cmd, void *arg)
             return(0);
             }
 
+#ifdef BT848_SAUDIO
+	if((priv->tunerready == TRUE) &&
+	    ioctl(priv->btfd, BT848_SAUDIO, &tv_param_audio_id) < 0)
+	    {
+	    perror("audioid:ioctl");
+	    }
+#endif
+
         return(TVI_CONTROL_TRUE);
         }
     

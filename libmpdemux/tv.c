@@ -57,9 +57,9 @@ int tv_param_input = 0; /* used in v4l and bttv */
 int tv_param_outfmt = IMGFMT_YV12;
 float tv_param_fps = -1.0;
 char **tv_param_channels = NULL;
+int tv_param_audio_id = 0;
 #if defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)
 int tv_param_amode = -1;
-int tv_param_audio_id = 0;
 int tv_param_volume = 60000;
 int tv_param_bass = -1;
 int tv_param_treble = -1;
