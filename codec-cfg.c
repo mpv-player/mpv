@@ -74,7 +74,7 @@ static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
 		goto err_out_parse_error;
 	return 1;
 err_out_duplicated:
-	mp_msg(MSGT_CODECCFG,MSGL_ERR,"duplicated fourcc/format");
+	mp_msg(MSGT_CODECCFG,MSGL_ERR,"duplicated fourcc");
 	return 0;
 err_out_too_many:
 	mp_msg(MSGT_CODECCFG,MSGL_ERR,"too many fourcc/format...");
@@ -84,7 +84,7 @@ err_out_parse_error:
 	return 0;
 }
 
-static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
+static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int *fourccmap)
 {
 	int i, j;
 	char *endptr;
@@ -97,14 +97,24 @@ static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 		return 0;
 	}
 
-        fourcc[i]=fourccmap[i]=strtoul(s,&endptr,0);
+        fourcc[i]=strtoul(s,&endptr,0);
 	if (*endptr != '\0') {
-		mp_msg(MSGT_CODECCFG,MSGL_ERR,"parse error");
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"parse error (format ID not number?)");
 		return 0;
 	}
+
+	if(alias){
+	    fourccmap[i]=strtoul(alias,&endptr,0);
+	    if (*endptr != '\0') {
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"parse error (format ID alias not number?)");
+		return 0;
+	    }
+	} else
+	    fourccmap[i]=fourcc[i];
+
 	for (j = 0; j < i; j++)
 		if (fourcc[j] == fourcc[i]) {
-			mp_msg(MSGT_CODECCFG,MSGL_ERR,"duplicated fourcc/format");
+			mp_msg(MSGT_CODECCFG,MSGL_ERR,"duplicated format ID");
 			return 0;
 		}
 
@@ -128,16 +138,20 @@ static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 		{"UYVY",  IMGFMT_UYVY},
 		{"YVYU",  IMGFMT_YVYU},
 
+	        {"RGB4",  IMGFMT_RGB|4},
 	        {"RGB8",  IMGFMT_RGB|8},
 		{"RGB15", IMGFMT_RGB|15}, 
 		{"RGB16", IMGFMT_RGB|16},
 		{"RGB24", IMGFMT_RGB|24},
 		{"RGB32", IMGFMT_RGB|32},
+		{"BGR4",  IMGFMT_BGR|4},
 		{"BGR8",  IMGFMT_BGR|8},
 		{"BGR15", IMGFMT_BGR|15},
 		{"BGR16", IMGFMT_BGR|16},
 		{"BGR24", IMGFMT_BGR|24},
 		{"BGR32", IMGFMT_BGR|32},
+	        {"RGB1",  IMGFMT_RGB|1},
+		{"BGR1",  IMGFMT_BGR|1},
 
 		{"MPES",  IMGFMT_MPEGPES},
 		{NULL,    0}
@@ -284,7 +298,7 @@ static short get_driver(char *s,int audioflag)
 static int validate_codec(codecs_t *c, int type)
 {
 	unsigned int i;
-	char *tmp_name = strdup(c->name);
+	char *tmp_name = c->name;
 
 	for (i = 0; i < strlen(tmp_name) && isalnum(tmp_name[i]); i++)
 		/* NOTHING */;
@@ -576,9 +590,10 @@ int parse_codec_cfg(char *cfgfile)
 						codec->fourccmap))
 				goto err_out_print_linenum;
 		} else if (!strcmp(token[0], "format")) {
-			if (get_token(1, 1) < 0)
+			if (get_token(1, 2) < 0)
 				goto err_out_parse_error;
-			if (!add_to_format(token[0], codec->fourcc,codec->fourccmap))
+			if (!add_to_format(token[0], token[1],
+					codec->fourcc,codec->fourccmap))
 				goto err_out_print_linenum;
 		} else if (!strcmp(token[0], "driver")) {
 			if (get_token(1, 1) < 0)
