@@ -68,6 +68,7 @@ void mp_msg_c( int x, const char *format, ... ){
     va_start(va, format);
     vsnprintf(tmp, MSGSIZE_MAX, mp_gettext(format), va);
     va_end(va);
+    tmp[MSGSIZE_MAX-2] = '\n';
     tmp[MSGSIZE_MAX-1] = 0;
 
 #if ENABLE_GUI_CODE
