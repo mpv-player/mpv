@@ -971,6 +971,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mux_v->bih->biCompression = mmioFOURCC('A', 'S', 'V', '2');
     else if (!strcasecmp(lavc_param_vcodec, "ffv1"))
 	mux_v->bih->biCompression = mmioFOURCC('F', 'F', 'V', '1');
+    else if (!strcasecmp(lavc_param_vcodec, "snow"))
+	mux_v->bih->biCompression = mmioFOURCC('S', 'N', 'O', 'W');
     else
 	mux_v->bih->biCompression = mmioFOURCC(lavc_param_vcodec[0],
 		lavc_param_vcodec[1], lavc_param_vcodec[2], lavc_param_vcodec[3]); /* FIXME!!! */
