@@ -130,7 +130,7 @@ divx4</option> may be faster, or even the fastest solution.
 </para>
 
 <para>
-The Divx4/5 binary codec library can be downloaded from
+The DivX4/5 binary codec library can be downloaded from
 <ulink url="http://avifile.sourceforge.net">avifile</ulink> or
 <ulink url="http://www.divx.com">divx.com</ulink>
 Unpack it, run <filename>./install.sh</filename> as root and do not forget adding
@@ -139,7 +139,7 @@ Unpack it, run <filename>./install.sh</filename> as root and do not forget addin
 </para>
 
 <para>
-Get the CVS version of the OLD OpenDivx core library like this:
+Get the CVS version of the OLD OpenDivX core library like this:
 </para>
 
 <procedure>

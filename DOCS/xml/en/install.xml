@@ -201,7 +201,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XviD</emphasis>: Open source encoding alternative to
-  Divx4Linux. Features:
+  DivX4Linux. Features:
   <itemizedlist>
   <listitem><simpara>
     1 pass or 2 pass encoding with
@@ -211,7 +211,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
     it's open-source, so it's multiplatform.
     </simpara></listitem>
   <listitem><simpara>
-    it's about 2 times faster than divx4 when encoding - about the same
+    it's about 2 times faster than divX4 when encoding - about the same
     quality
     </simpara></listitem>
   </itemizedlist>

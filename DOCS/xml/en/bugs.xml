@@ -140,7 +140,7 @@ auto-selected codec can't decode the file, try to select another using
 <listitem>
 <para>
 you try to play DivX 3.x file with OpenDivX decoder or XviD
-(<option>-vc odivx</option>) - install Divx4Linux and recompile player
+(<option>-vc odivx</option>) - install DivX4Linux and recompile player
 </para>
 </listitem>
 </itemizedlist>
