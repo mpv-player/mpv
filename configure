@@ -2341,16 +2341,19 @@ else
      _ld_pthread='-pthread'
     else
       echores "no static pthread found (v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, Win32 loader disabled)"
-      _ld_pthread='' ; _nas=no ; _tv_v4l=no ; _tv_v4l=no ; _macosx=no ; _win32=no
+      _ld_pthread='' ; _nas=no ; _tv_v4l=no ; _macosx=no ; _win32=no
     fi
   else
     echores "no (v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, win32 loader disabled)"
-    _ld_pthread='' ; _nas=no ; _tv_v4l=no ; _tv_v4l=no ; _macosx=no ; _win32=no
+    _ld_pthread='' ; _nas=no ; _tv_v4l=no ; _macosx=no ; _win32=no
   fi
 fi
 if test "$_ld_pthread" != '' ; then
   echores "yes (using $_ld_pthread)"
+else
+  echores "no"
 fi
+
 
 echocheck "sys/soundcard.h"
 cat > $TMPC << EOF
