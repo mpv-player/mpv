@@ -97,12 +97,12 @@ read_rtp_from_server(int fd, char *buffer, int length) {
 	char *data;
 	int len;
 	static int got_first = 0;
-	static int sequence;
+	static unsigned short sequence;
 
 	if( buffer==NULL || length<0 ) return -1;
 
 	getrtp2(fd, &rh, &data, &len);
-	if( got_first && rh.b.sequence != sequence+1 )
+	if( got_first && rh.b.sequence != (unsigned short)(sequence+1) )
 		printf("RTP packet sequence error!  Expected: %d, received: %d\n", 
 			sequence+1, rh.b.sequence);
 	got_first = 1;
@@ -366,7 +366,7 @@ extension=NULL;
 				printf("You must enter a port number for RTP streams!\n");
 				return -1;
 			}
-			return -1; 
+			return 0;
 		}
 
 		// Checking for ASF
@@ -562,6 +562,7 @@ rtp_open_socket( URL_t *url ) {
 	fd_set set;
 	struct sockaddr_in server_address;
 	struct ip_mreq mcast;
+        struct timeval tv;
 
 	printf("Listening for traffic on %s:%d ...\n", url->hostname, url->port );
 
@@ -609,12 +610,12 @@ rtp_open_socket( URL_t *url ) {
 		}
 	}
 
-	//tv.tv_sec = 0;
-	//tv.tv_usec = (10 * 1000000);	// 10 seconds timeout
+	tv.tv_sec = 0;
+	tv.tv_usec = (1 * 1000000);	// 1 second timeout
 	FD_ZERO( &set );
 	FD_SET( socket_server_fd, &set );
-	//if( select(socket_server_fd+1, &set, NULL, NULL, &tv)>0 ) {
-	if( select(socket_server_fd+1, &set, NULL, NULL, NULL)>0 ) {
+	if( select(socket_server_fd+1, &set, NULL, NULL, &tv)>0 ) {
+        //if( select(socket_server_fd+1, &set, NULL, NULL, NULL)>0 ) {
 		err_len = sizeof( err );
 		getsockopt( socket_server_fd, SOL_SOCKET, SO_ERROR, &err, &err_len );
 		if( err ) {
