@@ -1089,7 +1089,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   {
     // seteuid(0); /* Can't hurt to try to get root here */
     if ((rtc_fd = open("/dev/rtc", O_RDONLY)) < 0)
-	mp_msg(MSGT_CPLAYER, MSGL_WARN, "Failed to open /dev/rtc: %s (mplayer should be setuid root or /dev/rtc should be readable by the user.)\n", strerror(errno));
+	mp_msg(MSGT_CPLAYER, MSGL_WARN, "Failed to open /dev/rtc: %s (/dev/rtc should be readable by the user.)\n", strerror(errno));
      else {
 	unsigned long irqp = 1024; /* 512 seemed OK. 128 is jerky. */
 
