@@ -6735,13 +6735,15 @@ This is required if you want a CBR (constant bitrate) encode.
 .
 .TP
 .B iframe=<value>
-I frame frequency (default: 60)
-Raising their frequency usually improves quality.
+Sets maximum interval between I frames.
+Larger values save bits, thus improve quality, at the cost of seeking
+precision (default: 60).
 .
 .TP
-.B frameref=<value>
-Number of previous frames used as predictors in a P-frame (default: 1).
-This may cause tiny changes in bitrate and PSNR.
+.B frameref=<1\-15>
+Number of previous frames used as predictors in a P frame (default: 1).
+This is effective in Anime, but seems to make little difference in 
+live-action source material.
 Some decoders are unable to deal with large frameref values.
 .
 .TP
@@ -6840,7 +6842,7 @@ specified)
 Set the initial ratecontrol buffer (default: 1/4 of rc_buffer_size)
 .
 .TP
-.B rc_sens=<0\-100>
+.B rc_sens=<0\-100> (CBR only)
 ratecontrol sensitivity (default: 4)
 .
 .TP
@@ -6855,7 +6857,7 @@ quantizer factor between P and B frames (default: 2.0)
 .B pass=<1|2>
 Enable 2-pass mode.
 The first pass saves statistics.
-It is recommanded to always encode in 2-pass mode as it leads to a better bit
+It is recommended to always encode in 2-pass mode as it leads to a better bit
 distribution and improves overall quality.
 .
 .TP
