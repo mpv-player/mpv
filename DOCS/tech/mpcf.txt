@@ -23,7 +23,6 @@ Compact
 Error resistant
 	seeking / playback without an index
 	headers & index can be repeated
-	checksums to allow quick redownloading of damaged parts
 	damaged files can be played back with minimal data lost and fast
 	resyncing times
 
@@ -228,7 +227,18 @@ backward_ptr
 
 
 *_startcode
-	the first bit is allways set
+        all startcodes start with 'N'
+
+main_startcode
+	0x7A561F5F04ADULL + (((uint64_t)('N'<<8) + 'M')<<48)
+stream_starcode
+	0x11405BF2F9DBULL + (((uint64_t)('N'<<8) + 'S')<<48)
+frame_type2_startcode
+	0xE4ADEECA4569ULL + (((uint64_t)('N'<<8) + 'K')<<48)
+index_startcode
+	0xDD672F23E64EULL + (((uint64_t)('N'<<8) + 'X')<<48)
+info_startcode
+	0xAB68B596BA78ULL + (((uint64_t)('N'<<8) + 'I')<<48)
 
 version
 	1 for now
@@ -508,10 +518,6 @@ info packets, SHOULD be placed at the begin of the file at least
 for realtime streaming info packets will normally be transmitted when they apply
 for example, the current song title & artist of the currently shown music video
 
-		Stuffing packets
-can be used as a filler, for example to leave some empty space at the begin for
-a copy of the index
-
 		Unknown packets
 MUST be ignored by the decoder
 
@@ -578,63 +584,6 @@ static inline int put_v(BufferContext *bc, uint64_t val){
         
 	return 0;
 }
-
-                
-			Example stream
-                
-main header
-video_stream_header (stream 0, video    jpjp, timebase 30, lsb_timestamp_length=8)
-video_stream_header (stream 1  subtitle usen, timebase 30, lsb_timestamp_length=8)
-video_stream_header (stream 2  subtitle atde, timebase 30, lsb_timestamp_length=8)
-audio_stream_header (stream 3, audio    jpjp, timebase 1 , lsb_timestamp_length=8)
-audio_stream_header (stream 4, audio    usen, timebase 1 , lsb_timestamp_length=8)
-index (stream 0)
-keyframe (stream 0, msb_timestamp=0, lsb_timestamp=0)
-keyframe (stream 1, msb_timestamp=0, lsb_timestamp=0)
-keyframe (stream 2, msb_timestamp=0, lsb_timestamp=0)
-keyframe (stream 3, msb_timestamp=0, lsb_timestamp=0)
-keyframe (stream 4, msb_timestamp=0, lsb_timestamp=0)
-frame    (stream 0,                  lsb_timestamp=1)
-frame    (stream 0,                  lsb_timestamp=2)
-...
-frame    (stream 0,                  lsb_timestamp=30)
-keyframe (stream 3, msb_timestamp=0, lsb_timestamp=1)
-keyframe (stream 4, msb_timestamp=0, lsb_timestamp=1)
-frame    (stream 0,                  lsb_timestamp=31)
-frame    (stream 0,                  lsb_timestamp=32)
-...
-frame    (stream 0,                  lsb_timestamp=60)
-frame    (stream 1,                  lsb_timestamp=60)
-frame    (stream 2,                  lsb_timestamp=60)
-keyframe (stream 3, msb_timestamp=0, lsb_timestamp=2)
-keyframe (stream 4, msb_timestamp=0, lsb_timestamp=2)
-frame    (stream 0,                  lsb_timestamp=61)
-frame    (stream 0,                  lsb_timestamp=62)
-...
-main header
-video_stream_header (stream 0, video    jpjp, timebase 30, lsb_timestamp_length=8)
-video_stream_header (stream 1  subtitle usen, timebase 30, lsb_timestamp_length=8)
-video_stream_header (stream 2  subtitle atde, timebase 30, lsb_timestamp_length=8)
-audio_stream_header (stream 3, audio    jpjp, timebase 1 , lsb_timestamp_length=8)
-audio_stream_header (stream 4, audio    usen, timebase 1 , lsb_timestamp_length=8)
-frame    (stream 0,                  lsb_timestamp=255)
-frame    (stream 0, msb_timestamp=1  lsb_timestamp=0)
-frame    (stream 0,                  lsb_timestamp=1)
-frame    (stream 0,                  lsb_timestamp=2)
-frame    (stream 1, msb_timestamp=1  lsb_timestamp=2)
-frame    (stream 2, msb_timestamp=1  lsb_timestamp=2)
-frame    (stream 0,                  lsb_timestamp=3)
-frame    (stream 0,                  lsb_timestamp=4)
-...
-keyframe (stream 3, msb_timestamp=0, lsb_timestamp=9)
-keyframe (stream 4, msb_timestamp=0, lsb_timestamp=9)
-main header
-video_stream_header (stream 0, video    jpjp, timebase 30, lsb_timestamp_length=8)
-video_stream_header (stream 1  subtitle usen, timebase 30, lsb_timestamp_length=8)
-video_stream_header (stream 2  subtitle atde, timebase 30, lsb_timestamp_length=8)
-audio_stream_header (stream 3, audio    jpjp, timebase 1 , lsb_timestamp_length=8)
-audio_stream_header (stream 4, audio    usen, timebase 1 , lsb_timestamp_length=8)
-index (stream 0)
 
 		        Authors
 
