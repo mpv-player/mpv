@@ -182,7 +182,11 @@ int mov_check_file(demuxer_t* demuxer){
 	  priv->mdat_end=priv->mdat_start+len-8;
 	  flags|=2;
 	  break;
+	case MOV_FOURCC('f','r','e','e'):
+	  break;
+	case MOV_FOURCC('w','i','d','e'):
 	default:
+	  id = bswap_32(id);
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
 	}
 	if(!stream_skip(demuxer->stream,len-8)) break;
@@ -216,6 +220,9 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	//
 	if(trak){
 	  switch(id){
+	    case MOV_FOURCC('u','d','t','a'):
+		/* here not supported :p */
+		break;
 	    case MOV_FOURCC('t','k','h','d'): {
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sTrack header!\n",level,"");
 		// read codec data
@@ -510,7 +517,72 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    
 	}
 #endif
+	else if (id==MOV_FOURCC('u','d','t','a'))
+	{
+	    unsigned int udta_id;
+	    off_t udta_len;
+	    off_t udta_size = len;
 	
+	    mp_msg(MSGT_DEMUX, MSGL_DBG2, "mov: user data record found\n");
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Quicktime Clip Info:\n");
+
+	    while((len > 8) && (udta_size > 8))
+	    {
+		udta_len = stream_read_dword(demuxer->stream);
+		udta_id = stream_read_dword(demuxer->stream);
+		udta_size -= 8;
+		mp_msg(MSGT_DEMUX, MSGL_DBG2, "udta_id: %.4s (len: %d)\n", &udta_id, udta_len);
+		switch (udta_id)
+		{
+		    case MOV_FOURCC(0xa9,'c','p','y'):
+		    case MOV_FOURCC(0xa9,'i','n','f'):
+		    case MOV_FOURCC(0xa9,'n','a','m'):
+		    case MOV_FOURCC(0xa9,'A','R','T'):
+		    case MOV_FOURCC(0xa9,'d','i','r'):
+		    case MOV_FOURCC(0xa9,'c','m','t'):
+		    case MOV_FOURCC(0xa9,'r','e','q'):
+		    {
+			off_t text_len = stream_read_word(demuxer->stream);
+			char text[text_len+2+1];
+			stream_read(demuxer->stream, (char *)&text, text_len+2);
+			text[text_len+2] = 0x0;
+			switch(udta_id)
+			{
+			    case MOV_FOURCC(0xa9,'c','p','y'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'i','n','f'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Info: %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'n','a','m'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Name: %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'A','R','T'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Artist: %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'d','i','r'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Director: %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'c','m','t'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Comment: %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'r','e','q'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Requests(codec): %s\n", &text[2]);
+				break;
+			}
+			udta_size -= 4+text_len;
+			break;
+		    }
+		    default:
+		    {
+			char dump[udta_len-4];
+			stream_read(demuxer->stream, (char *)&dump, udta_len-4-4);
+			udta_size -= udta_len;
+		    }
+		}
+	    }
+	} /* eof udta */
+
 	pos+=len+8;
 	if(pos>=endpos) break;
 	if(!stream_seek(demuxer->stream,pos)) break;
