@@ -1,5 +1,6 @@
 #include "m_option.h"
 #include "../mp_msg.h"
+#include <stdlib.h>
 #include <inttypes.h>
 #include "ae_toolame.h"
 
