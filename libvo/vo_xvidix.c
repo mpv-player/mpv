@@ -43,7 +43,7 @@ static Window mywindow;
 static int X_already_started = 0;
 
 /* VIDIX related stuff */
-static const char *vidix_name = NULL;
+static const char *vidix_name = (char *)(-1);
 
 /* Image parameters */
 static uint32_t image_width;
@@ -84,6 +84,8 @@ static void resize(int x, int y)
 	    vidix_term();
 	    uninit();
     	    exit(1); /* !!! */
+	    x = window_width;
+	    y = window_height;
 	}
     }
     
@@ -112,14 +114,10 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     unsigned long xswamask;
     XWindowAttributes attribs;
     int window_depth;
-	
-    if (!vo_subdevice)
-        mp_msg(MSGT_VO, MSGL_INFO, "No vidix driver name provided, probing available drivers!\n");
-    else
-        vidix_name = strdup(vo_subdevice);
-	    
-    if (!title)
-        title = strdup("X11/VIDIX");
+
+//    if (title)
+//	free(title);
+    title = strdup("MPlayer VIDIX X11 Overlay");
 
     image_height = height;
     image_width = width;
@@ -219,8 +217,10 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 
     /* Map window. */
     XMapWindow(mDisplay, mywindow);
+#if 0
 #ifdef HAVE_XINERAMA
     vo_x11_xinerama_move(mDisplay, mywindow);
+#endif
 #endif
 
     /* Wait for map. */
@@ -278,13 +278,17 @@ static void Terminate_Display_Process(void)
     XDestroyWindow(mDisplay, mywindow);
     XCloseDisplay(mDisplay);
     X_already_started = 0;
+
+    return;
 }
 
 static void check_events(void)
 {
     const int event = vo_x11_check_events(mDisplay);
+
     if (event & VO_EVENT_RESIZE)
 	resize(vo_dwidth, vo_dheight);
+    return;
 }
 
 /* draw_osd, flip_page, draw_slice, draw_frame should be
@@ -316,7 +320,19 @@ static uint32_t draw_frame(uint8_t *src[])
 
 static uint32_t query_format(uint32_t format)
 {
-    vidix_preinit(vidix_name, &video_out_xvidix);
+    if (vidix_name == (char *)(-1))
+    {
+	if (vo_subdevice)
+	    vidix_name = strdup(vo_subdevice);
+	else
+	{
+    	    mp_msg(MSGT_VO, MSGL_INFO, "No vidix driver name provided, probing available drivers!\n");
+	    vidix_name = NULL;
+	}
+    }
+
+    if (vidix_preinit(vidix_name, &video_out_xvidix) != 0)
+	return(0);
     
     return(vidix_query_fourcc(format));
 }
