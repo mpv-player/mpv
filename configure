@@ -435,7 +435,7 @@ if test -z "$_target" ; then
       ppc) host_arch=ppc ;;
       alpha) host_arch=alpha ;;
       sparc*) host_arch=sparc ;;
-      9000*) host_arch=hppa ;;
+      parisc*|hppa*|9000*) host_arch=hppa ;;
       arm*) host_arch=arm ;;
       s390) host_arch=s390 ;;
       s390x) host_arch=s390x ;;
