@@ -26,22 +26,17 @@
 char *sub_cp=NULL;
 #endif
 
+/* Maximal length of line of a subtitle */
+#define LINE_LEN 1000
 
 static float mpsub_position=0;
 
 int sub_uses_time=0;
 int sub_errs=0;
 int sub_num=0;          // number of subtitle structs
-int sub_format=-1;     // 0 for microdvd
-		      // 1 for SubRip
-		     // 2 for SubViewer
-		    // 3 for SAMI (smi)
-		   // 4 for vplayer format
-		  // 5 for RT format
-		 // 6 for ssa (Sub Station Alpha)
-		// 7 for ... erm ... dunnowhat. tell me if you know
-	       // 8 for the glorious MPsub
-	      // 9 for AQTitle
+
+/* Use the SUB_* constant defined in the header file */
+int sub_format=SUB_INVALID;
 
 int eol(char p) {
     return (p=='\r' || p=='\n' || p=='\0');
@@ -56,9 +51,9 @@ static inline void trail_space(char *s) {
 
 
 subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
-    static char line[1001];
+    static char line[LINE_LEN+1];
     static char *s = NULL;
-    char text[1000], *p, *q;
+    char text[LINE_LEN+1], *p, *q;
     int state;
 
     current->lines = current->start = current->end = 0;
@@ -66,7 +61,7 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 
     /* read the first line */
     if (!s)
-	    if (!(s = fgets(line, 1000, fd))) return 0;
+	    if (!(s = fgets(line, LINE_LEN, fd))) return 0;
 
     do {
 	switch (state) {
@@ -122,7 +117,7 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 	}
 
 	/* read next line */
-	if (state != 99 && !(s = fgets (line, 1000, fd))) return 0;
+	if (state != 99 && !(s = fgets (line, LINE_LEN, fd))) return 0;
 
     } while (state != 99);
 
@@ -151,15 +146,15 @@ char *sub_readtext(char *source, char **dest) {
 }
 
 subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
-    char line[1001];
-    char line2[1001];
+    char line[LINE_LEN+1];
+    char line2[LINE_LEN+1];
     char *p, *next;
     int i;
 
     bzero (current, sizeof(subtitle));
 
     do {
-	if (!fgets (line, 1000, fd)) return NULL;
+	if (!fgets (line, LINE_LEN, fd)) return NULL;
     } while (sscanf (line, "{%ld}{%ld}%[^\r\n]", &(current->start), &(current->end),line2) <3);
 
     p=line2;
@@ -176,7 +171,7 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
 }
 
 subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
-    char line[1001];
+    char line[LINE_LEN+1];
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL, *q=NULL;
     int len;
@@ -184,12 +179,12 @@ subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
     bzero (current, sizeof(subtitle));
     
     while (1) {
-	if (!fgets (line, 1000, fd)) return NULL;
+	if (!fgets (line, LINE_LEN, fd)) return NULL;
 	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4) < 8) continue;
 	current->start = a1*360000+a2*6000+a3*100+a4;
 	current->end   = b1*360000+b2*6000+b3*100+b4;
 
-	if (!fgets (line, 1000, fd)) return NULL;
+	if (!fgets (line, LINE_LEN, fd)) return NULL;
 
 	p=q=line;
 	for (current->lines=1; current->lines < SUB_MAX_TEXT; current->lines++) {
@@ -206,8 +201,8 @@ subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_third(FILE *fd,subtitle *current) {
-    char line[1001];
+subtitle *sub_read_line_subviewer(FILE *fd,subtitle *current) {
+    char line[LINE_LEN+1];
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL;
     int i,len;
@@ -215,13 +210,13 @@ subtitle *sub_read_line_third(FILE *fd,subtitle *current) {
     bzero (current, sizeof(subtitle));
     
     while (!current->text[0]) {
-	if (!fgets (line, 1000, fd)) return NULL;
+	if (!fgets (line, LINE_LEN, fd)) return NULL;
 	if ((len=sscanf (line, "%d:%d:%d,%d --> %d:%d:%d,%d",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4)) < 8)
 	    continue;
 	current->start = a1*360000+a2*6000+a3*100+a4/10;
 	current->end   = b1*360000+b2*6000+b3*100+b4/10;
 	for (i=0; i<SUB_MAX_TEXT;) {
-	    if (!fgets (line, 1000, fd)) break;
+	    if (!fgets (line, LINE_LEN, fd)) break;
 	    len=0;
 	    for (p=line; *p!='\n' && *p!='\r' && *p; p++,len++);
 	    if (len) {
@@ -239,8 +234,8 @@ subtitle *sub_read_line_third(FILE *fd,subtitle *current) {
 }
 
 subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
-	char line[1001];
-	char line2[1001];
+	char line[LINE_LEN+1];
+	char line2[LINE_LEN+1];
 	int a1,a2,a3,b1,b2,b3;
 	char *p=NULL, *next;
 	int i,len,len2,plen;
@@ -248,10 +243,10 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 	bzero (current, sizeof(subtitle));
 
 	while (!current->text[0]) {
-		if (!fgets (line, 1000, fd)) return NULL;
+		if (!fgets (line, LINE_LEN, fd)) return NULL;
 		if ((len=sscanf (line, "%d:%d:%d:%n",&a1,&a2,&a3,&plen)) < 3)
 			continue;
-		if (!fgets (line2, 1000, fd)) return NULL;
+		if (!fgets (line2, LINE_LEN, fd)) return NULL;
 		if ((len2=sscanf (line2, "%d:%d:%d:",&b1,&b2,&b3)) < 3)
 			continue;
 		// przewiñ o linijkê do ty³u:
@@ -286,7 +281,7 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
 	//TODO: This format uses quite rich (sub/super)set of xhtml 
 	// I couldn't check it since DTD is not included.
 	// WARNING: full XML parses can be required for proper parsing 
-    char line[1001];
+    char line[LINE_LEN+1];
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL,*next=NULL;
     int i,len,plen;
@@ -294,7 +289,7 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
     bzero (current, sizeof(subtitle));
     
     while (!current->text[0]) {
-	if (!fgets (line, 1000, fd)) return NULL;
+	if (!fgets (line, LINE_LEN, fd)) return NULL;
 	//TODO: it seems that format of time is not easily determined, it may be 1:12, 1:12.0 or 0:1:12.0
 	//to describe the same moment in time. Maybe there are even more formats in use.
 	//if ((len=sscanf (line, "<Time Begin=\"%d:%d:%d.%d\" End=\"%d:%d:%d.%d\"",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4)) < 8)
@@ -327,13 +322,13 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	    hour2, min2, sec2, hunsec2, nothing;
 	int num;
 	
-	char line[1000],
-	     line3[1000],
+	char line[LINE_LEN+1],
+	     line3[LINE_LEN+1],
 	     *line2;
 	char *tmp;
 
 	do {
-		if (!fgets (line, 1000, fd)) return NULL;
+		if (!fgets (line, LINE_LEN, fd)) return NULL;
 	} while (sscanf (line, "Dialogue: Marked=%d,%d:%d:%d.%d,%d:%d:%d.%d,"
 			"%[^\n\r]", &nothing,
 			&hour1, &min1, &sec1, &hunsec1, 
@@ -366,12 +361,12 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 }
 
 subtitle *sub_read_line_dunnowhat(FILE *fd,subtitle *current) {
-    char line[1001];
-    char text[1001];
+    char line[LINE_LEN+1];
+    char text[LINE_LEN+1];
 
     bzero (current, sizeof(subtitle));
 
-    if (!fgets (line, 1000, fd))
+    if (!fgets (line, LINE_LEN, fd))
 	return NULL;
     if (sscanf (line, "%ld,%ld,\"%[^\"]", &(current->start),
 		&(current->end), text) <3)
@@ -383,14 +378,14 @@ subtitle *sub_read_line_dunnowhat(FILE *fd,subtitle *current) {
 }
 
 subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
-	char line[1000];
+	char line[LINE_LEN+1];
 	float a,b;
 	int num=0;
 	char *p, *q;
 
 	do
 	{
-		if (!fgets(line, 1000, fd)) return NULL;
+		if (!fgets(line, LINE_LEN, fd)) return NULL;
 	} while (sscanf (line, "%f %f", &a, &b) !=2);
 
 	mpsub_position += (a*100.0);
@@ -399,7 +394,7 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 	current->end=(int) mpsub_position;
 
 	while (num < SUB_MAX_TEXT) {
-		if (!fgets (line, 1000, fd)) return NULL;
+		if (!fgets (line, LINE_LEN, fd)) return NULL;
 		p=line;
 		while (isspace(*p)) p++;
 		if (eol(*p) && num > 0) return current;
@@ -421,13 +416,13 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 subtitle *previous_aqt_sub = NULL;
 
 subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
-    char line[1001];
+    char line[LINE_LEN+1];
 
     bzero (current, sizeof(subtitle));
 
     while (1) {
     // try to locate next subtitle
-        if (!fgets (line, 1000, fd))
+        if (!fgets (line, LINE_LEN, fd))
 		return NULL;
         if (!(sscanf (line, "-->> %ld", &(current->start)) <1))
 		break;
@@ -438,14 +433,14 @@ subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
     
     previous_aqt_sub = current;
 
-    if (!fgets (line, 1000, fd))
+    if (!fgets (line, LINE_LEN, fd))
 	return NULL;
 
     sub_readtext((char *) &line,&current->text[0]);
     current->lines = 1;
     current->end = current->start; // will be corrected by next subtitle
 
-    if (!fgets (line, 1000, fd))
+    if (!fgets (line, LINE_LEN, fd))
 	return current;;
 
     sub_readtext((char *) &line,&current->text[1]);
@@ -461,45 +456,45 @@ subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
 }
 
 int sub_autodetect (FILE *fd) {
-    char line[1001];
+    char line[LINE_LEN+1];
     int i,j=0;
     char p;
     
     while (j < 100) {
 	j++;
-	if (!fgets (line, 1000, fd))
-	    return -1;
+	if (!fgets (line, LINE_LEN, fd))
+	    return SUB_INVALID;
 
 	if (sscanf (line, "{%d}{%d}", &i, &i)==2)
-		{sub_uses_time=0;return 0;}
+		{sub_uses_time=0;return SUB_MICRODVD;}
 	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",     &i, &i, &i, &i, &i, &i, &i, &i)==8)
-		{sub_uses_time=1;return 1;}
+		{sub_uses_time=1;return SUB_SUBRIP;}
 	if (sscanf (line, "%d:%d:%d,%d --> %d:%d:%d,%d", &i, &i, &i, &i, &i, &i, &i, &i)==8)
-		{sub_uses_time=1;return 2;}
+		{sub_uses_time=1;return SUB_SUBVIEWER;}
 	if (strstr (line, "<SAMI>"))
-		{sub_uses_time=1; return 3;}
+		{sub_uses_time=1; return SUB_SAMI;}
 	if (sscanf (line, "%d:%d:%d:",     &i, &i, &i )==3)
-		{sub_uses_time=1;return 4;}
+		{sub_uses_time=1;return SUB_VPLAYER;}
 	//TODO: just checking if first line of sub starts with "<" is WAY
 	// too weak test for RT
 	// Please someone who knows the format of RT... FIX IT!!!
 	// It may conflict with other sub formats in the future (actually it doesn't)
 	if ( *line == '<' )
-		{sub_uses_time=1;return 5;}
+		{sub_uses_time=1;return SUB_RT;}
 
 	if (!memcmp(line, "Dialogue: Marked", 16))
-		{sub_uses_time=1; return 6;}
+		{sub_uses_time=1; return SUB_SSA;}
 	if (sscanf (line, "%d,%d,\"%c", &i, &i, (char *) &i) == 3)
-		{sub_uses_time=0;return 7;}
+		{sub_uses_time=0;return SUB_DUNNOWHAT;}
 	if (sscanf (line, "FORMAT=%d", &i) == 1)
-		{sub_uses_time=0; return 8;}
+		{sub_uses_time=0; return SUB_MPSUB;}
 	if (sscanf (line, "FORMAT=TIM%c", &p)==1 && p=='E')
-		{sub_uses_time=1; return 8;}
+		{sub_uses_time=1; return SUB_MPSUB;}
 	if (strstr (line, "-->>"))
-		{sub_uses_time=0; return 9;}
+		{sub_uses_time=0; return SUB_MPSUB;}
     }
 
-    return -1;  // too many bad lines
+    return SUB_INVALID;  // too many bad lines
 }
 
 #ifdef DUMPSUBS
@@ -581,7 +576,7 @@ subtitle* sub_read_file (char *filename) {
     {
 	    sub_read_line_microdvd,
 	    sub_read_line_subrip,
-	    sub_read_line_third,
+	    sub_read_line_subviewer,
 	    sub_read_line_sami,
 	    sub_read_line_vplayer,
 	    sub_read_line_rt,
@@ -595,7 +590,7 @@ subtitle* sub_read_file (char *filename) {
     fd=fopen (filename, "r"); if (!fd) return NULL;
 
     sub_format=sub_autodetect (fd);
-    if (sub_format==-1) {printf ("SUB: Could not determine file format\n");return NULL;}
+    if (sub_format==SUB_INVALID) {printf ("SUB: Could not determine file format\n");return NULL;}
     printf ("SUB: Detected subtitle file format: %d\n",sub_format);
     
     rewind (fd);
