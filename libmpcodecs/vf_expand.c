@@ -199,20 +199,10 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	if(mpi->flags&MP_IMGFLAG_PLANAR){
 	    mpi->planes[0]=vf->priv->dmpi->planes[0]+
 		vf->priv->exp_y*vf->priv->dmpi->stride[0]+vf->priv->exp_x;
-	    if (mpi->imgfmt == IMGFMT_YVU9)
-	    {
 	    mpi->planes[1]=vf->priv->dmpi->planes[1]+
-		(vf->priv->exp_y>>2)*vf->priv->dmpi->stride[1]+(vf->priv->exp_x>>2);
+		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->priv->dmpi->stride[1]+(vf->priv->exp_x>>mpi->chroma_x_shift);
 	    mpi->planes[2]=vf->priv->dmpi->planes[2]+
-		(vf->priv->exp_y>>2)*vf->priv->dmpi->stride[2]+(vf->priv->exp_x>>2);
-	    }
-	    else
-	    {
-	    mpi->planes[1]=vf->priv->dmpi->planes[1]+
-		(vf->priv->exp_y>>1)*vf->priv->dmpi->stride[1]+(vf->priv->exp_x>>1);
-	    mpi->planes[2]=vf->priv->dmpi->planes[2]+
-		(vf->priv->exp_y>>1)*vf->priv->dmpi->stride[2]+(vf->priv->exp_x>>1);
-	    }
+		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->priv->dmpi->stride[2]+(vf->priv->exp_x>>mpi->chroma_x_shift);
 	    mpi->stride[1]=vf->priv->dmpi->stride[1];
 	    mpi->stride[2]=vf->priv->dmpi->stride[2];
 	} else {
@@ -246,28 +236,14 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	        vf->priv->exp_y*vf->priv->dmpi->stride[0]+vf->priv->exp_x,
 		mpi->planes[0], mpi->w, mpi->h,
 		vf->priv->dmpi->stride[0],mpi->stride[0]);
-	if (mpi->imgfmt == IMGFMT_YVU9)
-	{
 	memcpy_pic(vf->priv->dmpi->planes[1]+
-		(vf->priv->exp_y>>2)*vf->priv->dmpi->stride[1]+(vf->priv->exp_x>>2),
-		mpi->planes[1], mpi->w>>2, mpi->h>>2,
+		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->priv->dmpi->stride[1]+(vf->priv->exp_x>>mpi->chroma_x_shift),
+		mpi->planes[1], mpi->chroma_width, mpi->chroma_height,
 		vf->priv->dmpi->stride[1],mpi->stride[1]);
 	memcpy_pic(vf->priv->dmpi->planes[2]+
-		(vf->priv->exp_y>>2)*vf->priv->dmpi->stride[2]+(vf->priv->exp_x>>2),
-		mpi->planes[2], mpi->w>>2, mpi->h>>2,
+		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->priv->dmpi->stride[2]+(vf->priv->exp_x>>mpi->chroma_x_shift),
+		mpi->planes[2], mpi->chroma_width, mpi->chroma_height,
 		vf->priv->dmpi->stride[2],mpi->stride[2]);
-	}
-	else
-	{
-	memcpy_pic(vf->priv->dmpi->planes[1]+
-		(vf->priv->exp_y>>1)*vf->priv->dmpi->stride[1]+(vf->priv->exp_x>>1),
-		mpi->planes[1], mpi->w>>1, mpi->h>>1,
-		vf->priv->dmpi->stride[1],mpi->stride[1]);
-	memcpy_pic(vf->priv->dmpi->planes[2]+
-		(vf->priv->exp_y>>1)*vf->priv->dmpi->stride[2]+(vf->priv->exp_x>>1),
-		mpi->planes[2], mpi->w>>1, mpi->h>>1,
-		vf->priv->dmpi->stride[2],mpi->stride[2]);
-	}
     } else {
 	memcpy_pic(vf->priv->dmpi->planes[0]+
 	        vf->priv->exp_y*vf->priv->dmpi->stride[0]+vf->priv->exp_x*(vf->priv->dmpi->bpp/8),

@@ -279,8 +279,8 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
     // clean
     memset(dmpi->planes[0], 0, dmpi->stride[0]*dmpi->h);
-    memset(dmpi->planes[1], 128, dmpi->stride[1]*dmpi->h>>1);
-    memset(dmpi->planes[2], 128, dmpi->stride[2]*dmpi->h>>1);
+    memset(dmpi->planes[1], 128, dmpi->stride[1]*dmpi->h>>dmpi->chroma_y_shift);
+    memset(dmpi->planes[2], 128, dmpi->stride[2]*dmpi->h>>dmpi->chroma_y_shift);
 
     if(frame%30)
     {

@@ -58,8 +58,8 @@ typedef struct mp_image_s {
     /* these are only used by planar formats Y,U(Cb),V(Cr) */
     int chroma_width;
     int chroma_height;
-    int chroma_h_shift;
-    int chroma_v_shift;
+    int chroma_x_shift; // horizontal
+    int chroma_y_shift; // vertical
 } mp_image_t;
 
 #ifdef IMGFMT_YUY2
@@ -91,8 +91,8 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->bpp=12;
 	mpi->chroma_width=(mpi->width>>1);
 	mpi->chroma_height=(mpi->height>>1);
-	mpi->chroma_h_shift=1;
-	mpi->chroma_v_shift=1;
+	mpi->chroma_x_shift=1;
+	mpi->chroma_y_shift=1;
 	return;
     case IMGFMT_IF09:
 	mpi->num_planes=4;
@@ -101,8 +101,8 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->bpp=9;
 	mpi->chroma_width=(mpi->width>>2);
 	mpi->chroma_height=(mpi->height>>2);
-	mpi->chroma_h_shift=2;
-	mpi->chroma_v_shift=2;
+	mpi->chroma_x_shift=2;
+	mpi->chroma_y_shift=2;
 	return;
     case IMGFMT_Y800:
     case IMGFMT_Y8:

@@ -72,19 +72,18 @@ static vf_info_t* filter_list[]={
 void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h){
     int y;
     if(mpi->flags&MP_IMGFLAG_PLANAR){
-	int div = (mpi->imgfmt == IMGFMT_YVU9 || mpi->imgfmt == IMGFMT_IF09) ? 2 : 1;
 	y0&=~1;h+=h&1;
 	if(x0==0 && w==mpi->width){
 	    // full width clear:
 	    memset(mpi->planes[0]+mpi->stride[0]*y0,0,mpi->stride[0]*h);
-	    memset(mpi->planes[1]+mpi->stride[1]*(y0>>div),128,mpi->stride[1]*(h>>div));
-	    memset(mpi->planes[2]+mpi->stride[2]*(y0>>div),128,mpi->stride[2]*(h>>div));
+	    memset(mpi->planes[1]+mpi->stride[1]*(y0>>mpi->chroma_y_shift),128,mpi->stride[1]*(h>>mpi->chroma_y_shift));
+	    memset(mpi->planes[2]+mpi->stride[2]*(y0>>mpi->chroma_y_shift),128,mpi->stride[2]*(h>>mpi->chroma_y_shift));
 	} else
 	for(y=y0;y<y0+h;y+=2){
 	    memset(mpi->planes[0]+x0+mpi->stride[0]*y,0,w);
 	    memset(mpi->planes[0]+x0+mpi->stride[0]*(y+1),0,w);
-	    memset(mpi->planes[1]+(x0>>div)+mpi->stride[1]*(y>>div),128,(w>>div));
-	    memset(mpi->planes[2]+(x0>>div)+mpi->stride[2]*(y>>div),128,(w>>div));
+	    memset(mpi->planes[1]+(x0>>mpi->chroma_x_shift)+mpi->stride[1]*(y>>mpi->chroma_y_shift),128,(w>>mpi->chroma_x_shift));
+	    memset(mpi->planes[2]+(x0>>mpi->chroma_x_shift)+mpi->stride[2]*(y>>mpi->chroma_y_shift),128,(w>>mpi->chroma_x_shift));
 	}
 	return;
     }
@@ -166,32 +165,27 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
         if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
           // non-direct and not yet allocated image. allocate it!
 	  // IF09 - allocate space for 4. plane delta info - unused
-	  if (mpi->imgfmt == IMGFMT_IF09) 
+	  if (mpi->imgfmt == IMGFMT_IF09)
+	  {
 	     mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8+
-	    				(mpi->width>>2)*(mpi->height>>2));
+	    				mpi->chroma_width*mpi->chroma_height);
+	     /* delta table, just for fun ;) */
+	     mpi->planes[3]=mpi->planes[0]+2*(mpi->chroma_width*mpi->chroma_height);
+	  }
 	  else
 	     mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8);
 	  if(mpi->flags&MP_IMGFLAG_PLANAR){
 	      // YV12/I420/YVU9/IF09. feel free to add other planar formats here...
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width;
-	      if (!mpi->stride[1])
-	      {
-	        if (mpi->imgfmt == IMGFMT_YVU9 || mpi->imgfmt == IMGFMT_IF09)
-		    mpi->stride[1]=mpi->stride[2]=mpi->width/4;
-	        else
-		    mpi->stride[1]=mpi->stride[2]=mpi->width/2;
-	      }
+	      if(!mpi->stride[1]) mpi->stride[1]=mpi->stride[2]=mpi->chroma_width;
 	      if(mpi->flags&MP_IMGFLAG_SWAPPED){
 	          // I420/IYUV  (Y,U,V)
 	          mpi->planes[1]=mpi->planes[0]+mpi->width*mpi->height;
-	          mpi->planes[2]=mpi->planes[1]+(mpi->width>>1)*(mpi->height>>1);
+	          mpi->planes[2]=mpi->planes[1]+mpi->chroma_width*mpi->chroma_height;
 	      } else {
-	          // YV12,YVU9  (Y,V,U)
+	          // YV12,YVU9,IF09  (Y,V,U)
 	          mpi->planes[2]=mpi->planes[0]+mpi->width*mpi->height;
-		  if (mpi->imgfmt == IMGFMT_YVU9 || mpi->imgfmt == IMGFMT_IF09)
-		    mpi->planes[1]=mpi->planes[2]+(mpi->width>>2)*(mpi->height>>2);
-		  else
-	            mpi->planes[1]=mpi->planes[2]+(mpi->width>>1)*(mpi->height>>1);
+	          mpi->planes[1]=mpi->planes[2]+mpi->chroma_width*mpi->chroma_height;
 	      }
 	  } else {
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
@@ -209,9 +203,10 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 		  (mpi->flags&MP_IMGFLAG_YUV)?"YUV":"RGB",
 		  (mpi->flags&MP_IMGFLAG_PLANAR)?"planar":"packed",
 	          mpi->bpp*mpi->width*mpi->height/8);
-	    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"(imgfmt: %x, planes: %x,%x,%x strides: %d,%d,%d)\n",
+	    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"(imgfmt: %x, planes: %x,%x,%x strides: %d,%d,%d, chroma: %dx%d, shift: h:%d,v:%d)\n",
 		mpi->imgfmt, mpi->planes[0], mpi->planes[1], mpi->planes[2],
-		mpi->stride[0], mpi->stride[1], mpi->stride[2]);
+		mpi->stride[0], mpi->stride[1], mpi->stride[2],
+		mpi->chroma_width, mpi->chroma_height, mpi->chroma_x_shift, mpi->chroma_y_shift);
 	    mpi->flags|=MP_IMGFLAG_TYPE_DISPLAYED;
     }
 

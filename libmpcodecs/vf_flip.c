@@ -34,10 +34,10 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	mpi->stride[0]=-vf->priv->dmpi->stride[0];
 	if(mpi->flags&MP_IMGFLAG_PLANAR){
 	    mpi->planes[1]=vf->priv->dmpi->planes[1]+
-		    vf->priv->dmpi->stride[1]*((vf->priv->dmpi->height>>1)-1);
+		    vf->priv->dmpi->stride[1]*((vf->priv->dmpi->height>>mpi->chroma_y_shift)-1);
 	    mpi->stride[1]=-vf->priv->dmpi->stride[1];
 	    mpi->planes[2]=vf->priv->dmpi->planes[2]+
-		    vf->priv->dmpi->stride[2]*((vf->priv->dmpi->height>>1)-1);
+		    vf->priv->dmpi->stride[2]*((vf->priv->dmpi->height>>mpi->chroma_y_shift)-1);
 	    mpi->stride[2]=-vf->priv->dmpi->stride[2];
 	}
 	mpi->flags|=MP_IMGFLAG_DIRECT;
@@ -60,10 +60,10 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     vf->priv->dmpi->stride[0]=-mpi->stride[0];
     if(vf->priv->dmpi->flags&MP_IMGFLAG_PLANAR){
         vf->priv->dmpi->planes[1]=mpi->planes[1]+
-	    mpi->stride[1]*((mpi->height>>1)-1);
+	    mpi->stride[1]*((mpi->height>>mpi->chroma_y_shift)-1);
 	vf->priv->dmpi->stride[1]=-mpi->stride[1];
 	vf->priv->dmpi->planes[2]=mpi->planes[2]+
-	    mpi->stride[2]*((mpi->height>>1)-1);
+	    mpi->stride[2]*((mpi->height>>mpi->chroma_y_shift)-1);
 	vf->priv->dmpi->stride[2]=-mpi->stride[2];
     }
     

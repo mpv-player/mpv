@@ -74,10 +74,10 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	       dmpi->w,dmpi->h,1,vf->priv->direction);
 	rotate(dmpi->planes[1],mpi->planes[1],
 	       dmpi->stride[1],mpi->stride[1],
-	       dmpi->w>>1,dmpi->h>>1,1,vf->priv->direction);
+	       dmpi->w>>mpi->chroma_x_shift,dmpi->h>>mpi->chroma_y_shift,1,vf->priv->direction);
 	rotate(dmpi->planes[2],mpi->planes[2],
 	       dmpi->stride[2],mpi->stride[2],
-	       dmpi->w>>1,dmpi->h>>1,1,vf->priv->direction);
+	       dmpi->w>>mpi->chroma_x_shift,dmpi->h>>mpi->chroma_y_shift,1,vf->priv->direction);
     } else {
 	rotate(dmpi->planes[0],mpi->planes[0],
 	       dmpi->stride[0],mpi->stride[0],
