@@ -43,6 +43,8 @@ LIBVO_EXTERN(syncfb)
 
 #include "drivers/syncfb/syncfb.h"
 
+#include "mmx.h"
+
 static vo_info_t vo_info =
 {
 	"Matrox G200/G400 Synchronous framebuffer (/dev/syncfb)",

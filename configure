@@ -70,6 +70,7 @@ usage: $0 [options]
 params:
         --cc                    use this C compiler to build MPlayer [gcc]
         --enable-mmx            build with mmx support [autodetect]
+        --enable-mmx2           build with mmx2 support (PIII, Athlon) [autodetect]
         --enable-3dnow          build with 3dnow! support [autodetect]
         --enable-sse            build with sse support [autodetect]
         --enable-gl             build with OpenGL render support [autodetect]
@@ -153,6 +154,7 @@ pmodel=`cat /proc/cpuinfo | grep "model$TAB" | cut -d ':' -f 2 | cut -d ' ' -f 2
 pstepping=`cat /proc/cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2`
 
 _mmx=no
+_mmx2=no
 _3dnow=no
 _mtrr=no
 _sse=no
@@ -192,6 +194,9 @@ for i in `echo $pparam`; do
         ;;
   mmx)
         _mmx=yes
+        ;;
+  mmxext)
+        _mmx2=yes
         ;;
   mtrr)
         _mtrr=yes
@@ -444,6 +449,9 @@ do
   --enable-mmx)
         _mmx=yes
         ;;
+  --enable-mmx2)
+        _mmx2=yes
+        ;;
   --enable-mtrr)
   	_mtrr=yes
 	;;
@@ -506,6 +514,7 @@ do
         ;;
   --disable-mmx)
         _mmx=no
+	_mmx2=no
         ;;
   --disable-mtrr)
   	_mtrr=no
@@ -573,6 +582,7 @@ echo "Checking for cpu vendor ... $pvendor ( $pfamily:$pmodel:$pstepping )"
 echo "Checking for cpu type ... $pname"
 echo "Optimizing to ... $proc"
 echo "Checking for mmx support ... $_mmx"
+echo "Checking for mmx2 support ... $_mmx2"
 echo "Checking for 3dnow support ... $_3dnow"
 echo "Checking for sse support ... $_sse"
 echo "Checking for mtrr support ... $_mtrr"
@@ -673,6 +683,12 @@ if [ "$_mmx" = "yes" ]; then
  _mmx='#define HAVE_MMX'
 else
  _mmx='#undef HAVE_MMX'
+fi
+
+if [ "$_mmx2" = "yes" ]; then
+ _mmx2='#define HAVE_MMX2'
+else
+ _mmx2='#undef HAVE_MMX2'
 fi
 
 if [ $_3dnow = yes ]; then
@@ -851,6 +867,7 @@ $_termcap
 $_mlib     // available only on solaris
 $_3dnowm   // only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)
 $_mmx      // only define if you have MMX
+$_mmx2     // only define if you have MMX2
 $_ssem     // only define if you have SSE (Intel Pentium III or Celeron II)
 
 /* libvo options */

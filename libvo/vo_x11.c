@@ -36,6 +36,8 @@ LIBVO_EXTERN( x11 )
 
 #include "x11_common.h"
 
+#include "mmx.h"
+
 static vo_info_t vo_info =
 {
         "X11 ( XImage/Shm )",

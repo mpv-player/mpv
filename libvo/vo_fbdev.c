@@ -24,6 +24,8 @@
 #include "yuv2rgb.h"
 extern void rgb15to16_mmx(char *s0, char *d0, int count);
 
+#include "mmx.h"
+
 LIBVO_EXTERN(fbdev)
 
 static vo_info_t vo_info = {

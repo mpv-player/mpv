@@ -28,6 +28,8 @@ LIBVO_EXTERN(xv)
 
 #include "x11_common.h"
 
+#include "mmx.h"
+
 static vo_info_t vo_info =
 {
         "X11/Xv",

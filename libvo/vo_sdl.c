@@ -68,6 +68,8 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
+
+#include "mmx.h"
 LIBVO_EXTERN(sdl)
 
 //#include "log.h"

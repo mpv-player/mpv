@@ -19,6 +19,8 @@ LIBVO_EXTERN(odivx)
 
 #include "../encore/encore.h"
 
+#include "mmx.h"
+
 static vo_info_t vo_info = 
 {
 	"OpenDivX AVI File writer",

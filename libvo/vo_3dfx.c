@@ -49,6 +49,8 @@ LIBVO_EXTERN(3dfx)
 
 #include "drivers/3dfx.h"
 
+#include "mmx.h"
+
 static vo_info_t vo_info = 
 {
 	"3dfx (/dev/3dfx)",
