@@ -5,7 +5,7 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2001 Arpad Gereoffy (viz DOCS!)\n"
+"MPlayer " VERSION "(C) 2000-2002 Arpad Gereoffy (viz DOCS!)\n"
 "\n";
 
 // Pøeklad do èe¹tiny Jiøí Svoboda
