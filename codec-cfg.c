@@ -550,8 +550,8 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 	if (!validate_codec(codec, codec_type))
 		goto err_out_not_valid;
 	printf("%d audio & %d video codecs\n", nr_acodecs, nr_vcodecs);
-	video_codecs[nr_vcodecs].name = NULL;
-	audio_codecs[nr_acodecs].name = NULL;
+	if(video_codecs) video_codecs[nr_vcodecs].name = NULL;
+	if(audio_codecs) audio_codecs[nr_acodecs].name = NULL;
 	ret_codecs[0] = video_codecs;
 	ret_codecs[1] = audio_codecs;
 out:
@@ -614,6 +614,7 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 			i = nr_vcodecs;
 			c = video_codecs;
 		}
+		if(!i) return NULL;
 		for (/* NOTHING */; i--; c++) {
                         if(start && c<=start) continue;
 			for (j = 0; j < CODECS_MAX_FOURCC; j++) {
