@@ -196,7 +196,7 @@ Codecs:
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (mpeg audio) support [autodetect]
   --enable-xmms          build with XMMS inputplugin support [disabled]
-  --enable-externalfaad  use externel faad library if available [disabled]
+  --enable-externalfaad  use external faad library if available [disabled]
   
 Video output:
   --disable-vidix        disable VIDIX stuff [enable on x86 *nix]
