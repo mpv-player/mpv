@@ -33,11 +33,7 @@
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>setcd -x [speed] [cdrom device]</CODE></P>
 
-<P>You can also try</P>
-
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 &gt; /proc/ide/[cdrom device]/settings</CODE></P>
-
-<P>but you will need root privileges. The following command may also help:</P>
+<P>If you have root privileges the following command may also help:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 &gt; /proc/ide/[cdrom device]/settings</CODE></P>
 

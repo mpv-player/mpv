@@ -34,9 +34,7 @@ program called <command>setcd</command>.  It works like this:
 </para>
 
 <para>
-You can also try
-<screen>echo current_speed:4 &gt; /proc/ide/<replaceable>[cdrom device]</replaceable>/settings</screen>
-but you will need root privileges. The following command may also help:
+If you have root privileges the following command may also help:
 <screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[cdrom device]</replaceable>/settings</screen>
 </para>
 
