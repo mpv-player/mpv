@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.44 -->
+<!-- synced with 1.45 -->
 <sect2 id="video-dev">
 <title>Urządzenia wyjścia video</title>
 
@@ -152,8 +152,9 @@ aby mogła być używana z <application>MPlayerem</application>.
   </para></listitem>
 <listitem><para>
 I na koniec sprawdź, czy <application>MPlayer</application> 
-został skompilowany z obsługą Xv. wykonaj <command>mplayer -vo help | grep xv </command>,
- jeżeli została zbudowana obsługa Xv to powinna się pojawić podobna linia:
+został skompilowany z obsługą Xv. 
+Wykonaj <command>mplayer -vo help | grep xv </command>. 
+Jeżeli została zbudowana obsługa Xv to powinna się pojawić podobna linia:
   <screen>
   xv      X11/Xv<!--
   --></screen>
