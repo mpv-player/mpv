@@ -336,9 +336,10 @@ static int init_vo(sh_video_t *sh){
 	avctx->height != sh->disp_h ||
 	!ctx->vo_inited)
     {
-	mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "aspect_ratio: %d\n", avctx->aspect_ratio);
-	sh->aspect = 
+	mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", avctx->aspect_ratio);
         ctx->last_aspect = avctx->aspect_ratio;
+//	if(ctx->last_aspect>=0.01 && ctx->last_aspect<100)
+	    sh->aspect = ctx->last_aspect;
 	sh->disp_w = avctx->width;
 	sh->disp_h = avctx->height;
 	ctx->vo_inited=1;
@@ -346,7 +347,7 @@ static int init_vo(sh_video_t *sh){
 	case PIX_FMT_YUV410P: ctx->best_csp=IMGFMT_YVU9;break; //svq1
 	case PIX_FMT_YUV420P: ctx->best_csp=IMGFMT_YV12;break; //mpegs
 	case PIX_FMT_YUV422P: ctx->best_csp=IMGFMT_422P;break; //mjpeg / huffyuv
-	case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //???
+	case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //photo jpeg
 	case PIX_FMT_YUV411P: ctx->best_csp=IMGFMT_411P;break; //dv ntsc
 	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
 	case PIX_FMT_BGR24 :  ctx->best_csp=IMGFMT_BGR24;break; //huffyuv
