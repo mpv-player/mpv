@@ -1,4 +1,4 @@
-.\" synced with 1.758
+.\" synced with 1.765
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -670,16 +670,22 @@ Pøi pøehrávání MPEG-TS proudu, pou¾ije MPlayer/\:Mencoder první program
 (pokud je) se zvoleným audio proudem.
 .
 .TP
-.B \-alang <dvouznakový\ kód\ zemì> (viz té¾ volbu \-aid) (pouze DVD)
-Zvolí jazyk ve kterém se má pøehrávat zvuk na DVD a zkou¹í pøehrát zvukové
-proudy jejich¾ národní kód odpovídá zvolenému jazyku.
+.B \-alang <kód\ jazyka> (viz také volbu \-aid)
+Pøehraje audio proud jeho¾ kód jazyka odpovídá zadanému.
+Rùzné nosné formáty souborù pou¾ívají rùzné kódy jazyka.
+DVD pou¾ívají dvoupísmenné kódy jazyka podle ISO 639-1, Matroska a NUT
+pou¾ívají trojpísmenné kódy podle ISO 639-2, zatímco OGM pou¾ívá volnou formu
+identifikace.
 Chcete-li seznam dostupných jazykù, pou¾ijte volbu \-v a prohlédnìte si výstup.
 .sp 1
 .I PØÍKLAD:
 .PD 0
 .RSs
 .IPs "\-alang hu,en"
-Pøehraje film v Bulhar¹tinì, nebo v Angliètinì pokud Bulhar¹tina není k dispozici.
+.IPs "mplayer dvd://1 \-alang hu,en"
+Vybere zvukovou stopu v bulhar¹tinì, pokud není k dispozici, pou¾ije stopu v angliètinì.
+.IPs "mplayer \-alang jpn example.mkv"
+Pøehraje Matroska soubor v japon¹tinì.
 .RE
 .PD 1
 .
@@ -2328,7 +2334,7 @@ Vybere video rozhraní, které se pou¾ije jako zdroj pro pøekrytí nad X11.
 .PD 1
 .
 .TP
-.B xvmc (pouze X11, \-vc ffmpeg12mc)
+.B xvmc (pouze X11 spolu s \-vc ffmpeg12mc)
 Výstupní video rozhraní vyu¾ívající XvMC (X Video Motion Compensation)
 roz¹íøení z XFree86 4.x ke zrychlení MPEG1/\:2 a VCR2 dekódování.
 .PD 0
@@ -3333,9 +3339,9 @@ pøirozený bikubický spline
 .sp 1
 .PD 1
 .I POZNÁMKA:
-Pøi \-sws\ 2 a 7, mù¾e být nastaveno ostøení spolu se ¹kálovacím parametrem (p)
-tedy \-vf scale (0 (jemné) \- 100 (ostré)), pøi \-sws 9, je udávána délka 
-filtru (1 \- 10).
+Pøi \-sws\ 2 a 7, mù¾e být nastavena ostrost spolu se ¹kálovacím parametrem (p)
+tedy \-vf scale (0 (jemné) \- 100 (ostré)), pøi \-sws 9, udává ¹kálovací
+parametr délku filtru (1 \- 10).
 .RE
 .
 .TP
@@ -3602,8 +3608,13 @@ Pou¾ijete-li \-zoom, a podkladové filtry (vèetnì libvo) nejsou schopny
 .br
 -3:   Vypoèítá ¹/\:v pomocí druhého rozmìru a pùvodního pomìru stran.
 .REss
-.IPs prokládané
+.IPs <prokládané>
 Pøepíná prokládané ¹kálování.
+.RSss
+0: vypnuto (default)
+.br
+1: zapnuto
+.REss
 .IPs <zru¹ení_barev>
 ignorování barevné informace
 .RSss
@@ -3615,19 +3626,21 @@ ignorování barevné informace
 .br
 3: Pou¾ívat barvy pouze z ka¾dého 8. øádku.
 .REss
-.IPs <param>
+.IPs "<param>[:<param2>] (viz také volbu \-sws)"
+Nastavení nìkterých parametrù v závislosti na typu ¹kálovaèe nastaveném
+pomocí \-sws.
 .RSss
-\-sws 2 (bikubické): B (rozostøení) a C (ringing)
+\-sws 2 (bikubické): B (rozostøení) a C (krou¾kování)
 .br
-(0.00, 0.60) default
+0.00:0.60 default
 .br
-(0.00, 0.75) odpovídá "precise bicubic" z VirtualDubu
+0.00:0.75 odpovídá "precise bicubic" z VirtualDubu
 .br
-(0.00, 0.50) Catmull-Rom spline
+0.00:0.50 Catmull-Rom spline
 .br
-(0.33, 0.33) Mitchell-Netravali spline
+0.33:0.33 Mitchell-Netravali spline
 .br
-(1.00, 0.00) kubická B-spline
+1.00:0.00 kubická B-spline
 .br
 \-sws 7 (Gauss): ostøení (0 (jemné) \- 100 (ostré))
 .br
@@ -4466,7 +4479,7 @@ poèet øádkù pro vybrání ze støedu obrázku (default: 12)
 .TP
 .B bmovl=hidden:opaque:fifo
 Tento filtr pro pøekrývání bitmap ète bitmapy z FIFO a vykresluje je pøes film,
-co¾ umo¾òuje nekteré transformace.
+co¾ umo¾òuje nìkteré transformace.
 Viz také TOOLS/\:bmovl-test.c, co¾ je malý testovací program pro tento filtr.
 .PD 0
 .RSs
@@ -4865,7 +4878,7 @@ nápovìda
 nastaví datový tok (bitrate)
 .RSs
 .IPs 4\-16000
-(v kbitech)
+(v kilobitech)
 .IPs 16001\-24000000
 (v bitech)
 .RE
@@ -5347,7 +5360,7 @@ první prùchod (viz také turbo)
 .IPs 2
 druhý prùchod
 .IPs 3
-Ntý prùchod (druhý a tøetí prùchod ve tøíprùchodovém re¾imu enkódování)
+N-tý prùchod (druhý a tøetí prùchod ve tøíprùchodovém re¾imu enkódování)
 .RE
 .RS
 Popis funkce a pou¾ití:
@@ -5423,7 +5436,7 @@ Nastaví datový tok (prùchod\ 1/\:2).
 Pozor: 1kBit = 1000 Bitù.
 .RSs
 .IPs 4\-16000
-(v kbitech)
+(v kilobitech)
 .IPs 16001\-24000000
 (v bitech)
 .IPs 800
@@ -5799,7 +5812,7 @@ rozumný rozsah
 Maskování doèasné komplexnosti (default: 0.0 (vypnuto)).
 .br
 Pøedstavme si scénu s ptákem letícím pøes celou obrazovku; tcplx_mask
-sní¾í kvantizery ptaèích makroblokù (co¾ sní¾í jejich kvalitu), proto¾e lidské
+zvý¹í kvantizery ptaèích makroblokù (co¾ sní¾í jejich kvalitu), proto¾e lidské
 oko si zpravidla nemá èas v¹imnout v¹ech ptaèích detailù.
 Upozoròujeme, ¾e pokud se maskovaný objekt zastaví (napø.\& pták pøistane),
 pak bude po urèitou dobu vypadat hroznì, dokud enkodér nepozná, ¾e se objekt
@@ -5813,9 +5826,9 @@ Maskování prostorové komplexnosti.
 Vìt¹í hodnoty potlaèují ètvereèkování, pokud není pou¾íván ¾ádný deblokovací 
 filtr pøi dekódování, co¾ nebývá dobrý nápad.
 .br
-Pøedstavme si scénu s trávou (ta mívá vysokou prostorovou komplexnost), domem a
-modrým nebem. Filtr scplx_mask sní¾í kvantizery makroblokù trávy (co¾ sní¾í
-jejich kvalitu) a u¹etøené bity pou¾ije na dùm a oblohu.
+Pøedstavme si scénu s domem, trávníkem (ten mívá vysokou prostorovou
+komplexnost) a modrým nebem. Filtr scplx_mask zvý¹í kvantizery makroblokù trávy
+(co¾ sní¾í jejich kvalitu) a u¹etøené bity pou¾ije na dùm a oblohu.
 .br
 .I TIP:
 Oøíznìte ve¹keré èerné okraje, proto¾e sni¾ují kvalitu makroblokù (to 
@@ -6269,7 +6282,7 @@ Nastaví prùchod ve dvou-prùchodovém re¾imu.
 .
 .TP
 .B bitrate=<hodnota>
-Nastaví po¾adovaný datový tok v kbitech/\:sekundu jestli¾e <16000 nebo 
+Nastaví po¾adovaný datový tok v kilobitech/\:sekundu jestli¾e <16000 nebo 
 v bitech/\:sekundu jestli¾e >16000.
 Pokud je <hodnota> záporná, XviD pou¾ije její absolutní hodnotu jako po¾adovanou
 velikost (v kB) videa a spoèítá datový tok automaticky.
@@ -6698,7 +6711,7 @@ Vrácené hodnoty jsou v dB (decibel), èím vy¹¹í tím lep¹í.
 .
 .TP
 .B bitrate=<hodnota>
-Nastaví datový tok k pou¾ití v kbitech/\:sekundu (default: vypnuto).
+Nastaví datový tok k pou¾ití v kilobitech/\:sekundu (default: vypnuto).
 Toto je nutné, pokud chcete provádìt CBR (konstantní datový tok) enkódování.
 .
 .TP
@@ -6820,11 +6833,46 @@ faktor kvantizeru mezi I a P snímky (default: 2.0)
 faktor kvantizeru mezi P a B snímky (default: 2.0)
 .
 .TP
-.B pass=<1|2>
-Zapne 2-prùchodový re¾im.
-První prùchod ukládá statistiky.
-Doporuèujeme v¾dy enkódovat ve 2-prùchodovém re¾imu, jeliko¾ umo¾òuje lep¹í
-rozdìlení bitù a zlepøuje celkovou kvalitu.
+.B pass=<1\-3>
+Zapíná 2 nebo 3-prùchodový re¾im.
+Doporuèujeme v¾dy enkódovat ve dvou nebo tøíprùchodovém re¾imu, proto¾e zaji¹»uje
+lep¹í rozdìlení bitù a tím zlep¹uje celkovou kvalitu.
+.PD 0
+.RSs
+.IPs 1
+první prùchod
+.IPs 2
+druhý prùchod
+.IPs 3
+N-tý prùchod (druhý a tøetí prùchod ve tøíprùchodovém re¾imu)
+.RE
+.RS
+Popis funkce a pou¾ití:
+.br
+V prvním prùchodu (pass=1) jsou shromá¾dìny statistické údaje o videu a zapí¹e
+je do souboru.
+Mìli byste deaktivovat nìkteré volby nároèné na procesor, kromì tìch, které
+jsou defaultnì zapnuté.
+.br
+Ve dvouprùchodovém re¾imu, se ve druhém prùchodu (pass=2) ètou statistiky
+ze souboru a na jejich základì je provádìno rozdìlování datového toku.
+.br
+Ve tøíprùchodovém re¾imu, se ve druhém prùchodu (pass=3, toto není pøeklep)
+provádí obojí: Nejprve se statistiky naètou a posléze jsou pøepsány.
+Mìli byste si zazálohovat divx2pass.log pøedtím ne¾ zaènete druhý(tøetí)
+prùchod, pokud je zde sebemen¹í ¹ance, ¾e pøeru¹íte MEncoder.
+Nyní mù¾ete pou¾ít v¹echny enkódovací volby, kromì tìch nejnároènìj¹ích na CPU.
+.br
+Tøetí prùchod (pass=3) je stejný jako druhý prùchod s tím, ¾e nyní se pou¾ívají
+statistiky ze druhého prùchodu.
+Nyní mù¾ete pou¾ít v¹echny enkódovací volby, vèetnì tìch nejnároènìj¹ích.
+.br
+.I
+POZNÁMKA:
+Implementace tøíprùchodového re¾imu kodeku x264 je v MEncoderu pomìrnì nová, 
+uvítáme va¹e názory na dobré kombinace voleb pro x264, které jsou jak rychlé,
+tak poskytují dobrou kvalitu.
+.REss
 .
 .TP
 .B qcomp=<0\-1>
@@ -6886,6 +6934,13 @@ Nastavení mno¾ství logovacích informací vypisovaných na obrazovku.
 .TP
 .B psnr | nopsnr
 Tiskne statistiky odstupu signál-¹um.
+.br
+.I POZNÁMKA:
+Sloupce 'Y', 'U', 'V', a 'Avg' PSNR ve shrnutí nejsou matematicky správné
+(jsou to jednodu¹e prùmìry odstupu signál-¹um z jednotlivých snímkù).
+Jsou zde pouze pro srovnání s JM referenèním kodekem.
+Pro jakékoli jiné vyu¾ití radìji pou¾ijte 'Globální' PSNR, nebo PSNR
+jednotlivých snímkù vypisovaných pøi log=3.
 .
 .
 .\" --------------------------------------------------------------------------
