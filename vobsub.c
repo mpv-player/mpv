@@ -17,6 +17,7 @@
 
 #include "stream.h"
 #include "vobsub.h"
+#include "libvo/video_out.h"
 #include "spudec.h"
 #include "mp_msg.h"
 
@@ -165,7 +166,7 @@ mpeg_run(mpeg_t *mpeg)
 	else if ((c & 0xf0) == 0x20)
 	    version = 2;
 	else {
-	    fprintf(stderr, "Unsupported MPEG version: 0x%02x", c);
+	    mp_msg(MSGT_VOBSUB,MSGL_ERR, "Unsupported MPEG version: 0x%02x", c);
 	    return -1;
 	}
 	if (version == 4) {
@@ -214,7 +215,7 @@ mpeg_run(mpeg_t *mpeg)
 	    hdrlen = c;
 	    dataidx = mpeg_tell(mpeg) + hdrlen;
 	    if (dataidx > idx + len) {
-		fprintf(stderr, "Invalid header length: %d (total length: %d, idx: %d, dataidx: %d)\n",
+		mp_msg(MSGT_VOBSUB,MSGL_ERR, "Invalid header length: %d (total length: %d, idx: %d, dataidx: %d)\n",
 			hdrlen, len, idx, dataidx);
 		return -1;
 	    }
@@ -222,7 +223,7 @@ mpeg_run(mpeg_t *mpeg)
 		if (stream_read(mpeg->stream, buf, 5) != 5)
 		    return -1;
 		if (!(((buf[0] & 0xf0) == 0x20) && (buf[0] & 1) && (buf[2] & 1) &&  (buf[4] & 1))) {
-		    fprintf(stderr, "vobsub PTS error: 0x%02x %02x%02x %02x%02x \n",
+		    mp_msg(MSGT_VOBSUB,MSGL_ERR, "vobsub PTS error: 0x%02x %02x%02x %02x%02x \n",
 			    buf[0], buf[1], buf[2], buf[3], buf[4]);
 		    mpeg->pts = 0;
 		}
@@ -237,7 +238,7 @@ mpeg_run(mpeg_t *mpeg)
 	    stream_seek(mpeg->stream, dataidx);
 	    mpeg->aid = stream_read_char(mpeg->stream);
 	    if (mpeg->aid < 0) {
-		fprintf(stderr, "Bogus aid %d\n", mpeg->aid);
+		mp_msg(MSGT_VOBSUB,MSGL_ERR, "Bogus aid %d\n", mpeg->aid);
 		return -1;
 	    }
 	    mpeg->packet_size = len - ((unsigned int) mpeg_tell(mpeg) - idx);
@@ -249,13 +250,13 @@ mpeg_run(mpeg_t *mpeg)
 		    mpeg->packet_reserve = mpeg->packet_size;
 	    }
 	    if (mpeg->packet == NULL) {
-		perror("malloc failure");
+		mp_msg(MSGT_VOBSUB,MSGL_FATAL,"malloc failure");
 		mpeg->packet_reserve = 0;
 		mpeg->packet_size = 0;
 		return -1;
 	    }
-	    if (stream_read(mpeg->stream, mpeg->packet, mpeg->packet_size) != mpeg->packet_size) {
-		perror("stream_read failure");
+	    if ((unsigned int)stream_read(mpeg->stream, mpeg->packet, mpeg->packet_size) != mpeg->packet_size) {
+		mp_msg(MSGT_VOBSUB,MSGL_ERR,"stream_read failure");
 		mpeg->packet_size = 0;
 		return -1;
 	    }
@@ -280,7 +281,7 @@ mpeg_run(mpeg_t *mpeg)
 		
 	}
 	else {
-	    fprintf(stderr, "unknown header 0x%02X%02X%02X%02X\n",
+	    mp_msg(MSGT_VOBSUB,MSGL_ERR,"unknown header 0x%02X%02X%02X%02X\n",
 		    buf[0], buf[1], buf[2], buf[3]);
 	    return -1;
 	}
@@ -353,7 +354,7 @@ packet_queue_ensure(packet_queue_t *queue, unsigned int needed_size)
 	if (queue->packets) {
 	    packet_t *tmp = realloc(queue->packets, 2 * queue->packets_reserve * sizeof(packet_t));
 	    if (tmp == NULL) {
-		perror("realloc failure");
+		mp_msg(MSGT_VOBSUB,MSGL_FATAL,"realloc failure");
 		return -1;
 	    }
 	    queue->packets = tmp;
@@ -362,7 +363,7 @@ packet_queue_ensure(packet_queue_t *queue, unsigned int needed_size)
 	else {
 	    queue->packets = malloc(sizeof(packet_t));
 	    if (queue->packets == NULL) {
-		perror("malloc failure");
+		mp_msg(MSGT_VOBSUB,MSGL_FATAL,"malloc failure");
 		return -1;
 	    }
 	    queue->packets_reserve = 1;
@@ -407,7 +408,6 @@ packet_queue_insert(packet_queue_t *queue)
  **********************************************************************/
 
 typedef struct {
-    void *spudec;
     unsigned int palette[16];
     unsigned int cuspal[4];
     int delay;
@@ -430,7 +430,7 @@ vobsub_ensure_spu_stream(vobsub_t *vob, unsigned int index)
 	if (vob->spu_streams) {
 	    packet_queue_t *tmp = realloc(vob->spu_streams, (index + 1) * sizeof(packet_queue_t));
 	    if (tmp == NULL) {
-		perror("vobsub_ensure_spu_stream: realloc failure");
+		mp_msg(MSGT_VOBSUB,MSGL_ERR,"vobsub_ensure_spu_stream: realloc failure");
 		return -1;
 	    }
 	    vob->spu_streams = tmp;
@@ -438,7 +438,7 @@ vobsub_ensure_spu_stream(vobsub_t *vob, unsigned int index)
 	else {
 	    vob->spu_streams = malloc((index + 1) * sizeof(packet_queue_t));
 	    if (vob->spu_streams == NULL) {
-		perror("vobsub_ensure_spu_stream: malloc failure");
+		mp_msg(MSGT_VOBSUB,MSGL_ERR,"vobsub_ensure_spu_stream: malloc failure");
 		return -1;
 	    }
 	}
@@ -460,7 +460,7 @@ vobsub_add_id(vobsub_t *vob, const char *id, size_t idlen, const unsigned int in
 	    free(vob->spu_streams[index].id);
 	vob->spu_streams[index].id = malloc(idlen + 1);
 	if (vob->spu_streams[index].id == NULL) {
-	    perror("vobsub_add_id: malloc failure");
+	    mp_msg(MSGT_VOBSUB,MSGL_FATAL,"vobsub_add_id: malloc failure");
 	    return -1;
 	}
 	vob->spu_streams[index].id[idlen] = 0;
@@ -468,7 +468,7 @@ vobsub_add_id(vobsub_t *vob, const char *id, size_t idlen, const unsigned int in
     }
     vob->spu_streams_current = index;
     if (verbose)
-	fprintf(stderr, "[vobsub] subtitle (vobsubid): %d language %s\n",
+	mp_msg(MSGT_VOBSUB,MSGL_V,"[vobsub] subtitle (vobsubid): %d language %s\n",
 		index, vob->spu_streams[index].id);
     return 0;
 }
@@ -479,7 +479,7 @@ vobsub_add_timestamp(vobsub_t *vob, off_t filepos, unsigned int ms)
     packet_queue_t *queue;
     packet_t *pkt;
     if (vob->spu_streams == 0) {
-	fprintf(stderr, "[vobsub] warning, binning some index entries.  Check your index file\n");
+	mp_msg(MSGT_VOBSUB,MSGL_WARN,"[vobsub] warning, binning some index entries.  Check your index file\n");
 	return -1;
     }
     queue = vob->spu_streams + vob->spu_streams_current;
@@ -676,13 +676,13 @@ vobsub_parse_cuspal(vobsub_t *vob, const char *line)
 
 /* don't know how to use tridx */
 static int
-vobsub_parse_tridx(vobsub_t *vob, const char *line)
+vobsub_parse_tridx(const char *line)
 {
     //tridx: XXXX
-    int i;
     int tridx;
     tridx = strtoul((line + 26), NULL, 16);
     tridx = ((tridx&0x1000)>>12) | ((tridx&0x100)>>7) | ((tridx&0x10)>>2) | ((tridx&1)<<3);
+    return tridx;
 }
 
 static int
@@ -698,21 +698,21 @@ vobsub_parse_delay(vobsub_t *vob, const char *line)
     	forward = -1;
 	line++;
     }
-    fprintf(stderr, "forward=%d", forward);
+    mp_msg(MSGT_SPUDEC,MSGL_V, "forward=%d", forward);
     h = atoi(line + 7);
-    fprintf(stderr, "h=%d," ,h);
+    mp_msg(MSGT_VOBSUB,MSGL_V, "h=%d," ,h);
     m = atoi(line + 10);
-    fprintf(stderr, "m=%d,", m);
+    mp_msg(MSGT_VOBSUB,MSGL_V, "m=%d,", m);
     s = atoi(line + 13);
-    fprintf(stderr, "s=%d,", s);
+    mp_msg(MSGT_VOBSUB,MSGL_V, "s=%d,", s);
     ms = atoi(line + 16);
-    fprintf(stderr, "ms=%d", ms);
+    mp_msg(MSGT_VOBSUB,MSGL_V, "ms=%d", ms);
     vob->delay = ms + 1000 * (s + 60 * (m + 60 * h)) * forward;
     return 0;
 }
 
 static int
-vobsub_set_lang(vobsub_t *vob, const char *line)
+vobsub_set_lang(const char *line)
 {
     if (vobsub_id == -1)
         vobsub_id = atoi(line + 8);
@@ -736,7 +736,7 @@ vobsub_parse_one_line(vobsub_t *vob, FILE *fd)
 	if (*line == 0 || *line == '\r' || *line == '\n' || *line == '#')
 	    continue;
 	else if (strncmp("langidx:", line, 8) == 0)
-	    res = vobsub_set_lang(vob, line);
+	    res = vobsub_set_lang(line);
 	else if (strncmp("delay:", line, 6) == 0)
 	    res = vobsub_parse_delay(vob, line);
 	else if (strncmp("id:", line, 3) == 0)
@@ -751,36 +751,37 @@ vobsub_parse_one_line(vobsub_t *vob, FILE *fd)
 	    res = vobsub_parse_timestamp(vob, line + 10);
 	else if (strncmp("custom colors:", line, 14) == 0)
 	    //custom colors: ON/OFF, tridx: XXXX, colors: XXXXXX, XXXXXX, XXXXXX,XXXXXX
-	    res = vobsub_parse_cuspal(vob, line) + vobsub_parse_tridx(vob, line) + vobsub_parse_custom(vob, line);
+	    res = vobsub_parse_cuspal(vob, line) + vobsub_parse_tridx(line) + vobsub_parse_custom(vob, line);
 	else {
 	    if (verbose)
-		fprintf(stderr, "vobsub: ignoring %s", line);
+		mp_msg(MSGT_VOBSUB,MSGL_V, "vobsub: ignoring %s", line);
 	    continue;
 	}
 	if (res < 0)
-	    fprintf(stderr, "ERROR in %s", line);
+	    mp_msg(MSGT_VOBSUB,MSGL_ERR,  "ERROR in %s", line);
 	break;
     } while (1);
     return res;
 }
 
 int
-vobsub_parse_ifo(const char *const name, unsigned int *palette, unsigned int *width, unsigned int *height, int force)
+vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette, unsigned int *width, unsigned int *height, int force)
 {
+    vobsub_t *vob = (vobsub_t*)this;
     int res = -1;
     FILE *fd = fopen(name, "rb");
     if (fd == NULL) {
         if (force)
-	    perror("Can't open IFO file");
+	    mp_msg(MSGT_VOBSUB,MSGL_ERR, "Can't open IFO file");
     } else {
 	// parse IFO header
 	unsigned char block[0x800];
 	const char *const ifo_magic = "DVDVIDEO-VTS";
 	if (fread(block, sizeof(block), 1, fd) != 1) {
 	    if (force)
-		perror("Can't read IFO header");
+		mp_msg(MSGT_VOBSUB,MSGL_ERR, "Can't read IFO header");
 	} else if (memcmp(block, ifo_magic, strlen(ifo_magic) + 1))
-	    fprintf(stderr, "Bad magic in IFO header\n");
+	    mp_msg(MSGT_VOBSUB,MSGL_ERR, "Bad magic in IFO header\n");
 	else {
 	    unsigned long pgci_sector = block[0xcc] << 24 | block[0xcd] << 16
 		| block[0xce] << 8 | block[0xcf];
@@ -803,11 +804,11 @@ vobsub_parse_ifo(const char *const name, unsigned int *palette, unsigned int *wi
 		*height /= 2;
 		break;
 	    default:
-		fprintf(stderr, "Unknown resolution %d \n", resolution);
+		mp_msg(MSGT_VOBSUB,MSGL_WARN,"Vobsub: Unknown resolution %d \n", resolution);
 	    }
 	    if (fseek(fd, pgci_sector * sizeof(block), SEEK_SET)
 		|| fread(block, sizeof(block), 1, fd) != 1)
-		perror("Can't read IFO PGCI");
+		mp_msg(MSGT_VOBSUB,MSGL_ERR, "Can't read IFO PGCI");
 	    else {
 		unsigned long idx;
 		unsigned long pgc_offset = block[0xc] << 24 | block[0xd] << 16
@@ -816,7 +817,8 @@ vobsub_parse_ifo(const char *const name, unsigned int *palette, unsigned int *wi
 		    unsigned char *p = block + pgc_offset + 0xa4 + 4 * idx;
 		    palette[idx] = p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3];
 		}
-		//vob->have_palette = 1;
+		if(vob)
+		  vob->have_palette = 1;
 		res = 0;
 	    }
 	}
@@ -826,12 +828,13 @@ vobsub_parse_ifo(const char *const name, unsigned int *palette, unsigned int *wi
 }
 
 void *
-vobsub_open(const char *const name, const int force)
+vobsub_open(const char *const name,const char *const ifo,const int force,void** spu)
 {
     vobsub_t *vob = malloc(sizeof(vobsub_t));
+    if(spu)
+      *spu = NULL;
     if (vob) {
 	char *buf;
-	vob->spudec = NULL;
 	vob->orig_frame_width = 0;
 	vob->orig_frame_height = 0;
 	vob->spu_streams = NULL;
@@ -843,18 +846,24 @@ vobsub_open(const char *const name, const int force)
 	    FILE *fd;
 	    mpeg_t *mpg;
 	    /* read in the info file */
-	    strcpy(buf, name);
-	    strcat(buf, ".ifo");
-	    vobsub_parse_ifo(buf, vob->palette, &vob->orig_frame_width, &vob->orig_frame_height, force);
+	    if(!ifo) {
+	      strcpy(buf, name);
+	      strcat(buf, ".ifo");
+	      vobsub_parse_ifo(vob,buf, vob->palette, &vob->orig_frame_width, &vob->orig_frame_height, force);
+	    } else
+	      vobsub_parse_ifo(vob,ifo, vob->palette, &vob->orig_frame_width, &vob->orig_frame_height, force);
 	    /* read in the index */
 	    strcpy(buf, name);
 	    strcat(buf, ".idx");
 	    fd = fopen(buf, "rb");
 	    if (fd == NULL) {
 		if(force)
-                    perror("VobSub: Can't open IDX file");
-                else
-                    return NULL;
+		  mp_msg(MSGT_VOBSUB,MSGL_ERR,"VobSub: Can't open IDX file");
+		else {
+		  free(buf);
+		  free(vob);
+		  return NULL;
+		}
 	    } else {
 		while (vobsub_parse_one_line(vob, fd) >= 0)
 		    /* NOOP */ ;
@@ -863,23 +872,29 @@ vobsub_open(const char *const name, const int force)
 	    /* if no palette in .idx then use custom colors */
 	    if ((vob->custom == 0)&&(vob->have_palette!=1))
 		vob->custom = 1;
-	    if (vob->orig_frame_width && vob->orig_frame_height)
-		vob->spudec = spudec_new_scaled_vobsub(vob->palette, vob->cuspal, vob->custom, vob->orig_frame_width, vob->orig_frame_height);
+	    if (spu && vob->orig_frame_width && vob->orig_frame_height)
+	      *spu = spudec_new_scaled_vobsub(vob->palette, vob->cuspal, vob->custom, vob->orig_frame_width, vob->orig_frame_height);
 
 	    /* read the indexed mpeg_stream */
 	    strcpy(buf, name);
 	    strcat(buf, ".sub");
 	    mpg = mpeg_open(buf);
 	    if (mpg == NULL) {
-                if(force)
-		    perror("VobSub: Can't open SUB file");
+	      if(force)
+		mp_msg(MSGT_VOBSUB,MSGL_ERR,"VobSub: Can't open SUB file");
+	      else {
+		
+		free(buf);
+		free(vob);
+		return NULL;
+	      }
 	    } else {
 		long last_pts_diff = 0;
 		while (!mpeg_eof(mpg)) {
 		    off_t pos = mpeg_tell(mpg);
 		    if (mpeg_run(mpg) < 0) {
 			if (!mpeg_eof(mpg))
-			    perror("mpeg_run error");
+			    mp_msg(MSGT_VOBSUB,MSGL_ERR,"mpeg_run error");
 			break;
 		    }
 		    if (mpg->packet_size) {
@@ -912,7 +927,7 @@ vobsub_open(const char *const name, const int force)
 				}
 			    }
 			    else
-				fprintf(stderr, "don't know what to do with subtitle #%u\n", sid);
+				mp_msg(MSGT_VOBSUB,MSGL_WARN, "don't know what to do with subtitle #%u\n", sid);
 			}
 		    }
 		}
@@ -931,8 +946,6 @@ void
 vobsub_close(void *this)
 {
     vobsub_t *vob = (vobsub_t *)this;
-    if (vob->spudec)
-	spudec_free(vob->spudec);
     if (vob->spu_streams) {
 	while (vob->spu_streams_size--)
 	    packet_queue_destroy(vob->spu_streams + vob->spu_streams_size);
@@ -941,34 +954,23 @@ vobsub_close(void *this)
     free(vob);
 }
 
-void vobsub_draw(void *this, int dxs, int dys, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
-{
-    vobsub_t *vob = (vobsub_t *)this;
-    if (vob->spudec) {
-	spudec_draw_scaled(vob->spudec, dxs, dys, draw_alpha);
-    }	
-}
-
-void
-vobsub_process(void *vobhandle, float pts)
-{
-    vobsub_t *vob = (vobsub_t *)vobhandle;
-    unsigned int pts100 = 90000 * pts;
-    if (vob->spudec) {
-	spudec_heartbeat(vob->spudec, pts100);
-	if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
-	    packet_queue_t *queue = vob->spu_streams + vobsub_id;
-	    while (queue->current_index < queue->packets_size) {
-		packet_t *pkt = queue->packets + queue->current_index;
-		if (pkt->pts100 <= pts100) {
-		    spudec_assemble(vob->spudec, pkt->data, pkt->size, pkt->pts100);
-		    ++queue->current_index;
-		}
-		else
-		    break;
-	    }
-	}
+int
+vobsub_get_packet(void *vobhandle, float pts,void** data, int* timestamp) {
+  vobsub_t *vob = (vobsub_t *)vobhandle;
+  unsigned int pts100 = 90000 * pts;
+  if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
+    packet_queue_t *queue = vob->spu_streams + vobsub_id;
+    while (queue->current_index < queue->packets_size) {
+      packet_t *pkt = queue->packets + queue->current_index;
+      if (pkt->pts100 <= pts100) {
+	++queue->current_index;
+	*data = pkt->data;
+	*timestamp = pkt->pts100;
+	return pkt->size;
+      } else break;
     }
+  }
+  return -1;
 }
 
 void
@@ -980,6 +982,4 @@ vobsub_reset(void *vobhandle)
 	while (n-- > 0)
 	    vob->spu_streams[n].current_index = 0;
     }
-    if (vob->spudec)
-	spudec_reset(vob->spudec);
 }

@@ -10,7 +10,6 @@ typedef struct mp_osd_bbox_s {
 #define OSDTYPE_SUBTITLE 2
 #define OSDTYPE_PROGBAR 3
 #define OSDTYPE_SPU 4
-#define OSDTYPE_VOBSUB 5
 
 #define OSDFLAG_VISIBLE 1
 #define OSDFLAG_CHANGED 2

@@ -279,6 +279,7 @@ static unsigned int inited_flags=0;
 #define INITED_SPUDEC 32
 #define INITED_STREAM 64
 #define INITED_INPUT    128
+#define INITED_VOBSUB  256
 #define INITED_ALL 0xFFFF
 
 void uninit_player(unsigned int mask){
@@ -308,6 +309,13 @@ void uninit_player(unsigned int mask){
     mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n[[[uninit getch2]]]\n");
   // restore terminal:
     getch2_disable();
+  }
+
+  if(mask&INITED_VOBSUB){
+    inited_flags&=~INITED_VOBSUB;
+    current_module="uninit_vobsub";
+    vobsub_close(vo_vobsub);
+    vo_vobsub=NULL;
   }
 
   if (mask&INITED_SPUDEC){
@@ -854,7 +862,7 @@ if(!use_stdin && !slave_mode){
 
     current_module="vobsub";
     if (vobsub_name){
-      vo_vobsub=vobsub_open(vobsub_name,1);
+      vo_vobsub=vobsub_open(vobsub_name,spudec_ifo,1,&vo_spudec);
       if(vo_vobsub==NULL)
         mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,vobsub_name);
     }else if(sub_auto && filename && (strlen(filename)>=5)){
@@ -862,7 +870,7 @@ if(!use_stdin && !slave_mode){
       char *buf = malloc((strlen(filename)-3) * sizeof(char));
       memset(buf,0,strlen(filename)-3); // make sure string is terminated
       strncpy(buf, filename, strlen(filename)-4); 
-      vo_vobsub=vobsub_open(buf,0);
+      vo_vobsub=vobsub_open(buf,spudec_ifo,0,&vo_spudec);
       free(buf);
     }
     if(vo_vobsub)
@@ -1149,12 +1157,12 @@ if(!sh_video && !sh_audio){
 demux_info_print(demuxer);
 
 //================== Read SUBTITLES (DVD & TEXT) ==========================
-if(sh_video){
+if(d_dvdsub->id >= 0 && vo_spudec==NULL && sh_video){
 
 if (spudec_ifo) {
   unsigned int palette[16], width, height;
   current_module="spudec_init_vobsub";
-  if (vobsub_parse_ifo(spudec_ifo, palette, &width, &height, 1) >= 0)
+  if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1) >= 0)
     vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
 }
 
@@ -1177,13 +1185,16 @@ if (vo_spudec==NULL && stream->type==STREAMTYPE_DVD) {
 if (vo_spudec==NULL) {
   current_module="spudec_init_normal";
   vo_spudec=spudec_new_scaled(NULL, sh_video->disp_w, sh_video->disp_h);
-  spudec_set_font_factor(font_factor);
+  spudec_set_font_factor(vo_spudec,font_factor);
 }
 
 if (vo_spudec!=NULL)
   inited_flags|=INITED_SPUDEC;
 
+}
+
 #ifdef USE_SUB
+if(sh_video) {
 // after reading video params we should load subtitles because
 // we know fps so now we can adjust subtitles time to ~6 seconds AST
 // check .sub
@@ -1198,9 +1209,9 @@ if (vo_spudec!=NULL)
   }
   if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
   if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, sh_video->fps);
-#endif	
-
 }
+#endif
+
 //================== Init AUDIO (codec) ==========================
 current_module="find_audio_codec";
 
@@ -1334,6 +1345,9 @@ current_module="init_vo_vaa";
 	    */
 	}
    }
+
+   if(vo_flags & 0x08 && vo_spudec)
+      spudec_set_hw_spu(vo_spudec,video_out);
 
 //================== MAIN: ==========================
    main:
@@ -2896,42 +2910,43 @@ if(rel_seek_secs || abs_seek_pos){
   }
 #endif
   
-
-  // VobSub subtitles
-  if(vo_vobsub){
-    current_module="vobsub";
-    if(d_video->pts+sub_delay>=0)
-      vobsub_process(vo_vobsub,d_video->pts+sub_delay);
-    
-    /* Don't know how to detect wether the sub has changed or not */
-    vo_osd_changed(OSDTYPE_VOBSUB);
-    current_module=NULL;
-  }
-
   // DVD sub:
-  if(vo_flags & 0x08){
-    static vo_mpegpes_t packet;
-    static vo_mpegpes_t *pkg=&packet;
-    packet.timestamp=sh_video->timer*90000.0;
-    packet.id=0x20; /* Subpic */
-    while((packet.size=ds_get_packet_sub(d_dvdsub,&packet.data))>0){
-      mp_msg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",packet.size,d_video->pts,d_dvdsub->pts);
-      if(vo_config_count) video_out->draw_frame(&pkg);
+if(vo_config_count && vo_spudec) {
+  unsigned char* packet=NULL;
+  int len,timestamp;
+    // Get a sub packet from the dvd or a vobsub and make a timestamp relative to sh_video->timer
+  int get_sub_packet(void) {
+    // Vobsub
+    len = 0;
+    if(vo_vobsub) {
+      if(d_video->pts+sub_delay>=0) {
+	// The + next_frame_time is there because we'll display the sub at the next frame
+	len = vobsub_get_packet(vo_vobsub,d_video->pts+sub_delay+next_frame_time,(void**)&packet,&timestamp);
+	if(len > 0) {
+	  timestamp -= (d_video->pts + sub_delay - sh_video->timer)*90000;
+	  mp_dbg(MSGT_CPLAYER,MSGL_V,"\rVOB sub: len=%d v_pts=%5.3f v_timer=%5.3f sub=%5.3f ts=%d \n",len,d_video->pts,sh_video->timer,timestamp / 90000.0);
+	}
+      }
+    } else {
+      // DVD sub
+      len = ds_get_packet_sub(d_dvdsub,(unsigned char**)&packet);
+      if(len > 0) {
+	timestamp = 90000*(sh_video->timer + d_dvdsub->pts + sub_delay - d_video->pts);
+	mp_dbg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  ts=%d \n",len,d_video->pts,d_dvdsub->pts,timestamp);
+      }
     }
-  }else if(vo_spudec){
-    unsigned char* packet=NULL;
-    int len;
-    current_module="spudec";
-    while((len=ds_get_packet_sub(d_dvdsub,&packet))>0){
-      mp_msg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,d_video->pts,d_dvdsub->pts);
-      spudec_assemble(vo_spudec,packet,len,90000*d_dvdsub->pts);
-    }
-    spudec_heartbeat(vo_spudec,90000*d_video->pts);
-
-    /* Don't know how to detect wether the sub has changed or not */
-    vo_osd_changed(OSDTYPE_SPU);
-    current_module=NULL;
+    return len;
   }
+  current_module="spudec";
+  spudec_heartbeat(vo_spudec,90000*sh_video->timer);
+  while(get_sub_packet()>0 && packet){
+      spudec_assemble(vo_spudec,packet,len,timestamp);
+  }
+  
+  /* Don't know how to detect wether the sub has changed or not */
+  vo_osd_changed(OSDTYPE_SPU);
+  current_module=NULL;
+}
   
 } // while(!eof)
 

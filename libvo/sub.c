@@ -390,12 +390,6 @@ int vo_update_osd(int dxs,int dys){
 	    else
 		obj->flags&=~OSDFLAG_VISIBLE;
 	    break;
-	case OSDTYPE_VOBSUB:
-	    if(vo_vobsub)
-		obj->flags|=OSDFLAG_VISIBLE|OSDFLAG_CHANGED;
-	    else
-		obj->flags&=~OSDFLAG_VISIBLE;
-	    break;
 	case OSDTYPE_OSD:
 	    if(vo_font && vo_osd_text && vo_osd_text[0]){
 		vo_update_text_osd(obj,dxs,dys); // update bbox
@@ -443,13 +437,12 @@ void vo_init_osd(){
 	draw_alpha_init_flag=1;
 	vo_draw_alpha_init();
     }
-    if(vo_osd_list) free_osd_list;
+    if(vo_osd_list) free_osd_list();
     // temp hack, should be moved to mplayer/mencoder later
     new_osd_obj(OSDTYPE_OSD);
     new_osd_obj(OSDTYPE_SUBTITLE);
     new_osd_obj(OSDTYPE_PROGBAR);
     new_osd_obj(OSDTYPE_SPU);
-    new_osd_obj(OSDTYPE_VOBSUB);
 }
 
 int vo_osd_changed_flag=0;
@@ -481,9 +474,6 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 	switch(obj->type){
 	case OSDTYPE_SPU:
 	    spudec_draw_scaled(vo_spudec, dxs, dys, draw_alpha); // FIXME
-	    break;
-	case OSDTYPE_VOBSUB:
-	    vobsub_draw(vo_vobsub, dxs, dys, draw_alpha);  // FIXME
 	    break;
 	case OSDTYPE_OSD:
 	    vo_draw_text_osd(obj,draw_alpha);

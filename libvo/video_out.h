@@ -39,6 +39,7 @@
 /* libmpcodecs direct rendering: */
 #define VOCTRL_GET_IMAGE 9
 #define VOCTRL_DRAW_IMAGE 13
+#define VOCTRL_SET_SPU_PALETTE 14
 /* decoding ahead: */
 #define VOCTRL_GET_NUM_FRAMES 10
 #define VOCTRL_GET_FRAME_NUM  11

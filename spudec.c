@@ -29,6 +29,7 @@
 #if ANTIALIASING_ALGORITHM == 2
 #include <math.h>
 #endif
+#include "libvo/video_out.h"
 #include "spudec.h"
 
 #define MIN(a, b)	((a)<(b)?(a):(b))
@@ -63,12 +64,11 @@ typedef struct {
   size_t scaled_image_size;
   unsigned char *scaled_image;
   unsigned char *scaled_aimage;
+  int auto_palette; /* 1 if we lack a palette and must use an heuristic. */
+  int font_start_level;  /* Darkest value used for the computed font */
+  vo_functions_t *hw_spu;
 } spudec_handle_t;
 
-/* 1 if we lack a palette and must use an heuristic. */
-static int auto_palette = 0;
-/* Darkest value used for the computed font */
-static int font_start_level = 0;
 
 static inline unsigned int get_be16(const unsigned char *p)
 {
@@ -219,8 +219,8 @@ static void compute_palette(spudec_handle_t *this)
     start = 0x80;
     step = 0;
   } else {
-    start = font_start_level;
-    step = (0xF0-font_start_level)/(cused-1);
+    start = this->font_start_level;
+    step = (0xF0-this->font_start_level)/(cused-1);
   }
   memset(used, 0, sizeof(used));
   for (i=0; i<4; i++) {
@@ -286,7 +286,10 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
 	this->alpha[1] = this->packet[off] & 0xf;
 	this->alpha[2] = this->packet[off + 1] >> 4;
 	this->alpha[3] = this->packet[off + 1] & 0xf;
-	if (auto_palette) compute_palette(this);
+	if (this->auto_palette) { 
+	  compute_palette(this);
+	  this->auto_palette = 0;
+	}
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Alpha %d, %d, %d, %d\n",
 	       this->alpha[0], this->alpha[1], this->alpha[2], this->alpha[3]);
 	off+=2;
@@ -333,8 +336,17 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
 
 static void spudec_decode(spudec_handle_t *this, unsigned int pts100)
 {
-  spudec_process_control(this, pts100);
-  spudec_process_data(this);
+  if(this->hw_spu) {
+    static vo_mpegpes_t packet = { NULL, 0, 0x20, 0 };
+    static vo_mpegpes_t *pkg=&packet;
+    packet.data = this->packet;
+    packet.size = this->packet_size;
+    packet.timestamp = pts100;
+    this->hw_spu->draw_frame((uint8_t**)&pkg);
+  } else {
+    spudec_process_control(this, pts100);
+    spudec_process_data(this);
+  }
 }
 
 
@@ -721,13 +733,17 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 void spudec_update_palette(void * this, unsigned int *palette)
 {
   spudec_handle_t *spu = (spudec_handle_t *) this;
-  if (spu && palette)
+  if (spu && palette) {
     memcpy(spu->global_palette, palette, sizeof(spu->global_palette));
+    if(spu->hw_spu)
+      spu->hw_spu->control(VOCTRL_SET_SPU_PALETTE,spu->global_palette);
+  }
 }
 
-void spudec_set_font_factor(double factor)
+void spudec_set_font_factor(void * this, double factor)
 {
-  font_start_level = (int)(0xF0-(0xE0*factor));
+  spudec_handle_t *spu = (spudec_handle_t *) this;
+  spu->font_start_level = (int)(0xF0-(0xE0*factor));
 }
 
 void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigned int frame_height)
@@ -736,11 +752,11 @@ void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigne
   if (this) {
     if (palette) {
       memcpy(this->global_palette, palette, sizeof(this->global_palette));
-      auto_palette = 0;
+      this->auto_palette = 0;
     }
     else {
       /* No palette, compute one */
-      auto_palette = 1;
+      this->auto_palette = 1;
     }
     this->packet = NULL;
     this->image = NULL;
@@ -749,7 +765,7 @@ void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigne
     this->orig_frame_height = frame_height;
   }
   else
-    perror("FATAL: spudec_init: calloc");
+    mp_msg(MSGT_SPUDEC,MSGL_FATAL, "FATAL: spudec_init: calloc");
   return this;
 }
 
@@ -766,19 +782,19 @@ void *spudec_new_scaled_vobsub(unsigned int *palette, unsigned int *cuspal, unsi
     this->orig_frame_height = frame_height;
     this->custom = custom;
     // set up palette:
-    auto_palette = 1;
+    this->auto_palette = 1;
     if (palette){
       memcpy(this->global_palette, palette, sizeof(this->global_palette));
-      auto_palette = 0;
+      this->auto_palette = 0;
     }
     this->custom = custom;
     if (custom && cuspal) {
       memcpy(this->cuspal, cuspal, sizeof(this->cuspal));
-      auto_palette = 0;
+      this->auto_palette = 0;
     }
   }
   else
-    perror("FATAL: spudec_init: calloc");
+    mp_msg(MSGT_SPUDEC,MSGL_FATAL, "FATAL: spudec_init: calloc");
   return this;
 }
 
@@ -799,4 +815,13 @@ void spudec_free(void *this)
       free(spu->image);
     free(spu);
   }
+}
+
+void spudec_set_hw_spu(void *this, vo_functions_t *hw_spu)
+{
+  spudec_handle_t *spu = (spudec_handle_t*)this;
+  if (!spu)
+    return;
+  spu->hw_spu = hw_spu;
+  hw_spu->control(VOCTRL_SET_SPU_PALETTE,spu->global_palette);
 }
