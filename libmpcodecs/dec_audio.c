@@ -257,6 +257,7 @@ void uninit_audio(sh_audio_t *sh_audio)
     if(sh_audio->afilter){
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"Uninit audio filters...\n");
 	af_uninit(sh_audio->afilter);
+	free(sh_audio->afilter);
 	sh_audio->afilter=NULL;
     }
     if(sh_audio->inited){
