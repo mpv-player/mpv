@@ -221,6 +221,8 @@ void CheckDir( GtkWidget * list,char * directory )
  gtk_widget_show( list );
 }
 
+int fs_PersistantHistory( char *subject ); /* forward declaration */
+
 void ShowFileSelect( int type,int modal )
 {
  int i;

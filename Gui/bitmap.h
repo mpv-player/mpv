@@ -1,11 +1,10 @@
-
 #ifndef __MYSAMPLE
 #define __MYSAMPLE
 
 typedef struct _txSample
 {
- unsigned int  Width;
- unsigned int  Height;
+ unsigned long Width;
+ unsigned long Height;
  unsigned int  BPP;
  unsigned long ImageSize;
  char *        Image;

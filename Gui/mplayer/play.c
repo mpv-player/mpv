@@ -8,6 +8,7 @@
 #include <signal.h>
 
 #include "../wm/ws.h"
+#include "../wm/wsxdnd.h"
 #include "../../config.h"
 #include "../../help_mp.h"
 #include "../../mplayer.h"
