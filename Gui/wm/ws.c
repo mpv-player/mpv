@@ -149,20 +149,24 @@ void wsXInit( void )
    fprintf( stderr,"[ws] sorry, your system is not supported X shared memory extension.\n" );
    wsUseXShm=0;
   }
-// if ( !XDGAQueryExtension( wsDisplay,&eventbase,&errorbase ) )
+#ifdef HAVE_DGA2
+ if ( !XDGAQueryExtension( wsDisplay,&eventbase,&errorbase ) )
   {
    fprintf( stderr,"[ws] sorry, your system is not supported DGA extension.\n" );
    wsUseDGA=0;
   }
- #ifdef HAVE_XSHAPE
+#else
+   wsUseDGA=0;
+#endif
+#ifdef HAVE_XSHAPE
   if ( !XShapeQueryExtension( wsDisplay,&eventbase,&errorbase ) )
    {
     fprintf( stderr,"[ws] sorry, your system is not supported XShape extension.\n" );
     wsUseXShape=0;
    }
- #else
+#else
   wsUseXShape=0;
- #endif
+#endif
 
  XSynchronize( wsDisplay,True );
 
@@ -172,7 +176,7 @@ void wsXInit( void )
  wsMaxY=DisplayHeight( wsDisplay,wsScreen );
 
  wsGetDepthOnScreen();
- #ifdef DEBUG
+#ifdef DEBUG
   {
    int minor,major,shp;
    fprintf( stderr,"[ws] Screen depth: %d\n",wsDepthOnScreen );
@@ -184,11 +188,11 @@ void wsXInit( void )
      XShmQueryVersion( wsDisplay,&major,&minor,&shp );
      fprintf( stderr,"[ws] XShm version is %d.%d\n",major,minor );
     }
-   if ( wsUseDGA )
-    {
+//   if ( wsUseDGA )
+//    {
 //     XDGAQueryVersion( wsDisplay,&major,&minor );
 //     fprintf( stderr,"[ws] DGA version is %d.%d\n",major,minor );
-    }
+//    }
    #ifdef HAVE_XSHAPE
     if ( wsUseXShape )
      {
@@ -197,7 +201,7 @@ void wsXInit( void )
      }
    #endif
   }
- #endif
+#endif
  initConverter();
  wsOutMask=wsGetOutMask();
  switch ( wsOutMask )
@@ -629,15 +633,36 @@ Bool wsDummyEvents( Display * display,XEvent * Event,XPointer arg )
 
 void wsMainLoop( void )
 {
+ int delay=20;
  fprintf( stderr,"[ws] init threads: %d\n",XInitThreads() );
  XSynchronize( wsDisplay,False );
  XLockDisplay( wsDisplay );
 // XIfEvent( wsDisplay,&wsEvent,wsEvents,NULL );
+
+#if 1
+
+while(wsTrue){
+ // handle pending events
+ while ( XPending(wsDisplay) ){
+   XNextEvent( wsDisplay,&wsEvent );
+   printf("### X event: %d  [%d]\n",wsEvent.type,delay);
+   wsEvents( wsDisplay,&wsEvent,NULL );
+   delay=20;
+ }
+ mplTimerHandler(0); // handle timer event
+ usleep(delay*1000); // FIXME!
+ if(delay<8*20) delay+=20; // pump up delay up to 0.16 sec (low activity)
+}
+
+#else
+
  while( wsTrue )
   {
    XIfEvent( wsDisplay,&wsEvent,wsDummyEvents,NULL );
    wsEvents( wsDisplay,&wsEvent,NULL );
   }
+#endif
+
  XUnlockDisplay( wsDisplay );
 }
 
