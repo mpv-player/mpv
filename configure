@@ -2531,6 +2531,7 @@ else
  _volib='-Llibvo -lvo'
  _voinc='-Ilibvo'
  _vodir='libvo'
+ _aosrc=$_aosrc' ao_mpegpes.c'
 fi
 
 if test "$_dxr3" = yes ; then
