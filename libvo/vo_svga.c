@@ -505,11 +505,15 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
       return (1);
     }  
   }
-  
+
+#ifdef CONFIG_VIDIX
   if(!vidix_name[0]){
+#endif
   	maxw = width; /* No scaling */
   	maxh = height;
+#ifdef CONFIG_VIDIX
   }	
+#endif
   if (pformat == IMGFMT_YV12) {
     yuv2rgb_init(bpp, MODE_RGB);
   }
