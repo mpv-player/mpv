@@ -404,7 +404,10 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 	current->end=(int) mpsub_position;
 
 	while (num < SUB_MAX_TEXT) {
-		if (!fgets (line, LINE_LEN, fd)) return NULL;
+		if (!fgets (line, LINE_LEN, fd)) {
+			if (num == 0) return NULL;
+			else return current;
+		}
 		p=line;
 		while (isspace(*p)) p++;
 		if (eol(*p) && num > 0) return current;
@@ -414,7 +417,7 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 		*q='\0';
 		if (strlen(p)) {
 			current->text[num]=strdup(p);
-			printf (">%s<\n",p);
+//			printf (">%s<\n",p);
 			current->lines = ++num;
 		} else {
 			if (num) return current;
