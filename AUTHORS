@@ -337,10 +337,10 @@ Dominik Mierzejewski <dominik@rangers.eu.org>
     * Polish documentation translation
 
 Diego Biurrun <diego@biurrun.de>
-    * documentation reviewer and co-maintainer
-    * console output translation (help_mp-XX.h) maintainer
-    * README, translations.txt
+    * documentation and console output translation (help_mp-XX.h) maintainer
+    * README, wishlist, translations.txt
     * random trivial fixes
+    * main tester and small fixes for the Cygwin and MinGW port
     * testing, bug reports
     * homepage improvements
     * head of the Ministry for English Composition
@@ -513,6 +513,10 @@ Attila Kinali <attila@kinali.ch>
     * documentation
     * patch application monkey, mailer daemon
 
+Nico Sabbi <nsabbi@tiscali.it>
+    * DVB code improvements
+    * MPEG TS support
+
 Andoni Zubimendi <andoni@lpsat.net>.
     * Spanish documentation translation
 
@@ -568,6 +572,9 @@ Translation from scratch:
     * Maciek 'paszczi' Paszta		<paszczi(at)go2(dot)pl>
     * Piotr 'Cobra' Michniewski		<cobra_666(at)poczta(dot)onet(dot)pl>
     * Waclaw 'Torinthiel' Schiller	<torinthiel(at)wp(dot)pl>
+
+Reimar Döffinger <reimar.doeffinger@stud.uni-karlsruhe.de>
+    * GL code fixes
 
 NOTE: If you think you are missing here, feel free to send a patch.
 =====

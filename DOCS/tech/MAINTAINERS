@@ -21,8 +21,9 @@ Homepage:
 English documentation:
     * user docs: Gabucino, Diego Biurrun
     * input layer, lirc, slave mode docs: Albeu
-    * man page: Jonas Jermann, Diego Biurrun
+    * man page: Diego Biurrun
     * tech/* docs: A'rpi
+    * tech/* documentation docs: Diego Biurrun
 
 Documentation translations:
     * Help Messages: Diego Biurrun
@@ -31,7 +32,7 @@ Documentation translations:
     * French: Nicolas Le Gaillart
     * Russian: Dmitry Baryshkov
     * Polish: Waclaw Schiller
-    * Italian: Roberto Togni (unmaintained)
+    * Italian: Daniele Forghieri
     * Chinese (simplified): Lu Ran
     * Spanish: Juan Martin
 
@@ -58,10 +59,11 @@ MPlayer code:
     * config files & commandline parser: Albeu, Alex
     * playtree, input layer: Albeu
     * postproc, colorspace converters: Michael Niedermayer
+    * DVB support: Nico Sabbi
 
 Imported libs/projects:
-    * libavcodec: Michael Niedermayer, Fabrice Bellard @ ffmpeg
-    * VIDIX core, libdha: Alex, Nick Kurshev @ mplayerxp
+    * libavcodec: Michael Niedermayer, Fabrice Bellard @ FFmpeg
+    * VIDIX core, libdha: Alex, Nick Kurshev @ MPlayerxp
     * mp3lib: A'rpi, mpg123/mpglib project
     * loader, dshow: Alex, A'rpi, Zdenek Kabelac @ avifile
     * liba52, libmpeg2: A'rpi, Michel LESPINASSE @ liba52.sf.net
@@ -84,7 +86,7 @@ libvo drivers:
     * vo_fbdev2.c - Joey Parrish
     * vo_ggi.c - Alex
     * vo_gif89a.c - Joey Parrish
-    * vo_gl.c - Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>
+    * vo_gl.c - Reimar Döffinger
     * vo_gl2.c - Reimar Döffinger
     * vo_jpeg.c - Pontscho
     * vo_md5.c - A'rpi
