@@ -809,6 +809,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 static uint32_t preinit(const char *arg)
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
+	HICON mplayericon=NULL;
+    char exedir[MAX_PATH];
     WNDCLASS   wc;
 	if(arg)
 	{
@@ -835,13 +837,19 @@ static uint32_t preinit(const char *arg)
        	mp_msg(MSGT_VO, MSGL_V ,"<vo_directx><INFO>using backpuffer\n");
 		nooverlay = 1;
 	}
+    /*load icon from the main app*/
+    if(GetModuleFileName(NULL,exedir,MAX_PATH))
+    {
+         mplayericon = ExtractIcon( hInstance, exedir, 0 );
+  	}
+    if(!mplayericon)mplayericon=LoadIcon(NULL,IDI_APPLICATION);
     wc.style         =  CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc   =  WndProc;
     wc.cbClsExtra    =  0;
     wc.cbWndExtra    =  0;
     wc.hInstance     =  hInstance;
     wc.hCursor       =  LoadCursor(NULL,IDC_ARROW);
-    wc.hIcon         =  LoadIcon(NULL,IDI_APPLICATION);
+    wc.hIcon         =  mplayericon;
     wc.hbrBackground =  CreateSolidBrush(windowcolor);
     wc.lpszClassName =  "Mplayer - Movieplayer for Linux";
     wc.lpszMenuName  =  NULL;
