@@ -281,22 +281,19 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     endian(c->audio,c->audio,len,c->bps);
 
   // Conversion table
-  switch(c->format & ~AF_FORMAT_END_MASK){
-  case(AF_FORMAT_MU_LAW):
+  if((c->format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_MU_LAW) {
     from_ulaw(c->audio, l->audio, len, l->bps, l->format&AF_FORMAT_POINT_MASK);
     if(AF_FORMAT_A_LAW == (l->format&AF_FORMAT_SPECIAL_MASK))
       to_ulaw(l->audio, l->audio, len, 1, AF_FORMAT_SI);
     if((l->format&AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
       si2us(l->audio,l->audio,len,l->bps);
-    break;
-  case(AF_FORMAT_A_LAW):
+  } else if((c->format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_A_LAW) {
     from_alaw(c->audio, l->audio, len, l->bps, l->format&AF_FORMAT_POINT_MASK);
     if(AF_FORMAT_A_LAW == (l->format&AF_FORMAT_SPECIAL_MASK))
       to_alaw(l->audio, l->audio, len, 1, AF_FORMAT_SI);
     if((l->format&AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
       si2us(l->audio,l->audio,len,l->bps);
-    break;
-  case(AF_FORMAT_F):
+  } else if((c->format & AF_FORMAT_POINT_MASK) == AF_FORMAT_F) {
     switch(l->format&AF_FORMAT_SPECIAL_MASK){
     case(AF_FORMAT_MU_LAW):
       to_ulaw(c->audio, l->audio, len, c->bps, c->format&AF_FORMAT_POINT_MASK);
@@ -310,8 +307,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 	si2us(l->audio,l->audio,len,l->bps);
       break;
     }
-    break;
-  default:
+  } else {
     // Input must be int
     
     // Change signed/unsigned
@@ -340,7 +336,6 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 	memcpy(l->audio,c->audio,len*c->bps);
       break;
     }
-    break;
   }
 
   // Switch from cpu native endian to the correct endianess 
