@@ -4329,7 +4329,7 @@ echores "$_sgiaudio"
 
 
 echocheck "VCD support"
-if linux || bsdos || freebsd || netbsd || openbsd || sunos ; then
+if linux || bsdos || freebsd || netbsd || sunos ; then
   _inputmodules="vcd $_inputmodules"
   _def_vcd='#define HAVE_VCD 1'
   echores "ok"
