@@ -251,31 +251,24 @@ diff -Naur libmpeg2.orig/motion_comp.c libmpeg2/motion_comp.c
      if (accel & MPEG2_ACCEL_X86_MMXEXT)
  	mpeg2_mc = mpeg2_mc_mmxext;
      else if (accel & MPEG2_ACCEL_X86_3DNOW)
-@@ -43,20 +43,24 @@
+@@ -42,7 +42,7 @@
+ 	mpeg2_mc = mpeg2_mc_mmx;
      else
  #endif
- #ifdef ARCH_PPC
-+#ifdef HAVE_ALTIVEC
+-#ifdef ARCH_PPC
++#if defined(ARCH_PPC) && defined(HAVE_ALTIVEC)
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
  	mpeg2_mc = mpeg2_mc_altivec;
      else
- #endif
-+#endif
- #ifdef ARCH_ALPHA
-     if (accel & MPEG2_ACCEL_ALPHA)
+@@ -52,7 +52,7 @@
  	mpeg2_mc = mpeg2_mc_alpha;
      else
  #endif
- #ifdef ARCH_SPARC
-+#ifdef HAVE_VIS
+-#ifdef ARCH_SPARC
++#if defined(ARCH_SPARC) && defined(HAVE_VIS)
      if (accel & MPEG2_ACCEL_SPARC_VIS)
  	mpeg2_mc = mpeg2_mc_vis;
      else
- #endif
-+#endif
- 	mpeg2_mc = mpeg2_mc_c;
- }
- 
 diff -Naur libmpeg2.orig/motion_comp_mmx.c libmpeg2/motion_comp_mmx.c
 --- libmpeg2.orig/motion_comp_mmx.c	2004-11-03 17:23:30.032865976 +0100
 +++ libmpeg2/motion_comp_mmx.c	2004-11-03 17:28:33.053799792 +0100
