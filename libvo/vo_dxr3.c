@@ -1,4 +1,3 @@
-#define PES_MAX_SIZE 2048
 /* 
  * vo_dxr3.c - DXR3/H+ video out
  *
@@ -46,7 +45,6 @@ struct { uint16_t Y,U,V; } YUV_s;
 
 static unsigned char *picture_data[3];
 static unsigned int picture_linesize[3];
-static unsigned char *spubuf=NULL;
 static int v_width,v_height;
 static int s_width,s_height;
 static int c_width,c_height;
@@ -54,7 +52,25 @@ static int s_pos_x,s_pos_y;
 static int d_pos_x,d_pos_y;
 static int osd_w,osd_h;
 static int img_format = 0;
-static int palette[] = { 0x000000, 0x494949, 0xb5b5b5, 0xffffff };
+static uint32_t palette[] =
+    {
+	0x00505050,
+	0x00000000,
+	0x00808080,
+	0xffffffff,
+	0x00005555,
+	0x0000ff00,
+	0x00cc2255,
+	0x00cc0055,
+	0x00404040,
+	0x00202020,
+	0x00b0b0b0,
+	0x00d0d0d0,
+	0x60606000,
+	0x70707000,
+	0x80808000,
+	0x60606000,
+    };
 static int fd_control = -1;
 static int fd_video = -1;
 static int fd_spu = -1;
@@ -72,7 +88,7 @@ static vo_info_t vo_info =
 void write_dxr3( rte_context* context, void* data, size_t size, void* user_data )
 {
     if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts ) < 0 )
-	printf( "VO: [dxr3] Unable to set PTS\n" );
+	printf( "VO: [dxr3] Unable to set video PTS\n" );
     write( fd_video, data, size );
 }
 #endif
@@ -125,9 +141,8 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
     v_height = height;
     s_width = scr_width;
     s_height = scr_height;
-    spubuf = malloc(53220); /* 53220 bytes is the standardized max size of a subpic */
 
-    if( format == IMGFMT_YV12 || format == IMGFMT_YUY2 )
+    if( format == IMGFMT_YV12 || format == IMGFMT_YUY2 || format == IMGFMT_BGR24 )
     {
 #ifdef USE_MP1E
 	int size;
@@ -162,6 +177,8 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	mp1e_context = rte_context_new( c_width, c_height, "mp1e", (void*)0xdeadbeef );
 	rte_set_verbosity( mp1e_context, 0 );
 	
+	printf( "VO: [dxr3] %dx%d => %dx%d\n", v_width, v_height, c_width, c_height );
+
 	if( !mp1e_context )
 	{
 	    printf( "VO: [dxr3] Unable to create context!\n" );
@@ -281,7 +298,7 @@ static uint32_t draw_frame(uint8_t * src[])
 	vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
 
 	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts ) < 0 )
-	    printf( "VO: [dxr3] Unable to set PTS\n" );
+	    printf( "VO: [dxr3] Unable to set video PTS\n" );
 
 	data_left = p->size;
 	while( data_left )
@@ -289,6 +306,7 @@ static uint32_t draw_frame(uint8_t * src[])
 
 	return 0;
     }
+#ifdef USE_MP1E
     else if( img_format == IMGFMT_YUY2 )
     {
 	int w=v_width,h=v_height;
@@ -310,8 +328,57 @@ static uint32_t draw_frame(uint8_t * src[])
 	rte_push_video_buffer( mp1e_context, &mp1e_buffer );
 	return 0;
     }
-    
-    printf( "VO: [dxr3] Error in draw_frame(...)\n" );
+    else if( img_format == IMGFMT_BGR24 )
+    {
+	int x,y,w=v_width,h=v_height;
+	unsigned char *s,*dY,*dU,*dV;
+	
+        if(d_pos_x+w>picture_linesize[0]) w=picture_linesize[0]-d_pos_x;
+        if(d_pos_y+h>c_height) h=c_height-d_pos_y;
+
+	s = src[0]+s_pos_y*(w*3);
+
+	dY = picture_data[0]+d_pos_y*picture_linesize[0];
+	dU = picture_data[1]+(d_pos_y/2)*picture_linesize[1];
+	dV = picture_data[2]+(d_pos_y/2)*picture_linesize[2];
+	
+	for(y=0;y<h;y++)
+	{
+	    dY+=d_pos_x;
+	    dU+=d_pos_x/4;
+	    dV+=d_pos_x/4;
+	    s+=s_pos_x;
+	    for(x=0;x<w;x+=4)
+	    {
+		RGBTOYUV(s[2],s[1],s[0]);
+		s+=3;
+		*dY = YUV_s.Y;dY++;
+//	The chrominance is shifted, ppl will have to settle with b&w for now ;)
+//		*dU = YUV_s.U;dU++;
+//		*dV = YUV_s.V;dV++;
+		
+		*dY = RGBTOY(s[2],s[1],s[0]);dY++;
+		s+=3;
+		*dY = RGBTOY(s[2],s[1],s[0]);dY++;
+		s+=3;
+		*dY = RGBTOY(s[2],s[1],s[0]);dY++;
+		s+=3;
+	    }
+	    dY+=d_pos_x;
+	    dU+=d_pos_x/4;
+	    dV+=d_pos_x/4;
+	    s+=s_pos_x;
+	}
+	
+	mp1e_buffer.data = picture_data[0];
+	mp1e_buffer.time = vo_pts/90000.0;
+	mp1e_buffer.user_data = NULL;
+	rte_push_video_buffer( mp1e_context, &mp1e_buffer );
+	
+	return 0;
+    }
+#endif
+
     return -1;
 }
 
@@ -328,36 +395,44 @@ static void flip_page (void)
 
 static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0 )
 {
-    unsigned char* s;
-    unsigned char* d;
-
     if( img_format == IMGFMT_YV12 )
     {
 #ifdef USE_MP1E
+	int y;
+	unsigned char *s,*s1;
+	unsigned char *d,*d1;
+
 	x0+=d_pos_x;
-        y0+=d_pos_y;
+	y0+=d_pos_y;
 
         if(x0+w>picture_linesize[0]) w=picture_linesize[0]-x0;
         if(y0+h>c_height) h=c_height-y0;
 
         s=srcimg[0]+s_pos_x+s_pos_y*stride[0];
         d=picture_data[0]+x0+y0*picture_linesize[0];
-	memcpy(d,s,(w*h));
+	for(y=0;y<h;y++)
+	{
+	    memcpy(d,s,w);
+	    s+=stride[0];
+	    d+=picture_linesize[0];
+	}
 
 	w/=2;h/=2;x0/=2;y0/=2;
 	
 	s=srcimg[1]+s_pos_x+s_pos_y*stride[1];
 	d=picture_data[1]+x0+y0*picture_linesize[1];
-	memcpy(d,s,(w*h));
+	s1=srcimg[2]+s_pos_x+s_pos_y*stride[2];
+	d1=picture_data[2]+x0+y0*picture_linesize[2];
+	for(y=0;y<h;y++)
+	{
+	    memcpy(d,s,w);
+	    memcpy(d1,s1,w);
+	    s+=stride[1];s1+=stride[2];
+	    d+=picture_linesize[1];d1+=picture_linesize[2];
+	}
 
-	s=srcimg[2]+s_pos_x+s_pos_y*stride[2];
-	d=picture_data[2]+x0+y0*picture_linesize[2];
-	memcpy(d,s,(w*h));
-	
 	return 0;
 #endif
-	printf( "VO: [dxr3] You need to install mp1e rte, read DOCS/DXR3\n" );
-	return -1;
     }
 
     return -1;
@@ -371,9 +446,11 @@ query_format(uint32_t format)
 #ifdef USE_MP1E
     if(format==IMGFMT_YV12) return 1;
     if(format==IMGFMT_YUY2) return 1;
+    if(format==IMGFMT_BGR24) { printf( "VO: [dxr3] WARNING\tExperimental output, black&white only and very slow\n\t(will be inproved later, this format is rarely used)\n" ); return 1; }
 #else
     if(format==IMGFMT_YV12) {printf("VO: [dxr3] You need to compile with mp1e rte to play this file! Read DOCS/DXR3\n" ); return 0;}
     if(format==IMGFMT_YUY2) {printf("VO: [dxr3] You need to compile with mp1e rte to play this file! Read DOCS/DXR3\n" ); return 0;}
+    if(format==IMGFMT_BGR24) {printf("VO: [dxr3] You need to compile with mp1e rte to play this file! Read DOCS/DXR3\n" ); return 0;}
 #endif
     else printf( "VO: [dxr3] Format unsupported, mail dholm@iname.com\n" );
     return 0;
@@ -382,12 +459,7 @@ query_format(uint32_t format)
 static void uninit(void)
 {
     printf( "VO: [dxr3] Uninitializing\n" );
-#ifdef USE_MP1E
-    if( mp1e_context ) rte_stop( mp1e_context );
-    if( mp1e_context ) rte_context_delete( mp1e_context );
     if( picture_data[0] ) free(picture_data[0]);
-#endif
-    if( spubuf ) free(spubuf);
     if( fd_video ) close(fd_video);
     if( fd_spu ) close(fd_spu);
 }
