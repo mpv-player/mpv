@@ -41,4 +41,6 @@ int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int siz
 int nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctrl );
 int nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl );
 
+int connect2Server(char *host, int port);
+
 #endif
