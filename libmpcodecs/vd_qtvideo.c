@@ -276,6 +276,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     int i;
     mp_image_t* mpi;
     ComponentResult cres;
+    
+    if(len<=0) return NULL; // skipped frame
 
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_STATIC, MP_IMGFLAG_PRESERVE, 
 	sh->disp_w, sh->disp_h);
