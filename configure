@@ -6,6 +6,11 @@
 #
 # Changes in reversed order:
 #
+# 2001/07/12 by Juergen Keil
+#  - add support for non-x86 targets
+#  - add autoconf checks for loader/wine
+#  - fix linux 2.2.x kernel check vs. SSE usage
+#
 # 2001/07/04 by Juergen Keil
 #  - autodetect the assembler binary used by the GCC C compiler
 #
@@ -172,18 +177,32 @@ EOF
 exit 0
 fi
 
+
 # LGB: Some inital help
 
 echo "You can get detailed help on configure with: $0 --help"
 echo "Please wait while ./configure discovers your software and hardware environment!"
 
+
+system_name=`uname -s 2>&1` # name of operating system: Linux, FreeBSD, NetBSD, SunOS
+host_arch=`uname -p 2>&1`   # host's instruction set or processor type
+case "$host_arch" in
+unknown)		    # Linux returns "unknown" for the processor type
+    case "`uname -m 2>&1`" in
+    i[3-9]86)
+	host_arch=i386;;
+    ppc)
+	host_arch=ppc;;
+    esac
+    ;;
+esac
+
 # Determine our OS name and OS dependent libs
 
-system_name=`uname -s 2>&1`
 if [ "$system_name" = "FreeBSD" ]; then
-_archlibs="-rdynamic -pthread"
+    _archlibs="-rdynamic -pthread"
 else
-_archlibs="-ldl -lpthread"
+    _archlibs="-ldl -lpthread"
 fi
 
 # LGB: temporary files
@@ -205,6 +224,10 @@ else
 	TMPO="/tmp/${TMPO}"
 	TMPS="/tmp/${TMPS}"
 fi
+
+cat > $TMPC << EOF
+int main( void ) { return 0; }
+EOF
 
 # ---
 
@@ -324,29 +347,34 @@ if [ "$_as" = auto ]; then
 fi
 
 
-if [ -r /proc/cpuinfo ]; then
+if [ "$host_arch" = i386 ]; then
+    if [ -r /proc/cpuinfo ]; then
 	# linux with /proc mounted, extract cpu information from it
 	_cpuinfo="cat /proc/cpuinfo"
-elif [ -r /compat/linux/proc/cpuinfo ]; then
+    elif [ -r /compat/linux/proc/cpuinfo ]; then
         # FreeBSD with linux emulation /proc mounted, 
 	# extract cpu information from it
         _cpuinfo="cat /compat/linux/proc/cpuinfo"
-else
+    else
 	# all other OS try to extract cpu information from a small helper
 	# program TOOLS/cpuinfo instead
 	$_cc -o TOOLS/cpuinfo TOOLS/cpuinfo.c
 	_cpuinfo="TOOLS/cpuinfo"
-fi
+    fi
 
-pname=`$_cpuinfo | grep 'model name' | cut -d ':' -f 2`
-pparam=`$_cpuinfo | grep 'features' | cut -d ':' -f 2`
-if [ -z "$pparam" ]; then
-  pparam=`$_cpuinfo | grep 'flags' | cut -d ':' -f 2`
+    pname=`$_cpuinfo | grep 'model name' | cut -d ':' -f 2`
+    pparam=`$_cpuinfo | grep 'features' | cut -d ':' -f 2`
+    if [ -z "$pparam" ]; then
+	pparam=`$_cpuinfo | grep 'flags' | cut -d ':' -f 2`
+    fi
+    pvendor=`$_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2`
+    pfamily=`$_cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2`
+    pmodel=`$_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2`
+    pstepping=`$_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2`
+else
+    # not an x86 host, cpuinfo stuff is not relevant
+    pname= pparam= pvendor= pfamily= pmodel= pstepping=
 fi
-pvendor=`$_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2`
-pfamily=`$_cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2`
-pmodel=`$_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2`
-pstepping=`$_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2`
 
 _mmx=no
 _mmx2=no
@@ -371,10 +399,11 @@ _dga=no
 _dga2=no
 _svga=no
 _fbdev=no
-[ x`uname -s` = xLinux ] && _fbdev=yes
+[ "$system_name" = Linux ] && _fbdev=yes
 _lirc=no
 _css=no
 _dshow=yes
+[ "$host_arch" != i386 ] && _dshow=no
 _fastmemcpy=yes
 _streaming=no
 _libavcodec=no
@@ -396,7 +425,7 @@ _gui=no;
 _alsa=yes
 _esd=yes
 
-for i in `echo $pparam`; do
+for i in $pparam; do
 
  case "$i" in
   3dnow)
@@ -427,161 +456,208 @@ done
 
 
 _win32libdirnotify=no
-if [ -d /usr/lib/win32 ]; then
- _win32libdir=/usr/lib/win32
-else
- if [ -d /usr/local/lib/win32 ]; then
-  _win32libdir=/usr/local/lib/win32
- else
-# This is our default:
-  _win32libdir=/usr/lib/win32
-  _win32libdirnotify=yes
- fi
+if [ "$host_arch" = i386 ]; then
+    if [ -d /usr/lib/win32 ]; then
+	_win32libdir=/usr/lib/win32
+    elif [ -d /usr/local/lib/win32 ]; then
+	_win32libdir=/usr/local/lib/win32
+    else
+	# This is our default:
+	_win32libdir=/usr/lib/win32
+	_win32libdirnotify=yes
+    fi
 fi
 
-if [ -d libavcodec ]; then
- if [ -f libavcodec/Makefile ]; then
-  _libavcodec=yes
- fi
+
+if [ -d libavcodec -a -f libavcodec/Makefile ]; then
+    _libavcodec=yes
 fi
+
 
 if [ -c /dev/mga_vid ]; then
  _mga=yes
  _syncfb=yes
 fi
 
-proc=pentium
-iproc=586
 
-case "$pvendor" in
- AuthenticAMD)
-   case "$pfamily" in
-    3)
-      proc=i386
-      iproc=386
-      ;;
-    4)
-      proc=i486
-      iproc=486
-      ;;
-    5)
-      if [ $pmodel -ge 6 ]; then	# LGB: models are: K5/SSA5 K5 K5 K5 ? ? K6 K6 K6-2 K6-3 
-    	    proc=k6
-      else
-    	    proc=k5
-      fi
-      iproc=586
-      ;;
-    6|7)				# LGB: Though it seems Athlon CPUs returns with "6"
-      proc=k7
-      iproc=686
-      ;;
+
+case "$host_arch" in
+i386)
+    _arch="#define ARCH_X86 1"
+    _target_arch="TARGET_ARCH_X86=yes"
+    _words_endian="#undef WORDS_BIGENDIAN"
+    proc=pentium
+    iproc=586
+
+    case "$pvendor" in
+    AuthenticAMD)
+	case "$pfamily" in
+	3)
+	    proc=i386
+	    iproc=386
+	    ;;
+	4)
+	    proc=i486
+	    iproc=486
+	    ;;
+	5)
+	    if [ $pmodel -ge 6 ]; then	# LGB: models are: K5/SSA5 K5 K5 K5 ? ? K6 K6 K6-2 K6-3 
+		proc=k6
+	    else
+		proc=k5
+	    fi
+	    iproc=586
+	    ;;
+	6|7)				# LGB: Though it seems Athlon CPUs returns with "6"
+	    proc=k7
+	    iproc=686
+	    ;;
+	*)
+	    proc=pentium
+	    iproc=586
+	    ;;
+	esac
+	;;
+    GenuineIntel)
+	case "$pfamily" in
+	3)
+	    proc=i386
+	    iproc=386
+	    ;;
+	4)
+	    proc=i486
+	    iproc=486
+	    ;;
+	5)
+	    proc=pentium
+	    iproc=586
+	    ;;
+	6)
+	    proc=i686
+	    iproc=686
+	    ;;
+	*)
+	    proc=pentium
+	    iproc=586
+	    ;;
+	esac
+	;;
+    unknown)              # added by Gabucino - upon Tibcu's request
+	case "$pfamily" in
+	3)
+	    proc=i386
+	    iproc=386
+	    ;;
+	4)
+	    proc=i486
+	    iproc=486
+	    ;;
+	*)
+	    proc=pentium
+	    iproc=586
+	    ;;
+	esac
+	;;
     *)
-      proc=pentium
-      iproc=586
-      ;;
-   esac
-   ;;
- GenuineIntel)
-   case "$pfamily" in
-    3)
-      proc=i386
-      iproc=386
-      ;;
-    4)
-      proc=i486
-      iproc=486
-      ;;
-    5)
-      proc=pentium
-      iproc=586
-      ;;
-    6)
-      proc=i686
-      iproc=686
-      ;;
-    *)
-      proc=pentium
-      iproc=586
-      ;;
-   esac
-   ;;
- unknown)              # added by Gabucino - upon Tibcu's request
-   case "$pfamily" in
-    3)
-      proc=i386
-      iproc=386
-      ;;
-    4)
-      proc=i486
-      iproc=486
-      ;;
-    *)
-      proc=pentium
-      iproc=586
-      ;;
-   esac
-   ;;
- *)
-   proc=pentium
-   iproc=586
-   ;;
-esac
+	proc=pentium
+	iproc=586
+	;;
+    esac
 
-# ---
+    # check that gcc supports our cpu, if not, fallback to pentium
+    # LGB: check -mcpu and -march swithing step by step with enabling
+    # to fall back till 386.
 
-cat > $TMPC << EOF
-int main( void ) { return 0; }
-EOF
-
-# check that gcc supports our cpu, if not, fallback to pentium
-# LGB: check -mcpu and -march swithing step by step with enabling
-# to fall back till 386.
-
-#echo -n "Checking your GCC CPU optimalization abilities: "
-if [ "$proc" = "k7" ]; then
-#	echo -n "trying k7  "
+    #echo -n "Checking your GCC CPU optimalization abilities: "
+    if [ "$proc" = "k7" ]; then
+	#echo -n "trying k7  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=athlon
-fi
-if [ "$proc" = "athlon" ]; then
-#	echo -n "trying athlon  "
+    fi
+    if [ "$proc" = "athlon" ]; then
+	#echo -n "trying athlon  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentiumpro
-fi
-if [ "$proc" = "k6" ]; then
-#	echo -n "trying k6  "
+    fi
+    if [ "$proc" = "k6" ]; then
+	#echo -n "trying k6  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=k5
-fi
-if [ "$proc" = "k5" ]; then
-#	echo -n "trying k5  "
+    fi
+    if [ "$proc" = "k5" ]; then
+	#echo -n "trying k5  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentium
-fi
-if [ "$proc" = "i686" ]; then
-#	echo -n "trying i686  "
+    fi
+    if [ "$proc" = "i686" ]; then
+	#echo -n "trying i686  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentiumpro
-fi
-if [ "$proc" = "pentiumpro" ]; then
-#	echo -n "trying pentiumpro  "
+    fi
+    if [ "$proc" = "pentiumpro" ]; then
+	#echo -n "trying pentiumpro  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentium
-fi
-if [ "$proc" = "pentium" ]; then
-#	echo -n "trying pentium  "
+    fi
+    if [ "$proc" = "pentium" ]; then
+	#echo -n "trying pentium  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=i486
-fi
-if [ "$proc" = "i486" ]; then
-#	echo -n "trying i486  "
+    fi
+    if [ "$proc" = "i486" ]; then
+	#echo -n "trying i486  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=i386
-fi
-if [ "$proc" = "i386" ]; then
-#	echo -n "trying i386  "
+    fi
+    if [ "$proc" = "i386" ]; then
+	#echo -n "trying i386  "
 	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=error
-fi
-if [ "$proc" = "error" ]; then
+    fi
+    if [ "$proc" = "error" ]; then
 	echo
 	echo "Your gcc does not support even \"i386\" for '-march' and '-mcpu'." >&2
 	rm -f $TMPC $TMPO $TMPS
 	exit
-fi
-#echo "DONE (${proc})."
+    fi
+
+    _march="-march=$proc"
+    _mcpu="-mcpu=$proc"
+    #echo "DONE (${proc})."
+    ;;
+
+
+sparc)
+    _arch="#define ARCH_SPARC 1"
+    _target_arch="TARGET_ARCH_SPARC=yes"
+    _words_endian="#define WORDS_BIGENDIAN 1"
+    iproc=sparc
+    proc=v8
+    _march=""
+    _mcpu="-mcpu=$proc"
+    ;;
+
+# Untested:
+#ppc)
+#    _arch="#define ARCH_PPC 1"
+#    _target_arch="TARGET_ARCH_PPC=yes"
+#    _words_endian="#define WORDS_BIGENDIAN 1"
+#    iproc=ppc
+#    proc=
+#    _march=""
+#    _mcpu=""
+#    ;;
+
+# Untested:
+#alpha)
+#    _arch="#define ARCH_ALPHA 1"
+#    _target_arch="TARGET_ARCH_ALPHA=yes"
+#    _words_endian="#undef WORDS_BIGENDIAN"
+#    iproc=alpha
+#    proc=
+#    _march=""
+#    _mcpu=""
+#    ;;
+
+*)
+    echo "The architecture of your CPU ($host_arch) is not supported by this configure script"
+    exit 1
+    ;;
+esac
+
+# ---
+
 
 
 $_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -lvgagl -lvga > /dev/null 2>&1 && _svga=yes
@@ -717,7 +793,43 @@ rm -f $TMPC $TMPO
 
 
 # ---
-# try to detect type of audio supported on this machine
+# check availability of some header files
+
+cat > $TMPC << EOF
+#include <malloc.h>
+int main( void ) { return 0; }
+EOF
+
+_malloc_h=no
+$_cc -o $TMPO $TMPC 2> /dev/null && _malloc_h=yes
+
+
+cat > $TMPC << EOF
+#include <alloca.h>
+int main( void ) { return 0; }
+EOF
+
+_alloca_h=no
+$_cc -o $TMPO $TMPC 2> /dev/null && _alloca_h=yes
+
+
+cat > $TMPC << EOF
+#include <sys/mman.h>
+int main( void ) { return 0; }
+EOF
+
+_sys_mman_h=no
+$_cc -o $TMPO $TMPC 2> /dev/null && _sys_mman_h=yes
+
+
+cat > $TMPC << EOF
+#include <dlfcn.h>
+int main( void ) {  return 0; }
+EOF
+
+_libdl=no
+$_cc -o $TMPO $TMPC -ldl 2> /dev/null && _libdl=yes
+
 
 cat > $TMPC << EOF
 #include <sys/soundcard.h>
@@ -727,6 +839,9 @@ EOF
 _sys_soundcard_h=no
 $_cc -o $TMPO $TMPC 2> /dev/null && _sys_soundcard_h=yes
 
+
+# ---
+# try to detect type of audio supported on this machine
 
 cat > $TMPC << EOF
 #include <sys/soundcard.h>
@@ -1085,24 +1200,24 @@ else
 fi
 
 # Checking kernel version...
-_k_verc_problem=no
-if [ "$system_name" != "FreeBSD" ];then
-kernel_version=`uname -r 2>&1`
-echo $_echo_n "Checking $system_name kernel version ... $_echo_c"
-case $kernel_version in
-    '') kernel_version="?.??"; _k_verc_fail=yes;;
-    [0-1].[0-99].[0-99]|2.[0-3].[0-99])
-	_k_verc_problem=yes;;
-esac
-if [ $_k_verc_problem = 'yes' ] && [ $_sse = 'yes' ]; then
-_k_verc_fail=yes
-fi
-if [ ! -z "$_k_verc_fail" ]; then
-echo "$kernel_version, fail"
-echo "WARNING! You want to run mplayer on this system then be prepared for problems"
-else
-echo "$kernel_version, ok"
-fi
+if [ "$system_name" = "Linux" ];then
+    _k_verc_problem=no
+    kernel_version=`uname -r 2>&1`
+    echo $_echo_n "Checking $system_name kernel version ... $_echo_c"
+    case "$kernel_version" in
+	'') kernel_version="?.??"; _k_verc_fail=yes;;
+	[0-1].[0-9].[0-9]*|2.[0-3].[0-9]*)
+	    _k_verc_problem=yes;;
+    esac
+    if [ $_k_verc_problem = 'yes' ] && [ "$_sse" = 'yes' ]; then
+	_k_verc_fail=yes
+    fi
+    if [ ! -z "$_k_verc_fail" ]; then
+	echo "$kernel_version, fail"
+	echo "WARNING! If you want to run mplayer on this system, be prepared for problems"
+    else
+	echo "$kernel_version, ok"
+    fi
 fi
 
 if [ "$_xmga" = "autodetect" ]; then
@@ -1115,15 +1230,19 @@ fi
 
 # to screen.
 echo "Install prefix: $_prefix"
-echo "Checking for cpu vendor ... $pvendor ( $pfamily:$pmodel:$pstepping )"
-echo "Checking for cpu type ... $pname"
+if [ "$host_arch" = i386 ]; then
+    echo "Checking for cpu vendor ... $pvendor ( $pfamily:$pmodel:$pstepping )"
+    echo "Checking for cpu type ... $pname"
+fi
 echo "Optimizing to ... $proc"
-echo "Checking for mmx support ... $_mmx"
-echo "Checking for mmx2 support ... $_mmx2"
-echo "Checking for 3dnow support ... $_3dnow"
-echo "Checking for 3dnowex support ... $_3dnowex"
-echo "Checking for sse support ... $_sse"
-echo "Checking for mtrr support ... $_mtrr"
+if [ "$host_arch" = i386 ]; then
+    echo "Checking for mmx support ... $_mmx"
+    echo "Checking for mmx2 support ... $_mmx2"
+    echo "Checking for 3dnow support ... $_3dnow"
+    echo "Checking for 3dnowex support ... $_3dnowex"
+    echo "Checking for sse support ... $_sse"
+    echo "Checking for mtrr support ... $_mtrr"
+fi
 echo "Screen size ... ${_x}x${_y}"
 echo "Checking for X11 libs ... $_x11libdir"
 echo "Checking for X11 headers ... $_x11incdir"
@@ -1257,9 +1376,9 @@ else
 fi
 
 if [ "$_kstat" = "yes" ]; then
-  _have_kstat="#define	HAVE_KSTAT 1"
+  _have_libkstat="#define HAVE_LIBKSTAT 1"
 else
-  _have_kstat="#undef	HAVE_KSTAT"
+  _have_libkstat="#undef HAVE_LIBKSTAT"
 fi
 
 if [ "$_xmmp" = "yes" ]; then
@@ -1317,13 +1436,37 @@ else
  _have_soundcard_h='#undef  HAVE_SYS_SOUNDCARD_H'
 fi
 
+if [ "$_malloc_h" = "yes" ]; then
+ _have_malloc_h='#define HAVE_MALLOC_H 1'
+else
+ _have_malloc_h='#undef  HAVE_MALLOC_H'
+fi
+
+if [ "$_alloca_h" = "yes" ]; then
+ _have_alloca_h='#define HAVE_ALLOCA_H 1'
+else
+ _have_alloca_h='#undef  HAVE_ALLOCA_H'
+fi
+
+if [ "$_sys_mman_h" = "yes" ]; then
+ _have_mman_h='#define HAVE_SYS_MMAN_H 1'
+else
+ _have_mman_h='#undef  HAVE_SYS_MMAN_H'
+fi
+
+if [ "$_libdl" = "yes" ]; then
+ _have_libdl='#define HAVE_LIBDL 1'
+else
+ _have_libdl='#undef  HAVE_LIBDL'
+fi
+
 
 # Checking for CFLAGS
 if [ "$_profile" != "" ] || [ "$_debug" != "" ]; then
- CFLAGS="-W -Wall -O2 -march=$proc -mcpu=$proc $_debug $_profile"
+ CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
 else
 if test -z "$CFLAGS"; then
- CFLAGS="-O4 -march=$proc -mcpu=$proc -pipe -ffast-math -fomit-frame-pointer"
+ CFLAGS="-O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer"
 fi
 fi
 # Under FreeBSD (maybe other systems as well?) we have to add to CFLAGS
@@ -1522,7 +1665,7 @@ cat > $MCONF << EOF
 prefix = $_prefix
 AR=ar
 CC=$_cc
-# OPTFLAGS=-O4 $_profile $_debug -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
+# OPTFLAGS=-O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=$CFLAGS
 EXTRA_INC=$_extraincdir
 WIN32_PATH=-DWIN32_PATH=\"$_win32libdir\"
@@ -1537,15 +1680,17 @@ LIRC_LIBS = $_lirclibs
 CSS_LIB = $_csslib
 CSS_INC = $_cssinc
 SDL_INC = $_sdlcflags
-DS_DEP = $_dshowdep $_lavcdep
-DS_LIB = $_dshowlib $_lavclib
+DS_DEP = $_dshowdep
+DS_LIB = $_dshowlib
+AV_DEP = $_lavcdep
+AV_LIB = $_lavclib
 ALSA_LIB = $_alsalib
 ESD_LIB = $_esdlib
 ARCH_LIBS = $_archlibs
 STREAM_SRCS = $_streamingsrcs
 
 # --- Some stuff for autoconfigure ----
-TARGET_ARCH_X86=yes
+$_target_arch
 TARGET_CPU=$iproc
 TARGET_MMX=$_cfg_mmx
 TARGET_MMX2=$_cfg_mmx2
@@ -1609,10 +1754,21 @@ $_xmmpaudio
 /* Define this if your system has the header file for the OSS sound interface */
 $_have_soundcard_h
 
+/* Define this if your system has the "malloc.h" header file */
+$_have_malloc_h
+
+/* Define this if your system has the "alloca.h" header file */
+$_have_alloca_h
+
+/* Define this if your system has the "sys/mman.h" header file */
+$_have_mman_h
+
+
+/* Define this if you have the elf dynamic linker -ldl library */
+$_have_libdl
 
 /* Define this if you have the kstat kernel statistics library */
-$_have_kstat
-
+$_have_libkstat
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_lircdefs
@@ -1649,9 +1805,9 @@ $_sunaudio
 
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
-/* #define WORDS_BIGENDIAN */
+$_words_endian
 
-#define ARCH_X86
+$_arch
 
 /* Define this to any prefered value from 386 up to infinity with step 100 */
 #define __CPU__ $iproc
@@ -1756,13 +1912,19 @@ if [ $_sdl = outdated ]; then
  echo "version might work. Use --enable-sdl to force usage of libSDL."
 fi
 
-if [ $_win32libdirnotify = yes ]; then
- echo "Failed to find a WIN32 codecs dir at $_win32libdir!"
- echo "Create it and copy the DLL files there! (You can get them from your windows"
- echo "directory or download them from:"
- echo "ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip"
+if [ "$host_arch" = i386 ]; then
+    if [ $_win32libdirnotify = yes ]; then
+	echo "Failed to find a WIN32 codecs dir at $_win32libdir!"
+	echo "Create it and copy the DLL files there! (You can get them from your windows"
+	echo "directory or download them from:"
+	echo "ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip"
+    else
+	echo "Ok, found Win32 codecs directory at $_win32libdir."
+    fi
 else
- echo "Ok, found Win32 codecs directory at $_win32libdir."
+    echo "NOTE: WIN32 codec DLLs are not supported on your CPU ($host_arch)."
+    echo "You may encounter a few AVI files that cannot be played due to"
+    echo "missing opensource video/audio codec support."
 fi
 
 # Last move:

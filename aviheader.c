@@ -1,5 +1,5 @@
 
-
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -13,9 +13,88 @@ extern int verbose; // defined in mplayer.c
 #include "wine/vfw.h"
 
 #include "codec-cfg.h"
+#include "bswap.h"
 #include "stheader.h"
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
+
+/*
+ * Some macros to swap little endian structures read from an AVI file
+ * into machine endian format
+ */
+#ifdef WORDS_BIGENDIAN
+#define	le2me_MainAVIHeader(h) {					\
+    (h)->dwMicroSecPerFrame = le2me_32((h)->dwMicroSecPerFrame);	\
+    (h)->dwMaxBytesPerSec = le2me_32((h)->dwMaxBytesPerSec);		\
+    (h)->dwPaddingGranularity = le2me_32((h)->dwPaddingGranularity);	\
+    (h)->dwFlags = le2me_32((h)->dwFlags);				\
+    (h)->dwTotalFrames = le2me_32((h)->dwTotalFrames);			\
+    (h)->dwInitialFrames = le2me_32((h)->dwInitialFrames);		\
+    (h)->dwStreams = le2me_32((h)->dwStreams);				\
+    (h)->dwSuggestedBufferSize = le2me_32((h)->dwSuggestedBufferSize);	\
+    (h)->dwWidth = le2me_32((h)->dwWidth);				\
+    (h)->dwHeight = le2me_32((h)->dwHeight);				\
+}
+
+#define	le2me_AVIStreamHeader(h) {					\
+    (h)->fccType = le2me_32((h)->fccType);				\
+    (h)->fccHandler = le2me_32((h)->fccHandler);			\
+    (h)->dwFlags = le2me_32((h)->dwFlags);				\
+    (h)->wPriority = le2me_16((h)->wPriority);				\
+    (h)->wLanguage = le2me_16((h)->wLanguage);				\
+    (h)->dwInitialFrames = le2me_32((h)->dwInitialFrames);		\
+    (h)->dwScale = le2me_32((h)->dwScale);				\
+    (h)->dwRate = le2me_32((h)->dwRate);				\
+    (h)->dwStart = le2me_32((h)->dwStart);				\
+    (h)->dwLength = le2me_32((h)->dwLength);				\
+    (h)->dwSuggestedBufferSize = le2me_32((h)->dwSuggestedBufferSize);	\
+    (h)->dwQuality = le2me_32((h)->dwQuality);				\
+    (h)->dwSampleSize = le2me_32((h)->dwSampleSize);			\
+    le2me_RECT(&(h)->rcFrame);						\
+}
+#define	le2me_RECT(h) {							\
+    (h)->left = le2me_16((h)->left);					\
+    (h)->top = le2me_16((h)->top);					\
+    (h)->right = le2me_16((h)->right);					\
+    (h)->bottom = le2me_16((h)->bottom);				\
+}
+#define le2me_BITMAPINFOHEADER(h) {					\
+    (h)->biSize = le2me_32((h)->biSize);				\
+    (h)->biWidth = le2me_32((h)->biWidth);				\
+    (h)->biHeight = le2me_32((h)->biHeight);				\
+    (h)->biPlanes = le2me_16((h)->biPlanes);				\
+    (h)->biBitCount = le2me_16((h)->biBitCount);			\
+    (h)->biCompression = le2me_32((h)->biCompression);			\
+    (h)->biSizeImage = le2me_32((h)->biSizeImage);			\
+    (h)->biXPelsPerMeter = le2me_32((h)->biXPelsPerMeter);		\
+    (h)->biYPelsPerMeter = le2me_32((h)->biYPelsPerMeter);		\
+    (h)->biClrUsed = le2me_32((h)->biClrUsed);				\
+    (h)->biClrImportant = le2me_32((h)->biClrImportant);		\
+}
+#define le2me_WAVEFORMATEX(h) {						\
+    (h)->wFormatTag = le2me_16((h)->wFormatTag);			\
+    (h)->nChannels = le2me_16((h)->nChannels);				\
+    (h)->nSamplesPerSec = le2me_32((h)->nSamplesPerSec);		\
+    (h)->nAvgBytesPerSec = le2me_32((h)->nAvgBytesPerSec);		\
+    (h)->nBlockAlign = le2me_16((h)->nBlockAlign);			\
+    (h)->wBitsPerSample = le2me_16((h)->wBitsPerSample);		\
+    (h)->cbSize = le2me_16((h)->cbSize);				\
+}
+#define le2me_AVIINDEXENTRY(h) {					\
+    (h)->ckid = le2me_32((h)->ckid);					\
+    (h)->dwFlags = le2me_32((h)->dwFlags);				\
+    (h)->dwChunkOffset = le2me_32((h)->dwChunkOffset);			\
+    (h)->dwChunkLength = le2me_32((h)->dwChunkLength);			\
+}
+#else
+#define	le2me_MainAVIHeader(h)	    /**/
+#define le2me_AVIStreamHeader(h)    /**/
+#define le2me_RECT(h)		    /**/
+#define le2me_BITMAPINFOHEADER(h)   /**/
+#define le2me_WAVEFORMATEX(h)	    /**/
+#define le2me_AVIINDEXENTRY(h)	    /**/
+#endif
+
 
 static MainAVIHeader avih;
 
@@ -61,12 +140,14 @@ while(1){
   switch(id){
     case ckidAVIMAINHDR:          // read 'avih'
       stream_read(demuxer->stream,(char*) &avih,MIN(size2,sizeof(avih)));
+      le2me_MainAVIHeader(&avih); // swap to machine endian
       chunksize-=MIN(size2,sizeof(avih));
       if(verbose) print_avih(&avih);
       break;
     case ckidSTREAMHEADER: {      // read 'strh'
       AVIStreamHeader h;
       stream_read(demuxer->stream,(char*) &h,MIN(size2,sizeof(h)));
+      le2me_AVIStreamHeader(&h);  // swap to machine endian
       chunksize-=MIN(size2,sizeof(h));
       ++stream_id;
       if(h.fccType==streamtypeVIDEO){
@@ -86,6 +167,7 @@ while(1){
 //        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
         if(verbose>=1) printf("found 'bih', %d bytes of %d\n",chunksize,sizeof(BITMAPINFOHEADER));
         stream_read(demuxer->stream,(char*) sh_video->bih,chunksize);
+	le2me_BITMAPINFOHEADER(sh_video->bih);  // swap to machine endian
         chunksize=0;
 //        sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
 //        sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
@@ -116,6 +198,7 @@ while(1){
 //        sh_audio->wf=malloc(chunksize); memset(sh_audio->wf,0,chunksize);
         if(verbose>=1) printf("found 'wf', %d bytes of %d\n",chunksize,sizeof(WAVEFORMATEX));
         stream_read(demuxer->stream,(char*) sh_audio->wf,chunksize);
+	le2me_WAVEFORMATEX(sh_audio->wf);
 	if (sh_audio->wf->cbSize != 0 &&
 	    wf_size < sizeof(WAVEFORMATEX)+sh_audio->wf->cbSize) {
 	    sh_audio->wf=realloc(sh_audio->wf, sizeof(WAVEFORMATEX)+sh_audio->wf->cbSize);
@@ -127,11 +210,14 @@ while(1){
       break;
     }
     case ckidAVINEWINDEX: if(index_mode){
+      int i;
       demuxer->idx_size=size2>>4;
       if(verbose>=1) printf("Reading INDEX block, %d chunks for %ld frames\n",
         demuxer->idx_size,avih.dwTotalFrames);
       demuxer->idx=malloc(demuxer->idx_size<<4);
       stream_read(demuxer->stream,(char*)demuxer->idx,demuxer->idx_size<<4);
+      for (i = 0; i < demuxer->idx_size; i++)	// swap index to machine endian
+	le2me_AVIINDEXENTRY((AVIINDEXENTRY*)demuxer->idx + i);
       chunksize-=demuxer->idx_size<<4;
       if(verbose>=2) print_index(demuxer->idx,demuxer->idx_size);
       break;

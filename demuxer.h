@@ -1,4 +1,6 @@
 
+#include "config.h"
+
 #define MAX_PACKS 4096
 #define MAX_PACK_BYTES 0x800000
 
@@ -143,7 +145,11 @@ int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start);
 static inline int avi_stream_id(unsigned int id){
   unsigned char *p=(unsigned char *)&id;
   unsigned char a,b;
+#if WORDS_BIGENDIAN
+  a=p[3]-'0'; b=p[2]-'0';
+#else
   a=p[0]-'0'; b=p[1]-'0';
+#endif
   if(a>9 || b>9) return 100; // invalid ID
   return a*10+b;
 }

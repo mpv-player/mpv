@@ -16,11 +16,20 @@ PRG_CFG = codec-cfg
 #prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
-SRCS = find_sub.c aviprint.c dll_init.c dec_audio.c dec_video.c aviwrite.c aviheader.c asfheader.c demux_avi.c demux_asf.c demux_mpg.c demuxer.c stream.c codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c mixer.c dvdauth.c spudec.c $(STREAM_SRCS)
+SRCS = find_sub.c aviprint.c dec_audio.c dec_video.c aviwrite.c aviheader.c asfheader.c demux_avi.c demux_asf.c demux_mpg.c demuxer.c stream.c codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c mixer.c dvdauth.c spudec.c $(STREAM_SRCS)
 OBJS = $(SRCS:.c=.o)
 CFLAGS = $(OPTFLAGS) -Iloader -Ilibvo $(CSS_INC) $(EXTRA_INC) # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB)
 VO_LIBS = -Llibvo -lvo $(X_LIBS)
+
+ifeq ($(TARGET_ARCH_X86),yes)
+SRCS += dll_init.c
+LOADER_DEP = loader/libloader.a $(DS_DEP)
+LIB_LOADER = -Lloader -lloader $(DS_LIB)
+else
+LOADER_DEP =
+endif
+
 
 .SUFFIXES: .c .o
 
@@ -64,11 +73,12 @@ opendivx/libdecore.a:
 encore/libencore.a:
 	$(MAKE) -C encore
 
-mplayerwithoutlink:	version.h mplayer.o $(OBJS) loader/libloader.a $(DS_DEP) libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
-	@for a in mp3lib libac3 libmpeg2 libvo opendivx encore loader/DirectShow ; do $(MAKE) -C $$a all ; done
 
-$(PRG):	version.h mplayer.o $(OBJS) loader/libloader.a $(DS_DEP) libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
-	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader $(DS_LIB) -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(ARCH_LIBS)
+mplayerwithoutlink:	version.h mplayer.o $(OBJS) $(LOADER_DEP) $(AV_DEP) libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
+	@for a in mp3lib libac3 libmpeg2 libvo opendivx libavcodec encore loader/DirectShow ; do $(MAKE) -C $$a all ; done
+
+$(PRG):	version.h mplayer.o $(OBJS) $(LOADER_DEP) $(AV_DEP) libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
+	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(ARCH_LIBS)
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
@@ -98,7 +108,7 @@ clean:
 	rm -f *.o *~ $(OBJS)
 
 distclean:
-	@for a in mp3lib libac3 libmpeg2 opendivx encore libvo libao2 loader loader/DirectShow drivers drivers/syncfb ; do $(MAKE) -C $$a distclean ; done
+	@for a in mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 loader loader/DirectShow drivers drivers/syncfb ; do $(MAKE) -C $$a distclean ; done
 	rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_HQ) $(PRG_AVIP) $(PRG_TV) $(OBJS) *.o *.a .depend
 
 dep:	depend
@@ -106,7 +116,7 @@ dep:	depend
 depend:
 	./version.sh
 	$(CC) -MM $(CFLAGS) mplayer.c $(SRCS) 1>.depend
-	@for a in mp3lib libac3 libmpeg2 libvo libao2 opendivx encore loader/DirectShow ; do $(MAKE) -C $$a dep ; done
+	@for a in mp3lib libac3 libmpeg2 libvo libao2 opendivx libavcodec encore loader/DirectShow ; do $(MAKE) -C $$a dep ; done
 
 # ./configure must be run if it changed in CVS
 config.h: configure

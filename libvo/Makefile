@@ -3,8 +3,12 @@ include config.mak
 
 LIBNAME = libvo.a
 
-SRCS=aclib.c osd.c font_load.c rgb15to16mmx.c yuv2rgb_mmx.c yuv2rgb.c video_out.c vo_null.c vo_pgm.c vo_md5.c vo_odivx.c x11_common.c $(OPTIONAL_SRCS)
+SRCS=aclib.c osd.c font_load.c yuv2rgb.c video_out.c vo_null.c vo_pgm.c vo_md5.c vo_odivx.c x11_common.c $(OPTIONAL_SRCS)
 OBJS=$(SRCS:.c=.o)
+
+ifeq ($(TARGET_ARCH_X86),yes)
+SRCS += rgb15to16mmx.c yuv2rgb_mmx.c
+endif
 
 CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) -DMPG12PLAY
 # -I/usr/X11R6/include/

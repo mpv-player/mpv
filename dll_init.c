@@ -11,7 +11,7 @@ extern int verbose; // defined in mplayer.c
 
 #include "loader.h"
 //#include "wine/mmreg.h"
-//#include "wine/vfw.h"
+#include "wine/vfw.h"
 #include "wine/avifmt.h"
 
 #include "codec-cfg.h"

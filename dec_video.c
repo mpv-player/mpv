@@ -76,6 +76,7 @@ int init_video(sh_video_t *sh_video){
 unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 
 switch(sh_video->codec->driver){
+#ifdef ARCH_X86
  case 2: {
    if(!init_video_codec(sh_video,0)) {
 //     GUI_MSG( mplUnknowError )
@@ -142,6 +143,13 @@ switch(sh_video->codec->driver){
    break;
 #endif
  }
+#else	/* !ARCH_X86 */
+ case 2:
+ case 4:
+ case 6:
+   fprintf(stderr,"MPlayer does not support win32 codecs on non-x86 platforms!\n");
+   return 0;
+#endif	/* !ARCH_X86 */
  case 3: {  // OpenDivX
    if(verbose) printf("OpenDivX video codec\n");
    { DEC_PARAM dec_param;
@@ -319,7 +327,9 @@ switch(sh_video->codec->driver){
   }
 #endif
   case 6:
-  case 2: {
+  case 2:
+#ifdef ARCH_X86
+  {
     HRESULT ret;
     unsigned int t=GetTimer();
     unsigned int t2;
@@ -368,6 +378,10 @@ else
     }
     break;
   }
+#else
+    printf("Win32 video codec unavailable on non-x86 CPU -> force nosound :(\n");
+    break;
+#endif
   case 1: {
         int in_frame=0;
         int t=0;
