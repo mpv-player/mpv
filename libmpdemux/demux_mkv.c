@@ -1794,33 +1794,36 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
   sh_a->wf->nChannels = track->a_channels;
   sh_a->samplerate = (uint32_t) track->a_sfreq;
   sh_a->wf->nSamplesPerSec = (uint32_t) track->a_sfreq;
-  sh_a->samplesize = track->a_bps / 8;
+  if (track->a_bps == 0)
+    {
+      sh_a->samplesize = 2;
+      sh_a->wf->wBitsPerSample = 16;
+    }
+  else
+    {
+      sh_a->samplesize = track->a_bps / 8;
+      sh_a->wf->wBitsPerSample = track->a_bps;
+    }
   if (track->a_formattag == 0x0055)  /* MP3 || MP2 */
     {
       sh_a->wf->nAvgBytesPerSec = 16000;
       sh_a->wf->nBlockAlign = 1152;
-      sh_a->wf->wBitsPerSample = 0;
-      sh_a->samplesize = 0;
     }
   else if (!strncmp(track->codec_id, MKV_A_AC3, strlen(MKV_A_AC3)))
     {
       sh_a->wf->nAvgBytesPerSec = 16000;
       sh_a->wf->nBlockAlign = 1536;
-      sh_a->wf->wBitsPerSample = 0;
-      sh_a->samplesize = 0;
     }
   else if (track->a_formattag == 0x0001)  /* PCM || PCM_BE */
     {
       sh_a->wf->nAvgBytesPerSec = sh_a->channels * sh_a->samplerate*2;
       sh_a->wf->nBlockAlign = sh_a->wf->nAvgBytesPerSec;
-      sh_a->wf->wBitsPerSample = track->a_bps;
       if (!strcmp(track->codec_id, MKV_A_PCM_BE))
         sh_a->format = mmioFOURCC('t', 'w', 'o', 's');
     }
   else if (!strcmp(track->codec_id, MKV_A_QDMC) ||
            !strcmp(track->codec_id, MKV_A_QDMC2))
     {
-      sh_a->wf->wBitsPerSample = track->a_bps;
       sh_a->wf->nAvgBytesPerSec = 16000;
       sh_a->wf->nBlockAlign = 1486;
       track->fix_i_bps = 1;
@@ -1839,8 +1842,6 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
 
       sh_a->wf->nAvgBytesPerSec = 16000;
       sh_a->wf->nBlockAlign = 1024;
-      sh_a->wf->wBitsPerSample = 0;
-      sh_a->samplesize = 0;
 
       /* Recreate the 'private data' */
       /* which faad2 uses in its initialization */
@@ -1899,7 +1900,6 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
       ra4p = (real_audio_v4_props_t *) track->private_data;
       ra5p = (real_audio_v5_props_t *) track->private_data;
 
-      sh_a->wf->wBitsPerSample = sh_a->samplesize * 8;
       sh_a->wf->nAvgBytesPerSec = 0;  /* FIXME !? */
       sh_a->wf->nBlockAlign = be2me_16 (ra4p->frame_size);
 
