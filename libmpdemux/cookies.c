@@ -215,7 +215,7 @@ cookies_set(HTTP_header_t * http_hdr, const char *domain, const char *url)
     char *path;
     char *buf;
 
-    path = index(url, '/');
+    path = strchr(url, '/');
     if (!path)
 	path = "";
 
