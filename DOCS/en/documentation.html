@@ -1822,15 +1822,18 @@ end
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</A>
   mailing list for help and latest information.</P>
 
-<P>You have to copy or symlink <CODE>etc/cygwin_inttypes.h</CODE> from the
+<P>Cygwin versions prior to 1.3.23 do not include <CODE>inttypes.h</CODE>. You
+  will have to copy or symlink <CODE>etc/cygwin_inttypes.h</CODE> from the
   MPlayer source directory to <CODE>/usr/include/inttypes.h</CODE> in order to
   make MPlayer compile.</P>
 
 <P>To get native DirectX video, download
   <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</A>,
   extract them to <CODE>/usr/include/</CODE> or <CODE>/usr/local/include/</CODE>
-  and recompile. If the image is distorted, try turning off hardware
-  acceleration with <CODE>-vo directx:noaccel</CODE>.</P>
+  and recompile. You will then be able to use the directx video out driver. You
+  can make the movie window stay on top with <CODE>-vo directx:ontop</CODE>. If
+  the image is distorted, try turning off hardware acceleration with
+  <CODE>-vo directx:noaccel</CODE>.</P>
 
 <P>Instructions and files for making SDL run under Cygwin can be found on the
   <A HREF="http://www.libsdl.org/extras/win32/cygwin/">libsdl site</A>.</P>
@@ -1852,6 +1855,9 @@ end
   <CODE>--enable-qtx-codecs</CODE> and put the codecs into the
   default Windows DLL location, <CODE>C:\WINNT\system32</CODE> or
   <CODE>C:\Windows\system</CODE> depending on your Windows version.</P>
+
+<P>The Cygwin console is rather slow. Redirecting output or using the
+  <CODE>-quiet</CODE> option has been reported to improve performance.</P>
 
 
 
