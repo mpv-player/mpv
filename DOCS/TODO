@@ -35,3 +35,4 @@ Requested codecs:
 - WMV (failing to load)
 - ASUS ASV1 (loaded, but picture is upside-down and very pixelized)
 - VoxWare audio (DirectShow required)
+- CRAM
