@@ -295,15 +295,16 @@ static mkv_track_t *find_track_by_num(mkv_demuxer_t *d, uint32_t n,
 }
 
 static int check_track_information(mkv_demuxer_t *d) {
-  int i;
+  int i, track_num;
   unsigned char *c;
   uint32_t u, offset, length;
   mkv_track_t *t;
   BITMAPINFOHEADER *bih;
   WAVEFORMATEX *wfe;
   
-  for (i = 0; i < d->num_tracks; i++) {
-    t = d->tracks[i];
+  for (track_num = 0; track_num < d->num_tracks; track_num++) {
+    
+    t = d->tracks[track_num];
     switch (t->type) {
       case 'v':                 // video track
         if (t->codec_id == NULL)
