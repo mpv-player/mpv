@@ -22,6 +22,7 @@
 //#include "vd_internal.h"
 
 extern vd_functions_t mpcodecs_vd_null;
+extern vd_functions_t mpcodecs_vd_cinepak;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
