@@ -47,10 +47,11 @@ unsigned long __attribute__((aligned(8))) costab_mmx[] =
 	1060439283,
 };
 
-static int temp;
 void synth_1to1_MMX_s(real *bandPtr, int channel, short *samples,
                       short *buffs, int *bo)
 {
+int temp;
+
 __asm __volatile(
         "movl %1,%%ecx\n\t"
         "movl %2,%%edi\n\t"
