@@ -638,7 +638,7 @@ fi
 
 if [ $_dga = yes ]; then
  _dga='#define HAVE_DGA'
- _vosrc=$_vosrc' vo_dga.c'
+ _vosrc=$_vosrc' vo_dga.c vo_fsdga.c'
 else
  _dga='#undef HAVE_DGA'
 fi
