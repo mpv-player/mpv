@@ -48,7 +48,7 @@ static char help_text[]=
 " + oder -        Audioverzögerung um +/- 0.1 Sekunde verändern\n"
 " o               OSD Mode:  Aus / Zuchleiste / Zuchleiste+Zeit\n"
 " * oder /        Lautstärke verstellen ('m' für Auswahl Master/Wave)\n"
-" z oder x          Untertitelverzögerung um +/- 0.1 Sekunde verändern\n"
+" z oder x        Untertitelverzögerung um +/- 0.1 Sekunde verändern\n"
 "\n"
 " * * * IN DER MANPAGE STEHEN WEITERE KEYS UND OPTIONEN ! * * *\n"
 "\n";
