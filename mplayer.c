@@ -1338,7 +1338,6 @@ fflush(stdout);
 //int frame_corr_num=0;   //
 //float v_frame=0;    // Video
 float time_frame=0; // Timer
-int force_redraw=0;
 //float num_frames=0;      // number of frames played
 int grab_frames=0;
 char osd_text_buffer[64];
@@ -1423,7 +1422,6 @@ if (dvd_nav && stream->type==STREAMTYPE_DVDNAV) {
 total_time_usage_start=GetTimer();
 audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 while(!eof){
-//    unsigned int aq_total_time=GetTimer();
     float aq_sleep_time=0;
 
     if(play_n_frames>=0){
@@ -1432,43 +1430,40 @@ while(!eof){
     }
 
 /*========================== PLAY AUDIO ============================*/
+
 while(sh_audio){
   unsigned int t;
   double tt;
   int playsize;
+
+  current_module="play_audio";
   
   ao_data.pts=sh_audio->timer*90000.0;
   playsize=audio_out->get_space();
   
-  if(!playsize) {
-    if(sh_video)
-      break; // buffer is full, do not block here!!!
+  // handle audio-only case:
+  if(!playsize && !sh_video) {  // buffer is full, do not block here!!!
     usec_sleep(10000); // Wait a tick before retry
     continue;
   }
   
   if(playsize>MAX_OUTBURST) playsize=MAX_OUTBURST; // we shouldn't exceed it!
-  //if(playsize>outburst) playsize=outburst;
 
-  // Update buffer if needed
+  // Fill buffer if needed:
   current_module="decode_audio";   // Enter AUDIO decoder module
   t=GetTimer();
   while(sh_audio->a_buffer_len<playsize && !d_audio->eof){
     int ret=decode_audio(sh_audio,&sh_audio->a_buffer[sh_audio->a_buffer_len],
         playsize-sh_audio->a_buffer_len,sh_audio->a_buffer_size-sh_audio->a_buffer_len);
-    if(ret>0) sh_audio->a_buffer_len+=ret; 
-    else {
-      if(!sh_video)
-	eof = PT_NEXT_ENTRY;
-      break;
-    }
+    if(ret<=0) break; // EOF?
+    sh_audio->a_buffer_len+=ret;
   }
-  current_module=NULL;   // Leave AUDIO decoder module
   t=GetTimer()-t;
-  tt = t*0.000001f;
-  audio_time_usage+=tt;
+  tt = t*0.000001f; audio_time_usage+=tt;
   if(playsize>sh_audio->a_buffer_len) playsize=sh_audio->a_buffer_len;
-  
+
+  // play audio:  
+  current_module="play_audio";
   playsize=audio_out->play(sh_audio->a_buffer,playsize,0);
 
   if(playsize>0){
@@ -1478,53 +1473,30 @@ while(sh_audio){
   }
 
   break;
-} // if(sh_audio)
-
-/*========================== UPDATE TIMERS ============================*/
-#if 0
-  if(alsa){
-    // Use system timer for sync, not audio card/driver
-    time_frame-=GetRelativeTime();
-    if(time_frame<-0.1 || time_frame>0.1){
-      time_frame=0;
-    } else {
-        while(time_frame>0.022){
-            usec_sleep(time_frame-0.022);
-            time_frame-=GetRelativeTime();
-        }
-        while(time_frame>0.007){
-            usec_sleep(1000);	// sleeps 1 clock tick (10ms)!
-            time_frame-=GetRelativeTime();
-        }
-    }
-  }
-#endif
+} // while(sh_audio)
 
 if(!sh_video) {
+  // handle audio-only case:
   if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f %4.1f%% %d%%   \r"
 		    ,sh_audio->timer-audio_out->get_delay()
 		    ,(sh_audio->timer>0.5)?100.0*audio_time_usage/(double)sh_audio->timer:0
 		    ,cache_fill_status
 		    );
-  if(d_audio->eof && sh_audio->a_buffer_len < ao_data.outburst)
-    eof = PT_NEXT_ENTRY;
-  goto read_input;
-}
+  if(d_audio->eof) eof = PT_NEXT_ENTRY;
+
+} else {
 
 /*========================== PLAY VIDEO ============================*/
 
-vo_pts=sh_video->timer*90000.0;
-vo_fps=sh_video->fps;
+  float frame_time=0;
+  int blit_frame=0;
 
-cvideo_base_vframe=sh_video->timer;
-cvideo_base_vtime=video_time_usage;
+    vo_pts=sh_video->timer*90000.0;
+    vo_fps=sh_video->fps;
 
-if(1)
-  while(1){
-  
-    float frame_time=0;
-    int blit_frame=0;
-    
+    cvideo_base_vframe=sh_video->timer;
+    cvideo_base_vtime=video_time_usage;
+
     //--------------------  Decode a frame: -----------------------
     vdecode_time=video_time_usage;
     {   unsigned char* start=NULL;
@@ -1541,17 +1513,21 @@ if(1)
     }
     vdecode_time=video_time_usage-vdecode_time;
     //------------------------ frame decoded. --------------------
-    
-//------------------------ add OSD to frame contents ---------
-    current_module="draw_osd";
-    if(vo_config_count) video_out->draw_osd();
 
-    current_module="av_sync";
-
+    mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
     sh_video->timer+=frame_time;
     time_frame+=frame_time;  // for nosound
 
-    mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
+// ==========================================================================
+    
+    current_module="draw_osd";
+    if(vo_config_count) video_out->draw_osd();
+
+#ifdef HAVE_NEW_GUI
+    if(use_gui) guiEventHandling();
+#endif
+
+    current_module="calc_sleep_time";
 
     if(drop_frame){
 
@@ -1569,13 +1545,12 @@ if(1)
 	      mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nstill dropping, %.2f\n", time_frame);
 	  }
       }
-#ifdef HAVE_NEW_GUI
-      if(use_gui) guiEventHandling();
-#endif
-      if(vo_config_count) video_out->check_events(); // check events AST
+
+      time_frame=0;	// don't sleep!
+      blit_frame=0;	// don't display!
+      
     } else {
       // It's time to sleep...
-      current_module="sleep";
 
       time_frame-=GetRelativeTime(); // reset timer
 
@@ -1583,7 +1558,7 @@ if(1)
 	  float delay=audio_out->get_delay();
 	  mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%f\n",delay);
 
-if(!dapsync){
+	if(!dapsync){
 
 	      /* Arpi's AV-sync */
 
@@ -1602,7 +1577,7 @@ if(!dapsync){
 	      mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nframe drop %d, %.2f\n", drop_frame, time_frame);
 	  }
 
-} else {
+	} else {  // if(!dapsync)
 
 	      /* DaP's AV-sync */
 
@@ -1645,9 +1620,10 @@ if(!dapsync){
 	        }
 	      }	/* /start dropframe */
 
-}
+	} // if(dapsync)
 
       } else {
+
           // NOSOUND:
           if( (time_frame<-3*frame_time || time_frame>3*frame_time) || benchmark)
 	      time_frame=0;
@@ -1658,15 +1634,17 @@ if(!dapsync){
 
       aq_sleep_time+=time_frame;
 
-#ifdef HAVE_NEW_GUI
-      if(use_gui) guiEventHandling();
-#endif
+    }	// !drop_frame
+    
+//============================== SLEEP: ===================================
 
-if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
+// flag 256 means: libvo driver does its timing (dvb card)
+if(time_frame>0.001 && !(vo_flags&256)){
 
 #ifdef HAVE_RTC
     if(rtc_fd>=0){
 	// -------- RTC -----------
+	current_module="sleep_rtc";
         while (time_frame > 0.000) {
 	    unsigned long long rtc_ts;
 	    if (read (rtc_fd, &rtc_ts, sizeof(rtc_ts)) <= 0)
@@ -1678,6 +1656,7 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
     {
 	// -------- USLEEP + SOFTSLEEP -----------
 	float min=softsleep?0.021:0.005;
+	current_module="sleep_usleep";
         while(time_frame>min){
           if(time_frame<=0.020)
              usec_sleep(0); // sleeps 1 clock tick (10ms)!
@@ -1686,6 +1665,7 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
           time_frame-=GetRelativeTime();
         }
 	if(softsleep){
+	    current_module="sleep_soft";
 	    if(time_frame<0) mp_msg(MSGT_AVSYNC, MSGL_WARN, "Warning! Softsleep underflow!\n");
 	    while(time_frame>0) time_frame-=GetRelativeTime(); // burn the CPU
 	}
@@ -1693,7 +1673,10 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 
 }
 
+//====================== FLIP PAGE (VIDEO BLT): =========================
+
         current_module="flip_page";
+
 	if(vo_config_count) video_out->check_events();
         if(blit_frame){
 	   unsigned int t2=GetTimer();
@@ -1710,27 +1693,16 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 		/* printf ("PANIC: too slow frame (%.3f)!\n", j); */
 
 	   if(vo_config_count) video_out->flip_page();
+//        usec_sleep(50000); // test only!
 	   t2=GetTimer()-t2;
 	   tt = t2*0.000001f;
 	   vout_time_usage+=tt;
 	}
-//        usec_sleep(50000); // test only!
 
-    }
-    current_module=NULL;
-    
-    if(eof) break;
-    if(force_redraw){
-      --force_redraw;
-      if(!force_redraw) osd_function=OSD_PLAY;
-      continue;
-    }
+//====================== A-V TIMESTAMP CORRECTION: =========================
 
-//    printf("A:%6.1f  V:%6.1f  A-V:%7.3f  frame=%5.2f   \r",d_audio->pts,d_video->pts,d_audio->pts-d_video->pts,sh_audio->timer);
-//    fflush(stdout);
+  current_module="av_sync";
 
-#if 1
-/*================ A-V TIMESTAMP CORRECTION: =========================*/
   if(sh_audio){
     float a_pts=0;
     float v_pts=0;
@@ -1739,29 +1711,18 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
     float delay=audio_out->get_delay()+(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;
 
     if(pts_from_bps){
-#if 1
+	// PTS = sample_no / samplerate
         unsigned int samples=(sh_audio->audio.dwSampleSize)?
           ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
           (d_audio->pack_no); // <- used for VBR audio
 	samples+=sh_audio->audio.dwStart; // offset
         a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
-#else
-      if(sh_audio->audio.dwSampleSize)
-        a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->wf->nAvgBytesPerSec;
-      else  // VBR:
-        a_pts=d_audio->pack_no*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
-#endif
-//      v_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-//      printf("V_PTS: PTS: %8.3f BPS: %8.3f  \n",d_video->pts,v_pts);
-      delay_corrected=1;
+	delay_corrected=1;
     } else {
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
       a_pts=d_audio->pts;
       if(!delay_corrected) if(a_pts) delay_corrected=1;
-      //printf("*** %5.3f ***\n",a_pts);
       a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-//      v_pts=d_video->pts-frame_time;
-//      v_pts=d_video->pts;
     }
     v_pts=d_video->pts;
 
@@ -1808,31 +1769,12 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
       fflush(stdout);
 
   }
-#endif
+
+//============================ Auto QUALITY ============================
 
 /*Output quality adjustments:*/
 if(auto_quality>0){
-#if 0
-  /*If we took a long time decoding this frame, downgrade the quality.*/
-  if(output_quality>0&&
-     (video_time_usage-cvideo_base_vtime)*sh_video->timer>=
-     (0.95*sh_video->timer-(vout_time_usage+audio_time_usage))*
-     (sh_video->timer-cvideo_base_vframe-frame_correction)){
-    output_quality>>=1;
-    mp_msg(MSGT_AUTOQ,MSGL_DBG2,"Downgrading quality to %i.\n",output_quality);
-    set_video_quality(sh_video,output_quality);
-  } else
-  /*If we had plenty of extra time, upgrade the quality.*/
-  if(output_quality<auto_quality&&
-     vdecode_time<0.5*frame_time&&
-     (video_time_usage-cvideo_base_vtime)*sh_video->timer<
-     (0.67*sh_video->timer-(vout_time_usage+audio_time_usage))*
-     (sh_video->timer-cvideo_base_vframe-frame_correction)){
-    output_quality++;
-    mp_msg(MSGT_AUTOQ,MSGL_DBG2,"Upgrading quality to %i.\n",output_quality);
-    set_video_quality(sh_video,output_quality);
-  }
-#else
+  current_module="autoq";
 //  float total=0.000001f * (GetTimer()-aq_total_time);
 //  if(output_quality<auto_quality && aq_sleep_time>0.05f*total)
   if(output_quality<auto_quality && aq_sleep_time>0)
@@ -1846,10 +1788,13 @@ if(auto_quality>0){
       output_quality=0;
 //  printf("total: %8.6f  sleep: %8.6f  q: %d\n",(0.000001f*aq_total_time),aq_sleep_time,output_quality);
   set_video_quality(sh_video,output_quality);
-#endif
 }
 
-read_input:
+} // end if(sh_video)
+
+//============================ Handle PAUSE ===============================
+
+  current_module="pause";
 
 #ifdef USE_OSD
   if(osd_visible){
@@ -1928,12 +1873,7 @@ read_input:
 #endif
   }
 
-
-    if(!force_redraw) break;
-  } //  while(sh_video->timer<sh_audio->timer || force_redraw)
-
-// skip some seconds... added by fly
-
+// handle -sstep
 if(step_sec>0) {
 	osd_function=OSD_FFW;
 	rel_seek_secs+=step_sec;
@@ -1945,6 +1885,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #endif
 
 //================= Keyboard events, SEEKing ====================
+
+  current_module="key_events";
 
 #ifndef HAVE_NEW_INPUT
 /* slave mode */ 
