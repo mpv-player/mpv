@@ -189,10 +189,9 @@ Current plugins:
     swap U & V plane
     MPI: EXPORT
     
--vop il=[d|i][s][c]
+-vop il=[d|i][s][:[d|i][s]]
     (de)interleaves lines
     d deinterleave
     i interleave
-    c chroma too (otherwise only luma is modified if the format is planar YUV)
     s swap fields (exchange even & odd lines)
     MPI: TEMP, accepts stride

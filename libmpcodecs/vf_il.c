@@ -37,11 +37,14 @@
 
 //===========================================================================//
 
+typedef struct FilterParam{
+	int interleave;
+	int swap;
+}FilterParam;
 
 struct vf_priv_s {
-	int interleave;
-	int chroma;
-	int swap;
+	FilterParam lumaParam;
+	FilterParam chromaParam;
 };
 
 
@@ -85,6 +88,8 @@ static int interleave(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, i
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	int w;
+	FilterParam *luma  = &vf->priv->lumaParam;
+	FilterParam *chroma= &vf->priv->chromaParam;
 
 	mp_image_t *dmpi=vf_get_image(vf->next,mpi->imgfmt,
 		MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
@@ -96,25 +101,16 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		w= mpi->w * mpi->bpp/8;
 
 	interleave(dmpi->planes[0], mpi->planes[0], 
-		w, mpi->h, dmpi->stride[0], mpi->stride[0], vf->priv->interleave, vf->priv->swap);
+		w, mpi->h, dmpi->stride[0], mpi->stride[0], luma->interleave, luma->swap);
 
 	if(mpi->flags&MP_IMGFLAG_PLANAR){
 		int cw= mpi->w >> mpi->chroma_x_shift;
 		int ch= mpi->h >> mpi->chroma_y_shift;
 
-	
-		if(vf->priv->chroma){
-			interleave(dmpi->planes[1], mpi->planes[1], cw,ch, 
-				dmpi->stride[1], mpi->stride[1], vf->priv->interleave, vf->priv->swap);
-			interleave(dmpi->planes[2], mpi->planes[2], cw,ch, 
-				dmpi->stride[2], mpi->stride[2], vf->priv->interleave, vf->priv->swap);
-		}else{
-			int y;
-			for(y=0; y < ch; y++)
-			    memcpy(dmpi->planes[1] + dmpi->stride[1]*y, mpi->planes[1] + mpi->stride[1]*y, cw);
-			for(y=0; y < ch; y++)
-			    memcpy(dmpi->planes[2] + dmpi->stride[2]*y, mpi->planes[2] + mpi->stride[2]*y, cw);
-		}
+		interleave(dmpi->planes[1], mpi->planes[1], cw,ch, 
+			dmpi->stride[1], mpi->stride[1], chroma->interleave, luma->swap);
+		interleave(dmpi->planes[2], mpi->planes[2], cw,ch, 
+			dmpi->stride[2], mpi->stride[2], chroma->interleave, luma->swap);
 	}
     
 	return vf_next_put_image(vf,dmpi);
@@ -127,6 +123,20 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 	return vf_next_query_format(vf, fmt); 
 }
 
+static void parse(FilterParam *fp, char* args){
+	char *pos;
+	char *max= strchr(args, ':');
+
+	if(!max) max= args + strlen(args);
+
+	pos= strchr(args, 's');
+	if(pos && pos<max) fp->swap=1;
+	pos= strchr(args, 'i');
+	if(pos && pos<max) fp->interleave=1;
+	pos= strchr(args, 'd');
+	if(pos && pos<max) fp->interleave=-1;
+}
+
 static int open(vf_instance_t *vf, char* args){
 	char *pos, *max;
 
@@ -136,19 +146,13 @@ static int open(vf_instance_t *vf, char* args){
 	vf->query_format=query_format;
 	vf->priv=malloc(sizeof(struct vf_priv_s));
 	memset(vf->priv, 0, sizeof(struct vf_priv_s));
-
-	if(args==NULL) return 0;
-
-	max= args + strlen(args);
-
-	pos= strchr(args, 's');
-	if(pos && pos<max) vf->priv->swap=1;
-	pos= strchr(args, 'c');
-	if(pos && pos<max) vf->priv->chroma=1;
-	pos= strchr(args, 'i');
-	if(pos && pos<max) vf->priv->interleave=1;
-	pos= strchr(args, 'd');
-	if(pos && pos<max) vf->priv->interleave=-1;
+	
+	if(args)
+	{
+		char *arg2= strchr(args,':');
+		if(arg2) parse(&vf->priv->chromaParam, arg2+1);
+		parse(&vf->priv->lumaParam, args);
+	}
 
 	return 1;
 }
