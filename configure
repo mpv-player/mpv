@@ -1936,6 +1936,7 @@ else
   _def_vesa='#undef HAVE_VESA'
   echores "no (not supported on this OS/architecture)"
 fi
+else
 _def_vesa='#undef HAVE_VESA'
 fi
 
