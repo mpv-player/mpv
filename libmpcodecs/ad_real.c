@@ -95,10 +95,11 @@ static int preinit(sh_audio_t *sh){
     // note: temp2[] come from audio stream extra header (last 16 of the total 24 bytes)
     ra_init_t init_data={
 	sh->wf->nSamplesPerSec,sh->wf->wBitsPerSample,sh->wf->nChannels,
-	100, 60,  // ?????
+	100, // ???
+	((short*)(sh->wf+1))[0],  // subpacket size
 	sh->wf->nBlockAlign,
 	16, // ??
-	((char*)(sh->wf+1))+2+8
+	((char*)(sh->wf+1))+6+8
     };
     result=raInitDecoder(sh->context,&init_data);
     if(result){
@@ -107,14 +108,14 @@ static int preinit(sh_audio_t *sh){
     }
   }
   
-    result=raSetFlavor(sh->context,*((short*)(sh->wf+1)));
+    result=raSetFlavor(sh->context,((short*)(sh->wf+1))[2]);
     if(result){
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Decoder flavor setup failed, error code: 0x%X\n",result);
       return 0;
     }
 
   sh->audio_out_minsize=128000; //sh->samplerate*sh->samplesize*sh->channels;
-  sh->audio_in_minsize=10*sh->wf->nBlockAlign;
+  sh->audio_in_minsize=((short*)(sh->wf+1))[1]*sh->wf->nBlockAlign;
 //  sh->samplesize=2;
 //  sh->channels=2;
 //  sh->samplerate=44100;
@@ -143,43 +144,38 @@ static void uninit(sh_audio_t *sh){
 static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen){
   int result;
   int len=-1;
+  int sps=((short*)(sh->wf+1))[0];
+  int w=sh->wf->nBlockAlign/sps; // 5
+  int h=((short*)(sh->wf+1))[1];
+  
+  printf("bs=%d  sps=%d  w=%d h=%d \n",sh->wf->nBlockAlign,sps,w,h);
 
+#if 1
   if(sh->a_in_buffer_len<=0){
       // fill the buffer!
       int x,y;
-      for(y=0;y<10;y++)
-        for(x=0;x<10;x++){
-	    demux_read_data(sh->ds, sh->a_in_buffer+10*60*x+60*5*(y&1)+60*(y>>1), 60);
+      for(y=0;y<h;y++)
+        for(x=0;x<w;x++){
+	    demux_read_data(sh->ds, sh->a_in_buffer+sps*(h*x+(h/2)*(y&1)+(y>>1)), sps);
 	}
-      sh->a_in_buffer_len=10*10*60;
+      sh->a_in_buffer_size=
+      sh->a_in_buffer_len=w*h*sps;
   }
+
+#else
+  if(sh->a_in_buffer_len<=0){
+      // fill the buffer!
+      demux_read_data(sh->ds, sh->a_in_buffer, sh->wf->nBlockAlign);
+      sh->a_in_buffer_size=
+      sh->a_in_buffer_len=sh->wf->nBlockAlign;
+  }
+#endif
   
-//  demux_read_data(sh->ds, sh->a_in_buffer, 600);
-  
-  result=raDecode(sh->context, sh->a_in_buffer+10*10*60-sh->a_in_buffer_len, sh->wf->nBlockAlign,
+  result=raDecode(sh->context, sh->a_in_buffer+sh->a_in_buffer_size-sh->a_in_buffer_len, sh->wf->nBlockAlign,
        buf, &len, -1);
   sh->a_in_buffer_len-=sh->wf->nBlockAlign;
   
   printf("radecode: %d bytes, res=0x%X  \n",len,result);
-
-  // audio decoding. the most important thing :)
-  // parameters you get:
-  //  buf = pointer to the output buffer, you have to store uncompressed 
-  //        samples there
-  //  minlen = requested minimum size (in bytes!) of output. it's just a
-  //        _recommendation_, you can decode more or less, it just tell you that
-  //        the caller process needs 'minlen' bytes. if it gets less, it will
-  //        call decode_audio() again.
-  //  maxlen = maximum size (bytes) of output. you MUST NOT write more to the
-  //        buffer, it's the upper-most limit!
-  //        note: maxlen will be always greater or equal to sh->audio_out_minsize
-
-  // now, let's decode...  
-  
-  // you can read the compressed stream using the demux stream functions:
-  //  demux_read_data(sh->ds, buffer, length) - read 'length' bytes to 'buffer'
-  //  ds_get_packet(sh->ds, &buffer) - set ptr buffer to next data packet
-  // (both func return number of bytes or 0 for error)
 
   return len; // return value: number of _bytes_ written to output buffer,
               // or -1 for EOF (or uncorrectable error)
