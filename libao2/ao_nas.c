@@ -109,6 +109,7 @@ struct ao_nas_data {
 	AuServer	*aud;
 	AuFlowID	flow;
 	AuDeviceID	dev;
+	AuFixedPoint	gain;
 
 	unsigned int state;
 	int expect_underrun;
@@ -266,13 +267,17 @@ static AuBool nas_event_handler(AuServer *aud, AuEvent *ev, AuEventHandlerRec *h
 		if (nas_data->expect_underrun) {
 			nas_data->expect_underrun = 0;
 		} else {
+			static int hint = 1;
 			mp_msg(MSGT_AO, MSGL_WARN,
 			       "ao_nas: Buffer underrun.\n");
-			mp_msg(MSGT_AO, MSGL_HINT,
-			       "Possible reasons are:"
-			       "1) Network congestion."
-			       "2) Your NAS server is too slow."
-			       "Try renicing your nasd to e.g. -15.\n");
+			if (hint) {
+				hint = 0;
+				mp_msg(MSGT_AO, MSGL_HINT,
+				       "Possible reasons are:\n"
+				       "1) Network congestion.\n"
+				       "2) Your NAS server is too slow.\n"
+				       "Try renicing your nasd to e.g. -15.\n");
+			}
 		}
 		if (nas_readBuffer(nas_data,
 		                   nas_data->server_buffer_size -
@@ -315,50 +320,34 @@ static unsigned int nas_aformat_to_auformat(unsigned int *format)
 		return AuFormatLinearUnsigned16LSB;
 	case	AFMT_U16_BE:
 		return AuFormatLinearUnsigned16MSB;
-#ifndef WORDS_BIGENDIAN
-	default:
-		*format=AFMT_S16_LE;
-#endif
 	case	AFMT_S16_LE:
 		return AuFormatLinearSigned16LSB;
-#ifdef WORDS_BIGENDIAN
-	default:
-		*format=AFMT_S16_BE;
-#endif
 	case	AFMT_S16_BE:
 		return AuFormatLinearSigned16MSB;
 	case	AFMT_MU_LAW:
 		return AuFormatULAW8;
+	default:
+		*format=AFMT_S16_NE;
+		return nas_aformat_to_auformat(format);
 	}
 }
 
 // to set/get/query special features/parameters
 static int control(int cmd, void *arg)
 {
-	AuDeviceAttributes *dattr;
-	AuFixedPoint fpgain;
+	AuElementParameters aep;
 	AuStatus as;
-	int gain;
 	int retval = CONTROL_UNKNOWN;
 
 	ao_control_vol_t *vol = (ao_control_vol_t *)arg;
 
-	dattr = AuGetDeviceAttributes(nas_data->aud, nas_data->dev, &as);
-	if (as != AuSuccess) {
-		nas_print_error(nas_data->aud,
-		                "control(): AuGetDeviceAttributes", as);
-		return CONTROL_ERROR;
-	}
-	gain = AuFixedPointRoundDown(AuDeviceGain(dattr));
-	// kn: 0 <= gain <= 100
-
 	switch (cmd) {
 	case AOCONTROL_GET_VOLUME:
 
-		vol->right = (float) gain;
+		vol->right = (float)nas_data->gain/AU_FIXED_POINT_SCALE*50;
 		vol->left = vol->right;
 
-		mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: AOCONTROL_GET_VOLUME: %d\n", gain);
+		mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: AOCONTROL_GET_VOLUME: %08x\n", nas_data->gain);
 		retval = CONTROL_OK;
 		break;
 
@@ -368,22 +357,23 @@ static int control(int cmd, void *arg)
 		 * know if something can change it outside of ao_nas
 		 * so i take the mean of both values.
 		 */
-		gain = (int) ((vol->left+vol->right)/2);
-		mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: AOCONTROL_SET_VOLUME: %d\n", gain);
+		nas_data->gain = AU_FIXED_POINT_SCALE*((vol->left+vol->right)/2)/50;
+		mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: AOCONTROL_SET_VOLUME: %08x\n", nas_data->gain);
 
-		fpgain = AuFixedPointFromSum(gain, 0);
-		AuDeviceGain(dattr) = fpgain;
-		AuSetDeviceAttributes(nas_data->aud, nas_data->dev,
-		                      AuCompDeviceGainMask, dattr, &as);
+		aep.parameters[AuParmsMultiplyConstantConstant]=nas_data->gain;
+		aep.flow = nas_data->flow;
+		aep.element_num = 1;
+		aep.num_parameters = AuParmsMultiplyConstant;
+
+		AuSetElementParameters(nas_data->aud, 1, &aep, &as);
 		if (as != AuSuccess) {
 			nas_print_error(nas_data->aud,
-			                "control(): AuSetDeviceAttributes", as);
+			                "control(): AuSetElementParameters", as);
 			retval = CONTROL_ERROR;
 		} else retval = CONTROL_OK;
 		break;
 	};
 
-	AuFreeDeviceAttributes(nas_data->aud, 1, dattr);
 	return retval;
 }
 
@@ -460,9 +450,11 @@ static int init(int rate,int channels,int format,int flags)
 				buffer_size / bytes_per_sample,
 				(buffer_size - NAS_FRAG_SIZE) /
 				bytes_per_sample, 0, NULL);
-	AuMakeElementExportDevice(elms+1, 0, nas_data->dev, rate,
+	nas_data->gain = AuFixedPointFromFraction(1, 1);
+	AuMakeElementMultiplyConstant(elms+1, 0, nas_data->gain);
+	AuMakeElementExportDevice(elms+2, 1, nas_data->dev, rate,
 				AuUnlimitedSamples, 0, NULL);
-	AuSetElements(nas_data->aud, nas_data->flow, AuTrue, 2, elms, &as);
+	AuSetElements(nas_data->aud, nas_data->flow, AuTrue, sizeof(elms)/sizeof(*elms), elms, &as);
 	if (as != AuSuccess) {
 		nas_print_error(nas_data->aud, "init(): AuSetElements", as);
 		AuCloseServer(nas_data->aud);
