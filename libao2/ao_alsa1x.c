@@ -1,7 +1,7 @@
 /*
   ao_alsa9 - ALSA-0.9.x output plugin for MPlayer
 
-  (C) Alex Beregszaszi <alex@naxine.org>
+  (C) Alex Beregszaszi
   
   modified for real alsa-0.9.0-support by Joy Winter <joy@pingfm.org>
   additional AC3 passthrough support by Andy Lo A Foe <andy@alsaplayer.org>  
@@ -37,7 +37,7 @@ static ao_info_t info =
 {
     "ALSA-0.9.x audio output",
     "alsa9",
-    "Alex Beregszaszi <alex@naxine.org>, Joy Winter <joy@pingfm.org>",
+    "Alex Beregszaszi, Joy Winter <joy@pingfm.org>",
     "under developement"
 };
 

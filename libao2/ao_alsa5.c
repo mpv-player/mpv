@@ -1,7 +1,7 @@
 /*
   ao_alsa5 - ALSA-0.5.x output plugin for MPlayer
 
-  (C) Alex Beregszaszi <alex@naxine.org>
+  (C) Alex Beregszaszi
 
   Thanks to Arpi for helping me ;)
 */
@@ -21,7 +21,7 @@ static ao_info_t info =
 {
     "ALSA-0.5.x audio output",
     "alsa5",
-    "Alex Beregszaszi <alex@naxine.org>",
+    "Alex Beregszaszi",
     ""
 };
 
