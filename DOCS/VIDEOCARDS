@@ -152,10 +152,9 @@ a, If you don't have X...
 
 
 b, You want to use framebuffer...
-  ... Use --enable-fbdev switch of ./configure and the FBdev target will be
-  built (don't forget to 'make distclean' first!). Yet another "don't forget" :
-  read the framebuffer documentation in the kernel sources
-  (Documentation/fb/*) !
+  ... Whether to build the FBdev target is autodetected during ./configure .
+  Read the framebuffer documentation in the kernel sources
+  (Documentation/fb/*) for info on how to enable it, etc.. !
 
   ... but your card doesn't support VBE 2.0 standard (older ISA/PCI
   cards, such as S3 Trio64) :
@@ -163,7 +162,8 @@ b, You want to use framebuffer...
   Doctor (formerly UniVBE) before booting Linux.  Use a DOS boot disk or
   whatever.  And don't forget to register your UniVBE ;))
 
-
+  NOTE : FBdev video mode changing _does not work_ with the VESA framebuffer,
+         and don't ask for it, since it's not an MPlayer limitation.
 
 	Gabucino & A'rpi
 

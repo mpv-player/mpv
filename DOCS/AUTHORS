@@ -20,8 +20,10 @@ Zoltán Ponekker (Pontscho/Fresh!):  <pontscho@makacs.poliod.hu>
 - configure script and Makefiles for easy compile
 - GUI system (coming soon!)
 - 3DNow! support into mp3lib
+- 3DNow! support into fastmemcpy.h
 - various X11 driver changes (keyboard handling, fullscreen, bpp detect, etc)
 - libvo: adding xmga driver (similar to Xv but works under X3.3.x)
+- mixer support
 
 Gábor Lénárt (LGB): <lgb@supervisor.hu>
 - testing and some improvements in mpeg player's user interface (options)

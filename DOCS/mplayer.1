@@ -32,6 +32,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-ffactor\ number ]
 .RB [ \-sub\ file ]
 .RB [ \-subfps\ rate ]
+.RB [ \-subdelay\ sec ]
 .I file
 .PP
 .SH DESCRIPTION
@@ -114,6 +115,9 @@ use/display this subtitle file
 .B \-subfps\ rate
 specify frame/sec rate of subtitle file
 (default: the same as the movie)
+.TP
+.B \-subdelay\ sec
+delays subtitles by <sec> seconds. Can be negative.
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
@@ -195,7 +199,7 @@ q or ESC        stop playing and quit program
 
 o               toggle OSD:  none / seek / seek+timer
 
-m or c          use mixer master or pcm channel
+m               toggle using master/pcm volume
 .IP
 .SH FILES AND DIRECTORIES
 .TP
