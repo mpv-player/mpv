@@ -98,7 +98,8 @@ Select audio channel [MPG: 0\-31 AVI: 1\-99 ASF: 0\-127 VOB: 128\-...]
 .TP
 .B \-alang <two letter\ country\ code> (also see \-aid option)
 Works only for DVD playback! Selects DVD audio language. It always tries
-to play audio streams whose language matches the given code.
+to play audio streams whose language matches the given code. For the list of
+available languages, use with the \-v switch and look at the output.
 
 .I EXAMPLE:
     \-alang hu,en  Plays Hungarian and falls back to
@@ -153,7 +154,7 @@ Available options are:
 .TP
 .B \-chapter <chapter\ id>[-<end\ chapter\ id>]
 Specify which chapter to start playing at. Optionally specify which chapter to
-end playing at. Examples can be found below.
+end playing at (default: 1). Examples can be found below.
 .TP
 .B \-csslib <filename>
 (old-style DVD option) This option is used to override the default location of libcss.so.
@@ -192,7 +193,8 @@ Override default DVD device name /dev/dvd.
 .TP
 .B \-dvdangle <angle\ id>
 Some DVD discs contain scenes that can be viewed from multiple angles.
-Here you can tell MPlayer which angles to use. Examples can be found below.
+Here you can tell MPlayer which angles to use (default: 1). Examples can be
+found below.
 .TP
 .B \-dvdauth <DVD\ device>
 (old-style DVD option) Turns on DVD authentication using the given device.
