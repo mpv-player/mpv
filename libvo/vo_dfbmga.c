@@ -58,6 +58,7 @@ extern int verbose;
  */
 static IDirectFB *dfb;
 
+static IDirectFBDisplayLayer *primary;
 static IDirectFBDisplayLayer *bes;
 static IDirectFBDisplayLayer *crtc2;
 static IDirectFBDisplayLayer *spic;
@@ -68,9 +69,11 @@ static int current_ip_buf;
 static IDirectFBSurface *bufs[3];
 
 static IDirectFBSurface *frame;
+static IDirectFBSurface *subframe;
+
 static IDirectFBSurface *besframe;
 static IDirectFBSurface *c2frame;
-static IDirectFBSurface *subframe;
+static IDirectFBSurface *spicframe;
 
 static DFBSurfacePixelFormat frame_format;
 static DFBSurfacePixelFormat subframe_format;
@@ -224,11 +227,6 @@ static uint32_t
 preinit( const char *arg )
 {
      DFBResult res;
-
-     bes = NULL;
-     crtc2 = NULL;
-     keyboard = NULL;
-     buffer = NULL;
 
      /* Some defaults */
      use_bes = 0;
@@ -422,6 +420,26 @@ preinit( const char *arg )
           }
 
      if (use_bes) {
+          struct layer_enum l = {
+               "FBDev Primary Layer",
+               &primary,
+               DFB_UNSUPPORTED
+          };
+          dfb->EnumDisplayLayers( dfb, get_layer_by_name, &l );
+          if (l.res != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR, "vo_dfbmga: Can't get primary layer - %s\n",
+                       DirectFBErrorString( l.res ) );
+               return -1;
+          }
+          if ((res = primary->SetCooperativeLevel( primary, DLSCL_EXCLUSIVE )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR, "Can't get exclusive access to primary layer - %s\n",
+                       DirectFBErrorString( res ) );
+               return -1;
+          }
+          use_input = 1;
+     }
+
+     if (use_bes) {
           DFBDisplayLayerConfig      dlc;
           DFBDisplayLayerConfigFlags failed;
           struct layer_enum l = {
@@ -489,6 +507,32 @@ preinit( const char *arg )
      return 0;
 }
 
+static void release_config( void )
+{
+     if (spicframe)
+          spicframe->Release( spicframe );
+     if (spic)
+          spic->Release( spic );
+     if (c2frame)
+          c2frame->Release( c2frame );
+     if (besframe)
+          besframe->Release( besframe );
+     if (bufs[0])
+          bufs[0]->Release( bufs[0] );
+     if (bufs[1])
+          bufs[1]->Release( bufs[1] );
+     if (bufs[2])
+          bufs[2]->Release( bufs[2] );
+     
+     spicframe = NULL;
+     spic = NULL;
+     c2frame = NULL;
+     besframe = NULL;
+     bufs[0] = NULL;
+     bufs[1] = NULL;
+     bufs[2] = NULL;
+}
+
 static uint32_t
 config( uint32_t width, uint32_t height,
         uint32_t d_width, uint32_t d_height,
@@ -504,12 +548,8 @@ config( uint32_t width, uint32_t height,
      uint32_t out_width;
      uint32_t out_height;
 
-     besframe = NULL;
-     c2frame = NULL;
-     spic = NULL;
-     subframe = NULL;
-     bufs[0] = bufs[1] = bufs[2] = NULL;
-     
+     release_config();
+
      in_width  = width;
      in_height = height;
 
@@ -559,31 +599,10 @@ config( uint32_t width, uint32_t height,
       * BES
       */
      if (use_bes) {
-          IDirectFBDisplayLayer *primary;
-          DFBDisplayLayerConfig pdlc;
-          struct layer_enum l = {
-               "FBDev Primary Layer",
-               &primary,
-               DFB_UNSUPPORTED
-          };
-          dfb->EnumDisplayLayers( dfb, get_layer_by_name, &l );
-          if (l.res != DFB_OK) {
-               mp_msg( MSGT_VO, MSGL_ERR, "vo_dfbmga: Can't get primary layer - %s\n",
-                       DirectFBErrorString( l.res ) );
-               return -1;
-          }
-          if ((res = primary->GetConfiguration( primary, &pdlc )) != DFB_OK) {
-               mp_msg( MSGT_VO, MSGL_ERR,
-                       "vo_dfbmga: Can't get primary layer configuration - %s!\n",
-                       DirectFBErrorString( res ) );
-               return -1;
-          }
-          primary->Release( primary );
-
-          aspect_save_screenres( pdlc.width, pdlc.height );
+          aspect_save_screenres( 0x10000, 0x10000 );
           aspect( &out_width, &out_height, A_ZOOM );
-          besrect.x = (pdlc.width - out_width) * in_width / pdlc.width / 2;
-          besrect.y = (pdlc.height - out_height) * in_height / pdlc.height / 2;
+          besrect.x = (0x10000 - out_width) * in_width / 0x10000 / 2;
+          besrect.y = (0x10000 - out_height) * in_height / 0x10000 / 2;
           besrect.w = in_width;
           besrect.h = in_height;
 
@@ -779,9 +798,9 @@ config( uint32_t width, uint32_t height,
                return -1;
           }
 
-          spic->GetSurface( spic, &subframe );
+          spic->GetSurface( spic, &spicframe );
 
-          subframe->GetPalette( subframe, &palette );
+          spicframe->GetPalette( spicframe, &palette );
           color.a = 0xff;
           for (i = 0; i < 16; i++) {
                color.r = i * 17;
@@ -791,15 +810,18 @@ config( uint32_t width, uint32_t height,
           }
           palette->Release( palette );
 
-          subframe->Clear( subframe, 0, 0, 0, 0 );
-          subframe->Flip( subframe, NULL, 0 );
-          subframe->Clear( subframe, 0, 0, 0, 0 );
-          subframe->Flip( subframe, NULL, 0 );
-          subframe->Clear( subframe, 0, 0, 0, 0 );
+          spicframe->Clear( spicframe, 0, 0, 0, 0 );
+          spicframe->Flip( spicframe, NULL, 0 );
+          spicframe->Clear( spicframe, 0, 0, 0, 0 );
+          spicframe->Flip( spicframe, NULL, 0 );
+          spicframe->Clear( spicframe, 0, 0, 0, 0 );
 
           mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: Sub-picture layer using %s buffering\n",
                   dlc.buffermode == DLBM_TRIPLE ? "triple" :
                   dlc.buffermode == DLBM_BACKVIDEO ? "double" : "single" );
+
+          subframe = spicframe;
+          subrect = NULL;
      } else if (use_crtc2) {
           /* Draw OSD to CRTC2 surface */
           subframe = c2frame;
@@ -1107,47 +1129,27 @@ flip_page( void )
 static void
 uninit( void )
 {
+     release_config();
+
      if (buffer)
           buffer->Release( buffer );
      if (keyboard)
           keyboard->Release( keyboard );
+     if (crtc2)
+          crtc2->Release( crtc2 );
+     if (bes)
+          bes->Release( bes );
+     if (primary)
+          primary->Release( primary );
+     if (dfb)
+          dfb->Release( dfb );
+
      buffer = NULL;
      keyboard = NULL;
-
-     while (num_bufs--) {
-          frame = bufs[num_bufs];
-          if (frame)
-               frame->Release( frame );
-          bufs[num_bufs] = NULL;
-     }
-     if (bes) {
-          if (besframe)
-               besframe->Release( besframe );
-          bes->SetOpacity( bes, 0 );
-          bes->Release( bes );
-          besframe = NULL;
-          bes = NULL;
-     }
-     if (crtc2) {
-          if (c2frame)
-               c2frame->Release( c2frame );
-          crtc2->SetOpacity( crtc2, 0 );
-          crtc2->Release( crtc2 );
-          c2frame = NULL;
-          crtc2 = NULL;
-     }
-     if (spic) {
-          if (subframe)
-               subframe->Release( subframe );
-          spic->SetOpacity( spic, 0 );
-          spic->Release( spic );
-          subframe = NULL;
-          spic = NULL;
-     }
-     if (dfb) {
-          dfb->Release( dfb );
-          dfb = NULL;
-     }
+     crtc2 = NULL;
+     bes = NULL;
+     primary = NULL;
+     dfb = NULL;
 }
 
 static uint32_t
