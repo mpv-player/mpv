@@ -158,7 +158,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
 
     alsa_format.rate = ao_data.samplerate;
-    alsa_format.voices = ao_data.channels*2;
+    alsa_format.voices = ao_data.channels;
     alsa_format.interleave = 1;
 
     if ((err = snd_pcm_open(&alsa_handler, 0, 0, SND_PCM_OPEN_PLAYBACK)) < 0)
