@@ -930,7 +930,11 @@ vidix_capability_t def_cap =
 void probe_fireGL_driver() {
   Display *dp = XOpenDisplay ((void*)0);
   int n = 0;
-  char **extlist = XListExtensions (dp, &n);
+  char **extlist;
+  if (dp==NULL) {
+       return;
+  }
+  extlist = XListExtensions (dp, &n);
   XCloseDisplay (dp);
   if (extlist) {
     int i;
