@@ -3,7 +3,7 @@
  
  API idea based on libvo2's
 
- UNDER HEAVY DEVELOPEMENT, DO NOT USE! :)
+ UNDER HEAVY DEVELOPEMENT, NO FEATURE REQUESTS PLEASE! :)
 */
 
 #include <stdio.h>
@@ -53,7 +53,7 @@ int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh)
     demux_packet_t* dp;
     int len;
 
-    mp_msg(MSGT_DEMUX, MSGL_DBG2, "demux_tv_fill_buffer(sequence:%d) called!\n", seq);
+    mp_dbg(MSGT_DEMUX, MSGL_DBG2, "demux_tv_fill_buffer(sequence:%d) called!\n", seq);
 
 //    demux->filepos = -1;
 
@@ -86,6 +86,10 @@ int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh)
     ds_add_packet(demux->audio,dp);
 
     return 1;
+}
+
+int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
+{
 }
 
 int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
@@ -176,6 +180,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
     demuxer->video->sh = sh_video;
     sh_video->ds = demuxer->video;
     demuxer->video->id = 0;
+    demuxer->seekable = 0;
 
     /* here comes audio init */
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)

@@ -160,7 +160,10 @@ int demux_vivo_fill_buffer(demuxer_t *demux);
 #ifdef USE_TV
 #include "tv.h"
 extern tvi_handle_t *tv_handler;
-int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh);
+extern int tv_param_on;
+
+extern int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh);
+extern int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh);
 #endif
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
@@ -352,10 +355,8 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer);
 int mov_check_file(demuxer_t* demuxer);
 int mov_read_header(demuxer_t* demuxer);
 
-#ifdef USE_TV
-/* tv ! */
-extern int tv_param_on;
-#endif
+extern int vivo_check_file(demuxer_t *demuxer);
+extern void demux_open_vivo(demuxer_t *demuxer);
 
 demuxer_t* demux_open(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id){
 

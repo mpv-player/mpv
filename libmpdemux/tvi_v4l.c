@@ -22,6 +22,8 @@
 #include <linux/videodev.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "mp_msg.h"
 #include "../libao2/afmt.h"
@@ -349,7 +351,6 @@ static int init(priv_t *priv, tvi_param_t *params)
     /* video buffers */
     priv->buf = (struct video_mmap *)malloc(priv->nbuf * sizeof(struct video_mmap));
     memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
-
     
     return(1);
 
@@ -363,6 +364,8 @@ static int uninit(priv_t *priv)
 {
     close(priv->fd);
 #warning "Implement uninit!"
+
+    return(1);
 }
 
 static int start(priv_t *priv)
@@ -404,6 +407,20 @@ static int start(priv_t *priv)
 	mp_msg(MSGT_TV, MSGL_DBG2, "buffer: %d => %p\n", i, &priv->buf[i]);
     } 
 
+#if 0
+    {
+	struct video_play_mode pmode;
+	
+	pmode.mode = VID_PLAY_NORMAL;
+	pmode.p1 = 1;
+	pmode.p2 = 0;
+	if (ioctl(priv->fd, VIDIOCSPLAYMODE, &pmode) == -1)
+	{
+	    mp_msg(MSGT_TV, MSGL_ERR, "ioctl set play mode failed: %s\n", strerror(errno));
+//	    return(0);
+	}
+    }
+#endif
 
 #if 0
     {
@@ -709,10 +726,10 @@ static int grab_video_frame(priv_t *priv, char *buffer, int len)
     int frame = priv->queue % priv->nbuf;
     int nextframe = (priv->queue+1) % priv->nbuf;
 
-    mp_msg(MSGT_TV, MSGL_DBG2, "grab_video_frame(priv=%p, buffer=%p, len=%d\n",
+    mp_dbg(MSGT_TV, MSGL_DBG2, "grab_video_frame(priv=%p, buffer=%p, len=%d\n",
 	priv, buffer, len);
 
-    mp_msg(MSGT_TV, MSGL_DBG3, "buf: %p + frame: %d => %p\n",
+    mp_dbg(MSGT_TV, MSGL_DBG3, "buf: %p + frame: %d => %p\n",
 	priv->buf, nextframe, &priv->buf[nextframe]);
     if (ioctl(priv->fd, VIDIOCMCAPTURE, &priv->buf[nextframe]) == -1)
     {
@@ -724,9 +741,14 @@ static int grab_video_frame(priv_t *priv, char *buffer, int len)
 	mp_msg(MSGT_TV, MSGL_ERR, "ioctl sync failed: %s\n", strerror(errno));
     priv->queue++;
     
-    mp_msg(MSGT_TV, MSGL_DBG3, "mmap: %p + offset: %d => %p\n",
+    mp_dbg(MSGT_TV, MSGL_DBG3, "mmap: %p + offset: %d => %p\n",
 	priv->mmap, priv->mbuf.offsets[frame],
 	priv->mmap+priv->mbuf.offsets[frame]);
+
+    /* XXX also directrendering would be nicer! */
+    /* 3 times copying the same picture to other buffer :( */
+
+    /* copy the actual frame */
     memcpy(buffer, priv->mmap+priv->mbuf.offsets[frame], len);
 
     return(len);
@@ -734,16 +756,17 @@ static int grab_video_frame(priv_t *priv, char *buffer, int len)
 
 static int get_video_framesize(priv_t *priv)
 {
-    return priv->bytesperline * priv->height;
+    return(priv->bytesperline * priv->height);
 }
 
 static int grab_audio_frame(priv_t *priv, char *buffer, int len)
 {
+    return(65536);
 }
 
 static int get_audio_framesize(priv_t *priv)
 {
-    return 65536;
+    return(65536);
 }
 
 #endif /* USE_TV */

@@ -97,9 +97,8 @@ typedef struct tvi_handle_s {
 #define TVI_CONTROL_SPC_GET_INPUT	0x401	/* set input channel (tv,s-video,composite..) */
 #define TVI_CONTROL_SPC_SET_INPUT	0x402	/* set input channel (tv,s-video,composite..) */
 
-//extern int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh);
-//extern int demux_open_tv(demuxer_t *demux, tvi_handle_t *tvh);
 extern tvi_handle_t *tv_begin(void);
 extern int tv_init(tvi_handle_t *tvh);
+extern int tv_uninit(tvi_handle_t *tvh);
 
 #endif /* USE_TV */
