@@ -104,6 +104,7 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  appMPlayer.subWindow.KeyHandler=mplMainKeyHandle;
  appMPlayer.subWindow.ReSize=mplResize;
 
+ wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
  if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
 
  wsPostRedisplay( &appMPlayer.mainWindow );

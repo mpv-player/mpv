@@ -193,9 +193,10 @@ if(mDisplay){
   {
    int minor,major,shp;
    fprintf( stderr,"[ws] Screen depth: %d\n",wsDepthOnScreen );
-   fprintf( stderr,"[ws] red mask: 0x%x\n",wsRedMask );
-   fprintf( stderr,"[ws] green mask: 0x%x\n",wsGreenMask );
-   fprintf( stderr,"[ws] blue mask: 0x%x\n",wsBlueMask );
+   fprintf( stderr,"[ws]  size: %dx%d\n",wsMaxX,wsMaxY );
+   fprintf( stderr,"[ws]  red mask: 0x%x\n",wsRedMask );
+   fprintf( stderr,"[ws]  green mask: 0x%x\n",wsGreenMask );
+   fprintf( stderr,"[ws]  blue mask: 0x%x\n",wsBlueMask );
    if ( wsUseXShm )
     {
      XShmQueryVersion( wsDisplay,&major,&minor,&shp );
@@ -366,7 +367,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
   win->WindowMask,&win->WindowAttrib );
 
  wsClassHint.res_name=label;
- wsClassHint.res_class="mPlayer";
+ wsClassHint.res_class="MPlayer";
  XSetClassHint( wsDisplay,win->WindowID,&wsClassHint );
 
  win->SizeHint.flags=PPosition | PSize | PResizeInc; // | PBaseSize

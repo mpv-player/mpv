@@ -35,10 +35,24 @@ extern int abs_seek_pos;
 
 void mplFullScreen( void )
 {
-// if ( appMPlayer.subWindow.isFullScreen )
-//  {
-//  }
- wsFullScreen( &appMPlayer.subWindow ); 
+ static int sx,sy;
+ wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
+ if ( appMPlayer.subWindow.isFullScreen )
+  {
+   wsResizeWindow( &appMPlayer.subWindow,sx,sy );
+   wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
+   wsWindowDecoration( &appMPlayer.subWindow,appMPlayer.subWindow.Decorations );
+   appMPlayer.subWindow.isFullScreen=0;
+  }
+  else
+   {
+    sx=appMPlayer.subWindow.Width; sy=appMPlayer.subWindow.Height;
+    wsResizeWindow( &appMPlayer.subWindow,wsMaxX,wsMaxY );
+    wsMoveWindow( &appMPlayer.subWindow,0,0 );
+    wsWindowDecoration( &appMPlayer.subWindow,0 );
+    appMPlayer.subWindow.isFullScreen=1;
+   }
+ wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
  mplResize( 0,0,appMPlayer.subWindow.Width,appMPlayer.subWindow.Height );
 }
 
