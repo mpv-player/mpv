@@ -80,6 +80,9 @@ use_master
 mute
     Mute/unmute sound output.
 
+switch_audio
+    Cycle through the available audio tracks.
+
 [contrast|gamma|brightness|hue|saturation] <-100 - 100> [<abs>]
     Set/adjust video parameters.
 
