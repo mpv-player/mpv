@@ -1,8 +1,8 @@
-/* This is a null audio out plugin it doesnt't really do anything
-   useful but serves an example of how audio plugins work. It delays
-   the output signal by the nuber of samples set by aop_delay n
-   where n is the number of bytes.
- */
+/* Audio out plugin it doesnt't really do anything useful but serves
+   an example of how audio plugins work. It delays the output signal
+   by the nuber of samples set by delay=n where n is the number of
+   bytes.  
+*/
 #define PLUGIN
 
 #include <stdio.h>
@@ -32,7 +32,6 @@ typedef struct pl_delay_s
   int rate;         // local data rate
   int channels;     // local number of channels
   int format;       // local format
-
 } pl_delay_t;
 
 static pl_delay_t pl_delay={NULL,NULL,0,0,0,0};
@@ -42,9 +41,11 @@ static int control(int cmd,int arg){
   switch(cmd){
   case AOCONTROL_PLUGIN_SET_LEN:
     if(pl_delay.data) 
-      uninit();
+      free(pl_delay.data);
     pl_delay.len = ao_plugin_data.len;
     pl_delay.data=(void*)malloc(ao_plugin_data.len);
+    if(!pl_delay.data)
+      return CONTROL_ERROR;
     return CONTROL_OK;
   }
   return -1;
@@ -54,11 +55,12 @@ static int control(int cmd,int arg){
 // return: 1=success 0=fail
 static int init(){
   int i=0;
-  float time_delay; // The number of tsamples this plugin delays the output data
-  /* if the output format of any of the below parameters differs from
+  float time_delay; // The time in [s] this plugin delays the output data
+  
+  /* If the output format of any of the below parameters differs from
      what is give it should be changed. See ao_plugin init() */
   pl_delay.rate=ao_plugin_data.rate;
-  pl_delay.channels=ao_plugin_data.channels+1; //0=mono 1=stereo
+  pl_delay.channels=ao_plugin_data.channels; //1=mono 2=stereo
   pl_delay.format=ao_plugin_data.format;
 
   // Tell ao_plugin how much this plugin adds to the overall time delay
@@ -67,11 +69,13 @@ static int init(){
     time_delay/=2;
   ao_plugin_data.delay_fix+=time_delay;
 
+  // Create buffer for the delayed data
   pl_delay.delay=(void*)malloc(ao_plugin_cfg.pl_delay_len);
   if(!pl_delay.delay)
     return 0;
-  for(i=0;i<ao_plugin_cfg.pl_delay_len;i++)
-    ((char*)pl_delay.delay)[i]=0;
+  memset(pl_delay.delay, 0, ao_plugin_cfg.pl_delay_len);
+
+  // Print some cool remark of what the plugin does
   printf("[pl_delay] Output sound delayed by %i bytes\n",ao_plugin_cfg.pl_delay_len);
   return 1;
 }
@@ -113,6 +117,15 @@ static int play(){
   ao_plugin_data.data=pl_delay.data;
   return 1;
 }
+
+
+
+
+
+
+
+
+
 
 
 
