@@ -317,7 +317,6 @@ Use these options if autodetection fails:
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
   --with-reallibdir=DIR    RealPlayer DLL files in DIR
-  --with-xvmclib=PATH      path to adapter specific XvMCxxxxx.so (e.g. NVIDIA)
   --with-xvidlibdir=DIR    libxvidcore (XviD) in DIR 
   --with-xvidincdir=DIR    XviD header in DIR
   --with-dtslibdir=DIR     libdts library in DIR 
@@ -328,6 +327,7 @@ Use these options if autodetection fails:
   --with-bio2jack=DIR      path to libbio2jack.a (e.g. /home/user/bio2jack)
   --with-cdparanoiaincdir=DIR  cdparanoia headers in DIR
   --with-cdparanoialibdir=DIR  cdparanoia libraries (libcdda_*) in DIR
+  --with-xvmclib=NAME      name of adapter-specific library (e.g. XvMCNVIDIA)
   --with-termcaplib=NAME   name of library with termcap functionality
                            name should be given without leading "lib"
                            checks for "termcap" and "tinfo"
