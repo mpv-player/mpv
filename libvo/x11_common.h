@@ -37,3 +37,7 @@ int vo_x11_check_events(Display *mydisplay);
 
 void saver_off( Display * );
 void saver_on( Display * );
+
+#ifdef HAVE_XINERAMA
+void vo_x11_xinerama_move(Display *dsp, Window w);
+#endif

@@ -148,15 +148,15 @@ int vo_init( void )
   {
   XineramaScreenInfo *screens;
   int num_screens;
-  int disp_screen = mScreen;
+
+  mScreen = 0;
 
   screens = XineramaQueryScreens(mDisplay, &num_screens);
-  if (disp_screen > num_screens)
-    disp_screen = 0;
   if (! vo_screenwidth)
-    vo_screenwidth=screens[disp_screen].width;
+    vo_screenwidth=screens[mScreen].width;
   if (! vo_screenheight)
-    vo_screenheight=screens[disp_screen].height;
+    vo_screenheight=screens[mScreen].height;
+  XFree(screens);
   }
  else
 #endif
@@ -476,5 +476,23 @@ void saver_off(Display *mDisplay) {
 	XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
 		    // turning off screensaver
 }
+
+
+
+#ifdef HAVE_XINERAMA
+void vo_x11_xinerama_move(Display *dsp, Window w)
+{
+	XineramaScreenInfo *screens;
+	int num_screens;
+
+	if(XineramaIsActive(dsp))
+	{
+		screens = XineramaQueryScreens(dsp,&num_screens);
+		/* printf("XXXX Xinerama screen: x: %hd y: %hd\n",screens[mScreen].x_org,screens[mScreen].y_org); */
+		XMoveWindow(dsp,w,screens[mScreen].x_org,screens[mScreen].y_org);
+		XFree(screens);
+	}
+}
+#endif
 
 #endif

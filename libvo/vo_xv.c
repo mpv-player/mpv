@@ -205,6 +205,9 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
    XSetStandardProperties(mDisplay, mywindow, hello, hello, None, NULL, 0, &hint);
    if ( mFullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
    XMapWindow(mDisplay, mywindow);
+#ifdef HAVE_XINERAMA
+   vo_x11_xinerama_move(mDisplay,mywindow);
+#endif
    mygc = XCreateGC(mDisplay, mywindow, 0L, &xgcv);
    XFlush(mDisplay);
    XSync(mDisplay, False);
