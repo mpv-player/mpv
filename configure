@@ -2496,6 +2496,7 @@ else
   _def_dxr2='#undef HAVE_DXR2'
   _noaomodules="dxr2 $_noaomodules"
   _novomodules="dxr2 $_novomodules"
+  _inc_dxr2=""
   echores "no"
 fi
 
