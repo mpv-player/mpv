@@ -114,7 +114,7 @@ static LPDIRECTSOUNDBUFFER hdspribuf = NULL; ///primary direct sound buffer
 static LPDIRECTSOUNDBUFFER hdsbuf = NULL; ///secondary direct sound buffer (stream buffer)
 static int buffer_size = 0;               ///size in bytes of the direct sound buffer   
 static int write_offset = 0;              ///offset of the write cursor in the direct sound buffer
-static int min_free_space = 4096;         ///if the free space is below this value get_space() will return 0
+static int min_free_space = 0;            ///if the free space is below this value get_space() will return 0
 static int device_num = 0;                ///wanted device number
 static GUID device;                       ///guid of the device 
 
@@ -481,6 +481,7 @@ static int init(int rate, int channels, int format, int flags)
 	dsbdesc.dwBufferBytes = ao_data.buffersize;
 	dsbdesc.lpwfxFormat = (WAVEFORMATEX *)&wformat;
 	buffer_size = dsbdesc.dwBufferBytes;
+	write_offset = 0;
 	ao_data.outburst = wformat.Format.nBlockAlign * 512;
 
 	// create primary buffer and set its format
@@ -546,11 +547,17 @@ static void audio_resume()
 
 /** 
 \brief close audio device
-\param immed stop playback immediately, currently not supported
+\param immed stop playback immediately
 */
 static void uninit(int immed)
 {
-	reset();
+	if(immed)reset();
+	else{
+		DWORD status;
+		IDirectSoundBuffer_Play(hdsbuf, 0, 0, 0);
+		while(!IDirectSoundBuffer_GetStatus(hdsbuf,&status) && (status&DSBSTATUS_PLAYING))
+			usec_sleep(20000);
+	}
 	DestroyBuffer();
 	UninitDirectSound();
 }
