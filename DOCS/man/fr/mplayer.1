@@ -1,4 +1,4 @@
-.\" synced with 1.731
+.\" synced with 1.732
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -5327,6 +5327,26 @@ pour les gens avec une oreille extrêmement bonne et un équipement en rapport.
 .IPs preset=help
 Affiche des options supplémentaires et des informations sur les
 paramètres de présélections.
+.RE
+.PD 1
+.
+.
+.SS toolame (\-toolameopts)
+.TP
+.B br=<0\-384>
+définit le bitrate (débit binaire) en kBit (CBR uniquement)
+.TP
+.B mode=<stereo  |  jstereo  |  mono  |  dual>
+(par défaut\ : mono pour de l'audio mono-canal, stéréo sinon)
+.TP
+.B psy=<0\-3>
+modèle psycho-acoustique (par défaut\ : 2)
+.TP
+.B errprot=<0 | 1>
+rajoute des informations de correction d'erreurs
+.TP
+.B debug=<0\-10>
+niveau de débogage
 .RE
 .PD 1
 .
