@@ -740,7 +740,7 @@ AAC (Advanced Audio Coding) - это кодек, иногда обнаруживаемый в MOV и MP4
 Если Вы используете gcc 3.2, который не может скомпилировать встроенный FAAD,
 или просто хотите использовать внешнюю библиотеку, скачаете её с 
 <ulink url="http://www.audiocoding.com/download.php">страницы скачивания</ulink>
-и укажите <filename>configure</filename> <option>--with-externalfaad</option>.
+и укажите <filename>configure</filename> <option>--with-external-faad</option>.
 Вам не нужен весь faad2, чтобы декодировать AAC файлы, достаточно libfaad.
 Вот как Вы можете её собрать:
 <screen>

@@ -736,7 +736,7 @@ Si vous utilisez gcc 3.2 qui ne peut pas compiler notre FAAD interne, ou si vous
 voulez utiliser une librairie externe pour d'autres raisons, téléchargez la
 librairie dpuis la
 <ulink url="http://www.audiocoding.com/download.php">page de téléchargements</ulink>
-et passez <option>--with-externalfaad</option> à <filename>configure</filename>.
+et passez <option>--with-external-faad</option> à <filename>configure</filename>.
 Vous n'avez pas besoin de tout faad2 pour décoder les fichiers AAC, libfaad suffit.
 Construisez comme ceci:
 <screen>
