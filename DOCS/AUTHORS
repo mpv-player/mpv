@@ -30,21 +30,23 @@ Gabucino:  <gabucino@k2.jozsef.kando.hu>
 - web design, docs
 - testing, (Open)DivX encoding, picture quality comparsions
 
+BERECZ Szabolcs: <szabi@inf.elte.hu>
+- config file and command line parser (coming soon)
+- mga_vid fixes, module option stc.
+
 Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 - LIRC support (see DOCS/LIRC)
 - DGA support in libvo
 
 Felix Bünemann: <Felix.Buenemann@gmx.de>
-- SDL driver
-
-BERECZ Szabolcs: <szabi@inf.elte.hu>
-- config file and command line parser (coming soon)
+- SDL driver fixes
 
 Main testers:
-  Gabucino
   Balazs Tibor (Tibcu)
   Sasi Peter (SaPe)
   Christoph H. Lampert
+  Dirk Vornheder
+  Attila Kinali
 
 ========================== The Codecs: ===================================
 
