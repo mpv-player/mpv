@@ -488,7 +488,7 @@ vorstellen).
 Ändert den Farbwert auf einen RGB-Wert deiner Wahl.
 0x000000 ist schwarz und ist weiß.
 Wird nur von folgenden Videoausgabetreibern unterstützt: cvidix, fbdev, 
-svga, vesa, winvidix, xmga, xvidix und xover.
+svga, vesa, winvidix, xmga, xvidix, xover und directx.
 .
 .TP
 .B \-nocolorkey
@@ -2213,7 +2213,9 @@ Wenn ein Prozentzeichen nach einem Argument verwendet wird, dann wird statt
 dessen die prozentuale Bildschirmbreite/\:-höhe verwendet.
 Auch das bei der X-Standardoption \-geometry verwendete Format wird
 unterstützt.
-Die Werte müssen ganze Zahlen sein.
+Falls ein externes Fenster mit der Option \-wid angegeben wird, so sind die
+Koordinaten x und y relativ zur linken oberen Ecke des Fensters und nicht zu
+der des Bildschirms.
 .br
 .I ANMERKUNG:
 Diese Option wird nur von x11-, xmga-, xv-, xvmc-, xvidix-,
@@ -3249,7 +3251,7 @@ Verfügbare Optionen sind folgende:
 .RE
 .RSs
 .IPs bug=<Wert>
-Umgehe Fehler (Bugs) des Encoders manuell:
+Umgehe Fehler (Bugs) des Encoders manuell.
 .RSss
 0: nichts
 .br
@@ -3282,7 +3284,7 @@ fourcc/\:version)
 fourcc/\:version)
 .REss
 .IPs debug=<Wert>
-Debugging:
+Zeige Debugging-Informationen an.
 .RSss
 .br
 0: deaktiviert
@@ -3314,7 +3316,7 @@ Debugging:
 0x1000: Fehler/\:Bugs
 .REss
 .IPs ec=<Wert>
-Verbergen von Fehlern:
+Setze zu verwendende Strategie zum Verbergen von Fehlern.
 .RSss
 1: Benutze einen starken Deblock-Filter bei beschädigten Makroblöcken (MBs).
 .br
@@ -3323,7 +3325,7 @@ Verbergen von Fehlern:
 3: alles (Standard)
 .REss
 .IPs er=<Wert>
-Fehlerbehandlung:
+Setze Strategie zur Fehlerbehandlung.
 .RSss
 .br
 0: deaktiviert
@@ -3374,7 +3376,7 @@ dann benutzt, falls die Breite des Videos größer oder gleich dem Wert <b> ist.
 .IPs "st=<Nummer> (nur bei MPEG2)"
 Überspringe oben die angegebene Anzahl von Makroblockreihen.
 .IPs vismv=<Wert>
-vismv:
+Visualisiere Motion-Vectors.
 .RSss
 .br
 0: deaktiviert
@@ -3801,6 +3803,30 @@ Differenz-Koeffizient (Standard: 2.5)
 .TP
 .B volnorm
 Maximiert die Lautstärke, ohne den Klang zu verzerren.
+.
+.TP
+.B ladspa=Datei:Label[:Kontrollen...]
+Lade ein LADSPA (Linux Audio Developer's Simple Plugin API) Plugin.
+Es können mehrere Filter gleichzeitig verwendet werden.
+.PD 0
+.RSs
+.IPs Datei\ 
+Gibt eine Bibliotheksdatei des LADSPA-Plugins an.
+Falls LADSPA_PATH gesetzt ist, wird nach der angegeben Datei gesucht.
+Ist es nicht gesetzt, muss der volle Pfadname angegeben werden.
+.IPs Label
+Gibt den Filter innerhalb der Bibliothek an.
+Manche Bibliotheken beinhalten nur einen Filter, andere aber enthalten mehrere.
+Angabe von 'help' zeigt alle verfügbaren Filter innerhalb der angegebenen
+Bibliothek, was die Benutzung von 'listplugins' des LADSPA SDK überflüssig
+macht.
+.IPs Kontrollen
+Kontrollen sind null oder mehr Fließkommawerte, die das Verhalten des
+geladenen Plugins bestimmen (zum Beispiel Verzögerung, Schwellenwert oder
+Verstärkung).
+Im ausführlichen Modus (füge \-v zur MPlayer-Kommandozeile hinzu) werden alle
+Kontrollen und ihre dazugehörigen Wertebereiche ausgegeben.
+Dies macht die Benutzung von 'analyseplugin' des LADSPA SDK überflüssig.
 .RE
 .PD 1
 .
