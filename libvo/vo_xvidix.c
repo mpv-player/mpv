@@ -405,7 +405,7 @@ static uint32_t query_format(uint32_t format)
 
 static void uninit(void)
 {
-    if ( vo_config_count ) return;
+    if ( !vo_config_count ) return;
     vidix_term();
 
     saver_on(mDisplay); /* screen saver back on */
