@@ -64,7 +64,9 @@ struct config conf[]={
 	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0},
         {"zoom", &softzoom, CONF_TYPE_FLAG, 0, 0, 1},
         {"nozoom", &softzoom, CONF_TYPE_FLAG, 0, 1, 0},
-        
+       
+        {"bpp", &user_bpp, CONF_TYPE_INT, CONF_RANGE, 0, 32},
+	
 	{"idx", &no_index, CONF_TYPE_FLAG, 0, 1, 0},
 	{"noidx", &no_index, CONF_TYPE_FLAG, 0, 0, 1},
 	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100},
