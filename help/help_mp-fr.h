@@ -1,4 +1,4 @@
-// sync'ed with help_mp-en.h 1.63
+// sync'ed with help_mp-en.h 1.65
 // Updates & fixes by pl <p_l@gmx.fr>
 // Original transation by Firebird <firebird@chez.com>
 
@@ -380,6 +380,9 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Browser de skins"
 #define MSGTR_MENU_Preferences "Préférences"
 #define MSGTR_MENU_Exit "Quitter ..."
+#define MSGTR_MENU_Mute "Silence"
+#define MSGTR_MENU_Original "Original"
+#define MSGTR_MENU_AspectRatio "Aspect (ratio)"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "Audio"
