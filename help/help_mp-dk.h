@@ -1,4 +1,5 @@
 // Translated by:  Anders Rune Jensen <anders@gnulinux.dk>
+// Sync'ed with help_mp-en.h 1.93.
 
 // ========================= MPlayer help ===========================
 
