@@ -28,6 +28,9 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 
+#include <registry.h>
+#include <wine/winreg.h>
+
 #include "guids.h"
 #include "interfaces.h"
 #include "DS_Filter.h"
@@ -38,6 +41,7 @@
 #include <default.h>
 
 #include "DS_VideoDec.h"
+
 
 using namespace std;
 extern "C" char* def_path;
@@ -213,29 +217,29 @@ extern "C" int DS_VideoDecoder_DecodeFrame(char* src, int size, int is_keyframe,
         m_bh.biSizeImage=size;
 
         IMediaSample* sample=0;
-        printf("GetBuffer... (m_pAll=%X) ",dsf->m_pAll);fflush(stdout);
+        //printf("GetBuffer... (m_pAll=%X) ",dsf->m_pAll);fflush(stdout);
 	dsf->m_pAll->vt->GetBuffer(dsf->m_pAll, &sample, 0, 0, 0);
-        printf("OK!\n");
+        //printf("OK!\n");
 	if(!sample)
 	{
 	    Debug cerr<<"ERROR: null sample"<<endl;
 	    return -1;
 	}
         char* ptr;
-        printf("GetPtr...");fflush(stdout);
+        //printf("GetPtr...");fflush(stdout);
 	sample->vt->GetPointer(sample, (BYTE **)&ptr);
-        printf("OK!\n");
+        //printf("OK!\n");
 	memcpy(ptr, src, size);
-        printf("memcpy OK!\n");
+        //printf("memcpy OK!\n");
 	sample->vt->SetActualDataLength(sample, size);
-        printf("SetActualDataLength OK!\n");
+        //printf("SetActualDataLength OK!\n");
         sample->vt->SetSyncPoint(sample, is_keyframe);
-        printf("SetSyncPoint OK!\n");
+        //printf("SetSyncPoint OK!\n");
 	sample->vt->SetPreroll(sample, !render);
 //    sample->vt->SetMediaType(sample, &m_sOurType);
         int result=dsf->m_pImp->vt->Receive(dsf->m_pImp, sample);
 	if(result)
-	    Debug printf("Error putting data into input pin %x\n", result);
+	    printf("Error putting data into input pin %x\n", result);
 
         sample->vt->Release((IUnknown*)sample);
 
@@ -382,4 +386,58 @@ extern "C" int DS_SetValue_DivX(char* name, int value){
         return -200;
 }
 
+extern "C" int DS_SetAttr_DivX(char* attribute, int value){
+    int result, status, newkey, count;
+        if(strcmp(attribute, "Quality")==0){
+	    char* keyname="SOFTWARE\\Microsoft\\Scrunch";
+    	    result=RegCreateKeyExA(HKEY_CURRENT_USER, keyname, 0, 0, 0, 0, 0,	   		&newkey, &status);
+            if(result!=0)
+	    {
+	        printf("VideoDecoder::SetExtAttr: registry failure\n");
+	        return -1;
+	    }    
+	    result=RegSetValueExA(newkey, "Current Post Process Mode", 0, REG_DWORD, &value, 4);
+            if(result!=0)
+	    {
+	        printf("VideoDecoder::SetExtAttr: error writing value\n");
+	        return -1;
+	    }    
+	    value=-1;
+	    result=RegSetValueExA(newkey, "Force Post Process Mode", 0, REG_DWORD, &value, 4);
+            if(result!=0)
+	    {
+		printf("VideoDecoder::SetExtAttr: error writing value\n");
+	    	return -1;
+	    }    
+   	    RegCloseKey(newkey);
+   	    return 0;
+	}   	
+
+        if(
+	(strcmp(attribute, "Saturation")==0) ||
+	(strcmp(attribute, "Hue")==0) ||
+	(strcmp(attribute, "Contrast")==0) ||
+	(strcmp(attribute, "Brightness")==0)
+	)
+        {
+	    char* keyname="SOFTWARE\\Microsoft\\Scrunch\\Video";
+    	    result=RegCreateKeyExA(HKEY_CURRENT_USER, keyname, 0, 0, 0, 0, 0,	   		&newkey, &status);
+            if(result!=0)
+	    {
+	        printf("VideoDecoder::SetExtAttr: registry failure\n");
+	        return -1;
+	    }    
+	    result=RegSetValueExA(newkey, attribute, 0, REG_DWORD, &value, 4);
+            if(result!=0)
+	    {
+	        printf("VideoDecoder::SetExtAttr: error writing value\n");
+	        return -1;
+	    }    
+   	    RegCloseKey(newkey);
+   	    return 0;
+	}   	
+
+        printf("Unknown attribute!\n");
+        return -200;
+}
 
