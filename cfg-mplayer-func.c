@@ -5,5 +5,5 @@
 int cfg_func_help(struct config *conf)
 {
 	printf("%s", help_text);
-	exit(0);
+	exit(1);
 }

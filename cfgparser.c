@@ -80,13 +80,15 @@ static int read_option(char *opt, char *param)
 				    !strcasecmp(param, "i") ||
 				    !strcmp(param, "1"))
 					*((int *) config[i].p) = config[i].max;
-				if (!strcasecmp(param, "no") ||
+				else if (!strcasecmp(param, "no") ||
 				    !strcasecmp(param, "nein") ||
 				    !strcasecmp(param, "nicht") ||
 				    !strcasecmp(param, "nem") ||
 				    !strcasecmp(param, "n") ||
 				    !strcmp(param, "0"))
 					*((int *) config[i].p) = config[i].min;
+				else
+					return ERR_OUT_OF_RANGE;
 				need_param = 1;
 			} else {	/* parser_mode == COMMAND_LINE */
 				*((int *) config[i].p) = config[i].max;
@@ -146,18 +148,17 @@ static int read_option(char *opt, char *param)
 			*((char **) config[i].p) = strdup(param);
 			need_param = 1;
 			break;
+		case CONF_TYPE_FUNC_PARAM:
+			if (param == NULL)
+				return ERR_MISSING_PARAM;
+			if ((((cfg_func_param_t) config[i].p)(config + i, param)) < 0)
+				return ERR_FUNC_ERR;
+			need_param = 1;
+			break;
 		case CONF_TYPE_FUNC:
-			if (config[i].flags & CONF_FUNC_PARAM) {
-				if (param == NULL)
-					return ERR_MISSING_PARAM;
-				if ((((cfg_func_param_t) config[i].p)(config + i, param)) < 0)
-					return ERR_FUNC_ERR;
-				need_param = 1;
-			} else {
-				if ((((cfg_func_t) config[i].p)(config + i)) < 0)
-					return ERR_FUNC_ERR;
-				need_param = 0;
-			}
+			if ((((cfg_func_t) config[i].p)(config + i)) < 0)
+				return ERR_FUNC_ERR;
+			need_param = 0;
 			break;
 		default:
 			printf("picsaba\n");
