@@ -164,7 +164,7 @@ int af_lencalc(frac_t mul, af_data_t* data);
    filter doesn't operate on the incoming buffer this macro must be
    called to ensure the buffer is big enough. */
 #define RESIZE_LOCAL_BUFFER(a,d)\
-((af->data->len < af_lencalc(af->mul,data))?af_resize_local_buffer(af,data):AF_OK)
+((a->data->len < af_lencalc(a->mul,d))?af_resize_local_buffer(a,d):AF_OK)
 
 #ifndef min
 #define min(a,b)(((a)>(b))?(b):(a))
