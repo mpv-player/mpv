@@ -158,6 +158,7 @@ typedef struct {
 
 int mov_check_file(demuxer_t* demuxer){
     int flags=0;
+    int no=0;
     mov_priv_t* priv=malloc(sizeof(mov_priv_t));
     
     mp_msg(MSGT_DEMUX,MSGL_V,"Checking for MOV\n");
@@ -187,11 +188,14 @@ int mov_check_file(demuxer_t* demuxer){
 	  /* unused, if you edit a mov, you can use space provided by free atoms (redefining it) */
 	  break;
 	case MOV_FOURCC('w','i','d','e'):
+	  break;
 	default:
+	  if(no==0) return 0; // first chunk is bad!
 	  id = bswap_32(id);
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
 	}
 	if(!stream_skip(demuxer->stream,len-8)) break;
+	++no;
     }
     
     if(flags==1)
