@@ -5,30 +5,23 @@
 
 #include "audio_out.h"
 
-#ifdef	USE_OSS_AUDIO
 #include <sys/soundcard.h> /* AFMT_* */
-#endif
 
-
-#ifndef	AFMT_U8
-#       define AFMT_MU_LAW              0x00000001
-#       define AFMT_A_LAW               0x00000002
-#       define AFMT_IMA_ADPCM           0x00000004
-#       define AFMT_U8                  0x00000008
-#       define AFMT_S16_LE              0x00000010      /* Little endian signed
-16*/
-#       define AFMT_S16_BE              0x00000020      /* Big endian signed 16
-*/
-#       define AFMT_S8                  0x00000040
-#       define AFMT_U16_LE              0x00000080      /* Little endian U16 */
-#       define AFMT_U16_BE              0x00000100      /* Big endian U16 */
-#       define AFMT_MPEG                0x00000200      /* MPEG (2) audio */
-
+#ifndef SOUNCARD_H
+# define AFMT_MU_LAW              0x00000001
+# define AFMT_A_LAW               0x00000002
+# define AFMT_IMA_ADPCM           0x00000004
+# define AFMT_U8                  0x00000008
+# define AFMT_S16_LE              0x00000010      /* Little endian signed 16*/
+# define AFMT_S16_BE              0x00000020      /* Big endian signed 16 */
+# define AFMT_S8                  0x00000040
+# define AFMT_U16_LE              0x00000080      /* Little endian U16 */
+# define AFMT_U16_BE              0x00000100      /* Big endian U16 */
+# define AFMT_MPEG                0x00000200      /* MPEG (2) audio */
 /* 32 bit formats (MSB aligned) formats */
-#       define AFMT_S32_LE              0x00001000
-#       define AFMT_S32_BE              0x00002000
+# define AFMT_S32_LE              0x00001000
+# define AFMT_S32_BE              0x00002000
 #endif
-
 
 // there are some globals:
 int ao_samplerate=0;
@@ -46,14 +39,12 @@ extern ao_functions_t audio_out_null;
 #ifdef HAVE_ALSA5
  extern ao_functions_t audio_out_alsa5;
 #endif
-/*
 #ifdef HAVE_ALSA9
  extern ao_functions_t audio_out_alsa9;
 #endif
 #ifdef HAVE_ESD
  extern ao_functions_t audio_out_esd;
 #endif
-*/
 #ifdef HAVE_SDL
 extern ao_functions_t audio_out_sdl;
 #endif
@@ -70,14 +61,12 @@ ao_functions_t* audio_out_drivers[] =
 #ifdef HAVE_ALSA5
 	&audio_out_alsa5,
 #endif
-/*
 #ifdef HAVE_ALSA9
 	&audio_out_alsa9,
 #endif
 #ifdef HAVE_ESD
 	&audio_out_esd,
 #endif
-*/
 #ifdef HAVE_SDL
         &audio_out_sdl,
 #endif
@@ -91,18 +80,29 @@ char *audio_out_format_name(int format)
 {
     switch (format)
     {
+/*
+	case AFMT_MU_LAW:
+	case AFMT_A_LAW:
+	case AFMT_IMA_ADPCM:
+*/
 	case AFMT_S8:
-	    return("signed 8-bit");
+	    return("Signed 8-bit");
 	case AFMT_U8:
-	    return("unsigned 8-bit");
+	    return("Unsigned 8-bit");
 	case AFMT_U16_LE:
-	    return("unsigned 16-bit (little-endian)");
+	    return("Unsigned 16-bit (Little-Endian)");
 	case AFMT_U16_BE: 
-	    return("unsigned 16-bit (big-endian)");
+	    return("Unsigned 16-bit (Big-Endian)");
 	case AFMT_S16_LE:
-	    return("signed 16-bit (little-endian)");
+	    return("Signed 16-bit (Little-Endian)");
 	case AFMT_S16_BE:
-	    return("unsigned 16-bit (big-endian)");
+	    return("Unsigned 16-bit (Big-Endian)");
+	case AFMT_MPEG:
+	    return("MPEG (2) audio");
+	case AFMT_S32_LE:
+	    return("Signed 32-bit (Little-Endian");
+	case AFMT_S32_BE:
+	    return("Signed 32-bit (Big-Endian");
     }
-    return("unknown");
+    return("Unknown");
 }
