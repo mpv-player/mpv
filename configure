@@ -1009,7 +1009,7 @@ fi
 
 #checking for gawk
 if test "$_vidix" = yes ; then
-_gawk_ver=`echo '' | awk --version 2>&1 | sed -n 's/^.*wk \([^A-Za-z ]*[0-9.]*\).*$/\1/p'`
+_gawk_ver=`echo '' | awk -W version 2>&1 | sed -n 's/^.*wk \([^A-Za-z ]*[0-9.]*\).*$/\1/p'`
   case $_gawk_ver in
     '')
       _gawk_ver="v. ?.??, bad"
