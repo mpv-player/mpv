@@ -155,7 +155,6 @@ typedef struct
  XGCValues            wGCV;
  unsigned long        WindowMask;
  XVisualInfo          VisualInfo;
- XWindowAttributes    Attribs;
  XSetWindowAttributes WindowAttrib;
  XSizeHints           SizeHint;
  XWMHints             WMHints;

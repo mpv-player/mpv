@@ -262,7 +262,6 @@ wsXDNDInitialize();
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[ws] Display name: %s => %s display.\n",dispname,localdisp?"local":"REMOTE");
  if (!localdisp) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Remote display, disabling XMITSHM\n");
 }
-
  if ( !XShmQueryExtension( wsDisplay ) )
   {
    mp_msg( MSGT_GPLAYER,MSGL_ERR,"[ws] sorry, your system is not supported X shared memory extension.\n" );
@@ -367,6 +366,8 @@ Window               LeaderWindow;
 
 void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,unsigned char D,char * label )
 {
+ int depth;
+
  win->Property=D;
  if ( D & wsShowFrame ) win->Decorations=1;
  wsHGC=DefaultGC( wsDisplay,wsScreen );
@@ -399,13 +400,13 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  win->wsCursorPixmap=XCreateBitmapFromData( wsDisplay,wsRootWin,win->wsCursorData,1,1 );
  if ( !(cV & wsShowMouseCursor) ) win->wsCursor=XCreatePixmapCursor( wsDisplay,win->wsCursorPixmap,win->wsCursorPixmap,&win->wsColor,&win->wsColor,0,0 );
 
- XGetWindowAttributes( wsDisplay,wsRootWin,&win->Attribs );
- if ( win->Attribs.depth < 15 )
+ depth = vo_find_depth_from_visuals( wsDisplay,wsScreen,NULL );
+ if ( depth < 15 )
   {
    mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] sorry, this color depth is not enough.\n" );
    exit( 0 );
   }
- XMatchVisualInfo( wsDisplay,wsScreen,win->Attribs.depth,TrueColor,&win->VisualInfo );
+ XMatchVisualInfo( wsDisplay,wsScreen,depth,TrueColor,&win->VisualInfo );
 
 // ---
  win->AtomLeaderClient=XInternAtom( wsDisplay,"WM_CLIENT_LEADER",False );
@@ -1139,24 +1140,40 @@ void wsVisibleMouse( wsTWindow * win,int m )
 
 int wsGetDepthOnScreen( void )
 {
- int                 bpp,ibpp;
- XImage            * mXImage;
- XWindowAttributes   attribs;
+ int depth;
+ XImage * mXImage;
+ Visual * visual;
 
- mXImage=XGetImage( wsDisplay,wsRootWin,0,0,1,1,AllPlanes,ZPixmap );
- bpp=mXImage->bits_per_pixel;
+ if( (depth = vo_find_depth_from_visuals( wsDisplay,wsScreen,&visual )) > 0 )
+  {
+   mXImage = XCreateImage( wsDisplay,visual,depth,ZPixmap,0,NULL,
+			   1,1,32,0 );
+   wsDepthOnScreen = mXImage->bits_per_pixel;
+   wsRedMask=mXImage->red_mask;
+   wsGreenMask=mXImage->green_mask;
+   wsBlueMask=mXImage->blue_mask;
+   XDestroyImage( mXImage );
+  }
+ else
+  {
+   int                 bpp,ibpp;
+   XWindowAttributes   attribs;
 
- XGetWindowAttributes( wsDisplay,wsRootWin,&attribs );
- ibpp=attribs.depth;
- mXImage=XGetImage( wsDisplay,wsRootWin,0,0,1,1,AllPlanes,ZPixmap );
- bpp=mXImage->bits_per_pixel;
- if ( ( ibpp + 7 ) / 8 != ( bpp + 7 ) / 8 ) ibpp=bpp;
- wsDepthOnScreen=ibpp;
- wsRedMask=mXImage->red_mask;
- wsGreenMask=mXImage->green_mask;
- wsBlueMask=mXImage->blue_mask;
- XDestroyImage( mXImage );
- return ibpp;
+   mXImage=XGetImage( wsDisplay,wsRootWin,0,0,1,1,AllPlanes,ZPixmap );
+   bpp=mXImage->bits_per_pixel;
+
+   XGetWindowAttributes( wsDisplay,wsRootWin,&attribs );
+   ibpp=attribs.depth;
+   mXImage=XGetImage( wsDisplay,wsRootWin,0,0,1,1,AllPlanes,ZPixmap );
+   bpp=mXImage->bits_per_pixel;
+   if ( ( ibpp + 7 ) / 8 != ( bpp + 7 ) / 8 ) ibpp=bpp;
+   wsDepthOnScreen=ibpp;
+   wsRedMask=mXImage->red_mask;
+   wsGreenMask=mXImage->green_mask;
+   wsBlueMask=mXImage->blue_mask;
+   XDestroyImage( mXImage );
+  }
+ return wsDepthOnScreen;
 }
 
 void wsXDone( void )
@@ -1195,7 +1212,7 @@ void wsCreateImage( wsTWindow * win,int Width,int Height )
   {
    CompletionType=XShmGetEventBase( wsDisplay ) + ShmCompletion;
    win->xImage=XShmCreateImage( wsDisplay,win->VisualInfo.visual,
-                   win->Attribs.depth,ZPixmap,NULL,&win->Shminfo,Width,Height );
+                   win->VisualInfo.depth,ZPixmap,NULL,&win->Shminfo,Width,Height );
    if ( win->xImage == NULL )
     {
      mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] shared memory extension error.\n" );
@@ -1224,7 +1241,7 @@ void wsCreateImage( wsTWindow * win,int Width,int Height )
   }
   else
    {
-    win->xImage=XCreateImage( wsDisplay,win->VisualInfo.visual,win->Attribs.depth,
+    win->xImage=XCreateImage( wsDisplay,win->VisualInfo.visual,win->VisualInfo.depth,
                               ZPixmap,0,0,Width,Height,
                               (wsDepthOnScreen == 3) ? 32 : wsDepthOnScreen,
                               0 );
