@@ -4299,7 +4299,7 @@ if test "$_xanim" = auto ; then
     echores "no (dynamic loader support needed)"
   fi
 else
-  echores "$_xanim"
+  echores "$_xanim (using $_xanimlibdir)"
 fi
 if test "$_xanim" = yes ; then
   _def_xanim='#define USE_XANIM 1'
@@ -4343,7 +4343,7 @@ if test "$_real" = auto ; then
     echores "no (dynamic loader support needed)"
   fi
 else
-  echores "$_real"
+  echores "$_real (using $_reallibdir)"
 fi
 if test "$_real" = yes ; then
   _def_real='#define USE_REALCODECS 1'
