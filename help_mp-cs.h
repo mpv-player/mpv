@@ -328,6 +328,12 @@ static char help_text[]=
 #define MSGTR_EQU_Bass "Basový"
 #define MSGTR_EQU_All "V¹e"
 
+// --- playlist
+#define MSGTR_PLAYLIST_Path "Cesta"
+#define MSGTR_PLAYLIST_Selected "Vybrané soubory"
+#define MSGTR_PLAYLIST_Files "Soubory"
+#define MSGTR_PLAYLIST_DirectoryTree "Adresáøe"
+
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatální chyba ..."
 #define MSGTR_MSGBOX_LABEL_Error "Chyba ..."
