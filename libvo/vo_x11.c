@@ -108,6 +108,7 @@ static void DeInstallXErrorHandler()
 static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_format;
+static uint32_t out_format=0;
 
 static void check_events(){
   vo_x11_check_events(mDisplay);
@@ -132,9 +133,113 @@ static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsign
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 }
 
-static unsigned int scale_srcW=0;
-static unsigned int scale_srcH=0;
+static SwsContext *swsContext=NULL;
+static int useSws=0; 
+extern int sws_flags;
 
+static XVisualInfo vinfo;
+
+static void getMyXImage()
+{
+#ifdef HAVE_SHM
+ if ( mLocalDisplay && XShmQueryExtension( mDisplay ) ) Shmem_Flag=1;
+  else
+   {
+    Shmem_Flag=0;
+    if ( !Quiet_Flag ) printf( "Shared memory not supported\nReverting to normal Xlib\n" );
+   }
+ if ( Shmem_Flag ) CompletionType=XShmGetEventBase( mDisplay ) + ShmCompletion;
+
+ InstallXErrorHandler();
+
+ if ( Shmem_Flag )
+  {
+   myximage=XShmCreateImage( mDisplay,vinfo.visual,depth,ZPixmap,NULL,&Shminfo[0],image_width,image_height );
+   if ( myximage == NULL )
+    {
+     if ( myximage != NULL ) XDestroyImage( myximage );
+     if ( !Quiet_Flag ) printf( "Shared memory error,disabling ( Ximage error )\n" );
+     goto shmemerror;
+    }
+   Shminfo[0].shmid=shmget( IPC_PRIVATE,
+   myximage->bytes_per_line * myximage->height ,
+   IPC_CREAT | 0777 );
+   if ( Shminfo[0].shmid < 0 )
+   {
+    XDestroyImage( myximage );
+    if ( !Quiet_Flag )
+     {
+      printf( "%s\n",strerror( errno ) );
+      perror( strerror( errno ) );
+      printf( "Shared memory error,disabling ( seg id error )\n" );
+     }
+    goto shmemerror;
+   }
+   Shminfo[0].shmaddr=( char * ) shmat( Shminfo[0].shmid,0,0 );
+
+   if ( Shminfo[0].shmaddr == ( ( char * ) -1 ) )
+   {
+    XDestroyImage( myximage );
+    if ( Shminfo[0].shmaddr != ( ( char * ) -1 ) ) shmdt( Shminfo[0].shmaddr );
+    if ( !Quiet_Flag ) printf( "Shared memory error,disabling ( address error )\n" );
+    goto shmemerror;
+   }
+   myximage->data=Shminfo[0].shmaddr;
+   ImageData=( unsigned char * ) myximage->data;
+   Shminfo[0].readOnly=False;
+   XShmAttach( mDisplay,&Shminfo[0] );
+
+   XSync( mDisplay,False );
+
+   if ( gXErrorFlag )
+   {
+    XDestroyImage( myximage );
+    shmdt( Shminfo[0].shmaddr );
+    if ( !Quiet_Flag ) printf( "Shared memory error,disabling.\n" );
+    gXErrorFlag=0;
+    goto shmemerror;
+   }
+   else
+    shmctl( Shminfo[0].shmid,IPC_RMID,0 );
+
+   {
+     static int firstTime=1;
+     if ( !Quiet_Flag && firstTime){
+       printf( "Sharing memory.\n" );
+       firstTime=0;
+     } 
+   }
+ }
+ else
+  {
+   shmemerror:
+   Shmem_Flag=0;
+#endif
+   myximage=XGetImage( mDisplay,mywindow,0,0,
+   image_width,image_height,AllPlanes,ZPixmap );
+   ImageData=myximage->data;
+#ifdef HAVE_SHM
+  }
+
+  DeInstallXErrorHandler();
+#endif
+}
+
+static void freeMyXImage()
+{
+#ifdef HAVE_SHM
+ if ( Shmem_Flag )
+  {
+   XShmDetach( mDisplay,&Shminfo[0] );
+   XDestroyImage( myximage );
+   shmdt( Shminfo[0].shmaddr );
+  }
+  else
+#endif
+  {
+   XDestroyImage( myximage );
+  }
+}
 
 static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d_height,uint32_t flags,char *title,uint32_t format )
 {
@@ -146,7 +251,6 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  char *hello=( title == NULL ) ? "X11 render" : title;
 // char *name=":0.0";
  XSizeHints hint;
- XVisualInfo vinfo;
  XEvent xev;
  XGCValues xgcv;
  Colormap theCmap;
@@ -176,12 +280,10 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
          image_width=vo_screenwidth;
          image_height=vo_screenheight;
      } else {
-         image_width=d_width&(~7);
+         image_width=d_width;
          image_height=d_height;
      }
-     scale_srcW=width;
-     scale_srcH=height;
-     SwScale_Init();
+     useSws=1; // we cannot initialize the swScaler here because we dont know the bpp (or do we?)
  }
 
 #ifdef HAVE_NEW_GUI
@@ -320,94 +422,25 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 #endif
    }
 
-#ifdef HAVE_SHM
- if ( mLocalDisplay && XShmQueryExtension( mDisplay ) ) Shmem_Flag=1;
-  else
-   {
-    Shmem_Flag=0;
-    if ( !Quiet_Flag ) printf( "Shared memory not supported\nReverting to normal Xlib\n" );
-   }
- if ( Shmem_Flag ) CompletionType=XShmGetEventBase( mDisplay ) + ShmCompletion;
-
- InstallXErrorHandler();
-
- if ( Shmem_Flag )
-  {
-   myximage=XShmCreateImage( mDisplay,vinfo.visual,depth,ZPixmap,NULL,&Shminfo[0],image_width,image_height );
-   if ( myximage == NULL )
-    {
-     if ( myximage != NULL ) XDestroyImage( myximage );
-     if ( !Quiet_Flag ) printf( "Shared memory error,disabling ( Ximage error )\n" );
-     goto shmemerror;
-    }
-   Shminfo[0].shmid=shmget( IPC_PRIVATE,
-   myximage->bytes_per_line * myximage->height ,
-   IPC_CREAT | 0777 );
-   if ( Shminfo[0].shmid < 0 )
-   {
-    XDestroyImage( myximage );
-    if ( !Quiet_Flag )
-     {
-      printf( "%s\n",strerror( errno ) );
-      perror( strerror( errno ) );
-      printf( "Shared memory error,disabling ( seg id error )\n" );
-     }
-    goto shmemerror;
-   }
-   Shminfo[0].shmaddr=( char * ) shmat( Shminfo[0].shmid,0,0 );
-
-   if ( Shminfo[0].shmaddr == ( ( char * ) -1 ) )
-   {
-    XDestroyImage( myximage );
-    if ( Shminfo[0].shmaddr != ( ( char * ) -1 ) ) shmdt( Shminfo[0].shmaddr );
-    if ( !Quiet_Flag ) printf( "Shared memory error,disabling ( address error )\n" );
-    goto shmemerror;
-   }
-   myximage->data=Shminfo[0].shmaddr;
-   ImageData=( unsigned char * ) myximage->data;
-   Shminfo[0].readOnly=False;
-   XShmAttach( mDisplay,&Shminfo[0] );
-
-   XSync( mDisplay,False );
-
-   if ( gXErrorFlag )
-   {
-    XDestroyImage( myximage );
-    shmdt( Shminfo[0].shmaddr );
-    if ( !Quiet_Flag ) printf( "Shared memory error,disabling.\n" );
-    gXErrorFlag=0;
-    goto shmemerror;
-   }
-   else
-    shmctl( Shminfo[0].shmid,IPC_RMID,0 );
-
-   if ( !Quiet_Flag ) printf( "Sharing memory.\n" );
- }
- else
-  {
-   shmemerror:
-   Shmem_Flag=0;
-#endif
-   myximage=XGetImage( mDisplay,mywindow,0,0,
-   image_width,image_height,AllPlanes,ZPixmap );
-   ImageData=myximage->data;
-#ifdef HAVE_SHM
-  }
-
-  DeInstallXErrorHandler();
-#endif
+   getMyXImage();
 
   switch ((bpp=myximage->bits_per_pixel)){
-         case 24: draw_alpha_fnc=draw_alpha_24; break;
-         case 32: draw_alpha_fnc=draw_alpha_32; break;
+         case 24: draw_alpha_fnc=draw_alpha_24; 
+	 	  out_format= IMGFMT_BGR24; break;
+         case 32: draw_alpha_fnc=draw_alpha_32;
+	 	  out_format= IMGFMT_BGR32; break;
          case 15:
-         case 16: if (depth==15)
+         case 16: if (depth==15){
 	 	     draw_alpha_fnc=draw_alpha_15;
-       		  else
+	 	     out_format= IMGFMT_BGR15;
+       		  }else{
 	 	     draw_alpha_fnc=draw_alpha_16;
-          	  break;
+	 	     out_format= IMGFMT_BGR16;
+          	  }break;
    	default:  draw_alpha_fnc=draw_alpha_null;
- }
+  }
+
+  if(useSws) swsContext= getSwsContextFromCmdLine(width, height, format, image_width, image_height, out_format );
 
 //  printf( "X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
@@ -443,14 +476,9 @@ static const vo_info_t* get_info( void )
 static void Terminate_Display_Process( void )
 {
  getchar();      /* wait for enter to remove window */
-#ifdef HAVE_SHM
- if ( Shmem_Flag )
-  {
-   XShmDetach( mDisplay,&Shminfo[0] );
-   XDestroyImage( myximage );
-   shmdt( Shminfo[0].shmaddr );
-  }
-#endif
+ 
+ freeMyXImage();
+ 
  XDestroyWindow( mDisplay,mywindow );
  XCloseDisplay( mDisplay );
 }
@@ -487,21 +515,37 @@ static void flip_page( void ){
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
- /* hack: swap planes for I420 ;) -- alex */
- if ((image_format == IMGFMT_IYUV) || (image_format == IMGFMT_I420))
- {
-    uint8_t *src_i420[3];
+if(swsContext){
+  uint8_t *dst[3];
+  int dstStride[3];
+  int newW= vo_dwidth&(~1);  // the swscaler should be able to handle odd sizes but something else doesnt seem to like it
+  int newH= vo_dheight&(~1);
     
-    src_i420[0] = src[0];
-    src_i420[1] = src[2];
-    src_i420[2] = src[1];
-    src = src_i420;
- }
-if(scale_srcW){
- uint8_t *dst[3] = {ImageData, NULL, NULL};
-    SwScale_YV12slice(src,stride,y,h,
-                         dst, image_width*((bpp+7)/8), ( depth == 24 ) ? bpp : depth,
-			 scale_srcW, scale_srcH, image_width, image_height);
+  if(newH==0) newH=2;
+  if(sws_flags==0) newW&= (~31); // not needed but, if the user wants the FAST_BILINEAR SCALER, then its needed
+  if(newW<8) newW=8;
+  
+  if(image_width!=newW || image_height!=newH)
+  {
+    SwsContext *oldContext= swsContext;
+    image_width= newW;
+    image_height= newH;
+    
+    freeMyXImage();
+    getMyXImage();
+
+    swsContext= getSwsContextFromCmdLine(oldContext->srcW, oldContext->srcH, oldContext->srcFormat, 
+    					 image_width, image_height, out_format);
+    freeSwsContext(oldContext);
+  }
+  dstStride[0]=image_width*((bpp+7)/8);
+  dstStride[1]=
+  dstStride[2]=(image_width*((bpp+7)/8)+1)>>1;
+  dst[0]=ImageData;
+  dst[1]=
+  dst[2]=NULL;
+
+  swScale(swsContext,src,stride,y,h,dst, dstStride);
 } else {
  uint8_t *dst=ImageData + ( image_width * y + x ) * ( bpp/8 );
  yuv2rgb( dst,src[0],src[1],src[2],w,h,image_width*( bpp/8 ),stride[0],stride[1] );
