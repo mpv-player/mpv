@@ -389,11 +389,11 @@ long VFWAPIV ICUniversalEx(HIC hic,int command,LPBITMAPINFOHEADER lpbiFormat,LPB
 
 #define ICDecompressBeginEx(hic, lpbiInput, lpbiOutput) 	\
     ICUniversalEx(						\
-    	hic, ICM_DECOMPRESSEX_BEGIN, (long)(void*)(lpbiInput),	\
-	(long)(void*)(lpbiOutput)				\
+    	hic, ICM_DECOMPRESSEX_BEGIN, (lpbiInput),		\
+	(lpbiOutput)						\
     )
 
-#define ICDecompressQuery(hic, lpbiInput, lpbiOutput) 	\
+#define ICDecompressQuery(hic, lpbiInput, lpbiOutput)	 	\
     ICSendMessage(						\
     	hic,ICM_DECOMPRESS_QUERY, (long)(void*)(lpbiInput),	\
 	(long) (void*)(lpbiOutput)				\
@@ -401,8 +401,8 @@ long VFWAPIV ICUniversalEx(HIC hic,int command,LPBITMAPINFOHEADER lpbiFormat,LPB
 
 #define ICDecompressQueryEx(hic, lpbiInput, lpbiOutput) 	\
     ICUniversalEx(						\
-    	hic,ICM_DECOMPRESSEX_QUERY, (long)(void*)(lpbiInput),	\
-	(long) (void*)(lpbiOutput)				\
+    	hic,ICM_DECOMPRESSEX_QUERY, (lpbiInput),		\
+	(lpbiOutput)						\
     )
 
 #define ICDecompressGetFormat(hic, lpbiInput, lpbiOutput)		\
