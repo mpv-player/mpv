@@ -181,6 +181,8 @@ float audio_preload=0.3;
     exit(0);  // From unknown reason a hangup occurs here :((((((
   }
 
+  dvd_title=2;
+
   if(argc>1)
     stream=open_stream(argv[1],0,&file_format);
   else
@@ -430,6 +432,7 @@ case VCODEC_DIVX4:
 }
 
 #if 1
+if(sh_audio)
 switch(mux_a->codec){
 case ACODEC_VBRMP3:
 
@@ -534,6 +537,7 @@ if(sh_audio){
 
     sh_video->timer+=frame_time;
 
+if(sh_audio){
     if(pts_from_bps){
         unsigned int samples=(sh_audio->audio.dwSampleSize)?
           ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
@@ -548,6 +552,8 @@ if(sh_audio){
       a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
     }
     v_pts=d_video->pts;
+
+}
 
     mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%%  %d%%\r",
 	  a_pts,v_pts,a_pts-v_pts,c_total,
