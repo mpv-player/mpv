@@ -269,6 +269,7 @@ static uint32_t mga_top_reserved = 0;	// reserved space for console font (matrox
 
 static int mga_brightness = 0;	// initial brightness
 static int mga_contrast = 0;	// initial contrast
+static int mga_number = 0; // which device/card is taken
 
 //static int mga_force_memsize = 0;
 
@@ -276,6 +277,8 @@ MODULE_PARM(mga_ram_size, "i");
 MODULE_PARM(mga_top_reserved, "i");
 MODULE_PARM(mga_brightness, "i");
 MODULE_PARM(mga_contrast, "i");
+MODULE_PARM(mga_number, "i");
+MODULE_PARM_DESC(mga_number, "selects matrox device/card (0=first)");
 
 static struct pci_dev *pci_dev;
 
@@ -1306,32 +1309,48 @@ static int mga_vid_find_card(void)
 {
 	struct pci_dev *dev = NULL;
 	unsigned int card_option;
+	char *mga_dev_name;
+	int num_found = 0;
 
-	if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G550, NULL)))
+	while((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_ANY_ID, dev)))
 	{
-		is_g400 = 1;
-		printk(KERN_INFO "mga_vid: Found MGA G550\n");
+		mga_dev_name = "";
+		num_found++;
+		switch(dev->device) {
+		case PCI_DEVICE_ID_MATROX_G550:
+			is_g400 = 1;
+			mga_dev_name = "MGA G550";
+			break;
+		case PCI_DEVICE_ID_MATROX_G400:
+			is_g400 = 1;
+			mga_dev_name = "MGA G400/G450";
+			break;
+		case PCI_DEVICE_ID_MATROX_G200_AGP:
+			is_g400 = 0;
+			mga_dev_name = "MGA G200 AGP";
+			break;
+		case PCI_DEVICE_ID_MATROX_G200_PCI:
+			is_g400 = 0;
+			mga_dev_name = "MGA G200";
+			break;
+		default:
+			num_found--;
+			printk(KERN_INFO "mga_vid: ignoring matrox device (%d) at %s [%s]\n", dev->device, dev->slot_name, dev->name);
+			break;
+		}
+		if(num_found == mga_number+1)
+			break;
 	}
-	else if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G400, NULL)))
+ 	
+	if(!dev)
 	{
-		is_g400 = 1;
-		printk(KERN_INFO "mga_vid: Found MGA G400/G450\n");
-	}
-	else if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G200_AGP, NULL)))
-	{
-		is_g400 = 0;
-		printk(KERN_INFO "mga_vid: Found MGA G200 AGP\n");
-	}
-	else if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G200_PCI, NULL)))
-	{
-		is_g400 = 0;
-		printk(KERN_INFO "mga_vid: Found MGA G200 PCI\n");
-	}
-	else
-	{
-		printk(KERN_ERR "mga_vid: No supported cards found\n");
+		if(num_found==0)
+			printk(KERN_ERR "mga_vid: No supported cards found\n");
+		else
+			printk(KERN_ERR "mga_vid: Only %d supported cards found\n", num_found);
 		return FALSE;   
 	}
+	printk(KERN_INFO "mga_vid: Found %s at %s [%s]\n", mga_dev_name, dev->slot_name, dev->name);
 
 	pci_dev = dev;
 
