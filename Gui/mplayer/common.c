@@ -167,7 +167,7 @@ void PutImage( txSample * bf,int x,int y,int max,int ofs )
  buf=(uint32_t *)image_buffer;
  drw=(uint32_t *)bf->Image;
 
-#if 0
+#if 1
  for ( iy=y;iy < (int)(y+bf->Height / max);iy++ )
   for ( ix=x;ix < (int)(x+bf->Width);ix++ )
    {
