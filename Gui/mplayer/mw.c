@@ -230,8 +230,8 @@ drawrenderedtext:
             if ( image )
              {
               PutImage( image,item->x,item->y,1,0 );
-//              if ( image->Image ) free( image->Image );
-//              free( image );
+              if ( image->Image ) free( image->Image );
+              free( image );
              }
             break;
       }
