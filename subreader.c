@@ -238,6 +238,7 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 
 		current->start = a1*360000+a2*6000+a3*100;
 		current->end   = b1*360000+b2*6000+b3*100;
+		if ((current->end - current->start) > 1000) {current->end = current->start + 1000;} // not too long though. 
 		// teraz czas na wkopiowanie stringu
 		p=line;	p+=plen;i=0;
 		if (*p!='|') {
