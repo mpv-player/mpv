@@ -99,7 +99,6 @@
 #include "aspect.h"
 #include "cpudetect.h"
 #include "spuenc.h"
-#include "../vidix/vidixlib.h"
 
 #define SPU_SUPPORT
 
@@ -182,13 +181,48 @@ uint32_t control(uint32_t request, void *data, ...)
 		    flag |= VFCAP_TIMER;
 		return flag;
 	    }
-	case VOCTRL_QUERY_VAA:
+	case VOCTRL_SET_EQUALIZER:
 	    {
-		vo_vaa_t *vaa = data;
+		va_list ap;
+		int value;
+		em8300_bcs_t bcs;
+		
+		va_start(ap, data);
+		value = va_arg(ap, int);
+		va_end(ap);
 
-		memset(vaa,0,sizeof(vo_vaa_t));
-		vaa->get_video_eq=get_video_eq;
-		vaa->set_video_eq=set_video_eq;
+		if (ioctl(fd_control, EM8300_IOCTL_GETBCS, &bcs) < 0)
+		    return VO_FALSE;
+		if (!strcasecmp(data, "brightness"))
+		    bcs.brightness = value;
+		else if (!strcasecmp(data, "contrast"))
+		    bcs.contrast = value;
+		else if (!strcasecmp(data, "saturation"))
+		    bcs.saturation = value;
+		
+		if (ioctl(fd_control, EM8300_IOCTL_SETBCS, &bcs) < 0)
+		    return VO_FALSE;
+		return VO_TRUE;
+	    }
+	case VOCTRL_GET_EQUALIZER:
+	    {
+		va_list ap;
+		int *value;
+		em8300_bcs_t bcs;
+		
+		va_start(ap, data);
+		value = va_arg(ap, int);
+		va_end(ap);
+
+		if (ioctl(fd_control, EM8300_IOCTL_GETBCS, &bcs) < 0)
+		    return VO_FALSE;
+		
+		if (!strcasecmp(data, "brightness"))
+		    *value = bcs.brightness;
+		else if (!strcasecmp(data, "contrast"))
+		    *value = bcs.contrast;
+		else if (!strcasecmp(data, "saturation"))
+		    *value = bcs.saturation;
 		return VO_TRUE;
 	    }
 	}
@@ -492,33 +526,4 @@ static uint32_t preinit(const char *arg)
 	strcpy(fds_name, devname);
 	
 	return 0;
-}
-
-static int get_video_eq(vidix_video_eq_t *info)
-{
-    em8300_bcs_t bcs;
-
-    if (ioctl(fd_control, EM8300_IOCTL_GETBCS, &bcs) < 0)
-	return 1;
-    info->brightness = bcs.brightness;
-    info->contrast = bcs.contrast;
-    info->saturation = bcs.saturation;
-    info->cap = VEQ_CAP_BRIGHTNESS|VEQ_CAP_CONTRAST|VEQ_CAP_SATURATION;
-    return 0;
-}
-
-static int set_video_eq(vidix_video_eq_t *info)
-{
-    em8300_bcs_t bcs;
-
-    if (info->cap & VEQ_CAP_BRIGHTNESS)
-	bcs.brightness = info->brightness;
-    if (info->cap & VEQ_CAP_CONTRAST)
-	bcs.contrast = info->contrast;
-    if (info->cap & VEQ_CAP_SATURATION)
-	bcs.saturation = info->saturation;
-
-    if (ioctl(fd_control, EM8300_IOCTL_SETBCS, &bcs) < 0)
-	return 1;
-    return 0;
 }
