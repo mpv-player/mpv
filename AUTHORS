@@ -333,6 +333,7 @@ Issaris, Panagiotis (takis) <takis@lumumba.luc.ac.be>
 
 Jacobs, Aurelien <aurel@gnuage.org>
     * standalone C Matroska demuxer
+    * DTS support
 
 Jelveh, Reza (timebomb) <reza.jelveh@tu-harburg.de>
     * NSV demuxer
