@@ -11,6 +11,7 @@
 #include <errno.h>
 
 #include "config.h"
+#include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "sub.h"
@@ -562,15 +563,16 @@ static void drawTextureDisplay ()
 }
 
 
-static void resize(int x,int y){
-  printf("[gl2] Resize: %dx%d\n",x,y);
+static void resize(int *x,int *y){
+  mp_msg(MSGT_VO,MSGL_V,"[gl2] Resize: %dx%d\n",*x,*y);
   if( vo_fs )
   {
-	  aspect(&x, &y, A_ZOOM);
-	  glViewport( (vo_screenwidth-x)/2, (vo_screenheight-y)/2, x, y);
+	  glClear(GL_COLOR_BUFFER_BIT);
+	  aspect(x, y, A_ZOOM);
+	  glViewport( (vo_screenwidth-*x)/2, (vo_screenheight-*y)/2, *x, *y);
   } else { 
-	  aspect(&x, &y, A_NOZOOM);
-	  glViewport( 0, 0, x, y );
+	  //aspect(x, y, A_NOZOOM);
+	  glViewport( 0, 0, *x, *y );
   }
 
   glMatrixMode(GL_PROJECTION);
@@ -732,6 +734,7 @@ static uint32_t config_glx(uint32_t width, uint32_t height, uint32_t d_width, ui
 #ifdef HAVE_XINERAMA
 	vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
+	vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
         XClearWindow(mDisplay,vo_window);
 
 	/* Wait for map. */
@@ -744,7 +747,10 @@ static uint32_t config_glx(uint32_t width, uint32_t height, uint32_t d_width, ui
 	XSelectInput(mDisplay, vo_window, NoEventMask);
 
    }
-   else if ( !(flags&1) ) XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
+   else {
+   	vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
+   	if ( !(flags&1) ) XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
+   }
 
   vo_x11_classhint( mDisplay,vo_window,"gl2" );
   vo_hidecursor(mDisplay,vo_window);
@@ -823,7 +829,7 @@ static int initGl(uint32_t d_width, uint32_t d_height)
         gl_bitmap_format_s, gl_bitmap_type_s, gl_alignment,
 	rgb_sz, r_sz, g_sz, b_sz, a_sz, gl_internal_format_s);
 
-  resize(d_width, d_height);
+  resize(&d_width, &d_height);
 
   glClearColor( 0.0f,0.0f,0.0f,0.0f );
   glClear( GL_COLOR_BUFFER_BIT );
@@ -1024,7 +1030,7 @@ static int gl_handlekey(int key)
 
 static void check_events(void) {
     int e=vo_w32_check_events();
-    if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
+    if(e&VO_EVENT_RESIZE) resize(&vo_dwidth, &vo_dheight);
     if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
 }
 
@@ -1057,7 +1063,7 @@ static void check_events(void)
 	      }
          }
 	 e=vo_x11_check_events(mDisplay);
-         if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
+         if(e&VO_EVENT_RESIZE) resize(&vo_dwidth, &vo_dheight);
          if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
 }
 
