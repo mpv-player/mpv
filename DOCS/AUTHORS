@@ -73,6 +73,7 @@ Felix Bünemann: <atmosfear@users.sourceforge.net>
 - New font (mp_font2.zip)
 - PNG file output support in libvo
 - flipping support (for Indeo 3/4, etc)
+- SDL audio driver
 
 TeLeNiEkO: <telenieko@telenieko.com>
 - spanish translation of documentation
