@@ -1396,7 +1396,7 @@ for ac_option do
   --disable-liba52)	_liba52=no	;;
   --enable-libmpeg2)	_libmpeg2=yes	;;
   --disable-libmpeg2)	_libmpeg2=no	;;
-  --enable-internal-matroska)  _matroska_internal=yes _matroska_external=no ;;
+  --enable-internal-matroska)  _matroska_internal=yes ;;
   --disable-internal-matroska) _matroska_internal=no ;;
   --enable-internal-faad)	_faad_internal=yes	_faad_external=no	;;
   --disable-internal-faad)	_faad_internal=no	;;
