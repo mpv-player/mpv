@@ -457,14 +457,6 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    trak->durmap[i].num=stream_read_dword(demuxer->stream);
 		    trak->durmap[i].dur=stream_read_dword(demuxer->stream);
 		    pts+=trak->durmap[i].num*trak->durmap[i].dur;
-		    
-		    if(i==0 && trak->type == MOV_TRAK_VIDEO)
-		    {
-		    sh_video_t* sh=get_sh_video(demuxer,priv->track_db);
-		    if (sh && !sh->fps)
-			sh->fps = trak->timescale/trak->durmap[i].dur;
-		    /* initial fps */
-		    }
 		}
 		if(trak->length!=pts) mp_msg(MSGT_DEMUX, MSGL_WARN, "Warning! pts=%d  length=%d\n",pts,trak->length);
 		break;
@@ -876,7 +868,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 //		   printf("pos=%d max=%d\n",pos,trak->stdata_len);
 		  }
 		}
-		if(!sh->fps) sh->fps=trak->timescale;
+		sh->fps=trak->timescale/
+		    ((trak->durmap_size>=1)?(float)trak->durmap[0].dur:1);
 		sh->frametime=1.0f/sh->fps;
 
 		sh->disp_w=trak->stdata[25]|(trak->stdata[24]<<8);
