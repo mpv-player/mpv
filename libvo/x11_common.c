@@ -149,6 +149,17 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
   }
 }
 
+#ifdef HAVE_GUI
+ Window    vo_window = None;
+ GC        vo_gc;
+ int       vo_xeventhandling = 1;
+ int       vo_resize = 0;
+ int       vo_expose = 0;
+
+ void vo_setwindow( Window w,GC g )
+ { vo_window=w; vo_gc=g; }
+#endif
+
 int vo_x11_check_events(Display *mydisplay){
  int ret=0;
  XEvent         Event;
@@ -157,26 +168,46 @@ int vo_x11_check_events(Display *mydisplay){
  XComposeStatus stat;
 // unsigned long  vo_KeyTable[512];
 
- while ( XPending( mydisplay ) )
-  {
-   XNextEvent( mydisplay,&Event );
-   switch( Event.type )
-    {
-       case Expose:
-	     ret|=VO_EVENT_EXPOSE;
-             break;
-       case ConfigureNotify:
-             vo_dwidth=Event.xconfigure.width;
-	     vo_dheight=Event.xconfigure.height;
-	     ret|=VO_EVENT_RESIZE;
-             break;
-       case KeyPress:
-             XLookupString( &Event.xkey,buf,sizeof(buf),&keySym,&stat );
-             vo_x11_putkey( ( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) ) );
-	     ret|=VO_EVENT_KEYPRESS;
-             break;
+#ifdef HAVE_GUI
+ if ( vo_xeventhandling )
+   {
+#endif
+    while ( XPending( mydisplay ) )
+      {
+       XNextEvent( mydisplay,&Event );
+       switch( Event.type )
+         {
+          case Expose:
+               ret|=VO_EVENT_EXPOSE;
+               break;
+          case ConfigureNotify:
+               vo_dwidth=Event.xconfigure.width;
+               vo_dheight=Event.xconfigure.height;
+	       ret|=VO_EVENT_RESIZE;
+               break;
+          case KeyPress:
+               XLookupString( &Event.xkey,buf,sizeof(buf),&keySym,&stat );
+               vo_x11_putkey( ( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) ) );
+	       ret|=VO_EVENT_KEYPRESS;
+               break;
+         }
+      }
+#ifdef HAVE_GUI
     }
-  }
+    else
+     {
+      if ( vo_resize )
+       {
+        vo_resize=0;
+        ret|=VO_EVENT_RESIZE;
+       }
+      if ( vo_expose )
+       {
+        vo_expose=0;
+        ret|=VO_EVENT_EXPOSE;
+       }
+     }
+#endif
 
   return ret;
 }

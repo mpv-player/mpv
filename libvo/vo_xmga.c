@@ -87,6 +87,10 @@ static Window                 mRoot;
 static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
 static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
 
+#ifdef HAVE_GUI
+ static uint32_t               mdwidth,mdheight;
+#endif
+
 static XSetWindowAttributes   xWAttribs;
 
 #include "mga_common.c"
@@ -105,6 +109,20 @@ static void set_window(){
          drwX=0; drwY=0; // drwWidth=wndWidth; drwHeight=wndHeight;
          XTranslateCoordinates( mDisplay,mWindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
          //fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+
+         #ifdef HAVE_GUI
+          if ( vo_window != None )
+           {
+            mFullscreen=0;
+            dwidth=mdwidth; dheight=mdheight;
+            if ( ( drwWidth == vo_screenwidth )&&( drwHeight == vo_screenheight ) )
+             {
+              mFullscreen=1;
+              dwidth=vo_screenwidth;
+              dheight=vo_screenwidth * mdheight / mdwidth;
+             }
+           }
+         #endif
 
          if ( mFullscreen )
           {
@@ -224,19 +242,11 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  wndX=0; wndY=0;
  wndWidth=d_width; wndHeight=d_height;
  dwidth=d_width; dheight=d_height;
+ #ifdef HAVE_GUI
+  mdwidth=d_width; mdheight=d_height;
+ #endif
  mFullscreen=fullscreen;
 
- if ( fullscreen )
-  {
-   wndWidth=vo_screenwidth;
-   wndHeight=vo_screenheight;
-  }
-
- XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
- mDepth=attribs.depth;
- if ( mDepth != 15 && mDepth != 16 && mDepth != 24 && mDepth != 32 ) mDepth=24;
- XMatchVisualInfo( mDisplay,mScreen,mDepth,TrueColor,&vinfo );
- xWAttribs.colormap=XCreateColormap( mDisplay,RootWindow( mDisplay,mScreen ),vinfo.visual,AllocNone );
  switch ( vo_depthonscreen )
   {
    case 32:
@@ -245,33 +255,61 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
    case 15: fgColor=0x7c1fL; break;
    default: printf( "Sorry, this (%d) color depth not supported.\n",vo_depthonscreen ); return -1;
   }
- xWAttribs.background_pixel=0;
- xWAttribs.border_pixel=0;
- xWAttribs.event_mask=StructureNotifyMask | ExposureMask | KeyPressMask;
- xswamask=CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
- mWindow=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
-   wndX,wndY,
-   wndWidth,wndHeight,
-   xWAttribs.border_pixel,
-   mDepth,
-   InputOutput,
-   vinfo.visual,xswamask,&xWAttribs );
- vo_hidecursor(mDisplay,mWindow);
+#ifdef HAVE_GUI
+ if ( vo_window == None )
+  {
+#endif
+   if ( fullscreen )
+    {
+     wndWidth=vo_screenwidth;
+     wndHeight=vo_screenheight;
+    }
 
- if ( fullscreen ) vo_x11_decoration( mDisplay,mWindow,0 );
+   XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
+   mDepth=attribs.depth;
+   if ( mDepth != 15 && mDepth != 16 && mDepth != 24 && mDepth != 32 ) mDepth=24;
+   XMatchVisualInfo( mDisplay,mScreen,mDepth,TrueColor,&vinfo );
+   xWAttribs.colormap=XCreateColormap( mDisplay,RootWindow( mDisplay,mScreen ),vinfo.visual,AllocNone );
+   xWAttribs.background_pixel=0;
+   xWAttribs.border_pixel=0;
+   xWAttribs.event_mask=StructureNotifyMask | ExposureMask | KeyPressMask;
+   xswamask=CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
- XGetNormalHints( mDisplay,mWindow,&hint );
- hint.x=wndX; hint.y=wndY;
- hint.width=wndWidth; hint.height=wndHeight;
- hint.base_width=wndWidth; hint.base_height=wndHeight;
- hint.flags=USPosition | USSize;
- XSetNormalHints( mDisplay,mWindow,&hint );
- XStoreName( mDisplay,mWindow,mTitle );
+   mWindow=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
+     wndX,wndY,
+     wndWidth,wndHeight,
+     xWAttribs.border_pixel,
+     mDepth,
+     InputOutput,
+     vinfo.visual,xswamask,&xWAttribs );
+   vo_hidecursor(mDisplay,mWindow);
 
+   if ( fullscreen ) vo_x11_decoration( mDisplay,mWindow,0 );
+
+   XGetNormalHints( mDisplay,mWindow,&hint );
+   hint.x=wndX; hint.y=wndY;
+   hint.width=wndWidth; hint.height=wndHeight;
+   hint.base_width=wndWidth; hint.base_height=wndHeight;
+   hint.flags=USPosition | USSize;
+   XSetNormalHints( mDisplay,mWindow,&hint );
+   XStoreName( mDisplay,mWindow,mTitle );
+   XMapWindow( mDisplay,mWindow );
+#ifdef HAVE_GUI
+  }
+  else
+    {
+     mWindow=vo_window;
+     fprintf( stderr,"[xmga] width: %d height: %d d_width: %d d_height: %d\n",width,height,d_width,d_height );
+     if ( vo_screenwidth != d_width )
+      {
+       XMoveWindow( mDisplay,mWindow,( vo_screenwidth - d_width ) / 2,( vo_screenheight - d_height ) / 2 );
+       XResizeWindow( mDisplay,mWindow,d_width,d_height );
+      }
+      else mFullscreen=1;
+    }
+#endif
  mGC=XCreateGC( mDisplay,mWindow,GCForeground,&wGCV );
-
- XMapWindow( mDisplay,mWindow );
 
  set_window();
 
@@ -285,8 +323,15 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
 
  if(mga_init()) return -1;
 
- XFlush( mDisplay );
- XSync( mDisplay,False );
+#ifdef HAVE_GUI
+ if ( vo_window == None )
+  {
+#endif
+   XFlush( mDisplay );
+   XSync( mDisplay,False );
+#ifdef HAVE_GUI
+  }
+#endif
 
  saver_off(mDisplay);
 

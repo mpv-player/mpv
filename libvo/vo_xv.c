@@ -85,6 +85,10 @@ static Window                 mRoot;
 static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
 static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
 
+#ifdef HAVE_GUI
+ static uint32_t               mdwidth,mdheight;
+#endif
+
 /*
  * connect to server, create and map window,
  * allocate colors and (shared) memory
@@ -121,36 +125,54 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
  screen = DefaultScreen(mydisplay);
 
- hint.x = 0;
- hint.y = 0;
- hint.width = d_width;
- hint.height = d_height;
- if ( fullscreen )
+#ifdef HAVE_GUI
+ if ( vo_window == None )
   {
-   hint.width=vo_screenwidth;
-   hint.height=vo_screenheight;
+#endif
+   hint.x = 0;
+   hint.y = 0;
+   hint.width = d_width;
+   hint.height = d_height;
+   if ( fullscreen )
+    {
+     hint.width=vo_screenwidth;
+     hint.height=vo_screenheight;
+    }
+   hint.flags = PPosition | PSize;
+   XGetWindowAttributes(mydisplay, DefaultRootWindow(mydisplay), &attribs);
+   depth=attribs.depth;
+   if (depth != 15 && depth != 16 && depth != 24 && depth != 32) depth = 24;
+   XMatchVisualInfo(mydisplay, screen, depth, TrueColor, &vinfo);
+
+   xswa.background_pixel = 0;
+   xswa.border_pixel     = 0;
+   xswamask = CWBackPixel | CWBorderPixel;
+
+   mywindow = XCreateWindow(mydisplay, RootWindow(mydisplay,screen),
+   hint.x, hint.y, hint.width, hint.height,
+   0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
+   vo_hidecursor(mydisplay,mywindow);
+
+   XSelectInput(mydisplay, mywindow, StructureNotifyMask | KeyPressMask );
+   XSetStandardProperties(mydisplay, mywindow, hello, hello, None, NULL, 0, &hint);
+   if ( fullscreen ) vo_x11_decoration( mydisplay,mywindow,0 );
+   XMapWindow(mydisplay, mywindow);
+   XFlush(mydisplay);
+   XSync(mydisplay, False);
+#ifdef HAVE_GUI
   }
- hint.flags = PPosition | PSize;
- XGetWindowAttributes(mydisplay, DefaultRootWindow(mydisplay), &attribs);
- depth=attribs.depth;
- if (depth != 15 && depth != 16 && depth != 24 && depth != 32) depth = 24;
- XMatchVisualInfo(mydisplay, screen, depth, TrueColor, &vinfo);
-
- xswa.background_pixel = 0;
- xswa.border_pixel     = 0;
- xswamask = CWBackPixel | CWBorderPixel;
-
- mywindow = XCreateWindow(mydisplay, RootWindow(mydisplay,screen),
- hint.x, hint.y, hint.width, hint.height,
- 0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
- vo_hidecursor(mydisplay,mywindow);
-
- XSelectInput(mydisplay, mywindow, StructureNotifyMask | KeyPressMask );
- XSetStandardProperties(mydisplay, mywindow, hello, hello, None, NULL, 0, &hint);
- if ( fullscreen ) vo_x11_decoration( mydisplay,mywindow,0 );
- XMapWindow(mydisplay, mywindow);
- XFlush(mydisplay);
- XSync(mydisplay, False);
+  else
+    {
+     mywindow=vo_window;
+     mygc=vo_gc;
+     if ( vo_screenwidth != d_width )
+      {
+       XMoveWindow( mydisplay,mywindow,( vo_screenwidth - d_width ) / 2,( vo_screenheight - d_height ) / 2 );
+       XResizeWindow( mydisplay,mywindow,d_width,d_height );
+      }
+      else mFullscreen=1;
+    }
+#endif
 
  mygc = XCreateGC(mydisplay, mywindow, 0L, &xgcv);
 
@@ -252,6 +274,20 @@ static void check_events(void)
    drwX=0; drwY=0;
    XTranslateCoordinates( mydisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
    printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+
+   #ifdef HAVE_GUI
+    if ( vo_window != None )
+     {
+      mFullscreen=0;
+      dwidth=mdwidth; dheight=mdheight;
+      if ( ( drwWidth == vo_screenwidth )&&( drwHeight == vo_screenheight ) )
+       {
+        mFullscreen=1;
+        dwidth=vo_screenwidth;
+        dheight=vo_screenwidth * mdheight / mdwidth;
+       }
+     }
+   #endif
 
    if ( mFullscreen )
     {

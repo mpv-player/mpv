@@ -116,9 +116,9 @@ struct config conf[]={
         
 	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100},
 	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, 0, 0, 0},
-	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+//	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+//	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+//	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
 

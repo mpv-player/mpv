@@ -88,6 +88,9 @@ extern int errno;
 #include "help_mp.h"
 
 #define DEBUG if(0)
+#ifdef HAVE_GUI
+ int nogui=1; // new
+#endif
 int verbose=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
@@ -325,7 +328,25 @@ static int play_in_bg=0;
 
 extern void avi_fixate();
 
+#ifdef HAVE_GUI
+ #include "../Gui/mplayer/psignal.h"
+#endif
+
 void exit_player(char* how){
+
+#ifdef HAVE_GUI
+ if ( !nogui )
+  {
+   if ( how != NULL )
+    {
+     if ( !strcmp( how,"Quit" ) ) mplSendMessage( mplEndOfFile );
+     if ( !strcmp( how,"End of file" ) ) mplSendMessage( mplEndOfFile );
+     if ( !strcmp( how,"audio_init" ) ) mplSendMessage( mplAudioError );
+    }
+    else mplSendMessage( mplUnknowError );
+  }
+#endif
+
   if(how) printf("\nExiting... (%s)\n",how);
   if(verbose) printf("max framesize was %d bytes\n",max_framesize);
   // restore terminal:
@@ -340,6 +361,9 @@ void exit_player(char* how){
 #endif
   if(encode_name) avi_fixate();
 #ifdef HAVE_LIRC
+  #ifdef HAVE_GUI
+   if ( nogui )
+  #endif
   lirc_mp_cleanup();
 #endif
   //if(play_in_bg) system("xsetroot -solid \\#000000");
@@ -359,6 +383,13 @@ void exit_sighandler(int x){
   printf("\nMPlayer interrupted by signal %d in module: %s \n",x,
       current_module?current_module:"unknown"
   );
+  #ifdef HAVE_GUI
+   if ( !nogui )
+    {
+     mplShMem->items.error.signal=x;
+     strcpy( mplShMem->items.error.module,current_module?current_module:"unknown" );
+    }
+  #endif
   exit_player(NULL);
 }
 
@@ -372,7 +403,6 @@ extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
 extern int vo_init(void);
 extern int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int maxlen);
 
-int main(int argc,char* argv[], char *envp[]){
 char* filename=NULL; //"MI2-Trailer.avi";
 int i;
 int seek_to_sec=0;
@@ -437,11 +467,17 @@ char *stream_dump_name=NULL;
 int stream_dump_type=0;
 //int user_bpp=0;
 
+int osd_visible=100;
+int osd_function=OSD_PLAY;
+int osd_last_pts=-303;
+
+int rel_seek_secs=0;
+
 #include "mixer.h"
 #include "cfg-mplayer.h"
 
-  printf("%s",banner_text);
-
+void parse_cfgfiles( void )
+{
 if (parse_config_file(conf, "/etc/mplayer.conf") < 0)
   exit(1);
 if ((conffile = get_path("")) == NULL) {
@@ -462,26 +498,42 @@ if ((conffile = get_path("")) == NULL) {
     free(conffile);
   }
 }
-if (parse_command_line(conf, argc, argv, envp, &filename) < 0)
-  exit(1);
-
-// Many users forget to include command line in bugreports...
-if(verbose){
-  printf("CommandLine:");
-  for(i=1;i<argc;i++)printf(" '%s'",argv[i]);
-  printf("\n");
 }
 
-if(video_driver && strcmp(video_driver,"help")==0){
-  printf("Available video output drivers:\n");
-  i=0;
-  while (video_out_drivers[i]) {
-    const vo_info_t *info = video_out_drivers[i++]->get_info ();
-  	printf("\t%s\t%s\n", info->short_name, info->name);
-  }
-  printf("\n");
-  exit(0);
-}
+#ifndef HAVE_GUI
+ int main(int argc,char* argv[], char *envp[]){
+#else
+ int mplayer(int argc,char* argv[], char *envp[]){
+#endif
+
+  printf("%s",banner_text);
+
+#ifdef HAVE_GUI
+  if ( nogui )
+   {
+#endif
+    if (parse_command_line(conf, argc, argv, envp, &filename) < 0) exit(1);
+
+    // Many users forget to include command line in bugreports...
+    if(verbose){
+      printf("CommandLine:");
+      for(i=1;i<argc;i++)printf(" '%s'",argv[i]);
+      printf("\n");
+    }
+
+    if(video_driver && strcmp(video_driver,"help")==0){
+      printf("Available video output drivers:\n");
+      i=0;
+      while (video_out_drivers[i]) {
+        const vo_info_t *info = video_out_drivers[i++]->get_info ();
+      	printf("\t%s\t%s\n", info->short_name, info->name);
+      }
+      printf("\n");
+      exit(0);
+     }
+#ifdef HAVE_GUI
+   }
+#endif
 
 if(!filename){
   if(vcd_track) filename="/dev/cdrom"; 
@@ -508,6 +560,9 @@ if(!filename){
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
     printf("(copy/link DOCS/codecs.conf to ~/.mplayer/codecs.conf)\n");
+    #ifdef HAVE_GUI
+     if ( !nogui ) { mplSendMessage( mplCodecConfNotFound ); usleep( 10000 ); }
+    #endif
     exit(1);
 }
 
@@ -573,12 +628,20 @@ if(vcd_track){
   if (dvdimportkey) {
     if (dvd_import_key(dvdimportkey)) {
 	fprintf(stderr,"Error processing DVD KEY.\n");
+        #ifdef HAVE_GUI
+         if ( !nogui ) { mplSendMessage( mplErrorDVDKeyProcess ); usleep( 10000 ); }
+        #endif
 	exit(1);
     }
     printf("DVD command line requested key is stored for descrambling.\n");
   }
   if (dvd_device) {
-    if (dvd_auth(dvd_device,f)) exit(0);
+    if (dvd_auth(dvd_device,f)) {
+        #ifdef HAVE_GUI
+         if ( !nogui ) { mplSendMessage( mplErrorDVDAuth ); usleep( 10000 ); }
+        #endif
+        exit(0);
+      } 
     printf("DVD auth sequence seems to be OK.\n");
   }
 #endif
@@ -653,6 +716,9 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
 if(file_format==DEMUXER_TYPE_UNKNOWN){
   printf("============= Sorry, this file format not recognized/supported ===============\n");
   printf("=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n");
+  #ifdef HAVE_GUI
+   if ( !nogui ) { mplSendMessage( mplUnknowFileType ); usleep( 10000 ); }
+  #endif
   exit(1);
 }
 //====== File format recognized, set up these for compatibility: =========
@@ -703,6 +769,9 @@ switch(file_format){
       }
       if(v_pos==-1){
         printf("AVI_NI: missing video stream!? contact the author, it may be a bug :(\n");
+        #ifdef HAVE_GUI
+         if ( !nogui ) { mplSendMessage( mplErrorAVINI ); usleep( 10000 ); }
+        #endif
         exit(1);
       }
       if(a_pos==-1){
@@ -727,6 +796,9 @@ switch(file_format){
   }
   if(!ds_fill_buffer(d_video)){
     printf("AVI: missing video stream!? contact the author, it may be a bug :(\n");
+    #ifdef HAVE_GUI
+     if ( !nogui ) { mplSendMessage( mplAVIErrorMissingVideoStream ); usleep( 10000 ); }
+    #endif
     exit(1);
   }
   sh_video=d_video->sh;sh_video->ds=d_video;
@@ -768,6 +840,9 @@ switch(file_format){
 //  demuxer->endpos=avi_header.movi_end;
   if(!ds_fill_buffer(d_video)){
     printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
+    #ifdef HAVE_GUI
+     if ( !nogui ) { mplSendMessage( mplASFErrorMissingVideoStream ); usleep( 10000 ); }
+    #endif
     exit(1);
   }
   sh_video=d_video->sh;sh_video->ds=d_video;
@@ -836,6 +911,9 @@ switch(file_format){
       if(!i || !skip_video_packet(d_video)){
         if(verbose)  printf("NONE :(\n");
         printf("MPEG: FATAL: EOF while searching for sequence header\n");
+        #ifdef HAVE_GUI
+         if ( !nogui ) { mplSendMessage( mplMPEGErrorSeqHeaderSearch ); usleep( 10000 ); }
+        #endif
         exit(1);
       }
    }
@@ -845,17 +923,43 @@ switch(file_format){
    mpeg2_init();
    // ========= Read & process sequence header & extension ============
    videobuffer=shmem_alloc(VIDEOBUFFER_SIZE);
-   if(!videobuffer){ printf("Cannot allocate shared memory\n");exit(0);}
+   if(!videobuffer){ 
+     printf("Cannot allocate shared memory\n");
+     #ifdef HAVE_GUI
+      if ( !nogui ) { mplSendMessage( mplErrorShMemAlloc ); usleep( 10000 ); }
+     #endif
+     exit(0);
+   }
    videobuf_len=0;
-   if(!read_video_packet(d_video)){ printf("FATAL: Cannot read sequence header!\n");exit(1);}
+   if(!read_video_packet(d_video)){ 
+     printf("FATAL: Cannot read sequence header!\n");
+     #ifdef HAVE_GUI
+      if ( !nogui ) { mplSendMessage( mplMPEGErrorCannotReadSeqHeader ); usleep( 10000 ); }
+     #endif
+     exit(1);
+   }
    if(header_process_sequence_header (picture, &videobuffer[4])) {
-     printf ("bad sequence header!\n"); exit(1);
+     printf ("bad sequence header!\n"); 
+     #ifdef HAVE_GUI
+      if ( !nogui ) { mplSendMessage( mplMPEGErrorBadSeqHeader ); usleep( 10000 ); }
+     #endif
+     exit(1);
    }
    if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
     videobuf_len=0;
-    if(!read_video_packet(d_video)){ printf("FATAL: Cannot read sequence header extension!\n");exit(1);}
+    if(!read_video_packet(d_video)){ 
+      printf("FATAL: Cannot read sequence header extension!\n");
+      #ifdef HAVE_GUI
+       if ( !nogui ) { mplSendMessage( mplMPEGErrorCannotReadSeqHeaderExt ); usleep( 10000 ); }
+      #endif
+      exit(1);
+    }
     if(header_process_extension (picture, &videobuffer[4])) {
-      printf ("bad sequence header extension!\n");  exit(1);
+      printf ("bad sequence header extension!\n");  
+      #ifdef HAVE_GUI
+       if ( !nogui ) { mplSendMessage( mplMPEGErrorBadSeqHeaderExt ); usleep( 10000 ); }
+      #endif
+      exit(1);
     }
    }
    // display info:
@@ -940,6 +1044,14 @@ while(1){
     sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
   if(!sh_video->codec){
     printf("Can't find codec for video format 0x%X !\n",sh_video->format);
+    #ifdef HAVE_GUI
+     if ( !nogui )
+      {
+       mplShMem->items.videodata.format=sh_video->format;
+       mplSendMessage( mplCantFindCodecForVideoFormat );
+       usleep( 10000 );
+      }
+    #endif
     exit(1);
   }
   if(!allow_dshow && sh_video->codec->driver==4) continue; // skip DShow
@@ -959,6 +1071,9 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
 }
 if(i>=CODECS_MAX_OUTFMT){
     printf("Sorry, selected video_out device is incompatible with this codec.\n");
+    #ifdef HAVE_GUI
+     if ( !nogui ) { mplSendMessage( mplIncompatibleVideoOutDevice ); usleep( 10000 ); }
+    #endif
     exit(1);
 }
 sh_video->outfmtidx=i;
@@ -967,13 +1082,21 @@ if(verbose) printf("vo_debug1: out_fmt=0x%08X\n",out_fmt);
 
 switch(sh_video->codec->driver){
  case 2: {
-   if(!init_video_codec(sh_video)) exit(1);
+   if(!init_video_codec(sh_video)) {
+     #ifdef HAVE_GUI
+      if ( !nogui ) { mplSendMessage( mplUnknowError ); usleep( 10000 ); }
+     #endif
+     exit(1);
+   }  
    if(verbose) printf("INFO: Win32 video codec init OK!\n");
    break;
  }
  case 4: { // Win32/DirectShow
 #ifndef USE_DIRECTSHOW
    printf("MPlayer was compiled WITHOUT directshow support!\n");
+   #ifdef HAVE_GUI
+    if ( !nogui ) { mplSendMessage( mplCompileWithoutDSSupport ); usleep( 10000 ); }
+   #endif
    exit(1);
 #else
    sh_video->our_out_buffer=NULL;
@@ -983,6 +1106,14 @@ switch(sh_video->codec->driver){
         printf("Maybe you forget to upgrade your win32 codecs?? It's time to download the new\n");
         printf("package from:  ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip  !\n");
         printf("Or you should disable DShow support: make distclean;make -f Makefile.No-DS\n");
+        #ifdef HAVE_GUI
+         if ( !nogui )
+          {
+           strcpy(  mplShMem->items.videodata.codecdll,sh_video->codec->dll );
+           mplSendMessage( mplDSCodecNotFound );
+           usleep( 10000 );
+          }
+        #endif
         exit(1);
    }
    
@@ -1125,11 +1256,24 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
 if(verbose) printf("vo_debug3: out_fmt=0x%08X\n",out_fmt);
 
+   #ifdef HAVE_GUI
+    if ( !nogui )
+     {
+      mplShMem->items.videodata.width=sh_video->disp_w;
+      mplShMem->items.videodata.height=sh_video->disp_h;
+      mplSendMessage( mplSetVideoData );
+     }
+   #endif
+
    if(video_out->init(sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2),
                       title,out_fmt)){
-     printf("FATAL: Cannot initialize video driver!\n");exit(1);
+     printf("FATAL: Cannot initialize video driver!\n");
+     #ifdef HAVE_GUI
+      if ( !nogui ) { mplSendMessage( mplCantInitVideoDriver ); usleep( 10000 ); }
+     #endif
+     exit(1);
    }
    if(verbose) printf("INFO: Video OUT driver init OK!\n");
 
@@ -1156,13 +1300,13 @@ double vout_time_usage=0;
 double audio_time_usage=0;
 int grab_frames=0;
 char osd_text_buffer[64];
-int osd_visible=100;
-int osd_function=OSD_PLAY;
-int osd_last_pts=-303;
 int drop_frame=0;
 int drop_frame_cnt=0;
 
 #ifdef HAVE_LIRC
+ #ifdef HAVE_GUI
+  if ( nogui )
+ #endif
   lirc_mp_setup();
 #endif
 
@@ -1175,7 +1319,12 @@ int drop_frame_cnt=0;
   // terminate requests:
   signal(SIGTERM,exit_sighandler); // kill
   signal(SIGHUP,exit_sighandler);  // kill -HUP  /  xterm closed
-  signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
+
+  #ifdef HAVE_GUI
+   if ( nogui )
+  #endif
+     signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
+
   signal(SIGQUIT,exit_sighandler); // Quit from keyboard
   // fatal errors:
   signal(SIGBUS,exit_sighandler);  // bus error
@@ -1658,15 +1807,22 @@ switch(sh_video->codec->driver){
 
   if(osd_function==OSD_PAUSE){
       printf("\n------ PAUSED -------\r");fflush(stdout);
-      while(
-#ifdef HAVE_LIRC
-          lirc_mp_getinput()<=0 &&
+#ifdef HAVE_GUI
+      if ( nogui )
+        {
 #endif
-          (!f || getch2(20)<=0) && mplayer_get_key()<=0){
-	  video_out->check_events();
-          if(!f) usleep(1000); // do not eat the CPU
-      }
-      osd_function=OSD_PLAY;
+         while(
+#ifdef HAVE_LIRC
+             lirc_mp_getinput()<=0 &&
+#endif
+             (!f || getch2(20)<=0) && mplayer_get_key()<=0){
+	     video_out->check_events();
+             if(!f) usleep(1000); // do not eat the CPU
+         }
+         osd_function=OSD_PLAY;
+#ifdef HAVE_GUI
+        } else while( osd_function != OSD_PLAY ) usleep( 1000 );
+#endif
   }
 
   } //  while(v_frame<a_frame || force_redraw)
@@ -1674,8 +1830,7 @@ switch(sh_video->codec->driver){
 
 //================= Keyboard events, SEEKing ====================
 
-{ int rel_seek_secs=0;
-  int c;
+{ int c;
   while(
 #ifdef HAVE_LIRC
       (c=lirc_mp_getinput())>0 ||
@@ -2041,6 +2196,7 @@ switch(file_format){
 //      num_frames=real_num_frames=0;
 
   }
+ rel_seek_secs=0;
 } // keyboard event handler
 
 //================= Update OSD ====================
