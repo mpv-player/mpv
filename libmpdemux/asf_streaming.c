@@ -610,15 +610,15 @@ printf("read: %d\n", i );
 				}
 				break;
 			case ASF_Redirector_e:
-			  if( http_hdr->body_size>0 ) {
-			    if( streaming_bufferize( stream->streaming_ctrl, http_hdr->body, http_hdr->body_size )<0 ) {
-			      http_free( http_hdr );
-			      return -1;
-			    }
-			  }
-			  stream->type = STREAMTYPE_PLAYLIST;
-			  done = 1;
-			  break;
+				if( http_hdr->body_size>0 ) {
+					if( streaming_bufferize( stream->streaming_ctrl, http_hdr->body, http_hdr->body_size )<0 ) {
+						http_free( http_hdr );
+						return -1;
+					}
+				}
+				stream->type = STREAMTYPE_PLAYLIST;
+				done = 1;
+				break;
 			case ASF_Unknown_e:
 			default:
 				printf("Unknown ASF streaming type\n");
@@ -629,7 +629,7 @@ printf("read: %d\n", i );
 	// Check if we got a redirect.	
 	} while(!done);
 
-	stream->fd= fd;
+	stream->fd = fd;
 	if( streaming_type==ASF_PlainText_e || streaming_type==ASF_Redirector_e ) {
 		stream->streaming_ctrl->streaming_read = nop_streaming_read;
 		stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
@@ -642,6 +642,6 @@ printf("read: %d\n", i );
 	stream->streaming_ctrl->status = streaming_playing_e;
 
 	http_free( http_hdr );
-	return fd;
+	return 0;
 }
 
