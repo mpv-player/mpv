@@ -214,7 +214,7 @@ int slice_process (picture_t *picture, uint8_t code, uint8_t * buffer);
 void stats_header (uint8_t code, uint8_t * buffer);
 
 #ifdef MPEG12_POSTPROC
-#define MBC 45
+#define MBC 48
 #define MBR 36
 extern int quant_store[MBR+1][MBC+1]; // [Review]
 #endif
