@@ -1,4 +1,5 @@
 // Translated by:  Bohdan Horst <nexus@hoth.amu.edu.pl>
+// Wszelkie uwagi i poprawki mile widziane :)
 
 // ========================= MPlayer help ===========================
 
@@ -335,6 +336,11 @@ static char help_text[]=
 #define MSGTR_Network "Strumieñ sieciowy ..."
 #define MSGTR_Preferences "Preferencje"
 #define MSGTR_OSSPreferences "Konfiguracja sterownika OSS"
+#define MSGTR_NoMediaOpened "Nie otwarto no¶nika"
+#define MSGTR_VCDTrack "Scie¿ka VCD: %d"
+#define MSGTR_NoChapter "Brak rozdzia³u"
+#define MSGTR_Chapter "Rozdzia³ %d"
+#define MSGTR_NoFileLoaded "Nie za³adowano pliku"
 
 // --- buttons ---
 #define MSGTR_Ok "Tak"
