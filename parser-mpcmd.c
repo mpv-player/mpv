@@ -224,12 +224,12 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	    pt->loop = l;
 	    tmp = 1;
 	  }
-	} else if(strcasecmp(opt,"rnd") == 0) {
+	} else if(strcasecmp(opt,"shuffle") == 0) {
 	  if(last_entry && last_entry->child)
 	    last_entry->flags |= PLAY_TREE_RND;
 	  else
 	    last_parent->flags |= PLAY_TREE_RND;
-	} else if(strcasecmp(opt,"nornd") == 0) {
+	} else if(strcasecmp(opt,"noshuffle") == 0) {
 	  if(last_entry && last_entry->child)
 	    last_entry->flags &= ~PLAY_TREE_RND;
 	  else

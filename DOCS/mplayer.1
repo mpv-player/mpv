@@ -281,12 +281,12 @@ Display less output and status messages.
 .B \-really\-quiet \ \ 
 Display even less output and status messages.
 .TP
-.B \-rnd \ \ 
-Play files in random order.
-.TP
 .B \-sdp
 Specifies that the input file is a SDP ('Session Description Protocol')
 file that describes an RTP session (see http://www.live.com/mplayer/).
+.TP
+.B \-shuffle \ \ 
+Play files in random order.
 .TP
 .B \-skin <skin\ directory> (BETA CODE)
 Load skin from the given directory (WITHOUT path name).
@@ -1282,7 +1282,7 @@ setup.
 .TP
 .B \-noslices
 Disable drawing video by 16-pixel height slices/\:bands, instead draws the
-while frame in a single run.
+whole frame in a single run.
 May be faster or slower, depending on card/\:cache.
 It has effect only with libmpeg2 and libavcodec codecs.
 .TP
