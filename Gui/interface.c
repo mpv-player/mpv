@@ -93,7 +93,7 @@ void guiInit( void )
  appInit( (void*)mDisplay );
        
  if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name );
- if ( sub_delay > 0.0f ) gtkSubDelay=sub_delay;
+ if ( sub_delay != 0.0f ) gtkSubDelay=sub_delay;
 #if defined( USE_OSD ) || defined( USE_SUB )
  guiLoadFont();
 #endif
