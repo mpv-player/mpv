@@ -1,4 +1,4 @@
-mplayer (0.90pre11-0) unstable; urgency=low
+mplayer (0.90rc1-0) unstable; urgency=low
 
   * new release.
   * now compiled with --enable-runtime-cpudetection for safety reasons.
