@@ -399,8 +399,8 @@ immediately.
 Enforces a fixed video system for multiple files (one (un)initialisation for
 all files).
 Therefore only one window will be opened for all files.
-Currently the following drivers are fixed-vo compliant: x11, xv, xvidix, xmga,
-gl2, and svga.
+Currently the following drivers are fixed-vo compliant: gl2, mga, svga, x11,
+xmga, xv and xvidix.
 .TP
 .B \-framedrop (also see \-hardframedrop)
 Skip displaying some frames to maintain A/\:V sync on slow systems.
@@ -459,6 +459,9 @@ several 'echo "seek 10" > mp_pipe' and the pipe will stay valid.
 Specifies a configuration file for LIRC (Linux Infrared Remote Control, see
 http://www.lirc.org) if you don't like the default ~/\:.lircrc.
 .TP
+.B \-list-options
+Prints out all the available options.
+.TP
 .B \-loop <number>
 Loops movie playback <number> times.
 0 means forever.
@@ -506,7 +509,7 @@ Display even less output and status messages.
 .B \-shuffle \ \ 
 Play files in random order.
 .TP
-.B \-skin <skin\ directory> (BETA CODE)
+.B \-skin <skin\ directory> (GUI only) (BETA CODE)
 Load skin from the given directory (WITHOUT path name).
 
 .I EXAMPLE:
