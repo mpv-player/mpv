@@ -77,8 +77,8 @@ ___________________________________
 STEP1: Installing FFmpeg libavcodec
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you are using an official (pre)release, skip this step, since official
-releases include libavcodec. CVS sources and thus CVS snapshots do not include
+If you are using an official (pre)release or a CVS snapshot, skip this step,
+since official releases include libavcodec. CVS sources do not include
 libavcodec. To verify if you do have libavcodec or not, check if a subdirectory
 named 'libavcodec' exists in the MPlayer source tree.
 
