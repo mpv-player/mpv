@@ -11,7 +11,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
-#include "../cfgparser.h"
+#include "../m_config.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -598,9 +598,9 @@ if(stream->type == STREAMTYPE_CDDA || use_rawaudio) {
   demuxer = new_demuxer(stream,DEMUXER_TYPE_RAWAUDIO,audio_id,video_id,dvdsub_id);
   file_format = DEMUXER_TYPE_RAWAUDIO;
 }
-if(use_rawvideo) {
+if(file_format == DEMUXER_TYPE_RAWVIDEO) {
   demuxer = new_demuxer(stream,DEMUXER_TYPE_RAWVIDEO,audio_id,video_id,dvdsub_id);
-  file_format = DEMUXER_TYPE_RAWVIDEO;
+  //file_format = DEMUXER_TYPE_RAWVIDEO;
 }
 
 #ifdef USE_TV
@@ -1156,6 +1156,7 @@ return demuxer;
 char* audio_stream = NULL;
 char* sub_stream = NULL;
 int demuxer_type = 0, audio_demuxer_type = 0, sub_demuxer_type = 0;
+int audio_stream_cache = 0;
 
 extern int hr_mp3_seek;
 
@@ -1170,6 +1171,14 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
       mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_CannotOpenAudioStream,audio_stream);
       return NULL;
     }
+    if(audio_stream_cache) {
+      if(!stream_enable_cache(as,audio_stream_cache*1024,audio_stream_cache*1024/5,
+			      audio_stream_cache*1024/20)) {
+	free_stream(as);
+	mp_msg(MSGT_DEMUXER,MSGL_ERR,"Can't enable audio stream cache\n");
+	return NULL;
+      }
+    }
   }
   if(sub_stream) {
     ss = open_stream(sub_stream,0,&sfmt);
@@ -1180,19 +1189,26 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
   }
 
   vd = demux_open_stream(vs,demuxer_type ? demuxer_type : file_format,audio_stream ? -2 : audio_id,video_id, sub_stream ? -2 : dvdsub_id, filename);
-  if(!vd)
+  if(!vd) {
+    if(as) free_stream(as);
+    if(ss) free_stream(ss);
     return NULL;
+  }
   if(as) {
     ad = demux_open_stream(as,audio_demuxer_type ? audio_demuxer_type : afmt,audio_id,-2,-2, audio_stream);
-    if(!ad)
+    if(!ad) {
       mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_OpeningAudioDemuxerFailed,audio_stream);
+      free_stream(as);
+    }
     else if(ad->audio->sh && ((sh_audio_t*)ad->audio->sh)->format == 0x55) // MP3
       hr_mp3_seek=1; // Enable high res seeking
   }
   if(ss) {
     sd = demux_open_stream(ss,sub_demuxer_type ? sub_demuxer_type : sfmt,-2,-2,dvdsub_id, sub_stream);
-    if(!sd)
+    if(!sd) {
       mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_OpeningSubtitlesDemuxerFailed,sub_stream);
+      free_stream(ss);
+    }
   }
 
   if(ad && sd)
