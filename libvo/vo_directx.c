@@ -68,6 +68,7 @@ static COLORREF windowcolor = RGB(0,0,16);          //windowcolor == colorkey
 static int adapter_count=0;
 static GUID selected_guid;
 static GUID *selected_guid_ptr = NULL;
+static RECT monitor_rect;	                        //monitor coordinates 
 static float window_aspect;
 
 extern void mplayer_put_key(int code);              //let mplayer handel the keyevents 
@@ -367,12 +368,17 @@ static BOOL WINAPI EnumCallbackEx(GUID FAR *lpGUID, LPSTR lpDriverDescription, L
     }
     
     if(adapter_count == vo_adapter_num){
+        MONITORINFO mi;
         if (!lpGUID)
             selected_guid_ptr = NULL;
         else
         {
             selected_guid = *lpGUID;
             selected_guid_ptr = &selected_guid;
+        }
+        mi.cbSize = sizeof(mi);
+        if (GetMonitorInfo(hm, &mi)) {
+			monitor_rect = mi.rcMonitor;
         }
         mp_msg(MSGT_VO, MSGL_INFO ,"\t\t<--");
     }
@@ -510,6 +516,10 @@ static uint32_t Directx_ManageDisplay()
       GetClientRect(hWnd, &rd);
 	  width=rd.right - rd.left;
 	  height=rd.bottom - rd.top;
+      pt.x -= monitor_rect.left;    /* move coordinates from global to local monitor space */
+      pt.y -= monitor_rect.top;
+      rd.right -= monitor_rect.left;
+      rd.bottom -= monitor_rect.top;
 	  rd.left = pt.x;
       rd.top = pt.y; 
       if(!nooverlay && (!width || !height)){
@@ -619,6 +629,10 @@ static uint32_t Directx_ManageDisplay()
           RECT rdw=rd;
           AdjustWindowRect(&rdw,WS_OVERLAPPEDWINDOW|WS_SIZEBOX,FALSE);
 //          printf("window: %i %i %ix%i\n",rdw.left,rdw.top,rdw.right - rdw.left,rdw.bottom - rdw.top);      
+		  rdw.left += monitor_rect.left; /* move to global coordinate space */
+          rdw.top += monitor_rect.top;
+		  rdw.right += monitor_rect.left;
+		  rdw.bottom += monitor_rect.top;
           SetWindowPos(hWnd,(vo_ontop)?HWND_TOPMOST:(vo_rootwin?HWND_BOTTOM:HWND_NOTOPMOST),rdw.left,rdw.top,rdw.right-rdw.left,rdw.bottom-rdw.top,SWP_NOOWNERZORDER); 
     }
     else SetWindowPos(vidmode?hWnd:hWndFS,vo_rootwin?HWND_BOTTOM:HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOOWNERZORDER);
@@ -841,7 +855,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			//printf("Windowposchange\n");
 			if(g_lpddsBack != NULL)  //or it will crash with -vm
 			{
-				Directx_ManageDisplay(0,0);
+				Directx_ManageDisplay();
 			}
 		    break;
 		}
@@ -961,6 +975,9 @@ static uint32_t preinit(const char *arg)
         mplayericon = ExtractIcon( hInstance, exedir, 0 );
   	}
     if(!mplayericon)mplayericon=LoadIcon(NULL,IDI_APPLICATION);
+    monitor_rect.right=GetSystemMetrics(SM_CXSCREEN);
+    monitor_rect.bottom=GetSystemMetrics(SM_CYSCREEN);
+	
     wc.style         =  CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc   =  WndProc;
     wc.cbClsExtra    =  0;
@@ -978,10 +995,12 @@ static uint32_t preinit(const char *arg)
 	wc.hbrBackground = CreateSolidBrush(RGB(0,0,0));                     
     wc.lpszClassName = "MPlayer - Fullscreen";
     RegisterClass(&wc);
-    if(!vidmode)hWndFS = CreateWindow("MPlayer - Fullscreen","MPlayer Fullscreen",WS_POPUP,0,0,GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics(SM_CYSCREEN),hWnd,NULL,hInstance,NULL);			
-    mp_msg(MSGT_VO, MSGL_DBG3 ,"<vo_directx><INFO>initial mplayer windows created\n");
 	
 	if (Directx_InitDirectDraw()!= 0)return 1;          //init DirectDraw
+	
+    if(!vidmode)hWndFS = CreateWindow("MPlayer - Fullscreen","MPlayer Fullscreen",WS_POPUP,monitor_rect.left,monitor_rect.top,monitor_rect.right-monitor_rect.left,monitor_rect.bottom-monitor_rect.top,hWnd,NULL,hInstance,NULL);			
+    mp_msg(MSGT_VO, MSGL_DBG3 ,"<vo_directx><INFO>initial mplayer windows created\n");
+    
     if (Directx_CheckPrimaryPixelformat()!=0)return 1;
 	if (!nooverlay && Directx_CheckOverlayPixelformats() == 0)        //check for supported hardware
 	{
@@ -1173,8 +1192,8 @@ static uint32_t
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t options, char *title, uint32_t format)
 {
     RECT rd;
-	vo_screenwidth = GetSystemMetrics(SM_CXSCREEN);
-	vo_screenheight = GetSystemMetrics(SM_CYSCREEN);
+    vo_screenwidth = monitor_rect.right - monitor_rect.left;
+    vo_screenheight = monitor_rect.bottom - monitor_rect.top;
     vo_fs = options & 0x01;
 	image_format =  format;
 	image_width = width;
@@ -1203,6 +1222,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
             vo_dx=rd.left;
             vo_dy=rd.top;
         }
+        vo_dx += monitor_rect.left; /* move position to global window space */
+        vo_dy += monitor_rect.top;
         rd.left = vo_dx;
         rd.top = vo_dy;
         rd.right = rd.left + d_image_width;
