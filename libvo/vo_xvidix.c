@@ -187,7 +187,6 @@ static void set_window(int force_update)
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
-    unsigned int fg, bg;
     XVisualInfo vinfo;
     XEvent xev;
     XSizeHints hint;
@@ -359,13 +358,16 @@ else
 }
 #endif
 
-    vidix_grkey_get(&gr_key);
-    gr_key.key_op = KEYS_PUT;
-    gr_key.ckey.op = CKEY_TRUE;
-    gr_key.ckey.red = 255;
-    gr_key.ckey.green = 0;
-    gr_key.ckey.blue = 255;
-    vidix_grkey_set(&gr_key);
+    if (vidix_grkey_support())
+    {
+	vidix_grkey_get(&gr_key);
+	gr_key.key_op = KEYS_PUT;
+	gr_key.ckey.op = CKEY_TRUE;
+	gr_key.ckey.red = 255;
+	gr_key.ckey.green = 0;
+	gr_key.ckey.blue = 255;
+	vidix_grkey_set(&gr_key);
+    }
 
     set_window(1);
 

@@ -190,6 +190,7 @@ int vidix_start(void)
 	printf("vosub_vidix: Can't start playback: %s\n",strerror(err));
 	return -1;
     }
+    
     vid_eq.brightness = vo_gamma_brightness;
     vid_eq.saturation = vo_gamma_saturation;
     vid_eq.contrast = vo_gamma_contrast;
@@ -371,6 +372,11 @@ uint32_t vidix_query_fourcc(uint32_t format)
   vidix_fourcc.fourcc = format;
   vdlQueryFourcc(vidix_handler,&vidix_fourcc);
   return vidix_fourcc.depth != VID_DEPTH_NONE;
+}
+
+int vidix_grkey_support(void)
+{
+    return (vidix_fourcc.flags & VID_CAP_COLORKEY);
 }
 
 int vidix_grkey_get(vidix_grkey_t *gr_key)

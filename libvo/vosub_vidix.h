@@ -31,6 +31,7 @@ void     vidix_draw_osd(void);
 
 #include "../vidix/vidix.h"
 /* graphic keys */
+int vidix_grkey_support(void);
 int vidix_grkey_get(vidix_grkey_t *gr_key);
 int vidix_grkey_set(const vidix_grkey_t *gr_key);
 
