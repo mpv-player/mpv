@@ -26,11 +26,15 @@ const GUID MEDIASUBTYPE_PCM = {
 
 typedef long STDCALL (*GETCLASS) (GUID*, GUID*, void**);
 
-DS_AudioDecoder * DS_AudioDecoder_Create(const CodecInfo * info, const WAVEFORMATEX* wf)
+DS_AudioDecoder * DS_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX* wf)
+//DS_AudioDecoder * DS_AudioDecoder_Create(const CodecInfo * info, const WAVEFORMATEX* wf)
 {
     DS_AudioDecoder *this;
     int sz;
     WAVEFORMATEX* pWF;
+
+    Setup_LDT_Keeper();
+    Setup_FS_Segment();
         
     this = malloc(sizeof(DS_AudioDecoder));
     
@@ -75,7 +79,7 @@ DS_AudioDecoder * DS_AudioDecoder_Create(const CodecInfo * info, const WAVEFORMA
     /*try*/
     {
         ALLOCATOR_PROPERTIES props, props1;
-        this->m_pDS_Filter = DS_FilterCreate((const char*)info->dll, info->guid, &this->m_sOurType, &this->m_sDestType);
+        this->m_pDS_Filter = DS_FilterCreate(dllname, guid, &this->m_sOurType, &this->m_sDestType);
 	if( !this->m_pDS_Filter ) {
            free(this);
            return NULL;
@@ -119,6 +123,8 @@ int DS_AudioDecoder_Convert(DS_AudioDecoder *this, const void* in_data, uint_t i
         
     if (!in_data || !out_data)
 	return -1;
+
+    Setup_FS_Segment();
 
     in_size -= in_size%this->in_fmt.nBlockAlign;
     while (in_size>0)

@@ -57,7 +57,7 @@ static ct check[] = {
 	    };
 
 
-DS_VideoDecoder * DS_VideoDecoder_Create(CodecInfo * info,  BITMAPINFOHEADER * format, int flip, int maxauto)
+DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER * format, int flip, int maxauto)
 {
     DS_VideoDecoder *this;
     HRESULT result;
@@ -142,7 +142,7 @@ DS_VideoDecoder * DS_VideoDecoder_Create(CodecInfo * info,  BITMAPINFOHEADER * f
                               * ((this->iv.m_obh.biBitCount + 7) / 8);
 
 
-	this->m_pDS_Filter = DS_FilterCreate((const char*)info->dll, info->guid, &this->m_sOurType, &this->m_sDestType);
+	this->m_pDS_Filter = DS_FilterCreate(dllname, guid, &this->m_sOurType, &this->m_sDestType);
 
 	if (!flip)
 	{
@@ -198,11 +198,11 @@ DS_VideoDecoder * DS_VideoDecoder_Create(CodecInfo * info,  BITMAPINFOHEADER * f
 	this->m_sDestType.subtype = MEDIASUBTYPE_RGB24;
 
 	this->m_iMinBuffers = this->iv.VBUFSIZE;
-	this->m_bIsDivX = (strcmp((const char*)info->dll, "divxcvki.ax") == 0
-		     || strcmp((const char*)info->dll, "divx_c32.ax") == 0
-		     || strcmp((const char*)info->dll, "wmvds32.ax") == 0
-		     || strcmp((const char*)info->dll, "wmv8ds32.ax") == 0);
-	this->m_bIsDivX4 = (strcmp((const char*)info->dll, "divxdec.ax") == 0);
+	this->m_bIsDivX = (strcmp(dllname, "divxcvki.ax") == 0
+		     || strcmp(dllname, "divx_c32.ax") == 0
+		     || strcmp(dllname, "wmvds32.ax") == 0
+		     || strcmp(dllname, "wmv8ds32.ax") == 0);
+	this->m_bIsDivX4 = (strcmp(dllname, "divxdec.ax") == 0);
 	if (this->m_bIsDivX)
 	    this->iv.VBUFSIZE += 7;
 	else if (this->m_bIsDivX4)
