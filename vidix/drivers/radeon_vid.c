@@ -52,12 +52,10 @@ typedef struct bes_registers_s
   uint32_t p2_x_start_end;
   uint32_t p3_x_start_end;
   uint32_t base_addr;
-  uint32_t vid_buf0_base_adrs;
-  uint32_t vid_buf1_base_adrs;
-  uint32_t vid_buf2_base_adrs;
-  uint32_t vid_buf3_base_adrs;
-  uint32_t vid_buf4_base_adrs;
-  uint32_t vid_buf5_base_adrs;
+  uint32_t vid_buf_base_adrs_y[VID_PLAY_MAXFRAMES];
+  uint32_t vid_buf_base_adrs_u[VID_PLAY_MAXFRAMES];
+  uint32_t vid_buf_base_adrs_v[VID_PLAY_MAXFRAMES];
+  uint32_t vid_nbufs;
 
   uint32_t p1_v_accum_init;
   uint32_t p1_h_accum_init;
@@ -967,13 +965,13 @@ static void radeon_vid_display_video( void )
 #ifdef RADEON
     OUTREG(OV0_BASE_ADDR,		besr.base_addr);
 #endif
-    OUTREG(OV0_VID_BUF0_BASE_ADRS,	besr.vid_buf0_base_adrs);
-    OUTREG(OV0_VID_BUF1_BASE_ADRS,	besr.vid_buf1_base_adrs);
-    OUTREG(OV0_VID_BUF2_BASE_ADRS,	besr.vid_buf2_base_adrs);
+    OUTREG(OV0_VID_BUF0_BASE_ADRS,	besr.vid_buf_base_adrs_y[0]);
+    OUTREG(OV0_VID_BUF1_BASE_ADRS,	besr.vid_buf_base_adrs_u[0]);
+    OUTREG(OV0_VID_BUF2_BASE_ADRS,	besr.vid_buf_base_adrs_v[0]);
     radeon_fifo_wait(9);
-    OUTREG(OV0_VID_BUF3_BASE_ADRS,	besr.vid_buf3_base_adrs);
-    OUTREG(OV0_VID_BUF4_BASE_ADRS,	besr.vid_buf4_base_adrs);
-    OUTREG(OV0_VID_BUF5_BASE_ADRS,	besr.vid_buf5_base_adrs);
+    OUTREG(OV0_VID_BUF3_BASE_ADRS,	besr.vid_buf_base_adrs_y[0]);
+    OUTREG(OV0_VID_BUF4_BASE_ADRS,	besr.vid_buf_base_adrs_u[0]);
+    OUTREG(OV0_VID_BUF5_BASE_ADRS,	besr.vid_buf_base_adrs_v[0]);
     OUTREG(OV0_P1_V_ACCUM_INIT,		besr.p1_v_accum_init);
     OUTREG(OV0_P1_H_ACCUM_INIT,		besr.p1_h_accum_init);
     OUTREG(OV0_P23_H_ACCUM_INIT,	besr.p23_h_accum_init);
@@ -1073,7 +1071,7 @@ static unsigned radeon_query_pitch(unsigned fourcc,const vidix_yuv_t *spitch)
 
 static int radeon_vid_init_video( vidix_playback_t *config )
 {
-    uint32_t tmp,src_w,src_h,dest_w,dest_h,pitch,h_inc,step_by,left,leftUV,top;
+    uint32_t i,tmp,src_w,src_h,dest_w,dest_h,pitch,h_inc,step_by,left,leftUV,top;
     int is_420,is_rgb32,is_rgb,best_pitch,mpitch;
     radeon_vid_stop_video();
     left = config->src.x << 16;
@@ -1139,7 +1137,8 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     /* keep everything in 16.16 */
     besr.base_addr = INREG(DISPLAY_BASE_ADDR);
     config->offsets[0] = 0;
-    config->offsets[1] = config->frame_size;
+    for(i=1;i<besr.vid_nbufs;i++)
+	    config->offsets[i] = config->offsets[i-1]+config->frame_size;
     if(is_420)
     {
         uint32_t d1line,d2line,d3line;
@@ -1152,15 +1151,15 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 	config->offset.y = d1line & VIF_BUF0_BASE_ADRS_MASK;
 	config->offset.v = d2line & VIF_BUF1_BASE_ADRS_MASK;
 	config->offset.u = d3line & VIF_BUF2_BASE_ADRS_MASK;
-        besr.vid_buf0_base_adrs=((radeon_overlay_off+config->offsets[0]+config->offset.y)&VIF_BUF0_BASE_ADRS_MASK);
-        besr.vid_buf1_base_adrs=((radeon_overlay_off+config->offsets[0]+config->offset.v)&VIF_BUF1_BASE_ADRS_MASK)|VIF_BUF1_PITCH_SEL;
-        besr.vid_buf2_base_adrs=((radeon_overlay_off+config->offsets[0]+config->offset.u)&VIF_BUF2_BASE_ADRS_MASK)|VIF_BUF2_PITCH_SEL;
-        besr.vid_buf3_base_adrs=((radeon_overlay_off+config->offsets[1]+config->offset.y)&VIF_BUF0_BASE_ADRS_MASK);
-        besr.vid_buf4_base_adrs=((radeon_overlay_off+config->offsets[1]+config->offset.v)&VIF_BUF1_BASE_ADRS_MASK)|VIF_BUF1_PITCH_SEL;
-        besr.vid_buf5_base_adrs=((radeon_overlay_off+config->offsets[1]+config->offset.u)&VIF_BUF2_BASE_ADRS_MASK)|VIF_BUF2_PITCH_SEL;
-	config->offset.y = ((besr.vid_buf0_base_adrs)&VIF_BUF0_BASE_ADRS_MASK) - radeon_overlay_off;
-	config->offset.v = ((besr.vid_buf1_base_adrs)&VIF_BUF1_BASE_ADRS_MASK) - radeon_overlay_off;
-	config->offset.u = ((besr.vid_buf2_base_adrs)&VIF_BUF2_BASE_ADRS_MASK) - radeon_overlay_off;
+	for(i=0;i<besr.vid_nbufs;i++)
+	{
+	    besr.vid_buf_base_adrs_y[i]=((radeon_overlay_off+config->offsets[i]+config->offset.y)&VIF_BUF0_BASE_ADRS_MASK);
+	    besr.vid_buf_base_adrs_v[i]=((radeon_overlay_off+config->offsets[i]+config->offset.v)&VIF_BUF1_BASE_ADRS_MASK)|VIF_BUF1_PITCH_SEL;
+	    besr.vid_buf_base_adrs_u[i]=((radeon_overlay_off+config->offsets[i]+config->offset.u)&VIF_BUF2_BASE_ADRS_MASK)|VIF_BUF2_PITCH_SEL;
+	}
+	config->offset.y = ((besr.vid_buf_base_adrs_y[0])&VIF_BUF0_BASE_ADRS_MASK) - radeon_overlay_off;
+	config->offset.v = ((besr.vid_buf_base_adrs_v[0])&VIF_BUF1_BASE_ADRS_MASK) - radeon_overlay_off;
+	config->offset.u = ((besr.vid_buf_base_adrs_u[0])&VIF_BUF2_BASE_ADRS_MASK) - radeon_overlay_off;
 	if(besr.fourcc == IMGFMT_I420 || besr.fourcc == IMGFMT_IYUV)
 	{
 	  uint32_t tmp;
@@ -1171,14 +1170,13 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     }
     else
     {
-      besr.vid_buf0_base_adrs = radeon_overlay_off;
       config->offset.y = config->offset.u = config->offset.v = ((left & ~7) << 1)&VIF_BUF0_BASE_ADRS_MASK;
-      besr.vid_buf0_base_adrs += config->offset.y;
-      besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs;
-      besr.vid_buf2_base_adrs = besr.vid_buf0_base_adrs;
-      besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
-      besr.vid_buf4_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
-      besr.vid_buf5_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
+      for(i=0;i<besr.vid_nbufs;i++)
+      {
+	besr.vid_buf_base_adrs_y[i] =
+	besr.vid_buf_base_adrs_u[i] =
+	besr.vid_buf_base_adrs_v[i] = radeon_overlay_off + config->offset.y;
+      }
     }
 
     tmp = (left & 0x0003ffff) + 0x00028000 + (h_inc << 3);
@@ -1253,15 +1251,30 @@ static void radeon_compute_framesize(vidix_playback_t *info)
 
 int vixConfigPlayback(vidix_playback_t *info)
 {
+  unsigned rgb_size;
   if(!is_supported_fourcc(info->fourcc)) return ENOSYS;
-  if(info->num_frames>2) info->num_frames=2;
+  if(info->num_frames>=VID_PLAY_MAXFRAMES) info->num_frames=VID_PLAY_MAXFRAMES-1;
   if(info->num_frames==1) besr.double_buff=0;
   else                    besr.double_buff=1;
   radeon_compute_framesize(info);
-  radeon_overlay_off = radeon_ram_size - info->frame_size*info->num_frames;
-  radeon_overlay_off &= 0xffff0000;
-  if(radeon_overlay_off < 0) return EINVAL;
-  info->dga_addr = (char *)radeon_mem_base + radeon_overlay_off;
+    
+  rgb_size = radeon_get_xres()*radeon_get_yres()*radeon_vid_get_dbpp();
+  for(;info->num_frames>0; info->num_frames--)
+  {
+      radeon_overlay_off = radeon_ram_size - info->frame_size*info->num_frames;
+      radeon_overlay_off &= 0xffff0000;
+      if(radeon_overlay_off >= (int)rgb_size ) break;
+  }
+  if(info->num_frames <= 3)
+   for(;info->num_frames>0; info->num_frames--)
+   {
+      radeon_overlay_off = radeon_ram_size - info->frame_size*info->num_frames;
+      radeon_overlay_off &= 0xffff0000;
+      if(radeon_overlay_off > 0) break;
+   }
+  if(info->num_frames <= 0) return EINVAL;
+  besr.vid_nbufs = info->num_frames;
+  info->dga_addr = (char *)radeon_mem_base + radeon_overlay_off;  
   radeon_vid_init_video(info);
   return 0;
 }
@@ -1281,29 +1294,20 @@ int vixPlaybackOff( void )
 int vixPlaybackFrameSelect(unsigned frame)
 {
     uint32_t off[6];
+    int prev_frame= (frame-1+besr.vid_nbufs) % besr.vid_nbufs;
     /*
     buf3-5 always should point onto second buffer for better
     deinterlacing and TV-in
     */
     if(!besr.double_buff) return 0;
-    if((frame%2))
-    {
-      off[0] = besr.vid_buf3_base_adrs;
-      off[1] = besr.vid_buf4_base_adrs;
-      off[2] = besr.vid_buf5_base_adrs;
-      off[3] = besr.vid_buf0_base_adrs;
-      off[4] = besr.vid_buf1_base_adrs;
-      off[5] = besr.vid_buf2_base_adrs;
-    }
-    else
-    {
-      off[0] = besr.vid_buf0_base_adrs;
-      off[1] = besr.vid_buf1_base_adrs;
-      off[2] = besr.vid_buf2_base_adrs;
-      off[3] = besr.vid_buf3_base_adrs;
-      off[4] = besr.vid_buf4_base_adrs;
-      off[5] = besr.vid_buf5_base_adrs;
-    }
+    if(frame > besr.vid_nbufs) frame = besr.vid_nbufs-1;
+    if(prev_frame > (int)besr.vid_nbufs) prev_frame = besr.vid_nbufs-1;
+    off[0] = besr.vid_buf_base_adrs_y[frame];
+    off[1] = besr.vid_buf_base_adrs_v[frame];
+    off[2] = besr.vid_buf_base_adrs_u[frame];
+    off[3] = besr.vid_buf_base_adrs_y[prev_frame];
+    off[4] = besr.vid_buf_base_adrs_v[prev_frame];
+    off[5] = besr.vid_buf_base_adrs_u[prev_frame];
     radeon_fifo_wait(8);
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     radeon_engine_idle();
@@ -1315,7 +1319,7 @@ int vixPlaybackFrameSelect(unsigned frame)
     OUTREG(OV0_VID_BUF4_BASE_ADRS,	off[4]);
     OUTREG(OV0_VID_BUF5_BASE_ADRS,	off[5]);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
-    radeon_wait_vsync();
+    if(besr.vid_nbufs == 2) radeon_wait_vsync();
     if(__verbose > 1) radeon_vid_dump_regs();
     return 0;
 }
