@@ -937,6 +937,7 @@ play_dvd:
       goto goto_next_file;
     }
     play_tree_insert_entry(playtree_iter->tree,entry);
+    play_tree_set_params_from(entry,playtree_iter->tree);
     entry = playtree_iter->tree;
     if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY) {
       eof = PT_NEXT_ENTRY;

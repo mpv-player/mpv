@@ -382,6 +382,23 @@ play_tree_unset_param(play_tree_t* pt, char* name) {
   return 1;
 }
 
+void
+play_tree_set_params_from(play_tree_t* dest,play_tree_t* src) {
+  int i;
+
+#ifdef MP_DEBUG
+  assert(dest != NULL);
+  assert(src != NULL);
+#endif
+
+  if(!src->params)
+    return;
+
+  for(i = 0; src->params[i].name != NULL ; i++)
+    play_tree_set_param(dest,src->params[i].name,src->params[i].value);
+
+}
+
 static void 
 play_tree_iter_push_params(play_tree_iter_t* iter) {
   int n;

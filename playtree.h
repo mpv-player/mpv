@@ -117,6 +117,9 @@ play_tree_set_param(play_tree_t* pt, char* name, char* val);
 int
 play_tree_unset_param(play_tree_t* pt, char* name);
 
+// Set all paramter of source in dest
+void
+play_tree_set_params_from(play_tree_t* dest,play_tree_t* src);
 
 /// Iterator
 
