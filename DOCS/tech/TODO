@@ -5,10 +5,17 @@ TODO:
 FOR THE NEXT PRE_RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 - fix -vop expand=-50 + ffdivx
-- remove -vop lavcdeint, remove -vop yuy2, yvu9
+- fix partial -dr + ffmpeg + B frames (different stride per frame)
+- remove or fix -vop lavcdeint
+- NEWSTRUCT DVB driver detection & support
+- fix locale problems (add common float parser / mp_sscanf())
+- apply the delayed patches
+- fix the known bugs: 
+   ... [Gabu: please list your bugs here...]
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
+- remove -vop yuy2, yvu9
 - cleanup qtaudio/qtvideo (move globals to context)
 - cleanup DMO interfaces
 - re-design makefile dependency system
@@ -16,9 +23,6 @@ FOR THE v0.90 RELEASE:
 - new demuxer layer - at least modularized...
 - fix AVI index offset base position handling ('no video stream found' bug)
 - review and implement draw_slice() support in video filters
-- fix locale problems (add common float parser / mp_sscanf())
-- NEWSTRUCT DVB driver support
-- apply the delayed patches
 - Update GUI code to support gtk 2.x (any volunteers??? we really need help here)
 
 FOR THE v1.00 RELEASE:
@@ -67,7 +71,8 @@ DOCUMENTATION TODO:
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- update the man page with all current options
+- update the man page with all current options:
+  - muxer layer (-of)
 - merge tech/vop.txt and tech/libavc-options.txt into the man page
 - finish reviewing all of the docs
   - mplayer.1
