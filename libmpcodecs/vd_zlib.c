@@ -31,11 +31,12 @@ typedef struct {
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh, int cmd, void *arg, ...)
 {
+    vd_zlib_ctx *ctx = sh->context;
     switch(cmd)
     {
 	case VDCTRL_QUERY_FORMAT:
 	{
-	    if (*((int*)arg) == IMGFMT_BGR24)
+	    if (*((int*)arg) == (IMGFMT_BGR|ctx->depth))
 		return(CONTROL_TRUE);
 	    else
 		return(CONTROL_FALSE);
