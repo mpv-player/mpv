@@ -1,4 +1,4 @@
-.\" synced with 1.858
+.\" synced with 1.859
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "14 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "16 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -5864,7 +5864,8 @@ Pour une conformité stricte MPEG-1/\:2/\:4 cela devrait être <=132.
 .TP
 .B sc_threshold=<-1000000\-1000000>
 Seuil pour la détection des changements de scène.
-Libavcodec ajoute une trame-clé quand elle détecte un changement de scène.
+Une trame-clé est insérée par libavcodec quand il détecte un changement
+de scène.
 Vous pouvez définir la sensibilité de la détection avec cette option.
 -1000000 signifie qu'il y aura un changement détecté à chaque trame, 1000000
 signifie qu'aucun changement de scène ne sera détecté (par défaut\ : 0).
@@ -6260,7 +6261,7 @@ Taille des paquets vidéo, améliore la résistance aux erreurs.
 .RSs
 .IPs 0\ \ \ \ 
 désactivé (par défaut)
-.IPs 100-1000
+.IPs 100\-1000
 bon choix
 .RE
 .PD 1
@@ -7141,7 +7142,8 @@ Définit le type de quantum à utiliser.
 conserver plus de détails.
 À faible débit binaire, H.263 adoucit plus les traits de l'image et donnera une
 image où les macro-blocs se verront moins.
-Si vous utilisez vos propres matrices de quantification, vous devez
+Si vous utilisez vos propres matrices de quantification, vous 
+.B devez
 utiliser la quantification MPEG.
 .
 .TP
@@ -7282,7 +7284,7 @@ du fichier généré.
 XviD permet aux utilisateurs de donner le l'overhead par trame de
 leur conteneur (donner une moyenne par trame).
 0 a un sens particulier, il laisse XviD prendre la valeur par défaut.
-(par défaut\ : 24 - l'overhead moyen d'AVI).
+(par défaut\ : 24 \- l'overhead moyen d'AVI).
 .
 .TP
 .B par=<mode>
