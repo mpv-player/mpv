@@ -319,7 +319,7 @@ static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timesta
   if(format==0x30335652){ // RV30 timestamps:
     kf=2*(((s[1]&15)<<8)+s[2]); // 12-bit timestamp from frame header
     //kf=((s[1]<<8)+s[2])>>3; // 12-bit timestamp from frame header
-    printf("\nTS: %08X (%04X) %02X %02X %02X %02X\n",timestamp,kf,s[0],s[1],s[2],s[3]);
+    if(verbose>1) printf("\nTS: %08X (%04X) %02X %02X %02X %02X\n",timestamp,kf,s[0],s[1],s[2],s[3]);
     kf|=timestamp&(~0x1fff);	// combine with packet timestamp
     if(kf<timestamp-4096) kf+=8192; else // workaround wrap-around problems
     if(kf>timestamp+4096) kf-=8192;
