@@ -2,8 +2,8 @@
 
 include ../config.mak
 
-MAJOR_VERSION = 0
-MINOR_VERSION = 1
+MAJOR_VERSION = 1
+MINOR_VERSION = 0
 VERSION = $(MAJOR_VERSION).$(MINOR_VERSION) 
 
 
@@ -60,7 +60,7 @@ endif
 all:    $(LIBNAME) $(SHORTNAME)
 
 pci_names.c:
-	$(AWK) -f pci_db2c.awk oth/pci.db
+	LC_CTYPE=C $(AWK) -f pci_db2c.awk oth/pci.db
 
 test:
 	$(CC) test.c -o test $(SHORTNAME)
