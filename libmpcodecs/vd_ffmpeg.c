@@ -347,7 +347,7 @@ static int init(sh_video_t *sh){
 #endif
     if (sh->ImageDesc &&
 	 sh->format == mmioFOURCC('S','V','Q','3')){
-	avctx->extradata_size = *(int*)sh->ImageDesc;
+	avctx->extradata_size = (*(int*)sh->ImageDesc) - sizeof(int);
 	avctx->extradata = malloc(avctx->extradata_size);
 	memcpy(avctx->extradata, ((int*)sh->ImageDesc)+1, avctx->extradata_size);
     }
