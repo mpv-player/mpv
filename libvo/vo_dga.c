@@ -233,7 +233,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 
     char *d;
     unsigned int offset;
-    unsigned int buffer_stride;
+    int buffer_stride;
 
     offset = vo_dga_width * y0 + x0;
     buffer_stride = vo_dga_width;
