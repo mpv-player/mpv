@@ -1,4 +1,4 @@
-#define TEXTUREFORMAT_32BPP
+#define TEXTUREFORMAT_ALWAYS GL_RGB8
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -134,8 +134,8 @@ static int find_gl_format (uint32_t format)
       gl_type = GL_UNSIGNED_BYTE;
       return 0;
   }
-#ifdef TEXTUREFORMAT_32BPP
-  gl_texfmt = GL_RGB8;
+#ifdef TEXTUREFORMAT_ALWAYS
+  gl_texfmt = TEXTUREFORMAT_ALWAYS;
 #endif
   return 1;
 }
