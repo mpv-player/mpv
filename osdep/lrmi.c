@@ -9,6 +9,8 @@ versions as being modified.
 
 This software has NO WARRANTY.  Use it at your own risk.
 Original location: http://cvs.debian.org/lrmi/
+
+Modified for use with MPlayer, see the CVS log for details.
 */
 
 #include "../config.h"
