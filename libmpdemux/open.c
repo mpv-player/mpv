@@ -351,7 +351,6 @@ tv_err:
           url_free(url);
 	  return NULL;
 	}
-	stream_enable_cache(stream,2048*1024);
 	url_free(url);
 	return stream;
   }
