@@ -24,7 +24,7 @@
 
 int smjpeg_check_file(demuxer_t* demuxer){
     int orig_pos = stream_tell(demuxer->stream);
-    char buf[7];
+    char buf[8];
     int version;
     
     mp_msg(MSGT_DEMUX, MSGL_V, "Checking for SMJPEG\n");
