@@ -312,6 +312,7 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC, couldn't find encoder for codec %s\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC, couldn't allocate context!\n"
 #define MSGTR_CouldntOpenCodec "Couldn't open codec %s, br=%d\n"
+#define MSGTR_FramesizeBufsizeTag "FRAME_SIZE: %d, BUFFER_SIZE: %d, TAG: 0x%x\n"
 
 // cfg-mencoder.h:
 
