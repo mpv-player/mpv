@@ -42,7 +42,7 @@ static unsigned long (*raGetFlavorProperty)(unsigned long,unsigned long,unsigned
 static unsigned long (*raInitDecoder)(unsigned long,unsigned long);
 static unsigned long (*raOpenCodec2)(unsigned long);
 static unsigned long (*raSetFlavor)(unsigned long,unsigned long);
-static void  (*raSetDLLAccessPath)(unsigned long);
+//static void  (*raSetDLLAccessPath)(unsigned long);
 static void  (*raSetPwd)(char*,char*);
 
 typedef struct {
@@ -78,12 +78,12 @@ static int preinit(sh_audio_t *sh){
     raOpenCodec2 = dlsym(handle, "RAOpenCodec2");
     raInitDecoder = dlsym(handle, "RAInitDecoder");
     raSetFlavor = dlsym(handle, "RASetFlavor");
-    raSetDLLAccessPath = dlsym(handle, "SetDLLAccessPath");
+//    raSetDLLAccessPath = dlsym(handle, "SetDLLAccessPath");
     raSetPwd = dlsym(handle, "RASetPwd"); // optional, used by SIPR
     
   if(!raCloseCodec || !raDecode || !raFlush || !raFreeDecoder ||
      !raGetFlavorProperty || !raOpenCodec2 || !raSetFlavor ||
-     !raSetDLLAccessPath || !raInitDecoder){
+     /*!raSetDLLAccessPath ||*/ !raInitDecoder){
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Cannot resolve symbols - incompatible dll\n");
       return 0;
   }
