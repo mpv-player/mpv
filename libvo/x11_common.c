@@ -45,6 +45,8 @@ Window   mRootWin;
 int mScreen;
 int mLocalDisplay;
 
+/* output window id */
+int WinID=-1;
 
 void vo_hidecursor ( Display *disp , Window win )
 {

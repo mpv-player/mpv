@@ -71,9 +71,6 @@ static XImage *myximage;
 static int depth,bpp,mode;
 static XWindowAttributes attribs;
 
-/* output window id */
-int WinID=0;
-
 //static int vo_dwidth,vo_dheight;
 
 static int Flip_Flag;
@@ -284,8 +281,8 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
      }
 #endif
  
-    if ( WinID ){
-      mywindow = (Window)WinID;
+    if ( WinID>=0 ){
+      mywindow = WinID ? ((Window)WinID) : RootWindow( mDisplay,mScreen );
       XUnmapWindow( mDisplay,mywindow );
       XChangeWindowAttributes( mDisplay,mywindow,xswamask,&xswa );
     }

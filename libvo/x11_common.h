@@ -12,6 +12,7 @@ extern Display *mDisplay;
 extern Window mRootWin;
 extern int mScreen;
 extern int mLocalDisplay;
+extern int WinID;
 
 int vo_init( void );
 int vo_hidecursor ( Display* , Window );

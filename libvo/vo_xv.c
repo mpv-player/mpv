@@ -188,9 +188,16 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
    xswa.border_pixel     = 0;
    xswamask = CWBackPixel | CWBorderPixel;
 
+    if ( WinID>=0 ){
+      mywindow = WinID ? ((Window)WinID) : RootWindow(mDisplay,mScreen);
+      XUnmapWindow( mDisplay,mywindow );
+      XChangeWindowAttributes( mDisplay,mywindow,xswamask,&xswa );
+    } else 
+
    mywindow = XCreateWindow(mDisplay, RootWindow(mDisplay,mScreen),
-   hint.x, hint.y, hint.width, hint.height,
-   0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
+       hint.x, hint.y, hint.width, hint.height,
+       0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
+
    vo_x11_classhint( mDisplay,mywindow,"xv" );
    vo_hidecursor(mDisplay,mywindow);
 
