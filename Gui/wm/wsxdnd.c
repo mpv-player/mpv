@@ -5,6 +5,7 @@
 #include "ws.h"
 #include "wsxdnd.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -158,7 +159,9 @@ wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event)
       int offset = 0;
       Atom* ret_buff;
       Atom ret_type;
-      unsigned long ret_format,ret_items;
+      int ret_format;
+      unsigned long ret_items;
+
       /* while there is data left...*/
       while(ret_left){
 	XGetWindowProperty(wsDisplay,event->data.l[0],_XA_XdndTypeList,

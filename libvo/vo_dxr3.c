@@ -199,12 +199,13 @@ uint32_t control(uint32_t request, void *data, ...)
 		if (ioctl(fd_control, EM8300_IOCTL_GETBCS, &bcs) < 0)
 		    return VO_FALSE;
 		if (!strcasecmp(data, "brightness"))
-		    bcs.brightness = value;
+		    bcs.brightness = (value+100)*5;
 		else if (!strcasecmp(data, "contrast"))
-		    bcs.contrast = value;
+		    bcs.contrast = (value+100)*5;
 		else if (!strcasecmp(data, "saturation"))
-		    bcs.saturation = value;
-		
+		    bcs.saturation = (value+100)*5;
+		else return VO_FALSE;
+        
 		if (ioctl(fd_control, EM8300_IOCTL_SETBCS, &bcs) < 0)
 		    return VO_FALSE;
 		return VO_TRUE;
@@ -223,11 +224,13 @@ uint32_t control(uint32_t request, void *data, ...)
 		    return VO_FALSE;
 		
 		if (!strcasecmp(data, "brightness"))
-		    *value = bcs.brightness;
+		    *value = (bcs.brightness/5)-100;
 		else if (!strcasecmp(data, "contrast"))
-		    *value = bcs.contrast;
+		    *value = (bcs.contrast/5)-100;
 		else if (!strcasecmp(data, "saturation"))
-		    *value = bcs.saturation;
+		    *value = (bcs.saturation/5)-100;
+		else return VO_FALSE;
+        
 		return VO_TRUE;
 	    }
 	}
