@@ -89,7 +89,7 @@ static int init(sh_video_t *sh){
     }
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: libavcodec init OK!\n");
     ctx->last_aspect=-3;
-    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
+    return 1; //mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
 }
 
 // uninit driver
