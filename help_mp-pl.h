@@ -8,20 +8,20 @@ static char help_text[]=
 "U¿ycie:   mplayer [opcje] [¶cie¿ka/]nazwa\n"
 "\n"
 "Opcje:\n"
-" -vo <drv[:dev]> wybierz sterownik[:urz±dzenie] video (lista po '-vo help')\n"
-" -ao <drv[:dev]> wybierz sterownik[:urz±dzenie] audio (lista po '-ao help')\n"
-" -vcd <trackno>  odtwarzaj bezpo¶rednio ¶cie¿kê VCD (video cd)\n"
+" -vo <drv[:dev]> wybór sterownika[:urz±dzenia] video (lista po '-vo help')\n"
+" -ao <drv[:dev]> wybór sterownika[:urz±dzenia] audio (lista po '-ao help')\n"
+" -vcd <trackno>  odtwarzanie bezpo¶rednio ¶cie¿ki VCD (video cd)\n"
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>  urz±dzenie DVD do autentykacji (dla zaszyfrowanych dysków)\n"
 #endif
-" -ss <timepos>   skocz do podanej pozycji (sekundy albo hh:mm:ss)\n"
-" -nosound        nie odtwarzaj d¼wiêku\n"
+" -ss <timepos>   skok do podanej pozycji (sekundy albo hh:mm:ss)\n"
+" -nosound        odtwarzanie bez d¼wiêku\n"
 #ifdef USE_FAKE_MONO
-" -stereo         wybierz tryb stereo dla MPEG1 (0:stereo 1:lewo 2:prawo)\n"
+" -stereo         wybór trybu stereo dla MPEG1 (0:stereo 1:lewo 2:prawo)\n"
 #endif
 " -fs -vm -zoom   opcje pe³noekranowe (pe³en ekran,zmiana trybu,skalowanie)\n"
-" -x <x> -y <y>   skaluj do rozdzielczo¶ci <x>*<y> [je¶li -vo driver pozwala!]\n"
-" -sub <file>     podaj plik z napisami (zobacz tak¿e -subfps, -subdelay)\n"
+" -x <x> -y <y>   skalowanie do rozdzielczo¶ci <x>*<y> [je¶li -vo pozwala!]\n"
+" -sub <file>     wybór pliku z napisami (zobacz tak¿e -subfps, -subdelay)\n"
 " -vid x -aid y   wybór odtwarzanego strumienia video (x) i audio (y)\n"
 " -fps x -srate y wybór prêdko¶ci odtwarzania video (x fps) i audio (y Hz)\n"
 " -pp <quality>   wybór filtra wyg³adzaj±cego (0-4 dla DivX, 0-63 dla mpeg)\n"
@@ -49,7 +49,8 @@ static char help_text[]=
 #define MSGTR_Exit_frames "Zadana liczba klatek odtworzona"
 #define MSGTR_Exit_quit "Wyj¶cie"
 #define MSGTR_Exit_eof "Koniec pliku"
-#define MSGTR_Exit_error "Fatal error" // FIXME!!
+#define MSGTR_Exit_error "B³±d krytyczny"
+#define MSGTR_IntBySignal "\nMPlayer przerwany sygna³em %d w module: %s \n"
 #define MSGTR_NoHomeDir "Nie mogê znale¼æ katalogu HOME\n"
 #define MSGTR_GetpathProblem "problem z get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Stwarzam plik z konfiguracj±: %s\n"
