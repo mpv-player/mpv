@@ -314,7 +314,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  XSizeHints hint;
  XVisualInfo vinfo;
  XEvent xev;
- XvPortID xv_p;
 
  XGCValues xgcv;
  XSetWindowAttributes xswa;
@@ -342,9 +341,17 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #endif
  flip_flag=flags&8;
  num_buffers=vo_doublebuffering?NUM_BUFFERS:1;
- 
- if (!vo_init()) return -1;
 
+   /* check image formats */
+     fo = XvListImageFormats(mDisplay, xv_port, (int*)&formats);
+     xv_format=0;
+     if(format==IMGFMT_BGR24) format=IMGFMT_YV12;
+     for(i = 0; i < formats; i++){
+       printf("Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
+       if (fo[i].id == format) xv_format = fo[i].id;
+     }
+     if (!xv_format) return -1;
+ 
  aspect_save_screenres(vo_screenwidth,vo_screenheight);
 
 #ifdef HAVE_NEW_GUI
@@ -439,42 +446,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
   }
 #endif
 
- xv_port = 0;
- if (Success == XvQueryExtension(mDisplay,&ver,&rel,&req,&ev,&err))
-  {
-   /* check for Xvideo support */
-   if (Success != XvQueryAdaptors(mDisplay,DefaultRootWindow(mDisplay), &adaptors,&ai))
-    {
-     printf("Xv: XvQueryAdaptors failed");
-     return -1;
-    }
-   /* check adaptors */
-   for (i = 0; i < adaptors && xv_port == 0; i++)
-    {
-     if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask))
-	 for (xv_p = ai[i].base_id; xv_p < ai[i].base_id+ai[i].num_ports; ++xv_p)
-	     if (!XvGrabPort(mDisplay, xv_p, CurrentTime)) {
-		 xv_port = xv_p;
-		 break;
-	     } else {
-		 printf("Xv: could not grab port %i\n", (int)xv_p);
-	     }
-    }
-   /* check image formats */
-   if (xv_port != 0)
-    {
-     fo = XvListImageFormats(mDisplay, xv_port, (int*)&formats);
-     xv_format=0;
-     if(format==IMGFMT_BGR24) format=IMGFMT_YV12;
-     for(i = 0; i < formats; i++){
-       printf("Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
-       if (fo[i].id == format) xv_format = fo[i].id;
-     }
-     if (!xv_format) xv_port = 0;
-    }
-
-   if (xv_port != 0)
-    {
      printf( "using Xvideo port %d for hw scaling\n",xv_port );
        
        switch (xv_format){
@@ -513,12 +484,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
       }
      saver_off(mDisplay);  // turning off screen saver
      return 0;
-    }
-  }
-
- printf("Sorry, Xv not supported by this X11 version/driver\n");
- printf("******** Try with  -vo x11  or  -vo sdl  *********\n");
- return 1;
 }
 
 static const vo_info_t * get_info(void)
@@ -745,7 +710,17 @@ static uint32_t get_image(mp_image_t *mpi){
 
 static uint32_t query_format(uint32_t format)
 {
+    int flag=1;
+   /* check image formats */
+     fo = XvListImageFormats(mDisplay, xv_port, (int*)&formats);
+     if(format==IMGFMT_BGR24){ format=IMGFMT_YV12;flag|=2;} // conversion!
+     for(i = 0; i < formats; i++){
+//       printf("Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
+       if (fo[i].id == format) return flag; //xv_format = fo[i].id;
+     }
+     return 0;
 
+/*
 switch(format){
  case IMGFMT_YUY2:
  case IMGFMT_UYVY:
@@ -760,8 +735,8 @@ switch(format){
 // umm, this is a kludge, we need to ask the server.. (see init function above)
     return 1;
 }
-
 return 0;
+*/
 
 }
 
@@ -770,20 +745,53 @@ static void uninit(void)
  int i;
  if(!mDisplay) return;
  saver_on(mDisplay); // screen saver back on
- for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
+ if(vo_config_count) for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
 #ifdef HAVE_XF86VM
  vo_vm_close(mDisplay);
 #endif
- vo_x11_uninit(mDisplay, vo_window);
+ if(vo_config_count) vo_x11_uninit(mDisplay, vo_window);
 }
 
 static uint32_t preinit(const char *arg)
 {
+    XvPortID xv_p;
     if(arg) 
     {
 	printf("vo_xv: Unknown subdevice: %s\n",arg);
 	return ENOSYS;
     }
+    if (!vo_init()) return -1;
+
+    xv_port = 0;
+   /* check for Xvideo extension */
+    if (Success != XvQueryExtension(mDisplay,&ver,&rel,&req,&ev,&err)){
+	printf("Sorry, Xv not supported by this X11 version/driver\n");
+	printf("******** Try with  -vo x11  or  -vo sdl  *********\n");
+	return -1;
+    }
+    
+   /* check for Xvideo support */
+    if (Success != XvQueryAdaptors(mDisplay,DefaultRootWindow(mDisplay), &adaptors,&ai)){
+	printf("Xv: XvQueryAdaptors failed");
+	return -1;
+    }
+
+   /* check adaptors */
+    for (i = 0; i < adaptors && xv_port == 0; i++){
+     if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask))
+	 for (xv_p = ai[i].base_id; xv_p < ai[i].base_id+ai[i].num_ports; ++xv_p)
+	     if (!XvGrabPort(mDisplay, xv_p, CurrentTime)) {
+		 xv_port = xv_p;
+		 break;
+	     } else {
+		 printf("Xv: could not grab port %i\n", (int)xv_p);
+	     }
+    }
+    if(!xv_port){
+	printf("Couldn't find free Xvideo port - maybe other applications keep open it\n");
+	return -1;
+    }
+
     return 0;
 }
 
