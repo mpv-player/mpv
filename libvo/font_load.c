@@ -5,6 +5,8 @@
 
 #include "font_load.h"
 
+char *get_path ( char * );
+
 raw_file* load_raw(char *name){
     int bpp;
     raw_file* raw=malloc(sizeof(raw_file));
@@ -107,17 +109,31 @@ while(fgets(sor,1020,f)){
   
   if(strcmp(section,"[files]")==0){
       if(pdb==2 && strcmp(p[0],"alpha")==0){
-          if(!((desc->pic_a[fontdb]=load_raw(p[1])))){
+    	  char *cp=get_path("font/");
+	  char *cp2=malloc(strlen(cp)+strlen(p[1])+1);
+	  sprintf(cp2,"%s%s",cp,p[1]);
+          if(!((desc->pic_a[fontdb]=load_raw(cp2)))){
                 printf("Can't load font bitmap: %s\n",p[1]);
+		free(cp);
+		free(cp2);
                 return NULL;
           }
+	  free(cp);
+	  free(cp2);
           continue;
       }
       if(pdb==2 && strcmp(p[0],"bitmap")==0){
-          if(!((desc->pic_b[fontdb]=load_raw(p[1])))){
+    	  char *cp=get_path("font/");
+	  char *cp2=malloc(strlen(cp)+strlen(p[1])+1);
+	  sprintf(cp2,"%s%s",cp,p[1]);
+          if(!((desc->pic_b[fontdb]=load_raw(cp2)))){
                 printf("Can't load font bitmap: %s\n",p[1]);
+		free(cp);
+		free(cp2);
                 return NULL;
           }
+	  free(cp);
+	  free(cp2);
           continue;
       }
   } else
