@@ -426,10 +426,8 @@ static inline void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len
 		 * is needed to become ordered again. */
 		__asm__ __volatile__ ("sfence":::"memory");
 #endif
-#ifndef HAVE_SSE
 		/* enables to use FPU */
 		__asm__ __volatile__ (EMMS:::"memory");
-#endif
 	}
 	/*
 	 *	Now do the tail of the block
