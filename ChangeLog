@@ -67,6 +67,7 @@ MPlayer (1.0)
     * snow video codec support via lavc
     * QuickDraw video support via lavc
     * Cinepak, CYUV and RoQ audio/video moved to FFmpeg
+    * Vianet Lsvx video support via binary DLL
 
     Demuxers:
     * fix -nosound and -novideo for NSV
