@@ -73,6 +73,23 @@ job, so why change? Besides, we dislike the auto* tools, just like
 <title>Compilation</title>
 <qandaentry>
 <question><para>
+Compilation fails with an error and <application>gcc</application> bails out
+with some cryptic message containing the phrase
+<systemitem>internal compiler error</systemitem> or
+<systemitem>unable to find a register to spill</systemitem>.
+</para></question>
+<answer><para>
+You have stumbled over a bug in <application>gcc</application>. Please
+<ulink url="http://gcc.gnu.org/bugs.html">report it to the gcc team</ulink>
+but not to us. For some reason <application>MPlayer</application> seems to
+trigger compiler bugs frequently. Nevertheless we cannot fix them and do not
+add workarounds for compiler bugs to our sources. Upgrading your compiler
+often makes the problem go away.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 Are there binary (RPM/deb) packages of <application>MPlayer</application>?
 </para></question>
 <answer><para>
