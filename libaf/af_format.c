@@ -126,26 +126,32 @@ static char* fmt2str(int format, char* str, size_t size)
   return str;
 }
 
-// Helper function to check sanity for input arguments
-int check_sanity(af_data_t* data)
-{
-  char buf[256];
-  // Sanity check for bytes per sample
-  if(data->bps != 4 && data->bps != 2 && data->bps != 1){
-    af_msg(AF_MSG_ERROR,"[format] The number of bytes per sample must be 1, 2 or 4. Current value is %i \n",data->bps);
-    return AF_ERROR;
-  }
+// Helper functions to check sanity for input arguments
 
-  // Check for unsupported formats
-  switch(data->format & AF_FORMAT_SPECIAL_MASK){
-  case(AF_FORMAT_MPEG2): 
-  case(AF_FORMAT_AC3):
-    af_msg(AF_MSG_ERROR,"[format] Sample format %s not yet supported \n",
-	 fmt2str(data->format,buf,255)); 
+// Sanity check for bytes per sample
+int check_bps(int bps)
+{
+  if(bps != 4 && bps != 2 && bps != 1){
+    af_msg(AF_MSG_ERROR,"[format] The number of bytes per sample" 
+	   " must be 1, 2 or 4. Current value is %i \n",bps);
     return AF_ERROR;
   }
   return AF_OK;
-}	
+}
+
+// Check for unsupported formats
+int check_format(int format)
+{
+  char buf[256];
+  switch(format & AF_FORMAT_SPECIAL_MASK){
+  case(AF_FORMAT_MPEG2): 
+  case(AF_FORMAT_AC3):
+    af_msg(AF_MSG_ERROR,"[format] Sample format %s not yet supported \n",
+	 fmt2str(format,buf,255)); 
+    return AF_ERROR;
+  }
+  return AF_OK;
+}
 
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
@@ -158,10 +164,12 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if(af->data->format == ((af_data_t*)arg)->format && 
        af->data->bps == ((af_data_t*)arg)->bps)
       return AF_DETACH;
-    
+
     // Check for errors in configuraton
-    if(AF_OK != check_sanity((af_data_t*)arg) || 
-       AF_OK != check_sanity(af->data))
+    if((AF_OK != check_bps(((af_data_t*)arg)->bps)) ||
+       (AF_OK != check_format(((af_data_t*)arg)->format)) ||
+       (AF_OK != check_bps(af->data->bps)) ||
+       (AF_OK != check_format(af->data->format)))
       return AF_ERROR;
 
     af_msg(AF_MSG_VERBOSE,"[format] Changing sample format from %ibit %sto %ibit %s \n",
@@ -175,35 +183,47 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     return AF_OK;
   }
   case AF_CONTROL_COMMAND_LINE:{
-    af_data_t d={NULL,0,0,0,0,2};
+    int bps = 2;
+    int format = AF_FORMAT_NE;
     char str[256];
     str[0] = '\0';
-    sscanf((char*)arg,"%i:%s",&(d.bps),str);
+    sscanf((char*)arg,"%i:%s",&bps,str);
     // Convert string to format
-    d.format = str2fmt(str);
+    format = str2fmt(str);
     
     // Automatic correction of errors
-    switch(d.format & AF_FORMAT_SPECIAL_MASK){
+    switch(format & AF_FORMAT_SPECIAL_MASK){
     case(AF_FORMAT_A_LAW):
     case(AF_FORMAT_MU_LAW): 
-      d.bps=1; break;
+      bps=1; break;
     case(AF_FORMAT_AC3):
-      d.bps=4; break; // I think
+      bps=4; break; // I think
     }
-    if(AF_FORMAT_F == (d.format & AF_FORMAT_POINT_MASK))
-      d.bps=4;
-
-    return af->control(af,AF_CONTROL_FORMAT,&d);
+    if(AF_FORMAT_F == (format & AF_FORMAT_POINT_MASK))
+      bps=4;
+    
+    if((AF_OK != af->control(af,AF_CONTROL_FORMAT_BPS | AF_CONTROL_SET,&bps)) ||
+       (AF_OK != af->control(af,AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET,&format)))
+      return AF_ERROR;
+    return AF_OK;
   }
-  case AF_CONTROL_FORMAT:
+  case AF_CONTROL_FORMAT_BPS | AF_CONTROL_SET:
     // Reinit must be called after this function has been called
     
     // Check for errors in configuraton
-    if(AF_OK != check_sanity((af_data_t*)arg))
+    if(AF_OK != check_bps(*(int*)arg))
       return AF_ERROR;
 
-    af->data->format = ((af_data_t*)arg)->format;
-    af->data->bps=((af_data_t*)arg)->bps; 
+    af->data->bps = *(int*)arg;
+    return AF_OK;
+  case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET:
+    // Reinit must be called after this function has been called
+
+    // Check for errors in configuraton
+    if(AF_OK != check_format(*(int*)arg))
+      return AF_ERROR;
+
+    af->data->format = *(int*)arg;
     return AF_OK;
   }
   return AF_UNKNOWN;

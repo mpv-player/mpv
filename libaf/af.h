@@ -180,6 +180,19 @@ int af_resize_local_buffer(af_instance_t* af, af_data_t* data);
    needed */
 int af_lencalc(frac_t mul, af_data_t* data);
 
+/* Helper function used to convert to gain value from dB. Returns
+   AF_OK if of and AF_ERROR if fail */
+int af_from_dB(int n, float* in, float* out, float k, float mi, float ma);
+/* Helper function used to convert from gain value to dB. Returns
+   AF_OK if of and AF_ERROR if fail */
+int af_to_dB(int n, float* in, float* out, float k);
+/* Helper function used to convert from ms to sample time*/
+int af_from_ms(int n, float* in, float* out, int rate, float mi, float ma);
+/* Helper function used to convert from sample time to ms */
+int af_to_ms(int n, float* in, float* out, int rate); 
+/* Helper function for testing the output format */
+int af_test_output(struct af_instance_s* af, af_data_t* out);
+
 /* Memory reallocation macro: if a local buffer is used (i.e. if the
    filter doesn't operate on the incoming buffer this macro must be
    called to ensure the buffer is big enough. */

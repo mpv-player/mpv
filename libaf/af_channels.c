@@ -10,6 +10,15 @@
 
 #include "af.h"
 
+#define FR 0
+#define TO 1
+
+typedef struct af_channels_s{
+  int route[AF_NCH][2];
+  int nr;
+  int router;
+}af_channels_t;
+
 // Local function for copying data
 void copy(void* in, void* out, int ins, int inos,int outs, int outos, int len, int bps)
 {
@@ -67,41 +76,140 @@ void copy(void* in, void* out, int ins, int inos,int outs, int outos, int len, i
     break;
   }
   default:
-    af_msg(AF_MSG_ERROR,"[channels] Unsupported number of bytes/sample: %i please report this error on the MPlayer mailing list. \n",bps);
+    af_msg(AF_MSG_ERROR,"[channels] Unsupported number of bytes/sample: %i" 
+	   " please report this error on the MPlayer mailing list. \n",bps);
   }
+}
+
+// Make sure the routes are sane
+static int check_routes(af_channels_t* s, int nin, int nout)
+{
+  int i;
+  if((s->nr < 1) || (s->nr > AF_NCH)){
+    af_msg(AF_MSG_ERROR,"[channels] The number of routing pairs musst be" 
+	   " between 1 and %i. Current value is %i\n",AF_NCH,s->nr);
+    return AF_ERROR;
+  }
+	
+  for(i=0;i<s->nr;i++){
+    if((s->route[i][FR] >= nin) || (s->route[i][TO] >= nout)){
+      af_msg(AF_MSG_ERROR,"[channels] Invalid routing in pair nr. %i.\n", i);
+      return AF_ERROR;
+    }
+  }
+  return AF_OK;
 }
 
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
+  af_channels_t* s = af->setup;
   switch(cmd){
   case AF_CONTROL_REINIT:
-    // Make sure this filter isn't redundant 
-    if(af->data->nch == ((af_data_t*)arg)->nch)
-      return AF_DETACH;
+
+    // Set default channel assignment
+    if(!s->router){
+      int i;
+      // Make sure this filter isn't redundant 
+      if(af->data->nch == ((af_data_t*)arg)->nch)
+	return AF_DETACH;
+
+      // If mono: fake stereo
+      if(((af_data_t*)arg)->nch == 1){
+	s->nr = min(af->data->nch,2);
+	for(i=0;i<s->nr;i++){
+	  s->route[i][FR] = 0;
+	  s->route[i][TO] = i;
+	}
+      }
+      else{
+	s->nr = min(af->data->nch, ((af_data_t*)arg)->nch);
+	for(i=0;i<s->nr;i++){
+	  s->route[i][FR] = i;
+	  s->route[i][TO] = i;
+	}
+      }
+    }
 
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->format = ((af_data_t*)arg)->format;
     af->data->bps    = ((af_data_t*)arg)->bps;
     af->mul.n        = af->data->nch;
     af->mul.d	     = ((af_data_t*)arg)->nch;
-    return AF_OK;
+    return check_routes(s,((af_data_t*)arg)->nch,af->data->nch);
   case AF_CONTROL_COMMAND_LINE:{
     int nch = 0;
-    sscanf((char*)arg,"%i",&nch);
-    return af->control(af,AF_CONTROL_CHANNELS,&nch);
-  }  
-  case AF_CONTROL_CHANNELS: 
+    int n = 0;
+    // Check number of channels and number of routing pairs
+    sscanf(arg, "%i:%i%n", &nch, &s->nr, &n);
+
+    // If router scan commandline for routing pairs
+    if(s->nr){
+      char* cp = &((char*)arg)[n];
+      int ch = 0;
+      // Sanity check
+      if((s->nr < 1) || (s->nr > AF_NCH)){
+	af_msg(AF_MSG_ERROR,"[channels] The number of routing pairs musst be" 
+	     " between 1 and %i. Current value is %i\n",AF_NCH,s->nr);
+      }	
+      s->router = 1;
+      // Scan for pairs on commandline
+      while((*cp == ':') && (ch < s->nr)){
+	sscanf(cp, ":%i:%i%n" ,&s->route[ch][FR], &s->route[ch][TO], &n);
+	af_msg(AF_MSG_DEBUG0,"[channels] Routing from channel %i to" 
+	       " channel %i\n",s->route[ch][FR],s->route[ch][TO]);
+	cp = &cp[n];
+	ch++;
+      }
+    }
+
+    if(AF_OK != af->control(af,AF_CONTROL_CHANNELS | AF_CONTROL_SET ,&nch))
+      return AF_ERROR;
+    return AF_OK;
+  }    
+  case AF_CONTROL_CHANNELS | AF_CONTROL_SET: 
     // Reinit must be called after this function has been called
     
     // Sanity check
     if(((int*)arg)[0] <= 0 || ((int*)arg)[0] > 6){
-      af_msg(AF_MSG_ERROR,"[channels] The number of output channels must be between 1 and 6. Current value is%i \n",((int*)arg)[0]);
+      af_msg(AF_MSG_ERROR,"[channels] The number of output channels must be" 
+	     " between 1 and %i. Current value is %i\n",AF_NCH,((int*)arg)[0]);
       return AF_ERROR;
     }
 
     af->data->nch=((int*)arg)[0]; 
-    af_msg(AF_MSG_VERBOSE,"[channels] Changing number of channels to %i\n",af->data->nch);
+    if(!s->router)
+      af_msg(AF_MSG_VERBOSE,"[channels] Changing number of channels" 
+	     " to %i\n",af->data->nch);
+    return AF_OK;
+  case AF_CONTROL_CHANNELS | AF_CONTROL_GET:
+    *(int*)arg = af->data->nch;
+    return AF_OK;
+  case AF_CONTROL_CHANNELS_ROUTING | AF_CONTROL_SET:{
+    int ch = ((af_control_ext_t*)arg)->ch;
+    int* route = ((af_control_ext_t*)arg)->arg;
+    s->route[ch][FR] = route[FR];
+    s->route[ch][TO] = route[TO];
+    return AF_OK;
+  }
+  case AF_CONTROL_CHANNELS_ROUTING | AF_CONTROL_GET:{
+    int ch = ((af_control_ext_t*)arg)->ch;
+    int* route = ((af_control_ext_t*)arg)->arg;
+    route[FR] = s->route[ch][FR];
+    route[TO] = s->route[ch][TO];
+    return AF_OK;
+  }
+  case AF_CONTROL_CHANNELS_NR | AF_CONTROL_SET:
+    s->nr = *(int*)arg;
+    return AF_OK;
+  case AF_CONTROL_CHANNELS_NR | AF_CONTROL_GET:
+    *(int*)arg = s->nr;
+    return AF_OK;
+  case AF_CONTROL_CHANNELS_ROUTER | AF_CONTROL_SET:
+    s->router = *(int*)arg;
+    return AF_OK;
+  case AF_CONTROL_CHANNELS_ROUTER | AF_CONTROL_GET:
+    *(int*)arg = s->router;
     return AF_OK;
   }
   return AF_UNKNOWN;
@@ -110,6 +218,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 // Deallocate memory 
 static void uninit(struct af_instance_s* af)
 {
+  if(af->setup)
+    free(af->setup);
   if(af->data)
     free(af->data);
 }
@@ -117,32 +227,21 @@ static void uninit(struct af_instance_s* af)
 // Filter data through filter
 static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 {
-  af_data_t*   c = data;			// Current working data
-  af_data_t*   l = af->data;	 		// Local data
-
+  af_data_t*   	 c = data;			// Current working data
+  af_data_t*   	 l = af->data;	 		// Local data
+  af_channels_t* s = af->setup;
+  int 		 i;
+  
   if(AF_OK != RESIZE_LOCAL_BUFFER(af,data))
     return NULL;
 
-  // Reset unused channels if nch in < nch out
-  if(af->mul.n > af->mul.d)
-    memset(l->audio,0,(c->len*af->mul.n)/af->mul.d);
+  // Reset unused channels
+  memset(l->audio,0,(c->len*af->mul.n)/af->mul.d);
   
-  // Special case always output L & R
-  if(c->nch == 1){
-    copy(c->audio,l->audio,1,0,l->nch,0,c->len,c->bps);
-    copy(c->audio,l->audio,1,0,l->nch,1,c->len,c->bps);
-  }
-  else{
-    int i;
-    if(l->nch < c->nch){ 
-      for(i=0;i<l->nch;i++) // Truncates R if l->nch == 1 not good need mixing
-	copy(c->audio,l->audio,c->nch,i,l->nch,i,c->len,c->bps);	
-    }
-    else{
-      for(i=0;i<c->nch;i++)
-	copy(c->audio,l->audio,c->nch,i,l->nch,i,c->len,c->bps);	
-    }
-  }
+  if(AF_OK == check_routes(s,c->nch,l->nch))
+    for(i=0;i<s->nr;i++)
+      copy(c->audio,l->audio,c->nch,s->route[i][FR],
+	   l->nch,s->route[i][TO],c->len,c->bps);
   
   // Set output data
   c->audio = l->audio;
@@ -160,7 +259,8 @@ static int open(af_instance_t* af){
   af->mul.n=1;
   af->mul.d=1;
   af->data=calloc(1,sizeof(af_data_t));
-  if(af->data == NULL)
+  af->setup=calloc(1,sizeof(af_channels_t));
+  if((af->data == NULL) || (af->setup == NULL))
     return AF_ERROR;
   return AF_OK;
 }

@@ -27,14 +27,15 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->format = ((af_data_t*)arg)->format;
     af->data->bps    = ((af_data_t*)arg)->bps;
     
-    return af->control(af,AF_CONTROL_DELAY_SET_LEN,&((af_delay_t*)af->setup)->tlen);
+    return af->control(af,AF_CONTROL_DELAY_LEN | AF_CONTROL_SET,
+		       &((af_delay_t*)af->setup)->tlen);
   }
   case AF_CONTROL_COMMAND_LINE:{
     float d = 0;
     sscanf((char*)arg,"%f",&d);
-    return af->control(af,AF_CONTROL_DELAY_SET_LEN,&d);
+    return af->control(af,AF_CONTROL_DELAY_LEN | AF_CONTROL_SET,&d);
   }  
-  case AF_CONTROL_DELAY_SET_LEN:{
+  case AF_CONTROL_DELAY_LEN | AF_CONTROL_SET:{
     af_delay_t* s  = (af_delay_t*)af->setup;
     void*       bt = s->buf; // Old buffer
     int         lt = s->len; // Old len
@@ -50,8 +51,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // Set new len and allocate new buffer
     s->tlen = *((float*)arg);
     af->delay = s->tlen * 1000.0;
-//    s->len  = af->data->rate*af->data->bps*af->data->nch*(int)s->tlen;
-    s->len  = ((int)(af->data->rate*s->tlen))*af->data->bps*af->data->nch;
+    s->len  = af->data->rate*af->data->bps*af->data->nch*(int)s->tlen;
     s->buf  = malloc(s->len);
     af_msg(AF_MSG_DEBUG0,"[delay] Delaying audio output by %0.2fs\n",s->tlen);
     af_msg(AF_MSG_DEBUG1,"[delay] Delaying audio output by %i bytes\n",s->len);
@@ -74,6 +74,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     }
     return AF_OK;
   }
+  case AF_CONTROL_DELAY_LEN | AF_CONTROL_GET:
+    *((float*)arg) = ((af_delay_t*)af->setup)->tlen;
+    return AF_OK;
   }
   return AF_UNKNOWN;
 }

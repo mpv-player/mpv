@@ -16,6 +16,9 @@ extern af_info_t af_info_format;
 extern af_info_t af_info_resample;
 extern af_info_t af_info_volume;
 extern af_info_t af_info_equalizer;
+extern af_info_t af_info_gate;
+extern af_info_t af_info_comp;
+extern af_info_t af_info_pan;
 
 static af_info_t* filter_list[]={ \
    &af_info_dummy,\
@@ -25,6 +28,9 @@ static af_info_t* filter_list[]={ \
    &af_info_resample,\
    &af_info_volume,\
    &af_info_equalizer,\
+   &af_info_gate,\
+   &af_info_comp,\
+   &af_info_pan,\
    NULL \
 };
 
@@ -72,7 +78,7 @@ af_instance_t* af_create(af_stream_t* s, char* name)
   // Allocate space for the new filter and reset all pointers
   af_instance_t* new=malloc(sizeof(af_instance_t));
   if(!new){
-    af_msg(AF_MSG_ERROR,"Could not allocate memory\n");
+    af_msg(AF_MSG_ERROR,"[libaf] Could not allocate memory\n");
     return NULL;
   }  
   memset(new,0,sizeof(af_instance_t));
@@ -88,13 +94,14 @@ af_instance_t* af_create(af_stream_t* s, char* name)
      non-reentrant */
   if(new->info->flags & AF_FLAGS_NOT_REENTRANT){
     if(af_get(s,name)){
-      af_msg(AF_MSG_ERROR,"There can only be one instance of the filter '%s' in each stream\n",name);  
+      af_msg(AF_MSG_ERROR,"[libaf] There can only be one instance of" 
+	     " the filter '%s' in each stream\n",name);  
       free(new);
       return NULL;
     }
   }
   
-  af_msg(AF_MSG_VERBOSE,"Adding filter %s \n",name);
+  af_msg(AF_MSG_VERBOSE,"[libaf] Adding filter %s \n",name);
   
   // Initialize the new filter
   if(AF_OK == new->info->open(new) && 
@@ -108,7 +115,8 @@ af_instance_t* af_create(af_stream_t* s, char* name)
   }
   
   free(new);
-  af_msg(AF_MSG_ERROR,"Couldn't create or open audio filter '%s'\n",name);  
+  af_msg(AF_MSG_ERROR,"[libaf] Couldn't create or open audio filter '%s'\n",
+	 name);  
   return NULL;
 }
 
@@ -164,6 +172,9 @@ af_instance_t* af_append(af_stream_t* s, af_instance_t* af, char* name)
 void af_remove(af_stream_t* s, af_instance_t* af)
 {
   if(!af) return;
+
+  // Print friendly message 
+  af_msg(AF_MSG_VERBOSE,"[libaf] Removing filter %s \n",af->info->name); 
 
   // Notify filter before changing anything
   af->control(af,AF_CONTROL_PRE_DESTROY,0);
@@ -234,8 +245,9 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 	  // Create format filter
 	  if(NULL == (new = af_prepend(s,af,"format")))
 	    return AF_ERROR;
-	  // Set output format
-	  if(AF_OK != (rv = new->control(new,AF_CONTROL_FORMAT,&in)))
+	  // Set output bits per sample
+	  if(AF_OK != (rv = new->control(new,AF_CONTROL_FORMAT_BPS,&in.bps)) || 
+	     AF_OK != (rv = new->control(new,AF_CONTROL_FORMAT_FMT,&in.format)))
 	    return rv;
 	  // Initialize format filter
 	  if(!new->prev) 
@@ -245,8 +257,11 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 	  if(AF_OK != (rv = new->control(new,AF_CONTROL_REINIT,&in)))
 	    return rv;
 	}
-	if(!new) // Should _never_ happen
+	if(!new){ // Should _never_ happen
+	  af_msg(AF_MSG_ERROR,"[libaf] Unable to correct audio format. " 
+		 "This error should never uccur, please send bugreport.\n");
 	  return AF_ERROR;
+	}
 	af=new;
       }
       break;
@@ -264,10 +279,17 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
       break;
     }
     default:
-      af_msg(AF_MSG_ERROR,"Reinitialization did not work, audio filter '%s' returned error code %i\n",af->info->name,rv);
+      af_msg(AF_MSG_ERROR,"[libaf] Reinitialization did not work, audio" 
+	     " filter '%s' returned error code %i\n",af->info->name,rv);
       return AF_ERROR;
     }
-    af=af->next;
+    // Check if there are any filters left in the list
+    if(NULL == af){
+      if(!af_append(s,s->first,"dummy")) 
+	return -1; 
+    }
+    else
+      af=af->next;
   }while(af);
   return AF_OK;
 }
@@ -315,7 +337,7 @@ int af_init(af_stream_t* s)
       }
     }
   }
-  
+
   // Init filters 
   if(AF_OK != af_reinit(s,s->first))
     return -1;
@@ -340,7 +362,8 @@ int af_init(af_stream_t* s)
 	}
       }
       // Init the new filter
-      if(!af || (AF_OK != af->control(af,AF_CONTROL_RESAMPLE,&(s->output.rate))))
+      if(!af || (AF_OK != af->control(af,AF_CONTROL_RESAMPLE_RATE,
+				      &(s->output.rate))))
 	return -1;
       if(AF_OK != af_reinit(s,af))
       	return -1;
@@ -368,7 +391,8 @@ int af_init(af_stream_t* s)
       else
 	af = s->last;
       // Init the new filter
-      if(!af ||(AF_OK != af->control(af,AF_CONTROL_FORMAT,&(s->output))))
+      if(!af ||(AF_OK != af->control(af,AF_CONTROL_FORMAT_BPS,&(s->output.bps))) 
+	 || (AF_OK != af->control(af,AF_CONTROL_FORMAT_FMT,&(s->output.format))))
 	return -1;
       if(AF_OK != af_reinit(s,af))
 	return -1;
@@ -383,7 +407,8 @@ int af_init(af_stream_t* s)
        (s->last->data->nch    != s->output.nch)    || 
        (s->last->data->rate   != s->output.rate))  {
       // Something is stuffed audio out will not work 
-      af_msg(AF_MSG_ERROR,"Unable to setup filter system can not meet sound-card demands, please report this error on MPlayer development mailing list. \n");
+      af_msg(AF_MSG_ERROR,"[libaf] Unable to setup filter system can not" 
+	     " meet sound-card demands, please send bugreport. \n");
       af_uninit(s);
       return -1;
     }
@@ -493,6 +518,10 @@ int af_calc_insize_constrained(af_stream_t* s, int len,
     mul.d *= af->mul.d;
     af=af->next;
   }while(af);
+  // Sanity check 
+  if(!mul.n || !mul.d) 
+    return -1;
+
   in = t * (((len/t) * mul.d - 1)/mul.n);
   
   if(in>max_insize) in=t*(max_insize/t);
@@ -531,14 +560,15 @@ inline int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
 {
   // Calculate new length
   register int len = af_lencalc(af->mul,data);
-  af_msg(AF_MSG_VERBOSE,"Reallocating memory in module %s, old len = %i, new len = %i\n",af->info->name,af->data->len,len);
+  af_msg(AF_MSG_VERBOSE,"[libaf] Reallocating memory in module %s, " 
+	 "old len = %i, new len = %i\n",af->info->name,af->data->len,len);
   // If there is a buffer free it
   if(af->data->audio) 
     free(af->data->audio);
   // Create new buffer and check that it is OK
   af->data->audio = malloc(len);
   if(!af->data->audio){
-    af_msg(AF_MSG_FATAL,"Could not allocate memory \n");
+    af_msg(AF_MSG_FATAL,"[libaf] Could not allocate memory \n");
     return AF_ERROR;
   }
   af->data->len=len;

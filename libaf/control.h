@@ -2,6 +2,57 @@
 #define __af_control_h
 
 /*********************************************
+// Control info struct. 
+//
+// This struct is the argument in a info call to a filter.
+*/
+
+// Argument types 
+#define AF_CONTROL_TYPE_BOOL	(0x0<<0)
+#define AF_CONTROL_TYPE_CHAR	(0x1<<0)
+#define AF_CONTROL_TYPE_INT	(0x2<<0)
+#define AF_CONTROL_TYPE_FLOAT	(0x3<<0)
+#define AF_CONTROL_TYPE_STRUCT	(0x4<<0)
+#define AF_CONTROL_TYPE_SPECIAL	(0x5<<0) // a pointer to a function for example
+#define AF_CONTROL_TYPE_MASK	(0x7<<0)
+// Argument geometry
+#define AF_CONTROL_GEOM_SCALAR	(0x0<<3)
+#define AF_CONTROL_GEOM_ARRAY	(0x1<<3)
+#define AF_CONTROL_GEOM_MATRIX	(0x2<<3)
+#define AF_CONTROL_GEOM_MASK	(0x3<<3)
+// Argument properties
+#define AF_CONTROL_PROP_READ	(0x0<<5) // The argument can be read
+#define AF_CONTROL_PROP_WRITE	(0x1<<5) // The argument can be written
+#define AF_CONTROL_PROP_SAVE	(0x2<<5) // Can be saved
+#define AF_CONTROL_PROP_RUNTIME	(0x4<<5) // Acessable during execution
+#define AF_CONTROL_PROP_CHANNEL (0x8<<5) // Argument is set per channel
+#define AF_CONTROL_PROP_MASK	(0xF<<5)
+
+typedef struct af_control_info_s{
+  int	 def;	// Control enumrification
+  char*	 name; 	// Name of argument
+  char*	 info;	// Description of what it does
+  int 	 flags;	// Flags as defined above	
+  float	 max;	// Max and min value 
+  float	 min;	// (only aplicable on float and int) 
+  int	 xdim;	// 1st dimension
+  int	 ydim;	// 2nd dimension (=0 for everything except matrix)
+  size_t sz;	// Size of argument in bytes
+  int	 ch;	// Channel number (for future use)
+  void*  arg;	// Data (for future use)
+}af_control_info_t;
+
+
+/*********************************************
+// Extended control used with arguments that operates on only one
+// channel at the time
+*/
+typedef struct af_control_ext_s{
+  void* arg;	// Argument
+  int	ch;	// Chanel number
+}af_control_ext_t;
+
+/*********************************************
 // Control parameters 
 */
 
@@ -11,9 +62,9 @@
    filter specific calls - applies only to some filters
 */
 
-#define AF_CONTROL_MANDATORY_BASE	0
-#define AF_CONTROL_OPTIONAL_BASE	100
-#define AF_CONTROL_FILTER_SPECIFIC_BASE	200
+#define AF_CONTROL_MANDATORY		0x10000000
+#define AF_CONTROL_OPTIONAL		0x20000000
+#define AF_CONTROL_FILTER_SPECIFIC	0x40000000
 
 // MANDATORY CALLS
 
@@ -23,66 +74,136 @@
    should be returned. If the incoming and outgoing data streams are
    identical the filter can return AF_DETACH. This will remove the
    filter. */
-#define AF_CONTROL_REINIT  		01 + AF_CONTROL_MANDATORY_BASE
+#define AF_CONTROL_REINIT  		0x00000100 | AF_CONTROL_MANDATORY
 
 // OPTIONAL CALLS
 
 /* Called just after creation with the af_cfg for the stream in which
    the filter resides as input parameter this call can be used by the
    filter to initialize itself */
-#define AF_CONTROL_POST_CREATE 		1 + AF_CONTROL_OPTIONAL_BASE
+#define AF_CONTROL_POST_CREATE 		0x00000100 | AF_CONTROL_OPTIONAL
 
 // Called just before destruction of a filter
-#define AF_CONTROL_PRE_DESTROY 		2 + AF_CONTROL_OPTIONAL_BASE
+#define AF_CONTROL_PRE_DESTROY 		0x00000200 | AF_CONTROL_OPTIONAL
 
 /* Commandline parameters. If there were any commandline parameters
    for this specific filter, they will be given as a char* in the
    argument */
-#define AF_CONTROL_COMMAND_LINE		3 + AF_CONTROL_OPTIONAL_BASE
+#define AF_CONTROL_COMMAND_LINE		0x00000300 | AF_CONTROL_OPTIONAL
 
 
 // FILTER SPECIFIC CALLS
 
-// Set output rate in resample
-#define AF_CONTROL_RESAMPLE		1 + AF_CONTROL_FILTER_SPECIFIC_BASE
+// Basic operations: These can be ored with any of the below calls
+// Set argument 
+#define AF_CONTROL_SET			0x00000000
+// Get argument
+#define AF_CONTROL_GET			0x00000001
+// Get info about the control, i.e fill in everything except argument
+#define AF_CONTROL_INFO			0x00000002  
 
-// Set output format in format
-#define AF_CONTROL_FORMAT		2 + AF_CONTROL_FILTER_SPECIFIC_BASE
+// Resample
+
+// Set output rate in resample
+#define AF_CONTROL_RESAMPLE_RATE	0x00000100 | AF_CONTROL_FILTER_SPECIFIC
+
+// Enable sloppy resampling
+#define AF_CONTROL_RESAMPLE_SLOPPY	0x00000200 | AF_CONTROL_FILTER_SPECIFIC
+
+// Set resampling accuracy
+#define AF_CONTROL_RESAMPLE_ACCURACY	0x00000300 | AF_CONTROL_FILTER_SPECIFIC
+
+// Format 
+
+// Set output format bits per sample
+#define AF_CONTROL_FORMAT_BPS		0x00000400 | AF_CONTROL_FILTER_SPECIFIC
+
+// Set output format sample format
+#define AF_CONTROL_FORMAT_FMT		0x00000500 | AF_CONTROL_FILTER_SPECIFIC
+
+// Channels
 
 // Set number of output channels in channels
-#define AF_CONTROL_CHANNELS		3 + AF_CONTROL_FILTER_SPECIFIC_BASE
+#define AF_CONTROL_CHANNELS		0x00000600 | AF_CONTROL_FILTER_SPECIFIC
 
-// Set delay length in delay
-#define AF_CONTROL_DELAY_SET_LEN	4 + AF_CONTROL_FILTER_SPECIFIC_BASE
+// Set number of channel routes
+#define AF_CONTROL_CHANNELS_ROUTES	0x00000700 | AF_CONTROL_FILTER_SPECIFIC
 
+// Set channel routing pair, arg is int[2] and ch is used
+#define AF_CONTROL_CHANNELS_ROUTING	0x00000800 | AF_CONTROL_FILTER_SPECIFIC
+
+// Set nuber of channel routing pairs, arg is int*
+#define AF_CONTROL_CHANNELS_NR		0x00000900 | AF_CONTROL_FILTER_SPECIFIC
+
+// Set make af_channels into a router
+#define AF_CONTROL_CHANNELS_ROUTER	0x00000A00 | AF_CONTROL_FILTER_SPECIFIC
+	
 // Volume 
 
-// Set volume level, arg is a float* with the volume for all the channels
-#define AF_CONTROL_VOLUME_SET		5 + AF_CONTROL_FILTER_SPECIFIC_BASE
-
-/* Get volume level for all channels, arg is a float* that will
-   contain the volume for all the channels */
-#define AF_CONTROL_VOLUME_GET		6 + AF_CONTROL_FILTER_SPECIFIC_BASE
-
-// Turn volume control on and off, arg is binary
-#define AF_CONTROL_VOLUME_ON_OFF	7 + AF_CONTROL_FILTER_SPECIFIC_BASE
+// Turn volume control on and off, arg is int*
+#define AF_CONTROL_VOLUME_ON_OFF	0x00000B00 | AF_CONTROL_FILTER_SPECIFIC
 
 // Turn soft clipping of the volume on and off, arg is binary
-#define AF_CONTROL_VOLUME_SOFTCLIP	8 + AF_CONTROL_FILTER_SPECIFIC_BASE
+#define AF_CONTROL_VOLUME_SOFTCLIP	0x00000C00 | AF_CONTROL_FILTER_SPECIFIC
 
-// Get the probed power level for all channels, arg is a float* 
-#define AF_CONTROL_VOLUME_PROBE_GET	9 + AF_CONTROL_FILTER_SPECIFIC_BASE
+// Set volume level, arg is a float* with the volume for all the channels
+#define AF_CONTROL_VOLUME_LEVEL		0x00000D00 | AF_CONTROL_FILTER_SPECIFIC
 
-// Get the maximum probed power level for all channels, arg is a float* 
-#define AF_CONTROL_VOLUME_PROBE_GET_MAX	10 + AF_CONTROL_FILTER_SPECIFIC_BASE
+// Probed power level for all channels, arg is a float* 
+#define AF_CONTROL_VOLUME_PROBE		0x00000E00 | AF_CONTROL_FILTER_SPECIFIC
 
-// Turn probing on and off, arg is binary
-#define AF_CONTROL_VOLUME_PROBE_ON_OFF 	11 + AF_CONTROL_FILTER_SPECIFIC_BASE
+// Maximum probed power level for all channels, arg is a float* 
+#define AF_CONTROL_VOLUME_PROBE_MAX	0x00000F00 | AF_CONTROL_FILTER_SPECIFIC
 
-// Set equalizer gain, arg is an equalizer_t* 
-#define AF_CONTROL_EQUALIZER_SET_GAIN 	12 + AF_CONTROL_FILTER_SPECIFIC_BASE
+// Compressor/expander
 
-// Get equalizer gain, arg is an equalizer_t* 
-#define AF_CONTROL_EQUALIZER_GET_GAIN 	13 + AF_CONTROL_FILTER_SPECIFIC_BASE
+// Turn compressor/expander on and off
+#define AF_CONTROL_COMP_ON_OFF	 	0x00001000 | AF_CONTROL_FILTER_SPECIFIC
+
+// Compression/expansion threshold [dB]
+#define AF_CONTROL_COMP_THRESH	 	0x00001100 | AF_CONTROL_FILTER_SPECIFIC
+
+// Compression/expansion attack time [ms]
+#define AF_CONTROL_COMP_ATTACK	 	0x00001200 | AF_CONTROL_FILTER_SPECIFIC
+
+// Compression/expansion release time [ms]
+#define AF_CONTROL_COMP_RELEASE 	0x00001300 | AF_CONTROL_FILTER_SPECIFIC
+
+// Compression/expansion gain level [dB]
+#define AF_CONTROL_COMP_RATIO	 	0x00001400 | AF_CONTROL_FILTER_SPECIFIC
+
+// Noise gate
+
+// Turn noise gate on an off
+#define AF_CONTROL_GATE_ON_OFF	 	0x00001500 | AF_CONTROL_FILTER_SPECIFIC
+
+// Noise gate threshold [dB] 
+#define AF_CONTROL_GATE_THRESH	 	0x00001600 | AF_CONTROL_FILTER_SPECIFIC
+
+// Noise gate attack time [ms]
+#define AF_CONTROL_GATE_ATTACK	 	0x00001700 | AF_CONTROL_FILTER_SPECIFIC
+
+// Noise gate release time [ms] 
+#define AF_CONTROL_GATE_RELEASE 	0x00001800 | AF_CONTROL_FILTER_SPECIFIC
+
+// Noise gate release range level [dB]
+#define AF_CONTROL_GATE_RANGE	 	0x00001900 | AF_CONTROL_FILTER_SPECIFIC
+
+// Pan
+
+// Pan levels, arg is a control_ext with a float* 
+#define AF_CONTROL_PAN_LEVEL	 	0x00001A00 | AF_CONTROL_FILTER_SPECIFIC
+
+// Number of outputs from pan, arg is int*
+#define AF_CONTROL_PAN_NOUT	 	0x00001B00 | AF_CONTROL_FILTER_SPECIFIC
+ 
+
+// Set equalizer gain, arg is a control_ext with a float* 
+#define AF_CONTROL_EQUALIZER_GAIN 	0x00001C00 | AF_CONTROL_FILTER_SPECIFIC
+
+
+// Set delay length in seconds
+#define AF_CONTROL_DELAY_LEN		0x00001D00 | AF_CONTROL_FILTER_SPECIFIC
+
 
 #endif /*__af_control_h */

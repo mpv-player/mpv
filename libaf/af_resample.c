@@ -25,45 +25,36 @@
    slow and to 16 if the machine is fast and has MMX.  
 */
 
-#if !defined(HAVE_SSE) && !defined(HAVE_3DNOW) // This machine is slow
+#if !defined(HAVE_MMX) // This machine is slow
+#define L8 
+#else
+#define L16
+#endif
 
-#define L   	8	// Filter length
-// Unrolled loop to speed up execution 
-#define FIR(x,w,y) \
-  (y[0])  = ( w[0]*x[0]+w[1]*x[1]+w[2]*x[2]+w[3]*x[3] \
-            + w[4]*x[4]+w[5]*x[5]+w[6]*x[6]+w[7]*x[7] ) >> 16
+#include "af_resample.h"
 
-#else  /* Fast machine */
+// Filtering types
+#define TYPE_LIN   0	// Linear interpolation
+#define TYPE_INT   1   	// 16 bit integer 
+#define TYPE_FLOAT 2	// 32 bit floating point
 
-#define L   	16
-// Unrolled loop to speed up execution 
-#define FIR(x,w,y) \
-  y[0] = ( w[0] *x[0] +w[1] *x[1] +w[2] *x[2] +w[3] *x[3] \
-         + w[4] *x[4] +w[5] *x[5] +w[6] *x[6] +w[7] *x[7] \
-         + w[8] *x[8] +w[9] *x[9] +w[10]*x[10]+w[11]*x[11] \
-         + w[12]*x[12]+w[13]*x[13]+w[14]*x[14]+w[15]*x[15] ) >> 16
-
-#endif /* Fast machine */
-
-// Macro to add data to circular que 
-#define ADDQUE(xi,xq,in)\
-  xq[xi]=xq[xi+L]=(*in);\
-  xi=(xi-1)&(L-1);
-
-
+// Accuracy for linear interpolation
+#define STEPACCURACY 32
 
 // local data
 typedef struct af_resample_s
 {
-  int16_t*  	w;	// Current filter weights
-  int16_t** 	xq; 	// Circular buffers
+  void*  	w;	// Current filter weights
+  void** 	xq; 	// Circular buffers
   uint32_t	xi; 	// Index for circular buffers
   uint32_t	wi;	// Index for w
-  uint32_t	i; 	// Number of new samples to put in x queue
+  uint32_t	i; 	// Number of new samples to put in x queue 
   uint32_t  	dn;     // Down sampling factor
   uint32_t	up;	// Up sampling factor 
+  uint64_t	step;	// Step size for linear interpolation
+  uint64_t	pt;	// Pointer remainder for linear interpolation
   int		sloppy;	// Enable sloppy resampling to reduce memory usage
-  int		fast;	// Enable linear interpolation instead of filtering
+  int		type;	// Filter type 
 } af_resample_t;
 
 // Euclids algorithm for calculating Greatest Common Divisor GCD(a,b)
@@ -82,96 +73,50 @@ static inline int gcd(register int a, register int b)
   return b;
 }
 
-static int upsample(af_data_t* c,af_data_t* l, af_resample_t* s)
+// Fast linear interpolation resample with modest audio quality
+static int linint(af_data_t* c,af_data_t* l, af_resample_t* s)
 {
-  uint32_t		ci    = l->nch; 	// Index for channels
-  uint32_t		len   = 0; 		// Number of input samples
-  uint32_t		nch   = l->nch;   	// Number of channels
-  uint32_t		inc   = s->up/s->dn; 
-  uint32_t		level = s->up%s->dn; 
-  uint32_t		up    = s->up;
-  uint32_t		dn    = s->dn;
-
-  register int16_t*	w     = s->w;
-  register uint32_t	wi    = 0;
-  register uint32_t	xi    = 0; 
-
-  // Index current channel
-  while(ci--){
-    // Temporary pointers
-    register int16_t*	x     = s->xq[ci];
-    register int16_t*	in    = ((int16_t*)c->audio)+ci;
-    register int16_t*	out   = ((int16_t*)l->audio)+ci;
-    int16_t* 		end   = in+c->len/2; // Block loop end
-    wi = s->wi; xi = s->xi;
-
-    while(in < end){
-      register uint32_t	i = inc;
-      if(wi<level) i++;
-
-      ADDQUE(xi,x,in);
-      in+=nch;
-      while(i--){
-	// Run the FIR filter
-	FIR((&x[xi]),(&w[wi*L]),out);
-	len++; out+=nch;
-	// Update wi to point at the correct polyphase component
-	wi=(wi+dn)%up;
-      }
-    }
-  }
-  // Save values that needs to be kept for next time
-  s->wi = wi;
-  s->xi = xi;
-  return len;
-}
-
-static int downsample(af_data_t* c,af_data_t* l, af_resample_t* s)
-{
-  uint32_t		ci    = l->nch; 	// Index for channels
-  uint32_t		len   = 0; 		// Number of output samples
-  uint32_t		nch   = l->nch;   	// Number of channels
-  uint32_t		inc   = s->dn/s->up; 
-  uint32_t		level = s->dn%s->up; 
-  uint32_t		up    = s->up;
-  uint32_t		dn    = s->dn;
-
-  register int32_t	i     = 0;
-  register uint32_t	wi    = 0;
-  register uint32_t	xi    = 0;
+  uint32_t	len   = 0; 		// Number of input samples
+  uint32_t	nch   = l->nch;   	// Words pre transfer
+  uint64_t	step  = s->step; 
+  int16_t*	in16  = ((int16_t*)c->audio);
+  int16_t*	out16 = ((int16_t*)l->audio);
+  int32_t*	in32  = ((int32_t*)c->audio);
+  int32_t*	out32 = ((int32_t*)l->audio);
+  uint64_t 	end   = ((((uint64_t)c->len)/2LL)<<STEPACCURACY);
+  uint64_t	pt    = s->pt;
+  uint16_t 	tmp;
   
-  // Index current channel
-  while(ci--){
-    // Temporary pointers
-    register int16_t*	x     = s->xq[ci];
-    register int16_t*	in    = ((int16_t*)c->audio)+ci;
-    register int16_t*	out   = ((int16_t*)l->audio)+ci;
-    register int16_t* 	end   = in+c->len/2;    // Block loop end
-    i = s->i; wi = s->wi; xi = s->xi;
-
-    while(in < end){
-
-      ADDQUE(xi,x,in);
-      in+=nch;
-      if((--i)<=0){
-	// Run the FIR filter
-	FIR((&x[xi]),(&s->w[wi*L]),out);
-	len++;	out+=nch;
-
-	// Update wi to point at the correct polyphase component
-	wi=(wi+dn)%up;  
-
-	// Insert i number of new samples in queue
-	i = inc;
-	if(wi<level) i++;
-      }
+  switch (nch){
+  case 1:
+    while(pt < end){
+      out16[len++]=in16[pt>>STEPACCURACY];    	    
+      pt+=step;
     }
+    s->pt=pt & ((1LL<<STEPACCURACY)-1);
+    break;		
+  case 2:
+    end/=2;
+    while(pt < end){
+      out32[len++]=in32[pt>>STEPACCURACY];    	    
+      pt+=step;
+    }
+    len=(len<<1);
+    s->pt=pt & ((1LL<<STEPACCURACY)-1);
+    break;
+  default:	
+    end /=nch;
+    while(pt < end){
+      tmp=nch;
+      do {	 
+	tmp--;   
+	out16[len+tmp]=in16[tmp+(pt>>STEPACCURACY)*nch];    	    
+      } while (tmp);
+      len+=nch;
+      pt+=step;
+    }	
+    s->pt=pt & ((1LL<<STEPACCURACY)-1);
   }
-  // Save values that needs to be kept for next time
-  s->wi = wi;
-  s->xi = xi;
-  s->i = i;
-
   return len;
 }
 
@@ -184,13 +129,24 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af_data_t* 	   n   = (af_data_t*)arg; // New configureation
     int            i,d = 0;
     int 	   rv  = AF_OK;
+    size_t 	   tsz = (s->type==TYPE_INT) ? sizeof(int16_t) : sizeof(float);
 
     // Make sure this filter isn't redundant 
     if(af->data->rate == n->rate)
       return AF_DETACH;
 
+    // If linear interpolation 
+    if(s->type == TYPE_LIN){
+      s->pt=0LL;
+      s->step=((uint64_t)n->rate<<STEPACCURACY)/(uint64_t)af->data->rate+1LL;
+      af_msg(AF_MSG_VERBOSE,"[resample] Linear interpolation step: 0x%016X.\n",
+	     s->step);
+      af->mul.n = af->data->rate;
+      af->mul.d = n->rate;
+    }
+
     // Create space for circular bufers (if nesessary)
-    if(af->data->nch != n->nch){
+    if((af->data->nch != n->nch) && (s->type != TYPE_LIN)){
       // First free the old ones
       if(s->xq){
 	for(i=1;i<af->data->nch;i++)
@@ -199,20 +155,30 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 	free(s->xq);
       }
       // ... then create new
-      s->xq = malloc(n->nch*sizeof(int16_t*));
+      s->xq = malloc(n->nch*sizeof(void*));
       for(i=0;i<n->nch;i++)
-	s->xq[i] = malloc(2*L*sizeof(int16_t));
+	s->xq[i] = malloc(2*L*tsz);
       s->xi = 0;
     }
 
     // Set parameters
     af->data->nch    = n->nch;
-    af->data->format = AF_FORMAT_NE | AF_FORMAT_SI;
-    af->data->bps    = 2;
+    if(s->type == TYPE_INT || s->type == TYPE_LIN){
+      af->data->format = AF_FORMAT_NE | AF_FORMAT_SI;
+      af->data->bps    = 2;
+    }
+    else{
+      af->data->format = AF_FORMAT_NE | AF_FORMAT_F;
+      af->data->bps    = 4;
+    }
     if(af->data->format != n->format || af->data->bps != n->bps)
       rv = AF_FALSE;
-    n->format = AF_FORMAT_NE | AF_FORMAT_SI;
-    n->bps = 2;
+    n->format = af->data->format;
+    n->bps = af->data->bps;
+
+    // If linear interpolation is used the setup is done.
+    if(s->type == TYPE_LIN)
+      return rv;
 
     // Calculate up and down sampling factors
     d=gcd(af->data->rate,n->rate);
@@ -244,7 +210,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       w = malloc(sizeof(float) * s->up *L);
       if(NULL != s->w)
 	free(s->w);
-      s->w = malloc(L*s->up*sizeof(int16_t));
+      s->w = malloc(L*s->up*tsz);
 
       // Design prototype filter type using Kaiser window with beta = 10
       if(NULL == w || NULL == s->w || 
@@ -256,13 +222,18 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       wt=w;
       for(j=0;j<L;j++){//Columns
 	for(i=0;i<s->up;i++){//Rows
-	  float t=(float)s->up*32767.0*(*wt);
-	  s->w[i*L+j] = (int16_t)((t>=0.0)?(t+0.5):(t-0.5));
+	  if(s->type == TYPE_INT){
+	    float t=(float)s->up*32767.0*(*wt);
+	    ((int16_t*)s->w)[i*L+j] = (int16_t)((t>=0.0)?(t+0.5):(t-0.5));
+	  }
+	  else
+	    ((float*)s->w)[i*L+j] = (float)s->up*(*wt);
 	  wt++;
 	}
       }
       free(w);
-      af_msg(AF_MSG_VERBOSE,"[resample] New filter designed up: %i down: %i\n", s->up, s->dn);
+      af_msg(AF_MSG_VERBOSE,"[resample] New filter designed up: %i "
+	     "down: %i\n", s->up, s->dn);
     }
 
     // Set multiplier and delay
@@ -274,20 +245,30 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_COMMAND_LINE:{
     af_resample_t* s   = (af_resample_t*)af->setup; 
     int rate=0;
-    sscanf((char*)arg,"%i:%i:%i",&rate,&(s->sloppy), &(s->fast));
-    return af->control(af,AF_CONTROL_RESAMPLE,&rate);
+    int lin=0;
+    sscanf((char*)arg,"%i:%i:%i", &rate, &(s->sloppy), &lin);
+    if(lin)
+      s->type = TYPE_LIN;
+    return af->control(af,AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET, &rate);
   }
-  case AF_CONTROL_RESAMPLE: 
+  case AF_CONTROL_POST_CREATE:	
+    ((af_resample_t*)af->setup)->type = 
+      ((af_cfg_t*)arg)->force  == AF_INIT_SLOW ? TYPE_INT : TYPE_FLOAT;
+    return AF_OK;
+  case AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET: 
     // Reinit must be called after this function has been called
     
     // Sanity check
     if(((int*)arg)[0] < 8000 || ((int*)arg)[0] > 192000){
-      af_msg(AF_MSG_ERROR,"[resample] The output sample frequency must be between 8kHz and 192kHz. Current value is %i \n",((int*)arg)[0]);
+      af_msg(AF_MSG_ERROR,"[resample] The output sample frequency " 
+	     "must be between 8kHz and 192kHz. Current value is %i \n",
+	     ((int*)arg)[0]);
       return AF_ERROR;
     }
 
     af->data->rate=((int*)arg)[0]; 
-    af_msg(AF_MSG_VERBOSE,"[resample] Changing sample rate to %iHz\n",af->data->rate);
+    af_msg(AF_MSG_VERBOSE,"[resample] Changing sample rate "  
+	   "to %iHz\n",af->data->rate);
     return AF_OK;
   }
   return AF_UNKNOWN;
@@ -312,14 +293,42 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     return NULL;
 
   // Run resampling
-  if(s->up>s->dn)
-    len = upsample(c,l,s);
-  else
-    len = downsample(c,l,s);
+  switch(s->type){
+  case(TYPE_INT):
+# define FORMAT_I 1
+    if(s->up>s->dn){
+#     define UP
+#     include "af_resample.h"
+#     undef UP 
+    }
+    else{
+#     define DN
+#     include "af_resample.h"
+#     undef DN
+    }
+    break;
+  case(TYPE_FLOAT):
+# undef FORMAT_I
+# define FORMAT_F 1
+    if(s->up>s->dn){
+#     define UP
+#     include "af_resample.h"
+#     undef UP 
+    }
+    else{
+#     define DN
+#     include "af_resample.h"
+#     undef DN
+    }
+    break;
+  case(TYPE_LIN):
+    len = linint(c, l, s);
+    break;
+  }
 
   // Set output data
   c->audio = l->audio;
-  c->len   = len*2;
+  c->len   = len*l->bps;
   c->rate  = l->rate;
   
   return c;
