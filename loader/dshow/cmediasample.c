@@ -4,6 +4,13 @@
 #include <string.h>
 #include <stdlib.h>
 
+/*
+ * currently hack to make some extra room for DS Acel codec which
+ * seems to overwrite allocated memory - FIXME better later
+ * check the buffer allocation
+ */
+static const int SAFETY_ACEL = 1024;
+
 static long STDCALL CMediaSample_QueryInterface(IUnknown* This,
 						/* [in] */ const GUID* iid,
 						/* [iid_is][out] */ void **ppv)
@@ -78,7 +85,7 @@ static HRESULT STDCALL CMediaSample_GetTime(IMediaSample * This,
 					    /* [out] */ REFERENCE_TIME *pTimeStart,
 					    /* [out] */ REFERENCE_TIME *pTimeEnd)
 {
-    Debug printf("CMediaSample_GetTime(%p) called (UNIMPLIMENTED)\n", This);
+    Debug printf("CMediaSample_GetTime(%p) called (UNIMPLEMENTED)\n", This);
     return E_NOTIMPL;
 }
 
@@ -86,7 +93,7 @@ static HRESULT STDCALL CMediaSample_SetTime(IMediaSample * This,
 					    /* [in] */ REFERENCE_TIME *pTimeStart,
 					    /* [in] */ REFERENCE_TIME *pTimeEnd)
 {
-    Debug printf("CMediaSample_SetTime(%p) called (UNIMPLIMENTED)\n", This);
+    Debug printf("CMediaSample_SetTime(%p) called (UNIMPLEMENTED)\n", This);
     return E_NOTIMPL;
 }
 
@@ -135,12 +142,13 @@ static HRESULT STDCALL CMediaSample_SetActualDataLength(IMediaSample* This,
 {
     CMediaSample* cms = (CMediaSample*)This;
     Debug printf("CMediaSample_SetActualDataLength(%p, %ld) called\n", This, __MIDL_0010);
+
     if (__MIDL_0010 > cms->size)
     {
         char* c = cms->own_block;
-	Debug printf(" CMediaSample - buffer overflow   %ld %d   %p %p\n",
+	Debug printf("CMediaSample - buffer overflow   %ld %d   %p %p\n",
 		     __MIDL_0010, ((CMediaSample*)This)->size, cms->own_block, cms->block);
-	cms->own_block = realloc(cms->own_block, __MIDL_0010);
+	cms->own_block = (char*) realloc(cms->own_block, (size_t) __MIDL_0010 + SAFETY_ACEL);
 	if (c == cms->block)
 	    cms->block = cms->own_block;
         cms->size = __MIDL_0010;
@@ -266,7 +274,7 @@ CMediaSample* CMediaSampleCreate(IMemAllocator* allocator, int _size)
     //    _size = (_size + 0xfff) & ~0xfff;
 
     This->vt = (IMediaSample_vt*) malloc(sizeof(IMediaSample_vt));
-    This->own_block = (char*) malloc(_size);
+    This->own_block = (char*) malloc((size_t)_size + SAFETY_ACEL);
     This->media_type.pbFormat = 0;
 
     if (!This->vt || !This->own_block)

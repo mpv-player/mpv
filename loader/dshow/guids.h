@@ -6,8 +6,8 @@
 #include "wine/windef.h"
 #include "wine/vfw.h"
 
-extern int DSHOW_DEBUG;
-#define Debug if(DSHOW_DEBUG)
+//#define Debug if(1)
+#define Debug if(0)
 
 typedef struct __attribute__((__packed__)) _MediaType
 {
@@ -58,6 +58,9 @@ extern const GUID CLSID_MemoryAllocator;
 extern const GUID MEDIATYPE_Video;
 extern const GUID GUID_NULL;
 extern const GUID FORMAT_VideoInfo;
+extern const GUID MEDIASUBTYPE_RGB1;
+extern const GUID MEDIASUBTYPE_RGB4;
+extern const GUID MEDIASUBTYPE_RGB8;
 extern const GUID MEDIASUBTYPE_RGB565;
 extern const GUID MEDIASUBTYPE_RGB555;
 extern const GUID MEDIASUBTYPE_RGB24;
@@ -74,5 +77,9 @@ extern const GUID MEDIASUBTYPE_Y211;
 extern const GUID MEDIASUBTYPE_YV12;
 extern const GUID MEDIASUBTYPE_I420;
 extern const GUID MEDIASUBTYPE_IF09;
+
+extern const GUID FORMAT_WaveFormatEx;
+extern const GUID MEDIATYPE_Audio;
+extern const GUID MEDIASUBTYPE_PCM;
 
 #endif /* DS_GUIDS_H */

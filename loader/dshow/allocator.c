@@ -283,7 +283,7 @@ static void MemAllocator_ResetPointer(MemAllocator* This)
     }
 }
 
-void MemAllocator_Destroy(MemAllocator* This)
+static void MemAllocator_Destroy(MemAllocator* This)
 {
     Debug printf("MemAllocator_Destroy(%p) called  (%d, %d)\n", This, This->refcount, AllocatorKeeper);
     if (--AllocatorKeeper == 0)

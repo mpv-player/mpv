@@ -18,7 +18,7 @@ static long STDCALL CLASSNAME ## _QueryInterface(IUnknown * This, \
     CLASSNAME * me = (CLASSNAME *)This;		\
     GUID* r; unsigned int i = 0;		\
     Debug printf(#CLASSNAME "_QueryInterface(%p) called\n", This);\
-    if (!ppvObject) return 0x80004003; 		\
+    if (!ppvObject) return E_POINTER; 		\
     for(r=me->interfaces; i<sizeof(me->interfaces)/sizeof(me->interfaces[0]); r++, i++) \
 	if(!memcmp(r, riid, sizeof(*r)))	\
 	{ 					\
@@ -26,7 +26,7 @@ static long STDCALL CLASSNAME ## _QueryInterface(IUnknown * This, \
 	    *ppvObject=This; 			\
 	    return 0; 				\
 	} 					\
-    Debug printf("Query failed!\n");		\
+    Debug printf("Query failed! (GUID: 0x%x)\n", *(unsigned int*)riid); \
     return E_NOINTERFACE;			\
 } 						\
 						\

@@ -8,7 +8,7 @@
 
 typedef long STDCALL (*GETCLASS) (const GUID*, const GUID*, void**);
 
-//extern "C" STDCALL void* GetProcAddress(int, const char*); // STDCALL has to be first NetBSD
+//void trapbug();
 
 static void DS_Filter_Start(DS_Filter* This)
 {
@@ -18,7 +18,7 @@ static void DS_Filter_Start(DS_Filter* This)
 	return;
 
     //Debug printf("DS_Filter_Start(%p)\n", This);
-    hr = This->m_pFilter->vt->Run(This->m_pFilter, 0);
+    hr = This->m_pFilter->vt->Run(This->m_pFilter, (REFERENCE_TIME)0);
     if (hr != 0)
     {
 	Debug printf("WARNING: m_Filter->Run() failed, error code %x\n", (int)hr);
@@ -73,7 +73,7 @@ void DS_Filter_Destroy(DS_Filter* This)
 
     // FIXME - we are still leaving few things allocated!
     if (This->m_iHandle)
-	FreeLibrary(This->m_iHandle);
+	FreeLibrary((unsigned)This->m_iHandle);
 
     free(This);
 
@@ -87,6 +87,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
     int init = 0;
 //    char eb[250];
     const char* em = NULL;
+    HRESULT result;
     DS_Filter* This = (DS_Filter*) malloc(sizeof(DS_Filter));
     if (!This)
 	return NULL;
@@ -108,7 +109,6 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 
     for (;;)
     {
-	HRESULT result;
 	GETCLASS func;
 	struct IClassFactory* factory = NULL;
 	struct IUnknown* object = NULL;
@@ -123,7 +123,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	    em = "could not open DirectShow DLL";
 	    break;
 	}
-	func = (GETCLASS)GetProcAddress(This->m_iHandle, "DllGetClassObject");
+	func = (GETCLASS)GetProcAddress((unsigned)This->m_iHandle, "DllGetClassObject");
 	if (!func)
 	{
 	    em = "illegal or corrupt DirectShow DLL";
@@ -159,7 +159,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 
 	enum_pins->vt->Reset(enum_pins);
 	result = enum_pins->vt->Next(enum_pins, (ULONG)256, (IPin**)array, &fetched);
-	Debug printf("Pins enumeration returned %d pins, error is %x\n", (int)fetched, (int)result);
+	Debug printf("Pins enumeration returned %ld pins, error is %x\n", fetched, (int)result);
 
 	for (i = 0; i < fetched; i++)
 	{
@@ -236,7 +236,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
     if (!init)
     {
 	DS_Filter_Destroy(This);
-	printf("Warning: DS_Filter() %s.  (DLL=%.200s)\n", em, dllname);
+	printf("Warning: DS_Filter() %s.  (DLL=%.200s, r=0x%x)\n", em, dllname, result);
         This = 0;
     }
     return This;

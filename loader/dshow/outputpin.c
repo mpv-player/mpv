@@ -84,7 +84,7 @@ static HRESULT STDCALL CEnumMediaTypes_Clone(IEnumMediaTypes * This,
     return E_NOTIMPL;
 }
 
-void CEnumMediaTypes_Destroy(CEnumMediaTypes* This)
+static void CEnumMediaTypes_Destroy(CEnumMediaTypes* This)
 {
     free(This->vt);
     free(This);
@@ -93,7 +93,7 @@ void CEnumMediaTypes_Destroy(CEnumMediaTypes* This)
 // IPin->IUnknown methods
 IMPLEMENT_IUNKNOWN(CEnumMediaTypes)
 
-CEnumMediaTypes* CEnumMediaTypesCreate(const AM_MEDIA_TYPE* amt)
+static CEnumMediaTypes* CEnumMediaTypesCreate(const AM_MEDIA_TYPE* amt)
 {
     CEnumMediaTypes *This = (CEnumMediaTypes*) malloc(sizeof(CEnumMediaTypes)) ;
 
