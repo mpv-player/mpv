@@ -29,6 +29,8 @@
 #include <string.h>
 
 #include "config.h"
+#include "mp_msg.h"
+
 #include "video_out.h"
 #include "video_out_internal.h"
 
@@ -106,10 +108,10 @@ static void set_window(){
 	 if ( WinID )
 	  {
            XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
-           fprintf( stderr,"[xmga] x: %d y: %d w: %d h: %d\n",drwX,drwY,drwWidth,drwHeight );
+           mp_msg(MSGT_VO,MSGL_V,"[xmga] x: %d y: %d w: %d h: %d\n",drwX,drwY,drwWidth,drwHeight );
            drwX=0; drwY=0;
            XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-           fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+           mp_msg(MSGT_VO,MSGL_V,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 	  }
 	  else { drwX=drwcX=vo_dx; drwY=drwcY=vo_dy; drwWidth=vo_dwidth; drwHeight=vo_dheight; }
 
@@ -123,7 +125,7 @@ static void set_window(){
            drwcY+=drwY;
            drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
            drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
-           fprintf( stderr,"[xmga-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+           mp_msg(MSGT_VO,MSGL_V,"[xmga-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
           }
 
          mDrawColorKey();
@@ -166,7 +168,7 @@ static void check_events(void)
  if ( !(e&VO_EVENT_RESIZE) && !(e&VO_EVENT_EXPOSE) ) return;
  set_window();
  mDrawColorKey();
- if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) ) printf( "Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
+ if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) ) mp_msg(MSGT_VO,MSGL_WARN,"Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 }
 
 static void draw_osd(void)
@@ -176,7 +178,7 @@ static void flip_page(void){
 #ifdef SHOW_TIME
     unsigned int t;
     t=GetTimer();
-    printf("  [timer: %08X  diff: %6d  dd: %6d ]  \n",t,t-timer,(t-timer)-timerd);
+    mp_msg(MSGT_VO,MSGL_STATUS,"  [timer: %08X  diff: %6d  dd: %6d ]  \n",t,t-timer,(t-timer)-timerd);
     timerd=t-timer;
     timer=t;
 #endif
@@ -218,7 +220,9 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
         mga_vid_config.format=MGA_VID_FORMAT_UYVY;
         mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height * 2;
         break;
-   default:          printf("mga: invalid output format %0X\n",format); return (-1);
+   default:
+       mp_msg(MSGT_VO,MSGL_ERR,"mga: invalid output format %0X\n",format);
+       return -1;
   }
 
  aspect_save_orig(width,height);
@@ -237,7 +241,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
    case 24: fgColor=0x00ff00ffL; break;
    case 16: fgColor=0xf81fL; break;
    case 15: fgColor=0x7c1fL; break;
-   default: printf( "Sorry, this (%d) color depth not supported.\n",vo_depthonscreen ); return -1;
+   default: mp_msg(MSGT_VO,MSGL_ERR,"Sorry, this (%d) color depth not supported.\n",vo_depthonscreen ); return -1;
   }
 
   inited=1;
@@ -335,6 +339,6 @@ uninit(void)
  mga_uninit();
  saver_on(mDisplay);
  vo_x11_uninit();
- printf("vo: uninit!\n");
+ mp_msg(MSGT_VO,MSGL_V,"vo: uninit!\n");
 }
 

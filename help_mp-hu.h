@@ -64,7 +64,7 @@ static char help_text[]=
 #define MSGTR_Exit_quit "Kilépés"
 #define MSGTR_Exit_eof "Vége a file-nak"
 #define MSGTR_Exit_error "Végzetes hiba"
-#define MSGTR_IntBySignal "\nAz MPlayer futása %d szignál miatt megszakadt a %s modulban\n"
+#define MSGTR_IntBySignal "\nAz MPlayer futása %d-es szignál miatt megszakadt a %s modulban\n"
 #define MSGTR_NoHomeDir "Nem találom a HOME konyvtárat\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") probléma\n"
 #define MSGTR_CreatingCfgFile "Konfigurációs file létrehozása: %s\n"

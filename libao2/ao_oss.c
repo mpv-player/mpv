@@ -12,6 +12,7 @@
 //#include <sys/soundcard.h>
 
 #include "../config.h"
+#include "../mp_msg.h"
 #include "../mixer.h"
 
 #include "afmt.h"
@@ -91,8 +92,7 @@ static int control(int cmd,int arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
-  if (verbose)
-  printf("ao2: %d Hz  %d chans  %s\n",rate,channels,
+  mp_msg(MSGT_AO,MSGL_V,"ao2: %d Hz  %d chans  %s\n",rate,channels,
     audio_out_format_name(format));
 
   if (ao_subdevice)
@@ -101,8 +101,7 @@ static int init(int rate,int channels,int format,int flags){
   if(mixer_device)
     oss_mixer_device=mixer_device;
 
-  if (verbose)
-    printf("audio_setup: using '%s' dsp device\n", dsp);
+  mp_msg(MSGT_AO,MSGL_V,"audio_setup: using '%s' dsp device\n", dsp);
 
 #ifdef __linux__
   audio_fd=open(dsp, O_WRONLY | O_NONBLOCK);
@@ -110,14 +109,14 @@ static int init(int rate,int channels,int format,int flags){
   audio_fd=open(dsp, O_WRONLY);
 #endif
   if(audio_fd<0){
-    printf("Can't open audio device %s: %s\n", dsp, strerror(errno));
+    mp_msg(MSGT_AO,MSGL_ERR,"audio_setup: Can't open audio device %s: %s\n", dsp, strerror(errno));
     return 0;
   }
 
 #ifdef __linux__
   /* Remove the non-blocking flag */
   if(fcntl(audio_fd, F_SETFL, 0) < 0) {
-   printf("Can't make filedescriptor non-blocking: %s\n", strerror(errno));
+   mp_msg(MSGT_AO,MSGL_ERR,"audio_setup: Can't make filedescriptor non-blocking: %s\n", strerror(errno));
    return 0;
   }  
 #endif
@@ -135,7 +134,7 @@ ac3_retry:
   ao_data.format=format;
   if( ioctl(audio_fd, SNDCTL_DSP_SETFMT, &ao_data.format)<0 ||
       ao_data.format != format) if(format == AFMT_AC3){
-    printf("Can't set audio device %s to AC3 output, trying S16...\n", dsp);
+    mp_msg(MSGT_AO,MSGL_WARN,"Can't set audio device %s to AC3 output, trying S16...\n", dsp);
 #ifdef WORDS_BIGENDIAN
     format=AFMT_S16_BE;
 #else
@@ -143,7 +142,7 @@ ac3_retry:
 #endif
     goto ac3_retry;
   }
-  printf("audio_setup: sample format: %s (requested: %s)\n",
+  mp_msg(MSGT_AO,MSGL_V,"audio_setup: sample format: %s (requested: %s)\n",
     audio_out_format_name(ao_data.format), audio_out_format_name(format));
   
   if(format != AFMT_AC3) {
@@ -152,35 +151,37 @@ ac3_retry:
     if (ao_data.channels > 2) {
       if ( ioctl(audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels) == -1 ||
 	   ao_data.channels != channels ) {
-	printf("audio_setup: Failed to set audio device to %d channels\n", channels);
+	mp_msg(MSGT_AO,MSGL_ERR,"audio_setup: Failed to set audio device to %d channels\n", channels);
 	return 0;
       }
     }
     else {
       int c = ao_data.channels-1;
       if (ioctl (audio_fd, SNDCTL_DSP_STEREO, &c) == -1) {
-	printf("audio_setup: Failed to set audio device to %d channels\n", ao_data.channels);
+	mp_msg(MSGT_AO,MSGL_ERR,"audio_setup: Failed to set audio device to %d channels\n", ao_data.channels);
 	return 0;
       }
     }
-    printf("audio_setup: using %d channels (requested: %d)\n", ao_data.channels, channels);
+    mp_msg(MSGT_AO,MSGL_V,"audio_setup: using %d channels (requested: %d)\n", ao_data.channels, channels);
     // set rate
     ao_data.samplerate=rate;
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
-    printf("audio_setup: using %d Hz samplerate (requested: %d)\n",ao_data.samplerate,rate);
+    mp_msg(MSGT_AO,MSGL_V,"audio_setup: using %d Hz samplerate (requested: %d)\n",ao_data.samplerate,rate);
+    if(ao_data.samplerate!=rate)
+	mp_msg(MSGT_AO,MSGL_WARN,"WARNING! Your soundcard does NOT support %d Hz samplerate! A-V sync problems are possible! Try with '-aop list=resample:fout=%d'\n",rate);
   }
 
   if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)==-1){
       int r=0;
-      printf("audio_setup: driver doesn't support SNDCTL_DSP_GETOSPACE :-(\n");
+      mp_msg(MSGT_AO,MSGL_WARN,"audio_setup: driver doesn't support SNDCTL_DSP_GETOSPACE :-(\n");
       if(ioctl(audio_fd, SNDCTL_DSP_GETBLKSIZE, &r)==-1){
-          printf("audio_setup: %d bytes/frag (config.h)\n",ao_data.outburst);
+          mp_msg(MSGT_AO,MSGL_V,"audio_setup: %d bytes/frag (config.h)\n",ao_data.outburst);
       } else {
           ao_data.outburst=r;
-          printf("audio_setup: %d bytes/frag (GETBLKSIZE)\n",ao_data.outburst);
+          mp_msg(MSGT_AO,MSGL_V,"audio_setup: %d bytes/frag (GETBLKSIZE)\n",ao_data.outburst);
       }
   } else {
-      printf("audio_setup: frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
+      mp_msg(MSGT_AO,MSGL_V,"audio_setup: frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
           zz.fragments, zz.fragstotal, zz.fragsize, zz.bytes);
       if(ao_data.buffersize==-1) ao_data.buffersize=zz.bytes;
       ao_data.outburst=zz.fragsize;
@@ -203,8 +204,8 @@ ac3_retry:
     }
     free(data);
     if(ao_data.buffersize==0){
-        printf("\n   ***  Your audio driver DOES NOT support select()  ***\n");
-          printf("Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n");
+        mp_msg(MSGT_AO,MSGL_ERR,"\n   ***  Your audio driver DOES NOT support select()  ***\n"
+          "Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n");
         return 0;
     }
 #endif
@@ -227,14 +228,9 @@ static void uninit(){
 // stop playing and empty buffers (for seeking/pause)
 static void reset(){
     uninit();
-#ifdef __linux__
-    audio_fd=open(dsp, O_WRONLY | O_NONBLOCK);
-    if(audio_fd < 0 || fcntl(audio_fd, F_SETFL, 0) < 0){
-#else
     audio_fd=open(dsp, O_WRONLY);
     if(audio_fd < 0){
-#endif
-	printf("\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE *** %s\n", strerror(errno));
+	mp_msg(MSGT_AO,MSGL_ERR,"\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE *** %s\n", strerror(errno));
 	return;
     }
 

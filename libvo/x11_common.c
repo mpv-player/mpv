@@ -128,8 +128,7 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 			   &nvisuals);
   if (visuals != NULL) {
     for (i = 0; i < nvisuals; i++) {
-      if (verbose)
-	printf("vo: X11 truecolor visual %#x, depth %d, R:%lX G:%lX B:%lX\n",
+      mp_msg(MSGT_VO,MSGL_V,"vo: X11 truecolor visual %#x, depth %d, R:%lX G:%lX B:%lX\n",
 	       visuals[i].visualid, visuals[i].depth,
 	       visuals[i].red_mask, visuals[i].green_mask,
 	       visuals[i].blue_mask);
@@ -163,15 +162,12 @@ static int x11_errorhandler(Display *display, XErrorEvent *event)
         
     XGetErrorText(display, event->error_code, (char *)&msg, MSGLEN);
     
-    printf("X11 error: %s\n", msg);
+    mp_msg(MSGT_VO,MSGL_ERR,"X11 error: %s\n", msg);
     
-    if (verbose)
-    {
-	printf("Type: %x, display: %x, resourceid: %x, serial: %x\n",
+    mp_msg(MSGT_VO,MSGL_V,"Type: %x, display: %x, resourceid: %x, serial: %x\n",
 	    event->type, event->display, event->resourceid, event->serial);
-	printf("Error code: %x, request code: %x, minor code: %x\n",
+    mp_msg(MSGT_VO,MSGL_V,"Error code: %x, request code: %x, minor code: %x\n",
 	    event->error_code, event->request_code, event->minor_code);
-    }
     
     abort();
     //exit_player("X11 error");
@@ -267,13 +263,12 @@ int vo_init( void )
   dispName = XDisplayName(mDisplayName);
 #endif
 
- if (verbose)
-    printf("X11 opening display: %s\n", dispName);
+ mp_msg(MSGT_VO,MSGL_V,"X11 opening display: %s\n", dispName);
 
  mDisplay=XOpenDisplay(dispName);
  if ( !mDisplay )
   {
-   printf( "vo: couldn't open the X11 display (%s)!\n",dispName );
+   mp_msg(MSGT_VO,MSGL_ERR,"vo: couldn't open the X11 display (%s)!\n",dispName );
    return 0;
   }
  mScreen=DefaultScreen( mDisplay );     // Screen ID.
@@ -345,8 +340,7 @@ int vo_init( void )
    bpp=mXImage->bits_per_pixel;
    if((vo_depthonscreen+7)/8 != (bpp+7)/8) vo_depthonscreen=bpp; // by A'rpi
    mask=mXImage->red_mask|mXImage->green_mask|mXImage->blue_mask;
-   if(verbose)
-     printf("vo: X11 color mask:  %X  (R:%lX G:%lX B:%lX)\n",
+   mp_msg(MSGT_VO,MSGL_V,"vo: X11 color mask:  %X  (R:%lX G:%lX B:%lX)\n",
 	    mask,mXImage->red_mask,mXImage->green_mask,mXImage->blue_mask);
    XDestroyImage( mXImage );
  }
@@ -361,7 +355,7 @@ int vo_init( void )
  else if ( strncmp(dispName, "localhost:", 10) == 0)
 		dispName += 9;
  if (*dispName==':') mLocalDisplay=1; else mLocalDisplay=0;
- printf("vo: X11 running at %dx%d with depth %d and %d bits/pixel (\"%s\" => %s display)\n",
+ mp_msg(MSGT_VO,MSGL_INFO,"vo: X11 running at %dx%d with depth %d and %d bpp (\"%s\" => %s display)\n",
 	vo_screenwidth,vo_screenheight,
 	depth, vo_depthonscreen,
 	dispName,mLocalDisplay?"local":"remote");
@@ -379,7 +373,7 @@ void vo_uninit( void )
     return;
  }
 // if( !vo_depthonscreen ) return;
- printf("vo: uninit ...\n" );
+ mp_msg(MSGT_VO,MSGL_V,"vo: uninit ...\n" );
  XSetErrorHandler(NULL);
  XCloseDisplay( mDisplay );
  vo_depthonscreen = 0;
@@ -780,16 +774,16 @@ void saver_on(Display *mDisplay) {
 	if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
 	{
 	    if (!DPMSEnable(mDisplay)) {  // restoring power saving settings
-                printf("DPMS not available?\n");
+                mp_msg(MSGT_VO,MSGL_WARN,"DPMS not available?\n");
             } else {
                 // DPMS does not seem to be enabled unless we call DPMSInfo
 	        BOOL onoff;
         	CARD16 state;
         	DPMSInfo(mDisplay, &state, &onoff);
                 if (onoff) {
-	            printf ("Successfully enabled DPMS\n");
+	            mp_msg(MSGT_VO,MSGL_INFO,"Successfully enabled DPMS\n");
                 } else {
-	            printf ("Could not enable DPMS\n");
+	            mp_msg(MSGT_VO,MSGL_WARN,"Could not enable DPMS\n");
                 }
             }
 	}
@@ -820,10 +814,10 @@ void saver_off(Display *mDisplay) {
 	if (onoff)
 	{
            Status stat;
-	    printf ("Disabling DPMS\n");
+	    mp_msg(MSGT_VO,MSGL_INFO,"Disabling DPMS\n");
 	    dpms_disabled=1;
 	    stat = DPMSDisable(mDisplay);  // monitor powersave off
-            printf ("stat: %d\n", stat);
+            mp_msg(MSGT_VO,MSGL_V,"DPMSDisable stat: %d\n", stat);
 	}
     }
 #endif
@@ -857,10 +851,10 @@ void vo_vm_switch(uint32_t X, uint32_t Y, int* modeline_width, int* modeline_hei
     
     if (XF86VidModeQueryExtension(mDisplay, &vm_event, &vm_error)) {
       XF86VidModeQueryVersion(mDisplay, &vm_ver, &vm_rev);
-      printf("XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
+      mp_msg(MSGT_VO,MSGL_V,"XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
       have_vm=1;
     } else
-      printf("XF86VidMode Extenstion not available.\n");
+      mp_msg(MSGT_VO,MSGL_WARN,"XF86VidMode Extenstion not available.\n");
 
     if (have_vm) {
       if (vidmodes==NULL)
@@ -878,7 +872,7 @@ void vo_vm_switch(uint32_t X, uint32_t Y, int* modeline_width, int* modeline_hei
 	      j=i;
 	    }
       
-      printf("XF86VM: Selected video mode %dx%d for image size %dx%d.\n",*modeline_width, *modeline_height, X, Y);
+      mp_msg(MSGT_VO,MSGL_INFO,"XF86VM: Selected video mode %dx%d for image size %dx%d.\n",*modeline_width, *modeline_height, X, Y);
       XF86VidModeLockModeSwitch(mDisplay,mScreen,0);
       XF86VidModeSwitchToMode(mDisplay,mScreen,vidmodes[j]);
       XF86VidModeSwitchToMode(mDisplay,mScreen,vidmodes[j]);
@@ -904,7 +898,7 @@ void vo_vm_close(Display *dpy)
            for (i=0; i<modecount; i++)
              if ((vidmodes[i]->hdisplay == vo_screenwidth) && (vidmodes[i]->vdisplay == vo_screenheight)) 
                { 
-                 printf("\nReturning to original mode %dx%d\n", vo_screenwidth, vo_screenheight);
+                 mp_msg(MSGT_VO,MSGL_INFO,"\nReturning to original mode %dx%d\n", vo_screenwidth, vo_screenheight);
                  break;
                }
 
