@@ -1200,6 +1200,11 @@ EOF
 
 fi
 
+echocheck "assembler support of -pipe option"
+cat > $TMPC << EOF
+int main(void) { return 0; }
+EOF
+cc_check -pipe && _pipe="-pipe" && echores "yes" || echores "no"
 
 _prefix="/usr/local"
 _xvmclib="XvMCNVIDIA"
@@ -4946,7 +4951,7 @@ if test "$_faad_internal" = auto ; then
   fi
   # internal faad: check if our dear gcc is able to compile it...
   cp "`pwd`/libfaad2/cfft.c" $TMPC
-  if ( cc_check -c -O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer $_inc_faad ); then
+  if ( cc_check -c -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer $_inc_faad ); then
     _faad_internal=yes
   else
     _faad_internal="no (broken gcc)"
@@ -5964,7 +5969,7 @@ if test "$_profile" != "" || test "$_debug" != "" ; then
   _stripbinaries=no
 elif test -z "$CFLAGS" ; then
   if test "$host_arch" != "mips" ; then
-    CFLAGS="-O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer"
+    CFLAGS="-O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
   else
     CFLAGS="-O4 $_march $_mcpu -ffast-math -fomit-frame-pointer"
   fi
@@ -6154,7 +6159,7 @@ CC = $_cc
 AWK = $_awk
 RANLIB = $_ranlib
 INSTALL = $_install
-# OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
+# OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu $_pipe -fomit-frame-pointer -ffast-math
 EXTRA_INC = $_inc_extra $_inc_gtk
 OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
