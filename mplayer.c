@@ -613,6 +613,7 @@ int osd_show_sub_visibility = 0;
 int osd_show_sub_alignment = 0;
 int osd_show_vobsub_changed = 0;
 int osd_show_percentage = 0;
+int osd_show_tv_channel = 25;
 
 int rtc_fd=-1;
 
@@ -2467,15 +2468,46 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_TV_STEP_CHANNEL :  {
       if (tv_param_on == 1) {
 	int v = cmd->args[0].v.i;
-	if(v > 0)
+	if(v > 0){
 	  tv_step_channel((tvi_handle_t*)(demuxer->priv), TV_CHANNEL_HIGHER);
-	else
+#ifdef USE_OSD
+	  if (tv_channel_list) {
+	    osd_show_tv_channel = sh_video->fps;
+	    vo_osd_changed(OSDTYPE_SUBTITLE);
+	  }
+#endif
+	} else {
 	  tv_step_channel((tvi_handle_t*)(demuxer->priv), TV_CHANNEL_LOWER);
+#ifdef USE_OSD
+	  if (tv_channel_list) {
+	    osd_show_tv_channel = sh_video->fps;
+	    vo_osd_changed(OSDTYPE_SUBTITLE);
+	  }
+#endif
+	}
       }
     } break;
     case MP_CMD_TV_SET_CHANNEL :  {
-      if (tv_param_on == 1)
+      if (tv_param_on == 1) {
 	tv_set_channel((tvi_handle_t*)(demuxer->priv), cmd->args[0].v.s);
+#ifdef USE_OSD
+	if (tv_channel_list) {
+		osd_show_tv_channel = sh_video->fps;
+		vo_osd_changed(OSDTYPE_SUBTITLE);
+	}
+#endif
+      }
+    } break;
+    case MP_CMD_TV_LAST_CHANNEL :  {
+      if (tv_param_on == 1) {
+	tv_last_channel((tvi_handle_t*)(demuxer->priv));
+#ifdef USE_OSD
+	if (tv_channel_list) {
+		osd_show_tv_channel = sh_video->fps;
+		vo_osd_changed(OSDTYPE_SUBTITLE);
+	}
+#endif
+      }
     } break;
     case MP_CMD_TV_STEP_NORM :  {
       if (tv_param_on == 1)
@@ -2950,6 +2982,12 @@ if(rel_seek_secs || abs_seek_pos){
       if (osd_show_dvd_nav_delay) {
           sprintf(osd_text_tmp, "DVDNAV: %s", dvd_nav_text);
           osd_show_dvd_nav_delay--;
+      } else
+#endif
+#ifdef USE_TV
+      if (osd_show_tv_channel && tv_channel_list) {
+	  sprintf(osd_text_tmp, "Channel: %s", tv_channel_current->name);
+	  osd_show_tv_channel--;
       } else
 #endif
       if (osd_show_sub_visibility) {

@@ -1225,7 +1225,6 @@ static void *video_grabber(void *data)
     struct timeval curtime;
     long long skew, prev_skew, xskew, interval, prev_interval;
     int frame, nextframe;
-    int fsize = priv->bytesperline * priv->height;
     int i;
     int first = 1;
     int framecount;
@@ -1284,7 +1283,7 @@ static void *video_grabber(void *data)
 		if (!priv->immediate_mode) {
 		    interval = (long long)1e6*curtime.tv_sec + curtime.tv_usec - priv->starttime;
 		} else {
-		    interval = (double)framecount/priv->fps;
+		    interval = (long long)1e6*framecount/priv->fps;
 		}
 
 		if (!priv->immediate_mode) {

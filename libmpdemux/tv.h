@@ -20,6 +20,7 @@ extern int tv_param_height;
 extern int tv_param_input;
 extern char *tv_param_outfmt;
 extern float tv_param_fps;
+extern char **tv_param_channels;
 extern int tv_param_noaudio;
 extern int tv_param_immediate;
 extern int tv_param_audiorate;
@@ -75,6 +76,18 @@ typedef struct tvi_handle_s {
     int			channel;
 } tvi_handle_t;
 
+typedef struct tv_channels_s {
+    int index;
+    char number[5];
+    char name[20];
+    int   freq;
+    struct tv_channels_s *next;
+    struct tv_channels_s *prev;
+} tv_channels_t;
+
+tv_channels_t *tv_channel_list;
+tv_channels_t *tv_channel_current, *tv_channel_last;
+char *tv_channel_last_real;
 
 #define TVI_CONTROL_FALSE		0
 #define TVI_CONTROL_TRUE		1
@@ -144,10 +157,14 @@ int tv_set_color_options(tvi_handle_t *tvh, int opt, int val);
 #define TV_COLOR_SATURATION	3
 #define TV_COLOR_CONTRAST	4
 
+int tv_step_channel_real(tvi_handle_t *tvh, int direction);
 int tv_step_channel(tvi_handle_t *tvh, int direction);
 #define TV_CHANNEL_LOWER	1
 #define TV_CHANNEL_HIGHER	2
 
+int tv_last_channel(tvi_handle_t *tvh);
+
+int tv_set_channel_real(tvi_handle_t *tvh, char *channel);
 int tv_set_channel(tvi_handle_t *tvh, char *channel);
 
 int tv_step_norm(tvi_handle_t *tvh);

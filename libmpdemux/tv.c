@@ -52,6 +52,7 @@ int tv_param_height = -1;
 int tv_param_input = 0; /* used in v4l and bttv */
 char *tv_param_outfmt = "yv12";
 float tv_param_fps = -1.0;
+char **tv_param_channels = NULL;
 #ifdef HAVE_TV_V4L
 int tv_param_amode = -1;
 int tv_param_audio_id = 0;
@@ -233,6 +234,72 @@ static int open_tv(tvi_handle_t *tvh)
 	goto done;
     }
 
+    /* Handle channels names */
+    if (tv_param_channels) {
+	mp_msg(MSGT_TV, MSGL_INFO, "TV Channels names detected.\n");
+	tv_channel_list = malloc(sizeof(tv_channels_t));
+	tv_channel_list->index=1;
+	tv_channel_list->next=NULL;
+	tv_channel_list->prev=NULL;
+	tv_channel_current = tv_channel_list;
+
+	while (*tv_param_channels) {
+		char* tmp = *(tv_param_channels++);
+		int i;
+		struct CHANLIST cl;
+
+		strcpy(tv_channel_current->name, strchr(tmp, '-') + 1);
+		strchr(tmp, '-')[0] = '\0';
+		strncpy(tv_channel_current->number, tmp, 4);
+
+		while (strchr(tv_channel_current->name, '_'))
+			strchr(tv_channel_current->name, '_')[0] = ' ';
+
+		tv_channel_current->freq = 0;
+		for (i = 0; i < chanlists[tvh->chanlist].count; i++) {
+		    cl = tvh->chanlist_s[i];
+		    if (!strcasecmp(cl.name, tv_channel_current->number)) {
+			tv_channel_current->freq=cl.freq;
+			break;
+		    }
+		}
+	        if (tv_channel_current->freq == 0)
+		    mp_msg(MSGT_TV, MSGL_ERR, "Couldn't find frequency for channel %s (%s)\n",
+				    tv_channel_current->number, tv_channel_current->name);
+
+		/*mp_msg(MSGT_TV, MSGL_INFO, "-- Detected channel %s - %s (%5.3f)\n",
+				tv_channel_current->number, tv_channel_current->name,
+				(float)tv_channel_current->freq/1000);*/
+
+		tv_channel_current->next = malloc(sizeof(tv_channels_t));
+		tv_channel_current->next->index = tv_channel_current->index + 1;
+		tv_channel_current->next->prev = tv_channel_current;
+		tv_channel_current->next->next = NULL;
+		tv_channel_current = tv_channel_current->next;
+	}
+
+	tv_channel_current->prev->next = NULL;
+	free(tv_channel_current);
+    } else 
+	    tv_channel_last_real = malloc(sizeof(char)*5);
+
+    if (tv_channel_list) {
+	int i;
+	int channel;
+	if (tv_param_channel)
+		channel = atoi(tv_param_channel);
+	else
+		channel = 1;
+
+	tv_channel_current = tv_channel_list;
+	for (i = 1; i < channel; i++)
+		if (tv_channel_current->next)
+			tv_channel_current = tv_channel_current->next;
+	mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n", tv_channel_current->number,
+			tv_channel_current->name, (float)tv_channel_current->freq/1000);
+	tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
+	tv_channel_last = tv_channel_current;
+    } else {
     /* we need to set frequency */
     if (tv_param_freq)
     {
@@ -246,18 +313,18 @@ static int open_tv(tvi_handle_t *tvh)
 	    freq, (float)freq/16);
     }
 
-    if (tv_param_channel)
-    {
+	    if (tv_param_channel) {
 	struct CHANLIST cl;
 
 	mp_msg(MSGT_TV, MSGL_V, "Requested channel: %s\n", tv_param_channel);
 	for (i = 0; i < chanlists[tvh->chanlist].count; i++)
 	{
 	    cl = tvh->chanlist_s[i];
-//	    printf("count%d: name: %s, freq: %d\n",
-//		i, cl.name, cl.freq);
+		    //  printf("count%d: name: %s, freq: %d\n",
+		    //	i, cl.name, cl.freq);
 	    if (!strcasecmp(cl.name, tv_param_channel))
 	    {
+			strcpy(tv_channel_last_real, cl.name);
 		tvh->channel = i;
 		mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s (freq: %.3f)\n",
 		    cl.name, (float)cl.freq/1000);
@@ -265,6 +332,7 @@ static int open_tv(tvi_handle_t *tvh)
 		break;
 	    }
 	}
+    }
     }
     
     /* grep frequency in chanlist */
@@ -526,7 +594,7 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
     return(1);
 }
 
-int tv_step_channel(tvi_handle_t *tvh, int direction)
+int tv_step_channel_real(tvi_handle_t *tvh, int direction)
 {
     struct CHANLIST cl;
 
@@ -534,6 +602,7 @@ int tv_step_channel(tvi_handle_t *tvh, int direction)
     {
 	if (tvh->channel-1 >= 0)
 	{
+	    strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
 	    cl = tvh->chanlist_s[--tvh->channel];
 	    mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s (freq: %.3f)\n",
 		cl.name, (float)cl.freq/1000);
@@ -545,6 +614,7 @@ int tv_step_channel(tvi_handle_t *tvh, int direction)
     {
 	if (tvh->channel+1 < chanlists[tvh->chanlist].count)
 	{
+	    strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
 	    cl = tvh->chanlist_s[++tvh->channel];
 	    mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s (freq: %.3f)\n",
 		cl.name, (float)cl.freq/1000);
@@ -554,11 +624,35 @@ int tv_step_channel(tvi_handle_t *tvh, int direction)
     return(1);
 }
 
-int tv_set_channel(tvi_handle_t *tvh, char *channel)
-{
+int tv_step_channel(tvi_handle_t *tvh, int direction) {
+	if (tv_channel_list) {
+		if (direction == TV_CHANNEL_HIGHER) {
+			if (tv_channel_current->next) {
+				tv_channel_last = tv_channel_current;
+				tv_channel_current = tv_channel_current->next;
+				tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
+				mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n",
+			tv_channel_current->number, tv_channel_current->name, (float)tv_channel_current->freq/1000);
+			}
+		}
+		if (direction == TV_CHANNEL_LOWER) {
+			if (tv_channel_current->prev) {
+				tv_channel_last = tv_channel_current;
+				tv_channel_current = tv_channel_current->prev;
+				tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
+				mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n",
+			tv_channel_current->number, tv_channel_current->name, (float)tv_channel_current->freq/1000);
+			}
+		}
+	} else tv_step_channel_real(tvh, direction);
+	return(1);
+}
+
+int tv_set_channel_real(tvi_handle_t *tvh, char *channel) {
 	int i;
 	struct CHANLIST cl;
 
+        strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
 	for (i = 0; i < chanlists[tvh->chanlist].count; i++)
 	{
 	    cl = tvh->chanlist_s[i];
@@ -573,6 +667,57 @@ int tv_set_channel(tvi_handle_t *tvh, char *channel)
 		break;
 	    }
 	}
+	return(1);
+}
+
+int tv_set_channel(tvi_handle_t *tvh, char *channel) {
+	int i, channel_int;
+
+	if (tv_channel_list) {
+		tv_channel_last = tv_channel_current;
+		channel_int = atoi(channel);
+		tv_channel_current = tv_channel_list;
+		for (i = 1; i < channel_int; i++)
+			if (tv_channel_current->next)
+				tv_channel_current = tv_channel_current->next;
+		mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n", tv_channel_current->number,
+				tv_channel_current->name, (float)tv_channel_current->freq/1000);
+		tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
+	} else tv_set_channel_real(tvh, channel);
+	return(1);
+}
+
+int tv_last_channel(tvi_handle_t *tvh) {
+
+	if (tv_channel_list) {
+		tv_channels_t *tmp;
+
+		tmp = tv_channel_last;
+		tv_channel_last = tv_channel_current;
+		tv_channel_current = tmp;
+
+		mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n", tv_channel_current->number,
+				tv_channel_current->name, (float)tv_channel_current->freq/1000);
+		tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
+	} else {
+		int i;
+		struct CHANLIST cl;
+
+		for (i = 0; i < chanlists[tvh->chanlist].count; i++)
+		{
+		    cl = tvh->chanlist_s[i];
+		    if (!strcasecmp(cl.name, tv_channel_last_real))
+		    {
+			strcpy(tv_channel_last_real, tvh->chanlist_s[tvh->channel].name);
+			tvh->channel = i;
+			mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s (freq: %.3f)\n",
+			    cl.name, (float)cl.freq/1000);
+			tv_set_freq(tvh, (unsigned long)(((float)cl.freq/1000)*16));
+			break;
+		    }
+		}
+	}
+	return(1);
 }
 
 int tv_step_norm(tvi_handle_t *tvh)

@@ -666,6 +666,7 @@ Specify other device than the default /dev/\:video0.
 Specify other input than the default 0 (Television) (see output for a list)
 .IPs freq=<value>
 Specify the frequency to set the tuner to (e.g.\& 511.250).
+Not compatible with channels parameter.
 .IPs outfmt=<value>
 output format of the tuner (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2,
 i420)
@@ -682,6 +683,13 @@ available: PAL, SECAM, NTSC
 Set tuner to <value> channel.
 .IPs chanlist=<value>
 available: europe-east, europe-west, us-bcast, us-cable, etc
+.IPs channels=<channel>-<name>,<channel>-<name>,...
+Set names for channels. Use _ for spaces in names (or play with quoting ;-).
+The channel names will then be written using OSD, and the commands tv_step_channel,
+tv_set_channel and tv_last_channel will then be usable using a remote (see. lirc).
+Not compatible with frequency parameter.
+Warning : The channel number will then be the position in the 'channels' list,
+beginning with 1. Ie. use tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
 .IPs audiorate=<value>
 set audio capture bitrate
 .IPs forceaudio
