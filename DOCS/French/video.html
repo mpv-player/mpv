@@ -509,66 +509,38 @@ C.f. <A HREF="http://aa-project.sourceforge.net/tune/">http://aa-project.sourcef
 
 <P><B><A NAME=2.2.1.A>2.2.1.A. Support TV-out</A></B></P>
 
+
 <P><B><A NAME=2.2.1.A.1>2.2.1.A.1. Cartes Matrox</A></B></P>
 
-<P><I> J'aimerais trouver dans mplayer les m&ecirc;mes fonctionnalit&eacute;s que sous windoze. 
-Quand je lance une vid&eacute;o dans windoze (en fen&ecirc;tre ou plein &eacute;cran)
-la vid&eacute;o est &eacute;galement redirig&eacute;e vers la sortie tv, donc je peux voir le film en plein &eacute;cran sur ma t&eacute;l&eacute;vision. 
-J'adore cette fonctionnalit&eacute; et me suis demand&eacute; s'il serait difficile de l'impl&eacute;menter dans MPlayer.</I></P>
-
-<P>C'est une limitation des drivers. BES (Back-End Scaler, le g&eacute;n&eacute;rateur overlay
-et moteur de dimensionnement YUV des cartes G200/G400/G450) fonctionne uniquement avec CRTC1.
-Normalement, CRTC1 (mode texte, chaqye bpp gfx et BES) est rout&eacute; vers HEAD1,
-et CRTC2 (uniquement 16/32bpp gfx) est rout&eacute; vers HEAD2 (TV-out).</P>
-
-<P>Sous linux, vous avez deux solutions pour faire fonctionner TV-Out :</P>
-
 <P><UL>
-<LI>UtiliserX 4.0.x + le driver HAL de matrox, qui apporte le support dual-head, 
-et vous permettra de rediriger la seconde sortie vera la TV.
-Malheureusement il a l'encryption Macrovision activ&eacute;e, et ne fonctionnera donc que sur une tv reli&eacute;e directement, pas sur un VCR.
-Autre probl&egrave;me : Xv ne fonctionne pas sur la seconde sortie.
-(Je ne sais pas comment fait Windows, peut-&ecirc;tre qu'il swappe les CRTCs entre les t&ecirc;tes, 
-ou utilise le framebuffer YUV sur le second DAC)
-<LI>Utiliser matroxfb avec le support dual-head activ&eacute; (noyaux 2.4.x).
-Vous pourrez alors obtenir une console framebuffer (utilisant CRTC2, donc lente), 
-et TV-out (utilisant CRTC1, avec support BES).
-Vous devez oublier X lorsque vous utilisez cette solution de TV-out ! :(
+<LI>Utiliser X 4.0.x + le driver HAL de matrox, qui apporte le support dual-head, et vous permettra de rediriger la seconde sortie vera la TV.
+Cette m&eacute;thode n'apporte pas la lecture optimis&eacute;e comme sous windoze ! La seconde t&ecirc;te supporte uniquement le framebuffer YUV, le <I>BES</I> (Back End Scalar, le scaler Yuv sur cartes G200/G400/G450/G550) ne fonctionne pas ici ! Le driver windows contourne le probl&egrave;me, probablement en utilisant le moteur 3D pour zoomer, et le framebuffer YUV pour afficher l'image agrandie. Si vous voulez vraiment utiliser X, essayez l'option <CODE>-vo x11 -zoom</CODE>, mais cela restera <B>LENT</B>, et ne passera pas la protection de copie Macrovision.
+<LI><B>Framebuffer</B>: utiliser les <B>modules matroxfb</B> dans le noyaux 2.4 et 2.2 ne suffit pas, vous devez s&eacute;lectionner toutes les options relatives aux cartes Matrox et les compiler comme <B>modules</B> !
 </UL></P>
 
 <P>Suivez ces instructions:</P>
-
 <P><UL>
-<LI>Compilez tout ce qui concerne le mat&eacute;riel matrox dans le noyau en tant que module.
-(vous DEVEZ les compiler comme modules, du moins je n'ai pas encore r&eacute;ussi a les faire fonctionner en monolithique.)
-[red&eacute;marrer sur ce nouveau noyau et installez les modules, mais ne les chargez pas encore !]
-<P><CODE>
-&nbsp;&nbsp;cd TVout<BR>
-&nbsp;&nbsp;./compile.sh</CODE></P>
-<LI>Ex&eacute;cutez le script 'modules' du r&eacute;pertoire TV-out de mplayer.
-Ceal mettra votre cpnsole dans le framebuffer.
-Changez pour tty1 (ALT+F1)!
-Lancez maintenant le script 'independent', qui ordonnera vos terminaux :
-<P>tty 1,2:      fb console, CRTC2, head 1 (monitor)<BR>
-tty 3,4,5...: framebuffer+BES, CRTC1, head 2 (TV-out)</P>
-Vous pouvez lancer les scripts TV-* et Mon-* pour changer les r&eacute;solutions :
-<P>allez sur tty1 (ALT+F1), et lancez Mon-* (l'un d'entre eux)<BR>
-allez sur tty3 (ALT+F3) puis revenez sur tty1 (ALT+F1)</P>
-(ce changement s&eacute;lectionnera tty3 sur/dev/fb1 - tricky)<BR>
-<P>lancez TV-* (l'un d'entre eux)</P>
-(vous devez avoir une console sur votre t&eacute;l&eacute; PAL - je ne sais pas si &ccedil;a marche pour NTSC)
-<P>Maintenant si vous lancez mplayer (syr tty1), l'image s'affichera sur 
-tty3, donc vous la verrez sur votre TV ou second moniteur.</P>
-</UL></P>
+<LI><CODE>
+Placez vous dans le r&eacute;pertoire TVout/matroxset et faites <CODE>make</CODE>. Installez <CODE>matroxset</CODE> quelque part dans votre PATH.</LI>
+<LI>Placez vous dans le r&eacute;pertoire <CODE>TVout/</CODE> des sources MPlayer, et ex&eacute;cutez<CODE>./modules</CODE> en tant que root. Votre console mode texte passera en mode framebuffer (pas de retour possible !) .</LI>
+<LI>Lancez ensuite le script <CODE>./matroxtv</CODE>. Il vous affichera un menu sommaire. Tapez <B>2</B> puis <B>ENTR&Eacute;E</B>. Vous devriez maintenant avoir la m&ecirc;me image sur la t&eacute;l&eacute; et sur votre moniteur. L'option <B>3</B> s&eacute;parera les deux affichages, mais vous ne pourrez alors <B>plus utiliser X</B> ! Si la TV a quelques lignes d&eacute;phas&eacute;es, c'est que le script n'a pas pu ajuster correctement la r&eacute;solution (640x512 par d&eacute;faut). Utiliser au hasard les autres options du menu, &ccedil;a devrait passer;-)</LI></UL>
+<P>
+Yoh. L'&eacute;tape suivante consiste &agrave; faire disparaitre le curseur de la console et de d&eacute;sactiver le blanking de l'&eacute;cran. Ex&eacute;cutez les commandes suivantes : </P>
+<P>
+<CODE>echo -e '\033[?25l'<BR>
+      setterm -blank 0</CODE>
+    </P>
+<P>Yeah kewl. Lancez la vid&eacute;o avec la commande <CODE>mplayer -vo mga -fs -screenw 640
+    -screenh 512 &lt;filename&gt;</CODE><BR>
+	(Si vous utilisez X, passer en matroxfb, par exemple CTRL-ALT-F1 !)<BR>
+Changez la r&eacute;soltion de 640x512 selon votre pr&eacute;f&eacute;rence...<BR>
+<B>Appr&eacute;ciez la sortie Matrox TV ultra-rapide et fonctionnelle (mieux que Xv) !</B>
+</P>
+  </LI>
+</LI>
+</UL>
+</P>
 
-<P>Oui, c'est un peu de la 'bidouille' actuellement. MAis j'attends que se finisse le projet marvel, qui proposera de vrais drivers TV-out, du moins je l'esp&egrave;re.</P>
-
-<P>Mon probl&egrave;me actuel reste que BES fonctionne uniquement avec CRTC1. Donc l'image s'affichera toujours versCRTC1 (le moniteur par d&eacute;faut),
-donc je dois swapper les CRTC, ce qui passera votre console en framebuffer
-(CRTC2 ne peut pas faire de mode texte) et sera un peu lent (pas d'acc&eacute;l&eacute;ration). :(</P>
-
-<P><I>Dans tous les cas j'ai seulement une sortie monochrome sur ma tv ...</I>
-Peut-&ecirc;tre avez vous une TV NTSC ? Ou bien vous n'avez pas lan&ccedil;&eacute; l'un des scripts TV-*.</P>
 
 <P><B><A NAME=2.2.1.A.2>2.2.1.A.2. Cartes ATI</A></B></P>
 
@@ -612,10 +584,29 @@ A:Un m&eacute;canisme de protection contre la copie.</code>
 <LI><b>Radeon VE</b> et <b>Rage PRO LT</b> incluent <i>ImpacTV2+</i> pas encore support&eacute; sous Linux.</P>
 
 <P>
-D'un autre cot&eacute; - nous pourrions obtenir un support TV-out spar les <B>drivers VESA</B>
-sur syst&egrave;mes x86 mais comme linux a un <i>vm86 syscall</i> trop limit&eacute;
-- &ccedil;a n'est pas faisable en pratique. Chaque acc&egrave;s &agrave; l'espace IO cause des exceptions
-et le driver tente m&ecirc;me d'&eacute;muler les appels VESA au lieu de les passer au handler int_10h natif.
+Heureusement, les possesseurs de machines suffisement puissantes ((Duron, Celeron2 et supérieur) <b>peuvent regarder les vidéos sur leur TV</b> avec les drivers <a href=#2.2.1.12>VESA</a>.
+</P>
+<P>
+Je pourrais également féliciter ATI Inc.:<br>
+<b>ils produisent des BIOS de haute qualité.</b>
+</P>
+<P>
+Les drivers <b>VESA</b> n'utilisent aucune accélération matérielle mais simulent le 
+<b>DGA</b> a travers une fenêtre de 64K, configurée avec les fonctions 32-bit du BIOS.Les cartes ATI possèdent suffisamanet de <b>mémoire vidéo rapide</b> (DIMM ou DDR
+chips avec accès 64 - 128-bit) donc ne souffrent pas de cette méthode. Il n'existe pas de
+limitations sur le mode vidéo utilisé pour votre TV (contrairement a d'autres cartes) donc vous pouvez utiliser <b>n'importe lequel</b> sur votre <b>TV</b> (de
+<b>320x200</b> jusqu'a <b>1024x768</b>).<br>
+La seule chose que vous devez faire - <b>brancher le connecteur connecteur TV avant de démarrer votre
+PC</b> puisque le bios vidéo s'initialise une seule fois durant la procédure POST.
+</P>
+<P>
+Pour plus de détail lisez la section <a href="video.html#2.2.1.12">VESA</a> de cette documentation.
+</P>
+
+<P><B><A NAME=2.2.1.A.3>2.2.1.A.3. Voodoo 3</A></B></P>
+
+<P>
+Consultez <A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">cette URL</A>.
 </P>
 
 </BODY>
