@@ -66,12 +66,6 @@ mencoder \- Movie Encoder for Linux
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p | ftp ] ://
-[user:passwd@]\fIURL\fP[:port] [options]
-.br
-.in
-.B mplayer
-'in +\n[.k]u
 .I dvd://[title | [start_title]-end_title ]
 [options]
 .br
@@ -79,12 +73,17 @@ mencoder \- Movie Encoder for Linux
 .B mplayer
 'in +\n[.k]u
 .I vcd://track[/device]
-[options]
 .br
 .in
 .B mplayer
 'in +\n[.k]u
 .I tv://[channel]
+[options]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I dvb://[card_number@]channel
 [options]
 .br
 .in
@@ -108,6 +107,12 @@ mencoder \- Movie Encoder for Linux
 .in
 .B mplayer
 'in +\n[.k]u
+.RI [ mms[t] | http | http_proxy | rt[s]p | ftp ] ://
+[user:passwd@]\fIURL\fP[:port] [options]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
 .I sdp://file
 [options]
 .br
@@ -118,20 +123,14 @@ mencoder \- Movie Encoder for Linux
 [options]
 .br
 .in
-.B mplayer
-'in +\n[.k]u
-.I dvb://[card_number@]channel
+.B gmplayer
 [options]
+[\-skin\ skin]
 .br
-.in
 .B mencoder
 [options]
 .RI [ \ file\  | \ URL\  | \ \-\  ]
 [\-o\ file]
-.br
-.B gmplayer
-[options]
-[\-skin\ skin]
 .ad
 .hy
 .
