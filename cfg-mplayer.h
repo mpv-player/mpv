@@ -27,6 +27,9 @@ extern int vo_dbpp;
 extern int osd_level;
 extern int sub_unicode;
 
+extern char *ao_outputfilename;
+extern int ao_pcm_waveheader;
+
 #ifdef HAVE_X11
 extern char *mDisplayName;
 #endif
@@ -104,6 +107,10 @@ struct config conf[]={
 	{"dumpfile", &stream_dump_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1},
 	{"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2},
+	
+	{"aofile", &ao_outputfilename, CONF_TYPE_STRING, 0, 0, 0},
+	{"waveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 0, 1},
+	{"nowaveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 1, 0},
 
 //	{"auds", &avi_header.audio_codec, CONF_TYPE_STRING, 0, 0, 0},
 //	{"vids", &avi_header.video_codec, CONF_TYPE_STRING, 0, 0, 0},
