@@ -2701,11 +2701,11 @@ if test "$_svga" = auto ; then
 int main(void) { return 0; }
 EOF
   _svga=no
-  cc_check  -lvgagl -lvga && _svga=yes
+  cc_check  -lvgagl -lvga -lm && _svga=yes
 fi
 if test "$_svga" = yes ; then
   _def_svga='#define HAVE_SVGALIB 1'
-  _ld_svga='-lvgagl -lvga'
+  _ld_svga='-lvgagl -lvga -lm'
   _vosrc="$_vosrc vo_svga.c"
   _vomodules="svga $_vomodules"
 else
