@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.29 -->
+<!-- synced with 1.33 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portaciones</title>
 
@@ -159,7 +159,8 @@ ser compilado usando el ensamblador de Sun <filename>/usr/ccs/bin/as</filename>.
 
 <para>El script <filename>configure</filename> intenta encontrarlo, qué 
 programa ensamblador es usado por tu órden &quot;gcc&quot; (en caso de que la
-autodetección falle, use la opción <option>--as=/donde/este/instalado/gnu-as</option>
+autodetección falle, use la opción
+<option>--as=<replaceable>/donde/este/instalado/gnu-as</replaceable></option>
 para decirle al script <filename>configure</filename> donde puede encontrar el "as"
 de GNU en su sistema).
 </para>
@@ -235,7 +236,7 @@ video.
 <para>
 Puede probar a instalar el programa de instalación GNU, y (si no lo tiene
 en su ruta global) apuntar a donde esté con:
-<screen>./configure --with-install=/ruta/y/nombre/del/instalador</screen>
+<screen>./configure --with-install=<replaceable>/ruta/y/nombre/del/instalador</replaceable></screen>
 </para>
 
 <para>
@@ -401,6 +402,47 @@ binarios compilados de <application>MPlayer</application> para Mac OS X desde el
 proyecto <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>.
 </para>
 
+</sect1>
+
+<sect1 id="hpux">
+<title>HP UX</title>
+<para>
+Martin Gansser mantiene un
+<ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">COMO</ulink>
+de mucho valor acerca de cómo compilar <application>MPlayer</application> en HP-UX. ¡Tiene
+incluso una sección de FAQ!
+</para>
+
+<para>
+De todos modos, nuestro código crudo de <application>MPlayer</application> se usa para
+compilar en HP-UX sin problemas.
+</para>
+</sect1>
+
+<sect1 id="amiga">
+<title>Amiga/MorphOS (GeedGadgets)</title>
+<para>
+Nicholas Det en Genesi ha hecho un port grande y potente de <application>MPlayer</application>
+para MorphOS. Tristemente basado en la serie 0.90.
+</para>
+
+<para>
+Obténgalo desde <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
+<itemizedlist>
+<listitem><para>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
+<application>MPlayer</application> 0.91 binario</ulink>
+</para></listitem>
+<listitem><para>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
+<application>MPlayer</application> 0.91 código fuente</ulink>
+</para></listitem>
+<listitem><para>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=912">
+<application>MEncoder</application> 0.91 binario</ulink>
+</listitem></para>
+</itemizedlist>
+</para>
 </sect1>
 
 </chapter>

@@ -1,12 +1,7 @@
-.\" synced with 1.495
+.\" synced with 1.504
 .\" MPlayer (C) 2000-2003 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun, Jonas Jermann
 .\" y traducida al español por Juan Martín López <nauj27@teleline.es>
-.\" 
-.\" Ejecute esto para obtener versión HTML de la página man:
-.\"   groff -man -Thtml mplayer.1 > manpage.html
-.\" Ejecute esto para obtener versión de texto de la página man:
-.\"   groff -m man -Tascii mplayer.1 | col -bx > manpage.txt
 .\" 
 .
 .\" --------------------------------------------------------------------------
@@ -697,9 +692,13 @@ Opcionalmente se especifica en qué capítulo se termina la
 reproducción (por defecto: 1).
 Se pueden encontrar ejemplos más abajo.
 .TP
-.B \-csslib <nombredearchivo>
-(opción DVD al viejo-estilo) Esta opción es usada para sobreescribir la
-localización por defecto de libcss.so.
+.B \-cookies
+Envía cookies cuando hace peticiones HTTP.
+.TP
+.B \-cookies-file <nombredearchivo>
+Lee cookies HTTP desde este archivo.
+Si usa esta opción, MPlayer no buscará las cookies en "~/.netscape/"
+y "~/.mozilla/".
 .TP
 .B \-demuxer <número>
 Fuerza el tipo de demuxer.
@@ -745,16 +744,6 @@ Algunos discos DVD contienen escenas que pueden verse desde múltiples ángulos.
 Aquí puede usted decirle a MPlayer qué ángulos desea usar (por defecto: 1).
 Here you can tell MPlayer which angles to use (default: 1).
 Se pueden encontrar ejemplos más abajo.
-.TP
-.B \-dvdauth <dispositivo\ DVD>
-(opción de DVD al viejo-estilo) Activa autenticación DVD usando el dispositivo
-dado.
-.TP
-.B \-dvdkey <llave\ CSS>
-(opción de DVD al viejo-estilo) Cuando se decodifica un archivo VOB copiado
-sin desencriptar de un DVD, esta opción proporciona la llave CSS necesaria
-para desencriptar el VOB (la llave es mostrada cuando se autentifica con la
-unidad de DVD usando \-dvdauth).
 .TP
 .B \-forceidx
 Fuerza la reconstrucción del INDICE.
@@ -1183,9 +1172,11 @@ tipografías FreeType:
 ~/.mplayer/\:subfont.ttf).
 .br
 .I NOTA:
-Con FreeType, esta opción determinar la ruta al archivo de tipografía de texto.
+Con FreeType, esta opción determina la ruta al archivo de tipografía de texto.
 .br
 Las opciones \-subfont-* están disponibles solo con soporte FreeType compilado.
+.br
+Con Fontconfig, esta opción determina el nombre de la tipografía de fontconfig.
 
 .I EJEMPLO:
 .PD 0
@@ -1193,6 +1184,8 @@ Las opciones \-subfont-* están disponibles solo con soporte FreeType compilado.
 \-font ~/\:.mplayer/\:arial-14/\:font.desc
 .br
 \-font ~/\:.mplayer/\:arialuni.ttf
+.br
+\-font 'Bitstream Vera Sans'
 .RE
 .PD 1
 .
@@ -2608,6 +2601,9 @@ soporte YUY2 rápido.
 Fuerza la conversión en el espacio de color YVU9 a YV12.
 Ya no se usa en favor del escalador de software.
 .TP
+.B yuvcsp\ 
+Mantiene los valores de color YUV en el rango CCIR 601 sin hacer una conversión real.
+.TP
 .B rgb2bgr[=swap]
 Conversión en el espacio de color RGB 24/\:32 <\-> BGR 24/\:32.
 .PD 0
@@ -2782,7 +2778,8 @@ componentes de Rojo, Verde y Azul.
 Los valores por defecto son 1.0, brillo=0.0.
 El parámetro peso puede usarse para reducir el efecto de un valor alto del gamma
 en áreas con brillo, e.g.\& se mantiene para obtener más amplificadas y blancos
-planos. Un valor de 0.0 devuelve la corrección gamma de todo mientras que 1.0 da
+planos.
+Un valor de 0.0 devuelve la corrección gamma de todo mientras que 1.0 da
 el máximo valor.
 Por defecto es gamma=1.0, contraste=1.0, brillo=0.0, saturación=1.0, peso=1.0.
 El rango es 0.1\-10 para gamma, -2\-2 para contraste (valores negativos resultan
@@ -2960,6 +2957,79 @@ implementación en G1 es más bien para ser probada.
 Actualmente pullup no tiene ninguna forma de fijar la tasa de bits
 de salida durante secuencias de 30 fps o pausas, devuelve más de 24 fps,
 lo que quiere decir que tendrá problemas is lo usa con mencoder \-ofps 23.976.
+.TP
+.B filmdint[=opciones]
+Filtro de telecine inverso, similar al filtro pullup de arriba.
+Está diseñado para manejar un patrón pulldown, incluyendo mezcla por software
+y telecine por hard y limitado para soportar películas que han sido ralentizadas
+o aceleradas desde su tasa de bits original para TV.
+Solo se usa el plano luma para encontrar los cortes de marcos de imagen.
+Si un campo no tiene coincidencia, es desentrelazado con una aproximación
+lineal simple.
+Si la fuente es MPEG-2, debe ser usado libmpeg2 para la decodificación (¡no
+ffmpeg2!), y este debe ser el primer filtro para permitir acceso a los
+field-flags establecidos por el decodificador MPEG-2.
+Dependiendo de la fuente mpeg, puede que le funcione ignorando este aviso y
+no vea un montón de advertencias "Bottom-first field".
+Sin opciones realiza un telecine inverso normal, y debe usarse junto con
+mencoder \-fps 29.97 \-ofps 23.976.
+Cuando este filtro se usa con mplayer, resulta en una tasa de imágenes por
+segundo impar durante la reproducción, pero sigue siendo generalmente mejor
+que usar pp=lb o no desentrelazar.
+Se pueden especificar múltiples opciones separadas por /.
+.RSs
+.IPs crop=w:h:x:y
+Igual que el filtro crop (recortado), pero más rápido, y funciona en mezclas
+de contexto de telecine hard y soft así como con un valor de y que no sea
+múltiplo de 4.
+Si x o y requieren recorte fraccional de pixels desde los planos de croma,
+el área de recorte es extendida.
+Normalmente esto significa que x e y deben ser pares.
+.IPs io=ifps:ofps
+Para cada ifps marcos de imagen de entrada el filtro proporciona ofps marcos.
+La razón ifps/ofps debe coincidir con la razón \-fps/\-ofps.
+Esto puede usarse para filtrar películas de broadcast en una TV a la razón
+de imágenes por segundo distinta a la original.
+.IPs luma_only=n
+Si n es distinto de cero, el plano croma es copiado sin cambios.
+Esto es útil para TV YV12 muestreada, que descarga uno de los campos de croma.
+.IPs mmx2=n
+En x86, si n=1, usa funcines optimizadas MMX2, si n=2, usa funciones optimizadas
+3DNow!, en otro caso, usa C plano.
+Si esta opción no es especificada, MMX2 y 3DNow! son auto-detectados, use esta
+opción para forzar la detección.
+.IPs fast=n
+Valores más altos de n aceleran el filtro a expensas de precisión.
+El valor por defecto es n=3.
+Si n es impar, el marco inmediatamente siguiente al marco marcado con la
+etiqueta mpeg REPEAT_FIRST_FIELD se asume que es progresivo, por eso el
+filtro no pierde ningún tiempo en contenido MPEG-2 soft-telecine.
+Este es el único efecto de esta etiqueta si MMX2 o 3DNow! están disponibles.
+Sin MMX2 y 3DNow!, si n=0 o 1, los mismos cálculos se usan como con MMX2.
+Si n=2 o 3, el número de niveles de luma usados para encontrar la rotura de marco
+es reducido de 256 a 128, que resulta en un filtro rápido sin perder mucha
+precisión.
+Si n=4 o 5, se usará una métrica rápida pero mucho menos precisa para encontrar
+la rotura de marcos, algo así como detectar un detalle vertical grande en
+un contexto entrelazado.
+.IPs verbose=n
+Si n no es cero, muestra la métrica detallada para cada marco.
+Útil para pruebas.
+.IPs dint_thres=n
+Umbral de desentrelazado.
+Usado durante el desentrelazado de marcos no coincidentes.
+Valores más grandes significa menos desentrelazado, use n=256 para desactivar
+el desentrelazado por completo.
+El valor por defecto es n=8.
+.IPs comb_thres=n
+Umbral para comparar campos superior e inferior.
+El valor por defecto es 128.
+.IPs diff_thres=n
+Umbral para detectar cambios temporales en un campo.
+El valor por defecto es 128.
+.IPs sad_thres=n
+Suma de umbrales de diferencia absoluta, el valor por defecto es 64.
+.RE
 .TP
 .B softpulldown
 Este filtro funciona correctamente solo con MEncoder y actúa en las marcas
@@ -3373,6 +3443,8 @@ no codifica, solo copia el flujo
 codifica a DivX4/\:DivX5
 .IPs "\-ovc rawrgb"
 codifica a RGB24 sin comprimir
+.IPs "\-ovc rawyuv"
+codifica a YUV (I420) sin comprimir
 .IPs "\-ovc lavc"
 codifica con codecs libavcodec
 .RE
@@ -4682,9 +4754,6 @@ mplayer dvd://1 \-dvdangle 2
 .TP
 .B Reproducción desde un dispositivo distinto de DVD
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
-.TP
-.B Reproducción de DVD (VOB) al viejo estilo
-mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
 .TP
 .B Flujo desde HTTP
 mplayer http://mplayer.hq/\:ejemplo.avi

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.19 -->
+<!-- synced with 1.24 -->
 <sect1 id="install">
 <title>Instalación</title>
 
@@ -187,7 +187,8 @@ núcleo 2.4.x es recomendado.
   como para decodificar. Características:
   <itemizedlist>
   <listitem><simpara>
-    codificación en 1 o 2 pasadas con<link linkend="mencoder">MEncoder</link>
+    codificación en 1 o 2 pasadas con
+    <link linkend="mencoder"><application>MEncoder</application></link>
     </simpara></listitem>
   <listitem><simpara>
     puede reproducir películas viejas en <emphasis role="bold">DivX3</emphasis>
@@ -204,7 +205,8 @@ núcleo 2.4.x es recomendado.
   Divx4Linux. Características:
   <itemizedlist>
   <listitem><simpara>
-    codificación en 1 o 2 pasadas con <link linkend="mencoder">MEncoder</link>
+    codificación en 1 o 2 pasadas con
+    <link linkend="mencoder"><application>MEncoder</application></link>
     </simpara></listitem>
   <listitem><simpara>
     es de código abierto, entonces es multiplataforma.
@@ -433,7 +435,8 @@ funciona con los siguientes controladores:
   </para></listitem>
 <listitem><para>
   Si desea instalar <application>MEncoder</application> (nuestro gran codificador
-  multiproposito), vea la sección <link linkend="mencoder">MEncoder</link>.
+  multiproposito), vea la sección
+  <link linkend="mencoder"><application>MEncoder</application></link>.
   </para></listitem>
 <listitem><para>
   Si tiene una placa <emphasis role="bold">sintonizadora de TV</emphasis> compatible con
@@ -466,14 +469,15 @@ el archivo <filename>codecs.conf</filename> en su directorio de inicio
 previa de <application>MPlayer</application> y borrela.
 </para>
 
-<para>Note qeu si tiene un <filename>codecs.conf</filename> en
+<para>Note que si tiene un <filename>codecs.conf</filename> en
 <filename>~/.mplayer/</filename>, el <filename>codecs.conf</filename>
 interno y el de sistema serán ignorados por completo.
 No use esto a menos que quiera trapichear con las cosas internas
-de MPlayer lo que puede ocasionarle problemas. Si quiere cambiar el órden
-de búsqueda de los codecs, use la opción <option>-vc</option>,
-<option>-ac</option>, <option>-vfm</option>, o <option>-afm</option> en la
-línea de órdenes o en su archivo de configuración (vea la página de manual).
+de <application>MPlayer</application> lo que puede ocasionarle problemas.
+Si quiere cambiar el órden de búsqueda de los codecs, use la opción
+<option>-vc</option>, <option>-ac</option>, <option>-vfm</option>,
+o <option>-afm</option> en la línea de órdenes o en su archivo de
+configuración (vea la página de manual).
 </para>
 
 
@@ -502,8 +506,9 @@ normalmente dice que falta.
 <para>
 Aunque no es obligatorio, las fuentes deberían ser instaladas para poder usar
 el texto en pantalla (OSD) y los subtítulos. El método recomendado es instalar
-una fuente TTF y avisarle a MPlayer que lo use. Vea la sección <link linkend="subosd">
-Subtítulos y OSD</link> para más detalles.
+una fuente TTF y avisarle a <application>MPlayer</application>
+que lo use. Vea la sección <link linkend="subosd">Subtítulos y OSD</link>
+para más detalles.
 </para>
 
 </sect2>
@@ -551,8 +556,8 @@ para usar el directorio <filename class="directory">*/Skin/pielnueva</filename>.
 <title>Subtítulos y OSD</title>
 
 <para>
-MPlayer puede mostrar subtítulos juntos con los archivos de películas. Actualmente
-los siguientes formatos están soportados:
+<application>MPlayer</application> puede mostrar subtítulos juntos con
+los archivos de películas. Actualmente los siguientes formatos están soportados:
 <itemizedlist>
 <listitem><para>VobSub</para></listitem>
 <listitem><para>OGM</para></listitem>
@@ -571,9 +576,10 @@ los siguientes formatos están soportados:
 </para>
 
 <para>
-MPlayer puede volcar los formatos de subtítulos listados anteriormente
-(<emphasis role="bold">con excepción de los 3 primeros</emphasis>) en los
-siguientes formatos de salida con las opciones correspondientes:
+<application>MPlayer</application> puede volcar los formatos de subtítulos
+listados anteriormente (<emphasis role="bold">con excepción de los 3
+primeros</emphasis>) en los siguientes formatos de salida con las opciones
+correspondientes:
 <itemizedlist>
 <listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
 <listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
@@ -664,8 +670,7 @@ Para más información acerca de subtítulos para DVD, lea la sección
 
 
 <sect2 id="mpsub">
-<title>El formato de subtítulos propio de MPlayer (MPsub)</title>
-
+<title>El formato de subtítulos propio de <application>MPlayer</application> (MPsub)</title>
 <para>
 <application>MPlayer</application> introduce un nuevo formato de subtítulos
 llamado <emphasis role="bold">MPsub</emphasis>. Fue diseñado por Gabucino. 
@@ -714,14 +719,28 @@ para mostrar el tiempo, la barra de volumen, la barra de búsqueda, etc.
 <title>Instalando OSD y subtítulos</title>
 
 <para>
-Necesita un paquete de fuentes para MPlayer para poder usar OSD/subtítulos.
+Necesita un paquete de tipografías para <application>MPlayer</application>
+para poder usar OSD/subtítulos.
 Hay muchas maneras de conseguirlo:
 </para>
 
 <itemizedlist>
 <listitem><para>
-  usando una fuente TrueType (TTF), gracias a la librería <systemitem class="library">
-  freetype</systemitem>. ¡La versión debe ser 2.0.9 o mayor! Entonces tiene 2 métodos:
+  Use la herramienta generadora de tipografías en
+  <filename class="directory">TOOLS/subfont-c</filename>. Es una
+  herramienta completa para convertir una tipografía TTF/Type1/etc
+  a tipografía pkg de <application>MPlayer</application> (lea
+  <filename>TOOLS/subfont-c/README</filename> para más detalles).
+  </para></listitem>
+<listitem><para>
+  Use el plugin de GIMP generador de tipografías en
+  <filename class="directory">TOOLS/subfont-GIMP</filename> (nota:
+  debe tener también el plugin HSI RAW,
+  vea <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
+  </para></listitem>
+  usando una tipografía TrueType (TTF), gracias a la biblioteca
+  <systemitem class="library">freetype</systemitem>.
+  ¡La versión debe ser 2.0.9 o mayor! Entonces tiene 2 métodos:
   <itemizedlist>
     <listitem><para>
       use la opción <option>-font /camino/a/arial.ttf</option> para especificar un
@@ -732,6 +751,13 @@ Hay muchas maneras de conseguirlo:
       </screen>
       </para></listitem>
       </itemizedlist>
+      Si <application>MPlayer</application> fue compilada con soporte para
+      <systemitem class="library">fontconfig</systemitem>, los métodos de arriba no
+      funcionarán, en su lugar la opción <option>-font</option> espera un nombre
+      de tipografía fontconfig y por defecto se usa la tipografía sans-serif.
+      Para obtener una lista de los tipos de letra que conoce fontconfig,
+      use <command>fc-list</command>.
+      Ejemplo: <option>-font 'Bitstream Vera Sans'</option>
   </para></listitem>
 <listitem><para>
   Descargue paquetes de fuentes listos para usar del sitio de MPlayer. Nota:
@@ -770,27 +796,14 @@ Hay muchas maneras de conseguirlo:
   <row><entry>
     <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
     </entry><entry>
-    Fuentes Coreanas y plugin RAW 
+    Tipografías Coreanas y plugin RAW 
     </entry></row>
   </tbody>
   </tgroup>
   </table>
 
   </para></listitem>
-<listitem><para>
-  Use la herramienta de generación de fuentes ubicada en <filename
-  class="directory">TOOLS/subfont-c</filename>. Es una herramienta completa para
-  convertir fuentes TTF/Type1/etc a un paquete de fuentes de <application>MPlayer</application>
-  (lea <filename>TOOLS/subfont-c/README</filename> para más detalles)
-  </para></listitem>
-<listitem><para>
-  Use el plugin generador de fuentes de GIMP disponible en
-  <filename  class="directory">TOOLS/subfont-GIMP</filename> (nota: debe tener
-  el plugin RAW para que funcione, vea las URL arriba)
-  <!-- FIXME: where's that URL? -->
-  </para></listitem>
 </itemizedlist>
-
 <para>
 Si elige fuentes no TTF, descomprima el archivo que haya descargado a
 <filename class="directory">~/.mplayer</filename> o <filename
@@ -838,7 +851,8 @@ Puede cambiar el comportamiento por omisión cambiando la variable
 <title>Menú en pantalla</title>
 
 <para>
-MPlayer trae una interfaz de Menú en pantalla completamente configurable por el usuario.
+<application>MPlayer</application> trae una interfaz de Menú en pantalla
+completamente configurable por el usuario.
 </para>
 
 <note><simpara>

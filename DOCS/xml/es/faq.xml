@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.23 -->
+<!-- synced with 1.25 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Preguntas de Usuario Frecuentes</title>
 
@@ -1068,7 +1068,7 @@ Use la <ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz"
 ¿Necesito ser (setuid) root/setuid fibmap_mplayer para poder reproducir un DVD?
 </para></question>
 <answer><para>
-No, solo para soporte antiguo de DVD. Aunque sí debe tener los permisos adecuados
+No. Sin embargo debe tener los permisos adecuados
 en el archivo del DVD en (en <filename class="directory">/dev/</filename>).
 </para></answer>
 </qandaentry>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.8 -->
+<!-- synced with 1.10 -->
 <chapter id="cd-dvd">
 <title>Uso de CD/DVD</title>
 
@@ -122,19 +122,6 @@ cualquier otra utilidad de este tipo.
 </para></note>
 
 <formalpara>
-<title>Soporte para DVD al viejo-estilo - OPCIONAL</title>
-<para>
-Útil si quiere reproducir VOBs codificados desde
-<emphasis role="bold">disco duro</emphasis>.
-Compile e instale <emphasis role="bold">libcss</emphasis> 0.0.1 (no posterior) para
-esto (Si MPlayer falla en la autodetección, use la opción
-<option>-csslib /ruta/a/libcss.so</option>). Para usarlo, necesita ser root, use
-un binario de MPlayer suid root o deje que MPlayer llame al programa falseador
-fibmap_mplayer suid-root.
-</para>
-</formalpara>
-
-<formalpara>
 <title>Estructura de DVD</title>
 <para>
 Los discos de DVD tienen 2048 bytes por sector con ECC/CRC. Normalmente tienen
@@ -155,30 +142,14 @@ del disco para implementar navegación DVD o desencriptar el contenido.
 </para>
 
 <para>
-El soporte completo de DVD al viejo-estilo con <systemitem>libcss</systemitem>
-necesita un sistema de archivos de DVD montado y un acceso basado-en-sectores
-al dispositivo. Desafortunadamente debe (bajo Linux) ser root para obtener
-direccionamiento por sectores de un archivo. Tiene las siguientes opciones:
-
-<itemizedlist>
-<listitem><para>
-Ser root o usar un binario de <application>MPlayer</application> suid-root.
-</para></listitem>
-
-<listitem><para>
-Dejar que <application>MPlayer</application> llame al programa falseador
-fibmap_mplayer suid-root para acceder al DVD (usado en la reproducción de
-DVD al viejo-estilo sobre <systemitem>libcss</systemitem>).
-</para></listitem>
-
-<listitem><para>
-No use el controlador de sistema de archivos del kernel y lo reimplemente en
-el estacio de usuario. <systemitem>libdvdread</systemitem> 0.9.x y
-<systemitem>libmpdvdkt</systemitem> necesitan tener su propio controlador
-de sistema de archivos UDF interno. Además el DVD no ha de estar montado
-para acceso únicamente basado en sectores.
-</para></listitem>
-</itemizedlist>
+El soporte DVD necesita acceso basado en sectores al dispositivo. Desafortunadamente
+debe (bajo Linux) ser root para obtener la dirección de un sector dentro de un
+archivo. Este es el motivo por el que no se usa el controlador interno del sistema
+de archivos del kernel, en su lugar se ha reimplementado en el espacio de usuario.
+<systemitem>libdvdread</systemitem> 0.9.x y <systemitem>libmpdvdkit</systemitem>
+hacen esto. El controlador de sistema de archivos UDF del kernel no es necesario
+ya que tenemos nuestro propio controlador de sistema de archivos UDF. Además
+el DVD no necesita estar montado ya que solo se usa acceso a nivel de sectores.
 </para>
 
 <para>
