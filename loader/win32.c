@@ -445,17 +445,19 @@ inline void* my_mreq(int size, int to_zero)
     return mreq_private(size, to_zero, AREATYPE_CLIENT);
 }
 
-static inline int my_size(void* memory)
+static /*inline*/ int my_size(void* memory)
 {
+    if(!memory) return 0;
     return ((alloc_header*)memory)[-1].size;
 }
 
 static void* my_realloc(void* memory, int size)
 {
     void *ans = memory;
-    int osize = my_size(memory);
+    int osize;
     if (memory == NULL)
 	return my_mreq(size, 0);
+    osize = my_size(memory);
     if (osize < size)
     {
 	ans = my_mreq(size, 0);
@@ -507,6 +509,7 @@ static HMODULE WINAPI expGetDriverModuleHandle(DRVR* pdrv)
 }
 
 #define	MODULE_HANDLE_kernel32	((HMODULE)0x120)
+#define	MODULE_HANDLE_user32	((HMODULE)0x121)
 
 static HMODULE WINAPI expGetModuleHandleA(const char* name)
 {
@@ -1336,31 +1339,35 @@ static int WINAPI expTlsAlloc()
 	if(tls_use_map[i]==0)
 	{
 	    tls_use_map[i]=1;
+	    dbgprintf("TlsAlloc() => %d\n",i);
 	    return i;
 	}
+    dbgprintf("TlsAlloc() => -1 (ERROR)\n");
     return -1;
 }
 
-static int WINAPI expTlsSetValue(void idx, void* value)
+static int WINAPI expTlsSetValue(DWORD index, void* value)
 {
-    int index = (int) idx;
-    if((index<0) || (index>64))
+    dbgprintf("TlsSetValue(%d,%p)\n",index,value);
+//    if((index<0) || (index>64))
+    if((index>=64))
 	return 0;
     *(void**)((char*)fs_seg+0x88+4*index) = value;
     return 1;
 }
 
-static void* WINAPI expTlsGetValue(int idx)
+static void* WINAPI expTlsGetValue(DWORD index)
 {
-    int index = (int) idx;
-    if((index<0) || (index>64))
-	return 0;
-    return *(void**)((char*)fs_seg+0x88+index);
+    dbgprintf("TlsGetValue(%d)\n",index);
+//    if((index<0) || (index>64))
+    if((index>=64)) return NULL;
+    return *(void**)((char*)fs_seg+0x88+4*index);
 }
 
 static int WINAPI expTlsFree(int idx)
 {
     int index = (int) idx;
+    dbgprintf("TlsFree(%d)\n",index);
     if((index<0) || (index>64))
 	return 0;
     tls_use_map[index]=0;
@@ -1588,7 +1595,7 @@ static long WINAPI expGetVersionExA(OSVERSIONINFOA* c)
     c->dwMajorVersion=4;
     c->dwMinorVersion=0;
     c->dwBuildNumber=0x4000457;
-#if 0
+#if 1
     // leave it here for testing win9x-only codecs
     c->dwPlatformId=VER_PLATFORM_WIN32_WINDOWS;
     strcpy(c->szCSDVersion, " B");
@@ -2136,6 +2143,10 @@ static int WINAPI expLoadLibraryA(char* name)
 	return ERROR_SUCCESS; /* yeah, we have also the kernel32 calls */
 			      /* exported -> do not return failed! */
 
+    if (strcasecmp(name, "user32.dll") == 0 || strcasecmp(name, "user32") == 0)
+//	return MODULE_HANDLE_kernel32;
+	return MODULE_HANDLE_user32;
+
     result=LoadLibraryA(name);
     dbgprintf("Returned LoadLibraryA(0x%x='%s'), def_path=%s => 0x%x\n", name, name, def_path, result);
 
@@ -2150,10 +2161,14 @@ static int WINAPI expFreeLibrary(int module)
 static void* WINAPI expGetProcAddress(HMODULE mod, char* name)
 {
     void* result;
-    if(mod!=MODULE_HANDLE_kernel32)
+    switch(mod){
+    case MODULE_HANDLE_kernel32:
+	result=LookupExternalByName("kernel32.dll", name); break;
+    case MODULE_HANDLE_user32:
+	result=LookupExternalByName("user32.dll", name); break;
+    default:
 	result=GetProcAddress(mod, name);
-    else
-	result=LookupExternalByName("kernel32.dll", name);
+    }
     dbgprintf("GetProcAddress(0x%x, '%s') => 0x%x\n", mod, name, result);
     return result;
 }
@@ -2936,12 +2951,34 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
 
     return atoi(cs1+2);
 }
+static UINT WINAPI expGetSystemDirectoryA(
+  char* lpBuffer,  // address of buffer for system directory
+  UINT uSize        // size of directory buffer
+){
+    dbgprintf("GetSystemDirectoryA(%p,%d)\n", lpBuffer,uSize);
+    if(!lpBuffer) strcpy(lpBuffer,".");
+    return 1;
+}
+/*
 static char sysdir[]=".";
 static LPCSTR WINAPI expGetSystemDirectoryA()
 {
     dbgprintf("GetSystemDirectoryA() => 0x%x='%s'\n", sysdir, sysdir);
     return sysdir;
 }
+*/
+static DWORD WINAPI expGetShortPathNameA
+(
+        LPCSTR longpath,
+        LPSTR shortpath,
+        DWORD shortlen
+){
+    if(!longpath) return 0;
+    dbgprintf("GetShortPathNameA('%s',%p,%d)\n",longpath,shortpath,shortlen);
+    strcpy(shortpath,longpath);
+    return strlen(shortpath);
+}
+			
 static WIN_BOOL WINAPI expReadFile(HANDLE h,LPVOID pv,DWORD size,LPDWORD rd,LPOVERLAPPED unused)
 {
     int result;
@@ -3489,6 +3526,153 @@ static int exp_setjmp3(void* jmpbuf, int x)
 	return 0;
 }
 
+static DWORD WINAPI expGetCurrentProcessId(void)
+{
+    return getpid(); //(DWORD)NtCurrentTeb()->pid;
+}
+
+static HANDLE WINAPI
+expCreateMutexA( SECURITY_ATTRIBUTES *sa, WIN_BOOL owner, LPCSTR name ){
+    static int x=0xcfcf9898;
+    //++x;
+    dbgprintf("CreateMutexA(%p,%d,'%s') => %d\n",sa,owner,name,x);
+    return x;
+}
+
+typedef struct {
+    UINT	wPeriodMin;
+    UINT	wPeriodMax;
+} TIMECAPS, *LPTIMECAPS;
+
+static MMRESULT WINAPI exptimeGetDevCaps(LPTIMECAPS lpCaps, UINT wSize)
+{
+    dbgprintf("timeGetDevCaps(%p, %u) !\n", lpCaps, wSize);
+
+    lpCaps->wPeriodMin = 1;
+    lpCaps->wPeriodMax = 65535;
+    return 0;
+}
+
+static MMRESULT WINAPI exptimeBeginPeriod(UINT wPeriod)
+{
+    dbgprintf("timeBeginPeriod(%u) !\n", wPeriod);
+
+    if (wPeriod < 1 || wPeriod > 65535) return 96+1; //TIMERR_NOCANDO;
+    return 0;
+}
+
+static void WINAPI expGlobalMemoryStatus(
+            LPMEMORYSTATUS lpmem
+) {
+    static MEMORYSTATUS	cached_memstatus;
+    static int cache_lastchecked = 0;
+    SYSTEM_INFO si;
+    FILE *f;
+
+    if (time(NULL)==cache_lastchecked) {
+	memcpy(lpmem,&cached_memstatus,sizeof(MEMORYSTATUS));
+	return;
+    }
+
+#if 1
+    f = fopen( "/proc/meminfo", "r" );
+    if (f)
+    {
+        char buffer[256];
+        int total, used, free, shared, buffers, cached;
+
+        lpmem->dwLength = sizeof(MEMORYSTATUS);
+        lpmem->dwTotalPhys = lpmem->dwAvailPhys = 0;
+        lpmem->dwTotalPageFile = lpmem->dwAvailPageFile = 0;
+        while (fgets( buffer, sizeof(buffer), f ))
+        {
+	    /* old style /proc/meminfo ... */
+            if (sscanf( buffer, "Mem: %d %d %d %d %d %d", &total, &used, &free, &shared, &buffers, &cached ))
+            {
+                lpmem->dwTotalPhys += total;
+                lpmem->dwAvailPhys += free + buffers + cached;
+            }
+            if (sscanf( buffer, "Swap: %d %d %d", &total, &used, &free ))
+            {
+                lpmem->dwTotalPageFile += total;
+                lpmem->dwAvailPageFile += free;
+            }
+
+	    /* new style /proc/meminfo ... */
+	    if (sscanf(buffer, "MemTotal: %d", &total))
+	    	lpmem->dwTotalPhys = total*1024;
+	    if (sscanf(buffer, "MemFree: %d", &free))
+	    	lpmem->dwAvailPhys = free*1024;
+	    if (sscanf(buffer, "SwapTotal: %d", &total))
+	        lpmem->dwTotalPageFile = total*1024;
+	    if (sscanf(buffer, "SwapFree: %d", &free))
+	        lpmem->dwAvailPageFile = free*1024;
+	    if (sscanf(buffer, "Buffers: %d", &buffers))
+	        lpmem->dwAvailPhys += buffers*1024;
+	    if (sscanf(buffer, "Cached: %d", &cached))
+	        lpmem->dwAvailPhys += cached*1024;
+        }
+        fclose( f );
+
+        if (lpmem->dwTotalPhys)
+        {
+            DWORD TotalPhysical = lpmem->dwTotalPhys+lpmem->dwTotalPageFile;
+            DWORD AvailPhysical = lpmem->dwAvailPhys+lpmem->dwAvailPageFile;
+            lpmem->dwMemoryLoad = (TotalPhysical-AvailPhysical)
+                                      / (TotalPhysical / 100);
+        }
+    } else
+#endif
+    {
+	/* FIXME: should do something for other systems */
+	lpmem->dwMemoryLoad    = 0;
+	lpmem->dwTotalPhys     = 16*1024*1024;
+	lpmem->dwAvailPhys     = 16*1024*1024;
+	lpmem->dwTotalPageFile = 16*1024*1024;
+	lpmem->dwAvailPageFile = 16*1024*1024;
+    }
+    expGetSystemInfo(&si);
+    lpmem->dwTotalVirtual  = si.lpMaximumApplicationAddress-si.lpMinimumApplicationAddress;
+    /* FIXME: we should track down all the already allocated VM pages and substract them, for now arbitrarily remove 64KB so that it matches NT */
+    lpmem->dwAvailVirtual  = lpmem->dwTotalVirtual-64*1024;
+    memcpy(&cached_memstatus,lpmem,sizeof(MEMORYSTATUS));
+    cache_lastchecked = time(NULL);
+
+    /* it appears some memory display programs want to divide by these values */
+    if(lpmem->dwTotalPageFile==0)
+        lpmem->dwTotalPageFile++;
+
+    if(lpmem->dwAvailPageFile==0)
+        lpmem->dwAvailPageFile++;
+}
+
+/**********************************************************************
+ * SetThreadPriority [KERNEL32.@]  Sets priority for thread.
+ *
+ * RETURNS
+ *    Success: TRUE
+ *    Failure: FALSE
+ */
+static WIN_BOOL WINAPI expSetThreadPriority(
+    HANDLE hthread, /* [in] Handle to thread */
+    INT priority)   /* [in] Thread priority level */
+{
+    dbgprintf("SetThreadPriority(%p,%d)\n",hthread,priority);
+    return TRUE;
+}
+
+static void WINAPI expExitProcess( DWORD status )
+{
+    printf("EXIT - code %d\n",status);
+    exit(status);
+}
+
+static INT WINAPI expMessageBoxA(HWND hWnd, LPCSTR text, LPCSTR title, UINT type){
+    printf("MSGBOX '%s' '%s' (%d)\n",text,title,type);
+    return 1;
+}
+
+
 
 
 struct exports
@@ -3616,6 +3800,7 @@ struct exports exp_kernel32[]=
     FF(CreateFileA,-1)
     FF(GetSystemDirectoryA,-1)
     FF(GetWindowsDirectoryA,-1)
+    FF(GetShortPathNameA,-1)
     FF(SetErrorMode, -1)
     FF(IsProcessorFeaturePresent, -1)
     FF(GetProcessAffinityMask, -1)
@@ -3633,6 +3818,11 @@ struct exports exp_kernel32[]=
     FF(DuplicateHandle,-1)
     FF(GetTickCount, -1)
     FF(SetThreadAffinityMask,-1)
+    FF(GetCurrentProcessId,-1)
+    FF(CreateMutexA,-1)
+    FF(GlobalMemoryStatus,-1)
+    FF(SetThreadPriority,-1)
+    FF(ExitProcess,-1)
 };
 
 struct exports exp_msvcrt[]={
@@ -3681,6 +3871,8 @@ struct exports exp_winmm[]={
     FF(DefDriverProc, -1)
     FF(OpenDriverA, -1)
     FF(OpenDriver, -1)
+    FF(timeGetDevCaps, -1)
+    FF(timeBeginPeriod, -1)
 };
 struct exports exp_user32[]={
     FF(LoadStringA, -1)
@@ -3699,6 +3891,7 @@ struct exports exp_user32[]={
     FF(GetSysColorBrush,-1)
     FF(GetWindowDC, -1)
     FF(DrawTextA, -1)
+    FF(MessageBoxA, -1)
 };
 struct exports exp_advapi32[]={
     FF(RegCloseKey, -1)
