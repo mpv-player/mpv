@@ -473,6 +473,7 @@ _vm=no
 _xdpms_3=no
 _xdpms_4=no
 _3dfx=no
+_tdfxfb=no
 _syncfb=no
 _mlib=no _mlibdir=/opt/SUNWmlib
 _xmga=autodetect
@@ -1166,6 +1167,9 @@ for ac_option do
         ;;
   --enable-3dfx)
         _3dfx=yes
+        ;;
+  --enable-tdfxfb)
+        _tdfxfb=yes
         ;;
   --enable-syncfb)
         _syncfb=yes
@@ -2065,6 +2069,13 @@ else
  _3dfx='#undef HAVE_3DFX'
 fi
 
+if [ $_tdfxfb = yes ]; then
+ _tdfxfb='#define HAVE_TDFXFB'
+ _vosrc=$_vosrc' vo_tdfxfb.c'
+else
+ _tdfxfb='#undef HAVE_TDFXFB'
+fi
+
 if [ $_svga = yes ]; then
  _svga='#define HAVE_SVGALIB'
  _vosrc=$_vosrc' vo_svga.c'
@@ -2375,6 +2386,7 @@ $_sdldef
 $_sdlbuggy
 $_ggi
 $_3dfx
+$_tdfxfb
 $_mga
 $_xmga
 $_syncfb
