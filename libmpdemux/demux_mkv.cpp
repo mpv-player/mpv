@@ -22,32 +22,32 @@ extern "C" {
 #include <iostream>
 #include <cassert>
 #include <typeinfo>
+#include <vector>
 
-#include "EbmlHead.h"
-#include "EbmlSubHead.h"
-#include "EbmlStream.h"
-#include "EbmlContexts.h"
-#include "EbmlVersion.h"
-#include "FileKax.h"
+#include <ebml/EbmlHead.h>
+#include <ebml/EbmlSubHead.h>
+#include <ebml/EbmlStream.h>
+#include <ebml/EbmlContexts.h>
+#include <ebml/EbmlVersion.h>
+#include <ebml/StdIOCallback.h>
 
-#include "KaxAttachements.h"
-#include "KaxBlock.h"
-#include "KaxBlockData.h"
-#include "KaxChapters.h"
-#include "KaxCluster.h"
-#include "KaxClusterData.h"
-#include "KaxContexts.h"
-#include "KaxCues.h"
-#include "KaxCuesData.h"
-#include "KaxInfo.h"
-#include "KaxInfoData.h"
-#include "KaxSeekHead.h"
-#include "KaxSegment.h"
-#include "KaxTracks.h"
-#include "KaxTrackAudio.h"
-#include "KaxTrackVideo.h"
-
-#include "StdIOCallback.h"
+#include <matroska/KaxAttachements.h>
+#include <matroska/KaxBlock.h>
+#include <matroska/KaxBlockData.h>
+#include <matroska/KaxChapters.h>
+#include <matroska/KaxCluster.h>
+#include <matroska/KaxClusterData.h>
+#include <matroska/KaxContexts.h>
+#include <matroska/KaxCues.h>
+#include <matroska/KaxCuesData.h>
+#include <matroska/KaxInfo.h>
+#include <matroska/KaxInfoData.h>
+#include <matroska/KaxSeekHead.h>
+#include <matroska/KaxSegment.h>
+#include <matroska/KaxTracks.h>
+#include <matroska/KaxTrackAudio.h>
+#include <matroska/KaxTrackVideo.h>
+#include <matroska/FileKax.h>
 
 #include "matroska.h"
 
@@ -57,6 +57,10 @@ using namespace std;
 #ifndef LIBEBML_VERSION
 #define LIBEBML_VERSION 000000
 #endif // LIBEBML_VERSION
+
+#if LIBEBML_VERSION < 000500
+#error libebml version too old - need at least 0.5.0
+#endif
 
 // for e.g. "-slang ger"
 extern char *dvdsub_lang;
@@ -153,10 +157,16 @@ typedef struct mkv_track {
   void *private_data;
   unsigned int private_size;
 
+  // For Vorbis audio
   unsigned char *headers[3];
   uint32_t header_sizes[3];
 
   int ok;
+
+  // Stuff for RealMedia packet assembly
+  bool realmedia;
+  demux_packet_t *rm_dp;
+  int rm_seqnum;
 } mkv_track_t;
 
 typedef struct mkv_demuxer {
@@ -189,6 +199,79 @@ typedef struct mkv_demuxer {
   int64_t skip_to_timecode;
 } mkv_demuxer_t;
 
+typedef struct {
+  uint32_t chunks;              // number of chunks
+  uint32_t timestamp;           // timestamp from packet header
+  uint32_t len;                 // length of actual data
+  uint32_t chunktab;            // offset to chunk offset array
+} dp_hdr_t;
+
+#pragma pack(push,2)
+
+typedef struct {
+  uint32_t size;
+  uint32_t fourcc1;
+  uint32_t fourcc2;
+  uint16_t width;
+  uint16_t height;
+  uint16_t bpp;
+  uint32_t unknown1;
+  uint32_t fps;
+  uint32_t type1;
+  uint32_t type2;
+} real_video_props_t;
+
+typedef struct {
+  uint32_t fourcc1;             // '.', 'r', 'a', 0xfd
+  uint16_t version1;            // 4 or 5
+  uint16_t unknown1;            // 00 000
+  uint32_t fourcc2;             // .ra4 or .ra5
+  uint32_t unknown2;            // ???
+  uint16_t version2;            // 4 or 5
+  uint32_t header_size;         // == 0x4e
+  uint16_t flavor;              // codec flavor id
+  uint32_t coded_frame_size;    // coded frame size
+  uint32_t unknown3;            // big number
+  uint32_t unknown4;            // bigger number
+  uint32_t unknown5;            // yet another number
+  uint16_t sub_packet_h;
+  uint16_t frame_size;
+  uint16_t sub_packet_size;
+  uint16_t unknown6;            // 00 00
+  uint16_t sample_rate;
+  uint16_t unknown8;            // 0
+  uint16_t sample_size;
+  uint16_t channels;
+} real_audio_v4_props_t;
+
+typedef struct {
+  uint32_t fourcc1;             // '.', 'r', 'a', 0xfd
+  uint16_t version1;            // 4 or 5
+  uint16_t unknown1;            // 00 000
+  uint32_t fourcc2;             // .ra4 or .ra5
+  uint32_t unknown2;            // ???
+  uint16_t version2;            // 4 or 5
+  uint32_t header_size;         // == 0x4e
+  uint16_t flavor;              // codec flavor id
+  uint32_t coded_frame_size;    // coded frame size
+  uint32_t unknown3;            // big number
+  uint32_t unknown4;            // bigger number
+  uint32_t unknown5;            // yet another number
+  uint16_t sub_packet_h;
+  uint16_t frame_size;
+  uint16_t sub_packet_size;
+  uint16_t unknown6;            // 00 00
+  uint8_t unknown7[6];          // 0, srate, 0
+  uint16_t sample_rate;
+  uint16_t unknown8;            // 0
+  uint16_t sample_size;
+  uint16_t channels;
+  uint32_t genr;                // "genr"
+  uint32_t fourcc3;             // fourcc
+} real_audio_v5_props_t;
+
+#pragma pack(pop)
+
 static uint16_t get_uint16(const void *buf) {
   uint16_t      ret;
   unsigned char *tmp;
@@ -213,6 +296,63 @@ static uint32_t get_uint32(const void *buf) {
   ret = (ret << 8) + (tmp[0] & 0xff);
 
   return ret;
+}
+
+static uint16_t get_uint16_be(const void *buf) {
+  uint16_t ret;
+  unsigned char *tmp;
+
+  tmp = (unsigned char *) buf;
+
+  ret = tmp[0] & 0xff;
+  ret = (ret << 8) + (tmp[1] & 0xff);
+
+  return ret;
+}
+
+static uint32_t get_uint32_be(const void *buf) {
+  uint32_t ret;
+  unsigned char *tmp;
+
+  tmp = (unsigned char *) buf;
+
+  ret = tmp[0] & 0xff;
+  ret = (ret << 8) + (tmp[1] & 0xff);
+  ret = (ret << 8) + (tmp[2] & 0xff);
+  ret = (ret << 8) + (tmp[3] & 0xff);
+
+  return ret;
+}
+
+unsigned char read_char(unsigned char *p, int &pos, int size) {
+  if ((pos + 1) > size)
+    throw exception();
+  pos++;
+  return p[pos - 1];
+}
+
+unsigned short read_word(unsigned char *p, int &pos, int size) {
+  unsigned short v;
+
+  if ((pos + 2) > size)
+    throw exception();
+  v = p[pos];
+  v = (v << 8) | (p[pos + 1] & 0xff);
+  pos += 2;
+  return v;
+}
+
+unsigned int read_dword(unsigned char *p, int &pos, int size) {
+  unsigned int v;
+
+  if ((pos + 4) > size)
+    throw exception();
+  v = p[pos];
+  v = (v << 8) | (p[pos + 1] & 0xff);
+  v = (v << 8) | (p[pos + 2] & 0xff);
+  v = (v << 8) | (p[pos + 3] & 0xff);
+  pos += 4;
+  return v;
 }
 
 static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
@@ -375,18 +515,7 @@ static int check_track_information(mkv_demuxer_t *d) {
             }
 
             memcpy(t->v_fourcc, &bih->biCompression, 4);
-
-            if (t->v_frate == 0.0) {
-              mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] ERROR: (MS compatibility "
-                     "mode, track %u) "
-                     "No VideoFrameRate element was found.\n", t->tnum);
-              continue;
-            }
           }
-        } else {
-          mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Native CodecIDs for video "
-                 "tracks are not supported yet (track %u).\n", t->tnum);
-          continue;
         }
 
         if (t->v_width == 0) {
@@ -521,9 +650,21 @@ static int check_track_information(mkv_demuxer_t *d) {
               t->header_sizes[0] - t->header_sizes[1];
 
             t->a_formattag = 0xFFFE;
+          } else if (t->private_size >= sizeof(real_audio_v4_props_t)) {
+            if (!strcmp(t->codec_id, MKV_A_REAL28))
+              t->a_formattag = mmioFOURCC('2', '8', '_', '8');
+            else if (!strcmp(t->codec_id, MKV_A_REALATRC))
+              t->a_formattag = mmioFOURCC('a', 't', 'r', 'c');
+            else if (!strcmp(t->codec_id, MKV_A_REALCOOK))
+              t->a_formattag = mmioFOURCC('c', 'o', 'o', 'k');
+            else if (!strcmp(t->codec_id, MKV_A_REALDNET))
+              t->a_formattag = mmioFOURCC('d', 'n', 'e', 't');
+            else if (!strcmp(t->codec_id, MKV_A_REALSIPR))
+              t->a_formattag = mmioFOURCC('s', 'i', 'p', 'r');
           } else {
             mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported audio "
-                   "codec ID '%s' for track %u.\n", t->codec_id, t->tnum);
+                   "codec ID '%s' for track %u or missing/faulty private "
+                   "codec data.\n", t->codec_id, t->tnum);
             continue;
           }
         }
@@ -645,6 +786,9 @@ static void add_cluster_position(mkv_demuxer_t *mkv_d, int64_t position) {
     mkv_d->num_cluster_pos = 0;
 }
 
+#define fits_parent(l, p) (l->GetElementPosition() < \
+                           (p->GetElementPosition() + p->ElementSize()))
+
 static int parse_cues(mkv_demuxer_t *mkv_d) {
   EbmlElement *l1 = NULL, *l2 = NULL, *l3 = NULL, *l4 = NULL, *l5 = NULL;
   EbmlStream *es;
@@ -676,7 +820,9 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
   l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el, 0xFFFFFFFFL,
                            true, 1);
   while (l2 != NULL) {
-    if (upper_lvl_el != 0)
+    if (upper_lvl_el > 0)
+      break;
+    if ((upper_lvl_el < 0) && !fits_parent(l2, l1))
       break;
 
     if (EbmlId(*l2) == KaxCuePoint::ClassInfos.GlobalId) {
@@ -687,7 +833,9 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
       l3 = es->FindNextElement(l2->Generic().Context, upper_lvl_el,
                                0xFFFFFFFFL, true, 1);
       while (l3 != NULL) {
-        if (upper_lvl_el != 0)
+        if (upper_lvl_el > 0)
+          break;
+        if ((upper_lvl_el < 0) && !fits_parent(l3, l2))
           break;
 
         if (EbmlId(*l3) == KaxCueTime::ClassInfos.GlobalId) {
@@ -706,7 +854,9 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
           l4 = es->FindNextElement(l3->Generic().Context, upper_lvl_el,
                                    0xFFFFFFFFL, true, 1);
           while (l4 != NULL) {
-            if (upper_lvl_el != 0)
+            if (upper_lvl_el > 0)
+              break;
+            if ((upper_lvl_el < 0) && !fits_parent(l4, l3))
               break;
 
             if (EbmlId(*l4) == KaxCueTrack::ClassInfos.GlobalId) {
@@ -755,7 +905,9 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
               l5 = es->FindNextElement(l4->Generic().Context, upper_lvl_el,
                                        0xFFFFFFFFL, true, 1);
               while (l5 != NULL) {
-                if (upper_lvl_el != 0)
+                if (upper_lvl_el > 0)
+                  break;
+                if ((upper_lvl_el < 0) && !fits_parent(l5, l4))
                   break;
 
                 if (EbmlId(*l5) == KaxCueRefTime::ClassInfos.GlobalId) {
@@ -789,21 +941,21 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
                   mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] |    + found cue ref "
                          "codec state: %llu\n", uint64(cue_rcs));
 
-                } else {
-                  mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] |    + unknown "
-                         "element, level 5: %s\n", typeid(*l5).name());
+                } else
+                  upper_lvl_el = 0;
+
+                if (upper_lvl_el == 0) {
+                  l5->SkipData(static_cast<EbmlStream &>(*es),
+                               l5->Generic().Context);
+                  delete l5;
+                  l5 = es->FindNextElement(l4->Generic().Context,
+                                           upper_lvl_el, 0xFFFFFFFFL, true);
                 }
 
-                l5->SkipData(static_cast<EbmlStream &>(*es),
-                             l5->Generic().Context);
-                delete l5;
-                l5 = es->FindNextElement(l4->Generic().Context,
-                                         upper_lvl_el, 0xFFFFFFFFL, true, 1);
               } // while (l5 != NULL)
 
             } else
-              mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] |  + unknown element, "
-                     "level 4: %s\n", typeid(*l4).name());
+              upper_lvl_el = 0;
 
             if (upper_lvl_el > 0) {		// we're coming from l5
               upper_lvl_el--;
@@ -812,13 +964,17 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
               if (upper_lvl_el > 0)
                 break;
 
-            } else {
+            } else if (upper_lvl_el == 0) {
               l4->SkipData(static_cast<EbmlStream &>(*es),
                            l4->Generic().Context);
               delete l4;
               l4 = es->FindNextElement(l3->Generic().Context, upper_lvl_el,
                                        0xFFFFFFFFL, true, 1);
+            } else {
+              delete l4;
+              l4 = l5;
             }
+
           } // while (l4 != NULL)
 
         } else
@@ -832,13 +988,17 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
           if (upper_lvl_el > 0)
             break;
 
-        } else {
+        } else if (upper_lvl_el == 0) {
           l3->SkipData(static_cast<EbmlStream &>(*es),
                        l3->Generic().Context);
           delete l3;
           l3 = es->FindNextElement(l2->Generic().Context, upper_lvl_el,
                                    0xFFFFFFFFL, true, 1);
+        } else {
+          delete l3;
+          l3 = l4;
         }
+
       } // while (l3 != NULL)
 
       // Three elements must have been found in order for this to be a
@@ -854,8 +1014,7 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
                         (elements_found & 8) ? 0 : 1);
 
     } else
-      mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] |  + unknown element, level 2: "
-             "%s\n", typeid(*l2).name());
+      upper_lvl_el = 0;
 
     if (upper_lvl_el > 0) {		// we're coming from l3
       upper_lvl_el--;
@@ -864,13 +1023,17 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
       if (upper_lvl_el > 0)
         break;
 
-    } else {
+    } else if (upper_lvl_el == 0) {
       l2->SkipData(static_cast<EbmlStream &>(*es),
                    l2->Generic().Context);
       delete l2;
       l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                                0xFFFFFFFFL, true, 1);
+    } else {
+      delete l2;
+      l2 = l3;
     }
+
   } // while (l2 != NULL)
 
   // Debug: dump the index
@@ -889,6 +1052,10 @@ static int parse_cues(mkv_demuxer_t *mkv_d) {
 
   return 1;
 }
+
+
+
+extern "C" void print_wave_header(WAVEFORMATEX *h);
 
 extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   unsigned char signature[4];
@@ -977,7 +1144,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     l1 = es->FindNextElement(l0->Generic().Context, upper_lvl_el, 0xFFFFFFFFL,
                              true, 1);
     while (l1 != NULL) {
-      if ((upper_lvl_el != 0) || exit_loop)
+      if ((upper_lvl_el > 0) || exit_loop)
+        break;
+      if ((upper_lvl_el < 0) && !fits_parent(l1, l0))
         break;
 
       if (EbmlId(*l1) == KaxInfo::ClassInfos.GlobalId) {
@@ -987,7 +1156,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                                  0xFFFFFFFFL, true, 1);
         while (l2 != NULL) {
-          if ((upper_lvl_el != 0) || exit_loop)
+          if ((upper_lvl_el > 0) || exit_loop)
+            break;
+          if ((upper_lvl_el < 0) && !fits_parent(l2, l1))
             break;
 
           if (EbmlId(*l2) == KaxTimecodeScale::ClassInfos.GlobalId) {
@@ -1005,14 +1176,15 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                    mkv_d->duration);
 
           } else
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] | + unknown element@2: %s\n",
-                   typeid(*l2).name());
+            upper_lvl_el = 0;
 
-          l2->SkipData(static_cast<EbmlStream &>(*es),
-                       l2->Generic().Context);
-          delete l2;
-          l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
-                                   0xFFFFFFFFL, true, 1);
+          if (upper_lvl_el == 0) {
+            l2->SkipData(static_cast<EbmlStream &>(*es),
+                         l2->Generic().Context);
+            delete l2;
+            l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
+                                     0xFFFFFFFFL, true, 1);
+          }
         }
 
       } else if (EbmlId(*l1) == KaxTracks::ClassInfos.GlobalId) {
@@ -1023,7 +1195,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                                  0xFFFFFFFFL, true, 1);
         while (l2 != NULL) {
-          if ((upper_lvl_el != 0) || exit_loop)
+          if ((upper_lvl_el > 0) || exit_loop)
+            break;
+          if ((upper_lvl_el < 0) && !fits_parent(l2, l1))
             break;
           
           if (EbmlId(*l2) == KaxTrackEntry::ClassInfos.GlobalId) {
@@ -1037,7 +1211,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
             l3 = es->FindNextElement(l2->Generic().Context, upper_lvl_el,
                                      0xFFFFFFFFL, true, 1);
             while (l3 != NULL) {
-              if (upper_lvl_el != 0)
+              if (upper_lvl_el > 0)
+                break;
+              if ((upper_lvl_el < 0) && !fits_parent(l3, l2))
                 break;
               
               // Now evaluate the data belonging to this track
@@ -1058,17 +1234,20 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                 mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Track UID: %u\n",
                        uint32(tuid));
 
-#if LIBEBML_VERSION >= 000404
               } else if (EbmlId(*l3) ==
                          KaxTrackDefaultDuration::ClassInfos.GlobalId) {
                 KaxTrackDefaultDuration &def_duration =
                   *static_cast<KaxTrackDefaultDuration *>(l3);
                 def_duration.ReadData(es->I_O());
-                track->v_frate = 1000000000.0 / (float)uint64(def_duration);
-                mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Default duration: "
-                       "%.3fms ( = %.3f fps)\n", (float)uint64(def_duration) /
-                       1000000.0, track->v_frate);
-#endif // LIBEBML_VERSION
+                if (uint64(def_duration) == 0)
+                  mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Default duration: 0");
+                else {
+                  track->v_frate = 1000000000.0 / (float)uint64(def_duration);
+                  mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Default duration: "
+                         "%.3fms ( = %.3f fps)\n",
+                         (float)uint64(def_duration) / 1000000.0,
+                         track->v_frate);
+                }
 
               } else if (EbmlId(*l3) == KaxTrackType::ClassInfos.GlobalId) {
                 KaxTrackType &ttype = *static_cast<KaxTrackType *>(l3);
@@ -1099,7 +1278,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                 l4 = es->FindNextElement(l3->Generic().Context, upper_lvl_el,
                                          0xFFFFFFFFL, true, 1);
                 while (l4 != NULL) {
-                  if (upper_lvl_el != 0)
+                  if (upper_lvl_el > 0)
+                    break;
+                  if ((upper_lvl_el < 0) && !fits_parent(l4, l3))
                     break;
                 
                   if (EbmlId(*l4) ==
@@ -1130,14 +1311,16 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                            track->a_bps);
 
                   } else
-                    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + unknown "
-                           "element@4: %s\n", typeid(*l4).name());
+                    upper_lvl_el = 0;
 
-                  l4->SkipData(static_cast<EbmlStream &>(*es),
-                               l4->Generic().Context);
-                  delete l4;
-                  l4 = es->FindNextElement(l3->Generic().Context, upper_lvl_el,
-                                           0xFFFFFFFFL, true, 1);
+                  if (upper_lvl_el == 0) {
+                    l4->SkipData(static_cast<EbmlStream &>(*es),
+                                 l4->Generic().Context);
+                    delete l4;
+                    l4 = es->FindNextElement(l3->Generic().Context,
+                                             upper_lvl_el, 0xFFFFFFFFL, true);
+                  }
+
                 } // while (l4 != NULL)
 
               } else if (EbmlId(*l3) == KaxTrackVideo::ClassInfos.GlobalId) {
@@ -1145,7 +1328,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                 l4 = es->FindNextElement(l3->Generic().Context, upper_lvl_el,
                                          0xFFFFFFFFL, true, 1);
                 while (l4 != NULL) {
-                  if (upper_lvl_el != 0)
+                  if (upper_lvl_el > 0)
+                    break;
+                  if ((upper_lvl_el < 0) && !fits_parent(l4, l3))
                     break;
 
                   if (EbmlId(*l4) == KaxVideoPixelWidth::ClassInfos.GlobalId) {
@@ -1194,28 +1379,24 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                            float(framerate));
 
                   } else
-                    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + unknown "
-                           "element@4: %s\n", typeid(*l4).name());
+                    upper_lvl_el = 0;
 
-                  l4->SkipData(static_cast<EbmlStream &>(*es),
-                               l4->Generic().Context);
-                  delete l4;
-                  l4 = es->FindNextElement(l3->Generic().Context, upper_lvl_el,
-                                           0xFFFFFFFFL, true, 1);
+                  if (upper_lvl_el == 0) {
+                    l4->SkipData(static_cast<EbmlStream &>(*es),
+                                 l4->Generic().Context);
+                    delete l4;
+                    l4 = es->FindNextElement(l3->Generic().Context,
+                                             upper_lvl_el, 0xFFFFFFFFL, true);
+                  }
+
                 } // while (l4 != NULL)
 
               } else if (EbmlId(*l3) == KaxCodecID::ClassInfos.GlobalId) {
                 KaxCodecID &codec_id = *static_cast<KaxCodecID*>(l3);
                 codec_id.ReadData(es->I_O());
-#if LIBEBML_VERSION >= 000404
                 mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Codec ID: %s\n",
                        string(codec_id).c_str());
                 track->codec_id = strdup(string(codec_id).c_str());
-#else
-                mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Codec ID: %s\n",
-                       &binary(codec_id));
-                track->codec_id = strdup((char *)&binary(codec_id));
-#endif // LIBEBML_VERSION
 
               } else if (EbmlId(*l3) == KaxCodecPrivate::ClassInfos.GlobalId) {
                 KaxCodecPrivate &c_priv = *static_cast<KaxCodecPrivate*>(l3);
@@ -1251,14 +1432,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                   free(track->language);
                 track->language = strdup(string(language).c_str());
 
-              } else if ((!(EbmlId(*l3) ==
-                            KaxTrackFlagLacing::ClassInfos.GlobalId)) &&
-                         (!(EbmlId(*l3) ==
-                            KaxTrackMinCache::ClassInfos.GlobalId)) &&
-                         (!(EbmlId(*l3) ==
-                            KaxTrackMaxCache::ClassInfos.GlobalId)))
-                mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + unknown element@3: "
-                       "%s\n", typeid(*l3).name());
+              } else
+                upper_lvl_el = 0;
 
               if (upper_lvl_el > 0) {	// we're coming from l4
                 upper_lvl_el--;
@@ -1266,13 +1441,17 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                 l3 = l4;
                 if (upper_lvl_el > 0)
                   break;
-              } else {
+              } else if (upper_lvl_el == 0) {
                 l3->SkipData(static_cast<EbmlStream &>(*es),
                              l3->Generic().Context);
                 delete l3;
                 l3 = es->FindNextElement(l2->Generic().Context, upper_lvl_el,
                                          0xFFFFFFFFL, true, 1);
+              } else {
+                delete l3;
+                l3 = l4;
               }
+
             } // while (l3 != NULL)
 
           } else
@@ -1284,13 +1463,17 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
             l2 = l3;
             if (upper_lvl_el > 0)
               break;
-          } else {
+          } else if (upper_lvl_el == 0) {
             l2->SkipData(static_cast<EbmlStream &>(*es),
                          l2->Generic().Context);
             delete l2;
             l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                                      0xFFFFFFFFL, true, 1);
+          } else {
+            delete l2;
+            l2 = l3;
           }
+
         } // while (l2 != NULL)
 
       } else if (EbmlId(*l1) == KaxSeekHead::ClassInfos.GlobalId) {
@@ -1299,7 +1482,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                                  0xFFFFFFFFL, true, 1);
         while (l2 != NULL) {
-          if (upper_lvl_el != 0)
+          if (upper_lvl_el > 0)
+            break;
+          if ((upper_lvl_el < 0) && !fits_parent(l2, l1))
             break;
 
           if (EbmlId(*l2) == KaxSeek::ClassInfos.GlobalId) {
@@ -1311,7 +1496,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
             l3 = es->FindNextElement(l2->Generic().Context, upper_lvl_el,
                                      0xFFFFFFFFL, true, 1);
             while (l3 != NULL) {
-              if (upper_lvl_el != 0)
+              if (upper_lvl_el > 0)
+                break;
+              if ((upper_lvl_el < 0) && !fits_parent(l3, l2))
                 break;
 
               if (EbmlId(*l3) == KaxSeekID::ClassInfos.GlobalId) {
@@ -1354,14 +1541,16 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                 seek_pos = uint64(kax_seek_pos);
 
               } else
-                mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + unknown element, "
-                       "level 3: %s\n", typeid(*l3).name());
+                upper_lvl_el = 0;
 
-              l3->SkipData(static_cast<EbmlStream &>(*es),
-                           l3->Generic().Context);
-              delete l3;
-              l3 = es->FindNextElement(l2->Generic().Context, upper_lvl_el,
-                                       0xFFFFFFFFL, true, 1);
+              if (upper_lvl_el == 0) {
+                l3->SkipData(static_cast<EbmlStream &>(*es),
+                             l3->Generic().Context);
+                delete l3;
+                l3 = es->FindNextElement(l2->Generic().Context, upper_lvl_el,
+                                         0xFFFFFFFFL, true, 1);
+              }
+
             } // while (l3 != NULL)
 
             if (!mkv_d->cues_found && (seek_pos > 0) &&
@@ -1369,8 +1558,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
               cues_pos = mkv_d->segment->GetGlobalPosition(seek_pos);
 
           } else
-            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + unknown element, level 2: "
-                   "%s\n", typeid(*l2).name());
+            upper_lvl_el = 0;
 
           if (upper_lvl_el > 0) {		// we're coming from l3
             upper_lvl_el--;
@@ -1379,13 +1567,17 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
             if (upper_lvl_el > 0)
               break;
 
-          } else {
+          } else if (upper_lvl_el == 0) {
             l2->SkipData(static_cast<EbmlStream &>(*es),
                          l2->Generic().Context);
             delete l2;
             l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                                      0xFFFFFFFFL, true, 1);
+          } else {
+            delete l2;
+            l2 = l3;
           }
+
         } // while (l2 != NULL)
 
       } else if ((EbmlId(*l1) == KaxCues::ClassInfos.GlobalId) &&
@@ -1405,8 +1597,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         exit_loop = 1;
 
       } else
-        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ unknown element@1: %s\n",
-               typeid(*l1).name());
+        upper_lvl_el = 0;
       
       if (exit_loop)      // we've found the first cluster, so get out
         break;
@@ -1417,12 +1608,16 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         l1 = l2;
         if (upper_lvl_el > 0)
           break;
-      } else {
+      } else if (upper_lvl_el == 0) {
         l1->SkipData(static_cast<EbmlStream &>(*es), l1->Generic().Context);
         delete l1;
         l1 = es->FindNextElement(l0->Generic().Context, upper_lvl_el,
-                                 0xFFFFFFFFL, true, 1);
+                                 0xFFFFFFFFL, true);
+      } else {
+        delete l1;
+        l1 = l2;
       }
+
     } // while (l1 != NULL)
 
     if (!exit_loop) {
@@ -1443,8 +1638,6 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       mkv_d->first_tc = 0;
     stream_seek(s, l1->GetElementPosition());
     
-    mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] First tc: %lld\n", mkv_d->first_tc);
-
     // If we have found an entry for the cues in the meta seek data but no
     // cues at the front of the file then read them now. This way the
     // timecode scale will have been initialized correctly.
@@ -1489,35 +1682,88 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     track = find_track_by_num(mkv_d, demuxer->video->id, NULL);
 
   if (track) {
-    if (track->ms_compat) {         // MS compatibility mode
-      BITMAPINFOHEADER *src, *dst;
-      mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Will play video track %u\n",
-             track->tnum);
-      sh_v = new_sh_video(demuxer, track->tnum);
-      sh_v->bih = (BITMAPINFOHEADER *)calloc(1, track->private_size);
-      if (sh_v->bih == NULL) {
-        free_mkv_demuxer(mkv_d);
-        return 0;
-      }
+    BITMAPINFOHEADER *bih;
 
-      dst = sh_v->bih;
+    bih = (BITMAPINFOHEADER *)calloc(1, track->private_size);
+    if (bih == NULL) {
+      free_mkv_demuxer(mkv_d);
+      return 0;
+    }
+
+    if (track->ms_compat) {         // MS compatibility mode
+      BITMAPINFOHEADER *src;
       src = (BITMAPINFOHEADER *)track->private_data;
-      dst->biSize = get_uint32(&src->biSize);
-      dst->biWidth = get_uint32(&src->biWidth);
-      dst->biHeight = get_uint32(&src->biHeight);
-      dst->biPlanes = get_uint16(&src->biPlanes);
-      dst->biBitCount = get_uint16(&src->biBitCount);
-      dst->biCompression = get_uint32(&src->biCompression);
-      dst->biSizeImage = get_uint32(&src->biSizeImage);
-      dst->biXPelsPerMeter = get_uint32(&src->biXPelsPerMeter);
-      dst->biYPelsPerMeter = get_uint32(&src->biYPelsPerMeter);
-      dst->biClrUsed = get_uint32(&src->biClrUsed);
-      dst->biClrImportant = get_uint32(&src->biClrImportant);
-      memcpy((char *)dst + sizeof(BITMAPINFOHEADER),
+      bih->biSize = get_uint32(&src->biSize);
+      bih->biWidth = get_uint32(&src->biWidth);
+      bih->biHeight = get_uint32(&src->biHeight);
+      bih->biPlanes = get_uint16(&src->biPlanes);
+      bih->biBitCount = get_uint16(&src->biBitCount);
+      bih->biCompression = get_uint32(&src->biCompression);
+      bih->biSizeImage = get_uint32(&src->biSizeImage);
+      bih->biXPelsPerMeter = get_uint32(&src->biXPelsPerMeter);
+      bih->biYPelsPerMeter = get_uint32(&src->biYPelsPerMeter);
+      bih->biClrUsed = get_uint32(&src->biClrUsed);
+      bih->biClrImportant = get_uint32(&src->biClrImportant);
+      memcpy((char *)bih + sizeof(BITMAPINFOHEADER),
              (char *)src + sizeof(BITMAPINFOHEADER),
              track->private_size - sizeof(BITMAPINFOHEADER));
 
+    } else {
+      bih->biSize = sizeof(BITMAPINFOHEADER);
+      bih->biWidth = track->v_width;
+      bih->biHeight = track->v_height;
+      bih->biBitCount = 24;
+      bih->biSizeImage = bih->biWidth * bih->biHeight * bih->biBitCount / 8;
+
+      if ((track->private_size >= sizeof(real_video_props_t)) &&
+          (!strcmp(track->codec_id, MKV_V_REALV10) ||
+           !strcmp(track->codec_id, MKV_V_REALV20) ||
+           !strcmp(track->codec_id, MKV_V_REALV30) ||
+           !strcmp(track->codec_id, MKV_V_REALV40))) {
+        unsigned char *dst, *src;
+        real_video_props_t *rvp;
+        uint32_t type2;
+
+        rvp = (real_video_props_t *)track->private_data;
+        src = (unsigned char *)(rvp + 1);
+
+        bih = (BITMAPINFOHEADER *)realloc(bih, sizeof(BITMAPINFOHEADER) + 12);
+        bih->biSize += 12;
+        type2 = get_uint32_be(&rvp->type2);
+        if ((type2 == 0x10003000) || (type2 == 0x100030001))
+          bih->biCompression = mmioFOURCC('R', 'V', '1', '3');
+        else
+          bih->biCompression = mmioFOURCC('R', 'V', track->codec_id[9], '0');
+        dst = (unsigned char *)(bih + 1);
+        ((unsigned int *)dst)[0] = get_uint32_be(&rvp->type1);
+        ((unsigned int *)dst)[1] = type2;
+
+		    if ((bih->biCompression <= 0x30335652) &&
+            (type2 >= 0x20200002)) {
+          // read secondary WxH for the cmsg24[] (see vd_realvid.c)
+          ((unsigned short *)(bih + 1))[4] = 4 * (unsigned short)src[0];
+          ((unsigned short *)(bih + 1))[5] = 4 * (unsigned short)src[1];
+        } else
+          memset(&dst[8], 0, 4);
+        track->realmedia = true;
+
+      } else {
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported CodecID "
+               "(%s) or missing/bad CodecPrivate data (track %u).\n",
+               track->codec_id, track->tnum);
+        demuxer->video->id = -2;
+      }
+    }
+
+    if (demuxer->video->id != -2) {
+      mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Will play video track %u\n",
+             track->tnum);
+
+      sh_v = new_sh_video(demuxer, track->tnum);
+      sh_v->bih = bih;
       sh_v->format = sh_v->bih->biCompression;
+      if (track->v_frate == 0.0)
+        track->v_frate = 25.0;
       sh_v->fps = track->v_frate;
       sh_v->frametime = 1 / track->v_frate;
       sh_v->disp_w = track->v_width;
@@ -1530,11 +1776,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       sh_v->ds = demuxer->video;
 
       mkv_d->video = track;
-    } else {
-      mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Native CodecIDs not supported at "
-             "the moment (track %u).\n", track->tnum);
-      demuxer->video->id = -2;
-    }
+    } else
+      free(bih);
+
   } else {
     mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] No video track found/wanted.\n");
     demuxer->video->id = -2;
@@ -1594,23 +1838,28 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     }
     sh_a->format = track->a_formattag;
     sh_a->wf->wFormatTag = track->a_formattag;
-    sh_a->channels = sh_a->wf->nChannels = track->a_channels;
-    sh_a->samplerate = sh_a->wf->nSamplesPerSec = (uint32_t)track->a_sfreq;
+    sh_a->channels = track->a_channels;
+    sh_a->wf->nChannels = track->a_channels;
+    sh_a->samplerate = (uint32_t)track->a_sfreq;
+    sh_a->wf->nSamplesPerSec = (uint32_t)track->a_sfreq;
+    sh_a->samplesize = track->a_bps / 8;
     if (!strcmp(track->codec_id, MKV_A_MP3)) {
       sh_a->wf->nAvgBytesPerSec = 16000;
       sh_a->wf->nBlockAlign = 1152;
       sh_a->wf->wBitsPerSample = 0;
       sh_a->samplesize = 0;
+
     } else if (!strcmp(track->codec_id, MKV_A_AC3)) {
       sh_a->wf->nAvgBytesPerSec = 16000;
       sh_a->wf->nBlockAlign = 1536;
       sh_a->wf->wBitsPerSample = 0;
       sh_a->samplesize = 0;
+
     } else if (!strcmp(track->codec_id, MKV_A_PCM)) {
       sh_a->wf->nAvgBytesPerSec = sh_a->channels * sh_a->samplerate * 2;
       sh_a->wf->nBlockAlign = sh_a->wf->nAvgBytesPerSec;
       sh_a->wf->wBitsPerSample = track->a_bps;
-      sh_a->samplesize = track->a_bps / 8;
+
     } else if (track->a_formattag == mmioFOURCC('M', 'P', '4', 'A')) {
       int profile, srate_idx;
 
@@ -1659,6 +1908,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       sh_a->codecdata_len = 2;
       sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xe) >> 1);
       sh_a->codecdata[1] = ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
+
     } else if (!strcmp(track->codec_id, MKV_A_VORBIS)) {
       for (i = 0; i < 3; i++) {
         dp = new_demux_packet(track->header_sizes[i]);
@@ -1667,7 +1917,47 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         dp->flags = 0;
         ds_add_packet(demuxer->audio, dp);
       }
+
+    } else if ((track->private_size >= sizeof(real_audio_v4_props_t)) &&
+               !strncmp(track->codec_id, MKV_A_REALATRC, 7)) {
+      // Common initialization for all RealAudio codecs
+      real_audio_v4_props_t *ra4p;
+      real_audio_v5_props_t *ra5p;
+      unsigned char *src;
+      int codecdata_length, version;
+
+      ra4p = (real_audio_v4_props_t *)track->private_data;
+      ra5p = (real_audio_v5_props_t *)track->private_data;
+
+      sh_a->wf->wBitsPerSample = sh_a->samplesize * 8;
+      sh_a->wf->nAvgBytesPerSec = 0; // FIXME !?
+      sh_a->wf->nBlockAlign = get_uint16_be(&ra4p->frame_size);
+
+      version = get_uint16_be(&ra4p->version1);
+
+      if (version == 4) {
+        src = (unsigned char *)(ra4p + 1);
+        src += src[0] + 1;
+        src += src[0] + 1;
+      } else
+        src = (unsigned char *)(ra5p + 1);
+
+      src += 3;
+      if (version == 5)
+        src++;
+      codecdata_length = get_uint32_be(src);
+      src += 4;
+      sh_a->wf->cbSize = 10 + codecdata_length;
+      sh_a->wf = (WAVEFORMATEX *)realloc(sh_a->wf, sizeof(WAVEFORMATEX) +
+                                         sh_a->wf->cbSize);
+      ((short *)(sh_a->wf + 1))[0] = get_uint16_be(&ra4p->sub_packet_size);
+      ((short *)(sh_a->wf + 1))[1] = get_uint16_be(&ra4p->sub_packet_h);
+      ((short *)(sh_a->wf + 1))[2] = get_uint16_be(&ra4p->flavor);
+      ((short *)(sh_a->wf + 1))[3] = get_uint32_be(&ra4p->coded_frame_size);
+      ((short *)(sh_a->wf + 1))[4] = codecdata_length;
+      memcpy(((char *)(sh_a->wf + 1)) + 10, src, codecdata_length);
     }
+
   } else {
     mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] No audio track found/wanted.\n");
     demuxer->audio->id = -2;
@@ -1714,6 +2004,39 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   return 1;
 }
 
+static void handle_realvideo(demuxer_t *demuxer, DataBuffer &data,
+                             bool keyframe, int &found_data) {
+  unsigned char *p, *buffer;
+  dp_hdr_t *hdr;
+  int chunks, isize;
+  mkv_demuxer_t *mkv_d;
+  demux_stream_t *ds;
+  demux_packet_t *dp;
+
+  mkv_d = (mkv_demuxer_t *)demuxer->priv;
+  ds = demuxer->video;
+  p = (unsigned char *)data.Buffer();
+  chunks = p[0];
+  isize = data.Size() - 1 - (chunks + 1) * 8;
+  dp = new_demux_packet(sizeof(dp_hdr_t) + isize + 8 * (chunks + 1));
+  memcpy(&dp->buffer[sizeof(dp_hdr_t)], &p[1 + (chunks + 1) * 8], isize);
+  memcpy(&dp->buffer[sizeof(dp_hdr_t) + isize], &p[1], (chunks + 1) * 8);
+  hdr = (dp_hdr_t *)dp->buffer;
+  hdr->len = isize;
+  hdr->chunks = chunks;
+  hdr->timestamp = (int)(mkv_d->last_pts * 1000);
+  hdr->chunktab = sizeof(dp_hdr_t) + isize;
+
+  dp->len = sizeof(dp_hdr_t) + isize + 8 * (chunks + 1);
+  dp->pts = hdr->timestamp;
+  dp->pos = demuxer->filepos;
+  dp->flags = keyframe ? 0x10 : 0;
+
+  ds_add_packet(ds, dp);
+
+  found_data++;
+}
+
 extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
   demux_packet_t *dp;
   demux_stream_t *ds;
@@ -1742,7 +2065,9 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
     // The idea is not to handle a complete KaxCluster with each call to
     // demux_mkv_fill_buffer because those might be rather big.
     while (l1 != NULL)  {
-      if ((upper_lvl_el != 0) || exit_loop)
+      if ((upper_lvl_el > 0) || exit_loop)
+        break;
+      if ((upper_lvl_el < 0) && !fits_parent(l1, l0))
         break;
 
       if (EbmlId(*l1) == KaxCluster::ClassInfos.GlobalId) {
@@ -1759,7 +2084,9 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
           l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                                    0xFFFFFFFFL, true, 1);
         while (l2 != NULL) {
-          if (upper_lvl_el != 0)
+          if (upper_lvl_el > 0)
+            break;
+          if ((upper_lvl_el < 0) && !fits_parent(l2, l1))
             break;
 
           // Handle at least one data packets in one call to
@@ -1795,6 +2122,8 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
               delete_element = 1;
               if (upper_lvl_el > 0)
                 break;
+              if ((upper_lvl_el < 0) && !fits_parent(l3, l2))
+                break;
 
               if (EbmlId(*l3) == KaxBlock::ClassInfos.GlobalId) {
                 block = static_cast<KaxBlock *>(l3);
@@ -1816,7 +2145,7 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                 KaxReferenceBlock &ref =
                   *static_cast<KaxReferenceBlock *>(l3);
                 ref.ReadData(es->I_O());
-                if (block_ref1 == 0) {
+                if ((elements_found & 4) == 0) {
                   block_ref1 = int64(ref);
                   elements_found |= 4;
                 } else {
@@ -1824,14 +2153,18 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                   elements_found |= 8;
                 }
 
+              } else
+                upper_lvl_el = 0;
+
+              if (upper_lvl_el == 0) {
+                l3->SkipData(static_cast<EbmlStream &>(*es),
+                             l3->Generic().Context);
+                if (delete_element)
+                  delete l3;
+                l3 = es->FindNextElement(l2->Generic().Context, upper_lvl_el,
+                                         0xFFFFFFFFL, true, 1);
               }
 
-              l3->SkipData(static_cast<EbmlStream &>(*es),
-                           l3->Generic().Context);
-              if (delete_element)
-                delete l3;
-              l3 = es->FindNextElement(l2->Generic().Context, upper_lvl_el,
-                                       0xFFFFFFFFL, true, 1);
             } // while (l3 != NULL)
 
             if (block != NULL) {
@@ -1850,41 +2183,50 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                   (mkv_d->video->tnum == block->TrackNum()))
                 ds = d->video;
               else if ((mkv_d->audio != NULL) && 
-                       (mkv_d->audio->tnum == block->TrackNum()))
-                  ds = d->audio;
+                         (mkv_d->audio->tnum == block->TrackNum()))
+                ds = d->audio;
 
               if (!mkv_d->skip_to_keyframe ||     // Not skipping is ok.
                   (((elements_found & 4) == 0) && // It's a key frame.
                    (ds != NULL) &&                // Corresponding track found
                    (ds == d->video))) {           // track is our video track
+                mkv_d->last_pts = (float)(block->GlobalTimecode() / 1000000.0 -
+                                          mkv_d->first_tc) / 1000.0;
+                d->filepos = mkv_d->in->getFilePointer();
+                mkv_d->last_filepos = d->filepos;
+
                 if ((ds != NULL) && ((block->GlobalTimecode() / 1000000 -
                                        mkv_d->first_tc) >=
                                      (uint64_t)mkv_d->skip_to_timecode)) {
                   for (i = 0; i < (int)block->NumberFrames(); i++) {
                     DataBuffer &data = block->GetBuffer(i);
-                    dp = new_demux_packet(data.Size());
-                    memcpy(dp->buffer, data.Buffer(), data.Size());
-                    dp->pts = mkv_d->last_pts;
-                    dp->flags = (elements_found & 4) == 0 ? 1 : 0; // keyframe
-                    ds_add_packet(ds, dp);
-                    found_data++;
+                    if ((mkv_d->video != NULL) &&
+                        mkv_d->video->realmedia &&
+                        (mkv_d->video->tnum == block->TrackNum()))
+                      handle_realvideo(d, data, (elements_found & 4) == 0,
+                                       found_data);
+                    else {
+                      dp = new_demux_packet(data.Size());
+                      memcpy(dp->buffer, data.Buffer(), data.Size());
+                      dp->pts = mkv_d->last_pts;
+                      // keyframe?
+                      dp->flags = (elements_found & 4) == 0 ? 1 : 0;
+                      ds_add_packet(ds, dp);
+                      found_data++;
+                    }
                   }
                   mkv_d->skip_to_keyframe = 0;
                   mkv_d->skip_to_timecode = 0;
                 } else if ((mkv_d->subs_track != NULL) &&
                            (mkv_d->subs_track->tnum == block->TrackNum()))
                   handle_subtitles(d, block, block_duration);
-
-                d->filepos = mkv_d->in->getFilePointer();
-                mkv_d->last_pts = (float)(block->GlobalTimecode() / 1000000.0 -
-                                          mkv_d->first_tc) / 1000.0;
-                mkv_d->last_filepos = d->filepos;
               }
 
               delete block;
             } // block != NULL
 
-          }
+          } else
+            upper_lvl_el = 0;
 
           if (upper_lvl_el > 0) {		// we're coming from l3
             upper_lvl_el--;
@@ -1892,20 +2234,22 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
             l2 = l3;
             if (upper_lvl_el > 0)
               break;
-          } else {
+          } else if (upper_lvl_el == 0) {
             l2->SkipData(static_cast<EbmlStream &>(*es),
                          l2->Generic().Context);
             delete l2;
             l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                                      0xFFFFFFFFL, true, 1);
+          } else {
+            delete l2;
+            l2 = l3;
           }
+
         } // while (l2 != NULL)
       } else if (EbmlId(*l1) == KaxCues::ClassInfos.GlobalId)
         return 0;
       else
-         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Unknown element@1: %s (stream "
-                "position %llu)\n", typeid(*l1).name(),
-                l1->GetElementPosition());
+        upper_lvl_el = 0;
 
       if (exit_loop)
         break;
@@ -1916,14 +2260,18 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
         l1 = l2;
         if (upper_lvl_el > 0)
           break;
-      } else {
+      } else if (upper_lvl_el == 0) {
         l1->SkipData(static_cast<EbmlStream &>(*es), l1->Generic().Context);
         delete l1;
         l1 = es->FindNextElement(l0->Generic().Context, upper_lvl_el,
                                  0xFFFFFFFFL, true, 1);
         if ((l1 != NULL) && (EbmlId(*l1) == KaxCluster::ClassInfos.GlobalId))
           add_cluster_position(mkv_d, l1->GetElementPosition());
+      } else {
+        delete l1;
+        l1 = l2;
       }
+
     } // while (l1 != NULL)
   } catch (exception ex) {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] exception caught\n");

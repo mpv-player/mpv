@@ -21,8 +21,17 @@
 #define MKV_A_PCM        "A_PCM/INT/LIT"
 #define MKV_A_VORBIS     "A_VORBIS"
 #define MKV_A_ACM        "A_MS/ACM"
+#define MKV_A_REAL28     "A_REAL/28_8"
+#define MKV_A_REALATRC   "A_REAL/ATRC"
+#define MKV_A_REALCOOK   "A_REAL/COOK"
+#define MKV_A_REALDNET   "A_REAL/DNET"
+#define MKV_A_REALSIPR   "A_REAL/SIPR"
 
 #define MKV_V_MSCOMP     "V_MS/VFW/FOURCC"
+#define MKV_V_REALV10    "V_REAL/RV10"
+#define MKV_V_REALV20    "V_REAL/RV20"
+#define MKV_V_REALV30    "V_REAL/RV30"
+#define MKV_V_REALV40    "V_REAL/RV40"
 
 #define MKV_S_TEXTASCII  "S_TEXT/ASCII"
 #define MKV_S_TEXTUTF8   "S_TEXT/UTF8"

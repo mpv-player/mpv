@@ -4169,35 +4169,40 @@ fi
 echores "$_theora"
 
 
-echocheck "Matroska support"
+echocheck "Matroska support (0.5.0 or later)"
 if test "$_matroska" != no ; then
   _matroska=no
+  _TMPC=$TMPC
+  TMPC=${TMPC}pp
   cat > $TMPC << EOF
-#include <EbmlConfig.h>
+#include <ebml/EbmlVersion.h>
+#include <matroska/KaxVersion.h>
+
+#if LIBEBML_VERSION < 000500
+#error libebml is too old
+#endif
+
+#if LIBMATROSKA_VERSION < 000500
+#error libmatroska is too old
+#endif
+
 int main(void) { return 0; }
 EOF
-  cc_check -lmatroska -lebml && _matroska=yes
+  cc_check -lmatroska -lebml -lstdc++ && _matroska=yes
   if test "$_matroska" = no ; then
     _saved_inc_extra=$_inc_extra
-    _inc_extra="$_inc_extra -I/usr/include/ebml -I/usr/include/matroska"
-    cc_check -lmatroska -lebml && _matroska=yes
+    _inc_extra="$_inc_extra -I/usr/local/include"
+    cc_check -lmatroska -lebml -lstdc++ && _matroska=yes
     if test "$_matroska" = no ; then
-      _inc_extra="$_saved_inc_extra -I/usr/local/include/ebml -I/usr/local/include/matroska"
-      cc_check -lmatroska -lebml && _matroska=yes
-      if test "$_matroska" = no ; then
-        _inc_extra=$_saved_inc_extra
-      fi
+      _inc_extra=$_saved_inc_extra
     fi
   fi
+  TMPC=$_TMPC
 fi
 if test "$_matroska" = yes ; then
   _def_matroska='#define HAVE_MATROSKA 1'
   _inputmodules="matroska $_inputmodules"
   _ld_matroska="-lmatroska -lebml -lstdc++"
-  case $cc_version in
-    2.*) _def_matroska_gcc2="#define LIBEBML_GCC2"     ;;
-    *)   _def_matroska_gcc2="/*#define LIBEBML_GCC2*/" ;;
-  esac
 else
   _def_matroska='#undef HAVE_MATROSKA'
   _noinputmodules="matroska $_noinputmodules"
@@ -5870,7 +5875,6 @@ $_def_theora
 
 /* enable Matroska support */
 $_def_matroska
-$_def_matroska_gcc2
 
 /* enable FAAD (AAC) support */
 $_def_faad
