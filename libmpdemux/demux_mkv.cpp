@@ -1925,6 +1925,9 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                      true);
 
             kbdur = FINDFIRST(l2, KaxBlockDuration);
+            if (kbdur != NULL)
+              block_duration = uint64(*kbdur);
+
             kblock = FINDFIRST(l2, KaxBlock);
             if (kblock != NULL)
               kblock->SetParent(*mkv_d->cluster);
