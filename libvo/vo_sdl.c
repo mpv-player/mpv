@@ -540,6 +540,9 @@ static int sdl_close (void)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 
+	if (priv->fullmode)
+	    SDL_ShowCursor(1);
+
 	/* Cleanup YUV Overlay structure */
 	if (priv->overlay) {
 		SDL_FreeYUVOverlay(priv->overlay);
@@ -1250,15 +1253,9 @@ static void check_events (void)
 				}	
 
                                 else switch(keypressed){
-				case SDLK_RETURN:
-					SDL_ShowCursor(1);
-					mplayer_put_key(KEY_ENTER);
-				break;
-                                case SDLK_ESCAPE:
-				case SDLK_q:
-					SDL_ShowCursor(1);
-					mplayer_put_key('q');
-				break;
+				case SDLK_RETURN: mplayer_put_key(KEY_ENTER);break;
+                                case SDLK_ESCAPE: mplayer_put_key(KEY_ESC);break;
+				case SDLK_q: mplayer_put_key('q');break;
                                 /*case SDLK_o: mplayer_put_key('o');break;
                                 case SDLK_SPACE: mplayer_put_key(' ');break;
                                 case SDLK_p: mplayer_put_key('p');break;*/
@@ -1298,10 +1295,7 @@ static void check_events (void)
                                 }
                                 
 				break;
-				case SDL_QUIT:
-					SDL_ShowCursor(1);
-					mplayer_put_key('q');
-				break;
+				case SDL_QUIT: mplayer_put_key('q');break;
 		}
 	}
 }
