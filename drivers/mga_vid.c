@@ -767,10 +767,8 @@ switch(config->format){
 	//Enable contrast and brightness control
 	regs.besglobctl |= (1<<5) + (1<<7);
 	
-	// brightness ; default is 0x7f;
-	regs.beslumactl = (mga_brightness << 16);
-	// contrast:
-	regs.beslumactl|= ((mga_contrast+0x80)<<0);
+	// brightness (-128..127) && contrast (0..255)
+	regs.beslumactl = (mga_brightness << 16) | ((mga_contrast+0x80)&0xFFFF);
 
 	//Setup destination window boundaries
 	besleft = x > 0 ? x : 0;
@@ -1263,7 +1261,10 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		break;
 
 		case MGA_VID_GET_LUMA:
-			tmp = regs.beslumactl - 0x80;
+			//tmp = regs.beslumactl;
+			//tmp = (tmp&0xFFFF0000) | (((tmp&0xFFFF) - 0x80)&0xFFFF);
+			tmp = (mga_brightness << 16) | (mga_contrast&0xFFFF);
+
 			if (copy_to_user((uint32_t *) arg, &tmp, sizeof(uint32_t)))
 			{
 				printk(KERN_ERR "mga_vid: failed copy %p to userspace %p\n",
@@ -1274,7 +1275,9 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			
 		case MGA_VID_SET_LUMA:
 			tmp = arg;
-			regs.beslumactl = tmp + 0x80;
+			mga_brightness=tmp>>16; mga_contrast=tmp&0xFFFF;
+			//regs.beslumactl = (tmp&0xFFFF0000) | ((tmp + 0x80)&0xFFFF);
+			regs.beslumactl = (mga_brightness << 16) | ((mga_contrast+0x80)&0xFFFF);
 			mga_vid_write_regs(0);
 		break;
 			
