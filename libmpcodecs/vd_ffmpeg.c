@@ -73,7 +73,7 @@ struct config lavc_decode_opts_conf[]={
 #if LIBAVCODEC_BUILD >= 4614
 	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
 #endif
-	{"vstats", &lavc_param_vstats, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
+	{"vstats", &lavc_param_vstats, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -224,8 +224,8 @@ static void draw_slice(struct AVCodecContext *s,
     int stride[3];
     int start=0, i;
     int skip_stride= (s->width+15)>>4;
-    UINT8 *skip= &s->mbskip_table[(y>>4)*skip_stride];
 #if LIBAVCODEC_BUILD > 4615
+    UINT8 *skip= &s->mbskip_table[(y>>4)*skip_stride];
     int threshold= s->pict_type==B_TYPE ? -99 : s->dr_ip_buffer_count;
 #endif
 
@@ -346,6 +346,10 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
     if(avctx->dr_stride && avctx->dr_stride !=mpi->stride[0]){
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Error: stride changed\n");
     }
+    
+    if(avctx->dr_uvstride && avctx->dr_uvstride !=mpi->stride[1]){
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Error: uvstride changed\n");
+    }
 
     avctx->dr_stride   = mpi->stride[0];
     avctx->dr_uvstride = mpi->stride[1];
@@ -353,6 +357,14 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
     avctx->dr_opaque_frame = mpi;
     avctx->dr_ip_buffer_count=2; //FIXME
 //printf("%X\n", (int)mpi->planes[0]);
+#if 0
+if(mpi->flags&MP_IMGFLAG_DIRECT)
+    printf("D");
+else if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)
+    printf("S");
+else
+    printf(".");
+#endif
 }
 #endif
 
