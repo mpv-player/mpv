@@ -70,6 +70,8 @@ static uint8_t current_buffer = 0;
 static uint8_t current_ip_buf = 0;
 static uint32_t buffer_stride[3];
 
+static int use_overlay = 1;
+
 // FIXME
 static void clear_screen(void) {
   tdfx_vid_agp_move_t mov;
@@ -144,6 +146,33 @@ flip_page(void)
 #ifdef VERBOSE
   printf("Flip\n");
 #endif
+  if(use_overlay) {
+    // These formats need conversion
+    switch(src_fmt) {
+    case IMGFMT_BGR8:
+    case IMGFMT_BGR24:
+    case IMGFMT_BGR32:
+      memset(&blit,0,sizeof(tdfx_vid_blit_t));
+      blit.src = back_buffer;
+      blit.src_stride = src_stride;
+      blit.src_x = 0;
+      blit.src_y = 0;
+      blit.src_w = src_width;
+      blit.src_h = src_height;
+      blit.src_format = src_fmt;
+      
+      blit.dst = front_buffer;
+      blit.dst_stride = dst_stride;
+      blit.dst_x = 0;
+      blit.dst_y = 0;
+      blit.dst_w = src_width;
+      blit.dst_h = src_height;
+      blit.dst_format = IMGFMT_BGR16;
+      if(ioctl(tdfx_fd,TDFX_VID_BLIT,&blit))
+	printf("tdfx_vid: Blit failed\n");
+    }
+    return;
+  }
   memset(&blit,0,sizeof(tdfx_vid_blit_t));
   blit.src = back_buffer;
   blit.src_stride = src_stride;
@@ -226,10 +255,12 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   src_fmt = 0;
   switch(format) {
   case IMGFMT_BGR8:
-  case IMGFMT_BGR15:
-  case IMGFMT_BGR16:
   case IMGFMT_BGR24:
   case IMGFMT_BGR32:
+    if(use_overlay)
+      printf("tdfx_vid: Non-native overlay format need conversion\n");
+  case IMGFMT_BGR15:
+  case IMGFMT_BGR16:
     src_bpp = ((format & 0x3F)+7)/8; 
     break;
   case IMGFMT_YV12:
@@ -249,6 +280,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   img_fmt = format;
   src_stride = src_width*src_bpp;
+  // The overlay need a 4 bytes aligned stride
+  if(use_overlay)
+    src_stride = ((src_stride+3)/4)*4;
   if(!src_fmt)
     src_fmt = format;
   if(!buffer_size)
@@ -266,9 +300,59 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   front_buffer = tdfx_cfg.screen_start;
   back_buffer = front_buffer + tdfx_page;
 
-  printf("tdfxvid setup : %d(%d) x %d @ %d => %d(%d) x %d @ %d\n",
-	 src_width,src_stride,src_height,src_bpp,
-	 dst_width,dst_stride,dst_height,dst_bpp);
+  while(use_overlay) {
+    tdfx_vid_overlay_t ov;
+    uint32_t ov_fmt = src_fmt, ov_stride = src_stride;
+    // Align the buffer
+    back_buffer = (((back_buffer+3)/4)*4);
+    // With the overlay the front buffer is not on the screen
+    // so we take the back buffer
+    front_buffer = back_buffer;
+    switch(src_fmt) {
+    case IMGFMT_BGR8:
+    case IMGFMT_BGR24:
+    case IMGFMT_BGR32:
+      back_buffer = front_buffer + 2*(src_stride*src_height);
+      ov_stride = dst_stride = src_width<<1;
+      ov_fmt = IMGFMT_BGR16;
+      break;
+    }
+    ov.src[0] = front_buffer;
+    ov.src[1] = front_buffer + (src_stride*src_height);
+    ov.src_width = src_width;
+    ov.src_height = src_height;
+    ov.src_stride = ov_stride;
+    ov.format = ov_fmt;
+    ov.dst_width = dst_width;
+    ov.dst_height = dst_height;
+    ov.dst_x = 0;
+    ov.dst_y = 0;
+    ov.use_colorkey = 0;
+
+    if(ioctl(tdfx_fd,TDFX_VID_SET_OVERLAY,&ov)) {
+      printf("tdfxvid: Overlay setup failed\n");
+      use_overlay = 0;
+      break;
+    }
+    if(use_overlay == 1) {
+      if(ioctl(tdfx_fd,TDFX_VID_OVERLAY_ON)) {
+	printf("tdfx_vid: Overlay on failed\n");
+	use_overlay = 0;
+	break;
+      }
+      use_overlay++;
+    }
+    
+    printf("tdfx_vid: Overlay ready : %d(%d) x %d @ %d => %d(%d) x %d @ %d\n",
+	   src_width,src_stride,src_height,src_bpp,
+	   dst_width,dst_stride,dst_height,dst_bpp);
+    break;
+  }
+
+  if(!use_overlay)
+    printf("tdfx_vid : Texture blit ready %d(%d) x %d @ %d => %d(%d) x %d @ %d\n",
+	   src_width,src_stride,src_height,src_bpp,
+	   dst_width,dst_stride,dst_height,dst_bpp);
   
   return 0;
 }
@@ -276,6 +360,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 static void
 uninit(void)
 {
+  if(use_overlay == 2) {
+    if(ioctl(tdfx_fd,TDFX_VID_OVERLAY_OFF))
+      printf("tdfx_vid: Overlay off failed\n");
+    use_overlay--;
+  }
   close(tdfx_fd);
   tdfx_fd = -1;
 }
