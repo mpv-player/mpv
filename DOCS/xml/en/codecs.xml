@@ -56,9 +56,9 @@ The most important ones above all:
   FLI/FLC
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">RealVideo 1.0</emphasis> from libavcodec, and
-  <emphasis role="bold">RealVideo 2.0, 3.0</emphasis> and
-  <emphasis role="bold">4.0</emphasis> codecs using RealPlayer libraries
+  <emphasis role="bold">RealVideo 1.0 & 2.0<emphasis> from libavcodec, and
+  <emphasis role="bold">RealVideo 3.0 & 4.0</emphasis> codecs using RealPlayer
+  libraries
   </simpara></listitem>
 <listitem><simpara>
   native decoder for HuffYUV
