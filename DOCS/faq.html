@@ -227,13 +227,13 @@
 
   <DT>Q: The <CODE>-xy</CODE> or <CODE>-fs</CODE> option doesn't work with the
     x11 driver (<CODE>-vo x11</CODE>) ...</DT>
-  <DD>A: It does, but you have to explicitly specify software scaling (it's
-    SLOW!) with the <CODE>-zoom</CODE> option. You better use XF86VidMode
+  <DD>A: It does, but you have to explicitly specify software scaling (very
+    slow) with the <CODE>-zoom</CODE> option. You better use XF86VidMode
     support: You must specify the <CODE>-vm</CODE> and the <CODE>-fs</CODE>
     switch, and you're done. Make sure you have the right modelines in your
     XF86Config file, and try to make the <A HREF="video.html#dga">DGA driver</A>
     and <A HREF="video.html#sdl">SDL's DGA driver</A> work for you.
-    It's much faster. If SDL's DGA works, use that, it'll be EVEN faster!</DD>
+    It's much faster. If SDL's DGA works, use that, it'll be even faster.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: What is the meaning of the numbers on the status line?</DT>
@@ -453,8 +453,8 @@
     <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></DT>
   <DD>A: This can have multiple reasons.
     <UL>
-      <LI>Your CPU <B>and/or</B> video card <B>and/or</B> bus is too SLOW.
-        <B>MPlayer</B>displays a message if this is the case (and the dropped
+      <LI>Your CPU <B>and/or</B> video card <B>and/or</B> bus is too slow.
+        <B>MPlayer</B> displays a message if this is the case (and the dropped
         frames counter goes up fast).</LI>
       <LI>If it is an AVI, maybe it has bad interleaving. Try the
         <CODE>-ni</CODE> option.</LI>
@@ -547,15 +547,18 @@
   <DD>A: It works only if running as root! It's a DGA limitation.
     You should become root (<CODE>su -</CODE>), and try again.
     Another solution is making <B>MPlayer</B> SUID root, but it's
-    <B>NOT RECOMMENDED!</B><BR>
+    <B>not recommended!</B><BR>
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chown root /usr/local/bin/mplayer</CODE><BR>
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod 755 /usr/local/bin/mplayer</CODE><BR>
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod +s /usr/local/bin/mplayer</CODE><BR>
-    <B>!!!! BUT STAY TUNED !!!!</B><BR>
-    This is a *BIG* security risk! *NEVER* do this on a server or on a computer
-    that you do not control completely because other users can gain root
-    privileges through SUID root MPlayer!!!<BR>
-    <B>!!!! SO YOU HAVE BEEN WARNED ... !!!!</B></DD>
+    <BLOCKQUOTE>
+      <B>Warning: security risk</B><BR>
+      This is a <B>big</B> security risk! <B>Never</B> do this on a server or
+      on a computer that you do not control completely because other users can
+      gain root privileges through SUID root <B>MPlayer</B>. <B>You have been
+      warned.</B>
+    </BLOCKQUOTE>
+  </DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: When using Xvideo, my Voodoo 3/Banshee says:<BR>

@@ -230,8 +230,8 @@
   Technically spoken this happens by mapping the framebuffer memory into
   the memory range of your process. This is allowed by the kernel only
   if you have superuser privileges. You can get these either by logging in
-  as root or by setting the SUID bit on the <B>MPlayer</B> executable (NOT
-  recommended!).</P>
+  as root or by setting the SUID bit on the <B>MPlayer</B> executable (<B>not
+  recommended</B>).</P>
 
 <P>There are two versions of DGA: DGA1 is used by XFree 3.x.x and DGA2 was
   introduced with XFree 4.0.1.</P>
@@ -264,7 +264,7 @@
   switches -vm (only with X 3.3.x), -fs, -bpp, -zoom to find a video mode that
   the movie fits in. There is no converter right now :(</P>
 
-<P>Become ROOT. DGA needs root access to be able to write directly video
+<P>Become root. DGA needs root access to be able to write directly to video
   memory. If you want to run it as user, then install <B>MPlayer</B> SUID
   root:</P>
 
@@ -275,11 +275,12 @@
 
 <P>Now it works as a simple user, too.</P>
 
-<P><B>!!!! BUT STAY TUNED !!!!</B><BR>
-  This is a <B>BIG</B> security risk! Never do this on a server or on a
-  computer can be accessed by more people than only you because they can gain
-  root privileges through SUID root <B>MPlayer</B>.<BR>
-  <B>!!!! SO YOU HAVE BEEN WARNED ... !!!!</B></P>
+<BLOCKQUOTE>
+  <B>Warning: security risk</B><BR>
+  This is a <B>big</B> security risk! <B>Never</B> do this on a server or on
+  a computer that can be accessed by other people because they can gain root
+  privileges through SUID root <B>MPlayer</B>.
+</BLOCKQUOTE>
 
 <P>Now use the <CODE>-vo dga</CODE> option, and there you go (hope so :))!
   You should also try if the <CODE>-vo sdl:dga</CODE> option works for you. It's
@@ -850,7 +851,7 @@
     requires X server and can work only under X server.</LI>
   <LI>You can use VIDIX subdevice which was applied to several video output
     drivers, such as:<BR>
-    <CODE>-vo vesa:vidix</CODE> (<B>LINUX ONLY</B>) and <CODE>-vo fbdev:vidix</CODE></LI>
+    <CODE>-vo vesa:vidix</CODE> (<B>Linux only</B>) and <CODE>-vo fbdev:vidix</CODE></LI>
 </UL>
 
 Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
@@ -902,9 +903,12 @@ recognize <CODE>:vidix</CODE> subdevice.
   it (mainly libdha). But there is hope that it will work on those systems
   where X11 does.</P>
 
-<P>And the last <B>WARNING</B>: (un)fortunately you <B>MUST</B> have
-  <B>ROOT</B> privileges to use VIDIX due to direct hardware access. At least
-  set the <B>SUID</B> bit on the <B>MPlayer</B> executable.</P>
+<BLOCKQUOTE>
+  <B>Warning: security risk</B><BR>
+  Unfortunately you <B>must</B> have <B>root</B> privileges to use VIDIX
+  due to direct hardware access. At least the <B>SUID</B> bit on the
+  <B>MPlayer</B> executable must be set.
+</BLOCKQUOTE>
 
 <P><B>VIDEO EQUALIZER</B></P>
 
