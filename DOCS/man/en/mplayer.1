@@ -5452,15 +5452,18 @@ There are three modes available: constant bitrate (CBR), fixed quantizer and
 2pass.
 .TP
 .B pass=<1|2>
-specify the pass in 2pass mode
+Specify the pass in 2pass mode.
 .TP
 .B bitrate=<value>
-sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second
-if >16000
+Sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second
+if >16000.
+.br
+If <value> is negative, XviD will use its absolute value as the target size
+(in kbytes) of the video and compute the associated bitrate automagically.
 (CBR or 2pass mode, default: 687 kbits/s)
 .TP
 .B fixed_quant=<1\-31>
-switch to fixed quantizer mode and specify the quantizer to be used
+Switch to fixed quantizer mode and specify the quantizer to be used.
 .TP
 .B me_quality=<0\-6>
 This option controls the motion estimation subsystem.
@@ -5473,12 +5476,11 @@ you need realtime encoding.
 .B interlacing
 For interlaced video material, turn this option on.
 .I Note:
-This option does not deinterlace video, it encodes it field-based
-(default: off).
+This option does not deinterlace video, it encodes it field-based.
 .TP
 .B 4mv\ \ \ \ 
-use 4 motion vectors per macro-block, might give better compression at the
-cost of a slower encoding (default: off).
+Use 4 motion vectors per macro-block, might give better compression at the
+cost of a slower encoding.
 .br
 .I WARNING:
 This option doesn't exist in XviD-1.0.x.
@@ -5511,24 +5513,26 @@ minimum interval between key frames (default: 0, 2pass only)
 maximum interval between key frames (default: 10*fps)
 .TP
 .B mpeg_quant
-use MPEG quantizers instead of H.263.
+Use MPEG quantizers instead of H.263.
 For high bitrates, you will find that MPEG quantization preserves more detail.
 For low bitrates, the smoothing of H.263 will give you less block noise.
 When using custom matrices, MPEG must be used.
-(default: off)
 .TP
 .B mod_quant
-decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis.
-(default: off, 2pass mode only)
+Decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis.
+.br
+.I WARNING:
+This will generate an illegal bitstream, and most likely not be decodeable
+by any MPEG4 decoder besides libavcodec or XviD.
+(2pass mode only)
 .TP
 .B greyscale
 Make XviD discard chroma planes so the encoded video is greyscale only.
 Note that this does not speed up encoding, it just prevents chroma data
 from being written in the last stage of encoding.
-(default: off)
 .TP
 .B debug\ \ 
-Save per-frame statistics in ./xvid.dbg (default: off).
+Save per-frame statistics in ./xvid.dbg.
 This is NOT the 2pass control file.
 .TP
 .B keyframe_boost=<0\-1000>
@@ -5553,15 +5557,15 @@ The following options are only available with the latest stable
 releases of XviD 1.0.x (api4).
 .TP
 .B packed\ 
-create a bitstream that can be decoded delay-free (default: off)
+Create a bitstream that can be decoded delay-free.
 .br
 .I WARNING:
-this will generate an illegal bitstream, and WILL NOT be
-decodeable by ISO-MPEG4 decoders except DivX/libavcodec/XviD
+This will generate an illegal bitstream, and WILL NOT be
+decodeable by ISO-MPEG4 decoders except DivX/libavcodec/XviD.
 .br
 .I WARNING:
 this will also store a fake DivX version in the file so the bug
-autodetection of some decoders might be confused
+autodetection of some decoders might be confused.
 .TP
 .B divx5bvop
 generate DivX5 compatible B-frames (default: on)
@@ -5576,14 +5580,12 @@ higher bitrate use will prevent it from giving a better image
 quality at a fixed bitrate.
 It's better to test with and without this option and see whether it
 is worth activating.
-(default: off)
 .TP
 .B gmc\ \ \ \ 
-Enable Global Motion Compensation, which makes XviD generate Sprite
-Frames which best describe Pan/Zoom/Rotating images.
+Enable Global Motion Compensation, which makes XviD generate special
+frames (GMC-frames) which best describe Pan/Zoom/Rotating images.
 The decision whether to activate this option or not to save bits
 depends highly on the video material.
-(default: off)
 .TP
 .B trellis
 Trellis Quantization is a kind of adaptive quantization method that
@@ -5591,7 +5593,7 @@ saves bits by modifying quantized coefficients to make them more
 compressible by the entropy encoder.
 Its impact on quality is good, and if VHQ uses too much CPU for you,
 this setting can be a good alternative to save a few bits (and gain
-quality at fixed bitrate) at a lesser cost than with VHQ (default: off).
+quality at fixed bitrate) at a lesser cost than with VHQ.
 .TP
 .B cartoon
 Activate this if your encoded sequence is an anime/cartoon.
@@ -5603,14 +5605,17 @@ The usual motion estimation algorithm uses only the luminance information to
 find the best motion vector.
 However for some video material, using the chroma planes can help find
 better vectors.
-This setting toggles the use of chroma planes for motion estimation
-(default: off).
+This setting toggles the use of chroma planes for motion estimation.
 .TP
 .B chroma_opt
-enable a chroma optimizer prefilter (default: off)
+Enable a chroma optimizer prefilter.
 .TP
 .B reduced
-enable encoding reduced resolution frames (default: off)
+Enable encoding reduced resolution frames.
+.br
+.I WARNING:
+The bitstream created is outside any MPEG-4 profile!
+This means it most likely won't be decoded by anything else than XviD.
 .TP
 .B max_bframes=<0\-4>
 maximum number of B frames to put between I/P frames (default: 0)
@@ -5632,7 +5637,6 @@ The higher the value, the higher the probability of B frames being used.
 .TP
 .B hq_ac\ \ 
 Activates High Quality AC coefficient prediction from neighbor blocks.
-(default:off)
 .TP
 .B vhq=<0\-4>
 The motion search algorithm is based on a search in the usual color domain
