@@ -31,48 +31,49 @@ static void process_MMX(unsigned char *dest, int dstride, unsigned char *src, in
 	int sstep = sstride-w;
 	short brvec[4];
 	short contvec[4];
-	short centvec[4] = { -128, -128, -128, -128 };
 
-	brightness = ((brightness+100)*511)/200-128;
-	contrast = ((contrast+100)*256)/200;
+	contrast = ((contrast+100)*256*16)/100;
+	brightness = ((brightness+100)*511)/200-128 - contrast/32;
 
 	brvec[0] = brvec[1] = brvec[2] = brvec[3] = brightness;
 	contvec[0] = contvec[1] = contvec[2] = contvec[3] = contrast;
 		
 	while (h--) {
-		asm (
+		asm volatile (
 			"movq (%5), %%mm3 \n\t"
 			"movq (%6), %%mm4 \n\t"
-			"movq (%7), %%mm5 \n\t"
 			"pxor %%mm0, %%mm0 \n\t"
+			"movl %4, %%eax\n\t"
 			".align 16 \n\t"
 			"1: \n\t"
 			"movq (%0), %%mm1 \n\t"
 			"movq (%0), %%mm2 \n\t"
 			"punpcklbw %%mm0, %%mm1 \n\t"
 			"punpckhbw %%mm0, %%mm2 \n\t"
-			"paddw %%mm5, %%mm1 \n\t"
-			"paddw %%mm5, %%mm2 \n\t"
-			"pmullw %%mm4, %%mm1 \n\t"
-			"pmullw %%mm4, %%mm2 \n\t"
-			"psraw $7, %%mm1 \n\t"
-			"psraw $7, %%mm2 \n\t"
-			"paddsw %%mm3, %%mm1 \n\t"
-			"paddsw %%mm3, %%mm2 \n\t"
+			"psllw $4, %%mm1 \n\t"
+			"psllw $4, %%mm2 \n\t"
+			"pmulhw %%mm4, %%mm1 \n\t"
+			"pmulhw %%mm4, %%mm2 \n\t"
+			"paddw %%mm3, %%mm1 \n\t"
+			"paddw %%mm3, %%mm2 \n\t"
 			"packuswb %%mm2, %%mm1 \n\t"
 			"addl $8, %0 \n\t"
 			"movq %%mm1, (%1) \n\t"
 			"addl $8, %1 \n\t"
-			"decl %4 \n\t"
+			"decl %%eax \n\t"
 			"jnz 1b \n\t"
 			: "=r" (src), "=r" (dest)
-			: "0" (src), "1" (dest), "r" (w/8), "r" (brvec), "r" (contvec), "r" (centvec)
+			: "0" (src), "1" (dest), "r" (w>>3), "r" (brvec), "r" (contvec)
+			: "%eax"
 		);
+
 		for (i = w&7; i; i--)
 		{
-			pel = ((*src++ - 128) * contrast)/256 + brightness;
-			*dest++ = pel > 255 ? 255 : (pel < 0 ? 0 : pel);
+			pel = ((*src++* contrast)>>12) + brightness;
+			if(pel&768) pel = (-pel)>>31;
+			*dest++ = pel;
 		}
+
 		src += sstep;
 		dest += dstep;
 	}
@@ -88,14 +89,15 @@ static void process_C(unsigned char *dest, int dstride, unsigned char *src, int 
 	int dstep = dstride-w;
 	int sstep = sstride-w;
 
-	brightness = ((brightness+100)*511)/200-128;
-	contrast = ((contrast+100)*256)/200;
+	contrast = ((contrast+100)*256*256)/100;
+	brightness = ((brightness+100)*511)/200-128 - contrast/512;
 
 	while (h--) {
 		for (i = w; i; i--)
 		{
-			pel = ((*src++ - 128) * contrast)/128 + brightness;
-			*dest++ = pel > 255 ? 255 : (pel < 0 ? 0 : pel);
+			pel = ((*src++* contrast)>>16) + brightness;
+			if(pel&768) pel = (-pel)>>31;
+			*dest++ = pel;
 		}
 		src += sstep;
 		dest += dstep;
