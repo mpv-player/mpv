@@ -94,7 +94,7 @@ int demux_audio_open(demuxer_t* demuxer) {
     sh_audio->wf->wFormatTag = sh_audio->format;
     sh_audio->wf->nChannels = mp3_chans;
     sh_audio->wf->nSamplesPerSec = mp3_freq;
-    sh_audio->wf->nBlockAlign = 1;
+    sh_audio->wf->nBlockAlign = 1152;
     sh_audio->wf->wBitsPerSample = 16;
     sh_audio->wf->cbSize = 0;    
     for(n = 0; n < 5 ; n++) {
