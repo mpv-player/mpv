@@ -373,10 +373,10 @@ query_format(uint32_t format) {
      */
     switch(format){
 	case IMGFMT_YV12:
-	case IMGFMT_RGB|24:
-	case IMGFMT_BGR|24:
-	case IMGFMT_RGB|32:
-	case IMGFMT_BGR|32:
+	case IMGFMT_RGB24:
+	case IMGFMT_BGR24:
+//	case IMGFMT_RGB32:
+//	case IMGFMT_BGR32:
 	    return 1;
     }
     return 0;
