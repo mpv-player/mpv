@@ -26,6 +26,11 @@ extern int verbose; // defined in mplayer.c
 #include "mp3lib/mp3.h"
 #include "libac3/ac3.h"
 
+#include "liba52/a52.h"
+static sample_t * a52_samples;
+static a52_state_t a52_state;
+
+
 #include "alaw.h"
 
 #include "xa/xa_gsm.h"
@@ -123,8 +128,35 @@ signed short mad_scale(mad_fixed_t sample)
 #endif
 
 
-
-
+static int a52_fillbuff(sh_audio_t *sh_audio){
+int length=0;
+int flags=0;
+int sample_rate=0;
+int bit_rate=0;
+while(1){
+    while(sh_audio->a_in_buffer_len<7){
+	int c=demux_getc(sh_audio->ds);
+	if(c<0) return -1; // EOF
+        sh_audio->a_in_buffer[sh_audio->a_in_buffer_len++]=c;
+    }
+    length = a52_syncinfo (sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
+    if(!length){
+	// bad file => resync
+	memcpy(sh_audio->a_in_buffer,sh_audio->a_in_buffer+1,6);
+	--sh_audio->a_in_buffer_len;
+	continue;
+    }
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"a52: len=%d  flags=0x%X  %d Hz %d bit/s\n",length,flags,sample_rate,bit_rate);
+    if(length<7 || length>3840){
+	 mp_msg(MSGT_DECAUDIO,MSGL_ERR,"a52: invalid frame length: %d\n",length);
+	 continue;
+    }
+    sh_audio->samplerate=sample_rate;
+    sh_audio->i_bps=bit_rate/8;
+    demux_read_data(sh_audio->ds,sh_audio->a_in_buffer+7,length-7);
+    return length;
+}
+}
 
 int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
 
@@ -229,6 +261,7 @@ case AFM_ALAW:
   sh_audio->audio_out_minsize=2048;
   break;
 case AFM_AC3:
+case AFM_A52:
   // Dolby AC3 audio:
   // however many channels, 2 bytes in a word, 256 samples in a block, 6 blocks in a frame
   sh_audio->audio_out_minsize=audio_output_channels*2*256*6;
@@ -352,6 +385,24 @@ if(gCpuCaps.has3DNow){
   } else {
     driver=0; // bad frame -> disable audio
   }
+  break;
+}
+case AFM_A52: {
+  // Dolby AC3 audio:
+  int accel=0; // should contain mmx/sse/etc flags
+  a52_samples=a52_init (accel);
+  if (a52_samples == NULL) {
+	mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 init failed\n");
+	driver=0;break;
+  }
+   sh_audio->a_in_buffer_size=3840;
+   sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
+   sh_audio->a_in_buffer_len=0;
+  if(a52_fillbuff(sh_audio)<0){
+	mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 sync failed\n");
+	driver=0;break;
+  }
+  sh_audio->channels=audio_output_channels;
   break;
 }
 case AFM_HWAC3: {
@@ -846,6 +897,43 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         }
         //printf("{3:%d}",avi_header.idx_pos);fflush(stdout);
         break;
+      case AFM_A52: { // AC3 decoder
+        int flags=0;
+	int i;
+	sample_t level=1, bias=384;
+        if(!sh_audio->a_in_buffer_len) 
+	    if(a52_fillbuff(sh_audio)<0) break; // EOF
+	switch(sh_audio->channels){
+	    case 1: flags=A52_MONO; break;
+//	    case 2: flags=A52_STEREO; break;
+	    case 2: flags=A52_DOLBY; break;
+//	    case 3: flags=A52_3F; break;
+	    case 3: flags=A52_2F1R; break;
+	    case 4: flags=A52_2F2R; break; // 2+2
+	    case 5: flags=A52_3F2R; break;
+	    case 6: flags=A52_3F2R|A52_LFE; break; // 5.1
+	}
+	flags|=A52_ADJUST_LEVEL;
+	sh_audio->a_in_buffer_len=0;
+	if (a52_frame (&a52_state, sh_audio->a_in_buffer, &flags, &level, bias)){
+	    mp_msg(MSGT_DECAUDIO,MSGL_WARN,"a52: error decoding frame\n");
+	    break;
+	}
+	// a52_dynrng (&state, NULL, NULL); // disable dynamic range compensation
+
+	// frame decoded, let's resample:
+	a52_resample_init(flags,sh_audio->channels);
+	len=0;
+	for (i = 0; i < 6; i++) {
+	    if (a52_block (&a52_state, a52_samples)){
+		mp_msg(MSGT_DECAUDIO,MSGL_WARN,"a52: error at resampling\n");
+		break;
+	    }
+	    len+=2*a52_resample(a52_samples,&buf[len]);
+	}
+	printf("len = %d      \n",len);
+	break;
+      }
       case AFM_HWAC3: // AC3 through SPDIF
 	if(demux_read_data(sh_audio->ds,sh_audio->ac3_frame, 6144) != 6144) 
 	    break; //EOF 
@@ -947,6 +1035,7 @@ void resync_audio_stream(sh_audio_t *sh_audio){
           sh_audio->ac3_frame=ac3_decode_frame(); // resync
     //      if(verbose) printf(" OK!\n");
           break;
+        case AFM_A52:
         case AFM_ACM:
         case AFM_DSHOW:
 	case AFM_HWAC3:
@@ -968,6 +1057,7 @@ void skip_audio_frame(sh_audio_t *sh_audio){
               switch(sh_audio->codec->driver){
                 case AFM_MPEG: MP3_DecodeFrame(NULL,-2);break; // skip MPEG frame
                 case AFM_AC3: sh_audio->ac3_frame=ac3_decode_frame();break; // skip AC3 frame
+                case AFM_A52: a52_fillbuff(sh_audio);break; // skip AC3 frame
 		case AFM_ACM:
 		case AFM_DSHOW: {
 		    int skip=sh_audio->wf->nBlockAlign;
