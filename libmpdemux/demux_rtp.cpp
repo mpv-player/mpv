@@ -314,7 +314,11 @@ extern "C" int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds) {
     // block myself until one comes available:
     TaskScheduler& scheduler
       = bufferQueue->readSource()->envir().taskScheduler();
+#if USAGEENVIRONMENT_LIBRARY_VERSION_INT >= 1038614400
+    scheduler.doEventLoop(&bufferQueue->blockingFlag);
+#else
     scheduler.blockMyself(&bufferQueue->blockingFlag);
+#endif
   }
 
   if (demuxer->stream->eof) return 0; // source stream has closed down
