@@ -104,5 +104,8 @@ FOR THE v0.90 RELEASE:
 FUTURE:
 ~~~~~~~
 
+- update the man page with all current options
+  (prefer-ipv4/6, ipv4-only-proxy, tsfastparse, dvbin + subopts,
+  (no)autoexpand, nuvopts + subopts, remove -aop?)
 - write a detailed encoding guide
 - restructuring?
