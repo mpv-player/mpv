@@ -252,6 +252,7 @@ extern int osd_visible;
 void mplEventHandling( int msg,float param )
 {
  int j;
+ int iparam = (int)param;
 
  switch( msg )
   {
@@ -270,22 +271,20 @@ void mplEventHandling( int msg,float param )
 	break;
 
    case evSetAudio:
-        if ( !guiIntfStruct.demuxer ) break;
-	audio_id=(int)param;
-	if ( guiIntfStruct.StreamType == STREAMTYPE_DVD ) goto play;
-	guiIntfStruct.FilenameChanged=1;
+        if ( !guiIntfStruct.demuxer || audio_id == iparam ) break;
+	audio_id=iparam;
+	guiIntfStruct.NewPlay=1;
 	break;
 
    case evSetVideo:
-        if ( !guiIntfStruct.demuxer ) break;
-        video_id=(int)param;
-        if ( guiIntfStruct.StreamType == STREAMTYPE_DVD ) goto play;
-        guiIntfStruct.FilenameChanged=1;
-        break;
+        if ( !guiIntfStruct.demuxer || video_id == iparam ) break;
+	video_id=iparam;
+	guiIntfStruct.NewPlay=1;
+	break;
 
 #ifdef HAVE_VCD
    case evSetVCDTrack:
-        guiIntfStruct.Track=(int)param;
+        guiIntfStruct.Track=iparam;
    case evPlayVCD:
  	gtkSet( gtkClearStruct,0,(void *)guiALL );
 	guiIntfStruct.StreamType=STREAMTYPE_VCD;
@@ -299,6 +298,7 @@ void mplEventHandling( int msg,float param )
 play_dvd_2:
  	gtkSet( gtkClearStruct,0,(void *)(guiALL - guiDVD) );
         guiIntfStruct.StreamType=STREAMTYPE_DVD;
+	goto play;
 #endif
    case evPlay:
    case evPlaySwitchToPause:
@@ -306,18 +306,11 @@ play:
 
         if ( ( msg == evPlaySwitchToPause )&&( guiIntfStruct.Playing == 2 ) ) goto NoPause;
 
-	vcd_track=0;
-	dvd_title=0;
-
 	if ( gtkSet( gtkGetCurrPlItem,0,NULL ) &&( guiIntfStruct.StreamType == STREAMTYPE_FILE ) )
 	 {
 	  plItem * next = gtkSet( gtkGetCurrPlItem,0,NULL );
 	  plLastPlayed=next;
-	  guiSetDF( guiIntfStruct.Filename,next->path,next->name );
-	  guiIntfStruct.StreamType=STREAMTYPE_FILE;
-	  guiIntfStruct.FilenameChanged=1;
-	  gfree( (void **)&guiIntfStruct.AudioFile );
-	  gfree( (void **)&guiIntfStruct.Subtitlename );
+	  mplSetFileName( next->path,next->name,STREAMTYPE_FILE );
 	 }
 
         switch ( guiIntfStruct.StreamType )
@@ -335,10 +328,9 @@ play:
 	        {
 		 if ( !guiIntfStruct.Track )
 		  {
-		   if ( guiIntfStruct.VCDTracks == 1 ) guiIntfStruct.Track=1;
-		    else guiIntfStruct.Track=2;
+		   if ( guiIntfStruct.VCDTracks > 1 ) guiIntfStruct.Track=2;
+		    else guiIntfStruct.Track=1;
 		  }
-		 vcd_track=guiIntfStruct.Track;
                  guiIntfStruct.DiskChanged=1;
 		}
 	       break;
@@ -350,31 +342,32 @@ play:
 	       mplSetFileName( NULL,dvd_device,STREAMTYPE_DVD );
 	       if ( guiIntfStruct.Playing != 2 )
 	        {
-	         dvd_title=guiIntfStruct.DVD.current_title;
-	         dvd_angle=guiIntfStruct.DVD.current_angle;
-                 dvd_chapter=guiIntfStruct.DVD.current_chapter;
+		 guiIntfStruct.Title=guiIntfStruct.DVD.current_title;
+		 guiIntfStruct.Chapter=guiIntfStruct.DVD.current_chapter;
+		 guiIntfStruct.Angle=guiIntfStruct.DVD.current_angle;
                  guiIntfStruct.DiskChanged=1;
 		} 
                break;
 #endif
          }
+	guiIntfStruct.NewPlay=1;
         mplPlay();
         break;
 #ifdef USE_DVDREAD
    case evSetDVDSubtitle:
-        dvdsub_id=(int)param;
+        dvdsub_id=iparam;
         goto play_dvd_2;
         break;
    case evSetDVDAudio:
-        audio_id=(int)param;
+        audio_id=iparam;
         goto play_dvd_2;
         break;
    case evSetDVDChapter:
-        guiIntfStruct.DVD.current_chapter=(int)param;
+        guiIntfStruct.DVD.current_chapter=iparam;
         goto play_dvd_2;
         break;
    case evSetDVDTitle:
-        guiIntfStruct.DVD.current_title=(int)param;
+        guiIntfStruct.DVD.current_title=iparam;
 	guiIntfStruct.DVD.current_chapter=1;
 	guiIntfStruct.DVD.current_angle=1;
         goto play_dvd_2;
@@ -387,7 +380,11 @@ NoPause:
         mplPause();
         break;
 
-   case evStop: guiIntfStruct.Playing=guiSetStop; mplState(); break;
+   case evStop: 
+	guiIntfStruct.Playing=guiSetStop; 
+	mplState(); 
+	guiIntfStruct.NoWindow=False;
+	break;
 
    case evLoadPlay:
         mplMainAutoPlay=1;
@@ -448,7 +445,7 @@ set_volume:
 
 
    case evIconify:
-        switch ( (int)param )
+        switch ( iparam )
          {
           case 0: wsIconify( appMPlayer.mainWindow ); break;
           case 1: wsIconify( appMPlayer.subWindow ); break;
@@ -489,7 +486,7 @@ set_volume:
         break;
 
    case evSetAspect:
-	switch ( (int)param )
+	switch ( iparam )
 	 {
 	  case 2:  movie_aspect=16.0f / 9.0f; break;
 	  case 3:  movie_aspect=4.0f / 3.0f;  break;
@@ -499,10 +496,10 @@ set_volume:
 	 }
 	wsClearWindow( appMPlayer.subWindow );
 #ifdef USE_DVDREAD
-	if ( guiIntfStruct.StreamType == STREAMTYPE_DVD ) goto play_dvd_2;
+	if ( guiIntfStruct.StreamType == STREAMTYPE_DVD || guiIntfStruct.StreamType == STREAMTYPE_VCD ) goto play_dvd_2;
 	 else 
 #endif
-	 guiIntfStruct.FilenameChanged=1;
+	 guiIntfStruct.NewPlay=1;
 	break;
 
 // --- timer events

@@ -58,7 +58,7 @@
 #define evLoadAudioFile	    42
 #define evSetAspect         44
 #define evSetAudio	    45
-#define evSetVideo          46
+#define evSetVideo	    46
 // 47 ...
 
 #define evExit              1000

@@ -234,7 +234,7 @@ int cmd_button( char * in )
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[skin]  x: %d y: %d sx: %d sy: %d\n",x,y,sx,sy );
 
  if ( ( defList->Items[ defList->NumberOfItems ].msg=appFindMessage( msg ) ) == -1 )
-   { ERRORMESSAGE( MSGTR_SKIN_BITMAP_UnknownMessage,msg ); return 1; }
+   { ERRORMESSAGE( MSGTR_SKIN_BITMAP_UnknownMessage,msg ); return 0; }
  defList->Items[ defList->NumberOfItems ].pressed=btnReleased;
  if ( defList->Items[ defList->NumberOfItems ].msg == evPauseSwitchToPlay ) defList->Items[ defList->NumberOfItems ].pressed=btnDisabled;
  defList->Items[ defList->NumberOfItems ].tmp=1;

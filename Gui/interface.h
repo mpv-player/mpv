@@ -63,9 +63,13 @@ typedef struct
    void * event_struct;
 
    int    DiskChanged;
+   int    NewPlay;
 
 #ifdef USE_DVDREAD
    guiDVDStruct         DVD;
+   int			Title;
+   int			Angle;
+   int			Chapter;
 #endif
 
 #ifdef HAVE_VCD
@@ -125,6 +129,7 @@ extern guiInterface_t guiIntfStruct;
 #define guiSetValues	    13
 #define guiSetFileFormat    14
 #define guiSetDemuxer       15
+#define guiSetParameters    16
 
 #define guiSetStop  0
 #define guiSetPlay  1

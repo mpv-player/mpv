@@ -13,6 +13,7 @@
 #include "mplayer/gtk/eq.h"
 #include "mplayer/widgets.h"
 #include "mplayer/mplayer.h"
+#include "mplayer/play.h"
 
 #include "../mplayer.h"
 #include "app.h"
@@ -264,6 +265,7 @@ void guiInit( void )
  mplSubRender=1;
 // ---
 
+ if ( filename ) mplSetFileName( NULL,filename,STREAMTYPE_FILE );
  if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name,STREAMTYPE_FILE );
  if ( sub_name ) guiSetFilename( guiIntfStruct.Subtitlename,sub_name );
 #if defined( USE_OSD ) || defined( USE_SUB )
@@ -435,10 +437,11 @@ int guiGetEvent( int type,char * arg )
    case guiCEvent:
         switch ( (int)arg )
 	 {
-          case guiSetPlay:  guiIntfStruct.Playing=1; mplState(); break;
-          case guiSetStop:  guiIntfStruct.Playing=0; mplState(); break;
-          case guiSetPause: guiIntfStruct.Playing=2; mplState(); break;
+          case guiSetPlay:  guiIntfStruct.Playing=1; break;
+          case guiSetStop:  guiIntfStruct.Playing=0; break;
+          case guiSetPause: guiIntfStruct.Playing=2; break;
 	 }
+	mplState();
         break;
    case guiSetState:
 	mplState();
@@ -450,9 +453,6 @@ int guiGetEvent( int type,char * arg )
 	guiIntfStruct.AudioOnly=(int)arg;
 	if ( (int)arg ) { guiIntfStruct.NoWindow=True; wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow ); }
 	  else wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
-	break;
-   case guiReDrawSubWindow:
-	wsPostRedisplay( &appMPlayer.subWindow );
 	break;
    case guiSetDemuxer:
 	guiIntfStruct.demuxer=(void *)arg;
@@ -500,8 +500,6 @@ int guiGetEvent( int type,char * arg )
 		  if ( vcd_seek_to_track( stream->fd,i ) < 0 ) break;
 		vcd_seek_to_track( stream->fd,vcd_track );
 		guiIntfStruct.VCDTracks=--i;
-		mp_msg( MSGT_GPLAYER,MSGL_INFO,"[gui] vcd tracks: %d\n",guiIntfStruct.VCDTracks );
-		guiIntfStruct.Track=vcd_track;
 	        break;
 	       }
 #endif
@@ -554,12 +552,6 @@ int guiGetEvent( int type,char * arg )
 	if ( guiIntfStruct.StreamType == STREAMTYPE_STREAM ) btnSet( evSetMoviePosition,btnDisabled );
 	 else btnSet( evSetMoviePosition,btnReleased );
 	 
-	if ( gtkCacheOn ) stream_cache_size=gtkCacheSize;
-	 else stream_cache_size=-1;
-
-	if ( gtkAutoSyncOn ) autosync=gtkAutoSync;
-	 else autosync=0;
-
 // -- audio
         if ( audio_out )
 	{
@@ -604,14 +596,42 @@ int guiGetEvent( int type,char * arg )
 #endif
 	break;
    case guiSetDefaults:
-	if ( filename && !guiIntfStruct.Filename )
-	 {
-	  gtkSet( gtkDelPl,0,NULL ); guiIntfStruct.StreamType=STREAMTYPE_FILE;
-	  guiSetFilename( guiIntfStruct.Filename,filename );
+        if ( guiIntfStruct.Playing == 1 && guiIntfStruct.FilenameChanged )
+         {
+          audio_id=-1;
+	  video_id=-1;
+	  dvdsub_id=-1;
+	  vobsub_id=-1;
+          stream_cache_size=-1;
+	  autosync=0;
+	  vcd_track=0;
+	  dvd_title=0;
+	 }				
+	wsPostRedisplay( &appMPlayer.subWindow );
+	break;
+   case guiSetParameters:
+        switch ( guiIntfStruct.StreamType ) 
+         {
+	  case STREAMTYPE_PLAYLIST:
+	       break;
+#ifdef HAVE_VCD
+	  case STREAMTYPE_VCD:
+	       vcd_track=guiIntfStruct.Track;
+	       break;
+#endif
+#ifdef USE_DVDREAD
+ 	  case STREAMTYPE_DVD:
+	       dvd_title=guiIntfStruct.Title;
+	       dvd_chapter=guiIntfStruct.Chapter;
+	       dvd_angle=guiIntfStruct.Angle;
+	       break;
+#endif
 	 }
-
-       guiIntfStruct.DiskChanged=0;
-
+	if ( guiIntfStruct.StreamType != STREAMTYPE_PLAYLIST )
+	 {	
+	  if ( guiIntfStruct.Filename ) filename=gstrdup( guiIntfStruct.Filename );
+	   else if ( filename ) guiSetFilename( guiIntfStruct.Filename,filename );
+	 }
 // --- video opts
        
        if ( !video_driver_list )
@@ -674,7 +694,7 @@ int guiGetEvent( int type,char * arg )
 	mixer_device=gtkAOOSSMixer;
 	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"oss",3 ) && gtkAOOSSDevice )
 	 {
-	  char * tmp = calloc( 1,strlen( gtkAOOSSDevice ) + 5 );
+	  char * tmp = calloc( 1,strlen( gtkAOOSSDevice ) + 7 );
 	  sprintf( tmp,"oss:%s",gtkAOOSSDevice );
 	  gaddlist( &audio_driver_list,tmp );
 	 }
@@ -692,9 +712,19 @@ int guiGetEvent( int type,char * arg )
 #endif
 
 // --- misc		    
+	if ( gtkCacheOn ) stream_cache_size=gtkCacheSize;
+	 else stream_cache_size=-1;
+
+	if ( gtkAutoSyncOn ) autosync=gtkAutoSync;
+	 else autosync=0;
+
         if ( guiIntfStruct.AudioFile ) audio_stream=guiIntfStruct.AudioFile;
 	  else if ( guiIntfStruct.FilenameChanged ) audio_stream=NULL;
 	
+        guiIntfStruct.DiskChanged=0;
+        guiIntfStruct.FilenameChanged=0;
+        guiIntfStruct.NewPlay=0;
+
 	break;
   }
  return False;

@@ -10,6 +10,7 @@
 #include "../wm/ws.h"
 #include "../../config.h"
 #include "../../help_mp.h"
+#include "../../mplayer.h"
 #include "../../libvo/x11_common.h"
 #include "../../input/input.h"
 
@@ -99,7 +100,7 @@ void mplEnd( void )
    plLastPlayed=next;
    guiSetDF( guiIntfStruct.Filename,next->path,next->name );
    guiIntfStruct.StreamType=STREAMTYPE_FILE;
-   guiIntfStruct.FilenameChanged=1;
+   guiIntfStruct.FilenameChanged=guiIntfStruct.NewPlay=1;
    gfree( (void **)&guiIntfStruct.AudioFile );
    gfree( (void **)&guiIntfStruct.Subtitlename );
   } 
@@ -110,6 +111,8 @@ void mplEnd( void )
      guiIntfStruct.TimeSec=0;
      guiIntfStruct.Position=0;
      guiIntfStruct.AudioType=0;
+     guiIntfStruct.NoWindow=False;
+
 #ifdef USE_DVDREAD
      guiIntfStruct.DVD.current_title=1;
      guiIntfStruct.DVD.current_chapter=1;
@@ -255,10 +258,10 @@ void mplSetFileName( char * dir,char * name,int type )
  if ( !name ) return;
  
  if ( !dir ) guiSetFilename( guiIntfStruct.Filename,name )
-  else guiSetDF( guiIntfStruct.Filename,dir,name )
+  else guiSetDF( guiIntfStruct.Filename,dir,name );
 
+// filename=guiIntfStruct.Filename;
  guiIntfStruct.StreamType=type;
- guiIntfStruct.FilenameChanged=1;
  gfree( (void **)&guiIntfStruct.AudioFile );
  gfree( (void **)&guiIntfStruct.Subtitlename );
 }

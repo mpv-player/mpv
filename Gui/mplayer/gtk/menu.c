@@ -379,14 +379,15 @@ GtkWidget * create_PopUpMenu( void )
     DVDAudioLanguageMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_AudioLanguages );
      if ( guiIntfStruct.DVD.nr_of_audio_channels )
       {
-       char tmp[64]; int i;
+       char tmp[64]; int i, id = audio_id;
        for ( i=0;i < guiIntfStruct.DVD.nr_of_audio_channels;i++ )
         {
 	 snprintf( tmp,64,"%s - %s %s",GetLanguage( guiIntfStruct.DVD.audio_streams[i].language ),
 	   ChannelTypes[ guiIntfStruct.DVD.audio_streams[i].type ],
 	   ChannelNumbers[ guiIntfStruct.DVD.audio_streams[i].channels ] );
+	 if ( id == -1 ) id=guiIntfStruct.DVD.audio_streams[i].id;
          AddMenuCheckItem( DVDAudioLanguageMenu,tmp,
-			   audio_id == guiIntfStruct.DVD.audio_streams[i].id,
+			   id == guiIntfStruct.DVD.audio_streams[i].id,
 			   ( guiIntfStruct.DVD.audio_streams[i].id << 16 ) + evSetDVDAudio );
         }
       }
@@ -424,7 +425,7 @@ GtkWidget * create_PopUpMenu( void )
     AddMenuItem( AspectMenu,"2.35",( 4 << 16 ) + evSetAspect );
    }
 
-  if ( guiIntfStruct.demuxer && guiIntfStruct.StreamType != STREAMTYPE_DVD )
+  if ( guiIntfStruct.Playing && guiIntfStruct.demuxer && guiIntfStruct.StreamType != STREAMTYPE_DVD )
    {
     int i,c = 0;
 

@@ -868,8 +868,8 @@ if(!use_stdin && !slave_mode){
 // =================== GUI idle loop (STOP state) ===========================
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) {
-
-      guiGetEvent( guiReDrawSubWindow,0 );
+      file_format=DEMUXER_TYPE_UNKNOWN;
+      guiGetEvent( guiSetDefaults,0 );
       while ( guiIntfStruct.Playing != 1 )
        {
         mp_cmd_t* cmd;                                                                                   
@@ -878,14 +878,8 @@ if(!use_stdin && !slave_mode){
 	guiGetEvent( guiReDraw,NULL );
 	if ( (cmd = mp_input_get_cmd(0,0)) != NULL) guiGetEvent( guiIEvent,(char *)cmd->id );
        } 
-
-      guiGetEvent( guiSetDefaults,NULL );
-
-      if ( ( guiIntfStruct.FilenameChanged || !filename )
-//#ifdef USE_DVDREAD
-//           && ( guiIntfStruct.StreamType != STREAMTYPE_DVD )
-//#endif
-       )      
+      guiGetEvent( guiSetParameters,NULL );
+      if ( guiIntfStruct.StreamType == STREAMTYPE_STREAM )
        {
         play_tree_t * entry = play_tree_new();
         play_tree_add_file( entry,guiIntfStruct.Filename );
@@ -905,7 +899,6 @@ if(!use_stdin && !slave_mode){
 	    filename = play_tree_iter_get_file(playtree_iter,1);
 	   }
          }
-   	guiIntfStruct.FilenameChanged=0;
        } 
     }
 #endif
@@ -950,6 +943,10 @@ if(!use_stdin && !slave_mode){
     goto goto_next_file;
   }
   inited_flags|=INITED_STREAM;
+
+#ifdef HAVE_NEW_GUI
+  if ( use_gui ) guiGetEvent( guiSetStream,(char *)stream );
+#endif
 
   if(stream->type == STREAMTYPE_PLAYLIST) {
     play_tree_t* entry;
@@ -1348,8 +1345,6 @@ fflush(stdout);
 #ifdef HAVE_NEW_GUI
    if ( use_gui )
     {
-     guiGetEvent( guiSetStream,(char *)stream );
-     guiGetEvent( guiSetFileName,filename );
      if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels; else guiIntfStruct.AudioType=0;
      if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,(char *)1 ); else guiGetEvent( guiSetAudioOnly,(char *)0 );
      guiGetEvent( guiSetFileFormat,(char *)demuxer->file_format );
@@ -2700,12 +2695,11 @@ if(rel_seek_secs || abs_seek_pos){
 	guiGetEvent( guiSetVolume,NULL );
 	if(guiIntfStruct.Playing==0) break; // STOP
 	if(guiIntfStruct.Playing==2) osd_function=OSD_PAUSE;
-        if ( guiIntfStruct.DiskChanged || guiIntfStruct.FilenameChanged ) goto goto_next_file;
+        if ( guiIntfStruct.DiskChanged || guiIntfStruct.NewPlay ) goto goto_next_file;
 #ifdef USE_DVDREAD
         if ( stream->type == STREAMTYPE_DVD )
 	 {
 	  dvd_priv_t * dvdp = stream->priv;
-	  /*guiIntfStruct.DVD.current_chapter=dvdp->cur_cell + 1;*/
 	  guiIntfStruct.DVD.current_chapter=dvd_chapter_from_cell(dvdp,guiIntfStruct.DVD.current_title-1, dvdp->cur_cell)+1;
 	 }
 #endif
