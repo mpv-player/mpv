@@ -837,7 +837,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       break;
     default:
       mp_msg(MSGT_DEMUX, MSGL_V, "Unknown FE type. Aborting\n");
-      exit(-1);
+      return 0;
   }
   usleep(100000);
 
