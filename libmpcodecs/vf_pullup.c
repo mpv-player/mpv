@@ -178,7 +178,14 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 		if (!f) return 0;
 		if (f->length < 2) {
 			pullup_release_frame(f);
-			return 0;
+			if (!(mpi->fields & MP_IMGFIELD_REPEAT_FIRST))
+				return 0;
+			f = pullup_get_frame(c);
+			if (!f) return 0;
+			if (f->length < 2) {
+				pullup_release_frame(f);
+				return 0;
+			}
 		}
 	}
 
