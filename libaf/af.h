@@ -47,6 +47,31 @@ typedef struct af_instance_s
 		 the length of the buffer. */
 }af_instance_t;
 
+// Initialization types
+#define SLOW  1
+#define FAST  2
+#define FORCE 3
+
+// Configuration switches
+typedef struct af_cfg_s{
+  int force;	// Initialization type
+  char** list;	/* list of names of plugins that are added to filter
+		   list during first initialization of stream */
+}af_cfg_t;
+
+// Current audio stream
+typedef struct af_stream_s
+{
+  // The first and last filter in the list
+  af_instance_t* first;
+  af_instance_t* last;
+  // Storage for input and output data formats
+  af_data_t input;
+  af_data_t output;
+  // Cofiguration for this stream
+  af_cfg_t cfg;
+}af_stream_t;
+
 /*********************************************
 // Control parameters 
 */
@@ -97,35 +122,28 @@ typedef struct af_instance_s
 #define AF_NA      -3
 
 
-/*********************************************
-// Command line configuration switches
-*/
-typedef struct af_cfg_s{
-  int rate;
-  int format;
-  int bps;
-  int force;
-  char** list;
-}af_cfg_t;
-
 
 // Export functions
 
-/* Init read configuration and create filter list accordingly. In and
-   out contains the format of the current movie and the formate of the
-   prefered output respectively */
-int af_init(af_data_t* in, af_data_t* out);
+/* Initialize the stream "s". This function creates a new fileterlist
+   if nessesary according to the values set in input and output. Input
+   and output should contain the format of the current movie and the
+   formate of the preferred output respectively. The function is
+   reentreant i.e. if called wit an already initialized stream the
+   stream will be reinitialized. The return value is 0 if sucess and
+   -1 if failure */
+int af_init(af_stream_t* s);
 // Uninit and remove all filters
-void af_uninit();
+void af_uninit(af_stream_t* s);
 // Filter data chunk through the filters in the list
-af_data_t* af_play(af_data_t* data);
+af_data_t* af_play(af_stream_t* s, af_data_t* data);
 /* Calculate how long the output from the filters will be given the
    input length "len" */
-int af_outputlen(int len);
+int af_outputlen(af_stream_t* s, int len);
 /* Calculate how long the input to the filters should be to produce a
    certain output length, i.e. the return value of this function is
    the input length required to produce the output length "len". */
-int af_inputlen(int len);
+int af_inputlen(af_stream_t* s, int len);
 
 
 
@@ -152,9 +170,5 @@ int af_lencalc(frac_t mul, int len);
 #ifndef max
 #define max(a,b)(((a)>(b))?(a):(b))
 #endif
-
-#ifndef AUDIO_FILTER
-extern af_cfg_t af_cfg;
-#endif /* AUDIO_FILTER */
 
 #endif

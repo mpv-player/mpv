@@ -97,7 +97,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     }
     af->data->bps=((af_data_t*)arg)->bps; 
 
-    mp_msg(MSGT_AFILTER,MSGL_STATUS,"[format] Changing number sample format to 0x%08X and/or bytes per sample to %i \n",af->data->format,af->data->bps);
+    mp_msg(MSGT_AFILTER,MSGL_V,"[format] Changing number sample format to 0x%08X and/or bytes per sample to %i \n",af->data->format,af->data->bps);
     return AF_OK;
   }
   return AF_UNKNOWN;

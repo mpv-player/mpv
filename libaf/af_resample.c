@@ -277,7 +277,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     }
 
     af->data->rate=((int*)arg)[0]; 
-    mp_msg(MSGT_AFILTER,MSGL_STATUS,"[resample] Changing sample rate to %iHz\n",af->data->rate);
+    mp_msg(MSGT_AFILTER,MSGL_V,"[resample] Changing sample rate to %iHz\n",af->data->rate);
     return AF_OK;
   }
   return AF_UNKNOWN;
