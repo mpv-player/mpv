@@ -1762,7 +1762,7 @@ char** sub_filenames(char* path, char *fname)
 		    if (prio) {
 			prio += prio;
 #ifdef USE_ICONV
-			if (sub_utf8 || (i<3)){ // prefer UTF-8 coded
+			if (i<3){ // prefer UTF-8 coded
 			    prio++;
 			}
 #endif
