@@ -10,7 +10,7 @@ endif
 
 OBJS	= $(SRCS:.c=.o)
 INCLUDE = -I../loader $(CSS_INC) $(EXTRA_INC)
-CFLAGS  = -Wall $(OPTFLAGS) $(INCLUDE)
+CFLAGS  = $(OPTFLAGS) $(INCLUDE)
 
 .SUFFIXES: .c .o
 
