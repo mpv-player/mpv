@@ -390,7 +390,7 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 				goto err_out;
 			}
 		        if (!(*codecsp = (codecs_t *) realloc(*codecsp,
-				sizeof(codecs_t) * (*nr_codecsp + 1)))) {
+				sizeof(codecs_t) * (*nr_codecsp + 2)))) {
 			    perror("can't realloc '*codecsp'");
 			    goto err_out;
 		        }
@@ -403,7 +403,6 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
 			for (i = 0; i < *nr_codecsp - 1; i++) {
-#warning audio meg videocodecnek lehet ugyanaz a neve? (most lehet...)
 				if (!strcmp(token[0], (*codecsp)[i].name)) {
 					PRINT_LINENUM;
 					printf("codec name '%s' isn't unique\n", token[0]);
@@ -481,13 +480,13 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 		} else if (!strcmp(token[0], "status")) {
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
-			if (!strcasecmp(token[0], ":-)"))
+			if (!strcasecmp(token[0], "working"))
 				codec->status = CODECS_STATUS_WORKING;
-			else if (!strcasecmp(token[0], ":-("))
+			else if (!strcasecmp(token[0], "crashing"))
 				codec->status = CODECS_STATUS_NOT_WORKING;
-			else if (!strcasecmp(token[0], "X-("))
+			else if (!strcasecmp(token[0], "untested"))
 				codec->status = CODECS_STATUS_UNTESTED;
-			else if (!strcasecmp(token[0], ":-|"))
+			else if (!strcasecmp(token[0], "buggy"))
 				codec->status = CODECS_STATUS_PROBLEMS;
 			else
 				goto err_out_parse_error;
@@ -496,6 +495,8 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 	}
 	if (!validate_codec(codec, codec_type))
 		goto err_out_not_valid;
+	video_codecs[nr_vcodecs].name = NULL;
+	audio_codecs[nr_acodecs].name = NULL;
 	ret_codecs[0] = video_codecs;
 	ret_codecs[1] = audio_codecs;
 out:
@@ -520,39 +521,54 @@ err_out_not_valid:
 	goto err_out;
 }
 
-codecs_t *find_audio_codec(unsigned int fourcc, unsigned int *fourccmap)
+codecs_t *find_audio_codec(unsigned int fourcc, unsigned int *fourccmap,
+		codecs_t *start)
 {
-	return find_codec(fourcc, fourccmap, 1);
+	return find_codec(fourcc, fourccmap, start, 1);
 }
 
-codecs_t *find_video_codec(unsigned int fourcc, unsigned int *fourccmap)
+codecs_t *find_video_codec(unsigned int fourcc, unsigned int *fourccmap,
+		codecs_t *start)
 {
-	return find_codec(fourcc, fourccmap, 0);
+	return find_codec(fourcc, fourccmap, start, 0);
 }
 
-codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,int audioflag)
+codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
+		codecs_t *start, int audioflag)
 {
 	int i, j;
 	codecs_t *c;
 
-	if (audioflag) {
-		i = nr_acodecs;
-		c = audio_codecs;
+	if (start) {
+		for (/* NOTHING */; start->name; start++) {
+			for (j = 0; j < CODECS_MAX_FOURCC; j++) {
+				if (start->fourcc[j] == fourcc) {
+					if (fourccmap)
+						*fourccmap = start->fourccmap[j];
+					return start;
+				}
+			}
+		}
 	} else {
-		i = nr_vcodecs;
-		c = video_codecs;
-	}
-	for (/* NOTHING */; i--; c++) {
-		for (j = 0; j < CODECS_MAX_FOURCC; j++) {
-			if (c->fourcc[j] == fourcc) {
-				if (fourccmap) *fourccmap = c->fourccmap[j];
-				return c;
+		if (audioflag) {
+			i = nr_acodecs;
+			c = audio_codecs;
+		} else {
+			i = nr_vcodecs;
+			c = video_codecs;
+		}
+		for (/* NOTHING */; i--; c++) {
+			for (j = 0; j < CODECS_MAX_FOURCC; j++) {
+				if (c->fourcc[j] == fourcc) {
+					if (fourccmap)
+						*fourccmap = c->fourccmap[j];
+					return c;
+				}
 			}
 		}
 	}
 	return NULL;
 }
-
 
 #ifdef TESTING
 int main(void)
