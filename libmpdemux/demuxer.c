@@ -659,7 +659,9 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
   } else {
     printf("MPEG packet stats: p100: %d  p101: %d  PES: %d  MP3: %d \n",
 	num_elementary_packets100,num_elementary_packets101,num_elementary_packetsPES,num_mp3audio_packets);
-    if(num_mp3audio_packets>50 && num_mp3audio_packets>2*num_elementary_packets100)
+//MPEG packet stats: p100: 458  p101: 458  PES: 0  MP3: 1103  (.m2v)
+    if(num_mp3audio_packets>50 && num_mp3audio_packets>2*num_elementary_packets100
+	&& abs(num_elementary_packets100-num_elementary_packets101)>2)
 	break; // it's .MP3
     // some hack to get meaningfull error messages to our unhappy users:
     if(num_elementary_packets100>=2 && num_elementary_packets101>=2 &&
