@@ -217,9 +217,6 @@ Falco, Salvatore <sfalco@studenti.ing.uniroma1.it>
     * overlapping subtitles & sub sorting support
     * SAMI subtitles dump support
 
-Fargas, Marc (TeLeNiEkO) <telenieko@telenieko.com>
-    * first Spanish documentation translation (outdated)
-
 Feigl, Johannes (jaf) <johannes.feigl@aon.at>
     * original German docs translation (outdated)
     * some improvements in configure, small patches
@@ -306,10 +303,6 @@ Hammelmann, Jürgen <juergen.hammelmann@gmx.de>
 
 Hertel, Christopher R. <crh@ubiqx.mn.org>
     * md5sum code used by vo_md5sum. part of uCIFS library.
-
-Heryan, Jiri <technik@domotech.cz>
-    * Czech man page translation
-    * some other Czech translation related work
 
 Hess, Andreas <jaska@gmx.net>
     * upgrading libdvdcss in libmpdvdkit2
@@ -417,9 +410,6 @@ Kovriga, Gregory <gkovriga@techunix.technion.ac.il>
     * GUI DVD fixes
     * various small bug fixes in ASX/URL parser
 
-Krämer, Sebastian <mplayer@skraemer.de>
-    * german man page translation
-
 Kühling, David <dvdkhlng@gmx.de>
     * libtheora support, Ogg/Theora demuxing changes
 
@@ -480,10 +470,6 @@ Lombard, Pierre (pl) <p_l@gmx.fr>
     * new configure script
     * general code maintaining, fixes, patch committing
 
-López, Juan Martin (nauj27) <nauj27@teleline.es>
-    * Spanish man page translation
-    * Spanish documentation translation
-
 Madick, Puk <pingy@swirvemail.com>
     * KDE/GNOME2 fullscreen fix
     * configparser fixes
@@ -516,6 +502,7 @@ von Merkatz, Arwed <v.merkatz@gmx.net>
 
 Merritt, Loren <lorenm@u.washington.edu>
     * x264 encoding support
+    * x264 documentation
     * some libavcodec documentation
 
 Mierzejewski, Dominik (Rathann) <dominik@rangers.eu.org>
@@ -529,9 +516,6 @@ Milushev, Mihail <lanzz@lanzz.org>
 Mistry, Nehal (Nehal) <nehalmistry@gmx.net>
     * various audio driver fixes
 
-Mizda, Gábor (Gabrov) <gabrov@freemail.hu>
-	* Hungarian translation
-
 Mohari, András <mayday@varoshaza.nagyatad.hu>
     * skin documentation
     * various docs updates and fixes
@@ -539,16 +523,6 @@ Mohari, András <mayday@varoshaza.nagyatad.hu>
 
 Mueller, Steven <diffusor@ugcs.caltech.edu>
     * first implementation of live changing playback speed
-
-MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
-    * Waclaw Schiller (Torinthiel) <torinthiel@wp.pl>
-    * Kuba Misiorny (Qba) <jim85@wp.pl>
-    * Lukasz Proszek (Frogu) <frogoo@o2.pl>
-    * Maciek Paszta (paszczi) <paszczi@go2.pl>
-    * Piotr Michniewski (Cobra) <cobra_666@poczta.onet.pl>
-    * Marcin Biernat (Boski Cinek) <boski_cinek@o2.pl>
-    * Marek Jarycki (Emdej) <emdej@emdej.com>
-    * Leszek Kaplita (Flex) <flex@tenbit.pl>
 
 Neundorf, Alexander <neundorf@kde.org>
     * raw DV demuxer
@@ -671,6 +645,7 @@ Sommer, Sascha (Faust3) <saschasommer@freenet.de>
 Strasser, Alexander (beastd) <eclipse7@gmx.net>
     * string handling security audit
     * EWMH fullscreen
+    * suboption parser
 
 Svoboda, Jiri (zar) <Jiri.Svoboda@seznam.cz>
     * AQT type subtitles support
@@ -680,7 +655,7 @@ Svoboda, Jiri (zar) <Jiri.Svoboda@seznam.cz>
 Syrjälä, Ville <syrjala@sci.fi>
     * -vo dfbmga driver (G400 DVDMax-like feature using dfb 0.9.14)
 
-Szecsi Gabor <deje@miki.hu>
+Szecsi, Gabor <deje@miki.hu>
     * directsound AO driver
 
 Tackaberry, Jason <tack@sault.org>
@@ -738,9 +713,6 @@ Ziv-Av, Matan <matan@svgalib.org>
 
 Zoltán, Márk Vicián (Se7en) <se7en@sch.bme.hu>
     * SVGAlib support in libvo
-
-Zubimendi, Andoni <andoni@lpsat.net>.
-    * Spanish documentation translation
 
 
 ________________
@@ -805,6 +777,41 @@ McGowan, John F. <http://www.jmcgowan.com>
 Williams, Adam <broadcast@earthling.net>
     * libmpeg3 (and xmovie) author [MPEG-1/MPEG-2 video decoder, used in
       v0.1-v0.4]
+
+
+___________
+Translation
+~~~~~~~~~~~
+
+Fargas, Marc (TeLeNiEkO) <telenieko@telenieko.com>
+    * first Spanish documentation translation (outdated)
+
+Heryan, Jiri <technik@domotech.cz>
+    * Czech man page and documentation translation
+    * some other Czech translation related work
+
+Krämer, Sebastian <mplayer@skraemer.de>
+    * german man page translation
+
+López, Juan Martin (nauj27) <nauj27@teleline.es>
+    * Spanish man page translation
+    * Spanish documentation translation
+
+Mizda, Gábor (Gabrov) <gabrov@freemail.hu>
+	* Hungarian translation
+
+MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
+    * Waclaw Schiller (Torinthiel) <torinthiel@wp.pl>
+    * Kuba Misiorny (Qba) <jim85@wp.pl>
+    * Lukasz Proszek (Frogu) <frogoo@o2.pl>
+    * Maciek Paszta (paszczi) <paszczi@go2.pl>
+    * Piotr Michniewski (Cobra) <cobra_666@poczta.onet.pl>
+    * Marcin Biernat (Boski Cinek) <boski_cinek@o2.pl>
+    * Marek Jarycki (Emdej) <emdej@emdej.com>
+    * Leszek Kaplita (Flex) <flex@tenbit.pl>
+
+Zubimendi, Andoni <andoni@lpsat.net>.
+    * Spanish documentation translation
 
 
 _________
@@ -889,7 +896,7 @@ Pehrson, Jurgen <jp@spektr.eu.org>
 Pizurica, Nikola <pizurica@neobee.net>
     * Industrial, XFce4
 
-Ptak, Oliwier (aleczapka) <aleczapka@@gmx.net>
+Ptak, Oliwier (aleczapka) <aleczapka@gmx.net>
     * mentalic, neutron
 
 Quiana <quiana@quiana.net>
@@ -917,7 +924,7 @@ Vigvary, Balasz (Toky)
     * avifile
 
 Weber, Andrew (Webby) <webbypssht@gmail.com>
-    * webby
+    * webby, smoothwebby
 
 Whitmore, Gary Jr.
     * krystal
