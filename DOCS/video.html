@@ -879,9 +879,6 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
     able to tell to VIDIX subdevice some video characteristics of server.</LI>
 </UL>
 
-I hope that probably every video output driver of MPlayer will
-recognize <CODE>:vidix</CODE> subdevice.
-
 <H4>USAGE METHODS</H4>
 
 <P>When VIDIX is used as <B>subdevice</B> (<CODE>-vo vesa:vidix</CODE>) then
@@ -910,9 +907,9 @@ recognize <CODE>:vidix</CODE> subdevice.
   autodetection.</P>
 
 <P>VIDIX is very new technology and it's extremely possible that on your system
-  (OS=abc CPU=xyz) it won't work. In this case only solution for you it's port
-  it (mainly libdha). But there is hope that it will work on those systems
-  where X11 does.</P>
+  (OS=abc CPU=xyz) it won't work. In this case the only solution for you is
+  porting (mainly libdha) it. But there is a hope, that it will work on those
+  systems where X11 does.</P>
 
 <BLOCKQUOTE>
   <B>Warning: security risk</B><BR>
@@ -920,55 +917,6 @@ recognize <CODE>:vidix</CODE> subdevice.
   due to direct hardware access. At least the <B>SUID</B> bit on the
   MPlayer executable must be set.
 </BLOCKQUOTE>
-
-<H4>VIDEO EQUALIZER</H4>
-
-<P>This is a video equalizer implemented especially for VIDIX. You can use
-  it either with <B>1-8</B> keys as described in the man page, or
-  by command line arguments. MPlayer recognizes the
-  following options:</P>
-
-<DL>
-  <DT><CODE>-brightness</CODE></DT>
-  <DD>Adjust <B>BRIGHTNESS</B> of video output. It's not equal to brightness
-    adjusting on monitor panel or on TV. It changes intensity of RGB components of
-    video signal from black to white screen.</DD>
-
-  <DT><CODE>-contrast</CODE></DT>
-  <DD>Adjust <B>CONTRAST</B> of video output. Works in similar manner as
-    brightness.</DD>
-
-  <DT><CODE>-saturation</CODE></DT>
-  <DD>Adjust <B>SATURATION</B> of video output. You can get grayscale
-    output with this option.</DD>
-
-  <DT><CODE>-hue</CODE></DT>
-  <DD>Adjust <B>HUE</B> of video signal. You can get colored negative
-    of image with this option.</DD>
-
-  <DT><CODE>-red_intensity</CODE></DT>
-  <DD>Adjust intensity of <B>RED</B> component of video signal.</DD>
-
-  <DT><CODE>-green_intensity</CODE></DT>
-  <DD>Adjust intensity of <B>GREEN</B> component of video signal.</DD>
-
-  <DT><CODE>-blue_intensity</CODE></DT>
-  <DD>Adjust intensity of <B>BLUE</B> component of video signal.</DD>
-</DL>
-
-<P>Each parameter can accept values from <B>-1000</B> to <B>+1000</B>.<BR>
-  Default value for each parameter is <B>0</B>.</P>
-
-<P><B>Note:</B> Not every driver provides support for each of those parameters.
-  Currently only <B>radeon_vid.so</B> provides full support for video equalizing.
-  Other drivers only partly support these options.</P>
-
-<P><B>Examples:</B><BR>
-  <CODE>mplayer -vo vesa:vidix -brightness -300 -contrast 200
-  filename.avi</CODE><BR>
-  or<BR>
-  <CODE>mplayer -vo xvidix -red_intensity -50 -saturation 400 -hue 300
-  filename.vob</CODE></P>
 
 
 <H4><A NAME="directfb">2.3.1.2.13 DirectFB</A></H4>
