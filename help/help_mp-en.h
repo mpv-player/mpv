@@ -835,7 +835,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] File: %s (%s)\nPCM: Samplerate: %iHz Channels: %s Format %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: fastest dumping is achieved with -vc dummy -vo null\nPCM: Info: to write WAVE files use -waveheader (default)."
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: fastest dumping is achieved with -vc dummy -vo null\nPCM: Info: to write WAVE files use -waveheader (default).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Failed to open %s for writing!\n"
 
 // ao_sdl.c
