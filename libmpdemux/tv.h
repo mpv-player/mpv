@@ -24,8 +24,13 @@ extern int tv_param_noaudio;
 extern int tv_param_immediate;
 extern int tv_param_audiorate;
 #ifdef HAVE_TV_V4L
-extern int tv_param_mono;
+extern int tv_param_amode;
 extern int tv_param_audio_id;
+extern int tv_param_volume;
+extern int tv_param_bass;
+extern int tv_param_treble;
+extern int tv_param_balance;
+extern int tv_param_forcechan;
 #ifdef HAVE_ALSA9
 extern int tv_param_alsa;
 #endif

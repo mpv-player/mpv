@@ -52,8 +52,13 @@ int tv_param_input = 0; /* used in v4l and bttv */
 char *tv_param_outfmt = "yv12";
 float tv_param_fps = -1.0;
 #ifdef HAVE_TV_V4L
-int tv_param_mono = 0;
+int tv_param_amode = -1;
 int tv_param_audio_id = 0;
+int tv_param_volume = 60000;
+int tv_param_bass = -1;
+int tv_param_treble = -1;
+int tv_param_balance = -1;
+int tv_param_forcechan = -1;
 #ifdef HAVE_ALSA9
 int tv_param_alsa = 0;
 #endif

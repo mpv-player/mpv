@@ -144,8 +144,20 @@ static const char *device_palette2name[] = {
 };
 #define PALETTE(x) ((x < sizeof(device_pal)/sizeof(char*)) ? device_pal[x] : "UNKNOWN")
 
-static const char *audio_mode2name[] = {
-    "unknown", "mono", "stereo", "language1", "language2", NULL
+static const char *audio_mode2name(int mode)
+{
+    switch (mode) {
+    case VIDEO_SOUND_MONO:
+	return "mono";
+    case VIDEO_SOUND_STEREO:
+	return "stereo";
+    case VIDEO_SOUND_LANG1:
+	return "language1";
+    case VIDEO_SOUND_LANG2:
+	return "language2";
+    default:
+	return "unknown";
+    }
 };
 
 static void *audio_grabber(void *data);
@@ -262,6 +274,7 @@ tvi_handle_t *tvi_init_v4l(char *device, char *adevice)
 static void init_v4l_audio(priv_t *priv)
 {
     int i;
+    int reqmode;
 
     if (!priv->capability.audios) return;
 
@@ -289,15 +302,26 @@ static void init_v4l_audio(priv_t *priv)
 	/* mute all channels */
 	priv->audio[i].volume = 0;
 	priv->audio[i].flags |= VIDEO_AUDIO_MUTE;
-	if (tv_param_mono) {
-	    priv->audio[i].mode = VIDEO_SOUND_MONO;
-	    ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[i]);
-	} else {
-	    /* try to set stereo */
-	    priv->audio[i].mode = VIDEO_SOUND_STEREO;
-	    ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[i]);
+	if (tv_param_amode >= 0) {
+	    switch (tv_param_amode) {
+	    case 0:
+		reqmode = VIDEO_SOUND_MONO;
+		break;
+	    case 1:
+		reqmode = VIDEO_SOUND_STEREO;
+		break;
+	    case 2:
+		reqmode = VIDEO_SOUND_LANG1;
+		break;
+	    case 3:
+		reqmode = VIDEO_SOUND_LANG2;
+		break;
+	    }
 	}
+	priv->audio[i].mode = reqmode;
+	ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[i]);
 	
+	// get the parameters back
 	if (ioctl(priv->video_fd, VIDIOCGAUDIO, &priv->audio[i]) == -1)
 	{
 	    mp_msg(MSGT_TV, MSGL_ERR, "ioctl get audio failed: %s\n", strerror(errno));
@@ -316,7 +340,15 @@ static void init_v4l_audio(priv_t *priv)
 	    break;
 	}
 
+	if (tv_param_amode >= 0 && priv->audio[i].mode != reqmode) {
+	    mp_msg(MSGT_TV, MSGL_ERR, "Audio mode setup warning!\n");
+	    mp_msg(MSGT_TV, MSGL_ERR, "Requested mode was %s, but v4l still reports %s.\n",
+		   audio_mode2name(reqmode), audio_mode2name(priv->audio[i].mode));
+	    mp_msg(MSGT_TV, MSGL_ERR, "You may need \"forcechan\" option\nto force stereo/mono audio recording.\n");
+	}
+
 	/* display stuff */
+	mp_msg(MSGT_TV, MSGL_V, "Video capture card reports the audio setup as follows:\n");
 	mp_msg(MSGT_TV, MSGL_V, "  %d: %s: ", priv->audio[i].audio,
 	       priv->audio[i].name);
 	if (priv->audio[i].flags & VIDEO_AUDIO_MUTABLE) {
@@ -325,8 +357,17 @@ static void init_v4l_audio(priv_t *priv)
 	}
 	mp_msg(MSGT_TV, MSGL_V, "volume=%d bass=%d treble=%d balance=%d mode=%s\n",
 	       priv->audio[i].volume, priv->audio[i].bass, priv->audio[i].treble,
-	       priv->audio[i].balance, audio_mode2name[priv->audio[i].mode]);
+	       priv->audio[i].balance, audio_mode2name(priv->audio[i].mode));
 	mp_msg(MSGT_TV, MSGL_V, " channels: %d\n", priv->audio_channels[i]);
+
+	if (tv_param_forcechan >= 0)
+	    priv->audio_channels[i] = tv_param_forcechan;
+
+	// we'll call VIDIOCSAUDIO again when starting capture
+	// let's set audio mode to requested mode again for the case
+	// when VIDIOCGAUDIO just cannot report the mode correctly
+	if (tv_param_amode >= 0)
+	    priv->audio[i].mode = reqmode; 
     }
 }
 
@@ -697,14 +738,20 @@ static int start(priv_t *priv)
     priv->first = 1;
 
     /* enable audio */
-    if (priv->audio[priv->audio_id].volume <= 0)
-	priv->audio[priv->audio_id].volume = 100;
+    if (tv_param_volume >= 0)
+	priv->audio[priv->audio_id].volume = tv_param_volume;
+    if (tv_param_bass >= 0)
+	priv->audio[priv->audio_id].bass = tv_param_bass;
+    if (tv_param_treble >= 0)
+	priv->audio[priv->audio_id].treble = tv_param_treble;
+    if (tv_param_balance >= 0)
+	priv->audio[priv->audio_id].balance = tv_param_balance;
     priv->audio[priv->audio_id].flags &= ~VIDEO_AUDIO_MUTE;
-    mp_msg(MSGT_TV, MSGL_V, "Starting audio capture\n");
+    mp_msg(MSGT_TV, MSGL_V, "Starting audio capture. Requested setup is:\n");
     mp_msg(MSGT_TV, MSGL_V, "id=%d volume=%d bass=%d treble=%d balance=%d mode=%s\n",
 	   priv->audio_id,
 	   priv->audio[priv->audio_id].volume, priv->audio[priv->audio_id].bass, priv->audio[priv->audio_id].treble,
-	   priv->audio[priv->audio_id].balance, audio_mode2name[priv->audio[priv->audio_id].mode]);
+	   priv->audio[priv->audio_id].balance, audio_mode2name(priv->audio[priv->audio_id].mode));
     mp_msg(MSGT_TV, MSGL_V, " channels: %d\n", priv->audio_channels[priv->audio_id]);
     ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
 	    

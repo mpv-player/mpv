@@ -206,7 +206,12 @@ struct config tvopts_conf[]={
 	{"outfmt", &tv_param_outfmt, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"fps", &tv_param_fps, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
 #ifdef HAVE_TV_V4L
-	{"mono", &tv_param_mono, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"amode", &tv_param_amode, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
+	{"volume", &tv_param_volume, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
+	{"bass", &tv_param_bass, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
+	{"treble", &tv_param_treble, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
+	{"balance", &tv_param_balance, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
+	{"forcechan", &tv_param_forcechan, CONF_TYPE_INT, CONF_RANGE, 1, 2, NULL},
 #ifdef HAVE_ALSA9
 	{"alsa", &tv_param_alsa, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif

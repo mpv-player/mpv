@@ -312,13 +312,37 @@ Available options are:
                       us-cable, etc
     audiorate=<value> set audio capture bitrate
     alsa              capture from ALSA
-    mono              force mono audio
+    amode=<0..3>      choose an audio mode:
+                      0 .. mono
+                      1 .. stereo
+                      2 .. language 1
+                      3 .. language 2
+    forcechan=<1,2>   By default, the count of
+                      recorded audio channels is
+                      determined automatically
+                      by querying the audio mode
+                      from the tv card. This option
+                      allows to force stereo/mono
+                      recording regardless of the
+                      amode option and the values
+                      returned by v4l. This can
+                      be used for troubleshooting
+                      when the tv card is unable
+                      to report the current audio
+                      mode.
     adevice=<value>   set an audio device
                       /dev/... for OSS,
                       hardware ID for ALSA
     audioid=<value>   choose an audio output
                       of the capture card, if it
                       has more of them
+    volume=<value>    These options set
+    bass=<value>      parameters of the mixer
+    treble=<value>    on the video capture card.
+    balance=<value>   They will have no effect,
+                      if your card doesn't have
+                      one. All values are from
+                      0 to 65535.
 
 .I NOTE:
 Mplayer doesn't accept colons so type dots instead in the device ID,
