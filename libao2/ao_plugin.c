@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mp_msg.h"
+#include "help_mp.h"
 #include "afmt.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
@@ -87,7 +89,7 @@ int add_plugin(int i,char* cfg){
 	}
 	cnt++;
       }
-      printf("[plugin]: Invalid plugin: %s \n",cfg);
+      mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_PLUGIN_InvalidPlugin,cfg);
       return 0;
     }
     else 
@@ -104,7 +106,7 @@ int add_plugin(int i,char* cfg){
 	}
 	cnt++;
       }
-      printf("[plugin]: Invalid plugin: %s \n",cfg);
+      mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_PLUGIN_InvalidPlugin,cfg); 
       return 0;
     }
     else 
