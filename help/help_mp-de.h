@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.158
+// In synch with rev 1.162
 
 // ========================= MPlayer help ===========================
 
@@ -219,6 +219,9 @@ static char help_text[]=
 #define MSGTR_WritingAVIHeader "Schreibe AVI-Header...\n"
 #define MSGTR_DuplicateFrames "\n%d doppelte(r) Frame(s)!\n"
 #define MSGTR_SkipFrame "\nFrame übersprungen!\n"
+#define MSGTR_ResolutionDoesntMatch "\nNeue Videodatei hat eine andere Auflösung als die vorige.\n"
+#define MSGTR_FrameCopyFileMismatch "\nAlle Videodateien müssen für -ovc copy identische fps, Auflösung und Codec haben.\n"
+#define MSGTR_AudioCopyFileMismatch "\nAlle Videodateien müssen für -oac copy identischen Audiocodec und Format haben.\n"
 #define MSGTR_ErrorWritingFile "%s: Fehler beim Schreiben der Datei.\n"
 #define MSGTR_WritingAVIIndex "\nSchreibe AVI-Index...\n"
 #define MSGTR_FixupAVIHeader "Korrigiere AVI-Header...\n"
@@ -343,6 +346,9 @@ static char help_text[]=
 "mw-us => 40kbps/Mono        voice => 56kbps/Mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
+#define MSGTR_LameCantInit "Kann Optionen für Lame nicht setzen, überprüfe Bitrate/Samplerate. "\
+"Manche sehr niedrige Bitraten (<32) benötigen niedrigere Sampleraten (z.B. -srate 8000). "\
+"Wenn alles andere nicht funktioniert, versuche es mit einem Preset."
 #define MSGTR_ConfigfileError "Konfigurationsdatei-Fehler"
 #define MSGTR_ErrorParsingCommandLine "Fehler beim Parsen der Kommandozeile."
 #define MSGTR_VideoStreamRequired "Videostream zwingend notwendig!\n"
@@ -942,7 +948,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Soundkartenmixer hat Kanal '%s' nicht, benutze Standard.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Kann Audiogerät %s nicht öffnen: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Kann Dateideskriptor nicht anlegen, blockiert: %s\n"
-#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Kann Audiogerät %s nicht auf AC3-Ausgabe setzen, versuche S16...\n"
+#define MSGTR_AO_OSS_CantSet "[AO OSS] Kann Audiogerät %s nicht auf %s-Ausgabe setzen, versuche %s...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Audiogerät auf %d Kanäle zu setzen ist fehlgeschlagen.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: Treiber unterstützt SNDCTL_DSP_GETOSPACE nicht :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   *** Dein Audiotreiber unterstützt select() NICHT ***\nKompiliere MPlayer mit #undef HAVE_AUDIO_SELECT in der Datei config.h !\n\n"
