@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.47 -->
+<!-- synced with 1.48 -->
 <sect1 id="install">
 <title>Telepítés</title>
 
@@ -145,7 +145,7 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
     </simpara></listitem>
   <listitem><simpara>
     ez a codec <emphasis role="bold">az elérhető leggyorsabb</emphasis> a
-    DivX/3/4/5 és egyébb MPEG4 típusú formátumoknál. Javasolt!
+    DivX/3/4/5 és egyébb MPEG-4 típusú formátumoknál. Javasolt!
     </simpara></listitem>
   </itemizedlist>
   </para></listitem>
