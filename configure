@@ -2667,11 +2667,11 @@ int main(void) { (void) encore(0, 0, 0, 0); return 0; }
 EOF
   if test "$_xvid" != no && test "$_xvidcore" && cc_check -lm "$_xvidcore" ; then
     _def_encore='#define HAVE_DIVX4ENCORE 1'
-    _ld_encore="lm $_xvidcore"
+    _ld_encore="-lm $_xvidcore"
     echores "XviD (with $_xvidcore)"
   elif test "$_xvid" != no && cc_check -lm -lxvidcore ; then
     _def_encore='#define HAVE_DIVX4ENCORE 1'
-    _ld_encore='lm -lxvidcore'
+    _ld_encore='-lm -lxvidcore'
     echores "XviD (with libxvidcore.so)"
   elif test "$_divx4linux" != no && cc_check -lm -ldivxencore ; then
     _def_encore='#define HAVE_DIVX4ENCORE 1'
