@@ -182,7 +182,7 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
     if(stream_eof(demuxer->stream)) break;
     if(!id || avi_stream_id(id)==100) goto skip_chunk; // bad ID (or padding?)
 
-    if(priv->idx_pos<=priv->idx_size){
+    if(priv->idx_pos>=priv->idx_size){
 //      priv->idx_size+=32;
       priv->idx_size+=1024; // +16kB
       priv->idx=realloc(priv->idx,priv->idx_size*sizeof(AVIINDEXENTRY));
