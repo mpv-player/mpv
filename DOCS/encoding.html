@@ -160,12 +160,12 @@
 
 <H3><A NAME="appending">7.5.1 Appending multiple AVI files</A></H3>
 
-<P>As a side-effect of fixing broken AVI files, MEncoder can be used to fix the
-  result of appending 2 (or more) AVI files:</P>
+<P>As a side-effect, the broken AVI fixer function enables MEncoder to append
+  2 (or more) AVI files:</P>
 
 <P>Command: <CODE>cat 1.avi 2.avi | mencoder -noidx -ovc copy -oac copy -o output.avi -</CODE></P>
 
-<P><B>Note:</B> This expects 1.avi and 2.avi to use the same codecs, resolution,
+<P><B>Note:</B> This expects <CODE>1.avi</CODE> and <CODE>2.avi</CODE> to use the same codecs, resolution,
   stream rate etc, and at least 1.avi must not be broken. You may need to fix
   your input AVI files first, as described <A HREF="#fixing">above</A>.</P>
 

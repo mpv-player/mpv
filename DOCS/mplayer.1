@@ -452,7 +452,7 @@ empty channels are inserted (unless mixing from mono to stereo, then the mono
 channel is repeated in both output channels).
 If the number of output channels is smaller than the number of input channels,
 results depend on the audio decoder (\-afm).
-Mplayer asks the decoder to decode the audio into as many channels as
+MPlayer asks the decoder to decode the audio into as many channels as
 specified.
 Now it's up to the decoder to fulfill the requirement.
 If the decoder outputs more channels than requested, the exceeding channels
@@ -556,7 +556,7 @@ Play/\:convert only first <number> frames, then quit.
 .B \-hr\-mp3\-seek (.MP3 only)
 Hi\-res mp3 seeking.
 Default is: enabled when playing from external MP3 file, as we need to seek
-to the very exact position to keep A/\:V sync.It can be slow especially when
+to the very exact position to keep A/\:V sync. It can be slow especially when
 seeking backwards \- it has to rewind to the beginning to find the exact
 frame.
 .TP
@@ -726,8 +726,7 @@ height of the output window
 .IPs fps=<value>
 framerate at which to capture video (frames per second)
 .IPs buffersize=<value>
-maximum size of the capture buffer in megabytes (default: half of the
-physical memory)
+maximum size of the capture buffer in megabytes (default: dynamical)
 .IPs norm=<value>
 available: PAL, SECAM, NTSC
 .IPs channel=<value>
@@ -740,7 +739,7 @@ Use _ for spaces in names (or play with quoting ;-).
 The channel names will then be written using OSD, and the commands tv_step_channel,
 tv_set_channel and tv_last_channel will then be usable using a remote (see lirc).
 Not compatible with frequency parameter.
-Warning : The channel number will then be the position in the 'channels' list,
+Warning: The channel number will then be the position in the 'channels' list,
 beginning with 1.
 Example: use tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
 .IPs audiorate=<value>
@@ -866,7 +865,6 @@ fonts: ~/\:.mplayer/\:font/\:font.desc, default for FreeType fonts:
 With FreeType, this option determines path to the text font file.
 .br
 The \-subfont-* options are available only with FreeType support compiled in.
-If FreeType support is enabled, the old font support can't be used.
 
 .I EXAMPLE:
 .PD 0
