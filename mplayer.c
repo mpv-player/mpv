@@ -430,11 +430,7 @@ if ((conffile = get_path("")) == NULL) {
 }
 }
 
-//ifndef HAVE_GUI
- int main(int argc,char* argv[], char *envp[]){
-//else
-// int mplayer(int argc,char* argv[], char *envp[]){
-//endif
+int main(int argc,char* argv[], char *envp[]){
 
 #ifdef USE_SUB
 static subtitle* subtitles=NULL;
@@ -530,6 +526,28 @@ int gui_no_filename=0;
       exit(0);
     }
 
+// check codec.conf
+if(!parse_codec_cfg(get_path("codecs.conf"))){
+  if(!parse_codec_cfg(DATADIR"/codecs.conf")){
+    mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
+    exit(1);
+  }
+}
+
+    if(audio_codec && strcmp(audio_codec,"help")==0){
+      printf("Available audio codecs:\n");
+      list_codecs(1);
+      printf("\n");
+      exit(0);
+    }
+    if(video_codec && strcmp(video_codec,"help")==0){
+      printf("Available video codecs:\n");
+      list_codecs(0);
+      printf("\n");
+      exit(0);
+    }
+
+
     if(!num_filenames && !vcd_track && !dvd_title){
       if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
@@ -550,13 +568,6 @@ int gui_no_filename=0;
 
 //------ load global data first ------
 
-// check codec.conf
-if(!parse_codec_cfg(get_path("codecs.conf"))){
-  if(!parse_codec_cfg(DATADIR"/codecs.conf")){
-    mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
-    exit(1);
-  }
-}
 
 // check font
 #ifdef USE_OSD

@@ -644,6 +644,30 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 	return NULL;
 }
 
+void list_codecs(int audioflag){
+	int i, j;
+	codecs_t *c;
+
+		if (audioflag) {
+			i = nr_acodecs;
+			c = audio_codecs;
+		} else {
+			i = nr_vcodecs;
+			c = video_codecs;
+		}
+		if(!i) return NULL;
+		for (/* NOTHING */; i--; c++) {
+			if(c->dll)
+			  printf("%-10s %2d  %s  [%s]\n",c->name,c->driver,c->info,c->dll);
+			else
+			  printf("%-10s %2d  %s\n",c->name,c->driver,c->info);
+			
+		}
+
+}
+
+
+
 #ifdef CODECS2HTML
 
 void wrapline(FILE *f2,char *s){
