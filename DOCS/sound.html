@@ -12,7 +12,7 @@
 
 <H3><A NAME="audio">2.3.2 Audio output devices</A></H3>
 
-<P><B>MPlayer</B>'s audio interface is called <I>libao2</I>. It currently
+<P>MPlayer's audio interface is called <I>libao2</I>. It currently
   contains these drivers:</P>
 
 <TABLE BORDER=0>
@@ -128,17 +128,17 @@
 
 <P>Sharing your sound card with another application like XMMS is <B>strongly
   discouraged</B>!  If the other sound application is using ESD, start
-  <B>MPlayer</B> with the <CODE>-vo sdl:esd</CODE> option to combine both
+  MPlayer with the <CODE>-vo sdl:esd</CODE> option to combine both
   sound streams. In fact, the option <CODE>-vo sdl:esd</CODE> could be used
-  with ESD even when playing <B>Mplayer</B> alone.</P>
+  with ESD even when playing MPlayer alone.</P>
 
-<P>Feedback to this document is welcome. Please tell us how <B>MPlayer</B>
+<P>Feedback to this document is welcome. Please tell us how MPlayer
   and your sound card(s) worked together.</P>
 
 
 <H4><A NAME="plugins">2.3.2.2 Audio plugins</A></H4>
 
-<P><B>MPlayer</B> has support for audio plugins. Audio plugins can be used for
+<P>MPlayer has support for audio plugins. Audio plugins can be used for
   changing the properties of the audio data before the sound reaches the sound
   card. They are enabled using the <CODE>-aop</CODE> switch which takes a
   <CODE>list=plugin1,plugin2,...</CODE> argument. The <CODE>list</CODE> argument
@@ -161,12 +161,12 @@
 <P>would set the output frequency of the resample plugin to 44100Hz and the
   output format of the format plugin to AFMT_U8.</P>                         
 
-<P>Currently audio plugins can not be used in <B>MEncoder</B>.</P>
+<P>Currently audio plugins can not be used in MEncoder.</P>
 
 
 <H5><A NAME="resample">2.3.2.2.1 Up/Downsampling</A></H5>
 
-<P><B>MPlayer</B> fully supports up/downsampling of the sound. This plugin can
+<P>MPlayer fully supports up/downsampling of the sound. This plugin can
   be used if you have a fixed frequency sound card or if you are
   stuck with an old sound card that is only capable of max 44.1kHz.
   Limitations in your hardware are not auto detected, so you have to specify
@@ -186,7 +186,7 @@
 
 <H5><A NAME="surround_decoding">2.3.2.2.2 Surround Sound decoding</A></H5>
 
-<P><B>MPlayer</B> has an audio plugin that can decode matrix encoded
+<P>MPlayer has an audio plugin that can decode matrix encoded
   surround sound. Dolby Surround is an example of a matrix encoded format.
   Many files with 2 channel audio actually contain matrixed surround sound.
   To use this feature you need a sound card supporting at least 4 channels.</P>
@@ -222,7 +222,7 @@
 
 <P>This plugin is a software replacement for the volume control, and
   can be used on machines with a broken mixer device. It can also be
-  used if one wants to change the output volume of <B>MPlayer</B>
+  used if one wants to change the output volume of MPlayer
   without changing the PCM volume setting in the mixer. It has one
   switch <CODE>volume</CODE> that is used for setting the initial
   sound level. The initial sound level can be set to values between 0

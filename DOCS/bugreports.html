@@ -16,7 +16,7 @@
   software project. But just like writing good software, good problem reports
   involve some work. Please realize that most developers are extremely busy and
   receive obscene amounts of email. So while your feedback is crucial in
-  improving <B>MPlayer</B> and very much appreciated, please understand that you
+  improving MPlayer and very much appreciated, please understand that you
   have to provide <B>all</B> of the information we request and follow the
   instructions in this document closely.</P>
 
@@ -26,14 +26,14 @@
 <P>If you feel have the necessary skills you are invited to have a go at fixing
   the bug yourself.  Or maybe you already did that?  Please read
   <A HREF="tech/patches.txt">this short document</A> to find out how to get
-  your code included in <B>MPlayer</B>. The people on the
+  your code included in MPlayer. The people on the
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
   mailing list will assist you if you have questions.</P>
 
 
 <H2>How to report bugs</H2>
 
-<P>First of all please try the latest CVS version of <B>MPlayer</B> as your bug
+<P>First of all please try the latest CVS version of MPlayer as your bug
   might already be fixed there. Development moves extremely fast, most problems
   in official releases are reported within days or even hours, so please use
   <B>only CVS</B> to report bugs. CVS instructions can be found at the bottom of
@@ -46,7 +46,7 @@
 <P>Please do not send bug reports privately to individual developers.  This is
   community work and thus there might be several people interested in it.
   Sometimes other users already experienced your troubles and know how to
-  circumvent a problem even if it is a bug in <B>MPlayer</B> code.</P>
+  circumvent a problem even if it is a bug in MPlayer code.</P>
 
 <P>Please describe your problem in as much detail as possible. Do a little
   detective work to narrow down the circumstances under which the problem
@@ -164,7 +164,7 @@ Please include these files:
 
 <H4>For playback problems</H4>
 
-<P>Please include the output of <B>MPlayer</B> at verbosity level 1, but
+<P>Please include the output of MPlayer at verbosity level 1, but
   remember to <B>not truncate the output</B> when you paste it into your mail.
   The developers need all of the messages to properly diagnose a problem. You
   can direct the output into a file like this:</P>
@@ -179,7 +179,7 @@ Please include these files:
 <P>Also upload a small text file having the same base name as your file
   with a .txt extension. Describe the problem you are having with the
   particular file there and include your email address as well as the output
-  of <B>MPlayer</B> at verbosity level 1. Usually the first 1-5 MB of a file are
+  of MPlayer at verbosity level 1. Usually the first 1-5 MB of a file are
   enough to reproduce the problem, but to be sure we ask you to:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;dd if=yourfile of=smallfile bs=1024k count=5</CODE></P>
@@ -220,12 +220,12 @@ Please include these files:
 
 <H4>How to conserve information about a reproducible crash</H4>
 
-Recompile <B>MPlayer</B> with debugging code enabled:
+Recompile MPlayer with debugging code enabled:
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
 
-and then run <B>MPlayer</B> within gdb using:
+and then run MPlayer within gdb using:
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb ./mplayer</CODE></P>
 
@@ -254,7 +254,7 @@ and send the complete output to us.
 <H2>I know what I am doing...</H2>
 
 <P>If you created a proper bug report following the steps above and you are
-  confident it is a bug in <B>MPlayer</B>, not a compiler problem or broken
+  confident it is a bug in MPlayer, not a compiler problem or broken
   file, you have already read the documentation and you could not find a
   solution, your sound drivers are OK, then you might want to subscribe to the
   mplayer-advusers list and send your bug report there to get a better and
@@ -263,7 +263,7 @@ and send the complete output to us.
   in the manual there, you will be ignored or flamed instead of getting an
   appropriate answer.<BR>
   So do not flame us and  subscribe to -advusers only if you really know
-  what you are doing and feel like being an advanced <B>MPlayer</B> user or
+  what you are doing and feel like being an advanced MPlayer user or
   developer.  If you meet these criteria it should not be difficult to find
   out how to subscribe...</P>
 

@@ -74,7 +74,7 @@
   encourages ASF/WMV. Not that anybody cares.</P>
 
 <P>There is a hack that allows AVI files to contain an Ogg Vorbis audio
-  stream, but makes them incompatible with standard AVI. <B>MPlayer</B>
+  stream, but makes them incompatible with standard AVI. MPlayer
   supports playing these files. Seeking is also implemented but severely
   hampered by badly encoded files with confusing headers. Unfortunately the
   only encoder currently capable of creating these files, NanDub, has this
@@ -82,14 +82,14 @@
 
 <P><B>Note:</B> DV cameras create raw DV streams that DV grabbing utilities
   convert to two different types of AVI files. The AVI will then contain either
-  separate audio and video streams that <B>MPlayer</B> can play or the raw DV
+  separate audio and video streams that MPlayer can play or the raw DV
   stream for which support is under development.</P>
 
 <P>There are two kinds of AVI files:</P>
 <UL>
   <LI><B>Interleaved:</B> Audio and video content is interleaved. This is the
     standard usage. Recommended and mostly used. Some tools create 
-    non-interleaved AVIs with bad sync. <B>MPlayer</B> detects these as
+    non-interleaved AVIs with bad sync. MPlayer detects these as
     interleaved, and this climaxes in loss of A/V sync, probably at seeking.
     These files should be played as non-interleaved (with the <CODE>-ni</CODE>
     option).</LI>
@@ -98,7 +98,7 @@
     CD-Rom difficult. (should be played with the <CODE>-ni</CODE> option)</LI>
 </UL>
 
-<P><B>MPlayer</B> supports two kinds of timings for AVI files:</P>
+<P>MPlayer supports two kinds of timings for AVI files:</P>
 <UL>
   <LI><B>bps-based</B>: It is based on the bitrate/samplerate of the video/audio stream. This
     method is used by most players, including <A HREF="http://avifile.sourceforge.net">avifile</A>
@@ -125,7 +125,7 @@
   variants of ASF, v1.0 and v2.0. v1.0 is used by their media tools (Windows
   Media Player and Windows Media Encoder) and is very secret. v2.0 is published
   and patented :). Of course they differ, there is no compatibility at all (it
-  is just another legal game). <B>MPlayer</B> supports only v1.0, as nobody has
+  is just another legal game). MPlayer supports only v1.0, as nobody has
   ever seen v2.0 files :). Note that ASF files nowadays come with the extension
   .WMA or .WMV.</P>
 
@@ -147,7 +147,7 @@
 
 <H4><A NAME="vivo">2.1.1.5 VIVO files</A></H4>
 
-<P><B>MPlayer</B> happily demuxes VIVO file formats. The biggest disadvantage
+<P>MPlayer happily demuxes VIVO file formats. The biggest disadvantage
   of the format is that it has no index block, nor a fixed packet size or sync
   bytes and most files lack even keyframes, so forget seeking!</P>
 
@@ -163,7 +163,7 @@
 <H4><A NAME="fli">2.1.1.6 FLI files</A></H4>
 
 <P><B>FLI</B> is a very old file format used by Autodesk Animator, but it is a
-  common file format for short animations on the net. <B>MPlayer</B> demuxes
+  common file format for short animations on the net. MPlayer demuxes
   and decodes FLI movies and is even able to seek within them (useful when
   looping with the <CODE>-loop</CODE> option). FLI files do not have keyframes,
   so the picture will be messy for a short time after seeking.</P>
@@ -171,7 +171,7 @@
 
 <H4><A NAME="real">2.1.1.7 RealMedia (RM) files</A></H4>
 
-<P>Yes, <B>MPlayer</B> can read (demux) RealMedia (.rm) files. Seeking works,
+<P>Yes, MPlayer can read (demux) RealMedia (.rm) files. Seeking works,
   but you have to explicitly specify the <CODE>-forceidx</CODE> option
   (the format supports keyframes). Here are the lists of the supported
   <A HREF="codecs.html#realvideo">RealVideo</A>
@@ -181,11 +181,11 @@
 <H4><A NAME="nuppelvideo">2.1.1.8 NuppelVideo files</A></H4>
 
 <P><A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A>
-  is a TV grabber tool (AFAIK:). <B>MPlayer</B> can read its .NUV files (only
+  is a TV grabber tool (AFAIK:). MPlayer can read its .NUV files (only
   NuppelVideo 5.0). Those files can contain uncompressed YV12, YV12+RTJpeg
   compressed, YV12 RTJpeg+lzo compressed, and YV12+lzo compressed frames.
-  <B>MPlayer</B> decodes them all (and also <B>encodes</B> them with
-  <B>MEncoder</B> to DivX/etc!). Seeking works.</P>
+  MPlayer decodes them all (and also <B>encodes</B> them with
+  MEncoder to DivX/etc!). Seeking works.</P>
 
 
 <H4><A NAME="yuv4mpeg">2.1.1.9 yuv4mpeg files</A></H4>
@@ -213,7 +213,7 @@
 <P>This is a new file format from <A HREF="http://www.xiph.org">Xiphophorus</A>.
   It can contain any video or audio codec, CBR or VBR. You will need to
   have <CODE>libogg</CODE> and <CODE>libvorbis</CODE> installed
-  before compiling <B>MPlayer</B> to be able to play it.</P>
+  before compiling MPlayer to be able to play it.</P>
 
 
 <H4><A NAME="sdp">2.1.1.13 SDP files</A></H4>
@@ -226,15 +226,15 @@
 
 <H3><A NAME="audio_formats">2.1.2 Audio formats</A></H3>
 
-<P><B>MPlayer</B> is a <B>Movie</B> and not a <B>Media</B> player, although
+<P>MPlayer is a <B>Movie</B> and not a <B>Media</B> player, although
   it can play some audio file formats (they are listed in the sections below).
-  This is not a recommended usage of <B>MPlayer</B>, you better use
+  This is not a recommended usage of MPlayer, you better use
   <A HREF="http://www.xmms.org">xmms</A>.</P>
 
 
 <H4><A NAME="mp3">2.1.2.1 MP3 files</A></H4>
 
-<P>You may have problems playing certain MP3 files that <B>MPlayer</B> will
+<P>You may have problems playing certain MP3 files that MPlayer will
   misdetect as MPEGs and play incorrectly or not at all. This cannot be fixed
   without dropping support for certain broken MPEG files and thus will remain
   like this for the foreseeable future. The <CODE>-demuxer</CODE> flag

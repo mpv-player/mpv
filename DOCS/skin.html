@@ -55,7 +55,7 @@ Last modified: 2002/05/24
 
 <h2><a name="intro">1 Introduction</a></h2>
 
-The purpose of this document is to describe the <b>MPlayer</b> skin format.
+The purpose of this document is to describe the MPlayer skin format.
 The information contained here might be wrong, for
 
 <ol type="a">
@@ -78,7 +78,7 @@ Thanks to <em>Zoltán Ponekker</em> for his help.
 <h2><a name="overview">2 Overview</a></h2>
 
 It does not really have anything to do with the skin format, but you should
-know that <b>MPlayer</b> has <b>no</b> builtin skin, so <b>at least one skin
+know that MPlayer has <b>no</b> builtin skin, so <b>at least one skin
 must be installed in order to be able to use the GUI.</b>
 
 
@@ -92,7 +92,7 @@ The directories searched for skins are (in order):
 </pre>
 
 <p>
-Note that the first path may vary according to the way <b>MPlayer</b> was
+Note that the first path may vary according to the way MPlayer was
 configured (see the <code>--prefix</code> and  <code>--datadir</code> arguments
 of the <code>configure</code> script).
 </p>
@@ -112,7 +112,7 @@ TGA format. The preferred format is PNG as it compresses very well.
 <p>
 In the main window (see below) you can use images with `transparency':
 Regions filled with the color #FF00FF (<font color="#FF00FF">magenta</font>)
-are fully transparent when viewed by <b>MPlayer</b>. This means that you can even
+are fully transparent when viewed by MPlayer. This means that you can even
 have shaped windows if your X server has the XShape extension.
 </p>
 
@@ -131,7 +131,7 @@ click).
 
 <ul>
 <li>
-The <b>main window</b> is where you can control <b>MPlayer</b>. The background of
+The <b>main window</b> is where you can control MPlayer. The background of
 the window is an image. Various items can (and must) be
 placed in the window: <em>buttons</em>, <em>potmeters</em> (sliders) and
 <em>labels</em>. For every item, you must
@@ -179,7 +179,7 @@ is <b>not allowed</b> here.</em>
 </li>
 
 <li>
-The <b>skin menu</b> is just a way to control <b>MPlayer</b> by means of
+The <b>skin menu</b> is just a way to control MPlayer by means of
 menu entries. Two images are required for the menu: one of them is the base
 image that shows the menu in its normal state, the other one is used to
 display the selected entries. When you pop up the menu, the first image is
@@ -195,7 +195,7 @@ section about the <a href="#skinmenu">skin menu</a> for details).
 
 <p>
 There is an important thing not mentioned yet: For buttons, potmeters and
-menu entries to work, <b>MPlayer</b> must know what to do if they are clicked.
+menu entries to work, MPlayer must know what to do if they are clicked.
 This is done by <a href="#guimsg">messages</a> (events). For these items
 you must define the messages to be generated when they are clicked.
 </p>
@@ -205,7 +205,7 @@ you must define the messages to be generated when they are clicked.
 You need the following files to build a skin:
 <ul>
 <li>
-The configuration file named <a href="#skin">skin</a> tells <b>MPlayer</b> how
+The configuration file named <a href="#skin">skin</a> tells MPlayer how
 to put different parts of the skin together and what to do if you click
 somewhere in the window.
 </li>
@@ -315,7 +315,7 @@ end
 <p>
 The name of an image file must be given without leading directories - images are
 searched for in the <code>Skin</code> directory. You may (but you need not)
-specify the extension of the file. If the file does not exist, <b>MPlayer</b>
+specify the extension of the file. If the file does not exist, MPlayer
 tries to load the file <code>&lt;filename&gt;.&lt;ext&gt;</code>, where
 <code>tga</code>, <code>TGA</code>, <code>bmp</code>, <code>BMP</code>,
 <code>png</code> and <code>PNG</code> is tried for <code>&lt;ext&gt;</code>
@@ -350,7 +350,7 @@ Here is an example to make this clear. Suppose that you have an image called
 </pre>
 </blockquote>
 
-<b>MPlayer</b> tries to load <code>main</code>, <code>main.tga</code>,
+MPlayer tries to load <code>main</code>, <code>main.tga</code>,
 <code>main.TGA</code>, <code>main.bmp</code> etc, so that <code>main.png</code>
 will be found.
 <br>
@@ -361,7 +361,7 @@ If (by accident) you wrote
 </pre>
 </blockquote>
 then <code>main.bmp</code>, <code>main.bmp.tga</code>, <code>main.bmp.TGA</code>,
-<code>main.bmp.bmp</code> would be searched for and <b>MPlayer</b> would finally
+<code>main.bmp.bmp</code> would be searched for and MPlayer would finally
 give up because there is no <code>main.bmp</code> in the directory, only
 <code>main.png</code>.
 </td></tr></table>

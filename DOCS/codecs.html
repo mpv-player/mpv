@@ -47,7 +47,7 @@
 <P>This section contains information about the DivX4 and DivX5 codecs of
   <A HREF="http://www.projectmayo.com">Project Mayo</A>. Their first available
   alpha version was OpenDivX 4.0 alpha 47 and 48. Support for this was included
-  in <B>MPlayer</B> in the past, and built by default. We also used its
+  in MPlayer in the past, and built by default. We also used its
   postprocessing code to optionally enhance visual quality of MPEG1/2 movies.
   Now we use our own, for all file types.</P>
 
@@ -67,7 +67,7 @@
 <P><B>Note:</B> Do <B>not</B> forget adding <CODE>/usr/local/lib</CODE> to your
   <CODE>/etc/ld.so.conf</CODE> and running <CODE>ldconfig</CODE>!</P>
 
-<P><B>MPlayer</B> autodetects DivX4/DivX5 if it is properly installed, just
+<P>MPlayer autodetects DivX4/DivX5 if it is properly installed, just
   compile as usual. If it does not detect it, you did not install or configure
   it correctly.</P>
 
@@ -76,7 +76,7 @@
 <DL>
   <DT><CODE>-vc odivx</CODE></DT>
   <DD>Uses the codec in OpenDivX fashion. In this case it
-    produces YV12 images in its own buffer, and <B>MPlayer</B> does colorspace
+    produces YV12 images in its own buffer, and MPlayer does colorspace
     conversion via libvo. (<B>Fast, recommended!</B>)</DD>
 
   <DT><CODE>-vc divx4</CODE></DT>
@@ -107,22 +107,22 @@
   variants:
   DivX 3, DivX 4, DivX 5, Windows Media Video 7 (WMV1)</P>
 
-<P>If you use an <B>MPlayer</B> release you have libavcodec right in the
-  package, just build as usual. If you use <B>MPlayer</B> from CVS you have to
+<P>If you use an MPlayer release you have libavcodec right in the
+  package, just build as usual. If you use MPlayer from CVS you have to
   extract libavcodec from the FFmpeg CVS tree as FFmpeg 0.4.5 does <B>not</B>
-  work with <B>MPlayer</B>. In order to achieve this do:</P>
+  work with MPlayer. In order to achieve this do:</P>
 
 <OL>
   <LI><CODE>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login</CODE></LI>
   <LI><CODE>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg</CODE></LI>
   <LI>Move the <CODE>libavcodec</CODE> directory from the FFmpeg sources to the
-    root of the <B>MPlayer</B> CVS tree. It should look like this:
+    root of the MPlayer CVS tree. It should look like this:
     <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
     Symlinking is <B>not</B> enough, you have to copy or move it!</LI>
   <LI>Compile. Configure should detect problems before compilation.</LI>
 </OL>
 
-<P><B>Note:</B> <B>MPlayer</B> from CVS does contain a libavcodec
+<P><B>Note:</B> MPlayer from CVS does contain a libavcodec
   subdirectory, but it does <B>not</B> contain the source for libavcodec!
   You must follow the steps above to obtain the source for this library.</P>
 
@@ -140,7 +140,7 @@
   action against anyone for codec-related issues.
 </P>
 
-<P><B>MPlayer</B> is capable of employing the XAnim codecs for decoding. Follow
+<P>MPlayer is capable of employing the XAnim codecs for decoding. Follow
   the instructions to enable them:</P>
 
 <OL>
@@ -157,7 +157,7 @@
 </OL>
 
 <P>XAnim is video codec family number 10, so you may want to use the <CODE>-vfm 10</CODE>
-  option to tell <B>MPlayer</B> to use them if possible.</P>
+  option to tell MPlayer to use them if possible.</P>
 
 <P>Tested codecs include: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>,
   <B>3ivX</B>, <B>h263</B>.</P>
@@ -165,7 +165,7 @@
 
 <H4><A NAME="vivo_video">2.2.1.4 VIVO video</A></H4>
 
-<P><B>MPlayer</B> can play Vivo (1.0 and 2.0) videos. The most suitable codec
+<P>MPlayer can play Vivo (1.0 and 2.0) videos. The most suitable codec
   for 1.0 files is FFmpeg's H263 decoder, you can use it with the <CODE>-vc
   ffh263</CODE> option (default). For 2.0 files, use the
   <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">ivvideo.dll</A>
@@ -176,7 +176,7 @@
 <H4><A NAME="mpeg">2.2.1.5 MPEG 1/2 video</A></H4>
 
 <P>MPEG1 and MPEG2 are decoded by the multiplatform native <B>libmpeg2</B>
-  library, whose source code is included in <B>MPlayer</B>. We handle buggy
+  library, whose source code is included in MPlayer. We handle buggy
   MPEG 1/2 video files by catching sig11 (segmentation fault), and quickly
   reinitializing the codec, continuing exactly from where the failure occurred. 
   This recovery technique has no measurable speed penalty.</P>
@@ -192,14 +192,14 @@
 
 <H4><A NAME="cinepak">2.2.1.7 Cinepak CVID</A></H4>
 
-<P><B>MPlayer</B> uses its own open source, multiplatform Cinepak decoder by
+<P>MPlayer uses its own open source, multiplatform Cinepak decoder by
   default. It supports YUV outputs, so that hardware scaling is possible if the
   video output driver permits it.</P>
 
 
 <H4><A NAME="realvideo">2.2.1.8 RealVideo</A></H4>
 
-<B>MPlayer</B> supports decoding all versions of RealVideo:
+MPlayer supports decoding all versions of RealVideo:
 
 <UL>
   <LI>RealVideo 1.0 (fourcc RV10) - en/decoding supported by <B>libavcodec</B></LI>
@@ -207,8 +207,8 @@
 </UL>
 
 <P>It is recommended to download and install RealPlayer8 or RealONE, because
-  <B>MPlayer</B> can use their libraries to decode files with RealVideo 2.0 -
-  4.0 video. The <B>MPlayer</B> configure script should detect the
+  MPlayer can use their libraries to decode files with RealVideo 2.0 -
+  4.0 video. The MPlayer configure script should detect the
   RealPlayer libraries in the standard locations of a full installation. If it
   does not, tell configure where to look with the
   <CODE>--with-reallibdir</CODE> switch.</P>
@@ -258,7 +258,7 @@
   <LI><CODE>make -f Makefile.linux</CODE></LI>
   <LI>Get <CODE>encore2.h</CODE> and <CODE>decore.h</CODE> from the DivX4Linux
     package, and copy them to <CODE>/usr/local/include/</CODE>.</LI>
-  <LI>Recompile <B>MPlayer</B> with <CODE>--with-xvidcore=/path/to/libcore.a</CODE>.</LI>
+  <LI>Recompile MPlayer with <CODE>--with-xvidcore=/path/to/libcore.a</CODE>.</LI>
 </OL>
 
 
@@ -354,13 +354,13 @@
   VIVO/2.0 file. VIVO/1.0 files have <B>g.723</B> audio, and VIVO/2.0 files
   have <B>Vivo Siren</B> audio. Both are supported. You can grab the
   <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">g.723/Siren</A>
-  Win32 DLL from the <B>MPlayer</B> site,
+  Win32 DLL from the MPlayer site,
   then copy it into the <CODE>/usr/lib/win32</CODE> directory.</P>
 
 
 <H4><A NAME="realaudio">2.2.2.5 RealAudio</A></H4>
 
-<B>MPlayer</B> supports decoding nearly all versions of RealAudio:
+MPlayer supports decoding nearly all versions of RealAudio:
 
 <UL>
   <LI>RealAudio DNET - decoding supported by <B>liba52</B></LI>
@@ -379,7 +379,7 @@
 
 <P>VFW (Video for Windows) is the old Video API for Windows. Its codecs have
   the .DLL or (rarely) .DRV extension.
-  If <B>MPlayer</B> fails at playing your AVI with this kind of message:</P>
+  If MPlayer fails at playing your AVI with this kind of message:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>UNKNOWN video codec: HFYU (0x55594648)</CODE></P>
 
@@ -435,7 +435,7 @@
 
 <P><B>Note:</B> If there is no <CODE>Filename</CODE> entry and <CODE>DisplayName</CODE>
   contains something like <CODE>device:dmo</CODE>, then it is a DMO-Codec, which are
-  currently not supported by <B>MPlayer</B>.</P>
+  currently not supported by MPlayer.</P>
 
 <P><B>Old Method:</B> Take a deep breath and start searching the registry...</P>
 

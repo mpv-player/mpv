@@ -12,7 +12,7 @@
 
 <H2><A NAME="encoding">2.4 Encoding with MEncoder</A></H2>
 
-<P><B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder) is a simple movie encoder,
+<P>MEncoder (MPlayer's Movie Encoder) is a simple movie encoder,
   designed to encode MPlayer-playable movies
   (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</B>) to other
   MPlayer-playable formats (see below). It can encode with various codecs, like
@@ -24,7 +24,7 @@
 <H3><A NAME="compilation">2.4.1 Compilation</A></H3>
 
 <UL>
-  <LI><B>OPTIONAL</B> - read <B>MPlayer</B>'s compilation instruction.</LI>
+  <LI><B>OPTIONAL</B> - read MPlayer's compilation instruction.</LI>
   <LI><B>OPTIONAL (LINUX ONLY)</B> - download the newest <B>DivX4linux</B> libs
     from <A HREF="http://avifile.sourceforge.net/download.htm">avifile.sourceforge.net</A>,
     and have them PROPERLY installed. You need them if you want DivX4
@@ -53,13 +53,13 @@
 </UL>
 
 <P>You are ready. As you probably know, other encoding tools need the
-  <I>avifile</I> library installed. <B>MEncoder</B> doesn't need it at all.</P>
+  <I>avifile</I> library installed. MEncoder doesn't need it at all.</P>
 
 
 <H3><A NAME="features">2.4.2 MEncoder features</A></H3>
 
 <UL>
-  <LI>encoding from the wide range of fileformats and decoders of <B>MPlayer</B></LI>
+  <LI>encoding from the wide range of fileformats and decoders of MPlayer</LI>
   <LI>encoding to all the codecs of ffmpeg's
     <A HREF="codecs.html#libavcodec">libavcodec</A></LI>
   <LI>video encoding from <B>V4L compatible TV tuners</B></LI>
@@ -68,7 +68,7 @@
   <LI>1, 2 or 3 pass encoding</LI>
   <LI><B>VBR</B> MP3 audio - <B>IMPORTANT NOTE:</B> VBR MP3 audio doesn't
     always play nicely on Windows players! On the other hand, currently
-    <B>MEncoder</B>'s CBR encoding is totally broken on Win32 players :)</LI>
+    MEncoder's CBR encoding is totally broken on Win32 players :)</LI>
   <LI>PCM audio</LI>
   <LI>stream copying</LI>
   <LI>input A/V synchronizing (PTS-based, can be disabled with -mc 0 option)</LI>
@@ -122,20 +122,20 @@
     <P><CODE>mencoder &lt;file/DVD&gt; -ovc frameno -oac mp3lame -lameopts vbr=3:more_options -o frameno.avi</CODE></P>
     <P>An audio-only avi file will be created, containing
       <B>only</B> the requested audio stream. Don't forget <CODE>-lameopts</CODE>,
-      if you need to set it. If you were encoding a long movie, <B>MEncoder</B>
+      if you need to set it. If you were encoding a long movie, MEncoder
       prints the recommended bitrate values for 650Mb, 700Mb, and 800Mb
       destination sizes, after this pass finishes.</P></LI>
   <LI>Second pass:
     <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
       -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=&lt;bitrate&gt;</CODE></P>
     <P>Alias the first pass of DivX4 video encoding. 
-      Optionally specify the video bitrate <B>MEncoder</B> printed at the end of
+      Optionally specify the video bitrate MEncoder printed at the end of
       the previous pass.</P></LI>
   <LI>Third pass:
     <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
       -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=&lt;bitrate&gt;</CODE></P>
     <P>Alias the second pass of DivX4 video encoding. 
-      Optionally specify the video bitrate <B>MEncoder</B> printed at the end of
+      Optionally specify the video bitrate MEncoder printed at the end of
       the previous pass. In this pass, audio from <CODE>frameno.avi</CODE> will
       be inserted into the destination file.. and it's all ready!</P></LI>
 </OL>
@@ -187,7 +187,7 @@
 
 <P>The scaling process is handled by the <I>'scale'</I> video filter:
   <CODE>-vop scale=X:Y</CODE>. Its quality can be set with the
-  <CODE>-sws</CODE> option. If it's not specified, <B>MEncoder</B> will use 0:
+  <CODE>-sws</CODE> option. If it's not specified, MEncoder will use 0:
   fast bilinear.</P>
 
 <P>Usage:<BR>
@@ -198,14 +198,14 @@
 
 <H4><A NAME="copying">2.4.2.3 Stream copying</A></H4>
 
-<P><B>MEncoder</B> can handle input streams in two ways: <B>encode</B> or
+<P>MEncoder can handle input streams in two ways: <B>encode</B> or
   <B>copy</B> them. This section is about <B>copying</B>.</P>
 
 <UL>
   <LI><B>Video stream</B> (option <CODE>-ovc copy</CODE>): nice stuff can be
     done :)<BR>
     Like, putting (not converting) FLI or VIVO or MPEG1 video into
-    an AVI file. Of course only <B>MPlayer</B> can play such files :) And it
+    an AVI file. Of course only MPlayer can play such files :) And it
     probably has no real life value at all. Rationally: video stream copying
     can be useful for example when only the audio stream has to be encoded
     (like, uncompressed PCM to MP3).</LI>
@@ -220,7 +220,7 @@
 <H4><A NAME="fixing">2.4.2.4 Fixing AVIs with broken index or interleaving</A></H4>
 
 <P>Easiest thing. We simply copy the video and audio streams, and
-  <B>MEncoder</B> generates the index. Of course this cannot fix possible bugs
+  MEncoder generates the index. Of course this cannot fix possible bugs
   in the video and/or audio streams. It also fixes files with broken
   interleaving, thus the <CODE>-ni</CODE> option won't be needed for them
   anymore.</P>
@@ -255,17 +255,17 @@
 
 <H4><A NAME="image_files">2.4.2.6 Encoding from multiple input image files (JPEGs, PNGs or TGAs)</A></H4>
 
-<P><B>MEncoder</B> is capable of creating movies from one or more JPEG, PNG or TGA
+<P>MEncoder is capable of creating movies from one or more JPEG, PNG or TGA
   files. With simple framecopy it can create MJPEG (Motion JPEG), MPNG
   (Motion PNG) or MTGA (Motion TGA) files.</P>
 
 Explanation of the process:
 
 <OL>
-  <LI><B>MEncoder</B> <I>decodes</I> the input image(s) with
+  <LI>MEncoder <I>decodes</I> the input image(s) with
     <CODE>libjpeg</CODE> (when decoding PNGs, it will use <B>libpng</B>).</LI>
 
-  <LI><B>MEncoder</B> then feeds the decoded image to the chosen video compressor
+  <LI>MEncoder then feeds the decoded image to the chosen video compressor
     (DivX4, Xvid, ffmpeg msmpeg4, etc...). Watch for the PNG decoder, as
     currently it can output only to RGB formats, thus can't be used with codecs
     that require YUV as input, like DivX4 or ffmpeg's msmpeg4.</LI>
@@ -303,10 +303,10 @@ Explanation of the process:
 
 <H4><A NAME="vobsub">2.4.2.7 Extracting DVD subtitles to Vobsub file</A></H4>
 
-<P><B>MEncoder</B> is capable of extracting subtitles from a DVD into
+<P>MEncoder is capable of extracting subtitles from a DVD into
   Vobsub fomat files. They consist of a pair of files ending in
   <CODE>.idx</CODE> and <CODE>.sub</CODE> and are usually packaged in a single
-  <CODE>.rar</CODE> archive. <B>MPlayer</B> can play these with the
+  <CODE>.rar</CODE> archive. MPlayer can play these with the
   <CODE>-vobsub</CODE> and <CODE>-vobsubid</CODE> options.</P>
 
 <P>You specify the basename (i.e without the <CODE>.idx</CODE> or
@@ -344,7 +344,7 @@ Explanation of the process:
 
 <H3><A NAME="options">2.4.3 Available options</A></H3>
 
-<P>For the complete list of available <B>MEncoder</B> options and examples,
+<P>For the complete list of available MEncoder options and examples,
   please see the man page.</P>
 
 </BODY>

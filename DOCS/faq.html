@@ -145,7 +145,7 @@
 
   <DT>Q: It doesn't compile, and it misses uint64_t inttypes.h and similar
     things ...</DT>
-  <DD>A: Copy etc/inttypes.h to the <B>MPlayer</B> directory
+  <DD>A: Copy etc/inttypes.h to the MPlayer directory
     (<CODE>cp etc/inttypes.h .</CODE>) and try again ...</DD>
   <DD>&nbsp;</DD>
 
@@ -159,7 +159,7 @@
   <DD>A: Read the <A HREF="video.html#mga_vid">mga_vid documentation</A>.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Are there rpm/deb/... packages of <B>MPlayer</B>?</DT>
+  <DT>Q: Are there rpm/deb/... packages of MPlayer?</DT>
   <DD>A: You can make a .deb package for yourself, check the
     <A HREF="documentation.html#debian">Debian packaging</A> section.
     There are links to official Red Hat RPM packages available on our
@@ -198,10 +198,10 @@
     <CODE>Warning: loading mga_vid.o will taint the kernel: no license</CODE></DT>
   <DD>A: The latest kernel modutils require a flag indicating the license
     (mainly to avoid kernel hackers debugging closed source drivers).
-    Upgrade your kernel, modutils and <B>MPlayer</B>.</DD>
+    Upgrade your kernel, modutils and MPlayer.</DD>
   <DD>&nbsp;</DD>
   
-    <DT>Q: When compiling <B>MEncoder</B>, it segfaults at linking!</DT>
+    <DT>Q: When compiling MEncoder, it segfaults at linking!</DT>
     <DD>A: This is a linker problem. Upgrading binutils should help (2.11.92.*
       or newer should be good). Since it is not our fault, please do <B>not</B>
       report!</DD>
@@ -211,7 +211,7 @@
     <DD>A: chmod 644 /usr/lib/libc.so</DD>
     <DD>&nbsp;</DD>
   
-    <DT>Q: I'd like to compile <B>MPlayer</B> on Minix!</DT>
+    <DT>Q: I'd like to compile MPlayer on Minix!</DT>
     <DD>A: Me too. :)</DD>
 
 </DL>
@@ -221,18 +221,18 @@
 
 <DL>
 
-  <DT>Q: How do I create a proper patch for <B>MPlayer</B>?</DT>
+  <DT>Q: How do I create a proper patch for MPlayer?</DT>
   <DD>A: We made a <A HREF="tech/patches.txt">short document</A> describing
     all the necessary details. Please follow the instructions.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: How can I support <B>MPlayer</B> development?</DT>
+  <DT>Q: How can I support MPlayer development?</DT>
   <DD>A: We are more than happy to accept your hardware and software
     <A HREF="http://www.mplayerhq.hu/homepage/donations.html">donations</A>.
-    They help us in continuously improving <B>MPlayer</B>.</DD>
+    They help us in continuously improving MPlayer.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: How can I become an <B>MPlayer</B> developer?</DT>
+  <DT>Q: How can I become an MPlayer developer?</DT>
   <DD>A: We always welcome coders and documenters.  Read the
     <A HREF="tech/">technical documentation</A> to get a first grasp. Then you
     should subscribe to the
@@ -240,7 +240,7 @@
     mailing list and start coding.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Can I run multiple instances of <B>MPlayer</B>?</DT>
+  <DT>Q: Can I run multiple instances of MPlayer?</DT>
   <DD>A: Yes. Some video out drivers like xv, dga or (x)mga are exclusive, some
     are exclusive in combination with certain graphics boards and drivers. You
     will not be able to run more than one instance of MPlayer with one of those
@@ -398,16 +398,16 @@
     </PRE>
   </DT>
   <DD>A: Probably the audio uses a codec not natively supported by
-    <B>MPlayer</B>. Install the Win32 codec package as described in the README
+    MPlayer. Install the Win32 codec package as described in the README
     or in the <A HREF="documentation.html#installation">Installation</A> section.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: ... works with avifile/aviplay but doesn't with MPlayer.</DT>
-  <DD>A: <B>MPlayer</B> is not avifile.
+  <DD>A: MPlayer is not avifile.
     The only common thing between these players is the Win32 DLL loader.
     The codecs (DLL) set, synchronization, demultiplexing etc is totally
     different and shouldn't be compared.
-    If something works with aviplay it doesn't mean that <B>MPlayer</B> will
+    If something works with aviplay it doesn't mean that MPlayer will
     work and vice versa.</DD>
   <DD>&nbsp;</DD>
 
@@ -426,7 +426,7 @@
     forces loading libraries to very low addresses.
     Because l3codeca.acm is a non-relocatable DLL, it must be loaded to
     0x00400000, we can't change this. You should use a non-patched kernel,
-    or use <B>MPlayer</B>'s <CODE>-afm 1</CODE> option to disable using
+    or use MPlayer's <CODE>-afm 1</CODE> option to disable using
     l3codeca.acm.</DD>
   <DD>&nbsp;</DD>
 
@@ -439,10 +439,10 @@
 
   <DT>Q: MPlayer dies with "MPlayer interrupted by signal 4 in module:
     decode_video".</DT>
-  <DD>A: Try running <B>MPlayer</B> on the machine you compiled on. Or recompile
+  <DD>A: Try running MPlayer on the machine you compiled on. Or recompile
     with runtime CPU detection
     (<CODE>./configure --enable-runtime-cpudetection</CODE>). Don't
-    use <B>MPlayer</B> on a CPU different from the one it was compiled on,
+    use MPlayer on a CPU different from the one it was compiled on,
     without using the feature mentioned just now.</DD>
   <DD>&nbsp;</DD>
 
@@ -467,7 +467,7 @@
     want to use arts sound, specify audio output via our native arts audio
     driver (<CODE>-ao arts</CODE>). If it fails or isn't compiled in, try SDL
     (<CODE>-ao sdl</CODE>) and make sure your SDL can handle arts sound. Yet
-    another option is to start <B>MPlayer</B> with artsdsp.</DD>
+    another option is to start MPlayer with artsdsp.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: I have an AVI that produces a gray screen when played with
@@ -481,7 +481,7 @@
   <DD>A: This can have multiple reasons.
     <UL>
       <LI>Your CPU <B>and/or</B> video card <B>and/or</B> bus is too slow.
-        <B>MPlayer</B> displays a message if this is the case (and the dropped
+        MPlayer displays a message if this is the case (and the dropped
         frames counter goes up fast).</LI>
       <LI>If it is an AVI, maybe it has bad interleaving. Try the
         <CODE>-ni</CODE> option.</LI>
@@ -560,7 +560,7 @@
   </DT>
   <DD>A: Are you running KDE or GNOME with the arts or esd sound daemon? Try
     disabling the sound daemon, or use the <CODE>-ao arts</CODE> switch to make
-    <B>MPlayer</B> use arts.</DD>
+    MPlayer use arts.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: What about the DGA driver? I can't find it!</DT>
@@ -575,7 +575,7 @@
     permissions. Help me!</DT>
   <DD>A: It works only if running as root! It's a DGA limitation.
     You should become root (<CODE>su -</CODE>), and try again.
-    Another solution is making <B>MPlayer</B> SUID root, but it's
+    Another solution is making MPlayer SUID root, but it's
     <B>not recommended!</B><BR>
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chown root /usr/local/bin/mplayer</CODE><BR>
     &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod 755 /usr/local/bin/mplayer</CODE><BR>
@@ -584,7 +584,7 @@
       <B>Warning: security risk</B><BR>
       This is a <B>big</B> security risk! <B>Never</B> do this on a server or
       on a computer that you do not control completely because other users can
-      gain root privileges through SUID root <B>MPlayer</B>. <B>You have been
+      gain root privileges through SUID root MPlayer. <B>You have been
       warned.</B>
     </BLOCKQUOTE>
   </DD>
@@ -670,7 +670,7 @@
   <DD>A: Who knows ... It's said to work, so please test it and send feedback.
     Refer to the documentation of libdvdread and its homepage as well. We're not
     the authors of libdvdread. Use <B>libmpdvdkit2</B>, which is present in
-    <B>MPlayer</B> source, and used by default.</DD>
+    MPlayer source, and used by default.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: What about subtitles? Can MPlayer display them?</DT>
@@ -713,8 +713,8 @@
 
 <DL>
 
-  <DT>Q: If <B>MPlayer</B> is paused and I try to seek or press any key at all,
-    <B>MPlayer</B> ceases to be paused. I would like to be able to seek in the
+  <DT>Q: If MPlayer is paused and I try to seek or press any key at all,
+    MPlayer ceases to be paused. I would like to be able to seek in the
     paused movie.</DT>
   <DD>A: This is very tricky to implement without losing A/V synchronization.
     All attempts have failed so far, but patches are welcome.</DD>
@@ -740,7 +740,7 @@
 <DL>
 
   <DT>Q: How can I encode?</DT>
-  <DD>A: Read the <B>MEncoder</B> <A HREF="encoding.html">documentation</A>.</DD>
+  <DD>A: Read the MEncoder <A HREF="encoding.html">documentation</A>.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: How can I create VCDs?</DT>

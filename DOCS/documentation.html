@@ -307,33 +307,33 @@
 <H1><A NAME="introduction">1. Introduction</A></H1>
 
 
-<P><B>MPlayer</B> is a movie player for LINUX (runs on many other Unices, and
+<P>MPlayer is a movie player for LINUX (runs on many other Unices, and
   <B>non-x86</B> CPUs, see the <A HREF="#ports">ports section</A>). It plays most
   MPEG, VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg,
   FILM, RoQ, PVA files, supported by many native, XAnim, RealPlayer, and
   Win32 DLL codecs. You can watch <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
   <B>3ivx</B>, <B>RealMedia</B>, and <B>DivX</B> movies too (and you don't need
   the avifile
-  library at all!). Another big feature of <B>MPlayer</B> is the wide range of
+  library at all!). Another big feature of MPlayer is the wide range of
   supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
   AAlib, DirectFB, but you can also use GGI and SDL (and this way all their
   drivers) and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon,
   Mach64, Permedia3) too! Most
   of them supports software or hardware scaling, so you can enjoy movies in
-  fullscreen. <B>MPlayer</B> supports displaying through some hardware MPEG
+  fullscreen. MPlayer supports displaying through some hardware MPEG
   decoder boards, such as the <B><A HREF="video.html#dvb">DVB</A></B> and
   <B><A HREF="video.html#dxr3">DXR3/Hollywood+</A></B>. And what about the nice big antialiased
   shaded subtitles (<B>10 supported types</B>) with European/ISO 8859-1,2
   (Hungarian, English, Czech, etc), Cyrillic, Korean fonts, and the onscreen
   display (OSD)?</P>
 
-<P><B>MPlayer</B> is under GPL v2 license.</P>
+<P>MPlayer is under GPL v2 license.</P>
 
 <P>The player is rock solid playing damaged MPEG files (useful for some VCDs),
   and it plays bad AVI files which are unplayable with the famous
   windows media player. Even AVI files without index chunk are playable, and
   you can temporarily rebuild their indexes with the <CODE>-idx</CODE> option, or
-  permanently with <B>MEncoder</B>, thus enabling seeking!
+  permanently with MEncoder, thus enabling seeking!
   As you see, stability and quality are the most important things,
   but the speed is also amazing.</P>
 
@@ -390,7 +390,7 @@
 <H2><A NAME="installation">1.2 Installation</A></H2>
 
 <P>In this chapter I'll try to guide you through the compiling and
-  configuring process of <B>MPlayer</B>. It's not easy, but it won't necessarily
+  configuring process of MPlayer. It's not easy, but it won't necessarily
   be hard. If you experience a different behavior than what I explain, please
   search through this documentation and you'll find your answers. If you
   see links, please follow them and read carefully what they contain. It
@@ -412,7 +412,7 @@
     runtime problems). If you vote for 3.x.x, try to use the latest version,
     early releases had various bugs, so be sure you use at least 3.1, it's
     tested and working. For detailed information about gcc 2.96's bugs (that are
-    still NOT fixed, they have been WORKED AROUND in <B>MPlayer</B>!), see the
+    still NOT fixed, they have been WORKED AROUND in MPlayer!), see the
     <A HREF="users_against_developers.html#gcc">gcc 2.96</A> section and the
     <A HREF="faq.html">FAQ</A>.</LI>
   <LI><B>XFree86</B> - suggested version is <B>always the newest (4.2.1)</B>.
@@ -429,9 +429,9 @@
     video cards that lag strangely with the xv driver). Always use the newest
     (beginning from 1.2.x).</LI>
   <LI><B>libjpeg</B> - optional JPEG decoder, used by -mf and some QT MOV files.
-    Useful for both <B>MPlayer</B> and <B>MEncoder</B> if you plan to work with jpeg files.</LI>
+    Useful for both MPlayer and MEncoder if you plan to work with jpeg files.</LI>
   <LI><B>libpng</B> - recommended and default (M)PNG decoder. Required for GUI.
-    Useful for both <B>MPlayer</B> and <B>MEncoder</B>.</LI>
+    Useful for both MPlayer and MEncoder.</LI>
   <LI><B>lame</B> - recommended, needed for encoding MP3 audio with MEncoder,
     suggested version is <B>always the newest</B> (at least 3.90).</LI>
   <LI><B>libogg</B> - optional, needed for playing OGG file format.</LI>
@@ -455,9 +455,9 @@
         other MPEG4 types. Recommended!</LI>
     </UL>
   </LI>
-  <LI><B>Win32 codecs</B>: If you plan to use <B>MPlayer</B> on x86
+  <LI><B>Win32 codecs</B>: If you plan to use MPlayer on x86
     architecture, you will possibly need them. Download and unzip w32codecs.zip
-    to /usr/lib/win32 <B>BEFORE</B> compiling <B>MPlayer</B>, otherwise no Win32
+    to /usr/lib/win32 <B>BEFORE</B> compiling MPlayer, otherwise no Win32
     support will be compiled!<BR>
     <B>Note:</B> the avifile project has a similar codecs package, but it differs
     from ours. If you want to use all supported codecs, then install our package
@@ -498,14 +498,14 @@
     screen, hardware YUV zoom) for decoding <B>3ivx</B> and Indeo 3/4/5 movies,
     and some old formats. And they are multiplatform, so this is the only way to
     play Indeo on non-x86 platforms (well, apart from using XAnim:). But for
-    example Cinepak movies are best played with <B>MPlayer</B>'s own Cinepak
+    example Cinepak movies are best played with MPlayer's own Cinepak
     decoder!</LI>
   <LI>For <B>Ogg Vorbis</B> audio decoding you need to install
     <CODE>libvorbis</CODE> properly. Use deb/rpm packages if available, or
     compile from
     <A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">source</A>
     (this is a nightly updated tarball of Vorbis CVS).</LI>
-  <LI><B>MPlayer</B> can use the libraries of RealPlayer 8 or RealONE to play
+  <LI>MPlayer can use the libraries of RealPlayer 8 or RealONE to play
     files with <B>RealVideo 2.0 - 4.0</B> video, and Sipro/Cook audio. See
     <A HREF="formats.html#real">RealMedia file format</A> section for
     installation instructions and more information.</LI>
@@ -528,14 +528,14 @@
     to use the mga_vid kernel module instead, for it works much better.
     Please see the <A HREF="video.html#mga_vid">mga_vid</A> section about its
     installation and usage. It is important to do these steps <I>before</I>
-    compiling <B>MPlayer</B>, otherwise no mga_vid support will be built. Also
+    compiling MPlayer, otherwise no mga_vid support will be built. Also
     check out the <A HREF="video.html#tv-out_matrox">Matrox TV-out</A> section.
     <U><B>If you don't use Linux</B></U>, your only possibility is the VIDIX
     driver: read the <A HREF="video.html#vidix">VIDIX</A> section.</LI>
   <LI><B>3Dfx Voodoo3/Banshee cards</B>: please see the
     <A HREF="video.html#tdfxfb">tdfxfb</A> section in order to gain big
     speedup. It is important to do these steps <B>before</B> compiling
-    <B>MPlayer</B>, otherwise no 3Dfx support will be built. Also see the <A
+    MPlayer, otherwise no 3Dfx support will be built. Also see the <A
     HREF="video.html#tv-out_voodoo">3dfx TV-out section</A>. If you use X, use
     <B>at least 4.2.0</B>, as the 3dfx Xv driver was broken in 4.1.0 and earlier
     releases.</LI>
@@ -636,7 +636,7 @@
   <LI><B>C-Media with SP/DIF out</B>: hardware AC3 passthrough is possible
     with these cards, see
     <A HREF="codecs.html#hardware_ac3">Hardware AC3 decoding</A> section.</LI>
-  <LI>Features of <B>other cards</B> aren't supported by <B>MPlayer</B>.
+  <LI>Features of <B>other cards</B> aren't supported by MPlayer.
     <U>It's very recommended to read the <A HREF="sound.html">sound card
     section</A>!</U></LI>
 </UL>
@@ -646,14 +646,14 @@
 <UL>
   <LI>Decide if you need GUI. If you do, see the <A HREF="#gui">GUI section</A>
     before compiling.</LI>
-  <LI>If you want to install <B>MEncoder</B> (our great all-purpose encoder),
+  <LI>If you want to install MEncoder (our great all-purpose encoder),
     see the <A HREF="encoding.html">MEncoder section</A>.</LI>
   <LI>If you have a V4L compatible <B>TV tuner</B> card, and wish to watch/grab
-    and encode movies with <B>MPlayer</B>, read the <A HREF="#tv">TV input</A>
+    and encode movies with MPlayer, read the <A HREF="#tv">TV input</A>
     section.</LI>
 </UL>
 
-<P>Then build <B>MPlayer</B>:</P>
+<P>Then build MPlayer:</P>
 
 <PRE>
     ./configure
@@ -661,17 +661,17 @@
     make install
 </PRE>
 
-<P>At this point, <B>MPlayer</B> is ready to use. The directory
+<P>At this point, MPlayer is ready to use. The directory
   <CODE>$PREFIX/share/mplayer</CODE> contains the <CODE>codecs.conf</CODE>
   file, which is used to tell the program all the codecs and their
   capabilities.  This file should always be kept up to date together with the
   main binary.<BR>
   Check if you have <CODE>codecs.conf</CODE> in your home directory
-  (<CODE>~/.mplayer/codecs.conf</CODE>) left from old <B>MPlayer</B> versions, and remove it.</P>
+  (<CODE>~/.mplayer/codecs.conf</CODE>) left from old MPlayer versions, and remove it.</P>
 
 <P><B>Debian users</B> can build a <CODE>.deb</CODE> package for themselves,
   it's very simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in
-  <B>MPlayer</B>'s root directory. See
+  MPlayer's root directory. See
   <A HREF="documentation.html#debian">Debian packaging</A> for detailed
   instructions.</P>
 
@@ -712,12 +712,12 @@
 <P>Currently you can't use the <CODE>-gui</CODE> option on the command line,
   due to technical reasons.</P>
 
-<P>As <B>MPlayer</B> doesn't have a skin included, you have to download them if
+<P>As MPlayer doesn't have a skin included, you have to download them if
   you want to use the GUI. See the
   <A HREF="http://www.mplayerhq.hu/homepage/dload.html">download page</A>.
   They should be extracted to the usual system-wide directory
   (<CODE>$PREFIX/share/mplayer/Skin</CODE>), or to
-  <CODE>$HOME/.mplayer/Skin</CODE>. <B>MPlayer</B> by default looks in these
+  <CODE>$HOME/.mplayer/Skin</CODE>. MPlayer by default looks in these
   directories for a directory named <I>default</I>, but you can use the
   <CODE>-skin newskin</CODE> option, or the <CODE>skin=newskin</CODE> config
   file directive to use the skin in <CODE>*/Skin/newskin</CODE> directory.</P>
@@ -726,7 +726,7 @@
 <H2><A NAME="subtitles_osd">1.4 Subtitles and OSD</A></H2>
 
 <P>
-  <B>MPlayer</B> can display subtitles along with movie files. Currently the following 
+  MPlayer can display subtitles along with movie files. Currently the following 
   formats are supported:</P>
 <UL>
   <LI>VobSub</LI>
@@ -779,7 +779,7 @@ The command line options differ slightly for the different formats:
   the subtitle file are different.<BR> Please note that the MicroDVD subtitle
   format uses absolute frame numbers for its timing, and therefore the
   <CODE>-subfps</CODE> option cannot be used with this format. As
-  <B>MPlayer</B> has no way to guess the frame rate of the subtitle file, you
+  MPlayer has no way to guess the frame rate of the subtitle file, you
   have to manually convert the frame rate. There is a little perl script in the
   <CODE>contrib</CODE> directory of the MPlayer FTP site to do this conversion
   for you.</P>
@@ -789,7 +789,7 @@ The command line options differ slightly for the different formats:
 
 <H3><A NAME="mpsub">1.4.1 MPlayer's own subtitle format (MPsub)</A></H3>
 
-<P><B>MPlayer</B> introduces a new subtitle format called <B>MPsub</B>. It was
+<P>MPlayer introduces a new subtitle format called <B>MPsub</B>. It was
   designed by me (Gabucino). Basically its main feature is being
   <I>dynamically</I> time-based (although it has frame-based mode too). Example
   (from
@@ -821,11 +821,11 @@ The command line options differ slightly for the different formats:
 
 <H3><A NAME="install_osd">1.4.2 Installing OSD and subtitles</A></H3>
 
-<P>You need an <B>MPlayer</B> font package to be able to use OSD/SUB feature.
+<P>You need an MPlayer font package to be able to use OSD/SUB feature.
   There are many ways to get it:</P>
 
 <UL>
-  <LI>download ready-to-use font packages from <B>MPlayer</B> site.
+  <LI>download ready-to-use font packages from MPlayer site.
     Note: currently available fonts are limited for iso 8859-1/2 support,
     but there are some other (including Korean, Russian, 8859-8 etc) fonts
     at contrib/font section of FTP, made by users.<BR>
@@ -871,7 +871,7 @@ The command line options differ slightly for the different formats:
 
 <H2><A NAME="rtc">1.5 RTC</A></H2>
 
-There are three timing methods in <B>MPlayer</B>.
+There are three timing methods in MPlayer.
 
 <UL>
   <LI><B>To use the old method</B>, you don't have to do anything. It uses
@@ -880,7 +880,7 @@ There are three timing methods in <B>MPlayer</B>.
   <LI><B>The new timer</B> code uses PC's RTC (Real Time Clock) for this task,
     because it has precise 1ms timers. It is automagically enabled when
     available, but requires root privileges, a <I>setuid root</I>
-    <B>MPlayer</B> binary or a properly set up kernel.
+    MPlayer binary or a properly set up kernel.
     <BR>
     If you are running kernel 2.4.19pre8 or later you can adjust the maximum
     RTC frequency for normal users through the <CODE>/proc</CODE> filesystem.
@@ -984,7 +984,7 @@ controls.</P>
 
 <H2><A NAME="command_line">3.1 Command line</A></H2>
 
-<P><B>MPlayer</B> utilizes a complex playtree. It consists of global options
+<P>MPlayer utilizes a complex playtree. It consists of global options
   written as first (for example <CODE>mplayer -vfm 5</CODE>), and options
   written after filenames, that apply only to the given filename/URL/whatever
   (for example <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).<BR>
@@ -1017,15 +1017,15 @@ controls.</P>
 
 <H2><A NAME="control">3.2 Control</A></H2>
 
-<P><B>MPlayer</B> has a fully configurable, command driven, control layer which
-  lets you control <B>MPlayer</B> with keyboard, mouse, joystick or remote
+<P>MPlayer has a fully configurable, command driven, control layer which
+  lets you control MPlayer with keyboard, mouse, joystick or remote
   control (using LIRC). See the man page for the complete list of keyboard
   controls.</P>
 
 
 <H3><A NAME="controls_configuration">3.2.1 Controls configuration</A></H3>
 
-<P><B>MPlayer</B> allows you bind any key/button to any <B>MPlayer</B> command
+<P>MPlayer allows you bind any key/button to any MPlayer command
   using a simple config file.  The syntax consist of a key name followed by a
   command. The default config file location is
   <CODE>$HOME/.mplayer/input.conf</CODE> but it can be overridden using the
@@ -1115,7 +1115,7 @@ ENTER pt_step 1 1
   <LI><B>audio_delay</B> (float) val
     <P>Adjust the audio delay of val seconds</P></LI>
   <LI><B>quit</B>
-    <P>Quit <B>MPlayer</B></P></LI>
+    <P>Quit MPlayer</P></LI>
   <LI><B>pause</B>
     <P>Pause/unpause the playback</P></LI>
   <LI><B>grap_frames</B>
@@ -1175,12 +1175,12 @@ ENTER pt_step 1 1
   More about it at <A HREF="http://www.lirc.org">www.lirc.org</A>.</P>
 
 <P>If you have installed the lirc-package, configure will autodetect it. If
-  everything went fine, <B>MPlayer</B> will print a message like "Setting up
+  everything went fine, MPlayer will print a message like "Setting up
   lirc support..." on startup. If an error occurs it will tell you. If it
   doesn't tell you anything about LIRC there's no support compiled in. That's
   it :-)</P>
 
-<P>The application name for <B>MPlayer</B> is - oh wonder - 'mplayer'.
+<P>The application name for MPlayer is - oh wonder - 'mplayer'.
   You can use any mplayer commands and even pass more than one command by
   separating them with \n. Don't forget to enable the repeat flag in .lircrc
   when it make sense (seek, volume, etc). Here's an excerpt from my
@@ -1220,23 +1220,23 @@ end
 
 <H3><A NAME="slave">3.2.3 Slave mode</A></H3>
 
-<P>The slave mode allow you to build simple frontend to <B>MPlayer</B>. When
-  enabled (with the <CODE>-slave</CODE> switch) <B>MPlayer</B> will read
+<P>The slave mode allow you to build simple frontend to MPlayer. When
+  enabled (with the <CODE>-slave</CODE> switch) MPlayer will read
   commands separated by new line (\n) from stdin.</P>
 
 
 <H2><A NAME="streaming">3.3 Streaming from network or pipes</A></H2>
 
-<P><B>MPlayer</B> can play files from network, using the HTTP, MMS or RTSP/RTP
+<P>MPlayer can play files from network, using the HTTP, MMS or RTSP/RTP
   protocol.</P>
 
 <P>Playing goes by simply using adding the URL to the command line.
-  <B>MPlayer</B> also honors the http_proxy environment variable, and uses
+  MPlayer also honors the http_proxy environment variable, and uses
   proxy if available. Proxy usage can also be forced:</P>
 
 <P><CODE>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
-<P><B>MPlayer</B> can read from stdin (NOT named pipes). This can be for example
+<P>MPlayer can read from stdin (NOT named pipes). This can be for example
   used to play from FTP:</P>
 
 <P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
@@ -1294,12 +1294,12 @@ end
 <P>To build the package you will need GNU make (gmake, /usr/ports/devel/gmake),
   native BSD make will not work.</P>
 
-<P>To run <B>MPlayer</B> you will need to re-compile the kernel with
+<P>To run MPlayer you will need to re-compile the kernel with
   "options USER_LDT" (unless you are running -CURRENT, where this is default).
   If you have a CPU with SSE also use "options CPU_ENABLE_SSE" to use it
   (FreeBSD-STABLE required, or use kernel patches).</P>
 
-<P>If <B>MPlayer</B> complains about "CD-ROM Device '/dev/cdrom' not found!" make a
+<P>If MPlayer complains about "CD-ROM Device '/dev/cdrom' not found!" make a
   symbolic link: <CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE></P>
 
 <P>There's no DVD support for FreeBSD yet.</P>
@@ -1317,7 +1317,7 @@ end
   available. However, <B>DivX/OpenDivX</B> movies should work, when using
   libavcodec.</P>
 
-<P>On <B>UltraSPARC</B>s, <B>MPlayer</B> takes advantage of their <B>VIS</B>
+<P>On <B>UltraSPARC</B>s, MPlayer takes advantage of their <B>VIS</B>
   extensions (equivalent to MMX), currently only in <I>libmpeg2</I>,
   <I>libvo</I> and <I>libavcodec</I>, but not in mp3lib. You can watch a VOB
   file on a 400MHz CPU. You'll need
@@ -1402,7 +1402,7 @@ end
 
 <H2><A NAME="strongarm">6.4 StrongARM</A></H2>
 
-<P><B>MPlayer</B> is reported to compile on StrongARM. Use the following command line:</P>
+<P>MPlayer is reported to compile on StrongARM. Use the following command line:</P>
 
 <PRE>
   ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
@@ -1419,7 +1419,7 @@ end
 <H2><A NAME="qnx">6.6 QNX</A></H2>
 
 <P>Works. You'll need to download SDL for QNX, and install it. Then run
-  <B>MPlayer</B> with <CODE>-vo sdl:photon</CODE> and <CODE>-ao sdl:nto</CODE>
+  MPlayer with <CODE>-vo sdl:photon</CODE> and <CODE>-ao sdl:nto</CODE>
   options, and it should be fast.</P>
 
 <P>The <CODE>-vo x11</CODE> output will be even slower than on Linux, since
@@ -1437,10 +1437,10 @@ end
   in PATH and do a '<CODE>gmake -k</CODE>', then make sure that the native
   version is used and do '<CODE>gmake</CODE>'.</P>
 
-<P>To use Win32 DLLs with <B>MPlayer</B> you will need to re-compile the
+<P>To use Win32 DLLs with MPlayer you will need to re-compile the
   kernel with "<CODE>option USER_LDT</CODE>".</P>
 
-<P>If <B>MPlayer</B> complains about not finding '/dev/cdrom' or
+<P>If MPlayer complains about not finding '/dev/cdrom' or
   '/dev/dvd' make a symbolic link, e.g. <CODE>ln -s
   /dev/rcd0c /dev/dvd</CODE></P>
 
@@ -1450,16 +1450,16 @@ end
 
 <H2><A NAME="cygwin">6.8. Cygwin</A></H2>
  
-<P>You will have to go to the <B>MPlayer</B> directory, and copy or symlink
+<P>You will have to go to the MPlayer directory, and copy or symlink
   <CODE>etc/cygwin_inttypes.h</CODE> to <CODE>/usr/include/inttypes.h</CODE> to
-  make <B>MPlayer</B> compile. Otherwise it will complain about missing
+  make MPlayer compile. Otherwise it will complain about missing
   <CODE>intypes.h</CODE>.</P>
 
 
 
 <H1><A NAME="mailing_lists">Appendix A - Mailing lists</A></H1>
 
-<P>There are some public mailing lists on <B>MPlayer</B>. Unless explicitly
+<P>There are some public mailing lists on MPlayer. Unless explicitly
   stated otherwise the language of these lists is <B>English</B>. Please do
   not send messages in other languages or HTML mail! Message size limit is 80k.
   If you have something bigger put it up for download somewhere. Click the
@@ -1474,7 +1474,7 @@ end
 <UL>
   <LI>MPlayer developers list:
     <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A><BR>
-    This list is about <B>MPlayer</B> development! Talking about interface/API
+    This list is about MPlayer development! Talking about interface/API
     changes, new libraries, code optimization, configure changes is ontopic
     here. Send patches but <B>not</B> bug reports, user questions, feature
     requests or flames here to keep the list traffic low.</LI>
@@ -1511,13 +1511,13 @@ end
   </LI>
   <LI>MPlayer CVS-log:
     <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A><BR>
-    All changes in <B>MPlayer</B> code are automatically sent to this list. Only
+    All changes in MPlayer code are automatically sent to this list. Only
     questions about these changes belong here (if you do not understand why a
     change is required or you have a better fix or you have noticed a possible
     bug/problem in the commit).</LI>
   <LI>MPlayer Cygwin-porting list:
     <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin">http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin</A><BR>
-    List for discussion about <B>MPlayer</B>'s Cygwin port.</LI>
+    List for discussion about MPlayer's Cygwin port.</LI>
 </UL>
 
 <P><B>Note:</B> You can reach the searchable mailing list archives at
