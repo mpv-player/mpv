@@ -14,14 +14,14 @@ mails a lot easier. If you do not know them please read
 are in a hurry) <ulink url="http://www.xs4all.nl/~hanb/documents/quotingguide.html">Quoting HOWTO</ulink>.
 <itemizedlist>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"><application>MPlayer</application> announce list</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"><application>MPlayer</application> announce</ulink>
 </para>
 <para>
 List for <application>MPlayer</application> announcements.
 Subscribe here if you want to get security and release announcements.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users list</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users</ulink>
 </para>
 <para>General support mailing list for questions related to
 <application>MPlayer</application> and <application>MEncoder</application>.
