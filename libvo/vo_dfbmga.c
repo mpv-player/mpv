@@ -1,7 +1,7 @@
 /*
    MPlayer video driver for DirectFB / Matrox G200/G400/G450/G550
 
-   Copyright (C) 2002,2003 Ville Syrjala <syrjala@sci.fi>
+   Copyright (C) 2002-2005 Ville Syrjala <syrjala@sci.fi>
 
    Originally based on vo_directfb.c by
    Jiri Svoboda <Jiri.Svoboda@seznam.cz>
@@ -158,16 +158,12 @@ static DFBSurfacePixelFormat
 imgfmt_to_pixelformat( uint32_t format )
 {
      switch (format) {
-     case IMGFMT_RGB32:
      case IMGFMT_BGR32:
 	  return DSPF_RGB32;
-     case IMGFMT_RGB24:
      case IMGFMT_BGR24:
 	  return DSPF_RGB24;
-     case IMGFMT_RGB16:
      case IMGFMT_BGR16:
 	  return DSPF_RGB16;
-     case IMGFMT_RGB15:
      case IMGFMT_BGR15:
 	  return DSPF_ARGB1555;
      case IMGFMT_YUY2:
@@ -838,13 +834,9 @@ static uint32_t
 query_format( uint32_t format )
 {
      switch (format) {
-          case IMGFMT_RGB32:
           case IMGFMT_BGR32:
-          case IMGFMT_RGB24:
           case IMGFMT_BGR24:
-          case IMGFMT_RGB16:
           case IMGFMT_BGR16:
-          case IMGFMT_RGB15:
           case IMGFMT_BGR15:
           case IMGFMT_UYVY:
           case IMGFMT_YV12:
