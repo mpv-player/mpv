@@ -68,8 +68,20 @@ void uninit(struct vf_instance_s* vf)
     free(vf->priv->Line);
 }
 
+//#define LowPass(Prev, Curr, Coef) (((Prev)*Coef[Prev - Curr] + (Curr)*(65536-(Coef[Prev - Curr]))) / 65536)
+//#define LowPass(Prev, Curr, Coef) ((  Prev*Coef[Prev-Curr] + Curr*(65536-(Coef[Prev-Curr]))  )/65536)
+//#define LowPass(Prev, Curr, Coef) ((  Prev*Coef[Prev-Curr] + Curr*65536 - Curr*Coef[Prev-Curr]  )/65536)
+//#define LowPass(Prev, Curr, Coef) (((int)(Curr)) + ((  (int)Prev*Coef[Prev-Curr] - (int)Curr*Coef[Prev-Curr]  )>>16) )
+//#define LowPass(Prev, Curr, Coef) (Curr + ((  Prev*Coef[Prev-Curr] - Curr*Coef[Prev-Curr]  )>>16) )
+//#define LowPass(Prev, Curr, Coef) (Curr + ((  (Prev-Curr)*(Coef[Prev-Curr])  )>>16) )
 
-#define LowPass(Prev, Curr, Coef) (((Prev)*Coef[Prev - Curr] + (Curr)*(65536-(Coef[Prev - Curr]))) / 65536)
+//#define LowPass(Prev, Curr, Coef) (Curr + (((Prev - Curr)*Coef[Prev - Curr]) / 65536))
+#define LowPass(Prev, Curr, Coef) (Curr + ((((unsigned int)(Prev - Curr))*Coef[Prev - Curr]) / 65536))
+//#define LowPass(Prev, Curr, Coef) (Curr + ((((unsigned int)(Prev - Curr))*Coef[((unsigned int)(Prev - Curr))]) / 65536))
+//#define LowPass(Prev, Curr, Coef) (Curr + ((((unsigned char)(Prev - Curr))*Coef[Prev - Curr]) / 65536))
+//#define LowPass(Prev, Curr, Coef) (Curr + (( ((((int)(Prev))-((int)(Curr)))) *Coef[Prev - Curr]) / 65536))
+//#define LowPass(Prev, Curr, Coef) (Curr + (((unsigned int)((Prev - Curr)*Coef[Prev - Curr])) / 65536))
+//#define LowPass(Prev, Curr, Coef) (Curr + (((Prev - Curr)*Coef[Prev - Curr]) >> 16))
 
 static void deNoise(unsigned char *Frame,        // mpi->planes[x]
                     unsigned char *FramePrev,    // pmpi->planes[x]
