@@ -148,7 +148,7 @@ static int sun_vcd_read(int fd, int *offset)
   int sync, header_code, user_data, edc_ecc, error_field;
   int sub_channel;
 
-  /* sector_type = 3;	/* mode2 */
+  /* sector_type = 3; *//* mode2 */
   sector_type = 5;	/* mode2/form2 */
   sync = 0;
   header_code = 0;
