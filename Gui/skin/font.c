@@ -176,6 +176,7 @@ txSample * fntRender( wItem * item,int px,char * fmt,... )
    item->Bitmap.Height=item->height=fntTextHeight( id,p );
    item->Bitmap.Width=iw;
    item->Bitmap.ImageSize=item->height * iw * 4;
+   if ( !item->Bitmap.ImageSize ) return NULL;
    item->Bitmap.BPP=32;
    item->Bitmap.Image=malloc( item->Bitmap.ImageSize );
   }
