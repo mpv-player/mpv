@@ -98,6 +98,7 @@ static int preinit(sh_audio_t *sh_audio)
     sh_audio->ds->ss_div = QT_IMA_ADPCM_SAMPLES_PER_BLOCK;
     sh_audio->ds->ss_mul = QT_IMA_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels;
   }
+  sh_audio->audio_in_minsize=sh_audio->ds->ss_mul;
   return 1;
 }
 
@@ -110,16 +111,11 @@ static int init(sh_audio_t *sh_audio)
   sh_audio->i_bps = 
     (sh_audio->ds->ss_mul * sh_audio->samplerate) / sh_audio->ds->ss_div;
 
-  if ((sh_audio->a_in_buffer =
-    (unsigned char *)malloc(sh_audio->ds->ss_mul)) == NULL)
-    return 0;
-
   return 1;
 }
 
 static void uninit(sh_audio_t *sh_audio)
 {
-  free(sh_audio->a_in_buffer);
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)

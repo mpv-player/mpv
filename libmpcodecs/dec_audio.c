@@ -40,6 +40,14 @@ int init_audio(sh_audio_t *sh_audio)
   }
   
   printf("Selecting Audio Decoder: [%s] %s\n",mpadec->info->short_name,mpadec->info->name);
+
+  // reset in/out buffer size/pointer:
+  sh_audio->a_buffer_size=0;
+  sh_audio->a_buffer=NULL;
+  sh_audio->a_in_buffer_size=0;
+  sh_audio->a_in_buffer=NULL;
+
+  // Set up some common usefull defaults. ad->preinit() can override these:
   
   sh_audio->samplesize=2;
 #ifdef WORDS_BIGENDIAN
@@ -48,20 +56,26 @@ int init_audio(sh_audio_t *sh_audio)
   sh_audio->sample_format=AFMT_S16_LE;
 #endif
   sh_audio->samplerate=0;
-  sh_audio->o_bps=0;
+  sh_audio->i_bps=0;  // input rate (bytes/sec)
+  sh_audio->o_bps=0;  // output rate (bytes/sec)
 
-  sh_audio->a_buffer_size=0;
-  sh_audio->a_buffer=NULL;
-
-  sh_audio->a_in_buffer_len=0;
-
-  /* setup required min. in/out buffer size:*/
   sh_audio->audio_out_minsize=8192;/* default size, maybe not enough for Win32/ACM*/
+  sh_audio->audio_in_minsize=0;
   
   if(!mpadec->preinit(sh_audio))
   {
       printf("ADecoder preinit failed :(\n");
       return 0;
+  }
+
+/* allocate audio in buffer: */
+  if(sh_audio->audio_in_minsize>0){
+      sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
+      mp_msg(MSGT_DECAUDIO,MSGL_V,"dec_audio: Allocating %d bytes for input buffer\n",
+          sh_audio->a_in_buffer_size);
+      sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
+      memset(sh_audio->a_in_buffer,0,sh_audio->a_in_buffer_size);
+      sh_audio->a_in_buffer_len=0;
   }
 
 /* allocate audio out buffer: */
@@ -79,30 +93,34 @@ int init_audio(sh_audio_t *sh_audio)
   sh_audio->a_buffer_len=0;
 
   if(!mpadec->init(sh_audio)){
-      printf("ADecoder init failed :(\n");
+      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"ADecoder init failed :(\n");
+      uninit_audio(sh_audio); // free buffers
       return 0;
   }
+
   sh_audio->inited=1;
   
   if(!sh_audio->channels || !sh_audio->samplerate){
     mp_msg(MSGT_DECAUDIO,MSGL_WARN,MSGTR_UnknownAudio);
-    if(sh_audio->a_buffer) free(sh_audio->a_buffer);
-    sh_audio->a_buffer=NULL;
+    uninit_audio(sh_audio); // free buffers
     return 0;
   }
 
   if(!sh_audio->o_bps)
   sh_audio->o_bps=sh_audio->channels*sh_audio->samplerate*sh_audio->samplesize;
-  return sh_audio->codec->driver;
+  
+  return 1;
 }
 
 void uninit_audio(sh_audio_t *sh_audio)
 {
+    if(sh_audio->a_buffer) free(sh_audio->a_buffer);
+    sh_audio->a_buffer=NULL;
+    if(sh_audio->a_in_buffer) free(sh_audio->a_in_buffer);
+    sh_audio->a_in_buffer=NULL;
     if(!sh_audio->inited) return;
     mp_msg(MSGT_DECAUDIO,MSGL_V,"uninit audio: %d  \n",sh_audio->codec->driver);
     mpadec->uninit(sh_audio);
-    if(sh_audio->a_buffer) free(sh_audio->a_buffer);
-    sh_audio->a_buffer=NULL;
     sh_audio->inited=0;
 }
 

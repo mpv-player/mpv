@@ -39,13 +39,8 @@ static faacDecFrameInfo faac_finfo;
 
 static int preinit(sh_audio_t *sh)
 {
-  sh->audio_in_minsize=FAAD_BUFFLEN;
   sh->audio_out_minsize=2048*FAAD_MAX_CHANNELS;
-
-  // XXX: why is this duplicated in sh struct? ::atmos
-  sh->a_in_buffer_size=sh->audio_in_minsize;
-  sh->a_in_buffer=malloc(sh->a_in_buffer_size);
-  sh->a_in_buffer_len=0;
+  sh->audio_in_minsize=FAAD_BUFFLEN;
   return 1;
 }
 
@@ -126,10 +121,6 @@ static void uninit(sh_audio_t *sh)
 {
   mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: Closing decoder!\n");
   faacDecClose(faac_hdec);
-  if(sh->a_in_buffer_size) {
-    free(sh->a_in_buffer);
-    sh->a_in_buffer = NULL;
-  } 
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)

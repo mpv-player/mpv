@@ -36,18 +36,14 @@ static int preinit(sh_audio_t *sh_audio)
   {
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_MissingDLLcodec,sh_audio->codec->dll);
     return 0;
-  } else {
+  }
     sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
     sh_audio->channels=sh_audio->wf->nChannels;
     sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
     sh_audio->audio_in_minsize=2*sh_audio->wf->nBlockAlign;
     if(sh_audio->audio_in_minsize<8192) sh_audio->audio_in_minsize=8192;
-    sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
-    sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
-    sh_audio->a_in_buffer_len=0;
     sh_audio->audio_out_minsize=16384;
     sh_audio->context = ds_adec;
-  }
   mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32/DShow audio codec init OK!\n");
   return 1;
 }

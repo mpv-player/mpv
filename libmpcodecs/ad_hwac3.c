@@ -32,6 +32,7 @@ static int preinit(sh_audio_t *sh)
 {
   /* Dolby AC3 audio: */
   sh->audio_out_minsize=4*256*6;
+  sh->audio_in_minsize=3840;
   sh->channels=2;
   return 1;
 }
@@ -44,9 +45,6 @@ static int init(sh_audio_t *sh_audio)
        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 init failed\n");
        return 0;
   }
-  sh_audio->a_in_buffer_size=3840;
-  sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
-  sh_audio->a_in_buffer_len=0;
   if(a52_fillbuff(sh_audio)<0) {
        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 sync failed\n");
        return 0;

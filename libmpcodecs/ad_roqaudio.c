@@ -22,6 +22,7 @@ static int preinit(sh_audio_t *sh_audio)
 {
   // minsize was stored in wf->nBlockAlign by the RoQ demuxer
   sh_audio->audio_out_minsize=sh_audio->wf->nBlockAlign;
+  sh_audio->audio_in_minsize=sh_audio->audio_out_minsize / 2; // FIXME?
   sh_audio->context = roq_decode_audio_init();
   return 1;
 }
@@ -31,17 +32,11 @@ static int init(sh_audio_t *sh_audio)
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
   sh_audio->i_bps = 44100;
-
-  if ((sh_audio->a_in_buffer =
-    (unsigned char *)malloc(sh_audio->audio_out_minsize / 2)) == NULL)
-    return 0;
-
   return 1;
 }
 
 static void uninit(sh_audio_t *sh_audio)
 {
-  free(sh_audio->a_in_buffer);
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)

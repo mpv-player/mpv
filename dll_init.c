@@ -103,15 +103,12 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
     mp_msg(MSGT_WIN32,MSGL_V,"Audio ACM output buffer min. size: %ld\n",srcsize);
 
     acmStreamSize(sh_audio->srcstream, srcsize, &srcsize, ACM_STREAMSIZEF_DESTINATION);
-    sh_audio->audio_in_minsize=srcsize; // audio input min. size
+//    if(srcsize<in_fmt->nBlockAlign) srcsize=in_fmt->nBlockAlign;
+
     mp_msg(MSGT_WIN32,MSGL_V,"Audio ACM input buffer min. size: %ld\n",srcsize);
+
+    sh_audio->audio_in_minsize=2*srcsize; // audio input min. size
     
-    if(srcsize<in_fmt->nBlockAlign) srcsize=in_fmt->nBlockAlign;
-
-    sh_audio->a_in_buffer_size=2*sh_audio->audio_in_minsize;
-    sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
-    sh_audio->a_in_buffer_len=0;
-
     return 1;
 }
 
