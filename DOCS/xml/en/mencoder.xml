@@ -886,13 +886,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  We're now ready to do the two pass encode. Pass 1:
+  We're now ready to do the two pass encode. Pass one:
 
   <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
 -o Harry_Potter_2.avi</screen>
 
-  And pass 2 is the same, except that we specify <option>vpass=2</option>:
+  And pass two is the same, except that we specify <option>vpass=2</option>:
 
   <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
