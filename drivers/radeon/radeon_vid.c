@@ -12,9 +12,12 @@
  * This file is partly based on mga_vid and sis_vid stuff from
  * mplayer's package.
  * Also here was used code from CVS of GATOS project and X11 trees.
+ *
+ * SPECIAL THANKS TO: Hans-Peter Raschke for active testing and hacking
+ * Rage128(pro) stuff of this driver.
  */
 
-#define RADEON_VID_VERSION "1.0.2.2"
+#define RADEON_VID_VERSION "1.1.0"
 
 /*
   It's entirely possible this major conflicts with something else
@@ -27,17 +30,16 @@
   -----------------------------------------------------------
   TODO:
   Highest priority: fbvid.h compatibility
-  High priority: RGB/BGR 2-32, YVU9, IF09 support
-  Middle priority:
-     SCALER_GAMMA_SEL_BRIGHT  gamma correction ??? 
-    OV0_AUTO_FLIP_CNTL
-    OV0_FILTER_CNTL
-    OV0_VIDEO_KEY_CLR
-    OV0_KEY_CNTL
-  Low priority:  CLPL, IYU1, IYU2, UYNV, CYUV
-		 YUNV, YVYU, Y41P, Y211, Y41T, Y42T, V422, V655, CLJR
-		       ^^^^
-		 YUVP, UYVP, Mpeg PES (mpeg-1,2) support
+  High priority: Fixing BUGS
+  Middle priority: RGB/BGR 2-32, YVU9, IF09 support
+  Low priority: CLPL, IYU1, IYU2, UYNV, CYUV, YUNV, YVYU, Y41P, Y211, Y41T,
+		      ^^^^
+		Y42T, V422, V655, CLJR, YUVP, UYVP, Mpeg PES (mpeg-1,2) support
+  ...........................................................
+  BUGS and LACKS:
+    Wrong aspect of scaling if image_height < 200 && screen_height == 200
+    Color and video keys don't work
+    Contrast and brightness are unconfigurable on radeons
 */
 
 #include <linux/config.h>
@@ -375,15 +377,20 @@ static void radeon_vid_display_video( void )
     OUTREG(OV0_COLOUR_CNTL, (besr.brightness & 0x7f) |
 			    (besr.saturation << 8) |
 			    (besr.saturation << 16));
-			    
+
     if(besr.ckey_on)
     {
 	OUTREG(OV0_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
 	OUTREG(OV0_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
 	OUTREG(OV0_KEY_CNTL,GRAPHIC_KEY_FN_EQ|VIDEO_KEY_FN_FALSE|CMP_MIX_OR);
     }
-    else OUTREG(OV0_KEY_CNTL,GRAPHIC_KEY_FN_NE);
-   
+    else
+    {
+	OUTREG(OV0_GRAPHICS_KEY_MSK, 0ULL);
+	OUTREG(OV0_GRAPHICS_KEY_CLR, 0ULL);
+	OUTREG(OV0_KEY_CNTL,GRAPHIC_KEY_FN_NE);
+    }
+
     OUTREG(OV0_H_INC,			besr.h_inc);
     OUTREG(OV0_STEP_BY,			besr.step_by);
     OUTREG(OV0_Y_X_START,		besr.y_x_start);
@@ -651,6 +658,7 @@ static void radeon_vid_frame_sel(int frame)
 
 static void radeon_vid_make_default(void)
 {
+  OUTREG(OV0_COLOUR_CNTL,0x00101000UL); /* Default brihgtness and saturation for Rage128 */
   besr.deinterlace_pattern = 0x900AAAAA;
   OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
   besr.deinterlace_on=1;
@@ -879,8 +887,11 @@ static int __init radeon_vid_config_card(void)
 static void radeon_param_buff_fill( void )
 {
     unsigned len,saturation;
-    long brightness;
-    brightness = besr.brightness;
+    int8_t brightness;
+    brightness = besr.brightness & 0x7f;
+    /* FIXME: It's probably x86 specific convertion. But it doesn't matter
+       for general logic - only for printing value */
+    if(brightness > 63) brightness = (((~besr.brightness) & 0x3f)+1) * (-1);
     saturation = besr.saturation;
     len = 0;
     len += sprintf(&radeon_param_buff[len],"Interface version: %04X\nDriver version: %s\n",MGA_VID_VERSION,RADEON_VID_VERSION);
@@ -898,7 +909,7 @@ static void radeon_param_buff_fill( void )
     len += sprintf(&radeon_param_buff[len],"Configurable stuff:\n");
     len += sprintf(&radeon_param_buff[len],"~~~~~~~~~~~~~~~~~~~\n");
     len += sprintf(&radeon_param_buff[len],PARAM_DOUBLE_BUFF"%s\n",besr.double_buff?"on":"off");
-    len += sprintf(&radeon_param_buff[len],PARAM_BRIGHTNESS"%li\n",brightness);
+    len += sprintf(&radeon_param_buff[len],PARAM_BRIGHTNESS"%i\n",(int)brightness);
     len += sprintf(&radeon_param_buff[len],PARAM_SATURATION"%u\n",saturation);
     len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE"%s\n",besr.deinterlace_on?"on":"off");
     len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE_PATTERN"%X\n",besr.deinterlace_pattern);
@@ -923,7 +934,7 @@ static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count
     {
       long brightness;
       brightness=simple_strtol(&buf[strlen(PARAM_BRIGHTNESS)],NULL,10);
-      if(brightness >= -64 && brightness <= 63)
+      if(brightness >= -64 && brightness <= 63) besr.brightness = brightness;
 	OUTREG(OV0_COLOUR_CNTL, (brightness & 0x7f) |
 				(besr.saturation << 8) |
 				(besr.saturation << 16));
@@ -1009,12 +1020,28 @@ static int radeon_vid_open(struct inode *inode, struct file *file)
 static struct file_operations radeon_vid_fops =
 {
 	llseek:		radeon_vid_lseek,
-	read:			radeon_vid_read,
+	read:		radeon_vid_read,
 	write:		radeon_vid_write,
+/*
+	readdir:
+	poll:
+*/
 	ioctl:		radeon_vid_ioctl,
-	mmap:			radeon_vid_mmap,
-	open:			radeon_vid_open,
+	mmap:		radeon_vid_mmap,
+	open:		radeon_vid_open,
+/*
+	flush:
+*/
 	release: 	radeon_vid_release
+/*
+	fsync:
+	fasync:
+	lock:
+	readv:
+	writev:
+	sendpage:
+	get_unmapped_area:
+*/
 };
 #else
 static struct file_operations radeon_vid_fops =
