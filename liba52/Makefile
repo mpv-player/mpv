@@ -19,7 +19,7 @@ $(LIBNAME):	$(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
 
 test:        $(LIBNAME) test.c
-	$(CC) $(CFLAGS) test.c -o test -L. -la52
+	$(CC) $(CFLAGS)  test.c ../cpudetect.c -o test -L. -la52 -lm
 
 test2:        $(LIBNAME) test.c
 	$(CC) $(CFLAGS) test.c -o test2 -L../libac3 -lac3 -L. -la52

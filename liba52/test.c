@@ -11,6 +11,7 @@
 #include <inttypes.h>
 
 #include "a52.h"
+#include "../cpudetect.h"
 
 static sample_t * samples;
 static a52_state_t state;
@@ -46,6 +47,11 @@ int bit_rate=0;
 long long t, sum=0, min=256*256*256*64;
 #endif
 
+    FILE *temp= stdout;
+    stdout= stderr; //EVIL HACK FIXME
+    GetCpuCaps(&gCpuCaps);
+    stdout= temp;
+    
     samples = a52_init (accel);
     if (samples == NULL) {
 	fprintf (stderr, "A52 init failed\n");
@@ -81,7 +87,7 @@ ENDTIMING
     buf_size=0;
 
     // decode:
-    flags=A52_STEREO; // A52_DOLBY // A52_2F2R // A52_3F2R | A52_LFE
+    flags=A52_STEREO; //A52_STEREO; // A52_DOLBY // A52_2F2R // A52_3F2R | A52_LFE
     channels=2;
     
     flags |= A52_ADJUST_LEVEL;
@@ -92,15 +98,15 @@ ENDTIMING
 
     // a52_dynrng (&state, NULL, NULL); // disable dynamic range compensation
 
+STARTTIMING
     a52_resample_init(flags,channels);
     s16 = out_buf;
     for (i = 0; i < 6; i++) {
-STARTTIMING
 	if (a52_block (&state, samples))
 	    { fprintf(stderr,"error at sampling\n"); break; }
-ENDTIMING
 	// float->int + channels interleaving:
 	s16+=a52_resample(samples,s16);
+ENDTIMING
     }
 #ifdef TIMING
 if(sum<min) min=sum;

@@ -19,9 +19,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * SSE optimizations from Michael Niedermayer (michaelni@gmx.at)
  */
 
 #include "config.h"
+#include "../cpudetect.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -72,7 +75,7 @@ static uint8_t bit_reverse_256[] = {
 	0x03, 0x23, 0x13, 0x33, 0x0b, 0x2b, 0x1b, 0x3b, 
 	0x07, 0x27, 0x17, 0x37, 0x0f, 0x2f, 0x1f, 0x3f};
 
-#ifdef HAVE_SSE
+#ifdef ARCH_X86
 // NOTE: SSE needs 16byte alignment or it will segfault 
 static complex_t __attribute__((aligned(16))) buf[128];
 static float __attribute__((aligned(16))) sseSinCos1a[256];
@@ -185,36 +188,6 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	
     /* 512 IMDCT with source and dest data in 'data' */
 	
-#ifdef HAVE_SSE
-    /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
-    /* Bit reversed shuffling */
-	asm volatile(
-		"xorl %%esi, %%esi			\n\t"
-		"leal bit_reverse_512, %%eax		\n\t"
-		"movl $1008, %%edi			\n\t"
-		"pushl %%ebp				\n\t" //use ebp without telling gcc
-		".balign 16				\n\t"
-		"1:					\n\t"
-		"movaps (%0, %%esi), %%xmm0		\n\t"
-		"movaps (%0, %%edi), %%xmm1		\n\t"
-		"shufps $0xA0, %%xmm0, %%xmm0		\n\t"
-		"shufps $0x5F, %%xmm1, %%xmm1		\n\t"
-		"mulps sseSinCos1a(%%esi), %%xmm0	\n\t"
-		"mulps sseSinCos1b(%%esi), %%xmm1	\n\t"
-		"addps %%xmm1, %%xmm0			\n\t"
-		"movzbl (%%eax), %%edx			\n\t"
-		"movzbl 1(%%eax), %%ebp			\n\t"
-		"movlps %%xmm0, (%1, %%edx,8)		\n\t"
-		"movhps %%xmm0, (%1, %%ebp,8)		\n\t"
-		"addl $16, %%esi			\n\t"
-		"addl $2, %%eax				\n\t" // avoid complex addressing for P4 crap
-		"subl $16, %%edi			\n\t"
-		" jnc 1b				\n\t"
-		"popl %%ebp				\n\t"//no we didnt touch ebp *g*
-		:: "b" (data), "c" (buf)
-		: "%esi", "%edi", "%eax", "%edx"
-	);
-#else
     /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
     for( i=0; i < 128; i++) {
 	/* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */ 
@@ -228,7 +201,6 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	if (k < i)
 	    swap_cmplx(&buf[i],&buf[k]);
     }
-#endif
 
 
     /* FFT Merge */
@@ -258,7 +230,209 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
     }
 */
     
-#ifdef HAVE_SSE
+    for(i = 0; i < 128; i += 2) {
+	tmp_a_r = buf[i].real;
+	tmp_a_i = buf[i].imag;
+	tmp_b_r = buf[i+1].real;
+	tmp_b_i = buf[i+1].imag;
+	buf[i].real = tmp_a_r + tmp_b_r;
+	buf[i].imag =  tmp_a_i + tmp_b_i;
+	buf[i+1].real = tmp_a_r - tmp_b_r;
+	buf[i+1].imag =  tmp_a_i - tmp_b_i;
+    }
+        
+	// Note w[1]={{1,0}, {0,-1}}
+    for(i = 0; i < 128; i += 4) {
+	tmp_a_r = buf[i].real;
+	tmp_a_i = buf[i].imag;
+	tmp_b_r = buf[i+2].real;
+	tmp_b_i = buf[i+2].imag;
+	buf[i].real = tmp_a_r + tmp_b_r;
+	buf[i].imag =  tmp_a_i + tmp_b_i;
+	buf[i+2].real = tmp_a_r - tmp_b_r;
+	buf[i+2].imag =  tmp_a_i - tmp_b_i;
+	tmp_a_r = buf[i+1].real;
+	tmp_a_i = buf[i+1].imag;
+	tmp_b_r = buf[i+3].imag;
+	tmp_b_i = buf[i+3].real;
+	buf[i+1].real = tmp_a_r + tmp_b_r;
+	buf[i+1].imag =  tmp_a_i - tmp_b_i;
+	buf[i+3].real = tmp_a_r - tmp_b_r;
+	buf[i+3].imag =  tmp_a_i + tmp_b_i;
+    }
+
+    for(i = 0; i < 128; i += 8) {
+		tmp_a_r = buf[i].real;
+		tmp_a_i = buf[i].imag;
+		tmp_b_r = buf[i+4].real;
+		tmp_b_i = buf[i+4].imag;
+		buf[i].real = tmp_a_r + tmp_b_r;
+		buf[i].imag =  tmp_a_i + tmp_b_i;
+		buf[i+4].real = tmp_a_r - tmp_b_r;
+		buf[i+4].imag =  tmp_a_i - tmp_b_i;
+		tmp_a_r = buf[1+i].real;
+		tmp_a_i = buf[1+i].imag;
+		tmp_b_r = (buf[i+5].real + buf[i+5].imag) * w[2][1].real;
+		tmp_b_i = (buf[i+5].imag - buf[i+5].real) * w[2][1].real;
+		buf[1+i].real = tmp_a_r + tmp_b_r;
+		buf[1+i].imag =  tmp_a_i + tmp_b_i;
+		buf[i+5].real = tmp_a_r - tmp_b_r;
+		buf[i+5].imag =  tmp_a_i - tmp_b_i;
+		tmp_a_r = buf[i+2].real;
+		tmp_a_i = buf[i+2].imag;
+		tmp_b_r = buf[i+6].imag;
+		tmp_b_i = - buf[i+6].real;
+		buf[i+2].real = tmp_a_r + tmp_b_r;
+		buf[i+2].imag =  tmp_a_i + tmp_b_i;
+		buf[i+6].real = tmp_a_r - tmp_b_r;
+		buf[i+6].imag =  tmp_a_i - tmp_b_i;
+		tmp_a_r = buf[i+3].real;
+		tmp_a_i = buf[i+3].imag;
+		tmp_b_r = (buf[i+7].real - buf[i+7].imag) * w[2][3].imag;
+		tmp_b_i = (buf[i+7].imag + buf[i+7].real) * w[2][3].imag;
+		buf[i+3].real = tmp_a_r + tmp_b_r;
+		buf[i+3].imag =  tmp_a_i + tmp_b_i;
+		buf[i+7].real = tmp_a_r - tmp_b_r;
+		buf[i+7].imag =  tmp_a_i - tmp_b_i;
+     }
+    
+    for (m=3; m < 7; m++) {
+        two_m = (1 << m);
+
+	two_m_plus_one = two_m<<1;
+
+	for(i = 0; i < 128; i += two_m_plus_one) {
+	    for(k = 0; k < two_m; k++) {
+		int p = k + i;
+		int q = p + two_m;
+		tmp_a_r = buf[p].real;
+		tmp_a_i = buf[p].imag;
+		tmp_b_r = buf[q].real * w[m][k].real - buf[q].imag * w[m][k].imag;
+		tmp_b_i = buf[q].imag * w[m][k].real + buf[q].real * w[m][k].imag;
+		buf[p].real = tmp_a_r + tmp_b_r;
+		buf[p].imag =  tmp_a_i + tmp_b_i;
+		buf[q].real = tmp_a_r - tmp_b_r;
+		buf[q].imag =  tmp_a_i - tmp_b_i;
+	    }
+	}
+    }
+    
+    /* Post IFFT complex multiply  plus IFFT complex conjugate*/
+    for( i=0; i < 128; i++) {
+	/* y[n] = z[n] * (xcos1[n] + j * xsin1[n]) ; */
+	tmp_a_r =        buf[i].real;
+	tmp_a_i = -1.0 * buf[i].imag;
+	buf[i].real =(tmp_a_r * xcos1[i])  -  (tmp_a_i  * xsin1[i]);
+	buf[i].imag =(tmp_a_r * xsin1[i])  +  (tmp_a_i  * xcos1[i]);
+    }
+	
+    data_ptr = data;
+    delay_ptr = delay;
+    window_ptr = imdct_window;
+
+    /* Window and convert to real valued signal */
+    for(i=0; i< 64; i++) { 
+	*data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias; 
+	*data_ptr++   =  buf[64-i-1].real * *window_ptr++ + *delay_ptr++ + bias; 
+    }
+    
+    for(i=0; i< 64; i++) { 
+	*data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias; 
+	*data_ptr++  =  buf[128-i-1].imag * *window_ptr++ + *delay_ptr++ + bias; 
+    }
+
+    /* The trailing edge of the window goes into the delay line */
+    delay_ptr = delay;
+
+    for(i=0; i< 64; i++) { 
+	*delay_ptr++  = -buf[64+i].real   * *--window_ptr; 
+	*delay_ptr++  =  buf[64-i-1].imag * *--window_ptr; 
+    }
+    
+    for(i=0; i<64; i++) {
+	*delay_ptr++  =  buf[i].imag       * *--window_ptr; 
+	*delay_ptr++  = -buf[128-i-1].real * *--window_ptr; 
+    }
+}
+
+#ifdef ARCH_X86
+void
+imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
+{
+    int i,k;
+    int p,q;
+    int m;
+    int two_m;
+    int two_m_plus_one;
+
+    sample_t tmp_a_i;
+    sample_t tmp_a_r;
+    sample_t tmp_b_i;
+    sample_t tmp_b_r;
+
+    sample_t *data_ptr;
+    sample_t *delay_ptr;
+    sample_t *window_ptr;
+	
+    /* 512 IMDCT with source and dest data in 'data' */
+	
+    /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
+    /* Bit reversed shuffling */
+	asm volatile(
+		"xorl %%esi, %%esi			\n\t"
+		"leal bit_reverse_512, %%eax		\n\t"
+		"movl $1008, %%edi			\n\t"
+		"pushl %%ebp				\n\t" //use ebp without telling gcc
+		".balign 16				\n\t"
+		"1:					\n\t"
+		"movaps (%0, %%esi), %%xmm0		\n\t"
+		"movaps (%0, %%edi), %%xmm1		\n\t"
+		"shufps $0xA0, %%xmm0, %%xmm0		\n\t"
+		"shufps $0x5F, %%xmm1, %%xmm1		\n\t"
+		"mulps sseSinCos1a(%%esi), %%xmm0	\n\t"
+		"mulps sseSinCos1b(%%esi), %%xmm1	\n\t"
+		"addps %%xmm1, %%xmm0			\n\t"
+		"movzbl (%%eax), %%edx			\n\t"
+		"movzbl 1(%%eax), %%ebp			\n\t"
+		"movlps %%xmm0, (%1, %%edx,8)		\n\t"
+		"movhps %%xmm0, (%1, %%ebp,8)		\n\t"
+		"addl $16, %%esi			\n\t"
+		"addl $2, %%eax				\n\t" // avoid complex addressing for P4 crap
+		"subl $16, %%edi			\n\t"
+		" jnc 1b				\n\t"
+		"popl %%ebp				\n\t"//no we didnt touch ebp *g*
+		:: "b" (data), "c" (buf)
+		: "%esi", "%edi", "%eax", "%edx"
+	);
+
+
+    /* FFT Merge */
+/* unoptimized variant
+    for (m=1; m < 7; m++) {
+	if(m)
+	    two_m = (1 << m);
+	else
+	    two_m = 1;
+
+	two_m_plus_one = (1 << (m+1));
+
+	for(i = 0; i < 128; i += two_m_plus_one) {
+	    for(k = 0; k < two_m; k++) {
+		p = k + i;
+		q = p + two_m;
+		tmp_a_r = buf[p].real;
+		tmp_a_i = buf[p].imag;
+		tmp_b_r = buf[q].real * w[m][k].real - buf[q].imag * w[m][k].imag;
+		tmp_b_i = buf[q].imag * w[m][k].real + buf[q].real * w[m][k].imag;
+		buf[p].real = tmp_a_r + tmp_b_r;
+		buf[p].imag =  tmp_a_i + tmp_b_i;
+		buf[q].real = tmp_a_r - tmp_b_r;
+		buf[q].imag =  tmp_a_i - tmp_b_i;
+	    }
+	}
+    }
+*/
+    
 	// Note w[0][0]={1,0}
 	asm volatile(
 		"xorps %%xmm1, %%xmm1	\n\t"
@@ -279,21 +453,8 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 		:: "g" (buf), "r" (buf + 128)
 		: "%esi"
 	);
-#else
-    for(i = 0; i < 128; i += 2) {
-	tmp_a_r = buf[i].real;
-	tmp_a_i = buf[i].imag;
-	tmp_b_r = buf[i+1].real;
-	tmp_b_i = buf[i+1].imag;
-	buf[i].real = tmp_a_r + tmp_b_r;
-	buf[i].imag =  tmp_a_i + tmp_b_i;
-	buf[i+1].real = tmp_a_r - tmp_b_r;
-	buf[i+1].imag =  tmp_a_i - tmp_b_i;
-    }
-#endif
         
 	// Note w[1]={{1,0}, {0,-1}}
-#ifdef HAVE_SSE
 	asm volatile(
 		"movaps ps111_1, %%xmm7		\n\t" // 1,1,1,-1
 		"movl %0, %%esi			\n\t"
@@ -314,28 +475,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 		:: "g" (buf), "r" (buf + 128)
 		: "%esi"
 	);
-#else    
-    for(i = 0; i < 128; i += 4) {
-	tmp_a_r = buf[i].real;
-	tmp_a_i = buf[i].imag;
-	tmp_b_r = buf[i+2].real;
-	tmp_b_i = buf[i+2].imag;
-	buf[i].real = tmp_a_r + tmp_b_r;
-	buf[i].imag =  tmp_a_i + tmp_b_i;
-	buf[i+2].real = tmp_a_r - tmp_b_r;
-	buf[i+2].imag =  tmp_a_i - tmp_b_i;
-	tmp_a_r = buf[i+1].real;
-	tmp_a_i = buf[i+1].imag;
-	tmp_b_r = buf[i+3].imag;
-	tmp_b_i = buf[i+3].real;
-	buf[i+1].real = tmp_a_r + tmp_b_r;
-	buf[i+1].imag =  tmp_a_i - tmp_b_i;
-	buf[i+3].real = tmp_a_r - tmp_b_r;
-	buf[i+3].imag =  tmp_a_i + tmp_b_i;
-    }
-#endif    
 
-#ifdef HAVE_SSE    
 /*
  Note sseW2+0={1,1,sqrt(2),sqrt(2))
  Note sseW2+16={0,0,sqrt(2),-sqrt(2))
@@ -380,44 +520,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 		:: "g" (buf), "r" (buf + 128)
 		: "%esi"
 	);
-#else    
-    for(i = 0; i < 128; i += 8) {
-		tmp_a_r = buf[i].real;
-		tmp_a_i = buf[i].imag;
-		tmp_b_r = buf[i+4].real;
-		tmp_b_i = buf[i+4].imag;
-		buf[i].real = tmp_a_r + tmp_b_r;
-		buf[i].imag =  tmp_a_i + tmp_b_i;
-		buf[i+4].real = tmp_a_r - tmp_b_r;
-		buf[i+4].imag =  tmp_a_i - tmp_b_i;
-		tmp_a_r = buf[1+i].real;
-		tmp_a_i = buf[1+i].imag;
-		tmp_b_r = (buf[i+5].real + buf[i+5].imag) * w[2][1].real;
-		tmp_b_i = (buf[i+5].imag - buf[i+5].real) * w[2][1].real;
-		buf[1+i].real = tmp_a_r + tmp_b_r;
-		buf[1+i].imag =  tmp_a_i + tmp_b_i;
-		buf[i+5].real = tmp_a_r - tmp_b_r;
-		buf[i+5].imag =  tmp_a_i - tmp_b_i;
-		tmp_a_r = buf[i+2].real;
-		tmp_a_i = buf[i+2].imag;
-		tmp_b_r = buf[i+6].imag;
-		tmp_b_i = - buf[i+6].real;
-		buf[i+2].real = tmp_a_r + tmp_b_r;
-		buf[i+2].imag =  tmp_a_i + tmp_b_i;
-		buf[i+6].real = tmp_a_r - tmp_b_r;
-		buf[i+6].imag =  tmp_a_i - tmp_b_i;
-		tmp_a_r = buf[i+3].real;
-		tmp_a_i = buf[i+3].imag;
-		tmp_b_r = (buf[i+7].real - buf[i+7].imag) * w[2][3].imag;
-		tmp_b_i = (buf[i+7].imag + buf[i+7].real) * w[2][3].imag;
-		buf[i+3].real = tmp_a_r + tmp_b_r;
-		buf[i+3].imag =  tmp_a_i + tmp_b_i;
-		buf[i+7].real = tmp_a_r - tmp_b_r;
-		buf[i+7].imag =  tmp_a_i - tmp_b_i;
-     }
-#endif
 
-#ifdef HAVE_SSE
     for (m=3; m < 7; m++) {
 	two_m = (1 << m);
 	two_m_plus_one = two_m<<1;
@@ -452,28 +555,6 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	);
     }
 
-#else
-    for (m=3; m < 7; m++) {
-        two_m = (1 << m);
-
-	two_m_plus_one = two_m<<1;
-
-	for(i = 0; i < 128; i += two_m_plus_one) {
-	    for(k = 0; k < two_m; k++) {
-		int p = k + i;
-		int q = p + two_m;
-		tmp_a_r = buf[p].real;
-		tmp_a_i = buf[p].imag;
-		tmp_b_r = buf[q].real * w[m][k].real - buf[q].imag * w[m][k].imag;
-		tmp_b_i = buf[q].imag * w[m][k].real + buf[q].real * w[m][k].imag;
-		buf[p].real = tmp_a_r + tmp_b_r;
-		buf[p].imag =  tmp_a_i + tmp_b_i;
-		buf[q].real = tmp_a_r - tmp_b_r;
-		buf[q].imag =  tmp_a_i - tmp_b_i;
-	    }
-	}
-    }
-#endif
     
     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
     for( i=0; i < 128; i++) {
@@ -489,7 +570,6 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
     window_ptr = imdct_window;
 
     /* Window and convert to real valued signal */
-#ifdef HAVE_SSE
 	asm volatile(
 		"xorl %%edi, %%edi			\n\t"  // 0
 		"xorl %%esi, %%esi			\n\t"  // 0
@@ -516,14 +596,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	data_ptr+=128;
 	delay_ptr+=128;
 //	window_ptr+=128;
-#else
-    for(i=0; i< 64; i++) { 
-	*data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias; 
-	*data_ptr++   =  buf[64-i-1].real * *window_ptr++ + *delay_ptr++ + bias; 
-    }
-#endif
-
-#ifdef HAVE_SSE
+	
 	asm volatile(
 		"movl $1024, %%edi			\n\t"  // 512
 		"xorl %%esi, %%esi			\n\t"  // 0
@@ -549,17 +622,10 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	);
 	data_ptr+=128;
 //	window_ptr+=128;
-#else
-    for(i=0; i< 64; i++) { 
-	*data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias; 
-	*data_ptr++  =  buf[128-i-1].imag * *window_ptr++ + *delay_ptr++ + bias; 
-    }
-#endif
 
     /* The trailing edge of the window goes into the delay line */
     delay_ptr = delay;
 
-#ifdef HAVE_SSE
 	asm volatile(
 		"xorl %%edi, %%edi			\n\t"  // 0
 		"xorl %%esi, %%esi			\n\t"  // 0
@@ -581,14 +647,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	);
 	delay_ptr+=128;
 //	window_ptr-=128;
-#else
-    for(i=0; i< 64; i++) { 
-	*delay_ptr++  = -buf[64+i].real   * *--window_ptr; 
-	*delay_ptr++  =  buf[64-i-1].imag * *--window_ptr; 
-    }
-#endif
-
-#ifdef HAVE_SSE
+	
 	asm volatile(
 		"movl $1024, %%edi			\n\t"  // 1024
 		"xorl %%esi, %%esi			\n\t"  // 0
@@ -608,13 +667,8 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 		:: "r" (buf), "r" (delay_ptr)
 		: "%esi", "%edi"
 	);
-#else
-    for(i=0; i<64; i++) {
-	*delay_ptr++  =  buf[i].imag       * *--window_ptr; 
-	*delay_ptr++  = -buf[128-i-1].real * *--window_ptr; 
-    }
-#endif
 }
+#endif //arch_x86
 
 void
 imdct_do_256(sample_t data[],sample_t delay[],sample_t bias)
@@ -756,14 +810,15 @@ void imdct_init (uint32_t mm_accel)
     {
 	int i, j, k;
 
-	fprintf (stderr, "No accelerated IMDCT transform found\n");
+	if(gCpuCaps.hasSSE) fprintf (stderr, "Using SSE optimized IMDCT transform\n");
+	else		    fprintf (stderr, "No accelerated IMDCT transform found\n");
 
 	/* Twiddle factors to turn IFFT into IMDCT */
 	for (i = 0; i < 128; i++) {
 	    xcos1[i] = -cos ((M_PI / 2048) * (8 * i + 1));
 	    xsin1[i] = -sin ((M_PI / 2048) * (8 * i + 1));
 	}
-#ifdef HAVE_SSE
+#ifdef ARCH_X86
 	for (i = 0; i < 128; i++) {
 	    sseSinCos1a[2*i+0]= -xsin1[i];
 	    sseSinCos1a[2*i+1]= -xcos1[i];
@@ -785,7 +840,7 @@ void imdct_init (uint32_t mm_accel)
 		w[i][k].imag = sin (-M_PI * k / j);
 	    }
 	}
-#ifdef HAVE_SSE
+#ifdef ARCH_X86
 	for (i = 1; i < 7; i++) {
 	    j = 1 << i;
 	    for (k = 0; k < j; k+=2) {
@@ -828,9 +883,10 @@ void imdct_init (uint32_t mm_accel)
 		sseWindow[384 + 2*i+0]=  imdct_window[126 - 2*i+1];
 		sseWindow[384 + 2*i+1]= -imdct_window[126 - 2*i+0];
 	}
-#endif
-	
-	imdct_512 = imdct_do_512;
+#endif // arch_x86
+
+	if(gCpuCaps.hasSSE)	imdct_512 = imdct_do_512_sse;
+	else			imdct_512 = imdct_do_512;
 	imdct_256 = imdct_do_256;
     }
 }
