@@ -6,7 +6,7 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2001 Arpad Gereoffy (siehe DOCS/AUTHORS)\n"
+"MPlayer " VERSION "(C) 2000-2001 Arpad Gereoffy (siehe DOCS!)\n"
 "\n";
 
 static char help_text[]=
@@ -67,8 +67,8 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Kann Homeverzeichnis nicht finden\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") Problem\n"
 #define MSGTR_CreatingCfgFile "Erstelle Konfigurationsdatei: %s\n"
-#define MSGTR_InvalidVOdriver "Ungültiger Videoausgabetreibername: %s\n'-vo help' zeigt eine Liste aller.\n"
-#define MSGTR_InvalidAOdriver "Ungültiger Audioausgabetreibername: %s\n'-ao help' zeigt eine Liste aller.\n"
+#define MSGTR_InvalidVOdriver "Ungültiger Videoausgabetreibername: %s\n'-vo help' zeigt eine Liste an.\n"
+#define MSGTR_InvalidAOdriver "Ungültiger Audioausgabetreibername: %s\n'-ao help' zeigt eine Liste an.\n"
 #define MSGTR_CopyCodecsConf "(kopiere/linke etc/codecs.conf nach ~/.mplayer/codecs.conf)\n"
 #define MSGTR_CantLoadFont "Kann Schriftdatei %s nicht laden\n"
 #define MSGTR_CantLoadSub "Kann Untertitel nicht laden: %s\n"
@@ -79,7 +79,7 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Kann dump-Datei nicht öffnen!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "FPS ist im Header nicht angegeben (oder ungültig)! Benutze -fps Option!\n"
-#define MSGTR_NoVideoStream "Sorry, kein Videostream... ist unabspielbar\n"
+#define MSGTR_NoVideoStream "Sorry, kein Videostream... ist nicht abspielbar\n"
 #define MSGTR_TryForceAudioFmt "Erzwinge Audiocodecgruppe %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Kann keinen Audiocodec für gewünschte Gruppe finden, verwende anderen.\n"
 #define MSGTR_CantFindAudioCodec "Kann Codec für Audioformat 0x%X nicht finden!\n"
@@ -95,9 +95,18 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATAL: Kann Videoausgabetreiber nicht initialisieren!\n"
 #define MSGTR_CannotInitAO "Kann Audiotreiber/Soundkarte nicht initialisieren -> Kein Ton\n"
 #define MSGTR_StartPlaying "Starte Wiedergabe...\n"
-#define MSGTR_SystemTooSlow "\n************************************************************************"\
-			    "\n** Dein System ist zu langsam. Versuche die -framedrop Option oder RTFM! **"\
-			    "\n************************************************************************\n"
+#define MSGTR_SystemTooSlow "\n\n"\
+"         ***************************************************\n"\
+"         **** Dein System ist zu LANGSAM zum Abspielen! ****\n"\
+"         ***************************************************\n"\
+"!!! Mögliche Gründe, Probleme, Abhilfen: \n"\
+"- Meistens: defekter/fehlerhafter _Audio_ Treiber. Abhilfe: versuche -ao sdl,\n"\
+"  verwende ALSA 0.5 oder die OSS Emulation von ALSA 0.9. Lese DOCS/sound.html!\n"\
+"- Langsame Videoausgabe. Versuche einen anderen -vo Treiber (Liste: -vo help)\n"\
+"  oder versuche es mit -framedrop ! Lese DOCS/video.html für Tipps.\n"\
+"- Langsame CPU. Keine DVD/DIVX auf einer langsamen CPU. Versuche -hardframedrop\n"\
+"- Defekte Datei. Versuche verschiede Kombinatationen: -nobps  -ni  -mc 0  -forceidx\n"\
+"Wenn nichts davon hilft, lese DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer wurde OHNE GUI-Unterstützung kompiliert!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI erfordert X11!\n"
@@ -127,7 +136,7 @@ static char help_text[]=
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Warnung! Audiostreamheader %d redefiniert!\n"
-#define MSGTR_VideoStreamRedefined "Warnung! Videostreamheader %d redefiniert\n"
+#define MSGTR_VideoStreamRedefined "Warnung! Videostreamheader %d redefiniert!\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Zu viele (%d in %d bytes) Audiopakete im Puffer!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Zu viele (%d in %d bytes) Videopakete im Puffer!\n"
 #define MSGTR_MaybeNI "Vielleicht spielst du einen non-interleaved Stream/Datei oder der Codec funktioniert nicht.\n"
