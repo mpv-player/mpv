@@ -37,7 +37,7 @@
 #include "libvo2/libvo2.h"
 #else
 #include "libvo/video_out.h"
-void* mDisplay; // Display* mDisplay;
+extern void* mDisplay; // Display* mDisplay;
 #endif
 
 //#ifdef USE_OSD
