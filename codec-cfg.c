@@ -240,7 +240,7 @@ static short get_driver(char *s,int audioflag)
 		"vfwex",
 		"divx4",
 		"raw",
-		"rle",
+		"msrle",
 		"xanim",
 		"msvidc",
 		"fli",

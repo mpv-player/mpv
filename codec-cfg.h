@@ -50,7 +50,7 @@
 #define VFM_VFWEX 6
 #define VFM_DIVX4 7
 #define VFM_RAW 8
-#define VFM_RLE 9
+#define VFM_MSRLE 9
 #define VFM_XANIM 10
 #define VFM_MSVIDC 11
 #define VFM_FLI 12
