@@ -677,15 +677,13 @@ static int fb_preinit(void)
 	}
 	fb_orig_vinfo = fb_vinfo;
 
-/*
-	fb_bpp = (fb_vinfo.bits_per_pixel == 32) ? 32 :
-		(fb_vinfo.red.length + fb_vinfo.green.length +
-		 fb_vinfo.blue.length);
-*/
-#warning FIXME
-	/* nemigy kellene bpp-t meghatarozni */
-	fb_bpp = (fb_vinfo.bits_per_pixel == 32) ? 32 :
-		(fb_vinfo.red.length + fb_vinfo.red.offset);
+	fb_bpp = fb_vinfo.bits_per_pixel;
+
+	/* 16 and 15 bpp is reported 16 bpp */
+	if (fb_bpp == 16)
+		fb_bpp = fb_vinfo.red.length + fb_vinfo.green.length +
+			fb_vinfo.blue.length;
+
 	if (vo_dbpp) {
 		if (vo_dbpp != 15 && vo_dbpp != 16 && vo_dbpp != 24 &&
 				vo_dbpp != 32) {
