@@ -7906,11 +7906,12 @@ Will be updated as necessary in the case of 'format=mpeg1' or 'mpeg2'.
 Sets timestamps on all frames, if possible.
 .
 .TP
-.B noreorder
-Disable the frame reordering code, that stores frames in decoding
+.B reorder
+Enables the frame reordering code, that stores frames in decoding
 (rather than display) order (default: disabled).
-Use it only if you believe the reordering code is buggy
-and working improperly.
+Use it only if you believe the video frames in the original stream
+were stored incorrectly.
+Works only with MPEG-1/2 video.
 .
 .TP
 .B init_vpts=<100\-700>
