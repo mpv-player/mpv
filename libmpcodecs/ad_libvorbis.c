@@ -133,7 +133,7 @@ static int init(sh_audio_t *sh)
     if(ov->rg_scale > 15.) 
       ov->rg_scale = 15.;
 #ifdef TREMOR
-    ov->rg_scale_int = (int)(ov->rg_scale*256.f);
+    ov->rg_scale_int = (int)(ov->rg_scale*128.f);
 #endif
     mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Bitstream is %d channel%s, %dHz, %dbit/s %cBR\n",(int)ov->vi.channels,ov->vi.channels>1?"s":"",(int)ov->vi.rate,(int)ov->vi.bitrate_nominal,
 	(ov->vi.bitrate_lower!=ov->vi.bitrate_nominal)||(ov->vi.bitrate_upper!=ov->vi.bitrate_nominal)?'V':'C');
@@ -212,7 +212,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 #ifdef TREMOR
 	      ogg_int32_t  *mono=pcm[i];
 	      for(j=0;j<bout;j++){
-		int val=(mono[j]*ov->rg_scale_int)>>(9+8);
+		int val=(mono[j]*ov->rg_scale_int)>>(9+7);
 #else
 	      float  *mono=pcm[i];
 	      for(j=0;j<bout;j++){
