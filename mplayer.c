@@ -1143,7 +1143,7 @@ if(file_format==DEMUXER_TYPE_AVI && sh_audio){
   if(verbose) printf("Initial frame delay  A: %d  V: %d\n",(int)sh_audio->audio.dwInitialFrames,(int)sh_video->video.dwInitialFrames);
   if(!pts_from_bps){
     float x=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)*sh_video->frametime;
-    audio_delay-=x;
+//    audio_delay-=x;
     if(verbose) printf("AVI Initial frame delay: %5.3f\n",x);
   }
   if(verbose){
