@@ -15,7 +15,7 @@
 #include "../../../config.h"
 #include "../../../help_mp.h"
 #include "../../../mplayer.h"
-#include "../../../libao2/eq.h"
+#include "../../../libaf/equalizer.h"
 #include "../../../libvo/video_out.h"
 #include "../widgets.h"
 #include "../mplayer.h"

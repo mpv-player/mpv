@@ -28,7 +28,7 @@
 #include "../libao2/audio_out.h"
 #include "../mixer.h"
 #include "../libaf/af.h"
-#include "../libao2/eq.h"
+#include "../libaf/equalizer.h"
 
 extern af_cfg_t af_cfg;
 
