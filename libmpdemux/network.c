@@ -602,7 +602,16 @@ extension=NULL;
 			*file_format = DEMUXER_TYPE_RTP;
 			return 0;
 #else
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"RTSP protocol support requires the \"LIVE.COM Streaming Media\" libraries!\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"RTSP support requires the \"LIVE.COM Streaming Media\" libraries!\n");
+			return -1;
+#endif
+		// Checking for SIP
+		} else if( !strcasecmp(url->protocol, "sip") ) {
+#ifdef STREAMING_LIVE_DOT_COM
+			*file_format = DEMUXER_TYPE_RTP;
+			return 0;
+#else
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"SIP support requires the \"LIVE.COM Streaming Media\" libraries!\n");
 			return -1;
 #endif
 		}
