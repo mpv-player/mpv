@@ -454,6 +454,14 @@ Töröld ki az MJPEG windows DLL-t a <CODE>codecs.conf</CODE>-ból, vagy
 használd a <CODE>-vc ffmjpeg</CODE> opciót (libavcodec szükséges).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Amikor grabbelni próbálok a tunerrõl mûködik, viszont a színek furcsák.
+Más programokkal viszont jók.
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+A kártyád valószínûleg rosszul adja vissza a colorspace képességét. Próbáld
+ki a YUY2-t az alapértelmezett YV12 helyett (lásd TV bemenet dokumentáció).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD COLSPAN=3><P><B><A NAME=5.4><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.4.  Video/audio meghajtó problémák (vo/ao)</A></B></P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 

@@ -846,8 +846,8 @@ to improve something then simply send me your patches.
     enabled.</LI>
   <LI><B>Framebuffer</B>: using the <B>matroxfb modules</B> in the 2.4 kernels.
     2.2 kernels don't have the TVout feature in them, thus unusable for this.
-    You have to enable ALL matroxfb-specific feature during compilation, and
-    compile them into <B>modules</B>!
+    You have to enable ALL matroxfb-specific feature during compilation (except
+    MultiHead), and compile them into <B>modules</B>!
     <UL>
       <LI>
 	Enter <CODE>TVout/matroxset</CODE> and type <CODE>make</CODE>. Install
@@ -864,7 +864,7 @@ to improve something then simply send me your patches.
         to a very simple menu. Press <B>2</B> and <B>ENTER</B>. Now you should
 	have the same picture on your monitor, and TV. The <B>3.</B> option
         will turn on independent display, but then you <B>can't use X</B>! If
-	the TV picture has some weird stripes on it, the script wasn't able to
+	the TV (PAL !) picture has some weird stripes on it, the script wasn't able to
 	set the resolution correctly (to 640x512 by default). Use other menu
 	items randomly and it'll be OK :)</LI>
     </UL>

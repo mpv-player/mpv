@@ -822,96 +822,69 @@ küldj patchet.</P>
 
 <P><B><A NAME=2.3.1.A.1>2.3.1.A.1.  Matrox kártyák</A></B></P>
 
-<P><I>Nagyon szeretném, ha az MPlayer tudná azt, amit a windows-os gépem. Amikor
-   elindítok egy lejátszást a windows-ban (ablakos vagy teljesképernyõs)
-   a film megjelenik a tv-kimeneten is. Imádom ezt, és azon gondolkoztam, milyen
-   nehéz lenne ezt beépíteni mplayer-be.</I></P>
-
-<P.Ez a driver korlátja. BES (Back-End Scaler, ez az overlay generator, és YUV
-  scaler a G200/G400/G450/G550 kártyákon) csak a CRTC1-en mûködik. Normális esetben,
-  CRTC1 (szöveges mód, minden bpp, BES) az 1-es head-re kerül, és CRTC2
-  (csak 16/32bpp, csak grafika) a 2-esre (TV-kimenet).</P>
-
-<P>Linux alatt, 2 lehetõseg van ennek mûködésre bírására:</P>
-
-<P><UL>
-<LI>4.0.x-es X használatával, valamint a HAL driverrel a Matrox-tól, így
-     lesz dualhead támogatás, és át lehet irányítani TV-re. Sajnos ez
-     bekapcsolt Macrovision kódolással van ellátva, így csak közvetlenül
-     TV-re mûködik, videomagnón keresztül nem. (**dehonnem, régi vidi rulez**)
-     A másik gond az, hogy az Xv nem mûködik a második head-en.
-     (nem tudom, hogy a Windows hogy oldja meg, talán megcseréli a CRTC-ket, 
-     vagy valami trükkel használja a YUV framebuffer-t a második DAC-en)
-
-<LI>Matroxfb használatával, és dual-head támogatással (2.4.x kernelek).
-     Lesz egy framebufferes konzolod (CRTC2-vel, úgyhogy lassú), és
-     TV-kimenet (CRTC1-gyel, BES támogatással).
-     Ilyenkor elfelejtheted az X-et! :(
-</UL></P>
-
-<P><UL>
-<LI>Fordíts minden matrox-féle cuccot modulba a kernelfordításkor.
-     (ez SZÜKSÉGES, legalábbis én máshogy még nem tudtam mûködésre bírni)
-     [indítsd az új kernelt és installáld a modulokat, de még ne töltsd be
-     õket!]
-
-<P><CODE>
-&nbsp;&nbsp;cd TVout<BR>
-&nbsp;&nbsp;./compile.sh</CODE></P>
-
-<LI>Futtasd a 'modules' script-et a TV-out könyvtárból.
-     Át fogja kapcsolni a konzolodat framebuffer-be.
-     Válts át tty1-re (ALT+F1)!
-     Most futtasd az 'independent' scriptet, ami így fogja beállítani a tty-ket:
-<P>tty 1,2:      fb konzol, CRTC2-n, 1-es headen (monitor)<BR>
-       tty 3,4,5:..: framebuffer+BES, CRTC1-en, 2-es headen (TV-kimenet)</P>
-     Futtasd a TV-* és Mon-* scripteket, hogy beállítsd a felbontásokat:
-<P>válts tty1-re (ALT+F1), és futtasd: Mon-* (csak az egyiket)<BR>
-       válts tty3-ra (ALT+F3), és most vissza tty1-re (ALT+F1)</P>
-         (ez kiválasztja a tty3-at a /dev/fb1-en - trükkös)   <BR>
-<P>Futtasd: TV-* (csak az egyiket)</P>
-        (most egy konzolod lesz a PAL TV-n - nem tudni NTSC-vel mi van)
-
-<P>Ha most elindítod az <B>MPlayer</B>-t (tty1-en), a kép tty3-on jön elõ, azaz
-     a TV-den, vagy a második monitorodon.</P>
-</UL></P>
-
-<P>Igen, egy csöppet gány. Jelenleg a marvel project elkészülésére várok,
-  remélem ez normális TV-out drivereket eredményez.</P>
-
-<P>Jelenlegi problémám, hogy a BES csak a CRTC1-en mûködik. Ezért a kép
-  mindig azon a head-en jön elõ, amelyik a CRTC1-hez van irányítva
-  (általában a monitor), így hát meg kell cserélni a CRTC-ket, viszont így
-  a konzolod framebufferes lesz (mert a CRTC2 nem tud szöveges módot) és  
-  egy kicsit lassú. :(</P>
-
-<P><I>egyébként csak fekete-fehér kimenet sikerült a tv-n ...</I><BR>
-  Nem lehet hogy NTSC TV-d van? Vagy csak nem futtattad le a TV-*
-  scriptet.</P>
-
-
-<P><B><A NAME=2.3.1.A.1a>2.3.1.A.1a. Matrox kártyák - második módszer (Az XFree Megközelítés)</A></B></P>
-
-<P>A fent ismertetett módszer nem túl megfelelõ az X-et használók számára,
-ugyanis vagy le kell állítaniuk, vagy az egész teljesen zavaros lesz. Ez
-a fejezet nekik íródott.</P>
+<P>Linux alatt két lehetõséged van :</P>
 
 <P>
-<LI>fordítsd modulba a matroxfb-t</LI>
-<LI>töltsd be a modulokat a <CODE>./modules</CODE> scripttel</LI>
-<LI>kapcsold be a megjelenítõ klónozását a <CODE>./cloning</CODE> scripttel</LI>
-<LI>indítsd el a <CODE>./TV-640x512</CODE> scriptet, vagy amilyen felbontást
-akarsz használni</LI>
+<UL>
+  <LI><B>XFree86</B>: a <A HREF="http://www.matrox.com">Matroxtól</A> letölthetõ
+    meghajtó, és a hozzávaló HAL modul. Ez X-et tud kiadni TV-re.<BR>
+    <B>Ezzel a módszerrel nem lesz hardveres gyorsítás</B> mint Windoze alatt!
+    A második fejnek csak YUV framebuffere van, a <I>BES</I> (Back End Scaler,
+    azaz a YUV scaler a G200/G400/G450/G550 kártyákon) nem mûködik rajta !
+    A windowsos meghajtó valahogy megkerüli ezt a limitet, valószínûleg
+    a 3D motorral nagyítva, és a YUV framebufferrel megjelenítve a képet.
+    Ha tényleg X-et akarsz használni, a <CODE>-vo x11 -fs -zoom</CODE>
+    opciók bekapcsolják a <B>LASSÚ</B> szoftveres nagyítást, és ráadásul
+    Macrovision másolásvédelem tetõzi az egészet.</LI>
+  <LI><B>Framebuffer</B>: a 2.4-es kernelek <B>matroxfb moduljait</B>
+    használva. A 2.2-es kernelekben nincs TV kimenet, így használhatatlanok
+    ilyen célra. Kernelfordításnál kapcsolj be MINDEN matroxfb-vel kapcsolatos
+    dolgot (MultiHead-et ne), és fordítsd õket <B>modulba</B> !
+    <UL>
+      <LI>
+	Menj a <CODE>TVout/matroxset</CODE> könyvtárba, és írd be: <CODE>make</CODE>.
+        Installáld a <CODE>matroxset</CODE>-et valahova a PATH-ba.</LI>
+      <LI>
+	Ha nincs <CODE>fbset</CODE>-ed installálva, lépj a
+        <CODE>TVout/fbset</CODE> könyvtárba, és írd be: <CODE>make</CODE>.
+	Installáld az <CODE>fbset</CODE>-et valahova a PATH-ba.</LI>
+      <LI>
+	Ezekután lépj bele a <CODE>TVout/</CODE> könyvtárba, és futtasd le a
+        <CODE>./modules</CODE> scriptet root-ként. A szöveges módú konzolodnak
+        most framebuffer módba kellett hogy lépjen (nincs visszaút!).</LI>
+      <LI>Most futtasd a <CODE>./matroxtv</CODE> scriptet. Ez egy egyszerû
+	menût ad. Írd be <B>2</B> és nyomj <B>ENTER-t</B>. Most a monitoron
+	és a TV-n ugyanannak a képnek kell lennie. A <B>3-as</B> menûpont
+	két független megjelenítõt kapcsol be, de így <B>nem használhatsz X-et</B> !
+	Ha a TV (PAL !) képén furcsa csíkok vannak, a script nem tudta
+	beállítani megfelelõen a felbontást (alapban 640x512-re). Ilyenkor
+	próbáld ki a TV-* scripteket a <CODE>TVout/</CODE> könyvtárban.</LI>
+    </UL>
+
+    <P>
+    Oks. A következõ feladat a kurzor eltüntetése, és a képernyõkímélõ
+    kikapcsolása. Futtasd a következõ parancsokat :</P>
+    <P>
+      <CODE>echo -e '\033[?25l'<BR>
+      setterm -blank 0</CODE>
+    </P>
+
+    <P>
+    Jobb ha valami script-be teszed õket, és kiüríted a képernyõt is..
+    A kurzor visszakapcsolása :<BR><CODE>echo -e '\033[?25h'</CODE>
+    </P>
+
+    <P>Yeah kewl. A lejátszást a következõ paraméterekkel indítsd :
+    <CODE>mplayer -vo mga -fs -screenw 640 -screenh 512 &lt;filename&gt;</CODE><BR>
+    (ha X-et használsz, most válts át konzolra például CTRL-ALT-F1 billentyûkkel)<BR>
+    A 640x512-t értelemszerûen írd át ha más felbontást állítottál be a matroxfb-n..<BR>
+    <B>És igen, élvezd az Xv-nél és windoznál szebb, jobb, gyorsabb Matrox TV kimenetet !</B.
+    </P>
+  </LI>
+</LI>
+</UL>
 </P>
 
-<P>Most a TV-n tiszta képnek kell lennie, és talán a konzolon egy kicsit
-furcsának. De a konzol nem számít, indíts X-et! A TV-rõl eltûnik a kép,
-de a monitor/X jó!<BR>
-Így, amikor csak TV-n akarsz nézni valamit, csak indítsd az <B>MPlayer</B>-t
-X alatt a <CODE>-vo mga -screenw XXX -screenh XXX</CODE> opciókkal
-(az XXX-ek helyére a framebuffered horizontális és vertikális felbontását írd,
-ilyen sorrendben), válts tty1-re (ctrl-alt-f1-gyel), és kapcsold ki a monitort.
-</P>
 
 
 <P><B><A NAME=2.3.1.A.2>2.3.1.A.2. ATI kártyák</A></B></P>

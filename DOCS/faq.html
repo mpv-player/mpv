@@ -490,6 +490,14 @@ Disable the Windows DLL in <CODE>codecs.conf</CODE>, or use <CODE>-vc ffmjpeg</C
 compile MPlayer with libavcodec).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+When I try to grab from my tuner, it works, but colors are strange. It's ok
+with other applications.
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Your card probably misreports its colorspace capacity. Try with YUY2 instead
+of default YV12 (see TV input documentation).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD COLSPAN=3>
 <B><A NAME=5.4><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.4. Video/audio driver problems (vo/ao)</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
