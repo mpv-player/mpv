@@ -1123,14 +1123,17 @@ to worry about it ... Note: With SDL you can force/disable Xv using
 <title>DVD playback</title>
 <qandaentry>
 <question><para>
-What about DVD navigation?
+What about DVD navigation/menus?
 </para></question>
 <answer><para>
-Support for dvdnav in <application>MPlayer</application> is currently broken,
-normal playback does work, though. If you want to have fancy menus, you will
-have to use another player like <application>Xine</application> or
-<application>Ogle</application>. If you care about DVD navigation, send a
-<ulink url="../../tech/patches.txt">patch</ulink>.
+<application>MPlayer</application> does not support DVD menus due to serious
+architectural limitations that prevent proper handling of still images and
+interactive content. If you want to have fancy menus, you will have to use
+another player like <application>xine</application>,
+<application>vlc</application> or <application>Ogle</application>.
+If you want to see DVD navigation in <application>MPlayer</application> you
+will have to implement it yourself, but be aware that it is a major
+undertaking.
 </para></answer>
 </qandaentry>
 
