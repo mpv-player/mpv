@@ -60,17 +60,23 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 	       }
 
 		mp_msg(MSGT_VO, MSGL_V,"geometry set to width: %i,"
-		  "height: %i, xoff: %i, yoff: %i, xper: %1, yper: %i\n",
+		  "height: %i, xoff: %i, yoff: %i, xper: %i, yper: %i\n",
 		  width, height, xoff, yoff, xper, yper);
 		  
 		if(xper >= 0 && xper <= 100) xoff = (scrw - *widw) * ((float)xper / 100.0);
 		if(yper >= 0 && yper <= 100) yoff = (scrh - *widh) * ((float)yper / 100.0);
 
+		mp_msg(MSGT_VO, MSGL_V,"geometry set to width: %i,"
+		  "height: %i, xoff: %i, yoff: %i, xper: %i, yper: %i\n",
+		  width, height, xoff, yoff, xper, yper);
+		mp_msg(MSGT_VO, MSGL_V,"geometry window parameter: widw: %i,"
+		  " widh: %i, scrw: %i, scrh: %i\n",*widw, *widh, scrw, scrh);
+		  
 		/* FIXME: better checking of bounds... */
-		if(width < 0 || width > scrw) width = *widw;
-		if(height < 0 || height > scrh) height = *widh;
-		if(xoff < 0 || xoff + *widw > scrw) xoff = 0;
-		if(yoff < 0 || yoff + *widh > scrh) yoff = 0;
+		if(width < 0 || width > scrw) width = (scrw < *widw) ? scrw : *widw;
+		if(height < 0 || height > scrh) height = (scrh < *widh) ? scrh : *widh;
+		if(xoff < 0 || xoff + width > scrw) xoff = 0;
+		if(yoff < 0 || yoff + height > scrh) yoff = 0;
 
 		if(xpos) *xpos = xoff;
 		if(ypos) *ypos = yoff;

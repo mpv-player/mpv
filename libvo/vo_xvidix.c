@@ -238,6 +238,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
     vo_dx = 0;
     vo_dy = 0;
+    vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;    
+    geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth, vo_screenheight);
     window_width = d_width;
     window_height = d_height;
 
@@ -266,7 +268,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
     aspect(&d_width, &d_height, A_NOZOOM);
 
-    vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;    
     vo_dwidth=d_width; vo_dheight=d_height;
 
 #ifdef HAVE_NEW_GUI
