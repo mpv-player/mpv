@@ -413,7 +413,7 @@ query_format(uint32_t format)
     if(format==IMGFMT_YV12) return 0x1|0x4;
     if(format==IMGFMT_YUY2) return 0x1|0x4;
     if(format==IMGFMT_BGR24) { printf( "VO: [dxr3] WARNING\tExperimental output, black&white only and very slow\n\t(will be inproved later, this format is rarely used)\n" ); return 0x1|0x4; }
-    else printf( "VO: [dxr3] Format unsuppomp1ed, mail dholm@iname.com\n" );
+    else printf( "VO: [dxr3] Format unsupported, mail dholm@iname.com\n" );
     return 0;
 }
 
