@@ -3038,7 +3038,7 @@ Skip FFmpeg's MP3 decoder.
 .B \-af-adv <force=(0\-3):list=(filters)> (also see \-af)
 Specify advanced audio filter options:
 .RSs
-.IPs force=<0\-3>
+.IPs force=<0\-7>
 Forces the insertion of audio filters to one of the following:
 .RSss
 0: completely automatic filter insertion (default)
@@ -3046,8 +3046,25 @@ Forces the insertion of audio filters to one of the following:
 1: Optimize for accuracy.
 .br
 2: Optimize for speed.
+.I Warning:
+Some features in the audio filters may silently fail,
+and the sound quality may drop.
 .br
-3: Turn off automatic filter insertion.
+3: Use no automatic insertion of filters and no optimization.
+.I Warning:
+It may be possible to crash MPlayer using this setting.
+.br
+4: Use automatic insertion of filters according to 0 above,
+but use floating point processing when possible.
+.br
+5: Use automatic insertion of filters according to 1 above,
+but use floating point processing when possible.
+.br
+6: Use automatic insertion of filters according to 2 above,
+but use floating point processing when possible.
+.br
+7: Use no automatic insertion of filters according to 3 above,
+and use floating point processing when possible.
 .REss
 .IPs list=<filters>
 Same as \-af.
