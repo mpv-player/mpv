@@ -34,6 +34,7 @@ static int preinit(sh_audio_t *sh)
   sh->audio_out_minsize=4*256*6;
   sh->audio_in_minsize=3840;
   sh->channels=2;
+  sh->sample_format=AFMT_AC3;
   return 1;
 }
 
