@@ -559,6 +559,7 @@ int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
 int osd_show_av_delay = 0;
 int osd_show_sub_delay = 0;
+int osd_show_sub_pos = 0;
 int osd_show_sub_visibility = 0;
 int osd_show_vobsub_changed = 0;
 
@@ -2328,6 +2329,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	if(sub_pos >100) sub_pos=100;
 	if(sub_pos <0) sub_pos=0;
 	vo_osd_changed(OSDTYPE_SUBTITLE);
+        osd_show_sub_pos = 9;
     }	break;
     case MP_CMD_SUB_VISIBILITY:
     {
@@ -2738,6 +2740,10 @@ if(rel_seek_secs || abs_seek_pos){
       if (osd_show_sub_delay) {
 	  sprintf(osd_text_tmp, "Sub delay: %d ms",(int)(sub_delay*1000));
 	  osd_show_sub_delay--;
+      } else
+      if (osd_show_sub_pos) {
+         sprintf(osd_text_tmp, "Sub position: %d/100", sub_pos);
+         osd_show_sub_pos--;
       } else
       if (osd_show_av_delay) {
 	  sprintf(osd_text_tmp, "A-V delay: %d ms",(int)(audio_delay*1000));
