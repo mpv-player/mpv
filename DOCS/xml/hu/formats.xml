@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.17 -->
+<!-- synced with 1.20 -->
 <sect1 id="formats">
 <title>Támogatott formátumok</title>
 
@@ -257,7 +257,7 @@ linkend="realaudio">RealAudio</link> codec-ek.
 <sect3 id="nuppelvideo">
 <title>NuppelVideo fájlok</title>
 <para>
-A <ulink url="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</ulink>
+A <ulink url="http://frost.htu.tuwien.ac.at/~roman/nuppelvideo/">NuppelVideo</ulink>
 egy TV grab-belő eszköz (AFAIK:). Az <application>MPlayer</application> tudja
 olvasni a <filename>.NUV</filename> fájlait (csak NuppelVideo 5.0). Ezek a
 fájlok tartalmazhatnak tömörítetlen YV12, YV12+RTJpeg tömörített,
@@ -328,11 +328,6 @@ szükséges.)
 A PVA egy MPEG-szerű formátum, melyet a DVB TV kártyák szoftvere használ (pl.:
 <application>MultiDec</application>, <application>WinTV</application> Windows alatt).
 </para>
-
-<para>
-A PVA specifikációk letölthetőek a következő címről:
-<ulink url="http://www.technotrend.de/download/av_format_v1.pdf"/>
-</para>
 </sect3>
 
 
@@ -385,7 +380,7 @@ tömörítés szabadalmának megsértését.
 <para>
 Ha a disztribúciódban nincs <systemitem class="library">libungif</systemitem>,
 töltsd le a
-<ulink url="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">libungif
+<ulink url="http://sourceforge.net/projects/libungif">libungif
 weboldaláról</ulink>. Bővebb technikai információkért vess egy pillantást a
 <ulink url="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF89a specifikációra</ulink>.
 </para>
@@ -464,7 +459,7 @@ Az <application>MPlayer</application> fel tudja használni az <application>XMMS</
 bemeneti plugin-jeit több fájl formátum lejátszásához. Van plugin SNES játék hangok, SID
 hangok (Commodore 64), sok Amiga formátum, .xm, .it, VQF, musepack, Bonk,
 és számos egyéb lejátszásához. Megtalálhatóak az
-<ulink url="http://www.xmms.org/plugins_input.html">XMMS bemeneti plugin oldalán</ulink>.
+<ulink url="http://www.xmms.org/plugins.php?category=input">XMMS bemeneti plugin oldalán</ulink>.
 </para>
 
 <para>
