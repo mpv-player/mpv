@@ -215,6 +215,7 @@
 
     <DT>Q: Je voudrais compiler MPlayer sur Minix!</DT>
     <DD>A: Moi aussi. :)</DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -384,6 +385,7 @@
 
   <DT>Q: Comment puis-je lancer MPlayer en tâche de fond?</DT>
   <DD>A: Utilisez: <CODE>mplayer &lt;options&gt; &lt;nomfichier&gt; &lt; /dev/null &amp;</CODE></DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -539,6 +541,14 @@
     mon notebook. Cela fonctionne normalement quand je le lance en tant qu'utilisateur.</DT>
   <DD>A: C'est là encore un effet de la gestion d'énergie (voir ci-dessus). Branchez l'alimentation secteur
     <B>avant</B> d'allumer votre notebook ou utilisez l'option <CODE>-nortc</CODE>.</DD>
+  <DD>&nbsp;</DD>
+  
+  <DT>Q: Pendant la lecture d'un film tout deviens sale et j'obtiens le message
+    suivant:<BR>
+    <CODE>Badly interleaved AVI file detected - switching to -ni mode...</CODE>
+  <DD>A: Les films mal entrelacés et <CODE>-cache</CODE> ne vont pas bien ensemble.
+    Essayez <CODE>-nocache</CODE>.</DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -639,6 +649,7 @@
     éclaircissements: la destination <CODE>x11</CODE> SDL utilise xv si disponible, vous
     n'avez pas à vous en soucier... Note: vous pouvez forcer/désactiver Xv via SDL
     en utilisant <CODE>-forcexv</CODE> et <CODE>-noxv</CODE></DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -701,6 +712,7 @@
   <DD>A: Utilisez l'option <CODE>-cache</CODE> (décrite dans la page de man)
     et essayez d'activer le DMA pour le lecteur DVD avec l'outil hdparm (décrit dans
     le <A HREF="cd-dvd.html#cd">chapitre CD</A> de la documentation).</DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -793,7 +805,8 @@
   <DT>Q: Pourquoi le bitrate affiché par MEncoder est négatif?</DT>
   <DD>A: Parce que le bitrate avec lequel vous avez encodé l'audio est trop grand pour faire tenir
     le film sur un CD. Vérifiez que libmp3lame est installé correctement.</DD>
-
+  <DD>&nbsp;</DD>
+  
 </DL>
 
 </BODY>
