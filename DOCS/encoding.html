@@ -211,8 +211,8 @@
 <UL>
   <LI><B>Video stream</B> (option <CODE>-ovc copy</CODE>): nice stuff can be
     done :)<BR>
-    Like, putting (not converting!) FLI or VIVO or MPEG1 video into
-    an AVI file! Of course only <B>MPlayer</B> can play such files :) And it
+    Like, putting (not converting) FLI or VIVO or MPEG1 video into
+    an AVI file. Of course only <B>MPlayer</B> can play such files :) And it
     probably has no real life value at all. Rationally: video stream copying
     can be useful for example when only the audio stream has to be encoded
     (like, uncompressed PCM to MP3).</LI>
@@ -350,10 +350,10 @@
 
 <P><B><A NAME="options">2.4.5  Available options</A></B></P>
 
-<P>NOTE: for all available options, <B>read the man page!</B></P>
+<P>NOTE: for all available options, <B>read the man page.</B></P>
 
 <P>As <B>MEncoder</B> is built on the same codebase as <B>MPlayer</B>, there
-  are many <B>MPlayer</B> options that have function in <B>MEncoder</B> too!
+  are many <B>MPlayer</B> options that have function in <B>MEncoder</B> too.
   See, you can use <CODE>-sid</CODE> to rip a DVD with subtitles, or
   <CODE>-noidx</CODE> to disregard buggy index of input AVI. <B>Be smart!</B></P>
 
@@ -365,7 +365,7 @@
   </TR>
   <TR>
     <TD><CODE>-endpos</CODE> time</TD>
-    <TD>stop encoding at the given time. See the man page for examples!
+    <TD>stop encoding at the given time. See the man page for examples.
     </TD>
   </TR>
   <TR>
@@ -417,7 +417,7 @@
     <TD><CODE>-divx4opts</CODE></TD>
     <TD>If encoding to DivX4, you can specify its parameters here, like:<BR>
       &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
-      Common options: <B>(for full list, check the man page!)</B><BR>
+      Common options: <B>(for a full list, check the man page)</B><BR>
       &nbsp;&nbsp;<B>help</B> - get help<BR>
       &nbsp;&nbsp;<B>br</B>=&lt;value&gt; - specify bitrate in kbit &lt;4-16000&gt;
         or bit &lt;16001-24000000&gt;<BR>
@@ -429,7 +429,7 @@
     <TD><CODE>-lavcopts</CODE></TD>
     <TD>If encoding with libavcodec, you can specify its parameters here, like:<BR>
       &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
-      Common options: <B>(for full list, check the man page!)</B><BR>
+      Common options: <B>(for a full list, check the man page)</B><BR>
       &nbsp;&nbsp;<B>help</B> - get help<BR>
       &nbsp;&nbsp;<B>vcodec</B>=&lt;value&gt; - select videocodec (for the full list, see the libavcodec section above)<BR>
       &nbsp;&nbsp;<B>vbitrate</B>=&lt;value&gt; - specify bitrate in kbit &lt;4-16000&gt; or bit &lt;16001-24000000&gt;<BR>
@@ -442,7 +442,7 @@
     <TD>If encoding to MP3 with libmp3lame, you can specify its parameters here, like:<BR>
       &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
       &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>
-      Common options: <B>(for full list, check the man page!)</B><BR>
+      Common options: <B>(for a full list, check the man page)</B><BR>
       &nbsp;&nbsp;<B>help</B> - get help<BR>
       &nbsp;&nbsp;<B>cbr</B> - select <B>CBR</B> MP3 (default is <B>VBR</B>)<BR>
       &nbsp;&nbsp;<B>br</B>=&lt;value&gt; - specify bitrate in kbit &lt;0-1024&gt; (this is for <B>CBR</B> only!)<BR>
@@ -488,10 +488,10 @@
 <P>Encoding multiple *.vob files:<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;cat *.vob | mencoder &lt;options&gt; -</CODE></P>
 
-<P>Encoding from tuner (for tuner options <A HREF="documentation.html#tv">see the TV input section!</A>):<BR>
+<P>Encoding from tuner (see the <A HREF="documentation.html#tv">TV input</A> section for tuner options):<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=640:height=480 &lt;options&gt;</CODE></P>
 
-<P>For all available options, <B>check the MEncoder man page!</B></P>
+<P>For all available options, <B>check the MEncoder man page.</B></P>
 
 </BODY>
 </HTML>

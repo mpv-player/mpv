@@ -16,7 +16,7 @@
 <P><B><A NAME="video_codecs">2.2.1 Video codecs</A></B></P>
 
 <P>See the <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">codec status table</A>
-  for the complete, daily generated list!!!</P>
+  for the complete, daily generated list.</P>
 
 <P>The most important ones above all:</P>
 <UL>
@@ -39,7 +39,7 @@
 
 <P>If you have a Win32 codec not listed here which is not supported yet, please
   read the <A HREF="#importing">codec importing HOWTO</A> and help us add support
-  for it!</P>
+  for it.</P>
 
 
 <P><B><A NAME="divx">2.2.1.1 DivX4/DivX5</A></B></P>
@@ -77,7 +77,7 @@
   <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><CODE>-vc&nbsp;odivx</CODE></TD><TD>&nbsp;&nbsp;</TD>
     <TD>Uses the codec in OpenDivX fashion. In this case it
     produces YV12 images in its own buffer, and <B>MPlayer</B> does colorspace
-    conversion via libvo. (<B>FAST, RECOMMENDED!</B>)</TD></TR>
+    conversion via libvo. (<B>Fast, recommended!</B>)</TD></TR>
   <TR><TD></TD><TD VALIGN=top><CODE>-vc&nbsp;divx4</CODE></TD><TD></TD>
     <TD>Uses the colorspace conversion of the codec.
     In this mode you can use YUY2/UYVY, too. (<B>SLOW</B>)</TD></TR>
@@ -117,12 +117,12 @@
   <LI>Move the <CODE>libavcodec</CODE> directory from the FFmpeg sources to the
     root of the <B>MPlayer</B> CVS tree. It should look like this:
     <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
-    Symlinking is <B>not</B> enough, you have to copy/move it!!!</LI>
+    Symlinking is <B>not</B> enough, you have to copy or move it!</LI>
   <LI>Compile. Configure should detect problems before compilation.</LI>
 </OL>
 
 <P><B>Note:</B> MPlayer from CVS does contain a libavcodec
-  subdirectory, but it does NOT contain the source for libavcodec!
+  subdirectory, but it does <B>not</B> contain the source for libavcodec!
   You must follow the steps above to obtain the source for this library.</P>
 
 <P>With FFmpeg and my Matrox G400, I can view even the highest resolution DivX
@@ -217,7 +217,7 @@
   <CODE>--with-reallibdir</CODE> switch.</P>
 
 <P><B>Note:</B> RealPlayer libraries currently <B>only work with Linux, FreeBSD,
-  NetBSD and Cygwin on the x86 platform</B>!</P>
+  NetBSD and Cygwin on the x86 platform.</B></P>
 
 <P><B>Note2:</B> We cannot distribute the RealPlayer libraries, the license does
   not allow this. You have to get them yourself.</P>
@@ -336,7 +336,7 @@
   driver must properly support the AFMT_AC3 format (C-Media does). Connect
   your AC3 decoder to the SP/DIF output, and use the <CODE>-ac hwac3</CODE>
   option. It is experimental but known to work with C-Media cards and
-  Soundblaster Live! + ALSA (but not OSS) drivers.</P>
+  Soundblaster Live! using ALSA (but not OSS) drivers.</P>
 
 
 <P><B><A NAME="libmad">2.2.2.3  libmad support</A></B></P>

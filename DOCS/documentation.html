@@ -286,7 +286,7 @@
     </UL>
   </LI>
   <LI><A HREF="#known_bugs">Appendix D - Known bugs</A></LI>
-  <LI><A HREF="skin-en.html">Appendix X - How to become a famous skin maker in 5 minutes!</A></LI>
+  <LI><A HREF="skin-en.html">Appendix X - MPlayer skin format</A></LI>
 </UL>
 
 <HR>
@@ -341,7 +341,7 @@ Developer Cries
   Win32 DLL codecs. You can watch <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
   <B>3ivx</B>, <B>RealMedia</B>, and <B>DivX</B> movies too (and you don't need
   the avifile
-  library at all!). The another big feature of mplayer is the wide range of
+  library at all!). Another big feature of <B>MPlayer</B> is the wide range of
   supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
   AAlib, DirectFB, but you can use GGI and SDL (and this way all their drivers)
   and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon,
@@ -349,8 +349,8 @@ Developer Cries
   of them supports software or hardware scaling, so you can enjoy movies in
   fullscreen. <B>MPlayer</B> supports displaying through some hardware MPEG
   decoder boards, such as the <B><A HREF="video.html#dvb">DVB</A></B> and
-  <B><A HREF="video.html#dxr3">DXR3/Hollywood+</A></B>! And what about the nice big antialiased
-  shaded subtitles (<B>10 supported types!!!</B>) with european/ISO 8859-1,2
+  <B><A HREF="video.html#dxr3">DXR3/Hollywood+</A></B>. And what about the nice big antialiased
+  shaded subtitles (<B>10 supported types</B>) with European/ISO 8859-1,2
   (Hungarian, English, Czech, etc), Cyrillic, Korean fonts, and the onscreen
   display (OSD)?</P>
 
@@ -431,7 +431,7 @@ Developer Cries
   <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
     responsible for generating MMX/3DNow!/etc instructions, thus very important.</LI>
   <LI><B>gcc</B> - suggested versions are: <B>2.95.3</B>, <B>2.95.4</B> and <B>3.1</B>.
-    <B>NEVER</B> use 2.96 or 3.0.x !!! They generate faulty code for MPlayer.
+    <B>NEVER</B> use 2.96 or 3.0.x! They generate faulty code for MPlayer.
     If you decide to change gcc from 2.96, then don't decide in favor of 3.0.x
     just because it's newer! Early releases of 3.0.x were even more buggy than
     2.96. So downgrade to 2.95.x (downgrade libstdc++ too, other programs may
@@ -483,9 +483,9 @@ Developer Cries
     architecture, you will possibly need them. Download and unzip w32codecs.zip
     to /usr/lib/win32 <B>BEFORE</B> compiling <B>MPlayer</B>, otherwise no Win32
     support will be compiled!<BR>
-    <B>Note</B>: the avifile project has similar codecs package, but it differs
-    from ours, so if you want to use all supported codecs, then use our package!
-    However, you can use our codecs package with avifile. Features:<BR>
+    <B>Note:</B> the avifile project has a similar codecs package, but it differs
+    from ours. If you want to use all supported codecs, then install our package
+    (do not worry, avifile works with it without problems). Features:<BR>
     <UL>
       <LI>you need this if you want to play or encode for example movies recorded
         with various hardware compressors, like tuner cards, digital cameras
@@ -532,7 +532,7 @@ Developer Cries
   <LI><B>MPlayer</B> can use the libraries of RealPlayer 8 or RealONE to play
     files with <B>RealVideo 2.0 and 3.0</B> video, and Sipro/Cook audio. See
     <A HREF="formats.html#real">RealMedia file format</A> section for
-    installation instructions and more information!</LI>
+    installation instructions and more information.</LI>
 </UL>
 
 <P><B>VIDEO CARDS</B></P>
@@ -543,8 +543,8 @@ Developer Cries
 <P><B>YUV cards</B></P>
 
 <P>They can display and scale (zoom) the picture to any size that fits in
-  their memory, with <B>small CPU usage</B> (zooming doesn't increase it!), thus
-  you get a nice and very fast fullscreen playing.</P>
+  their memory, with <B>small CPU usage</B> (even when zooming), thus
+  fullscreen playing is nice and very fast.</P>
 
 <UL>
   <LI><B>Matrox G200/G400/G450/G550 cards</B>: although a
@@ -554,15 +554,15 @@ Developer Cries
     installation and usage. It is important to do these steps <I>before</I>
     compiling <B>MPlayer</B>, otherwise no mga_vid support will be built. Also
     check out the <A HREF="video.html#tv-out_matrox">Matrox TV-out</A> section.
-    <U><B>If you are non-Linux user</B></U>, your only possibility is the Vidix
-    driver: read <A HREF="video.html#vidix">VIDIX</A> documentation!</LI>
+    <U><B>If you don't use Linux</B></U>, your only possibility is the VIDIX
+    driver: read the <A HREF="video.html#vidix">VIDIX</A> section.</LI>
   <LI><B>3Dfx Voodoo3/Banshee cards</B>: please see the
     <A HREF="video.html#tdfxfb">tdfxfb</A> section in order to gain big
     speedup. It is important to do these steps <I>before</I> compiling
     <B>MPlayer</B>, otherwise no 3Dfx support will be built. Also see the <A
     HREF="video.html#tv-out_voodoo">3dfx TV-out section</A>. If you use X, use at
     least 4.2.0, as 3dfx Xv driver was broken in 4.1.0, and earlier
-    releases!</LI>
+    releases.</LI>
   <LI><B>ATI cards</B>: <A HREF="video.html#vidix">Vidix driver</A> is
     provided for the following cards:
     <B>Radeon</B>, <B>Rage128</B>, <B>Mach64</B> (Rage XL/Mobility, Xpert98).
@@ -574,45 +574,45 @@ Developer Cries
     have problems with YV12 display, see <A HREF="video.html#xv_s3">S3 Xv
     section</A> for details. Older, Trio cards have no, or slow hardware
     support.</LI>
-  <LI><B>nVidia cards</B>: very bad choice for video playing (nVidia has
-    <A HREF="users_against_developers.html#nvidia">different opinion</A>!). 
-    nVidia's cards have very cheap and bad quality chips. Moreover, <U>the
-    built-in nVidia driver in XFree86 doesn't contain support for hardware YUV
-    acceleration for all nVidia cards!</U> You have to download nVidia's
-    closed-source drivers from nVidia.com. See details in <A
-    HREF="video.html#xv_nvidia">nVidia Xv driver</A> section.</LI>
+  <LI><B>nVidia cards</B>: very bad choice for video playing (nVidia
+    <A HREF="users_against_developers.html#nvidia">does not think so</A>). 
+    nVidia's cards have very cheap and bad quality chips. Moreover, <B>the
+    built-in nVidia driver in XFree86 does not support hardware YUV
+    acceleration on all nVidia cards.</B> You have to download nVidia's
+    closed-source drivers from nVidia.com. See the <A
+    HREF="video.html#xv_nvidia">nVidia Xv driver</A> section for details.</LI>
   <LI><B>3DLabs GLINT R3 and Permedia3</B>: a VIDIX driver is provided
-    (pm3_vid). Please see the <A HREF="video.html#vidix">VIDIX
-    instructions</A>.</LI>
-  <LI><B>other cards</B>: none of the above?
+    (pm3_vid). Please see the <A HREF="video.html#vidix">VIDIX</A> section for
+    details.</LI>
+  <LI><B>Other cards</B>: None of the above?
     <UL>
       <LI>Try if the XFree86 driver (and your card) supports hardware
         acceleration. See the <A HREF="video.html#xv">Xv section</A> for
         details.</LI>
       <LI>If it doesn't, then your card's video features aren't supported under
-        your OS :(<BR>
-        If it does hardware scaling under Windows, it doesn't mean it will do the
-        same under Linux or other OS, it depends on the drivers! Most
-        manufacturers don't make Linux drivers nor release chip specs - so you're
-        unlucky using their cards.  See the next section:</LI>
+        your operating system :(<BR>
+        If hardware scaling works under Windows, it doesn't mean it will work
+        under Linux or other operating systems: it depends on the drivers. Most
+        manufacturers neither make Linux drivers nor release specifications
+        for their chips, so you are unlucky using their cards.
+        See 'Non-YUV cards'.</LI>
     </UL>
   </LI>
 </UL>
 
 <P><B>Non-YUV cards</B></P>
 
-<P>Fullscreen playing can be achieved by either zooming <B>by software</B> (use
-  the option <CODE>-zoom</CODE> or <A HREF="#2.6.11"><CODE>-vop
-  scale</CODE></A>, but I warn you: this is SLOW!), or changing to a smaller
-  video mode, for example to 352x288. If you don't have YUV acceleration, this
-  latter method is the recommended one. Throughout <B>MPlayer</B>, <U>this
-  behavior can be switched on by using the <CODE>-vm</CODE> option</U> and with
-  the following drivers:</P>
+<P>Fullscreen playing can be achieved by either enabling <B>software scaling</B>
+  (use the <CODE>-zoom</CODE> or <A HREF="#filters_scale"><CODE>-vop scale</CODE></A>
+  option, but I warn you: this is slow), or switching to a small resolution
+  video mode, for example 352x288. If you don't have YUV acceleration, the
+  latter method is recommended. Video mode switching can be enabled by
+  using the <CODE>-vm</CODE> option and it works with the following drivers:</P>
 
 <UL>
-  <LI><B>using</B> XFree86: see details in
+  <LI><B>using</B> XFree86: see the
     <A HREF="video.html#dga">DGA driver</A> and
-    <A HREF="video.html#x11">X11 driver</A> sections. DGA is
+    <A HREF="video.html#x11">X11 driver</A> sections for details. DGA is
     recommended! Also try DGA via SDL, sometimes it's better.</LI>
   <LI><B>not using</B> XFree86: try the drivers in the following order:
     <A HREF="video.html#vesa">vesa</A>,
@@ -655,11 +655,11 @@ Developer Cries
   <LI><B>Soundblaster Live!</B>: with this card you can use 4 or 6 (<B>5.1</B>)
     channels AC3 decoding instead of 2. Read the
     <A HREF="codecs.html#software_ac3">Software AC3 decoding</A> section.
-    For hardware AC3 passthrough you MUST use ALSA 0.9 oss emulation!</LI>
+    For hardware AC3 passthrough you <B>must</B> use ALSA 0.9 with OSS emulation!</LI>
   <LI><B>C-Media with SP/DIF out</B>: hardware AC3 passthrough is possible
     with these cards, see
     <A HREF="codecs.html#hardware_ac3">Hardware AC3 decoding</A> section.</LI>
-  <LI><B>other cards'</B> features aren't supported by <B>MPlayer</B>.
+  <LI>Features of <B>other cards</B> aren't supported by <B>MPlayer</B>.
     <U>It's very recommended to read the <A HREF="sound.html">sound card
     section</A>!</U></LI>
 </UL>
@@ -687,16 +687,17 @@ Developer Cries
 <P>At this point, <B>MPlayer</B> is ready to use. The directory
   <CODE>$PREFIX/share/mplayer</CODE> contains the <CODE>codecs.conf</CODE>
   file, which is used to tell the program all the codecs and their
-  capabilities.  This file should always be kept uptodate together with the
-  main binary!<BR> Check if you have codecs.conf in your home directory
-  (~/.mplayer/codecs.conf) left from old MPlayer versions, and remove it!</P>
+  capabilities.  This file should always be kept up to date together with the
+  main binary.<BR>
+  Check if you have <CODE>codecs.conf</CODE> in your home directory
+  (<CODE>~/.mplayer/codecs.conf</CODE>) left from old <B>MPlayer</B> versions, and remove it.</P>
 
-<P><B>Debian users</B> can build a .deb package for themselves, it's very
-  simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in
-  <B>MPlayer</B>'s root dir. Detailed instructions can be found
+<P><B>Debian users</B> can build a <CODE>.deb</CODE> package for themselves,
+  it's very simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in
+  <B>MPlayer</B>'s root directory. Detailed instructions can be found
   <A HREF="documentation.html#debian">here</A>.</P>
 
-<P><B>ALWAYS browse the output of <CODE>./configure</CODE></B>, and the
+<P><B>Always browse the output of <CODE>./configure</CODE></B>, and the
   <CODE>configure.log</CODE> file, they contain information about what will be
   built, and what will not. You may also want to view <CODE>config.h</CODE> and
   <CODE>config.mak</CODE> files.<BR>
@@ -731,8 +732,8 @@ Developer Cries
     and call <CODE>gmplayer</CODE> instead.</LI>
   </UL>
 
-<P>HINT: use the middle button (on 2 button mice press left and right
-  simultaneously) for a popup GTK menu, with DVD playing option!</P>
+<P>HINT: Press the middle button (on 2 button mice press left and right
+  simultaneously) to open a GTK menu with DVD playing option!</P>
 
 <P>As <B>MPlayer</B> doesn't have a skin included, you have to download them if
   you want to use the GUI. See the
@@ -1556,7 +1557,7 @@ ENTER pt_step 1 1
 <P><B><A NAME="lirc">3.2.3 Control from LIRC</A></B></P>
 
 <P>Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver,
-  an (almost) arbitrary remote control and control your linux box with it!
+  an (almost) arbitrary remote control and control your Linux box with it!
   More about it at <A HREF="http://www.lirc.org">www.lirc.org</A>.</P>
 
 <P>If you have installed the lirc-package, configure will autodetect it. If
@@ -1758,19 +1759,19 @@ end
 <P>For DVD support you must have the patched libcss installed. Patch:
   <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A>.</P>
 
-<P>Due to two bugs in Solaris 8 x86,  you cannot reliably play DVDs using a
-  capacity >4GB:</P>
+<P>Due to two bugs in Solaris 8 x86, you cannot reliably play DVD discs larger
+  than 4 GB:</P>
 
 <UL>
   <LI>The sd(7D) driver on Solaris 8 x86 driver has bug when accessing a disk
     block >4GB on a device using a logical blocksize != DEV_BSIZE (i.e.  CD-ROM
-    and DVD media).  Due to a 32bit int overflow, a disk address modulo 4GB is
+    and DVD media).  Due to a 32Bit int overflow, a disk address modulo 4GB is
     accessed.
     (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
   </LI>
-  <LI>The similar bug is present in the hsfs(7FS) filesystem code (aka
-    ISO9660), hsfs currently does not support partitions/disks >4GB, all data
-    is accessed modulo 4GB
+  <LI>A similar bug is present in the hsfs(7FS) filesystem code (aka
+    ISO9660), hsfs currently does not support partitions/disks larger than 4GB, all data
+    is accessed modulo 4GB.
     (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)
   </LI>
 </UL>
@@ -1843,7 +1844,8 @@ end
 
 <P><B><A NAME="authors">Appendix A - Authors</A></B></P>
 
-<P>NOTE: Do *NOT* send bug reports, help &amp; feature requests directly to the authors!</P>
+<P>NOTE: Do <B>not</B> send bug reports, help &amp; feature requests directly to
+  the authors!</P>
 
 <P>Read <A HREF="bugreports.html">Appendix C</A> and subscribe to mplayer-users mailing lists.</P>
 
@@ -2503,8 +2505,8 @@ TOOLS:
     reads this list!</LI>
 </UL>
 
-<P><B>Note:</B> The Languages of above lists are ENGLISH, unless explicitly
-  stated otherwise.  Please do not send messages using another language!</P>
+<P><B>Note:</B> Unless explicitly stated otherwise the language of the above
+  lists is <B>English</B>. Please do not send messages in other languages!</P>
 
 <P><B>Note:</B> You can reach the searchable mailing list archives
   <A HREF="http://www.mplayerhq.hu/cgi-bin/htsearch">here</A>.

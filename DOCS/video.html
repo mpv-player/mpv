@@ -91,7 +91,7 @@
     <P>in /var/log/XFree86.0.log</P>
 
     <P>NOTE: this loads only the XFree86's extension. In a good install, this
-      is always loaded, and doesn't mean that the _card's_ XVideo support is
+      is always loaded, and doesn't mean that the <B>card's</B> XVideo support is
       loaded!</P>
   </LI>
   <LI>Your card has Xv support under Linux. To check, try 'xvinfo', it is the
@@ -135,12 +135,12 @@
 <P>Older 3dfx drivers were known to have problems with XVideo acceleration, it
   didn't support either YUY2 or YV12, and so. Verify that you have XFree86
   version 4.2.0 or greater, it works OK with YV12 and YUY2. Previous versions,
-  including 4.1.0 <B>crashes with YV12</B>! If you experience strange effects
+  including 4.1.0, <B>crash with YV12</B>. If you experience strange effects
   using -vo xv, try SDL (it has XVideo too) and see if it helps. Check the
   <A HREF="#sdl">SDL section</A> for details.</P>
 
 <P><B>OR</B>, try the NEW -vo tdfxfb driver! See the
-  <A HREF="#tdfxfb">tdfxfb</A> section!</P>
+  <A HREF="#tdfxfb">tdfxfb</A> section.</P>
 
 
 <P><B><A NAME="xv_s3">2.3.1.2.2 S3 cards</A></B></P>
@@ -262,7 +262,7 @@
 
 <P>If the driver couldn't switch to a smaller resolution, experiment with
   switches -vm (only with X 3.3.x), -fs, -bpp, -zoom to find a video mode that
-  the movie fits in. There is no converter right now.. :(</P>
+  the movie fits in. There is no converter right now :(</P>
 
 <P>Become ROOT. DGA needs root access to be able to write directly video
   memory. If you want to run it as user, then install <B>MPlayer</B> SUID
@@ -281,9 +281,9 @@
   root privileges through SUID root <B>MPlayer</B>.<BR>
   <B>!!!! SO YOU HAVE BEEN WARNED ... !!!!</B></P>
 
-<P>Now use '-vo dga' option, and there you go! (hope so:)
-  You should also try if the '-vo sdl:dga' option works for you! It's much
-  faster!!!</P>
+<P>Now use the <CODE>-vo dga</CODE> option, and there you go (hope so :))!
+  You should also try if the <CODE>-vo sdl:dga</CODE> option works for you. It's
+  much faster.</P>
 
 
 <P><B><A NAME="dga_resolution">2.3.1.3.4 Resolution switching</A></B></P>
@@ -523,7 +523,7 @@
 
 <P>Whether to build the FBdev target is autodetected during ./configure .
   Read the framebuffer documentation in the kernel sources
-  (Documentation/fb/*) for info on how to enable it, etc..!</P>
+  (Documentation/fb/*) for more information.</P>
 
 <P>If your card doesn't support VBE 2.0 standard (older ISA/PCI
   cards, such as S3 Trio64), only VBE 1.2 (or older?):
@@ -574,7 +574,7 @@
   framebuffer console and under X.</P>
 
 <P><B>WARNING</B>: on non-Linux systems, use <A HREF="#vidix">VIDIX</A> for
-  mga_vid !!!</P>
+  mga_vid!</P>
 
 <P>To use it, you first have to compile mga_vid.o:</P>
 
@@ -694,8 +694,8 @@
   render all frames!</P>
 
 <P>Playing on terminal you'll get better speed and quality using the Linux
-  driver, not curses (-aadriver linux). But therefore you need write access on
-  /dev/vcsa&lt;terminal&gt;!  That isn't autodetected by aalib, but vo_aa tries
+  driver, not curses (<CODE>-aadriver linux</CODE>). But therefore you need write access on
+  <CODE>/dev/vcsa&lt;terminal&gt;</CODE>.  That isn't autodetected by aalib, but vo_aa tries
   to find the best mode.  See
   <A HREF="http://aa-project.sourceforge.net/tune/">http://aa-project.sourceforge.net/tune/</A>
   for further tuning issues.</P>
@@ -728,24 +728,30 @@
   (I guess that TV-out frequently is standalone head or standalone output
   at least.)</P>
 
-<P><B>What are pluses:</B><BR>
-  - You have chances to watch movies <B>if Linux even doesn't know</B> your
-    video hardware.<BR>
-  - You don't need to have installed any graphics' related things on your Linux
-    (like X11 (aka XFree86), fbdev and so on). This driver can be run from
-    <B>text-mode</B>.<BR>
-  - You have chances to get <B>working TV-out</B>. (It's known at least for
-    ATI's cards).<BR>
-  - This driver calls <B>int 10h</B> handler thus it's not an emulator - it
-    calls <B>real</B> things of <B>real</B> BIOS in <B>real</B>-mode. (Finely -
-    in vm86 mode).<BR>
-  - You can use Vidix with it, thus getting accelerated video display
-    <B>AND</B> TV output at the same time! (recommended for ATI cards)</P>
+<B>Advantages:</B>
 
-<P><B>What are minuses:</B><BR>
-  - It works only on <B>x86 systems</B>.<BR>
-  - It can be used only by <B>ROOT</B>.<BR>
-  - Currently it's available only for <B>Linux</B>.</P>
+<UL>
+  <LI>You have the possibility to watch movies <B>even if Linux doesn't know</B>
+    your video hardware.</LI>
+  <LI>You don't need to have installed any graphics' related things on your Linux
+    (like X11 (aka XFree86), fbdev and so on). This driver can be run from
+    <B>text-mode</B>.</LI>
+  <LI>You have chances to get <B>working TV-out</B>. (It's known at least for
+    ATI's cards).</LI>
+  <LI>This driver calls <B>int 10h</B> handler thus it's not an emulator - it
+    calls <B>real</B> things of <B>real</B> BIOS in <B>real</B>-mode. (Finely -
+    in vm86 mode).</LI>
+  <LI>You can use Vidix with it, thus getting accelerated video display
+    <B>AND</B> TV output at the same time! (recommended for ATI cards)</LI>
+</UL>
+
+<B>Disadvantages:</B>
+
+<UL>
+  <LI>It works only on <B>x86 systems</B>.</LI>
+  <LI>It can be used only by <B>root</B>.</LI>
+  <LI>Currently it's available only for <B>Linux</B>.</LI>
+</UL>
 
 <P>Don't use this driver with <B>GCC 2.96</B>! It won't work!</P>
 
@@ -766,23 +772,26 @@
     single buffering, but has no flickering effects.</TD></TR>
 </TABLE>
 
-<P><B>Known problems and workaround:</B><BR>
-  - If you have installed <B>NLS</B> font on your Linux box and run VESA driver
-    from text-mode then after terminating <B>MPlayer</B> you will have <B>ROM
-    font</B> loaded instead of national. You can load national font again by
-    using <B><I>setsysfont</I></B> utility from for example Mandrake
-    distribution.<BR>
-    (<B>Hint</B>: The same utility is used for localization of fbdev).<BR>
-  - Some <B>Linux graphics drivers</B> don't update active <B>BIOS mode</B> in
+<B>Known problems and workaround:</B>
+
+<UL>
+  <LI>If you have installed <B>NLS</B> font on your Linux box and run VESA
+    driver from text-mode then after terminating <B>MPlayer</B> you will have
+    <B>ROM font</B> loaded instead of national. You can load national font again
+    by using <B><I>setsysfont</I></B> utility from the Mandrake distribution
+    for example.</BR>
+    (<B>Hint:</B> The same utility is used for the localization of fbdev).</LI>
+  <LI>Some <B>Linux graphics drivers</B> don't update active <B>BIOS mode</B> in
     DOS memory. So if you have such problem - always use VESA driver only from
     <B>text-mode</B>. Otherwise text-mode (#03) will be activated anyway and
-    you will need restart your computer.<BR>
-  - Often after terminating VESA driver you get <B>black screen</B>. To return
+    you will need restart your computer.</LI>
+  <LI>Often after terminating VESA driver you get <B>black screen</B>. To return
     your screen to original state - simply switch to other console (by pressing
-    <B>Alt-Fx</B>) then switch to your previous console by the same way.<BR>
-  - To get <B>working TV-out</B> you need have plugged TV-connector in before
+    <B>Alt-Fx</B>) then switch to your previous console by the same way.</LI>
+  <LI>To get <B>working TV-out</B> you need have plugged TV-connector in before
     booting your PC since video BIOS initializes itself only once during POST
-    procedure.</P>
+    procedure.</LI>
+</UL>
 
 
 <P><B><A NAME="x11">2.3.1.13  X11</A></B></P>
@@ -1151,7 +1160,7 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 
 <P>Under Linux you have 2 methods to get G400 TV out working:</P>
 
-<P><B>IMPORTANT:</B> Only Matrox G400DH/G400MAX has TV-out support under Linux, others (G450, G550) has <B>NOT!</B></P>
+<P><B>IMPORTANT:</B> Only Matrox G400DH/G400MAX has TV-out support under Linux, others (G450, G550) have <B>not!</B></P>
 
 <UL>
   <LI><B>XFree86</B>: using the driver and the HAL module, available from
@@ -1187,7 +1196,7 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
         to a very simple menu. Press <B>2</B> and <B>ENTER</B>. Now you should
 	have the same picture on your monitor, and TV. The <B>3.</B> option
         will turn on independent display, but then you <B>can't use X</B>! If
-	the TV (PAL!) picture has some weird stripes on it, the script wasn't able to
+	the TV (PAL) picture has some weird stripes on it, the script wasn't able to
 	set the resolution correctly (to 640x512 by default). Use other menu
 	items randomly and it'll be OK :)</LI>
     </UL>
@@ -1205,7 +1214,7 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     <P>Yeah kewl. Start movie playing with <CODE>mplayer -vo mga -fs -screenw 640
     -screenh 512 &lt;filename&gt;</CODE><BR>
     (if you use X, now change to matroxfb with for example CTRL-ALT-F1!)<BR>
-    Change 640x512 if you set the resolution to other..<BR>
+    Change 640x512 if you set the resolution to other.<BR>
     <B>Enjoy the ultra-fast ultra-featured Matrox TV output (better than Xv)!</B></P>
   </LI>
 </UL>
@@ -1225,7 +1234,7 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   <LI><B>ASIC Radeon VIVO</B>: supported by
   <A HREF="http://gatos.sf.net">gatos</A>.</LI>
   <LI><B>Radeon</B> and <B>Rage128</B>: supported by <B>MPlayer</B>!
-    Check <a href="#vesa">VESA driver</a> and <A HREF="#2.3.1.15">Vidix</A>
+    Check <a href="#vesa">VESA driver</a> and <A HREF="#vidix">VIDIX</A>
     sections.</LI>
 </UL>
 
