@@ -661,7 +661,7 @@ mp_input_default_key_func(int fd) {
   unsigned int l;
   l = 0;
   while(l < sizeof(int)) {
-    r = read(fd,(&code)+l,sizeof(int)-l);
+    r = read(fd,((char *)&code)+l,sizeof(int)-l);
     if(r <= 0)
       break;
     l +=r;
@@ -907,7 +907,7 @@ if(n>0){
     }
 #ifndef HAVE_NO_POSIX_SELECT
     // No input from this fd
-    if(! (key_fds[i].flags & MP_FD_NO_SELECT) && ! FD_ISSET(key_fds[i].fd,&fds))
+    if(! (key_fds[i].flags & MP_FD_NO_SELECT) && ! FD_ISSET(key_fds[i].fd,&fds) && key_fds[i].fd != 0)
       continue;
 #endif
     if(key_fds[i].fd == 0) { // stdin is handled by getch2
