@@ -6,6 +6,11 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-10-29:
+ *  Added new sync-engine, activate with :sync option.
+ *  Greatly improved commandline parser.
+ *  Replaced :noprebuf with :prebuf and made noprebuf the default.
+ *
  * 2002-10-28:
  *  Fixed multicard bug on athlons
  *
@@ -100,7 +105,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "aspect.h"
-#include "cpudetect.h"
 #include "spuenc.h"
 #include "sub.h"
 
@@ -119,7 +123,8 @@ LIBVO_EXTERN (dxr3)
 static int v_width, v_height;
 static int s_width, s_height;
 static int osd_w, osd_h;
-static int noprebuf = 0;
+static int prebuf = 0;
+static int newsync = 0;
 static int img_format = 0;
 
 /* File descriptors */
@@ -136,11 +141,13 @@ static int osdpicbuf_w;
 static int osdpicbuf_h;
 static int disposd = 0;
 static encodedata *spued;
-static encodedata *prebuf;
+static encodedata *spubuf;
 #endif
 
 /* Static variable used in ioctl's */
 static int ioval = 0;
+static int prev_pts = 0;
+static int pts_offset = 0;
 
 static int get_video_eq(vidix_video_eq_t *info);
 static int set_video_eq(vidix_video_eq_t *info);
@@ -152,7 +159,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	case VOCTRL_GUI_NOWINDOW:
 		return VO_TRUE;
 	case VOCTRL_RESUME:
-		if (!noprebuf) {
+		if (prebuf) {
 			ioval = EM8300_PLAYMODE_PLAY;
 			if (ioctl(fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval) < 0) {
 				printf("VO: [dxr3] Unable to set playmode!\n");
@@ -160,7 +167,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		}
 		return VO_TRUE;
 	case VOCTRL_PAUSE:
-		if (!noprebuf) {
+		if (prebuf) {
 			ioval = EM8300_PLAYMODE_PAUSED;
 			if (ioctl(fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval) < 0) {
 				printf("VO: [dxr3] Unable to set playmode!\n");
@@ -168,7 +175,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		}
 		return VO_TRUE;
 	case VOCTRL_RESET:
-		if (!noprebuf) {
+		if (prebuf || sync) {
 			close(fd_video);
 			fd_video = open(fdv_name, O_WRONLY);
 			close(fd_spu);
@@ -185,7 +192,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		    return 0;
 
 		flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_SPU;
-		if (!noprebuf)
+		if (prebuf)
 		    flag |= VFCAP_TIMER;
 		return flag;
 	    }
@@ -279,13 +286,15 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 #endif
 
+	/* Sync the video device to make sure the buffers are empty
+	 * and set the playback speed to normal. Also reset the
+	 * em8300 internal clock.
+	 */
 	fsync(fd_video);
-	if (!noprebuf) {
-		ioval = 0x900;
-		ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
-		ioval = 0;
-		ioctl(fd_control, EM8300_IOCTL_SCR_SET, &ioval);
-	}
+	ioval = 0x900;
+	ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
+	ioval = 0;
+	ioctl(fd_control, EM8300_IOCTL_SCR_SET, &ioval);
 
 	/* Store some variables statically that we need later in another scope */
 	img_format = format;
@@ -344,8 +353,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		printf("vo_dxr3:out of mem\n");
 		return -1;
 	}
-	prebuf = (encodedata *) malloc(sizeof(encodedata));
-	if (prebuf == NULL) {
+	spubuf = (encodedata *) malloc(sizeof(encodedata));
+	if (spubuf == NULL) {
 	        free( osdpicbuf );
 		free( spued );
 		printf("vo_dxr3:out of mem\n");
@@ -356,8 +365,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	osdpicbuf_w = s_width;
 	osdpicbuf_h = s_height;
 	
-	prebuf->count=0;
-	pixbuf_encode_rle( 0,0,osdpicbuf_w,osdpicbuf_h - 1,osdpicbuf,osdpicbuf_w,prebuf );
+	spubuf->count=0;
+	pixbuf_encode_rle( 0,0,osdpicbuf_w,osdpicbuf_h - 1,osdpicbuf,osdpicbuf_w,spubuf );
 
 #endif
 
@@ -418,8 +427,8 @@ static void draw_osd(void)
 		   {
 		    if ( !cleared )
 		     {
-		      spued->count=prebuf->count;
-		      memcpy( spued->data,prebuf->data,DATASIZE );
+		      spued->count=spubuf->count;
+		      memcpy( spued->data,spubuf->data,DATASIZE );
 		      cleared=1;
 		     }
 		   }
@@ -432,9 +441,6 @@ static void draw_osd(void)
 /*		Subpics are not stable yet =(
 		expect lockups if you enable */
 #if 1
-		if (!noprebuf) {
-			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
-		}
 		write(fd_spu, spued->data, spued->count);
 #endif
 	}
@@ -445,15 +451,10 @@ static void draw_osd(void)
 
 static uint32_t draw_frame(uint8_t * src[])
 {
-	char *pData;
-	int pSize;
 	vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
 		
 #ifdef SPU_SUPPORT
 	if (p->id == 0x20) {
-		if (!noprebuf) {
-			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
-		}
 		write(fd_spu, p->data, p->size);
 	} else
 #endif
@@ -463,8 +464,32 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
-	int size;
-	if (!noprebuf) {
+	if (newsync) {
+		ioctl(fd_control, EM8300_IOCTL_SCR_GET, &ioval);
+		ioval <<= 1;
+		if (vo_pts == 0) {
+			ioval = 0;
+			ioctl(fd_control, EM8300_IOCTL_SCR_SET, &ioval);
+			pts_offset = 0;
+		} else if ((vo_pts - pts_offset) < (ioval - 7200) || (vo_pts - pts_offset) > (ioval + 7200)) {
+			if (prev_pts > vo_pts) {
+				printf(" !! Wrap !!\n");
+			}
+			printf("VO: [dxr3] Resync\n");
+			ioval = (vo_pts + pts_offset) >> 1;
+	    		ioctl(fd_control, EM8300_IOCTL_SCR_SET, &ioval);
+			ioctl(fd_control, EM8300_IOCTL_SCR_GET, &ioval);
+			pts_offset = vo_pts - (ioval << 1);
+			if (pts_offset < 0) {
+				pts_offset = 0;
+			}
+		}
+		ioval = vo_pts + pts_offset;
+		ioctl(fd_video, EM8300_IOCTL_SPU_SETPTS, &ioval);
+		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &ioval);
+		prev_pts = vo_pts;
+	} else if (prebuf) {
+		ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
 		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
 	}
 }
@@ -503,30 +528,36 @@ static void check_events(void)
 static uint32_t preinit(const char *arg)
 {
 	char devname[80];
+	char devnum = 0;
 	int fdflags = O_WRONLY;
-	CpuCaps cpucaps;
 
-	GetCpuCaps(&cpucaps);
-	/* Open the control interface */
-	if (arg && !strncmp("noprebuf", arg, 8)) {
-		printf("VO: [dxr3] Disabling prebuffering.\n");
-		noprebuf = 1;
-		fdflags |= O_NONBLOCK;
+	/* Parse commandline */
+	while (arg) {
+		if (!strncmp("prebuf", arg, 6) && !prebuf) {
+			printf("VO: [dxr3] Enabling prebuffering.\n");
+			prebuf = 1;
+		} else if (!strncmp("sync", arg, 4) && !newsync) {
+			printf("VO: [dxr3] Using new sync engine.\n");
+			newsync = 1;
+		} else if (arg[0] == '0' || arg[0] == '1' || arg[0] == '2' || arg[0] == '3') {
+			devnum = arg[0];
+		}
+		
 		arg = strchr(arg, ':');
 		if (arg) {
 			arg++;
 		}
 	}
-
-	if (cpucaps.has3DNowExt) {
-		printf("VO: [dxr3] Fast AMD special disabling prebuffering.\n");
-		noprebuf = 1;
+	
+	if (prebuf) {
 		fdflags |= O_NONBLOCK;
 	}
+	
 
-	if (arg && arg[0]) {
-		printf("VO: [dxr3] Forcing use of device %s\n", arg);
-		sprintf(devname, "/dev/em8300-%s", arg);
+	/* Open the control interface */
+	if (devnum) {
+		printf("VO: [dxr3] Forcing use of device %c\n", devnum);
+		sprintf(devname, "/dev/em8300-%c", devnum);
 	} else {
 		/* Try new naming scheme by default */
 		sprintf(devname, "/dev/em8300-0");
@@ -544,8 +575,8 @@ static uint32_t preinit(const char *arg)
 	}
 
 	/* Open the video interface */
-	if (arg && arg[0]) {
-		sprintf(devname, "/dev/em8300_mv-%s", arg);
+	if (devnum) {
+		sprintf(devname, "/dev/em8300_mv-%c", devnum);
 	} else {
 		/* Try new naming scheme by default */
 		sprintf(devname, "/dev/em8300_mv-0");
@@ -568,8 +599,8 @@ static uint32_t preinit(const char *arg)
 	
 	/* Open the subpicture interface */
 	fdflags |= O_NONBLOCK;
-	if (arg && arg[0]) {
-		sprintf(devname, "/dev/em8300_sp-%s", arg);
+	if (devnum) {
+		sprintf(devname, "/dev/em8300_sp-%c", devnum);
 	} else {
 		/* Try new naming scheme by default */
 		sprintf(devname, "/dev/em8300_sp-0");
@@ -587,6 +618,9 @@ static uint32_t preinit(const char *arg)
 		}
 	}
 	strcpy(fds_name, devname);
+	
+	ioctl(fd_control, EM8300_IOCTL_SCR_GET, &ioval);
+	pts_offset = vo_pts - (ioval << 1);
 	
 	return 0;
 }
