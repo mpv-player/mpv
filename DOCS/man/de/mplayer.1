@@ -6049,7 +6049,7 @@ Durchschnitt über mehr Frames (langsamerer Wechsel).
 .IPs 0.0
 Glättung des Quantisierungsparameters deaktiviert.
 .IPs 1.0
-Bildet für den Quantisierungsparameter einen Durchschnitt aller vorangegangener
+Bildet für den Quantisierungsparameter den Durchschnitt aller vorangegangenen
 Frames.
 .RE
 .PD 1
@@ -6076,7 +6076,7 @@ konstante Qualität
 .IPs 1+(tex/\:avgTex-1)*qComp
 ungefähr die Gleichung der alten Bitratenkontrolle
 .IPs tex^qComp
-wobei qcomp = 0.5 oder einem ähnlichen Wert (Standard)
+wobei qcomp = 0.5 oder ein ähnlicher Wert (Standard)
 .RE
 .PP
 .RS
@@ -6117,7 +6117,7 @@ zeitliche Komplexität
 .IPs qComp
 auf der Kommandozeile angegebener Wert für qcomp
 .IPs "isI, isP, isB"
-Is 1 if picture type is I/\:P/\:B else 0.
+Ist 1 bei einem Bildtyp von I/\:P/\:B, sonst 0.
 .IPs Pi,E\ 
 Schau in dein Lieblingsmathebuch.
 .RE
@@ -6136,64 +6136,114 @@ Maximum / Minimum
 (equals) ist 1 falls a==b, sonst 0
 .IPs "sin, cos, tan, sinh, cosh, tanh, exp, log, abs"
 .RE
-.\" manpage is synced from top down to this option.
 .
-.IPs vrc_override=<Optionen>
-Benutzerdefinierte Qualität für bestimmte Abschnitte (Durchgang 1/\:2).
-Die Optionen haben folgenden Aufbau: <Startframe, Endframe,
-Qualität[/\:Startframe, Endframe, Qualität[/...]]>:
-.RSss
-Qualität 2\-31: Quantizer
-.br
-Qualität \-500\-0: Qualitätskorrektur in %
-.REss
-.IPs vrc_init_cplx=<0\-1000>
-anfägnliche Komplexität (Durchgang 1)
-.IPs vqsquish=<0\-1>
-Gibt an, wie die Quantizer zwischen qmin und qmax gehalten werden
-(Durchgang 1/\:2):
-.RSss
-0: mit Clipping
-.br
-1: benutzt eine schöne ableitbare Funktion (Standard)
-.REss
-.IPs vlelim=<-1000\-1000>
+.TP
+.B vrc_override=<Optionen>
+Benutzerdefinierte Qualität für bestimmte Abschnitte
+(Ende, Abspann, ...) (Durchlauf 1/\:2).
+Die Optionen haben folgenden Aufbau: <Startframe>, <Endframe>,
+<Qualität>[/\:<Startframe>, <Endframe>, <Qualität>[/\:...]]:
+.PD 0
+.RSs
+.IPs "Qualität (2\-31)"
+Quantisierungsparameter
+.IPs "Qualität (-500\-0)"
+Qualitätskorrektur in %
+.RE
+.PD 1
+.
+.TP
+.B vrc_init_cplx=<0\-1000>
+anfängliche Komplexität (Durchlauf 1)
+.
+.TP
+.B vqsquish=<0,1>
+Gibt an, wie die Quantisierungsparameter zwischen qmin und qmax gehalten werden
+(Durchlauf 1/\:2):
+.PD 0
+.RSs
+.IPs 0
+Benutze Clipping.
+.IPs 1
+Benutzt eine schöne ableitbare Funktion (Standard).
+.RE
+.PD 1
+.
+.TP
+.B vlelim=<-1000\-1000>
 Schwelle für die Eliminierung von einzelnen Koeffizienten beim
-Helligkeitsanteil. Bei negativen Werten werden auch die dc-Koeffizienten
-betrachtet (sollte mindestens -4 or niedriger sein, wenn mit quant=1
-encodiert wird):
-.RSss
-0: deaktiviert (Standard)
-.br
--4 (JVT\-Empfehlung)
-.REss
-.IPs vcelim=<-1000\-1000>
+Helligkeitsanteil.
+Bei negativen Werten werden auch die DC-Koeffizienten betrachtet (sollte
+mindestens -4 or niedriger sein, wenn mit quant=1 encodiert wird):
+.PD 0
+.RSs
+.IPs 0
+deaktiviert (Standard)
+.IPs -4
+JVT-Empfehlung
+.RE
+.PD 1
+.
+.TP
+.B vcelim=<-1000\-1000>
 Schwelle für die Eliminierung von einzelnen Koeffizienten beim
-Farbanteil. Bei negativen Werten werden auch die dc-Koeffizienten
-betrachtet (sollte mindestens -4 or niedriger sein, wenn mit quant=1
-encodiert wird):
-.RSss
-0 deaktiviert (Standard)
-.br
-7 (JVT\-Empfehlung)
-.REss
-.IPs vstrict=<-1\-1>
-Strikte Einhaltung der Standards.
-.RSss
-0: deaktiviert (Standardeinstellung)
-.br
-1: Nur empfehlenswert, wenn die Ausgabe mit einem MPEG-4 Referenzdekoder
-dekodiert werden soll.
-.br
--1: Erlaubt nichstandardkonforme YV12-Huffyuv-Encodierung (20% kleinere
-Dateien, die aber nicht mit dem offiziellen Huffyuv-Codec abgespielt
+Farbanteil.
+Bei negativen Werten werden auch die DC-Koeffizienten betrachtet (sollte
+mindestens -4 or niedriger sein, wenn mit quant=1 encodiert wird):
+.PD 0
+.RSs
+.IPs 0
+deaktiviert (Standard)
+.IPs 7
+JVT-Empfehlung
+.RE
+.PD 1
+.
+.TP
+.B vstrict=<-1,0,1>
+.PD 0
+.RSs
+.IPs 0
+deaktiviert (Standard)
+.IPs 1
+Nur empfehlenswert, wenn die Ausgabe mit einem MPEG-4-Referenzdecoder
+decodiert werden soll.
+.IPs -1
+Erlaubt nicht-standardkonforme YV12-HuffYUV-Encodierung (20% kleinere
+Dateien, die aber nicht mit dem offiziellen HuffYUV-Codec abgespielt
 werden können).
-.REss
-.IPs vdpart
-Datenpartitionierung. Fügt zwei Bytes pro Videopaket hinzu und erhöht die
-Fehlerresistenz beim Transfer über unzuverlässige Kanäle (z.B.\& Streaming
-über's Internet).
-.IPs vpsize=<0\-10000>
+.RE
+.PD 1
+.
+.TP
+.B vdpart\ 
+Datenpartitionierung.
+Fügt zwei Bytes pro Videopaket hinzu und erhöht die Fehlerresistenz beim
+Transfer über unzuverlässige Kanäle (z.B.\& Streaming über's Internet).
+Jedes Videopaket wird in drei separate Partitionen aufgeteilt:
+.PD 0
+.RSs
+.IPs "1. MVs"
+Bewegungen
+.IPs "2. DC-Koeffizienten"
+niedrig aufgelöstet Bild
+.IPs "3. AC-Koeffizienten"
+Details
+.RE
+.PD 1
+.RS
+MV und DC sind am wichtigsten, sie zu verlieren bedeutet ein viel schlechteres
+Bild als der Verlust von AC und der ersten oder zweiten Partition.
+MV und DC sind viel kleiner als die dritte (AC) Partition, was bedeutet, dass
+auftretende Fehler die AC-Partition viel häufiger treffen wird als die MV- und
+DC-Partitionen.
+Daher sieht das Bild mit Partitionierung viel besser aus, denn ohne eine
+solche würde ein Fehler AC/\:DC/\:MV in gleichem Umfang zerstören.
+.RE
+.
+.TP
+.\" manpage is synced from top down to this option.
+.B vpsize=<0\-10000> (siehe auch vdpart)
 Videopaketgröße, erhöht die Fehlerresistenz (siehe auch \-vdpart):
 .RSss
 0: deaktiviert (Standard)
