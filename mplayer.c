@@ -67,6 +67,7 @@
 
 int slave_mode=0;
 int verbose=0;
+int identify=0;
 static int quiet=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
@@ -1146,6 +1147,35 @@ if(sh_audio){
   } else
     inited_flags|=INITED_ACODEC;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+}
+
+if(identify) {
+  mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_FILENAME=%s\n", filename);
+  if (sh_video) {
+    /* Assume FOURCC if all bytes >= 0x20 (' ') */
+    if (sh_video->format >= 0x20202020)
+      mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FORMAT=%.4s\n", &sh_video->format);
+    else
+      mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FORMAT=%d\n", sh_video->format);
+    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_BITRATE=%d\n", sh_video->i_bps*8);
+    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_WIDTH=%d\n", sh_video->disp_w);
+    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_HEIGHT=%d\n", sh_video->disp_h);
+    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FPS=%5.3f\n", sh_video->fps);
+    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_ASPECT=%1.2f\n", sh_video->aspect);
+  }
+  if (sh_audio) {
+    if (sh_audio->codec)
+      mp_msg(MSGT_GLOBAL,MSGL_INFO, "ID_AUDIO_CODEC=%s\n", sh_audio->codec->name);
+    /* Assume FOURCC if all bytes >= 0x20 (' ') */
+    if (sh_audio->format >= 0x20202020)
+      mp_msg(MSGT_GLOBAL,MSGL_INFO, "ID_AUDIO_FORMAT=%.4s\n", &sh_audio->format);
+    else
+      mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_FORMAT=%d\n", sh_audio->format);
+    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_BITRATE=%d\n", sh_audio->i_bps*8);
+    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_RATE=%d\n", sh_audio->samplerate);
+    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_NCH=%d\n", sh_audio->channels);
+  }
+  goto goto_next_file;
 }
 
 if(!sh_video) goto main; // audio-only
