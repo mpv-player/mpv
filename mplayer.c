@@ -2967,7 +2967,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 		else
 		    last_dvb_step = -1;
 
-  		if(dvb_set_channel(priv, cmd->args[0].v.i))
+  		if(dvb_set_channel(priv, cmd->args[1].v.i, cmd->args[0].v.i))
 		{
 	  	  uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
 		  cache_uninit(stream);

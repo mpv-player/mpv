@@ -95,7 +95,7 @@ static mp_cmd_t mp_cmds[] = {
 #endif
   { MP_CMD_SUB_FORCED_ONLY, "forced_subs_only",  0, { {-1,{0}} } },
 #ifdef HAS_DVBIN_SUPPORT
-  { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", 1, { { MP_CMD_ARG_INT, {0}}, {-1,{0}}  }},
+  { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", 2, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}}}},
 #endif
   { MP_CMD_VO_FULLSCREEN, "vo_fullscreen", 0, { {-1,{0}} } },
   { MP_CMD_VO_ONTOP, "vo_ontop", 0, { {-1,{0}} } },
