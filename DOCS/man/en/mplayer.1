@@ -3058,9 +3058,8 @@ up from their original framerate for TV.
 Only the luma plane is used to find the frame breaks.
 If a field has no match, it is deinterlaced with simple linear
 approximation.
-If the source is MPEG-2, libmpeg2 must be used for decoding (not
-ffmpeg2!), and this must be the first filter to allow access to the
-field-flags set by the MPEG-2 decoder.
+If the source is MPEG-2, and this must be the first filter to allow
+access to the field-flags set by the MPEG-2 decoder.
 Depending on the source mpeg, you may be fine ignoring this advice, as
 long as you do not see lots of "Bottom-first field" warnings.
 With no options it does normal inverse telecine, and should be used
@@ -3130,8 +3129,7 @@ used for soft 3:2 pulldown (soft telecine).
 If you want to use the ivtc or detc filter on movies that are partly soft
 telecined, inserting this filter before them should make them more reliable.
 Currently only libmpeg2 exports the needed flags.
-If used on material that does not set them or if using ffmpeg12, the
-filter does nothing.
+If used on material that does not set them, the filter does nothing.
 .TP
 .B telecine[=start]
 Apply 3:2 'telecine' process to increase framerate by 20%.

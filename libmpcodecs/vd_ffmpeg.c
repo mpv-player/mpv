@@ -837,6 +837,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mpi->fields = MP_IMGFIELD_ORDERED;
     if(pic->interlaced_frame) mpi->fields |= MP_IMGFIELD_INTERLACED;
     if(pic->top_field_first ) mpi->fields |= MP_IMGFIELD_TOP_FIRST;    
+    if(pic->repeat_pict == 1) mpi->fields |= MP_IMGFIELD_REPEAT_FIRST;
 #endif
     
     return mpi;
