@@ -47,6 +47,12 @@
 /// Netstream packets def and some helpers
 #include <libmpdemux/netstream.h>
 
+
+//Set some standard variables
+char* dvdsub_lang=NULL;
+char* audio_lang=NULL;
+int sub_justify=0;
+
 static unsigned short int port = 10000;
 
 typedef struct client_st client_t;
