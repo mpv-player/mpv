@@ -215,7 +215,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 		  (! last_entry || last_entry->child) ) {
 	  int l;
 	  char* end;
-	  l = strtol(argv[i+1],&end,0);
+	  l = (i+1<argc) ? strtol(argv[i+1],&end,0) : 0;
 	  if(!end)
 	    tmp = ERR_OUT_OF_RANGE;
 	  else {
