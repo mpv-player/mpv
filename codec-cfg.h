@@ -17,6 +17,23 @@
 #define CODECS_STATUS_PROBLEMS		1
 #define CODECS_STATUS_WORKING		2
 
+// Codec family/driver:
+#define AFM_MPEG 1
+#define AFM_PCM 2
+#define AFM_AC3 3
+#define AFM_ACM 4
+#define AFM_ALAW 5
+#define AFM_GSM 6
+#define AFM_DSHOW 7
+#define AFM_DVDPCM 8
+
+#define VFM_MPEG 1
+#define VFM_VFW 2
+#define VFM_ODIVX 3
+#define VFM_DSHOW 4
+#define VFM_FFMPEG 5
+#define VFM_VFWEX 6
+#define VFM_DIVX4 7
 
 typedef struct {
 	unsigned long f1;

@@ -86,7 +86,7 @@ unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 
 switch(sh_video->codec->driver){
 #ifdef ARCH_X86
- case 2: {
+ case VFM_VFW: {
    if(!init_video_codec(sh_video,0)) {
 //     GUI_MSG( mplUnknowError )
 //     exit(1);
@@ -95,7 +95,7 @@ switch(sh_video->codec->driver){
    if(verbose) printf("INFO: Win32 video codec init OK!\n");
    break;
  }
- case 6: {
+ case VFM_VFWEX: {
    if(!init_video_codec(sh_video,1)) {
 //     GUI_MSG( mplUnknowError )
 //     exit(1);
@@ -104,7 +104,7 @@ switch(sh_video->codec->driver){
    if(verbose) printf("INFO: Win32Ex video codec init OK!\n");
    break;
  }
- case 4: { // Win32/DirectShow
+ case VFM_DSHOW: { // Win32/DirectShow
 #ifndef USE_DIRECTSHOW
    fprintf(stderr,"MPlayer was compiled WITHOUT directshow support!\n");
    return 0;
@@ -153,13 +153,13 @@ switch(sh_video->codec->driver){
 #endif
  }
 #else	/* !ARCH_X86 */
- case 2:
- case 4:
- case 6:
+ case VFM_VFW:
+ case VFM_DSHOW:
+ case VFM_VFWEX:
    fprintf(stderr,"MPlayer does not support win32 codecs on non-x86 platforms!\n");
    return 0;
 #endif	/* !ARCH_X86 */
- case 3: {  // OpenDivX
+ case VFM_ODIVX: {  // OpenDivX
    if(verbose) printf("OpenDivX video codec\n");
    { DEC_PARAM dec_param;
      DEC_SET dec_set;
@@ -178,7 +178,7 @@ switch(sh_video->codec->driver){
    if(verbose) printf("INFO: OpenDivX video codec init OK!\n");
    break;
  }
- case 7: {  // DivX4Linux
+ case VFM_DIVX4: {  // DivX4Linux
 #ifndef NEW_DECORE
    fprintf(stderr,"MPlayer was compiled WITHOUT DivX4Linux (libdivxdecore.so) support!\n");
    return 0; //exit(1);
@@ -213,7 +213,7 @@ switch(sh_video->codec->driver){
    break;
 #endif
  }
- case 5: {  // FFmpeg's libavcodec
+ case VFM_FFMPEG: {  // FFmpeg's libavcodec
 #ifndef USE_LIBAVCODEC
    fprintf(stderr,"MPlayer was compiled WITHOUT libavcodec support!\n");
    return 0; //exit(1);
@@ -241,7 +241,7 @@ switch(sh_video->codec->driver){
 #endif
  }
 
- case 1: {
+ case VFM_MPEG: {
    // init libmpeg2:
 #ifdef MPEG12_POSTPROC
    picture->pp_options=divx_quality;
@@ -275,7 +275,7 @@ unsigned int t2;
 
   //--------------------  Decode a frame: -----------------------
 switch(sh_video->codec->driver){
-  case 3: {
+  case VFM_ODIVX: {
     // OpenDivX
     DEC_FRAME dec_frame;
 #ifdef NEW_DECORE
@@ -317,7 +317,7 @@ switch(sh_video->codec->driver){
     break;
   }
 #ifdef NEW_DECORE
-  case 7: {
+  case VFM_DIVX4: {
     // DivX4Linux
     DEC_FRAME dec_frame;
     // let's decode
@@ -333,14 +333,14 @@ switch(sh_video->codec->driver){
   }
 #endif
 #ifdef USE_DIRECTSHOW
-  case 4: {        // W32/DirectShow
+  case VFM_DSHOW: {        // W32/DirectShow
     if(drop_frame<2) DS_VideoDecoder_DecodeFrame(start, in_size, 0, !drop_frame);
     if(!drop_frame && sh_video->our_out_buffer) blit_frame=3;
     break;
   }
 #endif
 #ifdef USE_LIBAVCODEC
-  case 5: {        // libavcodec
+  case VFM_FFMPEG: {        // libavcodec
     int got_picture=0;
     if(drop_frame<2 && in_size>0){
         int ret = avcodec_decode_video(&lavc_context, &lavc_picture,
@@ -356,8 +356,8 @@ switch(sh_video->codec->driver){
   }
 #endif
 #ifdef ARCH_X86
-  case 6:
-  case 2:
+  case VFM_VFWEX:
+  case VFM_VFW:
   {
     HRESULT ret;
     
@@ -369,7 +369,7 @@ switch(sh_video->codec->driver){
 //      sh_video->o_bih.biWidth = 1280;
 	    //      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME|(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL), 
 
-if(sh_video->codec->driver==6)
+if(sh_video->codec->driver==VFM_VFWEX)
       ret = ICDecompressEx(sh_video->hic, 
 	  ( (sh_video->ds->flags&1) ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
 	  ( (drop_frame==2 && !(sh_video->ds->flags&1))?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
@@ -390,7 +390,7 @@ else
     break;
   }
 #endif
-  case 1:
+  case VFM_MPEG:
     mpeg2_decode_data(video_out, start, start+in_size,drop_frame);
     if(!drop_frame) blit_frame=1;
     break;

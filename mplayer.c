@@ -800,7 +800,7 @@ while(1){
     exit(1);
   }
   // is next line needed anymore? - atmos ::
-  if(!allow_dshow && sh_video->codec->driver==4) continue; // skip DShow
+  if(!allow_dshow && sh_video->codec->driver==VFM_DSHOW) continue; // skip DShow
   else if(video_codec && strcmp(sh_video->codec->name,video_codec)) continue;
   else if(video_family!=-1 && sh_video->codec->driver!=video_family) continue;
   break;
@@ -1177,7 +1177,7 @@ if(1)
 	  if(grab_frames==2 && (i==0x1B3 || i==0x1B8)) grab_frames=1;
           if(!read_video_packet(d_video)){ eof=1; break;} // EOF
           //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
-	  if(sh_video->codec->driver!=1){
+	  if(sh_video->codec->driver!=VFM_MPEG){
 	    // if not libmpeg2:
 	    switch(i){
 	      case 0x1B3: header_process_sequence_header (picture, buffer);break;

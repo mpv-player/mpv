@@ -76,7 +76,7 @@ sh_audio->a_in_buffer_len=0;
 sh_audio->audio_out_minsize=8192;// default size, maybe not enough for Win32/ACM
 
 switch(driver){
-case 4:
+case AFM_ACM:
 #ifndef	ARCH_X86
   printf("Win32/ACM audio codec unavailable on non-x86 CPU -> force nosound :(\n");
   driver=0;
@@ -96,7 +96,7 @@ case 4:
   }
 #endif
   break;
-case 7:
+case AFM_DSHOW:
 #ifndef USE_DIRECTSHOW
   printf("Compiled without DirectShow support -> force nosound :(\n");
   driver=0;
@@ -119,21 +119,21 @@ case 7:
   }
 #endif
   break;
-case 2:
-case 8:
-case 5:
+case AFM_PCM:
+case AFM_DVDPCM:
+case AFM_ALAW:
   // PCM, aLaw
   sh_audio->audio_out_minsize=2048;
   break;
-case 3:
+case AFM_AC3:
   // Dolby AC3 audio:
   sh_audio->audio_out_minsize=4*256*6;
   break;
-case 6:
+case AFM_GSM:
   // MS-GSM audio codec:
   sh_audio->audio_out_minsize=4*320;
   break;
-case 1:
+case AFM_MPEG:
   // MPEG Audio:
   sh_audio->audio_out_minsize=4608;
   break;
@@ -157,7 +157,7 @@ sh_audio->a_buffer_len=0;
 
 switch(driver){
 #ifdef ARCH_X86
-case 4: {
+case AFM_ACM: {
     int ret=acm_decode_audio(sh_audio,sh_audio->a_buffer,4096,sh_audio->a_buffer_size);
     if(ret<0){
         printf("ACM decoding error: %d\n",ret);
@@ -167,7 +167,7 @@ case 4: {
     break;
 }
 #endif
-case 2: {
+case AFM_PCM: {
     // AVI PCM Audio:
     WAVEFORMATEX *h=sh_audio->wf;
     sh_audio->i_bps=h->nAvgBytesPerSec;
@@ -184,7 +184,7 @@ case 2: {
     }
     break;
 }
-case 8: {
+case AFM_DVDPCM: {
     // DVD PCM Audio:
     sh_audio->channels=2;
     sh_audio->samplerate=48000;
@@ -192,7 +192,7 @@ case 8: {
 //    sh_audio->pcm_bswap=1;
     break;
 }
-case 3: {
+case AFM_AC3: {
   // Dolby AC3 audio:
   dec_audio_sh=sh_audio; // save sh_audio for the callback:
   ac3_config.fill_buffer_callback = ac3_fill_buffer;
@@ -218,14 +218,14 @@ case 3: {
   }
   break;
 }
-case 5: {
+case AFM_ALAW: {
   // aLaw audio codec:
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
   sh_audio->i_bps=sh_audio->channels*sh_audio->samplerate;
   break;
 }
-case 6: {
+case AFM_GSM: {
   // MS-GSM audio codec:
   GSM_Init();
   sh_audio->channels=sh_audio->wf->nChannels;
@@ -236,7 +236,7 @@ case 6: {
   sh_audio->i_bps=65*(sh_audio->channels*sh_audio->samplerate)/320;  // 1:10
   break;
 }
-case 1: {
+case AFM_MPEG: {
   // MPEG Audio:
   dec_audio_sh=sh_audio; // save sh_audio for the callback:
 #ifdef USE_FAKE_MONO
@@ -279,13 +279,13 @@ if(!sh_audio->channels || !sh_audio->samplerate){
 int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
     int len=-1;
     switch(sh_audio->codec->driver){
-      case 1: // MPEG layer 2 or 3
+      case AFM_MPEG: // MPEG layer 2 or 3
         len=MP3_DecodeFrame(buf,-1);
         break;
-      case 2: // AVI PCM
+      case AFM_PCM: // AVI PCM
         len=demux_read_data(sh_audio->ds,buf,minlen);
         break;
-      case 8: // DVD PCM
+      case AFM_DVDPCM: // DVD PCM
       { int j;
         len=demux_read_data(sh_audio->ds,buf,minlen);
           //if(i&1){ printf("Warning! pcm_audio_size&1 !=0  (%d)\n",i);i&=~1; }
@@ -297,7 +297,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
           }
         break;
       }
-      case 5:  // aLaw decoder
+      case AFM_ALAW:  // aLaw decoder
       { int l=demux_read_data(sh_audio->ds,buf,minlen/2);
         unsigned short *d=(unsigned short *) buf;
         unsigned char *s=buf;
@@ -311,7 +311,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         }
         break;
       }
-      case 6:  // MS-GSM decoder
+      case AFM_GSM:  // MS-GSM decoder
       { unsigned char buf[65]; // 65 bytes / frame
         if(demux_read_data(sh_audio->ds,buf,65)!=65) break; // EOF
         XA_MSGSM_Decoder(buf,(unsigned short *) buf); // decodes 65 byte -> 320 short
@@ -319,7 +319,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         len=2*320;
         break;
       }
-      case 3: // AC3 decoder
+      case AFM_AC3: // AC3 decoder
         //printf("{1:%d}",avi_header.idx_pos);fflush(stdout);
         if(!sh_audio->ac3_frame) sh_audio->ac3_frame=ac3_decode_frame();
         //printf("{2:%d}",avi_header.idx_pos);fflush(stdout);
@@ -331,7 +331,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         //printf("{3:%d}",avi_header.idx_pos);fflush(stdout);
         break;
 #ifdef ARCH_X86
-      case 4:
+      case AFM_ACM:
 //        len=sh_audio->audio_out_minsize; // optimal decoded fragment size
 //        if(len<minlen) len=minlen; else
 //        if(len>maxlen) len=maxlen;
@@ -341,7 +341,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 #endif
 
 #ifdef USE_DIRECTSHOW
-      case 7: // DirectShow
+      case AFM_DSHOW: // DirectShow
       { int size_in=0;
         int size_out=0;
         int srcsize=DS_AudioDecoder_GetSrcSize(maxlen);
@@ -372,19 +372,19 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 
 void resync_audio_stream(sh_audio_t *sh_audio){
         switch(sh_audio->codec->driver){
-        case 1:  // MPEG
+        case AFM_MPEG:
           MP3_DecodeFrame(NULL,-2); // resync
           MP3_DecodeFrame(NULL,-2); // resync
           MP3_DecodeFrame(NULL,-2); // resync
           break;
-        case 3:  // AC3
+        case AFM_AC3:
           ac3_bitstream_reset();    // reset AC3 bitstream buffer
     //      if(verbose){ printf("Resyncing AC3 audio...");fflush(stdout);}
           sh_audio->ac3_frame=ac3_decode_frame(); // resync
     //      if(verbose) printf(" OK!\n");
           break;
-        case 4:  // ACM
-        case 7:  // DShow
+        case AFM_ACM:
+        case AFM_DSHOW:
           sh_audio->a_in_buffer_len=0;        // reset ACM/DShow audio buffer
           break;
         }
@@ -393,10 +393,10 @@ void resync_audio_stream(sh_audio_t *sh_audio){
 
 void skip_audio_frame(sh_audio_t *sh_audio){
               switch(sh_audio->codec->driver){
-                case 1: MP3_DecodeFrame(NULL,-2);break; // skip MPEG frame
-                case 3: sh_audio->ac3_frame=ac3_decode_frame();break; // skip AC3 frame
-		case 4:
-		case 7: {
+                case AFM_MPEG: MP3_DecodeFrame(NULL,-2);break; // skip MPEG frame
+                case AFM_AC3: sh_audio->ac3_frame=ac3_decode_frame();break; // skip AC3 frame
+		case AFM_ACM:
+		case AFM_DSHOW: {
 		    int skip=sh_audio->wf->nBlockAlign;
 		    if(skip<16){
 		      skip=(sh_audio->wf->nAvgBytesPerSec/16)&(~7);
@@ -405,9 +405,9 @@ void skip_audio_frame(sh_audio_t *sh_audio){
 		    demux_read_data(sh_audio->ds,NULL,skip);
 		    break;
 		}
-		case 2:  // AVI PCM
-		case 8:  // DVD PCM
-		case 5: {// aLaw
+		case AFM_PCM:
+		case AFM_DVDPCM:
+		case AFM_ALAW: {
 		    int skip=sh_audio->i_bps/16;
 		    skip=skip&(~3);
 		    demux_read_data(sh_audio->ds,NULL,skip);
