@@ -1,10 +1,8 @@
 
 /*
- * Discrete Cosine Tansform (DCT) for subband synthesis
- * optimized for machines with no auto-increment.
- * The performance is highly compiler dependend. Maybe
- * the dct64.c version for 'normal' processor may be faster
- * even for Intel processors.
+ * Discrete Cosine Tansform (DCT) for Altivec
+ * Copyright (c) 2004 Romain Dolbeau <romain@dolbeau.org>
+ * based upon code from "mp3lib/dct64.c"
  */
 
 #define real float
