@@ -1,0 +1,19 @@
+#!/usr/bin/perl -w
+# Helper script to ease MEncoder two pass encoding
+# Copyleft 2001 by Felix Buenemann <atmosfear@users.sourceforge.net>
+# This files comes udner GPL, see http://www.gnu.org/copyleft/gpl.html for more
+# information on it's licensing.
+use strict;
+my $mencoder="mencoder"; # Path to MEncoder (including binary name)
+
+die <<"EOF" unless @ARGV;
+Menc2Pass: No arguments given!
+Please give all usual encoding parameters you would give to mencoder, but leave
+away the -pass switch.
+EOF
+
+for(my $i=1; $i<=2; $i++) {
+	system($mencoder,@ARGV," -pass $i")
+		and die "MEncoder pass $i failed!\n"
+}
+
