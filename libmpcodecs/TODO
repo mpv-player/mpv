@@ -1,6 +1,12 @@
 URGENT:
 - add common postprocessing filter support (export qscale array)
 
+audio:
+
+libvorbis
+libmad
+faad
+
 TODO:
 - vo_config callbacks to ffmpeg, cinepak
 - better mpi support to xanim (now it's EXPORT but could be better)
