@@ -6,10 +6,22 @@ MPlayer (1.0)
     * buffer overflow in mp3lib fixed
     * many memleaks fixed
 
+    DOCS:
+    * finally all options are documented
+    * man page completely reviewed for spelling, wording and clarity
+    * all audio output driver suboptions documented
+    * all video output driver suboptions documented
+    * XviD documentation completed
+    * French man page in sync again
+    * German man page updated
+    * new Czech man page translation
+    * fixes and updates in various places
+
     Ports:
     * full x86_64 support
-    * -rootwin, -panscan support in the Quartz video output driver
-    * holding key pressed now works in the Quartz video output driver
+    * -rootwin, -panscan support in the quartz video output driver
+    * key repetition and aspect fixed in the quartz video output driver
+    * right-click menu for quartz video output driver added with zoom options
     * VCD support for Darwin
     * fix for stdin input and slave mode on MinGW
     * support for -rootwin in the DirectX video output driver
@@ -24,30 +36,32 @@ MPlayer (1.0)
     * JACK audio output driver updated to bio2jack API changes
     * OpenGL video output driver colorformat fixes (with :manyfmts)
     * aspect, panscan, Hardware OSD support in the OpenGL video output driver
-    * new pnm and md5sum video output drivers
+    * new pnm and md5sum video output drivers, replacing pgm and md5
+    * alsa9 and alsa1x replaced by alsa audio output driver
     * ALSA audio output driver always uses specified device, even for hwac3
-    * support for mixer channels selection in the ALSA audio output driver
+    * support for mixer channel selection in the ALSA audio output driver
+    * jpeg video output driver now supports output to multiple directories
 
     Decoders:
     * "experimental" support for 20 and 24 bit LPCM (DVD-Audio)
     * libmpeg2 updated to 0.4.0b
     * libfaad2 updated to 2.1beta CVS snapshot
     * DTS decoding via lavc
-    * Windows Media Audio 9 Voice support via binary codec
-    * Windows Media Video 9 Advanced support via binary codec
-    * Windows Media Screen Codec 2 support via binary codec
-    * Windows Media Picture Codec support via binary codec
-    * VDOWave video support via binary codec
+    * Windows Media Audio 9 Voice support via binary DLL
+    * Windows Media Video 9 Advanced support via binary DLL
+    * Windows Media Screen Codec 2 support via binary DLL
+    * Windows Media Picture Codec support via binary DLL
+    * VDOWave video support via binary DLL
     * Miro VideoXL video support via lavc
-    * Creative ADPCM audio support via lavc or binary codec
-    * IBM Ultimoion video support via lavc
-    * Micronas Speech codec support via binary codec
-    * H.261 video support via lavc
-    * Techsmith Camtasia Screen Codec video support via lavc
+    * Creative ADPCM audio support via lavc or binary DLL
+    * IBM Ultimotion video support via lavc
+    * Micronas Speech codec support via binary DLL
+    * H.261 video codec support via lavc
+    * TechSmith Camtasia video codec support via lavc
     * sonic audio codec support via lavc
     * snow video codec support via lavc
     * QuickDraw video support via lavc
-    * Cinepak, CYUV and RoQ Audio/Video moved to FFmpeg
+    * Cinepak, CYUV and RoQ audio/video moved to FFmpeg
 
     Demuxers:
     * fix -nosound and -novideo for NSV
@@ -57,24 +71,65 @@ MPlayer (1.0)
     * improved MP3 detection
     * AVC in .mp4 files
     * raw H.261 files via lavf
+    * improved seeking precision in MPEG files
+    * better subtitle language code handling for MKV files
 
     Streaming:
-    * -cache-min option
+    * -cache-min and -cache-prefill options added
     * compilation fix for newer LIVE.COM versions
     * make ASF without ECC work
     * support for MMS on non-standard port
+    * EOF detected in Real RTSP streams
 
     FFmpeg/libavcodec:
-    * new snow video codec
-    * new sonic audio codec
     * reduced resolution decoding
-    * TSCC support
+    * new experimental wavelet-based snow video codec
+    * new sonic audio codec
+    * TechSmith Camtasia video decoder
+    * IBM Ultimotion video decoder
+    * QuickDraw video decoder
+    * Creative ADPCM decoder
+    * Miro VideoXL decoder
+    * Sierra online audio files demuxer and decoder
+    * Electronic Arts Game Multimedia format demuxer
+    * H.261 fixes, H.261 encoder
+    * fix VIS accelerated code
+    * DTS support via libdts
+    * many DV fixes, seek in raw DV files
+    * support AAC in MOV files
+    * RV10 fixes
+    * AVI demuxer cleanup, palette change support
+    * iTunes metadata support
+    * HuffYUV fixes (endianness, RGB32 predictor, median encoding, interlacing)
+    * SSE optimizations for 4x4 compare function
+    * epzs motion search enhancements
+    * quad tree based motion compensation
+    * MPEG4 qpel MMX2/3DNow! optimizations
+    * H.264: lot of fixes and MMX2/3DNow! optimizations
+    * AVC1 (H.264 without sync word in .mp4 files) support
+    * H.264 qpel motion compensation
+    * Indeo3 grayscale decoding
+    * preliminary Truemotion 24 bit decoder
+    * avizlib encoder fixed
+    * trellis quantization support in H.263
+    * DCT optimizations
+    * AltiVec support on AmigaOS4
+    * adapt MMX/MMX2/SSE/3DNow! optimizations to work on x86_64
+    * seeking fixes
+    * better and faster audio resampler
+    * New dc1384 grabbing interface
+    * preliminary decoding support for H.264 with CABAC and B-frames
+    * dvr-ms suport in ASF demuxer
+    * MJPEG-B fixes
+    * range coder (arithmetic entropy coder) used by snow and ffv1
+    * ffv1 enhancements: signed golomb, range codes
+    * as usual, lots of bug fixes and optimizations
 
     Filters:
     * software volume control when no hardware support
     * high-quality audio resampling with -af lavcresample
     * cropdetect rounding parameter
-    * remaining audio plugins (extrastereo, volnorm) converted to audio filters
+    * missing audio plugins (extrastereo, volnorm) converted to audio filters
 
     Others:
     * -loop and -shuffle now work together
@@ -87,6 +142,19 @@ MPlayer (1.0)
     * changeable playback speed
     * some crashes with binary codecs fixed
     * subtitle alignment support for SAMI files
+    * MEncoder can encode MP2 with libtoolame
+    * MPlayer -af help
+    * also support Windows path separator '\'
+    * lavc "turbo mode" to speed up 2-pass encoding
+    * XviD encoder frontend updated to XviD 1.1 + API 4.1
+    * flush remainig frames at end of encoding process
+    * VIDIX Cyberblade TV-out fixed
+    * VIDIX I420 support for Cyberblade and mga
+    * VIDIX Radeon support on big-endian systems, other Radeon fixes
+    * CLE266 VIDIX driver
+    * -jpeg removed in favor of -vo jpeg suboptions
+    * FriBiDi fixes for comma handling in Hebrew subtitles
+    * -crash-debug option to attach gdb automatically after crashes
 
 
   pre5: "LinuxTag release" July 15, 2004
