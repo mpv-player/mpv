@@ -95,7 +95,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile);
  * 	-1 on error (invalid option...)
  * 	 1 otherwise
  */
-int m_config_parse_command_line(m_config_t* config, int argc, char **argv, char **envp);
+int m_config_parse_command_line(m_config_t* config, int argc, char **argv);
 
 m_config_t* m_config_new(play_tree_t* pt);
 

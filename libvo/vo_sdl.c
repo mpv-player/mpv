@@ -731,6 +731,29 @@ static void set_fullmode (int mode) {
 	/* try to change to given fullscreenmode */
 	newsurface = SDL_SetVideoMode(priv->dstwidth, screen_surface_h, priv->bpp,
                                   priv->sdlfullflags);
+
+	/*
+	 * In Mac OS X (and possibly others?) SDL_SetVideoMode() appears to 
+	 * destroy the datastructure previously retrived, so we need to 
+	 * re-assign it.  The comment in sdl_close() seems to imply that we 
+	 * should not free() anything.
+	 */
+	#ifdef SYS_DARWIN
+	{
+	const SDL_VideoInfo *vidInfo = NULL;
+	vidInfo = SDL_GetVideoInfo ();
+
+	/* collect all fullscreen & hardware modes available */
+	if (!(priv->fullmodes = SDL_ListModes (vidInfo->vfmt, priv->sdlfullflags))) {
+
+	    /* non hardware accelerated fullscreen modes */
+	    priv->sdlfullflags &= ~SDL_HWSURFACE;
+	    priv->fullmodes = SDL_ListModes (vidInfo->vfmt, priv->sdlfullflags);
+	}
+	}
+	#endif
+
+
 	
 	/* if creation of new surface was successfull, save it and hide mouse cursor */
 	if(newsurface) {

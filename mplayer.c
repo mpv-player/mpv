@@ -469,7 +469,17 @@ static int libmpdemux_was_interrupted(int eof) {
   return eof;
 }
 
-int main(int argc,char* argv[], char *envp[]){
+/*
+ * In Mac OS X the SDL-lib is built upon Cocoa. The easiest way to
+ * make it all work is to use the builtin SDL-bootstrap code, which 
+ * will be done automatically by replacing our main() if we include SDL.h.
+ */
+#if defined(SYS_DARWIN) && defined(HAVE_SDL)
+#include <SDL.h>
+#endif
+
+int main(int argc,char* argv[]){
+
 
 
 static demux_stream_t *d_audio=NULL;
@@ -564,7 +574,7 @@ int gui_no_filename=0;
     if ( use_gui ) cfg_read();
 #endif
 
-    if(m_config_parse_command_line(mconfig, argc, argv, envp) < 0) exit(1); // error parsing cmdline
+    if(m_config_parse_command_line(mconfig, argc, argv) < 0) exit(1); // error parsing cmdline
 
     playtree = play_tree_cleanup(playtree);
     if(playtree) {

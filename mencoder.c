@@ -295,7 +295,7 @@ void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags){
 }
 
 
-int main(int argc,char* argv[], char *envp[]){
+int main(int argc,char* argv[]){
 
 stream_t* stream=NULL;
 demuxer_t* demuxer=NULL;
@@ -373,7 +373,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   me_register_options(mconfig);
   parse_cfgfiles(mconfig);
 
-  if(m_config_parse_command_line(mconfig, argc, argv, envp) < 0) mencoder_exit(1, "error parsing cmdline");
+  if(m_config_parse_command_line(mconfig, argc, argv) < 0) mencoder_exit(1, "error parsing cmdline");
   playtree = play_tree_cleanup(playtree);
   if(playtree) {
     playtree_iter = play_tree_iter_new(playtree,mconfig);

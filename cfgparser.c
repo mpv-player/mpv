@@ -1033,7 +1033,7 @@ out:
 	return ret;
 }
 
-int m_config_parse_command_line(m_config_t *config, int argc, char **argv, char **envp)
+int m_config_parse_command_line(m_config_t *config, int argc, char **argv)
 {
 	int i;
 	int tmp;
@@ -1044,7 +1044,6 @@ int m_config_parse_command_line(m_config_t *config, int argc, char **argv, char 
 	assert(config != NULL);
 	assert(config->pt != NULL);
 	assert(argv != NULL);
-	assert(envp != NULL);
 	assert(argc >= 1);
 #endif
 	

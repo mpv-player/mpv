@@ -50,7 +50,7 @@ COMMON_LIBS = $(CODEC_LIBS) libmpdemux/libmpdemux.a input/libinput.a postproc/li
 ifeq ($(VIDIX),yes)
 MISC_LIBS += -Llibdha -ldha vidix/libvidix.a
 endif
-CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(FREETYPE_INC) # -Wall
+CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(FREETYPE_INC) $(SDL_INC) # -Wall
 
 PARTS = libfame libmpdemux libmpcodecs mp3lib liba52 libmp1e libmpeg2 libavcodec libao2 drivers linux postproc input libmpdvdkit libvo
 ifeq ($(VIDIX),yes)
