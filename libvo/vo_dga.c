@@ -611,10 +611,12 @@ static void init_video_buffers(uint8_t *buffer_base,
 	else
 		vo_dga_nr_video_buffers = 1;
 
-	vo_dga_current_video_buffer = 0;
-	
-	if(MAX_NR_VIDEO_BUFFERS < vo_dga_nr_video_buffers)
+	if (vo_dga_nr_video_buffers > MAX_NR_VIDEO_BUFFERS)
 		vo_dga_nr_video_buffers = MAX_NR_VIDEO_BUFFERS;
+	if (vo_dga_nr_video_buffers <= 0)
+		vo_dga_nr_video_buffers = 1;
+
+	vo_dga_current_video_buffer = 0;
 	
 	for(i = 0; i < vo_dga_nr_video_buffers; i++)
 	{
