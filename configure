@@ -1175,16 +1175,16 @@ fi
 
 
 echocheck "extra headers"
-if test "$_extraincdir" ; then
-  echores "$_extraincdir"
+if test "$_inc_extra" ; then
+  echores "$_inc_extra"
 else
   echores "none"
 fi
 
 
 echocheck "extra libs"
-if test "$_extralibdir" ; then
-  echores "$_extralibdir"
+if test "$_ld_extra" ; then
+  echores "$_ld_extra"
 else
   echores "none"
 fi
