@@ -414,7 +414,7 @@ static void draw_slice(struct AVCodecContext *s,
     sh_video_t * sh = s->opaque;
     int start=0, i;
     int width= s->width;
-    int skip_stride= (width+15)>>4;
+    int skip_stride= ((width<<lavc_param_lowres)+15)>>4;
     uint8_t *skip= &s->coded_frame->mbskip_table[(y>>4)*skip_stride];
     int threshold= s->coded_frame->age;
 #if LIBAVCODEC_BUILD >= 4670
@@ -787,8 +787,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	// average MB quantizer
 	{
 	    int x, y;
-	    int w = (avctx->width+15) >> 4;
-	    int h = (avctx->height+15) >> 4;
+	    int w = ((avctx->width  << lavc_param_lowres)+15) >> 4;
+	    int h = ((avctx->height << lavc_param_lowres)+15) >> 4;
 	    int8_t *q = pic->qscale_table;
 	    for( y = 0; y < h; y++ ) {
 		for( x = 0; x < w; x++ )
