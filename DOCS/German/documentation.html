@@ -20,6 +20,7 @@
 
 <P>
 <UL>
+  <LI><A HREF="#0">0. Wie diese Dokumentation zu lesen ist</A></LI>
   <LI><A HREF="#1">1. Einleitung</A>
   <UL>
     <LI><A HREF="#1.1">1.1 Übersicht</A></LI>
@@ -39,10 +40,16 @@
         <LI><A HREF="formats.html#2.1.1.3">2.1.1.3 ASF/WMV Dateien</A></LI>
         <LI><A HREF="formats.html#2.1.1.4">2.1.1.4 QT/MOV Dateien</A></LI>
         <LI><A HREF="formats.html#2.1.1.5">2.1.1.5 VIV Dateien</A></LI>
+        <LI><A HREF="formats.html#2.1.1.6">2.1.1.6 FLI Dateien</A></LI>
+        <LI><A HREF="formats.html#2.1.1.7">2.1.1.7 RealMedia Dateien</A></LI>
+        <LI><A HREF="formats.html#2.1.1.8">2.1.1.8 NuppelVideo Dateien</A></LI>
+        <LI><A HREF="formats.html#2.1.1.9">2.1.1.9 yuv4mpeg Dateien</A></LI>
+        <LI><A HREF="formats.html#2.1.1.10">2.1.1.10 FILM Dateien</A></LI>
+        <LI><A HREF="formats.html#2.1.1.11">2.1.1.11 RoQ Dateien</A></LI>
       </UL>
       <LI><A HREF="formats.html#2.1.2">2.1.2 Audio</A></LI>
     </UL>
-    <LI><A HREF="codecs.html#2.2">2.2 Unterstützte CodecsSupported codecs</A></LI>
+    <LI><A HREF="codecs.html#2.2">2.2 Unterstützte Codecs</A></LI>
     <UL>
       <LI><A HREF="codecs.html#2.2.1">2.2.1 Video</A></LI>
       <UL>
@@ -53,6 +60,7 @@
         <LI><A HREF="codecs.html#2.2.1.5">2.2.1.5 MPEG1/2 Video</A></LI>
 	<LI><A HREF="codecs.html#2.2.1.6">2.2.1.6 MS Video1</A></LI>
 	<LI><A HREF="codecs.html#2.2.1.7">2.2.1.7 Cinepak CVID</A></LI>
+        <LI><A HREF="codecs.html#2.2.1.8">2.2.1.8 RealVideo</A></LI>
       </UL>
       <LI><A HREF="codecs.html#2.2.2">2.2.2 Audio</A></LI>
       <UL>
@@ -60,6 +68,7 @@
 	<LI><A HREF="codecs.html#2.2.2.2">2.2.2.2 Hardwaremäßige AC3-Dekodierung</A></LI>
 	<LI><A HREF="codecs.html#2.2.2.3">2.2.2.3 libmad Unterstützung</A></LI>
         <LI><A HREF="codecs.html#2.2.2.4">2.2.2.4 VIVO Audio</A></LI>
+        <LI><A HREF="codecs.html#2.2.2.5">2.2.2.5 RealAudio</A></LI>
       </UL>
       <LI><A HREF="codecs.html#2.2.3">2.2.3 Win32 Codec Einbindungs-Howto</A></LI>
       <UL>
@@ -79,6 +88,7 @@
 	  <LI><A HREF="video.html#2.3.1.2.3">2.3.1.2.3 nVidia</A></LI>
 	  <LI><A HREF="video.html#2.3.1.2.4">2.3.1.2.4 ATI</A></LI>
 	  <LI><A HREF="video.html#2.3.1.2.5">2.3.1.2.5 NeoMagic</A></LI>
+          <LI><A HREF="video.html#2.3.1.2.6">2.3.1.2.6 Trident Karten</A></LI>
 	</UL>
 	<LI><A HREF="video.html#2.3.1.3">2.3.1.3 DGA</A></LI>
 	<UL>
@@ -105,7 +115,9 @@
 	<LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - zum VESA BIOS</A></LI>
 	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
 	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon Videooverlay (radeon_vid)</A></LI>
-	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A>
+        <LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
+        <LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (Für einige MJPEG Aufnahme/Wiedergabe Karten)</A></LI>
+       	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A></LI>
 	<UL>
 	  <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox</A></LI>
 	  <LI><A HREF="video.html#2.3.1.A.2">2.3.1.A.2 ATI</A></LI>
@@ -117,7 +129,11 @@
         <LI><A HREF="sound.html#2.3.2.1">2.3.2.1 Soundkarten Erfahrungen, Empfehlungen</A></LI>
 	<LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Audio Plugins</A></LI>
           <UL>
+            <LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Summary</A></LI>
             <LI><A HREF="sound.html#2.3.2.2.1">2.3.2.2.1 Up/Downsampling</A></LI>
+            <LI><A HREF="sound.html#2.3.2.2.2">2.3.2.2.2 Surround Sound Dekodierung</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.3">2.3.2.2.3 Beispiel Formats-Konvertierer</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.4">2.3.2.2.4 Verzögerung</A></LI>
           </UL>
       </UL>
     </UL>
@@ -131,19 +147,28 @@
             <LI><A HREF="encoding.html#2.4.3.1">2.4.3.1 2-Pass DivX4 Enkodierung</A></LI>
 	    <LI><A HREF="encoding.html#2.4.3.2">2.4.3.2 Rescaling von Filem</A></LI>
 	    <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Streamcopy</A></LI>
-	    <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Reparieren von AVIs mit defektem Index</A></LI>	    
+	    <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Reparieren von AVIs mit defektem Index</A></LI>
+	    <LI><A HREF="encoding.html#2.4.3.5">2.4.3.5 Enkodierung mit der libavcodec Codec-Familie</A></LI>
           </UL>
         <LI><A HREF="encoding.html#2.4.4">2.4.4 Syntax</A></LI>
 	<LI><A HREF="encoding.html#2.4.5">2.4.5 Verfügbare Optionen</A></LI>
 	<LI><A HREF="encoding.html#2.4.6">2.4.6 Beispiele</A></LI>
       </UL>
     <LI><A HREF=#2.5>2.5 TV Eingang</A></LI>
+    <UL>
+      <LI><A HREF=#2.5.1>2.5.1 Übersicht</A></LI>
+      <LI><A HREF=#2.5.2>2.5.2 Kompilierung</A></LI>
+      <LI><A HREF=#2.5.3>2.5.3 Verfügbare Optionen</A></LI>
+      <LI><A HREF=#2.5.4>2.5.4 Tastatursteuerung</A></LI>
+      <LI><A HREF=#2.5.5>2.5.5 Beispiele</A></LI>
+    </UL>
   </UL>
   <LI><A HREF="#3">3. Verwendung</A></LI>
     <UL>
-      <LI><A HREF="#3.1">3.1 Steuerung mit der Tastatur</A></LI>
-      <LI><A HREF="#3.2">3.2 Steuerung mit LIRC (Linux Infrared Remote Control)</A></LI>
-      <LI><A HREF="#3.3">3.3 Streaming von Netzwerk oder Pipes</A></LI>
+      <LI><A HREF="#3.1">3.1 Kommandozeile</A></LI>
+      <LI><A HREF="#3.2">3.2 Steuerung mit der Tastatur</A></LI>
+      <LI><A HREF="#3.2">3.3 Steuerung mit LIRC (Linux Infrared Remote Control)</A></LI>
+      <LI><A HREF="#3.4">3.4 Streaming von Netzwerk oder Pipes</A></LI>
     </UL>
   <LI><A HREF="cd-dvd.html#4">4. CD/DVD Sektion</A>
     <UL>
@@ -169,7 +194,7 @@
       <LI><A HREF="#6.5">6.5 SGI/Irix</A></LI>
       <LI><A HREF="#6.6">6.6 QNX</A></LI>
     </UL>
-    <LI><A HREF="../documentation.html#A">A. Autoren (Englisch)</A></LI>
+  <LI><A HREF="../documentation.html#A">A. Autoren (Englisch)</A></LI>
   <UL>
     <LI><A HREF="../documentation.html#A2">A/2. Beteiligte (Englisch)</A></LI>
   </UL>
@@ -183,7 +208,36 @@
 </UL>
 </P>
 
+<P>
+<HR>
+Entwicklerschreie (Englisch)
+<HR>
+</P>
+
+<P>
+<UL>
+  <LI><A HREF="../users_against_developers.html#gcc">1. GCC 2.96</A></LI>
+  <LI><A HREF="../users_against_developers.html#binary">2. Binary Packete</A></LI>
+  <LI><A HREF="../users_against_developers.html#nvidia">3. Meinungen zu NVidia</A></LI>
+  <LI><A HREF="../users_against_developers.html#kotsog">4. Über Joe Barr</A></LI>
+</UL>
+</P>
+        
 <P><HR></P>
+
+<P><B><A NAME=0>0. Wie diese Dokumentation zu lesen ist</A></B></P>
+
+<P>Wenn du die Installation zum ersten Mal durchführst: Pass auf, dass du 
+  alles von hier bis zum Ende der Installationsanleitung durchliest, und 
+  folge den entsprechenden Links. Wenn du immer noch Fragen hast, kehre zum
+  Inhaltsverzeichnis zurück und suche nach dem Begriff, lies die FAQ, oder
+  versuche mit Hilfe von grep die Dateien zu durchsuchen.</P>
+      
+<P>Die Hauptregel dieser Dokumentation: Wenn es nicht dokumentiert ist, 
+  <U>existiert es nicht</U>. Wenn nichts von einer Möglichkeit der 
+  Audioenkodierung von TV-Karten steht, kann man dies auch nicht tun.
+  Viel Glück. Du wirst es brauchen :)</P>
+
 
 <P><B><A NAME=1>1. Einleitung</A></B></P>
 
@@ -313,9 +367,10 @@ sie sind nicht zu empfehlen.</P>
 <LI><B>libavcodec</B> : Wenn die diese DivX3/DivX4/usw Codecs verwenden willst schau die Sektion
 <A HREF="codecs.html#2.2.1.2">2.2.1.2</A> vor dem Kompilieren an. Features:<BR>
 <UL>
-	<LI>es kann <B><I>DivX/DivX4</I>-Wiedergabe auf nicht-x86 Maschinen ermöglichen</B></LI>
-	<LI>dieser Codec hat die <B>größte Geschwindigkeit beim Dekodieren</B> von DivX und DivX4
-	Filmen (auch schneller als der orginal DivX4-Codec) !</LI>
+  <LI>es kann <B><I>DivX/DivX4</I>-Wiedergabe auf nicht-x86 Maschinen ermöglichen</B></LI>
+  <LI>RealVideo 1.0/VIVO/MJPEG/h263/Andere Wiedergabe und Enkodierung</LI>
+  <LI>dieser Codec hat die <B>größte Geschwindigkeit beim Dekodieren</B> von DivX und DivX4
+  Filmen (auch schneller als der orginal DivX4-Codec) !</LI>
 </UL>
 </LI>
 
@@ -325,9 +380,9 @@ nach /usr/lib/win32 . Hinweis: Das Avifile-Projekt hat ein ähnliches Codecs-Pake
 sich von unserem. Also wenn du alle unterstützten Codecs verwenden willst, verwende
 unser Paket! Wie auch immer, du kannst auch unserer Paket für avifile nutzen. Features:<BR>
 <UL>
-	<LI>du wirdst sie möglichweise brauchen um Video abzuspielen oder zu encodieren,
-	welche mit einer digitalen Kamera aufgezeichnet wurden (z.B. DV)</LI>
-	<LI>erforderlich um <B>WMV Filme</B> oder ältere ASFs abzuspielen</LI>
+  <LI>du wirdst sie möglichweise brauchen um Video abzuspielen oder zu encodieren,
+  welche mit einer digitalen Kamera aufgezeichnet wurden (z.B. DV)</LI>
+  <LI>erforderlich um <B>WMV Filme</B> oder ältere ASFs abzuspielen</LI>
 </UL>
 </LI>
 
@@ -335,9 +390,10 @@ unser Paket! Wie auch immer, du kannst auch unserer Paket für avifile nutzen. Fe
 erhältlich. Wenn du <B>MEncoder</B> nicht verwendest, kannst du auch <B>libavcodec</B> (siehe oben)
 verwenden, welcher schneller wäre.<BR>
 Features:<UL>
-	<LI>du kannst alte <B>DivX3</B>-Film schneller als beim Win32-DLL-Codec betrachten</LI>
-	<LI>es ist Closed-Source und es ist nur in einer x86-Version verfügbar.</LI>
-	<LI><I>Du brauchst diesen Codec auf für <B>MEncoder</B>, siehe unten !</I></LI>
+  <LI>1 Pass oder 2 Pass Enkodierung mit <A HREF="encoding.html">MEncoder</A></LI>
+  <LI>du kannst alte <B>DivX3</B>-Film schneller als beim Win32-DLL-Codec betrachten</LI>
+  <LI>es ist Closed-Source und es ist nur in einer x86-Version verfügbar.</LI>
+  <LI><I>Du brauchst diesen Codec auf für <B>MEncoder</B>, siehe unten !</I></LI>
 </UL>
 </LI>
 
@@ -358,7 +414,8 @@ auf nicht-x86 Platformen zu sehen (nun mal abgesehen von XAnim:).</LI>
 <P>
 <B><I>YUV Karten</I></B></P>
 
-<P>Sie können das Bild anzeigen und Scalen (Zoomen), in jeder Größe die in ihren Speicher passen und das
+<P>
+Sie können das Bild anzeigen und Scalen (Zoomen), in jeder Größe die in ihren Speicher passen und das
 auch noch mit <B>geringer CPU Auslastung</B> (Zoomen erhöht sie nicht!), darum bekommst du
 auch ein nettes und sehr schnelle Vollbild.</P>
 
@@ -431,17 +488,26 @@ der <CODE>-vm</CODE> Option</U> und mit den folgenden Treibern beeinflusst werde
 anstelle von 2 verwenden. Lese die <A HREF="codecs.html#2.2.2.1">Softwaremäßige AC3-Dekodierung</A> Sektion.</LI>
 </UL>
 
+<LI><B>C-Media mit SP/DIF Ausgang</B> : HArdware AC3 Durchgabe ist möglich
+  mit diesen Karten, siehe
+  <A HREF="codecs.html#2.2.2.2">Hardware AC3 decoding</A> section.</LI>
+    
 <LI>Die Features von <B>anderen Karten</B> werden von <B>MPlayer</B> nicht unterstützt.
-<U>Es ist sehr zu empfehlen die <A HREF="sound.html#2.3.2">Soundkarten Sektion</A> zu lesen !</U>
+  <U>Es ist sehr zu empfehlen die <A HREF="sound.html#2.3.2">Soundkarten Sektion</A> zu lesen !</U>
 </UL>
     
 <P><B><I>FEATURES</I></B></P>
 
+<UL>
 <LI>Für DVD-Unterstützung musst libdvdcss und libdvdread kompilieren (und in dieser Reichenfolge. Lese dazu die
 <A HREF="cd-dvd.html#4.2">Sektion 4.2</A>.</LI>
 
 <LI>Entscheinde dich, ob du GUI brauchst. Wenn du es braucht, wirf einen Blick auf die
 <A HREF=#1.4>Sektion 1.4</A> vor dem Kompilieren.</LI>
+
+<LI>Wenn du <B>MEncoder</B> installieren willst (unser grossartiger, vielseitiger Enkodierer),
+siehe <A HREF="encoding.html#2.4">MEncoder Sektion</A> .</LI>
+
 
 <LI>Wenn du eine V4L-kompatible <B>TV-Tuner</B> Karte hast und du mit <B>MPlayer</B>
 fernsehen oder encodieren willst, siehe in der <A HREF=#2.5>TV-Input</A> Sektion.</LI>
@@ -466,7 +532,16 @@ Root zu werden.</LI>
     make
     make install</PRE>
 
-<P><P><B><I>Schau dir IMMER die Ausgabe von ./configure</I></B> und der
+<P>Ab diesem Zeitpunkt ist <B>MPlayer</B> zur Benützung bereit. Das Verzeichnis
+<CODE>/usr/local/share/mplayer</CODE> enthält die <CODE>codecs.conf</CODE>
+Datei, welche benutzt wird um dem Programm alle Codecs und deren Möglichkeiten zu sagen.
+Diese Datei sollte zusammen mit dem Hauptprogramm immer aktuell gehalten werden!</P>
+
+<P><B>Debian Benutzer</B> können ein .deb Packet für sich kompilieren, es ist sehr einfach. 
+Man muss bloss <CODE>fakeroot debian/rules binary</CODE> in <B>MPlayer</B>'s
+Basisverzeichnis ausführen. Genauere Anleitungen können <A HREF="documentation.html#6.1">hier</A> gefunden werden.</P>
+
+<P><B><I>Schau dir IMMER die Ausgabe von ./configure</I></B> und der
 <CODE>configure.log</CODE>-Datei an, es enthält Infos darüber,
 was eingebaut wird, und was nicht. Du kannst dir auch die config.h und config.mak
 Dateien ansehen.</P>
@@ -499,6 +574,9 @@ Um MPlayer im GUI-Modus zu betreiben kannst du entweder
 </UL>
 </P>
 
+<P>HINWEIS: benütz die mittlere Maustaste (auf 2 Tastenmäusen drück links und rechts
+gleichzeitig) um ein GTK Menu mit DVD Wiedergabeoptionen zu öffnen!</P>
+
 <P>Da <B>MPlayer</B> keine Skins enthält musst du dir welche downloaden, wenn du
 das GUI verwenden willst. Schau dazu auf die <A HREF="http://www.mplayerhq.hu/homepage/dload.html">Download-Seite</A>.
 Diese sollten in das normale, systemweite Verzeichnis (<CODE>/usr/local/share/mplayer/Skin</CODE>)
@@ -507,12 +585,19 @@ sucht standardmäßig nach einem Verzeichnis namens <I>default</I>, aber du kannst
 mit der Option <I>-skin neuerskin</I> oder dem Eintrag <I>skin=neuerskin</I> in
 der Konfigurationsdatei den Skin <CODE>*/Skin/neuerskin</CODE> auswählen.
   
-
 <P><B><A NAME=1.5>1.5. Untertitel und OSD</A></B></P>
 
 <P><B>MPlayer</B> unterstützt mehrere Arten von Untertiteln. Zur Zeit
 können vom Subreader-Code 8 Arten von Untertitel verarbeitet werden. Um zu sehen
 welche diese Untertitelformate sind, siehe subreader.c, etwa Zeile 30.</P>
+
+<P><B>MPlayer</B> unterstützt VobSub Untertitel. VobSub Untertitel bestehen aus
+einem grossen .SUB file, einem .IDX file, und/oder einem .IFO file.
+Benützung : wenn du Dateien wie <CODE>sample.sub</CODE>, <CODE>sample.ifo</CODE>,
+<CODE>sample.idx</CODE> hast - musst du die Option <CODE>-vobsub sample -vobsubid
+0</CODE> mitgeben (optional mit Pfadangabe natürlich). Die
+<CODE>-vobsubid</CODE> Option ist wie <CODE>-sid</CODE> für DVDs, du kannst mit ihm
+zwischen Untertitel-Abschnitten (Sprache) wählen.</P>
 
 <P>Für DVD Untertitel lese die <A HREF="cd-dvd.html#4.2">DVD Sektion</A>.</P>
 
@@ -578,8 +663,10 @@ zu konvertieren (lese TOOLS/subfont-c/README für Details)
 </UL>
 </P>
 
-<P>Nach den Download entpacke die Dateien nach ~/.mplayer/font/ .
-Nun musst du die Zeit im oberen, linken Eck des Films sehen (kann
+<P>Nach den Download entpacke die Dateien nach <CODE>~/.mplayer/font/</CODE> oder
+<CODE>$PREFIX/share/mplayer</CODE>. Dann benennst du eine davon um oder erstellst 
+einen symbolischen Links zu <CODE>font</CODE> (wie z.B. : <CODE>ln -s ~/.mplayer/arial-24 
+~/.mplayer/font</CODE>). Nun musst du die Zeit im oberen, linken Eck des Films sehen (kann
 man mit 'o' ausschalten).</P>
 
 <P>Das OSD hat 3 Anzeigearten: (wechsel mit 'o')<BR>
@@ -591,6 +678,10 @@ man mit 'o' ausschalten).</P>
       
 <P>Du kannst das Standard-Verhalten mit der <CODE>osdlevel=</CODE> Variable
 in der Konfigurationsdatei einstellen.</P>
+
+
+<P><B><A NAME=2>2. Features</A></B></P>
+
 
 <P><A NAME=2.1>2.1. <A HREF="formats.html">Unterstützte Formate</A></P>
 
@@ -606,17 +697,19 @@ in der Konfigurationsdatei einstellen.</P>
 
 <P><A NAME=2.5><B>2.5. TV input</B></P>
 
+<A NAME=2.5.1><P><B><I>2.5.1.  Übersicht</I></B></P>
+
 <P>Dieser Teil der Docs zeigt wie man <B>das Sehen/Grabben über einen V4L-kompatiblen
 TV-Tuner ermöglicht</B>.</P>
 
-<P><B><I>Kompilierung</I></B></P>
+<A NAME=2.5.2><P><B><I>2.5.2.  Kompilierung</I></B></P>
 
 <P>
 <UL>
-    <LI>Als erstes musst du neu kompilieren. <CODE>./configure</CODE> erkennt automatisch die Kernel-Header von 
+   <LI>Als erstes musst du neu kompilieren. <CODE>./configure</CODE> erkennt automatisch die Kernel-Header von 
     v4l und ob die /dev/video* Einträge existieren. Wenn sie existieren wird die TV Unterstützung eingebaut.
     (siehe Ausgabe von configure !).</LI>
-    <LI>stelle sicher, dass dein Tuner mit anderer TV-Software unter Linux funktioniert,
+   <LI>stelle sicher, dass dein Tuner mit anderer TV-Software unter Linux funktioniert,
     zum Beispiel xawtv.</LI>
 </UL>
 </P>
@@ -626,7 +719,7 @@ TV-Tuner ermöglicht</B>.</P>
    <CODE>-vo sdl</CODE>) Colorspaces.
    Du kannst diese Eigenschaft mit der <CODE>outfmt=YV12</CODE> Option (siehe unten) einstellen.</P>
 
-<P><B><I>Verfügbare Optionen</I></B><BR>
+<A NAME=2.5.3><P><B><I>2.5.3.  Verfügbare Optionen</I></B><BR>
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -712,7 +805,7 @@ TV-Tuner ermöglicht</B>.</P>
 </TABLE>
 </P>
 
-<P><B><I>Keyboard-Tasten</I></B></P>
+<A NAME=2.5.4><P><B><I>2.5.4.  Tastatursteuerung</I></B></P>
 
 <TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wählt
@@ -721,7 +814,7 @@ vorherigen/nächsten Kanal</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Kanalliste</TD><TR>
 </TABLE>
 
-<P><B><I>Beispiele</I></B></P>
+<A NAME=2.5.5><P><B><I>2.5.5.  Beispiele</I></B></P>
 
 <P>
 Dummy Ausgabe zu AAlib :)<BR>
@@ -734,8 +827,16 @@ Eingabe von Standard-V4L<BR>
 
 <P><B><A NAME=3>3. Verwendung</A></P></B>
 
+<P><B><A NAME=3.1>3.1. Kommandozeile</A></B></P>
+
+<P><B>MPlayer</B> benützt einen komplexen playtree. Er besteht aus "standard" Optionen
+am Anfang (z.B. <CODE>mplayer -vfm 5</CODE>) und Optionen nach dem Dateiname, 
+welche nur für die jeweilige Datei/URL/etc gelten (z.B.
+<CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).</P>
+      
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Datei</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [Optionen] [Pfad/]Dateiname</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Datei</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [standard Optionen] [Pfad/]Dateiname [Optionen für datei1] datei2 datei3 [Optionen für datei3]</CODE></TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>VCD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [Optionen] -vcd Tracknr /dev/cdrom</CODE></TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [Optionen] -dvd Titelnr [/dev/dvd]</CODE></TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Netz</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [Optionen] http://site.com/datei.[mpg|avi]</CODE></TD><TR>
@@ -763,7 +864,6 @@ Eingabe von Standard-V4L<BR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt zwischen Master/PCM-Channel für Lautstärkenregelung</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>z oder x</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>einstellen des Untertitel-Delays, +/- 0,1 Sekunden</TD></TR>
 
-
 <TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(die folgende Tasten sind nur gültig, wenn man DirectShow DivX Codecs verwendet)</I></P></TD></TR>
 
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 oder 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kontrast-Einstellung</TD></TR>
@@ -781,7 +881,6 @@ Eingabe von Standard-V4L<BR>
 <P><B>GUI Keyboard-Tasten</B></P>
    
 <P><TABLE BORDER=0>
-
 <TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>, und .</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verherige / nächste Datei</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>graues - und +</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verringere / erhöhe Lautstärke</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Enter</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>startet Wiedergabe</TD></TR>
@@ -802,6 +901,7 @@ Eingabe von Standard-V4L<BR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verheriger/nächster Kanal</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Norm</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Kanalliste/TD></TR>
+
 </TABLE></P>
 
 <P><B><A NAME=3.2>3.2. Steuerung mit LIRC (Linux Infrared Remote Control)</A></P></B>
@@ -821,8 +921,9 @@ Das wars :-)</P>
 
 <P>Der Anwendungsname für <B>MPlayer</B> ist - oh, ein Wunder - mplayer_lirc.
 Es versteht die folgenden Befehle:</P>
-  
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PAUSE</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Pause für die Wiedergabe. Irgendein Tastendruck zum Weiterspielen.</TD><TR>
+
+<P><TABLE BORDER=0>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PAUSE</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Pause für die Wiedergabe. Irgendein Tastendruck zum Weiterspielen.</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>QUIT</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Beenden von MPlayer</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>RWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 Sekunden zurück</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FRWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>60 Sekunden zurück</TD><TR>
@@ -863,13 +964,16 @@ Die Konfigurierung ist einfach, kompiliere <B>MPlayer</B> neu mit</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
 
-<P><B>MPlayer</B> kann <B>KEINE ASF-Dateien</B> vom Netzwerk via MMS spielen, jedoch
-via HTTP.</P>
+<P>Abspielen geht einfach durch die Hinzufügung der URL zu der Kommandozeile. <B>MPlayer</B>
+berücksichtigt auch die HTTP_PROXY Variable und benutzt einen Proxy, falls vorhanden.
+Der Proxygebrauch kann auch erzwungen werden :</P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
 <P><B>MPlayer</B> kann auch von stdin lesen (NICHT benannte Pipes). Dies ist ein
 Beispiel für die Verwendung um von FTP zu spielen:</P>
 
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | m</CODE></P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
 
 <P><B><A NAME=4>4. <A HREF="faq.html">FAQ Sektion</A></A></B></P>
 
@@ -942,6 +1046,9 @@ du bekommen wirst, wenn du Solaris' Make anstatt von GNU Make verwendest:</P>
 <P><PRE>    % /usr/ccs/bin/make
     make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen</PRE></P>
 
+<P>Unter Solaris SPARC brauchst du den GNU C/C++ Compiler; es spielt keine Rolle
+ob der GNU C/C++ Compiler mit oder ohne GNU Assembler konfiguriert ist.</P>
+
 <P>Unter Solaris x86 brauchst du den GNU C/C++ Compiler, welcher konfiguriert
 sein muss, um den GNU Assembler zu verwenden! Der <B>MPlayer</B> Code erzeugt
 auf x86 Platformen eine Binäry mit Verwendungen von MMX, SSE und 3DNOW Befehlen,
@@ -1009,6 +1116,7 @@ kann. Verwende die folgende Commandline:</P>
 <P><PRE>    ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
 	--with-x11incdir=/usr/arm/lib --disable-gcc-checking</PRE></P>
 
+
 <P><B><A NAME=6.5>6.5. Silicon Graphics Indigo / IRIX</A></B></P>
 
 <P>Funktion wurde berichtet... Du musst möglicherweise den <I>sgi</I> ao-Treiber verwenden.
@@ -1017,10 +1125,13 @@ Hat jemand genauere Infos ?</P>
 
 <P><B><A NAME=6.6>6.6. QNX</A></B></P>
 
-<P>Funktioniert. Es hat nur <CODE>-vo x11</CODE>-Ausgabe, was jedoch viel langsamer
-als unter Linux ist, denn QNX <I>emuliert</I> nur X, was sehr langsam ist.
-Bisher keine weiteren Infos.</P>
-
+<P>Funktioniert. Du musst SDL für QNX herunterladen, installieren und dann <B>MPlayer</B> 
+  mit den Optionen <CODE>-vo sdl:photon</CODE> und <CODE>-ao sdl:nto</CODE> starten.
+  Es sollte schnell sein.</P>
+    
+<P>Die <CODE>-vo x11</CODE> Ausgabe ist sogar noch langsamer als unter Linux, da QNX nur
+  eine SEHR langsame X <I>Emulation</I> hat. Benutz SDL.
+  
 	
 <P><B><A NAME=B>Anhang B - Mailing-Listen</A></B></P>
 
@@ -1082,37 +1193,36 @@ anders angeben ist. Bitte sende keine Nachrichten in andere Sprache!</P>
 <P>Spezielle System-/CPU-spezifische Bugs/Probleme:</P>
 <UL>
 <LI>SIGILL (signal 4) in draw_frame, auf einem P3 (meinst mit eine 2.2.x Kernel):<BR>
-Problem: movups stützt ab in in libvo/fastmemcpy.h<BR>
-Abhilfe: ./configure --disable-fastmemcpy<BR>
-Lösung: Ausschalten des SSE-Codes in fastmemcpy.h ;-(</LI>
+  Problem: movups stützt ab in in libvo/fastmemcpy.h<BR>
+  Abhilfe: ./configure --disable-fastmemcpy<BR>
+  Lösung: Ausschalten des SSE-Codes in fastmemcpy.h ;-(</LI>
 
 <LI>Kein Bild (schwarzes Bild) beim Abspielen von MPEG oder OpenDivX-Dateien bei
-RGB 15/16bpp (x11, dga, fbdev, svga)<BR>
-Problem: gcc 2.96 Bug<BR>
-Abhilfe: ./configure --disable-mmx oder verwende gcc 2.95.x<BR>
-Lösung: Code korrigieren</LI>
+  RGB 15/16bpp (x11, dga, fbdev, svga)<BR>
+  Problem: gcc 2.96 Bug<BR>
+  Abhilfe: ./configure --disable-mmx oder verwende gcc 2.95.x<BR>
+  Lösung: Code korrigieren</LI>
 
 <LI>SIGILL (signal 4) oder anderer Fehler beim Laden von l3codeca.acm:<BR>
-Problem: die Lib wurde nach 0x00xxxxxx anstatt von 0x40xxxxxx geladen<BR>
-Abhilfe: mplayer -afm 1 ...<BR>
-Lösung: du verwendest einen Kernel-Patch für die Sicherheit, wie z.B. OpenWall</LI>
+  Problem: die Lib wurde nach 0x00xxxxxx anstatt von 0x40xxxxxx geladen<BR>
+  Abhilfe: mplayer -afm 1 ...<BR>
+  Lösung: du verwendest einen Kernel-Patch für die Sicherheit, wie z.B. OpenWall</LI>
 
 <LI>SIGILL (signal 4) auf einem P3 mit 2.2.x Kernel:<BR>
-Problem: Kernel 2.2.x hat keinen richtige SSE Unterstützung<BR>
-Endlösung: update den Kernel auf 2.4.x<BR>
-Abhilfe: ./configure --disable-sse</LI>
+  Problem: Kernel 2.2.x hat keinen richtige SSE Unterstützung<BR>
+  Endlösung: update den Kernel auf 2.4.x<BR>
+  Abhilfe: ./configure --disable-sse</LI>
 
 <LI>Allgemein SIGILL (signal 4):<BR>
-Problem: du hast MPlayer auf einem anderem Computer kompiliert, als auf dem du
-abspielst (z.B. kompiliert auf einem P3 und wiedergabe auf eine Celeron)<BR>
-Endlösung: kompiliere MPlayer auf dem Rechner, wie du abspielst<BR>
-Abhilfe: ./configure --disable-sse usw.</LI> 
+  Problem: du hast MPlayer auf einem anderem Computer kompiliert, als auf dem du
+  abspielst (z.B. kompiliert auf einem P3 und wiedergabe auf eine Celeron)<BR>
+  Endlösung: kompiliere MPlayer auf dem Rechner, wie du abspielst<BR>
+  Abhilfe: ./configure --disable-sse usw.</LI> 
 
 <LI>"Internal buffer inconsistency" wird während der Verwendung von MEncoder:<BR>
-Problem: bekannter gcc 2.96 Bug, wurde noch nicht gelöst. Wenn du gcc 2.95 nimmst,
-hast du eine libmp3lame Bibliothek dir mit gcc 2.96 kompiliert wurde (möglichweise aus
-einem deb/rpm Paket?). Prüfe welche Bibliothek MEncoder findet: ldd mencoder.</LI>
-
+  Problem: bekannter gcc 2.96 Bug, wurde noch nicht gelöst. Wenn du gcc 2.95 nimmst,
+  hast du eine libmp3lame Bibliothek dir mit gcc 2.96 kompiliert wurde (möglichweise aus
+  einem deb/rpm Paket?). Prüfe welche Bibliothek MEncoder findet: ldd mencoder.</LI>
 </UL>
 
 <P>Verschiedene A-V Sync- und andere Audio-Probleme</P>
@@ -1120,13 +1230,14 @@ einem deb/rpm Paket?). Prüfe welche Bibliothek MEncoder findet: ldd mencoder.</L
 Allgemein Audio-Abbruch und ruckartiger Sound (existiert mit allen oder einigen Dateien)<BR>
 <UL>
 <LI>Audio Pufferprobleme (Puffergröße schlecht erkannt)<BR>
-Abhilfe: mplayer -abs</LI>
+  Abhilfe: mplayer -abs</LI>
 <LI>Langsamer Rechner (CPU oder Grafik)<BR>
-versuche es mit -vo null, wenn es gut funktioniert hast du eine langsame
-VGA-Karte oder einen langsamen Treiber.<BR>
-Abhilfe: kaufe eine schneller Karte oder lese die Dokumentationen, wie man die
-Geschwingkeiten erhöht.<BR>
-Lösung: versuche -framedrop</LI>
+  versuche es mit -vo null, wenn es gut funktioniert hast du eine langsame
+  VGA-Karte oder einen langsamen Treiber.<BR>
+  Abhilfe: kaufe eine schneller Karte oder lese die Dokumentationen, wie man die
+  Geschwingkeiten erhöht.<BR>
+  Lösung: versuche -framedrop</LI>
+<LI>Anfällige Audio Treiber</LI>
 </UL><BR>
 
 Audio verschiebt sich / verliert die Synchronisation bei einer oder mehreren Dateien<BR>

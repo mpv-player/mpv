@@ -21,6 +21,7 @@ täglich generierte Liste!!!</P>
 <LI>XAnim Codecs</LI>
 <LI>VIVO</LI>
 <LI>FLI</LI>
+<LI>RealVideo 1.0</LI>
 </UL></P>
 
 <P>Wenn du einen Codec hast, der nicht gelistet ist, und noch nicht unterstützt
@@ -101,6 +102,16 @@ Platformen zu sehen!</B> und es besitzt eine schnelle <B>DivX/DivX4</B> Dekodier
 als der Win32 Codec oder die orginal DivX4 Codec. Es wurde von <B>MPlayer</B>s
 CVS-Tree entfernt, du musst es manuel direkt von <B>FFmpeg</B>s Tree beziehen:</P>
 
+<P>Es beinhaltet auch viele nette Codecs, wie RealVideo 1.0, MJPEG, h263,
+h263+, etc.</P>
+
+<P>Wenn du MPlayer benützest
+
+<UL>
+  <LI>Vom Release : dann hasst du die libavcodec gleich im Packet, kompliliere
+    <B>MPlayer</B> wie gewöhnlich.</LI>
+  <LI>Vom CVS : du must sie manuell vom <B>FFmpeg</B>-Projekt herunterladen:
+
 <P><CODE>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg
@@ -114,6 +125,8 @@ ffmpeg-Quellen) in das <B>MPlayer</B> Verzeichnise, das es so aussieht:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
 
 <P>Symbolische Links sind NICHT genug, du musst es kopieren oder verschieben!!!</P>
+  </LI>
+</UL>
 
 <P>Nun kompiliere. configure erkennt, ob es in Ordnung ist und eingebaut werden
 kann. Der Codec <B>unterstützt auch Postprocessing</B>!</P>
@@ -150,6 +163,7 @@ ist sehr einfach dies einzuschalten:</P>
 
   <LI>Entferne das Architur-Zeug auf dem Dateinamen, dass die so aussehen:
   <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>.
+
 </UL>
 </P>
   
@@ -193,6 +207,13 @@ Open-Source-Codec (von <A HREF="mailto:melanson@pcisys.net">Mike Melanson</A>) e
 Er unterstützt YUV Ausgabe, dies ermöglicht Hardwarescaling (wenn es der Videoausgabetreiber unterstützt).
 Er wird standardgemäß verwendet.</P>
 
+<P><B><A NAME=2.2.1.8>2.2.1.8.  RealVideo</A></B></P>
+
+<P>Momentan ist NUR der RealVideo 1.0 (fourcc RV10) Codec unterstützt, durch
+ffmpeg. Dummerweise, kommen keine neuen RealMedia files mit diesem Codec, nur mit den neueren
+RV20 und RV30 Codecs, welche closed-source sind. Deren zukünftige Unterstützung ist unwahrscheinlich :(</P>
+
+
 <P><B><A NAME=2.2.2>2.2.2. Audiocodecs</A></B></P>
 
 <P>Die wichtigsten Audiocodecs als erstes:<BR>
@@ -204,7 +225,9 @@ Er wird standardgemäß verwendet.</P>
 	<LI>Voxware Audio (Verwendung der DirectShow DLL)</LI>
 	<LI>alaw, MSGSM, PCM und andere einfache, alte Audioformate</LI>
 	<LI>VIVO Audio (G723, Vivo Siren)</LI>
+	<LI>RealAudio: DNET (AC3 mit tiefer Bitrate)</LI>
 </UL></P>
+
 
 <P><B><A NAME=2.2.2.1>2.2.2.1. Softwaremäßige AC3 Dekodierung</A></B></P>
 
@@ -258,7 +281,13 @@ downloaden und in in das <CODE>/usr/lib/win32</CODE> Verzeichnis (oder wo deine 
 kopieren.</P>
 
 
-<P><B><A NAME=2.1.4>2.1.4. Codec Einbindungs-Howto</A></B></P>
+<P><B><A NAME=2.2.2.5>2.2.2.5.  RealAudio</A></B></P>
+
+<P>Momentan ist der DNET Codec der einzige unterstützte Codec. Eigentlich ist er eine
+Version mit tiefer Bitrate des bekannten AC3 Codec. Er kann in alten und neuen RealMedia movies gefunden werden.</P>
+
+
+<P><B><A NAME=2.1.4>2.1.4. Win32 Codec Einbindungs-Howto</A></B></P>
 
 <P><B><A NAME=2.1.4.1>2.1.4.1. VFW Codecs</A></B></P>
 

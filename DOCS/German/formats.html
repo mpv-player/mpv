@@ -15,10 +15,14 @@
 <LI> <A HREF="#2.1.1.3">ASF/WMV</A> 1.0 Dateiformat
 <LI> <A HREF="#2.1.1.4">QT/MOV</A> Dateiformat mit (un)komprimierten Headers
 <LI> <A HREF="#2.1.1.5">VIVO</A> Format (.viv Dateien)
+<LI> <A HREF="#2.1.1.6">FLI</A> Format
+<LI> <A HREF="#2.1.1.7">RealMedia</A> Format (.rm Dateien)
+<LI> <A HREF="#2.1.1.8">NuppelVideo</A> format (.nuv Dateien)
+<LI> <A HREF="#2.1.1.9">yuv4mpeg</A> Format
+<LI> <A HREF="#2.1.1.10">FILM</A> Format
+<LI> <A HREF="#2.1.1.11">RoQ</A> Format
 <LI> unterstützt <A HREF="documentation.html#3.3">lesen von stdin</A> oder Netzwerk über HTTP
 </UL></P>
-
-<P>Hinweis: zu RealMedia (.ra/.rm) Support siehe FAQ!</P>
 
 <P>Es ist wichtig einen allgemeinen Fehler zu berichtigen. Wenn Leute eine Datei
 mit <B>.AVI</B>-Erweiterung sehen denken sie das es keine MPEG-Datei ist.
@@ -90,12 +94,26 @@ normal und abspielbar das andere weder normal noch abspielbar.</P>
     AVIs mit schlechtem Sync. <B>MPlayer</B> erkennt diese als interleaved und es wird
     im Verlust der A/V Sync sichtbar, möglichweise auch beim Suchen. Diese Dateien sollten
     non-interleaved (mit der <CODE>-ni</CODE> Option) abgespielt werden.</LI>
-    <LI><B>Non-interleaved</B>: schlecht. Als erstes kommt der ganze Videostream dann dann der
+  <LI><B>Non-interleaved</B>: schlecht. Als erstes kommt der ganze Videostream dann dann der
     ganze Audiostream, dies erfordert viel suchen in der Datei. Es ist sehr schlecht beim Abspielen
     vom Netzwerk oder von CDROM.</LI>
 </UL>
 </P>
 
+<P>MPlayer unterstützt 2 Arten des timings für AVI Dateien:
+<UL>
+  <LI><B>bps-basiert</B> : Es basiert auf die Bitrate/Samplerate des Video/Audio stream. Diese
+    Methode wird von den meisten Playern verwendet, inklusiv avifile und Windows Media Player.
+    Dateien mit kaputten headers, und Datein, welche mit VBR Audio aber nicht
+    VBR-unterstützdem Encoder erstellt wurden, führen zu einer A/V Desync mit dieser Methode
+    (Meist beim Suchen).</LI>
+  <LI><B>interleaving-basiert</B> : Es benutzt nicht mehr den Wert der Bitrate, sondern
+    benutzt die relative Position des interleaved Audio und Video Mülls. Es macht einige falsch 
+    codierten Dateien mit VBR audio abspielbar.</LI>
+</UL>
+</P>
+                            
+                            
 <P>Einige Audio- und Videocodecs sind erlaubt, aber bedenke das VBR Audio meinst nicht gut
 unstützt wird von den meinsten MPlayer. Das Dateiformat macht es möglich VBR
 Audio zu verwendenm, aber die meinsten Player erwarten CBR Audio, darum funktioniert VBR nicht. VBR ist
@@ -114,7 +132,7 @@ nur ein anderes legales Spiel). <B>MPlayer</B> unterstützt nur v1.0, weil noch n
 :) . Beachte das .ASF Dateien heute auch mit der Extension .WMA oder .WMV vorkommen.</P>
 
 
-<P><B><A NAME=2.1.1.4>2.1.1.4. QT/MOV Dateien</A></B></P>
+<P><B><A NAME=2.1.1.4>2.1.1.4. QuickTime/MOV Dateien</A></B></P>
 
 <P>Dies ist von Macintosh. Normalerweise hat es die Extensions .QT oder .MOV . Bedenke dass -
 seitdem die MPEG4-Gruppe QuickTime als das empfohlene Dateiformat für MPEG4 ausgewählt hat -
@@ -130,7 +148,7 @@ geheim und mir Apples Quicktime Player ist fähig diese Dateien abzuspielen (aber
 
 <P><B>MPlayer</B> demuxt nun auch fröhlich VIVO-Dateiformate. 
 Der große Nachteil des Formates ist das es keinen Index-Block besitzt, auch keine fixe Paketgröße oder Sync-Bytes.
-Die meisten Dateien besitzen auch Keyframes, also vergiss die Suchfunktion!</P>
+Die meisten Dateien besitzen nicht mal Keyframes, also vergiss die Suchfunktion!</P>
 
 <P>Der Videocodec von VIVO/1.0-Datei ist Standard <B>h.263</B> . Der Videocodec der VIVO/2.0 Dateien
 ist veränderter, nichtstandard <B>h.263</B> . Bei Audio ist es das selbe, es ist <B>g.723</B> (standard)
@@ -138,6 +156,50 @@ oder <B>Vivo Siren</B> .</P>
 
 <P>Siehe in der <A HREF=codecs.html#2.2.1.4>VIVO Videocodec</A>
 und <A HREF=codecs.html#2.2.2.4>VIVO Audiocodec</A> Sektion für Installationsanweisungen.</P>
+
+
+<P><B><A NAME=2.1.1.6>2.1.1.6. FLI Dateien</A></B></P>
+
+<P><B>FLI</B> ist ein sehr altes Fileformat benutzt vom Autodesk Animator, aber es 
+ist ein gebräucliches Fileformat auf dem Netz für kurze Animationen. <B>MPlayer</B> demuxt
+und decodiert FLI Filme und ist sogar fähig sie zu durchsuchen (nützlich wenn man
+looping aktiviert mit der -loop Option). FLI Dateien haben keine Keyframes, was zu verunstalteten
+Bildern kurz nach dem Suchen führt.</P>
+
+
+<P><B><A NAME=2.1.1.7>2.1.1.7. RealMedia (RM) Dateien</A></B></P>
+
+<P>Ja, <B>MPlayer</B> kann RealMedia (.rm) Dateien lesen (demuxen). Das Suchen
+wird gerade Implementiert und RM hat Keyframes, sodass es fehlerlos sein wird.
+Hier ist die Liste der unterstützten <A HREF="codecs.html#2.2.1.8">RealVideo</A>
+und <A HREF="codecs.html#2.2.2.5">RealAudio</A> Codecs.
+
+
+<P><B><A NAME=2.1.1.8>2.1.1.8. NuppelVideo Dateien</A></B></P>
+
+<P><A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A>
+ist, soweit ich weiss, ein TV-Grabbing Tool. <B>MPlayer</B> kann dessen <CODE>.nuv</CODE>
+Dateien (nur NuppelVideo 5.0) lesen. Diese Dateien können unkomprimierte YV12,
+YV12+RTJpeg komprimierte, YV12 RTJpeg+lzo komprimierte und YV12+lzo komprimierte Frames enthalten, 
+welche <B>MPlayer</B> alle dekodiert (und diese auch mit MEncoder zu DivX/etc! <B>encodiert</B>). 
+Eine Suchfunktion wird gerade implementiert.</P>
+
+
+<P><B><A NAME=2.1.1.9>2.1.1.9. yuv4mpeg Dateien</A></B></P>
+
+<P><A HREF="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</A> ist
+auch ein Fileformat für TV-Grabbing, oder so :) Ich weiss nur etwas dazu:
+Wir unterstützen es.</P>
+
+
+<P><B><A NAME=2.1.1.10>2.1.1.10. FILM Dateien</A></B></P>
+
+<P>Dieses Format wird auf alten Sega Saturn CD-ROM games verwendet.</P>
+
+
+<P><B><A NAME=2.1.1.11>2.1.1.11. RoQ Dateien</A></B></P>
+
+<P>Ich weiss nicht was das ist :) Melanson fügt alle 10 Minuten einen neuen demuxer hinzu :)</P>
 
 
 <P><B><A NAME=2.1.2>2.1.2. Audio Formate</A></B></P>

@@ -41,7 +41,7 @@ Du kannst auch <I>-ao alsa9</I> verwende, aber es hat noch einige Probleme
 </UL></P>
 
 <P>Verwende auf <B>Solaris/FreeBSD</B> Systemen den SUN Audio-Treiber mit der <I>-ao sun</I> Option,
-ansonsten wirdst kein du Video, also auch keine Ton haben.</P>    
+ansonsten wirst du weder Video noch Ton haben.</P>    
 
 <P><B><A NAME=2.2.2.1>2.2.2.1. Soundkarten Erfahrungen, Empfehlungen</A></B></P>
 
@@ -128,15 +128,87 @@ ansonsten wirdst kein du Video, also auch keine Ton haben.</P>
 
 <P><B><A NAME=2.3.2.2>2.3.2.2. Audio Plugins</B></P>
 
+<P><B>MPlayer</B> hat Unterstützung für Audio Plugins. Audio Plugins können 
+  benutzt werden,um die Einstellungen der Audio-Daten zu ändern bevor der Ton die
+  Soundkarte erreicht. Sie werden aktiviert durch den <CODE>-aop</CODE> Schalter
+  gefolgt von dem <CODE>list=plugin1,plugin2,...</CODE> Schalter. Der <CODE>list</CODE>
+  Schalter ist benötigt und stellt fest, welche Plugins benützt werden sollen und in 
+  welcher Reihenfolge diese ausgeführt werden sollen, Beispiel:
+</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample,format</CODE></P>
+
+<P>würde den Ton durch das Resampling-Plugin laufen lassen, gefolgt von dem Format des
+  Plugins.
+</P>
+
+<P>Die Plugins können auch durch Schalter haben, welche irh Verhalten ändern.
+  Diese Schalter sind im unteren Abschnitt im Detail beschrieben. Ein Plugin wird
+  mit den Standardeinstellungen gestartet, wenn dessen Optionen nicht mitgegeben werden.
+  Ein Beispiel, wie man Plugins in Kombination mit Plugin spezifischen Schaltern verwendet:
+</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=resample,format:fout=48000:format=0x8</CODE>
+</P>
+
+<P>würde die Ausgabefrequenz des Resample-Plugins auf 44100Hz and das
+  Ausgabeformat des Format-Plugins auf AFMT_U8 stellen.
+</P>
+                      
+<P>Momentan können Audio-Plugins nicht im <B>MEncoder</B> verwendet werden.</P>
+                     
+                      
 <P><B><A NAME=2.3.2.2.1>2.3.2.2.1. Up/Downsampling</B></P>
 
 <P><B>MPlayer</B> unterstützt vollständiges up/downsampling von Audiostreams.
-Es wird nicht automatisch erkannt, also must du es ganz normal angeben, wenn du
-zum Beispiel eine maximal 44.1Khz-fähige Soundkarte hast du der Audiostream 48Khz hat.
-Diese Funktion ist zur Zeit auch noch nicht implementiert in <B>MEncoder</B>.</P>
+Dieses Plugin kann z.B. verwendet werden, wenn du eine Soundkarte mit fester Frequenz
+besitzst oder wenn du eine alte Soundkarte am Hals hast, welche nur max 44.1kHz verarbeitet.
+Beschränkungen in deiner Hardware werden nicht automatisch erkannt, also must du die 
+Sample-Frequenz explizit angeben. Dieses Plugin hat einen Schalter:
+<CODE>fout</CODE>, welcher benutzt wird um die gewünschte Ausgabefrequenz zu setzen.
+Der Standard ist 48kHz, und wird in &lt;Hz&gt; angegeben.
 
 <P>Verwendung:<BR>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;erforderliche Frequenz in Hz, z.B. 44100&gt;</CODE></P>
+
+
+<P><B><A NAME=2.3.2.2.2>2.3.2.2.2. Surround Sound Dekodierung</B></P>
+
+<P><B>MPlayer</b> hat ein Audio-Plugin das matrix kodierten Surround Sound dekodieren kann.
+Dolby Surround ist ein Beispiel eines matrix kodierten Formats.</p>
+
+<P>Eigentlich enthalten viele Dateien mit 2 Audio Kanälen matrixed Surround
+Sound.</p>
+
+<P>Um dieses Feature zu benutzen, brauchst du eine Soundkarte mit mindestens 4 Kanälen.</P>
+
+<P>Verwendung :<BR>
+&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
+
+
+<P><B><A NAME=2.3.2.2.3>2.3.2.2.3. Sample Format Konvertierer</A></B></P>
+
+<P>Wenn deine Soundkarte keinen signed 16bit int unterstützt, kann dieses Plugin
+  benutzt werden um das Format in eines zu ändern, das deine Soundkarte versteht.
+  Es hat nur einen Schalter <CODE>format</CODE>, welcher auf eine Nummer gestellt werden kann, 
+  die man der Datei libao2/afmt.h findet. Dieses Plugin wird praktisch nie gebraucht
+  und ist für erfahrene Anwender gedacht. Dieses Plugin ändert nur das Sample Format und nicht
+  die Samplefrequenz oder die Anzahl Kanäle.
+</P>
+
+<P>Verwendung :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=format:format=&lt;required output format&gt;</CODE>
+</P>
+
+
+<P><B><A NAME=2.3.2.2.4>2.3.2.2.4. Verzögerung</A></B></P>
+             
+<P>Dieses Plugin verzögert den Ton und ist als Beispiel gedacht, wie man neue Plugins 
+  schreibt. Es kann für nichts sinnvolles aus der Anwenderperspektive verwendet werden
+  und ist hier nur aus Gründen der Vollständigkeit erwähnt. Verwende dieses Plugin nicht,
+  wenn du kein Entwickler bist.</P>
 
 
 </BODY>
