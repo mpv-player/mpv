@@ -466,7 +466,7 @@ http_send_request( URL_t *url, off_t pos ) {
 	    
 	if (network_cookies_enabled) cookies_set( http_hdr, server_url->hostname, server_url->url );
 	
-	http_set_field( http_hdr, "Connection: closed");
+	http_set_field( http_hdr, "Connection: close");
 	http_add_basic_authentication( http_hdr, url->username, url->password );
 	if( http_build_request( http_hdr )==NULL ) {
 		return -1;
