@@ -609,9 +609,10 @@ TV-Tuner ermöglicht</B>.</P>
 
 <P>
 <UL>
-  <LI>als erstes musst du die <CODE>--enable-tv</CODE> Option bei <CODE>./configure</CODE>
-    eingaben und MPlayer neu kompilieren.</LI>
-  <LI>stelle sicher, dass dein Tuner mit anderer TV-Software unter Linux funktioniert,
+    <LI>Als erstes musst du neu kompilieren. <CODE>./configure</CODE> erkennt automatisch die Kernel-Header von 
+    bttv und ob die /dev/video* Einträge existieren. Wenn sie existieren wird die TV Unterstützung eingebaut.
+    (siehe Ausgabe von configure !).</LI>
+    <LI>stelle sicher, dass dein Tuner mit anderer TV-Software unter Linux funktioniert,
     zum Beispiel xawtv.</LI>
 </UL>
 </P>
@@ -1298,6 +1299,11 @@ Autoren!</P>
 <LI><B><A HREF="mailto:foth@informatik.uni-hamburg.de">Kilian A. Foth</A></B>
 <UL>
   <LI>-slave mode</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:timf@mail.csse.monash.edu.au">Tim Ferguson</A></B>
+<UL>
+  <LI>Opensource Cinepak decoder</LI>
 </UL></LI>
 
 </UL></P>
