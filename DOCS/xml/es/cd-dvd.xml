@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.8 -->
 <chapter id="cd-dvd">
 <title>Uso de CD/DVD</title>
 
@@ -115,6 +115,11 @@ reproduce.
 pero esta solución <emphasis role="bold">no</emphasis> se recomienda, porque puede
 resultar en fallos, incompatibilidades de bibliotecas y velocidad más lenta.
 </para>
+
+<note><para>
+En caso de problemas de decodificación de DVD, pruebe a deshabilitar supermount, o
+cualquier otra utilidad de este tipo.
+</para></note>
 
 <formalpara>
 <title>Soporte para DVD al viejo-estilo - OPCIONAL</title>

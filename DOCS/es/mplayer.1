@@ -1794,10 +1794,13 @@ No mantener la razón de aspecto cuando se redimensionan ventanas X11
 (Funciona actualmente solo con \-vo x11, xv, xmga y xvidix y su administrador
 de ventanas necesita entender los consejos de aspecto de ventana.).
 .TP
+.B \-noxv (SDL solamente)
+Deshabilita el controlador XVideo SDL.
+.TP
 .B \-panscan <0.0\-1.0>
 Activa funcionalidad Pan y Scan, p.e.\& para mostrar una película 16:9 en
 una pantalla 4:3, los lados de la pantalla son recortados para obtener una
-imagen que se ajusta a la pantalla.
+imagen 4:3 que se ajusta a la pantalla.
 Esto funciona solamente con los drivers de salida de video xv, xmga, mga y
 xvidix.
 .br
@@ -4134,6 +4137,15 @@ suma de errores cuadráticos de la cuantización
 .RE
 .PD 1
 .TP
+.B cbp\ \ \ \ 
+Tasa el patrón de distorsión de código de bloque óptimo
+seleccionará el patrón de bloque codificado que minimize + lambda*tasa
+solo puede ser usado junto con cuantización trellis
+.TP
+.B mv0\ \ \ \ 
+intenta codificar cada MB con MV=<0,0> y elije el mejor
+esto no tiene ningún efecto si mbd=0
+.TP
 .B last_pred=<0\-99>
 Cantidad de predictores de movimiento desde los marcos previos
 .PD 0
@@ -4174,8 +4186,8 @@ usa cuantizadores MPEG en lugar de H.263.
 (por defecto: desactivado) (i.e.\& usa cuantizadores H.263)
 .TP
 .B aic\ \ \ \ 
-predicción interna avanzada (H.263+ solamente)
-Nota: vqmin debe ser 8 o superior.
+predicción ac (=predicción interna avanzada para H.263+)
+Nota: vqmin debe ser 8 o superior para AIC H263+
 .TP
 .B umv\ \ \ \ 
 MVs ilimitados (H.263+ solamente)

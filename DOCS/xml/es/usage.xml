@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.8 -->
+<!-- synced with 1.9 -->
 <chapter id="usage">
 <title>Uso</title>
 
@@ -83,15 +83,6 @@ Reproduciendo desde RTSP:
 <command>mplayer</command> [<replaceable>opciones</replaceable>]<!--
 --> rtsp://<replaceable>servidor.ejemplo.com/nombreFlujo</replaceable>
 </synopsis>
-</para>
-
-<para>
-Las últimas versiones de <application>MPlayer</application> también aceptan
-pistas de VCD y DVD de la manera de las URL, como <application>xine</application>
-hace:
-<screen>mplayer dvd://1</screen>
-o
-<screen>mplayer vcd://1</screen>
 </para>
 
 <para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.12 -->
+<!-- synced with 1.13 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portaciones</title>
 
@@ -81,7 +81,7 @@ no funciona) y una versión reciente de binutils.
 <para>
 Si MPlayer se queja de que no encuentra <filename>/dev/cdrom</filename> o
 <filename>/dev/dvd</filename>, cree un enlace simbólico apropiado:
-<screen>ln -s /dev/(su_dispositivo_de_cdrom) /dev/cdrom</screen>
+<screen>ln -s /dev/<replaceable>(su_dispositivo_de_cdrom)</replaceable> /dev/cdrom</screen>
 </para>
 
 <para>
