@@ -28,4 +28,4 @@ extra=""
 if test "$1" ; then
  extra="-$1"
 fi
-echo "#define VERSION \"CVS-${last_cvs_update}${extra} \"" >version.h
+echo "#define VERSION \"dev-CVS-${last_cvs_update}${extra} \"" >version.h
