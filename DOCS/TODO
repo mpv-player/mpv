@@ -1,30 +1,25 @@
 TO DO:
 ~~~~~~
 Urgent:
-- asterix.avi audio delays after 5-10 mins (bps mode only)
+- support for more codecs  (sample .avi files and .dll needed!) - HELP!
+
+They Have Been Around For A Long Time:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+High Priority:
+- integrating the gui?
 - finish ASF seeking (find next keyframe)
-- fix DGA driver to work in 15/16 bpp (DONE??? - bpp switch workaround)
+- seeking support for broken avi files without index chunk
+- support for MPEG TS (transport streams) and PES format (?) - I need
+  sample files!
+- audio copy/encoding capability
+
+Medium Priority:
 - fix x11 driver to work without SHM (for remote playing etc)
-
-Fix compilation problems:
-- SDL version detection into ./configure - DONE (disabled :))
-
-Libvo features:
-- framebuffer and svgalib support (DONE)
-- real fullscreen (black bands at unused areas) support - DONE for xmga & x11
-- fix X4.0.x/DRI OpenGL (doesn't really work, at least mga & tdfx & nvidia)
-
-Player features:
-- libcss support
-- subtitles (.sub files) & OSD support (DONE)
-- show movie length / position in percent (no, but there is a seekbar)
 - show current frame number [Gabucino]
 - seek_to_frame and seek_to_index options
 - fix mp3lib to avoid segfault with some damaged .avi files (workaround: -afm 4)
-- integrating the gui?
-- support for more codecs  (sample .avi files and .dll needed!) - HELP!
-- support for MPEG TS (transport streams) and PES format - I need sample files!
-- verify valid range of numeric options (like '-xy 0') - new configfile code?
-  (DONE)
-- audio copy/encoding capability
-- seeking support for broken avi files without index chunk
+
+Low Priority:
+- SDL version detection into ./configure - DONE (disabled :))
+- asterix.avi audio delays after 5-10 mins (bps mode only)
+- fix X4.0.x/DRI OpenGL (doesn't really work, at least mga & tdfx & nvidia)

@@ -46,7 +46,7 @@ Problems:
 - Indeo Video 3.2:  (IV32)
   ir32_32.dll: works, no YUV, image upside-down
 - ASUS ASV2: (ASV2)
-  asusasv2.dll: loads, image upside-down and very pixelized (no YUY2, but YVYU)
+  asusasv2.dll: works, image upside-down on RGB (YUV ok!)
 - ATI VCR1:  (VCR1)
   ativcr1.dll: can't load (16-bit DLL)
 - TrueMotion 2.0:  (TM20)
@@ -67,8 +67,6 @@ Not tested:
   icmw_32.dll: not tested (no sample file)
 - Indeo Video 3.1:  (IV31)
   ir32_32.dll: not tested (no sample file)
-- AngelPotion MPEG-4: (AP41,AP42)
-  APmpg4v1.dll: not tested
 - Windows Media Video 8 (WMV2)
   wmv8ds32.ax: not tested (no sample file)
 - I420: (I420)

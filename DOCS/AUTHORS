@@ -15,10 +15,11 @@
 - hacking DivX/Mpeg4 VfW codecs to get YUV output
 - opendivx decoder speed optimizations (see opendivx/ChangeLog)
 - OSD & SUB display code
+- everything that isn't listed elsewhere
 
 Zoltán Ponekker (Pontscho/Fresh!):  <pontscho@makacs.poliod.hu> 
 - configure script and Makefiles for easy compile
-- GUI system (coming soon!)
+- GUI system (/still/ coming soon!)
 - 3DNow! support into mp3lib
 - 3DNow! support into fastmemcpy.h
 - various X11 driver changes (keyboard handling, fullscreen, bpp detect, etc)
@@ -106,7 +107,7 @@ Michael Hipp:
 - mpg123 author   [free mpeg audio player, isn't used directly but in mp3lib]
 
 Mark Podlipec:
-- xanim author    [i'm using its aLaw audio decoder]
+- xanim author    [I'm using its aLaw audio decoder]
 
 Jutta Degener and Carsten Bormann:
 - xa_gsm.c authors  [MS-GSM audio codec]

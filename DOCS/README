@@ -1,5 +1,5 @@
-MoviePlayer v0.11        (C) 2000-2001. by Arpad Gereoffy  (A'rpi/ESP-team)
-=================           * See the file AUTHORS for the complete list! *
+MoviePlayer v0.12 "IdegCounter" (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)
+=============================== * See the file AUTHORS for the complete list *
 
 About:
 ~~~~~~
@@ -15,9 +15,12 @@ Short history:
 - mpg12play v0.1 has born, using libmpeg3 from www.heroinewarrior.com
 - mpg12play 2nd generation (v0.5-), using dvdview by Dirk Farin
 - mpg12play 3nd generation (v0.9-), using libmpeg2 (mpeg2dec) by Aaron Holtzman
-- mplayer has born, containing mpg12play 0.90pre5 and a new simple avi player
-- mplayer 0.10, mpeg and avi player in a single binary
-- mplayer 0.11: added .asf file support, and OpenDivX en/decoding
+- MPlayer has born, containing mpg12play 0.90pre5 and a new simple avi player
+- MPlayer 0.10, mpeg and avi player in a single binary
+- MPlayer 0.11: added .asf file support, and OpenDivX en/decoding
+- MPlayer 0.12 "IdegCounter"
+  The release version of the 0.11 development code. Far too many enhancements
+  to fit here (A'rpi?). Try it, and be amazed.
 
 As you see, I didn't write any codecs, just some players. But I spent
 a lot of time finding the best way to parse bad damaged input files
@@ -47,6 +50,7 @@ Supported input formats:
 - MPEG 1/2 System Stream (PS/VOB) and Elementary Stream (ES) file formats
 - RIFF AVI file format
 - ASF 1.0 file format
+- (De)crypted VOB files from DVD (experimental!)
 
 Supported audio & video codecs:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,7 +84,7 @@ Supported audio output devices:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - OSS driver
 - ALSA driver with OSS emulation (NOT recommended, causes annoying delays)
-- ESD with the esddsp utility (not tested)
+- ESD with the esddsp utility (not tested, not recommended, see ALSA)
 
 NOTE: check DOCS/SOUNDCARDS !
 
@@ -103,15 +107,22 @@ Usage:
     up or down      seek backward/forward 1 minute
     p or SPACE      pause movie (press any key to continue)
     q  or  ^C       stop playing and quit program
+    o               toggle OSD : none / seek / seek+timer
+    /  and *        decrease/increase volume
+    m               toggle using master/pcm channel for volume setting
 
   Examples:
     mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
     mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
     mplayer -vcd 2 /dev/cdrom
+    mplayer -dvd /dev/dvd /mnt/dvd/matrix.vob
     mplayer -alsa -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
 
-  Note:  for using Matrox YUV driver (-vo mga or xmga), you have to first
-         load the driver: insmod drivers/mga_vid.o
+  Note:  in order to use Matrox YUV driver (-vo mga or xmga), first you'll have
+         to load the driver: insmod drivers/mga_vid.o , or to make it automatic
+         insert the following line at the end of /etc/modules.conf:
+         alias char-major-178 mga_vid
+         and run 'depmod -a' .
 
 License:                                                                     
 ~~~~~~~~
@@ -180,7 +191,7 @@ Troubleshooting:
      support: ./configure --disable-gl (you have broken OpenGL headers/libs)
    - if you are a user, send us a bugreport (see above), including these:
       - output of ./configure
-      - output of make dep and make
+      - output of make
       - config.h and all of config.mak files
    Note: many users reported that SSE was not detected while running on P3.
    Current stable 2.2.x kernels does NOT support SSE, so you can't use it
@@ -215,7 +226,8 @@ Troubleshooting:
 
 7. sound-related problems:
    - maybe your card doesn't support 48kHz playback and the movie requires it.
-   - try player with the -noalsa option
+   - try MPlayer with the -noalsa option
+   - compile MPlayer with --disable-select
    - delayed audio with some AVI files: try with -bps or -nobps option!
    - if you experienced delayed audio, try to compensate with -delay or -abs.
      you can specify audio card's buffer size in bytes with -abs option, or
@@ -248,11 +260,11 @@ the following addresses:
 - MPlayer & Matrox G200/G400/G450 users: (about TV-out, mga_vid, syncfb, Xv)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-matrox
 
-- MPlayer CVS-log:     (announce about _every_ CVS commits)
+- MPlayer CVS-log:     (announce about _every_ CVS commit)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-cvslog
 
 Standard Disclaimer:
 ~~~~~~~~~~~~~~~~~~~~
-Use only at your own risk! There may be errors and inaccuracies that could 
-be damaging to your system or your eye. Proceed with caution, and although
-this is highly unlikely, I don't take any responsibility for that!
+Use only at your own risk! There may be errors and inaccuracies that could
+damage your system or your eye. Proceed with caution, and although this is
+highly unlikely, we don't take any responsibility for that!

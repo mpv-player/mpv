@@ -14,7 +14,7 @@ Q: What about DVD playback?
 A: Read files 'DVD' and 'DVD-FAQ'.
 
 Q: SDL output doesn't work or compile. Problem is ....
-A: It is tested with SDL v1.1.8 (probably runs on 1.1.7 too).
+A: It is tested with SDL v1.2.0 (probably runs on 1.1.7+ too).
    It does NOT work with 1.1.6, 1.1.5 1.1.4 1.1.3 1.0.4 etc, don't ask.
 
 Q: I am still having trouble compiling with SDL support. gcc says something
@@ -26,7 +26,7 @@ A: Where did you install the SDL library? If you installed in /usr/local
 Q: I have problem ... with the SDL driver.
 A: It's very experimental & buggy code, and it's UNSUPPORTED by us.
    Please do NOT report bugs or ask features relating to SDL.
-   But you can improve it, and send us patches!
+   If you can improve it, send us patches!
 
 Q: It doesn't compile, and it misses uint64_t inttypes.h and similar things...
 A: copy DOCS/inttypes.h to MPlayer directory (cp DOCS/inttypes.h .)
@@ -35,7 +35,7 @@ A: copy DOCS/inttypes.h to MPlayer directory (cp DOCS/inttypes.h .)
 Q: I have Pentium III but ./configure doesn't detect SSE
 A: Only kernel versions 2.4.x supports SSE (or try latest 2.2.19 or newer)
 
-Q: fullscreen option (-fs) and/or -xy doesn't work with x11 driver (-vo x11)
+Q: -xy option doesn't work with x11 driver (-vo x11)
 A: x11 driver doesn't support scaling, but XF86VidMode support is now
    used: you must specify the -vm and the -fs switch, and you're done.
    Make sure you have the right Modelines in your XF86Config file, and
@@ -177,5 +177,11 @@ A: Your driver is old, update it. The new driver also supports YUY2 required
    for DivX.
 
 Q: I've downloaded an ASF with asfrecorder, but MPlayer can't play it !
-A: There were/are some known issues with asfrecorder, and the ASF format is
-   a big crap itself. Please contact us, so the bug can be fixed.
+A: asfrecorder, and the ASF format itself is a big crap.
+   Do not contact us, go to hell.
+
+Q: Umm, what is "IdegCounter" ?
+A: A mixture of a hungarian and an english word. In english, "Ideg" means
+   "nerve", and is pronounced as something like "ydaegh" . It was first used
+   to measure the nervousness of A'rpi, after some (umm) "mystic" disappearance
+   of CVS code ;)

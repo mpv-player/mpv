@@ -27,7 +27,7 @@ Second, you must call ./configure script of MPlayer with these options:
 --withcssindfir=/usr/local/include
 	Directory contains header file 'css.h' of libcss.
 
-NOTE: There is no autodetection for libcss! You must require it with
+NOTE: Currently there is no autodetection for libcss! You MUST specify it with
 configure options.
 
 Viewing VOB files directly from DVD
@@ -36,17 +36,17 @@ mplayer -dvd /dev/dvd /mnt/cdrom/video_ts/vts_01_1.vob
 
 where,
 
-	'-dvd /dev/dvd' tells mplayer the device name of your DVD drive.
+	'-dvd /dev/dvd' tells MPlayer the device name of your DVD drive.
 	it's used in disc authentication process
 
 	the filename is simply a VOB file path on the disc
 
-Note that according my experiences disc authentication requires root
-privilegies so you must run mplayer as root! (see section 'Problems').
+Note that according to my experiences, disc authentication requires root
+privileges so you must run MPlayer as root! (see section 'Problems').
 
 NOTE about the sound:
-	It seems that mplayer sometimes fails to find the first audio stream.
-	You can specify it with using the '-aid 128' option, for example.
+	It seems that MPlayer sometimes fails to find the first audio stream.
+	You can specify it with the '-aid 128' option, for example.
 	Please experience with 128,129 and similar values. See section
 	'Problems'.
 
@@ -54,15 +54,15 @@ NOTE about the sound:
 New source files
 ~~~~~~~~~~~~~~~~
 dvdauth.c
-	Issues DVD disc and title authentication and fills key_disc and key_title
-	arraies.
+	Issues DVD disc and title authentication and fills key_disc and
+	key_title arraies.
 
 dvdauth.h
 	header file
 
-These files are embeded inside an '#ifdef ... #endif' block, so if libcss
+These files are embedded inside an '#ifdef ... #endif' block, so if libcss
 support was not requested, they do not produce any code and of course
-libcss is not linked against mplayer either.
+libcss is not linked against MPlayer either.
 
 
 Modifications in the source
@@ -83,8 +83,8 @@ On my AMD K6-2 with using hw scaling and colorspace conversion
 capability of my G400 it's possible to watch DVD with about 70%
 CPU usage with '-nosound'. Unfortunately with sound my machine is
 not enough :( Maybe it can be improved somewhat ...
-Guess, it's not so bad ... According reports from my friends
-xine uses 80-90% CPU to play DVD on much more powerfull machines
+Guess, it's not so bad ... According to reports from my friends
+xine uses 80-90% CPU to play DVD on much more powerful machines
 like 1GHz Athlon systems (as far as I know, it's said that about
 300MHz celeron is the minimum to watch DVDs ... using windows
 DVD viewers).
@@ -99,13 +99,12 @@ Problems (TODO)
 ~~~~~~~~~~~~~~~
 * disc authentication (the FIBMAP ioctl) requires root privilegies.
   this is strange since OMS can do it as user too.
-* sound. I'm using my only DVD disc (The Matrix) to test mplayer.
-  some VOB file has English sound, some has Spanish and some has
+* sound. I'm using my only DVD disc (The Matrix) to test MPlayer.
+  some VOB file have English sound, some have Spanish and some have
   no sound at all.
   IT SEEMS that if I give '-aid 128' everything works with English sound ...
-* strange effects but only with SOME vob
-  files (it looks like some interlacing effect, eg: every 2nd line
-  on the screen is from the last frame).
+* strange effects but only with SOME vob files (it looks like some interlacing
+  effect, eg: every 2nd line on the screen is from the last frame).
 
 
 feature TODO
