@@ -964,6 +964,29 @@ subtitle* subcp_recode (subtitle *sub)
 	return sub;
 }
 
+// for demux_ogg.c:
+subtitle* subcp_recode1 (subtitle *sub)
+{
+  int l=sub->lines;
+  size_t ileft, oleft;
+  char *op, *ip;
+
+  while (l){
+     ip = icbuffer;
+     op = sub->text[--l];
+     strcpy(ip, op);
+     ileft = strlen(ip);
+     oleft = ICBUFFSIZE - 1;
+		
+     if (iconv(icdsc, &ip, &ileft,
+	      &op, &oleft) == (size_t)(-1)) {
+	mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line.\n");
+	return sub;
+     }
+     *op='\0' ;
+  }
+  return sub;
+}
 #endif
 
 static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block){
