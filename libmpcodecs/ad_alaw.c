@@ -31,6 +31,8 @@ static int init(sh_audio_t *sh_audio)
 static int preinit(sh_audio_t *sh)
 {
   sh->audio_out_minsize=2048;
+  sh->ds->ss_div = 1; // 1 samples/packet
+  sh->ds->ss_mul = 1; // 1 bytes/packet
   return 1;
 }
 
@@ -61,7 +63,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
  unsigned short *d=(unsigned short *) buf;
  unsigned char *s=buf;
  len=2*l;
- if(sh_audio->format==6){
+ if(sh_audio->format==6 || sh_audio->format==0x77616C61){
  /* aLaw */
    while(l>0){ --l; d[l]=alaw2short[s[l]]; }
  } else {
