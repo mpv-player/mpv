@@ -101,6 +101,7 @@ static char * vbeErrToStr(int err)
     case VBE_VM86_FAIL: retval = "vm86() syscall failed"; break;
     case VBE_OUT_OF_DOS_MEM: retval = "Out of DOS memory"; break;
     case VBE_OUT_OF_MEM: retval = "Out of memory"; break;
+    case VBE_BROKEN_BIOS: retval = "Broken BIOS or DOS TSR"; break;
     default: sprintf(sbuff,"Uknown error: %i",err); retval=sbuff; break;
   }
   return retval;
