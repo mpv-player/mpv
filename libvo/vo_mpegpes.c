@@ -120,7 +120,7 @@ static uint32_t preinit(const char *arg){
 		perror("DVB VIDEO PLAY: ");
 		return -1;
 	}
-	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_AV_SYNC, false) < 0)){
+	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_AV_SYNC, true) < 0)){
 		perror("DVB AUDIO SET AV SYNC: ");
 		return -1;
 	}
