@@ -1,5 +1,13 @@
 
-/********************************************************************
+/*
+   Written by Mark Podlipec <podlipec@ici.net>.
+
+   Most of this code comes from a GSM 06.10 library by
+   Jutta Degener and Carsten Bormann, available via
+   <http://www.pobox.com/~jutta/toast.html>.
+
+   That library is distributed with the following copyright:
+
     Copyright 1992 by Jutta Degener and Carsten Bormann,
     Technische Universitaet Berlin
 
@@ -16,7 +24,7 @@ improvements that may be of general interest.
     Berlin, 15.09.1992
     Jutta Degener
     Carsten Bormann
-********************************************************************/
+*/
 
 
 #include <stdio.h>
