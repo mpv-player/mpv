@@ -99,7 +99,7 @@ static char help_text[]=
 #define MSGTR_VideoStreamRedefined "WarnUng! Aideostreamheader %d redefiniert!\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Zu viele (%d in %d bytes) Audiopakete im Puffer!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Zu viele (%d in %d bytes) Videopakete im Puffer\n"
-#define MSGTR_MaybeNI "Vielleicht spielst du einen non-interleaved Stream/Datei oder der Codec geht nicht\n";
+#define MSGTR_MaybeNI "Vielleicht spielst du einen non-interleaved Stream/Datei oder der Codec geht nicht\n"
 #define MSGTR_DetectedAVIfile "AVI Dateiformat erkannt!\n"
 #define MSGTR_DetectedASFfile "ASF Dateiformat erkannt!\n"
 #define MSGTR_DetectedMPEGPESfile "MPEG-PES Dateiformat erkannt!\n"
@@ -108,7 +108,7 @@ static char help_text[]=
 #define MSGTR_DetectedQTMOVfile "QuickTime/MOV Dateiformat erkannt!\n"
 #define MSGTR_MissingMpegVideo "Vermisse MPEG Videostream!? Kontaktiere den Author, das könnte ein Bug sein :(\n"
 #define MSGTR_InvalidMPEGES "Ungültiger MPEG-ES Stream??? Kontaktiere den Author, das könnte ein Bug sein :(\n"
-#define MSGTR_FormatNotRecognized =\
+#define MSGTR_FormatNotRecognized \
 "=========== Sorry, das Dateiformat/Codec wird nicht unterstützt =============\n"\
 "============== Sollte dies ein AVI, ASF oder MPEG Stream sein, ==============\n"\
 "================== dann kontaktiere bitte den Author ========================\n"
