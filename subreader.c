@@ -934,6 +934,7 @@ void	subcp_close (void)
 {
 	if (icdsc != (iconv_t)(-1)){
 		(void) iconv_close (icdsc);
+		icdsc = (iconv_t)(-1);
 		sub_utf8=sub_utf8_prev;
 	   	mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: closed iconv descriptor.\n");
 	}
@@ -983,18 +984,19 @@ subtitle* subcp_recode1 (subtitle *sub)
 {
   int l=sub->lines;
   size_t ileft, oleft;
-  char *op, *ip;
+  
+  if(icdsc == (iconv_t)(-1)) return sub;
 
   while (l){
-     ip = icbuffer;
-     op = sub->text[--l];
+     char *ip = icbuffer;
+     char *op = sub->text[--l];
      strcpy(ip, op);
      ileft = strlen(ip);
      oleft = ICBUFFSIZE - 1;
 		
      if (iconv(icdsc, &ip, &ileft,
 	      &op, &oleft) == (size_t)(-1)) {
-	mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line (2).\n");
+	mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: error recoding line (2).\n");
 	return sub;
      }
      *op='\0' ;
