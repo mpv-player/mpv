@@ -335,7 +335,7 @@ zooming), thus fullscreen is nice and very fast.
 <para>
 Fullscreen playing can be achieved by either enabling <emphasis role="bold">
 software scaling</emphasis> (use the <option>-zoom</option> or <option>-vf</option> option,
-but i warn you: this is slow), or switching to a smaller video mode, for example
+but I warn you: this is slow), or switching to a smaller video mode, for example
 352x288. If you don't have YUV acceleration, this latter method is recommended.
 Video mode switching can be enabled by using the <option>-vm</option> option and
 it works with the following drivers:
