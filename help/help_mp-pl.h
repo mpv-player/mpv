@@ -436,6 +436,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Font "Font"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocesing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Kodek & demuxer"
+#define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+#define MSGTR_PREFERENCES_FRAME_Misc "Ró¿ne"
 #define MSGTR_PREFERENCES_OSS_Device "Urz±dzenie:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mikser:"
 #define MSGTR_PREFERENCES_Message "Proszê pamiêtaæ, ¿e niektóre funkcje wymagaja restartowania odtwarzania."
@@ -473,6 +475,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontTextScale "Skalowanie tekstu:"
 #define MSGTR_PREFERENCES_FontOSDScale "Skalowanie OSD:"
 #define MSGTR_PREFERENCES_SubtitleOSD "Napisy i OSD"
+#define MSGTR_PREFERENCES_Cache "Cache w³±cz/wy³±cz"
+#define MSGTR_PREFERENCES_LoadFullscreen "Wystartowa³o na pe³nym ekranie"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "b³±d krytyczny ..."
