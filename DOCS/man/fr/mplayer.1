@@ -175,7 +175,7 @@ VESA, même sans X11), quelques drivers spécifiques à certaines cartes
 (pour Matrox, 3Dfx et ATI) et certaines cartes de décompression MPEG,
 telles que les Siemens DVB, DXR2 et DXR3/\:Hollywood+.
 La plupart d'entre eux gèrent le redimensionnement logiciel ou
-matériel, vous pouvez donc apprécier les films en plein écran.
+matériel, vous pouvez donc apprécier les films en plein-écran.
 .PP
 MPlayer possède un affichage sur écran (OnScreenDisplay) pour les
 informations, de belles et grandes polices lissées et des effets
@@ -321,7 +321,7 @@ Ajuste la fenêtre fenêtre vidéo à sa taille d'origine.
 .IPs "option + 2"
 Double la taille de la fenêtre vidéo.
 .IPs "option + f"
-Bascule en mode plein écran (voir aussi \-fs).
+Bascule en mode plein-écran (voir aussi \-fs).
 .IPs "option + [ et option + ]"
 Change l'alpha (transparence) de la fenêtre vidéo.
 .IPs T\ \ \ \ 
@@ -2177,14 +2177,14 @@ Tous les pilotes de sortie vidéo ne le permettent pas.
 .
 .TP
 .B \-fsmode-dontuse <0\-31> (OBSOLÈTE, utilisez l'option \-fs)
-Essayez cette option si vous avez encore des problèmes en plein écran.
+Essayez cette option si vous avez encore des problèmes en plein-écran.
 .
 .TP
 .B \-fstype <type1,type2,...> (X11 uniquement)
 Définit une liste classée par ordre de priorité des modes plein-écran
 à utiliser.
 Vous pouvez inverser les modes en les préfixant par '\-'.
-Si vous avez des problèmes d'affichage, comme votre vidéo en plein écran est
+Si vous avez des problèmes d'affichage, comme votre vidéo en plein-écran est
 cachée par d'autres fenêtres, essayez de ré-ordonner cette liste.
 .br
 .I NOTE:
@@ -2221,7 +2221,7 @@ Utilise l'astuce _NETWM_STATE_STAYS_ON_TOP si disponible.
 L'ordre par défaut, si des modes incorrects ou non gérés sont donnés, sera
 utilisé en recours.
 .IPs \-fullscreen
-Corrige le basculement en mode plein écran sur OpenBox 1.x.
+Corrige le basculement en mode plein-écran sur OpenBox 1.x.
 .RE
 .P 1
 .
@@ -2324,7 +2324,7 @@ Active la fonctionnalité "pan-and-scan" (par ex.\& couper les côtés d'un
 film 16/\:9e pour qu'il tienne sans bords noirs sur un écran 4/\:3)
 L'intervalle définit à quel point l'image sera coupée.
 Cette option ne fonctionne qu'avec les pilotes de sortie vidéo xv, xmga, mga,
-gl et xvidix.
+gl, quartz et xvidix.
 .
 .TP
 .B \-refreshrate <Hz>
@@ -2609,7 +2609,9 @@ avec par ex.\& \-vf format=yuy2
 .PD 0
 .RSs
 .IPs device_id=<numéro>
-Choisir le moniteur à utiliser en plein écran.
+Choisir le moniteur à utiliser en plein-écran.
+.IPs fs_res=<largeur>:<hauteur>
+Choisir la résolution du mode plein-écran (utile sur les systèmes plus lent)
 .RE
 .PD 1
 .
@@ -2709,7 +2711,7 @@ Change le comportement de l'OSD quand la taille de la fenêtre vidéo change
 Lorsqu'il est activé, il se comporte comme les autres pilotes de sortie
 vidéo, ce qui est mieux pour les polices de caractères à taille fixe.
 En le désactivant, le résultat est plus esthétique avec les polices FreeType,
-et en mode plein écran, s'affichera dans les bandes noires.
+et en mode plein-écran, s'affichera dans les bandes noires.
 .IPs (no)aspect
 Active ou désactive la gestion du redimensionnement du ratio d'aspect et
 le "pan-and-scan" (par défaut\ : activé).
