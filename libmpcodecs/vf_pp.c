@@ -25,11 +25,13 @@ struct vf_priv_s {
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int voflags, unsigned int outfmt){
-
-    if(vf->priv->context) freePPContext(vf->priv->context);
     vf->priv->context= getPPContext(width, height);
 
     return vf_next_config(vf,width,height,d_width,d_height,voflags,vf->priv->outfmt);
+}
+
+static void uninit(struct vf_instance_s* vf){
+    if(vf->priv->context) freePPContext(vf->priv->context);
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
@@ -118,8 +120,10 @@ static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->get_image=get_image;
     vf->put_image=put_image;
+    vf->uninit=uninit;
     vf->default_caps=VFCAP_ACCEPT_STRIDE|VFCAP_POSTPROC;
     vf->priv=malloc(sizeof(struct vf_priv_s));
+    vf->priv->context=NULL;
 
     // check csp:
     vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
