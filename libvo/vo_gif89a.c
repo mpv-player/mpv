@@ -58,7 +58,7 @@
 #include "../postproc/rgb2rgb.h"
 
 #define MPLAYER_VERSION 0.90
-#define VO_GIF_REVISION 4
+#define VO_GIF_REVISION 6
 
 static vo_info_t info = {
 	"animated GIF output",
@@ -95,8 +95,6 @@ static uint32_t img_width;
 static uint32_t img_height;
 // image data for slice rendering
 static uint8_t *slice_data = NULL;
-// pointer for whole frame rendering
-static uint8_t *frame_data = NULL;
 // reduced image data for flip_page
 static uint8_t *reduce_data = NULL;
 // reduced color map for flip_page
@@ -198,21 +196,11 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	// movies concatenated in one gif file.  the output
 	// gif will have the dimensions of the first movie.
 	
-	switch (format) {
-		case IMGFMT_RGB24: break;     
-		case IMGFMT_YV12:
-			yuv2rgb_init(24, MODE_BGR);
-			slice_data = malloc(img_width * img_height * 3);
-			if (slice_data == NULL) {
-				printf("GIF89a: malloc failed.\n");
-				return 1;
-			}
-			break;
-		default:
-			printf("GIF89a: Error - given unsupported colorspace.\n");
-			return 1;     
+	if (format != IMGFMT_RGB24) {
+		printf("GIF89a: Error - given unsupported colorspace.\n");
+		return 1;
 	}
-
+	
 	// the EGifSetGifVersion line causes segfaults in certain
 	// earlier versions of libungif.  i don't know exactly which,
 	// but certainly in all those before v4.  if you have problems,
@@ -227,6 +215,12 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	new_gif = EGifOpenFileName(gif_filename, 0);
 	if (new_gif == NULL) {
 		printf("GIF89a: error opening file \"%s\" for output.\n", gif_filename);
+		return 1;
+	}
+
+	slice_data = malloc(img_width * img_height * 3);
+	if (slice_data == NULL) {
+		printf("GIF89a: malloc failed.\n");
 		return 1;
 	}
 
@@ -295,24 +289,13 @@ static void flip_page(void)
 	char CB[4]; // control block
 	int delay = 0;
 	int ret;
-	uint8_t *img_data;
 
 	cycle_pos++;
 	if (cycle_pos < frame_cycle - frame_adj)
 		return; // we are skipping this frame
 
-	// slice_data is used for per slice rendering,
-	// and frame_data is used for per frame rendering.
-	// i seperated these two because slice_data is
-	// ram i allocate, and frame_data is not.
-	// using one pointer for both can lead to
-	// either segfault (freeing ram that i'm not supposed
-	// to) or memory leaks (not freeing any ram at all)
-	if (slice_data != NULL) img_data = slice_data;
-	else img_data = frame_data;
-	
 	// quantize the image
-	ret = gif_reduce(img_width, img_height, img_data, reduce_data, reduce_cmap->Colors);
+	ret = gif_reduce(img_width, img_height, slice_data, reduce_data, reduce_cmap->Colors);
 	if (ret == GIF_ERROR) {
 		printf("GIF89a: Quantize failed.\n");
 		return;
@@ -342,26 +325,27 @@ static void flip_page(void)
 
 static uint32_t draw_frame(uint8_t *src[])
 {
-	frame_data = src[0];
-	return 0;
+	return 1;
 }
 
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
-	uint8_t *dst;
+	uint8_t *dst, *frm;
+	int i;
 	dst = slice_data + (img_width * y + x) * 3;
-	yuv2rgb(dst, src[0], src[1], src[2], w, h, img_width * 3, stride[0], stride[1]);
+	frm = src[0];
+	for (i = 0; i < h; i++) {
+		memcpy(dst, frm, w * 3);
+		dst += (img_width * 3);
+		frm += stride[0];
+	}
 	return 0;
 }
 
 static uint32_t query_format(uint32_t format)
 {
-	switch (format) {
-		case IMGFMT_YV12:
-			return VFCAP_CSP_SUPPORTED | VFCAP_TIMER | VFCAP_ACCEPT_STRIDE;
-		case IMGFMT_RGB24:
-			return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_TIMER;
-	}
+	if (format == IMGFMT_RGB24)
+		return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_TIMER | VFCAP_ACCEPT_STRIDE;
 	return 0;
 }
 
@@ -369,6 +353,10 @@ static uint32_t control(uint32_t request, void *data, ...)
 {
 	if (request == VOCTRL_QUERY_FORMAT) {
 		return query_format(*((uint32_t*)data));
+	}
+	if (request == VOCTRL_DUPLICATE_FRAME) {
+		flip_page();
+		return VO_TRUE;
 	}
 	return VO_NOTIMPL;
 }
@@ -397,7 +385,6 @@ static void uninit(void)
 	// set the pointers back to null.
 	new_gif = NULL;
 	gif_filename = NULL;
-	frame_data = NULL;
 	slice_data = NULL;
 	reduce_data = NULL;
 	reduce_cmap = NULL;
