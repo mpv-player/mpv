@@ -3,32 +3,15 @@
 
 <FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 
-<P><B><A NAME=2.1>2.1. Video Formats, Audio &amp; Video Codecs</A></B></P>
-
-<P><B><A NAME=2.1.1>2.1.1. Supported input formats</A></B></P>
-
-<P><B>MPlayer</B> can read/play from the following devices/formats:<BR>
-<UL>
-<LI> VCD (Video CD) directly from CD-ROM or from CDRwin's .bin image file     
-<LI> DVD, directly from your DVD disk, using libdvdread for decryption
-<LI> MPEG 1/2 System Stream (PS/PES/VOB) and Elementary Stream (ES) file
-     formats
-<LI> RIFF AVI file format
-<LI> ASF/WMV 1.0 file format
-<LI> QT/MOV file format with (un)compressed headers
-<LI> VIVO format (.viv files)
-<LI> supports reading from file, stdin, or network via HTTP
-</UL></P>
-
-<P>Note: about realmedia (.ra/.rm) support read the FAQ!</P>
+<P><B><A NAME=2.2>2.2.  Supported codecs</A></B></P>
 
 
-<P><B><A NAME=2.1.2>2.1.2. Supported audio &amp; video codecs</A></B></P>
+<P><B><A NAME=2.2.1>2.2.1. Video codecs</A></B></P>
 
 <P>See <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A> for the complete,
 daily generated list!!!</P>
 
-<P>The most important video codecs:<BR>
+<P>The most important ones above all:<BR>
 <UL>
 <LI>MPEG1 (VCD) and MPEG2 (DVD) video</LI>
 <LI>DivX ;-), OpenDivX (DivX4), 3ivx and other MPEG4 variants</LI>
@@ -36,22 +19,14 @@ daily generated list!!!</P>
 <LI>Intel Indeo codecs (3.1,3.2,4.1,5.0)</LI>
 <LI>MJPEG, ASV2 and other hardware formats</LI>
 <LI>XAnim codecs</LI>
+<LI>VIVO</LI>
 </UL></P>
 
-<P>The most important audio codecs:<BR>
-<UL>
-<LI>MPEG layer 2, and layer 3 (MP3) audio (native code, with MMX/SSE/3DNow! optimization)</LI>
-<LI>AC3 dolby audio (native code, with SSE/3DNow! optimization)</LI>
-<LI>Ogg Vorbis audio codec (native lib)</LI>
-<LI>Voxware audio (using directshow DLL)</LI>
-<LI>alaw, msgsm, pcm and other simple old audio formats</LI>
-</UL></P>
-
-<P>If you have a codec not listed here, and not supported yet, just read <A
-HREF="#2.1.3">section 2.1.3</A> to get info about how to help us adding support
+<P>If you have a Win32 codec not listed here, and not supported yet, just read the <A
+HREF="#2.2.3">codec importing</A> to get info about how to help us adding support
 for it!</P>
 
-<P><B><A NAME=2.1.2.1>2.1.2.1. DivX4</A></B></P>
+<P><B><A NAME=2.2.1.1>2.2.1.1. DivX4</A></B></P>
 
 <P>This section contains information about the DivX4 codec of
 <A HREF="http://www.projectmayo.com">ProjectMayo</A>. Their first available alpha version was the OpenDivX 4.0
@@ -110,7 +85,7 @@ differ according to the current bpp.</P>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hard prostprocessing, eats many CPU (like level 4 with divxds</TD><TR>
 </TABLE></P>
 
-<P><B><A NAME=2.1.2.2>2.1.2.2. ffmpeg's DivX/libavcodec</A></B></P>
+<P><B><A NAME=2.2.1.2>2.2.1.2. ffmpeg's DivX/libavcodec</A></B></P>
 
 <P>Beginning with version 0.4.2 , <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contains an <B>opensource</B> DivX codec,
 which is compatible with the traditional DivX. <B>MPlayer</B> supports this codec,
@@ -150,15 +125,7 @@ Then <B>MPlayer</B> always uses <B>ffdivx/ffodivx</B> to decode
 highest resolution DivX/DivX4 movies on my K6/2 500, without framedrop.</P>
 
 
-<P><B><A NAME=2.1.2.3>2.1.2.3.  Hardware AC3 decoding</A></B></P>
-
-<P>You'll need an AC3 capable soundcard, with digital out (SP/DIF). The
-card's driver must support the AFMT_AC3 format (like SB Live! does).
-Connect your AC3 decoder to the SP/DIF output, and use the '-ac hwac3'
-option. It may or may not work (experimental). (probably won't...)</P>
-
-
-<P><B><A NAME=2.1.2.4>2.1.2.4.  XAnim codecs</A></B></P>
+<P><B><A NAME=2.2.1.3>2.2.1.3.  XAnim codecs</A></B></P>
 
 <P>Foreword: using (some) XAnim codecs with other program than XAnim, is
 <B><I>ILLEGAL</I></B>. It is <B>YOUR</B> responsibility to read its license,
@@ -185,7 +152,43 @@ option to tell <B>MPlayer</B> to use them if possible.</P>
 <P>Tested codecs are: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
 
 
-<P><B><A NAME=2.1.2.5>2.1.2.5.  libmad support</A></B></P>
+<P><B><A NAME=2.2.1.4>2.2.1.4.  VIVO video</A></B></P>
+
+<P>TODO</P>
+
+
+<P><B><A NAME=2.2.1.5>2.2.1.5.  MPEG 1/2 video</A></B></P>
+
+<P>MPEG1 and MPEG2 are decoded with the native library <B>libmpeg2</B>.
+Its source code is included in <B>MPlayer</B>, and of course is multiplatform.
+We handle buggy MPEG1/2 video files by checking for what signature does
+libmpeg2 return, and when it gives sig11 (segmentation fault), we quickly
+reinitialize the codec, and continue exactly from where the failure did occur.
+No speed decrease is measurable.</P>
+
+
+<P><B><A NAME=2.2.2>2.2.2.  Audio codecs</A></B></P>
+
+<P>The most important audio codecs above all :<BR>
+<UL>
+<LI>MPEG layer 2, and layer 3 (MP3) audio (<B>native</B> code, with MMX/SSE/3DNow! optimization)</LI>
+<LI>MPEG layer 1 audio (<B>native</B> code, with libavcodec)</LI>
+<LI>AC3 Dolby audio (<B>native</B> code, with SSE/3DNow! optimization)</LI>
+<LI>Ogg Vorbis audio codec (<B>native</B> lib)</LI>
+<LI>Voxware audio (using DirectShow DLL)</LI>
+<LI>alaw, msgsm, pcm and other simple old audio formats</LI>
+</UL></P>
+
+
+<P><B><A NAME=2.2.2.1>2.2.2.1.  Hardware AC3 decoding</A></B></P>
+
+<P>You'll need an AC3 capable soundcard, with digital out (SP/DIF). The
+card's driver must support the AFMT_AC3 format (like SB Live! does).
+Connect your AC3 decoder to the SP/DIF output, and use the '-ac hwac3'
+option. It may or may not work (experimental). (probably won't...)</P>
+
+
+<P><B><A NAME=2.2.2.2>2.2.2.2.  libmad support</A></B></P>
 
 <P><A HREF="http://mad.sourceforge.net">libmad</A> is a multiplatform MPEG audio
 decoding library. If you don't know why is it good, you probably don't need it.</P>
@@ -194,9 +197,9 @@ decoding library. If you don't know why is it good, you probably don't need it.<
 option.</P>
 
 
-<P><B><A NAME=2.1.3>2.1.3. Codec importing howto</A></B></P>
+<P><B><A NAME=2.2.3>2.2.3. Win32 codec importing howto</A></B></P>
 
-<P><B><A NAME=2.1.3.1>2.1.3.1. VFW codecs</A></B></P>
+<P><B><A NAME=2.2.3.1>2.2.3.1. VFW codecs</A></B></P>
 
 <P>VfW (Video for Windows) is the old Video API for Windows. Its codecs have
 the .DLL or (rarely) .DRV extension.
@@ -224,7 +227,7 @@ your codec support request in mail, and upload these files to the FTP:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
 
 
-<P><B><A NAME=2.1.3.2>2.1.3.2. DirectShow codecs</A></B></P>
+<P><B><A NAME=2.2.3.2>2.2.3.2. DirectShow codecs</A></B></P>
 
 <P>DirectShow is the newer Video API, which is even worse than its predecessor.
 Things are harder with DirectShow, since
