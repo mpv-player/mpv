@@ -1682,6 +1682,7 @@ if(trak->pos==0 && trak->stream_header_len>0){
     stream_read(demuxer->stream,dp->buffer+trak->stream_header_len,x);
     free(trak->stream_header);
     trak->stream_header = NULL;
+    trak->stream_header_len = 0;
     dp->pts=pts;
     dp->flags=0;
     dp->pos=pos; // FIXME?
