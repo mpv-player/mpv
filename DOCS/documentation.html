@@ -198,16 +198,25 @@
       <LI><A HREF=#2.6.9>2.6.9 RGB2BGR</A></LI>
       <LI><A HREF=#2.6.10>2.6.10 Rotate</A></LI>
       <LI><A HREF=#2.6.11>2.6.11 Scale</A></LI>
-      <LI><A HREF=#2.6.12>2.6.12 VO/A></LI>
+      <LI><A HREF=#2.6.12>2.6.12 VO</A></LI>
       <LI><A HREF=#2.6.13>2.6.13 YUY2</A></LI>
     </UL>
   </UL>
   <LI><A HREF="#3">3. Usage</A></LI>
     <UL>
       <LI><A HREF="#3.1">3.1 Command line</A></LI>
-      <LI><A HREF="#3.2">3.2 Control from keyboard</A></LI>
-      <LI><A HREF="#3.3">3.3 Control from LIRC (Linux Infrared Remote Control)</A></LI>
-      <LI><A HREF="#3.4">3.4 Streaming from network or pipes</A></LI>
+      <LI><A HREF="#3.2">3.2 Control</A></LI>
+      <UL>
+        <LI><A HREF="#3.2.1">3.2.1 Default controls</A></LI>
+        <LI><A HREF="#3.2.2">3.2.2 Controls configuration</A></LI>
+        <UL>
+           <LI><A HREF="#3.2.2.1">3.2.2.1 Key names</A></LI>
+           <LI><A HREF="#3.2.2.2">3.2.2.2. Commands</A></LI>
+        </UL>
+        <LI><A HREF="#3.2.3">3.2.3 Control from LIRC</A></LI>
+        <LI><A HREF="#3.2.4">3.2.4. Slave mode</A></LI>
+      </UL>
+      <LI><A HREF="#3.3">3.3 Streaming from network or pipes</A></LI>
     </UL>
   <LI><A HREF="cd-dvd.html#4">4. CD/DVD section</A></LI>
     <UL>
@@ -1157,8 +1166,14 @@ Xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE>
   mplayer -dvd 1 -dvd-device /dev/hdc
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
+<P><B><A NAME=3.2>3.2. Control</A></B></P>
 
-<P><B><A NAME=3.2>3.2. Control from keyboard</A></B></P>
+<P><B>MPlayer</B> have a fully configurable, command driven, control layer which allow you
+to control <B>MPlayer</B> using keyboard, mouse, joystick or remote control (using lirc).</P>
+
+<P><B><A NAME=3.2.1>3.2.1. Default controls</A></B></P>
+
+<P><B>Keyboard</B></P>
 
 <P><TABLE BORDER=0>
 <TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">&lt;-  or  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">seek backward/forward  10 seconds</TD></TR>
@@ -1172,6 +1187,10 @@ Xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE>
 <TR><TD></TD><TD><FONT CLASS="text">f</TD><TD></TD><TD><FONT CLASS="text">toggle fullscreen</TD></TR>
 <TR><TD></TD><TD><FONT CLASS="text">o</TD><TD></TD><TD><FONT CLASS="text">toggle OSD: none / seek / seek+timer</TD></TR>
 <TR><TD></TD><TD><FONT CLASS="text">z or x</TD><TD></TD><TD><FONT CLASS="text">adjust subtitle delay by +/- 0.1 second</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">r or t</TD><TD></TD><TD><FONT CLASS="text">adjust subtitle position</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">&gt; or &lt;</TD><TD></TD><TD><FONT CLASS="text">go to next/previous playtree entry</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">HOME or END</TD><TD></TD><TD><FONT CLASS="text">go to next/previous playtree entry in the parent list</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">INSERT or DELETE</TD><TD></TD><TD><FONT CLASS="text">go to next/previous alternative source (only avaible in asx playlist)</TD></TR>
 
 <TR><TD COLSPAN=4><P><I><FONT CLASS="text">(the following keys are valid only when using <CODE>-vo xv</CODE>)</I></P></TD></TR>
 
@@ -1181,7 +1200,7 @@ Xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE>
 <TR><TD></TD><TD><FONT CLASS="text">7 or 8</TD><TD></TD><TD><FONT CLASS="text">adjust saturation</TD></TR>
 </TABLE></P>
 
-<P><B>GUI keyboard control</B></P>
+<P><B>GUI</B></P>
 
 <P><TABLE BORDER=0>
 <TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">, and .</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">previous / next file</TD></TR>
@@ -1198,7 +1217,7 @@ Xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE>
 <TR><TD></TD><TD><FONT CLASS="text">m</TD><TD></TD><TD><FONT CLASS="text">toggle mute</TD>
 </TABLE></P>
 
-<P><B>TV input control</B></P>
+<P><B>TV</B></P>
 
 <P><TABLE BORDER=0>
 <TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">select previous/next channel</TD></TR>
@@ -1207,57 +1226,214 @@ Xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE>
 
 </TABLE></P>
 
-<P><B><A NAME=3.3>3.3. Control from LIRC</A></B></P>
+<P><B><A NAME=3.2.2>3.2.2. Controls configuration</A></B></P>
+
+<P>MPlayer allow you to bind any key/button to any MPlayer command using a simple config file.
+The syntax consist of a key name followed by a command. The default config file location is 
+$HOME/.mplayer/input.conf but it can be overrided using the -input conf switch (relative path are relative to $HOME/.mplayer).
+<P>
+Example:
+<PRE>
+##
+## MPlayer input control file
+##
+
+RIGHT seek +10
+LEFT seek -10
+- audio_delay 0.100
++ audio_delay -0.100
+q quit
+> pt_step 1
+< pt_step -1
+ENTER pt_step 1 1
+</PRE></P>
+
+</P>
+
+<P><B><A NAME=3.2.2.1>3.2.2.1. Key names</A></B></P>
+
+<P>You can have a full list by running "mplayer -input keylist"</P>
+
+<P><B>Keyboard</B></P>
+
+<P><UL>
+<LI>Any printable character</LI>
+<LI>SPACE</LI>
+<LI>ENTER</LI>
+<LI>TAB</LI>
+<LI>CTRL</LI>
+<LI>BS</LI>
+<LI>DEL</LI>
+<LI>INS</LI>
+<LI>HOME</LI>
+<LI>END</LI>
+<LI>PGUP</LI>
+<LI>PGDWN</LI>
+<LI>ESC</LI>
+<LI>RIGHT</LI>
+<LI>LEFT</LI>
+<LI>UP</LI>
+<LI>DOWN</LI>
+</UL></P>
+
+<P><B>Mouse</B></P>
+
+<P>Note : mouse is only supported under X</P>
+
+<P><UL>
+<LI>MOUSE_BTN0 (Left button)</LI>
+<LI>MOUSE_BTN1 (Rigth button)</LI>
+<LI>MOUSE_BTN2 (Middle button)</LI>
+<LI>MOUSE_BTN3 (Whell)</LI>
+<LI>MOUSE_BTN4 (Whell)</LI>
+<LI>...</LI>
+<LI>MOUSE_BTN9</LI>
+</UL></P>
+
+<P><B>Joystick</B></P>
+
+<P>Note : joystick support must be enabled at compile time</P>
+
+<P><UL>
+<LI>JOY_RIGHT or JOY_AXIS0_PLUS</LI>
+<LI>JOY_LEFT or JOY_AXIS0_MINUS</LI>
+<LI>JOY_UP or JOY_AXIS1_MINUS</LI>
+<LI>JOY_DOWN or JOY_AXIS1_PLUS</LI>
+<LI>JOY_AXIS2_PLUS</LI>
+<LI>JOY_AXIS2_MINUS</LI>
+<LI>....</LI>
+<LI>JOY_AXIS9_PLUS</LI>
+<LI>JOY_AXIS9_MINUS</LI>
+</UL></P>
+
+
+<P><B><A NAME=3.2.2.2>3.2.2.2. Commands</A></B></P>
+
+<P>You can have a full list of know commands by running "mplayer -input cmdlist"</P>
+
+<P>
+<UL>
+  <LI><B>seek</B> (int) val [(int) type=0]
+         <P>Seek to some place in the movie.<BR>
+              Type 0 is a relative seek of +/- val seconds.<BR>
+              Type 1 seek to val % in the movie. </P>
+  </LI>
+  <LI><B>audio_delay</B> (float) val
+         <P>Adjust the audio delay of val seconds</P>
+  </LI>
+  <LI><B>quit</B>
+         <P>Quit <B>MPlayer</B></P>
+  </LI>
+  <LI><B>pause</B>
+         <P>Pause/unpause the playback</P>
+  </LI>
+  <LI><B>grap_frames</B>
+         <P>Somebody know ?</P>
+  </LI>
+  <LI><B>pt_step</B> (int) val [(int) force=0]
+         <P>Go to next/prev entry in playtree. Val sign tell the direction.<BR>
+              If no other entry is avaible in the given direction it won't do anything unless force is non 0.
+         </P>
+  </LI>
+  <LI><B>pt_up_step</B> (int) val [(int) force=0]
+         <P>Like pt_step but it jump to next/prev in the parent list. It's useful to break innner loop in the playtree.</P>
+  </LI>
+  <LI><B>alt_src_step</B> (int) val
+         <P>When more than one source is avaible it select the next/previous one (only supported by asx playlist).</P>
+  </LI>
+  <LI><B>sub_delay</B> (float) val [(int) abs=0]
+         <P>Adjust the subtitles delay of +/- val seconds or set it to val seconds when abs is non zero.</P>
+  </LI>
+  <LI><B>osd</B> [(int) level=-1]
+         <P>Toggle osd mode or set it to level when level > 0.</P>
+  </LI>
+  <LI><B>volume</B> (int) dir
+         <P>Increase/decrease volume</P>
+  </LI>
+  <LI><B>contrast</B> (int) val [(int) abs=0]</LI>
+  <LI><B>brightness</B> (int) val [(int) abs=0]</LI>
+  <LI><B>hue</B> (int) val [(int) abs=0]</LI>
+  <LI><B>saturation</B> (int) val [(int) abs=0]
+         <P>Set/Adjust video paramters. Val range from -100 to 100.</P>
+  </LI>
+  <LI><B>frame_drop</B> [(int) type=-1]
+         <P>Toggle/Set frame dropping mode.</P>
+  </LI>
+  <LI><B>sub_pos</B> (int) val
+         <P>Adjust subtitles position.</P>
+  </LI>
+  <LI><B>vo_fullscreen</B>
+         <P>Switch fullscreen mode.</P>
+  </LI>
+  <LI><B>tv_step_channel</B> (int) dir
+         <P>Select next/previous tv channel.</P>
+  </LI>
+  <LI><B>tv_step_norm</B>
+         <P>Change TV norm.</P>
+  </LI>
+  <LI><B>tv_step_chanlist</B>
+         <P>Change channel list.</P>
+  </LI>
+  <LI><B>gui_loadfile</B></LI>
+  <LI><B>gui_loadsubtitle</B></LI>
+  <LI><B>gui_about</B></LI>
+  <LI><B>gui_play</B></LI>
+  <LI><B>gui_stop</B></LI>
+  <LI><B>gui_playlist</B></LI>
+  <LI><B>gui_preferences</B></LI>
+  <LI><B>gui_skinbrowser</B></LI>
+         <P>GUI actions</P>
+</UL>
+</P>
+
+<P><B><A NAME=3.2.3>3.2.3. Control from LIRC</A></B></P>
 
 <P>Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver,
 an (almost) arbitrary remote control and control your linux box with it!
 More about it at <A HREF="http://www.lirc.org">www.lirc.org</A>.</P>
 
-<P>If you have installed the lirc-package, you can compile <B>MPlayer</B> with LIRC
-support using  ./configure --enable-lirc</P>
-
-<P>If everything went fine, <B>MPlayer</B> will print a message like
-LIRC init was successful.
-on startup. If an error occurs it will tell you. If it doesn't tell you
-anything about LIRC there's no support compiled in. That's it :-)</P>
+<P>If you have installed the lirc-package, configure will autodetect it. If everything went fine, <B>MPlayer</B> will print a message like "Setting up lirc support..." on startup. If an error occurs it will tell you. If it doesn't tell you anything about LIRC there's no support compiled in. That's it :-)</P>
 
 <P>The application name for <B>MPlayer</B> is - oh wonder - 'mplayer'.
-It understands the following commands:</P>
-
-<P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">PAUSE</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">pause playing. Any other keystroke will continue replay.</TD><TR>
-<TD></TD><TD><FONT CLASS="text">QUIT</TD><TD></TD><TD><FONT CLASS="text">exit MPlayer</TD><TR>
-<TD></TD><TD><FONT CLASS="text">RWND</TD><TD></TD><TD><FONT CLASS="text">10 secs back</TD><TR>
-<TD></TD><TD><FONT CLASS="text">FRWND</TD><TD></TD><TD><FONT CLASS="text">60 secs back</TD><TR>
-<TD></TD><TD><FONT CLASS="text">FWD</TD><TD></TD><TD><FONT CLASS="text">skip 10 secs</TD><TR>
-<TD></TD><TD><FONT CLASS="text">FFWD</TD><TD></TD><TD><FONT CLASS="text">skip 60 secs</TD><TR>
-<TD></TD><TD><FONT CLASS="text">INCVOL</TD><TD></TD><TD><FONT CLASS="text">increase volume one percent</TD><TR>
-<TD></TD><TD><FONT CLASS="text">DECVOL</TD><TD></TD><TD><FONT CLASS="text">decrease volume one percent</TD><TR>
-<TD></TD><TD><FONT CLASS="text">PCM</TD><TD></TD><TD><FONT CLASS="text">use pcm mixer channel</TD><TR>
-</TABLE></P>
-
-<P> Don't forget to enable the repeat flag for RWND/FWD in .lircrc. Here's an
+You can use any mplayer commands and even pass more than one command by separating them with \n. Don't forget to enable the repeat flag in .lircrc when it make sense (seek, volume, etc). Here's an
 excerpt from my .lircrc:</P>
 
-<P><PRE>  begin
-   remote = CU-SX070
-   prog = mplayer
-   button = Tape_Play
-   repeat = 1
-   config = FFWD
-  end
+<P><PRE>
+begin
+     button = VOLUME_PLUS
+     prog = mplayer
+     config = volume 1
+     repeat = 1
+end
 
-  begin
-   remote = CU-SX070
-   prog = mplayer
-   button = Tape_Stop
-   config = QUIT
-  end</PRE></P>
+begin
+    button = VOLUME_MINUS
+    prog = mplayer
+    config = volume -1
+    repeat = 1
+end
+
+begin
+    button = CD_PLAY
+    prog = mplayer
+    config = pause
+end
+
+begin
+    button = CD_STOP
+    prog = mplayer
+    config = seek 0 1\npause
+end
+</PRE></P>
 
 <P>If you don't like the standard location for the lirc-config file (~/.lircrc)
 use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
-<P><B><A NAME=3.4>3.4. Streaming from network or pipes</A></B></P>
+<P><B><A NAME=3.2.4>3.2.4. Slave mode</A></B></P>
+
+<P>The slave mode allow you to build simple frontend to <B>MPlayer</B>. When enabled (with the -slave switch) <B>MPlayer</B> will read commands separeted by new line (\n) from stdin.<P>
+
+<P><B><A NAME=3.3>3.3. Streaming from network or pipes</A></B></P>
 
 <P><B>MPlayer</B> can play files from network, using the HTTP or MMS protocol.</P>
 
