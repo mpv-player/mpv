@@ -55,6 +55,18 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_TV_STEP_CHANNEL_LIST, "tv_step_chanlist", 0, { {-1,{0}} }  },
 #endif
   { MP_CMD_VO_FULLSCREEN, "vo_fullscreen", 0, { {-1,{0}} } },
+
+#ifdef HAVE_NEW_GUI  
+  { MP_CMD_GUI_LOADFILE, "gui_loadfile", 0, { {-1,{0}} } },
+  { MP_CMD_GUI_LOADSUBTITLE, "gui_loadsubtitle", 0, { {-1,{0}} } },
+  { MP_CMD_GUI_ABOUT, "gui_about", 0, { {-1,{0}} } },
+  { MP_CMD_GUI_PLAY, "gui_play", 0, { {-1,{0}} } },
+  { MP_CMD_GUI_STOP, "gui_stop", 0, { {-1,{0}} } },
+  { MP_CMD_GUI_PLAYLIST, "gui_playlist", 0, { {-1,{0}} } },
+  { MP_CMD_GUI_PREFERENCES, "gui_preferences", 0, { {-1,{0}} } },
+  { MP_CMD_GUI_SKINBROWSER, "gui_skinbrowser", 0, { {-1,{0}} } },
+#endif
+  
   { 0, NULL, 0, {} }
 };
 
@@ -137,7 +149,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { '-', 0 }, "audio_delay -0.100" },
   { { 'q', 0 }, "quit" },
   { { KEY_ESC, 0 }, "quit" },
-  { { 'p', 0 }, "pause" },
+//  { { 'p', 0 }, "pause" },
   { { ' ', 0 }, "pause" },
   { { KEY_HOME, 0 }, "pt_up_step 1" },
   { { KEY_END, 0 }, "pt_up_step -1" },
@@ -164,9 +176,19 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'd', 0 }, "frame_drop" },
 #ifdef USE_TV
   { { 'h', 0 }, "tv_step_channel 1" },
-  { { 'l', 0 }, "tv_step_channel -1" },
+  { { 'k', 0 }, "tv_step_channel -1" },
   { { 'n', 0 }, "tv_step_norm" },
-  { { 'b', 0 }, "tv_step_chanlist" },
+  { { 'm', 0 }, "tv_step_chanlist" },
+#endif
+#ifdef HAVE_NEW_GUI
+  { { 'l', 0 }, "gui_loadfile" },
+  { { 't', 0 }, "gui_loadsubtitle" },
+  { { 'a', 0 }, "gui_about" },
+  { { KEY_ENTER, 0 }, "gui_play" },
+  { { 's', 0 }, "gui_stop" },
+  { { 'p', 0 }, "gui_playlist" },
+  { { 'r', 0 }, "gui_preferences" },
+  { { 'c', 0 }, "gui_skinbrowser" },
 #endif
 #ifdef HAVE_JOYSTICK
   { { JOY_AXIS0_PLUS, 0 }, "seek 10" },

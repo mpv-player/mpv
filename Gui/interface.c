@@ -13,6 +13,7 @@
 #include "mplayer/mplayer.h"
 #include "app.h"
 #include "../libvo/x11_common.h"
+#include "../input/input.h"
 
 guiInterface_t guiIntfStruct;
 
@@ -30,6 +31,19 @@ void guiDone( void )
  wsXDone();
 }
 
+int guiCMDArray[] =
+ {
+  evLoad,
+  evLoadSubtitle,
+  evAbout,
+  evPlay,
+  evStop,
+  evPlayList,
+  evPreferences,
+  evFullScreen,
+  evSkinBrowser
+ };
+
 void guiGetEvent( int type,char * arg )
 {
  switch ( type )
@@ -40,6 +54,20 @@ void guiGetEvent( int type,char * arg )
         break;
    case guiCEvent:
         break;
+   case guiIEvent:
+        printf( "cmd: %d\n",(int)arg );
+	switch( (int)arg )
+	 {
+          case MP_CMD_QUIT:
+	       mplEventHandling( evExit,0 );
+	       break;
+	  case MP_CMD_VO_FULLSCREEN:
+	       mplEventHandling( evFullScreen,0 );
+	       break;
+          default:
+	       mplEventHandling( guiCMDArray[ (int)arg - MP_CMD_GUI_EVENTS - 1 ],0 );
+	 }
+	break;
   }
 }
 

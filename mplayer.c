@@ -783,8 +783,10 @@ if(!use_stdin && !slave_mode){
       if(filename && !guiIntfStruct.FilenameChanged) guiSetFilename( guiIntfStruct.Filename,filename );
 //      guiIntfStruct.Playing= (gui_no_filename) ? 0 : 1;
       while(guiIntfStruct.Playing!=1){
+        mp_cmd_t* cmd;                                                                                   
 	usleep(20000);
 	guiEventHandling();
+	if ( (cmd = mp_input_get_cmd(0,0)) != NULL) guiGetEvent( guiIEvent,(char *)cmd->id );
       }
 
 play_dvd:
@@ -2637,10 +2639,19 @@ if(step_sec>0) {
 #endif
     case MP_CMD_VO_FULLSCREEN:
     {
+#ifdef HAVE_NEW_GUI
+     if ( use_gui ) guiGetEvent( guiIEvent,(char *)MP_CMD_GUI_FULLSCREEN );
+      else
+#endif
 	video_out->control(VOCTRL_FULLSCREEN, 0);
     } break;
-    default :
+    default : {
+#ifdef HAVE_NEW_GUI
+      if ( ( use_gui )&&( cmd->id > MP_CMD_GUI_EVENTS ) ) guiGetEvent( guiIEvent,(char *)cmd->id );
+       else
+#endif
       printf("Received unknow cmd %s\n",cmd->name);
+    }
     }
     mp_cmd_free(cmd);
   }
