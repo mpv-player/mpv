@@ -33,7 +33,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2005-01-07" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2005-01-13" "The MPlayer Project" "The Movie Player"
 .
 .SH NAME
 mplayer  \- movie player
@@ -4228,8 +4228,8 @@ between neighbor pixels, second (default 0.15) is what part of image has to
 be detected as interlaced to drop the frame.
 .
 .TP
-.B lavcdeint
-libavcodec deinterlacing filter
+.B lavcdeint (OBSOLETE)
+libavcodec deinterlacing filter, same as \-vf pp=fd
 .
 .TP
 .B kerndeint[=thresh[:map[:order[:sharp[:twoway]]]]]
