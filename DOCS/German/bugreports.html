@@ -16,42 +16,42 @@
 
 <P><B>Wie berichte ich über Programmfehler?</B></P>
 
-<P>Versuche es als erstes mit der letzten CVS-Version, möglicherweise ist dein
-Problem schon gelöst. (Einfache) Anweisungen zum Download der CVS-Version siehe auf der
-Homepage.</P>
+<P>Versuche es als allererstes die letzte CVS-Version, da dein Problem  möglicherweise
+schon gelöst ist. CVS-Anweisungen können am unteren Ende <A HREF="http://www.mplayerhq.hu/homepage/dload.html">dieser Seite</A>
+gefunden werden.</P>
 
-<P> Wenn es nicht hilft lese <A HREF="documentation.html#D">Anhang D</A> sowie andere Dokumentationen. Wenn dein Problem
-nicht bekannt ist oder durch unsere Anweisungen nicht gelöst werden kann,
-berichte über den Fehler:</P>
+<P>Wenn dies nicht hilft, sollte im <A HREF="documentation.html#D">Anhang D</A> und dem Rest der 
+Dokumentationen nachgesehen werden. Wenn dein Problem nicht bekannt ist oder durch unsere Anweisungen 
+nicht gelöst werden kann, dann berichte über den Fehler:</P>
 
-<P><B>Wo?</B></P>
+<P><B>Wo sollen Fehler berichtet werden?</B></P>
 
 <P>Tritt der mplayer-users Mailingliste bei:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
 und sende deinen Fehlerbericht an:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="mailto:mplayer-users@mplayerhq.hu">mplayer-users@mplayerhq.hu</A><BR>
-Wir werden keine persönliche Kopie senden, also bitte anmelden!!!</P>
+Es sei darauf hingewiesen, dass wir keine individuellen Kopien (CC) versenden werden.
+Es ist also eine gute Idee sich anzumelden, wenn man auch eine Antwort erhalten möchte.</P>
 
-<P>Sende auf keinen Fall Fehlerberichte direkt an die private Mail-Adresse
-des Autors!!! Wir arbeiten miteinander am Quellcode, also ist jeder
-interessiert.
-Nebenbei gesagt: Oft wissen auch andere Benutzer eine Lösung
-(Systemkonfigurationsprobleme, fehlerhafte Treiber usw.), sogar wenn wir
-denken es sei ein Fehler in unserem Code.
+<P>Sende auf keinen Fall private Fehlerberichte an individuelle Entwickler. Das ist Gemeinschaftsarbeit,
+so dass es vielleicht mehrere interessierte Leute geben wird.
+Es kommt auch teilweise vor, dass derselbe Fehler von anderen Benutzer erlebt wurde, welche eine Lösung
+zur Umgehung des Problems haben (sogar bei einem Fehler im mplayer Code).<BR>
 Die Sprache dieser Mailingliste ist ENGLISCH!</P>
 
 <P>Bitte beschreibe dein Problem detailiert - Beispiele usw. - aber vergiss
 nicht, dass dein Bericht folgendes beinhalten sollte:</P>
 
-<P><B>Was?</B></P>
+<P><B>Was soll berichtet werden?</B></P>
 
-<P><B><I>1. Die Systeminfos, die wir immer wollen:</I></B></P>
+<P><B><I>Systeminformationen</I></B></P>
 
 <UL>
-<LI>Linux Distribution<BR>
-z.B.:<UL>
-    <LI>RedHat 7.1
-    <LI>Slackware 7.0 + devel packs von 7.1 ...</UL>
+<LI>Deine Linux Distribution oder Betriebssystem:<BR>
+    <UL>
+        <LI>RedHat 7.1
+        <LI>Slackware 7.0 + devel packs von 7.1 ...
+   </UL>
 <LI>Kernel Version:<BR>
     <CODE>uname -a</CODE>
 <LI>libc Version:<BR>
@@ -65,32 +65,35 @@ z.B.:<UL>
     <CODE>as --version</CODE>
 </UL>
 
-<P><B><I>2. Hardware & Treiber:</I></B></P>
+<P><B><I>Hardware &amp; Treiber:</I></B></P>
 
 <UL>
-<LI>CPU Infos:<BR>
+<LI>CPU Infos (dies funktioniert nur mit Linux):<BR>
     <CODE>cat /proc/cpuinfo</CODE>
-<LI>Grafikkartenhersteller und Modell<BR>
-    z.B.:<BR><UL>
-    <LI>ASUS V3800U chip: nVidia TNT2 Ultra Pro 32MB SDRAM
-    <LI>Matrox G400 DH 32MB SGRAM</UL>
-<LI>Grafikkartentreiber-Typ & Version<BR>
-    z.B.:<UL>
-    <LI>X eigener Treiber
-    <LI>nvidia 0.9.623
-    <LI>Utah-GLX CVS 2001-02-17
-    <LI>DRI von X 4.0.3</UL>
-<LI>Soundkartentyp und Treiber<BR>
-    z.B.:<BR><UL>
-    <LI>Creative SBLive! Gold mit OSS Treiber von oss.creative.com
-    <LI>Creative SB16 mit OSS Treiber des Kernels
-    <LI>GUS PnP mit ALSA OSS Emulation</UL>
-<LI>wenn du dir unsicher bist, schick die Ausgabe von lspci -v mit
+<LI>Grafikkartenhersteller und Modell:<BR>
+    <UL>
+        <LI>ASUS V3800U chip: nVidia TNT2 Ultra Pro 32MB SDRAM
+        <LI>Matrox G400 DH 32MB SGRAM
+    </UL>
+<LI>Grafikkartentreiber-Typ & Version:<BR>
+    <UL>
+        <LI>X eigener Treiber
+        <LI>nvidia 0.9.623
+        <LI>Utah-GLX CVS 2001-02-17
+        <LI>DRI von X 4.0.3
+    </UL>
+<LI>Soundkartentyp und Treiber:<BR>
+    <UL>
+        <LI>Creative SBLive! Gold mit OSS Treiber von oss.creative.com
+        <LI>Creative SB16 mit OSS Treiber des Kernels
+        <LI>GUS PnP mit ALSA OSS Emulation
+    </UL>
+<LI>wenn du dir unsicher bist, schick die Ausgabe von <CODE>lspci -vv</CODE> mit (auf Linux Systemen)
 </UL>
 
 <P><B>Bei Kompilierungsfehlern/-problemen</B></P>
 
-<P><B><I>3. diese Dateien:</I></B></P>
+<P><B><I>Bitte schicke diese Dateien mit:</I></B></P>
 <UL>
 <LI>configure.log
 <LI>config.h
@@ -98,37 +101,36 @@ z.B.:<UL>
 <LI>libvo/config.mak
 </UL>
 
-<P><B>Bei Wiedergabeproblemen:</B></P>
+<P><B>Bei Wiedergabeproblemen</B></P>
 
-<P><B><I>3. Ausgabe von MPlayer in Ausführlichkeits-Stufe 1 (-v)</I></B></P>
+<P><B><I>Bitte gib die Ausgabe von MPlayer in Ausführlichkeits-Stufe 1 (-v) mit an</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [Optionen] Dateiname &amp;&gt; mplayer.log</CODE></P>
   
-<P><B><I>4. Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
+<P><B><I>Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
   lade die Datei bitte auf:</I></B></P>
-<P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
+<P><CODE>&nbsp;&nbsp;&nbsp;<A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">ftp://mplayerhq.hu/MPlayer/incoming/</A></P>
   Uploade auch eine kleine .txt-Datei mit dem selben name wie die Datei 
-  (+ .txt Endung), die eine Problembeschreibung, die <CODE>mplayer -v datei</CODE>
-  Ausgabe und deine email-Adresse enthält!
+  (+ .txt Endung), die eine Problembeschreibung zur jeweiligen Datei, die 
+  detaillierte Ausgabe (-v) von mplayer und deine deine email-Adresse enthält!
   Normalerweise reichen die ersten 1-5MB der Datei aus, um das Problem zu
   reproduzieren, aber als erstes solltest du das ausprobieren:
 <P><CODE>&nbsp;&nbsp;&nbsp;dd if=deinedatei of=kleinedatei bs=1024k count=5</CODE></P>
   (kopiert die ersten 5 MB von 'deinedatei' in die Datei 'kleinedatei')
   Nun versuche es nochmals mit dieser kleinen Datei, wenn der Fehler
   immer noch auftritt reicht es die kleine Datei hochzuladen.<BR>
-  Sende NIE solche Dateien via mail! Lade es herauf und schicke nur den Pfad/
-  Dateinamen der Datei auf den FTP Server.
-  Wenn die Datei im Internet bereits verfügbar ist reicht die _exakte_ URL
+  Sende <STRONG>NIE</STRONG> solche Dateien via mail! Lade es herauf und schicke nur den Pfad/
+  Dateinamen der Datei auf den FTP Server.<BR>
+  Wenn die Datei im Internet bereits verfügbar ist reicht die <STRONG>exakte</STRONG> URL
   aus!
 
-<P><B><I>5. Bei Abstürzen (Speicherverletzung, SIGILL, signal 4 usw.):</I></B></P>
+<P><B><I>Bei Abstürzen</I></B></P>
 
-<P><I>Wenn du ein Speicherabbild (Coredump) vom Absturz besitzt, siehe 5.a,<BR>
-  ansonsten 5.b:</I></P>
+<P><I>Wenn du ein Speicherabbild (core dump) vom Absturz besitzt, lies beim nächsten
+  Paragraph weiter, ansonsten lass ihn aus.</I></P>
 
-<P><B><I>5.a: Bitte gib uns den Coredump aus (sofern er erzeugt wurde).</I></B></P>
+<P><B><I>Wie brauchbare Informationen von einem core dump extrahiert werden können</I></B></P>
 
-<P>Wie:
-Bitte erzeuge die folgende Kommandodatei (Command File):</P>
+<P>Bitte erzeuge die folgende Befehlsdatei (Command File):</P>
 
 <P><CODE>disass $eip-32 $eip+32<BR>
 printf "eax=%08lX\n",$eax<BR>
@@ -141,29 +143,29 @@ printf "edi=%08lX\n",$edi<BR>
 printf "esi=%08lX\n",$esi<BR>
 </CODE></P>
 
-<P>Dann führe einfach den folgenden Befehl aus:</P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=Kommandodatei >mplayer.bug</CODE></P>
+<P>Dann führe einfach den folgenden Befehl auf deiner Kommandozeile aus:</P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=Kommandodatei &gt; mplayer.bug</CODE></P>
 
-<P><B><I>5.b.: Führe MPlayer im gdb (GNU Debugger) aus:</I></B></P>
-<P>Kompiliere <B>MPlayer</B> neu, mit eingeschaltetem debugging:<BR>
-./configure --enable-debug<BR>
-make
-</P>
-<P>[im Root/User Shell Prompt:]<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE># gdb mplayer</CODE><BR>
-[im gdb Prompt:]<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; run -v [Optionen für Mplayer] Dateiname</CODE><BR>
-  ... (warte bis zum Absturz)<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; bt</CODE><BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>&gt; disass $eip-32 $eip+32</CODE><BR>
+<P><B><I>Wie informationen eines reproduzierbaren Absturzes bewahrt werden können</I></B></P>
+<P>Kompiliere MPlayer neu, mit eingeschaltetem debugging:<P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
+lass dann MPlayer mit gdb laufen:
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb mplayer</CODE></P>
+
+<P>Du benutzt nun gdb. Gib folgendes ein:</P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;run -v [Optionen von mplayer] dateiname</code></P>
+und reproduziere deinen Absturz. Sobald du dies getan hast, wird gdb zur Eingabeaufforderung
+zurückkehren, wo folgendes einzugeben hast:<BR>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;disass $eip-32 $eip+32</CODE></P>
 Sende uns die gesamte Ausgabe obiger Dinge!
-</P>
 
-<P><B>Allgemein:</B></P>
+<P><B>Allgemeine Hinweise</B></P>
 
-<P>Wenn etwas sehr groß ist (Log-Dateien usw.) ist es besser es gezippt
+<P>Wenn etwas sehr groß ist (Log-Dateien z.B.) ist es besser diese gezippt
 auf den FTP hochzuladen und nur den Pfad-/Dateinamen im Fehlerbericht
-anzugebeben!</P>
+anzugebeben.</P>
 
 <P><B>Ich weiss was ich mache...</B></P>
 
@@ -171,11 +173,12 @@ anzugebeben!</P>
 das ein Bug in MPlayer, nicht ein Problem mit dem Kompiler oder eine defekte Datei ist kannst
 du auch der mplayer-advusers - Mailingliste betreten und dort posten wenn du die auch alle
 Dokumentation gelesen hast und dein Soundtreiber ok ist. Du wirst schnellere und besser
-Antworten erhalten. Aber SEI GEWARNT: wenn du Newbie- oder Fragen nach dem RTFM-Stil schickst
-wirst du sofort gebannt anstatt das du eine Antwort erhältst. Also ärgere und nicht und trette
-der -advusers-Liste nur bei, wenn du weisst was du machst und du dich wie ein Advanced-MPlayer-User
-oder Entwickler fühlst. (Und bezüglich Subscribe: finde es heraus! Wenn du wirklich ein Advanced-User
-bist sollte das kein Problem für dich sein...)
+Antworten erhalten.<BR><BR>
+Aber sei gewarnt: Wenn du Newbiefragen oder Fragen, welche hier beantwortet wurden, schickst 
+wirst du sofort gebannt anstatt eine Antwort zu erhalten.<BR>
+Also ärgere und nicht und trette der -advusers-Liste nur bei, wenn du weisst was du machst und 
+du dich wie ein Advanced-MPlayer-User oder Entwickler fühlst. Wenn du wirklich ein Advanced-User 
+bist sollte das kein Problem für dich sein zu subscriben...
 </P>
 
 </BODY>

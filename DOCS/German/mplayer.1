@@ -17,6 +17,7 @@ mplayer \- Movie Player für Linux
 .RB [ \-sb\ <byte\ Position> ]
 .RB [ \-nosound ]
 .RB [ \-audiofile\ <Dateiname> ]
+.RB [ \-subfile\ <Dateiname> ]
 .RB [ \-abs\ <bytes> ]
 .RB [ \-delay\ <Sekunden> ]
 .RB [ \-nobps ]
@@ -26,6 +27,7 @@ mplayer \- Movie Player für Linux
 .RB [ \-fps\ <Rate> ]
 .RB [ \-mc\ <Sekunden/5f> ]
 .RB [ \-fs ]
+.RB [ \-dr ]
 .RB [ \-vm ]
 .RB [ \-zoom ]
 .RB [ \-x\ <x> ]
@@ -110,6 +112,13 @@ mplayer \- Movie Player für Linux
 .RB [ \-rootwin ]
 .RB [ \-font\ <Pfad\ zur\ font.desc\ Datei> ]
 .RB [ \-conf\ <Pfad\ zur\ input.conf\ Datei> ]
+.RB [ \-input\ <Kommandos> ]
+.RB [ \-nojoystick ]
+.RB [ \-nolirc ]
+.RB [ \-demuxer\ <Nummer> ]
+.RB [ \-audio-demuxer\ <Nummer> ]
+.RB [ \-sub-demuxer\ <Nummer> ]
+.RB [ \-hr-mp3-seek ]
 .I < - | Datei | URL | Device >
 .PP
 .SH BESCHREIBUNG
@@ -221,6 +230,10 @@ spielt den Ton aus einer externen Datei (MP3, AC3, Vorbis, usw)
 .B \-fs
 Vollbild-Wiedergabe (zentriert den Film und erzeugt schwarze Streifen um den 
 Film)
+.TP                                                                                                            
+.B \-dr
+aktiviert "direct rendering" (nicht von allen Codecs und Videoausgaben unterstützt).
+Standardmässig an.
 .TP
 .B \-vm
 versucht zu einem anderen Videomodus zu wechseln. dga2, x11 (XF86VidMode) und sdl
@@ -686,6 +699,40 @@ Besonders nützlich für langsamen Medien. Standardmässig auf off gestellt.
 .B \-softsleep
 benutzt einen Software-Timer von hoher Qualität. Effizient wie die RTC, benötigt keine root-Rechte,
 braucht jedoch mehr CPU.
+.TP
+.B \-input <Kommandos>
+Diese Option kann verwendet werden, um einige Teile des Eingangssystems zu konfigurieren.
+        conf=<Datei> liest eine alternative input.conf.
+                     Ohne Pfadname wird $HOME/.mplayer 
+                     angenommen.
+        ar-delay     Verzögerung in msec, bevor die automatische
+                     Wiederholung einer Taste erfolgt
+                     (0 um zu deaktivieren)
+        ar-rate      wieviele Tastendrücke/Sekunde, wenn diese
+                     automatisch wiederholt wird
+        keylist      zeigt alle Tasten, welche zugewiesen werden können
+        cmdlist      zeigt alle Befehle, welche zugeweisen werden können
+.TP
+.I HINWEIS
+Die automatische Wiederholung (autorepeat) wird momentan nur von Joysticks unterstützt.
+.TP
+.B \-nojoystick
+deaktiviert die Joystick-Unterstützung. Normalerweise aktiviert, falls mit einkompiliert.
+.TP
+.B \-nolirc
+deaktiviert die lirc-Unterstützung.
+.TP
+.B \-demuxer <Nummer>
+erzwingt den Demuxer Typ. Es muss eine Demuxer ID, welche in demuxers.h definiert ist, angegeben werden.
+.TP
+.B \-audio-demuxer <Nummer>
+erzwingt den Audio demuxer Typ für -audiofile. Es muss eine Demuxer ID, welche in demuxers.h definiert ist, 
+angegeben werden.
+.TP
+.B \-hr-mp3-seek
+MP3 Suche (seeking) mit hoher Auflösung. Normalerweise: aktiviert für die MP3 Wiedergabe. Er sucht genau die Stelle,
+an der er sein soll. Dies kann jedoch langsam sein, vor allem beim Rückwärtssuchen - er muss nämlich bis zum Beginn
+zurückgehen, um das exakte Frame zu finden.
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
@@ -699,6 +746,12 @@ schreibt den Videostream nach ./stream.dump (nur mit MPEG-PS) (nicht sehr benutz
 .TP
 .B \-dapsync
 verwendet eine alternative A/V-Synchronisationsmethode. Wo ist dies nützlich?
+.TP
+.B \-subfile <Dateiname>
+momentan unbrauchbar. Gleich wie -audiofile, jedoch für Untertitel-Streams. (OggDS?)
+.TP
+.B \-sub-demuxer <Nummer>
+erzwingt den Untertitel demuxer Typ für -subfile.
 .IP
 .SH TASTATURKONTROLLE
 .TP

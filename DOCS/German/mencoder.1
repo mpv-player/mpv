@@ -199,12 +199,26 @@ Verfügbare Optionen:
                  (in Frames)
   vhq            sehr hohe Qualität
   vme=XXX        motion estimation Methode
+
+  vqmin=XXX      minimaler Quantizer
+  vqmax=XXX      maximaler Quantizer
+  vqdiff=XXX     Quantizer Differenz. Beschränkt die maximale Quantizer
+                 Quantizer Differenz zwischen Frames.
+  vbt=XXX        angenäherte Bitrate-Toleranz
+  vqcomp=XXX     wenn der Wert auf 1.0 gesetzt wird, bleibt
+                 der Quantizer annährend konstant.
+                 Wenn er auf 0.0 gesetzt wird, wird der
+                 Quantizer geändert, um Frames annöhernd
+                 gleicher Grösse zu erzeugen.
+  vqblur=XXX     verwischt den Quantizer-Graph mit der Zeit (blur).
+                    0.0 : keine Verwischung
+                    1.0 : nimmt den Durchschnitt aller bisheriger Quantizer
 .TP
 .B \-lameopts
 Wenn mit libmp3lame zu MP3 konvertiert wird, kann man dessen Parameter hier 
 angeben, wie:
 
-  -lameopts br=192
+  -lameopts br=192:cbr
 
 Verfügbare Optionen:
 
@@ -215,7 +229,7 @@ Verfügbare Optionen:
     q=XXX        Qualität
                  (0-höchste, 9-schnellste)
                  (für VBR)
-    vbr=XXX      variable Bitrate-Methode
+    vratetol=XXX variable Bitrate-Methode
                    0=cbr
                    1=mt
                    2=rh(standard)
