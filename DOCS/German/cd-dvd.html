@@ -43,7 +43,7 @@ eines CDROM-Laufwerks. Schlecht erzeute CDROMs arbeiten bei einer geringeren
 Abtastrate möglicherweise besser als bei der maximalen. Moderne CDROM-Laufwerke
 können sehr hohe Abtastraten erreichen (bis zu 50-fach ist normal). Es wurde
 berichtet, dass diese Laufwerke bei diesen hohen Geschwindkeiten Lesefehler
-erzeugen; das herabsetzen der Geschwindigkeit kann die Datenverluste verringern.
+erzeugen; das Herabsetzen der Geschwindigkeit kann die Datenverluste verringern.
 Zu guter letzt erzeugen einige dieser Laufwerke störend laute Geräusche, die
 eine niedrigere Geschwindigkeit ebenfalls reduzieren kann.</P>
 
@@ -62,7 +62,7 @@ Verwendung:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 >/proc/ide/[CDROM-Device]/settings</CODE></P>
 
-<P>für 2MB Lesepuffer für die Dateien (nützlich bei zerkratzten CDs).
+<P>für 2MB Lesepuffer für die Daten (nützlich bei zerkratzten CDs).
 Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (CDROM-Device)</CODE></P>
@@ -70,8 +70,7 @@ Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
 <P>um den DMA-Zugriff, Vorauslesen und IRQ-Unmasking zu aktivieren.
 (Wenn du das nicht verstehst *lies die hdparm manpage*)</P>
 
-<P>Bitte schau dir "<CODE>/proc/ide/[CDROM-Gerät]/settings</CODE>" an um das CD-ROM feinein-
-zustellen.</P>
+<P>Bitte schau dir "<CODE>/proc/ide/[CDROM-Gerät]/settings</CODE>" an um das CD-ROM feineinzustellen.</P>
 
 <P><B><A NAME=4.2>4.2. DVD Wiedergabe</A></B></P>
   
