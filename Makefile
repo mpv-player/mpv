@@ -122,9 +122,6 @@ MPLAYER_DEP += Gui/libgui.a
 MENCODER_DEP += Gui/libgui.a
 endif
 
-mplayerwithoutlink: $(MPLAYER_DEP)	
-	@for a in $(PARTS); do $(MAKE) -C $$a all ; done
-
 $(PRG):	$(MPLAYER_DEP)
 	$(CC) -rdynamic $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) -Llibmpdemux -lmpdemux $(XMM_LIBS) $(LIRC_LIBS) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(TERMCAP_LIB) -lm
 
