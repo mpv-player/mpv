@@ -2,7 +2,7 @@
  * (linearly increases difference between L&R channels)
  * 
  * Current limitations:
- *  - only AFMT_S16_LE is supported currently
+ *  - only AFMT_S16_HE is supported currently
  *
  * License: GPLv2 (as a mix of pl_volume.c and 
  *          xmms:stereo_plugin/stereo.c)
@@ -20,6 +20,7 @@
 #include "audio_plugin.h"
 #include "audio_plugin_internal.h"
 #include "afmt.h"
+#include "../config.h"
 
 static ao_info_t info = {
         "Extra stereo plugin",
@@ -57,7 +58,11 @@ static int control(int cmd,int arg){
 // return: 1=success 0=fail
 static int init(){
   switch(ao_plugin_data.format){
+#ifndef WORDS_BIGENDIAN
   case(AFMT_S16_LE):
+#else
+  case(AFMT_S16_BE):
+#endif
     break;
   default:
     fprintf(stderr,"[pl_extrastereo] Audio format not yet suported \n");
@@ -87,7 +92,11 @@ static void reset(){
 static int play(){
 
   switch(pl_extrastereo.format){
+#ifndef WORDS_BIGENDIAN
   case(AFMT_S16_LE): {
+#else
+  case(AFMT_S16_BE): {
+#endif
 
     int16_t* data=(int16_t*)ao_plugin_data.data;
     int len=ao_plugin_data.len / 2; // 16 bits samples
