@@ -84,6 +84,10 @@ typedef struct stream_st {
   // Close
   void (*close)(struct stream_st *s);
 
+// --- align workaround
+  int dummy;
+// --- align workaround
+  
   int fd;   // file descriptor, see man open(2)
   int type; // see STREAMTYPE_*
   int flags;
