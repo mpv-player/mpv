@@ -419,11 +419,10 @@ char* title="MPlayer";
 // screen info:
 char* video_driver=NULL; //"mga"; // default
 int fullscreen=0;
-#ifdef HAVE_XF86VM
 int vidmode=0;
-#endif
-int screen_size_x=SCREEN_SIZE_X;
-int screen_size_y=SCREEN_SIZE_Y;
+int softzoom=0;
+int screen_size_x=0;//SCREEN_SIZE_X;
+int screen_size_y=0;//SCREEN_SIZE_Y;
 int screen_size_xy=0;
 // movie info:
 int movie_size_x=0;
@@ -485,11 +484,11 @@ if(video_driver && strcmp(video_driver,"help")==0){
 
 // check font
   if(font_name){
-       vo_font=read_font_desc(font_name,font_factor);
+       vo_font=read_font_desc(font_name,font_factor,verbose>1);
        if(!vo_font) printf("Can't load font: %s\n",font_name);
   } else {
       // try default:
-       vo_font=read_font_desc(get_path("font/font.desc"),font_factor);
+       vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
   }
 
 // check .sub
@@ -516,13 +515,6 @@ if(video_driver && strcmp(video_driver,"help")==0){
     printf("Invalid video output driver name: %s\n",video_driver);
     return 0;
   }
-
-#ifdef HAVE_XF86VM
-if (!video_driver)
-  vidmode=0;
-else if (strcmp(video_driver,"x11"))
-   vidmode=0;
-#endif
 
 if(!filename){
   if(vcd_track) filename="/dev/cdrom"; 
@@ -1029,12 +1021,6 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
    }
 #endif
 
-#ifdef HAVE_XF86VM
-  if (vidmode) {
-        if ( screen_size_x == SCREEN_SIZE_X ) screen_size_x = 0;
-        if ( screen_size_y == SCREEN_SIZE_Y ) screen_size_y = 0;
-  } else
-#endif
    if(screen_size_xy>0){
      if(screen_size_xy<=8){
        screen_size_x=screen_size_xy*movie_size_x;
@@ -1043,7 +1029,9 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
        screen_size_x=screen_size_xy;
        screen_size_y=screen_size_xy*movie_size_y/movie_size_x;
      }
-   } else {
+   } else if(!vidmode){
+     if(!screen_size_x) screen_size_x=SCREEN_SIZE_X;
+     if(!screen_size_y) screen_size_y=SCREEN_SIZE_Y;
      if(screen_size_x<=8) screen_size_x*=movie_size_x;
      if(screen_size_y<=8) screen_size_y*=movie_size_y;
    }
@@ -1051,14 +1039,16 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
    if(verbose) printf("Destination size: %d x %d  out_fmt=%0X\n",
                       screen_size_x,screen_size_y,out_fmt);
 
-   if(verbose) printf("video_out->init(%dx%d->%dx%d,fs=%d,'%s',0x%X)\n",
+   if(verbose) printf("video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
                       movie_size_x,movie_size_y,
                       screen_size_x,screen_size_y,
-                      fullscreen,title,out_fmt);
+                      fullscreen|(vidmode<<1)|(softzoom<<2),
+                      title,out_fmt);
 
    if(video_out->init(movie_size_x,movie_size_y,
                       screen_size_x,screen_size_y,
-                      fullscreen,title,out_fmt)){
+                      fullscreen|(vidmode<<1)|(softzoom<<2),
+                      title,out_fmt)){
      printf("FATAL: Cannot initialize video driver!\n");exit(1);
    }
    if(verbose) printf("INFO: Video OUT driver init OK!\n");

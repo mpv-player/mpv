@@ -44,14 +44,17 @@ struct config conf[]={
             CONF_TYPE_PRINT, 0, 0, 0},
 	{"pp", &divx_quality, CONF_TYPE_INT, CONF_RANGE, 0, 63},
 	{"br", &encode_bitrate, CONF_TYPE_INT, CONF_RANGE, 10000, 10000000},
+
 	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
 	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
 	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
-#ifdef HAVE_XF86VM
         {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1},
-#endif
+        {"novm", &vidmode, CONF_TYPE_FLAG, 0, 1, 0},
 	{"fs", &fullscreen, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0},
+        {"zoom", &softzoom, CONF_TYPE_FLAG, 0, 0, 1},
+        {"nozoom", &softzoom, CONF_TYPE_FLAG, 0, 1, 0},
+        
 	{"idx", &no_index, CONF_TYPE_FLAG, 0, 1, 0},
 	{"noidx", &no_index, CONF_TYPE_FLAG, 0, 0, 1},
 	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100},
