@@ -22,6 +22,9 @@
 #include <iconv.h>
 char *sub_cp=NULL;
 #endif
+#ifdef USE_FRIBIDI
+#include <fribidi/fribidi.h>
+#endif
 
 /* Maximal length of line of a subtitle */
 #define LINE_LEN 1000
@@ -1012,6 +1015,62 @@ subtitle* subcp_recode1 (subtitle *sub)
 }
 #endif
 
+#ifdef USE_FRIBIDI
+#define ALLOCATE(tp,ln) ((tp *) malloc (sizeof (tp) * (ln)))
+#define max(a,b)  (((a)>(b))?(a):(b))
+subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
+{
+  FriBidiChar logical[LINE_LEN+1], visual[LINE_LEN+1]; // Hopefully these two won't smash the stack
+  char        *ip      = NULL, *op     = NULL;
+  FriBidiCharType base;
+  size_t len,orig_len;
+  int l=sub->lines;
+  int char_set_num;
+  fribidi_boolean log2vis;
+  fribidi_set_mirroring (FRIBIDI_TRUE);
+  fribidi_set_reorder_nsm (FRIBIDI_FALSE);
+   
+  if( sub_utf8 == 0 ) {
+    char_set_num = fribidi_parse_charset ("ISO8859-8");//We might want to make this a config option
+  }else {
+    char_set_num = fribidi_parse_charset ("UTF-8");
+  }
+  while (l) {
+    ip = sub->text[--l];
+    orig_len = len = strlen( ip ); // We assume that we don't use full unicode, only UTF-8 or ISO8859-x
+    if(len > LINE_LEN) {
+      mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: sub->text is longer than LINE_LEN.\n");
+      l++;
+      break;
+    }
+    len = fribidi_charset_to_unicode (char_set_num, ip, len, logical);
+    base = FRIBIDI_TYPE_ON;
+    log2vis = fribidi_log2vis (logical, len, &base,
+			       /* output */
+			       visual, NULL, NULL, NULL);
+    if(log2vis) {
+      len = fribidi_remove_bidi_marks (visual, len, NULL, NULL,
+				       NULL);
+      if((op = ALLOCATE(char,(max(2*orig_len,2*len) + 1))) == NULL) {
+	mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error allocating mem.\n");
+	l++;
+	break;	
+      }
+      fribidi_unicode_to_charset ( char_set_num, visual, len,op);
+      free (ip);
+      sub->text[l] = op;
+    }
+  }
+  if (l){
+    for (l = sub->lines; l;)
+      free (sub->text[--l]);
+    return ERR;
+  }
+  return sub;
+}
+
+#endif
+
 static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block){
 	int n,m;
 	subtitle* nextsub;
@@ -1134,6 +1193,9 @@ subtitle* sub_read_file (char *filename, float fps) {
         if(!sub) break;   // EOF
 #ifdef USE_ICONV
 	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
+#endif
+#ifdef USE_FRIBIDI
+	if (sub!=ERR) sub=sub_fribidi(sub,sub_utf8);
 #endif
 	if ( sub == ERR )
 	 {

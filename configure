@@ -166,6 +166,7 @@ Optional features:
   --disable-new-conf     Disable new experimental config parser code [enabled]
   --enable-menu          Enable osd menu support (needs new config) [disabled]
   --disable-sortsub      Disable subtitles sorting [enabled]
+  --enable-fribidi       Enable using the FriBiDi libs [disabled]
   --disable-macosx       Disable Mac OS X specific features [autodetect]
 
 Codecs:
@@ -293,6 +294,8 @@ Use these options if autodetection fails:
   --with-xmmslibdir=DIR    path to libxmms.so.1
   --with-cdparanoiaincdir=DIR  cdparanoia headers in DIR
   --with-cdparanoialibdir=DIR  cdparanoia libraries (libcdda_*) in DIR
+  --with-fribidi-config=PATH  path to fribidi-config
+                           (e.g. /opt/bin/fribidi-config)
 
 EOF
     exit 0
@@ -1070,6 +1073,8 @@ _qtx_codecs=auto
 _macosx=auto
 _sortsub=yes
 _freetypeconfig='freetype-config'
+_fribidi=no
+_fribidiconfig='fribidi-config'
 
 for ac_option do
   case "$ac_option" in
@@ -1257,6 +1262,9 @@ for ac_option do
   --enable-unrarlib)	_unrarlib=yes	;;
   --disable-unrarlib)	_unrarlib=no	;;
 
+  --enable-fribidi)     _fribidi=yes    ;;
+  --disable-fribidi)    _fribidi=no     ;;
+
   --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
   --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
   --disable-dga) _dga=no ;;
@@ -1374,6 +1382,9 @@ for ac_option do
     ;;
   --with-freetype-config=*)
     _freetypeconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-fribidi-config=*)
+    _fribidiconfig=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --with-gtk-config=*)
     _gtkconfig=`echo $ac_option | cut -d '=' -f 2`
@@ -3789,6 +3800,38 @@ else
 fi
 echores "$_freetype"
 
+
+echocheck "fribidi with charsets"
+if test "$_fribidi" = yes ; then
+    if ( $_fribidiconfig --version ) >/dev/null 2>&1 ; then
+	cat > $TMPC << EOF
+#include <stdio.h>
+#include <fribidi/fribidi.h>
+int main()
+{
+    if(fribidi_parse_charset("UTF-8") != FRIBIDI_CHARSET_UTF8) {
+       printf("Fribidi headers are not consistents with the library!\n");
+       exit(1);
+    }
+    return 0;
+}
+EOF
+	_fribidi=no
+	cc_check `$_fribidiconfig --cflags` `$_fribidiconfig --libs` && ( $TMPO >> "$TMPLOG" ) && _fribidi=yes
+    else
+	_fribidi=no
+    fi
+fi
+if test "$_fribidi" = yes ; then
+    _def_fribidi='#define USE_FRIBIDI'
+    _inc_fribidi=`$_fribidiconfig --cflags`
+    _ld_fribidi=`$_fribidiconfig --libs`
+else
+    _def_fribidi='#undef USE_FRIBIDI'
+fi
+echores "$_fribidi"
+
+
 echocheck "zlib"
 cat > $TMPC << EOF
 #include <zlib.h>
@@ -5044,6 +5087,8 @@ CDPARANOIA_INC = $_inc_cdparanoia
 CDPARANOIA_LIB = $_ld_cdparanoia
 FREETYPE_INC = $_inc_freetype
 FREETYPE_LIB = $_ld_freetype
+FRIBIDI_INC = $_inc_fribidi
+FRIBIDI_LIB = $_ld_fribidi
 LIBLZO_LIB= $_ld_liblzo
 MAD_LIB = $_ld_mad
 VORBIS_LIB = $_ld_vorbis $_ld_libdv
@@ -5437,6 +5482,9 @@ $_def_gif_tvt_hack
 
 /* enable FreeType support */
 $_def_freetype
+
+/* enable FriBiDi usage */
+$_def_fribidi
 
 /* liblzo support */
 $_def_liblzo
