@@ -987,22 +987,20 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 		/* Quantizer mode uses the same plugin, we have only to define
 		 * a constant quantizer zone beginning at frame 0 */
 		if(pass == MODE_QUANT) {
-			int base, incr;
-
-			base = 100;
-			incr = (int)xvidenc_quantizer*base;
+                        XVIDRational squant;
+			squant = xvid_d2q(xvidenc_quantizer,128);
 
 			create->zones[create->num_zones].mode      = XVID_ZONE_QUANT;
 			create->zones[create->num_zones].frame     = 0;
-			create->zones[create->num_zones].base      = base;
-			create->zones[create->num_zones].increment = incr;
+			create->zones[create->num_zones].base      = squant.num;
+			create->zones[create->num_zones].increment = squant.den;
 			create->num_zones++;
 
 			mp_msg(MSGT_MENCODER, MSGL_INFO,
 			       "xvid: Fixed Quant Rate Control -- quantizer=%d/%d=%2.2f\n",
-			       incr,
-			       base,
-			       (float)(incr)/(float)(base));
+			       squant.num,
+			       squant.den,
+			       (float)(squant.num)/(float)(squant.den));
 			
 		} else {
 			mp_msg(MSGT_MENCODER, MSGL_INFO,
