@@ -1298,7 +1298,7 @@ All attempts have failed so far, but patches are welcome.
 I'd like to seek +/- 1 frames instead of 10 seconds.
 </para></question>
 <answer><para>
-You can step forward by pressing <keycap>.</keycap> when the movie is paused.
+You can step forward one frame by pressing <keycap>.</keycap>.
 Stepping backwards is unlikely to be implemented anytime soon.
 </para></answer>
 </qandaentry>
