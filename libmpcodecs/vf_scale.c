@@ -5,6 +5,7 @@
 
 #include "../config.h"
 #include "../mp_msg.h"
+#include "../cpudetect.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -169,7 +170,7 @@ static int config(struct vf_instance_s* vf,
 	    outfmt,
 		  vf->priv->w,vf->priv->h,
 	    best,
-	    int_sws_flags, srcFilter, dstFilter);
+	    int_sws_flags | get_sws_cpuflags(), srcFilter, dstFilter);
     if(!vf->priv->ctx){
 	// error...
 	mp_msg(MSGT_VFILTER,MSGL_WARN,"Couldn't init SwScaler for this setup\n");
@@ -377,6 +378,155 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->w,
     vf->priv->h);
     return 1;
+}
+
+//global sws_flags from the command line
+int sws_flags=2;
+
+//global srcFilter
+SwsFilter src_filter= {NULL, NULL, NULL, NULL};
+
+float sws_lum_gblur= 0.0;
+float sws_chr_gblur= 0.0;
+int sws_chr_vshift= 0;
+int sws_chr_hshift= 0;
+float sws_chr_sharpen= 0.0;
+float sws_lum_sharpen= 0.0;
+
+int get_sws_cpuflags(){
+    return 
+          (gCpuCaps.hasMMX   ? SWS_CPU_CAPS_MMX   : 0)
+	| (gCpuCaps.hasMMX2  ? SWS_CPU_CAPS_MMX2  : 0)
+	| (gCpuCaps.has3DNow ? SWS_CPU_CAPS_3DNOW : 0);
+}
+
+// old global scaler, dont use for new code
+// will use sws_flags from the command line
+void SwScale_YV12slice(unsigned char* src[], int srcStride[], int srcSliceY ,
+			     int srcSliceH, uint8_t* dst[], int dstStride, int dstbpp,
+			     int srcW, int srcH, int dstW, int dstH){
+
+	static struct SwsContext *context=NULL;
+	int dstFormat;
+	int dstStride3[3]= {dstStride, dstStride>>1, dstStride>>1};
+
+	switch(dstbpp)
+	{
+		case 8 : dstFormat= IMGFMT_Y8;		break;
+		case 12: dstFormat= IMGFMT_YV12;	break;
+		case 15: dstFormat= IMGFMT_BGR15;	break;
+		case 16: dstFormat= IMGFMT_BGR16;	break;
+		case 24: dstFormat= IMGFMT_BGR24;	break;
+		case 32: dstFormat= IMGFMT_BGR32;	break;
+		default: return;
+	}
+
+	if(!context) context=sws_getContextFromCmdLine(srcW, srcH, IMGFMT_YV12, dstW, dstH, dstFormat);
+
+	sws_scale(context, src, srcStride, srcSliceY, srcSliceH, dst, dstStride3);
+}
+
+void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, SwsFilter **dstFilterParam)
+{
+	static int firstTime=1;
+	*flags=0;
+
+#ifdef ARCH_X86
+	if(gCpuCaps.hasMMX)
+		asm volatile("emms\n\t"::: "memory"); //FIXME this shouldnt be required but it IS (even for non mmx versions)
+#endif
+	if(firstTime)
+	{
+		firstTime=0;
+		*flags= SWS_PRINT_INFO;
+	}
+	else if(verbose>1) *flags= SWS_PRINT_INFO;
+
+	if(src_filter.lumH) sws_freeVec(src_filter.lumH);
+	if(src_filter.lumV) sws_freeVec(src_filter.lumV);
+	if(src_filter.chrH) sws_freeVec(src_filter.chrH);
+	if(src_filter.chrV) sws_freeVec(src_filter.chrV);
+
+	if(sws_lum_gblur!=0.0){
+		src_filter.lumH= sws_getGaussianVec(sws_lum_gblur, 3.0);
+		src_filter.lumV= sws_getGaussianVec(sws_lum_gblur, 3.0);
+	}else{
+		src_filter.lumH= sws_getIdentityVec();
+		src_filter.lumV= sws_getIdentityVec();
+	}
+
+	if(sws_chr_gblur!=0.0){
+		src_filter.chrH= sws_getGaussianVec(sws_chr_gblur, 3.0);
+		src_filter.chrV= sws_getGaussianVec(sws_chr_gblur, 3.0);
+	}else{
+		src_filter.chrH= sws_getIdentityVec();
+		src_filter.chrV= sws_getIdentityVec();
+	}
+
+	if(sws_chr_sharpen!=0.0){
+		SwsVector *g= sws_getConstVec(-1.0, 3);
+		SwsVector *id= sws_getConstVec(10.0/sws_chr_sharpen, 1);
+		g->coeff[1]=2.0;
+		sws_addVec(id, g);
+		sws_convVec(src_filter.chrH, id);
+		sws_convVec(src_filter.chrV, id);
+		sws_freeVec(g);
+		sws_freeVec(id);
+	}
+
+	if(sws_lum_sharpen!=0.0){
+		SwsVector *g= sws_getConstVec(-1.0, 3);
+		SwsVector *id= sws_getConstVec(10.0/sws_lum_sharpen, 1);
+		g->coeff[1]=2.0;
+		sws_addVec(id, g);
+		sws_convVec(src_filter.lumH, id);
+		sws_convVec(src_filter.lumV, id);
+		sws_freeVec(g);
+		sws_freeVec(id);
+	}
+
+	if(sws_chr_hshift)
+		sws_shiftVec(src_filter.chrH, sws_chr_hshift);
+
+	if(sws_chr_vshift)
+		sws_shiftVec(src_filter.chrV, sws_chr_vshift);
+
+	sws_normalizeVec(src_filter.chrH, 1.0);
+	sws_normalizeVec(src_filter.chrV, 1.0);
+	sws_normalizeVec(src_filter.lumH, 1.0);
+	sws_normalizeVec(src_filter.lumV, 1.0);
+
+	if(verbose > 1) sws_printVec(src_filter.chrH);
+	if(verbose > 1) sws_printVec(src_filter.lumH);
+
+	switch(sws_flags)
+	{
+		case 0: *flags|= SWS_FAST_BILINEAR; break;
+		case 1: *flags|= SWS_BILINEAR; break;
+		case 2: *flags|= SWS_BICUBIC; break;
+		case 3: *flags|= SWS_X; break;
+		case 4: *flags|= SWS_POINT; break;
+		case 5: *flags|= SWS_AREA; break;
+		case 6: *flags|= SWS_BICUBLIN; break;
+		case 7: *flags|= SWS_GAUSS; break;
+		case 8: *flags|= SWS_SINC; break;
+		case 9: *flags|= SWS_LANCZOS; break;
+		case 10:*flags|= SWS_SPLINE; break;
+		default:*flags|= SWS_BILINEAR; break;
+	}
+	
+	*srcFilterParam= &src_filter;
+	*dstFilterParam= NULL;
+}
+
+// will use sws_flags & src_filter (from cmd line)
+struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, int dstW, int dstH, int dstFormat)
+{
+	int flags;
+	SwsFilter *dstFilterParam, *srcFilterParam;
+	sws_getFlagsAndFilterFromCmdLine(&flags, &srcFilterParam, &dstFilterParam);
+
+	return sws_getContext(srcW, srcH, srcFormat, dstW, dstH, dstFormat, flags | get_sws_cpuflags(), srcFilterParam, dstFilterParam);
 }
 
 /// An example of presets usage
