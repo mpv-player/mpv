@@ -41,10 +41,6 @@ static vidix_capability_t vidix_cap;
 static vidix_playback_t   vidix_play;
 static vidix_fourcc_t	  vidix_fourcc;
 
-#define PIXEL_SIZE() ((video_mode_info.BitsPerPixel+7)/8)
-#define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*(pixel_size) )
-#define IMAGE_LINE_SIZE(pixel_size) (image_width*(pixel_size))
-
 int vidix_preinit(const char *drvname,void *server)
 {
   int err;
@@ -130,6 +126,8 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	vidix_play.fourcc = format;
 	vidix_play.capability = vidix_cap.flags; /* every ;) */
 	vidix_play.blend_factor = 0; /* for now */
+	/* display the full picture.
+	   Nick: we could implement here zooming to a specified area -- alex */
 	vidix_play.src.x = vidix_play.src.y = 0;
 	vidix_play.src.w = src_width;
 	vidix_play.src.h = src_height;
@@ -144,14 +142,17 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		return -1;
 	}
 
-	next_frame = 0;
-	if(vo_doublebuffering)
-	    vdlPlaybackFrameSelect(vidix_handler,next_frame);
-	vidix_mem =vidix_play.dga_addr;
+	vidix_mem = vidix_play.dga_addr;
 
-	/*clear the buffer*/
-	memset(vidix_mem + vidix_play.offsets[0],0x80,vidix_play.frame_size*vidix_play.num_frames);
-	return 0;  
+	/* select first frame */
+	next_frame = 0;
+//        vdlPlaybackFrameSelect(vidix_handler,next_frame);
+
+	/* clear every frame with correct address and frame_size */
+	for (i = 0; i < vidix_play.num_frames; i++)
+	    memset(vidix_mem + vidix_play.offsets[i], 0x80,
+		vidix_play.frame_size);
+	return 0;
 }
 
 extern int vo_gamma_brightness;
@@ -167,10 +168,17 @@ static vidix_video_eq_t vid_eq;
 int vidix_start(void)
 {
     int err;
-
-    if(verbose > 1)
+    if((err=vdlPlaybackOn(vidix_handler))!=0)
     {
-	printf("vosub_vidix: vo_gamma_brightness=%i\n"
+	printf("vosub_vidix: Can't start playback: %s\n",strerror(err));
+	return -1;
+    }
+
+    if (vidix_cap.flags & FLAG_EQUALIZER)
+    {
+	if(verbose > 1)
+	{
+	    printf("vosub_vidix: vo_gamma_brightness=%i\n"
 	       "vosub_vidix: vo_gamma_saturation=%i\n"
 	       "vosub_vidix: vo_gamma_contrast=%i\n"
 	       "vosub_vidix: vo_gamma_hue=%i\n"
@@ -184,22 +192,17 @@ int vidix_start(void)
 	       ,vo_gamma_red_intense
 	       ,vo_gamma_green_intense
 	       ,vo_gamma_blue_intense);
+	}
+	vid_eq.brightness = vo_gamma_brightness;
+	vid_eq.saturation = vo_gamma_saturation;
+	vid_eq.contrast = vo_gamma_contrast;
+	vid_eq.hue = vo_gamma_hue;
+	vid_eq.red_intense = vo_gamma_red_intense;
+	vid_eq.green_intense = vo_gamma_green_intense;
+	vid_eq.blue_intense = vo_gamma_blue_intense;
+	vid_eq.flags = VEQ_FLG_ITU_R_BT_601;
+	vdlPlaybackSetEq(vidix_handler,&vid_eq);
     }
-    if((err=vdlPlaybackOn(vidix_handler))!=0)
-    {
-	printf("vosub_vidix: Can't start playback: %s\n",strerror(err));
-	return -1;
-    }
-    
-    vid_eq.brightness = vo_gamma_brightness;
-    vid_eq.saturation = vo_gamma_saturation;
-    vid_eq.contrast = vo_gamma_contrast;
-    vid_eq.hue = vo_gamma_hue;
-    vid_eq.red_intense = vo_gamma_red_intense;
-    vid_eq.green_intense = vo_gamma_green_intense;
-    vid_eq.blue_intense = vo_gamma_blue_intense;
-    vid_eq.flags = VEQ_FLG_ITU_R_BT_601;
-    vdlPlaybackSetEq(vidix_handler,&vid_eq);
     return 0;
 }
 
@@ -229,7 +232,7 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
     int i;
     apitch = vidix_play.dest.pitch.y-1;
     bespitch = (w + apitch) & ~apitch;
-
+    
     dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
     dest += bespitch*y + x;
     src = image[0];
@@ -371,12 +374,14 @@ uint32_t vidix_query_fourcc(uint32_t format)
   if(verbose > 1) printf("vosub_vidix: query_format was called: %x (%s)\n",format,vo_format_name(format));
   vidix_fourcc.fourcc = format;
   vdlQueryFourcc(vidix_handler,&vidix_fourcc);
-  return vidix_fourcc.depth != VID_DEPTH_NONE;
+  if (vidix_fourcc.depth == VID_DEPTH_NONE)
+    return(0);
+  return(0x2); /* hw support without conversion */
 }
 
 int vidix_grkey_support(void)
 {
-    return (vidix_fourcc.flags & VID_CAP_COLORKEY);
+    return(vidix_fourcc.flags & VID_CAP_COLORKEY);
 }
 
 int vidix_grkey_get(vidix_grkey_t *gr_key)
