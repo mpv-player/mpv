@@ -588,12 +588,13 @@ Display one frame every <sec> seconds.
 Useful for slideshows.
 .TP
 .B \-use-stdin
-Standard input will be used to read data instead of key events.
-If you open /dev/stdin (or the equivalent on your system), use stdin
+Prevent MPlayer from reading key events from standard input.
+Useful when reading data from standard input.
+This is automatically enabled when \- is found on the command line.
+There are situations where you have to set it manually, e.g.
+if you open /dev/stdin (or the equivalent on your system), use stdin
 in a playlist or intend to read from stdin later on via the loadfile or
-loadlist slave commands you
-.B need
-this option.
+loadlist slave commands.
 .
 .
 .SH "DEMUXER/STREAM OPTIONS"
