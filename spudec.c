@@ -206,6 +206,9 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
       case 0x00:
 	/* Menu ID, 1 byte */
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Menu ID\n");
+        /* shouldn't a Menu ID type force display start? */
+	//this->start_pts = pts100 + date;
+	//this->end_pts = UINT_MAX;
 	break;
       case 0x01:
 	/* Start display */
@@ -651,6 +654,18 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 		   spu->scaled_image, spu->scaled_aimage, spu->scaled_stride);
     }
   }
+  else
+  {
+    mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPU not displayed: start_pts=%d  end_pts=%d  now_pts=%d\n",
+        spu->start_pts, spu->end_pts, spu->now_pts);
+  }
+}
+
+void spudec_update_palette(void * this, unsigned int *palette)
+{
+  spudec_handle_t *spu = (spudec_handle_t *) this;
+  if (spu && palette)
+    memcpy(spu->global_palette, palette, sizeof(spu->global_palette));
 }
 
 void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigned int frame_height)
