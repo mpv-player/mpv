@@ -43,13 +43,7 @@ draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y
 	bespitch = (mga_vid_config.src_width + 31) & ~31;
 
 	dest = vid_data + bespitch*y + x;
-        src = image[0];
-	for(h=0; h < height; h++) 
-	{
-		memcpy(dest, src, width);
-		src += stride[0];
-		dest += bespitch;
-	}
+	mem2agpcpy_pic(dest, image[0], width, height, bespitch, stride[0]);
 
         width/=2;height/=2;x/=2;y/=2;
 
@@ -121,38 +115,32 @@ draw_slice_g400(uint8_t *image[], int stride[], int w,int h,int x,int y)
     bespitch2 = bespitch/2;
 
     dest = vid_data + bespitch * y + x;
-    src = image[0];
-    for(i=0;i<h;i++){
-        memcpy(dest,src,w);
-        src+=stride[0];
-        dest += bespitch;
-    }
+    mem2agpcpy_pic(dest, image[0], w, h, bespitch, stride[0]);
     
     w/=2;h/=2;x/=2;y/=2;
     
     dest = vid_data + bespitch*mga_vid_config.src_height + bespitch2 * y + x;
-    src = image[1];
-    for(i=0;i<h;i++){
-        memcpy(dest,src,w);
-        src+=stride[1];
-        dest += bespitch2;
-    }
+    mem2agpcpy_pic(dest, image[1], w, h, bespitch2, stride[1]);
 
     dest = vid_data + bespitch*mga_vid_config.src_height
                     + bespitch*mga_vid_config.src_height / 4 
                     + bespitch2 * y + x;
-    src = image[2];
-    for(i=0;i<h;i++){
-        memcpy(dest,src,w);
-        src+=stride[2];
-        dest += bespitch2;
-    }
+    mem2agpcpy_pic(dest, image[2], w, h, bespitch2, stride[2]);
 
 }
 
 static uint32_t
 draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
+
+#if 0
+	printf("vo: %p/%d %p/%d %p/%d  %dx%d/%d;%d  \n",
+	    src[0],stride[0],
+	    src[1],stride[1],
+	    src[2],stride[2],
+	    w,h,x,y);
+#endif
+
 	if (mga_vid_config.card_type == MGA_G200)
             draw_slice_g200(src,stride,w,h,x,y);
 	else
@@ -178,22 +166,10 @@ vo_mga_flip_page(void)
 static void
 write_frame_yuy2(uint8_t *y)
 {
-	uint8_t *dest;
-	uint32_t bespitch,h;
         int len=2*mga_vid_config.src_width;
+	uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
 
-	dest = vid_data;
-	bespitch = (mga_vid_config.src_width + 31) & ~31;
-        
-//        y+=2*mga_vid_config.src_width*mga_vid_config.src_height;
-
-	for(h=0; h < mga_vid_config.src_height; h++) 
-	{
-//		y -= 2*mga_vid_config.src_width;
-		memcpy(dest, y, len);
-		y += len;
-		dest += 2*bespitch;
-	}
+	mem2agpcpy_pic(vid_data, y, len, mga_vid_config.src_height, 2*bespitch, len);
 }
 
 
@@ -202,7 +178,6 @@ draw_frame(uint8_t *src[])
 {
     switch(mga_vid_config.format){
     case MGA_VID_FORMAT_YUY2:
-        write_frame_yuy2(src[0]);break;
     case MGA_VID_FORMAT_UYVY:
         write_frame_yuy2(src[0]);break;
     }
