@@ -1931,7 +1931,8 @@ static HRSRC WINAPI expFindResourceA(HMODULE module, char* name, char* type)
     HRSRC result;
 
     result=FindResourceA(module, name, type);
-    dbgprintf("FindResourceA(module 0x%x, name 0x%x(%s), type 0x%x(%s)) => 0x%x\n", module, HIWORD(name) ? name : "UNICODE", HIWORD(type) ? type : "UNICODE", result);
+    dbgprintf("FindResourceA(module 0x%x, name 0x%x(%s), type 0x%x(%s)) => 0x%x\n",
+	module, name, HIWORD(name) ? name : "UNICODE", type, HIWORD(type) ? type : "UNICODE", result);
     return result;
 }
 
