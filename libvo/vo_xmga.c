@@ -280,6 +280,11 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
    xWAttribs.event_mask=StructureNotifyMask | ExposureMask | KeyPressMask;
    xswamask=CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
+    if ( WinID>=0 ){
+      mWindow = WinID ? ((Window)WinID) : RootWindow(mDisplay,mScreen);
+      XUnmapWindow( mDisplay,mWindow );
+      XChangeWindowAttributes( mDisplay,mWindow,xswamask,&xWAttribs);
+    } else 
    mWindow=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
      wndX,wndY,
      wndWidth,wndHeight,
