@@ -87,11 +87,11 @@
   <itemizedlist>
   <listitem>
     <para>опции <option>-ni</option> или <option>-nobps</option> option (для
-    неслоеных или плохих файлов)</para>
+    не слоёных или плохих файлов)</para>
     <para>и/или</para>
   </listitem>
   <listitem>
-    <para><option>-mc 0</option>(требуется для файлов с плохо прослоенным VBR
+    <para><option>-mc 0</option>(требуется для файлов с плохо прослоённым VBR
 	аудио)</para>
     <para>и/или</para>
   </listitem>
@@ -128,7 +128,7 @@
 </sect2>
 
 <sect2 id="bugs-nopicture">
-<title>Вообще нет изображения (только простой серое/зеленое окно)</title>
+<title>Вообще нет изображения (только простой серое/зелёное окно)</title>
 <itemizedlist>
 <listitem>
 <para>Ваш файл использует не поддерживаемый видео кодек</para>
@@ -143,7 +143,7 @@
 <listitem>
 <para>
 Вы пытаетесь проиграть DivX 3.x файл, используя OpenDivX декодер или XviD
-(<option>-vc odivx</option>) - установите Divx4Linux и перекомпилируйте плейер
+(<option>-vc odivx</option>) - установите Divx4Linux и перекомпилируйте плеер
 </para>
 </listitem>
 </itemizedlist>
@@ -169,7 +169,7 @@
 </formalpara>
 
 <formalpara>
-<title>зеленое изображение при использовании mga_vid (<option>-vo mga</option>
+<title>зелёное изображение при использовании mga_vid (<option>-vo mga</option>
 / <option>-vo xmga</option>)</title>
 <para>
 <itemizedlist>

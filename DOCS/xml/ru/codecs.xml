@@ -68,7 +68,7 @@
 </itemizedlist>
 
 <para>
-Если у Вас есть не упомянутый здесь Win32 кодек, который еще не поддерживается,
+Если у Вас есть не упомянутый здесь Win32 кодек, который ещё не поддерживается,
 пожалуйста, прочтите <link linkend="win32-codecs">Как добавить кодек [codec
 importing HOWTO]</link> и помогите нам добавить для него поддержку.
 </para>
@@ -102,8 +102,8 @@ DivX4 работает в двух режимах:
 <variablelist>
 <varlistentry><term><option>-vc odivx</option></term>
 <listitem><simpara>
-  Использовать кодек в манере OpenDivX. В этом случае, он выдает YV12
-  изображения в своем собственном буфере, и <application>MPlayer</application>
+  Использовать кодек в манере OpenDivX. В этом случае, он выдаёт YV12
+  изображения в своём собственном буфере, и <application>MPlayer</application>
   сам изменяет пространство цветов через libvo. (<emphasis role="bold">Быстро,
   рекомендуется!</emphasis>)
   </simpara></listitem>
@@ -119,7 +119,7 @@ DivX4 работает в двух режимах:
 
 <para>
 Метод <option>-vc odivx</option> обычно быстрее, поскольку при этом изображение
-передается в YV12 формате (линейный YUV 4:2:0), и поэтому требуется много
+передаётся в YV12 формате (линейный YUV 4:2:0), и поэтому требуется много
 меньшая пропускная способность шины. Для упакованных YUV режимов (YUY2, UYVY)
 используйте метод <option>-vc divx4</option>. В RGB режимах скорость - такая же,
 различаясь в лучшем случае из-за текущей глубины цвета.
@@ -163,7 +163,7 @@ cp ../../src/decore.h /usr/local/include
 </para></step>
 <step><para>
 К сожалению, для библиотеки encore Linux'ового Makefile нет, и MMX оптимизированный
-код работает только под Windows. Вы все же можете скомпилировать ее, используя этот
+код работает только под Windows. Вы все же можете скомпилировать её, используя этот
 <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</ulink>.
 <screen>
 cd ../../../encore/build
@@ -197,7 +197,7 @@ cp ../../src/encore.h /usr/local/include
 с <emphasis role="bold">открытым исходным кодом</emphasis>, который способен
 декодировать потоки, закодированные H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV
 видео , или WMA (Windows Media Audio) аудио кодеками. Кроме того, с некоторыми
-из них можно еще и закодировать, причем этот пакет быстрее, чем Win32 кодеки или
+из них можно ещё и закодировать, причём этот пакет быстрее, чем Win32 кодеки или
 DivX.com DivX4/5 библиотека!
 </para>
 
@@ -242,7 +242,7 @@ FFmpeg <emphasis role="bold">не</emphasis> работают с
 <application>MPlayer</application> из CVS содержит подкаталог
 <filename>libavcodec</filename>, но он <emphasis role="bold">не</emphasis>
 содержит исходный код для libavcodec! Вы должны следовать указаниям,
-приведенным выше, чтобы получить исходный код этой библиотеки.
+приведённым выше, чтобы получить исходный код этой библиотеки.
 </para>
 </note>
 
@@ -264,7 +264,7 @@ FFmpeg <emphasis role="bold">не</emphasis> работают с
 <!--- XXX Find a better translation: However, the XAnim
 author has yet to bring legal action against anyone for codec-related issues.
 -->
-Тем не менее, автор XAnim'а еще должен еще произвести юридические действия по
+Тем не менее, автор XAnim'а ещё должен ещё произвести юридические действия по
 относящимся к кодекам вопросам.
 </para>
 </note>
@@ -335,7 +335,7 @@ h263.</emphasis>
 <title>MPEG 1/2 видео</title>
 <para>
 MPEG1 и MPEG2 декодируются многоплатформенной "родной" библиотекой <systemitem
-class="library">libmpeg2</systemitem>, исходный код которой включен в
+class="library">libmpeg2</systemitem>, исходный код которой включён в
 <application>MPlayer</application>.  Мы обрабатываем плохое MPEG 1/2 видео,
 перехватывая <systemitem>Сигнал 11</systemitem>
 (<systemitem>segmentation fault[ошибка сегментации]</systemitem>), и быстро
@@ -651,7 +651,7 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 </para>
 
 <para>
-Чтобы включить ее поддержку, компилируйте с опцией configure
+Чтобы включить её поддержку, компилируйте с опцией configure
 <option>--enable-mad</option>.
 </para>
 </sect3>
@@ -721,7 +721,7 @@ AAC (Advanced Audio Coding) - это кодек, иногда обнаруживаемый в MOV и MP4
 <ulink url="http://www.audiocoding.com"/>. Вы можете скачать кодек второго
 поколения - FAAD2 на их <ulink url="http://www.audiocoding.com/download.php">
 странице скачивания</ulink>. К сожалению, FAAD2 1.1 не компилируется под Linux,
-поэтому Вам придется использовать CVS версию. И вот как:
+поэтому Вам примется использовать CVS версию. И вот как:
 <screen>
 cvs -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac login
 cvs -z3 -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac co faad2
@@ -822,14 +822,14 @@ DirectShow - это более новый Video API, которые даже хуже, чем его предшественни
   В меню выберите Graph -> Insert Filters.
   </para></step>
 <step><para>
-  Щелкните <systemitem>DirectShow Filters</systemitem>
+  Щёлкните <systemitem>DirectShow Filters</systemitem>
   </para></step>
 <step><para>
-  Выберите нужное имя кодека и щелкните по нему.
+  Выберите нужное имя кодека и щёлкните по нему.
   </para></step>
 <step><para>
   В поле <systemitem>DisplayName</systemitem> обратите внимание на текст в
-  фигурных скобках после обратного слэша и выпишете их (пять разделенных
+  фигурных скобках после обратного слэша и выпишете их (пять разделённых
   дефисами блоков, GUID).
   </para></step>
 <step><para>
@@ -879,7 +879,7 @@ DirectShow - это более новый Video API, которые даже хуже, чем его предшественни
 
 <note>
 <para>
-Если поиск не удается, попробуйте включить все галочки. Вы можете получить
+Если поиск не удаётся, попробуйте включить все галочки. Вы можете получить
 ложные значения, но Вам может повести...
 </para>
 </note>

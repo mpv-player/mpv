@@ -24,7 +24,7 @@ Quoting HOWTO [КАК цитировать]</ulink>.
 <listitem><para>
 Рассылка разработчиков MPlayer'а:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"/>
-Это рассылка о разработке MPlayer'а! Разговор ведется о изменениях в
+Это рассылка о разработке MPlayer'а! Разговор ведётся о изменениях в
 интерфейсе/API, новых библиотеках, оптимизации кода, изменениях в конфигурации.
 Присылайте сюда патчи, а не сообщения об ошибках, вопросы пользователей, запросы
 новых возможностей, чтобы сохранить низким трафик.
@@ -78,7 +78,7 @@ Quoting HOWTO [КАК цитировать]</ulink>.
 <listitem><para>
 Пользователи MPlayer &amp; DVB карты:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"/>
-Вещи связанные с аппаратнодекодирующей картой, называемой DVB (не
+Вещи связанные с аппаратно декодирующей картой, называемой DVB (не
   <emphasis role="bold">DXR3</emphasis>!).
 </para></listitem>
 <listitem><para>
