@@ -40,6 +40,7 @@ clean:
 
 	# commands to clean up after the build process.
 	-$(MAKE) distclean
+	rm -f help_mp.h config.h config.mak libao2/config.mak libvo/config.mak Gui/config.mak
 	dh_clean
 
 # Build architecture-independent files here.
@@ -61,7 +62,7 @@ binary-arch: build
 
 	dh_installdebconf	
 	dh_installdocs --exclude=CVS --exclude=mplayer.1 DOCS/*
-	dh_installexamples etc/example.conf
+	dh_installexamples etc/example.conf etc/dvb-menu.conf etc/input.conf etc/menu.conf
 	dh_installmenu
 #	dh_installmime
 	dh_installinfo
