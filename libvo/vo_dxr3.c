@@ -56,10 +56,6 @@ static int fd_video = -1;
 static int fd_spu = -1;
 static int ioval = 0;
 
-struct {
-    int se_version;
-} conf_s;
-
 static vo_info_t vo_info = 
 {
 	"DXR3/H+ video out",
@@ -72,25 +68,17 @@ static vo_info_t vo_info =
 void write_dxr3( rte_context* context, void* data, size_t size, void* user_data )
 {
     size_t data_left = size;
-    if(!conf_s.se_version) if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&vo_pts) < 0)
+    if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&vo_pts) < 0)
 	    printf( "VO: [dxr3] Unable to set pts\n" );
     while( data_left )
 	data_left -= write( fd_video, (void*) data+(size-data_left), data_left );
 }
 #endif
 
-void parseconfig( )
-{
-    conf_s.se_version = 0;
-    if(vo_subdevice == NULL) return;
-    conf_s.se_version = 1;
-}
-
 static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
 {
     int tmp1,tmp2;
     
-    parseconfig();
     fd_control = open( "/dev/em8300", O_WRONLY );
     if( fd_control < 1 )
     {
@@ -111,11 +99,6 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	return -1;
     }
     
-    if(!conf_s.se_version)
-	printf( "VO: [dxr3] Using hardware sync\n" );
-    else
-	printf( "VO: [dxr3] Using software sync\n" );
-
     /* Subpic code isn't working yet, don't set to ON 
        unless you are really sure what you are doing */
     ioval = EM8300_SPUMODE_OFF;
@@ -307,7 +290,7 @@ static uint32_t draw_frame(uint8_t * src[])
 	vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
         size_t data_left = p->size;
 
-	if(!conf_s.se_version) if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&vo_pts) < 0)
+	if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&p->timestamp) < 0)
 	    printf( "VO: [dxr3] Unable to set pts\n" );
 
 	while( data_left )
@@ -426,7 +409,6 @@ query_format(uint32_t format)
 #else
     else printf( "VO: [dxr3] You have disabled libmp1e support, you won't be able to play this format!\n" );
 #endif
-    if(!conf_s.se_version && flag) flag |= 256;
     return flag;
 }
 
