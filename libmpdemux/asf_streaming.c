@@ -502,11 +502,11 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 			return NULL;
 		}
 		http_set_uri( http_hdr, server_url->url );
-		sprintf( str, "Host: %s:%d", server_url->hostname, server_url->port );
+		sprintf( str, "Host: %.220s:%d", server_url->hostname, server_url->port );
 		url_free( server_url );
 	} else {
 		http_set_uri( http_hdr, url->file );
-		sprintf( str, "Host: %s:%d", url->hostname, url->port );
+		sprintf( str, "Host: %.220s:%d", url->hostname, url->port );
 	}
 	
 	http_set_field( http_hdr, str );
