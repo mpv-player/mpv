@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.29  2001/07/16 18:41:52  jkeil
+ * vo_dga doesn't compile on non-x86 architecture due to x86 asm usage.
+ *
  * Revision 1.28  2001/07/03 23:45:49  arpi
  * extern vo_doublebuffering cleanup
  *
@@ -126,6 +129,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 
 #include "config.h"
@@ -336,12 +340,16 @@ static Display  *vo_dga_dpy;
 #define VD_RES   1
 
 void vd_printf( int level, const char *str, ...){
-  
+  va_list ap;
+
 #ifndef VO_DGA_DBG
   // show resolution and DBG-messages only in verbose mode ...
   if( !verbose && level)return;         
 #endif
-  vprintf( str, (&str)+1 );
+  
+  va_start(ap, str);
+  vprintf(str, ap);
+  va_end(ap);
 }
 
 //---------------------------------------------------------
@@ -430,8 +438,9 @@ static uint32_t draw_frame( uint8_t *src[] ){
   switch(SRC_MODE.vdm_conversion_func){
   case VDM_CONV_NATIVE:
 
-#ifdef HAVE_MMX
-    // use the code from fastmemcpy.h
+#if defined(HAVE_MMX) || !defined(ARCH_X86)
+    // use the code from fastmemcpy.h on x86,
+    // or ordinary memcpy on non-x86 cpus.
     if(vo_dga_vp_skip){
       // use some stride ...
       int i;
@@ -445,7 +454,7 @@ static uint32_t draw_frame( uint8_t *src[] ){
       // no stride, cool + fast ...
       memcpy(d,s, vo_dga_bytes_per_line * vo_dga_lines);
     }	  
-#else
+#else /* ARCH_X86 and NO_MMX */
     // use some homebrewn assembly code ...
     rep_movsl(d, s, lpl, vo_dga_vp_skip, numlines );
 #endif
