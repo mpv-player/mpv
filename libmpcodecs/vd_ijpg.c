@@ -133,6 +133,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
  if ( len <= 0 ) return NULL; // skipped frame
 
+ cinfo.err=jpeg_std_error( &jerr.pub );
+ jerr.pub.error_exit=my_error_exit;
  if( setjmp( jerr.setjmp_buffer ) )
   {
    mp_msg( MSGT_DECVIDEO,MSGL_ERR,"[ijpg] setjmp error ...\n" );
