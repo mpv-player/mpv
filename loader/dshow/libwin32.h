@@ -88,6 +88,8 @@ struct IAudioEncoder
 	CAP_UYVY = 8,
 	CAP_YVYU = 16,
 	CAP_I420 = 32,
+	CAP_YVU9 = 64,
+	CAP_IF09 = 128,
     };
     enum DecodingMode
     {
@@ -230,7 +232,7 @@ struct IRtConfig
 #define fccVCR2 mmioFOURCC('V', 'C', 'R', '2')
 #define fccVCR1 mmioFOURCC('V', 'C', 'R', '1')
 #define fccVYUY mmioFOURCC('V', 'Y', 'U', 'Y')
-#define fccYVU9 mmioFOURCC('I', 'Y', 'U', '9')
+#define fccIYU9 mmioFOURCC('I', 'Y', 'U', '9') // it was defined as fccYVU9
 
 /* Asus codecs */
 #define fccASV1 mmioFOURCC('A', 'S', 'V', '1')
@@ -255,5 +257,7 @@ struct IRtConfig
 #define fccIYUV mmioFOURCC('I', 'Y', 'U', 'V')/* Planar mode: Y + U + V  (3 planes) */
 #define fccUYVY mmioFOURCC('U', 'Y', 'V', 'Y')/* Packed mode: U0+Y0+V0+Y1 (1 plane) */
 #define fccYVYU mmioFOURCC('Y', 'V', 'Y', 'U')/* Packed mode: Y0+V0+Y1+U0 (1 plane) */
+#define fccYVU9 mmioFOURCC('Y', 'V', 'U', '9')/* Planar 4:1:0 */
+#define fccIF09 mmioFOURCC('I', 'F', '0', '9')/* Planar 4:1:0 + delta */
 
 #endif

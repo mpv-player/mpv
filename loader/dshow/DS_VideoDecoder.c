@@ -74,9 +74,10 @@ static ct check[] = {
 		{12, fccIYUV, &MEDIASUBTYPE_IYUV, CAP_IYUV},
 		{16, fccUYVY, &MEDIASUBTYPE_UYVY, CAP_UYVY},
 		{12, fccYV12, &MEDIASUBTYPE_YV12, CAP_YV12},
-		{16, fccYV12, &MEDIASUBTYPE_YV12, CAP_YV12},
+		//{16, fccYV12, &MEDIASUBTYPE_YV12, CAP_YV12},
 		{16, fccYVYU, &MEDIASUBTYPE_YVYU, CAP_YVYU},
-		//{12, fccI420, &MEDIASUBTYPE_I420, CAP_I420},
+		{12, fccI420, &MEDIASUBTYPE_I420, CAP_I420},
+		{9,  fccYVU9, &MEDIASUBTYPE_YVU9, CAP_YVU9},
 		{0},
 	    };
 
@@ -192,6 +193,7 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
 
 	switch (this->iv.m_bh->biCompression)
 	{
+#if 0
 	case fccDIV3:
 	case fccDIV4:
 	case fccDIV5:
@@ -206,10 +208,12 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
 	    //m_Caps = CAP_I420;
 	    this->m_Caps = (CAP_YUY2 | CAP_UYVY);
 	    break;
+#endif
 	default:
               
 	    this->m_Caps = CAP_NONE;
 
+	    printf("Decoder supports the following YUV formats: ");
 	    for (c = check; c->bits; c++)
 	    {
 		this->m_sVhdr2->bmiHeader.biBitCount = c->bits;
@@ -217,12 +221,16 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
 		this->m_sDestType.subtype = *c->subtype;
 		result = this->m_pDS_Filter->m_pOutputPin->vt->QueryAccept(this->m_pDS_Filter->m_pOutputPin, &this->m_sDestType);
 		if (!result)
+		{
 		    this->m_Caps = (this->m_Caps | c->cap);
+		    printf("%.4s ", &c->fcc);
+		}
 	    }
+	    printf("\n");
 	}
 
 	if (this->m_Caps != CAP_NONE)
-	    printf("Decoder is capable of YUV output ( flags 0x%x)\n", (int)this->m_Caps);
+	    printf("Decoder is capable of YUV output (flags 0x%x)\n", (int)this->m_Caps);
 
 	this->m_sVhdr2->bmiHeader.biBitCount = 24;
 	this->m_sVhdr2->bmiHeader.biCompression = 0;
@@ -480,12 +488,17 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp
 	case fccIYUV:
 	    this->m_sDestType.subtype = MEDIASUBTYPE_IYUV;
 	    break;
+	case fccI420:
+	    this->m_sDestType.subtype = MEDIASUBTYPE_I420;
+	    break;
 	case fccUYVY:
 	    this->m_sDestType.subtype = MEDIASUBTYPE_UYVY;
 	    break;
 	case fccYVYU:
 	    this->m_sDestType.subtype = MEDIASUBTYPE_YVYU;
 	    break;
+	case fccYVU9:
+	    this->m_sDestType.subtype = MEDIASUBTYPE_YVU9;
 	default:
 	    ok = false;
             break;
@@ -524,12 +537,20 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp
 	if(!(this->m_Caps & CAP_IYUV))
 	    should_test=false;
 	break;
+    case fccI420:
+	if(!(this->m_Caps & CAP_I420))
+	    should_test=false;
+	break;
     case fccUYVY:
 	if(!(this->m_Caps & CAP_UYVY))
 	    should_test=false;
 	break;
     case fccYVYU:
 	if(!(this->m_Caps & CAP_YVYU))
+	    should_test=false;
+	break;
+    case fccYVU9:
+	if(!(this->m_Caps & CAP_YVU9))
 	    should_test=false;
 	break;
     }
