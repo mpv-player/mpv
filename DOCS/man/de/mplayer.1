@@ -3801,7 +3801,8 @@ Parameter auf die Standardausgabe aus.
 .PD 0
 .RSs
 .IPs Limit
-Schwellwert, der optional angegeben werden kann als nichts (0) bis hin zu allem
+Schwellenwert, der optional angegeben werden kann als nichts (0) bis hin zu
+allem
 (255) (Standard: 24).
 .br
 .IPs Rundung
@@ -4076,9 +4077,9 @@ einfacher Nachbearbeitungsfilter
 .IPs qp\ \ \ 
 Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 .IPs Modus\ \ \ 
-0: harter Schwellwert (Standard)
+0: harter Schwellenwert (Standard)
 .br
-1: weicher Schwellwert (bessere Entschärfung, aber unschärfer)
+1: weicher Schwellenwert (bessere Entschärfung, aber unschärfer)
 .RE
 .
 .TP
@@ -4128,7 +4129,8 @@ beizubehalten.
 Nützlich nur in Verbindung mit expand und scale.
 .RSs
 .IPs Verhältnis
-Kontrolliere das Seitenverhältnis, berechnet durch DVB_HÖHE*VERHÄLTNIS (Standard:
+Kontrolliere das Seitenverhältnis, berechnet durch DVB_HÖHE*VERHÄLTNIS
+(Standard:
 576*4/\:3=768), setze auf 576*(16/\:9)=1024 für einen 16:9-Fernseher.
 .RE
 .sp 1
@@ -4281,69 +4283,227 @@ Das Argument max (falls positiv) setzt eine obere Grenze für die Anzahl
 aufeinanderfolgender Frames, die weggelassen werden können, sonst (falls
 negativ) das kleinste Intervall zwischen weggelassenen Frames.
 Ein Frame ist Kanditat dafür, weggelassen zu werden, falls keine 8x8-Region
-sich mehr unterscheidet als der Schwellwert hi angibt und falls sich nicht
+sich mehr unterscheidet als der Schwellenwert hi angibt und falls sich nicht
 mehr als der Anteil frac angibt (wobei 1 das ganze Bild bedeutet) vom
-Schwellwert lo unterscheidet.
+Schwellenwert lo unterscheidet.
 Werte für hi und lo beziehen sich auf 8x8-Pixelblöcke und repräsentieren
 aktuelle Unterschiede der Pixelwerte.
-Ein Schwellwert von 64 entspricht einer Einheit im Unterschied für jeden
+Ein Schwellenwert von 64 entspricht einer Einheit im Unterschied für jeden
 Pixel oder derselben unterschiedlichen Ausbreitung über einen Block.
 Die Hauptanwendung für diesen Filter ist die Encodierung bei sehr niedrigen
 Bitraten (z.B.\& Streaming über eine Modemverbindung), er kann aber
-theoretisch auch dazu benutzt werden, um Filme zu reparieren, mit
+theoretisch auch dazu benutzt werden, um Filme zu reparieren, die mit
 inversed-telecine fehlerhaft encodiert worden sind.
 .
 .TP
-.\" manpage is synced down to this option.
 .B dint[=sense:level]
 Erkennt interlaced Bilder im Videostream und verwirft jeweils das erste.
-Die Werte können zwischen 0.0 und 1.0 liegen. Der erste Wert (Standard: 0.1)
-ist die relative Differenz zwischen benachbarten Pixeln. Der zweite Wert
-(Standard: 0.15) gibt an, wieviel des Bildes als interlaced erkannt werden
-muss, damit das Bild verworfen wird.
-.IPs lavcdeint
-Benutzt den Deinterlace-Filter von libavcodec.
-.IPs "unsharp=l|cWxH:Menge[:l|cWxH:Menge]"
+Die Werte können zwischen 0.0 und 1.0 liegen.
+Der erste Wert (Standard: 0.1) ist die relative Differenz zwischen benachbarten
+Pixeln, der zweite Wert (Standard: 0.15) gibt an, wieviel des Bildes als
+interlaced erkannt werden muss, damit das Bild verworfen wird.
+.
+.TP
+.B lavcdeint
+Deinterlace-Filter von libavcodec.
+.
+.TP
+.B kerndeint[=thresh[:map[:order[:sharp[:twoway]]]]]
+Donald Grafts adaptiver Kernel-Deinterlacer.
+Führt ein Deinterlacing von Teilen des Videos durch, falls ein
+wählbarer Schwellenwert überschritten wird.
+.PD 0
+.RSs
+.IPs "thresh (0 \- 255)"
+Schwellenwert (Standard 10).
+.IPs "map (0 oder 1)"
+Färbt Pixel, die den Schwellenwert überschreiten, weiß (Standard: 0).
+.IPs "order (0 oder 1)"
+Tauscht Felder falls 1 (Standard: 0).
+.IPs "sharp (0 oder 1)"
+Fügt zusätzlich Schärfe hinzu (Standard: 0).
+.IPs "twoway (0 oder 1)"
+Aktiviert zwei-Wege-Schärfung (Standard: 0).
+.RE
+.PD 1
+.
+.TP
+.B "unsharp=l|cBxH:Menge[:l|cWxH:Menge]"
 Unschärfefilter / Gaußscher Weichzeichner
-.RSss
-l: Effektanwendung beim Helligkeitsanteil
-.br
-c: Effektanwendung beim Farbanteil
-.br
-WxH: Breite und Höhe (width, height) der Matrix, die in beide Richtungen
+.RS
+.IPs l\ \ \ \ 
+Wendet den Effekt auf den Helligkeitsanteil an.
+.IPs c\ \ \ \ 
+Wendet den Effekt auf den Farbanteil an.
+.IPs <Breite>x<Höhe>
+Breite und Höhe der Matrix, die in beide Richtungen
 ungerade sein muss (min = 3x3, max = 13x11 oder 11x13, normalerweise
 zwischen 3x3 und 7x7).
+.IPs Menge
+relative "Menge" der Schärfe/\:Unschärfe, die dem Bild hinzugefügt
+wird (ein vernünftiger Bereich ist -1.5\-1.5).
+.RSss
+<0: weichzeichnen
 .br
-Menge: relative "Menge" der Schärfe / Unschärfe, die dem Bild hinzugefügt
-wird (Menge < 0 = Unschärfe, Menge > 0 = Schärfe, normalerweise zwischen
-\-1.5 und 1.5).
+>0: schärfen
 .REss
-.IPs swapuv
-Vertauscht die U- und V-Anteile
-.IPs "il=[d|i][s][:[d|i][s]]"
-(de)interleavet Zeilen
+.RE
+.
+.TP
+.B swapuv\ 
+Vertauscht die U- und V-Ebene.
+.
+.TP
+.B il=[d|i][s][:[d|i][s]]
+Führt ein (De)Interleaving von Zeilen durch.
 Das Ziel dieses Filters ist es, die Bearbeitung von interlaced Bildern zu
 ermöglichen, ohne sie vorher zu deinterlacen.
 Du kannst eine interlaced DVD filtern und am Fernseher ausgeben, ohne
 das Interlacing zu entfernen.
-Die meisten Filter deinterlacen permanent (smoothing averaging etc). Dieser
-Filter hingegen teilt das Bild in zwei Felder auf (sogenannte Halbbilder),
-sodass diese unabhängig voneinander gefiltert und wieder interleavet werden
+Die meisten Filter deinterlacen permanent (smoothing, averaging, etc).
+Dieser Filter hingegen teilt das Bild in zwei Felder auf (sogenannte
+Halbbilder),
+so dass diese unabhängig voneinander gefiltert und wieder interleavt werden
 können.
-
-.RSss
-d: deinterleave, entschachteln
+.PD 0
+.RSs
+.IPs d
+deinterleave, entschachteln (einen über dem anderen plazieren)
+.IPs i
+interleave, verschachteln
+.IPs s
+vertauschen der Felder (gerade und ungerade Zeilen austauschen)
+.RE
+.PD 1
+.
+.TP
+.B fil=[i|d]
+Führt ein (De)Interleaving von Zeilen durch.
+Dieser Filter ist dem il-Filter sehr ähnlich, jedoch viel schneller.
+Der Hauptnachteil ist, dass er nicht immer funktioniert.
+Besonders in Kombination mit anderen Filtern kann es zu zufällig gestörten
+Bildern kommen.
+Sei also froh, wenn es funktioniert, beschwere dich aber nicht, falls bei
+deiner Kombination der Filter Fehler auftreten.
+.PD 0
+.RSs
+.IPs d
+Deinterleave der Felder, platziert beide Seite an Seite.
+.IPs i
+Erneutes Interleave der Felder (kehrt den Effekt von fil=d um).
+.RE
+.PD 1
+.
+.TP
+.B field[=n]
+Extrahiert ein einzelnes Feld eines interlaceten Bildes mit Stride-Arithmetik,
+um Verschwendung von CPU-Zeit zu vermeiden.
+Der optionale Parameter n gibt an, ob das gerade oder ungerade Feld extrahiert
+wird (abhängig davon, ob n selber gerade oder ungerade ist).
+.
+.TP
+.B detc[=Var1=Wert1:Var2=Wert2:...]
+Versucht, den 'Telecine'-Prozess umzukehren, um einen sauberen,
+nicht-interlaced-Stream mit der Framerate des Films wiederherzustellen.
+Dieser war der erste und primitivste Inverse-Telecine-Filter, der zu
+MPlayer/\:MEncoder hinzugefügt wurde.
+Er speichert Telecine-3:2-Muster zwischen und folgt ihnen soweit wie möglich.
+Dies macht in tauglich für perfekt-telecined Material, selbst bei
+Vorhandensein eines gewissen Grades an Störung.
+Er wird jedoch nicht funktionieren bei Vorhandensein komplexer
+Post-Telecine-Änderungen.
+Die Entwicklung an diesem Filter findet nicht weiter statt, da ivtc, pullup
+und filmdint für die meisten Anwendungen besser geeignet sind.
+Die folgenden Argumente (Syntax siehe oben) steuern das Verhalten des
+detc-Filters:
+.RSs
+.IPs dr\ \ \ 
+Setzt den Framedropping-Modus.
+0 (Standard) bedeutet, dass kein Frame ausgelassen wird, um die Framerate der
+Ausgabe beizubehalten.
+1 bedeutet, dass ein Frame ausgelassen wird, wenn es keine Auslassungen oder
+Telecine-Zusammenführungen innerhalb der letzten 5 Frames gab.
+2 bedeutet, dass ein ständiges Verhältnis von 5:4 der Eingabe zur Ausgabe
+beibehalten wird.
 .br
-i: interleave, verschachteln
+.I ANMERKUNG:
+Benutze Modus 1 oder 2 mit MEncoder.
+.IPs am\ \ \ 
+Analyse-Modus.
+Verfügbare Werte sind 0 (festgelegtes Muster mit initialer Anzahl der Frames
+angegeben durch fr=#) aund 1 (aggressive Suche nach Telecine-Muster).
+Standard ist 1.
+.IPs fr\ \ \ 
+Setzt die initiale Anzahl der Frames in Folge.
+0\-2 sind die drei sauberen, progressiven Frames; 3 und 4 sind die beiden
+interlaced-Frames.
+Der Standardwert, -1, bedeutet 'nicht in Telecine-Abfolge'.
+Die hier angegebene Zahl gibt den Typ des imaginären vorigen Frames an, bevor
+der Film beginnt.
+.IPs "tr0, tr1, tr2, tr3"
+Schwellenwerte, die in bestimmten Modi verwendet werden.
+.RE
+.
+.TP
+.B ivtc[=1]
+Experimenteller 'zustandsloser' Inverse-Telecine-Filter.
+Anstatt zu versuchen, ein Muster zu finden, wie es der dect-Filter tut, trifft
+ivtc seine Entscheidungen unabhängig für jeden Frame.
+Dies liefert wesentlich bessere Resultate für Material, das ausgiebiger
+Editierung unterzogen wurde, nachdem Telecine angewendet wurde.
+Im Endeffekt ist es jedoch nicht so nachsichtig bei leicht gestörtem Input,
+wie bei Capturing von TV-Input.
+Der optionale Parameter (ivtc=1) entspricht der Option dr=1 des detc-Filters
+und sollte nur von MEncoder, nicht von MPlayer verwendet werden.
+Wie bei detc muß auch hier bei Benutzung von MEncoder die korrekte
+Ausgabe-Framerate (\-ofps 23.976) angegeben werden.
+Die Entwicklung an itvc findet nicht weiter statt, da die Filter pullup und
+filmident genauer zu sein scheinen.
+.
+.TP
+.B pullup[=jl:jr:jo:ju:sb:mp]\
+Pulldown-Umkehrungs- (inverse telecine) Filter der dritten Generation, der
+mixed hard-telecine und Progressive-Material mit 24 und 30 fps handhaben kann.
+Der Pullup-Filer ist wesentlich robuster als detc oder ivtc, da er
+für Entscheidungen zukünftigen Kontext zurate zieht.
+Wie ivtc auch ist Pullup zustandslos in dem Sinne, dass er nicht nach einem zu
+folgenden Muster sucht, sondern stattdessen nach vorne schaut, um Gegenstücke
+zu finden und progressive Frames zusammenzusetzen.
+Der Filter befindet sich noch in der Entwicklung, scheint aber akkurat zu
+arbeiten.
+Die Optionen jl, jr, jo, und ju bestimmen die zu ignorierende Menge "Müll"
+links, rechts, oben und unten am Bildrand, respektive.
+Links/\:rechts sind in Einheiten von 8 Pixeln anzugeben, oben/\:unten in
+Einheiten von 2 Zeilen.
+Der Standardwert ist 8 Pixel an jeder Seite.
+Setzen der Option sb (strict breaks) auf 1 reduziert die Chancen von Pullup,
+gelegentlich einen falsch getroffenen Frame zu generieren.
+Es kann jedoch auch dazu führen, dass während schnellbewegten Szenen eine
+exzessive Anzahl an Frames ausgelassen wird.
+Im Gegensatz dazu führt ein Setzen auf -1 dazu, dass Pullup Felder leichter
+zuordnet.
+Dies kann helfen beim Verarbeiten von Videomaterial, das zwischen Feldern
+leicht verwischt ist, jedoch kann es auch zu interlaced Frames in der Ausgabe
+führen.
+Die Option mp (metric plane) kann auf 1 oder 2 gesetzt werden, um bei den
+Berechnungen von Pullup eine Chrominanzebene anstelle einer Helligkeitsebene
+zu verwenden.
+Dies kann die Genauigkeit bei sehr sauberem Quellmaterial verbessern,
+vermutlich wird die Qualitätt jedoch verschlechtert, vor allem wenn es sich um
+Videomaterial in Graustufen handelt oder Regenbogeneffekte sichbar sind.
+Der vorwiegende Zweck vom Setzen von mp auf Chrominanzebene ist, die
+CPU-Auslastung zu verringern und Pullup in Realtime oder auf langsamen
+Maschinen zu benutzen.
 .br
-s: vertausche die Felder (die ungerade und geraden Zeilen)
-.REss
-.IPs "field[=n]"
-Extrahiert ein einzelnes Feld eines interlaceten Bildes mit Stridearithmetic,
-um Verschwendung von CPU-Zeit zu vermeiden. Der optionale Parameter n
-gibt an, ob das gerade oder ungerade Feld extrahiert wird (abhängig davon,
-ob n selber gerade oder ungerade ist).
-.IPs "boxblur=Radius:Stärke[:Radius:Stärke]"
+.I ANMERKUNG:
+Lasse beim Encodieren auf jede Anwendung von Pullup den Filter softskip folgen.
+Dies stellt sicher, dass Pullup jeden Frame betrachtet.
+Falls dies nicht geschieht, führt dies zu einer unkorrekten Ausgabe und wird
+auf Grund von Designbeschränkungen auf Codec-/\:Filterebene normalerweise
+abbrechen.
+.
+.TP
+.B "boxblur=Radius:Stärke[:Radius:Stärke]"
 Kastenunschärfe (?)
 .RSss
 Radius: Größe des Filters
