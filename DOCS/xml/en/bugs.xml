@@ -32,7 +32,7 @@ lame packages, they may have been compiled with gcc 2.96.</para>
 <para>Workaround: use FFmpeg's (slow) MP1/MP2/MP3 decoder (<option>-ac ffmpeg</option>)</para>
 </listitem>
 <listitem>
-<para>sig11 in libmpeg2, when scaling+encoding:</para>
+<para>SIGSEGV (signal 11) in libmpeg2, when scaling+encoding:</para>
 <para>Solution: upgrade to 2.95.3</para>
 <para>Problem: known GCC 2.95.2 MMX bug</para>
 </listitem>
