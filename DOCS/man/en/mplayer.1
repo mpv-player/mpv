@@ -6006,6 +6006,11 @@ use chroma too, doesn't work (correctly) with B frames currently
 .
 .TP
 .B nssew=<0\-100>
+If you prefer to keep some noise in your encoded video rather than
+filtering it away before encoding, this setting controls NSSE weight,
+where larger weights will result in more noise.
+0 NSSE is identical to SSE.
+
 NSSE weight, larger weights will result in more noise,
 with 0 NSSE is identical to SSE.
 .
