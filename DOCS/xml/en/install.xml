@@ -449,6 +449,18 @@ copy of it. Check if you have
 </para>
 
 <para>
+Note that if you have a <filename>codecs.conf</filename> in
+<filename>~/.mplayer/</filename>,  the builtin and system
+<filename>codecs.conf</filename> will be ignored completely.
+Do not do this unless you want to fiddle with MPlayer internals as this can
+can cause many problems.  If you want to change the codecs search order, use
+the <option>-vc</option>, <option>-ac</option>, <option>-vfm</option>,
+or <option>-afm</option> options either on the command line or in your
+config file (see the manual page).
+</para>
+
+
+<para>
 Debian users can build a .deb package for themselves, it's very simple.
 Just exec
 <screen>fakeroot debian/rules binary</screen>

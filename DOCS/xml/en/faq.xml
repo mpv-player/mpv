@@ -664,8 +664,9 @@ I got this playing MPEG files: Can't find codec for video format 0x10000001!
 </para></question>
 <answer><para>
 You have an old version of <filename>codecs.conf</filename> at
-<filename class="directory">~/.mplayer/</filename>. Upgrade it from
-<filename class="directory">/etc/</filename>.
+<filename class="directory">~/.mplayer/</filename>,
+<filename class="directory">/etc/</filename>,
+<filename class="directory">/usr/local/etc/</filename> or similar. Remove it.
 <emphasis role="bold">OR</emphasis> you have the <option>vc=</option> option or
 something similar in your config file(s).
 </para></answer>
