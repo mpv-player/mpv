@@ -119,14 +119,14 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 	reg.val = MVCOMMAND_SYNC;
 	ioctl(fd_control, EM8300_IOCTL_WRITEREG, &reg);
 	
-	/* Set the default playback speed to 0x900 */
-	ioval = 0x900;
-	ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
-	
 	/* Flush the buffer and make sure it is clean by syncing it */
 	ioval = EM8300_SUBDEVICE_VIDEO;
 	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 	fsync(fd_video);
+	ioval = 0x900;
+	ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
+	ioval = 0;
+	ioctl(fd_control, EM8300_IOCTL_SCR_SET, &ioval);
 	/* We'll be nice and flush the audio buffer as well */
 	ioval = EM8300_SUBDEVICE_AUDIO;
 	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
@@ -172,7 +172,8 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 		avc_context->frame_rate = 30 * FRAME_RATE_BASE;
 		avc_context->gop_size = 12;
 		avc_context->bit_rate = 8e6;
-		avc_context->flags = CODEC_FLAG_HQ;
+		avc_context->flags = CODEC_FLAG_HQ | CODEC_FLAG_QSCALE;
+		avc_context->quality = 2;
 		avc_context->pix_fmt = PIX_FMT_YUV420P;
 		if (avcodec_open(avc_context, avc_codec) < 0) {
 			printf("VO: [dxr3] Unable to open codec\n");
@@ -239,14 +240,10 @@ static const vo_info_t* get_info(void)
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
 {
 #ifdef USE_LIBAVCODEC
-	/* This function draws the osd and subtitles etc. It will change to use spuenc soon */
-	switch (img_format) {
-	case IMGFMT_BGR24:
-	case IMGFMT_YV12:
-	case IMGFMT_YUY2:
+	/* This function draws the osd and subtitles etc. */
+	if (img_format != IMGFMT_MPEGPES) {
 		vo_draw_alpha_yv12(w, h, src, srca, srcstride,
 			avc_picture.data[0] + (x0 + d_pos_x) + (y0 + d_pos_y) * avc_picture.linesize[0], avc_picture.linesize[0]);
-		break;
 	}
 #endif
 }
@@ -264,12 +261,8 @@ static uint32_t draw_frame(uint8_t * src[])
 		vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
 		
 		if (p->id == 0x20) {
-			ioval = vo_pts / 2;
-			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &ioval);
 			write(fd_spu, p->data, p->size);
 		} else {
-			ioval = vo_pts / 2;
-			ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &ioval);
 			write(fd_video, p->data, p->size);
 		}
 		return 0;
@@ -297,8 +290,10 @@ static void flip_page(void)
 	/* Flush the device if a seek occured */
 	if (!vo_pts) {
 		/* Flush video */
-		ioval = EM8300_SUBDEVICE_VIDEO;
+		/*ioval = EM8300_SUBDEVICE_VIDEO;
 		ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
+		*/
+		fsync(fd_video);
 	}
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
@@ -390,6 +385,9 @@ static uint32_t query_format(uint32_t format)
 static void uninit(void)
 {
 	printf("VO: [dxr3] Uninitializing\n");
+	/* Set the default playback speed to 0x900 */
+	ioval = 0x900;
+	ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
 #ifdef USE_LIBAVCODEC
 	if (avc_context) {
 		avcodec_close(avc_context);
