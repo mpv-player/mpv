@@ -1625,22 +1625,22 @@ if [ $_mtrr = yes ]; then
 fi
 
 if [ $_sdl = outdated ]; then
- echo "You have libSDL installed, but your version is outdated (earlier then"
- echo "v.1.1.7), SDL support has been disabled please update, if you want to"
- echo "use it (libSDL v1.1.8 and v1.2.0/1 are tested and known to work, recent"
- echo "versions are available from http://www.libsdl.org/)."
- echo "After updating you need to re-run ./configure and recompile to enable SDL."
- echo "(If you only want to use SDLlib audio driver older versions might work, you"
- echo "can use --enable-sdl to force using SDLlib)"
- echo
+ echo "You have an outdated version of libSDL installed (older than v1.1.7)"
+ echo "and SDL support has therefore been disabled. Please upgrade to a more"
+ echo "recent version (v1.1.8 and v1.2.[0-1] are known to work) from:"
+ echo "http://www.libsdl.org"
+ echo "You need to re-run ./configure and recompile after updating SDL."
+ echo "If you are only interested in the libSDL audio drivers, then older"
+ echo "version might work. Use --enable-sdl to force usage of libSDL."
 fi
 
 if [ $_win32libdirnotify = yes ]; then
- echo "Missing WIN32 codecs dir at $_win32libdir !"
- echo "Make it and copy DLL files to there! (You can get them from your windows"
- echo "directory or download ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip"
+ echo "Failed to find a WIN32 codecs dir at $_win32libdir!"
+ echo "Create it and copy the DLL files there! (You can get them from your windows"
+ echo "directory or download them from:"
+ echo "ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip"
 else
- echo "Ok, Win32 codecs directory at $_win32libdir already exists."
+ echo "Ok, found Win32 codecs directory at $_win32libdir."
 fi
 
 # Last move:
