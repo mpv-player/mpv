@@ -811,15 +811,15 @@ static uint32_t preinit(const char *arg)
     WNDCLASS   wc;
 	if(arg)
 	{
-		if(!strcmp(arg,"noaccel"))
+		if(strstr(arg,"noaccel"))
 		{
 			mp_msg(MSGT_VO,MSGL_V,"<vo_directx><INFO>disabled overlay\n");
 		    nooverlay = 1;
 		}
-        else
+		if(strstr(arg,"ontop"))
 		{
-			mp_msg(MSGT_VO,MSGL_ERR,"<vo_directx><ERROR>unknown subdevice: %s\n",arg);
-	        return ENOSYS;
+			mp_msg(MSGT_VO,MSGL_V,"<vo_directx><INFO>window ontop\n");
+			ontop = 1;
 		}
 	}
 	if (Directx_InitDirectDraw()!= 0)return 1;          //init DirectDraw
@@ -1158,7 +1158,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		            SetWindowPlacement(hWnd,&window_placement);
 		            /*change style and restore the window*/ 
 					SetWindowLong(hWnd,GWL_STYLE,WS_OVERLAPPEDWINDOW|WS_SIZEBOX);
-					window_placement.showCmd = SW_SHOWNORMAL;		   
+					window_placement.showCmd = SW_RESTORE;
 		    		SetWindowPlacement(hWnd,&window_placement );
         			/*restore backgroundcolor*/
 		    		SetClassLongA(hWnd,GCL_HBRBACKGROUND,(int)CreateSolidBrush(windowcolor));
