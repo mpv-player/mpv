@@ -40,10 +40,10 @@
 	<LI><A HREF="codecs.html#2.1.2.4">2.1.2.4 XAnim codec-ek</A></LI>
 	<LI><A HREF="codecs.html#2.1.2.5">2.1.2.5 libmad támogatás</A></LI>
       </UL>
-      <LI><A HREF="codecs.html#2.1.4">2.1.4 Hogyan használj ismeretlen Win32 codec-et</A></LI>
+      <LI><A HREF="codecs.html#2.1.3">2.1.3 Hogyan használj ismeretlen Win32 codec-et</A></LI>
       <UL>
-	<LI><A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW</A></LI>
-	<LI><A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow</A></LI>
+	<LI><A HREF="codecs.html#2.1.3.1">2.1.3.1 VFW</A></LI>
+	<LI><A HREF="codecs.html#2.1.3.2">2.1.3.2 DirectShow</A></LI>
       </UL>
     </UL>
     <LI><A HREF="video.html">2.2 Video és audio kimeneti eszközök</A></LI>
@@ -453,7 +453,7 @@ konfigurációs file-ban.</P>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>master/pcm csatorna használata hangerõhöz</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>z vagy x</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>feliratok késleltetése +/- 0.1 másodperccel</TD><TR>
 
-<TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(a következõk csak a DirectShow DivX codecre érvényesek)</I></P></TD><TR>
+<TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(a következõk csak a DirectShow DivX illetve DivX4 codecekre érvényesek)</I></P></TD><TR>
 
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 vagy 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kontraszt beállítása</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3 vagy 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>fényerõ beállítása</TD><TR>
@@ -537,8 +537,8 @@ konfigurációs file-ban.</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
 
-<P><B>Nem tud</B> viszont lejátszani ASF file-okat hálózatról se HTTP-vel, se
-MMS-el.</P>
+<P><B>Nem tud</B> viszont lejátszani MMS protokollal ASF file-okat hálózatról,
+csak HTTP-vel.</P>
 
 <P><B>MPlayer</B> tud a standard bemenetrõl (NEM named pipe-okról) beolvasni.
   Itt egy példa az FTP-n keresztüli lejátszásra ennek segítségével :</P>
