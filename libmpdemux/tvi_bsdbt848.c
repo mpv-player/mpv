@@ -26,7 +26,7 @@
 
 #define NTSC_WIDTH  640
 #define NTSC_HEIGHT 480
-#define NTSC_FPS    30
+#define NTSC_FPS    29.97
 
 #include <stdio.h>
 #include <stdlib.h>
