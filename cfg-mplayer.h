@@ -47,17 +47,14 @@ extern int vo_doublebuffering;
 extern int vo_vsync;
 extern int vo_fsmode;
 extern int vo_dbpp;
-/* gamma correction */
+extern int vo_directrendering;
+extern int vd_use_slices;
+extern float vo_panscan;
+/* only used by startup (setting these values from configfile) */
 extern int vo_gamma_brightness;
 extern int vo_gamma_saturation;
 extern int vo_gamma_contrast;
 extern int vo_gamma_hue;
-extern int vo_gamma_red_intensity;
-extern int vo_gamma_green_intensity;
-extern int vo_gamma_blue_intensity;
-extern int vo_directrendering;
-extern int vd_use_slices;
-extern float vo_panscan;
 
 #ifdef USE_OSD
 extern int osd_level;
@@ -254,14 +251,10 @@ static config_t mplayer_opts[]={
 	{"xineramascreen", &xinerama_screen, CONF_TYPE_INT, CONF_RANGE, 0, 32, NULL},
 #endif
 
-	// dunno what, imho not used, or vidix stuff?
-	{"brightness",&vo_gamma_brightness, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
-	{"saturation",&vo_gamma_saturation, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
-	{"contrast",&vo_gamma_contrast, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
-	{"hue",&vo_gamma_hue, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
-	{"red_intensity",&vo_gamma_red_intensity, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
-	{"green_intensity",&vo_gamma_green_intensity, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
-	{"blue_intensity",&vo_gamma_blue_intensity, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
+	{"brightness",&vo_gamma_brightness, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
+	{"saturation",&vo_gamma_saturation, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
+	{"contrast",&vo_gamma_contrast, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
+	{"hue",&vo_gamma_hue, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
 
 	// direct rendering (decoding to video out buffer)
 	{"dr", &vo_directrendering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
