@@ -322,7 +322,7 @@ void guiGetEvent( int type,char * arg )
 	 }
 
        guiIntfStruct.DiskChanged=0;
-       guiIntfStruct.FilenameChanged=0;
+//       guiIntfStruct.FilenameChanged=0;
 
 // --- video opts	 
        if ( !gtkVODriver )
