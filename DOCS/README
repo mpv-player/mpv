@@ -172,8 +172,8 @@ Usage:
   Note:  in order to use Matrox YUV driver (-vo mga or xmga), first you'll have
          to load the driver: see DOCS/VIDEOCARDS .
 
-Playing from stdin:
-~~~~~~~~~~~~~~~~~~~
+Playing from Net & stdin:
+~~~~~~~~~~~~~~~~~~~~~~~~~
 Now it's possible.
 
 To play something by reading from stdin, just use '-' as filename:
@@ -193,12 +193,15 @@ This feature combined with external wrappers extends possibilities.
 For example, to play a movie just downloaded from your favourite divx
 server:
 	rar p ast-nssvcd.rar | mplayer -vo xmga -fs -
-
-With an ASF grabber or http dump program you can play from the net.
+or:
 	wget ftp://micorsops.com/something.avi -O - | mplayer -
 
-(however we planned to add direct ASF/http/ftp inputs with seeking and other
-stuff, but for now it's a good workaround)
+Playing from the net currently works only with HTTP, other methods (including
+ASF) coming soon.
+	mplayer http://test.localdomain/dune.mpg
+
+NOTE : you have to compile MPlayer with --enable-streaming !!!
+
 
 TV output:
 ~~~~~~~~~~

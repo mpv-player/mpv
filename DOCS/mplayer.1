@@ -53,6 +53,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-srate\ Hz ]
 .RB [ \-osdlevel\ level ]
 .RB [ \-config\ file ]
+.RB [ \-display\ name ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -262,6 +263,10 @@ specifies Hz to playback audio on. Has effect on playback speed!
 .TP
 .B \-config configfile
 specifies where to search for config file
+.TP
+.B \-display name
+specify the hostname and display number of the X server you want
+to display on. For example : -display xtest.localdomain:0
 .IP
 .SH "ALPHA/BETA CODE"
 .TP

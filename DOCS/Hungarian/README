@@ -195,12 +195,15 @@ mûködik az ablakban. Természetesen a LIRC mindenhol megy.
 Ez a tulajdonság néhány külsõ programmal együtt kibõvíti a lehetõségeinket.
 Például egy épp most letöltött divx film megnézése:
 	rar p ast-nssvcd.rar | mplayer -vo xmga -fs -
-
-Egy ASF grabberrel vagy HTTP dump programmal a netrõl is lejátszhatsz.
+vagy :
 	wget ftp://micorsops.com/something.avi -O - | mplayer -
 
-(késõbb majd lesz közvetlen ASF/http/ftp olvasás, tekeressel stb, de egyelõre
-ez van)
+A netrol egyelore csak HTTP-n keresztul lehet lejatszani, a tobbi (peldaul ASF)
+keszuloben. Pelda :
+        mplayer http://test.localdomain/dune.mpg   
+
+Megj.: az MPlayer-t --enable-streaming opcioval forditsd !!!
+
 
 TV output:
 ~~~~~~~~~~~
