@@ -79,6 +79,7 @@ static float winAlpha = 1;
 
 static int device_width;
 static int device_height;
+static int device_id;
 
 static WindowRef theWindow = NULL;
 
@@ -86,8 +87,9 @@ static Rect imgRect; // size of the original image (unscaled)
 static Rect dstRect; // size of the displayed image (after scaling)
 static Rect winRect; // size of the window containg the displayed image (include padding)
 static Rect oldWinRect; // size of the window containg the displayed image (include padding) when NOT in FS mode
+static Rect deviceRect; // size of the display device
 
-static CGContextRef context;
+CGrafPtr gDisplayPortPtr;
 
 #include "../osdep/keycodes.h"
 extern void mplayer_put_key(int code);
@@ -139,7 +141,7 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 	
 		if(window)
 		{
-			GetWindowPortBounds (window, &rectPort);
+			GetPortBounds(GetWindowPort(window), &rectPort);
 		}   
 	
 		switch (kind)
@@ -316,22 +318,35 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 										{ kEventClassWindow, kEventWindowClosed }, 
 										{ kEventClassWindow, kEventWindowBoundsChanged } };
   
-	InstallApplicationEventHandler (NewEventHandlerUPP (MainEventHandler), GetEventTypeCount(winEvents), winEvents, 0, NULL);
+	InstallApplicationEventHandler (NewEventHandlerUPP (MainEventHandler), GetEventTypeCount(winEvents), winEvents, NULL, NULL);
 }
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	WindowAttributes	windowAttrs;
 	GDHandle			deviceHdl;
-	Rect				deviceRect;
 	OSErr				qterr;
 	
 	//Get Main device info///////////////////////////////////////////////////
-	deviceHdl = GetMainDevice();
-	deviceRect = (*deviceHdl)->gdRect;
+	int i;
 	
-	device_width = deviceRect.right;
-	device_height = deviceRect.bottom;
+	deviceHdl = GetMainDevice();
+	
+	for(i=0; i<device_id; i++)
+	{
+		deviceHdl = GetNextDevice(deviceHdl);
+		
+		if(deviceHdl == NULL)
+		{
+			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: Device ID %d do not exist, falling back to main device.\n", device_id);
+			deviceHdl = GetMainDevice();
+			break;
+		}
+	}
+	
+	deviceRect = (*deviceHdl)->gdRect;
+	device_width = deviceRect.right-deviceRect.left;
+	device_height = deviceRect.bottom-deviceRect.top;
 	
 	//misc mplayer setup/////////////////////////////////////////////////////
 	SetRect(&imgRect, 0, 0, width, height);
@@ -384,7 +399,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		SetRect(&oldWinRect, 0, 0, d_width, d_height);
 		SizeWindow (theWindow, d_width, d_height, 1);
  	}
- 	
+	
+	gDisplayPortPtr = GetWindowPort(theWindow);
+	
  	get_image_done = 0;
 
 	if (!EnterMoviesDone)
@@ -401,7 +418,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		return -1;
 	}
 	
-	SetPort(GetWindowPort(theWindow));
+	SetPort(gDisplayPortPtr);
 	SetIdentityMatrix(&matrix);
 	
 	if ((d_width != width) || (d_height != height))
@@ -541,7 +558,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 					   yuv_qt_stuff.desc,
 					   (char *)P,
 					   image_buffer_size,
-					   GetWindowPort(theWindow),
+					   gDisplayPortPtr,//GetWindowPort(theWindow),
 					   NULL,
 					   NULL,
 					   ((d_width != width) || (d_height != height)) ? 
@@ -751,6 +768,22 @@ static void uninit(void)
 
 static uint32_t preinit(const char *arg)
 {
+	int parse_err = 0;
+	
+    if(arg) 
+    {
+        char *parse_pos = &arg[0];
+        while (parse_pos[0] && !parse_err) 
+		{
+			if (strncmp (parse_pos, "device_id=", 10) == 0)
+			{
+				parse_pos = &parse_pos[10];
+                device_id = strtol(parse_pos, &parse_pos, 0);
+            }
+            if (parse_pos[0] == ':') parse_pos = &parse_pos[1];
+            else if (parse_pos[0]) parse_err = 1;
+        }
+    }
     return 0;
 }
 
@@ -869,7 +902,8 @@ void window_resized()
 	uint32_t d_width;
 	uint32_t d_height;
 	
-	GetWindowPortBounds(theWindow, &winRect);
+	//GetWindowPortBounds(theWindow, &winRect);
+	GetPortBounds( gDisplayPortPtr, &winRect );
 
 	aspect( &d_width, &d_height, A_NOZOOM);
 	
@@ -887,15 +921,11 @@ void window_resized()
 		SetRect(&dstRect, 0, padding, (d_width*aspectX), d_height*aspectX+padding);
 	}
 
-	//create a graphic context for the window
-	SetPortBounds(GetWindowPort(theWindow), &winRect);
-	CreateCGContextForPort(GetWindowPort(theWindow),&context);
-
-	//fill background with black
-	CGRect winBounds = CGRectMake( winRect.top, winRect.left, winRect.right, winRect.bottom);
-	CGContextSetRGBFillColor(context, 0.0, 0.0, 0.0, 1.0);
-	CGContextFillRect(context, winBounds);
-	CGContextFlush(context);
+	//Clear Background
+	SetGWorld( gDisplayPortPtr, NULL );
+	RGBColor blackC = { 0x0000, 0x0000, 0x0000 };
+    RGBForeColor( &blackC );
+    PaintRect( &winRect );
 
 	long scale_X = FixDiv(Long2Fix(dstRect.right - dstRect.left),Long2Fix(imgRect.right));
 	long scale_Y = FixDiv(Long2Fix(dstRect.bottom - dstRect.top),Long2Fix(imgRect.bottom));
@@ -925,7 +955,7 @@ void window_ontop()
 void window_fullscreen()
 {
 	GDHandle deviceHdl;
-	Rect deviceRect;
+	//Rect deviceRect;
 
 	//go fullscreen
 	if(vo_fs)
@@ -942,7 +972,7 @@ void window_fullscreen()
 		//go fullscreen
 		//ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute);
 			
-		MoveWindow (theWindow, 0, 0, 1);		
+		MoveWindow (theWindow, deviceRect.left, deviceRect.top, 1);		
 		SizeWindow(theWindow, device_width, device_height,1);
 
 		vo_quartz_fs = 1;
