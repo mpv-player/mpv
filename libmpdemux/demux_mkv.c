@@ -1041,14 +1041,12 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
                    || !strcmp (track->codec_id, MKV_S_ASS))
             {
               track->subtitle_type = MATROSKA_SUBTYPE_SSA;
-              sub_utf8 = 1;
             }
           else if (!strcmp (track->codec_id, MKV_S_TEXTASCII))
             track->subtitle_type = MATROSKA_SUBTYPE_TEXT;
           if (!strcmp (track->codec_id, MKV_S_TEXTUTF8))
             {
               track->subtitle_type = MATROSKA_SUBTYPE_TEXT;
-              sub_utf8 = 1;
             }
           mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + Codec ID: %s\n",
                   track->codec_id);
@@ -2642,6 +2640,7 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
 #ifdef USE_ICONV
   subcp_recode1 (&mkv_d->subs);
 #endif
+  sub_utf8 = 1;
   vo_sub = &mkv_d->subs;
   vo_osd_changed (OSDTYPE_SUBTITLE);
 }
