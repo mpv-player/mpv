@@ -6,6 +6,9 @@
     Based on FFmpeg's libav/rm.c.
     
     $Log$
+    Revision 1.8  2002/01/23 19:41:01  alex
+    fixed num_of_packets and current_packet handling, bug found by Mike Melanson
+
     Revision 1.7  2002/01/18 11:02:52  alex
     fix dnet support
 
@@ -201,12 +204,10 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
     int i;
     int flags;
 
-//    printf("num_of_packets: %d\n", priv->num_of_packets);
-
 loop:
-    if ((priv->num_of_packets == 0) && (priv->num_of_packets != -10))
-	return 0; /* EOF */
-    if (priv->current_packet > priv->num_of_packets)
+    /* also don't check if no num_of_packets was defined in header */
+    if ((priv->current_packet > priv->num_of_packets) &&
+	(priv->num_of_packets != -10))
 	return 0; /* EOF */
     stream_skip(demuxer->stream, 2); /* version */
     len = stream_read_word(demuxer->stream);
@@ -230,8 +231,6 @@ loop:
 //    printf("packet#%d: pos: %d, len: %d, stream_id: %d, timestamp: %d, flags: %x\n",
 //	priv->current_packet, stream_tell(demuxer->stream)-12, len, stream_id, timestamp, flags);
 
-//    if (priv->num_of_packets != -10)
-//	priv->num_of_packets--;
     priv->current_packet++;
     len -= 12;    
 
