@@ -140,17 +140,9 @@ snd_pcm_t *spdif_init(char *pcm_name)
        }
        if ((err = snd_ctl_elem_write(ctl_handler, ctl)) < 0) {
 	 //fprintf(stderr, "Unable to update the IEC958 control: %s\n", snd_strerror(err));
-	 printf("alsa-spdif-init: cant set spdif-trough automatically\n");
+	 printf("alsa-spdif-init: cant set spdif-through automatically\n");
         goto __diga_end;
        }
-       	//test area
-       /* elem_device = snd_ctl_elem_id_get_device(elem_id); */
-       /* elem_name = snd_ctl_elem_value_get_name(ctl);  */
-       /* snd_ctl_elem_value_get_iec958(ctl, &spdif); */
-       /* printf("spdif = %i, device = %i\n", &spdif, elem_device); */
-       /* printf("name = %s\n", elem_name); */
-	//end test area
-
 
       snd_ctl_close(ctl_handler);
       __diga_end:                                                       
@@ -211,6 +203,8 @@ static int control(int cmd, int arg)
     return CONTROL_TRUE;
   case AOCONTROL_GET_VOLUME:
   case AOCONTROL_SET_VOLUME:
+#ifndef WORDS_BIGENDIAN 
+{ //seems to be a problem on macs?
     {
       ao_control_vol_t *vol = (ao_control_vol_t *)arg;
 
@@ -303,7 +297,17 @@ static int control(int cmd, int arg)
       snd_mixer_close(handle);
       return CONTROL_OK;
     }
+}// end big-endian
+#endif
+#ifdef WORDS_BIGENDIAN
+{
+  {
+    return (CONTROL_UNKNOWN);
   }
+}
+#endif
+    
+  } //end witch
   return(CONTROL_UNKNOWN);
 }
 
@@ -344,49 +348,60 @@ static int init(int rate_hz, int channels, int format, int flags)
     //ao_data.buffersize = MAX_OUTBURST; // was 16384
 
     switch (format)
-    {
-	case AFMT_S8:
-	    alsa_format = SND_PCM_FORMAT_S8;
-	    break;
-	case AFMT_U8:
-	    alsa_format = SND_PCM_FORMAT_U8;
-	    break;
-	case AFMT_U16_LE:
-	    alsa_format = SND_PCM_FORMAT_U16_LE;
-	    break;
-	case AFMT_U16_BE:
-	    alsa_format = SND_PCM_FORMAT_U16_BE;
-	    break;
+      {
+      case AFMT_S8:
+	alsa_format = SND_PCM_FORMAT_S8;
+	break;
+      case AFMT_U8:
+	alsa_format = SND_PCM_FORMAT_U8;
+	break;
+      case AFMT_U16_LE:
+	alsa_format = SND_PCM_FORMAT_U16_LE;
+	break;
+      case AFMT_U16_BE:
+	alsa_format = SND_PCM_FORMAT_U16_BE;
+	break;
 #ifndef WORDS_BIGENDIAN
-	case AFMT_AC3:
+      case AFMT_AC3:
 #endif
-	case AFMT_S16_LE:
-	    alsa_format = SND_PCM_FORMAT_S16_LE;
-	    break;
+      case AFMT_S16_LE:
+	alsa_format = SND_PCM_FORMAT_S16_LE;
+	break;
 #ifdef WORDS_BIGENDIAN
-	case AFMT_AC3:
+      case AFMT_AC3:
 #endif
-	case AFMT_S16_BE:
-	    alsa_format = SND_PCM_FORMAT_S16_BE;
-	    break;
-	default:
-	    alsa_format = SND_PCM_FORMAT_MPEG;
-	    break;
-    }
+      case AFMT_S16_BE:
+	alsa_format = SND_PCM_FORMAT_S16_BE;
+	break;
+      case AFMT_S32_LE:
+	alsa_format = SND_PCM_FORMAT_S32_LE;
+	break;
+      case AFMT_S32_BE:
+	alsa_format = SND_PCM_FORMAT_S32_BE;
+	break;
+
+      default:
+	alsa_format = SND_PCM_FORMAT_MPEG;
+	break;
+      }
     
     switch(alsa_format)
-    {
-	case SND_PCM_FORMAT_S16_LE:
-	case SND_PCM_FORMAT_U16_LE:
-	    ao_data.bps *= 2;
-	    break;
-	case -1:
-	    printf("alsa-init: invalid format (%s) requested - output disabled\n",
-		audio_out_format_name(format));
-	    return(0);
-	default:
-	    break;	    
-    }
+      {
+      case SND_PCM_FORMAT_S16_LE:
+      case SND_PCM_FORMAT_U16_LE:
+	ao_data.bps *= 2;
+	break;
+      case SND_PCM_FORMAT_S32_LE:
+      case SND_PCM_FORMAT_S32_BE:
+	ao_data.bps *= 4;
+	break;
+      case -1:
+	printf("alsa-init: invalid format (%s) requested - output disabled\n",
+	       audio_out_format_name(format));
+	return(0);
+      default:
+	break;	    
+      }
     
     if (ao_subdevice) {
       //start parsing ao_subdevice, ugly and not thread safe!
@@ -498,7 +513,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       if (device_set)
 	alsa_handler = spdif_init(alsa_device);
       else
-	alsa_handler = spdif_init("hw:0,2");
+	alsa_handler = spdif_init("iec958");
     }
 
     //setting modes for block or nonblock-mode
@@ -512,7 +527,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       set_block_mode = 0;
       str_block_mode = "block-mode";
     }
-    //cvs cosmetics fix
+
     //sets buff/chunksize if its set manually
     if (ao_data.buffersize) {
       switch (ao_data.buffersize)
