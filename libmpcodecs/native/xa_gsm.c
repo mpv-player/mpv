@@ -39,9 +39,9 @@ static void Gsm_RPE_Decoding();
 //static short gsm_buf[320];
 static XA_GSM_STATE gsm_state;
 
-unsigned char xa_sign_2_ulaw[256];
+static unsigned char xa_sign_2_ulaw[256];
 
-unsigned char XA_Signed_To_uLaw(long ch)
+static unsigned char XA_Signed_To_uLaw(long ch)
 {
   long mask;
   if (ch < 0) { ch = -ch; mask = 0x7f; }
@@ -58,7 +58,7 @@ unsigned char XA_Signed_To_uLaw(long ch)
   return (mask & ch);
 }
 
-void Gen_Signed_2_uLaw()
+static void Gen_Signed_2_uLaw()
 {
   unsigned long i;
   for(i=0;i<256;i++)
