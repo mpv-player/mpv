@@ -4204,13 +4204,16 @@ chrominance threshold
 luminance threshold
 .TP
 .B nolzo \ 
-disable the lzo compression
+Disable the lzo compression.
 .TP
 .B q=<3\-255>
-set the quality level
+Set the quality level.
 .TP
 .B raw \ \ \ 
-disable rtjpeg encoding
+Disable rtjpeg encoding.
+.TP
+.B rtjpeg\ 
+Enable rtjpeg encoding.
 
 .SS xvidenc (\-xvidencopts)
 
@@ -4268,7 +4271,7 @@ decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis.
 .B greyscale
 encode in black & white (default=off)
 .TP
-.B debug
+.B debug\ \ 
 save per-frame statistics in xvid.dbg (default=off)
 .br
 this is *not* the 2pass control file
