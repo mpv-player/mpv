@@ -1325,6 +1325,14 @@ main goal of this interface is to maximize the speed of video playback.
   the option "XaaNoPixmapCache" in the screen section instead.
   </simpara></listitem>
 <listitem><simpara>
+  There is a console vidix driver: <option>-vo cvidix</option>.
+  This requires a working and initialized framebuffer for most cards (or else
+  you'll just mess up the screen), and you'll have a similar effect as with
+  <option>-vo mga</option> or <option>-vo fbdev</option>. nVidia cards however
+  are able to output truly graphical video on a real text console. See the
+  <link linkend="vidix-nvidia">nvidia_vid section</link> for more information.
+  </simpara></listitem>
+<listitem><simpara>
   You can use VIDIX subdevice which was applied to several video output
   drivers, such as: <option>-vo vesa:vidix</option>
   (<emphasis role="bold">Linux only</emphasis>) and
@@ -1340,11 +1348,8 @@ Indeed it doesn't matter which video output driver is used with
 <itemizedlist spacing="compact">
 <title>REQUIREMENTS</title>
 <listitem><simpara>
-  Video card should be in graphics mode (I write <emphasis role="bold">should</emphasis>
-  simply because I tested it in text mode - it works but has awful output ;) Use
-  AAlib for that).
-  <emphasis role="bold">Note</emphasis>: Everyone can try this trick by commenting out mode
-  switching in vo_vesa driver.
+  Video card should be in graphics mode (except nVidia cards with the
+  <option>-vo cvidix</option> output driver).
   </simpara></listitem>
 <listitem><simpara>
   <application>MPlayer</application>'s video output driver should know
