@@ -667,20 +667,21 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  De plus, faites attention aux pixels &quot;mi-noirs&quot; sur les bords.
+  De plus, faites attention aux pixels &quot;à moitié noirs&quot; sur les
+  bords.
   Assurez-vous de les découper également, ou sinon vous gaspillerez des bits
   qui seraient mieux dépensés ailleurs.
 </para>
 
 <para>
-  Une fois tout ceci fait, vous obtiendrez probablement une vidéo dans les
-  pixels ne sont pas complètement en 1.85:1 ou 2.35:1, mais quelque chose
-  d'approchant. Vous pouvez calculer le nouvel aspect ratio manuellement,
+  Une fois tout ceci fait, vous obtiendrez probablement une vidéo dont les
+  pixels n'ont pas vraiment un rapport de 1.85:1 ou 2.35:1, mais quelque chose
+  d'approchant. Vous pouvez calculer le nouvel ratio d'aspect manuellement,
   mais <application>MEncoder</application> offre une option pour <systemitem
   class="library">libavcodec</systemitem> appelée <option>autoaspect</option>
   qui le fera pour vous. Ne redimmensionnez pas la vidéo pour obtenir des pixels
-  carrés, à moins que vous n'aimiez gaspiller votre espace disque. Le 
-  redimmensionnement devrait être appliqué lors de la lecture, et le lecteur
+  carrés, à moins que vous n'aimiez gaspiller votre espace disque. Le
+  redimensionnement devrait être appliqué lors de la lecture, et le lecteur
   utilisera l'aspect stocké dans le fichier AVI pour déterminer la résolution 
   appropriée.
 </para>
@@ -692,10 +693,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   L'audio est un problème bien plus simple à résoudre: laissez-le juste tel-quel.
-  Même les flux AC3 5.1 sont au plus en 448Kbit/s, et chaque bit est utile.
-  Vous pouvez être tenté de transcoder l'audio en Ogg Vorbis de haute qualité,
+  Même les flux AC3 5.1 sont au plus en 448Kbit/s, dont chaque bit est utile.
+  Vous pouvez être tenté de convertir l'audio en Ogg Vorbis de haute qualité,
   mais ne pas avoir de décodeur AC3 aujourd'hui ne veut pas dire que vous n'en
-  aurez pas demain. Préservez vos rips DVDs pour le futur en gardant le flux AC3.
+  aurez pas demain. Préparez le futur de vos rips DVDs en gardant le flux AC3.
 </para>
 
 
@@ -705,7 +706,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Interlacing and Telecine</title>
 
 <para>
-  La plupar des films sont tournés en 24 fps. Puisque NTSC est en 29.97 fps,
+  La plupart des films sont tournés en 24 fps. Puisque NTSC est en 29.97 fps,
   certains traitements doivent être appliqués pour l'adapter au débit NTSC.
   Ce procédé est appelé 3:2 pulldown, plus communément appelé téléciné (car
   le pulldown est souvent appliqué durant la phase de conversion en téléciné),
@@ -714,12 +715,12 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  Aucun traitement spécifique, cependant, n'est appliqué pour la vidéo des DVDs
+  Aucun traitement spécifique, n'est cependant appliqué pour la vidéo des DVDs
   PAL, qui tournent à 25 fps (techniquement, PAL peut être téléciné, ce qui est
   appelé 2:2 pulldown, mais ceci n'est pas un problème en pratique). Le film
   24 fps est simplement lu en 25 fps. Le résultat est que la vidéo tourne 
   légèrement plus vite, mais à moins d'être un alien, vous ne verrez pas la 
-  différence. La plupart des DVDs ont de l'audio dont le pitch à été corrigé,
+  différence. La plupart des DVDs ont de l'audio dont le ton a été corrigé,
   donc quand elle est joué à 25 fps cela sonne correctement, même si la piste
   audio (et donc le film entier) a une durée 4% plus courte que les DVDs NTSC.
 </para>
@@ -734,22 +735,24 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Pour les films tournés en 24fps, la vidéo du DVD NTSC est soit en 29.97 fps
   téléciné, soit en 24 fps progressif et prévu pour être téléciné à la volée
-  par le lecteur DVD. D'un autre coté, les séries TV sont généralement seulement
+  par le lecteur DVD. D'un autre coté, les séries TV sont généralement
+  seulement
   entrelaçées, pas télécinées. Ce n'est pas une règle absolue: certaines séries
-  TV sont entrelaçées (comme Buffy et les vampires) alors que d'autres sont
-  un mélange de progressif et d'entrelaçé (comme Angel, ou 24 heures chrono).
+  TV sont entrelaçées (comme Buffy contre les vampires) alors que d'autres sont
+  un mélange de progressif et d'entrelaçé (comme Dark Angel, ou 24 heures
+  chrono).
 </para>
 
 <para>
   Il est fortement recommandé de lire la section <link linkend="menc-feat-telecine">
-  Comment gérer le téléciné et le désentrelacement avec les DVDs NTSC</link> pour 
-  apprendre à gérer les différentes possibilités.
+  Comment gérer le téléciné et le désentrelacement avec les DVDs NTSC</link>
+  pour apprendre à gérer les différentes possibilités.
 </para>
 
 <para>
-  De toute façon, si vous rippez surtout des films, vous rencontrerez soit de la
-  vidéo 24 fps progressive ou de la télécinée, et dans ce cas vous pouvez utiliser
-  le filtre <option>pullup</option> <option>-vf pullup,softskip</option>.
+  De toute façon, si vous rippez surtout des films, vous rencontrerez soit de
+  la vidéo 24 fps progressive, soit télécinée, et dans ce cas vous pouvez
+  utiliser le filtre <option>pullup</option> <option>-vf pullup,softskip</option>.
 </para>
 
 </sect2>
@@ -759,12 +762,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Filtrage</title>
 
 <para>
-  De façon générale, vous devez faire le minimum de filtrage possible de façon
-  à rester proche de la source DVD originale. Le découpage est souvent nécessaire
-  (comme décrit ci-dessus), mais pas le redimmensionnement. Bien que la réduction
-  de taille soit parfois préférée à l'usage de quantiseurs plus élévés, nous
-  voulons éviter ces deux choses: rappelez-vous que nous avons décidé au début
-  d'échanger des bits contre de la qualité.
+  En général, vous devriez appliquer le moins de filtres possible de façon
+  à rester proche de la source DVD originale. Le découpage des bandes noires
+  est souvent nécessaire (comme décrit ci-dessus), mais pas le
+  redimensionnement.
+  Bien réduire la résolution soit parfois préférée à l'usage de quantiseurs
+  plus élévés, nous voulons éviter ces deux choses: rappelez-vous qu'au début
+  nous avions décidé de privilégier la qualité sur l'encombrement disque.
 </para>
 
 <para>
@@ -776,13 +780,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Une chose que vous pouvez faire, cependant, est de passer la vidéo au travers
   d'un très léger filtre anti-bruit, tel que <option>-vf hqdn3d=2:1:2</option>.
-  De nouveau, il s'agit d'utiliser ces bits de meilleur façon: pourquoi les
-  gaspiller à encoder du bruit alors que vous pouvez en rajouter durant la lecture ?
-  Augmenter les paramètres de <option>hqdn3d</option> améliorera la compression,
-  mais si vous augmentez trop, vous risquez de dégrader l'image. Les valeurs
-  suggérées ci-dessus (<option>2:1:2</option>) sont très conservatrices; vous êtes
-  libre d'expérimenter des valeurs plus grandes et d'observer les résultats par 
-  vous-même.
+  De nouveau, il s'agit d'utiliser ces bits de la meilleur façon: pourquoi les
+  gaspiller à encoder du bruit alors que vous pouvez en rajouter durant la
+  lecture ?
+  Augmenter les paramètres de <option>hqdn3d</option> améliorera la
+  compressibilité, mais si vous augmentez trop, vous risquez de dégrader
+  l'image. Les valeurs suggérées ci-dessus (<option>2:1:2</option>) sont très
+  conservatrices; vous êtes libre d'expérimenter des valeurs plus grandes et
+  d'observer les résultats par vous-même.
 </para>
 
 </sect2>
@@ -793,12 +798,12 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Donc, vous venez d'acheter votre tout nouvel exemplaire de Harry Potter et
-  la chambre des secrets (édition écran large, bien sûr), et vous voulez ripper
-  ce DVD pour pouvoir l'ajouter à votre PC &quot;Home Cinema&quot;. C'est un
+  la Chambre des Secrets (édition panoramique, bien sûr), et vous voulez ripper
+  ce DVD pour pouvoir l'ajouter à votre PC Home Cinema. C'est un
   DVD zone 1, donc en NTSC. L'exemple ci-dessous s'applique également au PAL,
   à part l'option <option>-ofps 23.976</option> qui devient inutile (car le
   débit sortant est le même que le débit entrant), et bien sûr les dimensions
-  de découpage seront différentes.
+  de découpe seront différentes.
 </para>
 
 <para>
@@ -817,12 +822,12 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <screen>mplayer dvd://1 -vf cropdetect</screen>
 
   Assurez-vous de vous placer dans une trame parfaitement remplie (tel qu'une
-  scène claire), et vous vérez sur la console de sortie de 
+  scène claire), et vous verrez sur la console de sortie de 
   <application>MPlayer</application>:
 
   <screen>crop area: X: 0..719  Y: 57..419  (-vf crop=720:362:0:58)</screen>
 
-  Nous relisons ensuite le film avec ce filtre pour tester ca correction:
+  Nous relisons ensuite le film avec ce filtre pour tester sa justesse:
 
   <screen>mplayer dvd://1 -vf crop=720:362:0:58</screen>
 
@@ -834,42 +839,44 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Nous pourrions simplement utiliser <option>crop=720:352:0:58</option>, mais
-  il serait sympatique de retirer un peu du haut et du bas pour aligner le centre.
-  Nous rabottons la hauteur de 10 pixels, mais nous ne voulons pas incrémenter
+  il serait plus sympatique de retirer un peu du haut et du bas pour aligner
+  au centre.
+  Nous rabotons la hauteur de 10 pixels, mais nous ne voulons pas augmenter
   le y-offset de 5 pixels car c'est un nombre impaire et cela pourrait affecter
   la qualité. À la place, nous allons augmenter le y-offset de 4 pixels:
 
   <screen>mplayer dvd://1 -vf crop=720:352:0:62</screen>
 
   Une autre raison de raser les pixels du haut et du bas est de nous assurer
-  que nous avons éliminer les possibles pixels mi-noirs. Notez que si votre
-  vidéo est télécinée, assurez-vous que le filtre <option>pullup</option> 
-  (ou tout autre filtre de téléciné inverse que vous décidez d'utiliser)
-  apparaisse bien dans la chaine de filtres avant votre découpage. Si la vidéo
-  est entrelaçée, désentrelacez-la avant le découpage (si vous voulez garder
-  la vidéo entrelaçée, alors assurez-vous que votre offset de découpage soit
-  un multiple de 4).
+  que nous avons éliminé les éventuels pixels à moitié noirs.
+  Notez que si votre vidéo est télécinée, assurez-vous que le filtre
+  <option>pullup</option> (ou tout autre filtre de téléciné inverse que vous
+  décidez d'utiliser) apparaisse bien au début de la chaine de filtres, avant
+  le découpage. Si la vidéo est entrelaçée, désentrelacez-la avant le
+  découpage (si vous voulez garder la vidéo entrelaçée, alors assurez-vous que
+  votre offset de découpage soit un multiple de 4).
 </para>
 
 <para>
-  Si perdre ces 10 pixels vous gène vraiment, vous pouvez de diminuer les 
-  dimmensions au plus proche multiple de 16.
+  Si perdre ces 10 pixels vous gène vraiment, vous pouvez diminuer les 
+  dimensions au plus proche multiple de 16.
   La chaine de filtre ressemblera alors à:
 
   <screen>-vf crop=720:362:0:58,scale=720:352</screen>
 
-  Ce genre de diminution implique qu'un certain nombre de détails sera perdu,
-  bien que cela sera probablement imperceptible. Augmenter les dimmensions
-  donnera une moins bonne qualité (à moins que vous n'augmentiez le débit).
+  La réduction de résolution implique qu'un certain nombre de détails sera
+  perdu, bien que cela sera probablement imperceptible.
+  Augmenter les dimensions donnera une moins bonne qualité (à moins que vous
+  n'augmentiez le débit).
   Le découpage supprime ces pixels. C'est un compromis à faire à chaque fois.
-  Par exemple, si le DVD a été fait pour la télévision, vous pouvez éviter
-  de redimmensionner verticalement, puisque les lignes correspondent à la façon
-  dont a été enregistré le contenu.
+  Par exemple, si le DVD a été fait pour la télévision, vous devriez éviter
+  de redimensionner verticalement, puisque l'échantillonnage de lignes
+  correspond à la façon dont a été enregistré le contenu.
 </para>
 
 <para>
-  Après inspection, nous voyons que le film a pas mal d'action et un haut
-  niveau de détail, nous choisissons donc un débit de 2400Kbit.
+  Après inspection, nous voyons que le film comporte pas mal d'action et un
+  haut niveau de détail, nous choisissons donc un débit de 2400Kbit.
 </para>
 
 <para>
@@ -893,18 +900,18 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <option>cmp=3:subcmp=3:mbcmp=3</option> selectionnent une fonction de
   comparaison qui donne une meilleur qualité que les paramètres par défaut.
   Vous pouvez faire des expérimentations avec ce paramètre (référez-vous à la 
-  page de man pour les valeurs possibles) car les différentes fonctions
+  page de manuel pour les valeurs possibles) car les différentes fonctions
   peuvent avoir un impact important sur la qualité suivant la source.
   Par exemple, si vous trouvez que
-  <systemitem class="library">libavcodec</systemitem> produit trop d'artéfacts
-  bloquants, vous pouvez essayer de séléctionner le NSSE expérimental en
+  <systemitem class="library">libavcodec</systemitem> produit trop d'artefacts
+  de type "blocs", vous pouvez essayer de sélectionner le NSSE expérimental en
   tant que fonction de comparaison via <option>*cmp=10</option>.
 </para>
 
 <para>
   Pour ce film, le fichier AVI final fera 138 minutes et environ 3Go. Comme
   la taille n'est pas importante, c'est tout à fait acceptable. En revanche,
-  si vous voulez un fichier plus petit, vous pouvez essayer un débit plus petit.
+  si vous voulez un fichier plus petit, vous pouvez essayer un débit plus faible.
   Augmenter le débit ne sert pas à grand chose, donc même si on peut obtenir
   une nette amélioration de 1800Kbit à 2000Kbit, l'amélioration ne sera peut
   être pas visible au dessus de 2000Kbit. Vous êtes libre d'expérimenter jusqu'à 
