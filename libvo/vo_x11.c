@@ -362,7 +362,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     vo_gc=XCreateGC( mDisplay,vo_window,0L,&xgcv );
 
     // we cannot grab mouse events on root window :(
-    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | 
+    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask |
 	((WinID==0)?0:(ButtonPressMask | ButtonReleaseMask | PointerMotionMask)) );
 
 #ifdef HAVE_XF86VM

@@ -453,6 +453,7 @@ int vo_x11_uninit(Display *display, Window window)
 
        int vo_mouse_timer_const = 30;
 static int vo_mouse_counter = 30;
+       int vo_wm_type = 1;
 
 int vo_x11_check_events(Display *mydisplay){
  int ret=0;
@@ -497,8 +498,9 @@ int vo_x11_check_events(Display *mydisplay){
 		&vo_dx, &vo_dy, (Window *)&foo);
 	    }
 #endif
-	   if (verbose)
+//	   if (verbose)
 	    printf("X11 Window %dx%d-%dx%d\n", vo_dx, vo_dy, vo_dwidth, vo_dheight);
+	    printf("============================================================\n" );
            ret|=VO_EVENT_RESIZE;
            break;
       case KeyPress:
@@ -539,32 +541,42 @@ int vo_x11_check_events(Display *mydisplay){
            mplayer_put_key(MOUSE_BTN0+Event.xbutton.button-1);
            break;
 #endif
+      case PropertyNotify: 
+	   if ( !strcmp( XGetAtomName( mydisplay,Event.xproperty.atom ),"_ICEWM_TRAY" ) ||
+		!strncmp( XGetAtomName( mydisplay,Event.xproperty.atom ),"_KDE_",5 ) ||
+	        !strcmp( XGetAtomName( mydisplay,Event.xproperty.atom ),"KWM_WIN_DESKTOP" ) ) vo_wm_type=0;
+		
+ 	     fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",
+	      vo_window,XGetAtomName( mydisplay,Event.xproperty.atom ),Event.xproperty.atom );
+
+	   break;
      }
   }
 
   return ret;
 }
 
-void vo_x11_sizehint( int x, int y, int width, int height )
+void vo_x11_sizehint( int x, int y, int width, int height, int max )
 {
- vo_hint.flags=PPosition | PSize | PWinGravity;
+ vo_hint.flags=PPosition | PSize | PWinGravity | PBaseSize;
  vo_hint.x=x; vo_hint.y=y; vo_hint.width=width; vo_hint.height=height;
+ if ( max )
+  {
+   vo_hint.max_width=width; vo_hint.max_height=height;
+   vo_hint.flags|=PMaxSize;
+  } else { vo_hint.max_width=0; vo_hint.max_height=0; }
+ vo_hint.base_width=width; vo_hint.base_height=height;
  vo_hint.win_gravity=StaticGravity;
  XSetWMNormalHints( mDisplay,vo_window,&vo_hint );
 }
 
 void vo_x11_fullscreen( void )
 {
- XUnmapWindow( mDisplay,vo_window );
+ if ( vo_wm_type ) XUnmapWindow( mDisplay,vo_window );
  if ( !vo_fs )
   {
    vo_fs=VO_TRUE;
    vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth;   vo_old_height=vo_dheight;
-//   {
-//    Window root; int foo, foo2;
-//    XGetGeometry( mDisplay,vo_window,&root,&vo_old_x,&vo_old_y,&vo_old_width,vo_old_height,&foo,&foo2 );
-//    XTranslateCoordinates( mDisplay,vo_window,root,0,0,&vo_old_x,&vo_old_y,(Window *)&foo);
-//   }
    vo_dx=0;        vo_dy=0;        vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight;
    vo_x11_decoration( mDisplay,vo_window,0 );
   }
@@ -574,10 +586,12 @@ void vo_x11_fullscreen( void )
     vo_dx=vo_old_x; vo_dy=vo_old_y; vo_dwidth=vo_old_width; vo_dheight=vo_old_height;
     vo_x11_decoration( mDisplay,vo_window,1 );
    }
- vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight );
+ vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight,0 );
  XMoveResizeWindow( mDisplay,vo_window,vo_dx,vo_dy,vo_dwidth,vo_dheight );
- XMapWindow( mDisplay,vo_window );
- XSync( mDisplay,False );
+ XMapRaised( mDisplay,vo_window );
+ 
+ XRaiseWindow( mDisplay,vo_window );
+ XFlush( mDisplay );
 }
 
 void saver_on(Display *mDisplay) {
