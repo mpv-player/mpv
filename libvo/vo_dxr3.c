@@ -6,6 +6,9 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2003-02-19:
+ *  Yet another patch from Tamas Kohegyi to fix subpic placement.
+ *
  * 2003-01-12:
  *  Added patch from Tamas Kohegyi to fix subpic placement with freetype.
  *
@@ -531,10 +534,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #ifdef SPU_SUPPORT
 #ifdef HAVE_FREETYPE
 	if (ioval == EM8300_ASPECTRATIO_16_9) {
-		s_width *= 1.5;
+		s_width *= d_height*1.78/s_height*(d_width*1.0/d_height)/2.35;
 	} else {
 		s_width *= 0.84;
 	}
+	//printf("VO: [dxr3] sw/sh:dw/dh ->%i,%i,%i,%i\n",s_width,s_height,d_width,d_height);
 #else
 	s_width*=2;
 	s_height*=2;
