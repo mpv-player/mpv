@@ -147,6 +147,7 @@ static struct pci_dev *pci_dev;
 
 static mga_vid_config_t mga_config; 
 
+static int mga_irq = -1;
 
 //All register offsets are converted to word aligned offsets (32 bit)
 //because we want all our register accesses to be 32 bits
@@ -178,18 +179,23 @@ static mga_vid_config_t mga_config;
 #define BESGLOBCTL  0x3dc0
 #define BESLUMACTL  0x3d40
 #define BESPITCH    0x3d24
+
 #define BESA1C3ORG  0x3d60
 #define BESA1CORG   0x3d10
 #define BESA1ORG    0x3d00
+
 #define BESA2C3ORG  0x3d64 
 #define BESA2CORG   0x3d14
 #define BESA2ORG    0x3d04
+
 #define BESB1C3ORG  0x3d68
 #define BESB1CORG   0x3d18
 #define BESB1ORG    0x3d08
+
 #define BESB2C3ORG  0x3d6C
 #define BESB2CORG   0x3d1C
 #define BESB2ORG    0x3d0C
+
 #define BESHCOORD   0x3d28
 #define BESHISCAL   0x3d30
 #define BESHSRCEND  0x3d3C
@@ -203,13 +209,25 @@ static mga_vid_config_t mga_config;
 #define BESVCOORD   0x3d2c
 #define BESSTATUS   0x3dc4
 
+#define CRTCX	    0x1fd4
+#define CRTCD	    0x1fd5
+#define	IEN	    0x1e1c
+#define ICLEAR	    0x1e18
+#define STATUS      0x1e14
+
+static int mga_next_frame=0;
 
 static void mga_vid_frame_sel(int frame)
 {
+    if ( mga_irq != -1 ) {
+	mga_next_frame=frame;
+    } else {
+
 	//we don't need the vcount protection as we're only hitting
 	//one register (and it doesn't seem to be double buffered)
 	regs.besctl = (regs.besctl & ~0x07000000) + (frame << 25);
 	writel( regs.besctl, mga_mmio_base + BESCTL ); 
+    }
 }
 
 
@@ -286,12 +304,18 @@ static void mga_vid_write_regs(void)
 
 	writel( regs.besa1org,    mga_mmio_base + BESA1ORG);
 	writel( regs.besa1corg,   mga_mmio_base + BESA1CORG);
+	writel( regs.besa2org,    mga_mmio_base + BESA2ORG);
+	writel( regs.besa2corg,   mga_mmio_base + BESA2CORG);
 	writel( regs.besb1org,    mga_mmio_base + BESB1ORG);
 	writel( regs.besb1corg,   mga_mmio_base + BESB1CORG);
+	writel( regs.besb2org,    mga_mmio_base + BESB2ORG);
+	writel( regs.besb2corg,   mga_mmio_base + BESB2CORG);
 	if(is_g400) 
 	{
 		writel( regs.besa1c3org,  mga_mmio_base + BESA1C3ORG);
+		writel( regs.besa2c3org,  mga_mmio_base + BESA2C3ORG);
 		writel( regs.besb1c3org,  mga_mmio_base + BESB1C3ORG);
+		writel( regs.besb2c3org,  mga_mmio_base + BESB2C3ORG);
 	}
 
 	writel( regs.beshcoord,   mga_mmio_base + BESHCOORD);
@@ -302,8 +326,11 @@ static void mga_vid_write_regs(void)
 	
 	writel( regs.besvcoord,   mga_mmio_base + BESVCOORD);
 	writel( regs.besviscal,   mga_mmio_base + BESVISCAL);
+
 	writel( regs.besv1srclst, mga_mmio_base + BESV1SRCLST);
 	writel( regs.besv1wght,   mga_mmio_base + BESV1WGHT);
+	writel( regs.besv2srclst, mga_mmio_base + BESV2SRCLST);
+	writel( regs.besv2wght,   mga_mmio_base + BESV2WGHT);
 	
 	//update the registers somewhere between 1 and 2 frames from now.
 	writel( regs.besglobctl + ((readl(mga_mmio_base + VCOUNT)+2)<<16),
@@ -338,7 +365,7 @@ static int mga_vid_set_config(mga_vid_config_t *config)
 	//FIXME figure out a better way to allocate memory on card
 	//allocate 2 megs
 	//mga_src_base = mga_mem_base + (MGA_VIDMEM_SIZE-2) * 0x100000;
-	mga_src_base = (MGA_VIDMEM_SIZE-2) * 0x100000;
+	mga_src_base = (MGA_VIDMEM_SIZE-3) * 0x100000;
 
 	
 	//Setup the BES registers for a three plane 4:2:0 video source 
@@ -415,7 +442,9 @@ switch(config->format){
 	baseadrofs = ((ofstop*regs.besviscal)>>16)*regs.bespitch;
 	frame_size = ((sw + 31) & ~31) * sh + (((sw + 31) & ~31) * sh) / 2;
 	regs.besa1org = (uint32_t) mga_src_base + baseadrofs;
-	regs.besb1org = (uint32_t) mga_src_base + baseadrofs + frame_size;
+	regs.besa2org = (uint32_t) mga_src_base + baseadrofs + 1*frame_size;
+	regs.besb1org = (uint32_t) mga_src_base + baseadrofs + 2*frame_size;
+	regs.besb2org = (uint32_t) mga_src_base + baseadrofs + 3*frame_size;
 
 	if (is_g400) 
 		baseadrofs = (((ofstop*regs.besviscal)/4)>>16)*regs.bespitch;
@@ -423,18 +452,109 @@ switch(config->format){
 		baseadrofs = (((ofstop*regs.besviscal)/2)>>16)*regs.bespitch;
 
 	regs.besa1corg = (uint32_t) mga_src_base + baseadrofs + regs.bespitch * sh ;
-	regs.besb1corg = (uint32_t) mga_src_base + baseadrofs + frame_size + regs.bespitch * sh;
+	regs.besa2corg = (uint32_t) mga_src_base + baseadrofs + 1*frame_size + regs.bespitch * sh;
+	regs.besb1corg = (uint32_t) mga_src_base + baseadrofs + 2*frame_size + regs.bespitch * sh;
+	regs.besb2corg = (uint32_t) mga_src_base + baseadrofs + 3*frame_size + regs.bespitch * sh;
 	regs.besa1c3org = regs.besa1corg + ((regs.bespitch * sh) / 4);
+	regs.besa2c3org = regs.besa2corg + ((regs.bespitch * sh) / 4);
 	regs.besb1c3org = regs.besb1corg + ((regs.bespitch * sh) / 4);
+	regs.besb2c3org = regs.besb2corg + ((regs.bespitch * sh) / 4);
 
 	weight = ofstop * (regs.besviscal >> 2);
 	weights = weight < 0 ? 1 : 0;
-	regs.besv1wght = (weights << 16) + ((weight & 0x3FFF) << 2);
-	regs.besv1srclst = sh - 1 - (((ofstop * regs.besviscal) >> 16) & 0x03FF);
+	regs.besv2wght = regs.besv1wght = (weights << 16) + ((weight & 0x3FFF) << 2);
+	regs.besv2srclst = regs.besv1srclst = sh - 1 - (((ofstop * regs.besviscal) >> 16) & 0x03FF);
 
 	mga_vid_write_regs();
 	return 0;
 }
+
+static void enable_irq(){
+	long int cc;
+
+	cc = readl(mga_mmio_base + IEN);
+	printk("<1>*** !!! IRQREG = %d\n", (int)(cc&0xff));
+
+	writeb( 0x11, mga_mmio_base + CRTCX);
+	
+	writeb(0x20, mga_mmio_base + CRTCD );  /* clear 0, enable off */
+	writeb(0x00, mga_mmio_base + CRTCD );  /* enable on */
+	writeb(0x10, mga_mmio_base + CRTCD );  /* clear = 1 */
+	
+	writel( regs.besglobctl , mga_mmio_base + BESGLOBCTL);
+
+}
+
+static void disable_irq(){
+
+	writeb( 0x11, mga_mmio_base + CRTCX);
+	writeb(0x20, mga_mmio_base + CRTCD );  /* clear 0, enable off */
+
+}
+
+void mga_handle_irq(int irq, void *dev_id, struct pt_regs *pregs) {
+//	static int frame=0;
+	static int counter=0;
+	long int cc;
+//	if ( ! mga_enabled_flag ) return;
+
+	//printk("mga_interrupt #%d\n", irq);
+
+	if ( irq != -1 ) {
+
+		cc = readl(mga_mmio_base + STATUS);
+		if ( ! (cc & 0x10) ) return;  /* vsyncpen */
+// 		debug_irqcnt++;
+	} 
+
+//    if ( debug_irqignore ) {
+//	debug_irqignore = 0;
+
+
+/*
+	if ( mga_conf_deinterlace ) {
+		if ( mga_first_field ) {
+			// printk("mga_interrupt first field\n");
+			if ( syncfb_interrupt() )
+				mga_first_field = 0;
+		} else {
+			// printk("mga_interrupt second field\n");
+			mga_select_buffer( mga_current_field | 2 );
+			mga_first_field = 1;
+		}
+	} else {
+		syncfb_interrupt();
+	}
+*/
+
+//	frame=(frame+1)&1;
+	regs.besctl = (regs.besctl & ~0x07000000) + (mga_next_frame << 25);
+	writel( regs.besctl, mga_mmio_base + BESCTL ); 
+	
+#if 0
+	++counter;
+	if(!(counter&63)){
+	    printk("mga irq counter = %d\n",counter);
+	}
+#endif
+
+//    } else {
+//	debug_irqignore = 1;
+//    }
+
+	if ( irq != -1 ) {
+		writeb( 0x11, mga_mmio_base + CRTCX);
+		writeb( 0, mga_mmio_base + CRTCD );
+		writeb( 0x10, mga_mmio_base + CRTCD );
+	}
+
+//	writel( regs.besglobctl, mga_mmio_base + BESGLOBCTL);
+
+
+	return;
+
+}
+
 
 
 static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
@@ -480,11 +600,14 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 				regs.besctl |= 1;
 				mga_vid_write_regs();
 			}
+			if ( mga_irq != -1 ) enable_irq();
+			mga_next_frame=0;
 		break;
 
 		case MGA_VID_OFF:
 			printk("mga_vid: Video OFF\n");
 			vid_src_ready = 0;   
+			if ( mga_irq != -1 ) disable_irq();
 			regs.besctl &= ~1;
 			mga_vid_write_regs();
 		break;
@@ -535,6 +658,8 @@ static int mga_vid_find_card(void)
 	}
 
 	pci_dev = dev;
+
+	mga_irq = pci_dev->irq;
 	
 #if LINUX_VERSION_CODE >= 0x020300
 	mga_mmio_base = ioremap_nocache(dev->resource[1].start,0x4000);
@@ -543,7 +668,8 @@ static int mga_vid_find_card(void)
 	mga_mmio_base = ioremap_nocache(dev->base_address[1] & PCI_BASE_ADDRESS_MEM_MASK,0x4000);
 	mga_mem_base =  dev->base_address[0] & PCI_BASE_ADDRESS_MEM_MASK;
 #endif
-	printk("mga_vid: MMIO at 0x%p\n", mga_mmio_base);
+//	printk("mga_vid: MMIO at 0x%p\n", mga_mmio_base);
+	printk("syncfb (mga): MMIO at 0x%p IRQ: %d\n", mga_mmio_base, mga_irq);
 	printk("mga_vid: Frame Buffer at 0x%08lX\n", mga_mem_base);
 
 	pci_read_config_dword(dev,  0x40, &card_option);
@@ -570,6 +696,20 @@ static int mga_vid_find_card(void)
 	}
       
 	printk("mga_vid: RAMSIZE seems to be %d MB\n", (unsigned int) mga_ram_size);
+
+	if ( mga_irq != -1 ) {
+		int tmp = request_irq(mga_irq, mga_handle_irq, SA_INTERRUPT | SA_SHIRQ, "Syncfb Time Base", &mga_irq);
+		if ( tmp ) {
+			printk("syncfb (mga): cannot register irq %d (Err: %d)\n", mga_irq, tmp);
+			mga_irq=-1;
+		} else {
+			printk("syncfb (mga): registered irq %d\n", mga_irq);
+		}
+	} else {
+		printk("syncfb (mga): No valid irq was found\n");
+		mga_irq=-1;
+	}
+
 	
 	return TRUE;
 }
@@ -589,7 +729,7 @@ static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 {
 
 	printk("mga_vid: mapping video memory into userspace\n");
-	if(remap_page_range(vma->vm_start, mga_mem_base + (MGA_VIDMEM_SIZE-2) * 0x100000,
+	if(remap_page_range(vma->vm_start, mga_mem_base + (MGA_VIDMEM_SIZE-3) * 0x100000,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 	{
 		printk("mga_vid: error mapping video memory\n");
@@ -694,6 +834,10 @@ int init_module(void)
 
 void cleanup_module(void)
 {
+
+	if ( mga_irq != -1)
+		free_irq(mga_irq, &mga_irq);
+
 	if(mga_mmio_base)
 		iounmap(mga_mmio_base);
 
