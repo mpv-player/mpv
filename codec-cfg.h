@@ -28,7 +28,8 @@
 
 
 #if !defined(GUID_TYPE) && !defined(GUID_DEFINED)
-#define GUID_TYPE
+#define GUID_TYPE 1
+#define GUID_DEFINED 1
 typedef struct {
 	unsigned long f1;
 	unsigned short f2;
