@@ -491,6 +491,12 @@ static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
 
   line = 0;
   mkv_d->subs.lines++;
+  if (mkv_d->subs.lines> SUB_MAX_TEXT - 1 )
+  {
+  	mp_msg(MSGT_DEMUX, MSGL_WARN,"[mkv] Warning: too many sublines to render, skipping\n");
+  	mkv_d->subs.lines--;
+  	return;
+  }
   s2 = mkv_d->subs.text[mkv_d->subs.lines - 1];
   state = 0;
 
@@ -2357,10 +2363,11 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                                                     sizeof(mkv_sh_sub_t));
       demuxer->sub->id = track->xid;
 
-    } else if (!(strcmp(track->codec_id, MKV_S_TEXTASCII) &&
+    } else if (strcmp(track->codec_id, MKV_S_TEXTASCII) &&
                strcmp(track->codec_id, MKV_S_TEXTUTF8) && 
                strcmp(track->codec_id, MKV_S_TEXTSSA) &&
-               strcmp(track->codec_id, "S_SSA")))
+               strcmp(track->codec_id, "S_SSA") &&
+               strcmp(track->codec_id, "S_TEXT/ASS"))
       mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Subtitle type '%s' is not "
              "supported. Track will not be displayed.\n", track->codec_id);
     else {
@@ -2374,7 +2381,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         if (!strcmp(track->codec_id, MKV_S_TEXTUTF8))
           sub_utf8 = 1;       // Force UTF-8 conversion.
         if (!strcmp(track->codec_id, MKV_S_TEXTSSA) ||
-            !strcmp(track->codec_id, "S_SSA")) {
+            !strcmp(track->codec_id, "S_SSA") ||
+            !strcmp(track->codec_id, "S_TEXT/ASS")) {
           mkv_d->subtitle_type = MKV_SUBTYPE_SSA;
           sub_utf8 = 1;
         } else
