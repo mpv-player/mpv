@@ -441,12 +441,13 @@ draw_frame(uint8_t *src[])
 }
 
 static uint32_t 
-draw_slice(uint8_t *src[], uint32_t slice_num) 
+//draw_slice(uint8_t *src[], uint32_t slice_num) 
+draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
 	uint32_t target;
 
-	target = vidpage2offset + (screenwidth*2 * 16*slice_num);
-	dump_yuv_planar((uint32_t *)src[0],(uint32_t *)src[1],(uint32_t *)src[2],target,vidwidth,16);
+	target = vidpage2offset + (screenwidth*2 * y);
+	dump_yuv_planar((uint32_t *)src[0],(uint32_t *)src[1],(uint32_t *)src[2],target,vidwidth,h);
 	return 0;
 }
 
