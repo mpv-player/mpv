@@ -130,16 +130,14 @@ static uint32_t preinit(const char *arg)
 {
     int ppm_type = 0, pgm_type = 0, pgmyuv_type = 0,
         raw_mode = 0, ascii_mode = 0;
-    strarg_t outdir  = {0, NULL},
-             subdirs = {0, NULL};
     opt_t subopts[] = {
         {"ppm",         OPT_ARG_BOOL,   &ppm_type,      NULL},
         {"pgm",         OPT_ARG_BOOL,   &pgm_type,      NULL},
         {"pgmyuv",      OPT_ARG_BOOL,   &pgmyuv_type,   NULL},
         {"raw",         OPT_ARG_BOOL,   &raw_mode,      NULL},
         {"ascii",       OPT_ARG_BOOL,   &ascii_mode,    NULL},
-        {"outdir",      OPT_ARG_STR,    &outdir,        NULL},
-        {"subdirs",     OPT_ARG_STR,    &subdirs,       NULL},
+        {"outdir",      OPT_ARG_MSTRZ,  &pnm_outdir,    NULL},
+        {"subdirs",     OPT_ARG_MSTRZ,  &pnm_subdirs,   NULL},
         {"maxfiles",    OPT_ARG_INT,    &pnm_maxfiles,  (opt_test_f)int_pos},
         {NULL}
     };
@@ -149,6 +147,8 @@ static uint32_t preinit(const char *arg)
                                             MSGTR_VO_ParsingSuboptions);
 
     pnm_maxfiles = 1000;
+    pnm_outdir = strdup(".");
+    pnm_subdirs = NULL;
 
     if (subopt_parse(arg, subopts) != 0) {
         return -1;
@@ -162,20 +162,6 @@ static uint32_t preinit(const char *arg)
     if (ppm_type)    pnm_type     = PNM_TYPE_PPM;
     if (ascii_mode)  pnm_mode     = PNM_ASCII_MODE;
     if (raw_mode)    pnm_mode     = PNM_RAW_MODE;
-
-    if (outdir.len) {
-        pnm_outdir = malloc(outdir.len + 1);
-        memcpy(pnm_outdir, outdir.str, outdir.len);
-        pnm_outdir[outdir.len] = '\0';
-    } else {
-        pnm_outdir = strdup(".");
-    }
-
-    if (subdirs.len) {
-        pnm_subdirs = malloc(subdirs.len + 1);
-        memcpy(pnm_subdirs, subdirs.str, subdirs.len);
-        pnm_subdirs[subdirs.len] = '\0';
-    }
 
     switch (pnm_mode) {
         case PNM_ASCII_MODE:

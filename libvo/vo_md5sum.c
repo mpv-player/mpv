@@ -103,9 +103,8 @@ void md5sum_write_error(void) {
 
 static uint32_t preinit(const char *arg)
 {
-    strarg_t outfile = {0, NULL};
     opt_t subopts[] = {
-        {"outfile",     OPT_ARG_STR,    &outfile,   NULL},
+        {"outfile",     OPT_ARG_MSTRZ,    &md5sum_outfile,   NULL},
         {NULL}
     };
 
@@ -114,16 +113,9 @@ static uint32_t preinit(const char *arg)
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
                                             MSGTR_VO_ParsingSuboptions);
 
+    md5sum_outfile = strdup("md5sums");
     if (subopt_parse(arg, subopts) != 0) {
         return -1;
-    }
-
-    if (outfile.len) {
-        md5sum_outfile = malloc(outfile.len + 1);
-        memcpy(md5sum_outfile, outfile.str, outfile.len);
-        md5sum_outfile[outfile.len] = '\0';
-    } else {
-        md5sum_outfile = strdup("md5sums");
     }
 
     mp_msg(MSGT_VO, MSGL_V, "%s: outfile --> %s\n", info.short_name,

@@ -22,6 +22,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <assert.h>
 
 #ifndef MPDEBUG
@@ -144,6 +145,23 @@ int subopt_parse( char const * const str, opt_t * opts )
                 last = parse_str( &str[parse_pos],
                                   (strarg_t *)opts[idx].valp );
                 break;
+              case OPT_ARG_MSTRZ:
+                {
+                  char **valp = opts[idx].valp;
+                  strarg_t tmp;
+                  tmp.str = NULL;
+                  tmp.len = 0;
+                  last = parse_str( &str[parse_pos], &tmp );
+                  if (*valp)
+                    free(*valp);
+                  *valp = NULL;
+                  if (tmp.str && tmp.len > 0) {
+                    *valp = malloc(tmp.len + 1);
+                    memcpy(*valp, tmp.str, tmp.len);
+                    *valp[tmp.len] = 0;
+                  }
+                  break;
+                }
               default:
                 assert( 0 && "Arg type of suboption doesn't exist!" );
                 last = NULL; // break parsing!
@@ -237,7 +255,7 @@ static char const * parse_str( char const * const str, strarg_t * const valp )
     match = &str[strlen(str)];
 
   // empty string or too long
-  if ((match == str) || (match - str > 255))
+  if ((match == str) || (match - str > INT_MAX))
     return NULL;
 
   valp->len = match - str;

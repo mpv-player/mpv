@@ -325,7 +325,6 @@ static int int_pos(int *mf)
 
 static uint32_t preinit(const char *arg)
 {
-    strarg_t outdir = {0, NULL}, subdirs = {0, NULL};
     opt_t subopts[] = {
         {"progressive", OPT_ARG_BOOL,   &jpeg_progressive_mode, NULL},
         {"baseline",    OPT_ARG_BOOL,   &jpeg_baseline,         NULL},
@@ -335,8 +334,8 @@ static uint32_t preinit(const char *arg)
                                                 (opt_test_f)int_zero_hundred},
         {"quality",     OPT_ARG_INT,    &jpeg_quality,
                                                 (opt_test_f)int_zero_hundred},
-        {"outdir",      OPT_ARG_STR,    &outdir,                NULL},
-        {"subdirs",     OPT_ARG_STR,    &subdirs,               NULL},
+        {"outdir",      OPT_ARG_MSTRZ,  &jpeg_outdir,           NULL},
+        {"subdirs",     OPT_ARG_MSTRZ,  &jpeg_subdirs,          NULL},
         {"maxfiles",    OPT_ARG_INT,    &jpeg_maxfiles, (opt_test_f)int_pos},
         {NULL}
     };
@@ -351,23 +350,11 @@ static uint32_t preinit(const char *arg)
     jpeg_smooth = 0;
     jpeg_quality = 75;
     jpeg_maxfiles = 1000;
+    jpeg_outdir = strdup(".");
+    jpeg_subdirs = NULL;
 
     if (subopt_parse(arg, subopts) != 0) {
         return -1;
-    }
-
-    if (outdir.len) {
-        jpeg_outdir = malloc(outdir.len + 1);
-        memcpy(jpeg_outdir, outdir.str, outdir.len);
-        jpeg_outdir[outdir.len] = '\0';
-    } else {
-        jpeg_outdir = strdup(".");
-    }
-
-    if (subdirs.len) {
-        jpeg_subdirs = malloc(subdirs.len + 1);
-        memcpy(jpeg_subdirs, subdirs.str, subdirs.len);
-        jpeg_subdirs[subdirs.len] = '\0';
     }
 
     if (jpeg_progressive_mode) info_message = MSGTR_VO_JPEG_ProgressiveJPEG;

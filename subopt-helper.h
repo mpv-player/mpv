@@ -12,6 +12,7 @@
 #define OPT_ARG_BOOL 0
 #define OPT_ARG_INT  1
 #define OPT_ARG_STR  2
+#define OPT_ARG_MSTRZ 3 ///< A malloced, zero terminated string, use free()!
 
 typedef int (*opt_test_f)(void *);
 
@@ -34,7 +35,7 @@ int subopt_parse( char const * const str, opt_t * opts );
 /*------------------ arg specific types and declaration -------------------*/
 typedef struct strarg_s
 {
-  unsigned char len; ///< length of the string determined by the parser
+  int len; ///< length of the string determined by the parser
   char const * str;  ///< pointer to position inside the parse string
 } strarg_t;
 

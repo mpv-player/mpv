@@ -141,12 +141,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	write_bytes = image_width * image_height * 3 / 2;
 	image = malloc(write_bytes);
 
-	yuv_out = fopen(yuv_filename ? yuv_filename : "stream.yuv", "wb");
+	yuv_out = fopen(yuv_filename, "wb");
 	if (!yuv_out || image == 0) 
 	{
 		mp_msg(MSGT_VO,MSGL_FATAL,
 			MSGTR_VO_YUV4MPEG_OutFileOpenError,
-			yuv_filename ? yuv_filename : "stream.yuv");
+			yuv_filename);
 		return -1;
 	}
 	image_y = image;
@@ -496,17 +496,16 @@ static void check_events(void)
 static uint32_t preinit(const char *arg)
 {
   int il, il_bf;
-  strarg_t file;
   opt_t subopts[] = {
     {"interlaced",    OPT_ARG_BOOL, &il,    NULL},
     {"interlaced_bf", OPT_ARG_BOOL, &il_bf, NULL},
-    {"file",          OPT_ARG_STR,  &file,  NULL},
+    {"file",          OPT_ARG_MSTRZ,  &yuv_filename,  NULL},
     {NULL}
   };
 
   il = 0;
   il_bf = 0;
-  file.len = 0;
+  yuv_filename = strdup("stream.yuv");
   if (subopt_parse(arg, subopts) != 0) {
     mp_msg(MSGT_VO, MSGL_FATAL, MSGTR_VO_YUV4MPEG_UnknownSubDev, arg); 
     return -1;
@@ -517,12 +516,6 @@ static uint32_t preinit(const char *arg)
     config_interlace = Y4M_ILACE_TOP_FIRST;
   if (il_bf)
     config_interlace = Y4M_ILACE_BOTTOM_FIRST;
-  yuv_filename = NULL;
-  if (file.len > 0) {
-    yuv_filename = malloc(file.len + 1);
-    memcpy(yuv_filename, file.str, file.len);
-    yuv_filename[file.len] = 0;
-  }
 
     /* Inform user which output mode is used */
     switch (config_interlace)
