@@ -1630,8 +1630,9 @@ Flips the image upside down.
 See also option \-flip.
 .IPs mirror
 Flips the image on Y axis.
-.IPs rotate[=<0-3>]
-Rotates and flips (optional) the image +/\:\- 90 degrees.
+.IPs rotate[=<0-7>]
+Rotates and flips (optional) the image +/\:\- 90 degrees. For parameters between 
+4-7 rotation is only done if the movie's geometry is portrait and not landscape. 
 .IPs scale[=w:h[:c[:p]]]
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
 colorspace conversion (see \-sws option too).
