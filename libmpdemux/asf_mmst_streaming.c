@@ -171,7 +171,7 @@ static int get_data (int s, char *buf, size_t count)
 
     len = recv (s, &buf[total], count-total, 0);
 
-    if (len<0) {
+    if (len<=0) {
       perror ("read error:");
       return 0;
     }
@@ -538,6 +538,7 @@ int asf_mmst_streaming_start(stream_t *stream)
 
   asf_header_len = get_header (s, asf_header, stream->streaming_ctrl);
 //  printf("---------------------------------- asf_header %d\n",asf_header);
+  if (asf_header_len==0) return -1; //error reading header
   packet_length = interp_header (asf_header, asf_header_len);
 
 
