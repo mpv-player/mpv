@@ -429,7 +429,9 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
        font.
        *sfalco*
      */
-    if(suboverlap_enabled) obj->y -= vo_font->pic_a[vo_font->font[40]]->h - vo_font->height;
+    if(suboverlap_enabled &&
+       vo_font->font[40]>=0 && vo_font->pic_a[vo_font->font[40]])
+	obj->y -= vo_font->pic_a[vo_font->font[40]]->h - vo_font->height;
 
     h = dys - obj->y;
     if (sub_alignment == 2)
