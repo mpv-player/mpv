@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.42 -->
+<!-- synced with 1.43 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -163,7 +163,8 @@ z instrukcji MMX, SSE i 3DNOW!, które nie mogą być skompilowane przy pomocy
 assemblera Sun <filename>/usr/ccs/bin/as</filename>.
 </para>
 
-<para>Skrypt <filename>configure</filename> stara się określić, jaki assembler
+<para>
+Skrypt <filename>configure</filename> stara się określić, jaki assembler
 wywoływany jest przez komendę &quot;gcc&quot; (jeżeli próba zakończy się fiaskiem,
 użyj opcji <option>--as=<replaceable>/gdziekolwiek/zainstalowałeś/gnu-as</replaceable></option>,
 żeby określić gdzie skrypt <filename>configure</filename> może znaleźć GNU "as" w Twoim
@@ -220,19 +221,6 @@ Problem może być rozwiązany przy pomocy łatki 109764-04 (sparc) / 109765-04 (x86
 </para></listitem>
 </itemizedlist>
 
-<para>
-Na Solarisie UltraSPARC, możesz otrzymać dodatkową moc obliczeniową,
-używając instrukcji VIS dla pewnych, czasochłonnych operacji. Akceleracja VIS 
-może być użyta w <application>MPlayerze</application>, odwołując się do
-funkcji zawartych w bibliotece Suna
-<ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mediaLib</ulink>.
-</para>
-
-<para>
-Przyspieszone, przy pomocy VIS, operacje z biblioteki mediaLib 
-są wykorzystywane przy dekodowaniu video w formacie mpeg2 i konwersji 
-przestrzeni kolorów w sterownikach wyjściowych video.
-</para>
 </sect1>
 
 <sect1 id="irix">
