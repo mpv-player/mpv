@@ -6,6 +6,10 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-12-24: (Hohoho)
+ *  Added patch from Thomas Jarosch <tomj@simonv.com> which adds support
+ *   for setting the TV norm by movie framerate.
+ *
  * 2002-11-03:
  *  Cleaned up syncing code and renamed setup variables so
  *   they can be accessed from the GUI.
@@ -153,6 +157,7 @@ int dxr3_prebuf = 0;
 int dxr3_newsync = 0;
 int dxr3_overlay = 0;
 int dxr3_device_num = 0;
+int dxr3_norm = 0;
 
 /* File descriptors */
 static int fd_control = -1;
@@ -445,6 +450,44 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
 	/* Set monitor_aspect to avoid jitter */
 	monitor_aspect = (float) width / (float) height;
+	
+	/* adjust TV norm */
+#ifdef EM8300_IOCTL_SET_VIDEOMODE
+	if (dxr3_norm != 0) {
+	    if (dxr3_norm == 5) {
+			ioval = EM8300_VIDEOMODE_NTSC;
+	    } else if (dxr3_norm == 4) {
+			ioval = EM8300_VIDEOMODE_PAL60;
+	    } else if (dxr3_norm == 3) {
+			ioval = EM8300_VIDEOMODE_PAL;
+	    } else if (dxr3_norm == 2) {
+			if (vo_fps > 28) {
+			    ioval = EM8300_VIDEOMODE_PAL60;
+			} else {
+			    ioval = EM8300_VIDEOMODE_PAL;
+			}
+			
+			printf("VO: [dxr3] Auto-selected TV norm by frame rate: ");
+			ioval == EM8300_VIDEOMODE_PAL60 ? printf("PAL-60") : printf("PAL");
+			printf("\n"); 
+		} else if (dxr3_norm == 1) {
+			if (vo_fps > 28) {
+			    ioval = EM8300_VIDEOMODE_NTSC;
+			} else {
+			    ioval = EM8300_VIDEOMODE_PAL;
+			}
+
+			printf("VO: [dxr3] Auto-selected TV norm by frame rate: ");
+			ioval == EM8300_VIDEOMODE_NTSC ? printf("NTSC") : printf("PAL");
+			printf("\n"); 
+	    }
+	
+	    if (ioctl(fd_control, EM8300_IOCTL_SET_VIDEOMODE, &ioval) < 0) {
+			printf("VO: [dxr3] Unable to set TV norm!\n");
+	    }
+	}
+#endif
+	
 	
 	/* libavcodec requires a width and height that is x|16 */
 	aspect_save_orig(width, height);
@@ -808,6 +851,37 @@ static uint32_t preinit(const char *arg)
 #else
 			printf("VO: [dxr3] Error: You need to compile mplayer with x11 libraries and headers installed to use overlay.\n");
 #endif
+		} else if (!strncmp("norm=", arg, 5)) {
+			arg += 5;
+			// dxr3_norm is 0 (-> don't change norm) by default
+			// but maybe someone changes this in the future
+
+			printf("VO: [dxr3] Will set TV norm to: ");
+			
+			if (*arg == '5') {
+			    dxr3_norm = 5;
+			    printf("NTSC");
+			} else if (*arg == '4') {
+			    dxr3_norm = 4;
+			    printf("PAL-60");
+			} else if (*arg == '3') {
+			    dxr3_norm = 3;
+			    printf("PAL");
+			} else if (*arg == '2') {
+			    dxr3_norm = 2;
+			    printf("Auto-adjust to movie frame rate (PAL/PAL60)");
+			} else if (*arg == '1') {
+			    dxr3_norm = 1;
+			    printf("Auto-adjust to movie frame rate (PAL/NTSC)");
+			} else if (*arg == '0') {
+			    dxr3_norm = 0;
+			    printf("Use current norm");
+			} else {
+			    dxr3_norm = 0;
+			    printf("Unknown norm supplied. Use current norm");
+			}
+			
+			printf("\n");
 		} else if (arg[0] == '0' || arg[0] == '1' || arg[0] == '2' || arg[0] == '3') {
 			dxr3_device_num = arg[0];
 		}
