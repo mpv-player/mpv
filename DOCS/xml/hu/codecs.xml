@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.55 -->
+<!-- synced to 1.56 -->
 <sect1 id="codecs">
 <title>Támogatott codec-ek</title>
 
@@ -71,7 +71,7 @@ A legfontosabb dolgok:
 
 <para>
 Ha van olyan Win32 codec-ed, ami nincs a listában és még nem támogatott,
-olvasd el a <link linkend="win32-codecs">codec importálás HOGYAN</link>-t
+olvasd el a <link linkend="codec-importing">codec importálás HOGYAN</link>-t
 és segítsd a munkánkat.
 </para>
 
@@ -744,7 +744,7 @@ pedig a <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>-tól.
 
 <!-- ********** -->
 
-<sect2 id="win32-codecs">
+<sect2 id="codec-importing">
 <title>Win32 codec importálási HOGYAN</title>
 
 <!-- TODO: a short paragraph of text would be nice here... -->
