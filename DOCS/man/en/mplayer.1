@@ -849,6 +849,10 @@ or ~/.mplayer/\:channels.conf as a last resort.
 .TP
 .B \-dvd-device <path\ to\ device> (DVD only)
 Specify the DVD device (default: /dev/\:dvd).
+You can also specify a directory that contains files previously copied directly
+from a DVD (such as with vobcopy).
+Note that using \-dumpstream is usually a better way to
+copy DVD titles in the first place (see the examples).
 .
 .TP
 .B \-dvdangle <angle\ ID> (DVD only)
@@ -7014,6 +7018,14 @@ mplayer dvd://1 \-dvdangle 2
 .TP
 .B Play from a different DVD device:
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
+.
+.TP
+.B Play DVD video from a directory with VOB files:
+mplayer dvd://1 \-dvd-device /path/\:to/\:directory/
+.
+.TP
+.B Copy a DVD title to hard disk, saving to file "title1.vob":
+mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
 .
 .TP
 .B Stream from HTTP:
