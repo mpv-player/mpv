@@ -94,11 +94,12 @@ struct config tvopts_conf[]={
 	{"on", &tv_param_on, CONF_TYPE_FLAG, 0, 0, 1},
 	{"driver", &tv_param_driver, CONF_TYPE_STRING, 0, 0, 0},
 	{"device", &tv_param_device, CONF_TYPE_STRING, 0, 0, 0},
-	{"freq", &tv_param_freq, CONF_TYPE_FLOAT, CONF_RANGE, 0, 2500000},
+	{"freq", &tv_param_freq, CONF_TYPE_INT, CONF_RANGE, 0, 2500000},
 	{"channel", &tv_param_channel, CONF_TYPE_STRING, 0, 0, 0},
 	{"norm", &tv_param_norm, CONF_TYPE_STRING, 0, 0, 0},
 	{"width", &tv_param_width, CONF_TYPE_INT, 0, 0, 4096},
 	{"height", &tv_param_height, CONF_TYPE_INT, 0, 0, 4096},
+	{"input", &tv_param_input, CONF_TYPE_INT, 0, 0, 20},
 	{NULL, NULL, 0, 0, 0, 0}
 };
 #endif

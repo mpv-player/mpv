@@ -72,7 +72,7 @@ extern int vcd_get_track_end(int fd,int track);
 
 #ifdef USE_TV
 #include "tv.h"
-extern tvi_handle_t *tv_handler;
+tvi_handle_t *tv_handler;
 #endif
 
 // Open a new stream  (stdin/file/vcd/url)
@@ -251,12 +251,13 @@ if(dvd_title){
 //============ Check for TV-input ====
   if (tv_param_on==1)
   {
-    stream=new_stream(-1,STREAMTYPE_TV);
+    stream = new_stream(-1,STREAMTYPE_TV);
     tv_handler = tv_begin();
     if (!tv_handler)
 	return(NULL);
-    tv_init(tv_handler);
-    return(stream);
+    if (tv_init(tv_handler) == 1)
+	return(stream);
+    return(NULL);
   }
 #endif
 

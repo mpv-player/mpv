@@ -158,7 +158,9 @@ int demux_asf_fill_buffer(demuxer_t *demux);
 int demux_mov_fill_buffer(demuxer_t *demux,demux_stream_t* ds);
 int demux_vivo_fill_buffer(demuxer_t *demux);
 #ifdef USE_TV
-int demux_tv_fill_buffer(demuxer_t *demux);
+#include "tv.h"
+extern tvi_handle_t *tv_handler;
+int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh);
 #endif
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
@@ -174,7 +176,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_MOV: return demux_mov_fill_buffer(demux,ds);
     case DEMUXER_TYPE_VIVO: return demux_vivo_fill_buffer(demux);
 #ifdef USE_TV
-    case DEMUXER_TYPE_TV: return demux_tv_fill_buffer(demux);
+    case DEMUXER_TYPE_TV: return demux_tv_fill_buffer(demux, tv_handler);
 #endif
   }
   return 0;
@@ -554,7 +556,7 @@ switch(file_format){
  }
 #ifdef USE_TV
  case DEMUXER_TYPE_TV: {
-    demux_open_tv(demuxer);
+    demux_open_tv(demuxer, tv_handler);
     break;
  }
 #endif
