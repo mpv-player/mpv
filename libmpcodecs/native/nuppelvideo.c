@@ -13,7 +13,7 @@
 #include "config.h"
 #include "mp_msg.h"
 
-#include "fastmemcpy.h"
+#include "../../libvo/fastmemcpy.h"
 
 #include "libmpdemux/nuppelvideo.h" 
 #include "RTjpegN.h"
