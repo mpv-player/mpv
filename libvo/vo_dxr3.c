@@ -75,6 +75,7 @@ static int fd_spu = -1;
 
 /* Static variable used in ioctl's */
 static int ioval = 0;
+static int pts = 0;
 
 static vo_info_t vo_info = 
 {
@@ -89,7 +90,7 @@ void write_dxr3(rte_context *context, void *data, size_t size, void *user_data)
 {
 	size_t data_left = size;
 	/* Set the timestamp of the next video packet */
-	if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts) < 0) {
+	if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts) < 0) {
 		printf("VO: [dxr3] Unable to set pts\n");
 	}
 	
@@ -183,10 +184,6 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 		printf("VO: [dxr3] Unable to set playmode!\n");
 	}
 	
-	/* Set start pts and speed */
-	ioctl(fd_control, EM8300_IOCTL_SCR_SET, &vo_pts);
-	ioval = 0x900;
-	ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
 	/* Start em8300 prebuffering and sync engine */
 	reg.microcode_register = 1;
 	reg.reg = 0;
@@ -390,7 +387,7 @@ static uint32_t draw_frame(uint8_t * src[])
 
 		if (p->id == 0x20) {
 			/* Set subpic timestamp */
-			if (ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts) < 0) {
+			if (ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &pts) < 0) {
 				printf("VO: [dxr3] Unable to set pts\n");
 			}
 
@@ -400,7 +397,7 @@ static uint32_t draw_frame(uint8_t * src[])
 			}
 		} else {
 			/* Set frame timestamp */
-			if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts) < 0) {
+			if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts) < 0) {
 				printf("VO: [dxr3] Unable to set pts\n");
 			}
 
@@ -436,7 +433,7 @@ static uint32_t draw_frame(uint8_t * src[])
 		rgb24toyv12(s, dY, dU, dV, w, h, picture_linesize[0], picture_linesize[1], v_width * 3);
 	
 		mp1e_buffer.data = picture_data[0];
-		mp1e_buffer.time = vo_pts / 90000.0;
+		mp1e_buffer.time = pts / 90000.0;
 		mp1e_buffer.user_data = NULL;
 		vo_draw_text(osd_w, osd_h, draw_alpha);
 		rte_push_video_buffer(mp1e_context, &mp1e_buffer);
@@ -450,24 +447,31 @@ static void flip_page(void)
 {
 	static int prev_pts = 0;
 	/* Flush the device if a seek occured */
-	if (prev_pts > vo_pts) {
+	if (prev_pts > pts) {
+		printf("Seek\n");
 		ioval = EM8300_SUBDEVICE_VIDEO;
 		ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
+		pts += 90000.0 / vo_fps;
+		ioctl(fd_control, EM8300_IOCTL_SCR_SET, &pts);
+		if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts) < 0) {
+			printf("VO: [dxr3] Unable to set pts\n");
+		}
 	}
-	prev_pts = vo_pts;
+	prev_pts = pts;
 #ifdef USE_MP1E
 	if (img_format == IMGFMT_YV12) {
 		mp1e_buffer.data = picture_data[0];
-		mp1e_buffer.time = vo_pts / 90000.0;
+		mp1e_buffer.time = pts / 90000.0;
 		mp1e_buffer.user_data = NULL;
 		rte_push_video_buffer(mp1e_context, &mp1e_buffer);
 	} else if (img_format == IMGFMT_YUY2) {
 		mp1e_buffer.data = picture_data[0];
-		mp1e_buffer.time = vo_pts / 90000.0;
+		mp1e_buffer.time = pts / 90000.0;
 		mp1e_buffer.user_data = NULL;
 		rte_push_video_buffer(mp1e_context, &mp1e_buffer);
 	}
 #endif
+	pts += 90000.0 / vo_fps;
 }
 
 static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0)
