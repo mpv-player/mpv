@@ -76,6 +76,7 @@ usage: $0 [options]
 
 params:
         --cc                    use this C compiler to build MPlayer [gcc]
+	--enable-debug[=1-3]	compile debugging information into mplayer
         --enable-mmx            build with mmx support [autodetect]
         --enable-mmx2           build with mmx2 support (PIII, Athlon) [autodetect]
         --enable-3dnow          build with 3dnow! support [autodetect]
@@ -506,6 +507,12 @@ rm -f $TMPC $TMPO
 for ac_option
 do
  case "$ac_option" in
+  --enable-debug)
+  	_debug='-g'
+	;;
+  --enable-debug=*)
+        _debug=`echo -n '-g'; echo $ac_option | cut -d '=' -f 2`
+	;;
   --enable-css)
 	_css=yes
 	;;
@@ -800,7 +807,7 @@ fi
 
 # Checking for CFLAGS
 if [ "$CFLAGS" = "" ]; then
- CFLAGS="-O4 -march=$proc -mcpu=$proc -pipe -ffast-math"
+ CFLAGS="-O4 $_debug -march=$proc -mcpu=$proc -pipe -ffast-math"
 fi
 
 echo
@@ -812,7 +819,7 @@ cat > $MCONF << EOF
 AR=ar
 CC=$_cc
 X11DIR=$_x11libdir
-# OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
+# OPTFLAGS=-O4 $_debug -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=$CFLAGS
 # LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
 X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng
