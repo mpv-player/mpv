@@ -519,17 +519,22 @@ static void mach64_vid_display_video( void )
     OUTREG(OVERLAY_SCALE_CNTL, 0x04000001 | (3<<30));
     mach64_wait_for_idle();
     vf = INREG(VIDEO_FORMAT);
+
+// Bits 16-19 seem to select the format
+// Bit 28 seems to toggle the chroma encoding
+// the remaining bits seem to have no effect
+
     switch(besr.fourcc)
     {
         /* 4:2:0 */
 	case IMGFMT_IYUV:
 	case IMGFMT_I420:
-	case IMGFMT_YV12:  OUTREG(VIDEO_FORMAT, (vf & ~0xF000) | 0xA000);  break;
+	case IMGFMT_YV12:  OUTREG(VIDEO_FORMAT, (vf & ~0xF0000) | 0xA0000);  break;
         /* 4:2:2 */
         case IMGFMT_YVYU:
 	case IMGFMT_UYVY:  OUTREG(VIDEO_FORMAT, (vf & ~0xF000) | 0xB000); break;
 	case IMGFMT_YUY2:
-	default:           OUTREG(VIDEO_FORMAT, (vf & ~0xF000) | 0xC000); break;
+	default:           OUTREG(VIDEO_FORMAT, (vf & ~0xF0000) | 0xB0000); break;
     }
 //    OUTPLL(PLL_SCALER_LOCK_EN, 0);
     if(__verbose > 1) mach64_vid_dump_regs();
@@ -582,6 +587,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     v_inc = (src_h << (12
 		+(mach64_is_interlace()?1:0)
 		-(mach64_is_dbl_scan()?1:0)
+		+(is_420?1:0)
 		)) / dest_h;
     h_inc = (src_w << (12+ecp)) / dest_w;
     v_inc /= 2;
