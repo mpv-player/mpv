@@ -1,4 +1,4 @@
-.\" synced with 1.721
+.\" synced with 1.723
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1801,7 +1801,7 @@ Przekazuje d¼wiêk przez demona ESD.
 .PD 0
 .RSs
 .IPs <serwer>
-Okre¶la jaki serwer SDL ma zostaæ u¿yty (domy¶lnie: localhost).
+Okre¶la jaki serwer ESD ma zostaæ u¿yty (domy¶lnie: localhost).
 .RE
 .PD 1
 
@@ -3578,9 +3578,8 @@ wy¶wietlanie OSD/\:napisów
 .RE
 .
 .TP
-.B flip\ \ \ 
+.B flip (zobacz równie¿ opcjê \-flip)
 Odwraca obraz do góry nogami.
-Zobacz tak¿e opcjê \-flip.
 .
 .TP
 .B mirror\ 
@@ -3593,11 +3592,11 @@ Dla parametrów pomiêdzy 4\-7 obracanie wykona siê tylko je¿eli geometria filmu
 jest portretem a nie krajobrazem.
 .
 .TP
-.B scale[=w:h[:przeplot[:gub_kolor[:parametr[:presize]]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:parametr[:parametr2[:presize]]]]]]
 Skaluje obraz (wolnym) programowym skalatorem i wykonuje konwersjê
 kolorów YUV<\->RGB (zobacz te¿ \-sws).
 .RSs
-.IPs w,h\ \ 
+.IPs <w>,<h> 
 Przeskalowana szeroko¶æ/\:wysoko¶æ (domy¶lnie: oryginalna szeroko¶æ/\:wysoko¶æ)
 .br
 .I INFORMACJA:
@@ -3612,9 +3611,9 @@ skalowaæ, domy¶lnie jest d_width/\:d_height!
 .br
 -3:   oblicza w/\:h u¿ywaj±c tej drugiej warto¶ci i oryginalnych proporcji.
 .REss
-.IPs przeplot
+.IPs interlaced
 Prze³±cza skalowanie z przeplotem.
-.IPs gub_kolor
+.IPs <chr_drop>
 opuszcza informacjê o kolorach
 .RSss
 0: U¿yje wszystkich dostêpnych linii wej¶cia koloru.
@@ -3625,16 +3624,25 @@ opuszcza informacjê o kolorach
 .br
 3: U¿yje tylko co 8m± liniê wej¶cia koloru.
 .REss
-.IPs parametr
-parametr skalowania (zale¿nie od u¿ytej metody)
+.IPs <parametr>
 .RSss
-\-sws 2 (bicubic):  ostro¶æ (0 (g³adkie) \- 100 (wyostrzone))
+\-sws 2 (dwu¶ciennie):  B (rozmazywanie) i C (pier¶cieniowanie)
+.br
+(0.00, 0.60) domy¶lnie
+.br
+(0.00, 0.75) "precyzyjna dwu¶cienna" VirtualDuba
+.br
+(0.00, 0.50) krzywa skejana Catmull-Rom
+.br
+(0.33, 0.33) krzywa sklejana Mitchell-Netravali
+.br
+(1.00, 0.00) jedno¶cienna krzywa sklejana B
 .br
 \-sws 7 (gaussian): ostro¶æ (0 (g³adkie) \- 100 (wyostrzone))
 .br
 \-sws 9 (lanczos):  d³ugo¶æ filtra (1\-10)
 .REss
-.IPs presize
+.IPs <presize>
 Skaluje do standardowych wielko¶ci.
 .RSss
 qntsc:   352x240 (æwieræ ekranu NTSC)
@@ -3652,7 +3660,7 @@ spal:    768x576 (PAL z kwadratowymi pikselami)
 .RE
 .
 .TP
-.B dsize={proporcja|w:h}
+.B dsize=[proporcja|w:h]
 Zmienia po¿±dan± wielko¶æ obrazu/\:proporcjê w wybranym miejscu ³añcucha
 filtrów.
 Proporcja mo¿e byæ podana jako u³amek (4/\:3) lub liczba rzeczywista (1.33).
@@ -3663,7 +3671,7 @@ prawid³owych proporcji.
 .
 .TP
 .B yuy2\ \ \ 
-Wymusza konwersjê programow± YV12/\:I420 lub 422P na YUY2.
+Wymusza konwersjê programow± YV12/\:I420/\:422P na YUY2.
 Przydatne przy kartach/\:sterownikach video, które maj± woln± obs³ugê YV12,
 ale szybk± YUY2.
 .
@@ -3697,6 +3705,8 @@ palety.
 Ograniczenie przestrzeni kolorów dla nastêpnego filtru bez robienia ¿adnej
 konwersji.
 Stosowaæ razem z filtrem skaluj±cym do prawdziwej konwersji.
+.br
+.I INFORMACJA:
 Listê dostêpnych formatów mo¿na uzskaæ wywo³uj±c format=fmt=help.
 .PD 0
 .RSs
@@ -3722,45 +3732,43 @@ nazwa formatu taka jak rgb15, bgr24, yv12, itp (domy¶lnie: yv12)
 .
 .TP
 .B pp[=filtr1[:opcja1[:opcja2...]]/\:[-]filtr2...] (zobacz tak¿e \-pphelp)
-Ta opcja w³±cza u¿ycie wewnêtrznych filtrów postprocessingu MPlayera,
-a tak¿e daje interfejs do przekazywania filtrom opcji.
-Podfiltry musz± byæ oddzielone znakiem /.
-Ka¿dy filtr domy¶lnie ustawiony jest na "c" (chrominance).
-Parametry akceptuj± prefix "-" wy³aczaj±cy opcjê.
-Do opcji mo¿e byæ do³±czony znak ":" i litera by wskazaæ jej zakres:
+Ta opcja uruchamia okre¶lony ³añcuch podfiltrów postprocessingu.
+Podfiltry musz± byæ oddzielone znakiem "/" i mog± byæ wy³±czone przez
+poprzedzenie ich kombinacj± "'\-".
+Dodanie ":" i "a", "c" lub "y" okre¶la zakres ³añcucha (domy¶lnie: c):
 .PD 0
 .RSs
 .IPs a
-Automatycznie wy³±cza filtr, gdy procesor jest zbyt wolny
+Wy³±cza filtr, je¶li procesor jest zbyt wolny.
 .IPs c
 Filtruje te¿ kolory.
 .IPs y
-Nie wykonuje filtrowania kolorów (tylko jasno¶ci).
+Wykonuje tylko filtrownie jasno¶ci.
 .RE
 .PD 1
 .sp 1
 .RS
 .br
 .I INFORMACJA:
-\-pphelp poka¿e wszystkie dostêpne filtry postprocessingu.
+\-pphelp poka¿e wszystkie dostêpne podfiltry.
 .sp 1
 .I PRZYK£AD:
 .RE
 .PD 0
 .RSs
-.IPs "\-vf pp=hb/\:vb/\:dr/\:al"
+.IPs "\-vf pp=hb/vb/dr/al"
 odblokowywanie poziome i pionowe, odpier¶cienianie i automatyczna korekcja
 jasno¶ci/\:kontrastu
-.IPs "\-vf pp=hb/\:vb/\:dr/\:al/\:lb"
+.IPs "\-vf pp=hb/vb/dr/al/lb"
 odblokowywanie poziome i pionowe, odpier¶cienianie, automatyczna korekcja
-jasno¶ci/\:kontrastu i usuwanie przeplotu liniowym rozmyciem.
-.IPs "\-vf pp=de/\-al"
+jasno¶ci/\:kontrastu i usuwanie przeplotu liniowym rozmyciem
+.IPs "\-vf pp=de/-al"
 domy¶lne filtry bez korekty jasno¶ci/\:kontrastu
-.IPs "\-vf pp=de/\:tn:1:2:3"
-domy¶lne filtry i tymczasowy odszumiacz.
-.IPs "\-vf pp=hb:y/\:vb:a \-autoq 6"
-Poziome odblokowywanie jasno¶ci i odblokowywanie pionowe w zale¿no¶ci od
-dostêpnego czasu procesora.
+.IPs "\-vf pp=de/tn:1:2:3"
+domy¶lne filtry i tymczasowy odszumiacz
+.IPs "\-vf pp=hb:y/vb:a"
+Odblokowywanie poziome tylko na jasno¶ci i automatyczne w³±czenie lub wy³±czenie
+odblokowywania pionowego w zale¿no¶ci od dostêpnego czasu procesora.
 .RE
 .PD 1
 .
@@ -3818,15 +3826,24 @@ z DVB/\:DXR3.
 .
 .TP
 .B dvbscale[=aspekt]
-Ustawia optymalne skalowanie dla kart DVB, czyli sprzêtowe skalowanie osi X
-i programowe wyliczanie skalowania osi Y tak, by zachowaæ proporcje.
-U¿yteczne tylko w po³±czeniu z expand+scale
-(\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
+Ustawia optymalne skalowanie dla kart DVB, czyli sprzêtowe skalowanie osi x
+i programowe wyliczanie skalowania osi y tak, by zachowaæ proporcje.
+U¿yteczne tylko w po³±czeniu z expand i scale.
 .RSs
 .IPs aspect
 Kontroluje proporcje, wyliczane przez wzór DVB_HEIGHT*ASPECTRATIO (domy¶lnie:
 576*4/\:3=768), ustaw na 576*(16/\:9)=1024 dla TV 16:9.
 .RE
+.sp 1
+.RS
+.I PRZYK£AD:
+.RE
+.PD 0
+.RSs
+.IPs "\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc"
+FIXME: Wyt³umaæzyc co to robi.
+.RE
+.PD 1
 .
 .TP
 .B noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
@@ -3854,16 +3871,14 @@ miesza wed³ug przypadkowego zak³ócenia z (pó³)regularnym wzorem
 .B denoise3d[=luma:chroma:time]
 Ten filtr redukuje zak³ócenia obrazu wyg³adzaj±c obraz, a nieruchome obrazy
 staj± siê naprawdê nieruchome (Powinno to poprawiæ mo¿liwo¶ci kompresji.).
-Mo¿na podaæ od 0 do 3 parametrów.
-Je¿eli pominiesz parametry, u¿yte zostan± rozs±dne warto¶ci.
 .PD 0
 .RSs
 .IPs luma\ 
-wp³yw przestrzeni jasno¶ci (domy¶lnie = 4)
+wp³yw przestrzeni jasno¶ci (domy¶lnie: 4)
 .IPs chroma
-wp³yw przestrzeni kolorów (domy¶lnie = 3)
+wp³yw przestrzeni kolorów (domy¶lnie: 3)
 .IPs time\ 
-czas wp³ywu (domy¶lnie = 6)
+czas wp³ywu (domy¶lnie: 6)
 .RE
 .PD 1
 .
@@ -3873,15 +3888,15 @@ Wersja filtra denoise3d z wysok± precyzj±/\:jako¶ci±.
 Parametry i sposób u¿ycia s± takie same.
 .
 .TP
-.B eq[=jasno¶æ:kontrast]
+.B eq[=jasno¶æ:kontrast] (PRZESTARZA£E)
 Programowy korektor z interaktywnym sterowaniem, zupe³nie jak korektor
 sprzêtowy, dla kart/\:sterowników które nie obs³uguj± sprzêtowego sterowania
 jasno¶ci± i kontrastem.
+Pocz±tkowe warto¶ci z przedzia³u -100\-100 mog± byæ podane w wierszu
+poleceñ.
 Mo¿e byæ tak¿e u¿yteczny z MEncoderem, w celu poprawy kiepsko przechwyconych
 filmów, lub te¿ w celu lekkiego zmniejszenia kontrastu, by ukryæ artefakty
 powsta³e z winy niskiego tempa bitowego.
-Pocz±tkowe warto¶ci z przedzia³u -100\-100 mog± byæ podane w wierszu
-poleceñ.
 .
 .TP
 .B eq2[=gamma:kontrast:jasno¶æ:nasycenie:rg:gg:bg:waga]
@@ -3979,7 +3994,7 @@ jakiej czê¶ci klatki musi byæ wykryty przeplot, aby j± usun±æ.
 .
 .TP
 .B lavcdeint
-U¿ywa filtra usuwaj±cego przeplot z biblioteki libavcodec.
+filtr usuwaj±cy przeplot z libavcodec
 .
 .TP
 .B kerndeint[=próg[:mapa[:kolejno¶æ[:ostr[:dwustr]]]]]
@@ -3987,7 +4002,7 @@ Adaptatywny deinterlacer j±dra autorstwa Donald'a Graft'a.
 Usuwa przeplot z czê¶ci video, je¶li zostanie przekroczony konfigurowalny próg.
 .PD 0
 .RSs
-.IPs "próg (0 - 255)"
+.IPs "próg (0 \- 255)"
 Warto¶æ progowa (domy¶lnie 10).
 .IPs "mapa (0 lub 1)"
 Koloruje piksele przekraczaj±ce próg na bia³o (domy¶lnie: 0).
@@ -4002,13 +4017,13 @@ W³±cza dwustronne wyostrzanie (domy¶lnie: 0).
 .
 .TP
 .B unsharp=l|cWxH:ilo¶æ[:l|cWxH:ilo¶æ]
-Maska zmiêkczaj±ca / rozmycie gaussa.
+maska zmiêkczaj±ca / rozmycie gaussa
 .RSs
-.IPs l
+.IPs l\ \ \ \
 Stosuje efekty na sk³adowej jasno¶ci.
-.IPs c
+.IPs c\ \ \ \
 Stosuje efekty na sk³adowych koloru.
-.IPs WxH
+.IPs <wysoko¶æ>x<szeroko¶æ> (WxH)
 szeroko¶æ i wysoko¶æ macierzy, nieparzysty rozmiar w obu kierunkach
 (min = 3x3, max = 13x11 lub 11x13, zazwyczaj co¶ pomiêdzy 3x3 i 7x7)
 .IPs ilo¶æ
@@ -4027,7 +4042,7 @@ Zamienia p³aszczyzny U i V.
 .
 .TP
 .B il=[d|i][s][:[d|i][s]]
-Rozdziela przeplatane obrazy.
+Usuwa/wstawia przeplot w obrazy.
 Celem tego filtra jest dodanie mo¿liwo¶ci przetwarzania przeplatanych obrazów
 pojedynczymi obrazami bez usuwania przeplotu.
 Mo¿esz filtrowaæ swoje DVD z przeplotem i odtwarzaæ na telewizorze nie psuj±c
@@ -4087,7 +4102,7 @@ siê do wiêkszo¶ci zastosowañ.
 Poni¿sze argumenty (sk³adnia jest opisana wy¿ej) mog± byæ u¿yte by kontrolowaæ
 jego dzia³anie:
 .RSs
-.IPs dr
+.IPs dr\ \
 Ustawia tryb gubienia klatek.
 0 (domy¶lnie) oznacza, ¿e klatki
 nie bêd± porzucane by utrzymaæ ustalon± wyj¶ciow± prêdko¶æ klatek.
@@ -4098,12 +4113,12 @@ wej¶ciowych do wyj¶ciowych.
 .br
 .I INFORMACJA:
 Z MEncoderem u¿ywaj zawsze trybu 1 lub 2!
-.IPs am
+.IPs am\ \
 Tryb analizy.
 Dostêpne warto¶ci to 0 (ustalony wzorzec z numerem klatki inicjalizuj±cej
 okre¶lony przez fr=#) i 1 (agresywne szukanie wzorca telecine).
 Domy¶lnie jest 1.
-.IPs fr
+.IPs fr\ \ \
 Ustawia numer pocz±tkowej klatki w sekwencji.
 0\-2 to trzy nastêpuj±ce po sobie klatki bez przeplotu; 3 i 4 to dwie klatki
 z przeplotem.
@@ -6787,8 +6802,9 @@ wy¿sze zmuszaj± go do delikatniejszych zmian.
 .
 .TP
 .B fullinter
-Wykorzystuje wszystkie dostêpne metody analizy inter-klatek (i4x4, psub8x8, psub16x16)
-(domy¶lnie: 4x4, psub16x16).
+Wykorzystuje wszystkie dostêpne makrobloki inter-klatek
+(i16x16, i4x4, p16x16-4x4)
+(domy¶lnie: i16x16, i2x4, p16x16-8x8).
 .
 .TP
 .B log=<-1\-3>
