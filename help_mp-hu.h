@@ -1,11 +1,15 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2001  Gereöffy Árpád  (lásd DOCS/AUTHORS)\n"
+"MPlayer " VERSION "(C) 2000-2001  Gereöffy Árpád  (lásd DOCS!)\n"
 "\n";
 
 static char help_text[]=
+#ifdef HAVE_NEW_GUI
+"Indítás:   mplayer [-gui] [opciók] [útvonal/]filenév\n"
+#else
 "Indítás:   mplayer [opciók] [útvonal/]filenév\n"
+#endif
 "\n"
 "Opciók:\n"
 " -vo <drv[:dev]> videomeghajtó és -alegység kiválasztása (lista: '-vo help')\n"
@@ -14,10 +18,13 @@ static char help_text[]=
 #ifdef HAVE_LIBCSS
 " -dvdauth <megh> DVD-meghajtó elérési útjának megadása (kódolt lemezekhez)\n"
 #endif
+#ifdef USE_DVDREAD
+" -dvd <titleno>  a megadott DVD sáv lejátszása, file helyett\n"
+#endif
 " -ss <idõpoz>    a megadott (másodperc v. óra:perc:mperc) pozícióra tekerés\n"
 " -nosound        hanglejátszás kikapcsolása\n"
 #ifdef USE_FAKE_MONO
-" -stereo         MPEG1 sztereó szabályozása (0:sztereó, 1:bal, 2:jobb)\n"
+" -stereo <mód>   MPEG1 sztereó szabályozása (0:sztereó, 1:bal, 2:jobb)\n"
 #endif
 " -fs -vm -zoom   teljesképernyõs lejátszás opciói (teljkép,módvált,szoft.nagy)\n"
 " -x <x> -y <y>   kép nagyítása <x> * <y> méretûre [ha -vo <meghajtó> támogatja]\n"
@@ -25,7 +32,7 @@ static char help_text[]=
 " -vid x -aid y   lejátszandó video- (x) és audio- (y) stream-ek kiválasztása\n"
 " -fps x -srate y video (x képkocka/mp) és audio (y Hz) ráta megadása\n"
 " -pp <minõség>   utókezelési fokozatok beállítása (0-63)\n"
-" -bps            alternatív A/V szinkron módszerének kiválasztása\n"
+" -nobps          alternatív A/V szinkron módszerének kiválasztása\n"
 " -framedrop      képkockák eldobásának engedélyezése (lassú gépekhez)\n"
 "\n"
 "Billentyûk:\n"
