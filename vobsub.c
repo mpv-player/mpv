@@ -263,7 +263,7 @@ mpeg_open(const char *filename)
 	res->packet = NULL;
 	res->packet_size = 0;
 	res->packet_reserve = 0;
-	res->stream = rar_open(filename, "r");
+	res->stream = rar_open(filename, "rb");
 	err = res->stream == NULL;
 	if (err)
 	    perror("fopen Vobsub file failed");
