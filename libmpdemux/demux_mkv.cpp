@@ -464,8 +464,13 @@ static int check_track_information(mkv_demuxer_t *d) {
             t->a_formattag = 0x2000;
           else if (!strcmp(t->codec_id, MKV_A_PCM))
             t->a_formattag = 0x0001;
-          else if (!strcmp(t->codec_id, MKV_A_AAC_2LC) ||
+          else if (!strcmp(t->codec_id, MKV_A_AAC_2MAIN) ||
+                   !strcmp(t->codec_id, MKV_A_AAC_2LC) ||
+                   !strcmp(t->codec_id, MKV_A_AAC_2SSR) ||
+                   !strcmp(t->codec_id, MKV_A_AAC_4MAIN) ||
                    !strcmp(t->codec_id, MKV_A_AAC_4LC) ||
+                   !strcmp(t->codec_id, MKV_A_AAC_4SSR) ||
+                   !strcmp(t->codec_id, MKV_A_AAC_4LTP) ||
                    !strcmp(t->codec_id, MKV_A_AAC_4SBR))
             t->a_formattag = mmioFOURCC('M', 'P', '4', 'A');
           else if (!strcmp(t->codec_id, MKV_A_VORBIS)) {
@@ -1439,16 +1444,33 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 
   if (track) {
     if (track->ms_compat) {         // MS compatibility mode
+      BITMAPINFOHEADER *src, *dst;
       mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Will play video track %u\n",
              track->tnum);
       sh_v = new_sh_video(demuxer, track->tnum);
-      sh_v->bih = (BITMAPINFOHEADER *)calloc(1, sizeof(BITMAPINFOHEADER));
+      sh_v->bih = (BITMAPINFOHEADER *)calloc(1, track->private_size);
       if (sh_v->bih == NULL) {
         free_mkv_demuxer(mkv_d);
         return 0;
       }
 
-      memcpy(sh_v->bih, track->private_data, sizeof(BITMAPINFOHEADER));
+      dst = sh_v->bih;
+      src = (BITMAPINFOHEADER *)track->private_data;
+      dst->biSize = get_uint32(&src->biSize);
+      dst->biWidth = get_uint32(&src->biWidth);
+      dst->biHeight = get_uint32(&src->biHeight);
+      dst->biPlanes = get_uint16(&src->biPlanes);
+      dst->biBitCount = get_uint16(&src->biBitCount);
+      dst->biCompression = get_uint32(&src->biCompression);
+      dst->biSizeImage = get_uint32(&src->biSizeImage);
+      dst->biXPelsPerMeter = get_uint32(&src->biXPelsPerMeter);
+      dst->biYPelsPerMeter = get_uint32(&src->biYPelsPerMeter);
+      dst->biClrUsed = get_uint32(&src->biClrUsed);
+      dst->biClrImportant = get_uint32(&src->biClrImportant);
+      memcpy((char *)dst + sizeof(BITMAPINFOHEADER),
+             (char *)src + sizeof(BITMAPINFOHEADER),
+             track->private_size - sizeof(BITMAPINFOHEADER));
+
       sh_v->format = sh_v->bih->biCompression;
       sh_v->fps = track->v_frate;
       sh_v->frametime = 1 / track->v_frate;
@@ -1537,13 +1559,54 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       sh_a->wf->nBlockAlign = sh_a->wf->nAvgBytesPerSec;
       sh_a->wf->wBitsPerSample = track->a_bps;
       sh_a->samplesize = track->a_bps / 8;
-    } else if (!strcmp(track->codec_id, MKV_A_AAC_2LC) ||
-               !strcmp(track->codec_id, MKV_A_AAC_4LC) ||
-               !strcmp(track->codec_id, MKV_A_AAC_4SBR)) {
+    } else if (track->a_formattag == mmioFOURCC('M', 'P', '4', 'A')) {
+      int profile, srate_idx;
+
       sh_a->wf->nAvgBytesPerSec = 16000;
       sh_a->wf->nBlockAlign = 1024;
       sh_a->wf->wBitsPerSample = 0;
       sh_a->samplesize = 0;
+
+      // Recreate the 'private data' which faad2 uses in its initialization.
+      // A_AAC/MPEG2/MAIN
+      // 0123456789012345
+      if (!strcmp(&track->codec_id[12], "MAIN"))
+        profile = 0;
+      else if (!strcmp(&track->codec_id[12], "LC"))
+        profile = 1;
+      else if (!strcmp(&track->codec_id[12], "SSR"))
+        profile = 2;
+      else
+        profile = 3;
+      if (92017 <= sh_a->samplerate)
+        srate_idx = 0;
+      else if (75132 <= sh_a->samplerate)
+        srate_idx = 1;
+      else if (55426 <= sh_a->samplerate)
+        srate_idx = 2;
+      else if (46009 <= sh_a->samplerate)
+        srate_idx = 3;
+      else if (37566 <= sh_a->samplerate)
+        srate_idx = 4;
+      else if (27713 <= sh_a->samplerate)
+        srate_idx = 5;
+      else if (23004 <= sh_a->samplerate)
+        srate_idx = 6;
+      else if (18783 <= sh_a->samplerate)
+        srate_idx = 7;
+      else if (13856 <= sh_a->samplerate)
+        srate_idx = 8;
+      else if (11502 <= sh_a->samplerate)
+        srate_idx = 9;
+      else if (9391 <= sh_a->samplerate)
+        srate_idx = 10;
+      else
+        srate_idx = 11;
+
+      sh_a->codecdata = (unsigned char *)calloc(1, 2);
+      sh_a->codecdata_len = 2;
+      sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xe) >> 1);
+      sh_a->codecdata[1] = ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
     } else if (!strcmp(track->codec_id, MKV_A_VORBIS)) {
       for (i = 0; i < 3; i++) {
         dp = new_demux_packet(track->header_sizes[i]);
