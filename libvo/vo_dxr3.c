@@ -67,9 +67,11 @@ static vo_info_t vo_info =
 #ifdef USE_MP1E
 void write_dxr3( rte_context* context, void* data, size_t size, void* user_data )
 {
+    size_t data_left = size;
     if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&vo_pts) < 0)
 	    printf( "VO: [dxr3] Unable to set pts\n" );
-    write( fd_video, data, size );
+    while( data_left )
+	data_left -= write( fd_video, (void*) data+(size-data_left), data_left );
 }
 #endif
 
@@ -113,18 +115,12 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
     v_width = scr_width;
     v_height = scr_height;
 
-    /* Calculate screen res */    
-    /*aspect_save_orig(v_width,v_height);
-    aspect_save_prescale(width,height);
-    aspect_save_screenres(702,575);*/ /* Reference values from DVD spec (711,483) (702,575) */
-    /*aspect(&s_width,&s_height,A_ZOOM);*/
     s_width = (v_width+15)/16; s_width*=16;
     s_height = (v_height+15)/16; s_height*=16;
     
     /* Try to figure out whether to use ws output or not */
     tmp1 = abs(height - ((width/4)*3));
     tmp2 = abs(height - (int)(width/2.35));
-    printf( "%d:%d\n",s_width,s_height);
     if(tmp1 < tmp2)
     {
 	tmp1 = EM8300_ASPECTRATIO_4_3;
@@ -290,14 +286,14 @@ static uint32_t draw_frame(uint8_t * src[])
 {
     if( img_format == IMGFMT_MPEGPES )
     {
-        int data_left;
 	vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
+        size_t data_left = p->size;
 
 	if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&vo_pts) < 0)
 	    printf( "VO: [dxr3] Unable to set pts\n" );
-	data_left = p->size;
+
 	while( data_left )
-	    data_left -= write( fd_video, &((unsigned char*)p->data)[p->size-data_left], data_left );
+	    data_left -= write( fd_video, (void*) p->data+(p->size-data_left), data_left );
 
 	return 0;
     }
