@@ -8,9 +8,8 @@
 #include "config.h"
 #include "../version.h"
 
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
+#include "aviheader.h"
+#include "ms_hdr.h"
 
 #include "muxer.h"
 

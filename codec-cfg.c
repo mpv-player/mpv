@@ -27,7 +27,7 @@
 #include "mp_msg.h"
 
 // for mmioFOURCC:
-#include "wine/avifmt.h"
+#include "libmpdemux/aviheader.h"
 
 #include "libvo/img_format.h"
 #include "codec-cfg.h"

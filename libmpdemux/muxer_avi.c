@@ -12,13 +12,11 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
 #include "bswap.h"
 
 #include "muxer.h"
 #include "aviheader.h"
+#include "ms_hdr.h"
 #include "mp_msg.h"
 
 extern char *info_name;

@@ -8,10 +8,10 @@
 #include "../version.h"
 #include "../mp_msg.h"
 
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
 #include "bswap.h"
+
+#include "aviheader.h"
+#include "ms_hdr.h"
 
 #include "muxer.h"
 

@@ -55,7 +55,7 @@
 #include "libmpcodecs/vf.h"
 
 // for MPEGLAYER3WAVEFORMAT:
-#include "loader/wine/mmreg.h"
+#include "libmpdemux/ms_hdr.h"
 
 #ifdef HAVE_MP3LAME
 #undef CDECL

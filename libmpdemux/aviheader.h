@@ -4,6 +4,136 @@
 //#include "config.h"	/* get correct definition WORDS_BIGENDIAN */
 #include "bswap.h"
 
+#ifndef MIN
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#endif
+
+#ifndef min
+#define min(a,b) (((a)<(b))?(a):(b))
+#endif
+
+#ifndef max
+#define max(a,b) (((a)>(b))?(a):(b))
+#endif
+
+#ifndef mmioFOURCC
+#define mmioFOURCC( ch0, ch1, ch2, ch3 )				\
+		( (uint32_t)(uint8_t)(ch0) | ( (uint32_t)(uint8_t)(ch1) << 8 ) |	\
+		( (uint32_t)(uint8_t)(ch2) << 16 ) | ( (uint32_t)(uint8_t)(ch3) << 24 ) )
+#endif
+
+/* Macro to make a TWOCC out of two characters */
+#ifndef aviTWOCC
+#define aviTWOCC(ch0, ch1) ((uint16_t)(uint8_t)(ch0) | ((uint16_t)(uint8_t)(ch1) << 8))
+#endif
+
+typedef uint16_t TWOCC;
+typedef uint32_t FOURCC;
+
+/* form types, list types, and chunk types */
+#define formtypeAVI             mmioFOURCC('A', 'V', 'I', ' ')
+#define listtypeAVIHEADER       mmioFOURCC('h', 'd', 'r', 'l')
+#define ckidAVIMAINHDR          mmioFOURCC('a', 'v', 'i', 'h')
+#define listtypeSTREAMHEADER    mmioFOURCC('s', 't', 'r', 'l')
+#define ckidSTREAMHEADER        mmioFOURCC('s', 't', 'r', 'h')
+#define ckidSTREAMFORMAT        mmioFOURCC('s', 't', 'r', 'f')
+#define ckidSTREAMHANDLERDATA   mmioFOURCC('s', 't', 'r', 'd')
+#define ckidSTREAMNAME		mmioFOURCC('s', 't', 'r', 'n')
+
+#define listtypeAVIMOVIE        mmioFOURCC('m', 'o', 'v', 'i')
+#define listtypeAVIRECORD       mmioFOURCC('r', 'e', 'c', ' ')
+
+#define ckidAVINEWINDEX         mmioFOURCC('i', 'd', 'x', '1')
+
+/*
+** Stream types for the <fccType> field of the stream header.
+*/
+#define streamtypeVIDEO         mmioFOURCC('v', 'i', 'd', 's')
+#define streamtypeAUDIO         mmioFOURCC('a', 'u', 'd', 's')
+#define streamtypeMIDI		mmioFOURCC('m', 'i', 'd', 's')
+#define streamtypeTEXT          mmioFOURCC('t', 'x', 't', 's')
+
+/* Basic chunk types */
+#define cktypeDIBbits           aviTWOCC('d', 'b')
+#define cktypeDIBcompressed     aviTWOCC('d', 'c')
+#define cktypePALchange         aviTWOCC('p', 'c')
+#define cktypeWAVEbytes         aviTWOCC('w', 'b')
+
+/* Chunk id to use for extra chunks for padding. */
+#define ckidAVIPADDING          mmioFOURCC('J', 'U', 'N', 'K')
+
+/* flags for use in <dwFlags> in AVIFileHdr */
+#define AVIF_HASINDEX		0x00000010	// Index at end of file?
+#define AVIF_MUSTUSEINDEX	0x00000020
+#define AVIF_ISINTERLEAVED	0x00000100
+#define AVIF_TRUSTCKTYPE	0x00000800	// Use CKType to find key frames?
+#define AVIF_WASCAPTUREFILE	0x00010000
+#define AVIF_COPYRIGHTED	0x00020000
+
+typedef struct
+{
+    uint32_t		dwMicroSecPerFrame;	// frame display rate (or 0L)
+    uint32_t		dwMaxBytesPerSec;	// max. transfer rate
+    uint32_t		dwPaddingGranularity;	// pad to multiples of this
+                                                // size; normally 2K.
+    uint32_t		dwFlags;		// the ever-present flags
+    uint32_t		dwTotalFrames;		// # frames in file
+    uint32_t		dwInitialFrames;
+    uint32_t		dwStreams;
+    uint32_t		dwSuggestedBufferSize;
+    
+    uint32_t		dwWidth;
+    uint32_t		dwHeight;
+    
+    uint32_t		dwReserved[4];
+} MainAVIHeader;
+
+/* The RECT structure */
+typedef struct tagRECT
+{
+    short  left;
+    short  top;
+    short  right;
+    short  bottom;
+} RECT, *PRECT, *LPRECT;
+typedef const RECT *LPCRECT;
+
+typedef struct {
+    FOURCC		fccType;
+    FOURCC		fccHandler;
+    uint32_t		dwFlags;	/* Contains AVITF_* flags */
+    uint16_t		wPriority;
+    uint16_t		wLanguage;
+    uint32_t		dwInitialFrames;
+    uint32_t		dwScale;	
+    uint32_t		dwRate;	/* dwRate / dwScale == samples/second */
+    uint32_t		dwStart;
+    uint32_t		dwLength; /* In units above... */
+    uint32_t		dwSuggestedBufferSize;
+    uint32_t		dwQuality;
+    uint32_t		dwSampleSize;
+    RECT		rcFrame;
+} AVIStreamHeader;
+
+/* Flags for index */
+#define AVIIF_LIST          0x00000001L // chunk is a 'LIST'
+#define AVIIF_KEYFRAME      0x00000010L // this frame is a key frame.
+
+#define AVIIF_NOTIME	    0x00000100L // this frame doesn't take any time
+#define AVIIF_COMPUSE       0x0FFF0000L // these bits are for compressor use
+
+#define FOURCC_RIFF     mmioFOURCC('R', 'I', 'F', 'F')
+#define FOURCC_LIST     mmioFOURCC('L', 'I', 'S', 'T')
+
+typedef struct
+{
+    uint32_t		ckid;
+    uint32_t		dwFlags;
+    uint32_t		dwChunkOffset;		// Position of chunk
+    uint32_t		dwChunkLength;		// Length of chunk
+} AVIINDEXENTRY;
+
+
 typedef struct _avisuperindex_entry {
     uint64_t qwOffset;           // absolute file offset
     uint32_t dwSize;             // size of index chunk at this offset

@@ -9,11 +9,8 @@
 #include "stream.h"
 #include "demuxer.h"
 
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
-
 #include "aviheader.h"
+#include "ms_hdr.h"
 
 //#include "codec-cfg.h"
 //#include "stheader.h"
@@ -79,7 +76,7 @@ void print_wave_header(WAVEFORMATEX *h){
     uint8_t* p = ((uint8_t*)h) + sizeof(WAVEFORMATEX);
     printf("Unknown extra header dump: ");
     for (i = 0; i < h->cbSize; i++)
-	printf("[%x] ", *(p+i));
+	printf("[%x] ", p[i]);
     printf("\n");
   }
   printf("===========================\n");
