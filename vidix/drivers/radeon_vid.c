@@ -1016,8 +1016,8 @@ int vixInit( void )
     case DEVICE_ATI_RADEON_MOBILITY_M7:
     case DEVICE_ATI_RADEON_MOBILITY_M72:
     case DEVICE_ATI_RADEON_MOBILITY_M62:
-    case DEVICE_ATI_RADEON_R250_IF:
       rage_ckey_model=1;
+    case DEVICE_ATI_RADEON_R250_IF:
     case DEVICE_ATI_RADEON_MOBILITY_M6:
     case DEVICE_ATI_RADEON_RV200_QW:
     case DEVICE_ATI_RADEON_RV200_QX:
@@ -1759,7 +1759,7 @@ static void set_gr_key( void )
 	{
 	case 15:
 #ifdef RADEON
-		if(RadeonFamily == 200)
+		if(RadeonFamily > 100)
 			besr.graphics_key_clr=
 				  ((radeon_grkey.ckey.blue &0xF8))
 				| ((radeon_grkey.ckey.green&0xF8)<<8)
@@ -1774,7 +1774,7 @@ static void set_gr_key( void )
 	case 16:
 #ifdef RADEON
 		/* This test may be too general/specific */
-		if(RadeonFamily == 200)
+		if(RadeonFamily > 100)
 			besr.graphics_key_clr=
 				  ((radeon_grkey.ckey.blue &0xF8))
 				| ((radeon_grkey.ckey.green&0xFC)<<8)
