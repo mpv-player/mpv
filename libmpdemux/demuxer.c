@@ -168,6 +168,7 @@ extern int tv_param_on;
 extern int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh);
 extern int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh);
 #endif
+int demux_y4m_fill_buffer(demuxer_t *demux);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -186,6 +187,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 #ifdef USE_TV
     case DEMUXER_TYPE_TV: return demux_tv_fill_buffer(demux, tv_handler);
 #endif
+    case DEMUXER_TYPE_Y4M: return demux_y4m_fill_buffer(demux);
   }
   return 0;
 }
@@ -363,6 +365,8 @@ int demux_open_fli(demuxer_t* demuxer);
 
 extern int vivo_check_file(demuxer_t *demuxer);
 extern void demux_open_vivo(demuxer_t *demuxer);
+extern int y4m_check_file(demuxer_t *demuxer);
+extern void demux_open_y4m(demuxer_t *demuxer);
 
 extern int real_check_file(demuxer_t *demuxer);
 extern void demux_open_real(demuxer_t *demuxer);
@@ -412,6 +416,14 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
   if(asf_check_header(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedASFfile);
       file_format=DEMUXER_TYPE_ASF;
+  }
+}
+//=============== Try to open as Y4M file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_Y4M){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_Y4M,audio_id,video_id,dvdsub_id);
+  if(y4m_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected YUV4MPEG2 file format!\n");
+      file_format=DEMUXER_TYPE_Y4M;
   }
 }
 //=============== Try to open as MOV file: =================
@@ -541,6 +553,10 @@ switch(file_format){
  }
  case DEMUXER_TYPE_VIVO: {
   demux_open_vivo(demuxer);
+  break;
+ }
+ case DEMUXER_TYPE_Y4M: {
+  demux_open_y4m(demuxer);
   break;
  }
  case DEMUXER_TYPE_REAL: {
