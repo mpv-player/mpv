@@ -79,7 +79,7 @@ static int alsa_can_pause = 0;
 #define ALSA_DEVICE_SIZE 256
 
 #undef BUFFERTIME
-#undef SET_CHUNKSIZE
+#define SET_CHUNKSIZE
 #undef USE_POLL
 
 /* to set/get/query special features/parameters */
@@ -104,7 +104,7 @@ static int control(int cmd, void *arg)
 
       long pmin, pmax;
       long get_vol, set_vol;
-      float calc_vol, diff, f_multi;
+      float f_multi;
 
       if(mixer_channel) mix_name = mixer_channel;
       if(mixer_device) card = mixer_device;
@@ -152,17 +152,11 @@ static int control(int cmd, void *arg)
 	}
 
       snd_mixer_selem_get_playback_volume_range(elem,&pmin,&pmax);
-      f_multi = (100 / (float)pmax);
+      f_multi = (100 / (float)pmax - pmin);
 
       if (cmd == AOCONTROL_SET_VOLUME) {
 
-	diff = (vol->left+vol->right) / 2;
-	set_vol = rint(diff / f_multi);
-	
-	if (set_vol < 0)
-	  set_vol = 0;
-	else if (set_vol > pmax)
-	  set_vol = pmax;
+	set_vol = (vol->left + pmin) / f_multi + 0.5;
 
 	//setting channels
 	if ((err = snd_mixer_selem_set_playback_volume(elem, 0, set_vol)) < 0) {
@@ -170,23 +164,25 @@ static int control(int cmd, void *arg)
 		 snd_strerror(err));
 	  return CONTROL_ERROR;
 	}
+	mp_msg(MSGT_AO,MSGL_DBG2,"left=%li, ", set_vol);
+
+	set_vol = (vol->right + pmin) / f_multi + 0.5;
+
 	if ((err = snd_mixer_selem_set_playback_volume(elem, 1, set_vol)) < 0) {
 	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-control: error setting right channel, %s\n", 
 		 snd_strerror(err));
 	  return CONTROL_ERROR;
 	}
-
-	mp_msg(MSGT_AO,MSGL_DBG2,"diff=%f, set_vol=%li, pmax=%li, mult=%f\n", 
-	       diff, set_vol, pmax, f_multi);
+	mp_msg(MSGT_AO,MSGL_DBG2,"right=%li, pmin=%li, pmax=%li, mult=%f\n", 
+	       set_vol, pmin, pmax, f_multi);
       }
       else {
 	snd_mixer_selem_get_playback_volume(elem, 0, &get_vol);
-	calc_vol = get_vol;
-	calc_vol = rintf(calc_vol * f_multi);
+	vol->left = (get_vol * f_multi) - pmin;
+	snd_mixer_selem_get_playback_volume(elem, 1, &get_vol);
+	vol->right = (get_vol * f_multi) - pmin;
 
-	vol->left = vol->right = (int)calc_vol;
-
-	mp_msg(MSGT_AO,MSGL_DBG2,"get_vol = %li, calc=%f\n",get_vol, calc_vol);
+	mp_msg(MSGT_AO,MSGL_DBG2,"left=%f, right=%f\n",vol->left,vol->right);
       }
       snd_mixer_close(handle);
       return CONTROL_OK;
@@ -197,6 +193,30 @@ static int control(int cmd, void *arg)
   return(CONTROL_UNKNOWN);
 }
 
+static void parse_device (char *dest, char *src, int len)
+{
+  char *tmp;
+  strncpy (dest, src, len);
+  while ((tmp = strrchr(dest, '.')))
+    tmp[0] = ',';
+  while ((tmp = strrchr(dest, '#')))
+    tmp[0] = ':';
+}
+
+static void print_help ()
+{
+  mp_msg (MSGT_AO, MSGL_FATAL,
+           "\n-ao alsa commandline help:\n"
+           "Example: mplayer -ao alsa:mmap:device=hw#0.3\n"
+           "  sets mmap-mode and first card fourth device\n"
+           "\nOptions:\n"
+           "  mmap\n"
+           "    Set memory-mapped mode, experimental\n"
+           "  noblock\n"
+           "    Sets non-blocking mode\n"
+           "  device=<device-name>\n"
+           "    Sets device (change , to . and : to #)\n");
+}
 
 /*
     open & setup audio device
@@ -206,7 +226,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 {
     int err;
     int cards = -1;
-    int period_val;
     snd_pcm_info_t *alsa_info;
     char *str_block_mode;
     int device_set = 0;
@@ -284,6 +303,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	break;
       case SND_PCM_FORMAT_S16_LE:
       case SND_PCM_FORMAT_U16_LE:
+      case SND_PCM_FORMAT_S16_BE:
+      case SND_PCM_FORMAT_U16_BE:
 	ao_data.bps *= 2;
 	break;
       case SND_PCM_FORMAT_S32_LE:
@@ -301,55 +322,38 @@ static int init(int rate_hz, int channels, int format, int flags)
 	mp_msg(MSGT_AO,MSGL_WARN,"alsa-init: couldn't convert to right format. setting bps to: %d", ao_data.bps);
       }
 
+    //subdevice parsing
     if (ao_subdevice) {
-      //start parsing ao_subdevice, ugly and not thread safe!
-      //maybe there's a better way?
-      int i2 = 1;
-      int i3 = 0;
-      char *sub_str;
-
-      char *token_str[3];
-      char* test_str = strdup(ao_subdevice);
-
-
-      if ((strcspn(ao_subdevice, ":")) > 0) {
-
-	sub_str = strtok(test_str, ":");
-	*(token_str) = sub_str;
-
-	while (((sub_str = strtok(NULL, ":")) != NULL) && (i2 <= 3)) {
-	  *(token_str+i2) = sub_str;
-	  i2 += 1;
-	}
-
-	for (i3=0; i3 <= i2-1; i3++) {
-	  if (strcmp(*(token_str + i3), "mmap") == 0) {
-	    ao_mmap = 1;
-	  }
-	  else if (strcmp(*(token_str+i3), "noblock") == 0) {
-	    ao_noblock = 1;
-	  }
-	  else if (strcmp(*(token_str+i3), "hw") == 0) {
-	    if ((i3 < i2-1) && (strcmp(*(token_str+i3+1), "noblock") != 0) && (strcmp(*(token_str+i3+1), "mmap") != 0)) {
-              char *tmp;
-
-	      snprintf(alsa_device, ALSA_DEVICE_SIZE, "hw:%s", *(token_str+(i3+1)));
-	      if ((tmp = strrchr(alsa_device, '.')) && isdigit(*(tmp+1)))
-                *tmp = ',';
-	      device_set = 1;
-	    }
-		else {
-		  strncpy (alsa_device, token_str[i3], ALSA_DEVICE_SIZE);
-		  device_set = 1;
-		}
-	  }
-	  else if (device_set == 0 && (!ao_mmap || !ao_noblock)) {
-	    strncpy (alsa_device, token_str[i3], ALSA_DEVICE_SIZE);
-	    device_set = 1;
-	  }
-	}
+      int parse_err = 0;
+      char *parse_pos = &ao_subdevice[0];
+      while (parse_pos[0] && !parse_err) {
+        if (strncmp (parse_pos, "mmap", 4) == 0) {
+          parse_pos = &parse_pos[4];
+          ao_mmap = 1;
+        } else if (strncmp (parse_pos, "noblock", 7) == 0) {
+          parse_pos = &parse_pos[7];
+          ao_noblock = 1;
+        } else if (strncmp (parse_pos, "device=", 7) == 0) {
+          int name_len;
+          parse_pos = &parse_pos[7];
+          name_len = strcspn (parse_pos, ":");
+          if (name_len < 0 || name_len > ALSA_DEVICE_SIZE) {
+            parse_err = 1;
+            break;
+          }
+          parse_device (alsa_device, parse_pos, name_len);
+          parse_pos = &parse_pos[name_len];
+          device_set = 1;
+        }
+        if (parse_pos[0] == ':') parse_pos = &parse_pos[1];
+        else if (parse_pos[0]) parse_err = 1;
+      }
+      if (parse_err) {
+        print_help();
+        return 0;
       }
     } else { //end parsing ao_subdevice
+
         /* in any case for multichannel playback we should select
          * appropriate device
          */
@@ -449,14 +453,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  }
 
 	mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: %d soundcard%s found, using: %s\n", cards+1,(cards >= 0) ? "" : "s", alsa_device);
-      } else if (strcmp(alsa_device, "help") == 0) {
-	printf("alsa-help: available options are:\n");
-	printf("           mmap: sets mmap-mode\n");
-	printf("           noblock: sets noblock-mode\n");
-	printf("           device-name: sets device name (change comma to point)\n");
-	printf("           example -ao alsa9:mmap:noblock:hw:0.3 sets noblock-mode,\n");
-	printf("           mmap-mode and the device-name as first card fourth device\n");
-	return(0);
       } else {
 		mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: soundcard set to %s\n", alsa_device);
       }
@@ -942,7 +938,7 @@ static int play_normal(void* data, int len)
     mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: write error %s", snd_strerror(res));
     return 0;
   }
-  return res < 0 ? (int)res : len - len % bytes_per_sample;
+  return len - len % bytes_per_sample;
 }
 
 /* mmap-mode mainly based on descriptions by Joshua Haberman <joshua@haberman.com>
@@ -955,7 +951,7 @@ static int play_mmap(void* data, int len)
   snd_pcm_uframes_t frames_transmit, size, offset;
   const snd_pcm_channel_area_t *area;
   void *outbuffer;
-  int err, result;
+  int result;
 
 #ifdef USE_POLL //seems not really be needed
   struct pollfd *ufds;
@@ -1073,15 +1069,15 @@ static int get_space()
     {
     case SND_PCM_STATE_OPEN:
       str_status = "open";
+      ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
+      break;
     case SND_PCM_STATE_PREPARED:
-      if (str_status != "open") {
 	str_status = "prepared";
 	first = 1;
 	ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
 	if (ret == 0) //ugly workaround for hang in mmap-mode
 	  ret = 10;
 	break;
-      }
     case SND_PCM_STATE_RUNNING:
       ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
       //avail_frames = snd_pcm_avail_update(alsa_handler) * bytes_per_sample;
@@ -1107,7 +1103,7 @@ static int get_space()
       }
     }
 
-    if (str_status != "running")
+    if (snd_pcm_status_get_state(status) == SND_PCM_STATE_RUNNING)
       mp_msg(MSGT_AO,MSGL_V,"alsa-space: free space = %i, status=%i, %s --\n", ret, status, str_status);
     
     if (ret < 0) {
