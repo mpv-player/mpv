@@ -1,112 +1,288 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
-<BODY BGCOLOR=white>
 
-<FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>
+<HEAD>
+  <TITLE>Son - MPlayer - Le lecteur vidéo pour Linux</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+</HEAD>
 
-<P><B><A NAME=2.2.2>2.2.2. P&eacute;riph&eacute;riques de sortie audio</A></P></B>
+<BODY>
 
-<P>L'interface audio de <B>MPlayer</B> se nomme <I>libao2</I>. Elle poss&egrave;de actuellement ces drivers :</P>
+
+<H3><A NAME="audio">2.3.2 Périphériques de sortie audio</A></H3>
+
+<H4><A NAME="sync">2.3.2.1 Description de la méthode de synchro A/V de MPlayer</A></H4>
+
+<P>L'interface audio de MPlayer se nomme <I>libao2</I>. Elle possède actuellement 
+  ces drivers :</P>
 
 <TABLE BORDER=0>
-
-<TD COLSPAN=4><P><B><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>General:</B></P></TD>
-
-<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>oss</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>driver OSS (ioctl)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>sdl</TD><TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>drivers SDL (supporte lecture acc&eacute;l&eacute;r&eacute;e/ralentie, <B>ESD</B>, <B>ARTS</B>, etc)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>alsa5</TD><TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>driver natif ALSA 0.5</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>alsa9</TD><TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>driver natif ALSA 0.9 (bogu&eacute;, utilisez plut&ocirc;t l'&eacute;mulation OSS)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>sun</TD><TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>driver audio SUN (/dev/audio) pour BSD et Solaris8</TD></TR>
-
+  <TR><TD COLSPAN=4><P><B>General:</B></P></TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>pilote OSS (ioctl) (supporte le transfert AC3 matériel)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>pilote SDL (supporte <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>pilote NAS (Network Audio System)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>pilote natif ALSA 0.5</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>pilote natif ALSA 0.9 (supporte le transfert AC3 matériel)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>pilote SUN audio (<CODE>/dev/audio</CODE>) pour les utilisateurs de BSD et de Solaris8</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>pilote natif ARTS (surtout pour les utilisateurs de KDE)</TD></TR>
 </TABLE>
 
-<P>Il faut bien le reconnaitre, les drivers audio de Linux sont g&eacute;n&eacute;ralement de mauvaise qualit&eacute;, 
-et incompatibles au possible. Cela peut prendre un certain temps pour trouver vos r&eacute;glages optimaux.</P>
-<P><UL>
-<LI>si vous avez un driver OSS, essayez d'abord avec l'option <I>-ao oss</I> (utilis&eacute; par d&eacute;faut).
-Si vous obtenez des scratchs ou une sonorit&eacute; anormale, essayez l'option <I>-ao sdl</I> (NOTE: vous devez bien s&ucirc;r avoir install&eacute; les libraries SDL et SDL-devel). 
-Elles sont plus efficaces dans de nombreux cas (elles supportent &eacute;galement ESD, ARTS, et
-la lecture acc&eacute;l&eacute;r&eacute;e/ralentie. esd provient de GNOME, arts de KDE).</LI>
-<LI>Si vous avez ALSA version 0.5, vous devrez certainement utiliser l'option <I>-ao alsa5</I> ,
-la version 0.5 &eacute;mulant mal l'OSS, qui plante <B>MPlayer</B> avec un message du type :<BR>
-  <UL>
-  <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></UL>
-</LI>
-<LI>si vous avez ALSA version 0.9, utilisez l'option <I>-ao oss</I> ou <I>-ao sdl</I>.</LI>
-</UL></P>
+<P>Il faut bien le reconnaître, les pilotes des cartes son ont des problèmes
+  d'incompatibilité. MPlayer utilise une fonction des pilotes écrits normalement
+  pour maintenir la synchro audio/vidéo. Malheureusement, certains auteurs de pilote
+  n'ont que faire de cette fonction: elle n'est pas requise pour lire des MP3s, ou
+  des effets sonores.</P>
 
-<P>Sur les syst&egrave;mes <B>Solaris/FreeBSD</B>, utilisez le driver audio de SUN avec l'option
-<I>-ao sun</I> sinon vous n'aurez ni vid&eacute;o ni son.</P>
+<P>Les autres lecteurs multimédia comme aviplay ou xine fonctionnent probablement
+  autrement avec ces pilotes parce qu'ils utilisent de "simples" méthodes pour leur
+  synchro interne. Une note: le temps affiché avec leurs méthodes ne sont pas AUSSI
+  précis que celui de MPlayer.</P>
 
-<P><B><A NAME=2.2.2.1>2.2.2.1. Probl&egrave;mes de cartes son, recommendations</A></B></P>
+<P>Utiliser MPlayer avec un pilote correctement écrit ne vous donnera pas de désynchro
+  A/V relatives à l'audio, seulement avec les les fichiers très mal créés (voir la
+  documentation pour les contournements!).</P>
 
-<P><TABLE BORDER=0 WIDTH=100%>
-<TD COLSPAN=3><B><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Aureal Vortex 2</B></TD><TR>
-<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>pas de driver</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS/Pro:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>ALSA:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>pas de driver</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Max kHz:</TD><TD>48</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Driver:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Driver2:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2> from <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">ici</A><BR>
-(<I>buffer size increased to 32k</I>)</TD><TR>
+<P>Si vous avez un mauvais pilote audio, essayez l'option <CODE>-autosync</CODE>,
+  il devrait régler vos problèmes. Voir la page de man pour les informations
+  détaillées.</P>
 
-<TD COLSPAN=3><B><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>GUS PnP</B></TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>pas de driver</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS/Pro:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>ALSA:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Max kHz:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>48</TD><TR>
+<P>Quelques notes:</P>
 
-<TD COLSPAN=3><B><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>SB Live!</B></TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>ALSA:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>(?)</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Max kHz:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>48</TD><TR>
+<UL>
+  <LI>Si vous avez un pilote OSS, essayez d'abord avec l'option <CODE>-ao oss</CODE>
+    (utilisé par défaut). Si vous obtenez des scratchs ou une sonorité anormale, 
+    essayez l'option <CODE>-ao sdl</CODE>(NOTE: vous devez bien sûr avoir installé 
+    les librairies SDL et SDL-devel). Elles sont plus efficaces dans de nombreux cas 
+    (elles supportent également ESD, ARTS, et la lecture accélérée/ralentie. ESD est le
+    le démon son de GNOME, ARTS celui de KDE).</LI>
+  <LI>Si vous avez ALSA version 0.5, vous devrez presque toujours utiliser l'option
+    <CODE>-ao alsa5</CODE> , la version 0.5 émulant mal l'OSS, qui <B>plante MPlayer</B> 
+      avec un message du type:<BR>
+    <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
+</UL>
 
-<TD COLSPAN=3><B><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>SB AWE 64</B></TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>max 44kHz</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>ALSA:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>mauvais son en 48kHz</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Max kHz:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>48</TD><TR>
+<P>Sur <B>Solaris</B>, utilisez le pilote audio SUN avec l'option
+  <CODE>-ao sun</CODE>, sinon ni la vidéo ni le son ne fonctionneront.</P>
 
-<TD COLSPAN=3><B><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Gravis UltraSound ACE</B></TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>max 44Khz. <I>pas OK</I></TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>ALSA:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Max kHz:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Gravis UltraSound MAX</B></TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>ALSA:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK (?)</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Max kHz:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>48</TD><TR>
+<H4><A NAME="experiences">2.3.2.2 Problèmes de cartes son, recommandations</A></H4>
 
-<TD COLSPAN=3><B><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>ESS 688</B></TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>ALSA:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK (?)</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Max kHz:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>48</TD><TR>
+<TABLE BORDER=0 WIDTH="100%">
+  <TR><TD COLSPAN=3><B>Chipset VIA intégré (via82cxxx) 48kHz uniquement</B></TD></TR>
+  <TR><TD></TD><TD>Pilote:</TD><TD> depuis <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">sourceforge.net</A></TD></TR>
 
-<TD COLSPAN=3><B><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>C-Media cards (which ones?)</B></TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>pas OK (sifflement) (?)</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>ALSA:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK (?)</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Max kHz:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>?</TD><TR>
+  <TR><TD COLSPAN=3><B>Aureal Vortex 2</B></TD></TR>
+  <TR><TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS:</TD><TD>pas de pilote</TD></TR>
+  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>pas de pilote</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
+  <TR><TD></TD><TD>Pilote:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD></TR>
+  <TR><TD></TD><TD>Pilote2:</TD><TD> depuis <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">Pontscho's page</A><BR>
+    (<I>tille du buffer augmentée à 32k</I>)</TD></TR>
 
-<TD COLSPAN=3><B><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Tecra 8100 (?) (ymf-pci)</B></TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>pas OK (?)</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>ALSA:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK uniquement avec ALSA 0.5 avec &eacute;mulation OSS <B>ET</B> l'option<I>-ao sdl</I> (!) (?)</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Max kHz:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>?</TD><TR>
+  <TR><TD COLSPAN=3><B>GUS PnP</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>pas de pilote</TD></TR>
+  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
 
-<TD COLSPAN=3><B><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>PC Speaker ou DAC</B></TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OSS:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>OK (<I>utilisez le driver SDL : -ao sdl</I>)</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>ALSA:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>pas de driver</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Max kHz:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>le driver &eacute;mule 44.1 kHz, peut-&ecirc;tre plus</TD><TR>
-<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>Driver:</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD><TR>
-</TABLE></P>
+  <TR><TD COLSPAN=3><B>SB Live!</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>Analogique OK, SP/DIF non fonctionnelle</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>Les deux OK</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>192</TD></TR>
 
-<P><UL>
-<LI>Sous Linux, utilisez le noyau 2.4 si possible, le 2.2 n'a pas &eacute;t&eacute; test&eacute;
-<LI>si le son &eacute;met des cliquements en lisant depuis le CD-ROM, activez l'IRQ unmasking !
-     par exemple &quot;hdparm -u1 /dev/cdrom&quot; (c.f. &quot;man hdparm&quot; !!!)
-     Cela reste recommand&eacute; de toute fa&ccedil;on... (pour XMMS, etc...)
-     Lisez la section <A HREF="cd-dvd.html#4.1">4.1</A>.
-<LI>N'utilisez pas votre carte son avec d'autres application en m&ecirc;me temps ( par ex. XMMS ) !
-     si vous utilisez ESD, lancez MPlayer avec l'option '-vo adl:esd' !
-<LI>Merci de nous faire savoir comment MPlayer g&egrave;re votre carte son !
-</UL></P>
+  <TR><TD COLSPAN=3><B>SB AWE 64</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>max 44kHz</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>48kHz son mauvais</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
+
+  <TR><TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>pas OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>44</TD></TR>
+
+  <TR><TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
+
+  <TR><TD COLSPAN=3><B>ESS 688</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
+
+  <TR><TD COLSPAN=3><B>Cartes C-Media (lesquelles?)</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>pas OK (hissing) (?)</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
+
+  <TR><TD COLSPAN=3><B>Cartes Yamaha (*ymf*)</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>pas OK (?) (peut-être <CODE>-ao sdl</CODE>)</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK uniquement avec ALSA 0.5 avec émulation OSS <B>ET</B> <CODE>-ao sdl</CODE> (!) (?)</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
+
+  <TR><TD COLSPAN=3><B>Cartes avec chips envy24 (comme la Terratec EWS88MT)</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>?</TD></TR>
+  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>?</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
+
+  <TR><TD COLSPAN=3><B>PC Speaker ou DAC</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>OK (Utilisez le pilote SDL: <CODE>-ao sdl</CODE>)</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>pas de pilote</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>Ce pilote émule 44.1, peut-être plus.</TD></TR>
+  <TR><TD></TD><TD>Pilote:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD></TR>
+</TABLE>
+
+<P>Sous Linux, utilisez le noyau 2.4 si possible, le 2.2 n'a pas été testé.</P>
+
+<P>Si le son émet des cliquements en lisant depuis le CD-ROM, activez l'IRQ unmasking ! par exemple
+  <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). C'est généralement bénéfique
+  et décrit plus en détail dans la <A HREF="cd-dvd.html#drives">section CD-ROM</A>.</P>
+
+<P>Partager votre carte son avec une autre application comme XMMS est <B>fortement
+  découragé</B>!  Si l'autre application sonore utilise ESD, lancez
+  MPlayer avec l'option <CODE>-vo sdl:esd</CODE> pour combiner les deux
+  flux sonores. En fait, l'option <CODE>-vo sdl:esd</CODE> aurait pu être
+  utilisé avec ESD même en utilisant MPlayer seul.</P>
+
+<P>Les retour sur ce document sont les bienvenus.
+  Merci de nous faire savoir comment MPlayer gère votre carte son.</P>
+
+
+<H4><A NAME="plugins">2.3.2.3 Plugins Audio</A></H4>
+
+<P>Mplayer supporte les plugins audio. Les plugins audio peuvent être utilisés
+  pour changer les propriétés des données audio avant que le son n'atteigne la
+  carte son. Ils sont activés en utilisant l'option <CODE>-aop</CODE> qui
+  accepte l'argument <CODE>list=plugin1,plugin2,...</CODE>. L'argument
+  <CODE>list</CODE> est requis et détermine quels plugins devraient être utilisés
+  et dans quel ordre ils devraient être exécutés. Exemple:</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample,format</CODE></P>
+
+<P>passerait le son au travers du plugin resampling suivi du plugin format.</P>
+
+<P>Ces plugins on également des options qui changent leur comportement. Ces options
+  sont expliqués en détail dans les sections ci-dessous. Un plugin s'exécutera avec
+  des paramètres par défaut si ses options sont omises. Voici un exemple de comment
+  utiliser les plugins en combinaison avec des options spécifiques au plugin:</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=resample,format:fout=44100:format=0x8</CODE></P>
+
+<P>fixerait la fréquence de sortie du plugin resample à 44100Hz et le format
+  de sortie du plugin format à AFMT_U8.</P>
+
+<P>Actuellement les plugins audio ne peuvent pas être utilisés dans MEncoder.</P>
+
+
+<H5><A NAME="resample">2.3.2.3.1 Up/Downsampling</A></H5>
+
+<P>Mplayer supporte pleinement l'up/downsampling du son. Ce plugin peut
+  être utilisé si vous avez une carte son à fréquence fixe ou que vous
+  vous battez avec une vieille carte son qui n'est capable que de sampler
+  à 44.1kHz maxi. Que l'utilisation de ce plugin soit nécessaire ou pas, il
+  est <B>autodétecté</B>. Ce plugin à une option:
+  <CODE>fout</CODE> qui peut être utilisé pour fixer la fréquence de sortie désirée. 
+  Elle est par défaut de 48kHz, et est donnée en &lt;Hz&gt;.</P>
+
+<P>Utilisation:<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;fréquence requise
+  en Hz, comme 44100&gt;</CODE></P>
+
+<P>Notez que la fréquence de sortie ne devrait pas être augmentée au dessus de sa
+  valeur par défaut. Le dépassement provoquera la lecture des flux audio et vidéo
+  en slow motion assortie d'une distortion audio.</P>
+
+
+<H5><A NAME="surround_decoding">2.3.2.3.2 Décodage son surround</A></H5>
+
+<P>MPlayer a un plugin audio qui peut décoder le son surround encodé en matrice.
+  Dolby Surround est un exemple de format encodé en matrice. Beaucoup de fichiers
+  avec deux canaux audio contiennent actuellement du son surround matricié.
+  Pour utiliser cette fonction vous avez besoin d'une carte son supportant
+  au moins 4 canaux.</P>
+
+<P>Utilisation:<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
+
+
+<H5><A NAME="format">2.3.2.3.3 Convertisseur de format de sample</A></H5>
+
+<P>Si votre carte son ne supporte pas le format de données <CODE>int</CODE> 16bit signé,
+  ce plugin peut être utilisé pour le changer dans un format que votre carte son
+  comprends. Il a une option, <CODE>format</CODE>, qui peut être initialisée avec les
+  nombres trouvés dans <CODE>libao2/afmt.h</CODE>. Ce plugin est très rarement utilisé
+  et est réservée aux utilisateurs avancés. Gardez à l'esprit que ce plugin ne change
+  que le format de sample et pas sa fréquence ou le nombre de canaux.</P>
+
+<P>Utilisation:<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=format:format=&lt;format de sortie requis&gt;</CODE></P>
+
+
+<H5><A NAME="delay">2.3.2.3.4 Décalage</A></H5>
+
+<P>Ce plugin décale le son est n'est là que comme exemple pour démontrer comment
+  développer de nouveaux plugins. Il ne peut être utilisé pour rien d'utile d'un
+  point de vue utilisateur et n'est mentionné ici que pour l'amour de l'exhaustivité.
+  N'utilisez pas ce plugin à moins que vous soyez un développeur.</P>
+
+
+<H5><A NAME="volume">2.3.2.3.5 Contrôle de volume logiciel</A></H5>
+
+<P>Ce plugin est un remplacement logiciel pour le contrôleur de volume,
+  et peut être utilisé sur des machines avec un périphérique mixeur endommagé.
+  Il peut également être utilisé si on veut changer le volume de sortie de
+  MPlayer sans changer le volume PCM du mixeur. Il a une option <CODE>volume</CODE>
+  qui est utilisée en fixant une valeur entre 0 et 255, 101 étant la valeur par
+  défaut qui équivaut à une amplification de 0dB. Utilisez ce plugin avec précaution
+  car il peut réduire le signal jusqu'au bruit. Dans la plupart des cas il vaut mieux
+  régler le volume PCM au maximum, laisser ce plugin, et contrôler le niveau de sortie
+  sur vos haut-parleurs avec le bouton principal du mixeur. Si il y a un ampli
+  externe connecté à votre ordinateur (c'est la plupart du temps le cas), le niveau
+  de bruit peut être minimisé en ajustant le niveau principal et la molette du volume
+  de l'ampli jusqu'a ce que le bruit résiduel soit parti.</P>
+
+<P>Utilisation:<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=volume:volume=&lt;0-255&gt;</CODE></P>
+
+<P>Ce plugin a également des capacités de compression ou "soft-clipping".
+  La compression peut être utilisé si si la dynamique du son est très élevée
+  ou si la dynamique de vos haut-parleurs est très basse. Soyez contient que cette
+  fonction crée des distortions et ne devrait être envisagée qu'en dernier ressort.</P>
+
+<P>Utilisation:<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=volume:softclip</CODE></P>
+
+
+<H5><A NAME="extrastereo">2.3.2.3.6 Extrastereo</A></H5>
+
+<P>Ce plugin augmente (linéairement) la différence entre les canaux gauche et
+  droit (comme le plugin extrastereo de XMMS) qui donne une sorte d'effet "live"
+  à la lecture.</P>
+
+<P>Utilisation:<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo</CODE><BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo:mul=3.45</CODE></P>
+
+<P>Le coefficient par défaut (<CODE>mul</CODE>) est un nombre à virgule initialisé
+  à 2.5. Si vous l'initialisez à 0.0, vous aurez un son mono (moyenne des deux
+  canaux). Si vous l'initialisez à 1.0, le son sera inchangé, si vous l'initialisez à
+  -1.0, les canaux gauche et droit seront inversés.</P>
+
+
+<H5><A NAME="normalizer">2.3.2.3.7 Volume normalizer</A></H5>
+
+<P>Ce plugin maximise le volume sans distordre le son.</P>
+
+<P>Utilisation:<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=volnorm</CODE><BR>
+
 
 </BODY>
 </HTML>
