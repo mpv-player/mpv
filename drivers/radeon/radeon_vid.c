@@ -109,6 +109,10 @@ static int swap_fourcc __initdata = 0;
 #define RTRACE(...)	((void)0)
 #endif
 
+#ifndef min
+#define min(a,b) (a < b ? a : b)
+#endif
+
 #ifndef RAGE128
 #if defined(__i386__)
 /* Ugly but only way */
