@@ -84,3 +84,4 @@ muxer_t *muxer_new_muxer(int type,FILE *);
 int muxer_init_muxer_avi(muxer_t *);
 int muxer_init_muxer_mpeg(muxer_t *);
 int muxer_init_muxer_rawvideo(muxer_t *);
+int muxer_init_muxer_lavf(muxer_t *);
