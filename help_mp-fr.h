@@ -1,5 +1,5 @@
-// Transated by: Firebird <firebird@chez.com>
-// Small fixes by pl <p_l@gmx.fr>
+// Original transation by Firebird <firebird@chez.com>
+// Maintained by pl <p_l@tfz.net>
 
 // ========================= Aide MPlayer ===========================
 
@@ -228,7 +228,7 @@ static char help_text[]=
 #define MSGTR_SubtitleSelect "Choisir un sous-titre ..."
 #define MSGTR_OtherSelect "Choisir ..."
 #define MSGTR_MessageBox "BoiteMessage"
-#define MSGTR_PlayList "PlayList"
+#define MSGTR_PlayList "Playlist"
 #define MSGTR_SkinBrowser "Browser de skins"
 
 // --- boutons ---
@@ -265,5 +265,39 @@ static char help_text[]=
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[Browser de skins] pas assez de mémoire.\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin non trouvé ( %s ).\n"
 #define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Erreur de lecture du fichier de configuration du skin ( %s ).\n"
+#define MSGTR_SKIN_LABEL "Skins:"
+
+// --- menus gtk
+#define MSGTR_MENU_AboutMPlayer "À propos de MPlayer"
+#define MSGTR_MENU_Open "Ouvrir ..."
+#define MSGTR_MENU_PlayFile "Lire un fichier ..."
+#define MSGTR_MENU_PlayVCD "Lire un VCD ..."
+#define MSGTR_MENU_PlayDVD "Lire un DVD ..."
+#define MSGTR_MENU_PlayURL "Lire une URL ..."
+#define MSGTR_MENU_LoadSubtitle "Charger un sous-titre ..."
+#define MSGTR_MENU_Playing "En cours de lecture"
+#define MSGTR_MENU_Play "Lecture"
+#define MSGTR_MENU_Pause "Pause"
+#define MSGTR_MENU_Stop "Arrêt"
+#define MSGTR_MENU_NextStream "Flux suivant"
+#define MSGTR_MENU_PrevStream "Flux précédent"
+#define MSGTR_MENU_Size "Taille"
+#define MSGTR_MENU_NormalSize "Taille normale"
+#define MSGTR_MENU_DoubleSize "Taille double"
+#define MSGTR_MENU_FullScreen "Plein écran"
+#define MSGTR_MENU_DVD "DVD"
+#define MSGTR_MENU_PlayDisc "Lire un disque..."
+#define MSGTR_MENU_ShowDVDMenu "Afficher le menu DVD"
+#define MSGTR_MENU_Titles "Titres"
+#define MSGTR_MENU_Title "Titre %2d"
+#define MSGTR_MENU_None "(aucun)"
+#define MSGTR_MENU_Chapters "Chapitres"
+#define MSGTR_MENU_Chapter "Chapitre %2d"
+#define MSGTR_MENU_AudioLanguages "Langues (audio)"
+#define MSGTR_MENU_SubtitleLanguages "Langues (sous-titres)"
+#define MSGTR_MENU_PlayList "Playlist"
+#define MSGTR_MENU_SkinBrowser "Browser de skins"
+#define MSGTR_MENU_Preferences "Préférences"
+#define MSGTR_MENU_Exit "Quitter ..."
 
 #endif
