@@ -3442,7 +3442,7 @@ EOF
 fi
 if test "$_liblzo" = yes ; then
   _def_liblzo='#define USE_LIBLZO 1'
-  _ld_liblzo='-lliblzo'
+  _ld_liblzo='-llzo'
   _codecmodules="liblzo $_codecmodules"
 else
   _def_liblzo='#undef USE_LIBLZO'
