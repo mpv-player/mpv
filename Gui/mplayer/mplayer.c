@@ -17,6 +17,7 @@
 #include "../error.h"
 
 #include "../../config.h"
+#include "../../libvo/x11_common.h"
 
 #define mplMouseTimerConst  10
 #define mplRedrawTimerConst 5
