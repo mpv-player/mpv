@@ -418,8 +418,11 @@ static void compute_breaks(struct pullup_context *c, struct pullup_field *f0)
 	struct pullup_field *f2 = f1->next;
 	struct pullup_field *f3 = f2->next;
 	int l, max_l=0, max_r=0;
+	//struct pullup_field *ff;
+	//for (i=0, ff=c->first; ff != f0; i++, ff=ff->next);
 
 	if (f0->flags & F_HAVE_BREAKS) return;
+	//printf("\n%d: ", i);
 	f0->flags |= F_HAVE_BREAKS;
 
 	/* Special case when fields are 100% identical */
@@ -438,6 +441,7 @@ static void compute_breaks(struct pullup_context *c, struct pullup_field *f0)
 		if (-l > max_r) max_r = -l;
 	}
 	/* Don't get tripped up when differences are mostly quant error */
+	//printf("%d %d\n", max_l, max_r);
 	if (max_l + max_r < 128) return;
 	if (max_l > 4*max_r) f1->breaks |= BREAK_LEFT;
 	if (max_r > 4*max_l) f2->breaks |= BREAK_RIGHT;
