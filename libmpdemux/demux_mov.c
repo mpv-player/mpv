@@ -303,6 +303,9 @@ int mov_check_file(demuxer_t* demuxer){
 	    priv->moov_start, priv->moov_end);
 	  flags|=1;
 	  break;
+	case MOV_FOURCC('w','i','d','e'):
+	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: 'WIDE' chunk found!\n");
+	  if(flags&2) break;
 	case MOV_FOURCC('m','d','a','t'):
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Movie DATA found!\n");
 	  priv->mdat_start=stream_tell(demuxer->stream);
@@ -313,7 +316,6 @@ int mov_check_file(demuxer_t* demuxer){
 	  break;
 	case MOV_FOURCC('f','r','e','e'):
 	case MOV_FOURCC('s','k','i','p'):
-	case MOV_FOURCC('w','i','d','e'):
 	case MOV_FOURCC('j','u','n','k'):
 	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: free space (len: %d)\n", len);
 	  /* unused, if you edit a mov, you can use space provided by free atoms (redefining it) */
