@@ -453,7 +453,7 @@ static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
 static void set_bpp(struct fb_var_screeninfo *p, int bpp)
 {
 	p->bits_per_pixel = (bpp + 1) & ~1;
-	p->red.msb_right = p->green.msb_right = p->blue.msb_right = 0;
+	p->red.msb_right = p->green.msb_right = p->blue.msb_right = p->transp.msb_right = 0;
 	p->transp.offset = p->transp.length = 0;
 	p->blue.offset = 0;
 	switch (bpp) {
@@ -568,15 +568,15 @@ char *monitor_vfreq_str = NULL;
 char *monitor_dotclock_str = NULL;
 
 /* fb.modes related variables */
-range_t *monitor_hfreq = NULL;
-range_t *monitor_vfreq = NULL;
-range_t *monitor_dotclock = NULL;
+static range_t *monitor_hfreq = NULL;
+static range_t *monitor_vfreq = NULL;
+static range_t *monitor_dotclock = NULL;
 static fb_mode_t *fb_mode = NULL;
 
 /* vt related variables */
-int vt_fd;
-FILE *vt_fp;
-int vt_doit = 1;
+static int vt_fd;
+static FILE *vt_fp;
+static int vt_doit = 1;
 
 /* vo_fbdev related variables */
 static int fb_dev_fd;
