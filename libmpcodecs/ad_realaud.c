@@ -112,9 +112,9 @@ static int preinit(sh_audio_t *sh){
 	sh->wf->nSamplesPerSec,sh->wf->wBitsPerSample,sh->wf->nChannels,
 	100, // ???
 	((short*)(sh->wf+1))[0],  // subpacket size
-	sh->wf->nBlockAlign,
-	16, // ??
-	((char*)(sh->wf+1))+6+8
+	((short*)(sh->wf+1))[3],  // coded frame size
+	((short*)(sh->wf+1))[4], // codec data length
+	((char*)(sh->wf+1))+10 // extras
     };
     result=raInitDecoder(sh->context,&init_data);
     if(result){

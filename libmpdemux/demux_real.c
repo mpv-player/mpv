@@ -8,6 +8,11 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.30  2002/11/04 00:23:53  arpi
+    - realaudio ATRC (sony atrac3) codec support
+    - fixed passing of codecdata from demuxer to codec
+    patch by Fabian Franz <FabianFranz@gmx.de>
+
     Revision 1.29  2002/11/01 17:46:43  arpi
     verbose can be negative
 
@@ -902,6 +907,8 @@ void demux_open_real(demuxer_t* demuxer)
 		    int sub_packet_h;
 		    int version;
 		    int flavor;
+		    int coded_frame_size;
+		    int codecdata_length;
 		    
 		    mp_msg(MSGT_DEMUX,MSGL_V,"Found audio stream!\n");
 		    version = stream_read_word(demuxer->stream);
@@ -913,7 +920,8 @@ void demux_open_real(demuxer_t* demuxer)
 		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
 		    stream_skip(demuxer->stream, 4); // header size == 0x4E
 		    flavor = stream_read_word(demuxer->stream);/* codec flavor id */
-		    stream_skip(demuxer->stream, 4); /* coded frame size */
+		    coded_frame_size = stream_read_dword(demuxer->stream);/* needed by codec */
+		    //stream_skip(demuxer->stream, 4); /* coded frame size */
 		    stream_skip(demuxer->stream, 4); // big number
 		    stream_skip(demuxer->stream, 4); // bigger number
 		    stream_skip(demuxer->stream, 4); // 2 || -''-
@@ -961,6 +969,23 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->wf->cbSize = 0;
 		    sh->format = MKTAG(buf[0], buf[1], buf[2], buf[3]);
 
+		    switch (sh->format){
+			case MKTAG('d', 'n', 'e', 't'):
+			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: DNET (AC3 with low-bitrate extension)\n");
+			    break;
+			case MKTAG('s', 'i', 'p', 'r'):
+			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: SiproLab's ACELP.net\n");
+			    break;
+			case MKTAG('c', 'o', 'o', 'k'):
+			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Real's GeneralCooker (?) (RealAudio G2?) (unsupported)\n");
+			    break;
+			case MKTAG('a', 't', 'r', 'c'):
+			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Sony ATRAC3 (RealAudio 8) (unsupported)\n");
+			    break;
+			default:
+			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%s)\n", buf);
+		    }
+
 		    switch (sh->format)
 		    {
 			case MKTAG('d', 'n', 'e', 't'):
@@ -969,7 +994,6 @@ void demux_open_real(demuxer_t* demuxer)
 			    break;
 			case MKTAG('s', 'i', 'p', 'r'):
 #if 0
-			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: SiproLab's ACELP.net\n");
 			    sh->format = 0x130;
 			    /* for buggy directshow loader */
 			    sh->wf->cbSize = 4;
@@ -989,25 +1013,33 @@ void demux_open_real(demuxer_t* demuxer)
 //			    sh->wf[sizeof(WAVEFORMATEX)+4] = 0;
 			    break;
 #endif
-			case MKTAG('c', 'o', 'o', 'k'):
-			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Real's GeneralCooker (?) (RealAudio G2?) (unsupported)\n");
-			    sh->wf->cbSize = 4+2+24;
-			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
-			    ((short*)(sh->wf+1))[0]=sub_packet_size;
-			    ((short*)(sh->wf+1))[1]=sub_packet_h;
-			    ((short*)(sh->wf+1))[2]=flavor;
-			    stream_read(demuxer->stream, ((char*)(sh->wf+1))+6, 24); // extras
-			    break;
 			case MKTAG('a', 't', 'r', 'c'):
-			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Sony ATRAC3 (RealAudio 8) (unsupported)\n");
+#if 0
 			    sh->format = 0x270;
 			    /* 14 bytes extra header needed ! */
 			    sh->wf->cbSize = 14;
 			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
-
 			    sh->wf->nAvgBytesPerSec = 16537; // 8268
 			    sh->wf->nBlockAlign = 384; // 192
 			    sh->wf->wBitsPerSample = 0; /* from AVI created by VirtualDub */
+			    break;
+#endif
+			case MKTAG('c', 'o', 'o', 'k'):
+			    // realaudio codec plugins - common:
+//			    sh->wf->cbSize = 4+2+24;
+			    stream_skip(demuxer->stream,3);  // Skip 3 unknown bytes 
+			    if (version==5)
+			      stream_skip(demuxer->stream,1);  // Skip 1 additional unknown byte 
+			    codecdata_length=stream_read_dword(demuxer->stream);
+			    sh->wf->cbSize = 10+codecdata_length;
+			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
+			    ((short*)(sh->wf+1))[0]=sub_packet_size;
+			    ((short*)(sh->wf+1))[1]=sub_packet_h;
+			    ((short*)(sh->wf+1))[2]=flavor;
+			    ((short*)(sh->wf+1))[3]=coded_frame_size;
+			    ((short*)(sh->wf+1))[4]=codecdata_length;
+//			    stream_read(demuxer->stream, ((char*)(sh->wf+1))+6, 24); // extras
+			    stream_read(demuxer->stream, ((char*)(sh->wf+1))+10, codecdata_length); // extras
 			    break;
 			default:
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%s)\n", buf);
