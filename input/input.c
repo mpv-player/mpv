@@ -12,6 +12,10 @@
 #include <fcntl.h>
 #include <ctype.h>
 
+#ifdef USE_SETLOCALE
+#include <locale.h>
+#endif
+
 #include "input.h"
 #include "mouse.h"
 #ifdef MP_DEBUG
@@ -470,7 +474,14 @@ mp_input_parse_cmd(char* str) {
       break;
     case MP_CMD_ARG_FLOAT:
       errno = 0;
+      /* <olo@altkom.com.pl> Use portable C locale for parsing floats: */
+#ifdef USE_SETLOCALE
+      setlocale(LC_NUMERIC, "C");
+#endif
       cmd->args[i].v.f = atof(ptr);
+#ifdef USE_SETLOCALE
+      setlocale(LC_NUMERIC, "");
+#endif
       if(errno != 0) {
 	mp_msg(MSGT_INPUT,MSGL_ERR,"Command %s : argument %d isn't a float\n",cmd_def->name,i+1);
 	ptr = NULL;

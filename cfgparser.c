@@ -16,6 +16,11 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+
+#ifdef USE_SETLOCALE
+#include <locale.h>
+#endif
+
 #include "config.h"
 
 #include "mp_msg.h"
@@ -550,25 +555,22 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 		case CONF_TYPE_FLOAT:
 			if (param == NULL)
 				goto err_missing_param;
-
+			/* <olo@altkom.com.pl> Use portable C locale for parsing floats: */
+#ifdef USE_SETLOCALE
+			setlocale(LC_NUMERIC, "C");
+#endif
 			tmp_float = strtod(param, &endptr);
 
 			switch(*endptr) {
 			    case ':':
 			    case '/':
 				tmp_float /= strtod(endptr+1, &endptr);
-				break;
-			    case '.':
-			    case ',':
-				/* we also handle floats specified with
-				 * non-locale decimal point ::atmos
-				 */
-				if(tmp_float<0)
-					tmp_float -= 1.0/pow(10,strlen(endptr+1)) * strtod(endptr+1, &endptr);
-				else
-					tmp_float += 1.0/pow(10,strlen(endptr+1)) * strtod(endptr+1, &endptr);
+			    default:
 				break;
 			}
+#ifdef USE_SETLOCALE
+			setlocale(LC_NUMERIC, "");
+#endif
 
 			if (*endptr) {
 				mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be a floating point number"
