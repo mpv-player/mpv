@@ -132,11 +132,13 @@ extern "C" int DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER*
         
 	dsf->Create(dllname, guid, &m_sOurType, &m_sDestType);
 
+#if 0
 	m_sVhdr2->bmiHeader.biBitCount=16;
 	m_sVhdr2->bmiHeader.biCompression=fccYUY2;
 	m_sDestType.subtype=MEDIASUBTYPE_YUY2;
 	result=dsf->m_pOutputPin->vt->QueryAccept(dsf->m_pOutputPin, &m_sDestType);
 //	if(!result) caps=(CAPS)(caps | CAP_YUY2);
+#endif
 
 	m_sVhdr2->bmiHeader.biBitCount=24;
 	m_sVhdr2->bmiHeader.biCompression=0;
@@ -275,23 +277,28 @@ extern "C" int DS_VideoDecoder_SetDestFmt(int bits, int csp){
     }	
     else
     {
-	m_obh.setSpace(csp);
+	m_obh.setSpace(csp,bits);
 	switch(csp)
 	{
 	    case fccYUY2:
 		m_sDestType.subtype=MEDIASUBTYPE_YUY2;
+                printf("DShow: using YUY2 colorspace\n");
 		break;
 	    case fccYV12:
 		m_sDestType.subtype=MEDIASUBTYPE_YV12;
+                printf("DShow: using YV12 colorspace\n");
 		break;
 	    case fccIYUV:
 		m_sDestType.subtype=MEDIASUBTYPE_IYUV;
+                printf("DShow: using IYUV colorspace\n");
 		break;
 	    case fccUYVY:
 		m_sDestType.subtype=MEDIASUBTYPE_UYVY;
+                printf("DShow: using UYVY colorspace\n");
 		break;
 	    case fccYVYU:
 		m_sDestType.subtype=MEDIASUBTYPE_YVYU;
+                printf("DShow: using YVYU colorspace\n");
 		break;
 	}
     }
