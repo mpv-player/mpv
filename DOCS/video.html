@@ -172,8 +172,12 @@ to check it').</P>
 <P><B><A NAME=2.3.1.2>2.3.1.2. Xv</A></B></P>
 
 <P>Under XFree86 4.0.2 or newer, you can use your card's hardware YUV routines
-using the XVideo extension. This is what the option '-vo xv' uses.
-In order to make this work, be sure to check the following:</P>
+using the XVideo extension. This is what the option '-vo xv' uses. Also,
+this is driver supports adjusting brightness/contrast/hue/etc (unless you use
+the old, slow DirectShow DivX codec, which supports it everywhere), see the
+manpage.</P>
+
+<P>In order to make this work, be sure to check the following:</P>
 <P><UL>
 <LI>You have to use XFree86 4.0.2 or newer (former versions don't have XVideo)
 <LI>Your card actually supports hardware acceleration (modern cards do)
