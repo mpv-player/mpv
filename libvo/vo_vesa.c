@@ -276,7 +276,7 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 }
 
 /* Please comment it out if you want have OSD within movie */
-#define OSD_OUTSIDE_MOVIE 1
+/*#define OSD_OUTSIDE_MOVIE 1*/
 
 static void draw_alpha_32(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
