@@ -1,0 +1,5 @@
+#!/bin/sh
+mplayer -identify "$@" 2>/dev/null |
+	grep "^ID" |
+	sed -e 's/[`\\!$"]/\\&/g' |
+	sed -e '/^ID_FILENAME/ { s/^ID_FILENAME=\(.*\)/ID_FILENAME="\1"/g; }'
