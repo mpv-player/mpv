@@ -1224,7 +1224,9 @@ if((video_out->preinit(vo_subdevice))!=0){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error opening/initializing the selected video_out (-vo) device!\n");
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
+#ifdef X11_FULLSCREEN
 vo_mouse_timer_const=(int)sh_video->fps;
+#endif
 sh_video->video_out=video_out;
 inited_flags|=INITED_VO;
 
