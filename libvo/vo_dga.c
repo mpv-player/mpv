@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.18  2001/05/01 20:24:31  acki2
+ * - now mpeg is fast again (no more offscreen buffer rubbish) But is it really ok?
+ *
  * Revision 1.17  2001/04/24 11:42:04  pontscho
  * clean up
  *
@@ -259,7 +262,6 @@ static int
                  vo_dga_dbf_current;     // current buffer (0 or 1)
 
 static unsigned char     *vo_dga_base;
-static unsigned char     *vo_dga_yv12_base = NULL;
 static Display  *vo_dga_dpy;
 
 //---------------------------------------------------------
@@ -370,10 +372,6 @@ static void check_events(void)
 
 static void flip_page( void ){
 
-  if(vo_dga_src_format ==IMGFMT_YV12 ){
-       draw_frame( &vo_dga_yv12_base);
-  }
-
   vo_draw_text(vo_dga_src_width,vo_dga_src_height,draw_alpha);
   
   if(vo_dga_dbf_mem_offset != 0){
@@ -397,18 +395,11 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],
                             int w,int h,int x,int y )
 {
 
-  // for osd, we need a separate buffer here ... :-()
-
-    yuv2rgb( vo_dga_yv12_base + (vo_dga_src_width * y +x) * BYTESPP,
-         src[0], src[1], src[2],
-         w,h, vo_dga_src_width * BYTESPP,
-         stride[0],stride[1] );
-
-  //  yuv2rgb( vo_dga_base + vo_dga_vp_offset + 
-  //        (vo_dga_width * y +x) * BYTESPP,
-  //         src[0], src[1], src[2],
-  //         w,h, vo_dga_width * BYTESPP,
-  //         stride[0],stride[1] );
+  yuv2rgb( vo_dga_base + vo_dga_dbf_current * vo_dga_dbf_mem_offset + vo_dga_vp_offset + 
+          (vo_dga_width * y +x) * BYTESPP,
+           src[0], src[1], src[2],
+           w,h, vo_dga_width * BYTESPP,
+           stride[0],stride[1] );
   return 0;
 };
 
@@ -518,8 +509,6 @@ uninit(void)
 #endif
 
   if(vo_dga_is_running){	
-    if(vo_dga_yv12_base)free(vo_dga_yv12_base);
-    vo_dga_yv12_base = NULL;
     vo_dga_is_running = 0;
     vd_printf( VD_DBG, "vo_dga: in uninit\n");
     XUngrabPointer (vo_dga_dpy, CurrentTime);
@@ -678,15 +667,6 @@ static uint32_t init( uint32_t width,  uint32_t height,
     return 1;
   } 
 
-  if(format ==IMGFMT_YV12 ){
-    vo_dga_yv12_base = malloc(wanted_width * wanted_height * BYTESPP);
-    if(vo_dga_yv12_base== NULL){
-      vd_printf(VD_ERR, "vo_dga: Not enough memory for offscreen YV12 buffer!\n");
-      return 1;
-    }
-  }
-
-
   vo_dga_vp_width = DisplayWidth( vo_dga_dpy, DefaultScreen(vo_dga_dpy));
   vo_dga_vp_height = DisplayHeight( vo_dga_dpy, DefaultScreen(vo_dga_dpy));
 
@@ -810,10 +790,6 @@ static uint32_t init( uint32_t width,  uint32_t height,
      }
 #endif
 #endif
-     if(vo_dga_yv12_base){
-       free(vo_dga_yv12_base);
-       vo_dga_yv12_base = NULL;
-     }
      return 1;
   }
 		         
