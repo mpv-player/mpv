@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.58 -->
+<!-- synced with 1.59 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -1316,6 +1316,8 @@ Szeretnék +/- 1 képkockát ugrani a 10 másodperc helyett.
 </para></question>
 <answer><para>
 Egy képkockával előre léphetsz a <keycap>.</keycap> gombbal.
+Ha a film nem volt megállítva, akkor ezután megáll
+(lásd a man oldalt a részletekért).
 A visszafelé lépés valószínűleg nem lesz mostanában megvalósítva.
 </para></answer>
 </qandaentry>
