@@ -1,4 +1,4 @@
-.\" synced with 1.711
+.\" synced with 1.715
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -2830,7 +2830,7 @@ Entrelace les trames de sortie, en commençant par les champs du bas.
 .br
 .I NOTE\ :
 Si vous ne définissez pas d'options, sortie sera "progressive"
-(c-à-d non entrelacée)
+(c-à-d non entrelacée).
 .RE
 .
 .TP
@@ -3203,7 +3203,7 @@ les flux valides)
 Active des optimisations non conformes aux spécifications, et
 qui peuvent éventuellement poser problème, comme une déquantification
 plus simple, l'hypothèse que les matrices de quantification ont été
-utilisées, que l'espace de couleur est YUV 4:2:0, et le saut de quelques
+utilisées, que l'espace de couleur est YUV 4:2:0 et le saut de quelques
 vérifications pour détecter les flux endommagés.
 .IPs gray\ 
 décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
@@ -3283,9 +3283,9 @@ Définit les paramètres de SwScaler.
 .PD 0
 .RSs
 .IPs lgb=<0\-100>
-Filtre flou gaussien (luma)
+filtre flou gaussien (luma)
 .IPs cgb=<0\-100>
-Filtre flou gaussien (chroma)
+filtre flou gaussien (chroma)
 .IPs ls=<0\-100>
 filtre netteté (sharpen) (luma)
 .IPs cs=<0\-100>
@@ -6754,9 +6754,10 @@ Fréquence des trames-I (par défaut\ : 60)
 .B frameref=<valeur>
 Nombre des trames précédentes à utiliser comme prédicteur pour les trames-P
 (par défaut\ : 1).
-.br
-.I NOTE\ :
-Jusqu'à la version r38 de x264, cette fonctionnalité n'est pas implémentée.
+Cela peut changer un peut le bitrate et le PSNR.
+This may cause tiny changes in bitrate and PSNR.
+Quelques décodeurs sont incapables de gérer de de grandes valeurs de
+frameref.
 .
 .TP
 .B idrframe=<valeur>
@@ -6793,7 +6794,7 @@ Une valeur positive réduit les artefacts de blocking, mais réduira les détails.
 Paramètre beta du filtre de deblocking (par défaut\ : 0).
 Affecte le gradient maximum autorisé entre deux blocs adjacents
 .
-.TP
+.TP\ \ \ 
 .B cabac
 Utilise CABAC (codage de l'information adaptée en fonction du contexte\ :
 Context-Adaptive Binary Arithmetic Coding)
@@ -6829,21 +6830,15 @@ Ainsi, la différence de débit binaire entre QP=20 et QP=40 est d'environ un
 facteur 10.
 Les quantificateurs utiles en H.264 ont tendance à être bien plus importants
 comparés à MPEG[124].
-.br
-.I NOTE\ :
-Cette option fonctionne même si vous avez demandé un encodage à débit binaire
-contant (CBR).
-Dans ce cas, la première trame utilisera le quantificateur que vous avez donné,
-mais pas les suivantes, qui seront quantifiées par le "ratecontrol".
 .
 .TP
 .B qp_min=<2-51> (CBR uniquement)
 Quantificateur minimum.
-Une valeur comprise dans l'intervalle 20-40 semble convenir (par défaut\ : 2)
+Une valeur comprise dans l'intervalle 15-35 semble convenir (par défaut\ : 10)
 .
 .TP
-.B qp_max=<2-51> (mode CBR uniquement)
-Quantificateur maximum.
+.B qp_max=<2-51> (CBR uniquement)
+quantificateur maximum (par défaut\ : 51)
 .
 .TP
 .B qp_step=<valeur>
@@ -6862,7 +6857,7 @@ taille initiale du tampon ratecontrol (par défaut\ : 1/4 de rc_buffer_size)
 .
 .TP
 .B rc_sens=<0-100>
-sensibilité du ratecontrol (default: 100)
+sensibilité du ratecontrol (default: 4)
 .
 .TP
 .B ip_factor=<value>
@@ -6884,7 +6879,7 @@ Cela affecte le ratecontrol\ : une faible valeur rend le débit binaire plus
 contant, alors qu'une valeur importante rend les quantificateurs plus contants.
 .
 .TP
-.B qblur=<0-1>
+.B qblur=<0-99>
 Flou temporel entre les quantificateurs (par défaut\ : 0.5).
 Une faible valeur permet aux quantificateurs de voir leur valeur varier plus
 d'une trame à l'autre\ ; une valeur forte oblige la variation à être plus
@@ -6901,17 +6896,18 @@ Ajuste la quantité d'informations de log à afficher à l'écran.
 .RSs
 -1: aucune
 .br
- 0: erreurs (pour le débogage de x264)
+ 0: Affiche uniquement les erreurs.
 .br
  1: avertissements
 .br
- 2: PSNR et autres analyses statistiques lorsque l'encodage se termine
-(par défaut)
+ 2: PSNR, temps d'encodage et autres analyses statistiques lorsque
+l'encodage se termine (par défaut)
 .br
- 3: PSNR, quantificateurs, type de trame, taille, et autres statistiques sur chaque trame.
+ 3: PSNR, paramètres de quantificateurs, type de trame, taille, et autres
+statistiques sur chaque trame.
 .REss
 .TP
-.B psnr
+.B psnr\ \ \ 
 Affiche les statistiques de rapport signal/bruit.
 .
 .
