@@ -482,6 +482,15 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
         }
       }
       break;
+      case DEMUXER_TYPE_LAVF:
+        if((int)sh_video->fps==1000 || (int)sh_video->fps<=1){
+          float next_pts = ds_get_next_pts(d_video);
+          float d= next_pts > 0 ? next_pts - d_video->pts : d_video->pts-pts1;
+          if(d>=0){
+            frame_time = d;
+          } 
+        }
+      break;
     }
     
     if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS ||
