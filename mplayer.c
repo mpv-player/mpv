@@ -269,36 +269,11 @@ static stream_t* stream=NULL;
 
 char* current_module=NULL; // for debugging
 
-int v_hw_equ_cap=0;
-/*
-For future:
-int v_red_intensity=0;
-int v_green_intensity=0;
-int v_blue_intensity=0;
-*/
+int vo_gamma_brightness = 0;
+int vo_gamma_contrast = 0;
+int vo_gamma_saturation = 0;
+int vo_gamma_hue = 0;
 
-void set_video_eq( int cap )
-{
- mp_cmd_t    * mp_cmd;
- 
- v_hw_equ_cap=cap;
- 
- mp_cmd = (mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
-  mp_cmd->id=MP_CMD_CONTRAST; mp_cmd->name=strdup( "contrast" ); 
-  mp_cmd->args[0].v.i=vo_gamma_contrast; mp_cmd->args[1].v.i=1; mp_input_queue_cmd( mp_cmd );
-
- mp_cmd = (mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
-  mp_cmd->id=MP_CMD_BRIGHTNESS; mp_cmd->name=strdup( "brightness" );
-  mp_cmd->args[0].v.i=vo_gamma_brightness; mp_cmd->args[1].v.i=1; mp_input_queue_cmd( mp_cmd );
-
- mp_cmd = (mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
-  mp_cmd->id=MP_CMD_HUE;        mp_cmd->name=strdup( "hue" );
-  mp_cmd->args[0].v.i=vo_gamma_hue; mp_cmd->args[1].v.i=1; mp_input_queue_cmd( mp_cmd );
-
- mp_cmd = (mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
-  mp_cmd->id=MP_CMD_SATURATION; mp_cmd->name=strdup( "saturation" );
-  mp_cmd->args[0].v.i=vo_gamma_saturation; mp_cmd->args[1].v.i=1; mp_input_queue_cmd( mp_cmd );
-}
 // ---
 
 #ifdef HAVE_RTC
@@ -1354,37 +1329,12 @@ if(auto_quality>0){
 
 // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
 
-current_module="init_vo_vaa";
-
-   if(video_out->control(VOCTRL_QUERY_VAA, &vo_vaa)==VO_NOTIMPL)
-     memset(&vo_vaa,0,sizeof(vo_vaa_t));
-   /*
-	get_hw_eq
-   */
-   if(vo_vaa.get_video_eq)
-   {
-	vidix_video_eq_t veq;
-	if( vo_vaa.get_video_eq(&veq) == 0)
-	{
-	    v_hw_equ_cap = veq.cap;
-	    if ( ( vo_gamma_brightness == -101 )&&( veq.cap & VEQ_CAP_BRIGHTNESS ) ) vo_gamma_brightness = veq.brightness / 10;
-	    if ( ( vo_gamma_contrast == -101 )&&( veq.cap & VEQ_CAP_CONTRAST ) ) vo_gamma_contrast = veq.contrast / 10;
-	    if ( ( vo_gamma_hue == -101 )&&( veq.cap & VEQ_CAP_HUE ) ) vo_gamma_hue = veq.hue / 10;
-	    if ( ( vo_gamma_saturation == -101 )&&( veq.cap & VEQ_CAP_SATURATION ) ) vo_gamma_saturation=veq.saturation / 10;
-	    /*
-	    v_red_intensity=veq.red_intensity/10;
-	    v_green_intensity=veq.green_intensity/10;
-	    v_blue_intensity=veq.blue_intensity/10;
-	    */
-	}
-   }
-
-   if ( vo_gamma_brightness == -101 ) vo_gamma_brightness=0.0f;
-   if ( vo_gamma_contrast == -101 ) vo_gamma_contrast=0.0f;
-   if ( vo_gamma_hue == -101 ) vo_gamma_hue=0.0f;
-   if ( vo_gamma_saturation == -101 ) vo_gamma_saturation=0.0f;
-
-   set_video_eq( v_hw_equ_cap );
+current_module="init_vo";
+    /* set defaults */
+    set_video_colors(sh_video, "brightness", vo_gamma_brightness);
+    set_video_colors(sh_video, "contrast", vo_gamma_contrast);
+    set_video_colors(sh_video, "saturation", vo_gamma_saturation);
+    set_video_colors(sh_video, "hue", vo_gamma_hue);
 
    if(vo_flags & 0x08 && vo_spudec)
       spudec_set_hw_spu(vo_spudec,video_out);
@@ -2439,40 +2389,19 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     }
     case MP_CMD_MIXER_USEMASTER :  {
     } break;
-    case MP_CMD_CONTRAST :  {
-      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
-      int e;
-      if(abs)
-	vo_gamma_contrast = v > 100 ? 100 : v;
-      else {
-	if ( (vo_gamma_contrast += v) > 100 ) vo_gamma_contrast = 100;
-      }
-      if(vo_gamma_contrast < -100) vo_gamma_contrast = -100;
-      if(v_hw_equ_cap & VEQ_CAP_CONTRAST) e=vo_gamma_contrast;
-        else e=( vo_gamma_contrast + 100 ) / 2;
-      if(set_video_colors(sh_video,"Contrast",e)){
-#ifdef USE_OSD
-	if(osd_level){
-	  osd_visible=sh_video->fps; // 1 sec
-	  vo_osd_progbar_type=OSD_CONTRAST;
-	  vo_osd_progbar_value=(vo_gamma_contrast<<7)/100 + 128;
-	  vo_osd_changed(OSDTYPE_PROGBAR);
-	}
-#endif
-      }
-    } break;
     case MP_CMD_BRIGHTNESS :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
-      int e;
-      if(abs)
-	vo_gamma_brightness = v > 100 ? 100 : v;
-      else {
-	if ( (vo_gamma_brightness += v) > 100 ) vo_gamma_brightness = 100;
-      }
-      if ( vo_gamma_brightness < -100 ) vo_gamma_brightness = -100;
-      if ( v_hw_equ_cap & VEQ_CAP_BRIGHTNESS ) e=vo_gamma_brightness;
-       else e=( vo_gamma_brightness + 100 ) / 2;
-      if(set_video_colors(sh_video,"Brightness",e)){
+     
+      if (abs)
+        vo_gamma_brightness = v;
+      else
+        vo_gamma_brightness += v;
+
+      if (vo_gamma_brightness > 100)
+        vo_gamma_brightness = 100;
+      else if (vo_gamma_brightness < -100)
+        vo_gamma_brightness = -100;
+      if(set_video_colors(sh_video, "brightness", vo_gamma_brightness)){
 #ifdef USE_OSD
        if(osd_level){
 	 osd_visible=sh_video->fps; // 1 sec
@@ -2483,48 +2412,73 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #endif // USE_OSD
       }
     } break;
-    case MP_CMD_HUE :  {
+    case MP_CMD_CONTRAST :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
-      int e;
-      if(abs)
-	vo_gamma_hue = v > 100 ? 100 : v;
-      else {
-	if ( (vo_gamma_hue += v) > 100 ) vo_gamma_hue = 100;
-      }
-      if ( vo_gamma_hue < -100 ) vo_gamma_hue = -100;
-      if(v_hw_equ_cap & VEQ_CAP_HUE) e=vo_gamma_hue;
-        else e=( vo_gamma_hue + 100 ) / 2;
-      if(set_video_colors(sh_video,"Hue",e)){
+     
+      if (abs)
+        vo_gamma_contrast = v;
+      else
+        vo_gamma_contrast += v;
+
+      if (vo_gamma_contrast > 100)
+        vo_gamma_contrast = 100;
+      else if (vo_gamma_contrast < -100)
+        vo_gamma_contrast = -100;
+      if(set_video_colors(sh_video, "contrast", vo_gamma_contrast)){
 #ifdef USE_OSD
-	if(osd_level){
-	  osd_visible=sh_video->fps; // 1 sec
-	  vo_osd_progbar_type=OSD_HUE;
-	  vo_osd_progbar_value=(vo_gamma_hue<<7)/100 + 128;
-	  vo_osd_changed(OSDTYPE_PROGBAR);
-	}
-#endif
-      }	
+       if(osd_level){
+	 osd_visible=sh_video->fps; // 1 sec
+	 vo_osd_progbar_type=OSD_CONTRAST;
+	 vo_osd_progbar_value=(vo_gamma_contrast<<7)/100 + 128;
+	 vo_osd_changed(OSDTYPE_PROGBAR);
+       }
+#endif // USE_OSD
+      }
     } break;
     case MP_CMD_SATURATION :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
-      int e;
-      if(abs)
-	vo_gamma_saturation = v > 100 ? 100 : v;
-      else {
-	if ( (vo_gamma_saturation += v) > 100 ) vo_gamma_saturation = 100;
-      }
-      if ( vo_gamma_saturation < -100 ) vo_gamma_saturation = -100;
-      if(v_hw_equ_cap & VEQ_CAP_SATURATION) e=vo_gamma_saturation;
-        else e=( vo_gamma_saturation + 100 ) / 2;
-      if(set_video_colors(sh_video,"Saturation",e)){
+     
+      if (abs)
+        vo_gamma_saturation = v;
+      else
+        vo_gamma_saturation += v;
+
+      if (vo_gamma_saturation > 100)
+        vo_gamma_saturation = 100;
+      else if (vo_gamma_saturation < -100)
+        vo_gamma_saturation = -100;
+      if(set_video_colors(sh_video, "saturation", vo_gamma_saturation)){
 #ifdef USE_OSD
-	if(osd_level){
-	  osd_visible=sh_video->fps; // 1 sec
-	  vo_osd_progbar_type=OSD_SATURATION;
-	  vo_osd_progbar_value=(vo_gamma_saturation<<7)/100 + 128;
-	  vo_osd_changed(OSDTYPE_PROGBAR);
-	}
-#endif
+       if(osd_level){
+	 osd_visible=sh_video->fps; // 1 sec
+	 vo_osd_progbar_type=OSD_SATURATION;
+	 vo_osd_progbar_value=(vo_gamma_saturation<<7)/100 + 128;
+	 vo_osd_changed(OSDTYPE_PROGBAR);
+       }
+#endif // USE_OSD
+      }
+    } break;
+    case MP_CMD_HUE :  {
+      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
+     
+      if (abs)
+        vo_gamma_hue = v;
+      else
+        vo_gamma_hue += v;
+
+      if (vo_gamma_hue > 100)
+        vo_gamma_hue = 100;
+      else if (vo_gamma_hue < -100)
+        vo_gamma_hue = -100;
+      if(set_video_colors(sh_video, "hue", vo_gamma_hue)){
+#ifdef USE_OSD
+       if(osd_level){
+	 osd_visible=sh_video->fps; // 1 sec
+	 vo_osd_progbar_type=OSD_HUE;
+	 vo_osd_progbar_value=(vo_gamma_hue<<7)/100 + 128;
+	 vo_osd_changed(OSDTYPE_PROGBAR);
+       }
+#endif // USE_OSD
       }
     } break;
     case MP_CMD_FRAMEDROPPING :  {

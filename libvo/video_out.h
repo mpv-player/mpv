@@ -3,6 +3,7 @@
  *
  *      Copyright (C) Aaron Holtzman - Aug 1999
  *	Strongly modified, most parts rewritten: A'rpi/ESP-team - 2000-2001
+ *	(C) MPlayer Developers
  *
  */
  
@@ -22,7 +23,7 @@
 
 /* takes a pointer to a vo_vaa_s struct */
 #define VOCTRL_QUERY_VAA 1
-/* takes a pointer to uint32_t fourcc */
+/* does the device support the required format */
 #define VOCTRL_QUERY_FORMAT 2
 /* signal a device reset seek */
 #define VOCTRL_RESET 3
@@ -30,7 +31,6 @@
 #define VOCTRL_GUISUPPORT 4
 /* used to switch to fullscreen */
 #define VOCTRL_FULLSCREEN 5
-/* user wants to have screen shot. (currently without args)*/
 #define VOCTRL_SCREENSHOT 6
 /* signal a device pause */
 #define VOCTRL_PAUSE 7
@@ -46,6 +46,9 @@
 #define VOCTRL_SET_FRAME_NUM  12
 #define VOCTRL_GET_PANSCAN 15
 #define VOCTRL_SET_PANSCAN 16
+/* equalizer controls */
+#define VOCTRL_SET_EQUALIZER 17
+#define VOCTRL_GET_EQUALIZER 18
 
 #define VO_TRUE		1
 #define VO_FALSE	0

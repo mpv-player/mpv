@@ -63,16 +63,7 @@ float vo_fps=0; // for mp1e rte
 
 char *vo_subdevice = NULL;
 int vo_directrendering=0;
-/****************************************
-*	GAMMA CORRECTION		*
-****************************************/
-int vo_gamma_brightness=-101;
-int vo_gamma_saturation=-101;
-int vo_gamma_contrast=-101;
-int vo_gamma_hue=-101;
-int vo_gamma_red_intensity=0;
-int vo_gamma_green_intensity=0;
-int vo_gamma_blue_intensity=0;
+
 //
 // Externally visible list of all vo drivers
 //

@@ -61,11 +61,9 @@ static vo_info_t vo_info =
 {
         "X11/Xv",
         "xv",
-        "Gerd Knorr <kraxel@goldbach.in-berlin.de>",
+        "Gerd Knorr <kraxel@goldbach.in-berlin.de> and others",
         ""
 };
-
-extern int verbose;
 
 /* local data */
 static unsigned char *ImageData;
@@ -101,9 +99,7 @@ static XShmSegmentInfo Shminfo[NUM_BUFFERS];
 static int Shmem_Flag;
 #endif
 
-//static int Quiet_Flag; <-- What is that for ? Albeu.
 static int gXErrorFlag;
-static int CompletionType = -1;
 
 static uint32_t image_width;
 static uint32_t image_height;
@@ -140,13 +136,16 @@ static void draw_alpha_uyvy(int x0,int y0, int w,int h, unsigned char* src, unsi
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 }
 
-static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
+static int xv_set_eq(char *name, int value, int use_reset)
 {
- XvAttribute *attributes;
- int howmany, xv_min,xv_max,xv_atomka;
- static int was_reset = 0;
-/* get available attributes */
-     attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
+    XvAttribute *attributes;
+    int howmany, xv_min, xv_max, xv_atom;
+    static int was_reset = 0;
+
+    mp_dbg(MSGT_VO, MSGL_V, "xv_set_eq called! (%s, %d, %d)\n", name, value, use_reset);
+
+    /* get available attributes */
+    attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
      /* first pass try reset */
      if(use_reset)
      {
@@ -156,12 +155,12 @@ static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
             {
 		was_reset = 1;
 		mp_msg(MSGT_VO,MSGL_V,"vo_xv: reset gamma correction\n");
-                xv_atomka = XInternAtom(mDisplay, attributes[i].name, True);
-                XvSetPortAttribute(mDisplay, xv_port, xv_atomka, attributes[i].max_value);
+                xv_atom = XInternAtom(mDisplay, attributes[i].name, True);
+                XvSetPortAttribute(mDisplay, xv_port, xv_atom, attributes[i].max_value);
 	    }
         }
 	/* for safety purposes */
-	if(!was_reset) return ENOSYS;
+	if(!was_reset) return(VO_FALSE);
      }
      for (i = 0; i < howmany && attributes; i++)
      {
@@ -169,40 +168,41 @@ static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
             {
                 xv_min = attributes[i].min_value;
                 xv_max = attributes[i].max_value;
-                xv_atomka = XInternAtom(mDisplay, attributes[i].name, True);
+                xv_atom = XInternAtom(mDisplay, attributes[i].name, True);
 /* since we have SET_DEFAULTS first in our list, we can check if it's available
    then trigger it if it's ok so that the other values are at default upon query */
-                if (xv_atomka != None)
+                if (xv_atom != None)
                 {
 		    int hue = 0,port_value,port_min,port_max,port_mid;
-		    if(strcmp(attributes[i].name,"XV_BRIGHTNESS") == 0
-			      && (info->cap & VEQ_CAP_BRIGHTNESS))
-				port_value = info->brightness;
+
+		    if(!strcmp(attributes[i].name,"XV_BRIGHTNESS") &&
+			(!strcasecmp(name, "brightness")))
+				port_value = value;
 		    else
-		    if(strcmp(attributes[i].name,"XV_SATURATION") == 0
-			      && (info->cap & VEQ_CAP_SATURATION))
-				port_value = info->saturation;
+		    if(!strcmp(attributes[i].name,"XV_CONTRAST") &&
+			(!strcasecmp(name, "contrast")))
+				port_value = value;
 		    else
-		    if(strcmp(attributes[i].name,"XV_CONTRAST") == 0
-			      && (info->cap & VEQ_CAP_CONTRAST))
-				port_value = info->contrast;
+		    if(!strcmp(attributes[i].name,"XV_SATURATION") &&
+			(!strcasecmp(name, "saturation")))
+				port_value = value;
 		    else
-		    if(strcmp(attributes[i].name,"XV_HUE") == 0
-			      && (info->cap & VEQ_CAP_HUE))
-				{ port_value = info->hue; hue=1; }
+		    if(!strcmp(attributes[i].name,"XV_HUE") &&
+			(!strcasecmp(name, "hue")))
+				{ port_value = value; hue=1; }
 		    else
                     /* Note: since 22.01.2002 GATOS supports these attrs for radeons (NK) */
-		    if(strcmp(attributes[i].name,"XV_RED_INTENSITY") == 0
-			      && (info->cap & VEQ_CAP_RGB_INTENSITY))
-				port_value = info->red_intensity;
+		    if(!strcmp(attributes[i].name,"XV_RED_INTENSITY") &&
+			(!strcasecmp(name, "red_intensity")))
+				port_value = value;
 		    else
-		    if(strcmp(attributes[i].name,"XV_GREEN_INTENSITY") == 0
-			      && (info->cap & VEQ_CAP_RGB_INTENSITY))
-				port_value = info->green_intensity;
+		    if(!strcmp(attributes[i].name,"XV_GREEN_INTENSITY") &&
+			(!strcasecmp(name, "green_intensity")))
+				port_value = value;
 		    else
-		    if(strcmp(attributes[i].name,"XV_BLUE_INTENSITY") == 0
-			      && (info->cap & VEQ_CAP_RGB_INTENSITY))
-				port_value = info->blue_intensity;
+		    if(!strcmp(attributes[i].name,"XV_BLUE_INTENSITY") &&
+			(!strcasecmp(name, "blue_intensity")))
+				port_value = value;
 		    else continue;
 		    /* means that user has untouched this parameter since
 		       NVidia driver has default == min for XV_HUE but not mid */
@@ -211,129 +211,20 @@ static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
 		    port_max = xv_max;
 		    port_mid = (port_min + port_max) / 2;
 
+		    /* nvidia hue workaround */
 		    if ( hue && port_min == 0 && port_max == 360 )
 		     {
 		      port_value=( port_value * port_mid ) / 1000;
 		      if ( port_value < 0 ) port_value+=port_max - 1;
 		     } else port_value = port_mid + (port_value * (port_max - port_min)) / 2000;
-		    
-                    XvSetPortAttribute(mDisplay, xv_port, xv_atomka, port_value);
+		     
+                    XvSetPortAttribute(mDisplay, xv_port, xv_atom, port_value);
+		    return(VO_TRUE);
                 }
         }
     }
-    return 0;
+    return(VO_FALSE);
 }
-
-
-static int xv_set_video_eq( const vidix_video_eq_t *info)
-{
-    return __xv_set_video_eq(info,0);
-}
-
-static int xv_get_video_eq( vidix_video_eq_t *info)
-{
- XvAttribute *attributes;
- int howmany, xv_min,xv_max,xv_atomka;
-/* get available attributes */
-     memset(info,0,sizeof(vidix_video_eq_t));
-     attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
-     for (i = 0; i < howmany && attributes; i++)
-     {
-            if (attributes[i].flags & XvGettable)
-            {
-                xv_min = attributes[i].min_value;
-                xv_max = attributes[i].max_value;
-                xv_atomka = XInternAtom(mDisplay, attributes[i].name, True);
-/* since we have SET_DEFAULTS first in our list, we can check if it's available
-   then trigger it if it's ok so that the other values are at default upon query */
-                if (xv_atomka != None)
-                {
-		    int value,port_value,port_min,port_max,port_mid;
-                    XvGetPortAttribute(mDisplay, xv_port, xv_atomka, &port_value);
-		    mp_msg(MSGT_VO,MSGL_V,"vo_xv: get: %s = %i\n",attributes[i].name,port_value);
-
-		    port_min = xv_min;
-		    port_max = xv_max;
-		    port_mid = (port_min + port_max) / 2;
-		    
-                    value = ((port_value - port_mid)*2000)/(port_max-port_min);
-		    
-		    mp_msg(MSGT_VO,MSGL_V,"vo_xv: assume: %s = %i\n",attributes[i].name,port_value);
-		    
-		    if(strcmp(attributes[i].name,"XV_BRIGHTNESS") == 0)
-		    {
-			info->cap |= VEQ_CAP_BRIGHTNESS;
-			info->brightness = value;
-		    }
-		    else
-		    if(strcmp(attributes[i].name,"XV_SATURATION") == 0)
-		    {
-			info->cap |= VEQ_CAP_SATURATION;
-			info->saturation = value;
-		    }
-		    else
-		    if(strcmp(attributes[i].name,"XV_CONTRAST") == 0)
-		    {
-			info->cap |= VEQ_CAP_CONTRAST;
-			info->contrast = value;
-		    }
-		    else
-		    if(strcmp(attributes[i].name,"XV_HUE") == 0)
-		    {
-		        if ( port_min == 0 && port_max == 360 )
-		         {
-		          if ( port_value > port_mid - 1 ) value=( port_value - port_max + 1 ) * 1000 / port_mid;
-			   else value=port_value * 1000 / port_mid;
-		         }
-//		        mp_msg(MSGT_VO,MSGL_STATUS,"vo_xv: assume: %s = %d (%d)\n",attributes[i].name,value,port_value);
-			info->cap |= VEQ_CAP_HUE;
-			info->hue = value;
-		    }
-		    else
-                    /* Note: since 22.01.2002 GATOS supports these attrs for radeons (NK) */
-		    if(strcmp(attributes[i].name,"XV_RED_INTENSITY") == 0)
-		    {
-			info->cap |= VEQ_CAP_RGB_INTENSITY;
-			info->red_intensity = port_value;
-		    }
-		    else
-		    if(strcmp(attributes[i].name,"XV_GREEN_INTENSITY") == 0)
-		    {
-			info->cap |= VEQ_CAP_RGB_INTENSITY;
-			info->green_intensity = port_value;
-		    }
-		    else
-		    if(strcmp(attributes[i].name,"XV_BLUE_INTENSITY") == 0)
-		    {
-			info->cap |= VEQ_CAP_RGB_INTENSITY;
-			info->blue_intensity = port_value;
-		    }
-		    else continue;
-                }
-        }
-    }
-    return 0;
-}
-
-#if 0
-static void set_gamma_correction( void )
-{
-  vidix_video_eq_t info;
-  /* try all */
-  info.cap = VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST | VEQ_CAP_SATURATION |
-	     VEQ_CAP_HUE | VEQ_CAP_RGB_INTENSITY;
-  info.flags = 0; /* doesn't matter for xv */
-  info.brightness = vo_gamma_brightness;
-  info.contrast = vo_gamma_contrast;
-  info.saturation = vo_gamma_saturation;
-  info.hue = vo_gamma_hue;
-  info.red_intensity = vo_gamma_red_intensity;
-  info.green_intensity = vo_gamma_green_intensity;
-  info.blue_intensity = vo_gamma_blue_intensity;
-  /* reset with XV_SET_DEFAULTS only once */
-  __xv_set_video_eq(&info,1);
-}
-#endif
 
 /*
  * connect to server, create and map window,
@@ -897,19 +788,9 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static void query_vaa(vo_vaa_t *vaa)
-{
-  memset(vaa,0,sizeof(vo_vaa_t));
-  vaa->get_video_eq = xv_get_video_eq;
-  vaa->set_video_eq = xv_set_video_eq;
-}
-
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
-  case VOCTRL_QUERY_VAA:
-    query_vaa((vo_vaa_t*)data);
-    return VO_TRUE;
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
@@ -937,6 +818,17 @@ static uint32_t control(uint32_t request, void *data, ...)
        }
      }
     return VO_TRUE;
+  case VOCTRL_SET_EQUALIZER:
+  {
+    va_list ap;
+    int value;
+    
+    va_start(ap, data);
+    value = va_arg(ap, int);
+    va_end(ap);
+    
+    return(xv_set_eq(data, value, 0));
+  }
   }
   return VO_NOTIMPL;
 }
