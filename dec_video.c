@@ -42,6 +42,8 @@ extern double video_time_usage;
 extern double vout_time_usage;
 extern double max_video_time_usage;
 extern double max_vout_time_usage;
+extern double cur_video_time_usage;
+extern double cur_vout_time_usage;
 extern vo_vaa_t vo_vaa;
 
 extern int frameratecode2framerate[16];
@@ -1218,6 +1220,7 @@ t2=GetTimer();t=t2-t;
 tt = t*0.000001f;
 video_time_usage+=tt;
 if(tt > max_video_time_usage) max_video_time_usage=tt;
+cur_video_time_usage=tt;
 if(painted) return 1;
 switch(blit_frame){
 case 3:
@@ -1278,6 +1281,7 @@ case 2:
     tt=t2*0.000001f;
     vout_time_usage+=tt;
     if(tt > max_vout_time_usage) max_vout_time_usage = tt;
+    cur_vout_time_usage=tt;
     blit_frame=1;
     break;
 }

@@ -178,10 +178,14 @@ double video_time_usage=0;
 double vout_time_usage=0;
 double max_video_time_usage=0;
 double max_vout_time_usage=0;
+double cur_video_time_usage=0;
+double cur_vout_time_usage=0;
 static double audio_time_usage=0;
 static double max_audio_time_usage=0;
+static double cur_audio_time_usage=0;
 static int total_time_usage_start=0;
 static int benchmark=0;
+static unsigned bench_dropped_frames=0;
 
 // static int play_in_bg=0;
 
@@ -1606,7 +1610,7 @@ while(sh_audio){
   tt = t*0.000001f;
   audio_time_usage+=tt;
   if(tt > max_audio_time_usage) max_audio_time_usage = tt;
-  
+  cur_audio_time_usage=tt;
   if(playsize>sh_audio->a_buffer_len) playsize=sh_audio->a_buffer_len;
   
   playsize=audio_out->play(sh_audio->a_buffer,playsize,0);
@@ -1842,7 +1846,7 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 	video_out->check_events();
         if(blit_frame){
 	   unsigned int t2=GetTimer();
-
+	   double tt;
 	   float j;
 #define	FRAME_LAG_WARN	0.2
 	   j = ((float)t2 - lastframeout_ts) / 1000000;
@@ -1855,13 +1859,19 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 		/* printf ("PANIC: too slow frame (%.3f)!\n", j); */
 
 	   video_out->flip_page();
-	   t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
+	   t2=GetTimer()-t2;
+	   tt = t2*0.000001f;
+	   vout_time_usage+=tt;
+	   if(cur_vout_time_usage + tt > max_vout_time_usage)
+		    max_vout_time_usage = cur_vout_time_usage + tt;
 	}
 #endif
 //        usec_sleep(50000); // test only!
 
     }
-
+/*  Compute total frame dropping here */
+    if((cur_video_time_usage + cur_vout_time_usage + cur_audio_time_usage)*vo_fps > 1)
+							bench_dropped_frames ++;
     current_module=NULL;
     
     if(eof) break;
@@ -2870,6 +2880,7 @@ if(benchmark){
 	   100.0*max_vout_time_usage/total_time_usage+
 	   100.0*max_audio_time_usage/total_time_usage
 	   );
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"TOTAL BENCHMARK%%: dropped frames: %u\n",bench_dropped_frames);
 }
 
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
