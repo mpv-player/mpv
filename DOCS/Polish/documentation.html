@@ -1,5 +1,4 @@
 <HTML>
-<meta http-equiv="content-type" content="text/html; charset=iso-8859-2">
 <BODY BGCOLOR=WHITE>
 
 <FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
@@ -128,6 +127,7 @@
             <LI><A HREF="encoding.html#2.4.3.1">2.4.3.1 Kodowanie dwupasmowe DivX4</A></LI>
             <LI><A HREF="encoding.html#2.4.3.2">2.4.3.2 Przeskalowywanie filmów</A></LI>
             <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Streamcopy</A></LI>
+	    <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Naprawa plików AVI z uszkodzonym indeksem</A></LI>
           </UL>
         <LI><A HREF="encoding.html#2.4.4">2.4.4 Składnia</A></LI>
         <LI><A HREF="encoding.html#2.4.5">2.4.5 Dostępne opcje</A></LI>
@@ -204,24 +204,27 @@ powiesz na ładne, duże, antyaliasowane podtytuły z cieniem (<B>wspieranych jest
 9 typów!!!</B>) z europejskim ISO 8859-1,2 (węgierskimi, angielskimi, czeskimi
 itd.), cyrylicą, koreańskimi fontami oraz OSD?</P>
 
-<P><B>MPlayer</B> is basically GPL, but contains some non-GPL code which is not
-allowed to be distributed in binary form, and also contains the OpenDivX
-library which has special license. We are still developing towards GPL.</P>
+<P><B>MPlayer</B> jest oparty na GPL, ale zawiera pewien kod nie-GPL, którego
+nie wolno rozpowszechniać w formie binarnej, a także zawiera bibliotekę
+OpenDivX, która jest na specjalnej licencji. Wciaż jednak rozwijamy się w
+kierunku GPL.</P> 
 
-<P>Distributing <B>MPlayer</B> in the form of binaries and/or binary packages
-is currently impossible, speaking about both <B>technical</B> and <B>law</B>
-areas. Detailed information can be found in the second part of <A HREF="users_against_developers.html">this file</A>,
-and it is recommended to read it.</P>
+<P>Rozprowadzanie <B>MPlayera</B> w formie binarnej i/lub w pakietach binarnych
+jest aktualnie niemożliwe zarówno ze względów <B>technicznych</B> jak i
+<B>prawnych</B>. Szczegółową informację na ten temat można znaleźć w drugiej
+części <A HREF="users_against_developers.html">tego pliku</A> i jest zalecane
+przeczytanie go.</P>
 
-<P>I didn't write any codecs, just some players. I spent
-a lot of time finding the best way to parse bad damaged input files
-(both MPEG and AVI) and to do perfect A-V sync with seeking ability.
-My player is rock solid playing damaged MPEG files (useful for some VCDs),
-and it plays bad AVI files which are unplayable with the famous
-windows media player. Even AVI files without index chunk are playable, and
-you can rebuild their indexes with the -idx option, thus enabling seeking!
-As you see, stability and quality are the most important things for me,
-but the speed is also amazing.</P>
+<P>Nie napisałem żadnych kodeków, tylko kilka odgrywarek. Spędziłem wiele
+czasu poszukując najlepszego sposobu, aby rozkodować złe, uszkodzone pliki
+wejściowe (zarówno MPEG jak i AVI), oraz by zrobić perfekcyjną synchronizację
+A-V w poszukiwanych możliwościach. Moja odgrywarka jest wybitnie dobra w
+odgrywaniu uszkodzonych plików MPEG (co jest użyteczne w pewnych VCD), a także
+odgrywa złe pliki AVI, których nie potrafi odtworzyć słynny windows media
+player. Nawet pliki AVI bez indeksowania są odgrywane i możesz dodatkowo
+przebudować ich indeksowanie za pomocą opcji -idx, co umożlliwia wyszukiwanie.
+Jak widzisz, stabilność i jakość, to dla mnie najważniejsze rzeczy, ale
+również prędkość jest zadziwiająca.</P>
 
 <P><B><A NAME=1.2>1.2. Historia</A></B></P>
 
@@ -235,124 +238,135 @@ Postanowiłem więc napisać nowy lub zmodyfikować jeden z tych programów...</P>
 
 <P><UL>
 <LI><B>mpg12play v0.1-v0.3:</B><BR>
-    The first try, hacked together in a half hour!
-    I've used libmpeg3 from www.heroinewarrior.com up to the version 0.3,
-    but there were image quality and speed problems with it.
+    Pierwsza próba, zakodowane razem w pół godziny!
+    Użyłem libmpeg3 z www.heroinewarrior.com aż do wersji 0.3,
+    ale były z tym problemy z jakością obrazu i szybkością.
 <LI><B>mpg12play v0.5-v0.87:</B><BR>
-    Mpeg codec replaced with DVDview by Dirk Farin, it was a great stuff,
-    but it was slow and was written in C++ (I hate C++!!!)
+    Kodek Mpeg zastąpiony kodekiem DVDview przez Dirka Farina, to była wielka
+    sprawa, ale to było wolne i napisane w C++ (nie znoszę C++!!!)
 <LI><B>mpg12play v0.9-v0.95pre5:</B><BR>
-    Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman & Michel Lespinasse.
-    It's great, optimized very fast C code with perfect image quality and
-    100% MPEG standard conformance.
+    Kodek Mpeg był libmpeg2 (mpeg2dec) wykonany przez Aaron Holtzman & Michel
+    Lespinasse.
+    To wspaniałe, zoptymalizowany, bardzo szybki kod C z doskonałą jakością
+    obrazu i 100% zgodnością ze standardem MPEG.
 <LI><B>MPlayer v0.3-v0.9:</B><BR>
-    It was a pack of two programs: mpg12playv0.95pre6 and my new simple AVI
-    player 'avip' based on avifile's Win32 DLL loader.
+    Paczka składająca się z dwóch programów: mpg12playv0.95pre6 oraz mojej
+    nowej, prostej odgrywarki AVI 'avip' opartej na programie ładującym Win32
+    DLL z avifile.
 <LI><B>MPlayer v0.10:</B><BR>
-    The MPEG and AVI player in a single binary!
+    Oddzielne binaria dla odgrywarki MPEG i AVI!
 <LI><B>MPlayer v0.11:</B><BR>
-    Some new developers joined and from 0.11 the mplayer project is a team-work!
-    Added .ASF file support, and OpenDivX (see www.projectmayo.com) en/decoding.
+    Kilku nowych developerów dołączyło i od 0.11 projekt mplayer jest pracą
+    zespołową!
+    Dodano wsparcie dla plików .ASF i kodowania/dekodowania OpenDivX (zobacz
+    www.projectmayo.com).
 <LI><B>MPlayer v0.17 "The IdegCounter"</B><BR>
-    The release version of the 0.11pre after 4 months of heavy development!
-    Try it, and be amazed! Thousands of new features added... and of course
-    old code was improved too, bugs removed etc.
+    Wersja 0.11pre wydana po 4 miesiącach wzmożonego rozwoju!
+    Wypróbuj tego, i dziw się! Dodano tysiące nowych właściwości ... i
+    oczywiście naprawiono stary kod także, usunięto błędy itp.
 <LI><B>MPlayer 0.18 "The BugCounter"</B><BR>
-    2 months since 0.17 and here's a new release.. Completed ASF support,
-    more subtitle formats, introduced libao (similar to libvo but to audio),
-    even more stable than ever, and so on. It's a MUST !
+    2 miesiące odkąd pojawiło się 0.17 i proszę, oto nowe wydanie ... Ukończona
+    obsługa ASF, wiecej formatów napisów, wprowadzenie libao (podobnej do libvo
+    ale dla dźwięku) i bardziej stabilne, niż kiedykolwiek i tak dalej. To jest
+    przełom!
 <LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
-    Hmm. Release again. Tons of new features, beta GUI version, bugs fixed,
-    new vo and ao drivers, ported to many systems, including opensource DivX
-    codecs and much more. Try it!
+    Hmm. Następne wydanie. Tony nowych właściwości, wersja beta GUI, poprawione
+    błędy, nowe sterowniki vo i ao, przeniesione na wiele systemów, włączając
+    kodeki opensource DivX i wiele innych. Wypróbuj to!
 
 </UL></P>
 
 <P><B><A NAME=1.3>1.3. Instalacja</A></B></P>
 
-<P>In this chapter I'll try to guide you through the compiling and
-configuring process of <B>MPlayer</B>. It's not easy, but it won't neccessarily
-be hard. If you experience a different behaviour than what I explain, please
-search through this documentation and you'll find your answers. If you
-see links, please follow them and read carefully what they contain. It
-will take some time, but it DOES worth it.</P>
+<P>W tym rozdziale spróbuję przeprowadzić cię przez proces kompilacji i
+konfiguracji <B>MPlayera</B>. To nie jest proste, ale też niekoniecznie musi
+być trudne. Jeśli zaobserwujesz inne zachowanie, niż to, które opiszę, proszę,
+przeszukaj tą dokumentację, a znajdziesz wyjaśnienie. Kiedy zobaczysz linki,
+przeczytaj uważnie dokumenty, które one wskazują. Zajmie ci to trochę czasu,
+ale warto to zrobić.</P>
 
-<P>You need a fairly recent system. On Linux, 2.4.x kernels are required, but
-with 2.4.10 and above you'll ocassionally experience problems (licensing,
-kernel bugs, etc) so they are discouraged.</P>
+<P>Potrzebna ci będzie dość nowa wersja systemu. W Linuksie wymagane są jądra
+2.4.x, ale z 2.4.10 i wyższymi czasami możesz napotkać problemy ( licencja,
+błędy jądra, itp.) więc są one odradzane.</P>
 
 <P><B><I>WYMAGANIA SPRZĘTOWE</I></B><BR>
 
 <UL>
-  <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
-    responsible for generating MMX/3DNow!/etc instructions, thus very important.</LI>
-  <LI><B>gcc</B> - suggested version is from <B>2.95.2</B> to <B>2.95.4</B>.
-    <B>NEVER</B> use 2.96 or 3.x.x !!! They generate faulty code. If you decide
-    to change gcc from 2.96, then don't decide in favor of 3.0 juts because
-    it's newer! In some ways it's even worse than 2.96. So downgrade to
-    2.95.x (downgrade libstdc++ too!) or don't up/downgrade at all (but in
-    this case, be prepared for runtime problems).
-    Detailed information about gcc 2.96's bugs can be found
-    <A HREF="users_against_developers.html"><B><I>here</I></B></A> and in the
-    <A HREF="faq.html">FAQ</A> !</I></B></LI>
-  <LI><B>XFree86</B> - suggested version is <B>always the newest (4.1.0)</B>.
-    Normally everyone wants this, as starting from XFree86 4.0.2, it contains
-    the <A HREF="video.html#2.3.1.2">XVideo</A> extension (somewhere referred
-    as <B>Xv</B>) which is needed to enable the hardware YUV acceleration (fast
-    image display) on cards that support it. <A HREF="video.html#2.3.1.2">More
-    information available.</A><BR>
-    Make sure its <B>development package</B> is installed too otherwise
-    it won't work.<BR>
-    For some videocards you don't need XFree86. See list below.</LI>
-  <LI><B>make</B> - suggested version is <B>always the newest</B> (at least 3.79.x). This
-    usually isn't important.</LI>
-  <LI><B>SDL</B> - it's not mandatory, but can help in some cases. Always
-    use the newest (beginning from 1.2.x).</LI>
+  <LI><B>binutils</B> - sugerowana wersja, to <B>2.11.x</B> . Ten program jest
+odpowiedzialny za generowanie instrukcji MMX/3DNow!/itp., które są bardzo
+istotne.</LI>
+  <LI><B>gcc</B> - sugerowana wersja od <B>2.95.2</B> do <B>2.95.4</B>.
+    <B>NIGDY</B> nie używaj 2.96 lub 3.x.x !!! One generują błędny kod. Jeśli
+zdecydujesz się zmienić gcc z 2.96, wtedy nie wybieraj odgałęzień 3.0, tylko
+dlatego, żę są nowsze! W pewnych względach, to jest wersja nawet gorsza niż
+2.96.  Tak więc zejdź do 2.95.x (zejdź także do niższej wersji libstdc++!),
+albo nie zmieniaj nic w ogóle (ale w tym wypadku bądź przygotowany na
+czasochłonne problemy). Szczegółowe informacje o błędach gcc 2.96 można znaleźć
+<A HREF="users_against_developers.html"><B><I>tu</I></B></A> oraz w <A
+HREF="faq.html">FAQu</A> !</I></B></LI>.
+  <LI><B>XFree86</B> - sugerowana wersja, to <B>wersja najnowsza (4.1.0)</B>.
+Normalnie każdy chce tej wersji, jako że poczynając od XFree86 4.0.2, zawiera
+ona rozszerzenie <A HREF="video.html#2.3.1.2">XVideo</A> (gdzieś określane jako
+<B>Xv</B>), które jest konieczne, aby włączyć akcelerację sprzętową YUV
+(szybkie wyświetlanie obrazów) w kartach, które to obsługują. Więcej informacji
+na ten temat jest dostępnych <A HREF="video.html#2.3.1.2">tutaj</A><BR>.
+Upewnij się, że <B>pakiet rozwojowy (development pkg)</B> jest również
+zainstalowany, w przeciwnym razie to nie zadziała.<BR> W pewnych kartach
+graficznych nie korzysta się z XFree86. Zobacz listę poniżej.</LI>
+  <LI><B>make</B> - sugerowana wersja, to <B>wersja najnowsza</B> (nie starsza
+niż 3.79.x). Jest to zazwyczaj mało istotne.</LI>
+  <LI><B>SDL</B> - nie jest to niezbędne, ale może pomóc w niektórych
+przypadkach. Zawsze używaj najnowszej wersji (począwszy od 1.2.x).</LI>
 </UL>
 
 <P><B><I>KODEKI</I></B></P>
 
 <UL>
-<LI><B>libavcodec</B> : If you want to use this DivX3/DivX4/etc codec, check the
-<A HREF="codecs.html#2.2.1.2">2.2.1.2</A> section before compiling. Features :<BR>
+<LI><B>libavcodec</B>: jeżeli chcesz używać kodeka DivX3/DivX4/itp., zobacz
+przed kompilacją sekcję <A HREF="codecs.html#2.2.1.2">2.2.1.2</A>.
+Właściwości:<BR>
 <UL>
-  <LI>you can <B>gain <I>DivX/DivX4</I> playing on non-x86 machines</B></LI>
-  <LI>this codec has the <B>greatest decoding speed</B> for DivX and DivX4
-movies (even faster than the original DivX4 library itself) ! Recommended!</LI>
+  <LI>możesz <B>osiągnąć <I>DivX/DivX4</I> odgrywanie ma maszynach
+nie-x86</B></LI>
+  <LI>ten kodek posiada <B>najlepszą prędkość dekodowania</B> filmów DivX i
+DivX4 (większą nawet niż oryginalna biblioteka DivX4)! Rekomendowany!</LI>
 </UL>
 </LI>
 
-<LI><B>Win32 codecs</B> : If you plan to use <B>MPlayer</B> on x86
-architecture, you will possibly need them. Download and unzip w32codecs.zip to
-/usr/lib/win32 . Note: the avifile project has similar codecs package, but it
-differs from ours, so if you want to use all supported codecs, then use our
-package! However, you can use our codecs package with avifile. Features :<BR>
+<LI><B>Win32 codecs</B> : Jeżeli planujesz używać <B>MPlayera</B> na procesorze
+o architekturze x86, będziesz ich prawdopodobnie potrzebował. Ściągnij i
+rozpakuj w32codecs.zip w /usr/lib/win32. Uwaga: projekt avifile ma podobny
+pakiet kodeków, ale one się różnią od naszych, więc jeśli chcesz używać
+wszystkich wspieranych kodeków, wówczas stosuj nasz pakiet! Jednakże możesz
+używać naszego pakietu kodeków z avifile. Właściwości:<BR>
 <UL>
-  <LI>you need this if you want to play or encode for example movies recorded
-  with digital cameras (example: DV)</LI>
-  <LI>needed if you want to play <B>WMV movies</B> or older ASF's</LI>
+  <LI>potrzebne, jeżeli chcesz odgrywać bądź zakodować np. filmy
+nagrane za pomocą cyfrowych kamer (np.: DV)</LI>
+  <LI>potrzebne, jeżeli chcesz odgrywać filmy <B>WMV</B> albo starsze ASF'y</LI>
 </UL>
 </LI>
 
-<LI><B>DivX4</B> : information about this codec is available in the
-<A HREF="codecs.html#2.2.1.1">2.2.1.1</A> section. If you don't want to use
-<B>MEncoder</B>, you possibly don't want this codec as <B>libavcodec</B> (see
-above) is much faster than this.<BR>
-Features :<UL>
-  <LI>can play old <B>DivX3</B> movies much faster than the Win32 DLL but
-    slower than <B>libavcodec</B> !</LI>
-  <LI>it's closed-source, and only an x86 version is available.</LI>
-  <LI><I>You also need this codec for <B>MEncoder</B>, see below !</I></LI>
+<LI><B>DivX4</B> : informacje na temat tego kodeka mozna uzyskać w sekcji <A
+HREF="codecs.html#2.2.1.1">2.2.1.1</A>. Jeżeli nie chcesz używać
+<B>MEncodera</B>, prawdopodobnie nie będziesz chciał używać tego kodeka, skoro
+<B>libavcodec</B> (zobacz wyżej) jest znacznie od niego szybszy.<BR>
+Właściwości :<UL>
+  <LI>potrafi odgrywać stare filmy <B>DivX3</B> znacznie szybciej niż Win32
+DLL, ale wolniej niż <B>libavcodec</B>!</LI>
+  <LI>jest closed-source i dostępna jest tylko wersja na x86.</LI>
+  <LI><I>Ten kodek będzie ci również potrzebny dla <B>MEncodera</B>, zobacz
+niżej !</I></LI>
 </UL>
 </LI>
 
-<LI>If you want to play <B>3ivx</B> movies, check the <A HREF=codecs.html#2.2.1.3>
-XAnim codecs section</A>.</LI>
+<LI>Jeśli chcesz odgrywać filmy <B>3ivx</B>, sprawdź sekcję 
+<A HREF=codecs.html#2.2.1.3> kodeków XAnim</A>.</LI>
 
-<LI>The <A HREF=codecs.html#2.2.1.3>XAnim codecs</A> are the best (full screen,
-hardware YUV zoom) for decoding old videos like Indeo 3/4/5, Cinepak, and some
-others. And they are multiplatform, so this is the only way to play Indeo on
-non-x86 platforms (well, apart from using XAnim:).</LI>
+<LI><A HREF=codecs.html#2.2.1.3>Kodeki XAnim</A> są najlepsze (pełny ekran,
+sprzętowy zoom YUV) do dekodowania starych filmów, takich jak Indeo 3/4/5,
+Cinepak oraz kilka innych. Te kodeki są wieloplatformowe, wiec to jedyny
+sposób, aby odgrywać Indeo na platformach nie-x86 (cóż, niezależnie od samego
+używania XAnim:).</LI>
 
 </UL>
 
@@ -835,36 +849,58 @@ Input from standard V4L<BR>
 
 <P><B><A NAME=3.2>3.2. Sterowanie za pomocą LIRC</A></B></P>
 
-<P>Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver,
-an (almost) arbitrary remote control and control your linux box with it!
-More about it at <A HREF="http://www.lirc.org">www.lirc.org</A>.</P>
+<P> Linux Infrared Remote Control - użyj łatwego w budowie, domowej roboty
+odbiornika IR, (prawie) dowolnego pilota i kontroluj za jego pomocą swoje linux
+box!  Więcej na ten temat na 
+<A HREF="http://www.lirc.org">www.lirc.org</A>.</P>
 
-<P>If you have installed the lirc-package, you can compile <B>MPlayer</B> with LIRC
-support using  ./configure --enable-lirc</P>
+<P>Jeśli zainstalowałeś pakiet lirc, możesz skompilować <B>MPlayera</B> z
+włączeniem obsługi LIRC stosując: ./configure --enable-lirc.</P> 
 
-<P>If everything went fine, <B>MPlayer</B> will print a message like
-LIRC init was successful.
-on startup. If an error occurs it will tell you. If it doesn't tell you
-anything about LIRC there's no support compiled in. That's it :-)</P>
+<P>Jeżeli wszystko poszło dobrze, <B>MPlayer</B> wyśle na starcie komunikat, że
+inicjalizacja LIRC zakończyła się sukcesem. Zawiadomi cie także wtedy, gdy
+pojawią się błędy. Jeśli nie wspomni o LIRC w ogóle, oznacza to, że obsługa
+LIRC nie została wkompilowana. To tyle :-)</P>
 
-<P>The application name for <B>MPlayer</B> is - oh wonder - mplayer_lirc.
-It understands the following commands:</P>
+<P>Aplikacja dla <B>MPlayera</B> nazywa się - nie zgadłbyś - mplayer_lirc.
+Rozumie ona następujące polecenia:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PAUSE</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pause playing. Any other keystroke will continue replay.</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>QUIT</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>exit MPlayer</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>RWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 secs back</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FRWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>60 secs back</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>skip 10 secs</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FFWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>skip 60 secs</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>INCVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>increase volume one percent</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DECVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>decrease volume one percent</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>MASTER</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>use master mixer channel</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PCM</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>use pcm mixer channel</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>PAUSE</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
+Helvetica, sans-serif" size=2> - zatrzymuje odgrywanie (pauza). Naciśnięcie
+dowolnego klawisza powoduje wznowienie odgrywania;</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>QUIT</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2> - wyjście z MPlayer;</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>RWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2> - 10 sek wstecz;</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>FRWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
+sans-serif" size=2> - 60 sek wstecz;</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>FWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2> - 10 secs naprzód;</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>FFWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2> - 60 sek naprzód;</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>INCVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
+sans-serif" size=2> - zwiększenie głośności o 1%;</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>DECVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
+sans-serif" size=2> - zmniejszenie głośności o 1%;</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>MASTER</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
+sans-serif" size=2> - użyj głównego kanału miksera;</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>PCM</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2> - użyj kanału pcm miksera;</TD><TR>
 </TABLE></P>
 
-<P> Don't forget to enable the repeat flag for RWND/FWD in .lircrc. Here's an
-excerpt from my .lircrc:</P>
+<P>Nie zapomnij ustawić flagę powtarzania dla RWND/FWD w .lircrc. Oto
+fragment z mojego .lircrc:</P>
 
 <P><PRE>  begin
    remote = CU-SX070
@@ -881,8 +917,8 @@ excerpt from my .lircrc:</P>
    config = QUIT
   end</PRE></P>
 
-<P>If you don't like the standard location for the lirc-config file (~/.lircrc)
-use the -lircconf &lt;filename&gt; switch to specify another file.</P>
+<P>Jeśli nie odpowiada ci standardowa lokalizacja pliku lirc-config (~/.lircrc)
+użyj przełącznika -lircconf &lt;nazwa_pliku&gt;, aby podać inny plik.</P>
 
 <P><B><A NAME=3.3>3.3. Obsługa potoków z sieci, bądź jako pipe</A></B></P>
 
