@@ -141,7 +141,9 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
 int demux_asf_fill_buffer(demuxer_t *demux){
 
   demux->filepos=stream_tell(demux->stream);
-  if(demux->filepos>=demux->movi_end){
+  // Brodcast stream have movi_start==movi_end
+  // Better test ?
+  if((demux->movi_start != demux->movi_end) && (demux->filepos>=demux->movi_end)){
           demux->stream->eof=1;
           return 0;
   }

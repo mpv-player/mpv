@@ -17,6 +17,15 @@ typedef struct {
 	int request;
 } asf_http_streaming_ctrl_t;
 
+#ifdef ARCH_X86
+#define	ASF_LOAD_GUID_PREFIX(guid)	(*(uint32_t *)(guid))
+#else
+#define	ASF_LOAD_GUID_PREFIX(guid)	\
+	((guid)[3] << 24 | (guid)[2] << 16 | (guid)[1] << 8 | (guid)[0])
+#endif
+
+
+
 // ASF streaming support several network protocol.
 // One use UDP, not known, yet!
 // Another is HTTP, this one is known.
@@ -59,23 +68,146 @@ asf_streaming_start( stream_t *stream ) {
 	return -1;
 }
 
+static int
+asf_streaming_parse_header(char* buffer,int size) {
+  ASF_header_t asfh;
+  ASF_obj_header_t objh;
+  ASF_file_header_t fileh;
+  int pos = 0;
+
+  if(size < (int)sizeof(asfh)) {
+    printf("Error chunk is too small\n");
+    return -1;
+  }
+  memcpy(&asfh,buffer,sizeof(asfh));
+  le2me_ASF_header_t(&asfh);
+  if(size < (int)asfh.objh.size) {
+    printf("Error chunk is too small\n");
+    return -1;
+  }
+  
+  if(asfh.cno > 256) {
+    printf("Error sub chunks number is invalid\n");
+    return -1;
+  }
+
+  pos += sizeof(asfh);
+  
+  while(size - pos >= (int)sizeof(objh)) {
+    memcpy(&objh,buffer+pos,sizeof(objh));
+    le2me_ASF_obj_header_t(&objh);
+
+    if(ASF_LOAD_GUID_PREFIX(objh.guid) == 0x8CABDCA1) {
+      pos += sizeof(objh);
+      memcpy(&fileh,buffer + pos,sizeof(fileh));
+      le2me_ASF_file_header_t(&fileh);
+      return fileh.packetsize == fileh.packetsize2 ? fileh.packetsize : -1;
+    } else {
+      pos += objh.size;
+    }
+  }
+
+  return -1;
+}
 
 int
 asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl ) {
-	int drop_packet;
-	int ret;
-//printf("asf_http_streaming_read\n");
-	
-	ret = nop_streaming_read( fd, buffer, size, streaming_ctrl );
-//printf("Read %d bytes\n", ret);
+  static ASF_stream_chunck_t chunk;
+  int read,chunk_size = 0;
+  static int rest = 0, drop_chunk = 0, waiting = 0;
+  static int asf_packetsize = 0;
 
-	ret = asf_streaming( buffer, size, &drop_packet );
-//printf("Streaming packet size=%d\n", ret);
-	if( ret<0 ) return -1;
-	if( !drop_packet ) {
-		memmove( buffer, buffer+sizeof(ASF_stream_chunck_t), ret-sizeof(ASF_stream_chunck_t) );
+  while(1) {
+    if (rest == 0 && waiting == 0) {
+      read = 0;
+      while(read < (int)sizeof(ASF_stream_chunck_t)){
+	int r = nop_streaming_read( fd, ((char*)&chunk) + read, 
+				    sizeof(ASF_stream_chunck_t)-read, 
+				    streaming_ctrl );
+	if(r < 0){
+	  printf("End of stream without a full chunk header\n");
+	  return -1;
 	}
-	return ret-sizeof(ASF_stream_chunck_t);
+	read += r;
+      }
+      chunk_size = asf_streaming(  (char*)&chunk, read, &drop_chunk );
+      if(chunk_size < 0) {
+	printf("Error while parsing chunk header\n");
+	return -1;
+      }
+      chunk_size -= sizeof(ASF_stream_chunck_t);
+	
+      if(asf_packetsize && (!drop_chunk)) {
+	if (asf_packetsize < chunk_size) {
+	  printf("Error chunk_size > asf_packetsize\n");
+	  return -1;
+	}
+	waiting = asf_packetsize;
+      } else {
+	waiting = chunk_size;
+      }
+
+    } else if (rest){
+      chunk_size = rest;
+      rest = 0;
+    }
+
+    read = 0;
+    if ( waiting >= chunk_size) {
+      if (chunk_size > size){
+	rest = chunk_size - size;
+	chunk_size = size;
+      }
+      while(read < chunk_size) {
+	int got = nop_streaming_read( fd,buffer+read,chunk_size-read,streaming_ctrl );
+	if(got < 0) {
+	  printf("Error while reading chunk EOF ?\n");
+	  return -1;
+	}
+	read += got;
+      }
+      waiting -= read;
+      if (drop_chunk) continue;
+    }
+    if (rest == 0 && waiting > 0 && size-read > 0) {
+      int s = MIN(waiting,size-read);
+      memset(buffer+read,0,s);
+      waiting -= s;
+      read += s;
+    }
+    break;
+}
+
+  if (chunk.type == 0x4824) { // Header
+    static char* save_buffer = NULL;
+    static int save_pos = 0,save_size = 0;
+    if(rest > 0 || save_buffer) {
+      if(save_buffer == NULL){
+	save_size = read+rest;
+	save_pos = 0;
+	save_buffer = (char*)malloc(save_size);
+      }
+      memcpy(save_buffer+save_pos,buffer,MIN(read,save_size-save_pos));
+      save_pos += MIN(read,save_size-save_pos);
+    }     
+    if( rest == 0 ){
+      if(save_buffer && save_pos != save_size){
+	printf("Header buffer inconsitency\n");
+	return -1;
+      }
+      asf_packetsize = asf_streaming_parse_header(save_buffer ? save_buffer : buffer,
+						  save_buffer ? save_pos : read);
+      if(save_buffer) {
+	free(save_buffer);
+	save_buffer = NULL;
+      }
+      if(asf_packetsize < 0) {
+	printf("Error during header parsing\n");
+	return -1;
+      }
+    }
+  }
+  return read;
 }
 
 int 
@@ -268,9 +400,14 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 				pragma += 9;
 				end = strstr( pragma, "," );
 				if( end==NULL ) {
-					len = strlen(pragma);
-				}
-				len = MIN(end-pragma,sizeof(features));
+				  int s = strlen(pragma);
+				  if(s > sizeof(features)) {
+				    printf("ASF HTTP PARSE WARNING : Pragma %s cuted from %d bytes to %d\n",pragma,s,sizeof(features));
+				    len = sizeof(features);
+				  } else				   
+				    len = s;
+				} else 
+				  len = MIN(end-pragma,sizeof(features));
 				strncpy( features, pragma, len );
 				features[len]='\0';
 				break;
@@ -332,9 +469,12 @@ asf_http_streaming_start( stream_t *stream ) {
 		http_hdr = asf_http_request( stream->streaming_ctrl );
 printf("Request [%s]\n", http_hdr->buffer );
 		write( fd, http_hdr->buffer, http_hdr->buffer_size );
-		http_free( http_hdr );
+printf("1\n");
+	//	http_free( http_hdr );
+printf("2\n");
 
 		http_hdr = http_new_header();
+printf("3\n");
 		do {
 			i = read( fd, buffer, BUFFER_SIZE );
 printf("read: %d\n", i );
