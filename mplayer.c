@@ -715,10 +715,10 @@ play_dvd:
       if(!subtitles) subtitles=sub_read_file(get_path("default.sub")); // try default
 #endif
   }
-#endif
 
   if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
   if(subtitles && stream_dump_type==4) dump_mpsub(subtitles);
+#endif
 
     stream=NULL;
     demuxer=NULL;
