@@ -1917,9 +1917,9 @@ extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
             cluster_pos = mkv_d->cluster_positions[i];
             min_diff = diff;
           }
-        } else if (abs(diff) < min_diff) {
+        } else if ((diff < 0 ? -1 * diff : diff) < min_diff) {
           cluster_pos = mkv_d->cluster_positions[i];
-          min_diff = abs(diff);
+          min_diff = diff < 0 ? -1 * diff : diff;
         }
       }
       if (min_diff != 0x0FFFFFFFL) {
