@@ -401,6 +401,9 @@ do
   --enable-mmx)
         _mmx=yes
         ;;
+  --enable-mtrr)
+  	_mtrr=yes
+	;;
   --enable-gl)
         _gl=yes
         ;;
@@ -449,6 +452,9 @@ do
   --disable-mmx)
         _mmx=no
         ;;
+  --disable-mtrr)
+  	_mtrr=no
+	;;
   --disable-gl)
         _gl=no
         ;;
