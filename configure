@@ -594,10 +594,12 @@ linux && _fbdev=yes
 _lirc=no
 _css=no
 _dvdread=no
-_win32=yes
-_dshow=yes
+_win32=no
+_dshow=no
 _xanim=yes
-test "$host_arch" != i386 && _dshow=no _win32=no
+if test x"$host_arch" = x"i386" -o x"$host_arch" = x"i486" -o x"$host_arch" = x"i586" -o x"$host_arch" = x"i686" ; then
+  _win32=yes ; _dshow=yes
+fi
 _fastmemcpy=yes
 _streaming=no
 _libavcodec=no
