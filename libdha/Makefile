@@ -2,12 +2,16 @@
 
 include ../config.mak
 
-VERSION = 0.1
+MAJOR_VERSION = 0
+MINOR_VERSION = 1
+VERSION = $(MAJOR_VERSION).$(MINOR_VERSION) 
+
 
 ifeq ($(TARGET_OS),CYGWIN)
 SHORTNAME = libdha.dll
 else
-SHORTNAME = libdha.so
+SHORTNAME = libdha.so.$(MAJOR_VERSION)
+SONAME_FLAGS = -Wl,-soname,$(SHORTNAME)
 endif
 LIBNAME = libdha.so.$(VERSION)
 
@@ -30,7 +34,7 @@ endif
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(LIBNAME):     $(OBJS)
-	$(CC) -shared -Wl,-soname -Wl,$(LIBNAME) -o $(LIBNAME) $(OBJS) $(LIBS)
+	$(CC) -shared $(SONAME_FLAGS) -o $(LIBNAME) $(OBJS) $(LIBS)
 	ln -sf $(LIBNAME) $(SHORTNAME)
 
 all:    $(LIBNAME) $(SHORTNAME)
@@ -42,10 +46,10 @@ test:
 	$(CC) test.c -o test $(SHORTNAME)
 
 clean:
-	rm -f *.o *.so *~
+	rm -f *.o *.so *.so.* *~
 
 distclean:
-	rm -f Makefile.bak *.o *.so test *~ .depend
+	rm -f Makefile.bak *.o *.so *.so.* test *~ .depend
 	rm -f pci_dev_ids.c pci_ids.h pci_names.c pci_names.h pci_vendors.h pci.db
 
 dep:    depend
