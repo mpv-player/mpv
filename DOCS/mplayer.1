@@ -646,16 +646,18 @@ In Xinerama configurations (i.e. a single desktop that spans across multiple
 displays) this option tells MPlayer which screen to display movie on. Range 0 \- ...
 .TP 
 .B \-x\ <x>
-Scale image to x width (if sw/hw scaling available)
+Scale image to x width (if sw/hw scaling available). Disables aspect calcs.
 .TP 
-.B \-xy\ <factor>
-Scale image by <factor>
+.B \-xy\ <x>
+x<=8: Scale image by factor <x>
+x>8:  Set width to <x> and calculate height to keep correct aspect ratio
 .TP 
 .B \-y\ <y>
-Scale image to y height (if sw/hw scaling available)
+Scale image to y height (if sw/hw scaling available). Disables aspect calcs.
 .TP 
 .B \-zoom
 Allow software scaling, where available. Could be used to force scaling with -vop scale
+(-vop scale will IGNORE options -x/-y/-xy/-fs/-aspect without -zoom)
 .TP 
 .B \-z\ <0\-9>
 Specifies compression level for PNG output (-vo png)
