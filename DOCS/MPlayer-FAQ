@@ -204,4 +204,8 @@ A: Check 'ldd /usr/local/bin/mplayer' output. If it contains
    Because l3codeca.acm is a non-relocatable DLL, it must be loaded to
    0x00400000, we can't change this. You should use non-patched kernel,
    or use MPlayer's -afm 1 option to disable using l3codeca.acm.
-   
+
+Q: My computer plays M$ DivX AVIs with resolutions ~ 640x300 and stereo mp3
+   sound too slow. When I use -nosound switch, everything is ok (but quiet).
+A: Those files probably have 48Khz audio, and your soundcard can't play
+   it correctly. Audio downsampling isn't implemented in MPlayer (yet).
