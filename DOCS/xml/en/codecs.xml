@@ -506,7 +506,8 @@ then started XviD. So both projects have the same origin.
   </para></step>
 <step><para>
   Recompile <application>MPlayer</application> with
-  <option>--with-xvidcore=<replaceable>/path/to/</replaceable>libxvidcore.a</option>.
+  <option>--with-xvidlibdir=<replaceable>/path/to/</replaceable>libxvidcore.a</option>
+  <option>--with-xvidincdir=<replaceable>/path/to/</replaceable>xvid.h</option>
   </para></step>
 </procedure>
 </sect3>
