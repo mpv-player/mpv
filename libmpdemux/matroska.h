@@ -30,6 +30,7 @@
 #define MKV_A_REALSIPR   "A_REAL/SIPR"
 #define MKV_A_QDMC       "A_QUICKTIME/QDMC"
 #define MKV_A_QDMC2      "A_QUICKTIME/QDM2"
+#define MKV_A_FLAC       "A_FLAC"
 
 #define MKV_V_MSCOMP     "V_MS/VFW/FOURCC"
 #define MKV_V_REALV10    "V_REAL/RV10"
