@@ -1,4 +1,4 @@
-.\" synced with 1.506
+.\" synced with 1.509
 .\" MPlayer (C) 2000-2003 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun, Jonas Jermann
 .\" y traducida al español por Juan Martín López <nauj27@teleline.es>
@@ -519,10 +519,10 @@ no será mostrada.
 Particularmente útil en terminales lentos o estropeados en los que no funciona
 como debiera el retorno de carro (i.e. \\r).
 .TP
-.B \-really-quiet \ \ 
+.B \-really-quiet
 Muestra todavía menos salida y mensajes de estado.
 .TP
-.B \-shuffle \ \ 
+.B \-shuffle
 Reproduce archivos en orden aleatorio.
 .TP
 .B \-skin <skin\ directorio> (sólo GUI)
@@ -2674,7 +2674,7 @@ desactiva dependiendo de la disponibiblidad del tiempo de CPU.
 .RE
 .PD 1
 .TP
-.B spp[=quality[:qp]]\ \ \ 
+.B spp[=quality[:qp]]
 filtro de postprocesado simple
 .RSs
 .IPs quality
@@ -2804,7 +2804,7 @@ solo líneas impares.
 Cualquier otro valor para f hace que se use el comportamiento por defecto (para
 hacer la media).
 .TP
-.B ilpack[=mode]\ 
+.B ilpack[=mode]
 Cuando el video entrelazado es almacenado en formatos YUV 4:2:0, el entrelazado
 de crominancia no se alinea correctamente debido al submuestreo vertical de los
 canales de crominancia.
@@ -3878,6 +3878,9 @@ Lo mismo que mbd=1, se mantiene por razones de compatibilidad.
 Permite 4 vectores de movimiento por macrobloque (calidad ligeramente superior).
 (por defecto: desactivado)
 .TP
+.B inter_threshold <-1000\-1000>
+Actualmente no hace absolutamente nada.
+.TP
 .B keyint=<0\-300>
 intervalo máximo entre marcos clave en los marcos.
 Los marcos clave son necesarios para posicionamiento y el posicionamiento solo
@@ -4007,7 +4010,7 @@ establecer q= -q * v{b|i}_qfactor + v{b|i}_qoffset
 .B \ 
 Consejo: Para realizar una codificación con cuantización constante con
 diferentes cuantizadores para marcos I/P y B puede usar:
-vqmin= <ip_quant>:vqmax= <ip_quant>:vb_qfactor= <b_quant/ip_quant>
+lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/ip_quant>
 .TP
 .B vqblur=<0.0\-1.0> (pasada 1)
 Cuantizador difuminado, valores mayores hacen media del cuantizador
@@ -4499,22 +4502,22 @@ siempre
 .PD 1
 .TP
 .B subq=<1\-8>
-redefinimiento de calidad de subpel (para qpel) (por defecto: 8).
+Redefinimiento de calidad de subpel (para qpel) (por defecto: 8).
 .I NOTA:
 Esto tiene un efecto significativo en la velocidad.
 .TP
 .B psnr\ \ \ 
-imprime la psnr (pico de relación señal ruido) para el video entero después de
+Imprime la psnr (pico de relación señal ruido) para el video entero después de
 la codificación y almacena la psnr por marco en un archivo con un nombre
 como 'psnr_hhmmss.log'.
 Los valores devueltos están en dB (decibelios), cuanto mál alto mejor.
 .TP
 .B mpeg_quant
-usa cuantizadores MPEG en lugar de H.263.
+Usa cuantizadores MPEG en lugar de H.263.
 (por defecto: desactivado) (i.e.\& usa cuantizadores H.263)
 .TP
 .B aic\ \ \ \ 
-predicción ac (=predicción interna avanzada para H.263+)
+Predicción ac (=predicción interna avanzada para H.263+)
 .I NOTA:
 vqmin debe ser 8 o superior para AIC H263+
 .TP
@@ -4523,15 +4526,15 @@ MVs ilimitados (H.263+ solamente)
 Permite codificación de MVs de longitud arbitraria.
 .TP
 .B ibias=<-256\-256>
-cuantizador de unión interno (256 == 1.0)
+Cuantizador de unión interno (256 == 1.0)
 .br
-cuantizador de estilo mpeg por defecto: 96
+Cuantizador de estilo mpeg por defecto: 96
 .br
-cuantizador de estilo h263 por defecto: 0
+Cuantizador de estilo h263 por defecto: 0
 .br
 .I NOTA:
-el cuantizador h263 MMX no puede manejar uniones positivas (establece vfdct=1ó2)
-el cuantizador mpeg MMX no puede manejar uniones negativas (establece vfdct=1ó2)
+El cuantizador h263 MMX no puede manejar uniones positivas (establece vfdct=1ó2)
+El cuantizador mpeg MMX no puede manejar uniones negativas (establece vfdct=1ó2)
 .TP
 .B pbias=<-256\-256>
 cuantizador de unión interno (256 == 1.0)
@@ -4843,24 +4846,26 @@ cat *.vob | mencoder <opciones> \-
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Fallos, autores, descargo estandar
+.\" Fallos, autores, descargo estándar
 .\" --------------------------------------------------------------------------
 .
 .SH FALLOS
-Probablemente.
-POR FAVOR, ¡compruebe doblemente la documentación (especialmente bugreports.html),
-el FAQ y el archivo de correo antes!
-.br
-Envíe su informe de errores completo a la lista de correo MPlayer-users en
-<mplayer-users@mplayerhq.hu>.
-Nos encantan los informes de errores completos :)
+Si encuentra uno, infórmenos de ello, pero por favor asegúrese de leer
+toda la documentación primero.
+Muchos errores son debidos a una configuración incorrecta o un mal uso
+de parámetros.
+La sección sobre informe de errores en la documentación
+(DOCS/HTML/es/bugreports.html) explica cómo crear informes de error
+útiles.
 .
 .
 .SH AUTORES
-Vea la documentación.
+MPlayer fue inicialmente escrito por Arpad Gereoffy.
+Vea el archivo AUTORES para obtener una lista de muchos otros
+contribuyentes.
 .TP
 MPlayer es (C) 2000\-2003
-.B Arpad Gereoffy
+.B El Equipo MPlayer
 .TP
 Esta página de manual está escrita y mantenida por
 .B Gabucino
@@ -4872,7 +4877,7 @@ Esta página de manual está escrita y mantenida por
 la versión en español es traducida y mantenida por
 .B Juan Martín López <nauj27@teleline.es>
 .PP
-Por favor, envíe correos acerca de ella a la lista de correo MPlayer-users.
+Por favor, envíe correos acerca de ella a la lista de correo MPlayer-DOCS.
 .
 .
 .SH "DESCARGO ESTANDAR"

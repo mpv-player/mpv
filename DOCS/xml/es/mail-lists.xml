@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.5 -->
+<!-- synced with 1.7 -->
 <appendix id="mailinglists">
 <title>Listas de correo</title>
 <para>
@@ -14,10 +14,10 @@ a los que leen su correo. Si no las conoce por favor lea
 apurado) <ulink url="http://www.xs4all.nl/~hanb/documents/quotingguide.html">COMO Citar</ulink>.
 <itemizedlist>
 <listitem><para>
-Lista de anunciación de MPlayer:
+Lista de anunciación de <application>MPlayer</application>:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"/>
-Lista para anunciamientos de MPlayer. Subscribase a esta lista si quiere obtener
-anuncios sobre nuevas características.
+Lista para anunciamientos de <application>MPlayer</application>.
+Subscribase a esta lista si quiere obtener anuncios sobre nuevas características.
 </para></listitem>
 <listitem><para>
 Lista para desarrolladores de MPlayer:
@@ -96,7 +96,8 @@ problema o falla en la modificación).
 <listitem><para>
 Lista de adaptación de MPlayer a Cygwin:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
-Lista para discutir sobre la adaptación de MPlayer a Cygwin.
+Lista para discutir sobre la adaptación de <application>MPlayer</application>
+a <application>Cygwin</application> y <application>MinGW</application>.
 </para></listitem>
 <listitem><para>
 Lista de adaptación de MPlayer a OS/2:

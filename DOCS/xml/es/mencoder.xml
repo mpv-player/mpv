@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.10 -->
 <chapter id="mencoder">
 <title>Codificando con MEncoder</title>
 
@@ -117,7 +117,7 @@ de <link linkend="ffmpeg">libavcodec</link>, porque los reproductores - excepto
 </para>
 
 <para>
-esta característica no es muy útil ahora, por un lado probablemente tenga muchos
+Esta característica no es muy útil ahora, por un lado probablemente tenga muchos
 fallos, pero lo más importante es porque MEncoder actualmente no codifica audio
 MPEG1 layer 2 (MP2), que es lo que otros reproductores esperan en los archivos MPEG.
 </para>
