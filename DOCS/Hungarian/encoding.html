@@ -258,8 +258,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
 <P><B><I>A folyamat magyarázata</I></B></P>
 
 <P>Elõször a <B>MEncoder</B> <I>dekódolja</I> a bemeneti fileokat egy
-  rendelkezésre álló és szabadonválasztott MJPEG dekóderrel (PNG-k dekódolása
-  esetén csak a beépitett PNG dekóder használható). Alapértelmezésben az
+  rendelkezésre álló és szabadonválasztott MJPEG dekóderrel (PNG-k dekódolását
+  a <B>MEncoder</B> a libpngvel végzi). Alapértelmezésben az
   <CODE>ffmjpeg</CODE> codec-et próbálja használni, így ajánlott libavcodec-kel
   fordítani. Ennek a codecnek a legnagyobb hátránya hogy bizonyos JPEG
   fileokat nem tud kezelni (ilyenkor zöld kimenet látható). Ilyenkor különbözõ

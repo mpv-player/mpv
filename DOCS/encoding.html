@@ -249,7 +249,7 @@ unsupported). You can encode to the following codecs :</P>
 <P><B><I>Explanation of the process</I></B></P>
 
 <P><B>MEncoder</B> <I>decodes</I> the input image(s) with an available MJPEG
-  video codec (when decoding PNGs, it will use the internal PNG decoder). By
+  video codec (when decoding PNGs, it will use <B>libpng</B>). By
   default it uses <CODE>ffmjpeg</CODE>, so you have to compile with libavcodec
   support (which is recommended anyways). Its disadvantage is that it can't
   handle some JPEG types (green image will be encoded for these). Use some
