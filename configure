@@ -730,16 +730,15 @@ ppc)
     _mcpu=""
     ;;
 
-# Untested:
-#alpha)
-#    _arch="#define ARCH_ALPHA 1"
-#    _target_arch="TARGET_ARCH_ALPHA=yes"
-#    _words_endian="#undef WORDS_BIGENDIAN"
-#    iproc=alpha
-#    proc=
-#    _march=""
-#    _mcpu=""
-#    ;;
+alpha)
+    _arch="#define ARCH_ALPHA 1"
+    _target_arch="TARGET_ARCH_ALPHA=yes"
+    _words_endian="#undef WORDS_BIGENDIAN"
+    iproc=alpha
+    proc=
+    _march=""
+    _mcpu="-mcpu=ev56"
+    ;;
 
 *)
     echo "The architecture of your CPU ($host_arch) is not supported by this configure script"
