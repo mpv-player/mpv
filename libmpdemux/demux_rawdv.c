@@ -40,7 +40,7 @@ void demux_seek_rawdv(demuxer_t *demuxer,float rel_seek_secs,int flags)
 {
    rawdv_frames_t *frames = (rawdv_frames_t *)demuxer->priv;
    sh_video_t *sh_video = demuxer->video->sh;
-   int newpos=(flags&1)?0:frames->current_frame;
+   off_t newpos=(flags&1)?0:frames->current_frame;
    if(flags&2)
    {
       // float 0..1
