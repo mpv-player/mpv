@@ -180,7 +180,7 @@ try_fec:
 int ts_check_file(demuxer_t * demuxer)
 {
 	const int buf_size = (TS_FEC_PACKET_SIZE * NUM_CONSECUTIVE_TS_PACKETS);
-	unsigned char buf[buf_size], done = 0, *ptr;
+	unsigned char buf[TS_FEC_PACKET_SIZE * NUM_CONSECUTIVE_TS_PACKETS], done = 0, *ptr;
 	uint32_t _read, i, count = 0, is_ts;
 	int cc[NB_PID_MAX], last_cc[NB_PID_MAX], pid, cc_ok, c, good, bad;
 	uint8_t size = 0;
