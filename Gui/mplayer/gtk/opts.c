@@ -63,24 +63,69 @@ static GtkWidget * HSPanscan;
 static GtkWidget * HSSubDelay;
 static GtkWidget * HSSubPosition;
 static GtkWidget * HSSubFPS;
-static GtkWidget * HSFontFactor;
 static GtkWidget * HSPPQuality;
 
 static GtkAdjustment * HSExtraStereoMuladj, * HSAudioDelayadj, * HSPanscanadj, * HSSubDelayadj;
-static GtkAdjustment * HSSubPositionadj, * HSSubFPSadj, * HSFontFactoradj, * HSPPQualityadj;
+static GtkAdjustment * HSSubPositionadj, * HSSubFPSadj, * HSPPQualityadj;
+
+#ifndef HAVE_FREETYPE
+static GtkWidget     * HSFontFactor;
+static GtkAdjustment * HSFontFactoradj;
+#else
+static GtkWidget     * HSFontBlur, * HSFontOutLine, * HSFontTextScale, * HSFontOSDScale;
+static GtkAdjustment * HSFontBluradj, * HSFontOutLineadj, * HSFontTextScaleadj, * HSFontOSDScaleadj;
+static GtkWidget     * CBFontEncoding, * EFontEncoding;
+static GtkWidget     * RBFontNoAutoScale, * BRFontAutoScaleWidth, * RBFontAutoScaleHeight, * RBFontAutoScaleDiagonal;
+//static GtkWidget     * AutoScale;
+#endif
 
 static struct
 {
  int    vfm;
  char * name;
 } lVFM[] =
-{ { -1,MSGTR_PREFERENCES_None   },
+ { 
+  { -1,MSGTR_PREFERENCES_None   },
   {  2,MSGTR_PREFERENCES_Codec1 },
   {  3,MSGTR_PREFERENCES_Codec2 },
   {  4,MSGTR_PREFERENCES_Codec3 },
   {  5,MSGTR_PREFERENCES_Codec4 },
   {  7,MSGTR_PREFERENCES_Codec5 },
-  { 10,MSGTR_PREFERENCES_Codec6 } };
+  { 10,MSGTR_PREFERENCES_Codec6 },
+  { 0,NULL }
+ };
+
+#ifdef HAVE_FREETYPE
+static struct 
+{
+ char * name;
+ char * comment;
+} lEncoding[] =
+ {
+  { "unicode",     MSGTR_PREFERENCES_FontEncoding1 },
+  { "iso-8859-1",  MSGTR_PREFERENCES_FontEncoding2 },
+  { "iso-8859-15", MSGTR_PREFERENCES_FontEncoding3 },
+  { "iso-8859-2",  MSGTR_PREFERENCES_FontEncoding4 },
+  { "iso-8859-3",  MSGTR_PREFERENCES_FontEncoding5 },
+  { "iso-8859-4",  MSGTR_PREFERENCES_FontEncoding6 },
+  { "iso-8859-5",  MSGTR_PREFERENCES_FontEncoding7 },
+  { "iso-8859-6",  MSGTR_PREFERENCES_FontEncoding8 },
+  { "iso-8859-7",  MSGTR_PREFERENCES_FontEncoding9 },
+  { "iso-8859-9",  MSGTR_PREFERENCES_FontEncoding10 },
+  { "iso-8859-13", MSGTR_PREFERENCES_FontEncoding11 },
+  { "iso-8859-14", MSGTR_PREFERENCES_FontEncoding12 },
+  { "iso-8859-8",  MSGTR_PREFERENCES_FontEncoding13 },
+  { "koi8-r",      MSGTR_PREFERENCES_FontEncoding14 },
+  { "koi8-u/ru",   MSGTR_PREFERENCES_FontEncoding15 },
+  { "cp936",       MSGTR_PREFERENCES_FontEncoding16 },
+  { "big5",        MSGTR_PREFERENCES_FontEncoding17 },
+  { "shift-jis",   MSGTR_PREFERENCES_FontEncoding18 },
+  { "cp949",       MSGTR_PREFERENCES_FontEncoding19 },
+  { "cp874",       MSGTR_PREFERENCES_FontEncoding20 },
+  { NULL,NULL } 
+ };
+char * lCEncoding = NULL;
+#endif
 	    
        int    gtkVPreferences = 0;
 static int    old_audio_driver = 0;
@@ -99,6 +144,9 @@ static int    old_video_driver = 0;
 static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data );
 static void prToggled( GtkToggleButton * togglebutton,gpointer user_data );
 static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data );
+#ifdef HAVE_FREETYPE
+static void prEntry( GtkContainer * container,GtkWidget * widget,gpointer user_data );
+#endif
 
 extern int    muted;
 
@@ -177,7 +225,6 @@ void ShowPreferences( void )
  gtk_adjustment_set_value( HSSubDelayadj,sub_delay );
  gtk_adjustment_set_value( HSSubFPSadj,sub_fps );
  gtk_adjustment_set_value( HSSubPositionadj,sub_pos );
- gtk_adjustment_set_value( HSFontFactoradj,font_factor );
  switch ( osd_level )
   {
    case 0: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBOSDNone ),TRUE ); break;
@@ -187,7 +234,31 @@ void ShowPreferences( void )
 #if 0
  if ( guiIntfStruct.Subtitlename ) gtk_entry_set_text( GTK_ENTRY( ESubtitleName ),guiIntfStruct.Subtitlename );
 #endif
+ // font ...
  if ( font_name ) gtk_entry_set_text( GTK_ENTRY( prEFontName ),font_name );
+#ifndef HAVE_FREETYPE
+ gtk_adjustment_set_value( HSFontFactoradj,font_factor );
+#else
+ gtk_adjustment_set_value( HSFontBluradj,subtitle_font_radius );
+ gtk_adjustment_set_value( HSFontOutLineadj,subtitle_font_thickness );
+ gtk_adjustment_set_value( HSFontTextScaleadj,text_font_scale_factor );
+ gtk_adjustment_set_value( HSFontOSDScaleadj,osd_font_scale_factor );
+ if ( subtitle_font_encoding )
+  {
+   int i;
+   for ( i=0;lEncoding[i].name;i++ ) 
+    if ( !gstrcmp( subtitle_font_encoding,lEncoding[i].name ) ) break;
+   if ( lEncoding[i].name ) lCEncoding=lEncoding[i].comment;
+   gtk_entry_set_text( GTK_ENTRY( EFontEncoding ),lCEncoding );
+  }
+ switch ( subtitle_autoscale )
+  {
+   case 0: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBFontNoAutoScale ),TRUE ); break;
+   case 1: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( BRFontAutoScaleWidth ),TRUE ); break;
+   case 2: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBFontAutoScaleHeight ),TRUE ); break;
+   case 3: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBFontAutoScaleDiagonal ),TRUE ); break;
+  }
+#endif
 
 // -- 4. page
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ),force_ni );
@@ -230,13 +301,27 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( CBNormalize ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)1 );
  gtk_signal_connect( GTK_OBJECT( CBAudioEqualizer ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)2 );
  gtk_signal_connect( GTK_OBJECT( CBNoSound ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)3 );
+#ifdef HAVE_FREETYPE
+ gtk_signal_connect( GTK_OBJECT( RBFontNoAutoScale ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)4 );
+ gtk_signal_connect( GTK_OBJECT( BRFontAutoScaleWidth ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)5 );
+ gtk_signal_connect( GTK_OBJECT( RBFontAutoScaleHeight ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)6 );
+ gtk_signal_connect( GTK_OBJECT( RBFontAutoScaleDiagonal ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)7 );
+#endif
 
  gtk_signal_connect( GTK_OBJECT( HSExtraStereoMul ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( HSAudioDelay ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)1 );
  gtk_signal_connect( GTK_OBJECT( HSPanscan ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)2 );
  gtk_signal_connect( GTK_OBJECT( HSSubDelay ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)3 );
  gtk_signal_connect( GTK_OBJECT( HSSubPosition ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)4 );
+#ifndef HAVE_FREETYPE
  gtk_signal_connect( GTK_OBJECT( HSFontFactor ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)5 );
+#else
+ gtk_signal_connect( GTK_OBJECT( HSFontBlur ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)6 );
+ gtk_signal_connect( GTK_OBJECT( HSFontOutLine ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)7 );
+ gtk_signal_connect( GTK_OBJECT( HSFontTextScale ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)8 );
+ gtk_signal_connect( GTK_OBJECT( HSFontOSDScale ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)9 );
+ gtk_signal_connect( GTK_OBJECT( EFontEncoding ),"changed",GTK_SIGNAL_FUNC( prEntry ),NULL );
+#endif
  
  gtk_signal_connect( GTK_OBJECT( CLADrivers ),"select_row",GTK_SIGNAL_FUNC( prCListRow ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( CLVDrivers ),"select_row",GTK_SIGNAL_FUNC( prCListRow ),(void*)1 );
@@ -259,6 +344,19 @@ void HidePreferences( void )
  HideDXR3Config();
 #endif
 }
+
+#ifdef HAVE_FREETYPE
+static void prEntry( GtkContainer * container,GtkWidget * widget,gpointer user_data )
+{
+ char * comment = gtk_entry_get_text( GTK_ENTRY( EFontEncoding ) );
+ int    i;
+ 
+ for ( i=0;lEncoding[i].name;i++ )
+  if ( !gstrcmp( lEncoding[i].comment,comment ) ) break;
+  
+ if ( lEncoding[i].comment ) gtkSet( gtkSetFontEncoding,0,lEncoding[i].name );
+}
+#endif
 
 static void prDestroy( GtkObject * object,gpointer user_data )
 { HidePreferences(); }
@@ -308,11 +406,24 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkSet( gtkSetSubDelay,HSSubDelayadj->value,NULL );
 	gtkSet( gtkSetSubFPS,HSSubFPSadj->value,NULL );
 	gtkSet( gtkSetSubPos,HSSubPositionadj->value,NULL );
-	gtkSet( gtkSetFontFactor,HSFontFactoradj->value,NULL );
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDNone ) ) ) osd_level=0;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDIndicator ) ) ) osd_level=1;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDTandP ) ) ) osd_level=2;
+
+        // font ...	
 	guiSetFilename( font_name,gtk_entry_get_text( GTK_ENTRY( prEFontName ) ) );
+#ifndef HAVE_FREETYPE
+	gtkSet( gtkSetFontFactor,HSFontFactoradj->value,NULL );
+#else
+	gtkSet( gtkSetFontBlur,HSFontBluradj->value,NULL );
+	gtkSet( gtkSetFontOutLine,HSFontOutLineadj->value,NULL );
+	gtkSet( gtkSetFontTextScale,HSFontTextScaleadj->value,NULL );
+	gtkSet( gtkSetFontOSDScale,HSFontOSDScaleadj->value,NULL );
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBFontNoAutoScale ) ) ) gtkSet( gtkSetFontAutoScale,0,NULL );
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( BRFontAutoScaleWidth ) ) ) gtkSet( gtkSetFontAutoScale,1,NULL );
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBFontAutoScaleHeight ) ) ) gtkSet( gtkSetFontAutoScale,2,NULL );
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBFontAutoScaleDiagonal ) ) ) gtkSet( gtkSetFontAutoScale,3,NULL );
+#endif
 
 	// -- 4. page
 	force_ni=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ) );
@@ -374,8 +485,23 @@ static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer u
         gtkSet( gtkSetSubPos,HSSubPositionadj->value,NULL );
 	break;
    case 5: // font factor
+#ifndef HAVE_FREETYPE
         gtkSet( gtkSetFontFactor,HSFontFactoradj->value,NULL );
 	break;
+#else
+   case 6: // font blur
+	gtkSet( gtkSetFontBlur,HSFontBluradj->value,NULL );
+        break;
+   case 7: // font outline
+        gtkSet( gtkSetFontOutLine,HSFontOutLineadj->value,NULL );
+        break;
+   case 8: // text scale
+        gtkSet( gtkSetFontTextScale,HSFontTextScaleadj->value,NULL );
+	break;
+   case 9: // osd scale
+        gtkSet( gtkSetFontOSDScale,HSFontOSDScaleadj->value,NULL );
+	break;
+#endif
   }
  return FALSE;
 }
@@ -394,6 +520,12 @@ static void prToggled( GtkToggleButton * togglebutton,gpointer user_data )
 //	break;
    case 3: // no sound
         mixer_mute();
+	break;
+   case 4:
+   case 5:
+   case 6:
+   case 7:
+	gtkSet( gtkSetFontAutoScale,(float)((int)user_data - 4 ),NULL );
 	break;
   }
 }
@@ -454,7 +586,9 @@ GtkWidget * create_Preferences( void )
   GtkWidget * frame5;
   GtkWidget * vbox600;
   GSList    * OSD_group = NULL;
+  GSList    * Font_group = NULL;
   GList	    * CBVFM_items = NULL;
+  GList     * CBFontEncoding_items = NULL;
   GtkWidget * frame6;
   GtkWidget * vbox7;
   GtkWidget * vbox8;
@@ -468,7 +602,9 @@ GtkWidget * create_Preferences( void )
   GtkWidget * hbox6;
   GtkWidget * label15;
   GtkWidget * hbuttonbox5;
+#ifndef HAVE_FREETYPE
   GtkWidget * hbox7;
+#endif
   GtkWidget * label16;
   GtkWidget * label3;
   GtkWidget * vbox601;
@@ -487,7 +623,11 @@ GtkWidget * create_Preferences( void )
   Preferences=gtk_window_new( GTK_WINDOW_DIALOG );
   gtk_widget_set_name( Preferences,"Preferences" );
   gtk_object_set_data( GTK_OBJECT( Preferences ),"Preferences",Preferences );
+#ifndef HAVE_FREETYPE
   gtk_widget_set_usize( Preferences,512,400 );
+#else
+  gtk_widget_set_usize( Preferences,612,565 );
+#endif
   gtk_window_set_title( GTK_WINDOW( Preferences ),MSGTR_Preferences );
   gtk_window_set_position( GTK_WINDOW( Preferences ),GTK_WIN_POS_CENTER );
   gtk_window_set_policy( GTK_WINDOW( Preferences ),FALSE,FALSE,FALSE );
@@ -1203,6 +1343,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( BLoadFont );
   gtk_container_add( GTK_CONTAINER( hbuttonbox5 ),BLoadFont );
 
+#ifndef HAVE_FREETYPE
   hbox7=gtk_hbox_new( FALSE,0 );
   gtk_widget_set_name( hbox7,"hbox7" );
   gtk_widget_ref( hbox7 );
@@ -1228,8 +1369,157 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( hbox7 ),HSFontFactor,TRUE,TRUE,0 );
   gtk_scale_set_value_pos( GTK_SCALE( HSFontFactor ),GTK_POS_RIGHT );
   gtk_scale_set_digits( GTK_SCALE( HSFontFactor ),2 );
+#else
 
-  label3=gtk_label_new( "Subtitle & OSD" );
+  
+//	static GtkWidget     * RBFontNoAutoScale, * BRFontAutoScaleWidth, * RBFontAutoScaleHeight, * RBFontAutoScaleDiagonal;
+
+  RBFontNoAutoScale=gtk_radio_button_new_with_label( Font_group,MSGTR_PREFERENCES_FontNoAutoScale );
+  Font_group=gtk_radio_button_group( GTK_RADIO_BUTTON( RBFontNoAutoScale ) );
+  gtk_widget_set_name( RBFontNoAutoScale,"RBFontNoAutoScale" );
+  gtk_widget_ref( RBFontNoAutoScale );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"RBFontNoAutoScale",RBFontNoAutoScale,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( RBFontNoAutoScale );
+  gtk_box_pack_start( GTK_BOX( vbox603 ),RBFontNoAutoScale,FALSE,FALSE,0 );
+
+  BRFontAutoScaleWidth=gtk_radio_button_new_with_label( Font_group,MSGTR_PREFERENCES_FontPropWidth );
+  Font_group=gtk_radio_button_group( GTK_RADIO_BUTTON( BRFontAutoScaleWidth ) );
+  gtk_widget_set_name( BRFontAutoScaleWidth,"BRFontAutoScaleWidth" );
+  gtk_widget_ref( BRFontAutoScaleWidth );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"BRFontAutoScaleWidth",BRFontAutoScaleWidth,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( BRFontAutoScaleWidth );
+  gtk_box_pack_start( GTK_BOX( vbox603 ),BRFontAutoScaleWidth,FALSE,FALSE,0 );
+
+  RBFontAutoScaleHeight=gtk_radio_button_new_with_label( Font_group,MSGTR_PREFERENCES_FontPropHeight );
+  Font_group=gtk_radio_button_group( GTK_RADIO_BUTTON( RBFontAutoScaleHeight ) );
+  gtk_widget_set_name( RBFontAutoScaleHeight,"RBFontAutoScaleHeight" );
+  gtk_widget_ref( RBFontAutoScaleHeight );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"RBFontAutoScaleHeight",RBFontAutoScaleHeight,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( RBFontAutoScaleHeight );
+  gtk_box_pack_start( GTK_BOX( vbox603 ),RBFontAutoScaleHeight,FALSE,FALSE,0 );
+
+  RBFontAutoScaleDiagonal=gtk_radio_button_new_with_label( Font_group,MSGTR_PREFERENCES_FontPropDiagonal );
+  Font_group=gtk_radio_button_group( GTK_RADIO_BUTTON( RBFontAutoScaleDiagonal ) );
+  gtk_widget_set_name( RBFontAutoScaleDiagonal,"RBFontAutoScaleDiagonal" );
+  gtk_widget_ref( RBFontAutoScaleDiagonal );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"RBFontAutoScaleDiagonal",RBFontAutoScaleDiagonal,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( RBFontAutoScaleDiagonal );
+  gtk_box_pack_start( GTK_BOX( vbox603 ),RBFontAutoScaleDiagonal,FALSE,FALSE,0 );
+
+  table1=gtk_table_new( 3,2,FALSE );
+  gtk_widget_set_name( table1,"table1" );
+  gtk_widget_ref( table1 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"table1",table1,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( table1 );
+  gtk_box_pack_start( GTK_BOX( vbox603 ),table1,FALSE,FALSE,0 );
+
+  label16=gtk_label_new( MSGTR_PREFERENCES_FontEncoding );
+  gtk_widget_set_name( label16,"label16" );
+  gtk_widget_ref( label16 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label16 );
+  gtk_table_attach( GTK_TABLE( table1 ),label16,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
+  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+  
+  CBFontEncoding=gtk_combo_new();
+  gtk_widget_set_name( CBFontEncoding,"CBFontEncoding" );
+  gtk_widget_ref( CBFontEncoding );
+  gtk_widget_show( CBFontEncoding );
+  gtk_table_attach( GTK_TABLE( table1 ),CBFontEncoding,1,2,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  {
+   int i;
+   for ( i=0;lEncoding[i].name;i++ ) CBFontEncoding_items=g_list_append( CBFontEncoding_items,lEncoding[i].comment );
+  }
+  gtk_combo_set_popdown_strings( GTK_COMBO( CBFontEncoding ),CBFontEncoding_items );
+  g_list_free( CBFontEncoding_items );
+
+  EFontEncoding=GTK_COMBO( CBFontEncoding )->entry;
+  gtk_widget_set_name( EFontEncoding,"EFontEncoding" );
+  gtk_entry_set_editable( GTK_ENTRY( EFontEncoding ),FALSE );
+  gtk_widget_ref( EFontEncoding );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"EFontEncoding",EFontEncoding,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( EFontEncoding );
+
+  label16=gtk_label_new( MSGTR_PREFERENCES_FontBlur );
+  gtk_widget_set_name( label16,"label16" );
+  gtk_widget_ref( label16 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label16 );
+  gtk_table_attach( GTK_TABLE( table1 ),label16,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
+  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+
+  HSFontBluradj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0.1,0,0 ) );
+  HSFontBlur=gtk_hscale_new( HSFontBluradj );
+  gtk_widget_set_name( HSFontBlur,"HSFontBlur" );
+  gtk_widget_ref( HSFontBlur );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"HSFontBlur",HSFontBlur,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( HSFontBlur );
+  gtk_table_attach( GTK_TABLE( table1 ),HSFontBlur,1,2,1,2,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_scale_set_value_pos( GTK_SCALE( HSFontBlur ),GTK_POS_RIGHT );
+  gtk_scale_set_digits( GTK_SCALE( HSFontBlur ),2 );
+
+  label16=gtk_label_new( MSGTR_PREFERENCES_FontOutLine );
+  gtk_widget_set_name( label16,"label16" );
+  gtk_widget_ref( label16 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label16 );
+  gtk_table_attach( GTK_TABLE( table1 ),label16,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
+  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+
+  HSFontOutLineadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0.1,0,0 ) );
+  HSFontOutLine=gtk_hscale_new( HSFontOutLineadj );
+  gtk_widget_set_name( HSFontOutLine,"HSFontOutLine" );
+  gtk_widget_ref( HSFontOutLine );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"HSFontOutLine",HSFontOutLine,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( HSFontOutLine );
+  gtk_table_attach( GTK_TABLE( table1 ),HSFontOutLine,1,2,2,3,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_scale_set_value_pos( GTK_SCALE( HSFontOutLine ),GTK_POS_RIGHT );
+  gtk_scale_set_digits( GTK_SCALE( HSFontOutLine ),2 );
+
+  label16=gtk_label_new( MSGTR_PREFERENCES_FontTextScale );
+  gtk_widget_set_name( label16,"label16" );
+  gtk_widget_ref( label16 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label16 );
+  gtk_table_attach( GTK_TABLE( table1 ),label16,0,1,3,4,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
+  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+
+  HSFontTextScaleadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0.1,0,0 ) );
+  HSFontTextScale=gtk_hscale_new( HSFontTextScaleadj );
+  gtk_widget_set_name( HSFontTextScale,"HSFontTextScale" );
+  gtk_widget_ref( HSFontTextScale );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"HSFontTextScale",HSFontTextScale,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( HSFontTextScale );
+  gtk_table_attach( GTK_TABLE( table1 ),HSFontTextScale,1,2,3,4,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_scale_set_value_pos( GTK_SCALE( HSFontTextScale ),GTK_POS_RIGHT );
+  gtk_scale_set_digits( GTK_SCALE( HSFontTextScale ),2 );
+
+  label16=gtk_label_new( MSGTR_PREFERENCES_FontOSDScale );
+  gtk_widget_set_name( label16,"label16" );
+  gtk_widget_ref( label16 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label16",label16,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label16 );
+  gtk_table_attach( GTK_TABLE( table1 ),label16,0,1,4,5,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_misc_set_alignment( GTK_MISC( label16 ),7.45058e-09,0.5 );
+  gtk_misc_set_padding( GTK_MISC( label16 ),4,0 );
+
+  HSFontOSDScaleadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0.1,0,0 ) );
+  HSFontOSDScale=gtk_hscale_new( HSFontOSDScaleadj );
+  gtk_widget_set_name( HSFontOSDScale,"HSFontOSDScale" );
+  gtk_widget_ref( HSFontOSDScale );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"HSFontOSDScale",HSFontOSDScale,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( HSFontOSDScale );
+  gtk_table_attach( GTK_TABLE( table1 ),HSFontOSDScale,1,2,4,5,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  gtk_scale_set_value_pos( GTK_SCALE( HSFontOSDScale ),GTK_POS_RIGHT );
+  gtk_scale_set_digits( GTK_SCALE( HSFontOSDScale ),2 );
+
+#endif
+
+  label3=gtk_label_new( MSGTR_PREFERENCES_SubtitleOSD );
   gtk_widget_set_name( label3,"label3" );
   gtk_widget_ref( label3 );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label3",label3,(GtkDestroyNotify)gtk_widget_unref );
@@ -1361,7 +1651,7 @@ GtkWidget * create_Preferences( void )
   gtk_box_pack_start( GTK_BOX( hbox5 ),CBVFM,TRUE,TRUE,0 );
   {
    int i;
-   for ( i=0;i<7;i++ ) CBVFM_items=g_list_append( CBVFM_items,lVFM[i].name );
+   for ( i=0;lVFM[i].name;i++ ) CBVFM_items=g_list_append( CBVFM_items,lVFM[i].name );
   }
   gtk_combo_set_popdown_strings( GTK_COMBO( CBVFM ),CBVFM_items );
   g_list_free( CBVFM_items );

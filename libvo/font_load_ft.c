@@ -856,21 +856,16 @@ void free_font_desc(font_desc_t *desc)
 
 static int load_sub_face(char *name, FT_Face *face)
 {
-    int err;
+    int err = -1;
     
-    if (name) {
-	err = FT_New_Face(library, name, 0, face);
-    } else {
-	err = 1;
-    }
+    if (name) err = FT_New_Face(library, name, 0, face);
 
     if (err) {
 	err = FT_New_Face(library, get_path("subfont.ttf"), 0, face);
 	if (err) {
 	    err = FT_New_Face(library, DATADIR"/subfont.ttf", 0, face);
 	    if (err) {
-		mp_msg(MSGT_OSD, MSGL_ERR, "New_Face failed. Maybe the font path is wrong.\n");
-		mp_msg(MSGT_OSD, MSGL_ERR, "Please supply the text font file (~/.mplayer/subfont.ttf).\n");
+	        mp_msg(MSGT_OSD, MSGL_ERR, "New_Face failed. Maybe the font path is wrong.\nPlease supply the text font file (~/.mplayer/subfont.ttf).\n" );
 		return -1;
 	    }
 	}
@@ -880,10 +875,7 @@ static int load_sub_face(char *name, FT_Face *face)
 
 static int load_osd_face(FT_Face *face)
 {
-    int err;
-    
-    err = FT_New_Memory_Face(library, osd_font_pfb, sizeof(osd_font_pfb), 0, face);
-    if (err) {
+    if ( FT_New_Memory_Face(library, osd_font_pfb, sizeof(osd_font_pfb), 0, face) ) {
 	mp_msg(MSGT_OSD, MSGL_ERR, "New_Memory_Face failed..\n");
 	return -1;
     }
@@ -966,7 +958,7 @@ font_desc_t* read_font_desc(char *fname, float factor, int movie_width, int movi
     /* generate the subtitle font */
     err = load_sub_face(fname, &face);
     if (err) {
-	mp_msg(MSGT_OSD, MSGL_ERR, "subtitle font: load_sub_face failed.\n");
+	mp_msg(MSGT_OSD, MSGL_WARN, "subtitle font: load_sub_face failed.\n");
 	goto gen_osd;
     }
 

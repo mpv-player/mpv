@@ -79,7 +79,11 @@ char * fsAudioFileNames[fsNumberOfAudioFilterNames+1][2] =
 
 #define fsNumberOfFontFilterNames 1
 char * fsFontFileNames[fsNumberOfFontFilterNames+1][2] =
+#ifdef HAVE_FREETYPE
+	 { { "font files (*.ttf)",					   "*.ttf" },
+#else
 	 { { "font files (*.desc)",					   "*.desc" },
+#endif
 	   { "All files ( * )",						   "*" } };
 
 GtkWidget   * fsFileNamesList;

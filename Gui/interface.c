@@ -672,10 +672,38 @@ void * gtkSet( int cmd,float fparam, void * vparam )
         sub_pos=(int)fparam;
         return NULL;   
 #if defined( USE_OSD ) || defined( USE_SUB )
+#ifndef HAVE_FREETYPE
    case gtkSetFontFactor:
         font_factor=fparam;
 	guiLoadFont();
 	return NULL;
+#else
+   case gtkSetFontOutLine:
+        subtitle_font_thickness=( 8.0f / 100.0f ) * fparam;
+	guiLoadFont();
+	return NULL;
+   case gtkSetFontBlur:
+	subtitle_font_radius=( 8.0f / 100.0f ) * fparam;
+	guiLoadFont();
+	return NULL;
+   case gtkSetFontTextScale:
+	text_font_scale_factor=fparam;
+	guiLoadFont();
+	return NULL;
+   case gtkSetFontOSDScale:
+	osd_font_scale_factor=fparam;
+	guiLoadFont();
+	return NULL;
+   case gtkSetFontEncoding:
+        if ( subtitle_font_encoding ) free( subtitle_font_encoding );
+	subtitle_font_encoding=gstrdup( (char *)vparam );
+	guiLoadFont();
+	return NULL;
+   case gtkSetFontAutoScale:
+	subtitle_autoscale=(int)fparam;
+	guiLoadFont();
+	return NULL;
+#endif
 #endif
 // --- misc
    case gtkClearStruct:

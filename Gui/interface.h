@@ -5,6 +5,7 @@
 #include "../config.h"
 #include "mplayer/play.h"
 #include "../mplayer.h"
+#include "../libvo/font_load.h"
 #include "cfg.h"
 
 #ifdef USE_DVDREAD
@@ -177,6 +178,12 @@ extern URLItem * URLList;
 #define gtkSetAutoq       18
 #define gtkClearStruct    19
 #define gtkAddURLItem     20
+#define gtkSetFontOutLine 21
+#define gtkSetFontBlur    22
+#define gtkSetFontTextScale 23
+#define gtkSetFontOSDScale  24
+#define gtkSetFontEncoding  25
+#define gtkSetFontAutoScale 26
 
 extern float gtkEquChannels[6][10];
 

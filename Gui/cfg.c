@@ -56,7 +56,7 @@ static config_t gui_opts[] =
  { "vo_direct_render",&vo_directrendering,CONF_TYPE_FLAG,0,0,1,NULL },
 
  { "v_framedrop",&frame_dropping,CONF_TYPE_INT,CONF_RANGE,0,2,NULL },
- { "v_flip",&flip,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "v_flip",&flip,CONF_TYPE_INT,CONF_RANGE,-1,1,NULL },
  { "v_ni",&force_ni,CONF_TYPE_FLAG,0,0,1,NULL },
  { "v_idx",&index_mode,CONF_TYPE_INT,CONF_RANGE,-1,2,NULL },
  { "v_vfm",&video_family,CONF_TYPE_INT,CONF_RANGE,-1,10,NULL },
@@ -82,6 +82,12 @@ static config_t gui_opts[] =
  { "sub_pos",&sub_pos,CONF_TYPE_INT,CONF_RANGE,0,200,NULL },
  { "font_factor",&font_factor,CONF_TYPE_FLOAT,CONF_RANGE,0.0,10.0,NULL },
  { "font_name",&font_name,CONF_TYPE_STRING,0,0,0,NULL },
+ { "font_encoding",&subtitle_font_encoding,CONF_TYPE_STRING,0,0,0,NULL },
+ { "font_text_scale",&text_font_scale_factor,CONF_TYPE_FLOAT,CONF_RANGE,0,100,NULL },
+ { "font_osd_scale",&osd_font_scale_factor,CONF_TYPE_FLOAT,CONF_RANGE,0,100,NULL },
+ { "font_blur",&subtitle_font_thickness,CONF_TYPE_FLOAT,CONF_RANGE,0,8,NULL },
+ { "font_outline",&subtitle_font_thickness,CONF_TYPE_FLOAT,CONF_RANGE,0,8,NULL },
+ { "font_autoscale",&subtitle_autoscale,CONF_TYPE_INT,CONF_RANGE,0,3,NULL },
  
  { "gui_skin",&skinName,CONF_TYPE_STRING,0,0,0,NULL },
 
