@@ -4520,8 +4520,7 @@ morceau.
 Initialise l'intervalle de temps du tampon audio (par défaut\ : 0.5s).
 .
 .TP
-.B \-endpos <[[hh:]mm:]ss[.ms]|taille[o|ko|mo]> (voir aussi \-ss et \-sb \
-également)
+.B \-endpos <[[hh:]mm:]ss[.ms]|taille[o|ko|mo]> (voir aussi \-ss et \-sb)
 Stoppe l'encodage à la position temps ou octet indiquée.
 .br
 .I NOTE:
@@ -4532,11 +4531,11 @@ s'arrêter qu'à une limite de trame.
 .PD 0
 .RSs
 .IPs "\-endpos 56"
-N'encode que 56 secondes
+N'encode que 56 secondes.
 .IPs "\-endpos 01:10:00"
-N'encode que 1 heure 10 minutes
+N'encode que 1 heure 10 minutes.
 .IPs "\-endpos 100mb"
-N'encode que 100 Mo
+N'encode que 100 Mo.
 .RE
 .PD 1
 .
@@ -4608,11 +4607,11 @@ Utilisez \-ovc help pour obtenir une liste des codecs disponibles.
 .IPs "\-oac copy"
 pas d'encodage, juste une copie du flux
 .IPs "\-oac pcm"
-Encode en PCM non-compressé
+Encode en PCM non-compressé.
 .IPs "\-oac mp3lame"
-Encode en MP3 (en utilisant Lame)
+Encode en MP3 (en utilisant LAME).
 .IPs "\-oac lavc"
-Encode avec un des codecs de libavcodec
+Encode avec un des codecs de libavcodec.
 .RE
 .PD 1
 .
@@ -4628,9 +4627,9 @@ disponibles.
 .PD 0
 .RSs
 .IPs "\-of avi"
-encode en avi
+Encode en AVI.
 .IPs "\-of mpeg"
-encode en mpeg
+Encode en MPEG.
 .IPs "\-of rawvideo"
 flux vidéo brut (pas de multiplexage - uniquement un flux vidéo)
 .RE
