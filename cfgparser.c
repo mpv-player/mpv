@@ -16,6 +16,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include "mp_msg.h"
 
 #define COMMAND_LINE		0
 #define CONFIG_FILE		1
@@ -46,7 +47,7 @@ static int init_conf(struct config *conf, int mode)
 	config = conf;
 #ifdef DEBUG
 	if (mode != COMMAND_LINE && mode != CONFIG_FILE) {
-		printf("init_conf: wrong mode!\n");
+		mp_msg(MSGT_CFGPARSER, MSGL_ERR, "init_conf: wrong mode!\n");
 		return -1;
 	}
 #endif
@@ -62,10 +63,8 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 	int ret = -1;
 	char *endptr;
 
-#ifdef DEBUG
-	printf("read_option: conf=%p optnr=%d opt='%s' param='%s'\n",
+	mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "read_option: conf=%p optnr=%d opt='%s' param='%s'\n",
 	    conf, conf_optnr, opt, param);
-#endif
 	for (i = 0; i < conf_optnr; i++) {
 		int namelength;
 		/* allow 'aa*' in config.name */
@@ -80,21 +79,20 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 	}
 	if (i == conf_optnr) {
 		if (parser_mode == CONFIG_FILE)
-			printf("invalid option:\n");
+			mp_msg(MSGT_CFGPARSER, MSGL_ERR, "invalid option:\n");
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
-#ifdef DEBUG
-	printf("read_option: name='%s' p=%p type=%d\n",
+	mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "read_option: name='%s' p=%p type=%d\n",
 	    conf[i].name, conf[i].p, conf[i].type);
-#endif
+
 	if (conf[i].flags & CONF_NOCFG && parser_mode == CONFIG_FILE) {
-		printf("this option can only be used on command line:\n");
+		mp_msg(MSGT_CFGPARSER, MSGL_ERR, "this option can only be used on command line:\n");
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
 	if (conf[i].flags & CONF_NOCMD && parser_mode == COMMAND_LINE) {
-		printf("this option can only be used in config file:\n");
+		mp_msg(MSGT_CFGPARSER, MSGL_ERR, "this option can only be used in config file:\n");
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
@@ -120,7 +118,7 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 				    !strcmp(param, "0"))
 					*((int *) conf[i].p) = conf[i].min;
 				else {
-					printf("invalid parameter for flag:\n");
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "invalid parameter for flag:\n");
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
@@ -136,21 +134,21 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 
 			tmp_int = strtol(param, &endptr, 0);
 			if (*endptr) {
-				printf("parameter must be an integer:\n");
+				mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be an integer:\n");
 				ret = ERR_OUT_OF_RANGE;
 				goto out;
 			}
 
 			if (conf[i].flags & CONF_MIN)
 				if (tmp_int < conf[i].min) {
-					printf("parameter must be >= %d:\n", (int) conf[i].min);
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be >= %d:\n", (int) conf[i].min);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
 
 			if (conf[i].flags & CONF_MAX)
 				if (tmp_int > conf[i].max) {
-					printf("parameter must be <= %d:\n", (int) conf[i].max);
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be <= %d:\n", (int) conf[i].max);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
@@ -168,7 +166,7 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 				tmp_float /= strtod(endptr+1, &endptr);
 
 			if (*endptr) {
-				printf("parameter must be a floating point number"
+				mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be a floating point number"
 				       " or a ratio (numerator[:/]denominator):\n");
 
 				ret = ERR_MISSING_PARAM;
@@ -177,14 +175,14 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 
 			if (conf[i].flags & CONF_MIN)
 				if (tmp_float < conf[i].min) {
-					printf("parameter must be >= %f:\n", conf[i].min);
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be >= %f:\n", conf[i].min);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
 
 			if (conf[i].flags & CONF_MAX)
 				if (tmp_float > conf[i].max) {
-					printf("parameter must be <= %f:\n", conf[i].max);
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be <= %f:\n", conf[i].max);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
@@ -198,7 +196,7 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 
 			if (conf[i].flags & CONF_MIN)
 				if (strlen(param) < conf[i].min) {
-					printf("parameter must be >= %d chars:\n",
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be >= %d chars:\n",
 							(int) conf[i].min);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
@@ -206,7 +204,7 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 
 			if (conf[i].flags & CONF_MAX)
 				if (strlen(param) > conf[i].max) {
-					printf("parameter must be <= %d chars:\n",
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be <= %d chars:\n",
 							(int) conf[i].max);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
@@ -273,16 +271,16 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 				case 2:
 				    if ((err = read_option((struct config *)subconf, subconf_optnr, subopt, subparam)) < 0)
 				    {
-					printf("Subconfig parsing returned error: %d in token: %s\n",
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Subconfig parsing returned error: %d in token: %s\n",
 					    err, token);
 					return(err);
 				    }
 				    break;
 				default:
-				    printf("Invalid subconfig argument! ('%s')\n", token);
+				    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Invalid subconfig argument! ('%s')\n", token);
 				    return(ERR_NOT_AN_OPTION);
 			    }
-//			    printf("token: '%s', i=%d, subopt='%s, subparam='%s'\n", token, i, subopt, subparam);
+			    mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "token: '%s', i=%d, subopt='%s, subparam='%s'\n", token, i, subopt, subparam);
 			    token = strtok(NULL, (char *)&(":"));
 			}
 
@@ -295,13 +293,13 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 			printf("%s", (char *) conf[i].p);
 			exit(1);
 		default:
-			printf("Unknown config type specified in conf-mplayer.h!\n");
+			mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Unknown config type specified in conf-mplayer.h!\n");
 			break;
 	}
 out:
 	return ret;
 err_missing_param:
-	printf("missing parameter:\n");
+	mp_msg(MSGT_CFGPARSER, MSGL_ERR, "missing parameter:\n");
 	ret = ERR_MISSING_PARAM;
 	goto out;
 }
@@ -343,7 +341,7 @@ int parse_config_file(struct config *conf, char *conffile)
 	}
 
 	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
-		perror("\ncan't get memory for 'line'");
+		printf("\ncan't get memory for 'line': %s", strerror(errno));
 		ret = -1;
 		goto out;
 	}
@@ -397,6 +395,7 @@ int parse_config_file(struct config *conf, char *conffile)
 			continue;
 		}
 		opt[opt_pos] = '\0';
+
 #ifdef DEBUG
 		PRINT_LINENUM;
 		printf("option: %s\n", opt);
@@ -457,10 +456,12 @@ int parse_config_file(struct config *conf, char *conffile)
 			errors++;
 			continue;
 		}
+
 #ifdef DEBUG
 		PRINT_LINENUM;
 		printf("parameter: %s\n", param);
 #endif
+
 		/* now, check if we have some more chars on the line */
 		/* whitespace... */
 		while (isspace(line[line_pos]))
@@ -525,7 +526,11 @@ next:
 		if ((*opt == '-') && (*(opt+1) == '-') && (*(opt+2) != 'h'))
 		{
 			no_more_opts = 1;
-//			printf("no more opts! %d\n",i);
+			if (i+1 >= argc)
+			{
+			    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "You added '--' but no filenames presented!\n");
+			    goto err_out;
+			}
 			i++;
 			goto next;
 		}
@@ -534,7 +539,8 @@ next:
 		{
 		    /* remove trailing '-' */
 		    opt++;
-//		    printf("this_opt = option: %s\n", opt);
+
+		    mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "this_opt = option: %s\n", opt);
 
 		    tmp = read_option(config, nr_options, opt, argv[i + 1]);
 
@@ -543,7 +549,7 @@ next:
 		    case ERR_MISSING_PARAM:
 		    case ERR_OUT_OF_RANGE:
 		    case ERR_FUNC_ERR:
-			printf("Error %d while parsing option: '%s'!\n",
+			mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Error %d while parsing option: '%s'!\n",
 			    tmp, opt);
 			goto err_out;
 		    default:
@@ -553,7 +559,8 @@ next:
 		}
 		else /* filename */
 		{
-//		    printf("this_opt = filename: %s\n", opt);
+		    mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "this_opt = filename: %s\n", opt);
+
 		    /* opt is not an option -> treat it as a filename */
 		    if (!(f = (char **) realloc(f, sizeof(*f) * (f_nr + 2))))
 			goto err_out_mem;
@@ -569,9 +576,9 @@ next:
 	--recursion_depth;
 	return f_nr; //filenames_nr;
 err_out_mem:
-	printf("can't allocate memory for filenames\n");
+	mp_msg(MSGT_CFGPARSER, MSGL_ERR, "can't allocate memory for filenames (%s)\n", strerror(errno));
 err_out:
 	--recursion_depth;
-	printf("command line: %s\n", argv[i]);
+	mp_msg(MSGT_CFGPARSER, MSGL_ERR, "command line: %s\n", argv[i]);
 	return -1;
 }
