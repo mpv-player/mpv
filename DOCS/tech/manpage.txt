@@ -210,7 +210,7 @@ Options, suboptions, examples structure:
       [...]
       description. Available options are:
 
-      .DP 0
+      .PD 0
       .RSs
       .IPs "subopt1=<value>"
       description1
@@ -220,7 +220,7 @@ Options, suboptions, examples structure:
       .IPs "last subopt=<value>"
       last description
       .RE
-      .DP 1
+      .PD 1
       .
       [...]
 
