@@ -31,6 +31,8 @@ static int init(sh_video_t *sh){
     // set format fourcc for raw RGB:
     if(sh->bih && sh->bih->biCompression==0){	// set based on bit depth
 	switch(sh->bih->biBitCount){
+	case 1:  sh->bih->biCompression=IMGFMT_BGR1; break;
+	case 4:  sh->bih->biCompression=IMGFMT_BGR4; break;
 	case 8:  sh->bih->biCompression=IMGFMT_BGR8; break;
 	case 15: sh->bih->biCompression=IMGFMT_BGR15; break;
 	// workaround bitcount==16 => bgr15 case for avi files:
@@ -53,8 +55,10 @@ static void uninit(sh_video_t *sh){
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_image_t* mpi;
-    if(len<=0) return NULL; // skipped frame
+    int frame_size;
     
+    if(len<=0) return NULL; // skipped frame
+
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, 
 	sh->disp_w, sh->disp_h);
     if(!mpi) return NULL;
@@ -63,6 +67,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	// TODO !!!
 	mpi->planes[0]=data;
 	mpi->stride[0]=mpi->width;
+	frame_size=mpi->stride[0]*mpi->h;
         if(mpi->flags&MP_IMGFLAG_YUV) {
             // Support for some common Planar YUV formats
 	    /* YV12,I420,IYUV */
@@ -74,6 +79,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
             mpi->stride[cb]=mpi->chroma_width;
             mpi->planes[cr]=mpi->planes[cb]+mpi->chroma_width*mpi->chroma_height;
             mpi->stride[cr]=mpi->chroma_width;
+	    frame_size+=2*mpi->chroma_width*mpi->chroma_height;
        	}
     } else {
 	mpi->planes[0]=data;
@@ -84,6 +90,14 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    // export palette:
 	    mpi->planes[1]=sh->bih ? (((unsigned char*)&sh->bih)+40) : NULL;
 	}
+	frame_size=mpi->stride[0]*mpi->h;
+	if(mpi->bpp<8) frame_size=frame_size*mpi->bpp/8;
+    }
+
+    if(len<frame_size){
+        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Frame too small! (%d<%d) Wrong format?\n",
+	    len,frame_size);
+	return NULL;
     }
     
     return mpi;
