@@ -108,7 +108,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     printf("crop area: X: %d..%d  Y: %d..%d  (-vop crop=%d:%d:%d:%d)\n",
 	vf->priv->x1,vf->priv->x2,
 	vf->priv->y1,vf->priv->y2,
-	(vf->priv->x2-x)&(~1),(vf->priv->y2-y)&(~1),x,y
+	(vf->priv->x2+1-x)&(~1),(vf->priv->y2+1-y)&(~1),x,y
 	  );
 
     vf_next_put_image(vf,dmpi);
