@@ -298,6 +298,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
     /* nothing will change its size, be we need some values initialized */
     resize();
 
+#ifdef USE_OSD
     /* now init out own 'font' (to use vo_draw_text_sub without edit them) */
     vo_font->spacewidth=1;
     vo_font->charspace=0;
@@ -313,7 +314,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
 	vo_font->pic_a[1]->bmp[i]=i;
 	vo_font->pic_b[1]->bmp[i]=i;
     };
-
+#endif
     /* say hello */
     osdmessage(5, 1, "Welcome to ASCII ARTS MPlayer");  
 
