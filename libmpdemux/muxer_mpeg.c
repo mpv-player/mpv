@@ -74,7 +74,7 @@ static int conf_ts_allframes = 0;
 static int conf_init_adelay = 0;
 static int conf_drop = 0;
 static int conf_skip_padding = 0;
-static int conf_noreorder = 0;
+static int conf_reorder = 0;
 
 enum FRAME_TYPE {
 	I_FRAME = 1,
@@ -171,7 +171,7 @@ m_option_t mpegopts_conf[] = {
 	{"drop", &conf_drop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"tsaf", &conf_ts_allframes, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"skip_padding", &conf_skip_padding, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noreorder", &conf_noreorder, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"reorder", &conf_reorder, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -389,10 +389,10 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
       spriv->min_pes_hlen = 18;
     else if(priv->is_xsvcd)
       spriv->min_pes_hlen = 22;
-    if(conf_noreorder)
-      spriv->reorder = 0;
-    else
+    if(conf_reorder)
       spriv->reorder = 1;
+    else
+      spriv->reorder = 0;
     mp_msg (MSGT_MUXER, MSGL_DBG2, "Added video stream %d, ckid=%X\n", muxer->num_videos, s->ckid);
   } else { // MUXER_TYPE_AUDIO
     spriv->type = 0;
