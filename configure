@@ -1967,6 +1967,23 @@ else
 fi
 echores "$_mman"
 
+if ppc && test "$_altivec" = "yes" ; then
+echocheck "altivec.h"
+cat > $TMPC << EOF
+#include <altivec.h>
+int main(void) { return 0; }
+EOF
+_altivec=no
+cc_check && _altivec=yes
+if test "$_altivec" = yes ; then
+  _def_altivec_h='#define HAVE_ALTIVEC_H 1'
+else
+  _def_altivec_h='#undef HAVE_ALTIVEC_H'
+fi
+echores "$_altivec"
+else
+  _def_altivec_h='#undef HAVE_ALTIVEC_H'
+fi
 
 echocheck "dynamic loader"
 cat > $TMPC << EOF
@@ -5669,6 +5686,13 @@ $_def_words_endian
 
 $_def_arch
 
+/* libmpeg2 wants ARCH_PPC and the rest of mplayer use ARCH_POWERPC,
+ * define ARCH_PPC if ARCH_POWERPC is set to cope with that.
+ */
+#ifdef ARCH_POWERPC
+#define ARCH_PPC 1
+#endif
+
 /* Define this for Cygwin build for win32 */
 $_def_confwin32
 
@@ -5813,6 +5837,9 @@ $_def_altivec	// only define if you have Altivec (G4)
 #ifdef HAVE_MMX
 #define USE_MMX_IDCT 1
 #endif
+
+$_def_altivec_h	// enables usage of altivec.h
+
 
 $_def_mlib  // Sun mediaLib, available only on solaris
 
