@@ -28,7 +28,7 @@ haya instalado, podrían haber sido compilados con gcc. 2.96</para>
 <listitem>
 <para>Sonido mezcla de MP2/MP3 en PPC:</para>
 <para>Problema: es un problema de compilación de GCC en plataformas PPC, no hay arreglo todavía.</para>
-<para>Solución temporal: use el decodificador de FFmpeg (lento) MP1/MP2/MP3 (<opción>-ac ffmpeg
+<para>Solución temporal: use el decodificador de FFmpeg (lento) MP1/MP2/MP3 (<option>-ac ffmpeg
 </option>)</para>
 </listitem>
 <listitem>
@@ -68,7 +68,7 @@ de muestreo usada en sus archivos - pruebe el plugin de cambio de frecuencia de 
 <itemizedlist>
 <listitem>
 <para>máquina lenta (CPU o VGA)</para>
-<para>pruebe con <option>-vo null</option, si se reproduce bien, entonces tiene
+<para>pruebe con <option>-vo null</option>, si se reproduce bien, entonces tiene
 una placa o controlador VGA lento.</para>
 <para>Solución: comprese una placa de vídeo más rápida o lea esta documentación
 acerca de como mejorar la velocidad</para>
@@ -144,6 +144,7 @@ codec usando las opciones <option>-vc</option> o <option>-vfm</option>.
 <para>
 intentó reproducir un archivo DivX 3.x con el decodificador OpenDivX o XviD
 (<option>-vc odivx</option>) - instale Divx4Linux y recompile <application>MPlayer</application>
+</para>
 </listitem>
 </itemizedlist>
 </sect2>

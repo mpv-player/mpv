@@ -199,7 +199,7 @@ con la extensión
 
 <para>
 Estos formatos han sido diseñados por Apple y pueden contener cualquier
-codec, CBR o VBR. Normalmente tienen extensión <filaname>.QT</filename> o
+codec, CBR o VBR. Normalmente tienen extensión <filename>.QT</filename> o
 <filename>.MP4</filename>. Note que desde que el grupo MPEG4 eligió
 QuickTime como el formato de archivo recomendado para MPEG4, sus archivos
 MOV vienen con extensión <filename>.MPG</filename> o <filename>.MP4</filename>
@@ -270,8 +270,8 @@ Sí, <application>MPlayer</application> puede leer (demultiplexar) archivos
 RealMedia (<filename>.rm</filename>). La búsqueda funciona, pero debe
 especificar la opción <option>-forceidx</option> (el formato soporta
 marcos clave). Aquí hay una lista de los codecs soportados de
-linkend="realvideo">RealVideo</link> y <link
-linkend="realaudio">RealAudio</link>.
+<link linkend="realvideo">RealVideo</link> y
+<link linkend="realaudio">RealAudio</link>.
 </para>
 </sect3>
 

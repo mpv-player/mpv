@@ -487,7 +487,7 @@ tengan el mismo origen.
 
 <para>
 Sorenson es un codec de video desarrollado por Sorenson Media y licenciado
-a Apple quien lo distribuye con su <application>Reproductor QuickTime</aplication>.
+a Apple quien lo distribuye con su <application>Reproductor QuickTime</application>.
 Actualmente se es capaz de decodificar todas las versiones de los archivos de
 video Sorenson con los siguientes decodificadores:
 </para>
@@ -726,7 +726,7 @@ MPlayer incluye libfaad 2.0RC1, por lo que no necesita obtenerlo por separado.
 <para>
 VFW (Video for Windows) es una API antigua para Windows. Sus codecs tienen
 la extensión <filename>.DLL</filename> o (rara vez) <filename>.DRV</filename>.
-Si <application>MPlayer</filename> falla al reproducir su AVI con este tipo
+Si <application>MPlayer</application> falla al reproducir su AVI con este tipo
 de mensaje:
 <screen>Codec de video DESCONOCIDO: HFYU (0x55594648)</screen>
 </para>

@@ -198,16 +198,16 @@ License Version 2 (GPL v.2).
 </chapter>
 
 
-<!-- &features.xml; -->
-<!-- &usage.xml; -->
-<!-- &faq.xml; -->
+&features.xml;
+&usage.xml;
+&faq.xml;
 &cd-dvd.xml;
 &ports.xml;
 &mencoder.xml;
 &mail-lists.xml;
-<!-- &bugreports.xml; -->
-<!-- &bugs.xml; -->
+&bugreports.xml;
+&bugs.xml;
 &skin.xml;
-<!-- &users-vs-dev.xml; -->
+&users-vs-dev.xml;
 &patches.xml;
 </book>

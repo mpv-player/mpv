@@ -320,7 +320,7 @@ el servidor X y modifica directamente la memoria de framebuffer. Técnicamente
 hablando esto se hace mapeando la memoria del framebuffer en el rango de
 memoria de su proceso. Esto es permitido por el kernel solo si tiene privilegios
 de superusuario. Puede obtenerlos identificandose como
-<systemitem class="username">root</username> o estableciendo el bit SUID en
+<systemitem class="username">root</systemitem> o estableciendo el bit SUID en
 el ejecutable de <application>MPlayer</application> (<emphasis role="bold">no
 recomendado</emphasis>).
 </para>
@@ -352,6 +352,8 @@ sistemas...
 
 <formalpara>
 <title>INSTALANDO SOPORTE DGA PARA MPLAYER</title>
+
+<para>Primero asegura que X carga la extensión DGA, mira en
 <filename>/var/log/XFree86.0.log</filename>:
 
 <programlisting>(II) Loading extension XFree86-DGA</programlisting>
@@ -1108,7 +1110,7 @@ suficientemente rápido para renderizar todos los marcos!
 Al reproducir en un terminal puede obtener mejor velocidad y calidad
 usando el controlador Linux, en lugar del curses (<option>-aadriver linux</option>).
 Pero lo malo es que necesita permisos de escritura en
-<filename>/dev/vcsa</replaceable>&lt;terminal&gt;</replaceable></filename>!
+<filename>/dev/vcsa<replaceable>&lt;terminal&gt;</replaceable></filename>!
 Esto no es automáticamente detectado por aalib, pero vo_aa intenta encontrar
 el mejor modo.
 Vea <ulink url="http://aa-project.sourceforge.net/tune"/> para más detalles
@@ -1400,7 +1402,7 @@ Pero esto es peligroso, y no debería hacerlo. En ese caso el controlador
 se ve forzado y el resultado puede ser impredicible (puede incluso
 <emphasis role="bold">dejar colgado</emphasis> su ordenador). Debe hacerlo
 SOLO si está absolutamente seguro de que funciona, y
-<application>MPlayer</aplication> no lo hace automáticamente. Por favor
+<application>MPlayer</application> no lo hace automáticamente. Por favor
 en ese caso dígaselo a los desarrolladores. La manera correcta de usar VIDIX es
 sin argumentos para activar la autodetección del controlador.
 </para>
@@ -1619,7 +1621,7 @@ la mayoría de los casos. Para un DivX de 512x384 (aspecto 4:3) pruebe:
 <para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=512:576</screen></para>
 
 <para>Si tiene una película widescreen y no quiere escalar a altura completa,
-puede usar el filtro <option>expand=w:h</optioin> para añadir bandas negras.
+puede usar el filtro <option>expand=w:h</option> para añadir bandas negras.
 Para ver un DivX de 640x384, pruebe:
 </para>
 
@@ -2019,7 +2021,7 @@ para instrucciones sobre salida-TV de Matrox G450/G550 , ¡vaya a la sección sigu
       que se encuentre en su <envar>PATH</envar>.
       </para></step>
     <step><para>
-      Si no tiene command>con2fb</command> instalado, entre en
+      Si no tiene <command>con2fb</command> instalado, entre en
       <filename class="directory">TVout/con2fb</filename> y escriba <command>make</command>.
       Instale <filename class="directory">con2fb</filename> en cualquier sitio
       que se encuentre en su <envar>PATH</envar>.

@@ -53,7 +53,7 @@ Puede leer el otro lado de la historia
 GCC 2.96 no permite caracteres <literal>|</literal> (tuberías) en comentarios
 en ensamblador porque esto lo hace Intel igual que la sintaxis de AT&amp;T y
 el caracter <literal>|</literal> es un símbolo en la variante Intel. El problema
-es que <emphasys>silenciosamente</emphasis> ignora el bloque de ensamblador
+es que <emphasis>silenciosamente</emphasis> ignora el bloque de ensamblador
 por completo. Esto es supuestamente corregible ahora, GCC imprime un mensaje
 de advertencia en lugar de saltarse el bloque.
 </para>
@@ -77,7 +77,7 @@ más que suficiente de las guerras con GCC 2.96. Por favor, déjenos contarle el r
 Si tiene problemas con GCC 2.96, puede obtener los paquetes 2.96-85 del
 <ulink url="ftp://updates.redhat.com">servidor ftp</ulink> de Red Hat, o
 vaya directamente a por los <ulink url="ftp://people.redhat.com/jakub/gcc/3.2-10/">
-paquetes gcc-3.2-10 (no oficiales, pero funcionan bien) y puede instalarlos junto
+paquetes gcc-3.2-10</ulink> (no oficiales, pero funcionan bien) y puede instalarlos junto
 con gcc-2.96 si ya lo tiene. MPlayer detectará y usará 3.2 en lugar de 2.96. Si no desea
 o no puede usar los paquetes binarios, aquí tiene cómo compilar GCC 3 desde el código
 fuente:

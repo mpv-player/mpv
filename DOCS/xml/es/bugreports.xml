@@ -259,7 +259,7 @@ en particular e incluya su dirección de correo electrónico así como la salida de
 MPlayer con nivel de prolijo 1. Usualmente los primeros 1-5 MB del archivo son
 suficientes para reproducir el problema, pero para asegurarse haga:
 <screen>dd if=<replaceable>su-archivo</replaceable> of=<replaceable>archivo-pequeño</replaceable> bs=1024k count=5</screen>
-Esto coje los primeros cinco megabytes de '<emphasis role="bold">su-archivo</filename>'
+Esto coje los primeros cinco megabytes de '<emphasis role="bold">su-archivo</emphasis>'
 y los escribe a '<emphasis role="bold">archivo-pequeño</emphasis>. Entonces pruebe de
 nuevo con este archivo pequeño y si el error sigue apareciendo su muestra será suficiente
 para nosotros.
@@ -273,7 +273,7 @@ archivo está disponible en la red, entonces enviar la URL
 <sect2 id="bugreports_crash">
 <title>Cuelgues</title>
 <para>
-Debería ejecutar <application>MPlayer</applicationj> dentro de <command>gdb</command>
+Debería ejecutar <application>MPlayer</application> dentro de <command>gdb</command>
 y enviarnos la salida completa o si tiene un volcado <filename>core</filename> de
 cuelgue puede extraer información útil desde el archivo Core. Aquí tiene cómo:
 </para>
