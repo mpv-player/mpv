@@ -1,34 +1,78 @@
 #!/bin/sh
-# Gabucino - no warranty
-# you need fbset, and matroxfb modules loaded
+#
+# Gabucino - no warranty, this script can BOOM your TV and/or monitor, or else.
+# v2.0
+# This script has been tested and configured on a Matrox G400DH and a PAL TV.
+#
+# INSTALLATION:
+#	1. READ MPLAYER'S TVOUT DOCUMENTATION!
+#	2. Edit 'defaultmode', 'TVdefaultmode', and 'SetTVstandard' functions
+#	   below to fit your needs.
+#	3. Remove 'exit 1' safety check.
+#
 
-# mode to use on the monitor in "1-Monitor only" and "4-Dualhead" mode
-# (from /etc/fb.modes)
-DEFAULTMODE="768x576-60"
+function defaultmode {
+	# You can choose the mode to use in monitor-only mode
+	# 640x480 60Hz 32bpp	(14" monitors)
+	fbset -a -xres 640 -yres 480 -vxres 640 -vyres 480 -depth 32 -pixclock 39721 -left 48 -right 16 -upper 33 -lower 10 -hslen 96 -vslen 2 -hsync high -accel true
+	# 768x576 60Hz 32bpp	(14" monitors)
+	# fbset -a -xres 768 -yres 576 -vxres 768 -vyres 5460 -depth 32 -pixclock 26101 -left 144 -right 16 -upper 28 -lower 6 -hslen 112 -vslen 4 -accel true
+	# 800x600 76Hz 32bpp	(15" monitors)
+	# fbset -a -xres 800 -yres 600 -vxres 800 -vyres 1440 -depth 32 -pixclock 20000 -left 128 -right 16 -upper 24 -lower 2 -hslen 96 -vslen 6
+	# 1024x768 70Hz 32bpp	(15" monitors)
+	# fbset -a -xres 1024 -yres 768 -vxres 1024 -vyres 1440 -depth 32 -pixclock 12500 -left 144 -right 32 -upper 30 -lower 2 -hslen 192 -vslen 6
+}
 
-echo "You didn't check this file for possible mis-configurations ! :)"
+function TVdefaultmode {
+
+	##
+	## PAL modes
+	##
+
+	# 640x512 80Hz 32bpp
+	fbset -depth 32 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true
+	# 640x528 83Hz 32bpp
+	# fbset -depth 32 -left 40 -right 0 -upper 63 -lower 29 -hslen 56 -vslen 4 -xres 640 -yres 528 -vxres 640 -vyres 528 -laced false -bcast true
+	# 720x576 78Hz 32bpp
+	# fbset -depth 32 -left 54 -right -36 -upper 55 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -laced false -bcast true
+
+	##
+	## NTSC modes
+	##
+
+	# 640x240 non-interlaced 32bpp
+	# fbset -depth 32 -xres 640 -yres 240 -vxres 640 -vyres 240 -pixclock 79443 -left 72 -right 40 -upper 15 -lower 5 -hslen 48 -vslen 3
+	# 640x480 interlaced 32bpp
+	# fbset -depth 32 -xres 640 -yres 480 -vxres 640 -vyres 480 -pixclock 79443 -left 72 -right 40 -upper 30 -lower 10 -hslen 48 -vslen 5 -laced true
+}
+
+function SetTVstandard {
+	matroxset 1		# PAL
+	# matroxset 2		# NTSC
+}
+	
+echo
+echo "Please read MPlayer's TV-out documentation, and install 'matroxset' and 'fbset'."
+echo "Then edit this script to suit your monitor+TV set."
+echo
 exit 1
 
 while [ 1 ]; do
 
 clear
 
-echo " [ 1 ]	Monitor only"
-echo " [ 2 ]	Cloning  - CRTC1 to Monitor and TV"
-echo " [ 3 ]	Dualhead - CRTC1 to Monitor, CRTC2 to TV"
-
-#echo " [ 4 ]	Cloning  - CRTC2 to Monitor and TV"
-#echo " [ 5 ]	Dualhead - CRTC2 to Monitor, CRTC1 to TV"
+echo " [ 1 ]    Monitor only"
+echo "                          /---> Monitor"
+echo " [ 2 ]    DualHead - CRTC1"
+echo "                          \\---> TV"
 
 echo
 
-#echo " [ Q ]	All consoles to fb0"
-#echo " [ W ]	tty3 to fb1"
-#echo
-
-echo " [ A ]	640x512"
-echo " [ S ]	640x528"
-echo " [ D ]	720x576"
+echo " [ A ]	640x512		PAL"
+echo " [ S ]	640x528		PAL"
+echo " [ D ]	720x576		PAL"
+echo " [ F ]	640x240		NTSC"
+echo " [ G ]	640x480		NTSC, Interlaced"
 
 read ABC
 
@@ -36,73 +80,41 @@ case "$ABC" in
 	1)
 	matroxset -f /dev/fb1 -m 0
 	matroxset -f /dev/fb0 -m 1
-	fbset -a -fb /dev/fb0 $DEFAULTMODE
+	defaultmode
 	echo
 	;;
 
 	2)
-	con2fb /dev/fb1 /dev/tty3  # Strange, this eliminates green bars
 	matroxset -f /dev/fb1 -m 0
 	matroxset -f /dev/fb0 -m 3
-	matroxset 1
-	# 640x512
-	fbset -fb /dev/fb1 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true
-	con2fb /dev/fb0 /dev/tty3  # Ok, now we can take it back
-	;;
-
-
-	3)
-	fbset -a -fb /dev/fb0 $DEFAULTMODE
-	echo
-	matroxset -f /dev/fb0 -m 0
-	matroxset -f /dev/fb1 -m 2
-	matroxset -f /dev/fb0 -m 1
-	matroxset 1
-	;;
-
-	4)
-	matroxset -f /dev/fb0 -m 0
-	matroxset -f /dev/fb1 -m 3
-	matroxset 1
-	;;
-
-	5)
-	matroxset -f /dev/fb1 -m 0
-	matroxset -f /dev/fb0 -m 2
-	matroxset -f /dev/fb1 -m 1
-	matroxset 1
-	# 640x512
-	fbset -fb /dev/fb1 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true
-	;;
-
-	q)
-	con2fb /dev/fb0 /dev/tty1
-	con2fb /dev/fb0 /dev/tty2
-	con2fb /dev/fb0 /dev/tty3
-	con2fb /dev/fb0 /dev/tty4
-	con2fb /dev/fb0 /dev/tty5
-	con2fb /dev/fb0 /dev/tty6
-	;;
-
-	w)
-	con2fb /dev/fb1 /dev/tty3
+	SetTVstandard
+	TVdefaultmode
 	;;
 
 	a)
-	# 640x512
-	fbset -fb /dev/fb1 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true
+	# 640x512 80Hz 32bpp
+	fbset -depth 32 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true
 	;;
 
 	s)
-	# 640x528
-	fbset -fb /dev/fb1 -left 40 -right 0 -upper 63 -lower 29 -hslen 56 -vslen 4 -xres 640 -yres 528 -vxres 640 -vyres 528 -depth 32 -laced false -bcast true
+	# 640x528 83Hz 32bpp
+	fbset -depth 32 -left 40 -right 0 -upper 63 -lower 29 -hslen 56 -vslen 4 -xres 640 -yres 528 -vxres 640 -vyres 528 -laced false -bcast true
 	;;
 
 	d)
-	# 720x576
-	fbset -fb /dev/fb1 -left 54 -right -36 -upper 55 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -depth 32 -laced false -bcast true
+	# 720x576 78Hz 32bpp
+	fbset -depth 32 -left 54 -right -36 -upper 55 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -laced false -bcast true
 	;;
 
+	f)
+	# 640x240 non-interlaced 32bpp
+	fbset -depth 32 -xres 640 -yres 240 -vxres 640 -vyres 240 -pixclock 79443 -left 72 -right 40 -upper 15 -lower 5 -hslen 48 -vslen 3
+	;;
+
+	g)
+	# 640x480 interlaced 32bpp
+	fbset -depth 32 -xres 640 -yres 480 -vxres 640 -vyres 480 -pixclock 79443 -left 72 -right 40 -upper 30 -lower 10 -hslen 48 -vslen 5 -laced true
+	;;
 esac
 
 done
