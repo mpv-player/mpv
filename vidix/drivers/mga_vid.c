@@ -5,6 +5,14 @@
 
     YUY2 support (see config.format) added by A'rpi/ESP-team
     double buffering added by A'rpi/ESP-team
+
+    Brightness/contrast support by Nick Kurshev
+
+    TODO:
+	* fix doublebuffering for vidix
+	* fix pci_config_read for option word (memory size detection)
+	* fix/complete brightness/contrast handling (Nick)
+	* translate all non-english comments to english
 */
 
 /*
@@ -35,6 +43,7 @@
 
 #define MGA_VSYNC_POS 2
 
+#undef MGA_EQUALIZER
 
 #include <errno.h>
 #include <stdio.h>
@@ -42,6 +51,8 @@
 #include <string.h>
 #include <math.h>
 #include <inttypes.h>
+
+//#include "../../libvo/fastmemcpy.h"
 
 #include "../vidix.h"
 #include "../fourcc.h"
@@ -62,7 +73,7 @@
 #define readl(addr)		GETREG(uint32_t,(uint32_t)(addr),0)
 #define writel(val,addr)	SETREG(uint32_t,(uint32_t)(addr),0,val)
 
-int mga_verbose = 0;
+static int mga_verbose = 0;
 
 /* for device detection */
 static int probed = 0;
@@ -85,8 +96,8 @@ static uint32_t mga_ram_size = 0; /* how much megabytes videoram we have */
 /* Graphic keys */
 static vidix_grkey_t mga_grkey;
 
-static int colkey_saved=0;
-static int colkey_on=0;
+static int colkey_saved = 0;
+static int colkey_on = 0;
 static unsigned char colkey_color[4];
 static unsigned char colkey_mask[4];
 
@@ -105,7 +116,11 @@ static vidix_capability_t mga_cap =
     4,
     4,
     -1,
-    FLAG_UPSCALER | FLAG_DOWNSCALER,
+    FLAG_UPSCALER | FLAG_DOWNSCALER
+#ifdef MGA_EQUALIZER
+    | FLAG_EQUALIZER
+#endif
+    ,
     VENDOR_MATROX,
     0,
     { 0, 0, 0, 0}
@@ -177,8 +192,8 @@ typedef struct bes_registers_s
 	uint32_t besv2wght;
 
 } bes_registers_t;
-
 static bes_registers_t regs;
+
 #ifdef CRTC2
 typedef struct crtc2_registers_s
 {
@@ -204,7 +219,6 @@ typedef struct crtc2_registers_s
 } crtc2_registers_t;
 static crtc2_registers_t cregs;
 #endif
-
 
 //All register offsets are converted to word aligned offsets (32 bit)
 //because we want all our register accesses to be 32 bits
@@ -232,7 +246,6 @@ static crtc2_registers_t cregs;
 #define XCOLKEY0BLUE  0x57
 
 #ifdef CRTC2
-
 /*CRTC2 registers*/
 #define XMISCCTRL  0x1e
 #define C2CTL       0x3c10 
@@ -254,8 +267,7 @@ static crtc2_registers_t cregs;
 #define C2VCOUNT    0x3c48
 #define C2VPARAM    0x3c1c
 #define C2VSYNC     0x3c20
-
-#endif
+#endif /* CRTC2 */
 
 // Backend Scaler registers
 #define BESCTL      0x3d20
@@ -332,6 +344,7 @@ case 3:
 
 int vixPlaybackFrameSelect(unsigned int frame)
 {
+    printf("[mga] frameselect: %d\n", frame);
 #if MGA_ALLOW_IRQ
     if (mga_irq != -1)
     {
@@ -679,7 +692,6 @@ int vixConfigPlayback(vidix_playback_t *config)
 {
 	int x, y, sw, sh, dw, dh;
 	int besleft, bestop, ifactor, ofsleft, ofstop, baseadrofs, weight, weights;
-	int frame_size;
 #ifdef CRTC2
 #define right_margin 0
 #define left_margin 18
@@ -697,16 +709,13 @@ int vixConfigPlayback(vidix_playback_t *config)
 	unsigned int vsyncend = vsyncstart + vsync_len;
 	unsigned int vtotal = vsyncend + upper_margin;
 #endif 
-    int frame;
 
     if ((config->num_frames < 1) || (config->num_frames > 4))
     {
-	printf("[mga] illegal num_frames: %d, setting to 2\n", config->num_frames);
-	config->num_frames = 2;
+	printf("[mga] illegal num_frames: %d, setting to 1\n", config->num_frames);
+	config->num_frames = 1;
 //        return(EINVAL);
     }
-    
-    config->num_frames = 2; /* let it be for now */
 
     x = config->dest.x;
     y = config->dest.y;
@@ -716,8 +725,7 @@ int vixConfigPlayback(vidix_playback_t *config)
     dh = config->dest.h;
     
     config->dest.pitch.y=32;
-    config->dest.pitch.u=
-    config->dest.pitch.v=16;
+    config->dest.pitch.u=config->dest.pitch.v=16;
 
     printf("[mga] Setting up a %dx%d+%d+%d video window (src %dx%d) format %X\n",
            dw, dh, x, y, sw, sh, config->fourcc);
@@ -733,6 +741,15 @@ int vixConfigPlayback(vidix_playback_t *config)
 //    printf("[mga] vcount = %d\n", readl(mga_mmio_base + VCOUNT));
     printf("[mga] mga_mmio_base = %p\n",mga_mmio_base);
     printf("[mga] mga_mem_base = %08x\n",mga_mem_base);
+    
+    config->offsets[0] = 0;
+    config->offsets[1] = config->frame_size;
+    config->offsets[2] = 2*config->frame_size;
+    config->offsets[3] = 3*config->frame_size;
+    
+    config->offset.y=0;
+    config->offset.v=((sw + 31) & ~31) * sh;
+    config->offset.u=config->offset.v+((sw + 31) & ~31) * sh /4;
 
     switch(config->fourcc)
     {
@@ -749,14 +766,10 @@ int vixConfigPlayback(vidix_playback_t *config)
 
 //    config->frame_size = config->src.h*config->src.w+(config->src.w*config->src.h)/2;
 
-    frame_size = config->frame_size;
-    
-    config->offsets[0] = 0;
-    config->offsets[1] = config->frame_size; /* ?? */
-    
-    config->offset.y=0;
-    config->offset.v=((sw + 31) & ~31) * sh;
-    config->offset.u=config->offset.v+((sw + 31) & ~31) * sh /4;
+    //FIXME figure out a better way to allocate memory on card
+    //allocate 2 megs
+    //mga_src_base = mga_mem_base + (MGA_VIDMEM_SIZE-2) * 0x100000;
+    //mga_src_base = (MGA_VIDMEM_SIZE-3) * 0x100000;
 
     mga_src_base = (mga_ram_size*0x100000-config->num_frames*config->frame_size);
     if (mga_src_base < 0)
@@ -768,15 +781,6 @@ int vixConfigPlayback(vidix_playback_t *config)
     printf("[mga] YUV buffer base: %p\n", mga_src_base);
 
     config->dga_addr = mga_mem_base + mga_src_base;
-
-//    config->offset.y = config->dga_addr;
-//    config->offset.u = config->offset.y+config->frame_size;
-//    config->offset.v = config->offset.u+2*config->frame_size;
-	
-    //FIXME figure out a better way to allocate memory on card
-    //allocate 2 megs
-    //mga_src_base = mga_mem_base + (MGA_VIDMEM_SIZE-2) * 0x100000;
-    //mga_src_base = (MGA_VIDMEM_SIZE-3) * 0x100000;
 
 	
     //Setup the BES registers for a three plane 4:2:0 video source 
@@ -873,9 +877,9 @@ int vixConfigPlayback(vidix_playback_t *config)
 	baseadrofs = ((ofstop*regs.besviscal)>>16)*regs.bespitch;
 	//frame_size = ((sw + 31) & ~31) * sh + (((sw + 31) & ~31) * sh) / 2;
 	regs.besa1org = (uint32_t) mga_src_base + baseadrofs;
-	regs.besa2org = (uint32_t) mga_src_base + baseadrofs + 1*frame_size;
-	regs.besb1org = (uint32_t) mga_src_base + baseadrofs + 2*frame_size;
-	regs.besb2org = (uint32_t) mga_src_base + baseadrofs + 3*frame_size;
+	regs.besa2org = (uint32_t) mga_src_base + baseadrofs + 1*config->frame_size;
+	regs.besb1org = (uint32_t) mga_src_base + baseadrofs + 2*config->frame_size;
+	regs.besb2org = (uint32_t) mga_src_base + baseadrofs + 3*config->frame_size;
 
 if(config->fourcc==IMGFMT_YV12
  ||config->fourcc==IMGFMT_IYUV
@@ -889,18 +893,18 @@ if(config->fourcc==IMGFMT_YV12
 
     if(config->fourcc==IMGFMT_YV12){
 	regs.besa1corg = (uint32_t) mga_src_base + baseadrofs + regs.bespitch * sh ;
-	regs.besa2corg = (uint32_t) mga_src_base + baseadrofs + 1*frame_size + regs.bespitch * sh;
-	regs.besb1corg = (uint32_t) mga_src_base + baseadrofs + 2*frame_size + regs.bespitch * sh;
-	regs.besb2corg = (uint32_t) mga_src_base + baseadrofs + 3*frame_size + regs.bespitch * sh;
+	regs.besa2corg = (uint32_t) mga_src_base + baseadrofs + 1*config->frame_size + regs.bespitch * sh;
+	regs.besb1corg = (uint32_t) mga_src_base + baseadrofs + 2*config->frame_size + regs.bespitch * sh;
+	regs.besb2corg = (uint32_t) mga_src_base + baseadrofs + 3*config->frame_size + regs.bespitch * sh;
 	regs.besa1c3org = regs.besa1corg + ((regs.bespitch * sh) / 4);
 	regs.besa2c3org = regs.besa2corg + ((regs.bespitch * sh) / 4);
 	regs.besb1c3org = regs.besb1corg + ((regs.bespitch * sh) / 4);
 	regs.besb2c3org = regs.besb2corg + ((regs.bespitch * sh) / 4);
     } else {
 	regs.besa1c3org = (uint32_t) mga_src_base + baseadrofs + regs.bespitch * sh ;
-	regs.besa2c3org = (uint32_t) mga_src_base + baseadrofs + 1*frame_size + regs.bespitch * sh;
-	regs.besb1c3org = (uint32_t) mga_src_base + baseadrofs + 2*frame_size + regs.bespitch * sh;
-	regs.besb2c3org = (uint32_t) mga_src_base + baseadrofs + 3*frame_size + regs.bespitch * sh;
+	regs.besa2c3org = (uint32_t) mga_src_base + baseadrofs + 1*config->frame_size + regs.bespitch * sh;
+	regs.besb1c3org = (uint32_t) mga_src_base + baseadrofs + 2*config->frame_size + regs.bespitch * sh;
+	regs.besb2c3org = (uint32_t) mga_src_base + baseadrofs + 3*config->frame_size + regs.bespitch * sh;
 	regs.besa1corg = regs.besa1c3org + ((regs.bespitch * sh) / 4);
 	regs.besa2corg = regs.besa2c3org + ((regs.bespitch * sh) / 4);
 	regs.besb1corg = regs.besb1c3org + ((regs.bespitch * sh) / 4);
@@ -1128,7 +1132,7 @@ switch(config->fourcc){
 	
     cregs.c2vparam=((vdispend - 1) << 16) | (vtotal - 1);
     cregs.c2vsync=((vsyncend - 1) << 16) | (vsyncstart - 1);
-#endif
+#endif /* CRTC2 */
 
     mga_vid_write_regs(0);
     return(0);
@@ -1167,22 +1171,6 @@ int vixPlaybackOff(void)
     mga_vid_write_regs(0);
 
     return(0);
-}
-
-static int mga_vid_release(/*struct inode *inode, struct file *file*/)
-{
-	//Close the window just in case
-	printf("[mga] Video OFF (release)\n");
-
-	vid_src_ready = 0;   
-	regs.besctl &= ~1;
-        regs.besglobctl &= ~(1<<6);  // UYVY format selected
-//	mga_config.colkey_on=0; //!!!
-	mga_vid_write_regs(1);
-	mga_vid_in_use = 0;
-
-//	MOD_DEC_USE_COUNT;
-	return 0;
 }
 
 int vixProbe(int verbose,int force)
@@ -1267,22 +1255,14 @@ int vixInit(void)
 	return(EINTR);
     }
 
-#if 0	
-#if LINUX_VERSION_CODE >= 0x020300
-    mga_mmio_base = ioremap_nocache(dev->resource[1].start,0x4000);
-    mga_mem_base =  dev->resource[0].start;
-#else
-    mga_mmio_base = ioremap_nocache(dev->base_address[1] & PCI_BASE_ADDRESS_MEM_MASK,0x4000);
-    mga_mem_base =  dev->base_address[0] & PCI_BASE_ADDRESS_MEM_MASK;
-#endif
-#endif
-
 #warning "FIXME: implement pciconfig_read! (or enable syscall)\n"
 #if 0
 /* from linux/pci.h */
 #define PCI_DEVFN(slot, func) ((((slot) & 0x1f) << 3) | ((func) & 0x07))
 
-    pci_config_read(pci_info.bus, PCI_DEVFN(pci_info.card, pci_info.func),
+//    pci_config_read(pci_info.bus, PCI_DEVFN(pci_info.card, pci_info.func),
+//        0x40, 4, &card_option);
+    pci_config_read(pci_info.bus, pci_info.card, pci_info.func,
         0x40, 4, &card_option);
 //    pci_read_config_dword(dev,  0x40, &card_option);
     printf("[mga] OPTION word: 0x%08X  mem: 0x%02X  %s\n", card_option,
@@ -1396,6 +1376,13 @@ void vixDestroy(void)
 {
     printf("[mga] destroy\n");
 
+    vid_src_ready = 0;   
+    regs.besctl &= ~1;
+    regs.besglobctl &= ~(1<<6);  // UYVY format selected
+//    mga_config.colkey_on=0; //!!!
+    mga_vid_write_regs(1);
+    mga_vid_in_use = 0;
+
 #ifdef MGA_ALLOW_IRQ
     if (mga_irq != -1)
     	free_irq(mga_irq, &mga_irq);
@@ -1458,8 +1445,8 @@ int vixSetGrKeys(const vidix_grkey_t *grkey)
     return(0);
 }
 
-#ifdef TEST_ME_PLEASE
-vidix_video_eq_t equal = { 0, 0, 0, 0, 0, 0, 0, 0 };
+#ifdef MGA_EQUALIZER
+static vidix_video_eq_t equal = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
 {
    uint32_t beslumactl;
