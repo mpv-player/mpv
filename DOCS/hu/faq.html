@@ -16,18 +16,60 @@
 <H1><A NAME=5>5. FAQ (Gyakran Feltett Kérdések)</A></H1>
 
 <UL>
-  <LI><A HREF="#compilation">5.1 Fordítás</A></LI>
-  <LI><A HREF="#general">5.2 Általános kérdések</A></LI>
-  <LI><A HREF="#playback">5.3 File lejátszással kapcsolatos problémák</A></LI>
-  <LI><A HREF="#driver">5.4 Video/audio meghajtó problémák (vo/ao)</A></LI>
-  <LI><A HREF="#dvd">5.5 DVD lejátszás</A></LI>
-  <LI><A HREF="#features">5.6 Feature kérések</A></LI>
-  <LI><A HREF="#encoding">5.7 Enkódolás</A></LI>
+  <LI><A HREF="#development">5.1 Fejlesztés</A></LI>
+  <LI><A HREF="#compilation">5.2 Fordítás</A></LI>
+  <LI><A HREF="#general">5.3 Általános kérdések</A></LI>
+  <LI><A HREF="#playback">5.4 File lejátszással kapcsolatos problémák</A></LI>
+  <LI><A HREF="#driver">5.5 Video/audio meghajtó problémák (vo/ao)</A></LI>
+  <LI><A HREF="#dvd">5.6 DVD lejátszás</A></LI>
+  <LI><A HREF="#features">5.7 Feature kérések</A></LI>
+  <LI><A HREF="#encoding">5.8 Enkódolás</A></LI>
 </UL>
 
-<H2><A NAME=compilation>5.1 Fordítás</A></H2>
+<H2><A NAME=development>5.1 Fejlesztés</A></H2>
 
 <DL>
+
+  <DT>Q: Hogyan készíthetek patchet az MPlayer-hez?</DT>
+  <DD>A: Küldd el a változtatásaidat egy (unified) diff (<CODE>diff -u</CODE>)
+    formájában az
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng">mplayer-dev-eng</A>
+    listára. Fontos, hogy a CVS verzióhoz küldd. Pontosabb információkat
+    <A HREF="../tech/patches.txt">innen</A> szerezhetsz.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Hogyan támogathatom az MPlayer fejlesztését?</DT>
+  <DD>A: Bármikor szívesen látunk hardver vagy esetleg szoftver
+    <A HREF="http://www.mplayerhq.hu/homepage/donations.html">adományokat</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Hogyan lehetek MPlayer fejlesztõ?</DT>
+  <DD>A: Tárt karokkal várjuk a kódereket illetve dokumentáció írókat. Elsõ
+    körben érdemes elolvasni a <A HREF="../tech">technológiai dokumentációt</A>.
+    Ezután íratkozz fel az
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
+    levelezési listára, és kezdhetsz is kódolni.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Miért nem használtok autoconf-ot vagy automake-t?</DT>
+  <DD>A: Van egy moduláris, kézzel írt build rendszerünk. Viszonylag jó munkát
+    végez, úgyhogy nincs okunk változtatni. Ráadásul nem nagyon szívleljük az
+    autotool-okat, mint ahogy <A HREF="http://freshmeat.net/articles/view/889/">mások</A>
+    sem.</DD>
+  <DD>&nbsp;</DD>
+
+</DL>
+
+
+<H2><A NAME=compilation>5.2 Fordítás</A></H2>
+
+<DL>
+
+  <DT>Q: Vannak bináris (RPM/deb) csomagok az MPlayer-bõl?</DD>
+  <DD>A: Lásd a <A HREF="documentation.html#debian">Debian</A> illetve
+    <A HREF="documentation.html#rpm">RedHat</A> fejezeteket.</DD>
+  <DD>&nbsp;</DD>
+
 
   <DT>Q: A fordítás ezzel az üzenettel áll le:
     <PRE>
@@ -50,24 +92,25 @@
   </DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Mi a fene van azzal a 2.96-os gcc-vel ?</DT>
-  <DD>A:  gcc 2.96 a RedHat NEM HIVATALOS (csak a RedHat/Mandrake-nél, vagy RedHat/Mandrake
+  <DT>Q: Mi a fene van azzal a 2.96-os gcc-vel ?</DT>
+  <DD>A: gcc 2.96 a RedHat NEM HIVATALOS (csak a RedHat/Mandrake-nél, vagy RedHat/Mandrake
      disztribúciókban található meg) és HIBÁS gcc-je. A gcc 2.96 TELJESEN
      használhatatlan az MPlayer-rel, mert egyszerûen ÁTUGORJA az MMX/3DNow
      utasításokat, nem fordítja le õket. Fontos: ez NEM MPlayer-specifikus   
      probléma, számos más project (DRI, avifile, Wine, stb..) szenved ebbõl fakadó
      problémáktól.<BR>
-<B><I>NE HASZNÁLD a gcc 2.96-ot !!!</I></B><BR>
-De ha valamilyen okból kifolyólag emésztõ vágy gyötör ezirányban, mindig
-csakis a legújabbat használd. További (angol nyelvû) információk
-<A HREF="../gcc-2.96-3.0.html">itt</A> és <A HREF="../users_against_developers.html">itt</A>
-(ajánlott!)</DD>
+     <B><I>NE HASZNÁLD a gcc 2.96-ot !!!</I></B><BR>
+     De ha valamilyen okból kifolyólag emésztõ vágy gyötör ezirányban, mindig
+     csakis a legújabbat használd. További (angol nyelvû) információk
+     <A HREF="../gcc-2.96-3.0.html">itt</A> és
+     <A HREF="../users_against_developers.html">itt</A>
+     (ajánlott!)</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Az jó, nekem 3.0.1-es gcc-m van a RedHat/Mandrake-tõl--</DT>
   <DD>A: Azzal is vannak problémák, úgyhogy inkább használd a mûködõképesebb, gyorsabb 2.95.x sorozatot.
-Ha 3.x.x nélkül nem tudsz élni, úgy bizonyosodj meg róla hogy az elérhetõ
-legfrissebb verzió van fent.</DD>
+    Ha 3.x.x nélkül nem tudsz élni, úgy bizonyosodj meg róla hogy az elérhetõ
+    legfrissebb verzió van fent.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Az MPlayer nem fordul, inkább ezt írja ki:<BR>
@@ -110,13 +153,16 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
      vagy újabbat, viszont biztos hogy gondok lesznek)</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  G200/G400-am van, hogy fordítsam/használjam az mga_vid drivert?</DT>
+  <DT>Q:  Matrox G200/G400/G450/G550-em van, hogy fordítsam/használjam az
+    mga_vid meghajtót?</DT>
   <DD>A:  Olvass el mindent.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Vannak rpm/deb/... csomagok az MPlayer-bõl?</DT>
-  <DD>A:  Csinálhatsz magadnak .deb csomagot, lásd a dokumentációt.
- A homepage-ünkrõl letölthetõk .rpm csomagok, más forrásból NE használj!</DD>
+  <DT>Q: Furi. Az mga_vid.o kernelmodul betöltése közben ez kerül a naplóba:<BR>
+    <CODE>Warning: loading mga_vid.o will taint the kernel: no
+      license</CODE></DT>
+  <DD>A: Az újabb modutils csomagok megvizsgálják a modulok licenszét.
+    Frissítsd a kernelt, a modutilst, és az MPlayert.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q:  'make' közben MPlayer az X11 file-jaira panaszkodik. Nem értem miért,
@@ -150,12 +196,6 @@ Megnéztem a file-t, és ott van az /usr/local/lib-ben.</DT>
 futtasd az <B>ldconfig</B>-ot.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Na ez érdekes. Mikor töltöm be az mga_vid.o kernelmodult, ilyet kapok a logba:<BR>
-<CODE>Warning: loading mga_vid.o will taint the kernel: no license</CODE></DT>
-  <DD>A: Hát ez jó kérdés, talán próbálj régebbi kernelt (az újabbakban ilyen licenszelõs
-marhaság van), frissíts MPlayer CVS-bõl, vagy valami.</DD>
-  <DD>&nbsp;</DD>
-
   <DT>Q: Mikor fordítanám a <B>MEncoder</B>-t, segmentation fault-tal elszáll linkelésnél.</DT>
   <DD>A: Frissítsd a binutils csomagodat (2.11.92.* vagy újabb valószínûleg elég), az remélhetõleg segít.</DD>
   <DD>&nbsp;</DD>
@@ -165,31 +205,28 @@ marhaság van), frissíts MPlayer CVS-bõl, vagy valami.</DD>
 
 </DL>
 
-<H2><A NAME=general>5.2.  Általános kérdések</A></H2>
+<H2><A NAME=general>5.3.  Általános kérdések</A></H2>
 
 <DL>
 
-  <DT>Q: Hogyan csináljak megfelelõ patchet az MPlayerhez?</DT>
-  <DD>A: Elkészítettünk egy <A HREF="../tech/patches.txt">rövid írást</A>
-    ami tartalmazza amit tudnod kell.</DD>
+  <DT>Q:  Vannak MPlayer levelezési listák?</DT>
+  <DD>A:  Igen! Lásd <A HREF="documentation.html#mailing_lists">itt</A>.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Hogyan támogathatom az MPlayer fejlesztését?</DT>
-  <DD>A: Boldogan elfogadunk bármilyen hardvert vagy szoftvert, a listát
-    lásd <A HREF="http://www.mplayerhq.hu/homepage/donations.html">itt</A>.</DD>
+  <DT>Q:  Találtam egy durva hibát, amikor a kedvenc filmemet néztem!
+    Kinek írjak?</DT>
+  <DD>A:  Lásd <A HREF="bugreports.html">C</A> függelék.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Hogyan lehetek MPlayer fejlesztõ?</DT>
-  <DD>A: Szívesen vesszük coder-ek és dokumentáció írók jelentkezését. Olvasd
-    el a <A HREF="../tech">technikai dokumentációt</A>, és iratkozz fel az
-    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
-    listára, és kezdj kódolni.</DD>
-  <DD>&nbsp:</DD>
+  <DT>Q:  Problémáim vannak a(z) ... codec-kel. Használhatom?</DT>
+  <DD>A:  Nézd meg itt: <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A>,
+     és ha nincs benne a te codeced, olvasd el a
+     <A HREF="codecs.html#2.1.3">2.1.3</A>-es fejezetet.</DD>
+  <DD>&nbsp;</DD>
 
-  <DT>Q: Futtathatok egyszerre többet az <B>MPlayerbõl</B>?</DT>
-  <DD>A: Igen. Amire figyelni kell az az, hogy néhány video meghajtóból
-    (például xv, dga, mga, xmga) csak egy darab futtatható, így ilyen
-    meghajtóval csak egy darab <B>MPlayer</B> indítható.</DD>
+  <DT>Q: Mûködik a lejátszás, de az MPlayer ezt írja ki :
+    <CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE></DT>
+  <DD>A: Olvasd el az <A HREF="documentation.html#rtc">RTC</A> fejezetet.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q:  És mi lesz a DVD lejátszással?</DT>
@@ -225,7 +262,8 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: És ha nem akarom hogy megjelenjenek?</DT>
-  <DD>A: Akkor használd a -quiet opciót, és olvasd el a manpage-t.</DD>
+  <DD>A: Akkor használd a <CODE>-quiet</CODE> illetve a <CODE>-really-quiet</CODE>
+    opciókat.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q:  A video output CPU használata miért 0% MPEG file-oknál?</DT>
@@ -238,19 +276,10 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
  (az avifile csomagja különbözik)</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Vannak MPlayer levelezési listák?</DT>
-  <DD>A:  Igen! Lásd dokumentáció.</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q:  Találtam egy durva hibát, amikor a kedvenc filmemet néztem!!
-      Kinek írjak?</DT>
-  <DD>A:  Lásd <A HREF="bugreports.html">C</A> függelék.</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q:  Problémáim vannak a(z) ... codec-kel. Használhatom?</DT>
-  <DD>A:  Nézd meg itt: <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A>,
-     és ha nincs benne a te codeced, olvasd el a
-     <A HREF="codecs.html#2.1.3">2.1.3</A>-es fejezetet.</DD>
+  <DT>Q: Futtathatok egyszerre többet az <B>MPlayerbõl</B>?</DT>
+  <DD>A: Igen. Amire figyelni kell az az, hogy néhány video meghajtóból
+    (például xv, dga, mga, xmga) csak egy darab futtatható, így ilyen
+    meghajtóval csak egy darab <B>MPlayer</B> indítható.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q:  Ööö, mi az az "IdegCounter" ?</DT>
@@ -276,7 +305,8 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
 
   <DT>Q:  Az OSD villog!</DT>
   <DD>A:  Olyan vo drivert használsz, ami egyszeres bufferelést használ (x11,xv).
-     Xv esetén használd a -double opciót.</DD>
+     Xv esetén használd a -double opciót. Kipróbálhatod még a
+     <CODE>-vf expand</CODE> opciót is.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Pontosan mi is ez a libavcodec?</DT>
@@ -306,17 +336,19 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
 
 </DL>
 
-<H2><A NAME=playback>5.3.  File lejátszással kapcsolatos problémák</A></H2>
+<H2><A NAME=playback>5.4.  File lejátszással kapcsolatos problémák</A></H2>
 
 <DL>
 
-  <DT>Q:  ...... mûködik avifile/aviplay-jel, de nem az MPlayer-rel!</DT>
-  <DD>A:  MPlayer != avifile
+  <DT>Q:  ...... mûködik xine/avifile-al, de nem az MPlayer-rel!</DT>
+  <DD>A:  MPlayer != xine/avifile
      Az egyetlen közös dolog a kettõben az a Win32 DLL loader. A codec
      csomag, szinkronizáció, demultiplexelés, stb. teljesen különbözik és
-     nem összehasonlítható.
-     Ha valami mûködik aviplay-jel az nem jelenti azt, hogy <B>MPlayer</B>-rel is
-     kellene, és fordítva.</DD>
+     nem összehasonlítható.  Ha valami mûködik aviplay-jel az nem jelenti azt,
+     hogy <B>MPlayer</B>-rel is kellene, és fordítva. Ha van egy olyan file-od
+     ami más lejátszókkal megy de MPlayerrel nem, akkor olvasd el a
+     <A HREF="bugreports.html">bugreports.html</A>-t, és töltsd fel nekünk a
+     file-t.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q:  A hang nincs szinkronban egy .avi file lejátszásakor</DT>
@@ -397,12 +429,6 @@ Más programokkal viszont jók.</DT>
 ki a YUY2-t az alapértelmezett YV12 helyett (lásd TV bemenet dokumentáció).</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Mûködik a lejátszás, de az MPlayer ezt írja ki :
-<CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE></DT>
-  <DD>A: Olvasd el az <A HREF="documentation.html#installation">Installálás</A> fejezetet. Azt
-a részt ami az új A/V szinkron kódrol szól.</DD>
-  <DD>&nbsp;</DD>
-
   <DT>Q: A/V szinkron problémáim vannak. A legtöbb AVI-m lejátszása jó, de az
 <B>MPlayer</B> néhányat kétszeres sebességgel játszik le.</DT>
   <DD>A: Bugos a hangkártyád vagy a meghajtója. Valószínûleg fix 44100Hz-es a kártya,
@@ -432,7 +458,7 @@ a <CODE>-ao sdl</CODE> opciót (SDL meghajtó).</DD>
 
 </DL>
 
-<H2><A NAME=driver>5.4.  Video/audio meghajtó problémák (vo/ao)</A></H2>
+<H2><A NAME=driver>5.5.  Video/audio meghajtó problémák (vo/ao)</A></H2>
 
 <DL>
 
@@ -488,11 +514,6 @@ meghajtót használom.</DT>
   <DD>A: Eegen. Az nvidia kijavított egy bugot (lásd fent), és betett egy újat. Jó mi?</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: SDL video kimenettel szeretném használni a GUI-t, de egy második video ablak
-is megjelenik.</DT>
-  <DD>A: Igen. Ne használj SDL-t GUI-val együtt.</DD>
-  <DD>&nbsp;</DD>
-
   <DT>Q: Az SDL-nek nincs <CODE>xv</CODE> target-je, csak <CODE>x11</CODE>! Miért?</DT>
   <DD>A: Mert miért lenne? Az SDL-nek csak <CODE>x11</CODE> target-je van, ami
 igenis használ xv-t, ha támogatva van. Nem kell külön írni semmit hozzá..</DD>
@@ -500,7 +521,7 @@ igenis használ xv-t, ha támogatva van. Nem kell külön írni semmit hozzá..</DD>
 
 </DL>
 
-<H2><A NAME=dvd>5.5.  DVD lejátszás</A></H2>
+<H2><A NAME=dvd>5.6.  DVD lejátszás</A></H2>
 
 <DL>
 
@@ -549,18 +570,13 @@ bekapcsolni a DMA-t a DVD meghajtón.</DD>
 
 </DL>
 
-<H2><A NAME=features>5.6.  Feature kérések</A></H2>
+<H2><A NAME=features>5.7.  Feature kérések</A></H2>
 
 <DL>
 
   <DT>  Q:   Szeretnék pluszminusz 1 képkockánként tekerni.</DT>
   <DD>  A:   Ez nem lesz megcsinálva. Amikor megvolt, elrontotta az A/V szinkront.
   Ha tudod, implementáld és küldj patch-et.</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q:   Hol a windows verzió ?</DT>
-  <DD>A:   Nincs kiadva, és nem is lesz. Nézz körül windowson milyen opensource ASF olvasók,
-  és fõleg enkódolók vannak, és rájössz miért. Nem igazán akarunk börtönbe jutni.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Hogyan mondhatom meg az MPlayernek hogy emlékezzen azokra az opciókra
@@ -572,12 +588,12 @@ bekapcsolni a DMA-t a DVD meghajtón.</DD>
 
 </DL>
 
-<B><A NAME=encoding>5.7. Enkódolás</A></B>
+<B><A NAME=encoding>5.8. Enkódolás</A></B>
 
 <DL>
 
   <DT>Q: Hogyan lehet enkódolni ?</DT>
-  <DD>A: Olvasd el a <A HREF="encoding.html">dokumentációt</A>.</DD>
+  <DD>A: Olvasd el <A HREF="encoding.html">ezt</A>.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Nem tudom a DVD feliratokat belekódolni az AVI-ba !</DT>
