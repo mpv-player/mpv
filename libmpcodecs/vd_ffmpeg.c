@@ -160,7 +160,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    avctx->opaque=sh->video_out;
 	}
     }
-    
+
+#if LIBAVCODEC_BUILD > 4603
+    avctx->hurry_up=(flags&3)?((flags&2)?2:1):0;
+#endif
+
     ret = avcodec_decode_video(avctx, &lavc_picture,
 	     &got_picture, data, len);
     
