@@ -7,10 +7,6 @@
 #ifndef __NETWORK_H
 #define __NETWORK_H
 
-#include <pthread.h>
-
-#include "stream.h"
-
 #include "url.h"
 
 #define BUFFER_SIZE		2048
@@ -20,30 +16,21 @@ typedef enum {
 	streaming_playing_e
 } streaming_status;
 
-typedef struct {
-	char *buffer;
-	int length;
-} Net_Fifo;
-
 typedef struct streaming_control {
-	URL_t **url;
-	int fd_net;
-	int fd_pipe_in;
+	URL_t *url;
 	streaming_status status;
-	pthread_t thread_id;
-	Net_Fifo *buffer;
 	int buffering;	// boolean
-	int prebuffer_size;
-	int (*streaming_read)( struct streaming_control *stream_ctrl );
+	unsigned int prebuffer_size;
+	char *buffer;
+	unsigned int buffer_size;
+	unsigned int buffer_pos;
+	int (*streaming_read)( int fd, char *buffer, int buffer_size, struct streaming_control *stream_ctrl );
+	int (*streaming_seek)( int fd, off_t pos, struct streaming_control *stream_ctrl );
 } streaming_ctrl_t;
 
-Net_Fifo* net_fifo_new( );
-void net_fifo_free(Net_Fifo *net_fifo );
-int net_fifo_pop(Net_Fifo *net_fifo, char *buffer, int length );
-int net_fifo_push(Net_Fifo *net_fifo, char *buffer, int length );
+int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size);
 
-int connect2Server(char *host, int port);
-int readFromServer(int fd, char *buffer, int length );
-int autodetectProtocol( URL_t *url, int *fd_out );
+int nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctrl );
+int nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl );
 
 #endif

@@ -11,67 +11,47 @@
 #include "network.h"
 
 #include "stream.h"
-//#include "demuxer.h"
-
-//extern demuxer_t *demuxer;
 
 static ASF_StreamType_e streaming_type = ASF_Unknown_e;
 
+// ASF streaming support several network protocol.
+// One use UDP, not known, yet!
+// Another is HTTP, this one is known.
+// So for now, we use the HTTP protocol.
 int
-asf_http_streaming_read( streaming_ctrl_t *streaming_ctrl ) {
-	char *buffer;
-	int drop_packet;
-	int ret;
-printf("asf_http_streaming_read\n");
-	ret = asf_streaming( streaming_ctrl->buffer->buffer, streaming_ctrl->buffer->length, &drop_packet );
-printf("ret: %d\n", ret);
-	if( ret<0 ) return -1;
-	if( ret>streaming_ctrl->buffer->length ) return 0;
-	buffer = (char*)malloc(ret);
-	if( buffer==NULL ) {
-		printf("Memory allocation failed\n");
-		return -1;
-	}
-printf("buffer length: %d\n", streaming_ctrl->buffer->length );
-	net_fifo_pop( streaming_ctrl->buffer, buffer, ret );
-printf("  pop: 0x%02X\n", *((unsigned int*)buffer) );
-printf("buffer length: %d\n", streaming_ctrl->buffer->length );
-printf("0x%02X\n", *((unsigned int*)(buffer+sizeof(ASF_stream_chunck_t))) );
-	if( !drop_packet ) {
-		write( streaming_ctrl->fd_pipe_in, buffer+sizeof(ASF_stream_chunck_t), ret-sizeof(ASF_stream_chunck_t) );
-	}
-	free( buffer );
-	return ret;
+asf_streaming_start( stream_t *stream ) {
+	return asf_http_streaming_start( stream );	
 }
 
+
 int
-asf_http_read( streaming_ctrl_t *streaming_ctrl ) {
-	char *buffer;
-	unsigned int length = streaming_ctrl->buffer->length;
-
-	buffer = (char*)malloc(length);
-	if( buffer==NULL ) {
-		printf("Memory allocation failed\n");
-		return -1;
-	}
+asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl ) {
+	int drop_packet;
+	int ret;
+//printf("asf_http_streaming_read\n");
 	
-	net_fifo_pop( streaming_ctrl->buffer, buffer, length );
+	ret = nop_streaming_read( fd, buffer, size, streaming_ctrl );
+//printf("Read %d bytes\n", ret);
 
-	write( streaming_ctrl->fd_pipe_in, buffer, length );
-
-	free( buffer );
-	return length;
+	ret = asf_streaming( buffer, size, &drop_packet );
+//printf("Streaming packet size=%d\n", ret);
+	if( ret<0 ) return -1;
+	if( !drop_packet ) {
+		memmove( buffer, buffer+sizeof(ASF_stream_chunck_t), ret-sizeof(ASF_stream_chunck_t) );
+	}
+	return ret-sizeof(ASF_stream_chunck_t);
 }
 
 int 
 asf_streaming(char *data, int length, int *drop_packet ) {
 	ASF_stream_chunck_t *stream_chunck=(ASF_stream_chunck_t*)data;
-	printf("ASF stream chunck size=%d\n", stream_chunck->size);
+/*	
+printf("ASF stream chunck size=%d\n", stream_chunck->size);
 printf("length: %d\n", length );
 printf("0x%02X\n", stream_chunck->type );
-
-	if( drop_packet!=NULL ) *drop_packet = 0;
+*/
 	if( data==NULL || length<=0 ) return -1;
+	if( drop_packet!=NULL ) *drop_packet = 0;
 
 	if( stream_chunck->size<8 ) {
 		printf("Ahhhh, stream_chunck size is too small: %d\n", stream_chunck->size);
@@ -81,35 +61,39 @@ printf("0x%02X\n", stream_chunck->type );
 		printf("size_confirm mismatch!: %d %d\n", stream_chunck->size, stream_chunck->size_confirm);
 		return -1;
 	}
-
+/*	
 	printf("  type: 0x%02X\n", stream_chunck->type );
 	printf("  size: %d (0x%02X)\n", stream_chunck->size, stream_chunck->size );
 	printf("  sequence_number: 0x%04X\n", stream_chunck->sequence_number );
 	printf("  unknown: 0x%02X\n", stream_chunck->unknown );
 	printf("  size_confirm: 0x%02X\n", stream_chunck->size_confirm );
-
-
+*/
 	switch(stream_chunck->type) {
-		case 0x4324:	// Clear ASF configuration
+		case 0x4324:	// $C	Clear ASF configuration
 			printf("=====> Clearing ASF stream configuration!\n");
 			if( drop_packet!=NULL ) *drop_packet = 1;
 			return stream_chunck->size;
 			break;
-		case 0x4424:    // Data follows
-			printf("=====> Data follows\n");
+		case 0x4424:    // $D	Data follows
+//			printf("=====> Data follows\n");
 			break;
-		case 0x4524:    // Transfer complete
+		case 0x4524:    // $E	Transfer complete
 			printf("=====> Transfer complete\n");
 			if( drop_packet!=NULL ) *drop_packet = 1;
 			return stream_chunck->size;
 			break;
-		case 0x4824:    // ASF header chunk follows
+		case 0x4824:    // $H	ASF header chunk follows
 			printf("=====> ASF header chunk follows\n");
 			break;
 		default:
 			printf("=====> Unknown stream type 0x%x\n", stream_chunck->type );
 	}
 	return stream_chunck->size+4;
+}
+
+int
+asf_http_streaming_seek( int fd, off_t pos, streaming_ctrl_t *streaming_ctrl ) {
+	return -1;
 }
 
 int
@@ -178,9 +162,6 @@ asf_http_request(URL_t *url) {
 			ptr = str;
 			ptr += sprintf( ptr, "Pragma: stream-switch-entry=");
 
-// FIXME: why do you need demuxer here? if you really need it, pass it as
-// parameter. -- A'rpi
-
 #if 0
 			for( i=0, asf_nb_stream=0 ; i<256 ; i++ ) {
 				// FIXME START
@@ -234,11 +215,13 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 	}
 
 	content_type = http_get_field( http_hdr, "Content-Type");
+//printf("Content-Type: [%s]\n", content_type);
 
 	pragma = http_get_field( http_hdr, "Pragma");
 	while( pragma!=NULL ) {
 		char *comma_ptr=NULL;
 		char *end;
+//printf("Pragma: [%s]\n", pragma );
 		// The pragma line can get severals attributes 
 		// separeted with a comma ','.
 		do {
@@ -263,11 +246,7 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 	}
 
 	streaming_type = asf_http_streaming_type( content_type, features );
-/*
-	if( http_hdr->body_size>0 ) {
-		asf_streaming( http_hdr->body, http_hdr->body_size, NULL);
-	}
-*/
+
 	return 0;
 }
 
@@ -282,13 +261,13 @@ asf_http_ASX_redirect( HTTP_header_t *http_hdr ) {
 }
 
 int
-asf_http_streaming_start( streaming_ctrl_t *streaming_ctrl ) {
+asf_http_streaming_start( stream_t *stream ) {
 	HTTP_header_t *http_hdr=NULL;
 	URL_t *url_next=NULL;
-	URL_t *url = *(streaming_ctrl->url);
+	URL_t *url = stream->streaming_ctrl->url;
 	char buffer[BUFFER_SIZE];
 	int i;
-	int fd = streaming_ctrl->fd_net;
+	int fd = stream->fd;
 	int done=1;
 
 streaming_type = ASF_Live_e;
@@ -299,13 +278,13 @@ streaming_type = ASF_Live_e;
 		if( fd<0 ) return -1;
 
 		http_hdr = asf_http_request( url );
-printf("[%s]\n", http_hdr->buffer );
+printf("Request [%s]\n", http_hdr->buffer );
 		write( fd, http_hdr->buffer, http_hdr->buffer_size );
-//		http_free( http_hdr );
+		http_free( http_hdr );
 
 		http_hdr = http_new_header();
 		do {
-			i = readFromServer( fd, buffer, BUFFER_SIZE );
+			i = read( fd, buffer, BUFFER_SIZE );
 printf("read: %d\n", i );
 			if( i<0 ) {
 				perror("read");
@@ -314,8 +293,8 @@ printf("read: %d\n", i );
 			}
 			http_response_append( http_hdr, buffer, i );
 		} while( !http_is_header_entire( http_hdr ) );
-//http_hdr->buffer[http_hdr->buffer_len]='\0';
-//printf("[%s]\n", http_hdr->buffer );
+http_hdr->buffer[http_hdr->buffer_size]='\0';
+printf("Response [%s]\n", http_hdr->buffer );
 		if( asf_http_parse_response(http_hdr)<0 ) {
 			printf("Failed to parse header\n");
 			http_free( http_hdr );
@@ -326,19 +305,11 @@ printf("read: %d\n", i );
 			case ASF_Prerecorded_e:
 			case ASF_PlainText_e:
 				if( http_hdr->body_size>0 ) {
-					net_fifo_push( streaming_ctrl->buffer, http_hdr->body, http_hdr->body_size );
-				} else {
-					ASF_stream_chunck_t *ptr;
-					int ret;
-					i = readFromServer( fd, buffer, sizeof(ASF_stream_chunck_t) );
-printf("read: %d\n", i );
-					ret = asf_streaming( buffer, i, NULL );
-					net_fifo_push( streaming_ctrl->buffer, buffer, i );
-					ptr = (ASF_stream_chunck_t*)buffer;
-					if( ret==ptr->size ) {
+					if( streaming_bufferize( stream->streaming_ctrl, http_hdr->body, http_hdr->body_size )<0 ) {
+						http_free( http_hdr );
+						return -1;
 					}
 				}
-//				done = 0;
 				break;
 			case ASF_Redirector_e:
 				url_next = asf_http_ASX_redirect( http_hdr );
@@ -349,10 +320,10 @@ printf("read: %d\n", i );
 					return -1;
 				}
 				if( url_next->port==0 ) url_next->port=80;
-				url_free( url );
+				url_free( stream->streaming_ctrl->url );
+				stream->streaming_ctrl->url = url_next;
 				url = url_next;
-				*(streaming_ctrl->url) = url_next;
-				url_next = NULL;
+				done = 0;
 				break;
 			case ASF_Unknown_e:
 			default:
@@ -365,15 +336,17 @@ printf("read: %d\n", i );
 		// Check if we got a redirect.	
 	} while(!done);
 
-	streaming_ctrl->fd_net = fd;
+	stream->fd= fd;
 	if( streaming_type==ASF_PlainText_e ) {
-		streaming_ctrl->streaming_read = asf_http_read;
+		stream->streaming_ctrl->streaming_read = nop_streaming_read;
+		stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
 	} else {
-		streaming_ctrl->streaming_read = asf_http_streaming_read;
+		stream->streaming_ctrl->streaming_read = asf_http_streaming_read;
+		stream->streaming_ctrl->streaming_seek = asf_http_streaming_seek;
 	}
-        streaming_ctrl->prebuffer_size = 20000;
-	streaming_ctrl->buffering = 1;
-	streaming_ctrl->status = streaming_playing_e;
+	stream->streaming_ctrl->prebuffer_size = 20000;
+	stream->streaming_ctrl->buffering = 1;
+	stream->streaming_ctrl->status = streaming_playing_e;
 
 	http_free( http_hdr );
 	return fd;
