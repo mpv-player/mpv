@@ -443,33 +443,7 @@ static int sdl_open (void *plugin, void *name)
 	    return 0;
 	opened = 1;*/
 
-	if(verbose > 2) printf("SDL: Opening Plugin\n");
 
-	if(vo_subdevice) setenv("SDL_VIDEODRIVER", vo_subdevice, 1);
-
-	/* does the user want SDL to try and force Xv */
-	if(sdl_forcexv)	setenv("SDL_VIDEO_X11_NODIRECTCOLOR", "1", 1);
-	
-	/* does the user want to disable Xv and use software scaling instead */
-	if(sdl_noxv) setenv("SDL_VIDEO_YUV_HWACCEL", "0", 1);
-	
-	
-	/* default to no fullscreen mode, we'll set this as soon we have the avail. modes */
-    priv->fullmode = -2;
-
-    priv->fullmodes = NULL;
-	priv->bpp = 0;
-
-	/* initialize the SDL Video system */
-    if (!SDL_WasInit(SDL_INIT_VIDEO)) {
-        if (SDL_Init (SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE)) {
-            printf("SDL: Initializing of SDL failed: %s.\n", SDL_GetError());
-            return -1;
-        }
-    }
-	
-	SDL_VideoDriverName(priv->driver, 8);
-	printf("SDL: Using driver: %s\n", priv->driver);
 	/* other default values */
 	#ifdef SDL_NOHWSURFACE
 		if(verbose) printf("SDL: using software-surface\n");
@@ -567,25 +541,25 @@ static int sdl_close (void)
 	struct sdl_priv_s *priv = &sdl_priv;
 
 	/* Cleanup YUV Overlay structure */
-	if (priv->overlay) 
+	if (priv->overlay) {
 		SDL_FreeYUVOverlay(priv->overlay);
+		priv->overlay=NULL;
+	}
 
 	/* Free RGB Surface */
-	if (priv->rgbsurface)
+	if (priv->rgbsurface) {
 		SDL_FreeSurface(priv->rgbsurface);
+		priv->rgbsurface=NULL;
+	}
 
 	/* Free our blitting surface */
-	if (priv->surface)
+	if (priv->surface) {
 		SDL_FreeSurface(priv->surface);
+		priv->surface=NULL;
+	}
 	
 	/* DONT attempt to free the fullscreen modes array. SDL_Quit* does this for us */
 	
-	/* Cleanup SDL */
-    if(SDL_WasInit(SDL_INIT_VIDEO))
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
-
-	if(verbose > 2) printf("SDL: Closed Plugin\n");
-
 	return 0;
 }
 
@@ -811,10 +785,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 //static int sdl_setup (int width, int height)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
-#ifdef HAVE_X11	
-	static Display *XDisplay;
-	static int XScreen;
-#endif
 
     switch(format){
         case IMGFMT_I420:
@@ -844,6 +814,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			return -1;
 	}
 
+    if ( vo_config_count ) sdl_close();
+
     if(verbose) printf("SDL: Using 0x%X (%s) image format\n", format,
                        vo_format_name(format));
     
@@ -870,19 +842,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
     priv->format = format;
     
-#ifdef HAVE_X11
-    XDisplay = XOpenDisplay(NULL);
-    if(XDisplay) {
-		if(verbose) printf("SDL: deactivating XScreensaver/DPMS\n");
-		XScreen = DefaultScreen(XDisplay);
-		priv->XWidth = DisplayWidth(XDisplay, XScreen);
-		priv->XHeight = DisplayHeight(XDisplay, XScreen);
-		priv->X = 1;
-		if(verbose) printf("SDL: X11 Resolution %ix%i\n", priv->XWidth, priv->XHeight);
-		saver_off(XDisplay);
-		XCloseDisplay(XDisplay);
-	}
-#endif
 	if (sdl_open(NULL, NULL) != 0)
 	    return -1;
 
@@ -1602,15 +1561,67 @@ uninit(void)
 	}
 #endif
 	sdl_close();
+
+	/* Cleanup SDL */
+    if(SDL_WasInit(SDL_INIT_VIDEO))
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+
+	if(verbose > 2) printf("SDL: Closed Plugin\n");
+
 }
 
 static uint32_t preinit(const char *arg)
 {
     struct sdl_priv_s *priv = &sdl_priv;
+#ifdef HAVE_X11	
+    static Display *XDisplay;
+    static int XScreen;
+#endif
 
     priv->rgbsurface = NULL;
     priv->overlay = NULL;
     priv->surface = NULL;
+
+    if(verbose > 2) printf("SDL: Opening Plugin\n");
+
+    if(vo_subdevice) setenv("SDL_VIDEODRIVER", vo_subdevice, 1);
+
+    /* does the user want SDL to try and force Xv */
+    if(sdl_forcexv)	setenv("SDL_VIDEO_X11_NODIRECTCOLOR", "1", 1);
+
+    /* does the user want to disable Xv and use software scaling instead */
+    if(sdl_noxv) setenv("SDL_VIDEO_YUV_HWACCEL", "0", 1);
+
+    /* default to no fullscreen mode, we'll set this as soon we have the avail. modes */
+    priv->fullmode = -2;
+
+    priv->fullmodes = NULL;
+    priv->bpp = 0;
+
+    /* initialize the SDL Video system */
+    if (!SDL_WasInit(SDL_INIT_VIDEO)) {
+        if (SDL_Init (SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE)) {
+            printf("SDL: Initializing of SDL failed: %s.\n", SDL_GetError());
+            return -1;
+        }
+    }
+
+    SDL_VideoDriverName(priv->driver, 8);
+    printf("SDL: Using driver: %s\n", priv->driver);
+
+#ifdef HAVE_X11
+    XDisplay = XOpenDisplay(NULL);
+    if(XDisplay) {
+		if(verbose) printf("SDL: deactivating XScreensaver/DPMS\n");
+		XScreen = DefaultScreen(XDisplay);
+		priv->XWidth = DisplayWidth(XDisplay, XScreen);
+		priv->XHeight = DisplayHeight(XDisplay, XScreen);
+		priv->X = 1;
+		if(verbose) printf("SDL: X11 Resolution %ix%i\n", priv->XWidth, priv->XHeight);
+		saver_off(XDisplay);
+		XCloseDisplay(XDisplay);
+	}
+#endif
 
     return 0;
 }
