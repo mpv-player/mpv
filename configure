@@ -2439,6 +2439,7 @@ if test "$_tv_v4l" = auto ; then
  if test "$_tv" = yes && linux ; then
   if test -c /dev/video0 || test -c /dev/video ; then
     cat > $TMPC <<EOF
+#include <stdlib.h>
 #include <linux/videodev.h>
 int main(void) { return 0; }
 EOF
