@@ -472,6 +472,12 @@ Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix and
 xover video out drivers.
 .
 .TP
+.B \-crash-debug (DEBUG CODE)
+Automatically attaches gdb upon crash or SIGTRAP.
+Support must be compiled in by configuring with --enable-crash-debug or
+by having a .developer file in the source tree.
+.
+.TP
 .B \-edl <filename> (EDL only)
 Enables edit decision list (EDL) actions during playback.
 Video will be skipped over and audio will be muted and unmuted according to

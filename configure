@@ -304,6 +304,7 @@ Advanced options:
   --enable-debug[=1-3]   compile debugging information into mplayer [disable]
   --enable-profile       compile profiling information into mplayer [disable]
   --disable-sighandler   disable sighandler for crashes [enable]
+  --enable-crash-debug   enable automatic gdb attach on crash [disable]
   --enable-i18n          _experimental_ gnu gettext() support [autodetect]
   --enable-dynamic-plugins  Enable support for dynamic a/v plugins [disable]
 
@@ -1355,6 +1356,7 @@ _linux_devfs=no
 _i18n=auto
 _dynamic_plugins=no
 _setlocale=auto
+_crash_debug=auto
 _sighandler=yes
 _libdv=auto
 _cdparanoia=auto
@@ -1697,6 +1699,12 @@ for ac_option do
     ;;
   --disable-debug)
     _debug=
+    ;;
+  --enable-crash-debug)
+    _crash_debug=yes
+    ;;
+  --disable-crash-debug)
+    _crash_debug=no
     ;;
   --enable-sighandler)
     _sighandler=yes
@@ -6173,6 +6181,9 @@ elif test -z "$CFLAGS" ; then
   # always compile with '-g' if .developer:
   if test -f ".developer" ; then
     CFLAGS="-g $CFLAGS"
+    if (test "$_crash_debug" = auto) && (not mingw32) ; then
+      _crash_debug=yes
+    fi
     _stripbinaries=no
   fi
 else
@@ -6187,6 +6198,16 @@ To do so, execute 'CFLAGS= ./configure <options>'
 
 EOF
 fi
+
+echocheck "automatic gdb attach"
+if test "$_crash_debug" = yes ; then
+  _def_crash_debug='#define CRASH_DEBUG 1'
+else
+  _def_crash_debug='#undef CRASH_DEBUG'
+  _crash_debug=no
+fi
+echores "$_crash_debug"
+
 if darwin ; then
   CFLAGS="$CFLAGS -DSYS_DARWIN"
   if [ "$_cc_major" = 3 ] && [ "$_cc_minor" -lt 1 ]; then
@@ -6580,6 +6601,9 @@ $_def_dynamic_plugins
 
 /* enable/disable SIGHANDLER */
 $_def_sighandler
+
+/* enable/disable automatic gdb attach on crash, requires SIGHANDLER */
+$_def_crash_debug
 
 /* Toggles debugging informations */
 $_def_debug

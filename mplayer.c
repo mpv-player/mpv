@@ -504,8 +504,16 @@ static void child_sighandler(int x){
 }
 #endif
 
+#ifdef CRASH_DEBUG
+static char *prog_path;
+static int crash_debug = 0;
+#endif
+
 static void exit_sighandler(int x){
   static int sig_count=0;
+#ifdef CRASH_DEBUG
+  if (!crash_debug || x != SIGTRAP)
+#endif
   ++sig_count;
   if(inited_flags==0 && sig_count>1) exit(1);
   if(sig_count==5)
@@ -527,7 +535,7 @@ static void exit_sighandler(int x){
   mp_msg(MSGT_CPLAYER,MSGL_FATAL,"\n" MSGTR_IntBySignal,x,
       current_module?current_module:mp_gettext("unknown")
   );
-  if(sig_count==1)
+  if(sig_count<=1)
   switch(x){
   case SIGINT:
   case SIGQUIT:
@@ -545,6 +553,26 @@ static void exit_sighandler(int x){
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGSEGV_SIGFPE);
   default:
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGCRASH);
+#ifdef CRASH_DEBUG
+      if (crash_debug) {
+        int gdb_pid;
+        char spid[20];
+        snprintf(spid, 19, "%i", getpid());
+        spid[19] = 0;
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Forking...\n");
+        gdb_pid = fork();
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Forked...\n");
+        if (gdb_pid == 0) { // We are the child
+          if (execlp("gdb", "gdb", prog_path, spid, NULL) == -1)
+            mp_msg(MSGT_CPLAYER, MSGL_ERR, "Couldn't start gdb\n");
+        } else if (gdb_pid < 0) 
+          mp_msg(MSGT_CPLAYER, MSGL_ERR, "Couldn't fork\n");
+        else {
+          waitpid(gdb_pid, NULL, 0);
+        }
+        if (x == SIGTRAP) return;
+      }
+#endif  
   }
   exit_player(NULL);
 }
@@ -1202,6 +1230,9 @@ current_module = NULL;
   signal(SIGCHLD,child_sighandler);
 #endif
 
+#ifdef CRASH_DEBUG
+  prog_path = argv[0];
+#endif
   //========= Catch terminate signals: ================
   // terminate requests:
   signal(SIGTERM,exit_sighandler); // kill
@@ -1217,6 +1248,10 @@ current_module = NULL;
   signal(SIGILL,exit_sighandler);  // illegal instruction
   signal(SIGFPE,exit_sighandler);  // floating point exc.
   signal(SIGABRT,exit_sighandler); // abort()
+#ifdef CRASH_DEBUG
+  if (crash_debug)
+    signal(SIGTRAP,exit_sighandler);
+#endif
 #endif
 
 #ifdef HAVE_NEW_GUI
