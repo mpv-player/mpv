@@ -18,8 +18,10 @@ demuxer:
 decoders:
 - getting mss1 (Windows Screen Video) DLL codec working... - kabi
 - getting PIM1 codec (DLL) working... - kabi
+- getting 3ivX DLL working (CoCreateFreeThreadedMarshaler call required)
 - optimize (or port optimized code from libac3) liba52 (imdct.c, resample.c)
 - fix seeking with libmad audio codec (codec lost sync and can't resync?)
+- fix ACELP DirectShow sound decoder (in avifile it's already fixed!)
 
 mencoder:
 - add some kind of "-ss" option, to start at e.g. 1:0:0 at the video
@@ -50,6 +52,7 @@ demuxer:
 - implement forward seeking in indexed avi streams
 - implement brute-force broken avi fixer
 - demux_mpg: support for VDR's index files for more accurate seeking
+- implement seeking for YUV4MPEG(2), NuppelVideo and Real
 
 decoders:
 - check and import videodecoding.de stuff
@@ -72,6 +75,7 @@ other:
 - sub database
 - mga_vid crtc2 fix
 - make mach64_vid
+- make nvidia_vid ;)
 - libvo2
 - display OSD and subtitles using DVB card's OSD
 
