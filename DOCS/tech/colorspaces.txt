@@ -113,7 +113,7 @@ RGB                     IMGFMT_RGB24
 BGR                     IMGFMT_BGR24
 
 order in an int         name
-mostsignifant .. least significant bit
+most significant .. least significant bit
 8A8R8G8B                IMGFMT_BGR32
 8A8B8G8R                IMGFMT_RGB32
 5R6G5B                  IMGFMT_BGR16
