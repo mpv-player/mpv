@@ -21,7 +21,7 @@ filename/URL/whatever, for example:
 You can group filenames/URLs together using <literal>{</literal> and
 <literal>}</literal>. It's useful with option <option>-loop</option>:
 
-<screen>mplayer { 1.avi - loop 2 2.avi } -loop 3</screen>
+<screen>mplayer { 1.avi -loop 2 2.avi } -loop 3</screen>
 
 The above command will play files in this order: 1, 1, 2, 1, 1, 2, 1, 1, 2.
 </para>
