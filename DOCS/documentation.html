@@ -24,11 +24,6 @@ Table of Contents
      <A HREF="#1.1">1.1 Overview +speed</A>
      <A HREF="#1.2">1.2 History</A>
      <A HREF="#1.3">1.3 Installation</A>
-	<A HREF="#1.3.1">1.3.1 Codecs</A>
-	<A HREF="#1.3.2">1.3.2 Drivers</A>
-	<A HREF="#1.3.3">1.3.3 Player</A>
-	<A HREF="#1.3.4">1.3.4 Matrox G400 DualHead Tools</A>
-	<A HREF="#1.3.5">1.3.5 Fonts</A>
      <A HREF="#1.4">1.4 What about the GUI?</A>
 </P>
 <P>
@@ -48,15 +43,20 @@ Table of Contents
      <A HREF="#2.2">2.2 Video & Audio output devices</A>
 	<A HREF="#2.2.1">2.2.1 Video output devices</A>
 	     <A HREF="#2.2.1.1">2.2.1.1 Xv</A>
+		    <A HREF="#2.2.1.1.1">2.2.1.1.1 3dfx cards</A>
+		    <A HREF="#2.2.1.1.2">2.2.1.1.2 S3 cards</A>
+		    <A HREF="#2.2.1.1.3">2.2.1.1.3 nVidia cards</A>
+		    <A HREF="#2.2.1.1.4">2.2.1.1.4 ATI cards</A>
 	     <A HREF="#2.2.1.2">2.2.1.2 DGA</A>
 		    <A HREF="#2.2.1.2.1">2.2.1.2.1 Summary</A>
 		    <A HREF="#2.2.1.2.2">2.2.1.2.2 What is DGA</A>
-		    <A HREF="#2.2.1.2.3">2.2.1.2.3 Resolution switching</A>
-		    <A HREF="#2.2.1.2.4">2.2.1.2.4 DGA & MPlayer</A>
-		    <A HREF="#2.2.1.2.5">2.2.1.2.5 Features of the DGA driver</A>
-		    <A HREF="#2.2.1.2.6">2.2.1.2.6 Speed issues</A>
-		    <A HREF="#2.2.1.2.7">2.2.1.2.7 Known bugs</A>
-		    <A HREF="#2.2.1.2.8">2.2.1.2.8 Future work</A>
+		    <A HREF="#2.2.1.2.3">2.2.1.2.3 Installing DGA support for MPlayer</A>
+		    <A HREF="#2.2.1.2.4">2.2.1.2.4 Resolution switching</A>
+		    <A HREF="#2.2.1.2.5">2.2.1.2.5 DGA & MPlayer</A>
+		    <A HREF="#2.2.1.2.6">2.2.1.2.6 Features of the DGA driver</A>
+		    <A HREF="#2.2.1.2.7">2.2.1.2.7 Speed issues</A>
+		    <A HREF="#2.2.1.2.8">2.2.1.2.8 Known bugs</A>
+		    <A HREF="#2.2.1.2.9">2.2.1.2.9 Future work</A>
 		    <A HREF="#2.2.1.2.A">2.2.1.2.A Some modelines</A>
 		    <A HREF="#2.2.1.2.B">2.2.1.2.B Bug Reports</A>
 	     <A HREF="#2.2.1.3">2.2.1.3 SDL</A>
@@ -68,9 +68,6 @@ Table of Contents
 	     <A HREF="#2.2.1.9">2.2.1.9 OpenGL output</A>
 	<A HREF="#2.2.2">2.2.2 Audio output devices</A>
 		+SOUNDCARDS
-</P>
-<P>
-     <A HREF="#2.3">2.3 Subtitles and OSD</A>
 </P>
 <P>
   <A HREF="#3">3. Usage</A>
@@ -126,7 +123,7 @@ Table of Contents
   <A NAME=1>1.  Introduction
 
 
-<A NAME=1.1>1.1.  Overview
+  <A NAME=1.1>1.1.  Overview
 
   MPlayer is a movie player for LINUX. It plays most MPEG, AVI and ASF files,
   supported by many native and Win32 DLL codecs. You can watch VCD, DVD and
@@ -189,51 +186,41 @@ Table of Contents
 
   <A NAME=1.3>1.3.  Installation
 
-
-  <A NAME=1.3.1>1.3.1.  The Codecs (w32codecs.zip)
-
-  Download and unzip w32codecs.zip to /usr/lib/win32
+  If you plan to use MPlayer on x86 architecture, you possibly want to use
+  Win32 codecs. Download and unzip w32codecs.zip to /usr/lib/win32 .
   Note: the avifile project has similar codecs package, but it differs
   from our, so if you want to use all supported codecs, then use
-  our package!
+  our package! However, you can use our codecs package with avifile.
+
+  If you own a Matrox G200/G400/G450 card, then please see the <A HREF="#2.2.1.6">2.2.1.6</A>
+  section in order to gain big speedup. It is important to do these steps
+  _before_ compiling MPlayer, otherwise no Matrox-specific support will be
+  built.
+
+  Then build MPlayer:
 
 
-  <A NAME=1.3.2>1.3.2.  Drivers (mga_vid.o)
-
-
-	cd drivers
+	./configure
 	make
-	mknod /dev/mga_vid c 178 0
-	chmod go+rw /dev/mga_vid
+	make install
 
 
-  <A NAME=1.3.3>1.3.3.  The Player (mplayer)
+  It is recommended to browse the output of ./configure , it contains info
+  about what will be built, and what won't. You may also want to view
+  config.h and config.mak files.
 
-    ./configure
-  [* read messages printed by ./configure, it may be very usefull! *]
-  [* check config.h and config.mak files! *]
-    make
-  [* check for errors! of none, you should have the ./mplayer binary *]
-    make install
-
-
-  <A NAME=1.3.4>1.3.4.  Matrox G400 DH TV-out tools
-
-    cd TVout  
-    ./compile.sh
+  Though not mandatory, the fonts should be installed in order to gain
+  OSD, and subtitle functionality. Download mp_font3.zip (and optional
+  language updates) and optional (if exists) language updates.
 
 
-  <A NAME=1.3.5>1.3.5.  Fonts
+	mkdir ~/.mplayer/font
+	cd ~/.mplayer/font
+	unzip mp_font3.zip
+	unzip mp_font3_hu.zip
 
-    Download mp_font3.zip (and optional language updates) and
-    unpack to ~/.mplayer/font/ :
 
-    cd ~/.mplayer
-    mkdir font
-    cd font
-    unzip mp_font3.zip
-    unzip mp_font3_hu.zip
-
+  See the <A HREF="#2.3">2.3 section</A> for details.
 
   <A NAME=1.4>1.4.  What about the GUI ?
 
@@ -252,12 +239,14 @@ Table of Contents
 
   <A NAME=2.1.1>2.1.1.  Supported input formats
 
-  - VCD (Video CD) directly from CD-ROM or from CDRwin's .bin image file     
-  - DVD, directly from your DVD disk, using optional libcss for decryption
-  - MPEG 1/2 System Stream (PS/PES/VOB) and Elementary Stream (ES) file formats
-  - RIFF AVI file format
-  - ASF 1.0 file format
-  - supports reading from file, stdin, DVD drive or network via HTTP
+  MPlayer can read/play from the following devices/formats:
+   - VCD (Video CD) directly from CD-ROM or from CDRwin's .bin image file     
+   - DVD, directly from your DVD disk, using optional libcss for decryption
+   - MPEG 1/2 System Stream (PS/PES/VOB) and Elementary Stream (ES) file
+     formats
+   - RIFF AVI file format
+   - ASF 1.0 file format
+   - supports reading from file, stdin, DVD drive or network via HTTP
 
   Note: about quicktime (.mov/.qt) and realmedia (.ra/.rm) support read the FAQ!
 
@@ -281,17 +270,100 @@ Table of Contents
   - alaw, msgsm, pcm and other simple old audio formats
 
   If you have a codec not listed here, and not supported yet, just
-  read http://mplayer.sourceforge.net/DOCS/codecs.html and DOCS/CODECS
+  read http://mplayer.sourceforge.net/DOCS/codecs.html
   to get info about its status and about how to help us adding support for it!
 
 
   <A NAME=2.1.2.1>2.1.2.1.  OpenDivX
 
+  This section contains information about the DivX/OpenDivX codecs of
+  <A HREF="http://www.projectmayo.com">ProjectMayo</A>. Their first available alpha version was the OpenDivX 4.0
+  alpha 47 and 48. Support for this was/is included in MPlayer, and built by
+  default. We even used its postprocessing code to optionally enhance visual
+  quality of MPEG1/2 movies.
+
+  The new generation of this codec can even decode movies made with the
+  infamous DivX codec! And it's not everything, it's MUCH faster than the
+  traditional Win32 DivX DLL's. See below for configuration. The only
+  disadvantage of this codec is that it's currently closed-source. :(
+
+  The codec can be downloaded from the following URL:
+
+
+    http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip
+
+
+  No automatic installing available at this time, so install it manually,
+  EXACTLY as described here. Unpack it, and copy files to their place:
+
+
+  cp libdivxdecore.so.0.0.0 /usr/local/lib/
+  ln -s /usr/local/lib/libdivxdecore.so.0.0.0 /usr/local/lib/libdivxdecore.so.0
+  ln -s /usr/local/lib/libdivxdecore.so.0 /usr/local/lib/libdivxdecore.so
+  ldconfig
+  cp decore.h /usr/local/include/
+
+
+  At the moment MPlayer doesn't contain autodetection for the codec, so you'll
+  have to edit config.h and config.mak manually. But first run ./configure .
+  Change #undef NEW_DECORE to #define NEW_DECORE in config.h
+  Change #define MPEG12_POSTPROC to #undef MPEG12_POSTPROC in config.h
+  Change DECORE_LIBS in config.mak to be:
+
+
+	DECORE_LIBS=-L/usr/local/lib -ldivxdecore
+
+
+  Continue compiling MPlayer as usual.
+
+  Using it is a bit tricky. As it conflicts with the old OpenDivX (it's API is
+  very similar to OpenDivX's), OpenDivX code is disabled, and the OpenDivX
+  driver calls this library too.
+
+  Generally we can pinpoint this issue to that you have two options to use
+  this codec:
+
+
+	-vc odivx : using divx4 codec as a new version of OpenDivX.
+		    in this case it produces YV12 image in its own buffer,
+		    and MPlayer (libvo) does colorspace conversion.
+
+	-vc divx4 : using divx4 codec's colorspace conversion.
+		    in this mode, you can use YUY2/UYVY too.
+
+  The 'odivx' method is usually faster, due to the fact that it transfers
+  image data in YV12 (planar YUV 4:2:0) format, thus requiring much less
+  bandwidth on the bus. For packed YUV modes (YUY2, UYVY) use the 'divx4'
+  method. For RGB modes you can choose freely, their speed is same, maybe
+  differ according to the current bpp.
+
+  Note: it supports postprocessing too, but range of values is strange:
+
+	0		no postproc
+	10 .. 20	postprocessing, normal
+			(like level 2 with divxds)
+	30 .. 60	hard postprocessing, eats many CPU.
+			(like level 4 with divxds)
+
 
   <A NAME=2.1.2.2>2.1.2.2.  ffmpeg's DivX/libavcodec
 
+  Beginning with version 0.4.2 , <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contains an <B>opensource</B> DivX codec,
+  which is compatible with the traditional DivX. MPlayer supports this codec,
+  and this makes it possible to <B>watch DivX movies on non-x86 platforms!</B>
+  To get it compile, you'll need nasm, bison, and flex, above the other
+  devel tools. No manual hacking is needed to build it, ./configure detects
+  if it can be built. At the moment it doesn't support postprocessing, and
+  is under optimization (it's generally a bit faster than the DirectShow
+  DivX codec, now).
 
-  <A NAME=2.1.4>2.1.4.  Codec importing howto
+  In order to use it, refresh your codecs.conf file, and do as the manpage,
+  or the example.conf says (the -vfm option).
+
+  Note: libavcodec contains other codecs as well, but at the moment we mostly
+        focus on ffdivx.
+
+  <A NAME=2.1.3>2.1.4.  Codec importing howto
 
 
   <A NAME=2.1.4.1>2.1.4.1.  VFW codecs
@@ -300,18 +372,27 @@ Table of Contents
   the .DLL or (rarely) .DRV extension.
   If MPlayer fails with your AVI:
 
+
         UNKNOWN video codec: HFYU (0x55594648)
+
 
   It means your AVI is encoded with a codec which has the HFYU fourcc (HFYU =
   HuffYUV codec, DIV3 = DivX Low Motion, etc...). Now that we know this, we'll
   have to find out which DLL Windows loads in order to play this file. In our
   case, the system.ini contains this (with many others):
+
+
 	VIDC.HFYU=huffyuv.dll
+
+
   So we'll need the huffyuv.dll file. Note that the audio codecs are specified
   with the MSACM prefix :
-	msacm.l3acm=L3codeca.acm
-  This is the MP3 codec.
 
+
+	msacm.l3acm=L3codeca.acm
+
+
+  This is the MP3 codec.
   So, now we have all the info needed (fourcc, codec file, sample AVI), submit
   your codec support request in mail, and upload these files to the FTP:
     ftp://thot.banki.hu/MPlayer/incoming/<codecname>/
@@ -339,9 +420,11 @@ Table of Contents
    - if found (in registry), there should be a FriendlyName field, and a CLSID
   field. Write down that 16 byte of CLSID, this is the GUID required by us.
 
+
   NOTE : if searching fails, try to enable all the checkboxes.. you may have
          false hits, but maybe you'll have the right, too...
   NOTE : dump that M$ shit.
+
 
   So, now we have all the info needed (fourcc, GUID, codec file, sample AVI),
   submit your codec support request in mail, and upload these files to the FTP:
@@ -383,30 +466,33 @@ Table of Contents
   - odivx:OpenDivX AVI File writer (use -br to set encoding bitrate)
   - null: Null output (for speed tests/benchmarking)
 
-  NOTE: check DOCS/VIDEOCARDS for details and requirements!
+  NOTE: check the following subsections for details and requirements!
 
 
   <A NAME=2.2.1.1>2.2.1.1.  Xv
 
-  I. Under XFree86 4.0.2 or newer, using the XVideo extension:
-     this is what the option '-vo xv' uses.
-
+  Under XFree86 4.0.2 or newer, you can use your card's hardware YUV routines
+  using the XVideo extension. This is what the option '-vo xv' uses.
   In order to make this work, be sure to check the following:
+   - You have to use XFree86 4.0.2 or newer (former versions don't have XVideo)
+   - Your card actually supports harware acceleration (modern cards do)
+   - X loads the XVideo extension, it's something like this:
 
-  1. You use XFree86 4.0.2 or newer (former versions don't have XVideo)
 
-  2. Your card actually supports harware acceleration (modern cards do)
+	(II) Loading extension XVideo
 
-  3. X loads the XVideo extension, it's something like this:
-     (II) Loading extension XVideo
+
      in /var/log/XFree86.0.log
+
+
      NOTE : this loads only the XFree86's extension. In a good install, this is
             always loaded, and doesn't mean that the _card's_ XVideo support is
             loaded!
 
-  4. Your card has Xv support under Linux. To check, try 'xvinfo', it is the
+   - Your card has Xv support under Linux. To check, try 'xvinfo', it is the
      part of the XFree86 distribution. It should display a long text, similar
      to this:
+
 
 	X-Video Extension version 2.2
 	screen #0
@@ -432,54 +518,46 @@ Table of Contents
 	        type: YUV (planar)
 	(...etc...)
 
+
      It must support YUY2 packed, and YV12 planar pixel formats to be
      usable with MPlayer.
 
-  I.1.
-    a, If xvinfo doesn't show these, but XVideo extension is loaded and you're
-       sure your card can do YUV conversion,
-      - 3dfx voodoo3/banshee users download a new DRI from
-        http://dri.sourceforge.net (or possibly use X 4.1.0)
-      - S3 Savage4 users download XFree86 >= 4.0.3 (4.1.0 preferred)
-      - nVidia users sell their card.. or download the nVidia driver from
-        nVidia's website
-    b, The GATOS driver (for ATI cards) has VSYNC enabled by default. It means
-       that decoding speed (!) is synced to the monitor's refresh rate. If
-       playing seems to be slow, try disabling VSYNC somehow, or set refresh
-       rate to n*(fps of the movie) Hz.
+   - And finally, check if MPlayer was compiled with 'xv' support.
+     ./configure prints this.
 
-  5. Be sure MPlayer is compiled with the "xv" target. "./configure" should say:
-	Checking for Xv ... yes
 
-  6. If all is fine, try the option '-vo xv' . It should work.
-     (if it doesn't, send us a bugreport. See the BUGREPORTS on how to do this.)
+  <A NAME=2.2.1.1.1>2.2.1.1.1.  3dfx cards
 
+  Older 3dfx drivers were known to have problems with XVideo acceleration,
+  it didn't support either YUY2 or YV12, and so. Verify that you have
+  XFree86 version 4.1.0 or greater, it works ok. Alternatively, you can use
+  <A HREF="http://dri.sourceforge.net">DRI</A> cvs.
+  If you experience strange effects using -vo xv, try SDL (it has XVideo too)
+  and see if it helps. Check the <A HREF="#2.2.1.3">SDL section</A> for details.
+
+
+  <A NAME=2.2.1.1.2>2.2.1.1.2.  S3 cards
+
+  S3 Savage3D's should work fine, but for Savage4, use XFree86 version 4.0.3
+  or greater.
+
+
+  <A NAME=2.2.1.1.3>2.2.1.1.3.  nVidia cards
+
+  nVidia isn't a very good choice under Linux.. You'll have to use the
+  binary nVidia driver, available at nVidia's website. The standard X
+  driver doesn't support XVideo for these cards, due to nVidia's closed
+  sources/specifications.
+
+
+  <A NAME=2.2.1.1.4>2.2.1.1.4.  ATI cards
+
+  The GATOS driver has VSYNC enabled by default. It means that decoding speed
+  (!) is synced to the monitor's refresh rate. If playing seems to be slow, try
+  disabling VSYNC somehow, or set refresh rate to n*(fps of the movie) Hz.
 
 
   <A NAME=2.2.1.2>2.2.1.2.  DGA
-
-  1. Make sure X loads the DGA extension:
-	(II) Loading extension XFree86-DGA
-     (you see, XFree86 4.0.x or greater is VERY RECOMMENDED!)
-  2. MPlayer's DGA driver is autodetected on ./configure, or you can force it
-     with --enable-dga.
-  3. If the driver couldn't switch to a smaller resolution, experiment with
-     switches -vm (only with X 3.3.x), -fs, -bpp, -zoom to find a video mode that
-     the movie fits in. There is no converter right now.. :(
-  4. Become ROOT. DGA needs root access to be able to write directly video memory.
-     If you want to run it as user, then install MPlayer SUID root:
-     'chown root /usr/local/bin/mplayer'
-     'chmod 750 /usr/local/bin/mplayer' 
-     'chmod +s /usr/local/bin/mplayer' 
-     Now it works as a simple user, too.
-     !!!! BUT STAY TUNED !!!!
-     This is a BIG security risk! Never do this on a server or on a computer
-     can be accessed by more people than only you because they can gain root
-     privilegies through suid root mplayer.
-     !!!! SO YOU HAVE BEEN WARNED ... !!!!
-  5. Use '-vo dga' option, and there you go! (hope so:)
-  6. Try if the '-vo sdl:dga' options work for you! It's much faster!!!
-
 
   <A NAME=2.2.1.2.1>2.2.1.2.1.  Summary
 
@@ -514,7 +592,47 @@ Table of Contents
   driver that controls this chip. So it does not work on every system ...
 
 
-  <A NAME=2.2.1.2.3>2.2.1.2.3.  Resolution switching
+<A NAME=2.2.1.2.3>2.2.1.2.3.  Installing DGA support for MPlayer
+
+  First make sure X loads the DGA extension, see in /var/log/XFree86.0.log :
+
+
+		(II) Loading extension XFree86-DGA
+
+
+  See, XFree86 4.0.x or greater is VERY RECOMMENDED!
+  MPlayer's DGA driver is autodetected on ./configure, or you can force it
+  with --enable-dga.
+
+  If the driver couldn't switch to a smaller resolution, experiment with
+  switches -vm (only with X 3.3.x), -fs, -bpp, -zoom to find a video mode that
+  the movie fits in. There is no converter right now.. :(
+
+  Become ROOT. DGA needs root access to be able to write directly video memory.
+  If you want to run it as user, then install MPlayer SUID root:
+
+
+		chown root /usr/local/bin/mplayer
+		chmod 750 /usr/local/bin/mplayer 
+		chmod +s /usr/local/bin/mplayer
+
+
+  Now it works as a simple user, too.
+
+
+                         !!!! BUT STAY TUNED !!!!
+    This is a BIG security risk! Never do this on a server or on a computer
+   can be accessed by more people than only you because they can gain root
+                    privilegies through suid root mplayer.
+                      !!!! SO YOU HAVE BEEN WARNED ... !!!!
+
+
+  Now use '-vo dga' option, and there you go! (hope so:)
+  You should also try if the '-vo sdl:dga' option works for you! It's much
+  faster!!!
+
+
+  <A NAME=2.2.1.2.4>2.2.1.2.4.  Resolution switching
 
   The DGA driver allows for switching the resolution of the output signal.
   This avoids the need for doing (slow) software scaling and at the same
@@ -530,7 +648,7 @@ Table of Contents
   See appendix A for some sample modeline definitions.
 
 
-  <A NAME=2.2.1.2.4>2.2.1.2.4.  DGA & MPlayer       
+  <A NAME=2.2.1.2.5>2.2.1.2.5.  DGA & MPlayer       
 
   DGA is used in two places with MPlayer: The SDL driver can be made to make
   use of it (-vo sdl:dga) and within the DGA driver (-vo dga).
@@ -538,7 +656,7 @@ Table of Contents
   how the DGA driver for MPlayer works.
 
 
-  <A NAME=2.2.1.2.5>2.2.1.2.5.  Features of the DGA driver
+  <A NAME=2.2.1.2.6>2.2.1.2.6.  Features of the DGA driver
  
   The DGA driver is invoked by specifying -vo dga at the command line.
   The default behaviour is to switch to a resolution matching the original 
@@ -577,7 +695,7 @@ Table of Contents
   CPU time!) depending on the implementation of DGA for your hardware. 
  
 
-  <A NAME=2.2.1.2.6>2.2.1.2.6.  Speed issues
+  <A NAME=2.2.1.2.7>2.2.1.2.7.  Speed issues
 
   Generally spoken, DGA framebuffer access should be at least as fast as using
   the X11 driver with the additional benefit of getting a fullscreen image.
@@ -601,7 +719,7 @@ Table of Contents
   CPUs might work at 400 MHZ and above.
 
 
-  <A NAME=2.2.1.2.7>2.2.1.2.7.  Known bugs
+  <A NAME=2.2.1.2.8>2.2.1.2.8.  Known bugs
 
   Well, according to some developpers of XFree, DGA is quite a beast. They 
   tell you better not to use it. Its implementation is not always flawless
@@ -621,7 +739,7 @@ Table of Contents
   o OSD only works with doublebuffering enabled
 
 
-  <A NAME=2.2.1.2.8>2.2.1.2.8.  Future work
+  <A NAME=2.2.1.2.9>2.2.1.2.9.  Future work
 
   o use of the new X11 render interface for OSD
   o where is my TODO list ???? :-(((
@@ -663,17 +781,20 @@ Table of Contents
 
   Here are some notes about SDL out in MPlayer.
 
-  There are several commandline switches for sdl:
-  -vo sdl:<name>	specifies sdl video driver to use (ie. aalib,
-			dga, x11)
- -ao sdl:<name>	specifies sdl audio driver to use (ie. dsp, esd)
-  -noxv		disables Xvideo hardware acceleration
-  -forcexv	tries to force Xvideo acceleration
+  There are several commandline switches for SDL:
+
+		-vo sdl:name	specifies sdl video driver to use (ie. aalib,
+				dga, x11)
+		-ao sdl:name	specifies sdl audio driver to use (ie. dsp,
+				esd)
+		-noxv		disables Xvideo hardware acceleration
+		-forcexv	tries to force Xvideo acceleration
 
   SDL Keys:
-  F toggles fullscreen/windowed mode
-  C cycles available fullscreen modes
-  W/S mappings for * and / (mixer control)
+
+		F toggles fullscreen/windowed mode
+		C cycles available fullscreen modes
+		W/S mappings for * and / (mixer control)
 
   KNOWN BUGS:
   - Keys pressed under aalib console driver repeat forever.
@@ -682,89 +803,115 @@ Table of Contents
 
   <A NAME=2.2.1.4>2.2.1.4.  SVGAlib
 
-  a, If you don't have X...
-    ...use the SVGAlib target! Be sure not to use the -fs switch, since it
-    toggles the usage of the software scaler, and it's SLOOOW now, unless you
-    have a real fast CPU (and/or MTRR?). :(
+  If you don't have X, you can use the SVGAlib target! Be sure not to use the
+  -fs switch, since it toggles the usage of the software scaler, and it's
+  SLOOOW now, unless you have a real fast CPU (and/or MTRR?). :(
 
-    Of course you'll have to install svgalib and its development package in
-    order for MPlayer build its SVGAlib driver (autodetected, but can be
-    forced), and don't forget to edit /etc/vga/libvga.config to suit your
-    card & monitor.
+  Of course you'll have to install svgalib and its development package in
+  order for MPlayer build its SVGAlib driver (autodetected, but can be
+  forced), and don't forget to edit /etc/vga/libvga.config to suit your
+  card & monitor.
 
 
   <A NAME=2.2.1.5>2.2.1.5.  Framebuffer output (FBdev)
 
-  b, You want to use framebuffer...
-    ... Whether to build the FBdev target is autodetected during ./configure .
-    Read the framebuffer documentation in the kernel sources
-    (Documentation/fb/*) for info on how to enable it, etc.. !
+  Whether to build the FBdev target is autodetected during ./configure .
+  Read the framebuffer documentation in the kernel sources
+  (Documentation/fb/*) for info on how to enable it, etc.. !
 
-    ... but your card doesn't support VBE 2.0 standard (older ISA/PCI
-    cards, such as S3 Trio64), only VBE 1.2 (or older?) :
-    Well, VESAfb is still available, but you'll have to load SciTech Display
-    Doctor (formerly UniVBE) before booting Linux.  Use a DOS boot disk or
-    whatever.  And don't forget to register your UniVBE ;))
+  If your card doesn't support VBE 2.0 standard (older ISA/PCI
+  cards, such as S3 Trio64), only VBE 1.2 (or older?) :
+  Well, VESAfb is still available, but you'll have to load SciTech Display
+  Doctor (formerly UniVBE) before booting Linux.  Use a DOS boot disk or
+  whatever.  And don't forget to register your UniVBE ;))
 
-    NOTE : FBdev video mode changing _does not work_ with the VESA framebuffer,
-           and don't ask for it, since it's not an MPlayer limitation.
+
+  NOTE: FBdev video mode changing _does not work_ with the VESA framebuffer,
+	and don't ask for it, since it's not an MPlayer limitation.
 
 
   <A NAME=2.2.1.6>2.2.1.6.  Matrox framebuffer (mga_vid)
 
-  1. Matrox G200/G400/G450 BES (Back-End Scaler) support -> mga_vid kernel drv.
-    It's active developed by me (A'rpi), and it has hardware VSYNC support
-    with triple buffering. It works on both framebuffer console and under X.
+  This section is about the Matrox G200/G400/G450 BES (Back-End Scaler)
+  support, the mga_vid kernel driver.  It's active developed by me (A'rpi), and
+  it has hardware VSYNC support with triple buffering. It works on both
+  framebuffer console and under X.
   
-    To use, simply compile the mga_vid.o in the drivers/ subdir (type: make)
-    create /dev/mga_vid device :
-	mknod /dev/mga_vid c 178 0
-    and load the driver with insmod mga_vid.o. You should verify the memory size
-    detection using the 'dmesg' command. If it's bad, use the mga_ram_size
-    option (rmmod mga_vid first), specify card's memory size in MB:
-      insmod mga_vid.o mga_ram_size=16
-    To make it load/unload automatically when needed, insert the following line
-    at the end of /etc/modules.conf :
-	alias char-major-178 mga_vid
-    Then run
-	depmod -a
+  To use it, you first have to compile mga_vid.o :
 
-    Using it from MPlayer:  (you should re-compile it with mga_vid support...)
+
+		cd drivers
+		make
+
+
+  Then create /dev/mga_vid device :
+
+
+		mknod /dev/mga_vid c 178 0
+
+
+  and load the driver with
+
+
+		insmod mga_vid.o
+
+
+  You should verify the memory size detection using the 'dmesg' command. If
+  it's bad, use the mga_ram_size option (rmmod mga_vid first), specify card's
+  memory size in MB:
+
+
+		insmod mga_vid.o mga_ram_size=16
+
+
+  To make it load/unload automatically when needed, insert the following line
+  at the end of /etc/modules.conf :
+
+
+		alias char-major-178 mga_vid
+
+
+  Then run
+
+
+		depmod -a
+
+
+  Now you have to (re)compile MPlayer, ./configure will detect /dev/mga_vid
+  and build the 'mga' driver. Using it from MPlayer goes by '-vo mga' if
+  you have matroxfb console, or '-vo xmga' under XFree86 3.x.x or 4.x.x .
+
+  Note: '-vo xmga' works under XFree86 4.x.x, but it conflicts with the Xv
+  driver, so avoid using both. If you messed up Xv with mga, try running
+  MPlayer with '-vo mga' . It should fix Xv.
   
-    Use the 'mga' vo driver on framebuffer console (matroxfb): -vo mga
-    and use the xmga driver for X 3.3.x: -vo xmga
-
-    Note: it works under X 4.0.2 too, but it conflicts with the Xv driver,
-    so avoid using both. Usually X restart or reboot needs to get Xv usable
-    again :(
-  
-    If you have a dual-head G400, and a TV or second monitor connected to head2,
-    then you can watch movies on it: read DOCS/TVout-G400 for details (big hack)
-
 
   <A NAME=2.2.1.7>2.2.1.7.  SiS 6326 framebuffer (sis_vid)
 
-  2. SiS 6326 YUV Framebuffer driver -> sis_vid kernel driver
-     Its interface should be compatible with the mga_vid, but the driver
-     was not updated after the mga_vid changes, so it's outdated now.
-     Volunteers needed to test it and bring the code up-to-date.
+  SiS 6326 YUV Framebuffer driver -> sis_vid kernel driver
+
+  Its interface should be compatible with the mga_vid, but the driver was not
+  updated after the mga_vid changes, so it's outdated now.  Volunteers
+  needed to test it and bring the code up-to-date.
 
 
   <A NAME=2.2.1.8>2.2.1.8.  3dfx YUV support
 
- 3. 3dfx (which ones?) YUV+scaler support, using /dev/3dfx (tdfx.o driver?)
-    The /dev/3dfx kernel driver exists only for 2.2.x kernels, for use with
-    Glide 2.x Linux ports. It's not tested with MPlayer, and so no more
-    supported. Volunteers needed to test it and bring the code up-to-date.
+  3dfx has native YUV+scaler support, using /dev/3dfx (tdfx.o driver?)
+  The /dev/3dfx kernel driver exists only for 2.2.x kernels, for use with
+  Glide 2.x Linux ports. It's not tested with MPlayer, and so no more
+  supported. Volunteers needed to test it and bring the code up-to-date.
 
 
   <A NAME=2.2.1.9>2.2.1.9.  OpenGL output
 
-     The old Utah-GLX drivers (for X 3.3.6) have it, with all cards.
-     See http://utah-glx.sourceforge.net for details about how to install it.
+  MPlayer support displaying movies using OpenGL. Unfortunately, not all
+  drivers support this ability. For example the Utah-GLX drivers
+  (for XFree86 3.3.6) have it, with all cards.
+  See <A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A> for details about how to install it.
 
-     DRI >= 4.0.3 supports it only with Matrox cards, and Radeon.
-     See dri.sourceforge.net for download, and installation instructions.
+  XFree86(DRI) >= 4.0.3 supports it only with Matrox, and Radeon cards.
+  See <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> for download, and installation instructions.
 
 
   <A NAME=2.2.2>2.2.2.  Audio output devices
@@ -775,42 +922,6 @@ Table of Contents
   - native ALSA 0.9 driver (buggy, use OSS emulation!)
   - native ESD driver (under development?)
   - SUN audio driver (/dev/audio) for BSD and Solaris8 users
-
-
-  <A NAME=2.3>2.3.  Subtitles and OSD (On-Screen Display)
-
-  Yes, mplayer also supports many kinds of subtitles. Currently (2001/06/01)
-  7 kinds of subtitle can be used by the subreader code. To see what are
-  these subtitle formats, see subreader.c, line ~20.
-
-  Subtitles are displayed with a technique called 'OSD', On Screen Display.
-  OSD is used to display current time, volume bar, seek bar etc.
-
-
-  INSTALLING OSD and SUB
-  -------
-
-  NOTE: OSD and SUBTITLES are NOT enabled by default! You have to download
-  fonts from mplayer's download page mplayerhq.hu/homepage/dload.html
-
-  Standard (Central-European, Latin1) font package:
-	http://thot.banki.hu/mp-ftp/releases/mp_font3.zip
-	(it obsoletes mp_font1.zip and mp_font2.zip)
-
-  Cyrillic fonts:
-	http://thot.banki.hu/mp-ftp/releases/bgfont.zip
-
-  And visit this site for korean subtitle support:
-	http://realtime.ssu.ac.kr/~lethean/mplayer
-	
-  After that, UNZIP the files to ~/.mplayer/font/
-  Now you have to see a clock at the upper left corner of the movie
-  (switch it off with 'o')
-
-  OSD has 3 states: (switch with 'o')
-    - clock + volume bar + seek bar + sub     (default)
-    - volume bar + seek bar + sub
-    - only sub
 
 
   <A NAME=3>3.  Usage
@@ -829,14 +940,15 @@ Table of Contents
 
   <A NAME=3.1>3.1.  Control from keyboard
 
-    <-  or  ->      seek backward/forward 10 seconds
-    up or down      seek backward/forward 1 minute  
-    p or SPACE      pause movie (press any key to continue)
-    q  or  ^C       stop playing and quit program
-    o               toggle OSD : none / seek / seek+timer
-    /  and *        decrease/increase volume
-    m               toggle using master/pcm channel for volume setting
-    f               toggle fullscreen (only with -vo sdl)
+
+    l/r arrows		seek backward/forward 10 seconds
+    up or down		seek backward/forward 1 minute  
+    p or SPACE		pause movie (press any key to continue)
+    q  or  ^C		stop playing and quit program
+    o			toggle OSD : none / seek / seek+timer
+    /  and *		decrease/increase volume
+    m			toggle using master/pcm channel for volume setting
+    f			toggle fullscreen (only with -vo sdl)
 
 
   <A NAME=3.2>3.2.  Control from LIRC
@@ -891,6 +1003,18 @@ Table of Contents
 
   <A NAME=3.3>3.3.  Streaming from network or pipes
 
+  MPlayer can play media from network, by using the HTTP protocol, and even
+  beta ASF streaming (FROM network) is available.
+  Configuring it is simple, just recompile MPlayer with
+
+
+	./configure --enable-streaming
+
+
+  MPlayer can read from stdin (NOT named pipes). This can be for example
+  used to play from FTP :
+
+
         wget ftp://micorsops.com/something.avi -O - | mplayer -
 
 
@@ -929,6 +1053,9 @@ Table of Contents
      (you MUST compile them to modules, at least I couldn't get them
      working built-in yet)
      [reboot to new kernel & install modules, but don't load them yet!]
+
+    cd TVout  
+    ./compile.sh
 
   -  Run the 'modules' script from the TV-out directory of mplayer.
      It will switch your console to framebuffer.
@@ -977,22 +1104,34 @@ Table of Contents
   The recommended way to do it is with a program called 'setcd' . It's kinda
   old, but won't be too hard to find on the Net.
   Use it with :
-	setcd -x <speed> <cdrom device>
+
+
+		setcd -x [speed] [cdrom device]
+
 
   Also you can try :
-	echo current_speed:4 >/proc/ide/<cdrom device>/settings
-  but you'll need root privileges. (It didn't work for me - Gabucino)
 
-  I use following command too :
-	echo file_readahead:2000000 >/proc/ide/<cdrom device>/settings
+
+		echo current_speed:4 >/proc/ide/[cdrom device]/settings
+
+
+  but you'll need root privileges. I use following command too :
+
+
+		echo file_readahead:2000000 >/proc/ide/[cdrom device]/settings
+
+
   for 2MB prefetched reading from the file (it's useful for scratched CDROMs).
-
   It's recommended that you tuneup your CDROM drive also with hdparm :
-	hdparm -d1 -a8 -u1 <cdrom device>
+
+
+		hdparm -d1 -a8 -u1 <cdrom device>
+
+
   to enable using DMA access, readahead, and IRQ unmasking.
   (if you don't understand these, *read the hdparm manpage*)
 
-  Please refer to "/proc/ide/<cdrom device>/settings" for fine-tuning your
+  Please refer to "/proc/ide/[cdrom device]/settings" for fine-tuning your
   CDROM.
 
 
@@ -1102,48 +1241,50 @@ Table of Contents
 
   <A NAME=5.3>5.3.  MTRR
 
-  Setting up MTRR for X11 3.3.x, SVGAlib or mga_vid:
-  ==================================================
-
-  1. find the base address
-  ~~~~~~~~~~~~~~~~~~~~~~~~
+  It is VERY recommended to set MTRR registers up properly, because they can
+  give a big performance boost. First you have to find the base address.
   You have 3 ways to find it:
 
   - from X11 startup messages, for example:
+
   (--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
   (--) SVGA: Linear framebuffer at 0xD8000000
 
   - from /proc/pci (use lspci -v command):
+
   01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
           Memory at d8000000 (32-bit, prefetchable)
         
   - from mga_vid kernel driver messages (use dmesg):
+
   mga_mem_base = d8000000
 
-  2. find memory size
-  ~~~~~~~~~~~~~~~~~~~
-  This is very easy, just convert video ram size to hexadecimal, or
-  use this table:
-     1 MB    0x100000
-     2 MB    0x200000
-     4 MB    0x400000
-     8 MB    0x800000
-    16 MB   0x1000000
-    32 MB   0x2000000
+  Then let's find the memory size. This is very easy, just convert video ram
+  size to hexadecimal, or use this table:
 
-  3. setting up mtrr
-  ~~~~~~~~~~~~~~~~~~
+
+		1 MB    0x100000
+		2 MB    0x200000
+		4 MB    0x400000
+		8 MB    0x800000
+		16 MB   0x1000000
+		32 MB   0x2000000
+
+
   You know base address and memory size, let's setup mtrr registers!
-
-    For example, for the matrox card above (base=0xd8000000) with 32MB
-    ram (size=0x2000000) just execute:
-  echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr
-
-   - Older K6-2's [around 266Mhz, stepping 0] doesn't support MTRR, but
-     stepping 12's do ('cat /proc/cpuinfo' to check it).
+  For example, for the Matrox card above (base=0xd8000000) with 32MB
+  ram (size=0x2000000) just execute:
 
 
-  <A NAME=6>6. FAQ section
+      echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr
+
+
+  Not all CPUs support MTRRs. For example older K6-2's [around 266Mhz,
+  stepping 0] doesn't support MTRR, but stepping 12's do ('cat /proc/cpuinfo'
+  to check it).
+
+
+  <A NAME=6>6. FAQ section (TODO)
 
 Yes, this is the MPlayer FAQ.
 =============================
@@ -1420,116 +1561,109 @@ A: It's from Gerard Lantau's ffmpeg package (http://ffmpeg.sourceforge.net).
 
   <A NAME=7.1>7.1.  Debian packaging
 
-To build the package:
- Get the cvs version, or .tgz and uncompress it,
- cd into programs directory:
-eyck@incubus:~/src$ cd main
-eyck@incubus:~/src/main$ fakeroot debian/rules binary
- (... mplayer detects hardware/software, builds itself and.. )
- ..
- dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.
+  To build the package, get the cvs version, or .tgz and uncompress it,
+  and cd into programs directory:
 
-And now just dpkg -i ../mplayer_0.18-1_i386.deb as root.
-Here's how it looks like:
 
-eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb 
-Password:
-(Reading database ... 26946 files and directories currently installed.)
-Preparing to replace mplayer 0.17a-1 (using ../mplayer_0.18-1_i386.deb) ...
-Unpacking replacement mplayer ...
-Setting up mplayer (0.18-1) ...
+		cd main
+		fakeroot debian/rules binary
+
+
+  (... mplayer detects hardware/software, builds itself and.. )
+  dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.
+
+  And now just become root, and :
+
+
+		dpkg -i ../mplayer_0.18-1_i386.deb as root.
+
+
+  Here's how it looks like:
+
+	eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb 
+	Password:
+	(Reading database ... 26946 files and directories currently installed.)
+	Preparing to replace mplayer 0.17a-1 (using ../mplayer_0.18-1_i386.deb)
+	Unpacking replacement mplayer ...
+	Setting up mplayer (0.18-1) ...
 
 
   <A NAME=7.2>7.2.  FreeBSD
 
-Notes for FreeBSD users
-=======================
+  To build the package you will need GNU make (gmake, /usr/ports/devel/gmake), 
+  native BSD make will not work.
 
-1. To build the package you will need GNU make (gmake, /usr/ports/devel/gmake), 
-native BSD make will not work.
+  To run MPlayer you will need to re-compile the kernel with 
+  "options USER_LDT" (unless you are running -CURRENT, where this is default).
 
-2. To run mplayer you will need to re-compile the kernel with 
-"options USER_LDT" (unless you are running -CURRENT, where this is default).
+  If MPlayer complains about "CD-ROM Device '/dev/cdrom' not found!" make a 
+  symbolic link : ln -s /dev/<your_cdrom_device> /dev/cdrom 
 
-3. If mplayer complains about "CD-ROM Device '/dev/cdrom' not found!" make a 
-symbolic link : ln -s /dev/<your_cdrom_device> /dev/cdrom 
-
-4. There's no DVD support for FreeBSD yet. 
-Feel free to add them :-)
-
-Enjoy (as do I)!
-
---
-Vladimir Kushnir
+  There's no DVD support for FreeBSD yet. 
+  Feel free to add it :-)
 
 
   <A NAME=7.3>7.3.  Solaris 8
 
-Notes for Solaris users
-=======================
+  AVI file playback works best on Solaris x86, because you have the
+  option to use the win32 codecs on the x86 platform.  On Solaris SPARC,
+  you'll find quite a few AVI files with non working video and/or
+  audio playback, because the video/audio codecs using the win32 DLLs
+  are not available. However, <B>DivX/OpenDivX</B> movies should work,
+  when using libavcodec.
 
-1. AVI file playback works best on Solaris x86, because you have the
-   option to use the win32 codecs on the x86 platform.  On Solaris SPARC,
-   you'll find quite a few AVI files with non working video and/or
-   audio playback, because the video/audio codecs using the win32 DLLs
-   are not available.
+  To build the package you will need GNU make (gmake, /opt/sfw/gmake), native
+  Solaris make will not work. Typical error you get when building with solaris'
+  make instead of GNU make:
 
-
-2. To build the package you will need GNU make (gmake, /opt/sfw/gmake), 
-   native Solaris make will not work.
-
-   Typical error you get when building with solaris' make instead of GNU
-   make:
 
    % /usr/ccs/bin/make
    make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
 
 
-3. On Solaris SPARC, you need the GNU C/C++ Compiler; it does not matter
-   if GNU C/C++ compiler is configured with or without the GNU assembler.
+  On Solaris SPARC, you need the GNU C/C++ Compiler; it does not matter
+  if GNU C/C++ compiler is configured with or without the GNU assembler.
 
-   On Solaris x86, you need the GNU assembler and the GNU C/C++
-   compiler, configured to use the GNU assembler!  The mplayer code on
-   the x86 platform makes heavy use of MMX, SSE and 3DNOW!
-   instructions that cannot be compiled using Sun's assembler
-   /usr/ccs/bin/as.
+  On Solaris x86, you need the GNU assembler and the GNU C/C++
+  compiler, configured to use the GNU assembler!  The mplayer code on
+  the x86 platform makes heavy use of MMX, SSE and 3DNOW!
+  instructions that cannot be compiled using Sun's assembler
+  /usr/ccs/bin/as.
 
+  The configure script tries to find out, which assembler program is
+  used by your "gcc" command (in case the autodetection fails, use
+  the "--as=/whereever/you/have/installed/gnu-as" option to tell the
+  configure script where it can find GNU "as" on your system).
 
-   The configure script tries to find out, which assembler program is
-   used by your "gcc" command (in case the autodetection fails, use
-   the "--as=/whereever/you/have/installed/gnu-as" option to tell the
-   configure script where it can find GNU "as" on your system).
+  Error message from configure on a Solaris x86 system using GCC
+  without GNU assembler:
 
-   Error message from configure on a Solaris x86 system using GCC
-   without GNU assembler:
+   % configure
+   ...
+   Checking assembler (/usr/ccs/bin/as) ... , failed
+   Please upgrade(downgrade) binutils to 2.10.1...
 
-     % configure
-     ...
-     Checking assembler (/usr/ccs/bin/as) ... , failed
-     Please upgrade(downgrade) binutils to 2.10.1...
+  (Solution: Install and use a gcc configured with "--with-as=gas")
 
-   (Solution: Install and use a gcc configured with "--with-as=gas")
+  Typical error you get when building with a GNU C compiler that does
+  not use GNU as:
 
-
-   Typical error you get when building with a GNU C compiler that does
-   not use GNU as:
-
-     % gmake
-     ...
-     gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math 
-	   -fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
-     Assembler: mplayer.c
-     "<stdin>", line 3567 : Illegal mnemonic
-     "<stdin>", line 3567 : Syntax error
-     ... more "Illegal mnemonic" and "Syntax error" errors ...
+   % gmake
+   ...
+   gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math 
+	-fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
+   Assembler: mplayer.c
+   "<stdin>", line 3567 : Illegal mnemonic
+   "<stdin>", line 3567 : Syntax error
+   ... more "Illegal mnemonic" and "Syntax error" errors ...
 
 
-4. For DVD support you must have the patched libcss installed. Patch:
-   http://www.tools.de/solaris/mplayer/
+  For DVD support you must have the patched libcss installed. Patch:
+  http://www.tools.de/solaris/mplayer/
 
 
-5. Due to two bugs in solaris 8 x86,  you cannot reliably play DVDs using a
-   capacity >4GB: 
+  Due to two bugs in solaris 8 x86,  you cannot reliably play DVDs using a
+  capacity >4GB: 
 
    - The sd(7D) driver on solaris 8 x86 driver has bug when accessing a
      disk block >4GB on a device using a logical blocksize != DEV_BSIZE
@@ -1541,9 +1675,6 @@ Notes for Solaris users
      ISO9660), hsfs currently does not support partitions/disks >4GB,
      all data is accessed modulo 4GB
      (http://groups.yahoo.com/group/solarisonintel/message/22592)
-
---
-Jürgen Keil
 
 
   <A NAME=A>Appendix A - Authors
