@@ -75,8 +75,15 @@ or even an answer.
 <para>
 Subscribe to the mplayer-users mailing list:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
-and send your bug report to:
-<ulink url="mailto:mplayer-users@mplayerhq.hu"/>
+and send your bug report to
+<ulink url="mailto:mplayer-users@mplayerhq.hu"/> where you can discuss it.
+</para>
+<para>
+If you prefer, you can instead use our brand new BugZilla at
+<ulink url="http://bugzilla.mplayerhq.hu/">.
+<note>
+Developers are using the BugZilla.
+</note>
 </para>
 <para>
 The language of this list is <emphasis role="bold">English</emphasis>. Please follow the standard
