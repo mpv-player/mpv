@@ -206,6 +206,7 @@ switch(video_codec){
    break;
  }
  case VIDEO_H264: {
+   int pos = 0;
    videobuf_len=0; videobuf_code_len=0;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for sequence parameter set... ");fflush(stdout);
    while(1){
@@ -222,6 +223,12 @@ switch(video_codec){
      mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
      return 0;
    }
+   pos = videobuf_len+4;
+   if(!read_video_packet(d_video)){ 
+     mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Can't read sequence parameter set\n");
+     return 0;
+   }
+   h264_parse_sps(&picture, &(videobuffer[pos]), videobuf_len - pos);
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for picture parameter set... ");fflush(stdout);
    while(1){
       int i=sync_video_packet(d_video);
@@ -243,6 +250,11 @@ switch(video_codec){
    }
    mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
    sh_video->format=0x10000005;
+   if(picture.fps) {
+     sh_video->fps=picture.fps*0.0001f;
+     sh_video->frametime=10000.0f/(float)picture.fps;
+     mp_msg(MSGT_DECVIDEO,MSGL_INFO, "FPS seems to be: %d/10000\n", picture.fps);
+   }
    break;
  }
  case VIDEO_MPEG12: {
@@ -495,7 +507,19 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
       //
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
+          int pos = videobuf_len+4;
+          if(!i) return -1;
           if(!read_video_packet(d_video)) return -1; // EOF
+          if((i&~0x60) == 0x107 && i != 0x107) {
+            h264_parse_sps(&picture, &(videobuffer[pos]), videobuf_len - pos);
+            if(picture.fps > 0) {
+              sh_video->fps=picture.fps*0.0001f;
+              sh_video->frametime=10000.0f/(float)picture.fps;
+            }
+            i=sync_video_packet(d_video);
+            if(!i) return -1;
+            if(!read_video_packet(d_video)) return -1; // EOF
+          }
           if((i&~0x60) == 0x101 || (i&~0x60) == 0x102 || (i&~0x60) == 0x105) break;
         }
 	*start=videobuffer; in_size=videobuf_len;

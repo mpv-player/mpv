@@ -210,3 +210,151 @@ int mp4_header_process_vop(mp_mpeg_header_t * picture, unsigned char * buffer)
   n++;
   n = read_timeinc(picture, buffer, n);
 }
+
+#define min(a, b) ((a) <= (b) ? (a) : (b))
+
+static unsigned int read_golomb(unsigned char *buffer, unsigned int *init)
+{
+  unsigned int x, v = 0, v2 = 0, m, len = 0, n = *init;
+  
+  while(getbits(buffer, n++, 1) == 0)
+    len++;
+  
+  x = len + n;
+  while(n < x)
+  {
+    m = min(x - n, 8);
+    v |= getbits(buffer, n, m);
+    n += m;
+    if(x - n > 8)
+      v <<= 8;
+  }
+  
+  v2 = 1;
+  for(n = 0; n < len; n++)
+    v2 <<= 1;
+  v2 = (v2 - 1) + v;
+  
+  //fprintf(stderr, "READ_GOLOMB(%u), V=2^%u + %u-1 = %u\n", *init, len, v, v2);
+  *init = x;
+  return v2;
+}
+
+
+static int h264_parse_vui(mp_mpeg_header_t * picture, unsigned char * buf, unsigned int n)
+{
+  unsigned int overscan, vsp_color, chroma, timing, fixed_fps;
+  
+  if(getbits(buf, n++, 1))
+  {
+    picture->aspect_ratio_information = getbits(buf, n, 8);
+    n += 8;
+    if(picture->aspect_ratio_information == 255)
+    {
+      picture->display_picture_width = (getbits(buf, n, 8) << 8) | getbits(buf, n + 8, 8);
+      n += 16;
+      
+      picture->display_picture_height = (getbits(buf, n, 8) << 8) | getbits(buf, n + 8, 8);
+      n += 16;
+    }
+  }
+  
+  if(overscan=getbits(buf, n++, 1))
+    n++;
+  if(vsp_color=getbits(buf, n++, 1))
+  {
+    n += 4;
+    if(getbits(buf, n++, 1))
+      n += 24;
+  }
+  if(chroma=getbits(buf, n++, 1))
+  {
+    read_golomb(buf, &n);
+    read_golomb(buf, &n);
+  }
+  if(timing=getbits(buf, n++, 1))
+  {
+    picture->timeinc_unit = (getbits(buf, n, 8) << 24) | (getbits(buf, n+8, 8) << 16) | (getbits(buf, n+16, 8) << 8) | getbits(buf, n+24, 8);
+    n += 32;
+    
+    picture->timeinc_resolution = (getbits(buf, n, 8) << 24) | (getbits(buf, n+8, 8) << 16) | (getbits(buf, n+16, 8) << 8) | getbits(buf, n+24, 8);
+    n += 32;
+    
+    fixed_fps = getbits(buf, n, 1);
+    
+    if(picture->timeinc_unit > 0 && picture->timeinc_resolution > 0)
+      picture->fps = (picture->timeinc_resolution * 10000) / picture->timeinc_unit;
+  }
+  
+  //fprintf(stderr, "H264_PARSE_VUI, OVESCAN=%u, VSP_COLOR=%u, CHROMA=%u, TIMING=%u, DISPW=%u, DISPH=%u, TIMERES=%u, TIMEINC=%u, FIXED_FPS=%u\n", overscan, vsp_color, chroma, timing, picture->display_picture_width, picture->display_picture_height,
+  //	picture->timeinc_resolution, picture->timeinc_unit, picture->timeinc_unit, fixed_fps);
+  
+  return n;
+}
+
+int h264_parse_sps(mp_mpeg_header_t * picture, unsigned char * buf, int len)
+{
+  unsigned int n = 0, m = 0, v, i, j;
+  unsigned char *dest;
+
+  dest = (unsigned char*) malloc(len);
+  if(! dest)
+    return 0;
+  j = i = 0;
+  while(i <= len-3)
+  {
+    if(buf[i] == 0 && buf[i+1] == 0 && buf[i+2] == 3)
+    {
+      dest[j] = dest[j+1] = 0;
+      j += 2;
+      i += 3;
+    }
+    else
+    {
+      dest[j] = buf[i];
+      j++;
+      i++;
+    }
+  }
+  dest[j] = buf[len-2];
+  dest[j+1] = buf[len-1];
+  j += 2;
+  len = j+1;
+  buf = dest;
+  
+  picture->fps = picture->timeinc_unit = picture->timeinc_resolution = 0;
+  n = 24;
+  read_golomb(buf, &n);
+  read_golomb(buf, &n);
+  v = read_golomb(buf, &n);
+  if(v == 0)
+    read_golomb(buf, &n);
+  else if(v == 1)
+  {
+    getbits(buf, n++, 1);
+    read_golomb(buf, &n);
+    read_golomb(buf, &n);
+    v = read_golomb(buf, &n);
+    for(i = 0; i < v; i++)
+      read_golomb(buf, &n);
+  }
+  read_golomb(buf, &n);
+  getbits(buf, n++, 1);
+  read_golomb(buf, &n);
+  read_golomb(buf, &n);
+  if(!getbits(buf, n++, 1))
+    getbits(buf, n++, 1);
+  getbits(buf, n++, 1);
+  if(getbits(buf, n++, 1))
+  {
+    read_golomb(buf, &n);
+    read_golomb(buf, &n);
+    read_golomb(buf, &n);
+    read_golomb(buf, &n);
+  }
+  if(getbits(buf, n++, 1))
+    n = h264_parse_vui(picture, buf, n);
+
+  free(dest);
+  return n;
+}
