@@ -62,6 +62,12 @@ Homepage:   http://avifile.sourceforge.net/
 Directory:  loader/
 License:    GNU General Public License
 
+Name:       dvbstream
+Version:    0.4.3-pre3 (cvs checkout)
+Homepage:   http://www.linuxstb.org/dvbstream/
+Directory:  libmpdemux
+License:    GNU General Public License
+
 Name:       fbset
 Version:    2.1
 Homepage:   http://home.tvd.be/cr26864/Linux/fbdev/
