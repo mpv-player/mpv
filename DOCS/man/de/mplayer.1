@@ -2151,40 +2151,6 @@ Du kannst mit dieser Option negative Farben erhalten.
 Wird nicht von allen Videoausgabetreibern unterstützt.
 .
 .TP
-.B \-jpeg <Option1:Option2:...> (nur mit \-vo jpeg)
-Gibt Optionen für den jpeg-Videoausgabetreiber an.
-.sp 1
-Verfügbare Optionen sind:
-.sp 1
-.PD 0
-.RSs
-.IPs [no]progressive
-Gibt Standard-JPEG oder progressives JPEG an (Standard: noprogressive).
-.IPs [no]baseline
-Benutze eine/\:keine Baseline (Standard: baseline).
-.IPs optimize=<Wert>
-Optimierungswert <0\-100> (Standard: 100)
-.IPs smooth=<Wert>
-Glättungsfaktor <0\-100> (Standard: 0)
-.IPs quality=<Wert>
-Qualitätsfaktor <0\-100> (Standard: 75)
-.IPs outdir=<Wert>
-Gib das Verzeichnis an, in das die JPEG-Bilder gespeichert werden.
-Falls nicht angegeben, werden alles JPEG-Dateien in das aktuelle Verzeichnis
-geschrieben.
-.IPs subdirs=<Wert>
-Falls angegeben, erstellt MPlayer nummerierte Unterverzeichnisse mit dem
-angegebenen Prefix.
-Falls nicht angegeben, werden alle JPEG-Dateien in das gleiche Verzeichnis
-geschrieben.
-.IPs maxfiles=<Wert>
-Maximale Anzahl an JPEG-Dateien, die pro Unterverzeichnis gespeichert werden,
-falls Unterverzeichnisse angegeben worden sind.
-Muss größer oder gleich 1 sein (Standard: 1000).
-.RE
-.PD 1
-.
-.TP
 .B \-monitor-dotclock <Bereich[,Bereich,...]> (nur bei \-vo fbdev und vesa)
 Gib den Bereich für dotclock oder pixelclock des Monitors an.
 .
@@ -2838,6 +2804,33 @@ Name.
 Gibt jeden Frame in eine JPEG-Datei im aktuellen Verzeichnis aus.
 Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
+.PD 0
+.RSs
+.IPs [no]progressive
+Gibt Standard-JPEG oder progressives JPEG an (Standard: noprogressive).
+.IPs [no]baseline
+Benutze eine/\:keine Baseline (Standard: baseline).
+.IPs optimize=<Wert>
+Optimierungswert <0\-100> (Standard: 100)
+.IPs smooth=<Wert>
+Glättungsfaktor <0\-100> (Standard: 0)
+.IPs quality=<Wert>
+Qualitätsfaktor <0\-100> (Standard: 75)
+.IPs outdir=<Wert>
+Gib das Verzeichnis an, in das die JPEG-Bilder gespeichert werden.
+Falls nicht angegeben, werden alles JPEG-Dateien in das aktuelle Verzeichnis
+geschrieben.
+.IPs subdirs=<Wert>
+Falls angegeben, erstellt MPlayer nummerierte Unterverzeichnisse mit dem
+angegebenen Prefix.
+Falls nicht angegeben, werden alle JPEG-Dateien in das gleiche Verzeichnis
+geschrieben.
+.IPs maxfiles=<Wert>
+Maximale Anzahl an JPEG-Dateien, die pro Unterverzeichnis gespeichert werden,
+falls Unterverzeichnisse angegeben worden sind.
+Muss größer oder gleich 1 sein (Standard: 1000).
+.RE
+.PD 1
 .
 .TP
 .B pgm\ \ \ \ 
@@ -2863,15 +2856,14 @@ Name.
 .
 .TP
 .B \-ac <[-]Codec1,[-]Codec2,...[,]>
-Gib eine Prioritätsliste der zu verwendenden Audiocdoecs an.
+Gib eine Prioritätsliste der zu verwendenden Audiocodecs an.
 Die Codecnamen entsprechen den in codecs.conf definierten Einträgen.
-Ein '-' vor einem Namen deaktiviert diesen Codec.
+Ein '-' vor dem Codecnamen deaktiviert diesen Codec.
+Wenn die Liste mit ',' endet, wird MPlayer auch auf Codecs zurückgreifen, die
+nicht in der Liste stehen.
 .br
 .I ANMERKUNG:
 Mit \-ac help erhälst du eine vollständige Liste aller verfügbaren Codecs.
-.br
-Wenn die Liste mit ',' endet, so werden notfalls auch nicht aufgeführte
-Codecs ausprobiert.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -2879,7 +2871,7 @@ Codecs ausprobiert.
 .IPs "\-ac mp3acm"
 Erzwingt den l3codeca.acm-MP3-Codec.
 .IPs "\-ac mad,"
-Probiert zuerst die libmad und dann andere Codecs.
+Probiert zuerst libmad und dann andere Codecs.
 .IPs "\-ac hwac3,a52,"
 Zuerst wird versucht, AC3 unverändert durchzureichen, dann die
 Software-AC3-Decodierung, danach andere Codecs.
@@ -2887,30 +2879,32 @@ Software-AC3-Decodierung, danach andere Codecs.
 Probiere andere Codecs, ausgenommen den MP3-Decoder von FFmpeg.
 .RE
 .PD 1
+.
 .TP
 .B \-af <Filter1[=Parameter1:Parameter2:...],Filter2,...>
 Aktiviert eine kommaseparierte Liste von Audiofiltern zusammen mit ihren
 Optionen.
-.br
+Siehe auch die Sektion Audiofilter der (englischen) Dokumentation.
+.sp 1
 Die verfügbaren Filter lauten:
-.
 .RSs
 .IPs resample[=srate[:sloppy][:type]]
 Ändert die Samplerate des Audiostreams zu der ganzzahligen srate (in Hz).
 Unterstützt nur das 16-bit Little-Endian-Format.
 .IPs channels[=nch]
 Ändert die Anzahl der Kanäle in nch Ausgabekanäle.
-Falls die Anzahl Ausgabekanäle größer ist als die Anzahl der Eingangskanäle, 
+Falls die Anzahl der Ausgabekanäle größer ist als die Anzahl der
+Eingangskanäle,
 so werden leere Kanäle erzeugt (Ausnahme: Upmix von Mono auf Stereo, dann wird
 der Monokanal auf beiden Ausgabekanälen wiederholt).
-Ist die Anzahl Ausgabekanäle kleiner als die Anzahl Eingangskanäle,
+Ist die Anzahl der Ausgabekanäle kleiner als die Anzahl der Eingangskanäle,
 so werden die überschüssigen Kanäle verworfen.
 .IPs format[=bps,f]
 Wählt das Format f und die Anzahl der Bytes pro Sample, bps, für die Ausgabe
 der Filterschicht.
-Die Option bps ist eine ganze Zahl.
+Die Option bps ist eine ganze Zahl und gibt Bytes pro Sample an.
 Das Format f ist eine Zeichenkette, die das Format beschreibt und folgende
-Optionen enthalten kann:
+Optionen aneinandergehängt enthalten kann:
 .br
 alaw, mulaw oder imaadpcm
 .br
@@ -2923,29 +2917,28 @@ le oder be (Little- oder Big-Endian)
 .IPs "volume[=v:sc]"
 Wählt das Lautstärkelevel der Ausgabe.
 Dieser Filter ist nicht reentrant (ablaufinvariant) und kann dementsprechend
-nur einmal pro
-Audiostream aufgerufen werden.
+nur einmal pro Audiostream aufgerufen werden.
 .RSss
-v: gewünschte Verstärkung in dB für alle Kanäle in diesem Stream.
+v: Setzt die gewünschte Verstärkung in dB für alle Kanäle in diesem Stream.
 Die Verstärkung kann zwischen -200dB und +60dB liegen, wobei -200dB den
 Sound komplett verstummen lässt und +60dB einer 1000-fachen Verstärkung
 entspricht.
 .br
-sc: Aktiviert "soft clipping".
+sc: Aktiviert "Soft-Clipping".
 .REss
 .IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
 Mischt Kanäle beliebig.
-Details findest du in DOCS/\:HTML/\:en/\:devices.html#audio-dev.
+Details findest du (auf Englisch) in DOCS/\:HTML/\:en/\:devices.html#audio-dev.
 .RSss
-n: Anzahl der Ausgabekanäle (1\-6).
+n: Anzahl der Eingabekanäle (1\-6).
 .br
-lij: gibt an, wieviel vom Quellkanal j in den Ausgabekanal i gemischt wird.
+lij: gibt an, wieviel vom Eingabekanal j in den Ausgabekanal i gemischt wird.
 .REss
 .IPs sub[=fc:ch]
 Fügt einen Subwoofer-Kanal hinzu.
 .RSss
 fc: ab dieser Frequenz schneidet der Tiefpassfilter ab (20Hz bis 300Hz)
-Standard: 60Hz).
+(Standard: 60Hz).
 .br
 ch: Kanalnummer für die Sub-Kanäle.
 .REss
@@ -2956,7 +2949,7 @@ Zweikanaldateien.
 d: Verzögerung in ms für den hinteren Lautsprecher (0ms bis 1000ms)
 (Standard: 15ms).
 .REss
-+.IPs delay[=ch1:ch2:...]
+.IPs delay[=Kanal1:Kanal2:...]
 Verzögert die Soundausgabe.
 Gib für jeden Kanal einzeln die Verzögerung der Soundausgabe in ms an
 (Fließkommazahl zwischen 0 und 1000).
@@ -2974,21 +2967,20 @@ nsamples: Anzahl der Samples pro Kanal (Standard: 512)
 .TP
 .B \-af-adv <force=(0\-3):list=(Filter)> (siehe auch \-af)
 Gibt erweiterte Audiofilteroptionen an:
-.
 .RSs
 .IPs force=<0-3>
 Erzwingt das Einfügen von Audiofiltern nach folgenden Regeln:
 .RSss
 0: Komplett automatisches Einfügen (Standard)
 .br
-1: Optimiere auf Geschwindigkeit.
+1: Optimiere auf Genauigkeit.
 .br
-2: Optimiere auf Genauigkeit.
+2: Optimiere auf Geschwindigkeit.
 .br
 3: Schalte automatisches Einfügen ab.
 .REss
 .IPs list=<Filter>
-Das gleiche wie \-af (siehe \-af-Option).
+Das gleiche wie \-af (siehe \-af).
 .RE
 .
 .TP
@@ -3000,12 +2992,12 @@ Familien benutzt werden kann, so werden die Standardcodecs verwendet.
 .I ANMERKUNG:
 .br
 Mit \-afm help erhälst du eine Liste aller verfügbaren Treiber.
-
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 .IPs "\-afm ffmpeg"
-Probiert zuerst die Codecs von FFmpegs libavcodec (mp1/\:2/\:3).
+Probiert zuerst die Codecs von FFmpegs libavcodec.
 .IPs "\-afm acm,dshow"
 Probiert zuerst die Win32-Codecs.
 .RE
@@ -3013,10 +3005,10 @@ Probiert zuerst die Win32-Codecs.
 .
 .TP
 .B \-aspect <Verhältnis>
-Überschreibt das Höhen-/Breitenverhältnis des Films. Bei MPEG-Dateien
-wird das Verhältnis automatisch erkannt. Bei den meisten AVI-Dateien kann
-es nicht automatisch erkannt werden.
-
+Überschreibt das Höhen-/\:Breitenverhältnis des Films.
+Bei MPEG-Dateien wird das Verhältnis automatisch erkannt, bei den
+meisten AVI-Dateienist dies nicht möglich.
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
@@ -3027,34 +3019,67 @@ es nicht automatisch erkannt werden.
 .PD 1
 .
 .TP
-.B \-flip \ 
-Stellt das Bild auf den Kopf.
+.B \-noaspect
+Deaktiviert die automatische Anpassung des Höhen-/\:Breitenverhältnisses.
+.
 .TP
-.B \-lavdopts <option1:option2:...> (DEBUG-CODE)
-Wenn zur Decodierung ein Codec der libavcodec eingsetzt werden kann, so
-werden seine Parameter mit dieser Option angegeben.
-
+.B \-flip \ 
+Stellt das Bild auf den Kopf (horizontales Spiegeln).
+.
+.TP
+.B \-lavdopts <Option1:Option2:...> (DEBUG-CODE)
+Gibt Parameter für das Decoding des libavcodec an.
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 \-lavdopts bug=1
 .RE
 .PD 1
-
-.I ANMERKUNG:
-.br
-Gib nur bei denjenigen Optionen Werte an, die du auch wirklich anschalten
-möchtest.
-.br
-Verfügbare Optionen sind:
-.
+.sp 1
+.RS
+Verfügbare Optionen sind folgende:
+.RE
 .RSs
-.IPs ec\ \ \ 
+.IPs bug=<Wert>
+Umgehe Fehler (Bugs) des Encoders manuell:
+.RSss
+0: nichts
+.br
+1: automatische Erkennung von Fehlern (Standard)
+.br
+2: (msmpeg4v3): manche ältere, von lavc generierte msmpeg4v3-Dateien (keine
+automatische Erkennung)
+.br
+4: (mpeg4): XviD-Interlacing-Fehler (automatisch erkennt bei fourcc==XVIX)
+.br
+8: (mpeg4): UMP4 (automatisch erkennt bei fourcc==UMP4)
+.br
+16: (mpeg4): Padding-Fehler (automatisch erkennt)
+.br
+32: (mpeg4): Fehler durch ungültigen vlc (automatisch erkennt durch fourcc)
+.br
+64: (mpeg4): qpel-Fehler bei XviD und DivX (automatisch erkennt bei
+fourcc/\:version)
+.br
+128: (mpeg4): alter qpel-Standardfehler (automatisch erkennt bei
+fourcc/\:version)
+.br
+256: (mpeg4): noch ein anderer qpel-Fehler (automatisch erkennt bei
+fourcc/\:version)
+.br
+512: (mpeg4): Fehler bei direkter qpel-Blockgröße (automatisch erkennt bei
+fourcc/\:version)
+.br
+1024: (mpeg4): Randfüllungsfehler (edge padding, automatisch erkennt bei
+fourcc/\:version)
+.REss
+.IPs ec\ \ \
 Verbergen von Fehlern:
 .RSss
-1: benutze einen starken Deblock-Filter bei beschädigten Macroblöcken (MBs)
+1: Benutze einen starken Deblock-Filter bei beschädigten Macroblöcken (MBs).
 .br
-2: iterative MotionVector-Suche (MV, langsam)
+2: iterative Bewegungsvektor (MV)-Suche (langsam)
 .br
 3: alles (Standard)
 .REss
@@ -3064,48 +3089,94 @@ Fehlerbehandlung:
 .br
 0: deaktiviert
 .br
-1: vorsichtig (sollte bei den meisten kaputten Encodern funktionieren)
+1: vorsichtig (Sollte mit den meisten fehlerhaften Encodern funktionieren.)
 .br
-2: normal (Standard) (funktioniert mit den meisten konformen Encodern)
+2: normal (Standard) (Funktioniert mit den meisten konformen Encodern.)
 .br
-3: agressiv (mehr Überprüfungen, die aber selbst bei konformen Daten
+3: aggressiv (mehr Überprüfungen, die aber selbst bei konformen Daten
 Fehler liefern können)
 .br
 4: sehr agressiv
 .REss
-.IPs bug=<Wert>
-manuelle Umgehung von Fehlern der Encoder:
+.IPs debug=<Wert>
+Debugging:
 .RSss
-0: keine
 .br
-1: automatische Fehlererkennung (Standard)
+0: deaktiviert
 .br
-2 (msmpeg4v3): einige alte mite lavc erstellte msmpeg4v3-Dateien (werden nicht
-automatisch erkannt)
+1: Bildinformationen
 .br
-4 (mpeg4): XviD-Interlacing-Fehler (wird bei einer FourCC von XVIX automatisch
-erkannt) 
+2: Ratenkontrolle (Rate Control)
 .br
-8 (mpeg4): UMP4 (wird bei einer FourCC von UMP4 automatisch erkannt)
+4: Bitstream 
 .br
-16 (mpeg4): Padding-Fehler
+8: Makroblock (MB)-Typ
 .br
-32 (mpeg4): "illegal vlc"-Fehler (je nach FourCC automatisch erkannt)
+16: Quantisierungsparameter (QP)
 .br
-64 (mpeg4): XviD und DivX qpel\-Fehler (wird automatisch erkannt)
+32: Bewegungsvektor (Motion-Vector, MV)
+.br
+0x0040: Bewegungsvektor-Visualisierung (benutze \-noslices)
+.br
+0x0080: Überspringen des Makroblocks (MB)
+.br
+0x0100: Startcode
+.br
+0x0200: PTS
+.br
+0x0400: Fehler-Belastbarkeit
+.br
+0x0800: Speichermanagement-Kontrolloperationen (H.264)
+.br
+0x1000: Fehler/\:Bugs
 .REss
-.IPs idct=<0\-99>
-(siehe lavcopts)
+.IPs "idct=<0\-99> (siehe \-lavcopts)"
+Um die beste Decodierqualität zu erreichen, benutze denselben idct-Algorithmus
+für Encoding und Decoding.
+Dies kann allerdings auf Kosten der Genauigkeit gehen.
+.IPs fast\
+Aktiviere Optimierungen, die nicht den Spezifikationen entsprechen und
+möglicherweise Probleme verursachen können, wie beispielsweise einfachere
+Dequantisierung, angenommene Benutzung der Standardquantisierungsmatrix, YUV
+angenommen 4:2:0 und das Überspringen von ein paar Überprüfungen, die sonst
+vorgenommen werden, um fehlerhafte Bitstreams zu erkennen.
 .IPs gray
 Decodierung nur mit Graustufen (was ein bischen schneller als mit Farbe ist)
+.IPs "sb=<Nummer> (nur bei MPEG2)"
+Überspringe unten die angegebene Anzahl von Macroblockreihen.
+.IPs "st=<Nummer> (nur bei MPEG2)"
+Überspringe oben die angegebene Anzahl von Macroblockreihen.
+.IPs vismv=<Wert>
+vismv:
+.RSss
+.br
+0: deaktiviert
+.br
+1: mache von P-Frames vorhergesagte Bewegungsvektoren sichtbar
+.br
+2: mache von B-Frames vorhergesagte Bewegungsvektoren sichtbar
+.br
+4: mache von B-Frames nach-gesagte Bewegungsvektoren sichtbar
+.REss
+.IPs vstats
+Gebe Statistiken aus und speichere sie in ./vstats_*.log.
 .RE
 .
 .TP
-.B \-noaspect
-Deaktiviert die automatische Anpassung des Höhen-/Breitenverhältnisses.
+.B \-noslices
+Deaktiviert die Anzeige des Videos in 16-Pixel-hohen Streifen und stellt den
+kompletten Frame statt dessen in einem einzigen durchgang dar.
+Dies kann die Darstellung schneller oder langsamer machen, abhängig von der
+Hardware/\:dem Cache.
+Dies hat nur einen Effekt bei den Codecfamilien libmpeg2 und libavcodec.
+.
 .TP
 .B \-nosound
-Spielt keinen Sound ab bzw. encodiert keinen Sound.
+Spielt keinen Sound ab bzw.\& encodiert keinen Sound.
+.TP
+.B \-novideo
+Spielt kein Video ab bzw.\& encodiert kein Video.
+.
 .TP
 .B \-pp <Qualität> (siehe auch \-vf pp)
 Setzt das Level der Nachbearbeitung der DLL. Diese Option kann
@@ -4650,13 +4721,15 @@ rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24
 .TP
 .B Encodiere mehrere .vob\-Dateien
 cat *.vob | mencoder <options> \-
-
-
+.
+.
+.\"
 .\" --------------------------------------------------------------------------
 .\" Fehler, Autoren, Haftunsausschluss
+.\"
 .\" --------------------------------------------------------------------------
 .
-.SH FEHLER
+.SH FEHLER/\:BUGS
 Berichte uns davon, wenn du einen findest, sei aber sicher, daß Du vorher die
 ganze Dokumentation gelesen hast.
 Viele Fehler sind das Resultat eines fehlerhaften Setups oder falscher
@@ -4666,23 +4739,16 @@ Die Sektion über Fehlerberichterstattung in der Dokumentation
 erstellt.
 .
 .
+.
 .SH AUTOREN
 MPlayer wurde ursprünglich von Arpad Gereöffy geschrieben.
 Siehe Datei AUTHORS für eine Liste einiger der vielen anderen Beitragenden.
 .PP
 MPlayer is (C) 2000\-2004 The MPlayer Team
 .PP
-Diese Manpage wurde geschrieben und wird gepflegt von
-.B Gabucino
-.br
-.B Diego Biurrun
-.br
-.B Jonas Jermann
-.br
-.B Moritz Bunkus
-.br
-.B Sebastian Krämer
-.PP
+Diese Manpage wurde zum größten Teil von Gabucino, Diego Biurrun, Jonas
+Jermann, Moritz Bunkus und Sebastian Krämer geschrieben.
+Sie wird gepflegt von Sebastian Krämer.
 Schicke Mails die Manpage betreffend bitte an die MPlayer-DOCS-Mailingliste.
 .\" Ende der Datei
 
