@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- synced with 1.5 -->
+<appendix id="bugreports">
+<title>Jak zgłaszać błędy</title>
+<para>
+Dobre raporty błędów stanowią bardzo istotny wkład w rozwój każdego
+projektu. Jednak tak jak pisanie dobrych programów wymaga sporo pracy, tak
+dobre zgłoszenia problemów wymagają trochę wysiłku. Prosimy wziąć pod uwagę to,
+że większość developerów jest bardzo zajęta i odbiera nieprzyzwoitą wręcz
+ilość listów. Wsparcie ze strony użytkownika jest naprawdę ważne w procesie ulepszania
+MPlayera. Należy jednak pamiętać, że trzeba dostarczyć <emphasis role="bold">wszystkie</emphasis>
+informację o które poprosimy i postępować dokładnie według instrukcji zawartej
+w tym dokumencie.
+</para>
+<sect1 id="bugreports_fix">
+<title>Jak poprawiać błędy</title>
+<para>
+Jeżeli uważasz, że posiadasz wystarczające umiejętności, namawiamy Cię do
+samodzielnego poprawiania błędów. A może już to zrobiłeś? Przeczytaj
+<ulink url="../../tech/patches.txt">ten krótki dokument</ulink>, żeby dowiedzieć
+się w jaki sposób dodać swoją łatę do źródeł MPlayera. Jeżeli będziesz miał jakieś
+pytania, pomogą Ci ludzie z listy
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+(tylko w języku angielskim -przyp. tłumacza).
+</para>
+</sect1>
+<sect1 id="bugreports_report">
+<title>Jak zgłaszać błędy</title>
+<para>
+Po pierwsze sprawdź najnowszą wersję CVS MPlayera, ponieważ dany błąd
+może być już w niej naprawiony. Rozwój MPlayera przebiega naprawdę szybko,
+większość problemów występujących w oficjalnych wydaniach jest zgłaszana
+w ciągu kilku dni albo nawet godzin. Dlatego też prosimy używać
+<emphasis role="bold">tylko wersji z CVSa</emphasis>
+do zgłaszania błędów. Dotyczy to głównie pakietów binarnych MPlayera. Instrukcje
+dotyczące CVSa znajdują się na dole
+<ulink url="http://www.mplayerhq.hu/homepage/dload.html">tej strony</ulink>
+lub w pliku README. Jeżeli problem dalej występuje prosimy sprawdzić listę
+<link linkend="bugs">znanych błędów</link> i resztę dokumentacji. Jeżeli problem
+nie jest znany lub rozwiązany przez naszą dokumentację prosimy zgłosić błąd.
+</para>
+
+<para>
+Nie należy wysyłać zgłoszeń do developerów. MPlayer jest dziełem dużej
+grupy, więc więcej osób może być zainteresowanych tym problemem. Czasami inni
+użytkownicy spotkali się już z danym problemem i wiedzą jak go rozwiązać nawet
+jeżeli jest to błąd w kodzie MPlayera.
+</para>
+
+<para>
+Prosimy opisywać problem tak dokładnie, jak to tylko możliwe. Należy sprawdzić w jakich
+dokładnie okolicznościach pojawia się błąd. Czy występuje on tylko w określonych sytuacjach?
+Czy ma związek z konkretnym plikiem lub typem plików? Czy dotyczy tylko danego
+kodeka, czy też jest niezależny od kodeków? Czy możesz go odtworzyć z każdym
+wyjściem video? Im więcej informacji dostarczysz, tym większe są szanse na rozwiązanie
+ zgłoszonego problemu. Nie należy również zapominać o dołączeniu wartościowych informacji
+ wymienionych poniżej. W przeciwnym wypadku nie będziemy w stanie prawidłowo
+ zdiagnozować zgłoszonego problemu.
+</para>
+
+<para>
+Doskonałym i dobrze napisanym przewodnikiem dotyczącym zadawania pytań jest dokument
+<ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">"Jak zadawać pytania w
+mądry sposób"</ulink> napisany przez <ulink url="http://www.catb.org/~esr/">Erica S. Raymonda</ulink>.
+Istnieje także inny dokumentem tego typu zatytułowany
+<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">Jak efektywnie zgłaszać błędy</ulink>
+stworzony przez <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simona Tathama</ulink>
+(Polskie tłumaczenie tego dokumentu można znaleźć
+<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs-pl.html">tutaj</ulink> -przyp. tłum.). Jeśli będziesz
+postępował zgodnie z tymi przewodnikami, powinieneś uzyskać pomoc. Prosimy jednak pamiętać, że śledzimy
+listę jako ochotnicy poświęcając nasz wolny czas. Jesteśmy bardzo zajęci i nie potrafimy zagwarantować, że
+pomożemy rozwiązać zgłoszony problem, ani nawet tego, że odpowiemy na Twoje zgłoszenie.
+</para>
+
+</sect1>
+
+<sect1 id="bugreports_where">
+<title>Gdzie zgłaszać błędy</title>
+<para>
+Zapisz się na listę mplayer-users:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+i wyślij swoje zgłoszenie błędu na:
+<ulink url="mailto:mplayer-users@mplayerhq.hu"/>
+</para>
+<para>
+Językiem obowiązującym na tej liście jest <emphasis role="bold">angielski</emphasis>. Prosimy trzymać się
+zasad standardowej <ulink url="http://www.ietf.org/rfc/rfc1855.txt">Netykiety</ulink> (Polską wersję netykiety
+można przeczytać np. <ulink url="http://www.pg.gda.pl/~agatek/netq.html">tutaj</ulink> -przyp. tłum.) i
+<emphasis role="bold">nie wysyłać listów w HTMLu</emphasis> na żadną z naszych list. W przeciwnym
+wypadku zostaniesz zignorowany lub wyrzucony z listy. Jeżeli nie wiesz czym jest list w HTMLu albo dlaczego
+jest on zły, przeczytaj ten <ulink url="http://expita.com/nomime.html">świetny dokument</ulink> (znów tylko
+po angielsku -przyp. tłum.). Wyjaśnia on wszystkie szczegóły i zawiera instrukcje wyłączania HTMLa. Zauważ
+również, że nie wysyłamy kopii listów do użytkowników, więc dobrym pomysłem jest zapisanie się na listę
+w celu  uzyskania odpowiedzi.
+</para>
+</sect1>
+
+<sect1 id="bugreports_what">
+<title>Co zgłaszać</title>
+<para>
+Możesz potrzebować dołączyć log, konfigurację lub przykładowy plik w twoim zgłoszeniu błędu.
+Jeżeli któryś z nich ma duży rozmiar, lepiej załadować go na nasz
+<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/">serwer FTP</ulink> w skompresowanej
+postaci (gzip i bzip2 są preferowanymi formatami) i załączyć tylko ścieżkę i nazwę pliku
+do zgłoszenia błędu. Nasza lista ma ustawiony limit rozmiaru każdej wiadomości na 80k.
+Jeżeli potrzebujesz wysłać coś większego, musisz to skompresować albo załadować na serwer.
+</para>
+
+<sect2 id="bugreports_system">
+<title>Informacja o systemie operacyjnym</title>
+<para>
+<itemizedlist>
+<listitem><para>
+Nazwa Twojej dystrybucji Linuksa albo system operacyjny. Np.:
+  <itemizedlist>
+    <listitem><para>Red Hat 7.1</para></listitem>
+    <listitem><para>Slackware 7.0 + pakiety rozwojowe z 7.1 ...</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+wersja jądra (kernela):
+<screen>uname -a</screen>
+</para></listitem>
+<listitem><para>
+wersja biblioteki libc:
+<screen>ls -l /lib/libc[.-]*</screen>
+</para></listitem>
+<listitem><para>
+wersja gcc i ld:
+<screen>
+gcc -v
+ld -v
+</screen>
+</para></listitem>
+<listitem><para>
+wersja binutils:
+<screen>
+as --version
+</screen>
+</para></listitem>
+<listitem><para>
+Jeżeli masz problem z trybem pełnoekranowym:
+  <itemizedlist>
+    <listitem><para>Menadżer okien i wersja</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Jeżeli masz problem z XVIDIXem:
+  <itemizedlist>
+    <listitem><para>głębia barw Xów (colour depth):
+<screen>xdpyinfo | grep &quot;depth of root&quot;</screen>
+    </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Jeżeli tylko GUI zawiera błędy:
+  <itemizedlist>
+    <listitem><para>wersja GTK</para></listitem>
+    <listitem><para>wersja GLIB</para></listitem>
+    <listitem><para>wersja libpng</para></listitem>
+    <listitem><para>Sytuacja w której pojawia się błąd GUI</para></listitem>
+  </itemizedlist>
+</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_hardware">
+<title>Sprzęt i sterowniki</title>
+<para>
+<itemizedlist>
+<listitem><para>
+informacje o procesorze (CPU) (to działa tylko pod Linuksem):
+<screen>cat /proc/cpuinfo</screen>
+</para></listitem>
+<listitem><para>
+Producent karty graficznej i model. Np.:
+  <itemizedlist>
+    <listitem><para>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM</para></listitem>
+    <listitem><para>Matrox G400 DH 32MB SGRAM</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Typ sterownika video i wersja, np:
+  <itemizedlist>
+    <listitem><para>wbudowane sterowniki X</para></listitem>
+    <listitem><para>nVidia 0.9.623</para></listitem>
+    <listitem><para>Utah-GLX CVS 2001-02-17</para></listitem>
+    <listitem><para>DRI z X 4.0.3</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Typ karty dźwiękowej i sterownik, np:
+  <itemizedlist>
+    <listitem><para>Creative SBLive! Gold ze sterownikiem OSS z oss.creative.com</para></listitem>
+    <listitem><para>Creative SB16 ze sterownikiem OSS z kernela</para></listitem>
+    <listitem><para>GUS PnP z emulacją ALSA OSS</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Jeżeli masz wątpliwości, załącz wyjście <command>lspci -vv</command> systemu Linux.
+</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_configure">
+<title>Problemy z konfiguracją</title>
+<para>
+Jeżeli dostajesz błąd podczas uruchamiania <command>./configure</command> albo
+automatyczne wykrywanie czegoś zawiedzie, przeczytaj <filename>configure.log</filename>.
+Możliwe, że znajdziesz tam odpowiedź, na przykład kilka połączonych wersji
+tej samej biblioteki w Twoim systemie albo że zapomniałeś zainstalować pakietów
+rozwojowych (tych z przyrostkiem -dev albo -devel). Jeżeli wydaje Ci się, że istnieje jednak błąd, załącz
+<filename>configure.log</filename> w twoim raporcie.
+</para>
+</sect2>
+
+<sect2 id="bugreports_conpilation">
+<title>Problemy z kompilacją</title>
+<para>
+Prosimy załączyć następujące pliki:
+<itemizedlist>
+<listitem><para>config.h</para></listitem>
+<listitem><para>config.mak</para></listitem>
+</itemizedlist>
+Tylko jeżeli kompilacja się nie powiedzie w którymś z tych katalogów, załącz następujące pliki:
+<itemizedlist>
+<listitem><para>Gui/config.mak</para></listitem>
+<listitem><para>libvo/config.mak</para></listitem>
+<listitem><para>libao2/config.mak</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_playback">
+<title>Problemy z odtwarzaniem</title>
+<para>
+Prosimy załączyć wyjście <application>MPlayera</application> w trybie gadatliwym
+na poziomie pierwszym (opcja -v -przyp. tłum.), ale pamiętając o
+<emphasis role="bold">nie skracaniu wyniku polecenia</emphasis> podczas kopiowania
+go do Twojego listu. Developerzy potrzebują  wszystkich informacji do prawidłowego
+zdiagnozowania problemu. Możesz przekierować wyjście bezpośrednio do pliku w ten sposób:
+<screen>mplayer -v <replaceable>opcje</replaceable> <replaceable>nazwa_pliku</replaceable> &gt; mplayer.log 2&gt;&amp;1</screen>
+</para>
+
+<para>
+Jeżeli Twój problem jest specyficzny dla jednego albo wielu plików, załaduj winowajcę(ów) na:
+<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/"/>
+</para>
+
+<para>
+Załaduj także mały plik tekstowy nazwany tak samo jak Twój plik, ale z rozszerzeniem
+.txt. Opisz w nim problem, który masz z zawartym plikiem i załącz swój adres email oraz
+wyjście MPlayera w trybie gadatliwym na poziomie pierwszym. Zazwyczaj pierwsze 1-5 MB
+pliku jest wystarczające do odtworzenia problemu, ale żeby być pewnym prosimy wykonać:
+<screen>dd if=<replaceable>twój_plik</replaceable> of=<replaceable>mały_plik</replaceable> bs=1024k count=5</screen>
+To polecenie weźmie pierwsze pięć megabajtów '<emphasis role="bold">twojego_pliku</emphasis>'
+i zapisze je do '<emphasis role="bold">małego_pliku</emphasis>'. Następnie spróbuj odtworzyć
+mały plik i jeśli błąd wciąż się pojawia plik ten jest dla nas wystarczający.
+Prosimy <emphasis role="bold">w żadnym wypadku</emphasis> nie wysyłać plików poprzez
+pocztę elektroniczną! Załaduj je na serwer FTP i wyślij tylko ścieżkę/nazwę pliku. Jeżeli plik jest
+dostępny w sieci, wyślij <emphasis role="bold">dokładny</emphasis> adres pod którym jest on dostępny.
+</para>
+</sect2>
+
+<sect2 id="bugreports_crash">
+<title>Awarie programu (ang. Crashes)</title>
+<para>
+Musisz uruchomić <application>MPlayera</application> wewnątrz <command>gdb</command>
+i wysłać nam kompletne wyjście albo jeżeli posiadasz zrzut <filename>core</filename> (ang. core dump)
+utworzony w wyniku awarii, wyciągnąć z niego użyteczne informacje. Oto jak to zrobić:
+</para>
+
+<sect3 id="bugreports_debug">
+<title>Jak otrzymać informację o awarii</title>
+<para>
+Przekompiluj MPlayera z opcją debugowania kodu:
+<screen>
+./configure --enable-debug=3
+make
+</screen>
+i uruchom MPlayera używając gdb:
+<screen>gdb ./mplayer</screen>
+Jesteś teraz wewnątrz gdb. Wpisz:
+<screen>run -v <replaceable>opcje-mplayera</replaceable> <replaceable>nazwa_pliku</replaceable></screen>
+i odtwórz swoją awarię. Gdy tylko to zrobisz, gdb przeniesie cię z powrotem do linii poleceń, gdzie należy wpisać
+<screen>
+bt
+disass $pc-32 $pc+32
+info all-registers
+</screen>
+</para>
+</sect3>
+
+<sect3 id="bugreports_core">
+<title>Jak wyciągnąć sensowne informację ze zrzutu core (ang. core dump)</title>
+<para>
+Utwórz następujący plik poleceń:
+<screen>
+bt
+disass $pc-32 $pc+32
+info all-registers
+</screen>
+A następnie uruchomić następujące polecenie:
+<screen>gdb mplayer --core=core -batch --command=<replaceable>command_file</replaceable> &gt; mplayer.bug</screen>
+</para>
+</sect3>
+</sect2>
+</sect1>
+
+<sect1 id="bugreports_advusers">
+<title>Wiem co robię...</title>
+<para>
+Jeżeli utworzyłeś właściwy raport błędu kierując się powyższymi wskazówkami i
+jesteś pewien że to błąd MPlayera, nie kompilatora albo uszkodzonego pliku,
+przeczytałeś dokumentację i nie możesz znaleźć rozwiązania, Twoje sterowniki
+dźwięku są w porządku, możesz chcieć zapisać się na listę mplayer-advusers
+(tylko po angielsku -przyp. tłum.) i wysłać tam swoje zgłoszenie błędu, aby uzyskać
+lepszą i szybszą odpowiedź.
+</para>
+
+<para>
+Wiedz, że jeśli zadasz trywialne pytanie albo odpowiedź na nie znajduje się w
+podręczniku (ang. man), zamiast dostać odpowiedź zostaniesz zignorowany
+albo obrzucony wyzwiskami.
+Dlatego też nie obrażaj nas i zapisz się na listę -advusers tylko jeżeli naprawdę
+wiesz co robisz i czujesz się zaawansowanym użytkownikiem lub developerem.
+Jeżeli spełniasz te kryteria, nie powinno Ci sprawić problemu znalezienie sposobu
+zapisania się na listę (pamiętaj, że musisz biegle znać j. angielski -przyp. tłum.)
+</para>
+
+</sect1>
+
+</appendix>

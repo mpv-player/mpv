@@ -1,0 +1,1160 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- synced with 1.8  -->
+<sect2 id="audio-dev">
+<title>Urządzenia wyjściowe audio</title>
+<sect3 id="sync">
+<title>Synchronizacja Audio/Video</title>
+
+
+<para>
+Interfejs audio <application>MPlayera</application> nazywany jest
+<emphasis>libao2</emphasis>. Obecnie zawiera następujące sterowniki:
+</para>
+
+<informaltable>
+<tgroup cols="2">
+<thead>
+  <row><entry>Sterownik</entry><entry>Komentarz</entry></row>
+</thead>
+<tbody>
+<row><entry>oss</entry><entry>
+  sterownik OSS (ioctl, sprzętowa obsługa AC3)
+  </entry></row>
+<row><entry>sdl</entry><entry>
+  sterownik SDL (obsługuje takie demony dźwięku jak: <emphasis role="bold">ESD</emphasis>
+  i <emphasis role="bold">ARTS</emphasis>)
+  </entry></row>
+<row><entry>nas</entry><entry>
+  sterownik NAS (Network Audio System)
+  </entry></row>
+<row><entry>alsa5</entry><entry>
+  rdzenny sterownik ALSA 0.5 
+  </entry></row>
+<row><entry>alsa9</entry><entry>
+  rdzenny sterownik ALSA 0.9 (sprzętowa obsługa AC3)
+  </entry></row>
+<row><entry>sun</entry><entry>
+  rdzenny sterownik dźwięku SUN (<filename>/dev/audio</filename>) dla użytkowników 
+  BSD Solarisa 8
+  </entry></row>
+<row><entry>macosx</entry><entry>
+  rdzenny sterownik MacOSX
+  </entry></row>
+<row><entry>win32</entry><entry>
+  rdzenny sterownik Win32
+  </entry></row>
+<row><entry>arts</entry><entry>
+  rdzenny sterownik ARTS (głównie dla użytkowników KDE)
+  </entry></row>
+<row><entry>esd</entry><entry>
+  rdzenny sterownik ESD (głównie dla użytkowników GNOMEa)
+  </entry></row>
+</tbody>
+</tgroup>
+</informaltable>
+
+<para>
+Sterowniki kart dźwiękowych przeznaczone dla Linuksa, mają problemy 
+związane z kompatybilnością. Dzieje się tak, ponieważ <application>MPlayer</application> 
+korzysta z wbudowanych właściwości <emphasis>poprawnie</emphasis> napisanych 
+sterowników dźwięku, które prawidłowo obsługują synchronizację audio/video.
+Niestety, niektórzy autorzy sterowników nie uwzględniają tej cechy, ponieważ
+nie jest ona potrzebna do odtwarzania efektów dźwiękowych i plików MP3. 
+</para>
+
+<para>
+Inne odtwarzacze, takie jak: <ulink url="http://avifile.sourceforge.net">aviplay</ulink>
+czy <ulink url="http://xine.sourceforge.net">xine</ulink> prawdopodobnie działają 
+od razu z tymi sterownikami, ponieważ używają "prostych" metod synchronizacji 
+korzystających z wewnętrznego zegara. Testy pokazały, że ich metody nie są tak
+wydajne jak <application>MPlayera</application>.
+</para>
+
+
+<para>
+Używanie <application>MPlayera</application> z poprawnie napisanym sterownikiem 
+dźwięku, nigdy nie zaowocuje desynchronizacją A/V z powodu dźwięku, poza bardzo źle
+stworzonymi plikami (sprawdź stronę man dla rozwiązań tego problemu).
+</para>
+
+<para>
+Jeśli zdarzy się tak, że posiadasz zły sterownik dźwięku, spróbuj opcji 
+<option>-autosync</option>, powinno to rozwiązać Twój problem. Sprawdź
+strony man dla dokładniejszych informacji.
+</para>
+
+<itemizedlist>
+<title>Kilka uwag:</title>
+<listitem><para>
+  Jeśli posiadasz sterownik OSS, spróbuj najpierw opcji <option>-ao oss</option>
+  (domyślna). Jeżeli zauważysz niestabilne działanie systemu, jego ciągłe 
+  zawieszenia się lub inne dziwne zachowanie, wypróbuj <option>-ao sdl</option>
+  (UWAGA: potrzebujesz zainstalowanych bibliotek i plików nagłówkowych SDL). 
+  Sterownik SDL pomaga w wielu wypadkach, a także obsługuje ESD (GNOME) i ARTS (KDE).
+  </para></listitem>
+<listitem><para>
+  Jeżeli posiadasz sterowniki ALSA w wersji 0.5, wtedy prawie zawsze będziesz musiał 
+  użyć <option>-ao alsa5</option>, ponieważ posiadają one wadliwy kod emulacji OSS i
+  spowoduje <emphasis role="bold">błąd <application>MPlayera</application></emphasis>
+  wyświetlając komunikat o podobnej treści, jak ta:
+  <screen>
+    DEMUXER: Za dużo (945 w 8390980 bajtach) pakietów video w buforze!
+    (DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!)<!--
+--></screen>
+  </para></listitem>
+<listitem><para>
+  Na Solarisie używaj sterownika SUN poprzez opcję <option>-ao sun</option>,
+  w przeciwnym wypadku ani video, ani audio nie będą działały.
+  </para></listitem>
+<listitem><para>
+  Jeśli dźwięk przerywany jest krótkimi trzaskami podczas odtwarzania  z CD-ROMu, 
+  włącz odmaskowanie IRQ, wpisując np. <command>hdparm -u1 /dev/cdrom</command> 
+  (<command>man hdparm</command>). Jest to bardzo przydatne i opisane bardziej 
+  szczegółowo w <link linkend="drives">sekcji dotyczącej CD-ROMu</link>.
+ </para></listitem>
+</itemizedlist>
+</sect3>
+
+<sect3 id="experiences">
+<title>Doświadczenia związane z użytkowaniem kart dźwiękowych, zalecenia</title>
+<para>
+Przy stosowaniu Linuksa, zalecamy jądro z serii 2.4.x . Jądro w wersji 2.2 nie było
+testowane.
+</para>
+
+<para>
+Sterowniki kart dźwiękowych używane w Linuksie są głównie dostarczane przez 
+wolną wersję OSS. Wypierane są one przez system
+<ulink url="http://www.alsa-project.org">ALSA</ulink>
+(Advanced Linux Sound Architecture) w wersji rozwojowej jądra 2.5. Jeżeli Twoja
+dystrybucja nie używa ALSA, możesz ją wypróbować, jeżeli będziesz miał jakieś 
+kłopoty z dźwiękiem. ALSA generalnie prześciga OSS w kompatybilności, wydajności
+i możliwościach. Jednak niektóre karty są obsługiwane wyłącznie przez komercyjną
+wersję OSS z witryny <ulink url="http://www.opensound.com/">4Front Technologies</ulink>.
+Obsługuje ona również kilka innych systemów poza Linuksem.
+</para>
+
+<informaltable>
+<tgroup cols="8">
+  <colspec colname="c1"/>
+  <colspec colname="c2"/>
+  <colspec colname="c3"/>
+  <colspec colname="c4"/>
+  <colspec colname="c5"/>
+  <colspec colname="c6"/>
+  <colspec colname="c7"/>
+  <colspec colname="c8"/>
+  <spanspec spanname="driver" namest="c2" nameend="c5"/>
+  <spanspec spanname="ossfree" namest="c2" nameend="c2"/>
+  <spanspec spanname="alsa" namest="c3" nameend="c3"/>
+  <spanspec spanname="osspro" namest="c4" nameend="c4"/>
+  <spanspec spanname="others" namest="c5" nameend="c5"/>
+<thead>
+  <row>
+    <entry morerows="2" valign="middle">KARTA DŹWIĘKOWA</entry>
+    <entry spanname="driver">STEROWNIK</entry>
+    <entry morerows="2" valign="middle">Max częstotliwość(kHz)</entry>
+    <entry morerows="2" valign="middle">Max ilość kanałów</entry>
+    <entry morerows="2" valign="middle">Max ilość programów
+      <footnote id="maxopens">
+        <para>ilość aplikacji, które są w stanie używać urządzenia
+         <emphasis>w tym samym czasie</emphasis>.</para>
+      </footnote>
+    </entry>
+  </row>
+
+  <row>
+    <entry spanname="ossfree">OSS/Free</entry>
+    <entry spanname="alsa">ALSA</entry>
+    <entry spanname="osspro">OSS/Pro</entry>
+    <entry spanname="others">inne</entry>
+  </row>
+</thead>
+
+<tbody>
+  <row>
+    <entry>Zintegrowane karty VIA (686/A/B, 8233, 8235)</entry>
+    <entry>
+      <ulink url="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</ulink>
+    </entry>
+    <entry>snd-via82xx</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry>4-48 kHz lub wyłącznie 48 kHz, w zależności od chipsetu</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>Aureal Vortex 2</entry>
+    <entry>brak</entry>
+    <entry>brak</entry>
+    <entry>OK</entry>
+    <entry>
+      <ulink url="http://aureal.sourceforge.net">Sterowniki do Aureala dla Linuksa </ulink>
+      <ulink url="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2"> bufor zwiększony do 32k</ulink>
+    </entry>
+    <entry>48</entry>
+    <entry>4.1</entry>
+    <entry>5+</entry>
+  </row>
+
+  <row>
+    <entry>SB Live!</entry>
+    <entry>Wyjście analogowe-OK, SP/DIF nie działa</entry>
+    <entry>Oba działają</entry>
+    <entry>Oba działają</entry>
+    <entry>
+      <ulink url="http://opensource.creative.com">Sterowniki OSS Creativu (obsługa SP/DIF)</ulink>
+    </entry>
+    <entry>192</entry>
+    <entry>4.0/5.1</entry>
+    <entry>32</entry>
+  </row>
+
+  <row>
+    <entry>SB 128 PCI (es1371)</entry>
+    <entry>OK</entry>
+    <entry>?</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry>48</entry>
+    <entry>stereo</entry>
+    <entry>2</entry>
+  </row>
+
+  <row>
+    <entry>SB AWE 64</entry>
+    <entry>max 44kHz</entry>
+    <entry>źle brzmi na 48kHz</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry>48</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>GUS PnP</entry>
+    <entry>brak</entry>
+    <entry>OK</entry>
+    <entry>OK</entry>
+    <entry></entry>
+    <entry>48</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>Gravis UltraSound ACE</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>Gravis UltraSound MAX</entry>
+    <entry>OK</entry>
+    <entry>OK (?)</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry>48</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>ESS 688</entry>
+    <entry>OK</entry>
+    <entry>OK (?)</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry>48</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>Karty C-Media (CMI8338/8738)</entry>
+    <entry>OK</entry>
+    <entry>OK SP/DIF jest obsługiwane przez ALSA 0.9.x</entry>
+    <entry>?</entry>
+    <entry></entry>
+    <entry>44</entry>
+    <entry>stereo</entry>
+    <entry>1</entry>
+  </row>
+
+  <row>
+    <entry>Karty Yamaha (*ymf*)</entry>
+    <entry>złe (?) (może <option>-ao sdl</option>)</entry>
+    <entry>Działa poprawnie tylko z ALSA 0.5 z włączoną emulacją OSS
+      <emphasis role="bold">i</emphasis> <option>-ao sdl</option> (!) (?)</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>Karty z chipami envy24 (jak Terratec EWS88MT)</entry>
+    <entry>?</entry>
+    <entry>?</entry>
+    <entry>OK</entry>
+    <entry></entry>
+    <entry>?</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>PC Speaker lub DAC</entry>
+    <entry>OK</entry>
+    <entry>brak</entry>
+    <entry></entry>
+    <entry>
+      <ulink url="http://www.geocities.com/stssppnn/pcsp.html">Sterowniki do PC speakera dla Linuksa (OSS)</ulink>
+    </entry>
+    <entry>Sterownik emuluje 44.1, może więcej.</entry>
+    <entry>mono</entry>
+    <entry>1</entry>
+  </row>
+
+</tbody>
+</tgroup>
+</informaltable>
+
+<para>
+Pomoc przy tworzeniu tego dokumentu jest mile widziana. Powiedz jak
+<application>MPlayer</application> i Twoja karta dźwiękowa
+(karty dźwiękowe) współpracują razem.
+</para>
+</sect3>
+
+
+<sect3 id="af">
+<title>Filtry audio</title>
+<para>
+  Stare wtyczki audio zostały wyparte przez nową warstwę filtrów dźwiękowych.
+  Mogą być one użyte do zmiany właściwości danych audio zanim dźwięk dotrze do 
+  karty. Ich uruchamianie i wyłączanie odbywa się przeważnie automatycznie, 
+  może to być jednak zmienione. Filtry są włączane wtedy, kiedy cechy dźwięku
+  różnią się od tych wymaganych przez urządzenie audio w przeciwnym wypadku 
+  procedura ta jest omijana. Opcja <option>-af filter1,filter2,...</option>
+  używana jest do nadpisania automatycznych ustawień lub do zastosowania
+  dodatkowych. Kolejność aplikowania filtrów uzależniona jest od kolejności 
+  w ciągu oddzielonych od siebie przecinkami wartości.
+</para>
+
+<para>
+Przykład:
+<screen>mplayer -af resample,pan film.avi</screen>
+uruchomi dźwięk poprzez filtr zmieniający częstotliwość próbkowania (resample filter) 
+a następnie poprzez filtr pan. Zauważ, że lista nie może zawierać żadnych spacji, 
+inaczej zostanie błędnie zinterpretowana przez program.
+</para>
+
+<para>
+Filtry często posiadają opcje, które zmieniają ich zachowanie. Są one dokładniej 
+opisane w sekcji poniżej. Jeżeli pominie się parametry, to filtr uruchomi się
+z domyślnymi ustawieniami. Poniżej przedstawiony jest przykład jak używać
+filtrów wraz z ich opcjami:
+<screen>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1 -srate 11025 media.avi</screen>
+ustawi częstotliwość wyjściową filtru zmieniającego próbkowanie (resample filter) 
+na 11025Hz i zmiksuje inne kanały do 1, używając filtru pan.
+</para>
+
+<para>
+Ogólną kontrolę nad warstwą filtrów daje opcja <option>-af-adv</option>.
+Zawiera ona dwie dodatkowe opcje:
+</para>
+
+<para>
+<option>force</option> jest polem bitowym, które określa jak filtry
+są stosowane i jakiej optymalizacji prędkości/dokładności używają:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>0</option></term>
+<listitem><para>
+Użyj automatycznego stosowania filtrów i optymalizuj względem szybkości procesora.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>1</option></term>
+<listitem><para>
+Użyj automatycznego stosowania filtrów i optymalizuj tak, żeby osiągnąć największą
+prędkość.
+<emphasis>Uwaga:</emphasis> Niektóre możliwości filtrów audio mogą nie zadziałać i 
+jakość dźwięku spadnie.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>2</option></term>
+<listitem><para>
+Użyj automatycznego stosowania filtrów i optymalizuj pod kątem jak największej
+jakości.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>3</option></term>
+<listitem><para>
+Nie używaj automatycznego stosowania filtrów i nie optymalizuj.
+<emphasis>Uwaga:</emphasis> Jeśli używasz tego ustawienia, możliwe jest
+wystąpienie błędów podczas działania MPlayera i jego zakończenie.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>4</option></term>
+<listitem><para>
+Użyj automatycznego stosowania filtrów (tak jak dla 0), jednak użyj przetwarzania
+zmiennoprzecinkowego kiedy to możliwe.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>5</option></term>
+<listitem><para>
+Użyj automatycznego stosowania filtrów (tak jak dla 1), jednak użyj przetwarzania
+zmiennoprzecinkowego kiedy to możliwe.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>6</option></term>
+<listitem><para>
+Użyj automatycznego stosowania filtrów (tak jak dla 2), jednak użyj przetwarzania
+zmiennoprzecinkowego kiedy to możliwe.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>7</option></term>
+<listitem><para>
+Użyj automatycznego stosowania filtrów (tak jak dla 3), jednak użyj przetwarzania
+zmiennoprzecinkowego kiedy to możliwe.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+<option>list</option> jest aliasem dla opcji -af.
+</para>
+
+<para>
+Warstwa filtrów jest również sterowana niżej podanymi, standardowymi opcjami:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>-v</option></term>
+<listitem><para>
+Zwiększa poziom "gadatliwości" i sprawia, że większość filtrów drukuje dodatkowe
+komunikaty.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-channels</option></term>
+<listitem><para>
+Ta opcja ustawia ilość kanałów wyjściowych, których ma używać Twoja karta.
+Ma ona również wpływ na ilość kanałów, które są dekodowane z
+nośnika danych. Jeśli zawiera on mniej kanałów, filtr kanałów (channels filter)
+zostanie automatycznie użyty (zobacz poniżej). Przekierowywanie będzie ustawione na
+domyślne.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-srate</option></term>
+<listitem><para>
+Opcja ta ustawia częstotliwość próbkowania, którą ma używać Twoja karta
+(oczywiście karty mają swoje ograniczenia). Jeżeli poziom próbkowania Twojej
+karty różni się od tego stosowanego w nośniku, zostanie włączony filtr zmieniający
+próbkowanie (resample filter, zobacz poniżej), aby zniwelować różnice.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-format</option></term>
+<listitem><para>
+Opcja ta ustawia format próbki pomiędzy filtrem audio a kartą dźwiękową.
+Jeżeli żądany format próbki dla karty jest inny niż format zawierający się w nośniku,
+zostanie zastosowany filtr formatu (format filter, zobacz poniżej), aby zniwelować 
+różnice.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<sect4 id="af_resample">
+<title>Zmniejszenie/Zwiększenie częstotliwości próbkowania (Up/Downsampling)</title>
+
+<para>
+MPlayer w pełni obsługuje zmniejszanie/zwiększanie częstotliwości (up/downsampling)
+poprzez filtr zmieniający częstotliwość próbkowania - <option>resample</option> filter.
+Może być on użyty, jeżeli masz stałą częstotliwość na karcie, albo jeżeli nie jest
+ona w stanie przerobić więcej niż 44.1kHz. Filtr jest automatycznie uruchamiany,
+jeżeli jest to konieczne, ale może również zostać włączony z poziomu linii komend.
+Ma trzy opcje:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>srate &lt;8000-192000&gt;</option></term>
+<listitem><para>
+    jest to liczba całkowita, używana do określenia wyjściowej częstotliwości 
+    próbkowania w Hz. Przyjmuje wartości z zakresu od 8kHz do 192kHz. Jeżeli
+    częstotliwość wejściowa i wyjściowa są takie same albo jeżeli ten parametr 
+    jest pominięty, filtr jest wyłączany. Wysoka częstotliwość przeważnie zwiększa 
+    jakość dźwięku, szczególnie jeżeli filtr jest użyty wraz z innymi.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>sloppy</option></term>
+<listitem><para>
+    jest dodatkowym parametrem binarnym, który pozwala na małą różnicę między 
+    częstotliwością wyjściową a tą podaną przez <option>srate</option>. Opcja
+    ta może zostać użyta jeżeli początek odtwarzania jest bardzo wolny. Jest 
+    standardowo uruchomiony.
+</para></listitem>
+</varlistentry>
+
+
+<varlistentry>
+<term><option>type &lt;0-2&gt;</option></term>
+<listitem><para>
+    jest dodatkową liczbą całkowitą z przedziału od <literal>0</literal> 
+    do <literal>2</literal>, która wybiera metodę zmiany częstotliwości 
+    próbkowania. Tutaj <literal>0</literal> przedstawia interpolację liniową
+    (linear interpolation), <literal>1</literal> reprezentuje  metodę wielofazowego 
+    przetwarzania banku filtrów (poly-phase filter-bank processing) oraz przetwarzanie 
+    całkowitoliczbowe, <literal>2</literal> do zmiany częstotliwości przy użyciu
+    wielofazowego przetwarzania banku filtrów (poly-phase filter-bank processing) 
+    oraz przetwarzania zmiennoprzecinkowego. Interpolacja liniowa (linear interpolation)
+    jest wyjątkowo szybka, jednak pogarsza jakość dźwięku szczególnie przy zwiększaniu
+    częstotliwości (upsampling). Najlepszą jakość daje <literal>2</literal>,
+    ale metoda ta potrzebuje największej mocy obliczeniowej.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>Przykład:
+<screen>mplayer -af resample=44100:0:0</screen>
+ustawi częstotliwość wyjściową filtru zmieniającego częstotliwość próbkowania
+(resample filter) na 44100Hz używając przy tym dokładnego skalowania częstotliwości 
+wyjściowej oraz interpolacji liniowej (linear interpolation).
+</para>
+</sect4>
+
+<sect4 id="af_channels">
+<title>Zmiana liczby kanałów</title>
+<para>
+Filtr kanałów (<option>channels</option> filter) może być użyty w celu dodania
+lub usunięcia kanałów, można go użyć także do kopiowania lub przekierowywania kanałów.
+Jest on automatycznie włączony, jeżeli wyjście warstwy audio filtrów różni się 
+od wejściowego lub jeżeli zażądano jego uruchomienia. Filtr wyłącza się sam,
+jeżeli nie jest używany. Liczba parametrów jest dynamiczna:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>nch &lt;1-6&gt;</option></term>
+<listitem><para>
+  jest to liczba całkowita z zakresu od <literal>1</literal> do <literal>6</literal>, 
+  która ustawia liczbę kanałów wyjściowych. Ta opcja jest wymagana,
+  w przypadku jeżeli nie zostanie podana, program wywoła błąd uruchamiania
+  (runtime error).
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>nr &lt;1-6&gt;</option></term>
+<listitem><para>
+  jest to liczba całkowita z zakresu od <literal>1</literal> do <literal>6</literal>, 
+  która używana jest do podania liczby dróg rutowania. Ten parametr jest opcjonalny. 
+  Jeżeli jest pominięty, stosowane jest domyślne rutowanie.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>od1:do1:od2:do2:od3:do3...</option></term>
+<listitem><para>
+  to pary liczb pomiędzy <literal>0</literal> a <literal>5</literal>, które
+  określają gdzie poszczególny kanał ma być przekierowywany.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+  Jeżeli tylko opcja <option>nch</option> jest podana, użyte jest domyślne przekierowywanie,
+  działa ono następująco: Jeżeli ilość kanałów wyjściowych jest większa niż 
+  wejściowych, tworzone są puste kanały (poza miksowaniem z mono do stereo, 
+  wtedy kanał mono jest powtarzany w obu kanałach wyjściowych). Jeżeli ilość 
+  kanałów wyjściowych jest mniejsza niż wejściowych, nadmiarowe kanały będą usuwane.
+</para>
+
+<para>
+Przykład 1:
+<screen>mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi</screen>
+zmieni ilość kanałów na 4 i ustawia 4 drogi przekierowywania, które zamieniają
+kanał 1 z 0, a 2 i 3 pozostawiają bez zmian. Zauważ, że jeżeli odtwarzany
+był nośnik zawierające 2 kanały, kanały 2 i 3 będą puste ale
+0 i 1 ciągle zamienione.
+</para>
+
+
+<para>
+Przykład 2:
+<screen>mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi</screen>
+zmieni ilość kanałów na 6 i ustawi 4 drogi przekierowywania, które skopiują
+kanał 0 do 0 i 3. Kanały 4 i 5 będą puste.
+</para>
+</sect4>
+
+<sect4 id="af_format">
+<title>Konwerter formatu próbek (sample format converter)</title>
+<para>
+Filtr formatu (<option>format</option> filter)  przekształca różne formaty
+próbek w inne. Jest automatycznie uruchamiany, kiedy jest potrzebny przez 
+kartę lub inny filtr dźwiękowy.
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>bps &lt;numer&gt;</option></term>
+<listitem><para>
+    może mieć wartość <literal>1</literal>, <literal>2</literal> lub 
+    <literal>4</literal>, określa ilość bajtów przypadającą na próbkę. Parametr 
+    ten jest wymagany, jeżeli nie zostanie podany, program wywoła błąd uruchamiania
+    (runtime error).
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>f &lt;format&gt;</option></term>
+<listitem><para>
+    jest ciągiem znaków, określających próbkę. Ciąg jest kombinacją:
+    <option>alaw</option>, <option>mulaw</option> lub
+    <option>imaadpcm</option>, <option>float</option> lub <option>int</option>,
+    <option>unsigned</option> lub <option>signed</option>, <option>le</option> lub
+    <option>be</option> (little lub big endian). Opcja ta jest wymagana, jeżeli
+    nie zostanie podana, program wywoła błąd podczas uruchamiania (runtime error).
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Przykład:
+<screen>mplayer -af format=4:float media.avi</screen>
+ustawi format wyjściowy na 4 bajty danych zmiennoprzecinkowych przypadających na próbkę.
+</para>
+</sect4>
+
+<sect4 id="af_delay">
+<title>Opóźnianie (delay)</title>
+<para>
+Filtr opóźniający (<option>delay</option> filter) opóźnia dźwięk zmierzający do
+głośników, tak żeby strumienie dźwiękowe z różnych kanałów dotarły do nich 
+jednocześnie. Jest to użyteczne, jeżeli masz więcej niż 2 głośniki. Filtr 
+ma kilka opcji:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>d1:d2:d3...</option></term>
+<listitem><para>
+    są liczbami rzeczywitymi, które przedstawiają opóźnienie w ms,
+    które powinno być zastosowane do każdego kanału. Minimalna wartość to 0ms a 
+    maksymalna to 1000ms.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Aby obliczyć opóźnienie dla poszczególnych kanałów, wykonaj co następuje:
+</para>
+
+<orderedlist>
+<listitem><para>
+    Oblicz odległość od głośników do pozycji słuchacza (w metrach), to da Ci
+    wartości od s1 do s5 (dla systemu 5.1). Nie ma sensu brać pod uwagę 
+    subwoofera (i tak nie usłyszysz różnicy).
+</para></listitem>
+<listitem><para>
+Odejmij odległość od s1 do s5 od odległości maksymalnej tzn.
+    s[i] = max(s) - s[i]; i = 1...5
+</para></listitem>
+<listitem><para>
+Oblicz opóźnienia w następujący sposób
+    d[i] = 1000*s[i]/342; i = 1...5
+</para></listitem>
+</orderedlist>
+
+<para>
+Przykład:
+<screen>mplayer -af delay=10.5:10.5:0:0:7:0 media.avi</screen>
+opóźni lewy i prawy przedni głośnik o 10.5ms, dwa tylnie i subwoofer o 0ms a
+centralny o 7ms.
+</para>
+
+</sect4>
+
+<sect4 id="af_volume">
+<title>Programowa regulacja głośności (software volume control)</title>
+
+<para>Programowa regulacja głośności (software volume control) jest obsługiwana
+poprzez filtr głośności (<option>volume</option> filter). Używaj go ostrożnie,
+gdyż może obniżyć stosunek sygnału do szumu. W większości wypadków
+najlepszym rozwiązaniem jest ustawienie miksera PCM na maksymalną wartość, wyłączy to 
+filtr, a Ty będziesz mógł regulować głośność poprzez głośniki. Jeżeli Twoja karta
+ma cyfrowy mikser PCM zamiast analogowego i zauważysz przekłamania, użyj miksera 
+MASTER. Jeżeli do komputera podłączony jest zewnętrzny wzmacniacz 
+(tak to zazwyczaj wygląda), poziom hałasu może zostać zredukowany poprzez 
+dostrojenie głównego poziomu głośności (master level) i pokrętła głośności, 
+dopóki syczenie w tle nie ustanie. Filtr ma dwie opcje:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>v &lt;-200 - +60&gt;</option></term>
+<listitem><para>
+    jest liczbą rzeczywistą pomiędzy <literal>-200</literal> a
+    <literal>+60</literal>, która przedstawia poziom głośności w dB. Domyślny
+     poziom to 0dB.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>c</option></term>
+<listitem><para>
+    jest binarną wartością która włącza lub wyłącza miękkie obcinanie (soft-clipping). 
+    Miękkie obcinanie (soft-clipping)  może sprawić, że dźwięk będzie łagodniejszy,
+    jeżeli wysokie poziomy dźwięku są użyte. Uaktywnij tę opcję, jeżeli moc
+    głośników jest zbyt niska. Zwróć uwagę, że ta metoda tworzy przekłamania i
+    powinna zostać użyta w ostateczności.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Przykład:
+<screen>mplayer -af volume=10.1:0 media.avi</screen>
+wzmocni dźwięk o 10.1dB i zastosuje metodę twardego obcinania (hard-clip), jeżeli 
+poziom dźwięku jest za wysoki.
+</para>
+
+<para>
+Ten filtr ma drugą właściwość: Mierzy ogólny, maksymalny poziom dźwięku i wypisuje go
+po zakończeniu MPlayera. Oszacowana głośność może być użyta do ustawienia poziomu 
+dźwięku w MEncoderze tak, żeby maksymalny zasięg dynamiczny był możliwy do 
+osiągnięcia.
+</para>
+</sect4>
+
+<sect4 id="af_equalizer">
+<title>Korektor (equalizer)</title>
+<para>
+Filtr korektora (<option>equalizer</option> filter) to 10 oktawowy,
+graficzny korektor pasm, zaimplementowany
+przy pomocy filtrów przejść 10 pasm IIR (10 IIR band pass filters). Oznacza to,
+że działa bez względu na format odtwarzanego dźwięku. Środkowe
+częstotliwości dla 10 pasm to:
+</para>
+
+<informaltable>
+<tgroup cols="2">
+<thead>
+  <row>
+    <entry>Numer pasma</entry><entry>Częstotliwość środkowa</entry>
+  </row>
+</thead>
+<tbody>
+  <row><entry>0</entry><entry>31.25 Hz</entry></row>
+  <row><entry>1</entry><entry>62.50 Hz</entry></row>
+  <row><entry>2</entry><entry>125.0 Hz</entry></row>
+  <row><entry>3</entry><entry>250.0 Hz</entry></row>
+  <row><entry>4</entry><entry>500.0 Hz</entry></row>
+  <row><entry>5</entry><entry>1.000 kHz</entry></row>
+  <row><entry>6</entry><entry>2.000 kHz</entry></row>
+  <row><entry>7</entry><entry>4.000 kHz</entry></row>
+  <row><entry>8</entry><entry>8.000 kHz</entry></row>
+  <row><entry>9</entry><entry>16.00 kHz</entry></row>
+</tbody>
+</tgroup>
+</informaltable>
+
+<para>
+Jeżeli częstotliwość próbkowania odtwarzanego dźwięku jest niższa niż środkowa
+częstotliwość dla odpowiedniego pasma, to jest ono wyłączane. Znanym błędem
+jest to, że właściwości dla najwyższego pasma nie są całkowicie symetryczne,
+jeżeli częstotliwość próbki jest zbliżona do częstotliwości środkowej danego pasma.
+Można obejść ten problem zwiększając jej częstotliwość (up-sampling), zanim ta
+dotrze do filtru korektora (equalizer filter).
+</para>
+
+<para>
+Filtr ma 10 parametrów:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>g1:g2:g3...g10</option></term>
+<listitem><para>
+są liczbami rzeczywistymi z przedziału od <literal>-12</literal> do
+<literal>+12</literal>, określającymi przyrost dB dla każdego pasma częstotliwości.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Przykład:
+<screen>mplayer -af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi</screen>
+wzmocni dźwięk w wyższych i niższych zakresach częstotliwości, wyciszając go 
+prawie całkowicie około 1kHz.
+</para>
+</sect4>
+
+<sect4 id="af_panning">
+<title>Filtr pan (panning filter)</title>
+<para>
+Użyj filtru pan (<option>pan</option> filter), żeby dowolnie miksować kanały. Najprościej 
+tłumacząc jest to połączenie programowej regulacji głośnością (software volume control) i 
+filtru kanałów (channels filter). Istnieją jego 2 podstawowe zastosowania:
+</para>
+
+<orderedlist>
+<listitem><para>
+Miksowanie wielu kanałów w mniejszą ilość, stereo do mono na przykład.
+</para></listitem>
+<listitem><para>
+Zmienianie &quot;szerokości&quot; centralnego głośnika w systemie przestrzennym.
+</para></listitem>
+</orderedlist>
+
+<para>
+Filtr jest trudny w użyciu i będzie wymagał zastosowania żmudnej metody prób i błędów,
+zanim zostanie osiągnięty oczekiwany rezultat. Liczba parametrów filtru zależy od
+ilości kanałów:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>nch &lt;1-6&gt;</option></term>
+<listitem><para>
+jest liczbą całkowitą z przedziału od <literal>1</literal> do <literal>6</literal> i 
+jest używana w celu określenia liczby kanałów wyjściowych. Opcja ta jest wymagana, 
+jeżeli nie zostanie podana, program wywoła błąd uruchamiania (runtime error).
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</option></term>
+<listitem><para>
+są liczbami rzeczywistymi z przedziału od <literal>0</literal> do
+<literal>1</literal>. <option>l[i][j]</option> ustala ile procent kanału wejściowego j 
+ma być zmiksowanych do kanału wyjściowego i.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Przykład 1:
+<screen>mplayer -af pan=1:0.5:0.5 -channels 1 media.avi</screen>
+zmiksuje kanały ze stereo do mono.
+</para>
+
+<para>
+Przykład 2:
+<screen>mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi</screen>
+da 3 kanał wyjściowy, zostawiając 0 i 1 nietkniętymi i miksując kanały 0 i 1
+do 2 kanału wyjściowego (który może być na przykład wysłany do subwoofera).
+</para>
+</sect4>
+
+<sect4 id="af_sub">
+<title>Subwoofer</title>
+<para>
+Filtr subwoofera (<option>sub</option> filter) dodaje kanał subwoofera do strumienia
+audio. Dane audio użyte do stworzenia tego kanału są średnią dźwięku w 0 i 1 kanale. Dźwięk 
+wynikowy zostanie poddany działaniu 4-rzędowego, dolnoprzepustowego filtru Butterwortha 
+(4th order Butterworth filter) z domyślną częstotliwością graniczną na poziomie 60Hz i 
+dodany do oddzielnego kanału w strumieniu audio.
+Uwaga: Wyłącz ten filtr, jeżeli odtwarzasz DVD z dźwiękiem w systemie Dolby Digital 5.1, 
+w przeciwnym wypadku, jego działanie zakłóci dźwięk subwoofera. Filtr ma 2 parametry:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>fc &lt;20-300&gt;</option></term>
+<listitem><para>
+    jest opcjonalną liczbą rzeczywistą, używaną do określenia wartości
+    częstotliwości granicznej w Hz. Prawidłowy zakres wynosi od 20Hz do 300Hz. Dla 
+    uzyskania najlepszego rezultatu, spróbuj ustawić ją na jak najniższą. Wzbogaci to
+    doświadczenia płynące z używania dźwięku stereo i w systemie przestrzennym. Domyślną 
+    wartością jest 60Hz.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>ch &lt;0-5&gt;</option></term>
+<listitem><para>
+    jest opcjonalną liczbą całkowitą pomiędzy <literal>0</literal> a 
+    <literal>5</literal>, która określa numer kanału, do którego ma zostać wysłany
+    dźwięk subwoofera. Domyślnym jest <literal>5</literal>. Zauważ, że liczbą kanałów
+    zwiększy się do <replaceable>ch</replaceable>, jeżeli zajdzie taka potrzeba.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Przykład:
+<screen>mplayer -af sub=100:4 -channels 5 media.avi</screen>
+doda kanał subwoofera z częstotliwością graniczną równą 100Hz do 4 kanału wyjściowego.
+</para>
+</sect4>
+
+<sect4 id="af_surround">
+<title>Dekoder dźwięku przestrzennego (Surround-sound decoder)</title>
+<para>
+Macierzowo zakodowany dźwięk przestrzenny, może być zdekodowany filtrem przestrzennym
+(<option>surround</option> filter). Dolby Surround jest przykładem
+formatu zakodowanego macierzowo. Wiele plików zawierających 2 kanały audio,
+faktycznie zawiera dźwięk przestrzenny zakodowany w tym systemie. Aby użyć 
+tego filtru potrzebujesz karty z obsługą przynajmniej 4 kanałów. Filtr 
+posiada jedną opcję:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>d &lt;0-1000&gt;</option></term>
+<listitem><para>
+jest opcjonalną liczbą rzeczywistą pomiędzy <literal>0</literal> a
+<literal>1000</literal>, używaną do ustawienia opóźnienia w ms dla tylnych głośników.
+Opóźnienie powinno być ustawione w następujący sposób: jeśli d1 to odległość od 
+pozycji słuchacza do przednich głośników a d2 to odległość od tylnych głośników,
+to opóźnienie d powinno być ustawione na 15ms, jeżeli d1 &lt;= d2 i 15 + 5*(d1-d2)
+jeżeli d1 &gt; d2. Domyślna wartość dla d to 20ms.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Przykład:
+<screen>mplayer -af surround=15 -channels 4 media.avi</screen>
+doda dźwięk przestrzenny dekodując z 15ms opóźnieniem dźwięk dla tylnych głośników.
+</para>
+</sect4>
+</sect3>
+
+<sect3 id="audio-plugins">
+<title>Wtyczki Audio (odradzane)</title>
+<note><para><emphasis role="bold">Wtyczki audio zostały wyparte przez filtry audio i 
+wkrótce zostaną usunięte.</emphasis></para></note>
+
+<para>
+<application>MPlayer</application> ma obsługę wtyczek audio. Mogą one być
+użyte do zmiany właściwości danych audio, zanim dźwięk dotrze do karty. Włącza 
+je się poprzez opcję <option>-aop</option>, która przyjmuje argumenty w postaci 
+<option>list=wtyczka1,wtyczka2,...</option>. Argument <option>list</option> 
+jest wymagany i określa, które wtyczki powinny zostać użyte i w jakiej kolejności. 
+Przykład:
+
+<screen>mplayer media.avi -aop list=resample,format</screen>
+
+przepuści dźwięk przez wtyczkę zmieniającą częstotliwość próbkowania 
+(resampling plugin) a następnie wtyczkę formatu (format plugin).
+</para>
+
+<para>
+Wtyczki również posiadają parametry, które zmieniają ich zachowanie. Opisane są 
+one dokładniej w sekcji poniżej. Wtyczka uruchomi się z domyślnymi wartościami, 
+jeżeli pominiemy jej opcje.  Poniżej podany jest przykład użycia wtyczek i 
+ich specyficznych ustawień:
+
+<screen>mplayer media.avi -aop list=resample,format:fout=44100:format=0x8</screen>
+
+ustawi częstotliwość wyjściową dla wtyczki zmieniającej częstotliwość próbkowania 
+(resample plugin) na 44100 Hz i format wyjściowy wtyczki formatu (format plugin) 
+na AFMT_U8.
+</para>
+
+<para>
+Obecnie wtyczki audio nie mogą zostać użyte w <application>MEncoderze</application>.
+</para>
+
+
+<sect4 id="updn-sampling">
+<title>Zwiększanie/Zmniejszanie częstotliwości próbkowania (up/downsampling)</title>
+
+<para>
+<application>MPlayer</application> w pełni obsługuje zmniejszanie/zwiększanie
+częstotliwości próbkowania (up/downsampling) dźwięku. Wtyczka ta może być
+użyta, jeżeli masz kartę ze stałą częstotliwością lub posiadasz kartę, która 
+nie jest w stanie przerobić więcej niż 44.1 kHz. Ograniczenia Twojego sprzętu
+nie są automatycznie wykrywane, więc musisz wyraźnie podać częstotliwość.
+Wtyczka ma jeden przełącznik: <option>fout</option>, który używany jest do
+ustawiania żądanej częstotliwości wyjściowej. Domyślną wartością jest
+48 kHz i podawana jest w Hz.
+</para>
+
+
+<para>
+Sposób użycia:
+
+<screen>
+mplayer <replaceable>media.avi</replaceable> -aop list=resample:fout=<replaceable>freq</replaceable></screen>
+
+gdzie <literal><replaceable>freq</replaceable></literal> jest częstotliwością
+w Hz, jak <literal>44100</literal>.
+</para>
+
+<note>
+<para>
+Częstotliwość wyjściową nie powinna być wyższa niż wartość domyślna.
+Spowoduje to odtwarzanie strumieni audio i video w zwolnionym tempie oraz
+zakłócenia dźwięku.
+</para>
+</note>
+</sect4>
+
+
+<sect4 id="surround-decode">
+<title>Dekodowanie dźwięku przestrzennego</title>
+
+<para>
+<application>MPlayer</application> posiada wtyczkę, która umożliwia dekodowanie
+macierzowo zakodowanego dźwięku przestrzennego. Dolby Surround jest przykładem
+takiego formatu.  Wiele plików zawierających 2 kanały audio faktycznie zawiera
+dźwięk przestrzenny zakodowany macierzowo. Aby skorzystać z tej właściwości potrzebujesz karty
+z obsługą przynajmniej 4 kanałów.
+</para>
+
+<para>
+Sposób użycia:
+<screen>mplayer <replaceable>media.avi</replaceable> -aop list=surround</screen>
+</para>
+</sect4>
+
+
+<sect4 id="sample-format-conv">
+<title>Konwerter formatu próbek (sample format converter)</title>
+
+<para>
+Jeżeli Twój sterownik do karty dźwiękowej nie obsługuje 16-bitowego typu danych ze znakiem,
+ta wtyczka może być użyta do jego zmiany na format zrozumiały dla 
+karty. Posiada jeden parametr - <option>format</option>, który może być ustawiony
+na jedną z wartości umieszczonych w <filename>libao2/afmt.h</filename>. Wtyczka 
+ta jest raczej rzadko potrzebna i jest przeznaczona dla zaawansowanych użytkowników.
+Mniej na uwadze, że zmienia ona tylko format próbki a nie jej częstotliwość czy 
+ilość kanałów.
+</para>
+
+<para>
+Sposób użycia:
+
+<screen>
+mplayer <replaceable>media.avi</replaceable> -aop list=format:format=<replaceable>outfmt</replaceable></screen>
+
+gdzie <literal><replaceable>outfmt</replaceable></literal> to wymagany format
+próbki.
+</para>
+</sect4>
+
+<sect4 id="audio-delay">
+<title>Opóźnianie</title>
+<para>
+Wtyczka opóźnia dźwięk i jest przykładem tego, jak tworzyć nowe wtyczki. Nie ma
+dla niej żadnego sensownego zastosowania z punktu widzenia użytkownika i wspomniałem 
+tylko o niej ze względu na kompletność tej dokumentacji. Nie używaj tej wtyczki,
+chyba że jesteś developerem.
+</para>
+</sect4>
+
+<sect4 id="sw-volume">
+<title>Programowa regulacja głośnością (software volume control)</title>
+
+<para>
+Wtyczka jest programowym odpowiednikiem regulacji głośnością i może
+być używana na maszynach z uszkodzonym urządzeniem miksującym. Może być również
+przydatna, jeżeli ktoś chce zmienić poziom wyjściowy głośności w 
+<application>MPlayerze</application> bez zmiany ustawień PCM w mikserze. 
+Ma jeden parametr - <option>volume</option>, który służy do ustawienia początkowej
+głośności. Może przyjmować wartości pomiędzy 0 a 255. Wartością domyślna jest 101,
+co odpowiada wzmocnieniu równemu 0dB. Używaj tej wtyczki z ostrożnością, gdyż 
+możesz obniżyć poziom sygnału do szumu. W większości wypadków najlepszym 
+rozwiązaniem jest ustawienie miksera PCM na maksymalną wartość i, zamiast wtyczką, 
+regulować głośność przy pomocy głośników. Jeżeli do komputera podłączony jest zewnętrzny wzmacniacz 
+(a zazwyczaj jest), poziom hałasu może zostać zredukowany poprzez
+dostrojenie głównego poziomu głośności (master level) i pokrętła głośności, 
+dopóki syczenie w tle nie ustanie.
+</para>
+
+<para>
+Sposób użycia:
+<screen>
+mplayer <replaceable>media.avi</replaceable> -aop list=volume:volume=<replaceable>0-255</replaceable></screen>
+</para>
+
+<para>
+Wtyczka ma również kompresor lub zdolność do miękkiego obcinania (soft-clipping).
+Kompresja może być użyta, jeżeli dynamika dźwięku jest bardzo wysoki lub
+jeżeli moc głośników jest zbyt niska. Bądź ostrożny, ponieważ ta
+funkcja tworzy zakłócenia dźwięku i powinna być użyta w ostateczności.
+</para>
+
+<para>
+Sposób użycia:
+<screen>
+mplayer <replaceable>media.avi</replaceable> -aop list=volume:softclip</screen>
+</para>
+</sect4>
+
+<sect4 id="extrastereo">
+<title>Extrastereo</title>
+
+<para>
+Wtyczka (liniowo) zwiększa różnicę pomiędzy lewym a prawym kanałem
+(jak wtyczka extrastereo w <application>XMMS</application>), co dodaje 
+efekt "na żywo" do odtwarzanego dźwięku.
+</para>
+
+<para>
+Sposób użycia:
+<screen>
+mplayer <replaceable>media.avi</replaceable> -aop list=extrastereo
+mplayer <replaceable>media.avi</replaceable> -aop list=extrastereo:mul=3.45<!--
+--></screen>
+
+Współczynnikiem (<option>mul</option>) jest liczba rzeczywista,
+której wartość domyślna to 2.5. Jeżeli ustawisz go na <literal>0.0</literal>, otrzymasz
+dźwięk mono (średnia obu kanałów). Jeśli na <literal>1.0</literal>, nic się nie 
+zmieni, a jeśli na <literal>-1.0</literal>, lewy i prawy kanał zostaną zamienione.
+</para>
+</sect4>
+
+
+<sect4 id="volnorm">
+<title>Normalizator głośności (volume normalizer)</title>
+
+<para>
+Wtyczka ustawia maksymalny poziom dźwięku, bez wywoływania zakłóceń.
+</para>
+
+<para>
+Sposób użycia:
+<screen>mplayer <replaceable>media.avi</replaceable> -aop list=volnorm</screen>
+</para>
+</sect4>
+</sect3>
+</sect2>

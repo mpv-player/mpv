@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- synced with 1.2 -->
+<chapter id="features">
+<title>Możliwości</title>
+
+&formats.xml;
+&codecs.xml;
+
+<sect1 id="devices">
+<title>Urządzenia wyjściowe</title>
+&video.xml;
+&audio.xml;
+</sect1>
+
+&tvinput.xml;
+&edl.xml;
+
+</chapter>

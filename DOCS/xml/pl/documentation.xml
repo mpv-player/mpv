@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="iso-8859-2" standalone="no"?>
+<!-- synced with 1.6 -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+	"/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd"
+[
+<!ENTITY audio.xml		SYSTEM "audio.xml">
+<!ENTITY bugreports.xml		SYSTEM "bugreports.xml">
+<!ENTITY bugs.xml		SYSTEM "bugs.xml">
+<!ENTITY cd-dvd.xml		SYSTEM "cd-dvd.xml">
+<!ENTITY codecs.xml		SYSTEM "codecs.xml">
+<!ENTITY edl.xml		SYSTEM "edl.xml">
+<!ENTITY faq.xml		SYSTEM "faq.xml">
+<!ENTITY features.xml		SYSTEM "features.xml">
+<!ENTITY formats.xml		SYSTEM "formats.xml">
+<!ENTITY history.xml		SYSTEM "history.xml">
+<!ENTITY install.xml		SYSTEM "install.xml">
+<!ENTITY mail-lists.xml		SYSTEM "mail-lists.xml">
+<!ENTITY mencoder.xml		SYSTEM "mencoder.xml">
+<!ENTITY patches.xml		SYSTEM "patches.xml">
+<!ENTITY ports.xml		SYSTEM "ports.xml">
+<!ENTITY skin.xml		SYSTEM "skin.xml">
+<!ENTITY tvinput.xml		SYSTEM "tvinput.xml">
+<!ENTITY usage.xml		SYSTEM "usage.xml">
+<!ENTITY users-vs-dev.xml	SYSTEM "users-vs-dev.xml">
+<!ENTITY video-filters.xml	SYSTEM "video-filters.xml">
+<!ENTITY video.xml		SYSTEM "video.xml">
+]>
+
+<book id="index" lang="pl">
+<bookinfo id="toc">
+<title>MPlayer - Odtwarzacz filmów dla LINUKSA</title>
+<subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
+<date>24 marca 2003</date>
+<copyright>
+  <year>2000</year>
+  <year>2001</year>
+  <year>2002</year>
+  <year>2003</year>
+  <holder>Arpad Gereoffy (A'rpi/ESP-team)</holder>
+</copyright>
+<!--
+<legalnotice>
+  <title>License</title>
+  <para>This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by the
+  Free Software Foundation; either version 2 of the License, or (at your
+  option) any later version.</para>
+
+  <para>This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+  for more details.</para>
+
+  <para>You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 59 Temple Place, Suite 330, Boston, MA, 02111-1307, USA.</para>
+</legalnotice>
+-->
+</bookinfo>
+
+
+<preface id="howtoread">
+<title>Jak czytać tę dokumentację</title>
+
+<para>
+Przy pierwszej instalacji powinieneś przeczytać wszystko od tego miejsca do
+końca rozdziału Instalacja, łącznie z tekstami, do których są tam odnośniki.
+Jeśli masz jeszcze jakieś pytania, wróć do <link linkend="toc">Spisu
+treści</link> i w nim poszukaj odpowiedniego tematu, przeczytaj 
+<xref linkend="faq"/> albo spróbuj przegrepować zbiory. Odpowiedź na większość
+pytań powinna być zawarta w niniejszej dokumentacji, a pozostałe prawdopodobnie zostały
+już zadane na naszych <link linkend="mailinglists">listach mailingowych</link>.
+Sprawdź <ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch">archiwa</ulink>,
+można tam znaleźć wiele interesujących informacji.
+</para>
+</preface>
+
+
+<chapter id="intro">
+<title>Wprowadzenie</title>
+
+<para>
+<application>MPlayer</application> jest odtwarzaczem filmów dla Linuksa 
+(działa też na wielu innych Uniksach i na procesorach 
+<emphasis role="bold">nie-x86</emphasis>, patrz <link linkend="ports">
+porty</link>). Odtwarza większość zbiorów w formatach MPEG, VOB, AVI, OGG/OGM, VIVO, 
+ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, 
+zbiory Matroska, obsługiwanych przez wiele rdzennych kodeków, XAnim, 
+RealPlayer, i Win32 DLL. Możesz w nim także oglądać filmy 
+<emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson,
+Theora</emphasis> i <emphasis role="bold">DivX</emphasis> (i wcale nie
+trzeba do tego biblioteki avifile!). Inną wielką zaletą MPlayera jest
+szeroki zakres obsługiwanych sterowników wyjściowych. Działa on z X11, Xv, DGA,
+OpenGL, SVGAlib, fbdev, AAlib, DirectFB, ale możesz też używać GGI i SDL (i
+dzięki temu wszystkich ich sterowników) i niektórych specyficznych dla kart
+graficznych sterowników niskiego poziomu (dla Matroxa, 3Dfxa, Radeona, Mach64,
+Permedia3)! Większość z nich obsługuje skalowanie sprzętowe lub programowe,
+więc filmy można oglądać na pełnym ekranie.
+<application>MPlayer</application> obsługuje wyświetlanie przy użyciu 
+niektórych sprzętowych dekoderów MPEG, takich jak 
+<link linkend="dvb">DVB</link> i <link linkend="dxr3">DXR3/Hollywood+</link>. 
+Nie można też zapomnieć o ładnych, dużych, antyaliasowanych i cieniowanych
+napisach (<emphasis role="bold">10 obsługiwanych typów</emphasis>) z
+czcionkami europejskimi/ISO&nbsp;8859-1,2 (polskimi, węgierskimi, angielskimi,
+czeskimi, itp.), cyrylicą, koreańskimi i wyświetlaniem na ekranie (OSD)!
+</para>
+
+<para>
+MPlayer jest doskonały do odczytywania uszkodzonych plików MPEG
+(przydatne przy niektórych VCD), odtwarza również błędne pliki AVI, których nie można
+odczytać za pomocą znanego odtwarzacza multimedialnego pod Windows. Nawet zbiory AVI
+bez bloku indeksowego można odtworzyć i można zrekonstruować ich indeks
+tymczasowo, używając opcji <option>-idx</option>, albo trwale dzięki
+<application>MEncoderowi</application>, w ten sposób umożliwiając sobie
+przeszukiwanie! Jak widać najważniejsza jest tu stabilność i jakość, ale szybkość
+również jest zadziwiająca.
+</para>
+
+<para>
+<application>MEncoder</application> (Enkoder filmów MPlayera) jest to prosty
+enkoder filmów, zaprojektowany do kodowania odczytywalnych przez
+<application>MPlayera</application> filmów 
+(<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
+na inne odczytywalne formaty (patrz niżej). Może kodować rozmaitymi kodekami video,
+takimi jak <emphasis role="bold">DivX4</emphasis> (1 i 2 przebiegowy), libavcodec oraz
+audio <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>. Ma też potężny
+system wtyczek do manipulacji obrazem.
+</para>
+
+
+<itemizedlist>
+<title>Możliwości MEncodera</title>
+<listitem><simpara>
+  Kodowanie z szerokiego zakresu formatów i dekoderów
+  <application>MPlayer</application>
+  </simpara></listitem>
+<listitem><simpara>
+  Kodowanie na wszystkie kodeki <link linkend="ffmpeg">libavcodec</link>
+  z ffmpeg.
+  </simpara></listitem>
+<listitem><simpara>
+  Kodowanie obrazu z <emphasis role="bold">tunerów kompatybilnych z V4L</emphasis>
+  </simpara></listitem>
+<listitem><simpara>
+  Kodowanie/multipleksowanie przeplatanych zbiorów AVI z prawidłowymi
+  indeksami
+  </simpara></listitem>
+<listitem><simpara>
+  Tworzenie zbiorów z zewnętrznego strumienia audio
+  </simpara></listitem>
+<listitem><simpara>
+  Kodowanie 1, 2 lub 3-przejściowe
+  </simpara></listitem>
+<listitem><para>
+  Dźwięk MP3 <emphasis role="bold">VBR</emphasis>
+  <important><simpara>
+  Dźwięk MP3 VBR w odtwarzaczach pod Windows nie zawsze brzmi przyjemnie!
+  </simpara></important>
+  </para></listitem>
+<listitem><simpara>
+  Dźwięk PCM
+  </simpara></listitem>
+<listitem><simpara>
+  Kopiowanie strumieniowe
+  </simpara></listitem>
+<listitem><simpara>
+  Synchronizacja wejścia A/V (oparta na PTS, może być wyłączona opcją 
+  <option>-mc 0</option>)
+  </simpara></listitem>
+<listitem><simpara>
+  Korekta FPS opcją <option>-ofps</option> (przydatne gdy kodujesz 
+  29.97 fps VOB na 24 fps AVI)
+  </simpara></listitem>
+<listitem><simpara>
+  Możliwość zastosowania naszego potężnego systemu wtyczek (kadrowanie,
+  powiększanie, obracanie, skalowanie, konwersja rgb/yuv)
+  <!-- Torinthiel: jak przetłumaczyć postprocess -->
+  </simpara></listitem>
+<listitem><simpara>
+  Możliwość wkodowania DVD/VOBsub <emphasis role="bold">ORAZ</emphasis> napisów
+  w zbiór wyjściowy
+  </simpara></listitem>
+<listitem><simpara>
+  Możliwość zapisu napisów DVD do formatu Vobsub
+  </simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+  <title>Planowane możliwości</title>
+  <listitem><simpara>
+  Zwiększenie zakresu dostępnych formatów/kodeków do (de)kodowania
+  (tworzenie zbiorów VOB ze strumieniami DivX4/Indeo5/VIVO :).
+  </simpara></listitem>
+</itemizedlist>
+
+<!-- FIXME: the license should be in bookinfo -->
+<para>
+<application>MPlayer</application> i <application>MEncoder</application>
+mogą być rozprowadzane zgodnie z warunkami GNU General Public License Version 2.
+</para>
+
+&history.xml;
+&install.xml;
+</chapter>
+
+
+&features.xml;
+&usage.xml;
+&faq.xml;
+&cd-dvd.xml;
+&ports.xml;
+&mencoder.xml;
+&mail-lists.xml;
+&bugreports.xml;
+&bugs.xml;
+&skin.xml;
+&users-vs-dev.xml;
+&patches.xml;
+</book>

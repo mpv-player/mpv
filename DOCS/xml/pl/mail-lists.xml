@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- synced with 1.3 -->
+<appendix id="mailinglists">
+<title>Listy mailingowe</title>
+<para>
+Istnieją publiczne listy mailingowe o <application>MPlayerze</application>.
+Jeśli nie jest to wyraźnie zaznaczone, językiem na nich obowiązującym jest 
+<emphasis role="bold">angielski</emphasis>. Proszę nie przysyłać wiadomości w
+innym języku, ani w formacie HTML! Limit na wielkość wiadomości wynosi 80KB.
+Większe dane należy ulokować w miejscu przeznaczonym do publicznego
+ściągania. Żeby się zapisać, należy kliknąć na poniższych odnośnikach. Na tych
+listach obowiązują te same zasady pisania i cytowania co w usenecie. Prosimy o ich
+przestrzeganie, ułatwia to życie tym, którzy czytają Wasze maile. Zasady pisania
+dostępne są pod adresami
+<ulink url="http://learn.to/edit_messages">HOWTO edit messages</ulink>
+lub (dla niecierpliwych)
+<ulink url="http://www.xs4all.nl/~hanb/documents/quotingguide.html">Quoting HOWTO</ulink>.
+<itemizedlist>
+<listitem><para>
+Lista ogłoszeń MPlayera:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"/>
+Lista na ogłoszenia MPlayera. Wysyłane są na nią informacje o nowych
+możliwościach.
+</para></listitem>
+<listitem><para>
+Lista developerów MPlayera:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"/>
+To lista dotycząca rozwoju MPlayera! Jest to miejsce na rozmowy o zmianach
+interface'u/API, nowych bibliotekach, optymalizacji kodu i zmianach w
+konfiguracji. Można przysyłać patche, ale nie zgłoszenia błędów, pytania
+użytkowników, prośby o nowe możliwości czy flame'y żeby utrzymać niski poziom
+ruchu na liście.
+</para></listitem>
+<listitem><para>
+Lista użytkowników MPlayera:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+  <itemizedlist>
+  <listitem><para>
+  Można tu przesyłać zgłoszenia błędów po przeczytaniu <link linkend="bugs">
+  znanych błędów</link> i <link linkend="bugreports">opisu zgłaszania
+  błędów</link>
+  </para></listitem>
+  <listitem><para>
+  Można tu przesyłać prośby o nowe możliwości (po przeczytaniu 
+  <emphasis role="bold">całej dokumentacji</emphasis>).
+  </para></listitem>
+  <listitem><para>
+  Można tu przesyłać pytania dotyczące użytkowania (po przeczytaniu 
+  <emphasis role="bold">całej dokumentacji</emphasis>).
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Lista węgierskich użytkowników MPlayera:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"/>
+  <itemizedlist>
+  <listitem><para>
+  Lista w języku węgierskim
+  </para></listitem>
+  <listitem><para>
+  Temat? Jeszcze zobaczymy... Na razie głównie flame i pytania typu RTFM :(
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Lista użytkowników MPlayera i Matroxa G200/G400/G450/G550:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"/>
+Pytania związane z Matroxem, takie jak
+  <itemizedlist>
+  <listitem><para>
+  pytania o mga_vid
+  </para></listitem>
+  <listitem><para>
+  oficjalne sterowniki beta Matroxa (dla X 4.x.x)
+  </para></listitem>
+  <listitem><para>
+  pytania o matroxfb-TVout
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Lista użytkowników MPlayera i kart DVB:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"/>
+Sprawy związane ze sprzętowym dekoderem zwanym DVB (nie 
+<emphasis role="bold">DXR3</emphasis>!).
+</para></listitem>
+<listitem><para>
+Log CVSu MPlayera:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"/>
+Na tę listę są automatycznie wysyłane wszystkie zmiany w kodzie MPlayera.
+Dozwolone są tu tylko pytania o te zmiany (prośby o 
+wyjaśnienie dlaczego dana zmiana jest konieczna, lepsze rozwiązania, możliwe
+problemy w tej zmianie).
+</para></listitem>
+<listitem><para>
+Lista przenoszenia MPlayera w środowisko Cygwin:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
+Lista poświęcona dyskusji o przenoszeniu MPlayera w środowisko Cygwin.
+</para></listitem>
+<listitem><para>
+Lista przenoszenia MPlayera w środowisko OS/2:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"/>
+Lista poświęcona dyskusji o przenoszeniu MPlayera w środowisko OS/2.
+</para></listitem>
+<listitem><para>
+Lista twórców i tłumaczy MPlayer Weekly News:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn"/>
+Lista poświęcona dyskusji o MPlayer Weekly News.
+</para></listitem>
+</itemizedlist>
+<note><para>
+Wyszukiwanie w archiwach list jest dostępne pod adresem
+<ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch"/>.
+</para></note>
+</para>
+</appendix>
