@@ -90,9 +90,10 @@ static void rawvideofile_write_index(muxer_t *muxer){
     return;
 }
 
-void muxer_init_muxer_rawvideo(muxer_t *muxer){
+int muxer_init_muxer_rawvideo(muxer_t *muxer){
   muxer->cont_new_stream = &rawvideofile_new_stream;
   muxer->cont_write_chunk = &rawvideofile_write_chunk;
   muxer->cont_write_header = &rawvideofile_write_header;
   muxer->cont_write_index = &rawvideofile_write_index;
+  return 1;
 }

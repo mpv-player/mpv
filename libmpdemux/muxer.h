@@ -8,7 +8,6 @@
 #define MUXER_TYPE_MPEG 1
 #define MUXER_TYPE_RAWVIDEO 2
 
-#define MUXER_MPEG_BLOCKSIZE 2048	// 2048 or 2324 - ?
 
 typedef struct {
   // muxer data:
@@ -24,7 +23,9 @@ typedef struct {
   unsigned int buffer_len;
   // mpeg block buffer:
   unsigned char *b_buffer;
-  unsigned int b_buffer_ptr;
+  unsigned int b_buffer_size;	//size of b_buffer
+  unsigned int b_buffer_ptr;	//index to next data to write
+  unsigned int b_buffer_len;	//len of next data to write
   // source stream:
   void* source; // sh_audio or sh_video
   int codec; // codec used for encoding. 0 means copy
@@ -58,23 +59,27 @@ typedef struct muxer_t{
   int idx_size;
   // streams:
   int num_videos;	// for MPEG recalculations
+  int num_audios;
   unsigned int sysrate;	// max rate in bytes/s
   //int num_streams;
   muxer_stream_t* def_v;  // default video stream (for general headers)
   muxer_stream_t* streams[MUXER_MAX_STREAMS];
+  void (*fix_stream_parameters)(muxer_stream_t *);
   void (*cont_write_chunk)(muxer_stream_t *,size_t,unsigned int);
   void (*cont_write_header)(struct muxer_t *);
   void (*cont_write_index)(struct muxer_t *);
   muxer_stream_t* (*cont_new_stream)(struct muxer_t *,int);
   FILE* file;
+  void *priv;
 } muxer_t;
 
 muxer_t *muxer_new_muxer(int type,FILE *);
 #define muxer_new_stream(muxer,a) muxer->cont_new_stream(muxer,a)
+#define muxer_stream_fix_parameters(muxer, a) muxer->fix_stream_parameters(a)
 #define muxer_write_chunk(a,b,c) a->muxer->cont_write_chunk(a,b,c)
 #define muxer_write_header(muxer) muxer->cont_write_header(muxer)
 #define muxer_write_index(muxer) muxer->cont_write_index(muxer)
 
-void muxer_init_muxer_avi(muxer_t *);
-void muxer_init_muxer_mpeg(muxer_t *);
-void muxer_init_muxer_rawvideo(muxer_t *);
+int muxer_init_muxer_avi(muxer_t *);
+int muxer_init_muxer_mpeg(muxer_t *);
+int muxer_init_muxer_rawvideo(muxer_t *);

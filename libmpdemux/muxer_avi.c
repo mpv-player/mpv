@@ -660,9 +660,10 @@ static void avifile_write_index(muxer_t *muxer){
   }
 }
 
-void muxer_init_muxer_avi(muxer_t *muxer){
+int muxer_init_muxer_avi(muxer_t *muxer){
   muxer->cont_new_stream = &avifile_new_stream;
   muxer->cont_write_chunk = &avifile_write_chunk;
   muxer->cont_write_header = &avifile_write_header;
   muxer->cont_write_index = &avifile_write_index;
+  return 1;
 }

@@ -72,6 +72,7 @@ extern m_option_t x264encopts_conf[];
 #endif
 
 extern m_option_t nuvopts_conf[];
+extern m_option_t mpegopts_conf[];
 
 m_option_t ovc_conf[]={
 	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_COPY, NULL},
@@ -269,6 +270,7 @@ m_option_t mencoder_opts[]={
 #endif
 
 	{"nuvopts",  nuvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"mpegopts",  mpegopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
 #define MAIN_CONF
 #include "cfg-common.h"
