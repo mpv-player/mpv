@@ -40,7 +40,7 @@ extern int verbose; // defined in mplayer.c
 int quant_store[MBR+1][MBC+1]; // [Review]
 #endif
 
-int avcodec_inited=0;
+//int avcodec_inited=0;
 
 // ===================================================================
 
