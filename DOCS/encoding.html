@@ -106,9 +106,9 @@
     can come from a previous 3-pass encoding (it interferes with current
     one)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
-    vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 1<BR>
+    vcodec=mpeg4:vpass=1:more_options -oac copy -o movie.avi<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
-    vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 2</CODE></P>
+    vcodec=mpeg4:vpass=2:more_options -oac copy -o movie.avi</CODE></P>
 
 <P><U><B>3-pass encoding:</B></U> this is an extension of 2-pass encoding,
   where the audio encoding takes place in a separate pass. This method enables
@@ -126,14 +126,14 @@
       prints the recommended bitrate values for 650Mb, 700Mb, and 800Mb
       destination sizes, after this pass finishes.</P></LI>
   <LI>Second pass:
-    <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
-      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=&lt;bitrate&gt;</CODE></P>
+    <P><CODE>mencoder &lt;file/DVD&gt; -oac copy
+      -ovc lavc -lavcopts vcodec=mpeg4:vpass=1:vbitrate=&lt;bitrate&gt;</CODE></P>
     <P>Alias the first pass of DivX4 video encoding. 
       Optionally specify the video bitrate MEncoder printed at the end of
       the previous pass.</P></LI>
   <LI>Third pass:
-    <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
-      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=&lt;bitrate&gt;</CODE></P>
+    <P><CODE>mencoder &lt;file/DVD&gt; -oac copy
+      -ovc lavc -lavcopts vcodec=mpeg4:vpass=2:vbitrate=&lt;bitrate&gt;</CODE></P>
     <P>Alias the second pass of DivX4 video encoding. 
       Optionally specify the video bitrate MEncoder printed at the end of
       the previous pass. In this pass, audio from <CODE>frameno.avi</CODE> will
@@ -148,9 +148,9 @@
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
     -o frameno.avi -oac mp3lame -lameopts vbr=3:more_options<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
-    -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 1<BR>
+    -lavcopts vcodec=mpeg4:vpass=1:more_options -oac copy -o movie.avi<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
-    -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 2</CODE></P>
+    -lavcopts vcodec=mpeg4:vpass=2:more_options -oac copy -o movie.avi</CODE></P>
 
 <P><U><B>2 or 3-pass encoding using internal libavcodec controller:</B></U>
   Optionally you can use libavcodec's internal 2 or 3-pass mode, it may give
@@ -159,13 +159,13 @@
 
 <UL>
   <LI><B>2-pass encoding:</B><BR>
-    <CODE>rm -f lavc_stats.txt<BR>
+    <CODE>
     mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 (audio-options) -o
       movie.avi<BR>
     mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 (audio-options) -o
       movie.avi</CODE></LI>
   <LI><B>3-pass encoding:</B><BR>
-    <CODE>rm -f frameno.avi lavc_stats.txt<BR>
+    <CODE>rm -f frameno.avi<BR>
     mencoder -dvd 2 -ovc frameno (audio-options) -o frameno.avi<BR>
     mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o
       movie.avi<BR>
@@ -332,8 +332,8 @@ Explanation of the process:
   &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
   &nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0
     -sid 2 -o frameno.avi -ovc frameno -oac mp3lame -lameopts vbr=3</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts pass=1</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts pass=2 -vobsubout
     subtitles -vobsuboutindex 1 -sid 5</CODE></P>
 
 <P><I>Copying a french subtitle from an MPEG file</I><BR>

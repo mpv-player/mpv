@@ -1800,12 +1800,16 @@ rate control reaction period
 rate control reaction ratio
 .IPs crispness=<0\-100>
 specify crispness/\:smoothness
+.IPs pass=<1\-2>
+With this you can encode 2pass DivX4 files.
+First encode with pass=1, then with the same parameters, encode with
+pass=2.
 .IPs vbrpass=<0\-2>
-Override the -pass argument and use XviD VBR Library instead of DivX4
+Override the pass argument and use XviD VBR Library instead of DivX4
 VBR.  Available options are:
 .
 .RSss
-0: one pass encoding (as in not putting -pass on the command line)
+0: one pass encoding (as in not putting pass on the command line)
 .br
 1: Analysis (first) pass of two pass encoding.
 The resulting AVI file can be directed to /dev/null.
@@ -2316,15 +2320,6 @@ encode with a libavcodec codecs
 .PD 1
 .
 .TP
-.B \-pass <1/\:2>
-With this you can encode 2pass DivX4 files.
-First encode with \-pass\ 1, then with the same parameters, encode with
-\-pass\ 2.
-
-.I NOTE:
-.br
-Use \-lavcopts vpass=1/\:2 for libavcodec 2-pass instead of \-pass\ 1/\:2.
-.TP
 .B \-passlogfile <filename>
 When encoding in 2pass mode, MEncoder dumps first pass' informations
 to the given file instead of the default divx2pass.log.
@@ -2685,7 +2680,7 @@ mencoder \-tv on:driver=v4l:width=640:height=480 \-o tv.avi \-ovc rawrgb
 .TP
 .B Encoding from a pipe
 rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24
-\-pass\ 1 \-\- \-
+\-\- \-
 .TP
 .B Encoding multiple *.vob files
 cat *.vob | mencoder <options> \-
