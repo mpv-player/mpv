@@ -199,6 +199,10 @@ Unpack the archive and choose one of the available font sizes. Then copy the
 font files of the corresponding size into /usr/local/share/mplayer/font/ or
 ~/.mplayer/font/ (or whatever you set with './configure --datadir=DIR').
 
+Alternatively you can use a ttf font installed on your system and 
+make a symbolic link to either /usr/local/share/mplayer/subfont.ttf or
+~/.mplayer/subfont.ttf.
+
 
 ____________________________
 STEP6: Installing a GUI skin
