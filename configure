@@ -1154,8 +1154,6 @@ if test "$_termcap" = auto ; then
 int main(void) { return 0; }
 EOF
   cc_check -ltermcap && _termcap=yes
-else
-  _termcap=no
 fi
 if test "$_termcap" = yes ; then
   _def_termcap='#define USE_TERMCAP 1'
@@ -1174,8 +1172,6 @@ if test "$_termios" = auto ; then
 int main(void) { return 0; }
 EOF
   cc_check && _termios=yes
-else
-  _termios=no
 fi
 if test "$_termios" = yes ; then
   _def_termios='#define HAVE_TERMIOS 1'
@@ -1352,7 +1348,7 @@ fi
 
 
 echocheck "Xv"
-if test "$_x11" = yes && test "$_xv" = auto ; then
+if test "$_x11" = yes && test "$_xv" != no ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/Xvlib.h>
@@ -1374,7 +1370,7 @@ echores "$_xv"
 
 
 echocheck "Xinerama"
-if test "$_x11" = yes && test "$_xinerama" = auto ; then
+if test "$_x11" = yes && test "$_xinerama" != no ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/Xinerama.h>
@@ -1400,7 +1396,7 @@ echores "$_xinerama"
 # This check may be useful for future mplayer versions (to change resolution)
 # If you run into problems, remove '-lXxf86vm'.
 echocheck "Xxf86vm"
-if test "$_x11" = yes && test "$_vm" = auto ; then
+if test "$_x11" = yes && test "$_vm" != no ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86vmode.h>
@@ -1421,7 +1417,7 @@ echores "$_vm"
 
 
 echocheck "DGA"
-if test "$_x11" = yes && test "$_dga" = auto ; then
+if test "$_x11" = yes && test "$_dga" != no ; then
   cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
@@ -1443,7 +1439,7 @@ echores "$_dga"
 
 
 echocheck "DGA 2.0"
-if test "$_x11" = yes && test "$_dga2" = auto ; then
+if test "$_x11" = yes && test "$_dga2" != no ; then
   cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
@@ -1451,8 +1447,6 @@ int main (void) { XDGAMode mode; XDGADevice device; return 0; }
 EOF
   _dga2=no
   cc_check $_inc_x11 $_ld_x11 -lXxf86dga -lXxf86vm && _dga2=yes
-else
-  _dga2=no
 fi
 if test "$_dga2" = yes ; then
   _def_dga2='#define HAVE_DGA2 1'
@@ -1538,7 +1532,7 @@ if test "$_ggi" = auto ; then
 int main(void) { return 0; }
 EOF
   _ggi=no
-  cc_check  -lggi && _ggi=yes
+  cc_check -lggi && _ggi=yes
 fi
 if test "$_ggi" = yes ; then
   _def_ggi='#define HAVE_GGI 1'
