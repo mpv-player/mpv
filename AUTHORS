@@ -356,6 +356,7 @@ Jacobs, Aurelien <aurel@gnuage.org>
 Jelveh, Reza (timebomb) <reza.jelveh@tu-harburg.de>
     * NSV demuxer
     * seeking in Real files without index
+    * savage_vid VIDIX driver
     * miscellaneous small fixes and improvements
 
 Jermann, Jonas (g0th) <jjermann@gmx.net>
@@ -662,9 +663,9 @@ Sommer, Sascha (Faust3) <saschasommer@freenet.de>
     * Windows waveout AO driver
     * QuickTime audio+video decoding, video encoding (using Win32 DLLs) support
     * MinGW port, Cygwin fixes
-    * winvidix driver
-    * cvidix driver
-    * nvidia_vid driver
+    * winvidix video output driver
+    * cvidix video output driver
+    * nvidia_vid VIDIX driver
     * dhahelperwin for direct hardware access under Windows NT/2000/XP
 
 Strasser, Alexander (beastd) <eclipse7@gmx.net>
@@ -914,6 +915,9 @@ Veres, Imre <six@freemail.hu>
 
 Vigvary, Balasz (Toky)
     * avifile
+
+Weber, Andrew (Webby) <webbypssht@gmail.com>
+    * webby
 
 Whitmore, Gary Jr.
     * krystal
