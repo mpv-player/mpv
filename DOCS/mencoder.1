@@ -43,6 +43,7 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-ss\ <time> ]
 .RB [ \-endpos\ <time> ]
 .RB [ \-audiofile\ <file\ name> ]
+.RB [ \-sub\ <subtitle\ file\ name> ]
 .I - or file or files specified with escaped wildcard or device
 .PP
 .SH DESCRIPTION
@@ -276,6 +277,10 @@ seek to given time position. For example :
     -ss 01:10:00   seeks to 1 hour 10 min
 
 Can start only from keyframes !
+.TP
+.B \-sub <subtitle file name>
+given VOBsub/text subtitle will be encoded INTO the output file. Text
+subtitles need fonts properly installed.
 .TP
 .B \-endpos <time>
 stop encoding at given time. Can be specified in many was :
