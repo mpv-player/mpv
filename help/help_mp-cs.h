@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan,  technik at domotech.cz
-// Synced to 1.149
+// Synced to 1.152
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -98,7 +98,7 @@ static char help_text[]=
 "  - Zkuste -cache 8192.\n"\
 "- Pou¾íváte -cache pro neprokládané AVI soubory?\n"\
 "  - Zkuste -nocache.\n"\
-"Tipy na vyladìní a zrychlení najdete v DOCS/HTML/en/devices.html.\n"\
+"Tipy na vyladìní a zrychlení najdete v DOCS/HTML/en/video.html.\n"\
 "Pokud nic z toho nepomù¾e, pøeètìte si DOCS/HTML/en/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer byl pøelo¾en BEZ podpory GUI.\n"
@@ -161,7 +161,6 @@ static char help_text[]=
 #define MSGTR_AudioFilterChainPreinitError "Chyba pøi pøedinicializaci øetìzce audio filtrù!\n"
 #define MSGTR_LinuxRTCReadError "Chyba pøi ètení z Linuxových RTC: %s\n"
 #define MSGTR_SoftsleepUnderflow "Varování! Podteèení softsleep!\n"
-#define MSGTR_EDLSKIPStartStopLength "\nEDL_SKIP: start [%f], stop [%f], délka [%f]\n"
 #define MSGTR_AnsSubVisibility "ANS_SUB_VISIBILITY=%ld\n"
 #define MSGTR_AnsLength "ANS_LENGTH=%ld\n"
 #define MSGTR_AnsVoFullscreen "ANS_VO_FULLSCREEN=%ld\n"
@@ -433,10 +432,10 @@ static char help_text[]=
 
 // m_config.c
 #define MSGTR_SaveSlotTooOld "Nalezen pøíli¾ starý save slot z lvl %d: %d !!!\n"
-#define MSGTR_InvalidCfgfileOption "Volbu %s nelze pou¾ít v konfiguraèním souboru\n"
-#define MSGTR_InvalidCmdlineOption "Volbu %s nelze pou¾ít z pøíkazového øádku\n"
-#define MSGTR_InvalidSuboption "Chyba: volba '%s' nemá ¾ádnou podvolbu '%s'\n"
-#define MSGTR_MissingSuboptionParameter "Chyba: podvloba '%s' volby '%s' musí mít parametr!\n"
+#define MSGTR_InvalidCfgfileOption "Volbu %s nelze pou¾ít v konfiguraèním souboru.\n"
+#define MSGTR_InvalidCmdlineOption "Volbu %s nelze pou¾ít z pøíkazového øádku.\n"
+#define MSGTR_InvalidSuboption "Chyba: volba '%s' nemá ¾ádnou podvolbu '%s'.\n"
+#define MSGTR_MissingSuboptionParameter "Chyba: podvolba '%s' volby '%s' musí mít parametr!\n"
 #define MSGTR_MissingOptionParameter "Chyba: volba '%s' musí mít parametr!\n"
 #define MSGTR_OptionListHeader "\n Název                Typ             Min        Max      Globál  CL    Konfig\n\n"
 #define MSGTR_TotalOptions "\nCelkem: %d voleb\n"
