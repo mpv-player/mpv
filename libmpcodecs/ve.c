@@ -41,6 +41,7 @@ static vf_info_t* encoder_list[]={
 };
 
 vf_instance_t* vf_open_encoder(vf_instance_t* next, char *name, char *args){
-    return vf_open_plugin(encoder_list,next,name,args);
+    char* vf_args[] = { "_oldargs_", args, NULL };
+    return vf_open_plugin(encoder_list,next,name,vf_args);
 }
 

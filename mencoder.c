@@ -681,7 +681,10 @@ default:
         mencoder_exit(1,NULL);
     }
     // append 'expand' filter, it fixes stride problems and renders osd:
-    if (auto_expand) sh_video->vfilter=vf_open_filter(sh_video->vfilter,"expand","-1:-1:-1:-1:1");
+    if (auto_expand) {
+      char* vf_args[] = { "osd", "1", NULL };
+      sh_video->vfilter=vf_open_filter(sh_video->vfilter,"expand",vf_args);
+    }
     sh_video->vfilter=append_filters(sh_video->vfilter);
 
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
