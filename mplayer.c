@@ -1275,7 +1275,15 @@ if(!demuxer)
   play_tree_t* entry;
   // Handle playlist
   current_module="handle_playlist";
-  if ( stream->type != STREAMTYPE_PLAYLIST ) goto goto_next_file;
+  switch(stream->type){
+  case STREAMTYPE_VCD:
+  case STREAMTYPE_DVD:
+  case STREAMTYPE_DVDNAV:
+  case STREAMTYPE_CDDA:
+  case STREAMTYPE_VCDBINCUE:
+    // don't try to parse raw media as playlist, it's unlikely
+    goto goto_next_file;
+  }
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"Falling back on trying to parse playlist %s...\n",filename);
   stream_reset(stream);
   stream_seek(stream,stream->start_pos);
