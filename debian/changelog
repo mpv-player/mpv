@@ -1,3 +1,9 @@
+mplayer (0.90-1) unstable; urgency=low
+
+  * 0.90 release including latest alsa9 fixes
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Wed,  3 Jul 2002 23:32:49 +0200
+
 mplayer (0.90pre5-1) unstable; urgency=low
 
   * rc1 to become 0.90
