@@ -678,14 +678,12 @@ static int config(struct vf_instance_s* vf,
 
 	  /* Disables diamond motion estimation */
 	  lavc_venc_context->pre_dia_size = 0;
-	  lavc_venc_context->dia_size = 0;
+	  lavc_venc_context->dia_size = 1;
 
 	  lavc_venc_context->quantizer_noise_shaping = 0; // qns=0
 	  lavc_venc_context->noise_reduction = 0; // nr=0
+	  lavc_venc_context->mb_decision = 0; // mbd=0 ("realtime" encoding)
 
-	  if (lavc_param_mb_decision) {
-	    lavc_venc_context->mb_decision = 1; // mbd=0 ("realtime" encoding)
-	  }
 	  lavc_venc_context->flags &= ~CODEC_FLAG_QPEL;
 	  lavc_venc_context->flags &= ~CODEC_FLAG_4MV;
 	  lavc_venc_context->flags &= ~CODEC_FLAG_TRELLIS_QUANT;
