@@ -19,6 +19,7 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <linux/videodev.h>
 #include <linux/soundcard.h>
 #include <unistd.h>
@@ -75,6 +76,9 @@ typedef struct {
     int				audio_samplesize[MAX_AUDIO_CHANNELS];
     int				audio_samplerate[MAX_AUDIO_CHANNELS];
     int				audio_blocksize;
+
+    /* other */
+    double			starttime;
 } priv_t;
 
 #include "tvi_def.h"
@@ -524,6 +528,12 @@ static int start(priv_t *priv)
     }
 #endif
 
+    {
+      struct timeval curtime;
+      gettimeofday(&curtime, NULL);
+      priv->starttime=curtime.tv_sec + curtime.tv_usec*.000001;
+    }
+
     return(1);
 }
 
@@ -541,8 +551,6 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    return(TVI_CONTROL_FALSE);
 	}
 	case TVI_CONTROL_IS_AUDIO:
-	    return(TVI_CONTROL_FALSE);
-/* also disable audio for as it's not working! */
 	    if (priv->channels[priv->act_channel].flags & VIDEO_VC_AUDIO)
 	    {
 		return(TVI_CONTROL_TRUE);
@@ -821,6 +829,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 
 static double grab_video_frame(priv_t *priv, char *buffer, int len)
 {
+    struct timeval curtime;
+    double timestamp;
     int frame = priv->queue % priv->nbuf;
     int nextframe = (priv->queue+1) % priv->nbuf;
 
@@ -841,6 +851,9 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
 
     priv->queue++;
     
+    gettimeofday(&curtime, NULL);
+    timestamp=curtime.tv_sec + curtime.tv_usec*.000001;
+
     mp_dbg(MSGT_TV, MSGL_DBG3, "mmap: %p + offset: %d => %p\n",
 	priv->mmap, priv->mbuf.offsets[frame],
 	priv->mmap+priv->mbuf.offsets[frame]);
@@ -851,7 +864,7 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
     /* copy the actual frame */
     memcpy(buffer, priv->mmap+priv->mbuf.offsets[frame], len);
 
-    return(0);
+    return(timestamp-priv->starttime);
 }
 
 static int get_video_framesize(priv_t *priv)
@@ -862,13 +875,13 @@ static int get_video_framesize(priv_t *priv)
 static double grab_audio_frame(priv_t *priv, char *buffer, int len)
 {
     int in_len = 0;
-//    int max_tries = 128;
+    int max_tries = 2;
 
     mp_dbg(MSGT_TV, MSGL_DBG2, "grab_audio_frame(priv=%p, buffer=%p, len=%d)\n",
 	priv, buffer, len);
     
-//    while (--max_tries > 0)
-    for (;;)
+    while (--max_tries > 0)
+//    for (;;)
     {
 	in_len = read(priv->audio_fd, buffer, len);
 //	printf("in_len: %d\n", in_len);
@@ -882,7 +895,6 @@ static double grab_audio_frame(priv_t *priv, char *buffer, int len)
 	    break;
 	}
     }
-//    printf("tries: %d\n", 128-max_tries);
 
     return 0; //(in_len); // FIXME!
 }
