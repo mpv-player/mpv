@@ -32,9 +32,9 @@ Adding new translations
 
 	<xsl:import href="../html.xsl"/>
 
-   Note: you mustn't xsl:include or xsl:import chunk.xsl directly!
-   Including it can (and will) break building of documentation, if chunk.xsl
-   is installed in the uncommon place.
+   Note: You mustn't xsl:include or xsl:import chunk.xsl directly!
+   Including it can (and will) break building of documentation if chunk.xsl
+   is installed at a nonstandard location.
 5) If you wish to change output encoding of generated files, create html.xsl
    as suggested in step 4) and add somwhere after <xsl:import .../> such string:
 
