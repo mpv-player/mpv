@@ -59,7 +59,6 @@ LIBVO_EXTERN(gl2)
 #define MODE_RGB 0
 
 /* local data */
-static unsigned char *ImageDataLocal=NULL;
 static unsigned char *ImageData=NULL;
 
 /* X11 related variables */
@@ -210,10 +209,10 @@ static int initTextures()
   texgrid = (struct TexSquare *)
     calloc (texnumx * texnumy, sizeof (struct TexSquare));
 
-  line_1 = (unsigned char *) ImageDataLocal;
-  line_2 = (unsigned char *) ImageDataLocal+(image_width*image_bytes);
+  line_1 = (unsigned char *) ImageData;
+  line_2 = (unsigned char *) ImageData+(image_width*image_bytes);
 
-  mem_start = (unsigned char *) ImageDataLocal;
+  mem_start = (unsigned char *) ImageData;
 
   raw_line_len = line_2 - line_1;
 
@@ -810,10 +809,8 @@ static uint32_t config_glx_gui(uint32_t d_width, uint32_t d_height) {
 
 static int initGl(uint32_t d_width, uint32_t d_height)
 {
-  ImageDataLocal=malloc(image_width*image_height*image_bytes);
-  memset(ImageDataLocal,128,image_width*image_height*image_bytes);
-
-  ImageData=ImageDataLocal;
+  ImageData=malloc(image_width*image_height*image_bytes);
+  memset(ImageData,128,image_width*image_height*image_bytes);
 
   texture_width=image_width;
   texture_height=image_height;
@@ -848,6 +845,9 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   gl_set_bilinear(1);
   
   drawTextureDisplay ();
+
+  free (ImageData);
+  ImageData = NULL;
 
   mp_msg(MSGT_VO, MSGL_V, "[gl2] Using image_bpp=%d, image_bytes=%d, isBGR=%d, \n\tgl_bitmap_format=%s, gl_bitmap_type=%s, \n\tgl_alignment=%d, rgb_size=%d (%d,%d,%d), a_sz=%d, \n\tgl_internal_format=%s\n",
   	image_bpp, image_bytes, image_mode==MODE_BGR, 
@@ -1100,7 +1100,10 @@ static void check_events(void)
 #endif
 
 static void draw_osd(void)
-{ vo_draw_text(image_width,image_height,draw_alpha_fnc); }
+{
+  if (ImageData)
+    vo_draw_text(image_width,image_height,draw_alpha_fnc);
+}
 
 static void
 flip_page(void)
