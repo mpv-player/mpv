@@ -53,7 +53,6 @@ static snd_pcm_t *alsa_handler;
 static snd_pcm_format_t alsa_format;
 static snd_pcm_hw_params_t *alsa_hwparams;
 static snd_pcm_sw_params_t *alsa_swparams;
-static char *alsa_device;
 
 /* possible 4096, original 8192 
  * was only needed for calculating chunksize? */
@@ -77,7 +76,7 @@ static int open_mode;
 static int set_block_mode;
 static int alsa_can_pause = 0;
 
-#define ALSA_DEVICE_SIZE 48
+#define ALSA_DEVICE_SIZE 256
 
 #undef BUFFERTIME
 #undef SET_CHUNKSIZE
@@ -100,27 +99,15 @@ static int control(int cmd, void *arg)
       snd_mixer_elem_t *elem;
       snd_mixer_selem_id_t *sid;
 
-      static char *mix_name = NULL;
-      static char *card = NULL;
+      static char *mix_name = "PCM";
+      static char *card = "default";
 
       long pmin, pmax;
       long get_vol, set_vol;
       float calc_vol, diff, f_multi;
 
-      if(mix_name == NULL){
-        if(mixer_device) {
-          card = strdup(mixer_device);
-          mix_name = strchr(card, '/');
-          if(mix_name) {
-            *mix_name++ = 0;
-          } else {
-            mix_name = "PCM";
-          }
-        } else {
-          mix_name = "PCM";
-          card = "default";
-        }
-      }
+      if(mixer_channel) mix_name = mixer_channel;
+      if(mixer_device) card = mixer_device;
 
       if(ao_data.format == AFMT_AC3)
 	return CONTROL_TRUE;
@@ -225,6 +212,9 @@ static int init(int rate_hz, int channels, int format, int flags)
     int device_set = 0;
     int dir = 0;
     snd_pcm_uframes_t bufsize;
+    char alsa_device[ALSA_DEVICE_SIZE + 1];
+    // make sure alsa_device is null-terminated even when using strncpy etc.
+    memset(alsa_device, 0, ALSA_DEVICE_SIZE + 1);
 
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
 	channels, audio_out_format_name(format));
@@ -343,19 +333,18 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    if ((i3 < i2-1) && (strcmp(*(token_str+i3+1), "noblock") != 0) && (strcmp(*(token_str+i3+1), "mmap") != 0)) {
               char *tmp;
 
-	      alsa_device = alloca(ALSA_DEVICE_SIZE);
 	      snprintf(alsa_device, ALSA_DEVICE_SIZE, "hw:%s", *(token_str+(i3+1)));
 	      if ((tmp = strrchr(alsa_device, '.')) && isdigit(*(tmp+1)))
                 *tmp = ',';
 	      device_set = 1;
 	    }
 		else {
-		  alsa_device = *(token_str+i3);
+		  strncpy (alsa_device, token_str[i3], ALSA_DEVICE_SIZE);
 		  device_set = 1;
 		}
 	  }
 	  else if (device_set == 0 && (!ao_mmap || !ao_noblock)) {
-	    alsa_device = *(token_str+i3);
+	    strncpy (alsa_device, token_str[i3], ALSA_DEVICE_SIZE);
 	    device_set = 1;
 	  }
 	}
@@ -364,28 +353,26 @@ static int init(int rate_hz, int channels, int format, int flags)
         /* in any case for multichannel playback we should select
          * appropriate device
          */
-        char devstr[128];
-
         switch (channels) {
 	case 1:
 	case 2:
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: setup for 1/2 channel(s)\n");
 	  break;
 	case 4:
-	    if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
-		// hack - use the converter plugin
-		strcpy(devstr, "plug:surround40");
-	    else
-		strcpy(devstr, "surround40");
-	  alsa_device = devstr;
+	  if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
+	    // hack - use the converter plugin
+	    strncpy(alsa_device, "plug:surround40", ALSA_DEVICE_SIZE);
+	  else
+	    strncpy(alsa_device, "surround40", ALSA_DEVICE_SIZE);
+	  device_set = 1;
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: device set to surround40\n");
 	  break;
 	case 6:
-	    if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
-		strcpy(devstr, "plug:surround51");
-	    else
-		strcpy(devstr, "surround51");
-	  alsa_device = devstr;
+	  if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
+	    strncpy(alsa_device, "plug:surround51", ALSA_DEVICE_SIZE);
+	  else
+	    strncpy(alsa_device, "surround51", ALSA_DEVICE_SIZE);
+	  device_set = 1;
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: device set to surround51\n");
 	  break;
 	default:
@@ -400,9 +387,7 @@ static int init(int rate_hz, int channels, int format, int flags)
      * 'iec958'
      */
     if (format == AFMT_AC3) {
-      char devstr[128];
       unsigned char s[4];
-      //int err, c; //unused
 
       switch (channels) {
       case 1:
@@ -415,40 +400,34 @@ static int init(int rate_hz, int channels, int format, int flags)
 	s[2] = 0;
 	s[3] = IEC958_AES3_CON_FS_48000;
 
-	sprintf(devstr, "iec958:AES0=0x%x,AES1=0x%x,AES2=0x%x,AES3=0x%x", 
-		s[0], s[1], s[2], s[3]);
+	snprintf(alsa_device, ALSA_DEVICE_SIZE,
+		"iec958:AES0=0x%x,AES1=0x%x,AES2=0x%x,AES3=0x%x", 
+ 		s[0], s[1], s[2], s[3]);
 
-	  mp_msg(MSGT_AO,MSGL_V,"alsa-spdif-init: playing AC3, %i channels\n", channels);
+	mp_msg(MSGT_AO,MSGL_V,"alsa-spdif-init: playing AC3, %i channels\n", channels);
+	device_set = 1;
 	break;
       case 4:
-	strcpy(devstr, "surround40");
+	strncpy(alsa_device, "surround40", ALSA_DEVICE_SIZE);
+	device_set = 1;
 	break;
     
       case 6:
-	strcpy(devstr, "surround51");
+	strncpy(alsa_device, "surround51", ALSA_DEVICE_SIZE);
+	device_set = 1;
 	break;
 
       default:
 	mp_msg(MSGT_AO,MSGL_ERR,"alsa-spdif-init: %d channels are not supported\n", channels);
       }
-
-      alsa_device = devstr;
     }
 
-    if (alsa_device == NULL)
+    if (!device_set)
       {
 	int tmp_device, tmp_subdevice, err;
 
-	if ((err = snd_pcm_info_malloc(&alsa_info)) < 0)
-	  {
-	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: memory allocation error: %s\n", snd_strerror(err));
-	  }
+	snd_pcm_info_alloca(&alsa_info);
 	
-	if ((alsa_device = alloca(ALSA_DEVICE_SIZE)) == NULL)
-	  {
-	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: memory allocation error: %s\n", strerror(errno));
-	  }
-
 	if ((tmp_device = snd_pcm_info_get_device(alsa_info)) < 0)
 	  {
 	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: can't get device\n");
@@ -469,7 +448,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: can't write device-id\n");
 	  }
 
-	snd_pcm_info_free(alsa_info);
 	mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: %d soundcard%s found, using: %s\n", cards+1,(cards >= 0) ? "" : "s", alsa_device);
       } else if (strcmp(alsa_device, "help") == 0) {
 	printf("alsa-help: available options are:\n");
@@ -762,7 +740,6 @@ static void uninit(int immed)
       }
     else {
       alsa_handler = NULL;
-      alsa_device = NULL;
       mp_msg(MSGT_AO,MSGL_INFO,"alsa-uninit: pcm closed\n");
     }
   }
@@ -1084,11 +1061,7 @@ static int get_space()
 
     //snd_pcm_sframes_t avail_frames = 0;
     
-    if ((ret = snd_pcm_status_malloc(&status)) < 0)
-    {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-space: memory allocation error: %s\n", snd_strerror(ret));
-	return(0);
-    }
+    snd_pcm_status_alloca(&status);
     
     if ((ret = snd_pcm_status(alsa_handler, status)) < 0)
     {
@@ -1136,7 +1109,6 @@ static int get_space()
 
     if (str_status != "running")
       mp_msg(MSGT_AO,MSGL_V,"alsa-space: free space = %i, status=%i, %s --\n", ret, status, str_status);
-    snd_pcm_status_free(status);
     
     if (ret < 0) {
       mp_msg(MSGT_AO,MSGL_ERR,"negative value!!\n");
@@ -1159,10 +1131,7 @@ static float get_delay()
     snd_pcm_status_t *status;
     float ret;
     
-    if ((ret = snd_pcm_status_malloc(&status)) < 0)
-    {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-delay: memory allocation error: %s\n", snd_strerror(ret));
-    }
+    snd_pcm_status_alloca(&status);
     
     if ((ret = snd_pcm_status(alsa_handler, status)) < 0)
     {
@@ -1180,7 +1149,6 @@ static float get_delay()
 	    ret = 0;
     }
     
-    snd_pcm_status_free(status);
 
     if (ret < 0)
       ret = 0;
