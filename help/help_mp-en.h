@@ -414,7 +414,7 @@ static char help_text[]=
 #define MSGTR_CodecLacksFourcc "\ncodec(%s) does not have FourCC/format!\n"
 #define MSGTR_CodecLacksDriver "\ncodec(%s) does not have a driver!\n"
 #define MSGTR_CodecNeedsDLL "\ncodec(%s) needs a 'dll'!\n"
-#define MSGTR_CodecNeedsOutfmt "\ncodec(%s) needa an 'outfmt'!\n"
+#define MSGTR_CodecNeedsOutfmt "\ncodec(%s) needs an 'outfmt'!\n"
 #define MSGTR_CantAllocateComment "Can't allocate memory for comment. "
 #define MSGTR_GetTokenMaxNotLessThanMAX_NR_TOKEN "get_token(): max >= MAX_MR_TOKEN!"
 #define MSGTR_ReadingFile "Reading %s: "
