@@ -6774,6 +6774,19 @@ and store the per frame PSNR in a file with a name like 'psnr_hhmmss.log' in
 the current directory.
 Returned values are in dB (decibel), the higher the better.
 .
+.PP
+.sp 1
+The following option is only available in development versions
+of XviD 1.1.x.
+.
+.TP
+.B bvhq=<0|1>
+This setting allows vector candidates for B frames to be used for
+the encoding chosen using a rate distortion optimized operator,
+which is what is done for P frames by the vhq option.
+This produces nicer-looking B frames while incurring almost no
+performance penalty.
+.
 .
 .SS x264enc (\-x264encopts)
 .
