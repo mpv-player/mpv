@@ -9,7 +9,9 @@ struct m_option_type;
 struct m_config_save_slot {
   m_config_save_slot_t* prev;
   int lvl;
-  unsigned char data[0];
+  // we have to store other datatypes in this as well,
+  // so make sure we get properly aligned addresses
+  unsigned char data[0] __attribute__ ((aligned (8)));
 };
 
 struct m_config_option {
