@@ -10,22 +10,6 @@ extern "C" {
 
 #ifdef HAVE_MATROSKA
 
-extern "C" {
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#include "../mp_msg.h"
-#include "../help_mp.h"
-#include "stream.h"
-#include "demuxer.h"
-#include "stheader.h"
-
-#include "../subreader.h"
-#include "../libvo/sub.h"
-
-}
-
 #include <vector>
 
 #include <ebml/EbmlHead.h>
@@ -53,6 +37,22 @@ extern "C" {
 #include <matroska/KaxTrackVideo.h>
 #include <matroska/KaxTrackEntryData.h>
 #include <matroska/FileKax.h>
+
+extern "C" {
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "../mp_msg.h"
+#include "../help_mp.h"
+#include "stream.h"
+#include "demuxer.h"
+#include "stheader.h"
+
+#include "../subreader.h"
+#include "../libvo/sub.h"
+
+}
 
 #include "matroska.h"
 
