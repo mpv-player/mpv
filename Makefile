@@ -16,7 +16,7 @@ PRG_CFG = codec-cfg
 #prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
-SRCS = cpudetect.c postproc/swscale.c postproc/postprocess.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c xa/rle8.c lirc_mp.c cfgparser.c mixer.c spudec.c
+SRCS = xacodec.c cpudetect.c postproc/swscale.c postproc/postprocess.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c xa/rle8.c lirc_mp.c cfgparser.c mixer.c spudec.c
 OBJS = $(SRCS:.c=.o)
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(CSS_INC) $(EXTRA_INC) # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB)
@@ -96,7 +96,7 @@ mplayerwithoutlink: $(MPLAYER_DEP)
 	@for a in $(PARTS); do $(MAKE) -C $$a all ; done
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) mplayer.o -Llibmpdemux -lmpdemux $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(DECORE_LIBS) $(GUI_LIBS) $(ARCH_LIBS)
+	$(CC) -rdynamic $(CFLAGS) -o $(PRG) mplayer.o -Llibmpdemux -lmpdemux $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(DECORE_LIBS) $(GUI_LIBS) $(ARCH_LIBS)
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
