@@ -1044,6 +1044,11 @@ void demux_open_real(demuxer_t* demuxer)
 		codec_data_size = stream_read_dword(demuxer->stream);
 		codec_pos = stream_tell(demuxer->stream);
 
+		if (!codec_data_size) {
+		  mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_real: no codec data in MDPR chunk at fpos=0x%X\n", codec_pos);
+		  break;
+		}
+
 		tmp = stream_read_dword(demuxer->stream);
 		
 		mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_real: type_spec: len=%d  fpos=0x%X  first_dword=0x%X (%.4s)  \n",
