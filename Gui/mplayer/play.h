@@ -53,10 +53,10 @@ extern char * Filename;
 
 extern int   mplParent;
 
-extern int   mplx;
-extern int   mply;
-extern int   mplwidth;
-extern int   mplheight;
+extern int   moviex;
+extern int   moviey;
+extern int   moviewidth;
+extern int   movieheight;
 
 extern mplCommStruct * mplShMem;
 

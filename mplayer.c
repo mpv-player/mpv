@@ -963,10 +963,9 @@ current_module="init_libvo";
 #ifdef HAVE_NEW_GUI
    if ( use_gui )
     {
-     if ( !appMPlayer.subWindow.isFullScreen ) 
-       wsResizeWindow( &appMPlayer.subWindow,sh_video->disp_w,sh_video->disp_h );
-     screen_size_x=appMPlayer.subWindow.Width;
-     screen_size_y=appMPlayer.subWindow.Height;
+     if ( !appMPlayer.subWindow.isFullScreen ) wsResizeWindow( &appMPlayer.subWindow,sh_video->disp_w,sh_video->disp_h );
+     moviewidth=screen_size_x=appMPlayer.subWindow.Width;
+     movieheight=screen_size_y=appMPlayer.subWindow.Height;
     }
 #endif
 

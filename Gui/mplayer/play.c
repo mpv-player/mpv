@@ -7,7 +7,7 @@
 
 int    mplParent = 1;
 
-int    mplx,mply,mplwidth,mplheight;
+int    moviex,moviey,moviewidth,movieheight;
 
 #include "../app.h"
 
@@ -37,32 +37,10 @@ void mplPlayerThread( void )
 
 void mplFullScreen( void )
 {
- if ( appMPlayer.subWindow.isFullScreen )
-  {
-   if ( mplShMem->Playing )
-    {
-     appMPlayer.subWindow.OldX=mplx;
-     appMPlayer.subWindow.OldY=mply;
-     appMPlayer.subWindow.OldWidth=mplwidth;
-     appMPlayer.subWindow.OldHeight=mplheight;
-    }
-    else
-     {
-      appMPlayer.subWindow.OldWidth=appMPlayer.sub.width;
-      appMPlayer.subWindow.OldHeight=appMPlayer.sub.height;
-      appMPlayer.subWindow.OldX=( wsMaxX - appMPlayer.sub.width ) / 2;
-      appMPlayer.subWindow.OldY=( wsMaxY - appMPlayer.sub.height ) / 2;
-     }
-  }
-  else
-   {
-     mplx=appMPlayer.subWindow.X;
-     mply=appMPlayer.subWindow.Y;
-     mplwidth=appMPlayer.subWindow.Width;
-     mplheight=appMPlayer.subWindow.Height;
-   }
- wsFullScreen( &appMPlayer.subWindow );
-// wsMoveTopWindow( &appMPlayer.subWindow );
+// if ( appMPlayer.subWindow.isFullScreen )
+//  {
+//  }
+ wsFullScreen( &appMPlayer.subWindow ); 
  mplResize( 0,0,appMPlayer.subWindow.Width,appMPlayer.subWindow.Height );
 }
 

@@ -125,8 +125,6 @@ void PutImage( txSample * bf,int x,int y,int max,int ofs )
    }
 }
 
-extern float gui_position;
-
 void mplMainDraw( wsParamDisplay )
 {
  wItem    * item;
@@ -328,8 +326,26 @@ NoPause:
    case evIncAudioBufDelay: mplIncAudioBufDelay(); break;
    case evDecAudioBufDelay: mplDecAudioBufDelay(); break;
 
-   case evNormalSize: if ( mplShMem->Playing ) wsResizeWindow( &appMPlayer.subWindow,mplwidth,mplheight ); break;
-   case evDoubleSize: if ( mplShMem->Playing ) wsResizeWindow( &appMPlayer.subWindow,mplwidth * 2,mplheight * 2 ); break;
+   case evNormalSize:
+        if ( mplShMem->Playing ) 
+	 {
+//	  wsWindowDecoration( &appMPlayer.subWindow,appMPlayer.subWindow.Decorations );
+//	  wsWindowDecoration( &appMPlayer.subWindow,0 );
+//	  appMPlayer.subWindow.isFullScreen=0;
+//	  wsMoveWindow( &appMPlayer.subWindow,appMPlayer.subWindow.OldX,appMPlayer.subWindow.OldY );
+//	  wsResizeWindow( &appMPlayer.subWindow,moviewidth,movieheight );
+	  appMPlayer.subWindow.isFullScreen=True;
+	  appMPlayer.subWindow.OldWidth=moviewidth; appMPlayer.subWindow.OldHeight=movieheight;
+	  wsFullScreen( &appMPlayer.subWindow );
+	  mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,moviewidth,movieheight );
+	 } 
+//	 else
+//	  {
+//	   wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
+//	   wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
+//	  }
+	break;
+//   case evDoubleSize: if ( mplShMem->Playing ) wsResizeWindow( &appMPlayer.subWindow,mplwidth * 2,mplheight * 2 ); break;
 
 // --- timer events
    case evHideMouseCursor:
