@@ -173,19 +173,17 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 //	  else
 	  for (j=0;j<=len;j++){
 	      if ((c=t[j])>=0x80){
-		 if (sub_unicode) 
-		    c = (c<<8) + t[++j]; 
-		 else
-		    if (sub_utf8){
-		       if ((c & 0xe0) == 0xc0)    /* 2 bytes U+00080..U+0007FF*/
-			  c = (c & 0x1f)<<6 | (t[++j] & 0x3f);
-		       else if((c & 0xf0) == 0xe0)/* 3 bytes U+00800..U+00FFFF*/
-			  c = ((c & 0x0f)<<6 |
-			       (t[++j] & 0x3f))<<6 | (t[++j] & 0x3f);
-		    }
+		 if (sub_utf8){
+		    if ((c & 0xe0) == 0xc0)    /* 2 bytes U+00080..U+0007FF*/
+		       c = (c & 0x1f)<<6 | (t[++j] & 0x3f);
+		    else if((c & 0xf0) == 0xe0)/* 3 bytes U+00800..U+00FFFF*/
+		       c = ((c & 0x0f)<<6 |
+			    (t[++j] & 0x3f))<<6 | (t[++j] & 0x3f);
+		 } else if (sub_unicode) 
+		       c = (c<<8) + t[++j]; 
 	      }
 	      if (k==MAX_UCS){
-		 utbl[k]=l=0; break;
+		 l=0 ; len=j; // cut here
 	      }
 	      utbl[k++]=c;
 	      if (c==' '){
@@ -193,20 +191,11 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 		 lastStripPosition=j;
 		 lastxsize=xsize;
 	      }
-#if 1
 	      else if ((font=vo_font->font[c])>=0){
 		  if (vo_font->pic_a[font]->h > h){
 		     h=vo_font->pic_a[font]->h;
 		  }
 	      }
-#endif
-#if 0
-	      else if ((font=vo_font->font[c])>=0){
-		  if ((memy-h)+vo_font->pic_a[font]->h > dys){
-		     h=vo_font->pic_a[font]->h;
-		  }
-	      }
-#endif
 	      xsize+=vo_font->width[c]+vo_font->charspace;
 	      if (dxs<xsize){
 		 if (lastStripPosition>0){
@@ -221,20 +210,20 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 	      } else if (j<len)
 		   continue;
 	      if (h>memy){ // out of the screen so end parsing
-		 memy +=vo_font->height-lasth; // correct the y position
+		 memy -=lasth - vo_font->height; // correct the y position
 		 l=0; break;
 	      }
 	      utbl[k++]=0;
 	      xtbl[lines++]=(dxs-xsize)/2;
 	      if (lines==MAX_UCSLINES||k>MAX_UCS){
-		 l=0; break;
+		 l=0; j=len; // end parsing
 	      } else if(l || j<len){ // not the last line or not the last char
 		 lastStripPosition=-1;
 		 xsize=-vo_font->charspace;
 		 lasth=h;
 		 h=vo_font->height;
 	      }
-	      printf("h: %d -> %d  \n",vo_font->height,h);
+//	      printf("h: %d -> %d  \n",vo_font->height,h);
 	      memy -=h; // according to max of vo_font->pic_a[font]->h 
 	  }
       }
@@ -248,7 +237,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
    while (i<lines){
 	 x= xtbl[i++]; 
 	 while ((c=utbl[j++])){
-	       if ((font=vo_font->font[c])>=0 && y<dys)
+	       if ((font=vo_font->font[c])>=0)
 		  draw_alpha(x,y,
 			     vo_font->width[c],
 			     vo_font->pic_a[font]->h+y<dys ? vo_font->pic_a[font]->h : dys-y,
