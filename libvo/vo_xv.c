@@ -84,6 +84,7 @@ static XvImage* xvimage[NUM_BUFFERS];
 int XShmGetEventBase(Display*);
 
 static XShmSegmentInfo Shminfo[NUM_BUFFERS];
+static int Shmem_Flag;
 #endif
 
 //static int Quiet_Flag; <-- What is that for ? Albeu.
