@@ -39,7 +39,7 @@ url_new(char* url) {
 	// extract the protocol
 	ptr1 = strstr(url, "://");
 	if( ptr1==NULL ) {
-		printf("Malformed URL or not an URL!\n");
+		printf("Not an URL!\n");
 		return NULL;
 	}
 	pos1 = ptr1-url;
@@ -68,7 +68,7 @@ url_new(char* url) {
 		pos2 = ptr2-url;
 	}
 	// copy the hostname in the URL container
-	Curl->hostname = (char*)malloc(strlen(url)+1);
+	Curl->hostname = (char*)malloc(pos2-pos1-3+1);
 	if( Curl->hostname==NULL ) {
 		printf("Memory allocation failed!\n");
 		exit(1);
@@ -88,11 +88,10 @@ url_new(char* url) {
 				printf("Memory allocation failed!\n");
 				exit(1);
 			}
-			Curl->file[0]='/';
-			strcpy(Curl->file+1, ptr2+1);
+			strcpy(Curl->file, ptr2);
 		}
 	} 
-	// Check if a filenme was given or set else set it with '/'
+	// Check if a filenme was given or set, else set it with '/'
 	if( Curl->file==NULL ) {
 		Curl->file = (char*)malloc(2);
 		if( Curl->file==NULL ) {
