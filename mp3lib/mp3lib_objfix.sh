@@ -6,7 +6,12 @@ for i in \
 	"CpuDetect" \
 	"ipentium" \
 	"a3dnow" \
-	"isse"
+	"isse" \
+	"dct36_3dnowex" \
+	"dct36_3dnow" \
+	"x_plus_minus_3dnow" \
+	"tfcos36" \
+	"COS9"
 do
 echo "fixing: $i=_$i"
 objcopy --redefine-sym "$i=_$i" libMP3.a
