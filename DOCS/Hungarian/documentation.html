@@ -973,8 +973,11 @@ Szabványos V4L-rõl bemenet<BR>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
 
-<P><B>Nem tud</B> viszont lejátszani MMS protokollal ASF file-okat hálózatról,
-csak HTTP-vel.</P>
+<P>A lejátszás maga egyszerûen az URL megadásával történik. Az <B>MPlayer</B>
+  automatikusan kezelni tudja továbbá a HTTP_PROXY környezeti változót.
+  A proxy használatának kényszerítése :</P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
 <P><B>MPlayer</B> tud a standard bemenetrõl (NEM named pipe-okról) beolvasni.
   Itt egy példa az FTP-n keresztüli lejátszásra ennek segítségével :</P>
