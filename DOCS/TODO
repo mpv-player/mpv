@@ -20,6 +20,7 @@ After the release:
 - remove opendivx encore - SKIPPED
 
 DONE: (move this to ChangeLog among other things)
+- CVS snapshots - DONE (generated after each commits)
 - update win32codec.zip package!!! (missing qdv.dll etc) - DONE
 - fix help-mp.h (remove -alsa etc, add new important options) - DONE
 - fix up fonts (make release version of font generator?) - DONE
