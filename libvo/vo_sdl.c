@@ -1129,20 +1129,6 @@ static void check_events (void)
 					if(verbose > 1) printf("SDL: Set next available fullscreen mode.\n");
 				}
 
-				/* f key pressed toggles/exits fullscreenmode */
-				else if ( keypressed == SDLK_f ) {
-					if (priv->surface->flags & SDL_FULLSCREEN) {
-						priv->surface = SDL_SetVideoMode(priv->windowsize.w, priv->windowsize.h, priv->bpp, priv->sdlflags);
-						SDL_ShowCursor(1);
-						if(verbose > 1) printf("SDL: Windowed mode\n");
-					} 
-					else if (priv->fullmodes){
-						set_fullmode(priv->fullmode);
-
-						if(verbose > 1) printf("SDL: Set fullscreen mode\n");
-					}
-				}
-
 				else if ( keypressed == SDLK_n ) {
 #ifdef HAVE_X11					
 					aspect(&priv->dstwidth, &priv->dstheight,A_NOZOOM);
@@ -1328,9 +1314,21 @@ static uint32_t preinit(const char *arg)
 
 static uint32_t control(uint32_t request, void *data, ...)
 {
+  struct sdl_priv_s *priv = &sdl_priv;
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_FULLSCREEN:
+    if (priv->surface->flags & SDL_FULLSCREEN) {
+      priv->surface = SDL_SetVideoMode(priv->windowsize.w, priv->windowsize.h, priv->bpp, priv->sdlflags);
+      SDL_ShowCursor(1);
+      if(verbose > 1) printf("SDL: Windowed mode\n");
+    } else if (priv->fullmodes) {
+      set_fullmode(priv->fullmode);
+      if(verbose > 1) printf("SDL: Set fullscreen mode\n");
+    }
+    //return VO_TRUE; // XXX what should VOCTRL_FULLSCREEN return?
   }
+
   return VO_NOTIMPL;
 }
