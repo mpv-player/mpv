@@ -193,6 +193,7 @@ VIDIX_LIBS += -Lvidix -lvidix
 endif
 
 $(PRG):	$(MPLAYER_DEP)
+	./darwinfixlib.sh $(MPLAYER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(VO_LIBS)  $(COMMON_LIBS) $(EXTRA_LIB) $(AO_LIBS) $(V_LIBS) $(VIDIX_LIBS) $(GUI_LIBS)  $(LIRC_LIB) $(STATIC_LIB) 
 
 $(PRG_FIBMAP): fibmap_mplayer.o
@@ -200,6 +201,7 @@ $(PRG_FIBMAP): fibmap_mplayer.o
 
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
+	./darwinfixlib.sh $(MENCODER_DEP) libmpcodecs/libmpencoders.a
 	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpcodecs -lmpencoders $(COMMON_LIBS) $(EXTRA_LIB) $(ENCORE_LIB) $(MLIB_LIB)
 endif
 
