@@ -49,7 +49,7 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
     p->iter = p->buffer;
   }
 
-  if(p->stream->eof && p->buffer_end == 0)
+  if(p->stream->eof && (p->buffer_end == 0 || p->iter[0] == '\0'))
     return NULL;
     
   while(1) {
@@ -83,12 +83,14 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
   }
 
   line_end = ((*(end-1)) == '\r') ? end-1 : end;
-  p->line = (char*)realloc(p->line,line_end - p->iter+1);
-  if(!p->line)
+  if(line_end - p->iter >= 0)
+    p->line = (char*)realloc(p->line,line_end - p->iter+1);
+  else
     return NULL;
-  strncpy(p->line,p->iter,line_end - p->iter);
+  if(line_end - p->iter > 0)
+    strncpy(p->line,p->iter,line_end - p->iter);
   p->line[line_end - p->iter] = '\0';
-  if(end != '\0')
+  if(end[0] != '\0')
     end++;
 
   if(!p->keep) {

@@ -264,7 +264,12 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
       if( i < parser->ret_stack_size)	
 	memmove(parser->ret_stack,parser->ret_stack+i, (parser->ret_stack_size - i)*sizeof(ASX_LineSave_t));
       parser->ret_stack_size -= i;
-      parser->ret_stack = (ASX_LineSave_t*)realloc(parser->ret_stack,parser->ret_stack_size*sizeof(ASX_LineSave_t));      
+      if(parser->ret_stack_size > 0)
+	parser->ret_stack = (ASX_LineSave_t*)realloc(parser->ret_stack,parser->ret_stack_size*sizeof(ASX_LineSave_t));
+      else {
+	free(parser->ret_stack);
+	parser->ret_stack = NULL;
+      }
     }
   }
 

@@ -605,7 +605,12 @@ play_tree_iter_up_step(play_tree_iter_t* iter, int d,int with_nodes) {
 
   iter->stack_size--;
   iter->loop = iter->status_stack[iter->stack_size];
-  iter->status_stack = (int*)realloc(iter->status_stack,iter->stack_size*sizeof(int));
+  if(iter->stack_size > 0)
+    iter->status_stack = (int*)realloc(iter->status_stack,iter->stack_size*sizeof(int));
+  else {
+    free(iter->status_stack);
+    iter->status_stack = NULL;
+  }
   if(iter->stack_size > 0 && iter->status_stack == NULL) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",iter->stack_size*sizeof(char*));
     return PLAY_TREE_ITER_ERROR;
