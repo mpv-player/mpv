@@ -140,9 +140,25 @@ static const char *device_cap2name[] = {
 static const char *device_palette2name[] = {
     "-", "grey", "hi240", "rgb16", "rgb24", "rgb32", "rgb15", "yuv422",
     "yuyv", "uyvy", "yuv420", "yuv411", "raw", "yuv422p", "yuv411p",
-    "yuv420p", "yuv410p", NULL
+    "yuv420p", "yuv410p"
 };
-#define PALETTE(x) ((x < sizeof(device_pal)/sizeof(char*)) ? device_pal[x] : "UNKNOWN")
+#define PALETTE(x) ((x < sizeof(device_palette2name)/sizeof(char*)) ? device_palette2name[x] : "UNKNOWN")
+
+static const char *norm2name(int mode)
+{
+    switch (mode) {
+    case VIDEO_MODE_PAL:
+	return "pal";
+    case VIDEO_MODE_SECAM:
+	return "secam";
+    case VIDEO_MODE_NTSC:
+	return "ntsc";
+    case VIDEO_MODE_AUTO:
+	return "auto";
+    default:
+	return "unknown";
+    }
+};
 
 static const char *audio_mode2name(int mode)
 {
@@ -280,6 +296,7 @@ static void init_v4l_audio(priv_t *priv)
 
     mp_msg(MSGT_TV, MSGL_V, " Audio devices: %d\n", priv->capability.audios);
 
+    mp_msg(MSGT_TV, MSGL_V, "Video capture card reports the audio setup as follows:\n");
     for (i = 0; i < priv->capability.audios; i++)
     {
 	if (i >= MAX_AUDIO_CHANNELS)
@@ -300,6 +317,7 @@ static void init_v4l_audio(priv_t *priv)
 	/* mute all channels */
 	priv->audio[i].volume = 0;
 	priv->audio[i].flags |= VIDEO_AUDIO_MUTE;
+	reqmode = -1;
 	if (tv_param_amode >= 0) {
 	    switch (tv_param_amode) {
 	    case 0:
@@ -314,9 +332,12 @@ static void init_v4l_audio(priv_t *priv)
 	    case 3:
 		reqmode = VIDEO_SOUND_LANG2;
 		break;
+	    default:
+		mp_msg(MSGT_TV, MSGL_ERR, "Unknown audio mode requested.\n");
+		break;
 	    }
+	    if (reqmode >= 0) priv->audio[i].mode = reqmode;
 	}
-	priv->audio[i].mode = reqmode;
 	ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[i]);
 	
 	// get the parameters back
@@ -338,25 +359,24 @@ static void init_v4l_audio(priv_t *priv)
 	    break;
 	}
 
-	if (tv_param_amode >= 0 && priv->audio[i].mode != reqmode) {
+	if (reqmode >= 0 && priv->audio[i].mode != reqmode) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "Audio mode setup warning!\n");
 	    mp_msg(MSGT_TV, MSGL_ERR, "Requested mode was %s, but v4l still reports %s.\n",
 		   audio_mode2name(reqmode), audio_mode2name(priv->audio[i].mode));
-	    mp_msg(MSGT_TV, MSGL_ERR, "You may need \"forcechan\" option\nto force stereo/mono audio recording.\n");
+	    mp_msg(MSGT_TV, MSGL_ERR, "You may need \"forcechan\" option to force stereo/mono audio recording.\n");
 	}
 
 	/* display stuff */
-	mp_msg(MSGT_TV, MSGL_V, "Video capture card reports the audio setup as follows:\n");
 	mp_msg(MSGT_TV, MSGL_V, "  %d: %s: ", priv->audio[i].audio,
 	       priv->audio[i].name);
 	if (priv->audio[i].flags & VIDEO_AUDIO_MUTABLE) {
 	    mp_msg(MSGT_TV, MSGL_V, "muted=%s ",
 		   (priv->audio[i].flags & VIDEO_AUDIO_MUTE) ? "yes" : "no");
 	}
-	mp_msg(MSGT_TV, MSGL_V, "volume=%d bass=%d treble=%d balance=%d mode=%s\n",
+	mp_msg(MSGT_TV, MSGL_V, "vol=%d bass=%d treble=%d balance=%d mode=%s",
 	       priv->audio[i].volume, priv->audio[i].bass, priv->audio[i].treble,
 	       priv->audio[i].balance, audio_mode2name(priv->audio[i].mode));
-	mp_msg(MSGT_TV, MSGL_V, " channels: %d\n", priv->audio_channels[i]);
+	mp_msg(MSGT_TV, MSGL_V, " chan=%d\n", priv->audio_channels[i]);
 
 	if (tv_param_forcechan >= 0)
 	    priv->audio_channels[i] = tv_param_forcechan;
@@ -364,8 +384,7 @@ static void init_v4l_audio(priv_t *priv)
 	// we'll call VIDIOCSAUDIO again when starting capture
 	// let's set audio mode to requested mode again for the case
 	// when VIDIOCGAUDIO just cannot report the mode correctly
-	if (tv_param_amode >= 0)
-	    priv->audio[i].mode = reqmode; 
+	if (reqmode >= 0) priv->audio[i].mode = reqmode;
     }
 }
 
@@ -391,31 +410,10 @@ static int init(priv_t *priv)
 	goto err;
     }
     
-    priv->fps = PAL_FPS; /* pal */
-    
     /* get capabilities (priv->capability is needed!) */
     if (ioctl(priv->video_fd, VIDIOCGCAP, &priv->capability) == -1)
     {
 	mp_msg(MSGT_TV, MSGL_ERR, "ioctl get capabilites failed: %s\n", strerror(errno));
-	goto err;
-    }
-
-    if (ioctl(priv->video_fd, VIDIOCGTUNER, &priv->tuner) == -1)
-    {
-	mp_msg(MSGT_TV, MSGL_ERR, "ioctl get tuner failed: %s\n", strerror(errno));
-	priv->fps = PAL_FPS;
-//	goto err;
-    } else
-    switch (priv->tuner.mode) {
-    case VIDEO_MODE_PAL:
-    case VIDEO_MODE_SECAM:
-	priv->fps = PAL_FPS;
-	break;
-    case VIDEO_MODE_NTSC:
-	priv->fps = NTSC_FPS;
-	break;
-    default:
-	mp_msg(MSGT_TV, MSGL_ERR, "get tuner returned an unknown mode: %d\n", priv->tuner.mode);
 	goto err;
     }
 
@@ -447,15 +445,16 @@ static int init(priv_t *priv)
 	    mp_msg(MSGT_TV, MSGL_ERR, "ioctl get channel failed: %s\n", strerror(errno));
 	    break;
 	}
-	mp_msg(MSGT_TV, MSGL_INFO, "  %d: %s: %s%s%s%s (tuner:%d, norm:%d)\n", i,
+	mp_msg(MSGT_TV, MSGL_INFO, "  %d: %s: %s%s%s%s (tuner:%d, norm:%s)\n", i,
 	    priv->channels[i].name,
 	    (priv->channels[i].flags & VIDEO_VC_TUNER) ? "tuner " : "",
 	    (priv->channels[i].flags & VIDEO_VC_AUDIO) ? "audio " : "",
 	    (priv->channels[i].flags & VIDEO_TYPE_TV) ? "tv " : "",
 	    (priv->channels[i].flags & VIDEO_TYPE_CAMERA) ? "camera " : "",
 	    priv->channels[i].tuners,
-	    priv->channels[i].norm);
+	    norm2name(priv->channels[i].norm));
     }
+    priv->act_channel = 0;
 
     if (!(priv->capability.type & VID_TYPE_CAPTURE))
     {
@@ -585,12 +584,9 @@ static int get_capture_buffer_size(priv_t *priv)
     bufsize = 16*1024*1024;
 #endif
 
-    cnt = bufsize/(priv->width*priv->bytesperline);
+    cnt = bufsize/(priv->height*priv->bytesperline);
     if (cnt < 2) cnt = 2;
     
-    mp_msg(MSGT_TV, MSGL_V, "Allocating a ring buffer for %d frames, %d MB total size.\n",
-	   cnt, cnt*priv->width*priv->bytesperline/(1024*1024));
-
     return cnt;
 }
 
@@ -615,8 +611,8 @@ static int start(priv_t *priv)
     }
 
     mp_msg(MSGT_TV, MSGL_V, "Picture values:\n");
-    mp_msg(MSGT_TV, MSGL_V, " Depth: %d, Palette: %d (Format: %s)\n", priv->picture.depth,
-	priv->picture.palette, vo_format_name(priv->format));
+    mp_msg(MSGT_TV, MSGL_V, " Depth: %d, Palette: %s (Format: %s)\n", priv->picture.depth,
+	PALETTE(priv->picture.palette), vo_format_name(priv->format));
     mp_msg(MSGT_TV, MSGL_V, " Brightness: %d, Hue: %d, Colour: %d, Contrast: %d\n",
 	priv->picture.brightness, priv->picture.hue,
 	priv->picture.colour, priv->picture.contrast);
@@ -719,6 +715,10 @@ static int start(priv_t *priv)
 	}
     }
 
+    mp_msg(MSGT_TV, MSGL_V, "Allocating a ring buffer for %d frames, %d MB total size.\n",
+	   priv->video_buffer_size,
+	   priv->video_buffer_size*priv->height*priv->bytesperline/(1024*1024));
+
     priv->video_ringbuffer = (unsigned char*)malloc(priv->bytesperline * priv->height * priv->video_buffer_size);
     if (!priv->video_ringbuffer) {
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate video buffer: %s\n", strerror(errno));
@@ -734,24 +734,26 @@ static int start(priv_t *priv)
     priv->video_cnt = 0;
     priv->first = 1;
 
-    /* enable audio */
-    if (tv_param_volume >= 0)
-	priv->audio[priv->audio_id].volume = tv_param_volume;
-    if (tv_param_bass >= 0)
-	priv->audio[priv->audio_id].bass = tv_param_bass;
-    if (tv_param_treble >= 0)
-	priv->audio[priv->audio_id].treble = tv_param_treble;
-    if (tv_param_balance >= 0)
-	priv->audio[priv->audio_id].balance = tv_param_balance;
-    priv->audio[priv->audio_id].flags &= ~VIDEO_AUDIO_MUTE;
-    mp_msg(MSGT_TV, MSGL_V, "Starting audio capture. Requested setup is:\n");
-    mp_msg(MSGT_TV, MSGL_V, "id=%d volume=%d bass=%d treble=%d balance=%d mode=%s\n",
-	   priv->audio_id,
-	   priv->audio[priv->audio_id].volume, priv->audio[priv->audio_id].bass, priv->audio[priv->audio_id].treble,
-	   priv->audio[priv->audio_id].balance, audio_mode2name(priv->audio[priv->audio_id].mode));
-    mp_msg(MSGT_TV, MSGL_V, " channels: %d\n", priv->audio_channels[priv->audio_id]);
-    ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
-	    
+    if (priv->capability.audios) {
+	/* enable audio */
+	if (tv_param_volume >= 0)
+	    priv->audio[priv->audio_id].volume = tv_param_volume;
+	if (tv_param_bass >= 0)
+	    priv->audio[priv->audio_id].bass = tv_param_bass;
+	if (tv_param_treble >= 0)
+	    priv->audio[priv->audio_id].treble = tv_param_treble;
+	if (tv_param_balance >= 0)
+	    priv->audio[priv->audio_id].balance = tv_param_balance;
+	priv->audio[priv->audio_id].flags &= ~VIDEO_AUDIO_MUTE;
+	mp_msg(MSGT_TV, MSGL_V, "Enabling tv audio. Requested setup is:\n");
+	mp_msg(MSGT_TV, MSGL_V, "id=%d vol=%d bass=%d treble=%d balance=%d mode=%s",
+	       priv->audio_id,
+	       priv->audio[priv->audio_id].volume, priv->audio[priv->audio_id].bass, priv->audio[priv->audio_id].treble,
+	       priv->audio[priv->audio_id].balance, audio_mode2name(priv->audio[priv->audio_id].mode));
+	mp_msg(MSGT_TV, MSGL_V, " chan=%d\n", priv->audio_channels[priv->audio_id]);
+	ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
+    }
+    
     /* launch capture threads */
     priv->shutdown = 0;
     if (!tv_param_noaudio) {
@@ -951,27 +953,48 @@ static int control(priv_t *priv, int cmd, void *arg)
 		return(TVI_CONTROL_FALSE);
 	    }
 
-	    if (((req_mode == TV_NORM_PAL) && !(priv->tuner.flags & VIDEO_TUNER_PAL)) ||
-		((req_mode == TV_NORM_NTSC) && !(priv->tuner.flags & VIDEO_TUNER_NTSC)) ||
-		((req_mode == TV_NORM_SECAM) && !(priv->tuner.flags & VIDEO_TUNER_SECAM)))
-	    {
-		mp_msg(MSGT_TV, MSGL_ERR, "Tuner isn't capable to set norm!\n");
-		return(TVI_CONTROL_FALSE);
+	    if (priv->channels[priv->act_channel].flags & VIDEO_VC_TUNER) {
+		control(priv, TVI_CONTROL_TUN_GET_TUNER, 0);
+		if (((req_mode == TV_NORM_PAL) && !(priv->tuner.flags & VIDEO_TUNER_PAL)) ||
+		    ((req_mode == TV_NORM_NTSC) && !(priv->tuner.flags & VIDEO_TUNER_NTSC)) ||
+		    ((req_mode == TV_NORM_SECAM) && !(priv->tuner.flags & VIDEO_TUNER_SECAM)))
+		{
+		    mp_msg(MSGT_TV, MSGL_ERR, "Tuner isn't capable to set norm!\n");
+		    return(TVI_CONTROL_FALSE);
+		}
+
+		switch(req_mode) {
+		case TV_NORM_PAL:
+		    priv->tuner.mode = VIDEO_MODE_PAL;
+		    break;
+		case TV_NORM_NTSC:
+		    priv->tuner.mode = VIDEO_MODE_NTSC;
+		    break;
+		case TV_NORM_SECAM:
+		    priv->tuner.mode = VIDEO_MODE_SECAM;
+		    break;
+		}
+	    
+		if (control(priv, TVI_CONTROL_TUN_SET_TUNER, &priv->tuner) != TVI_CONTROL_TRUE) {
+		    return(TVI_CONTROL_FALSE);
+		}
+
 	    }
 
 	    switch(req_mode) {
 	    case TV_NORM_PAL:
-		priv->tuner.mode = VIDEO_MODE_PAL;
+		priv->channels[priv->act_channel].norm = VIDEO_MODE_PAL;
 		break;
 	    case TV_NORM_NTSC:
-		priv->tuner.mode = VIDEO_MODE_NTSC;
+		priv->channels[priv->act_channel].norm = VIDEO_MODE_NTSC;
 		break;
 	    case TV_NORM_SECAM:
-		priv->tuner.mode = VIDEO_MODE_SECAM;
+		priv->channels[priv->act_channel].norm = VIDEO_MODE_SECAM;
 		break;
 	    }
-	    
-	    if (control(priv, TVI_CONTROL_TUN_SET_TUNER, &priv->tuner) != TVI_CONTROL_TRUE) {
+	    if (ioctl(priv->video_fd, VIDIOCSCHAN, &priv->channels[priv->act_channel]) == -1)
+	    {
+		mp_msg(MSGT_TV, MSGL_ERR, "ioctl set chan failed: %s\n", strerror(errno));
 		return(TVI_CONTROL_FALSE);
 	    }
 
@@ -1148,7 +1171,7 @@ static void *video_grabber(void *data)
     int first = 1;
 
     int dropped = 0;
-    double dropped_time;
+    double dropped_time = 0.0;
     double drop_delta = 0.0;
 
     /* start the capture process */
