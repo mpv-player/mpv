@@ -4931,7 +4931,7 @@ else
   _noinputmodules="matroska $_noinputmodules"
   _def_matroska='#undef HAVE_MATROSKA'
 fi
-
+echores "$_matroska_internal"
 
 
 echocheck "internal FAAD2 (AAC) support"
