@@ -96,6 +96,7 @@
 	<LI><A HREF="codecs.html#libmad">2.2.2.3 libmad támogatás</A></LI>
         <LI><A HREF="codecs.html#vivo_audio">2.2.2.4 VIVO audio</A></LI>
         <LI><A HREF="codecs.html#realaudio">2.2.2.5 RealAudio</A></LI>
+        <LI><A HREF="codecs.html#qdesign">2.2.2.6 QDesign codec-ek</A></LI>
       </UL>
       <LI><A HREF="codecs.html#importing">2.2.3 Hogyan használj ismeretlen Win32 codec-et</A></LI>
       <UL>
@@ -516,13 +517,17 @@
     <LI>Ha valamilyen hardveres tömörítõ eszközzel, digitális kamerával (pl.
     DV, ATI VCR, MJPEG) felvett filmeket is le akarsz játszani, akkor muszáj
     ezeket feltenned.</LI>
-    <LI><B>WMV8</B> filmek lejátszásához is szükséges. Régebbi ASF-ek
+    <LI><B>WMV8, WMV9/WMA9</B> filmek lejátszásához is szükséges. Régebbi ASF-ek
       lejátszásához nem, bár ezek között gyakori a VoxWare audio-val
       ellátott file - amihez viszont szükség van a Win32 codecekre.</LI>
     <LI>Nem szükséges WMA (Windows Media Audio) használatához, a libavcodec-nek
       van rá opensource dekódere.</LI>
   </UL>
 </LI>
+
+<LI><B>QuickTime codecek</B>: x86 platformon a QuickTime könyvtárak
+  használatával le lehet játszani Sorenson v1/v3, Cinepak, RPZA és egyéb
+  QuickTime videókat, valamint a QDesign audiót.</LI>
 
 <LI><B>DivX4/DivX5</B>: errõl a codecrõl a
   <A HREF="codecs.html#divx">2.2.1.1</A>-es fejezetben található információ.
@@ -1455,7 +1460,8 @@ Közelebbi információ valakinél?</P>
 <P>Natív DirectX video (<CODE>-vo directx</CODE>) használatához installáld
   a <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header
   file-okat</A>, és fordítsd le az MPlayer-t. Ez, és az <CODE>-ao win32</CODE>
-  opció használata adja a legjobb eredményt.</P>
+  opció használata adja a legjobb eredményt. Ha a kép torz, próbáld kapcsold
+  ki a hardveres gyorsítást a <CODE>-vo directx:noaccel</CODE> opcióval.</P>
 
 <P>Be kell lépned az <B>MPlayer</B> könyvtárába és át kell másolnod az
   <CODE>etc/cygwin_inttypes.h</CODE> file-t az
