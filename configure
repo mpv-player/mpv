@@ -285,6 +285,7 @@ Miscellaneous options:
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary. Set further linking
                          options with --enable-static="-lslang -lncurses"
+  --charset              convert the help messages to this charset
   --language=list        a white space or comma separated list of languages
                          for translated man pages, the first language is the
                          primary and therefore used for translated messages
@@ -1383,6 +1384,7 @@ _largefiles=no
 #_language=en
 _shm=auto
 _linux_devfs=no
+#_charset=utf8
 _i18n=auto
 _dynamic_plugins=no
 _crash_debug=auto
@@ -1682,6 +1684,9 @@ for ac_option do
   --enable-sortsub) _sortsub=yes ;;
   --disable-sortsub) _sortsub=no ;;
 
+  --charset=*)
+    _charset=`echo $ac_option | cut -d '=' -f 2`
+    ;;
   --language=*)
     _language=`echo $ac_option | cut -d '=' -f 2`
     ;;
@@ -6649,6 +6654,7 @@ INSTALL = $_install
 EXTRA_INC = $_inc_extra $_inc_gtk
 OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
+CHARSET = $_charset
 HELP_FILE = $_mp_help
 
 PRG = $_prg

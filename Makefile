@@ -399,7 +399,11 @@ doxygen_clean:
 help_mp.h: help/help_mp-en.h $(HELP_FILE)
 	@echo '// WARNING! This is a generated file. Do NOT edit.' > help_mp.h
 	@echo '// See the help/ subdir for the editable files.' >> help_mp.h
+ifeq ($(CHARSET),)
 	@echo '#include "$(HELP_FILE)"' >> help_mp.h
+else
+	iconv -f `cat $(HELP_FILE).charset` -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
+endif
 
 ifneq ($(HELP_FILE),help/help_mp-en.h)
 	@echo "Adding untranslated messages to help_mp.h"
