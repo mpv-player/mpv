@@ -17,7 +17,7 @@
  * Rage128(pro) stuff of this driver.
  */
 
-#define RADEON_VID_VERSION "1.1.1"
+#define RADEON_VID_VERSION "1.1.2"
 
 /*
   It's entirely possible this major conflicts with something else
@@ -180,7 +180,7 @@ static bes_registers_t besr;
 #else
 #define DECLARE_VREG(name) { name, 0 }
 #endif
-
+#ifdef DEBUG
 static video_registers_t vregs[] = 
 {
   DECLARE_VREG(VIDEOMUX_CNTL),
@@ -275,7 +275,7 @@ static video_registers_t vregs[] =
   DECLARE_VREG(IDCT_AUTH),
   DECLARE_VREG(IDCT_CONTROL)
 };
-
+#endif
 static uint32_t radeon_vid_in_use = 0;
 
 static uint8_t *radeon_mmio_base = 0;
@@ -344,6 +344,13 @@ static char *fourcc_format_name(int format)
 #define OUTREG8(addr,val)	writeb(val, (radeon_mmio_base)+addr)
 #define INREG(addr)		readl((radeon_mmio_base)+addr)
 #define OUTREG(addr,val)	writel(val, (radeon_mmio_base)+addr)
+#define OUTREGP(addr,val,mask)  					\
+	do {								\
+		unsigned int _tmp = INREG(addr);			\
+		_tmp &= (mask);						\
+		_tmp |= (val);						\
+		OUTREG(addr, _tmp);					\
+	} while (0)
 
 static uint32_t radeon_vid_get_dbpp( void )
 {
@@ -370,6 +377,50 @@ static int radeon_is_interlace( void )
   return (INREG(CRTC_GEN_CNTL))&CRTC_INTERLACE_EN;
 }
 
+static __inline__ void radeon_engine_flush ( void )
+{
+	int i;
+
+	/* initiate flush */
+	OUTREGP(RB2D_DSTCACHE_CTLSTAT, RB2D_DC_FLUSH_ALL,
+	        ~RB2D_DC_FLUSH_ALL);
+
+	for (i=0; i < 2000000; i++) {
+		if (!(INREG(RB2D_DSTCACHE_CTLSTAT) & RB2D_DC_BUSY))
+			break;
+	}
+}
+
+
+static __inline__ void _radeon_fifo_wait (int entries)
+{
+	int i;
+
+	for (i=0; i<2000000; i++)
+		if ((INREG(RBBM_STATUS) & 0x7f) >= entries)
+			return;
+}
+
+
+static __inline__ void _radeon_engine_idle ( void )
+{
+	int i;
+
+	/* ensure FIFO is empty before waiting for idle */
+	_radeon_fifo_wait (64);
+
+	for (i=0; i<2000000; i++) {
+		if (((INREG(RBBM_STATUS) & GUI_ACTIVE)) == 0) {
+			radeon_engine_flush ();
+			return;
+		}
+	}
+}
+
+#define radeon_engine_idle()		_radeon_engine_idle()
+#define radeon_fifo_wait(entries)	_radeon_fifo_wait(entries)
+
+#if 0
 static void __init radeon_vid_save_state( void )
 {
   size_t i;
@@ -380,10 +431,19 @@ static void __init radeon_vid_save_state( void )
 static void __exit radeon_vid_restore_state( void )
 {
   size_t i;
+  radeon_fifo_wait(2);
+  OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
+  radeon_engine_idle();
+  while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
+  radeon_fifo_wait(15);
   for(i=0;i<sizeof(vregs)/sizeof(video_registers_t);i++)
+  {
+	radeon_fifo_wait(1);
 	OUTREG(vregs[i].name,vregs[i].value);
+  }
+  OUTREG(OV0_REG_LOAD_CNTL,		0);
 }
-
+#endif
 #ifdef DEBUG
 static void radeon_vid_dump_regs( void )
 {
@@ -397,6 +457,7 @@ static void radeon_vid_dump_regs( void )
 
 static void radeon_vid_stop_video( void )
 {
+    radeon_engine_idle();
     OUTREG(OV0_SCALE_CNTL, SCALER_SOFT_RESET);
     OUTREG(OV0_EXCLUSIVE_HORZ, 0);
     OUTREG(OV0_AUTO_FLIP_CNTL, 0);   /* maybe */
@@ -408,9 +469,11 @@ static void radeon_vid_stop_video( void )
 static void radeon_vid_display_video( void )
 {
     int bes_flags;
+    radeon_fifo_wait(2);
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
+    radeon_engine_idle();
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
-
+    radeon_fifo_wait(15);
     OUTREG(OV0_AUTO_FLIP_CNTL,OV0_AUTO_FLIP_CNTL_SOFT_BUF_ODD);
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
@@ -421,6 +484,7 @@ static void radeon_vid_display_video( void )
 			    (besr.saturation << 8) |
 			    (besr.saturation << 16));
 #endif
+    radeon_fifo_wait(2);
     if(besr.ckey_on)
     {
 	OUTREG(OV0_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
@@ -452,6 +516,7 @@ static void radeon_vid_display_video( void )
     OUTREG(OV0_VID_BUF0_BASE_ADRS,	besr.vid_buf0_base_adrs);
     OUTREG(OV0_VID_BUF1_BASE_ADRS,	besr.vid_buf1_base_adrs);
     OUTREG(OV0_VID_BUF2_BASE_ADRS,	besr.vid_buf2_base_adrs);
+    radeon_fifo_wait(9);
     OUTREG(OV0_VID_BUF3_BASE_ADRS,	besr.vid_buf3_base_adrs);
     OUTREG(OV0_VID_BUF4_BASE_ADRS,	besr.vid_buf4_base_adrs);
     OUTREG(OV0_VID_BUF5_BASE_ADRS,	besr.vid_buf5_base_adrs);
@@ -1135,7 +1200,9 @@ static int __init radeon_vid_initialize(void)
 	}
 	radeon_param_buff = kmalloc(PARAM_BUFF_SIZE,GFP_KERNEL);
 	if(radeon_param_buff) radeon_param_buff_size = PARAM_BUFF_SIZE;
+#if 0
 	radeon_vid_save_state();
+#endif
 	radeon_vid_make_default();
 	radeon_vid_preset();
 #ifdef CONFIG_MTRR
@@ -1157,7 +1224,9 @@ int __init init_module(void)
 
 void __exit cleanup_module(void)
 {
+#if 0
 	radeon_vid_restore_state();
+#endif
 	if(radeon_mmio_base)
 		iounmap(radeon_mmio_base);
 	kfree(radeon_param_buff);
