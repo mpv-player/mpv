@@ -136,6 +136,7 @@ void mov_build_index(mov_track_t* trak){
 #define MOV_TRAK_UNKNOWN 0
 #define MOV_TRAK_VIDEO 1
 #define MOV_TRAK_AUDIO 2
+#define MOV_TRAK_FLASH 3
 
 typedef struct {
     off_t moov_start;
@@ -373,9 +374,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		lschunks(demuxer,level+1,pos+len,trak);
 		break;
 	    }
+	    default:
+		id = bswap_32(id);
+		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
+		break;
 	  }//switch(id)
-	} else
-	if(id==MOV_FOURCC('t','r','a','k')){
+	} else { /* not in track */
+	  switch(id) {
+	    case MOV_FOURCC('t','r','a','k'): {
 //	    if(trak) printf("MOV: Warning! trak in trak?\n");
 	    if(priv->track_db>=MOV_MAX_TRACKS){
 		mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVtooManyTrk);
@@ -438,27 +444,33 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		}
 		break;
 	    }
+	    default:
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Unknown track type found (type: %d)\n", trak->type);
+		break;
 	    }
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, "--------------\n");
 	    priv->track_db++;
 	    trak=NULL;
-	} else
+	    break;
+	}
 #ifndef HAVE_ZLIB
-	if(id==MOV_FOURCC('c','m','o','v')){
+	case MOV_FOURCC('c','m','o','v'): {
 	    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVcomprhdr);
 	    return;
 	}
 #else
-	if(id==MOV_FOURCC('c','m','o','v')){
+	case MOV_FOURCC('c','m','o','v'): {
 //	    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVcomprhdr);
 	    lschunks(demuxer,level+1,pos+len,NULL);
-	} else
-	if(id==MOV_FOURCC('d','c','o','m')){
+	    break;
+	}
+	case MOV_FOURCC('d','c','o','m'): {
 //	    int temp=stream_read_dword(demuxer->stream);
 	    unsigned int len=bswap_32(stream_read_dword(demuxer->stream));
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Compressed header uses %.4s algo!\n",&len);
-	} else
-	if(id==MOV_FOURCC('c','m','v','d')){
+	    break;
+	}
+	case MOV_FOURCC('c','m','v','d'): {
 //	    int temp=stream_read_dword(demuxer->stream);
 	    unsigned int moov_sz=stream_read_dword(demuxer->stream);
 	    unsigned int cmov_sz=len-4;
@@ -510,9 +522,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	      demuxer->stream=backup;
 	      free(cmov_buf);
 	      free(moov_buf);	    
+	      break;
 	}
 #endif
-	else if (id==MOV_FOURCC('u','d','t','a'))
+	case MOV_FOURCC('u','d','t','a'):
 	{
 	    unsigned int udta_id;
 	    off_t udta_len;
@@ -584,7 +597,13 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    }
 		}
 	    }
+	    break;
 	} /* eof udta */
+	default:
+	  id = bswap_32(id);
+	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
+	} /* endof switch */
+	} /* endof else */
 
 	pos+=len+8;
 	if(pos>=endpos) break;
