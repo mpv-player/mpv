@@ -118,8 +118,8 @@ header file to handle it, in which case, you'll include the new header
 file. The dec_*.c functions are in charge of initializing codecs and then
 passing encoded data to the proper decoder function. The init and decode
 functions are big switch statements that key off of the codec definition
-numbers from codec-cfg.h. Your best bet in here is to examine some simple
-other simple decoders and clone relevant portions of the case blocks.
+numbers from codec-cfg.h. Your best bet in here is to examine some other
+simple decoders and clone relevant portions of the case blocks.
 
 Next, compile the project and see if you have everything correct so far.
 
@@ -141,7 +141,64 @@ each block, that's a good sign that you're ready to move on to step
 decoder. Is your decoder even being invoked? If not, why not?
 
 2) Develop the decoder
-Go for it. Remember to make it work, first, then make it work fast.
+Go for it. Remember to make it work, first, then make it work fast. Some
+specific tips:
+
+What output formats should you support in your decoder? Whatever makes
+sense. YUV output is always preferable over RGB output. Generally, if a
+codec uses a YUV data as its source data, you will be able to decode a
+frame of YUV data. If a codec takes RGB data as its input, as many older
+video codecs do, then there's no point in supporting YUV output; just
+output as many RGB formats as possible.
+
+The most preferred output format for video data is YV12. This is because
+MPlayer supports a multitude of hardware devices that can display, scale,
+and filter this type of data directly. MPlayer also has a bunch of
+optimized conversion functions that can convert YV12 data to any other
+type of output data.
+
+If you do take the RGB output route, you should be aware that MPlayer
+actually orders packed RGB data as BGR. If you're decoding into a BGR24
+buffer, the output will look like:
+  B G R B G R B G R B ...
+If you're decoding into a BGR32 buffer, there will need to be an
+additional (unused) byte after each BGR triplet:
+  B G R - B G R - B G ...
+
+Make liberal use of sanity checks. Start by including the file mp_msg.h at
+the start of your decoder. Then you can use the mp_msg() function as you
+would a normal printf() statement. Whenever your decoder notices a strange
+bit of data or an odd condition, print a message such as:
+  mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Odd data encountered: %d\n", data);
+Obviously, you should make the message a little more
+descriptive, for your benefit. MSGL_WARN is a good message level for this
+type of information. Look in mp_msg.h for all of the error levels. You can
+even make MPlayer bail out completely by using MSGL_FATAL, but that should
+never be necessary at the data decoder level.
+
+What conditions should trigger a warning? Anything, and I mean *anything*
+out of the ordinary. Many chunks of compressed video data contain headers
+with data such as width, height, and chunk size. Reconcile these fields
+with the parameters passed into the decoding function (if you set it up to
+take those parameters). Such data should match up. If it doesn't, issue a
+warning and make an executive decision in the code about which data to
+believe (personally, I always lend more weight to the data that was passed
+into the decoder function, the data that comes from the container file's
+header). If there's supposed to be a magic number embedded in, or computed
+from, the chunk's header, issue a warning if it isn't correct.
+
+Whenever you're about the index into a memory array with an index that
+could theoretically be out of range, then test that the index is in range,
+no matter how tedious it seems. Accessing outside of your memory range is,
+after all, the number 1 cause of segmentation faults. Never trust that all
+the data passed to you will be correct. If an array index suddenly winds
+up out of range, it's probably best to issue a warning about it and bail
+out of the decoder (but not the whole application).
+
+Writing all of these warning statements may seem insipid, but consider
+that if you don't do it when you start writing your decoder, you'll
+probably end up doing it later on when your decoder isn't working properly
+and you need to figure out why (believe me, I know).
 
 3) Debug and test the decoder
 If you're extremely lucky, the decoder will work the first time. If you're
