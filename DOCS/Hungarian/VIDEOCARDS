@@ -87,11 +87,12 @@ Ha mûködésre akarod bírni, a következõket kell figyelembe venned:
 
 II.  OpenGL driverek, megfelelõ glTexSubImage() támogatással
 
-   Jelenleg csak a régebbi Utah-GLX driver (X 3.3.6) támogatja.
+   A régebbi Utah-GLX driver (X 3.3.6) támogatja, minden kartyaval.
    Lásd http://utah-glx.sourceforge.net
 
-   Az új X 4.x.x/DRI-nek és az nVidia drivereknek nincs használható
-   glTexSubImage-ük :(
+   Az DRI X 4.0.3-as vagy ujabb verzioja szinten tamogatja, de csak a Matrox
+   es Radeon kartyakkal.
+   Lasd dri.sourceforge.net cimen a letoltesi es installalasi instrukciokat.
 
 
 III. Nativ kártyaspecifikus driverek

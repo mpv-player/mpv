@@ -8,8 +8,7 @@ Videocards with hardware acceleration:
 bilinear filtering. Under Linux, there are several ways to access it:
 
 I.   The Xv (XVideo) extension of XFree86 4.0.2
-II.  OpenGL drivers with glTexSubImage() support (currently the Utah-GLX
-     drivers)
+II.  OpenGL drivers with glTexSubImage() support
 III. Native card-specific drivers, using special abilities of some cards
 IV.  DGA - direct graphic access. no YUV & scaling, but faster than raw X11
 V.   Not really acceleration, but...
@@ -83,10 +82,11 @@ In order to make this work, be sure to check the following:
 
 II. OpenGL drivers with *working* *fast* glTexSubImage() support.
 
-   Currently only the old Utah-GLX drivers (for X 3.3.6) have it.
+   The old Utah-GLX drivers (for X 3.3.6) have it, with all cards.
    See http://utah-glx.sourceforge.net for details about how to install it.
 
-   The new X4/DRI and nVidia's binary drivers have no usable glTexSubImage :(
+   DRI >= 4.0.3 supports it only with Matrox cards, and Radeon.
+   See dri.sourceforge.net for download, and installation instructions.
 
 III. Native card-specific drivers
 

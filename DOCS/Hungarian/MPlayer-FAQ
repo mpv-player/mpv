@@ -66,8 +66,9 @@ A: Nem nulla, de bele van építve a codecbe, így nem mérhetõ külön. Próbáld
 Q: Az OpenGL (-vo gl) output nem mûködik.
 A: Az OpenGL drivered nem támogatja a dinamikus textúraváltást
    (glTexSubImage).
-   Ismert, hogy nem mûködik 4.0.x DRI-vel, és az nVidia bináris szarjaival.
-   Ismert, hogy mûködik Utah-GLX és Matrox G400-zal.
+   Ismert, hogy nem mûködik az nVidia bináris szarjaival.
+   Ismert, hogy mûködik Utah-GLX/DRI és Matrox G400-zal, valamint DRI es
+   Radeon-nal is. DRI-vel ezen a ketton kivul massal nem megy.
    Nem fog mûködni 3dfx kártyákkal, mivel ezeknek maximum 256x256-os
    textúráik lehetnek.
 

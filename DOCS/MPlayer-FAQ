@@ -63,9 +63,10 @@ A: It's not zero, but it's built in into codec, so can't be measured separated.
    the difference to see video_out speed...
 
 Q: OpenGL (-vo gl) output doesn't work (hangup/black window/X11 errors/...)
-A: your opengl driver doesn't support dynamic texture chanegs (glTexSubImage)
-   it's known not to work with X 4.0.x DRI drivers and nVidia's binary shit.
-   it's known to work with Utah-GLX and Matrox G400 card.
+A: your opengl driver doesn't support dynamic texture changes (glTexSubImage)
+   it's known not to work with nVidia's binary shit.
+   it's known to work with Utah-GLX/DRI and Matrox G400 card. Also with
+   DRI and Radeon card. It won't work with DRI others than these.
    it will not work with 3DFX cards because the 256x256 texture size limit.
 
 Q: I have G200/G400, how to compile/use mga_vid driver?
