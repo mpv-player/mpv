@@ -80,20 +80,20 @@ void yuv2rgb_init (int bpp, int mode)
     if (yuv2rgb == NULL /*&& (config.flags & VO_MMX_ENABLE)*/) {
         yuv2rgb = yuv2rgb_init_mmx (bpp, mode);
         if (yuv2rgb != NULL)
-            fprintf (stderr, "Using MMX for colorspace transform\n");
+            printf ("Using MMX for colorspace transform\n");
         else
-            fprintf (stderr, "Cannot init MMX colorspace transform\n");
+            printf ("Cannot init MMX colorspace transform\n");
     }
 #endif
 #ifdef HAVE_MLIB
     if (yuv2rgb == NULL /*&& (config.flags & VO_MLIB_ENABLE)*/) {
 	yuv2rgb = yuv2rgb_init_mlib (bpp, mode);
 	if (yuv2rgb != NULL)
-	    fprintf (stderr, "Using mlib for colorspace transform\n");
+	    printf ("Using mlib for colorspace transform\n");
     }
 #endif
     if (yuv2rgb == NULL) {
-	fprintf (stderr, "No accelerated colorspace conversion found\n");
+	printf ("No accelerated colorspace conversion found\n");
 	yuv2rgb_c_init (bpp, mode);
 	yuv2rgb = (yuv2rgb_fun)yuv2rgb_c;
     }
@@ -401,7 +401,7 @@ static void yuv2rgb_c_init (int bpp, int mode)
 	break;
 
     default:
-	fprintf (stderr, "%ibpp not supported by yuv2rgb\n", bpp);
+	printf ("%ibpp not supported by yuv2rgb\n", bpp);
 	exit (1);
     }
 

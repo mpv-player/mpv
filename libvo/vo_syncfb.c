@@ -356,7 +356,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 		f = open("/dev/mga_vid",O_RDWR);
 		if(f == -1)
 		{
-			fprintf(stderr,"Couldn't open /dev/syncfb or /dev/mga_vid\n");
+			printf("Couldn't open /dev/syncfb or /dev/mga_vid\n");
 			return(-1);
 		}
 	}

@@ -133,7 +133,7 @@ static void check_events(void)
          set_window();
          if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
           {
-           fprintf( stderr,"Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
+           printf( "Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 //           exit( 0 );
           }
 
@@ -179,7 +179,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  f=open( "/dev/mga_vid",O_RDWR );
  if ( f == -1 )
   {
-   fprintf(stderr,"Couldn't open /dev/mga_vid\n");
+   printf("Couldn't open /dev/mga_vid\n");
    return(-1);
   }
 
@@ -205,7 +205,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
         mga_vid_config.format=MGA_VID_FORMAT_UYVY;
         mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height * 2;
         break;
-   default:          fprintf(stderr,"mga: invalid output format %0X\n",format); return (-1);
+   default:          printf("mga: invalid output format %0X\n",format); return (-1);
   }
 
  if ( X_already_started ) return -1;
@@ -216,7 +216,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  mDisplay=XOpenDisplay(name);
  if ( mDisplay == NULL )
   {
-   fprintf( stderr,"Can not open X11 display\n" );
+   printf( "Can not open X11 display\n" );
    return -1;
   }
 
@@ -246,7 +246,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
    case 24: fgColor=0x00ff00ffL; break;
    case 16: fgColor=0xf81fL; break;
    case 15: fgColor=0x7c1fL; break;
-   default: fprintf( stderr,"Sorry, this (%d) color depth not supported.\n",vo_depthonscreen ); return -1;
+   default: printf( "Sorry, this (%d) color depth not supported.\n",vo_depthonscreen ); return -1;
   }
  xWAttribs.background_pixel=0;
  xWAttribs.border_pixel=0;

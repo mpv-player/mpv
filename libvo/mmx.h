@@ -243,12 +243,12 @@ mmx_ok(void)
 	{ \
 		mmx_t mmx_trace; \
 		mmx_trace.uq = (imm); \
-		fprintf(stderr, #op "_i2r(" #imm "=0x%08x%08x, ", \
+		printf(#op "_i2r(" #imm "=0x%08x%08x, ", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 		__asm__ __volatile__ ("movq %%" #reg ", %0" \
 				      : "=X" (mmx_trace) \
 				      : /* nothing */ ); \
-		fprintf(stderr, #reg "=0x%08x%08x) => ", \
+		printf(#reg "=0x%08x%08x) => ", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 		__asm__ __volatile__ (#op " %0, %%" #reg \
 				      : /* nothing */ \
@@ -256,7 +256,7 @@ mmx_ok(void)
 		__asm__ __volatile__ ("movq %%" #reg ", %0" \
 				      : "=X" (mmx_trace) \
 				      : /* nothing */ ); \
-		fprintf(stderr, #reg "=0x%08x%08x\n", \
+		printf(#reg "=0x%08x%08x\n", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 	}
 
@@ -264,12 +264,12 @@ mmx_ok(void)
 	{ \
 		mmx_t mmx_trace; \
 		mmx_trace = (mem); \
-		fprintf(stderr, #op "_m2r(" #mem "=0x%08x%08x, ", \
+		printf(#op "_m2r(" #mem "=0x%08x%08x, ", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 		__asm__ __volatile__ ("movq %%" #reg ", %0" \
 				      : "=X" (mmx_trace) \
 				      : /* nothing */ ); \
-		fprintf(stderr, #reg "=0x%08x%08x) => ", \
+		printf(#reg "=0x%08x%08x) => ", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 		__asm__ __volatile__ (#op " %0, %%" #reg \
 				      : /* nothing */ \
@@ -277,7 +277,7 @@ mmx_ok(void)
 		__asm__ __volatile__ ("movq %%" #reg ", %0" \
 				      : "=X" (mmx_trace) \
 				      : /* nothing */ ); \
-		fprintf(stderr, #reg "=0x%08x%08x\n", \
+		printf(#reg "=0x%08x%08x\n", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 	}
 
@@ -287,16 +287,16 @@ mmx_ok(void)
 		__asm__ __volatile__ ("movq %%" #reg ", %0" \
 				      : "=X" (mmx_trace) \
 				      : /* nothing */ ); \
-		fprintf(stderr, #op "_r2m(" #reg "=0x%08x%08x, ", \
+		printf(#op "_r2m(" #reg "=0x%08x%08x, ", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 		mmx_trace = (mem); \
-		fprintf(stderr, #mem "=0x%08x%08x) => ", \
+		printf(#mem "=0x%08x%08x) => ", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 		__asm__ __volatile__ (#op " %%" #reg ", %0" \
 				      : "=X" (mem) \
 				      : /* nothing */ ); \
 		mmx_trace = (mem); \
-		fprintf(stderr, #mem "=0x%08x%08x\n", \
+		printf(#mem "=0x%08x%08x\n", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 	}
 
@@ -306,18 +306,18 @@ mmx_ok(void)
 		__asm__ __volatile__ ("movq %%" #regs ", %0" \
 				      : "=X" (mmx_trace) \
 				      : /* nothing */ ); \
-		fprintf(stderr, #op "_r2r(" #regs "=0x%08x%08x, ", \
+		printf(#op "_r2r(" #regs "=0x%08x%08x, ", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 		__asm__ __volatile__ ("movq %%" #regd ", %0" \
 				      : "=X" (mmx_trace) \
 				      : /* nothing */ ); \
-		fprintf(stderr, #regd "=0x%08x%08x) => ", \
+		printf(#regd "=0x%08x%08x) => ", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 		__asm__ __volatile__ (#op " %" #regs ", %" #regd); \
 		__asm__ __volatile__ ("movq %%" #regd ", %0" \
 				      : "=X" (mmx_trace) \
 				      : /* nothing */ ); \
-		fprintf(stderr, #regd "=0x%08x%08x\n", \
+		printf(#regd "=0x%08x%08x\n", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 	}
 
@@ -325,10 +325,10 @@ mmx_ok(void)
 	{ \
 		mmx_t mmx_trace; \
 		mmx_trace = (mems); \
-		fprintf(stderr, #op "_m2m(" #mems "=0x%08x%08x, ", \
+		printf(#op "_m2m(" #mems "=0x%08x%08x, ", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 		mmx_trace = (memd); \
-		fprintf(stderr, #memd "=0x%08x%08x) => ", \
+		printf(#memd "=0x%08x%08x) => ", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 		__asm__ __volatile__ ("movq %0, %%mm0\n\t" \
 				      #op " %1, %%mm0\n\t" \
@@ -336,7 +336,7 @@ mmx_ok(void)
 				      : "=X" (memd) \
 				      : "X" (mems)); \
 		mmx_trace = (memd); \
-		fprintf(stderr, #memd "=0x%08x%08x\n", \
+		printf(#memd "=0x%08x%08x\n", \
 			mmx_trace.d[1], mmx_trace.d[0]); \
 	}
 
@@ -692,7 +692,7 @@ mmx_ok(void)
 
 #define	emms() \
 	{ \
-		fprintf(stderr, "emms()\n"); \
+		printf("emms()\n"); \
 		__asm__ __volatile__ ("emms"); \
 	}
 

@@ -138,7 +138,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 
  if ( mDisplay == NULL )
   {
-   fprintf( stderr,"Can not open display\n" );
+   printf( "Can not open display\n" );
    return -1;
   }
  screen=DefaultScreen( mDisplay );
@@ -245,7 +245,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
   else
    {
     Shmem_Flag=0;
-    if ( !Quiet_Flag ) fprintf( stderr,"Shared memory not supported\nReverting to normal Xlib\n" );
+    if ( !Quiet_Flag ) printf( "Shared memory not supported\nReverting to normal Xlib\n" );
    }
  if ( Shmem_Flag ) CompletionType=XShmGetEventBase( mDisplay ) + ShmCompletion;
 
@@ -257,7 +257,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
    if ( myximage == NULL )
     {
      if ( myximage != NULL ) XDestroyImage( myximage );
-     if ( !Quiet_Flag ) fprintf( stderr,"Shared memory error,disabling ( Ximage error )\n" );
+     if ( !Quiet_Flag ) printf( "Shared memory error,disabling ( Ximage error )\n" );
      goto shmemerror;
     }
    Shminfo[0].shmid=shmget( IPC_PRIVATE,
@@ -270,7 +270,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
      {
       printf( "%s\n",strerror( errno ) );
       perror( strerror( errno ) );
-      fprintf( stderr,"Shared memory error,disabling ( seg id error )\n" );
+      printf( "Shared memory error,disabling ( seg id error )\n" );
      }
     goto shmemerror;
    }
@@ -280,7 +280,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
    {
     XDestroyImage( myximage );
     if ( Shminfo[0].shmaddr != ( ( char * ) -1 ) ) shmdt( Shminfo[0].shmaddr );
-    if ( !Quiet_Flag ) fprintf( stderr,"Shared memory error,disabling ( address error )\n" );
+    if ( !Quiet_Flag ) printf( "Shared memory error,disabling ( address error )\n" );
     goto shmemerror;
    }
    myximage->data=Shminfo[0].shmaddr;
@@ -294,14 +294,14 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
    {
     XDestroyImage( myximage );
     shmdt( Shminfo[0].shmaddr );
-    if ( !Quiet_Flag ) fprintf( stderr,"Shared memory error,disabling.\n" );
+    if ( !Quiet_Flag ) printf( "Shared memory error,disabling.\n" );
     gXErrorFlag=0;
     goto shmemerror;
    }
    else
     shmctl( Shminfo[0].shmid,IPC_RMID,0 );
 
-   if ( !Quiet_Flag ) fprintf( stderr,"Sharing memory.\n" );
+   if ( !Quiet_Flag ) printf( "Sharing memory.\n" );
  }
  else
   {
@@ -319,7 +319,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 
   bpp=myximage->bits_per_pixel;
 
-  fprintf( stderr,"X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
+  printf( "X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
   // If we have blue in the lowest bit then obviously RGB
   mode=( ( myximage->blue_mask & 0x01 ) != 0 ) ? MODE_RGB : MODE_BGR;
@@ -329,7 +329,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
   if ( myximage->byte_order != LSBFirst )
 #endif
   {
-   fprintf( stderr,"No support fon non-native XImage byte order!\n" );
+   printf( "No support fon non-native XImage byte order!\n" );
    return -1;
   }
 

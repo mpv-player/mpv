@@ -121,7 +121,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
 	if (mydisplay == NULL)
 	{
-		fprintf(stderr,"Can not open display\n");
+		printf("Can not open display\n");
 		return -1;
 	}
 

@@ -110,7 +110,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
  if (mydisplay == NULL)
   {
-   fprintf(stderr,"Can't open display\n");
+   printf("Can't open display\n");
    return -1;
   }
 
@@ -155,7 +155,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
    /* check for Xvideo support */
    if (Success != XvQueryAdaptors(mydisplay,DefaultRootWindow(mydisplay), &adaptors,&ai))
     {
-     fprintf(stderr,"Xv: XvQueryAdaptors failed");
+     printf("Xv: XvQueryAdaptors failed");
      return -1;
     }
    /* check adaptors */
@@ -170,7 +170,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
      xv_format=0;
      for(i = 0; i < formats; i++)
       {
-       fprintf(stderr, "Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
+       printf("Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
 
        if (fo[i].id == format)
         {
@@ -182,14 +182,14 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
    if (xv_port != 0)
     {
-     fprintf( stderr,"using Xvideo port %d for hw scaling\n",xv_port );
+     printf( "using Xvideo port %d for hw scaling\n",xv_port );
 
      allocate_xvimage(0);
 
      XGetGeometry( mydisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
      drwX=0; drwY=0;
      XTranslateCoordinates( mydisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-     fprintf( stderr,"[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+     printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
      if ( mFullscreen )
       {
@@ -199,7 +199,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
        drwcY+=drwY;
        drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
        drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
-       fprintf( stderr,"[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+       printf( "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
       }
 
      saver_off(mydisplay);  // turning off screen saver
@@ -243,7 +243,7 @@ static void check_events(void)
    XGetGeometry( mydisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
    drwX=0; drwY=0;
    XTranslateCoordinates( mydisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-   fprintf( stderr,"[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+   printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
    if ( mFullscreen )
     {
@@ -253,7 +253,7 @@ static void check_events(void)
      drwcY+=drwY;
      drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
      drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
-     fprintf( stderr,"[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+     printf( "[xv-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
     }
   }
 }

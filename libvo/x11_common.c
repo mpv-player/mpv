@@ -56,7 +56,7 @@ int vo_init( void )
  mDisplay=XOpenDisplay( DisplayName );
  if ( !mDisplay )
   {
-   fprintf( stderr,"vo: couldn't open the X11 display!\n" );
+   printf( "vo: couldn't open the X11 display!\n" );
    return 0;
   }
  mScreen=DefaultScreen( mDisplay );     // Screen ID.

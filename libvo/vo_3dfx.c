@@ -170,7 +170,7 @@ create_window(Display *display)
 	bpp = attribs.depth;
 	if (bpp != 16) 
 	{
-		fprintf(stderr,"Only 16bpp supported!");
+		printf("Only 16bpp supported!");
 		exit(-1);
 	}
 
@@ -336,7 +336,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	// Open driver device
 	if ( (fd = open("/dev/3dfx",O_RDWR) ) == -1) 
 	{
-		fprintf(stderr,"Couldn't open /dev/3dfx\n");
+		printf("Couldn't open /dev/3dfx\n");
 		exit(1);
 	}
 
