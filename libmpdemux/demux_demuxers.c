@@ -84,13 +84,21 @@ void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
 void demux_close_demuxers(demuxer_t* demuxer) {
   int i;
   dd_priv_t* priv = demuxer->priv;
+  stream_t *s;
 
   if(priv->vd)
     free_demuxer(priv->vd);
-  if(priv->ad && priv->ad != priv->vd)
+  if(priv->ad && priv->ad != priv->vd) {
+    // That's a hack to free the audio file stream
+    // It's ok atm but we shouldn't free that here
+    s = priv->ad->stream;
     free_demuxer(priv->ad);
-  if(priv->sd && priv->sd != priv->vd && priv->sd != priv->ad)
+    free_stream(s);
+  } if(priv->sd && priv->sd != priv->vd && priv->sd != priv->ad) {
+    s = priv->sd->stream;
     free_demuxer(priv->sd);
+    free_stream(s);
+  }
 
   free(priv);
   if(demuxer->info) {
