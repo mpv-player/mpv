@@ -236,7 +236,7 @@ Developer Cries
 
 <P><B>MPlayer</B> is a movie player for LINUX (runs on many other Unices, and
 <B>non-x86</B> CPUs, see <A HREF="#6">section 6</A>). It plays most MPEG, VOB,
-AVI, VIVO, ASF/WMV, QT/MOV, FLI files, supported by many native, XAnim, and
+AVI, VIVO, ASF/WMV, QT/MOV, FLI, RM files, supported by many native, XAnim, and
 Win32 DLL codecs. You can watch <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
 <B>3ivx</B>, and even <B>DivX</B> movies too (and you don't need the avifile
 library at all!). The another big feature of mplayer is the wide range of
@@ -256,7 +256,7 @@ library which has special license. We are still developing towards GPL.</P>
 
 <P>Distributing <B>MPlayer</B> in the form of binaries and/or binary packages
 is currently impossible, speaking about both <B>technical</B> and <B>law</B>
-areas. Detailed information can be found in the second part of <A HREF="users_against_developers.html">this file</A>,
+areas. Detailed information can be found in the second part of <A HREF="users_against_developers.html#binary">this file</A>,
 and it is recommended to read it.</P>
 
 <P>I didn't write any codecs, just some players. I spent
@@ -282,35 +282,38 @@ too. So I've decided to write/modify one...</P>
 <LI><B>mpg12play v0.1-v0.3:</B><BR>
     The first try, hacked together in a half hour!
     I've used libmpeg3 from www.heroinewarrior.com up to the version 0.3,
-    but there were image quality and speed problems with it.
+    but there were image quality and speed problems with it.</LI>
 <LI><B>mpg12play v0.5-v0.87:</B><BR>
     Mpeg codec replaced with DVDview by Dirk Farin, it was a great stuff,
-    but it was slow and was written in C++ (I hate C++!!!)
+    but it was slow and was written in C++ (I hate C++!!!)</LI>
 <LI><B>mpg12play v0.9-v0.95pre5:</B><BR>
     Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman & Michel Lespinasse.
     It's great, optimized very fast C code with perfect image quality and
-    100% MPEG standard conformance.
+    100% MPEG standard conformance.</LI>
 <LI><B>MPlayer v0.3-v0.9:</B><BR>
     It was a pack of two programs: mpg12playv0.95pre6 and my new simple AVI
-    player 'avip' based on avifile's Win32 DLL loader.
+    player 'avip' based on avifile's Win32 DLL loader.</LI>
 <LI><B>MPlayer v0.10:</B><BR>
-    The MPEG and AVI player in a single binary!
+    The MPEG and AVI player in a single binary!</LI>
 <LI><B>MPlayer v0.11:</B><BR>
     Some new developers joined and from 0.11 the mplayer project is a team-work!
-    Added .ASF file support, and OpenDivX (see www.projectmayo.com) en/decoding.
+    Added .ASF file support, and OpenDivX (see www.projectmayo.com) en/decoding.</LI>
 <LI><B>MPlayer v0.17 "The IdegCounter"</B><BR>
     The release version of the 0.11pre after 4 months of heavy development!
     Try it, and be amazed! Thousands of new features added... and of course
-    old code was improved too, bugs removed etc.
+    old code was improved too, bugs removed etc.</LI>
 <LI><B>MPlayer 0.18 "The BugCounter"</B><BR>
     2 months since 0.17 and here's a new release.. Completed ASF support,
     more subtitle formats, introduced libao (similar to libvo but to audio),
-    even more stable than ever, and so on. It's a MUST !
+    even more stable than ever, and so on. It's a MUST !</LI>
 <LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
     Hmm. Release again. Tons of new features, beta GUI version, bugs fixed,
     new vo and ao drivers, ported to many systems, including opensource DivX
-    codecs and much more. Try it!
-
+    codecs and much more. Try it!</LI>
+<LI><B>MPlayer 0.60 "The RTFMCounter"</B><BR>
+    MOV/VIVO/RM/FLI/NUV fileformats support, native CRAM, Cinepak, ADPCM codecs,
+    and support for XAnim's binary codecs; DVD subtitles support, first
+    release of MEncoder, TV grabbing, cache, liba52, countless fixes.</LI>
 </UL></P>
 
 <P><B><A NAME=1.3>1.3. Installation</A></B></P>
@@ -363,7 +366,7 @@ kernel bugs, etc) so they are discouraged.</P>
 <A HREF="codecs.html#2.2.1.2">2.2.1.2</A> section before compiling. Features :<BR>
 <UL>
   <LI>you can <B>gain <I>DivX/DivX4</I> playing on non-x86 machines</B></LI>
-  <LI>RealVideo 1.0/MJPEG/h263/others playing and encoding</LI>
+  <LI>RealVideo 1.0/VIVO/MJPEG/h263/others playing and encoding</LI>
   <LI>this codec has the <B>greatest decoding speed</B> for DivX and DivX4
 movies (even faster than the original DivX4 library itself) ! Recommended!</LI>
 </UL>
@@ -382,9 +385,11 @@ package! However, you can use our codecs package with avifile. Features :<BR>
 </LI>
 
 <LI><B>DivX4</B> : information about this codec is available in the
-<A HREF="codecs.html#2.2.1.1">2.2.1.1</A> section. You possibly don't want this
-codec as <B>libavcodec</B> (see above) is much faster than this.<BR>
+<A HREF="codecs.html#2.2.1.1">2.2.1.1</A> section. If you don't want to encode
+with it, you possibly don't want this codec as <B>libavcodec</B> (see above) is
+much faster than this.<BR>
 Features :<UL>
+  <LI>1 pass or 2 pass encoding with <A HREF="encoding.html">MEncoder</A></LI>
   <LI>can play old <B>DivX3</B> movies much faster than the Win32 DLL but
     slower than <B>libavcodec</B> !</LI>
   <LI>it's closed-source, and only an x86 version is available.</LI>
@@ -857,12 +862,6 @@ Input from standard V4L<BR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3 or 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust brightness</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5 or 6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust hue</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7 or 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust saturation</TD></TR>
-
-<TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(the following keys are valid only with TV input support</I></P></TD></TR>
-
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>select previous/next channel</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change norm</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change channel list</TD></TR>
 </TABLE></P>
 
 <P><B>GUI keyboard control</B></P>

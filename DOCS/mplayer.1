@@ -59,6 +59,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-osdlevel\ <level> ]
 .RB [ \-config\ <file> ]
 .RB [ \-display\ <name> ]
+.RB [ \-xinerama\ <screen\ number> ]
 .RB [ \-wid\ <window\ id> ]
 .RB [ \-unicode ]
 .RB [ \-utf8 ]
@@ -115,8 +116,8 @@ many native and Win32 DLL codecs. You can watch VideoCD, SVCD, DVD, and even
 DivX movies too (and you don't need the avifile library at all!).
 
 Another big feature of mplayer is the wide range of supported output drivers :
-X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, SDL (and all the drivers
-it supports), VESA (on every VESA compatible card, even without X!), and some
+X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, GGI, SDL (and all the drivers
+they support), VESA (on every VESA compatible card, even without X!), and some
 lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon) too! Most of them
 supports software or hardware scaling, so you can enjoy movies in fullscreen.
 
@@ -595,6 +596,11 @@ specifies where to search for config file
 .B \-display <name>
 specify the hostname and display number of the X server you want
 to display on. For example : -display xtest.localdomain:0
+.TP
+.B \-xinerama <screen number>
+in Xinerama configurations (i.e. a single desktop that spans across multiple
+displays) this option tells MPlayer which screen to display movie on. Range
+0-...
 .TP
 .B \-wid\ <window\ id>
 This tells MPlayer to use a X11 window, which is useful to embed MPlayer in a
