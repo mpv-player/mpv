@@ -34,7 +34,7 @@ CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo2 $(EXTRA_INC) # -Wall
 VO_LIBS = -Llibvo2 -lvo2 $(X_LIB) $(DXR3_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB)
 endif
 
-A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
+A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 -Lliba52 -la52 $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
 
 OSDEP_LIBS = -Llinux -losdep
 PP_LIBS = -Lpostproc -lpostproc
@@ -43,7 +43,7 @@ XA_LIBS = -Lxa -lxa
 # SRCS = $(SRCS_MENCODER) $(SRCS_MPLAYER)
 # OBJS = $(OBJS_MENCODER) $(OBJS_MPLAYER)
 
-PARTS = libmpdemux mp3lib libac3 libmp1e libmpeg2 opendivx libavcodec libvo libao2 drivers drivers/syncfb linux postproc xa
+PARTS = libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 opendivx libavcodec libvo libao2 drivers drivers/syncfb linux postproc xa
 ifeq ($(VO2),yes)
 PARTS = libmpdemux mp3lib libac3 libmp1e libmpeg2 opendivx libavcodec libvo2 libao2 drivers drivers/syncfb linux postproc xa
 endif
@@ -81,7 +81,7 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMONLIBS = libmpdemux/libmpdemux.a libvo/libvo.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmp1e/libmp1e.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+COMMONLIBS = libmpdemux/libmpdemux.a libvo/libvo.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmp1e/libmp1e.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
 ifeq ($(VO2),yes)
 COMMONLIBS = libmpdemux/libmpdemux.a libvo2/libvo2.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmp1e/libmp1e.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
 endif
@@ -115,6 +115,9 @@ libao2/libao2.a:
 
 libac3/libac3.a:
 	$(MAKE) -C libac3
+
+liba52/liba52.a:
+	$(MAKE) -C liba52
 
 mp3lib/libMP3.a:
 	$(MAKE) -C mp3lib
