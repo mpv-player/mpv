@@ -142,6 +142,10 @@ static int init(sh_video_t *sh){
         avctx->get_buffer_callback= get_buffer;
     }
 #endif
+
+#ifdef CODEC_FLAG_NOT_TRUNCATED
+    avctx->flags|= CODEC_FLAG_NOT_TRUNCATED;
+#endif
     
     avctx->width = sh->disp_w;
     avctx->height= sh->disp_h;
