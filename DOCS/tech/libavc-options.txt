@@ -320,7 +320,6 @@ trell	trellis quantization
 	lambda is a qp dependant constant
 	bits is the amount of bits needed to encode the block
 	error is simple the sum of squared errors of the quantization
-        Tip: this 
         
 last_pred	(0-99) amount of motion predictors from the previous frame
 	0 (default)
