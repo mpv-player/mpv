@@ -61,13 +61,13 @@ extern char* passtmpfile;
 static int bitrate = -1;
 static int qp_constant = 26;
 static int frame_ref = 1;
-static int iframe = 60;
+static int iframe = 250;
 static int idrframe = 2;
 static int bframe = 0;
 static int deblock = 1;
 static int deblockalpha = 0;
 static int deblockbeta = 0;
-static int cabac = 0;
+static int cabac = 1;
 static int cabacidc = -1;
 static int fullinter = 0;
 static float ip_factor = 2.0;
@@ -89,16 +89,19 @@ static int log_level = 2;
 m_option_t x264encopts_conf[] = {
     {"bitrate", &bitrate, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
     {"qp_constant", &qp_constant, CONF_TYPE_INT, CONF_RANGE, 1, 51, NULL},
-    {"frameref", &frame_ref, CONF_TYPE_INT, CONF_RANGE, 1, 100, NULL},
-    {"iframe", &iframe, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
-    {"idrframe", &idrframe, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
-    {"bframe", &bframe, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
-    {"deblock", &deblock, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
+    {"frameref", &frame_ref, CONF_TYPE_INT, CONF_RANGE, 1, 15, NULL},
+    {"keyint", &iframe, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
+    {"idrint", &idrframe, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
+    {"bframes", &bframe, CONF_TYPE_INT, CONF_RANGE, 0, 16, NULL},
+    {"deblock", &deblock, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nodeblock", &deblock, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"deblockalpha", &deblockalpha, CONF_TYPE_INT, CONF_RANGE, -6, 6, NULL},
     {"deblockbeta", &deblockbeta, CONF_TYPE_INT, CONF_RANGE, -6, 6, NULL},
     {"cabac", &cabac, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nocabac", &cabac, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"cabacidc", &cabacidc, CONF_TYPE_INT, CONF_RANGE, -1, 2, NULL},
     {"fullinter", &fullinter, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nofullinter", &fullinter, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"ip_factor", &ip_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"pb_factor", &pb_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"rc_buffer_size", &rc_buffer_size, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
@@ -113,6 +116,7 @@ m_option_t x264encopts_conf[] = {
     {"qblur", &qblur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
     {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
     {"psnr", &psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nopsnr", &psnr, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"log", &log_level, CONF_TYPE_INT, CONF_RANGE, -1, 3, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -166,6 +170,10 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
         break;
     case 2:
         mod->param.rc.b_stat_write = 0;
+        mod->param.rc.b_stat_read = 1;
+        break;
+    case 3:
+        mod->param.rc.b_stat_write = 1;
         mod->param.rc.b_stat_read = 1;
         break;
     }
