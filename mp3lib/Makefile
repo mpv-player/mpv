@@ -1,12 +1,26 @@
 
-include config.mak
+include ../config.mak
 
-SRCS = sr1.c d_cpu.s decode_i586.s dct64_MMX.s decode_MMX.s tabinit_MMX.s\
-dct36_3dnow.s dct64_3dnow.s dct36_k7.s dct64_k7.s
-OBJS = sr1.o d_cpu.o decode_i586.o dct64_MMX.o decode_MMX.o tabinit_MMX.o\
-dct36_3dnow.o dct64_3dnow.o dct36_k7.o dct64_k7.o
+SRCS = sr1.c d_cpu.s
+OBJS = sr1.o d_cpu.o
 # OBJS = $(SRCS:.c,.s=.o)
 CFLAGS  = $(OPTFLAGS) $(EXTRA_INC)
+ifeq ($(TARGET_ARCH_X86),yes)
+SRCS += decode_i586.s
+OBJS += decode_i586.o
+ifeq ($(TARGET_MMX),yes)
+SRCS += decode_MMX.s dct64_MMX.s tabinit_MMX.s
+OBJS += decode_MMX.o dct64_MMX.o tabinit_MMX.o
+endif
+ifeq ($(TARGET_3DNOW),yes)
+SRCS += dct36_3dnow.s dct64_3dnow.s
+OBJS += dct36_3dnow.o dct64_3dnow.o
+endif
+ifeq ($(TARGET_3DNOWEX),yes)
+SRCS += dct36_k7.s dct64_k7.s
+OBJS += dct36_k7.o dct64_k7.o
+endif
+endif
 
 .SUFFIXES: .c .o
 

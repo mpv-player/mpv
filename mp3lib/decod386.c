@@ -107,14 +107,15 @@ static int synth_1to1_r(real *bandPtr,int channel,unsigned char *out,int *pnt)
 
 synth_func_t synth_func;
 
+#ifdef HAVE_MMX
 int synth_1to1_MMX( real *bandPtr,int channel,short * samples)
 {
     static short buffs[2][2][0x110];
     static int bo = 1;
     synth_1to1_MMX_s(bandPtr, channel, samples, (short *) buffs, &bo); 
     return 0;
-  } 
-
+} 
+#endif
 static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
 {
   static real buffs[2][2][0x110];
@@ -125,7 +126,7 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
   real *b0,(*buf)[0x110];
   int clip = 0;
   int bo1;
-
+#ifdef ARCH_X86
   if ( synth_func )
    {
     int ret;
@@ -133,7 +134,7 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
     *pnt+=128;
     return ret;
    }
-
+#endif
   if(!channel) {     /* channel=0 */
     bo--;
     bo &= 0xf;

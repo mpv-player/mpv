@@ -415,12 +415,15 @@ void MP3_Init(){
     tables_done_flag=1;
 
     dct36_func=dct36;
+#ifdef HAVE_SSE
   if(_isse)
   {
     synth_func=synth_1to1_MMX;
     dct64_MMX_func=dct64_MMX;
   }    
   else
+#endif
+#ifdef HAVE_3DNOWEX
   if ( _3dnow > 1 )
   {
      synth_func=synth_1to1_MMX;
@@ -428,6 +431,8 @@ void MP3_Init(){
      dct64_MMX_func=dct64_MMX_3dnowex;
   }
   else
+#endif
+#ifdef HAVE_3DNOW
   if ( _3dnow )
   {
     synth_func=synth_1to1_MMX;
@@ -435,17 +440,22 @@ void MP3_Init(){
     dct64_MMX_func=dct64_MMX_3dnow;
   }
   else
+#endif
+#ifdef HAVE_MMX
   if ( _i586 > 1)
   {
     synth_func=synth_1to1_MMX;
     dct64_MMX_func=dct64_MMX;
   }    
   else
+#endif
+#ifdef ARCH_X86
   if ( _i586 )
   {
     synth_func=synth_1to1_pent;
   }    
   else
+#endif
   {
     synth_func = NULL;
   }
