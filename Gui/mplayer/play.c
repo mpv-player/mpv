@@ -238,7 +238,7 @@ void ChangeSkin( char * name )
  if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
   { mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_NEMDB ); return; }
 
- if ( wsWMType == wsWMUnknown ) wsVisibleWindow( &appMPlayer.mainWindow,wsHideWindow );
+ if ( vo_wm_type == vo_wm_Unknown ) wsVisibleWindow( &appMPlayer.mainWindow,wsHideWindow );
  wsResizeWindow( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
  wsMoveWindow( &appMPlayer.mainWindow,True,appMPlayer.main.x,appMPlayer.main.y );
  wsResizeImage( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );

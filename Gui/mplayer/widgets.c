@@ -144,13 +144,15 @@ void gtkMessageBox( int type,gchar * str )
   }
  gtk_widget_show( MessageBox );
  gtkSetLayer( MessageBox );
- gtkActive( MessageBox );
  if ( type == GTK_MB_FATAL )
   while ( MessageBox ) gtk_main_iteration_do( 0 );
 }
 
 void gtkSetLayer( GtkWidget * wdg )
-{ wsSetLayer( gdk_display,GDK_WINDOW_XWINDOW( wdg->window ),appMPlayer.subWindow.isFullScreen ); }
+{ 
+ wsSetLayer( gdk_display,GDK_WINDOW_XWINDOW( wdg->window ),appMPlayer.subWindow.isFullScreen );
+ gtkActive( wdg );
+}
 
 void gtkActive( GtkWidget * wdg )
 { wsMoveTopWindow( gdk_display,GDK_WINDOW_XWINDOW( wdg->window )); }

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "../app.h"
 #include "skin.h"
 #include "font.h"
 #include "cut.h"
@@ -118,7 +119,7 @@ int fntTextWidth( int id,char * str )
 
  if ( ( !Fonts[id] )||( !str[0] ) ) return 0;
 
- for ( i=0;i < (unsigned int)strlen( str );i++ )
+ for ( i=0;i < (int)strlen( str );i++ )
   {
    unsigned char c = (unsigned char)str[i];
    if ( Fonts[id]->Fnt[c].sx == -1 ) c = ' ';
@@ -144,16 +145,134 @@ int fntTextHeight( int id,char * str )
  return max;
 }
 
-txSample * fntRender( int id,int px,int sx,char * fmt,... )
+typedef struct
 {
- txSample      * tmp = NULL;
+ int  pos;
+ char c;
+} iChar;
+
+txSample * fntRender( wItem * item,int px,char * fmt,... )
+{
+#if 0
+ txSample  * tmp = NULL;
+ va_list     ap;
+ char        p[512];
+ iChar       pos[512];
+ int 	     i, dx = 0, s, tw;
+ uint32_t  * ibuf;
+ uint32_t  * obuf;
+
+ va_start( ap,fmt );
+ vsnprintf( p,512,fmt,ap );
+ va_end( ap );
+
+ if ( ( !item )||
+      ( !Fonts[item->fontid] )||
+      ( !p[0] )||
+      ( !fntTextWidth( item->fontid,p ) ) ) return NULL;
+
+ tw=fntTextWidth( item->fontid,p );
+
+ if ( item->Bitmap.Image == NULL ) 
+  {
+   item->Bitmap.Height=item->height=fntTextHeight( item->fontid,p );
+   item->Bitmap.Width=item->width;
+   item->Bitmap.ImageSize=item->height * item->width * 4;
+   item->Bitmap.BPP=32;
+   item->Bitmap.Image=malloc( item->Bitmap.ImageSize );
+  }
+
+ obuf=(uint32_t *)item->Bitmap.Image;
+ ibuf=(uint32_t *)Fonts[item->fontid]->Bitmap.Image;
+
+ for ( i=0;i < item->Bitmap.ImageSize / 4;i++ ) obuf[i]=0xff00ff;
+ 
+ if ( tw < item->width ) 
+  {
+   switch ( item->align )
+    {
+     default:
+     case fntAlignLeft:   dx=0; break;
+     case fntAlignCenter: dx=( item->width - fntTextWidth( item->fontid,p ) ) / 2; break;
+     case fntAlignRight:  dx=item->width - fntTextWidth( item->fontid,p ); break;
+    }
+    
+  } else dx+=px;
+/*
+ for ( i=0;i < (int)strlen( p );i++ )
+  {
+   int c = (int)p[i];
+   int fw = Fonts[item->fontid]->Fnt[c].sx;
+   int fh = Fonts[item->fontid]->Fnt[c].sy;
+   int fx = Fonts[item->fontid]->Fnt[c].x;
+   int fy = Fonts[item->fontid]->Fnt[c].y;
+
+   if ( fw != -1 )
+    {
+     // font rendernig
+     int x,y;
+     for ( y=0;y < fh;y++ )
+      {
+       if ( dx >= 0 ) 
+        for ( x=0; x < fw;x++ )
+         {
+          if ( dx + x >= item->width ) goto fnt_exit; 
+          obuf[y * item->width + x + dx]=ibuf[ ( fy + y ) * Fonts[item->fontid]->Bitmap.Width + fx + x ];
+         }
+      }
+     dx+=fw;
+    } else dx+=4;
+  }
+
+fnt_exit:
+*/
+
+if ( !strncmp( p,"lofasz",6 ) )
+{
+ int i,j, c = 0;
+ char t[512];
+ memset( t,0,512 );
+// printf( "!!!! " );
+ for ( i=0; i < (int)strlen( p );i++ )
+  {
+   int c = (int)p[i];
+   int fw = Fonts[item->fontid]->Fnt[c].sx;
+   pos[i].pos=dx;
+   pos[i].c=p[i];
+   if ( pos[i].pos > item->width ) pos[i].pos-=item->width;
+//   printf( "%d; ",pos[i] );
+   dx+=fw;
+  }
+ for ( i=0;i < (int)strlen( p );i++ ) 
+  for ( j=strlen( p );j > i;j-- )
+   if ( pos[j].pos < pos[i].pos )
+   {
+    iChar tmp;
+    memcpy( &tmp,&pos[i],sizeof( iChar ) );
+    memcpy( &pos[i],&pos[j],sizeof( iChar ) );
+    memcpy( &pos[j],&tmp,sizeof( iChar ) );
+   }
+//
+ for ( i=0;i < (int)strlen( p );i++ )
+  t[c++]=pos[i].c;
+//  if ( pos[i].pos > 0 && pos[i].pos < item->width ) t[c++]=pos[i].c;
+ printf( "!!! %s\n",t );
+}
+
+ return &item->Bitmap;
+ 
+#else
  txSample 	 tmp2;
- char            p[512];
+ txSample      * tmp = NULL;
  va_list         ap;
+ char            p[512];
  uint32_t * ibuf;
  uint32_t * obuf;
  int             i,x,y;
- int             oy = 0, ox = 0, dx = 0;
+ int             oy = 0, ox = 0, dx = 0, s = 0;
+ int		 id=item->fontid;
+ int		 sx=item->width;
+ int		 a=item->align;
 
  va_start( ap,fmt );
  vsnprintf( p,512,fmt,ap );
@@ -169,15 +288,24 @@ txSample * fntRender( int id,int px,int sx,char * fmt,... )
  tmp->BPP=32;
  tmp->ImageSize=tmp->Width * tmp->Height * 4;
  if ( ( tmp->Image=malloc( tmp->ImageSize ) ) ==  NULL ) return NULL;
+
  obuf=(uint32_t *)tmp->Image;
  ibuf=(uint32_t *)Fonts[id]->Bitmap.Image;
+ 
  for ( i=0;i < (int)strlen( p );i++ )
   {
    unsigned int c = (unsigned char)p[i];
+   int cx,cy;
+   
    if ( Fonts[id]->Fnt[c].sx == -1 ) c=32;
-   for ( oy=0,y=Fonts[id]->Fnt[c].y;y < Fonts[id]->Fnt[c].y + Fonts[id]->Fnt[c].sy; y++,oy++ )
-     for ( ox=0,x=Fonts[id]->Fnt[c].x;x < Fonts[id]->Fnt[c].x + Fonts[id]->Fnt[c].sx; x++,ox++ )
-       obuf[ oy * tmp->Width + dx + ox ]=ibuf[ y * Fonts[id]->Bitmap.Width + x ];
+   
+   cx=Fonts[id]->Fnt[c].x;
+   cy=Fonts[id]->Fnt[c].y;
+
+   for ( oy=0,y=cy;y < cy + Fonts[id]->Fnt[c].sy; y++,oy++ )
+     for ( ox=0,x=cx;x < cx + Fonts[id]->Fnt[c].sx; x++,ox++ )
+        obuf[ oy * tmp->Width + dx + ox ]=ibuf[ y * Fonts[id]->Bitmap.Width + x ];
+
    dx+=Fonts[id]->Fnt[c].sx;
   }
 
@@ -203,6 +331,7 @@ txSample * fntRender( int id,int px,int sx,char * fmt,... )
 
    free( tmp->Image ); tmp->Width=sx; tmp->ImageSize=tmp2.ImageSize; tmp->Image=tmp2.Image;
   }
+#endif
 
  return tmp;
 }

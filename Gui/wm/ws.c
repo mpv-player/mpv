@@ -19,6 +19,7 @@
 #include <inttypes.h>
 
 #include "../../config.h"
+#include "../../libvo/x11_common.h"
 #include "ws.h"
 #include "wsxdnd.h"
 #include "../../postproc/rgb2rgb.h"
@@ -33,7 +34,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-#define ENABLE_DPMS 0
+#undef ENABLE_DPMS 
 
 typedef struct
 {
@@ -54,7 +55,6 @@ int                  wsScreen;
 Window               wsRootWin;
 XEvent               wsEvent;
 int                  wsWindowDepth;
-int		     wsWMType = wsWMUnknown;
 GC                   wsHGC;
 MotifWmHints         wsMotifWmHints;
 Atom                 wsTextProperlyAtom = None;
@@ -167,73 +167,6 @@ int wsErrorHandler( Display * dpy,XErrorEvent * Event )
  exit( 0 );
 }
 
-int wsWindowManagerType( void )
-{
- Atom            type;
- int             format;
- unsigned long   nitems, bytesafter;
- unsigned char * args = NULL;
-
- Window		 win;
- XEvent          xev;
- int		 c = 0;
- int             wm = wsWMUnknown;
-
-// --- gnome
-/*
- type=XInternAtom( wsDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
- if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
-  {
-   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is Gnome\n" );
-   XFree( args );
-   return wsWMGnome;
-  }
-*/
-// --- net wm
- type=XInternAtom( wsDisplay,"_NET_SUPPORTED",False );
- if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
-  {
-   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is NetWM\n" );
-   XFree( args );
-   return wsWMNetWM;
-  }
-
-// --- other wm
- mp_dbg( MSGT_VO,MSGL_STATUS,"[ws] Create window for WM detect ...\n" );
- win=XCreateSimpleWindow( wsDisplay,wsRootWin,wsMaxX,wsMaxY,1,1,0,0,0 );
- XSelectInput( wsDisplay,win,PropertyChangeMask | StructureNotifyMask );
- XMapWindow( wsDisplay,win );
- XMoveWindow( wsDisplay,win,wsMaxX,wsMaxY );
- do 
-  { 
-   XCheckWindowEvent( wsDisplay,win,PropertyChangeMask | StructureNotifyMask,&xev );
-
-   if ( xev.type == PropertyNotify )
-    {
-     char * name = XGetAtomName( wsDisplay,xev.xproperty.atom );
-     if ( !name ) break;
-
-     if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
-      { mp_dbg( MSGT_VO,MSGL_STATUS,"[ws] Detected wm is IceWM.\n" ); wm=wsWMIceWM; break; }
-     if ( !strncmp( name,"_KDE_",5 ) )
-      { mp_dbg( MSGT_VO,MSGL_STATUS,"[ws] Detected wm is KDE.\n" ); wm=wsWMKDE; break; }
-     if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
-      { mp_dbg( MSGT_VO,MSGL_STATUS,"[ws] Detected wm is WindowMaker style.\n" ); wm=wsWMWMaker; break; }
-//     fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",win,name,xev.xproperty.atom );
-     XFree( name );
-    }
- } while( c++ < 25 );
- XUnmapWindow( wsDisplay,win );
- XDestroyWindow( wsDisplay,win );
-#ifdef MP_DEBUG
- if ( wm == wsWMUnknown ) mp_dbg( MSGT_VO,MSGL_STATUS,"[ws] Unknown wm type...\n" );
-#endif
- return wsWMUnknown;
-}
-
-extern int vo_wm_type;
-extern int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);
-
 void wsXInit( void* mDisplay )
 {
  int    eventbase;
@@ -265,6 +198,7 @@ wsXDNDInitialize();
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[ws] Display name: %s => %s display.\n",dispname,localdisp?"local":"REMOTE");
  if (!localdisp) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Remote display, disabling XMITSHM\n");
 }
+
  if ( !XShmQueryExtension( wsDisplay ) )
   {
    mp_msg( MSGT_GPLAYER,MSGL_ERR,"[ws] sorry, your system is not supported X shared memory extension.\n" );
@@ -286,9 +220,6 @@ wsXDNDInitialize();
  wsRootWin=RootWindow( wsDisplay,wsScreen );
  wsMaxX=DisplayWidth( wsDisplay,wsScreen );
  wsMaxY=DisplayHeight( wsDisplay,wsScreen );
-
- if ( vo_wm_type != -1 ) wsWMType=vo_wm_type;
-   else wsWMType=wsWindowManagerType();
 
  wsGetDepthOnScreen();
 #ifdef DEBUG
@@ -684,33 +615,6 @@ buttonreleased:
           wsWindowList[l]->MouseHandler( i,Event->xbutton.x,Event->xbutton.y,Event->xmotion.x_root,Event->xmotion.y_root );
         break;
 
-   case PropertyNotify:
-	{
-	 char * name = XGetAtomName( wsDisplay,Event->xproperty.atom );
-	 
-         if ( !name ) break;
-	 if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
-	  {
-	   wsWMType=wsWMIceWM;
-//	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is IceWM.\n" );
-	  }
-	 if ( !strncmp( name,"_KDE_",5 ) )
-	  {
-//	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is KDE.\n" );
-	   wsWMType=wsWMKDE;
-	  }
-	 if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
-	  {
-//	   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is WindowMaker style.\n" );
-	   wsWMType=wsWMWMaker;
-	  }
-	      
-//         fprintf(stderr,"[ws] PropertyNotify %s ( 0x%x )\n",name,Event->xproperty.atom );
-							  
-	 XFree( name );
-	}
-        break;
-
    case SelectionNotify:
      /* Handle DandD */
      wsXDNDProcessSelection(wsWindowList[l],Event);
@@ -775,75 +679,7 @@ while(wsTrue){
 #define WIN_LAYER_ONTOP                 10
 
 void wsSetLayer( Display * wsDisplay, Window win, int layer )
-{
- Atom            type;
- int             format;
- unsigned long   nitems, bytesafter;
- Atom          * args = NULL;
-
- if ( wsWMType == wsWMIceWM )
-  {
-   switch ( layer )
-    {
-     case -1: layer=2; break; // WinLayerBelow
-     case  0: layer=4; break; // WinLayerNormal
-     case  1: layer=8; break; // WinLayerOnTop
-    }
-  XChangeProperty( wsDisplay,win,
-    XInternAtom( wsDisplay,"_WIN_LAYER",False ),XA_CARDINAL,32,PropModeReplace,(unsigned char *)&layer,1 );
-  return;
- }
-
- type=XInternAtom( wsDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
- if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **)&args ) && nitems > 0 )
-  {
-   XClientMessageEvent  xev;
-   
-   memset( &xev,0,sizeof( xev ) );
-   xev.type=ClientMessage;
-   xev.window=win;
-   xev.message_type=XInternAtom( wsDisplay,"_WIN_LAYER",False );
-   xev.format=32;
-   switch ( layer ) 
-    {
-     case -1: xev.data.l[0] = WIN_LAYER_ONBOTTOM; break;
-     case  0: xev.data.l[0] = WIN_LAYER_NORMAL;   break;
-     case  1: xev.data.l[0] = WIN_LAYER_ONTOP;    break;
-    }
-   XSendEvent( wsDisplay,wsRootWin,False,SubstructureNotifyMask,(XEvent*)&xev );
-   if ( layer ) XRaiseWindow( wsDisplay,win );
-								              
-   XFree( args );
-   return;
-  }
-					
- type=XInternAtom( wsDisplay,"_NET_SUPPORTED",False );
- if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **)&args ) && nitems > 0 )
-  {
-   int    i;
-   XEvent e;
-   
-   e.xclient.type=ClientMessage;
-   e.xclient.message_type=XInternAtom( wsDisplay,"_NET_WM_STATE",False );
-   e.xclient.display=wsDisplay;
-   e.xclient.window=win;
-   e.xclient.format=32;
-   e.xclient.data.l[0]=layer;
-   
-   e.xclient.data.l[1]=XInternAtom( wsDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
-   type=XInternAtom( wsDisplay,"_NET_WM_STATE_FULLSCREEN",False );
-   for ( i=0;(unsigned long)i < nitems;i++ )
-    if ( args[i] == type ) { e.xclient.data.l[1]=XInternAtom( wsDisplay,"_NET_WM_STATE_FULLSCREEN",False ); break; }
-
-   e.xclient.data.l[2]=0l;
-   e.xclient.data.l[3]=0l;
-   e.xclient.data.l[4]=0l;
-   XSendEvent( wsDisplay,wsRootWin,False,SubstructureRedirectMask,&e );
-								   
-   XFree( args );
-   return;
-  }
-}
+{ vo_x11_setlayer( wsDisplay,win,layer ); }
 
 // ----------------------------------------------------------------------------------------------
 //    Switch to fullscreen.
@@ -851,17 +687,6 @@ void wsSetLayer( Display * wsDisplay, Window win, int layer )
 void wsFullScreen( wsTWindow * win )
 {
  int decoration = 0;
- 
- switch ( wsWMType )
-   {
-    case wsWMUnknown:
-//           XUnmapWindow( wsDisplay,win->WindowID );
-	   XWithdrawWindow( wsDisplay,win->WindowID,wsScreen );
-	   break;
-    case wsWMIceWM:
-           if ( !win->isFullScreen ) XUnmapWindow( wsDisplay,win->WindowID );
-           break;
-   }
 
  if ( win->isFullScreen )
   {
@@ -887,31 +712,21 @@ void wsFullScreen( wsTWindow * win )
 #endif
    }
 
- win->SizeHint.flags=PPosition | PSize | PWinGravity;// | PBaseSize;
- win->SizeHint.x=win->X;              win->SizeHint.y=win->Y;
- win->SizeHint.width=win->Width;      win->SizeHint.height=win->Height;
-// win->SizeHint.base_width=win->Width; win->SizeHint.base_height=win->Height;
- 
- win->SizeHint.win_gravity=StaticGravity;
- if ( win->Property & wsMaxSize )
+ if ( net_wm_support != SUPPORT_FULLSCREEN || metacity_hack == 1 )
   {
-   win->SizeHint.flags|=PMaxSize;
-   win->SizeHint.max_width=win->Width;
-   win->SizeHint.max_height=win->Height;
+   vo_x11_decoration( wsDisplay,win->WindowID,decoration );
+   vo_x11_sizehint( win->X,win->Y,win->Width,win->Height,0 );
   }
- if ( win->Property & wsMinSize )
+ vo_x11_setlayer( wsDisplay,win->WindowID,win->isFullScreen );
+ if ( net_wm_support != SUPPORT_FULLSCREEN || metacity_hack == 1 )
   {
-   win->SizeHint.flags|=PMinSize;
-   win->SizeHint.min_width=win->Width;
-   win->SizeHint.min_height=win->Height;
+   if ( vo_wm_type == vo_wm_Unknown && !(vo_fsmode&16) )
+    XWithdrawWindow( wsDisplay,win->WindowID,wsScreen );
+   XMoveResizeWindow( wsDisplay,win->WindowID,win->X,win->Y,win->Width,win->Height );
   }
- XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
-
- wsSetLayer( wsDisplay,win->WindowID,win->isFullScreen );
- XMoveResizeWindow( wsDisplay,win->WindowID,win->X,win->Y,win->Width,win->Height );
- wsWindowDecoration( win,decoration );
  XMapRaised( wsDisplay,win->WindowID );
  XRaiseWindow( wsDisplay,win->WindowID );
+ XFlush( wsDisplay );
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -1019,7 +834,7 @@ void wsResizeWindow( wsTWindow * win,int sx, int sy )
  win->SizeHint.win_gravity=StaticGravity;
  win->SizeHint.base_width=sx; win->SizeHint.base_height=sy;
 
- if ( wsWMType == wsWMUnknown ) XUnmapWindow( wsDisplay,win->WindowID );
+ if ( vo_wm_type == vo_wm_Unknown ) XUnmapWindow( wsDisplay,win->WindowID );
 
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
  XResizeWindow( wsDisplay,win->WindowID,sx,sy );
@@ -1038,30 +853,10 @@ void wsIconify( wsTWindow win )
 // ----------------------------------------------------------------------------------------------
 void wsMoveTopWindow( Display * wsDisplay,Window win )
 {
- switch ( wsWMType )
-  {
-   case wsWMIceWM:
-	  XUnmapWindow( wsDisplay,win );
-	  XMapWindow( wsDisplay,win );
-	  break;
-   case wsWMNetWM:
-   case wsWMKDE:
-	 {
-	  XEvent e;
-	  e.xclient.type=ClientMessage;
-	  e.xclient.message_type=XInternAtom( wsDisplay,"_NET_ACTIVE_WINDOW",False );
-	  e.xclient.display=wsDisplay;
-	  e.xclient.window=win;
-	  e.xclient.format=32;
-	  e.xclient.data.l[0]=0;
-	  XSendEvent( wsDisplay,RootWindow( wsDisplay,DefaultScreen( wsDisplay ) ),False,SubstructureRedirectMask,&e );
-	  break;
-	 }
-   default:
-         XMapRaised( wsDisplay,win );
-	 XRaiseWindow( wsDisplay,win );
-         break;
-  }
+// XUnmapWindow( wsDisplay,win );
+// XMapWindow( wsDisplay,win );
+ XMapRaised( wsDisplay,win );
+ XRaiseWindow( wsDisplay,win );
 }
 
 // ----------------------------------------------------------------------------------------------

@@ -7,6 +7,19 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#define vo_wm_Unknown   0
+#define vo_wm_NetWM	1
+#define vo_wm_Layered	2
+
+#define SUPPORT_NONE 0
+#define SUPPORT_FULLSCREEN 1
+#define SUPPORT_ABOVE 2
+#define SUPPORT_STAYS_ON_TOP 4
+
+extern int net_wm_support;
+extern int metacity_hack;
+extern int vo_fsmode;
+
 extern int vo_depthonscreen;
 extern int vo_screenwidth;
 extern int vo_screenheight;
@@ -35,6 +48,7 @@ extern void vo_x11_sizehint( int x, int y, int width, int height, int max );
 extern int vo_x11_check_events(Display *mydisplay);
 extern void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
 extern void vo_x11_fullscreen( void );
+extern void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer );
 extern void vo_x11_uninit();
 extern Colormap vo_x11_create_colormap(XVisualInfo *vinfo);
 extern uint32_t vo_x11_set_equalizer(char *name, int value);
@@ -63,6 +77,7 @@ void vo_vm_switch(uint32_t, uint32_t, int*, int*);
 void vo_vm_close(Display*);
 #endif
 
+int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);
+
 #endif
 
-int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);

@@ -41,10 +41,6 @@
 #include "../mplayer.h"
 #endif
 
-#define vo_wm_Unknown     0
-#define vo_wm_NetWM       1
-#define vo_wm_Layered     2
-
 #define WIN_LAYER_ONBOTTOM               2
 #define WIN_LAYER_NORMAL                 4
 #define WIN_LAYER_ONTOP                  6
@@ -72,10 +68,6 @@ int vo_wm_type = -1;
 /* if equal to 1 means that WM is a metacity (broken as hell) */
 int metacity_hack = 0;
 
-#define SUPPORT_NONE 0
-#define SUPPORT_FULLSCREEN 1
-#define SUPPORT_ABOVE 2
-#define SUPPORT_STAYS_ON_TOP 4
 int net_wm_support = 0;
 
 Atom XA_NET_SUPPORTED;
@@ -701,10 +693,13 @@ void vo_x11_sizehint( int x, int y, int width, int height, int max )
  XSetWMNormalHints( mDisplay,vo_window,&vo_hint );
 }
 
-void vo_x11_setlayer( int layer )
+void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
 {
  if ( WinID >= 0 ) return;
- 
+
+ // window manager could be changed during play
+ vo_wm_type=vo_wm_detect();
+
  switch ( vo_wm_type )
  { case vo_wm_Layered:
   {
@@ -718,6 +713,7 @@ void vo_x11_setlayer( int layer )
     xev.data.l[0] = layer?ice_layer:WIN_LAYER_NORMAL; // if not fullscreen, stay on layer "Normal"
     xev.data.l[1] = CurrentTime;
     mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Layered style stay on top ( layer %d ).\n",xev.data.l[0] );
+    printf( "[x11] Layered style stay on top ( layer %d ).\n",xev.data.l[0] );
     XSendEvent(mDisplay, mRootWin, False, SubstructureNotifyMask, (XEvent *) &xev);
     break;
   }
@@ -751,6 +747,7 @@ void vo_x11_setlayer( int layer )
    }
    state = XGetAtomName (mDisplay, xev.data.l[1]);
    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] NET style stay on top ( layer %d ). Using state %s.\n",layer,state );
+   printf( "[x11] NET style stay on top ( layer %d ). Using state %s.\n",layer,state );
    XFree (state);
   }
  }
@@ -784,7 +781,7 @@ void vo_x11_fullscreen( void )
    vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
    vo_x11_sizehint( x,y,w,h,0 );
  }
- vo_x11_setlayer( vo_fs );
+ vo_x11_setlayer( mDisplay,vo_window,vo_fs );
  if (net_wm_support!=SUPPORT_FULLSCREEN || metacity_hack==1)
  {
    if(vo_wm_type==vo_wm_Unknown && !(vo_fsmode&16))

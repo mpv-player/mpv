@@ -3,6 +3,11 @@
 #define _FONT_H
 
 #include "../bitmap.h"
+#include "../app.h"
+
+#define fntAlignLeft   0
+#define fntAlignCenter 1
+#define fntAlignRight  2
 
 typedef struct
 {
@@ -27,7 +32,7 @@ extern int  fntTextHeight( int id,char * str );
 extern int  fntTextWidth( int id,char * str );
 
 extern int        fntRead( char * path,char * fname );
-extern txSample * fntRender( int id,int px,int sx,char * fmt,... );
+extern txSample * fntRender( wItem * item,int px,char * fmt,... );
 
 #endif
 

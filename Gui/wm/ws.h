@@ -170,8 +170,6 @@ typedef struct
 extern int                  wsMaxX;
 extern int                  wsMaxY;
 
-extern int		    wsWMType;
-
 extern Display            * wsDisplay;
 extern int                  wsScreen;
 extern Window               wsRootWin;
