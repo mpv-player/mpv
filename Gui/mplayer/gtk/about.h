@@ -4,10 +4,7 @@
 
 #include "../../language.h"
 
-GtkWidget   * About;
-GdkColormap * abColorMap;
-
-void ab_Ok_released( GtkButton * button,gpointer user_data)
+void ab_Ok_released( GtkButton * button,gpointer user_data )
 {
  gtk_widget_hide( AboutBox );
  gtkVisibleAboutBox=0;
@@ -15,132 +12,195 @@ void ab_Ok_released( GtkButton * button,gpointer user_data)
 
 GtkWidget * create_About( void )
 {
- GtkWidget     * frame17;
- GtkWidget     * frame18;
- GtkWidget     * frame19;
- GtkWidget     * frame20;
- GtkWidget     * hbox7;
- GtkWidget     * pixmap1;
- GtkWidget     * vbox8;
- GtkWidget     * label4;
- GtkWidget     * hbuttonbox6;
- GtkWidget     * Ok;
- GtkAccelGroup * accel_group;
+  GtkWidget     * About;
+  GtkWidget     * frame1;
+  GtkWidget     * frame2;
+  GtkWidget     * frame3;
+  GtkWidget     * frame4;
+  GtkWidget     * vbox1;
+  GtkWidget     * pixmap1;
+  GtkWidget     * hseparator2;
+  GtkWidget     * scrolledwindow1;
+  GtkWidget     * AboutText;
+  GtkWidget     * hseparator1;
+  GtkWidget     * hbuttonbox1;
+  GtkWidget     * Ok;
 
- GtkStyle      * pixmapstyle;
- GtkPixmap     * pixmapwid;
- GdkBitmap     * mask;
+  GtkStyle      * pixmapstyle;
+  GtkPixmap     * pixmapwid;
+  GdkBitmap     * mask;
 
- accel_group=gtk_accel_group_new();
+  GtkAccelGroup * accel_group;
 
- About=gtk_window_new( GTK_WINDOW_DIALOG );
- gtk_widget_set_name( About,langAbout );
- gtk_object_set_data( GTK_OBJECT( About ),langAbout,About );
- gtk_widget_set_usize( About,290,105 );
- GTK_WIDGET_SET_FLAGS( About,GTK_CAN_FOCUS );
- GTK_WIDGET_SET_FLAGS( About,GTK_CAN_DEFAULT );
- gtk_window_set_title( GTK_WINDOW( About ),langAbout );
- gtk_window_set_position( GTK_WINDOW( About ),GTK_WIN_POS_CENTER );
- gtk_window_set_modal( GTK_WINDOW( About ),TRUE );
- gtk_window_set_policy( GTK_WINDOW( About ),FALSE,FALSE,FALSE );
+  accel_group=gtk_accel_group_new( );
 
- frame17=gtk_frame_new( NULL );
- gtk_widget_set_name( frame17,"frame17" );
- gtk_widget_ref( frame17 );
- gtk_object_set_data_full( GTK_OBJECT( About ),"frame17",frame17,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
- gtk_widget_show( frame17 );
- gtk_container_add( GTK_CONTAINER( About ),frame17 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame17 ),GTK_SHADOW_IN );
+  About=gtk_window_new( GTK_WINDOW_TOPLEVEL );
+  gtk_widget_set_name( About,"About" );
+  gtk_object_set_data( GTK_OBJECT( About ),"About",About );
+  gtk_widget_set_usize( About,340,415 );
+  gtk_window_set_title( GTK_WINDOW( About ),"MPlayer About" );
+  gtk_window_set_position( GTK_WINDOW( About ),GTK_WIN_POS_CENTER );
+  gtk_window_set_policy( GTK_WINDOW( About ),TRUE,FALSE,FALSE );
 
- frame18=gtk_frame_new( NULL );
- gtk_widget_set_name( frame18,"frame18" );
- gtk_widget_ref( frame18 );
- gtk_object_set_data_full( GTK_OBJECT( About ),"frame18",frame18,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
- gtk_widget_show( frame18 );
- gtk_container_add( GTK_CONTAINER( frame17 ),frame18 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame18 ),GTK_SHADOW_NONE );
+  frame1=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame1,"frame1" );
+  gtk_widget_ref( frame1 );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"frame1",frame1,( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( frame1 );
+  gtk_container_add( GTK_CONTAINER( About ),frame1 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame1 ),GTK_SHADOW_IN );
 
- frame19=gtk_frame_new( NULL );
- gtk_widget_set_name( frame19,"frame19" );
- gtk_widget_ref( frame19 );
- gtk_object_set_data_full( GTK_OBJECT( About ),"frame19",frame19,( GtkDestroyNotify ) gtk_widget_unref );
- gtk_widget_show( frame19 );
- gtk_container_add( GTK_CONTAINER( frame18 ),frame19 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame19 ),GTK_SHADOW_ETCHED_OUT );
+  frame2=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame2,"frame2" );
+  gtk_widget_ref( frame2 );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"frame2",frame2,( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( frame2 );
+  gtk_container_add( GTK_CONTAINER( frame1 ),frame2 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame2 ),GTK_SHADOW_NONE );
 
- frame20=gtk_frame_new( NULL );
- gtk_widget_set_name( frame20,"frame20" );
- gtk_widget_ref( frame20 );
- gtk_object_set_data_full( GTK_OBJECT( About ),"frame20",frame20,( GtkDestroyNotify ) gtk_widget_unref );
- gtk_widget_show( frame20 );
- gtk_container_add( GTK_CONTAINER( frame19 ),frame20 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame20 ),GTK_SHADOW_NONE );
+  frame3=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame3,"frame3" );
+  gtk_widget_ref( frame3 );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"frame3",frame3,( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( frame3 );
+  gtk_container_add( GTK_CONTAINER( frame2 ),frame3 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame3 ),GTK_SHADOW_ETCHED_OUT );
 
- hbox7=gtk_hbox_new( FALSE,0 );
- gtk_widget_set_name( hbox7,"hbox7" );
- gtk_widget_ref( hbox7 );
- gtk_object_set_data_full( GTK_OBJECT( About ),"hbox7",hbox7,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
- gtk_widget_show( hbox7 );
- gtk_container_add( GTK_CONTAINER( frame20 ),hbox7 );
+  frame4=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame4,"frame4" );
+  gtk_widget_ref( frame4 );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"frame4",frame4,( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( frame4 );
+  gtk_container_add( GTK_CONTAINER( frame3 ),frame4 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame4 ),GTK_SHADOW_NONE );
 
- pixmapstyle=gtk_widget_get_style( About );
- pixmapwid=gdk_pixmap_colormap_create_from_xpm_d( About->window,gdk_colormap_get_system(),&mask,&pixmapstyle->bg[GTK_STATE_NORMAL],(gchar **)logo_xpm );pixmap1=gtk_pixmap_new( pixmapwid,mask );
+  vbox1=gtk_vbox_new( FALSE,0 );
+  gtk_widget_set_name( vbox1,"vbox1" );
+  gtk_widget_ref( vbox1 );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"vbox1",vbox1,( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( vbox1 );
+  gtk_container_add( GTK_CONTAINER( frame4 ),vbox1 );
 
- gtk_widget_set_name( pixmap1,"pixmap1" );
- gtk_widget_ref( pixmap1 );
- gtk_object_set_data_full( GTK_OBJECT( About ),"pixmap1",pixmap1,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
- gtk_widget_show( pixmap1 );
- gtk_box_pack_start( GTK_BOX( hbox7 ),pixmap1,TRUE,TRUE,0 );
+  pixmapstyle=gtk_widget_get_style( About );
+  pixmapwid=gdk_pixmap_colormap_create_from_xpm_d( About->window,gdk_colormap_get_system(),&mask,&pixmapstyle->bg[GTK_STATE_NORMAL],(gchar ** )about_xpm );
+  pixmap1=gtk_pixmap_new( pixmapwid,mask );
 
- vbox8=gtk_vbox_new( FALSE,0 );
- gtk_widget_set_name( vbox8,"vbox8" );
- gtk_widget_ref( vbox8 );
- gtk_object_set_data_full( GTK_OBJECT( About ),"vbox8",vbox8,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
- gtk_widget_show( vbox8 );
- gtk_box_pack_start( GTK_BOX( hbox7 ),vbox8,TRUE,TRUE,0 );
+  gtk_widget_set_name( pixmap1,"pixmap1" );
+  gtk_widget_ref( pixmap1 );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"pixmap1",pixmap1,( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( pixmap1 );
+  gtk_box_pack_start( GTK_BOX( vbox1 ),pixmap1,FALSE,FALSE,0 );
+  gtk_widget_set_usize( pixmap1,-2,174 );
 
- label4=gtk_label_new( "The Movie Player for Linux" );
- gtk_widget_set_name( label4,"label4" );
- gtk_widget_ref( label4 );
- gtk_object_set_data_full( GTK_OBJECT( About ),"label4",label4,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
- gtk_widget_show( label4 );
- gtk_box_pack_start( GTK_BOX( vbox8 ),label4,FALSE,FALSE,0 );
- gtk_widget_set_usize( label4,-2,50 );
- gtk_label_set_line_wrap( GTK_LABEL( label4 ),TRUE );
+  hseparator2=gtk_hseparator_new( );
+  gtk_widget_set_name( hseparator2,"hseparator2" );
+  gtk_widget_ref( hseparator2 );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"hseparator2",hseparator2,( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( hseparator2 );
+  gtk_box_pack_start( GTK_BOX( vbox1 ),hseparator2,FALSE,FALSE,0 );
+  gtk_widget_set_usize( hseparator2,-2,7 );
 
- hbuttonbox6=gtk_hbutton_box_new();
- gtk_widget_set_name( hbuttonbox6,"hbuttonbox6" );
- gtk_widget_ref( hbuttonbox6 );
- gtk_object_set_data_full( GTK_OBJECT( About ),"hbuttonbox6",hbuttonbox6,( GtkDestroyNotify ) gtk_widget_unref );
- gtk_widget_show( hbuttonbox6 );
- gtk_box_pack_start( GTK_BOX( vbox8 ),hbuttonbox6,FALSE,FALSE,0 );
- gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox6 ),0 );
- gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox6 ),115,33 );
+  scrolledwindow1=gtk_scrolled_window_new( NULL,NULL );
+  gtk_widget_set_name( scrolledwindow1,"scrolledwindow1" );
+  gtk_widget_ref( scrolledwindow1 );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"scrolledwindow1",scrolledwindow1,( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( scrolledwindow1 );
+  gtk_box_pack_start( GTK_BOX( vbox1 ),scrolledwindow1,TRUE,TRUE,0 );
+  gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow1 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
 
- Ok=gtk_button_new_with_label( langOk );
- gtk_widget_set_name( Ok,langOk );
- gtk_widget_ref( Ok );
- gtk_object_set_data_full( GTK_OBJECT( About ),langOk,Ok,( GtkDestroyNotify ) gtk_widget_unref );
- gtk_widget_show( Ok );
- gtk_container_add( GTK_CONTAINER( hbuttonbox6 ),Ok );
- gtk_widget_set_usize( Ok,49,32 );
- GTK_WIDGET_SET_FLAGS( Ok,GTK_CAN_DEFAULT );
- gtk_widget_add_accelerator (Ok, "released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE);
+  AboutText=gtk_text_new( NULL,NULL );
+  gtk_widget_set_name( AboutText,"AboutText" );
+  gtk_widget_ref( AboutText );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"AboutText",AboutText,( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( AboutText );
+  gtk_container_add( GTK_CONTAINER( scrolledwindow1 ),AboutText );
+  gtk_text_insert( GTK_TEXT( AboutText ),NULL,NULL,NULL,
+                   "\nMPlayer code:\n" \
+                   "       fileformat detection,demuxers - A'rpi\n" \
+                   "       DVD support - ( alpha version was: LGB ) now: ?\n" \
+                   "       network streaming - Bertrand BAUDET\n" \
+                   "       A-V sync code - A'rpi\n" \
+                   "       subtitles file parser/reader - Lez( most of them )\n" \
+                   "       config files & commandline parser - Szabi\n" \
+                   "       fastmemcpy - Nick Kurshev\n" \
+                   "       LIRC support - Acki\n" \
+                   "       SUB/OSD renderer - Adam Tla/lka\n" \
+                   "       Gui - Pontscho\n\nlibvo drivers:\n" \
+                   "       vo_aa.c - Folke Ashberg\n" \
+                   "       vo_dga.c - Acki\n" \
+                   "       vo_fbdev.c - Szabi\n" \
+                   "       vo_ggi.c - al3x\n" \
+                   "       vo_gl.c - A'rpi\n" \
+                   "       vo_md5.c - A'rpi\n" \
+                   "       vo_mga.c - A'rpi\n" \
+                   "       vo_null.c - A'rpi\n" \
+                   "       vo_odivx.c - A'rpi\n" \
+                   "       vo_pgm.c - A'rpi\n" \
+                   "       vo_png.c - Atmos\n" \
+                   "       vo_sdl.c - Atmos\n" \
+                   "       vo_svga.c - se7en\n" \
+                   "       vo_x11.c - Pontscho\n"\
+                   "       vo_xmga.c - Pontscho\n"\
+                   "       vo_xv.c - Pontscho\n" \
+                   "       vo_aa.c - Folke Ashberg\n\n" \
+                   "libao2 drivers:\n" \
+                   "       ao_alsa5.c - al3x\n" \
+                   "       ao_alsa9.c - al3x( BUGGY,use oss )\n" \
+                   "       ao_null.c - A'rpi\n" \
+                   "       ao_oss.c - A'rpi\n" \
+                   "       ao_pcm.c - Atmos\n" \
+                   "       ao_sdl.c - Atmos\n" \
+                   "       ao_sun.c - Jürgen Keil\n\n" \
+                   "Homepage:\n" \
+                   "        Design:  Chass\n" \
+                   "        Contents: Gabucino\n\n" \
+                   "English documentation:\n" \
+                   "        tech-*.txt: A'rpi\n" \
+                   "        all the others: Gabucino\n\n" \
+                   "Documentation translations:\n" \
+                   "       Hungarian - Gabucino\n" \
+                   "       Spanish - TeLeNiEkO\n" \
+                   "       Russian - Nick Kurshev\n" \
+                   "       Polish - Dariush Pietrzak\n" \
+                   "       German - Atmosfear\n\n" \
+                   "Platforms/ports:\n" \
+                   "       DEBIAN packaging - Dariush Pietrzak\n" \
+                   "       FreeBSD support - Vladimir Kushnir\n" \
+                   "       Solaris 8 support - Jürgen Keil\n",1535 );
 
-// gtk_signal_connect( GTK_OBJECT( About ),"destroy",GTK_SIGNAL_FUNC( on_About_destroy ),NULL );
- gtk_signal_connect( GTK_OBJECT( About ),"destroy",GTK_SIGNAL_FUNC( ab_Ok_released ),NULL );
- gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( ab_Ok_released ),NULL);
+  hseparator1=gtk_hseparator_new( );
+  gtk_widget_set_name( hseparator1,"hseparator1" );
+  gtk_widget_ref( hseparator1 );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"hseparator1",hseparator1,
+                           ( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( hseparator1 );
+  gtk_box_pack_start( GTK_BOX( vbox1 ),hseparator1,FALSE,FALSE,0 );
+  gtk_widget_set_usize( hseparator1,-2,10 );
 
- gtk_window_add_accel_group( GTK_WINDOW( About ),accel_group );
+  hbuttonbox1=gtk_hbutton_box_new( );
+  gtk_widget_set_name( hbuttonbox1,"hbuttonbox1" );
+  gtk_widget_ref( hbuttonbox1 );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"hbuttonbox1",hbuttonbox1,
+                           ( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( hbuttonbox1 );
+  gtk_box_pack_start( GTK_BOX( vbox1 ),hbuttonbox1,FALSE,FALSE,0 );
 
- gtk_widget_grab_focus( Ok );
- return About;
+  Ok=gtk_button_new_with_label( "Ok" );
+  gtk_widget_set_name( Ok,"Ok" );
+  gtk_widget_ref( Ok );
+  gtk_object_set_data_full( GTK_OBJECT( About ),"Ok",Ok,( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_show( Ok );
+  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Ok );
+  GTK_WIDGET_SET_FLAGS( Ok,GTK_CAN_DEFAULT );
+
+  gtk_signal_connect( GTK_OBJECT( About ),"destroy",GTK_SIGNAL_FUNC( ab_Ok_released ),NULL );
+  gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( ab_Ok_released ),NULL );
+
+  gtk_widget_add_accelerator( Ok,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
+  gtk_widget_add_accelerator( Ok,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
+  gtk_window_add_accel_group( GTK_WINDOW( About ),accel_group );
+
+  return About;
 }
 
 #endif

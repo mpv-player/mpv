@@ -25,6 +25,7 @@
 #include "pixmaps/dir.xpm"
 #include "pixmaps/file.xpm"
 #include "pixmaps/logo.xpm"
+#include "pixmaps/about.xpm"
 
 GtkWidget     * SkinBrowser;
 GtkWidget     * PlayList;
