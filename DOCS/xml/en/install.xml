@@ -556,7 +556,7 @@ directory.
 <application>MPlayer</application> can display subtitles along with movie files.
 Currently the following formats are supported:
 <itemizedlist>
-<listitem><para>VobSub</para></listitem>
+<listitem><para>VOBsub</para></listitem>
 <listitem><para>OGM</para></listitem>
 <listitem><para>CC (closed caption)</para></listitem>
 <listitem><para>MicroDVD</para></listitem>
@@ -588,7 +588,7 @@ destination formats, with the given options:
 
 <para>
 <application>MEncoder</application> can dump DVD subtitles into
-<link linkend="menc-feat-extractsub">VobSub</link> format.
+<link linkend="menc-feat-extractsub">VOBsub</link> format.
 </para>
 
 <para>
@@ -596,9 +596,9 @@ The command line options differ slightly for the different formats:
 </para>
 
 <formalpara>
-<title>VobSub subtitles</title>
+<title>VOBsub subtitles</title>
 <para>
-VobSub subtitles consist of a big (some megabytes) <filename>.SUB</filename> file,
+VOBsub subtitles consist of a big (some megabytes) <filename>.SUB</filename> file,
 and optional <filename>.IDX</filename> and/or <filename>.IFO</filename>
 files.  If you have files like
 <filename><replaceable>sample.sub</replaceable></filename>,

@@ -356,11 +356,11 @@ mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <repl
 
 
 <sect1 id="menc-feat-extractsub">
-<title>Extracting DVD subtitles to Vobsub file</title>
+<title>Extracting DVD subtitles to VOBsub file</title>
 
 <para>
 <application>MEncoder</application> is capable of extracting subtitles from
-a DVD into Vobsub formatted files. They consist of a pair of files ending in
+a DVD into VOBsub formatted files. They consist of a pair of files ending in
 <filename>.idx</filename> and <filename>.sub</filename> and are usually
 packaged in a single <filename>.rar</filename> archive.
 <application>MPlayer</application> can play these with the

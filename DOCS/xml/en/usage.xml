@@ -289,7 +289,7 @@ You can have a full list of known commands by running
   </para></listitem>
 <listitem><para><literal>vobsub_lang</literal></para>
   <para>
-  Change the language of VobSub subtitles.
+  Change the language of VOBsub subtitles.
   </para></listitem>
 <listitem><para><literal>vo_fullscreen</literal></para>
   <para>

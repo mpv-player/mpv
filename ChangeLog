@@ -236,7 +236,7 @@ MPlayer (1.0)
     * XviD API-4 (1.0 beta2) support
     * improved FLAC-in-Ogg support
     * Matroska: better AC3 detection
-    * Matroska: VobSubs, MP2, FLAC, AAC and HE-AAC support
+    * Matroska: VOBsubs, MP2, FLAC, AAC and HE-AAC support
     * improved detection of Real RTSP through URL analysis
     * fixed stereo 16 bit TWOS
     * fixed MPNG when using BGR24 images
@@ -336,7 +336,7 @@ MPlayer (1.0)
     * improved FLAC configure detection
     * GUI file selector updated for newer formats
     * Fontconfig support
-    * proper VobSub seeking support
+    * proper VOBsub seeking support
     * removed oldskool libcss support (nobody uses it, it has drawbacks and
       possible security implications)
 
@@ -364,7 +364,7 @@ MPlayer (1.0)
     * finally fixed the compilation on non-MVI capable Alpha CPUs
     * better AltiVec detection in configure
     * OSD menu now works on MinGW
-    * slave mode, vobsub and MEncoder support on Windows
+    * slave mode, VOBsub and MEncoder support on Windows
     * MinGW 3.1.0 supports MPlayer out of the box!
     * VIDIX and libdha ported to Windows
     * SDL on IRIX support
@@ -623,7 +623,7 @@ MPlayer (0.90)
     * raw video support (-rawvideo, similar to -rawaudio)
     * experimental MPEG4-ES support (enable with -demuxer 27 -fps xxx)
     * new video filter: field (cheap deinterlacer)
-    * DVD/vobsub improvements: positioning, optional gaussian blur scaler
+    * DVD/VOBsub improvements: positioning, optional gaussian blur scaler
     * vf_bmovl: 400% speedup :)
     * libavcodec: native DV audio decoder
     * GIF demuxer (for animated GIFs)
@@ -734,7 +734,7 @@ MPlayer (0.90)
     * fixed possible v4l capturing crash
     * merged the EDL 0.5 patch - using & creating edit-lists (runtime cut&skip)
     * subtitle alignment changeable: top/bottom/middle (key 'i')
-    * -slang support for VobSub files
+    * -slang support for VOBsub files
 
     VO:
     * X11 fullscreen switching code changed again (esp. for GNOME2/KDE 3.1)
@@ -900,7 +900,7 @@ MPlayer (0.90)
     Features:
     * new audio filter layer (libaf) - automatic samplerate conversion
     * experimental -vo directx driver for Cygwin build
-    * unrarlib included for rar'ed vobsubs
+    * unrarlib included for rar'ed VOBsubs
     * native XviD encoding (-ovc xvid) interface for MEncoder
     * new softeq filter with gamma support: -vop eq2
     * -ao/-vo accepts list of drivers and can fall back to one, like -ac/-vc
@@ -999,7 +999,7 @@ MPlayer (0.90)
     * Detection of AVI files which needs -ni
     * workaround for some Nandub bugs
     * Support for live.com RTP/RTSP streaming libraries
-    * Support to rip DVD subs in VobSub format
+    * Support to rip DVD subs in VOBsub format
     * bug fixes of mpsub/srt converter
     * Closed Captioning (ASCII subs on RC1 DVDs) support
     * Massive directfb updates
@@ -1096,14 +1096,14 @@ MPlayer (0.90)
     * options -xy,-zoom,-flip usable with MEncoder, too, -xy keeps aspect
     * -vop lavc, using new fast best libavcodec for realtime MPEG1 transcoding
     * fixed GTK GUI crash with --disable-mencoder
-    * no more black vobsub subtitles :)
+    * no more black VOBsub subtitles :)
 
 
   pre1: Apr 21, 2002
     * 100% GPL - yeah, so what?
     * runtime CPU detection - x86 MPlayer binary can run on "any" other x86 CPU
     * video filter layer - with numerous plugins (crop, expand, etc)
-    * view or encode DVD/vobsub and/or text subtitles into the output AVI
+    * view or encode DVD/VOBsub and/or text subtitles into the output AVI
     * preliminary dvdnav support (experimental)
     * direct rendering - can't be used with libavcodec yet, sorry
     * display subtitles under the image, on black bands

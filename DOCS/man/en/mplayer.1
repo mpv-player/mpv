@@ -163,7 +163,7 @@ antialiased shaded subtitles and visual feedback for keyboard controls.
 European/\:ISO 8859-1,2 (Hungarian, English, Czech, etc), Cyrillic and Korean
 fonts are supported along with 11 subtitle formats (MicroDVD, SubRip,
 SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS and our own: MPsub) and
-DVD subtitles (SPU streams, VobSub and Closed Captions).
+DVD subtitles (SPU streams, VOBsub and Closed Captions).
 .PP
 .B mencoder
 (MPlayer's Movie Encoder) is a simple movie encoder, designed to encode
@@ -228,7 +228,8 @@ mute sound
 toggle fullscreen
 .IPs T\ \ \ \ 
 toggle stay-on-top.
-Supported by drivers which use X11, except SDL, as well as directx and gl2 under Windows.
+Supported by video out drivers which use X11, except SDL, as well as directx
+and gl2 under Windows.
 .IPs "w and e"
 decrease/\:increase panscan range
 .IPs o\ \ \ \ 
@@ -1215,8 +1216,8 @@ Display only forced subtitles for the DVD subtitle stream selected by e.g.\&
 Specifies the charset that will be passed to FriBiDi when decoding a non-UTF8
 subtitles (default: ISO8859-8).
 .TP
-.B \-ifo <vobsub\ ifo\ file>
-Indicate the file that will be used to load palette and frame size for VOBSUB
+.B \-ifo <VOBsub\ ifo\ file>
+Indicate the file that will be used to load palette and frame size for VOBsub
 subtitles.
 .TP
 .B \-noautosub
@@ -1269,7 +1270,7 @@ Selects Hungarian and falls back to English if Hungarian is not available.
 .
 .TP
 .B \-spuaa <mode> (OSD only)
-Antialiasing/scaling mode for DVD/VobSub.
+Antialiasing/scaling mode for DVD/VOBsub.
 A value of 16 may be added to mode in order to force scaling even
 when original and scaled frame size already match, for example to
 smooth subtitles with the gaussian blur.
@@ -1291,7 +1292,7 @@ uses swscaler gaussian blur (looks very good)
 .
 .TP
 .B \-spualign <-1\-2> (OSD only)
-Specify how spu (DVD/VobSub) subtitles should be aligned.
+Specify how spu (DVD/VOBsub) subtitles should be aligned.
 Values are the same as for \-subalign, with the extra choice -1 for original
 position.
 .TP
@@ -1453,13 +1454,13 @@ Tells MPlayer to handle the subtitle file as UNICODE.
 .B \-utf8 \ \ 
 Tells MPlayer to handle the subtitle file as UTF8.
 .TP
-.B \-vobsub <vobsub\ file\ without\ extension>
-Specify the VobSub files that are to be used for subtitle.
+.B \-vobsub <VOBsub\ file\ without\ extension>
+Specify the VOBsub files that are to be used for subtitle.
 This is the full pathname without extensions, i.e.\& without
 the '.idx', '.ifo' or '.sub'.
 .TP
 .B \-vobsubid <0\-31>
-Specify the VobSub subtitle id.
+Specify the VOBsub subtitle id.
 .
 .
 .SH "AUDIO OUTPUT OPTIONS (MPLAYER ONLY)"
@@ -4217,7 +4218,7 @@ Maximum skippable frames after non-skipped one
 .B \-vobsubout <basename>
 Specify the basename for the output .idx and .sub files.
 This turns off subtitle rendering in the encoded movie and diverts it to
-Vobsub subtitle files.
+VOBsub subtitle files.
 .TP
 .B \-vobsuboutid <langid>
 Specify the language two letter code for the subtitles.
