@@ -547,20 +547,58 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   // calc. FPS:
   sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
   sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-  // calculating video bitrate:
-  sh_video->i_bps=demuxer->movi_end-demuxer->movi_start-priv->idx_size*8;
-  if(sh_audio) sh_video->i_bps-=sh_audio->audio.dwLength;
-  mp_msg(MSGT_DEMUX,MSGL_V,"AVI video length=%lu\n",(unsigned long)sh_video->i_bps);
-  sh_video->i_bps=((float)sh_video->i_bps/(float)sh_video->video.dwLength)*sh_video->fps;
-  
-  if((priv->numberofframes=sh_video->video.dwLength)<=1)
-    // bad video header, try to get number of frames from audio
-    if(sh_audio && sh_audio->wf->nAvgBytesPerSec) priv->numberofframes=sh_video->fps*sh_audio->audio.dwLength/sh_audio->wf->nAvgBytesPerSec;
-  if(priv->numberofframes<=1){
-    mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CouldntDetFNo);
-    priv->numberofframes=0;
-  }          
- 
+
+  // calculating audio/video bitrate:
+  if(priv->idx_size>0){
+    // we have index, let's count 'em!
+    size_t vsize=0;
+    size_t asize=0;
+    size_t vsamples=0;
+    size_t asamples=0;
+    int i;
+    for(i=0;i<priv->idx_size;i++){ 
+      int id=avi_stream_id(((AVIINDEXENTRY *)priv->idx)[i].ckid);
+      int len=((AVIINDEXENTRY *)priv->idx)[i].dwChunkLength;
+      if(sh_video->ds->id == id) {
+        vsize+=len;
+        ++vsamples;
+      }
+      else if(sh_audio && sh_audio->ds->id == id) {
+        asize+=len;
+	asamples+=(len+priv->audio_block_size-1)/priv->audio_block_size;
+      }
+    }
+    mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%lu (%lu) audio size=%lu (%lu)\n",vsize,vsamples,asize,asamples);
+    priv->numberofframes=vsamples;
+    sh_video->i_bps=((float)vsize/(float)vsamples)*(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
+    if(sh_audio) sh_audio->i_bps=((float)asize/(float)asamples)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;
+  } else {
+    // guessing, results may be inaccurate:
+    size_t vsize;
+    size_t asize=0;
+
+    if((priv->numberofframes=sh_video->video.dwLength)<=1)
+      // bad video header, try to get number of frames from audio
+      if(sh_audio && sh_audio->wf->nAvgBytesPerSec) priv->numberofframes=sh_video->fps*sh_audio->audio.dwLength/sh_audio->wf->nAvgBytesPerSec;
+    if(priv->numberofframes<=1){
+      mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CouldntDetFNo);
+      priv->numberofframes=0;
+    }          
+
+    if(sh_audio){
+      if(sh_audio->wf->nAvgBytesPerSec && sh_audio->audio.dwSampleSize!=1){
+        asize=sh_audio->wf->nAvgBytesPerSec*priv->numberofframes*sh_video->frametime;
+        sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
+      } else {
+        asize=sh_audio->audio.dwLength;
+        sh_audio->i_bps=(float)asize/(sh_video->frametime*priv->numberofframes);
+      }
+    }
+    vsize=demuxer->movi_end-demuxer->movi_start-asize-8*priv->numberofframes;
+    mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%lu (%lu)  audio size=%lu\n",vsize,priv->numberofframes,asize);
+    sh_video->i_bps=(float)vsize/(sh_video->frametime*priv->numberofframes);
+  }
+
   mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     (char *)&sh_video->bih->biCompression,
     sh_video->bih->biWidth,
