@@ -978,6 +978,7 @@ fi
 echores "$_kstat"
 
 
+# required for nanosleep on some systems
 echocheck "posix4"
 cat > $TMPC << EOF
 int main(void) { return 0; }
@@ -998,7 +999,7 @@ EOF
 cc_check $_ld_sock -lsocket && _ld_sock="$_ld_sock -lsocket"
 cc_check $_ld_sock -lnsl && _ld_sock="$_ld_sock -lnsl"
 if test "$_ld_sock" ; then
-  echores "$_ld_sock"
+  echores "using $_ld_sock"
 else
   echores "not needed"
 fi
@@ -1091,6 +1092,28 @@ fi
 echores "$_dl"
 
 
+echocheck "dynamic linking"
+# FIXME !! make this dynamic detection to work
+# also gcc flags are different, but ld flags aren't (-Bdynamic/-Bstatic/-Bsymbolic)
+_ld_dl_dynamic=''
+if qnx ; then
+  _ld_dl_dynamic=''
+else
+  _ld_dl_dynamic='-rdynamic'
+fi
+#cat > $TMPC << EOF
+#int main(void) { return 0; }
+#EOF
+#if cc_check -rdynamic ; then
+#  _ld_dl_dynamic='-rdynamic'
+#elif cc_check -Bdynamic ; then
+#  _ld_dl_dynamic='-Bdynamic'
+#elif cc_check ; then
+#  _ld_dl_dynamic=''
+#fi
+echores "using $_ld_dl_dynamic"
+
+
 echocheck "pthread"
 cat > $TMPC << EOF
 #include <pthread.h>
@@ -1103,7 +1126,7 @@ elif cc_check -lpthread ; then
 elif cc_check -pthread ; then
   _ld_pthread='-pthread'
 else
-  die "Lib pthread not found."
+  die "Lib pthread not found. (needed by windows and networking stuff)"
 fi
 echores "using $_ld_pthread"
 
@@ -2342,8 +2365,8 @@ else
   _confcygwin="TARGET_CYGWIN = no"
 fi
 
-_ld_arch="$_ld_pthread $_ld_dl"
-bsd && _ld_arch="-rdynamic $_ld_arch"
+_ld_arch="$_ld_pthread $_ld_dl $_ld_dl_dynamic"
+#bsd && _ld_arch="-rdynamic $_ld_arch"
 bsdos && _ld_arch="$_ld_arch -ldvd"
 
 _def_debug='#undef MP_DEBUG'
