@@ -324,8 +324,8 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 
 <screen>mplayer /cygdrive/d/MPEG2/AVSEQ01.MPG</screen>
 
-<para>DVDs also work, just set the DVD device correctly to whatever your CD-ROM
-  device is:</para>
+<para>DVDs also work, adjust <option>-dvd-device</option> for the drive letter
+  of your DVD-ROM:</para>
 
 <screen>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</screen>
 
@@ -347,7 +347,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para>Extract DirectX header files to <filename class="directory">/mingw/include/</filename>.</para>
 
 <para>VCDs and DVDs work almost like Cygwin (adjust for the drive letter of your
-  CD-ROM):</para>
+  CD-ROM/DVD-ROM):</para>
 
 <screen>mplayer d:/mpegav/avseq01.dat</screen>
 
