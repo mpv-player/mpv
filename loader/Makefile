@@ -6,7 +6,7 @@ DEFINES=$(WIN32_PATH) -DMPLAYER -D__WINE__ -Ddbg_printf=__vprintf \
 
 LIB_OBJECTS= ldt_keeper.o pe_image.o module.o \
 ext.o win32.o driver.o pe_resource.o \
-resource.o registry.o elfdll.o afl.o vfl.o
+resource.o registry.o elfdll.o afl.o vfl.o wrapper.o
 
 # gcc-3.0 produces buggy code for acmStreamOpen() with
 # "-O3 -fomit-frame-pointer" or "-O2 -fomit-frame-pointer
