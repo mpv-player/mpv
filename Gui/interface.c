@@ -291,6 +291,7 @@ void guiInit( void )
    btnModify( evFullScreen,btnPressed );
   }
 #else
+ if ( !fullscreen ) fullscreen=gtkLoadFullscreen;
  if ( gtkShowVideoWindow )
  {
        wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
