@@ -1571,7 +1571,7 @@ screen.
 Adjust contrast of video output (default 0).
 Works in similar manner as brightness.
 .TP
-.B \-dfbopts <value> (\-vo directfb2 only)
+.B \-dfbopts <value> (\-vo directfb only)
 Specify a parameter list for the directfb driver.
 .TP
 .B \-display <name>
@@ -3556,13 +3556,24 @@ Output driver for the GGI graphics system.
 Play video using the DirectFB library.
 .PD 0
 .RSs
-.IPs number
-Selects layer.
+.IPs (no)input
+Use the DirectFB instead of the MPlayer keyboard code (default: enabled).
+.IPs buffermode=single|double|triple
+Double and triple buffering give best results if you want to avoid tearing issues.
+Triple buffering is more efficent than double buffering as it doesn't block MPlayer
+while waiting for the vertical retrace.
+Single buffering should be avoided (default: single).
+.IPs fieldparity=top|bottom
+Control the output order for interlaced frames (default: disabled).
+Valid values are top = top fields first, bottom = bottom fields first.
+This option doesn't have any effect on progressive film material
+like most MPEG movies are.
+You need to enable this option if you have tearing issues/unsmooth
+motions watching interlaced film material.
+.IPs layer=N
+Will force layer with id N for playback (default: -1 - auto).
 .RE
 .PD 1
-.TP
-.B directfb2
-Play video using the DirectFB library, second generation.
 .TP
 .B dfbmga\ 
 Matrox G400/G450/G550 specific output driver that uses the DirectFB library.
