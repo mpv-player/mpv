@@ -47,7 +47,7 @@ void CMediaSample_Destroy(CMediaSample* This)
     free(This->vt);
     free(This->own_block);
     if (This->media_type.pbFormat)
-	CoTaskMemFree(This->media_type.pbFormat);
+	free(This->media_type.pbFormat);
     free(This);
 }
 
@@ -171,10 +171,10 @@ static HRESULT STDCALL CMediaSample_GetMediaType(IMediaSample* This,
     }
 
     t = &((CMediaSample*)This)->media_type;
-    //    if(t.pbFormat)CoTaskMemFree(t.pbFormat);
-    (*ppMediaType) = (AM_MEDIA_TYPE*)CoTaskMemAlloc(sizeof(AM_MEDIA_TYPE));
+    //    if(t.pbFormat)free(t.pbFormat);
+    (*ppMediaType) = (AM_MEDIA_TYPE*)malloc(sizeof(AM_MEDIA_TYPE));
     **ppMediaType = *t;
-    (*ppMediaType)->pbFormat = (char*)CoTaskMemAlloc(t->cbFormat);
+    (*ppMediaType)->pbFormat = (char*)malloc(t->cbFormat);
     memcpy((*ppMediaType)->pbFormat, t->pbFormat, t->cbFormat);
     //    *ppMediaType=0; //media type was not changed
     return 0;
@@ -189,11 +189,11 @@ static HRESULT STDCALL CMediaSample_SetMediaType(IMediaSample * This,
 	return E_INVALIDARG;
     t = &((CMediaSample*)This)->media_type;
     if (t->pbFormat)
-	CoTaskMemFree(t->pbFormat);
+	free(t->pbFormat);
     t = pMediaType;
     if (t->cbFormat)
     {
-	t->pbFormat = (char*)CoTaskMemAlloc(t->cbFormat);
+	t->pbFormat = (char*)malloc(t->cbFormat);
 	memcpy(t->pbFormat, pMediaType->pbFormat, t->cbFormat);
     }
     else

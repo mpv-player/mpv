@@ -51,12 +51,12 @@ static HRESULT STDCALL CEnumMediaTypes_Next(IEnumMediaTypes * This,
 
     if (pcFetched)
 	*pcFetched=1;
-    ppMediaTypes[0] = (AM_MEDIA_TYPE *)CoTaskMemAlloc(sizeof(AM_MEDIA_TYPE));
+    ppMediaTypes[0] = (AM_MEDIA_TYPE *)malloc(sizeof(AM_MEDIA_TYPE));
     // copy structures - C can handle this...
     **ppMediaTypes = *type;
     if (ppMediaTypes[0]->pbFormat)
     {
-	ppMediaTypes[0]->pbFormat=(char *)CoTaskMemAlloc(ppMediaTypes[0]->cbFormat);
+	ppMediaTypes[0]->pbFormat=(char *)malloc(ppMediaTypes[0]->cbFormat);
 	memcpy(ppMediaTypes[0]->pbFormat, type->pbFormat, ppMediaTypes[0]->cbFormat);
     }
     if (cMediaTypes == 1)
@@ -171,7 +171,7 @@ static HRESULT STDCALL COutputPin_Connect(IPin * This,
     *pmt=((COutputPin*)This)->type;
     if(pmt->cbFormat>0)
     {
-	pmt->pbFormat=CoTaskMemAlloc(pmt->cbFormat);
+	pmt->pbFormat=malloc(pmt->cbFormat);
 	memcpy(pmt->pbFormat, ((COutputPin*)This)->type.pbFormat, pmt->cbFormat);
     }
 */
@@ -214,7 +214,7 @@ static HRESULT STDCALL COutputPin_ConnectionMediaType(IPin * This,
     *pmt = ((COutputPin*)This)->type;
     if (pmt->cbFormat>0)
     {
-	pmt->pbFormat=(char *)CoTaskMemAlloc(pmt->cbFormat);
+	pmt->pbFormat=(char *)malloc(pmt->cbFormat);
 	memcpy(pmt->pbFormat, ((COutputPin*)This)->type.pbFormat, pmt->cbFormat);
     }
     return 0;

@@ -173,7 +173,7 @@ static long STDCALL CInputPin_ConnectionMediaType(IPin* This,
     *pmt=((CInputPin*)This)->type;
     if (pmt->cbFormat > 0)
     {
-	pmt->pbFormat=(char *)CoTaskMemAlloc(pmt->cbFormat);
+	pmt->pbFormat=(char *)malloc(pmt->cbFormat);
 	memcpy(pmt->pbFormat, ((CInputPin*)This)->type.pbFormat, pmt->cbFormat);
     }
     return 0;
