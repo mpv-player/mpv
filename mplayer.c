@@ -2189,7 +2189,8 @@ while(sh_audio){
   playsize=audio_out->get_space();
   
   // handle audio-only case:
-  if(!playsize && !sh_video) {  // buffer is full, do not block here!!!
+  if(playsize < ao_data.outburst &&
+      !sh_video) {  // buffer is full, do not block here!!!
     usec_sleep(10000); // Wait a tick before retry
     continue;
   }
