@@ -29,6 +29,7 @@ mplayer (1.0)
     * builds out of the box under GNU Hurd
     * enable SSE optimizations under MinGW
     * SSE support under OpenBSD
+    * Altivec support under NetBSD
 
     Demuxers:
     * Matroska containing RealVideo works better
@@ -62,6 +63,7 @@ mplayer (1.0)
     * HE-AAC working through libfaad
     * removed libmpflac in favor of FFmpeg's FLAC implementation
     * support for libcaca
+    * liba52 dynamic range compression support
 
     Filters:
     * vf_bmovl bugfixes
@@ -88,6 +90,7 @@ mplayer (1.0)
     * pan & scan support in VIDIX nVidia driver
     * support for more cards in VIDIX nVidia driver
     * vo_quartz: MacOS X/Quartz video output
+    * support for VIDIX when ATI FireGLX drivers are used
 
     FFmpeg/libavcodec:
     * H263 AIC and MQ encoding support
