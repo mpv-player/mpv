@@ -147,6 +147,7 @@ static int init(sh_video_t *sh){
     AVCodecContext *avctx;
     vd_ffmpeg_ctx *ctx;
     AVCodec *lavc_codec;
+    int do_vis_debug= lavc_param_vismv || (lavc_param_debug&(FF_DEBUG_VIS_MB_TYPE|FF_DEBUG_VIS_QP));
 
     if(!avcodec_inited){
       avcodec_init();
@@ -165,10 +166,10 @@ static int init(sh_video_t *sh){
 	return 0;
     }
 
-    if(vd_use_slices && (lavc_codec->capabilities&CODEC_CAP_DRAW_HORIZ_BAND) && !lavc_param_vismv)
+    if(vd_use_slices && (lavc_codec->capabilities&CODEC_CAP_DRAW_HORIZ_BAND) && !do_vis_debug)
 	ctx->do_slices=1;
  
-    if(lavc_codec->capabilities&CODEC_CAP_DR1 && !lavc_param_vismv)
+    if(lavc_codec->capabilities&CODEC_CAP_DR1 && !do_vis_debug)
 	ctx->do_dr1=1;
     ctx->b_age= ctx->ip_age[0]= ctx->ip_age[1]= 256*256*256*64;
     ctx->ip_count= ctx->b_count= 0;
