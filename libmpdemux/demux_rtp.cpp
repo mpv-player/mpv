@@ -87,6 +87,7 @@ private:
 typedef struct RTPState {
   char const* sdpDescription;
   RTSPClient* rtspClient;
+  SIPClient* sipClient;
   MediaSession* mediaSession;
   ReadBufferQueue* audioBufferQueue;
   ReadBufferQueue* videoBufferQueue;
@@ -96,6 +97,26 @@ typedef struct RTPState {
 
 extern "C" char* network_username;
 extern "C" char* network_password;
+static char* openURL_rtsp(RTSPClient* client, char const* url) {
+  // If we were given a user name (and optional password), then use them: 
+  if (network_username != NULL) {
+    char const* password = network_password == NULL ? "" : network_password;
+    return client->describeWithPassword(url, network_username, password);
+  } else {
+    return client->describeURL(url);
+  }
+}
+
+static char* openURL_sip(SIPClient* client, char const* url) {
+  // If we were given a user name (and optional password), then use them: 
+  if (network_username != NULL) {
+    char const* password = network_password == NULL ? "" : network_password;
+    return client->inviteWithPassword(url, network_username, password);
+  } else {
+    return client->invite(url);
+  }
+}
+
 int rtspStreamOverTCP = 0; 
 
 extern "C" void demux_open_rtp(demuxer_t* demuxer) {
@@ -106,6 +127,7 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
     if (env == NULL) break;
 
     RTSPClient* rtspClient = NULL;
+    SIPClient* sipClient = NULL;
 
     if (demuxer == NULL || demuxer->stream == NULL) break;  // shouldn't happen
     demuxer->stream->eof = 0; // just in case 
@@ -115,26 +137,31 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
     char* sdpDescription = (char*)(demuxer->stream->priv);
     if (sdpDescription == NULL) {
       // We weren't given a SDP description directly, so assume that
-      // we were given a RTSP URL:
+      // we were given a RTSP or SIP URL:
+      char const* protocol = demuxer->stream->streaming_ctrl->url->protocol;
       char const* url = demuxer->stream->streaming_ctrl->url->url;
-
       extern int verbose;
-      rtspClient = RTSPClient::createNew(*env, verbose, "MPlayer");
-      if (rtspClient == NULL) {
-	fprintf(stderr, "Failed to create RTSP client: %s\n",
-		env->getResultMsg());
-	break;
+      if (strcmp(protocol, "rtsp") == 0) {
+	rtspClient = RTSPClient::createNew(*env, verbose, "MPlayer");
+	if (rtspClient == NULL) {
+	  fprintf(stderr, "Failed to create RTSP client: %s\n",
+		  env->getResultMsg());
+	  break;
+	}
+	sdpDescription = openURL_rtsp(rtspClient, url);
+      } else { // SIP
+	unsigned char desiredAudioType = 0; // PCMU (use 3 for GSM)
+	sipClient = SIPClient::createNew(*env, desiredAudioType, NULL,
+					 verbose, "MPlayer");
+	if (sipClient == NULL) {
+	  fprintf(stderr, "Failed to create SIP client: %s\n",
+		  env->getResultMsg());
+	  break;
+	}
+	sipClient->setClientStartPortNum(8000);
+	sdpDescription = openURL_sip(sipClient, url);
       }
 
-      // If we were given a user name (and optional password), then use them: 
-      if (network_username != NULL) {
-	char const* password
-	  = network_password == NULL ? "" : network_password;
-	sdpDescription
-	  = rtspClient->describeWithPassword(url, network_username, password);
-      } else {
-	sdpDescription = rtspClient->describeURL(url);
-      }
       if (sdpDescription == NULL) {
 	fprintf(stderr, "Failed to get a SDP description from URL \"%s\": %s\n",
 		url, env->getResultMsg());
@@ -152,6 +179,7 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
     RTPState* rtpState = new RTPState;
     rtpState->sdpDescription = sdpDescription;
     rtpState->rtspClient = rtspClient;
+    rtpState->sipClient = sipClient;
     rtpState->mediaSession = mediaSession;
     rtpState->audioBufferQueue = rtpState->videoBufferQueue = NULL;
     rtpState->flags = 0;
@@ -201,6 +229,8 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
     if (rtspClient != NULL) {
       // Issue a RTSP aggregate "PLAY" command on the whole session:
       if (!rtspClient->playMediaSession(*mediaSession)) break;
+    } else if (sipClient != NULL) {
+      sipClient->sendACK(); // to start the stream flowing
     }
 
     // Now that the session is ready to be read, do additional
@@ -319,7 +349,7 @@ Boolean insertRTPData(demuxer_t* demuxer, demux_stream_t* ds,
   return True;
 }
 
-static void teardownRTSPSession(RTPState* rtpState); // forward
+static void teardownRTSPorSIPSession(RTPState* rtpState); // forward
 
 extern "C" void demux_close_rtp(demuxer_t* demuxer) {
   // Reclaim all RTP-related state:
@@ -328,7 +358,7 @@ extern "C" void demux_close_rtp(demuxer_t* demuxer) {
   RTPState* rtpState = (RTPState*)(demuxer->priv);
   if (rtpState == NULL) return;
 
-  teardownRTSPSession(rtpState);
+  teardownRTSPorSIPSession(rtpState);
 
   UsageEnvironment* env = NULL;
   TaskScheduler* scheduler = NULL;
@@ -338,6 +368,7 @@ extern "C" void demux_close_rtp(demuxer_t* demuxer) {
   }
   Medium::close(rtpState->mediaSession);
   Medium::close(rtpState->rtspClient);
+  Medium::close(rtpState->sipClient);
   delete rtpState->audioBufferQueue;
   delete rtpState->videoBufferQueue;
   delete rtpState->sdpDescription;
@@ -479,16 +510,18 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   return dp;
 }
 
-static void teardownRTSPSession(RTPState* rtpState) {
-  RTSPClient* rtspClient = rtpState->rtspClient;
+static void teardownRTSPorSIPSession(RTPState* rtpState) {
   MediaSession* mediaSession = rtpState->mediaSession;
-  if (rtspClient == NULL || mediaSession == NULL) return;
+  if (mediaSession == NULL) return;
+  if (rtpState->rtspClient != NULL) {
+    MediaSubsessionIterator iter(*mediaSession);
+    MediaSubsession* subsession;
 
-  MediaSubsessionIterator iter(*mediaSession);
-  MediaSubsession* subsession;
-
-  while ((subsession = iter.next()) != NULL) {
-    rtspClient->teardownMediaSubsession(*subsession);
+    while ((subsession = iter.next()) != NULL) {
+      rtpState->rtspClient->teardownMediaSubsession(*subsession);
+    }
+  } else if (rtpState->sipClient != NULL) {
+    rtpState->sipClient->sendBYE();
   }
 }
 
