@@ -153,6 +153,8 @@ void mplMainSigHandler( int s )
         break;
    case evSkinBrowser: mplShMem->SkinChange=1; break;
    case evFileLoaded:
+        printf("*** gtkShMem->fs.dir == '%s'  \n",gtkShMem->fs.dir);
+        printf("*** gtkShMem->fs.filename == '%s'  \n",gtkShMem->fs.filename);
         strcpy( mplShMem->Filename,gtkShMem->fs.dir ); 
 	strcat( mplShMem->Filename,"/" ); 
 	strcat( mplShMem->Filename,gtkShMem->fs.filename );

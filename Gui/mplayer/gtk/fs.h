@@ -231,6 +231,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
   {
    case 1:
         fsSelectedDirectory=(unsigned char *)get_current_dir_name();
+	printf("[gtk-fs] 1-fsSelectedFile: %s\n",fsSelectedFile);
         #ifdef DEBUG
          dbprintf( 1,"[gtk-fs] fsSelectedFile: %s\n",fsSelectedFile );
         #endif
@@ -238,6 +239,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
    case 2:
         str=gtk_entry_get_text( GTK_ENTRY( fsComboEntry2 ) );
         fsSelectedFile=str;
+	printf("[gtk-fs] 2-fsSelectedFile: '%s'  \n",fsSelectedFile);
         #ifdef DEBUG
          dbprintf( 1,"[gtk-fs] fsSelectedFile: %s\n",fsSelectedFile );
         #endif
@@ -253,11 +255,14 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
             break;
            }
          }
+	printf("[gtk-fs-xxx] fsSelectedFile: '%s'  \n",fsSelectedFile);
+	printf("[gtk-fs-xxx] fsSelectedDirectory: '%s'  \n",fsSelectedDirectory);
         break;
   }
  strcpy( gtkShMem->fs.dir,fsSelectedDirectory );
-printf( "----gtk---> filname: %s\n",fsSelectedFile );
  strcpy( gtkShMem->fs.filename,fsSelectedFile );
+printf( "----gtk---> directory: %s\n",fsSelectedDirectory );
+printf( "----gtk---> filename: %s\n",fsSelectedFile );
  item=fsTopList_items;
  while( item )
   {
