@@ -970,7 +970,29 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
 
 <P>Although there is a driver for the 3DLabs GLINT R3 and Permedia3 chips,
   no one has tested it, so reports are welcome.</P>
+
+
+<H4><A NAME="vidix_nvidia">2.3.1.2.12.5 nVidia cards</A></H4>
+
+<P>There's a relatively new nvidia driver out there, it's known to work on Riva
+  128, TNT and GeForce2 chipsets, also others have been reported working.</P>
+
+<P>It's recommended to use the binary nvidia drivers for X before using this
+  vidix driver, because some of the registers haven't been discovered which
+  need to be initialised, so it will probably fail with the opensource Xfree86
+  nv.o driver.</P>
+
+<P>Reports awaited!</P>
   
+<H4><A NAME="vidix_sis">2.3.1.2.12.6 SiS cards</A></H4>
+
+<P>This is a very experimental code too, as the nvidia_vid.</P>
+
+<P>It's been tested on SiS 650/651/740 (the most common chipsets used in the 
+SiS versions of the "Shuttle XPC" barebones boxes out there)</P>
+
+<P>Reports awaited!</P>
+
 
 <H4><A NAME="directfb">2.3.1.2.13 DirectFB</A></H4>
 
