@@ -19,7 +19,6 @@ demuxer:
 - implement hardcore bruteforce avi re-sync for broken files (-forceidx)
 - fix for growing avi files (movi_end pos > stream->end_pos)
 - implement forward seeking in avi streams with no index
-- implement seeking to Ogg demuxer
 - fix .asf demuxer bugs
 - forward seeking from stdin ?
 - fix the whole syncing mechanism of Real demuxer
@@ -33,7 +32,7 @@ decoders:
 
 demuxer:
 - demux_mpg: support for VDR's index files for more accurate seeking
-- implement seeking for YUV4MPEG_2_, NuppelVideo and Real
+- implement seeking for YUV4MPEG_2_ and Real
 
 decoders:
 - qtx support?
