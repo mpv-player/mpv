@@ -582,6 +582,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		{
 		  if(image_bpp == 24 && video_mode_info.BitsPerPixel == 32) rgb2rgb_fnc = rgb24to32;
 		  else 
+		  if(image_bpp == 32 && video_mode_info.BitsPerPixel == 24) rgb2rgb_fnc = rgb32to24;
+		  else 
 		  {
 		    printf("vo_vesa: Can't convert %u to %u\n",image_bpp,video_mode_info.BitsPerPixel);
 		    return -1;
