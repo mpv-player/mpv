@@ -360,7 +360,7 @@ static void ReadLastTables(void);
 static void MakeDecodeTables(unsigned char *LenTab,
                              struct Decode *Dec,
                              int Size);
-int stricomp(char *Str1,char *Str2);
+static int my_stricomp(char *Str1,char *Str2);
 /* ------------------------------------------------------------------------ */
 
 
@@ -964,7 +964,7 @@ BOOL ExtrFile(void)
     }
 
 
-    if(TRUE == (FileFound=(stricomp(ArgName, ArcFileName) == 0)))
+    if(TRUE == (FileFound=(my_stricomp(ArgName, ArcFileName) == 0)))
     /* *** file found! ***                                                  */
     {
       {
@@ -1038,7 +1038,7 @@ BOOL ExtrFile(void)
 #else
     if (ArcPtr!=NULL) tseek(ArcPtr,NextBlockPos,SEEK_SET);
 #endif
-  } while(stricomp(ArgName, ArcFileName) != 0);/* exit if file is extracted */
+  } while(my_stricomp(ArgName, ArcFileName) != 0);/* exit if file is extracted */
 
   /* free memory, clear password and close archive                          */
   free(UnpMemory);
@@ -1119,7 +1119,7 @@ int tseek(void *stream,long offset,int fromwhere)
 #endif
 
 
-char* strupper(char *Str)
+static char* my_strupper(char *Str)
 {
   char *ChPtr;
   for (ChPtr=Str;*ChPtr;ChPtr++)
@@ -1127,8 +1127,8 @@ char* strupper(char *Str)
   return(Str);
 }
 
-
-int stricomp(char *Str1,char *Str2)
+ 
+static int my_stricomp(char *Str1,char *Str2)
 /* compare strings without regard of '\' and '/'                            */
 {
   char S1[512],S2[512];
@@ -1157,7 +1157,7 @@ int stricomp(char *Str1,char *Str2)
     *chptr = '_';
   }
 
-  return(strcmp(strupper(S1),strupper(S2)));
+  return(strcmp(my_strupper(S1),my_strupper(S2)));
 }
 
 
