@@ -76,6 +76,7 @@ Felix Bünemann: <atmosfear@users.sourceforge.net>
 - PNG file output support in libvo
 - flipping support (for Indeo 3/4, etc)
 - SDL audio driver
+- RAW PCM/WAVE file writer for libao2
 
 TeLeNiEkO: <telenieko@telenieko.com>
 - spanish translation of documentation
