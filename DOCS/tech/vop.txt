@@ -115,8 +115,13 @@ Current plugins:
     The 'aspect' parameter controls aspect ratio, it should be calculated
     as aspect=DVB_HEIGHT*ASPECTRATIO, default is 576*(4/3)=768
     (for 16:9 TV set it to 576*(16/9)=1024)
-    It's only usefull togethwer with expand+scale:
+    It's only usefull together with expand+scale:
 	-vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
     MPI: passthru
 
+-vop cropdetect
+    It's a special filter, it doesn't alter the image itself, but detects
+    (using some kind of heuristics) the black borders/bands of the image,
+    and prints the optimal -vop crop= parameters to the stdout/console.
+    MPI: EXPORT
     
