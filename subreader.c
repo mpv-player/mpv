@@ -457,7 +457,7 @@ char * sub_filename(char* path,  char * fname )
   char* sub_name=j?sub_name1:sub_name2;
   for ( i=0;i<(sizeof(sub_exts)/sizeof(char*));i++ ) {
    strcpy(j?aviptr1:aviptr2,sub_exts[i]);
-   printf("trying: '%s'\n",sub_name);
+//   printf("trying: '%s'\n",sub_name);
    if((f=fopen( sub_name,"rt" ))) {
      fclose( f );
      printf( "SUB: Detected sub file: %s\n",sub_name );
