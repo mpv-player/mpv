@@ -370,12 +370,15 @@ extern void dct64_MMX_3dnowex( void );
 extern void dct64_MMX_sse( void );
 void (*dct64_MMX_func)( void );
 
+#include "../cpudetect.h"
+
 // Init decoder tables.  Call first, once!
 #ifdef USE_FAKE_MONO
 void MP3_Init(int fakemono){
 #else
 void MP3_Init(){
 #endif
+#if 1
 #ifdef ARCH_X86
     _CpuID=CpuDetect();
     _i586=ipentium();
@@ -484,6 +487,86 @@ void MP3_Init(){
   {
     synth_func = NULL;
   }
+#else
+
+#ifdef HAVE_MMX
+/* Use it for any MMX cpu */
+   if(gCpuCaps.hasMMX)
+   {
+	make_decode_tables_MMX(outscale);
+	printf("mp3lib: made decode tables with mmx optimization\n");
+   }
+   else
+#endif
+	make_decode_tables(outscale);
+
+#ifdef USE_FAKE_MONO
+    if (fakemono == 1)
+        fr.synth=synth_1to1_l;
+    else if (fakemono == 2)
+        fr.synth=synth_1to1_r;
+    else
+        fr.synth=synth_1to1;
+#else
+    fr.synth=synth_1to1;
+#endif
+    fr.synth_mono=synth_1to1_mono2stereo;
+    fr.down_sample=0;
+    fr.down_sample_sblimit = SBLIMIT>>(fr.down_sample);
+    init_layer2();
+    init_layer3(fr.down_sample_sblimit);
+    tables_done_flag=1;
+
+    dct36_func=dct36;
+#ifdef HAVE_SSE
+  if(gCpuCaps.hasSSE)
+  {
+    synth_func=synth_1to1_MMX;
+    dct64_MMX_func=dct64_MMX_sse;
+    printf("mp3lib: using SSE optimized decore!\n");
+  }    
+  else
+#endif
+#ifdef HAVE_3DNOWEX
+  if (gCpuCaps.has3DNowExt)
+  {
+    synth_func=synth_1to1_MMX;
+    dct36_func=dct36_3dnowex;
+    dct64_MMX_func=dct64_MMX_3dnowex;
+    printf("mp3lib: using 3DNow!Ex optimized decore!\n");
+  }
+  else
+#endif
+#ifdef HAVE_3DNOW
+  if (gCpuCaps.has3DNow)
+  {
+    synth_func=synth_1to1_MMX;
+    dct36_func=dct36_3dnow;
+    dct64_MMX_func=dct64_MMX_3dnow;
+    printf("mp3lib: using 3DNow! optimized decore!\n");
+  }
+  else
+#endif
+#ifdef HAVE_MMX
+  if (gCpuCaps.hasMMX)
+  {
+    synth_func=synth_1to1_MMX;
+    dct64_MMX_func=dct64_MMX;
+    printf("mp3lib: using MMX optimized decore!\n");
+  }    
+  else
+#endif
+#ifdef ARCH_X86
+  if (gCpuCaps.cpuType >= CPUTYPE_I386)
+  {
+    synth_func=synth_1to1_pent;
+  }    
+  else
+#endif
+  {
+    synth_func = NULL;
+  }
+#endif
 }
 
 #if 0
