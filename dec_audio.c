@@ -1,5 +1,6 @@
 
 #define USE_G72X
+//#define USE_LIBAC3
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +27,10 @@ extern int verbose; // defined in mplayer.c
 #include "dll_init.h"
 
 #include "mp3lib/mp3.h"
+
+#ifdef USE_LIBAC3
 #include "libac3/ac3.h"
+#endif
 
 #include "liba52/a52.h"
 static sample_t * a52_samples;
@@ -250,6 +254,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
 
 static sh_audio_t* dec_audio_sh=NULL;
 
+#ifdef USE_LIBAC3
 // AC3 decoder buffer callback:
 static void ac3_fill_buffer(uint8_t **start,uint8_t **end){
     int len=ds_get_packet(dec_audio_sh->ds,start);
@@ -259,6 +264,7 @@ static void ac3_fill_buffer(uint8_t **start,uint8_t **end){
     else
           *end = *start + len;
 }
+#endif
 
 // MP3 decoder buffer callback:
 int mplayer_audio_read(char *buf,int size){
@@ -468,6 +474,10 @@ case AFM_DVDPCM: {
     break;
 }
 case AFM_AC3: {
+#ifndef USE_LIBAC3
+  mp_msg(MSGT_DECAUDIO,MSGL_WARN,"WARNING: libac3 support is disabled. (hint: upgrade codecs.conf)\n");
+  driver=0;
+#else
   // Dolby AC3 audio:
   dec_audio_sh=sh_audio; // save sh_audio for the callback:
   ac3_config.fill_buffer_callback = ac3_fill_buffer;
@@ -491,6 +501,7 @@ if(gCpuCaps.has3DNow){
   } else {
     driver=0; // bad frame -> disable audio
   }
+#endif
   break;
 }
 case AFM_A52: {
@@ -1056,6 +1067,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         len=2*fox62_adpcm_decode_block((unsigned short*)buf,ibuf, sh_audio->wf->nChannels);
         break;
       }
+#ifdef USE_LIBAC3
       case AFM_AC3: // AC3 decoder
         //printf("{1:%d}",avi_header.idx_pos);fflush(stdout);
         if(!sh_audio->ac3_frame) sh_audio->ac3_frame=ac3_decode_frame();
@@ -1067,6 +1079,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         }
         //printf("{3:%d}",avi_header.idx_pos);fflush(stdout);
         break;
+#endif
       case AFM_A52: { // AC3 decoder
         int flags=0;
 	int i;
@@ -1205,12 +1218,14 @@ void resync_audio_stream(sh_audio_t *sh_audio){
           ogg_stream_reset(&sh_audio->ov->os);
           break;
 #endif
+#ifdef USE_LIBAC3
         case AFM_AC3:
           ac3_bitstream_reset();    // reset AC3 bitstream buffer
     //      if(verbose){ printf("Resyncing AC3 audio...");fflush(stdout);}
           sh_audio->ac3_frame=ac3_decode_frame(); // resync
     //      if(verbose) printf(" OK!\n");
           break;
+#endif
         case AFM_A52:
         case AFM_ACM:
         case AFM_DSHOW:
@@ -1233,7 +1248,9 @@ void resync_audio_stream(sh_audio_t *sh_audio){
 void skip_audio_frame(sh_audio_t *sh_audio){
               switch(sh_audio->codec->driver){
                 case AFM_MPEG: MP3_DecodeFrame(NULL,-2);break; // skip MPEG frame
+#ifdef USE_LIBAC3
                 case AFM_AC3: sh_audio->ac3_frame=ac3_decode_frame();break; // skip AC3 frame
+#endif
 		case AFM_HWAC3:
                 case AFM_A52: a52_fillbuff(sh_audio);break; // skip AC3 frame
 		case AFM_ACM:
