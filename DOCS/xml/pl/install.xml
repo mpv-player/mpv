@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.41 -->
+<!-- synced with 1.44 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -934,7 +934,7 @@ Istnieją trzy metody synchronizacji w <application>MPlayerze</application>.
   musi być jeszcze dokładniejsza.
   </simpara></listitem>
 <listitem><para>
-  Kod <emphasis role="bold">nowego zegara</emphasis> korzysta z RTC PCta (Real Time Clock)
+  Kod <emphasis role="bold">nowego zegara</emphasis> korzysta z RTC(Real Time Clock)
   do tego zadania, ponieważ jest on dokładny co do 1ms. Jest automagicznie
   uruchomiany, jeżeli jest to możliwe, ale wymaga uprawnień roota, ustawionego
   <emphasis>bitu uid roota</emphasis> na pliku wykonywalnym
